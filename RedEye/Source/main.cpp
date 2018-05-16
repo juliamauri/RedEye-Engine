@@ -8,6 +8,7 @@
 #endif
 
 #include "Globals.h"
+#include "Config.h"
 
 #include "SDL2\include\SDL.h"
 #pragma comment( lib, "SDL2/libx86/SDL2.lib" )
@@ -20,6 +21,10 @@ int main(int argc, char* argv[])
 		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
 		return 1;
 	}
+
+	Config test;
+	test.TestRead();
+	test.TestWrite();
 
 	SDL_Quit();
 

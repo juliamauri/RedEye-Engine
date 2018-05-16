@@ -16,6 +16,9 @@
     <ClCompile Include="Application.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -34,6 +37,9 @@
       <Filter>Modules</Filter>
     </ClInclude>
     <ClInclude Include="Application.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
       <Filter>Main</Filter>
     </ClInclude>
   </ItemGroup>
