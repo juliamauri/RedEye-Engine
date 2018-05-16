@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="mmgr\mmgr.cpp">
+      <Filter>3rd Party\mmgr</Filter>
+    </ClCompile>
+    <ClCompile Include="Globals.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleWindow.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="mmgr\mmgr.h">
+      <Filter>3rd Party\mmgr</Filter>
+    </ClInclude>
+    <ClInclude Include="mmgr\nommgr.h">
+      <Filter>3rd Party\mmgr</Filter>
+    </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Module.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleWindow.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="3rd Party">
+      <UniqueIdentifier>{142aac87-e4d5-4f04-84b0-defb8cc28089}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\mmgr">
+      <UniqueIdentifier>{1ed35511-6d81-4386-bad2-e7491b3d24b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{a0e5d2d0-4f42-40d6-abb5-8640c9055e18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules">
+      <UniqueIdentifier>{c93e16ff-8607-4717-a0a8-06b569c9729a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
