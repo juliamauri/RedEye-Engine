@@ -1,29 +1,31 @@
 #ifndef __MODULE_H__
 #define __MODULE_H__
 
-class Application;
+#include "Globals.h"
 
 class Module
 {
 private:
+
+	const char* name;
 	bool enabled;
 
 public:
-	Application * App;
 
-	Module(Application* parent, bool start_enabled = true) : App(parent)
-	{}
-	virtual ~Module()
-	{}
+	Module(const char* module_name, bool start_enabled = true) : enabled(start_enabled)
+	{
+		name = module_name;
+	}
+	virtual ~Module(){}
 
-	virtual bool Init() { return true; }
+	bool IsActive() { return enabled; }
 
-	virtual void Awake(){}
-	virtual bool Start() { return true; }
+	virtual bool Init(/* CONFIG */) { return true; } //SETTING VALUES
+	virtual bool Start(/* CONFIG */) { return true; } //ACCESS OTHER MODULES
 	
-	virtual bool PreUpdate() { return true; }
-	virtual bool Update() { return true; }
-	virtual bool PostUpdate() { return true; }
+	virtual update_status PreUpdate() { return UPDATE_CONTINUE; }
+	virtual update_status Update() { return UPDATE_CONTINUE; }
+	virtual update_status PostUpdate() { return UPDATE_CONTINUE; }
 
 	virtual bool CleanUp() { return true; }
 
