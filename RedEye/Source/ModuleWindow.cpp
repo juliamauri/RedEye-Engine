@@ -83,7 +83,7 @@ bool ModuleWindow::CleanUp()
 {
 	if (window) SDL_DestroyWindow(window);
 
-	SDL_Quit();
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
 	return true;
 }
