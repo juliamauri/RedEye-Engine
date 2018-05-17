@@ -3,8 +3,8 @@
 
 #include "Module.h"
 
-class SDL_Window;
-class SDL_Surface;
+struct SDL_Window;
+struct SDL_Surface;
 
 class ModuleWindow : public Module
 {
