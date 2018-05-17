@@ -12,15 +12,12 @@ private:
 
 public:
 
-	Module(const char* module_name, bool start_enabled = true) : enabled(start_enabled)
-	{
-		name = module_name;
-	}
+	Module(const char* module_name, bool start_enabled = true) : enabled(start_enabled), name(module_name) {}
 	virtual ~Module(){}
 
-	bool IsActive() { return enabled; }
+	bool IsActive() const { return enabled; }
 
-	virtual bool Init(/* CONFIG */) { return true; } //SETTING VALUES
+	virtual bool Init(/* CONFIG */) { return true; } //SETTING OWN VALUES
 	virtual bool Start(/* CONFIG */) { return true; } //ACCESS OTHER MODULES
 	
 	virtual update_status PreUpdate() { return UPDATE_CONTINUE; }
@@ -30,7 +27,7 @@ public:
 	virtual bool CleanUp() { return true; }
 
 	virtual void Load(){}
-	virtual void Save(){}
+	virtual void Save() const {}
 };
 
 #endif //__MODULE_H__
