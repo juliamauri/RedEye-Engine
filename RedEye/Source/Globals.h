@@ -1,5 +1,7 @@
-#ifndef __GLOBALS_H__
-#define __GLOBALS_H__
+#pragma once
+
+#include <windows.h>
+#include <stdio.h>
 
 #define LOG(format, ...) _log(__FILE__, __LINE__, format, __VA_ARGS__)
 
@@ -23,9 +25,9 @@ typedef unsigned long long UID;
 
 enum update_status
 {
-	UPDATE_CONTINUE = 1,
-	UPDATE_STOP,
-	UPDATE_ERROR
+	UPDATE_ERROR = -1,
+	UPDATE_STOP = 0,
+	UPDATE_CONTINUE = 1
 };
 
 // Useful macros
@@ -33,11 +35,11 @@ enum update_status
 #define MIN(a,b) ((a)<(b)) ? (a) : (b)
 #define MAX(a,b) ((a)>(b)) ? (a) : (b)
 
-// Align 16, use if you have math elemtns in your class like float4x4 or AABB
+/*/ Align 16, use if you have math elemtns in your class like float4x4 or AABB
 #define ALIGN_CLASS_TO_16 \
 	void* operator new(size_t i) { return _aligned_malloc(i,16); }\
     void operator delete(void* p) { _aligned_free(p); }
-
+	*/
 // Deletes a buffer
 #define DEL( x )\
     {\
@@ -68,5 +70,3 @@ enum update_status
 #define _HAS_EXCEPTIONS 0
 #endif
 #define _STATIC_CPPLIB
-
-#endif // __GLOBALS_H__
