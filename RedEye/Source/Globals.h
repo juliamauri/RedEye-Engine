@@ -40,6 +40,8 @@ enum update_status
 	void* operator new(size_t i) { return _aligned_malloc(i,16); }\
     void operator delete(void* p) { _aligned_free(p); }
 	*/
+
+
 // Deletes a buffer
 #define DEL( x )\
     {\
@@ -62,11 +64,12 @@ enum update_status
 
 
 // Warning disabled ---
-#pragma warning( disable : 4577 ) // Warning that exceptions are disabled
-#pragma warning( disable : 4530 ) // Warning that exceptions are disabled
+//#pragma warning( disable : 4577 ) // Warning that exceptions are disabled
+//#pragma warning( disable : 4530 ) // Warning that exceptions are disabled
 
 // Disable STL exceptions
-#ifndef _HAS_EXCEPTIONS
+#undef _HAS_EXCEPTIONS
 #define _HAS_EXCEPTIONS 0
-#endif
+
 #define _STATIC_CPPLIB
+#define _DISABLE_DEPRECATE_STATIC_CPPLIB

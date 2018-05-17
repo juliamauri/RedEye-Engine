@@ -29,6 +29,7 @@ int main(int argc, char* argv[])
 			if (App->CleanUp())
 			{
 				main_return = EXIT_SUCCESS;
+				LOG("EXIT SUCCESS\n");
 			}
 			else
 			{
