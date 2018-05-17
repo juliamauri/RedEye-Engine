@@ -5,6 +5,7 @@
 
 class Module;
 class ModuleWindow;
+class ModuleInput;
 
 class Application
 {
@@ -24,6 +25,7 @@ private:
 public:
 
 	ModuleWindow* window = nullptr;
+	ModuleInput* input = nullptr;
 
 private:
 
