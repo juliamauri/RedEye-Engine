@@ -9,6 +9,14 @@
 *.userosscache
 *.sln.docstates
 
+#Build files
+RedEye.exe
+RedEye.iobj
+RedEye.exp
+RedEye.ipdb
+RedEye.lib
+RedEye.pdb
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

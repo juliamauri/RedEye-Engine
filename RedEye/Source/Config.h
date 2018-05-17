@@ -4,6 +4,9 @@
 class Config 
 {
 public:
+
+	void Init();
+
 	void TestRead();
 	void TestWrite();
 	void TestStreams();
