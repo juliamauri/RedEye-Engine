@@ -66,4 +66,9 @@
       <UniqueIdentifier>{5c9aef73-114b-4af7-98e0-23279889b965}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\EngineResources\config.json">
+      <Filter>Main</Filter>
+    </None>
+  </ItemGroup>
 </Project>

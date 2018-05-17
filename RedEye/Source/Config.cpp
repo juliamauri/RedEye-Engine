@@ -204,7 +204,7 @@ void Config::TestStreams()
 		*/
 		d.Clear();
 	}
-
+	/*
 		//File Streams
 	{//FileReadStream (Input)
 		FILE* fp = fopen("big.json", "rb");// non-Windows use "r"
@@ -226,4 +226,5 @@ void Config::TestStreams()
 		fclose(fp);
 		d.Clear();
 	}
+	*/
 }
