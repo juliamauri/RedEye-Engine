@@ -4,19 +4,23 @@
     <ClCompile Include="mmgr\mmgr.cpp">
       <Filter>3rd Party\mmgr</Filter>
     </ClCompile>
-    <ClCompile Include="Globals.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Main</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="Globals.cpp">
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="Application.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>Containers</Filter>
+    </ClCompile>
     <ClCompile Include="ModuleWindow.cpp">
       <Filter>Modules</Filter>
-    <ClCompile Include="Config.cpp">
-      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleInput.cpp">
+      <Filter>Modules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -29,30 +33,37 @@
     <ClInclude Include="Globals.h">
       <Filter>Main</Filter>
     </ClInclude>
-    <ClInclude Include="Module.h">
-      <Filter>Modules</Filter>
-    </ClInclude>
     <ClInclude Include="Application.h">
       <Filter>Main</Filter>
     </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Module.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
     <ClInclude Include="ModuleWindow.h">
       <Filter>Modules</Filter>
-    <ClInclude Include="Config.h">
-      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleInput.h">
+      <Filter>Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
-      <UniqueIdentifier>{142aac87-e4d5-4f04-84b0-defb8cc28089}</UniqueIdentifier>
+      <UniqueIdentifier>{6ee59120-7d58-46db-9b83-6553b3f6afae}</UniqueIdentifier>
     </Filter>
     <Filter Include="3rd Party\mmgr">
-      <UniqueIdentifier>{1ed35511-6d81-4386-bad2-e7491b3d24b1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Main">
-      <UniqueIdentifier>{a0e5d2d0-4f42-40d6-abb5-8640c9055e18}</UniqueIdentifier>
+      <UniqueIdentifier>{bc8263be-7628-473f-8ffe-937631d6a567}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules">
-      <UniqueIdentifier>{c93e16ff-8607-4717-a0a8-06b569c9729a}</UniqueIdentifier>
+      <UniqueIdentifier>{dbb90943-cf3a-483e-b9a2-928baf328345}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{9e983e10-37e2-43b9-8488-5c1ffa96e2dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Containers">
+      <UniqueIdentifier>{5c9aef73-114b-4af7-98e0-23279889b965}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
