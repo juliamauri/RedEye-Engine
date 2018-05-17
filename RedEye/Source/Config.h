@@ -6,6 +6,7 @@ class Config
 public:
 	void TestRead();
 	void TestWrite();
+	void TestStreams();
 };
 
 #endif //__CONFIG_H__

@@ -1,4 +1,8 @@
 #include "RapidJson\include\document.h"
+#include "RapidJson\include\stringbuffer.h"
+#include "RapidJson\include\writer.h"
+#include "RapidJson\include\filereadstream.h"
+#include "RapidJson\include\filewritestream.h"
 #include "Globals.h"
 #include "Config.h"
 
@@ -157,5 +161,69 @@ void Config::TestWrite()
 		s = StringRef(cstr, cstr_len);          // shortcut, same as above
 	}
 	*/
+	{//SWAP
+		Value a(123);
+		Value b("Hello");
+		a.Swap(b);
+		assert(a.IsString());
+		assert(b.IsInt());
+	}
 
+}
+
+//reading/writing JSON rapidjson::Stream
+void Config::TestStreams()
+{
+	Document d;
+	const char json[] = "[1, 2, 3, 4]";
+		//MemoryStream
+	//Input  StringStream
+	{ //SStringStream
+		StringStream s(json); //GenericStringStream<UTF8<> >
+		d.ParseStream(s);
+		d.Clear();
+	}
+	{// cosnt char*
+		d.Parse(json);
+		d.Clear();
+	}
+	//Output  StringBuffer 
+	{
+		StringBuffer buffer;
+		Writer<StringBuffer> writer(buffer);
+		d.Accept(writer);
+
+		const char* output = buffer.GetString();
+		/*
+		StringBuffer buffer1(0, 1024); // Use its allocator, initial size = 1024
+		StringBuffer buffer2(allocator, 1024);
+
+		By default, StringBuffer will instantiate an internal allocator.
+
+		Similarly, StringBuffer is a typedef of GenericStringBuffer<UTF8<> >.
+		*/
+		d.Clear();
+	}
+
+		//File Streams
+	{//FileReadStream (Input)
+		FILE* fp = fopen("big.json", "rb");// non-Windows use "r"
+		char readBuffer[65536];
+		FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+		d.ParseStream(is);
+		fclose(fp);
+		d.Clear();
+	}
+	{// FileWriteStream (Output)
+		d.Parse(json);
+		FILE* fp = fopen("output.json", "wb"); // non-Windows use "w"
+		
+		char writeBuffer[65536];
+		FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+
+		Writer<FileWriteStream> writer(os);
+		d.Accept(writer);
+		fclose(fp);
+		d.Clear();
+	}
 }
