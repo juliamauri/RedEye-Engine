@@ -4,6 +4,8 @@
 #include "ModuleWindow.h"
 #include "SDL2\include\SDL.h"
 
+#include "Config.h"
+
 using namespace std;
 
 Application::Application()
@@ -28,6 +30,9 @@ bool Application::Init()
 		LOG("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		ret = false;
 	}
+
+	Config config;
+	config.Init();
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)

@@ -26,6 +26,18 @@ void Config::Init()
 	FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 	d.ParseStream(is);
 	fclose(fp);
+
+	if (d.IsObject())
+	{
+		if (d.HasMember("engine"))
+		{
+			Value::ConstMemberIterator itr = d.FindMember("engine");
+
+			if(itr->value.HasMember("name_engine"))
+				LOG("The name engine is: %s", itr->value["name_engine"].GetString());
+		}
+	}
+
 	d.Clear();
 
 

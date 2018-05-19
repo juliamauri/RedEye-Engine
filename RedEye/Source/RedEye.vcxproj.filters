@@ -67,7 +67,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\EngineResources\config.json">
+    <None Include="..\Build\Assets\config.json">
       <Filter>Main</Filter>
     </None>
   </ItemGroup>

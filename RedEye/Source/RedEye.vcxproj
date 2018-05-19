@@ -38,7 +38,7 @@
     <ClInclude Include="ModuleWindow.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\EngineResources\config.json" />
+    <None Include="..\Build\Assets\config.json" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
