@@ -2,6 +2,7 @@
 #define __MODULE_H__
 
 #include "Globals.h"
+#include "RapidJson\include\document.h"
 
 class Module
 {
@@ -16,8 +17,9 @@ public:
 	virtual ~Module(){}
 
 	bool IsActive() const { return enabled; }
+	const char* GetName() const { return name; }
 
-	virtual bool Init(/* CONFIG */) { return true; } //SETTING OWN VALUES
+	virtual bool Init(rapidjson::Value::ConstMemberIterator config_module) { return true; } //SETTING OWN VALUES
 	virtual bool Start(/* CONFIG */) { return true; } //ACCESS OTHER MODULES
 	
 	virtual update_status PreUpdate() { return UPDATE_CONTINUE; }

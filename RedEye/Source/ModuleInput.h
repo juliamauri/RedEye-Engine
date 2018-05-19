@@ -21,9 +21,9 @@ public:
 	ModuleInput(const char* name, bool start_enabled = true);
 	~ModuleInput();
 
-	bool Init();
+	bool Init(rapidjson::Value::ConstMemberIterator config_module) override;
 	update_status PreUpdate(float dt);
-	bool CleanUp();
+	bool CleanUp() override;
 
 	KEY_STATE GetKey(int id) const;
 	KEY_STATE GetMouseButton(int id) const;

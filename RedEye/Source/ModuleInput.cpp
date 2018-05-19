@@ -18,7 +18,7 @@ ModuleInput::~ModuleInput()
 }
 
 // Called before render is available
-bool ModuleInput::Init()
+bool ModuleInput::Init(rapidjson::Value::ConstMemberIterator config_module)
 {
 	LOG("Init SDL input event system");
 	bool ret = true;

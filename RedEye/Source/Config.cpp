@@ -1,14 +1,6 @@
-#include "RapidJson\include\document.h"
-#include "RapidJson\include\stringbuffer.h"
-#include "RapidJson\include\writer.h"
-#include "RapidJson\include\filereadstream.h"
-#include "RapidJson\include\filewritestream.h"
 #include "Globals.h"
 #include "Config.h"
 #include "SDL2\include\SDL.h"
-
-
-using namespace rapidjson;
 
 //Tutorial http://rapidjson.org/md_doc_tutorial.html
 
@@ -42,6 +34,25 @@ void Config::Init()
 
 
 	SDL_free(path);
+}
+
+Document Config::LoadConfig()
+{
+	LOG("Loading config.json");
+	char* path = SDL_GetBasePath();
+
+	std::string test(SDL_GetBasePath());
+	test += "Assets\\config.json";
+
+	Document config;
+	FILE* fp = nullptr;
+	fopen_s(&fp, test.c_str(), "rb");// non-Windows use "r"
+	char readBuffer[65536];
+	FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+	config.ParseStream(is);
+	fclose(fp);
+
+	return config;
 }
 
 void Config::TestRead()

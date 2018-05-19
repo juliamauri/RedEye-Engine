@@ -13,7 +13,7 @@ public:
 	ModuleWindow(const char* name, bool start_enabled = true);
 	~ModuleWindow();
 
-	bool Init() override;
+	bool Init(rapidjson::Value::ConstMemberIterator config_module) override;
 	update_status Update() override;
 	bool CleanUp() override;
 

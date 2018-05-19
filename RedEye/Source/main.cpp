@@ -41,6 +41,10 @@ int main(int argc, char* argv[])
 			LOG("Application Update exits with ERROR");
 		}
 	}
+	else
+	{
+		LOG("Application Init exits with ERROR");
+	}
 
 	delete App;
 

@@ -32,11 +32,24 @@ bool Application::Init()
 	}
 
 	Config config;
-	config.Init();
+	Document modules_config = config.LoadConfig();
+	if (!modules_config.IsObject())
+	{
+		LOG("Can't load config");
+		return false;
+	}
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)
-			ret = (*it)->Init(/* CONFIG */);
+		{
+			if(modules_config.HasMember((*it)->GetName()))
+				ret = (*it)->Init(modules_config.FindMember((*it)->GetName()));
+			else
+			{
+				LOG("Can't find config of %s module", (*it)->GetName());
+				return false;
+			}
+		}
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)

@@ -12,7 +12,7 @@ ModuleWindow::~ModuleWindow()
 {}
 
 // Called before render is available
-bool ModuleWindow::Init()
+bool ModuleWindow::Init(rapidjson::Value::ConstMemberIterator config_module)
 {
 	LOG("Init SDL window & surface");
 	bool ret = true;
@@ -29,14 +29,29 @@ bool ModuleWindow::Init()
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 		flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;*/
 
-		uint screen_width = 1280;
-		uint screen_height = 1024;
-		bool fullscreen = false;
-		bool resizable = false;
-		bool borderless = false;
-		bool fullscreen_desktop = false;
+		const char* title = "";
+		uint screen_width;
+		uint screen_height;
+		bool fullscreen;
+		bool resizable;
+		bool borderless;
+		bool fullscreen_desktop;
 
-		
+		if (config_module->value.HasMember("title"))
+			title = config_module->value["title"].GetString();
+		if(config_module->value.HasMember("screen_width"))
+			screen_width = config_module->value["screen_width"].GetInt();
+		if(config_module->value.HasMember("screen_height"))
+			screen_height = config_module->value["screen_height"].GetInt();
+		if (config_module->value.HasMember("fullscreen"))
+			fullscreen = config_module->value["fullscreen"].GetBool();
+		if (config_module->value.HasMember("resizable"))
+			resizable = config_module->value["resizable"].GetBool();
+		if (config_module->value.HasMember("borderless"))
+			borderless = config_module->value["borderless"].GetBool();
+		if (config_module->value.HasMember("fullscreen_desktop"))
+			fullscreen_desktop = config_module->value["fullscreen_desktop"].GetBool();
+
 		if (fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
 		if (resizable) flags |= SDL_WINDOW_RESIZABLE;
 		if (borderless) flags |= SDL_WINDOW_BORDERLESS;
@@ -44,7 +59,7 @@ bool ModuleWindow::Init()
 
 		//Create window
 		window = SDL_CreateWindow(
-			"Hola Juli!!", // Title
+			title, // Title
 			SDL_WINDOWPOS_CENTERED, // x position
 			SDL_WINDOWPOS_CENTERED, // y position
 			screen_width, // width
