@@ -22,6 +22,9 @@
     <ClCompile Include="ModuleInput.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Event.cpp">
+      <Filter>Modules\Events</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -48,6 +51,12 @@
     <ClInclude Include="ModuleInput.h">
       <Filter>Modules</Filter>
     </ClInclude>
+    <ClInclude Include="Event.h">
+      <Filter>Modules\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="EventListener.h">
+      <Filter>Modules\Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -64,6 +73,9 @@
     </Filter>
     <Filter Include="Containers">
       <UniqueIdentifier>{5c9aef73-114b-4af7-98e0-23279889b965}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Events">
+      <UniqueIdentifier>{b7a63cfc-233b-4186-96c0-37e2ed9b095d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
