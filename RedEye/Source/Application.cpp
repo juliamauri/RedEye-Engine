@@ -82,6 +82,9 @@ int Application::Update()
 
 	FinishUpdate();
 
+	if (want_to_quit && ret != UPDATE_ERROR)
+		ret = UPDATE_STOP;
+
 	return ret;
 }
 
@@ -100,4 +103,10 @@ bool Application::CleanUp()
 	SDL_Quit();
 
 	return ret;
+}
+
+void Application::RecieveEvent(const Event* e)
+{
+	if (e->GetType() == REQUEST_QUIT)
+		want_to_quit = true;
 }

@@ -1,26 +1,24 @@
 #include "Event.h"
 #include "EventListener.h"
 
-void RE_Event::CheckTime()
-{
-	//timestamp = GetTicks();
-}
-
 Event::Event()
 {
-	SetInvalid();
+	Clear();
 }
 
-Event::Event(RE_EventType t, EventListener* lis) : listener(lis), type(t)
+Event::Event(RE_EventType t, unsigned int ts, EventListener* lis) : listener(lis), type(t), timestamp(ts)
 {
-	IsValid() ? data.CheckTime() : SetInvalid();
+	if (!IsValid())
+	{
+		Clear();
+	}
 }
 
-Event::Event(const Event& e) : listener(e.listener), type(e.type), data(e.data) {}
+Event::Event(const Event& e) : listener(e.listener), type(e.type), timestamp(e.timestamp) {}
 
 Event::~Event()
 {
-	SetInvalid();
+	Clear();
 }
 
 void Event::CallListener() const
@@ -33,8 +31,19 @@ bool Event::IsValid() const
 	return type != MAX_EVENT_TYPES;
 }
 
-void Event::SetInvalid()
+unsigned int Event::GetTimeStamp() const
+{
+	return timestamp;
+}
+
+RE_EventType Event::GetType() const
+{
+	return type;
+}
+
+void Event::Clear()
 {
 	type = MAX_EVENT_TYPES;
 	listener = nullptr;
+	timestamp = 0;
 }

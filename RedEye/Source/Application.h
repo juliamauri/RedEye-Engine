@@ -1,13 +1,14 @@
 #ifndef __APP_H__
 #define __APP_H__
 
+#include "EventListener.h"
 #include <list>
 
 class Module;
 class ModuleWindow;
 class ModuleInput;
 
-class Application
+class Application : public EventListener
 {
 public:
 	Application();
@@ -16,6 +17,8 @@ public:
 	bool Init();
 	int Update();
 	bool CleanUp();
+
+	void RecieveEvent(const Event* e) override;
 
 private:
 
@@ -30,6 +33,7 @@ public:
 private:
 
 	std::list<Module*> modules;
+	bool want_to_quit = false;
 };
 
 extern Application* App;

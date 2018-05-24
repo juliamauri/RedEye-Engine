@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "Event.h"
+#include "Globals.h"
 #include "SDL2\include\SDL.h"
 
 #define MAX_KEYS 300
@@ -23,7 +24,6 @@ bool ModuleInput::Init(rapidjson::Value::ConstMemberIterator config_module)
 {
 	LOG("Init SDL input event system");
 	bool ret = true;
-	SDL_Init(0);
 
 	if(SDL_InitSubSystem(SDL_INIT_EVENTS) < 0)
 	{
@@ -42,19 +42,14 @@ update_status ModuleInput::PreUpdate()
 	SDL_PumpEvents();
 
 	// Mouse
+	mouse.UpdateButtons();
 	mouse.ResetMotion();
-	mouse.UpdateMouseButtons();
 
 	// Keyboard
 	UpdateKeyboard();
 
 	// Other Events
 	HandleEventQueue();
-
-	if (keyboard[SDL_SCANCODE_ESCAPE] == KEY_UP) want_to_quit = true;
-	if (want_to_quit) ret = UPDATE_STOP;
-
-	
 
 	return ret;
 }
@@ -105,6 +100,9 @@ void ModuleInput::UpdateKeyboard()
 				keyboard[i] = KEY_IDLE;
 		}
 	}
+
+	if (keyboard[SDL_SCANCODE_ESCAPE] == KEY_UP)
+		AddEvent(Event(REQUEST_QUIT, SDL_GetTicks(), App));
 }
 
 void ModuleInput::HandleEventQueue()
@@ -117,7 +115,7 @@ void ModuleInput::HandleEventQueue()
 		{
 /* Application events */
 		case SDL_QUIT:/**< User-requested quit */
-			AddEvent(Event(REQUEST_QUIT, this));
+			AddEvent(Event(REQUEST_QUIT, e.quit.timestamp, App));
 			break;
 		case SDL_APP_TERMINATING:/**< The application is being terminated by the OS
 								Called on iOS in applicationWillTerminate()
@@ -287,13 +285,6 @@ void ModuleInput::HandleEventQueue()
 	}
 }
 
-void ModuleInput::RecieveEvent(const Event* e)
-{
-	if (e->type == REQUEST_QUIT)
-		want_to_quit = true;
-}
-
-
 // --------------------- SDL Event Types ---------------------
 //SDL_CommonEvent common;         /**< Common event data */
 //SDL_WindowEvent window;         /**< Window event data */
@@ -320,13 +311,12 @@ void ModuleInput::RecieveEvent(const Event* e)
 //SDL_DollarGestureEvent dgesture; /**< Gesture event data */
 //SDL_DropEvent drop;             /**< Drag and drop event data */
 
-
 void MouseData::ResetMotion()
 {
 	mouse_x_motion = mouse_y_motion = mouse_wheel_motion = 0;
 }
 
-void MouseData::UpdateMouseButtons()
+void MouseData::UpdateButtons()
 {
 	Uint32 buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
 
@@ -349,12 +339,12 @@ void MouseData::UpdateMouseButtons()
 	}
 }
 
-KEY_STATE MouseData::GetMouseButton(int id) const
+KEY_STATE MouseData::GetButton(int id) const
 {
 	return mouse_buttons[id];
 }
 
-bool MouseData::MouseMoved() const
+bool MouseData::Moved() const
 {
 	return (mouse_x_motion != 0 || mouse_x_motion != 0);
 }

@@ -18,6 +18,7 @@ enum KEY_STATE
 struct MouseData
 {
 	KEY_STATE mouse_buttons[MAX_MOUSE_BUTTONS];
+
 	int mouse_x;
 	int mouse_y;
 	int mouse_x_motion;
@@ -25,10 +26,10 @@ struct MouseData
 	int mouse_wheel_motion;
 
 	void ResetMotion();
-	void UpdateMouseButtons();
+	void UpdateButtons();
 
-	KEY_STATE GetMouseButton(int id) const;
-	bool MouseMoved() const;
+	KEY_STATE GetButton(int id) const;
+	bool Moved() const;
 };
 
 class ModuleInput : public Module
@@ -41,8 +42,6 @@ public:
 	bool Init(rapidjson::Value::ConstMemberIterator config_module) override;
 	update_status PreUpdate() override;
 	bool CleanUp() override;
-
-	void RecieveEvent(const Event* e) override;
 
 	bool AddEvent(const Event e);
 
@@ -59,7 +58,6 @@ private:
 	KEY_STATE* keyboard;
 	MouseData mouse;
 	std::queue<Event> re_events;
-	bool want_to_quit = false;
 };
 
 #endif // !__MODULEINPUT_H__

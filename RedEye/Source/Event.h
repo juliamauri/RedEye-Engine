@@ -20,38 +20,30 @@ typedef enum : unsigned short int
 	MAX_EVENT_TYPES
 } RE_EventType;
 
-struct RE_Event
-{
-	unsigned int timestamp;   /**< In milliseconds, populated using SDL_GetTicks() */
-	// ++Event data
-
-	void CheckTime();
-};
-
 class Event
 {
 public:
 
 	Event();
-	Event(RE_EventType t, EventListener* lis = nullptr);
+	Event(RE_EventType t, unsigned int ts, EventListener* lis = nullptr);
 	Event(const Event& e);
 	~Event();
 
 	void CallListener() const;
 	bool IsValid() const;
 
+	unsigned int GetTimeStamp() const;
+	RE_EventType GetType() const;
+
 private:
 
-	void SetInvalid();
+	void Clear();
 
-public:
+private:
 
-	RE_Event data;
 	RE_EventType type;
-
-private:
-
 	EventListener* listener;
+	unsigned int timestamp;
 };
 
 #endif
