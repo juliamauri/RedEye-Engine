@@ -2,6 +2,7 @@
   "engine": {
     "name_engine": "RedEye"
   },
+  "Input": {},
   "Window": {
     "title": "Hola Ruben!",
     "screen_width": 1280,

@@ -10,7 +10,7 @@ using namespace std;
 
 Application::Application()
 {
-	//modules.push_back(input = new ModuleInput("Input"));
+	modules.push_back(input = new ModuleInput("Input"));
 	modules.push_back(window = new ModuleWindow("Window"));
 }
 
