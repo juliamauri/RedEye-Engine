@@ -1,6 +1,7 @@
 #include "ModuleInput.h"
 
 #include "Application.h"
+#include "Event.h"
 #include "SDL2\include\SDL.h"
 
 #define MAX_KEYS 300
@@ -34,21 +35,34 @@ bool ModuleInput::Init(rapidjson::Value::ConstMemberIterator config_module)
 }
 
 // Called every draw update
-update_status ModuleInput::PreUpdate(float dt)
+update_status ModuleInput::PreUpdate()
 {
 	update_status ret = UPDATE_CONTINUE;
 
-	// reset mouse motions
-	mouse_x_motion = mouse_y_motion = mouse_wheel_motion = 0;
-
 	SDL_PumpEvents();
+
+	// Mouse
+	mouse.ResetMotion();
+	mouse.UpdateMouseButtons();
+
+	// Keyboard
 	UpdateKeyboard();
-	UpdateMouseButtons();
+
+	// Other Events
 	HandleEventQueue();
 
-	/*if(keyboard[SDL_SCANCODE_ESCAPE] == KEY_UP)
-		ret = UPDATE_STOP;*/
+	if (keyboard[SDL_SCANCODE_ESCAPE] == KEY_UP) want_to_quit = true;
+	if (want_to_quit) ret = UPDATE_STOP;
 
+	
+
+	return ret;
+}
+
+bool ModuleInput::AddEvent(const Event e)
+{
+	bool ret;
+	if (ret = e.IsValid()) re_events.push(e);
 	return ret;
 }
 
@@ -65,39 +79,9 @@ KEY_STATE ModuleInput::GetKey(int id) const
 	return keyboard[id];
 }
 
-KEY_STATE ModuleInput::GetMouseButton(int id) const
+const MouseData* ModuleInput::GetMouse() const
 {
-	return mouse_buttons[id];
-}
-
-int ModuleInput::GetMouseX() const
-{
-	return mouse_x;
-}
-
-int ModuleInput::GetMouseY() const
-{
-	return mouse_y;
-}
-
-int ModuleInput::GetMouseWheelMotion() const
-{
-	return mouse_wheel_motion;
-}
-
-int ModuleInput::GetMouseXMotion() const
-{
-	return mouse_x_motion;
-}
-
-int ModuleInput::GetMouseYMotion() const
-{
-	return mouse_y_motion;
-}
-
-bool ModuleInput::MouseMoved() const
-{
-	return (mouse_x_motion != 0 || mouse_x_motion != 0);
+	return &mouse;
 }
 
 void ModuleInput::UpdateKeyboard()
@@ -123,31 +107,9 @@ void ModuleInput::UpdateKeyboard()
 	}
 }
 
-void ModuleInput::UpdateMouseButtons()
-{
-	Uint32 buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
-
-	for (int i = 0; i < 5; ++i)
-	{
-		if (buttons & SDL_BUTTON(i))
-		{
-			if (mouse_buttons[i] == KEY_IDLE)
-				mouse_buttons[i] = KEY_DOWN;
-			else
-				mouse_buttons[i] = KEY_REPEAT;
-		}
-		else
-		{
-			if (mouse_buttons[i] == KEY_REPEAT || mouse_buttons[i] == KEY_DOWN)
-				mouse_buttons[i] = KEY_UP;
-			else
-				mouse_buttons[i] = KEY_IDLE;
-		}
-	}
-}
-
 void ModuleInput::HandleEventQueue()
 {
+	// SDL Events
 	SDL_Event e;
 	while (SDL_PollEvent(&e))
 	{
@@ -155,6 +117,7 @@ void ModuleInput::HandleEventQueue()
 		{
 /* Application events */
 		case SDL_QUIT:/**< User-requested quit */
+			AddEvent(Event(REQUEST_QUIT, this));
 			break;
 		case SDL_APP_TERMINATING:/**< The application is being terminated by the OS
 								Called on iOS in applicationWillTerminate()
@@ -232,17 +195,17 @@ void ModuleInput::HandleEventQueue()
 		
 /* Mouse events */
 		case SDL_MOUSEMOTION:/**< Mouse moved */
-			mouse_x = e.motion.x;
-			mouse_y = e.motion.y;
-			mouse_x_motion = e.motion.xrel;
-			mouse_y_motion = e.motion.yrel;
+			mouse.mouse_x = e.motion.x;
+			mouse.mouse_y = e.motion.y;
+			mouse.mouse_x_motion = e.motion.xrel;
+			mouse.mouse_y_motion = e.motion.yrel;
 			break;
 		case SDL_MOUSEBUTTONDOWN:/**< Mouse button pressed */
 			break;
 		case SDL_MOUSEBUTTONUP:/**< Mouse button released */
 			break;
 		case SDL_MOUSEWHEEL:/**< Mouse wheel motion */
-			mouse_wheel_motion = e.wheel.y;
+			mouse.mouse_wheel_motion = e.wheel.y;
 			break;
 
 /* Joystick events */
@@ -312,8 +275,26 @@ void ModuleInput::HandleEventQueue()
 			break;
 		}
 	}
+
+	// RE Events
+	Event* re_e = nullptr;
+	while (!re_events.empty())
+	{
+		if (re_events.front().IsValid())
+			re_events.front().CallListener();
+
+		re_events.pop();
+	}
 }
 
+void ModuleInput::RecieveEvent(const Event* e)
+{
+	if (e->type == REQUEST_QUIT)
+		want_to_quit = true;
+}
+
+
+// --------------------- SDL Event Types ---------------------
 //SDL_CommonEvent common;         /**< Common event data */
 //SDL_WindowEvent window;         /**< Window event data */
 //SDL_KeyboardEvent key;          /**< Keyboard event data */
@@ -338,3 +319,42 @@ void ModuleInput::HandleEventQueue()
 //SDL_MultiGestureEvent mgesture; /**< Gesture event data */
 //SDL_DollarGestureEvent dgesture; /**< Gesture event data */
 //SDL_DropEvent drop;             /**< Drag and drop event data */
+
+
+void MouseData::ResetMotion()
+{
+	mouse_x_motion = mouse_y_motion = mouse_wheel_motion = 0;
+}
+
+void MouseData::UpdateMouseButtons()
+{
+	Uint32 buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
+
+	for (int i = 0; i < 5; ++i)
+	{
+		if (buttons & SDL_BUTTON(i))
+		{
+			if (mouse_buttons[i] == KEY_IDLE)
+				mouse_buttons[i] = KEY_DOWN;
+			else
+				mouse_buttons[i] = KEY_REPEAT;
+		}
+		else
+		{
+			if (mouse_buttons[i] == KEY_REPEAT || mouse_buttons[i] == KEY_DOWN)
+				mouse_buttons[i] = KEY_UP;
+			else
+				mouse_buttons[i] = KEY_IDLE;
+		}
+	}
+}
+
+KEY_STATE MouseData::GetMouseButton(int id) const
+{
+	return mouse_buttons[id];
+}
+
+bool MouseData::MouseMoved() const
+{
+	return (mouse_x_motion != 0 || mouse_x_motion != 0);
+}

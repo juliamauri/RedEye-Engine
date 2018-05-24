@@ -2,9 +2,12 @@
 #define __MODULE_H__
 
 #include "Globals.h"
+
+#include "EventListener.h"
+
 #include "RapidJson\include\document.h"
 
-class Module
+class Module : public EventListener
 {
 private:
 
@@ -30,6 +33,8 @@ public:
 
 	virtual void Load(){}
 	virtual void Save() const {}
+
+	//virtual void RecieveEvent(const Event* e) override {}
 };
 
 #endif //__MODULE_H__

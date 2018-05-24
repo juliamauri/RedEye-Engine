@@ -14,8 +14,9 @@ public:
 	~ModuleWindow();
 
 	bool Init(rapidjson::Value::ConstMemberIterator config_module) override;
-	update_status Update() override;
 	bool CleanUp() override;
+
+	void RecieveEvent(const Event* e) override;
 
 public:
 

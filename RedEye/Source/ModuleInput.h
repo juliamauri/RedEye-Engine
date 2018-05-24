@@ -2,6 +2,7 @@
 #define __MODULEINPUT_H__
 
 #include "Module.h"
+#include "Event.h"
 #include <queue>
 
 #define MAX_MOUSE_BUTTONS 5
@@ -14,6 +15,22 @@ enum KEY_STATE
 	KEY_UP
 };
 
+struct MouseData
+{
+	KEY_STATE mouse_buttons[MAX_MOUSE_BUTTONS];
+	int mouse_x;
+	int mouse_y;
+	int mouse_x_motion;
+	int mouse_y_motion;
+	int mouse_wheel_motion;
+
+	void ResetMotion();
+	void UpdateMouseButtons();
+
+	KEY_STATE GetMouseButton(int id) const;
+	bool MouseMoved() const;
+};
+
 class ModuleInput : public Module
 {
 public:
@@ -22,34 +39,27 @@ public:
 	~ModuleInput();
 
 	bool Init(rapidjson::Value::ConstMemberIterator config_module) override;
-	update_status PreUpdate(float dt);
+	update_status PreUpdate() override;
 	bool CleanUp() override;
 
-	KEY_STATE GetKey(int id) const;
-	KEY_STATE GetMouseButton(int id) const;
-	int GetMouseX() const;
-	int GetMouseY() const;
-	int GetMouseXMotion() const;
-	int GetMouseYMotion() const;
-	int GetMouseWheelMotion() const;
+	void RecieveEvent(const Event* e) override;
 
-	bool MouseMoved() const;
+	bool AddEvent(const Event e);
+
+	KEY_STATE GetKey(int id) const;
+	const MouseData* GetMouse() const;
 
 private:
 
 	void UpdateKeyboard();
-	void UpdateMouseButtons();
 	void HandleEventQueue();
 
 private:
 
 	KEY_STATE* keyboard;
-	KEY_STATE mouse_buttons[MAX_MOUSE_BUTTONS];
-	int mouse_x;
-	int mouse_y;
-	int mouse_x_motion;
-	int mouse_y_motion;
-	int mouse_wheel_motion;
+	MouseData mouse;
+	std::queue<Event> re_events;
+	bool want_to_quit = false;
 };
 
 #endif // !__MODULEINPUT_H__

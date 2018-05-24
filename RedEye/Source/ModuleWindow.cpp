@@ -1,6 +1,7 @@
 #include "ModuleWindow.h"
 
-#include "Application.h"
+//#include "Application.h"
+#include "Event.h"
 #include "SDL2\include\SDL.h"
 
 ModuleWindow::ModuleWindow(const char* name, bool start_enabled) : Module(name, start_enabled),
@@ -80,19 +81,6 @@ bool ModuleWindow::Init(rapidjson::Value::ConstMemberIterator config_module)
 	return ret;
 }
 
-update_status ModuleWindow::Update()
-{
-	update_status ret = UPDATE_CONTINUE;
-
-	SDL_Event e;
-	while (SDL_PollEvent(&e))
-	{
-		if (e.type == SDL_QUIT) ret = UPDATE_STOP;
-	}
-
-	return ret;
-}
-
 // Called before quitting
 bool ModuleWindow::CleanUp()
 {
@@ -101,4 +89,8 @@ bool ModuleWindow::CleanUp()
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
 	return true;
+}
+
+void ModuleWindow::RecieveEvent(const Event* e)
+{
 }
