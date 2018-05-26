@@ -1,11 +1,9 @@
 #ifndef __MODULE_H__
 #define __MODULE_H__
 
-#include "Globals.h"
-
-#include "EventListener.h"
-
 #include "RapidJson\include\document.h"
+#include "Globals.h"
+#include "EventListener.h"
 
 class Module : public EventListener
 {

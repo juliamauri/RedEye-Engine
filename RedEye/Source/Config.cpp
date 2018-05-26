@@ -36,6 +36,30 @@ void Config::Init()
 	SDL_free(path);
 }
 
+bool Config::LoadJsons()
+{
+	LOG("Loading config.json");
+	char* path = SDL_GetBasePath();
+
+	std::string test(SDL_GetBasePath());
+	test += "Assets\\config.json";
+
+	FILE* fp = nullptr;
+	fopen_s(&fp, test.c_str(), "rb");// non-Windows use "r"
+	char readBuffer[65536];
+	FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+	config.ParseStream(is);
+	fclose(fp);
+
+	if (!config.IsObject())
+	{
+		LOG("Can't load config");
+		return false;
+	}
+
+	return true;
+}
+
 Document Config::LoadConfig()
 {
 	LOG("Loading config.json");
@@ -70,9 +94,15 @@ void Config::TestRead()
 	assert(document["hello"].IsString());
 	LOG("hello = %s\n", document["hello"].GetString());
 
+		//union test
+	//CValue cvalue;
+	//cvalue.c = document["hello"].GetString();
+
 		//check bool
 	assert(document["t"].IsBool());
 	LOG("t = %s\n", document["t"].GetBool() ? "true" : "false");
+
+	//cvalue.b = document["t"].GetBool();
 	
 		//check null
 	LOG("n = %s\n", document["n"].IsNull() ? "null" : "?");
