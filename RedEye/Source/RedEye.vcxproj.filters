@@ -13,9 +13,6 @@
     <ClCompile Include="Application.cpp">
       <Filter>Main</Filter>
     </ClCompile>
-    <ClCompile Include="Config.cpp">
-      <Filter>Containers</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleWindow.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
@@ -24,6 +21,9 @@
     </ClCompile>
     <ClCompile Include="Event.cpp">
       <Filter>Modules\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSystem.cpp">
+      <Filter>Modules\Independent Modules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -38,9 +38,6 @@
     </ClInclude>
     <ClInclude Include="Application.h">
       <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Containers</Filter>
     </ClInclude>
     <ClInclude Include="Module.h">
       <Filter>Modules</Filter>
@@ -57,6 +54,120 @@
     <ClInclude Include="EventListener.h">
       <Filter>Modules\Events</Filter>
     </ClInclude>
+    <ClInclude Include="FileSystem.h">
+      <Filter>Modules\Independent Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysFS\include\physfs.h">
+      <Filter>Tools\PhysFS</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysFS\include\physfs_internal.h">
+      <Filter>Tools\PhysFS</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\rapidjson.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\allocators.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\document.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\encodedstream.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\encodings.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\filereadstream.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\filewritestream.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\fwd.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\istreamwrapper.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\memorybuffer.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\memorystream.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\ostreamwrapper.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\pointer.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\prettywriter.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\reader.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\schema.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\stream.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\stringbuffer.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\writer.h">
+      <Filter>Tools\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\error\en.h">
+      <Filter>Tools\RapidJson\error</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\error\error.h">
+      <Filter>Tools\RapidJson\error</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\biginteger.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\diyfp.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\dtoa.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\ieee754.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\itoa.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\meta.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\pow10.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\regex.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\stack.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\strfunc.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\strtod.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\internal\swap.h">
+      <Filter>Tools\RapidJson\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\msinttypes\inttypes.h">
+      <Filter>Tools\RapidJson\msinttypes</Filter>
+    </ClInclude>
+    <ClInclude Include="RapidJson\include\msinttypes\stdint.h">
+      <Filter>Tools\RapidJson\msinttypes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -71,11 +182,35 @@
     <Filter Include="Main">
       <UniqueIdentifier>{9e983e10-37e2-43b9-8488-5c1ffa96e2dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Containers">
-      <UniqueIdentifier>{5c9aef73-114b-4af7-98e0-23279889b965}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Modules\Events">
       <UniqueIdentifier>{b7a63cfc-233b-4186-96c0-37e2ed9b095d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{f69c89c8-dbf0-497c-ade9-ac648258d3ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Independent Modules">
+      <UniqueIdentifier>{5c9aef73-114b-4af7-98e0-23279889b965}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{2f65736f-a4d5-414f-a733-ba496b3de811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools\PhysFS">
+      <UniqueIdentifier>{429ba044-1ffb-4246-aa0b-ab4a59cb5d97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Containers">
+      <UniqueIdentifier>{b68e0a5d-ad13-472e-be1a-55dccf9fc2ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools\RapidJson">
+      <UniqueIdentifier>{47bf42ae-64f7-408a-8df2-0e016762aa7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools\RapidJson\error">
+      <UniqueIdentifier>{82e15e95-8224-4039-98c5-8bd59a87a22d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools\RapidJson\internal">
+      <UniqueIdentifier>{25c6036d-7ab4-46d8-a195-fa24feb8d820}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools\RapidJson\msinttypes">
+      <UniqueIdentifier>{84cde038-91b4-48df-b508-24b57351bca2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

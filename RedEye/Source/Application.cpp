@@ -2,9 +2,9 @@
 #include "Module.h"
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
+#include "FileSystem.h"
 #include "SDL2\include\SDL.h"
 
-#include "Config.h"
 
 using namespace std;
 
@@ -31,25 +31,32 @@ bool Application::Init()
 		ret = false;
 	}
 
-	Config config;
-	Document modules_config = config.LoadConfig();
-	if (!modules_config.IsObject())
-	{
-		LOG("Can't load config");
-		return false;
-	}
+	//Config config;
 
-	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
-		if ((*it)->IsActive() == true)
+	//if (config.LoadConfig()){
+		/*Document* modules_config = config.GetConfig();
+		if (!modules_config->IsObject())
 		{
-			if(modules_config.HasMember((*it)->GetName()))
-				ret = (*it)->Init(modules_config.FindMember((*it)->GetName()));
-			else
+			LOG("Can't load config");
+			return false;
+		}*/
+
+		for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
+			if ((*it)->IsActive() == true)
 			{
-				LOG("Can't find config of %s module", (*it)->GetName());
-				return false;
+				//if (modules_config->HasMember((*it)->GetName()))
+					ret = (*it)->Init(nullptr);// config.GetMember((*it)->GetName()));
+				/*else
+				{
+					LOG("Can't find config of %s module", (*it)->GetName());
+					return false;
+				}*/
 			}
-		}
+	//}
+
+	
+
+	
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)

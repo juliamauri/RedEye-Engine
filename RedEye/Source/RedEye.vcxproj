@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="main.cpp" />
@@ -30,7 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
-    <ClInclude Include="Config.h" />
+    <ClInclude Include="FileSystem.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="EventListener.h" />
     <ClInclude Include="Globals.h" />
@@ -39,6 +39,43 @@
     <ClInclude Include="Module.h" />
     <ClInclude Include="ModuleInput.h" />
     <ClInclude Include="ModuleWindow.h" />
+    <ClInclude Include="PhysFS\include\physfs.h" />
+    <ClInclude Include="PhysFS\include\physfs_internal.h" />
+    <ClInclude Include="RapidJson\include\allocators.h" />
+    <ClInclude Include="RapidJson\include\document.h" />
+    <ClInclude Include="RapidJson\include\encodedstream.h" />
+    <ClInclude Include="RapidJson\include\encodings.h" />
+    <ClInclude Include="RapidJson\include\error\en.h" />
+    <ClInclude Include="RapidJson\include\error\error.h" />
+    <ClInclude Include="RapidJson\include\filereadstream.h" />
+    <ClInclude Include="RapidJson\include\filewritestream.h" />
+    <ClInclude Include="RapidJson\include\fwd.h" />
+    <ClInclude Include="RapidJson\include\internal\biginteger.h" />
+    <ClInclude Include="RapidJson\include\internal\diyfp.h" />
+    <ClInclude Include="RapidJson\include\internal\dtoa.h" />
+    <ClInclude Include="RapidJson\include\internal\ieee754.h" />
+    <ClInclude Include="RapidJson\include\internal\itoa.h" />
+    <ClInclude Include="RapidJson\include\internal\meta.h" />
+    <ClInclude Include="RapidJson\include\internal\pow10.h" />
+    <ClInclude Include="RapidJson\include\internal\regex.h" />
+    <ClInclude Include="RapidJson\include\internal\stack.h" />
+    <ClInclude Include="RapidJson\include\internal\strfunc.h" />
+    <ClInclude Include="RapidJson\include\internal\strtod.h" />
+    <ClInclude Include="RapidJson\include\internal\swap.h" />
+    <ClInclude Include="RapidJson\include\istreamwrapper.h" />
+    <ClInclude Include="RapidJson\include\memorybuffer.h" />
+    <ClInclude Include="RapidJson\include\memorystream.h" />
+    <ClInclude Include="RapidJson\include\msinttypes\inttypes.h" />
+    <ClInclude Include="RapidJson\include\msinttypes\stdint.h" />
+    <ClInclude Include="RapidJson\include\ostreamwrapper.h" />
+    <ClInclude Include="RapidJson\include\pointer.h" />
+    <ClInclude Include="RapidJson\include\prettywriter.h" />
+    <ClInclude Include="RapidJson\include\rapidjson.h" />
+    <ClInclude Include="RapidJson\include\reader.h" />
+    <ClInclude Include="RapidJson\include\schema.h" />
+    <ClInclude Include="RapidJson\include\stream.h" />
+    <ClInclude Include="RapidJson\include\stringbuffer.h" />
+    <ClInclude Include="RapidJson\include\writer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Build\Assets\config.json" />
