@@ -1,9 +1,10 @@
 #ifndef __MODULE_H__
 #define __MODULE_H__
 
-#include "RapidJson\include\document.h"
 #include "Globals.h"
 #include "EventListener.h"
+
+class JSONNode;
 
 class Module : public EventListener
 {
@@ -20,7 +21,7 @@ public:
 	bool IsActive() const { return enabled; }
 	const char* GetName() const { return name; }
 
-	virtual bool Init(rapidjson::Value::ConstMemberIterator config_module) { return true; } //SETTING OWN VALUES
+	virtual bool Init(JSONNode* config_module = nullptr) { return true; } //SETTING OWN VALUES
 	virtual bool Start(/* CONFIG */) { return true; } //ACCESS OTHER MODULES
 	
 	virtual update_status PreUpdate() { return UPDATE_CONTINUE; }

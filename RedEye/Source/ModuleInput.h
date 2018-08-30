@@ -39,7 +39,7 @@ public:
 	ModuleInput(const char* name, bool start_enabled = true);
 	~ModuleInput();
 
-	bool Init(rapidjson::Value::ConstMemberIterator config_module) override;
+	bool Init(JSONNode* config_module) override;
 	update_status PreUpdate() override;
 	bool CleanUp() override;
 

@@ -4,6 +4,10 @@
 #include "Event.h"
 #include "SDL2\include\SDL.h"
 
+#include "FileSystem.h"
+#include "RapidJson\include\document.h"
+
+
 ModuleWindow::ModuleWindow(const char* name, bool start_enabled) : Module(name, start_enabled),
 window(nullptr), screen_surface(nullptr), flags(0)
 {}
@@ -13,7 +17,7 @@ ModuleWindow::~ModuleWindow()
 {}
 
 // Called before render is available
-bool ModuleWindow::Init(rapidjson::Value::ConstMemberIterator config_module)
+bool ModuleWindow::Init(JSONNode* config_module)
 {
 	LOG("Init SDL window & surface");
 	bool ret = true;
@@ -31,27 +35,27 @@ bool ModuleWindow::Init(rapidjson::Value::ConstMemberIterator config_module)
 		flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;*/
 
 		const char* title = "";
-		uint screen_width;
-		uint screen_height;
-		bool fullscreen;
-		bool resizable;
-		bool borderless;
-		bool fullscreen_desktop;
+		uint screen_width = 1080;
+		uint screen_height = 720;
+		bool fullscreen = true;
+		bool resizable = true;
+		bool borderless = true;
+		bool fullscreen_desktop = true;
 
-		if (config_module->value.HasMember("title"))
-			title = config_module->value["title"].GetString();
-		if(config_module->value.HasMember("screen_width"))
-			screen_width = config_module->value["screen_width"].GetInt();
-		if(config_module->value.HasMember("screen_height"))
-			screen_height = config_module->value["screen_height"].GetInt();
-		if (config_module->value.HasMember("fullscreen"))
-			fullscreen = config_module->value["fullscreen"].GetBool();
-		if (config_module->value.HasMember("resizable"))
-			resizable = config_module->value["resizable"].GetBool();
-		if (config_module->value.HasMember("borderless"))
-			borderless = config_module->value["borderless"].GetBool();
-		if (config_module->value.HasMember("fullscreen_desktop"))
-			fullscreen_desktop = config_module->value["fullscreen_desktop"].GetBool();
+		/*if ((*config_module)->value.HasMember("title"))
+			title = (*config_module)->value["title"].GetString();
+		if((*config_module)->value.HasMember("screen_width"))
+			screen_width = (*config_module)->value["screen_width"].GetInt();
+		if((*config_module)->value.HasMember("screen_height"))
+			screen_height = (*config_module)->value["screen_height"].GetInt();
+		if ((*config_module)->value.HasMember("fullscreen"))
+			fullscreen = (*config_module)->value["fullscreen"].GetBool();
+		if ((*config_module)->value.HasMember("resizable"))
+			resizable = (*config_module)->value["resizable"].GetBool();
+		if ((*config_module)->value.HasMember("borderless"))
+			borderless = (*config_module)->value["borderless"].GetBool();
+		if ((*config_module)->value.HasMember("fullscreen_desktop"))
+			fullscreen_desktop = (*config_module)->value["fullscreen_desktop"].GetBool();*/
 
 		if (fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
 		if (resizable) flags |= SDL_WINDOW_RESIZABLE;
