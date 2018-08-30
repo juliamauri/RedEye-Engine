@@ -7,12 +7,12 @@
 
 /* rapidjson number types:
 
-int
-unsigned int
-long long
-unsigned long long
-double
-float
+int GetInt()
+unsigned int GetUint()
+long long GetInt64()
+unsigned long long GetUint64()
+double GetDouble()
+float GetFloat()
 
 bool
 string
@@ -49,13 +49,13 @@ public:
 	JSONNode	PushJObject(const char* name);
 
 	// Pull
-	bool			PullBool(const char* name, bool deflt) const;
-	int				PullInt(const char* name, int deflt) const;
-	unsigned int	PullUInt(const char* name, unsigned int deflt) const;
-	float			PullFloat(const char* name, float deflt) const;
-	double			PullDouble(const char* name, double deflt) const;
+	bool			PullBool(const char* name, bool deflt);
+	int				PullInt(const char* name, int deflt);
+	unsigned int	PullUInt(const char* name, unsigned int deflt);
+	float			PullFloat(const char* name, float deflt);
+	double			PullDouble(const char* name, double deflt);
 	const char*		PullString(const char* name, const char* deflt);
-	JSONNode		PullJObject(const char* name) const;
+	JSONNode		PullJObject(const char* name);
 
 	// Utility
 	unsigned int Serialize(char** buffer, bool pretty = true);
@@ -64,7 +64,7 @@ public:
 private:
 
 	Config* config;
-	const char* pointerPath;
+	std::string pointerPath;
 };
 
 class FileSystem
@@ -74,7 +74,7 @@ public:
 	FileSystem();
 	~FileSystem();
 
-	bool Init();
+	bool Init(int argc, char* argv[]);
 	Config* GetConfig() const;
 
 	bool Exists(const char* file) const;
@@ -96,7 +96,6 @@ public:
 	FileInfo(const FileInfo &copy);
 
 	bool SetFromFullPath(const char* fullpath);
-	const char* GetFullPath() const;
 	inline bool operator!() const;
 
 	std::string path;

@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 {
 	int main_return = EXIT_FAILURE;
 
-	App = new Application();
+	App = new Application(argc, argv);
 
 	if (App->Init())
 	{

@@ -34,7 +34,7 @@ bool ModuleWindow::Init(JSONNode* config_module)
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 		flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;*/
 
-		const char* title = "";
+		const char* title = config_module->PullString("title", "no se ha cargado");
 		uint screen_width = 1080;
 		uint screen_height = 720;
 		bool fullscreen = true;

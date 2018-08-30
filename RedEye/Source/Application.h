@@ -8,10 +8,12 @@ class Module;
 class ModuleWindow;
 class ModuleInput;
 
+class FileSystem;
+
 class Application : public EventListener
 {
 public:
-	Application();
+	Application(int argc, char* argv[]);
 	~Application();
 
 	bool Init();
@@ -30,10 +32,15 @@ public:
 	ModuleWindow* window = nullptr;
 	ModuleInput* input = nullptr;
 
+	FileSystem* fs = nullptr;
+
 private:
 
 	std::list<Module*> modules;
 	bool want_to_quit = false;
+
+	int argc;
+	char* argv[];
 };
 
 extern Application* App;

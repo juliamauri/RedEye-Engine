@@ -26,7 +26,6 @@ JSONNode::JSONNode(const char* path, Config* config) : pointerPath(path), config
 JSONNode::~JSONNode()
 {
 	config = nullptr;
-	delete pointerPath;
 }
 
 // Push ============================================================
@@ -52,11 +51,86 @@ void JSONNode::PushString(const char* name, const char* value)
 
 // Pull ============================================================
 
-/*bool PullBool(const char* name, bool deflt) const;
-int PullInt(const char* name, int deflt) const;
-uint PullUInt(const char* name, uint deflt) const;
-float PullFloat(const char* name, float deflt) const;
-double PullDouble(const char* name, double deflt) const;*/
+bool JSONNode::PullBool(const char* name, bool deflt)
+{
+	bool ret = false;
+
+	if (name != nullptr)
+	{
+		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
+		int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
+		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
+		ret = (val != nullptr) ? val->GetFloat() : deflt;
+		memset(buffer, 0, sizeof(buffer));
+	}
+
+	return ret;
+}
+
+int JSONNode::PullInt(const char* name, int deflt)
+{
+	int ret = 0;
+
+	if (name != nullptr)
+	{
+		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
+		int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
+		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
+		ret = (val != nullptr) ? val->GetInt() : deflt;
+		memset(buffer, 0, sizeof(buffer));
+	}
+
+	return ret;
+}
+
+uint JSONNode::PullUInt(const char* name, uint deflt)
+{
+	uint ret = 0;
+
+	if (name != nullptr)
+	{
+		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
+		int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
+		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
+		ret = (val != nullptr) ? val->GetUint() : deflt;
+		memset(buffer, 0, sizeof(buffer));
+	}
+
+	return ret;
+}
+
+
+float JSONNode::PullFloat(const char* name, float deflt)
+{
+	float ret = 0;
+
+	if (name != nullptr)
+	{
+		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
+		int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
+		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
+		ret = (val != nullptr) ? val->GetFloat() : deflt;
+		memset(buffer, 0, sizeof(buffer));
+	}
+
+	return ret;
+}
+
+double JSONNode::PullDouble(const char* name, double deflt)
+{
+	double ret = 0;
+
+	if (name != nullptr)
+	{
+		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
+		int len = sprintf_s(buffer, "%s/%s", pointerPath.c_str(), name);
+		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
+		ret = (val != nullptr) ? val->GetDouble() : deflt;
+		memset(buffer, 0, sizeof(buffer));
+	}
+
+	return ret;
+}
 
 const char*	JSONNode::PullString(const char* name, const char* deflt)
 {
@@ -64,11 +138,15 @@ const char*	JSONNode::PullString(const char* name, const char* deflt)
 
 	if (name != nullptr)
 	{
-		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
-		int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
-		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
+		std::string str(pointerPath);
+		str += "/";
+		str += name;
+
+		//char buffer[RAPIDJSON_MAX_PATH_BUFFER];
+		//int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
+		rapidjson::Value* val = rapidjson::Pointer(str.c_str()).Get(config->document);
 		ret = (val != nullptr) ? val->GetString() : deflt;
-		memset(buffer, 0, sizeof(buffer));
+		//memset(buffer, 0, sizeof(buffer));
 	}
 
 	return ret;
@@ -78,7 +156,7 @@ const char*	JSONNode::PullString(const char* name, const char* deflt)
 
 inline bool JSONNode::operator!() const
 {
-	return (config == nullptr) || (pointerPath == nullptr);
+	return (config == nullptr) || pointerPath.empty();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -94,14 +172,13 @@ FileSystem::~FileSystem()
 	PHYSFS_deinit();
 }
 
-bool FileSystem::Init()
+bool FileSystem::Init(int argc, char* argv[])
 {
 	bool ret = false;
-	char* base_path = SDL_GetBasePath();
-	
-	if (PHYSFS_init(base_path) != 0)
+
+	if (PHYSFS_init(argv[0]) != 0)
 	{
-		engine_config = new Config(base_path, "Config.json");
+		engine_config = new Config(SDL_GetBasePath(), "Assets\\config.json");
 		if (engine_config->Load())
 		{
 			ret = true;
@@ -116,7 +193,6 @@ bool FileSystem::Init()
 		//TODO: Log error - cant init physfs
 	}
 
-	SDL_free(base_path);
 	return ret;
 
 	
@@ -200,12 +276,6 @@ bool FileInfo::SetFromFullPath(const char* fullpath)
 	return !!this;
 }
 
-const char* FileInfo::GetFullPath() const
-{
-	std::string fullpath = path + name;
-	return fullpath.c_str();
-}
-
 inline bool FileInfo::operator!() const
 {
 	return path.empty() || name.empty();;
@@ -246,7 +316,9 @@ RE_FileIO::~RE_FileIO()
 
 bool RE_FileIO::Load()
 {
-	return (!!fileInfo && (HardLoad(fileInfo.GetFullPath(), &buffer) > 0));
+	std::string path(fileInfo.path);
+	path += fileInfo.name;
+	return (!!fileInfo && (HardLoad(path.c_str(), &buffer) > 0));
 }
 
 void RE_FileIO::Save()
@@ -332,20 +404,25 @@ Config::~Config()
 bool Config::Load()
 {
 	// Open file
+	bool ret = false;
 	FILE* fp = nullptr;
-	fopen_s(&fp, fileInfo.GetFullPath(), "rb");// non-Windows use "r"
+	std::string fullPath(fileInfo.path + fileInfo.name);
+	if (fopen_s(&fp, fullPath.c_str(), "rb") == 0);// non-Windows use "r"
+	{
+		// Read File
+		char readBuffer[65535];
+		rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 
-	// Read File
-	char readBuffer[65535];
-	rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+		// Parse file buffer into root::rapidjson::Document
+		//document.SetNull();
+		document.ParseStream(is);
 
-	// Parse file buffer into root::rapidjson::Document
-	document.ParseStream(is);
+		// Close file
+		fclose(fp);
 
-	// Close file
-	fclose(fp);
-
-	return document.IsObject();
+		ret = true;
+	}
+	return ret;
 }
 
 JSONNode* Config::GetRootNode(const char* member)
@@ -354,14 +431,14 @@ JSONNode* Config::GetRootNode(const char* member)
 
 	if (member != nullptr)
 	{
-		std::string path = "/";
+		std::string path("/");
 		path += member;
 		rapidjson::Value* value = rapidjson::Pointer(path.c_str()).Get(document);
 
 		if (value == nullptr)
 			value = &rapidjson::Pointer(path.c_str()).Create(document);
 
-		JSONNode* ret = new JSONNode(path.c_str(), this);
+		ret = new JSONNode(path.c_str(), this);
 	}
 
 	return ret;

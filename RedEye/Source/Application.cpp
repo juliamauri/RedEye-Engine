@@ -8,10 +8,12 @@
 
 using namespace std;
 
-Application::Application()
+Application::Application(int argc, char* argv[])
 {
 	modules.push_back(input = new ModuleInput("Input"));
 	modules.push_back(window = new ModuleWindow("Window"));
+
+	fs = new FileSystem();
 }
 
 Application::~Application()
@@ -31,28 +33,46 @@ bool Application::Init()
 		ret = false;
 	}
 
-	//Config config;
-
-	//if (config.LoadConfig()){
-		/*Document* modules_config = config.GetConfig();
-		if (!modules_config->IsObject())
-		{
-			LOG("Can't load config");
-			return false;
-		}*/
+	if (fs->Init(argc, argv))
+	{
+		JSONNode* node = nullptr;
+		Config* config = fs->GetConfig();
 
 		for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 			if ((*it)->IsActive() == true)
 			{
-				//if (modules_config->HasMember((*it)->GetName()))
-					ret = (*it)->Init(nullptr);// config.GetMember((*it)->GetName()));
-				/*else
+				node = config->GetRootNode((*it)->GetName());
+				ret = (*it)->Init(node);
+				delete node;
+				node = nullptr;
+			}
+				
+	}
+
+
+
+	/*/Config config;
+
+	//if (config.LoadConfig()){
+		Document* modules_config = config.GetConfig();
+		if (!modules_config->IsObject())
+		{
+			LOG("Can't load config");
+			return false;
+		}
+
+		for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
+			if ((*it)->IsActive() == true)
+			{
+				if (modules_config->HasMember((*it)->GetName()))
+					ret = (*it)->Init(config.GetMember((*it)->GetName()));
+				else
 				{
 					LOG("Can't find config of %s module", (*it)->GetName());
 					return false;
-				}*/
+				}
 			}
-	//}
+	}*/
 
 	
 
