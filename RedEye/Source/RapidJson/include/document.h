@@ -505,7 +505,7 @@ template<typename ValueType>
 struct TypeHelper<ValueType, typename ValueType::Object> {
     typedef typename ValueType::Object ObjectType;
     static bool Is(const ValueType& v) { return v.IsObject(); }
-    static ObjectType Get(ValueType& v) { return v.GetObject(); }
+    static ObjectType Get(ValueType& v) { return v.GetObjectVal(); }
     static ValueType& Set(ValueType& v, ObjectType data) { return v = data; }
     static ValueType& Set(ValueType& v, ObjectType data, typename ValueType::AllocatorType&) { v = data; }
 };
@@ -514,7 +514,7 @@ template<typename ValueType>
 struct TypeHelper<ValueType, typename ValueType::ConstObject> {
     typedef typename ValueType::ConstObject ObjectType;
     static bool Is(const ValueType& v) { return v.IsObject(); }
-    static ObjectType Get(const ValueType& v) { return v.GetObject(); }
+    static ObjectType Get(const ValueType& v) { return v.GetObjectVal(); }
 };
 
 } // namespace internal
@@ -1455,8 +1455,8 @@ public:
             return false;
     }
 
-    Object GetObject() { RAPIDJSON_ASSERT(IsObject()); return Object(*this); }
-    ConstObject GetObject() const { RAPIDJSON_ASSERT(IsObject()); return ConstObject(*this); }
+    Object GetObjectVal() { RAPIDJSON_ASSERT(IsObject()); return Object(*this); }
+    ConstObject GetObjectVal() const { RAPIDJSON_ASSERT(IsObject()); return ConstObject(*this); }
 
     //@}
 
