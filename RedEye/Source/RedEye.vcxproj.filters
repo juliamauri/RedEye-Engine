@@ -25,6 +25,12 @@
     <ClCompile Include="FileSystem.cpp">
       <Filter>Modules\Independent Modules</Filter>
     </ClCompile>
+    <ClCompile Include="gpudetect\DeviceId.cpp">
+      <Filter>3rd Party\gpudetect</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysFS\include\physfs.c">
+      <Filter>3rd Party\PhysFS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -58,115 +64,121 @@
       <Filter>Modules\Independent Modules</Filter>
     </ClInclude>
     <ClInclude Include="PhysFS\include\physfs.h">
-      <Filter>Tools\PhysFS</Filter>
+      <Filter>3rd Party\PhysFS</Filter>
     </ClInclude>
     <ClInclude Include="PhysFS\include\physfs_internal.h">
-      <Filter>Tools\PhysFS</Filter>
+      <Filter>3rd Party\PhysFS</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\rapidjson.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\allocators.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\document.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\encodedstream.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\encodings.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\filereadstream.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\filewritestream.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\fwd.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\istreamwrapper.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\memorybuffer.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\memorystream.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\ostreamwrapper.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\pointer.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\prettywriter.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\reader.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\schema.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\stream.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\stringbuffer.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\writer.h">
-      <Filter>Tools\RapidJson</Filter>
+      <Filter>3rd Party\RapidJson</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\error\en.h">
-      <Filter>Tools\RapidJson\error</Filter>
+      <Filter>3rd Party\RapidJson\error</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\error\error.h">
-      <Filter>Tools\RapidJson\error</Filter>
+      <Filter>3rd Party\RapidJson\error</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\biginteger.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\diyfp.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\dtoa.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\ieee754.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\itoa.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\meta.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\pow10.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\regex.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\stack.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\strfunc.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\strtod.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\internal\swap.h">
-      <Filter>Tools\RapidJson\internal</Filter>
+      <Filter>3rd Party\RapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\msinttypes\inttypes.h">
-      <Filter>Tools\RapidJson\msinttypes</Filter>
+      <Filter>3rd Party\RapidJson\msinttypes</Filter>
     </ClInclude>
     <ClInclude Include="RapidJson\include\msinttypes\stdint.h">
-      <Filter>Tools\RapidJson\msinttypes</Filter>
+      <Filter>3rd Party\RapidJson\msinttypes</Filter>
+    </ClInclude>
+    <ClInclude Include="gpudetect\DeviceId.h">
+      <Filter>3rd Party\gpudetect</Filter>
+    </ClInclude>
+    <ClInclude Include="gpudetect\dxgi1_4.h">
+      <Filter>3rd Party\gpudetect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -191,26 +203,26 @@
     <Filter Include="Modules\Independent Modules">
       <UniqueIdentifier>{5c9aef73-114b-4af7-98e0-23279889b965}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tools">
-      <UniqueIdentifier>{2f65736f-a4d5-414f-a733-ba496b3de811}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Tools\PhysFS">
-      <UniqueIdentifier>{429ba044-1ffb-4246-aa0b-ab4a59cb5d97}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Containers">
       <UniqueIdentifier>{b68e0a5d-ad13-472e-be1a-55dccf9fc2ce}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tools\RapidJson">
+    <Filter Include="3rd Party\PhysFS">
+      <UniqueIdentifier>{429ba044-1ffb-4246-aa0b-ab4a59cb5d97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\RapidJson">
       <UniqueIdentifier>{47bf42ae-64f7-408a-8df2-0e016762aa7c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tools\RapidJson\error">
+    <Filter Include="3rd Party\RapidJson\error">
       <UniqueIdentifier>{82e15e95-8224-4039-98c5-8bd59a87a22d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tools\RapidJson\internal">
+    <Filter Include="3rd Party\RapidJson\internal">
       <UniqueIdentifier>{25c6036d-7ab4-46d8-a195-fa24feb8d820}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tools\RapidJson\msinttypes">
+    <Filter Include="3rd Party\RapidJson\msinttypes">
       <UniqueIdentifier>{84cde038-91b4-48df-b508-24b57351bca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\gpudetect">
+      <UniqueIdentifier>{fec4a5bb-9630-4fec-ac82-f68facecd32b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

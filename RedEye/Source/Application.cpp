@@ -127,6 +127,8 @@ bool Application::CleanUp()
 		if ((*it)->IsActive() == true)
 			ret = (*it)->CleanUp();
 
+	delete fs;
+
 	SDL_Quit();
 
 	return ret;
