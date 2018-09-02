@@ -57,11 +57,12 @@ bool JSONNode::PullBool(const char* name, bool deflt)
 
 	if (name != nullptr)
 	{
-		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
-		int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
-		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
-		ret = (val != nullptr) ? val->GetFloat() : deflt;
-		memset(buffer, 0, sizeof(buffer));
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+		ret = (val != nullptr) ? val->GetBool() : deflt;
 	}
 
 	return ret;
@@ -73,11 +74,12 @@ int JSONNode::PullInt(const char* name, int deflt)
 
 	if (name != nullptr)
 	{
-		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
-		int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
-		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
 		ret = (val != nullptr) ? val->GetInt() : deflt;
-		memset(buffer, 0, sizeof(buffer));
 	}
 
 	return ret;
@@ -89,11 +91,12 @@ uint JSONNode::PullUInt(const char* name, uint deflt)
 
 	if (name != nullptr)
 	{
-		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
-		int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
-		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
 		ret = (val != nullptr) ? val->GetUint() : deflt;
-		memset(buffer, 0, sizeof(buffer));
 	}
 
 	return ret;
@@ -106,11 +109,12 @@ float JSONNode::PullFloat(const char* name, float deflt)
 
 	if (name != nullptr)
 	{
-		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
-		int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
-		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
 		ret = (val != nullptr) ? val->GetFloat() : deflt;
-		memset(buffer, 0, sizeof(buffer));
 	}
 
 	return ret;
@@ -122,11 +126,12 @@ double JSONNode::PullDouble(const char* name, double deflt)
 
 	if (name != nullptr)
 	{
-		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
-		int len = sprintf_s(buffer, "%s/%s", pointerPath.c_str(), name);
-		rapidjson::Value* val = rapidjson::Pointer(buffer).Get(config->document);
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
 		ret = (val != nullptr) ? val->GetDouble() : deflt;
-		memset(buffer, 0, sizeof(buffer));
 	}
 
 	return ret;
@@ -138,15 +143,12 @@ const char*	JSONNode::PullString(const char* name, const char* deflt)
 
 	if (name != nullptr)
 	{
-		std::string str(pointerPath);
-		str += "/";
-		str += name;
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
 
-		//char buffer[RAPIDJSON_MAX_PATH_BUFFER];
-		//int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
-		rapidjson::Value* val = rapidjson::Pointer(str.c_str()).Get(config->document);
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
 		ret = (val != nullptr) ? val->GetString() : deflt;
-		//memset(buffer, 0, sizeof(buffer));
 	}
 
 	return ret;

@@ -35,32 +35,20 @@ bool ModuleWindow::Init(JSONNode* config_module)
 		flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;*/
 
 		const char* title = config_module->PullString("title", "no se ha cargado");
-		uint screen_width = 1080;
-		uint screen_height = 720;
-		bool fullscreen = true;
-		bool resizable = true;
-		bool borderless = true;
-		bool fullscreen_desktop = true;
-
-		/*if ((*config_module)->value.HasMember("title"))
-			title = (*config_module)->value["title"].GetString();
-		if((*config_module)->value.HasMember("screen_width"))
-			screen_width = (*config_module)->value["screen_width"].GetInt();
-		if((*config_module)->value.HasMember("screen_height"))
-			screen_height = (*config_module)->value["screen_height"].GetInt();
-		if ((*config_module)->value.HasMember("fullscreen"))
-			fullscreen = (*config_module)->value["fullscreen"].GetBool();
-		if ((*config_module)->value.HasMember("resizable"))
-			resizable = (*config_module)->value["resizable"].GetBool();
-		if ((*config_module)->value.HasMember("borderless"))
-			borderless = (*config_module)->value["borderless"].GetBool();
-		if ((*config_module)->value.HasMember("fullscreen_desktop"))
-			fullscreen_desktop = (*config_module)->value["fullscreen_desktop"].GetBool();*/
+		uint screen_width = config_module->PullUInt("screen_width", 800);
+		uint screen_height = config_module->PullUInt("screen_height", 800);
+		bool fullscreen = config_module->PullBool("fullscreen", false);
+		bool resizable = config_module->PullBool("resizable", false);;
+		bool borderless = config_module->PullBool("borderless", false);;
+		bool fullscreen_desktop = config_module->PullBool("fullscreen_desktop", false);;
 
 		if (fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
 		if (resizable) flags |= SDL_WINDOW_RESIZABLE;
 		if (borderless) flags |= SDL_WINDOW_BORDERLESS;
 		if (fullscreen_desktop) flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+		//OpenGL context 
+		flags != SDL_WINDOW_OPENGL;
 
 		//Create window
 		window = SDL_CreateWindow(
