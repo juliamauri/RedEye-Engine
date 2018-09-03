@@ -2,6 +2,7 @@
 #include "Module.h"
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
+#include "ModuleRenderer3D.h"
 #include "FileSystem.h"
 #include "SDL2\include\SDL.h"
 
@@ -12,6 +13,7 @@ Application::Application(int argc, char* argv[])
 {
 	modules.push_back(input = new ModuleInput("Input"));
 	modules.push_back(window = new ModuleWindow("Window"));
+	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
 
 	fs = new FileSystem();
 }

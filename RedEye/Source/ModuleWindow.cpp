@@ -48,7 +48,7 @@ bool ModuleWindow::Init(JSONNode* config_module)
 		if (fullscreen_desktop) flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
 		//OpenGL context 
-		flags != SDL_WINDOW_OPENGL;
+		flags |= SDL_WINDOW_OPENGL;
 
 		//Create window
 		window = SDL_CreateWindow(
@@ -85,4 +85,9 @@ bool ModuleWindow::CleanUp()
 
 void ModuleWindow::RecieveEvent(const Event* e)
 {
+}
+
+SDL_Window * ModuleWindow::GetWindow() const
+{
+	return window;
 }

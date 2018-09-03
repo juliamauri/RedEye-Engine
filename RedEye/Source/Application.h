@@ -7,6 +7,7 @@
 class Module;
 class ModuleWindow;
 class ModuleInput;
+class ModuleRenderer3D;
 
 class FileSystem;
 
@@ -31,6 +32,7 @@ public:
 
 	ModuleWindow* window = nullptr;
 	ModuleInput* input = nullptr;
+	ModuleRenderer3D* renderer3d = nullptr;
 
 	FileSystem* fs = nullptr;
 

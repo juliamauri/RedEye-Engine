@@ -28,9 +28,7 @@
     <ClCompile Include="gpudetect\DeviceId.cpp">
       <Filter>3rd Party\gpudetect</Filter>
     </ClCompile>
-    <ClCompile Include="PhysFS\include\physfs.c">
-      <Filter>3rd Party\PhysFS</Filter>
-    </ClCompile>
+    <ClCompile Include="ModuleRenderer3D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -179,6 +177,9 @@
     </ClInclude>
     <ClInclude Include="gpudetect\dxgi1_4.h">
       <Filter>3rd Party\gpudetect</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleRenderer3D.h">
+      <Filter>Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

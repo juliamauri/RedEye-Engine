@@ -18,6 +18,8 @@ public:
 
 	void RecieveEvent(const Event* e) override;
 
+	SDL_Window* GetWindow() const;
+
 public:
 
 	SDL_Window* window;

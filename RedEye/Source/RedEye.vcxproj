@@ -27,8 +27,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mmgr\mmgr.cpp" />
     <ClCompile Include="ModuleInput.cpp" />
+    <ClCompile Include="ModuleRenderer3D.cpp" />
     <ClCompile Include="ModuleWindow.cpp" />
-    <ClCompile Include="PhysFS\include\physfs.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -42,6 +42,7 @@
     <ClInclude Include="mmgr\nommgr.h" />
     <ClInclude Include="Module.h" />
     <ClInclude Include="ModuleInput.h" />
+    <ClInclude Include="ModuleRenderer3D.h" />
     <ClInclude Include="ModuleWindow.h" />
     <ClInclude Include="PhysFS\include\physfs.h" />
     <ClInclude Include="PhysFS\include\physfs_internal.h" />
@@ -142,6 +143,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\Build</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
