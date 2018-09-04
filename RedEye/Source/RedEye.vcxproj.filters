@@ -204,15 +204,6 @@
     <ClInclude Include="ModuleEditor.h">
       <Filter>Modules</Filter>
     </ClInclude>
-    <ClInclude Include="MathGeoLib\MathBuildConfig.h">
-      <Filter>3rd Party\MathGeoLib</Filter>
-    </ClInclude>
-    <ClInclude Include="MathGeoLib\MathGeoLib.h">
-      <Filter>3rd Party\MathGeoLib</Filter>
-    </ClInclude>
-    <ClInclude Include="MathGeoLib\MathGeoLibFwd.h">
-      <Filter>3rd Party\MathGeoLib</Filter>
-    </ClInclude>
     <ClInclude Include="ImGui\imconfig.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
@@ -236,6 +227,15 @@
     </ClInclude>
     <ClInclude Include="ImGuizmo\ImGuizmo.h">
       <Filter>3rd Party\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="MathGeoLib\include\MathBuildConfig.h">
+      <Filter>3rd Party\MathGeoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="MathGeoLib\include\MathGeoLib.h">
+      <Filter>3rd Party\MathGeoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="MathGeoLib\include\MathGeoLibFwd.h">
+      <Filter>3rd Party\MathGeoLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
