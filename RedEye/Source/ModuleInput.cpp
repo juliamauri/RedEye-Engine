@@ -1,6 +1,7 @@
 #include "ModuleInput.h"
 
 #include "Application.h"
+#include "ModuleEditor.h"
 #include "Event.h"
 #include "Globals.h"
 #include "SDL2\include\SDL.h"
@@ -182,6 +183,7 @@ void ModuleInput::HandleEventQueue()
 
 /* Keyboard events */
 		case SDL_KEYDOWN:/**< Key pressed */
+			App->editor->HandleSDLEvent(&e);
 			break;
 		case SDL_KEYUP:/**< Key released */
 			break;

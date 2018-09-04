@@ -7,6 +7,7 @@
 class Module;
 class ModuleWindow;
 class ModuleInput;
+class ModuleEditor;
 class ModuleRenderer3D;
 
 class FileSystem;
@@ -21,6 +22,8 @@ public:
 	int Update();
 	bool CleanUp();
 
+	void Log(const char* text);
+	void RequestBrowser(const char* link) const;
 	void RecieveEvent(const Event* e) override;
 
 private:
@@ -32,6 +35,7 @@ public:
 
 	ModuleWindow* window = nullptr;
 	ModuleInput* input = nullptr;
+	ModuleEditor* editor = nullptr;
 	ModuleRenderer3D* renderer3d = nullptr;
 
 	FileSystem* fs = nullptr;

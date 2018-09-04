@@ -21,19 +21,21 @@ public:
 	bool IsActive() const { return enabled; }
 	const char* GetName() const { return name; }
 
-	virtual bool Init(JSONNode* config_module = nullptr) { return true; } //SETTING OWN VALUES
-	virtual bool Start(/* CONFIG */) { return true; } //ACCESS OTHER MODULES
+	virtual bool Init(JSONNode* node = nullptr) { return true; } //SETTING OWN VALUES
+	virtual bool Start() { return true; } //ACCESS OTHER MODULES
 	
 	virtual update_status PreUpdate() { return UPDATE_CONTINUE; }
 	virtual update_status Update() { return UPDATE_CONTINUE; }
 	virtual update_status PostUpdate() { return UPDATE_CONTINUE; }
 
+	virtual void DrawEditor() {}
+
 	virtual bool CleanUp() { return true; }
 
-	virtual void Load(){}
-	virtual void Save() const {}
+	virtual void Load(JSONNode* node = nullptr) {}
+	virtual void Save(JSONNode* node = nullptr) const {}
 
-	//virtual void RecieveEvent(const Event* e) override {}
+	virtual void RecieveEvent(const Event* e) override {}
 };
 
 #endif //__MODULE_H__

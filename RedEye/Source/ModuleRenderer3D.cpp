@@ -1,7 +1,8 @@
 #include "ModuleRenderer3D.h"
-#include "ModuleWindow.h"
-#include"Application.h"
 
+#include "Application.h"
+#include "ModuleWindow.h"
+#include "ModuleEditor.h"
 #include <Windows.h>
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
@@ -89,6 +90,9 @@ update_status ModuleRenderer3D::PostUpdate()
 	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
 	*/
+
+	// Draw Editor
+	App->editor->Draw();
 
 	//Swap buffers
 	SDL_GL_SwapWindow(App->window->GetWindow());
