@@ -26,8 +26,6 @@ GenericValue& SetFloat(float f)
 
 */
 
-#define RAPIDJSON_MAX_PATH_BUFFER 255
-
 class Config;
 
 class JSONNode
@@ -38,13 +36,13 @@ public:
 	~JSONNode();
 
 	// Push
-	bool		PushBool(const char* name, const bool value);
-	bool		PushInt(const char* name, const int value);
-	bool		PushUInt(const char* name, const unsigned int value);
-	bool		PushFloat(const char* name, const float value);
-	bool		PushDouble(const char* name, const double value);
+	void		PushBool(const char* name, const bool value);
+	void		PushInt(const char* name, const int value);
+	void		PushUInt(const char* name, const unsigned int value);
+	void		PushFloat(const char* name, const float value);
+	void		PushDouble(const char* name, const double value);
 	void		PushString(const char* name, const char* value);
-	JSONNode	PushJObject(const char* name);
+	JSONNode*	PushJObject(const char* name);
 
 	// Pull
 	bool			PullBool(const char* name, bool deflt);
@@ -53,11 +51,15 @@ public:
 	float			PullFloat(const char* name, float deflt);
 	double			PullDouble(const char* name, double deflt);
 	const char*		PullString(const char* name, const char* deflt);
-	JSONNode		PullJObject(const char* name);
+	JSONNode*		PullJObject(const char* name);
 
 	// Utility
 	unsigned int Serialize(char** buffer, bool pretty = true);
 	inline bool operator!() const;
+
+private:
+
+	JSONNode(JSONNode& node);
 
 private:
 

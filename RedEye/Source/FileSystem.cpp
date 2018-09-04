@@ -23,31 +23,104 @@
 JSONNode::JSONNode(const char* path, Config* config) : pointerPath(path), config(config)
 {}
 
+JSONNode::JSONNode(JSONNode& node) : pointerPath(nullptr), config(nullptr)
+{}
+
 JSONNode::~JSONNode()
 {
 	config = nullptr;
 }
 
+
 // Push ============================================================
 
-/*bool PushBool(const char* name, const bool value);
-bool PushInt(const char* name, const int value);
-bool PushUInt(const char* name, const uint value);
-bool PushFloat(const char* name, const float value);
-bool PushDouble(const char* name, const double value);*/
+void JSONNode::PushBool(const char* name, const bool value)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, value);
+	}
+}
+
+void JSONNode::PushInt(const char* name, const int value)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, value);
+	}
+}
+
+void JSONNode::PushUInt(const char* name, const unsigned int value)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, value);
+	}
+}
+
+void JSONNode::PushFloat(const char* name, const float value)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, value);
+	}
+}
+
+void JSONNode::PushDouble(const char* name, const double value)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, value);
+	}
+}
 
 void JSONNode::PushString(const char* name, const char* value)
 {
 	if (name != nullptr)
 	{
-		char buffer[RAPIDJSON_MAX_PATH_BUFFER];
-		int len = sprintf_s(buffer, "%s/%s", pointerPath, name);
-		rapidjson::Pointer(buffer).Set(config->document, value);
-		memset(buffer, 0, sizeof(buffer));
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, value);
 	}
 }
 
-//JSONNode PushJObject(const char* name);
+JSONNode* JSONNode::PushJObject(const char* name)
+{
+	JSONNode* ret = nullptr;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		ret = new JSONNode(path.c_str(), config);
+	}
+
+	return ret;
+}
 
 // Pull ============================================================
 
@@ -85,7 +158,7 @@ int JSONNode::PullInt(const char* name, int deflt)
 	return ret;
 }
 
-uint JSONNode::PullUInt(const char* name, uint deflt)
+unsigned int JSONNode::PullUInt(const char* name, const unsigned int deflt)
 {
 	uint ret = 0;
 
@@ -149,6 +222,22 @@ const char*	JSONNode::PullString(const char* name, const char* deflt)
 
 		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
 		ret = (val != nullptr) ? val->GetString() : deflt;
+	}
+
+	return ret;
+}
+
+JSONNode* JSONNode::PullJObject(const char * name)
+{
+	JSONNode* ret = nullptr;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		ret = new JSONNode(path.c_str(), config);
 	}
 
 	return ret;
