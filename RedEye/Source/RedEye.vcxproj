@@ -52,9 +52,9 @@
     <ClInclude Include="ImGui\stb_rect_pack.h" />
     <ClInclude Include="ImGui\stb_textedit.h" />
     <ClInclude Include="ImGui\stb_truetype.h" />
-    <ClInclude Include="MathGeoLib\MathBuildConfig.h" />
-    <ClInclude Include="MathGeoLib\MathGeoLib.h" />
-    <ClInclude Include="MathGeoLib\MathGeoLibFwd.h" />
+    <ClInclude Include="MathGeoLib\include\MathBuildConfig.h" />
+    <ClInclude Include="MathGeoLib\include\MathGeoLib.h" />
+    <ClInclude Include="MathGeoLib\include\MathGeoLibFwd.h" />
     <ClInclude Include="mmgr\mmgr.h" />
     <ClInclude Include="mmgr\nommgr.h" />
     <ClInclude Include="Module.h" />
