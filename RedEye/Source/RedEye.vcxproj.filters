@@ -28,7 +28,27 @@
     <ClCompile Include="gpudetect\DeviceId.cpp">
       <Filter>3rd Party\gpudetect</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleRenderer3D.cpp" />
+    <ClCompile Include="ModuleEditor.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui.cpp">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_demo.cpp">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_draw.cpp">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_impl_sdl_gl3.cpp">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuizmo\ImGuizmo.cpp">
+      <Filter>3rd Party\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleRenderer3D.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -181,6 +201,42 @@
     <ClInclude Include="ModuleRenderer3D.h">
       <Filter>Modules</Filter>
     </ClInclude>
+    <ClInclude Include="ModuleEditor.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="MathGeoLib\MathBuildConfig.h">
+      <Filter>3rd Party\MathGeoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="MathGeoLib\MathGeoLib.h">
+      <Filter>3rd Party\MathGeoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="MathGeoLib\MathGeoLibFwd.h">
+      <Filter>3rd Party\MathGeoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imconfig.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui_impl_sdl_gl3.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui_internal.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\stb_rect_pack.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\stb_textedit.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\stb_truetype.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuizmo\ImGuizmo.h">
+      <Filter>3rd Party\ImGuizmo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -224,6 +280,15 @@
     </Filter>
     <Filter Include="3rd Party\gpudetect">
       <UniqueIdentifier>{fec4a5bb-9630-4fec-ac82-f68facecd32b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\MathGeoLib">
+      <UniqueIdentifier>{431bcedd-ace7-494b-97d5-9917c675a2a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\ImGui">
+      <UniqueIdentifier>{a919df7d-26c5-4f48-bc4d-d94d785fcd11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\ImGuizmo">
+      <UniqueIdentifier>{a8753026-9d83-44bd-8441-d736761a142d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
