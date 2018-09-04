@@ -185,9 +185,6 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 		glEnableVertexAttribArray(0);
 	}
 
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
 	return ret;
 }
 
@@ -206,13 +203,14 @@ update_status ModuleRenderer3D::PostUpdate()
 {
 	update_status ret = UPDATE_CONTINUE;
 
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	// ..:: Drawing code (in render loop) :: .. EBO
 	glUseProgram(shaderProgram);
 	glBindVertexArray(VAO);
 	(B_EBO) ? glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0)/*EBO -> BAO*/ : glDrawArrays(GL_TRIANGLES, 0, 3); //VBO -> VAO
 	glBindVertexArray(0);
 
-
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	// Draw Editor
 	App->editor->Draw();
 
