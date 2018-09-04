@@ -47,6 +47,7 @@ int main(int argc, char* argv[])
 	}
 
 	delete App;
+	App = nullptr;
 
 #ifdef _DEBUG
 	LOG("With %d memory leaks!\n", (m_getMemoryStatistics().totalAllocUnitCount));
