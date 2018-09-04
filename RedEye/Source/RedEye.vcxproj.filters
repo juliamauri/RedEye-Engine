@@ -290,6 +290,9 @@
     <Filter Include="3rd Party\ImGuizmo">
       <UniqueIdentifier>{a8753026-9d83-44bd-8441-d736761a142d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utility\Shaders">
+      <UniqueIdentifier>{8ed48140-755a-4b70-b704-7ae8eff1170a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Build\Assets\config.json">

@@ -18,6 +18,14 @@ public:
 
 	void* mainContext;
 	unsigned int renderedTexture;
+
+private:
+	unsigned int shaderProgram;
+	unsigned int EBO;
+	unsigned int VAO;
+	bool B_EBO = true;
+
+	void LoadBuffer(const char* path, char** buffer, unsigned int size);
 };
 
 #endif // !__MODULERENDER3D_H__
