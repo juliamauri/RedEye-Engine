@@ -1,8 +1,6 @@
 #ifndef __FILESYSTEM_H__
 #define __FILESYSTEM_H__
 
-#include "Globals.h"
-
 #include "RapidJson\include\document.h"
 
 /* rapidjson number types:
