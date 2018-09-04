@@ -3,28 +3,13 @@
 
 #include "RapidJson\include\document.h"
 
-/* rapidjson number types:
-
-int GetInt()
-unsigned int GetUint()
-long long GetInt64()
-unsigned long long GetUint64()
-double GetDouble()
-float GetFloat()
-
-bool
-string
-
-
-
-GenericValue& SetInt(int i)
-GenericValue& SetUint(unsigned u)
-GenericValue& SetInt64(int64_t i64)
-GenericValue& SetUint64(uint64_t u64)
-GenericValue& SetDouble(double d)
-GenericValue& SetFloat(float f)
-
-*/
+/*	rapidjson number types:
+GenericValue& SetInt(int i) - int GetInt()
+GenericValue& SetUint(unsigned u) - unsigned int GetUint()
+GenericValue& SetInt64(int64_t i64) - long long GetInt64()
+GenericValue& SetUint64(uint64_t u64) - unsigned long long GetUint64()
+GenericValue& SetDouble(double d) - double GetDouble()
+GenericValue& SetFloat(float f) - float GetFloat()*/
 
 class Config;
 

@@ -7,10 +7,10 @@
 #include "RapidJson\include\rapidjson.h"
 #include "RapidJson\include\allocators.h"
 #include "RapidJson\include\pointer.h"
-#include "RapidJson\include\stringbuffer.h"
-#include "RapidJson\include\writer.h"
-#include "RapidJson\include\filewritestream.h"
 #include "RapidJson\include\filereadstream.h"
+//#include "RapidJson\include\stringbuffer.h"
+//#include "RapidJson\include\writer.h"
+//#include "RapidJson\include\filewritestream.h"
 
 #include "PhysFS\include\physfs.h"
 
