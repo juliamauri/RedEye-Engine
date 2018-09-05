@@ -140,4 +140,4 @@ public:
 	rapidjson::Document document;
 };
 
-#endif //__FILESYSTEM_H__
+#endif // !__FILESYSTEM_H__

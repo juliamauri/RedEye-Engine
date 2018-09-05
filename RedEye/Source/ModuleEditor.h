@@ -29,4 +29,4 @@ private:
 	ImGuiTextBuffer console_buffer;
 
 };
-#endif 
+#endif // !__MODULEEDITOR__
