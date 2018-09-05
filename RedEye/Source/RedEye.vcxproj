@@ -35,6 +35,7 @@
     <ClCompile Include="ModuleInput.cpp" />
     <ClCompile Include="ModuleRenderer3D.cpp" />
     <ClCompile Include="ModuleWindow.cpp" />
+    <ClCompile Include="TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -99,6 +100,7 @@
     <ClInclude Include="RapidJson\include\stream.h" />
     <ClInclude Include="RapidJson\include\stringbuffer.h" />
     <ClInclude Include="RapidJson\include\writer.h" />
+    <ClInclude Include="TimeManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Build\Assets\config.json" />

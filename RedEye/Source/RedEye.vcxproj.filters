@@ -49,6 +49,9 @@
     <ClCompile Include="ModuleRenderer3D.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="TimeManager.cpp">
+      <Filter>Modules\Independent Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -236,6 +239,9 @@
     </ClInclude>
     <ClInclude Include="MathGeoLib\include\MathGeoLibFwd.h">
       <Filter>3rd Party\MathGeoLib</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeManager.h">
+      <Filter>Modules\Independent Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

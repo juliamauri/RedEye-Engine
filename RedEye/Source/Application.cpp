@@ -5,6 +5,7 @@
 #include "ModuleEditor.h"
 #include "ModuleRenderer3D.h"
 #include "FileSystem.h"
+#include "TimeManager.h"
 #include "SDL2\include\SDL.h"
 
 
@@ -18,6 +19,7 @@ Application::Application(int argc, char* argv[])
 	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
 
 	fs = new FileSystem();
+	time = new TimeManager();
 }
 
 Application::~Application()
@@ -50,7 +52,6 @@ bool Application::Init()
 				delete node;
 				node = nullptr;
 			}
-				
 	}
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
@@ -62,6 +63,7 @@ bool Application::Init()
 
 void Application::PrepareUpdate()
 {
+	time->UpdateDeltaTime();
 }
 
 int Application::Update()
@@ -92,6 +94,7 @@ int Application::Update()
 
 void Application::FinishUpdate()
 {
+	time->ManageFrameTimers();
 }
 
 bool Application::CleanUp()
@@ -103,6 +106,7 @@ bool Application::CleanUp()
 			ret = (*it)->CleanUp();
 
 	delete fs;
+	delete time;
 
 	SDL_Quit();
 

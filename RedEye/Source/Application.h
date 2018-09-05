@@ -11,6 +11,7 @@ class ModuleEditor;
 class ModuleRenderer3D;
 
 class FileSystem;
+class TimeManager;
 
 class Application : public EventListener
 {
@@ -39,14 +40,14 @@ public:
 	ModuleRenderer3D* renderer3d = nullptr;
 
 	FileSystem* fs = nullptr;
+	TimeManager* time = nullptr;
 
 private:
 
 	std::list<Module*> modules;
 	bool want_to_quit = false;
 
-	int argc;
-	char* argv[];
+	int argc; char* argv[];
 };
 
 extern Application* App;
