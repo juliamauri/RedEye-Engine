@@ -1,17 +1,15 @@
 #include "Event.h"
 #include "EventListener.h"
+#include "SDL2\include\SDL_timer.h"
 
-Event::Event()
+Event::Event(RE_EventType t, EventListener* lis) : listener(lis), type(t)
 {
-	Clear();
+	IsValid() ? timestamp = SDL_GetTicks() : Clear();
 }
 
-Event::Event(RE_EventType t, unsigned int ts, EventListener* lis) : listener(lis), type(t), timestamp(ts)
+Event::Event(RE_EventType t, unsigned int ts, EventListener* lis) : listener(lis), type(t)
 {
-	if (!IsValid())
-	{
-		Clear();
-	}
+	IsValid() ? timestamp = ts : Clear();
 }
 
 Event::Event(const Event& e) : listener(e.listener), type(e.type), timestamp(e.timestamp) {}
@@ -28,7 +26,7 @@ void Event::CallListener() const
 
 bool Event::IsValid() const
 {
-	return type != MAX_EVENT_TYPES;
+	return type < MAX_EVENT_TYPES && listener != nullptr;
 }
 
 unsigned int Event::GetTimeStamp() const
@@ -45,5 +43,5 @@ void Event::Clear()
 {
 	type = MAX_EVENT_TYPES;
 	listener = nullptr;
-	timestamp = 0;
+	timestamp = 0u;
 }

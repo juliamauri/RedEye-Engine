@@ -24,7 +24,7 @@ class Event
 {
 public:
 
-	Event();
+	Event(RE_EventType t, EventListener* lis = nullptr);
 	Event(RE_EventType t, unsigned int ts, EventListener* lis = nullptr);
 	Event(const Event& e);
 	~Event();
