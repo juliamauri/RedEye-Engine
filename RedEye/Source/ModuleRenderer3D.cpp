@@ -211,8 +211,10 @@ update_status ModuleRenderer3D::PostUpdate()
 	glBindVertexArray(0);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
 	// Draw Editor
-	App->editor->Draw();
+	if(App->editor != nullptr)
+		App->editor->Draw();
 
 	//Swap buffers
 	SDL_GL_SwapWindow(App->window->GetWindow());

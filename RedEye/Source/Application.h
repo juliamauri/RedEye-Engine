@@ -52,4 +52,4 @@ private:
 
 extern Application* App;
 
-#endif // __APP_H__
+#endif // !__APP_H__

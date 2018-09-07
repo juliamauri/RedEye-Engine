@@ -112,10 +112,10 @@ bool Application::CleanUp()
 
 	return ret;
 }
-
 void Application::Log(const char * text)
 {
-	editor->AddTextConsole(text);
+	if(editor != nullptr && !modules.empty())
+		editor->AddTextConsole(text);
 }
 
 void Application::RequestBrowser(const char* link) const
