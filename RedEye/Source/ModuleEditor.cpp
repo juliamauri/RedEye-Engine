@@ -2,16 +2,18 @@
 
 #include "Application.h"
 #include "ModuleWindow.h"
+#include "ModuleInput.h"
 
 #include "ImGui\imgui_impl_sdl_gl3.h"
+#include "ImGuizmo\ImGuizmo.h"
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
 
-#include "ImGuizmo\ImGuizmo.h"
 
 ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
-	
+	windows.push_back(console = new ConsoleWindow());
+	show_demo = false;
 }
 
 ModuleEditor::~ModuleEditor()
@@ -20,10 +22,12 @@ ModuleEditor::~ModuleEditor()
 }
 
 // Load assets
-bool ModuleEditor::Start()
+bool ModuleEditor::Init(JSONNode* node)
 {
 	bool ret = ImGui_ImplSdlGL3_Init(App->window->GetWindow());
-	
+
+	// TODO set window lock positions
+
 	return ret;
 
 }
@@ -42,25 +46,56 @@ update_status ModuleEditor::Update()
 	// Main Menu Bar
 	if (ImGui::BeginMainMenuBar())
 	{
+		// File
 		if (ImGui::BeginMenu("File"))
 		{
+			if (ImGui::MenuItem(" Exit", "	Esc"))
+			{
+				App->input->AddEvent(Event(REQUEST_QUIT, App));
+			}
 			ImGui::EndMenu();
 		}
+
+		// View
+		if (ImGui::BeginMenu("View"))
+		{
+			std::list<EditorWindow*>::iterator it = windows.begin();
+			for (; it != windows.end(); it++)
+			{
+				if (ImGui::MenuItem((*it)->Name(), ((**it)) ? "Hide" : "Open"))
+				{
+					(*it)->SwitchActive();
+				}
+			}
+			ImGui::EndMenu();
+		}
+
+		// Help
 		if (ImGui::BeginMenu("Help"))
 		{
+			if (ImGui::MenuItem(show_demo ? "Close Gui Demo" : "Open Gui Demo"))
+				show_demo = !show_demo;
+			if (ImGui::MenuItem("Documentation"))
+				App->RequestBrowser("https://github.com/juliamauri/RedEye-Engine/wiki");
+			if (ImGui::MenuItem("Download Latest"))
+				App->RequestBrowser("https://github.com/juliamauri/RedEye-Engine/releases");
+			if (ImGui::MenuItem("Report a Bug"))
+				App->RequestBrowser("https://github.com/juliamauri/RedEye-Engine/issues");
+
 			ImGui::EndMenu();
 		}
+
+		if(show_demo) ImGui::ShowTestWindow();
 
 		ImGui::EndMainMenuBar();
 	}
 
-	// Console
-	ImGui::Begin("Console", 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	// Windows
+	std::list<EditorWindow*>::iterator it = windows.begin();
+	for (it; it != windows.end(); it++)
 	{
-		ImGui::Text(console_buffer.c_str());
+		if ((**it)) (*it)->DrawWindow();
 	}
-
-	ImGui::End();
 
 	return UPDATE_CONTINUE;
 }
@@ -68,7 +103,14 @@ update_status ModuleEditor::Update()
 // Load assets
 bool ModuleEditor::CleanUp()
 {
+	while (!windows.empty())
+	{
+		delete *(windows.rbegin());
+		windows.pop_back();
+	}
+
 	ImGui_ImplSdlGL3_Shutdown();
+
 	return true;
 }
 
@@ -84,5 +126,88 @@ void ModuleEditor::HandleSDLEvent(SDL_Event* e)
 
 void ModuleEditor::AddTextConsole(const char* text)
 {
-	console_buffer.append(text);
+	if(console != nullptr && !windows.empty())
+		console->console_buffer.append(text);
+}
+
+///////////////////////////////////////////////////////////////////////
+///////   Editor Windows   ////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+EditorWindow::EditorWindow(const char* name, bool start_enabled)
+	: name(name), active(start_enabled), lock_pos(false)
+{}
+
+void EditorWindow::DrawWindow()
+{
+	if (lock_pos)
+	{
+		ImGui::SetNextWindowPos(pos);
+		ImGui::SetWindowSize(size);
+	}
+
+	Draw();
+}
+
+void EditorWindow::SwitchActive()
+{
+	active = !active;
+}
+
+const char * EditorWindow::Name() const
+{
+	return name;
+}
+
+EditorWindow::operator bool() const
+{
+	return active;
+}
+
+inline bool EditorWindow::operator!() const
+{
+	return !active;
+}
+
+ConsoleWindow::ConsoleWindow(const char * name, bool start_active) : 
+	EditorWindow(name, start_active)
+{
+	pos.y = 500.f;
+}
+
+void ConsoleWindow::Draw()
+{
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		ImGui::Text(console_buffer.c_str());
+	}
+
+	ImGui::End();
+}
+
+PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
+	EditorWindow(name, start_active)
+{
+}
+
+void PropertiesWindow::Draw()
+{
+}
+
+HeriarchyWindow::HeriarchyWindow(const char * name, bool start_active) :
+	EditorWindow(name, start_active)
+{
+}
+
+void HeriarchyWindow::Draw()
+{
+}
+
+ConfigWindow::ConfigWindow(const char * name, bool start_active) :
+	EditorWindow(name, start_active)
+{
+}
+
+void ConfigWindow::Draw()
+{
 }
