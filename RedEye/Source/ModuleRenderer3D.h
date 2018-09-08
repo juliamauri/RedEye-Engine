@@ -5,6 +5,22 @@
 
 class Shader;
 class Texture2DManager;
+class Texture2D;
+
+enum ShaderType
+{
+	SIN,
+	VERTEX,
+	TEXTURE
+};
+
+enum Texzture2DType
+{
+	PUPPIE_1,
+	PUPPIE_2,
+	CONTAINER,
+	MIX_AWESOMEFACE
+};
 
 class ModuleRenderer3D : public Module 
 {
@@ -32,9 +48,18 @@ private:
 	float timeValue = 0;
 	Shader* sinusColor;
 	Shader* vertexColor;
-	bool v_color = true;
+	Shader* textureSquare;
+	Shader* twotextures;
+	ShaderType shaderenabled = SIN;
+	Texzture2DType textureEnabled = PUPPIE_1;
+	bool printvertextcolor = false;
 
 	Texture2DManager* texture_manager;
+
+	Texture2D* puppie1;
+	Texture2D* puppie2;
+	Texture2D* container;
+	Texture2D* awesomeface;
 };
 
 #endif // !__MODULERENDER3D_H__

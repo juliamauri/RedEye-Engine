@@ -1,5 +1,7 @@
 #include "Texture2DManager.h"
 
+#include "Glew/include/glew.h"
+
 #include "IL/include/il.h"
 #include "IL/include/ilu.h"
 #include "IL/include/ilut.h"
@@ -17,8 +19,6 @@ bool Texture2DManager::Init()
 	ilInit();
 	iluInit();
 	ilutInit();
-	//before any use ilut functions
-	ilutRenderer(ILUT_OPENGL);
 
 	return true;
 }
@@ -42,21 +42,31 @@ bool Texture2DManager::CleanUp()
 
 Texture2D::Texture2D(const char * path)
 {
-	ilGenImages(1, &ID);
-	ilBindImage(ID);
+	unsigned int imageID = 0;
+	ilGenImages(1, &imageID);
+	ilBindImage(imageID);
 
 	ilLoadImage(path);
+	iluFlipImage();
 
-	width = ilGetInteger(IL_IMAGE_WIDTH);
-	height = ilGetInteger(IL_IMAGE_HEIGHT);
+	/* OpenGL texture binding of the image loaded by DevIL  */
+	glGenTextures(1, &ID); /* Texture name generation */
+	glBindTexture(GL_TEXTURE_2D, ID); /* Binding of texture name */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear interpolation for minifying filter */
+	glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
 
 	ilBindImage(0);
+	/* Delete used resources*/
+	ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
 }
 
-const unsigned char * Texture2D::GetData()
+Texture2D::~Texture2D()
 {
-	ilBindImage(ID);
-	unsigned char* data = ilGetData();
-	ilBindImage(0);
-	return data;
+	glDeleteTextures(1, &ID);
+}
+
+void Texture2D::use()
+{
+	glBindTexture(GL_TEXTURE_2D, ID);
 }

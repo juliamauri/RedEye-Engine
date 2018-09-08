@@ -7,12 +7,12 @@ struct Texture2D
 {
 private:
 	unsigned int ID = 0;
-	int width, height;
 
 public:
 	Texture2D(const char* path);
+	~Texture2D();
 
-	const unsigned char* GetData();
+	void use();
 };
 
 class Texture2DManager 
