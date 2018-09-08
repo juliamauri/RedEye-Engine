@@ -7,10 +7,10 @@
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
-#include "RapidJson\include\filereadstream.h"
 #include "TimeManager.h"
 #include "Shader.h"
 #include "ModuleInput.h"
+#include "Texture2DManager.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -120,6 +120,17 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	glBindVertexArray(0);
 
+	texture_manager = new Texture2DManager();
+	texture_manager->Init();
+
+	std::string imagepath(SDL_GetBasePath());
+	imagepath += "Assets\\Images\\puppie1.jpg";
+	Texture2D* image1 = texture_manager->LoadTexture2D(imagepath.c_str());
+
+	imagepath = SDL_GetBasePath();
+	imagepath += "Assets\\Images\\puppie2.jpg";
+	Texture2D* image2 = texture_manager->LoadTexture2D(imagepath.c_str());
+
 	return ret;
 }
 
@@ -206,6 +217,9 @@ bool ModuleRenderer3D::CleanUp()
 	//Delete context
 	SDL_GL_DeleteContext(mainContext);
 
+	//Delete textures
+	delete texture_manager;
+
 	return ret;
 }
 
@@ -214,15 +228,4 @@ unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	return nrAttributes;
-}
-
-void ModuleRenderer3D::LoadBuffer(const char* path, char ** buffer, unsigned int size)
-{
-	FILE* fp;
-	if (fopen_s(&fp, path, "rb") == 0);// non-Windows use "r"
-	{
-		// Read File
-		rapidjson::FileReadStream is(fp, *buffer, size);
-		fclose(fp);
-	}
 }

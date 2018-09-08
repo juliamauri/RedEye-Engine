@@ -4,6 +4,7 @@
 #include "Module.h"
 
 class Shader;
+class Texture2DManager;
 
 class ModuleRenderer3D : public Module 
 {
@@ -33,7 +34,7 @@ private:
 	Shader* vertexColor;
 	bool v_color = true;
 
-	void LoadBuffer(const char* path, char** buffer, unsigned int size);
+	Texture2DManager* texture_manager;
 };
 
 #endif // !__MODULERENDER3D_H__

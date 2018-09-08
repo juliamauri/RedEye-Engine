@@ -58,6 +58,9 @@
     <ClCompile Include="Cvar.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
+    <ClCompile Include="Texture2DManager.cpp">
+      <Filter>Modules\Independent Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -254,6 +257,9 @@
     </ClInclude>
     <ClInclude Include="Cvar.h">
       <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture2DManager.h">
+      <Filter>Modules\Independent Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
