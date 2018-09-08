@@ -7,6 +7,7 @@
 #include "FileSystem.h"
 #include "TimeManager.h"
 #include "SDL2\include\SDL.h"
+#include "ImGui\imgui.h"
 
 
 using namespace std;
@@ -112,6 +113,38 @@ bool Application::CleanUp()
 
 	return ret;
 }
+void Application::DrawEditor()
+{
+	if (ImGui::CollapsingHeader("Application"))
+	{
+
+
+		/*static char input[100];
+		int size = sizeof(input) / sizeof(char);
+		sprintf_s(input, size, "%s", App->name.c_str());
+
+		if (ImGui::InputText("App Name", input, size))
+		{
+			App->name.assign(input);
+			App->window->SetTitle(input);
+		}
+
+		sprintf_s(input, size, "%s", App->organization.c_str());
+
+		if (ImGui::InputText("Organization", input, sizeof(input) / sizeof(char)))
+		{
+			App->organization.assign(input);
+		}*/
+
+
+		time->DrawEditor();
+	}
+
+	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
+		if ((*it)->IsActive() == true)
+			(*it)->DrawEditor();
+}
+
 void Application::Log(const char * text)
 {
 	if(editor != nullptr && !modules.empty())

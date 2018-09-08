@@ -2,7 +2,9 @@
 #define __APP_H__
 
 #include "EventListener.h"
+//#include "Cvar.h"
 #include <list>
+#include <map>
 
 class Module;
 class ModuleWindow;
@@ -23,6 +25,7 @@ public:
 	int Update();
 	bool CleanUp();
 
+	void DrawEditor();
 	void Log(const char* text);
 	void RequestBrowser(const char* link) const;
 	void RecieveEvent(const Event* e) override;
@@ -47,7 +50,10 @@ private:
 	std::list<Module*> modules;
 	bool want_to_quit = false;
 
-	int argc; char* argv[];
+	//std::map<const char*, DoubleCvar> config_vars;
+
+	int argc;
+	char* argv[];
 };
 
 extern Application* App;

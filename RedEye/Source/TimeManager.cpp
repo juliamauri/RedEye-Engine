@@ -1,13 +1,17 @@
 #include "TimeManager.h"
 
 #include "SDL2\include\SDL.h"
+#include "ImGui\imgui.h"
 
-TimeManager::TimeManager(unsigned int max_fps)
+TimeManager::TimeManager(float max_fps)
 {
 	dt = 0.f;
 	capped_fps = max_fps;
-	capped_ms = 1000 / capped_fps;
-	frames_counter = fps_counter = last_fps_count = last_frame_ms = 0u;
+	capped_ms = 1000.f / capped_fps;
+	frames_counter = fps_counter = last_fps_count = last_ms_count = 0u;
+	pause_plotting = false;
+
+	ClearArrays();
 }
 
 TimeManager::~TimeManager()
@@ -34,29 +38,69 @@ void TimeManager::ManageFrameTimers()
 		fps_timer.Start();
 	}
 
-	last_frame_ms = ms_timer.Read();
+	last_ms_count = ms_timer.Read();
 
 	// cap fps
-	if (capped_ms > 0 && last_frame_ms < capped_ms)
-		SDL_Delay(capped_ms - last_frame_ms);
+	if (capped_ms > 0 && last_ms_count < capped_ms)
+		SDL_Delay(capped_ms - last_ms_count);
 }
 
-void TimeManager::SetMaxFPS(unsigned int max_fps)
+void TimeManager::DrawEditor()
+{
+	if (!pause_plotting)
+	{
+		for (int i = 0; i < 99; i++)
+		{
+			ms[i] = ms[i + 1];
+			fps[i] = fps[i + 1];
+		}
+
+		ms[99] = last_ms_count;
+		fps[99] = last_fps_count;
+	}
+
+	//ImGui::PushItemWidth(250);
+	if (ImGui::SliderFloat("Max FPS", &capped_fps, 20.0f, 144.0f, "%.1f"))
+		SetMaxFPS(capped_fps);
+
+	char title[25];
+	sprintf_s(title, 25, "Framerate %.1f", fps[99]);
+	ImGui::PlotHistogram("##framerate", fps, ((int)(sizeof(fps) / sizeof(*fps))), 0, title, 0.0f, 150.0f, ImVec2(310, 100));
+	sprintf_s(title, 25, "Milliseconds %.1f", ms[99]);
+	ImGui::PlotHistogram("##milliseconds", ms, ((int)(sizeof(ms) / sizeof(*ms))), 0, title, 0.0f, 40.0f, ImVec2(310, 100));
+
+	if (ImGui::Checkbox(pause_plotting ? "Restart Plotting" : "Pause Plotting", &pause_plotting))
+	{
+		if (!pause_plotting)
+			ClearArrays();
+	}
+}
+
+void TimeManager::SetMaxFPS(float max_fps)
 {
 	capped_fps = max_fps;
 
-	if (capped_fps == 0)
-		capped_ms = 0;
+	if (capped_fps == 0.f)
+		capped_ms = 0u;
 	else
-		capped_ms = 1000 / capped_fps;
+		capped_ms = 1000.f / capped_fps;
 }
 
 float TimeManager::GetMaxFPS() const { return capped_fps; }
 float TimeManager::GetDeltaTime() const { return dt; }
 unsigned int TimeManager::GetCappedMS() const { return capped_ms; }
 unsigned int TimeManager::GetFpsCounter() const { return fps_counter; }
-unsigned int TimeManager::GetLastFrameMs() const { return last_frame_ms; }
+unsigned int TimeManager::GetLastMs() const { return last_ms_count; }
 unsigned int TimeManager::GetLastFPS() const { return last_fps_count; }
+
+void TimeManager::ClearArrays()
+{
+	for (int i = 0; i < 99; i++)
+	{
+		fps[i] = 0.f;
+		ms[i] = 0.f;
+	}
+}
 
 
 // TIME =======================================================================================

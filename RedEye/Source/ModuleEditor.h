@@ -84,19 +84,20 @@ class ConfigWindow : public EditorWindow
 public:
 	ConfigWindow(const char* name = "Configuration", bool start_active = true);
 	void Draw() override;
+	bool changed_config;
 };
 
 class HeriarchyWindow : public EditorWindow
 {
 public:
-	HeriarchyWindow(const char* name = "Heriarchy", bool start_active = true);
+	HeriarchyWindow(const char* name = "Heriarchy", bool start_active = false);
 	void Draw() override;
 };
 
 class PropertiesWindow : public EditorWindow
 {
 public:
-	PropertiesWindow(const char* name = "Properties", bool start_active = true);
+	PropertiesWindow(const char* name = "Properties", bool start_active = false);
 	void Draw() override;
 };
 

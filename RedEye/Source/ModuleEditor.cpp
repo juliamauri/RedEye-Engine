@@ -13,6 +13,7 @@
 ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
 	windows.push_back(console = new ConsoleWindow());
+	windows.push_back(config = new ConfigWindow());
 	show_demo = false;
 }
 
@@ -185,6 +186,25 @@ void ConsoleWindow::Draw()
 	ImGui::End();
 }
 
+ConfigWindow::ConfigWindow(const char * name, bool start_active) :
+	EditorWindow(name, start_active)
+{
+	changed_config = false;
+	pos.x = 2000.f;
+	pos.y = 400.f;
+}
+
+void ConfigWindow::Draw()
+{
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		App->DrawEditor();
+	}
+
+	ImGui::End();
+}
+
+
 PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {
@@ -200,14 +220,5 @@ HeriarchyWindow::HeriarchyWindow(const char * name, bool start_active) :
 }
 
 void HeriarchyWindow::Draw()
-{
-}
-
-ConfigWindow::ConfigWindow(const char * name, bool start_active) :
-	EditorWindow(name, start_active)
-{
-}
-
-void ConfigWindow::Draw()
 {
 }

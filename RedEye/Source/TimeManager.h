@@ -27,33 +27,42 @@ class TimeManager
 {
 public:
 
-	TimeManager(unsigned int max_fps = 60u);
+	TimeManager(float max_fps = 60.f);
 	~TimeManager();
 
 	float	UpdateDeltaTime(); // Called before updating modules
 	void	ManageFrameTimers(); // Called after modules update
+	void	DrawEditor(); // Draws graphs on time stats
 	
-	void	SetMaxFPS(unsigned int max_fps); // Set to 0 uncap fps
+	void	SetMaxFPS(float max_fps); // Set to 0 uncap fps
 	float	GetMaxFPS() const;
 	float	GetDeltaTime() const;
 	unsigned int GetCappedMS() const;
 	unsigned int GetFpsCounter() const;
-	unsigned int GetLastFrameMs() const;
+	unsigned int GetLastMs() const;
 	unsigned int GetLastFPS() const;
 
 private:
 
-	unsigned long frames_counter;
-	unsigned int fps_counter;
-	unsigned int last_fps_count;
-	unsigned int last_frame_ms;
+	void ClearArrays();
+
+private:
+
+	unsigned long	frames_counter;
+	unsigned int	fps_counter;
+	unsigned int	last_fps_count;
+	unsigned int	last_ms_count;
 
 	float	dt;
-	unsigned int capped_fps;
-	unsigned int capped_ms;
+	float	capped_fps;
+	unsigned int	capped_ms;
 
 	Timer	ms_timer; // read every frame
 	Timer	fps_timer; // read every second
+
+	float	fps[100] = {};
+	float	ms[100] = {};
+	bool	pause_plotting;
 };
 
 #endif // !__TIMEMANAGER_H__
