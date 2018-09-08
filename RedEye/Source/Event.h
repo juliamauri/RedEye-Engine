@@ -1,13 +1,13 @@
 #ifndef __EVENT_H__
 #define __EVENT_H__
 
+#include "Cvar.h"
+
 class EventListener;
 
 typedef enum : unsigned short int
 {
 	//SDL_EVENT = 0x00,
-
-	CONFIG_LOADED,
 	PLAY,
 	PAUSE,
 	UNPAUSE,
@@ -26,6 +26,8 @@ public:
 
 	Event(RE_EventType t, EventListener* lis = nullptr);
 	Event(RE_EventType t, unsigned int ts, EventListener* lis = nullptr);
+	Event(RE_EventType t, Cvar data, EventListener* lis = nullptr);
+	Event(RE_EventType t, Cvar data, unsigned int ts, EventListener* lis = nullptr);
 	Event(const Event& e);
 	~Event();
 
@@ -34,6 +36,7 @@ public:
 
 	unsigned int GetTimeStamp() const;
 	RE_EventType GetType() const;
+	const Cvar* GetData() const;
 
 private:
 
@@ -42,6 +45,7 @@ private:
 private:
 
 	RE_EventType type;
+	Cvar data;
 	EventListener* listener;
 	unsigned int timestamp;
 };

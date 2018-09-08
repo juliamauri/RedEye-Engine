@@ -12,6 +12,16 @@ Event::Event(RE_EventType t, unsigned int ts, EventListener* lis) : listener(lis
 	IsValid() ? timestamp = ts : Clear();
 }
 
+Event::Event(RE_EventType t, Cvar data, EventListener* lis) : listener(lis), type(t), data(data)
+{
+	IsValid() ? timestamp = SDL_GetTicks() : Clear();
+}
+
+Event::Event(RE_EventType t, Cvar data, unsigned int ts, EventListener* lis) : listener(lis), type(t), data(data)
+{
+	IsValid() ? timestamp = ts : Clear();
+}
+
 Event::Event(const Event& e) : listener(e.listener), type(e.type), timestamp(e.timestamp) {}
 
 Event::~Event()
@@ -37,6 +47,11 @@ unsigned int Event::GetTimeStamp() const
 RE_EventType Event::GetType() const
 {
 	return type;
+}
+
+const Cvar* Event::GetData() const
+{
+	return &data;
 }
 
 void Event::Clear()
