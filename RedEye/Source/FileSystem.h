@@ -3,15 +3,74 @@
 
 #include "RapidJson\include\document.h"
 
-/*	rapidjson number types:
-GenericValue& SetInt(int i) - int GetInt()
-GenericValue& SetUint(unsigned u) - unsigned int GetUint()
-GenericValue& SetInt64(int64_t i64) - long long GetInt64()
-GenericValue& SetUint64(uint64_t u64) - unsigned long long GetUint64()
-GenericValue& SetDouble(double d) - double GetDouble()
-GenericValue& SetFloat(float f) - float GetFloat()*/
-
 class Config;
+class RE_FileIO;
+
+class FileSystem
+{
+public:
+
+	FileSystem();
+	~FileSystem();
+
+	bool Init(int argc, char* argv[]);
+	Config* GetConfig() const;
+
+	bool AddPath(const char* path_or_zip, const char* mount_point = NULL);
+	bool Exists(const char* file) const;
+	bool IsDirectory(const char* file) const;
+	const char* GetExecutableDirectory() const;
+
+private:
+
+	Config* engine_config;
+};
+
+
+/* Access file buffer:
+RE_FileIO file("config.json");
+	if (file.Load())
+		const char* buffer = file.GetBuffer();*/
+
+class RE_FileIO
+{
+public:
+	RE_FileIO(const char* file_name);
+	~RE_FileIO();
+
+	virtual bool Load();
+	virtual void Save();
+
+	void ClearBuffer();
+	virtual const char* GetBuffer() const;
+
+	virtual inline bool operator!() const;
+
+private:
+
+	unsigned int HardLoad();
+
+protected:
+
+	char* buffer;
+	const char* file_name;
+};
+
+class JSONNode;
+
+class Config : public RE_FileIO
+{
+public:
+	Config(const char* file_name);
+
+	bool Load() override;
+	JSONNode* GetRootNode(const char* member);
+	inline bool operator!() const;
+
+public:
+
+	rapidjson::Document document;
+};
 
 class JSONNode
 {
@@ -50,94 +109,6 @@ private:
 
 	Config* config;
 	std::string pointerPath;
-};
-
-class FileSystem
-{
-public:
-
-	FileSystem();
-	~FileSystem();
-
-	bool Init(int argc, char* argv[]);
-	Config* GetConfig() const;
-
-	bool Exists(const char* file) const;
-	bool IsDirectory(const char* file) const;
-	const char* GetExecutableDirectory() const;
-
-private:
-
-	Config* engine_config;
-};
-
-struct FileInfo
-{
-public:
-
-	FileInfo();
-	FileInfo(const char* name, const bool includesPath = false);
-	FileInfo(const char* path, const char* name);
-	FileInfo(const FileInfo &copy);
-
-	bool SetFromFullPath(const char* fullpath);
-	inline bool operator!() const;
-
-	std::string path;
-	std::string name;
-};
-
-class RE_FileIO
-{
-public:
-
-	RE_FileIO(const char* name, const bool includesPath = false);
-	RE_FileIO(const char* path, const char* name);
-	RE_FileIO(FileInfo file);
-	~RE_FileIO();
-
-	virtual bool Load();
-	virtual void Save();
-
-	void ClearBuffer();
-	virtual const char* GetBuffer() const;
-
-	virtual inline bool operator!() const;
-
-private:
-
-	unsigned int HardLoad(const char* file, char** buffer);
-
-protected:
-
-	char* buffer;
-	FileInfo fileInfo;
-};
-
-class Config : public RE_FileIO
-{
-public:
-
-	Config(const char* name, const bool includesPath = false);
-	Config(const char* path, const char* name);
-	Config(FileInfo file);
-	~Config();
-
-	bool Load() override;
-	JSONNode* GetRootNode(const char* member);
-	inline bool operator!() const;
-
-	/*void Init();
-	bool LoadJsons();
-	bool LoadConfig();
-
-	void TestRead();
-	void TestWrite();
-	void TestStreams();*/
-
-public:
-
-	rapidjson::Document document;
 };
 
 #endif // !__FILESYSTEM_H__
