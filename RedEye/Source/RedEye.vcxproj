@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Cvar.cpp" />
     <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="Globals.cpp" />
@@ -40,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Cvar.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="EventListener.h" />
