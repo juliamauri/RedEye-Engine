@@ -52,6 +52,9 @@
     <ClCompile Include="TimeManager.cpp">
       <Filter>Modules\Independent Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -243,6 +246,9 @@
     <ClInclude Include="TimeManager.h">
       <Filter>Modules\Independent Modules</Filter>
     </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -259,9 +265,6 @@
     </Filter>
     <Filter Include="Modules\Events">
       <UniqueIdentifier>{b7a63cfc-233b-4186-96c0-37e2ed9b095d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Utility">
-      <UniqueIdentifier>{f69c89c8-dbf0-497c-ade9-ac648258d3ff}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\Independent Modules">
       <UniqueIdentifier>{5c9aef73-114b-4af7-98e0-23279889b965}</UniqueIdentifier>
@@ -296,8 +299,8 @@
     <Filter Include="3rd Party\ImGuizmo">
       <UniqueIdentifier>{a8753026-9d83-44bd-8441-d736761a142d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utility\Shaders">
-      <UniqueIdentifier>{8ed48140-755a-4b70-b704-7ae8eff1170a}</UniqueIdentifier>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{38c29b9d-7263-44b0-bf0d-759b506df6a8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

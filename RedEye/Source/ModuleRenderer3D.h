@@ -3,6 +3,7 @@
 
 #include "Module.h"
 
+class Shader;
 
 class ModuleRenderer3D : public Module 
 {
@@ -19,11 +20,18 @@ public:
 	void* mainContext;
 	unsigned int renderedTexture;
 
+	//Shaders - A vector in GLSL contains 4 component
+	unsigned int GetMaxVertexAttributes(); //it's usually 16
+
 private:
-	unsigned int shaderProgram;
-	unsigned int EBO;
-	unsigned int VAO;
-	bool B_EBO = true;
+	unsigned int VAO_Triangle, VAO_Square, VBO_Triangle, VBO_Square, EBO_Square;
+	bool B_EBO = false;
+	bool isLine = false;
+
+	float timeValue = 0;
+	Shader* sinusColor;
+	Shader* vertexColor;
+	bool v_color = true;
 
 	void LoadBuffer(const char* path, char** buffer, unsigned int size);
 };
