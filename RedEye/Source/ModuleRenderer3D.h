@@ -14,7 +14,7 @@ enum ShaderType
 	TEXTURE
 };
 
-enum Texzture2DType
+enum Texture2DType
 {
 	PUPPIE_1,
 	PUPPIE_2,
@@ -34,10 +34,13 @@ public:
 	update_status PostUpdate() override;
 	bool CleanUp() override;
 
+	void DrawEditor();
 	void RecieveEvent(const Event* e) override;
 
 	void* mainContext;
 	unsigned int renderedTexture;
+
+	void enableVSync(bool enable);
 
 	//Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
@@ -46,6 +49,7 @@ private:
 	unsigned int VAO_Triangle, VAO_Square, VBO_Triangle, VBO_Square, EBO_Square;
 	bool B_EBO = false;
 	bool isLine = false;
+	bool vsync = false;
 
 	float timeValue = 0;
 	Shader* sinusColor;
@@ -53,7 +57,7 @@ private:
 	Shader* textureSquare;
 	Shader* twotextures;
 	ShaderType shaderenabled = SIN;
-	Texzture2DType textureEnabled = PUPPIE_1;
+	Texture2DType textureEnabled = PUPPIE_1;
 	bool printvertextcolor = false;
 
 	Texture2DManager* texture_manager;

@@ -152,10 +152,7 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	imagepath += "Assets\\Images\\awesomeface.png";
 	awesomeface = texture_manager->LoadTexture2D(imagepath.c_str());
 
-	if(config_module->PullBool("vsync", false))
-		SDL_GL_SetSwapInterval(1); //vsync activated
-	else
-		SDL_GL_SetSwapInterval(0); //vsync de-activated
+	enableVSync(vsync = config_module->PullBool("vsync", false));
 
 	return ret;
 }
@@ -167,68 +164,6 @@ update_status ModuleRenderer3D::PreUpdate()
 	//Set background with a clear color
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	
-	//Shaders
-	if (App->input->GetKey(SDL_Scancode::SDL_SCANCODE_Q) == KEY_DOWN)
-		shaderenabled = SIN;
-
-	if (App->input->GetKey(SDL_Scancode::SDL_SCANCODE_W) == KEY_DOWN)
-		shaderenabled = VERTEX;
-
-	if (App->input->GetKey(SDL_Scancode::SDL_SCANCODE_E) == KEY_DOWN)
-		shaderenabled = TEXTURE;
-
-	if (App->input->GetKey(SDL_Scancode::SDL_SCANCODE_Z) == KEY_DOWN)
-	{
-		if (shaderenabled == TEXTURE)
-		{
-			textureSquare->use();
-			if (!printvertextcolor)
-			{
-				textureSquare->setBool("vertexcolor", true);
-				printvertextcolor = !printvertextcolor;
-			}
-			else
-			{
-				textureSquare->setBool("vertexcolor", false);
-				printvertextcolor = !printvertextcolor;
-			}
-		}
-	}
-
-	//Textures
-	if (shaderenabled == TEXTURE)
-	{
-		if (App->input->GetKey(SDL_Scancode::SDL_SCANCODE_A) == KEY_DOWN)
-		{
-			textureEnabled = PUPPIE_1;
-		}
-
-		if (App->input->GetKey(SDL_Scancode::SDL_SCANCODE_S) == KEY_DOWN)
-		{
-			textureEnabled = PUPPIE_2;
-		}
-
-		if (App->input->GetKey(SDL_Scancode::SDL_SCANCODE_D) == KEY_DOWN)
-		{
-			textureEnabled = CONTAINER;
-		}
-
-		if (App->input->GetKey(SDL_Scancode::SDL_SCANCODE_F) == KEY_DOWN)
-		{
-			textureEnabled = MIX_AWESOMEFACE;
-			twotextures->use();
-			twotextures->setInt("texture1", 1);
-			twotextures->setInt("texture2", 2);
-		}
-	}
-	//change figure
-	if (App->input->GetKey(SDL_Scancode::SDL_SCANCODE_1) == KEY_DOWN)
-		B_EBO = !B_EBO;
-
-	//wired
-	if (App->input->GetKey(SDL_Scancode::SDL_SCANCODE_2) == KEY_DOWN)
-		isLine = !isLine;
 
 	if (shaderenabled == SIN)
 	{
@@ -314,8 +249,6 @@ update_status ModuleRenderer3D::PostUpdate()
 	return ret;
 }
 
-
-
 bool ModuleRenderer3D::CleanUp()
 {
 	bool ret = true;
@@ -343,9 +276,114 @@ bool ModuleRenderer3D::CleanUp()
 	return ret;
 }
 
+void ModuleRenderer3D::DrawEditor()
+{
+	if (ImGui::CollapsingHeader("Renderer3D Debug"))
+	{
+		if (ImGui::Checkbox((vsync) ? "Disable vsync" : "Enable vsync", &vsync))
+		{
+			enableVSync(vsync);
+		}
+
+		if (ImGui::Checkbox((B_EBO) ? "Change to Triangle" : "Change to Square", &B_EBO))
+		{
+			if(shaderenabled == TEXTURE)
+				shaderenabled = SIN;
+		}
+
+		ImGui::Checkbox((isLine) ? "Disable Wireframe" : "Enable Wireframe", &isLine);
+
+		int selected;
+		if (B_EBO)
+		{
+			if (ImGui::Combo("Shader", &selected, "Sin\0Vertex\0Texture\0"))
+			{
+				switch ((ShaderType)selected)
+				{
+				case SIN:
+					shaderenabled = SIN;
+					break;
+				case VERTEX:
+					shaderenabled = VERTEX;
+					break;
+				case TEXTURE:
+					shaderenabled = TEXTURE;
+					break;
+				}
+			}
+		}
+		else
+		{
+			if (ImGui::Combo("Shader", &selected, "Sin\0Vertex\0"))
+			{
+				switch ((ShaderType)selected)
+				{
+				case SIN:
+					shaderenabled = SIN;
+					break;
+				case VERTEX:
+					shaderenabled = VERTEX;
+					break;
+				}
+			}
+		}
+
+		if (shaderenabled == TEXTURE)
+		{
+			if (ImGui::Combo("Texture", &selected, "Puppie 1\0Puppie 2\0Container\0Mix Awesomeface\0"))
+			{
+				switch ((Texture2DType)selected)
+				{
+				case PUPPIE_1:
+					textureEnabled = PUPPIE_1;
+					break;
+				case PUPPIE_2:
+					textureEnabled = PUPPIE_2;
+					break;
+				case CONTAINER:
+					textureEnabled = CONTAINER;
+					break;
+				case MIX_AWESOMEFACE:
+					textureEnabled = MIX_AWESOMEFACE;
+					twotextures->use();
+					twotextures->setInt("texture1", 1);
+					twotextures->setInt("texture2", 2);
+					break;
+				}
+			}
+
+			if (textureEnabled != MIX_AWESOMEFACE)
+			{
+				if (ImGui::Button("Activate Vertex Color"))
+				{
+					textureSquare->use();
+					if (!printvertextcolor)
+					{
+						textureSquare->setBool("vertexcolor", true);
+						printvertextcolor = !printvertextcolor;
+					}
+					else
+					{
+						textureSquare->setBool("vertexcolor", false);
+						printvertextcolor = !printvertextcolor;
+					}
+				}
+			}
+		}
+	}
+}
+
 void ModuleRenderer3D::RecieveEvent(const Event * e)
 {
 	
+}
+
+void ModuleRenderer3D::enableVSync(bool enable)
+{
+	if(enable)
+		SDL_GL_SetSwapInterval(1); //vsync activated
+	else
+		SDL_GL_SetSwapInterval(0); //vsync de-activated
 }
 
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
