@@ -34,6 +34,8 @@ public:
 	update_status PostUpdate() override;
 	bool CleanUp() override;
 
+	void RecieveEvent(const Event* e) override;
+
 	void* mainContext;
 	unsigned int renderedTexture;
 

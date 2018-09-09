@@ -11,5 +11,8 @@
     "resizable": false,
     "borderless": false,
     "fullscreen_desktop": false
+  },
+  "Renderer3D" :{
+  "vsync" : false
   }
 }

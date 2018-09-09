@@ -11,6 +11,7 @@
 #include "Shader.h"
 #include "ModuleInput.h"
 #include "Texture2DManager.h"
+#include "FileSystem.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -150,6 +151,11 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	imagepath = SDL_GetBasePath();
 	imagepath += "Assets\\Images\\awesomeface.png";
 	awesomeface = texture_manager->LoadTexture2D(imagepath.c_str());
+
+	if(config_module->PullBool("vsync", false))
+		SDL_GL_SetSwapInterval(1); //vsync activated
+	else
+		SDL_GL_SetSwapInterval(0); //vsync de-activated
 
 	return ret;
 }
@@ -335,6 +341,11 @@ bool ModuleRenderer3D::CleanUp()
 	delete texture_manager;
 
 	return ret;
+}
+
+void ModuleRenderer3D::RecieveEvent(const Event * e)
+{
+	
 }
 
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()

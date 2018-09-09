@@ -38,9 +38,9 @@ bool ModuleWindow::Init(JSONNode* config_module)
 		uint screen_width = config_module->PullUInt("screen_width", 800);
 		uint screen_height = config_module->PullUInt("screen_height", 800);
 		bool fullscreen = config_module->PullBool("fullscreen", false);
-		bool resizable = config_module->PullBool("resizable", false);;
-		bool borderless = config_module->PullBool("borderless", false);;
-		bool fullscreen_desktop = config_module->PullBool("fullscreen_desktop", false);;
+		bool resizable = config_module->PullBool("resizable", false);
+		bool borderless = config_module->PullBool("borderless", false);
+		bool fullscreen_desktop = config_module->PullBool("fullscreen_desktop", false);
 
 		if (fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
 		if (resizable) flags |= SDL_WINDOW_RESIZABLE;
