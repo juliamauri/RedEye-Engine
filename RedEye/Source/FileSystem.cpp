@@ -106,7 +106,10 @@ RE_FileIO::RE_FileIO(const char* file_name) : buffer(nullptr), file_name(file_na
 RE_FileIO::~RE_FileIO()
 {
 	if (buffer != nullptr)//delete buffer;
+	{
 		memset(buffer, 0, size);
+		buffer = nullptr;
+	}
 }
 
 bool RE_FileIO::Load()

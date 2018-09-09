@@ -49,7 +49,6 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	glEnable(GL_TEXTURE_2D);
 
 	//Creating vertex and fragment shader
-	
 	std::string fullPathvertex("Shaders/sinuscolor.vert");
 	std::string fullPathfragment("Shaders/sinuscolor.frag");
 	sinusColor = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
@@ -62,10 +61,8 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	fullPathfragment = "Shaders/textureSquare.frag";
  	textureSquare = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
 
-
 	fullPathvertex = "Shaders/twotextures.vert";
 	fullPathfragment = "Shaders/twotextures.frag";
-
 	twotextures = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
 
 	//Print a 2d triangle3d https://learnopengl.com/Getting-started/Hello-Triangle
@@ -164,7 +161,7 @@ update_status ModuleRenderer3D::PreUpdate()
 	//Set background with a clear color
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-
+	
 	if (shaderenabled == SIN)
 	{
 		//gradually change color usingf uniform at fragmentshader
@@ -173,7 +170,7 @@ update_status ModuleRenderer3D::PreUpdate()
 		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		sinusColor->setFloat("vertexColor", 0.0f, greenValue, 0.0f, 1.0f);
 	}
-
+	
 	return ret;
 }
 
