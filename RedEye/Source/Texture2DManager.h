@@ -7,6 +7,7 @@ struct Texture2D
 {
 private:
 	unsigned int ID = 0;
+	int width, height;
 
 public:
 	Texture2D(const char* path);

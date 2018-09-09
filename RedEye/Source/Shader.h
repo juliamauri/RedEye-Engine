@@ -34,9 +34,6 @@ public:
 private:
 	// the program ID
 	unsigned int ID;
-
-	//Temporally function, loads shaders code.
-	void LoadBuffer(const char* path, char** buffer, unsigned int size);
 };
 
 #endif // __SHADER_H__

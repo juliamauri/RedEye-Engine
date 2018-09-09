@@ -49,35 +49,21 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	//Creating vertex and fragment shader
 	
-	std::string fullPathvertex(SDL_GetBasePath());
-	fullPathvertex += "Assets\\Shaders\\sinuscolor.vert";
-
-	std::string fullPathfragment(SDL_GetBasePath());
-	fullPathfragment += "Assets\\Shaders\\sinuscolor.frag";
-
+	std::string fullPathvertex("Shaders/sinuscolor.vert");
+	std::string fullPathfragment("Shaders/sinuscolor.frag");
 	sinusColor = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
-	
-	fullPathvertex = SDL_GetBasePath();
-	fullPathvertex += "Assets\\Shaders\\vertexcolor.vert";
 
-	fullPathfragment = SDL_GetBasePath();
-	fullPathfragment += "Assets\\Shaders\\vertexcolor.frag";
-
+	fullPathvertex = "Shaders/vertexcolor.vert";
+	fullPathfragment = "Shaders/vertexcolor.frag";
 	vertexColor = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
 
-	fullPathvertex = SDL_GetBasePath();
-	fullPathvertex += "Assets\\Shaders\\textureSquare.vert";
-
-	fullPathfragment = SDL_GetBasePath();
-	fullPathfragment += "Assets\\Shaders\\textureSquare.frag";
-
+	fullPathvertex = "Shaders/textureSquare.vert";
+	fullPathfragment = "Shaders/textureSquare.frag";
  	textureSquare = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
 
-	fullPathvertex = SDL_GetBasePath();
-	fullPathvertex += "Assets\\Shaders\\twotextures.vert";
-	 
-	fullPathfragment = SDL_GetBasePath();
-	fullPathfragment += "Assets\\Shaders\\twotextures.frag";
+
+	fullPathvertex = "Shaders/twotextures.vert";
+	fullPathfragment = "Shaders/twotextures.frag";
 
 	twotextures = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
 

@@ -3,19 +3,21 @@
 #include "ModuleEditor.h"
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
-#include "RapidJson\include\filereadstream.h"
+#include "FileSystem.h"
 
 Shader::Shader(const char * vertexPath, const char * fragmentPath)
 {
+	const char* buffer = nullptr;
+
 	unsigned int vertexShader;
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
 	//load source
-	char* vs_buffer = new char[65536];
-	LoadBuffer(vertexPath, &vs_buffer, 65536);
-	glShaderSource(vertexShader, 1, &vs_buffer, NULL);
+	RE_FileIO file_vertexShader(vertexPath);
+	if (file_vertexShader.Load())
+		buffer = file_vertexShader.GetBuffer();
+	glShaderSource(vertexShader, 1, &buffer, NULL);
 	glCompileShader(vertexShader);
-	delete[] vs_buffer;
 
 	//check
 	int  success;
@@ -32,11 +34,11 @@ Shader::Shader(const char * vertexPath, const char * fragmentPath)
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
 	//load source
-	char* fs_buffer = new char[65536];
-	LoadBuffer(fragmentPath, &fs_buffer, 65536);
-	glShaderSource(fragmentShader, 1, &fs_buffer, NULL);
+	RE_FileIO file_fragmentShader(fragmentPath);
+	if (file_fragmentShader.Load())
+		buffer = file_fragmentShader.GetBuffer();
+	glShaderSource(fragmentShader, 1, &buffer, NULL);
 	glCompileShader(fragmentShader);
-	delete[] fs_buffer;
 
 	//check
 	int  success2;
@@ -152,15 +154,4 @@ void Shader::setUnsignedInt(const char * name, unsigned int value, unsigned int 
 void Shader::setUnsignedInt(const char * name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4)
 {
 	glUniform4ui(glGetUniformLocation(ID, name), value, value2, value3, value4);
-}
-
-void Shader::LoadBuffer(const char * path, char ** buffer, unsigned int size)
-{
-	FILE* fp;
-	if (fopen_s(&fp, path, "rb") == 0);// non-Windows use "r"
-	{
-		// Read File
-		rapidjson::FileReadStream is(fp, *buffer, size);
-		fclose(fp);
-	}
 }
