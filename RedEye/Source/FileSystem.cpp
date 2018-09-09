@@ -105,8 +105,8 @@ RE_FileIO::RE_FileIO(const char* file_name) : buffer(nullptr), file_name(file_na
 
 RE_FileIO::~RE_FileIO()
 {
-	if (buffer != nullptr)
-		delete buffer;
+	if (buffer != nullptr)//delete buffer;
+		memset(buffer, 0, size);
 }
 
 bool RE_FileIO::Load()
@@ -121,13 +121,13 @@ void RE_FileIO::Save()
 
 void RE_FileIO::ClearBuffer()
 {
-	delete buffer;
+	memset(buffer, 0, sizeof buffer);
 	buffer = nullptr;
 }
 
 const char* RE_FileIO::GetBuffer() const
 {
-	return buffer;
+	return (buffer);
 }
 
 inline bool RE_FileIO::operator!() const
@@ -145,14 +145,14 @@ unsigned int RE_FileIO::HardLoad()
 
 		if (fs_file != NULL)
 		{
-			signed long long size = PHYSFS_fileLength(fs_file);
-
-			if (size > 0)
+			signed long long sll_size = PHYSFS_fileLength(fs_file);
+			size = (unsigned int)sll_size;
+			if (sll_size > 0)
 			{
-				buffer = new char[(unsigned int)size];
-				signed long long amountRead = PHYSFS_read(fs_file, buffer, 1, (signed int)size);
-
-				if (amountRead != size)
+				buffer = new char[(unsigned int)sll_size];
+				signed long long amountRead = PHYSFS_read(fs_file, buffer, 1, (signed int)sll_size);
+				
+				if (amountRead != sll_size)
 				{
 					LOG("File System error while reading from file %s: %s\n", file_name, PHYSFS_getLastError());
 					delete (buffer);
@@ -160,6 +160,7 @@ unsigned int RE_FileIO::HardLoad()
 				else
 				{
 					ret = (uint)amountRead;
+					buffer[ret] = '\0';
 				}
 			}
 

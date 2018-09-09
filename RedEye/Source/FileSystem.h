@@ -54,6 +54,7 @@ protected:
 
 	char* buffer;
 	const char* file_name;
+	unsigned int size = 0;
 };
 
 class JSONNode;
