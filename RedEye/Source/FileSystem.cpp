@@ -105,10 +105,9 @@ RE_FileIO::RE_FileIO(const char* file_name) : buffer(nullptr), file_name(file_na
 
 RE_FileIO::~RE_FileIO()
 {
-	if (buffer != nullptr)//delete buffer;
+	if (buffer)//delete buffer;
 	{
-		memset(buffer, 0, size);
-		buffer = nullptr;
+		delete[] buffer;
 	}
 }
 
@@ -124,7 +123,7 @@ void RE_FileIO::Save()
 
 void RE_FileIO::ClearBuffer()
 {
-	memset(buffer, 0, sizeof buffer);
+	delete[] buffer;
 	buffer = nullptr;
 }
 
@@ -149,10 +148,9 @@ unsigned int RE_FileIO::HardLoad()
 		if (fs_file != NULL)
 		{
 			signed long long sll_size = PHYSFS_fileLength(fs_file);
-			size = (unsigned int)sll_size;
 			if (sll_size > 0)
 			{
-				buffer = new char[(unsigned int)sll_size];
+				buffer = new char[(unsigned int)sll_size + 1];
 				signed long long amountRead = PHYSFS_read(fs_file, buffer, 1, (signed int)sll_size);
 				
 				if (amountRead != sll_size)
