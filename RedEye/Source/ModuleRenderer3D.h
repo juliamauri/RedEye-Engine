@@ -50,6 +50,8 @@ private:
 	bool B_EBO = false;
 	bool isLine = false;
 	bool vsync = false;
+	int shader_selcted = 0;
+	int texture_selected = 0;
 
 	float timeValue = 0;
 	Shader* sinusColor;

@@ -284,18 +284,20 @@ void ModuleRenderer3D::DrawEditor()
 
 		if (ImGui::Checkbox((B_EBO) ? "Change to Triangle" : "Change to Square", &B_EBO))
 		{
-			if(shaderenabled == TEXTURE)
+			if (shaderenabled == TEXTURE)
+			{
 				shaderenabled = SIN;
+				shader_selcted = 0;
+			}
 		}
 
 		ImGui::Checkbox((isLine) ? "Disable Wireframe" : "Enable Wireframe", &isLine);
 
-		int selected;
 		if (B_EBO)
 		{
-			if (ImGui::Combo("Shader", &selected, "Sin\0Vertex\0Texture\0"))
+			if (ImGui::Combo("Shader", &shader_selcted, "Sin\0Vertex\0Texture\0"))
 			{
-				switch ((ShaderType)selected)
+				switch ((ShaderType)shader_selcted)
 				{
 				case SIN:
 					shaderenabled = SIN;
@@ -311,9 +313,9 @@ void ModuleRenderer3D::DrawEditor()
 		}
 		else
 		{
-			if (ImGui::Combo("Shader", &selected, "Sin\0Vertex\0"))
+			if (ImGui::Combo("Shader", &shader_selcted, "Sin\0Vertex\0"))
 			{
-				switch ((ShaderType)selected)
+				switch ((ShaderType)shader_selcted)
 				{
 				case SIN:
 					shaderenabled = SIN;
@@ -327,9 +329,9 @@ void ModuleRenderer3D::DrawEditor()
 
 		if (shaderenabled == TEXTURE)
 		{
-			if (ImGui::Combo("Texture", &selected, "Puppie 1\0Puppie 2\0Container\0Mix Awesomeface\0"))
+			if (ImGui::Combo("Texture", &texture_selected, "Puppie 1\0Puppie 2\0Container\0Mix Awesomeface\0"))
 			{
-				switch ((Texture2DType)selected)
+				switch ((Texture2DType)texture_selected)
 				{
 				case PUPPIE_1:
 					textureEnabled = PUPPIE_1;
@@ -351,7 +353,7 @@ void ModuleRenderer3D::DrawEditor()
 
 			if (textureEnabled != MIX_AWESOMEFACE)
 			{
-				if (ImGui::Button("Activate Vertex Color"))
+				if (ImGui::Button((!printvertextcolor) ? "Activate Vertex Color" : "Deactivate Vertex Color"))
 				{
 					textureSquare->use();
 					if (!printvertextcolor)
