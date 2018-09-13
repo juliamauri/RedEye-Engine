@@ -36,7 +36,7 @@
     <ClCompile Include="ModuleInput.cpp" />
     <ClCompile Include="ModuleRenderer3D.cpp" />
     <ClCompile Include="ModuleWindow.cpp" />
-    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="Texture2DManager.cpp" />
     <ClCompile Include="TimeManager.cpp" />
   </ItemGroup>
@@ -104,7 +104,7 @@
     <ClInclude Include="RapidJson\include\stream.h" />
     <ClInclude Include="RapidJson\include\stringbuffer.h" />
     <ClInclude Include="RapidJson\include\writer.h" />
-    <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="Texture2DManager.h" />
     <ClInclude Include="TimeManager.h" />
   </ItemGroup>

@@ -1,18 +1,22 @@
 #include "ModuleRenderer3D.h"
 
-#include "Application.h"
-#include "ModuleWindow.h"
-#include "ModuleEditor.h"
 #include <Windows.h>
+#include "MathGeoLib/include/MathGeoLib.h"
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
+
+#include "Application.h"
+#include "ModuleWindow.h"
+#include "ModuleEditor.h"
+
+
 #include "TimeManager.h"
-#include "Shader.h"
+#include "ShaderManager.h"
 #include "ModuleInput.h"
 #include "Texture2DManager.h"
 #include "FileSystem.h"
-#include "MathGeoLib/include/MathGeoLib.h"
+
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -50,22 +54,23 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	glEnable(GL_TEXTURE_2D);
 
-	//Creating vertex and fragment shader
-	std::string fullPathvertex("Shaders/sinuscolor.vert");
-	std::string fullPathfragment("Shaders/sinuscolor.frag");
-	sinusColor = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
+	//Loading Shaders
+	shader_manager = new ShaderManager("Shaders/");
+	ret = shader_manager->Load("sinuscolor", &sinusColor);
+	if (!ret)
+		LOG("%s\n", shader_manager->GetShaderError());
 
-	fullPathvertex = "Shaders/vertexcolor.vert";
-	fullPathfragment = "Shaders/vertexcolor.frag";
-	vertexColor = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
+	ret = shader_manager->Load("vertexcolor", &vertexColor);
+	if(!ret)
+		LOG("%s\n", shader_manager->GetShaderError());
 
-	fullPathvertex = "Shaders/textureSquare.vert";
-	fullPathfragment = "Shaders/textureSquare.frag";
- 	textureSquare = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
+	ret = shader_manager->Load("textureSquare", &textureSquare);
+	if (!ret)
+		LOG("%s\n", shader_manager->GetShaderError());
 
-	fullPathvertex = "Shaders/twotextures.vert";
-	fullPathfragment = "Shaders/twotextures.frag";
-	twotextures = new Shader(fullPathvertex.c_str(), fullPathfragment.c_str());
+	ret = shader_manager->Load("twotextures", &twotextures);
+	if (!ret)
+		LOG("%s\n", shader_manager->GetShaderError());
 
 	//Print a 2d triangle3d https://learnopengl.com/Getting-started/Hello-Triangle
 	//2d traingle defined with 3d coordenates
@@ -167,10 +172,10 @@ update_status ModuleRenderer3D::PreUpdate()
 	if (shaderenabled == SIN)
 	{
 		//gradually change color usingf uniform at fragmentshader
-		sinusColor->use(); //for updating values, we need to useprogram
+		shader_manager->use(sinusColor); //for updating values, we need to useprogram
 		timeValue += App->time->GetDeltaTime();
 		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		sinusColor->setFloat("vertexColor", 0.0f, greenValue, 0.0f, 1.0f);
+		shader_manager->setFloat(sinusColor, "vertexColor", 0.0f, greenValue, 0.0f, 1.0f);
 	}
 
 	/*
@@ -183,7 +188,7 @@ update_status ModuleRenderer3D::PreUpdate()
 	if (textureEnabled == MIX_AWESOMEFACE)
 	{
 		timerotateValue += App->time->GetDeltaTime();
-		twotextures->use();
+		shader_manager->use(twotextures);
 
 		math::float4x4 trans;
 		//All values needed to be inversed, because the InverseTranspose()
@@ -202,7 +207,7 @@ update_status ModuleRenderer3D::PreUpdate()
 		trans.InverseTranspose();
 
 		//send the matrix to the shaders
-		twotextures->setFloat4x4("transform",&trans);
+		shader_manager->setFloat4x4(twotextures, "transform",trans.ptr());
 	}
 
 
@@ -219,16 +224,16 @@ update_status ModuleRenderer3D::PostUpdate()
 	switch (shaderenabled)
 	{
 	case SIN:
-		sinusColor->use();
+		shader_manager->use(sinusColor);
 		break;
 	case VERTEX:
-		vertexColor->use();
+		shader_manager->use(vertexColor);
 		break;
 	case TEXTURE:
 		if (textureEnabled == MIX_AWESOMEFACE)
-			twotextures->use();
+			shader_manager->use(twotextures);
 		else
-			textureSquare->use();
+			shader_manager->use(textureSquare);
 		break;
 	}
 
@@ -284,12 +289,6 @@ update_status ModuleRenderer3D::PostUpdate()
 bool ModuleRenderer3D::CleanUp()
 {
 	bool ret = true;
-	
-	//delete shaders
-	delete sinusColor;
-	delete vertexColor;
-	delete textureSquare;
-	delete twotextures;
 
 	//de-allocate all resources
 	glDeleteVertexArrays(1, &VAO_Triangle);
@@ -304,6 +303,9 @@ bool ModuleRenderer3D::CleanUp()
 
 	//Delete textures
 	delete texture_manager;
+
+	//delete shaders
+	delete shader_manager;
 
 	return ret;
 }
@@ -379,9 +381,9 @@ void ModuleRenderer3D::DrawEditor()
 					break;
 				case MIX_AWESOMEFACE:
 					textureEnabled = MIX_AWESOMEFACE;
-					twotextures->use();
-					twotextures->setInt("texture1", 1);
-					twotextures->setInt("texture2", 2);
+					shader_manager->use(twotextures);
+					shader_manager->setInt(twotextures, "texture1", 1);
+					shader_manager->setInt(twotextures, "texture2", 2);
 					break;
 				}
 			}
@@ -390,15 +392,15 @@ void ModuleRenderer3D::DrawEditor()
 			{
 				if (ImGui::Button((!printvertextcolor) ? "Activate Vertex Color" : "Deactivate Vertex Color"))
 				{
-					textureSquare->use();
+					shader_manager->use(textureSquare);
 					if (!printvertextcolor)
 					{
-						textureSquare->setBool("vertexcolor", true);
+						shader_manager->setBool(textureSquare, "vertexcolor", true);
 						printvertextcolor = !printvertextcolor;
 					}
 					else
 					{
-						textureSquare->setBool("vertexcolor", false);
+						shader_manager->setBool(textureSquare, "vertexcolor", false);
 						printvertextcolor = !printvertextcolor;
 					}
 				}

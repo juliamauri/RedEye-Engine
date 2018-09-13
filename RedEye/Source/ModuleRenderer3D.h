@@ -3,7 +3,7 @@
 
 #include "Module.h"
 
-class Shader;
+class ShaderManager;
 class Texture2DManager;
 class Texture2D;
 
@@ -46,22 +46,13 @@ public:
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
 
 private:
-	unsigned int VAO_Triangle, VAO_Square, VBO_Triangle, VBO_Square, EBO_Square;
-	bool B_EBO = true;
-	bool isLine = false;
-	bool vsync = false;
-	int shader_selcted = 0;
-	int texture_selected = 0;
+	ShaderManager* shader_manager;
+	unsigned int sinusColor, vertexColor, textureSquare, twotextures;
 
-	float timeValue = 0;
-	float timerotateValue = 0;
-	Shader* sinusColor;
-	Shader* vertexColor;
-	Shader* textureSquare;
-	Shader* twotextures;
 	ShaderType shaderenabled = SIN;
 	Texture2DType textureEnabled = PUPPIE_1;
-	bool printvertextcolor = false;
+	int shader_selcted = 0;
+	int texture_selected = 0;
 
 	Texture2DManager* texture_manager;
 
@@ -69,6 +60,20 @@ private:
 	Texture2D* puppie2;
 	Texture2D* container;
 	Texture2D* awesomeface;
+
+	unsigned int VAO_Triangle, VAO_Square, VBO_Triangle, VBO_Square, EBO_Square;
+	bool B_EBO = true;
+	bool isLine = false;
+	bool vsync = false;
+	bool printvertextcolor = false;
+
+
+	float timeValue = 0;
+	float timerotateValue = 0;
+
+
+
+
 
 	bool isScaled = false;
 };

@@ -52,14 +52,14 @@
     <ClCompile Include="TimeManager.cpp">
       <Filter>Modules\Independent Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="Cvar.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
     <ClCompile Include="Texture2DManager.cpp">
       <Filter>Modules\Independent Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>Shaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -252,14 +252,14 @@
     <ClInclude Include="TimeManager.h">
       <Filter>Modules\Independent Modules</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="Cvar.h">
       <Filter>Containers</Filter>
     </ClInclude>
     <ClInclude Include="Texture2DManager.h">
       <Filter>Modules\Independent Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
