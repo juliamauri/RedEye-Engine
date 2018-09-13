@@ -12,9 +12,11 @@
 #include "ModuleInput.h"
 #include "Texture2DManager.h"
 #include "FileSystem.h"
+#include "MathGeoLib/include/MathGeoLib.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
+#pragma comment(lib, "MathGeoLib/lib/MathGeoLib_debug.lib")
 
 ModuleRenderer3D::ModuleRenderer3D(const char * name, bool start_enabled) : Module(name, start_enabled)
 {
@@ -92,7 +94,6 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	glBindVertexArray(0);
 	
 	//EBO
-
 	float verticesS[] = {
 		// positions          // colors           // texture coords
 		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
@@ -162,6 +163,7 @@ update_status ModuleRenderer3D::PreUpdate()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
+	//color change for Sinuscolor shader
 	if (shaderenabled == SIN)
 	{
 		//gradually change color usingf uniform at fragmentshader
@@ -170,7 +172,40 @@ update_status ModuleRenderer3D::PreUpdate()
 		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		sinusColor->setFloat("vertexColor", 0.0f, greenValue, 0.0f, 1.0f);
 	}
-	
+
+	/*
+	math::float4 vec(1.0f, 0.0f, 0.0f,1.0f);
+	math::float4x4 trans;
+	trans.Translate(math::float3(1.0f,1.0f,0.0f));
+	vec = trans * vec;
+	*/
+
+	if (textureEnabled == MIX_AWESOMEFACE)
+	{
+		timerotateValue += App->time->GetDeltaTime();
+		twotextures->use();
+
+		math::float4x4 trans;
+		//All values needed to be inversed, because the InverseTranspose()
+		//first rotate the container around the origin (0,0,0)
+		trans = trans.Translate(math::float3(0.0f, 0.0f, 0.0f));
+		trans = trans * trans.RotateAxisAngle(math::float3(0.0f, 0.0f, -1.0f), timerotateValue);
+
+		//scale the container
+		if(isScaled)
+			trans = trans * trans.Scale(math::float3(2.0f, 2.0f, 2.0f));
+
+		//we translate its rotated version to the bottom - right corner of the screen.
+		trans = trans * trans.Translate(math::float3(-0.5f, 0.5f, 0.0f));
+
+		//for opengl xD, debug for get explanations
+		trans.InverseTranspose();
+
+		//send the matrix to the shaders
+		twotextures->setFloat4x4("transform",&trans);
+	}
+
+
 	return ret;
 }
 
@@ -367,6 +402,10 @@ void ModuleRenderer3D::DrawEditor()
 						printvertextcolor = !printvertextcolor;
 					}
 				}
+			}
+			else if (textureEnabled == MIX_AWESOMEFACE)
+			{
+				if (ImGui::Checkbox((isScaled) ? "ToScale" : "ToNormal", &isScaled));
 			}
 		}
 	}

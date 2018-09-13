@@ -47,13 +47,14 @@ public:
 
 private:
 	unsigned int VAO_Triangle, VAO_Square, VBO_Triangle, VBO_Square, EBO_Square;
-	bool B_EBO = false;
+	bool B_EBO = true;
 	bool isLine = false;
 	bool vsync = false;
 	int shader_selcted = 0;
 	int texture_selected = 0;
 
 	float timeValue = 0;
+	float timerotateValue = 0;
 	Shader* sinusColor;
 	Shader* vertexColor;
 	Shader* textureSquare;
@@ -68,6 +69,8 @@ private:
 	Texture2D* puppie2;
 	Texture2D* container;
 	Texture2D* awesomeface;
+
+	bool isScaled = false;
 };
 
 #endif // !__MODULERENDER3D_H__

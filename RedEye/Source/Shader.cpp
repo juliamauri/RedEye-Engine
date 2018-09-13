@@ -155,3 +155,8 @@ void Shader::setUnsignedInt(const char * name, unsigned int value, unsigned int 
 {
 	glUniform4ui(glGetUniformLocation(ID, name), value, value2, value3, value4);
 }
+
+void Shader::setFloat4x4(const char * name, math::float4x4* trans)
+{
+	glUniformMatrix4fv(glGetUniformLocation(ID, name), 1, GL_FALSE, trans->ptr());
+}
