@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "MathGeoLib/include/MathGeoLib.h"
+
 class Shader
 {
 public:
@@ -30,6 +32,8 @@ public:
 	void setUnsignedInt(const char* name, unsigned int value, unsigned int value2);
 	void setUnsignedInt(const char* name, unsigned int value, unsigned int value2, unsigned int value3);
 	void setUnsignedInt(const char* name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
+
+	void setFloat4x4(const char* name, math::float4x4* trans);
 
 private:
 	// the program ID
