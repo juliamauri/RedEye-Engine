@@ -46,6 +46,8 @@ public:
 
 	virtual inline bool operator!() const;
 
+	virtual unsigned int GetSize();
+
 private:
 
 	unsigned int HardLoad();
@@ -54,6 +56,7 @@ protected:
 
 	char* buffer;
 	const char* file_name;
+	unsigned int size = 0;
 };
 
 class JSONNode;

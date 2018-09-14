@@ -113,7 +113,8 @@ RE_FileIO::~RE_FileIO()
 
 bool RE_FileIO::Load()
 {
-	return HardLoad() > 0;
+	size = HardLoad();
+	return size > 0;
 }
 
 void RE_FileIO::Save()
@@ -135,6 +136,11 @@ const char* RE_FileIO::GetBuffer() const
 inline bool RE_FileIO::operator!() const
 {
 	return buffer == nullptr;
+}
+
+unsigned int RE_FileIO::GetSize()
+{
+	return size;
 }
 
 unsigned int RE_FileIO::HardLoad()
