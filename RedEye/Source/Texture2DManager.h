@@ -1,7 +1,14 @@
 #ifndef __TEXTURE2DMANAGER_H__
 #define __TEXTURE2DMANAGER_H__
 
+#include <map>
 #include <list>
+
+enum ImageExtensionType
+{
+	PNG,
+	JPG
+};
 
 struct Texture2D
 {
@@ -10,10 +17,11 @@ private:
 	int width, height;
 
 public:
-	Texture2D(const char* path);
+	Texture2D(const char* path, int extension);
 	~Texture2D();
 
 	void use();
+	void GetWithHeight(int* w,int* h);
 };
 
 class Texture2DManager 
@@ -21,15 +29,25 @@ class Texture2DManager
 public:
 	~Texture2DManager();
 
-	bool Init();
+	bool Init(const char* folderPath);
 
-	//&width, &height, &nrChannels
-	Texture2D* LoadTexture2D(const char* path);
+	//Load texture
+	unsigned int LoadTexture2D(const char* name, ImageExtensionType extension);
 
-	bool CleanUp();
+	void use(unsigned int TextureID);
+	void GetWithHeight(unsigned int TextureID, int* w, int* h);
+
+	void DeleteTexture2D(unsigned int TextureID);
 
 private:
-	std::list<Texture2D*> textures2d;
+	const char* folderPath;
+	unsigned int ID_count = 0;
+
+	std::list<unsigned int> textureIDContainer;
+	std::map<unsigned int, Texture2D*> textures2D;
+
+	const char* GetExtensionStr(ImageExtensionType imageType);
+	int GetExtensionIL(ImageExtensionType imageType);
 };
 
 

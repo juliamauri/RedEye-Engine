@@ -9,14 +9,11 @@
 #include "Application.h"
 #include "ModuleWindow.h"
 #include "ModuleEditor.h"
-
-
 #include "TimeManager.h"
 #include "ShaderManager.h"
 #include "ModuleInput.h"
 #include "Texture2DManager.h"
 #include "FileSystem.h"
-
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -137,23 +134,12 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	glBindVertexArray(0);
 
 	texture_manager = new Texture2DManager();
-	texture_manager->Init();
+	texture_manager->Init("Images/");
 
-	std::string imagepath(SDL_GetBasePath());
-	imagepath += "Assets\\Images\\puppie1.jpg";
-	puppie1 = texture_manager->LoadTexture2D(imagepath.c_str());
-
-	imagepath = SDL_GetBasePath();
-	imagepath += "Assets\\Images\\puppie2.jpg";
-	puppie2 = texture_manager->LoadTexture2D(imagepath.c_str());
-
-	imagepath = SDL_GetBasePath();
-	imagepath += "Assets\\Images\\container.jpg";
-	container = texture_manager->LoadTexture2D(imagepath.c_str());
-
-	imagepath = SDL_GetBasePath();
-	imagepath += "Assets\\Images\\awesomeface.png";
-	awesomeface = texture_manager->LoadTexture2D(imagepath.c_str());
+	puppie1 = texture_manager->LoadTexture2D("puppie1", ImageExtensionType::JPG);
+	puppie2 = texture_manager->LoadTexture2D("puppie2", ImageExtensionType::JPG);
+	container = texture_manager->LoadTexture2D("container", ImageExtensionType::JPG);
+	awesomeface = texture_manager->LoadTexture2D("awesomeface", ImageExtensionType::PNG);
 
 	enableVSync(vsync = config_module->PullBool("vsync", false));
 
@@ -246,21 +232,21 @@ update_status ModuleRenderer3D::PostUpdate()
 			{
 			case PUPPIE_1:
 				glActiveTexture(GL_TEXTURE0);
-				puppie1->use();
+				texture_manager->use(puppie1);
 				break;
 			case PUPPIE_2:
 				glActiveTexture(GL_TEXTURE0);
-				puppie2->use();
+				texture_manager->use(puppie2);
 				break;
 			case CONTAINER:
 				glActiveTexture(GL_TEXTURE0);
-				container->use();
+				texture_manager->use(container);
 				break;
 			case MIX_AWESOMEFACE:
 				glActiveTexture(GL_TEXTURE1);
-				container->use();
+				texture_manager->use(container);
 				glActiveTexture(GL_TEXTURE2);
-				awesomeface->use();
+				texture_manager->use(awesomeface);
 				break;
 			}
 		}

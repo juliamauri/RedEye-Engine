@@ -1,5 +1,8 @@
 #include "Texture2DManager.h"
 
+#include <string>
+
+#include "FileSystem.h"
 #include "Glew/include/glew.h"
 
 #include "IL/include/il.h"
@@ -11,11 +14,17 @@
 
 Texture2DManager::~Texture2DManager()
 {
-	CleanUp();
+	Texture2D* toDelete = nullptr;
+	for (unsigned int TextureID : textureIDContainer) {
+		toDelete = textures2D.find(TextureID)->second;
+		delete toDelete;
+	}
 }
 
-bool Texture2DManager::Init()
+bool Texture2DManager::Init(const char* folderPath)
 {
+	this->folderPath = folderPath;
+
 	ilInit();
 	iluInit();
 	ilutInit();
@@ -23,30 +32,77 @@ bool Texture2DManager::Init()
 	return true;
 }
 
-Texture2D * Texture2DManager::LoadTexture2D(const char * path)
+unsigned int Texture2DManager::LoadTexture2D(const char * name, ImageExtensionType extension)
 {
-	Texture2D* new_image = new Texture2D(path);
-	textures2d.push_back(new_image);
-	return new_image;
+	std::string path(folderPath);
+	path += name;
+	path += GetExtensionStr(extension);
+
+	Texture2D* new_image = new Texture2D(path.c_str(), GetExtensionIL(extension));
+
+	textures2D.insert(std::pair<unsigned int, Texture2D*>(ID_count, new_image));
+
+	textureIDContainer.push_back(ID_count);
+
+	return ID_count++;
 }
 
-bool Texture2DManager::CleanUp()
+void Texture2DManager::use(unsigned int TextureID)
 {
-	while(!textures2d.empty())
+	textures2D.at(TextureID)->use();
+}
+
+void Texture2DManager::GetWithHeight(unsigned int TextureID, int * w, int * h)
+{
+	textures2D.at(TextureID)->GetWithHeight(w, h);
+}
+
+void Texture2DManager::DeleteTexture2D(unsigned int TextureID)
+{
+	Texture2D* toDelete = textures2D.find(TextureID)->second;
+	delete toDelete;
+	textureIDContainer.remove(TextureID);
+}
+
+const char * Texture2DManager::GetExtensionStr(ImageExtensionType imageType)
+{
+	switch (imageType)
 	{
-		delete textures2d.back();
-		textures2d.pop_back();
+	case PNG:
+		return ".png";
+		break;
+	case JPG:
+		return ".jpg";
+		break;
 	}
-	return true;
 }
 
-Texture2D::Texture2D(const char * path)
+int Texture2DManager::GetExtensionIL(ImageExtensionType imageType)
+{
+	int IL_Extension = 0;
+	switch (imageType)
+	{
+	case PNG:
+		IL_Extension = IL_PNG;
+		break;
+	case JPG:
+		IL_Extension = IL_JPG;
+		break;
+	}
+	return IL_Extension;
+}
+
+Texture2D::Texture2D(const char* path, int extension)
 {
 	unsigned int imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 
-	ilLoadImage(path);
+
+	RE_FileIO image(path);
+	if (image.Load())
+		ilLoadL(extension, image.GetBuffer(), image.GetSize());
+
 	iluFlipImage();
 
 	/* OpenGL texture binding of the image loaded by DevIL  */
@@ -69,4 +125,10 @@ Texture2D::~Texture2D()
 void Texture2D::use()
 {
 	glBindTexture(GL_TEXTURE_2D, ID);
+}
+
+void Texture2D::GetWithHeight(int * w, int * h)
+{
+	*w = width;
+	*h = height;
 }

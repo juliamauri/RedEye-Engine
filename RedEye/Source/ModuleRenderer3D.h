@@ -55,11 +55,7 @@ private:
 	int texture_selected = 0;
 
 	Texture2DManager* texture_manager;
-
-	Texture2D* puppie1;
-	Texture2D* puppie2;
-	Texture2D* container;
-	Texture2D* awesomeface;
+	unsigned int puppie1, puppie2, container, awesomeface;
 
 	unsigned int VAO_Triangle, VAO_Square, VBO_Triangle, VBO_Square, EBO_Square;
 	bool B_EBO = true;
