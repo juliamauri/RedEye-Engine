@@ -40,7 +40,7 @@ public:
 	void* mainContext;
 	unsigned int renderedTexture;
 
-	void enableVSync(bool enable);
+	void enableVSync(const bool enable);
 
 	//Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16

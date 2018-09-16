@@ -20,12 +20,10 @@
 #pragma comment(lib, "MathGeoLib/lib/MathGeoLib_debug.lib")
 
 ModuleRenderer3D::ModuleRenderer3D(const char * name, bool start_enabled) : Module(name, start_enabled)
-{
-}
+{}
 
 ModuleRenderer3D::~ModuleRenderer3D()
-{
-}
+{}
 
 bool ModuleRenderer3D::Init(JSONNode * config_module)
 {
@@ -404,12 +402,9 @@ void ModuleRenderer3D::RecieveEvent(const Event * e)
 	
 }
 
-void ModuleRenderer3D::enableVSync(bool enable)
+void ModuleRenderer3D::enableVSync(const bool enable)
 {
-	if(enable)
-		SDL_GL_SetSwapInterval(1); //vsync activated
-	else
-		SDL_GL_SetSwapInterval(0); //vsync de-activated
+	SDL_GL_SetSwapInterval(enable ? 1 : 0);
 }
 
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
