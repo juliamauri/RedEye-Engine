@@ -50,7 +50,8 @@ private:
 	std::list<Module*> modules;
 	bool want_to_quit = false;
 
-	//std::map<const char*, DoubleCvar> config_vars;
+	const char* app_name = "RedEye Engine";
+	const char* organization = "RedEye";
 
 	int argc;
 	char* argv[];

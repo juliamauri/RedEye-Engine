@@ -117,25 +117,16 @@ void Application::DrawEditor()
 {
 	if (ImGui::CollapsingHeader("Application"))
 	{
+		static char holder[100];
+		int size = sizeof(holder) / sizeof(char);
 
+		sprintf_s(holder, size, "%s", app_name);
+		if (ImGui::InputText("App Name", holder, size))
+			window->SetTitle(app_name = holder);
 
-		/*static char input[100];
-		int size = sizeof(input) / sizeof(char);
-		sprintf_s(input, size, "%s", App->name.c_str());
-
-		if (ImGui::InputText("App Name", input, size))
-		{
-			App->name.assign(input);
-			App->window->SetTitle(input);
-		}
-
-		sprintf_s(input, size, "%s", App->organization.c_str());
-
-		if (ImGui::InputText("Organization", input, sizeof(input) / sizeof(char)))
-		{
-			App->organization.assign(input);
-		}*/
-
+		sprintf_s(holder, size, "%s", organization);
+		if (ImGui::InputText("Organization", holder, size))
+			app_name = holder;
 
 		time->DrawEditor();
 	}
