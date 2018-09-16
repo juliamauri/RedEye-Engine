@@ -6,6 +6,7 @@
 #include "ModuleRenderer3D.h"
 #include "FileSystem.h"
 #include "TimeManager.h"
+#include "SystemInfo.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
 
@@ -21,6 +22,7 @@ Application::Application(int argc, char* argv[])
 
 	fs = new FileSystem();
 	time = new TimeManager();
+	sys_info = new SystemInfo();
 }
 
 Application::~Application()
@@ -58,6 +60,8 @@ bool Application::Init()
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)
 			ret = (*it)->Start(/* CONFIG */);
+
+	if (ret) sys_info->WhatAreWeRunningOn();
 
 	return ret;
 }
@@ -108,6 +112,7 @@ bool Application::CleanUp()
 
 	delete fs;
 	delete time;
+	delete sys_info;
 
 	SDL_Quit();
 
@@ -134,6 +139,9 @@ void Application::DrawEditor()
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		if ((*it)->IsActive() == true)
 			(*it)->DrawEditor();
+
+	if (ImGui::CollapsingHeader("Memory")) sys_info->MemoryDraw();
+	if (ImGui::CollapsingHeader("Hardware")) sys_info->HardwareDraw();
 }
 
 void Application::Log(const char * text)

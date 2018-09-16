@@ -14,6 +14,7 @@ class ModuleRenderer3D;
 
 class FileSystem;
 class TimeManager;
+class SystemInfo;
 
 class Application : public EventListener
 {
@@ -44,6 +45,7 @@ public:
 
 	FileSystem* fs = nullptr;
 	TimeManager* time = nullptr;
+	SystemInfo* sys_info = nullptr;
 
 private:
 
