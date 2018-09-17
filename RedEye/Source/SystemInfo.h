@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 
-
 class SystemInfo : public EventListener
 {
 public:
@@ -22,7 +21,7 @@ private:
 	void PlotMemory(const unsigned int current_mem);
 
 	void CheckVRAM();
-	std::string MemValAsString(const char* stat, const unsigned long long val) const;
+	void MemValAsString(std::string& stat, const unsigned long long val) const;
 
 private:
 

@@ -100,7 +100,8 @@ void SystemInfo::HardwareDraw()
 	ImGui::Separator();
 
 	// VRAM
-	if (ImGui::Button("Check VRAM")) CheckVRAM();
+	if (ImGui::Button("Check VRAM"))
+		CheckVRAM();
 
 	ImGui::Text(vram_total.c_str());
 	ImGui::Text(vram_used.c_str());
@@ -144,45 +145,39 @@ void SystemInfo::CheckVRAM()
 	unsigned __int64 total, used, available, reserved;
 	getGraphicsDeviceInfo(nullptr, nullptr, nullptr, &total, &used, &available, &reserved);
 
-	// Total
-
 	/*char ram_s[25];
 	sprintf_s(ram_s, 25, "Total VRAM: %0.1f Gb", total / GIGABYTE_F);
 	vram_total = ram_s;*/
 
-
-	vram_total = MemValAsString("Total VRAM: ", total);
-	vram_used = MemValAsString("VRAM used: ", used);
-	vram_available = MemValAsString("VRAM available: ", available);
-	vram_reserved = MemValAsString("VRAM reserved: ", reserved);
+	vram_total = "Total VRAM: "; MemValAsString(vram_total, total);
+	vram_used = "VRAM used: "; MemValAsString(vram_used, used);
+	vram_available = "VRAM available: "; MemValAsString(vram_available, available);
+	vram_reserved = "VRAM reserved: "; MemValAsString(vram_reserved, reserved);
 }
 
-
-std::string SystemInfo::MemValAsString(const char* stat, const unsigned long long val) const
+void SystemInfo::MemValAsString(std::string& stat, const unsigned long long val) const
 {
-	std::string ret = stat;
+	// TODO: eliminate ghost leaks
 	
 	if (val >= GIGABYTE)
 	{
-		ret += std::to_string(val / GIGABYTE_F);
-		ret += " Gbs";
+		stat += std::to_string(val / GIGABYTE_F);
+		stat += " Gbs";
 	}
 	else if (val >= MEGABYTE)
 	{
-		ret += std::to_string(val / MEGABYTE_F);
-		ret += " Mbs";
+		stat += std::to_string(val / MEGABYTE_F);
+		stat += " Mbs";
 	}
 	else if (val >= KILOBYTE)
 	{
-		ret += std::to_string(val / KILOBYTE_F);
-		ret += " Kbs";
+		stat += std::to_string(val / KILOBYTE_F);
+		stat += " Kbs";
 	}
 	else
 	{
-		ret += std::to_string(val);
-		ret += " bytes";
+		stat += std::to_string(val);
+		stat += " bytes";
 	}
-
-	return ret;
 }
 
