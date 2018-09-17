@@ -9,17 +9,25 @@
 class SystemInfo : public EventListener
 {
 public:
-	//SystemInfo();
 
+	// Check Hardware
 	void WhatAreWeRunningOn();
-	void CheckMemory();
 
+	// Editor Drawing to Configuration Window
 	void MemoryDraw();
 	void HardwareDraw();
 
 private:
 
-	std::vector<float> mem;
+	void PlotMemory(const unsigned int current_mem);
+
+	void CheckVRAM();
+	std::string MemValAsString(const char* stat, const unsigned long long val) const;
+
+private:
+
+	float mem[100] = {};
+	bool pause_plotting = false;
 
 	// Hardware
 	std::string cpus;
@@ -27,17 +35,22 @@ private:
 	std::string caps1;
 	std::string caps2;
 	std::string drivers;
+
+	// GPU
 	std::string gpu_renderer;
 	std::string gpu_vendor;
 	std::string gpu_version;
 	std::string gpu_shading;
+
+	//VRAM
 	std::string vram_total;
 	std::string vram_used;
 	std::string vram_available;
 	std::string vram_reserved;
 };
 
-/*
+/* extra functions
+
 bool getGraphicsDeviceInfo(
 	unsigned int* VendorId,
 	unsigned int* DeviceId,
@@ -51,10 +64,7 @@ getCPUInfo(
 	std::string* cpubrand,
 	std::string* cpuvendor)
 
-getGTGeneration(unsigned int deviceId)
-
-
-*/
+getGTGeneration(unsigned int deviceId) */
 
 
 #endif // !__SYSTEMINFO_H__

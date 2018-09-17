@@ -95,7 +95,7 @@ unsigned int TimeManager::GetLastFPS() const { return last_fps_count; }
 
 void TimeManager::ClearArrays()
 {
-	for (int i = 0; i < 99; i++)
+	for (int i = 0; i <= 99; i++)
 	{
 		fps[i] = 0.f;
 		ms[i] = 0.f;

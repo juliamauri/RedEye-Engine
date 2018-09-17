@@ -61,6 +61,7 @@ bool Application::Init()
 		if ((*it)->IsActive() == true)
 			ret = (*it)->Start(/* CONFIG */);
 
+	// Check hardware specs
 	if (ret) sys_info->WhatAreWeRunningOn();
 
 	return ret;

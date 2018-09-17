@@ -8,8 +8,6 @@
 #include "Glew\include\glew.h"
 #include <gl\GL.h>
 
-//SystemInfo::SystemInfo() {}
-
 void SystemInfo::WhatAreWeRunningOn()
 {
 	// CPU
@@ -21,9 +19,9 @@ void SystemInfo::WhatAreWeRunningOn()
 	char ram_s[25];
 	float system_ram = SDL_GetSystemRAM();
 	if (system_ram > KILOBYTE)
-		sprintf_s(ram_s, 25, "System RAM %0.1f Gb/s", system_ram / KILOBYTE_F);
+		sprintf_s(ram_s, 25, "System RAM %0.1f Gb", system_ram / KILOBYTE_F);
 	else
-		sprintf_s(ram_s, 25, "System RAM %0.1f Mb/s", system_ram);
+		sprintf_s(ram_s, 25, "System RAM %0.1f Mb", system_ram);
 	ram = ram_s;
 
 	// Caps
@@ -60,95 +58,13 @@ void SystemInfo::WhatAreWeRunningOn()
 	gpu_shading += (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 }
 
-void SystemInfo::CheckMemory()
-{
-	unsigned __int64 total, used, available, reserved;
-	getGraphicsDeviceInfo(nullptr, nullptr, nullptr, &total, &used, &available, &reserved);
-
-	// Total
-	vram_total = "Total VRAM: ";
-	if (total > GIGABYTE)
-	{
-		vram_total += std::to_string(total / GIGABYTE_F);
-		vram_total += " Gbs";
-	}
-	else if (total > GIGABYTE)
-	{
-		vram_total += std::to_string(total / MEGABYTE_F);
-		vram_total += " Mbs";
-	}
-	else
-	{
-		vram_total += std::to_string(total);
-		vram_total += " Kbs";
-	}
-
-	// Used
-	vram_used = "VRAM used: ";
-	if (used > GIGABYTE)
-	{
-		vram_used += std::to_string(used / GIGABYTE_F);
-		vram_used += " Gbs";
-	}
-	else if (used > GIGABYTE)
-	{
-		vram_used += std::to_string(used / MEGABYTE_F);
-		vram_used += " Mbs";
-	}
-	else
-	{
-		vram_used += std::to_string(used);
-		vram_used += " Kbs";
-	}
-
-	// Available
-	vram_available = "VRAM available: ";
-	if (available > GIGABYTE)
-	{
-		vram_available += std::to_string(available / GIGABYTE_F);
-		vram_available += " Gbs";
-	}
-	else if (available > GIGABYTE)
-	{
-		vram_available += std::to_string(available / MEGABYTE_F);
-		vram_available += " Mbs";
-	}
-	else
-	{
-		vram_available += std::to_string(available);
-		vram_available += " Kbs";
-	}
-
-	// Reserved
-	vram_reserved = "VRAM reserved: ";
-	if (reserved > GIGABYTE)
-	{
-		vram_reserved += std::to_string(reserved / GIGABYTE_F);
-		vram_reserved += " Gbs";
-	}
-	else if (reserved > GIGABYTE)
-	{
-		vram_reserved += std::to_string(reserved / MEGABYTE_F);
-		vram_reserved += " Mbs";
-	}
-	else
-	{
-		vram_reserved += std::to_string(reserved);
-		vram_reserved += " Kbs";
-	}
-}
-
 void SystemInfo::MemoryDraw()
 {
-	CheckMemory();
-
-	/*/ Mem Plotter
-	char title[25];
-	int max = AddPlotValue(mem, stats.totalReportedMemory);
-	sprintf_s(title, 25, "Memory Usage %d", stats.totalReportedMemory);
-	ImGui::PlotHistogram("##Memory Usage", &mem[0], mem.size(), 0, title, 0.f, 1.2f * max, ImVec2(310, 100));*/
-
 	sMStats stats = m_getMemoryStatistics();
+
+	PlotMemory(stats.totalReportedMemory);
+	ImGui::Separator();
+
 	ImGui::Text("Total Reported Mem: %u", stats.totalReportedMemory);
 	ImGui::Text("Total Actual Mem: %u", stats.totalActualMemory);
 	ImGui::Text("Peak Reported Mem: %u", stats.peakReportedMemory);
@@ -179,12 +95,94 @@ void SystemInfo::HardwareDraw()
 	// GPU
 	ImGui::Text(gpu_renderer.c_str());
 	ImGui::Text(gpu_vendor.c_str());
-	ImGui::Text(gpu_version.c_str());
+	ImGui::TextWrappedV(gpu_version.c_str(), "");
 	ImGui::Text(gpu_shading.c_str());
+	ImGui::Separator();
 
 	// VRAM
+	if (ImGui::Button("Check VRAM")) CheckVRAM();
+
 	ImGui::Text(vram_total.c_str());
 	ImGui::Text(vram_used.c_str());
 	ImGui::Text(vram_available.c_str());
 	ImGui::Text(vram_reserved.c_str());
 }
+
+void SystemInfo::PlotMemory(const unsigned int current_mem)
+{
+	float max = 0.f;
+
+	if (!pause_plotting)
+	{
+		for (int i = 0; i < 99; i++)
+		{
+			if (mem[i] >= max)
+				max = mem[i];
+
+			mem[i] = mem[i + 1];
+		}
+
+		mem[99] = current_mem;
+	}
+
+	char title[25];
+	sprintf_s(title, 25, "Memory Usage: %.1f", mem[99]);
+	ImGui::PlotHistogram("##Memory Usage", mem, ((int)(sizeof(mem) / sizeof(*mem))), 0, title, 0.0f, 1.2f * max, ImVec2(310, 100));
+
+
+	if (ImGui::Checkbox(pause_plotting ? "Restart Plotting" : "Pause Plotting", &pause_plotting))
+	{
+		if (!pause_plotting)
+		{
+			for (int i = 0; i < 99; i++) mem[i] = 0u; // Clear mem array
+		}
+	}
+}
+
+void SystemInfo::CheckVRAM()
+{
+	unsigned __int64 total, used, available, reserved;
+	getGraphicsDeviceInfo(nullptr, nullptr, nullptr, &total, &used, &available, &reserved);
+
+	// Total
+
+	/*char ram_s[25];
+	sprintf_s(ram_s, 25, "Total VRAM: %0.1f Gb", total / GIGABYTE_F);
+	vram_total = ram_s;*/
+
+
+	vram_total = MemValAsString("Total VRAM: ", total);
+	vram_used = MemValAsString("VRAM used: ", used);
+	vram_available = MemValAsString("VRAM available: ", available);
+	vram_reserved = MemValAsString("VRAM reserved: ", reserved);
+}
+
+
+std::string SystemInfo::MemValAsString(const char* stat, const unsigned long long val) const
+{
+	std::string ret = stat;
+	
+	if (val >= GIGABYTE)
+	{
+		ret += std::to_string(val / GIGABYTE_F);
+		ret += " Gbs";
+	}
+	else if (val >= MEGABYTE)
+	{
+		ret += std::to_string(val / MEGABYTE_F);
+		ret += " Mbs";
+	}
+	else if (val >= KILOBYTE)
+	{
+		ret += std::to_string(val / KILOBYTE_F);
+		ret += " Kbs";
+	}
+	else
+	{
+		ret += std::to_string(val);
+		ret += " bytes";
+	}
+
+	return ret;
+}
+

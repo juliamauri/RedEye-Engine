@@ -48,21 +48,21 @@ private:
 
 private:
 
-	unsigned long	frames_counter;
-	unsigned int	fps_counter;
-	unsigned int	last_fps_count;
-	unsigned int	last_ms_count;
+	unsigned long	frames_counter = 0u;
+	unsigned int	fps_counter = 0u;
+	unsigned int	last_fps_count = 0u;
+	unsigned int	last_ms_count = 0u;
 
-	float	dt;
-	float	capped_fps;
-	unsigned int	capped_ms;
+	float	dt = 0.f;
+	float	capped_fps = 0.f;
+	unsigned int	capped_ms = 0u;
 
 	Timer	ms_timer; // read every frame
 	Timer	fps_timer; // read every second
 
 	float	fps[100] = {};
 	float	ms[100] = {};
-	bool	pause_plotting;
+	bool	pause_plotting = false;
 };
 
 #endif // !__TIMEMANAGER_H__
