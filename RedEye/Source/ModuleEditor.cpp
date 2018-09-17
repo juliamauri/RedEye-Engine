@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
+#include "RE_Math.h"
 
 #include "ImGui\imgui_impl_sdl_gl3.h"
 #include "ImGuizmo\ImGuizmo.h"
@@ -14,12 +15,13 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 {
 	windows.push_back(console = new ConsoleWindow());
 	windows.push_back(config = new ConfigWindow());
+	windows.push_back(rng = new RandomTest());
 	show_demo = false;
 }
 
 ModuleEditor::~ModuleEditor()
 {
-
+	windows.clear();
 }
 
 // Load assets
@@ -204,7 +206,6 @@ void ConfigWindow::Draw()
 	ImGui::End();
 }
 
-
 PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {
@@ -221,4 +222,38 @@ HeriarchyWindow::HeriarchyWindow(const char * name, bool start_active) :
 
 void HeriarchyWindow::Draw()
 {
+}
+
+RandomTest::RandomTest(const char * name, bool start_active) :
+	EditorWindow(name, start_active)
+{}
+
+void RandomTest::Draw()
+{
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		ImGui::Text("Random Integer");
+		ImGui::SliderInt("Min Integer", &minInt, -100, maxInt);
+		ImGui::SliderInt("Max Integer", &maxInt, minInt, 100);
+
+		if (ImGui::Button("Generate Int"))
+			resultInt = App->math->RandomInt(minInt, maxInt);
+
+		ImGui::SameLine();
+		ImGui::Text("Random Integer: %u", resultInt);
+
+		ImGui::Separator();
+
+		ImGui::Text("Random Float");
+		ImGui::SliderFloat("Min Float", &minF, -100.f, maxF, "%.1f");
+		ImGui::SliderFloat("Max Float", &maxF, minF, 100.f, "%.1f");
+
+		if (ImGui::Button("Generate Float"))
+			resultF = App->math->RandomF(minF, maxF);
+
+		ImGui::SameLine();
+		ImGui::Text("Random Float: %.2f", resultF);
+	}
+
+	ImGui::End();
 }
