@@ -64,6 +64,9 @@
     <ClCompile Include="SystemInfo.cpp">
       <Filter>Modules\Independent App Modules\SystemInfo</Filter>
     </ClCompile>
+    <ClCompile Include="RE_Math.cpp">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -266,6 +269,9 @@
     </ClInclude>
     <ClInclude Include="SystemInfo.h">
       <Filter>Modules\Independent App Modules\SystemInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Math.h">
+      <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
