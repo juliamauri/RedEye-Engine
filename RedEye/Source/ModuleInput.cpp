@@ -55,6 +55,17 @@ update_status ModuleInput::PreUpdate()
 	return ret;
 }
 
+void ModuleInput::DrawEditor()
+{
+	if (ImGui::CollapsingHeader("Input"))
+	{
+		ImGui::Text("Mouse");
+		ImGui::Text("X: %u\tY: %u", mouse.mouse_x, mouse.mouse_y);
+		ImGui::Text("MotionX: %u\tMotionY: %u", mouse.mouse_x_motion, mouse.mouse_y_motion);
+		ImGui::Text("Wheel Motion: %u", mouse.mouse_wheel_motion);
+	}
+}
+
 bool ModuleInput::AddEvent(const Event e)
 {
 	bool ret;

@@ -41,6 +41,7 @@ public:
 
 	bool Init(JSONNode* config_module) override;
 	update_status PreUpdate() override;
+	void DrawEditor() override;
 	bool CleanUp() override;
 
 	bool AddEvent(const Event e);
