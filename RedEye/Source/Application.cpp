@@ -7,6 +7,7 @@
 #include "FileSystem.h"
 #include "TimeManager.h"
 #include "SystemInfo.h"
+#include "RE_Math.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
 
@@ -23,6 +24,7 @@ Application::Application(int argc, char* argv[])
 	fs = new FileSystem();
 	time = new TimeManager();
 	sys_info = new SystemInfo();
+	math = new RE_Math();
 }
 
 Application::~Application()
@@ -114,6 +116,7 @@ bool Application::CleanUp()
 	delete fs;
 	delete time;
 	delete sys_info;
+	delete math;
 
 	SDL_Quit();
 

@@ -11,6 +11,7 @@ class DemoWindow;
 class ConfigWindow;
 class HeriarchyWindow;
 class PropertiesWindow;
+class RandomTest;
 
 union SDL_Event;
 
@@ -34,14 +35,15 @@ public:
 private:
 
 	// Windows
-	ConsoleWindow* console;
-	ConfigWindow* config;
-	HeriarchyWindow* heriarchy;
-	PropertiesWindow* properties;
+	ConsoleWindow* console = nullptr;
+	ConfigWindow* config = nullptr;
+	HeriarchyWindow* heriarchy = nullptr;
+	PropertiesWindow* properties = nullptr;
+	RandomTest* rng = nullptr;
 
 	std::list<EditorWindow*> windows;
 
-	bool show_demo;
+	bool show_demo = false;
 };
 
 class EditorWindow
@@ -101,8 +103,17 @@ public:
 	void Draw() override;
 };
 
-// Missing windows:
-/*void RandomTest();
+class RandomTest : public EditorWindow
+{
+public:
+	RandomTest(const char* name = "Random Test", bool start_active = true);
+	void Draw() override;
+
+	int minInt = 0, maxInt = 1, resultInt = 0;
+	float minF = 0.f, maxF = 1.f, resultF = 0.f;
+};
+
+/*/ Missing windows:
 void GeometryTest();
 void About();
 void PlayPause();*/
