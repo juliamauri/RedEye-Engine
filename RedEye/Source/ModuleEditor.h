@@ -111,7 +111,7 @@ public:
 	RandomTest(const char* name = "Random Test", bool start_active = true);
 	void Draw() override;
 
-	int minInt = 0, maxInt = 1, resultInt = 0;
+	int minInt = 0, maxInt = 10, resultInt = 0;
 	float minF = 0.f, maxF = 1.f, resultF = 0.f;
 };
 

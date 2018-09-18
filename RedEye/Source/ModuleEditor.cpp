@@ -235,7 +235,7 @@ void RandomTest::Draw()
 	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
 	{
 		ImGui::Text("Random Integer");
-		ImGui::SliderInt("Min Integer", &minInt, -100, maxInt);
+		ImGui::SliderInt("Min Integer", &minInt, 0, maxInt);
 		ImGui::SliderInt("Max Integer", &maxInt, minInt, 100);
 
 		if (ImGui::Button("Generate Int"))
