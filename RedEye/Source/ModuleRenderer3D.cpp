@@ -48,6 +48,7 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	}
 
 	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_DEPTH_TEST);
 
 	//Loading Shaders
 	shader_manager = new ShaderManager("Shaders/");
@@ -64,6 +65,10 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 		LOG("%s\n", shader_manager->GetShaderError());
 
 	ret = shader_manager->Load("twotextures", &twotextures);
+	if (!ret)
+		LOG("%s\n", shader_manager->GetShaderError());
+
+	ret = shader_manager->Load("cube", &shader_cube);
 	if (!ret)
 		LOG("%s\n", shader_manager->GetShaderError());
 
@@ -131,6 +136,68 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	glBindVertexArray(0);
 
+	//Cube
+	float verticesCube[] = {
+	//Vertex pos		  Texture Coords
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+	glGenBuffers(1, &VBO_Cube);
+	glGenVertexArrays(1, &VAO_Cube);
+
+	glBindVertexArray(VAO_Cube);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_Cube);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesCube), verticesCube, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// texture coord attribute
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	glBindVertexArray(0);
+
 	texture_manager = new Texture2DManager();
 	texture_manager->Init("Images/");
 
@@ -150,8 +217,8 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	//Set background with a clear color
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	//color change for Sinuscolor shader
 	if (shaderenabled == SIN)
 	{
@@ -171,57 +238,109 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	if (textureEnabled == MIX_AWESOMEFACE)
 	{
-		if (!isRotated)
+		if (objectEnabled == PLANE)
 		{
-			math::float4x4 model;
-			model = model.Translate(math::float3(0.0f, 0.0f, 0.0f));
-			model = model * model.RotateAxisAngle(math::float3(1.0f, 0.0f, 0.0f), math::DegToRad(55.0f));
+			shader_manager->use(twotextures);
+			if (!isRotated)
+			{
+				math::float4x4 model;
+				model = model.Translate(math::float3(0.0f, 0.0f, 0.0f));
+				model = model * model.RotateAxisAngle(math::float3(-1.0f, 0.0f, 0.0f).Neg(), math::DegToRad(55.0f));
 
-			math::float4x4 view;
-			// note that we're translating the scene in the reverse direction of where we want to move
-			view = view.Translate(math::float3(0.0f, 0.0f, 3.0f));
-			view.InverseTranspose();
+				math::float4x4 view;
+				// note that we're translating the scene in the reverse direction of where we want to move
+				view = view.Translate(math::float3(0.0f, 0.0f, -3.0f).Neg());
+				view.InverseTranspose();
 
-			float horitzontalFOV = 1;
-			float verticalFOV = horitzontalFOV * (float)App->window->GetHeight() / (float)App->window->GetWidth();
+				float horitzontalFOV = 1;
+				float verticalFOV = horitzontalFOV * (float)App->window->GetHeight() / (float)App->window->GetWidth();
 
-			math::Frustum camera;
-			camera.SetViewPlaneDistances(0.1f, 100.0f);
-			camera.SetPerspective(horitzontalFOV, verticalFOV);
-			camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+				math::Frustum camera;
+				camera.SetViewPlaneDistances(0.1f, 100.0f);
+				camera.SetPerspective(horitzontalFOV, verticalFOV);
+				camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
 
 
-			shader_manager->setFloat4x4(twotextures, "model", model.ptr());
-			shader_manager->setFloat4x4(twotextures, "view", view.ptr());
-			shader_manager->setFloat4x4(twotextures, "projection", camera.ProjectionMatrix().Transposed().ptr());
+				shader_manager->setFloat4x4(twotextures, "model", model.ptr());
+				shader_manager->setFloat4x4(twotextures, "view", view.ptr());
+				shader_manager->setFloat4x4(twotextures, "projection", camera.ProjectionMatrix().Transposed().ptr());
+			}
+			else
+			{
+				timerotateValue += App->time->GetDeltaTime();
+
+				math::float4x4 trans;
+				//All values needed to be inversed, because the InverseTranspose()
+				//first rotate the container around the origin (0,0,0)
+				trans = trans.Translate(math::float3(0.0f, 0.0f, 0.0f));
+				trans = trans * trans.RotateAxisAngle(math::float3(0.0f, 0.0f, 1.0f).Neg(), timerotateValue);
+
+				//scale the container
+				if (isScaled)
+					trans = trans * trans.Scale(math::float3(2.0f, 2.0f, 2.0f));
+
+				//we translate its rotated version to the bottom - right corner of the screen.
+				trans = trans * trans.Translate(math::float3(0.5f, -0.5f, 0.0f).Neg());
+
+				//For OpenGL redeable
+				trans.InverseTranspose();
+
+				//send the matrix to the shaders
+				shader_manager->setFloat4x4(twotextures, "transform", trans.ptr());
+			}
 		}
 		else
 		{
-			timerotateValue += App->time->GetDeltaTime();
-			shader_manager->use(twotextures);
+			if (!isCubes)
+			{
+				shader_manager->use(shader_cube);
 
-			math::float4x4 trans;
-			//All values needed to be inversed, because the InverseTranspose()
-			//first rotate the container around the origin (0,0,0)
-			trans = trans.Translate(math::float3(0.0f, 0.0f, 0.0f));
-			trans = trans * trans.RotateAxisAngle(math::float3(0.0f, 0.0f, -1.0f), timerotateValue);
+				timeCuberotateValue += App->time->GetDeltaTime();
 
-			//scale the container
-			if(isScaled)
-				trans = trans * trans.Scale(math::float3(2.0f, 2.0f, 2.0f));
+				math::float4x4 model;
+				model = model.RotateAxisAngle(math::float3(0.5f, 1.0f, 0.0f).Neg(), timeCuberotateValue * math::DegToRad(50.0f));
 
-			//we translate its rotated version to the bottom - right corner of the screen.
-			trans = trans * trans.Translate(math::float3(-0.5f, 0.5f, 0.0f));
+				math::float4x4 view;
+				// note that we're translating the scene in the reverse direction of where we want to move
+				view = view.Translate(math::float3(0.0f, 0.0f, -3.0f).Neg());
+				view.InverseTranspose();
 
-			//for opengl xD, debug for get explanations
-			trans.InverseTranspose();
+				float horitzontalFOV = 1;
+				float verticalFOV = horitzontalFOV * (float)App->window->GetHeight() / (float)App->window->GetWidth();
 
-			//send the matrix to the shaders
-			shader_manager->setFloat4x4(twotextures, "transform",trans.ptr());
+				math::Frustum camera;
+				camera.SetViewPlaneDistances(0.1f, 100.0f);
+				camera.SetPerspective(horitzontalFOV, verticalFOV);
+				camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+
+				shader_manager->setFloat4x4(shader_cube, "model", model.ptr());
+				shader_manager->setFloat4x4(shader_cube, "view", view.ptr());
+				shader_manager->setFloat4x4(shader_cube, "projection", camera.ProjectionMatrix().Transposed().ptr());
+			}
+			else
+			{
+				shader_manager->use(shader_cube);
+
+				timeCuberotateValue += App->time->GetDeltaTime();
+
+				math::float4x4 view;
+				// note that we're translating the scene in the reverse direction of where we want to move
+				view = view.Translate(math::float3(0.0f, 0.0f, -3.0f).Neg());
+				view.InverseTranspose();
+
+				float horitzontalFOV = 1;
+				float verticalFOV = horitzontalFOV * (float)App->window->GetHeight() / (float)App->window->GetWidth();
+
+				math::Frustum camera;
+				camera.SetViewPlaneDistances(0.1f, 100.0f);
+				camera.SetPerspective(horitzontalFOV, verticalFOV);
+				camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+
+				shader_manager->setFloat4x4(shader_cube, "view", view.ptr());
+				shader_manager->setFloat4x4(shader_cube, "projection", camera.ProjectionMatrix().Transposed().ptr());
+			}
 		}
 	}
-
-
 	return ret;
 }
 
@@ -242,7 +361,10 @@ update_status ModuleRenderer3D::PostUpdate()
 		break;
 	case TEXTURE:
 		if (textureEnabled == MIX_AWESOMEFACE)
-			shader_manager->use(twotextures);
+			if (objectEnabled == PLANE)
+				shader_manager->use(twotextures);
+			else
+				shader_manager->use(shader_cube);
 		else
 			shader_manager->use(textureSquare);
 		break;
@@ -275,8 +397,44 @@ update_status ModuleRenderer3D::PostUpdate()
 				break;
 			}
 		}
-		glBindVertexArray(VAO_Square);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //EBO -> VAO
+		if (objectEnabled == PLANE)
+		{
+			glBindVertexArray(VAO_Square);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //EBO -> VAO
+		}
+		else
+		{
+			glBindVertexArray(VAO_Cube);
+			if (!isCubes)
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+			else
+			{
+				math::float3 cubePositions[] = {
+				  math::float3(0.0f,  0.0f,  0.0f),
+				  math::float3(2.0f,  5.0f, -15.0f),
+				  math::float3(-1.5f, -2.2f, -2.5f),
+				  math::float3(-3.8f, -2.0f, -12.3f),
+				  math::float3(2.4f, -0.4f, -3.5f),
+				  math::float3(-1.7f,  3.0f, -7.5f),
+				  math::float3(1.3f, -2.0f, -2.5f),
+				  math::float3(1.5f,  2.0f, -2.5f),
+				  math::float3(1.5f,  0.2f, -1.5f),
+				  math::float3(-1.3f,  1.0f, -1.5f)
+				};
+
+				for (unsigned int i = 0; i < 10; i++)
+				{
+					math::float4x4 model;
+					float angle = 20.0f * i;
+					model = model.RotateAxisAngle(math::float3(1.0f, 0.3f, 0.5f).Neg(), math::DegToRad(angle));
+					model = model * model.Translate(cubePositions[i].Neg());
+					model.InverseTranspose();
+					shader_manager->setFloat4x4(shader_cube, "model", model.ptr());
+
+					glDrawArrays(GL_TRIANGLES, 0, 36);
+				}
+			}
+		}
 	}
 	else
 	{
@@ -304,10 +462,12 @@ bool ModuleRenderer3D::CleanUp()
 	//de-allocate all resources
 	glDeleteVertexArrays(1, &VAO_Triangle);
 	glDeleteVertexArrays(1, &VAO_Square);
+	glDeleteVertexArrays(1, &VAO_Cube);
 
 	glDeleteBuffers(1, &VBO_Triangle);
 	glDeleteBuffers(1, &VBO_Square);
 	glDeleteBuffers(1, &EBO_Square);
+	glDeleteBuffers(1, &VBO_Cube);
 
 	//Delete context
 	SDL_GL_DeleteContext(mainContext);
@@ -395,6 +555,9 @@ void ModuleRenderer3D::DrawEditor()
 					shader_manager->use(twotextures);
 					shader_manager->setInt(twotextures, "texture1", 1);
 					shader_manager->setInt(twotextures, "texture2", 2);
+					shader_manager->use(shader_cube);
+					shader_manager->setInt(shader_cube, "texture1", 1);
+					shader_manager->setInt(shader_cube, "texture2", 2);
 					break;
 				}
 			}
@@ -418,17 +581,34 @@ void ModuleRenderer3D::DrawEditor()
 			}
 			else if (textureEnabled == MIX_AWESOMEFACE)
 			{
-				if (ImGui::Checkbox((isRotated) ? "ToPlane3D" : "ToPlane2D", &isRotated))
+				if (ImGui::Combo("Object Type", &object_selected, "Plane\0Cube"))
 				{
-					shader_manager->use(twotextures);
-					if (isRotated)
-						shader_manager->setBool(twotextures,"rotation", true);
-					else
-						shader_manager->setBool(twotextures, "rotation", false);
+					switch ((ObjectType)object_selected)
+					{
+					case PLANE:
+						objectEnabled = PLANE;
+						break;
+					case CUBE:
+						objectEnabled = CUBE;
+						break;
+					}
 				}
+				if (objectEnabled == PLANE)
+				{
+					if (ImGui::Checkbox((isRotated) ? "ToPlane3D" : "ToPlane2D", &isRotated))
+					{
+						shader_manager->use(twotextures);
+						if (isRotated)
+							shader_manager->setBool(twotextures, "rotation", true);
+						else
+							shader_manager->setBool(twotextures, "rotation", false);
+					}
 
-				if (isRotated)
-					ImGui::Checkbox((isScaled) ? "ToScale" : "ToNormal", &isScaled);
+					if (isRotated)
+						ImGui::Checkbox((isScaled) ? "ToScale" : "ToNormal", &isScaled);
+				}
+				else
+					ImGui::Checkbox((isCubes) ? "ToCube" : "ToCubes", &isCubes);
 			}
 		}
 	}

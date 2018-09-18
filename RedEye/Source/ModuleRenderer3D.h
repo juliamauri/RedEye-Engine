@@ -22,6 +22,11 @@ enum Texture2DType
 	MIX_AWESOMEFACE
 };
 
+enum ObjectType
+{
+	PLANE,
+	CUBE
+};
 
 class ModuleRenderer3D : public Module 
 {
@@ -48,17 +53,19 @@ public:
 
 private:
 	ShaderManager* shader_manager;
-	unsigned int sinusColor, vertexColor, textureSquare, twotextures;
+	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube;
 
 	ShaderType shaderenabled = SIN;
 	Texture2DType textureEnabled = PUPPIE_1;
+	ObjectType objectEnabled = PLANE;
 	int shader_selcted = 0;
 	int texture_selected = 0;
+	int object_selected = 0;
 
 	Texture2DManager* texture_manager;
 	unsigned int puppie1, puppie2, container, awesomeface;
 
-	unsigned int VAO_Triangle, VAO_Square, VBO_Triangle, VBO_Square, EBO_Square;
+	unsigned int VAO_Triangle, VAO_Square, VAO_Cube, VBO_Triangle, VBO_Square, VBO_Cube, EBO_Square;
 	bool B_EBO = true;
 	bool isLine = false;
 	bool vsync = false;
@@ -67,9 +74,11 @@ private:
 
 	float timeValue = 0;
 	float timerotateValue = 0;
+	float timeCuberotateValue = 0;
 
 	bool isRotated = false;
 	bool isScaled = false;
+	bool isCubes = false;
 };
 
 #endif // !__MODULERENDER3D_H__
