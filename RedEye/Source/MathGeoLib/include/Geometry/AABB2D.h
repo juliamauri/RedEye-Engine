@@ -72,6 +72,18 @@ struct AABB2D
 			&& rhs.maxPoint.x <= maxPoint.x && rhs.maxPoint.y <= maxPoint.y;
 	}
 
+	bool Contains(const float2 &pt) const
+	{
+		return pt.x >= minPoint.x && pt.y >= minPoint.y
+			&& pt.x <= maxPoint.x && pt.y <= maxPoint.y;
+	}
+
+	bool Contains(int x, int y) const
+	{
+		return x >= minPoint.x && y >= minPoint.y
+			&& x <= maxPoint.x && y <= maxPoint.y;
+	}
+
 	bool IsDegenerate() const
 	{
 		return minPoint.x >= maxPoint.x || minPoint.y >= maxPoint.y;
@@ -85,6 +97,16 @@ struct AABB2D
 	bool IsFinite() const
 	{
 		return minPoint.IsFinite() && maxPoint.IsFinite() && minPoint.MinElement() > -1e5f && maxPoint.MaxElement() < 1e5f;
+	}
+
+	float2 PosInside(const float2 &normalizedPos) const
+	{
+		return minPoint + normalizedPos.Mul(maxPoint - minPoint);
+	}
+
+	float2 ToNormalizedLocalSpace(const float2 &pt) const
+	{
+		return (pt - minPoint).Div(maxPoint - minPoint);
 	}
 
 	AABB2D operator +(const float2 &pt) const

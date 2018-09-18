@@ -46,6 +46,8 @@ namespace
 const MathLogChannel MathLogInfo = 1;
 const MathLogChannel MathLogError = 2;
 const MathLogChannel MathLogWarning = 4;
+const MathLogChannel MathLogErrorNoCallstack = MathLogError|65536;
+const MathLogChannel MathLogWarningNoCallstack = MathLogWarning|65536;
 }
 
 void PrintToConsoleVariadic(MathLogChannel channel, const char *format, ...);
@@ -59,14 +61,18 @@ void PrintToConsole(MathLogChannel channel, const char *str);
 
 #define LOGI(...) PrintToConsoleVariadic(MathLogInfo, __VA_ARGS__)
 #define LOGW(...) PrintToConsoleVariadic(MathLogWarning, __VA_ARGS__)
+#define LOGW_NS(...) PrintToConsoleVariadic(MathLogWarningNoCallstack, __VA_ARGS__)
 #define LOGE(...) PrintToConsoleVariadic(MathLogError, __VA_ARGS__)
+#define LOGE_NS(...) PrintToConsoleVariadic(MathLogErrorNoCallstack, __VA_ARGS__)
 #define LOG_MATHGEOLIB(channel, ...) PrintToConsoleVariadic(channel, __VA_ARGS__)
 
 #else
 
 #define LOG(...) ((void)0)
-#define LOGE(...) ((void)0)
 #define LOGW(...) ((void)0)
+#define LOGW_NS(...) ((void)0)
+#define LOGE(...) ((void)0)
+#define LOGE_NS(...) ((void)0)
 #define LOGI(...) ((void)0)
 
 #endif
