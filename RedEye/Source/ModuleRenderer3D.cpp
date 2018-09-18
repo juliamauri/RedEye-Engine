@@ -171,27 +171,54 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	if (textureEnabled == MIX_AWESOMEFACE)
 	{
-		timerotateValue += App->time->GetDeltaTime();
-		shader_manager->use(twotextures);
+		if (!isRotated)
+		{
+			math::float4x4 model;
+			model = model.Translate(math::float3(0.0f, 0.0f, 0.0f));
+			model = model * model.RotateAxisAngle(math::float3(1.0f, 0.0f, 0.0f), math::DegToRad(55.0f));
 
-		math::float4x4 trans;
-		//All values needed to be inversed, because the InverseTranspose()
-		//first rotate the container around the origin (0,0,0)
-		trans = trans.Translate(math::float3(0.0f, 0.0f, 0.0f));
-		trans = trans * trans.RotateAxisAngle(math::float3(0.0f, 0.0f, -1.0f), timerotateValue);
+			math::float4x4 view;
+			// note that we're translating the scene in the reverse direction of where we want to move
+			view = view.Translate(math::float3(0.0f, 0.0f, 3.0f));
+			view.InverseTranspose();
 
-		//scale the container
-		if(isScaled)
-			trans = trans * trans.Scale(math::float3(2.0f, 2.0f, 2.0f));
+			float horitzontalFOV = 1;
+			float verticalFOV = horitzontalFOV * (float)App->window->GetHeight() / (float)App->window->GetWidth();
 
-		//we translate its rotated version to the bottom - right corner of the screen.
-		trans = trans * trans.Translate(math::float3(-0.5f, 0.5f, 0.0f));
+			math::Frustum camera;
+			camera.SetViewPlaneDistances(0.1f, 100.0f);
+			camera.SetPerspective(horitzontalFOV, verticalFOV);
+			camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
 
-		//for opengl xD, debug for get explanations
-		trans.InverseTranspose();
 
-		//send the matrix to the shaders
-		shader_manager->setFloat4x4(twotextures, "transform",trans.ptr());
+			shader_manager->setFloat4x4(twotextures, "model", model.ptr());
+			shader_manager->setFloat4x4(twotextures, "view", view.ptr());
+			shader_manager->setFloat4x4(twotextures, "projection", camera.ProjectionMatrix().Transposed().ptr());
+		}
+		else
+		{
+			timerotateValue += App->time->GetDeltaTime();
+			shader_manager->use(twotextures);
+
+			math::float4x4 trans;
+			//All values needed to be inversed, because the InverseTranspose()
+			//first rotate the container around the origin (0,0,0)
+			trans = trans.Translate(math::float3(0.0f, 0.0f, 0.0f));
+			trans = trans * trans.RotateAxisAngle(math::float3(0.0f, 0.0f, -1.0f), timerotateValue);
+
+			//scale the container
+			if(isScaled)
+				trans = trans * trans.Scale(math::float3(2.0f, 2.0f, 2.0f));
+
+			//we translate its rotated version to the bottom - right corner of the screen.
+			trans = trans * trans.Translate(math::float3(-0.5f, 0.5f, 0.0f));
+
+			//for opengl xD, debug for get explanations
+			trans.InverseTranspose();
+
+			//send the matrix to the shaders
+			shader_manager->setFloat4x4(twotextures, "transform",trans.ptr());
+		}
 	}
 
 
@@ -391,7 +418,17 @@ void ModuleRenderer3D::DrawEditor()
 			}
 			else if (textureEnabled == MIX_AWESOMEFACE)
 			{
-				if (ImGui::Checkbox((isScaled) ? "ToScale" : "ToNormal", &isScaled));
+				if (ImGui::Checkbox((isRotated) ? "ToPlane3D" : "ToPlane2D", &isRotated))
+				{
+					shader_manager->use(twotextures);
+					if (isRotated)
+						shader_manager->setBool(twotextures,"rotation", true);
+					else
+						shader_manager->setBool(twotextures, "rotation", false);
+				}
+
+				if (isRotated)
+					ImGui::Checkbox((isScaled) ? "ToScale" : "ToNormal", &isScaled);
 			}
 		}
 	}

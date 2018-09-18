@@ -22,6 +22,7 @@ enum Texture2DType
 	MIX_AWESOMEFACE
 };
 
+
 class ModuleRenderer3D : public Module 
 {
 
@@ -67,10 +68,7 @@ private:
 	float timeValue = 0;
 	float timerotateValue = 0;
 
-
-
-
-
+	bool isRotated = false;
 	bool isScaled = false;
 };
 
