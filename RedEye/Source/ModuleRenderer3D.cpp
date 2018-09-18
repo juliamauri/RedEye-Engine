@@ -206,6 +206,14 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	container = texture_manager->LoadTexture2D("container", ImageExtensionType::JPG);
 	awesomeface = texture_manager->LoadTexture2D("awesomeface", ImageExtensionType::PNG);
 
+	//Defining GL_TEXTUREX for shaders
+	shader_manager->use(twotextures);
+	shader_manager->setInt(twotextures, "texture1", 1);
+	shader_manager->setInt(twotextures, "texture2", 2);
+	shader_manager->use(shader_cube);
+	shader_manager->setInt(shader_cube, "texture1", 1);
+	shader_manager->setInt(shader_cube, "texture2", 2);
+
 	enableVSync(vsync = config_module->PullBool("vsync", false));
 
 	return ret;
@@ -483,140 +491,10 @@ bool ModuleRenderer3D::CleanUp()
 
 void ModuleRenderer3D::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("Renderer3D Debug"))
-	{
-		if (ImGui::Checkbox((vsync) ? "Disable vsync" : "Enable vsync", &vsync))
-		{
-			enableVSync(vsync);
-		}
-
-		if (ImGui::Checkbox((B_EBO) ? "Change to Triangle" : "Change to Square", &B_EBO))
-		{
-			if (shaderenabled == TEXTURE)
-			{
-				shaderenabled = SIN;
-				shader_selcted = 0;
-			}
-		}
-
-		ImGui::Checkbox((isLine) ? "Disable Wireframe" : "Enable Wireframe", &isLine);
-
-		if (B_EBO)
-		{
-			if (ImGui::Combo("Shader", &shader_selcted, "Sin\0Vertex\0Texture\0"))
-			{
-				switch ((ShaderType)shader_selcted)
-				{
-				case SIN:
-					shaderenabled = SIN;
-					break;
-				case VERTEX:
-					shaderenabled = VERTEX;
-					break;
-				case TEXTURE:
-					shaderenabled = TEXTURE;
-					break;
-				}
-			}
-		}
-		else
-		{
-			if (ImGui::Combo("Shader", &shader_selcted, "Sin\0Vertex\0"))
-			{
-				switch ((ShaderType)shader_selcted)
-				{
-				case SIN:
-					shaderenabled = SIN;
-					break;
-				case VERTEX:
-					shaderenabled = VERTEX;
-					break;
-				}
-			}
-		}
-
-		if (shaderenabled == TEXTURE)
-		{
-			if (ImGui::Combo("Texture", &texture_selected, "Puppie 1\0Puppie 2\0Container\0Mix Awesomeface\0"))
-			{
-				switch ((Texture2DType)texture_selected)
-				{
-				case PUPPIE_1:
-					textureEnabled = PUPPIE_1;
-					break;
-				case PUPPIE_2:
-					textureEnabled = PUPPIE_2;
-					break;
-				case CONTAINER:
-					textureEnabled = CONTAINER;
-					break;
-				case MIX_AWESOMEFACE:
-					textureEnabled = MIX_AWESOMEFACE;
-					shader_manager->use(twotextures);
-					shader_manager->setInt(twotextures, "texture1", 1);
-					shader_manager->setInt(twotextures, "texture2", 2);
-					shader_manager->use(shader_cube);
-					shader_manager->setInt(shader_cube, "texture1", 1);
-					shader_manager->setInt(shader_cube, "texture2", 2);
-					break;
-				}
-			}
-
-			if (textureEnabled != MIX_AWESOMEFACE)
-			{
-				if (ImGui::Button((!printvertextcolor) ? "Activate Vertex Color" : "Deactivate Vertex Color"))
-				{
-					shader_manager->use(textureSquare);
-					if (!printvertextcolor)
-					{
-						shader_manager->setBool(textureSquare, "vertexcolor", true);
-						printvertextcolor = !printvertextcolor;
-					}
-					else
-					{
-						shader_manager->setBool(textureSquare, "vertexcolor", false);
-						printvertextcolor = !printvertextcolor;
-					}
-				}
-			}
-			else if (textureEnabled == MIX_AWESOMEFACE)
-			{
-				if (ImGui::Combo("Object Type", &object_selected, "Plane\0Cube"))
-				{
-					switch ((ObjectType)object_selected)
-					{
-					case PLANE:
-						objectEnabled = PLANE;
-						break;
-					case CUBE:
-						objectEnabled = CUBE;
-						break;
-					}
-				}
-				if (objectEnabled == PLANE)
-				{
-					if (ImGui::Checkbox((isRotated) ? "ToPlane3D" : "ToPlane2D", &isRotated))
-					{
-						shader_manager->use(twotextures);
-						if (isRotated)
-							shader_manager->setBool(twotextures, "rotation", true);
-						else
-							shader_manager->setBool(twotextures, "rotation", false);
-					}
-
-					if (isRotated)
-						ImGui::Checkbox((isScaled) ? "ToScale" : "ToNormal", &isScaled);
-				}
-				else
-					ImGui::Checkbox((isCubes) ? "ToCube" : "ToCubes", &isCubes);
-			}
-		}
-	}
 }
 
 void ModuleRenderer3D::RecieveEvent(const Event * e)
 {
-	
 }
 
 void ModuleRenderer3D::enableVSync(const bool enable)
@@ -629,4 +507,100 @@ unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	return nrAttributes;
+}
+
+ShaderType ModuleRenderer3D::GetShaderEnabled() const
+{
+	return shaderenabled;
+}
+
+Texture2DType ModuleRenderer3D::GetTexture2DEnabled() const
+{
+	return textureEnabled;
+}
+
+ObjectType ModuleRenderer3D::GetObjectEnabled() const
+{
+	return objectEnabled;
+}
+
+void ModuleRenderer3D::SetShaderEnabled(ShaderType shader_enabled)
+{
+	shaderenabled = shader_enabled;
+}
+
+void ModuleRenderer3D::SetTexture2DEnabled(Texture2DType texture2d_enabled)
+{
+	textureEnabled = texture2d_enabled;
+}
+
+void ModuleRenderer3D::SetObjectEnabled(ObjectType object_enabled)
+{
+	objectEnabled = object_enabled;
+}
+
+void ModuleRenderer3D::UseShader(ShaderType shader_enabled)
+{
+	switch (shader_enabled)
+	{
+	case SIN:
+		shader_manager->use(sinusColor);
+		break;
+	case VERTEX:
+		shader_manager->use(vertexColor);
+		break;
+	case TEXTURE:
+		if (objectEnabled == PLANE)
+			if (textureEnabled == MIX_AWESOMEFACE)
+				shader_manager->use(twotextures);
+			else
+				shader_manager->use(textureSquare);
+		else
+			shader_manager->use(shader_cube);
+		break;
+	}
+}
+
+void ModuleRenderer3D::SetShaderBool(const char * name, bool value)
+{
+	if (objectEnabled == PLANE)
+		if (textureEnabled == MIX_AWESOMEFACE)
+			shader_manager->setBool(twotextures, name, value);
+		else
+			shader_manager->setBool(textureSquare, name, value);
+}
+
+bool * ModuleRenderer3D::GetVsync()
+{
+	return &vsync;
+}
+
+bool * ModuleRenderer3D::GetB_EBO()
+{
+	return &B_EBO;
+}
+
+bool * ModuleRenderer3D::GetisLine()
+{
+	return &isLine;
+}
+
+bool * ModuleRenderer3D::Getprintvertextcolor()
+{
+	return &printvertextcolor;
+}
+
+bool * ModuleRenderer3D::GetisRotated()
+{
+	return &isRotated;
+}
+
+bool * ModuleRenderer3D::GetisScaled()
+{
+	return &isScaled;
+}
+
+bool * ModuleRenderer3D::GetisCubes()
+{
+	return &isCubes;
 }

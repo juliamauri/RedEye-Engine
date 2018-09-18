@@ -12,6 +12,7 @@ class ConfigWindow;
 class HeriarchyWindow;
 class PropertiesWindow;
 class RandomTest;
+class RendererTest;
 
 union SDL_Event;
 
@@ -40,6 +41,7 @@ private:
 	HeriarchyWindow* heriarchy = nullptr;
 	PropertiesWindow* properties = nullptr;
 	RandomTest* rng = nullptr;
+	RendererTest* renderer = nullptr;
 
 	std::list<EditorWindow*> windows;
 
@@ -111,6 +113,15 @@ public:
 
 	int minInt = 0, maxInt = 1, resultInt = 0;
 	float minF = 0.f, maxF = 1.f, resultF = 0.f;
+};
+
+class RendererTest : public EditorWindow
+{
+public:
+	RendererTest(const char* name = "Render Test", bool start_active = true);
+	void Draw() override;
+
+	int shader_selcted, texture_selected, object_selected = 0;
 };
 
 /*/ Missing windows:

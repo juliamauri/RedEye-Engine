@@ -51,34 +51,44 @@ public:
 	//Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
 
+	//Renderer Test Window
+	ShaderType GetShaderEnabled() const;
+	Texture2DType GetTexture2DEnabled() const;
+	ObjectType GetObjectEnabled() const;
+
+	void SetShaderEnabled(ShaderType shader_enabled);
+	void SetTexture2DEnabled(Texture2DType texture2d_enabled);
+	void SetObjectEnabled(ObjectType object_enabled);
+
+	void UseShader(ShaderType shader_enabled);
+	void SetShaderBool(const char* name, bool value);
+
+	bool* GetVsync();
+	bool* GetB_EBO();
+	bool* GetisLine();
+	bool* Getprintvertextcolor();
+	bool* GetisRotated();
+	bool* GetisScaled();
+	bool* GetisCubes();
+
 private:
 	ShaderManager* shader_manager;
 	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube;
 
-	ShaderType shaderenabled = SIN;
-	Texture2DType textureEnabled = PUPPIE_1;
-	ObjectType objectEnabled = PLANE;
-	int shader_selcted = 0;
-	int texture_selected = 0;
-	int object_selected = 0;
-
 	Texture2DManager* texture_manager;
 	unsigned int puppie1, puppie2, container, awesomeface;
 
+	//Renderer Test
 	unsigned int VAO_Triangle, VAO_Square, VAO_Cube, VBO_Triangle, VBO_Square, VBO_Cube, EBO_Square;
-	bool B_EBO = true;
-	bool isLine = false;
-	bool vsync = false;
-	bool printvertextcolor = false;
+	bool B_EBO = true, isLine = false, vsync = false, printvertextcolor = false;
 
+	ShaderType shaderenabled = SIN;
+	Texture2DType textureEnabled = PUPPIE_1;
+	ObjectType objectEnabled = PLANE;
 
-	float timeValue = 0;
-	float timerotateValue = 0;
-	float timeCuberotateValue = 0;
+	float timeValue = 0, timerotateValue = 0, timeCuberotateValue = 0;
 
-	bool isRotated = false;
-	bool isScaled = false;
-	bool isCubes = false;
+	bool isRotated = false, isScaled = false, isCubes = false;
 };
 
 #endif // !__MODULERENDER3D_H__

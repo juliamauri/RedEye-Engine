@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
+#include "ModuleRenderer3D.h"
 #include "RE_Math.h"
 
 #include "ImGui\imgui_impl_sdl_gl3.h"
@@ -16,6 +17,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(console = new ConsoleWindow());
 	windows.push_back(config = new ConfigWindow());
 	windows.push_back(rng = new RandomTest());
+	windows.push_back(renderer = new RendererTest());
 	show_demo = false;
 }
 
@@ -253,6 +255,150 @@ void RandomTest::Draw()
 
 		ImGui::SameLine();
 		ImGui::Text("Random Float: %.2f", resultF);
+	}
+
+	ImGui::End();
+}
+
+RendererTest::RendererTest(const char * name, bool start_active) : EditorWindow(name,start_active) {}
+
+void RendererTest::Draw()
+{
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		ModuleRenderer3D* renderer_module = App->renderer3d;
+
+		bool* vsync = renderer_module->GetVsync();
+		if (ImGui::Checkbox((*vsync) ? "Disable vsync" : "Enable vsync", vsync))
+		{
+			renderer_module->enableVSync(*vsync);
+		}
+
+		bool* B_EBO = renderer_module->GetB_EBO();
+		if (ImGui::Checkbox((*B_EBO) ? "Change to Triangle" : "Change to Square", B_EBO))
+		{
+			if (renderer_module->GetShaderEnabled() == ShaderType::TEXTURE)
+			{
+				renderer_module->SetShaderEnabled(ShaderType::SIN);
+				shader_selcted = 0;
+			}
+		}
+
+		bool* isLine = renderer_module->GetisLine();
+		ImGui::Checkbox((*isLine) ? "Disable Wireframe" : "Enable Wireframe", isLine);
+
+		if (*B_EBO)
+		{
+			if (ImGui::Combo("Shader", &shader_selcted, "Sin\0Vertex\0Texture\0"))
+			{
+				switch ((ShaderType)shader_selcted)
+				{
+				case SIN:
+					renderer_module->SetShaderEnabled(ShaderType::SIN);
+					break;
+				case VERTEX:
+					renderer_module->SetShaderEnabled(ShaderType::VERTEX);
+					break;
+				case TEXTURE:
+					renderer_module->SetShaderEnabled(ShaderType::TEXTURE);
+					break;
+				}
+			}
+		}
+		else
+		{
+			if (ImGui::Combo("Shader", &shader_selcted, "Sin\0Vertex\0"))
+			{
+				switch ((ShaderType)shader_selcted)
+				{
+				case SIN:
+					renderer_module->SetShaderEnabled(ShaderType::SIN);
+					break;
+				case VERTEX:
+					renderer_module->SetShaderEnabled(ShaderType::VERTEX);
+					break;
+				}
+			}
+		}
+
+		if (renderer_module->GetShaderEnabled() == ShaderType::TEXTURE)
+		{
+			if (ImGui::Combo("Texture", &texture_selected, "Puppie 1\0Puppie 2\0Container\0Mix Awesomeface\0"))
+			{
+				switch ((Texture2DType)texture_selected)
+				{
+				case PUPPIE_1:
+					renderer_module->SetTexture2DEnabled(Texture2DType::PUPPIE_1);
+					break;
+				case PUPPIE_2:
+					renderer_module->SetTexture2DEnabled(Texture2DType::PUPPIE_2);
+					break;
+				case CONTAINER:
+					renderer_module->SetTexture2DEnabled(Texture2DType::CONTAINER);
+					break;
+				case MIX_AWESOMEFACE:
+					renderer_module->SetTexture2DEnabled(Texture2DType::MIX_AWESOMEFACE);
+					break;
+				}
+			}
+
+			if (renderer_module->GetTexture2DEnabled() != Texture2DType::MIX_AWESOMEFACE)
+			{
+				bool* printvertextcolor = renderer_module->Getprintvertextcolor();
+				if (ImGui::Button((!(*printvertextcolor)) ? "Activate Vertex Color" : "Deactivate Vertex Color"))
+				{
+					renderer_module->UseShader(ShaderType::TEXTURE);
+					if (!(*printvertextcolor))
+					{
+						renderer_module->SetShaderBool("vertexcolor", true);
+						*printvertextcolor = !(*printvertextcolor);
+					}
+					else
+					{
+						renderer_module->SetShaderBool("vertexcolor", false);
+						*printvertextcolor = !(*printvertextcolor);
+					}
+				}
+			}
+			else if (renderer_module->GetTexture2DEnabled() == Texture2DType::MIX_AWESOMEFACE)
+			{
+				if (ImGui::Combo("Object Type", &object_selected, "Plane\0Cube"))
+				{
+					switch ((ObjectType)object_selected)
+					{
+					case PLANE:
+						renderer_module->SetObjectEnabled(ObjectType::PLANE);
+						break;
+					case CUBE:
+						renderer_module->SetObjectEnabled(ObjectType::CUBE);
+						break;
+					}
+				}
+				if (renderer_module->GetObjectEnabled() == ObjectType::PLANE)
+				{
+					bool* isRotated = renderer_module->GetisRotated();
+					if (ImGui::Checkbox((*isRotated) ? "ToPlane3D" : "ToPlane2D", isRotated))
+					{
+						renderer_module->UseShader(ShaderType::TEXTURE);
+						if (*isRotated)
+							renderer_module->SetShaderBool("rotation", true);
+						else
+							renderer_module->SetShaderBool("rotation", false);
+					}
+
+					if (*isRotated)
+					{
+						bool* isScaled = renderer_module->GetisScaled();
+						ImGui::Checkbox((*isScaled) ? "ToScale" : "ToNormal", isScaled);
+					}
+				}
+				else
+				{
+					bool* isCubes = renderer_module->GetisCubes();
+					ImGui::Checkbox((*isCubes) ? "ToCube" : "ToCubes", isCubes);
+				}
+			}
+		}
 	}
 
 	ImGui::End();
