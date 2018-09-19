@@ -41,3 +41,9 @@ void RE_Math::SetRNGSeed(unsigned int seed)
 {
 	lcg.Seed(seed);
 }
+
+math::float4x4 RE_Math::Rotate(math::float3 axis, float radians)
+{
+	axis.Normalize();
+	return math::float4x4(math::Quat::identity * math::Quat::RotateAxisAngle(axis, radians));
+}

@@ -1,7 +1,8 @@
 #ifndef __RE_MATH_H__
 #define __RE_MATH_H__
 
-#include "MathGeoLib\include\Algorithm\Random\LCG.h"
+#include "MathGeoLib/include/MathBuildConfig.h"
+#include "MathGeoLib/include/MathGeoLib.h"
 
 class RE_Math
 {
@@ -17,6 +18,8 @@ public:
 	int		RandomInt(int min, int max);
 
 	void	SetRNGSeed(unsigned int seed);
+
+	math::float4x4 Rotate(math::float3 axis, float radians);
 
 private:
 
