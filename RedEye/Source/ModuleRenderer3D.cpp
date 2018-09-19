@@ -246,28 +246,29 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	if (textureEnabled == MIX_AWESOMEFACE)
 	{
+		float horitzontalFOV = 1;
+		float verticalFOV = horitzontalFOV * (float)App->window->GetHeight() / (float)App->window->GetWidth();
+
+		math::Frustum camera;
+		camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+		camera.SetPerspective(horitzontalFOV, verticalFOV);
+		camera.SetViewPlaneDistances(0.1f, 100.0f);
+		camera.SetWorldMatrix(math::float3x4::Translate(math::float3(0.0f, 0.0f, 0.0f)));
+		camera.SetPos(math::float3(0.0f, 0.0f, -3.0f));
+
+		math::float4x4 view = camera.ViewMatrix();
+		view.InverseTranspose();
+
 		if (objectEnabled == PLANE)
 		{
 			shader_manager->use(twotextures);
 			if (!isRotated)
 			{
-				math::float4x4 model;
-				model = model.Translate(math::float3(0.0f, 0.0f, 0.0f));
-				model = model * model.RotateAxisAngle(math::float3(-1.0f, 0.0f, 0.0f).Neg(), math::DegToRad(55.0f));
-
-				math::float4x4 view;
-				// note that we're translating the scene in the reverse direction of where we want to move
-				view = view.Translate(math::float3(0.0f, 0.0f, -3.0f).Neg());
-				view.InverseTranspose();
-
-				float horitzontalFOV = 1;
-				float verticalFOV = horitzontalFOV * (float)App->window->GetHeight() / (float)App->window->GetWidth();
-
-				math::Frustum camera;
-				camera.SetViewPlaneDistances(0.1f, 100.0f);
-				camera.SetPerspective(horitzontalFOV, verticalFOV);
-				camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
-
+				math::float3 axis(1.0f, 0.0f, 0.0f);
+				axis.Normalize();
+				math::Quat rotation = math::Quat::identity * math::Quat::RotateAxisAngle(axis, math::DegToRad(55.0f));
+				math::float4x4 model = math::float4x4(rotation);
+				model.InverseTranspose();
 
 				shader_manager->setFloat4x4(twotextures, "model", model.ptr());
 				shader_manager->setFloat4x4(twotextures, "view", view.ptr());
@@ -277,12 +278,15 @@ update_status ModuleRenderer3D::PreUpdate()
 			{
 				timerotateValue += App->time->GetDeltaTime();
 
+				math::float3 axis(0.0f, 0.0f, -1.0f);
+				axis.Normalize();
+
+				math::Quat rotation = math::Quat::identity * math::Quat::RotateAxisAngle(axis, timerotateValue);
+
 				math::float4x4 trans;
 				//All values needed to be inversed, because the InverseTranspose()
-				//first rotate the container around the origin (0,0,0)
-				trans = trans.Translate(math::float3(0.0f, 0.0f, 0.0f));
-				trans = trans * trans.RotateAxisAngle(math::float3(0.0f, 0.0f, 1.0f).Neg(), timerotateValue);
-
+				trans = math::float4x4(rotation);
+				
 				//scale the container
 				if (isScaled)
 					trans = trans * trans.Scale(math::float3(2.0f, 2.0f, 2.0f));
@@ -299,53 +303,24 @@ update_status ModuleRenderer3D::PreUpdate()
 		}
 		else
 		{
+			shader_manager->use(shader_cube);
+
+			shader_manager->setFloat4x4(shader_cube, "view", view.ptr());
+			shader_manager->setFloat4x4(shader_cube, "projection", camera.ProjectionMatrix().Transposed().ptr());
+
 			if (!isCubes)
 			{
-				shader_manager->use(shader_cube);
-
 				timeCuberotateValue += App->time->GetDeltaTime();
+				float rotation = timeCuberotateValue * math::DegToRad(50.0f);
 
-				math::float4x4 model;
-				model = model.RotateAxisAngle(math::float3(0.5f, 1.0f, 0.0f).Neg(), timeCuberotateValue * math::DegToRad(50.0f));
+				math::float3 axis(0.5f, 1.0f, 0.0f);
+				axis.Normalize();
+				math::Quat rotation_quat = math::Quat::identity * math::Quat::RotateAxisAngle(axis, rotation);
 
-				math::float4x4 view;
-				// note that we're translating the scene in the reverse direction of where we want to move
-				view = view.Translate(math::float3(0.0f, 0.0f, -3.0f).Neg());
-				view.InverseTranspose();
-
-				float horitzontalFOV = 1;
-				float verticalFOV = horitzontalFOV * (float)App->window->GetHeight() / (float)App->window->GetWidth();
-
-				math::Frustum camera;
-				camera.SetViewPlaneDistances(0.1f, 100.0f);
-				camera.SetPerspective(horitzontalFOV, verticalFOV);
-				camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+				math::float4x4 model = math::float4x4(rotation_quat);
+				model.InverseTranspose();
 
 				shader_manager->setFloat4x4(shader_cube, "model", model.ptr());
-				shader_manager->setFloat4x4(shader_cube, "view", view.ptr());
-				shader_manager->setFloat4x4(shader_cube, "projection", camera.ProjectionMatrix().Transposed().ptr());
-			}
-			else
-			{
-				shader_manager->use(shader_cube);
-
-				timeCuberotateValue += App->time->GetDeltaTime();
-
-				math::float4x4 view;
-				// note that we're translating the scene in the reverse direction of where we want to move
-				view = view.Translate(math::float3(0.0f, 0.0f, -3.0f).Neg());
-				view.InverseTranspose();
-
-				float horitzontalFOV = 1;
-				float verticalFOV = horitzontalFOV * (float)App->window->GetHeight() / (float)App->window->GetWidth();
-
-				math::Frustum camera;
-				camera.SetViewPlaneDistances(0.1f, 100.0f);
-				camera.SetPerspective(horitzontalFOV, verticalFOV);
-				camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
-
-				shader_manager->setFloat4x4(shader_cube, "view", view.ptr());
-				shader_manager->setFloat4x4(shader_cube, "projection", camera.ProjectionMatrix().Transposed().ptr());
 			}
 		}
 	}
@@ -429,14 +404,17 @@ update_status ModuleRenderer3D::PostUpdate()
 				  math::float3(1.5f,  0.2f, -1.5f),
 				  math::float3(-1.3f,  1.0f, -1.5f)
 				};
-
+				
 				for (unsigned int i = 0; i < 10; i++)
 				{
-					math::float4x4 model;
 					float angle = 20.0f * i;
-					model = model.RotateAxisAngle(math::float3(1.0f, 0.3f, 0.5f).Neg(), math::DegToRad(angle));
-					model = model * model.Translate(cubePositions[i].Neg());
+					math::float3 axis(1.0f, 0.3f, 0.5f);
+					axis.Normalize();
+					math::Quat rotation = math::Quat::identity * math::Quat::RotateAxisAngle(axis,math::DegToRad(angle));
+
+					math::float4x4 model = math::float4x4(rotation) * math::float4x4::Translate(math::float3(cubePositions[i]).Neg());
 					model.InverseTranspose();
+
 					shader_manager->setFloat4x4(shader_cube, "model", model.ptr());
 
 					glDrawArrays(GL_TRIANGLES, 0, 36);
