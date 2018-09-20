@@ -14,10 +14,10 @@
 #include "ModuleInput.h"
 #include "Texture2DManager.h"
 #include "FileSystem.h"
+#include "RE_Camera.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
-#pragma comment(lib, "MathGeoLib/lib/MathGeoLib_debug.lib")
 
 ModuleRenderer3D::ModuleRenderer3D(const char * name, bool start_enabled) : Module(name, start_enabled)
 {}
@@ -216,6 +216,9 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	enableVSync(vsync = config_module->PullBool("vsync", false));
 
+	camera = new RE_Camera(true);
+	camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
+
 	return ret;
 }
 
@@ -237,28 +240,8 @@ update_status ModuleRenderer3D::PreUpdate()
 		shader_manager->setFloat(sinusColor, "vertexColor", 0.0f, greenValue, 0.0f, 1.0f);
 	}
 
-	/*
-	math::float4 vec(1.0f, 0.0f, 0.0f,1.0f);
-	math::float4x4 trans;
-	trans.Translate(math::float3(1.0f,1.0f,0.0f));
-	vec = trans * vec;
-	*/
-
 	if (textureEnabled == MIX_AWESOMEFACE)
 	{
-		float horitzontalFOV = 1;
-		float verticalFOV = horitzontalFOV * (float)App->window->GetHeight() / (float)App->window->GetWidth();
-
-		math::Frustum camera;
-		camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
-		camera.SetPerspective(horitzontalFOV, verticalFOV);
-		camera.SetViewPlaneDistances(0.1f, 100.0f);
-		camera.SetWorldMatrix(math::float3x4::Translate(math::float3(0.0f, 0.0f, 0.0f)));
-		camera.SetPos(math::float3(0.0f, 0.0f, -3.0f));
-
-		math::float4x4 view = camera.ViewMatrix();
-		view.InverseTranspose();
-
 		if (objectEnabled == PLANE)
 		{
 			shader_manager->use(twotextures);
@@ -268,8 +251,8 @@ update_status ModuleRenderer3D::PreUpdate()
 				model.InverseTranspose();
 
 				shader_manager->setFloat4x4(twotextures, "model", model.ptr());
-				shader_manager->setFloat4x4(twotextures, "view", view.ptr());
-				shader_manager->setFloat4x4(twotextures, "projection", camera.ProjectionMatrix().Transposed().ptr());
+				shader_manager->setFloat4x4(twotextures, "view", camera->GetView().ptr());
+				shader_manager->setFloat4x4(twotextures, "projection", camera->GetProjection().ptr());
 			}
 			else
 			{
@@ -297,8 +280,8 @@ update_status ModuleRenderer3D::PreUpdate()
 		{
 			shader_manager->use(shader_cube);
 
-			shader_manager->setFloat4x4(shader_cube, "view", view.ptr());
-			shader_manager->setFloat4x4(shader_cube, "projection", camera.ProjectionMatrix().Transposed().ptr());
+			shader_manager->setFloat4x4(shader_cube, "view", camera->GetView().ptr());
+			shader_manager->setFloat4x4(shader_cube, "projection", camera->GetProjection().ptr());
 
 			if (!isCubes)
 			{

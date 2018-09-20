@@ -36,6 +36,7 @@
     <ClCompile Include="ModuleInput.cpp" />
     <ClCompile Include="ModuleRenderer3D.cpp" />
     <ClCompile Include="ModuleWindow.cpp" />
+    <ClCompile Include="RE_Camera.cpp" />
     <ClCompile Include="RE_Math.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="SystemInfo.cpp" />
@@ -106,6 +107,7 @@
     <ClInclude Include="RapidJson\include\stream.h" />
     <ClInclude Include="RapidJson\include\stringbuffer.h" />
     <ClInclude Include="RapidJson\include\writer.h" />
+    <ClInclude Include="RE_Camera.h" />
     <ClInclude Include="RE_Math.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="SystemInfo.h" />

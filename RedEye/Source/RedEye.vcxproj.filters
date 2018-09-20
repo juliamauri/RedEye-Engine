@@ -50,7 +50,7 @@
       <Filter>Containers</Filter>
     </ClCompile>
     <ClCompile Include="ShaderManager.cpp">
-      <Filter>Shaders</Filter>
+      <Filter>Modules\Independent App Modules\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="FileSystem.cpp">
       <Filter>Modules\Independent App Modules\FileSystem</Filter>
@@ -65,6 +65,9 @@
       <Filter>Modules\Independent App Modules\SystemInfo</Filter>
     </ClCompile>
     <ClCompile Include="RE_Math.cpp">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Camera.cpp">
       <Filter>Modules\Independent App Modules</Filter>
     </ClCompile>
   </ItemGroup>
@@ -256,7 +259,7 @@
       <Filter>Containers</Filter>
     </ClInclude>
     <ClInclude Include="ShaderManager.h">
-      <Filter>Shaders</Filter>
+      <Filter>Modules\Independent App Modules\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="FileSystem.h">
       <Filter>Modules\Independent App Modules\FileSystem</Filter>
@@ -271,6 +274,9 @@
       <Filter>Modules\Independent App Modules\SystemInfo</Filter>
     </ClInclude>
     <ClInclude Include="RE_Math.h">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Camera.h">
       <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
   </ItemGroup>
@@ -320,9 +326,6 @@
     <Filter Include="3rd Party\ImGuizmo">
       <UniqueIdentifier>{a8753026-9d83-44bd-8441-d736761a142d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{38c29b9d-7263-44b0-bf0d-759b506df6a8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Modules\Independent App Modules">
       <UniqueIdentifier>{5c9aef73-114b-4af7-98e0-23279889b965}</UniqueIdentifier>
     </Filter>
@@ -337,6 +340,9 @@
     </Filter>
     <Filter Include="Modules\Independent App Modules\SystemInfo">
       <UniqueIdentifier>{53c1d23f-15c8-4f37-ad9f-906b62147787}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Independent App Modules\Shaders">
+      <UniqueIdentifier>{38c29b9d-7263-44b0-bf0d-759b506df6a8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

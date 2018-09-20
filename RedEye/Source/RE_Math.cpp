@@ -1,5 +1,6 @@
 #include "RE_Math.h"
-#include "MathGeoLib\include\Time\Clock.h"
+
+#pragma comment(lib, "MathGeoLib/lib/MathGeoLib_debug.lib")
 
 RE_Math::RE_Math()
 {

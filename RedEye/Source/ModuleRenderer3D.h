@@ -6,6 +6,7 @@
 class ShaderManager;
 class Texture2DManager;
 class Texture2D;
+class RE_Camera;
 
 enum ShaderType
 {
@@ -72,6 +73,8 @@ public:
 	bool* GetisCubes();
 
 private:
+	RE_Camera* camera;
+
 	ShaderManager* shader_manager;
 	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube;
 
