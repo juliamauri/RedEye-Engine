@@ -217,7 +217,6 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	enableVSync(vsync = config_module->PullBool("vsync", false));
 
 	camera = new RE_Camera(true);
-	camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
 
 	return ret;
 }
@@ -242,6 +241,8 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	if (textureEnabled == MIX_AWESOMEFACE)
 	{
+		camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
+
 		if (objectEnabled == PLANE)
 		{
 			shader_manager->use(twotextures);
@@ -278,19 +279,28 @@ update_status ModuleRenderer3D::PreUpdate()
 		}
 		else
 		{
+			timeCuberotateValue += App->time->GetDeltaTime();
 			shader_manager->use(shader_cube);
 
-			shader_manager->setFloat4x4(shader_cube, "view", camera->GetView().ptr());
 			shader_manager->setFloat4x4(shader_cube, "projection", camera->GetProjection().ptr());
 
 			if (!isCubes)
 			{
-				timeCuberotateValue += App->time->GetDeltaTime();
 
 				math::float4x4 model = App->math->Rotate(math::float3(0.5f, 1.0f, 0.0f), timeCuberotateValue * 50.0f * DEGTORAD);
 				model.InverseTranspose();
 
 				shader_manager->setFloat4x4(shader_cube, "model", model.ptr());
+				shader_manager->setFloat4x4(shader_cube, "view", camera->GetView().ptr());
+			}
+			else
+			{
+				float radius = 10.0f;
+				float camX = sin(timeCuberotateValue) * radius;
+				float camZ = cos(timeCuberotateValue) * radius;
+				camera->SetPos(math::float3(camX,0.0f,camZ));
+
+				shader_manager->setFloat4x4(shader_cube, "view", camera->LookAt(math::float3(0.0f, 0.0f, 0.0f)).ptr());
 			}
 		}
 	}

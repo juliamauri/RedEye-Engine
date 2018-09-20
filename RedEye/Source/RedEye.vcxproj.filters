@@ -65,10 +65,10 @@
       <Filter>Modules\Independent App Modules\SystemInfo</Filter>
     </ClCompile>
     <ClCompile Include="RE_Math.cpp">
-      <Filter>Modules\Independent App Modules</Filter>
+      <Filter>Modules\Independent App Modules\Math</Filter>
     </ClCompile>
     <ClCompile Include="RE_Camera.cpp">
-      <Filter>Modules\Independent App Modules</Filter>
+      <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -274,10 +274,10 @@
       <Filter>Modules\Independent App Modules\SystemInfo</Filter>
     </ClInclude>
     <ClInclude Include="RE_Math.h">
-      <Filter>Modules\Independent App Modules</Filter>
+      <Filter>Modules\Independent App Modules\Math</Filter>
     </ClInclude>
     <ClInclude Include="RE_Camera.h">
-      <Filter>Modules\Independent App Modules</Filter>
+      <Filter>Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -343,6 +343,12 @@
     </Filter>
     <Filter Include="Modules\Independent App Modules\Shaders">
       <UniqueIdentifier>{38c29b9d-7263-44b0-bf0d-759b506df6a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Independent App Modules\Math">
+      <UniqueIdentifier>{25cac595-e5b7-48c5-96a6-cc2ec0fbb40c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components">
+      <UniqueIdentifier>{e7540df0-e081-4ea9-a12e-d166f45541ad}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
