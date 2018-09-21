@@ -39,6 +39,12 @@ public:
 	//@param cameraTarget -> The object that the camera looks
 	math::float4x4 LookAt(math::float3 cameraTarget);
 
+	//Move camera
+	void MoveFront(float speed);
+	void MoveBack(float speed);
+	void MoveLeft(float speed);
+	void MoveRight(float speed);
+
 private:
 	//Camera frustum
 	math::Frustum camera;

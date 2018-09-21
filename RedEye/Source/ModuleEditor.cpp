@@ -396,6 +396,14 @@ void RendererTest::Draw()
 				{
 					bool* isCubes = renderer_module->GetisCubes();
 					ImGui::Checkbox((*isCubes) ? "ToCube" : "ToCubes", isCubes);
+
+					if (*isCubes)
+					{
+						bool* isMove = renderer_module->GetisMove();
+						if(ImGui::Checkbox((*isMove) ? "ToLookAround" : "ToMove", isMove))
+							if (*isMove)
+								renderer_module->ResetCameraPos();
+					}
 				}
 			}
 		}

@@ -64,6 +64,8 @@ public:
 	void UseShader(ShaderType shader_enabled);
 	void SetShaderBool(const char* name, bool value);
 
+	void ResetCameraPos();
+
 	bool* GetVsync();
 	bool* GetB_EBO();
 	bool* GetisLine();
@@ -71,6 +73,7 @@ public:
 	bool* GetisRotated();
 	bool* GetisScaled();
 	bool* GetisCubes();
+	bool* GetisMove();
 
 private:
 	RE_Camera* camera;
@@ -91,7 +94,7 @@ private:
 
 	float timeValue = 0, timerotateValue = 0, timeCuberotateValue = 0;
 
-	bool isRotated = false, isScaled = false, isCubes = false;
+	bool isRotated = false, isScaled = false, isCubes = false, isMove = true;
 };
 
 #endif // !__MODULERENDER3D_H__

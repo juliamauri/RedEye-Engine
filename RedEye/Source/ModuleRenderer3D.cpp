@@ -241,13 +241,13 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	if (textureEnabled == MIX_AWESOMEFACE)
 	{
-		camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
-
 		if (objectEnabled == PLANE)
 		{
 			shader_manager->use(twotextures);
 			if (!isRotated)
 			{	
+				camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
+
 				math::float4x4 model = App->math->Rotate(math::float3(1.0f, 0.0f, 0.0f), 55.0f * DEGTORAD);
 				model.InverseTranspose();
 
@@ -286,6 +286,7 @@ update_status ModuleRenderer3D::PreUpdate()
 
 			if (!isCubes)
 			{
+				camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
 
 				math::float4x4 model = App->math->Rotate(math::float3(0.5f, 1.0f, 0.0f), timeCuberotateValue * 50.0f * DEGTORAD);
 				model.InverseTranspose();
@@ -295,12 +296,30 @@ update_status ModuleRenderer3D::PreUpdate()
 			}
 			else
 			{
-				float radius = 10.0f;
-				float camX = sin(timeCuberotateValue) * radius;
-				float camZ = cos(timeCuberotateValue) * radius;
-				camera->SetPos(math::float3(camX,0.0f,camZ));
+				if (!isMove)
+				{
+					float radius = 10.0f;
+					float camX = sin(timeCuberotateValue) * radius;
+					float camZ = cos(timeCuberotateValue) * radius;
+					camera->SetPos(math::float3(camX, 0.0f, camZ));
 
-				shader_manager->setFloat4x4(shader_cube, "view", camera->LookAt(math::float3(0.0f, 0.0f, 0.0f)).ptr());
+					shader_manager->setFloat4x4(shader_cube, "view", camera->LookAt(math::float3(0.0f, 0.0f, 0.0f)).ptr());
+				}
+				else
+				{
+					float cameraSpeed = 2.5f * App->time->GetDeltaTime();
+
+					if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
+						camera->MoveFront(cameraSpeed);
+					if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
+						camera->MoveBack(cameraSpeed);
+					if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+						camera->MoveLeft(cameraSpeed);
+					if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+						camera->MoveRight(cameraSpeed);
+
+					shader_manager->setFloat4x4(shader_cube, "view", camera->GetView().ptr());
+				}
 			}
 		}
 	}
@@ -525,6 +544,11 @@ void ModuleRenderer3D::SetShaderBool(const char * name, bool value)
 			shader_manager->setBool(textureSquare, name, value);
 }
 
+void ModuleRenderer3D::ResetCameraPos()
+{
+	camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
+}
+
 bool * ModuleRenderer3D::GetVsync()
 {
 	return &vsync;
@@ -558,4 +582,9 @@ bool * ModuleRenderer3D::GetisScaled()
 bool * ModuleRenderer3D::GetisCubes()
 {
 	return &isCubes;
+}
+
+bool * ModuleRenderer3D::GetisMove()
+{
+	return &isMove;
 }
