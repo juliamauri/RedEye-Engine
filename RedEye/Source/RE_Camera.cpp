@@ -17,12 +17,27 @@ RE_Camera::RE_Camera(bool cameraType, float near_plane, float far_plane)
 	camera.SetViewPlaneDistances(near_plane, far_plane);
 }
 
-void RE_Camera::SetPos(math::float3 pos)
+void RE_Camera::SetFront(float yaw, float pitch)
+{
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	camera.SetFront(math::vec(cos(yaw * DEGTORAD) * cos(pitch * DEGTORAD), sin(pitch * DEGTORAD), sin(yaw * DEGTORAD) * cos(pitch * DEGTORAD)).Normalized());
+}
+
+void RE_Camera::SetFront(math::vec front)
+{
+	camera.SetFront(front);
+}
+
+void RE_Camera::SetPos(math::vec pos)
 {
 	camera.SetPos(pos);
 }
 
-void RE_Camera::SetWorldOrigin(math::float3 world)
+void RE_Camera::SetWorldOrigin(math::vec world)
 {
 	camera.SetWorldMatrix(math::float3x4::Translate(world));
 }
@@ -62,7 +77,7 @@ math::float4x4 RE_Camera::GetProjection()
 	return camera.ProjectionMatrix().Transposed();
 }
 
-math::float4x4 RE_Camera::LookAt(math::float3 cameraTarget)
+math::float4x4 RE_Camera::LookAt(math::vec cameraTarget)
 {
 	return GetView() * math::float4x4::LookAt(camera.Front().Normalized(),(camera.Pos() - cameraTarget).Normalized(),camera.Up().Normalized(),math::vec(0.0f,1.0f,0.0f).Normalized());
 }

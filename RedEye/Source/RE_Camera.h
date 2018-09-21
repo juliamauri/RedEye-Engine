@@ -13,11 +13,19 @@ public:
 
 	//Set the camera position, must use this
 	//@param pos ->camera position
-	void SetPos(math::float3 pos);
+	void SetPos(math::vec pos);
+
+	//Set the camera front vector
+	//@param yaw, pitch euler angles
+	void SetFront(float yaw, float pitch);
+
+	//Set the camera front vector
+	//@param front -> camera front
+	void SetFront(math::vec front);
 
 	//Set World origin Position
 	//@param world -> world position
-	void SetWorldOrigin(math::float3 world);
+	void SetWorldOrigin(math::vec world);
 
 	//Set the position planes by distance
 	//@param near and @far -> distances of planes from camera position
@@ -37,7 +45,7 @@ public:
 
 	//LookAt, return the view matrix (view * transformation matrix)
 	//@param cameraTarget -> The object that the camera looks
-	math::float4x4 LookAt(math::float3 cameraTarget);
+	math::float4x4 LookAt(math::vec cameraTarget);
 
 	//Move camera
 	void MoveFront(float speed);

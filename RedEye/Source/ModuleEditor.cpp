@@ -402,7 +402,7 @@ void RendererTest::Draw()
 						bool* isMove = renderer_module->GetisMove();
 						if(ImGui::Checkbox((*isMove) ? "ToLookAround" : "ToMove", isMove))
 							if (*isMove)
-								renderer_module->ResetCameraPos();
+								renderer_module->ResetCamera();
 					}
 				}
 			}

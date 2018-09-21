@@ -64,7 +64,7 @@ public:
 	void UseShader(ShaderType shader_enabled);
 	void SetShaderBool(const char* name, bool value);
 
-	void ResetCameraPos();
+	void ResetCamera();
 
 	bool* GetVsync();
 	bool* GetB_EBO();
@@ -95,6 +95,12 @@ private:
 	float timeValue = 0, timerotateValue = 0, timeCuberotateValue = 0;
 
 	bool isRotated = false, isScaled = false, isCubes = false, isMove = true;
+
+	float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+	float pitch = 0.0f;
+	float lastX;
+	float lastY;
+	bool firstMouse = true;
 };
 
 #endif // !__MODULERENDER3D_H__

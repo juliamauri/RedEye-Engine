@@ -309,6 +309,29 @@ update_status ModuleRenderer3D::PreUpdate()
 				{
 					float cameraSpeed = 2.5f * App->time->GetDeltaTime();
 
+					const MouseData* mouse = App->input->GetMouse();
+					if (firstMouse)
+					{
+						lastX = mouse->mouse_x;
+						lastY = mouse->mouse_y;
+						firstMouse = false;
+					}
+
+					float xoffset = mouse->mouse_x - lastX;
+					float yoffset = lastY - mouse->mouse_y;
+					lastX = mouse->mouse_x;
+					lastY = mouse->mouse_y;
+
+
+					float sensitivity = 0.05;
+					xoffset *= sensitivity;
+					yoffset *= sensitivity;
+
+					yaw += xoffset;
+					pitch += yoffset;
+
+					camera->SetFront(yaw, pitch);
+
 					if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
 						camera->MoveFront(cameraSpeed);
 					if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
@@ -544,9 +567,10 @@ void ModuleRenderer3D::SetShaderBool(const char * name, bool value)
 			shader_manager->setBool(textureSquare, name, value);
 }
 
-void ModuleRenderer3D::ResetCameraPos()
+void ModuleRenderer3D::ResetCamera()
 {
-	camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
+	camera->SetFront(math::vec(0.0f, 0.0f, -1.0f));
+	camera->SetPos(math::vec(0.0f, 0.0f, -3.0f));
 }
 
 bool * ModuleRenderer3D::GetVsync()
