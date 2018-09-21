@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "ModuleEditor.h"
+#include "ModuleWindow.h"
 #include "Event.h"
 #include "Globals.h"
 #include "SDL2\include\SDL.h"
@@ -89,6 +90,11 @@ KEY_STATE ModuleInput::GetKey(int id) const
 const MouseData* ModuleInput::GetMouse() const
 {
 	return &mouse;
+}
+
+void ModuleInput::SetMouseAtCenter()
+{
+	SDL_WarpMouseInWindow(App->window->GetWindow(), App->window->GetWidth() / 2, App->window->GetHeight() / 2);
 }
 
 void ModuleInput::UpdateKeyboard()

@@ -49,6 +49,8 @@ public:
 	KEY_STATE GetKey(int id) const;
 	const MouseData* GetMouse() const;
 
+	void SetMouseAtCenter();
+
 private:
 
 	void UpdateKeyboard();

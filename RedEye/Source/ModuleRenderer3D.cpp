@@ -307,21 +307,14 @@ update_status ModuleRenderer3D::PreUpdate()
 				}
 				else
 				{
+					App->input->SetMouseAtCenter();
+
 					float cameraSpeed = 2.5f * App->time->GetDeltaTime();
 
 					const MouseData* mouse = App->input->GetMouse();
-					if (firstMouse)
-					{
-						lastX = mouse->mouse_x;
-						lastY = mouse->mouse_y;
-						firstMouse = false;
-					}
 
-					float xoffset = mouse->mouse_x - lastX;
-					float yoffset = lastY - mouse->mouse_y;
-					lastX = mouse->mouse_x;
-					lastY = mouse->mouse_y;
-
+					float xoffset = mouse->mouse_x_motion;
+					float yoffset = mouse->mouse_y_motion;
 
 					float sensitivity = 0.05;
 					xoffset *= sensitivity;
@@ -340,6 +333,14 @@ update_status ModuleRenderer3D::PreUpdate()
 						camera->MoveLeft(cameraSpeed);
 					if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 						camera->MoveRight(cameraSpeed);
+
+					if (App->input->GetKey(SDL_SCANCODE_Q) == KEY_UP)
+					{
+						isMove = false;
+						yaw = -90.0f;
+						pitch = 0.0f;
+						ResetCamera();
+					}
 
 					shader_manager->setFloat4x4(shader_cube, "view", camera->GetView().ptr());
 				}
