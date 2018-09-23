@@ -13,6 +13,7 @@ class HeriarchyWindow;
 class PropertiesWindow;
 class RandomTest;
 class RendererTest;
+class GeometryTest;
 
 union SDL_Event;
 
@@ -42,6 +43,7 @@ private:
 	PropertiesWindow* properties = nullptr;
 	RandomTest* rng = nullptr;
 	RendererTest* renderer = nullptr;
+	GeometryTest* geo_test = nullptr;
 
 	std::list<EditorWindow*> windows;
 
@@ -124,8 +126,34 @@ public:
 	int shader_selcted, texture_selected, object_selected = 0;
 };
 
+enum GeoFigureType
+{
+	GEO_SPHERE = 0,
+	GEO_CAPSULE,
+	GEO_AABB,
+	GEO_OBB,
+	GEO_FRUSTUM,
+	GEO_PLANE
+	//GEO_TRINAGLE
+};
+
+class GeometryTest : public EditorWindow
+{
+public:
+	GeometryTest(const char* name = "Geometry Test", bool start_active = true);
+	void Draw() override;
+
+private:
+	float first_x, first_y, first_z = 0.f;
+	float second_x, second_y, second_z = 0.f;
+	float first_xtra, second_xtra = 0.f;
+	int first_type, second_type = 0;
+	std::string fig1 = "";
+	std::string fig2 = "";
+	bool intersects = false;
+};
+
 /*/ Missing windows:
-void GeometryTest();
 void About();
 void PlayPause();*/
 

@@ -5,6 +5,7 @@
 #include "ModuleInput.h"
 #include "ModuleRenderer3D.h"
 #include "RE_Math.h"
+#include "MathGeoLib\include\MathGeoLib.h"
 
 #include "ImGui\imgui_impl_sdl_gl3.h"
 #include "ImGuizmo\ImGuizmo.h"
@@ -18,6 +19,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(config = new ConfigWindow());
 	windows.push_back(rng = new RandomTest());
 	windows.push_back(renderer = new RendererTest());
+	windows.push_back(geo_test = new GeometryTest());
 	show_demo = false;
 }
 
@@ -407,6 +409,271 @@ void RendererTest::Draw()
 				}
 			}
 		}
+	}
+
+	ImGui::End();
+}
+
+GeometryTest::GeometryTest(const char * name, bool start_active) :
+	EditorWindow(name, start_active)
+{}
+
+void GeometryTest::Draw()
+{
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		ImGui::Combo("Figure 1", &first_type, "Sphere\0Capsule\0AABB\0OBB\0Frustum\0Plane");
+		ImGui::SliderFloat("F1-Pos X", &first_x, -10, 10);
+		ImGui::SliderFloat("F1-Pos Y", &first_y, -10, 10);
+		ImGui::SliderFloat("F1-Pos Z", &first_z, -10, 10);
+		ImGui::SliderFloat("F1-Extra value", &first_xtra, -10, 10);
+
+		ImGui::Separator();
+		ImGui::Combo("Figure 2", &second_type, "Sphere\0Capsule\0AABB\0OBB\0Frustum\0Plane");
+		ImGui::SliderFloat("F2-Pos X", &second_x, -10, 10);
+		ImGui::SliderFloat("F2-Pos Y", &second_y, -10, 10);
+		ImGui::SliderFloat("F2-Pos Z", &second_z, -10, 10);
+		ImGui::SliderFloat("F2-Extra value", &second_xtra, -10, 10);
+
+		ImGui::Separator();
+		if (ImGui::Button("Check Intersection"))
+		{
+			math::Sphere sphere;
+			math::Capsule capsule;
+			math::AABB aabb;
+			math::OBB obb;
+			math::Frustum frustum, tmp;
+			math::Plane plane;
+			fig1 = "Figure 1: ";
+			fig2 = "Figure 2: ";
+
+			switch (GeoFigureType(first_type)) {
+			case GEO_SPHERE:
+				fig1 += "Sphere with center at Pos(F1-Pos X, F1-Pos Y, F1-Pos Z) and radius(F1-Extra value)";
+				sphere = math::Sphere(math::vec(first_x, first_y, first_z), first_xtra);
+				switch (GeoFigureType(second_type)) {
+				case GEO_SPHERE:
+					fig2 += "Sphere with center at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra));
+					break;
+				case GEO_CAPSULE:
+					fig2 += "Capsule with bottom point(F2-Pos X, F2-Pos Y, F2-Pos Z), top point(F2-Pos X, (F2-Pos Y) + 2, F2-Pos Z) and radius(F2-Extra value))";
+					intersects = sphere.Intersects(math::Capsule(math::vec(second_x, second_y, second_z), math::vec(second_x, second_y + 2.0f, second_z), second_xtra));
+					break;
+				case GEO_AABB:
+					fig2 += "AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra)));
+					break;
+				case GEO_OBB:
+					fig2 += "OBB made from AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::OBB(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra))));
+					break;
+				case GEO_FRUSTUM:
+					fig2 += "Projective Frustum at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) with near plane at 0.1 and far plane at 10";
+					tmp.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+					tmp.SetPerspective(4.f, 3.f);
+					tmp.SetWorldMatrix(math::float3x4::Translate(math::float3(0.0f, 0.0f, 0.0f)));
+					tmp.SetPos(math::vec(second_x, second_y, second_z));
+					tmp.SetViewPlaneDistances(0.1f, 10.f);
+					intersects = sphere.Intersects(tmp);
+					break;
+				case GEO_PLANE:
+					fig2 += "Plane at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) facing UP";
+					intersects = sphere.Intersects(math::Plane(math::vec(first_x, first_y, first_z), math::vec(0.f, 1.f, 0.f)));
+					break;
+				}
+				break;
+			case GEO_CAPSULE:
+				fig1 += "Capsule with bottom point(F1-Pos X, F1-Pos Y, F1-Pos Z), top point(F1-Pos X, (F1-Pos Y) + 2, F1-Pos Z) and radius(F1-Extra value))";
+				capsule = math::Capsule(math::vec(first_x, first_y, first_z), math::vec(first_x, first_y + 2.0f, first_z), first_xtra);
+				switch (GeoFigureType(second_type)) {
+				case GEO_SPHERE:
+					fig2 += "Sphere with center at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra));
+					break;
+				case GEO_CAPSULE:
+					fig2 += "Capsule with bottom point(F2-Pos X, F2-Pos Y, F2-Pos Z), top point(F2-Pos X, (F2-Pos Y) + 2, F2-Pos Z) and radius(F2-Extra value))";
+					intersects = sphere.Intersects(math::Capsule(math::vec(second_x, second_y, second_z), math::vec(second_x, second_y + 2.0f, second_z), second_xtra));
+					break;
+				case GEO_AABB:
+					fig2 += "AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra)));
+					break;
+				case GEO_OBB:
+					fig2 += "OBB made from AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::OBB(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra))));
+					break;
+				case GEO_FRUSTUM:
+					fig2 += "Projective Frustum at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) with near plane at 0.1 and far plane at 10";
+					tmp.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+					tmp.SetPerspective(4.f, 3.f);
+					tmp.SetWorldMatrix(math::float3x4::Translate(math::float3(0.0f, 0.0f, 0.0f)));
+					tmp.SetPos(math::vec(second_x, second_y, second_z));
+					tmp.SetViewPlaneDistances(0.1f, 10.f);
+					intersects = sphere.Intersects(tmp);
+					break;
+				case GEO_PLANE:
+					fig2 += "Plane at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) facing UP";
+					intersects = sphere.Intersects(math::Plane(math::vec(first_x, first_y, first_z), math::vec(0.f, 1.f, 0.f)));
+					break;
+				}
+				break;
+			case GEO_AABB:
+				fig1 += "AABB made from sphere at Pos(F1-Pos X, F1-Pos Y, F1-Pos Z) and radius(F1-Extra value)";
+				aabb = math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra));
+				switch (GeoFigureType(second_type)) {
+				case GEO_SPHERE:
+					fig2 += "Sphere with center at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra));
+					break;
+				case GEO_CAPSULE:
+					fig2 += "Capsule with bottom point(F2-Pos X, F2-Pos Y, F2-Pos Z), top point(F2-Pos X, (F2-Pos Y) + 2, F2-Pos Z) and radius(F2-Extra value))";
+					intersects = sphere.Intersects(math::Capsule(math::vec(second_x, second_y, second_z), math::vec(second_x, second_y + 2.0f, second_z), second_xtra));
+					break;
+				case GEO_AABB:
+					fig2 += "AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra)));
+					break;
+				case GEO_OBB:
+					fig2 += "OBB made from AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::OBB(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra))));
+					break;
+				case GEO_FRUSTUM:
+					fig2 += "Projective Frustum at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) with near plane at 0.1 and far plane at 10";
+					tmp.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+					tmp.SetPerspective(4.f, 3.f);
+					tmp.SetWorldMatrix(math::float3x4::Translate(math::float3(0.0f, 0.0f, 0.0f)));
+					tmp.SetPos(math::vec(second_x, second_y, second_z));
+					tmp.SetViewPlaneDistances(0.1f, 10.f);
+					intersects = sphere.Intersects(tmp);
+					break;
+				case GEO_PLANE:
+					fig2 += "Plane at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) facing UP";
+					intersects = sphere.Intersects(math::Plane(math::vec(first_x, first_y, first_z), math::vec(0.f, 1.f, 0.f)));
+					break;
+				}
+				break;
+			case GEO_OBB:
+				fig1 += "OBB made from AABB made from sphere at Pos(F1-Pos X, F1-Pos Y, F1-Pos Z) and radius(F1-Extra value)";
+				obb = math::OBB(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra)));
+				switch (GeoFigureType(second_type)) {
+				case GEO_SPHERE:
+					fig2 += "Sphere with center at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra));
+					break;
+				case GEO_CAPSULE:
+					fig2 += "Capsule with bottom point(F2-Pos X, F2-Pos Y, F2-Pos Z), top point(F2-Pos X, (F2-Pos Y) + 2, F2-Pos Z) and radius(F2-Extra value))";
+					intersects = sphere.Intersects(math::Capsule(math::vec(second_x, second_y, second_z), math::vec(second_x, second_y + 2.0f, second_z), second_xtra));
+					break;
+				case GEO_AABB:
+					fig2 += "AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra)));
+					break;
+				case GEO_OBB:
+					fig2 += "OBB made from AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::OBB(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra))));
+					break;
+				case GEO_FRUSTUM:
+					fig2 += "Projective Frustum at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) with near plane at 0.1 and far plane at 10";
+					tmp.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+					tmp.SetPerspective(4.f, 3.f);
+					tmp.SetWorldMatrix(math::float3x4::Translate(math::float3(0.0f, 0.0f, 0.0f)));
+					tmp.SetPos(math::vec(second_x, second_y, second_z));
+					tmp.SetViewPlaneDistances(0.1f, 10.f);
+					intersects = sphere.Intersects(tmp);
+					break;
+				case GEO_PLANE:
+					fig2 += "Plane at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) facing UP";
+					intersects = sphere.Intersects(math::Plane(math::vec(first_x, first_y, first_z), math::vec(0.f, 1.f, 0.f)));
+					break;
+				}
+				break;
+			case GEO_FRUSTUM:
+				fig1 += "Projective Frustum at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) with near plane at 0.1 and far plane at 10";
+				frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+				frustum.SetPerspective(4.f, 3.f);
+				frustum.SetWorldMatrix(math::float3x4::Translate(math::float3(0.0f, 0.0f, 0.0f)));
+				frustum.SetPos(math::vec(second_x, second_y, second_z));
+				frustum.SetViewPlaneDistances(0.1f, 10.f);
+				switch (GeoFigureType(second_type)) {
+				case GEO_SPHERE:
+					fig2 += "Sphere with center at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra));
+					break;
+				case GEO_CAPSULE:
+					fig2 += "Capsule with bottom point(F2-Pos X, F2-Pos Y, F2-Pos Z), top point(F2-Pos X, (F2-Pos Y) + 2, F2-Pos Z) and radius(F2-Extra value))";
+					intersects = sphere.Intersects(math::Capsule(math::vec(second_x, second_y, second_z), math::vec(second_x, second_y + 2.0f, second_z), second_xtra));
+					break;
+				case GEO_AABB:
+					fig2 += "AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra)));
+					break;
+				case GEO_OBB:
+					fig2 += "OBB made from AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::OBB(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra))));
+					break;
+				case GEO_FRUSTUM:
+					fig2 += "Projective Frustum at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) with near plane at 0.1 and far plane at 10";
+					tmp.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+					tmp.SetPerspective(4.f, 3.f);
+					tmp.SetWorldMatrix(math::float3x4::Translate(math::float3(0.0f, 0.0f, 0.0f)));
+					tmp.SetPos(math::vec(second_x, second_y, second_z));
+					tmp.SetViewPlaneDistances(0.1f, 10.f);
+					intersects = sphere.Intersects(tmp);
+					break;
+				case GEO_PLANE:
+					fig2 += "Plane at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) facing UP";
+					intersects = sphere.Intersects(math::Plane(math::vec(first_x, first_y, first_z), math::vec(0.f, 1.f, 0.f)));
+					break;
+				}
+				break;
+			case GEO_PLANE:
+				fig1 += "Plane at Pos(F1-Pos X, F1-Pos Y, F1-Pos Z) facing UP";
+				plane = math::Plane(math::vec(first_x, first_y, first_z), math::vec(0.f, 1.f, 0.f));
+				switch (GeoFigureType(second_type)) {
+				case GEO_SPHERE:
+					fig2 += "Sphere with center at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra));
+					break;
+				case GEO_CAPSULE:
+					fig2 += "Capsule with bottom point(F2-Pos X, F2-Pos Y, F2-Pos Z), top point(F2-Pos X, (F2-Pos Y) + 2, F2-Pos Z) and radius(F2-Extra value))";
+					intersects = sphere.Intersects(math::Capsule(math::vec(second_x, second_y, second_z), math::vec(second_x, second_y + 2.0f, second_z), second_xtra));
+					break;
+				case GEO_AABB:
+					fig2 += "AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra)));
+					break;
+				case GEO_OBB:
+					fig2 += "OBB made from AABB made from sphere at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) and radius(F2-Extra value)";
+					intersects = sphere.Intersects(math::OBB(math::AABB(math::Sphere(math::vec(second_x, second_y, second_z), second_xtra))));
+					break;
+				case GEO_FRUSTUM:
+					fig2 += "Projective Frustum at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) with near plane at 0.1 and far plane at 10";
+					tmp.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+					tmp.SetPerspective(4.f, 3.f);
+					tmp.SetWorldMatrix(math::float3x4::Translate(math::float3(0.0f, 0.0f, 0.0f)));
+					tmp.SetPos(math::vec(second_x, second_y, second_z));
+					tmp.SetViewPlaneDistances(0.1f, 10.f);
+					intersects = sphere.Intersects(tmp);
+					break;
+				case GEO_PLANE:
+					fig2 += "Plane at Pos(F2-Pos X, F2-Pos Y, F2-Pos Z) facing UP";
+					intersects = sphere.Intersects(math::Plane(math::vec(first_x, first_y, first_z), math::vec(0.f, 1.f, 0.f)));
+					break;
+				}
+				break;
+			}
+		}
+
+		ImGui::TextWrappedV(fig1.c_str(), "");
+		ImGui::Text("&");
+		ImGui::TextWrappedV(fig2.c_str(), "");
+
+		if (intersects)
+			ImGui::Text("Intersect");
+		else
+			ImGui::Text("Do NOT Intersect");
+
 	}
 
 	ImGui::End();
