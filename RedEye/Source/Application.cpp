@@ -129,13 +129,16 @@ void Application::DrawEditor()
 		static char holder[100];
 		int size = sizeof(holder) / sizeof(char);
 
-		sprintf_s(holder, size, "%s", app_name);
+		sprintf_s(holder, size, "%s", app_name.c_str());
 		if (ImGui::InputText("App Name", holder, size))
-			window->SetTitle(app_name = holder);
-
-		sprintf_s(holder, size, "%s", organization);
-		if (ImGui::InputText("Organization", holder, size))
+		{
 			app_name = holder;
+			window->SetTitle(app_name.c_str());
+		}
+
+		sprintf_s(holder, size, "%s", organization.c_str());
+		if (ImGui::InputText("Organization", holder, size))
+			organization = holder;
 
 		time->DrawEditor();
 	}
@@ -167,10 +170,10 @@ void Application::RecieveEvent(const Event* e)
 
 const char * Application::GetName() const
 {
-	return app_name;
+	return app_name.c_str();
 }
 
 const char * Application::GetOrganization() const
 {
-	return organization;
+	return organization.c_str();
 }

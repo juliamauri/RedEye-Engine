@@ -3,6 +3,7 @@
 
 #include "EventListener.h"
 //#include "Cvar.h"
+#include <string>
 #include <list>
 #include <map>
 
@@ -57,8 +58,8 @@ private:
 	std::list<Module*> modules;
 	bool want_to_quit = false;
 
-	const char* app_name = "RedEye Engine";
-	const char* organization = "RedEye";
+	std::string app_name = "RedEye Engine";
+	std::string organization = "RedEye";
 
 	int argc;
 	char* argv[];

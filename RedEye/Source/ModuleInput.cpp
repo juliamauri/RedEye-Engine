@@ -207,7 +207,6 @@ void ModuleInput::HandleEventQueue()
 
 /* Keyboard events */
 		case SDL_KEYDOWN:/**< Key pressed */
-			App->editor->HandleSDLEvent(&e);
 			break;
 		case SDL_KEYUP:/**< Key released */
 			break;
@@ -299,6 +298,8 @@ void ModuleInput::HandleEventQueue()
 			break;
 		}
 	}
+
+	if(App->editor->IsActive()) App->editor->HandleSDLEvent(&e);
 
 	// RE Events
 	Event* re_e = nullptr;
