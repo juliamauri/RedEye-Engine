@@ -484,6 +484,8 @@ bool ModuleRenderer3D::CleanUp()
 	//delete shaders
 	delete shader_manager;
 
+	delete camera;
+
 	return ret;
 }
 

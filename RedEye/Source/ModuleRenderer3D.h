@@ -94,7 +94,7 @@ private:
 
 	float timeValue = 0, timerotateValue = 0, timeCuberotateValue = 0;
 
-	bool isRotated = false, isScaled = false, isCubes = false, isMove = true;
+	bool isRotated = false, isScaled = false, isCubes = false, isMove = false;
 
 	float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
 	float pitch = 0.0f;

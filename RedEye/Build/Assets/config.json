@@ -4,9 +4,9 @@
   },
   "Input": {},
   "Window": {
-    "title": "Hola Ruben!",
-    "screen_width": 800,
-    "screen_height": 600,
+    "title": "RedEye",
+    "screen_width": 1280,
+    "screen_height": 720,
     "fullscreen": false,
     "resizable": false,
     "borderless": false,
