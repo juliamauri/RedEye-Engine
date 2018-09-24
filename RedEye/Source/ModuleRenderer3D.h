@@ -66,9 +66,7 @@ public:
 
 	void ResetCamera();
 
-	bool* GetVsync();
 	bool* GetB_EBO();
-	bool* GetisLine();
 	bool* Getprintvertextcolor();
 	bool* GetisRotated();
 	bool* GetisScaled();

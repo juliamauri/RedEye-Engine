@@ -405,12 +405,6 @@ void RendererTest::Draw()
 	{
 		ModuleRenderer3D* renderer_module = App->renderer3d;
 
-		bool* vsync = renderer_module->GetVsync();
-		if (ImGui::Checkbox((*vsync) ? "Disable vsync" : "Enable vsync", vsync))
-		{
-			renderer_module->enableVSync(*vsync);
-		}
-
 		bool* B_EBO = renderer_module->GetB_EBO();
 		if (ImGui::Checkbox((*B_EBO) ? "Change to Triangle" : "Change to Square", B_EBO))
 		{
@@ -420,9 +414,6 @@ void RendererTest::Draw()
 				shader_selcted = 0;
 			}
 		}
-
-		bool* isLine = renderer_module->GetisLine();
-		ImGui::Checkbox((*isLine) ? "Disable Wireframe" : "Enable Wireframe", isLine);
 
 		if (*B_EBO)
 		{

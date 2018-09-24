@@ -491,6 +491,13 @@ bool ModuleRenderer3D::CleanUp()
 
 void ModuleRenderer3D::DrawEditor()
 {
+	if(ImGui::CollapsingHeader("Renderer 3D"))
+	{
+		if (ImGui::Checkbox((vsync) ? "Disable vsync" : "Enable vsync", &vsync))
+			enableVSync(vsync);
+
+		ImGui::Checkbox((isLine) ? "Disable Wireframe" : "Enable Wireframe", &isLine);
+	}
 }
 
 void ModuleRenderer3D::RecieveEvent(const Event * e)
@@ -576,19 +583,9 @@ void ModuleRenderer3D::ResetCamera()
 	camera->SetPos(math::vec(0.0f, 0.0f, -3.0f));
 }
 
-bool * ModuleRenderer3D::GetVsync()
-{
-	return &vsync;
-}
-
 bool * ModuleRenderer3D::GetB_EBO()
 {
 	return &B_EBO;
-}
-
-bool * ModuleRenderer3D::GetisLine()
-{
-	return &isLine;
 }
 
 bool * ModuleRenderer3D::Getprintvertextcolor()
