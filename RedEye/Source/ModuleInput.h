@@ -7,9 +7,9 @@
 
 #define MAX_MOUSE_BUTTONS 5
 
-enum KEY_STATE
+enum KEY_STATE : short unsigned int
 {
-	KEY_IDLE = 0,
+	KEY_IDLE = 0u,
 	KEY_DOWN,
 	KEY_REPEAT,
 	KEY_UP
@@ -46,7 +46,8 @@ public:
 
 	bool AddEvent(const Event e);
 
-	KEY_STATE GetKey(int id) const;
+	KEY_STATE GetKey(const unsigned int id) const;
+	bool CheckKey(const unsigned int id, const KEY_STATE state = KEY_UP) const;
 	const MouseData* GetMouse() const;
 
 	void SetMouseAtCenter();

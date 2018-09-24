@@ -82,9 +82,16 @@ bool ModuleInput::CleanUp()
 	return true;
 }
 
-KEY_STATE ModuleInput::GetKey(int id) const
+KEY_STATE ModuleInput::GetKey(const unsigned int id) const
 {
+	SDL_assert(id < MAX_KEYS);
 	return keyboard[id];
+}
+
+bool ModuleInput::CheckKey(const unsigned int id, const KEY_STATE state) const
+{
+	SDL_assert(id < MAX_KEYS);
+	return keyboard[id] == state;
 }
 
 const MouseData* ModuleInput::GetMouse() const

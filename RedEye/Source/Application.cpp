@@ -164,3 +164,13 @@ void Application::RecieveEvent(const Event* e)
 	if (e->GetType() == REQUEST_QUIT)
 		want_to_quit = true;
 }
+
+const char * Application::GetName() const
+{
+	return app_name;
+}
+
+const char * Application::GetOrganization() const
+{
+	return organization;
+}

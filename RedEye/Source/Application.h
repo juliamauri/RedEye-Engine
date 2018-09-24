@@ -32,6 +32,9 @@ public:
 	void RequestBrowser(const char* link) const;
 	void RecieveEvent(const Event* e) override;
 
+	const char* GetName() const;
+	const char* GetOrganization() const;
+
 private:
 
 	void PrepareUpdate();
