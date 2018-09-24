@@ -1,4 +1,6 @@
 # Red Eye Engine
+[![Build status](https://ci.appveyor.com/api/projects/status/swrp9sgx89yxl493?svg=true)](https://ci.appveyor.com/project/cumus/redeye-engine)
+
 3D Game Engine Sofware for academic purposes.
 * Repository [Github](https://github.com/juliamauri/RedEye-Engine)
 * Authors: [Julià Mauri Costa](https://github.com/juliamauri) & [Rubén Sardón](https://github.com/cumus)
