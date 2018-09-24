@@ -1,6 +1,10 @@
 #include "RE_Math.h"
 
+#ifdef _DEBUG
 #pragma comment(lib, "MathGeoLib/lib/MathGeoLib_debug.lib")
+#else
+#pragma comment(lib, "MathGeoLib/lib/MathGeoLib_release.lib")
+#endif
 
 RE_Math::RE_Math()
 {
