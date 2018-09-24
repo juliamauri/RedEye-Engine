@@ -11,6 +11,7 @@ class DemoWindow;
 class ConfigWindow;
 class HeriarchyWindow;
 class PropertiesWindow;
+class AboutWindow;
 class RandomTest;
 class RendererTest;
 class GeometryTest;
@@ -41,12 +42,15 @@ private:
 	ConfigWindow* config = nullptr;
 	HeriarchyWindow* heriarchy = nullptr;
 	PropertiesWindow* properties = nullptr;
+	AboutWindow* about = nullptr;
+
 	RandomTest* rng = nullptr;
 	RendererTest* renderer = nullptr;
 	GeometryTest* geo_test = nullptr;
 
-	std::list<EditorWindow*> windows;
+	std::list<EditorWindow*> windows, tools;
 
+	bool show_all = true;
 	bool show_demo = false;
 };
 
@@ -63,6 +67,7 @@ public:
 	/*ImGui::SetNextWindowPos(ImVec2(0, 738));
 	ImGui::SetWindowSize(ImVec2(1230.0f, 220.0f));*/
 
+	bool IsActive() const;
 	inline operator bool() const;
 	inline bool operator!() const;
 
@@ -104,6 +109,13 @@ class PropertiesWindow : public EditorWindow
 {
 public:
 	PropertiesWindow(const char* name = "Properties", bool start_active = false);
+	void Draw() override;
+};
+
+class AboutWindow : public EditorWindow
+{
+public:
+	AboutWindow(const char* name = "About", bool start_active = false);
 	void Draw() override;
 };
 
@@ -154,7 +166,6 @@ private:
 };
 
 /*/ Missing windows:
-void About();
 void PlayPause();*/
 
 #endif // !__MODULEEDITOR__
