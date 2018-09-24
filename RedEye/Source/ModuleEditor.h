@@ -122,7 +122,7 @@ public:
 class RandomTest : public EditorWindow
 {
 public:
-	RandomTest(const char* name = "Random Test", bool start_active = true);
+	RandomTest(const char* name = "Random Test", bool start_active = false);
 	void Draw() override;
 
 	int minInt = 0, maxInt = 10, resultInt = 0;
@@ -152,7 +152,7 @@ enum GeoFigureType
 class GeometryTest : public EditorWindow
 {
 public:
-	GeometryTest(const char* name = "Geometry Test", bool start_active = true);
+	GeometryTest(const char* name = "Geometry Test", bool start_active = false);
 	void Draw() override;
 
 private:
