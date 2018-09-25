@@ -19,7 +19,7 @@ public:
 
 	void	SetRNGSeed(unsigned int seed);
 
-	math::float4x4 Rotate(math::float3 axis, float radians);
+	static math::float4x4 Rotate(math::float3 axis, float radians);
 
 private:
 

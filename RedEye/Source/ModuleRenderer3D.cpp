@@ -248,7 +248,7 @@ update_status ModuleRenderer3D::PreUpdate()
 			{	
 				camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
 
-				math::float4x4 model = App->math->Rotate(math::float3(1.0f, 0.0f, 0.0f), 55.0f * DEGTORAD);
+				math::float4x4 model = RE_Math::Rotate(math::float3(1.0f, 0.0f, 0.0f), 55.0f * DEGTORAD);
 				model.InverseTranspose();
 
 				shader_manager->setFloat4x4(twotextures, "model", model.ptr());
@@ -261,7 +261,7 @@ update_status ModuleRenderer3D::PreUpdate()
 
 				math::float4x4 trans;
 				//All values needed to be inversed, because the InverseTranspose()
-				trans = App->math->Rotate(math::float3(0.0f, 0.0f, -1.0f), timerotateValue);
+				trans = RE_Math::Rotate(math::float3(0.0f, 0.0f, -1.0f), timerotateValue);
 				
 				//scale the container
 				if (isScaled)
@@ -287,8 +287,8 @@ update_status ModuleRenderer3D::PreUpdate()
 			if (!isCubes)
 			{
 				camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
-
-				math::float4x4 model = App->math->Rotate(math::float3(0.5f, 1.0f, 0.0f), timeCuberotateValue * 50.0f * DEGTORAD);
+				
+				math::float4x4 model = RE_Math::Rotate(math::float3(0.5f, 1.0f, 0.0f), timeCuberotateValue * 50.0f * DEGTORAD);
 				model.InverseTranspose();
 
 				shader_manager->setFloat4x4(shader_cube, "model", model.ptr());
@@ -432,7 +432,7 @@ update_status ModuleRenderer3D::PostUpdate()
 				{
 					float angle = 20.0f * i;
 
-					math::float4x4 model = App->math->Rotate(math::float3(1.0f, 0.3f, 0.5f), angle * DEGTORAD) * math::float4x4::Translate(math::float3(cubePositions[i]).Neg());
+					math::float4x4 model = RE_Math::Rotate(math::float3(1.0f, 0.3f, 0.5f), angle * DEGTORAD) * math::float4x4::Translate(math::float3(cubePositions[i]).Neg());
 					model.InverseTranspose();
 
 					shader_manager->setFloat4x4(shader_cube, "model", model.ptr());
