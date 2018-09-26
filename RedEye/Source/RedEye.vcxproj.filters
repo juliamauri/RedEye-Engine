@@ -70,6 +70,9 @@
     <ClCompile Include="RE_Camera.cpp">
       <Filter>Components</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleScene.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -278,6 +281,9 @@
     </ClInclude>
     <ClInclude Include="RE_Camera.h">
       <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleScene.h">
+      <Filter>Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
