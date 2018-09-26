@@ -8,8 +8,9 @@
 #include <map>
 
 class Module;
-class ModuleWindow;
 class ModuleInput;
+class ModuleWindow;
+class ModuleScene;
 class ModuleEditor;
 class ModuleRenderer3D;
 
@@ -43,8 +44,9 @@ private:
 
 public:
 
-	ModuleWindow* window = nullptr;
 	ModuleInput* input = nullptr;
+	ModuleWindow* window = nullptr;
+	ModuleScene* scene = nullptr;
 	ModuleEditor* editor = nullptr;
 	ModuleRenderer3D* renderer3d = nullptr;
 

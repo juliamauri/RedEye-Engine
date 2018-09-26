@@ -5,6 +5,7 @@
 
 struct SDL_Window;
 struct SDL_Surface;
+union SDL_Event;
 
 class ModuleWindow : public Module
 {
@@ -18,6 +19,7 @@ public:
 	bool CleanUp() override;
 
 	void RecieveEvent(const Event* e) override;
+	void WindowEvent(const SDL_Event* e);
 
 	SDL_Window* GetWindow() const;
 

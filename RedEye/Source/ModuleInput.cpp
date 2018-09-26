@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "ModuleEditor.h"
+#include "ModuleScene.h"
 #include "ModuleWindow.h"
 #include "Event.h"
 #include "Globals.h"
@@ -169,47 +170,16 @@ void ModuleInput::HandleEventQueue()
 
 /* Window events */
 		case SDL_WINDOWEVENT:/**< System specific event */
-			switch (e.window.event)
-			{
-			case SDL_WINDOWEVENT_SHOWN:/**< Window has been shown */
-				break;
-			case SDL_WINDOWEVENT_HIDDEN:/**< Window has been hidden */
-				break;
-			case SDL_WINDOWEVENT_EXPOSED:/**< Window has been exposed and should be redrawn */
-				break;
-			case SDL_WINDOWEVENT_MOVED:/**< Window has been moved to data1, data2 */
-				break;
-			case SDL_WINDOWEVENT_RESIZED:/**< Window has been resized to data1xdata2 */
-				//App->renderer3D->OnResize(e.window.data1, e.window.data2);
-				break;
-			case SDL_WINDOWEVENT_SIZE_CHANGED:/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
-				break;
-			case SDL_WINDOWEVENT_MINIMIZED:/**< Window has been minimized */
-				break;
-			case SDL_WINDOWEVENT_MAXIMIZED:/**< Window has been maximized */
-				break;
-			case SDL_WINDOWEVENT_RESTORED:/**< Window has been restored to normal size and position */
-				break;
-			case SDL_WINDOWEVENT_ENTER:/**< Window has gained mouse focus */
-				break;
-			case SDL_WINDOWEVENT_LEAVE:/**< Window has lost mouse focus */
-				break;
-			case SDL_WINDOWEVENT_FOCUS_GAINED:/**< Window has gained keyboard focus */
-				break;
-			case SDL_WINDOWEVENT_FOCUS_LOST:/**< Window has lost keyboard focus */
-				break;
-			case SDL_WINDOWEVENT_CLOSE:/**< The window manager requests that the window be closed */
-				break;
-			}
+			App->window->WindowEvent(&e);
 			break;
 		case SDL_SYSWMEVENT:/**< System specific event */
 			break;
 
-/* Keyboard events */
-		case SDL_KEYDOWN:/**< Key pressed */
+/* Keyboard events /
+		case SDL_KEYDOWN:/< Key pressed
 			break;
-		case SDL_KEYUP:/**< Key released */
-			break;
+		case SDL_KEYUP:< Key released 
+			break;*/
 		case SDL_TEXTEDITING:/**< Keyboard text editing (composition) */
 			break;
 		case SDL_TEXTINPUT:/**< Keyboard text input */
@@ -223,10 +193,10 @@ void ModuleInput::HandleEventQueue()
 			mouse.mouse_x_motion = e.motion.xrel;
 			mouse.mouse_y_motion = e.motion.yrel;
 			break;
-		case SDL_MOUSEBUTTONDOWN:/**< Mouse button pressed */
+		/*case SDL_MOUSEBUTTONDOWN:< Mouse button pressed
 			break;
-		case SDL_MOUSEBUTTONUP:/**< Mouse button released */
-			break;
+		case SDL_MOUSEBUTTONUP:< Mouse button released
+			break;*/
 		case SDL_MOUSEWHEEL:/**< Mouse wheel motion */
 			mouse.mouse_wheel_motion = e.wheel.y;
 			break;
@@ -283,12 +253,7 @@ void ModuleInput::HandleEventQueue()
 
 /* Drag and drop events */
 		case SDL_DROPFILE:/**< The system requests a file open */
-			/*Event drop;
-			drop.data.str = e.drop.file;
-			App->scene_intro->ReceiveEvent(drop);*/
-
-			// file name: e.drop.file
-
+			AddEvent(Event(FILE_DROP, Cvar(e.drop.file), e.drop.timestamp, App->scene));
 			break;
 
 /* Render events */

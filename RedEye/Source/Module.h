@@ -15,11 +15,14 @@ private:
 
 public:
 
-	Module(const char* module_name, bool start_enabled = true) : enabled(start_enabled), name(module_name) {}
+	Module(const char* module_name, bool start_enabled = true) : EventListener(), enabled(start_enabled), name(module_name) {}
 	virtual ~Module(){}
 
 	bool IsActive() const { return enabled; }
 	const char* GetName() const { return name; }
+
+	EventListener* AsEventListener() { return this; }
+	const EventListener* AsEventListener() const { return this; }
 
 	virtual bool Init(JSONNode* node = nullptr) { return true; } //SETTING OWN VALUES
 	virtual bool Start() { return true; } //ACCESS OTHER MODULES

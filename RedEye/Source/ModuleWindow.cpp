@@ -1,5 +1,7 @@
 #include "ModuleWindow.h"
 
+#include "Application.h"
+#include "ModuleInput.h"
 #include "FileSystem.h"
 #include "Event.h"
 #include "ImGui\imgui.h"
@@ -128,6 +130,47 @@ bool ModuleWindow::CleanUp()
 
 void ModuleWindow::RecieveEvent(const Event* e)
 {
+	
+}
+
+void ModuleWindow::WindowEvent(const SDL_Event * e)
+{
+	switch (e->window.event)
+	{
+	case SDL_WINDOWEVENT_SHOWN:/**< Window has been shown */
+		break;
+	case SDL_WINDOWEVENT_HIDDEN:/**< Window has been hidden */
+		break;
+	case SDL_WINDOWEVENT_EXPOSED:/**< Window has been exposed and should be redrawn */
+		break;
+	case SDL_WINDOWEVENT_MOVED:/**< Window has been moved to data1, data2 */
+		break;
+	case SDL_WINDOWEVENT_RESIZED:/**< Window has been resized to data1xdata2 */
+		width = e->window.data1;
+		height = e->window.data2;
+		// TODO
+		//App->renderer3D->OnResize(e.window.data1, e.window.data2); projection must change
+		break;
+	case SDL_WINDOWEVENT_SIZE_CHANGED:/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
+		break;
+	case SDL_WINDOWEVENT_MINIMIZED:/**< Window has been minimized */
+		break;
+	case SDL_WINDOWEVENT_MAXIMIZED:/**< Window has been maximized */
+		break;
+	case SDL_WINDOWEVENT_RESTORED:/**< Window has been restored to normal size and position */
+		break;
+	case SDL_WINDOWEVENT_ENTER:/**< Window has gained mouse focus */
+		break;
+	case SDL_WINDOWEVENT_LEAVE:/**< Window has lost mouse focus */
+		break;
+	case SDL_WINDOWEVENT_FOCUS_GAINED:/**< Window has gained keyboard focus */
+		break;
+	case SDL_WINDOWEVENT_FOCUS_LOST:/**< Window has lost keyboard focus */
+		break;
+	case SDL_WINDOWEVENT_CLOSE:/**< The window manager requests that the window be closed */
+		App->input->AddEvent(Event(REQUEST_QUIT, e->window.timestamp, App));
+		break;
+	}
 }
 
 SDL_Window * ModuleWindow::GetWindow() const

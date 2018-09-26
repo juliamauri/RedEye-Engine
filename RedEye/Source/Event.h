@@ -17,6 +17,8 @@ typedef enum : unsigned short int
 	REQUEST_LOAD,
 	REQUEST_QUIT,
 
+	FILE_DROP,
+
 	MAX_EVENT_TYPES
 } RE_EventType;
 

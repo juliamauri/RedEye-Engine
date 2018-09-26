@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "ModuleScene.h"
 #include "Module.h"
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
@@ -18,6 +19,7 @@ Application::Application(int argc, char* argv[])
 {
 	modules.push_back(input = new ModuleInput("Input"));
 	modules.push_back(window = new ModuleWindow("Window"));
+	modules.push_back(scene = new ModuleScene("Scene"));
 	modules.push_back(editor = new ModuleEditor("Editor"));
 	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
 
