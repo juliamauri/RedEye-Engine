@@ -253,7 +253,7 @@ void ModuleInput::HandleEventQueue()
 
 /* Drag and drop events */
 		case SDL_DROPFILE:/**< The system requests a file open */
-			AddEvent(Event(FILE_DROP, Cvar(e.drop.file), e.drop.timestamp, App->scene));
+			App->scene->FileDrop(e.drop.file);
 			break;
 
 /* Render events */

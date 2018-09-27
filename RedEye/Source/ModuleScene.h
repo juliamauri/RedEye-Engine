@@ -13,6 +13,8 @@ public:
 	//bool Init(JSONNode* config_module) override;
 	bool CleanUp() override;
 
+	void FileDrop(const char* file);
+
 	void RecieveEvent(const Event* e) override;
 
 private:
