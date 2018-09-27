@@ -3,6 +3,14 @@
 
 #include "RE_Math.h"
 
+enum CameraMovement
+{
+	FORWARD,
+	BACKWARD,
+	LEFT,
+	RIGHT
+};
+
 class RE_Camera
 {
 public:
@@ -17,7 +25,7 @@ public:
 
 	//Set the camera front vector
 	//@param yaw, pitch euler angles
-	void SetFront(float yaw, float pitch);
+	void SetEulerAngle(float pitch, float yaw);
 
 	//Set the camera front vector
 	//@param front -> camera front
@@ -45,17 +53,26 @@ public:
 
 	//LookAt, return the view matrix (view * transformation matrix)
 	//@param cameraTarget -> The object that the camera looks
-	math::float4x4 LookAt(math::vec cameraTarget);
+	void LookAt(math::vec cameraTarget);
+
+	float* RealView();
 
 	//Move camera
-	void MoveFront(float speed);
-	void MoveBack(float speed);
-	void MoveLeft(float speed);
-	void MoveRight(float speed);
+	void Move(CameraMovement dir, float speed);
+	
+	void ResetCameraQuat();
 
 private:
 	//Camera frustum
 	math::Frustum camera;
+
+	math::Quat cameraQuat = math::Quat::identity;
+
+	math::float4x4 view;
+
+	math::vec Up;
+	math::vec Front;
+	math::vec Right;
 
 	//true = Prespective | false = Orthographic
 	bool cameraType;

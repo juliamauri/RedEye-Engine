@@ -17,16 +17,6 @@ RE_Camera::RE_Camera(bool cameraType, float near_plane, float far_plane)
 	camera.SetViewPlaneDistances(near_plane, far_plane);
 }
 
-void RE_Camera::SetFront(float yaw, float pitch)
-{
-	if (pitch > 89.0f)
-		pitch = 89.0f;
-	if (pitch < -89.0f)
-		pitch = -89.0f;
-
-	camera.SetFront(math::vec(cos(yaw * DEGTORAD) * cos(pitch * DEGTORAD), sin(pitch * DEGTORAD), sin(yaw * DEGTORAD) * cos(pitch * DEGTORAD)).Normalized());
-}
-
 void RE_Camera::SetFront(math::vec front)
 {
 	camera.SetFront(front);
@@ -35,6 +25,33 @@ void RE_Camera::SetFront(math::vec front)
 void RE_Camera::SetPos(math::vec pos)
 {
 	camera.SetPos(pos);
+}
+
+void RE_Camera::SetEulerAngle(float pitch, float yaw)
+{
+	/*
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+	*/
+
+	math::Quat key_quat = math::Quat::FromEulerXYZ(yaw, pitch, 0.0f);
+
+	cameraQuat = key_quat * cameraQuat;
+
+	math::float4x4 rotate(cameraQuat.Normalized());
+	/*
+	math::vec front;
+	front.x = cos(yaw * DEGTORAD) * cos(pitch * DEGTORAD);
+	front.y = sin(pitch * DEGTORAD);
+	front.z = sin(yaw * DEGTORAD) * cos(pitch  * DEGTORAD);
+	camera.SetFront(front.Normalized());
+
+	math::vec right = front.Cross(math::vec(0.0f, 1.0f, 0.0f)).Normalized();
+	camera.SetUp(right.Cross(front).Normalized());
+	*/
+	view = rotate * GetView();
 }
 
 void RE_Camera::SetWorldOrigin(math::vec world)
@@ -77,27 +94,36 @@ math::float4x4 RE_Camera::GetProjection()
 	return camera.ProjectionMatrix().Transposed();
 }
 
-math::float4x4 RE_Camera::LookAt(math::vec cameraTarget)
+void RE_Camera::LookAt(math::vec cameraTarget)
 {
-	return GetView() * math::float4x4::LookAt(camera.Front().Normalized(),(camera.Pos() - cameraTarget).Normalized(),camera.Up().Normalized(),math::vec(0.0f,1.0f,0.0f).Normalized());
+	view = GetView() * math::float4x4::LookAt(camera.Front().Normalized(),(camera.Pos() - cameraTarget).Normalized(),camera.Up().Normalized(),math::vec(0.0f,1.0f,0.0f).Normalized());
 }
 
-void RE_Camera::MoveFront(float speed)
+float* RE_Camera::RealView()
 {
-	camera.SetPos(camera.Pos() - (speed * camera.Front()));
+	return view.ptr();
 }
 
-void RE_Camera::MoveBack(float speed)
+void RE_Camera::Move(CameraMovement dir, float speed)
 {
-	camera.SetPos(camera.Pos() + (speed * camera.Front()));
+	switch (dir)
+	{
+	case FORWARD:
+		camera.SetPos(camera.Pos() - (speed * camera.Front()));
+		break;
+	case BACKWARD:
+		camera.SetPos(camera.Pos() + (speed * camera.Front()));
+		break;
+	case LEFT:
+		camera.SetPos(camera.Pos() + (camera.Front().Cross(camera.Up()).Normalized() * speed));
+		break;
+	case RIGHT:
+		camera.SetPos(camera.Pos() - (camera.Front().Cross(camera.Up()).Normalized() * speed));
+		break;
+	}
 }
 
-void RE_Camera::MoveLeft(float speed)
+void RE_Camera::ResetCameraQuat()
 {
-	camera.SetPos(camera.Pos() + (camera.Front().Cross(camera.Up()).Normalized() * speed));
-}
-
-void RE_Camera::MoveRight(float speed)
-{
-	camera.SetPos(camera.Pos() - (camera.Front().Cross(camera.Up()).Normalized() * speed));
+	cameraQuat = math::Quat::identity;
 }

@@ -218,6 +218,9 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	camera = new RE_Camera(true);
 
+	lastX = App->window->GetWidth() / 2;
+	lastY = App->window->GetHeight() / 2;
+
 	return ret;
 }
 
@@ -302,47 +305,48 @@ update_status ModuleRenderer3D::PreUpdate()
 					float camX = sin(timeCuberotateValue) * radius;
 					float camZ = cos(timeCuberotateValue) * radius;
 					camera->SetPos(math::float3(camX, 0.0f, camZ));
-
-					shader_manager->setFloat4x4(shader_cube, "view", camera->LookAt(math::float3(0.0f, 0.0f, 0.0f)).ptr());
+					camera->LookAt(math::float3(0.0f, 0.0f, 0.0f));
+					shader_manager->setFloat4x4(shader_cube, "view", camera->RealView());
 				}
 				else
 				{
+					float cameraSpeed = 2.5f * App->time->GetDeltaTime();
+
 					App->input->SetMouseAtCenter();
 
-					float cameraSpeed = 2.5f * App->time->GetDeltaTime();
 
 					const MouseData* mouse = App->input->GetMouse();
 
-					float xoffset = mouse->mouse_x_motion;
-					float yoffset = mouse->mouse_y_motion;
+					float xoffset = mouse->mouse_x - lastX;
+					float yoffset = lastY - mouse->mouse_y;
 
-					float sensitivity = 0.05;
+					float sensitivity = 0.002f;
 					xoffset *= sensitivity;
 					yoffset *= sensitivity;
 
-					yaw += xoffset;
-					pitch += yoffset;
+					yaw = xoffset;
+					pitch = yoffset;
 
-					camera->SetFront(yaw, pitch);
-
-					if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
-						camera->MoveFront(cameraSpeed);
-					if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
-						camera->MoveBack(cameraSpeed);
-					if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
-						camera->MoveLeft(cameraSpeed);
-					if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
-						camera->MoveRight(cameraSpeed);
+					camera->SetEulerAngle(pitch, yaw);
+					
+					yaw = pitch = 0;
 
 					if (App->input->GetKey(SDL_SCANCODE_Q) == KEY_UP)
 					{
 						isMove = false;
-						yaw = -90.0f;
-						pitch = 0.0f;
 						ResetCamera();
 					}
 
-					shader_manager->setFloat4x4(shader_cube, "view", camera->GetView().ptr());
+					if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
+						camera->Move(CameraMovement::FORWARD, cameraSpeed);
+					if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
+						camera->Move(CameraMovement::BACKWARD, cameraSpeed);
+					if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+						camera->Move(CameraMovement::LEFT, cameraSpeed);
+					if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+						camera->Move(CameraMovement::RIGHT, cameraSpeed);
+
+					shader_manager->setFloat4x4(shader_cube, "view", camera->RealView());
 				}
 			}
 		}
@@ -579,7 +583,7 @@ void ModuleRenderer3D::SetShaderBool(const char * name, bool value)
 
 void ModuleRenderer3D::ResetCamera()
 {
-	camera->SetFront(math::vec(0.0f, 0.0f, -1.0f));
+	camera->ResetCameraQuat();
 	camera->SetPos(math::vec(0.0f, 0.0f, -3.0f));
 }
 
