@@ -111,6 +111,8 @@ bool Application::CleanUp()
 {
 	bool ret = true;
 
+	fs->GetConfig()->Save();
+
 	for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend() && ret; ++it)
 		if ((*it)->IsActive() == true)
 			ret = (*it)->CleanUp();

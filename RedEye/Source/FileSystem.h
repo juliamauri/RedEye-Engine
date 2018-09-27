@@ -48,9 +48,10 @@ public:
 
 	virtual unsigned int GetSize();
 
-private:
+protected:
 
 	unsigned int HardLoad();
+	void HardSave(const char* buffer);
 
 protected:
 
@@ -67,6 +68,7 @@ public:
 	Config(const char* file_name);
 
 	bool Load() override;
+	void Save() override;
 	JSONNode* GetRootNode(const char* member);
 	inline bool operator!() const;
 
@@ -101,7 +103,6 @@ public:
 	JSONNode*		PullJObject(const char* name);
 
 	// Utility
-	unsigned int Serialize(char** buffer, bool pretty = true);
 	inline bool operator!() const;
 
 private:

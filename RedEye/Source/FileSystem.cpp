@@ -7,10 +7,8 @@
 #include "RapidJson\include\rapidjson.h"
 #include "RapidJson\include\allocators.h"
 #include "RapidJson\include\pointer.h"
-#include "RapidJson\include\filereadstream.h"
-//#include "RapidJson\include\stringbuffer.h"
-//#include "RapidJson\include\writer.h"
-//#include "RapidJson\include\filewritestream.h"
+#include "RapidJson\include\stringbuffer.h"
+#include "RapidJson\include\writer.h"
 
 #include "PhysFS\include\physfs.h"
 
@@ -39,7 +37,7 @@ bool FileSystem::Init(int argc, char* argv[])
 		AddPath(".");
 		AddPath(path.c_str());
 
-		engine_config = new Config("Assets\\config.json");
+		engine_config = new Config("config.json");
 		if (engine_config->Load())
 		{
 			ret = true;
@@ -189,31 +187,25 @@ unsigned int RE_FileIO::HardLoad()
 	return ret;
 }
 
-/* Maybe memory leak solution
-char* file_read(const char* filename) {
-		SDL_RWops *rw = SDL_RWFromFile(filename, "rb");
-		if (rw == NULL) return NULL;
+void RE_FileIO::HardSave(const char* buffer)
+{
+	PHYSFS_file* file = PHYSFS_openWrite(file_name);
 
-		Sint64 res_size = SDL_RWsize(rw);
-		char* res = (char*)malloc(res_size + 1);
-
-		Sint64 nb_read_total = 0, nb_read = 1;
-		char* buf = res;
-		while (nb_read_total < res_size && nb_read != 0) {
-				nb_read = SDL_RWread(rw, buf, 1, (res_size - nb_read_total));
-				nb_read_total += nb_read;
-				buf += nb_read;
-		}
-		SDL_RWclose(rw);
-		if (nb_read_total != res_size) {
-				free(res);
-				return NULL;
+	if (file != NULL)
+	{
+		long long written = PHYSFS_write(file, (const void*)buffer, 1, strnlen_s(buffer, 0xffff));
+		if (written != size)
+		{
+			LOG("Error while writing to file %s: %s\n", file, PHYSFS_getLastError());
 		}
 
-		res[nb_read_total] = '\0';
-		return res;
+		if (PHYSFS_close(file) == 0)
+			LOG("Error while closing file %s: %s\n", file, PHYSFS_getLastError());
+	}
+	else
+		LOG("Error while opening file %s: %s\n", file, PHYSFS_getLastError());
 }
-*/
+
 
 ////////////////////////////////////////////////////////////////////
 ///////////////////Config
@@ -227,25 +219,28 @@ bool Config::Load()
 {
 	// Open file
 	bool ret = false;
-	FILE* fp = nullptr;
-	std::string full_path(SDL_GetBasePath());
-	full_path += file_name;
-	if (fopen_s(&fp, full_path.c_str(), "rb") == 0);// non-Windows use "r"
+
+	size = HardLoad();
+
+	if (ret = (size > 0))
 	{
-		// Read File
-		char readBuffer[65535];
-		rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-
-		// Parse file buffer into root::rapidjson::Document
-		//document.SetNull();
-		document.ParseStream(is);
-
-		// Close file
-		fclose(fp);
-
-		ret = true;
+		rapidjson::StringStream s(buffer);
+		document.ParseStream(s);
 	}
+
 	return ret;
+}
+
+void Config::Save()
+{
+	rapidjson::StringBuffer bufjer;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(bufjer);
+	document.Accept(writer);
+
+	const char* output = bufjer.GetString();
+
+	HardSave(output);
+
 }
 
 JSONNode* Config::GetRootNode(const char* member)
@@ -499,8 +494,6 @@ JSONNode* JSONNode::PullJObject(const char * name)
 
 	return ret;
 }
-
-//JSONNode PullJObject(const char* name) const;
 
 inline bool JSONNode::operator!() const
 {
