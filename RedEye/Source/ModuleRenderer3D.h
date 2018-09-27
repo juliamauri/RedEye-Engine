@@ -73,6 +73,8 @@ public:
 	bool* GetisCubes();
 	bool* GetisMove();
 
+	void ResetAspectRatio();
+
 private:
 	RE_Camera* camera;
 

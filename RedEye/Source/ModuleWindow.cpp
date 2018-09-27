@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModuleInput.h"
 #include "FileSystem.h"
+#include "ModuleRenderer3D.h"
 #include "Event.h"
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL.h"
@@ -146,10 +147,7 @@ void ModuleWindow::WindowEvent(const SDL_Event * e)
 	case SDL_WINDOWEVENT_MOVED:/**< Window has been moved to data1, data2 */
 		break;
 	case SDL_WINDOWEVENT_RESIZED:/**< Window has been resized to data1xdata2 */
-		width = e->window.data1;
-		height = e->window.data2;
-		// TODO
-		//App->renderer3D->OnResize(e.window.data1, e.window.data2); projection must change
+		SetWindowSize(e->window.data1, e->window.data2);
 		break;
 	case SDL_WINDOWEVENT_SIZE_CHANGED:/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
 		break;
@@ -245,8 +243,8 @@ void ModuleWindow::SetWindowSize(unsigned int new_width, unsigned int new_height
 	width = new_width;
 	height = new_height;
 
-	if (flags & SDL_WINDOW_RESIZABLE)
-		SDL_SetWindowSize(window, new_width, new_height);
+	SDL_SetWindowSize(window, new_width, new_height);
+	App->renderer3d->ResetAspectRatio();
 }
 
 void ModuleWindow::SetResizeable(const bool flag_value)
@@ -277,8 +275,8 @@ void ModuleWindow::SetFullScreen(bool flag_value)
 			SDL_SetWindowSize(window, width, height);
 		}
 
-		
 		SDL_SetWindowFullscreen(window, SDL_bool(flag_value));
+		App->renderer3d->ResetAspectRatio();
 	}
 }
 
