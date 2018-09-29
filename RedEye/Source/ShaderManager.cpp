@@ -199,6 +199,11 @@ void ShaderManager::setFloat(unsigned int ID, const char * name, float value, fl
 	glUniform4f(glGetUniformLocation(ID, name), value, value2, value3, value4);
 }
 
+void ShaderManager::setFloat(unsigned int ID, const char * name, math::vec value) const
+{
+	glUniform3f(glGetUniformLocation(ID, name), value.x, value.y, value.z);
+}
+
 void ShaderManager::setUnsignedInt(unsigned int ID, const char * name, unsigned int value)
 {
 	glUniform1ui(glGetUniformLocation(ID, name), value);

@@ -1,6 +1,8 @@
 #ifndef __SHADERMANAGER_H__
 #define __SHADERMANAGER_H__
 
+#include "RE_Math.h"
+
 #include <string>
 #include <vector>
 
@@ -37,6 +39,7 @@ public:
 	void setFloat(unsigned int ID, const char* name, float value, float value2) const;
 	void setFloat(unsigned int ID, const char* name, float value, float value2, float value3) const;
 	void setFloat(unsigned int ID, const char* name, float value, float value2, float value3, float value4) const;
+	void setFloat(unsigned int ID, const char* name, math::vec value) const;
 
 	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value);
 	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2);
