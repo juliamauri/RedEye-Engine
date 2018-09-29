@@ -46,6 +46,7 @@ public:
 	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3);
 	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
 
+	void setFloat3x3(unsigned int ID, const char* name, float* trans);
 	void setFloat4x4(unsigned int ID, const char* name, float* trans);
 
 private:

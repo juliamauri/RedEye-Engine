@@ -51,6 +51,9 @@ public:
 	//Get camera projection matrix
 	math::float4x4 GetProjection();
 
+	//Get camera pos vector
+	math::vec GetPos();
+
 	//LookAt, return the view matrix (view * transformation matrix)
 	//@param cameraTarget -> The object that the camera looks
 	void LookAt(math::vec cameraTarget);

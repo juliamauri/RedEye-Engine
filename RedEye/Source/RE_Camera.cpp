@@ -94,6 +94,11 @@ math::float4x4 RE_Camera::GetProjection()
 	return camera.ProjectionMatrix().Transposed();
 }
 
+math::vec RE_Camera::GetPos()
+{
+	return camera.Pos();
+}
+
 void RE_Camera::LookAt(math::vec cameraTarget)
 {
 	view = GetView() * math::float4x4::LookAt(camera.Front().Normalized(),(camera.Pos() - cameraTarget).Normalized(),camera.Up().Normalized(),math::vec(0.0f,1.0f,0.0f).Normalized());

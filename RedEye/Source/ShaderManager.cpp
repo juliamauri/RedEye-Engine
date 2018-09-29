@@ -224,6 +224,11 @@ void ShaderManager::setUnsignedInt(unsigned int ID, const char * name, unsigned 
 	glUniform4ui(glGetUniformLocation(ID, name), value, value2, value3, value4);
 }
 
+void ShaderManager::setFloat3x3(unsigned int ID, const char * name, float * trans)
+{
+	glUniformMatrix3fv(glGetUniformLocation(ID, name), 1, GL_FALSE, trans);
+}
+
 void ShaderManager::setFloat4x4(unsigned int ID, const char * name, float* trans)
 {
 	glUniformMatrix4fv(glGetUniformLocation(ID, name), 1, GL_FALSE, trans);
