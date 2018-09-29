@@ -9,9 +9,9 @@
 #include "TimeManager.h"
 #include "SystemInfo.h"
 #include "RE_Math.h"
+#include "OutputLog.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
-
 
 using namespace std;
 
@@ -159,11 +159,6 @@ void Application::Log(const char * text)
 {
 	if(editor != nullptr && !modules.empty())
 		editor->AddTextConsole(text);
-}
-
-void Application::RequestBrowser(const char* link) const
-{
-	ShellExecute(NULL, "open", link, NULL, NULL, SW_SHOWNORMAL);
 }
 
 void Application::RecieveEvent(const Event* e)

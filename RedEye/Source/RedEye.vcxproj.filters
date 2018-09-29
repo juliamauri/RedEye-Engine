@@ -7,9 +7,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Main</Filter>
     </ClCompile>
-    <ClCompile Include="Globals.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
     <ClCompile Include="Application.cpp">
       <Filter>Main</Filter>
     </ClCompile>
@@ -72,6 +69,9 @@
     </ClCompile>
     <ClCompile Include="ModuleScene.cpp">
       <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="OutputLog.cpp">
+      <Filter>Modules\Independent App Modules\Log</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -285,6 +285,9 @@
     <ClInclude Include="ModuleScene.h">
       <Filter>Modules</Filter>
     </ClInclude>
+    <ClInclude Include="OutputLog.h">
+      <Filter>Modules\Independent App Modules\Log</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -355,6 +358,9 @@
     </Filter>
     <Filter Include="Components">
       <UniqueIdentifier>{e7540df0-e081-4ea9-a12e-d166f45541ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Independent App Modules\Log">
+      <UniqueIdentifier>{f1f18652-ef76-444e-ab39-3f51efc4c14e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

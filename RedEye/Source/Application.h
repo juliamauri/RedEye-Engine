@@ -31,7 +31,6 @@ public:
 
 	void DrawEditor();
 	void Log(const char* text);
-	void RequestBrowser(const char* link) const;
 	void RecieveEvent(const Event* e) override;
 
 	const char* GetName() const;

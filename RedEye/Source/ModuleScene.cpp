@@ -1,5 +1,6 @@
 #include "ModuleScene.h"
 
+#include "OutputLog.h"
 #include <string>
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)

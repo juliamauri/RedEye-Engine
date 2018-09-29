@@ -1,6 +1,6 @@
 #include "FileSystem.h"
 
-#include "Globals.h"
+#include "OutputLog.h"
 #include "SDL2\include\SDL.h"
 #include "SDL2\include\SDL_assert.h"
 
@@ -159,7 +159,7 @@ unsigned int RE_FileIO::HardLoad()
 				}
 				else
 				{
-					ret = (uint)amountRead;
+					ret = (unsigned int)amountRead;
 					buffer[ret] = '\0';
 				}
 			}
@@ -407,7 +407,7 @@ int JSONNode::PullInt(const char* name, int deflt)
 
 unsigned int JSONNode::PullUInt(const char* name, const unsigned int deflt)
 {
-	uint ret = 0;
+	unsigned int ret = 0;
 
 	if (name != nullptr)
 	{

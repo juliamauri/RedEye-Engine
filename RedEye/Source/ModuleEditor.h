@@ -4,6 +4,7 @@
 #include "Module.h"
 #include "ImGui\imgui.h"
 #include <list>
+#include <string.h>
 
 class EditorWindow;
 class ConsoleWindow;
@@ -58,7 +59,7 @@ class EditorWindow
 {
 public:
 	EditorWindow(const char* name, bool start_active);
-
+	virtual ~EditorWindow();
 	void DrawWindow();
 	void SwitchActive();
 	const char* Name() const;
@@ -88,6 +89,7 @@ public:
 	ConsoleWindow(const char* name = "Console", bool start_active = true);
 	void Draw() override;
 	ImGuiTextBuffer console_buffer;
+	bool scroll_to_bot = true;
 };
 
 class ConfigWindow : public EditorWindow
@@ -160,9 +162,9 @@ private:
 	float second_x, second_y, second_z = 0.f;
 	float first_xtra, second_xtra = 0.f;
 	int first_type, second_type = 0;
+	bool intersects = false;
 	std::string fig1 = "";
 	std::string fig2 = "";
-	bool intersects = false;
 };
 
 /*/ Missing windows:

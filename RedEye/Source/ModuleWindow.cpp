@@ -5,6 +5,7 @@
 #include "FileSystem.h"
 #include "ModuleRenderer3D.h"
 #include "Event.h"
+#include "OutputLog.h"
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL.h"
 #include "RapidJson\include\document.h"

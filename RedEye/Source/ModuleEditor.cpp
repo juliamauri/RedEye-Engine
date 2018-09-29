@@ -5,6 +5,7 @@
 #include "ModuleInput.h"
 #include "ModuleRenderer3D.h"
 #include "RE_Math.h"
+#include "OutputLog.h"
 #include "MathGeoLib\include\MathGeoLib.h"
 
 #include "ImGui\imgui_impl_sdl_gl3.h"
@@ -105,11 +106,11 @@ update_status ModuleEditor::Update()
 				if (ImGui::MenuItem(show_demo ? "Close Gui Demo" : "Open Gui Demo"))
 					show_demo = !show_demo;
 				if (ImGui::MenuItem("Documentation"))
-					App->RequestBrowser("https://github.com/juliamauri/RedEye-Engine/wiki");
+					BROWSER("https://github.com/juliamauri/RedEye-Engine/wiki");
 				if (ImGui::MenuItem("Download Latest"))
-					App->RequestBrowser("https://github.com/juliamauri/RedEye-Engine/releases");
+					BROWSER("https://github.com/juliamauri/RedEye-Engine/releases");
 				if (ImGui::MenuItem("Report a Bug"))
-					App->RequestBrowser("https://github.com/juliamauri/RedEye-Engine/issues");
+					BROWSER("https://github.com/juliamauri/RedEye-Engine/issues");
 				if (ImGui::MenuItem("About", about->IsActive() ? "Hide" : "Open"))
 					about->SwitchActive();
 
@@ -179,8 +180,11 @@ void ModuleEditor::HandleSDLEvent(SDL_Event* e)
 
 void ModuleEditor::AddTextConsole(const char* text)
 {
-	if(console != nullptr && !windows.empty())
+	if (console != nullptr && !windows.empty())
+	{
 		console->console_buffer.append(text);
+		console->scroll_to_bot = true;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -189,6 +193,9 @@ void ModuleEditor::AddTextConsole(const char* text)
 
 EditorWindow::EditorWindow(const char* name, bool start_enabled)
 	: name(name), active(start_enabled), lock_pos(false)
+{}
+
+EditorWindow::~EditorWindow()
 {}
 
 void EditorWindow::DrawWindow()
@@ -237,7 +244,12 @@ void ConsoleWindow::Draw()
 {
 	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
 	{
-		ImGui::Text(console_buffer.c_str());
+		ImGui::TextUnformatted(console_buffer.begin());
+
+		if (scroll_to_bot)
+			ImGui::SetScrollHere(1.0f);
+
+		scroll_to_bot = false;
 	}
 
 	ImGui::End();
@@ -299,11 +311,11 @@ void AboutWindow::Draw()
 		ImGui::Text("Juli Mauri Costa");
 		ImGui::SameLine();
 		if (ImGui::Button("Visit Juli's Github Profile"))
-			App->RequestBrowser("https://github.com/juliamauri");
+			BROWSER("https://github.com/juliamauri");
 		ImGui::Text("Ruben Sardon Roldan");
 		ImGui::SameLine();
 		if (ImGui::Button("Visit Ruben's Github Profile"))
-			App->RequestBrowser("https://github.com/cumus");
+			BROWSER("https://github.com/cumus");
 
 		ImGui::Separator();
 		if (ImGui::CollapsingHeader("3rd Party Software:"))
@@ -311,57 +323,57 @@ void AboutWindow::Draw()
 			ImGui::BulletText("SDL v2.0");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit SDL website"))
-				App->RequestBrowser("https://www.libsdl.org/");
+				BROWSER("https://www.libsdl.org/");
 
 			ImGui::BulletText("SDL Mixer v2.0");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit SDL Mixer website"))
-				App->RequestBrowser("https://www.libsdl.org/projects/SDL_mixer/");
+				BROWSER("https://www.libsdl.org/projects/SDL_mixer/");
 
 			ImGui::BulletText("SDL TTF v2.0");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit SDL TTF website"))
-				App->RequestBrowser("https://www.libsdl.org/projects/SDL_ttf/");
+				BROWSER("https://www.libsdl.org/projects/SDL_ttf/");
 
 			ImGui::BulletText("OpenGl");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit OpenGl website"))
-				App->RequestBrowser("https://www.opengl.org/");
+				BROWSER("https://www.opengl.org/");
 
 			ImGui::BulletText("Glew v2.1.0");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit Glew website"))
-				App->RequestBrowser("http://glew.sourceforge.net/");
+				BROWSER("http://glew.sourceforge.net/");
 
 			ImGui::BulletText("DevIL v1.8.0");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit DevIL website"))
-				App->RequestBrowser("http://openil.sourceforge.net/");
+				BROWSER("http://openil.sourceforge.net/");
 
 			ImGui::BulletText("Open Asset Import Library");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit Assimp website"))
-				App->RequestBrowser("http://www.assimp.org/");
+				BROWSER("http://www.assimp.org/");
 
 			ImGui::BulletText("PhysFS v1.0");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit PhysFS website"))
-				App->RequestBrowser("https://icculus.org/physfs/");
+				BROWSER("https://icculus.org/physfs/");
 
 			ImGui::BulletText("ImGui v1.50 WIP");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit ImGui website"))
-				App->RequestBrowser("https://github.com/ocornut/imgui");
+				BROWSER("https://github.com/ocornut/imgui");
 
 			ImGui::BulletText("MathGeoLib");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit MathGeoLib website"))
-				App->RequestBrowser("https://github.com/juj/MathGeoLib");
+				BROWSER("https://github.com/juj/MathGeoLib");
 
 			ImGui::BulletText("Rapidjson v1.1.0");
 			ImGui::SameLine();
 			if (ImGui::Button("Visit Rapidjson website"))
-				App->RequestBrowser("http://rapidjson.org/");
+				BROWSER("http://rapidjson.org/");
 
 			ImGui::BulletText("gpudetect");
 			ImGui::BulletText("mmgr");
@@ -582,7 +594,7 @@ void GeometryTest::Draw()
 			math::Plane plane;
 			fig1 = "Figure 1: ";
 			fig2 = "Figure 2: ";
-
+			
 			switch (GeoFigureType(first_type)) {
 			case GEO_SPHERE:
 				fig1 += "Sphere with center at Pos(F1-Pos X, F1-Pos Y, F1-Pos Z) and radius(F1-Extra value)";
@@ -799,6 +811,7 @@ void GeometryTest::Draw()
 				}
 				break;
 			}
+
 		}
 
 		ImGui::TextWrappedV(fig1.c_str(), "");
