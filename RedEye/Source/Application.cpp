@@ -79,13 +79,6 @@ bool Application::Init()
 		sys_info->WhatAreWeRunningOn();
 		math->Init();
 	}
-
-	// Render Software
-	//App->ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
-	//App->ReportSoftware("GLslang", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
-	//App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
-
-
 	return ret;
 }
 

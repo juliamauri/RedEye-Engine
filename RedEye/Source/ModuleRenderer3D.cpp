@@ -6,6 +6,7 @@
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 
+#include "OutputLog.h"
 #include "Application.h"
 #include "ModuleWindow.h"
 #include "ModuleEditor.h"
@@ -46,6 +47,10 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 		//fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 		ret = false;
 	}
+
+	App->ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
+	App->ReportSoftware("GLslang", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
+	App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
@@ -458,7 +463,7 @@ update_status ModuleRenderer3D::PreUpdate()
 	{
 	float cameraSpeed = 2.5f * App->time->GetDeltaTime();
 
-	App->input->SetMouseAtCenter();
+	//App->input->SetMouseAtCenter();
 
 
 	const MouseData* mouse = App->input->GetMouse();
