@@ -264,7 +264,7 @@ void ModuleInput::HandleEventQueue()
 		}
 	}
 
-	if(App->editor->IsActive()) App->editor->HandleSDLEvent(&e);
+	if(App->editor && App->editor->IsActive()) App->editor->HandleSDLEvent(&e);
 
 	// RE Events
 	Event* re_e = nullptr;

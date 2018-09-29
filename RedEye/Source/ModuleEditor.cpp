@@ -29,6 +29,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 ModuleEditor::~ModuleEditor()
 {
 	windows.clear();
+	tools.clear();
 }
 
 // Load assets
@@ -127,7 +128,7 @@ update_status ModuleEditor::Update()
 			if ((**it)) (*it)->DrawWindow();
 		}
 
-		if (about->IsActive()) about->DrawWindow(); // (not in windows' list)
+		if (about && about->IsActive()) about->DrawWindow(); // (not in windows' list)
 
 		it = tools.begin();
 		for (it; it != tools.end(); it++)
@@ -151,6 +152,15 @@ bool ModuleEditor::CleanUp()
 		delete *(windows.rbegin());
 		windows.pop_back();
 	}
+
+	while (!tools.empty())
+	{
+		delete *(tools.rbegin());
+		tools.pop_back();
+	}
+
+	if (about != nullptr)
+		delete about;
 
 	ImGui_ImplSdlGL3_Shutdown();
 
@@ -253,8 +263,7 @@ void ConfigWindow::Draw()
 
 HeriarchyWindow::HeriarchyWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
-{
-}
+{}
 
 void HeriarchyWindow::Draw()
 {
@@ -263,8 +272,7 @@ void HeriarchyWindow::Draw()
 
 PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
-{
-}
+{}
 
 void PropertiesWindow::Draw()
 {
@@ -397,7 +405,9 @@ void RandomTest::Draw()
 	ImGui::End();
 }
 
-RendererTest::RendererTest(const char * name, bool start_active) : EditorWindow(name,start_active) {}
+RendererTest::RendererTest(const char * name, bool start_active) : EditorWindow(name,start_active)
+{}
+
 
 void RendererTest::Draw()
 {
