@@ -85,14 +85,14 @@ private:
 	unsigned int puppie1, puppie2, container, awesomeface;
 
 	//Renderer Test
-	unsigned int VAO_Triangle, VAO_Square, VAO_Cube, VAO_Light, VBO_Triangle, VBO_Square, VBO_Cube, EBO_Square;
+	unsigned int VAO_Triangle, VAO_Square, VAO_Cube, VAO_Light, VBO_Triangle, VBO_Square, VBO_Cube, VBO_Light, EBO_Square;
 	bool B_EBO = true, isLine = false, vsync = false, printvertextcolor = false;
 
 	ShaderType shaderenabled = SIN;
 	Texture2DType textureEnabled = PUPPIE_1;
 	ObjectType objectEnabled = PLANE;
 
-	float timeValue = 0, timerotateValue = 0, timeCuberotateValue = 0;
+	float timeValue = 0, timerotateValue = 0, timeCuberotateValue = 0, timeLight = 0;
 
 	bool isRotated = false, isScaled = false, isCubes = false, isMove = false;
 	

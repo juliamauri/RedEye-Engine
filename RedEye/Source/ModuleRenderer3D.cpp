@@ -52,26 +52,28 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	//Loading Shaders
 	shader_manager = new ShaderManager("Shaders/");
-	ret = shader_manager->Load("sinuscolor", &sinusColor);
-	if (!ret)
-		LOG("%s\n", shader_manager->GetShaderError());
+	if (false)
+	{
+		ret = shader_manager->Load("sinuscolor", &sinusColor);
+		if (!ret)
+			LOG("%s\n", shader_manager->GetShaderError());
 
-	ret = shader_manager->Load("vertexcolor", &vertexColor);
-	if(!ret)
-		LOG("%s\n", shader_manager->GetShaderError());
+		ret = shader_manager->Load("vertexcolor", &vertexColor);
+		if (!ret)
+			LOG("%s\n", shader_manager->GetShaderError());
 
-	ret = shader_manager->Load("textureSquare", &textureSquare);
-	if (!ret)
-		LOG("%s\n", shader_manager->GetShaderError());
+		ret = shader_manager->Load("textureSquare", &textureSquare);
+		if (!ret)
+			LOG("%s\n", shader_manager->GetShaderError());
 
-	ret = shader_manager->Load("twotextures", &twotextures);
-	if (!ret)
-		LOG("%s\n", shader_manager->GetShaderError());
+		ret = shader_manager->Load("twotextures", &twotextures);
+		if (!ret)
+			LOG("%s\n", shader_manager->GetShaderError());
 
-	ret = shader_manager->Load("cube", &shader_cube);
-	if (!ret)
-		LOG("%s\n", shader_manager->GetShaderError());
-
+		ret = shader_manager->Load("cube", &shader_cube);
+		if (!ret)
+			LOG("%s\n", shader_manager->GetShaderError());
+	}
 	ret = shader_manager->Load("light", &lightingShader);
 	if (!ret)
 		LOG("%s\n", shader_manager->GetShaderError());
@@ -80,201 +82,243 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	if (!ret)
 		LOG("%s\n", shader_manager->GetShaderError());
 
-	//Print a 2d triangle3d https://learnopengl.com/Getting-started/Hello-Triangle
-	//2d traingle defined with 3d coordenates
-	//VBO with VAO
-	float vertices[] = {
-		// positions         // colors
-		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
-		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
-		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
+	if (false)
+	{
+		//Print a 2d triangle3d https://learnopengl.com/Getting-started/Hello-Triangle
+		//2d traingle defined with 3d coordenates
+		//VBO with VAO
+		float vertices[] = {
+			// positions         // colors
+			 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+			-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+			 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
+		};
+		glGenVertexArrays(1, &VAO_Triangle);
+		glGenBuffers(1, &VBO_Triangle);
+		// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+		glBindVertexArray(VAO_Triangle);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_Triangle);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		// position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		// color attribute
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		glBindVertexArray(0);
+
+		//EBO
+		float verticesS[] = {
+			// positions          // colors           // texture coords
+			 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+			 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+			-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+			-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+		};
+
+		unsigned int indices[] = {  // note that we start from 0!
+			0, 1, 3,   // first triangle
+			1, 2, 3    // second triangle
+		};
+		glGenBuffers(1, &VBO_Square);
+		glGenBuffers(1, &EBO_Square);
+		glGenVertexArrays(1, &VAO_Square);
+		// ..:: Initialization code :: ..
+		// 1. bind Vertex Array Object
+		glBindVertexArray(VAO_Square);
+		// 2. copy our vertices array in a vertex buffer for OpenGL to use
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_Square);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verticesS), verticesS, GL_STATIC_DRAW);
+		// 3. copy our index array in a element buffer for OpenGL to use
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_Square);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		// 4. then set the vertex attributes pointers
+		//position
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		//vertex colors
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		//Texture coords
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0);
+
+		//Cube
+		float verticesCube[] = {
+			//Vertex pos		  Texture Coords
+			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		};
+		glGenBuffers(1, &VBO_Cube);
+		glGenVertexArrays(1, &VAO_Cube);
+
+		glBindVertexArray(VAO_Cube);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_Cube);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verticesCube), verticesCube, GL_STATIC_DRAW);
+
+		// position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		// texture coord attribute
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		glBindVertexArray(0);
+	}
+
+	//Lighting
+	float verticesCubeWNormal[] = {
+		//Vertex pos		  Normal Coords
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
-	glGenVertexArrays(1, &VAO_Triangle);
-	glGenBuffers(1, &VBO_Triangle);
-	// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-	glBindVertexArray(VAO_Triangle);
+	glGenBuffers(1, &VBO_Light);
+	glGenVertexArrays(1, &VAO_Light);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_Triangle);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindVertexArray(VAO_Light);
 
-	// position attribute
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_Light);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesCubeWNormal), verticesCubeWNormal, GL_STATIC_DRAW);
+	// we only need to bind to the VBO, the container's VBO's data already contains the correct data.
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_Light);
+	// set the vertex attributes
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	// color attribute
+	// normal attribute
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
-
-	glBindVertexArray(0);
-	
-	//EBO
-	float verticesS[] = {
-		// positions          // colors           // texture coords
-		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
-	};
-
-	unsigned int indices[] = {  // note that we start from 0!
-		0, 1, 3,   // first triangle
-		1, 2, 3    // second triangle
-	};
-	glGenBuffers(1, &VBO_Square);
-	glGenBuffers(1, &EBO_Square);
-	glGenVertexArrays(1, &VAO_Square);
-	// ..:: Initialization code :: ..
-	// 1. bind Vertex Array Object
-	glBindVertexArray(VAO_Square);
-	// 2. copy our vertices array in a vertex buffer for OpenGL to use
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_Square);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesS), verticesS, GL_STATIC_DRAW);
-	// 3. copy our index array in a element buffer for OpenGL to use
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_Square);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	// 4. then set the vertex attributes pointers
-	//position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	//vertex colors
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	//Texture coords
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-	glBindVertexArray(0);
-
-	//Cube
-	float verticesCube[] = {
-	//Vertex pos		  Texture Coords
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
-	glGenBuffers(1, &VBO_Cube);
-	glGenVertexArrays(1, &VAO_Cube);
-
-	glBindVertexArray(VAO_Cube);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_Cube);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesCube), verticesCube, GL_STATIC_DRAW);
-
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// texture coord attribute
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glBindVertexArray(0);
-
-	glGenVertexArrays(1, &VAO_Light);
-	glBindVertexArray(VAO_Light);
-	// we only need to bind to the VBO, the container's VBO's data already contains the correct data.
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_Cube);
-	// set the vertex attributes (only position data for our lamp)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 
 	glEnableVertexAttribArray(0);
 
 
 	texture_manager = new Texture2DManager();
 	texture_manager->Init("Images/");
+	if (false)
+	{
+		puppie1 = texture_manager->LoadTexture2D("puppie1", ImageExtensionType::JPG);
+		puppie2 = texture_manager->LoadTexture2D("puppie2", ImageExtensionType::JPG);
+		container = texture_manager->LoadTexture2D("container", ImageExtensionType::JPG);
+		awesomeface = texture_manager->LoadTexture2D("awesomeface", ImageExtensionType::PNG);
 
-	puppie1 = texture_manager->LoadTexture2D("puppie1", ImageExtensionType::JPG);
-	puppie2 = texture_manager->LoadTexture2D("puppie2", ImageExtensionType::JPG);
-	container = texture_manager->LoadTexture2D("container", ImageExtensionType::JPG);
-	awesomeface = texture_manager->LoadTexture2D("awesomeface", ImageExtensionType::PNG);
-
-	//Defining GL_TEXTUREX for shaders
-	shader_manager->use(twotextures);
-	shader_manager->setInt(twotextures, "texture1", 1);
-	shader_manager->setInt(twotextures, "texture2", 2);
-	shader_manager->use(shader_cube);
-	shader_manager->setInt(shader_cube, "texture1", 1);
-	shader_manager->setInt(shader_cube, "texture2", 2);
-
+		//Defining GL_TEXTUREX for shaders
+		shader_manager->use(twotextures);
+		shader_manager->setInt(twotextures, "texture1", 1);
+		shader_manager->setInt(twotextures, "texture2", 2);
+		shader_manager->use(shader_cube);
+		shader_manager->setInt(shader_cube, "texture1", 1);
+		shader_manager->setInt(shader_cube, "texture2", 2);
+	}
 	enableVSync(vsync = config_module->PullBool("vsync", false));
 
 	camera = new RE_Camera(true);
+	camera->SetPos(math::vec(0.0f, 0.0f, -3.0f));
 
 	lastX = App->window->GetWidth() / 2;
 	lastY = App->window->GetHeight() / 2;
 
-	math::float4x4 model;
+	math::float4x4 model_light;
 
-	model = math::TranslateOp(math::vec(0.0f));
-	model.InverseTranspose();
-
-	math::vec lightColor;
-	math::vec objectColor;
-	{
-		lightColor.Set(1.0f, 1.0f, 1.0f); //white, like sun
-		objectColor.Set(1.0f, 0.5f, 0.31f); //coral color
-		//math::vec result = lightColor.Mul(toyColor); // = (1.0f, 0.5f, 0.31f); | color reflected
-	}
-	/*
-	{
-		lightColor.Set(0.0f, 1.0f, 0.0f); //green light
-		toyColor.Set(1.0f, 0.5f, 0.31f);
-		//math::vec result = lightColor.Mul(toyColor); // = (0.0f, 0.5f, 0.0f); | reflects only green value | ark-greenish color
-	}
-	{
-		lightColor.Set(0.33f, 0.42f, 0.18f);
-		toyColor.Set(1.0f, 0.5f, 0.31f);
-		//math::vec result = lightColor.Mul(toyColor); // = (0.33f, 0.21f, 0.06f);
-	}
-	*/
-	shader_manager->use(lightingShader);
-	shader_manager->setFloat(lightingShader, "objectColor", objectColor);
-	shader_manager->setFloat(lightingShader, "lightColor", lightColor);
-	shader_manager->setFloat4x4(lightingShader, "model", model.ptr());
+	model_light = math::float4x4::Translate(math::vec(0.0f));
+	model_light.InverseTranspose();
 
 	math::vec lightPos(1.2f, 1.0f, 2.0f);
-	model = math::TranslateOp(lightPos.Neg());
-	model = model * math::ScaleOp(math::vec(2.0f));
-	model.InverseTranspose();
+
+	shader_manager->use(lightingShader);
+	shader_manager->setFloat4x4(lightingShader, "model", model_light.ptr());
+	math::float3x3 modelNormal(model_light.InverseTransposed().Float3x3Part());
+	shader_manager->setFloat3x3(lightingShader, "modelNormal", modelNormal.ptr());
+
+	math::float4x4 model_lamp(math::float4x4::Translate(math::vec::zero));
+	model_lamp = model_lamp * math::float4x4::Scale(math::vec(5.0f));
+	model_lamp = model_lamp * math::float4x4::Translate(lightPos.Neg());
+	model_lamp.InverseTranspose();
 
 	shader_manager->use(lampShader);
-	shader_manager->setFloat4x4(lampShader, "model", model.ptr());
+	shader_manager->setFloat4x4(lampShader, "model", model_lamp.ptr());
 
 	return ret;
 }
@@ -448,9 +492,32 @@ update_status ModuleRenderer3D::PreUpdate()
 	if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 		camera->Move(CameraMovement::RIGHT, cameraSpeed);
 
+	timeLight += App->time->GetDeltaTime();
+
+	math::vec lightColor;
+	lightColor.x = sin(timeLight * 2.0f);
+	lightColor.y = sin(timeLight * 0.7f);
+	lightColor.z = sin(timeLight * 1.3f);
+
+	math::vec diffuseColor = lightColor.Mul(2.0f); // decrease the influence
+	math::vec ambientColor = diffuseColor.Mul(0.2f); // low influence
+
 	shader_manager->use(lightingShader);
 	shader_manager->setFloat4x4(lightingShader, "view", camera->RealView());
 	shader_manager->setFloat4x4(lightingShader, "projection", camera->GetProjection().ptr());
+	shader_manager->setFloat(lightingShader, "viewPos", camera->GetPos());
+
+		//light propieties
+	shader_manager->setFloat(lightingShader, "light.ambient", ambientColor);
+	shader_manager->setFloat(lightingShader, "light.diffuse", diffuseColor);
+	shader_manager->setFloat(lightingShader, "light.specular", 1.0f, 1.0f, 1.0f);
+
+		//material propieties
+	shader_manager->setFloat(lightingShader, "material.ambient", 1.0f, 0.5f, 0.31f);
+	shader_manager->setFloat(lightingShader, "material.diffuse", 1.0f, 0.5f, 0.31f);
+	shader_manager->setFloat(lightingShader, "material.specular", 0.5f, 0.5f, 0.5f);
+	shader_manager->setFloat(lightingShader, "material.shininess", 32.0f);
+
 	shader_manager->use(lampShader);
 	shader_manager->setFloat4x4(lampShader, "view", camera->RealView());
 	shader_manager->setFloat4x4(lampShader, "projection", camera->GetProjection().ptr());
@@ -561,7 +628,7 @@ update_status ModuleRenderer3D::PostUpdate()
 	else
 	{
 		shader_manager->use(lightingShader);
-		glBindVertexArray(VAO_Cube);
+		glBindVertexArray(VAO_Light);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
@@ -593,11 +660,13 @@ bool ModuleRenderer3D::CleanUp()
 	glDeleteVertexArrays(1, &VAO_Triangle);
 	glDeleteVertexArrays(1, &VAO_Square);
 	glDeleteVertexArrays(1, &VAO_Cube);
+	glDeleteVertexArrays(1, &VAO_Light);
 
 	glDeleteBuffers(1, &VBO_Triangle);
 	glDeleteBuffers(1, &VBO_Square);
 	glDeleteBuffers(1, &EBO_Square);
 	glDeleteBuffers(1, &VBO_Cube);
+	glDeleteBuffers(1, &VBO_Light);
 
 	//Delete textures
 	delete texture_manager;
