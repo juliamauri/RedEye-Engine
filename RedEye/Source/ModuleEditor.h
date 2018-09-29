@@ -4,7 +4,7 @@
 #include "Module.h"
 #include "ImGui\imgui.h"
 #include <list>
-#include <string.h>
+#include <string>
 
 class EditorWindow;
 class ConsoleWindow;
@@ -18,6 +18,13 @@ class RendererTest;
 class GeometryTest;
 
 union SDL_Event;
+
+struct SoftwareInfo
+{
+	SoftwareInfo(const char * name, const char * version = nullptr, const char * website = nullptr);
+	std::string name, version, website;
+};
+
 
 class ModuleEditor : public Module
 {
@@ -33,6 +40,7 @@ public:
 	//void DrawEditor() override;
 
 	void AddTextConsole(const char* text);
+	bool AddSoftwareUsed(SoftwareInfo s);
 	void Draw();
 	void HandleSDLEvent(SDL_Event* e);
 
@@ -117,8 +125,9 @@ public:
 class AboutWindow : public EditorWindow
 {
 public:
-	AboutWindow(const char* name = "About", bool start_active = false);
+	AboutWindow(const char* name = "About", bool start_active = true);
 	void Draw() override;
+	std::list<SoftwareInfo> sw_info;
 };
 
 class RandomTest : public EditorWindow

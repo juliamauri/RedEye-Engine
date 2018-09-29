@@ -31,6 +31,7 @@ public:
 
 	void DrawEditor();
 	void Log(const char* text);
+	void ReportSoftware(const char * name, const char * version = nullptr, const char * website = nullptr);
 	void RecieveEvent(const Event* e) override;
 
 	const char* GetName() const;

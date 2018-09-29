@@ -1,5 +1,6 @@
 #include "FileSystem.h"
 
+#include "Application.h"
 #include "OutputLog.h"
 #include "SDL2\include\SDL.h"
 #include "SDL2\include\SDL_assert.h"
@@ -29,6 +30,14 @@ bool FileSystem::Init(int argc, char* argv[])
 
 	if (PHYSFS_init(argv[0]) != 0)
 	{
+		PHYSFS_Version physfs_version;
+		PHYSFS_VERSION(&physfs_version);
+		char tmp[8];
+		sprintf_s(tmp, 8, "%u.%u.%u", (int)physfs_version.major, (int)physfs_version.minor, (int)physfs_version.patch);
+		App->ReportSoftware("PhysFS", tmp, "https://icculus.org/physfs/");
+
+		App->ReportSoftware("Rapidjson", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
+
 		PHYSFS_setWriteDir(".");
 
 		std::string path(GetExecutableDirectory());
@@ -40,13 +49,9 @@ bool FileSystem::Init(int argc, char* argv[])
 		const char* config_file = "config.json";
 		engine_config = new Config(config_file);
 		if (engine_config->Load())
-		{
 			ret = true;
-		}
 		else
-		{
-			LOG("Error while loading Engine Configuration file: %s\nRed Eye Engire will use default configuration parameters.", config_file);
-		}
+			LOG("Error while loading Engine Configuration file: %s\nRed Eye Engine will initialize with default configuration parameters.", config_file);
 	}
 	else
 	{

@@ -9,7 +9,8 @@ class RE_Math
 public:
 
 	RE_Math();
-	RE_Math(unsigned int seed);
+
+	void Init();
 
 	float	RandomF();
 	int		RandomInt();

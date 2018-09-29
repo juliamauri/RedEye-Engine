@@ -1,5 +1,7 @@
 #include "RE_Math.h"
 
+#include "Application.h"
+
 #ifdef _DEBUG
 #pragma comment(lib, "MathGeoLib/lib/MathGeoLib_debug.lib")
 #else
@@ -7,13 +9,12 @@
 #endif
 
 RE_Math::RE_Math()
+{}
+
+void RE_Math::Init()
 {
 	lcg.Seed(Clock::TickU32());
-}
-
-RE_Math::RE_Math(unsigned int seed)
-{
-	lcg.Seed(seed);
+	App->ReportSoftware("MathGeoLib", nullptr, "https://github.com/juj/MathGeoLib");
 }
 
 float RE_Math::RandomF()

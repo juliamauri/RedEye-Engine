@@ -1,5 +1,6 @@
 #include "SystemInfo.h"
 
+#include "Application.h"
 #include "Globals.h"
 #include "SDL2\include\SDL.h"
 #include "imgui\imgui.h"
@@ -52,10 +53,9 @@ void SystemInfo::WhatAreWeRunningOn()
 	gpu_renderer += (char*)glGetString(GL_RENDERER);
 	gpu_vendor = "Brand: ";
 	gpu_vendor += (char*)glGetString(GL_VENDOR);
-	gpu_version = "Version:: ";
-	gpu_version += (char*)glGetString(GL_VERSION);
-	gpu_shading = "GLSL: ";
-	gpu_shading += (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+	App->ReportSoftware("gpudetect");
+	App->ReportSoftware("mmgr");
 }
 
 void SystemInfo::MemoryDraw()

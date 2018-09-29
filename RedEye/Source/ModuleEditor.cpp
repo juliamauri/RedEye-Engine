@@ -38,6 +38,9 @@ bool ModuleEditor::Init(JSONNode* node)
 {
 	bool ret = ImGui_ImplSdlGL3_Init(App->window->GetWindow());
 
+	if (ret)
+		App->ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
+
 	// TODO set window lock positions
 
 	return ret;
@@ -187,6 +190,19 @@ void ModuleEditor::AddTextConsole(const char* text)
 	}
 }
 
+bool ModuleEditor::AddSoftwareUsed(SoftwareInfo s)
+{
+	bool ret = false;
+
+	if (about)
+	{
+		about->sw_info.push_back(s);
+		ret = true;
+	}
+
+	return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////
 ///////   Editor Windows   ////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -320,63 +336,33 @@ void AboutWindow::Draw()
 		ImGui::Separator();
 		if (ImGui::CollapsingHeader("3rd Party Software:"))
 		{
-			ImGui::BulletText("SDL v2.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit SDL website"))
-				BROWSER("https://www.libsdl.org/");
+			std::list<SoftwareInfo>::iterator it = sw_info.begin();
+			for (; it != sw_info.end(); ++it)
+			{
+				if (!it->name.empty())
+				{
+					if (!it->version.empty())
+						ImGui::BulletText("%s: v%s ", it->name.c_str(), it->version.c_str());
+					else
+						ImGui::BulletText("%s ", it->name.c_str());
 
-			ImGui::BulletText("SDL Mixer v2.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit SDL Mixer website"))
-				BROWSER("https://www.libsdl.org/projects/SDL_mixer/");
+					if (!it->website.empty())
+					{
+						std::string button_name = "Open ";
+						button_name += it->name;
+						button_name += " Website";
+						ImGui::SameLine();
+						if (ImGui::Button(button_name.c_str()))
+							BROWSER(it->website.c_str());
+					}
+				}
+			}
 
-			ImGui::BulletText("SDL TTF v2.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit SDL TTF website"))
-				BROWSER("https://www.libsdl.org/projects/SDL_ttf/");
-
-			ImGui::BulletText("OpenGl");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit OpenGl website"))
-				BROWSER("https://www.opengl.org/");
-
-			ImGui::BulletText("Glew v2.1.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit Glew website"))
-				BROWSER("http://glew.sourceforge.net/");
-
-			ImGui::BulletText("DevIL v1.8.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit DevIL website"))
-				BROWSER("http://openil.sourceforge.net/");
-
-			ImGui::BulletText("Open Asset Import Library");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit Assimp website"))
-				BROWSER("http://www.assimp.org/");
-
-			ImGui::BulletText("PhysFS v1.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit PhysFS website"))
-				BROWSER("https://icculus.org/physfs/");
-
-			ImGui::BulletText("ImGui v1.50 WIP");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit ImGui website"))
-				BROWSER("https://github.com/ocornut/imgui");
-
-			ImGui::BulletText("MathGeoLib");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit MathGeoLib website"))
-				BROWSER("https://github.com/juj/MathGeoLib");
-
-			ImGui::BulletText("Rapidjson v1.1.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit Rapidjson website"))
-				BROWSER("http://rapidjson.org/");
-
-			ImGui::BulletText("gpudetect");
-			ImGui::BulletText("mmgr");
+			/* Missing Library Initialicers
+			SDL Mixer v2.0 https://www.libsdl.org/projects/SDL_mixer/
+			SDL TTF v2.0 https://www.libsdl.org/projects/SDL_ttf/
+			DevIL v1.8.0 http://openil.sourceforge.net/
+			Open Asset Import Library http://www.assimp.org/ */
 		}
 	}
 
@@ -826,4 +812,11 @@ void GeometryTest::Draw()
 	}
 
 	ImGui::End();
+}
+
+SoftwareInfo::SoftwareInfo(const char * name, const char * v, const char * w) :
+	name(name)
+{
+	if (v != nullptr) version = v;
+	if (w != nullptr) website = w;
 }
