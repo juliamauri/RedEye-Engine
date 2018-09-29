@@ -5,6 +5,7 @@
 #include "ModuleInput.h"
 #include "ModuleRenderer3D.h"
 #include "RE_Math.h"
+#include "OutputLog.h"
 #include "MathGeoLib\include\MathGeoLib.h"
 
 #include "ImGui\imgui_impl_sdl_gl3.h"
@@ -29,12 +30,16 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 ModuleEditor::~ModuleEditor()
 {
 	windows.clear();
+	tools.clear();
 }
 
 // Load assets
 bool ModuleEditor::Init(JSONNode* node)
 {
 	bool ret = ImGui_ImplSdlGL3_Init(App->window->GetWindow());
+
+	if (ret)
+		App->ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
 
 	// TODO set window lock positions
 
@@ -104,11 +109,11 @@ update_status ModuleEditor::Update()
 				if (ImGui::MenuItem(show_demo ? "Close Gui Demo" : "Open Gui Demo"))
 					show_demo = !show_demo;
 				if (ImGui::MenuItem("Documentation"))
-					App->RequestBrowser("https://github.com/juliamauri/RedEye-Engine/wiki");
+					BROWSER("https://github.com/juliamauri/RedEye-Engine/wiki");
 				if (ImGui::MenuItem("Download Latest"))
-					App->RequestBrowser("https://github.com/juliamauri/RedEye-Engine/releases");
+					BROWSER("https://github.com/juliamauri/RedEye-Engine/releases");
 				if (ImGui::MenuItem("Report a Bug"))
-					App->RequestBrowser("https://github.com/juliamauri/RedEye-Engine/issues");
+					BROWSER("https://github.com/juliamauri/RedEye-Engine/issues");
 				if (ImGui::MenuItem("About", about->IsActive() ? "Hide" : "Open"))
 					about->SwitchActive();
 
@@ -127,7 +132,7 @@ update_status ModuleEditor::Update()
 			if ((**it)) (*it)->DrawWindow();
 		}
 
-		if (about->IsActive()) about->DrawWindow(); // (not in windows' list)
+		if (about && about->IsActive()) about->DrawWindow(); // (not in windows' list)
 
 		it = tools.begin();
 		for (it; it != tools.end(); it++)
@@ -152,6 +157,15 @@ bool ModuleEditor::CleanUp()
 		windows.pop_back();
 	}
 
+	while (!tools.empty())
+	{
+		delete *(tools.rbegin());
+		tools.pop_back();
+	}
+
+	if (about != nullptr)
+		delete about;
+
 	ImGui_ImplSdlGL3_Shutdown();
 
 	return true;
@@ -169,8 +183,24 @@ void ModuleEditor::HandleSDLEvent(SDL_Event* e)
 
 void ModuleEditor::AddTextConsole(const char* text)
 {
-	if(console != nullptr && !windows.empty())
+	if (console != nullptr && !windows.empty())
+	{
 		console->console_buffer.append(text);
+		console->scroll_to_bot = true;
+	}
+}
+
+bool ModuleEditor::AddSoftwareUsed(SoftwareInfo s)
+{
+	bool ret = false;
+
+	if (about)
+	{
+		about->sw_info.push_back(s);
+		ret = true;
+	}
+
+	return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -179,6 +209,9 @@ void ModuleEditor::AddTextConsole(const char* text)
 
 EditorWindow::EditorWindow(const char* name, bool start_enabled)
 	: name(name), active(start_enabled), lock_pos(false)
+{}
+
+EditorWindow::~EditorWindow()
 {}
 
 void EditorWindow::DrawWindow()
@@ -227,7 +260,12 @@ void ConsoleWindow::Draw()
 {
 	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
 	{
-		ImGui::Text(console_buffer.c_str());
+		ImGui::TextUnformatted(console_buffer.begin());
+
+		if (scroll_to_bot)
+			ImGui::SetScrollHere(1.0f);
+
+		scroll_to_bot = false;
 	}
 
 	ImGui::End();
@@ -253,8 +291,7 @@ void ConfigWindow::Draw()
 
 HeriarchyWindow::HeriarchyWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
-{
-}
+{}
 
 void HeriarchyWindow::Draw()
 {
@@ -263,8 +300,7 @@ void HeriarchyWindow::Draw()
 
 PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
-{
-}
+{}
 
 void PropertiesWindow::Draw()
 {
@@ -291,72 +327,42 @@ void AboutWindow::Draw()
 		ImGui::Text("Juli Mauri Costa");
 		ImGui::SameLine();
 		if (ImGui::Button("Visit Juli's Github Profile"))
-			App->RequestBrowser("https://github.com/juliamauri");
+			BROWSER("https://github.com/juliamauri");
 		ImGui::Text("Ruben Sardon Roldan");
 		ImGui::SameLine();
 		if (ImGui::Button("Visit Ruben's Github Profile"))
-			App->RequestBrowser("https://github.com/cumus");
+			BROWSER("https://github.com/cumus");
 
 		ImGui::Separator();
 		if (ImGui::CollapsingHeader("3rd Party Software:"))
 		{
-			ImGui::BulletText("SDL v2.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit SDL website"))
-				App->RequestBrowser("https://www.libsdl.org/");
+			std::list<SoftwareInfo>::iterator it = sw_info.begin();
+			for (; it != sw_info.end(); ++it)
+			{
+				if (!it->name.empty())
+				{
+					if (!it->version.empty())
+						ImGui::BulletText("%s: v%s ", it->name.c_str(), it->version.c_str());
+					else
+						ImGui::BulletText("%s ", it->name.c_str());
 
-			ImGui::BulletText("SDL Mixer v2.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit SDL Mixer website"))
-				App->RequestBrowser("https://www.libsdl.org/projects/SDL_mixer/");
+					if (!it->website.empty())
+					{
+						std::string button_name = "Open ";
+						button_name += it->name;
+						button_name += " Website";
+						ImGui::SameLine();
+						if (ImGui::Button(button_name.c_str()))
+							BROWSER(it->website.c_str());
+					}
+				}
+			}
 
-			ImGui::BulletText("SDL TTF v2.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit SDL TTF website"))
-				App->RequestBrowser("https://www.libsdl.org/projects/SDL_ttf/");
-
-			ImGui::BulletText("OpenGl");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit OpenGl website"))
-				App->RequestBrowser("https://www.opengl.org/");
-
-			ImGui::BulletText("Glew v2.1.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit Glew website"))
-				App->RequestBrowser("http://glew.sourceforge.net/");
-
-			ImGui::BulletText("DevIL v1.8.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit DevIL website"))
-				App->RequestBrowser("http://openil.sourceforge.net/");
-
-			ImGui::BulletText("Open Asset Import Library");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit Assimp website"))
-				App->RequestBrowser("http://www.assimp.org/");
-
-			ImGui::BulletText("PhysFS v1.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit PhysFS website"))
-				App->RequestBrowser("https://icculus.org/physfs/");
-
-			ImGui::BulletText("ImGui v1.50 WIP");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit ImGui website"))
-				App->RequestBrowser("https://github.com/ocornut/imgui");
-
-			ImGui::BulletText("MathGeoLib");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit MathGeoLib website"))
-				App->RequestBrowser("https://github.com/juj/MathGeoLib");
-
-			ImGui::BulletText("Rapidjson v1.1.0");
-			ImGui::SameLine();
-			if (ImGui::Button("Visit Rapidjson website"))
-				App->RequestBrowser("http://rapidjson.org/");
-
-			ImGui::BulletText("gpudetect");
-			ImGui::BulletText("mmgr");
+			/* Missing Library Initialicers
+			SDL Mixer v2.0 https://www.libsdl.org/projects/SDL_mixer/
+			SDL TTF v2.0 https://www.libsdl.org/projects/SDL_ttf/
+			DevIL v1.8.0 http://openil.sourceforge.net/
+			Open Asset Import Library http://www.assimp.org/ */
 		}
 	}
 
@@ -397,7 +403,9 @@ void RandomTest::Draw()
 	ImGui::End();
 }
 
-RendererTest::RendererTest(const char * name, bool start_active) : EditorWindow(name,start_active) {}
+RendererTest::RendererTest(const char * name, bool start_active) : EditorWindow(name,start_active)
+{}
+
 
 void RendererTest::Draw()
 {
@@ -572,7 +580,7 @@ void GeometryTest::Draw()
 			math::Plane plane;
 			fig1 = "Figure 1: ";
 			fig2 = "Figure 2: ";
-
+			
 			switch (GeoFigureType(first_type)) {
 			case GEO_SPHERE:
 				fig1 += "Sphere with center at Pos(F1-Pos X, F1-Pos Y, F1-Pos Z) and radius(F1-Extra value)";
@@ -789,6 +797,7 @@ void GeometryTest::Draw()
 				}
 				break;
 			}
+
 		}
 
 		ImGui::TextWrappedV(fig1.c_str(), "");
@@ -803,4 +812,11 @@ void GeometryTest::Draw()
 	}
 
 	ImGui::End();
+}
+
+SoftwareInfo::SoftwareInfo(const char * name, const char * v, const char * w) :
+	name(name)
+{
+	if (v != nullptr) version = v;
+	if (w != nullptr) website = w;
 }

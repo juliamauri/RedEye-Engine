@@ -1,5 +1,5 @@
-#include "Globals.h"
 #include "Application.h"
+#include "OutputLog.h"
 
 #ifdef _DEBUG
 #include "mmgr\mmgr.h"

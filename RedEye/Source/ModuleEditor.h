@@ -4,6 +4,7 @@
 #include "Module.h"
 #include "ImGui\imgui.h"
 #include <list>
+#include <string>
 
 class EditorWindow;
 class ConsoleWindow;
@@ -17,6 +18,13 @@ class RendererTest;
 class GeometryTest;
 
 union SDL_Event;
+
+struct SoftwareInfo
+{
+	SoftwareInfo(const char * name, const char * version = nullptr, const char * website = nullptr);
+	std::string name, version, website;
+};
+
 
 class ModuleEditor : public Module
 {
@@ -32,6 +40,7 @@ public:
 	//void DrawEditor() override;
 
 	void AddTextConsole(const char* text);
+	bool AddSoftwareUsed(SoftwareInfo s);
 	void Draw();
 	void HandleSDLEvent(SDL_Event* e);
 
@@ -58,7 +67,7 @@ class EditorWindow
 {
 public:
 	EditorWindow(const char* name, bool start_active);
-
+	virtual ~EditorWindow();
 	void DrawWindow();
 	void SwitchActive();
 	const char* Name() const;
@@ -88,6 +97,7 @@ public:
 	ConsoleWindow(const char* name = "Console", bool start_active = true);
 	void Draw() override;
 	ImGuiTextBuffer console_buffer;
+	bool scroll_to_bot = true;
 };
 
 class ConfigWindow : public EditorWindow
@@ -115,8 +125,9 @@ public:
 class AboutWindow : public EditorWindow
 {
 public:
-	AboutWindow(const char* name = "About", bool start_active = false);
+	AboutWindow(const char* name = "About", bool start_active = true);
 	void Draw() override;
+	std::list<SoftwareInfo> sw_info;
 };
 
 class RandomTest : public EditorWindow
@@ -160,9 +171,9 @@ private:
 	float second_x, second_y, second_z = 0.f;
 	float first_xtra, second_xtra = 0.f;
 	int first_type, second_type = 0;
+	bool intersects = false;
 	std::string fig1 = "";
 	std::string fig2 = "";
-	bool intersects = false;
 };
 
 /*/ Missing windows:

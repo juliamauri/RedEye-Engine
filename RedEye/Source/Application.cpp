@@ -9,9 +9,9 @@
 #include "TimeManager.h"
 #include "SystemInfo.h"
 #include "RE_Math.h"
+#include "OutputLog.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
-
 
 using namespace std;
 
@@ -45,6 +45,14 @@ bool Application::Init()
 		LOG("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		ret = false;
 	}
+	else
+	{
+		SDL_version sdl_version;
+		SDL_VERSION(&sdl_version);
+		char tmp[8];
+		sprintf_s(tmp, 8, "%u.%u.%u", (int)sdl_version.major, (int)sdl_version.minor, (int)sdl_version.patch);
+		App->ReportSoftware("SDL", tmp, "https://www.libsdl.org/");
+	}
 
 	if (fs->Init(argc, argv))
 	{
@@ -66,7 +74,17 @@ bool Application::Init()
 			ret = (*it)->Start(/* CONFIG */);
 
 	// Check hardware specs
-	if (ret) sys_info->WhatAreWeRunningOn();
+	if (ret)
+	{
+		sys_info->WhatAreWeRunningOn();
+		math->Init();
+	}
+
+	// Render Software
+	//App->ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
+	//App->ReportSoftware("GLslang", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
+	//App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
+
 
 	return ret;
 }
@@ -161,9 +179,9 @@ void Application::Log(const char * text)
 		editor->AddTextConsole(text);
 }
 
-void Application::RequestBrowser(const char* link) const
+void Application::ReportSoftware(const char * name, const char * version, const char * website)
 {
-	ShellExecute(NULL, "open", link, NULL, NULL, SW_SHOWNORMAL);
+	editor->AddSoftwareUsed(SoftwareInfo(name, version, website));
 }
 
 void Application::RecieveEvent(const Event* e)

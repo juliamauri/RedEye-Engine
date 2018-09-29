@@ -16,7 +16,7 @@ public:
 	bool Init(int argc, char* argv[]);
 	Config* GetConfig() const;
 
-	bool AddPath(const char* path_or_zip, const char* mount_point = NULL);
+	bool AddPath(const char* path_or_zip, const char* mount_point = nullptr);
 	bool Exists(const char* file) const;
 	bool IsDirectory(const char* file) const;
 	const char* GetExecutableDirectory() const;
@@ -70,7 +70,7 @@ public:
 	bool Load() override;
 	void Save() override;
 	JSONNode* GetRootNode(const char* member);
-	inline bool operator!() const;
+	inline bool operator!() const override;
 
 public:
 

@@ -5,7 +5,7 @@
 #include "ModuleScene.h"
 #include "ModuleWindow.h"
 #include "Event.h"
-#include "Globals.h"
+#include "OutputLog.h"
 #include "SDL2\include\SDL.h"
 
 #define MAX_KEYS 300
@@ -264,7 +264,7 @@ void ModuleInput::HandleEventQueue()
 		}
 	}
 
-	if(App->editor->IsActive()) App->editor->HandleSDLEvent(&e);
+	if(App->editor && App->editor->IsActive()) App->editor->HandleSDLEvent(&e);
 
 	// RE Events
 	Event* re_e = nullptr;

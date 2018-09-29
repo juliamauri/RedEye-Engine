@@ -1,9 +1,10 @@
 #include "Texture2DManager.h"
 
-#include <string>
-
+#include "Application.h"
 #include "FileSystem.h"
+
 #include "Glew/include/glew.h"
+#include <string>
 
 #include "IL/include/il.h"
 #include "IL/include/ilu.h"
@@ -28,6 +29,10 @@ bool Texture2DManager::Init(const char* folderPath)
 	ilInit();
 	iluInit();
 	ilutInit();
+
+	char tmp[8];
+	sprintf_s(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
+	App->ReportSoftware("DevIL", tmp, "http://openil.sourceforge.net/");
 
 	return true;
 }
