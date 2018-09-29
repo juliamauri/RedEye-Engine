@@ -37,28 +37,23 @@ bool FileSystem::Init(int argc, char* argv[])
 		AddPath(".");
 		AddPath(path.c_str());
 
-		engine_config = new Config("config.json");
+		const char* config_file = "config.json";
+		engine_config = new Config(config_file);
 		if (engine_config->Load())
 		{
 			ret = true;
 		}
 		else
 		{
-			//TODO: Log error - cant load "Config.json"
+			LOG("Error while loading Engine Configuration file: %s\nRed Eye Engire will use default configuration parameters.", config_file);
 		}
 	}
 	else
 	{
-		//TODO: Log error - cant init physfs
+		LOG("PhysFS could not initialize! Error: %s\n", PHYSFS_getLastError());
 	}
 
 	return ret;
-
-	
-
-	/* TODO:
-	PHYSFS_setWriteDir(".");
-	AddPath(".");*/
 }
 
 Config* FileSystem::GetConfig() const
@@ -159,7 +154,7 @@ unsigned int RE_FileIO::HardLoad()
 				
 				if (amountRead != sll_size)
 				{
-					LOG("File System error while reading from file %s: %s\n", file_name, PHYSFS_getLastError());
+					LOG("File System error while reading from file %s: %s", file_name, PHYSFS_getLastError());
 					delete (buffer);
 				}
 				else
@@ -171,17 +166,17 @@ unsigned int RE_FileIO::HardLoad()
 
 			if (PHYSFS_close(fs_file) == 0)
 			{
-				LOG("File System error while closing file %s: %s\n", file_name, PHYSFS_getLastError());
+				LOG("File System error while closing file %s: %s", file_name, PHYSFS_getLastError());
 			}
 		}
 		else
 		{
-			LOG("File System error while opening file %s: %s\n", file_name, PHYSFS_getLastError());
+			LOG("File System error while opening file %s: %s", file_name, PHYSFS_getLastError());
 		}
 	}
 	else
 	{
-		LOG("File System error while opening file %s: %s\n", file_name, PHYSFS_getLastError());
+		LOG("File System error while opening file %s: %s", file_name, PHYSFS_getLastError());
 	}
 
 	return ret;
@@ -196,14 +191,14 @@ void RE_FileIO::HardSave(const char* buffer)
 		long long written = PHYSFS_write(file, (const void*)buffer, 1, strnlen_s(buffer, 0xffff));
 		if (written != size)
 		{
-			LOG("Error while writing to file %s: %s\n", file, PHYSFS_getLastError());
+			LOG("Error while writing to file %s: %s", file, PHYSFS_getLastError());
 		}
 
 		if (PHYSFS_close(file) == 0)
-			LOG("Error while closing file %s: %s\n", file, PHYSFS_getLastError());
+			LOG("Error while closing save file %s: %s", file, PHYSFS_getLastError());
 	}
 	else
-		LOG("Error while opening file %s: %s\n", file, PHYSFS_getLastError());
+		LOG("Error while opening save file %s: %s", file, PHYSFS_getLastError());
 }
 
 
