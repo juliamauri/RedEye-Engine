@@ -79,13 +79,13 @@ private:
 	RE_Camera* camera;
 
 	ShaderManager* shader_manager;
-	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube;
+	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube, lightingShader, lampShader;
 
 	Texture2DManager* texture_manager;
 	unsigned int puppie1, puppie2, container, awesomeface;
 
 	//Renderer Test
-	unsigned int VAO_Triangle, VAO_Square, VAO_Cube, VBO_Triangle, VBO_Square, VBO_Cube, EBO_Square;
+	unsigned int VAO_Triangle, VAO_Square, VAO_Cube, VAO_Light, VBO_Triangle, VBO_Square, VBO_Cube, EBO_Square;
 	bool B_EBO = true, isLine = false, vsync = false, printvertextcolor = false;
 
 	ShaderType shaderenabled = SIN;
