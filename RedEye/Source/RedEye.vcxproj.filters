@@ -76,7 +76,9 @@
     <ClCompile Include="RE_Mesh.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="RE_CompMesh.cpp" />
+    <ClCompile Include="RE_CompMesh.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
