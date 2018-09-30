@@ -79,10 +79,10 @@ private:
 	RE_Camera* camera;
 
 	ShaderManager* shader_manager;
-	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube, lightingShader, lampShader;
+	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube, lightingShader, lampShader, lightingmapShader;
 
 	Texture2DManager* texture_manager;
-	unsigned int puppie1, puppie2, container, awesomeface;
+	unsigned int puppie1, puppie2, container, awesomeface, container2, container2_specular;
 
 	//Renderer Test
 	unsigned int VAO_Triangle, VAO_Square, VAO_Cube, VAO_Light, VBO_Triangle, VBO_Square, VBO_Cube, VBO_Light, EBO_Square;

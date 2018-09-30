@@ -52,7 +52,7 @@ public:
 	math::float4x4 GetProjection();
 
 	//Get camera pos vector
-	math::vec GetPos();
+	math::vec GetPos(bool opengl = false);
 
 	//LookAt, return the view matrix (view * transformation matrix)
 	//@param cameraTarget -> The object that the camera looks

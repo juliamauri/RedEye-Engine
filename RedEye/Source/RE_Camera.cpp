@@ -94,9 +94,12 @@ math::float4x4 RE_Camera::GetProjection()
 	return camera.ProjectionMatrix().Transposed();
 }
 
-math::vec RE_Camera::GetPos()
+math::vec RE_Camera::GetPos(bool opengl)
 {
-	return camera.Pos();
+	if (!opengl)
+		return camera.Pos();
+	else
+		return math::vec(camera.Pos().x, camera.Pos().y, -camera.Pos().z);
 }
 
 void RE_Camera::LookAt(math::vec cameraTarget)

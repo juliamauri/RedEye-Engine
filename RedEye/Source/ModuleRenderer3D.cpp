@@ -83,10 +83,14 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	if (!ret)
 		LOG("%s\n", shader_manager->GetShaderError());
 
-		ret = shader_manager->Load("lamp", &lampShader);
+	ret = shader_manager->Load("lamp", &lampShader);
 	if (!ret)
 		LOG("%s\n", shader_manager->GetShaderError());
 
+	ret = shader_manager->Load("lightmaps", &lightingmapShader);
+	if (!ret)
+		LOG("%s\n", shader_manager->GetShaderError());
+	
 	if (false)
 	{
 		//Print a 2d triangle3d https://learnopengl.com/Getting-started/Hello-Triangle
@@ -218,48 +222,48 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	//Lighting
 	float verticesCubeWNormal[] = {
-		//Vertex pos		  Normal Coords
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+		// positions          // normals           // texture coords
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+		
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+		
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+		
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 	};
 	glGenBuffers(1, &VBO_Light);
 	glGenVertexArrays(1, &VAO_Light);
@@ -271,14 +275,16 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	// we only need to bind to the VBO, the container's VBO's data already contains the correct data.
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_Light);
 	// set the vertex attributes
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	// normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	// texture attribute
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	glEnableVertexAttribArray(0);
-
 
 	texture_manager = new Texture2DManager();
 	texture_manager->Init("Images/");
@@ -297,6 +303,8 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 		shader_manager->setInt(shader_cube, "texture1", 1);
 		shader_manager->setInt(shader_cube, "texture2", 2);
 	}
+	container2 = texture_manager->LoadTexture2D("container2", ImageExtensionType::PNG);
+	container2_specular = texture_manager->LoadTexture2D("container2_specular", ImageExtensionType::PNG);
 	enableVSync(vsync = config_module->PullBool("vsync", false));
 
 	camera = new RE_Camera(true);
@@ -310,12 +318,15 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	model_light = math::float4x4::Translate(math::vec(0.0f));
 	model_light.InverseTranspose();
 
-	math::vec lightPos(1.2f, 1.0f, 2.0f);
+	math::vec lightPos(0.5f, 0.0f, 3.0f);
 
-	shader_manager->use(lightingShader);
-	shader_manager->setFloat4x4(lightingShader, "model", model_light.ptr());
+	shader_manager->use(lightingmapShader);
+	shader_manager->setFloat4x4(lightingmapShader, "model", model_light.ptr());
 	math::float3x3 modelNormal(model_light.InverseTransposed().Float3x3Part());
-	shader_manager->setFloat3x3(lightingShader, "modelNormal", modelNormal.ptr());
+	shader_manager->setFloat3x3(lightingmapShader, "modelNormal", modelNormal.ptr());
+	shader_manager->setInt(lightingmapShader, "material.diffuse", 0);
+	shader_manager->setInt(lightingmapShader, "material.specular", 1);
+	shader_manager->setFloat(lightingmapShader, "light.position", lightPos);
 
 	math::float4x4 model_lamp(math::float4x4::Translate(math::vec::zero));
 	model_lamp = model_lamp * math::float4x4::Scale(math::vec(5.0f));
@@ -463,7 +474,7 @@ update_status ModuleRenderer3D::PreUpdate()
 	{
 	float cameraSpeed = 2.5f * App->time->GetDeltaTime();
 
-	//App->input->SetMouseAtCenter();
+	App->input->SetMouseAtCenter();
 
 
 	const MouseData* mouse = App->input->GetMouse();
@@ -497,6 +508,7 @@ update_status ModuleRenderer3D::PreUpdate()
 	if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 		camera->Move(CameraMovement::RIGHT, cameraSpeed);
 
+	/*
 	timeLight += App->time->GetDeltaTime();
 
 	math::vec lightColor;
@@ -506,22 +518,22 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	math::vec diffuseColor = lightColor.Mul(2.0f); // decrease the influence
 	math::vec ambientColor = diffuseColor.Mul(0.2f); // low influence
-
-	shader_manager->use(lightingShader);
-	shader_manager->setFloat4x4(lightingShader, "view", camera->RealView());
-	shader_manager->setFloat4x4(lightingShader, "projection", camera->GetProjection().ptr());
-	shader_manager->setFloat(lightingShader, "viewPos", camera->GetPos());
+	*/
+	shader_manager->use(lightingmapShader);
+	shader_manager->setFloat4x4(lightingmapShader, "view", camera->RealView());
+	shader_manager->setFloat4x4(lightingmapShader, "projection", camera->GetProjection().ptr());
+	shader_manager->setFloat(lightingmapShader, "viewPos", camera->GetPos(true));
 
 		//light propieties
-	shader_manager->setFloat(lightingShader, "light.ambient", ambientColor);
-	shader_manager->setFloat(lightingShader, "light.diffuse", diffuseColor);
-	shader_manager->setFloat(lightingShader, "light.specular", 1.0f, 1.0f, 1.0f);
+	shader_manager->setFloat(lightingmapShader, "light.ambient", 0.2f, 0.2f, 0.2f);
+	shader_manager->setFloat(lightingmapShader, "light.diffuse", 0.5f, 0.5f, 0.5f);
+	shader_manager->setFloat(lightingmapShader, "light.specular", 1.0f, 1.0f, 1.0f);
 
 		//material propieties
-	shader_manager->setFloat(lightingShader, "material.ambient", 1.0f, 0.5f, 0.31f);
-	shader_manager->setFloat(lightingShader, "material.diffuse", 1.0f, 0.5f, 0.31f);
-	shader_manager->setFloat(lightingShader, "material.specular", 0.5f, 0.5f, 0.5f);
-	shader_manager->setFloat(lightingShader, "material.shininess", 32.0f);
+	//shader_manager->setFloat(lightingShader, "material.ambient", 1.0f, 0.5f, 0.31f);
+	//shader_manager->setFloat(lightingShader, "material.diffuse", 1.0f, 0.5f, 0.31f);
+	//shader_manager->setFloat(lightingmapShader, "material.specular", 0.5f, 0.5f, 0.5f);
+	shader_manager->setFloat(lightingmapShader, "material.shininess", 64.0f);
 
 	shader_manager->use(lampShader);
 	shader_manager->setFloat4x4(lampShader, "view", camera->RealView());
@@ -632,7 +644,13 @@ update_status ModuleRenderer3D::PostUpdate()
 	}
 	else
 	{
-		shader_manager->use(lightingShader);
+		shader_manager->use(lightingmapShader);
+
+		glActiveTexture(GL_TEXTURE0);
+		texture_manager->use(container2);
+		glActiveTexture(GL_TEXTURE1);
+		texture_manager->use(container2_specular);
+
 		glBindVertexArray(VAO_Light);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
