@@ -52,33 +52,30 @@ bool Application::Init()
 		char tmp[8];
 		sprintf_s(tmp, 8, "%u.%u.%u", (int)sdl_version.major, (int)sdl_version.minor, (int)sdl_version.patch);
 		App->ReportSoftware("SDL", tmp, "https://www.libsdl.org/");
+
+		if (ret = (fs->Init(argc, argv)))
+		{
+			JSONNode* node = nullptr;
+			Config* config = fs->GetConfig();
+
+			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
+				if ((*it)->IsActive() == true)
+				{
+					node = config->GetRootNode((*it)->GetName());
+					ret = (*it)->Init(node);
+					delete node;
+					node = nullptr;
+				}
+
+			sys_info->WhatAreWeRunningOn();
+			math->Init();
+
+			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
+				if ((*it)->IsActive() == true)
+					ret = (*it)->Start(/* CONFIG */);
+		}
 	}
 
-	if (fs->Init(argc, argv))
-	{
-		JSONNode* node = nullptr;
-		Config* config = fs->GetConfig();
-
-		for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
-			if ((*it)->IsActive() == true)
-			{
-				node = config->GetRootNode((*it)->GetName());
-				ret = (*it)->Init(node);
-				delete node;
-				node = nullptr;
-			}
-	}
-
-	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
-		if ((*it)->IsActive() == true)
-			ret = (*it)->Start(/* CONFIG */);
-
-	// Check hardware specs
-	if (ret)
-	{
-		sys_info->WhatAreWeRunningOn();
-		math->Init();
-	}
 	return ret;
 }
 
@@ -164,6 +161,7 @@ void Application::DrawEditor()
 
 	if (ImGui::CollapsingHeader("Memory")) sys_info->MemoryDraw();
 	if (ImGui::CollapsingHeader("Hardware")) sys_info->HardwareDraw();
+	if (ImGui::CollapsingHeader("File System")) fs->DrawEditor();
 }
 
 void Application::Log(const char * text)

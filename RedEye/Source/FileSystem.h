@@ -2,6 +2,8 @@
 #define __FILESYSTEM_H__
 
 #include "RapidJson\include\document.h"
+#include <list>
+#include <string>
 
 class Config;
 class RE_FileIO;
@@ -16,7 +18,11 @@ public:
 	bool Init(int argc, char* argv[]);
 	Config* GetConfig() const;
 
+	void DrawEditor();
 	bool AddPath(const char* path_or_zip, const char* mount_point = nullptr);
+	bool SetWritePath(const char* dir);
+	const char* GetWritePath() const;
+
 	bool Exists(const char* file) const;
 	bool IsDirectory(const char* file) const;
 	const char* GetExecutableDirectory() const;
@@ -24,6 +30,8 @@ public:
 private:
 
 	Config* engine_config;
+	std::list<std::string> paths;
+	std::string write_path;
 };
 
 

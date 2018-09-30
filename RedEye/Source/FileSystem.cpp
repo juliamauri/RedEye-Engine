@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "OutputLog.h"
+#include "ImGui\imgui.h"
 #include "SDL2\include\SDL.h"
 #include "SDL2\include\SDL_assert.h"
 
@@ -20,7 +21,9 @@ FileSystem::FileSystem() : engine_config(nullptr)
 
 FileSystem::~FileSystem()
 {
+	paths.clear();
 	delete engine_config;
+
 	PHYSFS_deinit();
 }
 
@@ -35,18 +38,15 @@ bool FileSystem::Init(int argc, char* argv[])
 		char tmp[8];
 		sprintf_s(tmp, 8, "%u.%u.%u", (int)physfs_version.major, (int)physfs_version.minor, (int)physfs_version.patch);
 		App->ReportSoftware("PhysFS", tmp, "https://icculus.org/physfs/");
-
 		App->ReportSoftware("Rapidjson", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
-
-		PHYSFS_setWriteDir(".");
-
-		std::string path(GetExecutableDirectory());
-		path += "\\Assets";
-
+		
 		AddPath(".");
+		std::string path(GetExecutableDirectory()); path += "\\Assets";
 		AddPath(path.c_str());
 
-		const char* config_file = "config.json";
+		SetWritePath(path.c_str());
+
+		const char* config_file = "Settings/config.json";
 		engine_config = new Config(config_file);
 		if (engine_config->Load())
 			ret = true;
@@ -66,6 +66,23 @@ Config* FileSystem::GetConfig() const
 	return engine_config;
 }
 
+void FileSystem::DrawEditor()
+{
+	ImGui::Text("Executable Directory:");
+	ImGui::TextWrappedV(GetExecutableDirectory(), "");
+
+	ImGui::Separator();
+
+	ImGui::Text("Read Directories");
+	for (std::list<std::string>::iterator it = paths.begin(); it != paths.end(); ++it)
+		ImGui::TextWrappedV(it->c_str(), "");
+
+	ImGui::Separator();
+
+	ImGui::Text("Write Directory");
+	ImGui::TextWrappedV(write_path.c_str(), "");
+}
+
 bool FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
 {
 	bool ret = true;
@@ -75,8 +92,34 @@ bool FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
 		LOG("File System error while adding a path or zip(%s): %s\n", path_or_zip, PHYSFS_getLastError());
 		ret = false;
 	}
+	else
+	{
+		paths.push_back(path_or_zip);
+	}
 
 	return ret;
+}
+
+bool FileSystem::SetWritePath(const char * dir)
+{
+	bool ret = true;
+
+	if (!PHYSFS_setWriteDir(dir))
+	{
+		LOG("Error setting PhysFS Directory: %s", PHYSFS_getLastError());
+		ret = false;
+	}
+	else
+	{
+		write_path = dir;
+	}
+
+	return ret;
+}
+
+const char * FileSystem::GetWritePath() const
+{
+	return write_path.c_str();
 }
 
 bool FileSystem::Exists(const char* file) const
@@ -117,7 +160,7 @@ bool RE_FileIO::Load()
 
 void RE_FileIO::Save()
 {
-	//TODO: save buffer to file
+	HardSave(buffer);
 }
 
 void RE_FileIO::ClearBuffer()
@@ -181,7 +224,7 @@ unsigned int RE_FileIO::HardLoad()
 	}
 	else
 	{
-		LOG("File System error while opening file %s: %s", file_name, PHYSFS_getLastError());
+		LOG("File System error while checking file %s: %s", file_name, PHYSFS_getLastError());
 	}
 
 	return ret;
@@ -193,7 +236,7 @@ void RE_FileIO::HardSave(const char* buffer)
 
 	if (file != NULL)
 	{
-		long long written = PHYSFS_write(file, (const void*)buffer, 1, strnlen_s(buffer, 0xffff));
+		long long written = PHYSFS_write(file, (const void*)buffer, 1, size = (strnlen_s(buffer, 0xffff)));
 		if (written != size)
 		{
 			LOG("Error while writing to file %s: %s", file, PHYSFS_getLastError());
@@ -236,11 +279,8 @@ void Config::Save()
 	rapidjson::StringBuffer bufjer;
 	rapidjson::Writer<rapidjson::StringBuffer> writer(bufjer);
 	document.Accept(writer);
-
 	const char* output = bufjer.GetString();
-
 	HardSave(output);
-
 }
 
 JSONNode* Config::GetRootNode(const char* member)

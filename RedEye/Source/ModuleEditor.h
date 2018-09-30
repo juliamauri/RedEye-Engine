@@ -125,7 +125,7 @@ public:
 class AboutWindow : public EditorWindow
 {
 public:
-	AboutWindow(const char* name = "About", bool start_active = true);
+	AboutWindow(const char* name = "About", bool start_active = false);
 	void Draw() override;
 	std::list<SoftwareInfo> sw_info;
 };
