@@ -1,5 +1,7 @@
 #include "ModuleScene.h"
 
+#include "Application.h"
+#include "FileSystem.h"
 #include "OutputLog.h"
 #include <string>
 
@@ -16,10 +18,10 @@ bool ModuleScene::CleanUp()
 
 void ModuleScene::FileDrop(const char * file)
 {
-	std::string fn = file;
-	std::string ext = fn.substr(fn.find_last_of(".") + 1);
+	RE_FileIO* holder = App->fs->QuickBufferFromPDPath(file);
+	if(holder) LOG(holder->GetBuffer());
 
-	LOG("File - %s - dropped", fn.c_str());
+	DEL(holder);
 }
 
 void ModuleScene::RecieveEvent(const Event * e)
