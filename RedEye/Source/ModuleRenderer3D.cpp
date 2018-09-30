@@ -296,12 +296,12 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 		awesomeface = texture_manager->LoadTexture2D("awesomeface", ImageExtensionType::PNG);
 
 		//Defining GL_TEXTUREX for shaders
-		shader_manager->use(twotextures);
-		shader_manager->setInt(twotextures, "texture1", 1);
-		shader_manager->setInt(twotextures, "texture2", 2);
-		shader_manager->use(shader_cube);
-		shader_manager->setInt(shader_cube, "texture1", 1);
-		shader_manager->setInt(shader_cube, "texture2", 2);
+		ShaderManager::use(twotextures);
+		ShaderManager::setInt(twotextures, "texture1", 1);
+		ShaderManager::setInt(twotextures, "texture2", 2);
+		ShaderManager::use(shader_cube);
+		ShaderManager::setInt(shader_cube, "texture1", 1);
+		ShaderManager::setInt(shader_cube, "texture2", 2);
 	}
 	container2 = texture_manager->LoadTexture2D("container2", ImageExtensionType::PNG);
 	container2_specular = texture_manager->LoadTexture2D("container2_specular", ImageExtensionType::PNG);
@@ -315,26 +315,27 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	math::float4x4 model_light;
 
-	model_light = math::float4x4::Translate(math::vec(0.0f));
-	model_light.InverseTranspose();
+	//model_light = math::float4x4::Translate(math::vec(0.0f));
+	//model_light.InverseTranspose();
 
-	math::vec lightPos(0.5f, 0.0f, 3.0f);
+	math::vec lightPos(1.2f, 1.0f, 2.0f);
 
-	shader_manager->use(lightingmapShader);
-	shader_manager->setFloat4x4(lightingmapShader, "model", model_light.ptr());
-	math::float3x3 modelNormal(model_light.InverseTransposed().Float3x3Part());
-	shader_manager->setFloat3x3(lightingmapShader, "modelNormal", modelNormal.ptr());
-	shader_manager->setInt(lightingmapShader, "material.diffuse", 0);
-	shader_manager->setInt(lightingmapShader, "material.specular", 1);
-	shader_manager->setFloat(lightingmapShader, "light.position", lightPos);
+	ShaderManager::use(lightingmapShader);
+	ShaderManager::setBool(lightingmapShader, "spotlight", true);
+	//ShaderManager::setFloat4x4(lightingmapShader, "model", model_light.ptr());
+	//math::float3x3 modelNormal(model_light.InverseTransposed().Float3x3Part());
+	//ShaderManager::setFloat3x3(lightingmapShader, "modelNormal", modelNormal.ptr());
+	ShaderManager::setInt(lightingmapShader, "material.diffuse", 0);
+	ShaderManager::setInt(lightingmapShader, "material.specular", 1);
+	//ShaderManager::setFloat(lightingmapShader, "light.direction", lightPos.x, lightPos.y, lightPos.z, 1.0f);
 
 	math::float4x4 model_lamp(math::float4x4::Translate(math::vec::zero));
 	model_lamp = model_lamp * math::float4x4::Scale(math::vec(5.0f));
 	model_lamp = model_lamp * math::float4x4::Translate(lightPos.Neg());
 	model_lamp.InverseTranspose();
 
-	shader_manager->use(lampShader);
-	shader_manager->setFloat4x4(lampShader, "model", model_lamp.ptr());
+	ShaderManager::use(lampShader);
+	ShaderManager::setFloat4x4(lampShader, "model", model_lamp.ptr());
 
 	return ret;
 }
@@ -344,7 +345,7 @@ update_status ModuleRenderer3D::PreUpdate()
 	update_status ret = UPDATE_CONTINUE;
 
 	//Set background with a clear color
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	
@@ -354,17 +355,17 @@ update_status ModuleRenderer3D::PreUpdate()
 		if (shaderenabled == SIN)
 		{
 			//gradually change color usingf uniform at fragmentshader
-			shader_manager->use(sinusColor); //for updating values, we need to useprogram
+			ShaderManager::use(sinusColor); //for updating values, we need to useprogram
 			timeValue += App->time->GetDeltaTime();
 			float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-			shader_manager->setFloat(sinusColor, "vertexColor", 0.0f, greenValue, 0.0f, 1.0f);
+			ShaderManager::setFloat(sinusColor, "vertexColor", 0.0f, greenValue, 0.0f, 1.0f);
 		}
 
 		if (textureEnabled == MIX_AWESOMEFACE)
 		{
 			if (objectEnabled == PLANE)
 			{
-				shader_manager->use(twotextures);
+				ShaderManager::use(twotextures);
 				if (!isRotated)
 				{
 					camera->SetPos(math::float3(0.0f, 0.0f, -3.0f));
@@ -372,9 +373,9 @@ update_status ModuleRenderer3D::PreUpdate()
 					math::float4x4 model = RE_Math::Rotate(math::float3(1.0f, 0.0f, 0.0f), 55.0f * DEGTORAD);
 					model.InverseTranspose();
 
-					shader_manager->setFloat4x4(twotextures, "model", model.ptr());
-					shader_manager->setFloat4x4(twotextures, "view", camera->GetView().ptr());
-					shader_manager->setFloat4x4(twotextures, "projection", camera->GetProjection().ptr());
+					ShaderManager::setFloat4x4(twotextures, "model", model.ptr());
+					ShaderManager::setFloat4x4(twotextures, "view", camera->GetView().ptr());
+					ShaderManager::setFloat4x4(twotextures, "projection", camera->GetProjection().ptr());
 				}
 				else
 				{
@@ -395,15 +396,15 @@ update_status ModuleRenderer3D::PreUpdate()
 					trans.InverseTranspose();
 
 					//send the matrix to the shaders
-					shader_manager->setFloat4x4(twotextures, "transform", trans.ptr());
+					ShaderManager::setFloat4x4(twotextures, "transform", trans.ptr());
 				}
 			}
 			else
 			{
 				timeCuberotateValue += App->time->GetDeltaTime();
-				shader_manager->use(shader_cube);
+				ShaderManager::use(shader_cube);
 
-				shader_manager->setFloat4x4(shader_cube, "projection", camera->GetProjection().ptr());
+				ShaderManager::setFloat4x4(shader_cube, "projection", camera->GetProjection().ptr());
 
 				if (!isCubes)
 				{
@@ -412,8 +413,8 @@ update_status ModuleRenderer3D::PreUpdate()
 					math::float4x4 model = RE_Math::Rotate(math::float3(0.5f, 1.0f, 0.0f), timeCuberotateValue * 50.0f * DEGTORAD);
 					model.InverseTranspose();
 
-					shader_manager->setFloat4x4(shader_cube, "model", model.ptr());
-					shader_manager->setFloat4x4(shader_cube, "view", camera->GetView().ptr());
+					ShaderManager::setFloat4x4(shader_cube, "model", model.ptr());
+					ShaderManager::setFloat4x4(shader_cube, "view", camera->GetView().ptr());
 				}
 				else
 				{
@@ -424,7 +425,7 @@ update_status ModuleRenderer3D::PreUpdate()
 						float camZ = cos(timeCuberotateValue) * radius;
 						camera->SetPos(math::float3(camX, 0.0f, camZ));
 						camera->LookAt(math::float3(0.0f, 0.0f, 0.0f));
-						shader_manager->setFloat4x4(shader_cube, "view", camera->RealView());
+						ShaderManager::setFloat4x4(shader_cube, "view", camera->RealView());
 					}
 					else
 					{
@@ -464,7 +465,7 @@ update_status ModuleRenderer3D::PreUpdate()
 						if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 							camera->Move(CameraMovement::RIGHT, cameraSpeed);
 
-						shader_manager->setFloat4x4(shader_cube, "view", camera->RealView());
+						ShaderManager::setFloat4x4(shader_cube, "view", camera->RealView());
 					}
 				}
 			}
@@ -519,25 +520,36 @@ update_status ModuleRenderer3D::PreUpdate()
 	math::vec diffuseColor = lightColor.Mul(2.0f); // decrease the influence
 	math::vec ambientColor = diffuseColor.Mul(0.2f); // low influence
 	*/
-	shader_manager->use(lightingmapShader);
-	shader_manager->setFloat4x4(lightingmapShader, "view", camera->RealView());
-	shader_manager->setFloat4x4(lightingmapShader, "projection", camera->GetProjection().ptr());
-	shader_manager->setFloat(lightingmapShader, "viewPos", camera->GetPos(true));
+
+	ShaderManager::use(lightingmapShader);
+	ShaderManager::setFloat4x4(lightingmapShader, "view", camera->RealView());
+	ShaderManager::setFloat4x4(lightingmapShader, "projection", camera->GetProjection().ptr());
+	ShaderManager::setFloat(lightingmapShader, "viewPos", camera->GetPos(true));
 
 		//light propieties
-	shader_manager->setFloat(lightingmapShader, "light.ambient", 0.2f, 0.2f, 0.2f);
-	shader_manager->setFloat(lightingmapShader, "light.diffuse", 0.5f, 0.5f, 0.5f);
-	shader_manager->setFloat(lightingmapShader, "light.specular", 1.0f, 1.0f, 1.0f);
+	ShaderManager::setFloat(lightingmapShader, "light.SPosition", camera->GetPos(true));
+	ShaderManager::setFloat(lightingmapShader, "light.SDirection", camera->GetFront());
+	ShaderManager::setFloat(lightingmapShader, "light.cutOff", cos(12.5f * DEGTORAD));
+	ShaderManager::setFloat(lightingmapShader, "light.outerCutOff", cos(17.5f * DEGTORAD));
+
+	ShaderManager::setFloat(lightingmapShader, "light.ambient", 0.2f, 0.2f, 0.2f);
+	ShaderManager::setFloat(lightingmapShader, "light.diffuse", 0.5f, 0.5f, 0.5f);
+	ShaderManager::setFloat(lightingmapShader, "light.specular", 1.0f, 1.0f, 1.0f);
+	ShaderManager::setFloat(lightingmapShader, "light.constant", 1.0f);
+	ShaderManager::setFloat(lightingmapShader, "light.linear", 0.09f);
+	ShaderManager::setFloat(lightingmapShader, "light.quadratic", 0.032f);
+	//ShaderManager::setFloat(lightingmapShader, "light.direction", -0.2f, -1.0f, -0.3f, 0.0f);
+	
 
 		//material propieties
-	//shader_manager->setFloat(lightingShader, "material.ambient", 1.0f, 0.5f, 0.31f);
-	//shader_manager->setFloat(lightingShader, "material.diffuse", 1.0f, 0.5f, 0.31f);
-	//shader_manager->setFloat(lightingmapShader, "material.specular", 0.5f, 0.5f, 0.5f);
-	shader_manager->setFloat(lightingmapShader, "material.shininess", 64.0f);
+	//ShaderManager::setFloat(lightingShader, "material.ambient", 1.0f, 0.5f, 0.31f);
+	//ShaderManager::setFloat(lightingShader, "material.diffuse", 1.0f, 0.5f, 0.31f);
+	//ShaderManager::setFloat(lightingmapShader, "material.specular", 0.5f, 0.5f, 0.5f);
+	ShaderManager::setFloat(lightingmapShader, "material.shininess", 32.0f);
 
-	shader_manager->use(lampShader);
-	shader_manager->setFloat4x4(lampShader, "view", camera->RealView());
-	shader_manager->setFloat4x4(lampShader, "projection", camera->GetProjection().ptr());
+	ShaderManager::use(lampShader);
+	ShaderManager::setFloat4x4(lampShader, "view", camera->RealView());
+	ShaderManager::setFloat4x4(lampShader, "projection", camera->GetProjection().ptr());
 	}
 	return ret;
 }
@@ -554,19 +566,19 @@ update_status ModuleRenderer3D::PostUpdate()
 		switch (shaderenabled)
 		{
 		case SIN:
-			shader_manager->use(sinusColor);
+			ShaderManager::use(sinusColor);
 			break;
 		case VERTEX:
-			shader_manager->use(vertexColor);
+			ShaderManager::use(vertexColor);
 			break;
 		case TEXTURE:
 			if (textureEnabled == MIX_AWESOMEFACE)
 				if (objectEnabled == PLANE)
-					shader_manager->use(twotextures);
+					ShaderManager::use(twotextures);
 				else
-					shader_manager->use(shader_cube);
+					ShaderManager::use(shader_cube);
 			else
-				shader_manager->use(textureSquare);
+				ShaderManager::use(textureSquare);
 			break;
 		}
 
@@ -629,7 +641,7 @@ update_status ModuleRenderer3D::PostUpdate()
 						math::float4x4 model = RE_Math::Rotate(math::float3(1.0f, 0.3f, 0.5f), angle * DEGTORAD) * math::float4x4::Translate(math::float3(cubePositions[i]).Neg());
 						model.InverseTranspose();
 
-						shader_manager->setFloat4x4(shader_cube, "model", model.ptr());
+						ShaderManager::setFloat4x4(shader_cube, "model", model.ptr());
 
 						glDrawArrays(GL_TRIANGLES, 0, 36);
 					}
@@ -644,21 +656,46 @@ update_status ModuleRenderer3D::PostUpdate()
 	}
 	else
 	{
-		shader_manager->use(lightingmapShader);
+		ShaderManager::use(lightingmapShader);
 
 		glActiveTexture(GL_TEXTURE0);
 		texture_manager->use(container2);
 		glActiveTexture(GL_TEXTURE1);
 		texture_manager->use(container2_specular);
 
-		glBindVertexArray(VAO_Light);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		math::vec cubePositions[] = {
+			math::vec(0.0f,  0.0f,  0.0f),
+			math::vec(2.0f,  5.0f, -15.0f),
+			math::vec(-1.5f, -2.2f, -2.5f),
+			math::vec(-3.8f, -2.0f, -12.3f),
+			math::vec(2.4f, -0.4f, -3.5f),
+			math::vec(-1.7f,  3.0f, -7.5f),
+			math::vec(1.3f, -2.0f, -2.5f),
+			math::vec(1.5f,  2.0f, -2.5f),
+			math::vec(1.5f,  0.2f, -1.5f),
+			math::vec(-1.3f,  1.0f, -1.5f)
+		};
 
+		glBindVertexArray(VAO_Light);
+		for (unsigned int i = 0; i < 10; i++)
+		{
+			float angle = 20.0f * i;
+			math::float4x4 model = RE_Math::Rotate(math::vec(1.0f, 0.3f, 0.5f), angle * DEGTORAD) * math::float4x4::Translate(cubePositions[i].Neg());
+			model.InverseTranspose();
+			math::float3x3 modelNormal(model.InverseTransposed().Float3x3Part());
+
+			ShaderManager::setFloat3x3(lightingmapShader, "modelNormal", modelNormal.ptr());
+			ShaderManager::setFloat4x4(lightingmapShader, "model", model.ptr());
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
-		shader_manager->use(lampShader);
-		glBindVertexArray(VAO_Light);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//ShaderManager::use(lampShader);
+		//glBindVertexArray(VAO_Light);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 	
 	glBindVertexArray(0);
@@ -767,19 +804,19 @@ void ModuleRenderer3D::UseShader(ShaderType shader_enabled)
 	switch (shader_enabled)
 	{
 	case SIN:
-		shader_manager->use(sinusColor);
+		ShaderManager::use(sinusColor);
 		break;
 	case VERTEX:
-		shader_manager->use(vertexColor);
+		ShaderManager::use(vertexColor);
 		break;
 	case TEXTURE:
 		if (objectEnabled == PLANE)
 			if (textureEnabled == MIX_AWESOMEFACE)
-				shader_manager->use(twotextures);
+				ShaderManager::use(twotextures);
 			else
-				shader_manager->use(textureSquare);
+				ShaderManager::use(textureSquare);
 		else
-			shader_manager->use(shader_cube);
+			ShaderManager::use(shader_cube);
 		break;
 	}
 }
@@ -788,9 +825,9 @@ void ModuleRenderer3D::SetShaderBool(const char * name, bool value)
 {
 	if (objectEnabled == PLANE)
 		if (textureEnabled == MIX_AWESOMEFACE)
-			shader_manager->setBool(twotextures, name, value);
+			ShaderManager::setBool(twotextures, name, value);
 		else
-			shader_manager->setBool(textureSquare, name, value);
+			ShaderManager::setBool(textureSquare, name, value);
 }
 
 void ModuleRenderer3D::ResetCamera()

@@ -139,67 +139,67 @@ void ShaderManager::Delete(unsigned int ID)
 	glUseProgram(ID);
 }
 
-void ShaderManager::setBool(unsigned int ID, const char* name, bool value) const
+void ShaderManager::setBool(unsigned int ID, const char* name, bool value)
 {
 	glUniform1i(glGetUniformLocation(ID, name), (int)value);
 }
 
-void ShaderManager::setBool(unsigned int ID, const char* name, bool value, bool value2) const
+void ShaderManager::setBool(unsigned int ID, const char* name, bool value, bool value2)
 {
 	glUniform2i(glGetUniformLocation(ID, name), (int)value, (int)value2);
 }
 
-void ShaderManager::setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3) const
+void ShaderManager::setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3) 
 {
 	glUniform3i(glGetUniformLocation(ID, name), (int)value, (int)value2, (int)value3);
 }
 
-void ShaderManager::setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3, bool value4) const
+void ShaderManager::setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3, bool value4) 
 {
 	glUniform4i(glGetUniformLocation(ID, name), (int)value, (int)value2, (int)value3, (int)value4);
 }
 
-void ShaderManager::setInt(unsigned int ID, const char* name, int value) const
+void ShaderManager::setInt(unsigned int ID, const char* name, int value) 
 {
 	glUniform1i(glGetUniformLocation(ID, name), value);
 }
 
-void ShaderManager::setInt(unsigned int ID, const char * name, int value, int value2) const
+void ShaderManager::setInt(unsigned int ID, const char * name, int value, int value2) 
 {
 	glUniform2i(glGetUniformLocation(ID, name), value, value2);
 }
 
-void ShaderManager::setInt(unsigned int ID, const char * name, int value, int value2, int value3) const
+void ShaderManager::setInt(unsigned int ID, const char * name, int value, int value2, int value3) 
 {
 	glUniform3i(glGetUniformLocation(ID, name), value, value2, value3);
 }
 
-void ShaderManager::setInt(unsigned int ID, const char * name, int value, int value2, int value3, int value4) const
+void ShaderManager::setInt(unsigned int ID, const char * name, int value, int value2, int value3, int value4) 
 {
 	glUniform4i(glGetUniformLocation(ID, name), value, value2, value3, value4);
 }
 
-void ShaderManager::setFloat(unsigned int ID, const char*name, float value) const
+void ShaderManager::setFloat(unsigned int ID, const char*name, float value) 
 {
 	glUniform1f(glGetUniformLocation(ID, name), value);
 }
 
-void ShaderManager::setFloat(unsigned int ID, const char * name, float value, float value2) const
+void ShaderManager::setFloat(unsigned int ID, const char * name, float value, float value2) 
 {
 	glUniform2f(glGetUniformLocation(ID, name), value, value2);
 }
 
-void ShaderManager::setFloat(unsigned int ID, const char * name, float value, float value2, float value3) const
+void ShaderManager::setFloat(unsigned int ID, const char * name, float value, float value2, float value3) 
 {
 	glUniform3f(glGetUniformLocation(ID, name), value, value2, value3);
 }
 
-void ShaderManager::setFloat(unsigned int ID, const char * name, float value, float value2, float value3, float value4) const
+void ShaderManager::setFloat(unsigned int ID, const char * name, float value, float value2, float value3, float value4) 
 {
 	glUniform4f(glGetUniformLocation(ID, name), value, value2, value3, value4);
 }
 
-void ShaderManager::setFloat(unsigned int ID, const char * name, math::vec value) const
+void ShaderManager::setFloat(unsigned int ID, const char * name, math::vec value) 
 {
 	glUniform3f(glGetUniformLocation(ID, name), value.x, value.y, value.z);
 }

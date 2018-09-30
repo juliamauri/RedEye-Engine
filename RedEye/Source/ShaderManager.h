@@ -20,34 +20,34 @@ public:
 	//get last error
 	const char* GetShaderError();
 	// use/activate the shader
-	void use(unsigned int ID);
+	static void use(unsigned int ID);
 	//Delete manually shader
-	void Delete(unsigned int ID);
+	static void Delete(unsigned int ID);
 
 	// utility uniform functions
-	void setBool(unsigned int ID, const char* name, bool value) const;
-	void setBool(unsigned int ID, const char* name, bool value, bool value2) const;
-	void setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3) const;
-	void setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3, bool value4) const;
+	static void setBool(unsigned int ID, const char* name, bool value);
+	static void setBool(unsigned int ID, const char* name, bool value, bool value2);
+	static void setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3);
+	static void setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3, bool value4);
 
-	void setInt(unsigned int ID, const char* name, int value) const;
-	void setInt(unsigned int ID, const char* name, int value, int value2) const;
-	void setInt(unsigned int ID, const char* name, int value, int value2, int value3) const;
-	void setInt(unsigned int ID, const char* name, int value, int value2, int value3, int value4) const;
+	static void setInt(unsigned int ID, const char* name, int value);
+	static void setInt(unsigned int ID, const char* name, int value, int value2);
+	static void setInt(unsigned int ID, const char* name, int value, int value2, int value3);
+	static void setInt(unsigned int ID, const char* name, int value, int value2, int value3, int value4);
 
-	void setFloat(unsigned int ID, const char* name, float value) const;
-	void setFloat(unsigned int ID, const char* name, float value, float value2) const;
-	void setFloat(unsigned int ID, const char* name, float value, float value2, float value3) const;
-	void setFloat(unsigned int ID, const char* name, float value, float value2, float value3, float value4) const;
-	void setFloat(unsigned int ID, const char* name, math::vec value) const;
+	static void setFloat(unsigned int ID, const char* name, float value);
+	static void setFloat(unsigned int ID, const char* name, float value, float value2);
+	static void setFloat(unsigned int ID, const char* name, float value, float value2, float value3);
+	static void setFloat(unsigned int ID, const char* name, float value, float value2, float value3, float value4);
+	static void setFloat(unsigned int ID, const char* name, math::vec value);
+	
+	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value);
+	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2);
+	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3);
+	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
 
-	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value);
-	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2);
-	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3);
-	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
-
-	void setFloat3x3(unsigned int ID, const char* name, float* trans);
-	void setFloat4x4(unsigned int ID, const char* name, float* trans);
+	static void setFloat3x3(unsigned int ID, const char* name, float* trans);
+	static void setFloat4x4(unsigned int ID, const char* name, float* trans);
 
 private:
 	const char* folderPath;

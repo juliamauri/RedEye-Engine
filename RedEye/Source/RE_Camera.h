@@ -54,6 +54,9 @@ public:
 	//Get camera pos vector
 	math::vec GetPos(bool opengl = false);
 
+	//Get camera front vector
+	math::vec GetFront();
+
 	//LookAt, return the view matrix (view * transformation matrix)
 	//@param cameraTarget -> The object that the camera looks
 	void LookAt(math::vec cameraTarget);

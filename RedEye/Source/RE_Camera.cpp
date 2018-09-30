@@ -102,6 +102,11 @@ math::vec RE_Camera::GetPos(bool opengl)
 		return math::vec(camera.Pos().x, camera.Pos().y, -camera.Pos().z);
 }
 
+math::vec RE_Camera::GetFront()
+{
+	return camera.Front();
+}
+
 void RE_Camera::LookAt(math::vec cameraTarget)
 {
 	view = GetView() * math::float4x4::LookAt(camera.Front().Normalized(),(camera.Pos() - cameraTarget).Normalized(),camera.Up().Normalized(),math::vec(0.0f,1.0f,0.0f).Normalized());
