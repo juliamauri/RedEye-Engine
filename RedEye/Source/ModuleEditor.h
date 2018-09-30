@@ -32,7 +32,7 @@ public:
 	ModuleEditor(const char* name, bool start_enabled = true);
 	~ModuleEditor();
 
-	bool Init(JSONNode* node = nullptr) override;
+	bool Init(JSONNode* node) override;
 	update_status PreUpdate() override;
 	update_status Update() override;
 	bool CleanUp() override;

@@ -55,22 +55,24 @@ bool Application::Init()
 
 		if (ret = (fs->Init(argc, argv)))
 		{
-			JSONNode* node = nullptr;
 			Config* config = fs->GetConfig();
+			JSONNode* node = config->GetRootNode("App");
+			app_name = node->PullString("Name", app_name.c_str());
+			organization = node->PullString("Organization", organization.c_str());
+			DEL(node);
 
-			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
+			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 				if ((*it)->IsActive() == true)
 				{
 					node = config->GetRootNode((*it)->GetName());
 					ret = (*it)->Init(node);
-					delete node;
-					node = nullptr;
+					DEL(node);
 				}
 
 			sys_info->WhatAreWeRunningOn();
 			math->Init();
 
-			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
+			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 				if ((*it)->IsActive() == true)
 					ret = (*it)->Start(/* CONFIG */);
 		}
@@ -112,6 +114,9 @@ int Application::Update()
 
 void Application::FinishUpdate()
 {
+	if (want_to_load)
+		Load();
+
 	time->ManageFrameTimers();
 }
 
@@ -134,8 +139,47 @@ bool Application::CleanUp()
 
 	return ret;
 }
+
+bool Application::Load()
+{
+	bool ret = true;
+
+	Config* config = fs->GetConfig();
+	JSONNode* node = config->GetRootNode("App");
+	app_name = node->PullString("Name", app_name.c_str());
+	organization = node->PullString("Organization", organization.c_str());
+	DEL(node);
+
+	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
+		if ((*it)->IsActive() == true)
+		{
+			node = config->GetRootNode((*it)->GetName());
+			ret = (*it)->Load(node);
+			DEL(node);
+		}
+
+	if (!ret) LOG("Error Loading Configuration to modules");
+
+	want_to_load = false;
+
+	return ret;
+}
+
+bool Application::Save()
+{
+	return true;
+}
+
 void Application::DrawEditor()
 {
+	if (ImGui::BeginMenu("Options"))
+	{
+		if (ImGui::MenuItem("Restore Defaults")) want_to_load_def = true;
+		if (ImGui::MenuItem("Load")) want_to_load = true;
+		if (ImGui::MenuItem("Save")) want_to_save = true;
+
+		ImGui::EndMenu();
+	}
 	if (ImGui::CollapsingHeader("Application"))
 	{
 		static char holder[100];
@@ -143,10 +187,7 @@ void Application::DrawEditor()
 
 		sprintf_s(holder, size, "%s", app_name.c_str());
 		if (ImGui::InputText("App Name", holder, size))
-		{
 			app_name = holder;
-			window->SetTitle(app_name.c_str());
-		}
 
 		sprintf_s(holder, size, "%s", organization.c_str());
 		if (ImGui::InputText("Organization", holder, size))
@@ -177,8 +218,13 @@ void Application::ReportSoftware(const char * name, const char * version, const 
 
 void Application::RecieveEvent(const Event* e)
 {
-	if (e->GetType() == REQUEST_QUIT)
-		want_to_quit = true;
+	switch (e->GetType())
+	{
+	case REQUEST_DEFAULT_CONF: want_to_load_def = true; break;
+	case REQUEST_LOAD: want_to_load = true; break;
+	case REQUEST_SAVE: want_to_save = true; break;
+	case REQUEST_QUIT: want_to_quit = true; break;
+	}
 }
 
 const char * Application::GetName() const

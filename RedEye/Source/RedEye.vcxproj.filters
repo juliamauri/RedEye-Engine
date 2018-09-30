@@ -364,7 +364,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Build\Assets\config.json">
+    <None Include="..\Build\Assets\Settings\config.json">
       <Filter>Main</Filter>
     </None>
   </ItemGroup>

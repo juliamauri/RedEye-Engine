@@ -236,7 +236,7 @@ void RE_FileIO::HardSave(const char* buffer)
 
 	if (file != NULL)
 	{
-		long long written = PHYSFS_write(file, (const void*)buffer, 1, size = (strnlen_s(buffer, 0xff)));
+		long long written = PHYSFS_write(file, (const void*)buffer, 1, size = (strnlen_s(buffer, 0xffff)));
 		if (written != size)
 		{
 			LOG("Error while writing to file %s: %s", file, PHYSFS_getLastError());
@@ -315,7 +315,7 @@ inline bool Config::operator!() const
 JSONNode::JSONNode(const char* path, Config* config) : pointerPath(path), config(config)
 {}
 
-JSONNode::JSONNode(JSONNode& node) : pointerPath(nullptr), config(nullptr)
+JSONNode::JSONNode(JSONNode& node) : pointerPath(node.pointerPath), config(node.config)
 {}
 
 JSONNode::~JSONNode()
@@ -513,6 +513,7 @@ const char*	JSONNode::PullString(const char* name, const char* deflt)
 		path += name;
 
 		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+
 		ret = (val != nullptr) ? val->GetString() : deflt;
 	}
 

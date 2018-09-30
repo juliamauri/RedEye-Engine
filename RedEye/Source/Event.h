@@ -13,8 +13,9 @@ typedef enum : unsigned short int
 	UNPAUSE,
 	STOP,
 
-	REQUEST_SAVE,
+	REQUEST_DEFAULT_CONF,
 	REQUEST_LOAD,
+	REQUEST_SAVE,
 	REQUEST_QUIT,
 
 	FILE_DROP,

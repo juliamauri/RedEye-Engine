@@ -24,7 +24,7 @@ public:
 	EventListener* AsEventListener() { return this; }
 	const EventListener* AsEventListener() const { return this; }
 
-	virtual bool Init(JSONNode* node = nullptr) { return true; } //SETTING OWN VALUES
+	virtual bool Init(JSONNode* node) { return true; } //SETTING OWN VALUES
 	virtual bool Start() { return true; } //ACCESS OTHER MODULES
 	
 	virtual update_status PreUpdate() { return UPDATE_CONTINUE; }
@@ -35,8 +35,8 @@ public:
 
 	virtual bool CleanUp() { return true; }
 
-	virtual void Load(JSONNode* node = nullptr) {}
-	virtual void Save(JSONNode* node = nullptr) const {}
+	virtual bool Load(JSONNode* node) { return true; }
+	virtual bool Save(JSONNode* node) const { return true; }
 
 	virtual void RecieveEvent(const Event* e) override {}
 };

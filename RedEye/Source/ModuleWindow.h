@@ -2,9 +2,10 @@
 #define __ModuleWindow_H__
 
 #include "Module.h"
+#include <string>
 
 struct SDL_Window;
-struct SDL_Surface;
+class SDL_Surface;
 union SDL_Event;
 
 class ModuleWindow : public Module
@@ -14,10 +15,11 @@ public:
 	ModuleWindow(const char* name, bool start_enabled = true);
 	~ModuleWindow();
 
-	bool Init(JSONNode* node = nullptr) override;
+	bool Init(JSONNode* node) override;
 	void DrawEditor() override;
 	bool CleanUp() override;
-
+	bool Load(JSONNode* node) override;
+	bool Save(JSONNode* node) const;
 	void RecieveEvent(const Event* e) override;
 	void WindowEvent(const SDL_Event* e);
 
@@ -39,11 +41,16 @@ public:
 	void SetFullScreen(const bool flag_value);
 	void SetBorderless(const bool flag_value);
 	void SetFullDesktop(const bool flag_value);
+	void SetWindowPos(int x, int y);
 
 	void SwapResizeable();
 	void SwapFullScreen();
 	void SwapBorderless();
 	void SwapFullDesktop();
+
+private:
+
+	void SetWindowProperties();
 
 public:
 
@@ -52,10 +59,11 @@ public:
 
 private:
 
+	std::string title = "RedEye";
+	int pos_x;			int pos_y;
+	int width = 1280;	int height = 720;
 	unsigned int flags = 0u;
-
-	int width = 800;
-	int height = 600;
+	float brightness = 1.0f;
 };
 
 #endif // __ModuleWindow_H__

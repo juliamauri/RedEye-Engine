@@ -29,6 +29,9 @@ public:
 	int Update();
 	bool CleanUp();
 
+	bool Load();
+	bool Save();
+
 	void DrawEditor();
 	void Log(const char* text);
 	void ReportSoftware(const char * name, const char * version = nullptr, const char * website = nullptr);
@@ -58,6 +61,9 @@ public:
 private:
 
 	std::list<Module*> modules;
+	bool want_to_load_def = false;
+	bool want_to_load = false;
+	bool want_to_save = false;
 	bool want_to_quit = false;
 
 	std::string app_name = "RedEye Engine";
