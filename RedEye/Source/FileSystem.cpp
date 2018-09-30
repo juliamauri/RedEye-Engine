@@ -236,7 +236,7 @@ void RE_FileIO::HardSave(const char* buffer)
 
 	if (file != NULL)
 	{
-		long long written = PHYSFS_write(file, (const void*)buffer, 1, size = (strnlen_s(buffer, 0xffff)));
+		long long written = PHYSFS_write(file, (const void*)buffer, 1, size = (strnlen_s(buffer, 0xff)));
 		if (written != size)
 		{
 			LOG("Error while writing to file %s: %s", file, PHYSFS_getLastError());
