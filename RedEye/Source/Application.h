@@ -18,6 +18,7 @@ class FileSystem;
 class TimeManager;
 class SystemInfo;
 class RE_Math;
+struct OutputLogHolder;
 
 class Application : public EventListener
 {
@@ -33,7 +34,7 @@ public:
 	bool Save();
 
 	void DrawEditor();
-	void Log(const char* text);
+	void Log(const char* text, const char* file);
 	void ReportSoftware(const char * name, const char * version = nullptr, const char * website = nullptr);
 	void RecieveEvent(const Event* e) override;
 
@@ -57,6 +58,7 @@ public:
 	TimeManager* time = nullptr;
 	SystemInfo* sys_info = nullptr;
 	RE_Math* math = nullptr;
+	OutputLogHolder* log = nullptr;
 
 private:
 

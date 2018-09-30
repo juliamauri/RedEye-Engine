@@ -17,20 +17,27 @@ using namespace std;
 
 Application::Application(int argc, char* argv[])
 {
+	fs = new FileSystem();
+	time = new TimeManager();
+	sys_info = new SystemInfo();
+	math = new RE_Math();
+	log = new OutputLogHolder();
+
 	modules.push_back(input = new ModuleInput("Input"));
 	modules.push_back(window = new ModuleWindow("Window"));
 	modules.push_back(scene = new ModuleScene("Scene"));
 	modules.push_back(editor = new ModuleEditor("Editor"));
 	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
-
-	fs = new FileSystem();
-	time = new TimeManager();
-	sys_info = new SystemInfo();
-	math = new RE_Math();
 }
 
 Application::~Application()
 {
+	DEL(fs);
+	DEL(time);
+	DEL(sys_info);
+	DEL(math);
+	DEL(log);
+
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;
 }
@@ -133,11 +140,6 @@ bool Application::CleanUp()
 		if ((*it)->IsActive() == true)
 			ret = (*it)->CleanUp();
 
-	delete fs;
-	delete time;
-	delete sys_info;
-	delete math;
-
 	SDL_Quit();
 
 	return ret;
@@ -228,10 +230,13 @@ void Application::DrawEditor()
 	if (ImGui::CollapsingHeader("File System")) fs->DrawEditor();
 }
 
-void Application::Log(const char * text)
+void Application::Log(const char * text, const char* file)
 {
+	if(log != nullptr)
+		log->Add(text, file);
+
 	if(editor != nullptr && !modules.empty())
-		editor->AddTextConsole(text);
+		editor->LogToEditorConsole();
 }
 
 void Application::ReportSoftware(const char * name, const char * version, const char * website)

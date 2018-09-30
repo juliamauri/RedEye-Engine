@@ -147,7 +147,7 @@ RE_FileIO* FileSystem::QuickBufferFromPDPath(const char * full_path)// , char** 
 		std::string file_path = full_path;
 		std::string file_name = file_path.substr(file_path.find_last_of("\\") + 1);
 		std::string ext = file_name.substr(file_name.find_last_of(".") + 1);
-		for (int i = 0; i < file_name.length(); i++) file_path.pop_back();
+		file_path.erase(file_path.length() - file_name.length(), file_path.length());
 
 		ret = new RE_FileIO(file_name.c_str());
 		if (App->fs->AddPath(file_path.c_str()))

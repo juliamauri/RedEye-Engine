@@ -181,12 +181,15 @@ void ModuleEditor::HandleSDLEvent(SDL_Event* e)
 	ImGui_ImplSdlGL3_ProcessEvent(e);
 }
 
-void ModuleEditor::AddTextConsole(const char* text)
+void ModuleEditor::LogToEditorConsole()
 {
 	if (console != nullptr && !windows.empty())
 	{
-		console->console_buffer.append(text);
-		console->scroll_to_bot = true;
+		if (console->filter < 0 || App->log->logHistory.back().first == console->filter)
+		{
+			console->console_buffer.append(App->log->logHistory.back().second.c_str());
+			console->scroll_to_bot = true;
+		}
 	}
 }
 
@@ -260,15 +263,48 @@ void ConsoleWindow::Draw()
 {
 	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
 	{
+		if (ImGui::Button("All")) ChangeFilter(-1);
+
+		std::map<std::string, unsigned int>::iterator it = App->log->callers.begin();
+		for (; it != App->log->callers.end(); it++)
+		{
+			ImGui::SameLine();
+			if (ImGui::Button(it->first.c_str())) ChangeFilter(it->second);
+		}
+
 		ImGui::TextUnformatted(console_buffer.begin());
 
-		if (scroll_to_bot)
-			ImGui::SetScrollHere(1.0f);
-
+		if (scroll_to_bot) ImGui::SetScrollHere(1.0f);
 		scroll_to_bot = false;
 	}
 
 	ImGui::End();
+}
+
+void ConsoleWindow::ChangeFilter(int new_filter)
+{
+	if (new_filter != filter)
+	{
+		filter = new_filter;
+		console_buffer.clear();
+		scroll_to_bot = true;
+
+		std::list<std::pair<unsigned int, std::string>>::iterator it = App->log->logHistory.begin();
+		
+		if (new_filter < 0)
+		{
+			for (; it != App->log->logHistory.end(); it++)
+				console_buffer.append(it->second.c_str());
+		}
+		else
+		{
+			for (; it != App->log->logHistory.end(); it++)
+			{
+				if (it->first == filter)
+					console_buffer.append(it->second.c_str());
+			}
+		}
+	}
 }
 
 ConfigWindow::ConfigWindow(const char * name, bool start_active) :

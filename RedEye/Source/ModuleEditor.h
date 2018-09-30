@@ -39,7 +39,7 @@ public:
 
 	//void DrawEditor() override;
 
-	void AddTextConsole(const char* text);
+	void LogToEditorConsole();
 	bool AddSoftwareUsed(SoftwareInfo s);
 	void Draw();
 	void HandleSDLEvent(SDL_Event* e);
@@ -96,8 +96,10 @@ class ConsoleWindow : public EditorWindow
 public:
 	ConsoleWindow(const char* name = "Console", bool start_active = true);
 	void Draw() override;
+	void ChangeFilter(int new_filter);
 	ImGuiTextBuffer console_buffer;
 	bool scroll_to_bot = true;
+	int filter = -1;
 };
 
 class ConfigWindow : public EditorWindow
