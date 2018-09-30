@@ -52,6 +52,17 @@ unsigned int Texture2DManager::LoadTexture2D(const char * name, ImageExtensionTy
 	return ID_count++;
 }
 
+unsigned int Texture2DManager::LoadTexture2D(const char * path, const char* file_name)
+{
+	Texture2D* new_image = new Texture2D(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(ImageExtensionType::PNG));
+
+	textures2D.insert(std::pair<unsigned int, Texture2D*>(ID_count, new_image));
+
+	textureIDContainer.push_back(ID_count);
+
+	return ID_count++;
+}
+
 void Texture2DManager::use(unsigned int TextureID)
 {
 	textures2D.at(TextureID)->use();
@@ -102,7 +113,6 @@ Texture2D::Texture2D(const char* path, int extension)
 	unsigned int imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
-
 
 	RE_FileIO image(path);
 	if (image.Load())

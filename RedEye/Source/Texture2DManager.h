@@ -33,6 +33,7 @@ public:
 
 	//Load texture
 	unsigned int LoadTexture2D(const char* name, ImageExtensionType extension);
+	unsigned int LoadTexture2D(const char* path, const char* file_name);
 
 	void use(unsigned int TextureID);
 	void GetWithHeight(unsigned int TextureID, int* w, int* h);
