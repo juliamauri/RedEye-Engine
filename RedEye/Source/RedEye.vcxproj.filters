@@ -73,6 +73,9 @@
     <ClCompile Include="OutputLog.cpp">
       <Filter>Modules\Independent App Modules\Log</Filter>
     </ClCompile>
+    <ClCompile Include="RE_Mesh.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -287,6 +290,9 @@
     </ClInclude>
     <ClInclude Include="OutputLog.h">
       <Filter>Modules\Independent App Modules\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Mesh.h">
+      <Filter>Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

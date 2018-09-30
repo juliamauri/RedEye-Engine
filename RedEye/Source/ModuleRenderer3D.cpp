@@ -1,6 +1,5 @@
 #include "ModuleRenderer3D.h"
 
-#include <Windows.h>
 #include "RE_Math.h"
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
