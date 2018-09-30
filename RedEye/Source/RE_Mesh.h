@@ -11,15 +11,16 @@ struct Vertex {
 	// texCoords
 	math::float2 TexCoords;
 	// tangent
-	math::vec Tangent;
+	//math::vec Tangent;
 	// bitangent
-	math::vec Bitangent;
+	//math::vec Bitangent;
 };
 
 
 struct Texture {
 	unsigned int id;
 	std::string type;
+	std::string path;
 };
 
 class RE_Mesh

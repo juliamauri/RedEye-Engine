@@ -1,6 +1,9 @@
 #include "RE_Mesh.h"
 
+#include "Application.h"
+#include "ModuleRenderer3D.h"
 #include "ShaderManager.h"
+#include "Texture2DManager.h"
 
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
@@ -17,6 +20,7 @@ RE_Mesh::RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices
 
 void RE_Mesh::Draw(unsigned int shader_ID)
 {
+	ShaderManager::use(shader_ID);
 	// bind appropriate textures
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
@@ -41,7 +45,7 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 		ShaderManager::setUnsignedInt(shader_ID, (name + number).c_str(), i );
 
 		// and finally bind the texture
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		App->renderer3d->texture_manager->use(textures[i].id);
 	}
 
 	// draw mesh
@@ -82,11 +86,11 @@ void RE_Mesh::setupMesh()
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 	// vertex tangent
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+	//glEnableVertexAttribArray(3);
+	//glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
 	// vertex bitangent
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+	//glEnableVertexAttribArray(4);
+	//glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
 	glBindVertexArray(0);
 }
