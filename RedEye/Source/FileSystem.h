@@ -20,8 +20,11 @@ public:
 
 	void DrawEditor();
 	bool AddPath(const char* path_or_zip, const char* mount_point = nullptr);
+	bool RemovePath(const char* path_or_zip);
 	bool SetWritePath(const char* dir);
 	const char* GetWritePath() const;
+
+	RE_FileIO* QuickBufferFromPDPath(const char* full_path); // , char** buffer, unsigned int size);
 
 	bool Exists(const char* file) const;
 	bool IsDirectory(const char* file) const;
@@ -34,12 +37,6 @@ private:
 	std::string write_path;
 };
 
-
-/* Access file buffer:
-RE_FileIO file("config.json");
-	if (file.Load())
-		const char* buffer = file.GetBuffer();*/
-
 class RE_FileIO
 {
 public:
@@ -50,7 +47,8 @@ public:
 	virtual void Save();
 
 	void ClearBuffer();
-	virtual const char* GetBuffer() const;
+	char* GetBuffer();
+	const char* GetBuffer() const;
 
 	virtual inline bool operator!() const;
 

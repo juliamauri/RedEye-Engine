@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "OutputLog.h"
+#include "Globals.h"
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL.h"
 #include "SDL2\include\SDL_assert.h"
@@ -100,6 +101,21 @@ bool FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
 	return ret;
 }
 
+bool FileSystem::RemovePath(const char * path_or_zip)
+{
+	bool ret = true;
+
+	if (PHYSFS_removeFromSearchPath(path_or_zip) == 0)
+	{
+		LOG("Error removing PhysFS Directory (%s): %s", path_or_zip, PHYSFS_getLastError());
+		ret = false;
+	}
+
+	paths.remove(path_or_zip);
+
+	return ret;
+}
+
 bool FileSystem::SetWritePath(const char * dir)
 {
 	bool ret = true;
@@ -120,6 +136,28 @@ bool FileSystem::SetWritePath(const char * dir)
 const char * FileSystem::GetWritePath() const
 {
 	return write_path.c_str();
+}
+
+RE_FileIO* FileSystem::QuickBufferFromPDPath(const char * full_path)// , char** buffer, unsigned int size)
+{
+	RE_FileIO* ret = nullptr;
+
+	if (full_path != nullptr)
+	{
+		std::string file_path = full_path;
+		std::string file_name = file_path.substr(file_path.find_last_of("\\") + 1);
+		std::string ext = file_name.substr(file_name.find_last_of(".") + 1);
+		for (int i = 0; i < file_name.length(); i++) file_path.pop_back();
+
+		ret = new RE_FileIO(file_name.c_str());
+		if (App->fs->AddPath(file_path.c_str()))
+		{
+			if (!ret->Load()) DEL(ret);
+			App->fs->RemovePath(file_path.c_str());
+		}
+	}
+
+	return ret;
 }
 
 bool FileSystem::Exists(const char* file) const
@@ -167,6 +205,11 @@ void RE_FileIO::ClearBuffer()
 {
 	delete[] buffer;
 	buffer = nullptr;
+}
+
+char * RE_FileIO::GetBuffer()
+{
+	return (buffer);
 }
 
 const char* RE_FileIO::GetBuffer() const
@@ -276,10 +319,12 @@ bool Config::Load()
 
 void Config::Save()
 {
-	rapidjson::StringBuffer bufjer;
-	rapidjson::Writer<rapidjson::StringBuffer> writer(bufjer);
+	rapidjson::StringBuffer s_buffer;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(s_buffer);
 	document.Accept(writer);
-	const char* output = bufjer.GetString();
+	s_buffer.Put('\0');
+	size = s_buffer.GetSize();
+	const char* output = s_buffer.GetString();
 	HardSave(output);
 }
 
