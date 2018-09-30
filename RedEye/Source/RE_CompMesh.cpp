@@ -18,6 +18,14 @@ RE_CompMesh::RE_CompMesh(char * path)
 	loadModel(path);
 }
 
+RE_CompMesh::RE_CompMesh(char * path, const char * buffer, unsigned int size)
+{
+	buffer_size = size;
+	buffer_file = buffer;
+	droped = true;
+	loadModel(path);
+}
+
 void RE_CompMesh::Draw(unsigned int shader)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
@@ -26,21 +34,38 @@ void RE_CompMesh::Draw(unsigned int shader)
 
 void RE_CompMesh::loadModel(std::string path)
 {
-	RE_FileIO modelFBX(path.c_str());
-	
-	if (modelFBX.Load())
+	if (buffer_file != nullptr)
 	{
 		Assimp::Importer importer;
-		const aiScene *scene = importer.ReadFileFromMemory(modelFBX.GetBuffer(), modelFBX.GetSize(), aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene *scene = importer.ReadFileFromMemory(buffer_file, buffer_size, aiProcess_Triangulate | aiProcess_FlipUVs);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			LOG("ERROR::ASSIMP::%s", importer.GetErrorString());
 			return;
 		}
-		directory = path.substr(0, path.find_last_of('/'));
+		directory = path.substr(0, path.find_last_of('\\'));
 
 		processNode(scene->mRootNode, scene);
+	}
+	else
+	{
+		RE_FileIO modelFBX(path.c_str());
+
+		if (modelFBX.Load())
+		{
+			Assimp::Importer importer;
+			const aiScene *scene = importer.ReadFileFromMemory(modelFBX.GetBuffer(), modelFBX.GetSize(), aiProcess_Triangulate | aiProcess_FlipUVs);
+
+			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+			{
+				LOG("ERROR::ASSIMP::%s", importer.GetErrorString());
+				return;
+			}
+			directory = path.substr(0, path.find_last_of('/'));
+
+			processNode(scene->mRootNode, scene);
+		}
 	}
 }
 
@@ -137,7 +162,7 @@ std::vector<Texture> RE_CompMesh::loadMaterialTextures(aiMaterial * mat, aiTextu
 		if (!skip)
 		{   // if texture hasn't been loaded already, load it
 			Texture texture;
-			texture.id = App->renderer3d->texture_manager->LoadTexture2D(directory.c_str(), str.C_Str());
+			texture.id = App->renderer3d->texture_manager->LoadTexture2D(directory.c_str(), str.C_Str(), droped);
 			texture.type = typeName;
 			texture.path = str.C_Str();
 			textures.push_back(texture);

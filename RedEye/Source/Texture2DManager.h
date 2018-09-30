@@ -17,7 +17,7 @@ private:
 	int width, height;
 
 public:
-	Texture2D(const char* path, int extension);
+	Texture2D(const char* path, int extension, bool droped = false);
 	~Texture2D();
 
 	void use();
@@ -33,7 +33,7 @@ public:
 
 	//Load texture
 	unsigned int LoadTexture2D(const char* name, ImageExtensionType extension);
-	unsigned int LoadTexture2D(const char* path, const char* file_name);
+	unsigned int LoadTexture2D(const char* path, const char* file_name, bool droped = false);
 
 	void use(unsigned int TextureID);
 	void GetWithHeight(unsigned int TextureID, int* w, int* h);

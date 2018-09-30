@@ -15,14 +15,18 @@ class RE_CompMesh
 public:
 	/*  Functions   */
 	RE_CompMesh(char *path);
+	RE_CompMesh(char *path, const char* buffer, unsigned int size);
 
 	void Draw(unsigned int shader);
 private:
 	/*  Model Data  */
+	const char* buffer_file = nullptr;
+	unsigned int buffer_size = 0;
+	bool droped = false;
 	std::vector<RE_Mesh> meshes;
 	std::string directory;
 	std::vector<Texture> textures_loaded;
-
+	
 	/*  Functions   */
 	void loadModel(std::string path);
 	void processNode(aiNode *node, const aiScene *scene);

@@ -52,10 +52,14 @@ unsigned int Texture2DManager::LoadTexture2D(const char * name, ImageExtensionTy
 	return ID_count++;
 }
 
-unsigned int Texture2DManager::LoadTexture2D(const char * path, const char* file_name)
+unsigned int Texture2DManager::LoadTexture2D(const char * path, const char* file_name, bool droped)
 {
-	Texture2D* new_image = new Texture2D(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(ImageExtensionType::PNG));
-
+	Texture2D* new_image = nullptr;
+	if (droped)
+		new_image = new Texture2D(std::string(path + std::string("\\") + file_name).c_str(), GetExtensionIL(ImageExtensionType::PNG), droped);
+	else
+		new_image = new Texture2D(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(ImageExtensionType::PNG));
+	
 	textures2D.insert(std::pair<unsigned int, Texture2D*>(ID_count, new_image));
 
 	textureIDContainer.push_back(ID_count);
@@ -108,28 +112,54 @@ int Texture2DManager::GetExtensionIL(ImageExtensionType imageType)
 	return IL_Extension;
 }
 
-Texture2D::Texture2D(const char* path, int extension)
+Texture2D::Texture2D(const char* path, int extension, bool droped)
 {
-	unsigned int imageID = 0;
-	ilGenImages(1, &imageID);
-	ilBindImage(imageID);
+	if (droped)
+	{
+		unsigned int imageID = 0;
+		ilGenImages(1, &imageID);
+		ilBindImage(imageID);
 
-	RE_FileIO image(path);
-	if (image.Load())
-		ilLoadL(extension, image.GetBuffer(), image.GetSize());
+		RE_FileIO* image = App->fs->QuickBufferFromPDPath(path);
+		
+		ilLoadL(extension, image->GetBuffer(), image->GetSize());
 
-	iluFlipImage();
+		iluFlipImage();
 
-	/* OpenGL texture binding of the image loaded by DevIL  */
-	glGenTextures(1, &ID); /* Texture name generation */
-	glBindTexture(GL_TEXTURE_2D, ID); /* Binding of texture name */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear interpolation for minifying filter */
-	glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
+		/* OpenGL texture binding of the image loaded by DevIL  */
+		glGenTextures(1, &ID); /* Texture name generation */
+		glBindTexture(GL_TEXTURE_2D, ID); /* Binding of texture name */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear interpolation for minifying filter */
+		glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
 
-	ilBindImage(0);
-	/* Delete used resources*/
-	ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
+		ilBindImage(0);
+		/* Delete used resources*/
+		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
+	}
+	else
+	{
+		unsigned int imageID = 0;
+		ilGenImages(1, &imageID);
+		ilBindImage(imageID);
+
+		RE_FileIO image(path);
+		if (image.Load())
+			ilLoadL(extension, image.GetBuffer(), image.GetSize());
+
+		iluFlipImage();
+
+		/* OpenGL texture binding of the image loaded by DevIL  */
+		glGenTextures(1, &ID); /* Texture name generation */
+		glBindTexture(GL_TEXTURE_2D, ID); /* Binding of texture name */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear interpolation for minifying filter */
+		glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
+
+		ilBindImage(0);
+		/* Delete used resources*/
+		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
+	}
 }
 
 Texture2D::~Texture2D()

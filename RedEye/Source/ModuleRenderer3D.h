@@ -50,6 +50,9 @@ public:
 
 	void enableVSync(const bool enable);
 
+	//Load model
+	void LoadNewModel(const char* buffer, const char* path, unsigned int size);
+
 	//Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
 

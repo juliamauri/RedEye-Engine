@@ -336,7 +336,7 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	ShaderManager::setFloat4x4(lampShader, "model", model_lamp.ptr());
 	*/
 
-	nanosui = new RE_CompMesh("Meshes/BakerHouse/BakerHouse.fbx");
+	nanosui = nullptr;
 
 	return ret;
 }
@@ -476,7 +476,7 @@ update_status ModuleRenderer3D::PreUpdate()
 	{
 	float cameraSpeed = 2.5f * App->time->GetDeltaTime();
 
-	App->input->SetMouseAtCenter();
+	//App->input->SetMouseAtCenter();
 
 
 	const MouseData* mouse = App->input->GetMouse();
@@ -771,7 +771,8 @@ update_status ModuleRenderer3D::PostUpdate()
 	}
 	glBindVertexArray(0);
 	
-	nanosui->Draw(modelloading);
+	if(nanosui != nullptr)
+		nanosui->Draw(modelloading);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
@@ -835,6 +836,14 @@ void ModuleRenderer3D::RecieveEvent(const Event * e)
 void ModuleRenderer3D::enableVSync(const bool enable)
 {
 	SDL_GL_SetSwapInterval(enable ? 1 : 0);
+}
+
+void ModuleRenderer3D::LoadNewModel(const char * buffer, const char* path, unsigned int size)
+{
+	if (nanosui != nullptr)
+		delete nanosui;
+	
+	nanosui = new RE_CompMesh((char*)path, buffer, size);
 }
 
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
