@@ -7,6 +7,7 @@ class ShaderManager;
 class Texture2DManager;
 class Texture2D;
 class RE_Camera;
+class RE_CompMesh;
 
 enum ShaderType
 {
@@ -75,13 +76,15 @@ public:
 
 	void ResetAspectRatio();
 
+	ShaderManager* shader_manager; 
+	Texture2DManager* texture_manager;
+
 private:
+	RE_CompMesh* nanosui;
 	RE_Camera* camera;
 
-	ShaderManager* shader_manager;
-	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube, lightingShader, lampShader, lightingmapShader;
+	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube, lightingShader, lampShader, lightingmapShader, modelloading;
 
-	Texture2DManager* texture_manager;
 	unsigned int puppie1, puppie2, container, awesomeface, container2, container2_specular;
 
 	//Renderer Test

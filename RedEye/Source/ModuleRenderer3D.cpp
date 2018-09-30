@@ -15,6 +15,7 @@
 #include "Texture2DManager.h"
 #include "FileSystem.h"
 #include "RE_Camera.h"
+#include "RE_CompMesh.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -89,7 +90,11 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	ret = shader_manager->Load("lightmaps", &lightingmapShader);
 	if (!ret)
 		LOG("%s\n", shader_manager->GetShaderError());
-	
+
+	ret = shader_manager->Load("modelloading", &modelloading);
+	if (!ret)
+		LOG("%s\n", shader_manager->GetShaderError());
+
 	if (false)
 	{
 		//Print a 2d triangle3d https://learnopengl.com/Getting-started/Hello-Triangle
@@ -302,29 +307,23 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 		ShaderManager::setInt(shader_cube, "texture1", 1);
 		ShaderManager::setInt(shader_cube, "texture2", 2);
 	}
+	/*
 	container2 = texture_manager->LoadTexture2D("container2", ImageExtensionType::PNG);
 	container2_specular = texture_manager->LoadTexture2D("container2_specular", ImageExtensionType::PNG);
 	enableVSync(vsync = config_module->PullBool("vsync", false));
-
+	*/
 	camera = new RE_Camera(true);
 	camera->SetPos(math::vec(0.0f, 0.0f, -3.0f));
 
 	lastX = App->window->GetWidth() / 2;
 	lastY = App->window->GetHeight() / 2;
 
-	math::float4x4 model_light;
-
-	//model_light = math::float4x4::Translate(math::vec(0.0f));
-	//model_light.InverseTranspose();
-
-	math::vec lightPos(1.2f, 1.0f, 2.0f);
-
-	ShaderManager::use(lightingmapShader);
+	//ShaderManager::use(lightingmapShader);
 	//ShaderManager::setFloat4x4(lightingmapShader, "model", model_light.ptr());
 	//math::float3x3 modelNormal(model_light.InverseTransposed().Float3x3Part());
 	//ShaderManager::setFloat3x3(lightingmapShader, "modelNormal", modelNormal.ptr());
-	ShaderManager::setInt(lightingmapShader, "material.diffuse", 0);
-	ShaderManager::setInt(lightingmapShader, "material.specular", 1);
+	//ShaderManager::setInt(lightingmapShader, "material.diffuse", 0);
+	//ShaderManager::setInt(lightingmapShader, "material.specular", 1);
 	//ShaderManager::setFloat(lightingmapShader, "light.direction", lightPos.x, lightPos.y, lightPos.z, 1.0f);
 
 	/*
@@ -336,6 +335,8 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	ShaderManager::use(lampShader);
 	ShaderManager::setFloat4x4(lampShader, "model", model_lamp.ptr());
 	*/
+
+	nanosui = new RE_CompMesh("Meshes/BakerHouse/BakerHouse.fbx");
 
 	return ret;
 }
@@ -521,76 +522,74 @@ update_status ModuleRenderer3D::PreUpdate()
 	math::vec ambientColor = diffuseColor.Mul(0.2f); // low influence
 	*/
 
-	ShaderManager::use(lightingmapShader);
-	ShaderManager::setFloat4x4(lightingmapShader, "view", camera->RealView());
-	ShaderManager::setFloat4x4(lightingmapShader, "projection", camera->GetProjection().ptr());
-	ShaderManager::setFloat(lightingmapShader, "viewPos", camera->GetPos(true));
+	math::float4x4 model = math::float4x4::Scale(math::vec(5.0f)) * math::float4x4::Translate(math::vec(0.0f));
+	model.InverseTranspose();
+
+	ShaderManager::use(modelloading);
+	ShaderManager::setFloat4x4(modelloading, "model", model.ptr());
+	ShaderManager::setFloat4x4(modelloading, "view", camera->RealView());
+	ShaderManager::setFloat4x4(modelloading, "projection", camera->GetProjection().ptr());
+	ShaderManager::setFloat(modelloading, "viewPos", camera->GetPos(true));
+	math::float3x3 modelNormal(model.InverseTransposed().Float3x3Part());
+	ShaderManager::setFloat3x3(modelloading, "modelNormal", modelNormal.ptr());
 
 		//light propieties
-
 	math::vec pointLightPositions[] = {
-		math::vec(0.7f,  0.2f,  2.0f),
-		math::vec(2.3f, -3.3f, -4.0f),
-		math::vec(-4.0f,  2.0f, -12.0f),
-		math::vec(0.0f,  0.0f, -3.0f)
+		math::vec(1.2f, 1.0f, -1.0f),
 	};
-	for (unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < 1; i++)
 	{
 		char tmp[16];
 		sprintf_s(tmp, 16, "pointLights[%u].", i);
 		std::string pLarray(tmp);
 
 		pLarray += "position";
-		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), pointLightPositions[i]);
+		ShaderManager::setFloat(modelloading, pLarray.c_str(), pointLightPositions[i]);
 
 		pLarray = tmp;
 		pLarray += "constant";
-		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 1.0f);
+		ShaderManager::setFloat(modelloading, pLarray.c_str(), 1.0f);
 
 		pLarray = tmp;
 		pLarray += "linear";
-		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 0.09f);
+		ShaderManager::setFloat(modelloading, pLarray.c_str(), 0.09f);
 
 		pLarray = tmp;
 		pLarray += "quadratic";
-		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 0.032f);
+		ShaderManager::setFloat(modelloading, pLarray.c_str(), 0.032f);
 
 		pLarray = tmp;
 		pLarray += "ambient";
-		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 0.2f, 0.2f, 0.2f);
+		ShaderManager::setFloat(modelloading, pLarray.c_str(), 0.2f, 0.2f, 0.2f);
 
 		pLarray = tmp;
 		pLarray += "diffuse";
-		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 0.5f, 0.5f, 0.5f);
-
-		pLarray = tmp;
-		pLarray += "specular";
-		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 1.0f, 1.0f, 1.0f);
+		ShaderManager::setFloat(modelloading, pLarray.c_str(), 0.5f, 0.5f, 0.5f);
 	}
 	/*
 	ShaderManager::setFloat(lightingmapShader, "light.SPosition", camera->GetPos(true));
 	ShaderManager::setFloat(lightingmapShader, "light.SDirection", camera->GetFront());
 	ShaderManager::setFloat(lightingmapShader, "light.cutOff", cos(12.5f * DEGTORAD));
 	ShaderManager::setFloat(lightingmapShader, "light.outerCutOff", cos(17.5f * DEGTORAD));
-
-	ShaderManager::setFloat(lightingmapShader, "light.ambient", 0.2f, 0.2f, 0.2f);
-	ShaderManager::setFloat(lightingmapShader, "light.diffuse", 0.5f, 0.5f, 0.5f);
-	ShaderManager::setFloat(lightingmapShader, "light.specular", 1.0f, 1.0f, 1.0f);
-	ShaderManager::setFloat(lightingmapShader, "light.constant", 1.0f);
-	ShaderManager::setFloat(lightingmapShader, "light.linear", 0.09f);
-	ShaderManager::setFloat(lightingmapShader, "light.quadratic", 0.032f);
+	
+	ShaderManager::setFloat(modelloading, "light.ambient", 0.2f, 0.2f, 0.2f);
+	ShaderManager::setFloat(modelloading, "light.diffuse", 0.5f, 0.5f, 0.5f);
+	ShaderManager::setFloat(modelloading, "light.specular", 1.0f, 1.0f, 1.0f);
+	ShaderManager::setFloat(modelloading, "light.constant", 1.0f);
+	ShaderManager::setFloat(modelloading, "light.linear", 0.09f);
+	ShaderManager::setFloat(modelloading, "light.quadratic", 0.032f);
 	//ShaderManager::setFloat(lightingmapShader, "light.direction", -0.2f, -1.0f, -0.3f, 0.0f);
 	*/
 
 		//material propieties
-	//ShaderManager::setFloat(lightingShader, "material.ambient", 1.0f, 0.5f, 0.31f);
-	//ShaderManager::setFloat(lightingShader, "material.diffuse", 1.0f, 0.5f, 0.31f);
-	//ShaderManager::setFloat(lightingmapShader, "material.specular", 0.5f, 0.5f, 0.5f);
-	ShaderManager::setFloat(lightingmapShader, "material.shininess", 32.0f);
 
+	
+	//ShaderManager::setFloat(lightingmapShader, "material.shininess", 32.0f);
+	
 	ShaderManager::use(lampShader);
 	ShaderManager::setFloat4x4(lampShader, "view", camera->RealView());
 	ShaderManager::setFloat4x4(lampShader, "projection", camera->GetProjection().ptr());
+	
 	}
 	return ret;
 }
@@ -697,6 +696,7 @@ update_status ModuleRenderer3D::PostUpdate()
 	}
 	else
 	{
+		/*
 		ShaderManager::use(lightingmapShader);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -752,9 +752,26 @@ update_status ModuleRenderer3D::PostUpdate()
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+		*/
 	}
-	
+
+	ShaderManager::use(lampShader);	
+	glBindVertexArray(VAO_Light);
+
+	math::vec pointLightPositions[] = {
+		math::vec(1.2f, 1.0f, -1.0f),
+	};
+	for (unsigned int i = 0; i < 1; i++)
+	{
+		math::float4x4 model = math::float4x4::Scale(math::vec(5.0f)) * math::float4x4::Translate(pointLightPositions[i].Neg());
+		model.InverseTranspose();
+		ShaderManager::setFloat4x4(lampShader, "model", model.ptr());
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
 	glBindVertexArray(0);
+	
+	nanosui->Draw(modelloading);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
@@ -783,6 +800,8 @@ bool ModuleRenderer3D::CleanUp()
 	glDeleteBuffers(1, &EBO_Square);
 	glDeleteBuffers(1, &VBO_Cube);
 	glDeleteBuffers(1, &VBO_Light);
+
+	delete nanosui;
 
 	//Delete textures
 	delete texture_manager;
