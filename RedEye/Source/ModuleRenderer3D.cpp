@@ -321,7 +321,6 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	math::vec lightPos(1.2f, 1.0f, 2.0f);
 
 	ShaderManager::use(lightingmapShader);
-	ShaderManager::setBool(lightingmapShader, "spotlight", true);
 	//ShaderManager::setFloat4x4(lightingmapShader, "model", model_light.ptr());
 	//math::float3x3 modelNormal(model_light.InverseTransposed().Float3x3Part());
 	//ShaderManager::setFloat3x3(lightingmapShader, "modelNormal", modelNormal.ptr());
@@ -329,6 +328,7 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	ShaderManager::setInt(lightingmapShader, "material.specular", 1);
 	//ShaderManager::setFloat(lightingmapShader, "light.direction", lightPos.x, lightPos.y, lightPos.z, 1.0f);
 
+	/*
 	math::float4x4 model_lamp(math::float4x4::Translate(math::vec::zero));
 	model_lamp = model_lamp * math::float4x4::Scale(math::vec(5.0f));
 	model_lamp = model_lamp * math::float4x4::Translate(lightPos.Neg());
@@ -336,6 +336,7 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	ShaderManager::use(lampShader);
 	ShaderManager::setFloat4x4(lampShader, "model", model_lamp.ptr());
+	*/
 
 	return ret;
 }
@@ -527,6 +528,47 @@ update_status ModuleRenderer3D::PreUpdate()
 	ShaderManager::setFloat(lightingmapShader, "viewPos", camera->GetPos(true));
 
 		//light propieties
+
+	math::vec pointLightPositions[] = {
+		math::vec(0.7f,  0.2f,  2.0f),
+		math::vec(2.3f, -3.3f, -4.0f),
+		math::vec(-4.0f,  2.0f, -12.0f),
+		math::vec(0.0f,  0.0f, -3.0f)
+	};
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		char tmp[16];
+		sprintf_s(tmp, 16, "pointLights[%u].", i);
+		std::string pLarray(tmp);
+
+		pLarray += "position";
+		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), pointLightPositions[i]);
+
+		pLarray = tmp;
+		pLarray += "constant";
+		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 1.0f);
+
+		pLarray = tmp;
+		pLarray += "linear";
+		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 0.09f);
+
+		pLarray = tmp;
+		pLarray += "quadratic";
+		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 0.032f);
+
+		pLarray = tmp;
+		pLarray += "ambient";
+		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 0.2f, 0.2f, 0.2f);
+
+		pLarray = tmp;
+		pLarray += "diffuse";
+		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 0.5f, 0.5f, 0.5f);
+
+		pLarray = tmp;
+		pLarray += "specular";
+		ShaderManager::setFloat(lightingmapShader, pLarray.c_str(), 1.0f, 1.0f, 1.0f);
+	}
+	/*
 	ShaderManager::setFloat(lightingmapShader, "light.SPosition", camera->GetPos(true));
 	ShaderManager::setFloat(lightingmapShader, "light.SDirection", camera->GetFront());
 	ShaderManager::setFloat(lightingmapShader, "light.cutOff", cos(12.5f * DEGTORAD));
@@ -539,7 +581,7 @@ update_status ModuleRenderer3D::PreUpdate()
 	ShaderManager::setFloat(lightingmapShader, "light.linear", 0.09f);
 	ShaderManager::setFloat(lightingmapShader, "light.quadratic", 0.032f);
 	//ShaderManager::setFloat(lightingmapShader, "light.direction", -0.2f, -1.0f, -0.3f, 0.0f);
-	
+	*/
 
 		//material propieties
 	//ShaderManager::setFloat(lightingShader, "material.ambient", 1.0f, 0.5f, 0.31f);
@@ -693,9 +735,24 @@ update_status ModuleRenderer3D::PostUpdate()
 		//glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
-		//ShaderManager::use(lampShader);
-		//glBindVertexArray(VAO_Light);
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
+		ShaderManager::use(lampShader);
+		glBindVertexArray(VAO_Light);
+
+		math::vec pointLightPositions[] = {
+			math::vec(0.7f,  0.2f,  2.0f),
+			math::vec(2.3f, -3.3f, -4.0f),
+			math::vec(-4.0f,  2.0f, -12.0f),
+			math::vec(0.0f,  0.0f, -3.0f)
+		};
+
+		for (unsigned int i = 0; i < 4; i++)
+		{
+			math::float4x4 model = math::float4x4::Scale(math::vec(5.0f)) * math::float4x4::Translate(pointLightPositions[i].Neg());
+			model.InverseTranspose();
+			ShaderManager::setFloat4x4(lampShader, "model", model.ptr());
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 	}
 	
 	glBindVertexArray(0);
