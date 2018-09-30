@@ -53,7 +53,7 @@ bool Application::Init()
 		sprintf_s(tmp, 8, "%u.%u.%u", (int)sdl_version.major, (int)sdl_version.minor, (int)sdl_version.patch);
 		App->ReportSoftware("SDL", tmp, "https://www.libsdl.org/");
 
-		if (ret = (fs->Init(argc, argv)))
+		if (fs->Init(argc, argv))
 		{
 			Config* config = fs->GetConfig();
 			JSONNode* node = config->GetRootNode("App");
@@ -117,6 +117,9 @@ void Application::FinishUpdate()
 	if (want_to_load)
 		Load();
 
+	if (want_to_save)
+		Save();
+
 	time->ManageFrameTimers();
 }
 
@@ -167,14 +170,34 @@ bool Application::Load()
 
 bool Application::Save()
 {
-	return true;
+	bool ret = true;
+
+	Config* config = fs->GetConfig();
+	JSONNode* node = config->GetRootNode("App");
+	node->PushString("Name", app_name.c_str());
+	node->PushString("Organization", organization.c_str());
+	DEL(node);
+
+	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
+		if ((*it)->IsActive() == true)
+		{
+			node = config->GetRootNode((*it)->GetName());
+			ret = (*it)->Save(node);
+			DEL(node);
+		}
+
+	if (!ret) LOG("Error Save Configuration from modules");
+
+	want_to_save = false;
+
+	return ret;
 }
 
 void Application::DrawEditor()
 {
 	if (ImGui::BeginMenu("Options"))
 	{
-		if (ImGui::MenuItem("Restore Defaults")) want_to_load_def = true;
+		//if (ImGui::MenuItem("Restore Defaults")) want_to_load_def = true;
 		if (ImGui::MenuItem("Load")) want_to_load = true;
 		if (ImGui::MenuItem("Save")) want_to_save = true;
 

@@ -140,7 +140,30 @@ bool ModuleWindow::Load(JSONNode * node)
 
 bool ModuleWindow::Save(JSONNode * node) const
 {
-	return false;
+	bool ret = true;
+
+	if (flags == 0u)
+	{
+		node->PushBool("Fullscreen", false);
+		node->PushBool("Resizable", true);
+		node->PushBool("Borderless", false);
+		node->PushBool("Fullscreen Desktop", false);
+	}
+	else
+	{
+		node->PushBool("Fullscreen", flags & SDL_WINDOW_FULLSCREEN);
+		node->PushBool("Resizable", flags & SDL_WINDOW_RESIZABLE);
+		node->PushBool("Borderless", flags & SDL_WINDOW_BORDERLESS);
+		node->PushBool("Fullscreen Desktop", flags & SDL_WINDOW_FULLSCREEN_DESKTOP);
+	}
+
+	node->PushString("title", title.c_str());
+	node->PushInt("pos_x", pos_x);
+	node->PushInt("pos_y", pos_y);
+	node->PushInt("width", width);
+	node->PushInt("height", height);
+
+	return ret;
 }
 
 void ModuleWindow::RecieveEvent(const Event* e)
@@ -166,7 +189,8 @@ void ModuleWindow::WindowEvent(const SDL_Event * e)
 		SetWindowSize(e->window.data1, e->window.data2);
 		break;
 	case SDL_WINDOWEVENT_SIZE_CHANGED:/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
-		//SetWindowSize(e->window.data1, e->window.data2);
+		width = e->window.data1;
+		height = e->window.data2;
 		break;
 	case SDL_WINDOWEVENT_MINIMIZED:/**< Window has been minimized */
 		break;

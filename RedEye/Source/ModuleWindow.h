@@ -19,7 +19,7 @@ public:
 	void DrawEditor() override;
 	bool CleanUp() override;
 	bool Load(JSONNode* node) override;
-	bool Save(JSONNode* node) const;
+	bool Save(JSONNode* node) const override;
 	void RecieveEvent(const Event* e) override;
 	void WindowEvent(const SDL_Event* e);
 
@@ -60,10 +60,12 @@ public:
 private:
 
 	std::string title = "RedEye";
-	int pos_x;			int pos_y;
-	int width = 1280;	int height = 720;
+	int pos_x;
+	int pos_y;
+	int width = 1280;
+	int height = 720;
 	unsigned int flags = 0u;
-	float brightness = 1.0f;
+	float brightness = 0.9f;
 };
 
 #endif // __ModuleWindow_H__
