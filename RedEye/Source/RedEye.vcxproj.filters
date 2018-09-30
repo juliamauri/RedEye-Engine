@@ -71,11 +71,12 @@
       <Filter>Modules</Filter>
     </ClCompile>
     <ClCompile Include="OutputLog.cpp">
-      <Filter>Modules\Independent App Modules\Log</Filter>
+      <Filter>Utility\Log</Filter>
     </ClCompile>
     <ClCompile Include="RE_Mesh.cpp">
       <Filter>Components</Filter>
     </ClCompile>
+    <ClCompile Include="RE_CompMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -83,9 +84,6 @@
     </ClInclude>
     <ClInclude Include="mmgr\nommgr.h">
       <Filter>3rd Party\mmgr</Filter>
-    </ClInclude>
-    <ClInclude Include="Globals.h">
-      <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="Application.h">
       <Filter>Main</Filter>
@@ -289,10 +287,16 @@
       <Filter>Modules</Filter>
     </ClInclude>
     <ClInclude Include="OutputLog.h">
-      <Filter>Modules\Independent App Modules\Log</Filter>
+      <Filter>Utility\Log</Filter>
     </ClInclude>
     <ClInclude Include="RE_Mesh.h">
       <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompMesh.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -365,13 +369,16 @@
     <Filter Include="Components">
       <UniqueIdentifier>{e7540df0-e081-4ea9-a12e-d166f45541ad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\Independent App Modules\Log">
+    <Filter Include="Utility">
+      <UniqueIdentifier>{79e2c679-5e2b-47e5-95a0-240e5abe6473}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\Log">
       <UniqueIdentifier>{f1f18652-ef76-444e-ab39-3f51efc4c14e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Build\Assets\Settings\config.json">
-      <Filter>Main</Filter>
+      <Filter>Utility</Filter>
     </None>
   </ItemGroup>
 </Project>
