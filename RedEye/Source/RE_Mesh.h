@@ -10,10 +10,6 @@ struct Vertex {
 	math::vec Normal;
 	// texCoords
 	math::float2 TexCoords;
-	// tangent
-	//math::vec Tangent;
-	// bitangent
-	//math::vec Bitangent;
 };
 
 
@@ -35,6 +31,7 @@ public:
 	/*  Functions  */
 	// constructor
 	RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+	~RE_Mesh();
 
 	// render the mesh
 	void Draw(unsigned int shader_ID);
@@ -42,6 +39,7 @@ public:
 private:
 	/*  Render data  */
 	unsigned int VBO, EBO;
+	bool useIndex = true;
 
 	/*  Functions    */
 	// initializes all the buffer objects/arrays

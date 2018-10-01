@@ -4,20 +4,41 @@
 #include "Module.h"
 #include "Event.h"
 
+class RE_Mesh;
+class RE_CompMesh;
+
 class ModuleScene : public Module
 {
 public:
 	ModuleScene(const char* name, bool start_enabled = true);
 	~ModuleScene();
 
-	//bool Init(JSONNode* config_module) override;
+	bool Start() override;
+
+	update_status PreUpdate() override;
+	update_status Update() override;
+	update_status PostUpdate() override;
+
 	bool CleanUp() override;
 
 	void FileDrop(const char* file);
 
 	void RecieveEvent(const Event* e) override;
 
+	void DrawScene();
+
 private:
+	//shaders
+	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube, lightingShader, lampShader, lightingmapShader, modelloading;
+
+	//Textures
+	unsigned int puppie1, puppie2, container, awesomeface, container2, container2_specular;
+
+	//Meshes
+	RE_Mesh* triangle = nullptr;
+	RE_Mesh* square = nullptr;
+	RE_Mesh* cube = nullptr;
+	RE_CompMesh* mesh_droped = nullptr;
 
 	//GameObject root;
 };

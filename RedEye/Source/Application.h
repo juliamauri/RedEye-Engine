@@ -19,6 +19,8 @@ class TimeManager;
 class SystemInfo;
 class RE_Math;
 struct OutputLogHolder;
+class Texture2DManager;
+class ShaderManager;
 
 class Application : public EventListener
 {
@@ -47,7 +49,6 @@ private:
 	void FinishUpdate();
 
 public:
-
 	ModuleInput* input = nullptr;
 	ModuleWindow* window = nullptr;
 	ModuleScene* scene = nullptr;
@@ -59,6 +60,8 @@ public:
 	SystemInfo* sys_info = nullptr;
 	RE_Math* math = nullptr;
 	OutputLogHolder* log = nullptr;
+	Texture2DManager* textures = nullptr;
+	ShaderManager* shaders = nullptr;
 
 private:
 

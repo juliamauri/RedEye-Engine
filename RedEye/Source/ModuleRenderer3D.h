@@ -8,27 +8,8 @@ class Texture2DManager;
 class Texture2D;
 class RE_Camera;
 class RE_CompMesh;
+class RE_Mesh;
 
-enum ShaderType
-{
-	SIN,
-	VERTEX,
-	TEXTURE
-};
-
-enum Texture2DType
-{
-	PUPPIE_1,
-	PUPPIE_2,
-	CONTAINER,
-	MIX_AWESOMEFACE
-};
-
-enum ObjectType
-{
-	PLANE,
-	CUBE
-};
 
 class ModuleRenderer3D : public Module 
 {
@@ -50,57 +31,23 @@ public:
 
 	void enableVSync(const bool enable);
 
-	//Load model
-	void LoadNewModel(const char* buffer, const char* path, unsigned int size);
-
 	//Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
 
 	//Renderer Test Window
-	ShaderType GetShaderEnabled() const;
-	Texture2DType GetTexture2DEnabled() const;
-	ObjectType GetObjectEnabled() const;
-
-	void SetShaderEnabled(ShaderType shader_enabled);
-	void SetTexture2DEnabled(Texture2DType texture2d_enabled);
-	void SetObjectEnabled(ObjectType object_enabled);
-
-	void UseShader(ShaderType shader_enabled);
-	void SetShaderBool(const char* name, bool value);
-
 	void ResetCamera();
-
-	bool* GetB_EBO();
-	bool* Getprintvertextcolor();
-	bool* GetisRotated();
-	bool* GetisScaled();
-	bool* GetisCubes();
-	bool* GetisMove();
 
 	void ResetAspectRatio();
 
-	ShaderManager* shader_manager; 
-	Texture2DManager* texture_manager;
-
-private:
-	RE_CompMesh* nanosui;
 	RE_Camera* camera;
 
-	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube, lightingShader, lampShader, lightingmapShader, modelloading;
+private:
+	bool vsync = false;
+	bool isLine = false;
 
-	unsigned int puppie1, puppie2, container, awesomeface, container2, container2_specular;
 
-	//Renderer Test
-	unsigned int VAO_Triangle, VAO_Square, VAO_Cube, VAO_Light, VBO_Triangle, VBO_Square, VBO_Cube, VBO_Light, EBO_Square;
-	bool B_EBO = true, isLine = false, vsync = false, printvertextcolor = false;
-
-	ShaderType shaderenabled = SIN;
-	Texture2DType textureEnabled = PUPPIE_1;
-	ObjectType objectEnabled = PLANE;
 
 	float timeValue = 0, timerotateValue = 0, timeCuberotateValue = 0, timeLight = 0;
-
-	bool isRotated = false, isScaled = false, isCubes = false, isMove = false;
 	
 	float lastX, lastY;
 	float yaw = 0.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.

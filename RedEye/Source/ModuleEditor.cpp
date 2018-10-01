@@ -445,6 +445,7 @@ RendererTest::RendererTest(const char * name, bool start_active) : EditorWindow(
 
 void RendererTest::Draw()
 {
+	/*
 	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
 	{
 		ModuleRenderer3D* renderer_module = App->renderer3d;
@@ -582,6 +583,7 @@ void RendererTest::Draw()
 	}
 
 	ImGui::End();
+	*/
 }
 
 GeometryTest::GeometryTest(const char * name, bool start_active) :

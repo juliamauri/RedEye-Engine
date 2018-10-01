@@ -10,8 +10,13 @@
 #include "SystemInfo.h"
 #include "RE_Math.h"
 #include "OutputLog.h"
+#include "Texture2DManager.h"
+#include "ShaderManager.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
+#include "IL/include/il.h"
+#include "IL/include/ilu.h"
+#include "IL/include/ilut.h"
 
 using namespace std;
 
@@ -28,6 +33,9 @@ Application::Application(int argc, char* argv[])
 	modules.push_back(scene = new ModuleScene("Scene"));
 	modules.push_back(editor = new ModuleEditor("Editor"));
 	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
+
+	textures = new Texture2DManager("Images/");
+	shaders = new ShaderManager("Shaders/");
 }
 
 Application::~Application()
@@ -37,6 +45,8 @@ Application::~Application()
 	DEL(sys_info);
 	DEL(math);
 	DEL(log);
+	DEL(textures);
+	DEL(shaders);
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;
@@ -59,6 +69,8 @@ bool Application::Init()
 		char tmp[8];
 		sprintf_s(tmp, 8, "%u.%u.%u", (int)sdl_version.major, (int)sdl_version.minor, (int)sdl_version.patch);
 		App->ReportSoftware("SDL", tmp, "https://www.libsdl.org/");
+		sprintf_s(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
+		App->ReportSoftware("DevIL", tmp, "http://openil.sourceforge.net/");
 
 		if (fs->Init(argc, argv))
 		{

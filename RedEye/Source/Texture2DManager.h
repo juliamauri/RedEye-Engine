@@ -27,9 +27,8 @@ public:
 class Texture2DManager 
 {
 public:
+	Texture2DManager(const char* folderPath);
 	~Texture2DManager();
-
-	bool Init(const char* folderPath);
 
 	//Load texture
 	unsigned int LoadTexture2D(const char* name, ImageExtensionType extension);

@@ -162,7 +162,7 @@ std::vector<Texture> RE_CompMesh::loadMaterialTextures(aiMaterial * mat, aiTextu
 		if (!skip)
 		{   // if texture hasn't been loaded already, load it
 			Texture texture;
-			texture.id = App->renderer3d->texture_manager->LoadTexture2D(directory.c_str(), str.C_Str(), droped);
+			texture.id = App->textures->LoadTexture2D(directory.c_str(), str.C_Str(), droped);
 			texture.type = typeName;
 			texture.path = str.C_Str();
 			textures.push_back(texture);

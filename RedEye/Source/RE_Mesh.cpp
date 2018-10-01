@@ -11,11 +11,23 @@
 RE_Mesh::RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
 	this->vertices = vertices;
-	this->indices = indices;
+
+	if (indices.size() > 0)
+		this->indices = indices;
+	else
+		useIndex = false;
+
 	this->textures = textures;
 
 	// now that we have all the required data, set the vertex buffers and its attribute pointers.
 	setupMesh();
+}
+
+RE_Mesh::~RE_Mesh()
+{
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	if(useIndex) glDeleteBuffers(1, &EBO);
 }
 
 void RE_Mesh::Draw(unsigned int shader_ID)
@@ -42,17 +54,23 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 			number = std::to_string(heightNr++); // transfer unsigned int to stream
 
 												 // now set the sampler to the correct texture unit
-		ShaderManager::setUnsignedInt(shader_ID, (name + number).c_str(), i );
+		ShaderManager::setUnsignedInt(shader_ID, (name + number).c_str(), i);
 
 		// and finally bind the texture
-		App->renderer3d->texture_manager->use(textures[i].id);
+		App->textures->use(textures[i].id);
 	}
+	
+		// draw mesh
+		glBindVertexArray(VAO);
 
-	// draw mesh
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+		if (useIndex)
+			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+		else
+			glDrawArrays(GL_TRIANGLES,0,vertices.size());
 
+
+		glBindVertexArray(0);
+	
 	// always good practice to set everything back to defaults once configured.
 	glActiveTexture(GL_TEXTURE0);
 }
@@ -72,8 +90,11 @@ void RE_Mesh::setupMesh()
 	// again translates to 3/2 floats which translates to a byte array.
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+	if (useIndex)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+	}
 
 	// set the vertex attribute pointers
 	// vertex Positions
@@ -85,12 +106,6 @@ void RE_Mesh::setupMesh()
 	// vertex texture coords
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-	// vertex tangent
-	//glEnableVertexAttribArray(3);
-	//glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
-	// vertex bitangent
-	//glEnableVertexAttribArray(4);
-	//glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
 	glBindVertexArray(0);
 }
