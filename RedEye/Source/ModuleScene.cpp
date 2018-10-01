@@ -21,6 +21,7 @@ bool ModuleScene::Start()
 	bool ret = true;
 
 	//Loading Shaders
+	/*
 	ret = App->shaders->Load("sinuscolor", &sinusColor);
 	if (!ret)
 		LOG("%s\n", App->shaders->GetShaderError());
@@ -56,18 +57,22 @@ bool ModuleScene::Start()
 	ret = App->shaders->Load("modelloading", &modelloading);
 	if (!ret)
 		LOG("%s\n", App->shaders->GetShaderError());
+	*/
+	ret = App->shaders->Load("primitive", &ShaderPrimitive);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
 
 	//Loading textures
-	puppie1 = App->textures->LoadTexture2D("puppie1", ImageExtensionType::JPG);
-	puppie2 = App->textures->LoadTexture2D("puppie2", ImageExtensionType::JPG);
-	container = App->textures->LoadTexture2D("container", ImageExtensionType::JPG);
-	awesomeface = App->textures->LoadTexture2D("awesomeface", ImageExtensionType::PNG);
-	container2 = App->textures->LoadTexture2D("container2", ImageExtensionType::PNG);
-	container2_specular = App->textures->LoadTexture2D("container2_specular", ImageExtensionType::PNG);
+	//puppie1 = App->textures->LoadTexture2D("puppie1", ImageExtensionType::JPG);
+	//puppie2 = App->textures->LoadTexture2D("puppie2", ImageExtensionType::JPG);
+	//container = App->textures->LoadTexture2D("container", ImageExtensionType::JPG);
+	//awesomeface = App->textures->LoadTexture2D("awesomeface", ImageExtensionType::PNG);
+	//container2 = App->textures->LoadTexture2D("container2", ImageExtensionType::PNG);
+	//container2_specular = App->textures->LoadTexture2D("container2_specular", ImageExtensionType::PNG);
 		
 	//Loading meshes
 
-	Vertex send;
+	Vertex vert;
 	Texture tex;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> index;
@@ -87,9 +92,9 @@ bool ModuleScene::Start()
 
 	for (unsigned int i = 0; i < 3; i++)
 	{
-		send.Position = vPositionTriangle[i];
-		send.Normal = vColorsTriangle[i]; //using normal like vertex color
-		vertices.push_back(send);
+		vert.Position = vPositionTriangle[i];
+		vert.Normal = vColorsTriangle[i]; //using normal like vertex color
+		vertices.push_back(vert);
 		index.push_back(i);
 	}
 
@@ -98,9 +103,9 @@ bool ModuleScene::Start()
 	vertices.clear();
 	index.clear();
 	textures.clear();
-	send.Position = math::float3::nan;
-	send.Normal = math::float3::nan;
-	send.TexCoords = math::float2::nan;
+	vert.Position = math::float3::nan;
+	vert.Normal = math::float3::nan;
+	vert.TexCoords = math::float2::nan;
 	tex.id = 0;
 	tex.path.clear();
 	tex.type.clear();
@@ -134,10 +139,10 @@ bool ModuleScene::Start()
 
 	for (unsigned int i = 0; i < 4; i++)
 	{
-		send.Position = vPositionSquare[i];
-		send.Normal = vColorsSquare[i]; //using normal like vertex color
-		send.TexCoords = TextureCoordsSquare[i]; //using normal like vertex color
-		vertices.push_back(send);
+		vert.Position = vPositionSquare[i];
+		vert.Normal = vColorsSquare[i]; //using normal like vertex color
+		vert.TexCoords = TextureCoordsSquare[i]; //using normal like vertex color
+		vertices.push_back(vert);
 	}
 	for (unsigned int i = 0; i < 6; i++)
 		index.push_back(indicesSquare[i]);
@@ -147,9 +152,9 @@ bool ModuleScene::Start()
 	vertices.clear();
 	index.clear();
 	textures.clear();
-	send.Position = math::float3::nan;
-	send.Normal = math::float3::nan;
-	send.TexCoords = math::float2::nan;
+	vert.Position = math::float3::nan;
+	vert.Normal = math::float3::nan;
+	vert.TexCoords = math::float2::nan;
 	tex.id = 0;
 	tex.path.clear();
 	tex.type.clear();
@@ -199,129 +204,81 @@ bool ModuleScene::Start()
 		math::vec(-0.5f,  0.5f, -0.5f)
 	};
 
-	math::vec vNormalCube[] = {
-		math::vec(0.0f,  0.0f, -1.0f),
-		math::vec(0.0f,  0.0f, -1.0f),
-		math::vec(0.0f,  0.0f, -1.0f),
-		math::vec(0.0f,  0.0f, -1.0f),
-		math::vec(0.0f,  0.0f, -1.0f),
-		math::vec(0.0f,  0.0f, -1.0f),
-
-		math::vec(0.0f,  0.0f, 1.0f),
-		math::vec(0.0f,  0.0f, 1.0f),
-		math::vec(0.0f,  0.0f, 1.0f),
-		math::vec(0.0f,  0.0f, 1.0f),
-		math::vec(0.0f,  0.0f, 1.0f),
-		math::vec(0.0f,  0.0f, 1.0f),
-
-		math::vec(-1.0f,  0.0f,  0.0f),
-		math::vec(-1.0f,  0.0f,  0.0f),
-		math::vec(-1.0f,  0.0f,  0.0f),
-		math::vec(-1.0f,  0.0f,  0.0f),
-		math::vec(-1.0f,  0.0f,  0.0f),
-		math::vec(-1.0f,  0.0f,  0.0f),
-
-		math::vec(1.0f,  0.0f,  0.0f),
-		math::vec(1.0f,  0.0f,  0.0f),
-		math::vec(1.0f,  0.0f,  0.0f),
-		math::vec(1.0f,  0.0f,  0.0f),
-		math::vec(1.0f,  0.0f,  0.0f),
-		math::vec(1.0f,  0.0f,  0.0f),
-
-		math::vec(0.0f, -1.0f,  0.0f),
-		math::vec(0.0f, -1.0f,  0.0f),
-		math::vec(0.0f, -1.0f,  0.0f),
-		math::vec(0.0f, -1.0f,  0.0f),
-		math::vec(0.0f, -1.0f,  0.0f),
-		math::vec(0.0f, -1.0f,  0.0f),
-
-		math::vec(0.0f,  1.0f,  0.0f),
-		math::vec(0.0f,  1.0f,  0.0f),
-		math::vec(0.0f,  1.0f,  0.0f),
-		math::vec(0.0f,  1.0f,  0.0f),
-		math::vec(0.0f,  1.0f,  0.0f),
-		math::vec(0.0f,  1.0f,  0.0f),
-	};
-
-	math::float2 TextureCoordsCube[] = {
-		math::float2(0.0f, 0.0f),
-		math::float2(1.0f, 0.0f),
-		math::float2(1.0f, 1.0f),
-		math::float2(1.0f, 1.0f),
-		math::float2(0.0f, 1.0f),
-		math::float2(0.0f, 0.0f),
-
-		math::float2(0.0f, 0.0f),
-		math::float2(1.0f, 0.0f),
-		math::float2(1.0f, 1.0f),
-		math::float2(1.0f, 1.0f),
-		math::float2(0.0f, 1.0f),
-		math::float2(0.0f, 0.0f),
-
-		math::float2(1.0f, 0.0f),
-		math::float2(1.0f, 1.0f),
-		math::float2(0.0f, 1.0f),
-		math::float2(0.0f, 1.0f),
-		math::float2(0.0f, 0.0f),
-		math::float2(1.0f, 0.0f),
-
-		math::float2(1.0f, 0.0f),
-		math::float2(1.0f, 1.0f),
-		math::float2(0.0f, 1.0f),
-		math::float2(0.0f, 1.0f),
-		math::float2(0.0f, 0.0f),
-		math::float2(1.0f, 0.0f),
-
-		math::float2(0.0f, 1.0f),
-		math::float2(1.0f, 1.0f),
-		math::float2(1.0f, 0.0f),
-		math::float2(1.0f, 0.0f),
-		math::float2(0.0f, 0.0f),
-		math::float2(0.0f, 1.0f),
-
-		math::float2(0.0f, 1.0f),
-		math::float2(1.0f, 1.0f),
-		math::float2(1.0f, 0.0f),
-		math::float2(1.0f, 0.0f),
-		math::float2(0.0f, 0.0f),
-		math::float2(0.0f, 1.0f)
-	};
-
 	for (unsigned int i = 0; i < 36; i++)
 	{
-		send.Position = vPositionCube[i];
-		send.Normal = vNormalCube[i];
-		send.TexCoords = TextureCoordsCube[i];
-		vertices.push_back(send);
+		vert.Position = vPositionCube[i];
+		vertices.push_back(vert);
 	}
 
-	tex.id = container;
-	tex.type = "texture_diffuse";
-	textures.push_back(tex);
-
-	tex.id = awesomeface;
-	tex.type = "texture_diffuse";
-	textures.push_back(tex);
-
-	cube = new RE_Mesh(vertices, index, textures);
+	cube_array = new RE_Mesh(vertices, index, textures);
 
 	vertices.clear();
 	index.clear();
 	textures.clear();
-	send.Position = math::float3::nan;
-	send.Normal = math::float3::nan;
-	send.TexCoords = math::float2::nan;
+	vert.Position = math::float3::nan;
+	vert.Normal = math::float3::nan;
+	vert.TexCoords = math::float2::nan;
+	tex.id = 0;
+	tex.path.clear();
+	tex.type.clear();
+
+	//Cube with index
+	math::vec vPositionCubeArray[] = {
+		//vertecies        
+		math::vec(0.5f,  0.5f, 0.5f),  //Top Right Back - Vert 0
+		math::vec(0.5f, -0.5f, 0.5f),  //Bottom Right Back - Vert 1
+		math::vec(-0.5f, -0.5f, 0.5f),  //Bottom Left Back - Vert 2
+		math::vec(-0.5f,  0.5f, 0.5f),  //Top Left Back - Vert 3
+		math::vec(0.5f,  0.5f, -0.5f),  //Top Right Front - Vert 4
+		math::vec(0.5f, -0.5f, -0.5f),  //Bottom Right Front - Vert 5
+		math::vec(-0.5f, -0.5f, -0.5f),  //Bottom Left Front - Vert 6
+		math::vec(-0.5f,  0.5f, -0.5f), //Top Left Front - Vert 7
+	};
+
+	unsigned int indicesCube[] = {  //Tell OpenGL What triangle uses what Vertecies
+		0, 1, 3,   //Back Quad
+		1, 2, 3,
+		0, 1, 4,     //Right Quad
+		1, 5, 4,
+		2, 3, 7,   //Left Quad
+		2, 6, 7,
+		4, 5, 7,   //Front Quad
+		5, 6, 7,
+		0, 3, 4,   //Top Quad
+		3, 4, 7,
+		1, 2, 5,   //Bottom Quad
+		2, 5, 6
+	};
+
+	for (unsigned int i = 0; i < 8; i++)
+	{
+		vert.Position = vPositionCubeArray[i];
+		vertices.push_back(vert);
+	}
+
+	for (unsigned int i = 0; i < 36; i++)
+		index.push_back(indicesCube[i]);
+
+	cube_index = new RE_Mesh(vertices, index, textures);
+
+	vertices.clear();
+	index.clear();
+	textures.clear();
+	vert.Position = math::float3::nan;
+	vert.Normal = math::float3::nan;
+	vert.TexCoords = math::float2::nan;
 	tex.id = 0;
 	tex.path.clear();
 	tex.type.clear();
 
 	//Setting Camera
-	App->renderer3d->camera->SetPos(math::vec(0.0f, 0.0f, -3.0f));
+	//App->renderer3d->camera->SetPos(math::vec(0.0f, 0.0f, -3.0f));
 
 	//Setting Shaders
-	ShaderManager::use(twotextures);
-	ShaderManager::setFloat4x4(twotextures, "view", App->renderer3d->camera->GetView().ptr());
-	ShaderManager::setFloat4x4(twotextures, "projection", App->renderer3d->camera->GetProjection().ptr());
+	ShaderManager::use(ShaderPrimitive);
+	ShaderManager::setFloat4x4(ShaderPrimitive, "view", App->renderer3d->camera->GetView().ptr());
+	ShaderManager::setFloat4x4(ShaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
+	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	return ret;
 }
@@ -345,7 +302,8 @@ bool ModuleScene::CleanUp()
 {
 	DEL(triangle);
 	DEL(square);
-	DEL(cube);
+	DEL(cube_array);
+	DEL(cube_index);
 	if (mesh_droped != nullptr)
 		DEL(mesh_droped);
 	return true;
@@ -376,32 +334,22 @@ void ModuleScene::RecieveEvent(const Event * e)
 }
 
 void ModuleScene::DrawScene()
-{
-	ShaderManager::use(twotextures);
+{		
+	App->renderer3d->DirectDrawCube(math::vec(1.1f, 0.0f, 0.0f), math::vec(1.0f, 1.0f, 1.0f));
+		
+	/*
+	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 0.0f, 0.0f));
+	model.InverseTranspose();
+	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
+	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
+	cube_array->Draw(ShaderPrimitive);
 
-	math::float3 cubePositions[] = {
-		math::float3(0.0f,  0.0f,  0.0f),
-		math::float3(2.0f,  5.0f, -15.0f),
-		math::float3(-1.5f, -2.2f, -2.5f),
-		math::float3(-3.8f, -2.0f, -12.3f),
-		math::float3(2.4f, -0.4f, -3.5f),
-		math::float3(-1.7f,  3.0f, -7.5f),
-		math::float3(1.3f, -2.0f, -2.5f),
-		math::float3(1.5f,  2.0f, -2.5f),
-		math::float3(1.5f,  0.2f, -1.5f),
-		math::float3(-1.3f,  1.0f, -1.5f)
-	};
-
-	for (unsigned int i = 0; i < 10; i++)
-	{
-		float angle = 20.0f * i;
-
-		math::float4x4 model = RE_Math::Rotate(math::float3(1.0f, 0.3f, 0.5f), angle * DEGTORAD) * math::float4x4::Translate(math::float3(cubePositions[i]).Neg());
-		model.InverseTranspose();
-
-		ShaderManager::setFloat4x4(twotextures, "model", model.ptr());
-		cube->Draw(twotextures);
-	}
+	model = math::float4x4::Translate(math::float3(-1.1f, 0.0f, 0.0f));
+	model.InverseTranspose();
+	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
+	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
+	cube_index->Draw(ShaderPrimitive);
+	*/
 }
 
 //INIT

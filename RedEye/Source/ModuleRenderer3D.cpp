@@ -1,6 +1,5 @@
 #include "ModuleRenderer3D.h"
 
-#include "RE_Math.h"
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
@@ -75,9 +74,10 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	//Set background with a clear color
 	glMatrixMode(GL_PROJECTION); 
-	glLoadIdentity();
+	glLoadMatrixf(camera->GetProjection().ptr());
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	return ret;
 }
 
@@ -139,6 +139,65 @@ unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	return nrAttributes;
+}
+
+void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
+{
+	/*
+	math::float4x4 model = math::float4x4::Translate(position);
+	math::float4x4 view = camera->GetView().InverseTransposed();
+	math::float4x4 modelview = view * model;
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(modelview.ptr());
+*/
+	glBegin(GL_TRIANGLES);
+
+	glVertex3f(-0.5f, -0.5f, -0.5f);
+	glVertex3f(0.5f, -0.5f, -0.5f);
+	glVertex3f(0.5f, 0.5f, -0.5f);
+	glVertex3f(0.5f, 0.5f, -0.5f);
+	glVertex3f(- 0.5f, 0.5f, -0.5f);
+	glVertex3f(- 0.5f, -0.5f, -0.5f);
+
+	glVertex3f(- 0.5f, -0.5f, 0.5f);
+	glVertex3f(0.5f, -0.5f, 0.5f);
+	glVertex3f(0.5f, 0.5f, 0.5f);
+	glVertex3f(0.5f, 0.5f, 0.5f);
+	glVertex3f(- 0.5f, 0.5f, 0.5f);
+	glVertex3f(- 0.5f, -0.5f, 0.5f);
+
+	glVertex3f(-0.5f, 0.5f, 0.5f);
+	glVertex3f(-0.5f, 0.5f, -0.5f);
+	glVertex3f(-0.5f, -0.5f, -0.5f);
+	glVertex3f(-0.5f, -0.5f, -0.5f);
+	glVertex3f(-0.5f, -0.5f, 0.5f);
+	glVertex3f(- 0.5f, 0.5f, 0.5f);
+
+	glVertex3f(0.5f, 0.5f, 0.5f);
+	glVertex3f(0.5f, 0.5f, -0.5f);
+	glVertex3f(0.5f, -0.5f, -0.5f);
+	glVertex3f(0.5f, -0.5f, -0.5f);
+	glVertex3f(0.5f, -0.5f, 0.5f);
+	glVertex3f(0.5f, 0.5f, 0.5f);
+
+	glVertex3f(-0.5f, -0.5f, -0.5f);
+	glVertex3f(0.5f, -0.5f, -0.5f);
+	glVertex3f(0.5f, -0.5f, 0.5f);
+	glVertex3f(0.5f, -0.5f, 0.5f);
+	glVertex3f(-0.5f, -0.5f, 0.5f);
+	glVertex3f(- 0.5f, -0.5f, -0.5f);
+
+	glVertex3f(-0.5f, 0.5f, -0.5f);
+	glVertex3f(0.5f, 0.5f, -0.5f);
+	glVertex3f(0.5f, 0.5f, 0.5f);
+	glVertex3f(0.5f, 0.5f, 0.5f);
+	glVertex3f(-0.5f, 0.5f, 0.5f);
+	glVertex3f(- 0.5f, 0.5f, -0.5f);
+
+	//glColor3f(rcolor,gcolor,bcolor);
+
+	glEnd();
 }
 
 void ModuleRenderer3D::ResetCamera()

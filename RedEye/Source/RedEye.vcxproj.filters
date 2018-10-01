@@ -79,6 +79,9 @@
     <ClCompile Include="RE_CompMesh.cpp">
       <Filter>Components</Filter>
     </ClCompile>
+    <ClCompile Include="RE_CompPrimitives.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -299,6 +302,9 @@
     </ClInclude>
     <ClInclude Include="Globals.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompPrimitives.h">
+      <Filter>Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

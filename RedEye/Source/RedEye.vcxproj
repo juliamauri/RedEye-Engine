@@ -41,6 +41,7 @@
     <ClCompile Include="RE_CompMesh.cpp" />
     <ClCompile Include="RE_Math.cpp" />
     <ClCompile Include="RE_Mesh.cpp" />
+    <ClCompile Include="RE_CompPrimitives.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="SystemInfo.cpp" />
     <ClCompile Include="Texture2DManager.cpp" />
@@ -116,6 +117,7 @@
     <ClInclude Include="RE_Math.h" />
     <ClInclude Include="RE_Mesh.h" />
     <ClInclude Include="RE_CompMesh.h" />
+    <ClInclude Include="RE_CompPrimitives.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="SystemInfo.h" />
     <ClInclude Include="Texture2DManager.h" />

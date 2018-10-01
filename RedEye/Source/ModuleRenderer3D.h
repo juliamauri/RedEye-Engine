@@ -1,6 +1,7 @@
 #ifndef __MODULERENDER3D_H__
 #define __MODULERENDER3D_H__
 
+#include "RE_Math.h"
 #include "Module.h"
 
 class ShaderManager;
@@ -33,6 +34,9 @@ public:
 
 	//Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
+
+	//Draws
+	void DirectDrawCube(math::vec position, math::vec color);
 
 	//Renderer Test Window
 	void ResetCamera();

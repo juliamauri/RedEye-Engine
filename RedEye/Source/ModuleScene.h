@@ -30,6 +30,7 @@ public:
 private:
 	//shaders
 	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube, lightingShader, lampShader, lightingmapShader, modelloading;
+	unsigned int ShaderPrimitive;
 
 	//Textures
 	unsigned int puppie1, puppie2, container, awesomeface, container2, container2_specular;
@@ -37,7 +38,8 @@ private:
 	//Meshes
 	RE_Mesh* triangle = nullptr;
 	RE_Mesh* square = nullptr;
-	RE_Mesh* cube = nullptr;
+	RE_Mesh* cube_array = nullptr;
+	RE_Mesh* cube_index = nullptr;
 	RE_CompMesh* mesh_droped = nullptr;
 
 	//GameObject root;
