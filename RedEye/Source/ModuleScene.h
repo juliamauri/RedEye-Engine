@@ -43,8 +43,6 @@ private:
 	RE_Mesh* cube_index = nullptr;
 	RE_CompMesh* mesh_droped = nullptr;
 
-	RE_CompTriangle* triangle_comp = nullptr;
-
 	//GameObject root;
 };
 

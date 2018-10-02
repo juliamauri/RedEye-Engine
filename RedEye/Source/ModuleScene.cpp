@@ -239,8 +239,6 @@ bool ModuleScene::Start()
 	ShaderManager::setFloat4x4(ShaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
-	triangle_comp = new RE_CompTriangle();
-
 	return ret;
 }
 
@@ -297,7 +295,6 @@ void ModuleScene::RecieveEvent(const Event * e)
 void ModuleScene::DrawScene()
 {
 	//triangle->Draw(ShaderPrimitive);
-	//triangle_comp->Draw(ShaderPrimitive);
 
 	ShaderManager::use(0);
 	App->renderer3d->DirectDrawCube(math::vec(-3.0f,0.0f,0.0f), math::vec(1.0f,0.0f,0.0f));
