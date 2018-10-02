@@ -1,8 +1,7 @@
 #ifndef __RE_COMPPRIMITIVE_H__
 #define __RE_COMPPRIMITIVE_H__
 
-#include "RE_CompMesh.h"
-#include "MathGeoLib\include\MathGeoLib.h"
+#include "RE_Math.h"
 
 enum PrimitiveType : short unsigned int
 {
@@ -22,10 +21,10 @@ enum PrimitiveType : short unsigned int
 	FRUSTUM
 };
 
-class RE_CompPrimitives : public RE_CompMesh
+class RE_CompPrimitive
 {
 public:
-	RE_CompPrimitives(PrimitiveType t = POINT);
+	RE_CompPrimitive(PrimitiveType t = POINT);
 
 	PrimitiveType GetType() const;
 
@@ -39,7 +38,7 @@ protected:
 	
 };
 
-typedef RE_CompPrimitives RE_CompPoint;
+typedef RE_CompPrimitive RE_CompPoint;
 
 /**************************************************
 ******	Line

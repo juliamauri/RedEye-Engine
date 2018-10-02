@@ -1,10 +1,10 @@
-#include "RE_CompPrimitives.h"
+#include "RE_CompPrimitive.h"
 
 #include "RE_Mesh.h"
 
 #define SMALL_INFINITY 2000
 
-RE_CompPrimitives::RE_CompPrimitives(PrimitiveType t) :
+RE_CompPrimitive::RE_CompPrimitive(PrimitiveType t) :
 	transform(math::float4x4::identity), type(t)
 {
 	if (type == 0)
@@ -18,16 +18,16 @@ RE_CompPrimitives::RE_CompPrimitives(PrimitiveType t) :
 
 		vertices.push_back(vex);
 
-		meshes.push_back(RE_Mesh(vertices, indices, textures));
+		//meshes.push_back(RE_Mesh(vertices, indices, textures));
 	}
 }
 
-PrimitiveType RE_CompPrimitives::GetType() const
+PrimitiveType RE_CompPrimitive::GetType() const
 {
 	return type;
 }
 
-RE_CompLine::RE_CompLine(math::vec o, math::vec d) : RE_CompPrimitives(LINE), origin(o), dest(d)
+RE_CompLine::RE_CompLine(math::vec o, math::vec d) : RE_CompPrimitive(LINE), origin(o), dest(d)
 {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
@@ -40,10 +40,10 @@ RE_CompLine::RE_CompLine(math::vec o, math::vec d) : RE_CompPrimitives(LINE), or
 	vex.Position = dest;
 	vertices.push_back(vex);
 
-	meshes.push_back(RE_Mesh(vertices, indices, textures));
+	//meshes.push_back(RE_Mesh(vertices, indices, textures));
 }
 
-RE_CompRay::RE_CompRay(math::vec o, math::vec d) : RE_CompPrimitives(RAY), origin(o), dir(d)
+RE_CompRay::RE_CompRay(math::vec o, math::vec d) : RE_CompPrimitive(RAY), origin(o), dir(d)
 {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
@@ -56,10 +56,10 @@ RE_CompRay::RE_CompRay(math::vec o, math::vec d) : RE_CompPrimitives(RAY), origi
 	vex.Position = dir * SMALL_INFINITY;
 	vertices.push_back(vex);
 
-	meshes.push_back(RE_Mesh(vertices, indices, textures));
+	//meshes.push_back(RE_Mesh(vertices, indices, textures));
 }
 
-RE_CompTriangle::RE_CompTriangle() : RE_CompPrimitives(TRIANGLE)
+RE_CompTriangle::RE_CompTriangle() : RE_CompPrimitive(TRIANGLE)
 {
 	Vertex vert;
 	std::vector<Vertex> vertices;
@@ -79,5 +79,5 @@ RE_CompTriangle::RE_CompTriangle() : RE_CompPrimitives(TRIANGLE)
 		vertices.push_back(vert);
 	}
 
-	meshes.push_back(RE_Mesh(vertices, index, textures));
+	//meshes.push_back(RE_Mesh(vertices, index, textures));
 }

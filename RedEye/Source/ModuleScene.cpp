@@ -8,7 +8,7 @@
 #include "ShaderManager.h"
 #include "RE_CompMesh.h"
 #include "RE_Camera.h"
-#include "RE_CompPrimitives.h"
+#include "RE_CompPrimitive.h"
 #include <string>
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
@@ -22,55 +22,13 @@ bool ModuleScene::Start()
 	bool ret = true;
 
 	//Loading Shaders
-	/*
-	ret = App->shaders->Load("sinuscolor", &sinusColor);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
 
-	ret = App->shaders->Load("vertexcolor", &vertexColor);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
-
-	ret = App->shaders->Load("textureSquare", &textureSquare);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
-
-	ret = App->shaders->Load("twotextures", &twotextures);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
-	
-	ret = App->shaders->Load("cube", &shader_cube);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
-
-	ret = App->shaders->Load("light", &lightingShader);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
-
-	ret = App->shaders->Load("lamp", &lampShader);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
-
-	ret = App->shaders->Load("lightmaps", &lightingmapShader);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
-
-	ret = App->shaders->Load("modelloading", &modelloading);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
-	*/
 	ret = App->shaders->Load("primitive", &ShaderPrimitive);
 	if (!ret)
 		LOG("%s\n", App->shaders->GetShaderError());
 
 	//Loading textures
-	//puppie1 = App->textures->LoadTexture2D("puppie1", ImageExtensionType::JPG);
-	//puppie2 = App->textures->LoadTexture2D("puppie2", ImageExtensionType::JPG);
-	//container = App->textures->LoadTexture2D("container", ImageExtensionType::JPG);
-	//awesomeface = App->textures->LoadTexture2D("awesomeface", ImageExtensionType::PNG);
-	//container2 = App->textures->LoadTexture2D("container2", ImageExtensionType::PNG);
-	//container2_specular = App->textures->LoadTexture2D("container2_specular", ImageExtensionType::PNG);
-		
+
 	//Loading meshes
 
 	Vertex vert;
@@ -361,6 +319,48 @@ void ModuleScene::DrawScene()
 //INIT
 /*
 
+	ret = App->shaders->Load("sinuscolor", &sinusColor);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
+
+	ret = App->shaders->Load("vertexcolor", &vertexColor);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
+
+	ret = App->shaders->Load("textureSquare", &textureSquare);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
+
+	ret = App->shaders->Load("twotextures", &twotextures);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
+
+	ret = App->shaders->Load("cube", &shader_cube);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
+
+	ret = App->shaders->Load("light", &lightingShader);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
+
+	ret = App->shaders->Load("lamp", &lampShader);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
+
+	ret = App->shaders->Load("lightmaps", &lightingmapShader);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
+
+	ret = App->shaders->Load("modelloading", &modelloading);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
+
+	//puppie1 = App->textures->LoadTexture2D("puppie1", ImageExtensionType::JPG);
+	//puppie2 = App->textures->LoadTexture2D("puppie2", ImageExtensionType::JPG);
+	//container = App->textures->LoadTexture2D("container", ImageExtensionType::JPG);
+	//awesomeface = App->textures->LoadTexture2D("awesomeface", ImageExtensionType::PNG);
+	//container2 = App->textures->LoadTexture2D("container2", ImageExtensionType::PNG);
+	//container2_specular = App->textures->LoadTexture2D("container2_specular", ImageExtensionType::PNG);
 
 //Lighting
 	float verticesCubeWNormal[] = {

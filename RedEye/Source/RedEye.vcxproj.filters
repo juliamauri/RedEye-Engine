@@ -64,23 +64,35 @@
     <ClCompile Include="RE_Math.cpp">
       <Filter>Modules\Independent App Modules\Math</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Camera.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleScene.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
     <ClCompile Include="OutputLog.cpp">
       <Filter>Utility\Log</Filter>
     </ClCompile>
+    <ClCompile Include="RE_GameObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_PrimitiveManager.cpp">
+      <Filter>Modules\Independent App Modules\Primitive</Filter>
+    </ClCompile>
     <ClCompile Include="RE_Mesh.cpp">
-      <Filter>Components</Filter>
+      <Filter>GameObject\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CompTransform.cpp">
+      <Filter>GameObject\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Camera.cpp">
+      <Filter>GameObject\Components</Filter>
     </ClCompile>
     <ClCompile Include="RE_CompMesh.cpp">
-      <Filter>Components</Filter>
+      <Filter>GameObject\Components</Filter>
     </ClCompile>
-    <ClCompile Include="RE_CompPrimitives.cpp">
-      <Filter>Components</Filter>
+    <ClCompile Include="RE_Component.cpp">
+      <Filter>GameObject\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CompPrimitive.cpp">
+      <Filter>GameObject\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -285,26 +297,38 @@
     <ClInclude Include="RE_Math.h">
       <Filter>Modules\Independent App Modules\Math</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Camera.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleScene.h">
       <Filter>Modules</Filter>
     </ClInclude>
     <ClInclude Include="OutputLog.h">
       <Filter>Utility\Log</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Mesh.h">
-      <Filter>Components</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_CompMesh.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="Globals.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="RE_CompPrimitives.h">
-      <Filter>Components</Filter>
+    <ClInclude Include="RE_GameObject.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_PrimitiveManager.h">
+      <Filter>Modules\Independent App Modules\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompTransform.h">
+      <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Mesh.h">
+      <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompPrimitive.h">
+      <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Camera.h">
+      <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompMesh.h">
+      <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Component.h">
+      <Filter>GameObject\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -374,14 +398,20 @@
     <Filter Include="Modules\Independent App Modules\Math">
       <UniqueIdentifier>{25cac595-e5b7-48c5-96a6-cc2ec0fbb40c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Components">
-      <UniqueIdentifier>{e7540df0-e081-4ea9-a12e-d166f45541ad}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Utility">
       <UniqueIdentifier>{79e2c679-5e2b-47e5-95a0-240e5abe6473}</UniqueIdentifier>
     </Filter>
     <Filter Include="Utility\Log">
       <UniqueIdentifier>{f1f18652-ef76-444e-ab39-3f51efc4c14e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Independent App Modules\Primitive">
+      <UniqueIdentifier>{95f5fc35-7da0-472b-9b6e-42fdbcf708e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject">
+      <UniqueIdentifier>{e7540df0-e081-4ea9-a12e-d166f45541ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Components">
+      <UniqueIdentifier>{a1265e59-2843-4b5a-abaf-37c926bb38a7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
