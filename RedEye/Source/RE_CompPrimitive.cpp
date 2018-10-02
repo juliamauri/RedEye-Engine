@@ -4,80 +4,75 @@
 
 #define SMALL_INFINITY 2000
 
-RE_CompPrimitive::RE_CompPrimitive(PrimitiveType t) :
-	transform(math::float4x4::identity), type(t)
-{
-	if (type == 0)
-	{
-		std::vector<Vertex> vertices;
-		std::vector<unsigned int> indices;
-		std::vector<Texture> textures;
+RE_CompPrimitive::RE_CompPrimitive(RE_PrimitiveType t, unsigned int VAO) : VAO(VAO), type(t) {}
 
-		Vertex vex;
-		vex.Position = math::vec::zero;
-
-		vertices.push_back(vex);
-
-		//meshes.push_back(RE_Mesh(vertices, indices, textures));
-	}
-}
-
-PrimitiveType RE_CompPrimitive::GetType() const
+RE_PrimitiveType RE_CompPrimitive::GetType() const
 {
 	return type;
 }
 
-RE_CompLine::RE_CompLine(math::vec o, math::vec d) : RE_CompPrimitive(LINE), origin(o), dest(d)
+RE_CompAxis::RE_CompAxis(unsigned int VAO) : RE_CompPrimitive(RE_AXIS, VAO) {}
+
+void RE_CompAxis::Draw()
 {
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
-
-	Vertex vex;
-	vex.Position = origin;
-	vertices.push_back(vex);
-
-	vex.Position = dest;
-	vertices.push_back(vex);
-
-	//meshes.push_back(RE_Mesh(vertices, indices, textures));
 }
 
-RE_CompRay::RE_CompRay(math::vec o, math::vec d) : RE_CompPrimitive(RAY), origin(o), dir(d)
+RE_CompPoint::RE_CompPoint(unsigned int VAO, math::vec point) : point(point), RE_CompPrimitive(RE_POINT, VAO) {}
+
+void RE_CompPoint::Draw()
 {
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
-
-	Vertex vex;
-	vex.Position = origin;
-	vertices.push_back(vex);
-
-	vex.Position = dir * SMALL_INFINITY;
-	vertices.push_back(vex);
-
-	//meshes.push_back(RE_Mesh(vertices, indices, textures));
 }
 
-RE_CompTriangle::RE_CompTriangle() : RE_CompPrimitive(TRIANGLE)
+RE_CompLine::RE_CompLine(unsigned int VAO, math::vec origin, math::vec dest) : origin(origin), dest(dest), RE_CompPrimitive(RE_LINE, VAO) {}
+
+void RE_CompLine::Draw()
 {
-	Vertex vert;
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> index;
-	std::vector<Texture> textures;
+}
 
-	math::vec vPositionTriangle[] = {
-		// positions       
-		{ 0.5f, -0.5f, 0.0f },// bottom right
-		{-0.5f, -0.5f, 0.0f },   // bottom left
-		{ 0.0f,  0.5f, 0.0f }    // top 
-	};
+RE_CompRay::RE_CompRay(unsigned int VAO, math::vec origin, math::vec dir) : RE_CompLine(NULL, origin, dir), RE_CompPrimitive(RE_RAY, VAO) {}
 
-	for (unsigned int i = 0; i < 3; i++)
-	{
-		vert.Position = vPositionTriangle[i];
-		vertices.push_back(vert);
-	}
+void RE_CompRay::Draw()
+{
+}
 
-	//meshes.push_back(RE_Mesh(vertices, index, textures));
+RE_CompTriangle::RE_CompTriangle(unsigned int VAO) : RE_CompPrimitive(RE_TRIANGLE, VAO) {}
+
+void RE_CompTriangle::Draw()
+{
+}
+
+RE_CompPlane::RE_CompPlane(unsigned int VAO) : RE_CompPrimitive(RE_PLANE, VAO) {}
+
+void RE_CompPlane::Draw()
+{
+}
+
+RE_CompCube::RE_CompCube(unsigned int VAO) : RE_CompPrimitive(RE_CUBE, VAO) {}
+
+void RE_CompCube::Draw()
+{
+}
+
+RE_CompFustrum::RE_CompFustrum(unsigned int VAO) : RE_CompPrimitive(RE_FUSTRUM, VAO) {}
+
+void RE_CompFustrum::Draw()
+{
+}
+
+RE_CompSphere::RE_CompSphere(unsigned int VAO) : RE_CompPrimitive(RE_SPHERE, VAO) {}
+
+void RE_CompSphere::Draw()
+{
+}
+
+RE_CompCylinder::RE_CompCylinder(unsigned int VAO) : RE_CompPrimitive(RE_CYLINDER, VAO) {}
+
+void RE_CompCylinder::Draw()
+{
+}
+
+RE_CompCapsule::RE_CompCapsule(unsigned int VAO) : RE_CompPrimitive(RE_CAPSULE, VAO) {}
+
+void RE_CompCapsule::Draw()
+{
 }

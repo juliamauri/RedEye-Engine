@@ -21,6 +21,7 @@ class RE_Math;
 struct OutputLogHolder;
 class Texture2DManager;
 class ShaderManager;
+class RE_PrimitiveManager;
 
 class Application : public EventListener
 {
@@ -62,6 +63,7 @@ public:
 	OutputLogHolder* log = nullptr;
 	Texture2DManager* textures = nullptr;
 	ShaderManager* shaders = nullptr;
+	RE_PrimitiveManager* primitives = nullptr;
 
 private:
 

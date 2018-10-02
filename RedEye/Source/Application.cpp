@@ -12,6 +12,7 @@
 #include "OutputLog.h"
 #include "Texture2DManager.h"
 #include "ShaderManager.h"
+#include "RE_PrimitiveManager.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
 #include "IL/include/il.h"
@@ -27,15 +28,15 @@ Application::Application(int argc, char* argv[])
 	sys_info = new SystemInfo();
 	math = new RE_Math();
 	log = new OutputLogHolder();
+	textures = new Texture2DManager("Images/");
+	shaders = new ShaderManager("Shaders/");
+	primitives = new RE_PrimitiveManager();
 
 	modules.push_back(input = new ModuleInput("Input"));
 	modules.push_back(window = new ModuleWindow("Window"));
 	modules.push_back(scene = new ModuleScene("Scene"));
 	modules.push_back(editor = new ModuleEditor("Editor"));
 	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
-
-	textures = new Texture2DManager("Images/");
-	shaders = new ShaderManager("Shaders/");
 }
 
 Application::~Application()
@@ -47,6 +48,7 @@ Application::~Application()
 	DEL(log);
 	DEL(textures);
 	DEL(shaders);
+	DEL(primitives);
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;

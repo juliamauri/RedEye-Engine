@@ -3,51 +3,75 @@
 
 #include "RE_Math.h"
 
-enum PrimitiveType : short unsigned int
+enum RE_PrimitiveType : short unsigned int
 {
-	POINT = 0x00,
-	USES_THICK_POINTS,
-	LINE = 0x10,
-	RAY,
-	AXIS, //x xyz
-	USES_THICK_LINES,
-	TRIANGLE = 0x20,
-	SQUARE,
-	CUBE,
-	SPHERE,
-	CYLINDER,
-	PLANE,
-	CAPSULE,
-	FRUSTUM
+	RE_AXIS = 0x00, //x xyz
+	RE_POINT,
+	RE_USES_THICK_POINTS,
+	RE_LINE = 0x10,
+	RE_RAY,
+	RE_USES_THICK_LINES,
+	RE_TRIANGLE = 0x20,
+	RE_PLANE,
+	RE_CUBE,
+	RE_FUSTRUM,
+	RE_SPHERE,
+	RE_CYLINDER,
+	RE_CAPSULE
 };
 
 class RE_CompPrimitive
 {
 public:
-	RE_CompPrimitive(PrimitiveType t = POINT);
+	RE_CompPrimitive(RE_PrimitiveType t, unsigned int VAO);
 
-	PrimitiveType GetType() const;
+	RE_PrimitiveType GetType() const;
+	virtual void Draw() {};
 
 protected:
-
-	PrimitiveType type;
-	math::float4x4 transform;
-
-	//glLineWidth(2.0f);
-	//glPointSize(5.0f);
-	
+	RE_PrimitiveType type;
+	unsigned int VAO;
 };
 
-typedef RE_CompPrimitive RE_CompPoint;
+/**************************************************
+******	Axis
+**************************************************/
+
+class RE_CompAxis : public RE_CompPrimitive
+{
+public:
+	RE_CompAxis(unsigned int VAO = 0);
+	void Draw() override;
+
+private:
+	math::float4x4 basis;
+};
+
+/**************************************************
+******	Point
+**************************************************/
+
+class RE_CompPoint : public RE_CompPrimitive, RE_CompAxis
+{
+public:
+	RE_CompPoint(unsigned int VAO, math::vec point = math::vec::zero);
+	void Draw() override;
+
+private:
+	math::vec point;
+};
 
 /**************************************************
 ******	Line
 **************************************************/
 
-class RE_CompLine : public RE_CompPoint
+class RE_CompLine : public RE_CompPrimitive, RE_CompAxis
 {
 public:
-	RE_CompLine(math::vec origin = math::vec::zero, math::vec dest = math::vec(0.0f, 5.0f, 0.0f));
+	RE_CompLine(unsigned int VAO, math::vec origin = math::vec::zero, math::vec dest = math::vec(0.0f, 5.0f, 0.0f));
+	void Draw() override;
+
+private:
 	math::vec origin;
 	math::vec dest;
 };
@@ -56,112 +80,90 @@ public:
 ******	Ray
 **************************************************/
 
-class RE_CompRay : public RE_CompPoint
+class RE_CompRay : public RE_CompPrimitive, RE_CompLine, RE_CompAxis
 {
 public:
-	RE_CompRay(math::vec origin = math::vec::zero, math::vec dir = math::vec(0.0f, 1.0f, 0.0f));
-	math::vec origin;
-	math::vec dir;
+	RE_CompRay(unsigned int VAO = 0, math::vec origin = math::vec::zero, math::vec dir = math::vec(0.0f, 1.0f, 0.0f));
+	void Draw() override;
+
 };
 
 /**************************************************
 ******	Triangle
 **************************************************/
 
-class RE_CompTriangle : public RE_CompPoint
+class RE_CompTriangle : public RE_CompPrimitive, RE_CompAxis
 {
 public:
-	RE_CompTriangle();
-	RE_CompTriangle(math::vec origin, unsigned int );
-};
-
-/**************************************************
-******	Square
-**************************************************/
-
-class RE_CompSquare : public RE_CompPoint
-{
-public:
-	RE_CompSquare();
-	RE_CompSquare(math::vec origin, math::vec end);
-};
-
-/**************************************************
-******	Cube
-**************************************************/
-
-class RE_CompCube : public RE_CompPoint
-{
-public:
-	RE_CompCube();
-	RE_CompCube(math::vec origin, math::vec end);
-};
-
-/**************************************************
-******	Sphere
-**************************************************/
-
-class RE_CompSphere : public RE_CompPoint
-{
-public:
-	RE_CompSphere();
-	RE_CompSphere(math::vec origin, math::vec end);
-};
-
-/**************************************************
-******	Cylinder
-**************************************************/
-
-class RE_CompCylinder : public RE_CompPoint
-{
-public:
-	RE_CompCylinder();
-	RE_CompCylinder(math::vec origin, math::vec end);
-};
-
-/**************************************************
-******	Axis
-**************************************************/
-
-class RE_CompAxis : public RE_CompPoint
-{
-public:
-	RE_CompAxis();
-	RE_CompAxis(math::vec origin, math::vec end);
+	RE_CompTriangle(unsigned int VAO);
+	void Draw() override;
 };
 
 /**************************************************
 ******	Plane
 **************************************************/
 
-class RE_CompPlane : public RE_CompPoint
+class RE_CompPlane : public RE_CompPrimitive, RE_CompAxis
 {
 public:
-	RE_CompPlane();
-	RE_CompPlane(math::vec origin, math::vec end);
+	RE_CompPlane(unsigned int VAO);
+	void Draw() override;
 };
 
 /**************************************************
-******	Capsule
+******	Cube
 **************************************************/
 
-class RE_CompCapsule : public RE_CompPoint
+class RE_CompCube : public RE_CompPrimitive, RE_CompAxis
 {
 public:
-	RE_CompCapsule();
-	RE_CompCapsule(math::vec origin, math::vec end);
+	RE_CompCube(unsigned int VAO);
+	void Draw() override;
 };
 
 /**************************************************
 ******	Fustrum
 **************************************************/
 
-class RE_CompFustrum : public RE_CompPoint
+class RE_CompFustrum : public RE_CompPrimitive, RE_CompAxis
 {
 public:
-	RE_CompFustrum();
-	RE_CompFustrum(math::vec origin, math::vec end);
+	RE_CompFustrum(unsigned int VAO);
+	void Draw() override;
 };
 
+/**************************************************
+******	Sphere
+**************************************************/
+
+class RE_CompSphere : public RE_CompPrimitive, RE_CompAxis
+{
+public:
+	RE_CompSphere(unsigned int VAO);
+	void Draw() override;
+};
+
+/**************************************************
+******	Cylinder
+**************************************************/
+
+class RE_CompCylinder : public RE_CompPrimitive, RE_CompAxis
+{
+public:
+	RE_CompCylinder(unsigned int VAO);
+	void Draw() override;
+};
+
+
+/**************************************************
+******	Capsule
+**************************************************/
+
+class RE_CompCapsule : public RE_CompPrimitive, RE_CompAxis
+{
+public:
+	RE_CompCapsule(unsigned int VAO);
+	void Draw() override;
+};
 
 #endif // !__RE_COMPPRIMITIVE_H__
