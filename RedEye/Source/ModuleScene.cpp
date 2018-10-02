@@ -81,9 +81,9 @@ bool ModuleScene::Start()
 
 	math::vec vPositionTriangle[] = {
 		// positions       
-		math::vec(0.5f, -0.5f, 0.0f),   // bottom right
-		math::vec(-0.5f, -0.5f, 0.0f),   // bottom left
-		math::vec(0.0f,  0.5f, 0.0f)    // top 
+		math::vec(1.0f, -1.0f, 0.0f),   // bottom right
+		math::vec(-1.0f, -1.0f, 0.0f),   // bottom left
+		math::vec(0.0f,  1.0f, 0.0f)    // top 
 	};
 	math::vec vColorsTriangle[] = {
 		math::vec(1.0f, 0.0f, 0.0f),
@@ -113,10 +113,10 @@ bool ModuleScene::Start()
 
 	math::vec vPositionSquare[] = {
 		// positions          
-		 math::vec(0.5f,  0.5f, 0.0f),  // top right
-		 math::vec(0.5f, -0.5f, 0.0f),  // bottom right
-		 math::vec(-0.5f, -0.5f, 0.0f), // bottom left
-		 math::vec(-0.5f,  0.5f, 0.0f)  // top left 
+		 math::vec(1.0f,  1.0f, 0.0f),  // top right
+		 math::vec(1.0f, -1.0f, 0.0f),  // bottom right
+		 math::vec(-1.0f, -1.0f, 0.0f), // bottom left
+		 math::vec(-1.0f,  1.0f, 0.0f)  // top left 
 	};
 
 	math::vec vColorsSquare[] = {
@@ -162,47 +162,47 @@ bool ModuleScene::Start()
 
 	//Cube without index
 	math::vec vPositionCube[] = {
-		math::vec(-0.5f, -0.5f, -0.5f),
-		math::vec(0.5f, -0.5f, -0.5f),
-		math::vec(0.5f,  0.5f, -0.5f),
-		math::vec(0.5f,  0.5f, -0.5f),
-		math::vec(-0.5f,  0.5f, -0.5f),
-		math::vec(-0.5f, -0.5f, -0.5f),
+		math::vec(-1.0f, -1.0f, -1.0f),
+		math::vec(1.0f, -1.0f, -1.0f),
+		math::vec(1.0f,  1.0f, -1.0f),
+		math::vec(1.0f,  1.0f, -1.0f),
+		math::vec(-1.0f,  1.0f, -1.0f),
+		math::vec(-1.0f, -1.0f, -1.0f),
 
-		math::vec(-0.5f, -0.5f,  0.5f),
-		math::vec(0.5f, -0.5f,  0.5f),
-		math::vec(0.5f,  0.5f,  0.5f),
-		math::vec(0.5f,  0.5f,  0.5f),
-		math::vec(-0.5f,  0.5f,  0.5f),
-		math::vec(-0.5f, -0.5f,  0.5f),
+		math::vec(-1.0f, -1.0f,  1.0f),
+		math::vec(1.0f, -1.0f,  1.0f),
+		math::vec(1.0f,  1.0f,  1.0f),
+		math::vec(1.0f,  1.0f,  1.0f),
+		math::vec(-1.0f,  1.0f,  1.0f),
+		math::vec(-1.0f, -1.0f,  1.0f),
 
-		math::vec(-0.5f,  0.5f,  0.5f),
-		math::vec(-0.5f,  0.5f, -0.5f),
-		math::vec(-0.5f, -0.5f, -0.5f),
-		math::vec(-0.5f, -0.5f, -0.5f),
-		math::vec(-0.5f, -0.5f,  0.5f),
-		math::vec(-0.5f,  0.5f,  0.5f),
+		math::vec(-1.0f,  1.0f,  1.0f),
+		math::vec(-1.0f,  1.0f, -1.0f),
+		math::vec(-1.0f, -1.0f, -1.0f),
+		math::vec(-1.0f, -1.0f, -1.0f),
+		math::vec(-1.0f, -1.0f,  1.0f),
+		math::vec(-1.0f,  1.0f,  1.0f),
 
-		math::vec(0.5f,  0.5f,  0.5f),
-		math::vec(0.5f,  0.5f, -0.5f),
-		math::vec(0.5f, -0.5f, -0.5f),
-		math::vec(0.5f, -0.5f, -0.5f),
-		math::vec(0.5f, -0.5f,  0.5f),
-		math::vec(0.5f,  0.5f,  0.5f),
+		math::vec(1.0f,  1.0f,  1.0f),
+		math::vec(1.0f,  1.0f, -1.0f),
+		math::vec(1.0f, -1.0f, -1.0f),
+		math::vec(1.0f, -1.0f, -1.0f),
+		math::vec(1.0f, -1.0f,  1.0f),
+		math::vec(1.0f,  1.0f,  1.0f),
 
-		math::vec(-0.5f, -0.5f, -0.5f),
-		math::vec(0.5f, -0.5f, -0.5f),
-		math::vec(0.5f, -0.5f,  0.5f),
-		math::vec(0.5f, -0.5f,  0.5f),
-		math::vec(-0.5f, -0.5f,  0.5f),
-		math::vec(-0.5f, -0.5f, -0.5f),
+		math::vec(-1.0f, -1.0f, -1.0f),
+		math::vec(1.0f, -1.0f, -1.0f),
+		math::vec(1.0f, -1.0f,  1.0f),
+		math::vec(1.0f, -1.0f,  1.0f),
+		math::vec(-1.0f, -1.0f,  1.0f),
+		math::vec(-1.0f, -1.0f, -1.0f),
 
-		math::vec(-0.5f,  0.5f, -0.5f),
-		math::vec(0.5f,  0.5f, -0.5f),
-		math::vec(0.5f,  0.5f,  0.5f),
-		math::vec(0.5f,  0.5f,  0.5f),
-		math::vec(-0.5f,  0.5f,  0.5f),
-		math::vec(-0.5f,  0.5f, -0.5f)
+		math::vec(-1.0f,  1.0f, -1.0f),
+		math::vec(1.0f,  1.0f, -1.0f),
+		math::vec(1.0f,  1.0f,  1.0f),
+		math::vec(1.0f,  1.0f,  1.0f),
+		math::vec(-1.0f,  1.0f,  1.0f),
+		math::vec(-1.0f,  1.0f, -1.0f)
 	};
 
 	for (unsigned int i = 0; i < 36; i++)
@@ -226,14 +226,14 @@ bool ModuleScene::Start()
 	//Cube with index
 	math::vec vPositionCubeArray[] = {
 		//vertecies        
-		math::vec(0.5f,  0.5f, 0.5f),  //Top Right Back - Vert 0
-		math::vec(0.5f, -0.5f, 0.5f),  //Bottom Right Back - Vert 1
-		math::vec(-0.5f, -0.5f, 0.5f),  //Bottom Left Back - Vert 2
-		math::vec(-0.5f,  0.5f, 0.5f),  //Top Left Back - Vert 3
-		math::vec(0.5f,  0.5f, -0.5f),  //Top Right Front - Vert 4
-		math::vec(0.5f, -0.5f, -0.5f),  //Bottom Right Front - Vert 5
-		math::vec(-0.5f, -0.5f, -0.5f),  //Bottom Left Front - Vert 6
-		math::vec(-0.5f,  0.5f, -0.5f), //Top Left Front - Vert 7
+		math::vec(1.0f,  1.0f, 1.0f),  //Top Right Back - Vert 0
+		math::vec(1.0f, -1.0f, 1.0f),  //Bottom Right Back - Vert 1
+		math::vec(-1.0f, -1.0f, 1.0f),  //Bottom Left Back - Vert 2
+		math::vec(-1.0f,  1.0f, 1.0f),  //Top Left Back - Vert 3
+		math::vec(1.0f,  1.0f, -1.0f),  //Top Right Front - Vert 4
+		math::vec(1.0f, -1.0f, -1.0f),  //Bottom Right Front - Vert 5
+		math::vec(-1.0f, -1.0f, -1.0f),  //Bottom Left Front - Vert 6
+		math::vec(-1.0f,  1.0f, -1.0f), //Top Left Front - Vert 7
 	};
 
 	unsigned int indicesCube[] = {  //Tell OpenGL What triangle uses what Vertecies
@@ -273,7 +273,7 @@ bool ModuleScene::Start()
 	tex.type.clear();
 
 	//Setting Camera
-	//App->renderer3d->camera->SetPos(math::vec(0.0f, 0.0f, -3.0f));
+	App->renderer3d->camera->SetPos(math::vec(0.0f, 0.0f, -10.0f));
 
 	//Setting Shaders
 	ShaderManager::use(ShaderPrimitive);
@@ -341,21 +341,21 @@ void ModuleScene::DrawScene()
 	//triangle->Draw(ShaderPrimitive);
 	//triangle_comp->Draw(ShaderPrimitive);
 
-	//App->renderer3d->DirectDrawCube(math::vec(1.1f, 0.0f, 0.0f), math::vec(1.0f, 1.0f, 1.0f));
-		
-	/*
-	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 0.0f, 0.0f));
+	ShaderManager::use(0);
+	App->renderer3d->DirectDrawCube(math::vec(-3.0f,0.0f,0.0f), math::vec(1.0f,0.0f,0.0f));
+
+	ShaderManager::use(ShaderPrimitive);
+	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 0.0f, 0.0f).Neg());
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
-	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
+	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(0.0f, 1.0f, 0.0f));
 	cube_array->Draw(ShaderPrimitive);
 
-	model = math::float4x4::Translate(math::float3(-1.1f, 0.0f, 0.0f));
+	model = math::float4x4::Translate(math::float3(3.0f, 0.0f, 0.0f).Neg());
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
-	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
+	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(0.0f, 0.0f, 1.0f));
 	cube_index->Draw(ShaderPrimitive);
-	*/
 }
 
 //INIT
@@ -379,12 +379,12 @@ void ModuleScene::DrawScene()
 		-0.5f,  0.5f,  0.5f,    0.0f, 1.0f,
 		-0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
 
-		-0.5f,  0.5f,  0.5f,  ,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  ,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  ,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  ,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  ,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  ,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
 
 		 0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
