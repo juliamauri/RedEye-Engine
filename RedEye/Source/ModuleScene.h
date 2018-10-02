@@ -7,6 +7,7 @@
 class RE_Mesh;
 class RE_CompMesh;
 class RE_CompTriangle;
+class RE_CompCube;
 
 class ModuleScene : public Module
 {
@@ -43,6 +44,7 @@ private:
 	RE_Mesh* cube_index = nullptr;
 	RE_CompMesh* mesh_droped = nullptr;
 
+	RE_CompCube* compcube =  nullptr;
 	//GameObject root;
 };
 

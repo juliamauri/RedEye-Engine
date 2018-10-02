@@ -9,18 +9,26 @@ class RE_PrimitiveManager
 {
 public:
 	RE_PrimitiveManager();
+	~RE_PrimitiveManager();
 
+	 //Create
 	RE_CompPrimitive* CreateAxis();
 	RE_CompPrimitive* CreatePoint();
 	RE_CompPrimitive* CreateLine();
 	RE_CompPrimitive* CreateRay();
 	RE_CompPrimitive* CreateTriangle();
 	RE_CompPrimitive* CreatePlane();
-	RE_CompPrimitive* CreateCube();
+	RE_CompCube* CreateCube();
 	RE_CompPrimitive* CreateFrustum();
 	RE_CompPrimitive* CreateSphere();
 	RE_CompPrimitive* CreateCylinder();
 	RE_CompPrimitive* CreateCapsule();
+
+	//count
+	void Rest(RE_PrimitiveType count);
+
+	//loadshader
+	void LoadShader(const char* name);
 
 private:
 	//Vertex Array Object
@@ -33,13 +41,12 @@ private:
 
 	//Element Buffer Objects
 	unsigned int ebo_plane = 0, ebo_cube = 0, ebo_fustrum = 0, ebo_sphere = 0, ebo_cylinder = 0, ebo_capsule = 0;
+	
+	//Shader for primitives
+	unsigned int shaderPrimitive = 0;
 
 	//Primitives Count
 	std::map<RE_PrimitiveType, unsigned int> primitives_count;
-
-	//count
-	inline void operator+=(RE_PrimitiveType count);
-	inline void operator-=(RE_PrimitiveType count);
 
 	//Delete VAO of primitive when its count is 0
 	void DeleteVAOPrimitive(RE_PrimitiveType primitive);

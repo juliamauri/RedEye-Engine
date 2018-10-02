@@ -8,7 +8,7 @@
 #include "ShaderManager.h"
 #include "RE_CompMesh.h"
 #include "RE_Camera.h"
-#include "RE_CompPrimitive.h"
+#include "RE_PrimitiveManager.h"
 #include <string>
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
@@ -239,6 +239,9 @@ bool ModuleScene::Start()
 	ShaderManager::setFloat4x4(ShaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
+	//Testing primitives
+	compcube = App->primitives->CreateCube();
+
 	return ret;
 }
 
@@ -265,6 +268,8 @@ bool ModuleScene::CleanUp()
 	DEL(cube_index);
 	if (mesh_droped != nullptr)
 		DEL(mesh_droped);
+
+	DEL(compcube);
 	return true;
 }
 
@@ -311,6 +316,9 @@ void ModuleScene::DrawScene()
 	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(0.0f, 0.0f, 1.0f));
 	cube_index->Draw(ShaderPrimitive);
+
+	//primitives
+	compcube->Draw();
 }
 
 //INIT
@@ -451,12 +459,6 @@ void ModuleScene::DrawScene()
 
 	ShaderManager::use(lampShader);
 	ShaderManager::setFloat4x4(lampShader, "model", model_lamp.ptr());
-
-
-
-
-
-
 
 */
 
