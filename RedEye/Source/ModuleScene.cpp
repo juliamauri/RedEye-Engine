@@ -8,6 +8,7 @@
 #include "ShaderManager.h"
 #include "RE_CompMesh.h"
 #include "RE_Camera.h"
+#include "RE_CompPrimitives.h"
 #include <string>
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
@@ -280,6 +281,8 @@ bool ModuleScene::Start()
 	ShaderManager::setFloat4x4(ShaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
+	triangle_comp = new RE_CompTriangle();
+
 	return ret;
 }
 
@@ -334,8 +337,11 @@ void ModuleScene::RecieveEvent(const Event * e)
 }
 
 void ModuleScene::DrawScene()
-{		
-	App->renderer3d->DirectDrawCube(math::vec(1.1f, 0.0f, 0.0f), math::vec(1.0f, 1.0f, 1.0f));
+{
+	triangle->Draw(ShaderPrimitive);
+	//triangle_comp->Draw(ShaderPrimitive);
+
+	//App->renderer3d->DirectDrawCube(math::vec(1.1f, 0.0f, 0.0f), math::vec(1.0f, 1.0f, 1.0f));
 		
 	/*
 	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 0.0f, 0.0f));

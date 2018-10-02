@@ -15,7 +15,8 @@
 
 RE_CompMesh::RE_CompMesh(char * path)
 {
-	loadModel(path);
+	if (path != nullptr)
+		loadModel(path);
 }
 
 RE_CompMesh::RE_CompMesh(char * path, const char * buffer, unsigned int size)

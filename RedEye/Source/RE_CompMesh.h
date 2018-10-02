@@ -14,11 +14,11 @@ class RE_CompMesh
 {
 public:
 	/*  Functions   */
-	RE_CompMesh(char *path);
+	RE_CompMesh(char *path = nullptr);
 	RE_CompMesh(char *path, const char* buffer, unsigned int size);
 
 	void Draw(unsigned int shader);
-private:
+protected:
 	/*  Model Data  */
 	const char* buffer_file = nullptr;
 	unsigned int buffer_size = 0;
