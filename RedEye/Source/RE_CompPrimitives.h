@@ -25,8 +25,7 @@ enum PrimitiveType : short unsigned int
 class RE_CompPrimitives : public RE_CompMesh
 {
 public:
-	RE_CompPrimitives();
-	RE_CompPrimitives(PrimitiveType t);
+	RE_CompPrimitives(PrimitiveType t = POINT);
 
 	PrimitiveType GetType() const;
 

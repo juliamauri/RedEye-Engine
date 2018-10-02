@@ -4,24 +4,23 @@
 
 #define SMALL_INFINITY 2000
 
-RE_CompPrimitives::RE_CompPrimitives() : 
-	transform(math::float4x4::identity), type(POINT)
-{
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
-
-	Vertex vex;
-	vex.Position = math::vec::zero;
-
-	vertices.push_back(vex);
-
-	meshes.push_back(RE_Mesh(vertices, indices, textures));
-}
-
 RE_CompPrimitives::RE_CompPrimitives(PrimitiveType t) :
 	transform(math::float4x4::identity), type(t)
-{}
+{
+	if (type == 0)
+	{
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+		std::vector<Texture> textures;
+
+		Vertex vex;
+		vex.Position = math::vec::zero;
+
+		vertices.push_back(vex);
+
+		meshes.push_back(RE_Mesh(vertices, indices, textures));
+	}
+}
 
 PrimitiveType RE_CompPrimitives::GetType() const
 {
@@ -60,7 +59,7 @@ RE_CompRay::RE_CompRay(math::vec o, math::vec d) : RE_CompPrimitives(RAY), origi
 	meshes.push_back(RE_Mesh(vertices, indices, textures));
 }
 
-RE_CompTriangle::RE_CompTriangle()
+RE_CompTriangle::RE_CompTriangle() : RE_CompPrimitives(TRIANGLE)
 {
 	Vertex vert;
 	std::vector<Vertex> vertices;
@@ -73,18 +72,11 @@ RE_CompTriangle::RE_CompTriangle()
 		{-0.5f, -0.5f, 0.0f },   // bottom left
 		{ 0.0f,  0.5f, 0.0f }    // top 
 	};
-	math::vec vColorsTriangle[] = {
-		math::vec(1.0f, 0.0f, 0.0f),
-		math::vec(0.0f, 1.0f, 0.0f),
-		math::vec(0.0f, 0.0f, 1.0f)
-	};
 
 	for (unsigned int i = 0; i < 3; i++)
 	{
 		vert.Position = vPositionTriangle[i];
-		vert.Normal = vColorsTriangle[i]; //using normal like vertex color
 		vertices.push_back(vert);
-		index.push_back(i);
 	}
 
 	meshes.push_back(RE_Mesh(vertices, index, textures));

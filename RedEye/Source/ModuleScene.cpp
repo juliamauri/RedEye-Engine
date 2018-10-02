@@ -338,7 +338,7 @@ void ModuleScene::RecieveEvent(const Event * e)
 
 void ModuleScene::DrawScene()
 {
-	triangle->Draw(ShaderPrimitive);
+	//triangle->Draw(ShaderPrimitive);
 	//triangle_comp->Draw(ShaderPrimitive);
 
 	//App->renderer3d->DirectDrawCube(math::vec(1.1f, 0.0f, 0.0f), math::vec(1.0f, 1.0f, 1.0f));
