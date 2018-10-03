@@ -76,9 +76,6 @@
     <ClCompile Include="RE_PrimitiveManager.cpp">
       <Filter>Modules\Independent App Modules\Primitive</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Mesh.cpp">
-      <Filter>GameObject\Components</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompTransform.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
@@ -93,6 +90,12 @@
     </ClCompile>
     <ClCompile Include="RE_CompPrimitive.cpp">
       <Filter>GameObject\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshManager.cpp">
+      <Filter>Modules\Independent App Modules\MeshManager</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Mesh.cpp">
+      <Filter>Modules\Independent App Modules\MeshManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -315,9 +318,6 @@
     <ClInclude Include="RE_CompTransform.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Mesh.h">
-      <Filter>GameObject\Components</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompPrimitive.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
@@ -329,6 +329,12 @@
     </ClInclude>
     <ClInclude Include="RE_Component.h">
       <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshManager.h">
+      <Filter>Modules\Independent App Modules\MeshManager</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Mesh.h">
+      <Filter>Modules\Independent App Modules\MeshManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -412,6 +418,9 @@
     </Filter>
     <Filter Include="GameObject\Components">
       <UniqueIdentifier>{a1265e59-2843-4b5a-abaf-37c926bb38a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Independent App Modules\MeshManager">
+      <UniqueIdentifier>{6bc18870-4242-49e6-8c74-5360ef46f5ee}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

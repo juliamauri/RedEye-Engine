@@ -29,6 +29,7 @@
     <ClCompile Include="ImGui\imgui_demo.cpp" />
     <ClCompile Include="ImGui\imgui_draw.cpp" />
     <ClCompile Include="ImGui\imgui_impl_sdl_gl3.cpp" />
+    <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="OutputLog.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mmgr\mmgr.cpp" />
@@ -68,6 +69,7 @@
     <ClInclude Include="ImGui\stb_rect_pack.h" />
     <ClInclude Include="ImGui\stb_textedit.h" />
     <ClInclude Include="ImGui\stb_truetype.h" />
+    <ClInclude Include="MeshManager.h" />
     <ClInclude Include="OutputLog.h" />
     <ClInclude Include="MathGeoLib\include\MathBuildConfig.h" />
     <ClInclude Include="MathGeoLib\include\MathGeoLib.h" />
