@@ -321,20 +321,20 @@ void ModuleScene::DrawScene()
 	//triangle->Draw(ShaderPrimitive);
 
 	ShaderManager::use(0);
-	//App->renderer3d->DirectDrawCube(math::vec(-3.0f,0.0f,0.0f), math::vec(1.0f,0.0f,0.0f));
+	App->renderer3d->DirectDrawCube(math::vec(-3.0f,0.0f,0.0f), math::vec(1.0f,0.0f,0.0f));
 
 	ShaderManager::use(ShaderPrimitive);
 	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 0.0f, 0.0f).Neg());
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(0.0f, 1.0f, 0.0f));
-	//cube_array->Draw(ShaderPrimitive);
+	cube_array->Draw(ShaderPrimitive);
 
 	model = math::float4x4::Translate(math::float3(3.0f, 0.0f, 0.0f).Neg());
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(0.0f, 0.0f, 1.0f));
-	//cube_index->Draw(ShaderPrimitive);
+	cube_index->Draw(ShaderPrimitive);
 
 	//primitives
 	/*compcube->Draw();
@@ -342,7 +342,7 @@ void ModuleScene::DrawScene()
 	compline->Draw();
 	comptriangle->Draw();*/
 
-	root->Draw();
+	//root->Draw();
 }
 
 //INIT
