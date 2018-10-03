@@ -9,24 +9,24 @@
 
 RE_PrimitiveManager::RE_PrimitiveManager()
 {
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_POINT, 0));
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_LINE, 0));
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_RAY, 0));
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_AXIS, 0));
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_TRIANGLE, 0));
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_PLANE, 0));
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_CUBE, 0));
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_FUSTRUM, 0));
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_SPHERE, 0));
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_CYLINDER, 0));
-	primitives_count.insert(std::pair<RE_PrimitiveType, unsigned int>(RE_PrimitiveType::RE_CAPSULE, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_POINT, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_LINE, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_RAY, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_AXIS, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_TRIANGLE, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_PLANE, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CUBE, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_FUSTRUM, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_SPHERE, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CYLINDER, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CAPSULE, 0));
 }
 
 RE_PrimitiveManager::~RE_PrimitiveManager()	{}
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateAxis()
 {
-	if(primitives_count.find(RE_AXIS)->second++ == 0)
+	if(primitives_count.find(C_AXIS)->second++ == 0)
 	{
 
 	}
@@ -34,30 +34,61 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateAxis()
 	return ret;
 }
 
-RE_CompPrimitive* RE_PrimitiveManager::CreatePoint()
+RE_CompPrimitive* RE_PrimitiveManager::CreatePoint(math::vec pos)
 {
-
-	if (primitives_count.find(RE_POINT)->second++ == 0)
+	if (primitives_count.find(C_POINT)->second++ == 0)
 	{
+		glGenVertexArrays(1, &vao_point);
+		glGenBuffers(1, &vbo_point);
 
+		glBindVertexArray(vao_point);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_point);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(pos), &pos, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
-	RE_CompPrimitive* ret = new RE_CompPoint(vao_axis, shaderPrimitive);
+
+	RE_CompPoint* ret = new RE_CompPoint(vao_point, shaderPrimitive, pos);
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateLine()
+RE_CompPrimitive * RE_PrimitiveManager::CreateLine(math::vec origin, math::vec end)
 {
-	if (primitives_count.find(RE_LINE)->second++ == 0)
+	if (primitives_count.find(C_LINE)->second++ == 0)
 	{
+		math::vec vecline[] = {
+			origin,
+			end
+		};
 
+		glGenVertexArrays(1, &vao_line);
+		glGenBuffers(1, &vbo_line);
+
+		glBindVertexArray(vao_line);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_line);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vecline) * sizeof(math::vec), &vecline[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vecline), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
-	RE_CompPrimitive* ret = new RE_CompLine(vao_line, shaderPrimitive);
+	RE_CompLine* ret = new RE_CompLine(vao_line, shaderPrimitive,origin, end);
 	return ret;
 }
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateRay()
 {
-	if (primitives_count.find(RE_RAY)->second++ == 0)
+	if (primitives_count.find(C_RAY)->second++ == 0)
 	{
 
 	}
@@ -67,17 +98,44 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateRay()
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateTriangle()
 {
-	if (primitives_count.find(RE_TRIANGLE)->second++ == 0)
+	if (primitives_count.find(C_TRIANGLE)->second++ == 0)
 	{
+		math::vec vPositionTriangle[] = {
+			// positions       
+			math::vec(1.0f, -1.0f, 0.0f),  // bottom right
+			math::vec(-1.0f, -1.0f, 0.0f),   // bottom left
+			math::vec(0.0f,  1.0f, 0.0f)      // top 
+		};
+
+		unsigned int index[] = { 0,1,2 };
+
+		glGenVertexArrays(1, &vao_triangle);
+		glGenBuffers(1, &vbo_triangle);
+		glGenBuffers(1, &ebo_triangle);
+
+		glBindVertexArray(vao_triangle);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_triangle);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vPositionTriangle) * sizeof(math::vec), &vPositionTriangle[0], GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_triangle);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index), index, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vPositionTriangle), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	}
-	RE_CompPrimitive* ret = new RE_CompTriangle(vao_triangle, shaderPrimitive);
+	RE_CompTriangle* ret = new RE_CompTriangle(vao_triangle, shaderPrimitive);
 	return ret;
 }
 
 RE_CompPrimitive * RE_PrimitiveManager::CreatePlane()
 {
-	if (primitives_count.find(RE_PLANE)->second++ == 0)
+	if (primitives_count.find(C_PLANE)->second++ == 0)
 	{
 
 	}
@@ -85,9 +143,9 @@ RE_CompPrimitive * RE_PrimitiveManager::CreatePlane()
 	return ret;
 }
 
-RE_CompCube * RE_PrimitiveManager::CreateCube()
+RE_CompPrimitive * RE_PrimitiveManager::CreateCube()
 {
-	if (primitives_count.find(RE_CUBE)->second++ == 0)
+	if (primitives_count.find(C_CUBE)->second++ == 0)
 	{
 		//Cube with index
 		float vPositionCubeArray[] = {
@@ -141,9 +199,9 @@ RE_CompCube * RE_PrimitiveManager::CreateCube()
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateFrustum()
+RE_CompPrimitive * RE_PrimitiveManager::CreateFustrum()
 {
-	if (primitives_count.find(RE_FUSTRUM)->second++ == 0)
+	if (primitives_count.find(C_FUSTRUM)->second++ == 0)
 	{
 
 	}
@@ -153,7 +211,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateFrustum()
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateSphere()
 {
-	if (primitives_count.find(RE_SPHERE)->second++ == 0)
+	if (primitives_count.find(C_SPHERE)->second++ == 0)
 	{
 
 	}
@@ -163,7 +221,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateSphere()
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateCylinder()
 {
-	if (primitives_count.find(RE_CYLINDER)->second++ == 0)
+	if (primitives_count.find(C_CYLINDER)->second++ == 0)
 	{
 
 	}
@@ -173,7 +231,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateCylinder()
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateCapsule()
 {
-	if (primitives_count.find(RE_CAPSULE)->second++ == 0)
+	if (primitives_count.find(C_CAPSULE)->second++ == 0)
 	{
 
 	}
@@ -181,7 +239,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateCapsule()
 	return ret;
 }
 
-void RE_PrimitiveManager::Rest(RE_PrimitiveType count)
+void RE_PrimitiveManager::Rest(ComponentType count)
 {
 	primitives_count.find(count)->second--;
 	if (primitives_count.find(count)->second == 0)
@@ -193,66 +251,67 @@ void RE_PrimitiveManager::LoadShader(const char * name)
 		App->shaders->Load(name, &shaderPrimitive);
 }
 
-void RE_PrimitiveManager::DeleteVAOPrimitive(RE_PrimitiveType primitive)
+void RE_PrimitiveManager::DeleteVAOPrimitive(ComponentType primitive)
 {
 	switch (primitive)
 	{
-	case RE_AXIS:
+	case C_AXIS:
 		glDeleteVertexArrays(1, &vao_axis);
 		glDeleteBuffers(1, &vbo_axis);
 		break;
 
-	case RE_POINT:
+	case C_POINT:
 		glDeleteVertexArrays(1, &vao_point);
 		glDeleteBuffers(1, &vbo_point);
 		break;
 
-	case RE_LINE:
+	case C_LINE:
 		glDeleteVertexArrays(1, &vao_line);
 		glDeleteBuffers(1, &vbo_line);
 		break;
 
-	case RE_RAY:
+	case C_RAY:
 		glDeleteVertexArrays(1, &vao_ray);
 		glDeleteBuffers(1, &vbo_ray);
 		break;
 
-	case RE_TRIANGLE:
+	case C_TRIANGLE:
 		glDeleteVertexArrays(1, &vao_triangle);
 		glDeleteBuffers(1, &vbo_triangle);
+		glGenBuffers(1, &ebo_triangle);
 		break;
 
-	case RE_PLANE:
+	case C_PLANE:
 		glDeleteVertexArrays(1, &vao_plane);
 		glDeleteBuffers(1, &vbo_plane);
 		glDeleteBuffers(1, &ebo_plane);				
 		break;
 
-	case RE_CUBE:
+	case C_CUBE:
 		glDeleteVertexArrays(1, &vao_cube);
 		glDeleteBuffers(1, &vbo_cube);
 		glDeleteBuffers(1, &ebo_cube);
 		break;
 
-	case RE_FUSTRUM:
+	case C_FUSTRUM:
 		glDeleteVertexArrays(1, &vao_fustrum);
 		glDeleteBuffers(1, &vbo_fustrum);
 		glDeleteBuffers(1, &ebo_fustrum);
 		break;
 
-	case RE_SPHERE:
+	case C_SPHERE:
 		glDeleteVertexArrays(1, &vao_sphere);
 		glDeleteBuffers(1, &vbo_sphere);
 		glDeleteBuffers(1, &ebo_sphere);
 		break;
 
-	case RE_CYLINDER:
+	case C_CYLINDER:
 		glDeleteVertexArrays(1, &vao_cylinder);
 		glDeleteBuffers(1, &vbo_cylinder);
 		glDeleteBuffers(1, &ebo_cylinder);
 		break;
 
-	case RE_CAPSULE:
+	case C_CAPSULE:
 		glDeleteVertexArrays(1, &vao_capsule);
 		glDeleteBuffers(1, &vbo_capsule);
 		glDeleteBuffers(1, &ebo_capsule);

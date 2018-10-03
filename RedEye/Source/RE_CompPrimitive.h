@@ -2,35 +2,19 @@
 #define __RE_COMPPRIMITIVE_H__
 
 #include "RE_Math.h"
+#include "RE_Component.h"
 
-enum RE_PrimitiveType : short unsigned int
-{
-	RE_AXIS = 0x00, //x xyz
-	RE_POINT,
-	RE_USES_THICK_POINTS,
-	RE_LINE = 0x10,
-	RE_RAY,
-	RE_USES_THICK_LINES,
-	RE_TRIANGLE = 0x20,
-	RE_PLANE,
-	RE_CUBE,
-	RE_FUSTRUM,
-	RE_SPHERE,
-	RE_CYLINDER,
-	RE_CAPSULE
-};
-
-class RE_CompPrimitive
+class RE_CompPrimitive : public RE_Component
 {
 public:
-	RE_CompPrimitive(RE_PrimitiveType t, unsigned int VAO, unsigned int shader = 0);
+	RE_CompPrimitive(ComponentType t, unsigned int VAO, unsigned int shader = 0);
 	virtual ~RE_CompPrimitive();
 	
-	RE_PrimitiveType GetType() const;
+	ComponentType GetType() const;
 	virtual void Draw() = 0;
 
 protected:
-	RE_PrimitiveType type;
+	ComponentType type;
 	unsigned int VAO;
 	unsigned int shader;
 };

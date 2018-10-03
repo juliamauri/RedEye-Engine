@@ -1,5 +1,7 @@
 #include "RE_GameObject.h"
 
+#include "Application.h"
+#include "RE_PrimitiveManager.h"
 #include "RE_Component.h"
 #include "RE_CompTransform.h"
 #include "RE_CompPrimitive.h"
@@ -134,14 +136,59 @@ RE_Component* RE_GameObject::AddComponent(short unsigned int type, char* file_pa
 		ret = (RE_Component*)transform;
 		break;
 	}
+	case C_AXIS:
+	{
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateAxis()));
+		break;
+	}
 	case C_POINT:
 	{
-		components.push_back(ret = (RE_Component*)new RE_CompPoint());
+		components.push_back(ret = (RE_Component*)(App->primitives->CreatePoint(math::vec::zero)));
+		break;
+	}
+	case C_LINE:
+	{
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateLine(math::vec::zero, math::vec::one)));
+		break;
+	}
+	case C_RAY:
+	{
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateRay()));
+		break;
+	}
+	case C_TRIANGLE:
+	{
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateTriangle()));
+		break;
+	}
+	case C_PLANE:
+	{
+		components.push_back(ret = (RE_Component*)(App->primitives->CreatePlane()));
 		break;
 	}
 	case C_CUBE:
 	{
-		//components.push_back(ret = (RE_Component*)new RE_CompCube());
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateCube()));
+		break;
+	}
+	case C_FUSTRUM:
+	{
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateFustrum()));
+		break;
+	}
+	case C_SPHERE:
+	{
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateSphere()));
+		break;
+	}
+	case C_CYLINDER:
+	{
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateCylinder()));
+		break;
+	}
+	case C_CAPSULE:
+	{
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateCapsule()));
 		break;
 	}
 	case C_MESH:

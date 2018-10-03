@@ -241,7 +241,10 @@ bool ModuleScene::Start()
 
 	//Testing primitives
 	compcube = App->primitives->CreateCube();
-
+	comppoint = App->primitives->CreatePoint(math::vec(2.0f,0.0f,0.0f));
+	compline = App->primitives->CreateLine(math::vec(-5.0f,0.0f,0.0f),math::vec(0.0f,2.0f,0.0f));
+	comptriangle = App->primitives->CreateTriangle();
+	
 	return ret;
 }
 
@@ -270,6 +273,10 @@ bool ModuleScene::CleanUp()
 		DEL(mesh_droped);
 
 	DEL(compcube);
+	DEL(comppoint);
+	DEL(compline);
+	DEL(comptriangle);
+
 	return true;
 }
 
@@ -302,23 +309,26 @@ void ModuleScene::DrawScene()
 	//triangle->Draw(ShaderPrimitive);
 
 	ShaderManager::use(0);
-	App->renderer3d->DirectDrawCube(math::vec(-3.0f,0.0f,0.0f), math::vec(1.0f,0.0f,0.0f));
+	//App->renderer3d->DirectDrawCube(math::vec(-3.0f,0.0f,0.0f), math::vec(1.0f,0.0f,0.0f));
 
 	ShaderManager::use(ShaderPrimitive);
 	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 0.0f, 0.0f).Neg());
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(0.0f, 1.0f, 0.0f));
-	cube_array->Draw(ShaderPrimitive);
+	//cube_array->Draw(ShaderPrimitive);
 
 	model = math::float4x4::Translate(math::float3(3.0f, 0.0f, 0.0f).Neg());
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(0.0f, 0.0f, 1.0f));
-	cube_index->Draw(ShaderPrimitive);
+	//cube_index->Draw(ShaderPrimitive);
 
 	//primitives
 	compcube->Draw();
+	comppoint->Draw();
+	compline->Draw();
+	comptriangle->Draw();
 }
 
 //INIT

@@ -7,8 +7,18 @@ enum ComponentType : unsigned short int
 {
 	C_EMPTY,
 	C_TRANSFORM,
+	C_PRIMITIVE,
+	C_AXIS,
 	C_POINT,
+	C_LINE,
+	C_RAY,
+	C_TRIANGLE,
+	C_PLANE,
 	C_CUBE,
+	C_FUSTRUM,
+	C_SPHERE,
+	C_CYLINDER,
+	C_CAPSULE,
 	C_MESH,
 	C_CAMERA
 };
