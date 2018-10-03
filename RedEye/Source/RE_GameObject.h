@@ -16,6 +16,8 @@ public:
 	void Update();
 	void PostUpdate();
 
+	void Draw();
+
 	bool AddChild(RE_GameObject* child);
 	bool RemoveChild(RE_GameObject* child); //Breaks the link with the parent but does not delete the child.
 	void RemoveAllChilds();

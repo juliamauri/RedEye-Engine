@@ -22,6 +22,8 @@ public:
 	math::Quat GetRot()const;
 	math::vec GetScale()const;
 
+	math::float4x4 GetGlobalMatrix()const;
+
 	void DrawProperties();
 
 	void CalcGlobalTransform(bool call_tranf_modified = true);

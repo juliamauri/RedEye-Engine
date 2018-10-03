@@ -33,6 +33,8 @@ public:
 	virtual void Update() {}
 	virtual void PostUpdate() {}
 
+	virtual void Draw() {}
+
 	virtual void DrawProperties() {}
 
 	bool IsActive() const;

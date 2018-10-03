@@ -9,6 +9,8 @@
 #include "RE_CompMesh.h"
 #include "RE_Camera.h"
 #include "RE_PrimitiveManager.h"
+#include "RE_GameObject.h"
+#include "RE_CompTransform.h"
 #include <string>
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
@@ -240,10 +242,13 @@ bool ModuleScene::Start()
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	//Testing primitives
-	compcube = App->primitives->CreateCube();
-	comppoint = App->primitives->CreatePoint(math::vec(2.0f,0.0f,0.0f));
-	compline = App->primitives->CreateLine(math::vec(-5.0f,0.0f,0.0f),math::vec(0.0f,2.0f,0.0f));
-	comptriangle = App->primitives->CreateTriangle();
+	compcube = App->primitives->CreateCube(nullptr);
+	comppoint = App->primitives->CreatePoint(nullptr, math::vec(2.0f,0.0f,0.0f));
+	compline = App->primitives->CreateLine(nullptr, math::vec(-5.0f,0.0f,0.0f),math::vec(0.0f,2.0f,0.0f));
+	comptriangle = App->primitives->CreateTriangle(nullptr);
+
+	root = new RE_GameObject();
+	root->AddComponent(C_POINT);
 	
 	return ret;
 }
@@ -255,6 +260,13 @@ update_status ModuleScene::PreUpdate()
 
 update_status ModuleScene::Update()
 {
+
+	math::vec t = root->transform->GetPosition();
+	t.x += 0.01f;
+	root->transform->SetPos(t);
+
+	root->Update();
+
 	return UPDATE_CONTINUE;
 }
 
@@ -325,10 +337,12 @@ void ModuleScene::DrawScene()
 	//cube_index->Draw(ShaderPrimitive);
 
 	//primitives
-	compcube->Draw();
+	/*compcube->Draw();
 	comppoint->Draw();
 	compline->Draw();
-	comptriangle->Draw();
+	comptriangle->Draw();*/
+
+	root->Draw();
 }
 
 //INIT

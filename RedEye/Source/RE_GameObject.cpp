@@ -39,6 +39,8 @@ void RE_GameObject::Update()
 	std::list<RE_Component*>::iterator it_comp = components.begin();
 	for (; it_comp != components.end(); it_comp++)
 		(*it_comp)->Update();
+
+	transform->Update();
 }
 
 void RE_GameObject::PostUpdate()
@@ -50,6 +52,17 @@ void RE_GameObject::PostUpdate()
 	std::list<RE_Component*>::iterator it_comp = components.begin();
 	for (; it_comp != components.end(); it_comp++)
 		(*it_comp)->PostUpdate();
+}
+
+void RE_GameObject::Draw()
+{
+	std::list<RE_GameObject*>::iterator it_go = sons.begin();
+	for (; it_go != sons.end(); it_go++)
+		(*it_go)->Draw();
+
+	std::list<RE_Component*>::iterator it_comp = components.begin();
+	for (; it_comp != components.end(); it_comp++)
+		(*it_comp)->Draw();
 }
 
 bool RE_GameObject::AddChild(RE_GameObject * child)
@@ -138,57 +151,57 @@ RE_Component* RE_GameObject::AddComponent(short unsigned int type, char* file_pa
 	}
 	case C_AXIS:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateAxis()));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateAxis(this)));
 		break;
 	}
 	case C_POINT:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreatePoint(math::vec::zero)));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreatePoint(this, math::vec::zero)));
 		break;
 	}
 	case C_LINE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateLine(math::vec::zero, math::vec::one)));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateLine(this, math::vec::zero, math::vec::one)));
 		break;
 	}
 	case C_RAY:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateRay()));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateRay(this)));
 		break;
 	}
 	case C_TRIANGLE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateTriangle()));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateTriangle(this)));
 		break;
 	}
 	case C_PLANE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreatePlane()));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreatePlane(this)));
 		break;
 	}
 	case C_CUBE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateCube()));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateCube(this)));
 		break;
 	}
 	case C_FUSTRUM:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateFustrum()));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateFustrum(this)));
 		break;
 	}
 	case C_SPHERE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateSphere()));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateSphere(this)));
 		break;
 	}
 	case C_CYLINDER:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateCylinder()));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateCylinder(this)));
 		break;
 	}
 	case C_CAPSULE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateCapsule()));
+		components.push_back(ret = (RE_Component*)(App->primitives->CreateCapsule(this)));
 		break;
 	}
 	case C_MESH:

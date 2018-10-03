@@ -24,17 +24,17 @@ RE_PrimitiveManager::RE_PrimitiveManager()
 
 RE_PrimitiveManager::~RE_PrimitiveManager()	{}
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateAxis()
+RE_CompPrimitive * RE_PrimitiveManager::CreateAxis(RE_GameObject* go)
 {
 	if(primitives_count.find(C_AXIS)->second++ == 0)
 	{
 
 	}
-	RE_CompPrimitive* ret = new RE_CompAxis(vao_axis);
+	RE_CompPrimitive* ret = new RE_CompAxis(go, vao_axis);
 	return ret;
 }
 
-RE_CompPrimitive* RE_PrimitiveManager::CreatePoint(math::vec pos)
+RE_CompPrimitive* RE_PrimitiveManager::CreatePoint(RE_GameObject* game_obj, math::vec pos)
 {
 	if (primitives_count.find(C_POINT)->second++ == 0)
 	{
@@ -54,11 +54,11 @@ RE_CompPrimitive* RE_PrimitiveManager::CreatePoint(math::vec pos)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	RE_CompPoint* ret = new RE_CompPoint(vao_point, shaderPrimitive, pos);
+	RE_CompPoint* ret = new RE_CompPoint(game_obj, vao_point, shaderPrimitive, pos);
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateLine(math::vec origin, math::vec end)
+RE_CompPrimitive * RE_PrimitiveManager::CreateLine(RE_GameObject* game_obj, math::vec origin, math::vec end)
 {
 	if (primitives_count.find(C_LINE)->second++ == 0)
 	{
@@ -82,21 +82,21 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateLine(math::vec origin, math::vec e
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
-	RE_CompLine* ret = new RE_CompLine(vao_line, shaderPrimitive,origin, end);
+	RE_CompLine* ret = new RE_CompLine(game_obj, vao_line, shaderPrimitive,origin, end);
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateRay()
+RE_CompPrimitive * RE_PrimitiveManager::CreateRay(RE_GameObject* game_obj)
 {
 	if (primitives_count.find(C_RAY)->second++ == 0)
 	{
 
 	}
-	RE_CompPrimitive* ret = new RE_CompRay(vao_ray);
+	RE_CompPrimitive* ret = new RE_CompRay(game_obj, vao_ray);
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateTriangle()
+RE_CompPrimitive * RE_PrimitiveManager::CreateTriangle(RE_GameObject* game_obj)
 {
 	if (primitives_count.find(C_TRIANGLE)->second++ == 0)
 	{
@@ -129,21 +129,21 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateTriangle()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	}
-	RE_CompTriangle* ret = new RE_CompTriangle(vao_triangle, shaderPrimitive);
+	RE_CompTriangle* ret = new RE_CompTriangle(game_obj, vao_triangle, shaderPrimitive);
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreatePlane()
+RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
 {
 	if (primitives_count.find(C_PLANE)->second++ == 0)
 	{
 
 	}
-	RE_CompPrimitive* ret = new RE_CompPlane(vao_plane, shaderPrimitive);
+	RE_CompPrimitive* ret = new RE_CompPlane(game_obj, vao_plane, shaderPrimitive);
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateCube()
+RE_CompPrimitive * RE_PrimitiveManager::CreateCube(RE_GameObject* game_obj)
 {
 	if (primitives_count.find(C_CUBE)->second++ == 0)
 	{
@@ -195,47 +195,47 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateCube()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	RE_CompCube* ret = new RE_CompCube(vao_cube, shaderPrimitive);
+	RE_CompCube* ret = new RE_CompCube(game_obj, vao_cube, shaderPrimitive);
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateFustrum()
+RE_CompPrimitive * RE_PrimitiveManager::CreateFustrum(RE_GameObject* game_obj)
 {
 	if (primitives_count.find(C_FUSTRUM)->second++ == 0)
 	{
 
 	}
-	RE_CompPrimitive* ret = new RE_CompFustrum(vao_fustrum, shaderPrimitive);
+	RE_CompPrimitive* ret = new RE_CompFustrum(game_obj, vao_fustrum, shaderPrimitive);
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateSphere()
+RE_CompPrimitive * RE_PrimitiveManager::CreateSphere(RE_GameObject* game_obj)
 {
 	if (primitives_count.find(C_SPHERE)->second++ == 0)
 	{
 
 	}
-	RE_CompPrimitive* ret = new RE_CompSphere(vao_sphere, shaderPrimitive);
+	RE_CompPrimitive* ret = new RE_CompSphere(game_obj, vao_sphere, shaderPrimitive);
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateCylinder()
+RE_CompPrimitive * RE_PrimitiveManager::CreateCylinder(RE_GameObject* game_obj)
 {
 	if (primitives_count.find(C_CYLINDER)->second++ == 0)
 	{
 
 	}
-	RE_CompPrimitive* ret = new RE_CompCylinder(vao_cylinder, shaderPrimitive);
+	RE_CompPrimitive* ret = new RE_CompCylinder(game_obj, vao_cylinder, shaderPrimitive);
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateCapsule()
+RE_CompPrimitive * RE_PrimitiveManager::CreateCapsule(RE_GameObject* game_obj)
 {
 	if (primitives_count.find(C_CAPSULE)->second++ == 0)
 	{
 
 	}
-	RE_CompPrimitive* ret = new RE_CompCapsule(vao_capsule, shaderPrimitive);
+	RE_CompPrimitive* ret = new RE_CompCapsule(game_obj, vao_capsule, shaderPrimitive);
 	return ret;
 }
 

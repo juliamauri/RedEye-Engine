@@ -5,6 +5,8 @@
 
 #include <map>
 
+class RE_GameObject;
+
 class RE_PrimitiveManager
 {
 public:
@@ -12,17 +14,17 @@ public:
 	~RE_PrimitiveManager();
 
 	 //Create
-	RE_CompPrimitive* CreateAxis();
-	RE_CompPrimitive* CreatePoint(math::vec pos);
-	RE_CompPrimitive* CreateLine(math::vec origin, math::vec end);
-	RE_CompPrimitive* CreateRay();
-	RE_CompPrimitive* CreateTriangle();
-	RE_CompPrimitive* CreatePlane();
-	RE_CompPrimitive* CreateCube();
-	RE_CompPrimitive* CreateFustrum();
-	RE_CompPrimitive* CreateSphere();
-	RE_CompPrimitive* CreateCylinder();
-	RE_CompPrimitive* CreateCapsule();
+	RE_CompPrimitive* CreateAxis(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreatePoint(RE_GameObject* game_obj, math::vec pos);
+	RE_CompPrimitive* CreateLine(RE_GameObject* game_obj, math::vec origin, math::vec end);
+	RE_CompPrimitive* CreateRay(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreateTriangle(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreatePlane(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreateCube(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreateFustrum(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreateSphere(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreateCylinder(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreateCapsule(RE_GameObject* game_obj);
 
 	//count
 	void Rest(ComponentType count);

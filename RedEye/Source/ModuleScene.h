@@ -5,8 +5,9 @@
 #include "Event.h"
 
 class RE_Mesh;
-class RE_CompMesh;
+class RE_GameObject;
 class RE_CompPrimitive;
+class RE_CompMesh;
 
 class ModuleScene : public Module
 {
@@ -47,7 +48,8 @@ private:
 	RE_CompPrimitive* comppoint = nullptr;
 	RE_CompPrimitive* compline = nullptr;
 	RE_CompPrimitive* comptriangle = nullptr;
-	//GameObject root;
+	
+	RE_GameObject* root = nullptr;
 };
 
 

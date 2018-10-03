@@ -15,7 +15,7 @@ void RE_CompTransform::Update()
 {
 	if (transform_modified)
 	{
-		local_transform = local_transform.FromTRS(pos, rot_quat, scale);
+		local_transform = local_transform.FromTRS(pos.Neg(), rot_quat, scale);
 		CalcGlobalTransform();
 		transform_modified = false;
 	}
@@ -66,6 +66,11 @@ math::Quat RE_CompTransform::GetRot() const
 math::vec RE_CompTransform::GetScale() const
 {
 	return scale;
+}
+
+math::float4x4 RE_CompTransform::GetGlobalMatrix() const
+{
+	return global_transform.InverseTransposed();
 }
 
 void RE_CompTransform::DrawProperties()
