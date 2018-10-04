@@ -1,42 +1,13 @@
 #ifndef __MESHMANAGER_H__
 #define __MESHMANAGER_H__
 
-#include "MathGeoLib/include/MathGeoLib.h"
-
-#include <list>
-#include <vector>
 #include <map>
 
-/*struct aiNode;
-struct aiScene;
-struct aiMesh;
-struct aiMaterial;
-enum aiTextureType;
+class RE_MeshContainer;
 
-struct Vertex {
-	// position
-	math::vec Position;
-	// normal
-	math::vec Normal;
-	// texCoords
-	math::float2 TexCoords;
-};
-
-struct Texture {
-	unsigned int id;
-	std::string type;
-	std::string path;
-};
-
-struct RE_Mesh
-{
-	const char* buffer_file = nullptr;
-	unsigned int buffer_size = 0;
-	bool droped = false;
-	std::vector<RE_Mesh> meshes;
-	std::string directory;
-	std::vector<Texture> textures_loaded;
-};
+typedef std::map<unsigned int, std::pair<RE_MeshContainer*, unsigned int>> MeshMap;
+typedef MeshMap::iterator MeshIter;
+typedef MeshMap::const_iterator MeshConstIter;
 
 class MeshManager
 {
@@ -44,27 +15,26 @@ public:
 	MeshManager(const char* folderPath);
 	~MeshManager();
 
-	unsigned int LoadMesh(const char* path, bool droped = false);
+	void Init(const char* def_shader = nullptr);
 
-	RE_Mesh* operator[](unsigned int mesh_id);
+	unsigned int LoadMesh(const char* path, const bool dropped = false);
+	bool UnReference(const unsigned int mesh_id);
+	RE_MeshContainer* operator[](const unsigned int mesh_id) const;
+	unsigned int TotalMeshes() const;
 
-	void MeshReleased(unsigned int mesh_id);
+	unsigned int GetLoadedMesh(const char* path, const bool from_drop = false) const;
 
-
-private:
-
-	void loadModel(std::string path);
-	void processNode(aiNode *node, const aiScene *scene);
-	RE_Mesh processMesh(aiMesh *mesh, const aiScene *scene);
-	std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+	void DrawMesh(const unsigned int reference);
 
 private:
 
-	const char* folderPath;
-	unsigned int ID_count = 0;
+	unsigned int AddMesh(RE_MeshContainer* mesh);
+	
+private:
 
-	std::list<unsigned int> meshIDContainer;
-	std::map<unsigned int, RE_Mesh*> meshes;
-};*/
+	const char* folderPath = nullptr;
+	unsigned int default_shader = 0;
+	MeshMap meshes;
+};
 
 #endif // !__MESHMANAGER_H__

@@ -3,17 +3,15 @@
 
 #include "RE_Math.h"
 
-struct Vertex {
-	// position
+struct Vertex
+{
 	math::vec Position;
-	// normal
 	math::vec Normal;
-	// texCoords
 	math::float2 TexCoords;
 };
 
-
-struct Texture {
+struct Texture
+{
 	unsigned int id;
 	std::string type;
 	std::string path;
@@ -22,28 +20,54 @@ struct Texture {
 class RE_Mesh
 {
 public:
-	/*  Mesh Data  */
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
-	unsigned int VAO;
-
-	/*  Functions  */
-	// constructor
 	RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 	~RE_Mesh();
 
-	// render the mesh
 	void Draw(unsigned int shader_ID);
 
 private:
-	/*  Render data  */
-	unsigned int VBO, EBO;
-	bool useIndex = true;
 
-	/*  Functions    */
-	// initializes all the buffer objects/arrays
 	void setupMesh();
+
+private:
+
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+	std::vector<Texture> textures;
+	unsigned int VAO, VBO, EBO;
+	bool useIndex = true;
+};
+
+struct aiNode;
+struct aiScene;
+struct aiMesh;
+struct aiMaterial;
+enum aiTextureType;
+
+class RE_MeshContainer
+{
+public:
+
+	RE_MeshContainer(const char* file = nullptr, const char* directory = nullptr, bool dropped = false);
+	~RE_MeshContainer();
+
+	void Draw(unsigned int shader);
+
+	void	ProcessNode(aiNode* node, const aiScene* scene);
+	RE_Mesh	ProcessMesh(aiMesh* mesh, const aiScene* scene);
+
+	std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+
+	const char* GetFileName() const;
+
+private:
+
+	std::string file_name;
+	std::string directory;
+	bool dropped = false;
+
+	std::vector<RE_Mesh> meshes;
+	std::vector<Texture> textures_loaded;
 };
 
 #endif // !__RE_MESH_H__

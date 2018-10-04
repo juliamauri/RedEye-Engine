@@ -29,6 +29,9 @@ public:
 	RE_Component(ComponentType type = C_EMPTY, RE_GameObject* go = nullptr, bool start_active = true);
 	virtual ~RE_Component() {}
 
+	virtual void Init() {}
+	virtual void CleanUp() {}
+
 	virtual void PreUpdate() {}
 	virtual void Update() {}
 	virtual void PostUpdate() {}

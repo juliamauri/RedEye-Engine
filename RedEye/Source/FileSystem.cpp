@@ -138,6 +138,7 @@ const char * FileSystem::GetWritePath() const
 	return write_path.c_str();
 }
 
+// Quick Buffer From Platform-Dependent Path
 RE_FileIO* FileSystem::QuickBufferFromPDPath(const char * full_path)// , char** buffer, unsigned int size)
 {
 	RE_FileIO* ret = nullptr;
@@ -154,6 +155,10 @@ RE_FileIO* FileSystem::QuickBufferFromPDPath(const char * full_path)// , char** 
 		{
 			if (!ret->Load()) DEL(ret);
 			App->fs->RemovePath(file_path.c_str());
+		}
+		else
+		{
+			DEL(ret);
 		}
 	}
 
@@ -184,10 +189,7 @@ RE_FileIO::RE_FileIO(const char* file_name) : buffer(nullptr), file_name(file_na
 
 RE_FileIO::~RE_FileIO()
 {
-	if (buffer)//delete buffer;
-	{
-		delete[] buffer;
-	}
+	DEL_A(buffer);
 }
 
 bool RE_FileIO::Load()

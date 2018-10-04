@@ -31,9 +31,10 @@ public:
 	void SetActive(bool value);
 	void SetActiveAll(bool value);
 
-	RE_Component* AddComponent(short unsigned int type, char* file_path_data = nullptr);
+	RE_Component* AddComponent(short unsigned int type, char* file_path_data = nullptr, bool dropped = false);
 	bool RemoveComponent(RE_Component* component);
 	void RemoveAllComponents();
+	RE_Component* GetComponent(short unsigned int type);
 
 	void TransformModified();
 
