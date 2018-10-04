@@ -133,9 +133,12 @@ public:
 class RE_CompSphere : public RE_CompPrimitive, RE_CompAxis
 {
 public:
-	RE_CompSphere(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
+	RE_CompSphere(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, unsigned int numstodraw);
 	~RE_CompSphere();
 	void Draw() override;
+
+private:
+	unsigned int numstodraw;
 };
 
 /**************************************************

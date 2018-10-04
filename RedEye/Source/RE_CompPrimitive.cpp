@@ -75,9 +75,7 @@ RE_CompLine::~RE_CompLine()
 void RE_CompLine::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
-	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 0.0f, 0.0f).Neg());
-	model.InverseTranspose();
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", model.ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->transform->GetGlobalMatrix().ptr());
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView().ptr());
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection().ptr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
@@ -112,10 +110,7 @@ RE_CompTriangle::~RE_CompTriangle()
 void RE_CompTriangle::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
-	math::float4x4 model = math::float4x4::identity;//math::float4x4::Translate(math::float3(2.0f, 0.0f, 0.0f).Neg());
-	//model.InverseTranspose();
-
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::go->transform->GetGlobalMatrix().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->transform->GetGlobalMatrix().ptr());
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView().ptr());
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection().ptr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
@@ -170,7 +165,7 @@ void RE_CompFustrum::Draw()
 
 }
 
-RE_CompSphere::RE_CompSphere(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_SPHERE, game_obj, VAO, shader) {}
+RE_CompSphere::RE_CompSphere(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, unsigned int numstodraw) : numstodraw(numstodraw), RE_CompPrimitive(C_SPHERE, game_obj, VAO, shader) {}
 
 RE_CompSphere::~RE_CompSphere()
 {
@@ -179,6 +174,17 @@ RE_CompSphere::~RE_CompSphere()
 
 void RE_CompSphere::Draw()
 {
+	ShaderManager::use(RE_CompPrimitive::shader);
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->transform->GetGlobalMatrix().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection().ptr());
+	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
+
+	glBindVertexArray(RE_CompPrimitive::VAO);
+	glEnable(GL_PRIMITIVE_RESTART);
+	glPrimitiveRestartIndex(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+	glDrawElements(GL_QUAD_STRIP, numstodraw, GL_UNSIGNED_INT, NULL);
+	glBindVertexArray(0);
 }
 
 RE_CompCylinder::RE_CompCylinder(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_CYLINDER, game_obj, VAO, shader) {}

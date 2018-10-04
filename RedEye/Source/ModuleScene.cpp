@@ -244,9 +244,9 @@ bool ModuleScene::Start()
 	App->renderer3d->camera->SetPos(math::vec(0.0f, 0.0f, -10.0f));
 
 	root = new RE_GameObject();
-	root->AddComponent(C_POINT);
-	root->AddComponent(C_CUBE);
-
+	//root->AddComponent(C_POINT);
+	//root->AddComponent(C_CUBE);
+	root->AddComponent(C_SPHERE);
 	
 	return ret;
 }
