@@ -61,6 +61,9 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	//glEnable(GL_CULL_FACE);
 
 	enableVSync(vsync = config_module->PullBool("vsync", false));
+	enableVSync(cullface = config_module->PullBool("cullface", false));
+	enableVSync(depthtest = config_module->PullBool("depthtest", true));
+	enableVSync(lighting = config_module->PullBool("lighting", false));
 
 	camera = new RE_CompCamera();
 ;
@@ -180,7 +183,17 @@ void ModuleRenderer3D::DrawEditor()
 	if(ImGui::CollapsingHeader("Renderer 3D"))
 	{
 		if (ImGui::Checkbox((vsync) ? "Disable vsync" : "Enable vsync", &vsync))
+		if (ImGui::Checkbox((vsync) ? "Disable VSync" : "Enable VSync", &vsync))
 			enableVSync(vsync);
+
+		if (ImGui::Checkbox((cullface) ? "Disable Cull Face" : "Enable Cull Face", &cullface))
+			enableFaceCulling(cullface);
+
+		if (ImGui::Checkbox((depthtest) ? "Disable Depht Test" : "Enable Depht Test", &depthtest))
+			enableDepthTest(depthtest);
+
+		if (ImGui::Checkbox((lighting) ? "Disable Lighting" : "Enable Lighting", &lighting))
+			enableLighting(lighting);
 
 		ImGui::Checkbox((isLine) ? "Disable Wireframe" : "Enable Wireframe", &isLine);
 	}
@@ -194,6 +207,21 @@ void ModuleRenderer3D::RecieveEvent(const Event * e)
 void ModuleRenderer3D::enableVSync(const bool enable)
 {
 	SDL_GL_SetSwapInterval(enable ? 1 : 0);
+}
+
+void ModuleRenderer3D::enableDepthTest(const bool enable)
+{
+	enable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+}
+
+void ModuleRenderer3D::enableFaceCulling(const bool enable)
+{
+	enable ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+}
+
+void ModuleRenderer3D::enableLighting(const bool enable)
+{
+	enable ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
 }
 
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()

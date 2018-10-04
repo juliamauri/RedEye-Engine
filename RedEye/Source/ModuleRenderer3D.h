@@ -31,6 +31,9 @@ public:
 	unsigned int renderedTexture;
 
 	void enableVSync(const bool enable);
+	void enableDepthTest(const bool enable);
+	void enableFaceCulling(const bool enable);
+	void enableLighting(const bool enable);
 
 	//Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
@@ -47,6 +50,9 @@ public:
 
 private:
 	bool vsync = false;
+	bool cullface = false;
+	bool depthtest = true;
+	bool lighting = false;
 	bool isLine = false;
 
 
