@@ -132,7 +132,7 @@ void RE_GameObject::SetActiveAll(bool value)
 		(*it_go)->SetActiveAll(active);
 }
 
-RE_Component* RE_GameObject::AddComponent(short unsigned int type, char* file_path_data)
+RE_Component* RE_GameObject::AddComponent(short unsigned int type, char* file_path_data, bool drop)
 {
 	RE_Component* ret = nullptr;
 
@@ -206,7 +206,7 @@ RE_Component* RE_GameObject::AddComponent(short unsigned int type, char* file_pa
 	}
 	case C_MESH:
 	{
-		components.push_back(ret = (RE_Component*)new RE_CompMesh(file_path_data));
+		components.push_back(ret = (RE_Component*)new RE_CompMesh(this, file_path_data, drop));
 		break;
 	}
 	}
@@ -230,6 +230,20 @@ void RE_GameObject::RemoveAllComponents()
 		delete (*components.begin());
 		components.pop_front();
 	}
+}
+
+RE_Component* RE_GameObject::GetComponent(short unsigned int type)
+{
+	RE_Component* ret = nullptr;
+
+	std::list<RE_Component*>::iterator it_comp = components.begin();
+	for (; it_comp != components.end() && !ret; it_comp++)
+	{
+		if ((*it_comp)->GetType() == ComponentType(type))
+			ret = (*it_comp);
+	}
+
+	return ret;
 }
 
 void RE_GameObject::TransformModified()
