@@ -5,7 +5,7 @@
 #include <gl/GL.h>
 #include "Application.h"
 #include "ModuleRenderer3D.h"
-#include "RE_Camera.h"
+#include "RE_CompCamera.h"
 #include "ShaderManager.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_GameObject.h"
@@ -36,7 +36,7 @@ void RE_CompAxis::Draw()
 {
 }
 
-RE_CompPoint::RE_CompPoint(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, math::vec point) : point(point), RE_CompPrimitive(C_POINT, game_obj, VAO, shader) {}
+RE_CompPoint::RE_CompPoint(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, math::vec point) : point(point), RE_CompPrimitive(C_POINT, game_obj, VAO, shader)  {}
 
 RE_CompPoint::~RE_CompPoint()
 {
@@ -45,9 +45,8 @@ RE_CompPoint::~RE_CompPoint()
 
 void RE_CompPoint::Draw()
 {
+	RE_CompPrimitive::RE_Component::go->transform->SetPos(point);
 	ShaderManager::use(RE_CompPrimitive::shader);
-	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 0.0f, 0.0f).Neg());
-	model.InverseTranspose();
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->transform->GetGlobalMatrix().ptr());
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView().ptr());
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection().ptr());

@@ -79,9 +79,6 @@
     <ClCompile Include="RE_CompTransform.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Camera.cpp">
-      <Filter>GameObject\Components</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompMesh.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
@@ -96,6 +93,9 @@
     </ClCompile>
     <ClCompile Include="RE_Mesh.cpp">
       <Filter>Modules\Independent App Modules\MeshManager</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CompCamera.cpp">
+      <Filter>GameObject\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -321,9 +321,6 @@
     <ClInclude Include="RE_CompPrimitive.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Camera.h">
-      <Filter>GameObject\Components</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompMesh.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
@@ -335,6 +332,9 @@
     </ClInclude>
     <ClInclude Include="RE_Mesh.h">
       <Filter>Modules\Independent App Modules\MeshManager</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompCamera.h">
+      <Filter>GameObject\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

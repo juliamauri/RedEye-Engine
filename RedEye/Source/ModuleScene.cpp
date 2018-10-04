@@ -7,7 +7,7 @@
 #include "Texture2DManager.h"
 #include "ShaderManager.h"
 #include "RE_CompMesh.h"
-#include "RE_Camera.h"
+#include "RE_CompCamera.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
@@ -235,12 +235,6 @@ bool ModuleScene::Start()
 	//Setting Camera
 	App->renderer3d->camera->SetPos(math::vec(0.0f, 0.0f, -10.0f));
 
-	//Setting Shaders
-	ShaderManager::use(ShaderPrimitive);
-	ShaderManager::setFloat4x4(ShaderPrimitive, "view", App->renderer3d->camera->GetView().ptr());
-	ShaderManager::setFloat4x4(ShaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
-	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
-
 	//Testing primitives
 	compcube = App->primitives->CreateCube(nullptr);
 	comppoint = App->primitives->CreatePoint(nullptr, math::vec(2.0f,0.0f,0.0f));
@@ -249,20 +243,27 @@ bool ModuleScene::Start()
 
 	root = new RE_GameObject();
 	root->AddComponent(C_POINT);
+	root->AddComponent(C_CUBE);
+
 	
 	return ret;
 }
 
 update_status ModuleScene::PreUpdate()
 {
+	//Setting Shaders
+	ShaderManager::use(ShaderPrimitive);
+	ShaderManager::setFloat4x4(ShaderPrimitive, "view", App->renderer3d->camera->GetView().ptr());
+	ShaderManager::setFloat4x4(ShaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
+	//ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
+
 	return UPDATE_CONTINUE;
 }
 
 update_status ModuleScene::Update()
 {
-
 	math::vec t = root->transform->GetPosition();
-	t.x += 0.01f;
+
 	root->transform->SetPos(t);
 
 	root->Update();
@@ -321,28 +322,30 @@ void ModuleScene::DrawScene()
 	//triangle->Draw(ShaderPrimitive);
 
 	ShaderManager::use(0);
-	App->renderer3d->DirectDrawCube(math::vec(-3.0f,0.0f,0.0f), math::vec(1.0f,0.0f,0.0f));
+	//App->renderer3d->DirectDrawCube(math::vec(-3.0f,0.0f,0.0f), math::vec(1.0f,0.0f,0.0f));
 
 	ShaderManager::use(ShaderPrimitive);
 	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 0.0f, 0.0f).Neg());
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(0.0f, 1.0f, 0.0f));
-	cube_array->Draw(ShaderPrimitive);
+	//cube_array->Draw(ShaderPrimitive);
 
 	model = math::float4x4::Translate(math::float3(3.0f, 0.0f, 0.0f).Neg());
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(0.0f, 0.0f, 1.0f));
-	cube_index->Draw(ShaderPrimitive);
+	//cube_index->Draw(ShaderPrimitive);
 
 	//primitives
-	/*compcube->Draw();
+	/*
+	compcube->Draw();
 	comppoint->Draw();
 	compline->Draw();
-	comptriangle->Draw();*/
+	comptriangle->Draw();
+	*/
 
-	//root->Draw();
+	root->Draw();
 }
 
 //INIT

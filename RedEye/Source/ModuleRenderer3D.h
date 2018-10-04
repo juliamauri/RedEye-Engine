@@ -7,7 +7,7 @@
 class ShaderManager;
 class Texture2DManager;
 class Texture2D;
-class RE_Camera;
+class RE_CompCamera;
 class RE_CompMesh;
 class RE_Mesh;
 
@@ -43,7 +43,7 @@ public:
 
 	void ResetAspectRatio();
 
-	RE_Camera* camera;
+	RE_CompCamera* camera;
 
 private:
 	bool vsync = false;
@@ -53,7 +53,14 @@ private:
 
 	float timeValue = 0, timerotateValue = 0, timeCuberotateValue = 0, timeLight = 0;
 	
-	float lastX, lastY;
+	math::float2 mouse_init = math::float2::zero;
+	math::float2 mouse_dest = math::float2::zero;
+
+	bool firstMouse = true;
+	float lastx = 0.0f;
+	float lasty = 0.0f;
+	float newx = 0.0f;
+	float newy = 0.0f;
 	float yaw = 0.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
 	float pitch = 0.0f;
 };

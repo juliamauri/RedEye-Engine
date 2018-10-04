@@ -11,7 +11,7 @@
 #include "TimeManager.h"
 #include "ModuleInput.h"
 #include "FileSystem.h"
-#include "RE_Camera.h"
+#include "RE_CompCamera.h"
 #include "RE_CompMesh.h"
 #include "ModuleScene.h"
 
@@ -62,7 +62,7 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 
 	enableVSync(vsync = config_module->PullBool("vsync", false));
 
-	camera = new RE_Camera(true);
+	camera = new RE_CompCamera();
 ;
 
 	return ret;
@@ -79,6 +79,65 @@ update_status ModuleRenderer3D::PreUpdate()
 	glLoadIdentity();
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	float cameraSpeed = 2.5f * App->time->GetDeltaTime();
+
+	if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
+		camera->Move(CameraMovement::FORWARD, cameraSpeed);
+	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
+		camera->Move(CameraMovement::BACKWARD, cameraSpeed);
+	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+		camera->Move(CameraMovement::LEFT, cameraSpeed);
+	if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+		camera->Move(CameraMovement::RIGHT, cameraSpeed);
+
+	const MouseData* mouse = App->input->GetMouse();
+	if (mouse->GetButton(1) == KEY_REPEAT)
+	{
+		lastx = newx;
+		lasty = newy;
+
+		// get mouse coordinates from Windows
+		newx = mouse->mouse_x;
+		newy = mouse->mouse_y;
+
+		// these lines limit the camera's range
+		if (newy < 200)
+			newy = 200;
+		if (newy > 450)
+			newy = 450;
+
+		if ((newx - lastx) > 0)             // mouse moved to the right
+			yaw += 3.0f;
+		else if ((newx - lastx) < 0)     // mouse moved to the left
+			yaw -= 3.0f;
+
+		camera->SetEulerAngle(yaw, newy);
+
+		/*
+		if (firstMouse)
+		{
+			lastx = mouse->mouse_x;
+			lasty = mouse->mouse_y;
+			firstMouse = false;
+		}
+
+		float xoffset = mouse->mouse_x - lastx;
+		float yoffset = lasty - mouse->mouse_y;
+		lastx = mouse->mouse_x;
+		lasty = mouse->mouse_y;
+
+		float sensitivity = 0.05;
+		xoffset *= sensitivity;
+		yoffset *= sensitivity;
+
+		yaw += xoffset;
+		pitch += yoffset;
+
+		camera->SetEulerAngle(yoffset, xoffset);*/
+	}
+	
+	camera->Update();
 
 	return ret;
 }
@@ -129,6 +188,7 @@ void ModuleRenderer3D::DrawEditor()
 
 void ModuleRenderer3D::RecieveEvent(const Event * e)
 {
+	
 }
 
 void ModuleRenderer3D::enableVSync(const bool enable)
@@ -200,8 +260,6 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 
 void ModuleRenderer3D::ResetCamera()
 {
-	camera->ResetCameraQuat();
-	camera->SetPos(math::vec(0.0f, 0.0f, -3.0f));
 }
 
 void ModuleRenderer3D::ResetAspectRatio()

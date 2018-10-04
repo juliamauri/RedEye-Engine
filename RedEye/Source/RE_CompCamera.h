@@ -1,7 +1,10 @@
-#ifndef __RE_CAMERA_H__
-#define __RE_CAMERA_H__
+#ifndef __RE_COMPCAMERA_H__
+#define __RE_COMPCAMERA_H__
 
+#include "RE_Component.h"
 #include "RE_Math.h"
+
+class RE_CompTransform;
 
 enum CameraMovement
 {
@@ -11,29 +14,23 @@ enum CameraMovement
 	RIGHT
 };
 
-class RE_Camera
+class RE_CompCamera : public RE_Component
 {
 public:
 	//Camera initialize world origin at (0, 0, 0) and planes distance 0.1f near and 100.0f far
 	//@param camraType -> true = Prespective | false = Orthographic
 	//@param near and @far -> distances of planes from camera position
-	RE_Camera(bool cameraType, float near_plane = 0.1f, float far_plane = 100.0f);
+	RE_CompCamera(RE_GameObject* go = nullptr, bool cameraType = true, float near_plane = 0.1f, float far_plane = 100.0f);
+	
+	void PreUpdate() override;
+	void Update() override;
+	void PostUpdate() override;
 
-	//Set the camera position, must use this
-	//@param pos ->camera position
-	void SetPos(math::vec pos);
+	void Draw() override;
 
-	//Set the camera front vector
-	//@param yaw, pitch euler angles
-	void SetEulerAngle(float pitch, float yaw);
+	void DrawProperties() override;
 
-	//Set the camera front vector
-	//@param front -> camera front
-	void SetFront(math::vec front);
-
-	//Set World origin Position
-	//@param world -> world position
-	void SetWorldOrigin(math::vec world);
+	void OnTransformModified() override;
 
 	//Set the position planes by distance
 	//@param near and @far -> distances of planes from camera position
@@ -45,17 +42,15 @@ public:
 	//prespective to orthograohic or inverse
 	void ChangeCameraType();
 
+	void SetPos(math::vec position);
+
 	//Get camera view matrix
 	math::float4x4 GetView();
 
 	//Get camera projection matrix
 	math::float4x4 GetProjection();
 
-	//Get camera pos vector
-	math::vec GetPos(bool opengl = false);
-
-	//Get camera front vector
-	math::vec GetFront();
+	void SetEulerAngle(float pitch, float yaw);
 
 	//LookAt, return the view matrix (view * transformation matrix)
 	//@param cameraTarget -> The object that the camera looks
@@ -65,23 +60,21 @@ public:
 
 	//Move camera
 	void Move(CameraMovement dir, float speed);
-	
-	void ResetCameraQuat();
 
 private:
+	//transform
+	RE_CompTransform* transform = nullptr;
+
 	//Camera frustum
 	math::Frustum camera;
 
-	math::Quat cameraQuat = math::Quat::identity;
-
 	math::float4x4 view;
-
-	math::vec Up;
-	math::vec Front;
-	math::vec Right;
 
 	//true = Prespective | false = Orthographic
 	bool cameraType;
+
+	float yaw = 0.0f;
+	float pitch = 0.0f;
 };
 
-#endif // !__RE_CAMERA_H__
+#endif // !__RE_CCOMPAMERA_H__

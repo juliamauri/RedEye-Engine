@@ -1,6 +1,7 @@
 #include "RE_CompTransform.h"
 
 #include "RE_GameObject.h"
+#include "RE_CompCamera.h"
 
 RE_CompTransform::RE_CompTransform(RE_GameObject* go, math::vec pos) :
 	RE_Component(C_TRANSFORM, go)
@@ -15,7 +16,7 @@ void RE_CompTransform::Update()
 {
 	if (transform_modified)
 	{
-		local_transform = local_transform.FromTRS(pos.Neg(), rot_quat, scale);
+		local_transform = math::float4x4::FromTRS(pos.Neg(), rot_quat, scale);
 		CalcGlobalTransform();
 		transform_modified = false;
 	}
@@ -32,7 +33,7 @@ void RE_CompTransform::SetRot(const math::vec euler)
 	transform_modified = true;
 	rot_eul = euler;
 	math::vec rot_deg = math::DegToRad(rot_eul);
-	rot_quat = rot_quat.FromEulerXYZ(rot_deg.x, rot_deg.y, rot_deg.z);
+	rot_quat = math::Quat::FromEulerXYZ(rot_deg.x, rot_deg.y, rot_deg.z);
 }
 
 void RE_CompTransform::SetRot(const math::Quat quat)
@@ -53,6 +54,21 @@ math::vec RE_CompTransform::GetPosition() const
 	return pos;
 }
 
+math::vec RE_CompTransform::GetRight() const
+{
+	return right;
+}
+
+math::vec RE_CompTransform::GetUp() const
+{
+	return up;
+}
+
+math::vec RE_CompTransform::GetForward() const
+{
+	return forward;
+}
+
 math::vec RE_CompTransform::GetRotXYZ() const
 {
 	return rot_eul;
@@ -71,6 +87,11 @@ math::vec RE_CompTransform::GetScale() const
 math::float4x4 RE_CompTransform::GetGlobalMatrix() const
 {
 	return global_transform.InverseTransposed();
+}
+
+void RE_CompTransform::LookAt(math::vec cameraTarget)
+{
+
 }
 
 void RE_CompTransform::DrawProperties()
@@ -102,6 +123,25 @@ void RE_CompTransform::CalcGlobalTransform(bool call_tranf_modified)
 			global_transform = local_transform;
 		}
 
+		right = global_transform.Col3(0).Normalized();
+		up = global_transform.Col3(1).Normalized();
+		forward = global_transform.Col3(2).Normalized();
+
 		if (call_tranf_modified) go->TransformModified();
 	}
+	else if(update_camera != nullptr)
+	{
+		global_transform = local_transform;
+
+		right = global_transform.Col3(0).Normalized();
+		up = global_transform.Col3(1).Normalized();
+		forward = global_transform.Col3(2).Normalized();
+
+		update_camera->OnTransformModified();
+	}
+}
+
+void RE_CompTransform::setCamera(RE_CompCamera * cam)
+{
+	update_camera = cam;
 }
