@@ -13,6 +13,7 @@
 #include "Texture2DManager.h"
 #include "ShaderManager.h"
 #include "RE_PrimitiveManager.h"
+#include "MeshManager.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
 #include "IL/include/il.h"
@@ -38,6 +39,7 @@ Application::Application(int argc, char* argv[])
 	textures = new Texture2DManager("Images/");
 	shaders = new ShaderManager("Shaders/");
 	primitives = new RE_PrimitiveManager();
+	meshes = new MeshManager("Meshes/");
 }
 
 Application::~Application()
@@ -50,6 +52,7 @@ Application::~Application()
 	DEL(textures);
 	DEL(shaders);
 	DEL(primitives);
+	DEL(meshes);
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;
@@ -94,6 +97,7 @@ bool Application::Init()
 			sys_info->WhatAreWeRunningOn();
 			math->Init();
 			primitives->LoadShader("primitive");
+			meshes->Init("modelloading");
 
 			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 				if ((*it)->IsActive() == true)
