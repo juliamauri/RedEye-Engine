@@ -94,6 +94,20 @@ update_status ModuleRenderer3D::PreUpdate()
 	if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 		camera->Move(CameraMovement::RIGHT, cameraSpeed);
 
+	float p = 0, y = 0;
+
+	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
+		p = 1.0f;
+	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
+		p = -1.0f;
+	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
+		y = -1.0f;
+	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
+		y = 1.0F;
+
+	camera->SetEulerAngle(p,y);
+
+	/*
 	const MouseData* mouse = App->input->GetMouse();
 	if (mouse->GetButton(1) == KEY_REPEAT)
 	{
@@ -117,7 +131,7 @@ update_status ModuleRenderer3D::PreUpdate()
 
 		camera->SetEulerAngle(yaw, newy);
 
-		/*
+		
 		if (firstMouse)
 		{
 			lastx = mouse->mouse_x;
@@ -137,9 +151,9 @@ update_status ModuleRenderer3D::PreUpdate()
 		yaw += xoffset;
 		pitch += yoffset;
 
-		camera->SetEulerAngle(yoffset, xoffset);*/
+		camera->SetEulerAngle(yoffset, xoffset);
 	}
-	
+	*/
 	camera->Update();
 
 	return ret;
@@ -182,7 +196,6 @@ void ModuleRenderer3D::DrawEditor()
 {
 	if(ImGui::CollapsingHeader("Renderer 3D"))
 	{
-		if (ImGui::Checkbox((vsync) ? "Disable vsync" : "Enable vsync", &vsync))
 		if (ImGui::Checkbox((vsync) ? "Disable VSync" : "Enable VSync", &vsync))
 			enableVSync(vsync);
 

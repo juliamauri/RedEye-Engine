@@ -52,8 +52,13 @@ void RE_CompCamera::DrawProperties()
 
 void RE_CompCamera::SetEulerAngle(float p, float y)
 {
+	yaw += y;
+	pitch += p;
 
-	transform->SetRot(math::vec(20.0f,0.0f,0.0f));
+	transform->SetRot(math::vec(pitch,yaw,0.0f));
+
+
+
 }
 
 void RE_CompCamera::OnTransformModified()

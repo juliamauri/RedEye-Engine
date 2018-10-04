@@ -32,7 +32,7 @@ bool ModuleScene::Start()
 	//Loading textures
 
 	//Loading meshes
-
+	/*
 	Vertex vert;
 	Texture tex;
 	std::vector<Vertex> vertices;
@@ -232,14 +232,16 @@ bool ModuleScene::Start()
 	tex.path.clear();
 	tex.type.clear();
 
-	//Setting Camera
-	App->renderer3d->camera->SetPos(math::vec(0.0f, 0.0f, -10.0f));
 
 	//Testing primitives
 	compcube = App->primitives->CreateCube(nullptr);
 	comppoint = App->primitives->CreatePoint(nullptr, math::vec(2.0f,0.0f,0.0f));
 	compline = App->primitives->CreateLine(nullptr, math::vec(-5.0f,0.0f,0.0f),math::vec(0.0f,2.0f,0.0f));
 	comptriangle = App->primitives->CreateTriangle(nullptr);
+	*/
+
+	//Setting Camera
+	App->renderer3d->camera->SetPos(math::vec(0.0f, 0.0f, -10.0f));
 
 	root = new RE_GameObject();
 	root->AddComponent(C_POINT);
@@ -262,9 +264,9 @@ update_status ModuleScene::PreUpdate()
 
 update_status ModuleScene::Update()
 {
-	math::vec t = root->transform->GetPosition();
+	//math::vec t = root->transform->GetPosition();
 
-	root->transform->SetPos(t);
+	//root->transform->SetPos(t);
 
 	root->Update();
 
@@ -305,7 +307,7 @@ void ModuleScene::FileDrop(const char * file)
 		if (mesh_droped != nullptr)
 			DEL(mesh_droped);
 
-		mesh_droped = new RE_CompMesh((char*)file, holder->GetBuffer(), holder->GetSize());
+		//mesh_droped = new RE_CompMesh((char*)file, holder->GetBuffer(), holder->GetSize());
 	}
 
 	if(holder) LOG(holder->GetBuffer());
