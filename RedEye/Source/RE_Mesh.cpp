@@ -4,7 +4,9 @@
 #include "ModuleRenderer3D.h"
 #include "ShaderManager.h"
 #include "Texture2DManager.h"
+#include "OutputLog.h"
 
+#include "SDL2\include\SDL_assert.h"
 #include "assimp\include\scene.h"
 
 #include "Glew\include\glew.h"
@@ -114,8 +116,10 @@ void RE_Mesh::setupMesh()
 
 RE_MeshContainer::RE_MeshContainer(const char* f, const char* d, bool dropped) : dropped(dropped)
 {
-	if (f != nullptr) file_name = f;
-	if (d != nullptr) directory = d;
+	SDL_assert(f != nullptr && d != nullptr);
+	file_name = f;
+	directory = d;
+	//LOG("Creating Mesh Container: %s (from: %s%s)", file_name = f, directory = d, dropped ? " - Dropped" : " ");
 }
 
 RE_MeshContainer::~RE_MeshContainer()
@@ -152,6 +156,8 @@ RE_Mesh RE_MeshContainer::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
 
+	LOG("Processing Mesh with %u vertices, %u faces and %u texture indexes", mesh->mNumVertices, mesh->mNumFaces, mesh->mMaterialIndex);
+
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		// process vertex positions, normals and texture coordinates
@@ -183,22 +189,21 @@ RE_Mesh RE_MeshContainer::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
-		for (unsigned int j = 0; j < face.mNumIndices; j++)
-			indices.push_back(face.mIndices[j]);
+
+		if (face.mNumIndices != 3)
+			LOG("WARNING, geometry face with %u indices instead of 3!", face.mNumIndices);
+		else
+			for (unsigned int j = 0; j < face.mNumIndices; j++)
+				indices.push_back(face.mIndices[j]);
 	}
 	// process material
 	if (mesh->mMaterialIndex >= 0)
 	{
-		if (mesh->mMaterialIndex >= 0)
-		{
-			aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-			std::vector<Texture> diffuseMaps = LoadMaterialTextures(material,
-				aiTextureType_DIFFUSE, "texture_diffuse");
-			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			std::vector<Texture> specularMaps = LoadMaterialTextures(material,
-				aiTextureType_SPECULAR, "texture_specular");
-			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-		}
+		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+		std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		//std::vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
 	return RE_Mesh(vertices, indices, textures);

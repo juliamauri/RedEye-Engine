@@ -247,6 +247,7 @@ bool ModuleScene::Start()
 	//root->AddComponent(C_POINT);
 	//root->AddComponent(C_CUBE);
 	root->AddComponent(C_SPHERE);
+	drop = new RE_GameObject();
 	
 	return ret;
 }
@@ -269,6 +270,7 @@ update_status ModuleScene::Update()
 	//root->transform->SetPos(t);
 
 	root->Update();
+	drop->Update();
 
 	return UPDATE_CONTINUE;
 }
@@ -304,13 +306,20 @@ void ModuleScene::FileDrop(const char * file)
 
 	if (ext.compare("fbx") == 0)
 	{
-		if (mesh_droped != nullptr)
+		RE_CompMesh* c_mesh = (RE_CompMesh*)drop->GetComponent(C_MESH);
+
+		if (c_mesh == nullptr)
+			drop->AddComponent(C_MESH, (char*)file, true);
+		else
+			c_mesh->LoadMesh(file, true);
+
+		/*if (mesh_droped != nullptr)
 			DEL(mesh_droped);
 
-		//mesh_droped = new RE_CompMesh((char*)file, holder->GetBuffer(), holder->GetSize());
+		mesh_droped = new RE_CompMesh((char*)file, holder->GetBuffer(), holder->GetSize()); */
 	}
 
-	if(holder) LOG(holder->GetBuffer());
+	if(holder) LOG("Finished %s's drop", holder->GetBuffer());
 
 	DEL(holder);
 }
@@ -347,7 +356,8 @@ void ModuleScene::DrawScene()
 	comptriangle->Draw();
 	*/
 
-	root->Draw();
+	//root->Draw();
+	//drop->Draw();
 }
 
 //INIT

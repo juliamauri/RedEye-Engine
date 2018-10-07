@@ -50,7 +50,6 @@ unsigned int MeshManager::LoadMesh(const char * path, bool dropped)
 		else if (mesh_file_tmp.Load())
 		{
 			mesh_file = &mesh_file_tmp;
-
 		}
 
 		if (mesh_file != nullptr)
@@ -65,7 +64,11 @@ unsigned int MeshManager::LoadMesh(const char * path, bool dropped)
 			else
 			{
 				std::string path_s(path);
-				RE_MeshContainer* mesh = new RE_MeshContainer(nullptr, path_s.substr(0, path_s.find_last_of(dropped ? '\\' : '/')).c_str(), true);
+				unsigned int separator_pos = path_s.find_last_of(dropped ? '\\' : '/');
+				RE_MeshContainer* mesh = new RE_MeshContainer(
+					path_s.substr(separator_pos, path_s.size()).c_str(),
+					path_s.substr(0, separator_pos).c_str(),
+					true);
 				mesh->ProcessNode(scene->mRootNode, scene);
 				ret = AddMesh(mesh);
 			}
@@ -81,18 +84,21 @@ bool MeshManager::UnReference(unsigned int mesh_id)
 {
 	bool ret = false;
 
-	MeshIter it = meshes.find(mesh_id);
-	if (it != meshes.end())
+	if (mesh_id > 0)
 	{
-		it->second.second--;
-		if (it->second.second == 0)
+		MeshIter it = meshes.find(mesh_id);
+		if (it != meshes.end())
 		{
-			// Release Mesh
-			SDL_assert(it->second.first != nullptr);
-			DEL(it->second.first);
-			meshes.erase(it);
+			it->second.second--;
+			if (it->second.second == 0)
+			{
+				// Release Mesh
+				SDL_assert(it->second.first != nullptr);
+				DEL(it->second.first);
+				meshes.erase(it);
+			}
+			ret = true;
 		}
-		ret = true;
 	}
 
 	return ret;

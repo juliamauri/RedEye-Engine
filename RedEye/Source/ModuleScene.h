@@ -48,8 +48,9 @@ private:
 	RE_CompPrimitive* comppoint = nullptr;
 	RE_CompPrimitive* compline = nullptr;
 	RE_CompPrimitive* comptriangle = nullptr;
-	
+
 	RE_GameObject* root = nullptr;
+	RE_GameObject* drop = nullptr;
 };
 
 
