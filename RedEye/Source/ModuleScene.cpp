@@ -357,7 +357,7 @@ void ModuleScene::DrawScene()
 	*/
 
 	//root->Draw();
-	//drop->Draw();
+	drop->Draw();
 }
 
 //INIT
