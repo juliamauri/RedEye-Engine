@@ -8,6 +8,7 @@ class RE_Mesh;
 class RE_GameObject;
 class RE_CompPrimitive;
 class RE_CompMesh;
+class RE_CompUnregisteredMesh;
 
 class ModuleScene : public Module
 {
@@ -42,7 +43,7 @@ private:
 	RE_Mesh* square = nullptr;
 	RE_Mesh* cube_array = nullptr;
 	RE_Mesh* cube_index = nullptr;
-	RE_CompMesh* mesh_droped = nullptr;
+	RE_CompUnregisteredMesh* mesh_droped = nullptr;
 
 	RE_CompPrimitive* compcube =  nullptr;
 	RE_CompPrimitive* comppoint = nullptr;

@@ -29,6 +29,10 @@ bool ModuleScene::Start()
 	if (!ret)
 		LOG("%s\n", App->shaders->GetShaderError());
 
+	ret = App->shaders->Load("modelloading", &modelloading);
+	if (!ret)
+		LOG("%s\n", App->shaders->GetShaderError());
+
 	//Loading textures
 
 	//Loading meshes
@@ -248,6 +252,8 @@ bool ModuleScene::Start()
 	//root->AddComponent(C_CUBE);
 	root->AddComponent(C_SPHERE);
 	drop = new RE_GameObject();
+
+	mesh_droped = nullptr;
 	
 	return ret;
 }
@@ -306,17 +312,17 @@ void ModuleScene::FileDrop(const char * file)
 
 	if (ext.compare("fbx") == 0)
 	{
-		RE_CompMesh* c_mesh = (RE_CompMesh*)drop->GetComponent(C_MESH);
+		/*RE_CompMesh* c_mesh = (RE_CompMesh*)drop->GetComponent(C_MESH);
 
 		if (c_mesh == nullptr)
 			drop->AddComponent(C_MESH, (char*)file, true);
 		else
-			c_mesh->LoadMesh(file, true);
+			c_mesh->LoadMesh(file, true);*/
 
-		/*if (mesh_droped != nullptr)
+		if (mesh_droped != nullptr)
 			DEL(mesh_droped);
 
-		mesh_droped = new RE_CompMesh((char*)file, holder->GetBuffer(), holder->GetSize()); */
+		mesh_droped = new RE_CompUnregisteredMesh((char*)file, holder->GetBuffer(), holder->GetSize());
 	}
 
 	if(holder) LOG("Finished %s's drop", holder->GetBuffer());
@@ -332,7 +338,7 @@ void ModuleScene::DrawScene()
 {
 	//triangle->Draw(ShaderPrimitive);
 
-	ShaderManager::use(0);
+	/*ShaderManager::use(0);
 	//App->renderer3d->DirectDrawCube(math::vec(-3.0f,0.0f,0.0f), math::vec(1.0f,0.0f,0.0f));
 
 	ShaderManager::use(ShaderPrimitive);
@@ -346,7 +352,7 @@ void ModuleScene::DrawScene()
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(ShaderPrimitive, "model", model.ptr());
 	ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(0.0f, 0.0f, 1.0f));
-	//cube_index->Draw(ShaderPrimitive);
+	//cube_index->Draw(ShaderPrimitive);*/
 
 	//primitives
 	/*
@@ -357,7 +363,28 @@ void ModuleScene::DrawScene()
 	*/
 
 	//root->Draw();
-	drop->Draw();
+
+	if (mesh_droped)
+	{
+		ShaderManager::use(ShaderPrimitive);
+		ShaderManager::setFloat4x4(ShaderPrimitive, "model", root->transform->GetGlobalMatrix().ptr());
+		ShaderManager::setFloat4x4(ShaderPrimitive, "view", App->renderer3d->camera->GetView().ptr());
+		ShaderManager::setFloat4x4(ShaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
+		ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(.2f, 0.1f, 0.1f));
+		mesh_droped->Draw(ShaderPrimitive);
+
+		/*ShaderManager::use(modelloading);
+		ShaderManager::setFloat4x4(modelloading, "model", root->transform->GetGlobalMatrix().ptr());
+		ShaderManager::setFloat4x4(modelloading, "view", App->renderer3d->camera->GetView().ptr());
+		ShaderManager::setFloat4x4(modelloading, "projection", App->renderer3d->camera->GetProjection().ptr());
+		ShaderManager::setFloat(modelloading, "viewPos", math::vec(.0f, 0.0f, 10.0f));
+		math::float3x3 modelNormal(root->transform->GetGlobalMatrix().InverseTransposed().Float3x3Part());
+		ShaderManager::setFloat3x3(modelloading, "modelNormal", modelNormal.ptr());
+		mesh_droped->Draw(modelloading);*/
+	}
+	
+
+	//drop->Draw();
 }
 
 //INIT

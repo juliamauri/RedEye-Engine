@@ -66,6 +66,9 @@ private:
 	std::string directory;
 	bool dropped = false;
 
+	bool show_face_normals = true;
+	bool show_vertex_normals = false;
+
 	std::vector<RE_Mesh> meshes;
 	std::vector<Texture> textures_loaded;
 };
