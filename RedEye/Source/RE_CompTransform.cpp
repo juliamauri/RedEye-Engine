@@ -130,44 +130,58 @@ void RE_CompTransform::DrawProperties()
 		transform_modified = true;
 	}
 
-	// Rotation -----------------------------------------------------
-	holder = rot_eul.x;
-	if (ImGui::SliderFloat("Rot X", &holder, MIN_SCALE, 360.f, "%.1f"))
-	{
-		rot_eul.x = holder;
-		SetRot(rot_eul);
-	}
-	holder = rot_eul.y;
-	if (ImGui::SliderFloat("Rot Y", &holder, MIN_SCALE, 360.f, "%.1f"))
-	{
-		rot_eul.y = holder;
-		SetRot(rot_eul);
-	}
-	holder = rot_eul.z;
-	if (ImGui::SliderFloat("Rot Z", &holder, MIN_SCALE, 360.f, "%.1f"))
-	{
-		rot_eul.z = holder;
-		SetRot(rot_eul);
-	}
+	bool allow_edit = true;
 
-	// Scale -----------------------------------------------------
-	holder = scale.x;
-	if (ImGui::SliderFloat("Scale X", &holder, 0.f, 10.f, "%.1f"))
+	if (allow_edit)
 	{
-		scale.x = holder;
-		transform_modified = true;
+		// Rotation -----------------------------------------------------
+		holder = rot_eul.x;
+		if (ImGui::SliderFloat("Rot X", &holder, MIN_SCALE, 360.f, "%.1f"))
+		{
+			rot_eul.x = holder;
+			SetRot(rot_eul);
+		}
+		holder = rot_eul.y;
+		if (ImGui::SliderFloat("Rot Y", &holder, MIN_SCALE, 360.f, "%.1f"))
+		{
+			rot_eul.y = holder;
+			SetRot(rot_eul);
+		}
+		holder = rot_eul.z;
+		if (ImGui::SliderFloat("Rot Z", &holder, MIN_SCALE, 360.f, "%.1f"))
+		{
+			rot_eul.z = holder;
+			SetRot(rot_eul);
+		}
+
+		// Scale -----------------------------------------------------
+		holder = scale.x;
+		if (ImGui::SliderFloat("Scale X", &holder, 0.f, 10.f, "%.1f"))
+		{
+			scale.x = holder;
+			transform_modified = true;
+		}
+		holder = scale.y;
+		if (ImGui::SliderFloat("Scale Y", &holder, 0.f, 10.f, "%.1f"))
+		{
+			scale.y = holder;
+			transform_modified = true;
+		}
+		holder = scale.z;
+		if (ImGui::SliderFloat("Scale Z", &holder, 0.f, 10.f, "%.1f"))
+		{
+			scale.z = holder;
+			transform_modified = true;
+		}
 	}
-	holder = scale.y;
-	if (ImGui::SliderFloat("Scale Y", &holder, 0.f, 10.f, "%.1f"))
+	else
 	{
-		scale.y = holder;
-		transform_modified = true;
-	}
-	holder = scale.z;
-	if (ImGui::SliderFloat("Scale Z", &holder, 0.f, 10.f, "%.1f"))
-	{
-		scale.z = holder;
-		transform_modified = true;
+		ImGui::Text("Rot X: %f", rot_eul.x);
+		ImGui::Text("Rot Y: %f", rot_eul.y);
+		ImGui::Text("Rot Z: %f", rot_eul.z);
+		ImGui::Text("Scale X: %f", scale.x);
+		ImGui::Text("Scale Y: %f", scale.y);
+		ImGui::Text("Scale Z: %f", scale.z);
 	}
 }
 

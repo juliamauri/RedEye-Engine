@@ -154,19 +154,7 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 			normal = v.Cross(w).Normalized() * line_length;
 
 			glColor3f(color.x, color.y, color.z);
-			//math::float4x4 model = ((RE_CompTransform*)App->scene->root->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
-			RE_CompTransform* transform = (RE_CompTransform*)App->scene->root->GetComponent(C_TRANSFORM);
-			math::float4x4 model = math::float4x4::identity;
-
-			model = model * math::float4x4::FromQuat(transform->GetRot());
-			model = model * math::float4x4::Translate(transform->GetPosition().Neg());
-
-			//math::float4x4::LookAt(transform->GetPosition(), App->renderer3d->camera->transform->GetPosition(), math::vec(1.f, 1.f, 1.f), );
-			//model = model * math::float4x4::FromQuat(transform->GetRot());
-
-
-			model = model.InverseTransposed();
-			
+			math::float4x4 model = ((RE_CompTransform*)App->scene->root->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
 			glMatrixMode(GL_MODELVIEW);
 			glLoadMatrixf((App->renderer3d->camera->GetView() * model).ptr());
 
