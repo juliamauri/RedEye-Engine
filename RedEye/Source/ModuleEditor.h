@@ -120,7 +120,7 @@ public:
 class PropertiesWindow : public EditorWindow
 {
 public:
-	PropertiesWindow(const char* name = "Properties", bool start_active = false);
+	PropertiesWindow(const char* name = "Properties", bool start_active = true);
 	void Draw() override;
 };
 

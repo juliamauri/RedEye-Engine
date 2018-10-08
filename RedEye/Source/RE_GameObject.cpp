@@ -236,11 +236,18 @@ RE_Component* RE_GameObject::GetComponent(short unsigned int type)
 {
 	RE_Component* ret = nullptr;
 
-	std::list<RE_Component*>::iterator it_comp = components.begin();
-	for (; it_comp != components.end() && !ret; it_comp++)
+	if (ComponentType(type) == C_TRANSFORM)
 	{
-		if ((*it_comp)->GetType() == ComponentType(type))
-			ret = (*it_comp);
+		ret = transform;
+	}
+	else
+	{
+		std::list<RE_Component*>::iterator it_comp = components.begin();
+		for (; it_comp != components.end() && !ret; it_comp++)
+		{
+			if ((*it_comp)->GetType() == ComponentType(type))
+				ret = (*it_comp);
+		}
 	}
 
 	return ret;

@@ -61,7 +61,7 @@ public:
 	//Move camera
 	void Move(CameraMovement dir, float speed);
 
-private:
+public:
 	//transform
 	RE_CompTransform* transform = nullptr;
 

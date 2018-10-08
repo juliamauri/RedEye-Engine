@@ -109,6 +109,9 @@ public:
 	RE_CompUnregisteredMesh(char *path, const char* buffer, unsigned int size);
 
 	void Draw(unsigned int shader);
+
+	void DrawProperties();
+
 private:
 	/*  Model Data  */
 	const char* buffer_file = nullptr;

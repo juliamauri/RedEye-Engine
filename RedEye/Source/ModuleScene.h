@@ -21,14 +21,16 @@ public:
 	update_status PreUpdate() override;
 	update_status Update() override;
 	update_status PostUpdate() override;
-
 	bool CleanUp() override;
 
 	void FileDrop(const char* file);
-
 	void RecieveEvent(const Event* e) override;
 
 	void DrawScene();
+	void DrawFocusedProperties();
+
+	RE_GameObject* root = nullptr;
+	RE_CompUnregisteredMesh* mesh_droped = nullptr;
 
 private:
 	//shaders
@@ -43,14 +45,12 @@ private:
 	RE_Mesh* square = nullptr;
 	RE_Mesh* cube_array = nullptr;
 	RE_Mesh* cube_index = nullptr;
-	RE_CompUnregisteredMesh* mesh_droped = nullptr;
 
 	RE_CompPrimitive* compcube =  nullptr;
 	RE_CompPrimitive* comppoint = nullptr;
 	RE_CompPrimitive* compline = nullptr;
 	RE_CompPrimitive* comptriangle = nullptr;
 
-	RE_GameObject* root = nullptr;
 	RE_GameObject* drop = nullptr;
 };
 

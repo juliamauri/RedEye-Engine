@@ -322,6 +322,8 @@ void ModuleScene::FileDrop(const char * file)
 		if (mesh_droped != nullptr)
 			DEL(mesh_droped);
 
+		root->GetComponent(C_TRANSFORM)->Reset();
+
 		mesh_droped = new RE_CompUnregisteredMesh((char*)file, holder->GetBuffer(), holder->GetSize());
 	}
 
@@ -385,6 +387,18 @@ void ModuleScene::DrawScene()
 	
 
 	//drop->Draw();
+}
+
+void ModuleScene::DrawFocusedProperties()
+{
+	if (mesh_droped)
+	{
+		// root->DrawProperties();
+
+		RE_CompTransform* transform = (RE_CompTransform*)root->GetComponent(C_TRANSFORM);
+		transform->DrawProperties();
+		mesh_droped->DrawProperties();
+	}
 }
 
 //INIT

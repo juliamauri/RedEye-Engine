@@ -19,25 +19,28 @@ public:
 	void SetRot(const math::Quat quat);
 	void SetScale(const math::vec scale);
 
-	math::vec GetPosition()const;
-	math::vec GetRight()const;
-	math::vec GetUp()const;
-	math::vec GetForward()const;
-	math::vec GetRotXYZ()const;
-	math::Quat GetRot()const;
-	math::vec GetScale()const;
+	math::vec GetPosition() const;
+	math::vec GetRight() const;
+	math::vec GetUp() const;
+	math::vec GetForward() const;
+	math::vec GetRotXYZ() const;
+	math::Quat GetRot() const;
+	math::vec GetScale() const;
 
-	math::float4x4 GetGlobalMatrix()const;
-
-	void LookAt(math::vec cameraTarget);
+	math::float4x4 GetLocalMatrix() const;
+	math::float4x4 GetGlobalMatrix() const;
 
 	void DrawProperties();
+	void Reset();
+
+	void LookAt(math::vec cameraTarget);
+	void setCamera(RE_CompCamera* cam);
+
+private:
 
 	void CalcGlobalTransform(bool call_tranf_modified = true);
 
-	void setCamera(RE_CompCamera* cam);
-
-protected:
+private:
 
 	math::vec pos = math::vec::zero;
 	math::vec right = math::vec::zero;
@@ -50,8 +53,6 @@ protected:
 
 	math::float4x4 local_transform = math::float4x4::identity;
 	math::float4x4 global_transform = math::float4x4::identity;
-
-private:
 
 	bool transform_modified = false;
 

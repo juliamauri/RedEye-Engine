@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "MeshManager.h"
 #include "OutputLog.h"
+#include "Globals.h"
 
 RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char * path, const bool file_dropped, const bool start_active) : RE_Component(C_MESH, go, start_active)
 {
@@ -69,11 +70,16 @@ void RE_CompMesh::Draw()
 #include "ModuleRenderer3D.h"
 #include "ShaderManager.h"
 #include "Texture2DManager.h"
+#include "ModuleScene.h"
+#include "RE_GameObject.h"
+#include "RE_CompTransform.h"
 #include "FileSystem.h"
 #include "RE_CompCamera.h"
-
+#include "ImGui\imgui.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
+#include "MathGeoLib\include\MathGeoLib.h"
+#include "MathGeoLib\include\Math\Quat.h"
 
 #include "SDL2\include\SDL_assert.h"
 #include "assimp/include/Importer.hpp"
@@ -147,10 +153,20 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 			w = vertices[i+2].Position - vertices[i].Position;
 			normal = v.Cross(w).Normalized() * line_length;
 
-
 			glColor3f(color.x, color.y, color.z);
-			math::float4x4 model = math::float4x4::Translate({ 0.f, 0.f, 0.f });
-			model.InverseTranspose();
+			//math::float4x4 model = ((RE_CompTransform*)App->scene->root->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
+			RE_CompTransform* transform = (RE_CompTransform*)App->scene->root->GetComponent(C_TRANSFORM);
+			math::float4x4 model = math::float4x4::identity;
+
+			model = model * math::float4x4::FromQuat(transform->GetRot());
+			model = model * math::float4x4::Translate(transform->GetPosition().Neg());
+
+			//math::float4x4::LookAt(transform->GetPosition(), App->renderer3d->camera->transform->GetPosition(), math::vec(1.f, 1.f, 1.f), );
+			//model = model * math::float4x4::FromQuat(transform->GetRot());
+
+
+			model = model.InverseTransposed();
+			
 			glMatrixMode(GL_MODELVIEW);
 			glLoadMatrixf((App->renderer3d->camera->GetView() * model).ptr());
 
@@ -174,8 +190,7 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 		for (unsigned int i = 0; i < indices.size(); i++)
 		{
 			glColor3f(color.x, color.y, color.z);
-			math::float4x4 model = math::float4x4::Translate({ 0.f, 0.f, 0.f });
-			model.InverseTranspose();
+			math::float4x4 model = ((RE_CompTransform*)App->scene->root->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
 			glMatrixMode(GL_MODELVIEW);
 			glLoadMatrixf((App->renderer3d->camera->GetView() * model).ptr());
 
@@ -199,8 +214,7 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 		for (unsigned int i = 0; i < indices.size(); i++)
 		{
 			glColor3f(color.x, color.y, color.z);
-			math::float4x4 model = math::float4x4::Translate({ 0.f, 0.f, 0.f });
-			model.InverseTranspose();
+			math::float4x4 model = ((RE_CompTransform*)App->scene->root->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
 			glMatrixMode(GL_MODELVIEW);
 			glLoadMatrixf((App->renderer3d->camera->GetView() * model).ptr());
 
@@ -332,6 +346,8 @@ RE_UnregisteredMesh RE_CompUnregisteredMesh::processMesh(aiMesh * mesh, const ai
 	std::vector<unsigned int> indices;
 	std::vector<_Texture> textures;
 
+	LOG("Processing Mesh with %u vertices, %u faces and %u texture indexes", mesh->mNumVertices, mesh->mNumFaces, mesh->mMaterialIndex);
+
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		// process vertex positions, normals and texture coordinates
@@ -412,4 +428,8 @@ std::vector<_Texture> RE_CompUnregisteredMesh::loadMaterialTextures(aiMaterial *
 		}
 	}
 	return textures;
+}
+
+void RE_CompUnregisteredMesh::DrawProperties()
+{
 }

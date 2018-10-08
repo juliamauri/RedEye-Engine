@@ -4,6 +4,7 @@
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
 #include "ModuleRenderer3D.h"
+#include "ModuleScene.h"
 #include "RE_Math.h"
 #include "OutputLog.h"
 #include "MathGeoLib\include\MathGeoLib.h"
@@ -19,7 +20,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(console = new ConsoleWindow());
 	windows.push_back(config = new ConfigWindow());
 	//windows.push_back(heriarchy = new HeriarchyWindow());
-	//windows.push_back(properties = new PropertiesWindow());
+	windows.push_back(properties = new PropertiesWindow());
 	about = new AboutWindow();
 
 	tools.push_back(rng = new RandomTest());
@@ -341,6 +342,12 @@ PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
 void PropertiesWindow::Draw()
 {
 	// draw transform and components
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		App->scene->DrawFocusedProperties();
+	}
+
+	ImGui::End();
 }
 
 AboutWindow::AboutWindow(const char * name, bool start_active) :
