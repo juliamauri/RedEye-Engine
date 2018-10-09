@@ -14,23 +14,30 @@
 
 #pragma comment(lib, "assimp/libx86/assimp-vc140-mt.lib")
 
-MeshManager::MeshManager(const char * folderPath) : folderPath(folderPath)
+MeshManager::MeshManager(const char* f) : ResourceManager(R_MESH), folderPath(f)
 {}
 
 MeshManager::~MeshManager()
+{}
+
+bool MeshManager::Init(const char* def_shader)
 {
-	while (!meshes.empty())
+	LOG("Initializing Mesh Manager");
+
+	bool ret = (folderPath != nullptr);
+	if (ret)
 	{
-		LOG("WARNING: Unreferenced mesh: %s", meshes.begin()->second.first->GetFileName());
-		meshes.erase(meshes.begin());
+		ret = App->shaders->Load(def_shader, &default_shader);
+		if (!ret) LOG_ERROR("Mesh Manager could not load shader: %s", def_shader);
 	}
-}
+	else
+	{
+		LOG_ERROR("Mesh Manager could not read folder path");
+	}
+	
+	App->ReportSoftware("Assimp"); // , version, website);
 
-void MeshManager::Init(const char* def_shader)
-{
-	// TODO App->ReportSoftware(name, version, website); assimp;
-
-	App->shaders->Load(def_shader, &default_shader);
+	return ret;
 }
 
 unsigned int MeshManager::LoadMesh(const char * path, bool dropped)
@@ -80,41 +87,6 @@ unsigned int MeshManager::LoadMesh(const char * path, bool dropped)
 	return ret;
 }
 
-bool MeshManager::UnReference(unsigned int mesh_id)
-{
-	bool ret = false;
-
-	if (mesh_id > 0)
-	{
-		MeshIter it = meshes.find(mesh_id);
-		if (it != meshes.end())
-		{
-			it->second.second--;
-			if (it->second.second == 0)
-			{
-				// Release Mesh
-				SDL_assert(it->second.first != nullptr);
-				DEL(it->second.first);
-				meshes.erase(it);
-			}
-			ret = true;
-		}
-	}
-
-	return ret;
-}
-
-RE_MeshContainer* MeshManager::operator[](unsigned int mesh_id) const
-{
-	MeshConstIter it = meshes.find(mesh_id);
-	return it != meshes.end() ? it->second.first : nullptr;
-}
-
-unsigned int MeshManager::TotalMeshes() const
-{
-	return meshes.size();
-}
-
 unsigned int MeshManager::GetLoadedMesh(const char * path, const bool from_drop) const
 {
 	// TODO search for mesh with path
@@ -124,18 +96,18 @@ unsigned int MeshManager::GetLoadedMesh(const char * path, const bool from_drop)
 void MeshManager::DrawMesh(const unsigned int reference)
 {
 	if (reference > 0)
-		meshes.at(reference).first->Draw(default_shader);
+		((RE_MeshContainer*)resources.at(reference).first)->Draw(default_shader);
 }
 
 unsigned int MeshManager::AddMesh(RE_MeshContainer * mesh)
 {
-	unsigned int ret = 1 + (meshes.size() * 2);
-	MeshIter it = meshes.find(ret);
+	unsigned int ret = 1 + (resources.size() * 2);
+	ResourceIter it = resources.find(ret);
 
-	while (it != meshes.end())
-		it = meshes.find(ret--);
+	while (it != resources.end())
+		it = resources.find(ret--);
 
-	meshes[ret] = { mesh, 1 };
+	resources[ret] = { (ResourceContainer*)mesh, 1 };
 	
 	return ret;
 }
