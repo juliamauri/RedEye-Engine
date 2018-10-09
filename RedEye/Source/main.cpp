@@ -17,15 +17,21 @@ int main(int argc, char* argv[])
 
 	App = new Application(argc, argv);
 
+	LOG_SEPARATOR("Initializing RedEye");
+
 	if (App->Init())
 	{
 		int update_return = App->Update();
+
+		LOG_SEPARATOR("Entering Application's Main Loop");
 
 		while(update_return == 1)
 			update_return = App->Update();
 
 		if (update_return == 0)
 		{
+			LOG_SEPARATOR("Cleaning Up Application");
+
 			if (App->CleanUp())
 			{
 				main_return = EXIT_SUCCESS;
@@ -33,17 +39,17 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				LOG_SEPARATOR("Application CleanUp exits with ERROR");
+				LOG_ERROR("Application CleanUp exits with ERROR");
 			}
 		}
 		else
 		{
-			LOG_SEPARATOR("Application Update exits with ERROR");
+			LOG_ERROR("Application Update exits with ERROR");
 		}
 	}
 	else
 	{
-		LOG_SEPARATOR("Application Init exits with ERROR");
+		LOG_ERROR("Application Init exits with ERROR");
 	}
 
 	delete App;

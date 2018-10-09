@@ -253,6 +253,7 @@ void ModuleInput::HandleEventQueue()
 
 /* Drag and drop events */
 		case SDL_DROPFILE:/**< The system requests a file open */
+			LOG("File Dropped: %s", e.drop.file);
 			App->scene->FileDrop(e.drop.file);
 			break;
 

@@ -63,7 +63,6 @@ bool Application::Init()
 {
 	bool ret = true;
 
-	LOG_SEPARATOR("Initializing RedEye");
 	LOG("Initializing Application");
 	LOG_SECONDARY("Initializing SDL without any subsystems");
 
@@ -117,7 +116,7 @@ bool Application::Init()
 			if (!primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
 			if (!meshes->Init("modelloading"))  LOG_WARNING("Won't be able to use meshes");
 
-			LOG_SEPARATOR("Starting RedEye Application");
+			LOG_SEPARATOR("Starting Application");
 
 			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 				if ((*it)->IsActive() == true)

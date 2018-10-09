@@ -327,8 +327,6 @@ void ModuleScene::FileDrop(const char * file)
 		mesh_droped = new RE_CompUnregisteredMesh((char*)file, holder->GetBuffer(), holder->GetSize());
 	}
 
-	if(holder) LOG("Finished %s's drop", holder->GetBuffer());
-
 	DEL(holder);
 }
 
