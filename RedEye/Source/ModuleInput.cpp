@@ -25,12 +25,12 @@ ModuleInput::~ModuleInput()
 // Called before render is available
 bool ModuleInput::Init(JSONNode* config_module)
 {
-	LOG("Init SDL input event system");
+	LOG_SECONDARY("Init SDL input & event subsystems");
 	bool ret = true;
 
 	if(SDL_InitSubSystem(SDL_INIT_EVENTS) < 0)
 	{
-		LOG("SDL_EVENTS could not initialize! SDL_Error: %s\n", SDL_GetError());
+		LOG_ERROR("SDL_EVENTS could not initialize! SDL_Error: %s", SDL_GetError());
 		ret = false;
 	}
 

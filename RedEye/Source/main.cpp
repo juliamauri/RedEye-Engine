@@ -29,21 +29,21 @@ int main(int argc, char* argv[])
 			if (App->CleanUp())
 			{
 				main_return = EXIT_SUCCESS;
-				LOG("EXIT SUCCESS\n");
+				LOG_SEPARATOR("EXIT SUCCESS");
 			}
 			else
 			{
-				LOG("Application CleanUp exits with ERROR");
+				LOG_SEPARATOR("Application CleanUp exits with ERROR");
 			}
 		}
 		else
 		{
-			LOG("Application Update exits with ERROR");
+			LOG_SEPARATOR("Application Update exits with ERROR");
 		}
 	}
 	else
 	{
-		LOG("Application Init exits with ERROR");
+		LOG_SEPARATOR("Application Init exits with ERROR");
 	}
 
 	delete App;

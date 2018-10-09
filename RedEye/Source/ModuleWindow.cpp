@@ -18,12 +18,12 @@ ModuleWindow::~ModuleWindow()
 
 bool ModuleWindow::Init(JSONNode* node)
 {
-	LOG("Init SDL window & surface");
+	LOG_SECONDARY("Init SDL video subsystem");
 	bool ret = true;
 
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
 	{
-		LOG("SDL_VIDEO could not initialize! SDL_Error: %s\n", SDL_GetError());
+		LOG_ERROR("SDL_VIDEO could not initialize! SDL_Error: %s", SDL_GetError());
 		ret = false;
 	}
 	else

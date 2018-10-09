@@ -35,26 +35,19 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	
-	LOG("Creating SDL Context");
+	LOG_SECONDARY("Creating SDL GL Context");
 	mainContext = SDL_GL_CreateContext(App->window->GetWindow());
-	if (mainContext == nullptr)
-	{
-		//Error
-		ret = false;
-	}
+	if (ret = (mainContext != nullptr))
+		App->ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
+	else
+		LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
 
-	//Glew inicialitzation
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
-	{
-		/* Problem: glewInit failed, something is seriously wrong. */
-		//fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-		ret = false;
-	}
-
-	App->ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
-	App->ReportSoftware("GLslang", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
-	App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
+	LOG_SECONDARY("Initializing Glew");
+	GLenum error = glewInit();
+	if (ret = (error == GLEW_OK))
+		App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
+	else
+		LOG_ERROR("Glew could not initialize! Glew_Error: %s", glewGetErrorString(error));
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
@@ -66,7 +59,6 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	enableVSync(lighting = config_module->PullBool("lighting", false));
 
 	camera = new RE_CompCamera();
-;
 
 	return ret;
 }
