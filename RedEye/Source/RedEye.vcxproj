@@ -38,6 +38,8 @@
     <ClCompile Include="ModuleRenderer3D.cpp" />
     <ClCompile Include="ModuleScene.cpp" />
     <ClCompile Include="ModuleWindow.cpp" />
+    <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="RE_CompCamera.cpp" />
     <ClCompile Include="RE_CompMesh.cpp" />
     <ClCompile Include="RE_Component.cpp" />
@@ -119,6 +121,8 @@
     <ClInclude Include="RapidJson\include\stream.h" />
     <ClInclude Include="RapidJson\include\stringbuffer.h" />
     <ClInclude Include="RapidJson\include\writer.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="RE_CompCamera.h" />
     <ClInclude Include="RE_Component.h" />
     <ClInclude Include="RE_GameObject.h" />

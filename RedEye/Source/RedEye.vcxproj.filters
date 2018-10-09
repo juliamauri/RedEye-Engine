@@ -46,14 +46,8 @@
     <ClCompile Include="Cvar.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderManager.cpp">
-      <Filter>Modules\Independent App Modules\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="FileSystem.cpp">
       <Filter>Modules\Independent App Modules\FileSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture2DManager.cpp">
-      <Filter>Modules\Independent App Modules\Texture2DManager</Filter>
     </ClCompile>
     <ClCompile Include="TimeManager.cpp">
       <Filter>Modules\Independent App Modules\TimeManager</Filter>
@@ -73,9 +67,6 @@
     <ClCompile Include="RE_GameObject.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="RE_PrimitiveManager.cpp">
-      <Filter>Modules\Independent App Modules\Primitive</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompTransform.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
@@ -88,14 +79,29 @@
     <ClCompile Include="RE_CompPrimitive.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
-    <ClCompile Include="MeshManager.cpp">
-      <Filter>Modules\Independent App Modules\MeshManager</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Mesh.cpp">
-      <Filter>Modules\Independent App Modules\MeshManager</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompCamera.cpp">
       <Filter>GameObject\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_PrimitiveManager.cpp">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture2DManager.cpp">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshManager.cpp">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Mesh.cpp">
+      <Filter>Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Containers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -282,14 +288,8 @@
     <ClInclude Include="Cvar.h">
       <Filter>Containers</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderManager.h">
-      <Filter>Modules\Independent App Modules\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="FileSystem.h">
       <Filter>Modules\Independent App Modules\FileSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture2DManager.h">
-      <Filter>Modules\Independent App Modules\Texture2DManager</Filter>
     </ClInclude>
     <ClInclude Include="TimeManager.h">
       <Filter>Modules\Independent App Modules\TimeManager</Filter>
@@ -312,9 +312,6 @@
     <ClInclude Include="RE_GameObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="RE_PrimitiveManager.h">
-      <Filter>Modules\Independent App Modules\Primitive</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompTransform.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
@@ -327,14 +324,29 @@
     <ClInclude Include="RE_Component.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
-    <ClInclude Include="MeshManager.h">
-      <Filter>Modules\Independent App Modules\MeshManager</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Mesh.h">
-      <Filter>Modules\Independent App Modules\MeshManager</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompCamera.h">
       <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_PrimitiveManager.h">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture2DManager.h">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshManager.h">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Mesh.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -389,17 +401,11 @@
     <Filter Include="Modules\Independent App Modules\FileSystem">
       <UniqueIdentifier>{ad6c1631-980d-429f-8b61-6e17d3393f18}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\Independent App Modules\Texture2DManager">
-      <UniqueIdentifier>{b2736c8b-68d2-4e90-a449-bc9b852d5b3f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Modules\Independent App Modules\TimeManager">
       <UniqueIdentifier>{8ce620fa-8774-4a60-8abd-93f1c8e1f000}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\Independent App Modules\SystemInfo">
       <UniqueIdentifier>{53c1d23f-15c8-4f37-ad9f-906b62147787}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Modules\Independent App Modules\Shaders">
-      <UniqueIdentifier>{38c29b9d-7263-44b0-bf0d-759b506df6a8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\Independent App Modules\Math">
       <UniqueIdentifier>{25cac595-e5b7-48c5-96a6-cc2ec0fbb40c}</UniqueIdentifier>
@@ -410,17 +416,14 @@
     <Filter Include="Utility\Log">
       <UniqueIdentifier>{f1f18652-ef76-444e-ab39-3f51efc4c14e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\Independent App Modules\Primitive">
-      <UniqueIdentifier>{95f5fc35-7da0-472b-9b6e-42fdbcf708e7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameObject">
       <UniqueIdentifier>{e7540df0-e081-4ea9-a12e-d166f45541ad}</UniqueIdentifier>
     </Filter>
     <Filter Include="GameObject\Components">
       <UniqueIdentifier>{a1265e59-2843-4b5a-abaf-37c926bb38a7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\Independent App Modules\MeshManager">
-      <UniqueIdentifier>{6bc18870-4242-49e6-8c74-5360ef46f5ee}</UniqueIdentifier>
+    <Filter Include="Modules\Resource Managers">
+      <UniqueIdentifier>{c7fdb747-bf4e-4864-8336-d13e49a20d25}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
