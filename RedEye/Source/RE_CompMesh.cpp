@@ -87,11 +87,13 @@ void RE_CompMesh::Draw()
 #include "assimp/include/postprocess.h"
 
 
-RE_UnregisteredMesh::RE_UnregisteredMesh(std::vector<_Vertex> vertices, std::vector<unsigned int> indices, std::vector<_Texture> textures)
+RE_UnregisteredMesh::RE_UnregisteredMesh(std::vector<_Vertex> vertices, std::vector<unsigned int> indices, std::vector<_Texture> textures, unsigned int triangles)
 {
 	this->vertices = vertices;
 	this->indices = indices;
 	this->textures = textures;
+
+	triangle_count = triangles;
 
 	// now that we have all the required data, set the vertex buffers and its attribute pointers.
 	_setupMesh();
@@ -266,7 +268,7 @@ RE_CompUnregisteredMesh::RE_CompUnregisteredMesh(char * path, const char * buffe
 {
 	buffer_size = size;
 	buffer_file = buffer;
-	droped = true;
+	dropped = true;
 	loadModel(path);
 }
 
@@ -280,20 +282,26 @@ void RE_CompUnregisteredMesh::loadModel(std::string path)
 {
 	if (buffer_file != nullptr)
 	{
+		LOG("Loading Model: %s", buffer_file);
+
 		Assimp::Importer importer;
 		const aiScene *scene = importer.ReadFileFromMemory(buffer_file, buffer_size, aiProcess_Triangulate | aiProcess_FlipUVs);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
-			LOG("ERROR::ASSIMP::%s", importer.GetErrorString());
+			LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 			return;
 		}
+
+		name = buffer_file;
 		directory = path.substr(0, path.find_last_of('\\'));
 
 		processNode(scene->mRootNode, scene);
 	}
 	else
 	{
+		LOG("Loading Model from: %s", path.c_str());
+
 		RE_FileIO modelFBX(path.c_str());
 
 		if (modelFBX.Load())
@@ -303,9 +311,11 @@ void RE_CompUnregisteredMesh::loadModel(std::string path)
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
-				LOG("ERROR::ASSIMP::%s", importer.GetErrorString());
+				LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 				return;
 			}
+
+			name = modelFBX.GetBuffer();
 			directory = path.substr(0, path.find_last_of('/'));
 
 			processNode(scene->mRootNode, scene);
@@ -315,27 +325,41 @@ void RE_CompUnregisteredMesh::loadModel(std::string path)
 
 void RE_CompUnregisteredMesh::processNode(aiNode * node, const aiScene * scene)
 {
-	// process all the node's meshes (if any)
-	for (unsigned int i = 0; i < node->mNumMeshes; i++)
+	LOG_SECONDARY("%s Node: %s (%u meshes | %u children)",
+		node->mParent ? "SON" : "PARENT",
+		node->mName.C_Str(),
+		node->mNumMeshes,
+		node->mNumChildren);
+
+	unsigned int i = 0;
+
+	for (; i < node->mNumMeshes; i++)
 	{
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene));
+		meshes.push_back(processMesh(mesh, scene, i + 1));
+		meshes.rbegin()->name = node->mName.C_Str();
+		total_triangle_count += meshes.rbegin()->triangle_count;
 	}
-	// then do the same for each of its children
-	for (unsigned int i = 0; i < node->mNumChildren; i++)
-	{
+
+	for (i = 0; i < node->mNumChildren; i++)
 		processNode(node->mChildren[i], scene);
-	}
 }
 
-RE_UnregisteredMesh RE_CompUnregisteredMesh::processMesh(aiMesh * mesh, const aiScene * scene)
+RE_UnregisteredMesh RE_CompUnregisteredMesh::processMesh(aiMesh * mesh, const aiScene * scene, const unsigned int pos)
 {
 	std::vector<_Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<_Texture> textures;
 
-	LOG("Processing Mesh with %u vertices, %u faces and %u texture indexes", mesh->mNumVertices, mesh->mNumFaces, mesh->mMaterialIndex);
+	LOG_TERCIARY("Mesh %u: %s (%u vertices | %u faces | %u texture indexes | %u bones)",
+		pos,
+		mesh->mName.C_Str(),
+		mesh->mNumVertices,
+		mesh->mNumFaces,
+		mesh->mMaterialIndex,
+		mesh->mNumBones);
 
+	// process vertices
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		// process vertex positions, normals and texture coordinates
@@ -363,26 +387,27 @@ RE_UnregisteredMesh RE_CompUnregisteredMesh::processMesh(aiMesh * mesh, const ai
 
 		vertices.push_back(vertex);
 	}
+	
 	// process indices
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
+
+		if (face.mNumIndices != 3)
+			LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face.mNumIndices);
+
 		for (unsigned int j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
 	}
+
 	// process material
-	if (mesh->mMaterialIndex >= 0)
-	{
-		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+	aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+	std::vector<_Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+	//std::vector<_Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+	//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-		std::vector<_Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-
-		std::vector<_Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-	}
-
-	return RE_UnregisteredMesh(vertices, indices, textures);
+	return RE_UnregisteredMesh(vertices, indices, textures, mesh->mNumFaces);
 }
 
 std::vector<_Texture> RE_CompUnregisteredMesh::loadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName)
@@ -405,7 +430,7 @@ std::vector<_Texture> RE_CompUnregisteredMesh::loadMaterialTextures(aiMaterial *
 		if (!skip)
 		{   // if texture hasn't been loaded already, load it
 			_Texture texture;
-			texture.id = App->textures->LoadTexture2D(directory.c_str(), str.C_Str(), droped);
+			texture.id = App->textures->LoadTexture2D(directory.c_str(), str.C_Str(), dropped);
 			texture.type = typeName;
 			texture.path = str.C_Str();
 			textures.push_back(texture);
@@ -417,4 +442,39 @@ std::vector<_Texture> RE_CompUnregisteredMesh::loadMaterialTextures(aiMaterial *
 
 void RE_CompUnregisteredMesh::DrawProperties()
 {
+	if (ImGui::CollapsingHeader("Mesh"))
+	{
+		ImGui::Text("Name: %s%s", name.c_str(), dropped ? " (dropped)" : " ");
+
+		ImGui::TextWrapped("Directory: %s", directory.c_str());
+		ImGui::Text("Triangle Count: %u", total_triangle_count);
+		if (ImGui::Button(show_f_normals ? "Hide Face Normals" : "Show Face Normals")) show_f_normals = !show_f_normals;
+		if (ImGui::Button(show_v_normals ? "Hide Vertex Normals" : "Show Vertex Normals")) show_v_normals = !show_v_normals;
+
+		std::vector<RE_UnregisteredMesh>::iterator it = meshes.begin();
+		for (; it != meshes.end(); it++)
+		{
+			if (ImGui::CollapsingHeader(it->name.c_str()))
+			{
+				ImGui::Text("Vertex count: %u", it->vertices.size());
+				ImGui::Text("Triangle Face count: %u", it->triangle_count);
+				ImGui::Text("VAO: %u", it->VAO);
+
+				int width = 0;
+				int height = 0;
+				std::vector<_Texture>::iterator it2 = it->textures.begin();
+				for (unsigned int i = 1; it2 != it->textures.end(); it2++, i++)
+				{
+
+					ImGui::Separator();
+					ImGui::Text("Texture %u:", i);
+					ImGui::Text("\t- ID: %u", it2->id);
+					App->textures->GetWithHeight(it2->id, &width, &height);
+					ImGui::Text("\t- Size: %ux%u", width, height);
+					ImGui::Text("\t- Path: %s", it2->path.c_str());
+					ImGui::Text("\t- Type: %s", it2->type.c_str());
+				}
+			}
+		}
+	}
 }

@@ -280,7 +280,7 @@ void ConsoleWindow::Draw()
 
 			if (ImGui::BeginMenu("Filter Categories"))
 			{
-				for (unsigned int j = 0; j < 6; j++)
+				for (unsigned int j = 0; j < L_TOTAL_CATEGORIES; j++)
 					if (ImGui::MenuItem(category_names[j], categories[j] ? "Hide" : "Show"))
 						SwapCategory(j);
 
@@ -355,7 +355,7 @@ ConfigWindow::ConfigWindow(const char * name, bool start_active) :
 
 void ConfigWindow::Draw()
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_HorizontalScrollbar);
 	{
 		App->DrawEditor();
 	}
@@ -379,7 +379,7 @@ PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
 void PropertiesWindow::Draw()
 {
 	// draw transform and components
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_HorizontalScrollbar);
 	{
 		App->scene->DrawFocusedProperties();
 	}
@@ -882,9 +882,9 @@ void GeometryTest::Draw()
 
 		}
 
-		ImGui::TextWrappedV(fig1.c_str(), "");
+		ImGui::TextWrapped(fig1.c_str());
 		ImGui::Text("&");
-		ImGui::TextWrappedV(fig2.c_str(), "");
+		ImGui::TextWrapped(fig2.c_str());
 
 		if (intersects)
 			ImGui::Text("Intersect");

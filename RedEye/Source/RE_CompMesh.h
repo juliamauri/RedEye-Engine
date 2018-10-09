@@ -19,52 +19,18 @@ protected:
 };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <vector>
 #include "MathGeoLib/include/MathGeoLib.h"
 
-struct _Vertex {
-	// position
+struct _Vertex
+{
 	math::vec Position;
-	// normal
 	math::vec Normal;
-	// texCoords
 	math::float2 TexCoords;
-	// tangent
-	//math::vec Tangent;
-	// bitangent
-	//math::vec Bitangent;
 };
 
-
-struct _Texture {
+struct _Texture
+{
 	unsigned int id;
 	std::string type;
 	std::string path;
@@ -79,7 +45,7 @@ enum aiTextureType;
 class RE_UnregisteredMesh
 {
 public:
-	RE_UnregisteredMesh(std::vector<_Vertex> vertices, std::vector<unsigned int> indices, std::vector<_Texture> textures);
+	RE_UnregisteredMesh(std::vector<_Vertex> vertices, std::vector<unsigned int> indices, std::vector<_Texture> textures, unsigned int triangles);
 
 	void Draw(unsigned int shader_ID, bool f_normals = false, bool v_normals = false);
 
@@ -92,6 +58,8 @@ public:
 	std::vector<_Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<_Texture> textures;
+	std::string name;
+	unsigned int triangle_count = 0;
 	unsigned int VAO;
 
 private:
@@ -112,14 +80,18 @@ private:
 
 	void loadModel(std::string path);
 	void processNode(aiNode *node, const aiScene *scene);
-	RE_UnregisteredMesh processMesh(aiMesh *mesh, const aiScene *scene);
+	RE_UnregisteredMesh processMesh(aiMesh *mesh, const aiScene *scene, const unsigned int pos = 1);
 	std::vector<_Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
 
-private:
+public:
+
 	const char* buffer_file = nullptr;
+	std::string name;
 	std::string directory;
 	unsigned int buffer_size = 0;
-	bool droped = false;
+
+	bool dropped = false;
+	unsigned int total_triangle_count = 0;
 
 	std::vector<RE_UnregisteredMesh> meshes;
 	std::vector<_Texture> textures_loaded;
@@ -127,4 +99,5 @@ private:
 	bool show_f_normals = true;
 	bool show_v_normals = false;
 };
+
 #endif // !__RE_COMPMESH_H__
