@@ -79,56 +79,52 @@ enum aiTextureType;
 class RE_UnregisteredMesh
 {
 public:
-	/*  Mesh Data  */
+	RE_UnregisteredMesh(std::vector<_Vertex> vertices, std::vector<unsigned int> indices, std::vector<_Texture> textures);
+
+	void Draw(unsigned int shader_ID, bool f_normals = false, bool v_normals = false);
+
+private:
+
+	void _setupMesh();
+
+public:
+
 	std::vector<_Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<_Texture> textures;
 	unsigned int VAO;
 
-	/*  Functions  */
-	// constructor
-	RE_UnregisteredMesh(std::vector<_Vertex> vertices, std::vector<unsigned int> indices, std::vector<_Texture> textures);
-
-	// render the mesh
-	void Draw(unsigned int shader_ID, bool f_normals = false, bool v_normals = false);
-
 private:
-	/*  Render data  */
-	unsigned int VBO, EBO;
 
-	/*  Functions    */
-	// initializes all the buffer objects/arrays
-	void _setupMesh();
+	unsigned int VBO, EBO;
 };
 
 class RE_CompUnregisteredMesh
 {
 public:
-	/*  Functions   */
 	RE_CompUnregisteredMesh(char *path);
 	RE_CompUnregisteredMesh(char *path, const char* buffer, unsigned int size);
 
 	void Draw(unsigned int shader);
-
 	void DrawProperties();
 
 private:
-	/*  Model Data  */
+
+	void loadModel(std::string path);
+	void processNode(aiNode *node, const aiScene *scene);
+	RE_UnregisteredMesh processMesh(aiMesh *mesh, const aiScene *scene);
+	std::vector<_Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+
+private:
 	const char* buffer_file = nullptr;
+	std::string directory;
 	unsigned int buffer_size = 0;
 	bool droped = false;
+
 	std::vector<RE_UnregisteredMesh> meshes;
-	std::string directory;
 	std::vector<_Texture> textures_loaded;
 
 	bool show_f_normals = true;
 	bool show_v_normals = false;
-
-	/*  Functions   */
-	void loadModel(std::string path);
-	void processNode(aiNode *node, const aiScene *scene);
-	RE_UnregisteredMesh processMesh(aiMesh *mesh, const aiScene *scene);
-	std::vector<_Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type,
-		std::string typeName);
 };
 #endif // !__RE_COMPMESH_H__

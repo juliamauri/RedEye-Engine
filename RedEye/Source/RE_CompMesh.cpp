@@ -12,12 +12,12 @@ RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char * path, const bool file_
 
 RE_CompMesh::~RE_CompMesh()
 {
-	App->meshes->UnReference(reference);
+	((ResourceManager*)App->meshes)->UnReference(reference);
 }
 
 unsigned int RE_CompMesh::LoadMesh(const char * path, bool dropped)
 {
-	App->meshes->UnReference(reference);
+	((ResourceManager*)App->meshes)->UnReference(reference);
 
 	if (path != nullptr)
 		reference = App->meshes->LoadMesh(path, dropped);
@@ -373,16 +373,13 @@ RE_UnregisteredMesh RE_CompUnregisteredMesh::processMesh(aiMesh * mesh, const ai
 	// process material
 	if (mesh->mMaterialIndex >= 0)
 	{
-		if (mesh->mMaterialIndex >= 0)
-		{
-			aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-			std::vector<_Texture> diffuseMaps = loadMaterialTextures(material,
-				aiTextureType_DIFFUSE, "texture_diffuse");
-			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			std::vector<_Texture> specularMaps = loadMaterialTextures(material,
-				aiTextureType_SPECULAR, "texture_specular");
-			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-		}
+		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+
+		std::vector<_Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+
+		std::vector<_Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
 	return RE_UnregisteredMesh(vertices, indices, textures);
