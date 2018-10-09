@@ -8,6 +8,10 @@
 class SystemInfo : public EventListener
 {
 public:
+	SystemInfo();
+	~SystemInfo();
+
+	void Init();
 
 	// Check Hardware
 	void WhatAreWeRunningOn();

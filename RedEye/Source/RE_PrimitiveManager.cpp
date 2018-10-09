@@ -1,12 +1,13 @@
 #include "RE_PrimitiveManager.h"
 
+#include "Application.h"
+#include "ShaderManager.h"
+#include "OutputLog.h"
+#include "RE_Math.h"
+
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
-
-#include "Application.h"
-#include "ShaderManager.h"
-#include "RE_Math.h"
 
 RE_PrimitiveManager::RE_PrimitiveManager()
 {
@@ -299,9 +300,22 @@ void RE_PrimitiveManager::Rest(ComponentType count)
 		DeleteVAOPrimitive(count);
 }
 
-void RE_PrimitiveManager::LoadShader(const char * name)
+bool RE_PrimitiveManager::Init(const char* def_shader)
 {
-		App->shaders->Load(name, &shaderPrimitive);
+	LOG("Initializing Primitive Manager");
+
+	bool ret = (def_shader != nullptr);
+	if (ret)
+	{
+		ret = App->shaders->Load(def_shader, &shaderPrimitive);
+		if (!ret) LOG_ERROR("Primitive Manager could not load shader: %s", def_shader);
+	}
+	else
+	{
+		LOG_ERROR("Primitive Manager invalid default shader name", def_shader);
+	}
+
+	return ret;
 }
 
 void RE_PrimitiveManager::DeleteVAOPrimitive(ComponentType primitive)

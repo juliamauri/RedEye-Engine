@@ -1,21 +1,23 @@
 #include "TimeManager.h"
 
+#include "OutputLog.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
 
-TimeManager::TimeManager(float max_fps)
+TimeManager::TimeManager()
 {
-	dt = 0.f;
-	capped_fps = max_fps;
 	capped_ms = 1000.f / capped_fps;
-	frames_counter = fps_counter = last_fps_count = last_ms_count = 0u;
-	pause_plotting = false;
-
 	ClearArrays();
 }
 
 TimeManager::~TimeManager()
 {}
+
+void TimeManager::Init(float max_fps)
+{
+	LOG("Initializing Time Manager");
+	SetMaxFPS(max_fps);
+}
 
 float TimeManager::UpdateDeltaTime()
 {

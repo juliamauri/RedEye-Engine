@@ -15,6 +15,8 @@ public:
 	//delete all programs loaded
 	~ShaderManager();
 
+	bool Init();
+
 	//Load shaders and put in vector
 	bool Load(const char* name, unsigned int* ID);
 	//get last error

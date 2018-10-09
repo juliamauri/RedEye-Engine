@@ -1,9 +1,11 @@
 #include "ShaderManager.h"
 
+#include "Application.h"
 #include "ModuleEditor.h"
+#include "FileSystem.h"
+#include "OutputLog.h"
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
-#include "FileSystem.h"
 
 ShaderManager::ShaderManager(const char * folderPath) : folderPath(folderPath) {}
 
@@ -12,6 +14,18 @@ ShaderManager::~ShaderManager()
 	for (unsigned int ID : shaders) {
 		glDeleteProgram(ID);
 	}
+}
+
+bool ShaderManager::Init()
+{
+	LOG("Initializing Shader Manager");
+
+	App->ReportSoftware("GLSLang", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
+	
+	bool ret = (folderPath != nullptr);
+	if (!ret) LOG_ERROR("Shader Manager could not read folder path");
+
+	return ret;
 }
 
 bool ShaderManager::Load(const char* name, unsigned int* ID)

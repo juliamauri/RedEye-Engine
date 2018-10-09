@@ -27,8 +27,10 @@ class TimeManager
 {
 public:
 
-	TimeManager(float max_fps = 60.f);
+	TimeManager();
 	~TimeManager();
+
+	void Init(float max_fps = 60.f);
 
 	float	UpdateDeltaTime(); // Called before updating modules
 	void	ManageFrameTimers(); // Called after modules update
@@ -54,7 +56,7 @@ private:
 	unsigned int	last_ms_count = 0u;
 
 	float	dt = 0.f;
-	float	capped_fps = 0.f;
+	float	capped_fps = 60.f;
 	unsigned int	capped_ms = 0u;
 
 	Timer	ms_timer; // read every frame

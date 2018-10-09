@@ -30,6 +30,8 @@ public:
 	Texture2DManager(const char* folderPath);
 	~Texture2DManager();
 
+	bool Init();
+
 	//Load texture
 	unsigned int LoadTexture2D(const char* name, ImageExtensionType extension);
 	unsigned int LoadTexture2D(const char* path, const char* file_name, bool droped = false);

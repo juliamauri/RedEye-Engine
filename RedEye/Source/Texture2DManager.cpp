@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "FileSystem.h"
+#include "OutputLog.h"
 
 #include "Glew/include/glew.h"
 #include <string>
@@ -14,13 +15,7 @@
 #pragma comment(lib, "IL/libx86/ILUT.lib")
 
 Texture2DManager::Texture2DManager(const char * folderPath) : folderPath(folderPath) 
-{
-	ilutRenderer(ILUT_OPENGL);
-	ilInit();
-	iluInit();
-	ilutInit();
-	ilutRenderer(ILUT_OPENGL);
-}
+{}
 
 Texture2DManager::~Texture2DManager()
 {
@@ -29,6 +24,34 @@ Texture2DManager::~Texture2DManager()
 		toDelete = textures2D.find(TextureID)->second;
 		delete toDelete;
 	}
+}
+
+bool Texture2DManager::Init()
+{
+	LOG("Initializing Texture Manager");
+
+	ilInit();
+	iluInit();
+	ilutInit();
+
+	ILenum error = ilGetError();
+	bool ret = (error == IL_NO_ERROR);
+	if (ret)
+		ilutRenderer(ILUT_OPENGL);
+	else
+		LOG_ERROR("DevIL could not initialice! DevIL Error %d - %s", error, iluErrorString(error));
+	
+	if (folderPath == nullptr)
+	{
+		LOG_ERROR("Texure Manager could not read folder path");
+		ret = false;
+	}
+
+	char tmp[8];
+	sprintf_s(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
+	App->ReportSoftware("DevIL", tmp, "http://openil.sourceforge.net/");
+
+	return ret;
 }
 
 unsigned int Texture2DManager::LoadTexture2D(const char * name, ImageExtensionType extension)

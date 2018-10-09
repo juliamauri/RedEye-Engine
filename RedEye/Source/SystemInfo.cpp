@@ -2,12 +2,25 @@
 
 #include "Application.h"
 #include "Globals.h"
+#include "OutputLog.h"
 #include "SDL2\include\SDL.h"
 #include "imgui\imgui.h"
 #include "mmgr\mmgr.h"
 #include "gpudetect\DeviceId.h"
 #include "Glew\include\glew.h"
 #include <gl\GL.h>
+
+SystemInfo::SystemInfo()
+{}
+
+SystemInfo::~SystemInfo()
+{}
+
+void SystemInfo::Init()
+{
+	LOG("Initializing System Info");
+	WhatAreWeRunningOn();
+}
 
 void SystemInfo::WhatAreWeRunningOn()
 {

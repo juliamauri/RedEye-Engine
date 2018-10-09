@@ -13,6 +13,8 @@ public:
 	RE_PrimitiveManager();
 	~RE_PrimitiveManager();
 
+	bool Init(const char* def_shader);
+
 	 //Create
 	RE_CompPrimitive* CreateAxis(RE_GameObject* game_obj);
 	RE_CompPrimitive* CreatePoint(RE_GameObject* game_obj, math::vec pos);
