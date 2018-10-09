@@ -341,9 +341,16 @@ JSONNode* Config::GetRootNode(const char* member)
 		rapidjson::Value* value = rapidjson::Pointer(path.c_str()).Get(document);
 
 		if (value == nullptr)
+		{
 			value = &rapidjson::Pointer(path.c_str()).Create(document);
+			LOG("Configuration node not found for %s, created new pointer", path.c_str());
+		}
 
 		ret = new JSONNode(path.c_str(), this);
+	}
+	else
+	{
+		LOG("Error Loading Configuration node: Empty Member Name");
 	}
 
 	return ret;
@@ -586,4 +593,9 @@ JSONNode* JSONNode::PullJObject(const char * name)
 inline bool JSONNode::operator!() const
 {
 	return (config == nullptr) || pointerPath.empty();
+}
+
+const char * JSONNode::GetDocumentPath() const
+{
+	return pointerPath.c_str();
 }

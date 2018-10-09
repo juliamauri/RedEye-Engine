@@ -110,6 +110,7 @@ public:
 
 	// Utility
 	inline bool operator!() const;
+	const char* GetDocumentPath() const;
 
 private:
 
