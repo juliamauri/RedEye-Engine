@@ -28,6 +28,7 @@ void _log(const int category, const char file[], int line, const char* format, .
 		case L_SEPARATOR: sprintf_s(tmp_string2, 4096, "\n\n=============\t%s\t=============", tmp_string); break;
 		case L_GLOBAL: sprintf_s(tmp_string2, 4096, "\n%s", tmp_string); break;
 		case L_SECONDARY: sprintf_s(tmp_string2, 4096, "\n\t- %s", tmp_string); break;
+		case L_TERCIARY: sprintf_s(tmp_string2, 4096, "\n\t\t+ %s", tmp_string); break;
 		case L_ERROR: sprintf_s(tmp_string2, 4096, "\nERROR: %s", tmp_string); break;
 		case L_WARNING: sprintf_s(tmp_string2, 4096, "\nWARNING: %s", tmp_string); break;
 		case L_SOFTWARE: sprintf_s(tmp_string2, 4096, "\n\t* 3rd party software report: %s", tmp_string); break;

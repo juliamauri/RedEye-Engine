@@ -101,8 +101,8 @@ public:
 	ImGuiTextBuffer console_buffer;
 	bool scroll_to_bot = true;
 	int file_filter = -1;
-	bool categories[6] = { true, true, true, true, true, true };
-	const char* category_names[6] = { "Separator", "Global", "Secondary", "Error" , "Warning" , "Software" };
+	bool categories[7] = { true, true, true, true, true, true, true };
+	const char* category_names[7] = { "Separator", "Global", "Secondary", "Terciary", "Error" , "Warning" , "Software" };
 };
 
 class ConfigWindow : public EditorWindow

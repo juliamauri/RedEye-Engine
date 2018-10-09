@@ -6,14 +6,17 @@ enum LogCategory : int
 	L_SEPARATOR = 0x00,
 	L_GLOBAL,
 	L_SECONDARY,
+	L_TERCIARY,
 	L_ERROR,
 	L_WARNING,
-	L_SOFTWARE
+	L_SOFTWARE,
+	L_TOTAL_CATEGORIES
 };
 
 #define LOG(format, ...) _log(L_GLOBAL, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_SEPARATOR(format, ...) _log(L_SEPARATOR, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_SECONDARY(format, ...) _log(L_SECONDARY, __FILE__, __LINE__, format, __VA_ARGS__)
+#define LOG_TERCIARY(format, ...) _log(L_TERCIARY, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_ERROR(format, ...) _log(L_ERROR, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_WARNING(format, ...) _log(L_WARNING, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_SOFTWARE(format, ...) _log(L_SOFTWARE, __FILE__, __LINE__, format, __VA_ARGS__)
