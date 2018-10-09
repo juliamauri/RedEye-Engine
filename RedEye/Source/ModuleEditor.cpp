@@ -37,10 +37,14 @@ ModuleEditor::~ModuleEditor()
 // Load assets
 bool ModuleEditor::Init(JSONNode* node)
 {
+	LOG_SECONDARY("Init ImGui");
+
 	bool ret = ImGui_ImplSdlGL3_Init(App->window->GetWindow());
 
 	if (ret)
 		App->ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
+	else
+		LOG_ERROR("ImGui could not initialize!");
 
 	// TODO set window lock positions
 
@@ -184,25 +188,20 @@ void ModuleEditor::HandleSDLEvent(SDL_Event* e)
 
 void ModuleEditor::LogToEditorConsole()
 {
-	if (console != nullptr && !windows.empty())
+	if (console != nullptr && !windows.empty()
+		&& (console->file_filter < 0 || App->log->logHistory.back().caller_id == console->file_filter)
+		&& console->categories[(int)App->log->logHistory.back().category])
 	{
-		if (console->filter < 0 || App->log->logHistory.back().first == console->filter)
-		{
-			console->console_buffer.append(App->log->logHistory.back().second.c_str());
-			console->scroll_to_bot = true;
-		}
+		console->console_buffer.append(App->log->logHistory.back().data.c_str());
+		console->scroll_to_bot = true;
 	}
 }
 
 bool ModuleEditor::AddSoftwareUsed(SoftwareInfo s)
 {
-	bool ret = false;
+	bool ret = (about != nullptr);
 
-	if (about)
-	{
-		about->sw_info.push_back(s);
-		ret = true;
-	}
+	if (ret) about->sw_info.push_back(s);
 
 	return ret;
 }
@@ -262,19 +261,36 @@ ConsoleWindow::ConsoleWindow(const char * name, bool start_active) :
 
 void ConsoleWindow::Draw()
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	ImGui::Begin(name, 0, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoFocusOnAppearing);
 	{
-		if (ImGui::Button("All")) ChangeFilter(-1);
-
-		std::map<std::string, unsigned int>::iterator it = App->log->callers.begin();
-		for (; it != App->log->callers.end(); it++)
+		if (ImGui::BeginMenuBar())
 		{
-			ImGui::SameLine();
-			if (ImGui::Button(it->first.c_str())) ChangeFilter(it->second);
+			if (ImGui::BeginMenu("Filter Files"))
+			{
+				if (ImGui::MenuItem("All")) ChangeFilter(-1);
+
+				std::map<std::string, unsigned int>::iterator it = App->log->callers.begin();
+				for (int i = 0; it != App->log->callers.end(); i++, it++)
+				{
+					if (ImGui::MenuItem(it->first.c_str())) ChangeFilter(it->second);
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Filter Categories"))
+			{
+				for (unsigned int j = 0; j < 6; j++)
+					if (ImGui::MenuItem(category_names[j], categories[j] ? "Hide" : "Show"))
+						SwapCategory(j);
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenuBar();
 		}
 
 		ImGui::TextUnformatted(console_buffer.begin());
-
 		if (scroll_to_bot) ImGui::SetScrollHere(1.0f);
 		scroll_to_bot = false;
 	}
@@ -282,29 +298,50 @@ void ConsoleWindow::Draw()
 	ImGui::End();
 }
 
-void ConsoleWindow::ChangeFilter(int new_filter)
+void ConsoleWindow::ChangeFilter(const int new_filter)
 {
-	if (new_filter != filter)
+	if (new_filter != file_filter)
 	{
-		filter = new_filter;
+		file_filter = new_filter;
 		console_buffer.clear();
 		scroll_to_bot = true;
 
-		std::list<std::pair<unsigned int, std::string>>::iterator it = App->log->logHistory.begin();
-		
-		if (new_filter < 0)
+		std::list<RE_Log>::iterator it = App->log->logHistory.begin();
+
+		if (file_filter < 0)
 		{
 			for (; it != App->log->logHistory.end(); it++)
-				console_buffer.append(it->second.c_str());
+				if (categories[it->category])
+					console_buffer.append(it->data.c_str());
 		}
 		else
 		{
 			for (; it != App->log->logHistory.end(); it++)
-			{
-				if (it->first == filter)
-					console_buffer.append(it->second.c_str());
-			}
+				if (it->caller_id == file_filter && categories[it->category])
+					console_buffer.append(it->data.c_str());
 		}
+	}
+}
+
+void ConsoleWindow::SwapCategory(const unsigned int c)
+{
+	categories[c] = !categories[c];
+	console_buffer.clear();
+	scroll_to_bot = true;
+
+	std::list<RE_Log>::iterator it = App->log->logHistory.begin();
+
+	if (file_filter < 0)
+	{
+		for (; it != App->log->logHistory.end(); it++)
+			if (categories[it->category])
+				console_buffer.append(it->data.c_str());
+	}
+	else
+	{
+		for (; it != App->log->logHistory.end(); it++)
+			if (it->caller_id == file_filter && categories[it->category])
+				console_buffer.append(it->data.c_str());
 	}
 }
 

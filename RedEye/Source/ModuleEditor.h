@@ -96,10 +96,13 @@ class ConsoleWindow : public EditorWindow
 public:
 	ConsoleWindow(const char* name = "Console", bool start_active = true);
 	void Draw() override;
-	void ChangeFilter(int new_filter);
+	void ChangeFilter(const int new_filter);
+	void SwapCategory(const unsigned int category);
 	ImGuiTextBuffer console_buffer;
 	bool scroll_to_bot = true;
-	int filter = -1;
+	int file_filter = -1;
+	bool categories[6] = { true, true, true, true, true, true };
+	const char* category_names[6] = { "Separator", "Global", "Secondary", "Error" , "Warning" , "Software" };
 };
 
 class ConfigWindow : public EditorWindow
