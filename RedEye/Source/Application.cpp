@@ -49,6 +49,7 @@ Application::~Application()
 	DEL(sys_info);
 	DEL(math);
 	DEL(log);
+
 	DEL(textures);
 	DEL(shaders);
 	DEL(primitives);
@@ -62,10 +63,13 @@ bool Application::Init()
 {
 	bool ret = true;
 
-	// Initialize SDL without any subsystems
+	LOG_SEPARATOR("Initializing RedEye");
+	LOG("Initializing Application");
+	LOG_SECONDARY("Initializing SDL without any subsystems");
+
 	if (SDL_Init(0) < 0)
 	{
-		LOG("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+		LOG_ERROR("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		ret = false;
 	}
 	else
@@ -75,8 +79,8 @@ bool Application::Init()
 		char tmp[8];
 		sprintf_s(tmp, 8, "%u.%u.%u", (int)sdl_version.major, (int)sdl_version.minor, (int)sdl_version.patch);
 		App->ReportSoftware("SDL", tmp, "https://www.libsdl.org/");
-		sprintf_s(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
-		App->ReportSoftware("DevIL", tmp, "http://openil.sourceforge.net/");
+
+		LOG("Initializing File System");
 
 		if (fs->Init(argc, argv))
 		{
@@ -86,22 +90,41 @@ bool Application::Init()
 			organization = node->PullString("Organization", organization.c_str());
 			DEL(node);
 
+			// Initiallize Updating Modules
 			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 				if ((*it)->IsActive() == true)
 				{
 					node = config->GetRootNode((*it)->GetName());
-					ret = (*it)->Init(node);
+
+					if (node)
+						LOG("Initializing Module %s (%s)", (*it)->GetName(), node->GetDocumentPath());
+					else
+						LOG("Initializing Module %s (empty)", (*it)->GetName());
+
+					if (!(ret = (*it)->Init(node)))
+
 					DEL(node);
 				}
 
-			sys_info->WhatAreWeRunningOn();
+			// Initiallize Indenpendent Modules
+			time->Init(/*TODO get max fps from node*/);
+			sys_info->Init();
 			math->Init();
-			primitives->LoadShader("primitive");
-			meshes->Init("modelloading");
+
+			// Initiallize Resource Managers
+			if (!textures->Init()) LOG_WARNING("Won't be able to use textures");
+			if (!shaders->Init()) LOG_WARNING("Won't be able to use shaders");
+			if (!primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
+			if (!meshes->Init("modelloading"))  LOG_WARNING("Won't be able to use meshes");
+
+			LOG_SEPARATOR("Starting RedEye Application");
 
 			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 				if ((*it)->IsActive() == true)
-					ret = (*it)->Start(/* CONFIG */);
+				{
+					LOG("Starting Module %s", (*it)->GetName());
+					ret = (*it)->Start();
+				}
 		}
 	}
 
@@ -208,7 +231,7 @@ bool Application::Save()
 			DEL(node);
 		}
 
-	if (!ret) LOG("Error Save Configuration from modules");
+	if (!ret) LOG_ERROR("Error Save Configuration from modules");
 
 	want_to_save = false;
 
@@ -250,10 +273,10 @@ void Application::DrawEditor()
 	if (ImGui::CollapsingHeader("File System")) fs->DrawEditor();
 }
 
-void Application::Log(const char * text, const char* file)
+void Application::Log(int category, const char * text, const char* file)
 {
 	if(log != nullptr)
-		log->Add(text, file);
+		log->Add(category, text, file);
 
 	if(editor != nullptr && !modules.empty())
 		editor->LogToEditorConsole();
@@ -261,7 +284,29 @@ void Application::Log(const char * text, const char* file)
 
 void Application::ReportSoftware(const char * name, const char * version, const char * website)
 {
-	editor->AddSoftwareUsed(SoftwareInfo(name, version, website));
+	if (name != nullptr)
+	{
+		if (version != nullptr)
+		{
+			if (website != nullptr)
+				LOG_SOFTWARE("%s v%s (%s)", name, version, website);
+			else
+				LOG_SOFTWARE("%s v%s", name, version);
+		}
+		else
+		{
+			if (website != nullptr)
+				LOG_SOFTWARE("%s (%s)", name, website);
+			else
+				LOG_SOFTWARE(name);
+		}
+
+		editor->AddSoftwareUsed(SoftwareInfo(name, version, website));
+	}
+	else
+	{
+		LOG_ERROR("Reporting Software with invalid name");
+	}
 }
 
 void Application::RecieveEvent(const Event* e)

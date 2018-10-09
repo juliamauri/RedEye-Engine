@@ -38,7 +38,7 @@ public:
 	bool Save();
 
 	void DrawEditor();
-	void Log(const char* text, const char* file);
+	void Log(const int category, const char* text, const char* file);
 	void ReportSoftware(const char * name, const char * version = nullptr, const char * website = nullptr);
 	void RecieveEvent(const Event* e) override;
 
