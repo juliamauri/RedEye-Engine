@@ -14,6 +14,12 @@
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
 
+SoftwareInfo::SoftwareInfo(const char * name, const char * v, const char * w) :
+	name(name)
+{
+	if (v != nullptr) version = v;
+	if (w != nullptr) website = w;
+}
 
 ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
@@ -233,25 +239,16 @@ void EditorWindow::SwitchActive()
 	active = !active;
 }
 
-const char * EditorWindow::Name() const
-{
-	return name;
-}
+const char * EditorWindow::Name() const { return name; }
 
-bool EditorWindow::IsActive() const
-{
-	return active;
-}
+bool EditorWindow::IsActive() const { return active; }
 
-EditorWindow::operator bool() const
-{
-	return active;
-}
+EditorWindow::operator bool() const { return active; }
 
-inline bool EditorWindow::operator!() const
-{
-	return !active;
-}
+inline bool EditorWindow::operator!() const { return !active; }
+
+
+///////   Console Window   ////////////////////////////////////////////
 
 ConsoleWindow::ConsoleWindow(const char * name, bool start_active) : 
 	EditorWindow(name, start_active)
@@ -345,6 +342,9 @@ void ConsoleWindow::SwapCategory(const unsigned int c)
 	}
 }
 
+
+///////   Configuration Window   ////////////////////////////////////////////
+
 ConfigWindow::ConfigWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {
@@ -363,6 +363,9 @@ void ConfigWindow::Draw()
 	ImGui::End();
 }
 
+
+///////   Heriarchy Window   ////////////////////////////////////////////
+
 HeriarchyWindow::HeriarchyWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {}
@@ -371,6 +374,9 @@ void HeriarchyWindow::Draw()
 {
 	// draw gameobject tree
 }
+
+
+///////   Properties Window   ////////////////////////////////////////////
 
 PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
@@ -386,6 +392,9 @@ void PropertiesWindow::Draw()
 
 	ImGui::End();
 }
+
+
+///////   About Window   ////////////////////////////////////////////
 
 AboutWindow::AboutWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
@@ -449,6 +458,9 @@ void AboutWindow::Draw()
 	ImGui::End();
 }
 
+
+///////   Random Tool   ////////////////////////////////////////////
+
 RandomTest::RandomTest(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {}
@@ -482,6 +494,9 @@ void RandomTest::Draw()
 
 	ImGui::End();
 }
+
+
+///////   Render Test Tool   ////////////////////////////////////////////
 
 RendererTest::RendererTest(const char * name, bool start_active) : EditorWindow(name,start_active)
 {}
@@ -629,6 +644,9 @@ void RendererTest::Draw()
 	ImGui::End();
 	*/
 }
+
+
+///////   Random Tool   ////////////////////////////////////////////
 
 GeometryTest::GeometryTest(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
@@ -896,9 +914,3 @@ void GeometryTest::Draw()
 	ImGui::End();
 }
 
-SoftwareInfo::SoftwareInfo(const char * name, const char * v, const char * w) :
-	name(name)
-{
-	if (v != nullptr) version = v;
-	if (w != nullptr) website = w;
-}
