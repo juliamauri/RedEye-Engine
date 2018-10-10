@@ -141,7 +141,67 @@ RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
 {
 	if (primitives_count.find(C_PLANE)->second++ == 0)
 	{
+		std::vector<float> vertices;
+		for (float f = 0.f; f < 50.f; f++)
+		{
+			vertices.push_back((f * 5.f) - 125.f);
+			vertices.push_back(0.f);
+			vertices.push_back(125.f);
+			vertices.push_back((f * 5.f) - 125.f);
+			vertices.push_back(0.f);
+			vertices.push_back(-125.f);
+			vertices.push_back(125.f);
+			vertices.push_back(0.f);
+			vertices.push_back((f * 5.f) - 125.f);
+			vertices.push_back(-125.f);
+			vertices.push_back(0.f);
+			vertices.push_back((f * 5.f) - 125.f);
+		}
 
+		glGenVertexArrays(1, &vao_plane);
+		glGenBuffers(1, &vbo_plane);
+
+		glBindVertexArray(vao_plane);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_plane);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+		glEnableVertexAttribArray(0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		// 2 triangle plane
+		/*math::vec vPositionPlane[] = {
+			// positions       
+			math::vec(1.0f,  1.0f, 0.0f),  // top right
+			math::vec(1.0f, -1.0f, 0.0f),  // bottom right
+			math::vec(-1.0f, -1.0f, 0.0f), // bottom left
+			math::vec(-1.0f,  1.0f, 0.0f) // top left
+		};
+
+		unsigned int index[] = { 0,1,3,1,2,3 };
+
+		glGenVertexArrays(1, &vao_plane);
+		glGenBuffers(1, &vbo_plane);
+		glGenBuffers(1, &ebo_plane);
+
+		glBindVertexArray(vao_plane);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_plane);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vPositionPlane) * sizeof(math::vec), &vPositionPlane[0], GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_plane);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index), index, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vPositionPlane), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
 	}
 	RE_CompPrimitive* ret = new RE_CompPlane(game_obj, vao_plane, shaderPrimitive);
 	return ret;
