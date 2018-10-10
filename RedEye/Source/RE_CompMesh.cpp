@@ -451,29 +451,34 @@ void RE_CompUnregisteredMesh::DrawProperties()
 		if (ImGui::Button(show_f_normals ? "Hide Face Normals" : "Show Face Normals")) show_f_normals = !show_f_normals;
 		if (ImGui::Button(show_v_normals ? "Hide Vertex Normals" : "Show Vertex Normals")) show_v_normals = !show_v_normals;
 
+		int width = 0;
+		int height = 0;
 		std::vector<RE_UnregisteredMesh>::iterator it = meshes.begin();
 		for (; it != meshes.end(); it++)
 		{
-			if (ImGui::CollapsingHeader(it->name.c_str()))
+			if (ImGui::TreeNode(it->name.c_str()))
 			{
 				ImGui::Text("Vertex count: %u", it->vertices.size());
 				ImGui::Text("Triangle Face count: %u", it->triangle_count);
 				ImGui::Text("VAO: %u", it->VAO);
 
-				int width = 0;
-				int height = 0;
 				std::vector<_Texture>::iterator it2 = it->textures.begin();
 				for (unsigned int i = 1; it2 != it->textures.end(); it2++, i++)
 				{
-
-					ImGui::Separator();
-					ImGui::Text("Texture %u:", i);
-					ImGui::Text("\t- ID: %u", it2->id);
 					App->textures->GetWithHeight(it2->id, &width, &height);
-					ImGui::Text("\t- Size: %ux%u", width, height);
-					ImGui::Text("\t- Path: %s", it2->path.c_str());
-					ImGui::Text("\t- Type: %s", it2->type.c_str());
+
+					if (ImGui::TreeNode("Texture"))
+					{
+						ImGui::Text("\t- ID: %u", it2->id);
+						ImGui::Text("\t- Size: %ux%u", width, height);
+						ImGui::Text("\t- Path: %s", it2->path.c_str());
+						ImGui::Text("\t- Type: %s", it2->type.c_str());
+
+						ImGui::TreePop();
+					}
 				}
+
+				ImGui::TreePop();
 			}
 		}
 	}
