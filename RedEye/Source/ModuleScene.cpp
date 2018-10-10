@@ -24,12 +24,7 @@ bool ModuleScene::Start()
 	bool ret = true;
 
 	//Loading Shaders
-
-	ret = App->shaders->Load("primitive", &ShaderPrimitive);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
-
-	ret = App->shaders->Load("modelloading", &modelloading);
+	ret = App->shaders->Load("texture", &modelloading);
 	if (!ret)
 		LOG("%s\n", App->shaders->GetShaderError());
 
@@ -261,9 +256,9 @@ bool ModuleScene::Start()
 update_status ModuleScene::PreUpdate()
 {
 	//Setting Shaders
-	ShaderManager::use(ShaderPrimitive);
-	ShaderManager::setFloat4x4(ShaderPrimitive, "view", App->renderer3d->camera->GetView().ptr());
-	ShaderManager::setFloat4x4(ShaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
+	//ShaderManager::use(ShaderPrimitive);
+	//ShaderManager::setFloat4x4(ShaderPrimitive, "view", App->renderer3d->camera->GetView().ptr());
+	//ShaderManager::setFloat4x4(ShaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
 	//ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	return UPDATE_CONTINUE;
@@ -366,12 +361,12 @@ void ModuleScene::DrawScene()
 
 	if (mesh_droped)
 	{
-		ShaderManager::use(ShaderPrimitive);
-		ShaderManager::setFloat4x4(ShaderPrimitive, "model", root->transform->GetGlobalMatrix().ptr());
-		ShaderManager::setFloat4x4(ShaderPrimitive, "view", App->renderer3d->camera->GetView().ptr());
-		ShaderManager::setFloat4x4(ShaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
-		ShaderManager::setFloat(ShaderPrimitive, "objectColor", math::vec(.2f, 0.1f, 0.1f));
-		mesh_droped->Draw(ShaderPrimitive);
+		ShaderManager::use(modelloading);
+		ShaderManager::setFloat4x4(modelloading, "model", root->transform->GetGlobalMatrix().ptr());
+		ShaderManager::setFloat4x4(modelloading, "view", App->renderer3d->camera->GetView().ptr());
+		ShaderManager::setFloat4x4(modelloading, "projection", App->renderer3d->camera->GetProjection().ptr());
+		ShaderManager::setFloat(modelloading, "objectColor", math::vec(.2f, 0.1f, 0.1f));
+		mesh_droped->Draw(modelloading);
 
 		/*ShaderManager::use(modelloading);
 		ShaderManager::setFloat4x4(modelloading, "model", root->transform->GetGlobalMatrix().ptr());
