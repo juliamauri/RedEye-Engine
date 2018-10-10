@@ -11,7 +11,7 @@
 #include "TimeManager.h"
 #include "ModuleInput.h"
 #include "FileSystem.h"
-#include "RE_CompCamera.h"
+#include "RE_Camera.h"
 #include "RE_CompMesh.h"
 #include "ModuleScene.h"
 
@@ -58,7 +58,7 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	enableVSync(depthtest = config_module->PullBool("depthtest", true));
 	enableVSync(lighting = config_module->PullBool("lighting", false));
 
-	camera = new RE_CompCamera();
+	camera = new RE_Camera();
 
 	return ret;
 }
@@ -69,22 +69,25 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	//Set background with a clear color
 	glMatrixMode(GL_PROJECTION); 
-	glLoadMatrixf(camera->GetProjection().ptr());
+	glLoadMatrixf(camera->GetProjection());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	float cameraSpeed = 2.5f * App->time->GetDeltaTime();
+	float cameraSpeed = 2.5f;
+	if (App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+		cameraSpeed *= 2.0f;
+	cameraSpeed *= App->time->GetDeltaTime();
 
 	if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
-		camera->Move(CameraMovement::FORWARD, cameraSpeed);
+		camera->Move(Camera_Movement::FORWARD, cameraSpeed);
 	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
-		camera->Move(CameraMovement::BACKWARD, cameraSpeed);
+		camera->Move(Camera_Movement::BACKWARD, cameraSpeed);
 	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
-		camera->Move(CameraMovement::LEFT, cameraSpeed);
+		camera->Move(Camera_Movement::LEFT, cameraSpeed);
 	if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
-		camera->Move(CameraMovement::RIGHT, cameraSpeed);
+		camera->Move(Camera_Movement::RIGHT, cameraSpeed);
 
 	float p = 0, y = 0;
 
@@ -97,10 +100,14 @@ update_status ModuleRenderer3D::PreUpdate()
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
 		y = 1.0F;
 
-	camera->SetEulerAngle(p,y);
+	const MouseData* mouse = App->input->GetMouse();
+	if(App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse->GetButton(1) == KEY_REPEAT)
+		camera->RotateWMouse(-mouse->mouse_x_motion, mouse->mouse_y_motion);
+
+	camera->ZoomMouse(mouse->mouse_wheel_motion);
 
 	/*
-	const MouseData* mouse = App->input->GetMouse();
+	
 	if (mouse->GetButton(1) == KEY_REPEAT)
 	{
 		lastx = newx;
@@ -146,7 +153,7 @@ update_status ModuleRenderer3D::PreUpdate()
 		camera->SetEulerAngle(yoffset, xoffset);
 	}
 	*/
-	camera->Update();
+	//camera->Update();
 
 	return ret;
 }
@@ -244,7 +251,7 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	model.InverseTranspose();
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((camera->GetView() * model).ptr());
+	glLoadMatrixf((camera->GetViewMatrixMathGeoLib() * model).ptr());
 
 	glBegin(GL_TRIANGLES);
 	glVertex3f(-1.0f, -1.0f, -1.0f);
@@ -298,5 +305,5 @@ void ModuleRenderer3D::ResetCamera()
 void ModuleRenderer3D::ResetAspectRatio()
 {
 	glViewport(0, 0, App->window->GetWidth(), App->window->GetHeight());
-	camera->ResetFov();
+	//camera->ResetFov();
 }

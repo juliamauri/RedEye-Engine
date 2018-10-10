@@ -7,7 +7,7 @@
 class ShaderManager;
 class Texture2DManager;
 class Texture2D;
-class RE_CompCamera;
+class RE_Camera;
 class RE_CompMesh;
 class RE_Mesh;
 
@@ -46,7 +46,7 @@ public:
 
 	void ResetAspectRatio();
 
-	RE_CompCamera* camera;
+	RE_Camera* camera;
 
 private:
 	bool vsync = false;

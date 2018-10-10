@@ -7,7 +7,7 @@
 #include "Texture2DManager.h"
 #include "ShaderManager.h"
 #include "RE_CompMesh.h"
-#include "RE_CompCamera.h"
+#include "RE_Camera.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
@@ -240,7 +240,7 @@ bool ModuleScene::Start()
 	*/
 
 	//Setting Camera
-	App->renderer3d->camera->SetPos(math::vec(0.0f, 0.0f, -10.0f));
+	//App->renderer3d->camera->SetPos(math::vec(0.0f, 0.0f, -10.0f));
 
 	root = new RE_GameObject();
 	//root->AddComponent(C_POINT);
@@ -363,8 +363,8 @@ void ModuleScene::DrawScene()
 	{
 		ShaderManager::use(modelloading);
 		ShaderManager::setFloat4x4(modelloading, "model", root->transform->GetGlobalMatrix().ptr());
-		ShaderManager::setFloat4x4(modelloading, "view", App->renderer3d->camera->GetView().ptr());
-		ShaderManager::setFloat4x4(modelloading, "projection", App->renderer3d->camera->GetProjection().ptr());
+		ShaderManager::setFloat4x4(modelloading, "view", App->renderer3d->camera->GetView());
+		ShaderManager::setFloat4x4(modelloading, "projection", App->renderer3d->camera->GetProjection());
 		ShaderManager::setFloat(modelloading, "objectColor", math::vec(.2f, 0.1f, 0.1f));
 		mesh_droped->Draw(modelloading);
 

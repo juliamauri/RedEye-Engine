@@ -103,6 +103,9 @@
     <ClCompile Include="Resource.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
+    <ClCompile Include="RE_Camera.cpp">
+      <Filter>GameObject\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -347,6 +350,9 @@
     </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Camera.h">
+      <Filter>GameObject\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
