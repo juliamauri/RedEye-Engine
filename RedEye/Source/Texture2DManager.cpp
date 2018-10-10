@@ -148,7 +148,7 @@ Texture2D::Texture2D(const char* path, int extension, bool droped)
 			ilLoadL(extension, image.GetBuffer(), image.GetSize());
 	}
 
-	iluFlipImage();
+	//iluFlipImage();
 
 	/* OpenGL texture binding of the image loaded by DevIL  */
 	glGenTextures(1, &ID); /* Texture name generation */
