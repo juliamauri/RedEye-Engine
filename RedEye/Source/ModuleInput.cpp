@@ -63,8 +63,8 @@ void ModuleInput::DrawEditor()
 	{
 		ImGui::Text("Mouse");
 		ImGui::Text("X: %u\tY: %u", mouse.mouse_x, mouse.mouse_y);
-		ImGui::Text("MotionX: %u\tMotionY: %u", mouse.mouse_x_motion, mouse.mouse_y_motion);
-		ImGui::Text("Wheel Motion: %u", mouse.mouse_wheel_motion);
+		ImGui::Text("MotionX: %i\tMotionY: %i", mouse.mouse_x_motion, mouse.mouse_y_motion);
+		ImGui::Text("Wheel Motion: %i", mouse.mouse_wheel_motion);
 	}
 }
 
