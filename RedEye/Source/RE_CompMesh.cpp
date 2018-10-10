@@ -157,9 +157,9 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 			normal = v.Cross(w).Normalized() * line_length;
 
 			glColor3f(color.x, color.y, color.z);
-			math::float4x4 model = ((RE_CompTransform*)App->scene->root->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
+			math::float4x4 model = ((RE_CompTransform*)App->scene->drop->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
 			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixf((App->renderer3d->camera->GetViewMatrixMathGeoLib() * model).ptr());
+			glLoadMatrixf((App->renderer3d->camera->GetView() * model).ptr());
 
 			glBegin(GL_LINES);
 			glVertex3f(pos.x, pos.y, pos.z);
@@ -181,9 +181,9 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 		for (unsigned int i = 0; i < indices.size(); i++)
 		{
 			glColor3f(color.x, color.y, color.z);
-			math::float4x4 model = ((RE_CompTransform*)App->scene->root->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
+			math::float4x4 model = ((RE_CompTransform*)App->scene->drop->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
 			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixf((App->renderer3d->camera->GetViewMatrixMathGeoLib() * model).ptr());
+			glLoadMatrixf((App->renderer3d->camera->GetView() * model).ptr());
 
 			glBegin(GL_LINES);
 			glVertex3f(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z);
@@ -205,9 +205,9 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 		for (unsigned int i = 0; i < indices.size(); i++)
 		{
 			glColor3f(color.x, color.y, color.z);
-			math::float4x4 model = ((RE_CompTransform*)App->scene->root->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
+			math::float4x4 model = ((RE_CompTransform*)App->scene->drop->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
 			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixf((App->renderer3d->camera->GetViewMatrixMathGeoLib() * model).ptr());
+			glLoadMatrixf((App->renderer3d->camera->GetView() * model).ptr());
 
 			glBegin(GL_POINTS);
 			glVertex3f(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z);

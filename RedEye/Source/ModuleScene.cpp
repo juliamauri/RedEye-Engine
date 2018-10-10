@@ -246,6 +246,7 @@ bool ModuleScene::Start()
 	//root->AddComponent(C_POINT);
 	//root->AddComponent(C_CUBE);
 	root->AddComponent(C_PLANE);
+	//root->AddComponent(C_SPHERE);
 	drop = new RE_GameObject();
 
 	mesh_droped = nullptr;
@@ -317,7 +318,7 @@ void ModuleScene::FileDrop(const char * file)
 		if (mesh_droped != nullptr)
 			DEL(mesh_droped);
 
-		root->GetComponent(C_TRANSFORM)->Reset();
+		drop->GetComponent(C_TRANSFORM)->Reset();
 
 		mesh_droped = new RE_CompUnregisteredMesh((char*)file, holder->GetBuffer(), holder->GetSize());
 	}
@@ -362,10 +363,9 @@ void ModuleScene::DrawScene()
 	if (mesh_droped)
 	{
 		ShaderManager::use(modelloading);
-		ShaderManager::setFloat4x4(modelloading, "model", root->transform->GetGlobalMatrix().ptr());
-		ShaderManager::setFloat4x4(modelloading, "view", App->renderer3d->camera->GetView());
-		ShaderManager::setFloat4x4(modelloading, "projection", App->renderer3d->camera->GetProjection());
-		ShaderManager::setFloat(modelloading, "objectColor", math::vec(.2f, 0.1f, 0.1f));
+		ShaderManager::setFloat4x4(modelloading, "model", drop->transform->GetGlobalMatrix().ptr());
+		ShaderManager::setFloat4x4(modelloading, "view", App->renderer3d->camera->GetView().ptr());
+		ShaderManager::setFloat4x4(modelloading, "projection", App->renderer3d->camera->GetProjection().ptr());
 		mesh_droped->Draw(modelloading);
 
 		/*ShaderManager::use(modelloading);
@@ -388,7 +388,7 @@ void ModuleScene::DrawFocusedProperties()
 	{
 		// root->DrawProperties();
 
-		RE_CompTransform* transform = (RE_CompTransform*)root->GetComponent(C_TRANSFORM);
+		RE_CompTransform* transform = (RE_CompTransform*)drop->GetComponent(C_TRANSFORM);
 		transform->DrawProperties();
 		mesh_droped->DrawProperties();
 	}

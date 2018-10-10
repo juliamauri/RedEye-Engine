@@ -13,22 +13,12 @@ RE_Camera::RE_Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
 	updateCameraVectors();
 }
 
-const float* RE_Camera::GetView()
-{
-	return ConvertGLMtoMathGeoLibMatrix(glm::lookAt(Position, Position + Front, Up)).ptr();
-}
-
-math::float4x4 RE_Camera::GetViewMatrixMathGeoLib()
+math::float4x4 RE_Camera::GetView()
 {
 	return ConvertGLMtoMathGeoLibMatrix(glm::lookAt(Position, Position + Front, Up));
 }
 
-const float* RE_Camera::GetProjection()
-{
-	return ConvertGLMtoMathGeoLibMatrix(glm::perspective(glm::radians(Zoom), (float)(App->window->GetWidth() / App->window->GetHeight()), 0.1f, 100.0f)).ptr();
-}
-
-math::float4x4 RE_Camera::GetProjectionMatrixMathGeoLib()
+math::float4x4 RE_Camera::GetProjection()
 {
 	return ConvertGLMtoMathGeoLibMatrix(glm::perspective(glm::radians(Zoom), (float)(App->window->GetWidth() / App->window->GetHeight()), 0.1f, 100.0f));
 }

@@ -30,6 +30,7 @@ public:
 	void DrawFocusedProperties();
 
 	RE_GameObject* root = nullptr;
+	RE_GameObject* drop = nullptr;
 	RE_CompUnregisteredMesh* mesh_droped = nullptr;
 
 private:
@@ -50,8 +51,6 @@ private:
 	RE_CompPrimitive* comppoint = nullptr;
 	RE_CompPrimitive* compline = nullptr;
 	RE_CompPrimitive* comptriangle = nullptr;
-
-	RE_GameObject* drop = nullptr;
 };
 
 

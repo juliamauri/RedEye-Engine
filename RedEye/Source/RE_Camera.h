@@ -27,12 +27,10 @@ public:
 	RE_Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
 
 	//Get camera view matrix
-	const float* GetView();
-	math::float4x4 GetViewMatrixMathGeoLib();
+	math::float4x4 GetView();
 
 	//Get camera projection matrix
-	const float* GetProjection();
-	math::float4x4 GetProjectionMatrixMathGeoLib();
+	math::float4x4 GetProjection();
 
 	//Move camera
 	void Move(Camera_Movement direction, float velocity);

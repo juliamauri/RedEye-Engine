@@ -69,7 +69,7 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	//Set background with a clear color
 	glMatrixMode(GL_PROJECTION); 
-	glLoadMatrixf(camera->GetProjection());
+	glLoadMatrixf(camera->GetProjection().ptr());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -251,7 +251,7 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	model.InverseTranspose();
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((camera->GetViewMatrixMathGeoLib() * model).ptr());
+	glLoadMatrixf((camera->GetView() * model).ptr());
 
 	glBegin(GL_TRIANGLES);
 	glVertex3f(-1.0f, -1.0f, -1.0f);
