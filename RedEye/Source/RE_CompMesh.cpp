@@ -74,6 +74,7 @@ void RE_CompMesh::Draw()
 #include "RE_GameObject.h"
 #include "RE_Component.h"
 #include "RE_CompTransform.h"
+#include "RE_PrimitiveManager.h"
 #include "FileSystem.h"
 #include "RE_Camera.h"
 #include "ImGui\imgui.h"
@@ -99,7 +100,17 @@ RE_UnregisteredMesh::RE_UnregisteredMesh(std::vector<_Vertex> vertices, std::vec
 	// now that we have all the required data, set the vertex buffers and its attribute pointers.
 	_setupMesh();
 }
+/*
+RE_UnregisteredMesh::~RE_UnregisteredMesh()
+{
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 
+	if (lVertexNormals) clearVertexNormals();
+	if (lFaceNormals) clearFaceNormals();
+}
+*/
 void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_normals)
 {
 	ShaderManager::use(shader_ID);
@@ -140,82 +151,50 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 
 	ShaderManager::use(0);
 
-	if (f_normals)
+	if (f_normals || v_normals)
 	{
-		math::vec pos = math::vec::zero;
-		math::vec v = math::vec::zero;
-		math::vec w = math::vec::zero;
-		math::vec normal = math::vec::zero;
-		math::vec color(0.f, 0.f, 1.f);
-		int line_length = 1.5f;
-
-		for (unsigned int i = 0; i < indices.size(); i+=3)
-		{
-			pos = (vertices[i].Position + vertices[i+1].Position + vertices[i+2].Position) / 3;
-			v = vertices[i+1].Position - vertices[i].Position;
-			w = vertices[i+2].Position - vertices[i].Position;
-			normal = v.Cross(w).Normalized() * line_length;
-
-			glColor3f(color.x, color.y, color.z);
-			math::float4x4 model = ((RE_CompTransform*)App->scene->drop->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
-			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixf((App->renderer3d->camera->GetView() * model).ptr());
-
-			glBegin(GL_LINES);
-			glVertex3f(pos.x, pos.y, pos.z);
-			glVertex3f(pos.x + normal.x, pos.y + normal.y, pos.z + normal.z);
-			glEnd();
-
-		}
+		ShaderManager::use(App->primitives->shaderPrimitive);
+		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "model", App->scene->drop->transform->GetGlobalMatrix().ptr());
+		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "view", App->renderer3d->camera->GetView().ptr());
+		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
 	}
 
+	if (f_normals)
+	{
+		math::vec color(0.f, 0.f, 1.f);
+		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
+
+		glBindVertexArray(VAO_FaceNormals);
+		glDrawArrays(GL_LINES, 0, indices.size() / 3 * 2);
+		glBindVertexArray(0);
+	}
+	
 	if (v_normals)
 	{
-		math::vec pos = math::vec::zero;
-		math::vec v = math::vec::zero;
-		math::vec w = math::vec::zero;
-		math::vec normal = math::vec::zero;
 		math::vec color(0.f, 1.f, 0.f);
-		int line_length = 1.5f;
+		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
 
-		for (unsigned int i = 0; i < indices.size(); i++)
-		{
-			glColor3f(color.x, color.y, color.z);
-			math::float4x4 model = ((RE_CompTransform*)App->scene->drop->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
-			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixf((App->renderer3d->camera->GetView() * model).ptr());
-
-			glBegin(GL_LINES);
-			glVertex3f(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z);
-			glVertex3f(vertices[i].Position.x + (vertices[i].Normal.x * line_length),
-				vertices[i].Position.y + (vertices[i].Normal.y * line_length),
-				vertices[i].Position.z + (vertices[i].Normal.z * line_length));
-			glEnd();
-
-		}
+		glBindVertexArray(VAO_VertexNormals);
+		glDrawArrays(GL_LINES, 0, indices.size() * 2);
+		glBindVertexArray(0);
 	}
 
 	if (f_normals || v_normals)
 	{
 		math::vec color(1.f, 1.f, 1.f);
+		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
 
 		glEnable(GL_PROGRAM_POINT_SIZE);
 		glPointSize(10.0f);
 
-		for (unsigned int i = 0; i < indices.size(); i++)
-		{
-			glColor3f(color.x, color.y, color.z);
-			math::float4x4 model = ((RE_CompTransform*)App->scene->drop->GetComponent(C_TRANSFORM))->GetGlobalMatrix();
-			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixf((App->renderer3d->camera->GetView() * model).ptr());
-
-			glBegin(GL_POINTS);
-			glVertex3f(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z);
-			glEnd();
-		}
+		glBindVertexArray(VAO_Vertex);
+		glDrawArrays(GL_POINTS, 0, vertices.size());
+		glBindVertexArray(0);
 
 		glPointSize(1.0f);
 		glDisable(GL_PROGRAM_POINT_SIZE);
+
+		ShaderManager::use(0);
 	}
 }
 
@@ -257,7 +236,119 @@ void RE_UnregisteredMesh::_setupMesh()
 	glBindVertexArray(0);
 }
 
+void RE_UnregisteredMesh::loadVertexNormals()
+{
+	if (!lFaceNormals) loadVertex();
 
+	glGenVertexArrays(1, &VAO_VertexNormals);
+	glGenBuffers(1, &VBO_VertexNormals);
+
+	glBindVertexArray(VAO_VertexNormals);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_VertexNormals);
+
+	int line_length = 1.5f;
+
+	std::vector<math::vec> lines;
+	for (unsigned int i = 0; i < indices.size(); i++)
+	{
+		lines.push_back(math::vec(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z));
+		lines.push_back(math::vec(vertices[i].Position.x + (vertices[i].Normal.x * line_length),
+			vertices[i].Position.y + (vertices[i].Normal.y * line_length),
+			vertices[i].Position.z + (vertices[i].Normal.z * line_length)));
+	}
+
+	glBufferData(GL_ARRAY_BUFFER, lines.size() * sizeof(math::vec), &lines[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(math::vec), (void*)0);
+
+	glBindVertexArray(0);
+
+	lVertexNormals = true;
+}
+
+void RE_UnregisteredMesh::loadFaceNormals()
+{
+	if(!lVertexNormals) loadVertex();
+
+	glGenVertexArrays(1, &VAO_FaceNormals);
+	glGenBuffers(1, &VBO_FaceNormals);
+
+	glBindVertexArray(VAO_FaceNormals);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_FaceNormals);
+
+	math::vec pos = math::vec::zero;
+	math::vec v = math::vec::zero;
+	math::vec w = math::vec::zero;
+	math::vec normal = math::vec::zero;
+	int line_length = 1.5f;
+	
+	std::vector<math::vec> lines;
+	for (unsigned int i = 0; i < indices.size(); i += 3)
+	{
+		pos = (vertices[i].Position + vertices[i + 1].Position + vertices[i + 2].Position) / 3;
+		v = vertices[i + 1].Position - vertices[i].Position;
+		w = vertices[i + 2].Position - vertices[i].Position;
+		normal = v.Cross(w).Normalized() * line_length;
+;
+		lines.push_back(math::vec(pos.x, pos.y, pos.z));
+		lines.push_back(math::vec(pos.x + normal.x, pos.y + normal.y, pos.z + normal.z));
+	}
+
+	glBufferData(GL_ARRAY_BUFFER, lines.size() * sizeof(math::vec), &lines[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(math::vec), (void*)0);
+
+	glBindVertexArray(0);
+
+	lFaceNormals = true;
+}
+
+void RE_UnregisteredMesh::clearVertexNormals()
+{
+	if (!lFaceNormals) clearVertex();
+
+	glDeleteVertexArrays(1, &VAO_VertexNormals);
+	glDeleteBuffers(1, &VBO_VertexNormals);
+	VAO_VertexNormals = VBO_VertexNormals = 0;
+
+	lVertexNormals = false;
+}
+
+void RE_UnregisteredMesh::clearFaceNormals()
+{
+	if (!lVertexNormals) clearVertex();
+
+	glDeleteVertexArrays(1, &VAO_FaceNormals);
+	glDeleteBuffers(1, &VBO_FaceNormals);
+	VAO_FaceNormals = VBO_FaceNormals = 0;
+
+	lFaceNormals = false;
+}
+
+void RE_UnregisteredMesh::loadVertex()
+{
+	glGenVertexArrays(1, &VAO_Vertex);
+	glGenBuffers(1, &VBO_Vertex);
+
+	glBindVertexArray(VAO_Vertex);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_Vertex);
+
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(_Vertex), &vertices[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(_Vertex), (void*)0);
+
+	glBindVertexArray(0);
+}
+
+void RE_UnregisteredMesh::clearVertex()
+{
+	glDeleteVertexArrays(1, &VAO_Vertex);
+	glDeleteBuffers(1, &VBO_Vertex);
+	VAO_Vertex = VBO_Vertex = 0;
+}
 
 
 RE_CompUnregisteredMesh::RE_CompUnregisteredMesh(char * path)
@@ -452,14 +543,23 @@ void RE_CompUnregisteredMesh::DrawProperties()
 
 		ImGui::TextWrapped("Directory: %s", directory.c_str());
 		ImGui::Text("Triangle Count: %u", total_triangle_count);
+
 		if (ImGui::Button(show_f_normals ? "Hide Face Normals" : "Show Face Normals")) show_f_normals = !show_f_normals;
+
 		if (ImGui::Button(show_v_normals ? "Hide Vertex Normals" : "Show Vertex Normals")) show_v_normals = !show_v_normals;
+
 
 		int width = 0;
 		int height = 0;
 		std::vector<RE_UnregisteredMesh>::iterator it = meshes.begin();
 		for (; it != meshes.end(); it++)
 		{
+			if (show_f_normals && !it->lFaceNormals)	it->loadFaceNormals();
+			if (show_v_normals && !it->lVertexNormals)	it->loadVertexNormals();
+
+			if (!show_f_normals && it->lFaceNormals) it->clearFaceNormals();
+			if (!show_v_normals && it->lVertexNormals) it->clearVertexNormals();
+
 			if (ImGui::TreeNode(it->name.c_str()))
 			{
 				ImGui::Text("Vertex count: %u", it->vertices.size());

@@ -31,8 +31,8 @@ public:
 	//count
 	void Rest(ComponentType count);
 
-	//loadshader
-	void LoadShader(const char* name);
+	//Shader for primitives
+	unsigned int shaderPrimitive = 0;
 
 private:
 	//Vertex Array Object
@@ -45,9 +45,6 @@ private:
 
 	//Element Buffer Objects
 	unsigned int ebo_triangle = 0, ebo_plane = 0, ebo_cube = 0, ebo_fustrum = 0, ebo_sphere = 0, ebo_cylinder = 0, ebo_capsule = 0;
-	
-	//Shader for primitives
-	unsigned int shaderPrimitive = 0;
 
 	//Primitives Count
 	std::map<ComponentType, unsigned int> primitives_count;

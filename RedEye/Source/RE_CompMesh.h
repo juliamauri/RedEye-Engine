@@ -46,6 +46,7 @@ class RE_UnregisteredMesh
 {
 public:
 	RE_UnregisteredMesh(std::vector<_Vertex> vertices, std::vector<unsigned int> indices, std::vector<_Texture> textures, unsigned int triangles);
+	//~RE_UnregisteredMesh();
 
 	void Draw(unsigned int shader_ID, bool f_normals = false, bool v_normals = false);
 
@@ -61,10 +62,20 @@ public:
 	std::string name;
 	unsigned int triangle_count = 0;
 	unsigned int VAO;
+	unsigned int VAO_Vertex, VAO_FaceNormals, VAO_VertexNormals;
+
+	void loadVertexNormals();
+	void loadFaceNormals();
+	void clearVertexNormals();
+	void clearFaceNormals();
+	bool lVertexNormals = false, lFaceNormals = false;
 
 private:
-
 	unsigned int VBO, EBO;
+	unsigned int VBO_Vertex, VBO_FaceNormals, VBO_VertexNormals;
+
+	void loadVertex();
+	void clearVertex();
 };
 
 class RE_CompUnregisteredMesh
@@ -100,7 +111,7 @@ public:
 
 	bool error_loading = false;
 
-	bool show_f_normals = true;
+	bool show_f_normals = false;
 	bool show_v_normals = false;
 };
 
