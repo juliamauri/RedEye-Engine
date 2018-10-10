@@ -128,6 +128,15 @@ RE_CompPlane::~RE_CompPlane()
 
 void RE_CompPlane::Draw()
 {
+	ShaderManager::use(RE_CompPrimitive::shader);
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->transform->GetGlobalMatrix().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection());
+	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
+
+	glBindVertexArray(RE_CompPrimitive::VAO);
+	glDrawArrays(GL_LINES, 0, 200);
+	glBindVertexArray(0);
 }
 
 RE_CompCube::RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_CUBE, game_obj, VAO, shader) {}

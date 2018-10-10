@@ -245,7 +245,7 @@ bool ModuleScene::Start()
 	root = new RE_GameObject();
 	//root->AddComponent(C_POINT);
 	//root->AddComponent(C_CUBE);
-	root->AddComponent(C_SPHERE);
+	root->AddComponent(C_PLANE);
 	drop = new RE_GameObject();
 
 	mesh_droped = nullptr;
@@ -357,7 +357,7 @@ void ModuleScene::DrawScene()
 	comptriangle->Draw();
 	*/
 
-	//root->Draw();
+	root->Draw();
 
 	if (mesh_droped)
 	{
