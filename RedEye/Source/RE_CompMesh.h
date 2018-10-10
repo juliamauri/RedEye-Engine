@@ -96,6 +96,10 @@ public:
 	std::vector<RE_UnregisteredMesh> meshes;
 	std::vector<_Texture> textures_loaded;
 
+	math::AABB bounding_box;
+
+	bool error_loading = false;
+
 	bool show_f_normals = true;
 	bool show_v_normals = false;
 };

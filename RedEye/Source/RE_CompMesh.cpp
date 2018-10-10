@@ -263,6 +263,7 @@ void RE_UnregisteredMesh::_setupMesh()
 RE_CompUnregisteredMesh::RE_CompUnregisteredMesh(char * path)
 {
 	loadModel(path);
+	bounding_box.minPoint = bounding_box.maxPoint = math::vec::zero;
 }
 
 RE_CompUnregisteredMesh::RE_CompUnregisteredMesh(char * path, const char * buffer, unsigned int size)
@@ -275,8 +276,9 @@ RE_CompUnregisteredMesh::RE_CompUnregisteredMesh(char * path, const char * buffe
 
 void RE_CompUnregisteredMesh::Draw(unsigned int shader)
 {
-	for (unsigned int i = 0; i < meshes.size(); i++)
-		meshes[i].Draw(shader, show_f_normals, show_v_normals);
+	if (!error_loading)
+		for (unsigned int i = 0; i < meshes.size(); i++)
+			meshes[i].Draw(shader, show_f_normals, show_v_normals);
 }
 
 void RE_CompUnregisteredMesh::loadModel(std::string path)
@@ -365,26 +367,24 @@ RE_UnregisteredMesh RE_CompUnregisteredMesh::processMesh(aiMesh * mesh, const ai
 	{
 		// process vertex positions, normals and texture coordinates
 		_Vertex vertex;
-		math::vec vector;
-		vector.x = mesh->mVertices[i].x;
-		vector.y = mesh->mVertices[i].y;
-		vector.z = mesh->mVertices[i].z;
-		vertex.Position = vector;
+		if		((vertex.Position.x = mesh->mVertices[i].x) < bounding_box.minPoint.x) bounding_box.minPoint.x = vertex.Position.x;
+		else if ((vertex.Position.x = mesh->mVertices[i].x) > bounding_box.maxPoint.x) bounding_box.maxPoint.x = vertex.Position.x;
+		if		((vertex.Position.y = mesh->mVertices[i].y) < bounding_box.minPoint.y) bounding_box.minPoint.y = vertex.Position.y;
+		else if ((vertex.Position.y = mesh->mVertices[i].y) > bounding_box.maxPoint.y) bounding_box.maxPoint.y = vertex.Position.y;
+		if		((vertex.Position.z = mesh->mVertices[i].z) < bounding_box.minPoint.z) bounding_box.minPoint.z = vertex.Position.z;
+		else if ((vertex.Position.z = mesh->mVertices[i].z) > bounding_box.maxPoint.z) bounding_box.maxPoint.z = vertex.Position.x;
 
-		vector.x = mesh->mNormals[i].x;
-		vector.y = mesh->mNormals[i].y;
-		vector.z = mesh->mNormals[i].z;
-		vertex.Normal = vector;
+		vertex.Normal.x = mesh->mNormals[i].x;
+		vertex.Normal.y = mesh->mNormals[i].y;
+		vertex.Normal.z = mesh->mNormals[i].z;
 
 		if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
 		{
-			math::float2 vec;
-			vec.x = mesh->mTextureCoords[0][i].x;
-			vec.y = mesh->mTextureCoords[0][i].y;
-			vertex.TexCoords = vec;
+			vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
+			vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
 		}
 		else
-			vertex.TexCoords = math::float2(0.0f, 0.0f);
+			vertex.TexCoords = math::float2::zero;
 
 		vertices.push_back(vertex);
 	}
@@ -393,9 +393,12 @@ RE_UnregisteredMesh RE_CompUnregisteredMesh::processMesh(aiMesh * mesh, const ai
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
-
+		
 		if (face.mNumIndices != 3)
+		{
+			error_loading = true;
 			LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face.mNumIndices);
+		}
 
 		for (unsigned int j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
