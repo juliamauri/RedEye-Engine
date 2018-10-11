@@ -19,6 +19,7 @@
 
 // New useful types
 typedef unsigned int uint;
+typedef unsigned short int ushortint;
 typedef unsigned char uchar;
 typedef unsigned long ulong;
 typedef unsigned long long UID;

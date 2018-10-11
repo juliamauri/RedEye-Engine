@@ -1,16 +1,21 @@
 #include "RE_GameObject.h"
 
 #include "Application.h"
+#include "ModuleScene.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_Component.h"
 #include "RE_CompTransform.h"
 #include "RE_CompPrimitive.h"
 #include "RE_CompMesh.h"
+#include "OutputLog.h"
+#include "SDL2\include\SDL_assert.h"
 
-RE_GameObject::RE_GameObject(RE_GameObject * parent, bool start_active) :
-	parent(parent), active(start_active)
+RE_GameObject::RE_GameObject(RE_GameObject * p, const bool start_active) : active(start_active)
 {
-	AddComponent(C_TRANSFORM);
+	parent = (p);// != nullptr) ? p : App->scene->GetRoot();
+	bounding_box.minPoint = bounding_box.maxPoint = math::vec::zero;
+	transform = new RE_CompTransform(this);
+	components.push_back((RE_Component*)transform);
 }
 
 RE_GameObject::~RE_GameObject()
@@ -39,8 +44,6 @@ void RE_GameObject::Update()
 	std::list<RE_Component*>::iterator it_comp = components.begin();
 	for (; it_comp != components.end(); it_comp++)
 		(*it_comp)->Update();
-
-	transform->Update();
 }
 
 void RE_GameObject::PostUpdate()
@@ -67,9 +70,13 @@ void RE_GameObject::Draw()
 
 bool RE_GameObject::AddChild(RE_GameObject * child)
 {
-	bool ret = child != nullptr;
+	bool ret = (child != nullptr);
 
-	if (ret) sons.push_back(child);
+	if (ret)
+	{
+		child->parent = this;
+		sons.push_back(child);
+	}
 
 	return ret;
 }
@@ -93,35 +100,21 @@ void RE_GameObject::RemoveAllChilds()
 	}
 }
 
-const std::list<RE_GameObject*>* RE_GameObject::GetChilds() const
-{
-	return &sons;
-}
+const std::list<RE_GameObject*>* RE_GameObject::GetChilds() const { return &sons; }
 
-unsigned int RE_GameObject::ChildCount() const
-{
-	return sons.size();
-}
+unsigned int RE_GameObject::ChildCount() const { return sons.size(); }
 
-RE_GameObject * RE_GameObject::GetParent() const
-{
-	return parent;
-}
+RE_GameObject * RE_GameObject::GetParent() const { return parent; }
 
 void RE_GameObject::SetParent(RE_GameObject * p)
 {
+	SDL_assert(p != nullptr);
 	parent = p;
 }
 
-bool RE_GameObject::IsActive() const
-{
-	return active;
-}
+bool RE_GameObject::IsActive() const { return active; }
 
-void RE_GameObject::SetActive(bool value)
-{
-	active = value;
-}
+void RE_GameObject::SetActive(bool value) { active = value; }
 
 void RE_GameObject::SetActiveAll(bool value)
 {
@@ -132,8 +125,9 @@ void RE_GameObject::SetActiveAll(bool value)
 		(*it_go)->SetActiveAll(active);
 }
 
-RE_Component* RE_GameObject::AddComponent(short unsigned int type, char* file_path_data, bool drop)
+RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file_path_data, const bool drop)
 {
+	SDL_assert(type < MAX_COMPONENT_TYPES);
 	RE_Component* ret = nullptr;
 
 	switch (ComponentType(type))
@@ -151,65 +145,72 @@ RE_Component* RE_GameObject::AddComponent(short unsigned int type, char* file_pa
 	}
 	case C_AXIS:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateAxis(this)));
+		ret = (RE_Component*)(App->primitives->CreateAxis(this));
 		break;
 	}
 	case C_POINT:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreatePoint(this, math::vec::zero)));
+		ret = (RE_Component*)(App->primitives->CreatePoint(this, math::vec::zero));
 		break;
 	}
 	case C_LINE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateLine(this, math::vec::zero, math::vec::one)));
+		ret = (RE_Component*)(App->primitives->CreateLine(this, math::vec::zero, math::vec::one));
 		break;
 	}
 	case C_RAY:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateRay(this)));
+		ret = (RE_Component*)(App->primitives->CreateRay(this));
 		break;
 	}
 	case C_TRIANGLE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateTriangle(this)));
+		ret = (RE_Component*)(App->primitives->CreateTriangle(this));
 		break;
 	}
 	case C_PLANE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreatePlane(this)));
+		ret = (RE_Component*)(App->primitives->CreatePlane(this));
 		break;
 	}
 	case C_CUBE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateCube(this)));
+		ret = (RE_Component*)(App->primitives->CreateCube(this));
 		break;
 	}
 	case C_FUSTRUM:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateFustrum(this)));
+		ret = (RE_Component*)(App->primitives->CreateFustrum(this));
 		break;
 	}
 	case C_SPHERE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateSphere(this)));
+		ret = (RE_Component*)(App->primitives->CreateSphere(this));
 		break;
 	}
 	case C_CYLINDER:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateCylinder(this)));
+		ret = (RE_Component*)(App->primitives->CreateCylinder(this));
 		break;
 	}
 	case C_CAPSULE:
 	{
-		components.push_back(ret = (RE_Component*)(App->primitives->CreateCapsule(this)));
+		ret = (RE_Component*)(App->primitives->CreateCapsule(this));
 		break;
 	}
 	case C_MESH:
 	{
-		components.push_back(ret = (RE_Component*)new RE_CompMesh(this, file_path_data, drop));
+		ret = (RE_Component*)new RE_CompMesh(this, file_path_data, drop);
 		break;
 	}
+	default:
+		LOG_ERROR("Component of type %u is unsupported", type);
 	}
+
+	if (ret != nullptr)
+		components.push_back(ret);
+	else
+		LOG_ERROR("GameObject could not add type %u component", type);
 
 	return ret;
 }
@@ -232,7 +233,7 @@ void RE_GameObject::RemoveAllComponents()
 	}
 }
 
-RE_Component* RE_GameObject::GetComponent(short unsigned int type)
+RE_Component* RE_GameObject::GetComponent(const ushortint type) const
 {
 	RE_Component* ret = nullptr;
 
@@ -242,8 +243,8 @@ RE_Component* RE_GameObject::GetComponent(short unsigned int type)
 	}
 	else
 	{
-		std::list<RE_Component*>::iterator it_comp = components.begin();
-		for (; it_comp != components.end() && !ret; it_comp++)
+		std::list<RE_Component*>::const_iterator it_comp = components.cbegin();
+		for (; it_comp != components.cend() && !ret; it_comp++)
 		{
 			if ((*it_comp)->GetType() == ComponentType(type))
 				ret = (*it_comp);
@@ -252,6 +253,8 @@ RE_Component* RE_GameObject::GetComponent(short unsigned int type)
 
 	return ret;
 }
+
+RE_CompTransform * RE_GameObject::GetTransform() const { return transform; }
 
 void RE_GameObject::TransformModified()
 {

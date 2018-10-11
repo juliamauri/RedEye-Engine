@@ -363,7 +363,7 @@ void ModuleScene::DrawScene()
 	if (mesh_droped)
 	{
 		ShaderManager::use(modelloading);
-		ShaderManager::setFloat4x4(modelloading, "model", drop->transform->GetGlobalMatrix().ptr());
+		ShaderManager::setFloat4x4(modelloading, "model", drop->GetTransform()->GetGlobalMatrix().ptr());
 		ShaderManager::setFloat4x4(modelloading, "view", App->renderer3d->camera->GetView().ptr());
 		ShaderManager::setFloat4x4(modelloading, "projection", App->renderer3d->camera->GetProjection().ptr());
 		mesh_droped->Draw(modelloading);

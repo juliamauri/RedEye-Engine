@@ -13,7 +13,7 @@ RE_CompCamera::RE_CompCamera(RE_GameObject* go , bool cameraType, float near_pla
 		transform->setCamera(this);
 	}
 	else
-		transform = go->transform;
+		transform = go->GetTransform();
 
 	this->cameraType = cameraType;
 	camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);

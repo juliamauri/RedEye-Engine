@@ -1,11 +1,13 @@
 #ifndef __RE_COMPONENT_H__
 #define __RE_COMPONENT_H__
 
+#include "Globals.h"
+
 class RE_GameObject;
 
-enum ComponentType : unsigned short int
+enum ComponentType : ushortint
 {
-	C_EMPTY,
+	C_EMPTY = 0x00,
 	C_TRANSFORM,
 	C_PRIMITIVE,
 	C_AXIS,
@@ -20,13 +22,14 @@ enum ComponentType : unsigned short int
 	C_CYLINDER,
 	C_CAPSULE,
 	C_MESH,
-	C_CAMERA
+	C_CAMERA,
+	MAX_COMPONENT_TYPES
 };
 
 class RE_Component
 {
 public:
-	RE_Component(ComponentType type = C_EMPTY, RE_GameObject* go = nullptr, bool start_active = true);
+	RE_Component(const ComponentType type = C_EMPTY, RE_GameObject* go = nullptr, const bool start_active = true);
 	virtual ~RE_Component() {}
 
 	virtual void Init() {}
@@ -37,11 +40,10 @@ public:
 	virtual void PostUpdate() {}
 
 	virtual void Draw() {}
-
 	virtual void DrawProperties() {}
 
 	bool IsActive() const;
-	void SetActive(bool value);
+	void SetActive(const bool value);
 
 	ComponentType GetType() const;
 	RE_GameObject* GetGO() const;

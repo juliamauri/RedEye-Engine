@@ -154,7 +154,7 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 	if (f_normals || v_normals)
 	{
 		ShaderManager::use(App->primitives->shaderPrimitive);
-		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "model", App->scene->drop->transform->GetGlobalMatrix().ptr());
+		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "model", App->scene->drop->GetTransform()->GetGlobalMatrix().ptr());
 		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "view", App->renderer3d->camera->GetView().ptr());
 		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
 	}
