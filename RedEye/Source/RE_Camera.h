@@ -41,6 +41,9 @@ public:
 	//Zoom
 	void ZoomMouse(float yoffset);
 
+	void SetPosition(const math::vec pos);
+	void SetFocus(const math::vec focus);
+
 private:
 	// Camera Attributes
 	glm::vec3 Position;

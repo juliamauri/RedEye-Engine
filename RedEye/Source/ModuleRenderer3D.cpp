@@ -76,35 +76,39 @@ update_status ModuleRenderer3D::PreUpdate()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	float cameraSpeed = 2.5f;
-	if (App->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+	if (App->input->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT))
 		cameraSpeed *= 2.0f;
 	cameraSpeed *= App->time->GetDeltaTime();
 
-	if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
+	if (App->input->CheckKey(SDL_SCANCODE_W, KEY_REPEAT))
 		camera->Move(Camera_Movement::FORWARD, cameraSpeed);
-	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
+	if (App->input->CheckKey(SDL_SCANCODE_S, KEY_REPEAT))
 		camera->Move(Camera_Movement::BACKWARD, cameraSpeed);
-	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+	if (App->input->CheckKey(SDL_SCANCODE_A, KEY_REPEAT))
 		camera->Move(Camera_Movement::LEFT, cameraSpeed);
-	if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+	if (App->input->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))
 		camera->Move(Camera_Movement::RIGHT, cameraSpeed);
 
 	float p = 0, y = 0;
 
-	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
-		p = 1.0f;
-	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
-		p = -1.0f;
-	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
-		y = -1.0f;
-	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
-		y = 1.0F;
+	if (App->input->CheckKey(SDL_SCANCODE_UP, KEY_REPEAT)) p = 1.0f;
+	if (App->input->CheckKey(SDL_SCANCODE_DOWN, KEY_REPEAT)) p = -1.0f;
+	if (App->input->CheckKey(SDL_SCANCODE_RIGHT, KEY_REPEAT)) y = -1.0f;
+	if (App->input->CheckKey(SDL_SCANCODE_LEFT, KEY_REPEAT)) y = 1.0F;
 
 	const MouseData* mouse = App->input->GetMouse();
 	if(App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse->GetButton(1) == KEY_REPEAT)
 		camera->RotateWMouse(-mouse->mouse_x_motion, mouse->mouse_y_motion);
 
 	camera->ZoomMouse(mouse->mouse_wheel_motion);
+
+	if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
+		&& App->scene->mesh_droped != nullptr
+		&& !App->scene->mesh_droped->error_loading)
+	{
+		camera->SetPosition(App->scene->mesh_droped->bounding_box.maxPoint * 2);
+		camera->SetFocus(App->scene->mesh_droped->bounding_box.CenterPoint());
+	}
 
 	/*
 	

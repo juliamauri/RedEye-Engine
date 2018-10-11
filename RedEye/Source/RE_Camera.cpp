@@ -15,7 +15,7 @@ RE_Camera::RE_Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
 
 math::float4x4 RE_Camera::GetView()
 {
-	return ConvertGLMtoMathGeoLibMatrix(glm::lookAt(Position, Position + Front, Up));
+	return ConvertGLMtoMathGeoLibMatrix(glm::lookAt(Position, Front, Up));
 }
 
 math::float4x4 RE_Camera::GetProjection()
@@ -64,6 +64,28 @@ void RE_Camera::ZoomMouse(float yoffset)
 		Zoom = 1.0f;
 	if (Zoom >= 45.0f)
 		Zoom = 45.0f;
+}
+
+void RE_Camera::SetPosition(const math::vec pos)
+{
+	Position.x = pos.x;
+	Position.y = pos.y;
+	Position.z = pos.z;
+
+	updateCameraVectors();
+}
+
+void RE_Camera::SetFocus(const math::vec f)
+{
+	glm::vec3 focus = { f.x, f.y, f.z };
+	const glm::mat4 inverted = glm::inverse(glm::lookAt(Position, focus, Up));
+
+	Front = -glm::vec3(inverted[2]);
+	Yaw = glm::degrees(glm::atan(Front.z, Front.x));
+	Pitch = glm::degrees(glm::asin(Front.y));
+
+	Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+	Up = glm::normalize(glm::cross(Right, Front));
 }
 
 void RE_Camera::updateCameraVectors()
