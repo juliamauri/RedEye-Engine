@@ -41,6 +41,8 @@ public:
 	//Zoom
 	void ZoomMouse(float yoffset);
 
+	void Orbit(float xoffset, float yoffset, math::vec target);
+
 	void SetPosition(const math::vec pos);
 	void SetFocus(const math::vec focus);
 
@@ -51,6 +53,7 @@ private:
 	glm::vec3 Up;
 	glm::vec3 Right;
 	glm::vec3 WorldUp;
+	glm::vec3 Focus;
 	// Euler Angles
 	float Yaw;
 	float Pitch;

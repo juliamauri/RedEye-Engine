@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModuleWindow.h"
 #include "TimeManager.h"
+#include "OutputLog.h"
 
 RE_Camera::RE_Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
 {
@@ -15,7 +16,7 @@ RE_Camera::RE_Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
 
 math::float4x4 RE_Camera::GetView()
 {
-	return ConvertGLMtoMathGeoLibMatrix(glm::lookAt(Position, Front, Up));
+	return ConvertGLMtoMathGeoLibMatrix(glm::lookAt(Position, Focus, Up));
 }
 
 math::float4x4 RE_Camera::GetProjection()
@@ -66,6 +67,64 @@ void RE_Camera::ZoomMouse(float yoffset)
 		Zoom = 45.0f;
 }
 
+void RE_Camera::Orbit(float xoffset, float yoffset, math::vec target)
+{
+	Position.x = -target.x;
+	Position.y = -target.y;
+	Position.z = -target.z;
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	front.y = sin(glm::radians(Pitch));
+	front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	Front = glm::normalize(front);
+	// Also re-calculate the Right and Up vector
+	Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+	Up = glm::normalize(glm::cross(Right, Front));
+
+	xoffset *= MouseSensitivity;
+	yoffset *= MouseSensitivity;
+
+	Yaw += xoffset;
+	Pitch += yoffset;
+
+	if (Pitch > 89.0f)
+		Pitch = 89.0f;
+	if (Pitch < -89.0f)
+		Pitch = -89.0f;
+
+	front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	front.y = sin(glm::radians(Pitch));
+	front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	Front = glm::normalize(front);
+	// Also re-calculate the Right and Up vector
+	Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+	Up = glm::normalize(glm::cross(Right, Front));
+
+	Position += Front * 10.0f;
+
+	front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	front.y = sin(glm::radians(Pitch));
+	front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	Front = glm::normalize(front);
+	// Also re-calculate the Right and Up vector
+	Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+	Up = glm::normalize(glm::cross(Right, Front));
+
+	glm::vec3 focus = { target.x, target.y, target.z };
+	const glm::mat4 inverted = glm::inverse(glm::lookAt(Position, focus, Up));
+
+	Front = -glm::vec3(inverted[2]);
+	Yaw = glm::degrees(glm::atan(Front.z, Front.x));
+	Pitch = glm::degrees(glm::asin(Front.y));
+
+	Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+	Up = glm::normalize(glm::cross(Right, Front));
+	
+	Focus = Position + Front;
+	LOG("%.2f %.2f %f.2", Focus.x, Focus.y, Focus.z);
+}
+
 void RE_Camera::SetPosition(const math::vec pos)
 {
 	Position.x = pos.x;
@@ -99,6 +158,8 @@ void RE_Camera::updateCameraVectors()
 	// Also re-calculate the Right and Up vector
 	Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
 	Up = glm::normalize(glm::cross(Right, Front));
+
+	Focus = Position + Front;
 }
 
 math::float4x4 RE_Camera::ConvertGLMtoMathGeoLibMatrix(glm::mat4 mat)
