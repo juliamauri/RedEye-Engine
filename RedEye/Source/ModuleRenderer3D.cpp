@@ -81,17 +81,16 @@ update_status ModuleRenderer3D::PreUpdate()
 
 		if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse->GetButton(1) == KEY_REPEAT)
 		{
-			if(App->scene->mesh_droped != nullptr && !App->scene->mesh_droped->error_loading)
+			if(App->scene->mesh_droped != nullptr
+				&& !App->scene->mesh_droped->error_loading
+				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
 				camera->Orbit(-mouse->mouse_x_motion, mouse->mouse_y_motion, App->scene->mesh_droped->bounding_box.CenterPoint());
 		}
 		else
 		{
-			if (mouse->GetButton(3) == KEY_DOWN)
-				orbit = !orbit;
-
-			if (orbit)
+			if (mouse->GetButton(3) == KEY_REPEAT)
 			{
-				float cameraSpeed = 2.5f;
+				float cameraSpeed = 5.f;
 				if (App->input->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT))
 					cameraSpeed *= 2.0f;
 				cameraSpeed *= App->time->GetDeltaTime();
@@ -105,9 +104,9 @@ update_status ModuleRenderer3D::PreUpdate()
 				if (App->input->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))
 					camera->Move(Camera_Movement::RIGHT, cameraSpeed);
 
-				if (mouse->GetButton(1) == KEY_REPEAT)
-					camera->RotateWMouse(-mouse->mouse_x_motion, mouse->mouse_y_motion);
+				camera->RotateWMouse(mouse->mouse_x_motion, -mouse->mouse_y_motion);
 			}
+
 			camera->ZoomMouse(mouse->mouse_wheel_motion);
 		}
 	}
