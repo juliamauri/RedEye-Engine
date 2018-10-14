@@ -288,12 +288,9 @@ update_status ModuleScene::PostUpdate()
 
 bool ModuleScene::CleanUp()
 {
-	if (mesh_droped)
-		DEL(mesh_droped);
-	if (root)
-		DEL(root);
-	if (drop)
-		DEL(drop);
+	DEL(mesh_droped);
+	DEL(root);
+	DEL(drop);
 
 	return true;
 }
@@ -318,12 +315,14 @@ void ModuleScene::FileDrop(const char * file)
 		else
 			c_mesh->LoadMesh(file, true);*/
 
-		if (mesh_droped != nullptr)
-			DEL(mesh_droped);
+		DEL(mesh_droped);
 
 		drop->GetComponent(C_TRANSFORM)->Reset();
 
 		mesh_droped = new RE_CompUnregisteredMesh((char*)file, holder->GetBuffer(), holder->GetSize());
+
+		App->renderer3d->camera->SetPosition(mesh_droped->bounding_box.maxPoint * 2);
+		App->renderer3d->camera->SetFocus(mesh_droped->bounding_box.CenterPoint());
 	}
 	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
 	{
