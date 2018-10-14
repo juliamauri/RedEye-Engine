@@ -25,9 +25,12 @@ bool ModuleScene::Start()
 	bool ret = true;
 
 	//Loading Shaders
-	ret = App->shaders->Load("texture", &modelloading);
-	if (!ret)
-		LOG("%s\n", App->shaders->GetShaderError());
+	if (App->shaders)
+	{
+		ret = App->shaders->Load("texture", &modelloading);
+		if (!ret)
+			LOG("%s\n", App->shaders->GetShaderError());
+	}
 
 	//Loading textures
 

@@ -111,10 +111,10 @@ bool Application::Init()
 			math->Init();
 
 			// Initiallize Resource Managers
-			if (!textures->Init()) LOG_WARNING("Won't be able to use textures");
-			if (!shaders->Init()) LOG_WARNING("Won't be able to use shaders");
-			if (!primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
-			if (!meshes->Init("texture"))  LOG_WARNING("Won't be able to use meshes");
+			if (textures && !textures->Init()) LOG_WARNING("Won't be able to use textures");
+			if (shaders && !shaders->Init()) LOG_WARNING("Won't be able to use shaders");
+			if (primitives && !primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
+			if (meshes && !meshes->Init("texture"))  LOG_WARNING("Won't be able to use meshes");
 
 			LOG_SEPARATOR("Starting Application");
 

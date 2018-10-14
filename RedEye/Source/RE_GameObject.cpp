@@ -130,9 +130,7 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 	SDL_assert(type < MAX_COMPONENT_TYPES);
 	RE_Component* ret = nullptr;
 
-	switch (ComponentType(type))
-	{
-	case C_TRANSFORM:
+	if (ComponentType(type) == C_TRANSFORM)
 	{
 		if (transform != nullptr)
 		{
@@ -141,70 +139,73 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 		}
 		transform = new RE_CompTransform(this);
 		ret = (RE_Component*)transform;
-		break;
 	}
-	case C_AXIS:
+	else if (App->primitives)
 	{
-		ret = (RE_Component*)(App->primitives->CreateAxis(this));
-		break;
+		switch (ComponentType(type))
+		{
+		case C_AXIS:
+		{
+			ret = (RE_Component*)(App->primitives->CreateAxis(this));
+			break;
+		}
+		case C_POINT:
+		{
+			ret = (RE_Component*)(App->primitives->CreatePoint(this, math::vec::zero));
+			break;
+		}
+		case C_LINE:
+		{
+			ret = (RE_Component*)(App->primitives->CreateLine(this, math::vec::zero, math::vec::one));
+			break;
+		}
+		case C_RAY:
+		{
+			ret = (RE_Component*)(App->primitives->CreateRay(this));
+			break;
+		}
+		case C_TRIANGLE:
+		{
+			ret = (RE_Component*)(App->primitives->CreateTriangle(this));
+			break;
+		}
+		case C_PLANE:
+		{
+			ret = (RE_Component*)(App->primitives->CreatePlane(this));
+			break;
+		}
+		case C_CUBE:
+		{
+			ret = (RE_Component*)(App->primitives->CreateCube(this));
+			break;
+		}
+		case C_FUSTRUM:
+		{
+			ret = (RE_Component*)(App->primitives->CreateFustrum(this));
+			break;
+		}
+		case C_SPHERE:
+		{
+			ret = (RE_Component*)(App->primitives->CreateSphere(this));
+			break;
+		}
+		case C_CYLINDER:
+		{
+			ret = (RE_Component*)(App->primitives->CreateCylinder(this));
+			break;
+		}
+		case C_CAPSULE:
+		{
+			ret = (RE_Component*)(App->primitives->CreateCapsule(this));
+			break;
+		}
+		default:
+			LOG_ERROR("Component of type %u is unsupported", type);
+		}
 	}
-	case C_POINT:
-	{
-		ret = (RE_Component*)(App->primitives->CreatePoint(this, math::vec::zero));
-		break;
-	}
-	case C_LINE:
-	{
-		ret = (RE_Component*)(App->primitives->CreateLine(this, math::vec::zero, math::vec::one));
-		break;
-	}
-	case C_RAY:
-	{
-		ret = (RE_Component*)(App->primitives->CreateRay(this));
-		break;
-	}
-	case C_TRIANGLE:
-	{
-		ret = (RE_Component*)(App->primitives->CreateTriangle(this));
-		break;
-	}
-	case C_PLANE:
-	{
-		ret = (RE_Component*)(App->primitives->CreatePlane(this));
-		break;
-	}
-	case C_CUBE:
-	{
-		ret = (RE_Component*)(App->primitives->CreateCube(this));
-		break;
-	}
-	case C_FUSTRUM:
-	{
-		ret = (RE_Component*)(App->primitives->CreateFustrum(this));
-		break;
-	}
-	case C_SPHERE:
-	{
-		ret = (RE_Component*)(App->primitives->CreateSphere(this));
-		break;
-	}
-	case C_CYLINDER:
-	{
-		ret = (RE_Component*)(App->primitives->CreateCylinder(this));
-		break;
-	}
-	case C_CAPSULE:
-	{
-		ret = (RE_Component*)(App->primitives->CreateCapsule(this));
-		break;
-	}
-	case C_MESH:
+	else if (ComponentType(type) == C_MESH)
 	{
 		ret = (RE_Component*)new RE_CompMesh(this, file_path_data, drop);
-		break;
-	}
-	default:
-		LOG_ERROR("Component of type %u is unsupported", type);
 	}
 
 	if (ret != nullptr)

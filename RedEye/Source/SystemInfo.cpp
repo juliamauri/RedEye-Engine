@@ -63,9 +63,12 @@ void SystemInfo::WhatAreWeRunningOn()
 
 	// GPU
 	gpu_renderer = "GPU: ";
-	gpu_renderer += (char*)glGetString(GL_RENDERER);
 	gpu_vendor = "Brand: ";
-	gpu_vendor += (char*)glGetString(GL_VENDOR);
+	if (App->renderer3d)
+	{
+		gpu_renderer += (char*)glGetString(GL_RENDERER);
+		gpu_vendor += (char*)glGetString(GL_VENDOR);
+	}
 
 	App->ReportSoftware("gpudetect");
 	App->ReportSoftware("mmgr");

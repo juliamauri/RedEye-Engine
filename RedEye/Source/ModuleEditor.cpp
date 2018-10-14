@@ -389,7 +389,7 @@ void PropertiesWindow::Draw()
 	// draw transform and components
 	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_HorizontalScrollbar);
 	{
-		App->scene->DrawFocusedProperties();
+		if (App->scene) App->scene->DrawFocusedProperties();
 	}
 
 	ImGui::End();
