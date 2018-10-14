@@ -142,7 +142,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
 	if (primitives_count.find(C_PLANE)->second++ == 0)
 	{
 		std::vector<float> vertices;
-		for (float f = 0.f; f < 50.f; f++)
+		for (float f = 0.f; f < 50.f; f += 0.5f)
 		{
 			vertices.push_back((f * 5.f) - 125.f);
 			vertices.push_back(0.f);

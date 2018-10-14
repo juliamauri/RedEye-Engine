@@ -135,7 +135,7 @@ void RE_CompPlane::Draw()
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
-	glDrawArrays(GL_LINES, 0, 200);
+	glDrawArrays(GL_LINES, 0, 400);
 	glBindVertexArray(0);
 }
 
