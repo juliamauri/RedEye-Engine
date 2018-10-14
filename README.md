@@ -27,6 +27,7 @@ Each option toggles a hide/view window from a list of available windows:
 
 ## Release Versions
 ### v1.0
+* Press F1 to toggle showing editor
 * Mesh: load, drop and view properties
 * Texture: load and change applied to mesh
 * Config save/load
