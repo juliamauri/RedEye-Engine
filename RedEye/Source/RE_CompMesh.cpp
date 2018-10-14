@@ -579,6 +579,21 @@ void RE_CompUnregisteredMesh::DrawProperties()
 						ImGui::Text("\t- Type: %s", it2->type.c_str());
 
 						App->textures->drawTexture(it2->id);
+
+						if (ImGui::TreeNode("Change Texture (Click to set)"))
+						{
+							std::vector<Texture2D*>* textures = App->textures->GetTextures();
+							if (textures->size() != 0)
+							{
+								std::vector<Texture2D*>::iterator it = textures->begin();
+								for (it; it != textures->end(); ++it)
+								{
+									if (ImGui::Button((*it)->GetName()))
+										it2->id = App->textures->FindTMID(*it);
+								}
+							}
+							ImGui::TreePop();
+						}
 						ImGui::TreePop();
 					}
 				}

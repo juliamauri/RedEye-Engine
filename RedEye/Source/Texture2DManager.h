@@ -50,6 +50,8 @@ public:
 
 	std::vector<Texture2D*>* GetTextures();
 
+	unsigned int FindTMID(Texture2D* tex);
+
 private:
 	const char* folderPath;
 	unsigned int ID_count = 0;

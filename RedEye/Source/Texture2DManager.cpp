@@ -127,6 +127,17 @@ std::vector<Texture2D*>* Texture2DManager::GetTextures()
 	return &actualTextures;
 }
 
+unsigned int Texture2DManager::FindTMID(Texture2D * tex)
+{
+	unsigned int ret = 0;
+
+	for (unsigned int TextureID : textureIDContainer) {
+		if (tex == textures2D.find(TextureID)->second)
+			ret = TextureID;
+	}
+	return ret;
+}
+
 const char * Texture2DManager::GetExtensionStr(ImageExtensionType imageType)
 {
 	switch (imageType)
