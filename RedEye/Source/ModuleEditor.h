@@ -16,6 +16,7 @@ class AboutWindow;
 class RandomTest;
 class RendererTest;
 class GeometryTest;
+class TexturesWindow;
 
 union SDL_Event;
 
@@ -56,6 +57,7 @@ private:
 	RandomTest* rng = nullptr;
 	RendererTest* renderer = nullptr;
 	GeometryTest* geo_test = nullptr;
+	TexturesWindow* textures = nullptr;
 
 	std::list<EditorWindow*> windows, tools;
 
@@ -179,6 +181,13 @@ private:
 	bool intersects = false;
 	std::string fig1 = "";
 	std::string fig2 = "";
+};
+
+class TexturesWindow : public EditorWindow
+{
+public:
+	TexturesWindow(const char* name = "Texture Manager", bool start_active = false);
+	void Draw() override;
 };
 
 /*/ Missing windows:

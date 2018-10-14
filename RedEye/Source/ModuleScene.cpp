@@ -12,6 +12,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include <string>
+#include <algorithm>
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
 {}
@@ -304,7 +305,11 @@ void ModuleScene::FileDrop(const char * file)
 	RE_FileIO* holder = App->fs->QuickBufferFromPDPath(file);
 
 	std::string full_path(file);
+	std::string file_name = full_path.substr(full_path.find_last_of("\\") + 1);
+	std::string directory = full_path.substr(0, full_path.find_last_of('\\'));
 	std::string ext = full_path.substr(full_path.find_last_of(".") + 1);
+
+	std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
 	if (ext.compare("fbx") == 0)
 	{
@@ -321,6 +326,10 @@ void ModuleScene::FileDrop(const char * file)
 		drop->GetComponent(C_TRANSFORM)->Reset();
 
 		mesh_droped = new RE_CompUnregisteredMesh((char*)file, holder->GetBuffer(), holder->GetSize());
+	}
+	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
+	{
+		App->textures->LoadTexture2D(directory.c_str(), file_name.c_str(), true);
 	}
 
 	DEL(holder);

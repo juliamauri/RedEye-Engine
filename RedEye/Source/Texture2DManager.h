@@ -2,6 +2,7 @@
 #define __TEXTURE2DMANAGER_H__
 
 #include <map>
+#include <vector>
 #include <list>
 
 enum ImageExtensionType
@@ -16,14 +17,17 @@ struct Texture2D
 private:
 	unsigned int ID = 0;
 	int width, height;
+	std::string name;
 
 public:
-	Texture2D(const char* path, int extension, bool droped = false);
+	Texture2D(const char* path, int extension,const char* name, bool droped = false);
 	~Texture2D();
 
 	void use();
 	void GetWithHeight(int* w,int* h);
 	void DrawTextureImGui();
+	const char* GetName();
+	const unsigned int GetID();
 };
 
 class Texture2DManager 
@@ -44,12 +48,16 @@ public:
 
 	void DeleteTexture2D(unsigned int TextureID);
 
+	std::vector<Texture2D*>* GetTextures();
+
 private:
 	const char* folderPath;
 	unsigned int ID_count = 0;
+	bool texturesmodified = false;
 
 	std::list<unsigned int> textureIDContainer;
 	std::map<unsigned int, Texture2D*> textures2D;
+	std::vector<Texture2D*> actualTextures;
 
 	const char* GetExtensionStr(ImageExtensionType imageType);
 	int GetExtensionIL(const char* ext);

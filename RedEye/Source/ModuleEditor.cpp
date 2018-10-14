@@ -5,6 +5,7 @@
 #include "ModuleInput.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleScene.h"
+#include "Texture2DManager.h"
 #include "RE_Math.h"
 #include "OutputLog.h"
 #include "MathGeoLib\include\MathGeoLib.h"
@@ -32,6 +33,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	tools.push_back(rng = new RandomTest());
 	tools.push_back(renderer = new RendererTest());
 	tools.push_back(geo_test = new GeometryTest());
+	tools.push_back(textures = new TexturesWindow());
 }
 
 ModuleEditor::~ModuleEditor()
@@ -914,3 +916,30 @@ void GeometryTest::Draw()
 	ImGui::End();
 }
 
+TexturesWindow::TexturesWindow(const char* name, bool start_active)  : EditorWindow(name, start_active) {}
+
+void TexturesWindow::Draw()
+{
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		std::vector<Texture2D*>* textures = App->textures->GetTextures();
+		if (textures->size() != 0)
+		{
+			std::vector<Texture2D*>::iterator it = textures->begin();
+			for (it; it != textures->end(); ++it) {
+
+				if (ImGui::TreeNode((*it)->GetName()))
+				{
+					int widht, height;
+					(*it)->GetWithHeight(&widht, &height);
+					ImGui::Text("GL ID: %u", (*it)->GetID());
+					ImGui::Text("Widht: %u", widht);
+					ImGui::Text("Height: %u", height);
+					(*it)->DrawTextureImGui();
+					ImGui::TreePop();
+				}
+			}
+		}
+	}
+	ImGui::End();
+}

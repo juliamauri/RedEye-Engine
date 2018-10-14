@@ -61,8 +61,10 @@ unsigned int Texture2DManager::LoadTexture2D(const char * name, ImageExtensionTy
 	std::string path(folderPath);
 	path += name;
 	path += extension;
-
-	Texture2D* new_image = new Texture2D(path.c_str(), GetExtensionIL(extension.c_str()));
+	std::string file_name = name;
+	file_name  += ".";
+	file_name += extension;
+	Texture2D* new_image = new Texture2D(path.c_str(), GetExtensionIL(extension.c_str()), file_name.c_str());
 
 	textures2D.insert(std::pair<unsigned int, Texture2D*>(ID_count, new_image));
 
@@ -77,13 +79,15 @@ unsigned int Texture2DManager::LoadTexture2D(const char * path, const char* file
 	std::string filename = file_name;
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 	if (droped)
-		new_image = new Texture2D(std::string(path + std::string("\\") + file_name).c_str(), GetExtensionIL(extension.c_str()), droped);
+		new_image = new Texture2D(std::string(path + std::string("\\") + file_name).c_str(), GetExtensionIL(extension.c_str()), file_name, droped);
 	else
-		new_image = new Texture2D(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(extension.c_str()));
+		new_image = new Texture2D(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(extension.c_str()), file_name);
 	
 	textures2D.insert(std::pair<unsigned int, Texture2D*>(ID_count, new_image));
 
 	textureIDContainer.push_back(ID_count);
+
+	texturesmodified = true;
 
 	return ID_count++;
 }
@@ -108,6 +112,19 @@ void Texture2DManager::DeleteTexture2D(unsigned int TextureID)
 	Texture2D* toDelete = textures2D.find(TextureID)->second;
 	delete toDelete;
 	textureIDContainer.remove(TextureID);
+}
+
+std::vector<Texture2D*>* Texture2DManager::GetTextures()
+{
+	if (texturesmodified)
+	{
+		actualTextures.clear();
+		for (unsigned int TextureID : textureIDContainer) {
+			actualTextures.push_back(textures2D.find(TextureID)->second);
+		}
+		texturesmodified = false;
+	}
+	return &actualTextures;
 }
 
 const char * Texture2DManager::GetExtensionStr(ImageExtensionType imageType)
@@ -139,9 +156,9 @@ int Texture2DManager::GetExtensionIL(const char* ext)
 	return IL_Extension;
 }
 
-Texture2D::Texture2D(const char* path, int extension, bool droped)
+Texture2D::Texture2D(const char* path, int extension, const char* name, bool droped)
 {
-
+	this->name.append(name);
 	unsigned int imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
@@ -192,4 +209,14 @@ void Texture2D::GetWithHeight(int * w, int * h)
 void Texture2D::DrawTextureImGui()
 {
 	ImGui::Image((void *)ID, ImVec2(200, 200));
+}
+
+const char * Texture2D::GetName()
+{
+	return name.c_str();
+}
+
+const unsigned int Texture2D::GetID()
+{
+	return ID;
 }
