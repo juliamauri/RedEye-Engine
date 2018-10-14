@@ -12,7 +12,7 @@
 #include "ModuleInput.h"
 #include "FileSystem.h"
 #include "RE_Camera.h"
-#include "RE_CompMesh.h"
+#include "RE_Mesh.h"
 #include "ModuleScene.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
