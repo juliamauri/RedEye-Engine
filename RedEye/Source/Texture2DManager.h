@@ -7,7 +7,8 @@
 enum ImageExtensionType
 {
 	PNG,
-	JPG
+	JPG,
+	DDS
 };
 
 struct Texture2D
@@ -22,6 +23,7 @@ public:
 
 	void use();
 	void GetWithHeight(int* w,int* h);
+	void DrawTextureImGui();
 };
 
 class Texture2DManager 
@@ -37,6 +39,7 @@ public:
 	unsigned int LoadTexture2D(const char* path, const char* file_name, bool droped = false);
 
 	void use(unsigned int TextureID);
+	void drawTexture(unsigned int TextureID);
 	void GetWithHeight(unsigned int TextureID, int* w, int* h);
 
 	void DeleteTexture2D(unsigned int TextureID);
@@ -49,7 +52,7 @@ private:
 	std::map<unsigned int, Texture2D*> textures2D;
 
 	const char* GetExtensionStr(ImageExtensionType imageType);
-	int GetExtensionIL(ImageExtensionType imageType);
+	int GetExtensionIL(const char* ext);
 };
 
 

@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "FileSystem.h"
+#include "ModuleEditor.h"
 #include "OutputLog.h"
 
 #include "Glew/include/glew.h"
@@ -54,13 +55,14 @@ bool Texture2DManager::Init()
 	return ret;
 }
 
-unsigned int Texture2DManager::LoadTexture2D(const char * name, ImageExtensionType extension)
+unsigned int Texture2DManager::LoadTexture2D(const char * name, ImageExtensionType ext)
 {
+	std::string extension = GetExtensionStr(ext);
 	std::string path(folderPath);
 	path += name;
-	path += GetExtensionStr(extension);
+	path += extension;
 
-	Texture2D* new_image = new Texture2D(path.c_str(), GetExtensionIL(extension));
+	Texture2D* new_image = new Texture2D(path.c_str(), GetExtensionIL(extension.c_str()));
 
 	textures2D.insert(std::pair<unsigned int, Texture2D*>(ID_count, new_image));
 
@@ -72,10 +74,12 @@ unsigned int Texture2DManager::LoadTexture2D(const char * name, ImageExtensionTy
 unsigned int Texture2DManager::LoadTexture2D(const char * path, const char* file_name, bool droped)
 {
 	Texture2D* new_image = nullptr;
+	std::string filename = file_name;
+	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 	if (droped)
-		new_image = new Texture2D(std::string(path + std::string("\\") + file_name).c_str(), GetExtensionIL(ImageExtensionType::PNG), droped);
+		new_image = new Texture2D(std::string(path + std::string("\\") + file_name).c_str(), GetExtensionIL(extension.c_str()), droped);
 	else
-		new_image = new Texture2D(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(ImageExtensionType::PNG));
+		new_image = new Texture2D(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(extension.c_str()));
 	
 	textures2D.insert(std::pair<unsigned int, Texture2D*>(ID_count, new_image));
 
@@ -87,6 +91,11 @@ unsigned int Texture2DManager::LoadTexture2D(const char * path, const char* file
 void Texture2DManager::use(unsigned int TextureID)
 {
 	textures2D.at(TextureID)->use();
+}
+
+void Texture2DManager::drawTexture(unsigned int TextureID)
+{
+	textures2D.at(TextureID)->DrawTextureImGui();
 }
 
 void Texture2DManager::GetWithHeight(unsigned int TextureID, int * w, int * h)
@@ -106,26 +115,27 @@ const char * Texture2DManager::GetExtensionStr(ImageExtensionType imageType)
 	switch (imageType)
 	{
 	case PNG:
-		return ".png";
+		return "png";
 		break;
 	case JPG:
-		return ".jpg";
+		return "jpg";
+	case DDS:
+		return "dds";
 		break;
 	}
 }
 
-int Texture2DManager::GetExtensionIL(ImageExtensionType imageType)
+int Texture2DManager::GetExtensionIL(const char* ext)
 {
 	int IL_Extension = 0;
-	switch (imageType)
-	{
-	case PNG:
+	std::string exttension(ext);
+	if (exttension.compare("dds") == 0)
+		IL_Extension = IL_DDS;
+	else if (exttension.compare("png") == 0)
 		IL_Extension = IL_PNG;
-		break;
-	case JPG:
+	else if (exttension.compare("jpg") == 0)
 		IL_Extension = IL_JPG;
-		break;
-	}
+
 	return IL_Extension;
 }
 
@@ -139,7 +149,8 @@ Texture2D::Texture2D(const char* path, int extension, bool droped)
 	if (droped)
 	{
 		RE_FileIO* image = App->fs->QuickBufferFromPDPath(path);
-		ilLoadL(extension, image->GetBuffer(), image->GetSize());
+		if(image)
+			ilLoadL(extension, image->GetBuffer(), image->GetSize());
 	}
 	else
 	{
@@ -176,4 +187,9 @@ void Texture2D::GetWithHeight(int * w, int * h)
 {
 	*w = width;
 	*h = height;
+}
+
+void Texture2D::DrawTextureImGui()
+{
+	ImGui::Image((void *)ID, ImVec2(200, 200));
 }

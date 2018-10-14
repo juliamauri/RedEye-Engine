@@ -578,6 +578,7 @@ void RE_CompUnregisteredMesh::DrawProperties()
 						ImGui::Text("\t- Path: %s", it2->path.c_str());
 						ImGui::Text("\t- Type: %s", it2->type.c_str());
 
+						App->textures->drawTexture(it2->id);
 						ImGui::TreePop();
 					}
 				}
