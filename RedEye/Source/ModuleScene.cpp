@@ -289,13 +289,18 @@ bool ModuleScene::CleanUp()
 	DEL(square);
 	DEL(cube_array);
 	DEL(cube_index);
-	if (mesh_droped != nullptr)
+	if (mesh_droped)
 		DEL(mesh_droped);
 
 	DEL(compcube);
 	DEL(comppoint);
 	DEL(compline);
 	DEL(comptriangle);
+
+	if (root)
+		DEL(root);
+	if (drop)
+		DEL(drop);
 
 	return true;
 }
