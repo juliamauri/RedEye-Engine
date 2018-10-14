@@ -113,78 +113,19 @@ void RE_CompTransform::DrawProperties()
 	if (ImGui::CollapsingHeader("Transform"))
 	{
 		// Position -----------------------------------------------------
-		float holder = pos.x;
-		if (ImGui::SliderFloat("Pos X", &holder, -10.f, 10.f, "%.3f"))
-		{
-			pos.x = holder;
-			transform_modified = true;
-		}
-		holder = pos.y;
-		if (ImGui::SliderFloat("Pos Y", &holder, -10.f, 10.f, "%.3f"))
-		{
-			pos.y = holder;
-			transform_modified = true;
-		}
-		holder = pos.z;
-		if (ImGui::SliderFloat("Pos Z", &holder, -10.f, 10.f, "%.3f"))
-		{
-			pos.z = holder;
-			transform_modified = true;
-		}
+		float p[3] = { pos.x, pos.y, pos.z };
+		if (ImGui::InputFloat3("Position", p, 2))
+			SetPos({ p[0], p[1], p[2] });
 
-		bool allow_edit = true;
+		// Rotation -----------------------------------------------------
+		float r[3] = { rot_eul.x, rot_eul.y, rot_eul.z };
+		if (ImGui::InputFloat3("Rotation", r, 2))
+			SetRot({ r[0], r[1], r[2] });
 
-		if (allow_edit)
-		{
-			// Rotation -----------------------------------------------------
-			holder = rot_eul.x;
-			if (ImGui::SliderFloat("Rot X", &holder, MIN_SCALE, 360.f, "%.1f"))
-			{
-				rot_eul.x = holder;
-				SetRot(rot_eul);
-			}
-			holder = rot_eul.y;
-			if (ImGui::SliderFloat("Rot Y", &holder, MIN_SCALE, 360.f, "%.1f"))
-			{
-				rot_eul.y = holder;
-				SetRot(rot_eul);
-			}
-			holder = rot_eul.z;
-			if (ImGui::SliderFloat("Rot Z", &holder, MIN_SCALE, 360.f, "%.1f"))
-			{
-				rot_eul.z = holder;
-				SetRot(rot_eul);
-			}
-
-			// Scale -----------------------------------------------------
-			holder = scale.x;
-			if (ImGui::SliderFloat("Scale X", &holder, 0.f, 10.f, "%.1f"))
-			{
-				scale.x = holder;
-				transform_modified = true;
-			}
-			holder = scale.y;
-			if (ImGui::SliderFloat("Scale Y", &holder, 0.f, 10.f, "%.1f"))
-			{
-				scale.y = holder;
-				transform_modified = true;
-			}
-			holder = scale.z;
-			if (ImGui::SliderFloat("Scale Z", &holder, 0.f, 10.f, "%.1f"))
-			{
-				scale.z = holder;
-				transform_modified = true;
-			}
-		}
-		else
-		{
-			ImGui::Text("Rot X: %f", rot_eul.x);
-			ImGui::Text("Rot Y: %f", rot_eul.y);
-			ImGui::Text("Rot Z: %f", rot_eul.z);
-			ImGui::Text("Scale X: %f", scale.x);
-			ImGui::Text("Scale Y: %f", scale.y);
-			ImGui::Text("Scale Z: %f", scale.z);
-		}
+		// Scale -----------------------------------------------------
+		float s[3] = { scale.x, scale.y, scale.z };
+		if (ImGui::InputFloat3("Scale", s, 2))
+			SetScale({ s[0], s[1], s[2] });
 	}
 }
 
