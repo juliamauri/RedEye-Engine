@@ -25,19 +25,18 @@ Each option toggles a hide/view window from a list of available windows:
 * **Report a Bug**: opens a browser to repository's issues page
 * **About**: Shows engine info and 3rd party software.
 
-## Advice
-* Gameobject's mesh component kept causing troubles and for now, the class RE_UnregisteredMesh holds dropped mesh as an auxiliary patch. GameObject in SceneModule::drop holds it's transform and uses SceneModule::mesh_droped to draw and set properties.
-* At the moment we still couldn't find the source of 10 memory leaks
-
 ## Release Versions
 ### v1.0
-* Propieties: Shows mesh drop info and can change mesh texture
-* Drop mesh
-* Drop texture
+* Mesh: load, drop and view properties
+* Texture: load and change applied to mesh
 * Config save/load
+* Propieties window shows mesh dropped info: transform and mesh. Can also alter transform and mesh texture.
 * Console with filters
 * Scene with grid
 * Camera with GLMath
+### Rough details
+* Gameobject's mesh component kept causing troubles and for now, the class RE_UnregisteredMesh holds dropped mesh as an auxiliary patch. GameObject in SceneModule::drop holds it's transform and uses SceneModule::mesh_droped to draw and set properties.
+* At the moment we still couldn't find the source of 10 memory leaks.
 
 ### v0.0.1
 * Random Test
