@@ -4,10 +4,7 @@
 #include "Module.h"
 #include "Event.h"
 
-class RE_Mesh;
 class RE_GameObject;
-class RE_CompPrimitive;
-class RE_CompMesh;
 class RE_CompUnregisteredMesh;
 
 class ModuleScene : public Module
@@ -35,22 +32,7 @@ public:
 
 private:
 	//shaders
-	unsigned int sinusColor, vertexColor, textureSquare, twotextures, shader_cube, lightingShader, lampShader, lightingmapShader, modelloading;
-	unsigned int ShaderPrimitive;
-
-	//Textures
-	unsigned int puppie1, puppie2, container, awesomeface, container2, container2_specular;
-
-	//Meshes
-	RE_Mesh* triangle = nullptr;
-	RE_Mesh* square = nullptr;
-	RE_Mesh* cube_array = nullptr;
-	RE_Mesh* cube_index = nullptr;
-
-	RE_CompPrimitive* compcube =  nullptr;
-	RE_CompPrimitive* comppoint = nullptr;
-	RE_CompPrimitive* compline = nullptr;
-	RE_CompPrimitive* comptriangle = nullptr;
+	unsigned int modelloading;
 };
 
 

@@ -177,8 +177,11 @@ Texture2D::Texture2D(const char* path, int extension, const char* name, bool dro
 	if (droped)
 	{
 		RE_FileIO* image = App->fs->QuickBufferFromPDPath(path);
-		if(image)
+		if (image)
+		{
 			ilLoadL(extension, image->GetBuffer(), image->GetSize());
+			DEL(image);
+		}
 	}
 	else
 	{
