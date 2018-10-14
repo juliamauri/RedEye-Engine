@@ -14,8 +14,6 @@ class HeriarchyWindow;
 class PropertiesWindow;
 class AboutWindow;
 class RandomTest;
-class RendererTest;
-class GeometryTest;
 class TexturesWindow;
 
 union SDL_Event;
@@ -55,8 +53,6 @@ private:
 	AboutWindow* about = nullptr;
 
 	RandomTest* rng = nullptr;
-	RendererTest* renderer = nullptr;
-	GeometryTest* geo_test = nullptr;
 	TexturesWindow* textures = nullptr;
 
 	std::list<EditorWindow*> windows, tools;
@@ -145,42 +141,6 @@ public:
 
 	int minInt = 0, maxInt = 10, resultInt = 0;
 	float minF = 0.f, maxF = 1.f, resultF = 0.f;
-};
-
-class RendererTest : public EditorWindow
-{
-public:
-	RendererTest(const char* name = "Render Test", bool start_active = true);
-	void Draw() override;
-
-	int shader_selcted, texture_selected, object_selected = 0;
-};
-
-enum GeoFigureType
-{
-	GEO_SPHERE = 0,
-	GEO_CAPSULE,
-	GEO_AABB,
-	GEO_OBB,
-	GEO_FRUSTUM,
-	GEO_PLANE
-	//GEO_TRINAGLE
-};
-
-class GeometryTest : public EditorWindow
-{
-public:
-	GeometryTest(const char* name = "Geometry Test", bool start_active = false);
-	void Draw() override;
-
-private:
-	float first_x, first_y, first_z = 0.f;
-	float second_x, second_y, second_z = 0.f;
-	float first_xtra, second_xtra = 0.f;
-	int first_type, second_type = 0;
-	bool intersects = false;
-	std::string fig1 = "";
-	std::string fig2 = "";
 };
 
 class TexturesWindow : public EditorWindow
