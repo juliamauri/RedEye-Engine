@@ -98,7 +98,7 @@ void RE_Camera::Orbit(float xoffset, float yoffset, math::vec target)
 void RE_Camera::SetPosition(const math::vec pos)
 {
 	Position = { pos.x, pos.y, pos.z };
-	updateCameraVectors();
+	Focus = Position + Front;
 }
 
 void RE_Camera::SetFocus(const math::vec f)
@@ -112,6 +112,7 @@ void RE_Camera::SetFocus(const math::vec f)
 
 	Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
 	Up = glm::normalize(glm::cross(Right, Front));
+	Focus = Position + Front;
 }
 
 void RE_Camera::updateCameraVectors()

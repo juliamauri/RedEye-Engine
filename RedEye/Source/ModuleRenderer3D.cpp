@@ -24,7 +24,7 @@ ModuleRenderer3D::ModuleRenderer3D(const char * name, bool start_enabled) : Modu
 ModuleRenderer3D::~ModuleRenderer3D()
 {}
 
-bool ModuleRenderer3D::Init(JSONNode * config_module)
+bool ModuleRenderer3D::Init(JSONNode * node)
 {
 	bool ret = true;
 
@@ -42,23 +42,21 @@ bool ModuleRenderer3D::Init(JSONNode * config_module)
 	else
 		LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
 
-	LOG_SECONDARY("Initializing Glew");
-	GLenum error = glewInit();
-	if (ret = (error == GLEW_OK))
-		App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
-	else
-		LOG_ERROR("Glew could not initialize! Glew_Error: %s", glewGetErrorString(error));
-
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
-
-	enableVSync(vsync = config_module->PullBool("vsync", false));
-	enableVSync(cullface = config_module->PullBool("cullface", false));
-	enableVSync(depthtest = config_module->PullBool("depthtest", true));
-	enableVSync(lighting = config_module->PullBool("lighting", false));
-
-	camera = new RE_Camera();
+	if (ret)
+	{
+		LOG_SECONDARY("Initializing Glew");
+		GLenum error = glewInit();
+		if (ret = (error == GLEW_OK))
+		{
+			Load(node);
+			camera = new RE_Camera();
+			App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
+		}
+		else
+		{
+			LOG_ERROR("Glew could not initialize! Glew_Error: %s", glewGetErrorString(error));
+		}
+	}
 
 	return ret;
 }
@@ -67,11 +65,13 @@ update_status ModuleRenderer3D::PreUpdate()
 {
 	update_status ret = UPDATE_CONTINUE;
 
-	//Set background with a clear color
+	// Reset projection & view
 	glMatrixMode(GL_PROJECTION); 
 	glLoadMatrixf(camera->GetProjection().ptr());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	//Set background with a clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -85,6 +85,13 @@ update_status ModuleRenderer3D::PreUpdate()
 				&& !App->scene->mesh_droped->error_loading
 				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
 				camera->Orbit(-mouse->mouse_x_motion, mouse->mouse_y_motion, App->scene->mesh_droped->bounding_box.CenterPoint());
+		}
+		else if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
+			&& App->scene->mesh_droped != nullptr
+			&& !App->scene->mesh_droped->error_loading)
+		{
+			camera->SetPosition(App->scene->mesh_droped->bounding_box.maxPoint * 2);
+			camera->SetFocus(App->scene->mesh_droped->bounding_box.CenterPoint());
 		}
 		else
 		{
@@ -111,65 +118,6 @@ update_status ModuleRenderer3D::PreUpdate()
 		}
 	}
 
-	//
-
-	if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
-		&& App->scene->mesh_droped != nullptr
-		&& !App->scene->mesh_droped->error_loading)
-	{
-		camera->SetPosition(App->scene->mesh_droped->bounding_box.maxPoint * 2);
-		camera->SetFocus(App->scene->mesh_droped->bounding_box.CenterPoint());
-	}
-
-	/*
-	
-	if (mouse->GetButton(1) == KEY_REPEAT)
-	{
-		lastx = newx;
-		lasty = newy;
-
-		// get mouse coordinates from Windows
-		newx = mouse->mouse_x;
-		newy = mouse->mouse_y;
-
-		// these lines limit the camera's range
-		if (newy < 200)
-			newy = 200;
-		if (newy > 450)
-			newy = 450;
-
-		if ((newx - lastx) > 0)             // mouse moved to the right
-			yaw += 3.0f;
-		else if ((newx - lastx) < 0)     // mouse moved to the left
-			yaw -= 3.0f;
-
-		camera->SetEulerAngle(yaw, newy);
-
-		
-		if (firstMouse)
-		{
-			lastx = mouse->mouse_x;
-			lasty = mouse->mouse_y;
-			firstMouse = false;
-		}
-
-		float xoffset = mouse->mouse_x - lastx;
-		float yoffset = lasty - mouse->mouse_y;
-		lastx = mouse->mouse_x;
-		lasty = mouse->mouse_y;
-
-		float sensitivity = 0.05;
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
-
-		yaw += xoffset;
-		pitch += yoffset;
-
-		camera->SetEulerAngle(yoffset, xoffset);
-	}
-	*/
-	//camera->Update();
-
 	return ret;
 }
 
@@ -177,16 +125,13 @@ update_status ModuleRenderer3D::PostUpdate()
 {
 	update_status ret = UPDATE_CONTINUE;
 
-	if(isLine)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	
-	App->scene->DrawScene();
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	// Draw Scene
+	if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	if (App->scene != nullptr) App->scene->DrawScene();
 	
 	// Draw Editor
-	if(App->editor != nullptr)
-		App->editor->Draw();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if(App->editor != nullptr) App->editor->Draw();
 
 	//Swap buffers
 	SDL_GL_SwapWindow(App->window->GetWindow());
@@ -196,14 +141,12 @@ update_status ModuleRenderer3D::PostUpdate()
 
 bool ModuleRenderer3D::CleanUp()
 {
-	bool ret = true;
-
-	delete camera;
+	DEL(camera);
 
 	//Delete context
 	SDL_GL_DeleteContext(mainContext);
 
-	return ret;
+	return true;
 }
 
 void ModuleRenderer3D::DrawEditor()
@@ -211,44 +154,97 @@ void ModuleRenderer3D::DrawEditor()
 	if(ImGui::CollapsingHeader("Renderer 3D"))
 	{
 		if (ImGui::Checkbox((vsync) ? "Disable VSync" : "Enable VSync", &vsync))
-			enableVSync(vsync);
+			SetVSync(vsync);
 
 		if (ImGui::Checkbox((cullface) ? "Disable Cull Face" : "Enable Cull Face", &cullface))
-			enableFaceCulling(cullface);
+			SetDepthTest(cullface);
 
 		if (ImGui::Checkbox((depthtest) ? "Disable Depht Test" : "Enable Depht Test", &depthtest))
-			enableDepthTest(depthtest);
+			SetFaceCulling(depthtest);
 
 		if (ImGui::Checkbox((lighting) ? "Disable Lighting" : "Enable Lighting", &lighting))
-			enableLighting(lighting);
+			SetLighting(lighting);
 
-		ImGui::Checkbox((isLine) ? "Disable Wireframe" : "Enable Wireframe", &isLine);
+		if (ImGui::Checkbox((texture2d) ? "Disable Texture2D" : "Enable Texture2D", &texture2d))
+			SetTexture2D(texture2d);
+
+		if (ImGui::Checkbox((color_material) ? "Disable Color Material" : "Enable Color Material", &color_material))
+			SetColorMaterial(color_material);
+
+		if (ImGui::Checkbox((wireframe) ? "Disable Wireframe" : "Enable Wireframe", &wireframe))
+			SetWireframe(wireframe);
 	}
 }
 
-void ModuleRenderer3D::RecieveEvent(const Event * e)
+bool ModuleRenderer3D::Load(JSONNode * node)
 {
-	
+	bool ret = (node != nullptr);
+
+	if (ret)
+	{
+		SetVSync(node->PullBool("vsync", vsync));
+		SetDepthTest(node->PullBool("cullface", cullface));
+		SetFaceCulling(node->PullBool("depthtest", depthtest));
+		SetLighting(node->PullBool("lighting", lighting));
+		SetTexture2D(node->PullBool("texture 2d", texture2d));
+		SetColorMaterial(node->PullBool("color material", color_material));
+		SetWireframe(node->PullBool("wireframe", wireframe));
+	}
+
+	return ret;
 }
 
-void ModuleRenderer3D::enableVSync(const bool enable)
+bool ModuleRenderer3D::Save(JSONNode * node) const
 {
-	SDL_GL_SetSwapInterval(enable ? 1 : 0);
+	bool ret = (node != nullptr);
+
+	if (ret)
+	{
+		node->PushBool("vsync", vsync);
+		node->PushBool("cullface", cullface);
+		node->PushBool("depthtest", depthtest);
+		node->PushBool("lighting", lighting);
+		node->PushBool("texture 2d", texture2d);
+		node->PushBool("color material", color_material);
+		node->PushBool("wireframe", wireframe);
+	}
+
+	return ret;
 }
 
-void ModuleRenderer3D::enableDepthTest(const bool enable)
+void ModuleRenderer3D::SetVSync(const bool enable)
 {
-	enable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+	SDL_GL_SetSwapInterval((vsync = enable) ? 1 : 0);
 }
 
-void ModuleRenderer3D::enableFaceCulling(const bool enable)
+void ModuleRenderer3D::SetDepthTest(const bool enable)
 {
-	enable ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+	(cullface = enable) ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 }
 
-void ModuleRenderer3D::enableLighting(const bool enable)
+void ModuleRenderer3D::SetFaceCulling(const bool enable)
 {
-	enable ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
+	(depthtest = enable) ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+}
+
+void ModuleRenderer3D::SetLighting(const bool enable)
+{
+	(lighting = enable) ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
+}
+
+void ModuleRenderer3D::SetTexture2D(const bool enable)
+{
+	(texture2d = enable) ? glEnable(GL_TEXTURE_2D) : glDisable(GL_TEXTURE_2D);
+}
+
+void ModuleRenderer3D::SetColorMaterial(const bool enable)
+{
+	(color_material = enable) ? glEnable(GL_COLOR_MATERIAL) : glDisable(GL_COLOR_MATERIAL);
+}
+
+void ModuleRenderer3D::SetWireframe(const bool enable)
+{
+	wireframe = enable;
 }
 
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
@@ -311,10 +307,6 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	glVertex3f(-1.0f, 1.0f, 1.0f);
 	glVertex3f(- 1.0f, 1.0f, -1.0f);
 	glEnd();
-}
-
-void ModuleRenderer3D::ResetCamera()
-{
 }
 
 void ModuleRenderer3D::ResetAspectRatio()
