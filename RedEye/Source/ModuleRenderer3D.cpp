@@ -26,21 +26,30 @@ ModuleRenderer3D::~ModuleRenderer3D()
 
 bool ModuleRenderer3D::Init(JSONNode * node)
 {
-	bool ret = true;
+	bool ret = false;
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); 
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1); 
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24); 
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8); 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) < 0)
+		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_PROFILE_MASK: SDL_GL_CONTEXT_PROFILE_CORE'");
+	if (SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1) < 0)
+		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_DOUBLEBUFFER: 1'");
+	if (SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24) < 0)
+		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_DEPTH_SIZE: 24'");
+	if (SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8) < 0)
+		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_STENCIL_SIZE: 8'");
+	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3) < 0)
+		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MAJOR_VERSION: 3'");
+	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1) < 0)
+		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MINOR_VERSION: 1'");
 	
-	LOG_SECONDARY("Creating SDL GL Context");
-	mainContext = SDL_GL_CreateContext(App->window->GetWindow());
-	if (ret = (mainContext != nullptr))
-		App->ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
-	else
-		LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
+	if (App->window)
+	{
+		LOG_SECONDARY("Creating SDL GL Context");
+		mainContext = SDL_GL_CreateContext(App->window->GetWindow());
+		if (ret = (mainContext != nullptr))
+			App->ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
+		else
+			LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
+	}
 
 	if (ret)
 	{

@@ -174,8 +174,7 @@ bool ModuleEditor::CleanUp()
 		tools.pop_back();
 	}
 
-	if (about != nullptr)
-		delete about;
+	DEL(about);
 
 	ImGui_ImplSdlGL3_Shutdown();
 

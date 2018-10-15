@@ -23,7 +23,7 @@ FileSystem::FileSystem() : engine_config(nullptr)
 FileSystem::~FileSystem()
 {
 	paths.clear();
-	delete engine_config;
+	DEL(engine_config);
 
 	PHYSFS_deinit();
 }

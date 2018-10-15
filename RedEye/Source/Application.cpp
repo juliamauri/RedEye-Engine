@@ -44,12 +44,6 @@ Application::Application(int argc, char* argv[])
 
 Application::~Application()
 {
-	DEL(fs);
-	DEL(time);
-	DEL(sys_info);
-	DEL(math);
-	DEL(log);
-
 	DEL(textures);
 	DEL(shaders);
 	DEL(primitives);
@@ -57,6 +51,12 @@ Application::~Application()
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;
+
+	DEL(fs);
+	DEL(time);
+	DEL(sys_info);
+	DEL(math);
+	DEL(log);
 }
 
 bool Application::Init()
@@ -105,25 +105,28 @@ bool Application::Init()
 					DEL(node);
 				}
 
-			// Initiallize Indenpendent Modules
-			time->Init(/*TODO get max fps from node*/);
-			sys_info->Init();
-			math->Init();
+			if (ret)
+			{
+				// Initiallize Indenpendent Modules
+				if (time) time->Init(/*TODO get max fps from node*/);
+				if (sys_info) sys_info->Init();
+				if (math) math->Init();
 
-			// Initiallize Resource Managers
-			if (textures && !textures->Init()) LOG_WARNING("Won't be able to use textures");
-			if (shaders && !shaders->Init()) LOG_WARNING("Won't be able to use shaders");
-			if (primitives && !primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
-			if (meshes && !meshes->Init("texture"))  LOG_WARNING("Won't be able to use meshes");
+				// Initiallize Resource Managers
+				if (textures && !textures->Init()) LOG_WARNING("Won't be able to use textures");
+				if (shaders && !shaders->Init()) LOG_WARNING("Won't be able to use shaders");
+				if (primitives && !primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
+				if (meshes && !meshes->Init("texture"))  LOG_WARNING("Won't be able to use meshes");
 
-			LOG_SEPARATOR("Starting Application");
+				LOG_SEPARATOR("Starting Application");
 
-			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
-				if ((*it)->IsActive() == true)
-				{
-					LOG("Starting Module %s", (*it)->GetName());
-					ret = (*it)->Start();
-				}
+				for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
+					if ((*it)->IsActive() == true)
+					{
+						LOG("Starting Module %s", (*it)->GetName());
+						ret = (*it)->Start();
+					}
+			}
 		}
 	}
 
@@ -274,11 +277,13 @@ void Application::DrawEditor()
 
 void Application::Log(int category, const char * text, const char* file)
 {
-	if(log != nullptr)
+	if (log != nullptr)
+	{
 		log->Add(category, text, file);
 
-	if(editor != nullptr && !modules.empty())
-		editor->LogToEditorConsole();
+		if (editor != nullptr && !modules.empty())
+			editor->LogToEditorConsole();
+	}
 }
 
 void Application::ReportSoftware(const char * name, const char * version, const char * website)
@@ -300,7 +305,8 @@ void Application::ReportSoftware(const char * name, const char * version, const 
 				LOG_SOFTWARE(name);
 		}
 
-		editor->AddSoftwareUsed(SoftwareInfo(name, version, website));
+		if (editor != nullptr)
+			editor->AddSoftwareUsed(SoftwareInfo(name, version, website));
 	}
 	else
 	{
