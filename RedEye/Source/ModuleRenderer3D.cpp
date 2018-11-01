@@ -84,7 +84,8 @@ update_status ModuleRenderer3D::PreUpdate()
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (!ImGui::IsMouseHoveringAnyWindow())
+	// CAMERA CONTROLS
+	/*if (!ImGui::IsMouseHoveringAnyWindow())
 	{
 		const MouseData* mouse = App->input->GetMouse();
 
@@ -125,7 +126,7 @@ update_status ModuleRenderer3D::PreUpdate()
 
 			camera->ZoomMouse(mouse->mouse_wheel_motion);
 		}
-	}
+	}*/
 
 	return ret;
 }

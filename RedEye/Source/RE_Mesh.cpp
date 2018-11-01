@@ -337,7 +337,8 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 
 	ShaderManager::use(0);
 
-	if (f_normals || v_normals)
+	// MESH DEBUG DRAWING
+	/*if (f_normals || v_normals)
 	{
 		ShaderManager::use(App->primitives->shaderPrimitive);
 		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "model", App->scene->drop->GetTransform()->GetGlobalMatrix().ptr());
@@ -381,7 +382,7 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 		glDisable(GL_PROGRAM_POINT_SIZE);
 
 		ShaderManager::use(0);
-	}
+	}*/
 }
 
 void RE_UnregisteredMesh::_setupMesh()

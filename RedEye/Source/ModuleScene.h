@@ -14,10 +14,7 @@ public:
 	~ModuleScene();
 
 	bool Start() override;
-
-	update_status PreUpdate() override;
 	update_status Update() override;
-	update_status PostUpdate() override;
 	bool CleanUp() override;
 
 	void FileDrop(const char* file);
@@ -26,11 +23,11 @@ public:
 	void DrawScene();
 	void DrawFocusedProperties();
 
-	RE_GameObject* root = nullptr;
-	RE_GameObject* drop = nullptr;
-	RE_CompUnregisteredMesh* mesh_droped = nullptr;
 
 private:
+	// Root
+	RE_GameObject* root = nullptr;
+
 	//shaders
 	unsigned int modelloading;
 };
