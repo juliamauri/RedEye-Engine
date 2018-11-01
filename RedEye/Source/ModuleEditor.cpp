@@ -257,7 +257,7 @@ ConsoleWindow::ConsoleWindow(const char * name, bool start_active) :
 
 void ConsoleWindow::Draw()
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoFocusOnAppearing);
+	ImGui::Begin(name, 0, ImGuiWindowFlags_MenuBar);// | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoFocusOnAppearing);
 	{
 		if (ImGui::BeginMenuBar())
 		{
@@ -286,9 +286,12 @@ void ConsoleWindow::Draw()
 			ImGui::EndMenuBar();
 		}
 
-		ImGui::TextUnformatted(console_buffer.begin());
-		if (scroll_to_bot) ImGui::SetScrollHere(1.0f);
-		scroll_to_bot = false;
+		ImGui::TextWrapped(console_buffer.begin());
+		if (scroll_to_bot)
+		{
+			ImGui::SetScrollHere(1.f);
+			scroll_to_bot = false;
+		}
 	}
 
 	ImGui::End();
