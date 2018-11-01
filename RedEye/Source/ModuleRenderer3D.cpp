@@ -257,6 +257,11 @@ void ModuleRenderer3D::SetWireframe(const bool enable)
 	wireframe = enable;
 }
 
+RE_Camera * ModuleRenderer3D::GetCamera() const
+{
+	return camera;
+}
+
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
 {
 	int nrAttributes;

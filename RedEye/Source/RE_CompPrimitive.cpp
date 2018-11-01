@@ -48,8 +48,8 @@ void RE_CompPoint::Draw()
 	RE_CompPrimitive::RE_Component::go->GetTransform()->SetPos(point);
 	ShaderManager::use(RE_CompPrimitive::shader);
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatrix().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->GetCamera()->GetView().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->GetCamera()->GetProjection().ptr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -76,8 +76,8 @@ void RE_CompLine::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatrix().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->GetCamera()->GetView().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->GetCamera()->GetProjection().ptr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glLineWidth(2.0f);
@@ -111,8 +111,8 @@ void RE_CompTriangle::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatrix().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->GetCamera()->GetView().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->GetCamera()->GetProjection().ptr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
@@ -130,8 +130,8 @@ void RE_CompPlane::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatrix().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->GetCamera()->GetView().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->GetCamera()->GetProjection().ptr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
@@ -152,8 +152,8 @@ void RE_CompCube::Draw()
 	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 3.0f, 0.0f).Neg());
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", model.ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->GetCamera()->GetView().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->GetCamera()->GetProjection().ptr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 1.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
@@ -185,8 +185,8 @@ void RE_CompSphere::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatrix().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->camera->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->camera->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->renderer3d->GetCamera()->GetView().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->renderer3d->GetCamera()->GetProjection().ptr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);

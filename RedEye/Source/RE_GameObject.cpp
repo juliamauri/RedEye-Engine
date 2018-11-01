@@ -7,12 +7,15 @@
 #include "RE_CompTransform.h"
 #include "RE_CompPrimitive.h"
 #include "RE_CompMesh.h"
+#include "RE_CompCamera.h"
 #include "OutputLog.h"
 #include "SDL2\include\SDL_assert.h"
+#include "ImGui\imgui.h"
 
-RE_GameObject::RE_GameObject(RE_GameObject * p, const bool start_active) : active(start_active)
+RE_GameObject::RE_GameObject(const char* name, RE_GameObject * p, const bool start_active)
+	: name(name), parent(p), active(start_active)
 {
-	parent = (p);// != nullptr) ? p : App->scene->GetRoot();
+	if (parent != nullptr) parent->AddChild(this);
 	bounding_box.minPoint = bounding_box.maxPoint = math::vec::zero;
 	transform = new RE_CompTransform(this);
 	components.push_back((RE_Component*)transform);
@@ -26,83 +29,54 @@ RE_GameObject::~RE_GameObject()
 
 void RE_GameObject::PreUpdate()
 {
-	std::list<RE_GameObject*>::iterator it_go = sons.begin();
-	for (; it_go != sons.end(); it_go++)
-		(*it_go)->PreUpdate();
-
-	std::list<RE_Component*>::iterator it_comp = components.begin();
-	for (; it_comp != components.end(); it_comp++)
-		(*it_comp)->PreUpdate();
+	for (auto child : childs) child->PreUpdate();
+	for (auto component : components) component->PreUpdate();
 }
 
 void RE_GameObject::Update()
 {
-	std::list<RE_GameObject*>::iterator it_go = sons.begin();
-	for (; it_go != sons.end(); it_go++)
-		(*it_go)->Update();
-
-	std::list<RE_Component*>::iterator it_comp = components.begin();
-	for (; it_comp != components.end(); it_comp++)
-		(*it_comp)->Update();
+	for (auto child : childs) child->PreUpdate();
+	for (auto component : components) component->Update();
 }
 
 void RE_GameObject::PostUpdate()
 {
-	std::list<RE_GameObject*>::iterator it_go = sons.begin();
-	for (; it_go != sons.end(); it_go++)
-		(*it_go)->PostUpdate();
-
-	std::list<RE_Component*>::iterator it_comp = components.begin();
-	for (; it_comp != components.end(); it_comp++)
-		(*it_comp)->PostUpdate();
+	for (auto child : childs) child->PostUpdate();
+	for (auto component : components) component->PostUpdate();
 }
 
 void RE_GameObject::Draw()
 {
-	std::list<RE_GameObject*>::iterator it_go = sons.begin();
-	for (; it_go != sons.end(); it_go++)
-		(*it_go)->Draw();
-
-	std::list<RE_Component*>::iterator it_comp = components.begin();
-	for (; it_comp != components.end(); it_comp++)
-		(*it_comp)->Draw();
+	for (auto child : childs) child->Draw();
+	for (auto component : components) component->Draw();
 }
 
-bool RE_GameObject::AddChild(RE_GameObject * child)
+void RE_GameObject::AddChild(RE_GameObject * child)
 {
-	bool ret = (child != nullptr);
-
-	if (ret)
-	{
-		child->parent = this;
-		sons.push_back(child);
-	}
-
-	return ret;
+	SDL_assert(child != nullptr);
+	child->parent = this;
+	childs.push_back(child);
 }
 
-bool RE_GameObject::RemoveChild(RE_GameObject * child)
+void RE_GameObject::RemoveChild(RE_GameObject * child)
 {
-	bool ret = child != nullptr;
-
-	if (ret) sons.remove(child);
-
-	return ret;
+	SDL_assert(child != nullptr);
+	childs.remove(child);
 }
 
 void RE_GameObject::RemoveAllChilds()
 {
-	while (!sons.empty())
+	while (!childs.empty())
 	{
-		(*sons.begin())->RemoveAllChilds();
-		delete (*sons.begin());
-		sons.pop_front();
+		(*childs.begin())->RemoveAllChilds();
+		DEL(*childs.begin());
+		childs.pop_front();
 	}
 }
 
-const std::list<RE_GameObject*>* RE_GameObject::GetChilds() const { return &sons; }
+const std::list<RE_GameObject*>* RE_GameObject::GetChilds() const { return &childs; }
 
-unsigned int RE_GameObject::ChildCount() const { return sons.size(); }
+unsigned int RE_GameObject::ChildCount() const { return childs.size(); }
 
 RE_GameObject * RE_GameObject::GetParent() const { return parent; }
 
@@ -119,10 +93,7 @@ void RE_GameObject::SetActive(bool value) { active = value; }
 void RE_GameObject::SetActiveAll(bool value)
 {
 	active = value;
-
-	std::list<RE_GameObject*>::iterator it_go = sons.begin();
-	for (; it_go != sons.end(); it_go++)
-		(*it_go)->SetActiveAll(active);
+	for (auto child : childs) child->SetActiveAll(active);
 }
 
 RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file_path_data, const bool drop)
@@ -216,13 +187,10 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 	return ret;
 }
 
-bool RE_GameObject::RemoveComponent(RE_Component * component)
+void RE_GameObject::RemoveComponent(RE_Component * component)
 {
-	bool ret = component != nullptr;
-
-	if (ret) components.remove(component);
-
-	return ret;
+	SDL_assert(component != nullptr);
+	components.remove(component);
 }
 
 void RE_GameObject::RemoveAllComponents()
@@ -234,21 +202,43 @@ void RE_GameObject::RemoveAllComponents()
 	}
 }
 
+RE_CompTransform * RE_GameObject::AddCompTransform()
+{
+	DEL(transform);
+	return (transform = new RE_CompTransform(this));
+}
+
+RE_CompMesh * RE_GameObject::AddCompMesh(const char * file_path_data, const bool dropped)
+{
+	RE_CompMesh* ret = new RE_CompMesh(this, file_path_data, dropped);
+	components.push_back(ret->AsComponent());
+	return ret;
+}
+
+RE_CompCamera * RE_GameObject::AddCompCamera()
+{
+	RE_CompCamera* ret = new RE_CompCamera();
+	components.push_back(ret->AsComponent());
+	return ret;
+}
+
 RE_Component* RE_GameObject::GetComponent(const ushortint type) const
 {
 	RE_Component* ret = nullptr;
 
-	if (ComponentType(type) == C_TRANSFORM)
+	if (type == ComponentType::C_TRANSFORM)
 	{
 		ret = transform;
 	}
 	else
 	{
-		std::list<RE_Component*>::const_iterator it_comp = components.cbegin();
-		for (; it_comp != components.cend() && !ret; it_comp++)
+		for (auto component : components)
 		{
-			if ((*it_comp)->GetType() == ComponentType(type))
-				ret = (*it_comp);
+			if (component->GetType() == type)
+			{
+				ret = component;
+				break;
+			}
 		}
 	}
 
@@ -257,9 +247,61 @@ RE_Component* RE_GameObject::GetComponent(const ushortint type) const
 
 RE_CompTransform * RE_GameObject::GetTransform() const { return transform; }
 
+RE_CompMesh * RE_GameObject::GetMesh() const
+{
+	RE_CompMesh* ret = nullptr;
+
+	for (auto component : components)
+	{
+		if (component->GetType() == ComponentType::C_MESH)
+		{
+			ret = (RE_CompMesh*)component;
+			break;
+		}
+	}
+
+	return ret;
+}
+
+RE_CompCamera * RE_GameObject::GetCamera() const
+{
+	RE_CompCamera* ret = nullptr;
+
+	for (auto component : components)
+	{
+		if (component->GetType() == ComponentType::C_MESH)
+		{
+			ret = (RE_CompCamera*)component;
+			break;
+		}
+	}
+
+	return ret;
+}
+
 void RE_GameObject::TransformModified()
 {
-	std::list<RE_Component*>::iterator it_comp = components.begin();
-	for (; it_comp != components.end(); it_comp++)
-		(*it_comp)->OnTransformModified();
+	for (auto component : components)
+		component->OnTransformModified();
+}
+
+void RE_GameObject::DrawProperties()
+{
+	if (ImGui::BeginMenu("Options"))
+	{
+		// if (ImGui::MenuItem("Save as prefab")) {}
+
+		ImGui::EndMenu();
+	}
+
+	char name_holder[64];
+	sprintf_s(name_holder, 64, "%s", name.c_str());
+	if (ImGui::InputText("Name", name_holder, 64))
+		name = name_holder;
+
+	if (ImGui::Checkbox("Active", &active))
+		active != active;
+
+	for (auto component : components)
+		component->DrawProperties();
 }

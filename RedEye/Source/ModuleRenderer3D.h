@@ -29,9 +29,6 @@ public:
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
 
-	void* mainContext;
-	unsigned int renderedTexture;
-
 	void SetVSync(const bool enable);
 	void SetDepthTest(const bool enable);
 	void SetFaceCulling(const bool enable);
@@ -39,6 +36,8 @@ public:
 	void SetTexture2D(const bool enable);
 	void SetColorMaterial(const bool enable);
 	void SetWireframe(const bool enable);
+
+	RE_Camera* GetCamera() const;
 
 	//Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
@@ -49,9 +48,13 @@ public:
 	//Renderer Test Window
 	void ResetAspectRatio();
 
-	RE_Camera* camera;
-
 private:
+
+	RE_Camera* camera = nullptr;
+
+	void* mainContext;
+	unsigned int renderedTexture;
+
 	bool vsync = false;
 	bool cullface = false;
 	bool depthtest = true;
