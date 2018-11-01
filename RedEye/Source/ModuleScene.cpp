@@ -6,12 +6,9 @@
 #include "OutputLog.h"
 #include "Texture2DManager.h"
 #include "ShaderManager.h"
-//#include "RE_CompMesh.h"
-#include "RE_Mesh.h"
-#include "RE_Camera.h"
-#include "RE_PrimitiveManager.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
+#include "RE_CompMesh.h"
 #include <string>
 #include <algorithm>
 
@@ -33,9 +30,15 @@ bool ModuleScene::Start()
 			LOG("%s\n", App->shaders->GetShaderError());
 	}
 
-	root = new RE_GameObject();
+	// root
+	root = new RE_GameObject("root");
 	root->AddComponent(C_PLANE);
-	
+	selected = root;
+
+	// load default meshes
+	selected = new RE_GameObject("default model", root);
+	selected->AddCompMesh("path");
+
 	return ret;
 }
 
@@ -93,6 +96,13 @@ void ModuleScene::RecieveEvent(const Event * e)
 {
 }
 
+RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent)
+{
+	RE_GameObject* ret = new RE_GameObject(name, parent ? parent : root);
+
+	return ret;
+}
+
 void ModuleScene::DrawScene()
 {
 	root->Draw();
@@ -125,12 +135,12 @@ void ModuleScene::DrawScene()
 void ModuleScene::DrawFocusedProperties()
 {
 	// DRAW SELECTED GO
-	/*if (mesh_droped)
+	if (selected != root)
 	{
-		// root->DrawProperties();
+		selected->DrawProperties();
 
-		RE_CompTransform* transform = (RE_CompTransform*)drop->GetComponent(C_TRANSFORM);
+		/*RE_CompTransform* transform = (RE_CompTransform*)drop->GetComponent(C_TRANSFORM);
 		transform->DrawProperties();
-		mesh_droped->DrawProperties();
-	}*/
+		mesh_droped->DrawProperties();*/
+	}
 }

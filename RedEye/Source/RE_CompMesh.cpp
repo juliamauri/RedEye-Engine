@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "MeshManager.h"
+#include "ImGui\imgui.h"
 
 RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char * path, const bool file_dropped, const bool start_active) : RE_Component(C_MESH, go, start_active)
 {
@@ -26,5 +27,14 @@ unsigned int RE_CompMesh::LoadMesh(const char * path, bool dropped)
 void RE_CompMesh::Draw()
 {
 	if(reference) App->meshes->DrawMesh(reference);
+}
+
+void RE_CompMesh::DrawProperties()
+{
+	if (ImGui::CollapsingHeader("Mesh"))
+	{
+		if (reference) App->meshes->DrawMesh(reference);
+		else ImGui::TextWrapped("Empty Mesh Component");
+	}
 }
 

@@ -5,7 +5,6 @@
 #include "Event.h"
 
 class RE_GameObject;
-class RE_CompUnregisteredMesh;
 
 class ModuleScene : public Module
 {
@@ -20,13 +19,15 @@ public:
 	void FileDrop(const char* file);
 	void RecieveEvent(const Event* e) override;
 
+	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
+
 	void DrawScene();
 	void DrawFocusedProperties();
 
-
 private:
-	// Root
+
 	RE_GameObject* root = nullptr;
+	RE_GameObject* selected = nullptr;
 
 	//shaders
 	unsigned int modelloading;

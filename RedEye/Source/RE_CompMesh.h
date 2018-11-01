@@ -13,34 +13,12 @@ public:
 
 	void Draw() override;
 
+	void DrawProperties() override;
+
 protected:
 
 	unsigned int reference = 0u;
 };
-
-
-#include <vector>
-#include "MathGeoLib/include/MathGeoLib.h"
-
-struct _Vertex
-{
-	math::vec Position;
-	math::vec Normal;
-	math::float2 TexCoords;
-};
-
-struct _Texture
-{
-	unsigned int id;
-	std::string type;
-	std::string path;
-};
-
-struct aiNode;
-struct aiScene;
-struct aiMesh;
-struct aiMaterial;
-enum aiTextureType;
 
 
 #endif // !__RE_COMPMESH_H__

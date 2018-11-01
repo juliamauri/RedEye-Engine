@@ -42,17 +42,19 @@ public:
 	virtual void Draw() {}
 	virtual void DrawProperties() {}
 
+	virtual void Save() const {}
+	virtual void Load() {}
+	virtual void Reset() {}
+
+	virtual void OnTransformModified() {}
+
 	bool IsActive() const;
 	void SetActive(const bool value);
 
 	ComponentType GetType() const;
 	RE_GameObject* GetGO() const;
 
-	virtual void Save() const {}
-	virtual void Load() {}
-	virtual void Reset() {}
-
-	virtual void OnTransformModified() {}
+	RE_Component* AsComponent() const;
 
 protected:
 
