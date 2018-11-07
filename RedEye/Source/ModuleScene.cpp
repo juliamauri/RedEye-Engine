@@ -11,6 +11,7 @@
 #include "RE_CompTransform.h"
 #include "RE_CompMesh.h"
 #include "RE_Camera.h"
+#include "MeshManager.h"
 #include <string>
 #include <algorithm>
 
@@ -38,11 +39,16 @@ bool ModuleScene::Start()
 	root->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 10.0f)));
 
 	// load default meshes
-
-	// depricated way
-	selected = new RE_GameObject("Street", root);
-	selected->AddCompMesh("path");
+	App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
+	selected = root->GetChilds().begin()._Ptr->_Myval;
 	selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
+
+	//// depricated way
+	//selected = new RE_GameObject("Street", root);
+	//selected->AddCompMesh("path");
+	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
+
+
 
 	// call this instead to create all gameobjects from fbx
 	//selected = App->meshes->DumpGeometry(root, "path del street fbx");

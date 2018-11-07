@@ -50,6 +50,7 @@ public:
 
 	RE_CompTransform* AddCompTransform();
 	RE_CompMesh* AddCompMesh(const char* file_path_data = nullptr, const bool dropped = false);
+	void AddCompMesh(RE_CompMesh* comp_mesh);
 	RE_CompCamera* AddCompCamera();
 
 	RE_CompTransform* GetTransform() const;

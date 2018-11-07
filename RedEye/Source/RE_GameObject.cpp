@@ -234,6 +234,12 @@ RE_CompMesh * RE_GameObject::AddCompMesh(const char * file_path_data, const bool
 	return ret;
 }
 
+void RE_GameObject::AddCompMesh(RE_CompMesh * comp_mesh)
+{
+	components.push_back((RE_Component*)comp_mesh);
+}
+
+
 RE_CompCamera * RE_GameObject::AddCompCamera()
 {
 	RE_CompCamera* ret = new RE_CompCamera();

@@ -40,6 +40,7 @@ Application::Application(int argc, char* argv[])
 	shaders = new ShaderManager("Shaders/");
 	primitives = new RE_PrimitiveManager();
 	meshes = new MeshManager("Meshes/");
+	resources = new ResourceManager();
 }
 
 Application::~Application()
@@ -48,6 +49,7 @@ Application::~Application()
 	DEL(shaders);
 	DEL(primitives);
 	DEL(meshes);
+	DEL(resources);
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;

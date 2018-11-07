@@ -23,6 +23,7 @@ class Texture2DManager;
 class ShaderManager;
 class RE_PrimitiveManager;
 class MeshManager;
+class ResourceManager;
 
 class Application : public EventListener
 {
@@ -66,6 +67,7 @@ public:
 	ShaderManager* shaders = nullptr;
 	RE_PrimitiveManager* primitives = nullptr;
 	MeshManager* meshes = nullptr;
+	ResourceManager* resources = nullptr;
 
 private:
 
