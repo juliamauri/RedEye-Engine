@@ -65,7 +65,4 @@ private:
 	int GetExtensionIL(const char* ext);
 };
 
-
-
-
 #endif // !__TEXTURE2DMANAGER_H__
