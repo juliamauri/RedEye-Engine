@@ -146,12 +146,12 @@ void RE_CompTransform::CalcGlobalTransform(bool call_tranf_modified)
 		{
 			global_transform = parent->GetTransform()->global_transform * local_transform;
 
-			const std::list<RE_GameObject*>* go_sons = go->GetChilds();
+			const std::list<RE_GameObject*> go_sons = go->GetChilds();
 
-			if (!go_sons->empty())
+			if (!go_sons.empty())
 			{
-				std::list<RE_GameObject*>::const_iterator child = go_sons->begin();
-				for (; child != go_sons->end(); child++)
+				std::list<RE_GameObject*>::const_iterator child = go_sons.begin();
+				for (; child != go_sons.end(); child++)
 					(*child)->GetTransform()->CalcGlobalTransform();
 			}
 		}

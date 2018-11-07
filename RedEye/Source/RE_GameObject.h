@@ -13,7 +13,7 @@ class RE_CompCamera;
 class RE_GameObject
 {
 public:
-	RE_GameObject(const char* name, RE_GameObject* parent = nullptr, const bool start_active = true);
+	RE_GameObject(const char* name, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
 	~RE_GameObject();
 
 	void PreUpdate();
@@ -25,7 +25,8 @@ public:
 	void AddChild(RE_GameObject* child);
 	void RemoveChild(RE_GameObject* child); //Breaks the link with the parent but does not delete the child.
 	void RemoveAllChilds();
-	const std::list<RE_GameObject*>* GetChilds() const;
+	std::list<RE_GameObject*>& GetChilds();
+	const std::list<RE_GameObject*>& GetChilds() const;
 	unsigned int ChildCount() const;
 
 	// Parent
@@ -36,6 +37,10 @@ public:
 	bool IsActive() const;
 	void SetActive(const bool value);
 	void SetActiveAll(const bool value);
+
+	// Static
+	bool IsStatic() const;
+	void SetStatic(bool value);
 
 	// Components
 	RE_Component* AddComponent(const ushortint type, const char* file_path_data = nullptr, const bool dropped = false);
@@ -54,12 +59,22 @@ public:
 	// Transform
 	void TransformModified();
 
+	// Name
+	const char* GetName() const;
+
+	// AABB
+	void SetBoundingBox(math::AABB& box);
+	math::AABB GetBoundingBox() const;
+
 	// Editor
 	void DrawProperties();
+	void DrawHeriarchy();
 
 private:
 
 	bool active = true;
+	bool isStatic = false;
+
 	std::string name;
 	math::AABB bounding_box;
 

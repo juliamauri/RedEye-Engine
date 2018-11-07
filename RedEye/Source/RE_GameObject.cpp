@@ -12,8 +12,8 @@
 #include "SDL2\include\SDL_assert.h"
 #include "ImGui\imgui.h"
 
-RE_GameObject::RE_GameObject(const char* name, RE_GameObject * p, const bool start_active)
-	: name(name), parent(p), active(start_active)
+RE_GameObject::RE_GameObject(const char* name, RE_GameObject * p, bool start_active, bool isStatic)
+	: name(name), parent(p), active(start_active), isStatic(isStatic)
 {
 	if (parent != nullptr) parent->AddChild(this);
 	bounding_box.minPoint = bounding_box.maxPoint = math::vec::zero;
@@ -74,7 +74,16 @@ void RE_GameObject::RemoveAllChilds()
 	}
 }
 
-const std::list<RE_GameObject*>* RE_GameObject::GetChilds() const { return &childs; }
+std::list<RE_GameObject*>& RE_GameObject::GetChilds()
+{
+	return childs;
+}
+
+const std::list<RE_GameObject*>& RE_GameObject::GetChilds() const
+{
+	return childs;
+}
+
 
 unsigned int RE_GameObject::ChildCount() const { return childs.size(); }
 
@@ -94,6 +103,16 @@ void RE_GameObject::SetActiveAll(bool value)
 {
 	active = value;
 	for (auto child : childs) child->SetActiveAll(active);
+}
+
+bool RE_GameObject::IsStatic() const
+{
+	return isStatic;
+}
+
+void RE_GameObject::SetStatic(bool value)
+{
+	isStatic = value;
 }
 
 RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file_path_data, const bool drop)
@@ -285,14 +304,29 @@ void RE_GameObject::TransformModified()
 		component->OnTransformModified();
 }
 
+const char * RE_GameObject::GetName() const
+{
+	return name.c_str();
+}
+
+void RE_GameObject::SetBoundingBox(math::AABB & box)
+{
+	bounding_box = box;
+}
+
+math::AABB RE_GameObject::GetBoundingBox() const
+{
+	return bounding_box;
+}
+
 void RE_GameObject::DrawProperties()
 {
-	if (ImGui::BeginMenu("Options"))
+	/*if (ImGui::BeginMenu("Options"))
 	{
 		// if (ImGui::MenuItem("Save as prefab")) {}
 
 		ImGui::EndMenu();
-	}
+	}*/
 
 	char name_holder[64];
 	sprintf_s(name_holder, 64, "%s", name.c_str());
@@ -302,6 +336,30 @@ void RE_GameObject::DrawProperties()
 	if (ImGui::Checkbox("Active", &active))
 		active != active;
 
+	ImGui::SameLine();
+
+	if (ImGui::Checkbox("Static", &isStatic))
+		isStatic != isStatic;
+
+	if (ImGui::TreeNode("Bounding Box"))
+	{
+		ImGui::TextWrapped("Min: { %d, %d, %d}", bounding_box.minPoint.x, bounding_box.minPoint.y, bounding_box.minPoint.z);
+		ImGui::TextWrapped("Max: { %d, %d, %d}", bounding_box.maxPoint.x, bounding_box.maxPoint.y, bounding_box.maxPoint.z);
+
+		ImGui::TreePop();
+	}
+
 	for (auto component : components)
 		component->DrawProperties();
+}
+
+void RE_GameObject::DrawHeriarchy()
+{
+	if (ImGui::TreeNode(name.c_str()))
+	{
+		for (auto child : childs)
+			child->DrawHeriarchy();
+
+		ImGui::TreePop();
+	}
 }
