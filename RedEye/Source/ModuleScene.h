@@ -3,6 +3,7 @@
 
 #include "Module.h"
 #include "Event.h"
+#include "QuadTree.h"
 
 class RE_GameObject;
 
@@ -22,12 +23,19 @@ public:
 	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
 
 	void DrawScene();
+	void DrawHeriarchy();
 	void DrawFocusedProperties();
+
+	void SetSelected(RE_GameObject* selected);
+	RE_GameObject* GetSelected() const;
 
 private:
 
 	RE_GameObject* root = nullptr;
 	RE_GameObject* selected = nullptr;
+
+	bool draw_quad_tree = true;
+	QTree quad_tree;
 
 	//shaders
 	unsigned int modelloading;

@@ -22,9 +22,6 @@
     <ClCompile Include="gpudetect\DeviceId.cpp">
       <Filter>3rd Party\gpudetect</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleEditor.cpp">
-      <Filter>Modules</Filter>
-    </ClCompile>
     <ClCompile Include="ImGui\imgui.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
@@ -105,6 +102,15 @@
     </ClCompile>
     <ClCompile Include="RE_Camera.cpp">
       <Filter>GameObject\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="QuadTree.cpp">
+      <Filter>Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleEditor.cpp">
+      <Filter>Modules\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorWindows.cpp">
+      <Filter>Modules\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -252,9 +258,6 @@
     <ClInclude Include="ModuleRenderer3D.h">
       <Filter>Modules</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleEditor.h">
-      <Filter>Modules</Filter>
-    </ClInclude>
     <ClInclude Include="ImGui\imconfig.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
@@ -354,6 +357,15 @@
     <ClInclude Include="RE_Camera.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
+    <ClInclude Include="QuadTree.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleEditor.h">
+      <Filter>Modules\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorWindows.h">
+      <Filter>Modules\Editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -430,6 +442,9 @@
     </Filter>
     <Filter Include="Modules\Resource Managers">
       <UniqueIdentifier>{c7fdb747-bf4e-4864-8336-d13e49a20d25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Editor">
+      <UniqueIdentifier>{355a2309-34fd-415d-af8a-c2ca6f635028}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

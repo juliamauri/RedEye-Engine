@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "ModuleRenderer3D.h"
+#include "ModuleEditor.h"
 #include "FileSystem.h"
 #include "OutputLog.h"
 #include "Texture2DManager.h"
@@ -9,6 +10,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_CompMesh.h"
+#include "RE_Camera.h"
 #include <string>
 #include <algorithm>
 
@@ -33,11 +35,19 @@ bool ModuleScene::Start()
 	// root
 	root = new RE_GameObject("root");
 	root->AddComponent(C_PLANE);
-	selected = root;
+	root->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 10.0f)));
 
 	// load default meshes
-	selected = new RE_GameObject("default model", root);
+
+	// depricated way
+	selected = new RE_GameObject("Street", root);
 	selected->AddCompMesh("path");
+	selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
+
+	// call this instead to create all gameobjects from fbx
+	//selected = App->meshes->DumpGeometry(root, "path del street fbx");
+
+	quad_tree.Build(root);
 
 	return ret;
 }
@@ -67,22 +77,14 @@ void ModuleScene::FileDrop(const char * file)
 
 	if (ext.compare("fbx") == 0)
 	{
-		/*RE_CompMesh* c_mesh = (RE_CompMesh*)drop->GetComponent(C_MESH);
+		// CREATE GAMEOBJECTS WITH GEOMETRY
+		if (selected != nullptr) selected = root;
 
-		if (c_mesh == nullptr)
-			drop->AddComponent(C_MESH, (char*)file, true);
-		else
-			c_mesh->LoadMesh(file, true);*/
+		//selected = App->meshes->DumpGeometry(selected, "path del street fbx");
 
-		// FOCUS ON DROP
-		/*DEL(mesh_droped);
-
-		drop->GetComponent(C_TRANSFORM)->Reset();
-
-		mesh_droped = new RE_CompUnregisteredMesh((char*)file, holder->GetBuffer(), holder->GetSize());
-
-		App->renderer3d->camera->SetPosition(mesh_droped->bounding_box.maxPoint * 2);
-		App->renderer3d->camera->SetFocus(mesh_droped->bounding_box.CenterPoint());*/
+		// FOCUS CAMERA ON DROPPED GEOMETRY
+		App->editor->GetCamera()->SetPosition(selected->GetBoundingBox().maxPoint * 2);
+		App->editor->GetCamera()->SetFocus(selected->GetBoundingBox().CenterPoint());
 	}
 	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
 	{
@@ -105,6 +107,9 @@ RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent)
 
 void ModuleScene::DrawScene()
 {
+	if (draw_quad_tree)
+		quad_tree.Draw();
+
 	root->Draw();
 
 	// mesh drawing
@@ -132,15 +137,30 @@ void ModuleScene::DrawScene()
 	//drop->Draw();
 }
 
+void ModuleScene::DrawHeriarchy()
+{
+	if (root != nullptr)
+	{
+		for (auto child : root->GetChilds())
+			child->DrawHeriarchy();
+	}
+}
+
 void ModuleScene::DrawFocusedProperties()
 {
 	// DRAW SELECTED GO
-	if (selected != root)
+	if (selected != nullptr && selected != root)
 	{
 		selected->DrawProperties();
-
-		/*RE_CompTransform* transform = (RE_CompTransform*)drop->GetComponent(C_TRANSFORM);
-		transform->DrawProperties();
-		mesh_droped->DrawProperties();*/
 	}
+}
+
+void ModuleScene::SetSelected(RE_GameObject * select)
+{
+	selected = (select != nullptr) ? select : root;
+}
+
+RE_GameObject * ModuleScene::GetSelected() const
+{
+	return selected;
 }

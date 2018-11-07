@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Cvar.cpp" />
+    <ClCompile Include="EditorWindows.cpp" />
     <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="gpudetect\DeviceId.cpp" />
@@ -38,6 +39,7 @@
     <ClCompile Include="ModuleRenderer3D.cpp" />
     <ClCompile Include="ModuleScene.cpp" />
     <ClCompile Include="ModuleWindow.cpp" />
+    <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="RE_Camera.cpp" />
@@ -58,6 +60,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="Cvar.h" />
+    <ClInclude Include="EditorWindows.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="EventListener.h" />
@@ -87,6 +90,7 @@
     <ClInclude Include="ModuleWindow.h" />
     <ClInclude Include="PhysFS\include\physfs.h" />
     <ClInclude Include="PhysFS\include\physfs_internal.h" />
+    <ClInclude Include="QuadTree.h" />
     <ClInclude Include="RapidJson\include\allocators.h" />
     <ClInclude Include="RapidJson\include\document.h" />
     <ClInclude Include="RapidJson\include\encodedstream.h" />
