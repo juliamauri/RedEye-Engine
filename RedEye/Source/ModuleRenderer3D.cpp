@@ -58,7 +58,6 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		if (ret = (error == GLEW_OK))
 		{
 			Load(node);
-			camera = new RE_Camera();
 			App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
 		}
 		else
@@ -76,57 +75,13 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	// Reset projection & view
 	glMatrixMode(GL_PROJECTION); 
-	glLoadMatrixf(camera->GetProjection().ptr());
+	glLoadMatrixf(App->editor->GetCamera()->GetProjection().ptr());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	//Set background with a clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// CAMERA CONTROLS
-	/*if (!ImGui::IsMouseHoveringAnyWindow())
-	{
-		const MouseData* mouse = App->input->GetMouse();
-
-		if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse->GetButton(1) == KEY_REPEAT)
-		{
-			if(App->scene->mesh_droped != nullptr
-				&& !App->scene->mesh_droped->error_loading
-				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
-				camera->Orbit(-mouse->mouse_x_motion, mouse->mouse_y_motion, App->scene->mesh_droped->bounding_box.CenterPoint());
-		}
-		else if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
-			&& App->scene->mesh_droped != nullptr
-			&& !App->scene->mesh_droped->error_loading)
-		{
-			camera->SetPosition(App->scene->mesh_droped->bounding_box.maxPoint * 2);
-			camera->SetFocus(App->scene->mesh_droped->bounding_box.CenterPoint());
-		}
-		else
-		{
-			if (mouse->GetButton(3) == KEY_REPEAT)
-			{
-				float cameraSpeed = 5.f;
-				if (App->input->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT))
-					cameraSpeed *= 2.0f;
-				cameraSpeed *= App->time->GetDeltaTime();
-
-				if (App->input->CheckKey(SDL_SCANCODE_W, KEY_REPEAT))
-					camera->Move(Camera_Movement::FORWARD, cameraSpeed);
-				if (App->input->CheckKey(SDL_SCANCODE_S, KEY_REPEAT))
-					camera->Move(Camera_Movement::BACKWARD, cameraSpeed);
-				if (App->input->CheckKey(SDL_SCANCODE_A, KEY_REPEAT))
-					camera->Move(Camera_Movement::LEFT, cameraSpeed);
-				if (App->input->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))
-					camera->Move(Camera_Movement::RIGHT, cameraSpeed);
-
-				camera->RotateWMouse(mouse->mouse_x_motion, -mouse->mouse_y_motion);
-			}
-
-			camera->ZoomMouse(mouse->mouse_wheel_motion);
-		}
-	}*/
 
 	return ret;
 }
@@ -151,8 +106,6 @@ update_status ModuleRenderer3D::PostUpdate()
 
 bool ModuleRenderer3D::CleanUp()
 {
-	DEL(camera);
-
 	//Delete context
 	SDL_GL_DeleteContext(mainContext);
 
@@ -257,11 +210,6 @@ void ModuleRenderer3D::SetWireframe(const bool enable)
 	wireframe = enable;
 }
 
-RE_Camera * ModuleRenderer3D::GetCamera() const
-{
-	return camera;
-}
-
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
 {
 	int nrAttributes;
@@ -277,7 +225,7 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	model.InverseTranspose();
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((camera->GetView() * model).ptr());
+	glLoadMatrixf((App->editor->GetCamera()->GetView() * model).ptr());
 
 	glBegin(GL_TRIANGLES);
 	glVertex3f(-1.0f, -1.0f, -1.0f);
