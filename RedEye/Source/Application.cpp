@@ -306,7 +306,7 @@ void Application::ReportSoftware(const char * name, const char * version, const 
 		}
 
 		if (editor != nullptr)
-			editor->AddSoftwareUsed(SoftwareInfo(name, version, website));
+			editor->AddSoftwareUsed(name, version, website);
 	}
 	else
 	{
