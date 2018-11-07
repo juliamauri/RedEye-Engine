@@ -24,17 +24,43 @@
 #include "assimp/include/scene.h"
 #include "assimp/include/postprocess.h"
 
+void _CheckGLError(const char* file, int line);
 
-RE_Mesh::RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+#define CheckGLError() _CheckGLError(__FILE__, __LINE__)
+
+void _CheckGLError(const char* file, int line)
+{
+	GLenum err(glGetError());
+
+	while (err != GL_NO_ERROR)
+	{
+		std::string error;
+		switch (err)
+		{
+		case GL_INVALID_OPERATION:  error = "INVALID_OPERATION";      break;
+		case GL_INVALID_ENUM:       error = "INVALID_ENUM";           break;
+		case GL_INVALID_VALUE:      error = "INVALID_VALUE";          break;
+		case GL_OUT_OF_MEMORY:      error = "OUT_OF_MEMORY";          break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:  error = "INVALID_FRAMEBUFFER_OPERATION";  break;
+		}
+		std::cout << "GL_" << error.c_str() << " - " << file << ":" << line << std::endl;
+		err = glGetError();
+	}
+
+	return;
+}
+
+
+
+RE_Mesh::RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, unsigned int triangles)
 {
 	this->vertices = vertices;
-
-	if (indices.size() > 0)
-		this->indices = indices;
-	else
-		useIndex = false;
-
+	this->indices = indices;
 	this->textures = textures;
+
+	triangle_count = triangles;
+
+	
 
 	// now that we have all the required data, set the vertex buffers and its attribute pointers.
 	setupMesh();
@@ -44,260 +70,13 @@ RE_Mesh::~RE_Mesh()
 {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	if(useIndex) glDeleteBuffers(1, &EBO);
+	glDeleteBuffers(1, &EBO);
+
+	if (lVertexNormals) clearVertexNormals();
+	if (lFaceNormals) clearFaceNormals();
 }
 
 void RE_Mesh::Draw(unsigned int shader_ID)
-{
-	ShaderManager::use(shader_ID);
-	// bind appropriate textures
-	unsigned int diffuseNr = 1;
-	unsigned int specularNr = 1;
-	unsigned int normalNr = 1;
-	unsigned int heightNr = 1;
-	for (unsigned int i = 0; i < textures.size(); i++)
-	{
-		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
-		// retrieve texture number (the N in diffuse_textureN)
-		std::string number;
-		std::string name = textures[i].type;
-		if (name == "texture_diffuse")
-			number = std::to_string(diffuseNr++);
-		else if (name == "texture_specular")
-			number = std::to_string(specularNr++); // transfer unsigned int to stream
-		else if (name == "texture_normal")
-			number = std::to_string(normalNr++); // transfer unsigned int to stream
-		else if (name == "texture_height")
-			number = std::to_string(heightNr++); // transfer unsigned int to stream
-
-												 // now set the sampler to the correct texture unit
-		ShaderManager::setUnsignedInt(shader_ID, (name + number).c_str(), i);
-
-		// and finally bind the texture
-		App->textures->use(textures[i].id);
-	}
-	
-		// draw mesh
-	glBindVertexArray(VAO);
-
-	if (useIndex)
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	}
-	else
-	{
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-	}
-
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	
-	// always good practice to set everything back to defaults once configured.
-	glActiveTexture(GL_TEXTURE0);
-}
-
-void RE_Mesh::setupMesh()
-{
-	// create buffers/arrays
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	glBindVertexArray(VAO);
-	// load data into vertex buffers
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// A great thing about structs is that their memory layout is sequential for all its items.
-	// The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
-	// again translates to 3/2 floats which translates to a byte array.
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
-
-	if (useIndex)
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
-	}
-
-	// set the vertex attribute pointers
-	// vertex Positions
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-	// vertex normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-	// vertex texture coords
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-RE_MeshContainer::RE_MeshContainer(const char* f, const char* d, bool dropped) : dropped(dropped)
-{
-	SDL_assert(f != nullptr && d != nullptr);
-	file_name = f;
-	directory = d;
-	//LOG("Creating Mesh Container: %s (from: %s%s)", file_name = f, directory = d, dropped ? " - Dropped" : " ");
-}
-
-RE_MeshContainer::~RE_MeshContainer()
-{
-	meshes.clear();
-	textures_loaded.clear();
-}
-
-void RE_MeshContainer::Draw(unsigned int shader)
-{
-	for (unsigned int i = 0; i < meshes.size(); i++)
-		meshes[i].Draw(shader);
-}
-
-void RE_MeshContainer::ProcessNode(aiNode * node, const aiScene * scene)
-{
-	unsigned int i = 0;
-
-	// process all the node's meshes (if any)
-	for (; i < node->mNumMeshes; i++)
-	{
-		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(ProcessMesh(mesh, scene));
-	}
-
-	// then do the same for each children
-	for (i = 0; i < node->mNumChildren; i++)
-		ProcessNode(node->mChildren[i], scene);
-}
-
-RE_Mesh RE_MeshContainer::ProcessMesh(aiMesh * mesh, const aiScene * scene)
-{
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
-
-	LOG("Processing Mesh with %u vertices, %u faces and %u texture indexes", mesh->mNumVertices, mesh->mNumFaces, mesh->mMaterialIndex);
-
-	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-	{
-		// process vertex positions, normals and texture coordinates
-		Vertex vertex;
-		math::vec vector;
-		vector.x = mesh->mVertices[i].x;
-		vector.y = mesh->mVertices[i].y;
-		vector.z = mesh->mVertices[i].z;
-		vertex.Position = vector;
-
-		vector.x = mesh->mNormals[i].x;
-		vector.y = mesh->mNormals[i].y;
-		vector.z = mesh->mNormals[i].z;
-		vertex.Normal = vector;
-
-		if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
-		{
-			math::float2 vec;
-			vec.x = mesh->mTextureCoords[0][i].x;
-			vec.y = mesh->mTextureCoords[0][i].y;
-			vertex.TexCoords = vec;
-		}
-		else
-			vertex.TexCoords = math::float2(0.0f, 0.0f);
-
-		vertices.push_back(vertex);
-	}
-	// process indices
-	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-	{
-		aiFace face = mesh->mFaces[i];
-
-		if (face.mNumIndices != 3)
-			LOG("WARNING, geometry face with %u indices instead of 3!", face.mNumIndices);
-		else
-			for (unsigned int j = 0; j < face.mNumIndices; j++)
-				indices.push_back(face.mIndices[j]);
-	}
-	// process material
-	if (mesh->mMaterialIndex >= 0)
-	{
-		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-		std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-		//std::vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-		//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-	}
-
-	return RE_Mesh(vertices, indices, textures);
-}
-
-std::vector<Texture> RE_MeshContainer::LoadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName)
-{
-	std::vector<Texture> textures;
-	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
-	{
-		aiString str;
-		mat->GetTexture(type, i, &str);
-		bool skip = false;
-		for (unsigned int j = 0; j < textures_loaded.size(); j++)
-		{
-			if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
-			{
-				textures.push_back(textures_loaded[j]);
-				skip = true;
-				break;
-			}
-		}
-		if (!skip)
-		{   // if texture hasn't been loaded already, load it
-			Texture texture;
-			texture.id = App->textures->LoadTexture2D(directory.c_str(), str.C_Str(), dropped);
-			texture.type = typeName;
-			texture.path = str.C_Str();
-			textures.push_back(texture);
-			textures_loaded.push_back(texture); // add to loaded textures
-		}
-	}
-	return textures;
-}
-
-const char * RE_MeshContainer::GetFileName() const
-{
-	return file_name.c_str();
-}
-
-
-////////////////////////////////////////////////////
-////////////////////////////////////////////////////
-//////// RE_UnregisteredMesh
-////////////////////////////////////////////////////
-////////////////////////////////////////////////////
-
-// RE_Mesh not working properly
-
-
-RE_UnregisteredMesh::RE_UnregisteredMesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, unsigned int triangles)
-{
-	this->vertices = vertices;
-	this->indices = indices;
-	this->textures = textures;
-
-	triangle_count = triangles;
-
-	// now that we have all the required data, set the vertex buffers and its attribute pointers.
-	_setupMesh();
-}
-/*
-RE_UnregisteredMesh::~RE_UnregisteredMesh()
-{
-glDeleteVertexArrays(1, &VAO);
-glDeleteBuffers(1, &VBO);
-glDeleteBuffers(1, &EBO);
-
-if (lVertexNormals) clearVertexNormals();
-if (lFaceNormals) clearFaceNormals();
-}
-*/
-void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_normals)
 {
 	ShaderManager::use(shader_ID);
 	// bind appropriate textures
@@ -329,6 +108,7 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 
 	// draw mesh
 	glBindVertexArray(VAO);
+	CheckGLError();
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
@@ -338,7 +118,8 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 	ShaderManager::use(0);
 
 	// MESH DEBUG DRAWING
-	/*if (f_normals || v_normals)
+	/*
+	if (f_normals || v_normals)
 	{
 		ShaderManager::use(App->primitives->shaderPrimitive);
 		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "model", App->scene->drop->GetTransform()->GetGlobalMatrix().ptr());
@@ -385,26 +166,21 @@ void RE_UnregisteredMesh::Draw(unsigned int shader_ID, bool f_normals, bool v_no
 	}*/
 }
 
-void RE_UnregisteredMesh::_setupMesh()
+void RE_Mesh::setupMesh()
 {
-	// create buffers/arrays
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
 	glBindVertexArray(VAO);
-	// load data into vertex buffers
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// A great thing about structs is that their memory layout is sequential for all its items.
-	// The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
-	// again translates to 3/2 floats which translates to a byte array.
+
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
-	// set the vertex attribute pointers
-	// vertex Positions
+	// vertex positions
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 	// vertex normals
@@ -413,17 +189,11 @@ void RE_UnregisteredMesh::_setupMesh()
 	// vertex texture coords
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-	// vertex tangent
-	//glEnableVertexAttribArray(3);
-	//glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
-	// vertex bitangent
-	//glEnableVertexAttribArray(4);
-	//glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
 	glBindVertexArray(0);
 }
 
-void RE_UnregisteredMesh::loadVertexNormals()
+void RE_Mesh::loadVertexNormals()
 {
 	if (!lFaceNormals) loadVertex();
 
@@ -454,7 +224,7 @@ void RE_UnregisteredMesh::loadVertexNormals()
 	lVertexNormals = true;
 }
 
-void RE_UnregisteredMesh::loadFaceNormals()
+void RE_Mesh::loadFaceNormals()
 {
 	if (!lVertexNormals) loadVertex();
 
@@ -492,7 +262,7 @@ void RE_UnregisteredMesh::loadFaceNormals()
 	lFaceNormals = true;
 }
 
-void RE_UnregisteredMesh::clearVertexNormals()
+void RE_Mesh::clearVertexNormals()
 {
 	if (!lFaceNormals) clearVertex();
 
@@ -503,7 +273,7 @@ void RE_UnregisteredMesh::clearVertexNormals()
 	lVertexNormals = false;
 }
 
-void RE_UnregisteredMesh::clearFaceNormals()
+void RE_Mesh::clearFaceNormals()
 {
 	if (!lVertexNormals) clearVertex();
 
@@ -514,7 +284,7 @@ void RE_UnregisteredMesh::clearFaceNormals()
 	lFaceNormals = false;
 }
 
-void RE_UnregisteredMesh::loadVertex()
+void RE_Mesh::loadVertex()
 {
 	glGenVertexArrays(1, &VAO_Vertex);
 	glGenBuffers(1, &VBO_Vertex);
@@ -530,81 +300,35 @@ void RE_UnregisteredMesh::loadVertex()
 	glBindVertexArray(0);
 }
 
-void RE_UnregisteredMesh::clearVertex()
+void RE_Mesh::clearVertex()
 {
 	glDeleteVertexArrays(1, &VAO_Vertex);
 	glDeleteBuffers(1, &VBO_Vertex);
 	VAO_Vertex = VBO_Vertex = 0;
 }
 
-
-RE_CompUnregisteredMesh::RE_CompUnregisteredMesh(char * path)
+RE_MeshContainer::RE_MeshContainer(const aiScene* scene, const char* f, const char* d, bool dropped) : dropped(dropped)
 {
-	loadModel(path);
-	bounding_box.minPoint = bounding_box.maxPoint = math::vec::zero;
+	SDL_assert(f != nullptr && d != nullptr && scene != nullptr);
+	file_name = f;
+	directory = d;
+	ProcessNode(scene->mRootNode, scene);
+	//LOG("Creating Mesh Container: %s (from: %s%s)", file_name = f, directory = d, dropped ? " - Dropped" : " ");
 }
 
-RE_CompUnregisteredMesh::RE_CompUnregisteredMesh(char * path, const char * buffer, unsigned int size)
+RE_MeshContainer::~RE_MeshContainer()
 {
-	buffer_size = size;
-	buffer_file = buffer;
-	dropped = true;
-	loadModel(path);
+	meshes.clear();
+	textures_loaded.clear();
 }
 
-void RE_CompUnregisteredMesh::Draw(unsigned int shader)
+void RE_MeshContainer::Draw(unsigned int shader)
 {
-	if (!error_loading)
-		for (unsigned int i = 0; i < meshes.size(); i++)
-			meshes[i].Draw(shader, show_f_normals, show_v_normals);
+	for (unsigned int i = 0; i < meshes.size(); i++)
+		meshes[i].Draw(shader);
 }
 
-void RE_CompUnregisteredMesh::loadModel(std::string path)
-{
-	if (buffer_file != nullptr)
-	{
-		LOG("Loading Model: %s", buffer_file);
-
-		Assimp::Importer importer;
-		const aiScene *scene = importer.ReadFileFromMemory(buffer_file, buffer_size, aiProcess_Triangulate | aiProcess_FlipUVs);
-
-		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-		{
-			LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
-			return;
-		}
-
-		name = buffer_file;
-		directory = path.substr(0, path.find_last_of('\\'));
-
-		processNode(scene->mRootNode, scene);
-	}
-	else
-	{
-		LOG("Loading Model from: %s", path.c_str());
-
-		RE_FileIO modelFBX(path.c_str());
-
-		if (modelFBX.Load())
-		{
-			Assimp::Importer importer;
-			const aiScene *scene = importer.ReadFileFromMemory(modelFBX.GetBuffer(), modelFBX.GetSize(), aiProcess_Triangulate | aiProcess_FlipUVs);
-
-			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-			{
-				LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
-				return;
-			}
-
-			name = modelFBX.GetBuffer();
-			directory = path.substr(0, path.find_last_of('/'));
-
-			processNode(scene->mRootNode, scene);
-		}
-	}
-}
-
-void RE_CompUnregisteredMesh::processNode(aiNode * node, const aiScene * scene)
+void RE_MeshContainer::ProcessNode(aiNode * node, const aiScene * scene)
 {
 	LOG_SECONDARY("%s Node: %s (%u meshes | %u children)",
 		node->mParent ? "SON" : "PARENT",
@@ -617,16 +341,16 @@ void RE_CompUnregisteredMesh::processNode(aiNode * node, const aiScene * scene)
 	for (; i < node->mNumMeshes; i++)
 	{
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene, i + 1));
+		meshes.push_back(ProcessMesh(mesh, scene, i + 1));
 		meshes.rbegin()->name = node->mName.C_Str();
 		total_triangle_count += meshes.rbegin()->triangle_count;
 	}
 
 	for (i = 0; i < node->mNumChildren; i++)
-		processNode(node->mChildren[i], scene);
+		ProcessNode(node->mChildren[i], scene);
 }
 
-RE_UnregisteredMesh RE_CompUnregisteredMesh::processMesh(aiMesh * mesh, const aiScene * scene, const unsigned int pos)
+RE_Mesh RE_MeshContainer::ProcessMesh(aiMesh * mesh, const aiScene * scene, const unsigned int pos)
 {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
@@ -684,15 +408,15 @@ RE_UnregisteredMesh RE_CompUnregisteredMesh::processMesh(aiMesh * mesh, const ai
 
 	// process material
 	aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-	std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+	std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 	//std::vector<_Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 	//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-	return RE_UnregisteredMesh(vertices, indices, textures, mesh->mNumFaces);
+	return RE_Mesh(vertices, indices, textures, mesh->mNumFaces);
 }
 
-std::vector<Texture> RE_CompUnregisteredMesh::loadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName)
+std::vector<Texture> RE_MeshContainer::LoadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName)
 {
 	std::vector<Texture> textures;
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
@@ -722,11 +446,11 @@ std::vector<Texture> RE_CompUnregisteredMesh::loadMaterialTextures(aiMaterial * 
 	return textures;
 }
 
-void RE_CompUnregisteredMesh::DrawProperties()
+void RE_MeshContainer::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Mesh"))
 	{
-		ImGui::Text("Name: %s%s", name.c_str(), dropped ? " (dropped)" : " ");
+		ImGui::Text("Name: %s%s", file_name.c_str(), dropped ? " (dropped)" : " ");
 
 		ImGui::TextWrapped("Directory: %s", directory.c_str());
 		ImGui::Text("Triangle Count: %u", total_triangle_count);
@@ -738,7 +462,7 @@ void RE_CompUnregisteredMesh::DrawProperties()
 
 		int width = 0;
 		int height = 0;
-		std::vector<RE_UnregisteredMesh>::iterator it = meshes.begin();
+		std::vector<RE_Mesh>::iterator it = meshes.begin();
 		for (; it != meshes.end(); it++)
 		{
 			if (show_f_normals && !it->lFaceNormals)	it->loadFaceNormals();
@@ -789,4 +513,9 @@ void RE_CompUnregisteredMesh::DrawProperties()
 			}
 		}
 	}
+}
+
+const char * RE_MeshContainer::GetFileName() const
+{
+	return file_name.c_str();
 }

@@ -9,6 +9,11 @@ RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char * path, const bool file_
 	LoadMesh(path, file_dropped);
 }
 
+RE_CompMesh::RE_CompMesh(RE_GameObject * go, unsigned int reference, const bool start_active) : RE_Component(C_MESH, go, start_active)
+{
+	this->reference = reference;
+}
+
 RE_CompMesh::~RE_CompMesh()
 {
 	((ResourceManager*)App->meshes)->UnReference(reference);
