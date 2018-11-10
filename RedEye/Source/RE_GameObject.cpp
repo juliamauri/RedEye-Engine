@@ -363,7 +363,6 @@ void RE_GameObject::DrawHeriarchy()
 {
 	if (ImGui::TreeNode(name.c_str()))
 	{
-		App->scene->SetSelected(this);
 		for (auto child : childs)
 			child->DrawHeriarchy();
 
