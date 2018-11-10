@@ -3,6 +3,7 @@
 
 #include "RE_Math.h"
 #include "ResourceManager.h"
+#include "assimp/include/matrix4x4.h"
 #include <vector>
 
 class RE_MeshContainer;

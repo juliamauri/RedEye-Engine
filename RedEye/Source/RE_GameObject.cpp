@@ -35,7 +35,7 @@ void RE_GameObject::PreUpdate()
 
 void RE_GameObject::Update()
 {
-	for (auto child : childs) child->PreUpdate();
+	for (auto child : childs) child->Update();
 	for (auto component : components) component->Update();
 }
 

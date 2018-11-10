@@ -8,6 +8,7 @@
 #include "OutputLog.h"
 #include "Globals.h"
 #include "RE_CompMesh.h"
+#include "RE_CompTransform.h"
 #include "RE_Mesh.h"
 
 #include "SDL2\include\SDL_assert.h"
@@ -187,6 +188,20 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene)
 		RE_CompMesh* comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)ProcessMesh(mesh, scene, i + 1)));
 		go->AddCompMesh(comp_mesh);
 		go->SetBoundingBox(bounding_box);
+		aiMatrix4x4 local_transform = node->mTransformation;
+		math::float4x4 local(
+			local_transform.a1, local_transform.a2, local_transform.a3, local_transform.a4,
+			local_transform.b1, local_transform.b2, local_transform.b3, local_transform.b4,
+			local_transform.c1, local_transform.c2, local_transform.c3, local_transform.c4,
+			local_transform.d1, local_transform.d2, local_transform.d3, local_transform.d4);
+		math::float3 transform;
+		math::Quat quat;
+		math::float3 scale;
+		local.Decompose(transform, quat, scale);
+		go->GetTransform()->SetPos(transform);
+		go->GetTransform()->SetRot(quat);
+		go->GetTransform()->SetScale(scale);
+
 		//meshes.rbegin()->name = node->mName.C_Str();
 		//total_triangle_count += meshes.rbegin()->triangle_count;
 	}

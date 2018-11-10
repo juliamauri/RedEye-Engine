@@ -2,6 +2,11 @@
 
 #include "Application.h"
 #include "MeshManager.h"
+#include "ShaderManager.h"
+#include "ModuleScene.h"
+#include "RE_GameObject.h"
+#include "RE_CompTransform.h"
+#include"RE_Math.h"
 #include "ImGui\imgui.h"
 
 RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char * path, const bool file_dropped, const bool start_active) : RE_Component(C_MESH, go, start_active)
@@ -31,7 +36,12 @@ unsigned int RE_CompMesh::LoadMesh(const char * path, bool dropped)
 
 void RE_CompMesh::Draw()
 {
-	if(reference) App->meshes->DrawMesh(reference);
+	if (reference)
+	{
+		ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetGlobalMatrix().ptr());
+		App->meshes->DrawMesh(reference);
+	}
+
 }
 
 void RE_CompMesh::DrawProperties()

@@ -29,6 +29,10 @@ public:
 	void SetSelected(RE_GameObject* selected);
 	RE_GameObject* GetSelected() const;
 
+
+	//shaders
+	unsigned int modelloading;
+
 private:
 
 	RE_GameObject* root = nullptr;
@@ -37,8 +41,6 @@ private:
 	bool draw_quad_tree = true;
 	QTree quad_tree;
 
-	//shaders
-	unsigned int modelloading;
 };
 
 

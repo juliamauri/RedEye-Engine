@@ -118,7 +118,6 @@ void ModuleScene::DrawScene()
 		quad_tree.Draw();
 
 	ShaderManager::use(modelloading);
-	ShaderManager::setFloat4x4(modelloading, "model", root->GetTransform()->GetGlobalMatrix().ptr());
 	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetView().ptr());
 	ShaderManager::setFloat4x4(modelloading, "projection", App->editor->GetCamera()->GetProjection().ptr());
 
