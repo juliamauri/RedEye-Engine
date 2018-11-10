@@ -1,6 +1,7 @@
 #ifndef __MESHMANAGER_H__
 #define __MESHMANAGER_H__
 
+#include "RE_Math.h"
 #include "ResourceManager.h"
 #include <vector>
 
@@ -25,6 +26,7 @@ public:
 	unsigned int LoadMesh(const char* path, const bool dropped = false);
 	unsigned int GetLoadedMesh(const char* path, const bool from_drop = false) const;
 	void DrawMesh(const unsigned int reference);
+	void SetDefaultShader(unsigned int shader);
 
 private:
 
@@ -40,6 +42,7 @@ private:
 	unsigned int default_shader = 0;
 
 	RE_GameObject* to_fill = nullptr;
+	math::AABB bounding_box;
 	bool from_drop = false;
 	bool error_loading = false;
 	std::vector<RE_Mesh*> meshes_to_fill;

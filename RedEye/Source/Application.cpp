@@ -118,7 +118,7 @@ bool Application::Init()
 				if (textures && !textures->Init()) LOG_WARNING("Won't be able to use textures");
 				if (shaders && !shaders->Init()) LOG_WARNING("Won't be able to use shaders");
 				if (primitives && !primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
-				if (meshes && !meshes->Init("texture"))  LOG_WARNING("Won't be able to use meshes");
+				if (meshes && !meshes->Init())  LOG_WARNING("Won't be able to use meshes");
 
 				LOG_SEPARATOR("Starting Application");
 

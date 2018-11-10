@@ -108,7 +108,6 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 
 	// draw mesh
 	glBindVertexArray(VAO);
-	CheckGLError();
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 

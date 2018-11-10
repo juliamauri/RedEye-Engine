@@ -31,6 +31,7 @@ bool ModuleScene::Start()
 		ret = App->shaders->Load("texture", &modelloading);
 		if (!ret)
 			LOG("%s\n", App->shaders->GetShaderError());
+		App->meshes->SetDefaultShader(modelloading);
 	}
 
 	// root
@@ -39,7 +40,7 @@ bool ModuleScene::Start()
 	root->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 10.0f)));
 
 	// load default meshes
-	App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
+	App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.fbx");
 	selected = root->GetChilds().begin()._Ptr->_Myval;
 	selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
 
@@ -115,6 +116,11 @@ void ModuleScene::DrawScene()
 {
 	if (draw_quad_tree)
 		quad_tree.Draw();
+
+	ShaderManager::use(modelloading);
+	ShaderManager::setFloat4x4(modelloading, "model", root->GetTransform()->GetGlobalMatrix().ptr());
+	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetView().ptr());
+	ShaderManager::setFloat4x4(modelloading, "projection", App->editor->GetCamera()->GetProjection().ptr());
 
 	root->Draw();
 

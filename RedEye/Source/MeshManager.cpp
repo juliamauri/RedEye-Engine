@@ -30,8 +30,11 @@ bool MeshManager::Init(const char* def_shader)
 	bool ret = (folderPath != nullptr);
 	if (ret)
 	{
-		ret = App->shaders->Load(def_shader, &default_shader);
-		if (!ret) LOG_ERROR("Mesh Manager could not load shader: %s", def_shader);
+		if (def_shader != nullptr)
+		{
+			ret = App->shaders->Load(def_shader, &default_shader);
+			if (!ret) LOG_ERROR("Mesh Manager could not load shader: %s", def_shader);
+		}
 	}
 	else
 	{
@@ -140,6 +143,11 @@ void MeshManager::DrawMesh(const unsigned int reference)
 		((RE_Mesh*)App->resources->At(reference))->Draw(default_shader);
 }
 
+void MeshManager::SetDefaultShader(unsigned int shader)
+{
+	default_shader = shader;
+}
+
 unsigned int MeshManager::AddMesh(RE_Mesh * mesh)
 {
 	return App->resources->Reference((ResourceContainer*)mesh);
@@ -148,26 +156,19 @@ unsigned int MeshManager::AddMesh(RE_Mesh * mesh)
 void MeshManager::ProcessModel(const char* buffer, unsigned int size)
 {
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFileFromMemory(buffer, size, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType);;
+	const aiScene *scene = importer.ReadFileFromMemory(buffer, size, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_FlipUVs);;
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 	else
 	{
+		RE_GameObject* go = new RE_GameObject(scene->mRootNode->mName.C_Str(), to_fill);
+		to_fill = go;
 		ProcessNode(scene->mRootNode, scene);
-		
-
-		/*
-
-			*/
-		//ret = AddMesh(mesh_container);
 	}
-
-
 }
 
 void MeshManager::ProcessNode(aiNode * node, const aiScene * scene)
 {
-	RE_GameObject* go = new RE_GameObject(node->mName.C_Str(), to_fill);
 	//RE_CompMesh* compmesh = new RE_CompMesh;
 	//mesh->AddComponent((RE_Component*))
 
@@ -181,18 +182,17 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene)
 
 	for (; i < node->mNumMeshes; i++)
 	{
+		RE_GameObject* go = new RE_GameObject(node->mName.C_Str(), to_fill);
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
 		RE_CompMesh* comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)ProcessMesh(mesh, scene, i + 1)));
 		go->AddCompMesh(comp_mesh);
+		go->SetBoundingBox(bounding_box);
 		//meshes.rbegin()->name = node->mName.C_Str();
 		//total_triangle_count += meshes.rbegin()->triangle_count;
 	}
 
 	for (i = 0; i < node->mNumChildren; i++)
-	{
-		to_fill = go;
 		ProcessNode(node->mChildren[i], scene);
-	}
 }
 
 RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const unsigned int pos)
@@ -213,14 +213,13 @@ RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const un
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		// process vertex positions, normals and texture coordinates
-		
 		Vertex vertex;
-		/*f ((*/vertex.Position.x = mesh->mVertices[i].x;//) < bounding_box.minPoint.x) bounding_box.minPoint.x = vertex.Position.x;
-		/*else if ((*/vertex.Position.x = mesh->mVertices[i].x;//) > bounding_box.maxPoint.x) bounding_box.maxPoint.x = vertex.Position.x;
-		/*if ((*/vertex.Position.y = mesh->mVertices[i].y;//) < bounding_box.minPoint.y) bounding_box.minPoint.y = vertex.Position.y;
-		/*else if ((*/vertex.Position.y = mesh->mVertices[i].y;//) > bounding_box.maxPoint.y) bounding_box.maxPoint.y = vertex.Position.y;
-		/*if ((*/vertex.Position.z = mesh->mVertices[i].z;//) < bounding_box.minPoint.z) bounding_box.minPoint.z = vertex.Position.z;
-		/*else if ((*/vertex.Position.z = mesh->mVertices[i].z;//) > bounding_box.maxPoint.z) bounding_box.maxPoint.z = vertex.Position.x;
+		if ((vertex.Position.x = mesh->mVertices[i].x) < bounding_box.minPoint.x) bounding_box.minPoint.x = vertex.Position.x;
+		else if ((vertex.Position.x = mesh->mVertices[i].x) > bounding_box.maxPoint.x) bounding_box.maxPoint.x = vertex.Position.x;
+		if ((vertex.Position.y = mesh->mVertices[i].y) < bounding_box.minPoint.y) bounding_box.minPoint.y = vertex.Position.y;
+		else if ((vertex.Position.y = mesh->mVertices[i].y) > bounding_box.maxPoint.y) bounding_box.maxPoint.y = vertex.Position.y;
+		if ((vertex.Position.z = mesh->mVertices[i].z) < bounding_box.minPoint.z) bounding_box.minPoint.z = vertex.Position.z;
+		else if ((vertex.Position.z = mesh->mVertices[i].z) > bounding_box.maxPoint.z) bounding_box.maxPoint.z = vertex.Position.x;
 
 		vertex.Normal.x = mesh->mNormals[i].x;
 		vertex.Normal.y = mesh->mNormals[i].y;
