@@ -361,9 +361,11 @@ void RE_GameObject::DrawProperties()
 
 void RE_GameObject::DrawHeriarchy()
 {
-	if (ImGui::TreeNode(name.c_str()))
+	if (ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_OpenOnArrow + ImGuiTreeNodeFlags_OpenOnDoubleClick))
 	{
-		App->scene->SetSelected(this);
+		if (ImGui::IsItemClicked())
+			App->scene->SetSelected(this);
+
 		for (auto child : childs)
 			child->DrawHeriarchy();
 
