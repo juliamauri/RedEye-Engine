@@ -140,7 +140,7 @@ void RE_CompCamera::RecalculateMatrixes()
 	calculated_view = frustum.ViewMatrix();
 	calculated_view.Transpose();
 
-	calculated_projection = frustum.ViewMatrix();
+	calculated_projection = frustum.ProjectionMatrix();
 	calculated_projection.Transpose();
 
 	need_recalculation = false;
@@ -148,23 +148,25 @@ void RE_CompCamera::RecalculateMatrixes()
 
 void RE_CompCamera::RotateWithMouse(float xoffset, float yoffset, bool constrainPitch)
 {
-	/*xoffset *= MouseSensitivity;
-	yoffset *= MouseSensitivity;
+	math::vec rot = transform->GetRotXYZ();
 
-	Yaw += xoffset;
-	Pitch += yoffset;
-
-	// Make sure that when pitch is out of bounds, screen doesn't get flipped
+	// Pitch
+	rot.x += yoffset * SENSITIVITY;
 	if (constrainPitch)
 	{
-		if (Pitch > 89.0f)
-			Pitch = 89.0f;
-		if (Pitch < -89.0f)
-			Pitch = -89.0f;
+		if (rot.x > 89.0f)
+			rot.x = 89.0f;
+		else if (rot.x < -89.0f)
+			rot.x = -89.0f;
 	}
 
-	// Update Front, Right and Up Vectors using the updated Euler angles
-	UpdateFrustum();*/
+	// Yaw
+	rot.y += xoffset * SENSITIVITY;
+
+	// Roll
+	rot.z = 0.f;
+
+	transform->SetRot(rot);
 }
 
 void RE_CompCamera::MouseWheelZoom(float yoffset)

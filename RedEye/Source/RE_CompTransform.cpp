@@ -126,10 +126,10 @@ void RE_CompTransform::LocalMove(Dir dir, float speed)
 
 		switch (dir)
 		{
-		case FORWARD:	pos += front * speed; break;
-		case BACKWARD:	pos -= front * speed; break;
-		case LEFT:		pos -= right * speed; break;
-		case RIGHT:		pos += right * speed; break;
+		case FORWARD:	pos -= front * speed; break;
+		case BACKWARD:	pos += front * speed; break;
+		case LEFT:		pos += right * speed; break;
+		case RIGHT:		pos -= right * speed; break;
 		}
 	}
 }

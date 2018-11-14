@@ -5,6 +5,8 @@
 #include "RE_Math.h"
 #include "Globals.h"
 
+#define SENSITIVITY 0.1f
+
 class RE_CompTransform;
 
 class RE_CompCamera : public RE_Component
