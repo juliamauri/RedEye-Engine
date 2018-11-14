@@ -4,11 +4,12 @@
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
-#include "TimeManager.h"
-#include "RE_GameObject.h"
-#include "OutputLog.h"
 #include "EditorWindows.h"
-#include "RE_Camera.h"
+#include "TimeManager.h"
+#include "OutputLog.h"
+#include "RE_GameObject.h"
+#include "RE_CompTransform.h"
+#include "RE_CompCamera.h"
 
 #include "MathGeoLib\include\MathGeoLib.h"
 #include "ImGui\imgui_impl_sdl_gl3.h"
@@ -26,8 +27,6 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 
 	tools.push_back(rng = new RandomTest());
 	tools.push_back(textures = new TexturesWindow());
-
-	camera = new RE_Camera();
 }
 
 ModuleEditor::~ModuleEditor()
@@ -51,6 +50,9 @@ bool ModuleEditor::Init(JSONNode* node)
 		LOG_ERROR("ImGui could not initialize!");
 
 	// TODO set window lock positions
+
+
+	camera = new RE_CompCamera();
 
 	return ret;
 
@@ -212,7 +214,7 @@ void ModuleEditor::HandleSDLEvent(SDL_Event* e)
 	ImGui_ImplSdlGL3_ProcessEvent(e);
 }
 
-RE_Camera * ModuleEditor::GetCamera() const
+RE_CompCamera * ModuleEditor::GetCamera() const
 {
 	return camera;
 }
@@ -223,13 +225,14 @@ void ModuleEditor::UpdateCamera()
 	if (!ImGui::IsMouseHoveringAnyWindow())
 	{
 		const MouseData* mouse = App->input->GetMouse();
+		RE_CompTransform* transform = camera->GetTransform();
 
 		if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse->GetButton(1) == KEY_REPEAT)
 		{
 			if (App->scene->GetSelected() != nullptr
 				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
 			{
-				camera->Orbit(
+				transform->Orbit(
 					-mouse->mouse_x_motion,
 					mouse->mouse_y_motion,
 					App->scene->GetSelected()->GetBoundingBox().CenterPoint());
@@ -238,8 +241,8 @@ void ModuleEditor::UpdateCamera()
 		else if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
 			&& App->scene->GetSelected() != nullptr)
 		{
-			camera->SetPosition(App->scene->GetSelected()->GetBoundingBox().maxPoint * 2);
-			camera->SetFocus(App->scene->GetSelected()->GetBoundingBox().CenterPoint());
+			transform->SetPos(App->scene->GetSelected()->GetBoundingBox().maxPoint * 2);
+			transform->LocalLookAt(App->scene->GetSelected()->GetBoundingBox().CenterPoint());
 		}
 		else
 		{
@@ -251,19 +254,20 @@ void ModuleEditor::UpdateCamera()
 				cameraSpeed *= App->time->GetDeltaTime();
 
 				if (App->input->CheckKey(SDL_SCANCODE_W, KEY_REPEAT))
-					camera->Move(Camera_Movement::FORWARD, cameraSpeed);
+					transform->LocalMove(Dir::FORWARD, cameraSpeed);
 				if (App->input->CheckKey(SDL_SCANCODE_S, KEY_REPEAT))
-					camera->Move(Camera_Movement::BACKWARD, cameraSpeed);
+					transform->LocalMove(Dir::BACKWARD, cameraSpeed);
 				if (App->input->CheckKey(SDL_SCANCODE_A, KEY_REPEAT))
-					camera->Move(Camera_Movement::LEFT, cameraSpeed);
+					transform->LocalMove(Dir::LEFT, cameraSpeed);
 				if (App->input->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))
-					camera->Move(Camera_Movement::RIGHT, cameraSpeed);
+					transform->LocalMove(Dir::RIGHT, cameraSpeed);
 
-				camera->RotateWMouse(mouse->mouse_x_motion, -mouse->mouse_y_motion);
+				camera->RotateWithMouse(mouse->mouse_x_motion, -mouse->mouse_y_motion);
 			}
 
-			camera->ZoomMouse(mouse->mouse_wheel_motion);
+			camera->MouseWheelZoom(mouse->mouse_wheel_motion);
 		}
-	}
 
+		camera->Update();
+	}
 }

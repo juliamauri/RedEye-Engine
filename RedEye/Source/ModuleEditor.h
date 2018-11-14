@@ -16,7 +16,7 @@ class RandomTest;
 class TexturesWindow;
 
 struct SoftwareInfo;
-class RE_Camera;
+class RE_CompCamera;
 
 union SDL_Event;
 
@@ -39,7 +39,7 @@ public:
 	void HandleSDLEvent(SDL_Event* e);
 
 	// Camera
-	RE_Camera* GetCamera() const;
+	RE_CompCamera* GetCamera() const;
 
 private:
 
@@ -47,7 +47,7 @@ private:
 
 private:
 
-	RE_Camera* camera = nullptr;
+	RE_CompCamera* camera = nullptr;
 
 	bool show_all = true;
 	bool show_demo = false;

@@ -31,6 +31,16 @@ enum update_status
 	UPDATE_CONTINUE = 1
 };
 
+enum Dir
+{
+	FORWARD,
+	BACKWARD,
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN
+};
+
 // Useful macros
 #define RE_CAP(n) ((n <= 0.0f) ? n=0.0f : (n >= 1.0f) ? n=1.0f : n=n)
 #define RE_MIN(a,b) ((a)<(b)) ? (a) : (b)
