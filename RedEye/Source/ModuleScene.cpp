@@ -40,11 +40,16 @@ bool ModuleScene::Start()
 	root->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 10000.0f)));
 
 	// load default meshes
-	App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.fbx");
-	//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
+	//App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.fbx");
+	App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
 
-	selected = *root->GetChilds().begin();
-	root->SetBoundingBoxFromChilds();
+	if (!root->GetChilds().empty())
+	{
+		selected = *root->GetChilds().begin();
+		root->SetBoundingBoxFromChilds();
+	}
+	else
+		selected = root;
 	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
 
 	//// depricated way
