@@ -44,7 +44,8 @@ bool ModuleScene::Start()
 	//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
 
 	selected = *root->GetChilds().begin();
-	selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
+	root->SetBoundingBoxFromChilds();
+	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
 
 	//// depricated way
 	//selected = new RE_GameObject("Street", root);

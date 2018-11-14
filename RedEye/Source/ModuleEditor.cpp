@@ -184,6 +184,41 @@ bool ModuleEditor::CleanUp()
 	return true;
 }
 
+void ModuleEditor::DrawEditor()
+{
+	if (ImGui::CollapsingHeader("Editor"))
+	{
+		ImGui::Text("Editor Camera");
+
+		RE_CompTransform* c_transform = camera->GetTransform();
+
+		if (c_transform && ImGui::TreeNodeEx("Camera Transform", ImGuiTreeNodeFlags_OpenOnArrow + ImGuiTreeNodeFlags_OpenOnDoubleClick))
+		{
+			// Position -----------------------------------------------------
+			math::vec tmp = c_transform->GetLocalPosition();
+			float c_p[3] = { tmp.x, tmp.y, tmp.z };
+			if (ImGui::DragFloat3("Camera Position", c_p, 0.1f, -10000.f, 10000.f, "%.2f"))
+				c_transform->SetPos({ c_p[0], c_p[1], c_p[2] });
+
+			// Rotation -----------------------------------------------------
+			tmp = c_transform->GetLocalRotXYZ();
+			float c_r[3] = { tmp.x, tmp.y, tmp.z };
+			if (ImGui::DragFloat3("Camera Rotation", c_r, 0.1f, -360.f, 360.f, "%.2f"))
+				c_transform->SetRot({ c_r[0], c_r[1], c_r[2] });
+
+			// Scale -----------------------------------------------------
+			tmp = c_transform->GetLocalRotXYZ();
+			float c_s[3] = { tmp.x, tmp.y, tmp.z };
+			if (ImGui::InputFloat3("Camera Scale", c_s, 2))
+				c_transform->SetScale({ c_s[0], c_s[1], c_s[2] });
+
+			ImGui::TreePop();
+		}
+
+		camera->DrawProperties();
+	}
+}
+
 void ModuleEditor::LogToEditorConsole()
 {
 	if (console != nullptr && !windows.empty()
@@ -240,8 +275,12 @@ void ModuleEditor::UpdateCamera()
 		else if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
 			&& App->scene->GetSelected() != nullptr)
 		{
-			transform->SetPos(App->scene->GetSelected()->GetBoundingBox().maxPoint * 2);
-			transform->LocalLookAt(App->scene->GetSelected()->GetBoundingBox().CenterPoint());
+			math::AABB selected_box = App->scene->GetSelected()->GetBoundingBox();
+			math::vec target_global_pos = App->scene->GetSelected()->GetTransform()->GetGlobalPosition();
+			math::vec camera_pos = selected_box.maxPoint + target_global_pos;
+
+			transform->SetPos(camera_pos);
+			transform->LocalLookAt(selected_box.CenterPoint() + target_global_pos);
 		}
 		else
 		{

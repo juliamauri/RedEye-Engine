@@ -5,12 +5,10 @@
 #include "Globals.h"
 #include "MathGeoLib\include\MathGeoLib.h"
 
-class RE_CompCamera;
-
 class RE_CompTransform : public RE_Component
 {
 public:
-	RE_CompTransform(RE_GameObject* go = nullptr, math::vec position = math::vec::zero);
+	RE_CompTransform(RE_GameObject* go = nullptr);
 	~RE_CompTransform();
 
 	void Update();

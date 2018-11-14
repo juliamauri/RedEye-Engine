@@ -6,7 +6,7 @@
 
 #define MIN_SCALE 0.001f
 
-RE_CompTransform::RE_CompTransform(RE_GameObject* go, math::vec pos) :
+RE_CompTransform::RE_CompTransform(RE_GameObject* go) :
 	RE_Component(C_TRANSFORM, go)
 {
 	CalcGlobalTransform(false);
@@ -133,7 +133,7 @@ math::float4x4 RE_CompTransform::GetGlobalMatrix() const
 void RE_CompTransform::LocalLookAt(math::vec& target_pos)
 {
 	math::vec direction = target_pos - pos;
-	SetRot(rot_quat * math::Quat::LookAt(front, direction.Normalized(), up, math::float3(0.f, 1.f, 0.f)));
+	SetRot(/*rot_quat * */math::Quat::LookAt(front, direction.Normalized(), up, math::float3(0.f, 1.f, 0.f)));
 }
 
 void RE_CompTransform::LocalMove(Dir dir, float speed)
@@ -186,12 +186,12 @@ void RE_CompTransform::DrawProperties()
 	{
 		// Position -----------------------------------------------------
 		float p[3] = { pos.x, pos.y, pos.z };
-		if (ImGui::InputFloat3("Position", p, 2))
+		if (ImGui::DragFloat3("Position", p, 0.1f, -10000.f, 10000.f, "%.2f"))
 			SetPos({ p[0], p[1], p[2] });
 
 		// Rotation -----------------------------------------------------
 		float r[3] = { rot_eul.x, rot_eul.y, rot_eul.z };
-		if (ImGui::InputFloat3("Rotation", r, 2))
+		if (ImGui::DragFloat3("Rotation", r, 0.1f, -360.f, 360.f, "%.2f"))
 			SetRot({ r[0], r[1], r[2] });
 
 		// Scale -----------------------------------------------------
@@ -223,18 +223,29 @@ void RE_CompTransform::CalcGlobalTransform(bool call_transform_modified)
 		{
 			global_transform = parent->GetTransform()->global_transform * local_transform;
 
-			const std::list<RE_GameObject*> go_sons = go->GetChilds();
+			right = global_transform.Col3(0).Normalized();
+			up = global_transform.Col3(1).Normalized();
+			front = global_transform.Col3(2).Normalized();
 
-			if (!go_sons.empty())
-			{
-				std::list<RE_GameObject*>::const_iterator child = go_sons.begin();
-				for (; child != go_sons.end(); child++)
-					(*child)->GetTransform()->CalcGlobalTransform(call_transform_modified);
-			}
+			global_transform.Decompose(global_pos, global_rot_quat, global_scale);
+			global_rot_eul = global_rot_quat.ToEulerXYZ();
+
+			for (auto child : go->GetChilds())
+				child->GetTransform()->CalcGlobalTransform(call_transform_modified);
 		}
 		else
 		{
 			global_transform = local_transform;
+
+			right = global_transform.Col3(0).Normalized();
+			up = global_transform.Col3(1).Normalized();
+			front = global_transform.Col3(2).Normalized();
+
+			global_transform.Decompose(global_pos, global_rot_quat, global_scale);
+			global_rot_eul = global_rot_quat.ToEulerXYZ();
+
+			for (auto child : go->GetChilds())
+				child->GetTransform()->CalcGlobalTransform(call_transform_modified);
 		}
 
 		if (call_transform_modified) go->TransformModified();
@@ -242,14 +253,14 @@ void RE_CompTransform::CalcGlobalTransform(bool call_transform_modified)
 	else
 	{
 		global_transform = local_transform;
+
+		right = global_transform.Col3(0).Normalized();
+		up = global_transform.Col3(1).Normalized();
+		front = global_transform.Col3(2).Normalized();
+
+		global_transform.Decompose(global_pos, global_rot_quat, global_scale);
+		global_rot_eul = global_rot_quat.ToEulerXYZ();
 	}
-
-	right = global_transform.Col3(0).Normalized();
-	up = global_transform.Col3(1).Normalized();
-	front = global_transform.Col3(2).Normalized();
-
-	global_transform.Decompose(global_pos, global_rot_quat, global_scale);
-	global_rot_eul = global_rot_quat.ToEulerXYZ();
 
 	just_calculated_global = true;
 }

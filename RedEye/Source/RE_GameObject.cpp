@@ -17,7 +17,7 @@ RE_GameObject::RE_GameObject(const char* name, RE_GameObject * p, bool start_act
 	: name(name), parent(p), active(start_active), isStatic(isStatic)
 {
 	if (parent != nullptr) parent->AddChild(this);
-	bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec(MIN_AABB_SIZE));
+	bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	transform = new RE_CompTransform(this);
 	components.push_back((RE_Component*)transform);
 }
@@ -341,6 +341,8 @@ void RE_GameObject::SetBoundingBox(math::AABB box)
 
 void RE_GameObject::SetBoundingBoxFromChilds()
 {
+	bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+
 	for (auto child : childs)
 	{
 		math::AABB child_box = child->GetBoundingBox();
@@ -394,8 +396,8 @@ void RE_GameObject::DrawProperties()
 
 	if (ImGui::TreeNode("Bounding Box"))
 	{
-		ImGui::TextWrapped("Min: { %d, %d, %d}", bounding_box.minPoint.x, bounding_box.minPoint.y, bounding_box.minPoint.z);
-		ImGui::TextWrapped("Max: { %d, %d, %d}", bounding_box.maxPoint.x, bounding_box.maxPoint.y, bounding_box.maxPoint.z);
+		ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", bounding_box.minPoint.x, bounding_box.minPoint.y, bounding_box.minPoint.z);
+		ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", bounding_box.maxPoint.x, bounding_box.maxPoint.y, bounding_box.maxPoint.z);
 
 		ImGui::TreePop();
 	}
