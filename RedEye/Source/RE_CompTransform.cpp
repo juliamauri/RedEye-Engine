@@ -113,9 +113,7 @@ math::float4x4 RE_CompTransform::GetGlobalMatrix() const
 void RE_CompTransform::LocalLookAt(math::vec& target_pos)
 {
 	math::vec direction = target_pos - pos;
-	Quat::LookAt(front, direction.Normalized(), up, float3(0.f, 1.f, 0.f));
-
-	SetRot(rot_quat * Quat::LookAt(front, direction.Normalized(), up, float3(0.f, 1.f, 0.f)));
+	SetRot(rot_quat * math::Quat::LookAt(front, direction.Normalized(), up, math::float3(0.f, 1.f, 0.f)));
 }
 
 void RE_CompTransform::LocalMove(Dir dir, float speed)
@@ -128,8 +126,8 @@ void RE_CompTransform::LocalMove(Dir dir, float speed)
 		{
 		case FORWARD:	pos -= front * speed; break;
 		case BACKWARD:	pos += front * speed; break;
-		case LEFT:		pos += right * speed; break;
-		case RIGHT:		pos -= right * speed; break;
+		case LEFT:		pos -= right * speed; break;
+		case RIGHT:		pos += right * speed; break;
 		}
 	}
 }

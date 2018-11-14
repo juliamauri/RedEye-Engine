@@ -151,7 +151,7 @@ void RE_CompCamera::RotateWithMouse(float xoffset, float yoffset, bool constrain
 	math::vec rot = transform->GetRotXYZ();
 
 	// Pitch
-	rot.x += yoffset * SENSITIVITY;
+	rot.x -= yoffset * SENSITIVITY;
 	if (constrainPitch)
 	{
 		if (rot.x > 89.0f)
@@ -161,7 +161,7 @@ void RE_CompCamera::RotateWithMouse(float xoffset, float yoffset, bool constrain
 	}
 
 	// Yaw
-	rot.y += xoffset * SENSITIVITY;
+	rot.y -= xoffset * SENSITIVITY;
 
 	// Roll
 	rot.z = 0.f;
