@@ -11,7 +11,6 @@
 #include "RE_CompTransform.h"
 #include "RE_PrimitiveManager.h"
 #include "FileSystem.h"
-#include "RE_Camera.h"
 
 #include "ImGui\imgui.h"
 #include "Glew/include/glew.h"
