@@ -166,6 +166,7 @@ void MeshManager::ProcessModel(const char* buffer, unsigned int size)
 		to_fill = go;
 		aiMatrix4x4 identity;
 		ProcessNode(scene->mRootNode, scene, identity);
+		to_fill->SetBoundingBox(bounding_box);
 	}
 }
 
@@ -194,20 +195,16 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 			RE_CompMesh* comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)ProcessMesh(mesh, scene, i + 1)));
 			go->AddCompMesh(comp_mesh);
 			go->SetBoundingBox(bounding_box);
-			aiMatrix4x4 local_transform = transform;
+
+			aiVector3D scale;
+			aiVector3D rotation;
+			aiVector3D position;
+
+			transform.Decompose(scale, rotation, position);
 			
-			math::float4x4 local(
-				local_transform.a1, local_transform.a2, local_transform.a3, local_transform.a4,
-				local_transform.b1, local_transform.b2, local_transform.b3, local_transform.b4,
-				local_transform.c1, local_transform.c2, local_transform.c3, local_transform.c4,
-				local_transform.d1, local_transform.d2, local_transform.d3, local_transform.d4);
-			math::float3 position;
-			math::Quat quat;
-			math::float3 scale;
-			local.Decompose(position, quat, scale);
-			go->GetTransform()->SetPos(position);
-			go->GetTransform()->SetRot(quat);
-			go->GetTransform()->SetScale(scale);
+			go->GetTransform()->SetRot(math::vec(rotation.x, rotation.y, rotation.z));
+			go->GetTransform()->SetPos(math::vec(position.x, position.y, position.z));
+			go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
 
 			//meshes.rbegin()->name = node->mName.C_Str();
 			//total_triangle_count += meshes.rbegin()->triangle_count;

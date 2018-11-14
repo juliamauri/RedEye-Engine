@@ -64,7 +64,7 @@ public:
 	const char* GetName() const;
 
 	// AABB
-	void SetBoundingBox(math::AABB& box);
+	void SetBoundingBox(math::AABB box);
 	math::AABB GetBoundingBox() const;
 
 	// Editor
