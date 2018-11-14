@@ -78,11 +78,20 @@ unsigned int Texture2DManager::LoadTexture2D(const char * path, const char* file
 	Texture2D* new_image = nullptr;
 	std::string filename = file_name;
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
-	if (droped)
-		new_image = new Texture2D(std::string(path + std::string("\\") + file_name).c_str(), GetExtensionIL(extension.c_str()), file_name, droped);
+
+	if (filename.find("\\") > 0 && !droped)
+	{
+		filename = filename.substr(filename.find_last_of("\\") + 1);
+		new_image = new Texture2D(std::string(path + std::string("/") + filename).c_str(), GetExtensionIL(extension.c_str()), file_name);
+	}
 	else
-		new_image = new Texture2D(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(extension.c_str()), file_name);
-	
+	{
+		if (droped)
+			new_image = new Texture2D(std::string(path + std::string("\\") + file_name).c_str(), GetExtensionIL(extension.c_str()), file_name, droped);
+		else
+			new_image = new Texture2D(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(extension.c_str()), file_name);
+	}
+
 	textures2D.insert(std::pair<unsigned int, Texture2D*>(ID_count, new_image));
 
 	textureIDContainer.push_back(ID_count);
@@ -163,6 +172,8 @@ int Texture2DManager::GetExtensionIL(const char* ext)
 		IL_Extension = IL_PNG;
 	else if (exttension.compare("jpg") == 0)
 		IL_Extension = IL_JPG;
+	else if (exttension.compare("tga") == 0)
+		IL_Extension = IL_TGA;
 
 	return IL_Extension;
 }
@@ -190,7 +201,8 @@ Texture2D::Texture2D(const char* path, int extension, const char* name, bool dro
 			ilLoadL(extension, image.GetBuffer(), image.GetSize());
 	}
 
-	//iluFlipImage();
+	if(extension == IL_TGA)
+		iluFlipImage();
 
 	/* OpenGL texture binding of the image loaded by DevIL  */
 	glGenTextures(1, &ID); /* Texture name generation */
