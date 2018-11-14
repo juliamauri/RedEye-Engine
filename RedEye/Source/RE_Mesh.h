@@ -32,6 +32,8 @@ public:
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
 
+	math::AABB GetAABB();
+
 	void loadVertexNormals();
 	void loadFaceNormals();
 	void clearVertexNormals();
@@ -41,9 +43,12 @@ public:
 
 private:
 
+	void SetupAABB();
 	void setupMesh();
 
 private:
+
+	math::AABB bounding_box;
 	unsigned int VAO_Vertex, VAO_FaceNormals, VAO_VertexNormals;
 
 private:

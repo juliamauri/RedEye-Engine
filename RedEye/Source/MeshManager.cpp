@@ -166,7 +166,7 @@ void MeshManager::ProcessModel(const char* buffer, unsigned int size)
 		to_fill = go;
 		aiMatrix4x4 identity;
 		ProcessNode(scene->mRootNode, scene, identity);
-		to_fill->SetBoundingBox(bounding_box);
+		to_fill->SetBoundingBoxFromChilds();
 	}
 }
 
@@ -192,9 +192,10 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 		{
 			RE_GameObject* go = new RE_GameObject(node->mName.C_Str(), to_fill);
 			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-			RE_CompMesh* comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)ProcessMesh(mesh, scene, i + 1)));
+			RE_Mesh* processed_mesh = ProcessMesh(mesh, scene, i + 1);
+			RE_CompMesh* comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)processed_mesh));
 			go->AddCompMesh(comp_mesh);
-			go->SetBoundingBox(bounding_box);
+			go->SetBoundingBox(processed_mesh->GetAABB());
 
 			aiVector3D scale;
 			aiVector3D rotation;
@@ -234,12 +235,10 @@ RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const un
 	{
 		// process vertex positions, normals and texture coordinates
 		Vertex vertex;
-		if ((vertex.Position.x = mesh->mVertices[i].x) < bounding_box.minPoint.x) bounding_box.minPoint.x = vertex.Position.x;
-		else if ((vertex.Position.x = mesh->mVertices[i].x) > bounding_box.maxPoint.x) bounding_box.maxPoint.x = vertex.Position.x;
-		if ((vertex.Position.y = mesh->mVertices[i].y) < bounding_box.minPoint.y) bounding_box.minPoint.y = vertex.Position.y;
-		else if ((vertex.Position.y = mesh->mVertices[i].y) > bounding_box.maxPoint.y) bounding_box.maxPoint.y = vertex.Position.y;
-		if ((vertex.Position.z = mesh->mVertices[i].z) < bounding_box.minPoint.z) bounding_box.minPoint.z = vertex.Position.z;
-		else if ((vertex.Position.z = mesh->mVertices[i].z) > bounding_box.maxPoint.z) bounding_box.maxPoint.z = vertex.Position.x;
+
+		vertex.Position.x = mesh->mVertices[i].x;
+		vertex.Position.y = mesh->mVertices[i].y;
+		vertex.Position.z = mesh->mVertices[i].z;
 
 		vertex.Normal.x = mesh->mNormals[i].x;
 		vertex.Normal.y = mesh->mNormals[i].y;

@@ -5,12 +5,10 @@
 #include "Globals.h"
 #include "MathGeoLib\include\MathGeoLib.h"
 
-class RE_CompCamera;
-
 class RE_CompTransform : public RE_Component
 {
 public:
-	RE_CompTransform(RE_GameObject* go = nullptr, math::vec position = math::vec::zero);
+	RE_CompTransform(RE_GameObject* go = nullptr);
 	~RE_CompTransform();
 
 	void Update();
@@ -20,13 +18,19 @@ public:
 	void SetRot(math::Quat quat);
 	void SetScale(math::vec scale);
 
-	math::vec	GetPosition() const;
-	math::vec	GetRight() const;
-	math::vec	GetUp() const;
-	math::vec	GetForward() const;
-	math::vec	GetRotXYZ() const;
-	math::Quat	GetRot() const;
-	math::vec	GetScale() const;
+	math::vec	GetGlobalPosition() const;
+	math::vec	GetGlobalRotXYZ() const;
+	math::Quat	GetGlobalRot() const;
+	math::vec	GetGlobalScale() const;
+
+	math::vec	GetGlobalRight() const;
+	math::vec	GetGlobalUp() const;
+	math::vec	GetGlobalForward() const;
+
+	math::vec	GetLocalPosition() const;
+	math::vec	GetLocalRotXYZ() const;
+	math::Quat	GetLocalRot() const;
+	math::vec	GetLocalScale() const;
 
 	math::float4x4 GetLocalMatrix() const;
 	math::float4x4 GetGlobalMatrix() const;
@@ -51,13 +55,18 @@ private:
 
 	// Position
 	math::vec pos = math::vec::zero;
+	math::vec global_pos = math::vec::zero;
 
 	// Rotation
 	math::vec rot_eul = math::vec::zero;
 	math::Quat rot_quat = math::Quat::identity;
 
+	math::vec global_rot_eul = math::vec::zero;
+	math::Quat global_rot_quat = math::Quat::identity;
+	
 	// Scale
 	math::float3 scale = math::vec::one;
+	math::float3 global_scale = math::vec::one;
 
 	// Axis
 	math::vec right = math::vec::zero;

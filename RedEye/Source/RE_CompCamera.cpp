@@ -21,9 +21,9 @@ RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float near_p
 		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
 
 	frustum.SetWorldMatrix(math::float3x4::Translate(0.f, 0.f, 0.f));
-	//frustum.SetWorldMatrix(transform->GetGlobalMatrix().Float3x4Part());
-
 	frustum.SetViewPlaneDistances(near_plane, far_plane);
+
+	SetVerticalFOV(30.f);
 
 	RecalculateMatrixes();
 }
@@ -97,12 +97,14 @@ void RE_CompCamera::SetPlanesDistance(float near_plane, float far_plane)
 	frustum.SetViewPlaneDistances(near_plane, far_plane);
 }
 
-void RE_CompCamera::ResetFov()
+void RE_CompCamera::ResetAspectRatio()
 {
 	if (isPerspective)
-		frustum.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
+		frustum.SetVerticalFovAndAspectRatio(v_fov_rads, App->window->GetAspectRatio());
 	else
 		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
+
+	need_recalculation = true;
 }
 
 void RE_CompCamera::SwapCameraType()
@@ -113,6 +115,26 @@ void RE_CompCamera::SwapCameraType()
 		frustum.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
 	
 	isPerspective = !isPerspective;
+
+	need_recalculation = true;
+}
+
+void RE_CompCamera::SetVerticalFOV(float vertical_fov_degrees)
+{
+	if (isPerspective)
+	{
+		RE_CAPTO(vertical_fov_degrees, 180.0f);
+
+		v_fov_rads = vertical_fov_degrees * DEGTORAD;
+		h_fov_rads = 2.0f * math::Atan(math::Tan(v_fov_rads / 2.0f) * App->window->GetAspectRatio());
+
+		h_fov_degrees = h_fov_rads * RADTODEG;
+		v_fov_degrees = vertical_fov_degrees;
+
+		frustum.SetPerspective(h_fov_rads, v_fov_rads);
+
+		need_recalculation = true;
+	}
 }
 
 math::float4x4 RE_CompCamera::GetView() const
@@ -148,10 +170,10 @@ void RE_CompCamera::RecalculateMatrixes()
 
 void RE_CompCamera::RotateWithMouse(float xoffset, float yoffset, bool constrainPitch)
 {
-	math::vec rot = transform->GetRotXYZ();
+	math::vec rot = transform->GetLocalRotXYZ();
 
 	// Pitch
-	rot.x -= yoffset * SENSITIVITY;
+	pitch = rot.x -= yoffset * SENSITIVITY;
 	if (constrainPitch)
 	{
 		if (rot.x > 89.0f)
@@ -161,20 +183,15 @@ void RE_CompCamera::RotateWithMouse(float xoffset, float yoffset, bool constrain
 	}
 
 	// Yaw
-	rot.y -= xoffset * SENSITIVITY;
+	yaw = rot.y -= xoffset * SENSITIVITY;
 
 	// Roll
-	rot.z = 0.f;
+	roll = rot.z = 0.f;
 
 	transform->SetRot(rot);
 }
 
-void RE_CompCamera::MouseWheelZoom(float yoffset)
+float RE_CompCamera::GetVFOVDegrees() const
 {
-	/*if (Zoom >= 1.0f && Zoom <= 45.0f)
-		Zoom -= yoffset;
-	if (Zoom <= 1.0f)
-		Zoom = 1.0f;
-	if (Zoom >= 45.0f)
-		Zoom = 45.0f;*/
+	return v_fov_degrees;
 }

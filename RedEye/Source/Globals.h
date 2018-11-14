@@ -43,6 +43,7 @@ enum Dir
 
 // Useful macros
 #define RE_CAP(n) ((n <= 0.0f) ? n=0.0f : (n >= 1.0f) ? n=1.0f : n=n)
+#define RE_CAPTO(n, t) ((n <= 0.0f) ? n=0.0f : (n >= t) ? n=t : n=n)
 #define RE_MIN(a,b) ((a)<(b)) ? (a) : (b)
 #define RE_MAX(a,b) ((a)>(b)) ? (a) : (b)
 
