@@ -59,7 +59,7 @@ RE_Mesh::RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices
 
 	triangle_count = triangles;
 
-	
+	SetupAABB();
 
 	// now that we have all the required data, set the vertex buffers and its attribute pointers.
 	setupMesh();
@@ -164,6 +164,34 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 	}*/
 }
 
+void RE_Mesh::SetupAABB()
+{
+	// reset size to minimum
+	bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec(MIN_AABB_SIZE));
+
+	// adapt box to each vertex position
+	for (auto vertex : vertices)
+	{
+		// X
+		if (vertex.Position.x > bounding_box.maxPoint.x)
+			bounding_box.maxPoint.x = vertex.Position.x;
+		else if (vertex.Position.x < bounding_box.minPoint.x)
+			bounding_box.minPoint.x = vertex.Position.x;
+
+		// Y
+		if (vertex.Position.y > bounding_box.maxPoint.y)
+			bounding_box.maxPoint.y = vertex.Position.y;
+		else if (vertex.Position.y < bounding_box.minPoint.y)
+			bounding_box.minPoint.y = vertex.Position.y;
+
+		// Z
+		if (vertex.Position.z > bounding_box.maxPoint.z)
+			bounding_box.maxPoint.z = vertex.Position.z;
+		else if (vertex.Position.z < bounding_box.minPoint.z)
+			bounding_box.minPoint.z = vertex.Position.z;
+	}
+}
+
 void RE_Mesh::setupMesh()
 {
 	glGenVertexArrays(1, &VAO);
@@ -189,6 +217,11 @@ void RE_Mesh::setupMesh()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
 	glBindVertexArray(0);
+}
+
+math::AABB RE_Mesh::GetAABB()
+{
+	return bounding_box;
 }
 
 void RE_Mesh::loadVertexNormals()

@@ -5,6 +5,8 @@
 #include "MathGeoLib\include\MathGeoLib.h"
 #include <list>
 
+#define MIN_AABB_SIZE 0.01f
+
 class RE_Component;
 class RE_CompTransform;
 class RE_CompMesh;
@@ -64,7 +66,9 @@ public:
 	const char* GetName() const;
 
 	// AABB
+	void DrawAABB();
 	void SetBoundingBox(math::AABB box);
+	void SetBoundingBoxFromChilds();
 	math::AABB GetBoundingBox() const;
 
 	// Editor

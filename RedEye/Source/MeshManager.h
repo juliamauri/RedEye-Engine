@@ -43,7 +43,6 @@ private:
 	unsigned int default_shader = 0;
 
 	RE_GameObject* to_fill = nullptr;
-	math::AABB bounding_box;
 	bool from_drop = false;
 	bool error_loading = false;
 	std::vector<RE_Mesh*> meshes_to_fill;
