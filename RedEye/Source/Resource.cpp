@@ -14,9 +14,14 @@ ResourceContainer::ResourceContainer(const char* _name, const char * _origin, Re
 
 ResourceContainer::~ResourceContainer()
 {
-	DEL(name);
-	DEL(origin);
-	DEL(md5);
+	/*
+	if(name)
+		DEL(name);
+	if(origin)
+		DEL(origin);
+		*/
+	if(md5)
+		DEL(md5);
 }
 
 const char * ResourceContainer::GetName() const

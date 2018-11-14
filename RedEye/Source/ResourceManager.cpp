@@ -16,6 +16,7 @@ ResourceManager::~ResourceManager()
 		//LOG("WARNING: Deleating Unreferenced Resource: %s (from %s)",
 			//resources.begin()->second.first->GetName(),
 			//resources.begin()->second.first->GetOrigin());
+		DEL(resources.begin()->second);
 		resources.erase(resources.begin());
 	}
 }
