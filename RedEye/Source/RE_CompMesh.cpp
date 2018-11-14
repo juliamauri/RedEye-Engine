@@ -38,7 +38,8 @@ void RE_CompMesh::Draw()
 {
 	if (reference)
 	{
-		ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetGlobalMatrix().ptr());
+		ShaderManager::use(App->scene->modelloading);
+		ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetGlobalMatInvTrans().ptr());
 		App->meshes->DrawMesh(reference);
 	}
 

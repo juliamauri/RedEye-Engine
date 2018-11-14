@@ -10,7 +10,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_CompMesh.h"
-#include "RE_Camera.h"
+#include "RE_CompCamera.h"
 #include "MeshManager.h"
 #include <string>
 #include <algorithm>
@@ -41,6 +41,8 @@ bool ModuleScene::Start()
 
 	// load default meshes
 	App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.fbx");
+	//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
+
 	selected = root->GetChilds().begin()._Ptr->_Myval;
 	selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
 
@@ -90,8 +92,8 @@ void ModuleScene::FileDrop(const char * file)
 		//selected = App->meshes->DumpGeometry(selected, "path del street fbx");
 
 		// FOCUS CAMERA ON DROPPED GEOMETRY
-		App->editor->GetCamera()->SetPosition(selected->GetBoundingBox().maxPoint * 2);
-		App->editor->GetCamera()->SetFocus(selected->GetBoundingBox().CenterPoint());
+		//App->editor->GetCamera()->SetPosition(selected->GetBoundingBox().maxPoint * 2);
+		//App->editor->GetCamera()->SetFocus(selected->GetBoundingBox().CenterPoint());
 	}
 	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
 	{
@@ -117,9 +119,9 @@ void ModuleScene::DrawScene()
 	if (draw_quad_tree)
 		quad_tree.Draw();
 
-	ShaderManager::use(modelloading);
-	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetView().ptr());
-	ShaderManager::setFloat4x4(modelloading, "projection", App->editor->GetCamera()->GetProjection().ptr());
+	ShaderManager::use(modelloading); 
+	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(modelloading, "projection", App->editor->GetCamera()->GetProjectionPtr());
 
 	root->Draw();
 
@@ -143,9 +145,6 @@ void ModuleScene::DrawScene()
 		ShaderManager::setFloat3x3(modelloading, "modelNormal", modelNormal.ptr());
 		mesh_droped->Draw(modelloading);
 	}*/
-	
-
-	//drop->Draw();
 }
 
 void ModuleScene::DrawHeriarchy()
