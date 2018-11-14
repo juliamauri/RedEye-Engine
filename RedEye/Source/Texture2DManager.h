@@ -1,6 +1,8 @@
 #ifndef __TEXTURE2DMANAGER_H__
 #define __TEXTURE2DMANAGER_H__
 
+#include "Resource.h"
+
 #include <map>
 #include <vector>
 #include <list>
@@ -12,22 +14,19 @@ enum ImageExtensionType
 	DDS
 };
 
-struct Texture2D
+struct Texture2D : ResourceContainer
 {
 private:
 	unsigned int ID = 0;
 	int width, height;
-	std::string name;
 
 public:
-	Texture2D(const char* path, int extension,const char* name, bool droped = false);
+	Texture2D(unsigned int ID, int widht, int height);
 	~Texture2D();
 
 	void use();
 	void GetWithHeight(int* w,int* h);
 	void DrawTextureImGui();
-	const char* GetName();
-	const unsigned int GetID();
 };
 
 class Texture2DManager 
@@ -39,30 +38,27 @@ public:
 	bool Init();
 
 	//Load texture
-	unsigned int LoadTexture2D(const char* name, ImageExtensionType extension);
-	unsigned int LoadTexture2D(const char* path, const char* file_name, bool droped = false);
+	const char* LoadTexture2D(const char* name, ImageExtensionType extension);
+	const char* LoadTexture2D(const char* path, const char* file_name, bool droped = false);
 
-	void use(unsigned int TextureID);
-	void drawTexture(unsigned int TextureID);
-	void GetWithHeight(unsigned int TextureID, int* w, int* h);
+	void use(const char* TextureID);
+	void drawTexture(const char* TextureID);
+	void GetWithHeight(const char* TextureID, int* w, int* h);
 
-	void DeleteTexture2D(unsigned int TextureID);
-
-	std::vector<Texture2D*>* GetTextures();
-
-	unsigned int FindTMID(Texture2D* tex);
+	void DeleteTexture2D(const char* TextureID);
 
 private:
-	const char* folderPath;
-	unsigned int ID_count = 0;
-	bool texturesmodified = false;
 
-	std::list<unsigned int> textureIDContainer;
-	std::map<unsigned int, Texture2D*> textures2D;
-	std::vector<Texture2D*> actualTextures;
+	Texture2D* ProcessTexture(const char* path, int extension, const char* name, bool  droped = false);
+
+	const char* folderPath;
+	bool texturesmodified = false;
 
 	const char* GetExtensionStr(ImageExtensionType imageType);
 	int GetExtensionIL(const char* ext);
+
+	std::string md5_genereted;
+	std::string exists_md5;
 };
 
 #endif // !__TEXTURE2DMANAGER_H__

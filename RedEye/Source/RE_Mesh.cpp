@@ -515,27 +515,15 @@ void RE_MeshContainer::DrawProperties()
 
 					if (ImGui::TreeNode("Texture"))
 					{
-						ImGui::Text("\t- ID: %u", it2->id);
+						ImGui::Text("\t- MD5: %s", it2->id);
 						ImGui::Text("\t- Size: %ux%u", width, height);
 						ImGui::Text("\t- Path: %s", it2->path.c_str());
 						ImGui::Text("\t- Type: %s", it2->type.c_str());
 
 						App->textures->drawTexture(it2->id);
 
-						if (ImGui::TreeNode("Change Texture (Click to set)"))
-						{
-							std::vector<Texture2D*>* textures = App->textures->GetTextures();
-							if (textures->size() != 0)
-							{
-								std::vector<Texture2D*>::iterator it = textures->begin();
-								for (it; it != textures->end(); ++it)
-								{
-									if (ImGui::Button((*it)->GetName()))
-										it2->id = App->textures->FindTMID(*it);
-								}
-							}
-							ImGui::TreePop();
-						}
+
+						
 						ImGui::TreePop();
 					}
 				}

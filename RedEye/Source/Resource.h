@@ -17,14 +17,6 @@ enum Resource_Type : short unsigned int
 	R_MESH
 };
 
-union Container
-{
-	RE_Mesh* mesh = nullptr;
-	RE_Shader* shader;
-	RE_Texture* texture;
-	RE_Primitive* primitive;
-};
-
 class ResourceContainer
 {
 public:
@@ -41,10 +33,8 @@ public:
 private:
 	const char* name;
 	const char* origin;
-	std::string* md5;
+	std::string* md5 = nullptr;
 	Resource_Type type;
-
-	Container contains;
 };
 
 #endif // !__RESOURCE_H__

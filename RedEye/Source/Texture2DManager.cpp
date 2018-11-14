@@ -1,6 +1,7 @@
 #include "Texture2DManager.h"
 
 #include "Application.h"
+#include "ResourceManager.h"
 #include "FileSystem.h"
 #include "ModuleEditor.h"
 #include "OutputLog.h"
@@ -15,16 +16,13 @@
 #pragma comment(lib, "IL/libx86/ILU.lib")
 #pragma comment(lib, "IL/libx86/ILUT.lib")
 
+#include "md5.h"
+
 Texture2DManager::Texture2DManager(const char * folderPath) : folderPath(folderPath) 
 {}
 
 Texture2DManager::~Texture2DManager()
 {
-	Texture2D* toDelete = nullptr;
-	for (unsigned int TextureID : textureIDContainer) {
-		toDelete = textures2D.find(TextureID)->second;
-		delete toDelete;
-	}
 }
 
 bool Texture2DManager::Init()
@@ -55,7 +53,7 @@ bool Texture2DManager::Init()
 	return ret;
 }
 
-unsigned int Texture2DManager::LoadTexture2D(const char * name, ImageExtensionType ext)
+const char* Texture2DManager::LoadTexture2D(const char * name, ImageExtensionType ext)
 {
 	std::string extension = GetExtensionStr(ext);
 	std::string path(folderPath);
@@ -64,16 +62,20 @@ unsigned int Texture2DManager::LoadTexture2D(const char * name, ImageExtensionTy
 	std::string file_name = name;
 	file_name  += ".";
 	file_name += extension;
-	Texture2D* new_image = new Texture2D(path.c_str(), GetExtensionIL(extension.c_str()), file_name.c_str());
+	Texture2D* new_image = ProcessTexture(path.c_str(), GetExtensionIL(extension.c_str()), file_name.c_str());
 
-	textures2D.insert(std::pair<unsigned int, Texture2D*>(ID_count, new_image));
-
-	textureIDContainer.push_back(ID_count);
-
-	return ID_count++;
+	if (new_image)
+	{
+		ResourceContainer* texure_resource = (ResourceContainer*)new_image;
+		texure_resource->SetType(Resource_Type::R_TEXTURE);
+		texure_resource->SetMD5(md5_genereted.c_str());
+		return App->resources->Reference(texure_resource);
+	}
+	else
+		return App->resources->At(exists_md5.c_str())->GetMD5()->c_str();
 }
 
-unsigned int Texture2DManager::LoadTexture2D(const char * path, const char* file_name, bool droped)
+const char* Texture2DManager::LoadTexture2D(const char * path, const char* file_name, bool droped)
 {
 	Texture2D* new_image = nullptr;
 	std::string filename = file_name;
@@ -82,69 +84,117 @@ unsigned int Texture2DManager::LoadTexture2D(const char * path, const char* file
 	if (filename.find("\\") > 0 && !droped)
 	{
 		filename = filename.substr(filename.find_last_of("\\") + 1);
-		new_image = new Texture2D(std::string(path + std::string("/") + filename).c_str(), GetExtensionIL(extension.c_str()), file_name);
+		new_image = ProcessTexture(std::string(path + std::string("/") + filename).c_str(), GetExtensionIL(extension.c_str()), file_name);
 	}
 	else
 	{
 		if (droped)
-			new_image = new Texture2D(std::string(path + std::string("\\") + file_name).c_str(), GetExtensionIL(extension.c_str()), file_name, droped);
+			new_image = ProcessTexture(std::string(path + std::string("\\") + file_name).c_str(), GetExtensionIL(extension.c_str()), file_name, droped);
 		else
-			new_image = new Texture2D(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(extension.c_str()), file_name);
+			new_image = ProcessTexture(std::string(path + std::string("/") + file_name).c_str(), GetExtensionIL(extension.c_str()), file_name);
 	}
 
-	textures2D.insert(std::pair<unsigned int, Texture2D*>(ID_count, new_image));
-
-	textureIDContainer.push_back(ID_count);
-
-	texturesmodified = true;
-
-	return ID_count++;
-}
-
-void Texture2DManager::use(unsigned int TextureID)
-{
-	textures2D.at(TextureID)->use();
-}
-
-void Texture2DManager::drawTexture(unsigned int TextureID)
-{
-	textures2D.at(TextureID)->DrawTextureImGui();
-}
-
-void Texture2DManager::GetWithHeight(unsigned int TextureID, int * w, int * h)
-{
-	textures2D.at(TextureID)->GetWithHeight(w, h);
-}
-
-void Texture2DManager::DeleteTexture2D(unsigned int TextureID)
-{
-	Texture2D* toDelete = textures2D.find(TextureID)->second;
-	delete toDelete;
-	textureIDContainer.remove(TextureID);
-}
-
-std::vector<Texture2D*>* Texture2DManager::GetTextures()
-{
-	if (texturesmodified)
+	if (new_image)
 	{
-		actualTextures.clear();
-		for (unsigned int TextureID : textureIDContainer) {
-			actualTextures.push_back(textures2D.find(TextureID)->second);
-		}
-		texturesmodified = false;
+		ResourceContainer* texure_resource = (ResourceContainer*)new_image;
+		texure_resource->SetType(Resource_Type::R_TEXTURE);
+		texure_resource->SetMD5(md5_genereted.c_str());
+		return App->resources->Reference(texure_resource);
 	}
-	return &actualTextures;
+	else
+		return App->resources->At(exists_md5.c_str())->GetMD5()->c_str();
 }
 
-unsigned int Texture2DManager::FindTMID(Texture2D * tex)
+void Texture2DManager::use(const char* TextureID)
 {
-	unsigned int ret = 0;
+	((Texture2D*)App->resources->At(TextureID))->use();
+}
 
-	for (unsigned int TextureID : textureIDContainer) {
-		if (tex == textures2D.find(TextureID)->second)
-			ret = TextureID;
+void Texture2DManager::drawTexture(const char* TextureID)
+{
+	((Texture2D*)App->resources->At(TextureID))->DrawTextureImGui();
+}
+
+void Texture2DManager::GetWithHeight(const char* TextureID, int * w, int * h)
+{
+	((Texture2D*)App->resources->At(TextureID))->GetWithHeight(w, h);
+}
+
+void Texture2DManager::DeleteTexture2D(const char* TextureID)
+{
+	//App->resources->UnReference(TextureID);
+}
+
+Texture2D * Texture2DManager::ProcessTexture(const char * path, int extension, const char * name, bool droped)
+{
+	uint ID = 0;
+	int width = 0;
+	int height = 0;
+
+	const char* is_reference = nullptr;
+	Texture2D* texture = nullptr;
+
+	unsigned int imageID = 0;
+
+	if (droped)
+	{
+		RE_FileIO* image = App->fs->QuickBufferFromPDPath(path);
+		if (image)
+		{
+			md5_genereted = md5(path);
+			is_reference = App->resources->IsReference(md5_genereted.c_str());
+			if (is_reference)
+				exists_md5 = is_reference;
+			else
+			{
+				ilGenImages(1, &imageID);
+				ilBindImage(imageID);
+
+				ilLoadL(extension, image->GetBuffer(), image->GetSize());
+				DEL(image);
+			}
+		}
 	}
-	return ret;
+	else
+	{
+		RE_FileIO image(path);
+		if (image.Load())
+		{
+			md5_genereted = md5(path);
+			is_reference = App->resources->IsReference(md5_genereted.c_str());
+			if (is_reference)
+				exists_md5 = is_reference;
+			else
+			{
+				ilGenImages(1, &imageID);
+				ilBindImage(imageID);
+
+				ilLoadL(extension, image.GetBuffer(), image.GetSize());
+			}
+		}
+	}
+
+	if (!is_reference)
+	{
+
+		if (extension == IL_TGA)
+			iluFlipImage();
+
+		/* OpenGL texture binding of the image loaded by DevIL  */
+		glGenTextures(1, &ID); /* Texture name generation */
+		glBindTexture(GL_TEXTURE_2D, ID); /* Binding of texture name */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear interpolation for minifying filter */
+		glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
+
+		ilBindImage(0);
+		/* Delete used resources*/
+		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
+
+		texture = new Texture2D(ID, width, height);
+	}
+
+	return texture;
 }
 
 const char * Texture2DManager::GetExtensionStr(ImageExtensionType imageType)
@@ -178,42 +228,11 @@ int Texture2DManager::GetExtensionIL(const char* ext)
 	return IL_Extension;
 }
 
-Texture2D::Texture2D(const char* path, int extension, const char* name, bool droped)
+Texture2D::Texture2D(unsigned int ID, int widht, int height)
 {
-	this->name.append(name);
-	unsigned int imageID = 0;
-	ilGenImages(1, &imageID);
-	ilBindImage(imageID);
-
-	if (droped)
-	{
-		RE_FileIO* image = App->fs->QuickBufferFromPDPath(path);
-		if (image)
-		{
-			ilLoadL(extension, image->GetBuffer(), image->GetSize());
-			DEL(image);
-		}
-	}
-	else
-	{
-		RE_FileIO image(path);
-		if (image.Load())
-			ilLoadL(extension, image.GetBuffer(), image.GetSize());
-	}
-
-	if(extension == IL_TGA)
-		iluFlipImage();
-
-	/* OpenGL texture binding of the image loaded by DevIL  */
-	glGenTextures(1, &ID); /* Texture name generation */
-	glBindTexture(GL_TEXTURE_2D, ID); /* Binding of texture name */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear interpolation for minifying filter */
-	glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
-
-	ilBindImage(0);
-	/* Delete used resources*/
-	ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
+	this->ID = ID;
+	this->width = widht;
+	this->height = height;
 }
 
 Texture2D::~Texture2D()
@@ -235,14 +254,4 @@ void Texture2D::GetWithHeight(int * w, int * h)
 void Texture2D::DrawTextureImGui()
 {
 	ImGui::Image((void *)ID, ImVec2(200, 200));
-}
-
-const char * Texture2D::GetName()
-{
-	return name.c_str();
-}
-
-const unsigned int Texture2D::GetID()
-{
-	return ID;
 }

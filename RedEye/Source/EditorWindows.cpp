@@ -311,6 +311,7 @@ void TexturesWindow::Draw()
 {
 	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
 	{
+		/*
 		std::vector<Texture2D*>* textures = App->textures->GetTextures();
 		if (textures->size() != 0)
 		{
@@ -329,6 +330,7 @@ void TexturesWindow::Draw()
 				}
 			}
 		}
+		*/
 	}
 	ImGui::End();
 }

@@ -4,6 +4,8 @@
 #include "MeshManager.h"
 #include "ShaderManager.h"
 #include "ModuleScene.h"
+#include "ResourceManager.h"
+#include "RE_Mesh.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include"RE_Math.h"
@@ -35,7 +37,13 @@ void RE_CompMesh::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Mesh"))
 	{
-		if (!reference.empty()) ImGui::TextWrapped("Reference: %s",reference.c_str());
+		if (!reference.empty())
+		{
+			ImGui::TextWrapped("Reference: %s", reference.c_str());
+
+			for (auto texture : ((RE_Mesh*)App->resources->At(reference.c_str()))->textures)
+				ImGui::TextWrapped("Texture Reference: %s", texture.id);
+		}
 		else ImGui::TextWrapped("Empty Mesh Component");
 	}
 }

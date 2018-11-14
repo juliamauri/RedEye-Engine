@@ -17,22 +17,6 @@ ResourceContainer::~ResourceContainer()
 	DEL(name);
 	DEL(origin);
 	DEL(md5);
-
-	switch (type)
-	{
-	case R_SHADER:
-		DEL(contains.shader);
-		break;
-	case R_PRIMITIVE:
-		DEL(contains.primitive);
-		break;
-	case R_TEXTURE:
-		DEL(contains.texture);
-		break;
-	case R_MESH:
-		DEL(contains.mesh);
-		break;
-	}
 }
 
 const char * ResourceContainer::GetName() const
@@ -58,18 +42,6 @@ Resource_Type ResourceContainer::GetType() const
 void ResourceContainer::SetType(Resource_Type type)
 {
 	this->type = type;
-	switch (type)
-	{
-	case R_SHADER:
-		break;
-	case R_PRIMITIVE:
-		break;
-	case R_TEXTURE:
-		break;
-	case R_MESH:
-		contains.mesh = (RE_Mesh*)this;
-		break;
-	}
 }
 
 void ResourceContainer::SetMD5(const char * md5)

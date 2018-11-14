@@ -13,7 +13,7 @@ struct Vertex
 
 struct Texture
 {
-	unsigned int id;
+	const char* id;
 	std::string type;
 	std::string path;
 };
