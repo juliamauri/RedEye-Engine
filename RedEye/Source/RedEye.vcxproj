@@ -30,6 +30,7 @@
     <ClCompile Include="ImGui\imgui_demo.cpp" />
     <ClCompile Include="ImGui\imgui_draw.cpp" />
     <ClCompile Include="ImGui\imgui_impl_sdl_gl3.cpp" />
+    <ClCompile Include="md5.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="OutputLog.cpp" />
     <ClCompile Include="main.cpp" />
@@ -74,6 +75,7 @@
     <ClInclude Include="ImGui\stb_rect_pack.h" />
     <ClInclude Include="ImGui\stb_textedit.h" />
     <ClInclude Include="ImGui\stb_truetype.h" />
+    <ClInclude Include="md5.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="OutputLog.h" />
     <ClInclude Include="MathGeoLib\include\MathBuildConfig.h" />
@@ -209,6 +211,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EntryPointSymbol>

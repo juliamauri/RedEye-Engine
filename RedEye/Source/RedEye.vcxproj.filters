@@ -109,6 +109,9 @@
     <ClCompile Include="EditorWindows.cpp">
       <Filter>Modules\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="md5.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -359,6 +362,9 @@
     </ClInclude>
     <ClInclude Include="EditorWindows.h">
       <Filter>Modules\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
