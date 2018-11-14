@@ -217,7 +217,7 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 			
 			go->GetTransform()->SetRot(math::vec(rotation.x, rotation.y, rotation.z));
 			go->GetTransform()->SetPos(math::vec(position.x, position.y, position.z));
-			go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
+			//go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
 
 			//meshes.rbegin()->name = node->mName.C_Str();
 			//total_triangle_count += meshes.rbegin()->triangle_count;
