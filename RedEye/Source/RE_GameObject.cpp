@@ -315,7 +315,7 @@ const char * RE_GameObject::GetName() const
 	return name.c_str();
 }
 
-void RE_GameObject::SetBoundingBox(math::AABB & box)
+void RE_GameObject::SetBoundingBox(math::AABB box)
 {
 	bounding_box = box;
 }
