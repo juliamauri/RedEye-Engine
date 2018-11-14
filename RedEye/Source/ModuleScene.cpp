@@ -37,13 +37,13 @@ bool ModuleScene::Start()
 	// root
 	root = new RE_GameObject("root");
 	root->AddComponent(C_PLANE);
-	root->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 10.0f)));
+	root->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 10000.0f)));
 
 	// load default meshes
 	App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.fbx");
 	//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
 
-	selected = root->GetChilds().begin()._Ptr->_Myval;
+	selected = *root->GetChilds().begin();
 	selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
 
 	//// depricated way
@@ -118,6 +118,8 @@ void ModuleScene::DrawScene()
 {
 	if (draw_quad_tree)
 		quad_tree.Draw();
+
+	selected->DrawAABB();
 
 	ShaderManager::use(modelloading); 
 	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());
