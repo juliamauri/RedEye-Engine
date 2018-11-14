@@ -60,37 +60,57 @@ void RE_CompTransform::SetScale(math::vec _scale)
 	scale = _scale;
 }
 
-math::vec RE_CompTransform::GetPosition() const
+math::vec RE_CompTransform::GetGlobalPosition() const
 {
-	return pos;
+	return global_pos;
 }
 
-math::vec RE_CompTransform::GetRight() const
+math::vec RE_CompTransform::GetGlobalRotXYZ() const
+{
+	return global_rot_eul;
+}
+
+math::Quat RE_CompTransform::GetGlobalRot() const
+{
+	return global_rot_quat;
+}
+
+math::vec RE_CompTransform::GetGlobalScale() const
+{
+	return global_scale;
+}
+
+math::vec RE_CompTransform::GetGlobalRight() const
 {
 	return right;
 }
 
-math::vec RE_CompTransform::GetUp() const
+math::vec RE_CompTransform::GetGlobalUp() const
 {
 	return up;
 }
 
-math::vec RE_CompTransform::GetForward() const
+math::vec RE_CompTransform::GetGlobalForward() const
 {
 	return front;
 }
 
-math::vec RE_CompTransform::GetRotXYZ() const
+math::vec RE_CompTransform::GetLocalPosition() const
+{
+	return pos;
+}
+
+math::vec RE_CompTransform::GetLocalRotXYZ() const
 {
 	return rot_eul;
 }
 
-math::Quat RE_CompTransform::GetRot() const
+math::Quat RE_CompTransform::GetLocalRot() const
 {
 	return rot_quat;
 }
 
-math::vec RE_CompTransform::GetScale() const
+math::vec RE_CompTransform::GetLocalScale() const
 {
 	return scale;
 }
@@ -227,6 +247,9 @@ void RE_CompTransform::CalcGlobalTransform(bool call_transform_modified)
 	right = global_transform.Col3(0).Normalized();
 	up = global_transform.Col3(1).Normalized();
 	front = global_transform.Col3(2).Normalized();
+
+	global_transform.Decompose(global_pos, global_rot_quat, global_scale);
+	global_rot_eul = global_rot_quat.ToEulerXYZ();
 
 	just_calculated_global = true;
 }

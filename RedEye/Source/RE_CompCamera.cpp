@@ -170,7 +170,7 @@ void RE_CompCamera::RecalculateMatrixes()
 
 void RE_CompCamera::RotateWithMouse(float xoffset, float yoffset, bool constrainPitch)
 {
-	math::vec rot = transform->GetRotXYZ();
+	math::vec rot = transform->GetLocalRotXYZ();
 
 	// Pitch
 	pitch = rot.x -= yoffset * SENSITIVITY;
