@@ -57,10 +57,7 @@ void QTreeNode::Clear()
 	if (nodes[0] != nullptr)
 	{
 		for (auto node : nodes)
-		{
-			node->Clear();
 			DEL(node);
-		}
 	}
 
 	g_objs.clear();
