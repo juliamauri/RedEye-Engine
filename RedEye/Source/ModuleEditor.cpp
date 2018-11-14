@@ -221,7 +221,6 @@ RE_CompCamera * ModuleEditor::GetCamera() const
 
 void ModuleEditor::UpdateCamera()
 {
-
 	if (!ImGui::IsMouseHoveringAnyWindow())
 	{
 		const MouseData* mouse = App->input->GetMouse();
@@ -265,7 +264,8 @@ void ModuleEditor::UpdateCamera()
 				camera->RotateWithMouse(mouse->mouse_x_motion, -mouse->mouse_y_motion);
 			}
 
-			camera->MouseWheelZoom(mouse->mouse_wheel_motion);
+			if (mouse->mouse_wheel_motion != 0)
+				camera->SetVerticalFOV(camera->GetVFOVDegrees() - mouse->mouse_wheel_motion);
 		}
 
 		camera->Update();

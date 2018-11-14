@@ -29,6 +29,7 @@ public:
 	int GetHeight() const;
 	int GetMaxWidth() const;
 	int GetMaxHeight() const;
+	float GetAspectRatio() const;
 
 	float	GetBrightness()const;
 	bool	CheckFlag(uint flag) const;

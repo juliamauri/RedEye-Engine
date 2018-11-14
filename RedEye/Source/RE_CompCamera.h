@@ -32,8 +32,10 @@ public:
 	void SetPlanesDistance(float near_plane, float far_plane);
 	void SwapCameraType();
 
+	void SetVerticalFOV(float vertical_fov_degrees);
+
 	// Call this function if window size changed.
-	void ResetFov();
+	void ResetAspectRatio();
 
 	math::float4x4 GetView() const;
 	float* GetViewPtr() const;
@@ -41,8 +43,10 @@ public:
 	math::float4x4 GetProjection() const;
 	float* GetProjectionPtr() const;
 
+	// Mouse motion rotation
 	void RotateWithMouse(float xoffset, float yoffset, bool constrainPitch = true);
-	void MouseWheelZoom(float yoffset);
+
+	float GetVFOVDegrees() const;
 
 private:
 	
@@ -55,9 +59,19 @@ private:
 
 	// Camera frustum
 	math::Frustum frustum;
+
+	// Values from frustum
 	bool isPerspective = true;
-	float yaw = 0.0f;
+
 	float pitch = 0.0f;
+	float yaw = 0.0f;
+	float roll = 0.0f;
+
+	float h_fov_rads = 0.0f;
+	float v_fov_rads = 0.0f;
+
+	float h_fov_degrees = 0.0f;
+	float v_fov_degrees = 0.0f;
 
 	// View & Projection
 	bool need_recalculation = false;

@@ -255,6 +255,11 @@ int ModuleWindow::GetMaxHeight() const
 	return ret;
 }
 
+float ModuleWindow::GetAspectRatio() const
+{
+	return (float)width / (float)height;
+}
+
 float ModuleWindow::GetBrightness()const
 {
 	return brightness;
