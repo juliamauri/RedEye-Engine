@@ -11,7 +11,7 @@
 #include "TimeManager.h"
 #include "ModuleInput.h"
 #include "FileSystem.h"
-#include "RE_Camera.h"
+#include "RE_CompCamera.h"
 #include "RE_Mesh.h"
 #include "ModuleScene.h"
 
@@ -75,7 +75,7 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	// Reset projection & view
 	glMatrixMode(GL_PROJECTION); 
-	glLoadMatrixf(App->editor->GetCamera()->GetProjection().ptr());
+	glLoadMatrixf(App->editor->GetCamera()->GetProjectionPtr());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 

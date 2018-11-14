@@ -6,11 +6,11 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
-#include "RE_Camera.h"
 #include "ShaderManager.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
+#include "RE_CompCamera.h"
 
 #define SMALL_INFINITY 2000
 
@@ -48,9 +48,9 @@ void RE_CompPoint::Draw()
 {
 	RE_CompPrimitive::RE_Component::go->GetTransform()->SetPos(point);
 	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatrix().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatInvTrans().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -76,9 +76,9 @@ RE_CompLine::~RE_CompLine()
 void RE_CompLine::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatrix().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatInvTrans().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glLineWidth(2.0f);
@@ -111,9 +111,9 @@ RE_CompTriangle::~RE_CompTriangle()
 void RE_CompTriangle::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatrix().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatInvTrans().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
@@ -130,9 +130,9 @@ RE_CompPlane::~RE_CompPlane()
 void RE_CompPlane::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatrix().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatInvTrans().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
@@ -153,8 +153,8 @@ void RE_CompCube::Draw()
 	math::float4x4 model = math::float4x4::Translate(math::float3(0.0f, 3.0f, 0.0f).Neg());
 	model.InverseTranspose();
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", model.ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 1.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
@@ -185,9 +185,9 @@ RE_CompSphere::~RE_CompSphere()
 void RE_CompSphere::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatrix().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetView().ptr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjection().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetGlobalMatInvTrans().ptr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);

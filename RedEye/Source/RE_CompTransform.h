@@ -2,6 +2,7 @@
 #define __RE_COMPTRANSFORM_H__
 
 #include "RE_Component.h"
+#include "Globals.h"
 #include "MathGeoLib\include\MathGeoLib.h"
 
 class RE_CompCamera;
@@ -14,27 +15,33 @@ public:
 
 	void Update();
 
-	void SetPos(const math::vec position);
-	void SetRot(const math::vec euler);
-	void SetRot(const math::Quat quat);
-	void SetScale(const math::vec scale);
+	void SetPos(math::vec position);
+	void SetRot(math::vec euler);
+	void SetRot(math::Quat quat);
+	void SetScale(math::vec scale);
 
-	math::vec GetPosition() const;
-	math::vec GetRight() const;
-	math::vec GetUp() const;
-	math::vec GetForward() const;
-	math::vec GetRotXYZ() const;
-	math::Quat GetRot() const;
-	math::vec GetScale() const;
+	math::vec	GetPosition() const;
+	math::vec	GetRight() const;
+	math::vec	GetUp() const;
+	math::vec	GetForward() const;
+	math::vec	GetRotXYZ() const;
+	math::Quat	GetRot() const;
+	math::vec	GetScale() const;
 
 	math::float4x4 GetLocalMatrix() const;
 	math::float4x4 GetGlobalMatrix() const;
+	math::float4x4 GetGlobalMatInvTrans() const;
 
 	void DrawProperties();
 	void Reset();
+	bool HasChanged() const;
 
-	void LookAt(math::vec cameraTarget);
-	void setCamera(RE_CompCamera* cam);
+	void LocalLookAt(math::vec& target_pos);
+	void LocalMove(Dir dir, float speed);
+	void Orbit(float xoffset, float yoffset, math::vec& target);
+
+	//void GlobalLookAt(math::vec& target_pos);
+	//void GlobalMove(Dir dir, float speed);
 
 private:
 
@@ -42,21 +49,26 @@ private:
 
 private:
 
+	// Position
 	math::vec pos = math::vec::zero;
-	math::vec right = math::vec::zero;
-	math::vec up = math::vec::zero;
-	math::vec forward = math::vec::zero;
 
+	// Rotation
 	math::vec rot_eul = math::vec::zero;
 	math::Quat rot_quat = math::Quat::identity;
+
+	// Scale
 	math::float3 scale = math::vec::one;
+
+	// Axis
+	math::vec right = math::vec::zero;
+	math::vec up = math::vec::zero;
+	math::vec front = math::vec::zero;
 
 	math::float4x4 local_transform = math::float4x4::identity;
 	math::float4x4 global_transform = math::float4x4::identity;
 
 	bool transform_modified = false;
-
-	RE_CompCamera* update_camera = nullptr;
+	bool just_calculated_global = false;
 };
 
 #endif // !__RE_COMPTRANSFORM_H__
