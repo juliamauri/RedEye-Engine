@@ -3,78 +3,67 @@
 
 #include "RE_Component.h"
 #include "RE_Math.h"
+#include "Globals.h"
 
 class RE_CompTransform;
-
-enum CameraMovement
-{
-	FORWARD,
-	BACKWARD,
-	LEFT,
-	RIGHT
-};
 
 class RE_CompCamera : public RE_Component
 {
 public:
 	//Camera initialize world origin at (0, 0, 0) and planes distance 0.1f near and 100.0f far
-	//@param camraType -> true = Prespective | false = Orthographic
+	//@param toPerspective -> true = Prespective | false = Orthographic
 	//@param near and @far -> distances of planes from camera position
-	RE_CompCamera(RE_GameObject* go = nullptr, bool cameraType = true, float near_plane = 0.1f, float far_plane = 100.0f);
+	RE_CompCamera(
+		RE_GameObject* go = nullptr,
+		bool toPerspective = true, 
+		float near_plane = 0.1f,
+		float far_plane = 100.0f);
 	
-	void PreUpdate() override;
 	void Update() override;
-	void PostUpdate() override;
-
 	void Draw() override;
-
 	void DrawProperties() override;
 
+	RE_CompTransform* GetTransform() const;
 	void OnTransformModified() override;
 
-	//Set the position planes by distance
-	//@param near and @far -> distances of planes from camera position
+	void SetEulerAngle(float pitch, float yaw);
 	void SetPlanesDistance(float near_plane, float far_plane);
+	void SwapCameraType();
 
-	//If window size changed, needed to call this function.
+	// Call this function if window size changed.
 	void ResetFov();
 
-	//prespective to orthograohic or inverse
-	void ChangeCameraType();
+	math::float4x4 GetView() const;
+	float* GetViewPtr() const;
+	
+	math::float4x4 GetProjection() const;
+	float* GetProjectionPtr() const;
 
-	void SetPos(math::vec position);
+	void RotateWithMouse(float xoffset, float yoffset, bool constrainPitch = true);
+	void MouseWheelZoom(float yoffset);
 
-	//Get camera view matrix
-	math::float4x4 GetView();
+private:
+	
+	void RecalculateMatrixes();
 
-	//Get camera projection matrix
-	math::float4x4 GetProjection();
+private:
 
-	void SetEulerAngle(float pitch, float yaw);
-
-	//LookAt, return the view matrix (view * transformation matrix)
-	//@param cameraTarget -> The object that the camera looks
-	void LookAt(math::vec cameraTarget);
-
-	float* RealView();
-
-	//Move camera
-	void Move(CameraMovement dir, float speed);
-
-public:
-	//transform
+	// Transform
 	RE_CompTransform* transform = nullptr;
 
-	//Camera frustum
-	math::Frustum camera;
-
-	math::float4x4 view;
-
-	//true = Prespective | false = Orthographic
-	bool cameraType;
-
+	// Camera frustum
+	math::Frustum frustum;
+	bool isPerspective = true;
 	float yaw = 0.0f;
 	float pitch = 0.0f;
+
+	// View & Projection
+	bool need_recalculation = false;
+	math::float4x4 calculated_view;
+	math::float4x4 calculated_projection;
+
+	// Debug Drawing
+	bool draw_frustum = true;
 };
 
 #endif // !__RE_CCOMPAMERA_H__

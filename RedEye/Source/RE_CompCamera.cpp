@@ -4,45 +4,62 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "ModuleWindow.h"
+#include "SDL2\include\SDL_opengl.h"
 
-RE_CompCamera::RE_CompCamera(RE_GameObject* go , bool cameraType, float near_plane, float far_plane) : RE_Component(C_CAMERA,go)
+RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float near_plane, float far_plane)
+	: RE_Component(C_CAMERA, go), isPerspective(toPerspective)
 {
-	if (go == nullptr)
-	{
-		transform = new RE_CompTransform();
-		transform->setCamera(this);
-	}
+	transform = (go == nullptr) ? new RE_CompTransform() : go->GetTransform();
+
+	frustum.SetKind(
+		math::FrustumProjectiveSpace::FrustumSpaceGL,
+		math::FrustumHandedness::FrustumRightHanded);
+
+	if (isPerspective)
+		frustum.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
 	else
-		transform = go->GetTransform();
+		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
 
-	this->cameraType = cameraType;
-	camera.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+	frustum.SetWorldMatrix(math::float3x4::Translate(0.f, 0.f, 0.f));
+	//frustum.SetWorldMatrix(transform->GetGlobalMatrix().Float3x4Part());
 
-	if (cameraType)
-		camera.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
-	else
-		camera.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
+	frustum.SetViewPlaneDistances(near_plane, far_plane);
 
-	camera.SetWorldMatrix(math::float3x4::Translate(math::float3(0.0f, 0.0f, 0.0f)));
-	camera.SetViewPlaneDistances(near_plane, far_plane);
-}
-
-void RE_CompCamera::PreUpdate()
-{
+	RecalculateMatrixes();
 }
 
 void RE_CompCamera::Update()
 {
 	if (go == nullptr)
+	{
 		transform->Update();
-}
 
-void RE_CompCamera::PostUpdate()
-{
+		if (transform->HasChanged())
+			OnTransformModified();
+	}
+	
+	if (need_recalculation)
+		RecalculateMatrixes();
 }
 
 void RE_CompCamera::Draw()
 {
+	if (draw_frustum)
+	{
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBegin(GL_LINES);
+		glLineWidth(2.0f);
+		glColor4f(0.f, 1.0f, 0.2f, 1.0f);
+
+		for (uint i = 0; i < 12; i++)
+		{
+			glVertex3f(frustum.Edge(i).a.x, frustum.Edge(i).a.y, frustum.Edge(i).a.z);
+			glVertex3f(frustum.Edge(i).b.x, frustum.Edge(i).b.y, frustum.Edge(i).b.z);
+		}
+
+		glEnd();
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	}
 }
 
 void RE_CompCamera::DrawProperties()
@@ -56,80 +73,106 @@ void RE_CompCamera::SetEulerAngle(float p, float y)
 	pitch += p;
 
 	transform->SetRot(math::vec(pitch,yaw,0.0f));
+}
 
-
-
+RE_CompTransform * RE_CompCamera::GetTransform() const
+{
+	return go != nullptr ? go->GetTransform() : transform;
 }
 
 void RE_CompCamera::OnTransformModified()
 {
-	camera.SetWorldMatrix(transform->GetGlobalMatrix().Float3x4Part());
+	math::float4x4 global_transform = transform->GetGlobalMatrix();
+	
+	frustum.SetFrame(
+		global_transform.Col3(3),
+		global_transform.Col3(2).Normalized(),
+		global_transform.Col3(1).Normalized());
+
+	need_recalculation = true;
 }
 
 void RE_CompCamera::SetPlanesDistance(float near_plane, float far_plane)
 {
-	camera.SetViewPlaneDistances(near_plane, far_plane);
+	frustum.SetViewPlaneDistances(near_plane, far_plane);
 }
 
 void RE_CompCamera::ResetFov()
 {
-	if (cameraType)
-		camera.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
+	if (isPerspective)
+		frustum.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
 	else
-		camera.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
+		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
 }
 
-void RE_CompCamera::ChangeCameraType()
+void RE_CompCamera::SwapCameraType()
 {
-	if (cameraType)
-		camera.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
+	if (isPerspective)
+		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
 	else
-		camera.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
+		frustum.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
 	
-	cameraType = !cameraType;
+	isPerspective = !isPerspective;
 }
 
-void RE_CompCamera::SetPos(math::vec position)
+math::float4x4 RE_CompCamera::GetView() const
 {
-	transform->SetPos(position);
+	return calculated_view;
 }
 
-math::float4x4 RE_CompCamera::GetView()
+float* RE_CompCamera::GetViewPtr() const
 {
-	math::float4x4 view = transform->GetGlobalMatrix();
-	return view;
+	return (float*)calculated_view.v;
 }
 
-math::float4x4 RE_CompCamera::GetProjection()
+math::float4x4 RE_CompCamera::GetProjection() const
 {
-	return camera.ProjectionMatrix().Transposed();
+	return calculated_projection;
 }
 
-void RE_CompCamera::LookAt(math::vec cameraTarget)
+float* RE_CompCamera::GetProjectionPtr() const
 {
-	view = GetView() * math::float4x4::LookAt(camera.Front().Normalized(),(camera.Pos() - cameraTarget).Normalized(),camera.Up().Normalized(),math::vec(0.0f,1.0f,0.0f).Normalized());
+	return (float*)calculated_projection.v;
 }
 
-float* RE_CompCamera::RealView()
+void RE_CompCamera::RecalculateMatrixes()
 {
-	return view.ptr();
+	calculated_view = frustum.ViewMatrix();
+	calculated_view.Transpose();
+
+	calculated_projection = frustum.ViewMatrix();
+	calculated_projection.Transpose();
+
+	need_recalculation = false;
 }
 
-void RE_CompCamera::Move(CameraMovement dir, float speed)
+void RE_CompCamera::RotateWithMouse(float xoffset, float yoffset, bool constrainPitch)
 {
-	switch (dir)
+	/*xoffset *= MouseSensitivity;
+	yoffset *= MouseSensitivity;
+
+	Yaw += xoffset;
+	Pitch += yoffset;
+
+	// Make sure that when pitch is out of bounds, screen doesn't get flipped
+	if (constrainPitch)
 	{
-	case FORWARD:
-		transform->SetPos(transform->GetPosition() + (speed * transform->GetForward()));
-		break;
-	case BACKWARD:
-		transform->SetPos(transform->GetPosition() - (speed * transform->GetForward()));
-		break;
-	case LEFT:
-		transform->SetPos(transform->GetPosition() + (transform->GetRight() * speed));
-		break;
-	case RIGHT:
-		transform->SetPos(transform->GetPosition() - (transform->GetRight() * speed));
-		break;
+		if (Pitch > 89.0f)
+			Pitch = 89.0f;
+		if (Pitch < -89.0f)
+			Pitch = -89.0f;
 	}
+
+	// Update Front, Right and Up Vectors using the updated Euler angles
+	UpdateFrustum();*/
+}
+
+void RE_CompCamera::MouseWheelZoom(float yoffset)
+{
+	/*if (Zoom >= 1.0f && Zoom <= 45.0f)
+		Zoom -= yoffset;
+	if (Zoom <= 1.0f)
+		Zoom = 1.0f;
+	if (Zoom >= 45.0f)
+		Zoom = 45.0f;*/
 }

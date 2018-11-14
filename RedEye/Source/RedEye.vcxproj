@@ -42,7 +42,6 @@
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
-    <ClCompile Include="RE_Camera.cpp" />
     <ClCompile Include="RE_CompCamera.cpp" />
     <ClCompile Include="RE_CompMesh.cpp" />
     <ClCompile Include="RE_Component.cpp" />
@@ -128,7 +127,6 @@
     <ClInclude Include="RapidJson\include\writer.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ResourceManager.h" />
-    <ClInclude Include="RE_Camera.h" />
     <ClInclude Include="RE_CompCamera.h" />
     <ClInclude Include="RE_Component.h" />
     <ClInclude Include="RE_GameObject.h" />
