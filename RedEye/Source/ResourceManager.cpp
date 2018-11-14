@@ -20,11 +20,23 @@ ResourceManager::~ResourceManager()
 	}
 }
 
-unsigned int ResourceManager::Reference(ResourceContainer* rc)
+const char* ResourceManager::Reference(ResourceContainer* rc)
 {
-	rc->SetID(reference_count);
-	resources.insert(Resource(reference_count, rc));
-	return reference_count++;
+	resources.insert(Resource(rc->GetMD5(), rc));
+	return rc->GetMD5()->c_str();
+}
+
+const char * ResourceManager::IsReference(const char * md5)
+{
+	const char* ret = nullptr;
+
+	for (auto resource : resources)
+	{
+		if (resource.first->compare(md5) == 0)
+			ret = resource.first->c_str();
+	}
+
+	return ret;
 }
 
 bool ResourceManager::UnReference(const unsigned intid)
@@ -47,10 +59,17 @@ bool ResourceManager::UnReference(const unsigned intid)
 	return ret;
 }
 
-ResourceContainer* ResourceManager::At(const unsigned int id) const
+ResourceContainer* ResourceManager::At(const char* md5) const
 {
-	ResourceConstIter it = resources.find(id);
-	return it != resources.end() ? it->second : nullptr;
+	ResourceContainer* ret = nullptr;
+
+	for (auto resource : resources)
+	{
+		if (resource.first->compare(md5) == 0)
+			ret = resource.second;
+	}
+
+	return ret;
 }
 
 unsigned int ResourceManager::TotalReferences() const

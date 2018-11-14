@@ -6,6 +6,8 @@ class RE_Shader;
 class RE_Texture;
 class RE_Primitive;
 
+#include <string>
+
 enum Resource_Type : short unsigned int
 {
 	R_UNDEFINED = 0x00,
@@ -26,22 +28,22 @@ union Container
 class ResourceContainer
 {
 public:
-	ResourceContainer(const char* name = nullptr, const char* origin = nullptr, Resource_Type type = R_UNDEFINED, unsigned int id = 0u);
+	ResourceContainer(const char* name = nullptr, const char* origin = nullptr, Resource_Type type = R_UNDEFINED, const char* md5 = nullptr);
 	virtual ~ResourceContainer();
 	const char* GetName() const;
 	const char* GetOrigin() const;
-	unsigned int GetID() const;
+	std::string* GetMD5() const;
 	Resource_Type GetType() const;
 	
-	void SetID(unsigned int id);
 	void SetType(Resource_Type type);
+	void SetMD5(const char* md5);
 
 private:
 	const char* name;
 	const char* origin;
-
-	unsigned int id;
+	std::string* md5;
 	Resource_Type type;
+
 	Container contains;
 };
 

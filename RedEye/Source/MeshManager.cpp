@@ -10,6 +10,7 @@
 #include "RE_CompMesh.h"
 #include "RE_CompTransform.h"
 #include "RE_Mesh.h"
+#include "md5.h"
 
 #include "SDL2\include\SDL_assert.h"
 #include "assimp\include\Importer.hpp"
@@ -138,7 +139,7 @@ unsigned int MeshManager::GetLoadedMesh(const char * path, const bool from_drop)
 	return 0;
 }
 
-void MeshManager::DrawMesh(const unsigned int reference)
+void MeshManager::DrawMesh(const char* reference)
 {
 	if (reference > 0)
 		((RE_Mesh*)App->resources->At(reference))->Draw(default_shader);
@@ -149,9 +150,9 @@ void MeshManager::SetDefaultShader(unsigned int shader)
 	default_shader = shader;
 }
 
-unsigned int MeshManager::AddMesh(RE_Mesh * mesh)
+void MeshManager::AddMesh(RE_Mesh * mesh)
 {
-	return App->resources->Reference((ResourceContainer*)mesh);
+	App->resources->Reference((ResourceContainer*)mesh);
 }
 
 void MeshManager::ProcessModel(const char* buffer, unsigned int size)
@@ -192,10 +193,21 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 		{
 			RE_GameObject* go = new RE_GameObject(node->mName.C_Str(), to_fill);
 			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+
+			RE_CompMesh* comp_mesh = nullptr;
 			RE_Mesh* processed_mesh = ProcessMesh(mesh, scene, i + 1);
-			RE_CompMesh* comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)processed_mesh));
+			if (processed_mesh)
+			{
+				comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)processed_mesh));
+				go->SetBoundingBox(processed_mesh->GetAABB());
+			}
+			else
+			{
+				comp_mesh = new RE_CompMesh(go, exists_md5.c_str());
+				go->SetBoundingBox(((RE_Mesh*)App->resources->At(exists_md5.c_str()))->GetAABB());
+			}
+
 			go->AddCompMesh(comp_mesh);
-			go->SetBoundingBox(processed_mesh->GetAABB());
 
 			aiVector3D scale;
 			aiVector3D rotation;
@@ -255,32 +267,50 @@ RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const un
 		vertices.push_back(vertex);
 	}
 
-	// process indices
-	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+	std::string vertex_buffer;
+
+	for (auto vertice : vertices)
 	{
-		aiFace face = mesh->mFaces[i];
-
-		if (face.mNumIndices != 3)
-		{
-			error_loading = true;
-			LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face.mNumIndices);
-		}
-
-		for (unsigned int j = 0; j < face.mNumIndices; j++)
-			indices.push_back(face.mIndices[j]);
+		vertex_buffer += vertice.Normal.ToString();
 	}
 
-	// process material
-	aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-	std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-	//std::vector<_Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-	//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+	RE_Mesh* ret_mesh = nullptr;
 
-	RE_Mesh* ret_mesh = new RE_Mesh(vertices, indices, textures, mesh->mNumFaces);
-	ResourceContainer* mesh_resource = (ResourceContainer*)ret_mesh;
-	mesh_resource->SetType(Resource_Type::R_MESH);
+	std::string md5_id = md5(vertex_buffer.c_str());
 
+	const char* exists = App->resources->IsReference(md5_id.c_str());
+	if (exists)
+		exists_md5 = exists;
+	else
+	{
+		// process indices
+		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+		{
+			aiFace face = mesh->mFaces[i];
+
+			if (face.mNumIndices != 3)
+			{
+				error_loading = true;
+				LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face.mNumIndices);
+			}
+
+			for (unsigned int j = 0; j < face.mNumIndices; j++)
+				indices.push_back(face.mIndices[j]);
+		}
+
+		// process material
+		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+		std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		//std::vector<_Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+		ret_mesh = new RE_Mesh(vertices, indices, textures, mesh->mNumFaces);
+		ResourceContainer* mesh_resource = (ResourceContainer*)ret_mesh;
+		mesh_resource->SetType(Resource_Type::R_MESH);
+		mesh_resource->SetMD5(md5_id.c_str());
+
+	}
 	return ret_mesh;
 }
 

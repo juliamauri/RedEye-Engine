@@ -9,38 +9,24 @@
 #include"RE_Math.h"
 #include "ImGui\imgui.h"
 
-RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char * path, const bool file_dropped, const bool start_active) : RE_Component(C_MESH, go, start_active)
-{
-	LoadMesh(path, file_dropped);
-}
 
-RE_CompMesh::RE_CompMesh(RE_GameObject * go, unsigned int reference, const bool start_active) : RE_Component(C_MESH, go, start_active)
+RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool start_active) : RE_Component(C_MESH, go, start_active)
 {
 	this->reference = reference;
 }
 
 RE_CompMesh::~RE_CompMesh()
 {
-	((ResourceManager*)App->meshes)->UnReference(reference);
-}
-
-unsigned int RE_CompMesh::LoadMesh(const char * path, bool dropped)
-{
-	((ResourceManager*)App->meshes)->UnReference(reference);
-
-	if (path != nullptr)
-		reference = App->meshes->LoadMesh(path, dropped);
-
-	return reference;
+	//((ResourceManager*)App->meshes)->UnReference(reference);
 }
 
 void RE_CompMesh::Draw()
 {
-	if (reference)
+	if (!reference.empty())
 	{
 		ShaderManager::use(App->scene->modelloading);
 		ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetGlobalMatInvTrans().ptr());
-		App->meshes->DrawMesh(reference);
+		App->meshes->DrawMesh(reference.c_str());
 	}
 
 }
@@ -49,7 +35,7 @@ void RE_CompMesh::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Mesh"))
 	{
-		if (reference) App->meshes->DrawMesh(reference);
+		if (!reference.empty()) ImGui::TextWrapped("Reference: %s",reference.c_str());
 		else ImGui::TextWrapped("Empty Mesh Component");
 	}
 }

@@ -26,12 +26,12 @@ public:
 	void LoadMeshOnGameObject(RE_GameObject* parent, const char* path, const bool dropped = false);
 	unsigned int LoadMesh(const char* path, const bool dropped = false);
 	unsigned int GetLoadedMesh(const char* path, const bool from_drop = false) const;
-	void DrawMesh(const unsigned int reference);
+	void DrawMesh(const char* reference);
 	void SetDefaultShader(unsigned int shader);
 
 private:
 
-	unsigned int AddMesh(RE_Mesh* mesh);
+	void AddMesh(RE_Mesh* mesh);
 	void ProcessModel(const char* buffer, unsigned int size);
 	void ProcessNode(aiNode* node, const aiScene* scene, aiMatrix4x4 transform);
 	RE_Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, const unsigned int pos);
@@ -45,6 +45,7 @@ private:
 	RE_GameObject* to_fill = nullptr;
 	bool from_drop = false;
 	bool error_loading = false;
+	std::string exists_md5;
 	std::vector<RE_Mesh*> meshes_to_fill;
 	std::vector<Texture> textures_loaded;
 	std::string file;
