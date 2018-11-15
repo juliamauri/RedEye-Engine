@@ -170,7 +170,8 @@ void HeriarchyWindow::Draw()
 {
 	ImGui::Begin(name, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
 	{
-		App->scene->DrawHeriarchy();
+		if(App->scene)
+			App->scene->DrawHeriarchy();
 	}
 
 	ImGui::End();

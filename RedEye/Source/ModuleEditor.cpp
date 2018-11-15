@@ -33,8 +33,6 @@ ModuleEditor::~ModuleEditor()
 {
 	windows.clear();
 	tools.clear();
-
-	DEL(camera);
 }
 
 // Load assets
@@ -178,6 +176,7 @@ bool ModuleEditor::CleanUp()
 	}
 
 	DEL(about);
+	DEL(camera);
 
 	ImGui_ImplSdlGL3_Shutdown();
 

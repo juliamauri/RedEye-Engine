@@ -20,6 +20,7 @@ public:
 		bool toPerspective = true, 
 		float near_plane = 0.1f,
 		float far_plane = 100.0f);
+	~RE_CompCamera();
 	
 	void Update() override;
 	void Draw() override;

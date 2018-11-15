@@ -28,6 +28,12 @@ RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float near_p
 	RecalculateMatrixes();
 }
 
+RE_CompCamera::~RE_CompCamera()
+{
+	if(go == nullptr)
+		DEL(transform);
+}
+
 void RE_CompCamera::Update()
 {
 	if (go == nullptr)
