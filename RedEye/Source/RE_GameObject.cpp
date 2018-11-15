@@ -8,6 +8,8 @@
 #include "RE_CompPrimitive.h"
 #include "RE_CompMesh.h"
 #include "RE_CompCamera.h"
+#include "ShaderManager.h"
+#include "ModuleEditor.h"
 #include "OutputLog.h"
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
@@ -318,9 +320,19 @@ const char * RE_GameObject::GetName() const
 
 void RE_GameObject::DrawAABB()
 {
+	ShaderManager::use(0);
+
+	glColor3f(0.0f, 0.0f, 1.0f);
+
+	math::float4x4 model = math::float4x4::Translate(GetTransform()->GetGlobalPosition().Neg());
+	model.InverseTranspose();
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf((App->editor->GetCamera()->GetView() * model).ptr());
+
+	glLineWidth(5.0f);
+
 	glBegin(GL_LINES);
-	glLineWidth(3.0f);
-	glColor4f(0.00f, 0.00f, 0.80f, 1.00f);
 
 	math::vec position = transform->GetGlobalPosition();
 
@@ -331,7 +343,8 @@ void RE_GameObject::DrawAABB()
 	}
 
 	glEnd();
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+	glLineWidth(1.0f);
 }
 
 void RE_GameObject::SetBoundingBox(math::AABB box)
