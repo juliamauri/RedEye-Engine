@@ -23,6 +23,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(config = new ConfigWindow());
 	windows.push_back(heriarchy = new HeriarchyWindow());
 	windows.push_back(properties = new PropertiesWindow());
+	windows.push_back(editor_settings = new EditorSettingsWindow());
 	about = new AboutWindow();
 
 	tools.push_back(rng = new RandomTest());
@@ -265,6 +266,7 @@ void ModuleEditor::UpdateCamera()
 			if (App->scene->GetSelected() != nullptr
 				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
 			{
+				// Orbit
 				transform->Orbit(
 					-mouse->mouse_x_motion,
 					mouse->mouse_y_motion,
@@ -274,6 +276,7 @@ void ModuleEditor::UpdateCamera()
 		else if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
 			&& App->scene->GetSelected() != nullptr)
 		{
+			// Focus
 			math::AABB selected_box = App->scene->GetSelected()->GetBoundingBox();
 			math::vec target_global_pos = App->scene->GetSelected()->GetTransform()->GetGlobalPosition();
 			math::vec camera_pos = selected_box.maxPoint + target_global_pos;
@@ -285,11 +288,12 @@ void ModuleEditor::UpdateCamera()
 		{
 			if (mouse->GetButton(3) == KEY_REPEAT)
 			{
-				float cameraSpeed = 5.f;
+				// Camera Speed
+				float cameraSpeed = CAM_SPEED * App->time->GetDeltaTime();
 				if (App->input->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT))
 					cameraSpeed *= 2.0f;
-				cameraSpeed *= App->time->GetDeltaTime();
 
+				// Move
 				if (App->input->CheckKey(SDL_SCANCODE_W, KEY_REPEAT))
 					transform->LocalMove(Dir::FORWARD, cameraSpeed);
 				if (App->input->CheckKey(SDL_SCANCODE_S, KEY_REPEAT))
@@ -299,9 +303,25 @@ void ModuleEditor::UpdateCamera()
 				if (App->input->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))
 					transform->LocalMove(Dir::RIGHT, cameraSpeed);
 
-				camera->RotateWithMouse(mouse->mouse_x_motion, -mouse->mouse_y_motion);
+				if (mouse->mouse_x_motion != 0)
+					transform->SetRot(math::Quat::RotateY(-1.00f * CAM_SENSITIVITY * DEGTORAD * mouse->mouse_x_motion) * transform->GetLocalRot());
+
+				if (mouse->mouse_y_motion != 0)
+				{
+					math::Quat desired_rot = transform->GetLocalRot() * math::Quat::RotateX(-1.00f * CAM_SENSITIVITY * DEGTORAD * mouse->mouse_y_motion);
+					transform->SetRot(desired_rot);
+
+					// X cap not working
+					/*float des_x_euler = math::RadToDeg(desired_rot.ToEulerXYZ()).x;
+
+					if (des_x_euler < 90.f && des_x_euler > -90.f)
+						transform->SetRot(desired_rot);
+					else
+						int blocked = 0;*/
+				}
 			}
 
+			// Zoom
 			if (mouse->mouse_wheel_motion != 0)
 				camera->SetVerticalFOV(camera->GetVFOVDegrees() - mouse->mouse_wheel_motion);
 		}

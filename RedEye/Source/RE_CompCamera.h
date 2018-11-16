@@ -5,8 +5,6 @@
 #include "RE_Math.h"
 #include "Globals.h"
 
-#define SENSITIVITY 0.1f
-
 class RE_CompTransform;
 
 class RE_CompCamera : public RE_Component
@@ -43,9 +41,6 @@ public:
 	
 	math::float4x4 GetProjection() const;
 	float* GetProjectionPtr() const;
-
-	// Mouse motion rotation
-	void RotateWithMouse(float xoffset, float yoffset, bool constrainPitch = true);
 
 	float GetVFOVDegrees() const;
 

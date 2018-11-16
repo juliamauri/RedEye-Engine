@@ -89,11 +89,12 @@ RE_CompTransform * RE_CompCamera::GetTransform() const
 void RE_CompCamera::OnTransformModified()
 {
 	math::float4x4 global_transform = transform->GetGlobalMatrix();
-	
-	frustum.SetFrame(
+	/*frustum.SetFrame(
 		global_transform.Col3(3),
 		global_transform.Col3(2).Normalized(),
-		global_transform.Col3(1).Normalized());
+		global_transform.Col3(1).Normalized());*/
+
+	frustum.SetWorldMatrix(global_transform.Float3x4Part());
 
 	need_recalculation = true;
 }
@@ -172,29 +173,6 @@ void RE_CompCamera::RecalculateMatrixes()
 	calculated_projection.Transpose();
 
 	need_recalculation = false;
-}
-
-void RE_CompCamera::RotateWithMouse(float xoffset, float yoffset, bool constrainPitch)
-{
-	math::vec rot = transform->GetLocalRotXYZ();
-
-	// Pitch
-	pitch = rot.x -= yoffset * SENSITIVITY;
-	if (constrainPitch)
-	{
-		if (rot.x > 89.0f)
-			rot.x = 89.0f;
-		else if (rot.x < -89.0f)
-			rot.x = -89.0f;
-	}
-
-	// Yaw
-	yaw = rot.y -= xoffset * SENSITIVITY;
-
-	// Roll
-	roll = rot.z = 0.f;
-
-	transform->SetRot(rot);
 }
 
 float RE_CompCamera::GetVFOVDegrees() const

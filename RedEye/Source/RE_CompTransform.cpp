@@ -51,7 +51,7 @@ void RE_CompTransform::SetRot(math::Quat quat)
 {
 	transform_modified = true;
 	rot_quat = quat;
-	rot_eul = math::RadToDeg(rot_quat.ToEulerXYZ());;
+	rot_eul = math::RadToDeg(rot_quat.ToEulerXYZ());
 }
 
 void RE_CompTransform::SetScale(math::vec _scale)
@@ -133,7 +133,7 @@ math::float4x4 RE_CompTransform::GetGlobalMatrix() const
 void RE_CompTransform::LocalLookAt(math::vec& target_pos)
 {
 	math::vec direction = target_pos - pos;
-	SetRot(/*rot_quat * */math::Quat::LookAt(front, direction.Normalized(), up, math::float3(0.f, 1.f, 0.f)));
+	SetRot(math::Quat::LookAt(front, direction.Normalized(), up, math::float3(0.f, 1.f, 0.f)) * rot_quat);
 }
 
 void RE_CompTransform::LocalMove(Dir dir, float speed)
@@ -144,10 +144,10 @@ void RE_CompTransform::LocalMove(Dir dir, float speed)
 
 		switch (dir)
 		{
-		case FORWARD:	pos -= front * speed; break;
-		case BACKWARD:	pos += front * speed; break;
-		case LEFT:		pos -= right * speed; break;
-		case RIGHT:		pos += right * speed; break;
+		case FORWARD:	pos += front * speed; break;
+		case BACKWARD:	pos -= front * speed; break;
+		case LEFT:		pos += right * speed; break;
+		case RIGHT:		pos -= right * speed; break;
 		}
 	}
 }

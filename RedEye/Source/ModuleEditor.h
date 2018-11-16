@@ -14,9 +14,13 @@ class PropertiesWindow;
 class AboutWindow;
 class RandomTest;
 class TexturesWindow;
+class EditorSettingsWindow;
 
 struct SoftwareInfo;
 class RE_CompCamera;
+
+#define CAM_SENSITIVITY 0.1F
+#define CAM_SPEED 5.0f
 
 union SDL_Event;
 
@@ -57,8 +61,11 @@ private:
 	ConfigWindow* config = nullptr;
 	HeriarchyWindow* heriarchy = nullptr;
 	PropertiesWindow* properties = nullptr;
+	EditorSettingsWindow* editor_settings = nullptr;
+
 	AboutWindow* about = nullptr;
 
+	// Tools
 	RandomTest* rng = nullptr;
 	TexturesWindow* textures = nullptr;
 
