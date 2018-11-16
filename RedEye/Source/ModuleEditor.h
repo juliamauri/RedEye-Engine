@@ -35,8 +35,6 @@ public:
 	update_status Update() override;
 	bool CleanUp() override;
 
-	void DrawEditor() override;
-
 	void LogToEditorConsole();
 	bool AddSoftwareUsed(const char * name, const char * version, const char * website);
 	void Draw();

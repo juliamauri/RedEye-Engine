@@ -1,7 +1,11 @@
 #include "QuadTree.h"
 
+#include "Application.h"
+#include "ModuleEditor.h"
+#include "RE_CompCamera.h"
 #include "RE_GameObject.h"
 #include "Globals.h"
+#include "ShaderManager.h"
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
 
@@ -35,7 +39,7 @@ void QTreeNode::Push(RE_GameObject* g_obj)
 	{
 		for (auto node : nodes)
 		{
-			if (node->box.Intersects(g_obj->GetBoundingBox()))
+			if (node->box.Intersects(g_obj->GetGlobalBoundingBox()))
 				node->Push(g_obj);
 		}
 	}
@@ -115,7 +119,7 @@ void QTreeNode::Distribute()
 
 		for (uint i = 0; i < 4; i++)
 		{
-			intersecting[i] = nodes[i]->box.Intersects((*it)->GetBoundingBox());
+			intersecting[i] = nodes[i]->box.Intersects((*it)->GetGlobalBoundingBox());
 			if (intersecting[i]) intersections_counter++; 
 		}
 
@@ -149,7 +153,7 @@ void QTree::Build(RE_GameObject * root_g_obj)
 
 	if (root != nullptr) root->Clear();
 
-	root = new QTreeNode(box = root_g_obj->GetBoundingBox());
+	root = new QTreeNode(box = root_g_obj->GetGlobalBoundingBox());
 
 	RecursiveBuildFromRoot(root_g_obj);
 }
@@ -158,14 +162,25 @@ void QTree::Draw()
 {
 	if (root != nullptr)
 	{
+		ShaderManager::use(0);
+
+		glColor3f(0.0f, 1.0f, 0.0f);
+
+		math::float4x4 model = math::float4x4::Translate(box.CenterPoint());
+		model.InverseTranspose();
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf((App->editor->GetCamera()->GetView() * model).ptr());
+
+		glLineWidth(5.0f);
+
 		glBegin(GL_LINES);
-		glLineWidth(3.0f);
-		glColor4f(0.00f, 0.00f, 0.80f, 1.00f);
 
 		root->Draw();
 
 		glEnd();
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+		glLineWidth(1.0f);
 	}
 }
 
@@ -175,9 +190,9 @@ void QTree::Push(RE_GameObject * g_obj)
 
 	if (root != nullptr)
 	{
-		if (g_obj->GetBoundingBox().IsFinite())
+		if (g_obj->GetGlobalBoundingBox().IsFinite())
 		{
-			if (g_obj->GetBoundingBox().Intersects(root->GetBox()))
+			if (g_obj->GetGlobalBoundingBox().Intersects(root->GetBox()))
 			{
 				root->Push(g_obj);
 			}

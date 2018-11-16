@@ -5,8 +5,6 @@
 #include "MathGeoLib\include\MathGeoLib.h"
 #include <list>
 
-#define MIN_AABB_SIZE 0.01f
-
 class RE_Component;
 class RE_CompTransform;
 class RE_CompMesh;
@@ -67,9 +65,10 @@ public:
 
 	// AABB
 	void DrawAABB();
-	void SetBoundingBox(math::AABB box);
+	void DrawAllAABB();
+	void SetLocalBoundingBox(math::AABB box);
 	void SetBoundingBoxFromChilds();
-	math::AABB GetBoundingBox() const;
+	math::AABB GetGlobalBoundingBox() const;
 
 	// Editor
 	void DrawProperties();
@@ -81,7 +80,8 @@ private:
 	bool isStatic = false;
 
 	std::string name;
-	math::AABB bounding_box;
+	math::AABB local_bounding_box;
+	math::AABB global_bounding_box;
 
 	RE_GameObject* parent = nullptr;
 	RE_CompTransform* transform = nullptr;

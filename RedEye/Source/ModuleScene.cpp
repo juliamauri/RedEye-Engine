@@ -37,19 +37,21 @@ bool ModuleScene::Start()
 	// root
 	root = new RE_GameObject("root");
 	root->AddComponent(C_PLANE);
-	root->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 10000.0f)));
 
 	// load default meshes
-	//App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.fbx");
-	App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
+	App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.fbx");
+	//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
 
 	if (!root->GetChilds().empty())
 	{
 		selected = *root->GetChilds().begin();
+		selected->SetBoundingBoxFromChilds();
 		root->SetBoundingBoxFromChilds();
 	}
 	else
 		selected = root;
+
+
 	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
 
 	//// depricated way
@@ -120,10 +122,20 @@ RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent)
 	return ret;
 }
 
+void ModuleScene::DrawEditor()
+{
+	if (ImGui::CollapsingHeader(GetName()))
+	{
+		ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
+	}
+}
+
 void ModuleScene::DrawScene()
 {
 	if (draw_quad_tree)
 		quad_tree.Draw();
+
+	//root->DrawAllAABB();
 
 	selected->DrawAABB();
 

@@ -199,12 +199,12 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 			if (processed_mesh)
 			{
 				comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)processed_mesh));
-				go->SetBoundingBox(processed_mesh->GetAABB());
+				go->SetLocalBoundingBox(processed_mesh->GetAABB());
 			}
 			else
 			{
 				comp_mesh = new RE_CompMesh(go, exists_md5.c_str());
-				go->SetBoundingBox(((RE_Mesh*)App->resources->At(exists_md5.c_str()))->GetAABB());
+				go->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(exists_md5.c_str()))->GetAABB());
 			}
 
 			go->AddCompMesh(comp_mesh);

@@ -19,7 +19,8 @@ RE_GameObject::RE_GameObject(const char* name, RE_GameObject * p, bool start_act
 	: name(name), parent(p), active(start_active), isStatic(isStatic)
 {
 	if (parent != nullptr) parent->AddChild(this);
-	bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	transform = new RE_CompTransform(this);
 	components.push_back((RE_Component*)transform);
 }
@@ -324,7 +325,7 @@ void RE_GameObject::DrawAABB()
 
 	glColor3f(0.0f, 0.0f, 1.0f);
 
-	math::float4x4 model = math::float4x4::Translate(GetTransform()->GetGlobalPosition().Neg());
+	math::float4x4 model = math::float4x4::Translate(GetTransform()->GetGlobalPosition());
 	model.InverseTranspose();
 
 	glMatrixMode(GL_MODELVIEW);
@@ -334,12 +335,10 @@ void RE_GameObject::DrawAABB()
 
 	glBegin(GL_LINES);
 
-	math::vec position = transform->GetGlobalPosition();
-
 	for (uint i = 0; i < 12; i++)
 	{
-		glVertex3f(bounding_box.Edge(i).a.x + position.x, bounding_box.Edge(i).a.y + position.y, bounding_box.Edge(i).a.z + position.z);
-		glVertex3f(bounding_box.Edge(i).b.x + position.x, bounding_box.Edge(i).b.y + position.y, bounding_box.Edge(i).b.z + position.z);
+		glVertex3f(global_bounding_box.Edge(i).a.x, global_bounding_box.Edge(i).a.y, global_bounding_box.Edge(i).a.z);
+		glVertex3f(global_bounding_box.Edge(i).b.x, global_bounding_box.Edge(i).b.y, global_bounding_box.Edge(i).b.z);
 	}
 
 	glEnd();
@@ -347,42 +346,65 @@ void RE_GameObject::DrawAABB()
 	glLineWidth(1.0f);
 }
 
-void RE_GameObject::SetBoundingBox(math::AABB box)
+void RE_GameObject::DrawAllAABB()
 {
-	bounding_box = box;
+	DrawAABB();
+
+	for (auto child : childs)
+		child->DrawAllAABB();
+}
+
+void RE_GameObject::SetLocalBoundingBox(math::AABB box)
+{
+	local_bounding_box = box;
+
+	math::float4x4 global_mat = transform->GetGlobalMatrix();
+
+	global_bounding_box.maxPoint = global_mat.MulPos(local_bounding_box.maxPoint);
+	global_bounding_box.minPoint = global_mat.MulPos(local_bounding_box.minPoint);
+
+	
+
+	/*set global_bounding_box
+		from local_bounding_box*/
 }
 
 void RE_GameObject::SetBoundingBoxFromChilds()
 {
-	bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 
 	for (auto child : childs)
 	{
-		math::AABB child_box = child->GetBoundingBox();
+		math::AABB child_box = child->GetGlobalBoundingBox();
 
 		// X
-		if (child_box.maxPoint.x > bounding_box.maxPoint.x)
-			bounding_box.maxPoint.x = child_box.maxPoint.x;
-		else if (child_box.minPoint.x < bounding_box.minPoint.x)
-			bounding_box.minPoint.x = child_box.minPoint.x;
+		if (child_box.maxPoint.x > global_bounding_box.maxPoint.x)
+			global_bounding_box.maxPoint.x = child_box.maxPoint.x;
+		else if (child_box.minPoint.x < global_bounding_box.minPoint.x)
+			global_bounding_box.minPoint.x = child_box.minPoint.x;
 
 		// Y
-		if (child_box.maxPoint.y > bounding_box.maxPoint.y)
-			bounding_box.maxPoint.y = child_box.maxPoint.y;
-		else if (child_box.minPoint.y < bounding_box.minPoint.y)
-			bounding_box.minPoint.y = child_box.minPoint.y;
+		if (child_box.maxPoint.y > global_bounding_box.maxPoint.y)
+			global_bounding_box.maxPoint.y = child_box.maxPoint.y;
+		else if (child_box.minPoint.y < global_bounding_box.minPoint.y)
+			global_bounding_box.minPoint.y = child_box.minPoint.y;
 
 		// Z
-		if (child_box.maxPoint.z > bounding_box.maxPoint.z)
-			bounding_box.maxPoint.z = child_box.maxPoint.z;
-		else if (child_box.minPoint.z < bounding_box.minPoint.z)
-			bounding_box.minPoint.z = child_box.minPoint.z;
+		if (child_box.maxPoint.z > global_bounding_box.maxPoint.z)
+			global_bounding_box.maxPoint.z = child_box.maxPoint.z;
+		else if (child_box.minPoint.z < global_bounding_box.minPoint.z)
+			global_bounding_box.minPoint.z = child_box.minPoint.z;
 	}
+
+	math::float4x4 global_mat = transform->GetGlobalMatrix();
+
+	local_bounding_box.maxPoint = global_mat.MulPos(global_bounding_box.maxPoint);
+	local_bounding_box.minPoint = global_mat.MulPos(global_bounding_box.minPoint);
 }
 
-math::AABB RE_GameObject::GetBoundingBox() const
+math::AABB RE_GameObject::GetGlobalBoundingBox() const
 {
-	return bounding_box;
+	return global_bounding_box;
 }
 
 void RE_GameObject::DrawProperties()
@@ -409,8 +431,8 @@ void RE_GameObject::DrawProperties()
 
 	if (ImGui::TreeNode("Bounding Box"))
 	{
-		ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", bounding_box.minPoint.x, bounding_box.minPoint.y, bounding_box.minPoint.z);
-		ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", bounding_box.maxPoint.x, bounding_box.maxPoint.y, bounding_box.maxPoint.z);
+		ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", local_bounding_box.minPoint.x, local_bounding_box.minPoint.y, local_bounding_box.minPoint.z);
+		ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", local_bounding_box.maxPoint.x, local_bounding_box.maxPoint.y, local_bounding_box.maxPoint.z);
 
 		ImGui::TreePop();
 	}

@@ -184,41 +184,6 @@ bool ModuleEditor::CleanUp()
 	return true;
 }
 
-void ModuleEditor::DrawEditor()
-{
-	if (ImGui::CollapsingHeader("Editor"))
-	{
-		ImGui::Text("Editor Camera");
-
-		RE_CompTransform* c_transform = camera->GetTransform();
-
-		if (c_transform && ImGui::TreeNodeEx("Camera Transform", ImGuiTreeNodeFlags_OpenOnArrow + ImGuiTreeNodeFlags_OpenOnDoubleClick))
-		{
-			// Position -----------------------------------------------------
-			math::vec tmp = c_transform->GetLocalPosition();
-			float c_p[3] = { tmp.x, tmp.y, tmp.z };
-			if (ImGui::DragFloat3("Camera Position", c_p, 0.1f, -10000.f, 10000.f, "%.2f"))
-				c_transform->SetPos({ c_p[0], c_p[1], c_p[2] });
-
-			// Rotation -----------------------------------------------------
-			tmp = c_transform->GetLocalRotXYZ();
-			float c_r[3] = { tmp.x, tmp.y, tmp.z };
-			if (ImGui::DragFloat3("Camera Rotation", c_r, 0.1f, -360.f, 360.f, "%.2f"))
-				c_transform->SetRot({ c_r[0], c_r[1], c_r[2] });
-
-			// Scale -----------------------------------------------------
-			tmp = c_transform->GetLocalRotXYZ();
-			float c_s[3] = { tmp.x, tmp.y, tmp.z };
-			if (ImGui::InputFloat3("Camera Scale", c_s, 2))
-				c_transform->SetScale({ c_s[0], c_s[1], c_s[2] });
-
-			ImGui::TreePop();
-		}
-
-		camera->DrawProperties();
-	}
-}
-
 void ModuleEditor::LogToEditorConsole()
 {
 	if (console != nullptr && !windows.empty()
@@ -270,14 +235,14 @@ void ModuleEditor::UpdateCamera()
 				transform->Orbit(
 					-mouse->mouse_x_motion,
 					mouse->mouse_y_motion,
-					App->scene->GetSelected()->GetBoundingBox().CenterPoint());
+					App->scene->GetSelected()->GetGlobalBoundingBox().CenterPoint());
 			}
 		}
 		else if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
 			&& App->scene->GetSelected() != nullptr)
 		{
 			// Focus
-			math::AABB selected_box = App->scene->GetSelected()->GetBoundingBox();
+			math::AABB selected_box = App->scene->GetSelected()->GetGlobalBoundingBox();
 			math::vec target_global_pos = App->scene->GetSelected()->GetTransform()->GetGlobalPosition();
 			math::vec camera_pos = selected_box.maxPoint + target_global_pos;
 
@@ -302,6 +267,10 @@ void ModuleEditor::UpdateCamera()
 					transform->LocalMove(Dir::LEFT, cameraSpeed);
 				if (App->input->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))
 					transform->LocalMove(Dir::RIGHT, cameraSpeed);
+				if (App->input->CheckKey(SDL_SCANCODE_SPACE, KEY_REPEAT))
+					transform->LocalMove(Dir::UP, cameraSpeed);
+				if (App->input->CheckKey(SDL_SCANCODE_C, KEY_REPEAT))
+					transform->LocalMove(Dir::DOWN, cameraSpeed);
 
 				if (mouse->mouse_x_motion != 0)
 					transform->SetRot(math::Quat::RotateY(-1.00f * CAM_SENSITIVITY * DEGTORAD * mouse->mouse_x_motion) * transform->GetLocalRot());

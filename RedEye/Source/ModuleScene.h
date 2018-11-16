@@ -22,6 +22,7 @@ public:
 
 	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
 
+	void DrawEditor() override;
 	void DrawScene();
 	void DrawHeriarchy();
 	void DrawFocusedProperties();
@@ -38,7 +39,7 @@ private:
 	RE_GameObject* root = nullptr;
 	RE_GameObject* selected = nullptr;
 
-	bool draw_quad_tree = true;
+	bool draw_quad_tree = false;
 	QTree quad_tree;
 
 };
