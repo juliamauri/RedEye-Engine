@@ -1,8 +1,11 @@
 #include "EditorWindows.h"
 
 #include "Application.h"
+#include "ModuleEditor.h"
 #include "ModuleScene.h"
 #include "Texture2DManager.h"
+#include "RE_CompTransform.h"
+#include "RE_CompCamera.h"
 #include "RE_Math.h"
 #include "OutputLog.h"
 
@@ -332,6 +335,19 @@ void TexturesWindow::Draw()
 			}
 		}
 		*/
+	}
+	ImGui::End();
+}
+
+EditorSettingsWindow::EditorSettingsWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
+
+void EditorSettingsWindow::Draw()
+{
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		RE_CompCamera* cam = App->editor->GetCamera();
+		cam->DrawProperties();
+		cam->GetTransform()->DrawProperties();
 	}
 	ImGui::End();
 }

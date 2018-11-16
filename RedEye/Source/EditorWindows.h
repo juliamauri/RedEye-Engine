@@ -136,6 +136,16 @@ private:
 	void Draw() override;
 };
 
+class EditorSettingsWindow : public EditorWindow
+{
+public:
+	EditorSettingsWindow(const char* name = "Editor Settings", bool start_active = true);
+
+private:
+
+	void Draw() override;
+};
+
 /*/ Missing windows:
 void PlayPause();*/
 
