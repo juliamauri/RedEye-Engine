@@ -61,6 +61,7 @@ protected:
 
 	unsigned int HardLoad();
 	void HardSave(const char* buffer);
+	void WriteFile(const char* zip_path, const char* filename, const char * buffer, unsigned int size);
 
 protected:
 

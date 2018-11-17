@@ -112,9 +112,6 @@
     <ClCompile Include="md5.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
-    <ClCompile Include="ZipManager.cpp">
-      <Filter>Modules\Independent App Modules\FileSystem\ZipManager</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -369,9 +366,6 @@
     <ClInclude Include="md5.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="ZipManager.h">
-      <Filter>Modules\Independent App Modules\FileSystem\ZipManager</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -451,9 +445,6 @@
     </Filter>
     <Filter Include="Modules\Editor">
       <UniqueIdentifier>{355a2309-34fd-415d-af8a-c2ca6f635028}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Modules\Independent App Modules\FileSystem\ZipManager">
-      <UniqueIdentifier>{41106ac2-f0dc-44ba-b183-fd3c18ea53fe}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -56,7 +56,6 @@
     <ClCompile Include="SystemInfo.cpp" />
     <ClCompile Include="Texture2DManager.cpp" />
     <ClCompile Include="TimeManager.cpp" />
-    <ClCompile Include="ZipManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -143,7 +142,6 @@
     <ClInclude Include="SystemInfo.h" />
     <ClInclude Include="Texture2DManager.h" />
     <ClInclude Include="TimeManager.h" />
-    <ClInclude Include="ZipManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Build\Assets\Settings\config.json" />
