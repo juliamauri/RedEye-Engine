@@ -37,9 +37,9 @@ Application::Application(int argc, char* argv[])
 	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
 
 	textures = new Texture2DManager("Images/");
-	shaders = new ShaderManager("data/Assets/Shaders/");
+	shaders = new ShaderManager("Assets/Shaders/");
 	primitives = new RE_PrimitiveManager();
-	meshes = new MeshManager("data/Assets/Meshes/");
+	meshes = new MeshManager("Assets/Meshes/");
 	resources = new ResourceManager();
 }
 

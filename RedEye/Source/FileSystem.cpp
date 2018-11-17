@@ -50,29 +50,15 @@ bool FileSystem::Init(int argc, char* argv[])
 
 		std::string path(GetExecutableDirectory());
 		path += "data.zip";
-		PHYSFS_mount(path.c_str(), "data", 1);
-
-		path = GetExecutableDirectory();
-		path += "engine.zip";
-		PHYSFS_mount((path.c_str()), engine_path.c_str(), 1);
-
-		//TestZIP(path.c_str());
-
-
-
-		//LogFolderItems("data");
-		
-		//PHYSFS_mkdir("test");
-
+		PHYSFS_mount(path.c_str(), NULL, 1);
 
 		char **i;
 
 		for (i = PHYSFS_getSearchPath(); *i != NULL; i++)
 			LOG("[%s] is in the search path.\n", *i);
 		PHYSFS_freeList(*i);
-		//SetWritePath(path.c_str());
 
-		const char* config_file = "engine/Settings/config.json";
+		const char* config_file = "Settings/config.json";
 		engine_config = new Config(config_file, path.c_str());
 		if (engine_config->Load())
 			ret = true;
@@ -376,16 +362,9 @@ void Config::Save()
 		LOG("Ettot when unmount: %s", PHYSFS_getLastError());
 
 	std::string file(file_name);
-	std::string to_delete("engine/");
-
-	std::string::size_type i = file.find(to_delete);
-
-	if (i != std::string::npos)
-		file.erase(i, to_delete.length());
-
 	TestZIP(from_zip, file.c_str(), buffer, size = (strnlen_s(buffer, 0xffff)));
 
-	PHYSFS_mount(from_zip, "engine", 1);
+	PHYSFS_mount(from_zip, NULL, 1);
 	
 	//HardSave(output);
 }
