@@ -7,14 +7,14 @@
 #include <crtdbg.h>
 #endif
 
-#include "ziplib/include/zip.h"
+#include "libzip/include/zip.h"
 
 
 #ifdef _DEBUG
-#pragma comment( lib, "ziplib/libx86/Debug/zip.lib" )
+#pragma comment( lib, "libzip/zip_d.lib" )
 
 #else
-#pragma comment( lib, "ziplib/libx86/Release/zip.lib" )
+#pragma comment( lib, "libzip/zip_r.lib" )
 #endif // _DEBUG
 
 #include <fstream>

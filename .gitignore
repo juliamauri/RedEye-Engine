@@ -6,6 +6,7 @@
 #keep some folders, not ignore
 !RedEye/DebugData/*
 !RedEye/ReleaseData/*
+!RedEye/Source/libzip/*
 
 # User-specific files
 *.suo
