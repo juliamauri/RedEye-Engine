@@ -39,7 +39,7 @@ bool ModuleScene::Start()
 	root->AddComponent(C_PLANE);
 
 	// load default meshes
-	App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.fbx");
+	App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.FBX");
 	//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
 
 	if (!root->GetChilds().empty())

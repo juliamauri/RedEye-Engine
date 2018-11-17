@@ -23,6 +23,7 @@ public:
 	bool RemovePath(const char* path_or_zip);
 	bool SetWritePath(const char* dir);
 	const char* GetWritePath() const;
+	void LogFolderItems(const char* folder);
 
 	RE_FileIO* QuickBufferFromPDPath(const char* full_path); // , char** buffer, unsigned int size);
 
@@ -33,14 +34,16 @@ public:
 private:
 
 	Config* engine_config;
-	std::list<std::string> paths;
+	std::string engine_path;
+	std::string library_path;
+	std::string assets_path;
 	std::string write_path;
 };
 
 class RE_FileIO
 {
 public:
-	RE_FileIO(const char* file_name);
+	RE_FileIO(const char* file_name, const char* from_zip = nullptr);
 	~RE_FileIO();
 
 	virtual bool Load();
@@ -61,6 +64,7 @@ protected:
 
 protected:
 
+	const char* from_zip;
 	char* buffer;
 	const char* file_name;
 	unsigned int size = 0;
@@ -71,7 +75,7 @@ class JSONNode;
 class Config : public RE_FileIO
 {
 public:
-	Config(const char* file_name);
+	Config(const char* file_name, const char* from_zip);
 
 	bool Load() override;
 	void Save() override;
@@ -79,7 +83,7 @@ public:
 	inline bool operator!() const override;
 
 public:
-
+	std::string zip_path;
 	rapidjson::Document document;
 };
 

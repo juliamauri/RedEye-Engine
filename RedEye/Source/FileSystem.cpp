@@ -17,16 +17,18 @@
 
 #pragma comment( lib, "PhysFS/libx86/physfs.lib" )
 
+#include "ZipManager.h"
+
 FileSystem::FileSystem() : engine_config(nullptr)
 {}
 
 FileSystem::~FileSystem()
 {
-	paths.clear();
 	DEL(engine_config);
 
 	PHYSFS_deinit();
 }
+
 
 bool FileSystem::Init(int argc, char* argv[])
 {
@@ -41,14 +43,37 @@ bool FileSystem::Init(int argc, char* argv[])
 		App->ReportSoftware("PhysFS", tmp, "https://icculus.org/physfs/");
 		App->ReportSoftware("Rapidjson", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
 		
-		AddPath(".");
-		std::string path(GetExecutableDirectory()); path += "\\Assets";
-		AddPath(path.c_str());
+		engine_path = "engine";
+		library_path = "Library";
+		assets_path = "Assets";
 
-		SetWritePath(path.c_str());
 
-		const char* config_file = "Settings/config.json";
-		engine_config = new Config(config_file);
+		std::string path(GetExecutableDirectory());
+		path += "data.zip";
+		PHYSFS_mount(path.c_str(), "data", 1);
+
+		path = GetExecutableDirectory();
+		path += "engine.zip";
+		PHYSFS_mount((path.c_str()), engine_path.c_str(), 1);
+
+		//TestZIP(path.c_str());
+
+
+
+		//LogFolderItems("data");
+		
+		//PHYSFS_mkdir("test");
+
+
+		char **i;
+
+		for (i = PHYSFS_getSearchPath(); *i != NULL; i++)
+			LOG("[%s] is in the search path.\n", *i);
+		PHYSFS_freeList(*i);
+		//SetWritePath(path.c_str());
+
+		const char* config_file = "engine/Settings/config.json";
+		engine_config = new Config(config_file, path.c_str());
 		if (engine_config->Load())
 			ret = true;
 		else
@@ -74,9 +99,9 @@ void FileSystem::DrawEditor()
 
 	ImGui::Separator();
 
-	ImGui::Text("Read Directories");
-	for (std::list<std::string>::iterator it = paths.begin(); it != paths.end(); ++it)
-		ImGui::TextWrappedV(it->c_str(), "");
+	//ImGui::Text("Read Directories");
+	//for (std::list<std::string>::iterator it = paths.begin(); it != paths.end(); ++it)
+		//ImGui::TextWrappedV(it->c_str(), "");
 
 	ImGui::Separator();
 
@@ -95,7 +120,7 @@ bool FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
 	}
 	else
 	{
-		paths.push_back(path_or_zip);
+		//paths.push_back(path_or_zip);
 	}
 
 	return ret;
@@ -111,7 +136,7 @@ bool FileSystem::RemovePath(const char * path_or_zip)
 		ret = false;
 	}
 
-	paths.remove(path_or_zip);
+	//paths.remove(path_or_zip);
 
 	return ret;
 }
@@ -136,6 +161,17 @@ bool FileSystem::SetWritePath(const char * dir)
 const char * FileSystem::GetWritePath() const
 {
 	return write_path.c_str();
+}
+
+void FileSystem::LogFolderItems(const char * folder)
+{
+	char **rc = PHYSFS_enumerateFiles(folder);
+	char **i;
+
+	for (i = rc; *i != NULL; i++)
+		LOG(" * We've got [%s].\n", *i);
+
+	PHYSFS_freeList(rc);
 }
 
 // Quick Buffer From Platform-Dependent Path
@@ -185,7 +221,7 @@ const char* FileSystem::GetExecutableDirectory() const
 ///////////////////RE_FileIO
 ////////////////////////////////////////////////////////////////////
 
-RE_FileIO::RE_FileIO(const char* file_name) : buffer(nullptr), file_name(file_name) {}
+RE_FileIO::RE_FileIO(const char* file_name, const char* from_zip) : buffer(nullptr), file_name(file_name) {}
 
 RE_FileIO::~RE_FileIO()
 {
@@ -277,7 +313,11 @@ unsigned int RE_FileIO::HardLoad()
 
 void RE_FileIO::HardSave(const char* buffer)
 {
+
 	PHYSFS_file* file = PHYSFS_openWrite(file_name);
+
+
+
 
 	if (file != NULL)
 	{
@@ -301,7 +341,11 @@ void RE_FileIO::HardSave(const char* buffer)
 
 //Tutorial http://rapidjson.org/md_doc_tutorial.html
 
-Config::Config(const char* file_name) : RE_FileIO(file_name) {}
+Config::Config(const char* file_name, const char* from_zip) : RE_FileIO(file_name)
+{
+	zip_path = from_zip;
+	this->from_zip = zip_path.c_str();
+}
 
 bool Config::Load()
 {
@@ -327,7 +371,23 @@ void Config::Save()
 	s_buffer.Put('\0');
 	size = s_buffer.GetSize();
 	const char* output = s_buffer.GetString();
-	HardSave(output);
+
+	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
+		LOG("Ettot when unmount: %s", PHYSFS_getLastError());
+
+	std::string file(file_name);
+	std::string to_delete("engine/");
+
+	std::string::size_type i = file.find(to_delete);
+
+	if (i != std::string::npos)
+		file.erase(i, to_delete.length());
+
+	TestZIP(from_zip, file.c_str(), buffer, size = (strnlen_s(buffer, 0xffff)));
+
+	PHYSFS_mount(from_zip, "engine", 1);
+	
+	//HardSave(output);
 }
 
 JSONNode* Config::GetRootNode(const char* member)
