@@ -16,6 +16,9 @@ public:
 
 	void Serialize(JSONNode* node, rapidjson::Value* val) override;
 
+	void SetTexture(const char* reference);
+
+
 protected:
 
 	std::string reference;

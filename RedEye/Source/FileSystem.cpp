@@ -8,6 +8,7 @@
 #include "SDL2\include\SDL_assert.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
+#include "RE_CompMesh.h"
 
 #include "RapidJson\include\pointer.h"
 #include "RapidJson\include\stringbuffer.h"
@@ -766,6 +767,59 @@ RE_GameObject * JSONNode::FillGO()
 
 			vector = v.FindMember("rotation")->value;
 			new_go->GetTransform()->SetLocalRot({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+		
+			rapidjson::Value& components = v.FindMember("components")->value;
+			if (components.IsArray())
+			{
+				for (auto& c : components.GetArray())
+				{
+					ComponentType type = (ComponentType)c.FindMember("type")->value.GetInt();
+
+					RE_CompMesh* mesh = nullptr;
+					rapidjson::Value* textures_val = nullptr;
+					rapidjson::Value* vector = nullptr;
+					math::vec position = math::vec::zero;
+					math::vec scale = math::vec::zero;
+					math::vec rotation = math::vec::zero;
+
+					switch (type)
+					{
+					case C_MESH:
+						mesh = new RE_CompMesh(new_go, c.FindMember("reference")->value.GetString());
+						textures_val = &c.FindMember("textures")->value;
+						if (textures_val->IsArray())
+							for (auto& t : textures_val->GetArray())
+								mesh->SetTexture(t.FindMember("reference")->value.GetString());
+						new_go->AddCompMesh(mesh);
+						break;
+					case C_CAMERA:
+						vector = &v.FindMember("position")->value;
+						position.Set(vector->GetArray()[0].GetFloat(), vector->GetArray()[1].GetFloat(), vector->GetArray()[2].GetFloat());
+
+						vector = &v.FindMember("scale")->value;
+						scale.Set(vector->GetArray()[0].GetFloat(), vector->GetArray()[1].GetFloat(), vector->GetArray()[2].GetFloat());
+
+						vector = &v.FindMember("rotation")->value;
+						rotation.Set(vector->GetArray()[0].GetFloat(), vector->GetArray()[1].GetFloat(), vector->GetArray()[2].GetFloat());
+
+						new_go->AddCompCamera(
+							c.FindMember("isPrespective")->value.GetBool(),
+							c.FindMember("near_plane")->value.GetFloat(),
+							c.FindMember("far_plane")->value.GetFloat(),
+							c.FindMember("pitch")->value.GetFloat(),
+							c.FindMember("yaw")->value.GetFloat(),
+							c.FindMember("roll")->value.GetFloat(),
+							c.FindMember("h_fov_rads")->value.GetFloat(),
+							c.FindMember("v_fov_rads")->value.GetFloat(),
+							c.FindMember("h_fov_degrees")->value.GetFloat(),
+							c.FindMember("v_fov_degrees")->value.GetFloat(),
+							position,
+							rotation,
+							scale);
+						break;
+					}
+				}
+			}
 		}
 	}
 

@@ -102,7 +102,7 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 		ShaderManager::setUnsignedInt(shader_ID, (name + number).c_str(), i);
 
 		// and finally bind the texture
-		App->textures->use(textures[i].id);
+		App->textures->use(textures[i].id.c_str());
 	}
 
 	// draw mesh
@@ -511,7 +511,7 @@ void RE_MeshContainer::DrawProperties()
 				std::vector<Texture>::iterator it2 = it->textures.begin();
 				for (unsigned int i = 1; it2 != it->textures.end(); it2++, i++)
 				{
-					App->textures->GetWithHeight(it2->id, &width, &height);
+					App->textures->GetWithHeight(it2->id.c_str(), &width, &height);
 
 					if (ImGui::TreeNode("Texture"))
 					{
@@ -520,7 +520,7 @@ void RE_MeshContainer::DrawProperties()
 						ImGui::Text("\t- Path: %s", it2->path.c_str());
 						ImGui::Text("\t- Type: %s", it2->type.c_str());
 
-						App->textures->drawTexture(it2->id);
+						App->textures->drawTexture(it2->id.c_str());
 
 
 						

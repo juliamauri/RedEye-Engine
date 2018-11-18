@@ -83,7 +83,7 @@ void RE_GameObject::Serialize(JSONNode * node)
 
 	rapidjson::Value float_array(rapidjson::kArrayType);
 
-	float_array.PushBack(GetTransform()->GetGlobalPosition().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalPosition().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalPosition().z, fill_node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalPosition().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().z, fill_node->GetDocument()->GetAllocator());
 	val_go.AddMember(rapidjson::Value::StringRefType("position"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
@@ -91,7 +91,7 @@ void RE_GameObject::Serialize(JSONNode * node)
 	val_go.AddMember(rapidjson::Value::StringRefType("rotation"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetGlobalScale().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().z, fill_node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalScale().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().z, fill_node->GetDocument()->GetAllocator());
 	val_go.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
 
 	rapidjson::Value val_comp(rapidjson::kArrayType);
@@ -165,6 +165,13 @@ bool RE_GameObject::IsStatic() const
 void RE_GameObject::SetStatic(bool value)
 {
 	isStatic = value;
+}
+
+RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float pitch, float yaw, float roll, float h_fov_rads, float v_fov_rads, float h_fov_degrees, float v_fov_degrees, math::vec position, math::vec rotation, math::vec scale)
+{
+	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, pitch, yaw, roll, h_fov_rads, v_fov_rads, h_fov_degrees, v_fov_degrees, position, rotation, scale);
+	components.push_back((RE_Component*)comp_camera);
+	return comp_camera;
 }
 
 RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file_path_data, const bool drop)

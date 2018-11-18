@@ -60,12 +60,19 @@ void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 	for (auto texture : ((RE_Mesh*)App->resources->At(reference.c_str()))->textures)
 	{
 		rapidjson::Value texture_val(rapidjson::kObjectType);
-		texture_val.AddMember(rapidjson::Value::StringRefType("reference"), rapidjson::Value().SetString(texture.id, node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
+		texture_val.AddMember(rapidjson::Value::StringRefType("reference"), rapidjson::Value().SetString(texture.id.c_str(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
 		
 		texture_array.PushBack(texture_val, node->GetDocument()->GetAllocator());
 	}
 	val.AddMember(rapidjson::Value::StringRefType("textures"), texture_array, node->GetDocument()->GetAllocator());
 
 	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
+}
+
+void RE_CompMesh::SetTexture(const char * reference)
+{
+	Texture tex;
+	tex.id = reference;
+	((RE_Mesh*)App->resources->At(this->reference.c_str()))->textures.push_back(tex);
 }
 

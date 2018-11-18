@@ -18,6 +18,17 @@ public:
 		bool toPerspective = true, 
 		float near_plane = 0.1f,
 		float far_plane = 100.0f);
+
+	RE_CompCamera(
+		RE_GameObject* go,
+		bool toPerspective,
+		float near_plane,
+		float far_plane,
+		float pitch, float yaw, float roll, 
+		float h_fov_rads, float v_fov_rads, 
+		float h_fov_degrees, float v_fov_degrees, 
+		math::vec position, math::vec rotation, math::vec scale);
+
 	~RE_CompCamera();
 	
 	void Update() override;
@@ -60,6 +71,9 @@ private:
 
 	// Values from frustum
 	bool isPerspective = true;
+
+	float near_plane = 0.0f;
+	float far_plane = 0.0f;
 
 	float pitch = 0.0f;
 	float yaw = 0.0f;
