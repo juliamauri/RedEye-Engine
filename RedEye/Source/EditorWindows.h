@@ -146,6 +146,16 @@ private:
 	void Draw() override;
 };
 
+class PlayPauseWindow : public EditorWindow
+{
+public:
+	PlayPauseWindow(const char* name = "Play Controls", bool start_active = true);
+
+private:
+
+	void Draw() override;
+};
+
 /*/ Missing windows:
 void PlayPause();*/
 

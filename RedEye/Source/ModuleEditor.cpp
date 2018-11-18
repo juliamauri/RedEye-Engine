@@ -24,6 +24,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(heriarchy = new HeriarchyWindow());
 	windows.push_back(properties = new PropertiesWindow());
 	windows.push_back(editor_settings = new EditorSettingsWindow());
+	windows.push_back(play_pause = new PlayPauseWindow());
 	about = new AboutWindow();
 
 	tools.push_back(rng = new RandomTest());

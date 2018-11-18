@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
+#include "TimeManager.h"
 #include "Texture2DManager.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
@@ -348,6 +349,27 @@ void EditorSettingsWindow::Draw()
 		RE_CompCamera* cam = App->editor->GetCamera();
 		cam->DrawProperties();
 		cam->GetTransform()->DrawProperties();
+	}
+	ImGui::End();
+}
+
+PlayPauseWindow::PlayPauseWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
+
+void PlayPauseWindow::Draw()
+{
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		float seconds = App->time->GetGameTimer();
+		if (ImGui::Button(App->GetState() == GS_PLAY ? "Restart" : "Play"))
+			App->ScenePlay();
+		ImGui::SameLine();
+		if (ImGui::Button("Pause"))
+			App->ScenePause();
+		ImGui::SameLine();
+		if (ImGui::Button("Stop"))
+			App->SceneStop();
+		ImGui::SameLine();
+		ImGui::Text("%f", seconds);
 	}
 	ImGui::End();
 }

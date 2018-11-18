@@ -17,6 +17,7 @@ void TimeManager::Init(float max_fps)
 {
 	LOG("Initializing Time Manager");
 	SetMaxFPS(max_fps);
+	game_timer.Stop();
 }
 
 float TimeManager::UpdateDeltaTime()
@@ -95,6 +96,26 @@ unsigned int TimeManager::GetFpsCounter() const { return fps_counter; }
 unsigned int TimeManager::GetLastMs() const { return last_ms_count; }
 unsigned int TimeManager::GetLastFPS() const { return last_fps_count; }
 
+float TimeManager::GetGameTimer() const
+{
+	return game_timer.ReadF()/1000.f;
+}
+
+void TimeManager::StartGameTimer()
+{
+	game_timer.Start();
+}
+
+void TimeManager::PauseGameTimer()
+{
+	game_timer.Pause();
+}
+
+void TimeManager::StopGameTimer()
+{
+	game_timer.Stop();
+}
+
 void TimeManager::ClearArrays()
 {
 	for (int i = 0; i <= 99; i++)
@@ -143,7 +164,7 @@ void Timer::Pause()
 
 void Timer::Stop()
 {
-	paused = false;
+	paused = true;
 	started_at = paused_at = 0u;
 }
 

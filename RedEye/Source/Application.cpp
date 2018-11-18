@@ -316,10 +316,29 @@ void Application::ReportSoftware(const char * name, const char * version, const 
 	}
 }
 
-void Application::RecieveEvent(const Event* e)
+void Application::RecieveEvent(const Event& e)
 {
-	switch (e->GetType())
+	switch (e.GetType())
 	{
+	case PLAY: 
+	{
+		state = GS_PLAY;
+		time->StartGameTimer();
+		break;
+	}
+	case PAUSE:
+	{
+		state = GS_PAUSE;
+		time->PauseGameTimer();
+		break;
+	}
+	case STOP:
+	{
+		state = GS_STOP;
+		time->StopGameTimer();
+		// load saved scene
+		break;
+	}
 	case REQUEST_DEFAULT_CONF: want_to_load_def = true; break;
 	case REQUEST_LOAD: want_to_load = true; break;
 	case REQUEST_SAVE: want_to_save = true; break;
@@ -335,4 +354,24 @@ const char * Application::GetName() const
 const char * Application::GetOrganization() const
 {
 	return organization.c_str();
+}
+
+GameState Application::GetState() const
+{
+	return state;
+}
+
+void Application::ScenePlay()
+{
+	input->AddEvent(Event(PLAY, this));
+}
+
+void Application::ScenePause()
+{
+	input->AddEvent(Event(PAUSE, this));
+}
+
+void Application::SceneStop()
+{
+	input->AddEvent(Event(STOP, this));
 }

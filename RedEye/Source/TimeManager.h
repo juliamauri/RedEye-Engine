@@ -44,6 +44,11 @@ public:
 	unsigned int GetLastMs() const;
 	unsigned int GetLastFPS() const;
 
+	float GetGameTimer() const;
+	void StartGameTimer();
+	void PauseGameTimer();
+	void StopGameTimer();
+
 private:
 
 	void ClearArrays();
@@ -61,6 +66,8 @@ private:
 
 	Timer	ms_timer; // read every frame
 	Timer	fps_timer; // read every second
+
+	Timer	game_timer;
 
 	float	fps[100] = {};
 	float	ms[100] = {};

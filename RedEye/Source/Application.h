@@ -25,6 +25,13 @@ class RE_PrimitiveManager;
 class MeshManager;
 class ResourceManager;
 
+enum GameState : char
+{
+	GS_PLAY,
+	GS_PAUSE,
+	GS_STOP
+};
+
 class Application : public EventListener
 {
 public:
@@ -41,10 +48,15 @@ public:
 	void DrawEditor();
 	void Log(const int category, const char* text, const char* file);
 	void ReportSoftware(const char * name, const char * version = nullptr, const char * website = nullptr);
-	void RecieveEvent(const Event* e) override;
+	void RecieveEvent(const Event& e) override;
 
 	const char* GetName() const;
 	const char* GetOrganization() const;
+
+	GameState GetState() const;
+	void ScenePlay();
+	void ScenePause();
+	void SceneStop();
 
 private:
 
@@ -79,6 +91,8 @@ private:
 
 	std::string app_name = "RedEye Engine";
 	std::string organization = "RedEye";
+
+	GameState state = GS_STOP;
 
 	int argc;
 	char* argv[];

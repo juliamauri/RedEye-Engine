@@ -15,6 +15,7 @@ class AboutWindow;
 class RandomTest;
 class TexturesWindow;
 class EditorSettingsWindow;
+class PlayPauseWindow;
 
 struct SoftwareInfo;
 class RE_CompCamera;
@@ -60,6 +61,7 @@ private:
 	HeriarchyWindow* heriarchy = nullptr;
 	PropertiesWindow* properties = nullptr;
 	EditorSettingsWindow* editor_settings = nullptr;
+	PlayPauseWindow* play_pause = nullptr;
 
 	AboutWindow* about = nullptr;
 
