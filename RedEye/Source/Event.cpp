@@ -31,7 +31,7 @@ Event::~Event()
 
 void Event::CallListener() const
 {
-	if(listener != nullptr) listener->RecieveEvent(this);
+	if(listener != nullptr) listener->RecieveEvent(*this);
 }
 
 bool Event::IsValid() const

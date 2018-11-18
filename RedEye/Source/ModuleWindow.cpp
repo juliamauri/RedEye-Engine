@@ -166,7 +166,7 @@ bool ModuleWindow::Save(JSONNode * node) const
 	return ret;
 }
 
-void ModuleWindow::RecieveEvent(const Event* e)
+void ModuleWindow::RecieveEvent(const Event& e)
 {
 	
 }

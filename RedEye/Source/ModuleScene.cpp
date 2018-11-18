@@ -114,7 +114,7 @@ void ModuleScene::FileDrop(const char * file)
 	DEL(holder);
 }
 
-void ModuleScene::RecieveEvent(const Event * e)
+void ModuleScene::RecieveEvent(const Event& e)
 {
 }
 

@@ -1,9 +1,9 @@
 #pragma once
 
-class Event;
+#include "Event.h"
 
 class EventListener
 {
 public:
-	virtual void RecieveEvent(const Event* e) {}
+	virtual void RecieveEvent(const Event& e) {}
 };

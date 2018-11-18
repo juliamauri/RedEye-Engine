@@ -38,7 +38,7 @@ public:
 	virtual bool Load(JSONNode* node) { return true; }
 	virtual bool Save(JSONNode* node) const { return true; }
 
-	virtual void RecieveEvent(const Event* e) override {}
+	virtual void RecieveEvent(const Event& e) override {}
 };
 
 #endif //__MODULE_H__

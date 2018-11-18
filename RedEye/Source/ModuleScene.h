@@ -18,7 +18,7 @@ public:
 	bool CleanUp() override;
 
 	void FileDrop(const char* file);
-	void RecieveEvent(const Event* e) override;
+	void RecieveEvent(const Event& e) override;
 
 	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
 

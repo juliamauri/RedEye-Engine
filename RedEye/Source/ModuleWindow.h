@@ -20,7 +20,7 @@ public:
 	bool CleanUp() override;
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
-	void RecieveEvent(const Event* e) override;
+	void RecieveEvent(const Event& e) override;
 	void WindowEvent(const SDL_Event* e);
 
 	SDL_Window* GetWindow() const;
