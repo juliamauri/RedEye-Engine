@@ -29,10 +29,13 @@ public:
 	
 	void SetType(Resource_Type type);
 	void SetMD5(const char* md5);
+	void SetFilePath(const char* path);
+	const char* GetFilePath();
 
 private:
 	const char* name;
 	const char* origin;
+	std::string from_file;
 	std::string* md5 = nullptr;
 	Resource_Type type;
 };

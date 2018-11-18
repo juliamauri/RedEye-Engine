@@ -56,3 +56,13 @@ void ResourceContainer::SetMD5(const char * md5)
 
 	this->md5 = new std::string(md5);
 }
+
+void ResourceContainer::SetFilePath(const char * path)
+{
+	from_file = path;
+}
+
+const char * ResourceContainer::GetFilePath()
+{
+	return from_file.c_str();
+}

@@ -40,7 +40,7 @@ public:
 	//Load texture
 	const char* LoadTexture2D(const char* name, ImageExtensionType extension);
 	const char* LoadTexture2D(const char* path, const char* file_name, bool droped = false);
-
+	void LoadTexture2D(const char* path);
 	void use(const char* TextureID);
 	void drawTexture(const char* TextureID);
 	void GetWithHeight(const char* TextureID, int* w, int* h);

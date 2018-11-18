@@ -36,22 +36,24 @@ bool ModuleScene::Start()
 	}
 
 	// root
-	root = new RE_GameObject("root");
-	root->AddComponent(C_PLANE);
+	std::string path_scene("Assets/Scenes/");
+	path_scene += GetName();
+	path_scene += ".re";
 
-	// load default meshes
-	App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.FBX");
-	//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
-
-	if (!root->GetChilds().empty())
+	Config scene_file(path_scene.c_str(), App->fs->GetZipPath());
+	if (scene_file.Load() && false)
 	{
-		selected = *root->GetChilds().begin();
-		selected->SetBoundingBoxFromChilds();
-		root->SetBoundingBoxFromChilds();
+		JSONNode* node = scene_file.GetRootNode("Game Objects");
+		root = node->FillGO();
 	}
 	else
-		selected = root;
-
+	{
+		root = new RE_GameObject("root");
+		// load default meshes
+		//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
+		App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.FBX");
+	}
+	root->AddComponent(C_PLANE);
 
 	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
 

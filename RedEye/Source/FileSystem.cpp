@@ -9,6 +9,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_CompMesh.h"
+#include "ResourceManager.h"
 
 #include "RapidJson\include\pointer.h"
 #include "RapidJson\include\stringbuffer.h"
@@ -781,15 +782,21 @@ RE_GameObject * JSONNode::FillGO()
 					math::vec position = math::vec::zero;
 					math::vec scale = math::vec::zero;
 					math::vec rotation = math::vec::zero;
-
+					std::string file;
 					switch (type)
 					{
 					case C_MESH:
+						file = c.FindMember("file")->value.GetString();
+						App->resources->CheckFileLoaded(file.c_str(), Resource_Type::R_MESH);
 						mesh = new RE_CompMesh(new_go, c.FindMember("reference")->value.GetString());
 						textures_val = &c.FindMember("textures")->value;
 						if (textures_val->IsArray())
 							for (auto& t : textures_val->GetArray())
+							{
+								file = t.FindMember("file")->value.GetString();
+								App->resources->CheckFileLoaded(file.c_str(), Resource_Type::R_TEXTURE);
 								mesh->SetTexture(t.FindMember("reference")->value.GetString());
+							}
 						new_go->AddCompMesh(mesh);
 						break;
 					case C_CAMERA:

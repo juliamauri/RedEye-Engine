@@ -87,50 +87,31 @@ void MeshManager::LoadMeshOnGameObject(RE_GameObject* parent, const char * name,
 			LOG("Loading Model from: %s", path.c_str());
 			ProcessModel(mesh_file->GetBuffer(), mesh_file->GetSize());
 
-
-
 			DEL(mesh_file);
 		}
 	}
 }
 
-unsigned int MeshManager::LoadMesh(const char * name, bool dropped)
+void MeshManager::LoadMesh(const char * path, bool dropped)
 {
-	std::string path;
-	unsigned int ret = GetLoadedMesh(name, dropped);
-	if (!ret)
+
+	RE_FileIO* mesh_file = nullptr;
+
+	mesh_file = new RE_FileIO(path);
+	if (!mesh_file->Load())
 	{
-		RE_FileIO* mesh_file = nullptr;
-		if (dropped)
-		{
-			path += name;
-			mesh_file = App->fs->QuickBufferFromPDPath(path.c_str());
-			if (!mesh_file)
-				LOG("Error when load mesh from dropped file:\n%s", path.c_str());
-		}
-		else
-		{
-			path += folderPath;
-			path += name;
-			mesh_file = new RE_FileIO(path.c_str());
-			if (!mesh_file->Load())
-			{
-				LOG("Error when load mesh file:\n%s", path.c_str());
-				DEL(mesh_file);
-			}
-		}
-
-		if (mesh_file != nullptr)
-		{
-			LOG("Loading Model from: %s", path.c_str());
-
-			//ProcesMesh(mesh_file->GetBuffer(), mesh_file->GetSize());
-
-			DEL(mesh_file);
-		}
+		LOG("Error when load mesh file:\n%s", path);
+		DEL(mesh_file);
 	}
 
-	return ret;
+	if (mesh_file != nullptr)
+	{
+		LOG("Loading Model from: %s", path);
+
+		ProcessModel(mesh_file->GetBuffer(), mesh_file->GetSize(), false);
+
+		DEL(mesh_file);
+	}
 }
 
 unsigned int MeshManager::GetLoadedMesh(const char * path, const bool from_drop) const
@@ -155,7 +136,7 @@ void MeshManager::AddMesh(RE_Mesh * mesh)
 	App->resources->Reference((ResourceContainer*)mesh);
 }
 
-void MeshManager::ProcessModel(const char* buffer, unsigned int size)
+void MeshManager::ProcessModel(const char* buffer, unsigned int size, bool go_fill)
 {
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFileFromMemory(buffer, size, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_FlipUVs);;
@@ -163,11 +144,18 @@ void MeshManager::ProcessModel(const char* buffer, unsigned int size)
 		LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 	else
 	{
-		RE_GameObject* go = new RE_GameObject(scene->mRootNode->mName.C_Str(), GUID_NULL, to_fill);
-		to_fill = go;
+		if (go_fill)
+		{
+			RE_GameObject* go = new RE_GameObject(scene->mRootNode->mName.C_Str(), GUID_NULL, to_fill);
+			to_fill = go;
+			to_fill->SetBoundingBoxFromChilds();
+			isFilliingGO = true;
+		}
+		else
+			isFilliingGO = false;
+
 		aiMatrix4x4 identity;
 		ProcessNode(scene->mRootNode, scene, identity);
-		to_fill->SetBoundingBoxFromChilds();
 	}
 }
 
@@ -191,36 +179,47 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 	{
 		for (; i < node->mNumMeshes; i++)
 		{
-			RE_GameObject* go = new RE_GameObject(node->mName.C_Str(), GUID_NULL, to_fill);
-			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-
-			RE_CompMesh* comp_mesh = nullptr;
-			RE_Mesh* processed_mesh = ProcessMesh(mesh, scene, i + 1);
-			if (processed_mesh)
+			if (isFilliingGO)
 			{
-				comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)processed_mesh));
-				go->SetLocalBoundingBox(processed_mesh->GetAABB());
+				RE_GameObject* go = new RE_GameObject(node->mName.C_Str(), GUID_NULL, to_fill);
+				aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+
+				RE_CompMesh* comp_mesh = nullptr;
+				RE_Mesh* processed_mesh = ProcessMesh(mesh, scene, i + 1);
+				if (processed_mesh)
+				{
+					comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)processed_mesh));
+					go->SetLocalBoundingBox(processed_mesh->GetAABB());
+				}
+				else
+				{
+					comp_mesh = new RE_CompMesh(go, exists_md5.c_str());
+					go->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(exists_md5.c_str()))->GetAABB());
+				}
+
+				go->AddCompMesh(comp_mesh);
+
+				aiVector3D scale;
+				aiVector3D rotation;
+				aiVector3D position;
+
+				transform.Decompose(scale, rotation, position);
+
+				go->GetTransform()->SetLocalRot(math::vec(rotation.x, rotation.y, rotation.z));
+				go->GetTransform()->SetPos(math::vec(position.x, position.y, position.z));
+				//go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
+
+				//meshes.rbegin()->name = node->mName.C_Str();
+				//total_triangle_count += meshes.rbegin()->triangle_count;
 			}
 			else
 			{
-				comp_mesh = new RE_CompMesh(go, exists_md5.c_str());
-				go->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(exists_md5.c_str()))->GetAABB());
+				aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+				RE_Mesh* processed_mesh = ProcessMesh(mesh, scene, i + 1);
+				if (processed_mesh)
+					App->resources->Reference((ResourceContainer*)processed_mesh);
 			}
 
-			go->AddCompMesh(comp_mesh);
-
-			aiVector3D scale;
-			aiVector3D rotation;
-			aiVector3D position;
-
-			transform.Decompose(scale, rotation, position);
-			
-			go->GetTransform()->SetLocalRot(math::vec(rotation.x, rotation.y, rotation.z));
-			go->GetTransform()->SetPos(math::vec(position.x, position.y, position.z));
-			//go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
-
-			//meshes.rbegin()->name = node->mName.C_Str();
-			//total_triangle_count += meshes.rbegin()->triangle_count;
 		}
 	}
 
@@ -298,18 +297,22 @@ RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const un
 				indices.push_back(face.mIndices[j]);
 		}
 
-		// process material
-		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-		std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-		//std::vector<_Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-		//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
+		if (isFilliingGO)
+		{
+			// process material
+			aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+			std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+			//std::vector<_Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+			//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+		}
 		ret_mesh = new RE_Mesh(vertices, indices, textures, mesh->mNumFaces);
 		ResourceContainer* mesh_resource = (ResourceContainer*)ret_mesh;
 		mesh_resource->SetType(Resource_Type::R_MESH);
 		mesh_resource->SetMD5(md5_id.c_str());
-
+		std::string path(directory);
+		path += file;
+		mesh_resource->SetFilePath(path.c_str());
 	}
 	return ret_mesh;
 }

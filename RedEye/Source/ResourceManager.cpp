@@ -1,6 +1,8 @@
 #include "ResourceManager.h"
 
-#include "Resource.h"
+#include "Application.h"
+#include "Texture2DManager.h"
+#include "MeshManager.h"
 #include "Globals.h"
 #include "OutputLog.h"
 #include "SDL2\include\SDL_assert.h"
@@ -38,6 +40,31 @@ const char * ResourceManager::IsReference(const char * md5)
 	}
 
 	return ret;
+}
+
+void ResourceManager::CheckFileLoaded(const char * filepath, Resource_Type type)
+{
+	bool isLoaded = false;
+	for (auto resource_it : resources)
+	{
+		if (std::string(resource_it.second->GetFilePath()).compare(filepath) == 0)
+			isLoaded = true;
+	}
+
+	if (!isLoaded)
+	{
+		switch (type)
+		{
+		case R_TEXTURE:
+			App->textures->LoadTexture2D(filepath);
+			break;
+		case R_MESH:
+			App->meshes->LoadMesh(filepath);
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 bool ResourceManager::UnReference(const unsigned intid)

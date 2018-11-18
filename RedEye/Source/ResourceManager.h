@@ -4,6 +4,7 @@
 #include <map>
 
 class ResourceContainer;
+#include "Resource.h"
 
 class ResourceManager
 {
@@ -13,6 +14,7 @@ public:
 
 	const char* Reference(ResourceContainer* rc);
 	const char* IsReference(const char* md5);
+	void CheckFileLoaded(const char* filepath, Resource_Type type);
 	bool UnReference(const unsigned intid);
 	ResourceContainer* At(const char* md5) const;
 	unsigned int TotalReferences() const;

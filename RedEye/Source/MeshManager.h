@@ -24,7 +24,7 @@ public:
 
 	bool Init(const char* def_shader = nullptr);
 	void LoadMeshOnGameObject(RE_GameObject* parent, const char* path, const bool dropped = false);
-	unsigned int LoadMesh(const char* path, const bool dropped = false);
+	void LoadMesh(const char* path, const bool dropped = false);
 	unsigned int GetLoadedMesh(const char* path, const bool from_drop = false) const;
 	void DrawMesh(const char* reference);
 	void SetDefaultShader(unsigned int shader);
@@ -32,7 +32,7 @@ public:
 private:
 
 	void AddMesh(RE_Mesh* mesh);
-	void ProcessModel(const char* buffer, unsigned int size);
+	void ProcessModel(const char* buffer, unsigned int size, bool go_fill = true);
 	void ProcessNode(aiNode* node, const aiScene* scene, aiMatrix4x4 transform);
 	RE_Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, const unsigned int pos);
 	std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
@@ -42,6 +42,7 @@ private:
 	const char* folderPath = nullptr;
 	unsigned int default_shader = 0;
 
+	bool isFilliingGO = false;
 	RE_GameObject* to_fill = nullptr;
 	bool from_drop = false;
 	bool error_loading = false;
