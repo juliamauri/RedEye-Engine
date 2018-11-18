@@ -26,6 +26,19 @@ Each option toggles a hide/view window from a list of available windows:
 * **About**: Shows engine info and 3rd party software.
 
 ## Release Versions
+### v2.0
+* Street Scene loaded on Start
+* Camera FOV changes with mouse wheel
+* Static gameobjects saved to a quadtree
+* App adapts to window's aspect ratio
+* Gameobjects have an AABB set their mesh components and envolves childs AABBs'
+* Scene serializes into a json file
+* Engine has Start/Pause/Stop controls
+* Resources load once and components hold a reference number to access them
+### Rough details
+* Transform malfunctions with shaders. Culling and Mouse Pick not working.
+* Stop does not reload scene
+* Mesh properties not showing
 ### v1.0
 * Press F1 to toggle showing editor
 * Mesh: load, drop and view properties
@@ -37,7 +50,6 @@ Each option toggles a hide/view window from a list of available windows:
 * Camera with GLMath
 ### Rough details
 * Gameobject's mesh component kept causing troubles and for now, the class RE_UnregisteredMesh holds dropped mesh as an auxiliary patch. GameObject in SceneModule::drop holds it's transform and uses SceneModule::mesh_droped to draw and set properties.
-* At the moment we still couldn't find the source of 10 memory leaks.
 
 ### v0.0.1
 * Random Test
