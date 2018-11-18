@@ -215,7 +215,7 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 
 			transform.Decompose(scale, rotation, position);
 			
-			go->GetTransform()->SetRot(math::vec(rotation.x, rotation.y, rotation.z));
+			go->GetTransform()->SetLocalRot(math::vec(rotation.x, rotation.y, rotation.z));
 			go->GetTransform()->SetPos(math::vec(position.x, position.y, position.z));
 			//go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
 

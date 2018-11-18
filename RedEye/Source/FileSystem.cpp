@@ -748,7 +748,7 @@ RE_GameObject * JSONNode::FillGO()
 				go->GetTransform()->SetScale({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
 
 				vector = v.FindMember("rotation")->value;
-				go->GetTransform()->SetRot({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+				go->GetTransform()->SetLocalRot({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
 
 				first = false;
 				continue;
@@ -765,7 +765,7 @@ RE_GameObject * JSONNode::FillGO()
 			new_go->GetTransform()->SetScale({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
 
 			vector = v.FindMember("rotation")->value;
-			new_go->GetTransform()->SetRot({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+			new_go->GetTransform()->SetLocalRot({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
 		}
 	}
 

@@ -22,12 +22,11 @@ void RE_CompTransform::Update()
 	if (transform_modified)
 	{
 		// make sure scale is not 0
-		math::vec real_scale = {
+		scale = {
 			scale.x > MIN_SCALE ? 1.0f / scale.x : 1.0f / MIN_SCALE,
 			scale.y > MIN_SCALE ? 1.0f / scale.y : 1.0f / MIN_SCALE,
 			scale.z > MIN_SCALE ? 1.0f / scale.z : 1.0f / MIN_SCALE };
 
-		local_transform = math::float4x4::FromTRS(pos.Neg(), rot_quat, real_scale);
 		CalcGlobalTransform();
 		transform_modified = false;
 	}
@@ -39,7 +38,7 @@ void RE_CompTransform::SetPos(math::vec position)
 	pos = position;
 }
 
-void RE_CompTransform::SetRot(math::vec euler)
+void RE_CompTransform::SetLocalRot(math::vec euler)
 {
 	transform_modified = true;
 	rot_eul = euler;
@@ -47,7 +46,7 @@ void RE_CompTransform::SetRot(math::vec euler)
 	rot_quat = math::Quat::FromEulerXYZ(rot_deg.x, rot_deg.y, rot_deg.z);
 }
 
-void RE_CompTransform::SetRot(math::Quat quat)
+void RE_CompTransform::SetLocalRot(math::Quat quat)
 {
 	transform_modified = true;
 	rot_quat = quat;
@@ -60,24 +59,58 @@ void RE_CompTransform::SetScale(math::vec _scale)
 	scale = _scale;
 }
 
-math::vec RE_CompTransform::GetGlobalPosition() const
+void RE_CompTransform::LocalRotate(math::vec axis, float angle)
 {
-	return global_pos;
+	rot_quat = rot_quat.RotateAxisAngle(axis, angle) * rot_quat;
+	rot_eul = math::RadToDeg(rot_quat.ToEulerXYZ());
+
+	transform_modified = true;
 }
 
-math::vec RE_CompTransform::GetGlobalRotXYZ() const
+void RE_CompTransform::GlobalRotate(math::vec axis, float angle)
 {
-	return global_rot_eul;
+	if (angle != 0.f)
+	{
+		math::float4x4 gm = GetGlobalMatrix();
+		gm = gm.RotateAxisAngle(axis, angle);
+
+		math::vec pos_global, scale_global;
+		math::Quat desired_rot_global;
+
+		if (go != nullptr)
+		{
+			
+			gm.Decompose(pos_global, desired_rot_global, scale_global);
+			rot_quat = desired_rot_global / go->GetParent()->GetTransform()->GetGlobalRot();
+
+			//rot_quat = rot_quat.RotateAxisAngle(axis, angle) * rot_quat;
+		}
+		else
+		{
+			gm.Decompose(pos_global, desired_rot_global, scale_global);
+			rot_quat = desired_rot_global * rot_quat;
+
+		}
+
+		rot_eul = math::RadToDeg(rot_quat.ToEulerXYZ());
+
+		transform_modified = true;
+	}
+}
+
+math::vec RE_CompTransform::GetGlobalPosition() const
+{
+	return (go != nullptr && go->GetParent() != nullptr) ? pos + go->GetParent()->GetTransform()->GetGlobalPosition() : pos;
 }
 
 math::Quat RE_CompTransform::GetGlobalRot() const
 {
-	return global_rot_quat;
+	return (go != nullptr && go->GetParent() != nullptr) ? rot_quat * go->GetParent()->GetTransform()->GetGlobalRot() : rot_quat;
 }
 
 math::vec RE_CompTransform::GetGlobalScale() const
 {
-	return global_scale;
+	return (go != nullptr && go->GetParent() != nullptr) ? scale.Mul(go->GetParent()->GetTransform()->GetGlobalScale()) : scale;
 }
 
 math::vec RE_CompTransform::GetGlobalRight() const
@@ -117,23 +150,23 @@ math::vec RE_CompTransform::GetLocalScale() const
 
 math::float4x4 RE_CompTransform::GetLocalMatrix() const
 {
-	return local_transform.InverseTransposed();
+	return float4x4::FromTRS(pos, rot_quat, scale);
 }
 
 math::float4x4 RE_CompTransform::GetGlobalMatInvTrans() const
 {
-	return global_transform.InverseTransposed();
+	return GetGlobalMatrix().InverseTransposed();
 }
 
 math::float4x4 RE_CompTransform::GetGlobalMatrix() const
 {
-	return global_transform;
+	return float4x4::FromTRS(GetGlobalPosition(), GetGlobalRot(), GetGlobalScale());
 }
 
 void RE_CompTransform::LocalLookAt(math::vec& target_pos)
 {
 	math::vec direction = target_pos - pos;
-	SetRot(math::Quat::LookAt(front, direction.Normalized(), up, math::float3(0.f, 1.f, 0.f)) * rot_quat);
+	SetLocalRot(math::Quat::LookAt(front, direction.Normalized(), up, math::float3(0.f, 1.f, 0.f)) * rot_quat);
 }
 
 void RE_CompTransform::LocalMove(Dir dir, float speed)
@@ -144,18 +177,23 @@ void RE_CompTransform::LocalMove(Dir dir, float speed)
 
 		switch (dir)
 		{
-		case FORWARD:	pos += front * speed; break;
-		case BACKWARD:	pos -= front * speed; break;
-		case LEFT:		pos += right * speed; break;
-		case RIGHT:		pos -= right * speed; break;
-		case UP:		pos -= up * speed; break;
-		case DOWN:		pos += up * speed; break;
+		case FORWARD:	pos -= front * speed; break;
+		case BACKWARD:	pos += front * speed; break;
+		case LEFT:		pos -= right * speed; break;
+		case RIGHT:		pos += right * speed; break;
+		case UP:		pos += up * speed; break;
+		case DOWN:		pos -= up * speed; break;
 		}
 	}
 }
 
 void RE_CompTransform::Orbit(float xoffset, float yoffset, math::vec& target)
 {
+	float distance = math::Distance3(math::float4(pos, 0.f), math::float4(target, 0.f));
+
+
+
+
 	/*glm::vec3 focus = { target.x, target.y, target.z };
 	float distance = glm::distance(Position, focus);
 	Position = focus;
@@ -194,7 +232,7 @@ void RE_CompTransform::DrawProperties()
 		// Rotation -----------------------------------------------------
 		float r[3] = { rot_eul.x, rot_eul.y, rot_eul.z };
 		if (ImGui::DragFloat3("Rotation", r, 0.1f, -360.f, 360.f, "%.2f"))
-			SetRot({ r[0], r[1], r[2] });
+			SetLocalRot({ r[0], r[1], r[2] });
 
 		// Scale -----------------------------------------------------
 		float s[3] = { scale.x, scale.y, scale.z };
@@ -206,7 +244,7 @@ void RE_CompTransform::DrawProperties()
 void RE_CompTransform::Reset()
 {
 	SetPos(math::vec::zero);
-	SetRot(math::Quat::identity);
+	SetLocalRot(math::Quat::identity);
 	SetScale(math::vec::one);
 }
 
@@ -223,28 +261,22 @@ void RE_CompTransform::CalcGlobalTransform(bool call_transform_modified)
 
 		if (parent != nullptr && parent->GetTransform() != nullptr)
 		{
-			global_transform = parent->GetTransform()->global_transform * local_transform;
+			math::float4x4 global_transform = parent->GetTransform()->GetGlobalMatrix().Inverted();
 
 			right = global_transform.Col3(0).Normalized();
 			up = global_transform.Col3(1).Normalized();
 			front = global_transform.Col3(2).Normalized();
-
-			global_transform.Decompose(global_pos, global_rot_quat, global_scale);
-			global_rot_eul = global_rot_quat.ToEulerXYZ();
 
 			for (auto child : go->GetChilds())
 				child->GetTransform()->CalcGlobalTransform(call_transform_modified);
 		}
 		else
 		{
-			global_transform = local_transform;
+			math::float4x4 global_transform =  GetLocalMatrix();
 
 			right = global_transform.Col3(0).Normalized();
 			up = global_transform.Col3(1).Normalized();
 			front = global_transform.Col3(2).Normalized();
-
-			global_transform.Decompose(global_pos, global_rot_quat, global_scale);
-			global_rot_eul = global_rot_quat.ToEulerXYZ();
 
 			for (auto child : go->GetChilds())
 				child->GetTransform()->CalcGlobalTransform(call_transform_modified);
@@ -254,14 +286,11 @@ void RE_CompTransform::CalcGlobalTransform(bool call_transform_modified)
 	}
 	else
 	{
-		global_transform = local_transform;
+		math::float4x4 global_transform = GetLocalMatrix();
 
 		right = global_transform.Col3(0).Normalized();
 		up = global_transform.Col3(1).Normalized();
 		front = global_transform.Col3(2).Normalized();
-
-		global_transform.Decompose(global_pos, global_rot_quat, global_scale);
-		global_rot_eul = global_rot_quat.ToEulerXYZ();
 	}
 
 	just_calculated_global = true;

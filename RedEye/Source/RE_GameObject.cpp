@@ -87,7 +87,7 @@ void RE_GameObject::Serialize(JSONNode * node)
 	val_go.AddMember(rapidjson::Value::StringRefType("position"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetGlobalRotXYZ().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalRotXYZ().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalRotXYZ().z, fill_node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalRot().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalRot().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalRot().z, fill_node->GetDocument()->GetAllocator());
 	val_go.AddMember(rapidjson::Value::StringRefType("rotation"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();

@@ -79,7 +79,7 @@ void RE_CompCamera::SetEulerAngle(float p, float y)
 	yaw += y;
 	pitch += p;
 
-	transform->SetRot(math::vec(pitch,yaw,0.0f));
+	transform->SetLocalRot(math::vec(pitch,yaw,0.0f));
 }
 
 RE_CompTransform * RE_CompCamera::GetTransform() const
@@ -202,15 +202,15 @@ void RE_CompCamera::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 
 	rapidjson::Value float_array(rapidjson::kArrayType);
 
-	float_array.PushBack(GetTransform()->GetGlobalPosition().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalPosition().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalPosition().z, node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalPosition().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalPosition().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalPosition().z, node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("position"), float_array.Move(), node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetGlobalRotXYZ().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalRotXYZ().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalRotXYZ().z, node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalRotXYZ().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalRot().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalRot().z, node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("rotation"), float_array.Move(), node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetGlobalScale().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().z, node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalRot().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().z, node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), node->GetDocument()->GetAllocator());
 
 	comp_array->PushBack(val, node->GetDocument()->GetAllocator());

@@ -14,12 +14,14 @@ public:
 	void Update();
 
 	void SetPos(math::vec position);
-	void SetRot(math::vec euler);
-	void SetRot(math::Quat quat);
+	void SetLocalRot(math::vec euler);
+	void SetLocalRot(math::Quat quat);
 	void SetScale(math::vec scale);
 
+	void LocalRotate(math::vec axis, float angle);
+	void GlobalRotate(math::vec axis, float angle);
+
 	math::vec	GetGlobalPosition() const;
-	math::vec	GetGlobalRotXYZ() const;
 	math::Quat	GetGlobalRot() const;
 	math::vec	GetGlobalScale() const;
 
@@ -55,26 +57,21 @@ private:
 
 	// Position
 	math::vec pos = math::vec::zero;
-	math::vec global_pos = math::vec::zero;
 
 	// Rotation
 	math::vec rot_eul = math::vec::zero;
 	math::Quat rot_quat = math::Quat::identity;
-
-	math::vec global_rot_eul = math::vec::zero;
-	math::Quat global_rot_quat = math::Quat::identity;
 	
 	// Scale
-	math::float3 scale = math::vec::one;
-	math::float3 global_scale = math::vec::one;
+	math::vec scale = math::vec::one;
 
 	// Axis
 	math::vec right = math::vec::zero;
 	math::vec up = math::vec::zero;
 	math::vec front = math::vec::zero;
 
-	math::float4x4 local_transform = math::float4x4::identity;
-	math::float4x4 global_transform = math::float4x4::identity;
+	//math::float4x4 local_transform = math::float4x4::identity;
+	//math::float4x4 global_transform = math::float4x4::identity;
 
 	bool transform_modified = false;
 	bool just_calculated_global = false;

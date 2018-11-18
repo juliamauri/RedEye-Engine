@@ -247,7 +247,7 @@ void ModuleEditor::UpdateCamera()
 			math::vec camera_pos = selected_box.maxPoint + target_global_pos;
 
 			transform->SetPos(camera_pos);
-			transform->LocalLookAt(selected_box.CenterPoint() + target_global_pos);
+			transform->LocalLookAt(selected_box.CenterPoint());
 		}
 		else
 		{
@@ -272,22 +272,15 @@ void ModuleEditor::UpdateCamera()
 				if (App->input->CheckKey(SDL_SCANCODE_C, KEY_REPEAT))
 					transform->LocalMove(Dir::DOWN, cameraSpeed);
 
+
+
 				if (mouse->mouse_x_motion != 0)
-					transform->SetRot(math::Quat::RotateY(-1.00f * CAM_SENSITIVITY * DEGTORAD * mouse->mouse_x_motion) * transform->GetLocalRot());
-
+					transform->LocalRotate(transform->GetLocalMatrix().Col3(1).Normalized(), -1.00f * CAM_SENSITIVITY * DEGTORAD * mouse->mouse_x_motion);
 				if (mouse->mouse_y_motion != 0)
-				{
-					math::Quat desired_rot = transform->GetLocalRot() * math::Quat::RotateX(-1.00f * CAM_SENSITIVITY * DEGTORAD * mouse->mouse_y_motion);
-					transform->SetRot(desired_rot);
+					transform->LocalRotate(transform->GetLocalMatrix().Col3(0).Normalized(), -1.00f * CAM_SENSITIVITY * DEGTORAD * mouse->mouse_y_motion);
 
-					// X cap not working
-					/*float des_x_euler = math::RadToDeg(desired_rot.ToEulerXYZ()).x;
-
-					if (des_x_euler < 90.f && des_x_euler > -90.f)
-						transform->SetRot(desired_rot);
-					else
-						int blocked = 0;*/
-				}
+				// Cap Z roll
+				//transform->LocalRotate(transform->GetLocalMatrix().Col3(2).Normalized(), -1.00f * DEGTORAD * transform->GetLocalRotXYZ().z);
 			}
 
 			// Zoom
