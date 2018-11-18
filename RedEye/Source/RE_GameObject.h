@@ -25,7 +25,7 @@ public:
 	void PreUpdate();
 	void Update();
 	void PostUpdate();
-	void Draw();
+	void Draw(bool recursive = true);
 
 	void Serialize(JSONNode* node);
 

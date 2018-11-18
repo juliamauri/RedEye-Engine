@@ -227,7 +227,15 @@ void ModuleEditor::UpdateCamera()
 		const MouseData* mouse = App->input->GetMouse();
 		RE_CompTransform* transform = camera->GetTransform();
 
-		if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse->GetButton(1) == KEY_REPEAT)
+		if (mouse->GetButton(1) == KEY_DOWN)
+		{
+			// Mouse Pick
+			App->scene->RayCastSelect(
+				math::Ray(camera->GetFrustum().UnProjectLineSegment(
+				(2.f * mouse->mouse_x) / App->window->GetWidth() - 1.f,
+					1.f - (2.f * mouse->mouse_y) / App->window->GetHeight())));
+		}
+		else if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse->GetButton(1) == KEY_REPEAT)
 		{
 			if (App->scene->GetSelected() != nullptr
 				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))

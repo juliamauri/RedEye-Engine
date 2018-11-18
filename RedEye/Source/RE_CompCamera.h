@@ -17,7 +17,7 @@ public:
 		RE_GameObject* go = nullptr,
 		bool toPerspective = true, 
 		float near_plane = 0.1f,
-		float far_plane = 100.0f);
+		float far_plane = 1000.0f);
 
 	RE_CompCamera(
 		RE_GameObject* go,
@@ -52,6 +52,8 @@ public:
 	
 	math::float4x4 GetProjection() const;
 	float* GetProjectionPtr() const;
+
+	math::Frustum GetFrustum() const;
 
 	float GetVFOVDegrees() const;
 

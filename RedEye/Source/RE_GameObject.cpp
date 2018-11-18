@@ -55,9 +55,11 @@ void RE_GameObject::PostUpdate()
 	for (auto component : components) component->PostUpdate();
 }
 
-void RE_GameObject::Draw()
+void RE_GameObject::Draw(bool recursive)
 {
-	for (auto child : childs) child->Draw();
+	if (recursive)
+		for (auto child : childs) child->Draw();
+
 	for (auto component : components) component->Draw();
 }
 

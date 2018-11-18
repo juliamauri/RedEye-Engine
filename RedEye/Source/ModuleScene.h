@@ -30,6 +30,8 @@ public:
 	void SetSelected(RE_GameObject* selected);
 	RE_GameObject* GetSelected() const;
 
+	void RayCastSelect(math::Ray& ls);
+
 	void Serialize();
 
 	//shaders
@@ -42,6 +44,7 @@ private:
 	bool draw_quad_tree = false;
 	QTree quad_tree;
 
+	int drawn_go = 0;
 };
 
 

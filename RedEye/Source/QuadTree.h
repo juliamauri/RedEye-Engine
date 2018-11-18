@@ -1,12 +1,12 @@
 #ifndef __QUADTREE_H__
 #define __QUADTREE_H__
 
+#include "RE_GameObject.h"
 #include "MathGeoLib\include\Geometry\AABB.h"
 #include <list>
 
 #define MIN_BOX_RADIUS 4
 
-class RE_GameObject;
 
 class QTreeNode
 {
@@ -22,6 +22,9 @@ public:
 
 	const AABB& GetBox() const;
 	bool IsLeaf() const;
+
+	template<typename TYPE>
+	inline void CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
 
 private:
 
@@ -43,8 +46,10 @@ public:
 	~QTree();
 
 	void Build(RE_GameObject* root_g_obj);
-
 	void Draw();
+
+	template<typename TYPE>
+	inline void CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
 
 private:
 
@@ -62,3 +67,27 @@ private:
 };
 
 #endif // !__QUADTREE_H__
+
+template<typename TYPE>
+inline void QTreeNode::CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const
+{
+	if (primitive.Intersects(box))
+	{
+		for (std::list<RE_GameObject*>::const_iterator it = g_objs.begin(); it != g_objs.end(); ++it)
+		{
+			if (primitive.Intersects((*it)->GetGlobalBoundingBox()))
+				objects.push_back(*it);
+		}
+
+		for (int i = 0; i < 4; ++i)
+			if (nodes[i] != nullptr) nodes[i]->CollectIntersections(objects, primitive);
+	}
+
+
+}
+
+template<typename TYPE>
+inline void QTree::CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const
+{
+	root->CollectIntersections(objects, primitive);
+}

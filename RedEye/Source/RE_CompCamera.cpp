@@ -190,6 +190,11 @@ float* RE_CompCamera::GetProjectionPtr() const
 	return (float*)calculated_projection.v;
 }
 
+math::Frustum RE_CompCamera::GetFrustum() const
+{
+	return frustum;
+}
+
 void RE_CompCamera::RecalculateMatrixes()
 {
 	calculated_view = frustum.ViewMatrix();

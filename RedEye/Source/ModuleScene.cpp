@@ -130,6 +130,7 @@ void ModuleScene::DrawEditor()
 	if (ImGui::CollapsingHeader(GetName()))
 	{
 		ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
+		ImGui::Text("%i", drawn_go);
 	}
 }
 
@@ -138,13 +139,20 @@ void ModuleScene::DrawScene()
 	if (draw_quad_tree)
 		quad_tree.Draw();
 
-	//root->DrawAllAABB();
+	root->DrawAllAABB();
 
-	selected->DrawAABB();
+	//selected->DrawAABB();
 
 	ShaderManager::use(modelloading); 
 	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());
 	ShaderManager::setFloat4x4(modelloading, "projection", App->editor->GetCamera()->GetProjectionPtr());
+
+	// Frustum Culling
+	std::vector<RE_GameObject*> objects;
+	quad_tree.CollectIntersections(objects, App->editor->GetCamera()->GetFrustum());
+	drawn_go = objects.size();
+
+	//for (auto object : objects) object->Draw(false);
 
 	root->Draw();
 
@@ -198,6 +206,33 @@ RE_GameObject * ModuleScene::GetSelected() const
 	return selected;
 }
 
+void ModuleScene::RayCastSelect(math::Ray & ray)
+{
+	std::vector<RE_GameObject*> objects;
+	quad_tree.CollectIntersections(objects, ray);
+	if (!objects.empty())
+	{
+		float closest_distance = -1.f;
+		RE_GameObject* new_selection = nullptr;
+		math::float4 camera_pos = math::float4(App->editor->GetCamera()->GetTransform()->GetGlobalPosition(), 0.f);
+
+		for (auto object : objects)
+		{
+			RE_CompMesh* comp_mesh = object->GetMesh();
+			if (comp_mesh != nullptr)
+			{
+				/*math::vec pos =	comp_mesh->GetClosestTriangleIntersectPos(ray, App->editor->GetCamera());
+				float res_distance = math::Distance3(math::float4(pos, 0.f), camera_pos);
+				if (closest_distance < 0.f || closest_distance > res_distance)
+				{
+					new_selection = object;
+					closest_distance = res_distance;
+				}*/
+			}
+		}
+	}
+}
+
 void ModuleScene::Serialize()
 {
 	char* buffer = nullptr;
@@ -217,3 +252,4 @@ void ModuleScene::Serialize()
 
 	scene_file.Save();
 }
+
