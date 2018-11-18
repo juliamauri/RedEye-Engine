@@ -14,6 +14,8 @@ public:
 
 	void DrawProperties() override;
 
+	void Serialize(JSONNode* node, rapidjson::Value* val) override;
+
 protected:
 
 	std::string reference;

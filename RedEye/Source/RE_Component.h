@@ -3,7 +3,12 @@
 
 #include "Globals.h"
 
+#include "RapidJson\include\rapidjson.h"
+#include "RapidJson\include\document.h"
+#include "RapidJson\include\allocators.h"
+
 class RE_GameObject;
+class JSONNode;
 
 enum ComponentType : ushortint
 {
@@ -55,6 +60,8 @@ public:
 	RE_GameObject* GetGO() const;
 
 	RE_Component* AsComponent() const;
+
+	virtual void Serialize(JSONNode* node, rapidjson::Value* val);
 
 protected:
 

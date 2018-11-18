@@ -407,7 +407,7 @@ void Config::Save()
 		LOG("Ettot when unmount: %s", PHYSFS_getLastError());
 
 	std::string file(file_name);
-	WriteFile(from_zip, file.c_str(), output, size = (strnlen_s(output, 0xffff)));
+	WriteFile(from_zip, file.c_str(), output, size);
 
 	PHYSFS_mount(from_zip, NULL, 1);
 	

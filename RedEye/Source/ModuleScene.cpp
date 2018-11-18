@@ -201,8 +201,6 @@ RE_GameObject * ModuleScene::GetSelected() const
 void ModuleScene::Serialize()
 {
 	char* buffer = nullptr;
-
-	//RE_FileIO scene_file(GetName(), App->fs->GetZipPath());
 	
 	std::string path_scene("Assets/Scenes/");
 	path_scene += GetName();

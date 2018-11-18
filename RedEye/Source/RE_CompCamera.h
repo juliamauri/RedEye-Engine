@@ -44,6 +44,8 @@ public:
 
 	float GetVFOVDegrees() const;
 
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override;
+
 private:
 	
 	void RecalculateMatrixes();

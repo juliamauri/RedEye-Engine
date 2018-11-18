@@ -94,6 +94,10 @@ void RE_GameObject::Serialize(JSONNode * node)
 	float_array.PushBack(GetTransform()->GetGlobalScale().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().z, fill_node->GetDocument()->GetAllocator());
 	val_go.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
 
+	rapidjson::Value val_comp(rapidjson::kArrayType);
+	for (auto component : components) component->Serialize(node, &val_comp);
+	val_go.AddMember(rapidjson::Value::StringRefType("components"), val_comp, fill_node->GetDocument()->GetAllocator());
+
 	node->PushValue(&val_go);
 
 	for (auto child : childs) { child->Serialize(node); }

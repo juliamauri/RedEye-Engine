@@ -13,3 +13,6 @@ ComponentType RE_Component::GetType() const { return type; }
 RE_GameObject * RE_Component::GetGO() const { return go; }
 
 RE_Component * RE_Component::AsComponent() const { return (RE_Component*)this; }
+
+void RE_Component::Serialize(JSONNode * node, rapidjson::Value * val)
+{}

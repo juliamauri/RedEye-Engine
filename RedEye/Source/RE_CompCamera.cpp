@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "RE_GameObject.h"
+#include "FileSystem.h"
 #include "RE_CompTransform.h"
 #include "ModuleWindow.h"
 #include "SDL2\include\SDL_opengl.h"
@@ -178,4 +179,39 @@ void RE_CompCamera::RecalculateMatrixes()
 float RE_CompCamera::GetVFOVDegrees() const
 {
 	return v_fov_degrees;
+}
+
+void RE_CompCamera::Serialize(JSONNode * node, rapidjson::Value * comp_array)
+{
+	rapidjson::Value val(rapidjson::kObjectType);
+
+	val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetInt((int)type), node->GetDocument()->GetAllocator());
+	
+	val.AddMember(rapidjson::Value::StringRefType("isPrespective"), rapidjson::Value().SetBool(isPerspective), node->GetDocument()->GetAllocator());
+
+	val.AddMember(rapidjson::Value::StringRefType("pitch"), rapidjson::Value().SetFloat(pitch), node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("yaw"), rapidjson::Value().SetFloat(yaw), node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("roll"), rapidjson::Value().SetFloat(roll), node->GetDocument()->GetAllocator());
+
+	val.AddMember(rapidjson::Value::StringRefType("h_fov_rads"), rapidjson::Value().SetFloat(h_fov_rads), node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("v_fov_rads"), rapidjson::Value().SetFloat(v_fov_rads), node->GetDocument()->GetAllocator());
+
+	val.AddMember(rapidjson::Value::StringRefType("h_fov_degrees"), rapidjson::Value().SetFloat(h_fov_degrees), node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("v_fov_degrees"), rapidjson::Value().SetFloat(v_fov_degrees), node->GetDocument()->GetAllocator());
+
+
+	rapidjson::Value float_array(rapidjson::kArrayType);
+
+	float_array.PushBack(GetTransform()->GetGlobalPosition().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalPosition().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalPosition().z, node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("position"), float_array.Move(), node->GetDocument()->GetAllocator());
+
+	float_array.SetArray();
+	float_array.PushBack(GetTransform()->GetGlobalRotXYZ().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalRotXYZ().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalRotXYZ().z, node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("rotation"), float_array.Move(), node->GetDocument()->GetAllocator());
+
+	float_array.SetArray();
+	float_array.PushBack(GetTransform()->GetGlobalScale().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().z, node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), node->GetDocument()->GetAllocator());
+
+	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
 }
