@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "ModuleScene.h"
+#include "FileSystem.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_Component.h"
 #include "RE_CompTransform.h"
@@ -15,9 +16,14 @@
 #include "Glew\include\glew.h"
 #include "ImGui\imgui.h"
 
-RE_GameObject::RE_GameObject(const char* name, RE_GameObject * p, bool start_active, bool isStatic)
+RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, bool start_active, bool isStatic)
 	: name(name), parent(p), active(start_active), isStatic(isStatic)
 {
+	if (uuid == GUID_NULL)
+		UuidCreate(&this->uuid);
+	else
+		this->uuid = uuid;
+
 	if (parent != nullptr) parent->AddChild(this);
 	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
@@ -53,6 +59,44 @@ void RE_GameObject::Draw()
 {
 	for (auto child : childs) child->Draw();
 	for (auto component : components) component->Draw();
+}
+
+void RE_GameObject::Serialize(JSONNode * node)
+{
+	JSONNode* fill_node = node;
+
+	rapidjson::Value val_go(rapidjson::kObjectType);
+
+	val_go.AddMember(rapidjson::Value::StringRefType("name"), rapidjson::Value().SetString(GetName(), fill_node->GetDocument()->GetAllocator()), fill_node->GetDocument()->GetAllocator());
+
+	char* str = nullptr;
+	UuidToStringA(&uuid, (RPC_CSTR*)&str);
+	val_go.AddMember(rapidjson::Value::StringRefType("UUID"), rapidjson::Value().SetString(str, fill_node->GetDocument()->GetAllocator()), fill_node->GetDocument()->GetAllocator());
+	RpcStringFreeA((RPC_CSTR*)&str);
+
+	if (parent != nullptr)
+	{
+		UuidToStringA(&parent->uuid, (RPC_CSTR*)&str);
+		val_go.AddMember(rapidjson::Value::StringRefType("Parent UUID"), rapidjson::Value().SetString(str, fill_node->GetDocument()->GetAllocator()), fill_node->GetDocument()->GetAllocator());
+		RpcStringFreeA((RPC_CSTR*)&str);
+	}
+
+	rapidjson::Value float_array(rapidjson::kArrayType);
+
+	float_array.PushBack(GetTransform()->GetGlobalPosition().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalPosition().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalPosition().z, fill_node->GetDocument()->GetAllocator());
+	val_go.AddMember(rapidjson::Value::StringRefType("position"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
+
+	float_array.SetArray();
+	float_array.PushBack(GetTransform()->GetGlobalRotXYZ().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalRotXYZ().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalRotXYZ().z, fill_node->GetDocument()->GetAllocator());
+	val_go.AddMember(rapidjson::Value::StringRefType("rotation"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
+
+	float_array.SetArray();
+	float_array.PushBack(GetTransform()->GetGlobalScale().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetGlobalScale().z, fill_node->GetDocument()->GetAllocator());
+	val_go.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
+
+	node->PushValue(&val_go);
+
+	for (auto child : childs) { child->Serialize(node); }
 }
 
 void RE_GameObject::AddChild(RE_GameObject * child)
@@ -304,6 +348,23 @@ RE_CompCamera * RE_GameObject::GetCamera() const
 			break;
 		}
 	}
+
+	return ret;
+}
+
+RE_GameObject * RE_GameObject::GetGoFromUUID(UUID parent)
+{
+	RE_GameObject* ret = nullptr;
+
+	if (uuid == parent)
+		ret = this;
+	else
+		for (auto child : childs)
+		{
+			ret = child->GetGoFromUUID(parent);
+			if (ret)
+				break;
+		}
 
 	return ret;
 }

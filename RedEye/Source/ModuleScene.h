@@ -30,12 +30,12 @@ public:
 	void SetSelected(RE_GameObject* selected);
 	RE_GameObject* GetSelected() const;
 
+	void Serialize();
 
 	//shaders
 	unsigned int modelloading;
 
 private:
-
 	RE_GameObject* root = nullptr;
 	RE_GameObject* selected = nullptr;
 

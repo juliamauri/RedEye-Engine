@@ -6,9 +6,9 @@
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL.h"
 #include "SDL2\include\SDL_assert.h"
+#include "RE_GameObject.h"
+#include "RE_CompTransform.h"
 
-#include "RapidJson\include\rapidjson.h"
-#include "RapidJson\include\allocators.h"
 #include "RapidJson\include\pointer.h"
 #include "RapidJson\include\stringbuffer.h"
 #include "RapidJson\include\writer.h"
@@ -32,7 +32,6 @@
 #include <crtdbg.h>
 #endif
 #include <fstream>
-#include <string>
 
 FileSystem::FileSystem() : engine_config(nullptr)
 {}
@@ -63,9 +62,9 @@ bool FileSystem::Init(int argc, char* argv[])
 		assets_path = "Assets";
 
 
-		std::string path(GetExecutableDirectory());
-		path += "data.zip";
-		PHYSFS_mount(path.c_str(), NULL, 1);
+		zip_path = (GetExecutableDirectory());
+		zip_path += "data.zip";
+		PHYSFS_mount(zip_path.c_str(), NULL, 1);
 
 		char **i;
 
@@ -74,7 +73,7 @@ bool FileSystem::Init(int argc, char* argv[])
 		PHYSFS_freeList(*i);
 
 		const char* config_file = "Settings/config.json";
-		engine_config = new Config(config_file, path.c_str());
+		engine_config = new Config(config_file, zip_path.c_str());
 		if (engine_config->Load())
 			ret = true;
 		else
@@ -217,6 +216,11 @@ const char* FileSystem::GetExecutableDirectory() const
 	return PHYSFS_getBaseDir();
 }
 
+const char * FileSystem::GetZipPath()
+{
+	return zip_path.c_str();
+}
+
 
 ////////////////////////////////////////////////////////////////////
 ///////////////////RE_FileIO
@@ -238,6 +242,11 @@ bool RE_FileIO::Load()
 void RE_FileIO::Save()
 {
 	HardSave(buffer);
+}
+
+void RE_FileIO::Save(char * buffer)
+{
+	WriteFile(from_zip, file_name, buffer, size = (strnlen_s(buffer, 0xffff)));
 }
 
 void RE_FileIO::ClearBuffer()
@@ -398,7 +407,7 @@ void Config::Save()
 		LOG("Ettot when unmount: %s", PHYSFS_getLastError());
 
 	std::string file(file_name);
-	WriteFile(from_zip, file.c_str(), buffer, size = (strnlen_s(buffer, 0xffff)));
+	WriteFile(from_zip, file.c_str(), output, size = (strnlen_s(output, 0xffff)));
 
 	PHYSFS_mount(from_zip, NULL, 1);
 	
@@ -441,8 +450,10 @@ inline bool Config::operator!() const
 ///////////////////JSONNode
 ////////////////////////////////////////////////////////////////////
 
-JSONNode::JSONNode(const char* path, Config* config) : pointerPath(path), config(config)
-{}
+JSONNode::JSONNode(const char* path, Config* config, bool isArray) : pointerPath(path), config(config)
+{
+	if (isArray)	rapidjson::Pointer(path).Get(config->document)->SetArray();
+}
 
 JSONNode::JSONNode(JSONNode& node) : pointerPath(node.pointerPath), config(node.config)
 {}
@@ -474,7 +485,7 @@ void JSONNode::PushInt(const char* name, const int value)
 		std::string path(pointerPath);
 		path += "/";
 		path += name;
-
+		
 		rapidjson::Pointer(path.c_str()).Set(config->document, value);
 	}
 }
@@ -503,6 +514,21 @@ void JSONNode::PushFloat(const char* name, const float value)
 	}
 }
 
+void JSONNode::PushFloatVector(const char * name, math::vec vector)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value float_array(rapidjson::kArrayType);
+		float_array.PushBack(vector.x, config->document.GetAllocator()).PushBack(vector.y, config->document.GetAllocator()).PushBack(vector.z, config->document.GetAllocator());
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
+	}
+}
+
 void JSONNode::PushDouble(const char* name, const double value)
 {
 	if (name != nullptr)
@@ -525,6 +551,13 @@ void JSONNode::PushString(const char* name, const char* value)
 
 		rapidjson::Pointer(path.c_str()).Set(config->document, value);
 	}
+}
+
+void JSONNode::PushValue(rapidjson::Value * val)
+{
+	rapidjson::Value* val_push = rapidjson::Pointer(pointerPath.c_str()).Get(config->document);
+	if (val_push->IsArray())
+		val_push->PushBack(*val, config->document.GetAllocator());
 }
 
 JSONNode* JSONNode::PushJObject(const char* name)
@@ -614,6 +647,30 @@ float JSONNode::PullFloat(const char* name, float deflt)
 	return ret;
 }
 
+math::vec JSONNode::PullFloatVector(const char * name, math::vec deflt)
+{
+
+	math::vec ret = math::vec::zero;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+
+		if (val != nullptr)
+			ret.Set(val->GetArray()[0].GetFloat(),
+			val->GetArray()[1].GetFloat(),
+			val->GetArray()[2].GetFloat());
+		else
+			ret = deflt;
+	}
+
+	return ret;
+}
+
 double JSONNode::PullDouble(const char* name, double deflt)
 {
 	double ret = 0;
@@ -665,6 +722,56 @@ JSONNode* JSONNode::PullJObject(const char * name)
 	return ret;
 }
 
+RE_GameObject * JSONNode::FillGO()
+{
+	RE_GameObject * go = nullptr;
+
+	bool first = true;
+	rapidjson::Value* val = rapidjson::Pointer(pointerPath.c_str()).Get(config->document);
+
+	if (val->IsArray())
+	{
+		for (auto& v : val->GetArray())
+		{
+			UUID uuid;
+			UUID parent_uuid;
+
+			if (first)
+			{
+				UuidFromStringA((RPC_CSTR)v.FindMember("UUID")->value.GetString(), &uuid);
+				go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid);
+
+				rapidjson::Value& vector = v.FindMember("position")->value;
+				go->GetTransform()->SetPos({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+
+				vector = v.FindMember("scale")->value;
+				go->GetTransform()->SetScale({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+
+				vector = v.FindMember("rotation")->value;
+				go->GetTransform()->SetRot({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+
+				first = false;
+				continue;
+			}
+			UuidFromStringA((RPC_CSTR)v.FindMember("UUID")->value.GetString(), &uuid);
+			UuidFromStringA((RPC_CSTR)v.FindMember("Parent UUID")->value.GetString(), &parent_uuid);
+
+			RE_GameObject* new_go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid, go->GetGoFromUUID(parent_uuid));
+
+			rapidjson::Value& vector = v.FindMember("position")->value;
+			new_go->GetTransform()->SetPos({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+
+			vector = v.FindMember("scale")->value;
+			new_go->GetTransform()->SetScale({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+
+			vector = v.FindMember("rotation")->value;
+			new_go->GetTransform()->SetRot({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+		}
+	}
+
+	return go;
+}
+
 inline bool JSONNode::operator!() const
 {
 	return (config == nullptr) || pointerPath.empty();
@@ -673,4 +780,14 @@ inline bool JSONNode::operator!() const
 const char * JSONNode::GetDocumentPath() const
 {
 	return pointerPath.c_str();
+}
+
+rapidjson::Document * JSONNode::GetDocument()
+{
+	return &config->document;
+}
+
+void JSONNode::SetArray()
+{
+	rapidjson::Pointer(pointerPath.c_str()).Get(config->document)->SetArray();
 }

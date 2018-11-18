@@ -15,8 +15,7 @@
 #include <string>
 #include <algorithm>
 
-ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
-{}
+ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled) {}
 
 ModuleScene::~ModuleScene()
 {}
@@ -24,6 +23,8 @@ ModuleScene::~ModuleScene()
 bool ModuleScene::Start()
 {
 	bool ret = true;
+
+
 
 	//Loading Shaders
 	if (App->shaders)
@@ -77,6 +78,8 @@ update_status ModuleScene::Update()
 
 bool ModuleScene::CleanUp()
 {
+	Serialize();
+	
 	DEL(root);
 	return true;
 }
@@ -117,7 +120,7 @@ void ModuleScene::RecieveEvent(const Event * e)
 
 RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent)
 {
-	RE_GameObject* ret = new RE_GameObject(name, parent ? parent : root);
+	RE_GameObject* ret = new RE_GameObject(name, GUID_NULL, parent ? parent : root);
 
 	return ret;
 }
@@ -193,4 +196,26 @@ void ModuleScene::SetSelected(RE_GameObject * select)
 RE_GameObject * ModuleScene::GetSelected() const
 {
 	return selected;
+}
+
+void ModuleScene::Serialize()
+{
+	char* buffer = nullptr;
+
+	//RE_FileIO scene_file(GetName(), App->fs->GetZipPath());
+	
+	std::string path_scene("Assets/Scenes/");
+	path_scene += GetName();
+	path_scene += ".re";
+
+	Config scene_file(path_scene.c_str(), App->fs->GetZipPath());
+
+	JSONNode* node = scene_file.GetRootNode("Game Objects");
+
+	node->SetArray();
+	root->Serialize(node);
+
+	DEL(node);
+
+	scene_file.Save();
 }

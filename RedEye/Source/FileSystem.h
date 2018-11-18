@@ -1,12 +1,17 @@
 #ifndef __FILESYSTEM_H__
 #define __FILESYSTEM_H__
 
+#include "RapidJson\include\rapidjson.h"
 #include "RapidJson\include\document.h"
+#include "RapidJson\include\allocators.h"
+
+#include "MathGeoLib/include/Math/float3.h"
 #include <list>
 #include <string>
 
 class Config;
 class RE_FileIO;
+class RE_GameObject;
 
 class FileSystem
 {
@@ -31,12 +36,15 @@ public:
 	bool IsDirectory(const char* file) const;
 	const char* GetExecutableDirectory() const;
 
+	const char* GetZipPath();
+
 private:
 
 	Config* engine_config;
 	std::string engine_path;
 	std::string library_path;
 	std::string assets_path;
+	std::string zip_path;
 	std::string write_path;
 };
 
@@ -48,6 +56,7 @@ public:
 
 	virtual bool Load();
 	virtual void Save();
+	virtual void Save(char* buffer);
 
 	void ClearBuffer();
 	char* GetBuffer();
@@ -79,7 +88,8 @@ public:
 	Config(const char* file_name, const char* from_zip);
 
 	bool Load() override;
-	void Save() override;
+	void Save() override;	
+
 	JSONNode* GetRootNode(const char* member);
 	inline bool operator!() const override;
 
@@ -92,7 +102,7 @@ class JSONNode
 {
 public:
 
-	JSONNode(const char* path = nullptr, Config* config = nullptr);
+	JSONNode(const char* path = nullptr, Config* config = nullptr, bool isArray = false);
 	~JSONNode();
 
 	// Push
@@ -100,8 +110,10 @@ public:
 	void		PushInt(const char* name, const int value);
 	void		PushUInt(const char* name, const unsigned int value);
 	void		PushFloat(const char* name, const float value);
+	void		PushFloatVector(const char* name, math::vec vector);
 	void		PushDouble(const char* name, const double value);
 	void		PushString(const char* name, const char* value);
+	void		PushValue(rapidjson::Value* val);
 	JSONNode*	PushJObject(const char* name);
 
 	// Pull
@@ -109,20 +121,26 @@ public:
 	int				PullInt(const char* name, int deflt);
 	unsigned int	PullUInt(const char* name, unsigned int deflt);
 	float			PullFloat(const char* name, float deflt);
+	math::vec		PullFloatVector(const char* name, math::vec deflt);
 	double			PullDouble(const char* name, double deflt);
 	const char*		PullString(const char* name, const char* deflt);
 	JSONNode*		PullJObject(const char* name);
 
+	//GameObject
+	RE_GameObject* FillGO();
+
 	// Utility
 	inline bool operator!() const;
 	const char* GetDocumentPath() const;
+	rapidjson::Document* GetDocument();
+
+	void SetArray();
 
 private:
 
 	JSONNode(JSONNode& node);
 
 private:
-
 	Config* config;
 	std::string pointerPath;
 };

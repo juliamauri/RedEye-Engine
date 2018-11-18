@@ -163,7 +163,7 @@ void MeshManager::ProcessModel(const char* buffer, unsigned int size)
 		LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 	else
 	{
-		RE_GameObject* go = new RE_GameObject(scene->mRootNode->mName.C_Str(), to_fill);
+		RE_GameObject* go = new RE_GameObject(scene->mRootNode->mName.C_Str(), GUID_NULL, to_fill);
 		to_fill = go;
 		aiMatrix4x4 identity;
 		ProcessNode(scene->mRootNode, scene, identity);
@@ -191,7 +191,7 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 	{
 		for (; i < node->mNumMeshes; i++)
 		{
-			RE_GameObject* go = new RE_GameObject(node->mName.C_Str(), to_fill);
+			RE_GameObject* go = new RE_GameObject(node->mName.C_Str(), GUID_NULL, to_fill);
 			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
 
 			RE_CompMesh* comp_mesh = nullptr;

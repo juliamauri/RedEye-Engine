@@ -5,21 +5,29 @@
 #include "MathGeoLib\include\MathGeoLib.h"
 #include <list>
 
+#pragma comment(lib, "rpcrt4.lib")  // UuidCreate - Minimum supported OS Win 2000
+#include <windows.h>
+#include <iostream>
+
+
 class RE_Component;
 class RE_CompTransform;
 class RE_CompMesh;
 class RE_CompCamera;
+class JSONNode;
 
 class RE_GameObject
 {
 public:
-	RE_GameObject(const char* name, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
+	RE_GameObject(const char* name, UUID uuid = GUID_NULL, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
 	~RE_GameObject();
 
 	void PreUpdate();
 	void Update();
 	void PostUpdate();
 	void Draw();
+
+	void Serialize(JSONNode* node);
 
 	// Children
 	void AddChild(RE_GameObject* child);
@@ -57,6 +65,8 @@ public:
 	RE_CompMesh* GetMesh() const;
 	RE_CompCamera* GetCamera() const;
 
+	RE_GameObject* GetGoFromUUID(UUID parent);
+
 	// Transform
 	void TransformModified();
 
@@ -78,6 +88,8 @@ private:
 
 	bool active = true;
 	bool isStatic = false;
+
+	UUID uuid;
 
 	std::string name;
 	math::AABB local_bounding_box;
