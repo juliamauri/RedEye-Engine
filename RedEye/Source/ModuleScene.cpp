@@ -41,7 +41,7 @@ bool ModuleScene::Start()
 	path_scene += ".re";
 
 	Config scene_file(path_scene.c_str(), App->fs->GetZipPath());
-	if (scene_file.Load() && false)
+	if (scene_file.Load())
 	{
 		JSONNode* node = scene_file.GetRootNode("Game Objects");
 		root = node->FillGO();

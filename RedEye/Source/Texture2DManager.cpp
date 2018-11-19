@@ -114,6 +114,15 @@ void Texture2DManager::LoadTexture2D(const char * path)
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	new_image = ProcessTexture(file_path.c_str(), GetExtensionIL(extension.c_str()), filename.c_str());
+
+	if (new_image)
+	{
+		ResourceContainer* texure_resource = (ResourceContainer*)new_image;
+		texure_resource->SetType(Resource_Type::R_TEXTURE);
+		texure_resource->SetMD5(md5_genereted.c_str());
+		texure_resource->SetFilePath(std::string(path + std::string("/") + filename).c_str());
+		App->resources->Reference(texure_resource);
+	}
 }
 
 void Texture2DManager::use(const char* TextureID)
