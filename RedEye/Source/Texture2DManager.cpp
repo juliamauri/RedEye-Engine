@@ -72,7 +72,7 @@ const char* Texture2DManager::LoadTexture2D(const char * name, ImageExtensionTyp
 		return App->resources->Reference(texure_resource);
 	}
 	else
-		return App->resources->At(exists_md5.c_str())->GetMD5()->c_str();
+		return App->resources->At(exists_md5.c_str())->GetMD5();
 }
 
 const char* Texture2DManager::LoadTexture2D(const char * path, const char* file_name, bool droped)
@@ -103,24 +103,24 @@ const char* Texture2DManager::LoadTexture2D(const char * path, const char* file_
 		return App->resources->Reference(texure_resource);
 	}
 	else
-		return App->resources->At(exists_md5.c_str())->GetMD5()->c_str();
+		return App->resources->At(exists_md5.c_str())->GetMD5();
 }
 
-void Texture2DManager::LoadTexture2D(const char * path)
+void Texture2DManager::LoadTexture2D(const char * path, bool from_Library, const char* assets_file)
 {
 	Texture2D* new_image = nullptr;
 	std::string file_path(path);
 	std::string filename = file_path.substr(file_path.find_last_of("/") + 1);;
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 
-	new_image = ProcessTexture(file_path.c_str(), GetExtensionIL(extension.c_str()), filename.c_str());
+	new_image = ProcessTexture(file_path.c_str(), (from_Library) ? IL_DDS : GetExtensionIL(extension.c_str()), filename.c_str(), false, from_Library);
 
 	if (new_image)
 	{
 		ResourceContainer* texure_resource = (ResourceContainer*)new_image;
 		texure_resource->SetType(Resource_Type::R_TEXTURE);
 		texure_resource->SetMD5(md5_genereted.c_str());
-		texure_resource->SetFilePath(std::string(path + std::string("/") + filename).c_str());
+		texure_resource->SetFilePath((!from_Library) ? path : assets_file);
 		App->resources->Reference(texure_resource);
 	}
 }
@@ -145,7 +145,7 @@ void Texture2DManager::DeleteTexture2D(const char* TextureID)
 	//App->resources->UnReference(TextureID);
 }
 
-Texture2D * Texture2DManager::ProcessTexture(const char * path, int extension, const char * name, bool droped)
+Texture2D * Texture2DManager::ProcessTexture(const char * path, int extension, const char * name, bool droped, bool from_Library)
 {
 	uint ID = 0;
 	int width = 0;
@@ -180,7 +180,14 @@ Texture2D * Texture2DManager::ProcessTexture(const char * path, int extension, c
 		RE_FileIO image(path);
 		if (image.Load())
 		{
-			md5_genereted = md5(path);
+			if (!from_Library)
+				md5_genereted = md5(path);
+			else
+			{
+				std::string fullname(name);
+				size_t lastindex = fullname.find_last_of(".");
+				md5_genereted = fullname.substr(0, lastindex);
+			}
 			is_reference = App->resources->IsReference(md5_genereted.c_str());
 			if (is_reference)
 				exists_md5 = is_reference;
@@ -190,13 +197,29 @@ Texture2D * Texture2DManager::ProcessTexture(const char * path, int extension, c
 				ilBindImage(imageID);
 
 				ilLoadL(extension, image.GetBuffer(), image.GetSize());
+
+				if (!from_Library)
+				{
+					if (extension == IL_TGA)
+						ilFlipSurfaceDxtcData();
+
+					//Save into dds
+					ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
+					ILubyte *data = new ILubyte[size];
+
+					ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
+					std::string save_path("Library/Images/");
+					save_path += md5_genereted;
+					save_path += ".eye";
+					RE_FileIO save(save_path.c_str(), App->fs->GetZipPath());
+					save.Save((char*)data, size);
+				}
 			}
 		}
 	}
 
 	if (!is_reference)
 	{
-
 		if (extension == IL_TGA)
 			iluFlipImage();
 
@@ -236,7 +259,7 @@ int Texture2DManager::GetExtensionIL(const char* ext)
 {
 	int IL_Extension = 0;
 	std::string exttension(ext);
-	if (exttension.compare("dds") == 0)
+	if (exttension.compare("dds") == 0 || exttension.compare("eye") == 0)
 		IL_Extension = IL_DDS;
 	else if (exttension.compare("png") == 0)
 		IL_Extension = IL_PNG;

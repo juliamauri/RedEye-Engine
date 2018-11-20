@@ -14,14 +14,14 @@ public:
 
 	const char* Reference(ResourceContainer* rc);
 	const char* IsReference(const char* md5);
-	void CheckFileLoaded(const char* filepath, Resource_Type type);
+	void CheckFileLoaded(const char* filepath, const char* resource, Resource_Type type);
 	bool UnReference(const unsigned intid);
 	ResourceContainer* At(const char* md5) const;
 	unsigned int TotalReferences() const;
 	//unsigned int TotalReferenceCount() const;
 
-	typedef std::pair<std::string*, ResourceContainer*> Resource;
-	typedef std::map<std::string*, ResourceContainer*> ResourceMap;
+	typedef std::pair<std::string, ResourceContainer*> Resource;
+	typedef std::map<std::string, ResourceContainer*> ResourceMap;
 	typedef ResourceMap::iterator ResourceIter;
 	typedef ResourceMap::const_iterator ResourceConstIter;
 	

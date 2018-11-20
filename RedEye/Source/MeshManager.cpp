@@ -108,6 +108,11 @@ void MeshManager::LoadMesh(const char * path, bool dropped)
 	{
 		LOG("Loading Model from: %s", path);
 
+		std::string path_s(path);
+		unsigned int separator_pos = path_s.find_last_of(dropped ? '\\' : '/');
+		file = path_s.substr(separator_pos, path_s.size()).c_str();
+		directory = path_s.substr(0, separator_pos).c_str();
+
 		ProcessModel(mesh_file->GetBuffer(), mesh_file->GetSize(), false);
 
 		DEL(mesh_file);
@@ -279,7 +284,10 @@ RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const un
 
 	const char* exists = App->resources->IsReference(md5_id.c_str());
 	if (exists)
+	{
 		exists_md5 = exists;
+		DEL_A(exists);
+	}
 	else
 	{
 		// process indices

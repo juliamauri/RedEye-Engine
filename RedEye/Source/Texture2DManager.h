@@ -40,7 +40,7 @@ public:
 	//Load texture
 	const char* LoadTexture2D(const char* name, ImageExtensionType extension);
 	const char* LoadTexture2D(const char* path, const char* file_name, bool droped = false);
-	void LoadTexture2D(const char* path);
+	void LoadTexture2D(const char* path, bool from_Library = false, const char* assets_file = nullptr);
 	void use(const char* TextureID);
 	void drawTexture(const char* TextureID);
 	void GetWithHeight(const char* TextureID, int* w, int* h);
@@ -49,7 +49,7 @@ public:
 
 private:
 
-	Texture2D* ProcessTexture(const char* path, int extension, const char* name, bool  droped = false);
+	Texture2D* ProcessTexture(const char* path, int extension, const char* name, bool  droped = false, bool from_Library = false);
 
 	const char* folderPath;
 	bool texturesmodified = false;

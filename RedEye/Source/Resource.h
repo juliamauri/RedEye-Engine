@@ -24,7 +24,7 @@ public:
 	virtual ~ResourceContainer();
 	const char* GetName() const;
 	const char* GetOrigin() const;
-	std::string* GetMD5() const;
+	const char* GetMD5() const;
 	Resource_Type GetType() const;
 	
 	void SetType(Resource_Type type);
@@ -36,7 +36,7 @@ private:
 	const char* name;
 	const char* origin;
 	std::string from_file;
-	std::string* md5 = nullptr;
+	std::string md5;
 	Resource_Type type;
 };
 

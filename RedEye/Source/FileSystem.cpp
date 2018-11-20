@@ -228,7 +228,7 @@ const char * FileSystem::GetZipPath()
 ///////////////////RE_FileIO
 ////////////////////////////////////////////////////////////////////
 
-RE_FileIO::RE_FileIO(const char* file_name, const char* from_zip) : buffer(nullptr), file_name(file_name) {}
+RE_FileIO::RE_FileIO(const char* file_name, const char* from_zip) : buffer(nullptr), file_name(file_name), from_zip(from_zip) {}
 
 RE_FileIO::~RE_FileIO()
 {
@@ -246,9 +246,9 @@ void RE_FileIO::Save()
 	HardSave(buffer);
 }
 
-void RE_FileIO::Save(char * buffer)
+void RE_FileIO::Save(char * buffer, unsigned int size)
 {
-	WriteFile(from_zip, file_name, buffer, size = (strnlen_s(buffer, 0xffff)));
+	WriteFile(from_zip, file_name, buffer, this->size = ((size == 0) ? strnlen_s(buffer, 0xffff) : size));
 }
 
 void RE_FileIO::ClearBuffer()
@@ -348,6 +348,9 @@ void RE_FileIO::HardSave(const char* buffer)
 
 void RE_FileIO::WriteFile(const char * zip_path, const char * filename, const char * buffer, unsigned int size)
 {
+	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
+		LOG("Ettot when unmount: %s", PHYSFS_getLastError());
+
 	struct zip *f_zip = NULL;
 	int error = 0;
 	f_zip = zip_open(zip_path, ZIP_CHECKCONS, &error); /* on ouvre l'archive zip */
@@ -365,6 +368,8 @@ void RE_FileIO::WriteFile(const char * zip_path, const char * filename, const ch
 
 	zip_close(f_zip);
 	f_zip = NULL;
+
+	PHYSFS_mount(from_zip, NULL, 1);
 }
 
 
@@ -405,15 +410,8 @@ void Config::Save()
 	size = s_buffer.GetSize();
 	const char* output = s_buffer.GetString();
 
-	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
-		LOG("Ettot when unmount: %s", PHYSFS_getLastError());
-
 	std::string file(file_name);
 	WriteFile(from_zip, file.c_str(), output, size);
-
-	PHYSFS_mount(from_zip, NULL, 1);
-	
-	//HardSave(output);
 }
 
 JSONNode* Config::GetRootNode(const char* member)
@@ -783,19 +781,22 @@ RE_GameObject * JSONNode::FillGO()
 					math::vec scale = math::vec::zero;
 					math::vec rotation = math::vec::zero;
 					std::string file;
+					const char* reference = nullptr;
 					switch (type)
 					{
 					case C_MESH:
 						file = c.FindMember("file")->value.GetString();
-						App->resources->CheckFileLoaded(file.c_str(), Resource_Type::R_MESH);
-						mesh = new RE_CompMesh(new_go, c.FindMember("reference")->value.GetString());
+						reference = c.FindMember("reference")->value.GetString();
+						App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MESH);
+						mesh = new RE_CompMesh(new_go, reference);
 						textures_val = &c.FindMember("textures")->value;
 						if (textures_val->IsArray())
 							for (auto& t : textures_val->GetArray())
 							{
 								file = t.FindMember("file")->value.GetString();
-								App->resources->CheckFileLoaded(file.c_str(), Resource_Type::R_TEXTURE);
-								mesh->SetTexture(t.FindMember("reference")->value.GetString());
+								reference = t.FindMember("reference")->value.GetString();
+								App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_TEXTURE);
+								mesh->SetTexture(reference);
 							}
 						new_go->AddCompMesh(mesh);
 						break;

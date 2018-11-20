@@ -56,7 +56,7 @@ public:
 
 	virtual bool Load();
 	virtual void Save();
-	virtual void Save(char* buffer);
+	virtual void Save(char* buffer, unsigned int size = 0);
 
 	void ClearBuffer();
 	char* GetBuffer();
