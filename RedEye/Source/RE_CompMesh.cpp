@@ -9,6 +9,7 @@
 #include "RE_Mesh.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
+#include "Texture2DManager.h"
 #include"RE_Math.h"
 #include "ImGui\imgui.h"
 
@@ -31,6 +32,12 @@ void RE_CompMesh::Draw()
 		ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetGlobalMatInvTrans().ptr());
 		App->meshes->DrawMesh(reference.c_str());
 	}
+	if (ptr == nullptr)
+		ptr = (RE_Mesh*)App->resources->At(reference.c_str());
+	
+	ShaderManager::use(App->scene->modelloading);
+	ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetGlobalMatInvTrans().ptr());
+	App->meshes->DrawMesh(ptr);
 
 }
 

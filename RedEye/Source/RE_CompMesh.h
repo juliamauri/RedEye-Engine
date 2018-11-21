@@ -22,6 +22,7 @@ public:
 protected:
 
 	std::string reference;
+	RE_Mesh* ptr = nullptr;
 };
 
 

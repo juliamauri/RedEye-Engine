@@ -131,6 +131,11 @@ void MeshManager::DrawMesh(const char* reference)
 		((RE_Mesh*)App->resources->At(reference))->Draw(default_shader);
 }
 
+void MeshManager::DrawMesh(RE_Mesh * mesh)
+{
+	mesh->Draw(default_shader);
+}
+
 void MeshManager::SetDefaultShader(unsigned int shader)
 {
 	default_shader = shader;

@@ -10,6 +10,7 @@
 #include "RE_Component.h"
 #include "RE_CompTransform.h"
 #include "RE_PrimitiveManager.h"
+#include "ResourceManager.h"
 #include "FileSystem.h"
 
 #include "ImGui\imgui.h"
@@ -102,7 +103,9 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 		ShaderManager::setUnsignedInt(shader_ID, (name + number).c_str(), i);
 
 		// and finally bind the texture
-		App->textures->use(textures[i].id.c_str());
+		if (textures[i].ptr == nullptr)
+			textures[i].ptr = (Texture2D*)App->resources->At(textures[i].id.c_str());
+		App->textures->use(textures[i].ptr);
 	}
 
 	// draw mesh

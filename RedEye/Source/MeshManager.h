@@ -27,6 +27,7 @@ public:
 	void LoadMesh(const char* path, const bool dropped = false);
 	unsigned int GetLoadedMesh(const char* path, const bool from_drop = false) const;
 	void DrawMesh(const char* reference);
+	void DrawMesh(RE_Mesh* mesh);
 	void SetDefaultShader(unsigned int shader);
 
 private:

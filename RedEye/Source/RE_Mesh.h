@@ -4,6 +4,8 @@
 #include "RE_Math.h"
 #include "Resource.h"
 
+struct Texture2D;
+
 struct Vertex
 {
 	math::vec Position;
@@ -16,6 +18,8 @@ struct Texture
 	std::string id;
 	std::string type;
 	std::string path;
+
+	Texture2D* ptr = nullptr;
 };
 
 class RE_Mesh : ResourceContainer
