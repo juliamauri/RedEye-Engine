@@ -130,9 +130,19 @@ void Texture2DManager::use(const char* TextureID)
 	((Texture2D*)App->resources->At(TextureID))->use();
 }
 
+void Texture2DManager::use(Texture2D * TextureID)
+{
+	TextureID->use();
+}
+
 void Texture2DManager::drawTexture(const char* TextureID)
 {
 	((Texture2D*)App->resources->At(TextureID))->DrawTextureImGui();
+}
+
+void Texture2DManager::drawTexture(Texture2D * TextureID)
+{
+	TextureID->DrawTextureImGui();
 }
 
 void Texture2DManager::GetWithHeight(const char* TextureID, int * w, int * h)

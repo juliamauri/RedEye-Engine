@@ -42,7 +42,9 @@ public:
 	const char* LoadTexture2D(const char* path, const char* file_name, bool droped = false);
 	void LoadTexture2D(const char* path, bool from_Library = false, const char* assets_file = nullptr);
 	void use(const char* TextureID);
+	void use(Texture2D* TextureID);
 	void drawTexture(const char* TextureID);
+	void drawTexture(Texture2D* TextureID);
 	void GetWithHeight(const char* TextureID, int* w, int* h);
 
 	void DeleteTexture2D(const char* TextureID);
