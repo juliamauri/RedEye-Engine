@@ -8,7 +8,6 @@
 #include "OutputLog.h"
 #include "SDL2\include\SDL_assert.h"
 
-
 ResourceManager::ResourceManager()
 {}
 
@@ -36,12 +35,9 @@ const char * ResourceManager::IsReference(const char * md5)
 
 	for (auto resource : resources)
 	{
-		if (resource.first.compare(md5) == 0)
+		if (std::strcmp(resource.first, md5) == 0)
 		{
-			char * writable = new char[resource.first.size() + 1];
-			std::copy(resource.first.begin(), resource.first.end(), writable);
-			writable[resource.first.size()] = '\0';
-			ret = writable;
+			ret = resource.first;
 			break;
 		}
 	}
@@ -54,7 +50,7 @@ void ResourceManager::CheckFileLoaded(const char * filepath, const char* resourc
 	bool isLoaded = false;
 	for (auto resource_it : resources)
 	{
-		if (std::string(resource_it.second->GetMD5()).compare(resource) == 0)
+		if (std::strcmp(resource_it.second->GetMD5(),resource) == 0)
 		{
 			isLoaded = true;
 			break;
@@ -77,7 +73,13 @@ void ResourceManager::CheckFileLoaded(const char * filepath, const char* resourc
 				App->textures->LoadTexture2D(filepath);
 			break;
 		case R_MESH:
-			App->meshes->LoadMesh(filepath);
+			path_library += "Meshes/";
+			path_library += resource;
+			path_library += ".red";
+			if (App->fs->Exists(path_library.c_str()))
+				App->meshes->LoadDirectMesh(path_library.c_str(), resource, filepath);
+			else
+				App->meshes->LoadMesh(filepath);
 			break;
 		default:
 			break;
@@ -111,7 +113,7 @@ ResourceContainer* ResourceManager::At(const char* md5) const
 
 	for (auto resource : resources)
 	{
-		if (resource.first.compare(md5) == 0)
+		if (std::strcmp(resource.first,md5) == 0)
 		{
 			ret = resource.second;
 			break;

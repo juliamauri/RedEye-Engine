@@ -9,11 +9,19 @@ ResourceContainer::ResourceContainer(const char* _name, const char * _origin, Re
 	name = (_name != nullptr) ? _name : "unnkown";
 	this->type = type;
 	if (_md5)
-		md5 = _md5;
+	{
+		std::string str(_md5);
+		char* writtable = new char[str.size() + 1];
+		std::copy(str.begin(), str.end(), writtable);
+		writtable[str.size()] = '\0';
+		md5 = writtable;
+	}
 }
 
 ResourceContainer::~ResourceContainer()
 {
+	if (md5)
+		DEL_A(md5);
 }
 
 const char * ResourceContainer::GetName() const
@@ -28,7 +36,7 @@ const char * ResourceContainer::GetOrigin() const
 
 const char* ResourceContainer::GetMD5() const
 {
-	return md5.c_str();
+	return md5;
 }
 
 Resource_Type ResourceContainer::GetType() const
@@ -43,7 +51,19 @@ void ResourceContainer::SetType(Resource_Type type)
 
 void ResourceContainer::SetMD5(const char * _md5)
 {
-	md5 = _md5;
+	if (md5)
+	{
+		DEL_A(md5);
+		md5 = nullptr;
+	}
+	if (_md5)
+	{
+		std::string str(_md5);
+		char* writtable = new char[str.size() + 1];
+		std::copy(str.begin(), str.end(), writtable);
+		writtable[str.size()] = '\0';
+		md5 = writtable;
+	}
 }
 
 void ResourceContainer::SetFilePath(const char * path)

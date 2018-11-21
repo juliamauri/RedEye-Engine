@@ -20,8 +20,8 @@ public:
 	unsigned int TotalReferences() const;
 	//unsigned int TotalReferenceCount() const;
 
-	typedef std::pair<std::string, ResourceContainer*> Resource;
-	typedef std::map<std::string, ResourceContainer*> ResourceMap;
+	typedef std::pair<const char*, ResourceContainer*> Resource;
+	typedef std::map<const char*, ResourceContainer*> ResourceMap;
 	typedef ResourceMap::iterator ResourceIter;
 	typedef ResourceMap::const_iterator ResourceConstIter;
 	

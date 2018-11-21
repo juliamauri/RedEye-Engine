@@ -36,7 +36,7 @@ private:
 	const char* name;
 	const char* origin;
 	std::string from_file;
-	std::string md5;
+	const char* md5 = nullptr;
 	Resource_Type type;
 };
 
