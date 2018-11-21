@@ -119,6 +119,30 @@ void MeshManager::LoadMesh(const char * path, bool dropped)
 	}
 }
 
+void MeshManager::LoadDirectMesh(const char* file_library, const char* reference, const char* file_assets)
+{
+	std::vector<Texture> null_text;
+	std::vector<Vertex> vertexes;
+	std::vector<unsigned int> indexes;
+
+	Config mesh_serialized(file_library, App->fs->GetZipPath());
+
+	if (mesh_serialized.Load())
+	{
+		JSONNode* mesh_json = mesh_serialized.GetRootNode("mesh");
+		mesh_json->PullMeshVertex(&vertexes, &indexes);
+
+		RE_Mesh* mesh = new RE_Mesh(vertexes, indexes, null_text, indexes.size() / 3);
+		ResourceContainer* mesh_resource = (ResourceContainer*)mesh;
+		mesh_resource->SetType(Resource_Type::R_MESH);
+		mesh_resource->SetMD5(reference);
+		mesh_resource->SetFilePath(file_assets);
+		App->resources->Reference(mesh_resource);
+
+		DEL(mesh_json);
+	}
+}
+
 unsigned int MeshManager::GetLoadedMesh(const char * path, const bool from_drop) const
 {
 	// TODO search for mesh with path
@@ -280,7 +304,7 @@ RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const un
 
 	for (auto vertice : vertices)
 	{
-		vertex_buffer += vertice.Normal.ToString();
+		vertex_buffer += vertice.Position.ToString();
 	}
 
 	RE_Mesh* ret_mesh = nullptr;
@@ -289,10 +313,7 @@ RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const un
 
 	const char* exists = App->resources->IsReference(md5_id.c_str());
 	if (exists)
-	{
 		exists_md5 = exists;
-		DEL_A(exists);
-	}
 	else
 	{
 		// process indices
@@ -319,6 +340,23 @@ RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const un
 			//std::vector<_Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 			//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		}
+
+		
+		std::string save_path("Library/Meshes/");
+		save_path += md5_id;
+		save_path += ".red";
+		Config save_mesh(save_path.c_str(), App->fs->GetZipPath());
+		JSONNode* mesh_serialize = save_mesh.GetRootNode("mesh");
+		mesh_serialize->SetObject();
+		mesh_serialize->PushMeshVertex(vertices, indices);
+		save_mesh.Save();
+		DEL(mesh_serialize);
+		/*
+		Load::
+		std::vector<Vertex> test_ertices;
+		std::vector<unsigned int> test_indices;
+		mesh_serialize->PullMeshVertex(&test_ertices, &test_indices);
+		*/
 		ret_mesh = new RE_Mesh(vertices, indices, textures, mesh->mNumFaces);
 		ResourceContainer* mesh_resource = (ResourceContainer*)ret_mesh;
 		mesh_resource->SetType(Resource_Type::R_MESH);
@@ -352,7 +390,12 @@ std::vector<Texture> MeshManager::LoadMaterialTextures(aiMaterial * mat, aiTextu
 			Texture texture;
 			texture.id = App->textures->LoadTexture2D(directory.c_str(), str.C_Str(), from_drop);
 			texture.type = typeName;
-			texture.path = str.C_Str();
+			std::string tex_path(directory);
+			tex_path += "/";
+			std::string text_filename(str.C_Str());
+			unsigned int separator_pos = text_filename.find_last_of('\\');
+			tex_path += text_filename.substr(separator_pos + 1, text_filename.size()).c_str();
+			texture.path = tex_path.c_str();
 			textures.push_back(texture);
 			textures_loaded.push_back(texture); // add to loaded textures
 		}

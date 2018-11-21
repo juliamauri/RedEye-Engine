@@ -12,6 +12,7 @@
 class Config;
 class RE_FileIO;
 class RE_GameObject;
+struct Vertex;
 
 class FileSystem
 {
@@ -52,7 +53,7 @@ class RE_FileIO
 {
 public:
 	RE_FileIO(const char* file_name, const char* from_zip = nullptr);
-	~RE_FileIO();
+	virtual ~RE_FileIO();
 
 	virtual bool Load();
 	virtual void Save();
@@ -114,6 +115,7 @@ public:
 	void		PushDouble(const char* name, const double value);
 	void		PushString(const char* name, const char* value);
 	void		PushValue(rapidjson::Value* val);
+	void		PushMeshVertex(std::vector<Vertex>& vertexes, std::vector<unsigned int>& indeces);
 	JSONNode*	PushJObject(const char* name);
 
 	// Pull
@@ -124,6 +126,7 @@ public:
 	math::vec		PullFloatVector(const char* name, math::vec deflt);
 	double			PullDouble(const char* name, double deflt);
 	const char*		PullString(const char* name, const char* deflt);
+	void			PullMeshVertex(std::vector<Vertex>* vertexes, std::vector<unsigned int>* indeces);
 	JSONNode*		PullJObject(const char* name);
 
 	//GameObject
@@ -135,6 +138,7 @@ public:
 	rapidjson::Document* GetDocument();
 
 	void SetArray();
+	void SetObject();
 
 private:
 

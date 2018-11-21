@@ -277,7 +277,7 @@ void RE_GameObject::RemoveAllComponents()
 {
 	while (!components.empty())
 	{
-		delete (*components.begin());
+		DEL(*components.begin());
 		components.pop_front();
 	}
 }

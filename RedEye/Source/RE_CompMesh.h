@@ -4,6 +4,8 @@
 #include "RE_Component.h"
 #include <string>
 
+class RE_Mesh;
+
 class RE_CompMesh : public RE_Component
 {
 public:
@@ -16,7 +18,7 @@ public:
 
 	void Serialize(JSONNode* node, rapidjson::Value* val) override;
 
-	void SetTexture(const char* reference);
+	void SetTexture(const char* reference, const char* file_path, const char* type);
 
 
 protected:

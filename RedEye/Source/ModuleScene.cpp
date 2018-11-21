@@ -45,6 +45,7 @@ bool ModuleScene::Start()
 	{
 		JSONNode* node = scene_file.GetRootNode("Game Objects");
 		root = node->FillGO();
+		DEL(node);
 	}
 	else
 	{

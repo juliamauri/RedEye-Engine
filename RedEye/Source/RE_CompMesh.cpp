@@ -26,12 +26,6 @@ RE_CompMesh::~RE_CompMesh()
 
 void RE_CompMesh::Draw()
 {
-	if (!reference.empty())
-	{
-		ShaderManager::use(App->scene->modelloading);
-		ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetGlobalMatInvTrans().ptr());
-		App->meshes->DrawMesh(reference.c_str());
-	}
 	if (ptr == nullptr)
 		ptr = (RE_Mesh*)App->resources->At(reference.c_str());
 	
@@ -65,11 +59,12 @@ void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 	val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(((ResourceContainer*)App->resources->At(reference.c_str()))->GetFilePath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
 
 	rapidjson::Value texture_array(rapidjson::kArrayType);
-	for (auto texture : ((RE_Mesh*)App->resources->At(reference.c_str()))->textures)
+	for (auto texture : ptr->textures)
 	{
 		rapidjson::Value texture_val(rapidjson::kObjectType);
 		texture_val.AddMember(rapidjson::Value::StringRefType("reference"), rapidjson::Value().SetString(texture.id.c_str(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
-		texture_val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(((ResourceContainer*)App->resources->At(texture.id.c_str()))->GetFilePath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
+		texture_val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(texture.path.c_str(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
+		texture_val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetString(texture.type.c_str(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
 
 		texture_array.PushBack(texture_val, node->GetDocument()->GetAllocator());
 	}
@@ -78,10 +73,33 @@ void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
 }
 
-void RE_CompMesh::SetTexture(const char * reference)
+void RE_CompMesh::SetTexture(const char * reference, const char* file_path, const char* type)
 {
-	Texture tex;
-	tex.id = reference;
-	((RE_Mesh*)App->resources->At(this->reference.c_str()))->textures.push_back(tex);
+	if(ptr == nullptr)
+		ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
+
+	bool have_texture = false;
+	if (ptr->textures.size() > 0)
+	{
+		for (auto texture : ptr->textures)
+			if (texture.id.compare(reference) == 0)
+			{
+				have_texture = true;
+				break;
+			}
+	}
+
+	if (!have_texture)
+	{
+		Texture tex;
+		const char* is_reference = App->resources->IsReference(reference);
+		if (is_reference)
+		{
+			tex.path = file_path;
+			tex.type = type;
+			tex.id = is_reference;
+			ptr->textures.push_back(tex);
+		}
+	}
 }
 

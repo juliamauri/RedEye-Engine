@@ -25,6 +25,7 @@ public:
 	bool Init(const char* def_shader = nullptr);
 	void LoadMeshOnGameObject(RE_GameObject* parent, const char* path, const bool dropped = false);
 	void LoadMesh(const char* path, const bool dropped = false);
+	void LoadDirectMesh(const char* file_library, const char* reference, const char* file_assets);
 	unsigned int GetLoadedMesh(const char* path, const bool from_drop = false) const;
 	void DrawMesh(const char* reference);
 	void DrawMesh(RE_Mesh* mesh);
