@@ -23,6 +23,7 @@ public:
 	ResourceContainer(const char* name = nullptr, const char* origin = nullptr, Resource_Type type = R_UNDEFINED, const char* md5 = nullptr);
 	virtual ~ResourceContainer();
 	const char* GetName() const;
+	const char* GetFilePath() const;
 	const char* GetOrigin() const;
 	const char* GetMD5() const;
 	Resource_Type GetType() const;
@@ -30,7 +31,6 @@ public:
 	void SetType(Resource_Type type);
 	void SetMD5(const char* md5);
 	void SetFilePath(const char* path);
-	const char* GetFilePath();
 
 private:
 	const char* name;
