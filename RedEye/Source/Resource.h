@@ -1,6 +1,9 @@
 #ifndef __RESOURCE_H__
 #define __RESOURCE_H__
 
+// disable warning for unsafe copy
+#pragma warning(disable : 4996)
+
 class RE_Mesh;
 class RE_Shader;
 class RE_Texture;

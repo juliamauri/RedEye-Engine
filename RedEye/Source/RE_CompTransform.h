@@ -38,6 +38,8 @@ public:
 	math::float4x4 GetGlobalMatrix() const;
 	math::float4x4 GetGlobalMatInvTrans() const;
 
+	void SetTransformMat();
+
 	void DrawProperties();
 	void Reset();
 	bool HasChanged() const;

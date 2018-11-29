@@ -71,7 +71,7 @@ void ResourceContainer::SetFilePath(const char * path)
 	from_file = path;
 }
 
-const char * ResourceContainer::GetFilePath()
+const char * ResourceContainer::GetFilePath() const
 {
 	return from_file.c_str();
 }

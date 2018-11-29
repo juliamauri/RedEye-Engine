@@ -234,15 +234,15 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 				go->AddCompMesh(comp_mesh);
 
 				aiVector3D scale;
-				aiVector3D rotation;
+				aiQuaternion rotation;
 				aiVector3D position;
 
 				transform.Decompose(scale, rotation, position);
 
-				go->GetTransform()->SetLocalRot(math::vec(rotation.x, rotation.y, rotation.z));
+				go->GetTransform()->SetLocalRot(math::Quat(rotation.w, rotation.x, rotation.y, rotation.z));
 				go->GetTransform()->SetPos(math::vec(position.x, position.y, position.z));
 				//go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
-
+				transform = aiMatrix4x4();
 				//meshes.rbegin()->name = node->mName.C_Str();
 				//total_triangle_count += meshes.rbegin()->triangle_count;
 			}
@@ -396,6 +396,7 @@ std::vector<Texture> MeshManager::LoadMaterialTextures(aiMaterial * mat, aiTextu
 			unsigned int separator_pos = text_filename.find_last_of('\\');
 			tex_path += text_filename.substr(separator_pos + 1, text_filename.size()).c_str();
 			texture.path = tex_path.c_str();
+			texture.ptr = (Texture2D*)App->resources->At(texture.id.c_str());
 			textures.push_back(texture);
 			textures_loaded.push_back(texture); // add to loaded textures
 		}

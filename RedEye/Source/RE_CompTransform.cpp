@@ -158,6 +158,10 @@ math::float4x4 RE_CompTransform::GetGlobalMatInvTrans() const
 	return GetGlobalMatrix().InverseTransposed();
 }
 
+void RE_CompTransform::SetTransformMat()
+{
+}
+
 math::float4x4 RE_CompTransform::GetGlobalMatrix() const
 {
 	return float4x4::FromTRS(GetGlobalPosition(), GetGlobalRot(), GetGlobalScale());
@@ -261,7 +265,7 @@ void RE_CompTransform::CalcGlobalTransform(bool call_transform_modified)
 
 		if (parent != nullptr && parent->GetTransform() != nullptr)
 		{
-			math::float4x4 global_transform = parent->GetTransform()->GetGlobalMatrix().Inverted();
+			math::float4x4 global_transform = parent->GetTransform()->GetGlobalMatrix() * GetLocalMatrix();
 
 			right = global_transform.Col3(0).Normalized();
 			up = global_transform.Col3(1).Normalized();
@@ -272,7 +276,7 @@ void RE_CompTransform::CalcGlobalTransform(bool call_transform_modified)
 		}
 		else
 		{
-			math::float4x4 global_transform =  GetLocalMatrix();
+			math::float4x4 global_transform = GetLocalMatrix();
 
 			right = global_transform.Col3(0).Normalized();
 			up = global_transform.Col3(1).Normalized();
