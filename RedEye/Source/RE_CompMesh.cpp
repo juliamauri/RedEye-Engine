@@ -30,7 +30,7 @@ RE_CompMesh::~RE_CompMesh()
 void RE_CompMesh::Draw()
 {
 	ShaderManager::use(App->scene->modelloading);
-	ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetGlobalMatInvTrans().ptr());
+	ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetShaderModel());
 	App->meshes->DrawMesh(ptr);
 
 }

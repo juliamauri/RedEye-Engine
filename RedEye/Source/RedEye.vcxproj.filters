@@ -64,9 +64,6 @@
     <ClCompile Include="RE_GameObject.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="RE_CompTransform.cpp">
-      <Filter>GameObject\Components</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompMesh.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
@@ -111,6 +108,9 @@
     </ClCompile>
     <ClCompile Include="md5.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CompTransform.cpp">
+      <Filter>GameObject\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -318,9 +318,6 @@
     <ClInclude Include="RE_GameObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="RE_CompTransform.h">
-      <Filter>GameObject\Components</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompPrimitive.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
@@ -365,6 +362,9 @@
     </ClInclude>
     <ClInclude Include="md5.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompTransform.h">
+      <Filter>GameObject\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

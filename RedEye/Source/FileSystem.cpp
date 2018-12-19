@@ -828,13 +828,13 @@ RE_GameObject * JSONNode::FillGO()
 				go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid);
 
 				rapidjson::Value& vector = v.FindMember("position")->value;
-				go->GetTransform()->SetPos({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+				go->GetTransform()->SetPosition({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
 
 				vector = v.FindMember("scale")->value;
 				go->GetTransform()->SetScale({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
 
 				vector = v.FindMember("rotation")->value;
-				go->GetTransform()->SetLocalRot({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+				go->GetTransform()->SetRotation({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
 
 				first = false;
 				continue;
@@ -845,13 +845,13 @@ RE_GameObject * JSONNode::FillGO()
 			RE_GameObject* new_go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid, go->GetGoFromUUID(parent_uuid));
 
 			rapidjson::Value& vector = v.FindMember("position")->value;
-			new_go->GetTransform()->SetPos({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+			new_go->GetTransform()->SetPosition({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
 
 			vector = v.FindMember("scale")->value;
 			new_go->GetTransform()->SetScale({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
 
 			vector = v.FindMember("rotation")->value;
-			new_go->GetTransform()->SetLocalRot({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+			new_go->GetTransform()->SetRotation({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
 		
 			rapidjson::Value& components = v.FindMember("components")->value;
 			if (components.IsArray())

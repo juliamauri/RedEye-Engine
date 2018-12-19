@@ -22,6 +22,8 @@ public:
 
 	static math::float4x4 Rotate(math::float3 axis, float radians);
 
+	static math::float4x4 Rotate(math::Quat quat);
+
 private:
 
 	math::LCG lcg;

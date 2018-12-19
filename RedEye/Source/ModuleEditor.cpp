@@ -240,11 +240,13 @@ void ModuleEditor::UpdateCamera()
 			if (App->scene->GetSelected() != nullptr
 				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
 			{
+				/*
 				// Orbit
 				transform->Orbit(
 					-mouse->mouse_x_motion,
 					mouse->mouse_y_motion,
 					App->scene->GetSelected()->GetGlobalBoundingBox().CenterPoint());
+					*/
 			}
 		}
 		else if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
@@ -255,8 +257,8 @@ void ModuleEditor::UpdateCamera()
 			math::vec target_global_pos = App->scene->GetSelected()->GetTransform()->GetGlobalPosition();
 			math::vec camera_pos = selected_box.maxPoint + target_global_pos;
 
-			transform->SetPos(camera_pos);
-			transform->LocalLookAt(selected_box.CenterPoint());
+			transform->SetPosition(camera_pos);
+			//transform->LocalLookAt(selected_box.CenterPoint());
 		}
 		else
 		{
@@ -282,14 +284,23 @@ void ModuleEditor::UpdateCamera()
 					transform->LocalMove(Dir::DOWN, cameraSpeed);
 
 
-
+				
 				if (mouse->mouse_x_motion != 0)
-					transform->LocalRotate(transform->GetLocalMatrix().Col3(1).Normalized(), -1.00f * CAM_SENSITIVITY * DEGTORAD * mouse->mouse_x_motion);
-				if (mouse->mouse_y_motion != 0)
-					transform->LocalRotate(transform->GetLocalMatrix().Col3(0).Normalized(), -1.00f * CAM_SENSITIVITY * DEGTORAD * mouse->mouse_y_motion);
+				{
+					math::vec rotation = transform->GetEulerRotation();
 
-				// Cap Z roll
-				//transform->LocalRotate(transform->GetLocalMatrix().Col3(2).Normalized(), -1.00f * DEGTORAD * transform->GetLocalRotXYZ().z);
+					rotation.x += CAM_SENSITIVITY * mouse->mouse_x_motion;
+
+					transform->SetRotation(rotation);
+				}
+				if (mouse->mouse_y_motion != 0)
+				{
+					math::vec rotation = transform->GetEulerRotation();
+
+					rotation.y += CAM_SENSITIVITY * mouse->mouse_y_motion;
+
+					transform->SetRotation(rotation);
+				}
 			}
 
 			// Zoom

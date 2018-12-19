@@ -1,183 +1,99 @@
 #include "RE_CompTransform.h"
 
 #include "RE_GameObject.h"
-#include "RE_CompCamera.h"
 #include "ImGui\imgui.h"
+#include "RE_Math.h"
 
 #define MIN_SCALE 0.001f
 
-RE_CompTransform::RE_CompTransform(RE_GameObject* go) :
-	RE_Component(C_TRANSFORM, go)
+RE_CompTransform::RE_CompTransform(RE_GameObject * go) : RE_Component(C_TRANSFORM, go) 
 {
-	CalcGlobalTransform(false);
+	scale.scale = math::vec::one;
+	if (go == nullptr)
+		useParent = false;
 }
 
 RE_CompTransform::~RE_CompTransform()
-{}
+{
+}
 
 void RE_CompTransform::Update()
 {
-	just_calculated_global = false;
-
-	if (transform_modified)
-	{
-		// make sure scale is not 0
-		scale = {
-			scale.x > MIN_SCALE ? 1.0f / scale.x : 1.0f / MIN_SCALE,
-			scale.y > MIN_SCALE ? 1.0f / scale.y : 1.0f / MIN_SCALE,
-			scale.z > MIN_SCALE ? 1.0f / scale.z : 1.0f / MIN_SCALE };
-
+	if (needed_update_transform)
 		CalcGlobalTransform();
-		transform_modified = false;
-	}
 }
 
-void RE_CompTransform::SetPos(math::vec position)
+math::float4x4 RE_CompTransform::GetMatrixModel()
 {
-	transform_modified = true;
+	return model;
+}
+
+float* RE_CompTransform::GetShaderModel()
+{
+	return model.ptr();
+}
+
+void RE_CompTransform::SetRotation(math::Quat rotation)
+{
+	rot_quat = rotation;
+	using_euler = false;
+	needed_update_transform = true;
+}
+
+void RE_CompTransform::SetRotation(math::vec rotation)
+{
+	rot_eul = rotation;
+	using_euler = true;
+	needed_update_transform = true;
+}
+
+void RE_CompTransform::SetScale(math::vec scale)
+{
+	this->scale.scale = scale;
+	this->scale.scale = {
+	this->scale.scale.x > MIN_SCALE ? 1.0f / this->scale.scale.x : 1.0f / MIN_SCALE,
+	this->scale.scale.y > MIN_SCALE ? 1.0f / this->scale.scale.y : 1.0f / MIN_SCALE,
+	this->scale.scale.z > MIN_SCALE ? 1.0f / this->scale.scale.z : 1.0f / MIN_SCALE };
+
+	needed_update_transform = true;
+}
+
+void RE_CompTransform::SetPosition(math::vec position)
+{
 	pos = position;
+	needed_update_transform = true;
 }
 
-void RE_CompTransform::SetLocalRot(math::vec euler)
-{
-	transform_modified = true;
-	rot_eul = euler;
-	math::vec rot_deg = math::DegToRad(rot_eul);
-	rot_quat = math::Quat::FromEulerXYZ(rot_deg.x, rot_deg.y, rot_deg.z);
-}
-
-void RE_CompTransform::SetLocalRot(math::Quat quat)
-{
-	transform_modified = true;
-	rot_quat = quat;
-	rot_eul = math::RadToDeg(rot_quat.ToEulerXYZ());
-}
-
-void RE_CompTransform::SetScale(math::vec _scale)
-{
-	transform_modified = true;
-	scale = _scale;
-}
-
-void RE_CompTransform::LocalRotate(math::vec axis, float angle)
-{
-	rot_quat = rot_quat.RotateAxisAngle(axis, angle) * rot_quat;
-	rot_eul = math::RadToDeg(rot_quat.ToEulerXYZ());
-
-	transform_modified = true;
-}
-
-void RE_CompTransform::GlobalRotate(math::vec axis, float angle)
-{
-	if (angle != 0.f)
-	{
-		math::float4x4 gm = GetGlobalMatrix();
-		gm = gm.RotateAxisAngle(axis, angle);
-
-		math::vec pos_global, scale_global;
-		math::Quat desired_rot_global;
-
-		if (go != nullptr)
-		{
-			
-			gm.Decompose(pos_global, desired_rot_global, scale_global);
-			rot_quat = desired_rot_global / go->GetParent()->GetTransform()->GetGlobalRot();
-
-			//rot_quat = rot_quat.RotateAxisAngle(axis, angle) * rot_quat;
-		}
-		else
-		{
-			gm.Decompose(pos_global, desired_rot_global, scale_global);
-			rot_quat = desired_rot_global * rot_quat;
-
-		}
-
-		rot_eul = math::RadToDeg(rot_quat.ToEulerXYZ());
-
-		transform_modified = true;
-	}
-}
-
-math::vec RE_CompTransform::GetGlobalPosition() const
-{
-	return (go != nullptr && go->GetParent() != nullptr) ? pos + go->GetParent()->GetTransform()->GetGlobalPosition() : pos;
-}
-
-math::Quat RE_CompTransform::GetGlobalRot() const
-{
-	return (go != nullptr && go->GetParent() != nullptr) ? rot_quat * go->GetParent()->GetTransform()->GetGlobalRot() : rot_quat;
-}
-
-math::vec RE_CompTransform::GetGlobalScale() const
-{
-	return (go != nullptr && go->GetParent() != nullptr) ? scale.Mul(go->GetParent()->GetTransform()->GetGlobalScale()) : scale;
-}
-
-math::vec RE_CompTransform::GetGlobalRight() const
-{
-	return right;
-}
-
-math::vec RE_CompTransform::GetGlobalUp() const
-{
-	return up;
-}
-
-math::vec RE_CompTransform::GetGlobalForward() const
-{
-	return front;
-}
-
-math::vec RE_CompTransform::GetLocalPosition() const
-{
-	return pos;
-}
-
-math::vec RE_CompTransform::GetLocalRotXYZ() const
-{
-	return rot_eul;
-}
-
-math::Quat RE_CompTransform::GetLocalRot() const
+math::Quat RE_CompTransform::GetQuaternionRotation()
 {
 	return rot_quat;
 }
 
-math::vec RE_CompTransform::GetLocalScale() const
+math::vec RE_CompTransform::GetEulerRotation()
 {
-	return scale;
+	return rot_eul;
 }
 
-math::float4x4 RE_CompTransform::GetLocalMatrix() const
+math::vec RE_CompTransform::GetScale()
 {
-	return float4x4::FromTRS(pos, rot_quat, scale);
+	return scale.scale;
 }
 
-math::float4x4 RE_CompTransform::GetGlobalMatInvTrans() const
+math::vec RE_CompTransform::GetPosition()
 {
-	return GetGlobalMatrix().InverseTransposed();
+	return pos;
 }
 
-void RE_CompTransform::SetTransformMat()
+math::vec RE_CompTransform::GetGlobalPosition()
 {
-}
-
-math::float4x4 RE_CompTransform::GetGlobalMatrix() const
-{
-	return float4x4::FromTRS(GetGlobalPosition(), GetGlobalRot(), GetGlobalScale());
-}
-
-void RE_CompTransform::LocalLookAt(math::vec& target_pos)
-{
-	math::vec direction = target_pos - pos;
-	SetLocalRot(math::Quat::LookAt(front, direction.Normalized(), up, math::float3(0.f, 1.f, 0.f)) * rot_quat);
+	return model.Float3x4Part().Col(3);
 }
 
 void RE_CompTransform::LocalMove(Dir dir, float speed)
 {
 	if (speed != 0.f)
 	{
-		transform_modified = true;
+		needed_update_transform = true;
 
 		switch (dir)
 		{
@@ -191,39 +107,6 @@ void RE_CompTransform::LocalMove(Dir dir, float speed)
 	}
 }
 
-void RE_CompTransform::Orbit(float xoffset, float yoffset, math::vec& target)
-{
-	float distance = math::Distance3(math::float4(pos, 0.f), math::float4(target, 0.f));
-
-
-
-
-	/*glm::vec3 focus = { target.x, target.y, target.z };
-	float distance = glm::distance(Position, focus);
-	Position = focus;
-
-	xoffset *= MouseSensitivity;
-	yoffset *= MouseSensitivity;
-
-	Yaw += xoffset;
-	Pitch += yoffset;
-
-	if (Pitch > 89.0f) Pitch = 89.0f;
-	if (Pitch < -89.0f) Pitch = -89.0f;
-
-	Front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-	Front.y = sin(glm::radians(Pitch));
-	Front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-	Front = glm::normalize(Front);
-
-	Position -= Front * distance;
-
-	Right = glm::normalize(glm::cross(Front, WorldUp));
-	Up = glm::normalize(glm::cross(Right, Front));
-
-	Focus = Position + Front;*/
-}
-
 void RE_CompTransform::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Transform"))
@@ -231,71 +114,52 @@ void RE_CompTransform::DrawProperties()
 		// Position -----------------------------------------------------
 		float p[3] = { pos.x, pos.y, pos.z };
 		if (ImGui::DragFloat3("Position", p, 0.1f, -10000.f, 10000.f, "%.2f"))
-			SetPos({ p[0], p[1], p[2] });
+			SetPosition({ p[0], p[1], p[2] });
 
 		// Rotation -----------------------------------------------------
 		float r[3] = { rot_eul.x, rot_eul.y, rot_eul.z };
 		if (ImGui::DragFloat3("Rotation", r, 0.1f, -360.f, 360.f, "%.2f"))
-			SetLocalRot({ r[0], r[1], r[2] });
+			SetRotation({ r[0], r[1], r[2] });
 
 		// Scale -----------------------------------------------------
-		float s[3] = { scale.x, scale.y, scale.z };
+		float s[3] = { scale.scale.x, scale.scale.y, scale.scale.z };
 		if (ImGui::InputFloat3("Scale", s, 2))
 			SetScale({ s[0], s[1], s[2] });
 	}
 }
 
-void RE_CompTransform::Reset()
+bool RE_CompTransform::HasChanged()
 {
-	SetPos(math::vec::zero);
-	SetLocalRot(math::Quat::identity);
-	SetScale(math::vec::one);
+	has_changed = false;
+	return !has_changed;
 }
 
-bool RE_CompTransform::HasChanged() const
+void RE_CompTransform::CalcGlobalTransform()
 {
-	return just_calculated_global;
-}
+	model = math::float4x4::identity;
 
-void RE_CompTransform::CalcGlobalTransform(bool call_transform_modified)
-{
-	if (go != nullptr)
+	if (using_euler)
 	{
-		RE_GameObject* parent = go->GetParent();
-
-		if (parent != nullptr && parent->GetTransform() != nullptr)
-		{
-			math::float4x4 global_transform = parent->GetTransform()->GetGlobalMatrix() * GetLocalMatrix();
-
-			right = global_transform.Col3(0).Normalized();
-			up = global_transform.Col3(1).Normalized();
-			front = global_transform.Col3(2).Normalized();
-
-			for (auto child : go->GetChilds())
-				child->GetTransform()->CalcGlobalTransform(call_transform_modified);
-		}
-		else
-		{
-			math::float4x4 global_transform = GetLocalMatrix();
-
-			right = global_transform.Col3(0).Normalized();
-			up = global_transform.Col3(1).Normalized();
-			front = global_transform.Col3(2).Normalized();
-
-			for (auto child : go->GetChilds())
-				child->GetTransform()->CalcGlobalTransform(call_transform_modified);
-		}
-
-		if (call_transform_modified) go->TransformModified();
+		model = model * RE_Math::Rotate(right,math::DegToRad(rot_eul.x));
+		model = model * RE_Math::Rotate(up, math::DegToRad(rot_eul.y));
+		model = model * RE_Math::Rotate(front, math::DegToRad(rot_eul.z));
 	}
 	else
-	{
-		math::float4x4 global_transform = GetLocalMatrix();
+		model = model * RE_Math::Rotate(rot_quat);
 
-		right = global_transform.Col3(0).Normalized();
-		up = global_transform.Col3(1).Normalized();
-		front = global_transform.Col3(2).Normalized();
-	}
+	model = model * scale;
 
-	just_calculated_global = true;
+	model = model * math::float4x4::Translate(pos);
+
+	if(useParent)
+		model = go->GetTransform()->GetMatrixModel() * model;
+
+	front = model.Col3(0).Normalized();
+	up = model.Col3(1).Normalized();
+	right = model.Col3(2).Normalized();
+
+	model.InverseTranspose();
+
+	needed_update_transform = false;
+	has_changed = true;
 }

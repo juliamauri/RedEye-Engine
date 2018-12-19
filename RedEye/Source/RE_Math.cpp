@@ -55,3 +55,8 @@ math::float4x4 RE_Math::Rotate(math::float3 axis, float radians)
 	axis.Normalize();
 	return math::float4x4(math::Quat::identity * math::Quat::RotateAxisAngle(axis, radians));
 }
+
+math::float4x4 RE_Math::Rotate(math::Quat quat)
+{
+	return math::float4x4(math::Quat::identity * quat);
+}

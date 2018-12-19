@@ -32,8 +32,8 @@ RE_CompCamera::RE_CompCamera(RE_GameObject * go, bool toPerspective, float near_
 	: RE_Component(C_CAMERA, go), isPerspective(toPerspective), near_plane(near_plane), far_plane(far_plane), pitch(pitch), yaw(yaw), roll(roll), h_fov_rads(h_fov_rads), v_fov_rads(v_fov_rads), h_fov_degrees(h_fov_degrees), v_fov_degrees(v_fov_degrees)
 {
 	transform = go->GetTransform();
-	transform->SetPos(position);
-	transform->SetLocalRot(rotation);
+	transform->SetPosition(position);
+	transform->SetRotation(rotation);
 	transform->SetScale(scale);
 
 	frustum.SetKind(
@@ -104,7 +104,7 @@ void RE_CompCamera::SetEulerAngle(float p, float y)
 	yaw += y;
 	pitch += p;
 
-	transform->SetLocalRot(math::vec(pitch,yaw,0.0f));
+	transform->SetRotation(math::vec(pitch,yaw,0.0f));
 }
 
 RE_CompTransform * RE_CompCamera::GetTransform() const
@@ -114,7 +114,7 @@ RE_CompTransform * RE_CompCamera::GetTransform() const
 
 void RE_CompCamera::OnTransformModified()
 {
-	math::float4x4 global_transform = transform->GetGlobalMatrix();
+	math::float4x4 global_transform = transform->GetMatrixModel();
 	/*frustum.SetFrame(
 		global_transform.Col3(3),
 		global_transform.Col3(2).Normalized(),
@@ -235,15 +235,15 @@ void RE_CompCamera::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 
 	rapidjson::Value float_array(rapidjson::kArrayType);
 
-	float_array.PushBack(GetTransform()->GetLocalPosition().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().z, node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetPosition().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetPosition().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetPosition().z, node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("position"), float_array.Move(), node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetLocalRotXYZ().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalRot().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalRot().z, node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetEulerRotation().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetEulerRotation().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetEulerRotation().z, node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("rotation"), float_array.Move(), node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetLocalScale().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().z, node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetScale().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetScale().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetScale().z, node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), node->GetDocument()->GetAllocator());
 
 	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
