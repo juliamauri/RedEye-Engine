@@ -284,20 +284,11 @@ void ModuleEditor::UpdateCamera()
 					transform->LocalMove(Dir::DOWN, cameraSpeed);
 
 
-				
-				if (mouse->mouse_x_motion != 0)
+				if (mouse->mouse_x_motion != 0 || mouse->mouse_y_motion != 0)
 				{
-					math::vec rotation = transform->GetEulerRotation();
-
-					rotation.x += CAM_SENSITIVITY * mouse->mouse_x_motion;
-
-					transform->SetRotation(rotation);
-				}
-				if (mouse->mouse_y_motion != 0)
-				{
-					math::vec rotation = transform->GetEulerRotation();
-
-					rotation.y += CAM_SENSITIVITY * mouse->mouse_y_motion;
+					math::Quat rotation = transform->GetQuaternionRotation();
+					rotation = rotation * rotation.RotateY(CAM_SENSITIVITY * mouse->mouse_x_motion);
+					rotation = rotation * rotation.RotateX(CAM_SENSITIVITY * mouse->mouse_y_motion);
 
 					transform->SetRotation(rotation);
 				}

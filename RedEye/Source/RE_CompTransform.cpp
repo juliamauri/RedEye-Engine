@@ -11,6 +11,10 @@ RE_CompTransform::RE_CompTransform(RE_GameObject * go) : RE_Component(C_TRANSFOR
 	scale.scale = math::vec::one;
 	if (go == nullptr)
 		useParent = false;
+
+	front = math::vec(0.0f, 0.0f, 1.0f);
+	up = math::vec(0.0f,1.0f,0.0f);
+	right = math::vec(1.0f,0.0f,0.0f);
 }
 
 RE_CompTransform::~RE_CompTransform()
@@ -97,7 +101,9 @@ void RE_CompTransform::LocalMove(Dir dir, float speed)
 
 		switch (dir)
 		{
-		case FORWARD:	pos -= front * speed; break;
+		case FORWARD:	
+			pos -= front * speed; 
+			break;
 		case BACKWARD:	pos += front * speed; break;
 		case LEFT:		pos -= right * speed; break;
 		case RIGHT:		pos += right * speed; break;
@@ -147,16 +153,16 @@ void RE_CompTransform::CalcGlobalTransform()
 	else
 		model = model * RE_Math::Rotate(rot_quat);
 
+	front = model.Col3(2).Normalized();
+	up = model.Col3(1).Normalized();
+	right = model.Col3(0).Normalized();
+
 	model = model * scale;
 
 	model = model * math::float4x4::Translate(pos);
 
 	if(useParent)
 		model = go->GetTransform()->GetMatrixModel() * model;
-
-	front = model.Col3(0).Normalized();
-	up = model.Col3(1).Normalized();
-	right = model.Col3(2).Normalized();
 
 	model.InverseTranspose();
 
