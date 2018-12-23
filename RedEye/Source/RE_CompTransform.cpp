@@ -90,7 +90,7 @@ math::vec RE_CompTransform::GetPosition()
 
 math::vec RE_CompTransform::GetGlobalPosition()
 {
-	return model_global.Col3(3);
+	return model_global.Row3(3);
 }
 
 void RE_CompTransform::LocalMove(Dir dir, float speed)
@@ -158,6 +158,8 @@ void RE_CompTransform::CalcGlobalTransform()
 	right = model_local.Col3(0); right.Normalize();
 	up = model_local.Col3(1); up.Normalize();
 	front = model_local.Col3(2); front.Normalize();
+
+	model_local.Transpose();
 
 	if (useParent)
 		model_global = go->GetTransform()->GetMatrixModel() * model_local;
