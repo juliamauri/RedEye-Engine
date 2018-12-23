@@ -48,6 +48,10 @@ public:
 	virtual void Draw() {}
 	virtual void DrawProperties() {}
 
+	virtual void OnPlay() {}
+	virtual void OnPause() {}
+	virtual void OnStop() {}
+
 	virtual void Save() const {}
 	virtual void Load() {}
 	virtual void Reset() {}

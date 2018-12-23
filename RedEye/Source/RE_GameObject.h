@@ -50,6 +50,11 @@ public:
 	bool IsStatic() const;
 	void SetStatic(bool value);
 
+	// Editor Controls
+	void OnPlay();
+	void OnPause();
+	void OnStop();
+
 	// Components
 	RE_Component* AddComponent(const ushortint type, const char* file_path_data = nullptr, const bool dropped = false);
 	RE_Component* GetComponent(const ushortint type) const;

@@ -31,6 +31,10 @@ public:
 	virtual update_status Update() { return UPDATE_CONTINUE; }
 	virtual update_status PostUpdate() { return UPDATE_CONTINUE; }
 
+	virtual void OnPlay() {}
+	virtual void OnPause() {}
+	virtual void OnStop() {}
+
 	virtual void DrawEditor() {}
 
 	virtual bool CleanUp() { return true; }

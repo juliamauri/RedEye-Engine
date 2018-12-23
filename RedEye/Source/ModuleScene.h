@@ -17,6 +17,10 @@ public:
 	update_status Update() override;
 	bool CleanUp() override;
 
+	void OnPlay() override;
+	void OnPause() override;
+	void OnStop() override;
+
 	void FileDrop(const char* file);
 	void RecieveEvent(const Event& e) override;
 

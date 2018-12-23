@@ -9,6 +9,7 @@
 #include "RE_CompPrimitive.h"
 #include "RE_CompMesh.h"
 #include "RE_CompCamera.h"
+#include "RE_CompParticleEmiter.h"
 #include "ShaderManager.h"
 #include "ModuleEditor.h"
 #include "OutputLog.h"
@@ -169,6 +170,24 @@ void RE_GameObject::SetStatic(bool value)
 	isStatic = value;
 }
 
+void RE_GameObject::OnPlay()
+{
+	for (auto component : components) component->OnPlay();
+	for (auto child : childs) child->OnPlay();
+}
+
+void RE_GameObject::OnPause()
+{
+	for (auto component : components) component->OnPause();
+	for (auto child : childs) child->OnPause();
+}
+
+void RE_GameObject::OnStop()
+{
+	for (auto component : components) component->OnStop();
+	for (auto child : childs) child->OnStop();
+}
+
 RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float pitch, float yaw, float roll, float h_fov_rads, float v_fov_rads, float h_fov_degrees, float v_fov_degrees, math::vec position, math::vec rotation, math::vec scale)
 {
 	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, pitch, yaw, roll, h_fov_rads, v_fov_rads, h_fov_degrees, v_fov_degrees, position, rotation, scale);
@@ -190,6 +209,14 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 		}
 		transform = new RE_CompTransform(this);
 		ret = (RE_Component*)transform;
+	}
+	else if (ComponentType(type) == C_MESH)
+	{
+		ret = (RE_Component*)new RE_CompMesh(this, file_path_data, drop);
+	}
+	else if (ComponentType(type) == C_PARTICLEEMITER)
+	{
+		ret = (RE_Component*)new RE_CompParticleEmitter(this);
 	}
 	else if (App->primitives)
 	{
@@ -253,10 +280,6 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 		default:
 			LOG_ERROR("Component of type %u is unsupported", type);
 		}
-	}
-	else if (ComponentType(type) == C_MESH)
-	{
-		ret = (RE_Component*)new RE_CompMesh(this, file_path_data, drop);
 	}
 
 	if (ret != nullptr)

@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
+#include "ModuleInput.h"
 #include "FileSystem.h"
 #include "OutputLog.h"
 #include "Texture2DManager.h"
@@ -77,6 +78,17 @@ bool ModuleScene::Start()
 update_status ModuleScene::Update()
 {
 	root->Update();
+
+	if (App->GetState() == GS_PLAY)
+	{
+		// Spawn Firework on Key 1
+		if (App->input->CheckKey(30))
+		{
+			RE_GameObject* smoke = App->scene->AddGO("Smoke");
+			smoke->AddComponent(C_PARTICLEEMITER);
+		}
+	}
+
 	return UPDATE_CONTINUE;
 }
 
@@ -86,6 +98,21 @@ bool ModuleScene::CleanUp()
 	
 	DEL(root);
 	return true;
+}
+
+void ModuleScene::OnPlay()
+{
+	root->OnPlay();
+}
+
+void ModuleScene::OnPause()
+{
+	root->OnPause();
+}
+
+void ModuleScene::OnStop()
+{
+	root->OnStop();
 }
 
 void ModuleScene::FileDrop(const char * file)
