@@ -115,6 +115,9 @@
     <ClCompile Include="RE_CompParticleEmiter.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>GameObject\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">

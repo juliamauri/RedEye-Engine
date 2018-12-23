@@ -32,6 +32,7 @@
     <ClCompile Include="ImGui\imgui_impl_sdl_gl3.cpp" />
     <ClCompile Include="md5.cpp" />
     <ClCompile Include="MeshManager.cpp" />
+    <ClCompile Include="Particle.cpp" />
     <ClCompile Include="RE_CompParticleEmiter.cpp" />
     <ClCompile Include="RE_CompTransform.cpp" />
     <ClCompile Include="OutputLog.cpp" />

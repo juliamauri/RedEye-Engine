@@ -37,19 +37,21 @@ private:
 	Particle* particles = nullptr;
 
 	math::vec point_particle_spawn = math::vec::zero;
-	math::vec direction_particle_spawn = math::vec::zero;
 	math::vec gravity_particle = math::vec::zero;
 
-	float angle_margin = 0.0f;
 
+	float timer_duration = 0.0f;
 	float duration = -1.0f;
 	float lifetime = 1.0f;
 	float lifetime_margin = 0.0f;
-	int emisionRate = 50;
-	math::vec speed_particle = math::vec::zero;
+	unsigned int max_particles = 0;
+	int emisionRate = 3;
+	math::vec direction_particle = math::vec::zero;
 	math::vec speed_margin = math::vec::zero;
+	math::vec angle_margin = math::vec::zero;
 
 	math::vec rgb_alpha = math::vec::zero;
+	unsigned int shader = 0;
 
 	RE_Mesh* mParticle = nullptr;
 };
