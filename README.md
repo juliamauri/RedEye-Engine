@@ -3,7 +3,7 @@
 
 3D Game Engine Sofware for academic purposes.
 * Repository [Github](https://github.com/juliamauri/RedEye-Engine)
-* Webpage: [RedEye Webpage]https://github.com/juliamauri/RedEye-Engine)
+* Webpage: https://juliamauri.github.io/RedEye-Engine/
 * Authors: [Julià Mauri Costa](https://github.com/juliamauri) & [Rubén Sardón](https://github.com/cumus)
 * Professor: [Ricard Pillosu](https://github.com/d0n3val)
 * University: [CITM UPC](https://www.citm.upc.edu/)
