@@ -44,7 +44,7 @@ void RE_CompParticleEmitter::Update()
 
 			while (spawn_counter > 1000.f / emissionRate)
 			{
-				spawn_counter - (1000.f / emissionRate);
+				spawn_counter -= (1000.f / emissionRate);
 				spawns_needed++;
 			}
 		}
@@ -53,9 +53,9 @@ void RE_CompParticleEmitter::Update()
 	{
 		spawn_counter += App->time->GetDeltaTime();
 
-		while (spawn_counter > 1000.f / emissionRate)
+		while (spawn_counter > 1.f / emissionRate)
 		{
-			spawn_counter - (1000.f / emissionRate);
+			spawn_counter -= (1.f / emissionRate);
 			spawns_needed++;
 		}
 	}
@@ -71,20 +71,16 @@ void RE_CompParticleEmitter::OnPlay()
 {
 	LOG_SECONDARY("particle emitter play");
 
-	if (App->time->GetGameTimer() > 0.f)
-	{
-		// Restart
-	}
-	else
-	{
-		particles = new Particle[max_particles = (unsigned int)(emissionRate * (lifetime + lifetime_margin))];
+	if (particles)
+		DEL_A(particles);
 
-		time_counter = 0.0f;
-		spawn_counter = 0.0f;
+	particles = new Particle[max_particles = (unsigned int)(emissionRate * (lifetime + lifetime_margin))];
 
-		for (unsigned int i = 0; i < max_particles; i++)
-			particles[i].SetUp(this);
-	}
+	time_counter = 0.0f;
+	spawn_counter = 0.0f;
+
+	for (unsigned int i = 0; i < max_particles; i++)
+		particles[i].SetUp(this);
 }
 
 void RE_CompParticleEmitter::OnPause()
@@ -164,6 +160,12 @@ RE_Mesh * RE_CompParticleEmitter::GetMesh() const
 
 void RE_CompParticleEmitter::Serialize(JSONNode * node, rapidjson::Value * val)
 {
+}
+
+void RE_CompParticleEmitter::SetUp(RE_Mesh * particle, unsigned int shader)
+{
+	mParticle = particle;
+	this->shader = shader;
 }
 
 void RE_CompParticleEmitter::ResetParticle(Particle * p)

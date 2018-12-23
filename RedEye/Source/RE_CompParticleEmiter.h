@@ -42,6 +42,8 @@ public:
 
 	void Serialize(JSONNode* node, rapidjson::Value* val) override;
 
+	void SetUp(RE_Mesh* paticle, unsigned int shader);
+
 private:
 
 	void ResetParticle(Particle* p);

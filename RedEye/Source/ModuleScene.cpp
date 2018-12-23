@@ -12,6 +12,7 @@
 #include "RE_CompTransform.h"
 #include "RE_CompMesh.h"
 #include "RE_CompCamera.h"
+#include "RE_CompParticleEmiter.h"
 #include "MeshManager.h"
 #include <string>
 #include <algorithm>
@@ -85,14 +86,12 @@ update_status ModuleScene::Update()
 {
 	root->Update();
 
-	if (App->GetState() == GS_PLAY)
+
+	// Spawn Firework on Key 1
+	if (App->input->CheckKey(30))
 	{
-		// Spawn Firework on Key 1
-		if (App->input->CheckKey(30))
-		{
-			RE_GameObject* smoke = App->scene->AddGO("Smoke");
-			smoke->AddComponent(C_PARTICLEEMITER);
-		}
+		RE_GameObject* smoke = App->scene->AddGO("Smoke");
+		((RE_CompParticleEmitter*)smoke->AddComponent(C_PARTICLEEMITER))->SetUp(smoke_particle, shader_particle);
 	}
 
 	return UPDATE_CONTINUE;

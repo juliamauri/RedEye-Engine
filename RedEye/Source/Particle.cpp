@@ -24,7 +24,7 @@ void Particle::Update()
 
 bool Particle::Alive()
 {
-	return current_lifetime < max_lifetime;
+	return current_lifetime < lifetime;
 }
 
 void Particle::Emit()
@@ -50,8 +50,9 @@ void Particle::Draw(unsigned int shader)
 			right.y, up.y, front.y, position.y,
 			right.z, up.z, front.z, position.z,
 			0.f, 0.f, 0.f, 1.f);
+		transform_matrix.Transpose();
 
-		if (!parent_emiter->LocalEmission())
+		if (parent_emiter->LocalEmission())
 			transform_matrix = transform_matrix * parent_emiter->GetGO()->GetTransform()->GetMatrixModel();
 
 		ShaderManager::setFloat4x4(shader, "model", transform_matrix.ptr());
@@ -62,4 +63,5 @@ void Particle::Draw(unsigned int shader)
 void Particle::SetUp(RE_CompParticleEmitter * pe)
 {
 	parent_emiter = pe;
+	lifetime = 0.0f;
 }
