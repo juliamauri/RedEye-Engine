@@ -8,9 +8,9 @@ struct Texture2D;
 
 struct Vertex
 {
-	math::vec Position;
-	math::vec Normal;
-	math::float2 TexCoords;
+	math::vec Position = math::vec::zero;
+	math::vec Normal = math::vec::zero;
+	math::float2 TexCoords = math::float2::zero;
 };
 
 struct Texture

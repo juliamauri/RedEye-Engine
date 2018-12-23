@@ -106,7 +106,7 @@ const char* Texture2DManager::LoadTexture2D(const char * path, const char* file_
 		return App->resources->At(exists_md5.c_str())->GetMD5();
 }
 
-void Texture2DManager::LoadTexture2D(const char * path, bool from_Library, const char* assets_file)
+const char* Texture2DManager::LoadTexture2D(const char * path, bool from_Library, const char* assets_file)
 {
 	Texture2D* new_image = nullptr;
 	std::string file_path(path);
@@ -121,8 +121,10 @@ void Texture2DManager::LoadTexture2D(const char * path, bool from_Library, const
 		texure_resource->SetType(Resource_Type::R_TEXTURE);
 		texure_resource->SetMD5(md5_genereted.c_str());
 		texure_resource->SetFilePath((!from_Library) ? path : assets_file);
-		App->resources->Reference(texure_resource);
+		return App->resources->Reference(texure_resource);
 	}
+	else
+		return nullptr;
 }
 
 void Texture2DManager::use(const char* TextureID)

@@ -165,6 +165,51 @@ void MeshManager::SetDefaultShader(unsigned int shader)
 	default_shader = shader;
 }
 
+RE_Mesh * MeshManager::CreateMeshByTexture(const char* image_path)
+{
+	std::vector<Texture> textures;
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+
+	//texture
+	Texture texture;
+	texture.id = App->textures->LoadTexture2D(image_path);
+	texture.path = image_path;
+	texture.type = "texture_diffuse";
+	textures.push_back(texture);
+
+	//vertex
+	Vertex v1;
+	v1.Position.Set(0.5f, 0.5f, 0.0f);
+	v1.TexCoords.Set(1.0f, 1.0f);
+	vertices.push_back(v1);
+
+	Vertex v2;
+	v2.Position.Set(0.5f, -0.5f, 0.0f);
+	v2.TexCoords.Set(1.0f, 0.0f);
+	vertices.push_back(v2);
+
+	Vertex v3;
+	v3.Position.Set(-0.5f, -0.5f, 0.0f);
+	v3.TexCoords.Set(0.0f, 0.0f);
+	vertices.push_back(v3);
+
+	Vertex v4;
+	v4.Position.Set(-0.5f, 0.5f, 0.0f);
+	v4.TexCoords.Set(0.0f, 1.0f);
+	vertices.push_back(v4);
+
+	//indices
+	indices.push_back(0);
+	indices.push_back(1);
+	indices.push_back(3);
+	indices.push_back(1);
+	indices.push_back(2);
+	indices.push_back(3);
+
+	return new RE_Mesh(vertices, indices, textures, 2);
+}
+
 void MeshManager::AddMesh(RE_Mesh * mesh)
 {
 	App->resources->Reference((ResourceContainer*)mesh);

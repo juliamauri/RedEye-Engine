@@ -31,6 +31,8 @@ public:
 	void DrawMesh(RE_Mesh* mesh);
 	void SetDefaultShader(unsigned int shader);
 
+	RE_Mesh* CreateMeshByTexture(const char* image_path);
+
 private:
 
 	void AddMesh(RE_Mesh* mesh);
