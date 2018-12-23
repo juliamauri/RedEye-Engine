@@ -373,7 +373,7 @@
       <Filter>GameObject\Components</Filter>
     </ClInclude>
     <ClInclude Include="RE_CompTransform.h">
-      <Filter>GameObject</Filter>
+      <Filter>GameObject\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

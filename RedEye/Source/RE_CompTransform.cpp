@@ -115,9 +115,9 @@ void RE_CompTransform::DrawProperties()
 			SetPosition({ p[0], p[1], p[2] });
 
 		// Rotation -----------------------------------------------------
-		float r[3] = { rot_eul.x, rot_eul.y, rot_eul.z };
+		float r[3] = { math::RadToDeg(rot_eul.x), math::RadToDeg(rot_eul.y), math::RadToDeg(rot_eul.z) };
 		if (ImGui::DragFloat3("Rotation", r, 0.1f, -360.f, 360.f, "%.2f"))
-			SetRotation({ r[0], r[1], r[2] });
+			SetRotation({ math::DegToRad(r[0]), math::DegToRad(r[1]), math::DegToRad(r[2]) });
 
 		// Scale -----------------------------------------------------
 		float s[3] = { scale.scale.x, scale.scale.y, scale.scale.z };
@@ -132,15 +132,18 @@ bool RE_CompTransform::HasChanged()
 	return !has_changed;
 }
 
+void RE_CompTransform::OnTransformModified()
+{
+	needed_update_transform = true;
+}
+
 void RE_CompTransform::CalcGlobalTransform()
 {
 	model_local = math::float4x4::identity;
 
 	model_local = model_local * scale;
 
-	model_local = model_local * math::float4x4::RotateX(math::DegToRad(rot_eul.x));
-	model_local = model_local * math::float4x4::RotateY(math::DegToRad(rot_eul.y));
-	model_local = model_local * math::float4x4::RotateZ(math::DegToRad(rot_eul.z));
+	model_local = model_local * math::float4x4(rot_quat);
 
 	model_local = model_local * math::float4x4::Translate(pos);
 
@@ -150,6 +153,9 @@ void RE_CompTransform::CalcGlobalTransform()
 		model_global = go->GetParent()->GetTransform()->GetMatrixModel() * model_local;
 	else
 		model_global = model_local;
+
+	if (go != nullptr)
+		go->TransformModified();
 
 	needed_update_transform = false;
 	has_changed = true;

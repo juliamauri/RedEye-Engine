@@ -54,6 +54,7 @@ bool ModuleScene::Start()
 		//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
 		App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.FBX");
 	}
+	root->SetBoundingBoxFromChilds();
 	root->AddComponent(C_PLANE);
 
 	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));

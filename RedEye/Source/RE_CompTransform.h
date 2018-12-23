@@ -34,6 +34,8 @@ public:
 
 	bool HasChanged();
 
+	void OnTransformModified();
+
 private:
 
 	void CalcGlobalTransform();

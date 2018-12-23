@@ -35,7 +35,7 @@ private:
 
 	void AddMesh(RE_Mesh* mesh);
 	void ProcessModel(const char* buffer, unsigned int size, bool go_fill = true);
-	void ProcessNode(aiNode* node, const aiScene* scene, aiMatrix4x4 transform);
+	void ProcessNode(aiNode* node, const aiScene* scene, bool isRoot = false);
 	RE_Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, const unsigned int pos);
 	std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 

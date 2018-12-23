@@ -39,20 +39,20 @@ RE_GameObject::~RE_GameObject()
 
 void RE_GameObject::PreUpdate()
 {
-	for (auto child : childs) child->PreUpdate();
 	for (auto component : components) component->PreUpdate();
+	for (auto child : childs) child->PreUpdate();
 }
 
 void RE_GameObject::Update()
 {
-	for (auto child : childs) child->Update();
 	for (auto component : components) component->Update();
+	for (auto child : childs) child->Update();
 }
 
 void RE_GameObject::PostUpdate()
 {
-	for (auto child : childs) child->PostUpdate();
 	for (auto component : components) component->PostUpdate();
+	for (auto child : childs) child->PostUpdate();
 }
 
 void RE_GameObject::Draw(bool recursive)
@@ -386,6 +386,9 @@ void RE_GameObject::TransformModified()
 {
 	for (auto component : components)
 		component->OnTransformModified();
+
+	for (auto child : childs)
+		child->TransformModified();
 }
 
 const char * RE_GameObject::GetName() const

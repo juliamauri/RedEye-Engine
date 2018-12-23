@@ -178,34 +178,45 @@ void MeshManager::ProcessModel(const char* buffer, unsigned int size, bool go_fi
 		LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 	else
 	{
+		RE_GameObject* go = nullptr;
+
 		if (go_fill)
 		{
-			RE_GameObject* go = new RE_GameObject(scene->mRootNode->mName.C_Str(), GUID_NULL, to_fill);
+			go = new RE_GameObject(scene->mRootNode->mName.C_Str(), GUID_NULL, to_fill);
 			to_fill = go;
-			to_fill->SetBoundingBoxFromChilds();
 			isFilliingGO = true;
 		}
 		else
 			isFilliingGO = false;
 
-		aiMatrix4x4 identity;
-		ProcessNode(scene->mRootNode, scene, identity);
+		ProcessNode(scene->mRootNode, scene, true);
 	}
 }
 
-void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 accTransform)
+void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, bool isRoot)
 {
-	//RE_CompMesh* compmesh = new RE_CompMesh;
-	//mesh->AddComponent((RE_Component*))
-
-	aiMatrix4x4 transform = node->mTransformation * accTransform;
-
-
 	LOG_SECONDARY("%s Node: %s (%u meshes | %u children)",
 		node->mParent ? "SON" : "PARENT",
 		node->mName.C_Str(),
 		node->mNumMeshes,
 		node->mNumChildren);
+
+	RE_GameObject* go_haschildren = nullptr;
+	if (node->mNumChildren > 0)
+	{
+		go_haschildren = new RE_GameObject(node->mName.C_Str(), GUID_NULL, to_fill);
+
+		aiVector3D scale;
+		aiQuaternion rotation;
+		aiVector3D position;
+		node->mTransformation.Decompose(scale, rotation, position);
+
+		go_haschildren->GetTransform()->SetRotation(math::Quat(rotation.x, rotation.y, rotation.z, rotation.w));
+		go_haschildren->GetTransform()->SetPosition(math::vec(position.x, position.y, position.z));
+		go_haschildren->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
+		go_haschildren->GetTransform()->Update();
+		to_fill = go_haschildren;
+	}
 
 	unsigned int i = 0;
 
@@ -215,7 +226,12 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 		{
 			if (isFilliingGO)
 			{
-				RE_GameObject* go = new RE_GameObject(node->mName.C_Str(), GUID_NULL, to_fill);
+				RE_GameObject* go = nullptr;
+				if (go_haschildren == nullptr)
+					go = new RE_GameObject(node->mName.C_Str(), GUID_NULL, to_fill);
+				else
+					go = go_haschildren;
+				
 				aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
 
 				RE_CompMesh* comp_mesh = nullptr;
@@ -233,16 +249,19 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 
 				go->AddCompMesh(comp_mesh);
 
-				aiVector3D scale;
-				aiVector3D rotation;
-				aiVector3D position;
+				if (go_haschildren == nullptr)
+				{
+					aiVector3D scale;
+					aiQuaternion rotation;
+					aiVector3D position;
 
-				transform.Decompose(scale, rotation, position);
+					node->mTransformation.Decompose(scale, rotation, position);
 
-				go->GetTransform()->SetRotation(math::vec(rotation.x, rotation.y, rotation.z));
-				go->GetTransform()->SetPosition(math::vec(position.x, position.y, position.z));
-				go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
-				transform = aiMatrix4x4();
+					go->GetTransform()->SetRotation(math::Quat(rotation.x, rotation.y, rotation.z, rotation.w));
+					go->GetTransform()->SetPosition(math::vec(position.x, position.y, position.z));
+					go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
+					go->GetTransform()->Update();
+				}
 				//meshes.rbegin()->name = node->mName.C_Str();
 				//total_triangle_count += meshes.rbegin()->triangle_count;
 			}
@@ -258,7 +277,11 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 	}
 
 	for (i = 0; i < node->mNumChildren; i++)
-		ProcessNode(node->mChildren[i], scene, transform);
+	{
+		if(isRoot) 
+			to_fill = go_haschildren;
+		ProcessNode(node->mChildren[i], scene);
+	}
 }
 
 RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const unsigned int pos)
