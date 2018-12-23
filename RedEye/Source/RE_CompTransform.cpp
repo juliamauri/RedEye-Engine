@@ -146,12 +146,12 @@ void RE_CompTransform::CalcGlobalTransform()
 
 	if (using_euler)
 	{
-		model = model * RE_Math::Rotate(right,math::DegToRad(rot_eul.x));
-		model = model * RE_Math::Rotate(up, math::DegToRad(rot_eul.y));
-		model = model * RE_Math::Rotate(front, math::DegToRad(rot_eul.z));
+		model = model * math::float4x4::RotateX(math::DegToRad(rot_eul.x));
+		model = model * math::float4x4::RotateY(math::DegToRad(rot_eul.y));
+		model = model * math::float4x4::RotateZ(math::DegToRad(rot_eul.z));
 	}
 	else
-		model = model * RE_Math::Rotate(rot_quat);
+		model = model * math::float4x4(rot_quat);
 
 	front = model.Col3(2).Normalized();
 	up = model.Col3(1).Normalized();
@@ -160,6 +160,7 @@ void RE_CompTransform::CalcGlobalTransform()
 	model = model * scale;
 
 	model = model * math::float4x4::Translate(pos);
+
 
 	if(useParent)
 		model = go->GetTransform()->GetMatrixModel() * model;

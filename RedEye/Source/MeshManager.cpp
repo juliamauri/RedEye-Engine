@@ -234,14 +234,14 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, aiMatrix4x4 
 				go->AddCompMesh(comp_mesh);
 
 				aiVector3D scale;
-				aiQuaternion rotation;
+				aiVector3D rotation;
 				aiVector3D position;
 
 				transform.Decompose(scale, rotation, position);
 
-				go->GetTransform()->SetRotation(math::Quat(rotation.w, rotation.x, rotation.y, rotation.z));
+				go->GetTransform()->SetRotation(math::vec(rotation.x, rotation.y, rotation.z));
 				go->GetTransform()->SetPosition(math::vec(position.x, position.y, position.z));
-				//go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
+				go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
 				transform = aiMatrix4x4();
 				//meshes.rbegin()->name = node->mName.C_Str();
 				//total_triangle_count += meshes.rbegin()->triangle_count;
