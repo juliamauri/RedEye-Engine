@@ -126,10 +126,14 @@ void RE_CompTransform::DrawProperties()
 	}
 }
 
-bool RE_CompTransform::HasChanged()
+bool RE_CompTransform::HasChanged() const
+{
+	return has_changed;
+}
+
+void RE_CompTransform::ConfirmChange()
 {
 	has_changed = false;
-	return !has_changed;
 }
 
 void RE_CompTransform::OnTransformModified()

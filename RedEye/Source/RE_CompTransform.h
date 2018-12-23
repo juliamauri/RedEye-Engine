@@ -32,7 +32,8 @@ public:
 
 	void DrawProperties();
 
-	bool HasChanged();
+	bool HasChanged() const;
+	void ConfirmChange();
 
 	void OnTransformModified();
 

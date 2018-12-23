@@ -251,6 +251,7 @@ void ModuleEditor::UpdateCamera()
 			&& App->scene->GetSelected() != nullptr)
 		{
 			// Focus
+			camera->Focus(App->scene->GetSelected());
 			math::AABB selected_box = App->scene->GetSelected()->GetGlobalBoundingBox();
 			math::vec target_global_pos = App->scene->GetSelected()->GetTransform()->GetGlobalPosition();
 			math::vec camera_pos = selected_box.maxPoint + target_global_pos;
@@ -281,17 +282,9 @@ void ModuleEditor::UpdateCamera()
 				if (App->input->CheckKey(SDL_SCANCODE_C, KEY_REPEAT))
 					camera->LocalMove(Dir::DOWN, cameraSpeed);
 
-
+				// Rotate
 				if (mouse->mouse_x_motion != 0 || mouse->mouse_y_motion != 0)
-				{
 					camera->LocalRotate(CAM_SENSITIVITY * -mouse->mouse_x_motion, CAM_SENSITIVITY * mouse->mouse_y_motion);
-					
-					//math::Quat rotation = transform->GetQuaternionRotation();
-					//rotation = rotation * rotation.RotateY(CAM_SENSITIVITY * mouse->mouse_x_motion);
-					//rotation = rotation * rotation.RotateX(CAM_SENSITIVITY * mouse->mouse_y_motion);
-					//
-					//transform->SetRotation(rotation);
-				}
 			}
 
 			// Zoom

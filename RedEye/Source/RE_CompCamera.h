@@ -35,8 +35,6 @@ public:
 	void Draw() override;
 	void DrawProperties() override;
 
-	void LocalRotate(float dx, float dy);
-
 	RE_CompTransform* GetTransform() const;
 	void OnTransformModified() override;
 
@@ -58,9 +56,13 @@ public:
 
 	float GetVFOVDegrees() const;
 
+	// Camera Controls
+	void LocalRotate(float dx, float dy);
 	void LocalMove(Dir dir, float speed);
 	void Orbit(float dx, float dy, RE_GameObject* focus);
+	void Focus(RE_GameObject* focus);
 
+	// local camera Axis
 	math::vec GetRight() const;
 	math::vec GetUp() const;
 	math::vec GetFront() const;

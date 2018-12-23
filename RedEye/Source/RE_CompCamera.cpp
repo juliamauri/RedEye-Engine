@@ -81,7 +81,10 @@ void RE_CompCamera::Update()
 		transform->Update();
 
 		if (transform->HasChanged())
+		{
+			transform->ConfirmChange();
 			OnTransformModified();
+		}
 	}
 	
 	if (need_recalculation)
@@ -282,6 +285,33 @@ void RE_CompCamera::Orbit(float dx, float dy, RE_GameObject * focus)
 	transform->Update();
 	LocalRotate(dx, dy);
 	transform->SetGlobalPosition(focus_global_pos - (front * distance));
+}
+
+void RE_CompCamera::Focus(RE_GameObject * focus)
+{
+	focus_global_pos = focus->GetTransform()->GetGlobalPosition();
+	math::vec corner = math::vec(50.f, 50.f, 50.f);
+
+	/*if (focus->GetMesh() != nullptr)
+	{
+		// include AABB from mesh
+		math::AABB box = focus->GetGlobalBoundingBox();
+		focus_global_pos += box.CenterPoint();
+		if (!box.CornerPoint(7).IsZero())
+			corner = box.CornerPoint(7);
+	}*/
+
+	front = -corner;
+	right = front.Cross(math::vec(0.f, 1.f, 0.f));
+	up = front.Cross(right);
+
+	front.Normalize();
+	right.Normalize();
+	up.Normalize();
+
+	transform->SetGlobalPosition(focus_global_pos - (corner));
+	transform->Update();
+	OnTransformModified();
 }
 
 math::vec RE_CompCamera::GetRight() const
