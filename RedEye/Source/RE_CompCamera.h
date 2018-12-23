@@ -35,7 +35,7 @@ public:
 	void Draw() override;
 	void DrawProperties() override;
 
-	void MouseScreenRotate(float dx, float dy);
+	void LocalRotate(float dx, float dy);
 
 	RE_CompTransform* GetTransform() const;
 	void OnTransformModified() override;
@@ -59,6 +59,7 @@ public:
 	float GetVFOVDegrees() const;
 
 	void LocalMove(Dir dir, float speed);
+	void Orbit(float dx, float dy, RE_GameObject* focus);
 
 	math::vec GetRight() const;
 	math::vec GetUp() const;
@@ -79,6 +80,9 @@ private:
 	math::vec right = math::vec::zero;
 	math::vec up = math::vec::zero;
 	math::vec front = math::vec::zero;
+
+	// Focus
+	math::vec focus_global_pos = math::vec::zero;
 
 	// Camera frustum
 	math::Frustum frustum;

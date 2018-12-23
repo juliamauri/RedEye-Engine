@@ -120,7 +120,7 @@ void RE_CompCamera::DrawProperties()
 	ImGui::DragFloat3("Front", f, 0.1f, -10, 10, "%.2f");
 }
 
-void RE_CompCamera::MouseScreenRotate(float dx, float dy)
+void RE_CompCamera::LocalRotate(float dx, float dy)
 {
 	if (dx != 0)
 	{
@@ -150,8 +150,6 @@ void RE_CompCamera::MouseScreenRotate(float dx, float dy)
 	front.Normalize();
 
 	OnTransformModified();
-
-	//Reference = Position - Reference;
 }
 
 RE_CompTransform * RE_CompCamera::GetTransform() const
@@ -272,6 +270,18 @@ void RE_CompCamera::LocalMove(Dir dir, float speed)
 		case DOWN:		transform->SetPosition(transform->GetPosition() - (up * speed)); break;
 		}
 	}
+}
+
+void RE_CompCamera::Orbit(float dx, float dy, RE_GameObject * focus)
+{
+	focus_global_pos = focus->GetTransform()->GetGlobalPosition();
+	math::vec position = transform->GetGlobalPosition();
+	float distance = position.Distance(focus_global_pos);
+
+	transform->SetGlobalPosition(focus_global_pos);
+	transform->Update();
+	LocalRotate(dx, dy);
+	transform->SetGlobalPosition(focus_global_pos - (front * distance));
 }
 
 math::vec RE_CompCamera::GetRight() const

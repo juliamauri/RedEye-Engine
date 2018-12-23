@@ -240,13 +240,11 @@ void ModuleEditor::UpdateCamera()
 			if (App->scene->GetSelected() != nullptr
 				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
 			{
-				/*
 				// Orbit
-				transform->Orbit(
-					-mouse->mouse_x_motion,
-					mouse->mouse_y_motion,
-					App->scene->GetSelected()->GetGlobalBoundingBox().CenterPoint());
-					*/
+				camera->Orbit(
+					CAM_SENSITIVITY * -mouse->mouse_x_motion,
+					CAM_SENSITIVITY * mouse->mouse_y_motion,
+					App->scene->GetSelected());
 			}
 		}
 		else if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
@@ -286,7 +284,7 @@ void ModuleEditor::UpdateCamera()
 
 				if (mouse->mouse_x_motion != 0 || mouse->mouse_y_motion != 0)
 				{
-					camera->MouseScreenRotate(CAM_SENSITIVITY * -mouse->mouse_x_motion, CAM_SENSITIVITY * mouse->mouse_y_motion);
+					camera->LocalRotate(CAM_SENSITIVITY * -mouse->mouse_x_motion, CAM_SENSITIVITY * mouse->mouse_y_motion);
 					
 					//math::Quat rotation = transform->GetQuaternionRotation();
 					//rotation = rotation * rotation.RotateY(CAM_SENSITIVITY * mouse->mouse_x_motion);

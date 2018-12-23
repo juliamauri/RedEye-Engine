@@ -76,7 +76,7 @@ void RE_CompTransform::SetPosition(math::vec position)
 
 void RE_CompTransform::SetGlobalPosition(math::vec global_position)
 {
-	pos = global_position - go->GetParent()->GetTransform()->GetGlobalPosition();
+	pos = go != nullptr && go->GetParent() != nullptr ? global_position - go->GetParent()->GetTransform()->GetGlobalPosition() : global_position;
 	needed_update_transform = true;
 }
 
@@ -146,7 +146,7 @@ void RE_CompTransform::CalcGlobalTransform()
 
 	model_local.Transpose();
 
-	if (useParent)
+	if (useParent && go->GetParent() != nullptr)
 		model_global = go->GetParent()->GetTransform()->GetMatrixModel() * model_local;
 	else
 		model_global = model_local;
