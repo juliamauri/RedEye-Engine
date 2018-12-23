@@ -10,7 +10,7 @@
 
 void Particle::Update()
 {
-	lifetime -= App->time->GetDeltaTime();
+	lifetime += App->time->GetDeltaTime();
 
 	if (lifetime > 0)
 	{
@@ -18,48 +18,48 @@ void Particle::Update()
 		position += speed * App->time->GetDeltaTime();
 		transform.SetPosition(position);
 		transform.Update();*/
+
 	}
-
-	if (lifetime <= 0)
-		isEmitted_flag = false;
 }
 
-bool Particle::isEmitted()
+bool Particle::Alive()
 {
-	return isEmitted_flag;
+	return current_lifetime < max_lifetime;
 }
 
-void Particle::Emit(math::vec spawn, math::vec s, math::vec g, float lt)
+void Particle::Emit()
 {
-	/*position = spawn;
-	speed = s;
-	gravity = g;
-	lifetime = lt;
-	
-	transform.SetPosition(position);
-	transform.Update();*/
+	lifetime = 100.0f;
+	current_lifetime = 0.0f;
 
-	isEmitted_flag = true;
+	right = math::vec(1.f, 0.f, 0.f);
+	up = math::vec(0.f, 1.f, 0.f);
+	front = math::vec(0.f, 0.f, 1.f);
+
+	position = math::vec::zero;
 }
 
 void Particle::Draw(unsigned int shader)
 {
-	math::float4x4 transform_matrix = math::float4x4(
-		right.x, up.x, front.x, position.x,
-		right.y, up.y, front.y, position.y,
-		right.z, up.z, front.z, position.z,
-		0.f, 0.f, 0.f, 1.f);
+	RE_Mesh* mesh = parent_emiter->GetMesh();
 
-	if (!parent_emiter->LocalEmission())
-		transform_matrix = transform_matrix * parent_emiter->GetGO()->GetTransform()->GetMatrixModel();
+	if (mesh != nullptr)
+	{
+		math::float4x4 transform_matrix = math::float4x4(
+			right.x, up.x, front.x, position.x,
+			right.y, up.y, front.y, position.y,
+			right.z, up.z, front.z, position.z,
+			0.f, 0.f, 0.f, 1.f);
 
+		if (!parent_emiter->LocalEmission())
+			transform_matrix = transform_matrix * parent_emiter->GetGO()->GetTransform()->GetMatrixModel();
 
-	ShaderManager::setFloat4x4(shader, "model", transform_matrix.ptr());
-	mesh->Draw(shader);
+		ShaderManager::setFloat4x4(shader, "model", transform_matrix.ptr());
+		mesh->Draw(shader);
+	}
 }
 
-void Particle::SetUp(RE_CompParticleEmitter * pe, RE_Mesh * m)
+void Particle::SetUp(RE_CompParticleEmitter * pe)
 {
 	parent_emiter = pe;
-	mesh = m;
 }

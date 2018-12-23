@@ -36,19 +36,28 @@ public:
 	void DrawProperties() override;
 
 	bool LocalEmission() const;
+	bool EmmissionFinished() const;
+
+	RE_Mesh* GetMesh() const;
 
 	void Serialize(JSONNode* node, rapidjson::Value* val) override;
 
 private:
+
+	void ResetParticle(Particle* p);
+	void UpdateParticles(int spawns_needed);
+
+private:
 	Particle* particles = nullptr;
 
-	// Emissor Life
-	float timer_duration = 0.0f;
+	int max_particles = 0;
+	float time_counter = 0.0f;
+	float spawn_counter = 0.0f;
+
 	float emissor_life = -1.0f;
 
 	// Emissor Values
 	float emissionRate = 3.0f;
-	int max_particles = 0;
 	math::vec spawn_position_offset = math::vec::zero;
 	math::vec gravity = math::vec::zero;
 	bool local_emission = true;

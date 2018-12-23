@@ -20,11 +20,6 @@ RE_CompParticleEmitter::~RE_CompParticleEmitter()
 
 void RE_CompParticleEmitter::Init()
 {
-	particles = new Particle[max_particles = (unsigned int)(emissionRate * (lifetime + lifetime_margin))];
-	timer_duration = emissor_life;
-
-	for (unsigned int i = 0; i < max_particles; i++)
-		particles[i].SetUp(this, mParticle);
 }
 
 void RE_CompParticleEmitter::CleanUp()
@@ -37,35 +32,35 @@ void RE_CompParticleEmitter::PreUpdate()
 
 void RE_CompParticleEmitter::Update()
 {
-	if (timer_duration != -1)
-		timer_duration -= App->time->GetDeltaTime();
+	int spawns_needed = 0;
 
-	if (timer_duration > 0 || timer_duration == -1)
+	if (emissor_life > 0.f)
 	{
-		Particle* p = nullptr;
-		int emisionCount = 0;
-		for (unsigned int i = 0; i < max_particles; i++)
+		time_counter += App->time->GetDeltaTime();
+
+		if (time_counter <= emissor_life)
 		{
-			p = &particles[i];
-			if (emisionCount <= emissionRate)
+			spawn_counter += App->time->GetDeltaTime();
+
+			while (spawn_counter > 1000.f / emissionRate)
 			{
-				if (!p->isEmitted())
-				{
-					
-					/*direction_particle.x += speed_margin.x * App->math->RandomF(-1.f, 1.f);
-					direction_particle.y += speed_margin.y * App->math->RandomF(-1.f, 1.f);
-					direction_particle.z += speed_margin.z * App->math->RandomF(-1.f, 1.f);*/
-
-					//direction_particle.
-
-					//p->Emit();
-					emisionCount++;
-				}
+				spawn_counter - (1000.f / emissionRate);
+				spawns_needed++;
 			}
-			if (p->isEmitted())
-				p->Update();
 		}
 	}
+	else
+	{
+		spawn_counter += App->time->GetDeltaTime();
+
+		while (spawn_counter > 1000.f / emissionRate)
+		{
+			spawn_counter - (1000.f / emissionRate);
+			spawns_needed++;
+		}
+	}
+
+	UpdateParticles(spawns_needed);
 }
 
 void RE_CompParticleEmitter::PostUpdate()
@@ -75,6 +70,21 @@ void RE_CompParticleEmitter::PostUpdate()
 void RE_CompParticleEmitter::OnPlay()
 {
 	LOG_SECONDARY("particle emitter play");
+
+	if (App->time->GetGameTimer() > 0.f)
+	{
+		// Restart
+	}
+	else
+	{
+		particles = new Particle[max_particles = (unsigned int)(emissionRate * (lifetime + lifetime_margin))];
+
+		time_counter = 0.0f;
+		spawn_counter = 0.0f;
+
+		for (unsigned int i = 0; i < max_particles; i++)
+			particles[i].SetUp(this);
+	}
 }
 
 void RE_CompParticleEmitter::OnPause()
@@ -89,13 +99,10 @@ void RE_CompParticleEmitter::OnStop()
 
 void RE_CompParticleEmitter::Draw()
 {
-	if (timer_duration > 0 || timer_duration == -1)
+	for (unsigned int i = 0; i < max_particles; i++)
 	{
-		for (unsigned int i = 0; i < max_particles; i++)
-		{
-			if (particles[i].isEmitted())
-				particles[i].Draw(shader);
-		}
+		if (particles[i].Alive())
+			particles[i].Draw(shader);
 	}
 }
 
@@ -108,7 +115,6 @@ void RE_CompParticleEmitter::DrawProperties()
 
 
 		ImGui::SliderFloat("Emission Rate", &emissionRate, 0.0f, 20.f, "%.2f");
-		ImGui::SliderInt("Max Particles", &max_particles, 0, MAX_PARTICLES);
 		float ps[3] = { spawn_position_offset.x, spawn_position_offset.y, spawn_position_offset.z };
 		if (ImGui::DragFloat3("Spawn Position Offset", ps, 0.1f, -10000.f, 10000.f, "%.2f"))
 			spawn_position_offset.Set(ps[0], ps[1], ps[2]);
@@ -146,6 +152,44 @@ bool RE_CompParticleEmitter::LocalEmission() const
 	return local_emission;
 }
 
+bool RE_CompParticleEmitter::EmmissionFinished() const
+{
+	return emissor_life < 0.f ? false : time_counter <= emissor_life;
+}
+
+RE_Mesh * RE_CompParticleEmitter::GetMesh() const
+{
+	return mParticle;
+}
+
 void RE_CompParticleEmitter::Serialize(JSONNode * node, rapidjson::Value * val)
 {
+}
+
+void RE_CompParticleEmitter::ResetParticle(Particle * p)
+{
+	p->Emit();
+}
+
+void RE_CompParticleEmitter::UpdateParticles(int spawns_needed)
+{
+	Particle* p = nullptr;
+
+	for (unsigned int i = 0; i < max_particles; i++)
+	{
+		p = &particles[i];
+
+		if (!p->Alive())
+		{
+			if (spawns_needed > 0)
+			{
+				ResetParticle(p);
+				spawns_needed--;
+			}
+		}
+		else
+		{
+			p->Update();
+		}
+	}
 }

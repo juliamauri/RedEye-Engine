@@ -8,24 +8,16 @@ class RE_Mesh;
 class Particle {
 public:
 	void Update();
-
-	bool isEmitted();
-	void Emit(math::vec spawn, math::vec s, math::vec g, float lt);
+	bool Alive();
+	void Emit();
 
 	void Draw(unsigned int shader);
 
-	void SetUp(RE_CompParticleEmitter* pe, RE_Mesh* mesh);
+	void SetUp(RE_CompParticleEmitter* pe);
 
-private:
+public:
 	RE_CompParticleEmitter* parent_emiter = nullptr;
-	//RE_CompTransform transform;
 
-	RE_Mesh* mesh = nullptr;
-
-	bool isEmitted_flag = false;
-	bool position_is_local = false;
-
-	// life
 	float current_lifetime = 0.0f;
 	float max_lifetime = 0.0f;
 
@@ -36,7 +28,7 @@ private:
 	math::vec front = math::vec::zero;
 
 	float speed = 0.f;
-	float lifetime = 1.0f;
+	float lifetime = 100.0f;
 };
 
 #endif // !__PARTICLE_H__
