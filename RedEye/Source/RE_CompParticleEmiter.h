@@ -21,35 +21,48 @@ public:
 	RE_CompParticleEmitter(RE_GameObject* go = nullptr);
 	~RE_CompParticleEmitter();
 
-	void Init();
-	void CleanUp();
+	void Init() override;
+	void CleanUp() override;
 
-	void PreUpdate();
-	void Update();
-	void PostUpdate();
+	void PreUpdate() override;
+	void Update() override;
+	void PostUpdate() override;
 
-	void Draw();
-	void DrawProperties();
+	void OnPlay() override;
+	void OnPause() override;
+	void OnStop() override;
 
-	void Serialize(JSONNode* node, rapidjson::Value* val);
+	void Draw() override;
+	void DrawProperties() override;
+
+	bool LocalEmission() const;
+
+	void Serialize(JSONNode* node, rapidjson::Value* val) override;
 
 private:
 	Particle* particles = nullptr;
 
-	math::vec point_particle_spawn = math::vec::zero;
-	math::vec gravity_particle = math::vec::zero;
-
-
+	// Emissor Life
 	float timer_duration = 0.0f;
-	float duration = -1.0f;
-	float lifetime = 1.0f;
-	float lifetime_margin = 0.0f;
-	unsigned int max_particles = 0;
-	int emisionRate = 3;
-	math::vec direction_particle = math::vec::zero;
-	math::vec speed_margin = math::vec::zero;
-	math::vec angle_margin = math::vec::zero;
+	float emissor_life = -1.0f;
 
+	// Emissor Values
+	float emissionRate = 3.0f;
+	int max_particles = 0;
+	math::vec spawn_position_offset = math::vec::zero;
+	math::vec gravity = math::vec::zero;
+	bool local_emission = true;
+
+	// Particle Spawned Info
+	float lifetime = 1.0f;
+	float initial_speed = 0.f;
+
+	// Margins
+	math::vec direction_margin = math::vec::zero;
+	float speed_margin = 0.f;
+	float lifetime_margin = 0.f;
+
+	// Particle Drawing
 	math::vec rgb_alpha = math::vec::zero;
 	unsigned int shader = 0;
 

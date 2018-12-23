@@ -14,10 +14,10 @@ void Particle::Update()
 
 	if (lifetime > 0)
 	{
-		speed += gravity * App->time->GetDeltaTime();
+		/*speed += gravity * App->time->GetDeltaTime();
 		position += speed * App->time->GetDeltaTime();
 		transform.SetPosition(position);
-		transform.Update();
+		transform.Update();*/
 	}
 
 	if (lifetime <= 0)
@@ -31,21 +31,30 @@ bool Particle::isEmitted()
 
 void Particle::Emit(math::vec spawn, math::vec s, math::vec g, float lt)
 {
-	position = spawn;
+	/*position = spawn;
 	speed = s;
 	gravity = g;
 	lifetime = lt;
 	
 	transform.SetPosition(position);
-	transform.Update();
+	transform.Update();*/
 
 	isEmitted_flag = true;
 }
 
 void Particle::Draw(unsigned int shader)
 {
-	math::float4x4 model = parent_emiter->GetGO()->GetTransform()->GetMatrixModel() * transform.GetMatrixModel();
-	ShaderManager::setFloat4x4(shader, "model", model.ptr());
+	math::float4x4 transform_matrix = math::float4x4(
+		right.x, up.x, front.x, position.x,
+		right.y, up.y, front.y, position.y,
+		right.z, up.z, front.z, position.z,
+		0.f, 0.f, 0.f, 1.f);
+
+	if (!parent_emiter->LocalEmission())
+		transform_matrix = transform_matrix * parent_emiter->GetGO()->GetTransform()->GetMatrixModel();
+
+
+	ShaderManager::setFloat4x4(shader, "model", transform_matrix.ptr());
 	mesh->Draw(shader);
 }
 

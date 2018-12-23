@@ -18,17 +18,25 @@ public:
 
 private:
 	RE_CompParticleEmitter* parent_emiter = nullptr;
-	RE_CompTransform transform;
-	bool isunlinked_from_parent = false;
+	//RE_CompTransform transform;
 
 	RE_Mesh* mesh = nullptr;
 
 	bool isEmitted_flag = false;
+	bool position_is_local = false;
 
-	float lifetime = 0.0f;
+	// life
+	float current_lifetime = 0.0f;
+	float max_lifetime = 0.0f;
+
 	math::vec position = math::vec::zero;
-	math::vec speed = math::vec::zero;
-	math::vec gravity = math::vec::zero;
+
+	math::vec right = math::vec::zero;
+	math::vec up = math::vec::zero;
+	math::vec front = math::vec::zero;
+
+	float speed = 0.f;
+	float lifetime = 1.0f;
 };
 
 #endif // !__PARTICLE_H__
