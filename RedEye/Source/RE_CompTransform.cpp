@@ -29,12 +29,12 @@ void RE_CompTransform::Update()
 
 math::float4x4 RE_CompTransform::GetMatrixModel()
 {
-	return model;
+	return model_global;
 }
 
 float* RE_CompTransform::GetShaderModel()
 {
-	return model.ptr();
+	return model_global.ptr();
 }
 
 void RE_CompTransform::SetRotation(math::Quat rotation)
@@ -90,7 +90,7 @@ math::vec RE_CompTransform::GetPosition()
 
 math::vec RE_CompTransform::GetGlobalPosition()
 {
-	return model.Float3x4Part().Col(3);
+	return model_global.Col3(3);
 }
 
 void RE_CompTransform::LocalMove(Dir dir, float speed)
@@ -101,9 +101,7 @@ void RE_CompTransform::LocalMove(Dir dir, float speed)
 
 		switch (dir)
 		{
-		case FORWARD:	
-			pos -= front * speed; 
-			break;
+		case FORWARD:	pos -= front * speed; break;
 		case BACKWARD:	pos += front * speed; break;
 		case LEFT:		pos -= right * speed; break;
 		case RIGHT:		pos += right * speed; break;
@@ -142,30 +140,29 @@ bool RE_CompTransform::HasChanged()
 
 void RE_CompTransform::CalcGlobalTransform()
 {
-	model = math::float4x4::identity;
+	model_local = math::float4x4::identity;
+
+	model_local = model_local * scale;
 
 	if (using_euler)
 	{
-		model = model * math::float4x4::RotateX(math::DegToRad(rot_eul.x));
-		model = model * math::float4x4::RotateY(math::DegToRad(rot_eul.y));
-		model = model * math::float4x4::RotateZ(math::DegToRad(rot_eul.z));
+		model_local = model_local * math::float4x4::RotateX(math::DegToRad(rot_eul.x));
+		model_local = model_local * math::float4x4::RotateY(math::DegToRad(rot_eul.y));
+		model_local = model_local * math::float4x4::RotateZ(math::DegToRad(rot_eul.z));
 	}
 	else
-		model = model * math::float4x4(rot_quat);
+		model_local = model_local * math::float4x4(rot_quat);
 
-	front = model.Col3(2).Normalized();
-	up = model.Col3(1).Normalized();
-	right = model.Col3(0).Normalized();
+	model_local = model_local * math::float4x4::Translate(pos);
 
-	model = model * scale;
+	right = model_local.Col3(0); right.Normalize();
+	up = model_local.Col3(1); up.Normalize();
+	front = model_local.Col3(2); front.Normalize();
 
-	model = model * math::float4x4::Translate(pos);
-
-
-	if(useParent)
-		model = go->GetTransform()->GetMatrixModel() * model;
-
-	model.InverseTranspose();
+	if (useParent)
+		model_global = go->GetTransform()->GetMatrixModel() * model_local;
+	else
+		model_global = model_local;
 
 	needed_update_transform = false;
 	has_changed = true;

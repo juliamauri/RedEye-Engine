@@ -57,7 +57,8 @@ private:
 	math::vec front = math::vec::zero;
 
 	// Matrix
-	math::float4x4 model = math::float4x4::identity;
+	math::float4x4 model_local = math::float4x4::identity;
+	math::float4x4 model_global = math::float4x4::identity;
 
 	//Separate from parent
 	bool useParent = true;
