@@ -36,14 +36,24 @@ float* RE_CompTransform::GetShaderModel()
 void RE_CompTransform::SetRotation(math::Quat rotation)
 {
 	rot_quat = rotation;
-	using_euler = false;
+	rot_eul = rotation.ToEulerXYZ();
+	rot_mat = rotation.ToFloat3x3();
 	needed_update_transform = true;
 }
 
 void RE_CompTransform::SetRotation(math::vec rotation)
 {
 	rot_eul = rotation;
-	using_euler = true;
+	rot_quat = math::Quat::FromEulerXYZ(rotation.x, rotation.y, rotation.z);
+	rot_mat = math::float3x3::FromEulerXYZ(rotation.x, rotation.y, rotation.z);
+	needed_update_transform = true;
+}
+
+void RE_CompTransform::SetRotation(math::float3x3 rotation)
+{
+	rot_mat = rotation;
+	rot_eul = rotation.ToEulerXYZ();
+	rot_quat = rotation.ToQuat();
 	needed_update_transform = true;
 }
 
@@ -61,6 +71,12 @@ void RE_CompTransform::SetScale(math::vec scale)
 void RE_CompTransform::SetPosition(math::vec position)
 {
 	pos = position;
+	needed_update_transform = true;
+}
+
+void RE_CompTransform::SetGlobalPosition(math::vec global_position)
+{
+	pos = global_position - go->GetParent()->GetTransform()->GetGlobalPosition();
 	needed_update_transform = true;
 }
 
@@ -122,25 +138,16 @@ void RE_CompTransform::CalcGlobalTransform()
 
 	model_local = model_local * scale;
 
-	if (using_euler)
-	{
-		model_local = model_local * math::float4x4::RotateX(math::DegToRad(rot_eul.x));
-		model_local = model_local * math::float4x4::RotateY(math::DegToRad(rot_eul.y));
-		model_local = model_local * math::float4x4::RotateZ(math::DegToRad(rot_eul.z));
-	}
-	else
-		model_local = model_local * math::float4x4(rot_quat);
+	model_local = model_local * math::float4x4::RotateX(math::DegToRad(rot_eul.x));
+	model_local = model_local * math::float4x4::RotateY(math::DegToRad(rot_eul.y));
+	model_local = model_local * math::float4x4::RotateZ(math::DegToRad(rot_eul.z));
 
 	model_local = model_local * math::float4x4::Translate(pos);
-
-	/*right = model_local.Col3(0); right.Normalize();
-	up = model_local.Col3(1); up.Normalize();
-	front = model_local.Col3(2); front.Normalize();*/
 
 	model_local.Transpose();
 
 	if (useParent)
-		model_global = go->GetTransform()->GetMatrixModel() * model_local;
+		model_global = go->GetParent()->GetTransform()->GetMatrixModel() * model_local;
 	else
 		model_global = model_local;
 

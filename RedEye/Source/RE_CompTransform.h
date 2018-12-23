@@ -18,8 +18,11 @@ public:
 	
 	void SetRotation(math::Quat rotation);
 	void SetRotation(math::vec rotation);
+	void SetRotation(math::float3x3 rotation);
 	void SetScale(math::vec scale);
 	void SetPosition(math::vec position);
+
+	void SetGlobalPosition(math::vec global_position);
 
 	math::Quat GetQuaternionRotation();
 	math::vec GetEulerRotation();
@@ -44,7 +47,7 @@ private:
 	// Rotation
 	math::vec rot_eul = math::vec::zero;
 	math::Quat rot_quat = math::Quat::identity;
-	bool using_euler = false;
+	math::float3x3 rot_mat = math::float3x3::identity;
 
 	// Scale
 	math::ScaleOp scale;

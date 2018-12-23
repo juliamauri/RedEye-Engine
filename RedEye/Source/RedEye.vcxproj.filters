@@ -366,14 +366,14 @@
     <ClInclude Include="md5.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="RE_CompTransform.h">
-      <Filter>GameObject\Components</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompParticleEmiter.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
     <ClInclude Include="Particle.h">
       <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompTransform.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
