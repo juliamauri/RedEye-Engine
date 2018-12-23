@@ -27,8 +27,6 @@ public:
 	math::vec GetPosition();
 	math::vec GetGlobalPosition();
 
-	void LocalMove(Dir dir, float speed);
-
 	void DrawProperties();
 
 	bool HasChanged();
@@ -50,11 +48,6 @@ private:
 
 	// Scale
 	math::ScaleOp scale;
-
-	// Axis
-	math::vec right = math::vec::zero;
-	math::vec up = math::vec::zero;
-	math::vec front = math::vec::zero;
 
 	// Matrix
 	math::float4x4 model_local = math::float4x4::identity;

@@ -11,10 +11,6 @@ RE_CompTransform::RE_CompTransform(RE_GameObject * go) : RE_Component(C_TRANSFOR
 	scale.scale = math::vec::one;
 	if (go == nullptr)
 		useParent = false;
-
-	front = math::vec(0.0f, 0.0f, 1.0f);
-	up = math::vec(0.0f,1.0f,0.0f);
-	right = math::vec(1.0f,0.0f,0.0f);
 }
 
 RE_CompTransform::~RE_CompTransform()
@@ -93,24 +89,6 @@ math::vec RE_CompTransform::GetGlobalPosition()
 	return model_global.Row3(3);
 }
 
-void RE_CompTransform::LocalMove(Dir dir, float speed)
-{
-	if (speed != 0.f)
-	{
-		needed_update_transform = true;
-
-		switch (dir)
-		{
-		case FORWARD:	pos -= front * speed; break;
-		case BACKWARD:	pos += front * speed; break;
-		case LEFT:		pos -= right * speed; break;
-		case RIGHT:		pos += right * speed; break;
-		case UP:		pos += up * speed; break;
-		case DOWN:		pos -= up * speed; break;
-		}
-	}
-}
-
 void RE_CompTransform::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Transform"))
@@ -155,9 +133,9 @@ void RE_CompTransform::CalcGlobalTransform()
 
 	model_local = model_local * math::float4x4::Translate(pos);
 
-	right = model_local.Col3(0); right.Normalize();
+	/*right = model_local.Col3(0); right.Normalize();
 	up = model_local.Col3(1); up.Normalize();
-	front = model_local.Col3(2); front.Normalize();
+	front = model_local.Col3(2); front.Normalize();*/
 
 	model_local.Transpose();
 
@@ -169,3 +147,4 @@ void RE_CompTransform::CalcGlobalTransform()
 	needed_update_transform = false;
 	has_changed = true;
 }
+

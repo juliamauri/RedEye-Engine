@@ -35,10 +35,11 @@ public:
 	void Draw() override;
 	void DrawProperties() override;
 
+	void MouseScreenRotate(float dx, float dy);
+
 	RE_CompTransform* GetTransform() const;
 	void OnTransformModified() override;
 
-	void SetEulerAngle(float pitch, float yaw);
 	void SetPlanesDistance(float near_plane, float far_plane);
 	void SwapCameraType();
 
@@ -57,6 +58,12 @@ public:
 
 	float GetVFOVDegrees() const;
 
+	void LocalMove(Dir dir, float speed);
+
+	math::vec GetRight() const;
+	math::vec GetUp() const;
+	math::vec GetFront() const;
+
 	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override;
 
 private:
@@ -68,6 +75,11 @@ private:
 	// Transform
 	RE_CompTransform* transform = nullptr;
 
+	// Axis
+	math::vec right = math::vec::zero;
+	math::vec up = math::vec::zero;
+	math::vec front = math::vec::zero;
+
 	// Camera frustum
 	math::Frustum frustum;
 
@@ -76,10 +88,6 @@ private:
 
 	float near_plane = 0.0f;
 	float far_plane = 0.0f;
-
-	float pitch = 0.0f;
-	float yaw = 0.0f;
-	float roll = 0.0f;
 
 	float h_fov_rads = 0.0f;
 	float v_fov_rads = 0.0f;

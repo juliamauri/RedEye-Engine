@@ -271,26 +271,28 @@ void ModuleEditor::UpdateCamera()
 
 				// Move
 				if (App->input->CheckKey(SDL_SCANCODE_W, KEY_REPEAT))
-					transform->LocalMove(Dir::FORWARD, cameraSpeed);
+					camera->LocalMove(Dir::FORWARD, cameraSpeed);
 				if (App->input->CheckKey(SDL_SCANCODE_S, KEY_REPEAT))
-					transform->LocalMove(Dir::BACKWARD, cameraSpeed);
+					camera->LocalMove(Dir::BACKWARD, cameraSpeed);
 				if (App->input->CheckKey(SDL_SCANCODE_A, KEY_REPEAT))
-					transform->LocalMove(Dir::LEFT, cameraSpeed);
+					camera->LocalMove(Dir::LEFT, cameraSpeed);
 				if (App->input->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))
-					transform->LocalMove(Dir::RIGHT, cameraSpeed);
+					camera->LocalMove(Dir::RIGHT, cameraSpeed);
 				if (App->input->CheckKey(SDL_SCANCODE_SPACE, KEY_REPEAT))
-					transform->LocalMove(Dir::UP, cameraSpeed);
+					camera->LocalMove(Dir::UP, cameraSpeed);
 				if (App->input->CheckKey(SDL_SCANCODE_C, KEY_REPEAT))
-					transform->LocalMove(Dir::DOWN, cameraSpeed);
+					camera->LocalMove(Dir::DOWN, cameraSpeed);
 
 
 				if (mouse->mouse_x_motion != 0 || mouse->mouse_y_motion != 0)
 				{
-					math::Quat rotation = transform->GetQuaternionRotation();
-					rotation = rotation * rotation.RotateY(CAM_SENSITIVITY * mouse->mouse_x_motion);
-					rotation = rotation * rotation.RotateX(CAM_SENSITIVITY * mouse->mouse_y_motion);
-
-					transform->SetRotation(rotation);
+					camera->MouseScreenRotate(CAM_SENSITIVITY * -mouse->mouse_x_motion, CAM_SENSITIVITY * mouse->mouse_y_motion);
+					
+					//math::Quat rotation = transform->GetQuaternionRotation();
+					//rotation = rotation * rotation.RotateY(CAM_SENSITIVITY * mouse->mouse_x_motion);
+					//rotation = rotation * rotation.RotateX(CAM_SENSITIVITY * mouse->mouse_y_motion);
+					//
+					//transform->SetRotation(rotation);
 				}
 			}
 

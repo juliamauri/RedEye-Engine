@@ -20,8 +20,8 @@ class PlayPauseWindow;
 struct SoftwareInfo;
 class RE_CompCamera;
 
-#define CAM_SENSITIVITY 0.1F
-#define CAM_SPEED 5.0f
+#define CAM_SENSITIVITY 0.01
+#define CAM_SPEED 5.0
 
 union SDL_Event;
 
