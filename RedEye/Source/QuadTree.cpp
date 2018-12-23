@@ -151,7 +151,7 @@ void QTree::Build(RE_GameObject * root_g_obj)
 {
 	assert(root_g_obj != nullptr);
 
-	if (root != nullptr) root->Clear();
+	if (root != nullptr) DEL(root);
 
 	root = new QTreeNode(box = root_g_obj->GetGlobalBoundingBox());
 
