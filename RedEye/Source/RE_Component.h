@@ -28,6 +28,7 @@ enum ComponentType : ushortint
 	C_CAPSULE,
 	C_MESH,
 	C_CAMERA,
+	C_PARTICLEEMITER,
 	MAX_COMPONENT_TYPES
 };
 

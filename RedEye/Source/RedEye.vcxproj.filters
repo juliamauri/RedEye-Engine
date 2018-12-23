@@ -112,6 +112,9 @@
     <ClCompile Include="RE_CompTransform.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
+    <ClCompile Include="RE_CompParticleEmiter.cpp">
+      <Filter>GameObject\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -364,6 +367,12 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="RE_CompTransform.h">
+      <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompParticleEmiter.h">
+      <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
   </ItemGroup>
