@@ -173,7 +173,8 @@ void MeshManager::AddMesh(RE_Mesh * mesh)
 void MeshManager::ProcessModel(const char* buffer, unsigned int size, bool go_fill)
 {
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFileFromMemory(buffer, size, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_FlipUVs);;
+	const aiScene *scene = importer.ReadFileFromMemory(buffer, size, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | /*aiProcess_PreTransformVertices |*/ aiProcess_SortByPType | aiProcess_FlipUVs);
+
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 	else
@@ -207,11 +208,11 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, bool isRoot)
 		go_haschildren = new RE_GameObject(node->mName.C_Str(), GUID_NULL, to_fill);
 
 		aiVector3D scale;
-		aiQuaternion rotation;
+		aiVector3D rotation;
 		aiVector3D position;
 		node->mTransformation.Decompose(scale, rotation, position);
 
-		go_haschildren->GetTransform()->SetRotation(math::Quat(rotation.x, rotation.y, rotation.z, rotation.w));
+		go_haschildren->GetTransform()->SetRotation(math::vec(rotation.x, rotation.y, rotation.z));
 		go_haschildren->GetTransform()->SetPosition(math::vec(position.x, position.y, position.z));
 		go_haschildren->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
 		go_haschildren->GetTransform()->Update();
@@ -252,12 +253,12 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, bool isRoot)
 				if (go_haschildren == nullptr)
 				{
 					aiVector3D scale;
-					aiQuaternion rotation;
+					aiVector3D rotation;
 					aiVector3D position;
 
 					node->mTransformation.Decompose(scale, rotation, position);
 
-					go->GetTransform()->SetRotation(math::Quat(rotation.x, rotation.y, rotation.z, rotation.w));
+					go->GetTransform()->SetRotation(math::vec(rotation.x, rotation.y, rotation.z));
 					go->GetTransform()->SetPosition(math::vec(position.x, position.y, position.z));
 					go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
 					go->GetTransform()->Update();

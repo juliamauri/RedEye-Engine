@@ -147,7 +147,7 @@ void RE_CompTransform::CalcGlobalTransform()
 
 	model_local = model_local * scale;
 
-	model_local = model_local * math::float4x4(rot_quat);
+	model_local = model_local * math::float4x4(math::Quat::identity * rot_quat);
 
 	model_local = model_local * math::float4x4::Translate(pos);
 
