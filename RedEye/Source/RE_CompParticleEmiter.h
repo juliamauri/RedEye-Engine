@@ -47,7 +47,7 @@ private:
 	float lifetime_margin = 0.0f;
 	int emisionRate = 50;
 	math::vec speed_particle = math::vec::zero;
-	float speed_margin = 1.0f;
+	math::vec speed_margin = math::vec::zero;
 
 	math::vec rgb_alpha = math::vec::zero;
 

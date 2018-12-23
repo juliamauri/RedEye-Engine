@@ -13,6 +13,31 @@ RE_CompParticleEmitter::~RE_CompParticleEmitter()
 {
 }
 
+void RE_CompParticleEmitter::Init()
+{
+	//particles = new Particle[];
+}
+
+void RE_CompParticleEmitter::CleanUp()
+{
+}
+
+void RE_CompParticleEmitter::PreUpdate()
+{
+}
+
+void RE_CompParticleEmitter::Update()
+{
+}
+
+void RE_CompParticleEmitter::PostUpdate()
+{
+}
+
+void RE_CompParticleEmitter::Draw()
+{
+}
+
 void RE_CompParticleEmitter::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Particle Emitter"))
@@ -38,7 +63,9 @@ void RE_CompParticleEmitter::DrawProperties()
 		float sp[3] = { speed_particle.x, speed_particle.y, speed_particle.z };
 		if (ImGui::DragFloat3("Speed particle", sp, 0.1f, -10000.f, 10000.f, "%.2f"))
 			speed_particle.Set(sp[0], sp[1], sp[2]);
-		ImGui::SliderFloat("Speed Margin", &speed_margin, 0.0f, 10.0f, "%.2f");
+		float smp[3] = { speed_margin.x, speed_margin.y, speed_margin.z };
+		if (ImGui::DragFloat3("Speed particle", smp, 0.1f, -10000.f, 10000.f, "%.2f"))
+			speed_margin.Set(smp[0], smp[1], smp[2]);
 
 		float rgba[3] = { rgb_alpha.x, rgb_alpha.y, rgb_alpha.z };
 		if (ImGui::DragFloat3("RGB Alpha", rgba, 0.1f, 0.0f, 255.0f, "%.2f"))
@@ -50,4 +77,8 @@ void RE_CompParticleEmitter::DrawProperties()
 			mParticle->textures.at(0).ptr->DrawTextureImGui();
 		}
 	}
+}
+
+void RE_CompParticleEmitter::Serialize(JSONNode * node, rapidjson::Value * val)
+{
 }
