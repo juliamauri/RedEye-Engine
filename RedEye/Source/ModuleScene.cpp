@@ -34,7 +34,13 @@ bool ModuleScene::Start()
 		if (!ret)
 			LOG("%s\n", App->shaders->GetShaderError());
 		App->meshes->SetDefaultShader(modelloading);
+
+		ret = App->shaders->Load("particle", &shader_particle);
+		if (!ret)
+			LOG("%s\n", App->shaders->GetShaderError());
 	}
+
+	smoke_particle = App->meshes->CreateMeshByTexture("Assets/Images/particle_texture.png");
 
 	// root
 	std::string path_scene("Assets/Scenes/");
@@ -97,6 +103,10 @@ bool ModuleScene::CleanUp()
 	Serialize();
 	
 	DEL(root);
+
+	if (smoke_particle)
+		DEL(smoke_particle);
+
 	return true;
 }
 
@@ -178,6 +188,9 @@ void ModuleScene::DrawScene()
 	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());
 	ShaderManager::setFloat4x4(modelloading, "projection", App->editor->GetCamera()->GetProjectionPtr());
 
+	ShaderManager::setFloat4x4(shader_particle, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(shader_particle, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	
 	// Frustum Culling
 	std::vector<RE_GameObject*> objects;
 	quad_tree.CollectIntersections(objects, App->editor->GetCamera()->GetFrustum());

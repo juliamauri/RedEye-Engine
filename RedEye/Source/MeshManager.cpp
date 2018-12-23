@@ -176,6 +176,7 @@ RE_Mesh * MeshManager::CreateMeshByTexture(const char* image_path)
 	texture.id = App->textures->LoadTexture2D(image_path);
 	texture.path = image_path;
 	texture.type = "texture_diffuse";
+	texture.ptr = (Texture2D*)App->resources->At(texture.id.c_str());
 	textures.push_back(texture);
 
 	//vertex

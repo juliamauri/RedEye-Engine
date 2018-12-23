@@ -6,6 +6,7 @@
 #include "QuadTree.h"
 
 class RE_GameObject;
+class RE_Mesh;
 
 class ModuleScene : public Module
 {
@@ -49,6 +50,9 @@ private:
 	QTree quad_tree;
 
 	int drawn_go = 0;
+
+	RE_Mesh* smoke_particle = nullptr;
+	unsigned int shader_particle;
 };
 
 
