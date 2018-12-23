@@ -208,11 +208,12 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, bool isRoot)
 		go_haschildren = new RE_GameObject(node->mName.C_Str(), GUID_NULL, to_fill);
 
 		aiVector3D scale;
-		aiVector3D rotation;
 		aiVector3D position;
-		node->mTransformation.Decompose(scale, rotation, position);
+		aiQuaternion rotationQuat;
 
-		go_haschildren->GetTransform()->SetRotation(math::vec(rotation.x, rotation.y, rotation.z));
+		node->mTransformation.Decompose(scale, rotationQuat, position);
+
+		go_haschildren->GetTransform()->SetRotation(math::Quat(rotationQuat.x, rotationQuat.y, rotationQuat.z, rotationQuat.w));
 		go_haschildren->GetTransform()->SetPosition(math::vec(position.x, position.y, position.z));
 		go_haschildren->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
 		go_haschildren->GetTransform()->Update();
@@ -253,12 +254,12 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, bool isRoot)
 				if (go_haschildren == nullptr)
 				{
 					aiVector3D scale;
-					aiVector3D rotation;
 					aiVector3D position;
+					aiQuaternion rotationQuat;
 
-					node->mTransformation.Decompose(scale, rotation, position);
+					node->mTransformation.Decompose(scale, rotationQuat, position);
 
-					go->GetTransform()->SetRotation(math::vec(rotation.x, rotation.y, rotation.z));
+					go->GetTransform()->SetRotation(math::Quat(rotationQuat.x, rotationQuat.y, rotationQuat.z, rotationQuat.w));
 					go->GetTransform()->SetPosition(math::vec(position.x, position.y, position.z));
 					go->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
 					go->GetTransform()->Update();

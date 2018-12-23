@@ -28,9 +28,11 @@ RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float near_p
 
 	SetVerticalFOV(30.f);
 
-	math::vec right = math::vec(1.f, 0.f, 0.f);
-	math::vec up = math::vec(0.f, 1.f, 0.f);
-	math::vec front = math::vec(0.f, 0.f, 1.f);
+	right = math::vec(1.f, 0.f, 0.f);
+	up = math::vec(0.f, 1.f, 0.f);
+	front = math::vec(0.f, 0.f, 1.f);
+
+	transform->SetPosition(math::vec(0.f, 5.f, -5.f));
 
 	OnTransformModified();
 
@@ -58,9 +60,9 @@ RE_CompCamera::RE_CompCamera(RE_GameObject * go, bool toPerspective, float near_
 
 	SetVerticalFOV(30.f);
 
-	math::vec right = math::vec(1.f, 0.f, 0.f);
-	math::vec up = math::vec(0.f, 1.f, 0.f);
-	math::vec front = math::vec(0.f, 0.f, 1.f);
+	right = math::vec(1.f, 0.f, 0.f);
+	up = math::vec(0.f, 1.f, 0.f);
+	front = math::vec(0.f, 0.f, 1.f);
 
 	OnTransformModified();
 
@@ -123,20 +125,20 @@ void RE_CompCamera::DrawProperties()
 	ImGui::DragFloat3("Front", f, 0.1f, -10, 10, "%.2f");
 }
 
-void RE_CompCamera::LocalRotate(float dx, float dy)
+void RE_CompCamera::LocalRotate(float x_angle_rad, float y_angle_rad)
 {
-	if (dx != 0)
+	if (x_angle_rad != 0)
 	{
-		float3x3 rot = float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f), dx);
+		float3x3 rot = float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f), x_angle_rad);
 
 		right = rot * right;
 		up = rot * up;
 		front = rot * front;
 	}
 
-	if (dy != 0)
+	if (y_angle_rad != 0)
 	{
-		float3x3 rot = float3x3::RotateAxisAngle(right, dy);
+		float3x3 rot = float3x3::RotateAxisAngle(right, y_angle_rad);
 
 		up = rot * up;
 		front = rot * front;
@@ -178,16 +180,6 @@ void RE_CompCamera::SetPlanesDistance(float near_plane, float far_plane)
 	frustum.SetViewPlaneDistances(near_plane, far_plane);
 }
 
-void RE_CompCamera::ResetAspectRatio()
-{
-	if (isPerspective)
-		frustum.SetVerticalFovAndAspectRatio(v_fov_rads, App->window->GetAspectRatio());
-	else
-		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
-
-	need_recalculation = true;
-}
-
 void RE_CompCamera::SwapCameraType()
 {
 	if (isPerspective)
@@ -198,6 +190,16 @@ void RE_CompCamera::SwapCameraType()
 	isPerspective = !isPerspective;
 
 	need_recalculation = true;
+}
+
+float RE_CompCamera::GetVFOVDegrees() const
+{
+	return v_fov_degrees;
+}
+
+float RE_CompCamera::GetHFOVDegrees() const
+{
+	return h_fov_degrees;
 }
 
 void RE_CompCamera::SetVerticalFOV(float vertical_fov_degrees)
@@ -216,6 +218,16 @@ void RE_CompCamera::SetVerticalFOV(float vertical_fov_degrees)
 
 		need_recalculation = true;
 	}
+}
+
+void RE_CompCamera::ResetAspectRatio()
+{
+	if (isPerspective)
+		frustum.SetVerticalFovAndAspectRatio(v_fov_rads, App->window->GetAspectRatio());
+	else
+		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
+
+	need_recalculation = true;
 }
 
 math::float4x4 RE_CompCamera::GetView() const
@@ -254,11 +266,6 @@ void RE_CompCamera::RecalculateMatrixes()
 	need_recalculation = false;
 }
 
-float RE_CompCamera::GetVFOVDegrees() const
-{
-	return v_fov_degrees;
-}
-
 void RE_CompCamera::LocalMove(Dir dir, float speed)
 {
 	if (speed != 0.f)
@@ -290,7 +297,7 @@ void RE_CompCamera::Orbit(float dx, float dy, RE_GameObject * focus)
 void RE_CompCamera::Focus(RE_GameObject * focus)
 {
 	focus_global_pos = focus->GetTransform()->GetGlobalPosition();
-	math::vec corner = math::vec(50.f, 50.f, 50.f);
+	math::vec corner = math::vec(1.f, 1.f, 1.f);
 
 	/*if (focus->GetMesh() != nullptr)
 	{
@@ -302,14 +309,13 @@ void RE_CompCamera::Focus(RE_GameObject * focus)
 	}*/
 
 	front = -corner;
-	right = front.Cross(math::vec(0.f, 1.f, 0.f));
-	up = front.Cross(right);
-
 	front.Normalize();
+	right = front.Cross(math::vec(0.f, 1.f, 0.f));
 	right.Normalize();
+	up = right.Cross(front);
 	up.Normalize();
 
-	transform->SetGlobalPosition(focus_global_pos - (corner));
+	transform->SetGlobalPosition(focus_global_pos - (front * 40.f));
 	transform->Update();
 	OnTransformModified();
 }

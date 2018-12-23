@@ -41,6 +41,9 @@ public:
 	void SetPlanesDistance(float near_plane, float far_plane);
 	void SwapCameraType();
 
+	// FOV
+	float GetVFOVDegrees() const;
+	float GetHFOVDegrees() const;
 	void SetVerticalFOV(float vertical_fov_degrees);
 
 	// Call this function if window size changed.
@@ -54,7 +57,6 @@ public:
 
 	math::Frustum GetFrustum() const;
 
-	float GetVFOVDegrees() const;
 
 	// Camera Controls
 	void LocalRotate(float dx, float dy);

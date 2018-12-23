@@ -9,6 +9,7 @@
 RE_CompTransform::RE_CompTransform(RE_GameObject * go) : RE_Component(C_TRANSFORM, go) 
 {
 	scale.scale = math::vec::one;
+
 	if (go == nullptr)
 		useParent = false;
 }
@@ -25,11 +26,17 @@ void RE_CompTransform::Update()
 
 math::float4x4 RE_CompTransform::GetMatrixModel()
 {
+	if (needed_update_transform)
+		CalcGlobalTransform();
+
 	return model_global;
 }
 
 float* RE_CompTransform::GetShaderModel()
 {
+	if (needed_update_transform)
+		CalcGlobalTransform();
+
 	return model_global.ptr();
 }
 
@@ -80,27 +87,27 @@ void RE_CompTransform::SetGlobalPosition(math::vec global_position)
 	needed_update_transform = true;
 }
 
-math::Quat RE_CompTransform::GetQuaternionRotation()
+math::Quat RE_CompTransform::GetQuaternionRotation() const
 {
 	return rot_quat;
 }
 
-math::vec RE_CompTransform::GetEulerRotation()
+math::vec RE_CompTransform::GetEulerRotation() const
 {
 	return rot_eul;
 }
 
-math::vec RE_CompTransform::GetScale()
+math::vec RE_CompTransform::GetScale() const
 {
 	return scale.scale;
 }
 
-math::vec RE_CompTransform::GetPosition()
+math::vec RE_CompTransform::GetPosition() const
 {
 	return pos;
 }
 
-math::vec RE_CompTransform::GetGlobalPosition()
+math::vec RE_CompTransform::GetGlobalPosition() const
 {
 	return model_global.Row3(3);
 }
@@ -143,18 +150,12 @@ void RE_CompTransform::OnTransformModified()
 
 void RE_CompTransform::CalcGlobalTransform()
 {
-	model_local = math::float4x4::identity;
-
-	model_local = model_local * scale;
-
-	model_local = model_local * math::float4x4(math::Quat::identity * rot_quat);
-
-	model_local = model_local * math::float4x4::Translate(pos);
+	model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale);
 
 	model_local.Transpose();
 
 	if (useParent && go->GetParent() != nullptr)
-		model_global = go->GetParent()->GetTransform()->GetMatrixModel() * model_local;
+		model_global = model_local * go->GetParent()->GetTransform()->GetMatrixModel();
 	else
 		model_global = model_local;
 

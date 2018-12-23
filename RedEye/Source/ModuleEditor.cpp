@@ -240,7 +240,6 @@ void ModuleEditor::UpdateCamera()
 			if (App->scene->GetSelected() != nullptr
 				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
 			{
-				// Orbit
 				camera->Orbit(
 					CAM_SENSITIVITY * -mouse->mouse_x_motion,
 					CAM_SENSITIVITY * mouse->mouse_y_motion,
@@ -250,14 +249,7 @@ void ModuleEditor::UpdateCamera()
 		else if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
 			&& App->scene->GetSelected() != nullptr)
 		{
-			// Focus
 			camera->Focus(App->scene->GetSelected());
-			math::AABB selected_box = App->scene->GetSelected()->GetGlobalBoundingBox();
-			math::vec target_global_pos = App->scene->GetSelected()->GetTransform()->GetGlobalPosition();
-			math::vec camera_pos = selected_box.maxPoint + target_global_pos;
-
-			transform->SetPosition(camera_pos);
-			//transform->LocalLookAt(selected_box.CenterPoint());
 		}
 		else
 		{
@@ -284,7 +276,11 @@ void ModuleEditor::UpdateCamera()
 
 				// Rotate
 				if (mouse->mouse_x_motion != 0 || mouse->mouse_y_motion != 0)
-					camera->LocalRotate(CAM_SENSITIVITY * -mouse->mouse_x_motion, CAM_SENSITIVITY * mouse->mouse_y_motion);
+				{
+					camera->LocalRotate(
+						CAM_SENSITIVITY * -mouse->mouse_x_motion,
+						CAM_SENSITIVITY * mouse->mouse_y_motion);
+				}
 			}
 
 			// Zoom
