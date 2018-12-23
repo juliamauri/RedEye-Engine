@@ -16,6 +16,7 @@ class RandomTest;
 class TexturesWindow;
 class EditorSettingsWindow;
 class PlayPauseWindow;
+class SelectFile;
 
 struct SoftwareInfo;
 class RE_CompCamera;
@@ -44,6 +45,9 @@ public:
 	// Camera
 	RE_CompCamera* GetCamera() const;
 
+	//Select file
+	SelectFile* GetSelectWindow();
+
 private:
 
 	void UpdateCamera();
@@ -64,6 +68,8 @@ private:
 	PlayPauseWindow* play_pause = nullptr;
 
 	AboutWindow* about = nullptr;
+
+	SelectFile* select_file = nullptr;
 
 	// Tools
 	RandomTest* rng = nullptr;

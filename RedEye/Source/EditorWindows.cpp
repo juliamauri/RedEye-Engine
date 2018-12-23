@@ -10,6 +10,8 @@
 #include "RE_Math.h"
 #include "OutputLog.h"
 
+#include "PhysFS\include\physfs.h"
+
 #include <map>
 
 EditorWindow::EditorWindow(const char* name, bool start_enabled)
@@ -370,6 +372,50 @@ void PlayPauseWindow::Draw()
 			App->SceneStop();
 		ImGui::SameLine();
 		ImGui::Text("%f", seconds);
+	}
+	ImGui::End();
+}
+
+SelectFile::SelectFile(const char * name, bool start_active) : EditorWindow(name, start_active) {}
+
+void SelectFile::Start(const char * path)
+{
+	SwitchActive();
+	this->path = path;
+	selected.clear();
+
+	rc = PHYSFS_enumerateFiles(path);
+}
+
+std::string SelectFile::IsSelected()
+{
+	if (!selected.empty())
+	{
+		SwitchActive();
+		PHYSFS_freeList(rc);
+		return selected;
+	}
+	else
+		return "";
+}
+
+void SelectFile::Draw()
+{
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		if (selected.empty())
+		{
+			char **i;
+			for (i = rc; *i != NULL; i++)
+			{
+				if (ImGui::Button(*i))
+				{
+					selected = path;
+					selected += *i;
+					break;
+				}
+			}
+		}
 	}
 	ImGui::End();
 }

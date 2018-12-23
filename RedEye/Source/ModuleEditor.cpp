@@ -25,6 +25,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(properties = new PropertiesWindow());
 	windows.push_back(editor_settings = new EditorSettingsWindow());
 	windows.push_back(play_pause = new PlayPauseWindow());
+	windows.push_back(select_file = new SelectFile());
 	about = new AboutWindow();
 
 	tools.push_back(rng = new RandomTest());
@@ -218,6 +219,11 @@ void ModuleEditor::HandleSDLEvent(SDL_Event* e)
 RE_CompCamera * ModuleEditor::GetCamera() const
 {
 	return camera;
+}
+
+SelectFile * ModuleEditor::GetSelectWindow()
+{
+	return select_file;
 }
 
 void ModuleEditor::UpdateCamera()

@@ -156,8 +156,22 @@ private:
 	void Draw() override;
 };
 
-/*/ Missing windows:
-void PlayPause();*/
+class SelectFile : public EditorWindow
+{
+public:
+	SelectFile(const char* name = "Select File", bool start_active = false);
+
+	void Start(const char* path);
+
+	std::string IsSelected();
+
+private:
+	void Draw() override;
+
+	std::string path;
+	std::string selected;
+	char **rc = nullptr;
+};
 
 
 
