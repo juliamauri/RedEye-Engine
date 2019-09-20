@@ -16,6 +16,7 @@
 	@author Jukka Jylänki
 	@brief Common mathematical functions. */
 #include "MathFunc.h"
+#include "Swap.h"
 #include "SSEMath.h"
 #ifdef MATH_ENABLE_STL_SUPPORT
 #include <utility>
@@ -24,6 +25,7 @@
 
 #include "myassert.h"
 #include "float2.h"
+#include "float4.h"
 #ifdef MATH_WITH_GRISU3
 #include "grisu3.h"
 #endif

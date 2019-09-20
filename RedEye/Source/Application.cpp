@@ -83,7 +83,7 @@ bool Application::Init(int argc, char* argv[])
 
 		LOG("Initializing File System");
 
-		if (fs->Init(argc, argv))
+		if (ret = fs->Init(argc, argv))
 		{
 			Config* config = fs->GetConfig();
 			JSONNode* node = config->GetRootNode("App");

@@ -73,15 +73,30 @@ public:
 
 	/// Stores the data in this matrix in row-major format.
 	/** [noscript] */
-#if defined(MATH_SIMD)
 	union
 	{
-#endif
 		float v[Rows][Cols];
 #if defined(MATH_SIMD)
 		simd4f row[3];
-	};
 #endif
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4201) // warning C4201: nonstandard extension used: nameless struct/union
+#endif
+		// Alias into the array of elements to allow accessing items from this matrix directly for convenience.
+		// This gives human-readable names to the individual matrix elements:
+		struct
+		{
+			float  scaleX, shearXy, shearXz, x;
+			float shearYx,  scaleY, shearYz, y;
+			float shearZx, shearZy,  scaleZ, z;
+		};
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+		// where scaleX/Y/Z specify how much principal axes are scaled by, x/y/z specify translation (position) on the axes,
+		// and shearAb specify how much shearing occurs towards axis A from axis b (when vector is multiplied via M*v convention)
+	};
 
 	/// A constant matrix that has zeroes in all its entries.
 	static const float3x4 zero;
@@ -426,7 +441,7 @@ public:
 	/// Sets the translation part of this matrix.
 	/** This function sets the translation part of this matrix. These are the three first elements of the fourth column.
 		All other entries are left untouched. */
-	void SetTranslatePart(float tx, float ty, float tz) { SetCol(3, tx, ty, tz); }
+	void SetTranslatePart(float translateX, float translateY, float translateZ) { SetCol(3, translateX, translateY, translateZ); }
 	void SetTranslatePart(const float3 &offset) { SetCol(3, offset); }
 
 	/// Sets the 3-by-3 part of this matrix to perform rotation about the positive X axis which passes through
@@ -610,15 +625,19 @@ public:
 	/// Transforms the given point vector by this matrix M , i.e. returns M * (x, y, z, 1).
 	/** The suffix "Pos" in this function means that the w component of the input vector is assumed to be 1, i.e. the input
 		vector represents a point (a position). */
+	float2 TransformPos(const float2 &pointVector) const;
 	float3 TransformPos(const float3 &pointVector) const;
 	float3 TransformPos(float x, float y, float z) const;
+	float2 TransformPos(float x, float y) const;
 
 	/// Transforms the given direction vector by this matrix M , i.e. returns M * (x, y, z, 0).
 	/** The suffix "Dir" in this function just means that the w component of the input vector is assumed to be 0, i.e. the
 		input vector represents a direction. The input vector does not need to be normalized. */
 	float4 TransformDir(const float4 &directionVector) const;
 	float3 TransformDir(const float3 &directionVector) const;
+	float2 TransformDir(const float2 &directionVector) const;
 	float3 TransformDir(float x, float y, float z) const;
+	float2 TransformDir(float x, float y) const;
 
 	/// Transforms the given 4-vector by this matrix M, i.e. returns M * (x, y, z, w).
 	float4 Transform(const float4 &vector) const;
@@ -803,8 +822,10 @@ public:
 	float3x4 Mul(const float3x4 &rhs) const;
 	float4x4 Mul(const float4x4 &rhs) const;
 	float3x4 Mul(const Quat &rhs) const;
+	float2 MulPos(const float2 &pointVector) const;
 	float3 MulPos(const float3 &pointVector) const;
 	float4 MulPos(const float4 &pointVector) const;
+	float2 MulDir(const float2 &directionVector) const;
 	float3 MulDir(const float3 &directionVector) const;
 	float4 MulDir(const float4 &directionVector) const;
 	float4 Mul(const float4 &vector) const;

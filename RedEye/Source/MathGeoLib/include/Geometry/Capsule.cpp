@@ -18,6 +18,7 @@
 #include "Capsule.h"
 #include "../Math/MathConstants.h"
 #include "../Math/MathFunc.h"
+#include "../Math/Swap.h"
 #include "../Math/float3x3.h"
 #include "../Math/float3x4.h"
 #include "../Math/float4x4.h"
@@ -238,6 +239,11 @@ void Capsule::Translate(const vec &offset)
 	l.b += offset;
 }
 
+Capsule Capsule::Translated(const vec &offset) const
+{
+	return Capsule(l.a + offset, l.b + offset, r);
+}
+
 void Capsule::Scale(const vec &centerPoint, float scaleFactor)
 {
 	float3x4 tm = float3x4::Scale(DIR_VEC_SCALAR(scaleFactor), centerPoint);
@@ -400,7 +406,7 @@ bool Capsule::Intersects(const Plane &plane) const
 
 bool Capsule::Intersects(const AABB &aabb) const
 {
-	return GJKIntersect(*this, aabb);
+	return FloatingPointOffsetedGJKIntersect(*this, aabb);
 }
 
 bool Capsule::Intersects(const OBB &obb) const
