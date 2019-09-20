@@ -46,6 +46,9 @@ public:
 	//Renderer Test Window
 	void ResetAspectRatio();
 
+	//context getter
+	void* GetContext()const;
+
 private:
 
 	void* mainContext;

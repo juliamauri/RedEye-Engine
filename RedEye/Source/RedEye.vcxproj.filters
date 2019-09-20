@@ -31,9 +31,6 @@
     <ClCompile Include="ImGui\imgui_draw.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGui\imgui_impl_sdl_gl3.cpp">
-      <Filter>3rd Party\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="ImGuizmo\ImGuizmo.cpp">
       <Filter>3rd Party\ImGuizmo</Filter>
     </ClCompile>
@@ -117,6 +114,15 @@
     </ClCompile>
     <ClCompile Include="Particle.cpp">
       <Filter>GameObject\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_impl_opengl3.cpp">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_impl_sdl.cpp">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_widgets.cpp">
+      <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -270,9 +276,6 @@
     <ClInclude Include="ImGui\imgui.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\imgui_impl_sdl_gl3.h">
-      <Filter>3rd Party\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="ImGui\imgui_internal.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
@@ -377,6 +380,21 @@
     </ClInclude>
     <ClInclude Include="RE_CompTransform.h">
       <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui_impl_opengl3.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui_impl_sdl.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imstb_rectpack.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imstb_textedit.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imstb_truetype.h">
+      <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

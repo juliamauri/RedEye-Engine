@@ -277,3 +277,8 @@ void ModuleRenderer3D::ResetAspectRatio()
 	glViewport(0, 0, App->window->GetWidth(), App->window->GetHeight());
 	//camera->ResetFov();
 }
+
+void * ModuleRenderer3D::GetContext() const
+{
+	return mainContext;
+}
