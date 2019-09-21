@@ -15,11 +15,11 @@ int main(int argc, char* argv[])
 {
 	int main_return = EXIT_FAILURE;
 
-	App = new Application(argc, argv);
+	App = new Application();
 
 	LOG_SEPARATOR("Initializing RedEye");
 
-	if (App->Init())
+	if (App->Init(argc, argv))
 	{
 		int update_return = App->Update();
 

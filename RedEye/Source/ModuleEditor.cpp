@@ -4,6 +4,7 @@
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
+#include "ModuleRenderer3D.h"
 #include "EditorWindows.h"
 #include "TimeManager.h"
 #include "OutputLog.h"
@@ -12,7 +13,8 @@
 #include "RE_CompCamera.h"
 
 #include "MathGeoLib\include\MathGeoLib.h"
-#include "ImGui\imgui_impl_sdl_gl3.h"
+#include "ImGui\imgui_impl_opengl3.h"
+#include "ImGui\imgui_impl_sdl.h"
 #include "ImGuizmo\ImGuizmo.h"
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
@@ -42,9 +44,15 @@ ModuleEditor::~ModuleEditor()
 bool ModuleEditor::Init(JSONNode* node)
 {
 	LOG_SECONDARY("Init ImGui");
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-	bool ret = ImGui_ImplSdlGL3_Init(App->window->GetWindow());
+	ImGui::StyleColorsDark();
 
+	bool ret = true;
+	ImGui_ImplSDL2_InitForOpenGL(App->window->GetWindow(),App->renderer3d->GetContext());
+	ImGui_ImplOpenGL3_Init();
 	if (ret)
 		App->ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
 	else
@@ -61,7 +69,9 @@ bool ModuleEditor::Init(JSONNode* node)
 
 update_status ModuleEditor::PreUpdate()
 {
-	ImGui_ImplSdlGL3_NewFrame(App->window->GetWindow());
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame(App->window->GetWindow());
+	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
 	return UPDATE_CONTINUE;
 }
@@ -181,7 +191,9 @@ bool ModuleEditor::CleanUp()
 	DEL(about);
 	DEL(camera);
 
-	ImGui_ImplSdlGL3_Shutdown();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
 
 	return true;
 }
@@ -209,11 +221,12 @@ bool ModuleEditor::AddSoftwareUsed(const char * name, const char * version, cons
 void ModuleEditor::Draw()
 {
 	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void ModuleEditor::HandleSDLEvent(SDL_Event* e)
 {
-	ImGui_ImplSdlGL3_ProcessEvent(e);
+	ImGui_ImplSDL2_ProcessEvent(e);
 }
 
 RE_CompCamera * ModuleEditor::GetCamera() const
@@ -228,7 +241,7 @@ SelectFile * ModuleEditor::GetSelectWindow()
 
 void ModuleEditor::UpdateCamera()
 {
-	if (!ImGui::IsMouseHoveringAnyWindow())
+	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
 	{
 		const MouseData* mouse = App->input->GetMouse();
 		RE_CompTransform* transform = camera->GetTransform();

@@ -26,7 +26,6 @@
 
 #include "MathTypes.h"
 #include "MathConstants.h"
-#include "float3.h"
 #include "Reinterpret.h"
 #include "SSEMath.h"
 
@@ -43,6 +42,13 @@ MATH_BEGIN_NAMESPACE
 /// @param v2 A vector of type float2, or a C array of two elements.
 /// @see DOT3(), DOT4().
 #define DOT2(v1, v2) ((v1)[0] * (v2)[0] + (v1)[1] * (v2)[1])
+
+/// Computes the dot product of a float2 and another vector given by two floats.
+/// @param v1 A vector of type float2, or a C array of two elements.
+/// @param x The x component of a second vector.
+/// @param y The y component of a second vector.
+/// @see DOT2().
+#define DOT2_xy(v1, x, y) ((v1)[0] * (x) + (v1)[1] * (y))
 
 /// Computes the dot product of two 3D vectors, the elements are accessed using array notation.
 /// @param v1 A vector of type float3, or a C array of three elements.
@@ -112,12 +118,10 @@ MATH_BEGIN_NAMESPACE
 
 /// Converts the given amount of degrees into radians.
 /// 180 degrees equals pi, 360 degrees is a full circle, and equals 2pi.
-inline float3 DegToRad(const float3 &degrees) { return degrees * (pi / 180.f); }
-inline float DegToRad(float degrees) { return degrees * (pi / 180.f); }
+FORCE_INLINE float DegToRad(float degrees) { return degrees * (pi / 180.f); }
 
 /// Converts the given amount of radians into degrees.
-inline float3 RadToDeg(const float3 &radians) { return radians * (180.f / pi); }
-inline float RadToDeg(float radians) { return radians * (180.f / pi); }
+FORCE_INLINE float RadToDeg(float radians) { return radians * (180.f / pi); }
 
 /// Computes the function sin(x).
 /** @see Cos(), Tan(), SinCos(), Asin(), Acos(), Atan(), Atan2(), Sinh(), Cosh(), Tanh(). */
@@ -395,7 +399,7 @@ int CombinatorialTab(int n, int k);
 /// Clamps the given input value to the range [min, max].
 /** @see Clamp01(), Min(), Max(). */
 template<typename T>
-inline T Clamp(const T &val, const T &floor, const T &ceil)
+FORCE_INLINE T Clamp(const T &val, const T &floor, const T &ceil)
 {
 	assume(floor <= ceil);
 	return val <= ceil ? (val >= floor ? val : floor) : ceil;
@@ -404,12 +408,12 @@ inline T Clamp(const T &val, const T &floor, const T &ceil)
 /// Clamps the given input value to the range [0, 1].
 /** @see Clamp(), Min(), Max(). */
 template<typename T>
-inline T Clamp01(const T &val) { return Clamp(val, T(0), T(1)); }
+FORCE_INLINE T Clamp01(const T &val) { return Clamp(val, T(0), T(1)); }
 
 /// Computes the smaller of two values.
 /** @see Clamp(), Clamp01(), Max(). */
 template<typename T>
-inline T Min(const T &a, const T &b)
+FORCE_INLINE T Min(const T &a, const T &b)
 {
 	return a <= b ? a : b;
 }
@@ -417,13 +421,13 @@ inline T Min(const T &a, const T &b)
 /// Computes the larger of two values.
 /** @see Clamp(), Clamp01(), Min(). */
 template<typename T>
-inline T Max(const T &a, const T &b)
+FORCE_INLINE T Max(const T &a, const T &b)
 {
 	return a >= b ? a : b;
 }
 
 template<>
-inline float Max(const float &a, const float &b)
+FORCE_INLINE float Max(const float &a, const float &b)
 {
 #ifdef MATH_SSE
 	return s4f_x(_mm_max_ss(setx_ps(a), setx_ps(b)));
@@ -435,13 +439,13 @@ inline float Max(const float &a, const float &b)
 /// Computes the smallest of three values.
 /** @see Clamp(), Clamp01(), Max(). */
 template<typename T>
-inline T Min(const T &a, const T &b, const T &c)
+FORCE_INLINE T Min(const T &a, const T &b, const T &c)
 {
 	return Min(Min(a, b), c);
 }
 
 template<>
-inline float Min(const float &a, const float &b)
+FORCE_INLINE float Min(const float &a, const float &b)
 {
 #ifdef MATH_SSE
 	return s4f_x(_mm_min_ss(setx_ps(a), setx_ps(b)));
@@ -453,7 +457,7 @@ inline float Min(const float &a, const float &b)
 /// Computes the largest of three values.
 /** @see Clamp(), Clamp01(), Min(). */
 template<typename T>
-inline T Max(const T &a, const T &b, const T &c)
+FORCE_INLINE T Max(const T &a, const T &b, const T &c)
 {
 	return Max(Max(a, b), c);
 }
@@ -461,7 +465,7 @@ inline T Max(const T &a, const T &b, const T &c)
 /// Computes the smallest of four values.
 /** @see Clamp(), Clamp01(), Max(). */
 template<typename T>
-inline T Min(const T &a, const T &b, const T &c, const T &d)
+FORCE_INLINE T Min(const T &a, const T &b, const T &c, const T &d)
 {
 	return Min(Min(a, b), Min(c, d));
 }
@@ -469,43 +473,34 @@ inline T Min(const T &a, const T &b, const T &c, const T &d)
 /// Computes the largest of four values.
 /** @see Clamp(), Clamp01(), Min(). */
 template<typename T>
-inline T Max(const T &a, const T &b, const T &c, const T &d)
+FORCE_INLINE T Max(const T &a, const T &b, const T &c, const T &d)
 {
 	return Max(Max(a, b), Max(c, d));
 }
 
-/// Swaps the two values.
-template<typename T>
-inline void Swap(T &a, T &b)
-{
-	T temp = a;
-	a = b;
-	b = temp;
-}
-
 /** @return True if a > b. */
 template<typename T>
-inline bool GreaterThan(const T &a, const T &b)
+FORCE_INLINE bool GreaterThan(const T &a, const T &b)
 {
 	return a > b;
 }
 
 /** @return True if a < b. */
 template<typename T>
-inline bool LessThan(const T &a, const T &b)
+FORCE_INLINE bool LessThan(const T &a, const T &b)
 {
 	return a < b;
 }
 
 /** @return The absolute value of a. */
 template<typename T>
-inline T Abs(const T &a)
+FORCE_INLINE T Abs(const T &a)
 {
 	return a >= 0 ? a : -a;
 }
 
 template<>
-inline float Abs(const float &a)
+FORCE_INLINE float Abs(const float &a)
 {
 #ifdef MATH_SSE
 	return s4f_x(abs_ps(setx_ps(a)));

@@ -38,6 +38,7 @@
 #include "../Math/float4.h"
 #include "../Math/float4x4.h"
 #include "../Math/Quat.h"
+#include "../Math/Swap.h"
 #include "Triangle.h"
 #include "Capsule.h"
 
@@ -450,6 +451,11 @@ void AABB::Translate(const vec &offset)
 {
 	minPoint += offset;
 	maxPoint += offset;
+}
+
+AABB AABB::Translated(const vec &offset) const
+{
+	return AABB(minPoint + offset, maxPoint + offset);
 }
 
 void AABB::Scale(const vec &centerPoint, float scaleFactor)

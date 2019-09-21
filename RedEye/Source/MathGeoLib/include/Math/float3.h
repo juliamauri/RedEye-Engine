@@ -512,6 +512,7 @@ public:
 		(monotonous and non-decreasing) function.
 		@see Distance(), Length(), LengthSq(). */
 	float DistanceSq(const float3 &point) const;
+	double DistanceSqD(const float3 &point) const;
 
 	/// Computes the dot product of this and the given vector.
 	/** The dot product has a geometric interpretation of measuring how close two direction vectors are to pointing
@@ -760,8 +761,17 @@ bool EqualAbs(float a, float b, float epsilon);
 #define POINT_VEC(...) float4(__VA_ARGS__, 1.f)
 #define DIR_VEC(...) float4(__VA_ARGS__, 0.f)
 
+#define POINT_VEC2D(...) float4(__VA_ARGS__, 0.f, 1.f)
+#define DIR_VEC2D(...) float4(__VA_ARGS__, 0.f, 0.f)
+
 #define POINT_VEC_SCALAR(s) float4(pos_from_scalar_ps(s))
 #define DIR_VEC_SCALAR(s) float4(dir_from_scalar_ps(s))
+
+#define FLOAT4D_POINT_VEC(...) float4d(__VA_ARGS__)
+#define FLOAT4D_DIR_VEC(...) float4d(__VA_ARGS__)
+
+#define FLOAT4D_POINT_VEC_SCALAR(s) float4d(pos_from_scalar_ps(s))
+#define FLOAT4D_DIR_VEC_SCALAR(s) float4d(dir_from_scalar_ps(s))
 
 #define POINT_TO_FLOAT3(v) (v).xyz()
 #define DIR_TO_FLOAT3(v) (v).xyz()
@@ -787,6 +797,8 @@ inline float3 DIR_TO_FLOAT3(const vec &v)
 #else
 #define POINT_VEC(...) float3(__VA_ARGS__)
 #define DIR_VEC(...) float3(__VA_ARGS__)
+#define POINT_VEC2D(...) float2(__VA_ARGS__)
+#define DIR_VEC2D(...) float2(__VA_ARGS__)
 #define POINT_TO_FLOAT3(x) x
 #define DIR_TO_FLOAT3(x) x
 #define POINT_VEC_SCALAR(s) float3::FromScalar(s)
@@ -796,9 +808,22 @@ inline float3 DIR_TO_FLOAT3(const vec &v)
 #define FLOAT4_TO_POINT(v) (v).xyz()
 #define FLOAT4_TO_DIR(v) (v).xyz()
 
+#define FLOAT4D_POINT_VEC(...) float4d(__VA_ARGS__, 1.f)
+#define FLOAT4D_DIR_VEC(...) float4d(__VA_ARGS__, 0.f)
+
+#define FLOAT4D_POINT_VEC_SCALAR(s) float4d::FromScalar(s, 1.f)
+#define FLOAT4D_DIR_VEC_SCALAR(s) float4d::FromScalar(s, 0.f)
+
 #endif
 
 vec PointVecFromString(const char *str, const char **outEndStr = 0);
 vec DirVecFromString(const char *str, const char **outEndStr = 0);
+
+/// Converts the given amount of degrees into radians.
+/// 180 degrees equals pi, 360 degrees is a full circle, and equals 2pi.
+FORCE_INLINE float3 DegToRad(const float3 &degrees) { return degrees * (pi / 180.f); }
+
+/// Converts the given amount of radians into degrees.
+FORCE_INLINE float3 RadToDeg(const float3 &radians) { return radians * (180.f / pi); }
 
 MATH_END_NAMESPACE

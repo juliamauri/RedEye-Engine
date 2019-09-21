@@ -22,7 +22,7 @@
 
 using namespace std;
 
-Application::Application(int argc, char* argv[])
+Application::Application()
 {
 	fs = new FileSystem();
 	time = new TimeManager();
@@ -61,7 +61,7 @@ Application::~Application()
 	DEL(log);
 }
 
-bool Application::Init()
+bool Application::Init(int argc, char* argv[])
 {
 	bool ret = true;
 
@@ -83,7 +83,7 @@ bool Application::Init()
 
 		LOG("Initializing File System");
 
-		if (fs->Init(argc, argv))
+		if (ret = fs->Init(argc, argv))
 		{
 			Config* config = fs->GetConfig();
 			JSONNode* node = config->GetRootNode("App");

@@ -75,6 +75,10 @@ u32 LCG::IntFast()
 
 u32 LCG::Int()
 {
+#ifdef __EMSCRIPTEN__
+#warning Because of code size and performance issues, on Emscripten LCG::Int() is currently routed to LCG::IntFast() (TODO: Check if this is still needed for Wasm and rem64?)
+	return IntFast();
+#else
 	assert(modulus != 0);
 	/// \todo Convert to using Schrage's method for approximate factorization. (Numerical Recipes in C)
 
@@ -97,6 +101,7 @@ u32 LCG::Int()
 	assert4((((u32)newNum) != 0 || increment != 0) && "LCG degenerated to producing a stream of zeroes!", lastNumber, multiplier, increment, modulus);
 	lastNumber = (u32)newNum;
 	return lastNumber;
+#endif
 }
 
 int LCG::Int(int a, int b)
@@ -161,7 +166,7 @@ float LCG::FloatNeg1_1()
 
 float LCG::Float(float a, float b)
 {
-	assume(a <= b && "LCG::Float(a,b): Error in range: b < a!");
+	assume2(a <= b && "LCG::Float(a,b): Error in range: b < a!", a, b);
 
 	if (a == b)
 		return a;

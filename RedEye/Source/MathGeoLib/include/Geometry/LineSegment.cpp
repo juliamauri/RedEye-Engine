@@ -27,8 +27,10 @@
 #include "../Math/float3x3.h"
 #include "../Math/float3x4.h"
 #include "../Math/float4x4.h"
+#include "../Math/float4d.h"
 #include "OBB.h"
 #include "../Math/Quat.h"
+#include "../Math/Swap.h"
 #include "Sphere.h"
 #include "Capsule.h"
 #include "Triangle.h"
@@ -149,6 +151,13 @@ bool LineSegment::Contains(const LineSegment &rhs, float distanceThreshold) cons
 bool LineSegment::Equals(const LineSegment &rhs, float e) const
 {
 	return (a.Equals(rhs.a, e) && b.Equals(rhs.b, e)) || (a.Equals(rhs.b, e) && b.Equals(rhs.a, e));
+}
+
+vec LineSegment::ClosestPointD(const vec &point, double &d) const
+{
+	float4d dir = FLOAT4D_POINT_VEC(b) - FLOAT4D_POINT_VEC(a);
+	d = Clamp01(dir.Dot(FLOAT4D_POINT_VEC(point) - FLOAT4D_POINT_VEC(a)) / dir.LengthSq());
+	return (FLOAT4D_POINT_VEC(a) + d * dir).ToPointVec();
 }
 
 vec LineSegment::ClosestPoint(const vec &point, float &d) const
@@ -277,6 +286,15 @@ float LineSegment::DistanceSq(const vec &point) const
 	/// See Christer Ericson's Real-Time Collision Detection, p.130.
 	vec closestPoint = ClosestPoint(point, d);
 	return closestPoint.DistanceSq(point);
+}
+
+double LineSegment::DistanceSqD(const vec &point) const
+{
+	double d;
+	float4d pt = FLOAT4D_POINT_VEC(point);
+	/// See Christer Ericson's Real-Time Collision Detection, p.130.
+	float4d closestPoint = FLOAT4D_POINT_VEC(ClosestPointD(pt.ToPointVec(), d));
+	return closestPoint.DistanceSq(FLOAT4D_POINT_VEC(point));
 }
 
 float LineSegment::Distance(const Ray &other, float &d, float &d2) const

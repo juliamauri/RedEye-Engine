@@ -84,7 +84,7 @@ bool FileSystem::Init(int argc, char* argv[])
 	}
 	else
 	{
-		LOG("PhysFS could not initialize! Error: %s\n", PHYSFS_getLastError());
+		LOG("PhysFS could not initialize! Error: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 	}
 
 	return ret;

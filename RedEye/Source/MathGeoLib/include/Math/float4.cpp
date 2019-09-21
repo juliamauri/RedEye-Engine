@@ -29,6 +29,8 @@
 #include "../Geometry/AABB.h"
 #include "../Geometry/Sphere.h"
 #include "../Algorithm/Random/LCG.h"
+#include "float3x3.h"
+#include "float3x4.h"
 #include "float4x4.h"
 #include "MathFunc.h"
 #include "SSEMath.h"
@@ -940,21 +942,10 @@ void float4::PerpendicularBasis(float4 &outB, float4 &outC) const
 	//   Best: 17.468 nsecs / 29.418 ticks, Avg: 17.703 nsecs, Worst: 19.275 nsecs
 	basis_ps(this->v, &outB.v, &outC.v);
 #else
-	// Benchmark 'float4_PerpendicularBasis': float4::PerpendicularBasis
-	//   Best: 33.731 nsecs / 57.715 ticks, Avg: 35.080 nsecs, Worst: 39.152 nsecs
-	float4 a = this->Abs();
-	// Choose from (1,0,0), (0,1,0), and (0,0,1) the one that's most perpendicular to this vector.
-	float4 q;
-	if (a.x <= a.y)
-	{
-		if (a.x <= a.z) q = float4(1,0,0,0);
-		else q = float4(0,0,1,0);
-	}
-	else if (a.y <= a.z) q = float4(0,1,0,0);
-	else q = float4(0,0,1,0);
-
-	outB = this->Cross(q).Normalized();
-	outC = this->Cross(outB).Normalized();
+	float3 b, c;
+	Float3Part().PerpendicularBasis(b, c);
+	outB = float4(b, 0.f);
+	outC = float4(c, 0.f);
 #endif
 }
 
@@ -1470,6 +1461,13 @@ std::ostream &operator <<(std::ostream &out, const float4 &rhs)
 	return out;
 }
 #endif
+
+float4 Perp2D(const float4 &v) { return float4(v.xy().Perp(), v.z, v.w); }
+float4 Mul2D(const float3x3 &transform, const float4 &v) { return transform.Mul(v); }
+float4 MulPos2D(const float3x4 &transform, const float4 &v) { return transform.Transform(float4(v.x, v.y, 0.f, 1.f)); }
+float4 MulPos2D(const float4x4 &transform, const float4 &v) { return transform.Transform(float4(v.x, v.y, 0.f, 1.f)); }
+float4 MulDir2D(const float3x4 &transform, const float4 &v) { return transform.Transform(float4(v.x, v.y, 0.f, 0.f)); }
+float4 MulDir2D(const float4x4 &transform, const float4 &v) { return transform.Transform(float4(v.x, v.y, 0.f, 0.f)); }
 
 const float4 float4::zero = float4(0, 0, 0, 0);
 const float4 float4::one = float4(1, 1, 1, 1);

@@ -35,10 +35,10 @@ enum GameState : char
 class Application : public EventListener
 {
 public:
-	Application(int argc, char* argv[]);
+	Application();
 	~Application();
 
-	bool Init();
+	bool Init(int argc, char* argv[]);
 	int Update();
 	bool CleanUp();
 
@@ -95,9 +95,6 @@ private:
 	std::string organization = "RedEye";
 
 	GameState state = GS_STOP;
-
-	int argc;
-	char* argv[];
 };
 
 extern Application* App;
