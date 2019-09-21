@@ -75,10 +75,12 @@ public:
 	SystemInfo* sys_info = nullptr;
 	RE_Math* math = nullptr;
 	OutputLogHolder* log = nullptr;
+
 	Texture2DManager* textures = nullptr;
 	ShaderManager* shaders = nullptr;
 	RE_PrimitiveManager* primitives = nullptr;
 	MeshManager* meshes = nullptr;
+
 	ResourceManager* resources = nullptr;
 
 private:

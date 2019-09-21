@@ -339,5 +339,5 @@ KEY_STATE MouseData::GetButton(int id) const
 
 bool MouseData::Moved() const
 {
-	return (mouse_x_motion != 0 || mouse_x_motion != 0);
+	return (mouse_x_motion != 0 || mouse_y_motion != 0);
 }

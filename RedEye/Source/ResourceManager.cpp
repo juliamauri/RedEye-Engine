@@ -57,10 +57,10 @@ void ResourceManager::CheckFileLoaded(const char * filepath, const char* resourc
 		}
 	}
 
-	std::string path_library("Library/");
-
 	if (!isLoaded)
 	{
+		std::string path_library("Library/");
+
 		switch (type)
 		{
 		case R_TEXTURE:

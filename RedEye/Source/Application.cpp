@@ -103,8 +103,7 @@ bool Application::Init()
 						LOG("Initializing Module %s (empty)", (*it)->GetName());
 
 					if (!(ret = (*it)->Init(node)))
-
-					DEL(node);
+						DEL(node);
 				}
 
 			if (ret)
