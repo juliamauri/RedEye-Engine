@@ -214,6 +214,10 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 	{
 		ret = (RE_Component*)new RE_CompMesh(this, file_path_data, drop);
 	}
+	else if (ComponentType(type) == C_CAMERA)
+	{
+		ret = (RE_Component*)new RE_CompCamera(this);
+	}
 	else if (ComponentType(type) == C_PARTICLEEMITER)
 	{
 		ret = (RE_Component*)new RE_CompParticleEmitter(this);

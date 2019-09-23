@@ -145,7 +145,8 @@ void RE_CompTransform::ConfirmChange()
 
 void RE_CompTransform::OnTransformModified()
 {
-	needed_update_transform = true;
+	if (!has_changed)
+		needed_update_transform = true;
 }
 
 void RE_CompTransform::CalcGlobalTransform()
@@ -159,10 +160,10 @@ void RE_CompTransform::CalcGlobalTransform()
 	else
 		model_global = model_local;
 
-	if (go != nullptr)
-		go->TransformModified();
-
 	needed_update_transform = false;
 	has_changed = true;
+
+	if (go != nullptr)
+		go->TransformModified();
 }
 
