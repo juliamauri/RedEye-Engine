@@ -60,11 +60,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wattributes"
-#endif
-
 // -------------------------------------------------------------------------------
 /** 
  * A node in the imported hierarchy.
@@ -168,9 +163,6 @@ struct ASSIMP_API aiNode
 #endif // __cplusplus
 };
 
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
 
 // -------------------------------------------------------------------------------
 /**

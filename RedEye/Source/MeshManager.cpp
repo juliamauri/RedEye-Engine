@@ -17,7 +17,11 @@
 #include "assimp\include\scene.h"
 #include "assimp\include\postprocess.h"
 
-#pragma comment(lib, "assimp/libx86/assimp-vc140-mt.lib")
+#ifdef _DEBUG
+#pragma comment(lib, "assimp/libx86/assimp-vc140-mt-debug.lib")
+#else
+#pragma comment(lib, "assimp/libx86/assimp-vc140-mt-release.lib")
+#endif
 
 MeshManager::MeshManager(const char* f) : folderPath(f)
 {}
@@ -412,7 +416,6 @@ RE_Mesh* MeshManager::ProcessMesh(aiMesh * mesh, const aiScene * scene, const un
 			//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		}
 
-		
 		std::string save_path("Library/Meshes/");
 		save_path += md5_id;
 		save_path += ".red";
