@@ -425,11 +425,11 @@ void RE_GameObject::DrawAABB()
 
 	glColor3f(0.0f, 0.0f, 1.0f);
 
-	math::float4x4 model = math::float4x4::Translate(GetTransform()->GetGlobalPosition());
-	model.InverseTranspose();
+	math::float4x4 model = transform->GetMatrixModel();
+	RE_CompCamera* camera = App->editor->GetCamera();
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((App->editor->GetCamera()->GetView() * model).ptr());
+	glLoadMatrixf((model * camera->GetView()).ptr());
 
 	glLineWidth(5.0f);
 
@@ -437,8 +437,14 @@ void RE_GameObject::DrawAABB()
 
 	for (uint i = 0; i < 12; i++)
 	{
-		glVertex3f(global_bounding_box.Edge(i).a.x, global_bounding_box.Edge(i).a.y, global_bounding_box.Edge(i).a.z);
-		glVertex3f(global_bounding_box.Edge(i).b.x, global_bounding_box.Edge(i).b.y, global_bounding_box.Edge(i).b.z);
+		glVertex3f(
+			global_bounding_box.Edge(i).a.x,
+			global_bounding_box.Edge(i).a.y,
+			global_bounding_box.Edge(i).a.z);
+		glVertex3f(
+			global_bounding_box.Edge(i).b.x,
+			global_bounding_box.Edge(i).b.y,
+			global_bounding_box.Edge(i).b.z);
 	}
 
 	glEnd();
