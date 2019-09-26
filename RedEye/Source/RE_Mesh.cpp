@@ -168,7 +168,7 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 void RE_Mesh::SetupAABB()
 {
 	// reset size to minimum
-	bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	bounding_box.SetFromCenterAndSize(vertices[0].Position, vertices[0].Position);
 
 	// adapt box to each vertex position
 	for (auto vertex : vertices)

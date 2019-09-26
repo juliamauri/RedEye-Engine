@@ -54,6 +54,8 @@ bool ModuleScene::Start()
 		JSONNode* node = scene_file.GetRootNode("Game Objects");
 		root = node->FillGO();
 		DEL(node);
+
+		// TODO: check if loaded scene already has camera
 	}
 	else
 	{
@@ -61,6 +63,8 @@ bool ModuleScene::Start()
 		// load default meshes
 		//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
 		App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.FBX");
+
+		(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
 	}
 	root->SetBoundingBoxFromChilds();
 	root->AddComponent(C_PLANE);
