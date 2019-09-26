@@ -188,9 +188,9 @@ void RE_GameObject::OnStop()
 	for (auto child : childs) child->OnStop();
 }
 
-RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float pitch, float yaw, float roll, float h_fov_rads, float v_fov_rads, float h_fov_degrees, float v_fov_degrees, math::vec position, math::vec rotation, math::vec scale)
+RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float h_fov_rads, float v_fov_rads, float h_fov_degrees, float v_fov_degrees, math::vec position, math::vec rotation, math::vec scale)
 {
-	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, pitch, yaw, roll, h_fov_rads, v_fov_rads, h_fov_degrees, v_fov_degrees, position, rotation, scale);
+	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, h_fov_rads, v_fov_rads, h_fov_degrees, v_fov_degrees, position, rotation, scale);
 	components.push_back((RE_Component*)comp_camera);
 	return comp_camera;
 }

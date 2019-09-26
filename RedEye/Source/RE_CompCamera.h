@@ -24,7 +24,6 @@ public:
 		bool toPerspective,
 		float near_plane,
 		float far_plane,
-		float pitch, float yaw, float roll, 
 		float h_fov_rads, float v_fov_rads, 
 		float h_fov_degrees, float v_fov_degrees, 
 		math::vec position, math::vec rotation, math::vec scale);

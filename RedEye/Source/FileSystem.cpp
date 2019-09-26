@@ -843,7 +843,6 @@ RE_GameObject * JSONNode::FillGO()
 
 					RE_CompMesh* mesh = nullptr;
 					rapidjson::Value* textures_val = nullptr;
-					rapidjson::Value* vector = nullptr;
 					math::vec position = math::vec::zero;
 					math::vec scale = math::vec::zero;
 					math::vec rotation = math::vec::zero;
@@ -868,22 +867,19 @@ RE_GameObject * JSONNode::FillGO()
 						new_go->AddCompMesh(mesh);
 						break;
 					case C_CAMERA:
-						vector = &v.FindMember("position")->value;
-						position.Set(vector->GetArray()[0].GetFloat(), vector->GetArray()[1].GetFloat(), vector->GetArray()[2].GetFloat());
+						vector = c.FindMember("position")->value;
+						position.Set(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
 
-						vector = &v.FindMember("scale")->value;
-						scale.Set(vector->GetArray()[0].GetFloat(), vector->GetArray()[1].GetFloat(), vector->GetArray()[2].GetFloat());
+						vector = c.FindMember("rotation")->value;
+						rotation.Set(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
 
-						vector = &v.FindMember("rotation")->value;
-						rotation.Set(vector->GetArray()[0].GetFloat(), vector->GetArray()[1].GetFloat(), vector->GetArray()[2].GetFloat());
+						vector = c.FindMember("scale")->value;
+						scale.Set(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
 
 						new_go->AddCompCamera(
 							c.FindMember("isPrespective")->value.GetBool(),
 							c.FindMember("near_plane")->value.GetFloat(),
 							c.FindMember("far_plane")->value.GetFloat(),
-							c.FindMember("pitch")->value.GetFloat(),
-							c.FindMember("yaw")->value.GetFloat(),
-							c.FindMember("roll")->value.GetFloat(),
 							c.FindMember("h_fov_rads")->value.GetFloat(),
 							c.FindMember("v_fov_rads")->value.GetFloat(),
 							c.FindMember("h_fov_degrees")->value.GetFloat(),
