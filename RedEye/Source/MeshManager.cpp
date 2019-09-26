@@ -47,7 +47,7 @@ bool MeshManager::Init(const char* def_shader)
 		LOG_ERROR("Mesh Manager could not read folder path");
 	}
 	
-	App->ReportSoftware("Assimp"); // , version, website);
+	App->ReportSoftware("Assimp", "4.0.1", "http://www.assimp.org/"); // , version, website);
 
 	return ret;
 }
