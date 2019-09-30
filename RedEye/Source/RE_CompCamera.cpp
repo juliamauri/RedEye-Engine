@@ -115,14 +115,17 @@ void RE_CompCamera::Draw()
 
 void RE_CompCamera::DrawProperties()
 {
-	float r[3] = { right.x, right.y, right.z };
-	ImGui::DragFloat3("Right", r, 0.1f, -10, 10, "%.2f");
+	if (ImGui::CollapsingHeader("Camera"))
+	{
+		float r[3] = { right.x, right.y, right.z };
+		ImGui::DragFloat3("Right", r, 0.1f, -10, 10, "%.2f");
 
-	float u[3] = { up.x, up.y, up.z };
-	ImGui::DragFloat3("Up", u, 0.1f, -10, 10, "%.2f");
+		float u[3] = { up.x, up.y, up.z };
+		ImGui::DragFloat3("Up", u, 0.1f, -10, 10, "%.2f");
 
-	float f[3] = { front.x, front.y, front.z };
-	ImGui::DragFloat3("Front", f, 0.1f, -10, 10, "%.2f");
+		float f[3] = { front.x, front.y, front.z };
+		ImGui::DragFloat3("Front", f, 0.1f, -10, 10, "%.2f");
+	}
 }
 
 void RE_CompCamera::LocalRotate(float x_angle_rad, float y_angle_rad)

@@ -553,9 +553,16 @@ void RE_GameObject::DrawProperties()
 
 void RE_GameObject::DrawHeriarchy()
 {
-	if (ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_OpenOnArrow + ImGuiTreeNodeFlags_OpenOnDoubleClick))
+	if (ImGui::TreeNodeEx(name.c_str(),
+		(App->scene->GetSelected() == this ?
+			ImGuiTreeNodeFlags_(childs.empty() ?
+				ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_Leaf :
+				ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick) :
+			ImGuiTreeNodeFlags_(childs.empty() ?
+				ImGuiTreeNodeFlags_None | ImGuiTreeNodeFlags_Leaf :
+				ImGuiTreeNodeFlags_None | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick))))
 	{
-		if (ImGui::IsItemClicked())
+		if (ImGui::IsItemClicked(0))
 			App->scene->SetSelected(this);
 
 		for (auto child : childs)
@@ -563,4 +570,6 @@ void RE_GameObject::DrawHeriarchy()
 
 		ImGui::TreePop();
 	}
+	else if (ImGui::IsItemClicked(0))
+		App->scene->SetSelected(this);
 }

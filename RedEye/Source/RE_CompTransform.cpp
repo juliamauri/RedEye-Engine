@@ -114,7 +114,7 @@ math::vec RE_CompTransform::GetGlobalPosition() const
 
 void RE_CompTransform::DrawProperties()
 {
-	if (ImGui::CollapsingHeader("Transform"))
+	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		// Position -----------------------------------------------------
 		float p[3] = { pos.x, pos.y, pos.z };
