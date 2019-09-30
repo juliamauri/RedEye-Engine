@@ -38,8 +38,8 @@ RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float near_p
 
 	RecalculateMatrixes();
 }
-RE_CompCamera::RE_CompCamera(RE_GameObject * go, bool toPerspective, float near_plane, float far_plane, float pitch, float yaw, float roll, float h_fov_rads, float v_fov_rads, float h_fov_degrees, float v_fov_degrees, math::vec position, math::vec rotation, math::vec scale)
-	: RE_Component(C_CAMERA, go), isPerspective(toPerspective), near_plane(near_plane), far_plane(far_plane), /*pitch(pitch), yaw(yaw), roll(roll),*/ h_fov_rads(h_fov_rads), v_fov_rads(v_fov_rads), h_fov_degrees(h_fov_degrees), v_fov_degrees(v_fov_degrees)
+RE_CompCamera::RE_CompCamera(RE_GameObject * go, bool toPerspective, float near_plane, float far_plane, float h_fov_rads, float v_fov_rads, float h_fov_degrees, float v_fov_degrees, math::vec position, math::vec rotation, math::vec scale)
+	: RE_Component(C_CAMERA, go), isPerspective(toPerspective), near_plane(near_plane), far_plane(far_plane), h_fov_rads(h_fov_rads), v_fov_rads(v_fov_rads), h_fov_degrees(h_fov_degrees), v_fov_degrees(v_fov_degrees)
 {
 	transform = go->GetTransform();
 	transform->SetPosition(position);
@@ -348,10 +348,6 @@ void RE_CompCamera::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 
 	val.AddMember(rapidjson::Value::StringRefType("near_plane"), rapidjson::Value().SetFloat(near_plane), node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("far_plane"), rapidjson::Value().SetFloat(far_plane), node->GetDocument()->GetAllocator());
-
-	//val.AddMember(rapidjson::Value::StringRefType("pitch"), rapidjson::Value().SetFloat(pitch), node->GetDocument()->GetAllocator());
-	//val.AddMember(rapidjson::Value::StringRefType("yaw"), rapidjson::Value().SetFloat(yaw), node->GetDocument()->GetAllocator());
-	//val.AddMember(rapidjson::Value::StringRefType("roll"), rapidjson::Value().SetFloat(roll), node->GetDocument()->GetAllocator());
 
 	val.AddMember(rapidjson::Value::StringRefType("h_fov_rads"), rapidjson::Value().SetFloat(h_fov_rads), node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("v_fov_rads"), rapidjson::Value().SetFloat(v_fov_rads), node->GetDocument()->GetAllocator());

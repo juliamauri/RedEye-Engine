@@ -810,9 +810,8 @@ JSONNode* JSONNode::PullJObject(const char * name)
 
 RE_GameObject * JSONNode::FillGO()
 {
-	RE_GameObject * go = nullptr;
-
-	bool first = true;
+	RE_GameObject * rootGo = nullptr;
+	RE_GameObject* new_go = nullptr;
 	rapidjson::Value* val = rapidjson::Pointer(pointerPath.c_str()).Get(config->document);
 
 	if (val->IsArray())
@@ -822,27 +821,9 @@ RE_GameObject * JSONNode::FillGO()
 			UUID uuid;
 			UUID parent_uuid;
 
-			if (first)
-			{
-				UuidFromStringA((RPC_CSTR)v.FindMember("UUID")->value.GetString(), &uuid);
-				go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid);
-
-				rapidjson::Value& vector = v.FindMember("position")->value;
-				go->GetTransform()->SetPosition({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
-
-				vector = v.FindMember("scale")->value;
-				go->GetTransform()->SetScale({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
-
-				vector = v.FindMember("rotation")->value;
-				go->GetTransform()->SetRotation({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
-
-				first = false;
-				continue;
-			}
 			UuidFromStringA((RPC_CSTR)v.FindMember("UUID")->value.GetString(), &uuid);
-			UuidFromStringA((RPC_CSTR)v.FindMember("Parent UUID")->value.GetString(), &parent_uuid);
-
-			RE_GameObject* new_go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid, go->GetGoFromUUID(parent_uuid));
+			if(rootGo != nullptr) UuidFromStringA((RPC_CSTR)v.FindMember("Parent UUID")->value.GetString(), &parent_uuid);
+			(rootGo == nullptr) ? rootGo = new_go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid) : new_go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid, rootGo->GetGoFromUUID(parent_uuid));
 
 			rapidjson::Value& vector = v.FindMember("position")->value;
 			new_go->GetTransform()->SetPosition({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
@@ -862,7 +843,6 @@ RE_GameObject * JSONNode::FillGO()
 
 					RE_CompMesh* mesh = nullptr;
 					rapidjson::Value* textures_val = nullptr;
-					rapidjson::Value* vector = nullptr;
 					math::vec position = math::vec::zero;
 					math::vec scale = math::vec::zero;
 					math::vec rotation = math::vec::zero;
@@ -887,22 +867,19 @@ RE_GameObject * JSONNode::FillGO()
 						new_go->AddCompMesh(mesh);
 						break;
 					case C_CAMERA:
-						vector = &v.FindMember("position")->value;
-						position.Set(vector->GetArray()[0].GetFloat(), vector->GetArray()[1].GetFloat(), vector->GetArray()[2].GetFloat());
+						vector = c.FindMember("position")->value;
+						position.Set(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
 
-						vector = &v.FindMember("scale")->value;
-						scale.Set(vector->GetArray()[0].GetFloat(), vector->GetArray()[1].GetFloat(), vector->GetArray()[2].GetFloat());
+						vector = c.FindMember("rotation")->value;
+						rotation.Set(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
 
-						vector = &v.FindMember("rotation")->value;
-						rotation.Set(vector->GetArray()[0].GetFloat(), vector->GetArray()[1].GetFloat(), vector->GetArray()[2].GetFloat());
+						vector = c.FindMember("scale")->value;
+						scale.Set(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
 
 						new_go->AddCompCamera(
 							c.FindMember("isPrespective")->value.GetBool(),
 							c.FindMember("near_plane")->value.GetFloat(),
 							c.FindMember("far_plane")->value.GetFloat(),
-							c.FindMember("pitch")->value.GetFloat(),
-							c.FindMember("yaw")->value.GetFloat(),
-							c.FindMember("roll")->value.GetFloat(),
 							c.FindMember("h_fov_rads")->value.GetFloat(),
 							c.FindMember("v_fov_rads")->value.GetFloat(),
 							c.FindMember("h_fov_degrees")->value.GetFloat(),
@@ -917,7 +894,7 @@ RE_GameObject * JSONNode::FillGO()
 		}
 	}
 
-	return go;
+	return rootGo;
 }
 
 inline bool JSONNode::operator!() const
