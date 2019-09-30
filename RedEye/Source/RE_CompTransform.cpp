@@ -22,6 +22,8 @@ void RE_CompTransform::Update()
 {
 	if (needed_update_transform)
 		CalcGlobalTransform();
+	else
+		ConfirmChange();
 }
 
 math::float4x4 RE_CompTransform::GetMatrixModel()
