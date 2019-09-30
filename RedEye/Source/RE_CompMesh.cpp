@@ -60,6 +60,10 @@ void RE_CompMesh::DrawProperties()
 			//if (!show_f_normals && ptr->lFaceNormals) ptr->clearFaceNormals();
 			//if (!show_v_normals && ptr->lVertexNormals) ptr->clearVertexNormals();
 
+			math::AABB box = ptr->GetAABB();
+
+			ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", box.minPoint.x, box.minPoint.y, box.minPoint.z);
+			ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", box.maxPoint.x, box.maxPoint.y, box.maxPoint.z);
 
 			ImGui::Text("Vertex count: %u", ptr->vertices.size());
 			ImGui::Text("Triangle Face count: %u", ptr->triangle_count);
