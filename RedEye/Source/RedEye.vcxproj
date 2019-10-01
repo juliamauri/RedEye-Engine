@@ -55,6 +55,7 @@
     <ClCompile Include="RE_Math.cpp" />
     <ClCompile Include="RE_Mesh.cpp" />
     <ClCompile Include="RE_CompPrimitive.cpp" />
+    <ClCompile Include="RE_Prefab.cpp" />
     <ClCompile Include="RE_PrimitiveManager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="SystemInfo.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="RE_Mesh.h" />
     <ClInclude Include="RE_CompMesh.h" />
     <ClInclude Include="RE_CompPrimitive.h" />
+    <ClInclude Include="RE_Prefab.h" />
     <ClInclude Include="RE_PrimitiveManager.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="SystemInfo.h" />
