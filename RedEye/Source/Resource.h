@@ -17,7 +17,9 @@ enum Resource_Type : short unsigned int
 	R_SHADER,
 	R_PRIMITIVE,
 	R_TEXTURE,
-	R_MESH
+	R_MESH,
+	R_PREFAB,
+	R_INTERNALPREFAB
 };
 
 class ResourceContainer

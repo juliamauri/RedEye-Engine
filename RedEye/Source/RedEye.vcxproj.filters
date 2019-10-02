@@ -124,7 +124,9 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Prefab.cpp" />
+    <ClCompile Include="RE_Prefab.cpp">
+      <Filter>Containers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -397,7 +399,9 @@
     <ClInclude Include="ImGui\imstb_truetype.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Prefab.h" />
+    <ClInclude Include="RE_Prefab.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">

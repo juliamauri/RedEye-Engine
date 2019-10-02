@@ -2,29 +2,29 @@
 #define __RE_PREFAB_H__
 
 class RE_GameObject;
+#include "Resource.h"
 
-class RE_Prefab
+#include <string>
+
+//Internal is named .efab
+//external is named .refab
+class RE_Prefab : public ResourceContainer
 {
 public:
-	RE_Prefab();
+	RE_Prefab(RE_GameObject* toBePrefab, bool isInternal = false);
 	~RE_Prefab();
 
 public:
-
-	void load();
-	void unload();
+	//returns a new, needed destroy after use.
 	RE_GameObject* GetRoot();
 
 private:
-	char* md5;
-	 //uuid
+	void Load();
+	void Unload();
 
+private:
 	RE_GameObject* loaded = nullptr;
-
 	bool isInternal = false;
-	bool isInMemory = false;
-
-	char* filePath = false;
 };
 
 #endif // !__RE_PREFAB_H__
