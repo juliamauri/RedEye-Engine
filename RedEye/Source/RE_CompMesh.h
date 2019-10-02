@@ -10,6 +10,7 @@ class RE_CompMesh : public RE_Component
 {
 public:
 	RE_CompMesh(RE_GameObject* go = nullptr, const char* reference = nullptr, const bool start_active = true);
+	RE_CompMesh(const RE_CompMesh& cmpMesh, RE_GameObject* go = nullptr);
 	~RE_CompMesh();
 
 	void Draw() override;

@@ -45,14 +45,21 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 		switch (cmpGO->GetType())
 		{
 		case C_TRANSFORM:
-			transform = new RE_CompTransform(*transform, this);
+			transform = new RE_CompTransform(*(RE_CompTransform*)cmpGO, this);
 			components.push_back((RE_Component*)transform);
 			break;
 		case C_CAMERA:
+			components.push_back(new RE_CompCamera(*(RE_CompCamera*)cmpGO, this));
+			break;
+		case C_MESH:
+			components.push_back(new RE_CompMesh(*(RE_CompMesh*)cmpGO, this));
+			break;
+		}
+	}
 
-			break;
-		default:
-			break;
+	if (!go.childs.empty()) {
+		for (RE_GameObject* go : go.childs) {
+			new RE_GameObject(*go, this);
 		}
 	}
 }

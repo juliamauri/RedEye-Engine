@@ -69,7 +69,7 @@ RE_CompCamera::RE_CompCamera(RE_GameObject * go, bool toPerspective, float near_
 	RecalculateMatrixes();
 }
 
-RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go)
+RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go) : RE_Component(C_CAMERA, go)
 {
 	if (cmpCamera.GetGO() == nullptr && go == nullptr)
 		transform = new RE_CompTransform(*cmpCamera.transform);

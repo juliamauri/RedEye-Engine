@@ -22,6 +22,14 @@ RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool s
 		ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
 }
 
+RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go) : RE_Component(C_MESH, go, cmpMesh.active)
+{
+	this->reference = cmpMesh.reference;
+
+	if (ptr == nullptr)
+		ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
+}
+
 RE_CompMesh::~RE_CompMesh()
 {
 	//((ResourceManager*)App->meshes)->UnReference(reference);
