@@ -28,6 +28,11 @@ public:
 		float h_fov_degrees, float v_fov_degrees, 
 		math::vec position, math::vec rotation, math::vec scale);
 
+	RE_CompCamera(
+		const RE_CompCamera& cmpCamera,
+		RE_GameObject* go
+	);
+
 	~RE_CompCamera();
 	
 	void Update() override;

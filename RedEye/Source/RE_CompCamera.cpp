@@ -69,6 +69,35 @@ RE_CompCamera::RE_CompCamera(RE_GameObject * go, bool toPerspective, float near_
 	RecalculateMatrixes();
 }
 
+RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go)
+{
+	if (cmpCamera.GetGO() == nullptr && go == nullptr)
+		transform = new RE_CompTransform(*cmpCamera.transform);
+	else
+		transform = (go == nullptr) ? new RE_CompTransform() : go->GetTransform();
+
+	near_plane = cmpCamera.near_plane;
+	far_plane = cmpCamera.far_plane;
+
+	h_fov_rads = cmpCamera.h_fov_rads;
+	v_fov_rads = cmpCamera.v_fov_rads;
+
+	h_fov_degrees = cmpCamera.h_fov_degrees;
+	v_fov_degrees = cmpCamera.v_fov_degrees;
+
+	isPerspective = cmpCamera.isPerspective;
+
+	frustum = cmpCamera.frustum;
+
+	right = cmpCamera.right;
+	up = cmpCamera.up;
+	front = cmpCamera.front;
+
+	OnTransformModified();
+
+	RecalculateMatrixes();
+}
+
 
 RE_CompCamera::~RE_CompCamera()
 {
