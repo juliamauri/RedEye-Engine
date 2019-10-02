@@ -39,6 +39,8 @@ public:
 
 	void Serialize();
 
+	void AddGoToRoot(RE_GameObject* toAdd);
+
 	//shaders
 	unsigned int modelloading;
 

@@ -20,6 +20,8 @@
 
 #include "PhysFS\include\physfs.h"
 
+#include "md5.h"
+
 #pragma comment( lib, "PhysFS/libx86/physfs.lib" )
 
 #ifdef _DEBUG
@@ -444,6 +446,18 @@ JSONNode* Config::GetRootNode(const char* member)
 inline bool Config::operator!() const
 {
 	return document.IsNull();
+}
+
+std::string Config::GetMd5()
+{
+	rapidjson::StringBuffer s_buffer;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(s_buffer);
+	document.Accept(writer);
+	s_buffer.Put('\0');
+	size = s_buffer.GetSize();
+	const char* output = s_buffer.GetString();
+
+	return md5(output);
 }
 
 

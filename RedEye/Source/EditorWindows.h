@@ -1,9 +1,12 @@
 #ifndef __EDITORWINDOWS__
 #define __EDITORWINDOWS__
 
+#include "Resource.h"
+
 #include "ImGui\imgui.h"
 #include <list>
 #include <string>
+#include <vector>
 
 class EditorWindow
 {
@@ -171,6 +174,19 @@ private:
 	std::string path;
 	std::string selected;
 	char **rc = nullptr;
+};
+
+class PrefabsPanel :public EditorWindow
+{
+public:
+	PrefabsPanel(const char* name = "Prefabs", bool start_active = false);
+
+private:
+	void Draw() override;
+
+	std::vector<ResourceContainer*> prefabs;
+
+	ResourceContainer* selected = nullptr;
 };
 
 

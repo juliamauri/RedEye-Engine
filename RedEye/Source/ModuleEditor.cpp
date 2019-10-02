@@ -28,6 +28,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(editor_settings = new EditorSettingsWindow());
 	windows.push_back(play_pause = new PlayPauseWindow());
 	windows.push_back(select_file = new SelectFile());
+	windows.push_back(prefabsPanel = new PrefabsPanel());
 	about = new AboutWindow();
 
 	tools.push_back(rng = new RandomTest());

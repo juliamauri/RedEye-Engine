@@ -2,6 +2,7 @@
 #define __RESOURCEMANAGER_H__
 
 #include <map>
+#include <vector>
 
 class ResourceContainer;
 #include "Resource.h"
@@ -19,6 +20,9 @@ public:
 	ResourceContainer* At(const char* md5) const;
 	unsigned int TotalReferences() const;
 	//unsigned int TotalReferenceCount() const;
+	std::vector<ResourceContainer*> GetResourcesByType(Resource_Type type);
+
+
 
 	typedef std::pair<const char*, ResourceContainer*> Resource;
 	typedef std::map<const char*, ResourceContainer*> ResourceMap;

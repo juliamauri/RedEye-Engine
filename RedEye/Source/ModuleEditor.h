@@ -17,6 +17,7 @@ class TexturesWindow;
 class EditorSettingsWindow;
 class PlayPauseWindow;
 class SelectFile;
+class PrefabsPanel;
 
 struct SoftwareInfo;
 class RE_CompCamera;
@@ -70,6 +71,8 @@ private:
 	AboutWindow* about = nullptr;
 
 	SelectFile* select_file = nullptr;
+
+	PrefabsPanel* prefabsPanel = nullptr;
 
 	// Tools
 	RandomTest* rng = nullptr;

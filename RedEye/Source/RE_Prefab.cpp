@@ -13,7 +13,7 @@ RE_Prefab::RE_Prefab(RE_GameObject* toBePrefab, bool isInternal) : ResourceConta
 {
 	SetType((isInternal) ? Resource_Type::R_INTERNALPREFAB : Resource_Type::R_PREFAB);
 
-	std::string save_path((isInternal) ? "Library/Scenes/" : "Assets/Prefab/");
+	std::string save_path((isInternal) ? "Library/Scenes/" : "Assets/Prefabs/");
 
 	save_path += GetName();
 	//Internal is named .efab
@@ -31,10 +31,9 @@ RE_Prefab::RE_Prefab(RE_GameObject* toBePrefab, bool isInternal) : ResourceConta
 
 	DEL(node);
 
-	prefab_file.Save();
+	SetMD5(prefab_file.GetMd5().c_str());
 
-	MD5 newMD5 = MD5(prefab_file.GetBuffer());
-	SetMD5(newMD5.hexdigest().c_str());
+	prefab_file.Save();
 }
 
 RE_Prefab::~RE_Prefab()

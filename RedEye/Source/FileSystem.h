@@ -94,6 +94,8 @@ public:
 	JSONNode* GetRootNode(const char* member);
 	inline bool operator!() const override;
 
+	std::string GetMd5();
+
 public:
 	std::string zip_path;
 	rapidjson::Document document;

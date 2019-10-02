@@ -9,6 +9,9 @@
 #include "RE_CompCamera.h"
 #include "RE_Math.h"
 #include "OutputLog.h"
+#include "ResourceManager.h"
+
+#include "RE_Prefab.h"
 
 #include "PhysFS\include\physfs.h"
 
@@ -416,6 +419,48 @@ void SelectFile::Draw()
 				}
 			}
 		}
+	}
+	ImGui::End();
+}
+
+PrefabsPanel::PrefabsPanel(const char * name, bool start_active) : EditorWindow(name, start_active) {}
+
+void PrefabsPanel::Draw()
+{
+	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	{
+		if (ImGui::Button("Reload Prefabs"))
+			prefabs = App->resources->GetResourcesByType(Resource_Type::R_PREFAB);
+		
+		ImGui::SameLine();
+
+		if (ImGui::Button("Create Prefab"))
+		{
+			if (App->scene->GetSelected() != nullptr)
+				App->resources->Reference(new RE_Prefab(App->scene->GetSelected()));
+		}
+
+		if (ImGui::Button("Clone selected to Scene"))
+		{
+			if (selected != nullptr)
+				App->scene->AddGoToRoot(((RE_Prefab*)selected)->GetRoot());
+		}
+
+		ImGui::NewLine();
+
+		if (!prefabs.empty())
+		{
+			ImGui::Text("Current Prefabs");
+
+			for (ResourceContainer* currentPrefab : prefabs)
+			{
+				if(ImGui::Button(currentPrefab->GetName()))
+					selected = currentPrefab;
+			}
+
+		}
+		else
+			ImGui::Text("Empty");
 	}
 	ImGui::End();
 }

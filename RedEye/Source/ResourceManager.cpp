@@ -127,6 +127,16 @@ unsigned int ResourceManager::TotalReferences() const
 {
 	return resources.size();
 }
+std::vector<ResourceContainer*> ResourceManager::GetResourcesByType(Resource_Type type)
+{
+	std::vector<ResourceContainer*> ret;
+	for (auto resource : resources)
+	{
+		if (resource.second->GetType() == type)
+			ret.push_back(resource.second);
+	}
+	return ret;
+}
 /*
 unsigned int ResourceManager::TotalReferenceCount() const
 {

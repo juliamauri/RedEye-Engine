@@ -300,3 +300,8 @@ void ModuleScene::Serialize()
 	scene_file.Save();
 }
 
+void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
+{
+	root->AddChild(toAdd);
+}
+
