@@ -20,6 +20,7 @@ class RE_GameObject
 {
 public:
 	RE_GameObject(const char* name, UUID uuid = GUID_NULL, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
+	RE_GameObject(const RE_GameObject& go, RE_GameObject* parent = nullptr);
 	~RE_GameObject();
 
 	void PreUpdate();

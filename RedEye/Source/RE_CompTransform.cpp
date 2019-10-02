@@ -14,6 +14,16 @@ RE_CompTransform::RE_CompTransform(RE_GameObject * go) : RE_Component(C_TRANSFOR
 		useParent = false;
 }
 
+RE_CompTransform::RE_CompTransform(RE_CompTransform & cmptransform, RE_GameObject * go) : RE_Component(C_TRANSFORM, go)
+{
+	if (go == nullptr)
+		useParent = false;
+
+	SetPosition(cmptransform.pos);
+	SetScale(cmptransform.scale.scale);
+	SetRotation(cmptransform.rot_quat);
+}
+
 RE_CompTransform::~RE_CompTransform()
 {
 }

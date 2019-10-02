@@ -32,6 +32,31 @@ RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, boo
 	components.push_back((RE_Component*)transform);
 }
 
+RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : parent(p)
+{
+	UuidCreate(&this->uuid);
+	if (parent != nullptr) parent->AddChild(this);
+	isStatic = go.isStatic;
+	active = go.active;
+	name = go.name;
+	
+	for (RE_Component* cmpGO : go.components)
+	{
+		switch (cmpGO->GetType())
+		{
+		case C_TRANSFORM:
+			transform = new RE_CompTransform(*transform, this);
+			components.push_back((RE_Component*)transform);
+			break;
+		case C_CAMERA:
+
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 RE_GameObject::~RE_GameObject()
 {
 	RemoveAllChilds();
