@@ -2,7 +2,7 @@
 
 #include "Application.h"
 #include "Texture2DManager.h"
-#include "MeshManager.h"
+#include "ModelImporter.h"
 #include "FileSystem.h"
 #include "Globals.h"
 #include "OutputLog.h"
@@ -77,9 +77,9 @@ void ResourceManager::CheckFileLoaded(const char * filepath, const char* resourc
 			path_library += resource;
 			path_library += ".red";
 			if (App->fs->Exists(path_library.c_str()))
-				App->meshes->LoadDirectMesh(path_library.c_str(), resource, filepath);
+				App->modelImporter->ProcessMeshFromLibrary(path_library.c_str(), resource, filepath);
 			else
-				App->meshes->LoadMesh(filepath);
+				App->modelImporter->LoadModelFromAssets(filepath);
 			break;
 		default:
 			break;

@@ -13,7 +13,8 @@
 #include "Texture2DManager.h"
 #include "ShaderManager.h"
 #include "RE_PrimitiveManager.h"
-#include "MeshManager.h"
+#include "ModelImporter.h"
+#include "ResourceManager.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
 #include "IL/include/il.h"
@@ -39,7 +40,7 @@ Application::Application()
 	textures = new Texture2DManager("Images/");
 	shaders = new ShaderManager("Assets/Shaders/");
 	primitives = new RE_PrimitiveManager();
-	meshes = new MeshManager("Assets/Meshes/");
+	modelImporter = new ModelImporter("Assets/Meshes/");
 	resources = new ResourceManager();
 }
 
@@ -48,7 +49,7 @@ Application::~Application()
 	DEL(textures);
 	DEL(shaders);
 	DEL(primitives);
-	DEL(meshes);
+	DEL(modelImporter);
 	DEL(resources);
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
@@ -117,7 +118,7 @@ bool Application::Init(int argc, char* argv[])
 				if (textures && !textures->Init()) LOG_WARNING("Won't be able to use textures");
 				if (shaders && !shaders->Init()) LOG_WARNING("Won't be able to use shaders");
 				if (primitives && !primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
-				if (meshes && !meshes->Init())  LOG_WARNING("Won't be able to use meshes");
+				if (modelImporter && !modelImporter->Init())  LOG_WARNING("Won't be able to import model");
 
 				LOG_SEPARATOR("Starting Application");
 

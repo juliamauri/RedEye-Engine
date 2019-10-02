@@ -22,7 +22,7 @@ struct OutputLogHolder;
 class Texture2DManager;
 class ShaderManager;
 class RE_PrimitiveManager;
-class MeshManager;
+class ModelImporter;
 class ResourceManager;
 
 enum GameState : char
@@ -79,7 +79,7 @@ public:
 	Texture2DManager* textures = nullptr;
 	ShaderManager* shaders = nullptr;
 	RE_PrimitiveManager* primitives = nullptr;
-	MeshManager* meshes = nullptr;
+	ModelImporter* modelImporter = nullptr;
 
 	ResourceManager* resources = nullptr;
 

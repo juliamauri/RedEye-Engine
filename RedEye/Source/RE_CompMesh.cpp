@@ -1,7 +1,6 @@
 #include "RE_CompMesh.h"
 
 #include "Application.h"
-#include "MeshManager.h"
 #include "FileSystem.h"
 #include "ShaderManager.h"
 #include "ModuleScene.h"
@@ -39,8 +38,7 @@ void RE_CompMesh::Draw()
 {
 	ShaderManager::use(App->scene->modelloading);
 	ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetShaderModel());
-	App->meshes->DrawMesh(ptr);
-
+	ptr->Draw(App->scene->modelloading);
 }
 
 void RE_CompMesh::DrawProperties()

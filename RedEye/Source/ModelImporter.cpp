@@ -1,4 +1,4 @@
-#include "Modelmporter.h"
+#include "ModelImporter.h"
 
 #include "Application.h"
 #include "FileSystem.h"
@@ -20,64 +20,64 @@
 #include "assimp\include\scene.h"
 #include "assimp\include\postprocess.h"
 
+
+#ifdef _DEBUG
+#pragma comment(lib, "assimp/libx86/assimp-vc140-mt-debug.lib")
+#else
+#pragma comment(lib, "assimp/libx86/assimp-vc140-mt-release.lib")
+#endif
+
 #include <Windows.h>
 
 
-Modelmporter::Modelmporter(const char* f) : folderPath(f)
+ModelImporter::ModelImporter(const char* f) : folderPath(f)
 {
 }
 
 
-Modelmporter::~Modelmporter()
+ModelImporter::~ModelImporter()
 {
 }
 
-bool Modelmporter::Init(const char * def_shader)
+bool ModelImporter::Init(const char * def_shader)
 {
-	LOG("Initializing Mesh Manager");
+	LOG("Initializing Model Importer");
 
-	bool ret = (folderPath != nullptr);
-	if (ret)
-	{
-		if (def_shader != nullptr)
-		{
-			ret = App->shaders->Load(def_shader, &default_shader);
-			if (!ret) LOG_ERROR("Mesh Manager could not load shader: %s", def_shader);
-		}
-	}
-	else
-	{
-		LOG_ERROR("Mesh Manager could not read folder path");
-	}
+	App->ReportSoftware("Assimp", "4.0.1", "http://www.assimp.org/");
 
-	App->ReportSoftware("Assimp", "4.0.1", "http://www.assimp.org/"); // , version, website);
-
-	return ret;
+	return true;
 }
 
-void Modelmporter::LoadModelFromAssets(const char * path)
+RE_Prefab* ModelImporter::LoadModelFromAssets(const char * path)
 {
+	RE_Prefab* modelreturn = nullptr;
 	RE_FileIO* mesh_file = nullptr;
 
-	mesh_file = new RE_FileIO(path);
+	std::string assetsPath = folderPath;
+	assetsPath += path;
+	mesh_file = new RE_FileIO(assetsPath.c_str());
 	if (!mesh_file->Load())
 	{
-		LOG("Error when load mesh file:\n%s", path);
+		LOG("Error when load mesh file:\n%s", assetsPath.c_str());
 		DEL(mesh_file);
 	}
 
 	if (mesh_file != nullptr)
 	{
-		LOG("Loading Model from: %s", path);
-		workingfilepath = path;
-		ProcessModel(mesh_file->GetBuffer(), mesh_file->GetSize());
+		LOG("Loading Model from: %s", assetsPath.c_str());
+		workingfilepath = assetsPath;
+		modelreturn = ProcessModel(mesh_file->GetBuffer(), mesh_file->GetSize());
 
 		DEL(mesh_file);
 	}
+
+	return modelreturn;
 }
 
-void Modelmporter::ProcessModel(const char * buffer, unsigned int size)
+RE_Prefab*  ModelImporter::ProcessModel(const char * buffer, unsigned int size)
 {
+	RE_Prefab* newModelPrefab = nullptr;
+
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFileFromMemory(buffer, size, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | /*aiProcess_PreTransformVertices |*/ aiProcess_SortByPType | aiProcess_FlipUVs);
 
@@ -88,12 +88,13 @@ void Modelmporter::ProcessModel(const char * buffer, unsigned int size)
 		RE_GameObject* rootGO = new RE_GameObject(scene->mRootNode->mName.C_Str(), GUID_NULL);
 		ProcessNode(scene->mRootNode, scene, rootGO, true);
 
-		RE_Prefab* newModelPrefab = new RE_Prefab(rootGO, true);
+		newModelPrefab = new RE_Prefab(rootGO, true);
 		App->resources->Reference(newModelPrefab);
 	}
+	return newModelPrefab;
 }
 
-void Modelmporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObject* currentGO, bool isRoot)
+void ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObject* currentGO, bool isRoot)
 {
 	LOG_SECONDARY("%s Node: %s (%u meshes | %u children)",
 		node->mParent ? "SON" : "PARENT",
@@ -143,16 +144,16 @@ void Modelmporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObje
 
 			RE_CompMesh* comp_mesh = nullptr;
 			RE_Mesh* processed_mesh = nullptr;
-			std::string exists = ProcessMesh(mesh, scene, i + 1, processed_mesh);
-			if (exists.empty())
+			const char* exists = ProcessMesh(mesh, scene, i + 1, &processed_mesh);
+			if (exists == nullptr)
 			{
 				comp_mesh = new RE_CompMesh(goMesh, App->resources->Reference((ResourceContainer*)processed_mesh));
 				goMesh->SetLocalBoundingBox(processed_mesh->GetAABB());
 			}
 			else
 			{
-				comp_mesh = new RE_CompMesh(goMesh, exists.c_str());
-				goMesh->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(exists.c_str()))->GetAABB());
+				comp_mesh = new RE_CompMesh(goMesh, exists);
+				goMesh->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(exists))->GetAABB());
 			}
 			goMesh->AddCompMesh(comp_mesh);
 
@@ -165,9 +166,8 @@ void Modelmporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObje
 		ProcessNode(node->mChildren[i], scene, currentGO);
 }
 
-std::string Modelmporter::ProcessMesh(aiMesh * mesh, const aiScene * scene, const unsigned int pos, RE_Mesh* toFill)
+const char* ModelImporter::ProcessMesh(aiMesh * mesh, const aiScene * scene, const unsigned int pos, RE_Mesh** toFill)
 {
-	std::string meshMD5;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
@@ -212,12 +212,9 @@ std::string Modelmporter::ProcessMesh(aiMesh * mesh, const aiScene * scene, cons
 		vertex_buffer += vertice.Position.ToString();
 	}
 
-	RE_Mesh* ret_mesh = nullptr;
-
-	meshMD5 = md5(vertex_buffer.c_str());
-
+	std::string meshMD5 = md5(vertex_buffer.c_str());
 	const char* exists = App->resources->IsReference(meshMD5.c_str());
-	if (!exists)
+	if (exists == nullptr)
 	{
 		// process indices
 		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -241,17 +238,16 @@ std::string Modelmporter::ProcessMesh(aiMesh * mesh, const aiScene * scene, cons
 		save_mesh.Save();
 		DEL(mesh_serialize);
 
-		ret_mesh = new RE_Mesh(vertices, indices, textures, mesh->mNumFaces);
-		ResourceContainer* mesh_resource = (ResourceContainer*)ret_mesh;
-		mesh_resource->SetType(Resource_Type::R_MESH);
-		mesh_resource->SetMD5(meshMD5.c_str());
-		mesh_resource->SetFilePath(workingfilepath.c_str());
+		(*toFill) = new RE_Mesh(vertices, indices, textures, mesh->mNumFaces);
+		(*toFill)->SetType(Resource_Type::R_MESH);
+		(*toFill)->SetMD5(meshMD5.c_str());
+		(*toFill)->SetFilePath(workingfilepath.c_str());
 	}
 
-	return meshMD5;
+	return exists;
 }
 
-void Modelmporter::ProcessMeshFromLibrary(const char * file_library, const char * reference, const char * file_assets)
+void ModelImporter::ProcessMeshFromLibrary(const char * file_library, const char * reference, const char * file_assets)
 {
 	std::vector<Texture> null_text;
 	std::vector<Vertex> vertexes;

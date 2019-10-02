@@ -9,11 +9,12 @@
 #include "Texture2DManager.h"
 #include "ShaderManager.h"
 #include "RE_GameObject.h"
+#include "RE_Prefab.h"
 #include "RE_CompTransform.h"
 #include "RE_CompMesh.h"
 #include "RE_CompCamera.h"
 #include "RE_CompParticleEmiter.h"
-#include "MeshManager.h"
+#include "ModelImporter.h"
 #include <string>
 #include <algorithm>
 
@@ -25,23 +26,14 @@ ModuleScene::~ModuleScene()
 bool ModuleScene::Start()
 {
 	bool ret = true;
-
-
-
+	
 	//Loading Shaders
 	if (App->shaders)
 	{
 		ret = App->shaders->Load("texture", &modelloading);
 		if (!ret)
 			LOG("%s\n", App->shaders->GetShaderError());
-		App->meshes->SetDefaultShader(modelloading);
-
-		ret = App->shaders->Load("particle", &shader_particle);
-		if (!ret)
-			LOG("%s\n", App->shaders->GetShaderError());
 	}
-
-	smoke_particle = App->meshes->CreateMeshByTexture("Assets/Images/particle_texture.png");
 
 	// root
 	std::string path_scene("Assets/Scenes/");
@@ -54,15 +46,15 @@ bool ModuleScene::Start()
 		JSONNode* node = scene_file.GetRootNode("Game Objects");
 		root = node->FillGO();
 		DEL(node);
-
-		// TODO: check if loaded scene already has camera
 	}
 	else
 	{
 		root = new RE_GameObject("root");
 		// load default meshes
 		//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
-		App->meshes->LoadMeshOnGameObject(root, "street/Street environment_V01.FBX");
+		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets("street/Street environment_V01.FBX");
+
+		root->AddChild(newModel->GetRoot());
 
 		(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
 	}

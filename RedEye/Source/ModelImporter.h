@@ -6,25 +6,25 @@ struct aiMesh;
 struct aiScene;
 class RE_Mesh;
 class RE_GameObject;
+class RE_Prefab;
 
 #include <string>
 
-class Modelmporter
+class ModelImporter
 {
 public:
-	Modelmporter(const char* f);
-	~Modelmporter();
+	ModelImporter(const char* f);
+	~ModelImporter();
 
 	bool Init(const char* def_shader = nullptr);
-	void LoadModelFromAssets(const char * path);
-	void ProcessModel(const char* buffer, unsigned int size);
+	RE_Prefab* LoadModelFromAssets(const char * path);
+	RE_Prefab* ProcessModel(const char* buffer, unsigned int size);
 	void ProcessNode(aiNode* node, const aiScene* scene, RE_GameObject* currentGO, bool isRoot = false);
-	std::string ProcessMesh(aiMesh* mesh, const aiScene* scene, const unsigned int pos, RE_Mesh* toFill);
+	const char* ProcessMesh(aiMesh* mesh, const aiScene* scene, const unsigned int pos, RE_Mesh** toFill);
 	void ProcessMeshFromLibrary(const char* file_library, const char* reference, const char* file_assets);
 
 private:
 	const char* folderPath = nullptr;
-	unsigned int default_shader = 0;
 	std::string workingfilepath;
 };
 
