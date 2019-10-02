@@ -68,8 +68,6 @@ bool ModuleScene::Start()
 	//selected->AddCompMesh("path");
 	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
 
-
-
 	// call this instead to create all gameobjects from fbx
 	//selected = App->meshes->DumpGeometry(root, "path del street fbx");
 

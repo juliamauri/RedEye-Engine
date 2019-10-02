@@ -19,6 +19,7 @@
 #include "assimp\include\Importer.hpp"
 #include "assimp\include\scene.h"
 #include "assimp\include\postprocess.h"
+#include "assimp/include/material.h"
 
 
 #ifdef _DEBUG
@@ -144,17 +145,20 @@ void ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObj
 
 			RE_CompMesh* comp_mesh = nullptr;
 			RE_Mesh* processed_mesh = nullptr;
-			const char* exists = ProcessMesh(mesh, scene, i + 1, &processed_mesh);
-			if (exists == nullptr)
+			const char* existsMesh = ProcessMesh(mesh, scene, i + 1, &processed_mesh);
+			if (existsMesh == nullptr)
 			{
 				comp_mesh = new RE_CompMesh(goMesh, App->resources->Reference((ResourceContainer*)processed_mesh));
 				goMesh->SetLocalBoundingBox(processed_mesh->GetAABB());
 			}
 			else
 			{
-				comp_mesh = new RE_CompMesh(goMesh, exists);
-				goMesh->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(exists))->GetAABB());
+				comp_mesh = new RE_CompMesh(goMesh, existsMesh);
+				goMesh->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(existsMesh))->GetAABB());
 			}
+
+			const char* existsMaterial = ProcessMaterial(scene->mMaterials[i], i + 1);
+
 			goMesh->AddCompMesh(comp_mesh);
 
 			//meshes.rbegin()->name = node->mName.C_Str();
@@ -243,7 +247,6 @@ const char* ModelImporter::ProcessMesh(aiMesh * mesh, const aiScene * scene, con
 		(*toFill)->SetMD5(meshMD5.c_str());
 		(*toFill)->SetFilePath(workingfilepath.c_str());
 	}
-
 	return exists;
 }
 
@@ -269,4 +272,49 @@ void ModelImporter::ProcessMeshFromLibrary(const char * file_library, const char
 
 		DEL(mesh_json);
 	}
+}
+
+const char * ModelImporter::ProcessMaterial(aiMaterial * material, unsigned int pos)
+{
+	aiString name;
+	material->Get(AI_MATKEY_NAME, name);
+
+	aiColor3D colorDiffuse(-1, -1, -1);
+	material->Get(AI_MATKEY_COLOR_DIFFUSE, colorDiffuse);
+
+	aiColor3D colorSpecular(-1, -1, -1);
+	material->Get(AI_MATKEY_COLOR_SPECULAR, colorSpecular);
+
+	aiColor3D colorAmbient(-1, -1, -1);
+	material->Get(AI_MATKEY_COLOR_AMBIENT, colorAmbient);
+
+	aiColor3D colorEmissive(-1, -1, -1);
+	material->Get(AI_MATKEY_COLOR_EMISSIVE, colorEmissive);
+
+	aiColor3D colorTransparent(-1, -1, -1);
+	material->Get(AI_MATKEY_COLOR_TRANSPARENT, colorTransparent);
+
+	bool twosided = false;
+	material->Get(AI_MATKEY_TWOSIDED, twosided);
+
+	aiShadingMode shadingType;
+	material->Get(AI_MATKEY_SHADING_MODEL, shadingType);
+
+	bool blendFunc = false;
+	material->Get(AI_MATKEY_BLEND_FUNC, blendFunc);
+
+	float opacity = 1.0f;
+	material->Get(AI_MATKEY_OPACITY, opacity);
+
+	float shininess = 0.f;
+	material->Get(AI_MATKEY_SHININESS, shininess);
+
+	float shininessStrenght = 1.0f;
+	material->Get(AI_MATKEY_SHININESS_STRENGTH, shininessStrenght);
+
+	float refracti = 1.0f;
+	material->Get(AI_MATKEY_REFRACTI, refracti);
+
+
+	return nullptr;
 }
