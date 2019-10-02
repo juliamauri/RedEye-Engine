@@ -127,6 +127,9 @@
     <ClCompile Include="RE_Prefab.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
+    <ClCompile Include="Modelmporter.cpp">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -401,6 +404,9 @@
     </ClInclude>
     <ClInclude Include="RE_Prefab.h">
       <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Modelmporter.h">
+      <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

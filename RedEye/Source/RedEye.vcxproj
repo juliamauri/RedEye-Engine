@@ -34,6 +34,7 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="md5.cpp" />
     <ClCompile Include="MeshManager.cpp" />
+    <ClCompile Include="Modelmporter.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="RE_CompParticleEmiter.cpp" />
     <ClCompile Include="RE_CompTransform.cpp" />
@@ -86,6 +87,7 @@
     <ClInclude Include="ImGui\stb_truetype.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="MeshManager.h" />
+    <ClInclude Include="Modelmporter.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="RE_CompParticleEmiter.h" />
     <ClInclude Include="RE_CompTransform.h" />
