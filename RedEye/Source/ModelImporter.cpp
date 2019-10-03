@@ -157,7 +157,7 @@ void ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObj
 				goMesh->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(existsMesh))->GetAABB());
 			}
 
-			const char* existsMaterial = ProcessMaterial(scene->mMaterials[i], i + 1);
+			const char* existsMaterial = ProcessMaterial(scene->mMaterials[mesh->mMaterialIndex], i + 1);
 
 			goMesh->AddCompMesh(comp_mesh);
 
@@ -277,44 +277,99 @@ void ModelImporter::ProcessMeshFromLibrary(const char * file_library, const char
 const char * ModelImporter::ProcessMaterial(aiMaterial * material, unsigned int pos)
 {
 	aiString name;
-	material->Get(AI_MATKEY_NAME, name);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_NAME, name))
+	{
+		int i = 0;
+	}
 
-	aiColor3D colorDiffuse(-1, -1, -1);
-	material->Get(AI_MATKEY_COLOR_DIFFUSE, colorDiffuse);
+	aiShadingMode shadingType = aiShadingMode::aiShadingMode_Flat;
+	if (AI_SUCCESS != material->Get(AI_MATKEY_SHADING_MODEL, shadingType))
+	{
+		int i = 0;
+	}
 
-	aiColor3D colorSpecular(-1, -1, -1);
-	material->Get(AI_MATKEY_COLOR_SPECULAR, colorSpecular);
+	if (uint textures = material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+	{
+		for (uint t = 0; t < textures; t++)
+		{
+			aiString texturePath;
+			if (AI_SUCCESS != material->GetTexture(aiTextureType_DIFFUSE, t, &texturePath)) {
+				int i = 0;
+			}
+			else
+				int i = 0;
+		}
+	}
 
-	aiColor3D colorAmbient(-1, -1, -1);
-	material->Get(AI_MATKEY_COLOR_AMBIENT, colorAmbient);
+	aiColor3D colorDiffuse(0, 0, 0);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_DIFFUSE, colorDiffuse))
+	{
+		int i = 0;
+	}
+	else
+	{
+		if (shadingType == aiShadingMode::aiShadingMode_Flat && !colorDiffuse.IsBlack()) shadingType = aiShadingMode::aiShadingMode_Gouraud;
+	}
 
-	aiColor3D colorEmissive(-1, -1, -1);
-	material->Get(AI_MATKEY_COLOR_EMISSIVE, colorEmissive);
+	aiColor3D colorSpecular(0, 0, 0);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_SPECULAR, colorSpecular))
+	{
+	int i = 0;
+	}
 
-	aiColor3D colorTransparent(-1, -1, -1);
-	material->Get(AI_MATKEY_COLOR_TRANSPARENT, colorTransparent);
+	aiColor3D colorAmbient(0, 0, 0);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_AMBIENT, colorAmbient))
+	{
+	int i = 0;
+	}
+
+	aiColor3D colorEmissive(0, 0, 0);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_EMISSIVE, colorEmissive))
+	{
+	int i = 0;
+	}
+
+	aiColor3D colorTransparent(0, 0, 0);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_TRANSPARENT, colorTransparent))
+	{
+	int i = 0;
+	}
 
 	bool twosided = false;
-	material->Get(AI_MATKEY_TWOSIDED, twosided);
-
-	aiShadingMode shadingType;
-	material->Get(AI_MATKEY_SHADING_MODEL, shadingType);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_TWOSIDED, twosided))
+	{
+	int i = 0;
+	}
 
 	bool blendFunc = false;
-	material->Get(AI_MATKEY_BLEND_FUNC, blendFunc);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_BLEND_FUNC, blendFunc))
+	{
+	int i = 0;
+	}
 
 	float opacity = 1.0f;
-	material->Get(AI_MATKEY_OPACITY, opacity);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_OPACITY, opacity))
+	{
+	int i = 0;
+	}
 
 	float shininess = 0.f;
-	material->Get(AI_MATKEY_SHININESS, shininess);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS, shininess))
+	{
+	int i = 0;
+	}
 
 	float shininessStrenght = 1.0f;
-	material->Get(AI_MATKEY_SHININESS_STRENGTH, shininessStrenght);
+	if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS_STRENGTH, shininessStrenght))
+	{
+	int i = 0;
+	}
 
 	float refracti = 1.0f;
-	material->Get(AI_MATKEY_REFRACTI, refracti);
-
+	if (AI_SUCCESS != material->Get(AI_MATKEY_REFRACTI, refracti))
+	{
+	int i = 0;
+	}
 
 	return nullptr;
 }
