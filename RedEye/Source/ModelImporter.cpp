@@ -29,6 +29,7 @@
 #endif
 
 #include <Windows.h>
+#include <map>
 
 
 ModelImporter::ModelImporter(const char* f) : folderPath(f)
@@ -86,9 +87,14 @@ RE_Prefab*  ModelImporter::ProcessModel(const char * buffer, unsigned int size)
 		LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 	else
 	{
+		//First loading all materials
+		if(scene->HasMaterials()) ProcessMaterials(scene);
+
+		//Mount a go hiteracy with nodes from model
 		RE_GameObject* rootGO = new RE_GameObject(scene->mRootNode->mName.C_Str(), GUID_NULL);
 		ProcessNode(scene->mRootNode, scene, rootGO, true);
 
+		//We save own format of model as internal prefab
 		newModelPrefab = new RE_Prefab(rootGO, true);
 		App->resources->Reference(newModelPrefab);
 	}
@@ -156,9 +162,6 @@ void ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObj
 				comp_mesh = new RE_CompMesh(goMesh, existsMesh);
 				goMesh->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(existsMesh))->GetAABB());
 			}
-
-			const char* existsMaterial = ProcessMaterial(scene->mMaterials[mesh->mMaterialIndex], i + 1);
-
 			goMesh->AddCompMesh(comp_mesh);
 
 			//meshes.rbegin()->name = node->mName.C_Str();
@@ -274,102 +277,225 @@ void ModelImporter::ProcessMeshFromLibrary(const char * file_library, const char
 	}
 }
 
-const char * ModelImporter::ProcessMaterial(aiMaterial * material, unsigned int pos)
+void ModelImporter::ProcessMaterials(const aiScene* scene)
 {
-	aiString name;
-	if (AI_SUCCESS != material->Get(AI_MATKEY_NAME, name))
-	{
-		int i = 0;
-	}
+	std::map<aiMaterial*, int> indexMaterialImporter;
 
-	aiShadingMode shadingType = aiShadingMode::aiShadingMode_Flat;
-	if (AI_SUCCESS != material->Get(AI_MATKEY_SHADING_MODEL, shadingType))
+	for (uint i = 0; i < scene->mNumMaterials; i++)
 	{
-		int i = 0;
-	}
-
-	if (uint textures = material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-	{
-		for (uint t = 0; t < textures; t++)
+		aiMaterial* material = scene->mMaterials[i];
+		aiString name;
+		if (AI_SUCCESS != material->Get(AI_MATKEY_NAME, name))
 		{
-			aiString texturePath;
-			if (AI_SUCCESS != material->GetTexture(aiTextureType_DIFFUSE, t, &texturePath)) {
-				int i = 0;
-			}
-			else
-				int i = 0;
+			int i = 0;
 		}
-	}
 
-	aiColor3D colorDiffuse(0, 0, 0);
-	if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_DIFFUSE, colorDiffuse))
-	{
-		int i = 0;
-	}
-	else
-	{
-		if (shadingType == aiShadingMode::aiShadingMode_Flat && !colorDiffuse.IsBlack()) shadingType = aiShadingMode::aiShadingMode_Gouraud;
-	}
+		aiShadingMode shadingType = aiShadingMode::aiShadingMode_Flat;
+		if (AI_SUCCESS != material->Get(AI_MATKEY_SHADING_MODEL, shadingType))
+		{
+			int i = 0;
+		}
 
-	aiColor3D colorSpecular(0, 0, 0);
-	if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_SPECULAR, colorSpecular))
-	{
-	int i = 0;
-	}
+		if (uint textures = material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+		{
+			for (uint t = 0; t < textures; t++)
+			{
+				aiString texturePath;
+				if (AI_SUCCESS != material->GetTexture(aiTextureType_DIFFUSE, t, &texturePath)) {
+					int i = 0;
+				}
+				else
+					int i = 0;
+			}
+		}
 
-	aiColor3D colorAmbient(0, 0, 0);
-	if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_AMBIENT, colorAmbient))
-	{
-	int i = 0;
-	}
+		aiColor3D colorDiffuse(0, 0, 0);
+		if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_DIFFUSE, colorDiffuse))
+		{
+			int i = 0;
+		}
+		else
+		{
+			if (shadingType == aiShadingMode::aiShadingMode_Flat && !colorDiffuse.IsBlack()) shadingType = aiShadingMode::aiShadingMode_Gouraud;
+		}
 
-	aiColor3D colorEmissive(0, 0, 0);
-	if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_EMISSIVE, colorEmissive))
-	{
-	int i = 0;
-	}
+		if (uint textures = material->GetTextureCount(aiTextureType_SPECULAR) > 0)
+		{
+			for (uint t = 0; t < textures; t++)
+			{
+				aiString texturePath;
+				if (AI_SUCCESS != material->GetTexture(aiTextureType_SPECULAR, t, &texturePath)) {
+					int i = 0;
+				}
+				else
+					int i = 0;
+			}
+		}
 
-	aiColor3D colorTransparent(0, 0, 0);
-	if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_TRANSPARENT, colorTransparent))
-	{
-	int i = 0;
-	}
+		aiColor3D colorSpecular(0, 0, 0);
+		if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_SPECULAR, colorSpecular))
+		{
+			int i = 0;
+		}
 
-	bool twosided = false;
-	if (AI_SUCCESS != material->Get(AI_MATKEY_TWOSIDED, twosided))
-	{
-	int i = 0;
-	}
+		if (uint textures = material->GetTextureCount(aiTextureType_AMBIENT) > 0)
+		{
+			for (uint t = 0; t < textures; t++)
+			{
+				aiString texturePath;
+				if (AI_SUCCESS != material->GetTexture(aiTextureType_AMBIENT, t, &texturePath)) {
+					int i = 0;
+				}
+				else
+					int i = 0;
+			}
+		}
 
-	bool blendFunc = false;
-	if (AI_SUCCESS != material->Get(AI_MATKEY_BLEND_FUNC, blendFunc))
-	{
-	int i = 0;
-	}
+		aiColor3D colorAmbient(0, 0, 0);
+		if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_AMBIENT, colorAmbient))
+		{
+			int i = 0;
+		}
 
-	float opacity = 1.0f;
-	if (AI_SUCCESS != material->Get(AI_MATKEY_OPACITY, opacity))
-	{
-	int i = 0;
-	}
+		if (uint textures = material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
+		{
+			for (uint t = 0; t < textures; t++)
+			{
+				aiString texturePath;
+				if (AI_SUCCESS != material->GetTexture(aiTextureType_EMISSIVE, t, &texturePath)) {
+					int i = 0;
+				}
+				else
+					int i = 0;
+			}
+		}
 
-	float shininess = 0.f;
-	if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS, shininess))
-	{
-	int i = 0;
-	}
+		aiColor3D colorEmissive(0, 0, 0);
+		if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_EMISSIVE, colorEmissive))
+		{
+			int i = 0;
+		}
 
-	float shininessStrenght = 1.0f;
-	if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS_STRENGTH, shininessStrenght))
-	{
-	int i = 0;
-	}
+		aiColor3D colorTransparent(0, 0, 0);
+		if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_TRANSPARENT, colorTransparent))
+		{
+			int i = 0;
+		}
 
-	float refracti = 1.0f;
-	if (AI_SUCCESS != material->Get(AI_MATKEY_REFRACTI, refracti))
-	{
-	int i = 0;
-	}
+		bool twosided = false;
+		if (AI_SUCCESS != material->Get(AI_MATKEY_TWOSIDED, twosided))
+		{
+			int i = 0;
+		}
 
-	return nullptr;
+		bool blendFunc = false;
+		if (AI_SUCCESS != material->Get(AI_MATKEY_BLEND_FUNC, blendFunc))
+		{
+			int i = 0;
+		}
+
+		if (uint textures = material->GetTextureCount(aiTextureType_OPACITY) > 0)
+		{
+			for (uint t = 0; t < textures; t++)
+			{
+				aiString texturePath;
+				if (AI_SUCCESS != material->GetTexture(aiTextureType_OPACITY, t, &texturePath)) {
+					int i = 0;
+				}
+				else
+					int i = 0;
+			}
+		}
+
+		float opacity = 1.0f;
+		if (AI_SUCCESS != material->Get(AI_MATKEY_OPACITY, opacity))
+		{
+			int i = 0;
+		}
+
+		if (uint textures = material->GetTextureCount(aiTextureType_SHININESS) > 0)
+		{
+			for (uint t = 0; t < textures; t++)
+			{
+				aiString texturePath;
+				if (AI_SUCCESS != material->GetTexture(aiTextureType_SHININESS, t, &texturePath)) {
+					int i = 0;
+				}
+				else
+					int i = 0;
+			}
+		}
+
+		float shininess = 0.f;
+		if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS, shininess))
+		{
+			int i = 0;
+		}
+
+		float shininessStrenght = 1.0f;
+		if (AI_SUCCESS != material->Get(AI_MATKEY_SHININESS_STRENGTH, shininessStrenght))
+		{
+			int i = 0;
+		}
+
+		float refracti = 1.0f;
+		if (AI_SUCCESS != material->Get(AI_MATKEY_REFRACTI, refracti))
+		{
+			int i = 0;
+		}
+
+		if (uint textures = material->GetTextureCount(aiTextureType_HEIGHT) > 0)
+		{
+			for (uint t = 0; t < textures; t++)
+			{
+				aiString texturePath;
+				if (AI_SUCCESS != material->GetTexture(aiTextureType_HEIGHT, t, &texturePath)) {
+					int i = 0;
+				}
+				else
+					int i = 0;
+			}
+		}
+
+		if (uint textures = material->GetTextureCount(aiTextureType_NORMALS) > 0)
+		{
+			for (uint t = 0; t < textures; t++)
+			{
+				aiString texturePath;
+				if (AI_SUCCESS != material->GetTexture(aiTextureType_NORMALS, t, &texturePath)) {
+					int i = 0;
+				}
+				else
+					int i = 0;
+			}
+		}
+
+		if (uint textures = material->GetTextureCount(aiTextureType_REFLECTION) > 0)
+		{
+			for (uint t = 0; t < textures; t++)
+			{
+				aiString texturePath;
+				if (AI_SUCCESS != material->GetTexture(aiTextureType_REFLECTION, t, &texturePath)) {
+					int i = 0;
+				}
+				else
+					int i = 0;
+			}
+		}
+
+		if (uint textures = material->GetTextureCount(aiTextureType_UNKNOWN) > 0)
+		{
+			for (uint t = 0; t < textures; t++)
+			{
+				aiString texturePath;
+				if (AI_SUCCESS != material->GetTexture(aiTextureType_UNKNOWN, t, &texturePath)) {
+					int i = 0;
+				}
+				else
+					int i = 0;
+			}
+		}
+
+		indexMaterialImporter.insert(std::pair<aiMaterial*,int>(material, i));
+	}
 }
