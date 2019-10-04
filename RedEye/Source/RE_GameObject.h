@@ -83,7 +83,7 @@ public:
 	// AABB
 	void DrawAABB();
 	void DrawAllAABB();
-	void SetLocalBoundingBox(math::AABB box);
+	void AddToBoundingBox(math::AABB box);
 	void SetBoundingBoxFromChilds();
 	math::AABB GetGlobalBoundingBox() const;
 

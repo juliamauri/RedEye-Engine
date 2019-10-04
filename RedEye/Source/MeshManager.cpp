@@ -288,16 +288,7 @@ void MeshManager::ProcessNode(aiNode * node, const aiScene * scene, bool isRoot)
 
 				RE_CompMesh* comp_mesh = nullptr;
 				RE_Mesh* processed_mesh = ProcessMesh(mesh, scene, i + 1);
-				if (processed_mesh)
-				{
-					comp_mesh = new RE_CompMesh(go, App->resources->Reference((ResourceContainer*)processed_mesh));
-					go->SetLocalBoundingBox(processed_mesh->GetAABB());
-				}
-				else
-				{
-					comp_mesh = new RE_CompMesh(go, exists_md5.c_str());
-					go->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(exists_md5.c_str()))->GetAABB());
-				}
+				comp_mesh = new RE_CompMesh(go, processed_mesh ? App->resources->Reference((ResourceContainer*)processed_mesh) : exists_md5.c_str());
 
 				go->AddCompMesh(comp_mesh);
 

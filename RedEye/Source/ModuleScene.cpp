@@ -41,7 +41,7 @@ bool ModuleScene::Start()
 			LOG("%s\n", App->shaders->GetShaderError());
 	}
 
-	smoke_particle = App->meshes->CreateMeshByTexture("Assets/Images/particle_texture.png");
+	//smoke_particle = App->meshes->CreateMeshByTexture("Assets/Images/particle_texture.png");
 
 	// root
 	std::string path_scene("Assets/Scenes/");
@@ -66,7 +66,7 @@ bool ModuleScene::Start()
 
 		(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
 	}
-	root->SetBoundingBoxFromChilds();
+	//root->SetBoundingBoxFromChilds();
 	root->AddComponent(C_PLANE);
 
 	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));

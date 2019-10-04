@@ -14,20 +14,18 @@
 #include "ImGui\imgui.h"
 
 
-RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool start_active) : RE_Component(C_MESH, go, start_active)
+RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool start_active)
+	: RE_Component(C_MESH, go, start_active), reference(reference)
 {
-	this->reference = reference;
-
-	if (ptr == nullptr)
-		ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
+	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
+	go->AddToBoundingBox(ptr->GetAABB());
 }
 
-RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go) : RE_Component(C_MESH, go, cmpMesh.active)
+RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go)
+	: RE_Component(C_MESH, go, cmpMesh.active), reference(cmpMesh.reference)
 {
-	this->reference = cmpMesh.reference;
-
-	if (ptr == nullptr)
-		ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
+	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
+	go->AddToBoundingBox(ptr->GetAABB());
 }
 
 RE_CompMesh::~RE_CompMesh()

@@ -14,6 +14,7 @@ public:
 
 	void Update();
 
+	math::float4x4 GetLocalMatrixModel();
 	math::float4x4 GetMatrixModel();
 	float* GetShaderModel();
 	

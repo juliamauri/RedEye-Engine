@@ -266,7 +266,7 @@ void ModuleEditor::UpdateCamera()
 					App->scene->GetSelected());
 			}
 		}
-		else if (App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN
+		else if ((App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN | App->input->GetKey(SDL_SCANCODE_F) == KEY_REPEAT)
 			&& App->scene->GetSelected() != nullptr)
 		{
 			camera->Focus(App->scene->GetSelected());
