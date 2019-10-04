@@ -29,8 +29,6 @@
 #endif
 
 #include <Windows.h>
-#include <map>
-
 
 ModelImporter::ModelImporter(const char* f) : folderPath(f)
 {
@@ -67,9 +65,10 @@ RE_Prefab* ModelImporter::LoadModelFromAssets(const char * path)
 	if (mesh_file != nullptr)
 	{
 		LOG("Loading Model from: %s", assetsPath.c_str());
-		workingfilepath = assetsPath;
+		aditionalData = new currentlyImporting();
+		aditionalData->workingfilepath = assetsPath;
 		modelreturn = ProcessModel(mesh_file->GetBuffer(), mesh_file->GetSize());
-
+		DEL(aditionalData);
 		DEL(mesh_file);
 	}
 
@@ -89,6 +88,9 @@ RE_Prefab*  ModelImporter::ProcessModel(const char * buffer, unsigned int size)
 	{
 		//First loading all materials
 		if(scene->HasMaterials()) ProcessMaterials(scene);
+
+		//Second loading all meshes
+		if (scene->HasMeshes()) ProcessMeshes(scene);
 
 		//Mount a go hiteracy with nodes from model
 		RE_GameObject* rootGO = new RE_GameObject(scene->mRootNode->mName.C_Str(), GUID_NULL);
@@ -147,21 +149,10 @@ void ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObj
 				goMesh->GetTransform()->Update();
 			}
 
-			aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+			const char* md5Mesh = aditionalData->meshesLoaded.at(scene->mMeshes[node->mMeshes[i]]);
+			RE_CompMesh* comp_mesh = new RE_CompMesh(goMesh, md5Mesh);
 
-			RE_CompMesh* comp_mesh = nullptr;
-			RE_Mesh* processed_mesh = nullptr;
-			const char* existsMesh = ProcessMesh(mesh, scene, i + 1, &processed_mesh);
-			if (existsMesh == nullptr)
-			{
-				comp_mesh = new RE_CompMesh(goMesh, App->resources->Reference((ResourceContainer*)processed_mesh));
-				goMesh->SetLocalBoundingBox(processed_mesh->GetAABB());
-			}
-			else
-			{
-				comp_mesh = new RE_CompMesh(goMesh, existsMesh);
-				goMesh->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(existsMesh))->GetAABB());
-			}
+			goMesh->SetLocalBoundingBox(((RE_Mesh*)App->resources->At(md5Mesh))->GetAABB());
 			goMesh->AddCompMesh(comp_mesh);
 
 			//meshes.rbegin()->name = node->mName.C_Str();
@@ -173,84 +164,92 @@ void ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObj
 		ProcessNode(node->mChildren[i], scene, currentGO);
 }
 
-const char* ModelImporter::ProcessMesh(aiMesh * mesh, const aiScene * scene, const unsigned int pos, RE_Mesh** toFill)
+void ModelImporter::ProcessMeshes(const aiScene* scene)
 {
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	for (uint i = 0; i < scene->mNumMeshes; i++) {
 
-	LOG_TERCIARY("Mesh %u: %s (%u vertices | %u faces | %u texture indexes | %u bones)",
-		pos,
-		mesh->mName.C_Str(),
-		mesh->mNumVertices,
-		mesh->mNumFaces,
-		mesh->mMaterialIndex,
-		mesh->mNumBones);
+		aiMesh* mesh = scene->mMeshes[i];
 
-	// process vertices
-	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-	{
-		// process vertex positions, normals and texture coordinates
-		Vertex vertex;
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+		std::vector<Texture> textures;
 
-		vertex.Position.x = mesh->mVertices[i].x;
-		vertex.Position.y = mesh->mVertices[i].y;
-		vertex.Position.z = mesh->mVertices[i].z;
+		LOG_TERCIARY("Mesh %u: %s (%u vertices | %u faces | %u texture indexes | %u bones)",
+			i,
+			mesh->mName.C_Str(),
+			mesh->mNumVertices,
+			mesh->mNumFaces,
+			mesh->mMaterialIndex,
+			mesh->mNumBones);
 
-		vertex.Normal.x = mesh->mNormals[i].x;
-		vertex.Normal.y = mesh->mNormals[i].y;
-		vertex.Normal.z = mesh->mNormals[i].z;
-
-		if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+		// process vertices
+		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
-			vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
-			vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
-		}
-		else
-			vertex.TexCoords = math::float2::zero;
+			// process vertex positions, normals and texture coordinates
+			Vertex vertex;
 
-		vertices.push_back(vertex);
-	}
+			vertex.Position.x = mesh->mVertices[i].x;
+			vertex.Position.y = mesh->mVertices[i].y;
+			vertex.Position.z = mesh->mVertices[i].z;
 
-	std::string vertex_buffer;
+			vertex.Normal.x = mesh->mNormals[i].x;
+			vertex.Normal.y = mesh->mNormals[i].y;
+			vertex.Normal.z = mesh->mNormals[i].z;
 
-	for (auto vertice : vertices)
-	{
-		vertex_buffer += vertice.Position.ToString();
-	}
+			if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+			{
+				vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
+				vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
+			}
+			else
+				vertex.TexCoords = math::float2::zero;
 
-	std::string meshMD5 = md5(vertex_buffer.c_str());
-	const char* exists = App->resources->IsReference(meshMD5.c_str());
-	if (exists == nullptr)
-	{
-		// process indices
-		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-		{
-			aiFace face = mesh->mFaces[i];
-
-			if (face.mNumIndices != 3)
-				LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face.mNumIndices);
-
-			for (unsigned int j = 0; j < face.mNumIndices; j++)
-				indices.push_back(face.mIndices[j]);
+			vertices.push_back(vertex);
 		}
 
-		std::string save_path("Library/Meshes/");
-		save_path += meshMD5;
-		save_path += ".red";
-		Config save_mesh(save_path.c_str(), App->fs->GetZipPath());
-		JSONNode* mesh_serialize = save_mesh.GetRootNode("mesh");
-		mesh_serialize->SetObject();
-		mesh_serialize->PushMeshVertex(vertices, indices);
-		save_mesh.Save();
-		DEL(mesh_serialize);
+		std::string vertex_buffer;
 
-		(*toFill) = new RE_Mesh(vertices, indices, textures, mesh->mNumFaces);
-		(*toFill)->SetType(Resource_Type::R_MESH);
-		(*toFill)->SetMD5(meshMD5.c_str());
-		(*toFill)->SetFilePath(workingfilepath.c_str());
+		for (auto vertice : vertices)
+		{
+			vertex_buffer += vertice.Position.ToString();
+		}
+
+		std::string meshMD5 = md5(vertex_buffer.c_str());
+		const char* exists = App->resources->IsReference(meshMD5.c_str());
+		if (exists == nullptr)
+		{
+			// process indices
+			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+			{
+				aiFace face = mesh->mFaces[i];
+
+				if (face.mNumIndices != 3)
+					LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face.mNumIndices);
+
+				for (unsigned int j = 0; j < face.mNumIndices; j++)
+					indices.push_back(face.mIndices[j]);
+			}
+
+			std::string save_path("Library/Meshes/");
+			save_path += meshMD5;
+			save_path += ".red";
+			Config save_mesh(save_path.c_str(), App->fs->GetZipPath());
+			JSONNode* mesh_serialize = save_mesh.GetRootNode("mesh");
+			mesh_serialize->SetObject();
+			mesh_serialize->PushMeshVertex(vertices, indices);
+			save_mesh.Save();
+			DEL(mesh_serialize);
+
+			RE_Mesh* meshResource = new RE_Mesh(vertices, indices, textures, mesh->mNumFaces);
+			meshResource->SetType(Resource_Type::R_MESH);
+			meshResource->SetMD5(meshMD5.c_str());
+			meshResource->SetFilePath(aditionalData->workingfilepath.c_str());
+
+			App->resources->Reference(meshResource);
+			exists = meshResource->GetMD5();
+		}
+		aditionalData->meshesLoaded.insert(std::pair<aiMesh*, const char*>(mesh, exists));
 	}
-	return exists;
 }
 
 void ModelImporter::ProcessMeshFromLibrary(const char * file_library, const char * reference, const char * file_assets)

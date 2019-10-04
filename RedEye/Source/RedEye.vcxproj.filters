@@ -127,7 +127,9 @@
     <ClCompile Include="ModelImporter.cpp">
       <Filter>Modules\Resource Managers</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Material.cpp" />
+    <ClCompile Include="RE_Material.cpp">
+      <Filter>Containers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -403,7 +405,9 @@
     <ClInclude Include="ModelImporter.h">
       <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Material.h" />
+    <ClInclude Include="RE_Material.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
