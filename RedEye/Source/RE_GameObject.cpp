@@ -53,8 +53,7 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 		switch (cmpGO->GetType())
 		{
 		case C_TRANSFORM:
-			transform = new RE_CompTransform(*(RE_CompTransform*)cmpGO, this);
-			components.push_back((RE_Component*)transform);
+			components.push_back(transform = new RE_CompTransform(*(RE_CompTransform*)cmpGO, this));
 			break;
 		case C_CAMERA:
 			components.push_back(new RE_CompCamera(*(RE_CompCamera*)cmpGO, this));
@@ -66,8 +65,8 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 	}
 
 	if (!go.childs.empty()) {
-		for (RE_GameObject* go : go.childs) {
-			new RE_GameObject(*go, this);
+		for (RE_GameObject* childGO : go.childs) {
+			new RE_GameObject(*childGO, this);
 		}
 	}
 }
@@ -507,6 +506,8 @@ void RE_GameObject::DrawAllAABB()
 
 void RE_GameObject::AddToBoundingBox(math::AABB box)
 {
+	if (transform != nullptr)
+		return;
 	local_bounding_box = math::AABB(
 		math::vec(
 			local_bounding_box.MinX() <= box.MinX() ? local_bounding_box.MinX() : box.MinX(),

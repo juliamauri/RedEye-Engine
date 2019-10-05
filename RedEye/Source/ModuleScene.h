@@ -26,6 +26,8 @@ public:
 	void RecieveEvent(const Event& e) override;
 
 	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
+	void AddGoToRoot(RE_GameObject* toAdd);
+	void DuplicateSelectedObject();
 
 	void DrawEditor() override;
 	void DrawScene();
@@ -39,7 +41,6 @@ public:
 
 	void Serialize();
 
-	void AddGoToRoot(RE_GameObject* toAdd);
 
 	//shaders
 	unsigned int modelloading;

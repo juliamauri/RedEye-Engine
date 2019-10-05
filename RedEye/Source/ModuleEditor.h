@@ -78,6 +78,9 @@ private:
 	RandomTest* rng = nullptr;
 	TexturesWindow* textures = nullptr;
 
+	//crtd security
+	bool isDuplicated = false;
+
 	std::list<EditorWindow*> windows, tools;
 };
 

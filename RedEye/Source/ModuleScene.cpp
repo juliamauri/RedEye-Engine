@@ -164,10 +164,20 @@ void ModuleScene::RecieveEvent(const Event& e)
 
 RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent)
 {
-	RE_GameObject* ret = new RE_GameObject(name, GUID_NULL, parent ? parent : root);
-
-	return ret;
+	return new RE_GameObject(name, GUID_NULL, parent ? parent : root);
 }
+
+void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
+{
+	root->AddChild(toAdd);
+}
+
+void ModuleScene::DuplicateSelectedObject()
+{
+	if(selected != nullptr) selected->GetParent()->AddChild(new RE_GameObject(*selected));
+}
+
+
 
 void ModuleScene::DrawEditor()
 {
@@ -299,9 +309,3 @@ void ModuleScene::Serialize()
 
 	scene_file.Save();
 }
-
-void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
-{
-	root->AddChild(toAdd);
-}
-
