@@ -9,6 +9,13 @@
 #pragma comment( lib, "SDL2/libx86/SDL2.lib" )
 #pragma comment( lib, "SDL2/libx86/SDL2main.lib" )
 
+#include "Optick/include/optick.h"
+#ifdef _DEBUG
+#pragma comment( lib, "Optick/libx86/OptickCore_debug.lib" )
+#else
+#pragma comment( lib, "Optick/libx86/OptickCore_release.lib" )
+#endif
+
 Application* App = nullptr;
 
 int main(int argc, char* argv[])
@@ -25,8 +32,11 @@ int main(int argc, char* argv[])
 
 		LOG_SEPARATOR("Entering Application's Main Loop");
 
-		while(update_return == 1)
+		while (update_return == 1)
+		{
+			OPTICK_FRAME("MainThread RedEye");
 			update_return = App->Update();
+		}
 
 		if (update_return == 0)
 		{

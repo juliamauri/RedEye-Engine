@@ -408,6 +408,12 @@
     <ClInclude Include="RE_TextureImporter.h">
       <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
+    <ClInclude Include="Optick\include\optick.config.h">
+      <Filter>3rd Party\Optick</Filter>
+    </ClInclude>
+    <ClInclude Include="Optick\include\optick.h">
+      <Filter>3rd Party\Optick</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -487,6 +493,9 @@
     </Filter>
     <Filter Include="Modules\Editor">
       <UniqueIdentifier>{355a2309-34fd-415d-af8a-c2ca6f635028}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\Optick">
+      <UniqueIdentifier>{96f88492-7884-4afc-8db2-b5f3566d4b9c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
