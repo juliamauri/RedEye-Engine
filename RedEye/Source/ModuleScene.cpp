@@ -26,7 +26,7 @@ ModuleScene::~ModuleScene()
 bool ModuleScene::Start()
 {
 	bool ret = true;
-	
+
 	//Loading Shaders
 	if (App->shaders)
 	{
@@ -34,6 +34,8 @@ bool ModuleScene::Start()
 		if (!ret)
 			LOG("%s\n", App->shaders->GetShaderError());
 	}
+
+	//smoke_particle = App->meshes->CreateMeshByTexture("Assets/Images/particle_texture.png");
 
 	// root
 	std::string path_scene("Assets/Scenes/");
@@ -58,7 +60,7 @@ bool ModuleScene::Start()
 
 		(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
 	}
-	root->SetBoundingBoxFromChilds();
+	//root->SetBoundingBoxFromChilds();
 	root->AddComponent(C_PLANE);
 
 	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
@@ -94,7 +96,7 @@ update_status ModuleScene::Update()
 bool ModuleScene::CleanUp()
 {
 	Serialize();
-	
+
 	DEL(root);
 
 	if (smoke_particle)
@@ -154,10 +156,20 @@ void ModuleScene::RecieveEvent(const Event& e)
 
 RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent)
 {
-	RE_GameObject* ret = new RE_GameObject(name, GUID_NULL, parent ? parent : root);
-
-	return ret;
+	return new RE_GameObject(name, GUID_NULL, parent ? parent : root);
 }
+
+void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
+{
+	root->AddChild(toAdd);
+}
+
+void ModuleScene::DuplicateSelectedObject()
+{
+	if(selected != nullptr) selected->GetParent()->AddChild(new RE_GameObject(*selected));
+}
+
+
 
 void ModuleScene::DrawEditor()
 {
@@ -177,13 +189,13 @@ void ModuleScene::DrawScene()
 
 	//selected->DrawAABB();
 
-	ShaderManager::use(modelloading); 
+	ShaderManager::use(modelloading);
 	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());
 	ShaderManager::setFloat4x4(modelloading, "projection", App->editor->GetCamera()->GetProjectionPtr());
 
 	ShaderManager::setFloat4x4(shader_particle, "view", App->editor->GetCamera()->GetViewPtr());
 	ShaderManager::setFloat4x4(shader_particle, "projection", App->editor->GetCamera()->GetProjectionPtr());
-	
+
 	// Frustum Culling
 	std::vector<RE_GameObject*> objects;
 	quad_tree.CollectIntersections(objects, App->editor->GetCamera()->GetFrustum());
@@ -273,7 +285,7 @@ void ModuleScene::RayCastSelect(math::Ray & ray)
 void ModuleScene::Serialize()
 {
 	char* buffer = nullptr;
-	
+
 	std::string path_scene("Assets/Scenes/");
 	path_scene += GetName();
 	path_scene += ".re";
@@ -289,9 +301,3 @@ void ModuleScene::Serialize()
 
 	scene_file.Save();
 }
-
-void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
-{
-	root->AddChild(toAdd);
-}
-

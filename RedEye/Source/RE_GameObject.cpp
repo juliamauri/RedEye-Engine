@@ -25,28 +25,35 @@ RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, boo
 	else
 		this->uuid = uuid;
 
-	if (parent != nullptr) parent->AddChild(this);
-	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
-	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	transform = new RE_CompTransform(this);
 	components.push_back((RE_Component*)transform);
+
+	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+
+	if (parent != nullptr)
+		parent->AddChild(this);
 }
 
 RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : parent(p)
 {
 	UuidCreate(&this->uuid);
-	if (parent != nullptr) parent->AddChild(this);
 	isStatic = go.isStatic;
 	active = go.active;
 	name = go.name;
+
+	local_bounding_box = go.local_bounding_box;
+	global_bounding_box = go.global_bounding_box;
+
+	if (parent != nullptr)
+		parent->AddChild(this);
 	
 	for (RE_Component* cmpGO : go.components)
 	{
 		switch (cmpGO->GetType())
 		{
 		case C_TRANSFORM:
-			transform = new RE_CompTransform(*(RE_CompTransform*)cmpGO, this);
-			components.push_back((RE_Component*)transform);
+			components.push_back(transform = new RE_CompTransform(*(RE_CompTransform*)cmpGO, this));
 			break;
 		case C_CAMERA:
 			components.push_back(new RE_CompCamera(*(RE_CompCamera*)cmpGO, this));
@@ -58,8 +65,8 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 	}
 
 	if (!go.childs.empty()) {
-		for (RE_GameObject* go : go.childs) {
-			new RE_GameObject(*go, this);
+		for (RE_GameObject* childGO : go.childs) {
+			new RE_GameObject(*childGO, this);
 		}
 	}
 }
@@ -142,6 +149,7 @@ void RE_GameObject::AddChild(RE_GameObject * child)
 {
 	SDL_assert(child != nullptr);
 	child->parent = this;
+	child->AddToBoundingBox(math::AABB(math::vec::zero, math::vec::zero));
 	childs.push_back(child);
 }
 
@@ -474,13 +482,13 @@ void RE_GameObject::DrawAABB()
 	for (uint i = 0; i < 12; i++)
 	{
 		glVertex3f(
-			global_bounding_box.Edge(i).a.x,
-			global_bounding_box.Edge(i).a.y,
-			global_bounding_box.Edge(i).a.z);
+			local_bounding_box.Edge(i).a.x,
+			local_bounding_box.Edge(i).a.y,
+			local_bounding_box.Edge(i).a.z);
 		glVertex3f(
-			global_bounding_box.Edge(i).b.x,
-			global_bounding_box.Edge(i).b.y,
-			global_bounding_box.Edge(i).b.z);
+			local_bounding_box.Edge(i).b.x,
+			local_bounding_box.Edge(i).b.y,
+			local_bounding_box.Edge(i).b.z);
 	}
 
 	glEnd();
@@ -496,19 +504,32 @@ void RE_GameObject::DrawAllAABB()
 		child->DrawAllAABB();
 }
 
-void RE_GameObject::SetLocalBoundingBox(math::AABB box)
+void RE_GameObject::AddToBoundingBox(math::AABB box)
 {
-	local_bounding_box = box;
+	if (transform != nullptr)
+		return;
+	local_bounding_box = math::AABB(
+		math::vec(
+			local_bounding_box.MinX() <= box.MinX() ? local_bounding_box.MinX() : box.MinX(),
+			local_bounding_box.MinY() <= box.MinY() ? local_bounding_box.MinY() : box.MinY(),
+			local_bounding_box.MinZ() <= box.MinZ() ? local_bounding_box.MinZ() : box.MinZ()),
+		math::vec(
+			local_bounding_box.MaxX() >= box.MaxX() ? local_bounding_box.MaxX() : box.MaxX(),
+			local_bounding_box.MaxY() >= box.MaxY() ? local_bounding_box.MaxY() : box.MaxY(),
+			local_bounding_box.MaxZ() >= box.MaxZ() ? local_bounding_box.MaxZ() : box.MaxZ()));
 
 	math::float4x4 global_mat = transform->GetMatrixModel();
-
 	global_bounding_box.maxPoint = global_mat.MulPos(local_bounding_box.maxPoint);
 	global_bounding_box.minPoint = global_mat.MulPos(local_bounding_box.minPoint);
 
-	
+	if (parent != nullptr)
+	{
+		math::float4x4 trs = transform->GetLocalMatrixModel();
 
-	/*set global_bounding_box
-		from local_bounding_box*/
+		parent->AddToBoundingBox(math::AABB(
+			trs.MulPos(local_bounding_box.maxPoint),
+			trs.MulPos(local_bounding_box.minPoint)));
+	}
 }
 
 void RE_GameObject::SetBoundingBoxFromChilds()

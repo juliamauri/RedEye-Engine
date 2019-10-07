@@ -26,6 +26,7 @@ RE_CompTransform::RE_CompTransform(RE_CompTransform & cmptransform, RE_GameObjec
 
 RE_CompTransform::~RE_CompTransform()
 {
+	
 }
 
 void RE_CompTransform::Update()
@@ -34,6 +35,14 @@ void RE_CompTransform::Update()
 		CalcGlobalTransform();
 	else
 		ConfirmChange();
+}
+
+math::float4x4 RE_CompTransform::GetLocalMatrixModel()
+{
+	if (needed_update_transform)
+		model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale);
+
+	return model_local;
 }
 
 math::float4x4 RE_CompTransform::GetMatrixModel()

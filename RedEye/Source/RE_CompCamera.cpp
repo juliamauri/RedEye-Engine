@@ -5,6 +5,7 @@
 #include "FileSystem.h"
 #include "RE_CompTransform.h"
 #include "ModuleWindow.h"
+#include "OutputLog.h"
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
@@ -328,26 +329,15 @@ void RE_CompCamera::Orbit(float dx, float dy, RE_GameObject * focus)
 
 void RE_CompCamera::Focus(RE_GameObject * focus)
 {
-	focus_global_pos = focus->GetTransform()->GetGlobalPosition();
-	math::vec corner = math::vec(1.f, 1.f, 1.f);
+	math::AABB box = focus->GetGlobalBoundingBox();
 
-	/*if (focus->GetMesh() != nullptr)
-	{
-		// include AABB from mesh
-		math::AABB box = focus->GetGlobalBoundingBox();
-		focus_global_pos += box.CenterPoint();
-		if (!box.CornerPoint(7).IsZero())
-			corner = box.CornerPoint(7);
-	}*/
+	float radius = box.Size().Length();
+	focus_global_pos = box.CenterPoint();
+	float camDistance = (radius) / math::Tan(v_fov_rads/2.0);
 
-	front = -corner;
-	front.Normalize();
-	right = front.Cross(math::vec(0.f, 1.f, 0.f));
-	right.Normalize();
-	up = right.Cross(front);
-	up.Normalize();
+	LOG("Camera distance = %f", camDistance);
 
-	transform->SetGlobalPosition(focus_global_pos - (front * 40.f));
+	transform->SetGlobalPosition(focus_global_pos - (front * camDistance));
 	transform->Update();
 	OnTransformModified();
 }
