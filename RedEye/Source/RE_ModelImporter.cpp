@@ -116,7 +116,7 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 	RE_GameObject* go_haschildren = nullptr;
 	if (node->mNumChildren > 0)
 	{
-		go_haschildren = new RE_GameObject(node->mName.C_Str(), GUID_NULL, currentGO);
+		go_haschildren = (!isRoot) ? new RE_GameObject(node->mName.C_Str(), GUID_NULL, currentGO) : currentGO;
 
 		aiVector3D scale;
 		aiVector3D position;
@@ -161,7 +161,7 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 	}
 
 	for (i = 0; i < node->mNumChildren; i++)
-		ProcessNode(node->mChildren[i], scene, currentGO);
+		ProcessNode(node->mChildren[i], scene, go_haschildren);
 }
 
 void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
