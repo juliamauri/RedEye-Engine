@@ -69,6 +69,8 @@ RE_Prefab* RE_ModelImporter::LoadModelFromAssets(const char * path)
 		LOG("Loading Model from: %s", assetsPath.c_str());
 		aditionalData = new currentlyImporting();
 		aditionalData->workingfilepath = assetsPath;
+		uint l;
+		aditionalData->name = assetsPath.substr(l = assetsPath.find_last_of("/") + 1, assetsPath.find_last_of(".") - l);
 		modelreturn = ProcessModel(mesh_file->GetBuffer(), mesh_file->GetSize());
 		DEL(aditionalData);
 		DEL(mesh_file);
@@ -95,7 +97,7 @@ RE_Prefab*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int siz
 		if (scene->HasMeshes()) ProcessMeshes(scene);
 
 		//Mount a go hiteracy with nodes from model
-		RE_GameObject* rootGO = new RE_GameObject(scene->mRootNode->mName.C_Str(), GUID_NULL);
+		RE_GameObject* rootGO = new RE_GameObject(aditionalData->name.c_str(), GUID_NULL);
 		ProcessNode(scene->mRootNode, scene, rootGO, true);
 
 		//We save own format of model as internal prefab
@@ -251,13 +253,13 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 	}
 }
 
-void RE_ModelImporter::ProcessMeshFromLibrary(const char * file_library, const char * reference, const char * file_assets)
+const char* RE_ModelImporter::ProcessMeshFromLibrary(const char * file_library, const char * reference, const char * file_assets)
 {
 	std::vector<Vertex> vertexes;
 	std::vector<unsigned int> indexes;
 
 	Config mesh_serialized(file_library, App->fs->GetZipPath());
-
+	ResourceContainer* mesh_resource = nullptr;
 	if (mesh_serialized.Load())
 	{
 		JSONNode* mesh_json = mesh_serialized.GetRootNode("mesh");
@@ -272,6 +274,7 @@ void RE_ModelImporter::ProcessMeshFromLibrary(const char * file_library, const c
 
 		DEL(mesh_json);
 	}
+	return (mesh_resource) ? mesh_resource->GetMD5() : nullptr;
 }
 
 void RE_ModelImporter::ProcessMaterials(const aiScene* scene)

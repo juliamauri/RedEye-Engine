@@ -875,8 +875,8 @@ RE_GameObject * JSONNode::FillGO()
 							{
 								file = t.FindMember("path")->value.GetString();
 								reference = t.FindMember("md5")->value.GetString();
-								App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MATERIAL);
-								mesh->SetMaterial(App->resources->At(reference)->GetMD5());
+								const char* matL = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MATERIAL);
+								if(matL) mesh->SetMaterial(matL);
 							}
 						new_go->AddCompMesh(mesh);
 						break;

@@ -4,6 +4,7 @@
 #include "RE_TextureImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_Material.h"
+#include "RE_Prefab.h"
 #include "FileSystem.h"
 #include "Globals.h"
 #include "OutputLog.h"
@@ -46,60 +47,59 @@ const char * ResourceManager::IsReference(const char * md5)
 	return ret;
 }
 
-void ResourceManager::CheckFileLoaded(const char * filepath, const char* resource, Resource_Type type)
+const char* ResourceManager::CheckFileLoaded(const char * filepath, const char* resource, Resource_Type type)
 {
-	bool isLoaded = false;
+	const char* ret = nullptr;
 	for (auto resource_it : resources)
 	{
-		if (std::strcmp(resource_it.second->GetMD5(),resource) == 0)
+		if (std::strcmp(ret = resource_it.second->GetMD5(),resource) == 0)
 		{
-			isLoaded = true;
-			break;
+			return ret;
 		}
 	}
 
-	if (!isLoaded)
+	std::string path_library("Library/");
+	switch (type)
 	{
-		std::string path_library("Library/");
-
-		switch (type)
+	case R_TEXTURE:
+		path_library += "Images/";
+		path_library += resource;
+		path_library += ".eye";
+		if(App->fs->Exists(path_library.c_str()))
+			ret = App->textures->LoadTextureLibrary(path_library.c_str(), filepath);
+		else
+			ret = App->textures->LoadTextureAssets(filepath);
+		break;
+	case R_MESH:
+		path_library += "Meshes/";
+		path_library += resource;
+		path_library += ".red";
+		if (App->fs->Exists(path_library.c_str()))
+			ret = App->modelImporter->ProcessMeshFromLibrary(path_library.c_str(), resource, filepath);
+		else
 		{
-		case R_TEXTURE:
-			path_library += "Images/";
-			path_library += resource;
-			path_library += ".eye";
-			if(App->fs->Exists(path_library.c_str()))
-				App->textures->LoadTextureLibrary(path_library.c_str(), filepath);
-			else
-				App->textures->LoadTextureAssets(filepath);
-			break;
-		case R_MESH:
-			path_library += "Meshes/";
-			path_library += resource;
-			path_library += ".red";
-			if (App->fs->Exists(path_library.c_str()))
-				App->modelImporter->ProcessMeshFromLibrary(path_library.c_str(), resource, filepath);
-			else
-				App->modelImporter->LoadModelFromAssets(filepath);
-			break;
-		case R_MATERIAL:
-		{
-			Config material(filepath, App->fs->GetZipPath());
-			if (material.Load()) {
-				JSONNode* nodeMat = material.GetRootNode("Material");
-				rapidjson::Value& val = nodeMat->GetDocument()->FindMember("Material")->value.GetArray()[0];
-				RE_Material* materialLoaded = new RE_Material(val.FindMember("Name")->value.GetString(), &val);
-				((ResourceContainer*)materialLoaded)->SetMD5(resource);
-				((ResourceContainer*)materialLoaded)->SetFilePath(filepath);
-				((ResourceContainer*)materialLoaded)->SetType(R_MATERIAL);
-				App->resources->Reference((ResourceContainer*)materialLoaded);
-			}
+			RE_Prefab* scene = App->modelImporter->LoadModelFromAssets(filepath);
+			ret = (scene) ? ((ResourceContainer*)scene)->GetMD5() : nullptr;
 		}
-			break;
-		default:
-			break;
+		break;
+	case R_MATERIAL:
+	{
+		Config material(filepath, App->fs->GetZipPath());
+		if (material.Load()) {
+			JSONNode* nodeMat = material.GetRootNode("Material");
+			rapidjson::Value& val = nodeMat->GetDocument()->FindMember("Material")->value.GetArray()[0];
+			RE_Material* materialLoaded = new RE_Material(val.FindMember("Name")->value.GetString(), &val);
+			((ResourceContainer*)materialLoaded)->SetMD5(resource);
+			((ResourceContainer*)materialLoaded)->SetFilePath(filepath);
+			((ResourceContainer*)materialLoaded)->SetType(R_MATERIAL);
+			ret = App->resources->Reference((ResourceContainer*)materialLoaded);
 		}
 	}
+		break;
+	default:
+		break;
+	}
+	return ret;
 }
 
 bool ResourceManager::UnReference(const unsigned intid)

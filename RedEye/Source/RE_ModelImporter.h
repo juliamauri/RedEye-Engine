@@ -16,6 +16,7 @@ struct currentlyImporting {
 	std::map<aiMesh*, const char*> meshesLoaded;
 	std::map<aiMaterial*, const char*> materialsLoaded;
 	std::string workingfilepath;
+	std::string name;
 };
 
 class RE_ModelImporter
@@ -30,7 +31,7 @@ public:
 	void ProcessMaterials(const aiScene* scene);
 	void ProcessMeshes(const aiScene* scene);
 	void ProcessNode(aiNode* node, const aiScene* scene, RE_GameObject* currentGO, bool isRoot = false);
-	void ProcessMeshFromLibrary(const char* file_library, const char* reference, const char* file_assets);
+	const char* ProcessMeshFromLibrary(const char* file_library, const char* reference, const char* file_assets);
 
 private:
 	const char* folderPath = nullptr;
