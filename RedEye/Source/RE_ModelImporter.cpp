@@ -127,7 +127,7 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 	);
 
 	RE_GameObject* go_haschildren = nullptr;
-	if (node->mNumChildren > 0)
+	if (node->mNumChildren > 0 || (node->mNumChildren == 0 && node->mNumMeshes == 0))
 	{
 		if (isRoot || std::string(node->mName.C_Str()).find("_$Assimp") == std::string::npos)
 		{
@@ -178,23 +178,6 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 			//meshes.rbegin()->name = node->mName.C_Str();
 			//total_triangle_count += meshes.rbegin()->triangle_count;
 		}
-	}
-
-	if (node->mNumChildren == 0 && node->mNumMeshes == 0)
-	{
-		go_haschildren = (!isRoot) ? new RE_GameObject(node->mName.C_Str(), GUID_NULL, currentGO) : currentGO;
-
-		math::float3 position;
-		math::Quat rotation;
-		math::float3 scale;
-		transform.Decompose(position, rotation, scale);
-
-		go_haschildren->GetTransform()->SetRotation(rotation);
-		go_haschildren->GetTransform()->SetPosition(position);
-		go_haschildren->GetTransform()->SetScale(scale);
-		go_haschildren->GetTransform()->Update();
-
-		transform = math::float4x4::identity;
 	}
 
 	for (i = 0; i < node->mNumChildren; i++)
