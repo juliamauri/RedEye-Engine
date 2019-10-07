@@ -281,7 +281,7 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 {
 	std::string fileTexturePath = aditionalData->workingfilepath.substr(0, aditionalData->workingfilepath.find_last_of("/") + 1);
 
-	for (uint i = 0; i < scene->mNumMaterials; i++)
+	for (int i = scene->mNumMaterials - 1; i > -1; i--)
 	{
 		const char* materialMD5 = nullptr;
 		aiMaterial* material = scene->mMaterials[i];
