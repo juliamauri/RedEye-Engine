@@ -477,6 +477,9 @@ void RE_GameObject::TransformModified()
 
 		global_bounding_box.minPoint = global_mat.TransformPos(local_bounding_box.minPoint);
 		global_bounding_box.maxPoint = global_mat.TransformPos(local_bounding_box.maxPoint);
+
+		if (parent != nullptr)
+			parent->ResetBoundingBoxFromChilds();
 	}
 }
 
@@ -539,22 +542,41 @@ void RE_GameObject::AddToBoundingBox(math::AABB box)
 
 	if (parent != nullptr)
 	{
+		//parent->ResetBoundingBoxFromChilds();
 		math::float4x4 trs = transform->GetLocalMatrixModel();
-
 		parent->AddToBoundingBox(math::AABB(
-			trs.MulPos(local_bounding_box.minPoint),
-			trs.MulPos(local_bounding_box.maxPoint)));
+			trs.TransformPos(local_bounding_box.minPoint),
+			trs.TransformPos(local_bounding_box.maxPoint)));
 	}
 }
 
 void RE_GameObject::ResetBoundingBoxFromChilds()
 {
-	for (std::list<RE_GameObject*>::iterator child = childs.begin(); child != childs.end();  child++)
-		local_bounding_box.Enclose((*child)->local_bounding_box);
+	if (childs.empty())
+	{
+		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	}
+	else
+	{
+		std::list<RE_GameObject*>::iterator child = childs.begin();
+		math::float4x4 trs = (*child)->transform->GetLocalMatrixModel();
+		local_bounding_box = math::AABB(
+			trs.TransformPos(local_bounding_box.minPoint),
+			trs.TransformPos(local_bounding_box.maxPoint));
+
+		for (child = child++; child != childs.end(); child++)
+		{
+			trs = (*child)->transform->GetLocalMatrixModel();
+
+			local_bounding_box.Enclose(math::AABB(
+				trs.TransformPos((*child)->local_bounding_box.minPoint),
+				trs.TransformPos((*child)->local_bounding_box.maxPoint)));
+		}
+	}
 
 	math::float4x4 global_mat = transform->GetMatrixModel();
-	global_bounding_box.minPoint = global_mat.MulPos(local_bounding_box.minPoint);
-	global_bounding_box.maxPoint = global_mat.MulPos(local_bounding_box.maxPoint);
+	global_bounding_box.minPoint = global_mat.TransformPos(local_bounding_box.minPoint);
+	global_bounding_box.maxPoint = global_mat.TransformPos(local_bounding_box.maxPoint);
 }
 
 math::AABB RE_GameObject::GetLocalBoundingBox() const
