@@ -19,7 +19,8 @@ enum Resource_Type : short unsigned int
 	R_TEXTURE,
 	R_MESH,
 	R_PREFAB,
-	R_INTERNALPREFAB
+	R_INTERNALPREFAB,
+	R_MATERIAL
 };
 
 class ResourceContainer

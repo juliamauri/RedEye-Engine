@@ -8,7 +8,8 @@
 #include "RE_Mesh.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
-#include "Texture2DManager.h"
+#include "RE_TextureImporter.h"
+#include "RE_Material.h"
 #include"RE_Math.h"
 #include "ImGui\imgui.h"
 
@@ -75,27 +76,44 @@ void RE_CompMesh::DrawProperties()
 			ImGui::Text("Triangle Face count: %u", ptr->triangle_count);
 			ImGui::Text("VAO: %u", ptr->VAO);
 
-			std::vector<Texture>::iterator it = ptr->textures.begin();
-			for (unsigned int i = 1; it != ptr->textures.end(); it++, i++)
+			if (ptr->materialMD5)
 			{
-				Texture2D* texture = it->ptr;
-				texture->GetWithHeight(&width, &height);
+				RE_Material* meshMaterial = (RE_Material*)App->resources->At(ptr->materialMD5);
 
-				if (ImGui::TreeNode("Texture"))
+				if (meshMaterial && !meshMaterial->tDiffuse.empty())
 				{
-					ImGui::Text("\t- MD5: %s", texture->GetMD5());
-					ImGui::Text("\t- Size: %ux%u", width, height);
-					ImGui::TextWrapped("\t- Path: %s", texture->GetFilePath());
-					ImGui::Text("\t- Type: %s", it->type.c_str());
+					for (unsigned int i = 0; i < meshMaterial->tDiffuse.size(); i++)
+					{
+						Texture2D* texture = (Texture2D*)App->resources->At(meshMaterial->tDiffuse[i]);
 
-					texture->DrawTextureImGui();
+						texture->GetWithHeight(&width, &height);
 
-					ImGui::TreePop();
+						if (ImGui::TreeNode("Texture"))
+						{
+							ImGui::Text("\t- MD5: %s", texture->GetMD5());
+							ImGui::Text("\t- Size: %ux%u", width, height);
+							ImGui::TextWrapped("\t- Path: %s", texture->GetFilePath());
+							ImGui::Text("\t- Type: Diffuse");
+
+							texture->DrawTextureImGui();
+
+							ImGui::TreePop();
+						}
+
+					}
 				}
 			}
+			else
+				ImGui::Text("Mesh don't contain Material.");
+
 		}
 		else ImGui::TextWrapped("Empty Mesh Component");
 	}
+}
+
+void RE_CompMesh::SetMaterial(const char * md5)
+{
+	ptr->materialMD5 = md5;
 }
 
 void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
@@ -107,45 +125,16 @@ void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 	val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(((ResourceContainer*)App->resources->At(reference.c_str()))->GetFilePath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
 
 	rapidjson::Value texture_array(rapidjson::kArrayType);
-	for (auto texture : ptr->textures)
+	RE_Material* meshMaterial = (RE_Material*)App->resources->At(ptr->materialMD5);
+	if (meshMaterial)
 	{
 		rapidjson::Value texture_val(rapidjson::kObjectType);
-		texture_val.AddMember(rapidjson::Value::StringRefType("reference"), rapidjson::Value().SetString(texture.id.c_str(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
-		texture_val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(texture.path.c_str(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
-		texture_val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetString(texture.type.c_str(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
-
+		texture_val.AddMember(rapidjson::Value::StringRefType("path"), rapidjson::Value().SetString(((ResourceContainer*)meshMaterial)->GetFilePath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
+		texture_val.AddMember(rapidjson::Value::StringRefType("md5"), rapidjson::Value().SetString(((ResourceContainer*)meshMaterial)->GetMD5(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
 		texture_array.PushBack(texture_val, node->GetDocument()->GetAllocator());
 	}
-	val.AddMember(rapidjson::Value::StringRefType("textures"), texture_array, node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("material"), texture_array, node->GetDocument()->GetAllocator());
 
 	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
-}
-
-void RE_CompMesh::SetTexture(const char * reference, const char* file_path, const char* type)
-{
-	bool have_texture = false;
-	if (ptr->textures.size() > 0)
-	{
-		for (auto texture : ptr->textures)
-			if (texture.id.compare(reference) == 0)
-			{
-				have_texture = true;
-				break;
-			}
-	}
-
-	if (!have_texture)
-	{
-		Texture tex;
-		const char* is_reference = App->resources->IsReference(reference);
-		if (is_reference)
-		{
-			tex.path = file_path;
-			tex.type = type;
-			tex.id = is_reference;
-			tex.ptr = (Texture2D*)App->resources->At(is_reference);
-			ptr->textures.push_back(tex);
-		}
-	}
 }
 

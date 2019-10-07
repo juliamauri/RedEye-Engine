@@ -869,14 +869,14 @@ RE_GameObject * JSONNode::FillGO()
 						reference = c.FindMember("reference")->value.GetString();
 						App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MESH);
 						mesh = new RE_CompMesh(new_go, reference);
-						textures_val = &c.FindMember("textures")->value;
+						textures_val = &c.FindMember("material")->value;
 						if (textures_val->IsArray())
 							for (auto& t : textures_val->GetArray())
 							{
-								file = t.FindMember("file")->value.GetString();
-								reference = t.FindMember("reference")->value.GetString();
-								App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_TEXTURE);
-								mesh->SetTexture(reference,file.c_str(), t.FindMember("type")->value.GetString());
+								file = t.FindMember("path")->value.GetString();
+								reference = t.FindMember("md5")->value.GetString();
+								App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MATERIAL);
+								mesh->SetMaterial(App->resources->At(reference)->GetMD5());
 							}
 						new_go->AddCompMesh(mesh);
 						break;

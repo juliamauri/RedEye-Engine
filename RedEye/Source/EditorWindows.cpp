@@ -4,7 +4,6 @@
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
 #include "TimeManager.h"
-#include "Texture2DManager.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
 #include "RE_Math.h"

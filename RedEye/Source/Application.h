@@ -19,10 +19,10 @@ class TimeManager;
 class SystemInfo;
 class RE_Math;
 struct OutputLogHolder;
-class Texture2DManager;
+class RE_TextureImporter;
 class ShaderManager;
 class RE_PrimitiveManager;
-class ModelImporter;
+class RE_ModelImporter;
 class ResourceManager;
 
 enum GameState : char
@@ -76,10 +76,10 @@ public:
 	RE_Math* math = nullptr;
 	OutputLogHolder* log = nullptr;
 
-	Texture2DManager* textures = nullptr;
+	RE_TextureImporter* textures = nullptr;
 	ShaderManager* shaders = nullptr;
 	RE_PrimitiveManager* primitives = nullptr;
-	ModelImporter* modelImporter = nullptr;
+	RE_ModelImporter* modelImporter = nullptr;
 
 	ResourceManager* resources = nullptr;
 

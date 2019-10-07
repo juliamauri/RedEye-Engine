@@ -1,8 +1,9 @@
 #include "ResourceManager.h"
 
 #include "Application.h"
-#include "Texture2DManager.h"
-#include "ModelImporter.h"
+#include "RE_TextureImporter.h"
+#include "RE_ModelImporter.h"
+#include "RE_Material.h"
 #include "FileSystem.h"
 #include "Globals.h"
 #include "OutputLog.h"
@@ -68,9 +69,9 @@ void ResourceManager::CheckFileLoaded(const char * filepath, const char* resourc
 			path_library += resource;
 			path_library += ".eye";
 			if(App->fs->Exists(path_library.c_str()))
-				App->textures->LoadTexture2D(path_library.c_str(), true, filepath);
+				App->textures->LoadTextureLibrary(path_library.c_str(), filepath);
 			else
-				App->textures->LoadTexture2D(filepath);
+				App->textures->LoadTextureAssets(filepath);
 			break;
 		case R_MESH:
 			path_library += "Meshes/";
@@ -80,6 +81,20 @@ void ResourceManager::CheckFileLoaded(const char * filepath, const char* resourc
 				App->modelImporter->ProcessMeshFromLibrary(path_library.c_str(), resource, filepath);
 			else
 				App->modelImporter->LoadModelFromAssets(filepath);
+			break;
+		case R_MATERIAL:
+		{
+			Config material(filepath, App->fs->GetZipPath());
+			if (material.Load()) {
+				JSONNode* nodeMat = material.GetRootNode("Material");
+				rapidjson::Value& val = nodeMat->GetDocument()->FindMember("Material")->value.GetArray()[0];
+				RE_Material* materialLoaded = new RE_Material(val.FindMember("Name")->value.GetString(), &val);
+				((ResourceContainer*)materialLoaded)->SetMD5(resource);
+				((ResourceContainer*)materialLoaded)->SetFilePath(filepath);
+				((ResourceContainer*)materialLoaded)->SetType(R_MATERIAL);
+				App->resources->Reference((ResourceContainer*)materialLoaded);
+			}
+		}
 			break;
 		default:
 			break;

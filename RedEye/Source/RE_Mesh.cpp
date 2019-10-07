@@ -3,7 +3,7 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ShaderManager.h"
-#include "Texture2DManager.h"
+#include "RE_TextureImporter.h"
 #include "OutputLog.h"
 #include "ModuleScene.h"
 #include "RE_GameObject.h"
@@ -12,6 +12,8 @@
 #include "RE_PrimitiveManager.h"
 #include "ResourceManager.h"
 #include "FileSystem.h"
+
+#include "RE_Material.h"
 
 #include "ImGui\imgui.h"
 #include "Glew/include/glew.h"
@@ -52,11 +54,11 @@ void _CheckGLError(const char* file, int line)
 
 
 
-RE_Mesh::RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, unsigned int triangles)
+RE_Mesh::RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, const char* materialMD5, unsigned int triangles)
 {
 	this->vertices = vertices;
 	this->indices = indices;
-	this->textures = textures;
+	this->materialMD5 = materialMD5;
 
 	triangle_count = triangles;
 
@@ -84,13 +86,29 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 	unsigned int specularNr = 1;
 	unsigned int normalNr = 1;
 	unsigned int heightNr = 1;
-	for (unsigned int i = 0; i < textures.size(); i++)
+
+	if (materialMD5)
 	{
-		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
-										  // retrieve texture number (the N in diffuse_textureN)
-		std::string number;
-		std::string name = textures[i].type;
-		if (name == "texture_diffuse")
+		RE_Material* meshMaterial = (RE_Material*)App->resources->At(materialMD5);
+
+		if (!meshMaterial->tDiffuse.empty())
+		{
+			for (unsigned int i = 0; i < meshMaterial->tDiffuse.size(); i++)
+			{
+				glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+												  // retrieve texture number (the N in diffuse_textureN)
+				std::string name = "texture_diffuse";
+				name += std::to_string(diffuseNr++);
+				// now set the sampler to the correct texture unit
+				ShaderManager::setUnsignedInt(shader_ID, name.c_str(), i);
+
+				// and finally bind the texture
+				((Texture2D*)App->resources->At(meshMaterial->tDiffuse[i]))->use();
+			}
+		}
+	}
+	/*
+			if (name == "texture_diffuse")
 			number = std::to_string(diffuseNr++);
 		else if (name == "texture_specular")
 			number = std::to_string(specularNr++); // transfer unsigned int to stream
@@ -98,13 +116,7 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 			number = std::to_string(normalNr++); // transfer unsigned int to stream
 		else if (name == "texture_height")
 			number = std::to_string(heightNr++); // transfer unsigned int to stream
-
-												 // now set the sampler to the correct texture unit
-		ShaderManager::setUnsignedInt(shader_ID, (name + number).c_str(), i);
-
-		// and finally bind the texture
-		App->textures->use(textures[i].ptr);
-	}
+	*/
 
 	// draw mesh
 	glBindVertexArray(VAO);

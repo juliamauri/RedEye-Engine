@@ -6,7 +6,7 @@
 #include "ModuleInput.h"
 #include "FileSystem.h"
 #include "OutputLog.h"
-#include "Texture2DManager.h"
+#include "RE_TextureImporter.h"
 #include "ShaderManager.h"
 #include "RE_GameObject.h"
 #include "RE_Prefab.h"
@@ -14,7 +14,7 @@
 #include "RE_CompMesh.h"
 #include "RE_CompCamera.h"
 #include "RE_CompParticleEmiter.h"
-#include "ModelImporter.h"
+#include "RE_ModelImporter.h"
 #include <string>
 #include <algorithm>
 
@@ -142,7 +142,7 @@ void ModuleScene::FileDrop(const char * file)
 	}
 	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
 	{
-		App->textures->LoadTexture2D(directory.c_str(), file_name.c_str(), true);
+		//App->textures->LoadTexture2D(directory.c_str(), file_name.c_str(), true);
 	}
 
 	DEL(holder);

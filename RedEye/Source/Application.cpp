@@ -10,10 +10,10 @@
 #include "SystemInfo.h"
 #include "RE_Math.h"
 #include "OutputLog.h"
-#include "Texture2DManager.h"
+#include "RE_TextureImporter.h"
 #include "ShaderManager.h"
 #include "RE_PrimitiveManager.h"
-#include "ModelImporter.h"
+#include "RE_ModelImporter.h"
 #include "ResourceManager.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
@@ -37,10 +37,10 @@ Application::Application()
 	modules.push_back(editor = new ModuleEditor("Editor"));
 	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
 
-	textures = new Texture2DManager("Images/");
+	textures = new RE_TextureImporter("Images/");
 	shaders = new ShaderManager("Assets/Shaders/");
 	primitives = new RE_PrimitiveManager();
-	modelImporter = new ModelImporter("Assets/Meshes/");
+	modelImporter = new RE_ModelImporter("Assets/Meshes/");
 	resources = new ResourceManager();
 }
 

@@ -13,19 +13,10 @@ struct Vertex
 	math::float2 TexCoords = math::float2::zero;
 };
 
-struct Texture
-{
-	std::string id;
-	std::string type;
-	std::string path;
-
-	Texture2D* ptr = nullptr;
-};
-
 class RE_Mesh : public ResourceContainer
 {
 public:
-	RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, unsigned int triangles);
+	RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, const char* materialMD5, unsigned int triangles);
 	~RE_Mesh();
 
 	void Draw(unsigned int shader_ID);
@@ -34,7 +25,7 @@ public:
 	unsigned int triangle_count = 0;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	const char* materialMD5 = nullptr;
 
 	math::AABB GetAABB();
 

@@ -17,10 +17,9 @@ public:
 
 	void DrawProperties() override;
 
+	void SetMaterial(const char* md5);
+
 	void Serialize(JSONNode* node, rapidjson::Value* val) override;
-
-	void SetTexture(const char* reference, const char* file_path, const char* type);
-
 
 protected:
 

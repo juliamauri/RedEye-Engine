@@ -1,9 +1,10 @@
 #include "RE_CompParticleEmiter.h"
 
 #include "Application.h"
+#include "ResourceManager.h"
 #include "TimeManager.h"
 #include "RE_Mesh.h"
-#include "Texture2DManager.h"
+#include "RE_TextureImporter.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "ImGui\imgui.h"
@@ -138,7 +139,7 @@ void RE_CompParticleEmitter::DrawProperties()
 		if (mParticle)
 		{
 			ImGui::Text("Particle Texture");
-			mParticle->textures.at(0).ptr->DrawTextureImGui();
+			((Texture2D*)App->resources->At(mParticle->materialMD5))->DrawTextureImGui();
 		}
 	}
 }
