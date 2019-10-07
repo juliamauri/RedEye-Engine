@@ -27,7 +27,7 @@ public:
 	std::vector<unsigned int> indices;
 	const char* materialMD5 = nullptr;
 
-	math::AABB GetAABB();
+	math::AABB GetAABB() const;
 
 	void loadVertexNormals();
 	void loadFaceNormals();

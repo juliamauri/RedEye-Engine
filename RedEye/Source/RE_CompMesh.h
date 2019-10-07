@@ -2,6 +2,7 @@
 #define __RE_COMPMESH_H__
 
 #include "RE_Component.h"
+#include "MathGeoLib/include/Geometry/AABB.h"
 #include <string>
 
 class RE_Mesh;
@@ -20,6 +21,8 @@ public:
 	void SetMaterial(const char* md5);
 
 	void Serialize(JSONNode* node, rapidjson::Value* val) override;
+
+	math::AABB GetAABB() const;
 
 protected:
 

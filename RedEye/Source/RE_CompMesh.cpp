@@ -18,14 +18,12 @@ RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool s
 	: RE_Component(C_MESH, go, start_active), reference(reference)
 {
 	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
-	go->AddToBoundingBox(ptr->GetAABB());
 }
 
 RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go)
 	: RE_Component(C_MESH, go, cmpMesh.active), reference(cmpMesh.reference)
 {
 	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
-	go->AddToBoundingBox(ptr->GetAABB());
 }
 
 RE_CompMesh::~RE_CompMesh()
@@ -134,5 +132,10 @@ void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 	val.AddMember(rapidjson::Value::StringRefType("material"), texture_array, node->GetDocument()->GetAllocator());
 
 	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
+}
+
+math::AABB RE_CompMesh::GetAABB() const
+{
+	return ptr->GetAABB();
 }
 

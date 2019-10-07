@@ -153,8 +153,6 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 
 			const char* md5Mesh = aditionalData->meshesLoaded.at(scene->mMeshes[node->mMeshes[i]]);
 			RE_CompMesh* comp_mesh = new RE_CompMesh(goMesh, md5Mesh);
-
-			goMesh->AddToBoundingBox(((RE_Mesh*)App->resources->At(md5Mesh))->GetAABB());
 			goMesh->AddCompMesh(comp_mesh);
 
 			//meshes.rbegin()->name = node->mName.C_Str();

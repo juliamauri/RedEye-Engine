@@ -84,7 +84,8 @@ public:
 	void DrawAABB();
 	void DrawAllAABB();
 	void AddToBoundingBox(math::AABB box);
-	void SetBoundingBoxFromChilds();
+	void ResetBoundingBoxFromChilds();
+	math::AABB GetLocalBoundingBox() const;
 	math::AABB GetGlobalBoundingBox() const;
 
 	// Editor

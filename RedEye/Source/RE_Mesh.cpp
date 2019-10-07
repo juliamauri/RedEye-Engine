@@ -232,7 +232,7 @@ void RE_Mesh::setupMesh()
 	glBindVertexArray(0);
 }
 
-math::AABB RE_Mesh::GetAABB()
+math::AABB RE_Mesh::GetAABB() const
 {
 	return bounding_box;
 }
