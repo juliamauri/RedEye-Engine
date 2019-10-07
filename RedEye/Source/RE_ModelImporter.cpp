@@ -98,7 +98,7 @@ RE_Prefab*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int siz
 
 		//Mount a go hiteracy with nodes from model
 		RE_GameObject* rootGO = new RE_GameObject(aditionalData->name.c_str(), GUID_NULL);
-		ProcessNode(scene->mRootNode, scene, rootGO, true);
+		ProcessNode(scene->mRootNode, scene, rootGO, math::float4x4::identity, true);
 
 		//We save own format of model as internal prefab
 		newModelPrefab = new RE_Prefab(rootGO, true);
@@ -107,7 +107,7 @@ RE_Prefab*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int siz
 	return newModelPrefab;
 }
 
-void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObject* currentGO, bool isRoot)
+void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot)
 {
 	LOG_SECONDARY("%s Node: %s (%u meshes | %u children)",
 		node->mParent ? "SON" : "PARENT",
@@ -115,21 +115,38 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 		node->mNumMeshes,
 		node->mNumChildren);
 
+	aiVector3D nScale;
+	aiVector3D nPosition;
+	aiQuaternion nRotationQuat;
+
+	node->mTransformation.Decompose(nScale, nRotationQuat, nPosition);
+	transform = transform * math::float4x4::FromTRS(
+		{ nPosition.x,nPosition.y, nPosition.z },
+		math::Quat(nRotationQuat.x, nRotationQuat.y, nRotationQuat.z, nRotationQuat.w),
+		{ nScale.x,nScale.y, nScale.z }
+	);
+
 	RE_GameObject* go_haschildren = nullptr;
 	if (node->mNumChildren > 0)
 	{
-		go_haschildren = (!isRoot) ? new RE_GameObject(node->mName.C_Str(), GUID_NULL, currentGO) : currentGO;
+		if (isRoot || std::string(node->mName.C_Str()).find("_$Assimp") == std::string::npos)
+		{
+			go_haschildren = (!isRoot) ? new RE_GameObject(node->mName.C_Str(), GUID_NULL, currentGO) : currentGO;
 
-		aiVector3D scale;
-		aiVector3D position;
-		aiQuaternion rotationQuat;
+			math::float3 position;
+			math::Quat rotation;
+			math::float3 scale;
+			transform.Decompose(position, rotation, scale);
 
-		node->mTransformation.Decompose(scale, rotationQuat, position);
+			go_haschildren->GetTransform()->SetRotation(rotation);
+			go_haschildren->GetTransform()->SetPosition(position);
+			go_haschildren->GetTransform()->SetScale(scale);
+			go_haschildren->GetTransform()->Update();
 
-		go_haschildren->GetTransform()->SetRotation(math::Quat(rotationQuat.x, rotationQuat.y, rotationQuat.z, rotationQuat.w));
-		go_haschildren->GetTransform()->SetPosition(math::vec(position.x, position.y, position.z));
-		go_haschildren->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
-		go_haschildren->GetTransform()->Update();
+			transform = math::float4x4::identity;
+		}
+		else 		
+			go_haschildren = currentGO;
 	}
 
 	unsigned int i = 0;
@@ -141,16 +158,17 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 			RE_GameObject* goMesh = (go_haschildren == nullptr) ? new RE_GameObject(node->mName.C_Str(), GUID_NULL, currentGO) : go_haschildren;
 			if (go_haschildren == nullptr)
 			{
-				aiVector3D scale;
-				aiVector3D position;
-				aiQuaternion rotationQuat;
+				math::float3 position;
+				math::Quat rotation;
+				math::float3 scale;
+				transform.Decompose(position, rotation, scale);
 
-				node->mTransformation.Decompose(scale, rotationQuat, position);
-
-				goMesh->GetTransform()->SetRotation(math::Quat(rotationQuat.x, rotationQuat.y, rotationQuat.z, rotationQuat.w));
-				goMesh->GetTransform()->SetPosition(math::vec(position.x, position.y, position.z));
-				goMesh->GetTransform()->SetScale(math::vec(scale.x, scale.y, scale.z));
+				goMesh->GetTransform()->SetRotation(rotation);
+				goMesh->GetTransform()->SetPosition(position);
+				goMesh->GetTransform()->SetScale(scale);
 				goMesh->GetTransform()->Update();
+
+				transform = math::float4x4::identity;
 			}
 
 			const char* md5Mesh = aditionalData->meshesLoaded.at(scene->mMeshes[node->mMeshes[i]]);
@@ -162,8 +180,25 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 		}
 	}
 
+	if (node->mNumChildren == 0 && node->mNumMeshes == 0)
+	{
+		go_haschildren = (!isRoot) ? new RE_GameObject(node->mName.C_Str(), GUID_NULL, currentGO) : currentGO;
+
+		math::float3 position;
+		math::Quat rotation;
+		math::float3 scale;
+		transform.Decompose(position, rotation, scale);
+
+		go_haschildren->GetTransform()->SetRotation(rotation);
+		go_haschildren->GetTransform()->SetPosition(position);
+		go_haschildren->GetTransform()->SetScale(scale);
+		go_haschildren->GetTransform()->Update();
+
+		transform = math::float4x4::identity;
+	}
+
 	for (i = 0; i < node->mNumChildren; i++)
-		ProcessNode(node->mChildren[i], scene, go_haschildren);
+		ProcessNode(node->mChildren[i], scene, go_haschildren, transform);
 }
 
 void RE_ModelImporter::ProcessMeshes(const aiScene* scene)

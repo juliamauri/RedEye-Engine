@@ -9,6 +9,8 @@ class RE_Mesh;
 class RE_GameObject;
 class RE_Prefab;
 
+#include "MathGeoLib/include/Math/float4x4.h"
+
 #include <string>
 #include <map>
 
@@ -30,7 +32,7 @@ public:
 	RE_Prefab* ProcessModel(const char* buffer, unsigned int size);
 	void ProcessMaterials(const aiScene* scene);
 	void ProcessMeshes(const aiScene* scene);
-	void ProcessNode(aiNode* node, const aiScene* scene, RE_GameObject* currentGO, bool isRoot = false);
+	void ProcessNode(aiNode* node, const aiScene* scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot = false);
 	const char* ProcessMeshFromLibrary(const char* file_library, const char* reference, const char* file_assets);
 
 private:
