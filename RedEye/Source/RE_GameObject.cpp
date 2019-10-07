@@ -44,9 +44,6 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 
 	local_bounding_box = go.local_bounding_box;
 	global_bounding_box = go.global_bounding_box;
-
-	if (parent != nullptr)
-		parent->AddChild(this);
 	
 	for (RE_Component* cmpGO : go.components)
 	{
@@ -63,6 +60,9 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 			break;
 		}
 	}
+
+	if (parent != nullptr)
+		parent->AddChild(this);
 
 	if (!go.childs.empty()) {
 		for (RE_GameObject* childGO : go.childs) {
