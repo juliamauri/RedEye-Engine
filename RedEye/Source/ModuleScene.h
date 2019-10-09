@@ -22,7 +22,6 @@ public:
 	void OnPause() override;
 	void OnStop() override;
 
-	void FileDrop(const char* file);
 	void RecieveEvent(const Event& e) override;
 
 	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
@@ -40,6 +39,8 @@ public:
 	void RayCastSelect(math::Ray& ls);
 
 	void Serialize();
+
+	void LoadFBXOnScene(const char* fbxPath);
 
 
 	//shaders

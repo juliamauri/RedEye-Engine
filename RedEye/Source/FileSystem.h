@@ -39,6 +39,17 @@ public:
 
 	const char* GetZipPath();
 
+	void HandleDropedFile(const char* file);
+
+private:
+
+	std::string RecursiveFindFbx(const char* path);
+
+	//Returns true if same
+	bool RecursiveComparePath(const char* path1, const char* path2);
+
+	void RecursiveCopy(const char* origin, const char* dest);
+
 private:
 
 	Config* engine_config;

@@ -1,6 +1,7 @@
 #include "FileSystem.h"
 
 #include "Application.h"
+#include "ModuleScene.h"
 #include "OutputLog.h"
 #include "Globals.h"
 #include "ImGui\imgui.h"
@@ -37,6 +38,7 @@
 #include <crtdbg.h>
 #endif
 #include <fstream>
+#include <algorithm>
 
 FileSystem::FileSystem() : engine_config(nullptr)
 {}
@@ -224,6 +226,211 @@ const char* FileSystem::GetExecutableDirectory() const
 const char * FileSystem::GetZipPath()
 {
 	return zip_path.c_str();
+}
+
+void FileSystem::HandleDropedFile(const char * file)
+{
+	std::string full_path(file);
+	std::string directory = full_path.substr(0, full_path.find_last_of('\\') + 2);
+	std::string fileNameExtension = full_path.substr(full_path.find_last_of("\\") + 1);
+	std::string fileName = fileNameExtension.substr(0, fileNameExtension.find_last_of("."));
+	std::string ext = full_path.substr(full_path.find_last_of(".") + 1);
+
+	std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
+	if (ext.compare("zip") == 0)
+	{
+		std::string exportPath("Exporting/");
+		App->fs->AddPath(file, exportPath.c_str());
+
+		std::string fbxToLoadInScene;
+
+		std::string fbxFound = RecursiveFindFbx(exportPath.c_str());
+
+		if (!fbxFound.empty()) {
+			char **rc = PHYSFS_enumerateFiles("Assets/Meshes/");
+			char **i;
+
+			bool existsinAssets = false;
+			bool sameFolder = false;
+			for (i = rc; *i != NULL; i++)
+			{
+				if (fileName.compare(*i) == 0) {
+					sameFolder = true;
+					std::string folderExport = exportPath + fileName + "/";
+					std::string folderAssets = "Assets/Meshes/" + fileName + "/";
+					if (RecursiveComparePath(folderExport.c_str(), folderAssets.c_str())) {
+						existsinAssets = true;
+						fbxToLoadInScene = folderAssets + fbxFound.substr(fbxFound.find_last_of("/") + 1);
+						break;
+					}
+				}
+			}
+			PHYSFS_freeList(rc);
+
+			if (!existsinAssets) {
+				std::string folderToCopy("Assets/Meshes/");
+				std::string fileCount = fileName;
+				if(sameFolder){
+					uint countSame = 0;
+					char **rc = PHYSFS_enumerateFiles("Assets/Meshes/");
+					char **i;
+					for (i = rc; *i != NULL; i++)
+					{
+						if (fileName.compare(*i) == 0) {
+							fileCount = fileName + std::to_string(countSame++);
+						}
+					}
+					PHYSFS_freeList(rc);
+				}
+				folderToCopy += fileCount + "/";
+				exportPath += fileName + "/";
+				RecursiveCopy(exportPath.c_str(), folderToCopy.c_str());
+				fbxToLoadInScene = folderToCopy + fbxFound.substr(fbxFound.find_last_of("/") + 1);
+			}
+		}
+		App->fs->RemovePath(file);
+
+		App->scene->LoadFBXOnScene(fbxToLoadInScene.c_str());
+	}
+	else if (ext.compare("fbx") == 0)
+	{
+
+
+		// FOCUS CAMERA ON DROPPED GEOMETRY
+		//App->editor->GetCamera()->SetPosition(selected->GetBoundingBox().maxPoint * 2);
+		//App->editor->GetCamera()->SetFocus(selected->GetBoundingBox().CenterPoint());
+	}
+	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
+	{
+		//App->textures->LoadTexture2D(directory.c_str(), file_name.c_str(), true);
+	}
+}
+
+std::string FileSystem::RecursiveFindFbx(const char * path)
+{
+	std::string	fbxPathReturn;
+	std::string iterPath(path);
+
+	char **rc = PHYSFS_enumerateFiles(iterPath.c_str());
+	char **i;
+
+	for (i = rc; *i != NULL; i++)
+	{
+		std::string inPath(iterPath);
+		inPath += *i;
+
+		PHYSFS_Stat fileStat;
+		if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
+			if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
+				inPath += "/";
+				fbxPathReturn = RecursiveFindFbx(inPath.c_str());
+				if (!fbxPathReturn.empty()) {
+					PHYSFS_freeList(rc);
+					return fbxPathReturn;
+				}
+			}
+			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
+				std::string ext = inPath.substr(inPath.find_last_of(".") + 1);
+				std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
+				if (ext.compare("fbx") == 0) {
+					PHYSFS_freeList(rc);
+					return inPath;
+				}
+
+			}
+		
+		}
+	}
+
+	PHYSFS_freeList(rc);
+	return fbxPathReturn;
+}
+
+bool FileSystem::RecursiveComparePath(const char * path1, const char * path2)
+{
+	bool isSame = true;
+	std::string iterPath1 = path1;
+	std::string iterPath2 = path2;
+	char **rc1 = PHYSFS_enumerateFiles(path1);
+	char **rc2 = PHYSFS_enumerateFiles(path2);
+	char **i1;
+	char **i2;
+
+	for (i1 = rc1, i2 = rc2; *i1 != NULL && *i2 != NULL; i1++, i2++)
+	{
+		if (std::strcmp(*i1, *i2) == 0) {
+
+			std::string inPath1(iterPath1);
+			inPath1 += *i1;
+
+			std::string inPath2(iterPath2);
+			inPath2 += *i2;
+
+			PHYSFS_Stat fileStat1;
+			PHYSFS_Stat fileStat2;
+			if (PHYSFS_stat(inPath1.c_str(), &fileStat1) && PHYSFS_stat(inPath2.c_str(), &fileStat2)) {
+
+				if (fileStat1.filetype == fileStat2.filetype) {
+
+					if (fileStat1.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
+						inPath1 += "/";
+						inPath2 += "/";
+						isSame = RecursiveComparePath(inPath1.c_str(), inPath2.c_str());
+					}
+					else if (fileStat1.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
+						isSame = (fileStat1.filesize == fileStat2.filesize);
+					}
+
+				}
+				else
+					isSame = false;
+			}
+		}
+		else
+			isSame = false;
+
+		if (!isSame) break;
+	}
+
+	PHYSFS_freeList(rc1);
+	PHYSFS_freeList(rc2);
+
+	return isSame;
+}
+
+void FileSystem::RecursiveCopy(const char * origin, const char * dest)
+{
+	std::string iterOrigin(origin);
+	std::string iterDest(dest);
+
+	char **rc = PHYSFS_enumerateFiles(iterOrigin.c_str());
+	char **i;
+
+	for (i = rc; *i != NULL; i++)
+	{
+		std::string inOrigin(iterOrigin);
+		inOrigin += *i;
+		std::string inDest(iterDest);
+		inDest += *i;
+
+		PHYSFS_Stat fileStat;
+		if (PHYSFS_stat(inOrigin.c_str(), &fileStat)) {
+			if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
+				inOrigin += "/";
+				inDest += "/";
+				RecursiveCopy(inOrigin.c_str(), inDest.c_str());
+			}
+			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
+				RE_FileIO fileOrigin(inOrigin.c_str());
+				if (fileOrigin.Load()) {
+					RE_FileIO fileDest(inDest.c_str(), GetZipPath());
+					fileDest.Save(fileOrigin.GetBuffer(), fileOrigin.GetSize());
+				}
+			}
+		}
+	}
 }
 
 

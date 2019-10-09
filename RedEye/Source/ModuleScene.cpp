@@ -16,7 +16,6 @@
 #include "RE_CompParticleEmiter.h"
 #include "RE_ModelImporter.h"
 #include <string>
-#include <algorithm>
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled) {}
 
@@ -54,9 +53,9 @@ bool ModuleScene::Start()
 		root = new RE_GameObject("root");
 		// load default meshes
 		//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
-		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets("street/Street environment_V01.FBX");
-
+		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets("Assets/Meshes/street/Street environment_V01.FBX");
 		root->AddChild(newModel->GetRoot());
+		DEL(newModel);
 
 		(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
 	}
@@ -84,11 +83,11 @@ update_status ModuleScene::Update()
 
 
 	// Spawn Firework on Key 1
-	if (App->input->CheckKey(30))
-	{
-		RE_GameObject* smoke = App->scene->AddGO("Smoke");
-		((RE_CompParticleEmitter*)smoke->AddComponent(C_PARTICLEEMITER))->SetUp(smoke_particle, shader_particle);
-	}
+	//if (App->input->CheckKey(30))
+	//{
+	//	RE_GameObject* smoke = App->scene->AddGO("Smoke");
+	//	((RE_CompParticleEmitter*)smoke->AddComponent(C_PARTICLEEMITER))->SetUp(smoke_particle, shader_particle);
+	//}
 
 	return UPDATE_CONTINUE;
 }
@@ -118,36 +117,6 @@ void ModuleScene::OnPause()
 void ModuleScene::OnStop()
 {
 	root->OnStop();
-}
-
-void ModuleScene::FileDrop(const char * file)
-{
-	RE_FileIO* holder = App->fs->QuickBufferFromPDPath(file);
-
-	std::string full_path(file);
-	std::string file_name = full_path.substr(full_path.find_last_of("\\") + 1);
-	std::string directory = full_path.substr(0, full_path.find_last_of('\\'));
-	std::string ext = full_path.substr(full_path.find_last_of(".") + 1);
-
-	std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-
-	if (ext.compare("fbx") == 0)
-	{
-		// CREATE GAMEOBJECTS WITH GEOMETRY
-		if (selected != nullptr) selected = root;
-
-		//selected = App->meshes->DumpGeometry(selected, "path del street fbx");
-
-		// FOCUS CAMERA ON DROPPED GEOMETRY
-		//App->editor->GetCamera()->SetPosition(selected->GetBoundingBox().maxPoint * 2);
-		//App->editor->GetCamera()->SetFocus(selected->GetBoundingBox().CenterPoint());
-	}
-	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
-	{
-		//App->textures->LoadTexture2D(directory.c_str(), file_name.c_str(), true);
-	}
-
-	DEL(holder);
 }
 
 void ModuleScene::RecieveEvent(const Event& e)
@@ -300,4 +269,40 @@ void ModuleScene::Serialize()
 	DEL(node);
 
 	scene_file.Save();
+}
+
+void ModuleScene::LoadFBXOnScene(const char * fbxPath)
+{
+	std::string path(fbxPath);
+	std::string fileName = path.substr(path.find_last_of("/") + 1);
+	fileName = fileName.substr(0, fileName.find_last_of("."));
+
+	std::string fbxOnLibrary("Library/Scenes/");
+	fbxOnLibrary += fileName + ".efab";
+
+	RE_GameObject* toAdd = nullptr;
+	if (App->fs->Exists(fbxOnLibrary.c_str())) {
+		
+		Config fbxPrefab(fbxOnLibrary.c_str(), App->fs->GetZipPath());
+		if (fbxPrefab.Load()) {
+			JSONNode* node = fbxPrefab.GetRootNode("Game Objects");
+			toAdd = node->FillGO();
+			DEL(node);
+		}
+	}
+	else
+	{
+		RE_Prefab* toLoad = App->modelImporter->LoadModelFromAssets(fbxPath);
+		toAdd = toLoad->GetRoot();
+		DEL(toLoad);
+	}
+
+	if (toAdd) {
+		if (root) DEL(root);
+		selected = nullptr;
+		root = new RE_GameObject("root");
+		root->AddChild(toAdd);
+	}
+	else
+		LOG_ERROR("Error to load dropped fbx");
 }

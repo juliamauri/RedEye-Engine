@@ -55,8 +55,7 @@ RE_Prefab* RE_ModelImporter::LoadModelFromAssets(const char * path)
 	RE_Prefab* modelreturn = nullptr;
 	RE_FileIO* mesh_file = nullptr;
 
-	std::string assetsPath = folderPath;
-	assetsPath += path;
+	std::string assetsPath(path);
 	mesh_file = new RE_FileIO(assetsPath.c_str());
 	if (!mesh_file->Load())
 	{
@@ -102,7 +101,7 @@ RE_Prefab*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int siz
 
 		//We save own format of model as internal prefab
 		newModelPrefab = new RE_Prefab(rootGO, true);
-		App->resources->Reference(newModelPrefab);
+		//App->resources->Reference(newModelPrefab);
 	}
 	return newModelPrefab;
 }
