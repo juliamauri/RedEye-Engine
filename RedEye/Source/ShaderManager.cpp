@@ -30,6 +30,8 @@ bool ShaderManager::Init()
 
 bool ShaderManager::Load(const char* name, unsigned int* ID)
 {
+	LOG("Loading %s shader.", name);
+
 	bool ret = true;
 	last_error.clear();
 

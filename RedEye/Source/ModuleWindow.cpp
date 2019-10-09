@@ -105,6 +105,8 @@ bool ModuleWindow::Load(JSONNode * node)
 {
 	bool ret = true;
 
+	LOG_SECONDARY("Loading Window propieties from config:");
+
 	//OpenGL context 
 	flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 	if (node->PullBool("fullscreen", false))
@@ -383,6 +385,7 @@ void ModuleWindow::SetWindowProperties()
 {
 	if (window == nullptr)
 	{
+		LOG_SECONDARY("Creating new window: %s | Width: %i | Height: %i", title.c_str(), width, height);
 		window = SDL_CreateWindow(title.c_str(), pos_x, pos_y, width, height, flags);
 	}
 	else

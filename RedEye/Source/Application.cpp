@@ -15,11 +15,14 @@
 #include "RE_PrimitiveManager.h"
 #include "RE_ModelImporter.h"
 #include "ResourceManager.h"
+
+
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
 #include "IL/include/il.h"
 #include "IL/include/ilu.h"
 #include "IL/include/ilut.h"
+#include "Optick/include/optick.h"
 
 using namespace std;
 
@@ -81,6 +84,8 @@ bool Application::Init(int argc, char* argv[])
 		char tmp[8];
 		sprintf_s(tmp, 8, "%u.%u.%u", (int)sdl_version.major, (int)sdl_version.minor, (int)sdl_version.patch);
 		App->ReportSoftware("SDL", tmp, "https://www.libsdl.org/");
+
+		App->ReportSoftware("Optick", "1.2.9", "https://optick.dev/");
 
 		LOG("Initializing File System");
 

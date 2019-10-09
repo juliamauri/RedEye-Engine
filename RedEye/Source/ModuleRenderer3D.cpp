@@ -27,7 +27,7 @@ ModuleRenderer3D::~ModuleRenderer3D()
 bool ModuleRenderer3D::Init(JSONNode * node)
 {
 	bool ret = false;
-
+	LOG_SECONDARY("Seting SDL/GL Attributes.");
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) < 0)
 		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_PROFILE_MASK: SDL_GL_CONTEXT_PROFILE_CORE'");
 	if (SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1) < 0)
@@ -142,16 +142,24 @@ void ModuleRenderer3D::DrawEditor()
 bool ModuleRenderer3D::Load(JSONNode * node)
 {
 	bool ret = (node != nullptr);
+	LOG_SECONDARY("Loading Render3D config values:");
 
 	if (ret)
 	{
 		SetVSync(node->PullBool("vsync", vsync));
-		SetDepthTest(node->PullBool("cullface", cullface));
-		SetFaceCulling(node->PullBool("depthtest", depthtest));
+		LOG_TERCIARY((vsync)? "VSync enabled." : "VSync disabled");
+		SetFaceCulling(node->PullBool("cullface", cullface));
+		LOG_TERCIARY((cullface)? "CullFace enabled." : "CullFace disabled");
+		SetDepthTest(node->PullBool("depthtest", depthtest));
+		LOG_TERCIARY((depthtest)? "DepthTest enabled." : "DepthTest disabled");
 		SetLighting(node->PullBool("lighting", lighting));
+		LOG_TERCIARY((lighting)? "Lighting enabled." : "Lighting disabled");
 		SetTexture2D(node->PullBool("texture 2d", texture2d));
+		LOG_TERCIARY((texture2d)? "Textures enabled." : "Textures disabled");
 		SetColorMaterial(node->PullBool("color material", color_material));
+		LOG_TERCIARY((color_material)? "Color Material enabled." : "Color Material disabled");
 		SetWireframe(node->PullBool("wireframe", wireframe));
+		LOG_TERCIARY((wireframe)? "Wireframe enabled." : "Wireframe disabled");
 	}
 
 	return ret;
