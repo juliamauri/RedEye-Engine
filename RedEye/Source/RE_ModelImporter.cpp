@@ -114,6 +114,8 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 		node->mNumMeshes,
 		node->mNumChildren);
 
+	//TODO ignore child motion of warrior, we don´t want to load a skeleton.
+
 	aiVector3D nScale;
 	aiVector3D nPosition;
 	aiQuaternion nRotationQuat;
@@ -332,7 +334,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						newMaterial->tDiffuse.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if(App->fs->Exists(realAssetsPath.c_str()))
+							newMaterial->tDiffuse.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
 					}
 				}
 			}
@@ -354,7 +357,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						newMaterial->tSpecular.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if (App->fs->Exists(realAssetsPath.c_str()))
+							newMaterial->tSpecular.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
 					}
 				}
 			}
@@ -375,7 +379,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						newMaterial->tAmbient.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if (App->fs->Exists(realAssetsPath.c_str()))
+							newMaterial->tAmbient.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
 					}
 				}
 			}
@@ -396,7 +401,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						newMaterial->tEmissive.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if (App->fs->Exists(realAssetsPath.c_str()))
+							newMaterial->tEmissive.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
 					}
 				}
 			}
@@ -435,7 +441,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						newMaterial->tOpacity.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if (App->fs->Exists(realAssetsPath.c_str()))
+							newMaterial->tOpacity.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
 					}
 				}
 			}
@@ -456,7 +463,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						newMaterial->tShininess.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if (App->fs->Exists(realAssetsPath.c_str()))
+							newMaterial->tShininess.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
 					}
 				}
 			}
@@ -489,7 +497,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						newMaterial->tHeight.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if (App->fs->Exists(realAssetsPath.c_str()))
+							newMaterial->tHeight.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
 					}
 				}
 			}
@@ -504,7 +513,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						newMaterial->tNormals.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if (App->fs->Exists(realAssetsPath.c_str()))
+							newMaterial->tNormals.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
 					}
 				}
 			}
@@ -519,7 +529,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						newMaterial->tReflection.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if (App->fs->Exists(realAssetsPath.c_str()))
+							newMaterial->tReflection.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
 					}
 				}
 			}
@@ -534,7 +545,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						newMaterial->tUnknown.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if (App->fs->Exists(realAssetsPath.c_str()))
+							newMaterial->tUnknown.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
 					}
 				}
 			}
