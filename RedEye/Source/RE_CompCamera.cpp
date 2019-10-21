@@ -5,7 +5,9 @@
 #include "FileSystem.h"
 #include "RE_CompTransform.h"
 #include "ModuleWindow.h"
+#include "ModuleEditor.h"
 #include "OutputLog.h"
+#include "ShaderManager.h"
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
@@ -127,10 +129,14 @@ void RE_CompCamera::Draw()
 {
 	if (draw_frustum)
 	{
-		glBindTexture(GL_TEXTURE_2D, 0);
+		ShaderManager::use(0);
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf((transform->GetMatrixModel() * App->editor->GetCamera()->GetView()).ptr());
+
+		glColor3f(0.f, 255.f, 165.f);
+		glLineWidth(3.0f);
 		glBegin(GL_LINES);
-		glLineWidth(2.0f);
-		glColor4f(0.f, 1.0f, 0.2f, 1.0f);
 
 		for (uint i = 0; i < 12; i++)
 		{
@@ -139,7 +145,7 @@ void RE_CompCamera::Draw()
 		}
 
 		glEnd();
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glLineWidth(1.0f);
 	}
 }
 
