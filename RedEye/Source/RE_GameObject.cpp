@@ -150,14 +150,6 @@ void RE_GameObject::AddChild(RE_GameObject * child)
 	SDL_assert(child != nullptr);
 	child->parent = this;
 
-	if (child->transform != nullptr)
-	{
-		math::float4x4 trs = child->transform->GetLocalMatrixModel();
-		AddToBoundingBox(math::AABB(
-			trs.MulPos(child->local_bounding_box.maxPoint),
-			trs.MulPos(child->local_bounding_box.minPoint)));
-	}
-
 	childs.push_back(child);
 }
 
@@ -260,9 +252,8 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 	}
 	else if (ComponentType(type) == C_MESH)
 	{
-		ret = (RE_Component*)new RE_CompMesh(this, file_path_data, drop);
 		RE_CompMesh* mesh_comp = new RE_CompMesh(this, file_path_data, drop);
-		AddToBoundingBox(mesh_comp->GetAABB());
+		//AddToBoundingBox(mesh_comp->GetAABB());
 		ret = (RE_Component*)mesh_comp;
 	}
 	else if (ComponentType(type) == C_CAMERA)
@@ -369,14 +360,14 @@ RE_CompTransform * RE_GameObject::AddCompTransform()
 RE_CompMesh * RE_GameObject::AddCompMesh(const char * file_path_data, const bool dropped)
 {
 	RE_CompMesh* ret = new RE_CompMesh(this, file_path_data, dropped);
-	AddToBoundingBox(ret->GetAABB());
+	//AddToBoundingBox(ret->GetAABB());
 	components.push_back(ret->AsComponent());
 	return ret;
 }
 
 void RE_GameObject::AddCompMesh(RE_CompMesh * comp_mesh)
 {
-	AddToBoundingBox(comp_mesh->GetAABB());
+	//AddToBoundingBox(comp_mesh->GetAABB());
 	components.push_back((RE_Component*)comp_mesh);
 }
 
@@ -470,17 +461,7 @@ void RE_GameObject::TransformModified()
 	for (auto child : childs)
 		child->TransformModified();
 
-	if (transform != nullptr)
-	{
-		math::float4x4 global_mat = transform->GetMatrixModel();
-		global_mat.Transpose();
-
-		global_bounding_box.minPoint = global_mat.TransformPos(local_bounding_box.minPoint);
-		global_bounding_box.maxPoint = global_mat.TransformPos(local_bounding_box.maxPoint);
-
-		if (parent != nullptr)
-			parent->ResetBoundingBoxFromChilds();
-	}
+	App->scene->SceneModified();
 }
 
 const char * RE_GameObject::GetName() const
@@ -488,11 +469,9 @@ const char * RE_GameObject::GetName() const
 	return name.c_str();
 }
 
-void RE_GameObject::DrawAABB()
+void RE_GameObject::DrawAABB(math::vec color, float width)
 {
 	ShaderManager::use(0);
-
-	glColor3f(0.0f, 0.0f, 1.0f);
 
 	math::float4x4 model = transform->GetMatrixModel();
 	RE_CompCamera* camera = App->editor->GetCamera();
@@ -500,8 +479,8 @@ void RE_GameObject::DrawAABB()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf((model * camera->GetView()).ptr());
 
-	glLineWidth(5.0f);
-
+	glColor3f(color.x, color.y, color.z);
+	glLineWidth(width);
 	glBegin(GL_LINES);
 
 	for (uint i = 0; i < 12; i++)
@@ -517,16 +496,16 @@ void RE_GameObject::DrawAABB()
 	}
 
 	glEnd();
-
 	glLineWidth(1.0f);
 }
 
-void RE_GameObject::DrawAllAABB()
+void RE_GameObject::DrawAllAABB(math::vec color, float width)
 {
-	DrawAABB();
+	if (App->scene->GetSelected() != this)
+		DrawAABB(color, width);
 
 	for (auto child : childs)
-		child->DrawAllAABB();
+		child->DrawAllAABB(color, width);
 }
 
 void RE_GameObject::AddToBoundingBox(math::AABB box)
@@ -535,48 +514,36 @@ void RE_GameObject::AddToBoundingBox(math::AABB box)
 		return;
 
 	local_bounding_box.Enclose(box);
-
-	math::float4x4 global_mat = transform->GetMatrixModel();;
-	global_bounding_box.minPoint = global_mat.MulPos(local_bounding_box.minPoint);
-	global_bounding_box.maxPoint = global_mat.MulPos(local_bounding_box.maxPoint);
-
-	if (parent != nullptr)
-	{
-		//parent->ResetBoundingBoxFromChilds();
-		math::float4x4 trs = transform->GetLocalMatrixModel();
-		parent->AddToBoundingBox(math::AABB(
-			trs.TransformPos(local_bounding_box.minPoint),
-			trs.TransformPos(local_bounding_box.maxPoint)));
-	}
 }
 
 void RE_GameObject::ResetBoundingBoxFromChilds()
 {
-	if (childs.empty())
-	{
-		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
-	}
+	if (GetMesh() != nullptr)
+		local_bounding_box = GetMesh()->GetAABB();
 	else
+		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+
+	if (!childs.empty())
 	{
-		std::list<RE_GameObject*>::iterator child = childs.begin();
-		math::float4x4 trs = (*child)->transform->GetLocalMatrixModel();
-		local_bounding_box = math::AABB(
-			trs.TransformPos(local_bounding_box.minPoint),
-			trs.TransformPos(local_bounding_box.maxPoint));
-
-		for (child = child++; child != childs.end(); child++)
+		// Enclose remaining childs' AABBs
+		for (std::list<RE_GameObject*>::iterator child = childs.begin(); child != childs.end(); child++)
 		{
-			trs = (*child)->transform->GetLocalMatrixModel();
+			// Update child AABB
+			(*child)->ResetBoundingBoxFromChilds();
 
-			local_bounding_box.Enclose(math::AABB(
-				trs.TransformPos((*child)->local_bounding_box.minPoint),
-				trs.TransformPos((*child)->local_bounding_box.maxPoint)));
+			// Enclose child AABB
+			math::float4x4 trs = (*child)->transform->GetLocalMatrixModel();
+			math::AABB child_aabb = (*child)->GetLocalBoundingBox();
+			local_bounding_box.Enclose(
+				trs.TransformPos(child_aabb.minPoint),
+				trs.TransformPos(child_aabb.maxPoint));
 		}
 	}
 
-	math::float4x4 global_mat = transform->GetMatrixModel();
-	global_bounding_box.minPoint = global_mat.TransformPos(local_bounding_box.minPoint);
-	global_bounding_box.maxPoint = global_mat.TransformPos(local_bounding_box.maxPoint);
+	math::float4x4 global_trs = transform->GetMatrixModel();;
+	global_bounding_box = math::AABB(
+		global_trs.TransformPos(local_bounding_box.minPoint),
+		global_trs.TransformPos(local_bounding_box.maxPoint));
 }
 
 math::AABB RE_GameObject::GetLocalBoundingBox() const

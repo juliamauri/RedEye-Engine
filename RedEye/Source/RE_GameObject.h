@@ -81,8 +81,8 @@ public:
 	const char* GetName() const;
 
 	// AABB
-	void DrawAABB();
-	void DrawAllAABB();
+	void DrawAABB(math::vec color, float width);
+	void DrawAllAABB(math::vec color, float width);
 	void AddToBoundingBox(math::AABB box);
 	void ResetBoundingBoxFromChilds();
 	math::AABB GetLocalBoundingBox() const;
