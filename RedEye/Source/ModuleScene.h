@@ -42,6 +42,7 @@ public:
 
 	void LoadFBXOnScene(const char* fbxPath);
 
+	void SceneModified();
 
 	//shaders
 	unsigned int modelloading;
@@ -53,8 +54,19 @@ private:
 	bool draw_quad_tree = false;
 	QTree quad_tree;
 
+	bool aabb_need_reset = false;
 	int drawn_go = 0;
 
+	// Config
+	bool draw_all_aabb = true;
+	math::vec all_aabb_color;
+	float all_aabb_width = 1.0f;
+
+	bool draw_selected_aabb = true;
+	math::vec sel_aabb_color;
+	float sel_aabb_width = 5.0f;
+
+	// Particles
 	RE_Mesh* smoke_particle = nullptr;
 	unsigned int shader_particle;
 };

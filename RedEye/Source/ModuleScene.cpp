@@ -17,7 +17,11 @@
 #include "RE_ModelImporter.h"
 #include <string>
 
-ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled) {}
+ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
+{
+	all_aabb_color = math::vec(0.f, 225.f, 0.f);
+	sel_aabb_color = math::vec(255.f, 255.f, 0.f);
+}
 
 ModuleScene::~ModuleScene()
 {}
@@ -61,6 +65,9 @@ bool ModuleScene::Start()
 	}
 	//root->SetBoundingBoxFromChilds();
 	root->AddComponent(C_PLANE);
+
+	root->ResetBoundingBoxFromChilds();
+	aabb_need_reset = false;
 
 	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
 
@@ -138,14 +145,44 @@ void ModuleScene::DuplicateSelectedObject()
 	if(selected != nullptr) selected->GetParent()->AddChild(new RE_GameObject(*selected));
 }
 
-
-
 void ModuleScene::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
 	{
+		if (aabb_need_reset && ImGui::Button("Reset All AABB"))
+		{
+			root->ResetBoundingBoxFromChilds();
+			aabb_need_reset = false;
+		}
+
+		// AABB All
+		ImGui::Checkbox("Draw All AABB", &draw_all_aabb);
+		if (draw_all_aabb)
+		{
+			// Color 
+			float p[3] = { all_aabb_color.x, all_aabb_color.y, all_aabb_color.z };
+			if (ImGui::DragFloat3("Color All", p, 0.1f, 0.f, 255.f, "%.2f"))
+				all_aabb_color = math::vec(p[0], p[1], p[2]);
+
+			// Width
+			ImGui::DragFloat("Width All", &all_aabb_width, 01.f, 0.1f, 100.f, "%.1f");
+		}
+
+		// AABB Selected
+		ImGui::Checkbox("Draw Selected AABB", &draw_selected_aabb);
+		if (draw_selected_aabb)
+		{
+			// Color 
+			float p[3] = { sel_aabb_color.x, sel_aabb_color.y, sel_aabb_color.z };
+			if (ImGui::DragFloat3("Color Selected", p, 0.1f, 0.f, 255.f, "%.2f"))
+				sel_aabb_color = math::vec(p[0], p[1], p[2]);
+
+			// Width
+			ImGui::DragFloat("Width Selected", &sel_aabb_width, 01.f, 0.1f, 100.f, "%.1f");
+		}
+
 		ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
-		ImGui::Text("%i", drawn_go);
+		ImGui::Text("drawn_go: %i", drawn_go);
 	}
 }
 
@@ -154,9 +191,11 @@ void ModuleScene::DrawScene()
 	if (draw_quad_tree)
 		quad_tree.Draw();
 
-	root->DrawAllAABB();
+	if (draw_all_aabb)
+		root->DrawAllAABB(all_aabb_color, all_aabb_width);
 
-	//selected->DrawAABB();
+	if (draw_selected_aabb && selected != nullptr && selected != root)
+		selected->DrawAABB(sel_aabb_color, sel_aabb_width);
 
 	ShaderManager::use(modelloading);
 	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());
@@ -205,13 +244,11 @@ void ModuleScene::DrawHeriarchy()
 	}
 }
 
+// DRAW SELECTED GO
 void ModuleScene::DrawFocusedProperties()
 {
-	// DRAW SELECTED GO
 	if (selected != nullptr && selected != root)
-	{
 		selected->DrawProperties();
-	}
 }
 
 void ModuleScene::SetSelected(RE_GameObject * select)
@@ -305,4 +342,9 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 	}
 	else
 		LOG_ERROR("Error to load dropped fbx");
+}
+
+void ModuleScene::SceneModified()
+{
+	aabb_need_reset = true;
 }
