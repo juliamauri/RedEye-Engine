@@ -30,8 +30,7 @@ public:
 
 	RE_CompCamera(
 		const RE_CompCamera& cmpCamera,
-		RE_GameObject* go
-	);
+		RE_GameObject* go);
 
 	~RE_CompCamera();
 	
@@ -61,12 +60,11 @@ public:
 
 	math::Frustum GetFrustum() const;
 
-
 	// Camera Controls
 	void LocalRotate(float dx, float dy);
 	void LocalMove(Dir dir, float speed);
 	void Orbit(float dx, float dy, RE_GameObject* focus);
-	void Focus(RE_GameObject* focus);
+	void Focus(RE_GameObject* focus, float min_dist = 25.0f);
 
 	// local camera Axis
 	math::vec GetRight() const;

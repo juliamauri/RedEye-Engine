@@ -181,6 +181,8 @@ void ModuleScene::DrawEditor()
 			ImGui::DragFloat("Width Selected", &sel_aabb_width, 01.f, 0.1f, 100.f, "%.1f");
 		}
 
+		ImGui::Checkbox("Focus on Select", &focus_on_select);
+
 		ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
 		ImGui::Text("drawn_go: %i", drawn_go);
 	}
@@ -254,6 +256,9 @@ void ModuleScene::DrawFocusedProperties()
 void ModuleScene::SetSelected(RE_GameObject * select)
 {
 	selected = (select != nullptr) ? select : root;
+
+	if (focus_on_select)
+		App->editor->GetCamera()->Focus(App->scene->GetSelected());
 }
 
 RE_GameObject * ModuleScene::GetSelected() const

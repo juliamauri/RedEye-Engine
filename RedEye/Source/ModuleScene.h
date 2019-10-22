@@ -66,6 +66,8 @@ private:
 	math::vec sel_aabb_color;
 	float sel_aabb_width = 5.0f;
 
+	bool focus_on_select = true;
+
 	// Particles
 	RE_Mesh* smoke_particle = nullptr;
 	unsigned int shader_particle;

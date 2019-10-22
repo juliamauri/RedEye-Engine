@@ -333,19 +333,34 @@ void RE_CompCamera::Orbit(float dx, float dy, RE_GameObject * focus)
 	transform->SetGlobalPosition(focus_global_pos - (front * distance));
 }
 
-void RE_CompCamera::Focus(RE_GameObject * focus)
+void RE_CompCamera::Focus(RE_GameObject * focus, float min_dist)
 {
 	math::AABB box = focus->GetGlobalBoundingBox();
-
-	float radius = box.Size().Length();
 	focus_global_pos = box.CenterPoint();
-	float camDistance = (radius) / math::Tan(v_fov_rads/2.0);
 
-	LOG("Camera distance = %f", camDistance);
+	float radius = box.HalfSize().Length();
+	float camDistance = min_dist;
+
+	if (radius > 0)
+	{
+		// Vertical
+		float v_dist = radius / math::Sin(v_fov_rads);
+		if (v_dist > camDistance)
+			camDistance = v_dist;
+
+		// Horizontal
+		float h_dist = radius / math::Sin(h_fov_rads);
+		if (h_dist > camDistance)
+			camDistance = h_dist;
+
+		LOG("Camera dist:(%.1f) - V:(%.1f), H:(%.1f)", camDistance, v_dist, h_dist);
+	}
+	else
+	{
+		LOG("AABB radius too small (r=%.1f, dist=%.1f)", radius, camDistance);
+	}
 
 	transform->SetGlobalPosition(focus_global_pos - (front * camDistance));
-	transform->Update();
-	OnTransformModified();
 }
 
 math::vec RE_CompCamera::GetRight() const
