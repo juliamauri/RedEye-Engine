@@ -16,6 +16,8 @@
 
 #include <map>
 
+#include "ImGui/imgui_internal.h"
+
 EditorWindow::EditorWindow(const char* name, bool start_enabled)
 	: name(name), active(start_enabled), lock_pos(false)
 {
@@ -87,10 +89,9 @@ void ConsoleWindow::Draw()
 
 			ImGui::EndMenuBar();
 		}
-
-		// TextWrapped buffer max size is 3060
-		for (int cursor = 0; cursor < console_buffer.size(); cursor += 3060)
-			ImGui::TextWrapped(console_buffer.begin() + cursor);
+		
+		//Draw console buffer
+		ImGui::TextEx(console_buffer.begin(), console_buffer.end(), ImGuiTextFlags_NoWidthForLargeClippedText);
 
 		if (scroll_to_bot)
 		{
