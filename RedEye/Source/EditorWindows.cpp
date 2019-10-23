@@ -90,7 +90,7 @@ void ConsoleWindow::Draw()
 			ImGui::EndMenuBar();
 		}
 		
-		//Draw console buffer
+		//Draw console buffer //TODO print parcial buffer, play with cursors
 		ImGui::TextEx(console_buffer.begin(), console_buffer.end(), ImGuiTextFlags_NoWidthForLargeClippedText);
 
 		if (scroll_to_bot)
