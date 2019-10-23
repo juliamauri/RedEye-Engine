@@ -88,7 +88,10 @@ void ConsoleWindow::Draw()
 			ImGui::EndMenuBar();
 		}
 
-		ImGui::TextWrapped(console_buffer.begin());
+		// TextWrapped buffer max size is 3060
+		for (int cursor = 0; cursor < console_buffer.size(); cursor += 3060)
+			ImGui::TextWrapped(console_buffer.begin() + cursor);
+
 		if (scroll_to_bot)
 		{
 			ImGui::SetScrollHere(1.f);
