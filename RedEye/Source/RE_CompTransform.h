@@ -26,12 +26,12 @@ public:
 
 	void SetGlobalPosition(math::vec global_position);
 
-	math::Quat GetQuaternionRotation() const;
-	math::vec GetEulerRotation() const;
-	math::vec GetScale() const;
-	math::vec GetPosition() const;
+	math::Quat GetLocalQuaternionRotation() const;
+	math::vec GetLocalEulerRotation() const;
+	math::vec GetLocalScale() const;
+	math::vec GetLocalPosition() const;
 
-	math::vec GetGlobalPosition() const;
+	math::vec GetGlobalPosition();
 
 	void DrawProperties();
 

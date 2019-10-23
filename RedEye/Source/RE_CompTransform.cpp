@@ -104,32 +104,35 @@ void RE_CompTransform::SetPosition(math::vec position)
 
 void RE_CompTransform::SetGlobalPosition(math::vec global_position)
 {
-	pos = go != nullptr && go->GetParent() != nullptr ? global_position - go->GetParent()->GetTransform()->GetGlobalPosition() : global_position;
+	pos = (go != nullptr && go->GetParent() != nullptr) ? global_position - go->GetParent()->GetTransform()->GetGlobalPosition() : global_position;
 	needed_update_transform = true;
 }
 
-math::Quat RE_CompTransform::GetQuaternionRotation() const
+math::Quat RE_CompTransform::GetLocalQuaternionRotation() const
 {
 	return rot_quat;
 }
 
-math::vec RE_CompTransform::GetEulerRotation() const
+math::vec RE_CompTransform::GetLocalEulerRotation() const
 {
 	return rot_eul;
 }
 
-math::vec RE_CompTransform::GetScale() const
+math::vec RE_CompTransform::GetLocalScale() const
 {
 	return scale.scale;
 }
 
-math::vec RE_CompTransform::GetPosition() const
+math::vec RE_CompTransform::GetLocalPosition() const
 {
 	return pos;
 }
 
-math::vec RE_CompTransform::GetGlobalPosition() const
+math::vec RE_CompTransform::GetGlobalPosition()
 {
+	if (needed_update_transform)
+		CalcGlobalTransform();
+
 	return model_global.Row3(3);
 }
 
