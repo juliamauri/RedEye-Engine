@@ -311,12 +311,12 @@ void RE_CompCamera::LocalMove(Dir dir, float speed)
 	{
 		switch (dir)
 		{
-		case FORWARD:	transform->SetPosition(transform->GetPosition() + (front * speed)); break;
-		case BACKWARD:	transform->SetPosition(transform->GetPosition() - (front * speed)); break;
-		case LEFT:		transform->SetPosition(transform->GetPosition() + (right * speed)); break;
-		case RIGHT:		transform->SetPosition(transform->GetPosition() - (right * speed)); break;
-		case UP:		transform->SetPosition(transform->GetPosition() + (up * speed)); break;
-		case DOWN:		transform->SetPosition(transform->GetPosition() - (up * speed)); break;
+		case FORWARD:	transform->SetPosition(transform->GetLocalPosition() + (front * speed)); break;
+		case BACKWARD:	transform->SetPosition(transform->GetLocalPosition() - (front * speed)); break;
+		case LEFT:		transform->SetPosition(transform->GetLocalPosition() + (right * speed)); break;
+		case RIGHT:		transform->SetPosition(transform->GetLocalPosition() - (right * speed)); break;
+		case UP:		transform->SetPosition(transform->GetLocalPosition() + (up * speed)); break;
+		case DOWN:		transform->SetPosition(transform->GetLocalPosition() - (up * speed)); break;
 		}
 	}
 }
@@ -336,20 +336,20 @@ void RE_CompCamera::Orbit(float dx, float dy, RE_GameObject * focus)
 void RE_CompCamera::Focus(RE_GameObject * focus, float min_dist)
 {
 	math::AABB box = focus->GetGlobalBoundingBox();
-	focus_global_pos = box.CenterPoint();
-
 	float radius = box.HalfSize().Length();
+
+	focus_global_pos = box.CenterPoint();
 	float camDistance = min_dist;
 
 	if (radius > 0)
 	{
 		// Vertical
-		float v_dist = radius / math::Sin(v_fov_rads);
+		float v_dist = radius / math::Sin(v_fov_rads / 2.0f);
 		if (v_dist > camDistance)
 			camDistance = v_dist;
 
 		// Horizontal
-		float h_dist = radius / math::Sin(h_fov_rads);
+		float h_dist = radius / math::Sin(h_fov_rads / 2.0f);
 		if (h_dist > camDistance)
 			camDistance = h_dist;
 
@@ -360,7 +360,15 @@ void RE_CompCamera::Focus(RE_GameObject * focus, float min_dist)
 		LOG("AABB radius too small (r=%.1f, dist=%.1f)", radius, camDistance);
 	}
 
+	LOG("CameraPos(%.1f,%.1f,%.1f), FocusPos(%.1f,%.1f,%.1f), CenterAABB(%.1f,%.1f,%.1f)",
+		(focus_global_pos - (front * camDistance)).x,
+		(focus_global_pos - (front * camDistance)).y,
+		(focus_global_pos - (front * camDistance)).z,
+		focus_global_pos.x, focus_global_pos.y, focus_global_pos.z,
+		box.CenterPoint().x, box.CenterPoint().y, box.CenterPoint().z);
+
 	transform->SetGlobalPosition(focus_global_pos - (front * camDistance));
+	transform->Update();
 }
 
 math::vec RE_CompCamera::GetRight() const
@@ -398,15 +406,15 @@ void RE_CompCamera::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 
 	rapidjson::Value float_array(rapidjson::kArrayType);
 
-	float_array.PushBack(GetTransform()->GetPosition().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetPosition().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetPosition().z, node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalPosition().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().z, node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("position"), float_array.Move(), node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetEulerRotation().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetEulerRotation().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetEulerRotation().z, node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalEulerRotation().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalEulerRotation().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalEulerRotation().z, node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("rotation"), float_array.Move(), node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetScale().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetScale().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetScale().z, node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalScale().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().z, node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), node->GetDocument()->GetAllocator());
 
 	comp_array->PushBack(val, node->GetDocument()->GetAllocator());

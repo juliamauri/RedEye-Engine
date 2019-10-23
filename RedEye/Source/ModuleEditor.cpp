@@ -257,6 +257,7 @@ void ModuleEditor::UpdateCamera()
 		}
 		else if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse->GetButton(1) == KEY_REPEAT)
 		{
+			// Orbit
 			if (App->scene->GetSelected() != nullptr
 				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
 			{
@@ -266,9 +267,9 @@ void ModuleEditor::UpdateCamera()
 					App->scene->GetSelected());
 			}
 		}
-		else if ((App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN | App->input->GetKey(SDL_SCANCODE_F) == KEY_REPEAT)
-			&& App->scene->GetSelected() != nullptr)
+		else if ((App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && App->scene->GetSelected() != nullptr)
 		{
+			// Focus
 			camera->Focus(App->scene->GetSelected());
 		}
 		else

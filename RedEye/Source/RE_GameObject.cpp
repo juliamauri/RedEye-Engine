@@ -125,15 +125,15 @@ void RE_GameObject::Serialize(JSONNode * node)
 
 	rapidjson::Value float_array(rapidjson::kArrayType);
 
-	float_array.PushBack(GetTransform()->GetPosition().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetPosition().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetPosition().z, fill_node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalPosition().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().z, fill_node->GetDocument()->GetAllocator());
 	val_go.AddMember(rapidjson::Value::StringRefType("position"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetEulerRotation().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetEulerRotation().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetEulerRotation().z, fill_node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalEulerRotation().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalEulerRotation().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalEulerRotation().z, fill_node->GetDocument()->GetAllocator());
 	val_go.AddMember(rapidjson::Value::StringRefType("rotation"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
 
 	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetScale().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetScale().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetScale().z, fill_node->GetDocument()->GetAllocator());
+	float_array.PushBack(GetTransform()->GetLocalScale().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().z, fill_node->GetDocument()->GetAllocator());
 	val_go.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
 
 	rapidjson::Value val_comp(rapidjson::kArrayType);
@@ -518,6 +518,7 @@ void RE_GameObject::AddToBoundingBox(math::AABB box)
 
 void RE_GameObject::ResetBoundingBoxFromChilds()
 {
+	// Local Bounding Box
 	if (GetMesh() != nullptr)
 		local_bounding_box = GetMesh()->GetAABB();
 	else
@@ -534,16 +535,38 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 			// Enclose child AABB
 			math::float4x4 trs = (*child)->transform->GetLocalMatrixModel();
 			math::AABB child_aabb = (*child)->GetLocalBoundingBox();
-			local_bounding_box.Enclose(
+
+			child_aabb.SetFromCenterAndSize(
+				trs.Row3(3) + trs.TransformPos(child_aabb.CenterPoint()),
+				trs.TransformPos(child_aabb.Size()));
+
+			const math::vec points[4] = {
+				local_bounding_box.minPoint,
+				local_bounding_box.maxPoint,
+				child_aabb.minPoint,
+				child_aabb.maxPoint
+			};
+
+			local_bounding_box.SetFrom(&points[0], 4);
+
+
+			/*local_bounding_box.Enclose(
 				trs.TransformPos(child_aabb.minPoint),
-				trs.TransformPos(child_aabb.maxPoint));
+				trs.TransformPos(child_aabb.maxPoint));*/
 		}
 	}
 
-	math::float4x4 global_trs = transform->GetMatrixModel();;
-	global_bounding_box = math::AABB(
-		global_trs.TransformPos(local_bounding_box.minPoint),
-		global_trs.TransformPos(local_bounding_box.maxPoint));
+	// Global Bounding Box
+	math::float4x4 global_trs = transform->GetMatrixModel();
+	global_bounding_box.SetFromCenterAndSize(
+		global_trs.Row3(3) + global_trs.TransformPos(local_bounding_box.CenterPoint()),
+		global_trs.TransformPos(local_bounding_box.Size()));
+
+	const math::vec points[2] = {
+		global_bounding_box.minPoint,
+		global_bounding_box.maxPoint };
+
+	global_bounding_box.SetFrom(&points[0], 2);
 }
 
 math::AABB RE_GameObject::GetLocalBoundingBox() const
