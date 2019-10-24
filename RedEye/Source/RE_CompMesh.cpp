@@ -10,7 +10,8 @@
 #include "RE_CompTransform.h"
 #include "RE_TextureImporter.h"
 #include "RE_Material.h"
-#include"RE_Math.h"
+#include "RE_Math.h"
+#include "RE_PrimitiveManager.h"
 #include "ImGui\imgui.h"
 
 
@@ -33,8 +34,17 @@ RE_CompMesh::~RE_CompMesh()
 
 void RE_CompMesh::Draw()
 {
+	// Setup primitive shader model uniform
+	if (show_f_normals || show_v_normals)
+	{
+		ShaderManager::use(App->primitives->shaderPrimitive);
+		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "model", go->GetTransform()->GetShaderModel());
+	}
+
+	// Setup model shader model uniform
 	ShaderManager::use(App->scene->modelloading);
 	ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetShaderModel());
+
 	ptr->Draw(App->scene->modelloading);
 }
 
@@ -44,24 +54,21 @@ void RE_CompMesh::DrawProperties()
 	{
 		if (!reference.empty())
 		{
-
-			//ImGui::Text("Name: %s", ptr->GetName());
+			ImGui::Text("Name: %s", ptr->GetName());
 			ImGui::TextWrapped("Reference: %s", reference.c_str());
-
 			ImGui::TextWrapped("Directory: %s", ptr->GetFilePath());
-			//ImGui::Text("Triangle Count: %u", total_triangle_count);
 
-			//if (ImGui::Button(show_f_normals ? "Hide Face Normals" : "Show Face Normals")) show_f_normals = !show_f_normals;
+			if (ImGui::Button(show_f_normals ? "Hide Face Normals" : "Show Face Normals"))
+				show_f_normals = !show_f_normals;
 
-			//if (ImGui::Button(show_v_normals ? "Hide Vertex Normals" : "Show Vertex Normals")) show_v_normals = !show_v_normals;
+			if (ImGui::Button(show_v_normals ? "Hide Vertex Normals" : "Show Vertex Normals"))
+				show_v_normals = !show_v_normals;
 
-			int width = 0;
-			int height = 0;
-			//if (show_f_normals && !ptr->lFaceNormals)	ptr->loadFaceNormals();
-			//if (show_v_normals && !ptr->lVertexNormals)	ptr->loadVertexNormals();
+			if (show_f_normals && !ptr->lFaceNormals)	ptr->loadFaceNormals();
+			if (show_v_normals && !ptr->lVertexNormals)	ptr->loadVertexNormals();
 
-			//if (!show_f_normals && ptr->lFaceNormals) ptr->clearFaceNormals();
-			//if (!show_v_normals && ptr->lVertexNormals) ptr->clearVertexNormals();
+			if (!show_f_normals && ptr->lFaceNormals) ptr->clearFaceNormals();
+			if (!show_v_normals && ptr->lVertexNormals) ptr->clearVertexNormals();
 
 			math::AABB box = ptr->GetAABB();
 
@@ -82,6 +89,8 @@ void RE_CompMesh::DrawProperties()
 					{
 						Texture2D* texture = (Texture2D*)App->resources->At(meshMaterial->tDiffuse[i]);
 
+						int width = 0;
+						int height = 0;
 						texture->GetWithHeight(&width, &height);
 
 						if (ImGui::TreeNode("Texture"))

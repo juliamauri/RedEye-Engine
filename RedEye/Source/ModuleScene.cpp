@@ -16,6 +16,7 @@
 #include "RE_CompParticleEmiter.h"
 #include "RE_ModelImporter.h"
 #include "TimeManager.h"
+#include "RE_PrimitiveManager.h"
 #include <string>
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
@@ -189,8 +190,10 @@ void ModuleScene::DrawScene()
 	ShaderManager::use(modelloading);
 	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());
 	ShaderManager::setFloat4x4(modelloading, "projection", App->editor->GetCamera()->GetProjectionPtr());
-	//ShaderManager::setFloat4x4(shader_particle, "view", App->editor->GetCamera()->GetViewPtr());
-	//ShaderManager::setFloat4x4(shader_particle, "projection", App->editor->GetCamera()->GetProjectionPtr());
+
+	ShaderManager::use(App->primitives->shaderPrimitive);
+	ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "projection", App->editor->GetCamera()->GetProjectionPtr());
 
 	/*/ Frustum Culling
 	std::vector<RE_GameObject*> objects;
@@ -233,7 +236,7 @@ RE_GameObject * ModuleScene::GetSelected() const
 void ModuleScene::RayCastSelect(math::Ray & ray)
 {
 	std::vector<RE_GameObject*> objects;
-	quad_tree.CollectIntersections(objects, ray);
+	//quad_tree.CollectIntersections(objects, ray);
 	if (!objects.empty())
 	{
 		float closest_distance = -1.f;

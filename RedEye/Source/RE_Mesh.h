@@ -21,36 +21,37 @@ public:
 
 	void Draw(unsigned int shader_ID);
 
-	std::string name;
-	unsigned int triangle_count = 0;
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	const char* materialMD5 = nullptr;
-
 	math::AABB GetAABB() const;
 
 	void loadVertexNormals();
 	void loadFaceNormals();
 	void clearVertexNormals();
 	void clearFaceNormals();
-	bool lVertexNormals = false, lFaceNormals = false;
+
+public:
+
+	std::string name;
 	unsigned int VAO;
+	unsigned int triangle_count = 0;
+	const char* materialMD5 = nullptr;
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+	bool lVertexNormals = false, lFaceNormals = false;
 
 private:
 
 	void SetupAABB();
 	void setupMesh();
 
+	void loadVertex();
+	void clearVertex();
+
 private:
 
 	math::AABB bounding_box;
-	unsigned int VAO_Vertex, VAO_FaceNormals, VAO_VertexNormals;
 
-private:
 	unsigned int VBO, EBO;
-	unsigned int VBO_Vertex, VBO_FaceNormals, VBO_VertexNormals;
-
-	void loadVertex();
-	void clearVertex();
+	unsigned int VAO_Vertex, VAO_FaceNormals, VAO_VertexNormals, VAO_FaceCenters;
+	unsigned int VBO_Vertex, VBO_FaceNormals, VBO_VertexNormals, VBO_FaceCenters;
 };
 #endif // !__RE_MESH_H__

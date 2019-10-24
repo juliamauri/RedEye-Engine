@@ -28,6 +28,8 @@ protected:
 
 	std::string reference;
 	RE_Mesh* ptr = nullptr;
+	bool show_f_normals = false;
+	bool show_v_normals = false;
 };
 
 

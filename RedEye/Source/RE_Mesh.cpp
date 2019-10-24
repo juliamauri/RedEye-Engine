@@ -129,16 +129,10 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 	ShaderManager::use(0);
 
 	// MESH DEBUG DRAWING
-	/*
-	if (f_normals || v_normals)
-	{
+	if (lFaceNormals || lVertexNormals)
 		ShaderManager::use(App->primitives->shaderPrimitive);
-		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "model", App->scene->drop->GetTransform()->GetGlobalMatrix().ptr());
-		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "view", App->renderer3d->camera->GetView().ptr());
-		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "projection", App->renderer3d->camera->GetProjection().ptr());
-	}
 
-	if (f_normals)
+	if (lFaceNormals)
 	{
 		math::vec color(0.f, 0.f, 1.f);
 		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
@@ -146,21 +140,31 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 		glBindVertexArray(VAO_FaceNormals);
 		glDrawArrays(GL_LINES, 0, indices.size() / 3 * 2);
 		glBindVertexArray(0);
+
+		color.Set(1.f, 1.f, 1.f);
+		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
+
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		glPointSize(10.0f);
+
+		glBindVertexArray(VAO_FaceCenters);
+		glDrawArrays(GL_POINTS, 0, indices.size() / 3);
+		glBindVertexArray(0);
+
+		glPointSize(1.0f);
+		glDisable(GL_PROGRAM_POINT_SIZE);
 	}
 
-	if (v_normals)
+	if (lVertexNormals)
 	{
 		math::vec color(0.f, 1.f, 0.f);
 		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
 
 		glBindVertexArray(VAO_VertexNormals);
-		glDrawArrays(GL_LINES, 0, indices.size() * 2);
+		glDrawArrays(GL_LINES, 0, vertices.size() * 2);
 		glBindVertexArray(0);
-	}
 
-	if (f_normals || v_normals)
-	{
-		math::vec color(1.f, 1.f, 1.f);
+		color.Set(1.f, 1.f, 1.f);
 		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
 
 		glEnable(GL_PROGRAM_POINT_SIZE);
@@ -172,9 +176,10 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 
 		glPointSize(1.0f);
 		glDisable(GL_PROGRAM_POINT_SIZE);
+	}
 
+	if (lFaceNormals || lVertexNormals)
 		ShaderManager::use(0);
-	}*/
 }
 
 void RE_Mesh::SetupAABB()
@@ -252,10 +257,11 @@ void RE_Mesh::loadVertexNormals()
 	std::vector<math::vec> lines;
 	for (unsigned int i = 0; i < indices.size(); i++)
 	{
-		lines.push_back(math::vec(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z));
-		lines.push_back(math::vec(vertices[i].Position.x + (vertices[i].Normal.x * line_length),
-			vertices[i].Position.y + (vertices[i].Normal.y * line_length),
-			vertices[i].Position.z + (vertices[i].Normal.z * line_length)));
+		lines.push_back(math::vec(vertices[indices[i]].Position.x, vertices[indices[i]].Position.y, vertices[indices[i]].Position.z));
+		lines.push_back(math::vec(
+			vertices[indices[i]].Position.x + (vertices[indices[i]].Normal.x * line_length),
+			vertices[indices[i]].Position.y + (vertices[indices[i]].Normal.y * line_length),
+			vertices[indices[i]].Position.z + (vertices[indices[i]].Normal.z * line_length)));
 	}
 
 	glBufferData(GL_ARRAY_BUFFER, lines.size() * sizeof(math::vec), &lines[0], GL_STATIC_DRAW);
@@ -284,19 +290,33 @@ void RE_Mesh::loadFaceNormals()
 	math::vec normal = math::vec::zero;
 	int line_length = 1.5f;
 
-	std::vector<math::vec> lines;
+	std::vector<math::vec> lines, face_centers;
 	for (unsigned int i = 0; i < indices.size(); i += 3)
 	{
-		pos = (vertices[i].Position + vertices[i + 1].Position + vertices[i + 2].Position) / 3;
-		v = vertices[i + 1].Position - vertices[i].Position;
-		w = vertices[i + 2].Position - vertices[i].Position;
+		pos = (vertices[indices[i]].Position + vertices[indices[i + 1]].Position + vertices[indices[i + 2]].Position) / 3;
+		v = vertices[indices[i + 1]].Position - vertices[indices[i]].Position;
+		w = vertices[indices[i + 2]].Position - vertices[indices[i]].Position;
 		normal = v.Cross(w).Normalized() * line_length;
-		;
+
 		lines.push_back(math::vec(pos.x, pos.y, pos.z));
 		lines.push_back(math::vec(pos.x + normal.x, pos.y + normal.y, pos.z + normal.z));
+		face_centers.push_back(math::vec(pos.x, pos.y, pos.z));
 	}
 
 	glBufferData(GL_ARRAY_BUFFER, lines.size() * sizeof(math::vec), &lines[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(math::vec), (void*)0);
+
+	glBindVertexArray(0);
+
+	glGenVertexArrays(1, &VAO_FaceCenters);
+	glGenBuffers(1, &VBO_FaceCenters);
+
+	glBindVertexArray(VAO_FaceCenters);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_FaceCenters);
+
+	glBufferData(GL_ARRAY_BUFFER, face_centers.size() * sizeof(math::vec), &face_centers[0], GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(math::vec), (void*)0);
@@ -324,6 +344,10 @@ void RE_Mesh::clearFaceNormals()
 	glDeleteVertexArrays(1, &VAO_FaceNormals);
 	glDeleteBuffers(1, &VBO_FaceNormals);
 	VAO_FaceNormals = VBO_FaceNormals = 0;
+
+	glDeleteVertexArrays(1, &VAO_FaceCenters);
+	glDeleteBuffers(1, &VBO_FaceCenters);
+	VAO_FaceCenters = VBO_FaceCenters = 0;
 
 	lFaceNormals = false;
 }
