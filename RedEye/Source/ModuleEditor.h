@@ -38,6 +38,9 @@ public:
 	update_status Update() override;
 	bool CleanUp() override;
 
+	void DrawEditor() override;
+	void FocusSelected();
+
 	void LogToEditorConsole();
 	bool AddSoftwareUsed(const char * name, const char * version, const char * website);
 	void Draw();
@@ -56,6 +59,7 @@ private:
 private:
 
 	RE_CompCamera* camera = nullptr;
+	float min_focus_dist = 3.0f;
 
 	bool show_all = true;
 	bool show_demo = false;

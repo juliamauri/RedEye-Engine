@@ -197,7 +197,7 @@ void ModuleScene::DrawScene()
 		root->DrawAllAABB(all_aabb_color, all_aabb_width);
 
 	if (draw_selected_aabb && selected != nullptr && selected != root)
-		selected->DrawAABB(sel_aabb_color, sel_aabb_width);
+		selected->DrawGlobalAABB(sel_aabb_color, sel_aabb_width);
 
 	ShaderManager::use(modelloading);
 	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());
@@ -258,7 +258,7 @@ void ModuleScene::SetSelected(RE_GameObject * select)
 	selected = (select != nullptr) ? select : root;
 
 	if (focus_on_select)
-		App->editor->GetCamera()->Focus(App->scene->GetSelected());
+		App->editor->FocusSelected();
 }
 
 RE_GameObject * ModuleScene::GetSelected() const

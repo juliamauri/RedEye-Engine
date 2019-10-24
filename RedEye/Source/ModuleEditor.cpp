@@ -199,6 +199,17 @@ bool ModuleEditor::CleanUp()
 	return true;
 }
 
+void ModuleEditor::DrawEditor()
+{
+	if (ImGui::CollapsingHeader(GetName()))
+		ImGui::DragFloat("Focus min dist", &min_focus_dist, 0.1f, 0.f, 50.f, "%.1f");
+}
+
+void ModuleEditor::FocusSelected()
+{
+	camera->Focus(App->scene->GetSelected(), min_focus_dist);
+}
+
 void ModuleEditor::LogToEditorConsole()
 {
 	if (console != nullptr && !windows.empty()
@@ -270,7 +281,7 @@ void ModuleEditor::UpdateCamera()
 		else if ((App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && App->scene->GetSelected() != nullptr)
 		{
 			// Focus
-			camera->Focus(App->scene->GetSelected());
+			FocusSelected();
 		}
 		else
 		{
