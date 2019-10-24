@@ -82,6 +82,7 @@ public:
 
 	// AABB
 	void DrawAABB(math::vec color, float width);
+	void DrawGlobalAABB(math::vec color, float width);
 	void DrawAllAABB(math::vec color, float width);
 	void AddToBoundingBox(math::AABB box);
 	void ResetBoundingBoxFromChilds();

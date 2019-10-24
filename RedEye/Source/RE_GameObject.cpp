@@ -499,10 +499,37 @@ void RE_GameObject::DrawAABB(math::vec color, float width)
 	glLineWidth(1.0f);
 }
 
+void RE_GameObject::DrawGlobalAABB(math::vec color, float width)
+{
+	ShaderManager::use(0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf((App->editor->GetCamera()->GetView()).ptr());
+
+	glColor3f(color.x, color.y, color.z);
+	glLineWidth(width);
+	glBegin(GL_LINES);
+
+	for (uint i = 0; i < 12; i++)
+	{
+		glVertex3f(
+			global_bounding_box.Edge(i).a.x,
+			global_bounding_box.Edge(i).a.y,
+			global_bounding_box.Edge(i).a.z);
+		glVertex3f(
+			global_bounding_box.Edge(i).b.x,
+			global_bounding_box.Edge(i).b.y,
+			global_bounding_box.Edge(i).b.z);
+	}
+
+	glEnd();
+	glLineWidth(1.0f);
+}
+
 void RE_GameObject::DrawAllAABB(math::vec color, float width)
 {
 	if (App->scene->GetSelected() != this)
-		DrawAABB(color, width);
+		DrawGlobalAABB(color, width);
 
 	for (auto child : childs)
 		child->DrawAllAABB(color, width);
@@ -510,10 +537,8 @@ void RE_GameObject::DrawAllAABB(math::vec color, float width)
 
 void RE_GameObject::AddToBoundingBox(math::AABB box)
 {
-	if (transform == nullptr)
-		return;
-
-	local_bounding_box.Enclose(box);
+	if (transform != nullptr)
+		local_bounding_box.Enclose(box);
 }
 
 void RE_GameObject::ResetBoundingBoxFromChilds()
@@ -522,7 +547,7 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 	if (GetMesh() != nullptr)
 		local_bounding_box = GetMesh()->GetAABB();
 	else
-		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec(0.3f, 0.3f, 0.3f));
 
 	if (!childs.empty())
 	{
@@ -548,23 +573,14 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 			};
 
 			local_bounding_box.SetFrom(&points[0], 4);
-
-
-			/*local_bounding_box.Enclose(
-				trs.TransformPos(child_aabb.minPoint),
-				trs.TransformPos(child_aabb.maxPoint));*/
 		}
 	}
 
 	// Global Bounding Box
-	math::float4x4 global_trs = transform->GetMatrixModel();
-	global_bounding_box.SetFromCenterAndSize(
-		global_trs.Row3(3) + global_trs.TransformPos(local_bounding_box.CenterPoint()),
-		global_trs.TransformPos(local_bounding_box.Size()));
-
+	math::float4x4 global_trs = transform->GetMatrixModel().Transposed();
 	const math::vec points[2] = {
-		global_bounding_box.minPoint,
-		global_bounding_box.maxPoint };
+		global_trs.TransformPos(local_bounding_box.minPoint) + global_trs.Row3(3),
+		global_trs.TransformPos(local_bounding_box.maxPoint) + global_trs.Row3(3) };
 
 	global_bounding_box.SetFrom(&points[0], 2);
 }
