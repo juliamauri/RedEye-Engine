@@ -296,10 +296,9 @@ void FileSystem::HandleDropedFile(const char * file)
 	else if (ext.compare("fbx") == 0)
 	{
 
-
 		// FOCUS CAMERA ON DROPPED GEOMETRY
-		//App->editor->GetCamera()->SetPosition(selected->GetBoundingBox().maxPoint * 2);
-		//App->editor->GetCamera()->SetFocus(selected->GetBoundingBox().CenterPoint());
+		// App->scene->SetSelected(go);
+		// App->editor->FocusSelected();
 	}
 	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
 	{

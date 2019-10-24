@@ -35,27 +35,27 @@ public:
 
 	void SetSelected(RE_GameObject* selected);
 	RE_GameObject* GetSelected() const;
-
 	void RayCastSelect(math::Ray& ls);
 
 	void Serialize();
-
 	void LoadFBXOnScene(const char* fbxPath);
-
 	void SceneModified();
 
 	//shaders
 	unsigned int modelloading;
 
 private:
+
 	RE_GameObject* root = nullptr;
 	RE_GameObject* selected = nullptr;
 
-	bool draw_quad_tree = false;
-	QTree quad_tree;
-
+	// Bounding Boxes
 	bool aabb_need_reset = false;
-	int drawn_go = 0;
+	unsigned int aabb_reset_time = 0;
+
+	// Quadtree
+	QTree quad_tree;
+	bool draw_quad_tree = false;
 
 	// Config
 	bool draw_all_aabb = true;
@@ -66,7 +66,7 @@ private:
 	math::vec sel_aabb_color;
 	float sel_aabb_width = 5.0f;
 
-	bool focus_on_select = true;
+	bool focus_on_select = false;
 
 	// Particles
 	RE_Mesh* smoke_particle = nullptr;

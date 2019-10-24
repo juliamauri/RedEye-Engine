@@ -103,12 +103,6 @@
     <ClCompile Include="RE_CompTransform.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
-    <ClCompile Include="RE_CompParticleEmiter.cpp">
-      <Filter>GameObject\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Particle.cpp">
-      <Filter>GameObject\Components</Filter>
-    </ClCompile>
     <ClCompile Include="ImGui\imgui_impl_opengl3.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
@@ -129,6 +123,12 @@
     </ClCompile>
     <ClCompile Include="RE_TextureImporter.cpp">
       <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>GameObject\Components\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CompParticleEmiter.cpp">
+      <Filter>GameObject\Components\Particles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -372,12 +372,6 @@
     <ClInclude Include="md5.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="RE_CompParticleEmiter.h">
-      <Filter>GameObject\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Particle.h">
-      <Filter>GameObject\Components</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompTransform.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
@@ -413,6 +407,12 @@
     </ClInclude>
     <ClInclude Include="Optick\include\optick.h">
       <Filter>3rd Party\Optick</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>GameObject\Components\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompParticleEmiter.h">
+      <Filter>GameObject\Components\Particles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -496,6 +496,9 @@
     </Filter>
     <Filter Include="3rd Party\Optick">
       <UniqueIdentifier>{96f88492-7884-4afc-8db2-b5f3566d4b9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Components\Particles">
+      <UniqueIdentifier>{6be67668-60b0-48b8-9870-6f373919f170}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

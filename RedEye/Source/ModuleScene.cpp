@@ -15,6 +15,7 @@
 #include "RE_CompCamera.h"
 #include "RE_CompParticleEmiter.h"
 #include "RE_ModelImporter.h"
+#include "TimeManager.h"
 #include <string>
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
@@ -38,48 +39,38 @@ bool ModuleScene::Start()
 			LOG("%s\n", App->shaders->GetShaderError());
 	}
 
-	//smoke_particle = App->meshes->CreateMeshByTexture("Assets/Images/particle_texture.png");
-
-	// root
+	// Load scene
 	std::string path_scene("Assets/Scenes/");
 	path_scene += GetName();
 	path_scene += ".re";
-
 	Config scene_file(path_scene.c_str(), App->fs->GetZipPath());
 	if (scene_file.Load())
 	{
+		// Load saved scene
 		JSONNode* node = scene_file.GetRootNode("Game Objects");
 		root = node->FillGO();
 		DEL(node);
 	}
 	else
 	{
-		root = new RE_GameObject("root");
-		// load default meshes
-		//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
+		// Load default FBX
 		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets("Assets/Meshes/street/Street environment_V01.FBX");
+		//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
+
+		root = new RE_GameObject("root");
 		root->AddChild(newModel->GetRoot());
 		DEL(newModel);
 
+		// Add camera
 		(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
 	}
-	//root->SetBoundingBoxFromChilds();
-	root->AddComponent(C_PLANE);
 
+	// Setup AABB
 	root->ResetBoundingBoxFromChilds();
 	aabb_need_reset = false;
 
-	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
-
-	//// depricated way
-	//selected = new RE_GameObject("Street", root);
-	//selected->AddCompMesh("path");
-	//selected->SetBoundingBox(math::AABB(math::Sphere({ 0.0f, 0.0f, 0.0f }, 1.0f)));
-
-	// call this instead to create all gameobjects from fbx
-	//selected = App->meshes->DumpGeometry(root, "path del street fbx");
-
-	quad_tree.Build(root);
+	// Quadtree
+	//quad_tree.Build(root);
 
 	return ret;
 }
@@ -87,14 +78,6 @@ bool ModuleScene::Start()
 update_status ModuleScene::Update()
 {
 	root->Update();
-
-
-	// Spawn Firework on Key 1
-	//if (App->input->CheckKey(30))
-	//{
-	//	RE_GameObject* smoke = App->scene->AddGO("Smoke");
-	//	((RE_CompParticleEmitter*)smoke->AddComponent(C_PARTICLEEMITER))->SetUp(smoke_particle, shader_particle);
-	//}
 
 	return UPDATE_CONTINUE;
 }
@@ -149,6 +132,8 @@ void ModuleScene::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
 	{
+		// AABB Controls
+		ImGui::Text("Last AABB Reset took: %f", aabb_reset_time);
 		if (aabb_need_reset && ImGui::Button("Reset All AABB"))
 		{
 			root->ResetBoundingBoxFromChilds();
@@ -183,58 +168,37 @@ void ModuleScene::DrawEditor()
 
 		ImGui::Checkbox("Focus on Select", &focus_on_select);
 
-		ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
-		ImGui::Text("drawn_go: %i", drawn_go);
+		//ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
 	}
 }
 
 void ModuleScene::DrawScene()
 {
-	if (draw_quad_tree)
-		quad_tree.Draw();
-
+	// Draw Bounding Boxes
 	if (draw_all_aabb)
 		root->DrawAllAABB(all_aabb_color, all_aabb_width);
 
 	if (draw_selected_aabb && selected != nullptr && selected != root)
 		selected->DrawGlobalAABB(sel_aabb_color, sel_aabb_width);
 
+	/*/ Draw Quadtree
+	if (draw_quad_tree)
+		quad_tree.Draw();*/
+
+	// Load Shader Uniforms
 	ShaderManager::use(modelloading);
 	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());
 	ShaderManager::setFloat4x4(modelloading, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	//ShaderManager::setFloat4x4(shader_particle, "view", App->editor->GetCamera()->GetViewPtr());
+	//ShaderManager::setFloat4x4(shader_particle, "projection", App->editor->GetCamera()->GetProjectionPtr());
 
-	ShaderManager::setFloat4x4(shader_particle, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(shader_particle, "projection", App->editor->GetCamera()->GetProjectionPtr());
-
-	// Frustum Culling
+	/*/ Frustum Culling
 	std::vector<RE_GameObject*> objects;
 	quad_tree.CollectIntersections(objects, App->editor->GetCamera()->GetFrustum());
 	drawn_go = objects.size();
-
-	//for (auto object : objects) object->Draw(false);
+	for (auto object : objects) object->Draw(false);*/
 
 	root->Draw();
-
-	// mesh drawing
-	/*if (mesh_droped)
-	{
-		// glm calls
-		ShaderManager::use(modelloading);
-		ShaderManager::setFloat4x4(modelloading, "model", drop->GetTransform()->GetGlobalMatrix().ptr());
-		ShaderManager::setFloat4x4(modelloading, "view", App->renderer3d->camera->GetView().ptr());
-		ShaderManager::setFloat4x4(modelloading, "projection", App->renderer3d->camera->GetProjection().ptr());
-		mesh_droped->Draw(modelloading);
-
-		// mathgeolib calls
-		ShaderManager::use(modelloading);
-		ShaderManager::setFloat4x4(modelloading, "model", root->transform->GetGlobalMatrix().ptr());
-		ShaderManager::setFloat4x4(modelloading, "view", App->renderer3d->camera->GetView().ptr());
-		ShaderManager::setFloat4x4(modelloading, "projection", App->renderer3d->camera->GetProjection().ptr());
-		ShaderManager::setFloat(modelloading, "viewPos", math::vec(.0f, 0.0f, 10.0f));
-		math::float3x3 modelNormal(root->transform->GetGlobalMatrix().InverseTransposed().Float3x3Part());
-		ShaderManager::setFloat3x3(modelloading, "modelNormal", modelNormal.ptr());
-		mesh_droped->Draw(modelloading);
-	}*/
 }
 
 void ModuleScene::DrawHeriarchy()

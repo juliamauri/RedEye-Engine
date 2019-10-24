@@ -26,7 +26,6 @@ RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float near_p
 	else
 		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
 
-	//frustum.SetWorldMatrix(math::float3x4::Translate(0.f, 0.f, 0.f));
 	frustum.SetViewPlaneDistances(near_plane, far_plane);
 
 	SetVerticalFOV(30.f);
@@ -34,8 +33,6 @@ RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float near_p
 	right = math::vec(1.f, 0.f, 0.f);
 	up = math::vec(0.f, 1.f, 0.f);
 	front = math::vec(0.f, 0.f, 1.f);
-
-	transform->SetPosition(math::vec(0.f, 5.f, -5.f));
 
 	OnTransformModified();
 
@@ -58,7 +55,6 @@ RE_CompCamera::RE_CompCamera(RE_GameObject * go, bool toPerspective, float near_
 	else
 		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
 
-	//frustum.SetWorldMatrix(math::float3x4::Translate(0.f, 0.f, 0.f));
 	frustum.SetViewPlaneDistances(near_plane, far_plane);
 
 	SetVerticalFOV(30.f);
@@ -209,8 +205,6 @@ void RE_CompCamera::OnTransformModified()
 		front,
 		up);
 
-	//frustum.SetWorldMatrix(global_transform.Float3x4Part());
-
 	need_recalculation = true;
 }
 
@@ -323,7 +317,7 @@ void RE_CompCamera::LocalMove(Dir dir, float speed)
 
 void RE_CompCamera::Orbit(float dx, float dy, RE_GameObject * focus)
 {
-	focus_global_pos = focus->GetTransform()->GetGlobalPosition();
+	focus_global_pos = focus->GetGlobalBoundingBox().CenterPoint();
 	math::vec position = transform->GetGlobalPosition();
 	float distance = position.Distance(focus_global_pos);
 

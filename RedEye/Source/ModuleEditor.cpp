@@ -44,14 +44,18 @@ ModuleEditor::~ModuleEditor()
 // Load assets
 bool ModuleEditor::Init(JSONNode* node)
 {
+	bool ret = true;
+
+	// Editor camera
+	camera = new RE_CompCamera();
+	camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
+
+	// ImGui
 	LOG_SECONDARY("Init ImGui");
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-
 	ImGui::StyleColorsDark();
-
-	bool ret = true;
 	ImGui_ImplSDL2_InitForOpenGL(App->window->GetWindow(),App->renderer3d->GetContext());
 	ImGui_ImplOpenGL3_Init();
 	if (ret)
@@ -59,13 +63,7 @@ bool ModuleEditor::Init(JSONNode* node)
 	else
 		LOG_ERROR("ImGui could not initialize!");
 
-	// TODO set window lock positions
-
-
-	camera = new RE_CompCamera();
-
 	return ret;
-
 }
 
 update_status ModuleEditor::PreUpdate()
@@ -107,7 +105,7 @@ update_status ModuleEditor::Update()
 					}
 				}
 
-				// tools submenu
+				// Tools submenu
 				if (ImGui::BeginMenu("Tools"))
 				{
 					for (auto tool : tools)
@@ -146,7 +144,7 @@ update_status ModuleEditor::Update()
 			ImGui::EndMainMenuBar();
 		}
 
-		// Windows
+		// Draw Windows
 		for (auto window : windows)
 		{
 			if (window->IsActive())
@@ -161,12 +159,11 @@ update_status ModuleEditor::Update()
 			if (tool->IsActive())
 				tool->DrawWindow();
 		}
-
 	}
 	
+	// Toggle show editor on F1
 	if(App->input->CheckKey(SDL_SCANCODE_F1))
 		show_all = !show_all;
-
 
 	// CAMERA CONTROLS
 	UpdateCamera();
@@ -256,7 +253,6 @@ void ModuleEditor::UpdateCamera()
 	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
 	{
 		const MouseData* mouse = App->input->GetMouse();
-		RE_CompTransform* transform = camera->GetTransform();
 
 		if (mouse->GetButton(1) == KEY_DOWN)
 		{
