@@ -17,6 +17,7 @@
 #include "RE_ModelImporter.h"
 #include "TimeManager.h"
 #include "RE_PrimitiveManager.h"
+#include <gl/GL.h>
 #include <string>
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
@@ -66,12 +67,38 @@ bool ModuleScene::Start()
 		(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
 	}
 
+	root->AddComponent(C_PLANE);
+
 	// Setup AABB
 	root->ResetBoundingBoxFromChilds();
 	aabb_need_reset = false;
 
 	// Quadtree
 	//quad_tree.Build(root);
+
+	// Checkers
+	int value;
+	int IMAGE_ROWS = 64;
+	int IMAGE_COLS = 64;
+	GLubyte imageData[64][64][3];
+	for (int row = 0; row < IMAGE_ROWS; row++) {
+		for (int col = 0; col < IMAGE_COLS; col++) {
+			// Each cell is 8x8, value is 0 or 255 (black or white)
+			value = (((row & 0x8) == 0) ^ ((col & 0x8) == 0)) * 255;
+			imageData[row][col][0] = (GLubyte)value;
+			imageData[row][col][1] = (GLubyte)value;
+			imageData[row][col][2] = (GLubyte)value;
+		}
+	}
+
+	glGenTextures(1, &checkers_texture);
+	glBindTexture(GL_TEXTURE_2D, checkers_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, IMAGE_COLS, IMAGE_ROWS, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return ret;
 }
@@ -88,6 +115,7 @@ bool ModuleScene::CleanUp()
 	Serialize();
 
 	DEL(root);
+	glDeleteTextures(1, &checkers_texture);
 
 	if (smoke_particle)
 		DEL(smoke_particle);

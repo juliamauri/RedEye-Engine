@@ -19,7 +19,7 @@ public:
 	RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, const char* materialMD5, unsigned int triangles);
 	~RE_Mesh();
 
-	void Draw(unsigned int shader_ID);
+	void Draw(const float* transform, bool use_checkers = false);
 
 	math::AABB GetAABB() const;
 
