@@ -53,19 +53,15 @@ void _CheckGLError(const char* file, int line)
 }
 
 
-
-RE_Mesh::RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, const char* materialMD5, unsigned int triangles)
+RE_Mesh::RE_Mesh(std::vector<Vertex> _vertices, std::vector<unsigned int> _indices, const char* _materialMD5, unsigned int triangles)
 {
-	this->vertices = vertices;
-	this->indices = indices;
-	this->materialMD5 = materialMD5;
-
+	vertices = _vertices;
+	indices = _indices;
+	materialMD5 = _materialMD5;
 	triangle_count = triangles;
 
 	SetupAABB();
-
-	// now that we have all the required data, set the vertex buffers and its attribute pointers.
-	setupMesh();
+	SetupMesh();
 }
 
 RE_Mesh::~RE_Mesh()
@@ -81,6 +77,7 @@ RE_Mesh::~RE_Mesh()
 void RE_Mesh::Draw(unsigned int shader_ID)
 {
 	ShaderManager::use(shader_ID);
+
 	// bind appropriate textures
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
@@ -125,8 +122,6 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 
 	// always good practice to set everything back to defaults once configured.
 	glActiveTexture(GL_TEXTURE0);
-
-	ShaderManager::use(0);
 
 	// MESH DEBUG DRAWING
 	if (lFaceNormals || lVertexNormals)
@@ -178,39 +173,21 @@ void RE_Mesh::Draw(unsigned int shader_ID)
 		glDisable(GL_PROGRAM_POINT_SIZE);
 	}
 
-	if (lFaceNormals || lVertexNormals)
-		ShaderManager::use(0);
+	ShaderManager::use(0);
 }
 
 void RE_Mesh::SetupAABB()
 {
-	// reset size to minimum
-	bounding_box.SetFromCenterAndSize(vertices[0].Position, math::vec::zero);
+	std::vector<math::vec> vertex_pos;
+	vertex_pos.resize(vertices.size());
 
-	// adapt box to each vertex position
-	for (auto vertex : vertices)
-	{
-		// X
-		if (vertex.Position.x > bounding_box.maxPoint.x)
-			bounding_box.maxPoint.x = vertex.Position.x;
-		else if (vertex.Position.x < bounding_box.minPoint.x)
-			bounding_box.minPoint.x = vertex.Position.x;
+	for (int i = 0; i < vertices.size(); i++)
+		vertex_pos[i].Set(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z);
 
-		// Y
-		if (vertex.Position.y > bounding_box.maxPoint.y)
-			bounding_box.maxPoint.y = vertex.Position.y;
-		else if (vertex.Position.y < bounding_box.minPoint.y)
-			bounding_box.minPoint.y = vertex.Position.y;
-
-		// Z
-		if (vertex.Position.z > bounding_box.maxPoint.z)
-			bounding_box.maxPoint.z = vertex.Position.z;
-		else if (vertex.Position.z < bounding_box.minPoint.z)
-			bounding_box.minPoint.z = vertex.Position.z;
-	}
+	bounding_box.SetFrom(&vertex_pos[0], vertices.size());
 }
 
-void RE_Mesh::setupMesh()
+void RE_Mesh::SetupMesh()
 {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -244,7 +221,8 @@ math::AABB RE_Mesh::GetAABB() const
 
 void RE_Mesh::loadVertexNormals()
 {
-	if (!lFaceNormals) loadVertex();
+	if (!lFaceNormals)
+		LoadVertex();
 
 	glGenVertexArrays(1, &VAO_VertexNormals);
 	glGenBuffers(1, &VBO_VertexNormals);
@@ -276,7 +254,7 @@ void RE_Mesh::loadVertexNormals()
 
 void RE_Mesh::loadFaceNormals()
 {
-	if (!lVertexNormals) loadVertex();
+	if (!lVertexNormals) LoadVertex();
 
 	glGenVertexArrays(1, &VAO_FaceNormals);
 	glGenBuffers(1, &VBO_FaceNormals);
@@ -328,7 +306,7 @@ void RE_Mesh::loadFaceNormals()
 
 void RE_Mesh::clearVertexNormals()
 {
-	if (!lFaceNormals) clearVertex();
+	if (!lFaceNormals) ClearVertex();
 
 	glDeleteVertexArrays(1, &VAO_VertexNormals);
 	glDeleteBuffers(1, &VBO_VertexNormals);
@@ -339,7 +317,7 @@ void RE_Mesh::clearVertexNormals()
 
 void RE_Mesh::clearFaceNormals()
 {
-	if (!lVertexNormals) clearVertex();
+	if (!lVertexNormals) ClearVertex();
 
 	glDeleteVertexArrays(1, &VAO_FaceNormals);
 	glDeleteBuffers(1, &VBO_FaceNormals);
@@ -352,7 +330,7 @@ void RE_Mesh::clearFaceNormals()
 	lFaceNormals = false;
 }
 
-void RE_Mesh::loadVertex()
+void RE_Mesh::LoadVertex()
 {
 	glGenVertexArrays(1, &VAO_Vertex);
 	glGenBuffers(1, &VBO_Vertex);
@@ -368,7 +346,7 @@ void RE_Mesh::loadVertex()
 	glBindVertexArray(0);
 }
 
-void RE_Mesh::clearVertex()
+void RE_Mesh::ClearVertex()
 {
 	glDeleteVertexArrays(1, &VAO_Vertex);
 	glDeleteBuffers(1, &VBO_Vertex);

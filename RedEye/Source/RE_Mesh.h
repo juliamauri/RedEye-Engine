@@ -41,10 +41,10 @@ public:
 private:
 
 	void SetupAABB();
-	void setupMesh();
+	void SetupMesh();
 
-	void loadVertex();
-	void clearVertex();
+	void LoadVertex();
+	void ClearVertex();
 
 private:
 

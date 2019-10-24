@@ -547,17 +547,25 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 	if (GetMesh() != nullptr)
 		local_bounding_box = GetMesh()->GetAABB();
 	else
-		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec(0.3f, 0.3f, 0.3f));
+		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec(0.1f, 0.1f, 0.1f));
 
 	if (!childs.empty())
 	{
-		// Enclose remaining childs' AABBs
+		// Create vector to store all contained points
+		unsigned int cursor = 0;
+		std::vector<math::vec> points;
+		points.resize(2 + (childs.size() * 2));
+
+		// Store local mesh AABB max and min points
+		points[cursor++].Set(local_bounding_box.minPoint.x, local_bounding_box.minPoint.y, local_bounding_box.minPoint.z);
+		points[cursor++].Set(local_bounding_box.maxPoint.x, local_bounding_box.maxPoint.y, local_bounding_box.maxPoint.z);
+
+		// Store child AABBs max and min points
 		for (std::list<RE_GameObject*>::iterator child = childs.begin(); child != childs.end(); child++)
 		{
 			// Update child AABB
 			(*child)->ResetBoundingBoxFromChilds();
 
-			// Enclose child AABB
 			math::float4x4 trs = (*child)->transform->GetLocalMatrixModel();
 			math::AABB child_aabb = (*child)->GetLocalBoundingBox();
 
@@ -565,15 +573,12 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 				trs.Row3(3) + trs.TransformPos(child_aabb.CenterPoint()),
 				trs.TransformPos(child_aabb.Size()));
 
-			const math::vec points[4] = {
-				local_bounding_box.minPoint,
-				local_bounding_box.maxPoint,
-				child_aabb.minPoint,
-				child_aabb.maxPoint
-			};
-
-			local_bounding_box.SetFrom(&points[0], 4);
+			points[cursor++].Set(child_aabb.minPoint.x, child_aabb.minPoint.y, child_aabb.minPoint.z);
+			points[cursor++].Set(child_aabb.maxPoint.x, child_aabb.maxPoint.y, child_aabb.maxPoint.z);
 		}
+
+		// Enclose stored points
+		local_bounding_box.SetFrom(&points[0], points.size());
 	}
 
 	// Global Bounding Box
