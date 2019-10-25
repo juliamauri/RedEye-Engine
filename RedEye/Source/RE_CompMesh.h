@@ -19,6 +19,7 @@ public:
 	void DrawProperties() override;
 
 	void SetMaterial(const char* md5);
+	const char* GetMaterial()const;
 
 	void Serialize(JSONNode* node, rapidjson::Value* val) override;
 

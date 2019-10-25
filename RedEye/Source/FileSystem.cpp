@@ -336,6 +336,12 @@ void FileSystem::HandleDropedFile(const char * file)
 				neededCopyToAssets = true;
 			}
 		}
+		else
+		{
+			fbxAssetsPath = assetsPath; fbxAssetsPath += fileNameExtension;
+			neededCopyToAssets = true;
+		}
+
 
 		if (neededCopyToAssets)
 		{
@@ -346,7 +352,7 @@ void FileSystem::HandleDropedFile(const char * file)
 			std::string exportPath("FindFile/");
 			AddPath(directory.c_str(), exportPath.c_str());
 			for (uint i = 0; i < resourcesNames.size(); i++)
-				resourcesPath[i] = RecursiveFindFile(directory.c_str(), exportPath.c_str(), resourcesNames[i].c_str());
+				resourcesPath[i] = RecursiveFindFileOutsideFileSystem(directory.c_str(), exportPath.c_str(), resourcesNames[i].c_str());
 			App->fs->RemovePath(directory.c_str());
 
 			//copiar a asssets
@@ -376,7 +382,19 @@ void FileSystem::HandleDropedFile(const char * file)
 	}
 	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
 	{
-		//App->textures->LoadTexture2D(directory.c_str(), file_name.c_str(), true);
+		std::string assetsTexturePath("Assets/Images/");
+		std::string textureToLoad = RecursiveFindFileOwnFileSystem(assetsTexturePath.c_str(), fileNameExtension.c_str());
+		if (textureToLoad.empty()) {
+			RE_FileIO* textureFile = QuickBufferFromPDPath(file);
+			if (textureFile) {
+				textureToLoad += assetsTexturePath;
+				textureToLoad += fileNameExtension;
+				RE_FileIO textureAssets(textureToLoad.c_str(), GetZipPath());
+				textureAssets.Save(textureFile->GetBuffer(), textureFile->GetSize());
+				DEL(textureFile);
+			}
+		}
+		App->scene->LoadTextureOnSelectedGO(textureToLoad.c_str());
 	}
 }
 
@@ -399,8 +417,7 @@ std::string FileSystem::RecursiveFindFbx(const char * path)
 				inPath += "/";
 				fbxPathReturn = RecursiveFindFbx(inPath.c_str());
 				if (!fbxPathReturn.empty()) {
-					PHYSFS_freeList(rc);
-					return fbxPathReturn;
+					break;
 				}
 			}
 			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
@@ -408,12 +425,10 @@ std::string FileSystem::RecursiveFindFbx(const char * path)
 				std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
 				if (ext.compare("fbx") == 0) {
-					PHYSFS_freeList(rc);
-					return inPath;
+					fbxPathReturn = inPath;
+					break;
 				}
-
 			}
-		
 		}
 	}
 
@@ -421,7 +436,46 @@ std::string FileSystem::RecursiveFindFbx(const char * path)
 	return fbxPathReturn;
 }
 
-std::string FileSystem::RecursiveFindFile(const char* directory_path, const char* exporting_path, const char* fileToFind)
+std::string FileSystem::RecursiveFindFileOwnFileSystem(const char * directory_path, const char * fileToFind)
+{
+	std::string	filePathReturn;
+	std::string	iterPath(directory_path);
+
+	char **rc = PHYSFS_enumerateFiles(iterPath.c_str());
+	char **i;
+
+	for (i = rc; *i != NULL; i++)
+	{
+		std::string inPath(iterPath);
+		inPath += *i;
+
+		PHYSFS_Stat fileStat;
+		if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
+			if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
+				inPath += "/";
+
+				filePathReturn = RecursiveFindFileOwnFileSystem(inPath.c_str(), fileToFind);
+				if (!filePathReturn.empty()) {
+					break;
+				}
+			}
+			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
+
+				std::string fileName = inPath.substr(inPath.find_last_of("/") + 1);
+
+				if (fileName.compare(fileToFind) == 0) {
+					filePathReturn = inPath;
+					break;
+				}
+			}
+		}
+	}
+
+	PHYSFS_freeList(rc);
+	return filePathReturn;
+}
+
+std::string FileSystem::RecursiveFindFileOutsideFileSystem(const char* directory_path, const char* exporting_path, const char* fileToFind)
 {
 	std::string	filePathReturn;
 	std::string	directoryPath(directory_path);
@@ -441,20 +495,18 @@ std::string FileSystem::RecursiveFindFile(const char* directory_path, const char
 				inPath += "/";
 				directoryPath += *i; directoryPath += "\\";
 
-				filePathReturn = RecursiveFindFile(directoryPath.c_str(), inPath.c_str(), fileToFind);
+				filePathReturn = RecursiveFindFileOutsideFileSystem(directoryPath.c_str(), inPath.c_str(), fileToFind);
 				if (!filePathReturn.empty()) {
-					PHYSFS_freeList(rc);
-					return filePathReturn;
+					break;
 				}
 			}
 			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
 
 				std::string fileName = inPath.substr(inPath.find_last_of("/") + 1);
-
 				if (fileName.compare(fileToFind) == 0) {
-					PHYSFS_freeList(rc);
 					directoryPath += fileName;
-					return directoryPath;
+					filePathReturn = directoryPath;
+					break;
 				}
 
 			}

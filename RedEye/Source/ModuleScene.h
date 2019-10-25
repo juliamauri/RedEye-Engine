@@ -39,6 +39,7 @@ public:
 
 	void Serialize();
 	void LoadFBXOnScene(const char* fbxPath);
+	void LoadTextureOnSelectedGO(const char* texturePath);
 	void SceneModified();
 
 	//shaders

@@ -44,7 +44,8 @@ public:
 private:
 
 	std::string RecursiveFindFbx(const char* path);
-	std::string RecursiveFindFile(const char* directory_path, const char* exporting_path, const char* fileToFind);
+	std::string RecursiveFindFileOwnFileSystem(const char* directory_path, const char* fileToFind);
+	std::string RecursiveFindFileOutsideFileSystem(const char* directory_path, const char* exporting_path, const char* fileToFind);
 
 	//Returns true if same
 	bool RecursiveComparePath(const char* path1, const char* path2);
