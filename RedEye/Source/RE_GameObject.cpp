@@ -235,6 +235,11 @@ RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane,
 	return comp_camera;
 }
 
+void RE_GameObject::AddComponent(RE_Component * component)
+{
+	components.push_back(component);
+}
+
 RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file_path_data, const bool drop)
 {
 	SDL_assert(type < MAX_COMPONENT_TYPES);
