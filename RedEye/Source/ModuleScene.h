@@ -44,6 +44,9 @@ public:
 	//shaders
 	unsigned int modelloading;
 
+	// Checkers
+	unsigned int checkers_texture;
+
 private:
 
 	RE_GameObject* root = nullptr;

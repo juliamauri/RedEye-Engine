@@ -74,103 +74,116 @@ RE_Mesh::~RE_Mesh()
 	if (lFaceNormals) clearFaceNormals();
 }
 
-void RE_Mesh::Draw(unsigned int shader_ID)
+void RE_Mesh::Draw(const float* transform, bool use_checkers)
 {
-	ShaderManager::use(shader_ID);
+	// Set Shader uniforms
+	ShaderManager::use(App->scene->modelloading);
+	ShaderManager::setFloat4x4(App->scene->modelloading, "model", transform);
 
-	// bind appropriate textures
-	unsigned int diffuseNr = 1;
-	unsigned int specularNr = 1;
-	unsigned int normalNr = 1;
-	unsigned int heightNr = 1;
-
-	if (materialMD5)
+	// Bind Textures
+	if (use_checkers)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		std::string name = "texture_diffuse0";
+		ShaderManager::setUnsignedInt(App->scene->modelloading, name.c_str(), 0);
+		glBindTexture(GL_TEXTURE_2D, App->scene->checkers_texture);
+	}
+	else if (materialMD5)
 	{
 		RE_Material* meshMaterial = (RE_Material*)App->resources->At(materialMD5);
 
+		// Bind diffuse textures
+		unsigned int diffuseNr = 1;
 		if (!meshMaterial->tDiffuse.empty())
 		{
 			for (unsigned int i = 0; i < meshMaterial->tDiffuse.size(); i++)
 			{
-				glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
-												  // retrieve texture number (the N in diffuse_textureN)
+				glActiveTexture(GL_TEXTURE0 + i);
 				std::string name = "texture_diffuse";
 				name += std::to_string(diffuseNr++);
-				// now set the sampler to the correct texture unit
-				ShaderManager::setUnsignedInt(shader_ID, name.c_str(), i);
-
-				// and finally bind the texture
+				ShaderManager::setUnsignedInt(App->scene->modelloading, name.c_str(), i);
 				((Texture2D*)App->resources->At(meshMaterial->tDiffuse[i]))->use();
 			}
 		}
-	}
-	/*
-			if (name == "texture_diffuse")
-			number = std::to_string(diffuseNr++);
-		else if (name == "texture_specular")
-			number = std::to_string(specularNr++); // transfer unsigned int to stream
-		else if (name == "texture_normal")
-			number = std::to_string(normalNr++); // transfer unsigned int to stream
-		else if (name == "texture_height")
-			number = std::to_string(heightNr++); // transfer unsigned int to stream
-	*/
+		/*
+			unsigned int specularNr = 1;
+			unsigned int normalNr = 1;
+			unsigned int heightNr = 1;
 
-	// draw mesh
+				if (name == "texture_diffuse")
+				number = std::to_string(diffuseNr++);
+			else if (name == "texture_specular")
+				number = std::to_string(specularNr++); // transfer unsigned int to stream
+			else if (name == "texture_normal")
+				number = std::to_string(normalNr++); // transfer unsigned int to stream
+			else if (name == "texture_height")
+				number = std::to_string(heightNr++); // transfer unsigned int to stream
+		*/
+	}
+
+	// Draw mesh
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
 
-	// always good practice to set everything back to defaults once configured.
-	glActiveTexture(GL_TEXTURE0);
+	// Release buffers
+	glBindVertexArray(0);
+	if (use_checkers || materialMD5)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 
 	// MESH DEBUG DRAWING
 	if (lFaceNormals || lVertexNormals)
+	{
 		ShaderManager::use(App->primitives->shaderPrimitive);
+		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "model", transform);
 
-	if (lFaceNormals)
-	{
-		math::vec color(0.f, 0.f, 1.f);
-		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
+		if (lFaceNormals)
+		{
+			math::vec color(0.f, 0.f, 1.f);
+			ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
 
-		glBindVertexArray(VAO_FaceNormals);
-		glDrawArrays(GL_LINES, 0, indices.size() / 3 * 2);
-		glBindVertexArray(0);
+			glBindVertexArray(VAO_FaceNormals);
+			glDrawArrays(GL_LINES, 0, indices.size() / 3 * 2);
+			glBindVertexArray(0);
 
-		color.Set(1.f, 1.f, 1.f);
-		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
+			color.Set(1.f, 1.f, 1.f);
+			ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
 
-		glEnable(GL_PROGRAM_POINT_SIZE);
-		glPointSize(10.0f);
+			glEnable(GL_PROGRAM_POINT_SIZE);
+			glPointSize(10.0f);
 
-		glBindVertexArray(VAO_FaceCenters);
-		glDrawArrays(GL_POINTS, 0, indices.size() / 3);
-		glBindVertexArray(0);
+			glBindVertexArray(VAO_FaceCenters);
+			glDrawArrays(GL_POINTS, 0, indices.size() / 3);
+			glBindVertexArray(0);
 
-		glPointSize(1.0f);
-		glDisable(GL_PROGRAM_POINT_SIZE);
-	}
+			glPointSize(1.0f);
+			glDisable(GL_PROGRAM_POINT_SIZE);
+		}
 
-	if (lVertexNormals)
-	{
-		math::vec color(0.f, 1.f, 0.f);
-		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
+		if (lVertexNormals)
+		{
+			math::vec color(0.f, 1.f, 0.f);
+			ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
 
-		glBindVertexArray(VAO_VertexNormals);
-		glDrawArrays(GL_LINES, 0, vertices.size() * 2);
-		glBindVertexArray(0);
+			glBindVertexArray(VAO_VertexNormals);
+			glDrawArrays(GL_LINES, 0, vertices.size() * 2);
+			glBindVertexArray(0);
 
-		color.Set(1.f, 1.f, 1.f);
-		ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
+			color.Set(1.f, 1.f, 1.f);
+			ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
 
-		glEnable(GL_PROGRAM_POINT_SIZE);
-		glPointSize(10.0f);
+			glEnable(GL_PROGRAM_POINT_SIZE);
+			glPointSize(10.0f);
 
-		glBindVertexArray(VAO_Vertex);
-		glDrawArrays(GL_POINTS, 0, vertices.size());
-		glBindVertexArray(0);
+			glBindVertexArray(VAO_Vertex);
+			glDrawArrays(GL_POINTS, 0, vertices.size());
+			glBindVertexArray(0);
 
-		glPointSize(1.0f);
-		glDisable(GL_PROGRAM_POINT_SIZE);
+			glPointSize(1.0f);
+			glDisable(GL_PROGRAM_POINT_SIZE);
+		}
 	}
 
 	ShaderManager::use(0);

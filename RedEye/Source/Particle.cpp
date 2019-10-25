@@ -56,7 +56,7 @@ void Particle::Draw(unsigned int shader)
 			transform_matrix = transform_matrix * parent_emiter->GetGO()->GetTransform()->GetMatrixModel();
 
 		ShaderManager::setFloat4x4(shader, "model", transform_matrix.ptr());
-		mesh->Draw(shader);
+		//mesh->Draw(shader);
 	}
 }
 

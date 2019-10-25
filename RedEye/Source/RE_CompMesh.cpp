@@ -34,18 +34,7 @@ RE_CompMesh::~RE_CompMesh()
 
 void RE_CompMesh::Draw()
 {
-	// Setup primitive shader model uniform
-	if (show_f_normals || show_v_normals)
-	{
-		ShaderManager::use(App->primitives->shaderPrimitive);
-		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "model", go->GetTransform()->GetShaderModel());
-	}
-
-	// Setup model shader model uniform
-	ShaderManager::use(App->scene->modelloading);
-	ShaderManager::setFloat4x4(App->scene->modelloading, "model", go->GetTransform()->GetShaderModel());
-
-	ptr->Draw(App->scene->modelloading);
+	ptr->Draw(go->GetTransform()->GetShaderModel(), show_checkers);
 }
 
 void RE_CompMesh::DrawProperties()
@@ -57,62 +46,56 @@ void RE_CompMesh::DrawProperties()
 			ImGui::Text("Name: %s", ptr->GetName());
 			ImGui::TextWrapped("Reference: %s", reference.c_str());
 			ImGui::TextWrapped("Directory: %s", ptr->GetFilePath());
-
-			if (ImGui::Button(show_f_normals ? "Hide Face Normals" : "Show Face Normals"))
-				show_f_normals = !show_f_normals;
-
-			if (ImGui::Button(show_v_normals ? "Hide Vertex Normals" : "Show Vertex Normals"))
-				show_v_normals = !show_v_normals;
-
-			if (show_f_normals && !ptr->lFaceNormals)	ptr->loadFaceNormals();
-			if (show_v_normals && !ptr->lVertexNormals)	ptr->loadVertexNormals();
-
-			if (!show_f_normals && ptr->lFaceNormals) ptr->clearFaceNormals();
-			if (!show_v_normals && ptr->lVertexNormals) ptr->clearVertexNormals();
-
-			math::AABB box = ptr->GetAABB();
-
-			ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", box.minPoint.x, box.minPoint.y, box.minPoint.z);
-			ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", box.maxPoint.x, box.maxPoint.y, box.maxPoint.z);
-
 			ImGui::Text("Vertex count: %u", ptr->vertices.size());
 			ImGui::Text("Triangle Face count: %u", ptr->triangle_count);
 			ImGui::Text("VAO: %u", ptr->VAO);
 
-			if (ptr->materialMD5)
+			if (ImGui::TreeNodeEx("Bounding Box"))
 			{
-				RE_Material* meshMaterial = (RE_Material*)App->resources->At(ptr->materialMD5);
-
-				if (meshMaterial && !meshMaterial->tDiffuse.empty())
-				{
-					for (unsigned int i = 0; i < meshMaterial->tDiffuse.size(); i++)
-					{
-						Texture2D* texture = (Texture2D*)App->resources->At(meshMaterial->tDiffuse[i]);
-
-						int width = 0;
-						int height = 0;
-						texture->GetWithHeight(&width, &height);
-
-						if (ImGui::TreeNode("Texture"))
-						{
-							ImGui::Text("\t- MD5: %s", texture->GetMD5());
-							ImGui::Text("\t- Size: %ux%u", width, height);
-							ImGui::TextWrapped("\t- Path: %s", texture->GetFilePath());
-							ImGui::Text("\t- Type: Diffuse");
-
-							texture->DrawTextureImGui();
-
-							ImGui::TreePop();
-						}
-
-					}
-				}
+				math::AABB box = ptr->GetAABB();
+				ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", box.minPoint.x, box.minPoint.y, box.minPoint.z);
+				ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", box.maxPoint.x, box.maxPoint.y, box.maxPoint.z);
+				ImGui::TreePop();
 			}
-			else
-				ImGui::Text("Mesh don't contain Material.");
 
+			if (ImGui::Button(show_f_normals ? "Hide Face Normals" : "Show Face Normals"))
+				show_f_normals = !show_f_normals;
+			if (ImGui::Button(show_v_normals ? "Hide Vertex Normals" : "Show Vertex Normals"))
+				show_v_normals = !show_v_normals;
+			if (show_f_normals && !ptr->lFaceNormals)	ptr->loadFaceNormals();
+			if (show_v_normals && !ptr->lVertexNormals)	ptr->loadVertexNormals();
+			if (!show_f_normals && ptr->lFaceNormals) ptr->clearFaceNormals();
+			if (!show_v_normals && ptr->lVertexNormals) ptr->clearVertexNormals();
 		}
 		else ImGui::TextWrapped("Empty Mesh Component");
+	}
+
+	if (ImGui::CollapsingHeader("Material"))
+	{
+		if (!reference.empty() && ptr->materialMD5)
+		{
+			ImGui::Checkbox("Use checkers texture", &show_checkers);
+
+			RE_Material* meshMaterial = (RE_Material*)App->resources->At(ptr->materialMD5);
+			if (meshMaterial && !meshMaterial->tDiffuse.empty())
+			{
+				for (unsigned int i = 0; i < meshMaterial->tDiffuse.size(); i++)
+				{
+					int width = 0;
+					int height = 0;
+					Texture2D* texture = (Texture2D*)App->resources->At(meshMaterial->tDiffuse[i]);
+					texture->GetWithHeight(&width, &height);
+
+					ImGui::Text("Type: Diffuse");
+					ImGui::Text("Size: %ux%u", width, height);
+					ImGui::TextWrapped("Path: %s", texture->GetFilePath());
+					ImGui::Text("MD5: %s", texture->GetMD5());
+					texture->DrawTextureImGui();
+				}
+			}
+		}
+		else
+			ImGui::Text("Mesh don't contain Material.");
 	}
 }
 
