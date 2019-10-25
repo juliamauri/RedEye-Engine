@@ -104,6 +104,11 @@ void RE_CompMesh::SetMaterial(const char * md5)
 	ptr->materialMD5 = md5;
 }
 
+const char * RE_CompMesh::GetMaterial() const
+{
+	return ptr->materialMD5;
+}
+
 void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 {
 	rapidjson::Value val(rapidjson::kObjectType);

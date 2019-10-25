@@ -6,6 +6,8 @@
 #include "ModuleInput.h"
 #include "FileSystem.h"
 #include "OutputLog.h"
+#include "ResourceManager.h"
+#include "RE_Material.h"
 #include "RE_TextureImporter.h"
 #include "ShaderManager.h"
 #include "RE_GameObject.h"
@@ -17,6 +19,7 @@
 #include "RE_ModelImporter.h"
 #include "TimeManager.h"
 #include "RE_PrimitiveManager.h"
+#include "md5.h"
 #include <gl/GL.h>
 #include <string>
 
@@ -72,6 +75,12 @@ bool ModuleScene::Start()
 	// Setup AABB
 	root->ResetBoundingBoxFromChilds();
 	aabb_need_reset = false;
+
+	// FOCUS CAMERA
+	if (!root->GetChilds().empty()) {
+		App->scene->SetSelected(root->GetChilds().begin()._Ptr->_Myval);
+		App->editor->FocusSelected();
+	}
 
 	// Quadtree
 	//quad_tree.Build(root);
@@ -352,12 +361,38 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 		root = new RE_GameObject("root");
 		root->AddChild(toAdd);
 
+		root->ResetBoundingBoxFromChilds();
+		aabb_need_reset = false;
 		// FOCUS CAMERA ON DROPPED GEOMETRY
 		App->scene->SetSelected(toAdd);
 		App->editor->FocusSelected();
 	}
 	else
 		LOG_ERROR("Error to load dropped fbx");
+}
+
+void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
+{
+	RE_CompMesh* selectedMesh = nullptr;
+	if (selected && (selectedMesh = (RE_CompMesh*)selected->GetComponent(ComponentType::C_MESH)) != nullptr ) {
+		std::string path(texturePath);
+		std::string fileName = path.substr(path.find_last_of("/") + 1);
+		fileName = fileName.substr(0, fileName.find_last_of("."));
+
+		std::string md5Generated = md5(texturePath);
+		const char* textureResource = App->resources->CheckFileLoaded(texturePath, md5Generated.c_str(), Resource_Type::R_TEXTURE);
+
+		const char* materialMD5 = selectedMesh->GetMaterial();
+		if (materialMD5) {
+			RE_Material* selectedMaterial = (RE_Material*)App->resources->At(materialMD5);
+			if (selectedMaterial) {
+				if (selectedMaterial->tDiffuse.empty())
+					selectedMaterial->tDiffuse.push_back(textureResource);
+				else
+					selectedMaterial->tDiffuse[0] = textureResource;
+			}
+		}
+	}
 }
 
 void ModuleScene::SceneModified()
