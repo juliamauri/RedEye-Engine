@@ -212,57 +212,28 @@ RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateCube(RE_GameObject* game_obj)
 {
-	if (primitives_count.find(C_CUBE)->second++ == 0)
-	{
-		//Cube with index
-		float vPositionCubeArray[] = {
-			//vertecies        
-			1.0f,  1.0f, 1.0f,   //Top Right Back - Vert 0
-			1.0f, -1.0f, 1.0f,   //Bottom Right Back - Vert 1
-			-1.0f, -1.0f, 1.0f,  //Bottom Left Back - Vert 2
-			-1.0f,  1.0f, 1.0f,  //Top Left Back - Vert 3
-			1.0f,  1.0f, -1.0f,  //Top Right Front - Vert 4
-			1.0f, -1.0f, -1.0f,  //Bottom Right Front - Vert 5
-			-1.0f, -1.0f, -1.0f,  //Bottom Left Front - Vert 6
-			-1.0f,  1.0f, -1.0f   //Top Left Front - Vert 7
-		};
+	par_shapes_mesh* cube = par_shapes_create_cube();
 
-		unsigned int indicesCube[] = {  //Tell OpenGL What triangle uses what Vertecies
-			0, 1, 3,   //Back Quad
-			1, 2, 3,
-			0, 1, 4,     //Right Quad
-			1, 5, 4,
-			2, 3, 7,   //Left Quad
-			2, 6, 7,
-			4, 5, 7,   //Front Quad
-			5, 6, 7,
-			0, 3, 4,   //Top Quad
-			3, 4, 7,
-			1, 2, 5,   //Bottom Quad
-			2, 5, 6
-		};
+	glGenVertexArrays(1, &vao_cube);
+	glGenBuffers(1, &vbo_cube);
 
-		glGenVertexArrays(1, &vao_cube);
-		glGenBuffers(1, &vbo_cube);
-		glGenBuffers(1, &ebo_cube);
+	glBindVertexArray(vao_cube);
 
-		glBindVertexArray(vao_cube);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube);
+	glBufferData(GL_ARRAY_BUFFER, cube->npoints * sizeof(float) * 3, cube->points, GL_STATIC_DRAW);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_cube);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vPositionCubeArray), vPositionCubeArray, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(0);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_cube);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicesCube), indicesCube, GL_STATIC_DRAW);
-	
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
+	glGenBuffers(1, &ebo_cube);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_cube);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube->ntriangles * sizeof(unsigned short) * 3, cube->triangles, GL_STATIC_DRAW);
 
-		glBindVertexArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	}
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	RE_CompCube* ret = new RE_CompCube(game_obj, vao_cube, shaderPrimitive);
+	RE_CompCube* ret = new RE_CompCube(game_obj, vao_cube, shaderPrimitive, cube->ntriangles);
 	return ret;
 }
 

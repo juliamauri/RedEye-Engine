@@ -110,9 +110,15 @@ public:
 class RE_CompCube : public RE_CompPrimitive, RE_CompAxis
 {
 public:
-	RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
+	RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
 	~RE_CompCube();
 	void Draw() override;
+
+private:
+	bool show_checkers = false;
+	math::vec color;
+	int triangle_count;
+
 };
 
 /**************************************************

@@ -168,7 +168,7 @@ void ModuleScene::DuplicateSelectedObject()
 
 void ModuleScene::CreateCube()
 {
-	RE_GameObject* cube_go = AddGO("Sphere", root);
+	RE_GameObject* cube_go = AddGO("Cube", root);
 	cube_go->AddComponent(App->primitives->CreateCube(cube_go));
 }
 
