@@ -88,10 +88,10 @@ void RE_CompTransform::SetRotation(math::float3x3 rotation)
 void RE_CompTransform::SetScale(math::vec scale)
 {
 	this->scale.scale = scale;
-	this->scale.scale = {
+	/*this->scale.scale = {
 	this->scale.scale.x > MIN_SCALE ? 1.0f / this->scale.scale.x : 1.0f / MIN_SCALE,
 	this->scale.scale.y > MIN_SCALE ? 1.0f / this->scale.scale.y : 1.0f / MIN_SCALE,
-	this->scale.scale.z > MIN_SCALE ? 1.0f / this->scale.scale.z : 1.0f / MIN_SCALE };
+	this->scale.scale.z > MIN_SCALE ? 1.0f / this->scale.scale.z : 1.0f / MIN_SCALE };*/
 
 	needed_update_transform = true;
 }
