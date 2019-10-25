@@ -204,7 +204,7 @@ void RE_CompSphere::Draw()
 
 		// Draw
 		glBindVertexArray(RE_CompPrimitive::VAO);
-		glDrawElements(GL_TRIANGLES, triangle_count, GL_UNSIGNED_SHORT, 0);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 	}
 	else
 	{
@@ -215,7 +215,7 @@ void RE_CompSphere::Draw()
 
 		// Draw
 		glBindVertexArray(RE_CompPrimitive::VAO);
-		glDrawElements(GL_TRIANGLES, triangle_count, GL_UNSIGNED_SHORT, 0);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 
 		// Release Texture
 		glActiveTexture(GL_TEXTURE0);

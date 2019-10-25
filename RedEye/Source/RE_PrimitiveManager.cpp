@@ -287,14 +287,14 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateSphere(RE_GameObject* game_obj)
 
 	glGenBuffers(1, &vbo_sphere);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_sphere);
-	glBufferData(GL_ARRAY_BUFFER, sphere->npoints * sizeof(float), sphere->points, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sphere->npoints * sizeof(float) * 3, sphere->points, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
 
 	glGenBuffers(1, &ebo_sphere);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_sphere);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short), sphere->triangles, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, sphere->triangles, GL_STATIC_DRAW);
 
 	RE_CompPrimitive* ret = new RE_CompSphere(game_obj, vao_sphere, shaderPrimitive, sphere->ntriangles);
 	par_shapes_free_mesh(sphere);
