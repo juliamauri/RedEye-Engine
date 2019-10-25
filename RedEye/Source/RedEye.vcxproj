@@ -88,6 +88,7 @@
     <ClInclude Include="md5.h" />
     <ClInclude Include="Optick\include\optick.config.h" />
     <ClInclude Include="Optick\include\optick.h" />
+    <ClInclude Include="par_shapes.h" />
     <ClInclude Include="RE_ModelImporter.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="RE_CompParticleEmiter.h" />

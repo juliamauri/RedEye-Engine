@@ -414,6 +414,9 @@
     <ClInclude Include="RE_CompParticleEmiter.h">
       <Filter>GameObject\Components\Particles</Filter>
     </ClInclude>
+    <ClInclude Include="par_shapes.h">
+      <Filter>3rd Party\PAR Shapes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -499,6 +502,9 @@
     </Filter>
     <Filter Include="GameObject\Components\Particles">
       <UniqueIdentifier>{6be67668-60b0-48b8-9870-6f373919f170}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\PAR Shapes">
+      <UniqueIdentifier>{9fe0d206-8ee0-4092-b453-1b77011f1006}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

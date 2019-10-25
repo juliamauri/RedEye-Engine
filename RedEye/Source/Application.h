@@ -18,7 +18,7 @@ class FileSystem;
 class TimeManager;
 class SystemInfo;
 class RE_Math;
-struct OutputLogHolder;
+class OutputLogHolder;
 class RE_TextureImporter;
 class ShaderManager;
 class RE_PrimitiveManager;
