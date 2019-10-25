@@ -58,6 +58,12 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 		case C_MESH:
 			components.push_back(new RE_CompMesh(*(RE_CompMesh*)cmpGO, this));
 			break;
+		case C_CUBE:
+			components.push_back((RE_CompPrimitive*)new RE_CompCube(*(RE_CompCube*)((RE_CompPrimitive*)cmpGO), this));
+			break;
+		case C_SPHERE:
+			components.push_back((RE_CompPrimitive*)new RE_CompSphere(*(RE_CompSphere*)((RE_CompPrimitive*)cmpGO), this));
+			break;
 		}
 	}
 

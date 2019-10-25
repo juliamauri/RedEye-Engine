@@ -205,8 +205,6 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // END PUBLIC API
 // -----------------------------------------------------------------------------
-
-#define PAR_SHAPES_IMPLEMENTATION
 #ifdef PAR_SHAPES_IMPLEMENTATION
 #include <stdlib.h>
 #include <stdio.h>

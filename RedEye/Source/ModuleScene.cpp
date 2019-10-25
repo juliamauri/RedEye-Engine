@@ -19,6 +19,7 @@
 #include "RE_ModelImporter.h"
 #include "TimeManager.h"
 #include "RE_PrimitiveManager.h"
+#include "RE_CompPrimitive.h" 
 #include "md5.h"
 #include <gl/GL.h>
 #include <string>

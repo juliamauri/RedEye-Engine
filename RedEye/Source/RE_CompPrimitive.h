@@ -4,20 +4,28 @@
 #include "RE_Math.h"
 #include "RE_Component.h"
 
-
 class RE_CompPrimitive : public RE_Component
 {
 public:
-	RE_CompPrimitive(ComponentType t, RE_GameObject* game_obj, unsigned int VAO, unsigned int shader = 0);
+	RE_CompPrimitive(ComponentType t, RE_GameObject* game_obj, unsigned int VAO = 0, unsigned int shader = 0);
 	virtual ~RE_CompPrimitive();
 	
 	ComponentType GetType() const;
 	virtual void Draw() override = 0;
+	virtual void DrawProperties() override = 0;
+	virtual void Serialize(JSONNode* node, rapidjson::Value* comp_array) override { }
+
+	void SetColor(float r, float g, float b) { color.Set(r, g, b); }
 
 protected:
 	ComponentType type;
-	unsigned int VAO;
+	unsigned int VAO = 0;
+	unsigned int VBO = 0;
+	unsigned int EBO = 0;
+
 	unsigned int shader;
+
+	math::vec color = math::vec::one;
 };
 
 /**************************************************
@@ -30,6 +38,8 @@ public:
 	RE_CompAxis(RE_GameObject* game_obj = nullptr, unsigned int VAO = 0);
 	~RE_CompAxis();
 	void Draw() override;
+	void DrawProperties() override {}
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
 
 private:
 	math::float4x4 basis;
@@ -45,6 +55,8 @@ public:
 	RE_CompPoint(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, math::vec point = math::vec::zero);
 	~RE_CompPoint();
 	void Draw() override;
+	void DrawProperties() override {}
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
 
 private:
 	math::vec point;
@@ -60,6 +72,8 @@ public:
 	RE_CompLine(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, math::vec origin = math::vec::zero, math::vec dest = math::vec(0.0f, 5.0f, 0.0f));
 	~RE_CompLine();
 	void Draw() override;
+	void DrawProperties() override {}
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
 
 private:
 	math::vec origin;
@@ -76,7 +90,8 @@ public:
 	RE_CompRay(RE_GameObject* game_obj, unsigned int shader, unsigned int VAO = 0, math::vec origin = math::vec::zero, math::vec dir = math::vec(0.0f, 1.0f, 0.0f));
 	~RE_CompRay();
 	void Draw() override;
-
+	void DrawProperties() override {}
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
 };
 
 /**************************************************
@@ -89,6 +104,8 @@ public:
 	RE_CompTriangle(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
 	~RE_CompTriangle();
 	void Draw() override;
+	void DrawProperties() override {}
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
 };
 
 /**************************************************
@@ -101,6 +118,8 @@ public:
 	RE_CompPlane(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
 	~RE_CompPlane();
 	void Draw() override;
+	void DrawProperties() override {}
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
 };
 
 /**************************************************
@@ -111,12 +130,14 @@ class RE_CompCube : public RE_CompPrimitive, RE_CompAxis
 {
 public:
 	RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
+	RE_CompCube(const RE_CompCube& cmpCube, RE_GameObject* go = nullptr);
 	~RE_CompCube();
 	void Draw() override;
+	void DrawProperties() override;
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override;
 
 private:
 	bool show_checkers = false;
-	math::vec color;
 	int triangle_count;
 
 };
@@ -131,24 +152,32 @@ public:
 	RE_CompFustrum(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
 	~RE_CompFustrum();
 	void Draw() override;
+	void DrawProperties() override {}
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
 };
 
 /**************************************************
 ******	Sphere
 **************************************************/
 
-class RE_CompSphere : public RE_CompPrimitive, RE_CompAxis
+class RE_CompSphere : public RE_CompPrimitive
 {
 public:
-	RE_CompSphere(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
+	RE_CompSphere(RE_GameObject* game_obj, unsigned int shader, int slice, int stacks);
+	RE_CompSphere(const RE_CompSphere& cmpSphere, RE_GameObject* go = nullptr);
 	~RE_CompSphere();
 	void Draw() override;
 	void DrawProperties() override;
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override;
+
+private:
+	void GenerateNewSphere(int slice, int stacks);
 
 private:
 	bool show_checkers = false;
-	math::vec color;
 	int triangle_count;
+	int slice, stacks;
+	int tmpSl, tmpSt;
 };
 
 /**************************************************
@@ -161,6 +190,8 @@ public:
 	RE_CompCylinder(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
 	~RE_CompCylinder();
 	void Draw() override;
+	void DrawProperties() override {}
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
 };
 
 
@@ -174,6 +205,8 @@ public:
 	RE_CompCapsule(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
 	~RE_CompCapsule();
 	void Draw() override;
+	void DrawProperties() override {}
+	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
 };
 
 #endif // !__RE_COMPPRIMITIVE_H__

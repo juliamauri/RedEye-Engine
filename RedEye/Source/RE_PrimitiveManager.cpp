@@ -5,11 +5,20 @@
 #include "OutputLog.h"
 #include "RE_Math.h"
 
+#include "RE_CompPrimitive.h"
+
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 
+#ifndef PAR_SHAPES_IMPLEMENTATION
+#define PAR_SHAPES_IMPLEMENTATION
+#endif
+
 #include "par_shapes.h"
+
+
+#define CUBE_TRIANGLES 36
 
 RE_PrimitiveManager::RE_PrimitiveManager()
 {
@@ -212,28 +221,32 @@ RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateCube(RE_GameObject* game_obj)
 {
-	par_shapes_mesh* cube = par_shapes_create_cube();
+	if (primitives_count.find(C_CUBE)->second++ == 0) {
 
-	glGenVertexArrays(1, &vao_cube);
-	glGenBuffers(1, &vbo_cube);
+		par_shapes_mesh* cube = par_shapes_create_cube();
 
-	glBindVertexArray(vao_cube);
+		glGenVertexArrays(1, &vao_cube);
+		glGenBuffers(1, &vbo_cube);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_cube);
-	glBufferData(GL_ARRAY_BUFFER, cube->npoints * sizeof(float) * 3, cube->points, GL_STATIC_DRAW);
+		glBindVertexArray(vao_cube);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_cube);
+		glBufferData(GL_ARRAY_BUFFER, cube->npoints * sizeof(float) * 3, cube->points, GL_STATIC_DRAW);
 
-	glGenBuffers(1, &ebo_cube);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_cube);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube->ntriangles * sizeof(unsigned short) * 3, cube->triangles, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+		glEnableVertexAttribArray(0);
 
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glGenBuffers(1, &ebo_cube);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_cube);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube->ntriangles * sizeof(unsigned short) * 3, cube->triangles, GL_STATIC_DRAW);
 
-	RE_CompCube* ret = new RE_CompCube(game_obj, vao_cube, shaderPrimitive, cube->ntriangles);
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		par_shapes_free_mesh(cube);
+	}
+	RE_CompCube* ret = new RE_CompCube(game_obj, vao_cube, shaderPrimitive, CUBE_TRIANGLES);
 	return ret;
 }
 
@@ -247,30 +260,9 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateFustrum(RE_GameObject* game_obj)
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateSphere(RE_GameObject* game_obj)
+RE_CompPrimitive * RE_PrimitiveManager::CreateSphere(RE_GameObject* game_obj, int slices, int stacks)
 {
-	//TODO: if (primitives_count.find(C_SPHERE)->second++ == 0)
-
-	par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(16,18);
-	
-	glGenVertexArrays(1, &vao_sphere);
-	glBindVertexArray(vao_sphere);
-
-	glGenBuffers(1, &vbo_sphere);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_sphere);
-	glBufferData(GL_ARRAY_BUFFER, sphere->npoints * sizeof(float) * 3, sphere->points, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(0);
-
-	glGenBuffers(1, &ebo_sphere);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_sphere);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, sphere->triangles, GL_STATIC_DRAW);
-
-	RE_CompPrimitive* ret = new RE_CompSphere(game_obj, vao_sphere, shaderPrimitive, sphere->ntriangles);
-	par_shapes_free_mesh(sphere);
-
-	return ret;
+	return new RE_CompSphere(game_obj, shaderPrimitive, slices, stacks);
 }
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateCylinder(RE_GameObject* game_obj)
@@ -293,7 +285,36 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateCapsule(RE_GameObject* game_obj)
 	return ret;
 }
 
-void RE_PrimitiveManager::Rest(ComponentType count)
+unsigned int RE_PrimitiveManager::CheckCubeVAO()
+{
+	if (vao_cube == 0 && primitives_count.find(C_CUBE)->second++ == 0) {
+		par_shapes_mesh* cube = par_shapes_create_cube();
+
+		glGenVertexArrays(1, &vao_cube);
+		glGenBuffers(1, &vbo_cube);
+
+		glBindVertexArray(vao_cube);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_cube);
+		glBufferData(GL_ARRAY_BUFFER, cube->npoints * sizeof(float) * 3, cube->points, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+		glEnableVertexAttribArray(0);
+
+		glGenBuffers(1, &ebo_cube);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_cube);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube->ntriangles * sizeof(unsigned short) * 3, cube->triangles, GL_STATIC_DRAW);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		par_shapes_free_mesh(cube);
+	}
+	return vao_cube;
+}
+
+void RE_PrimitiveManager::Rest(unsigned short int count)
 {
 	primitives_count.find(count)->second--;
 	if (primitives_count.find(count)->second == 0)
@@ -318,70 +339,64 @@ bool RE_PrimitiveManager::Init(const char* def_shader)
 	return ret;
 }
 
-void RE_PrimitiveManager::DeleteVAOPrimitive(ComponentType primitive)
+void RE_PrimitiveManager::DeleteVAOPrimitive(unsigned short int primitive)
 {
 	switch (primitive)
 	{
 	case C_AXIS:
-		glDeleteVertexArrays(1, &vao_axis);
-		glDeleteBuffers(1, &vbo_axis);
+		glDeleteVertexArrays(1, &(GLuint)vao_axis);
+		glDeleteBuffers(1, &(GLuint)vbo_axis);
 		break;
 
 	case C_POINT:
-		glDeleteVertexArrays(1, &vao_point);
-		glDeleteBuffers(1, &vbo_point);
+		glDeleteVertexArrays(1, &(GLuint)vao_point);
+		glDeleteBuffers(1, &(GLuint)vbo_point);
 		break;
 
 	case C_LINE:
-		glDeleteVertexArrays(1, &vao_line);
-		glDeleteBuffers(1, &vbo_line);
+		glDeleteVertexArrays(1, &(GLuint)vao_line);
+		glDeleteBuffers(1, &(GLuint)vbo_line);
 		break;
 
 	case C_RAY:
-		glDeleteVertexArrays(1, &vao_ray);
-		glDeleteBuffers(1, &vbo_ray);
+		glDeleteVertexArrays(1, &(GLuint)vao_ray);
+		glDeleteBuffers(1, &(GLuint)vbo_ray);
 		break;
 
 	case C_TRIANGLE:
-		glDeleteVertexArrays(1, &vao_triangle);
-		glDeleteBuffers(1, &vbo_triangle);
-		glGenBuffers(1, &ebo_triangle);
+		glDeleteVertexArrays(1, &(GLuint)vao_triangle);
+		glDeleteBuffers(1, &(GLuint)vbo_triangle);
+		glGenBuffers(1, &(GLuint)ebo_triangle);
 		break;
 
 	case C_PLANE:
-		glDeleteVertexArrays(1, &vao_plane);
-		glDeleteBuffers(1, &vbo_plane);
-		glDeleteBuffers(1, &ebo_plane);				
+		glDeleteVertexArrays(1, &(GLuint)vao_plane);
+		glDeleteBuffers(1, &(GLuint)vbo_plane);
+		glDeleteBuffers(1, &(GLuint)ebo_plane);
 		break;
 
 	case C_CUBE:
-		glDeleteVertexArrays(1, &vao_cube);
-		glDeleteBuffers(1, &vbo_cube);
-		glDeleteBuffers(1, &ebo_cube);
+		glDeleteVertexArrays(1, &(GLuint)vao_cube);
+		glDeleteBuffers(1, &(GLuint)vbo_cube);
+		glDeleteBuffers(1, &(GLuint)ebo_cube);
 		break;
 
 	case C_FUSTRUM:
-		glDeleteVertexArrays(1, &vao_fustrum);
-		glDeleteBuffers(1, &vbo_fustrum);
-		glDeleteBuffers(1, &ebo_fustrum);
-		break;
-
-	case C_SPHERE:
-		glDeleteVertexArrays(1, &vao_sphere);
-		glDeleteBuffers(1, &vbo_sphere);
-		glDeleteBuffers(1, &ebo_sphere);
+		glDeleteVertexArrays(1, &(GLuint)vao_fustrum);
+		glDeleteBuffers(1, &(GLuint)vbo_fustrum);
+		glDeleteBuffers(1, &(GLuint)ebo_fustrum);
 		break;
 
 	case C_CYLINDER:
-		glDeleteVertexArrays(1, &vao_cylinder);
-		glDeleteBuffers(1, &vbo_cylinder);
-		glDeleteBuffers(1, &ebo_cylinder);
+		glDeleteVertexArrays(1, &(GLuint)vao_cylinder);
+		glDeleteBuffers(1, &(GLuint)vbo_cylinder);
+		glDeleteBuffers(1, &(GLuint)ebo_cylinder);
 		break;
 
 	case C_CAPSULE:
-		glDeleteVertexArrays(1, &vao_capsule);
-		glDeleteBuffers(1, &vbo_capsule);
-		glDeleteBuffers(1, &ebo_capsule);
+		glDeleteVertexArrays(1, &(GLuint)vao_capsule);
+		glDeleteBuffers(1, &(GLuint)vbo_capsule);
+		glDeleteBuffers(1, &(GLuint)ebo_capsule);
 		break;
 	}
 }

@@ -13,6 +13,8 @@
 #include "RE_Mesh.h"
 #include "ResourceManager.h"
 #include "RE_ModelImporter.h"
+#include "RE_PrimitiveManager.h"
+#include "RE_CompPrimitive.h"
 
 #include "RapidJson\include\pointer.h"
 #include "RapidJson\include\stringbuffer.h"
@@ -1279,6 +1281,22 @@ RE_GameObject * JSONNode::FillGO()
 							rotation,
 							scale);
 						break;
+					case C_SPHERE:
+					{
+						RE_CompPrimitive* newSphere = nullptr;
+						new_go->AddComponent(newSphere = App->primitives->CreateSphere(new_go, c.FindMember("slices")->value.GetInt(), c.FindMember("stacks")->value.GetInt()));
+						vector = c.FindMember("color")->value;
+						newSphere->SetColor(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
+					}
+					break;
+					case C_CUBE:
+					{
+						RE_CompPrimitive* newCube = nullptr;
+						new_go->AddComponent(newCube = App->primitives->CreateCube(new_go));
+						vector = c.FindMember("color")->value;
+						newCube->SetColor(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
+					}
+					break;
 					}
 				}
 			}

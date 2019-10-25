@@ -12,6 +12,9 @@
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
 #include "ModuleScene.h"
+#include "FileSystem.h"
+
+#include "par_shapes.h"
 
 #define SMALL_INFINITY 2000
 
@@ -144,7 +147,15 @@ void RE_CompPlane::Draw()
 RE_CompCube::RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count) : 
 	RE_CompPrimitive(C_CUBE, game_obj, VAO, shader), triangle_count(triangle_count) 
 {
-	color = math::vec(1.0f, 0.15f, 0.15f);
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+}
+
+RE_CompCube::RE_CompCube(const RE_CompCube & cmpCube, RE_GameObject * go) :
+	RE_CompPrimitive(C_CUBE, go, cmpCube.RE_CompPrimitive::VAO, cmpCube.RE_CompPrimitive::shader)
+{
+	RE_CompPrimitive::color = cmpCube.RE_CompPrimitive::color;
+	triangle_count = cmpCube.triangle_count;
+	RE_CompPrimitive::VAO = App->primitives->CheckCubeVAO();
 }
 
 RE_CompCube::~RE_CompCube()
@@ -164,7 +175,7 @@ void RE_CompCube::Draw()
 	if (!show_checkers)
 	{
 		// Apply Diffuse Color
-		ShaderManager::setFloat(shader_id, "objectColor", color);
+		ShaderManager::setFloat(shader_id, "objectColor", RE_CompPrimitive::color);
 
 		// Draw
 		glBindVertexArray(RE_CompPrimitive::VAO);
@@ -190,6 +201,31 @@ void RE_CompCube::Draw()
 	ShaderManager::use(0);
 }
 
+void RE_CompCube::DrawProperties()
+{
+	if (ImGui::CollapsingHeader("Cube Primitive"))
+	{
+		ImGui::Checkbox("Use checkers texture", &show_checkers);
+
+		float p[3] = { RE_CompPrimitive::color.x, RE_CompPrimitive::color.y, RE_CompPrimitive::color.z };
+		if (ImGui::DragFloat3("Diffuse Color", p, 0.01f, 0.f, 1.0f, "%.2f"))
+			RE_CompPrimitive::color = math::vec(p[0], p[1], p[2]);
+	}
+}
+
+void RE_CompCube::Serialize(JSONNode * node, rapidjson::Value * comp_array)
+{
+	rapidjson::Value val(rapidjson::kObjectType);
+	val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetInt((int)ComponentType::C_CUBE), node->GetDocument()->GetAllocator());
+
+	rapidjson::Value float_array(rapidjson::kArrayType);
+
+	float_array.PushBack(RE_CompPrimitive::color.x, node->GetDocument()->GetAllocator()).PushBack(RE_CompPrimitive::color.y, node->GetDocument()->GetAllocator()).PushBack(RE_CompPrimitive::color.z, node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("color"), float_array.Move(), node->GetDocument()->GetAllocator());
+
+	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
+}
+
 RE_CompFustrum::RE_CompFustrum(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_FUSTRUM, game_obj, VAO, shader) {}
 
 RE_CompFustrum::~RE_CompFustrum()
@@ -202,16 +238,25 @@ void RE_CompFustrum::Draw()
 
 }
 
-RE_CompSphere::RE_CompSphere(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
-	: RE_CompPrimitive(C_SPHERE, game_obj, VAO, shader),
-	triangle_count(triangle_count)
+RE_CompSphere::RE_CompSphere(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks)
+	: RE_CompPrimitive(C_SPHERE, game_obj, NULL, shader)
 {
-	color = math::vec(1.0f, 0.15f, 0.15f);
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+	GenerateNewSphere(tmpSl = _slice, tmpSt = _stacks);
+}
+
+RE_CompSphere::RE_CompSphere(const RE_CompSphere & cmpSphere, RE_GameObject * go)
+	: RE_CompPrimitive(C_SPHERE, go, NULL, cmpSphere.RE_CompPrimitive::shader)
+{
+	RE_CompPrimitive::color = cmpSphere.RE_CompPrimitive::color;
+	GenerateNewSphere(tmpSl = cmpSphere.slice, tmpSt = cmpSphere.stacks);
 }
 
 RE_CompSphere::~RE_CompSphere()
 {
-	App->primitives->Rest(RE_CompPrimitive::type);
+	glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+	glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+	glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
 }
 
 void RE_CompSphere::Draw()
@@ -226,7 +271,7 @@ void RE_CompSphere::Draw()
 	if (!show_checkers)
 	{
 		// Apply Diffuse Color
-		ShaderManager::setFloat(shader_id, "objectColor", color);
+		ShaderManager::setFloat(shader_id, "objectColor", RE_CompPrimitive::color);
 
 		// Draw
 		glBindVertexArray(RE_CompPrimitive::VAO);
@@ -254,13 +299,67 @@ void RE_CompSphere::Draw()
 
 void RE_CompSphere::DrawProperties()
 {
-	if (ImGui::CollapsingHeader("Sphere"))
+	if (ImGui::CollapsingHeader("Sphere Primitive"))
 	{
 		ImGui::Checkbox("Use checkers texture", &show_checkers);
 
-		float p[3] = { color.x, color.y, color.z };
-		if (ImGui::DragFloat3("Diffuse Color", p, 0.1f, 0.f, 255.f, "%.2f"))
-			color = math::vec(p[0], p[1], p[2]);
+		float p[3] = { RE_CompPrimitive::color.x, RE_CompPrimitive::color.y, RE_CompPrimitive::color.z };
+		if (ImGui::DragFloat3("Diffuse Color", p, 0.01f, 0.f, 1.0f, "%.2f"))
+			RE_CompPrimitive::color = math::vec(p[0], p[1], p[2]);
+
+		ImGui::DragInt("Slices: ", &tmpSl, 1.0f, 3);
+		ImGui::DragInt("Stacks: ", &tmpSt, 1.0f, 3);
+		if (ImGui::Button("Apply")) GenerateNewSphere(tmpSl, tmpSt);
+	}
+}
+
+void RE_CompSphere::Serialize(JSONNode * node, rapidjson::Value * comp_array)
+{
+	rapidjson::Value val(rapidjson::kObjectType);
+	val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetInt((int)ComponentType::C_SPHERE), node->GetDocument()->GetAllocator());
+
+	rapidjson::Value float_array(rapidjson::kArrayType);
+
+	float_array.PushBack(RE_CompPrimitive::color.x, node->GetDocument()->GetAllocator()).PushBack(RE_CompPrimitive::color.y, node->GetDocument()->GetAllocator()).PushBack(RE_CompPrimitive::color.z, node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("color"), float_array.Move(), node->GetDocument()->GetAllocator());
+
+	val.AddMember(rapidjson::Value::StringRefType("slices"), rapidjson::Value().SetInt((int)slice), node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("stacks"), rapidjson::Value().SetInt((int)stacks), node->GetDocument()->GetAllocator());
+
+	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
+}
+
+void RE_CompSphere::GenerateNewSphere(int _slice, int _stacks)
+{
+	if (slice != _slice || stacks != _stacks)
+	{
+		if (RE_CompPrimitive::VAO != 0) {
+			glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		}
+
+		slice = _slice; stacks = _stacks;
+
+		par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(slice, stacks);
+
+		glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+		glBindVertexArray(RE_CompPrimitive::VAO);
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
+		glBufferData(GL_ARRAY_BUFFER, sphere->npoints * sizeof(float) * 3, sphere->points, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+		glEnableVertexAttribArray(0);
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RE_CompPrimitive::EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, sphere->triangles, GL_STATIC_DRAW);
+
+		triangle_count = sphere->ntriangles;
+
+		par_shapes_free_mesh(sphere);
 	}
 }
 
