@@ -55,7 +55,7 @@ bool ModuleScene::Start()
 	else
 	{
 		// Load default FBX
-		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets("Assets/Meshes/street/Street environment_V01.FBX");
+		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets("Assets/Meshes/BakerHouse/BakerHouse.fbx");
 		//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
 
 		root = new RE_GameObject("root");
@@ -311,6 +311,10 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 		selected = nullptr;
 		root = new RE_GameObject("root");
 		root->AddChild(toAdd);
+
+		// FOCUS CAMERA ON DROPPED GEOMETRY
+		App->scene->SetSelected(toAdd);
+		App->editor->FocusSelected();
 	}
 	else
 		LOG_ERROR("Error to load dropped fbx");

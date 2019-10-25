@@ -12,6 +12,7 @@
 #include "RE_CompMesh.h"
 #include "RE_Mesh.h"
 #include "ResourceManager.h"
+#include "RE_ModelImporter.h"
 
 #include "RapidJson\include\pointer.h"
 #include "RapidJson\include\stringbuffer.h"
@@ -231,7 +232,7 @@ const char * FileSystem::GetZipPath()
 void FileSystem::HandleDropedFile(const char * file)
 {
 	std::string full_path(file);
-	std::string directory = full_path.substr(0, full_path.find_last_of('\\') + 2);
+	std::string directory = full_path.substr(0, full_path.find_last_of('\\') + 1);
 	std::string fileNameExtension = full_path.substr(full_path.find_last_of("\\") + 1);
 	std::string fileName = fileNameExtension.substr(0, fileNameExtension.find_last_of("."));
 	std::string ext = full_path.substr(full_path.find_last_of(".") + 1);
@@ -295,10 +296,52 @@ void FileSystem::HandleDropedFile(const char * file)
 	}
 	else if (ext.compare("fbx") == 0)
 	{
+		std::vector<std::string> resourcesNames = App->modelImporter->GetOutsideResourcesAssetsPath(file);
+		std::vector<std::string> resourcesPath;
+		resourcesPath.resize(resourcesNames.size());
 
-		// FOCUS CAMERA ON DROPPED GEOMETRY
-		// App->scene->SetSelected(go);
-		// App->editor->FocusSelected();
+		std::string exportPath("FindFile/");
+		AddPath(directory.c_str(), exportPath.c_str());
+		for (uint i = 0; i < resourcesNames.size(); i++)
+			resourcesPath[i] = RecursiveFindFile(directory.c_str(), exportPath.c_str(), resourcesNames[i].c_str());
+		App->fs->RemovePath(directory.c_str());
+
+		//copiar a asssets
+		std::string assetsPath("Assets/Meshes/");
+		assetsPath += fileName;
+		assetsPath += "/";
+
+		if (!Exists(assetsPath.c_str())) {
+			std::string fbxAssetsPath(assetsPath);
+			fbxAssetsPath += fileNameExtension;
+			RE_FileIO* fbxFile = QuickBufferFromPDPath(file);
+			if (fbxFile) {
+
+				RE_FileIO fbxAssets(fbxAssetsPath.c_str(), GetZipPath());
+				fbxAssets.Save(fbxFile->GetBuffer(), fbxFile->GetSize());
+
+				DEL(fbxFile);
+
+				for (uint i = 0; i < resourcesPath.size(); i++) {
+					std::string resourceAssetsPath(assetsPath);
+					resourceAssetsPath += resourcesNames[i];
+
+					RE_FileIO* resourceFile = QuickBufferFromPDPath(resourcesPath[i].c_str());
+
+					if (resourceFile) {
+						RE_FileIO resourceAssets(resourceAssetsPath.c_str(), GetZipPath());
+						resourceAssets.Save(resourceFile->GetBuffer(), resourceFile->GetSize());
+						DEL(resourceFile);
+					}
+				}
+				App->scene->LoadFBXOnScene(fbxAssetsPath.c_str());
+			}
+		}
+		else
+		{
+			std::string fbxInExixtAssets = RecursiveFindFbx(assetsPath.c_str());
+			if(!fbxInExixtAssets.empty()) App->scene->LoadFBXOnScene(fbxInExixtAssets.c_str());
+		}
 	}
 	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
 	{
@@ -345,6 +388,51 @@ std::string FileSystem::RecursiveFindFbx(const char * path)
 
 	PHYSFS_freeList(rc);
 	return fbxPathReturn;
+}
+
+std::string FileSystem::RecursiveFindFile(const char* directory_path, const char* exporting_path, const char* fileToFind)
+{
+	std::string	filePathReturn;
+	std::string	directoryPath(directory_path);
+	std::string iterPath(exporting_path);
+
+	char **rc = PHYSFS_enumerateFiles(iterPath.c_str());
+	char **i;
+
+	for (i = rc; *i != NULL; i++)
+	{
+		std::string inPath(iterPath);
+		inPath += *i;
+
+		PHYSFS_Stat fileStat;
+		if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
+			if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
+				inPath += "/";
+				directoryPath += *i; directoryPath += "\\";
+
+				filePathReturn = RecursiveFindFile(directoryPath.c_str(), inPath.c_str(), fileToFind);
+				if (!filePathReturn.empty()) {
+					PHYSFS_freeList(rc);
+					return filePathReturn;
+				}
+			}
+			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
+
+				std::string fileName = inPath.substr(inPath.find_last_of("/") + 1);
+
+				if (fileName.compare(fileToFind) == 0) {
+					PHYSFS_freeList(rc);
+					directoryPath += fileName;
+					return directoryPath;
+				}
+
+			}
+
+		}
+	}
+
+	PHYSFS_freeList(rc);
+	return directoryPath;
 }
 
 bool FileSystem::RecursiveComparePath(const char * path1, const char * path2)
