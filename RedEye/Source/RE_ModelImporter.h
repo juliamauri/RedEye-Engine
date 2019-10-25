@@ -11,6 +11,7 @@ class RE_Prefab;
 
 #include "MathGeoLib/include/Math/float4x4.h"
 
+#include <vector>
 #include <string>
 #include <map>
 
@@ -34,6 +35,8 @@ public:
 	void ProcessMeshes(const aiScene* scene);
 	void ProcessNode(aiNode* node, const aiScene* scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot = false);
 	const char* ProcessMeshFromLibrary(const char* file_library, const char* reference, const char* file_assets);
+
+	std::vector<std::string> GetOutsideResourcesAssetsPath(const char * path);
 
 private:
 	const char* folderPath = nullptr;

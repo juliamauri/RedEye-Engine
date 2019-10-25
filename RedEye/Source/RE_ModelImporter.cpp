@@ -97,8 +97,8 @@ RE_Prefab*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int siz
 
 		//Mount a go hiteracy with nodes from model
 		RE_GameObject* rootGO = new RE_GameObject(aditionalData->name.c_str(), GUID_NULL);
-		ProcessNode(scene->mRootNode, scene, rootGO, math::float4x4::identity, true);
 
+		ProcessNode(scene->mRootNode, scene, rootGO, math::float4x4::identity, true);
 		//We save own format of model as internal prefab
 		newModelPrefab = new RE_Prefab(rootGO, true);
 		//App->resources->Reference(newModelPrefab);
@@ -174,8 +174,9 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 
 			const char* md5Mesh = aditionalData->meshesLoaded.at(scene->mMeshes[node->mMeshes[i]]);
 			RE_CompMesh* comp_mesh = new RE_CompMesh(goMesh, md5Mesh);
+			comp_mesh->SetMaterial(aditionalData->materialsLoaded.at(scene->mMaterials[scene->mMeshes[node->mMeshes[i]]->mMaterialIndex]));
 			goMesh->AddCompMesh(comp_mesh);
-
+			
 			//meshes.rbegin()->name = node->mName.C_Str();
 			//total_triangle_count += meshes.rbegin()->triangle_count;
 		}
@@ -294,6 +295,163 @@ const char* RE_ModelImporter::ProcessMeshFromLibrary(const char * file_library, 
 		DEL(mesh_json);
 	}
 	return (mesh_resource) ? mesh_resource->GetMD5() : nullptr;
+}
+
+std::vector<std::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(const char * path)
+{
+	std::vector<std::string> retPaths;
+	RE_FileIO* fbxloaded = App->fs->QuickBufferFromPDPath(path);
+
+	if (fbxloaded != nullptr)
+	{
+		Assimp::Importer importer;
+		const aiScene *scene = importer.ReadFileFromMemory(fbxloaded->GetBuffer(), fbxloaded->GetSize(), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | /*aiProcess_PreTransformVertices |*/ aiProcess_SortByPType | aiProcess_FlipUVs);
+
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+			LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
+		else
+		{
+			if (scene->HasMaterials()) {
+				for (uint i = 0; i < scene->mNumMaterials; i++) {
+					aiMaterial* material = scene->mMaterials[i];
+
+					if (uint textures = material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+					{
+						for (uint t = 0; t < textures; t++)
+						{
+							aiString texturePath;
+							if (AI_SUCCESS == material->GetTexture(aiTextureType_DIFFUSE, t, &texturePath)) {
+								std::string file_path(texturePath.C_Str());
+								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+								retPaths.push_back(filename);
+							}
+						}
+					}
+
+					if (uint textures = material->GetTextureCount(aiTextureType_SPECULAR) > 0)
+					{
+						for (uint t = 0; t < textures; t++)
+						{
+							aiString texturePath;
+							if (AI_SUCCESS == material->GetTexture(aiTextureType_SPECULAR, t, &texturePath)) {
+								retPaths.push_back(texturePath.C_Str());
+							}
+						}
+					}
+
+					if (uint textures = material->GetTextureCount(aiTextureType_AMBIENT) > 0)
+					{
+						for (uint t = 0; t < textures; t++)
+						{
+							aiString texturePath;
+							if (AI_SUCCESS == material->GetTexture(aiTextureType_AMBIENT, t, &texturePath)) {
+								std::string file_path(texturePath.C_Str());
+								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+								retPaths.push_back(filename);
+							}
+						}
+					}
+
+					if (uint textures = material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
+					{
+						for (uint t = 0; t < textures; t++)
+						{
+							aiString texturePath;
+							if (AI_SUCCESS == material->GetTexture(aiTextureType_EMISSIVE, t, &texturePath)) {
+								std::string file_path(texturePath.C_Str());
+								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+								retPaths.push_back(filename);
+							}
+						}
+					}
+
+					if (uint textures = material->GetTextureCount(aiTextureType_OPACITY) > 0)
+					{
+						for (uint t = 0; t < textures; t++)
+						{
+							aiString texturePath;
+							if (AI_SUCCESS == material->GetTexture(aiTextureType_OPACITY, t, &texturePath)) {
+								std::string file_path(texturePath.C_Str());
+								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+								retPaths.push_back(filename);
+							}
+						}
+					}
+
+					if (uint textures = material->GetTextureCount(aiTextureType_SHININESS) > 0)
+					{
+						for (uint t = 0; t < textures; t++)
+						{
+							aiString texturePath;
+							if (AI_SUCCESS == material->GetTexture(aiTextureType_SHININESS, t, &texturePath)) {
+								std::string file_path(texturePath.C_Str());
+								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+								retPaths.push_back(filename);
+							}
+						}
+					}
+
+					if (uint textures = material->GetTextureCount(aiTextureType_HEIGHT) > 0)
+					{
+						for (uint t = 0; t < textures; t++)
+						{
+							aiString texturePath;
+							if (AI_SUCCESS == material->GetTexture(aiTextureType_HEIGHT, t, &texturePath)) {
+								std::string file_path(texturePath.C_Str());
+								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+								retPaths.push_back(filename);
+							}
+						}
+					}
+
+					if (uint textures = material->GetTextureCount(aiTextureType_NORMALS) > 0)
+					{
+						for (uint t = 0; t < textures; t++)
+						{
+							aiString texturePath;
+							if (AI_SUCCESS == material->GetTexture(aiTextureType_NORMALS, t, &texturePath)) {
+								std::string file_path(texturePath.C_Str());
+								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+								retPaths.push_back(filename);
+							}
+						}
+					}
+
+					if (uint textures = material->GetTextureCount(aiTextureType_REFLECTION) > 0)
+					{
+						for (uint t = 0; t < textures; t++)
+						{
+							aiString texturePath;
+							if (AI_SUCCESS == material->GetTexture(aiTextureType_REFLECTION, t, &texturePath)) {
+								std::string file_path(texturePath.C_Str());
+								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+								retPaths.push_back(filename);
+							}
+						}
+					}
+
+					if (uint textures = material->GetTextureCount(aiTextureType_UNKNOWN) > 0)
+					{
+						for (uint t = 0; t < textures; t++)
+						{
+							aiString texturePath;
+							if (AI_SUCCESS == material->GetTexture(aiTextureType_UNKNOWN, t, &texturePath)) {
+								std::string file_path(texturePath.C_Str());
+								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+								retPaths.push_back(filename);
+							}
+						}
+					}
+
+				}
+			}
+		}
+
+	}
+
+	DEL(fbxloaded);
+
+	return retPaths;
 }
 
 void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
