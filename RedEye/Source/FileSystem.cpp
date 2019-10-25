@@ -296,24 +296,60 @@ void FileSystem::HandleDropedFile(const char * file)
 	}
 	else if (ext.compare("fbx") == 0)
 	{
-		std::vector<std::string> resourcesNames = App->modelImporter->GetOutsideResourcesAssetsPath(file);
-		std::vector<std::string> resourcesPath;
-		resourcesPath.resize(resourcesNames.size());
-
-		std::string exportPath("FindFile/");
-		AddPath(directory.c_str(), exportPath.c_str());
-		for (uint i = 0; i < resourcesNames.size(); i++)
-			resourcesPath[i] = RecursiveFindFile(directory.c_str(), exportPath.c_str(), resourcesNames[i].c_str());
-		App->fs->RemovePath(directory.c_str());
-
-		//copiar a asssets
 		std::string assetsPath("Assets/Meshes/");
 		assetsPath += fileName;
 		assetsPath += "/";
 
-		if (!Exists(assetsPath.c_str())) {
-			std::string fbxAssetsPath(assetsPath);
-			fbxAssetsPath += fileNameExtension;
+		std::string fbxAssetsPath;
+		bool neededCopyToAssets = false;
+
+		if (Exists(assetsPath.c_str())) {
+			fbxAssetsPath = RecursiveFindFbx(assetsPath.c_str());
+			if (fbxAssetsPath.empty()) {
+				//TODO user chose
+
+				//Replace folder TODO
+
+				//DEFAULT Creates another folder DONE
+				assetsPath = assetsPath.substr(0, assetsPath.find_last_of("/"));
+				uint count = 0;
+				std::string pathCount;
+				do {
+					count++;
+					pathCount = assetsPath;
+					pathCount += " "; 
+					pathCount += std::to_string(count);
+				} while (!Exists(pathCount.c_str()));
+				if (count > 0)
+				{
+					assetsPath += " ";	assetsPath += std::to_string(count);
+
+					fbxAssetsPath = assetsPath; fbxAssetsPath += fileName;
+					fbxAssetsPath += " ";  fbxAssetsPath += std::to_string(count);
+					fbxAssetsPath += ".";  fbxAssetsPath += ext;
+				}
+				else
+				{
+					assetsPath += "/";
+					fbxAssetsPath = assetsPath; fbxAssetsPath += fileNameExtension;
+				}
+				neededCopyToAssets = true;
+			}
+		}
+
+		if (neededCopyToAssets)
+		{
+			std::vector<std::string> resourcesNames = App->modelImporter->GetOutsideResourcesAssetsPath(file);
+			std::vector<std::string> resourcesPath;
+			resourcesPath.resize(resourcesNames.size());
+
+			std::string exportPath("FindFile/");
+			AddPath(directory.c_str(), exportPath.c_str());
+			for (uint i = 0; i < resourcesNames.size(); i++)
+				resourcesPath[i] = RecursiveFindFile(directory.c_str(), exportPath.c_str(), resourcesNames[i].c_str());
+			App->fs->RemovePath(directory.c_str());
+
+			//copiar a asssets
 			RE_FileIO* fbxFile = QuickBufferFromPDPath(file);
 			if (fbxFile) {
 
@@ -334,14 +370,9 @@ void FileSystem::HandleDropedFile(const char * file)
 						DEL(resourceFile);
 					}
 				}
-				App->scene->LoadFBXOnScene(fbxAssetsPath.c_str());
 			}
 		}
-		else
-		{
-			std::string fbxInExixtAssets = RecursiveFindFbx(assetsPath.c_str());
-			if(!fbxInExixtAssets.empty()) App->scene->LoadFBXOnScene(fbxInExixtAssets.c_str());
-		}
+		App->scene->LoadFBXOnScene(fbxAssetsPath.c_str());
 	}
 	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
 	{
