@@ -4,6 +4,7 @@
 #include "RE_Math.h"
 #include "RE_Component.h"
 
+
 class RE_CompPrimitive : public RE_Component
 {
 public:
@@ -133,12 +134,15 @@ public:
 class RE_CompSphere : public RE_CompPrimitive, RE_CompAxis
 {
 public:
-	RE_CompSphere(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, unsigned int numstodraw);
+	RE_CompSphere(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
 	~RE_CompSphere();
 	void Draw() override;
+	void DrawProperties() override;
 
 private:
-	unsigned int numstodraw;
+	bool show_checkers = false;
+	math::vec color;
+	int triangle_count;
 };
 
 /**************************************************

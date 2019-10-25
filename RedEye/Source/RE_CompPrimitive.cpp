@@ -11,6 +11,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
+#include "ModuleScene.h"
 
 #define SMALL_INFINITY 2000
 
@@ -175,7 +176,12 @@ void RE_CompFustrum::Draw()
 
 }
 
-RE_CompSphere::RE_CompSphere(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, unsigned int numstodraw) : numstodraw(numstodraw), RE_CompPrimitive(C_SPHERE, game_obj, VAO, shader) {}
+RE_CompSphere::RE_CompSphere(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
+	: RE_CompPrimitive(C_SPHERE, game_obj, VAO, shader),
+	triangle_count(triangle_count)
+{
+	color = math::vec(255.0f, 40.0f, 40.0f);
+}
 
 RE_CompSphere::~RE_CompSphere()
 {
@@ -184,17 +190,52 @@ RE_CompSphere::~RE_CompSphere()
 
 void RE_CompSphere::Draw()
 {
-	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
+	unsigned int shader_id = (show_checkers ? App->scene->modelloading : RE_CompPrimitive::shader);
 
-	glBindVertexArray(RE_CompPrimitive::VAO);
-	glEnable(GL_PRIMITIVE_RESTART);
-	glPrimitiveRestartIndex(GL_PRIMITIVE_RESTART_FIXED_INDEX);
-	glDrawElements(GL_QUAD_STRIP, numstodraw, GL_UNSIGNED_INT, NULL);
+	ShaderManager::use(shader_id);
+	ShaderManager::setFloat4x4(shader_id, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+	ShaderManager::setFloat4x4(shader_id, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(shader_id, "projection", App->editor->GetCamera()->GetProjectionPtr());
+
+	if (!show_checkers)
+	{
+		// Apply Diffuse Color
+		ShaderManager::setFloat(shader_id, "objectColor", color);
+
+		// Draw
+		glBindVertexArray(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count, GL_UNSIGNED_SHORT, 0);
+	}
+	else
+	{
+		// Apply Checkers Texture
+		glActiveTexture(GL_TEXTURE0);
+		ShaderManager::setUnsignedInt(shader_id, "texture_diffuse0", 0);
+		glBindTexture(GL_TEXTURE_2D, App->scene->checkers_texture);
+
+		// Draw
+		glBindVertexArray(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count, GL_UNSIGNED_SHORT, 0);
+
+		// Release Texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 	glBindVertexArray(0);
+	ShaderManager::use(0);
+}
+
+void RE_CompSphere::DrawProperties()
+{
+	if (ImGui::CollapsingHeader("Sphere"))
+	{
+		ImGui::Checkbox("Use checkers texture", &show_checkers);
+
+		float p[3] = { color.x, color.y, color.z };
+		if (ImGui::DragFloat3("Diffuse Color", p, 0.1f, 0.f, 255.f, "%.2f"))
+			color = math::vec(p[0], p[1], p[2]);
+	}
 }
 
 RE_CompCylinder::RE_CompCylinder(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_CYLINDER, game_obj, VAO, shader) {}

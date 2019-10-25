@@ -94,6 +94,18 @@ update_status ModuleEditor::Update()
 				ImGui::EndMenu();
 			}
 
+			// Create
+			if (ImGui::BeginMenu("Create"))
+			{
+				if (ImGui::MenuItem("Cube"))
+					App->scene->CreateCube();
+
+				if (ImGui::MenuItem("Sphere"))
+					App->scene->CreateSphere();
+
+				ImGui::EndMenu();
+			}
+
 			// View
 			if (ImGui::BeginMenu("View"))
 			{

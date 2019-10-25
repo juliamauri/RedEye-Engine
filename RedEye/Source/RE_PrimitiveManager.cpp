@@ -9,6 +9,8 @@
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 
+#include "par_shapes.h"
+
 RE_PrimitiveManager::RE_PrimitiveManager()
 {
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_POINT, 0));
@@ -24,7 +26,8 @@ RE_PrimitiveManager::RE_PrimitiveManager()
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CAPSULE, 0));
 }
 
-RE_PrimitiveManager::~RE_PrimitiveManager()	{}
+RE_PrimitiveManager::~RE_PrimitiveManager()
+{}
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateAxis(RE_GameObject* go)
 {
@@ -275,61 +278,27 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateFustrum(RE_GameObject* game_obj)
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateSphere(RE_GameObject* game_obj)
 {
-	unsigned int ntd = 0;
-	if (primitives_count.find(C_SPHERE)->second++ == 0)
-	{
-		int i, j;
-		int lats = 40;
-		int longs = 40;
-		std::vector<float> vertices;
-		std::vector<unsigned int> indices;
+	//TODO: if (primitives_count.find(C_SPHERE)->second++ == 0)
 
-		int indicator = 0;
-		for (i = 0; i <= lats; i++) {
-			double lat0 = (double)math::pi * (-0.5 + (double)(i - 1) / lats);
-			double z0 = sin(lat0);
-			double zr0 = cos(lat0);
+	par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(16,18);
+	
+	glGenVertexArrays(1, &vao_sphere);
+	glBindVertexArray(vao_sphere);
 
-			double lat1 = (double)math::pi * (-0.5 + (double)i / lats);
-			double z1 = sin(lat1);
-			double zr1 = cos(lat1);
+	glGenBuffers(1, &vbo_sphere);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_sphere);
+	glBufferData(GL_ARRAY_BUFFER, sphere->npoints * sizeof(float), sphere->points, GL_STATIC_DRAW);
 
-			for (j = 0; j <= longs; j++) {
-				double lng = 2 * (double)math::pi * (double)(j - 1) / longs;
-				double x = cos(lng);
-				double y = sin(lng);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(0);
 
-				vertices.push_back(x * zr0);
-				vertices.push_back(y * zr0);
-				vertices.push_back(z0);
-				indices.push_back(indicator);
-				indicator++;
+	glGenBuffers(1, &ebo_sphere);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_sphere);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short), sphere->triangles, GL_STATIC_DRAW);
 
-				vertices.push_back(x * zr1);
-				vertices.push_back(y * zr1);
-				vertices.push_back(z1);
-				indices.push_back(indicator);
-				indicator++;
-			}
-			indices.push_back(GL_PRIMITIVE_RESTART_FIXED_INDEX);
-		}
+	RE_CompPrimitive* ret = new RE_CompSphere(game_obj, vao_sphere, shaderPrimitive, sphere->ntriangles);
+	par_shapes_free_mesh(sphere);
 
-		glGenVertexArrays(1, &vao_sphere);
-		glBindVertexArray(vao_sphere);
-
-		glGenBuffers(1, &vbo_sphere);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_sphere);
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(0);
-
-		glGenBuffers(1, &ebo_sphere);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_sphere);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
-		ntd = indices.size();
-	}
-	RE_CompPrimitive* ret = new RE_CompSphere(game_obj, vao_sphere, shaderPrimitive, ntd);
 	return ret;
 }
 
