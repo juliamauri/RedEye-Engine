@@ -76,6 +76,12 @@ bool ModuleScene::Start()
 	root->ResetBoundingBoxFromChilds();
 	aabb_need_reset = false;
 
+	// FOCUS CAMERA
+	if (!root->GetChilds().empty()) {
+		App->scene->SetSelected(root->GetChilds().begin()._Ptr->_Myval);
+		App->editor->FocusSelected();
+	}
+
 	// Quadtree
 	//quad_tree.Build(root);
 
@@ -343,6 +349,8 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 		root = new RE_GameObject("root");
 		root->AddChild(toAdd);
 
+		root->ResetBoundingBoxFromChilds();
+		aabb_need_reset = false;
 		// FOCUS CAMERA ON DROPPED GEOMETRY
 		App->scene->SetSelected(toAdd);
 		App->editor->FocusSelected();
