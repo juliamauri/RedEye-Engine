@@ -78,9 +78,9 @@ bool ModuleScene::Start()
 
 	// Checkers
 	int value;
-	int IMAGE_ROWS = 64;
-	int IMAGE_COLS = 64;
-	GLubyte imageData[64][64][3];
+	int IMAGE_ROWS = 264;
+	int IMAGE_COLS = 264;
+	GLubyte imageData[264][264][3];
 	for (int row = 0; row < IMAGE_ROWS; row++) {
 		for (int col = 0; col < IMAGE_COLS; col++) {
 			// Each cell is 8x8, value is 0 or 255 (black or white)
@@ -155,6 +155,18 @@ void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
 void ModuleScene::DuplicateSelectedObject()
 {
 	if(selected != nullptr) selected->GetParent()->AddChild(new RE_GameObject(*selected));
+}
+
+void ModuleScene::CreateCube()
+{
+	RE_GameObject* cube_go = AddGO("Sphere", root);
+	cube_go->AddComponent(App->primitives->CreateCube(cube_go));
+}
+
+void ModuleScene::CreateSphere()
+{
+	RE_GameObject* sphere_go = AddGO("Sphere", root);
+	sphere_go->AddComponent(App->primitives->CreateSphere(sphere_go));
 }
 
 void ModuleScene::DrawEditor()

@@ -28,6 +28,9 @@ public:
 	void AddGoToRoot(RE_GameObject* toAdd);
 	void DuplicateSelectedObject();
 
+	void CreateCube();
+	void CreateSphere();
+
 	void DrawEditor() override;
 	void DrawScene();
 	void DrawHeriarchy();
