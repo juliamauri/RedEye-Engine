@@ -38,7 +38,7 @@ ModuleScene::~ModuleScene()
 bool ModuleScene::Init(JSONNode * node)
 {
 	defaultModel = node->PullString("defaultModel", DEFAULTMODEL);;
-	return false;
+	return true;
 }
 
 bool ModuleScene::Start()
