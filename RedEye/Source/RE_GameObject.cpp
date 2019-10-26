@@ -603,15 +603,8 @@ void RE_GameObject::ResetGlobalBoundingBox()
 {
 	// Global Bounding Box
 	math::float4x4 global_trs = transform->GetMatrixModel().Transposed();
-	//global_bounding_box = local_bounding_box.Transform(global_trs.Float3x3Part()).MinimalEnclosingAABB();
-	
-	const math::vec points[2] = {
-				/*global_bounding_box.minPoint + global_trs.Row3(3),
-				global_bounding_box.maxPoint + global_trs.Row3(3) };*/
-		global_trs.TransformPos(local_bounding_box.minPoint) + global_trs.Row3(3),
-		global_trs.TransformPos(local_bounding_box.maxPoint) + global_trs.Row3(3) };
-
-	global_bounding_box.SetFrom(&points[0], 2);
+	global_bounding_box = local_bounding_box;
+	global_bounding_box.TransformAsAABB(global_trs);
 }
 
 math::AABB RE_GameObject::GetLocalBoundingBox() const

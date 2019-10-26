@@ -126,7 +126,7 @@ public:
 ******	Cube
 **************************************************/
 
-class RE_CompCube : public RE_CompPrimitive, RE_CompAxis
+class RE_CompCube : public RE_CompPrimitive
 {
 public:
 	RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);

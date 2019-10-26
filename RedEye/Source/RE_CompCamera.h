@@ -16,8 +16,8 @@ public:
 	RE_CompCamera(
 		RE_GameObject* go = nullptr,
 		bool toPerspective = true, 
-		float near_plane = 0.1f,
-		float far_plane = 10000.0f);
+		float near_plane = 150.0f,
+		float far_plane = 2000.0f);
 
 	RE_CompCamera(
 		RE_GameObject* go,
