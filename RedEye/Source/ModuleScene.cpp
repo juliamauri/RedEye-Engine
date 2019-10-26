@@ -46,6 +46,7 @@ bool ModuleScene::Start()
 	}
 
 	// Load scene
+	Timer timer;
 	std::string path_scene("Assets/Scenes/");
 	path_scene += GetName();
 	path_scene += ".re";
@@ -53,17 +54,16 @@ bool ModuleScene::Start()
 	if (scene_file.Load())
 	{
 		LOG("Importing scene from own format:");
-		Timer timer;
 		// Load saved scene
 		JSONNode* node = scene_file.GetRootNode("Game Objects");
 		root = node->FillGO();
 		DEL(node);
-		LOG("Time importing: %u ms", timer.Read());
+		LOG("Time imported: %u ms", timer.Read());
 	}
 	else
 	{
 		// Load default FBX
-		LOG("Importing scene from default assetr model:");
+		LOG("Importing scene from default asset model:");
 		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets("Assets/Meshes/BakerHouse/BakerHouse.fbx"); //street/Street environment_V01.FBX
 
 		root = new RE_GameObject("root");

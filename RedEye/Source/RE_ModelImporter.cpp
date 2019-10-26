@@ -55,7 +55,6 @@ RE_Prefab* RE_ModelImporter::LoadModelFromAssets(const char * path)
 {
 	Timer timer;
 	LOG("Importing Model from: %s", path);
-
 	RE_Prefab* modelreturn = nullptr;
 	RE_FileIO* mesh_file = nullptr;
 
@@ -77,8 +76,8 @@ RE_Prefab* RE_ModelImporter::LoadModelFromAssets(const char * path)
 		modelreturn = ProcessModel(mesh_file->GetBuffer(), mesh_file->GetSize());
 		DEL(aditionalData);
 		DEL(mesh_file);
+		LOG("Time imported model from assets: %u ms\n", timer.Read());
 	}
-	LOG("Time importing: %u ms", timer.Read());
 
 	return modelreturn;
 }
@@ -117,7 +116,7 @@ RE_Prefab*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int siz
 
 void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot)
 {
-	LOG_SECONDARY("%s Node: %s (%u meshes | %u children)",
+	LOG_TERCIARY("%s Node: %s (%u meshes | %u children)",
 		node->mParent ? "SON" : "PARENT",
 		node->mName.C_Str(),
 		node->mNumMeshes,
@@ -283,6 +282,8 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 
 const char* RE_ModelImporter::ProcessMeshFromLibrary(const char * file_library, const char * reference, const char * file_assets)
 {
+	Timer timer;
+	LOG("Processing mesh from library:\nLibrary path: %s\nOrigin asset: %s\n", file_library, file_assets);
 	std::vector<Vertex> vertexes;
 	std::vector<unsigned int> indexes;
 
@@ -301,6 +302,7 @@ const char* RE_ModelImporter::ProcessMeshFromLibrary(const char * file_library, 
 		App->resources->Reference(mesh_resource);
 
 		DEL(mesh_json);
+		LOG("Time imported mesh from library: %u ms\n", timer.Read());
 	}
 	return (mesh_resource) ? mesh_resource->GetMD5() : nullptr;
 }

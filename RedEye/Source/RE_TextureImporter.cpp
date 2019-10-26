@@ -6,6 +6,7 @@
 
 #include "Globals.h"
 #include "OutputLog.h"
+#include "TimeManager.h"
 
 #include "md5.h"
 
@@ -55,6 +56,7 @@ bool RE_TextureImporter::Init()
 
 const char * RE_TextureImporter::LoadTextureAssets(const char * assetsPath)
 {
+	Timer timer;
 	const char* exists = nullptr;
 	std::string file_path(assetsPath);
 	std::string filename = file_path.substr(file_path.find_last_of("/") + 1);
@@ -72,15 +74,18 @@ const char * RE_TextureImporter::LoadTextureAssets(const char * assetsPath)
 			newTexture->SetMD5(md5Generated.c_str());
 			newTexture->SetType(Resource_Type::R_TEXTURE);
 			exists = App->resources->Reference(newTexture);
+			LOG("Time imported texture from assets: %u ms\n", timer.Read());
 		}
 		else
-			LOG("Getting %s from resources, already exits. md5: %s", filename.c_str(), exists);
+			LOG("Getting %s from resources, already exits\nmd5: %s\n", filename.c_str(), exists);
 	}
 	return exists;
 }
 
 const char * RE_TextureImporter::LoadTextureLibrary(const char * libraryPath, const char * assetsPath)
 {
+	Timer timer;
+	LOG("Loading texture from Library: %s\nOrigin asset: %s\n", libraryPath, assetsPath);
 	const char* exists = nullptr;
 
 	RE_FileIO file(libraryPath);
@@ -94,9 +99,16 @@ const char * RE_TextureImporter::LoadTextureLibrary(const char * libraryPath, co
 			newTexture->SetMD5(md5Generated.c_str());
 			newTexture->SetType(Resource_Type::R_TEXTURE);
 			exists = App->resources->Reference(newTexture);
+			LOG("Time imported texture from library: %u ms\n", timer.Read());
 		}
-	}
+		else
+		{
+			std::string file_path(assetsPath);
+			std::string filename = file_path.substr(file_path.find_last_of("/") + 1);
+			LOG("Getting %s from resources, already exits\nmd5: %s\n", filename.c_str(), exists);
+		}
 
+	}
 	return exists;
 }
 

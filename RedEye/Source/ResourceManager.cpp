@@ -57,7 +57,7 @@ const char* ResourceManager::Reference(ResourceContainer* rc)
 		resourceName = "undefined";
 		break;
 	}
-	LOG("Referencing the %s %s resource from %s | Imported file: %s | md5 generated: %s", rc->GetName(), resourceName.c_str(), rc->GetOrigin(), rc->GetFilePath(), rc->GetMD5());
+	LOG("Referencing the %s %s resource from %s\nAsset file: %s\nmd5 generated: %s\n", rc->GetName(), resourceName.c_str(), rc->GetOrigin(), rc->GetFilePath(), rc->GetMD5());
 	resources.insert(Resource(rc->GetMD5(), rc));
 	return rc->GetMD5();
 }
