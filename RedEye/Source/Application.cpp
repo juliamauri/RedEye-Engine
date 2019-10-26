@@ -130,7 +130,7 @@ bool Application::Init(int argc, char* argv[])
 				for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 					if ((*it)->IsActive() == true)
 					{
-						LOG("Starting Module %s", (*it)->GetName());
+						LOG_SEPARATOR("Starting Module %s", (*it)->GetName());
 						ret = (*it)->Start();
 					}
 			}

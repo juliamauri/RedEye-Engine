@@ -10,6 +10,8 @@
 #include "OutputLog.h"
 #include "SDL2\include\SDL_assert.h"
 
+#include <string>
+
 ResourceManager::ResourceManager()
 {}
 
@@ -27,6 +29,35 @@ ResourceManager::~ResourceManager()
 
 const char* ResourceManager::Reference(ResourceContainer* rc)
 {
+	std::string resourceName;
+	switch (rc->GetType())
+	{
+	case Resource_Type::R_TEXTURE:
+		resourceName = "texture";
+		break;
+	case Resource_Type::R_INTERNALPREFAB:
+		resourceName = "internal prefab";
+		break;
+	case Resource_Type::R_MATERIAL:
+		resourceName = "material";
+		break;
+	case Resource_Type::R_MESH:
+		resourceName = "mesh";
+		break;
+	case Resource_Type::R_PREFAB:
+		resourceName = "prefab";
+		break;
+	case Resource_Type::R_PRIMITIVE:
+		resourceName = "primitive";
+		break;
+	case Resource_Type::R_SHADER:
+		resourceName = "shader";
+		break;
+	case Resource_Type::R_UNDEFINED:
+		resourceName = "undefined";
+		break;
+	}
+	LOG("Referencing the %s %s resource from %s | Imported file: %s | md5 generated: %s", rc->GetName(), resourceName.c_str(), rc->GetOrigin(), rc->GetFilePath(), rc->GetMD5());
 	resources.insert(Resource(rc->GetMD5(), rc));
 	return rc->GetMD5();
 }

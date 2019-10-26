@@ -59,6 +59,7 @@ const char * RE_TextureImporter::LoadTextureAssets(const char * assetsPath)
 	std::string file_path(assetsPath);
 	std::string filename = file_path.substr(file_path.find_last_of("/") + 1);
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+	LOG("Importing %s texture from %s", filename.c_str(), assetsPath);
 
 	RE_FileIO file(assetsPath);
 	if (file.Load())
@@ -72,6 +73,8 @@ const char * RE_TextureImporter::LoadTextureAssets(const char * assetsPath)
 			newTexture->SetType(Resource_Type::R_TEXTURE);
 			exists = App->resources->Reference(newTexture);
 		}
+		else
+			LOG("Getting %s from resources, already exits. md5: %s", filename.c_str(), exists);
 	}
 	return exists;
 }

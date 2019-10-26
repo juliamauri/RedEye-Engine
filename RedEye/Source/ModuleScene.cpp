@@ -52,23 +52,26 @@ bool ModuleScene::Start()
 	Config scene_file(path_scene.c_str(), App->fs->GetZipPath());
 	if (scene_file.Load())
 	{
+		LOG("Importing scene from own format:");
+		Timer timer;
 		// Load saved scene
 		JSONNode* node = scene_file.GetRootNode("Game Objects");
 		root = node->FillGO();
 		DEL(node);
+		LOG("Time importing: %u ms", timer.Read());
 	}
 	else
 	{
 		// Load default FBX
-		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets("Assets/Meshes/BakerHouse/BakerHouse.fbx");
-		//App->meshes->LoadMeshOnGameObject(root, "BakerHouse/BakerHouse.fbx");
+		LOG("Importing scene from default assetr model:");
+		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets("Assets/Meshes/BakerHouse/BakerHouse.fbx"); //street/Street environment_V01.FBX
 
 		root = new RE_GameObject("root");
 		root->AddChild(newModel->GetRoot());
 		DEL(newModel);
 
 		// Add camera
-		(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
+		//(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
 	}
 
 	root->AddComponent(C_PLANE);

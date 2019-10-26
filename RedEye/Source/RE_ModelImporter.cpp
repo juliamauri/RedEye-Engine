@@ -17,6 +17,7 @@
 #include "OutputLog.h"
 #include "Globals.h"
 #include "md5.h"
+#include "TimeManager.h"
 
 #include "assimp\include\Importer.hpp"
 #include "assimp\include\scene.h"
@@ -52,6 +53,9 @@ bool RE_ModelImporter::Init(const char * def_shader)
 
 RE_Prefab* RE_ModelImporter::LoadModelFromAssets(const char * path)
 {
+	Timer timer;
+	LOG("Importing Model from: %s", path);
+
 	RE_Prefab* modelreturn = nullptr;
 	RE_FileIO* mesh_file = nullptr;
 
@@ -65,7 +69,7 @@ RE_Prefab* RE_ModelImporter::LoadModelFromAssets(const char * path)
 
 	if (mesh_file != nullptr)
 	{
-		LOG("Loading Model from: %s", assetsPath.c_str());
+		LOG("Loading Model");
 		aditionalData = new currentlyImporting();
 		aditionalData->workingfilepath = assetsPath;
 		uint l;
@@ -74,6 +78,7 @@ RE_Prefab* RE_ModelImporter::LoadModelFromAssets(const char * path)
 		DEL(aditionalData);
 		DEL(mesh_file);
 	}
+	LOG("Time importing: %u ms", timer.Read());
 
 	return modelreturn;
 }
@@ -89,16 +94,20 @@ RE_Prefab*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int siz
 		LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 	else
 	{
+		LOG_SECONDARY("Loading all materials");
 		//First loading all materials
 		if(scene->HasMaterials()) ProcessMaterials(scene);
 
+		LOG_SECONDARY("Loading all meshes");
 		//Second loading all meshes
 		if (scene->HasMeshes()) ProcessMeshes(scene);
 
+		LOG_SECONDARY("Processing model hierarchy");
 		//Mount a go hiteracy with nodes from model
 		RE_GameObject* rootGO = new RE_GameObject(aditionalData->name.c_str(), GUID_NULL);
-
 		ProcessNode(scene->mRootNode, scene, rootGO, math::float4x4::identity, true);
+
+		LOG_SECONDARY("Saving model as internal prefab.");
 		//We save own format of model as internal prefab
 		newModelPrefab = new RE_Prefab(rootGO, true);
 		//App->resources->Reference(newModelPrefab);
@@ -195,13 +204,12 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 
-		LOG_TERCIARY("Mesh %u: %s (%u vertices | %u faces | %u texture indexes | %u bones)",
+		LOG_TERCIARY("Mesh %u: %s (%u vertices | %u faces | %s material index)",
 			i,
 			mesh->mName.C_Str(),
 			mesh->mNumVertices,
 			mesh->mNumFaces,
-			mesh->mMaterialIndex,
-			mesh->mNumBones);
+			mesh->mMaterialIndex);
 
 		// process vertices
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -467,6 +475,7 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 		{
 			int i = 0;
 		}
+		LOG_TERCIARY("Loadinig %s material.", name.C_Str());
 
 		std::string filePath("Assets/Materials/");
 		filePath += name.C_Str();
