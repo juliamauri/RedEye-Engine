@@ -203,7 +203,7 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 
-		LOG_TERCIARY("Mesh %u: %s (%u vertices | %u faces | %s material index)",
+		LOG_TERCIARY("Mesh %u: %s (%u vertices | %u faces | %u material index)",
 			i,
 			mesh->mName.C_Str(),
 			mesh->mNumVertices,
@@ -276,6 +276,9 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 			App->resources->Reference(meshResource);
 			exists = meshResource->GetMD5();
 		}
+		else
+			LOG("Getting %s from resources, already exits\nmd5: %s\n", mesh->mName.C_Str(), exists);
+
 		aditionalData->meshesLoaded.insert(std::pair<aiMesh*, const char*>(mesh, exists));
 	}
 }

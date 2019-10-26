@@ -14,6 +14,7 @@ public:
 	ModuleScene(const char* name, bool start_enabled = true);
 	~ModuleScene();
 
+	bool Init(JSONNode* node) override;
 	bool Start() override;
 	update_status Update() override;
 	bool CleanUp() override;
@@ -52,6 +53,8 @@ public:
 	unsigned int checkers_texture;
 
 private:
+	//init values
+	std::string defaultModel;
 
 	RE_GameObject* root = nullptr;
 	RE_GameObject* selected = nullptr;

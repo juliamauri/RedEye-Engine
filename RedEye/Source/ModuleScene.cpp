@@ -24,6 +24,8 @@
 #include <gl/GL.h>
 #include <string>
 
+#define DEFAULTMODEL "Assets/Meshes/BakerHouse/BakerHouse.fbx"
+
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
 	all_aabb_color = math::vec(0.f, 225.f, 0.f);
@@ -32,6 +34,12 @@ ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, st
 
 ModuleScene::~ModuleScene()
 {}
+
+bool ModuleScene::Init(JSONNode * node)
+{
+	defaultModel = node->PullString("defaultModel", DEFAULTMODEL);;
+	return false;
+}
 
 bool ModuleScene::Start()
 {
@@ -64,7 +72,7 @@ bool ModuleScene::Start()
 	{
 		// Load default FBX
 		LOG("Importing scene from default asset model:");
-		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets("Assets/Meshes/BakerHouse/BakerHouse.fbx"); //street/Street environment_V01.FBX
+		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets(defaultModel.c_str());
 
 		root = new RE_GameObject("root");
 		root->AddChild(newModel->GetRoot());
