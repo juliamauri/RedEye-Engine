@@ -207,9 +207,7 @@ void RE_CompCube::DrawProperties()
 	{
 		ImGui::Checkbox("Use checkers texture", &show_checkers);
 
-		float p[3] = { RE_CompPrimitive::color.x, RE_CompPrimitive::color.y, RE_CompPrimitive::color.z };
-		if (ImGui::DragFloat3("Diffuse Color", p, 0.01f, 0.f, 1.0f, "%.2f"))
-			RE_CompPrimitive::color = math::vec(p[0], p[1], p[2]);
+		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
 	}
 }
 
@@ -241,15 +239,17 @@ void RE_CompFustrum::Draw()
 RE_CompSphere::RE_CompSphere(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks)
 	: RE_CompPrimitive(C_SPHERE, game_obj, NULL, shader)
 {
+	if (_slice < 3) _slice = 3;
+	if (_stacks < 3) _stacks = 3;
 	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-	GenerateNewSphere(tmpSl = _slice, tmpSt = _stacks);
+	GenerateNewSphere(slice = tmpSl = _slice, stacks = tmpSt = _stacks);
 }
 
 RE_CompSphere::RE_CompSphere(const RE_CompSphere & cmpSphere, RE_GameObject * go)
 	: RE_CompPrimitive(C_SPHERE, go, NULL, cmpSphere.RE_CompPrimitive::shader)
 {
 	RE_CompPrimitive::color = cmpSphere.RE_CompPrimitive::color;
-	GenerateNewSphere(tmpSl = cmpSphere.slice, tmpSt = cmpSphere.stacks);
+	GenerateNewSphere(slice = tmpSl = cmpSphere.slice, stacks = tmpSt = cmpSphere.stacks);
 }
 
 RE_CompSphere::~RE_CompSphere()
@@ -303,13 +303,28 @@ void RE_CompSphere::DrawProperties()
 	{
 		ImGui::Checkbox("Use checkers texture", &show_checkers);
 
-		float p[3] = { RE_CompPrimitive::color.x, RE_CompPrimitive::color.y, RE_CompPrimitive::color.z };
-		if (ImGui::DragFloat3("Diffuse Color", p, 0.01f, 0.f, 1.0f, "%.2f"))
-			RE_CompPrimitive::color = math::vec(p[0], p[1], p[2]);
+		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
 
-		ImGui::DragInt("Slices: ", &tmpSl, 1.0f, 3);
-		ImGui::DragInt("Stacks: ", &tmpSt, 1.0f, 3);
-		if (ImGui::Button("Apply")) GenerateNewSphere(tmpSl, tmpSt);
+		ImGui::PushItemWidth(75.0f);
+		if (ImGui::DragInt("Slices", &tmpSl, 1.0f, 3))
+		{
+			if (slice != tmpSl && tmpSl >= 3) {
+				slice = tmpSl;
+				canChange = true;
+			}
+			else if (tmpSl < 3) tmpSl = 3;
+		}
+		if(ImGui::DragInt("Stacks", &tmpSt, 1.0f, 3))
+		{
+			if (tmpSt >= 3 && stacks != tmpSt) {
+				stacks = tmpSt;
+				canChange = true;
+			}
+			else if (tmpSt < 3) tmpSt = 3;
+		}
+		ImGui::PopItemWidth();
+
+		if (ImGui::Button("Apply")) GenerateNewSphere(slice, stacks);
 	}
 }
 
@@ -331,15 +346,13 @@ void RE_CompSphere::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 
 void RE_CompSphere::GenerateNewSphere(int _slice, int _stacks)
 {
-	if (slice != _slice || stacks != _stacks)
+	if (canChange)
 	{
 		if (RE_CompPrimitive::VAO != 0) {
 			glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
 			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
 		}
-
-		slice = _slice; stacks = _stacks;
 
 		par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(slice, stacks);
 
@@ -360,6 +373,8 @@ void RE_CompSphere::GenerateNewSphere(int _slice, int _stacks)
 		triangle_count = sphere->ntriangles;
 
 		par_shapes_free_mesh(sphere);
+
+		canChange = false;
 	}
 }
 

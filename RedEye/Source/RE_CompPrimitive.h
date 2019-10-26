@@ -177,7 +177,10 @@ private:
 	bool show_checkers = false;
 	int triangle_count;
 	int slice, stacks;
+	bool canChange = true;
+public:
 	int tmpSl, tmpSt;
+
 };
 
 /**************************************************
