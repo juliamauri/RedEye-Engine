@@ -361,10 +361,15 @@ void RE_CompSphere::GenerateNewSphere(int _slice, int _stacks)
 
 		glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
-		glBufferData(GL_ARRAY_BUFFER, sphere->npoints * sizeof(float) * 3, sphere->points, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sphere->npoints * sizeof(float) * (3 + 2), NULL, GL_STATIC_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sphere->npoints * sizeof(float) * 3, sphere->points);
+		glBufferSubData(GL_ARRAY_BUFFER, sphere->npoints * sizeof(float) * 3, sphere->npoints * sizeof(float) * 2, sphere->tcoords);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
+
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)(sizeof(float) * 3));
 
 		glGenBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RE_CompPrimitive::EBO);
