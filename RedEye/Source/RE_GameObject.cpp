@@ -473,6 +473,7 @@ void RE_GameObject::TransformModified()
 		child->TransformModified();
 
 	App->scene->SceneModified();
+	ResetGlobalBoundingBox();
 }
 
 const char * RE_GameObject::GetName() const
@@ -540,7 +541,10 @@ void RE_GameObject::DrawGlobalAABB(math::vec color, float width)
 void RE_GameObject::DrawAllAABB(math::vec color, float width)
 {
 	if (App->scene->GetSelected() != this)
-		DrawGlobalAABB(color, width);
+	{
+		//DrawGlobalAABB(color, width);
+		DrawAABB(color, 3.f);
+	}
 
 	for (auto child : childs)
 		child->DrawAllAABB(color, width);
@@ -558,7 +562,7 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 	if (GetMesh() != nullptr)
 		local_bounding_box = GetMesh()->GetAABB();
 	else
-		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec(0.1f, 0.1f, 0.1f));
+		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 
 	if (!childs.empty())
 	{
@@ -592,9 +596,18 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 		local_bounding_box.SetFrom(&points[0], points.size());
 	}
 
+	ResetGlobalBoundingBox();
+}
+
+void RE_GameObject::ResetGlobalBoundingBox()
+{
 	// Global Bounding Box
 	math::float4x4 global_trs = transform->GetMatrixModel().Transposed();
+	//global_bounding_box = local_bounding_box.Transform(global_trs.Float3x3Part()).MinimalEnclosingAABB();
+	
 	const math::vec points[2] = {
+				/*global_bounding_box.minPoint + global_trs.Row3(3),
+				global_bounding_box.maxPoint + global_trs.Row3(3) };*/
 		global_trs.TransformPos(local_bounding_box.minPoint) + global_trs.Row3(3),
 		global_trs.TransformPos(local_bounding_box.maxPoint) + global_trs.Row3(3) };
 

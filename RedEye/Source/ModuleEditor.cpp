@@ -56,12 +56,16 @@ bool ModuleEditor::Init(JSONNode* node)
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui::StyleColorsDark();
-	ImGui_ImplSDL2_InitForOpenGL(App->window->GetWindow(),App->renderer3d->GetContext());
-	ImGui_ImplOpenGL3_Init();
-	if (ret)
-		App->ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
+
+	if (ret = ImGui_ImplSDL2_InitForOpenGL(App->window->GetWindow(), App->renderer3d->GetContext()))
+	{
+		if (ret = ImGui_ImplOpenGL3_Init())
+			App->ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
+		else
+			LOG_ERROR("ImGui could not OpenGL3_Init!");
+	}
 	else
-		LOG_ERROR("ImGui could not initialize!");
+		LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
 
 	return ret;
 }

@@ -238,7 +238,8 @@ void ModuleScene::DrawScene()
 {
 	// Draw Bounding Boxes
 	if (draw_all_aabb)
-		root->DrawAllAABB(all_aabb_color, all_aabb_width);
+		for (RE_GameObject* go : root->GetChilds())
+			go->DrawAllAABB(all_aabb_color, all_aabb_width);
 
 	if (draw_selected_aabb && selected != nullptr && selected != root)
 		selected->DrawGlobalAABB(sel_aabb_color, sel_aabb_width);
