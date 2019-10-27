@@ -2,6 +2,7 @@
 #define __APP_H__
 
 #include "EventListener.h"
+#include "Optick/include/optick.h"
 //#include "Cvar.h"
 #include <string>
 #include <list>

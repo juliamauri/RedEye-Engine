@@ -156,10 +156,9 @@ bool ModuleScene::Start()
 
 update_status ModuleScene::Update()
 {
-	root->Update();
+	OPTICK_CATEGORY("Update Scene", Optick::Category::GameLogic);
 
-	if (App->input->GetKey(SDL_SCANCODE_L) == KEY_STATE::KEY_UP)
-		App->editor->popupWindow->PopUp("Accept", "Testing PopUp", true);
+	root->Update();
 
 	return UPDATE_CONTINUE;
 }
@@ -269,6 +268,9 @@ void ModuleScene::DrawEditor()
 
 void ModuleScene::DrawScene()
 {
+	OPTICK_CATEGORY("Scene Draw", Optick::Category::Rendering);
+
+	OPTICK_CATEGORY("AABB Draw", Optick::Category::Debug);
 	// Draw Bounding Boxes
 	if (draw_all_aabb)
 		for (RE_GameObject* go : root->GetChilds())
@@ -281,6 +283,7 @@ void ModuleScene::DrawScene()
 	if (draw_quad_tree)
 		quad_tree.Draw();*/
 
+	OPTICK_CATEGORY("Hiteracy Draw", Optick::Category::Rendering);
 	// Load Shader Uniforms
 	ShaderManager::use(modelloading);
 	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());

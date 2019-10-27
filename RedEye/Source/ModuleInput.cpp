@@ -41,6 +41,7 @@ bool ModuleInput::Init(JSONNode* config_module)
 // Called every draw update
 update_status ModuleInput::PreUpdate()
 {
+	OPTICK_CATEGORY("UpdateInput", Optick::Category::Input);
 	update_status ret = UPDATE_CONTINUE;
 
 	SDL_PumpEvents();

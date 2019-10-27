@@ -71,6 +71,8 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 update_status ModuleRenderer3D::PreUpdate()
 {
+	OPTICK_CATEGORY("PreUpdate Renderer3D", Optick::Category::GameLogic);
+
 	update_status ret = UPDATE_CONTINUE;
 
 	// Reset projection & view
@@ -88,6 +90,8 @@ update_status ModuleRenderer3D::PreUpdate()
 
 update_status ModuleRenderer3D::PostUpdate()
 {
+	OPTICK_CATEGORY("PostUpdate Renderer3D", Optick::Category::GameLogic);
+
 	update_status ret = UPDATE_CONTINUE;
 
 	// Draw Scene

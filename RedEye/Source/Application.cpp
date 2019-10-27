@@ -150,18 +150,23 @@ void Application::PrepareUpdate()
 
 int Application::Update()
 {
+	OPTICK_CATEGORY("Update Application", Optick::Category::GameLogic);
+
 	PrepareUpdate();
 
 	int ret = UPDATE_CONTINUE;
 
+	OPTICK_CATEGORY("PreUpdate Application", Optick::Category::GameLogic);
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)
 			ret = (*it)->PreUpdate();
 
+	OPTICK_CATEGORY("Update Application", Optick::Category::GameLogic);
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)
 			ret = (*it)->Update();
 
+	OPTICK_CATEGORY("PostUpdate Application", Optick::Category::GameLogic);
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)
 			ret = (*it)->PostUpdate();

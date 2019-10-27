@@ -234,6 +234,7 @@ const char * FileSystem::GetZipPath()
 
 void FileSystem::HandleDropedFile(const char * file)
 {
+	OPTICK_CATEGORY("Dropped File", Optick::Category::IO);
 	std::string full_path(file);
 	std::string directory = full_path.substr(0, full_path.find_last_of('\\') + 1);
 	std::string fileNameExtension = full_path.substr(full_path.find_last_of("\\") + 1);

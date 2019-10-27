@@ -74,6 +74,7 @@ bool ModuleEditor::Init(JSONNode* node)
 
 update_status ModuleEditor::PreUpdate()
 {
+	OPTICK_CATEGORY("PreUpdate ModuleEditor", Optick::Category::GameLogic);
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame(App->window->GetWindow());
 	ImGui::NewFrame();
@@ -85,6 +86,7 @@ update_status ModuleEditor::PreUpdate()
 // Update
 update_status ModuleEditor::Update()
 {
+	OPTICK_CATEGORY("Update ModuleEditor", Optick::Category::UI);
 	if (show_all)
 	{
 		// Main Menu Bar
@@ -250,6 +252,7 @@ bool ModuleEditor::AddSoftwareUsed(const char * name, const char * version, cons
 
 void ModuleEditor::Draw()
 {
+	OPTICK_CATEGORY("ImGui Rend", Optick::Category::Rendering);
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -276,6 +279,7 @@ void ModuleEditor::PopUpFocus(bool focus)
 
 void ModuleEditor::UpdateCamera()
 {
+	OPTICK_CATEGORY("Update ModuleEditor Camera", Optick::Category::Camera);
 	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
 	{
 		const MouseData* mouse = App->input->GetMouse();
