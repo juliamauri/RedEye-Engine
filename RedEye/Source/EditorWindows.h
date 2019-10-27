@@ -142,7 +142,7 @@ private:
 class EditorSettingsWindow : public EditorWindow
 {
 public:
-	EditorSettingsWindow(const char* name = "Editor Settings", bool start_active = true);
+	EditorSettingsWindow(const char* name = "Editor Settings", bool start_active = false);
 
 private:
 
@@ -152,7 +152,7 @@ private:
 class PlayPauseWindow : public EditorWindow
 {
 public:
-	PlayPauseWindow(const char* name = "Play Controls", bool start_active = true);
+	PlayPauseWindow(const char* name = "Play Controls", bool start_active = false);
 
 private:
 

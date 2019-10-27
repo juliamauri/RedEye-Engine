@@ -103,10 +103,13 @@ void RE_GameObject::PostUpdate()
 
 void RE_GameObject::Draw(bool recursive)
 {
-	if (recursive)
-		for (auto child : childs) child->Draw();
+	if (active)
+	{
+		if (recursive)
+			for (auto child : childs) child->Draw();
 
-	for (auto component : components) component->Draw();
+		for (auto component : components) component->Draw();
+	}
 }
 
 void RE_GameObject::Serialize(JSONNode * node)
@@ -540,14 +543,14 @@ void RE_GameObject::DrawGlobalAABB(math::vec color, float width)
 
 void RE_GameObject::DrawAllAABB(math::vec color, float width)
 {
-	if (App->scene->GetSelected() != this)
+	if (active)
 	{
-		//DrawGlobalAABB(color, width);
-		DrawAABB(color, 3.f);
-	}
+		if (App->scene->GetSelected() != this)
+			DrawGlobalAABB(color, width);
 
-	for (auto child : childs)
-		child->DrawAllAABB(color, width);
+		for (auto child : childs)
+			child->DrawAllAABB(color, width);
+	}
 }
 
 void RE_GameObject::AddToBoundingBox(math::AABB box)
@@ -559,10 +562,17 @@ void RE_GameObject::AddToBoundingBox(math::AABB box)
 void RE_GameObject::ResetBoundingBoxFromChilds()
 {
 	// Local Bounding Box
-	if (GetMesh() != nullptr)
-		local_bounding_box = GetMesh()->GetAABB();
-	else
-		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+
+	for (RE_Component* comp : components)
+	{
+		switch (comp->GetType())
+		{
+		case C_MESH: local_bounding_box = GetMesh()->GetAABB(); break;
+		case C_SPHERE: local_bounding_box = math::AABB(-math::vec::one, math::vec::one); break;
+		case C_CUBE: local_bounding_box = math::AABB(math::vec::zero, math::vec::one); break;
+		}
+	}
 
 	if (!childs.empty())
 	{
@@ -581,12 +591,16 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 			// Update child AABB
 			(*child)->ResetBoundingBoxFromChilds();
 
-			math::float4x4 trs = (*child)->transform->GetLocalMatrixModel();
+			/*math::float4x4 trs = (*child)->transform->GetLocalMatrixModel();
 			math::AABB child_aabb = (*child)->GetLocalBoundingBox();
 
 			child_aabb.SetFromCenterAndSize(
 				trs.Row3(3) + trs.TransformPos(child_aabb.CenterPoint()),
-				trs.TransformPos(child_aabb.Size()));
+				trs.TransformPos(child_aabb.Size()));*/
+
+
+			math::AABB child_aabb = (*child)->GetLocalBoundingBox();
+			child_aabb.TransformAsAABB((*child)->transform->GetLocalMatrixModel().Transposed());
 
 			points[cursor++].Set(child_aabb.minPoint.x, child_aabb.minPoint.y, child_aabb.minPoint.z);
 			points[cursor++].Set(child_aabb.maxPoint.x, child_aabb.maxPoint.y, child_aabb.maxPoint.z);
@@ -602,9 +616,8 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 void RE_GameObject::ResetGlobalBoundingBox()
 {
 	// Global Bounding Box
-	math::float4x4 global_trs = transform->GetMatrixModel().Transposed();
 	global_bounding_box = local_bounding_box;
-	global_bounding_box.TransformAsAABB(global_trs);
+	global_bounding_box.TransformAsAABB(transform->GetMatrixModel().Transposed());
 }
 
 math::AABB RE_GameObject::GetLocalBoundingBox() const
