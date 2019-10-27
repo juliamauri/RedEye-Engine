@@ -63,6 +63,7 @@ bool ModuleScene::Start()
 	std::string path_scene("Assets/Scenes/");
 	path_scene += GetName();
 	path_scene += ".re";
+	bool loadDefaultFBX = false;
 	Config scene_file(path_scene.c_str(), App->fs->GetZipPath());
 	if (scene_file.Load())
 	{
@@ -79,12 +80,15 @@ bool ModuleScene::Start()
 		}
 		else {
 			LOG_ERROR("Own serialized scene can't be loaded");
-			root = new RE_GameObject("root");
+			loadDefaultFBX = true;
 		}
 
 		LOG("Time imported: %u ms", timer.Read());
 	}
 	else
+		loadDefaultFBX = true;
+	
+	if(loadDefaultFBX)
 	{
 		App->handlerrors->StartHandling();
 
@@ -379,7 +383,7 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 
 	std::string fbxOnLibrary("Library/Scenes/");
 	fbxOnLibrary += fileName + ".efab";
-
+	bool reloadFBX = false;
 	RE_GameObject* toAdd = nullptr;
 	if (App->fs->Exists(fbxOnLibrary.c_str())) {
 		LOG_SECONDARY("Internal prefab of fbx exits. Loading from it.\nPath: %s", fbxOnLibrary.c_str());
@@ -389,13 +393,26 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 			toAdd = node->FillGO();
 			DEL(node);
 		}
+		else {
+			LOG_WARNING("Can't open internal prefab, reload from .fbx");
+			reloadFBX = true;
+		}
 	}
 	else
+		reloadFBX = true;
+	
+	if(reloadFBX)
 	{
 		LOG_SECONDARY("Loading fbx on scene: %s", fbxPath);
 		RE_Prefab* toLoad = App->modelImporter->LoadModelFromAssets(fbxPath);
-		toAdd = toLoad->GetRoot();
-		DEL(toLoad);
+		if (toLoad) {
+			toAdd = toLoad->GetRoot();
+			DEL(toLoad);
+		}
+		else {
+			LOG_ERROR("Can't load the .fbx.\nAssetsPath: %s", fbxPath);
+		}
+
 	}
 
 	if (toAdd) {
@@ -428,7 +445,7 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 		bool createMaterial = false;
 		std::string filePath("Assets/Materials/");
 		filePath += fileName;
-		filePath += ".pupile";
+		filePath += ".pupil";
 		const char* materialMD5 = selectedMesh->GetMaterial();
 		if (!materialMD5) {
 			LOG_SECONDARY("Material don't exists on mesh creating a new one: %s", filePath.c_str());
@@ -451,7 +468,7 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 						filePath = newFile;
 						filePath += " ";
 						filePath += std::to_string(count);
-						filePath += ".pupile";
+						filePath += ".pupil";
 					} while (!App->fs->Exists(filePath.c_str()));
 
 					createMaterial = true;
@@ -459,9 +476,8 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 			}
 
 			if (createMaterial) {
-				LOG_SECONDARY("Saving new material: %s", filePath.c_str());
+				LOG_SECONDARY("Creating new material: %s", filePath.c_str());
 				RE_Material* newMaterial = new RE_Material(fileName.c_str());
-
 
 				newMaterial->tDiffuse.push_back(textureResource);
 

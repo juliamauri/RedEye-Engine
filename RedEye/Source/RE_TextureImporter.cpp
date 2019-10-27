@@ -70,15 +70,19 @@ const char * RE_TextureImporter::LoadTextureAssets(const char * assetsPath)
 		exists = App->resources->IsReference(md5Generated.c_str());
 		if (exists == nullptr) {
 			Texture2D * newTexture = ProcessTexture(&file, GetExtensionIL(extension.c_str()), true, md5Generated.c_str());
-			newTexture->SetFilePath(assetsPath);
-			newTexture->SetMD5(md5Generated.c_str());
-			newTexture->SetType(Resource_Type::R_TEXTURE);
-			exists = App->resources->Reference(newTexture);
+			if (newTexture != nullptr) {
+				newTexture->SetFilePath(assetsPath);
+				newTexture->SetMD5(md5Generated.c_str());
+				newTexture->SetType(Resource_Type::R_TEXTURE);
+				exists = App->resources->Reference(newTexture);
+			}
 			LOG("Time imported texture from assets: %u ms\n", timer.Read());
 		}
 		else
 			LOG("Getting %s from resources, already exits\nmd5: %s\n", filename.c_str(), exists);
 	}
+	else
+		LOG_ERROR("Error while loadind texture");
 	return exists;
 }
 
@@ -95,10 +99,12 @@ const char * RE_TextureImporter::LoadTextureLibrary(const char * libraryPath, co
 		exists = App->resources->IsReference(md5Generated.c_str());
 		if (exists == nullptr) {
 			Texture2D * newTexture = ProcessTexture(&file, IL_DDS);
-			newTexture->SetFilePath(assetsPath);
-			newTexture->SetMD5(md5Generated.c_str());
-			newTexture->SetType(Resource_Type::R_TEXTURE);
-			exists = App->resources->Reference(newTexture);
+			if (newTexture != nullptr) {
+				newTexture->SetFilePath(assetsPath);
+				newTexture->SetMD5(md5Generated.c_str());
+				newTexture->SetType(Resource_Type::R_TEXTURE);
+				exists = App->resources->Reference(newTexture);
+			}
 			LOG("Time imported texture from library: %u ms\n", timer.Read());
 		}
 		else
@@ -109,11 +115,15 @@ const char * RE_TextureImporter::LoadTextureLibrary(const char * libraryPath, co
 		}
 
 	}
+	else
+		LOG_ERROR("Error while loadind texture");
+
 	return exists;
 }
 
 Texture2D * RE_TextureImporter::ProcessTexture(RE_FileIO * fileTexture, int ILextension, bool generateOwnFormat, const char* md5Generated)
 {
+	Texture2D* texRet = nullptr;
 	uint imageID = 0;
 	uint ID = 0;
 	int width = 0;
@@ -122,40 +132,45 @@ Texture2D * RE_TextureImporter::ProcessTexture(RE_FileIO * fileTexture, int ILex
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 	
-	ilLoadL(ILextension, fileTexture->GetBuffer(), fileTexture->GetSize());
-	
-	if (generateOwnFormat)
-	{
-		if (ILextension == IL_TGA)
-			ilFlipSurfaceDxtcData();
+	if (IL_TRUE != ilLoadL(ILextension, fileTexture->GetBuffer(), fileTexture->GetSize())) {
+		if (generateOwnFormat)
+		{
+			if (ILextension == IL_TGA)
+				ilFlipSurfaceDxtcData();
 
-		//Save into dds
-		ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
-		ILubyte *data = new ILubyte[size];
-	
-		ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
-		std::string save_path("Library/Images/");
-		save_path += md5Generated;
-		save_path += ".eye";
-		RE_FileIO save(save_path.c_str(), App->fs->GetZipPath());
-		save.Save((char*)data, size);
+				//Save into dds
+				ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
+				ILubyte *data = new ILubyte[size];
+
+				ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
+				std::string save_path("Library/Images/");
+			save_path += md5Generated;
+			save_path += ".eye";
+			RE_FileIO save(save_path.c_str(), App->fs->GetZipPath());
+			save.Save((char*)data, size);
+		}
+
+		if (ILextension == IL_TGA)
+			iluFlipImage();
+
+		/* OpenGL texture binding of the image loaded by DevIL  */
+		glGenTextures(1, &ID); /* Texture name generation */
+		glBindTexture(GL_TEXTURE_2D, ID); /* Binding of texture name */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear interpolation for minifying filter */
+		glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
+
+		ilBindImage(0);
+		/* Delete used resources*/
+		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
+		texRet = new Texture2D(ID, width, height);
+	}
+	else {
+		LOG_ERROR("Error when loading texture on DevIL");
 	}
 	
-	if (ILextension == IL_TGA)
-		iluFlipImage();
 	
-	/* OpenGL texture binding of the image loaded by DevIL  */
-	glGenTextures(1, &ID); /* Texture name generation */
-	glBindTexture(GL_TEXTURE_2D, ID); /* Binding of texture name */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear interpolation for magnification filter */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear interpolation for minifying filter */
-	glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), width = ilGetInteger(IL_IMAGE_WIDTH), height = ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
-	
-	ilBindImage(0);
-	/* Delete used resources*/
-	ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
-	
-	return new Texture2D(ID, width, height);
+	return texRet;
 }
 
 int RE_TextureImporter::GetExtensionIL(const char * extension)

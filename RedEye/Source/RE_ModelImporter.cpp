@@ -62,7 +62,7 @@ RE_Prefab* RE_ModelImporter::LoadModelFromAssets(const char * path)
 	mesh_file = new RE_FileIO(assetsPath.c_str());
 	if (!mesh_file->Load())
 	{
-		LOG("Error when load mesh file:\n%s", assetsPath.c_str());
+		LOG_ERROR("Error when load mesh file:\n%s", assetsPath.c_str());
 		DEL(mesh_file);
 	}
 
@@ -307,6 +307,9 @@ const char* RE_ModelImporter::ProcessMeshFromLibrary(const char * file_library, 
 		DEL(mesh_json);
 		LOG("Time imported mesh from library: %u ms\n", timer.Read());
 	}
+	else {
+		LOG_ERROR("Can't load mesh from library. Path: %s", file_library);
+	}
 	return (mesh_resource) ? mesh_resource->GetMD5() : nullptr;
 }
 
@@ -484,7 +487,7 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 
 		std::string filePath("Assets/Materials/");
 		filePath += name.C_Str();
-		filePath += ".pupile";
+		filePath += ".pupil";
 
 		if (!App->fs->Exists(filePath.c_str())) {
 
@@ -506,8 +509,19 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
-						if(App->fs->Exists(realAssetsPath.c_str()))
-							newMaterial->tDiffuse.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						if (App->fs->Exists(realAssetsPath.c_str()))
+						{
+							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+							if (texture != nullptr) {
+								newMaterial->tDiffuse.push_back(texture);
+							}
+							else {
+								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+							}
+						}
+						else {
+							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						}
 					}
 				}
 			}
@@ -530,7 +544,18 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
 						if (App->fs->Exists(realAssetsPath.c_str()))
-							newMaterial->tSpecular.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						{
+							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+							if (texture != nullptr) {
+								newMaterial->tSpecular.push_back(texture);
+							}
+							else {
+								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+							}
+						}
+						else {
+							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						}
 					}
 				}
 			}
@@ -552,7 +577,18 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
 						if (App->fs->Exists(realAssetsPath.c_str()))
-							newMaterial->tAmbient.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						{
+							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+							if (texture != nullptr) {
+								newMaterial->tAmbient.push_back(texture);
+							}
+							else {
+								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+							}
+						}
+						else {
+							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						}
 					}
 				}
 			}
@@ -574,7 +610,18 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
 						if (App->fs->Exists(realAssetsPath.c_str()))
-							newMaterial->tEmissive.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						{
+							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+							if (texture != nullptr) {
+								newMaterial->tEmissive.push_back(texture);
+							}
+							else {
+								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+							}
+						}
+						else {
+							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						}
 					}
 				}
 			}
@@ -614,7 +661,18 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
 						if (App->fs->Exists(realAssetsPath.c_str()))
-							newMaterial->tOpacity.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						{
+							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+							if (texture != nullptr) {
+								newMaterial->tOpacity.push_back(texture);
+							}
+							else {
+								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+							}
+						}
+						else {
+							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						}
 					}
 				}
 			}
@@ -636,7 +694,18 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
 						if (App->fs->Exists(realAssetsPath.c_str()))
-							newMaterial->tShininess.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						{
+							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+							if (texture != nullptr) {
+								newMaterial->tShininess.push_back(texture);
+							}
+							else {
+								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+							}
+						}
+						else {
+							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						}
 					}
 				}
 			}
@@ -670,7 +739,18 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
 						if (App->fs->Exists(realAssetsPath.c_str()))
-							newMaterial->tHeight.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						{
+							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+							if (texture != nullptr) {
+								newMaterial->tHeight.push_back(texture);
+							}
+							else {
+								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+							}
+						}
+						else {
+							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						}
 					}
 				}
 			}
@@ -686,7 +766,18 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
 						if (App->fs->Exists(realAssetsPath.c_str()))
-							newMaterial->tNormals.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						{
+							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+							if (texture != nullptr) {
+								newMaterial->tNormals.push_back(texture);
+							}
+							else {
+								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+							}
+						}
+						else {
+							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						}
 					}
 				}
 			}
@@ -702,7 +793,18 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
 						if (App->fs->Exists(realAssetsPath.c_str()))
-							newMaterial->tReflection.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						{
+							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+							if (texture != nullptr) {
+								newMaterial->tReflection.push_back(texture);
+							}
+							else {
+								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+							}
+						}
+						else {
+							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						}
 					}
 				}
 			}
@@ -718,7 +820,18 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 						std::string realAssetsPath(fileTexturePath);
 						realAssetsPath += filename;
 						if (App->fs->Exists(realAssetsPath.c_str()))
-							newMaterial->tUnknown.push_back(App->textures->LoadTextureAssets(realAssetsPath.c_str()));
+						{
+							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+							if (texture != nullptr) {
+								newMaterial->tUnknown.push_back(texture);
+							}
+							else {
+								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+							}
+						}
+						else {
+							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						}
 					}
 				}
 			}

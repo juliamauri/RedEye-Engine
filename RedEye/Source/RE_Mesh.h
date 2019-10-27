@@ -21,6 +21,8 @@ public:
 
 	void Draw(const float* transform, bool use_checkers = false);
 
+	void DrawCheckerTexture();
+
 	math::AABB GetAABB() const;
 
 	void loadVertexNormals();

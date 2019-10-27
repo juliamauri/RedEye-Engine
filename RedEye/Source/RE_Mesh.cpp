@@ -83,10 +83,7 @@ void RE_Mesh::Draw(const float* transform, bool use_checkers)
 	// Bind Textures
 	if (use_checkers)
 	{
-		glActiveTexture(GL_TEXTURE0);
-		std::string name = "texture_diffuse0";
-		ShaderManager::setUnsignedInt(App->scene->modelloading, name.c_str(), 0);
-		glBindTexture(GL_TEXTURE_2D, App->scene->checkers_texture);
+		DrawCheckerTexture();
 	}
 	else if (materialMD5)
 	{
@@ -105,6 +102,10 @@ void RE_Mesh::Draw(const float* transform, bool use_checkers)
 				((Texture2D*)App->resources->At(meshMaterial->tDiffuse[i]))->use();
 			}
 		}
+		else {
+			use_checkers = true;
+			DrawCheckerTexture();
+		}
 		/*
 			unsigned int specularNr = 1;
 			unsigned int normalNr = 1;
@@ -122,10 +123,7 @@ void RE_Mesh::Draw(const float* transform, bool use_checkers)
 	}
 	else {
 		use_checkers = true;
-		glActiveTexture(GL_TEXTURE0);
-		std::string name = "texture_diffuse0";
-		ShaderManager::setUnsignedInt(App->scene->modelloading, name.c_str(), 0);
-		glBindTexture(GL_TEXTURE_2D, App->scene->checkers_texture);
+		DrawCheckerTexture();
 	}
 
 	// Draw mesh
@@ -194,6 +192,14 @@ void RE_Mesh::Draw(const float* transform, bool use_checkers)
 	}
 
 	ShaderManager::use(0);
+}
+
+void RE_Mesh::DrawCheckerTexture()
+{
+	glActiveTexture(GL_TEXTURE0);
+	std::string name = "texture_diffuse0";
+	ShaderManager::setUnsignedInt(App->scene->modelloading, name.c_str(), 0);
+	glBindTexture(GL_TEXTURE_2D, App->scene->checkers_texture);
 }
 
 void RE_Mesh::SetupAABB()
