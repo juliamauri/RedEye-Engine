@@ -574,8 +574,6 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 		}
 	}
 
-	ResetGlobalBoundingBox();
-
 	if (!childs.empty())
 	{
 		// Create vector to store all contained points
