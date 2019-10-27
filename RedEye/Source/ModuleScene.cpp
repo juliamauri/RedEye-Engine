@@ -411,8 +411,60 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 		std::string md5Generated = md5(texturePath);
 		const char* textureResource = App->resources->CheckFileLoaded(texturePath, md5Generated.c_str(), Resource_Type::R_TEXTURE);
 
+		bool createMaterial = false;
+		std::string filePath("Assets/Materials/");
+		filePath += fileName;
+		filePath += ".pupile";
 		const char* materialMD5 = selectedMesh->GetMaterial();
-		if (materialMD5) {
+		if (!materialMD5) {
+			if (!App->fs->Exists(filePath.c_str())) {
+				createMaterial = true;
+			}
+			else {
+				Config materialToLoad(filePath.c_str(), App->fs->GetZipPath());
+				if (materialToLoad.Load()) {
+					materialMD5 = App->resources->CheckFileLoaded(filePath.c_str(), materialToLoad.GetMd5().c_str(), Resource_Type::R_MATERIAL);
+					selectedMesh->SetMaterial(materialMD5);
+				}
+				else {
+					std::string newFile("Assets/Materials/");
+					newFile += fileName;
+					uint count = 0;
+
+					do {
+						count++;
+						filePath = newFile;
+						filePath += " ";
+						filePath += std::to_string(count);
+						filePath += ".pupile";
+					} while (!App->fs->Exists(filePath.c_str()));
+
+					createMaterial = true;
+				}
+			}
+
+			if (createMaterial) {
+				RE_Material* newMaterial = new RE_Material(fileName.c_str());
+
+
+				newMaterial->tDiffuse.push_back(textureResource);
+
+				Config materialSerialize(filePath.c_str(), App->fs->GetZipPath());
+				JSONNode* materialNode = materialSerialize.GetRootNode("Material");
+				materialNode->SetArray();
+				newMaterial->Serialize(materialNode, &materialNode->GetDocument()->FindMember("Material")->value);
+
+				((ResourceContainer*)newMaterial)->SetFilePath(filePath.c_str());
+				((ResourceContainer*)newMaterial)->SetMD5(materialSerialize.GetMd5().c_str());
+				((ResourceContainer*)newMaterial)->SetType(Resource_Type::R_MATERIAL);
+
+				materialSerialize.Save();
+
+				materialMD5 = App->resources->Reference((ResourceContainer*)newMaterial);
+				selectedMesh->SetMaterial(materialMD5);
+			}
+		} 
+		else {
 			RE_Material* selectedMaterial = (RE_Material*)App->resources->At(materialMD5);
 			if (selectedMaterial) {
 				if (selectedMaterial->tDiffuse.empty())
