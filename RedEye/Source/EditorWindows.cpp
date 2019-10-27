@@ -593,28 +593,51 @@ void PopUpWindow::Draw(bool secondary)
 {
 	if(ImGui::Begin(titleText.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
-		if (fromHandleError) {
-			if (ImGui::CollapsingHeader("All logs", 0, ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar)) {
+		if (fromHandleError)
+		{
+			// Error
+			ImGui::TextColored(ImVec4(255.f, 0.f, 0.f, 1.f), !App->handlerrors->AnyErrorHandled() ?
+				"No errors" :
+				App->handlerrors->GetErrors(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+			
+			ImGui::Separator();
+
+			// Solution
+			ImGui::TextColored(ImVec4(0.f, 255.f, 0.f, 1.f), !App->handlerrors->AnyErrorHandled() ?
+				"No solutions" :
+				App->handlerrors->GetSolutions(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+
+			ImGui::Separator();
+
+			// Accept Button
+			if (ImGui::Button(btnText.c_str()))
+			{
+				active = false;
+				disableAllWindows = false;
+				App->editor->PopUpFocus(disableAllWindows);
+				if (fromHandleError) {
+					App->handlerrors->ClearAll();
+					fromHandleError = false;
+				}
+			}
+
+			// Logs
+			if (ImGui::TreeNode("Show All Logs"))
+			{
 				ImGui::TextEx(App->handlerrors->GetLogs(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+				ImGui::TreePop();
 			}
 
-			static bool anyWarning = App->handlerrors->AnyWarningHandled();
-			if (ImGui::CollapsingHeader("Warnings", 0, ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar)) {
-				ImGui::TextEx((!anyWarning) ? "No warnings" : App->handlerrors->GetWarnings(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
-			}
-
-			static bool anyError = App->handlerrors->AnyErrorHandled();
-			if (ImGui::CollapsingHeader("Errors", 0, ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse)) {
-				ImGui::TextEx((!anyError) ? "No errors" :  App->handlerrors->GetErrors(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
-			}
-
-			static bool anySolution = App->handlerrors->AnyErrorHandled();
-			if (ImGui::CollapsingHeader("Solutions", 0, ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse)) {
-				ImGui::TextEx((!anySolution) ? "No solutions" : App->handlerrors->GetSolutions(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+			// Warnings
+			if (ImGui::TreeNode("Show Warnings"))
+			{
+				ImGui::TextEx(!App->handlerrors->AnyWarningHandled() ?
+					"No warnings" :
+					App->handlerrors->GetWarnings(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+				ImGui::TreePop();
 			}
 		}
-
-		if (ImGui::Button(btnText.c_str()))
+		else if (ImGui::Button(btnText.c_str()))
 		{
 			active = false;
 			disableAllWindows = false;
@@ -625,5 +648,6 @@ void PopUpWindow::Draw(bool secondary)
 			}
 		}
 	}
+
 	ImGui::End();
 }
