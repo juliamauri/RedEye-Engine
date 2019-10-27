@@ -62,7 +62,7 @@ ConsoleWindow::ConsoleWindow(const char * name, bool start_active) :
 
 void ConsoleWindow::Draw(bool secondary)
 {
-	if(ImGui::Begin(name, 0, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove))
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_MenuBar))
 	{
 		if (secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -173,7 +173,7 @@ ConfigWindow::ConfigWindow(const char * name, bool start_active) :
 
 void ConfigWindow::Draw(bool secondary)
 {
-	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_HorizontalScrollbar))
 	{
 		if (secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -200,7 +200,7 @@ HeriarchyWindow::HeriarchyWindow(const char * name, bool start_active) :
 
 void HeriarchyWindow::Draw(bool secondary)
 {
-	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_HorizontalScrollbar))
 	{
 		if (secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -228,7 +228,7 @@ PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
 void PropertiesWindow::Draw(bool secondary)
 {
 	// draw transform and components
-	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_HorizontalScrollbar))
 	{
 		if (secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);

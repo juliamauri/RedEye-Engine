@@ -98,6 +98,7 @@ bool ModuleScene::Start()
 	root->AddComponent(C_PLANE);
 
 	// Setup AABB
+	root->TransformModified();
 	root->ResetBoundingBoxFromChilds();
 	aabb_need_reset = false;
 
