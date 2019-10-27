@@ -1,6 +1,7 @@
 # Red Eye Engine [![Build status](https://ci.appveyor.com/api/projects/status/swrp9sgx89yxl493?svg=true)](https://ci.appveyor.com/project/cumus/redeye-engine)
 
 3D Game Engine Sofware for academic purposes. Loads geometry onto a Game Object Hierarchy with its materials. Same meshes only load once. Orbital camera encloses selected geometry on focus using bounding boxes.
+
 * Repository [Github](https://github.com/juliamauri/RedEye-Engine)
 * Webpage: https://juliamauri.github.io/RedEye-Engine/
 * Authors: [Julià Mauri Costa](https://github.com/juliamauri) & [Rubén Sardón](https://github.com/cumus)
@@ -23,7 +24,7 @@
 ### Supported Drag & Drop file extensions
 * **.zip**: If not already in /Library, file copies to /Assets and is iterated. Resources are saved in /Library with our own format and loaded to scene.
 * **.fbx**: If not already in /Library, file copies to /Assets. Then searches at origin path for other files needed and copies them too. Resources are saved in /Library with our own format and loaded to scene.
-* **.png & .dds**: If not already in /Library, imports file to /Assets. If selected Game Object has a mesh, the meshes' texture is changed.
+* **.png, .dds, .jpg & .tga**: If not already in /Library, imports file to /Assets. If selected Game Object has a mesh, the meshes' texture is changed.
 
 ## Other Systems
 ### Console & Error Handler
