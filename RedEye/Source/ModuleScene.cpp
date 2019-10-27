@@ -424,6 +424,7 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 		root = new RE_GameObject("root");
 		root->AddChild(toAdd);
 
+		root->TransformModified();
 		root->ResetBoundingBoxFromChilds();
 		aabb_need_reset = false;
 		// FOCUS CAMERA ON DROPPED GEOMETRY
