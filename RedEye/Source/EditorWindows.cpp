@@ -532,16 +532,16 @@ void PrefabsPanel::Draw(bool secondary)
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
-
-		if (ImGui::Button("Reload Prefabs"))
-			prefabs = App->resources->GetResourcesByType(Resource_Type::R_PREFAB);
 		
 		ImGui::SameLine();
 
 		if (ImGui::Button("Create Prefab"))
 		{
 			if (App->scene->GetSelected() != nullptr)
+			{
 				App->resources->Reference(new RE_Prefab(App->scene->GetSelected()));
+				prefabs = App->resources->GetResourcesByType(Resource_Type::R_PREFAB);
+			}
 		}
 
 		if (ImGui::Button("Clone selected to Scene"))
@@ -558,7 +558,7 @@ void PrefabsPanel::Draw(bool secondary)
 
 			for (ResourceContainer* currentPrefab : prefabs)
 			{
-				if(ImGui::Button(currentPrefab->GetName()))
+				if(ImGui::Button((selected == currentPrefab) ? std::string(std::string("Selected -> ") + std::string(currentPrefab->GetName())).c_str() : currentPrefab->GetName()))
 					selected = currentPrefab;
 			}
 

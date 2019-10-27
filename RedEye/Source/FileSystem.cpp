@@ -1278,13 +1278,14 @@ RE_GameObject * JSONNode::FillGO()
 					math::vec scale = math::vec::zero;
 					math::vec rotation = math::vec::zero;
 					std::string file;
+					const char* materialResource = nullptr;
 					const char* reference = nullptr;
 					switch (type)
 					{
 					case C_MESH:
 						file = c.FindMember("file")->value.GetString();
 						reference = c.FindMember("reference")->value.GetString();
-						const char* materialResource  = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MESH);
+						materialResource  = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MESH);
 						if (materialResource)
 						{
 							mesh = new RE_CompMesh(new_go, reference);
