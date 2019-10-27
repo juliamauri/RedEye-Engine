@@ -298,7 +298,7 @@ const char* RE_ModelImporter::ProcessMeshFromLibrary(const char * file_library, 
 		mesh_json->PullMeshVertex(&vertexes, &indexes);
 
 		RE_Mesh* mesh = new RE_Mesh(vertexes, indexes, nullptr, indexes.size() / 3);
-		ResourceContainer* mesh_resource = (ResourceContainer*)mesh;
+		mesh_resource = (ResourceContainer*)mesh;
 		mesh_resource->SetType(Resource_Type::R_MESH);
 		mesh_resource->SetMD5(reference);
 		mesh_resource->SetFilePath(file_assets);
