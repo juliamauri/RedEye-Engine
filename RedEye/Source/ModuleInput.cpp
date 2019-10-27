@@ -6,6 +6,7 @@
 #include "ModuleWindow.h"
 #include "Event.h"
 #include "OutputLog.h"
+#include "ModelHandleErrors.h"
 #include "SDL2\include\SDL.h"
 
 #define MAX_KEYS 300
@@ -253,8 +254,16 @@ void ModuleInput::HandleEventQueue()
 
 /* Drag and drop events */
 		case SDL_DROPFILE:/**< The system requests a file open */
+			App->handlerrors->StartHandling();
+
 			LOG("File Dropped: %s", e.drop.file);
 			App->fs->HandleDropedFile(e.drop.file);
+
+			App->handlerrors->StopHandling();
+			if (App->handlerrors->AnyErrorHandled()) {
+				App->handlerrors->ActivatePopUp();
+			}
+
 			break;
 
 /* Render events */

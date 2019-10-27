@@ -58,7 +58,6 @@ bool ModuleScene::Start()
 			LOG("%s\n", App->shaders->GetShaderError());
 	}
 
-	App->handlerrors->StartHandling();
 	// Load scene
 	Timer timer;
 	std::string path_scene("Assets/Scenes/");
@@ -67,26 +66,39 @@ bool ModuleScene::Start()
 	Config scene_file(path_scene.c_str(), App->fs->GetZipPath());
 	if (scene_file.Load())
 	{
+		App->handlerrors->StartHandling();
+
 		LOG("Importing scene from own format:");
 		// Load saved scene
 		JSONNode* node = scene_file.GetRootNode("Game Objects");
-		root = node->FillGO();
-		DEL(node);
+		RE_GameObject* loadedDO = node->FillGO();
+
+		if (loadedDO) {
+			root = loadedDO;
+			DEL(node);
+		}
+		else {
+			LOG_ERROR("Own serialized scene can't be loaded");
+			root = new RE_GameObject("root");
+		}
+
 		LOG("Time imported: %u ms", timer.Read());
 	}
 	else
 	{
-		LOG_SOLUTION("Default Own Scene not found, loading default asset");
+		App->handlerrors->StartHandling();
+
 		// Load default FBX
 		LOG("Importing scene from default asset model:");
 		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets(defaultModel.c_str());
-
-		root = new RE_GameObject("root");
-		root->AddChild(newModel->GetRoot());
-		DEL(newModel);
-
-		// Add camera
-		//(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
+		if (newModel) {
+			root = new RE_GameObject("root");
+			root->AddChild(newModel->GetRoot());
+			DEL(newModel);
+		}
+		else {
+			LOG_ERROR("Cannot be lodadded the default model.\nAssetsPath: %s", defaultModel.c_str());
+		}
 	}
 
 	App->handlerrors->StopHandling();
@@ -370,7 +382,7 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 
 	RE_GameObject* toAdd = nullptr;
 	if (App->fs->Exists(fbxOnLibrary.c_str())) {
-		
+		LOG_SECONDARY("Internal prefab of fbx exits. Loading from it.\nPath: %s", fbxOnLibrary.c_str());
 		Config fbxPrefab(fbxOnLibrary.c_str(), App->fs->GetZipPath());
 		if (fbxPrefab.Load()) {
 			JSONNode* node = fbxPrefab.GetRootNode("Game Objects");
@@ -380,6 +392,7 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 	}
 	else
 	{
+		LOG_SECONDARY("Loading fbx on scene: %s", fbxPath);
 		RE_Prefab* toLoad = App->modelImporter->LoadModelFromAssets(fbxPath);
 		toAdd = toLoad->GetRoot();
 		DEL(toLoad);
@@ -418,6 +431,7 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 		filePath += ".pupile";
 		const char* materialMD5 = selectedMesh->GetMaterial();
 		if (!materialMD5) {
+			LOG_SECONDARY("Material don't exists on mesh creating a new one: %s", filePath.c_str());
 			if (!App->fs->Exists(filePath.c_str())) {
 				createMaterial = true;
 			}
@@ -445,6 +459,7 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 			}
 
 			if (createMaterial) {
+				LOG_SECONDARY("Saving new material: %s", filePath.c_str());
 				RE_Material* newMaterial = new RE_Material(fileName.c_str());
 
 
@@ -466,6 +481,8 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 			}
 		} 
 		else {
+			LOG_SECONDARY("Material on mesh found, changing texture and saving.");
+
 			RE_Material* selectedMaterial = (RE_Material*)App->resources->At(materialMD5);
 			if (selectedMaterial) {
 				if (selectedMaterial->tDiffuse.empty())
@@ -481,6 +498,10 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 				materialSerialize.Save();
 			}
 		}
+	}
+	else
+	{
+		LOG_ERROR("Selected GameObject don't have mesh");
 	}
 }
 

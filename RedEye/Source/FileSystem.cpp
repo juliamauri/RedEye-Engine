@@ -244,6 +244,8 @@ void FileSystem::HandleDropedFile(const char * file)
 
 	if (ext.compare("zip") == 0)
 	{
+		bool canImport = true;
+		LOG_SECONDARY(".zip detected");
 		std::string exportPath("Exporting/");
 		App->fs->AddPath(file, exportPath.c_str());
 
@@ -252,6 +254,8 @@ void FileSystem::HandleDropedFile(const char * file)
 		std::string fbxFound = RecursiveFindFbx(exportPath.c_str());
 
 		if (!fbxFound.empty()) {
+			LOG_TERCIARY("FBX in zip detected. File: %s",fbxFound.c_str());
+
 			char **rc = PHYSFS_enumerateFiles("Assets/Meshes/");
 			char **i;
 
@@ -264,9 +268,13 @@ void FileSystem::HandleDropedFile(const char * file)
 					std::string folderExport = exportPath + fileName + "/";
 					std::string folderAssets = "Assets/Meshes/" + fileName + "/";
 					if (RecursiveComparePath(folderExport.c_str(), folderAssets.c_str())) {
+						LOG_TERCIARY("Dropped .zip with .fbx exits in assets.");
 						existsinAssets = true;
 						fbxToLoadInScene = folderAssets + fbxFound.substr(fbxFound.find_last_of("/") + 1);
 						break;
+					}
+					else {
+						LOG_WARNING("Same folder as zip but differents contents");
 					}
 				}
 			}
@@ -289,16 +297,23 @@ void FileSystem::HandleDropedFile(const char * file)
 				}
 				folderToCopy += fileCount + "/";
 				exportPath += fileName + "/";
+				if (sameFolder) LOG_SOLUTION("Copying assets to new path: %s", folderToCopy.c_str());
 				RecursiveCopy(exportPath.c_str(), folderToCopy.c_str());
 				fbxToLoadInScene = folderToCopy + fbxFound.substr(fbxFound.find_last_of("/") + 1);
 			}
 		}
+		else {
+			LOG_ERROR("Dropped .zip don't contain any .fbx");
+			canImport = false;
+		}
 		App->fs->RemovePath(file);
 
-		App->scene->LoadFBXOnScene(fbxToLoadInScene.c_str());
+		if(canImport) App->scene->LoadFBXOnScene(fbxToLoadInScene.c_str());
 	}
 	else if (ext.compare("fbx") == 0)
 	{
+		bool canImport = true;
+		LOG_SECONDARY(".fbx detected");
 		std::string assetsPath("Assets/Meshes/");
 		assetsPath += fileName;
 		assetsPath += "/";
@@ -307,6 +322,7 @@ void FileSystem::HandleDropedFile(const char * file)
 		bool neededCopyToAssets = false;
 
 		if (Exists(assetsPath.c_str())) {
+			LOG_TERCIARY("Found a folder with same name as file");
 			fbxAssetsPath = RecursiveFindFbx(assetsPath.c_str());
 			if (fbxAssetsPath.empty()) {
 				//TODO user chose
@@ -314,6 +330,8 @@ void FileSystem::HandleDropedFile(const char * file)
 				//Replace folder TODO
 
 				//DEFAULT Creates another folder DONE
+				LOG_WARNING("Not .fbx found on assets.");
+
 				assetsPath = assetsPath.substr(0, assetsPath.find_last_of("/"));
 				uint count = 0;
 				std::string pathCount;
@@ -336,6 +354,7 @@ void FileSystem::HandleDropedFile(const char * file)
 					assetsPath += "/";
 					fbxAssetsPath = assetsPath; fbxAssetsPath += fileNameExtension;
 				}
+				LOG_SOLUTION("Copying assets to new path: %s", fbxAssetsPath.c_str());
 				neededCopyToAssets = true;
 			}
 		}
@@ -348,6 +367,7 @@ void FileSystem::HandleDropedFile(const char * file)
 
 		if (neededCopyToAssets)
 		{
+			LOG_TERCIARY("Copying .fbx with textures found to assets");
 			std::vector<std::string> resourcesNames = App->modelImporter->GetOutsideResourcesAssetsPath(file);
 			std::vector<std::string> resourcesPath;
 			resourcesPath.resize(resourcesNames.size());
@@ -380,14 +400,21 @@ void FileSystem::HandleDropedFile(const char * file)
 					}
 				}
 			}
+			else {
+				LOG_ERROR("Cannot open&copy dropped fbx");
+				canImport = false;
+			}
 		}
-		App->scene->LoadFBXOnScene(fbxAssetsPath.c_str());
+		if(canImport) App->scene->LoadFBXOnScene(fbxAssetsPath.c_str());
 	}
 	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
 	{
+		LOG_SECONDARY(".%s detected", ext.c_str());
 		std::string assetsTexturePath("Assets/Images/");
 		std::string textureToLoad = RecursiveFindFileOwnFileSystem(assetsTexturePath.c_str(), fileNameExtension.c_str());
+		bool canImport = true;
 		if (textureToLoad.empty()) {
+			LOG_TERCIARY("Copying texture to assets.", ext.c_str());
 			RE_FileIO* textureFile = QuickBufferFromPDPath(file);
 			if (textureFile) {
 				textureToLoad += assetsTexturePath;
@@ -395,9 +422,19 @@ void FileSystem::HandleDropedFile(const char * file)
 				RE_FileIO textureAssets(textureToLoad.c_str(), GetZipPath());
 				textureAssets.Save(textureFile->GetBuffer(), textureFile->GetSize());
 				DEL(textureFile);
+			}else {
+				canImport = false; 
+				LOG_ERROR("Cannot open&copy dropped texture");
 			}
 		}
-		App->scene->LoadTextureOnSelectedGO(textureToLoad.c_str());
+		else {
+			LOG_TERCIARY("Found existing texture in assets");
+		}
+		
+		if(canImport) App->scene->LoadTextureOnSelectedGO(textureToLoad.c_str());
+	}
+	else {
+		LOG_ERROR("File extension not suported.");
 	}
 }
 
