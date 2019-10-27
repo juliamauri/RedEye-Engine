@@ -562,10 +562,19 @@ void RE_GameObject::AddToBoundingBox(math::AABB box)
 void RE_GameObject::ResetBoundingBoxFromChilds()
 {
 	// Local Bounding Box
-	if (GetMesh() != nullptr)
-		local_bounding_box = GetMesh()->GetAABB();
-	else
-		local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+
+	for (RE_Component* comp : components)
+	{
+		switch (comp->GetType())
+		{
+		case C_MESH: local_bounding_box = GetMesh()->GetAABB(); break;
+		case C_SPHERE: local_bounding_box = math::AABB(-math::vec::one, math::vec::one); break;
+		case C_CUBE: local_bounding_box = math::AABB(math::vec::zero, math::vec::one); break;
+		}
+	}
+
+	ResetGlobalBoundingBox();
 
 	if (!childs.empty())
 	{
