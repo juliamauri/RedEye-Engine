@@ -17,6 +17,7 @@ ModelHandleErrors::~ModelHandleErrors()
 
 void ModelHandleErrors::StartHandling()
 {
+	ClearAll();
 	recLogs = true;
 }
 
