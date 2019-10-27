@@ -77,10 +77,12 @@ const char * ModelHandleErrors::GetWarnings()
 
 void ModelHandleErrors::ClearAll()
 {
-	logs.clear();
-	errors.clear();
-	warnings.clear();
-	solutions.clear();
+	if (!App->editor->popupWindow->IsActive()) {
+		logs.clear();
+		errors.clear();
+		warnings.clear();
+		solutions.clear();
+	}
 }
 
 void ModelHandleErrors::ActivatePopUp()
