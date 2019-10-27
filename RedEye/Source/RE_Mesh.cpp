@@ -120,6 +120,13 @@ void RE_Mesh::Draw(const float* transform, bool use_checkers)
 				number = std::to_string(heightNr++); // transfer unsigned int to stream
 		*/
 	}
+	else {
+		use_checkers = true;
+		glActiveTexture(GL_TEXTURE0);
+		std::string name = "texture_diffuse0";
+		ShaderManager::setUnsignedInt(App->scene->modelloading, name.c_str(), 0);
+		glBindTexture(GL_TEXTURE_2D, App->scene->checkers_texture);
+	}
 
 	// Draw mesh
 	glBindVertexArray(VAO);

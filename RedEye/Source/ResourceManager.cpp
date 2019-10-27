@@ -83,7 +83,8 @@ const char* ResourceManager::CheckFileLoaded(const char * filepath, const char* 
 	const char* ret = nullptr;
 	for (auto resource_it : resources)
 	{
-		if (std::strcmp(ret = resource_it.second->GetMD5(),resource) == 0)
+
+		if (resource_it.second && std::strcmp(ret = resource_it.second->GetMD5(),resource) == 0)
 		{
 			return ret;
 		}
