@@ -1280,25 +1280,26 @@ RE_GameObject * JSONNode::FillGO()
 					math::vec rotation = math::vec::zero;
 					std::string file;
 					const char* materialResource = nullptr;
+					const char* meshResource = nullptr;
 					const char* reference = nullptr;
 					switch (type)
 					{
 					case C_MESH:
 						file = c.FindMember("file")->value.GetString();
 						reference = c.FindMember("reference")->value.GetString();
-						materialResource  = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MESH);
-						if (materialResource)
+						meshResource = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MESH);
+						if (meshResource)
 						{
-							mesh = new RE_CompMesh(new_go, reference);
+							mesh = new RE_CompMesh(new_go, meshResource);
 							textures_val = &c.FindMember("material")->value;
 							if (textures_val->IsArray())
 								for (auto& t : textures_val->GetArray())
 								{
 									file = t.FindMember("path")->value.GetString();
 									reference = t.FindMember("md5")->value.GetString();
-									const char* matL = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MATERIAL);
-									if (matL) {
-										mesh->SetMaterial(matL);
+									materialResource = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MATERIAL);
+									if (materialResource) {
+										mesh->SetMaterial(materialResource);
 									}
 									else {
 										LOG_ERROR("Can't Load Material from mesh.\nmd5: %s\nAsset path: ", reference, file.c_str());
