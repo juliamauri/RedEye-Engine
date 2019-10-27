@@ -336,6 +336,8 @@ bool RE_PrimitiveManager::Init(const char* def_shader)
 		LOG_ERROR("Primitive Manager invalid default shader name", def_shader);
 	}
 
+	App->ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
+
 	return ret;
 }
 

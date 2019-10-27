@@ -66,6 +66,7 @@ bool FileSystem::Init(int argc, char* argv[])
 		sprintf_s(tmp, 8, "%u.%u.%u", (int)physfs_version.major, (int)physfs_version.minor, (int)physfs_version.patch);
 		App->ReportSoftware("PhysFS", tmp, "https://icculus.org/physfs/");
 		App->ReportSoftware("Rapidjson", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
+		App->ReportSoftware("LibZip", "1.5.0", "https://libzip.org/");
 		
 		engine_path = "engine";
 		library_path = "Library";
