@@ -16,11 +16,13 @@
 #include "ImGui\imgui_impl_opengl3.h"
 #include "ImGui\imgui_impl_sdl.h"
 #include "ImGuizmo\ImGuizmo.h"
+#include "ImGui/imgui_internal.h"
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
 
 ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
+	popupWindow = new PopUpWindow();
 	windows.push_back(console = new ConsoleWindow());
 	windows.push_back(config = new ConfigWindow());
 	windows.push_back(heriarchy = new HeriarchyWindow());
@@ -160,20 +162,22 @@ update_status ModuleEditor::Update()
 			ImGui::EndMainMenuBar();
 		}
 
+		if (popupWindow->IsActive()) popupWindow->DrawWindow();
+
 		// Draw Windows
 		for (auto window : windows)
 		{
 			if (window->IsActive())
-				window->DrawWindow();
+				window->DrawWindow(popUpFocus);
 		}
 
 		if (about != nullptr && about->IsActive())
-			about->DrawWindow(); // (not in windows' list)
+			about->DrawWindow(popUpFocus); // (not in windows' list)
 
 		for (auto tool : tools)
 		{
 			if (tool->IsActive())
-				tool->DrawWindow();
+				tool->DrawWindow(popUpFocus);
 		}
 	}
 	
@@ -202,6 +206,7 @@ bool ModuleEditor::CleanUp()
 		tools.pop_back();
 	}
 
+	DEL(popupWindow);
 	DEL(about);
 	DEL(camera);
 
@@ -262,6 +267,11 @@ RE_CompCamera * ModuleEditor::GetCamera() const
 SelectFile * ModuleEditor::GetSelectWindow()
 {
 	return select_file;
+}
+
+void ModuleEditor::PopUpFocus(bool focus)
+{
+	popUpFocus = focus;
 }
 
 void ModuleEditor::UpdateCamera()

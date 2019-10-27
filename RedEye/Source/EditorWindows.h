@@ -14,7 +14,7 @@ public:
 	EditorWindow(const char* name, bool start_active);
 	virtual ~EditorWindow();
 
-	void DrawWindow();
+	void DrawWindow(bool secondary = false);
 
 	bool IsActive() const;
 	void SwitchActive();
@@ -27,7 +27,7 @@ public:
 
 private:
 
-	virtual void Draw() = 0;
+	virtual void Draw(bool secondary = false) = 0;
 
 protected:
 
@@ -49,15 +49,15 @@ public:
 
 private:
 
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 
 public:
 
 	ImGuiTextBuffer console_buffer;
 	bool scroll_to_bot = true;
 	int file_filter = -1;
-	bool categories[7] = { true, true, true, true, true, true, true };
-	const char* category_names[7] = { "Separator", "Global", "Secondary", "Terciary", "Error" , "Warning" , "Software" };
+	bool categories[8] = { true, true, true, true, true, true, true, true };
+	const char* category_names[8] = { "Separator", "Global", "Secondary", "Terciary", "Error" , "Warning", "Solution" , "Software" };
 };
 
 class ConfigWindow : public EditorWindow
@@ -67,7 +67,7 @@ public:
 
 private:
 
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 
 public:
 
@@ -81,7 +81,7 @@ public:
 
 private:
 
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 };
 
 class PropertiesWindow : public EditorWindow
@@ -91,7 +91,7 @@ public:
 
 private:
 
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 };
 
 struct SoftwareInfo
@@ -107,7 +107,7 @@ public:
 
 private:
 
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 
 public:
 
@@ -121,7 +121,7 @@ public:
 
 private:
 
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 
 public:
 
@@ -136,7 +136,7 @@ public:
 
 private:
 
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 };
 
 class EditorSettingsWindow : public EditorWindow
@@ -146,7 +146,7 @@ public:
 
 private:
 
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 };
 
 class PlayPauseWindow : public EditorWindow
@@ -156,7 +156,7 @@ public:
 
 private:
 
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 };
 
 class SelectFile : public EditorWindow
@@ -169,7 +169,7 @@ public:
 	std::string IsSelected();
 
 private:
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 
 	std::string path;
 	std::string selected;
@@ -182,13 +182,31 @@ public:
 	PrefabsPanel(const char* name = "Prefabs", bool start_active = false);
 
 private:
-	void Draw() override;
+	void Draw(bool secondary = false) override;
 
 	std::vector<ResourceContainer*> prefabs;
 
 	ResourceContainer* selected = nullptr;
 };
 
+class PopUpWindow :public EditorWindow
+{
+public:
+	PopUpWindow(const char* name = "PopUp", bool start_active = false);
+
+	void PopUp(const char* btnText = "Accept", const char* title = "PopUp", bool disableAllWindows = false);
+
+	void PopUpError();
+
+private:
+	void Draw(bool secondary = false) override;
+
+	bool disableAllWindows = false;
+	bool fromHandleError = false;
+	std::string btnText;
+	std::string titleText;
+
+};
 
 
 #endif // !__EDITORWINDOWS__

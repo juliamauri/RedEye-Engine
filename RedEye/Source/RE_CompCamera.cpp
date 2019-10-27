@@ -184,7 +184,7 @@ void RE_CompCamera::LocalRotate(float x_angle_rad, float y_angle_rad)
 			up = front.Cross(right);
 		}
 	}
-
+	
 	right.Normalize();
 	up.Normalize();
 	front.Normalize();

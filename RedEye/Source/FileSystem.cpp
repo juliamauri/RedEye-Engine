@@ -87,11 +87,11 @@ bool FileSystem::Init(int argc, char* argv[])
 		if (engine_config->Load())
 			ret = true;
 		else
-			LOG("Error while loading Engine Configuration file: %s\nRed Eye Engine will initialize with default configuration parameters.", config_file);
+			LOG_ERROR("Error while loading Engine Configuration file: %s\nRed Eye Engine will initialize with default configuration parameters.", config_file);
 	}
 	else
 	{
-		LOG("PhysFS could not initialize! Error: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+		LOG_ERROR("PhysFS could not initialize! Error: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 	}
 
 	return ret;
@@ -125,7 +125,7 @@ bool FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
 
 	if (PHYSFS_mount(path_or_zip, mount_point, 1) == 0)
 	{
-		LOG("File System error while adding a path or zip(%s): %s\n", path_or_zip, PHYSFS_getLastError());
+		LOG_ERROR("File System error while adding a path or zip(%s): %s\n", path_or_zip, PHYSFS_getLastError());
 		ret = false;
 	}
 	else
@@ -142,7 +142,7 @@ bool FileSystem::RemovePath(const char * path_or_zip)
 
 	if (PHYSFS_removeFromSearchPath(path_or_zip) == 0)
 	{
-		LOG("Error removing PhysFS Directory (%s): %s", path_or_zip, PHYSFS_getLastError());
+		LOG_ERROR("Error removing PhysFS Directory (%s): %s", path_or_zip, PHYSFS_getLastError());
 		ret = false;
 	}
 
@@ -157,7 +157,7 @@ bool FileSystem::SetWritePath(const char * dir)
 
 	if (!PHYSFS_setWriteDir(dir))
 	{
-		LOG("Error setting PhysFS Directory: %s", PHYSFS_getLastError());
+		LOG_ERROR("Error setting PhysFS Directory: %s", PHYSFS_getLastError());
 		ret = false;
 	}
 	else
@@ -677,7 +677,7 @@ unsigned int RE_FileIO::HardLoad()
 				
 				if (amountRead != sll_size)
 				{
-					LOG("File System error while reading from file %s: %s", file_name, PHYSFS_getLastError());
+					LOG_ERROR("File System error while reading from file %s: %s", file_name, PHYSFS_getLastError());
 					delete (buffer);
 				}
 				else
@@ -689,17 +689,17 @@ unsigned int RE_FileIO::HardLoad()
 
 			if (PHYSFS_close(fs_file) == 0)
 			{
-				LOG("File System error while closing file %s: %s", file_name, PHYSFS_getLastError());
+				LOG_ERROR("File System error while closing file %s: %s", file_name, PHYSFS_getLastError());
 			}
 		}
 		else
 		{
-			LOG("File System error while opening file %s: %s", file_name, PHYSFS_getLastError());
+			LOG_ERROR("File System error while opening file %s: %s", file_name, PHYSFS_getLastError());
 		}
 	}
 	else
 	{
-		LOG("File System error while checking file %s: %s", file_name, PHYSFS_getLastError());
+		LOG_ERROR("File System error while checking file %s: %s", file_name, PHYSFS_getLastError());
 	}
 
 	return ret;
@@ -718,25 +718,25 @@ void RE_FileIO::HardSave(const char* buffer)
 		long long written = PHYSFS_write(file, (const void*)buffer, 1, size = (strnlen_s(buffer, 0xffff)));
 		if (written != size)
 		{
-			LOG("Error while writing to file %s: %s", file, PHYSFS_getLastError());
+			LOG_ERROR("Error while writing to file %s: %s", file, PHYSFS_getLastError());
 		}
 
 		if (PHYSFS_close(file) == 0)
-			LOG("Error while closing save file %s: %s", file, PHYSFS_getLastError());
+			LOG_ERROR("Error while closing save file %s: %s", file, PHYSFS_getLastError());
 	}
 	else
-		LOG("Error while opening save file %s: %s", file, PHYSFS_getLastError());
+		LOG_ERROR("Error while opening save file %s: %s", file, PHYSFS_getLastError());
 }
 
 void RE_FileIO::WriteFile(const char * zip_path, const char * filename, const char * buffer, unsigned int size)
 {
 	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
-		LOG("Ettot when unmount: %s", PHYSFS_getLastError());
+		LOG_ERROR("Ettot when unmount: %s", PHYSFS_getLastError());
 
 	struct zip *f_zip = NULL;
 	int error = 0;
 	f_zip = zip_open(zip_path, ZIP_CHECKCONS, &error); /* on ouvre l'archive zip */
-	if (error)	LOG("could not open or create archive: %s", zip_path);
+	if (error)	LOG_ERROR("could not open or create archive: %s", zip_path);
 
 	zip_source_t *s;
 
@@ -745,7 +745,7 @@ void RE_FileIO::WriteFile(const char * zip_path, const char * filename, const ch
 	if (s == NULL ||
 		zip_file_add(f_zip, filename, s, ZIP_FL_OVERWRITE + ZIP_FL_ENC_UTF_8) < 0) {
 		zip_source_free(s);
-		LOG("error adding file: %s\n", zip_strerror(f_zip));
+		LOG_ERROR("error adding file: %s\n", zip_strerror(f_zip));
 	}
 
 	zip_close(f_zip);

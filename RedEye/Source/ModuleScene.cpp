@@ -3,6 +3,8 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
+#include "EditorWindows.h"
+#include "ModelHandleErrors.h"
 #include "ModuleInput.h"
 #include "FileSystem.h"
 #include "OutputLog.h"
@@ -23,6 +25,9 @@
 #include "md5.h"
 #include <gl/GL.h>
 #include <string>
+
+#include "SDL2\include\SDL.h"
+
 
 #define DEFAULTMODEL "Assets/Meshes/BakerHouse/BakerHouse.fbx"
 
@@ -53,6 +58,7 @@ bool ModuleScene::Start()
 			LOG("%s\n", App->shaders->GetShaderError());
 	}
 
+	App->handlerrors->StartHandling();
 	// Load scene
 	Timer timer;
 	std::string path_scene("Assets/Scenes/");
@@ -70,6 +76,7 @@ bool ModuleScene::Start()
 	}
 	else
 	{
+		LOG_SOLUTION("Default Own Scene not found, loading default asset");
 		// Load default FBX
 		LOG("Importing scene from default asset model:");
 		RE_Prefab* newModel = App->modelImporter->LoadModelFromAssets(defaultModel.c_str());
@@ -80,6 +87,12 @@ bool ModuleScene::Start()
 
 		// Add camera
 		//(new RE_GameObject("Main Camera", GUID_NULL, root))->AddComponent(C_CAMERA);
+	}
+
+	App->handlerrors->StopHandling();
+
+	if (App->handlerrors->AnyErrorHandled()) {
+		App->handlerrors->ActivatePopUp();
 	}
 
 	root->AddComponent(C_PLANE);
@@ -127,6 +140,9 @@ bool ModuleScene::Start()
 update_status ModuleScene::Update()
 {
 	root->Update();
+
+	if (App->input->GetKey(SDL_SCANCODE_L) == KEY_STATE::KEY_UP)
+		App->editor->popupWindow->PopUp("Accept", "Testing PopUp", true);
 
 	return UPDATE_CONTINUE;
 }

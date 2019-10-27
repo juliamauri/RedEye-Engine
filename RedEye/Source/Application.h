@@ -24,6 +24,7 @@ class ShaderManager;
 class RE_PrimitiveManager;
 class RE_ModelImporter;
 class ResourceManager;
+class ModelHandleErrors;
 
 enum GameState : char
 {
@@ -82,6 +83,8 @@ public:
 	RE_ModelImporter* modelImporter = nullptr;
 
 	ResourceManager* resources = nullptr;
+
+	ModelHandleErrors* handlerrors = nullptr;
 
 private:
 

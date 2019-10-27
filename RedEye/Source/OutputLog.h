@@ -9,6 +9,7 @@ enum LogCategory : int
 	L_TERCIARY,
 	L_ERROR,
 	L_WARNING,
+	L_SOLUTION,
 	L_SOFTWARE,
 	L_TOTAL_CATEGORIES
 };
@@ -19,6 +20,7 @@ enum LogCategory : int
 #define LOG_TERCIARY(format, ...) _log(L_TERCIARY, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_ERROR(format, ...) _log(L_ERROR, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_WARNING(format, ...) _log(L_WARNING, __FILE__, __LINE__, format, __VA_ARGS__)
+#define LOG_SOLUTION(format, ...) _log(L_SOLUTION, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_SOFTWARE(format, ...) _log(L_SOFTWARE, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_CATEGORY(category, format, ...) _log(LogCategory(category), __FILE__, __LINE__, format, __VA_ARGS__)
 

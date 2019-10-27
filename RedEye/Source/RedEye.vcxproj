@@ -33,6 +33,7 @@
     <ClCompile Include="ImGui\imgui_impl_sdl.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="md5.cpp" />
+    <ClCompile Include="ModelHandleErrors.cpp" />
     <ClCompile Include="RE_ModelImporter.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="RE_CompParticleEmiter.cpp" />
@@ -86,6 +87,7 @@
     <ClInclude Include="ImGui\stb_textedit.h" />
     <ClInclude Include="ImGui\stb_truetype.h" />
     <ClInclude Include="md5.h" />
+    <ClInclude Include="ModelHandleErrors.h" />
     <ClInclude Include="Optick\include\optick.config.h" />
     <ClInclude Include="Optick\include\optick.h" />
     <ClInclude Include="par_shapes.h" />

@@ -9,6 +9,7 @@
 #include "RE_Math.h"
 #include "OutputLog.h"
 #include "ResourceManager.h"
+#include "ModelHandleErrors.h"
 
 #include "RE_Prefab.h"
 
@@ -30,7 +31,7 @@ EditorWindow::EditorWindow(const char* name, bool start_enabled)
 EditorWindow::~EditorWindow()
 {}
 
-void EditorWindow::DrawWindow()
+void EditorWindow::DrawWindow(bool secondary)
 {
 	if (lock_pos)
 	{
@@ -38,7 +39,7 @@ void EditorWindow::DrawWindow()
 		ImGui::SetWindowSize(size);
 	}
 
-	Draw();
+	Draw(secondary);
 }
 
 void EditorWindow::SwitchActive()
@@ -59,10 +60,15 @@ ConsoleWindow::ConsoleWindow(const char * name, bool start_active) :
 	pos.y = 500.f;
 }
 
-void ConsoleWindow::Draw()
+void ConsoleWindow::Draw(bool secondary)
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove))
 	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("Filter Files"))
@@ -98,8 +104,12 @@ void ConsoleWindow::Draw()
 			ImGui::SetScrollHere(1.f);
 			scroll_to_bot = false;
 		}
-	}
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
 
+	}
 	ImGui::End();
 }
 
@@ -161,13 +171,23 @@ ConfigWindow::ConfigWindow(const char * name, bool start_active) :
 	pos.y = 400.f;
 }
 
-void ConfigWindow::Draw()
+void ConfigWindow::Draw(bool secondary)
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
 	{
-		App->DrawEditor();
-	}
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
 
+		App->DrawEditor();
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+
+	}
 	ImGui::End();
 }
 
@@ -178,14 +198,23 @@ HeriarchyWindow::HeriarchyWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {}
 
-void HeriarchyWindow::Draw()
+void HeriarchyWindow::Draw(bool secondary)
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
 	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
 		if(App->scene)
 			App->scene->DrawHeriarchy();
-	}
 
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+	}
 	ImGui::End();
 }
 
@@ -196,14 +225,23 @@ PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {}
 
-void PropertiesWindow::Draw()
+void PropertiesWindow::Draw(bool secondary)
 {
 	// draw transform and components
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar))
 	{
-		if (App->scene) App->scene->DrawFocusedProperties();
-	}
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
 
+		if (App->scene) App->scene->DrawFocusedProperties();
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+	}
 	ImGui::End();
 }
 
@@ -221,10 +259,15 @@ AboutWindow::AboutWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {}
 
-void AboutWindow::Draw()
+void AboutWindow::Draw(bool secondary)
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
 	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
 		ImGui::Text("Engine name: %s", App->GetName());
 		ImGui::Text("Organization: %s", App->GetOrganization());
 		ImGui::Text("License: GNU General Public License v3.0");
@@ -274,9 +317,14 @@ void AboutWindow::Draw()
 			DevIL v1.8.0 http://openil.sourceforge.net/
 			Open Asset Import Library http://www.assimp.org/ */
 		}
-	}
 
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+	}
 	ImGui::End();
+
 }
 
 
@@ -286,10 +334,15 @@ RandomTest::RandomTest(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {}
 
-void RandomTest::Draw()
+void RandomTest::Draw(bool secondary)
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
 	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
 		ImGui::Text("Random Integer");
 		ImGui::SliderInt("Min Integer", &minInt, 0, maxInt);
 		ImGui::SliderInt("Max Integer", &maxInt, minInt, 100);
@@ -311,8 +364,12 @@ void RandomTest::Draw()
 
 		ImGui::SameLine();
 		ImGui::Text("Random Float: %.2f", resultF);
-	}
 
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+	}
 	ImGui::End();
 }
 
@@ -320,10 +377,14 @@ void RandomTest::Draw()
 ///////   Texture Manager  ////////////////////////////////////////////
 TexturesWindow::TexturesWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
 
-void TexturesWindow::Draw()
+void TexturesWindow::Draw(bool secondary)
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
 	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
 		/*
 		std::vector<Texture2D*>* textures = App->textures->GetTextures();
 		if (textures->size() != 0)
@@ -344,29 +405,48 @@ void TexturesWindow::Draw()
 			}
 		}
 		*/
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
 	}
 	ImGui::End();
 }
 
 EditorSettingsWindow::EditorSettingsWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
 
-void EditorSettingsWindow::Draw()
+void EditorSettingsWindow::Draw(bool secondary)
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
 	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
 		RE_CompCamera* cam = App->editor->GetCamera();
 		cam->DrawProperties();
 		cam->GetTransform()->DrawProperties();
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
 	}
 	ImGui::End();
 }
 
 PlayPauseWindow::PlayPauseWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
 
-void PlayPauseWindow::Draw()
+void PlayPauseWindow::Draw(bool secondary)
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
 	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
 		float seconds = App->time->GetGameTimer();
 		if (ImGui::Button(App->GetState() == GS_PLAY ? "Restart" : "Play"))
 			App->ScenePlay();
@@ -378,6 +458,11 @@ void PlayPauseWindow::Draw()
 			App->SceneStop();
 		ImGui::SameLine();
 		ImGui::Text("%f", seconds);
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
 	}
 	ImGui::End();
 }
@@ -405,10 +490,15 @@ std::string SelectFile::IsSelected()
 		return "";
 }
 
-void SelectFile::Draw()
+void SelectFile::Draw(bool secondary)
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
 	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
 		if (selected.empty())
 		{
 			char **i;
@@ -422,16 +512,26 @@ void SelectFile::Draw()
 				}
 			}
 		}
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
 	}
 	ImGui::End();
 }
 
 PrefabsPanel::PrefabsPanel(const char * name, bool start_active) : EditorWindow(name, start_active) {}
 
-void PrefabsPanel::Draw()
+void PrefabsPanel::Draw(bool secondary)
 {
-	ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing);
+	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
 	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
 		if (ImGui::Button("Reload Prefabs"))
 			prefabs = App->resources->GetResourcesByType(Resource_Type::R_PREFAB);
 		
@@ -464,6 +564,66 @@ void PrefabsPanel::Draw()
 		}
 		else
 			ImGui::Text("Empty");
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+	}
+	ImGui::End();
+}
+
+PopUpWindow::PopUpWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
+
+void PopUpWindow::PopUp(const char * _btnText, const char* title, bool _disableAllWindows)
+{
+	btnText = _btnText;
+	titleText = title;
+	if (disableAllWindows = _disableAllWindows) App->editor->PopUpFocus(disableAllWindows);
+	active = true;
+}
+
+void PopUpWindow::PopUpError()
+{
+	fromHandleError = true;
+	PopUp("Accept", "Error", true);
+}
+
+void PopUpWindow::Draw(bool secondary)
+{
+	if(ImGui::Begin(titleText.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		if (fromHandleError) {
+			if (ImGui::CollapsingHeader("All logs", 0, ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar)) {
+				ImGui::TextEx(App->handlerrors->GetLogs(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+			}
+
+			static bool anyWarning = App->handlerrors->AnyWarningHandled();
+			if (ImGui::CollapsingHeader("Warnings", 0, ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar)) {
+				ImGui::TextEx((!anyWarning) ? "No warnings" : App->handlerrors->GetWarnings(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+			}
+
+			static bool anyError = App->handlerrors->AnyErrorHandled();
+			if (ImGui::CollapsingHeader("Errors", 0, ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse)) {
+				ImGui::TextEx((!anyError) ? "No errors" :  App->handlerrors->GetErrors(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+			}
+
+			static bool anySolution = App->handlerrors->AnyErrorHandled();
+			if (ImGui::CollapsingHeader("Solutions", 0, ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse)) {
+				ImGui::TextEx((!anySolution) ? "No solutions" : App->handlerrors->GetSolutions(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+			}
+		}
+
+		if (ImGui::Button(btnText.c_str()))
+		{
+			active = false;
+			disableAllWindows = false;
+			App->editor->PopUpFocus(disableAllWindows);
+			if (fromHandleError) {
+				App->handlerrors->ClearAll();
+				fromHandleError = false;
+			}
+		}
 	}
 	ImGui::End();
 }

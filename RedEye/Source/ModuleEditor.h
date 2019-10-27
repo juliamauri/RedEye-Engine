@@ -18,6 +18,7 @@ class EditorSettingsWindow;
 class PlayPauseWindow;
 class SelectFile;
 class PrefabsPanel;
+class PopUpWindow;
 
 struct SoftwareInfo;
 class RE_CompCamera;
@@ -52,6 +53,9 @@ public:
 	//Select file
 	SelectFile* GetSelectWindow();
 
+	void PopUpFocus(bool focus);
+	PopUpWindow* popupWindow = nullptr;
+
 private:
 
 	void UpdateCamera();
@@ -63,6 +67,8 @@ private:
 
 	bool show_all = true;
 	bool show_demo = false;
+
+	bool popUpFocus = false;
 
 	// Windows
 	ConsoleWindow* console = nullptr;
@@ -77,6 +83,7 @@ private:
 	SelectFile* select_file = nullptr;
 
 	PrefabsPanel* prefabsPanel = nullptr;
+
 
 	// Tools
 	RandomTest* rng = nullptr;
