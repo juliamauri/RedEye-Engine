@@ -739,13 +739,21 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 		}
 		else
 		{
-			for (std::map<aiMaterial*, const char*>::iterator it = aditionalData->materialsLoaded.begin(); it != aditionalData->materialsLoaded.end(); ++it) 
+			if (!aditionalData->materialsLoaded.empty())
 			{
-				if (std::strcmp(filePath.c_str(), App->resources->At(it->second)->GetFilePath()) == 0)
+				for (std::map<aiMaterial*, const char*>::iterator it = aditionalData->materialsLoaded.begin(); it != aditionalData->materialsLoaded.end(); ++it)
 				{
-					materialMD5 = App->resources->At(it->second)->GetMD5();
-					break;
+					ResourceContainer* res = App->resources->At(it->second);
+					if (res && std::strcmp(filePath.c_str(), res->GetFilePath()) == 0)
+					{
+						materialMD5 = res->GetMD5();
+						break;
+					}
 				}
+			}
+
+			if (materialMD5 == nullptr) {
+				materialMD5 = App->resources->CheckFileLoaded(filePath.c_str(), nullptr, Resource_Type::R_MATERIAL);
 			}
 		}
 

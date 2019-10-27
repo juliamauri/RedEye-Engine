@@ -120,7 +120,7 @@ const char* ResourceManager::CheckFileLoaded(const char * filepath, const char* 
 			JSONNode* nodeMat = material.GetRootNode("Material");
 			rapidjson::Value& val = nodeMat->GetDocument()->FindMember("Material")->value.GetArray()[0];
 			RE_Material* materialLoaded = new RE_Material(val.FindMember("Name")->value.GetString(), &val);
-			((ResourceContainer*)materialLoaded)->SetMD5(resource);
+			((ResourceContainer*)materialLoaded)->SetMD5((resource != nullptr) ? resource : material.GetMd5().c_str());
 			((ResourceContainer*)materialLoaded)->SetFilePath(filepath);
 			((ResourceContainer*)materialLoaded)->SetType(R_MATERIAL);
 			ret = App->resources->Reference((ResourceContainer*)materialLoaded);
