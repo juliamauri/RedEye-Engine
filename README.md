@@ -77,15 +77,6 @@ Each option toggles a hide/view window from a list of available windows:
 * **Report a Bug**: opens a browser to repository's issues page
 * **About**: Shows engine info and 3rd party software.
 
-## Release Versions
-### v1.0
-* Camera FOV changes with mouse wheel
-* App adapts to window's aspect ratio
-* Gameobjects have a bounding box envolving its childs bounding boxes.
-* Scene serializes into a json file
-* Resources load once and components hold a reference to access them
-* Press F1 to toggle showing editor
-
 ## Libraries Used
 * SDL v2.0.7
 * Optick v1.2.9
