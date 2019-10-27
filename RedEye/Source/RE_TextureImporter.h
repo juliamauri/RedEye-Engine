@@ -20,6 +20,7 @@ public:
 	void use();
 	void GetWithHeight(int* w, int* h);
 	void DrawTextureImGui();
+	unsigned int GetID()const { return ID; }
 };
 
 class RE_TextureImporter

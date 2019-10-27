@@ -472,6 +472,13 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 					selectedMaterial->tDiffuse.push_back(textureResource);
 				else
 					selectedMaterial->tDiffuse[0] = textureResource;
+
+				Config materialSerialize(((ResourceContainer*)selectedMaterial)->GetFilePath(), App->fs->GetZipPath());
+
+				JSONNode* materialNode = materialSerialize.GetRootNode("Material");
+				materialNode->SetArray();
+				selectedMaterial->Serialize(materialNode, &materialNode->GetDocument()->FindMember("Material")->value);
+				materialSerialize.Save();
 			}
 		}
 	}

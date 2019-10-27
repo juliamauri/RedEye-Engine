@@ -10,6 +10,7 @@
 #include "OutputLog.h"
 #include "ResourceManager.h"
 #include "ModelHandleErrors.h"
+#include "RE_TextureImporter.h"
 
 #include "RE_Prefab.h"
 
@@ -385,26 +386,26 @@ void TexturesWindow::Draw(bool secondary)
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
-		/*
-		std::vector<Texture2D*>* textures = App->textures->GetTextures();
-		if (textures->size() != 0)
+		std::vector<ResourceContainer*> textures = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+		if (!textures.empty())
 		{
-			std::vector<Texture2D*>::iterator it = textures->begin();
-			for (it; it != textures->end(); ++it) {
+			std::vector<ResourceContainer*>::iterator it = textures.begin();
+			for (it; it != textures.end(); ++it) {
 
 				if (ImGui::TreeNode((*it)->GetName()))
 				{
+					Texture2D* texture = (Texture2D*)(*it);
 					int widht, height;
-					(*it)->GetWithHeight(&widht, &height);
-					ImGui::Text("GL ID: %u", (*it)->GetID());
+					texture->GetWithHeight(&widht, &height);
+					ImGui::Text("GL ID: %u", texture->GetID());
 					ImGui::Text("Widht: %u", widht);
 					ImGui::Text("Height: %u", height);
-					(*it)->DrawTextureImGui();
+					texture->DrawTextureImGui();
 					ImGui::TreePop();
 				}
 			}
 		}
-		*/
+
 		if (secondary) {
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
