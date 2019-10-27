@@ -132,7 +132,7 @@ Texture2D * RE_TextureImporter::ProcessTexture(RE_FileIO * fileTexture, int ILex
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 	
-	if (IL_TRUE != ilLoadL(ILextension, fileTexture->GetBuffer(), fileTexture->GetSize())) {
+	if (IL_FALSE != ilLoadL(ILextension, fileTexture->GetBuffer(), fileTexture->GetSize())) {
 		if (generateOwnFormat)
 		{
 			if (ILextension == IL_TGA)
