@@ -12,6 +12,8 @@
 
 #include "ImGui\imgui.h"
 
+#include "Glew/include/glew.h"
+
 #include "IL/include/il.h"
 #include "IL/include/ilu.h"
 #include "IL/include/ilut.h"
@@ -119,6 +121,47 @@ const char * RE_TextureImporter::LoadTextureLibrary(const char * libraryPath, co
 		LOG_ERROR("Error while loadind texture");
 
 	return exists;
+}
+
+unsigned int RE_TextureImporter::LoadSkyBoxTextures(const char * texturesPath, const char* extension)
+{
+	std::vector<std::string> skyBoxTexturesPath = App->fs->FindAllFilesByExtension(texturesPath, extension);
+	uint ID = 0;
+	glGenTextures(1, &ID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
+
+	uint count = 0;
+	for (auto texturePath : skyBoxTexturesPath) {
+
+		RE_FileIO texData(texturePath.c_str());
+
+		if (texData.Load()) {
+			uint imageID = 0;
+
+			ilGenImages(1, &imageID);
+			ilBindImage(imageID);
+
+			if (IL_FALSE != ilLoadL(GetExtensionIL(extension), texData.GetBuffer(), texData.GetSize())) {
+
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + count++,
+					0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()
+				);
+
+				ilBindImage(0);
+				ilDeleteImages(1, &imageID);
+			}
+		}
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	return ID;
 }
 
 Texture2D * RE_TextureImporter::ProcessTexture(RE_FileIO * fileTexture, int ILextension, bool generateOwnFormat, const char* md5Generated)

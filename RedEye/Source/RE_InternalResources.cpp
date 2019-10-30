@@ -2,12 +2,19 @@
 
 #include "Application.h"
 
+#include "FileSystem.h"
+#include "ResourceManager.h"
+
 #include "ShaderManager.h"
+#include "RE_TextureImporter.h"
 
 #include "OutputLog.h"
 
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
+
+#include <vector>
+#include <string>
 
 RE_InternalResources::RE_InternalResources()
 {
@@ -26,6 +33,8 @@ bool RE_InternalResources::Init()
 
 	ret = InitChecker();
 
+	ret = InitSkyBox();
+
 	return false;
 }
 
@@ -37,6 +46,11 @@ bool RE_InternalResources::InitShaders()
 	if (App->shaders)
 	{
 		if (!App->shaders->Load("default", &defaultShader, true)) {
+			LOG("%s\n", App->shaders->GetShaderError());
+			ret = false;
+		}
+
+		if (!App->shaders->Load("skybox", &skyboxShader, true)) {
 			LOG("%s\n", App->shaders->GetShaderError());
 			ret = false;
 		}
@@ -74,12 +88,87 @@ bool RE_InternalResources::InitChecker()
 	return true;
 }
 
+bool RE_InternalResources::InitSkyBox()
+{
+	float skyboxVertices[] = {
+		// positions          
+		-2000.f,  2000.f, -2000.f,
+		-2000.f, -2000.f, -2000.f,
+		 2000.f, -2000.f, -2000.f,
+		 2000.f, -2000.f, -2000.f,
+		 2000.f,  2000.f, -2000.f,
+		-2000.f,  2000.f, -2000.f,
+
+		-2000.f, -2000.f,  2000.f,
+		-2000.f, -2000.f, -2000.f,
+		-2000.f,  2000.f, -2000.f,
+		-2000.f,  2000.f, -2000.f,
+		-2000.f,  2000.f,  2000.f,
+		-2000.f, -2000.f,  2000.f,
+
+		 2000.f, -2000.f, -2000.f,
+		 2000.f, -2000.f,  2000.f,
+		 2000.f,  2000.f,  2000.f,
+		 2000.f,  2000.f,  2000.f,
+		 2000.f,  2000.f, -2000.f,
+		 2000.f, -2000.f, -2000.f,
+
+		-2000.f, -2000.f,  2000.f,
+		-2000.f,  2000.f,  2000.f,
+		 2000.f,  2000.f,  2000.f,
+		 2000.f,  2000.f,  2000.f,
+		 2000.f, -2000.f,  2000.f,
+		-2000.f, -2000.f,  2000.f,
+
+		-2000.f,  2000.f, -2000.f,
+		 2000.f,  2000.f, -2000.f,
+		 2000.f,  2000.f,  2000.f,
+		 2000.f,  2000.f,  2000.f,
+		-2000.f,  2000.f,  2000.f,
+		-2000.f,  2000.f, -2000.f,
+
+		-2000.f, -2000.f, -2000.f,
+		-2000.f, -2000.f,  2000.f,
+		 2000.f, -2000.f, -2000.f,
+		 2000.f, -2000.f, -2000.f,
+		-2000.f, -2000.f,  2000.f,
+		 2000.f, -2000.f,  2000.f
+	};
+
+	glGenVertexArrays(1, &skyBoxVAO);
+	glGenBuffers(1, &skyBoxVBO);
+	glBindVertexArray(skyBoxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyBoxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	skyBoxTexturesID = App->textures->LoadSkyBoxTextures("Assets/Skyboxes/default/", "jpg");
+
+	return true;
+}
+
 unsigned int RE_InternalResources::GetDefaultShader() const
 {
 	return defaultShader;
 }
 
+unsigned int RE_InternalResources::GetSkyBoxShader() const
+{
+	return skyboxShader;
+}
+
 unsigned int RE_InternalResources::GetTextureChecker() const
 {
 	return checkerTexture;
+}
+
+unsigned int RE_InternalResources::GetSkyBoxVAO() const
+{
+	return skyBoxVAO;
+}
+
+unsigned int RE_InternalResources::GetSkyBoxTexturesID() const
+{
+	return skyBoxTexturesID;
 }

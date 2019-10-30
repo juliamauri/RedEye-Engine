@@ -559,6 +559,44 @@ std::string FileSystem::RecursiveFindFileOutsideFileSystem(const char* directory
 	return directoryPath;
 }
 
+std::vector<std::string> FileSystem::FindAllFilesByExtension(const char * path, const char * extension, bool repercusive)
+{
+	std::vector<std::string> ret;
+
+	std::string iterPath(path);
+
+	char **rc = PHYSFS_enumerateFiles(iterPath.c_str());
+	char **i;
+
+	for (i = rc; *i != NULL; i++)
+	{
+		std::string inPath(iterPath);
+		inPath += *i;
+
+		PHYSFS_Stat fileStat;
+		if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
+			if (repercusive && fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
+				inPath += "/";
+				std::vector<std::string> fromFolder = FindAllFilesByExtension(inPath.c_str(), extension, repercusive);
+
+				if (!fromFolder.empty()) {
+					ret.insert(ret.end(), fromFolder.begin(), fromFolder.end());
+				}
+			}
+			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
+				std::string ext = inPath.substr(inPath.find_last_of(".") + 1);
+				std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
+				if (ext.compare(extension) == 0) {
+					ret.push_back(inPath);
+				}
+			}
+		}
+	}
+
+	return ret;
+}
+
 bool FileSystem::RecursiveComparePath(const char * path1, const char * path2)
 {
 	bool isSame = true;

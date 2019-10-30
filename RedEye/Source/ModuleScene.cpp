@@ -29,6 +29,7 @@
 #include "TimeManager.h"
 
 #include "md5.h"
+#include "Glew/include/glew.h"
 #include <gl/GL.h>
 #include <string>
 
@@ -48,7 +49,7 @@ ModuleScene::~ModuleScene()
 
 bool ModuleScene::Init(JSONNode * node)
 {
-	defaultModel = node->PullString("defaultModel", DEFAULTMODEL);;
+	defaultModel = node->PullString("defaultModel", DEFAULTMODEL);
 	return true;
 }
 
@@ -57,6 +58,9 @@ bool ModuleScene::Start()
 	bool ret = true;
 
 	sceneShader = App->internalResources->GetDefaultShader();
+	skyboxShader = App->internalResources->GetSkyBoxShader();
+	skyboxVAO = App->internalResources->GetSkyBoxVAO();
+	skyboxTexID = App->internalResources->GetSkyBoxTexturesID();
 
 	// Load scene
 	Timer timer;
@@ -126,7 +130,6 @@ bool ModuleScene::Start()
 
 	// Quadtree
 	//quad_tree.Build(root);
-
 
 	return ret;
 }
@@ -269,6 +272,26 @@ void ModuleScene::DrawScene()
 	for (auto object : objects) object->Draw(false);*/
 
 	root->Draw();
+
+
+	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
+
+	ShaderManager::use(skyboxShader);
+	ShaderManager::setFloat4x4(skyboxShader, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(skyboxShader, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	ShaderManager::setInt(skyboxShader, "skybox", 0);
+	// draw skybox as last
+	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+	// skybox cube
+	glBindVertexArray(skyboxVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexID);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	glDepthFunc(GL_LESS); // set depth function back to default
+	ShaderManager::use(0);
+
 }
 
 void ModuleScene::DrawHeriarchy()

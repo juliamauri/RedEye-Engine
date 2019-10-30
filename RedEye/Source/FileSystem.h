@@ -8,6 +8,7 @@
 #include "MathGeoLib/include/Math/float3.h"
 #include <list>
 #include <string>
+#include <vector>
 
 class Config;
 class RE_FileIO;
@@ -40,6 +41,8 @@ public:
 	const char* GetZipPath();
 
 	void HandleDropedFile(const char* file);
+
+	std::vector<std::string> FindAllFilesByExtension(const char* path, const char* extension, bool repercusive = false);
 
 private:
 
