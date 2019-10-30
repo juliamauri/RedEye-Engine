@@ -130,7 +130,7 @@
     <ClCompile Include="RE_CompParticleEmiter.cpp">
       <Filter>GameObject\Components\Particles</Filter>
     </ClCompile>
-    <ClCompile Include="ModelHandleErrors.cpp">
+    <ClCompile Include="RE_HandleErrors.cpp">
       <Filter>Modules\Independent App Modules</Filter>
     </ClCompile>
   </ItemGroup>
@@ -420,7 +420,7 @@
     <ClInclude Include="par_shapes.h">
       <Filter>3rd Party\PAR Shapes</Filter>
     </ClInclude>
-    <ClInclude Include="ModelHandleErrors.h">
+    <ClInclude Include="RE_HandleErrors.h">
       <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,7 +6,7 @@
 #include "ModuleWindow.h"
 #include "Event.h"
 #include "OutputLog.h"
-#include "ModelHandleErrors.h"
+#include "RE_HandleErrors.h"
 #include "SDL2\include\SDL.h"
 
 #define MAX_KEYS 300

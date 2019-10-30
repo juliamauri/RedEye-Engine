@@ -15,7 +15,7 @@
 #include "RE_PrimitiveManager.h"
 #include "RE_ModelImporter.h"
 #include "ResourceManager.h"
-#include "ModelHandleErrors.h"
+#include "RE_HandleErrors.h"
 
 
 #include "SDL2\include\SDL.h"
@@ -46,7 +46,7 @@ Application::Application()
 	primitives = new RE_PrimitiveManager();
 	modelImporter = new RE_ModelImporter("Assets/Meshes/");
 	resources = new ResourceManager();
-	handlerrors = new ModelHandleErrors();
+	handlerrors = new RE_HandleErrors();
 }
 
 Application::~Application()

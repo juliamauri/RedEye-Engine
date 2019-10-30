@@ -4,7 +4,7 @@
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
 #include "EditorWindows.h"
-#include "ModelHandleErrors.h"
+#include "RE_HandleErrors.h"
 #include "ModuleInput.h"
 #include "FileSystem.h"
 #include "OutputLog.h"

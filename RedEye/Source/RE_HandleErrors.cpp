@@ -1,4 +1,4 @@
-#include "ModelHandleErrors.h"
+#include "RE_HandleErrors.h"
 
 #include "Application.h"
 #include "ModuleEditor.h"
@@ -6,27 +6,27 @@
 
 #include "OutputLog.h"
 
-ModelHandleErrors::ModelHandleErrors() : Module("ModuleHandleErrors")
+RE_HandleErrors::RE_HandleErrors()
 {
 }
 
 
-ModelHandleErrors::~ModelHandleErrors()
+RE_HandleErrors::~RE_HandleErrors()
 {
 }
 
-void ModelHandleErrors::StartHandling()
+void RE_HandleErrors::StartHandling()
 {
 	ClearAll();
 	recLogs = true;
 }
 
-void ModelHandleErrors::StopHandling()
+void RE_HandleErrors::StopHandling()
 {
 	recLogs = false;
 }
 
-void ModelHandleErrors::HandleLog(const char * _log, LogCategory category)
+void RE_HandleErrors::HandleLog(const char * _log, LogCategory category)
 {
 	if (recLogs) {
 		logs += _log;
@@ -40,42 +40,42 @@ void ModelHandleErrors::HandleLog(const char * _log, LogCategory category)
 	}
 }
 
-bool ModelHandleErrors::AnyErrorHandled() const
+bool RE_HandleErrors::AnyErrorHandled() const
 {
 	return !errors.empty();
 }
 
-bool ModelHandleErrors::AnyWarningHandled() const
+bool RE_HandleErrors::AnyWarningHandled() const
 {
 	return !warnings.empty();
 }
 
-bool ModelHandleErrors::AnySolutionHandled() const
+bool RE_HandleErrors::AnySolutionHandled() const
 {
 	return !solutions.empty();
 }
 
-const char * ModelHandleErrors::GetErrors()
+const char * RE_HandleErrors::GetErrors()
 {
 	return errors.c_str();
 }
 
-const char * ModelHandleErrors::GetSolutions()
+const char * RE_HandleErrors::GetSolutions()
 {
 	return solutions.c_str();
 }
 
-const char * ModelHandleErrors::GetLogs()
+const char * RE_HandleErrors::GetLogs()
 {
 	return logs.c_str();
 }
 
-const char * ModelHandleErrors::GetWarnings()
+const char * RE_HandleErrors::GetWarnings()
 {
 	return warnings.c_str();
 }
 
-void ModelHandleErrors::ClearAll()
+void RE_HandleErrors::ClearAll()
 {
 	if (!App->editor->popupWindow->IsActive()) {
 		logs.clear();
@@ -85,7 +85,7 @@ void ModelHandleErrors::ClearAll()
 	}
 }
 
-void ModelHandleErrors::ActivatePopUp()
+void RE_HandleErrors::ActivatePopUp()
 {
 	App->editor->popupWindow->PopUpError();
 }

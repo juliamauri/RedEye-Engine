@@ -9,7 +9,7 @@
 #include "RE_Math.h"
 #include "OutputLog.h"
 #include "ResourceManager.h"
-#include "ModelHandleErrors.h"
+#include "RE_HandleErrors.h"
 #include "RE_TextureImporter.h"
 
 #include "RE_Prefab.h"

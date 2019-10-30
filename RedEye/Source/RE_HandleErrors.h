@@ -1,5 +1,5 @@
-#ifndef __MODULEHANDLEERRORS_H__
-#define __MODULEHANDLEERRORS_H__
+#ifndef __RE_HANDLEERRORS_H__
+#define __RE_HANDLEERRORS_H__
 
 #include "Module.h"
 
@@ -7,12 +7,10 @@
 
 enum LogCategory;
 
-class ModelHandleErrors :
-	public Module
-{
+class RE_HandleErrors {
 public:
-	ModelHandleErrors();
-	~ModelHandleErrors();
+	RE_HandleErrors();
+	~RE_HandleErrors();
 
 	void StartHandling();
 	void StopHandling();
@@ -40,4 +38,4 @@ private:
 	bool recLogs = false;
 };
 
-#endif // !__MODULEHANDLEERRORS_H__
+#endif // !__RE_HANDLEERRORS_H__
