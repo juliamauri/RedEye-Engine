@@ -469,14 +469,14 @@ RE_GameObject * RE_GameObject::GetGoFromUUID(UUID parent)
 
 void RE_GameObject::TransformModified()
 {
+	App->scene->SceneModified();
+	ResetGlobalBoundingBox();
+
 	for (auto component : components)
 		component->OnTransformModified();
 
 	for (auto child : childs)
 		child->TransformModified();
-
-	App->scene->SceneModified();
-	ResetGlobalBoundingBox();
 }
 
 const char * RE_GameObject::GetName() const
