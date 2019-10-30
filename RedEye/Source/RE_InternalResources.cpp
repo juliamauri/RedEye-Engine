@@ -23,6 +23,9 @@ RE_InternalResources::RE_InternalResources()
 RE_InternalResources::~RE_InternalResources()
 {
 	if(checkerTexture != 0) glDeleteTextures(1, &checkerTexture);
+	if (skyBoxTexturesID != 0) glDeleteTextures(6, &checkerTexture);
+	if (skyBoxVAO != 0) glDeleteBuffers(1, &skyBoxVAO);
+	if (skyBoxVBO != 0) glDeleteBuffers(1, &skyBoxVBO);
 }
 
 bool RE_InternalResources::Init()
