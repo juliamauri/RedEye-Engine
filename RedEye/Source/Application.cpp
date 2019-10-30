@@ -1,22 +1,26 @@
 #include "Application.h"
-#include "ModuleScene.h"
+
 #include "Module.h"
+#include "ModuleScene.h"
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
 #include "ModuleEditor.h"
 #include "ModuleRenderer3D.h"
+
+#include "RE_Math.h"
 #include "FileSystem.h"
+#include "RE_PrimitiveManager.h"
+#include "ResourceManager.h"
+
+#include "ShaderManager.h"
+#include "RE_TextureImporter.h"
+#include "RE_ModelImporter.h"
+#include "RE_InternalResources.h"
+
 #include "TimeManager.h"
 #include "SystemInfo.h"
-#include "RE_Math.h"
 #include "OutputLog.h"
-#include "RE_TextureImporter.h"
-#include "ShaderManager.h"
-#include "RE_PrimitiveManager.h"
-#include "RE_ModelImporter.h"
-#include "ResourceManager.h"
 #include "RE_HandleErrors.h"
-
 
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
@@ -46,6 +50,7 @@ Application::Application()
 	primitives = new RE_PrimitiveManager();
 	modelImporter = new RE_ModelImporter("Assets/Meshes/");
 	resources = new ResourceManager();
+	internalResources = new RE_InternalResources();
 	handlerrors = new RE_HandleErrors();
 }
 
@@ -56,6 +61,7 @@ Application::~Application()
 	DEL(primitives);
 	DEL(modelImporter);
 	DEL(resources);
+	DEL(internalResources);
 	DEL(handlerrors);
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
@@ -123,10 +129,12 @@ bool Application::Init(int argc, char* argv[])
 				if (math) math->Init();
 
 				// Initiallize Resource Managers
+				if (internalResources && !internalResources->Init())  LOG_WARNING("Won't be able to load internal Resources");
 				if (textures && !textures->Init()) LOG_WARNING("Won't be able to use textures");
 				if (shaders && !shaders->Init()) LOG_WARNING("Won't be able to use shaders");
 				if (primitives && !primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
 				if (modelImporter && !modelImporter->Init())  LOG_WARNING("Won't be able to import model");
+				
 
 				LOG_SEPARATOR("Starting Application");
 

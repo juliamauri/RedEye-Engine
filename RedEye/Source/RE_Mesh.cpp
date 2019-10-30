@@ -2,18 +2,22 @@
 
 #include "Application.h"
 #include "ModuleRenderer3D.h"
+#include "ModuleScene.h"
+
+#include "FileSystem.h"
+#include "RE_PrimitiveManager.h"
+#include "ResourceManager.h"
+
 #include "ShaderManager.h"
 #include "RE_TextureImporter.h"
-#include "OutputLog.h"
-#include "ModuleScene.h"
+
+#include "RE_Material.h"
+
 #include "RE_GameObject.h"
 #include "RE_Component.h"
 #include "RE_CompTransform.h"
-#include "RE_PrimitiveManager.h"
-#include "ResourceManager.h"
-#include "FileSystem.h"
 
-#include "RE_Material.h"
+#include "OutputLog.h"
 
 #include "ImGui\imgui.h"
 #include "Glew/include/glew.h"
@@ -25,32 +29,6 @@
 #include "assimp/include/Importer.hpp"
 #include "assimp/include/scene.h"
 #include "assimp/include/postprocess.h"
-
-void _CheckGLError(const char* file, int line);
-
-#define CheckGLError() _CheckGLError(__FILE__, __LINE__)
-
-void _CheckGLError(const char* file, int line)
-{
-	GLenum err(glGetError());
-
-	while (err != GL_NO_ERROR)
-	{
-		std::string error;
-		switch (err)
-		{
-		case GL_INVALID_OPERATION:  error = "INVALID_OPERATION";      break;
-		case GL_INVALID_ENUM:       error = "INVALID_ENUM";           break;
-		case GL_INVALID_VALUE:      error = "INVALID_VALUE";          break;
-		case GL_OUT_OF_MEMORY:      error = "OUT_OF_MEMORY";          break;
-		case GL_INVALID_FRAMEBUFFER_OPERATION:  error = "INVALID_FRAMEBUFFER_OPERATION";  break;
-		}
-		std::cout << "GL_" << error.c_str() << " - " << file << ":" << line << std::endl;
-		err = glGetError();
-	}
-
-	return;
-}
 
 
 RE_Mesh::RE_Mesh(std::vector<Vertex> _vertices, std::vector<unsigned int> _indices, const char* _materialMD5, unsigned int triangles)
@@ -74,21 +52,26 @@ RE_Mesh::~RE_Mesh()
 	if (lFaceNormals) clearFaceNormals();
 }
 
-void RE_Mesh::Draw(const float* transform, bool use_checkers)
+void RE_Mesh::Draw(const float* transform, unsigned int shader, unsigned int checker, bool use_checkers)
 {
 	// Set Shader uniforms
-	ShaderManager::use(App->scene->modelloading);
-	ShaderManager::setFloat4x4(App->scene->modelloading, "model", transform);
+	ShaderManager::use(shader);
+	ShaderManager::setFloat4x4(shader, "model", transform);
+
+	RE_Material* meshMaterial = nullptr;
+	if(materialMD5) meshMaterial = (RE_Material*)App->resources->At(materialMD5);
 
 	// Bind Textures
-	if (use_checkers)
+	if (use_checkers || !materialMD5 || meshMaterial->tDiffuse.empty())
 	{
-		DrawCheckerTexture();
+		use_checkers = true;
+		glActiveTexture(GL_TEXTURE0);
+		std::string name = "texture_diffuse0";
+		ShaderManager::setUnsignedInt(shader, name.c_str(), 0);
+		glBindTexture(GL_TEXTURE_2D, checker);
 	}
 	else if (materialMD5)
 	{
-		RE_Material* meshMaterial = (RE_Material*)App->resources->At(materialMD5);
-
 		// Bind diffuse textures
 		unsigned int diffuseNr = 1;
 		if (!meshMaterial->tDiffuse.empty())
@@ -98,13 +81,9 @@ void RE_Mesh::Draw(const float* transform, bool use_checkers)
 				glActiveTexture(GL_TEXTURE0 + i);
 				std::string name = "texture_diffuse";
 				name += std::to_string(diffuseNr++);
-				ShaderManager::setUnsignedInt(App->scene->modelloading, name.c_str(), i);
+				ShaderManager::setUnsignedInt(shader, name.c_str(), i);
 				((Texture2D*)App->resources->At(meshMaterial->tDiffuse[i]))->use();
 			}
-		}
-		else {
-			use_checkers = true;
-			DrawCheckerTexture();
 		}
 		/*
 			unsigned int specularNr = 1;
@@ -121,10 +100,6 @@ void RE_Mesh::Draw(const float* transform, bool use_checkers)
 				number = std::to_string(heightNr++); // transfer unsigned int to stream
 		*/
 	}
-	else {
-		use_checkers = true;
-		DrawCheckerTexture();
-	}
 
 	// Draw mesh
 	glBindVertexArray(VAO);
@@ -132,7 +107,7 @@ void RE_Mesh::Draw(const float* transform, bool use_checkers)
 
 	// Release buffers
 	glBindVertexArray(0);
-	if (use_checkers || materialMD5)
+	if (use_checkers || (materialMD5 && !meshMaterial->tDiffuse.empty()))
 	{
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -192,14 +167,6 @@ void RE_Mesh::Draw(const float* transform, bool use_checkers)
 	}
 
 	ShaderManager::use(0);
-}
-
-void RE_Mesh::DrawCheckerTexture()
-{
-	glActiveTexture(GL_TEXTURE0);
-	std::string name = "texture_diffuse0";
-	ShaderManager::setUnsignedInt(App->scene->modelloading, name.c_str(), 0);
-	glBindTexture(GL_TEXTURE_2D, App->scene->checkers_texture);
 }
 
 void RE_Mesh::SetupAABB()

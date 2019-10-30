@@ -6,7 +6,6 @@
 #include "QuadTree.h"
 
 class RE_GameObject;
-class RE_Mesh;
 
 class ModuleScene : public Module
 {
@@ -46,11 +45,7 @@ public:
 	void LoadTextureOnSelectedGO(const char* texturePath);
 	void SceneModified();
 
-	//shaders
-	unsigned int modelloading;
-
-	// Checkers
-	unsigned int checkers_texture;
+	uint GetShaderScene()const;
 
 private:
 	//init values
@@ -78,9 +73,7 @@ private:
 
 	bool focus_on_select = false;
 
-	// Particles
-	RE_Mesh* smoke_particle = nullptr;
-	unsigned int shader_particle;
+	unsigned int sceneShader = 0;
 };
 
 

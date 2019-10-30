@@ -28,7 +28,7 @@ bool ShaderManager::Init()
 	return ret;
 }
 
-bool ShaderManager::Load(const char* name, unsigned int* ID)
+bool ShaderManager::Load(const char* name, unsigned int* ID, bool fromLibrary)
 {
 	LOG("Loading %s shader.", name);
 
@@ -44,7 +44,7 @@ bool ShaderManager::Load(const char* name, unsigned int* ID)
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
 	//load source
-	std::string path(this->folderPath);
+	std::string path((!fromLibrary) ? this->folderPath : "Library/Shaders/");
 	path += name;
 	path += ".vert";
 	RE_FileIO file_vertexShader(path.c_str());

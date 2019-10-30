@@ -13,6 +13,7 @@
 #include "RE_CompCamera.h"
 #include "ModuleScene.h"
 #include "FileSystem.h"
+#include "RE_InternalResources.h"
 
 #include "par_shapes.h"
 
@@ -165,7 +166,7 @@ RE_CompCube::~RE_CompCube()
 
 void RE_CompCube::Draw()
 {
-	unsigned int shader_id = (show_checkers ? App->scene->modelloading : RE_CompPrimitive::shader);
+	unsigned int shader_id = (show_checkers ? App->scene->GetShaderScene() : RE_CompPrimitive::shader);
 
 	ShaderManager::use(shader_id);
 	ShaderManager::setFloat4x4(shader_id, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
@@ -186,7 +187,7 @@ void RE_CompCube::Draw()
 		// Apply Checkers Texture
 		glActiveTexture(GL_TEXTURE0);
 		ShaderManager::setUnsignedInt(shader_id, "texture_diffuse0", 0);
-		glBindTexture(GL_TEXTURE_2D, App->scene->checkers_texture);
+		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw
 		glBindVertexArray(RE_CompPrimitive::VAO);
@@ -261,7 +262,7 @@ RE_CompSphere::~RE_CompSphere()
 
 void RE_CompSphere::Draw()
 {
-	unsigned int shader_id = (show_checkers ? App->scene->modelloading : RE_CompPrimitive::shader);
+	unsigned int shader_id = (show_checkers ? App->scene->GetShaderScene() : RE_CompPrimitive::shader);
 
 	ShaderManager::use(shader_id);
 	ShaderManager::setFloat4x4(shader_id, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
@@ -282,7 +283,7 @@ void RE_CompSphere::Draw()
 		// Apply Checkers Texture
 		glActiveTexture(GL_TEXTURE0);
 		ShaderManager::setUnsignedInt(shader_id, "texture_diffuse0", 0);
-		glBindTexture(GL_TEXTURE_2D, App->scene->checkers_texture);
+		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw
 		glBindVertexArray(RE_CompPrimitive::VAO);

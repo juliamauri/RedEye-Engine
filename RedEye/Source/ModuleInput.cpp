@@ -2,11 +2,14 @@
 
 #include "Application.h"
 #include "ModuleEditor.h"
-#include "FileSystem.h"
 #include "ModuleWindow.h"
+
+#include "FileSystem.h"
+
 #include "Event.h"
 #include "OutputLog.h"
 #include "RE_HandleErrors.h"
+
 #include "SDL2\include\SDL.h"
 
 #define MAX_KEYS 300

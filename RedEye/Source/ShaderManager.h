@@ -18,7 +18,7 @@ public:
 	bool Init();
 
 	//Load shaders and put in vector
-	bool Load(const char* name, unsigned int* ID);
+	bool Load(const char* name, unsigned int* ID, bool fromLibrary = false);
 	//get last error
 	const char* GetShaderError();
 	// use/activate the shader

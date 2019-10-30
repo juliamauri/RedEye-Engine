@@ -4,8 +4,6 @@
 #include "RE_Math.h"
 #include "Resource.h"
 
-struct Texture2D;
-
 struct Vertex
 {
 	math::vec Position = math::vec::zero;
@@ -19,9 +17,7 @@ public:
 	RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, const char* materialMD5, unsigned int triangles);
 	~RE_Mesh();
 
-	void Draw(const float* transform, bool use_checkers = false);
-
-	void DrawCheckerTexture();
+	void Draw(const float* transform, unsigned int shader, unsigned int checker, bool use_checkers = false);
 
 	math::AABB GetAABB() const;
 

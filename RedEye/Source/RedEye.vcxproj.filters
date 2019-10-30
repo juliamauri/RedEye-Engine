@@ -133,6 +133,12 @@
     <ClCompile Include="RE_HandleErrors.cpp">
       <Filter>Modules\Independent App Modules</Filter>
     </ClCompile>
+    <ClCompile Include="RE_InternalResources.cpp">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Globals.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -421,6 +427,9 @@
       <Filter>3rd Party\PAR Shapes</Filter>
     </ClInclude>
     <ClInclude Include="RE_HandleErrors.h">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_InternalResources.h">
       <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
   </ItemGroup>

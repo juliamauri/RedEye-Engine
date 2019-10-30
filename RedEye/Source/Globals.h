@@ -85,3 +85,8 @@ enum Dir
 
 #define _STATIC_CPPLIB
 #define _DISABLE_DEPRECATE_STATIC_CPPLIB
+
+//OpenGL GetError
+void _CheckGLError(const char* file, int line);
+
+#define CheckGLError() _CheckGLError(__FILE__, __LINE__)

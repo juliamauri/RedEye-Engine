@@ -24,6 +24,7 @@
     <ClCompile Include="EditorWindows.cpp" />
     <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="Event.cpp" />
+    <ClCompile Include="Globals.cpp" />
     <ClCompile Include="gpudetect\DeviceId.cpp" />
     <ClCompile Include="ImGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -34,6 +35,7 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="md5.cpp" />
     <ClCompile Include="RE_HandleErrors.cpp" />
+    <ClCompile Include="RE_InternalResources.cpp" />
     <ClCompile Include="RE_ModelImporter.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="RE_CompParticleEmiter.cpp" />
@@ -91,6 +93,7 @@
     <ClInclude Include="Optick\include\optick.config.h" />
     <ClInclude Include="Optick\include\optick.h" />
     <ClInclude Include="par_shapes.h" />
+    <ClInclude Include="RE_InternalResources.h" />
     <ClInclude Include="RE_ModelImporter.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="RE_CompParticleEmiter.h" />

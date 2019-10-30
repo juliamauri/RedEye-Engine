@@ -1,30 +1,39 @@
 #include "RE_CompMesh.h"
 
 #include "Application.h"
-#include "FileSystem.h"
-#include "ShaderManager.h"
 #include "ModuleScene.h"
+
+#include "RE_Math.h"
+#include "FileSystem.h"
+
+#include "RE_InternalResources.h"
+#include "RE_PrimitiveManager.h"
 #include "ResourceManager.h"
+#include "RE_TextureImporter.h"
+#include "ShaderManager.h"
+
 #include "RE_Mesh.h"
+#include "RE_Material.h"
+
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
-#include "RE_TextureImporter.h"
-#include "RE_Material.h"
-#include "RE_Math.h"
-#include "RE_PrimitiveManager.h"
-#include "ImGui\imgui.h"
 
+#include "ImGui\imgui.h"
 
 RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool start_active)
 	: RE_Component(C_MESH, go, start_active), reference(reference)
 {
 	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
+	shaderForDraw = App->scene->GetShaderScene();
+	checkerTexture = App->internalResources->GetTextureChecker();
 }
 
 RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go)
 	: RE_Component(C_MESH, go, cmpMesh.active), reference(cmpMesh.reference)
 {
 	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
+	shaderForDraw = cmpMesh.shaderForDraw;
+	checkerTexture = cmpMesh.checkerTexture;
 }
 
 RE_CompMesh::~RE_CompMesh()
@@ -34,7 +43,7 @@ RE_CompMesh::~RE_CompMesh()
 
 void RE_CompMesh::Draw()
 {
-	ptr->Draw(go->GetTransform()->GetShaderModel(), show_checkers);
+	ptr->Draw(go->GetTransform()->GetShaderModel(), checkerTexture, show_checkers);
 }
 
 void RE_CompMesh::DrawProperties()

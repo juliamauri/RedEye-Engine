@@ -2,26 +2,31 @@
 
 #include "Application.h"
 #include "ModuleRenderer3D.h"
-#include "ModuleEditor.h"
-#include "EditorWindows.h"
-#include "RE_HandleErrors.h"
 #include "ModuleInput.h"
+#include "ModuleEditor.h"
+
+#include "EditorWindows.h"
 #include "FileSystem.h"
-#include "OutputLog.h"
-#include "ResourceManager.h"
-#include "RE_Material.h"
-#include "RE_TextureImporter.h"
-#include "ShaderManager.h"
-#include "RE_GameObject.h"
-#include "RE_Prefab.h"
-#include "RE_CompTransform.h"
-#include "RE_CompMesh.h"
-#include "RE_CompCamera.h"
-#include "RE_CompParticleEmiter.h"
-#include "RE_ModelImporter.h"
-#include "TimeManager.h"
 #include "RE_PrimitiveManager.h"
+#include "ResourceManager.h"
+
+#include "ShaderManager.h"
+#include "RE_ModelImporter.h"
+#include "RE_TextureImporter.h"
+
+#include "RE_Material.h"
+#include "RE_Prefab.h"
+
+#include "RE_GameObject.h"
+#include "RE_CompMesh.h"
+#include "RE_CompTransform.h"
+#include "RE_CompCamera.h"
 #include "RE_CompPrimitive.h" 
+
+#include "OutputLog.h"
+#include "RE_HandleErrors.h"
+#include "TimeManager.h"
+
 #include "md5.h"
 #include <gl/GL.h>
 #include <string>
@@ -49,14 +54,6 @@ bool ModuleScene::Init(JSONNode * node)
 bool ModuleScene::Start()
 {
 	bool ret = true;
-
-	//Loading Shaders
-	if (App->shaders)
-	{
-		ret = App->shaders->Load("texture", &modelloading);
-		if (!ret)
-			LOG("%s\n", App->shaders->GetShaderError());
-	}
 
 	// Load scene
 	Timer timer;
@@ -127,29 +124,6 @@ bool ModuleScene::Start()
 	// Quadtree
 	//quad_tree.Build(root);
 
-	// Checkers
-	int value;
-	int IMAGE_ROWS = 264;
-	int IMAGE_COLS = 264;
-	GLubyte imageData[264][264][3];
-	for (int row = 0; row < IMAGE_ROWS; row++) {
-		for (int col = 0; col < IMAGE_COLS; col++) {
-			// Each cell is 8x8, value is 0 or 255 (black or white)
-			value = (((row & 0x8) == 0) ^ ((col & 0x8) == 0)) * 255;
-			imageData[row][col][0] = (GLubyte)value;
-			imageData[row][col][1] = (GLubyte)value;
-			imageData[row][col][2] = (GLubyte)value;
-		}
-	}
-
-	glGenTextures(1, &checkers_texture);
-	glBindTexture(GL_TEXTURE_2D, checkers_texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, IMAGE_COLS, IMAGE_ROWS, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return ret;
 }
@@ -168,10 +142,6 @@ bool ModuleScene::CleanUp()
 	Serialize();
 
 	DEL(root);
-	glDeleteTextures(1, &checkers_texture);
-
-	if (smoke_particle)
-		DEL(smoke_particle);
 
 	return true;
 }
@@ -285,9 +255,9 @@ void ModuleScene::DrawScene()
 
 	OPTICK_CATEGORY("Hiteracy Draw", Optick::Category::Rendering);
 	// Load Shader Uniforms
-	ShaderManager::use(modelloading);
-	ShaderManager::setFloat4x4(modelloading, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(modelloading, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	ShaderManager::use(sceneShader);
+	ShaderManager::setFloat4x4(sceneShader, "view", App->editor->GetCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(sceneShader, "projection", App->editor->GetCamera()->GetProjectionPtr());
 
 	ShaderManager::use(App->primitives->shaderPrimitive);
 	ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "view", App->editor->GetCamera()->GetViewPtr());
@@ -528,4 +498,9 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 void ModuleScene::SceneModified()
 {
 	aabb_need_reset = true;
+}
+
+uint ModuleScene::GetShaderScene() const
+{
+	return sceneShader;
 }

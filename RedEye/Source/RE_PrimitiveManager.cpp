@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "ShaderManager.h"
+#include "RE_InternalResources.h"
 #include "OutputLog.h"
 #include "RE_Math.h"
 
@@ -33,6 +34,8 @@ RE_PrimitiveManager::RE_PrimitiveManager()
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_SPHERE, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CYLINDER, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CAPSULE, 0));
+
+	shaderPrimitive = App->internalResources->GetPrimitiveShader();
 }
 
 RE_PrimitiveManager::~RE_PrimitiveManager()
@@ -323,22 +326,9 @@ void RE_PrimitiveManager::Rest(unsigned short int count)
 
 bool RE_PrimitiveManager::Init(const char* def_shader)
 {
-	LOG("Initializing Primitive Manager");
-
-	bool ret = (def_shader != nullptr);
-	if (ret)
-	{
-		ret = App->shaders->Load(def_shader, &shaderPrimitive);
-		if (!ret) LOG_ERROR("Primitive Manager could not load shader: %s", def_shader);
-	}
-	else
-	{
-		LOG_ERROR("Primitive Manager invalid default shader name", def_shader);
-	}
-
 	App->ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
 
-	return ret;
+	return true;
 }
 
 void RE_PrimitiveManager::DeleteVAOPrimitive(unsigned short int primitive)

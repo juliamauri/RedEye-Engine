@@ -36,9 +36,6 @@ public:
 	//count
 	void Rest(unsigned short int count);
 
-	//Shader for primitives
-	unsigned int shaderPrimitive = 0;
-
 private:
 	//Vertex Array Object
 	unsigned int vao_point = 0, vao_line = 0, vao_ray = 0, vao_axis = 0, vao_triangle = 0, vao_plane = 0,
@@ -56,6 +53,9 @@ private:
 
 	//Delete VAO of primitive when its count is 0
 	void DeleteVAOPrimitive(unsigned short int primitive);
+
+	//Shader for primitives
+	unsigned int shaderPrimitive = 0;
 };
 
 #endif // !__RE_PRIMITVEMANAGER_H__#
