@@ -80,7 +80,7 @@ bool ShaderManager::Load(const char* name, unsigned int* ID, bool fromLibrary)
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
 	//load source
-	path = this->folderPath;
+	path = (!fromLibrary) ? this->folderPath : "Library/Shaders/";
 	path += name;
 	path += ".frag";
 	RE_FileIO file_fragmentShader(path.c_str());

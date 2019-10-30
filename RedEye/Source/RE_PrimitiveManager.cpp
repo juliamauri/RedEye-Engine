@@ -34,8 +34,6 @@ RE_PrimitiveManager::RE_PrimitiveManager()
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_SPHERE, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CYLINDER, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CAPSULE, 0));
-
-	shaderPrimitive = App->internalResources->GetPrimitiveShader();
 }
 
 RE_PrimitiveManager::~RE_PrimitiveManager()
@@ -326,6 +324,9 @@ void RE_PrimitiveManager::Rest(unsigned short int count)
 
 bool RE_PrimitiveManager::Init(const char* def_shader)
 {
+	
+	shaderPrimitive = App->internalResources->GetPrimitiveShader();
+
 	App->ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
 
 	return true;

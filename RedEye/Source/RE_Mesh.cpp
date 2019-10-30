@@ -5,7 +5,7 @@
 #include "ModuleScene.h"
 
 #include "FileSystem.h"
-#include "RE_PrimitiveManager.h"
+#include "RE_InternalResources.h"
 #include "ResourceManager.h"
 
 #include "ShaderManager.h"
@@ -116,20 +116,21 @@ void RE_Mesh::Draw(const float* transform, unsigned int shader, unsigned int che
 	// MESH DEBUG DRAWING
 	if (lFaceNormals || lVertexNormals)
 	{
-		ShaderManager::use(App->primitives->shaderPrimitive);
-		ShaderManager::setFloat4x4(App->primitives->shaderPrimitive, "model", transform);
+		uint shaderPrimitive = App->internalResources->GetPrimitiveShader();
+		ShaderManager::use(shaderPrimitive);
+		ShaderManager::setFloat4x4(shaderPrimitive, "model", transform);
 
 		if (lFaceNormals)
 		{
 			math::vec color(0.f, 0.f, 1.f);
-			ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
+			ShaderManager::setFloat(shaderPrimitive, "objectColor", color);
 
 			glBindVertexArray(VAO_FaceNormals);
 			glDrawArrays(GL_LINES, 0, indices.size() / 3 * 2);
 			glBindVertexArray(0);
 
 			color.Set(1.f, 1.f, 1.f);
-			ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
+			ShaderManager::setFloat(shaderPrimitive, "objectColor", color);
 
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
@@ -145,14 +146,14 @@ void RE_Mesh::Draw(const float* transform, unsigned int shader, unsigned int che
 		if (lVertexNormals)
 		{
 			math::vec color(0.f, 1.f, 0.f);
-			ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
+			ShaderManager::setFloat(shaderPrimitive, "objectColor", color);
 
 			glBindVertexArray(VAO_VertexNormals);
 			glDrawArrays(GL_LINES, 0, vertices.size() * 2);
 			glBindVertexArray(0);
 
 			color.Set(1.f, 1.f, 1.f);
-			ShaderManager::setFloat(App->primitives->shaderPrimitive, "objectColor", color);
+			ShaderManager::setFloat(shaderPrimitive, "objectColor", color);
 
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);

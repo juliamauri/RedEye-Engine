@@ -129,11 +129,11 @@ bool Application::Init(int argc, char* argv[])
 				if (math) math->Init();
 
 				// Initiallize Resource Managers
-				if (internalResources && !internalResources->Init())  LOG_WARNING("Won't be able to load internal Resources");
 				if (textures && !textures->Init()) LOG_WARNING("Won't be able to use textures");
 				if (shaders && !shaders->Init()) LOG_WARNING("Won't be able to use shaders");
-				if (primitives && !primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
 				if (modelImporter && !modelImporter->Init())  LOG_WARNING("Won't be able to import model");
+				if (internalResources && !internalResources->Init())  LOG_WARNING("Won't be able to load internal Resources");
+				if (primitives && !primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
 				
 
 				LOG_SEPARATOR("Starting Application");

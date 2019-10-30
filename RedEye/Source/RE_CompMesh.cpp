@@ -32,8 +32,8 @@ RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go)
 	: RE_Component(C_MESH, go, cmpMesh.active), reference(cmpMesh.reference)
 {
 	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
-	shaderForDraw = cmpMesh.shaderForDraw;
-	checkerTexture = cmpMesh.checkerTexture;
+	shaderForDraw = App->scene->GetShaderScene();
+	checkerTexture = App->internalResources->GetTextureChecker();
 }
 
 RE_CompMesh::~RE_CompMesh()
@@ -43,7 +43,7 @@ RE_CompMesh::~RE_CompMesh()
 
 void RE_CompMesh::Draw()
 {
-	ptr->Draw(go->GetTransform()->GetShaderModel(), checkerTexture, show_checkers);
+	ptr->Draw(go->GetTransform()->GetShaderModel(), shaderForDraw, checkerTexture, show_checkers);
 }
 
 void RE_CompMesh::DrawProperties()
