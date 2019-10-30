@@ -325,7 +325,7 @@ void RE_PrimitiveManager::Rest(unsigned short int count)
 bool RE_PrimitiveManager::Init(const char* def_shader)
 {
 	
-	shaderPrimitive = App->internalResources->GetPrimitiveShader();
+	shaderPrimitive = App->internalResources->GetDefaultShader();
 
 	App->ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
 

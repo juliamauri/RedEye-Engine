@@ -64,6 +64,9 @@ void RE_Mesh::Draw(const float* transform, unsigned int shader, unsigned int che
 	// Bind Textures
 	if (use_checkers || !materialMD5 || meshMaterial->tDiffuse.empty())
 	{
+		ShaderManager::setFloat(shader, "useColor", 0.0f);
+		ShaderManager::setFloat(shader, "useTexture", 1.0f);
+
 		use_checkers = true;
 		glActiveTexture(GL_TEXTURE0);
 		std::string name = "texture_diffuse0";
@@ -76,6 +79,9 @@ void RE_Mesh::Draw(const float* transform, unsigned int shader, unsigned int che
 		unsigned int diffuseNr = 1;
 		if (!meshMaterial->tDiffuse.empty())
 		{
+			ShaderManager::setFloat(shader, "useColor", 0.0f);
+			ShaderManager::setFloat(shader, "useTexture", 1.0f);
+
 			for (unsigned int i = 0; i < meshMaterial->tDiffuse.size(); i++)
 			{
 				glActiveTexture(GL_TEXTURE0 + i);
@@ -116,21 +122,20 @@ void RE_Mesh::Draw(const float* transform, unsigned int shader, unsigned int che
 	// MESH DEBUG DRAWING
 	if (lFaceNormals || lVertexNormals)
 	{
-		uint shaderPrimitive = App->internalResources->GetPrimitiveShader();
-		ShaderManager::use(shaderPrimitive);
-		ShaderManager::setFloat4x4(shaderPrimitive, "model", transform);
+		ShaderManager::setFloat(shader, "useColor", 1.0f);
+		ShaderManager::setFloat(shader, "useTexture", 0.0f);
 
 		if (lFaceNormals)
 		{
 			math::vec color(0.f, 0.f, 1.f);
-			ShaderManager::setFloat(shaderPrimitive, "objectColor", color);
+			ShaderManager::setFloat(shader, "objectColor", color);
 
 			glBindVertexArray(VAO_FaceNormals);
 			glDrawArrays(GL_LINES, 0, indices.size() / 3 * 2);
 			glBindVertexArray(0);
 
 			color.Set(1.f, 1.f, 1.f);
-			ShaderManager::setFloat(shaderPrimitive, "objectColor", color);
+			ShaderManager::setFloat(shader, "objectColor", color);
 
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
@@ -146,14 +151,14 @@ void RE_Mesh::Draw(const float* transform, unsigned int shader, unsigned int che
 		if (lVertexNormals)
 		{
 			math::vec color(0.f, 1.f, 0.f);
-			ShaderManager::setFloat(shaderPrimitive, "objectColor", color);
+			ShaderManager::setFloat(shader, "objectColor", color);
 
 			glBindVertexArray(VAO_VertexNormals);
 			glDrawArrays(GL_LINES, 0, vertices.size() * 2);
 			glBindVertexArray(0);
 
 			color.Set(1.f, 1.f, 1.f);
-			ShaderManager::setFloat(shaderPrimitive, "objectColor", color);
+			ShaderManager::setFloat(shader, "objectColor", color);
 
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);

@@ -54,8 +54,8 @@ void RE_CompPoint::Draw()
 	RE_CompPrimitive::RE_Component::go->GetTransform()->SetPosition(point);
 	ShaderManager::use(RE_CompPrimitive::shader);
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+	ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -82,8 +82,8 @@ void RE_CompLine::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+	ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glLineWidth(2.0f);
@@ -117,8 +117,8 @@ void RE_CompTriangle::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+	ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
@@ -136,8 +136,8 @@ void RE_CompPlane::Draw()
 {
 	ShaderManager::use(RE_CompPrimitive::shader);
 	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+	ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
 	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
@@ -166,17 +166,15 @@ RE_CompCube::~RE_CompCube()
 
 void RE_CompCube::Draw()
 {
-	unsigned int shader_id = (show_checkers ? App->scene->GetShaderScene() : RE_CompPrimitive::shader);
-
-	ShaderManager::use(shader_id);
-	ShaderManager::setFloat4x4(shader_id, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat4x4(shader_id, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(shader_id, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	ShaderManager::use(RE_CompPrimitive::shader);
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
 	if (!show_checkers)
 	{
 		// Apply Diffuse Color
-		ShaderManager::setFloat(shader_id, "objectColor", RE_CompPrimitive::color);
+		ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+		ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+		ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
 
 		// Draw
 		glBindVertexArray(RE_CompPrimitive::VAO);
@@ -186,7 +184,9 @@ void RE_CompCube::Draw()
 	{
 		// Apply Checkers Texture
 		glActiveTexture(GL_TEXTURE0);
-		ShaderManager::setUnsignedInt(shader_id, "texture_diffuse0", 0);
+		ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
+		ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
+		ShaderManager::setUnsignedInt(RE_CompPrimitive::shader, "texture_diffuse0", 0);
 		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw
@@ -262,17 +262,15 @@ RE_CompSphere::~RE_CompSphere()
 
 void RE_CompSphere::Draw()
 {
-	unsigned int shader_id = (show_checkers ? App->scene->GetShaderScene() : RE_CompPrimitive::shader);
-
-	ShaderManager::use(shader_id);
-	ShaderManager::setFloat4x4(shader_id, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat4x4(shader_id, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(shader_id, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	ShaderManager::use(RE_CompPrimitive::shader);
+	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
 	if (!show_checkers)
 	{
 		// Apply Diffuse Color
-		ShaderManager::setFloat(shader_id, "objectColor", RE_CompPrimitive::color);
+		ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+		ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+		ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
 
 		// Draw
 		glBindVertexArray(RE_CompPrimitive::VAO);
@@ -282,7 +280,9 @@ void RE_CompSphere::Draw()
 	{
 		// Apply Checkers Texture
 		glActiveTexture(GL_TEXTURE0);
-		ShaderManager::setUnsignedInt(shader_id, "texture_diffuse0", 0);
+		ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
+		ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
+		ShaderManager::setUnsignedInt(RE_CompPrimitive::shader, "texture_diffuse0", 0);
 		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw

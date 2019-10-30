@@ -57,7 +57,6 @@ bool ModuleScene::Start()
 	bool ret = true;
 
 	sceneShader = App->internalResources->GetDefaultShader();
-	primitiveShader = App->internalResources->GetPrimitiveShader();
 
 	// Load scene
 	Timer timer;
@@ -262,10 +261,6 @@ void ModuleScene::DrawScene()
 	ShaderManager::use(sceneShader);
 	ShaderManager::setFloat4x4(sceneShader, "view", App->editor->GetCamera()->GetViewPtr());
 	ShaderManager::setFloat4x4(sceneShader, "projection", App->editor->GetCamera()->GetProjectionPtr());
-
-	ShaderManager::use(primitiveShader);
-	ShaderManager::setFloat4x4(primitiveShader, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(primitiveShader, "projection", App->editor->GetCamera()->GetProjectionPtr());
 
 	/*/ Frustum Culling
 	std::vector<RE_GameObject*> objects;

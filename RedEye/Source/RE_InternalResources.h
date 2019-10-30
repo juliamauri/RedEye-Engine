@@ -10,7 +10,6 @@ public:
 	bool Init();
 
 	unsigned int GetDefaultShader() const;
-	unsigned int GetPrimitiveShader() const;
 	
 	unsigned int GetTextureChecker() const;
 
@@ -20,7 +19,6 @@ private:
 
 private:
 	unsigned int defaultShader = 0;
-	unsigned int primitiveShader = 0;
 
 	unsigned int checkerTexture = 0;
 };

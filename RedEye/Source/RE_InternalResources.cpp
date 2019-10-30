@@ -40,11 +40,6 @@ bool RE_InternalResources::InitShaders()
 			LOG("%s\n", App->shaders->GetShaderError());
 			ret = false;
 		}
-
-		if (!App->shaders->Load("primitive", &primitiveShader, true)) {
-			LOG("%s\n", App->shaders->GetShaderError());
-			ret = false;
-		}
 	}
 
 	return ret;
@@ -82,11 +77,6 @@ bool RE_InternalResources::InitChecker()
 unsigned int RE_InternalResources::GetDefaultShader() const
 {
 	return defaultShader;
-}
-
-unsigned int RE_InternalResources::GetPrimitiveShader() const
-{
-	return primitiveShader;
 }
 
 unsigned int RE_InternalResources::GetTextureChecker() const
