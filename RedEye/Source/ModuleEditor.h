@@ -19,6 +19,7 @@ class PlayPauseWindow;
 class SelectFile;
 class PrefabsPanel;
 class PopUpWindow;
+class SkyBoxWindow;
 
 struct SoftwareInfo;
 class RE_CompCamera;
@@ -51,10 +52,12 @@ public:
 	RE_CompCamera* GetCamera() const;
 
 	//Select file
-	SelectFile* GetSelectWindow();
+	SelectFile* GetSelectWindow()const;
 
 	void PopUpFocus(bool focus);
 	PopUpWindow* popupWindow = nullptr;
+	SkyBoxWindow* skyBoxWindow = nullptr;
+
 
 private:
 
@@ -83,7 +86,6 @@ private:
 	SelectFile* select_file = nullptr;
 
 	PrefabsPanel* prefabsPanel = nullptr;
-
 
 	// Tools
 	RandomTest* rng = nullptr;

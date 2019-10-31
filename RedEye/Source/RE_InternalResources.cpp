@@ -16,6 +16,8 @@
 #include <vector>
 #include <string>
 
+#define SKYBOXDEFSIZE 2000.0f
+
 RE_InternalResources::RE_InternalResources()
 {
 }
@@ -23,7 +25,7 @@ RE_InternalResources::RE_InternalResources()
 RE_InternalResources::~RE_InternalResources()
 {
 	if(checkerTexture != 0) glDeleteTextures(1, &checkerTexture);
-	if (skyBoxTexturesID != 0) glDeleteTextures(6, &checkerTexture);
+	if (skyBoxTexturesID != 0) glDeleteTextures(1, &skyBoxTexturesID);
 	if (skyBoxVAO != 0) glDeleteBuffers(1, &skyBoxVAO);
 	if (skyBoxVBO != 0) glDeleteBuffers(1, &skyBoxVBO);
 }
@@ -93,49 +95,61 @@ bool RE_InternalResources::InitChecker()
 
 bool RE_InternalResources::InitSkyBox()
 {
+	CreateSkyBoxCube(SKYBOXDEFSIZE);
+
+	skyBoxTexturesID = App->textures->LoadSkyBoxTextures("Assets/Skyboxes/default/", "jpg");
+
+	return true;
+}
+
+void RE_InternalResources::CreateSkyBoxCube(float cubeSize)
+{
+	if (skyBoxVAO != 0) glDeleteBuffers(1, &skyBoxVAO);
+	if (skyBoxVBO != 0) glDeleteBuffers(1, &skyBoxVBO);
+
 	float skyboxVertices[] = {
 		// positions          
-		-2000.f,  2000.f, -2000.f,
-		-2000.f, -2000.f, -2000.f,
-		 2000.f, -2000.f, -2000.f,
-		 2000.f, -2000.f, -2000.f,
-		 2000.f,  2000.f, -2000.f,
-		-2000.f,  2000.f, -2000.f,
+		-cubeSize,  cubeSize, -cubeSize,
+		-cubeSize, -cubeSize, -cubeSize,
+		 cubeSize, -cubeSize, -cubeSize,
+		 cubeSize, -cubeSize, -cubeSize,
+		 cubeSize,  cubeSize, -cubeSize,
+		-cubeSize,  cubeSize, -cubeSize,
 
-		-2000.f, -2000.f,  2000.f,
-		-2000.f, -2000.f, -2000.f,
-		-2000.f,  2000.f, -2000.f,
-		-2000.f,  2000.f, -2000.f,
-		-2000.f,  2000.f,  2000.f,
-		-2000.f, -2000.f,  2000.f,
+		-cubeSize, -cubeSize,  cubeSize,
+		-cubeSize, -cubeSize, -cubeSize,
+		-cubeSize,  cubeSize, -cubeSize,
+		-cubeSize,  cubeSize, -cubeSize,
+		-cubeSize,  cubeSize,  cubeSize,
+		-cubeSize, -cubeSize,  cubeSize,
 
-		 2000.f, -2000.f, -2000.f,
-		 2000.f, -2000.f,  2000.f,
-		 2000.f,  2000.f,  2000.f,
-		 2000.f,  2000.f,  2000.f,
-		 2000.f,  2000.f, -2000.f,
-		 2000.f, -2000.f, -2000.f,
+		 cubeSize, -cubeSize, -cubeSize,
+		 cubeSize, -cubeSize,  cubeSize,
+		 cubeSize,  cubeSize,  cubeSize,
+		 cubeSize,  cubeSize,  cubeSize,
+		 cubeSize,  cubeSize, -cubeSize,
+		 cubeSize, -cubeSize, -cubeSize,
 
-		-2000.f, -2000.f,  2000.f,
-		-2000.f,  2000.f,  2000.f,
-		 2000.f,  2000.f,  2000.f,
-		 2000.f,  2000.f,  2000.f,
-		 2000.f, -2000.f,  2000.f,
-		-2000.f, -2000.f,  2000.f,
+		-cubeSize, -cubeSize,  cubeSize,
+		-cubeSize,  cubeSize,  cubeSize,
+		 cubeSize,  cubeSize,  cubeSize,
+		 cubeSize,  cubeSize,  cubeSize,
+		 cubeSize, -cubeSize,  cubeSize,
+		-cubeSize, -cubeSize,  cubeSize,
 
-		-2000.f,  2000.f, -2000.f,
-		 2000.f,  2000.f, -2000.f,
-		 2000.f,  2000.f,  2000.f,
-		 2000.f,  2000.f,  2000.f,
-		-2000.f,  2000.f,  2000.f,
-		-2000.f,  2000.f, -2000.f,
+		-cubeSize,  cubeSize, -cubeSize,
+		 cubeSize,  cubeSize, -cubeSize,
+		 cubeSize,  cubeSize,  cubeSize,
+		 cubeSize,  cubeSize,  cubeSize,
+		-cubeSize,  cubeSize,  cubeSize,
+		-cubeSize,  cubeSize, -cubeSize,
 
-		-2000.f, -2000.f, -2000.f,
-		-2000.f, -2000.f,  2000.f,
-		 2000.f, -2000.f, -2000.f,
-		 2000.f, -2000.f, -2000.f,
-		-2000.f, -2000.f,  2000.f,
-		 2000.f, -2000.f,  2000.f
+		-cubeSize, -cubeSize, -cubeSize,
+		-cubeSize, -cubeSize,  cubeSize,
+		 cubeSize, -cubeSize, -cubeSize,
+		 cubeSize, -cubeSize, -cubeSize,
+		-cubeSize, -cubeSize,  cubeSize,
+		 cubeSize, -cubeSize,  cubeSize
 	};
 
 	glGenVertexArrays(1, &skyBoxVAO);
@@ -145,10 +159,6 @@ bool RE_InternalResources::InitSkyBox()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-	skyBoxTexturesID = App->textures->LoadSkyBoxTextures("Assets/Skyboxes/default/", "jpg");
-
-	return true;
 }
 
 unsigned int RE_InternalResources::GetDefaultShader() const
@@ -174,4 +184,10 @@ unsigned int RE_InternalResources::GetSkyBoxVAO() const
 unsigned int RE_InternalResources::GetSkyBoxTexturesID() const
 {
 	return skyBoxTexturesID;
+}
+
+void RE_InternalResources::ChangeSkyBoxTexturesID(unsigned int id)
+{
+	if (skyBoxTexturesID != 0) glDeleteTextures(1, &skyBoxTexturesID);
+	skyBoxTexturesID = id;
 }

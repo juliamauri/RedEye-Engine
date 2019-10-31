@@ -1,4 +1,4 @@
-#include "ModuleEditor.h"
+ #include "ModuleEditor.h"
 
 #include "Application.h"
 #include "ModuleWindow.h"
@@ -29,9 +29,10 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(properties = new PropertiesWindow());
 	//windows.push_back(editor_settings = new EditorSettingsWindow());
 	//windows.push_back(play_pause = new PlayPauseWindow());
-	//windows.push_back(select_file = new SelectFile());
+	windows.push_back(skyBoxWindow = new SkyBoxWindow());
 	windows.push_back(prefabsPanel = new PrefabsPanel());
 	about = new AboutWindow();
+	select_file = new SelectFile();
 
 	tools.push_back(rng = new RandomTest());
 	tools.push_back(textures = new TexturesWindow());
@@ -166,6 +167,8 @@ update_status ModuleEditor::Update()
 
 		if (popupWindow->IsActive()) popupWindow->DrawWindow();
 
+		if (select_file->IsActive()) select_file->DrawWindow();
+
 		// Draw Windows
 		for (auto window : windows)
 		{
@@ -211,6 +214,7 @@ bool ModuleEditor::CleanUp()
 	DEL(popupWindow);
 	DEL(about);
 	DEL(camera);
+	DEL(select_file);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
@@ -267,7 +271,7 @@ RE_CompCamera * ModuleEditor::GetCamera() const
 	return camera;
 }
 
-SelectFile * ModuleEditor::GetSelectWindow()
+SelectFile * ModuleEditor::GetSelectWindow()const
 {
 	return select_file;
 }

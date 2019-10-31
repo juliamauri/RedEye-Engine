@@ -35,6 +35,7 @@ public:
 	const char* LoadTextureLibrary(const char* libraryPath, const char* assetsPath);
 
 	unsigned int LoadSkyBoxTextures(const char* texturesPath, const char* extension);
+	unsigned int LoadSkyBoxTextures(const char* texturesPath[6]);
 
 private:
 	Texture2D* ProcessTexture(RE_FileIO* fileTexture, int ILextension, bool generateOwnFormat = false, const char* md5Generated = nullptr);

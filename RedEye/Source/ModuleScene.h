@@ -75,9 +75,6 @@ private:
 
 	unsigned int sceneShader = 0;
 	unsigned int skyboxShader = 0;
-
-	unsigned int skyboxVAO = 0;
-	unsigned int skyboxTexID = 0;
 };
 
 

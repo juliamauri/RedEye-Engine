@@ -59,8 +59,6 @@ bool ModuleScene::Start()
 
 	sceneShader = App->internalResources->GetDefaultShader();
 	skyboxShader = App->internalResources->GetSkyBoxShader();
-	skyboxVAO = App->internalResources->GetSkyBoxVAO();
-	skyboxTexID = App->internalResources->GetSkyBoxTexturesID();
 
 	// Load scene
 	Timer timer;
@@ -283,9 +281,9 @@ void ModuleScene::DrawScene()
 	// draw skybox as last
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
 	// skybox cube
-	glBindVertexArray(skyboxVAO);
+	glBindVertexArray(App->internalResources->GetSkyBoxVAO());
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);

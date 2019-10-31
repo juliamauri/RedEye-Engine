@@ -164,16 +164,25 @@ class SelectFile : public EditorWindow
 public:
 	SelectFile(const char* name = "Select File", bool start_active = false);
 
-	void Start(const char* path);
+	void Start(const char* windowName, const char* path, std::string* forFill, bool selectFolder = false);
 
-	std::string IsSelected();
 
 private:
 	void Draw(bool secondary = false) override;
 
+	void SendSelected();
+	void Clear();
+
+private:
+	bool selectingFolder = false;
+
+	std::string windowName;
 	std::string path;
 	std::string selected;
 	char **rc = nullptr;
+	char **selectedPointer = nullptr;
+
+	std::string* toFill = nullptr;
 };
 
 class PrefabsPanel :public EditorWindow
@@ -206,6 +215,29 @@ private:
 	std::string btnText;
 	std::string titleText;
 
+};
+
+class SkyBoxWindow : public EditorWindow {
+public:
+	SkyBoxWindow(const char* name = "SkyBox", bool start_active = false);
+
+	void SetSkyBoxPath(const char* path);
+	void SetTextures(std::string texturesname[6]);
+
+private:
+	void Draw(bool secondary = false) override;
+
+private:
+	float skyBoxSize = 0.0f;
+	std::string skyboxesPath;
+	std::string skyboxPathSelected;
+
+	bool applySize = false;
+	bool applyTextures = false;
+
+	//Textures
+	std::string texturesPath[6] = { "", "", "", "", "", "" };
+	const char* texturesname[6] = { "Right", "Left", "Top", "Bottom", "Front", "Back" };
 };
 
 

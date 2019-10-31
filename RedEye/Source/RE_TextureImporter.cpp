@@ -4,6 +4,9 @@
 #include "ResourceManager.h"
 #include "FileSystem.h"
 
+#include "ModuleEditor.h"
+#include "EditorWindows.h"
+
 #include "Globals.h"
 #include "OutputLog.h"
 #include "TimeManager.h"
@@ -126,16 +129,20 @@ const char * RE_TextureImporter::LoadTextureLibrary(const char * libraryPath, co
 unsigned int RE_TextureImporter::LoadSkyBoxTextures(const char * texturesPath, const char* extension)
 {
 	std::vector<std::string> skyBoxTexturesPath = App->fs->FindAllFilesByExtension(texturesPath, extension);
+	App->editor->skyBoxWindow->SetSkyBoxPath(texturesPath);
+	
 	uint ID = 0;
 	glGenTextures(1, &ID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 
+	std::string skyBoxTextures[6];
 	uint count = 0;
 	for (auto texturePath : skyBoxTexturesPath) {
-
 		RE_FileIO texData(texturePath.c_str());
 
 		if (texData.Load()) {
+			skyBoxTextures[count] = texturePath.c_str();
+
 			uint imageID = 0;
 
 			ilGenImages(1, &imageID);
@@ -161,6 +168,55 @@ unsigned int RE_TextureImporter::LoadSkyBoxTextures(const char * texturesPath, c
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
+	App->editor->skyBoxWindow->SetTextures(skyBoxTextures);
+
+	return ID;
+}
+
+unsigned int RE_TextureImporter::LoadSkyBoxTextures(const char * texturesPath[6])
+{
+	uint ID = 0;
+	glGenTextures(1, &ID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
+
+	for (uint i = 0; i < 6; i++) {
+		std::string path(texturesPath[i]);
+		std::string filename = path.substr(path.find_last_of("/") + 1);
+		std::string extension = filename.substr(filename.find_last_of(".") + 1);
+
+		RE_FileIO texData(texturesPath[i]);
+
+		if (texData.Load()) {
+
+			uint imageID = 0;
+
+			ilGenImages(1, &imageID);
+			ilBindImage(imageID);
+			
+			int ILextension = GetExtensionIL(extension.c_str());
+
+			if (IL_FALSE != ilLoadL(ILextension, texData.GetBuffer(), texData.GetSize())) {
+
+				if (ILextension == IL_TGA)
+					iluFlipImage();
+
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+					0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()
+				);
+
+				ilBindImage(0);
+				ilDeleteImages(1, &imageID);
+			}
+		}
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	return ID;
 }
 

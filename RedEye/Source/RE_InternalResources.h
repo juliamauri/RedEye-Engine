@@ -16,6 +16,8 @@ public:
 
 	unsigned int GetSkyBoxVAO() const;
 	unsigned int GetSkyBoxTexturesID() const;
+	void ChangeSkyBoxTexturesID(unsigned int id);
+	void CreateSkyBoxCube(float cubeSize);
 
 private:
 	bool InitShaders();

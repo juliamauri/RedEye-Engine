@@ -11,6 +11,7 @@
 #include "ResourceManager.h"
 #include "RE_HandleErrors.h"
 #include "RE_TextureImporter.h"
+#include "RE_InternalResources.h"
 
 #include "RE_Prefab.h"
 
@@ -470,48 +471,80 @@ void PlayPauseWindow::Draw(bool secondary)
 
 SelectFile::SelectFile(const char * name, bool start_active) : EditorWindow(name, start_active) {}
 
-void SelectFile::Start(const char * path)
+void SelectFile::Start(const char* windowName, const char * path, std::string* forFill, bool selectFolder)
 {
-	SwitchActive();
-	this->path = path;
-	selected.clear();
+	if (active == false) {
+		active = true;
+		this->windowName = windowName;
+		this->path = path;
+		toFill = forFill;
+		selected.clear();
+		selectingFolder = selectFolder;
 
-	rc = PHYSFS_enumerateFiles(path);
+		rc = PHYSFS_enumerateFiles(path);
+	}
 }
 
-std::string SelectFile::IsSelected()
+void SelectFile::Clear()
 {
-	if (!selected.empty())
-	{
-		SwitchActive();
-		PHYSFS_freeList(rc);
-		return selected;
-	}
-	else
-		return "";
+	active = false;
+	PHYSFS_freeList(rc);
+	rc = nullptr;
+	selectedPointer = nullptr;
+	selected.clear();
+	windowName.clear();
+	toFill = nullptr;
 }
 
 void SelectFile::Draw(bool secondary)
 {
-	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
+	if(ImGui::Begin((windowName.empty()) ? name : windowName.c_str(), 0))
 	{
 		if (secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (selected.empty())
+		if (rc != nullptr)
 		{
 			char **i;
 			for (i = rc; *i != NULL; i++)
 			{
+				bool popColor = false;
+				if (selectedPointer != nullptr && *selectedPointer == *i) {
+					popColor = true;
+					ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, { 0.5f, 0.0f, 0.0f, 1.0f });
+					ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ButtonHovered, { 1.0f, 0.0f, 0.0f, 1.0f });
+				}
 				if (ImGui::Button(*i))
 				{
+					selectedPointer = i;
 					selected = path;
 					selected += *i;
-					break;
+				}
+
+				if (popColor) {
+					ImGui::PopStyleColor(2);
 				}
 			}
+		}
+
+		bool popStyle = false;
+		if (!secondary && selected.empty()) {
+			popStyle = true;
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		if (ImGui::Button("Apply")) {
+			if (selectingFolder)  selected += "/";
+			*toFill = selected;
+			Clear();
+		}
+
+		if (popStyle && !secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
 		}
 
 		if (secondary) {
@@ -520,6 +553,10 @@ void SelectFile::Draw(bool secondary)
 		}
 	}
 	ImGui::End();
+}
+
+void SelectFile::SendSelected()
+{
 }
 
 PrefabsPanel::PrefabsPanel(const char * name, bool start_active) : EditorWindow(name, start_active) {}
@@ -650,5 +687,85 @@ void PopUpWindow::Draw(bool secondary)
 		}
 	}
 
+	ImGui::End();
+}
+
+SkyBoxWindow::SkyBoxWindow(const char * name, bool start_active) : EditorWindow(name, start_active) 
+{
+	skyboxesPath = "Assets/Skyboxes/";
+	skyboxPathSelected = skyboxesPath + "default/";
+}
+
+void SkyBoxWindow::SetSkyBoxPath(const char * path)
+{
+	skyboxPathSelected = path;
+}
+
+void SkyBoxWindow::SetTextures(std::string texturesname[6])
+{
+	for (uint i = 0; i < 6; i++) {
+		texturesPath[i] = texturesname[i];
+	}
+}
+
+void SkyBoxWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
+	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		if (ImGui::SliderFloat("SkyBox size", &skyBoxSize, 0.0f, 10000.0f))
+			applySize = true;
+
+		ImGui::Text("Skybox textures folder selected:\n%s", skyboxPathSelected.c_str());
+		if (ImGui::Button("Select Skybox Folder")) {
+			std::string s = "Select folder";
+			App->editor->GetSelectWindow()->Start(s.c_str(), skyboxesPath.c_str(), &skyboxPathSelected, true);
+		}
+
+		for (uint i = 0; i < 6; i++) {
+
+			if (ImGui::TreeNodeEx(texturesname[i], ImGuiTreeNodeFlags_None | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
+
+
+				if (!texturesPath[i].empty())
+					ImGui::Text("Path: %s", texturesPath[i].c_str());
+				else
+					ImGui::Text("%s texture don't exists", texturesname[i]);
+
+				if (ImGui::Button("Select texture")) {
+					std::string s = "Select ";
+					s += texturesname[i];
+					s += " file";
+					texturesPath[i].clear();
+					App->editor->GetSelectWindow()->Start(s.c_str(), skyboxPathSelected.c_str(), &texturesPath[i]);
+					applyTextures = true;
+				}
+				ImGui::TreePop();
+			}
+		}
+
+		if (ImGui::Button("Apply Changes")) {
+
+			if (applySize) App->internalResources->CreateSkyBoxCube(skyBoxSize);
+
+			if (applyTextures) {
+				const char* texs[6] = { texturesPath[0].c_str(), texturesPath[1].c_str(), texturesPath[2].c_str(), texturesPath[3].c_str(),
+				texturesPath[4].c_str(), texturesPath[5].c_str() };
+				App->internalResources->ChangeSkyBoxTexturesID(App->textures->LoadSkyBoxTextures(texs));
+			}
+
+			applySize = false;
+			applyTextures = false;
+		}
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+	}
 	ImGui::End();
 }
