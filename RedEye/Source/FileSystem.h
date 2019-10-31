@@ -83,6 +83,8 @@ public:
 
 	virtual unsigned int GetSize();
 
+	virtual std::string GetMd5();
+
 protected:
 
 	unsigned int HardLoad();
@@ -92,7 +94,7 @@ protected:
 protected:
 
 	const char* from_zip;
-	char* buffer;
+	char* buffer = nullptr;
 	const char* file_name;
 	unsigned int size = 0;
 };
@@ -110,7 +112,7 @@ public:
 	JSONNode* GetRootNode(const char* member);
 	inline bool operator!() const override;
 
-	std::string GetMd5();
+	std::string GetMd5() override;
 
 public:
 	std::string zip_path;

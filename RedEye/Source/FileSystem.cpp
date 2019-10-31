@@ -736,6 +736,14 @@ unsigned int RE_FileIO::GetSize()
 	return size;
 }
 
+std::string RE_FileIO::GetMd5()
+{
+	if (buffer == nullptr)
+		Load();
+		
+	return md5(std::string(buffer, size));
+}
+
 unsigned int RE_FileIO::HardLoad()
 {
 	unsigned int ret = 0u;
@@ -749,6 +757,7 @@ unsigned int RE_FileIO::HardLoad()
 			signed long long sll_size = PHYSFS_fileLength(fs_file);
 			if (sll_size > 0)
 			{
+				if (buffer) DEL_A(buffer);
 				buffer = new char[(unsigned int)sll_size + 1];
 				signed long long amountRead = PHYSFS_read(fs_file, buffer, 1, (signed int)sll_size);
 				
