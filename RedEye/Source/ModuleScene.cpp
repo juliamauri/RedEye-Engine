@@ -471,20 +471,14 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 
 			if (createMaterial) {
 				LOG_SECONDARY("Creating new material: %s", filePath.c_str());
-				RE_Material* newMaterial = new RE_Material(fileName.c_str());
+				RE_Material* newMaterial = new RE_Material();
 
 				newMaterial->tDiffuse.push_back(textureResource);
 
-				Config materialSerialize(filePath.c_str(), App->fs->GetZipPath());
-				JSONNode* materialNode = materialSerialize.GetRootNode("Material");
-				materialNode->SetArray();
-				newMaterial->JsonSerialize(materialNode, &materialNode->GetDocument()->FindMember("Material")->value);
-
-				((ResourceContainer*)newMaterial)->SetLibraryPath(filePath.c_str());
-				((ResourceContainer*)newMaterial)->SetMD5(materialSerialize.GetMd5().c_str());
+				((ResourceContainer*)newMaterial)->SetName(fileName.c_str());
+				((ResourceContainer*)newMaterial)->SetAssetPath(filePath.c_str());
 				((ResourceContainer*)newMaterial)->SetType(Resource_Type::R_MATERIAL);
-
-				materialSerialize.Save();
+				newMaterial->Save();
 
 				materialMD5 = App->resources->Reference((ResourceContainer*)newMaterial);
 				selectedMesh->SetMaterial(materialMD5);
@@ -500,12 +494,7 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 				else
 					selectedMaterial->tDiffuse[0] = textureResource;
 
-				Config materialSerialize(((ResourceContainer*)selectedMaterial)->GetLibraryPath(), App->fs->GetZipPath());
-
-				JSONNode* materialNode = materialSerialize.GetRootNode("Material");
-				materialNode->SetArray();
-				selectedMaterial->JsonSerialize(materialNode, &materialNode->GetDocument()->FindMember("Material")->value);
-				materialSerialize.Save();
+				selectedMaterial->Save();
 			}
 		}
 	}

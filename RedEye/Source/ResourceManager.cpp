@@ -78,6 +78,7 @@ const char * ResourceManager::IsReference(const char * md5)
 	return ret;
 }
 
+//TODO This wanna change completly, all resources loaded by filesystem finding .meta
 const char* ResourceManager::CheckFileLoaded(const char * filepath, const char* resource, Resource_Type type)
 {
 	const char* ret = nullptr;
