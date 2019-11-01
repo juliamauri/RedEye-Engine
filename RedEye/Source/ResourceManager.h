@@ -22,6 +22,9 @@ public:
 	//unsigned int TotalReferenceCount() const;
 	std::vector<ResourceContainer*> GetResourcesByType(Resource_Type type);
 
+	const char* FindMD5ByMETAPath(const char* metaPath, Resource_Type type = Resource_Type::R_UNDEFINED);
+	const char* FindMD5ByAssetsPath(const char* assetsPath, Resource_Type type = Resource_Type::R_UNDEFINED);
+
 
 
 	typedef std::pair<const char*, ResourceContainer*> Resource;

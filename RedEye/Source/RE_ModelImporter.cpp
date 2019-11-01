@@ -271,7 +271,7 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 			RE_Mesh* meshResource = new RE_Mesh(vertices, indices, aditionalData->materialsLoaded[scene->mMaterials[mesh->mMaterialIndex]], mesh->mNumFaces);
 			meshResource->SetType(Resource_Type::R_MESH);
 			meshResource->SetMD5(meshMD5.c_str());
-			meshResource->SetFilePath(aditionalData->workingfilepath.c_str());
+			meshResource->SetLibraryPath(aditionalData->workingfilepath.c_str());
 
 			App->resources->Reference(meshResource);
 			exists = meshResource->GetMD5();
@@ -301,7 +301,7 @@ const char* RE_ModelImporter::ProcessMeshFromLibrary(const char * file_library, 
 		mesh_resource = (ResourceContainer*)mesh;
 		mesh_resource->SetType(Resource_Type::R_MESH);
 		mesh_resource->SetMD5(reference);
-		mesh_resource->SetFilePath(file_assets);
+		mesh_resource->SetLibraryPath(file_assets);
 		App->resources->Reference(mesh_resource);
 
 		DEL(mesh_json);

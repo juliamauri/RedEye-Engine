@@ -54,7 +54,7 @@ void RE_CompMesh::DrawProperties()
 		{
 			ImGui::Text("Name: %s", ptr->GetName());
 			ImGui::TextWrapped("Reference: %s", reference.c_str());
-			ImGui::TextWrapped("Directory: %s", ptr->GetFilePath());
+			ImGui::TextWrapped("Directory: %s", ptr->GetLibraryPath());
 			ImGui::Text("Vertex count: %u", ptr->vertices.size());
 			ImGui::Text("Triangle Face count: %u", ptr->triangle_count);
 			ImGui::Text("VAO: %u", ptr->VAO);
@@ -97,7 +97,7 @@ void RE_CompMesh::DrawProperties()
 
 					ImGui::Text("Type: Diffuse");
 					ImGui::Text("Size: %ux%u", width, height);
-					ImGui::TextWrapped("Path: %s", texture->GetFilePath());
+					ImGui::TextWrapped("Path: %s", texture->GetLibraryPath());
 					ImGui::Text("MD5: %s", texture->GetMD5());
 					texture->DrawTextureImGui();
 				}
@@ -124,14 +124,14 @@ void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 
 	val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetInt((int)type), node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("reference"), rapidjson::Value().SetString(reference.c_str(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(((ResourceContainer*)App->resources->At(reference.c_str()))->GetFilePath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(((ResourceContainer*)App->resources->At(reference.c_str()))->GetLibraryPath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
 
 	rapidjson::Value texture_array(rapidjson::kArrayType);
 	RE_Material* meshMaterial = (RE_Material*)App->resources->At(ptr->materialMD5);
 	if (meshMaterial)
 	{
 		rapidjson::Value texture_val(rapidjson::kObjectType);
-		texture_val.AddMember(rapidjson::Value::StringRefType("path"), rapidjson::Value().SetString(((ResourceContainer*)meshMaterial)->GetFilePath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
+		texture_val.AddMember(rapidjson::Value::StringRefType("path"), rapidjson::Value().SetString(((ResourceContainer*)meshMaterial)->GetLibraryPath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
 		texture_val.AddMember(rapidjson::Value::StringRefType("md5"), rapidjson::Value().SetString(((ResourceContainer*)meshMaterial)->GetMD5(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
 		texture_array.PushBack(texture_val, node->GetDocument()->GetAllocator());
 	}

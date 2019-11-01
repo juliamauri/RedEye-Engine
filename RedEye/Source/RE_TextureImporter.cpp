@@ -76,7 +76,7 @@ const char * RE_TextureImporter::LoadTextureAssets(const char * assetsPath)
 		if (exists == nullptr) {
 			Texture2D * newTexture = ProcessTexture(&file, GetExtensionIL(extension.c_str()), true, md5Generated.c_str());
 			if (newTexture != nullptr) {
-				newTexture->SetFilePath(assetsPath);
+				newTexture->SetLibraryPath(assetsPath);
 				newTexture->SetMD5(md5Generated.c_str());
 				newTexture->SetType(Resource_Type::R_TEXTURE);
 				exists = App->resources->Reference(newTexture);
@@ -105,7 +105,7 @@ const char * RE_TextureImporter::LoadTextureLibrary(const char * libraryPath, co
 		if (exists == nullptr) {
 			Texture2D * newTexture = ProcessTexture(&file, IL_DDS);
 			if (newTexture != nullptr) {
-				newTexture->SetFilePath(assetsPath);
+				newTexture->SetLibraryPath(assetsPath);
 				newTexture->SetMD5(md5Generated.c_str());
 				newTexture->SetType(Resource_Type::R_TEXTURE);
 				exists = App->resources->Reference(newTexture);

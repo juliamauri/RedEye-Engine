@@ -57,7 +57,7 @@ const char* ResourceManager::Reference(ResourceContainer* rc)
 		resourceName = "undefined";
 		break;
 	}
-	LOG("Referencing the %s %s resource from %s\nAsset file: %s\nmd5 generated: %s\n", rc->GetName(), resourceName.c_str(), rc->GetOrigin(), rc->GetFilePath(), rc->GetMD5());
+	LOG("Referencing the %s %s resource from %s\nAsset file: %s\nmd5 generated: %s\n", rc->GetName(), resourceName.c_str(), rc->GetAssetPath(), rc->GetLibraryPath(), rc->GetMD5());
 	resources.insert(Resource(rc->GetMD5(), rc));
 	return rc->GetMD5();
 }
@@ -122,7 +122,7 @@ const char* ResourceManager::CheckFileLoaded(const char * filepath, const char* 
 			rapidjson::Value& val = nodeMat->GetDocument()->FindMember("Material")->value.GetArray()[0];
 			RE_Material* materialLoaded = new RE_Material(val.FindMember("Name")->value.GetString(), &val);
 			((ResourceContainer*)materialLoaded)->SetMD5((resource != nullptr) ? resource : material.GetMd5().c_str());
-			((ResourceContainer*)materialLoaded)->SetFilePath(filepath);
+			((ResourceContainer*)materialLoaded)->SetLibraryPath(filepath);
 			((ResourceContainer*)materialLoaded)->SetType(R_MATERIAL);
 			ret = App->resources->Reference((ResourceContainer*)materialLoaded);
 		}
@@ -184,6 +184,51 @@ std::vector<ResourceContainer*> ResourceManager::GetResourcesByType(Resource_Typ
 	}
 	return ret;
 }
+
+const char * ResourceManager::FindMD5ByMETAPath(const char * metaPath, Resource_Type type)
+{
+	const char* ret = nullptr;
+	if (type != Resource_Type::R_UNDEFINED) {
+		for (auto resource : resources)
+		{
+			if (std::strcmp(resource.second->GetMetaPath(), metaPath) == 0)
+				ret = resource.first;
+		}
+	}
+	else
+	{
+		std::vector<ResourceContainer*> tResources = GetResourcesByType(type);
+		for (auto resource : tResources)
+		{
+			if (std::strcmp(resource->GetMetaPath(), metaPath) == 0)
+				ret = resource->GetMD5();
+		}
+	}
+	return ret;
+}
+
+const char * ResourceManager::FindMD5ByAssetsPath(const char * assetsPath, Resource_Type type)
+{
+	const char* ret = nullptr;
+	if (type != Resource_Type::R_UNDEFINED) {
+		for (auto resource : resources)
+		{
+			if (std::strcmp(resource.second->GetAssetPath(), assetsPath) == 0)
+				ret = resource.first;
+		}
+	}
+	else
+	{
+		std::vector<ResourceContainer*> tResources = GetResourcesByType(type);
+		for (auto resource : tResources)
+		{
+			if (std::strcmp(resource->GetAssetPath(), assetsPath) == 0)
+				ret = resource->GetMD5();
+		}
+	}
+	return ret;
+}
+
 /*
 unsigned int ResourceManager::TotalReferenceCount() const
 {
