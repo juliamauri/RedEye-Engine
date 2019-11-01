@@ -17,7 +17,7 @@ enum RE_ShadingMode { //from assimp documentation
 	S_FLAT = 0x1,
 	S_GORAUND,
 	S_PHONG,
-	S_PHONG_BLIIN,
+	S_PHONG_BLINN,
 	S_TOON,
 	S_ORENNAYAR,
 	S_MINNAERT,
@@ -29,14 +29,35 @@ enum RE_ShadingMode { //from assimp documentation
 class RE_Material : ResourceContainer
 {
 public:
-	RE_Material(const char* name);
-	RE_Material(const char* name, rapidjson::Value* val);
+	RE_Material();
+	RE_Material(const char* metapath);
 	~RE_Material();
 
-	void Serialize(JSONNode* node, rapidjson::Value* val);
+	void LoadInMemory() override;
+	void UnloadMemory() override;
+
+	void Save();
+
+private:
+	void Draw() override;
+
+	void DrawTextures(const char* texturesName, std::vector<const char*>* textures);
+
+	void JsonDeserialize();
+	void JsonSerialize();
+
+	void PullTexturesJson(JSONNode * texturesNode, std::vector<const char*>* textures);
+	void PushTexturesJson(JSONNode * texturesNode, std::vector<const char*>* textures);
+
+	void BinaryDeserialize();
+	void BinarySerialize();
+	unsigned int GetBinarySize();
+
+	void DeserializeTexturesBinary(char * &cursor, std::vector<const char*>* textures);
+	void SerializeTexturesBinary(char * &cursor, std::vector<const char*>* textures);
+
 
 public:
-	std::string name;
 	RE_ShadingMode shadingType = S_FLAT;
 
 	std::vector<const char*> tDiffuse;
@@ -63,6 +84,13 @@ public:
 	std::vector<const char*> tNormals;
 	std::vector<const char*> tReflection;
 	std::vector<const char*> tUnknown;
+
+private:
+	const char* shadingItems[10] = { "Flat", "Goraund", "Phong", "Phong Blinn", "Toon", "Oren Nayar", "Minnaert", "Cook Torrance", "No Shading", "Fresnel" };
+
+	bool applySave = false;
+	std::vector<const char*>* whereToApply = nullptr;
+	std::vector<const char*>::iterator changeToApply;
 };
 
 #endif // !__RE_MATERIAL_H__

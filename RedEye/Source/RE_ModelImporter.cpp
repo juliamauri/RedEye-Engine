@@ -486,12 +486,14 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 		LOG_TERCIARY("Loadinig %s material.", name.C_Str());
 
 		std::string filePath("Assets/Materials/");
+		filePath += aditionalData->name.c_str();
+		filePath += "/";
 		filePath += name.C_Str();
 		filePath += ".pupil";
 
 		if (!App->fs->Exists(filePath.c_str())) {
 
-			RE_Material* newMaterial = new RE_Material(name.C_Str());
+			RE_Material* newMaterial = new RE_Material();
 
 			aiShadingMode shadingType = aiShadingMode::aiShadingMode_Flat;
 			if (AI_SUCCESS != material->Get(AI_MATKEY_SHADING_MODEL, shadingType))
@@ -836,39 +838,15 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 				}
 			}
 
-			Config materialSerialize(filePath.c_str(), App->fs->GetZipPath());
-
-			JSONNode* materialNode = materialSerialize.GetRootNode("Material");
-			materialNode->SetArray();
-			newMaterial->Serialize(materialNode, &materialNode->GetDocument()->FindMember("Material")->value);
-
-			((ResourceContainer*)newMaterial)->SetFilePath(filePath.c_str());
-			((ResourceContainer*)newMaterial)->SetMD5(materialSerialize.GetMd5().c_str());
+			((ResourceContainer*)newMaterial)->SetName(name.C_Str());
+			((ResourceContainer*)newMaterial)->SetAssetPath(filePath.c_str());
 			((ResourceContainer*)newMaterial)->SetType(Resource_Type::R_MATERIAL);
-
-			materialSerialize.Save();
-
+			newMaterial->Save();
+			((ResourceContainer*)newMaterial)->SaveMeta();
 			materialMD5 = App->resources->Reference((ResourceContainer*)newMaterial);
 		}
 		else
-		{
-			if (!aditionalData->materialsLoaded.empty())
-			{
-				for (std::map<aiMaterial*, const char*>::iterator it = aditionalData->materialsLoaded.begin(); it != aditionalData->materialsLoaded.end(); ++it)
-				{
-					ResourceContainer* res = App->resources->At(it->second);
-					if (res && std::strcmp(filePath.c_str(), res->GetFilePath()) == 0)
-					{
-						materialMD5 = res->GetMD5();
-						break;
-					}
-				}
-			}
-
-			if (materialMD5 == nullptr) {
-				materialMD5 = App->resources->CheckFileLoaded(filePath.c_str(), nullptr, Resource_Type::R_MATERIAL);
-			}
-		}
+			materialMD5 = App->resources->FindMD5ByAssetsPath(filePath.c_str(), Resource_Type::R_MATERIAL);
 
 		aditionalData->materialsLoaded.insert(std::pair<aiMaterial*,const char*>(material, materialMD5));
 	}
