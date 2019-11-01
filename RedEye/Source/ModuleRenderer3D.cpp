@@ -222,6 +222,11 @@ void ModuleRenderer3D::SetWireframe(const bool enable)
 	wireframe = enable;
 }
 
+bool ModuleRenderer3D::GetLighting() const
+{
+	return lighting;
+}
+
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
 {
 	int nrAttributes;

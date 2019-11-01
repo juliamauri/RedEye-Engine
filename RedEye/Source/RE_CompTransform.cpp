@@ -143,17 +143,26 @@ void RE_CompTransform::DrawProperties()
 		// Position -----------------------------------------------------
 		float p[3] = { pos.x, pos.y, pos.z };
 		if (ImGui::DragFloat3("Position", p, 0.1f, -10000.f, 10000.f, "%.2f"))
+		{
 			SetPosition({ p[0], p[1], p[2] });
+			go->SetStatic(false);
+		}
 
 		// Rotation -----------------------------------------------------
 		float r[3] = { math::RadToDeg(rot_eul.x), math::RadToDeg(rot_eul.y), math::RadToDeg(rot_eul.z) };
 		if (ImGui::DragFloat3("Rotation", r, 1.f, -360.f, 360.f, "%.2f"))
+		{
 			SetRotation({ math::DegToRad(r[0]), math::DegToRad(r[1]), math::DegToRad(r[2]) });
+			go->SetStatic(false);
+		}
 
 		// Scale -----------------------------------------------------
 		float s[3] = { scale.scale.x, scale.scale.y, scale.scale.z };
 		if (ImGui::DragFloat3("Scale", s, 0.1f, -10000.f, 10000.f, "%.2f"))
+		{
 			SetScale({ s[0], s[1], s[2] });
+			go->SetStatic(false);
+		}
 	}
 }
 
