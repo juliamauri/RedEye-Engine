@@ -485,10 +485,24 @@ void SelectFile::Start(const char* windowName, const char * path, std::string* f
 	}
 }
 
+void SelectFile::SelectTexture()
+{
+	textures = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+}
+
+ResourceContainer * SelectFile::GetSelectedTexture()
+{
+	ResourceContainer* ret = selectedTexture;
+	Clear();
+	return ret;
+}
+
 void SelectFile::Clear()
 {
 	active = false;
-	PHYSFS_freeList(rc);
+	textures.clear();
+	selectedTexture = nullptr;
+	if(rc) PHYSFS_freeList(rc);
 	rc = nullptr;
 	selectedPointer = nullptr;
 	selected.clear();
@@ -528,6 +542,26 @@ void SelectFile::Draw(bool secondary)
 				}
 			}
 		}
+		else if (!textures.empty()) {
+
+			for (auto textureResource : textures) {
+				bool popColor = false;
+				if (selectedTexture != nullptr && selectedTexture == textureResource) {
+					popColor = true;
+					ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, { 0.5f, 0.0f, 0.0f, 1.0f });
+					ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ButtonHovered, { 1.0f, 0.0f, 0.0f, 1.0f });
+				}
+				if (ImGui::Button(textureResource->GetName()))
+				{
+					selectedTexture = textureResource;
+				}
+
+				if (popColor) {
+					ImGui::PopStyleColor(2);
+				}
+			}
+
+		}
 
 		bool popStyle = false;
 		if (!secondary && selected.empty()) {
@@ -537,9 +571,14 @@ void SelectFile::Draw(bool secondary)
 		}
 
 		if (ImGui::Button("Apply")) {
-			if (selectingFolder)  selected += "/";
-			*toFill = selected;
-			Clear();
+			if (rc != nullptr) {
+				if (selectingFolder)  selected += "/";
+				*toFill = selected;
+				Clear();
+			}
+			else if (!textures.empty()) {
+				active = false;
+			}
 		}
 
 		if (popStyle && !secondary) {

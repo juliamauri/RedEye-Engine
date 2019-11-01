@@ -166,6 +166,9 @@ public:
 
 	void Start(const char* windowName, const char* path, std::string* forFill, bool selectFolder = false);
 
+	void SelectTexture();
+
+	ResourceContainer* GetSelectedTexture();
 
 private:
 	void Draw(bool secondary = false) override;
@@ -183,6 +186,9 @@ private:
 	char **selectedPointer = nullptr;
 
 	std::string* toFill = nullptr;
+
+	ResourceContainer* selectedTexture = nullptr;
+	std::vector<ResourceContainer*> textures;
 };
 
 class PrefabsPanel :public EditorWindow
