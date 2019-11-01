@@ -79,14 +79,8 @@
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Modules\Resource Managers</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Mesh.cpp">
-      <Filter>Containers</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
       <Filter>Modules\Resource Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="Resource.cpp">
-      <Filter>Containers</Filter>
     </ClCompile>
     <ClCompile Include="QuadTree.cpp">
       <Filter>Containers</Filter>
@@ -112,12 +106,6 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Prefab.cpp">
-      <Filter>Containers</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Material.cpp">
-      <Filter>Containers</Filter>
-    </ClCompile>
     <ClCompile Include="RE_ModelImporter.cpp">
       <Filter>Modules\Resource Managers</Filter>
     </ClCompile>
@@ -138,6 +126,30 @@
     </ClCompile>
     <ClCompile Include="Globals.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Material.cpp">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Mesh.cpp">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Prefab.cpp">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Texture.cpp">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_SkyBox.cpp">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Scene.cpp">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Shader.cpp">
+      <Filter>Modules\Resource Managers\Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -360,14 +372,8 @@
     <ClInclude Include="ShaderManager.h">
       <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Mesh.h">
-      <Filter>Containers</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceManager.h">
       <Filter>Modules\Resource Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Containers</Filter>
     </ClInclude>
     <ClInclude Include="QuadTree.h">
       <Filter>Containers</Filter>
@@ -399,12 +405,6 @@
     <ClInclude Include="ImGui\imstb_truetype.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Prefab.h">
-      <Filter>Containers</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Material.h">
-      <Filter>Containers</Filter>
-    </ClInclude>
     <ClInclude Include="RE_ModelImporter.h">
       <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
@@ -431,6 +431,30 @@
     </ClInclude>
     <ClInclude Include="RE_InternalResources.h">
       <Filter>Modules\Independent App Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Material.h">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Mesh.h">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Prefab.h">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Texture.h">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Scene.h">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Shader.h">
+      <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_SkyBox.h">
+      <Filter>Modules\Resource Managers\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -520,6 +544,9 @@
     </Filter>
     <Filter Include="3rd Party\PAR Shapes">
       <UniqueIdentifier>{9fe0d206-8ee0-4092-b453-1b77011f1006}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Resource Managers\Resources">
+      <UniqueIdentifier>{138e3b14-77d4-440e-872a-1d54ebdae46f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

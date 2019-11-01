@@ -20,7 +20,7 @@ RE_Prefab::RE_Prefab(RE_GameObject* toBePrefab, bool isInternal) : ResourceConta
 	//external is named .refab
 	save_path += (isInternal) ? ".efab" : ".refab";
 
-	SetFilePath(save_path.c_str());
+	SetLibraryPath(save_path.c_str());
 
 	Config prefab_file(save_path.c_str(), App->fs->GetZipPath());
 
@@ -49,7 +49,7 @@ RE_GameObject * RE_Prefab::GetRoot()
 
 void RE_Prefab::Load()
 {
-	Config prefab_file(GetFilePath(), App->fs->GetZipPath());
+	Config prefab_file(GetLibraryPath(), App->fs->GetZipPath());
 	if (prefab_file.Load())
 	{
 		JSONNode* node = prefab_file.GetRootNode("Game Objects");

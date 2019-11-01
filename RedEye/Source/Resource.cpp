@@ -73,6 +73,9 @@ void ResourceContainer::SetType(Resource_Type type)
 	case R_PREFAB:
 		propietiesName = "Prefab";
 		break;
+	case R_SKYBOX:
+		propietiesName = "SkyBox";
+		break;
 	case R_INTERNALPREFAB:
 		propietiesName = "Internal preafab";
 		break;
