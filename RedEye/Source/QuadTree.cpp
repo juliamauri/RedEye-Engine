@@ -24,7 +24,7 @@ void QTreeNode::Push(RE_GameObject* g_obj)
 {
 	if (IsLeaf())
 	{
-		if (g_objs.size() < 4 || box.HalfSize().LengthSq() <= MIN_BOX_RADIUS)
+		if (g_objs.size() < 4)
 		{
 			g_objs.push_back(g_obj);
 		}
@@ -67,12 +67,18 @@ void QTreeNode::Clear()
 	g_objs.clear();
 }
 
-void QTreeNode::Draw()
+void QTreeNode::Draw() const
 {
 	for (uint i = 0; i < 12; i++)
 	{
-		glVertex3f(box.Edge(i).a.x, box.Edge(i).a.y, box.Edge(i).a.z);
-		glVertex3f(box.Edge(i).b.x, box.Edge(i).b.y, box.Edge(i).b.z);
+		glVertex3f(
+			box.Edge(i).a.x,
+			box.Edge(i).a.y,
+			box.Edge(i).a.z);
+		glVertex3f(
+			box.Edge(i).b.x,
+			box.Edge(i).b.y,
+			box.Edge(i).b.z);
 	}
 
 	if (nodes[0] != nullptr)
@@ -120,7 +126,9 @@ void QTreeNode::Distribute()
 		for (uint i = 0; i < 4; i++)
 		{
 			intersecting[i] = nodes[i]->box.Intersects((*it)->GetGlobalBoundingBox());
-			if (intersecting[i]) intersections_counter++; 
+
+			if (intersecting[i])
+				intersections_counter++; 
 		}
 
 		if (intersections_counter != 4)
@@ -158,30 +166,10 @@ void QTree::Build(RE_GameObject * root_g_obj)
 	RecursiveBuildFromRoot(root_g_obj);
 }
 
-void QTree::Draw()
+void QTree::Draw() const
 {
 	if (root != nullptr)
-	{
-		ShaderManager::use(0);
-
-		glColor3f(0.0f, 1.0f, 0.0f);
-
-		math::float4x4 model = math::float4x4::Translate(box.CenterPoint());
-		model.InverseTranspose();
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf((App->editor->GetCamera()->GetView() * model).ptr());
-
-		glLineWidth(5.0f);
-
-		glBegin(GL_LINES);
-
 		root->Draw();
-
-		glEnd();
-
-		glLineWidth(1.0f);
-	}
 }
 
 void QTree::Push(RE_GameObject * g_obj)

@@ -5,9 +5,6 @@
 #include "MathGeoLib\include\Geometry\AABB.h"
 #include <list>
 
-#define MIN_BOX_RADIUS 4
-
-
 class QTreeNode
 {
 public:
@@ -18,7 +15,7 @@ public:
 	void Pop(RE_GameObject* g_obj);
 	void Clear();
 
-	void Draw();
+	void Draw() const;
 
 	const AABB& GetBox() const;
 	bool IsLeaf() const;
@@ -46,7 +43,7 @@ public:
 	~QTree();
 
 	void Build(RE_GameObject* root_g_obj);
-	void Draw();
+	void Draw() const;
 
 	template<typename TYPE>
 	inline void CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
@@ -63,7 +60,6 @@ private:
 
 	AABB box;
 	QTreeNode* root = nullptr;
-
 };
 
 #endif // !__QUADTREE_H__
@@ -82,8 +78,6 @@ inline void QTreeNode::CollectIntersections(std::vector<RE_GameObject*>& objects
 		for (int i = 0; i < 4; ++i)
 			if (nodes[i] != nullptr) nodes[i]->CollectIntersections(objects, primitive);
 	}
-
-
 }
 
 template<typename TYPE>
