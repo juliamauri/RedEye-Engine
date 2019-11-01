@@ -273,7 +273,6 @@ void ModuleScene::DrawScene()
 		}
 
 		glEnd();
-		glLineWidth(1.0f);
 
 		if (resetLight)
 			App->renderer3d->SetLighting(true);

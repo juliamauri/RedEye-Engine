@@ -82,7 +82,7 @@ public:
 	const char* GetName() const;
 
 	// AABB
-	void DrawAABB(math::vec color, float width);
+	void DrawAABB(math::vec color);
 	void DrawGlobalAABB();
 	void DrawAllAABB();
 	void AddToBoundingBox(math::AABB box);

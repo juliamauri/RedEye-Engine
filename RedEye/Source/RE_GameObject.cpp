@@ -484,7 +484,7 @@ const char * RE_GameObject::GetName() const
 	return name.c_str();
 }
 
-void RE_GameObject::DrawAABB(math::vec color, float width)
+void RE_GameObject::DrawAABB(math::vec color)
 {
 	ShaderManager::use(0);
 
@@ -495,7 +495,6 @@ void RE_GameObject::DrawAABB(math::vec color, float width)
 	glLoadMatrixf((model * camera->GetView()).ptr());
 
 	glColor3f(color.x, color.y, color.z);
-	glLineWidth(width);
 	glBegin(GL_LINES);
 
 	for (uint i = 0; i < 12; i++)
@@ -509,6 +508,8 @@ void RE_GameObject::DrawAABB(math::vec color, float width)
 			local_bounding_box.Edge(i).b.y,
 			local_bounding_box.Edge(i).b.z);
 	}
+
+	glEnd();
 }
 
 void RE_GameObject::DrawGlobalAABB()
