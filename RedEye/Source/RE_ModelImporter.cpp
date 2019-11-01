@@ -331,143 +331,38 @@ std::vector<std::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(const c
 				for (uint i = 0; i < scene->mNumMaterials; i++) {
 					aiMaterial* material = scene->mMaterials[i];
 
-					if (uint textures = material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-					{
-						for (uint t = 0; t < textures; t++)
-						{
-							aiString texturePath;
-							if (AI_SUCCESS == material->GetTexture(aiTextureType_DIFFUSE, t, &texturePath)) {
-								std::string file_path(texturePath.C_Str());
-								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-								retPaths.push_back(filename);
-							}
-						}
-					}
-
-					if (uint textures = material->GetTextureCount(aiTextureType_SPECULAR) > 0)
-					{
-						for (uint t = 0; t < textures; t++)
-						{
-							aiString texturePath;
-							if (AI_SUCCESS == material->GetTexture(aiTextureType_SPECULAR, t, &texturePath)) {
-								retPaths.push_back(texturePath.C_Str());
-							}
-						}
-					}
-
-					if (uint textures = material->GetTextureCount(aiTextureType_AMBIENT) > 0)
-					{
-						for (uint t = 0; t < textures; t++)
-						{
-							aiString texturePath;
-							if (AI_SUCCESS == material->GetTexture(aiTextureType_AMBIENT, t, &texturePath)) {
-								std::string file_path(texturePath.C_Str());
-								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-								retPaths.push_back(filename);
-							}
-						}
-					}
-
-					if (uint textures = material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
-					{
-						for (uint t = 0; t < textures; t++)
-						{
-							aiString texturePath;
-							if (AI_SUCCESS == material->GetTexture(aiTextureType_EMISSIVE, t, &texturePath)) {
-								std::string file_path(texturePath.C_Str());
-								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-								retPaths.push_back(filename);
-							}
-						}
-					}
-
-					if (uint textures = material->GetTextureCount(aiTextureType_OPACITY) > 0)
-					{
-						for (uint t = 0; t < textures; t++)
-						{
-							aiString texturePath;
-							if (AI_SUCCESS == material->GetTexture(aiTextureType_OPACITY, t, &texturePath)) {
-								std::string file_path(texturePath.C_Str());
-								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-								retPaths.push_back(filename);
-							}
-						}
-					}
-
-					if (uint textures = material->GetTextureCount(aiTextureType_SHININESS) > 0)
-					{
-						for (uint t = 0; t < textures; t++)
-						{
-							aiString texturePath;
-							if (AI_SUCCESS == material->GetTexture(aiTextureType_SHININESS, t, &texturePath)) {
-								std::string file_path(texturePath.C_Str());
-								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-								retPaths.push_back(filename);
-							}
-						}
-					}
-
-					if (uint textures = material->GetTextureCount(aiTextureType_HEIGHT) > 0)
-					{
-						for (uint t = 0; t < textures; t++)
-						{
-							aiString texturePath;
-							if (AI_SUCCESS == material->GetTexture(aiTextureType_HEIGHT, t, &texturePath)) {
-								std::string file_path(texturePath.C_Str());
-								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-								retPaths.push_back(filename);
-							}
-						}
-					}
-
-					if (uint textures = material->GetTextureCount(aiTextureType_NORMALS) > 0)
-					{
-						for (uint t = 0; t < textures; t++)
-						{
-							aiString texturePath;
-							if (AI_SUCCESS == material->GetTexture(aiTextureType_NORMALS, t, &texturePath)) {
-								std::string file_path(texturePath.C_Str());
-								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-								retPaths.push_back(filename);
-							}
-						}
-					}
-
-					if (uint textures = material->GetTextureCount(aiTextureType_REFLECTION) > 0)
-					{
-						for (uint t = 0; t < textures; t++)
-						{
-							aiString texturePath;
-							if (AI_SUCCESS == material->GetTexture(aiTextureType_REFLECTION, t, &texturePath)) {
-								std::string file_path(texturePath.C_Str());
-								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-								retPaths.push_back(filename);
-							}
-						}
-					}
-
-					if (uint textures = material->GetTextureCount(aiTextureType_UNKNOWN) > 0)
-					{
-						for (uint t = 0; t < textures; t++)
-						{
-							aiString texturePath;
-							if (AI_SUCCESS == material->GetTexture(aiTextureType_UNKNOWN, t, &texturePath)) {
-								std::string file_path(texturePath.C_Str());
-								std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-								retPaths.push_back(filename);
-							}
-						}
-					}
-
+					GetTexturePath(material, retPaths, aiTextureType_DIFFUSE);
+					GetTexturePath(material, retPaths, aiTextureType_SPECULAR);
+					GetTexturePath(material, retPaths, aiTextureType_AMBIENT);
+					GetTexturePath(material, retPaths, aiTextureType_EMISSIVE);
+					GetTexturePath(material, retPaths, aiTextureType_OPACITY);
+					GetTexturePath(material, retPaths, aiTextureType_SHININESS);
+					GetTexturePath(material, retPaths, aiTextureType_HEIGHT);
+					GetTexturePath(material, retPaths, aiTextureType_NORMALS);
+					GetTexturePath(material, retPaths, aiTextureType_REFLECTION);
+					GetTexturePath(material, retPaths, aiTextureType_UNKNOWN);
 				}
 			}
 		}
-
+		DEL(fbxloaded);
 	}
-
-	DEL(fbxloaded);
-
 	return retPaths;
+}
+
+void RE_ModelImporter::GetTexturePath(aiMaterial * material, std::vector<std::string> &retPaths, aiTextureType textureType)
+{
+	if (uint textures = material->GetTextureCount(textureType) > 0)
+	{
+		for (uint t = 0; t < textures; t++)
+		{
+			aiString texturePath;
+			if (AI_SUCCESS == material->GetTexture(textureType, t, &texturePath)) {
+				std::string file_path(texturePath.C_Str());
+				std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+				retPaths.push_back(filename);
+			}
+		}
+	}
 }
 
 void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
@@ -501,33 +396,7 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 				int i = 0;
 			}
 
-			if (uint textures = material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-			{
-				for (uint t = 0; t < textures; t++)
-				{
-					aiString texturePath;
-					if (AI_SUCCESS == material->GetTexture(aiTextureType_DIFFUSE, t, &texturePath)) {
-						std::string file_path(texturePath.C_Str());
-						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-						std::string realAssetsPath(fileTexturePath);
-						realAssetsPath += filename;
-						if (App->fs->Exists(realAssetsPath.c_str()))
-						{
-							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
-							if (texture != nullptr) {
-								newMaterial->tDiffuse.push_back(texture);
-							}
-							else {
-								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-							}
-						}
-						else {
-							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-						}
-					}
-				}
-			}
-
+			GetTexturesMaterial(material, fileTexturePath, aiTextureType_DIFFUSE, &newMaterial->tDiffuse, name);
 			aiColor3D colorDiffuse(0, 0, 0);
 			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, colorDiffuse))
 			{
@@ -535,99 +404,22 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 				newMaterial->cDiffuse.Set(colorDiffuse.r, colorDiffuse.g, colorDiffuse.g);
 			}
 
-			if (uint textures = material->GetTextureCount(aiTextureType_SPECULAR) > 0)
-			{
-				for (uint t = 0; t < textures; t++)
-				{
-					aiString texturePath;
-					if (AI_SUCCESS == material->GetTexture(aiTextureType_SPECULAR, t, &texturePath)) {
-						std::string file_path(texturePath.C_Str());
-						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-						std::string realAssetsPath(fileTexturePath);
-						realAssetsPath += filename;
-						if (App->fs->Exists(realAssetsPath.c_str()))
-						{
-							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
-							if (texture != nullptr) {
-								newMaterial->tSpecular.push_back(texture);
-							}
-							else {
-								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-							}
-						}
-						else {
-							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-						}
-					}
-				}
-			}
 
+			GetTexturesMaterial(material, fileTexturePath, aiTextureType_SPECULAR, &newMaterial->tSpecular, name);
 			aiColor3D colorSpecular(0, 0, 0);
 			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_SPECULAR, colorSpecular))
 			{
 				newMaterial->cSpecular.Set(colorSpecular.r, colorSpecular.g, colorSpecular.g);
 			}
 
-			if (uint textures = material->GetTextureCount(aiTextureType_AMBIENT) > 0)
-			{
-				for (uint t = 0; t < textures; t++)
-				{
-					aiString texturePath;
-					if (AI_SUCCESS == material->GetTexture(aiTextureType_AMBIENT, t, &texturePath)) {
-						std::string file_path(texturePath.C_Str());
-						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-						std::string realAssetsPath(fileTexturePath);
-						realAssetsPath += filename;
-						if (App->fs->Exists(realAssetsPath.c_str()))
-						{
-							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
-							if (texture != nullptr) {
-								newMaterial->tAmbient.push_back(texture);
-							}
-							else {
-								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-							}
-						}
-						else {
-							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-						}
-					}
-				}
-			}
-
+			GetTexturesMaterial(material, fileTexturePath, aiTextureType_AMBIENT, &newMaterial->tAmbient, name);
 			aiColor3D colorAmbient(0, 0, 0);
 			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_AMBIENT, colorAmbient))
 			{
 				newMaterial->cAmbient.Set(colorAmbient.r, colorAmbient.g, colorAmbient.g);
 			}
 
-			if (uint textures = material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
-			{
-				for (uint t = 0; t < textures; t++)
-				{
-					aiString texturePath;
-					if (AI_SUCCESS == material->GetTexture(aiTextureType_EMISSIVE, t, &texturePath)) {
-						std::string file_path(texturePath.C_Str());
-						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-						std::string realAssetsPath(fileTexturePath);
-						realAssetsPath += filename;
-						if (App->fs->Exists(realAssetsPath.c_str()))
-						{
-							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
-							if (texture != nullptr) {
-								newMaterial->tEmissive.push_back(texture);
-							}
-							else {
-								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-							}
-						}
-						else {
-							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-						}
-					}
-				}
-			}
-
+			GetTexturesMaterial(material, fileTexturePath, aiTextureType_EMISSIVE, &newMaterial->tEmissive, name);
 			aiColor3D colorEmissive(0, 0, 0);
 			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_EMISSIVE, colorEmissive))
 			{
@@ -652,66 +444,14 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 				newMaterial->blendMode = blendFunc;
 			}
 
-			if (uint textures = material->GetTextureCount(aiTextureType_OPACITY) > 0)
-			{
-				for (uint t = 0; t < textures; t++)
-				{
-					aiString texturePath;
-					if (AI_SUCCESS == material->GetTexture(aiTextureType_OPACITY, t, &texturePath)) {
-						std::string file_path(texturePath.C_Str());
-						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-						std::string realAssetsPath(fileTexturePath);
-						realAssetsPath += filename;
-						if (App->fs->Exists(realAssetsPath.c_str()))
-						{
-							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
-							if (texture != nullptr) {
-								newMaterial->tOpacity.push_back(texture);
-							}
-							else {
-								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-							}
-						}
-						else {
-							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-						}
-					}
-				}
-			}
-
+			GetTexturesMaterial(material, fileTexturePath, aiTextureType_OPACITY, &newMaterial->tOpacity, name);
 			float opacity = 1.0f;
 			if (AI_SUCCESS == material->Get(AI_MATKEY_OPACITY, opacity))
 			{
 				newMaterial->opacity = opacity;
 			}
 
-			if (uint textures = material->GetTextureCount(aiTextureType_SHININESS) > 0)
-			{
-				for (uint t = 0; t < textures; t++)
-				{
-					aiString texturePath;
-					if (AI_SUCCESS == material->GetTexture(aiTextureType_SHININESS, t, &texturePath)) {
-						std::string file_path(texturePath.C_Str());
-						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-						std::string realAssetsPath(fileTexturePath);
-						realAssetsPath += filename;
-						if (App->fs->Exists(realAssetsPath.c_str()))
-						{
-							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
-							if (texture != nullptr) {
-								newMaterial->tShininess.push_back(texture);
-							}
-							else {
-								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-							}
-						}
-						else {
-							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-						}
-					}
-				}
-			}
-
+			GetTexturesMaterial(material, fileTexturePath, aiTextureType_SHININESS, &newMaterial->tShininess, name);
 			float shininess = 0.f;
 			if (AI_SUCCESS == material->Get(AI_MATKEY_SHININESS, shininess))
 			{
@@ -730,124 +470,50 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 				newMaterial->refraccti = refracti;
 			}
 
-			if (uint textures = material->GetTextureCount(aiTextureType_HEIGHT) > 0)
-			{
-				for (uint t = 0; t < textures; t++)
-				{
-					aiString texturePath;
-					if (AI_SUCCESS == material->GetTexture(aiTextureType_HEIGHT, t, &texturePath)) {
-						std::string file_path(texturePath.C_Str());
-						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-						std::string realAssetsPath(fileTexturePath);
-						realAssetsPath += filename;
-						if (App->fs->Exists(realAssetsPath.c_str()))
-						{
-							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
-							if (texture != nullptr) {
-								newMaterial->tHeight.push_back(texture);
-							}
-							else {
-								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-							}
-						}
-						else {
-							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-						}
-					}
-				}
-			}
-
-			if (uint textures = material->GetTextureCount(aiTextureType_NORMALS) > 0)
-			{
-				for (uint t = 0; t < textures; t++)
-				{
-					aiString texturePath;
-					if (AI_SUCCESS == material->GetTexture(aiTextureType_NORMALS, t, &texturePath)) {
-						std::string file_path(texturePath.C_Str());
-						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-						std::string realAssetsPath(fileTexturePath);
-						realAssetsPath += filename;
-						if (App->fs->Exists(realAssetsPath.c_str()))
-						{
-							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
-							if (texture != nullptr) {
-								newMaterial->tNormals.push_back(texture);
-							}
-							else {
-								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-							}
-						}
-						else {
-							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-						}
-					}
-				}
-			}
-
-			if (uint textures = material->GetTextureCount(aiTextureType_REFLECTION) > 0)
-			{
-				for (uint t = 0; t < textures; t++)
-				{
-					aiString texturePath;
-					if (AI_SUCCESS == material->GetTexture(aiTextureType_REFLECTION, t, &texturePath)) {
-						std::string file_path(texturePath.C_Str());
-						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-						std::string realAssetsPath(fileTexturePath);
-						realAssetsPath += filename;
-						if (App->fs->Exists(realAssetsPath.c_str()))
-						{
-							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
-							if (texture != nullptr) {
-								newMaterial->tReflection.push_back(texture);
-							}
-							else {
-								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-							}
-						}
-						else {
-							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-						}
-					}
-				}
-			}
-
-			if (uint textures = material->GetTextureCount(aiTextureType_UNKNOWN) > 0)
-			{
-				for (uint t = 0; t < textures; t++)
-				{
-					aiString texturePath;
-					if (AI_SUCCESS == material->GetTexture(aiTextureType_UNKNOWN, t, &texturePath)) {
-						std::string file_path(texturePath.C_Str());
-						std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-						std::string realAssetsPath(fileTexturePath);
-						realAssetsPath += filename;
-						if (App->fs->Exists(realAssetsPath.c_str()))
-						{
-							const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
-							if (texture != nullptr) {
-								newMaterial->tUnknown.push_back(texture);
-							}
-							else {
-								LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-							}
-						}
-						else {
-							LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
-						}
-					}
-				}
-			}
+			GetTexturesMaterial(material, fileTexturePath, aiTextureType_HEIGHT, &newMaterial->tHeight, name);
+			GetTexturesMaterial(material, fileTexturePath, aiTextureType_NORMALS, &newMaterial->tNormals, name);
+			GetTexturesMaterial(material, fileTexturePath, aiTextureType_REFLECTION, &newMaterial->tReflection, name);
+			GetTexturesMaterial(material, fileTexturePath, aiTextureType_UNKNOWN, &newMaterial->tUnknown, name);
 
 			((ResourceContainer*)newMaterial)->SetName(name.C_Str());
 			((ResourceContainer*)newMaterial)->SetAssetPath(filePath.c_str());
 			((ResourceContainer*)newMaterial)->SetType(Resource_Type::R_MATERIAL);
 			newMaterial->Save();
-			((ResourceContainer*)newMaterial)->SaveMeta();
 			materialMD5 = App->resources->Reference((ResourceContainer*)newMaterial);
 		}
 		else
 			materialMD5 = App->resources->FindMD5ByAssetsPath(filePath.c_str(), Resource_Type::R_MATERIAL);
 
 		aditionalData->materialsLoaded.insert(std::pair<aiMaterial*,const char*>(material, materialMD5));
+	}
+}
+
+void RE_ModelImporter::GetTexturesMaterial(aiMaterial * material, std::string &fileTexturePath, aiTextureType textureType, std::vector<const char*>* vectorToFill, aiString &name)
+{
+	if (uint textures = material->GetTextureCount(textureType) > 0)
+	{
+		for (uint t = 0; t < textures; t++)
+		{
+			aiString texturePath;
+			if (AI_SUCCESS == material->GetTexture(textureType, t, &texturePath)) {
+				std::string file_path(texturePath.C_Str());
+				std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+				std::string realAssetsPath(fileTexturePath);
+				realAssetsPath += filename;
+				if (App->fs->Exists(realAssetsPath.c_str()))
+				{
+					const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+					if (texture != nullptr) {
+						vectorToFill->push_back(texture);
+					}
+					else {
+						LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+					}
+				}
+				else {
+					LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+				}
+			}
+		}
 	}
 }

@@ -21,6 +21,7 @@ RE_Material::~RE_Material() { }
 
 void RE_Material::LoadInMemory()
 {
+	//TODO ResourcesManager, apply count referending textures
 	if (App->fs->Exists(GetLibraryPath())) {
 		BinaryDeserialize();
 	}
@@ -35,6 +36,7 @@ void RE_Material::LoadInMemory()
 
 void RE_Material::UnloadMemory()
 {
+	//TODO ResourcesManager, apply count referending textures
 	tDiffuse.clear();
 	tSpecular.clear();
 	tAmbient.clear();
@@ -86,12 +88,23 @@ void RE_Material::Draw()
 		whereToApply = nullptr;
 	}
 
+	if (ImGui::Button("Save Changes")) {
+		if (applySave) {
+
+			Save();
+
+			applySave = false;
+		}
+	}
+
 	int shadingMode = shadingType;
 	if (ImGui::ListBox("Shader type", &shadingMode, shadingItems, 10)) {
 
 		if (shadingMode != shadingType) {
 			shadingType = (RE_ShadingMode)shadingMode;
 			applySave = true;
+
+			// TODO ResourcesManager count referending textures
 		}
 	}
 
