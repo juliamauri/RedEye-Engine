@@ -47,6 +47,8 @@ public:
 
 	uint GetShaderScene()const;
 
+	bool DrawingSelAABB() const;
+
 private:
 	//init values
 	std::string defaultModel;
@@ -58,21 +60,21 @@ private:
 	bool aabb_need_reset = false;
 	unsigned int aabb_reset_time = 0;
 
+	bool draw_all_aabb = false;
+	math::vec all_aabb_color;
+
+	bool draw_selected_aabb = false;
+	math::vec sel_aabb_color;
+
 	// Quadtree
 	QTree quad_tree;
-	bool draw_quad_tree = false;
+	bool draw_quad_tree = true;
+	math::vec quad_tree_color;
 
 	// Config
-	bool draw_all_aabb = true;
-	math::vec all_aabb_color;
-	float all_aabb_width = 1.0f;
-
-	bool draw_selected_aabb = true;
-	math::vec sel_aabb_color;
-	float sel_aabb_width = 5.0f;
-
 	bool focus_on_select = false;
 
+	// Shaders
 	unsigned int sceneShader = 0;
 	unsigned int skyboxShader = 0;
 };

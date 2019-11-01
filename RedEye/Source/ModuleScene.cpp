@@ -40,8 +40,9 @@
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
-	all_aabb_color = math::vec(0.f, 225.f, 0.f);
-	sel_aabb_color = math::vec(255.f, 255.f, 0.f);
+	all_aabb_color = math::vec(0.f, 1.f, 0.f);
+	sel_aabb_color = math::vec(1.f, 1.f, 1.f);
+	quad_tree_color = math::vec(1.f, 1.f, 0.f);
 }
 
 ModuleScene::~ModuleScene()
@@ -127,7 +128,7 @@ bool ModuleScene::Start()
 	}
 
 	// Quadtree
-	//quad_tree.Build(root);
+	quad_tree.Build(root);
 
 	return ret;
 }
@@ -216,9 +217,6 @@ void ModuleScene::DrawEditor()
 			float p[3] = { all_aabb_color.x, all_aabb_color.y, all_aabb_color.z };
 			if (ImGui::DragFloat3("Color All", p, 0.1f, 0.f, 255.f, "%.2f"))
 				all_aabb_color = math::vec(p[0], p[1], p[2]);
-
-			// Width
-			ImGui::DragFloat("Width All", &all_aabb_width, 01.f, 0.1f, 100.f, "%.1f");
 		}
 
 		// AABB Selected
@@ -229,14 +227,11 @@ void ModuleScene::DrawEditor()
 			float p[3] = { sel_aabb_color.x, sel_aabb_color.y, sel_aabb_color.z };
 			if (ImGui::DragFloat3("Color Selected", p, 0.1f, 0.f, 255.f, "%.2f"))
 				sel_aabb_color = math::vec(p[0], p[1], p[2]);
-
-			// Width
-			ImGui::DragFloat("Width Selected", &sel_aabb_width, 01.f, 0.1f, 100.f, "%.1f");
 		}
 
 		ImGui::Checkbox("Focus on Select", &focus_on_select);
 
-		//ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
+		ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
 	}
 }
 
@@ -245,19 +240,47 @@ void ModuleScene::DrawScene()
 	OPTICK_CATEGORY("Scene Draw", Optick::Category::Rendering);
 
 	OPTICK_CATEGORY("AABB Draw", Optick::Category::Debug);
+
 	// Draw Bounding Boxes
-	if (draw_all_aabb)
-		for (RE_GameObject* go : root->GetChilds())
-			go->DrawAllAABB(all_aabb_color, all_aabb_width);
+	if (draw_all_aabb || draw_selected_aabb || draw_quad_tree)
+	{
+		ShaderManager::use(0);
+		bool resetLight = App->renderer3d->GetLighting();
 
-	if (draw_selected_aabb && selected != nullptr && selected != root)
-		selected->DrawGlobalAABB(sel_aabb_color, sel_aabb_width);
+		if (resetLight)
+			App->renderer3d->SetLighting(false);
 
-	/*/ Draw Quadtree
-	if (draw_quad_tree)
-		quad_tree.Draw();*/
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf((App->editor->GetCamera()->GetView()).ptr());
+		glBegin(GL_LINES);
+
+		if (draw_all_aabb)
+		{
+			glColor3f(all_aabb_color.x, all_aabb_color.y, all_aabb_color.z);
+			root->DrawAllAABB();
+		}
+
+		if (draw_selected_aabb && selected != nullptr && selected != root)
+		{
+			glColor3f(sel_aabb_color.x, sel_aabb_color.y, sel_aabb_color.z);
+			selected->DrawGlobalAABB();
+		}
+
+		if (draw_quad_tree)
+		{
+			glColor3f(quad_tree_color.x, quad_tree_color.y, quad_tree_color.z);
+			quad_tree.Draw();
+		}
+
+		glEnd();
+		glLineWidth(1.0f);
+
+		if (resetLight)
+			App->renderer3d->SetLighting(true);
+	}
 
 	OPTICK_CATEGORY("Hiteracy Draw", Optick::Category::Rendering);
+
 	// Load Shader Uniforms
 	ShaderManager::use(sceneShader);
 	ShaderManager::setFloat4x4(sceneShader, "view", App->editor->GetCamera()->GetViewPtr());
@@ -270,7 +293,6 @@ void ModuleScene::DrawScene()
 	for (auto object : objects) object->Draw(false);*/
 
 	root->Draw();
-
 
 	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
 
@@ -523,4 +545,9 @@ void ModuleScene::SceneModified()
 uint ModuleScene::GetShaderScene() const
 {
 	return sceneShader;
+}
+
+bool ModuleScene::DrawingSelAABB() const
+{
+	return draw_selected_aabb;
 }

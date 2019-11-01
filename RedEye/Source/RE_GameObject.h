@@ -83,8 +83,8 @@ public:
 
 	// AABB
 	void DrawAABB(math::vec color, float width);
-	void DrawGlobalAABB(math::vec color, float width);
-	void DrawAllAABB(math::vec color, float width);
+	void DrawGlobalAABB();
+	void DrawAllAABB();
 	void AddToBoundingBox(math::AABB box);
 	void ResetBoundingBoxFromChilds();
 	void ResetGlobalBoundingBox();
@@ -98,7 +98,7 @@ public:
 private:
 
 	bool active = true;
-	bool isStatic = false;
+	bool isStatic = true;
 
 	UUID uuid;
 

@@ -509,22 +509,10 @@ void RE_GameObject::DrawAABB(math::vec color, float width)
 			local_bounding_box.Edge(i).b.y,
 			local_bounding_box.Edge(i).b.z);
 	}
-
-	glEnd();
-	glLineWidth(1.0f);
 }
 
-void RE_GameObject::DrawGlobalAABB(math::vec color, float width)
+void RE_GameObject::DrawGlobalAABB()
 {
-	ShaderManager::use(0);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((App->editor->GetCamera()->GetView()).ptr());
-
-	glColor3f(color.x, color.y, color.z);
-	glLineWidth(width);
-	glBegin(GL_LINES);
-
 	for (uint i = 0; i < 12; i++)
 	{
 		glVertex3f(
@@ -536,20 +524,22 @@ void RE_GameObject::DrawGlobalAABB(math::vec color, float width)
 			global_bounding_box.Edge(i).b.y,
 			global_bounding_box.Edge(i).b.z);
 	}
-
-	glEnd();
-	glLineWidth(1.0f);
 }
 
-void RE_GameObject::DrawAllAABB(math::vec color, float width)
+void RE_GameObject::DrawAllAABB()
 {
 	if (active)
 	{
-		if (App->scene->GetSelected() != this)
-			DrawGlobalAABB(color, width);
+		if (App->scene->GetSelected() == this)
+		{
+			if (!App->scene->DrawingSelAABB())
+				DrawGlobalAABB();
+		}
+		else if (parent != nullptr)
+			DrawGlobalAABB();
 
 		for (auto child : childs)
-			child->DrawAllAABB(color, width);
+			child->DrawAllAABB();
 	}
 }
 
