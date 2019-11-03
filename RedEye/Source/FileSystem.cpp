@@ -1010,6 +1010,21 @@ void JSONNode::PushFloatVector(const char * name, math::vec vector)
 	}
 }
 
+void JSONNode::PushFloat4(const char * name, math::float4 vector)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value float_array(rapidjson::kArrayType);
+		float_array.PushBack(vector.x, config->document.GetAllocator()).PushBack(vector.y, config->document.GetAllocator()).PushBack(vector.z, config->document.GetAllocator()).PushBack(vector.w, config->document.GetAllocator());
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
+	}
+}
+
 void JSONNode::PushDouble(const char* name, const double value)
 {
 	if (name != nullptr)
@@ -1183,6 +1198,30 @@ math::vec JSONNode::PullFloatVector(const char * name, math::vec deflt)
 			ret.Set(val->GetArray()[0].GetFloat(),
 			val->GetArray()[1].GetFloat(),
 			val->GetArray()[2].GetFloat());
+		else
+			ret = deflt;
+	}
+
+	return ret;
+}
+
+math::float4 JSONNode::PullFloat4(const char * name, math::float4 deflt)
+{
+	math::float4 ret = math::float4::zero;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+
+		if (val != nullptr)
+			ret.Set(val->GetArray()[0].GetFloat(),
+				val->GetArray()[1].GetFloat(),
+				val->GetArray()[2].GetFloat(),
+				val->GetArray()[3].GetFloat());
 		else
 			ret = deflt;
 	}

@@ -6,6 +6,7 @@
 #include "RapidJson\include\allocators.h"
 
 #include "MathGeoLib/include/Math/float3.h"
+#include "MathGeoLib/include/Math/float4.h"
 #include <list>
 #include <string>
 #include <vector>
@@ -132,6 +133,7 @@ public:
 	void		PushUInt(const char* name, const unsigned int value);
 	void		PushFloat(const char* name, const float value);
 	void		PushFloatVector(const char* name, math::vec vector);
+	void		PushFloat4(const char* name, math::float4 vector);
 	void		PushDouble(const char* name, const double value);
 	void		PushString(const char* name, const char* value);
 	void		PushValue(rapidjson::Value* val);
@@ -144,6 +146,7 @@ public:
 	unsigned int	PullUInt(const char* name, unsigned int deflt);
 	float			PullFloat(const char* name, float deflt);
 	math::vec		PullFloatVector(const char* name, math::vec deflt);
+	math::float4		PullFloat4(const char* name, math::float4 deflt);
 	double			PullDouble(const char* name, double deflt);
 	const char*		PullString(const char* name, const char* deflt);
 	void			PullMeshVertex(std::vector<Vertex>* vertexes, std::vector<unsigned int>* indeces);

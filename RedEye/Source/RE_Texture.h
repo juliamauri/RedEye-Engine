@@ -38,6 +38,15 @@ struct RE_TextureSettings {
 	RE_TextureWrap wrap_s = RE_REPEAT;
 	RE_TextureWrap wrap_t = RE_REPEAT;
 	math::float4 borderColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	inline bool operator==(const RE_TextureSettings &b) {
+		return (min_filter == b.min_filter && mag_filter == b.mag_filter && wrap_s == b.wrap_s && wrap_t == b.wrap_t && borderColor.Equals(b.borderColor));
+	}
+
+
+	inline bool operator!=(const RE_TextureSettings &b) {
+		return (min_filter != b.min_filter || mag_filter != b.mag_filter || wrap_s != b.wrap_s || wrap_t != b.wrap_t || !borderColor.Equals(b.borderColor));
+	}
 };
 
 
@@ -61,7 +70,6 @@ public:
 	unsigned int GetID()const { return ID; }
 
 private:
-	//TODO
 	void Draw() override;
 	void SaveResourceMeta(JSONNode* metaNode) override; 
 	void LoadResourceMeta(JSONNode* metaNode) override; 
@@ -69,12 +77,24 @@ private:
 	void AssetLoad();
 	void LibraryLoad();
 	void LibrarySave();
+
+	int GetComboFilter(RE_TextureFilters filter);
+	RE_TextureFilters GetFilterCombo(int combo);
+
+	int GetComboWrap(RE_TextureWrap wrap);
+	RE_TextureWrap GetWrapCombo(int combo);
+
+	void TexParameteri(unsigned int pname, int param);
+	void TexParameterfv(unsigned int pname, float* param);
 											  
 private:
 	unsigned int ID = 0;
 	int width, height;
 	TextureType texType = RE_TEXTURE_UNKNOWN;
 	RE_TextureSettings texSettings;
+
+	bool applySave = false;
+	RE_TextureSettings restoreSettings;
 };
 
 #endif // !__RE_TEXTURE_H__
