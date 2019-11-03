@@ -26,17 +26,17 @@ enum RE_TextureFilters {
 	RE_LINEAR_MIPMAP_LINEAR = 0x2703,
 };
 enum RE_TextureWrap {
-	GL_REPEAT = 0x2901,
-	GL_CLAMP_TO_BORDER = 0x812D,
-	GL_CLAMP_TO_EDGE = 0x812F,
-	GL_MIRRORED_REPEAT = 0x8370
+	RE_REPEAT = 0x2901,
+	RE_CLAMP_TO_BORDER = 0x812D,
+	RE_CLAMP_TO_EDGE = 0x812F,
+	RE_MIRRORED_REPEAT = 0x8370
 };
 
 struct RE_TextureSettings {
 	RE_TextureFilters min_filter = RE_NEAREST;
 	RE_TextureFilters mag_filter = RE_NEAREST;
-	RE_TextureWrap wrap_s = GL_REPEAT;
-	RE_TextureWrap wrap_t = GL_REPEAT;
+	RE_TextureWrap wrap_s = RE_REPEAT;
+	RE_TextureWrap wrap_t = RE_REPEAT;
 	math::float4 borderColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
 

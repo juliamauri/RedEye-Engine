@@ -198,7 +198,7 @@ void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int s
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, settings.wrap_s); /* We will use linear interpolation for minifying filter */
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, settings.wrap_t); /* We will use linear interpolation for minifying filter */
 
-		if(settings.wrap_s == RE_TextureWrap::GL_CLAMP_TO_BORDER || settings.wrap_t == RE_TextureWrap::GL_CLAMP_TO_BORDER)
+		if(settings.wrap_s == RE_TextureWrap::RE_CLAMP_TO_BORDER || settings.wrap_t == RE_TextureWrap::RE_CLAMP_TO_BORDER)
 			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &settings.borderColor[0]);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), *width = ilGetInteger(IL_IMAGE_WIDTH), *height = ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
