@@ -3,6 +3,8 @@
 
 #include "Resource.h"
 
+#include "MathGeoLib/include/Math/float4.h"
+
 //Same as image types defines on  il.h DevIL
 enum TextureType {
 	RE_TEXTURE_UNKNOWN = 0x0000,
@@ -14,9 +16,28 @@ enum TextureType {
 	RE_DDS = 0x0437
 };
 
-//TODO
-struct RE_TextureSettings {
+//Same as GL values
+enum RE_TextureFilters {
+	RE_NEAREST = 0x2600,
+	RE_LINEAR = 0x2601,
+	RE_NEAREST_MIPMAP_NEAREST = 0x2700,
+	RE_LINEAR_MIPMAP_NEAREST = 0x2701,
+	RE_NEAREST_MIPMAP_LINEAR = 0x2702,
+	RE_LINEAR_MIPMAP_LINEAR = 0x2703,
+};
+enum RE_TextureWrap {
+	GL_REPEAT = 0x2901,
+	GL_CLAMP_TO_BORDER = 0x812D,
+	GL_CLAMP_TO_EDGE = 0x812F,
+	GL_MIRRORED_REPEAT = 0x8370
+};
 
+struct RE_TextureSettings {
+	RE_TextureFilters min_filter = RE_NEAREST;
+	RE_TextureFilters mag_filter = RE_NEAREST;
+	RE_TextureWrap wrap_s = GL_REPEAT;
+	RE_TextureWrap wrap_t = GL_REPEAT;
+	math::float4 borderColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
 
 
@@ -40,6 +61,7 @@ public:
 	unsigned int GetID()const { return ID; }
 
 private:
+	//TODO
 	void Draw() override;
 	void SaveResourceMeta(JSONNode* metaNode) override; 
 	void LoadResourceMeta(JSONNode* metaNode) override; 
