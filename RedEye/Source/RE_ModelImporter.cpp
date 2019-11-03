@@ -502,7 +502,11 @@ void RE_ModelImporter::GetTexturesMaterial(aiMaterial * material, std::string &f
 				realAssetsPath += filename;
 				if (App->fs->Exists(realAssetsPath.c_str()))
 				{
-					const char* texture = App->textures->LoadTextureAssets(realAssetsPath.c_str());
+					const char* texture = App->resources->FindMD5ByAssetsPath(realAssetsPath.c_str());
+					if (texture == nullptr) {
+						texture = App->textures->AddNewTextureOnResources(realAssetsPath.c_str());
+					}
+
 					if (texture != nullptr) {
 						vectorToFill->push_back(texture);
 					}

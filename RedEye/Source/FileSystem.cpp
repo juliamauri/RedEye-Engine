@@ -739,7 +739,8 @@ unsigned int RE_FileIO::GetSize()
 std::string RE_FileIO::GetMd5()
 {
 	if (buffer == nullptr)
-		Load();
+		if (!Load())
+			return "";
 		
 	return md5(std::string(buffer, size));
 }
