@@ -14,7 +14,6 @@ class PropertiesWindow;
 class AboutWindow;
 class RandomTest;
 class TexturesWindow;
-class EditorSettingsWindow;
 class PlayPauseWindow;
 class SelectFile;
 class PrefabsPanel;
@@ -23,9 +22,6 @@ class SkyBoxWindow;
 
 struct SoftwareInfo;
 class RE_CompCamera;
-
-#define CAM_SENSITIVITY 0.01
-#define CAM_SPEED 5.0
 
 union SDL_Event;
 
@@ -41,15 +37,11 @@ public:
 	bool CleanUp() override;
 
 	void DrawEditor() override;
-	void FocusSelected();
 
 	void LogToEditorConsole();
 	bool AddSoftwareUsed(const char * name, const char * version, const char * website);
 	void Draw();
 	void HandleSDLEvent(SDL_Event* e);
-
-	// Camera
-	RE_CompCamera* GetCamera() const;
 
 	//Select file
 	SelectFile* GetSelectWindow()const;
@@ -58,34 +50,31 @@ public:
 	PopUpWindow* popupWindow = nullptr;
 	SkyBoxWindow* skyBoxWindow = nullptr;
 
-
 private:
 
 	void UpdateCamera();
 
 private:
 
-	RE_CompCamera* camera = nullptr;
-	float min_focus_dist = 3.0f;
-
 	bool show_all = true;
 	bool show_demo = false;
-
 	bool popUpFocus = false;
 
+	// Camera
+	float cam_speed = 5.0f;
+	float cam_sensitivity = 0.01f;
+
 	// Windows
+	std::list<EditorWindow*> windows, tools;
 	ConsoleWindow* console = nullptr;
 	ConfigWindow* config = nullptr;
 	HeriarchyWindow* heriarchy = nullptr;
 	PropertiesWindow* properties = nullptr;
-	EditorSettingsWindow* editor_settings = nullptr;
 	PlayPauseWindow* play_pause = nullptr;
+	PrefabsPanel* prefabsPanel = nullptr;
 
 	AboutWindow* about = nullptr;
-
 	SelectFile* select_file = nullptr;
-
-	PrefabsPanel* prefabsPanel = nullptr;
 
 	// Tools
 	RandomTest* rng = nullptr;
@@ -93,8 +82,6 @@ private:
 
 	//crtd security
 	bool isDuplicated = false;
-
-	std::list<EditorWindow*> windows, tools;
 };
 
 #endif // !__MODULEEDITOR__

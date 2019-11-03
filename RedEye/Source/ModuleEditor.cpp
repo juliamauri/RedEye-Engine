@@ -27,8 +27,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(config = new ConfigWindow());
 	windows.push_back(heriarchy = new HeriarchyWindow());
 	windows.push_back(properties = new PropertiesWindow());
-	//windows.push_back(editor_settings = new EditorSettingsWindow());
-	//windows.push_back(play_pause = new PlayPauseWindow());
+	windows.push_back(play_pause = new PlayPauseWindow());
 	windows.push_back(skyBoxWindow = new SkyBoxWindow());
 	windows.push_back(prefabsPanel = new PrefabsPanel());
 	about = new AboutWindow();
@@ -49,10 +48,6 @@ bool ModuleEditor::Init(JSONNode* node)
 {
 	bool ret = true;
 
-	// Editor camera
-	camera = new RE_CompCamera();
-	camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
-
 	// ImGui
 	LOG_SECONDARY("Init ImGui");
 	IMGUI_CHECKVERSION();
@@ -60,7 +55,7 @@ bool ModuleEditor::Init(JSONNode* node)
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui::StyleColorsDark();
 
-	if (ret = ImGui_ImplSDL2_InitForOpenGL(App->window->GetWindow(), App->renderer3d->GetContext()))
+	if (ret = ImGui_ImplSDL2_InitForOpenGL(App->window->GetWindow(), App->renderer3d->GetWindowContext()))
 	{
 		if (ret = ImGui_ImplOpenGL3_Init())
 			App->ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
@@ -213,7 +208,6 @@ bool ModuleEditor::CleanUp()
 
 	DEL(popupWindow);
 	DEL(about);
-	DEL(camera);
 	DEL(select_file);
 
 	ImGui_ImplOpenGL3_Shutdown();
@@ -226,12 +220,10 @@ bool ModuleEditor::CleanUp()
 void ModuleEditor::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
-		ImGui::DragFloat("Focus min dist", &min_focus_dist, 0.1f, 0.f, 50.f, "%.1f");
-}
-
-void ModuleEditor::FocusSelected()
-{
-	camera->Focus(App->scene->GetSelected(), min_focus_dist);
+	{
+		ImGui::DragFloat("Camera speed", &cam_speed, 0.1f, 0.1f, 100.0f, "%.1f");
+		ImGui::DragFloat("Camera sensitivity", &cam_sensitivity, 0.01f, 0.01f, 1.0f, "%.2f");
+	}
 }
 
 void ModuleEditor::LogToEditorConsole()
@@ -266,11 +258,6 @@ void ModuleEditor::HandleSDLEvent(SDL_Event* e)
 	ImGui_ImplSDL2_ProcessEvent(e);
 }
 
-RE_CompCamera * ModuleEditor::GetCamera() const
-{
-	return camera;
-}
-
 SelectFile * ModuleEditor::GetSelectWindow()const
 {
 	return select_file;
@@ -284,6 +271,7 @@ void ModuleEditor::PopUpFocus(bool focus)
 void ModuleEditor::UpdateCamera()
 {
 	OPTICK_CATEGORY("Update ModuleEditor Camera", Optick::Category::Camera);
+	RE_CompCamera* camera = App->renderer3d->CurrentCamera();
 	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
 	{
 		const MouseData* mouse = App->input->GetMouse();
@@ -303,22 +291,22 @@ void ModuleEditor::UpdateCamera()
 				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
 			{
 				camera->Orbit(
-					CAM_SENSITIVITY * -mouse->mouse_x_motion,
-					CAM_SENSITIVITY * mouse->mouse_y_motion,
+					cam_sensitivity * -mouse->mouse_x_motion,
+					cam_sensitivity * mouse->mouse_y_motion,
 					App->scene->GetSelected());
 			}
 		}
 		else if ((App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && App->scene->GetSelected() != nullptr)
 		{
 			// Focus
-			FocusSelected();
+			App->renderer3d->CurrentCamera()->Focus(App->scene->GetSelected());
 		}
 		else
 		{
 			if (mouse->GetButton(3) == KEY_REPEAT)
 			{
 				// Camera Speed
-				float cameraSpeed = CAM_SPEED * App->time->GetDeltaTime();
+				float cameraSpeed = cam_speed * App->time->GetDeltaTime();
 				if (App->input->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT))
 					cameraSpeed *= 2.0f;
 
@@ -340,8 +328,8 @@ void ModuleEditor::UpdateCamera()
 				if (mouse->mouse_x_motion != 0 || mouse->mouse_y_motion != 0)
 				{
 					camera->LocalRotate(
-						CAM_SENSITIVITY * -mouse->mouse_x_motion,
-						CAM_SENSITIVITY * mouse->mouse_y_motion);
+						cam_sensitivity * -mouse->mouse_x_motion,
+						cam_sensitivity * mouse->mouse_y_motion);
 				}
 			}
 
@@ -349,7 +337,5 @@ void ModuleEditor::UpdateCamera()
 			if (mouse->mouse_wheel_motion != 0)
 				camera->SetVerticalFOV(camera->GetVFOVDegrees() - mouse->mouse_wheel_motion);
 		}
-
-		camera->Update();
 	}
 }

@@ -12,6 +12,7 @@
 #include "ModuleInput.h"
 #include "FileSystem.h"
 #include "RE_CompCamera.h"
+#include "RE_CompTransform.h"
 #include "RE_Mesh.h"
 #include "ModuleScene.h"
 
@@ -66,6 +67,13 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		}
 	}
 
+	if (ret)
+	{
+		// Editor camera
+		editor_camera = new RE_CompCamera();
+		editor_camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
+	}
+
 	return ret;
 }
 
@@ -74,12 +82,6 @@ update_status ModuleRenderer3D::PreUpdate()
 	OPTICK_CATEGORY("PreUpdate Renderer3D", Optick::Category::GameLogic);
 
 	update_status ret = UPDATE_CONTINUE;
-
-	// Reset projection & view
-	glMatrixMode(GL_PROJECTION); 
-	glLoadMatrixf(App->editor->GetCamera()->GetProjectionPtr());
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 
 	//Set background with a clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -93,6 +95,14 @@ update_status ModuleRenderer3D::PostUpdate()
 	OPTICK_CATEGORY("PostUpdate Renderer3D", Optick::Category::GameLogic);
 
 	update_status ret = UPDATE_CONTINUE;
+
+	editor_camera->Update();
+
+	// Reset projection & view
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(CurrentCamera()->GetProjectionPtr());
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 	// Draw Scene
 	if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -112,6 +122,8 @@ bool ModuleRenderer3D::CleanUp()
 {
 	//Delete context
 	SDL_GL_DeleteContext(mainContext);
+
+	DEL(editor_camera);
 
 	return true;
 }
@@ -187,37 +199,37 @@ bool ModuleRenderer3D::Save(JSONNode * node) const
 	return ret;
 }
 
-void ModuleRenderer3D::SetVSync(const bool enable)
+void ModuleRenderer3D::SetVSync(bool enable)
 {
 	SDL_GL_SetSwapInterval((vsync = enable) ? 1 : 0);
 }
 
-void ModuleRenderer3D::SetDepthTest(const bool enable)
+void ModuleRenderer3D::SetDepthTest(bool enable)
 {
 	(cullface = enable) ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 }
 
-void ModuleRenderer3D::SetFaceCulling(const bool enable)
+void ModuleRenderer3D::SetFaceCulling(bool enable)
 {
 	(depthtest = enable) ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
 }
 
-void ModuleRenderer3D::SetLighting(const bool enable)
+void ModuleRenderer3D::SetLighting(bool enable)
 {
 	(lighting = enable) ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
 }
 
-void ModuleRenderer3D::SetTexture2D(const bool enable)
+void ModuleRenderer3D::SetTexture2D(bool enable)
 {
 	(texture2d = enable) ? glEnable(GL_TEXTURE_2D) : glDisable(GL_TEXTURE_2D);
 }
 
-void ModuleRenderer3D::SetColorMaterial(const bool enable)
+void ModuleRenderer3D::SetColorMaterial(bool enable)
 {
 	(color_material = enable) ? glEnable(GL_COLOR_MATERIAL) : glDisable(GL_COLOR_MATERIAL);
 }
 
-void ModuleRenderer3D::SetWireframe(const bool enable)
+void ModuleRenderer3D::SetWireframe(bool enable)
 {
 	wireframe = enable;
 }
@@ -225,6 +237,24 @@ void ModuleRenderer3D::SetWireframe(const bool enable)
 bool ModuleRenderer3D::GetLighting() const
 {
 	return lighting;
+}
+
+RE_CompCamera * ModuleRenderer3D::CurrentCamera() const
+{
+	return (App->GetState() == GS_STOP ? editor_camera : main_camera);
+}
+
+void ModuleRenderer3D::ResetAspectRatio(float width, float height)
+{
+	glViewport(0, 0, width, height);
+	editor_camera->ResetAspectRatio(width, height);
+	if (main_camera != nullptr)
+		main_camera->ResetAspectRatio(width, height);
+}
+
+bool ModuleRenderer3D::HasMainCamera() const
+{
+	return main_camera != nullptr;
 }
 
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
@@ -242,7 +272,7 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	model.InverseTranspose();
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((App->editor->GetCamera()->GetView() * model).ptr());
+	glLoadMatrixf((CurrentCamera()->GetView() * model).ptr());
 
 	glBegin(GL_TRIANGLES);
 	glVertex3f(-1.0f, -1.0f, -1.0f);
@@ -289,13 +319,7 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	glEnd();
 }
 
-void ModuleRenderer3D::ResetAspectRatio()
-{
-	glViewport(0, 0, App->window->GetWidth(), App->window->GetHeight());
-	//camera->ResetFov();
-}
-
-void * ModuleRenderer3D::GetContext() const
+void * ModuleRenderer3D::GetWindowContext() const
 {
 	return mainContext;
 }

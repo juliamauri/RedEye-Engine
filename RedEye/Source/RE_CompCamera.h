@@ -50,7 +50,7 @@ public:
 	void SetVerticalFOV(float vertical_fov_degrees);
 
 	// Call this function if window size changed.
-	void ResetAspectRatio();
+	void ResetAspectRatio(float width, float height);
 
 	math::float4x4 GetView() const;
 	float* GetViewPtr() const;
@@ -64,7 +64,7 @@ public:
 	void LocalRotate(float dx, float dy);
 	void LocalMove(Dir dir, float speed);
 	void Orbit(float dx, float dy, RE_GameObject* focus);
-	void Focus(RE_GameObject* focus, float min_dist);
+	void Focus(RE_GameObject* focus, float min_dist = 3.0f);
 
 	// local camera Axis
 	math::vec GetRight() const;

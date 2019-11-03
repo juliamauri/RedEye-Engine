@@ -3,7 +3,6 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleInput.h"
-#include "ModuleEditor.h"
 
 #include "EditorWindows.h"
 #include "FileSystem.h"
@@ -124,7 +123,7 @@ bool ModuleScene::Start()
 	// FOCUS CAMERA
 	if (!root->GetChilds().empty()) {
 		App->scene->SetSelected(root->GetChilds().begin()._Ptr->_Myval);
-		App->editor->FocusSelected();
+		App->renderer3d->CurrentCamera()->Focus(selected);
 	}
 
 	// Quadtree
@@ -251,7 +250,7 @@ void ModuleScene::DrawScene()
 			App->renderer3d->SetLighting(false);
 
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf((App->editor->GetCamera()->GetView()).ptr());
+		glLoadMatrixf((App->renderer3d->CurrentCamera()->GetView()).ptr());
 		glBegin(GL_LINES);
 
 		if (draw_all_aabb)
@@ -282,8 +281,8 @@ void ModuleScene::DrawScene()
 
 	// Load Shader Uniforms
 	ShaderManager::use(sceneShader);
-	ShaderManager::setFloat4x4(sceneShader, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(sceneShader, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	ShaderManager::setFloat4x4(sceneShader, "view", App->renderer3d->CurrentCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(sceneShader, "projection", App->renderer3d->CurrentCamera()->GetProjectionPtr());
 
 	/*/ Frustum Culling
 	std::vector<RE_GameObject*> objects;
@@ -296,8 +295,8 @@ void ModuleScene::DrawScene()
 	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
 
 	ShaderManager::use(skyboxShader);
-	ShaderManager::setFloat4x4(skyboxShader, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(skyboxShader, "projection", App->editor->GetCamera()->GetProjectionPtr());
+	ShaderManager::setFloat4x4(skyboxShader, "view", App->renderer3d->CurrentCamera()->GetViewPtr());
+	ShaderManager::setFloat4x4(skyboxShader, "projection", App->renderer3d->CurrentCamera()->GetProjectionPtr());
 	ShaderManager::setInt(skyboxShader, "skybox", 0);
 	// draw skybox as last
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
@@ -334,7 +333,7 @@ void ModuleScene::SetSelected(RE_GameObject * select)
 	selected = (select != nullptr) ? select : root;
 
 	if (focus_on_select)
-		App->editor->FocusSelected();
+		App->renderer3d->CurrentCamera()->Focus(selected);
 }
 
 RE_GameObject * ModuleScene::GetSelected() const
@@ -350,7 +349,7 @@ void ModuleScene::RayCastSelect(math::Ray & ray)
 	{
 		float closest_distance = -1.f;
 		RE_GameObject* new_selection = nullptr;
-		math::float4 camera_pos = math::float4(App->editor->GetCamera()->GetTransform()->GetGlobalPosition(), 0.f);
+		math::float4 camera_pos = math::float4(App->renderer3d->CurrentCamera()->GetTransform()->GetGlobalPosition(), 0.f);
 
 		for (auto object : objects)
 		{
@@ -439,8 +438,8 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 		root->ResetBoundingBoxFromChilds();
 		aabb_need_reset = false;
 		// FOCUS CAMERA ON DROPPED GEOMETRY
-		App->scene->SetSelected(toAdd);
-		App->editor->FocusSelected();
+		SetSelected(toAdd);
+		App->renderer3d->CurrentCamera()->Focus(selected);
 	}
 	else
 		LOG_ERROR("Error to load dropped fbx");

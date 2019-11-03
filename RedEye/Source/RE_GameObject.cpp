@@ -11,7 +11,7 @@
 #include "RE_CompCamera.h"
 #include "RE_CompParticleEmiter.h"
 #include "ShaderManager.h"
-#include "ModuleEditor.h"
+#include "ModuleRenderer3D.h"
 #include "OutputLog.h"
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
@@ -488,11 +488,8 @@ void RE_GameObject::DrawAABB(math::vec color)
 {
 	ShaderManager::use(0);
 
-	math::float4x4 model = transform->GetMatrixModel();
-	RE_CompCamera* camera = App->editor->GetCamera();
-
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((model * camera->GetView()).ptr());
+	glLoadMatrixf((transform->GetMatrixModel() * App->renderer3d->CurrentCamera()->GetView()).ptr());
 
 	glColor3f(color.x, color.y, color.z);
 	glBegin(GL_LINES);
@@ -553,7 +550,7 @@ void RE_GameObject::AddToBoundingBox(math::AABB box)
 void RE_GameObject::ResetBoundingBoxFromChilds()
 {
 	// Local Bounding Box
-	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::one * 0.1f);
 
 	for (RE_Component* comp : components)
 	{
@@ -581,14 +578,6 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 		{
 			// Update child AABB
 			(*child)->ResetBoundingBoxFromChilds();
-
-			/*math::float4x4 trs = (*child)->transform->GetLocalMatrixModel();
-			math::AABB child_aabb = (*child)->GetLocalBoundingBox();
-
-			child_aabb.SetFromCenterAndSize(
-				trs.Row3(3) + trs.TransformPos(child_aabb.CenterPoint()),
-				trs.TransformPos(child_aabb.Size()));*/
-
 
 			math::AABB child_aabb = (*child)->GetLocalBoundingBox();
 			child_aabb.TransformAsAABB((*child)->transform->GetLocalMatrixModel().Transposed());

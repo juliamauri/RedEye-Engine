@@ -5,7 +5,7 @@
 #include "FileSystem.h"
 #include "RE_CompTransform.h"
 #include "ModuleWindow.h"
-#include "ModuleEditor.h"
+#include "ModuleRenderer3D.h"
 #include "OutputLog.h"
 #include "ShaderManager.h"
 
@@ -128,7 +128,7 @@ void RE_CompCamera::Draw()
 		ShaderManager::use(0);
 
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf((transform->GetMatrixModel() * App->editor->GetCamera()->GetView()).ptr());
+		glLoadMatrixf((transform->GetMatrixModel() * App->renderer3d->CurrentCamera()->GetView()).ptr());
 
 		glColor3f(0.f, 255.f, 165.f);
 		glLineWidth(3.0f);
@@ -253,12 +253,12 @@ void RE_CompCamera::SetVerticalFOV(float vertical_fov_degrees)
 	}
 }
 
-void RE_CompCamera::ResetAspectRatio()
+void RE_CompCamera::ResetAspectRatio(float width, float height)
 {
 	if (isPerspective)
-		frustum.SetVerticalFovAndAspectRatio(v_fov_rads, App->window->GetAspectRatio());
+		frustum.SetVerticalFovAndAspectRatio(v_fov_rads, width / height);
 	else
-		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
+		frustum.SetOrthographic(width, height);
 
 	need_recalculation = true;
 }

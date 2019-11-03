@@ -7,10 +7,9 @@
 class ShaderManager;
 class Texture2DManager;
 class Texture2D;
-class RE_Camera;
+class RE_CompCamera;
 class RE_CompMesh;
 class RE_Mesh;
-
 
 class ModuleRenderer3D : public Module 
 {
@@ -29,33 +28,40 @@ public:
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
 
-	void SetVSync(const bool enable);
-	void SetDepthTest(const bool enable);
-	void SetFaceCulling(const bool enable);
-	void SetLighting(const bool enable);
-	void SetTexture2D(const bool enable);
-	void SetColorMaterial(const bool enable);
-	void SetWireframe(const bool enable);
-
+	// Editor Values
+	void SetVSync(bool enable);
+	void SetDepthTest(bool enable);
+	void SetFaceCulling(bool enable);
+	void SetLighting(bool enable);
+	void SetTexture2D(bool enable);
+	void SetColorMaterial(bool enable);
+	void SetWireframe(bool enable);
 	bool GetLighting() const;
 
-	//Shaders - A vector in GLSL contains 4 component
+	// Camera
+	RE_CompCamera * CurrentCamera() const;
+	void ResetAspectRatio(float width, float height);
+	bool HasMainCamera() const;
+
+	// Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
 
-	//Draws
+	// Draws
 	void DirectDrawCube(math::vec position, math::vec color);
 
-	//Renderer Test Window
-	void ResetAspectRatio();
-
-	//context getter
-	void* GetContext()const;
+	// Context
+	void* GetWindowContext()const;
 
 private:
 
+	// Context
 	void* mainContext;
-	unsigned int renderedTexture;
+	
+	// Cameras
+	RE_CompCamera* editor_camera = nullptr;
+	RE_CompCamera* main_camera = nullptr;
 
+	// Configuration
 	bool vsync = false;
 	bool cullface = false;
 	bool depthtest = true;
@@ -63,8 +69,6 @@ private:
 	bool texture2d = false;
 	bool color_material = false;
 	bool wireframe = false;
-
-	//float timeValue = 0, timerotateValue = 0, timeCuberotateValue = 0, timeLight = 0;
 };
 
 #endif // !__MODULERENDER3D_H__
