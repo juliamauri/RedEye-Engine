@@ -415,29 +415,6 @@ void TexturesWindow::Draw(bool secondary)
 	ImGui::End();
 }
 
-EditorSettingsWindow::EditorSettingsWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
-
-void EditorSettingsWindow::Draw(bool secondary)
-{
-	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
-	{
-		if (secondary) {
-			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-		}
-
-		RE_CompCamera* cam = App->editor->GetCamera();
-		cam->DrawProperties();
-		cam->GetTransform()->DrawProperties();
-
-		if (secondary) {
-			ImGui::PopItemFlag();
-			ImGui::PopStyleVar();
-		}
-	}
-	ImGui::End();
-}
-
 PlayPauseWindow::PlayPauseWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
 
 void PlayPauseWindow::Draw(bool secondary)

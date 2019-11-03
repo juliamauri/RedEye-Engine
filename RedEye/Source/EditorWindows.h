@@ -139,16 +139,6 @@ private:
 	void Draw(bool secondary = false) override;
 };
 
-class EditorSettingsWindow : public EditorWindow
-{
-public:
-	EditorSettingsWindow(const char* name = "Editor Settings", bool start_active = false);
-
-private:
-
-	void Draw(bool secondary = false) override;
-};
-
 class PlayPauseWindow : public EditorWindow
 {
 public:
