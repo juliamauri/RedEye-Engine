@@ -50,6 +50,8 @@ public:
 	// Static
 	bool IsStatic() const;
 	void SetStatic(bool value);
+	void IterativeSetActive(bool val);
+	void IterativeSetStatic(bool val);
 
 	// Editor Controls
 	void OnPlay();

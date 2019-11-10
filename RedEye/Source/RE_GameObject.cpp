@@ -16,6 +16,7 @@
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
 #include "ImGui\imgui.h"
+#include <stack>
 
 RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, bool start_active, bool isStatic)
 	: name(name), parent(p), active(start_active), isStatic(isStatic)
@@ -44,6 +45,8 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 
 	local_bounding_box = go.local_bounding_box;
 	global_bounding_box = go.global_bounding_box;
+
+	RE_CompCamera* comp_camera;
 	
 	for (RE_Component* cmpGO : go.components)
 	{
@@ -53,7 +56,9 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 			components.push_back(transform = new RE_CompTransform(*(RE_CompTransform*)cmpGO, this));
 			break;
 		case C_CAMERA:
-			components.push_back(new RE_CompCamera(*(RE_CompCamera*)cmpGO, this));
+			comp_camera = new RE_CompCamera(*(RE_CompCamera*)cmpGO, this);
+			App->renderer3d->AddMainCamera(comp_camera);
+			components.push_back(comp_camera);
 			break;
 		case C_MESH:
 			components.push_back(new RE_CompMesh(*(RE_CompMesh*)cmpGO, this));
@@ -219,6 +224,44 @@ void RE_GameObject::SetStatic(bool value)
 	isStatic = value;
 }
 
+void RE_GameObject::IterativeSetActive(bool val)
+{
+	bool tmp = active;
+	std::stack<RE_GameObject*> gos;
+	gos.push(this);
+
+	while (!gos.empty())
+	{
+		RE_GameObject * go = gos.top();
+		go->active = val;
+		gos.pop();
+
+		for (auto child : go->childs)
+			gos.push(child);
+	}
+
+	active = tmp;
+}
+
+void RE_GameObject::IterativeSetStatic(bool val)
+{
+	bool tmp = isStatic;
+	std::stack<RE_GameObject*> gos;
+	gos.push(this);
+
+	while (!gos.empty())
+	{
+		RE_GameObject * go = gos.top();
+		go->isStatic = val;
+		gos.pop();
+
+		for (auto child : go->childs)
+			gos.push(child);
+	}
+
+	isStatic = tmp;
+}
+
 void RE_GameObject::OnPlay()
 {
 	for (auto component : components) component->OnPlay();
@@ -237,10 +280,19 @@ void RE_GameObject::OnStop()
 	for (auto child : childs) child->OnStop();
 }
 
+RE_CompCamera * RE_GameObject::AddCompCamera()
+{
+	RE_CompCamera* ret = new RE_CompCamera();
+	components.push_back(ret->AsComponent());
+	App->renderer3d->AddMainCamera(ret);
+	return ret;
+}
+
 RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float h_fov_rads, float v_fov_rads, float h_fov_degrees, float v_fov_degrees, math::vec position, math::vec rotation, math::vec scale)
 {
 	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, h_fov_rads, v_fov_rads, h_fov_degrees, v_fov_degrees, position, rotation, scale);
 	components.push_back((RE_Component*)comp_camera);
+	App->renderer3d->AddMainCamera(comp_camera);
 	return comp_camera;
 }
 
@@ -272,7 +324,9 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 	}
 	else if (ComponentType(type) == C_CAMERA)
 	{
-		ret = (RE_Component*)new RE_CompCamera(this);
+		RE_CompCamera* comp_camera = new RE_CompCamera(this);
+		App->renderer3d->AddMainCamera(comp_camera);
+		ret = (RE_Component*)comp_camera;
 	}
 	else if (ComponentType(type) == C_PARTICLEEMITER)
 	{
@@ -385,14 +439,6 @@ void RE_GameObject::AddCompMesh(RE_CompMesh * comp_mesh)
 	components.push_back((RE_Component*)comp_mesh);
 }
 
-
-RE_CompCamera * RE_GameObject::AddCompCamera()
-{
-	RE_CompCamera* ret = new RE_CompCamera();
-	components.push_back(ret->AsComponent());
-	return ret;
-}
-
 RE_Component* RE_GameObject::GetComponent(const ushortint type) const
 {
 	RE_Component* ret = nullptr;
@@ -440,7 +486,7 @@ RE_CompCamera * RE_GameObject::GetCamera() const
 
 	for (auto component : components)
 	{
-		if (component->GetType() == ComponentType::C_MESH)
+		if (component->GetType() == ComponentType::C_CAMERA)
 		{
 			ret = (RE_CompCamera*)component;
 			break;
@@ -469,7 +515,9 @@ RE_GameObject * RE_GameObject::GetGoFromUUID(UUID parent)
 
 void RE_GameObject::TransformModified()
 {
-	App->scene->SceneModified();
+	if (isStatic)
+		App->scene->StaticTransformed();
+
 	ResetGlobalBoundingBox();
 
 	for (auto component : components)
@@ -612,25 +660,34 @@ math::AABB RE_GameObject::GetGlobalBoundingBox() const
 
 void RE_GameObject::DrawProperties()
 {
-	/*if (ImGui::BeginMenu("Options"))
+	if (ImGui::BeginMenu("Child Options"))
 	{
 		// if (ImGui::MenuItem("Save as prefab")) {}
 
+		if (ImGui::MenuItem("Activate Childs"))
+			IterativeSetActive(true);
+		if (ImGui::MenuItem("Deactivate Childs"))
+			IterativeSetActive(false);
+
+		if (ImGui::MenuItem("Childs to Static"))
+			IterativeSetStatic(true);
+		if (ImGui::MenuItem("Childs to non-Static"))
+			IterativeSetStatic(false);
+
 		ImGui::EndMenu();
-	}*/
+	}
 
 	char name_holder[64];
 	sprintf_s(name_holder, 64, "%s", name.c_str());
 	if (ImGui::InputText("Name", name_holder, 64))
 		name = name_holder;
 
-	if (ImGui::Checkbox("Active", &active))
-		active != active;
+	ImGui::Checkbox("Active", &active);
 
 	ImGui::SameLine();
 
 	if (ImGui::Checkbox("Static", &isStatic))
-		isStatic != isStatic;
+		App->scene->StaticTransformed();
 
 	if (ImGui::TreeNode("Local Bounding Box"))
 	{
