@@ -121,30 +121,6 @@ void RE_CompCamera::Update()
 		RecalculateMatrixes();
 }
 
-void RE_CompCamera::Draw()
-{
-	if (draw_frustum)
-	{
-		ShaderManager::use(0);
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf((transform->GetMatrixModel() * App->renderer3d->CurrentCamera()->GetView()).ptr());
-
-		glColor3f(0.f, 255.f, 165.f);
-		glLineWidth(3.0f);
-		glBegin(GL_LINES);
-
-		for (uint i = 0; i < 12; i++)
-		{
-			glVertex3f(frustum.Edge(i).a.x, frustum.Edge(i).a.y, frustum.Edge(i).a.z);
-			glVertex3f(frustum.Edge(i).b.x, frustum.Edge(i).b.y, frustum.Edge(i).b.z);
-		}
-
-		glEnd();
-		glLineWidth(1.0f);
-	}
-}
-
 void RE_CompCamera::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Camera"))
@@ -157,6 +133,18 @@ void RE_CompCamera::DrawProperties()
 
 		float f[3] = { front.x, front.y, front.z };
 		ImGui::DragFloat3("Front", f, 0.1f, -10, 10, "%.2f");
+	}
+}
+
+void RE_CompCamera::DrawFrustum() const
+{
+	if (draw_frustum)
+	{
+		for (uint i = 0; i < 12; i++)
+		{
+			glVertex3f(frustum.Edge(i).a.x, frustum.Edge(i).a.y, frustum.Edge(i).a.z);
+			glVertex3f(frustum.Edge(i).b.x, frustum.Edge(i).b.y, frustum.Edge(i).b.z);
+		}
 	}
 }
 

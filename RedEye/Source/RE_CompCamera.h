@@ -35,8 +35,8 @@ public:
 	~RE_CompCamera();
 	
 	void Update() override;
-	void Draw() override;
 	void DrawProperties() override;
+	void DrawFrustum() const;
 
 	RE_CompTransform* GetTransform() const;
 	void OnTransformModified() override;
@@ -92,8 +92,6 @@ private:
 
 	// Camera frustum
 	math::Frustum frustum;
-
-	// Values from frustum
 	bool isPerspective = true;
 
 	float near_plane = 0.0f;
