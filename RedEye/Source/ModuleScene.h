@@ -30,6 +30,7 @@ public:
 
 	void CreateCube();
 	void CreateSphere();
+	void CreateCamera();
 
 	void DrawEditor() override;
 	void DrawScene();
@@ -43,9 +44,11 @@ public:
 	void Serialize();
 	void LoadFBXOnScene(const char* fbxPath);
 	void LoadTextureOnSelectedGO(const char* texturePath);
-	void SceneModified();
+	
+	void StaticTransformed();
+	std::list<RE_CompCamera*> GetCameras();
 
-	uint GetShaderScene()const;
+	uint GetShaderScene() const;
 
 	bool DrawingSelAABB() const;
 
@@ -57,7 +60,7 @@ private:
 	RE_GameObject* selected = nullptr;
 
 	// Bounding Boxes
-	bool aabb_need_reset = false;
+	bool static_gos_modified = false;
 	unsigned int aabb_reset_time = 0;
 
 	bool draw_all_aabb = false;
@@ -70,6 +73,10 @@ private:
 	QTree quad_tree;
 	bool draw_quad_tree = true;
 	math::vec quad_tree_color;
+
+	// Camera Frustums
+	bool draw_cameras = true;
+	math::vec frustum_color;
 
 	// Config
 	bool focus_on_select = false;

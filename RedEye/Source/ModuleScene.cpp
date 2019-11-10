@@ -31,6 +31,7 @@
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 #include <string>
+#include <stack>
 
 #include "SDL2\include\SDL.h"
 
@@ -42,6 +43,7 @@ ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, st
 	all_aabb_color = math::vec(0.f, 1.f, 0.f);
 	sel_aabb_color = math::vec(1.f, 1.f, 1.f);
 	quad_tree_color = math::vec(1.f, 1.f, 0.f);
+	frustum_color = math::vec(0.f, 1.f, 1.f);
 }
 
 ModuleScene::~ModuleScene()
@@ -107,18 +109,24 @@ bool ModuleScene::Start()
 		}
 	}
 
+	// Error Handling
 	App->handlerrors->StopHandling();
-
 	if (App->handlerrors->AnyErrorHandled()) {
 		App->handlerrors->ActivatePopUp();
 	}
 
+	// Grid Plane
 	root->AddComponent(C_PLANE);
+
+	// Render Camera Management
+	App->renderer3d->ResetSceneCameras();
+	if (!App->renderer3d->HasMainCamera())
+		CreateCamera();
 
 	// Setup AABB
 	root->TransformModified();
 	root->ResetBoundingBoxFromChilds();
-	aabb_need_reset = false;
+	static_gos_modified = false;
 
 	// FOCUS CAMERA
 	if (!root->GetChilds().empty()) {
@@ -181,7 +189,8 @@ void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
 
 void ModuleScene::DuplicateSelectedObject()
 {
-	if(selected != nullptr) selected->GetParent()->AddChild(new RE_GameObject(*selected));
+	if(selected != nullptr)
+		selected->GetParent()->AddChild(new RE_GameObject(*selected));
 }
 
 void ModuleScene::CreateCube()
@@ -196,25 +205,30 @@ void ModuleScene::CreateSphere()
 	sphere_go->AddComponent(App->primitives->CreateSphere(sphere_go));
 }
 
+void ModuleScene::CreateCamera()
+{
+	RE_GameObject* cam_go = AddGO("Camera", root);
+	cam_go->AddCompCamera();
+}
+
 void ModuleScene::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
 	{
 		// AABB Controls
 		ImGui::Text("Last AABB Reset took: %f", aabb_reset_time);
-		if (aabb_need_reset && ImGui::Button("Reset All AABB"))
+		if (static_gos_modified && ImGui::Button("Reset All AABB"))
 		{
 			root->ResetBoundingBoxFromChilds();
-			aabb_need_reset = false;
+			static_gos_modified = false;
 		}
 
 		// AABB All
 		ImGui::Checkbox("Draw All AABB", &draw_all_aabb);
 		if (draw_all_aabb)
 		{
-			// Color 
 			float p[3] = { all_aabb_color.x, all_aabb_color.y, all_aabb_color.z };
-			if (ImGui::DragFloat3("Color All", p, 0.1f, 0.f, 255.f, "%.2f"))
+			if (ImGui::ColorEdit3("Color All", p))
 				all_aabb_color = math::vec(p[0], p[1], p[2]);
 		}
 
@@ -222,14 +236,21 @@ void ModuleScene::DrawEditor()
 		ImGui::Checkbox("Draw Selected AABB", &draw_selected_aabb);
 		if (draw_selected_aabb)
 		{
-			// Color 
 			float p[3] = { sel_aabb_color.x, sel_aabb_color.y, sel_aabb_color.z };
-			if (ImGui::DragFloat3("Color Selected", p, 0.1f, 0.f, 255.f, "%.2f"))
+			if (ImGui::ColorEdit3("Color Selected", p))
 				sel_aabb_color = math::vec(p[0], p[1], p[2]);
 		}
 
-		ImGui::Checkbox("Focus on Select", &focus_on_select);
+		// Camera Fustrums
+		ImGui::Checkbox("Draw Camera Fustrums", &draw_cameras);
+		if (draw_cameras)
+		{
+			float p[3] = { frustum_color.x, frustum_color.y, frustum_color.z };
+			if (ImGui::ColorEdit3("Color Fustrum", p))
+				frustum_color = math::vec(p[0], p[1], p[2]);
+		}
 
+		ImGui::Checkbox("Focus on Select", &focus_on_select);
 		ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
 	}
 }
@@ -269,6 +290,13 @@ void ModuleScene::DrawScene()
 		{
 			glColor3f(quad_tree_color.x, quad_tree_color.y, quad_tree_color.z);
 			quad_tree.Draw();
+		}
+
+		if (draw_cameras)
+		{
+			glColor3f(frustum_color.x, frustum_color.y, frustum_color.z);
+			for(auto cam : App->renderer3d->GetCameras())
+				cam->DrawFrustum();
 		}
 
 		glEnd();
@@ -436,7 +464,7 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 
 		root->TransformModified();
 		root->ResetBoundingBoxFromChilds();
-		aabb_need_reset = false;
+		static_gos_modified = false;
 		// FOCUS CAMERA ON DROPPED GEOMETRY
 		SetSelected(toAdd);
 		App->renderer3d->CurrentCamera()->Focus(selected);
@@ -535,9 +563,32 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 	}
 }
 
-void ModuleScene::SceneModified()
+void ModuleScene::StaticTransformed()
 {
-	aabb_need_reset = true;
+	static_gos_modified = true;
+}
+
+std::list<RE_CompCamera*> ModuleScene::GetCameras()
+{
+	std::list<RE_CompCamera*> ret;
+	std::stack<RE_GameObject*> gos;
+	gos.push(root);
+
+	while (!gos.empty())
+	{
+		RE_GameObject * go = gos.top();
+		RE_CompCamera * cam = go->GetCamera();
+
+		if (cam != nullptr)
+			ret.push_back(cam);
+
+		gos.pop();
+
+		for (auto child : go->GetChilds())
+			gos.push(child);
+	}
+
+	return ret;
 }
 
 uint ModuleScene::GetShaderScene() const

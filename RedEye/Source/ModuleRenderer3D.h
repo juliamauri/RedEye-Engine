@@ -3,6 +3,7 @@
 
 #include "RE_Math.h"
 #include "Module.h"
+#include <list>
 
 class ShaderManager;
 class Texture2DManager;
@@ -42,6 +43,9 @@ public:
 	RE_CompCamera * CurrentCamera() const;
 	void ResetAspectRatio(float width, float height);
 	bool HasMainCamera() const;
+	void AddMainCamera(RE_CompCamera* cam);
+	const std::list<RE_CompCamera*>& GetCameras() const;
+	void ResetSceneCameras();
 
 	// Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
@@ -60,6 +64,7 @@ private:
 	// Cameras
 	RE_CompCamera* editor_camera = nullptr;
 	RE_CompCamera* main_camera = nullptr;
+	std::list<RE_CompCamera*> scene_cameras;
 
 	// Configuration
 	bool vsync = false;

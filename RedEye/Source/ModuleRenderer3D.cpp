@@ -83,7 +83,7 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	update_status ret = UPDATE_CONTINUE;
 
-	//Set background with a clear color
+	// Reset background with a clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -255,6 +255,38 @@ void ModuleRenderer3D::ResetAspectRatio(float width, float height)
 bool ModuleRenderer3D::HasMainCamera() const
 {
 	return main_camera != nullptr;
+}
+
+void ModuleRenderer3D::AddMainCamera(RE_CompCamera* cam)
+{
+	if (scene_cameras.empty())
+		main_camera = cam;
+
+	scene_cameras.push_back(cam);
+}
+
+const std::list<RE_CompCamera*>& ModuleRenderer3D::GetCameras() const
+{
+	return scene_cameras;
+}
+
+void ModuleRenderer3D::ResetSceneCameras()
+{
+	main_camera = nullptr;
+	scene_cameras.clear();
+	scene_cameras = App->scene->GetCameras();
+	if (!scene_cameras.empty())
+	{
+		for (std::list<RE_CompCamera*>::iterator cam = scene_cameras.begin();
+			cam != scene_cameras.end(); cam++)
+		{
+			if (main_camera == nullptr)
+				main_camera = (*cam);
+
+			/*if ((*cam)->isMain)
+			else: more than 1 main cameras*/
+		}
+	}
 }
 
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
