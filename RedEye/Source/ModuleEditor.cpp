@@ -107,6 +107,9 @@ update_status ModuleEditor::Update()
 				if (ImGui::MenuItem("Sphere"))
 					App->scene->CreateSphere();
 
+				if (ImGui::MenuItem("Camera"))
+					App->scene->CreateCamera();
+
 				ImGui::EndMenu();
 			}
 
@@ -186,7 +189,8 @@ update_status ModuleEditor::Update()
 		show_all = !show_all;
 
 	// CAMERA CONTROLS
-	UpdateCamera();
+	if (App->GetState() == GS_STOP)
+		UpdateCamera();
 
 	return UPDATE_CONTINUE;
 }

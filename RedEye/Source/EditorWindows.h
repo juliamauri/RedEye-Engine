@@ -142,7 +142,7 @@ private:
 class PlayPauseWindow : public EditorWindow
 {
 public:
-	PlayPauseWindow(const char* name = "Play Controls", bool start_active = false);
+	PlayPauseWindow(const char* name = "Play Controls", bool start_active = true);
 
 private:
 

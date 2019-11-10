@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
+#include "ModuleRenderer3d.h"
 #include "TimeManager.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
@@ -428,15 +429,18 @@ void PlayPauseWindow::Draw(bool secondary)
 
 		float seconds = App->time->GetGameTimer();
 		if (ImGui::Button(App->GetState() == GS_PLAY ? "Restart" : "Play"))
-			App->ScenePlay();
+		{
+			// check scene ready
+			if (App->renderer3d->HasMainCamera())
+				App->ScenePlay();
+			// else { report problems }
+		}
 		ImGui::SameLine();
-		if (ImGui::Button("Pause"))
-			App->ScenePause();
+		if (ImGui::Button("Pause")) App->ScenePause();
 		ImGui::SameLine();
-		if (ImGui::Button("Stop"))
-			App->SceneStop();
+		if (ImGui::Button("Stop")) App->SceneStop();
 		ImGui::SameLine();
-		ImGui::Text("%f", seconds);
+		ImGui::Text("%.2f", seconds);
 
 		if (secondary) {
 			ImGui::PopItemFlag();
