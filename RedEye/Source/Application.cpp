@@ -343,36 +343,32 @@ void Application::RecieveEvent(const Event& e)
 	{
 	case PLAY: 
 	{
-		state = GS_PLAY;
-		time->StartGameTimer();
-
 		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive() == true)
 				(*it)->OnPlay();
-		
+
+		time->StartGameTimer();
+		state = GS_PLAY;
 		break;
 	}
 	case PAUSE:
 	{
-		state = GS_PAUSE;
-		time->PauseGameTimer();
-
 		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive() == true)
 				(*it)->OnPause();
 
+		time->PauseGameTimer();
+		state = GS_PAUSE;
 		break;
 	}
 	case STOP:
 	{
-		state = GS_STOP;
-		time->StopGameTimer();
-
 		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive() == true)
 				(*it)->OnStop();
 
-		// load saved scene
+		time->StopGameTimer();
+		state = GS_STOP;
 		break;
 	}
 	case REQUEST_DEFAULT_CONF: want_to_load_def = true; break;
