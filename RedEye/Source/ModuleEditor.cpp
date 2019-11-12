@@ -284,7 +284,7 @@ void ModuleEditor::UpdateCamera()
 		{
 			// Mouse Pick
 			App->scene->RayCastSelect(
-				math::Ray(camera->GetFrustum().UnProjectLineSegment(
+				math::Ray(camera->GetFrustumGlobal().UnProjectLineSegment(
 				(2.f * mouse->mouse_x) / App->window->GetWidth() - 1.f,
 					1.f - (2.f * mouse->mouse_y) / App->window->GetHeight())));
 		}
@@ -339,7 +339,7 @@ void ModuleEditor::UpdateCamera()
 
 			// Zoom
 			if (mouse->mouse_wheel_motion != 0)
-				camera->SetVerticalFOV(camera->GetVFOVDegrees() - mouse->mouse_wheel_motion);
+				camera->SetFOV(camera->GetVFOVDegrees() - mouse->mouse_wheel_motion);
 		}
 	}
 }

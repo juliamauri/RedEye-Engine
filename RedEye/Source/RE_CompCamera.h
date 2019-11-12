@@ -10,23 +10,13 @@ class RE_CompTransform;
 class RE_CompCamera : public RE_Component
 {
 public:
-	//Camera initialize world origin at (0, 0, 0) and planes distance 0.1f near and 100.0f far
-	//@param toPerspective -> true = Prespective | false = Orthographic
-	//@param near and @far -> distances of planes from camera position
 	RE_CompCamera(
 		RE_GameObject* go = nullptr,
-		bool toPerspective = true, 
+		bool toPerspective = true,
 		float near_plane = 1.0f,
-		float far_plane = 5000.0f);
-
-	RE_CompCamera(
-		RE_GameObject* go,
-		bool toPerspective,
-		float near_plane,
-		float far_plane,
-		float h_fov_rads, float v_fov_rads, 
-		float h_fov_degrees, float v_fov_degrees, 
-		math::vec position, math::vec rotation, math::vec scale);
+		float far_plane = 5000.0f,
+		float v_fov = 30.f,
+		bool draw_frustum = true);
 
 	RE_CompCamera(
 		const RE_CompCamera& cmpCamera,
@@ -41,24 +31,24 @@ public:
 	RE_CompTransform* GetTransform() const;
 	void OnTransformModified() override;
 
+	math::Frustum GetFrustumLocal() const;
+	math::Frustum GetFrustumGlobal() const;
+
 	void SetPlanesDistance(float near_plane, float far_plane);
+	void SetFOV(float vertical_fov_degrees);
+	void ResetAspectRatio(float width, float height);
+	void SetPerspective();
+	void SetOrthographic();
 	void SwapCameraType();
 
-	// FOV
 	float GetVFOVDegrees() const;
 	float GetHFOVDegrees() const;
-	void SetVerticalFOV(float vertical_fov_degrees);
-
-	// Call this function if window size changed.
-	void ResetAspectRatio(float width, float height);
 
 	math::float4x4 GetView() const;
 	float* GetViewPtr() const;
 	
 	math::float4x4 GetProjection() const;
 	float* GetProjectionPtr() const;
-
-	math::Frustum GetFrustum() const;
 
 	// Camera Controls
 	void LocalRotate(float dx, float dy);
@@ -92,14 +82,13 @@ private:
 
 	// Camera frustum
 	math::Frustum frustum;
-	bool isPerspective = true;
 
 	float near_plane = 0.0f;
 	float far_plane = 0.0f;
 
+	bool isPerspective = true;
 	float h_fov_rads = 0.0f;
-	float v_fov_rads = 0.0f;
-
+	float v_fov_rads = 30.0f;
 	float h_fov_degrees = 0.0f;
 	float v_fov_degrees = 0.0f;
 
