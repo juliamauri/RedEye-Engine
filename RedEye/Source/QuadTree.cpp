@@ -99,8 +99,10 @@ bool QTreeNode::IsLeaf() const
 void QTreeNode::AddNodes()
 {
 	AABB target_box;
-	float3 target_size(box.Size() * 0.5f);
 	float3 center(box.CenterPoint());
+	float3 target_size(box.Size());
+	target_size.x *= 0.5f;
+	target_size.z *= 0.5f;
 
 	for (uint i = 0; i < 4; i++)
 	{
@@ -161,7 +163,10 @@ void QTree::Build(RE_GameObject * root_g_obj)
 
 	if (root != nullptr) DEL(root);
 
-	root = new QTreeNode(box = root_g_obj->GetGlobalBoundingBox());
+	box = root_g_obj->GetGlobalBoundingBox();
+	//box.Scale(box.CenterPoint(), 1000.f);
+
+	root = new QTreeNode(box);
 
 	RecursiveBuildFromRoot(root_g_obj);
 }
