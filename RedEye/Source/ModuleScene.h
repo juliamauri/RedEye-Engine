@@ -33,7 +33,7 @@ public:
 	void CreateCamera();
 
 	void DrawEditor() override;
-	void DrawScene();
+	void DrawScene(bool cull_scene = true);
 	void DrawHeriarchy();
 	void DrawFocusedProperties();
 

@@ -65,6 +65,7 @@ private:
 	RE_CompCamera* editor_camera = nullptr;
 	RE_CompCamera* main_camera = nullptr;
 	std::list<RE_CompCamera*> scene_cameras;
+	bool cull_scene = true;
 
 	// Configuration
 	bool vsync = false;

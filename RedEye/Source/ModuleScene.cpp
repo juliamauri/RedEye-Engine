@@ -255,14 +255,14 @@ void ModuleScene::DrawEditor()
 	}
 }
 
-void ModuleScene::DrawScene()
+void ModuleScene::DrawScene(bool cull_scene)
 {
 	OPTICK_CATEGORY("Scene Draw", Optick::Category::Rendering);
 
 	OPTICK_CATEGORY("AABB Draw", Optick::Category::Debug);
 
 	// Draw Bounding Boxes
-	if (draw_all_aabb || draw_selected_aabb || draw_quad_tree)
+	if (draw_all_aabb || draw_selected_aabb || draw_quad_tree || draw_cameras)
 	{
 		ShaderManager::use(0);
 		bool resetLight = App->renderer3d->GetLighting();
@@ -305,20 +305,28 @@ void ModuleScene::DrawScene()
 			App->renderer3d->SetLighting(true);
 	}
 
-	OPTICK_CATEGORY("Hiteracy Draw", Optick::Category::Rendering);
+	OPTICK_CATEGORY("Culling", Optick::Category::Rendering);
 
 	// Load Shader Uniforms
 	ShaderManager::use(sceneShader);
 	ShaderManager::setFloat4x4(sceneShader, "view", App->renderer3d->CurrentCamera()->GetViewPtr());
 	ShaderManager::setFloat4x4(sceneShader, "projection", App->renderer3d->CurrentCamera()->GetProjectionPtr());
 
-	/*/ Frustum Culling
-	std::vector<RE_GameObject*> objects;
-	quad_tree.CollectIntersections(objects, App->editor->GetCamera()->GetFrustum());
-	drawn_go = objects.size();
-	for (auto object : objects) object->Draw(false);*/
+	// Frustum Culling
+	if (cull_scene
+		&& selected != nullptr
+		&& selected->GetCamera() != nullptr)
+	{
+		std::vector<RE_GameObject*> objects;
+		quad_tree.CollectIntersections(objects, selected->GetCamera()->GetFrustum());
 
-	root->Draw();
+		for (auto object : objects)
+			object->Draw(false);
+	}
+	else
+	{
+		root->Draw();
+	}
 
 	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
 

@@ -106,7 +106,7 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	// Draw Scene
 	if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	if (App->scene != nullptr) App->scene->DrawScene();
+	if (App->scene != nullptr) App->scene->DrawScene(HasMainCamera());
 	
 	// Draw Editor
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
