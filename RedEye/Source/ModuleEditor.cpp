@@ -284,7 +284,7 @@ void ModuleEditor::UpdateCamera()
 		{
 			// Mouse Pick
 			App->scene->RayCastSelect(
-				math::Ray(camera->GetFrustumGlobal().UnProjectLineSegment(
+				math::Ray(camera->GetFrustum().UnProjectLineSegment(
 				(2.f * mouse->mouse_x) / App->window->GetWidth() - 1.f,
 					1.f - (2.f * mouse->mouse_y) / App->window->GetHeight())));
 		}

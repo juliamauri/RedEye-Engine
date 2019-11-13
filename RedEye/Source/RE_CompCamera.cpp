@@ -20,19 +20,18 @@ RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float n_plan
 	draw_frustum(draw_frustum)
 {
 	// Fustrum - Kind
-	frustum.SetKind(
-		math::FrustumProjectiveSpace::FrustumSpaceGL,
-		math::FrustumHandedness::FrustumRightHanded);
+	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
 
 	// Fustrum - Plane distance
 	SetPlanesDistance(n_plane, f_plane);
 
 	// Fustrum - Perspective & Aspect Ratio
 	isPerspective = toPerspective;
-	SetFOV(v_fov);
+	v_fov_rads = v_fov;
 	float width = App->window->GetWidth();
 	float height = App->window->GetHeight();
 	ResetAspectRatio(width, height);
+	SetFOV(v_fov_rads);
 
 	// Transform
 	transform = (go == nullptr) ? new RE_CompTransform() : go->GetTransform();
@@ -56,10 +55,11 @@ RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go
 
 	// Fustrum - Perspective & Aspect Ratio
 	isPerspective = cmpCamera.isPerspective;
-	SetFOV(cmpCamera.v_fov_rads);
+	v_fov_rads = cmpCamera.v_fov_rads;
 	float width = App->window->GetWidth();
 	float height = App->window->GetHeight();
 	ResetAspectRatio(width, height);
+	SetFOV(v_fov_rads);
 
 	// Transform
 	if (cmpCamera.GetGO() == nullptr && go == nullptr)
@@ -90,6 +90,8 @@ void RE_CompCamera::Update()
 			OnTransformModified();
 		}
 	}
+	else if (transform == nullptr)
+		transform = go->GetTransform();
 	
 	if (need_recalculation)
 		RecalculateMatrixes();
@@ -243,6 +245,11 @@ void RE_CompCamera::SwapCameraType()
 	need_recalculation = true;
 }
 
+math::Frustum RE_CompCamera::GetFrustum() const
+{
+	return frustum;
+}
+
 float RE_CompCamera::GetVFOVDegrees() const
 {
 	return v_fov_degrees;
@@ -271,24 +278,6 @@ math::float4x4 RE_CompCamera::GetProjection() const
 float* RE_CompCamera::GetProjectionPtr() const
 {
 	return (float*)calculated_projection.v;
-}
-
-math::Frustum RE_CompCamera::GetFrustumLocal() const
-{
-	math::Frustum ret = frustum;
-	math::float4x4 trs = transform->GetLocalMatrixModel();
-
-	ret.SetFrame(
-		trs.Row3(3),
-		trs.MulDir(front),
-		trs.MulDir(up));
-
-	return ret;
-}
-
-math::Frustum RE_CompCamera::GetFrustumGlobal() const
-{
-	return frustum;
 }
 
 void RE_CompCamera::RecalculateMatrixes()

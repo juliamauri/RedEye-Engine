@@ -31,15 +31,14 @@ public:
 	RE_CompTransform* GetTransform() const;
 	void OnTransformModified() override;
 
-	math::Frustum GetFrustumLocal() const;
-	math::Frustum GetFrustumGlobal() const;
-
 	void SetPlanesDistance(float near_plane, float far_plane);
 	void SetFOV(float vertical_fov_degrees);
 	void ResetAspectRatio(float width, float height);
 	void SetPerspective();
 	void SetOrthographic();
 	void SwapCameraType();
+
+	math::Frustum GetFrustum() const;
 
 	float GetVFOVDegrees() const;
 	float GetHFOVDegrees() const;
