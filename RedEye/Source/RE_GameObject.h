@@ -68,8 +68,7 @@ public:
 	RE_CompTransform* AddCompTransform();
 	RE_CompMesh* AddCompMesh(const char* file_path_data = nullptr, const bool dropped = false);
 	void AddCompMesh(RE_CompMesh* comp_mesh);
-	RE_CompCamera* AddCompCamera();
-	RE_CompCamera* AddCompCamera(bool toPerspective, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 30.f, bool draw_frustum = true);
+	RE_CompCamera* AddCompCamera(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 30.f, bool draw_frustum = true);
 
 	RE_CompTransform* GetTransform() const;
 	RE_CompMesh* GetMesh() const;

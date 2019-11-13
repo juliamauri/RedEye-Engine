@@ -280,14 +280,6 @@ void RE_GameObject::OnStop()
 	for (auto child : childs) child->OnStop();
 }
 
-RE_CompCamera * RE_GameObject::AddCompCamera()
-{
-	RE_CompCamera* ret = new RE_CompCamera();
-	components.push_back(ret->AsComponent());
-	App->renderer3d->AddMainCamera(ret);
-	return ret;
-}
-
 RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float v_fov_rads, bool draw_frustum)
 {
 	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, v_fov_rads, draw_frustum);
