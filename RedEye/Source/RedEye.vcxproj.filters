@@ -139,6 +139,9 @@
     <ClCompile Include="Globals.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="RE_CameraManager.cpp">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -430,6 +433,9 @@
       <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
     <ClInclude Include="RE_InternalResources.h">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CameraManager.h">
       <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
   </ItemGroup>
