@@ -12,7 +12,7 @@
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
 
-RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float n_plane, float f_plane, float v_fov, bool draw_frustum) :
+RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool draw_frustum) :
 	RE_Component(C_CAMERA, go),
 	right(math::vec(1.f, 0.f, 0.f)),
 	up(math::vec(0.f, 1.f, 0.f)),
@@ -28,10 +28,7 @@ RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float n_plan
 	// Fustrum - Perspective & Aspect Ratio
 	isPerspective = toPerspective;
 	v_fov_rads = v_fov;
-	float width = App->window->GetWidth();
-	float height = App->window->GetHeight();
-	ResetAspectRatio(width, height);
-	SetFOV(v_fov_rads);
+	SetAspectRatio(AspectRatioTYPE(aspect));
 
 	// Transform
 	transform = (go == nullptr) ? new RE_CompTransform() : go->GetTransform();
@@ -56,10 +53,7 @@ RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go
 	// Fustrum - Perspective & Aspect Ratio
 	isPerspective = cmpCamera.isPerspective;
 	v_fov_rads = cmpCamera.v_fov_rads;
-	float width = App->window->GetWidth();
-	float height = App->window->GetHeight();
-	ResetAspectRatio(width, height);
-	SetFOV(v_fov_rads);
+	SetAspectRatio(cmpCamera.target_ar);
 
 	// Transform
 	if (cmpCamera.GetGO() == nullptr && go == nullptr)
@@ -70,7 +64,6 @@ RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go
 	OnTransformModified();
 	RecalculateMatrixes();
 }
-
 
 RE_CompCamera::~RE_CompCamera()
 {
@@ -102,6 +95,7 @@ void RE_CompCamera::DrawProperties()
 	if (ImGui::CollapsingHeader("Camera"))
 	{
 		ImGui::Checkbox("Draw Frustum", &draw_frustum);
+		ImGui::Checkbox("Override Culling", &override_cull);
 
 		if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f"))
 			SetPlanesDistance(near_plane, far_plane);
@@ -195,7 +189,7 @@ void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 	RE_CAPTO(vertical_fov_degrees, 180.0f);
 
 	v_fov_rads = vertical_fov_degrees * DEGTORAD;
-	h_fov_rads = 2.0f * math::Atan(math::Tan(v_fov_rads / 2.0f) * App->window->GetAspectRatio());
+	h_fov_rads = 2.0f * math::Atan(math::Tan(v_fov_rads / 2.0f) * (width / height));
 
 	h_fov_degrees = h_fov_rads * RADTODEG;
 	v_fov_degrees = vertical_fov_degrees;
@@ -207,45 +201,115 @@ void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 	}
 }
 
-void RE_CompCamera::ResetAspectRatio(float width, float height)
+void RE_CompCamera::SetAspectRatio(AspectRatioTYPE aspect_ratio, bool use_main_window)
 {
-	if (isPerspective)
-		frustum.SetVerticalFovAndAspectRatio(v_fov_rads, width / height);
+	target_ar = aspect_ratio;
+	if (use_main_window)
+		SetBounds(App->window->GetWidth(), App->window->GetHeight());
 	else
+		SetBounds(width, height);
+}
+
+void RE_CompCamera::SetBounds(float w, float h)
+{
+	switch (target_ar)
+	{
+	case Fit_Window:
+	{
+		width = w;
+		height = h;
+		break;
+	}
+	case Square_1x1:
+	{
+		if (w >= h)
+			width = height = h;
+		else
+			width = height = w;
+
+		break;
+	}
+	case TraditionalTV_4x3:
+	{
+		if (w / 4.0f >= h / 3.0f)
+		{
+			width = (h * 4.0f) / 3.0f;
+			height = h;
+		}
+		else
+		{
+			width = w;
+			height = (w * 3.0f) / 4.0f;
+		}
+
+		break;
+	}
+	case Movietone_16x9:
+	{
+		if (w / 16.0f >= h / 9.0f)
+		{
+			width = (h * 16.0f) / 9.0f;
+			height = h;
+		}
+		else
+		{
+			width = w;
+			height = (w * 9.0f) / 16.0f;
+		}
+		break;
+	}
+	}
+
+	SetFOV(v_fov_rads * RADTODEG);
+
+	if (!isPerspective)
 		frustum.SetOrthographic(width, height);
 
 	need_recalculation = true;
 }
 
+float RE_CompCamera::GetTargetWidth() const
+{
+	return width;
+}
+
+float RE_CompCamera::GetTargetHeight() const
+{
+	return height;
+}
+
+void RE_CompCamera::GetTargetWidthHeight(int & w, int & h) const
+{
+	w = width;
+	h = height;
+}
+
+void RE_CompCamera::GetTargetWidthHeight(float & w, float & h) const
+{
+	w = width;
+	h = height;
+}
+
 void RE_CompCamera::SetPerspective()
 {
 	isPerspective = true;
-
-	float width = App->window->GetWidth();
-	float height = App->window->GetHeight();
-
 	frustum.SetVerticalFovAndAspectRatio(v_fov_rads, width / height);
+	need_recalculation = true;
 }
 
 void RE_CompCamera::SetOrthographic()
 {
 	isPerspective = false;
-
-	float width = App->window->GetWidth();
-	float height = App->window->GetHeight();
-
 	frustum.SetOrthographic(width, height);
+	need_recalculation = true;
 }
 
 void RE_CompCamera::SwapCameraType()
 {
-	if (isPerspective) SetOrthographic();
-	else SetPerspective();
-
-	need_recalculation = true;
+	isPerspective ? SetOrthographic() : SetPerspective();
 }
 
-math::Frustum RE_CompCamera::GetFrustum() const
+const math::Frustum RE_CompCamera::GetFrustum() const
 {
 	return frustum;
 }
@@ -278,6 +342,11 @@ math::float4x4 RE_CompCamera::GetProjection() const
 float* RE_CompCamera::GetProjectionPtr() const
 {
 	return (float*)calculated_projection.v;
+}
+
+bool RE_CompCamera::OverridesCulling() const
+{
+	return override_cull;
 }
 
 void RE_CompCamera::RecalculateMatrixes()
@@ -370,6 +439,8 @@ void RE_CompCamera::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 	val.AddMember(rapidjson::Value::StringRefType("far_plane"), rapidjson::Value().SetFloat(far_plane), node->GetDocument()->GetAllocator());
 
 	val.AddMember(rapidjson::Value::StringRefType("v_fov_rads"), rapidjson::Value().SetFloat(v_fov_rads), node->GetDocument()->GetAllocator());
+
+	val.AddMember(rapidjson::Value::StringRefType("aspect_ratio"), rapidjson::Value().SetInt((int)target_ar), node->GetDocument()->GetAllocator());
 
 	val.AddMember(rapidjson::Value::StringRefType("draw_frustum"), rapidjson::Value().SetBool(draw_frustum), node->GetDocument()->GetAllocator());
 

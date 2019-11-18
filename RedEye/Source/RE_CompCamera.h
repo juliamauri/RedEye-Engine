@@ -5,6 +5,15 @@
 #include "RE_Math.h"
 #include "Globals.h"
 
+enum AspectRatioTYPE : short
+{
+	Fit_Window = 0,
+	Square_1x1,
+	TraditionalTV_4x3,
+	Movietone_16x9,
+	Personalized
+};
+
 class RE_CompTransform;
 
 class RE_CompCamera : public RE_Component
@@ -15,13 +24,10 @@ public:
 		bool toPerspective = true,
 		float near_plane = 1.0f,
 		float far_plane = 5000.0f,
-		float v_fov = 30.f,
+		float v_fov = 0.523599f,
+		short aspect_ratio_t = 0, 
 		bool draw_frustum = true);
-
-	RE_CompCamera(
-		const RE_CompCamera& cmpCamera,
-		RE_GameObject* go);
-
+	RE_CompCamera(const RE_CompCamera& cmpCamera, RE_GameObject* go);
 	~RE_CompCamera();
 	
 	void Update() override;
@@ -33,12 +39,19 @@ public:
 
 	void SetPlanesDistance(float near_plane, float far_plane);
 	void SetFOV(float vertical_fov_degrees);
-	void ResetAspectRatio(float width, float height);
+	void SetAspectRatio(AspectRatioTYPE aspect_ratio, bool use_main_window = true);
+	void SetBounds(float width, float height);
+
+	float GetTargetWidth() const;
+	float GetTargetHeight() const;
+	void GetTargetWidthHeight(int &width, int &height) const;
+	void GetTargetWidthHeight(float &width, float &height) const;
+
 	void SetPerspective();
 	void SetOrthographic();
 	void SwapCameraType();
 
-	math::Frustum GetFrustum() const;
+	const math::Frustum GetFrustum() const;
 
 	float GetVFOVDegrees() const;
 	float GetHFOVDegrees() const;
@@ -48,6 +61,8 @@ public:
 	
 	math::float4x4 GetProjection() const;
 	float* GetProjectionPtr() const;
+
+	bool OverridesCulling() const;
 
 	// Camera Controls
 	void LocalRotate(float dx, float dy);
@@ -82,14 +97,21 @@ private:
 	// Camera frustum
 	math::Frustum frustum;
 
+	// Panes
 	float near_plane = 0.0f;
 	float far_plane = 0.0f;
 
+	// Field of View
 	bool isPerspective = true;
 	float h_fov_rads = 0.0f;
 	float v_fov_rads = 30.0f;
 	float h_fov_degrees = 0.0f;
 	float v_fov_degrees = 0.0f;
+
+	// Aspect Ratio
+	AspectRatioTYPE target_ar = Fit_Window;
+	float width = 0.f;
+	float height = 0.f;
 
 	// View & Projection
 	bool need_recalculation = false;
@@ -98,6 +120,7 @@ private:
 
 	// Debug Drawing
 	bool draw_frustum = true;
+	bool override_cull = false;
 };
 
 #endif // !__RE_CCOMPAMERA_H__
