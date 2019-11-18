@@ -20,6 +20,7 @@ class TimeManager;
 class SystemInfo;
 class RE_Math;
 class OutputLogHolder;
+class RE_CameraManager;
 class RE_TextureImporter;
 class ShaderManager;
 class RE_PrimitiveManager;
@@ -79,6 +80,7 @@ public:
 	RE_Math* math = nullptr;
 	OutputLogHolder* log = nullptr;
 
+	RE_CameraManager* cams = nullptr;
 	RE_TextureImporter* textures = nullptr;
 	ShaderManager* shaders = nullptr;
 	RE_PrimitiveManager* primitives = nullptr;
