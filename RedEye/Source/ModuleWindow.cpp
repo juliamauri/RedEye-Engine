@@ -188,11 +188,11 @@ void ModuleWindow::WindowEvent(const SDL_Event * e)
 		pos_y = e->window.data2;
 		break;
 	case SDL_WINDOWEVENT_RESIZED:/**< Window has been resized to data1xdata2 */
-		SetWindowSize(e->window.data1, e->window.data2);
+		// this sneaky event is always preceded by SDL_WINDOWEVENT_SIZE_CHANGED
+		//App->renderer3d->MainContextChanged(width = e->window.data1, height = e->window.data2);
 		break;
 	case SDL_WINDOWEVENT_SIZE_CHANGED:/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
-		width = e->window.data1;
-		height = e->window.data2;
+		App->renderer3d->WindowSizeChanged(width = e->window.data1, height = e->window.data2);
 		break;
 	case SDL_WINDOWEVENT_MINIMIZED:/**< Window has been minimized */
 		break;
@@ -290,11 +290,8 @@ void ModuleWindow::SetTitle(const char* new_title)
 
 void ModuleWindow::SetWindowSize(unsigned int new_width, unsigned int new_height)
 {
-	width = new_width;
-	height = new_height;
-
-	SDL_SetWindowSize(window, new_width, new_height);
-	App->renderer3d->ResetAspectRatio(new_width, new_height);
+	SDL_SetWindowSize(window, width = new_width, height = new_height);
+	App->renderer3d->WindowSizeChanged(width, height);
 }
 
 void ModuleWindow::SetResizeable(const bool flag_value)
@@ -326,7 +323,7 @@ void ModuleWindow::SetFullScreen(bool flag_value)
 		}
 
 		SDL_SetWindowFullscreen(window, SDL_bool(flag_value));
-		App->renderer3d->ResetAspectRatio(width, height);
+		App->renderer3d->WindowSizeChanged(width, height);
 	}
 }
 
@@ -353,7 +350,7 @@ void ModuleWindow::SetFullDesktop(bool flag_value)
 			flags -= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
 		SDL_SetWindowFullscreen(window, flag_value ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_FALSE);
-		App->renderer3d->ResetAspectRatio(width, height);
+		App->renderer3d->WindowSizeChanged(width, height);
 	}
 }
 

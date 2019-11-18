@@ -24,6 +24,7 @@ public:
 
 	void RecieveEvent(const Event& e) override;
 
+	RE_GameObject* GetRoot() const;
 	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
 	void AddGoToRoot(RE_GameObject* toAdd);
 	void DuplicateSelectedObject();
@@ -33,7 +34,7 @@ public:
 	void CreateCamera();
 
 	void DrawEditor() override;
-	void DrawScene(bool cull_scene = true);
+	void DrawDebug() const;
 	void DrawHeriarchy();
 	void DrawFocusedProperties();
 
@@ -46,11 +47,10 @@ public:
 	void LoadTextureOnSelectedGO(const char* texturePath);
 	
 	void StaticTransformed();
-	std::list<RE_CompCamera*> GetCameras();
-
-	uint GetShaderScene() const;
 
 	bool DrawingSelAABB() const;
+
+	const QTree* GetQuadTree() const;
 
 private:
 	//init values
@@ -80,10 +80,6 @@ private:
 
 	// Config
 	bool focus_on_select = false;
-
-	// Shaders
-	unsigned int sceneShader = 0;
-	unsigned int skyboxShader = 0;
 };
 
 

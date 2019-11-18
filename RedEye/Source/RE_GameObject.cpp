@@ -13,6 +13,7 @@
 #include "ShaderManager.h"
 #include "ModuleRenderer3D.h"
 #include "OutputLog.h"
+#include "RE_CameraManager.h"
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
 #include "ImGui\imgui.h"
@@ -57,7 +58,7 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 			break;
 		case C_CAMERA:
 			comp_camera = new RE_CompCamera(*(RE_CompCamera*)cmpGO, this);
-			App->renderer3d->AddMainCamera(comp_camera);
+			App->cams->AddMainCamera(comp_camera);
 			components.push_back(comp_camera);
 			break;
 		case C_MESH:
@@ -106,15 +107,35 @@ void RE_GameObject::PostUpdate()
 	for (auto child : childs) child->PostUpdate();
 }
 
-void RE_GameObject::Draw(bool recursive)
+void RE_GameObject::DrawWithChilds() const
 {
 	if (active)
 	{
-		if (recursive)
-			for (auto child : childs) child->Draw();
+		for (auto component : components)
+			component->Draw();
 
-		for (auto component : components) component->Draw();
+		std::stack<const RE_GameObject*> gos;
+		gos.push(this);
+		while (!gos.empty())
+		{
+			const RE_GameObject * go = gos.top();
+			gos.pop();
+
+			for (auto component : go->components)
+				component->Draw();
+
+			for (auto child : go->GetChilds())
+				if (child->IsActive())
+					gos.push(child);
+		}
 	}
+}
+
+void RE_GameObject::DrawItselfOnly() const
+{
+	if (active)
+		for (auto component : components)
+			component->Draw();
 }
 
 void RE_GameObject::Serialize(JSONNode * node)
@@ -280,11 +301,11 @@ void RE_GameObject::OnStop()
 	for (auto child : childs) child->OnStop();
 }
 
-RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float v_fov_rads, bool draw_frustum)
+RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float v_fov_rads, short aspect_ratio_t, bool draw_frustum)
 {
-	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, v_fov_rads, draw_frustum);
+	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, v_fov_rads, aspect_ratio_t, draw_frustum);
 	components.push_back((RE_Component*)comp_camera);
-	App->renderer3d->AddMainCamera(comp_camera);
+	App->cams->AddMainCamera(comp_camera);
 	return comp_camera;
 }
 
@@ -317,7 +338,7 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 	else if (ComponentType(type) == C_CAMERA)
 	{
 		RE_CompCamera* comp_camera = new RE_CompCamera(this);
-		App->renderer3d->AddMainCamera(comp_camera);
+		App->cams->AddMainCamera(comp_camera);
 		ret = (RE_Component*)comp_camera;
 	}
 	else if (ComponentType(type) == C_PARTICLEEMITER)
@@ -529,7 +550,7 @@ void RE_GameObject::DrawAABB(math::vec color)
 	ShaderManager::use(0);
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((transform->GetMatrixModel() * App->renderer3d->CurrentCamera()->GetView()).ptr());
+	glLoadMatrixf((transform->GetMatrixModel() * RE_CameraManager::CurrentCamera()->GetView()).ptr());
 
 	glColor3f(color.x, color.y, color.z);
 	glBegin(GL_LINES);

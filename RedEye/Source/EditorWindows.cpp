@@ -13,6 +13,7 @@
 #include "RE_HandleErrors.h"
 #include "RE_TextureImporter.h"
 #include "RE_InternalResources.h"
+#include "RE_CameraManager.h"
 
 #include "RE_Prefab.h"
 
@@ -430,8 +431,8 @@ void PlayPauseWindow::Draw(bool secondary)
 		float seconds = App->time->GetGameTimer();
 		if (ImGui::Button(App->GetState() == GS_PLAY ? "Restart" : "Play"))
 		{
-			// check scene ready
-			if (App->renderer3d->HasMainCamera())
+			// check main camera
+			if (RE_CameraManager::HasMainCamera())
 				App->ScenePlay();
 			// else { report problems }
 		}

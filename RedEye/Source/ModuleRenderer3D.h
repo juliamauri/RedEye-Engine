@@ -20,6 +20,7 @@ public:
 	~ModuleRenderer3D();
 
 	bool Init(JSONNode* node) override;
+	bool Start() override;
 	update_status PreUpdate() override;
 	update_status PostUpdate() override;
 	bool CleanUp() override;
@@ -39,14 +40,6 @@ public:
 	void SetWireframe(bool enable);
 	bool GetLighting() const;
 
-	// Camera
-	RE_CompCamera * CurrentCamera() const;
-	void ResetAspectRatio(float width, float height);
-	bool HasMainCamera() const;
-	void AddMainCamera(RE_CompCamera* cam);
-	const std::list<RE_CompCamera*>& GetCameras() const;
-	void ResetSceneCameras();
-
 	// Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
 
@@ -55,17 +48,14 @@ public:
 
 	// Context
 	void* GetWindowContext()const;
+	void WindowSizeChanged(int width, int height);
+
+	uint GetShaderScene() const;
 
 private:
 
 	// Context
 	void* mainContext;
-	
-	// Cameras
-	RE_CompCamera* editor_camera = nullptr;
-	RE_CompCamera* main_camera = nullptr;
-	std::list<RE_CompCamera*> scene_cameras;
-	bool cull_scene = true;
 
 	// Configuration
 	bool vsync = false;
@@ -75,6 +65,11 @@ private:
 	bool texture2d = false;
 	bool color_material = false;
 	bool wireframe = false;
+	bool cull_scene = true;
+
+	// Default Shaders
+	unsigned int sceneShader = 0;
+	unsigned int skyboxShader = 0;
 };
 
 #endif // !__MODULERENDER3D_H__

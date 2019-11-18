@@ -11,6 +11,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
+#include "RE_CameraManager.h"
 
 #include "MathGeoLib\include\MathGeoLib.h"
 #include "ImGui\imgui_impl_opengl3.h"
@@ -227,6 +228,8 @@ void ModuleEditor::DrawEditor()
 	{
 		ImGui::DragFloat("Camera speed", &cam_speed, 0.1f, 0.1f, 100.0f, "%.1f");
 		ImGui::DragFloat("Camera sensitivity", &cam_sensitivity, 0.01f, 0.01f, 1.0f, "%.2f");
+
+		RE_CameraManager::EditorCamera()->DrawProperties();
 	}
 }
 
@@ -275,7 +278,7 @@ void ModuleEditor::PopUpFocus(bool focus)
 void ModuleEditor::UpdateCamera()
 {
 	OPTICK_CATEGORY("Update ModuleEditor Camera", Optick::Category::Camera);
-	RE_CompCamera* camera = App->renderer3d->CurrentCamera();
+	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
 	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
 	{
 		const MouseData* mouse = App->input->GetMouse();
@@ -303,7 +306,7 @@ void ModuleEditor::UpdateCamera()
 		else if ((App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && App->scene->GetSelected() != nullptr)
 		{
 			// Focus
-			App->renderer3d->CurrentCamera()->Focus(App->scene->GetSelected());
+			camera->Focus(App->scene->GetSelected());
 		}
 		else
 		{
@@ -342,4 +345,6 @@ void ModuleEditor::UpdateCamera()
 				camera->SetFOV(camera->GetVFOVDegrees() - mouse->mouse_wheel_motion);
 		}
 	}
+
+	camera->Update();
 }

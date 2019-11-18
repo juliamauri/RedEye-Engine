@@ -26,7 +26,8 @@ public:
 	void PreUpdate();
 	void Update();
 	void PostUpdate();
-	void Draw(bool recursive = true);
+	void DrawWithChilds() const;
+	void DrawItselfOnly() const;
 
 	void Serialize(JSONNode* node);
 
@@ -68,7 +69,7 @@ public:
 	RE_CompTransform* AddCompTransform();
 	RE_CompMesh* AddCompMesh(const char* file_path_data = nullptr, const bool dropped = false);
 	void AddCompMesh(RE_CompMesh* comp_mesh);
-	RE_CompCamera* AddCompCamera(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 30.f, bool draw_frustum = true);
+	RE_CompCamera* AddCompCamera(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 0.523599f, short aspect_ratio_t = 0, bool draw_frustum = true);
 
 	RE_CompTransform* GetTransform() const;
 	RE_CompMesh* GetMesh() const;

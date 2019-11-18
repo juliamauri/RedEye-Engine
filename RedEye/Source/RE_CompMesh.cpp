@@ -11,6 +11,7 @@
 #include "ResourceManager.h"
 #include "RE_TextureImporter.h"
 #include "ShaderManager.h"
+#include "ModuleRenderer3D.h"
 
 #include "RE_Mesh.h"
 #include "RE_Material.h"
@@ -24,7 +25,8 @@ RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool s
 	: RE_Component(C_MESH, go, start_active), reference(reference)
 {
 	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
-	shaderForDraw = App->scene->GetShaderScene();
+	if (!(shaderForDraw = App->renderer3d->GetShaderScene()))
+		shaderForDraw = App->internalResources->GetDefaultShader();
 	checkerTexture = App->internalResources->GetTextureChecker();
 }
 
@@ -32,7 +34,8 @@ RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go)
 	: RE_Component(C_MESH, go, cmpMesh.active), reference(cmpMesh.reference)
 {
 	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
-	shaderForDraw = App->scene->GetShaderScene();
+	if (!(shaderForDraw = App->renderer3d->GetShaderScene()))
+		shaderForDraw = App->internalResources->GetDefaultShader();
 	checkerTexture = App->internalResources->GetTextureChecker();
 }
 

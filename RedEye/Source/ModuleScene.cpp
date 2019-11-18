@@ -7,9 +7,8 @@
 #include "EditorWindows.h"
 #include "FileSystem.h"
 #include "RE_PrimitiveManager.h"
-#include "RE_InternalResources.h"
 #include "ResourceManager.h"
-
+#include "RE_CameraManager.h"
 #include "ShaderManager.h"
 #include "RE_ModelImporter.h"
 #include "RE_TextureImporter.h"
@@ -31,7 +30,6 @@
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 #include <string>
-#include <stack>
 
 #include "SDL2\include\SDL.h"
 
@@ -58,9 +56,6 @@ bool ModuleScene::Init(JSONNode * node)
 bool ModuleScene::Start()
 {
 	bool ret = true;
-
-	sceneShader = App->internalResources->GetDefaultShader();
-	skyboxShader = App->internalResources->GetSkyBoxShader();
 
 	// Load scene
 	Timer timer;
@@ -119,8 +114,8 @@ bool ModuleScene::Start()
 	root->AddComponent(C_PLANE);
 
 	// Render Camera Management
-	App->renderer3d->ResetSceneCameras();
-	if (!App->renderer3d->HasMainCamera())
+	App->cams->RecallCameras(root);
+	if (!RE_CameraManager::HasMainCamera())
 		CreateCamera();
 
 	// Setup AABB
@@ -131,7 +126,7 @@ bool ModuleScene::Start()
 	// FOCUS CAMERA
 	if (!root->GetChilds().empty()) {
 		App->scene->SetSelected(root->GetChilds().begin()._Ptr->_Myval);
-		App->renderer3d->CurrentCamera()->Focus(selected);
+		RE_CameraManager::CurrentCamera()->Focus(selected);
 	}
 
 	// Quadtree
@@ -175,6 +170,11 @@ void ModuleScene::OnStop()
 
 void ModuleScene::RecieveEvent(const Event& e)
 {
+}
+
+RE_GameObject * ModuleScene::GetRoot() const
+{
+	return root;
 }
 
 RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent)
@@ -255,23 +255,23 @@ void ModuleScene::DrawEditor()
 	}
 }
 
-void ModuleScene::DrawScene(bool cull_scene)
+void ModuleScene::DrawDebug() const
 {
-	OPTICK_CATEGORY("Scene Draw", Optick::Category::Rendering);
-
-	OPTICK_CATEGORY("AABB Draw", Optick::Category::Debug);
+	OPTICK_CATEGORY("Scene Debug Draw", Optick::Category::Debug);
 
 	// Draw Bounding Boxes
-	if (draw_all_aabb || draw_selected_aabb || draw_quad_tree || draw_cameras)
+	if (draw_all_aabb || draw_selected_aabb || draw_quad_tree)
 	{
 		ShaderManager::use(0);
 		bool resetLight = App->renderer3d->GetLighting();
 
 		if (resetLight)
-			App->renderer3d->SetLighting(false);
+			glDisable(GL_LIGHTING);
 
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixf(RE_CameraManager::CurrentCamera()->GetProjectionPtr());
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf((App->renderer3d->CurrentCamera()->GetView()).ptr());
+		glLoadMatrixf((RE_CameraManager::CurrentCamera()->GetView()).ptr());
 		glBegin(GL_LINES);
 
 		if (draw_all_aabb)
@@ -295,57 +295,15 @@ void ModuleScene::DrawScene(bool cull_scene)
 		if (draw_cameras)
 		{
 			glColor3f(frustum_color.x, frustum_color.y, frustum_color.z);
-			for(auto cam : App->renderer3d->GetCameras())
+			for(auto cam : App->cams->GetCameras())
 				cam->DrawFrustum();
 		}
 
 		glEnd();
 
 		if (resetLight)
-			App->renderer3d->SetLighting(true);
+			glEnable(GL_LIGHTING);
 	}
-
-	OPTICK_CATEGORY("Culling", Optick::Category::Rendering);
-
-	// Load Shader Uniforms
-	ShaderManager::use(sceneShader);
-	ShaderManager::setFloat4x4(sceneShader, "view", App->renderer3d->CurrentCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(sceneShader, "projection", App->renderer3d->CurrentCamera()->GetProjectionPtr());
-
-	// Frustum Culling
-	if (cull_scene
-		&& selected != nullptr
-		&& selected->GetCamera() != nullptr)
-	{
-		std::vector<RE_GameObject*> objects;
-		quad_tree.CollectIntersections(objects, selected->GetCamera()->GetFrustum());
-
-		for (auto object : objects)
-			object->Draw(false);
-	}
-	else
-	{
-		root->Draw();
-	}
-
-	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
-
-	ShaderManager::use(skyboxShader);
-	ShaderManager::setFloat4x4(skyboxShader, "view", App->renderer3d->CurrentCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(skyboxShader, "projection", App->renderer3d->CurrentCamera()->GetProjectionPtr());
-	ShaderManager::setInt(skyboxShader, "skybox", 0);
-	// draw skybox as last
-	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-	// skybox cube
-	glBindVertexArray(App->internalResources->GetSkyBoxVAO());
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	glDepthFunc(GL_LESS); // set depth function back to default
-	ShaderManager::use(0);
-
 }
 
 void ModuleScene::DrawHeriarchy()
@@ -369,7 +327,7 @@ void ModuleScene::SetSelected(RE_GameObject * select)
 	selected = (select != nullptr) ? select : root;
 
 	if (focus_on_select)
-		App->renderer3d->CurrentCamera()->Focus(selected);
+		RE_CameraManager::CurrentCamera()->Focus(selected);
 }
 
 RE_GameObject * ModuleScene::GetSelected() const
@@ -385,7 +343,7 @@ void ModuleScene::RayCastSelect(math::Ray & ray)
 	{
 		float closest_distance = -1.f;
 		RE_GameObject* new_selection = nullptr;
-		math::float4 camera_pos = math::float4(App->renderer3d->CurrentCamera()->GetTransform()->GetGlobalPosition(), 0.f);
+		math::float4 camera_pos = math::float4(RE_CameraManager::CurrentCamera()->GetTransform()->GetGlobalPosition(), 0.f);
 
 		for (auto object : objects)
 		{
@@ -475,7 +433,7 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 		static_gos_modified = false;
 		// FOCUS CAMERA ON DROPPED GEOMETRY
 		SetSelected(toAdd);
-		App->renderer3d->CurrentCamera()->Focus(selected);
+		RE_CameraManager::CurrentCamera()->Focus(selected);
 	}
 	else
 		LOG_ERROR("Error to load dropped fbx");
@@ -576,35 +534,12 @@ void ModuleScene::StaticTransformed()
 	static_gos_modified = true;
 }
 
-std::list<RE_CompCamera*> ModuleScene::GetCameras()
-{
-	std::list<RE_CompCamera*> ret;
-	std::stack<RE_GameObject*> gos;
-	gos.push(root);
-
-	while (!gos.empty())
-	{
-		RE_GameObject * go = gos.top();
-		RE_CompCamera * cam = go->GetCamera();
-
-		if (cam != nullptr)
-			ret.push_back(cam);
-
-		gos.pop();
-
-		for (auto child : go->GetChilds())
-			gos.push(child);
-	}
-
-	return ret;
-}
-
-uint ModuleScene::GetShaderScene() const
-{
-	return sceneShader;
-}
-
 bool ModuleScene::DrawingSelAABB() const
 {
 	return draw_selected_aabb;
+}
+
+const QTree* ModuleScene::GetQuadTree() const
+{
+	return &quad_tree;
 }

@@ -12,9 +12,12 @@
 #include "ModuleInput.h"
 #include "FileSystem.h"
 #include "RE_CompCamera.h"
+#include "RE_CameraManager.h"
 #include "RE_CompTransform.h"
 #include "RE_Mesh.h"
 #include "ModuleScene.h"
+#include "ShaderManager.h"
+#include "RE_InternalResources.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -67,14 +70,17 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		}
 	}
 
-	if (ret)
-	{
-		// Editor camera
-		editor_camera = new RE_CompCamera();
-		editor_camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
-	}
-
 	return ret;
+}
+
+bool ModuleRenderer3D::Start()
+{
+	WindowSizeChanged(App->window->GetWidth(), App->window->GetHeight());
+
+	sceneShader = App->internalResources->GetDefaultShader();
+	skyboxShader = App->internalResources->GetSkyBoxShader();
+
+	return true;
 }
 
 update_status ModuleRenderer3D::PreUpdate()
@@ -96,21 +102,59 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	update_status ret = UPDATE_CONTINUE;
 
-	editor_camera->Update();
+	OPTICK_CATEGORY("Culling", Optick::Category::Rendering);
+	std::vector<RE_GameObject*> objects;
+	if (cull_scene)
+		App->scene->GetQuadTree()->CollectIntersections(objects, App->cams->GetCullingFrustum());
 
-	// Reset projection & view
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(CurrentCamera()->GetProjectionPtr());
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	OPTICK_CATEGORY("Scene Draw", Optick::Category::Rendering);
 
-	// Draw Scene
-	if(wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	if (App->scene != nullptr) App->scene->DrawScene(HasMainCamera());
+	// Prepare if using wireframe
+	if(wireframe)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	RE_CompCamera* current_camera = RE_CameraManager::CurrentCamera();
+	current_camera->Update();
+
+	// Load Shader Uniforms
+	ShaderManager::use(sceneShader);
+	ShaderManager::setFloat4x4(sceneShader, "view", current_camera->GetViewPtr());
+	ShaderManager::setFloat4x4(sceneShader, "projection", current_camera->GetProjectionPtr());
+
+	// Frustum Culling
+	if (cull_scene)
+		for (auto object : objects)
+			object->DrawItselfOnly();
+	else
+		App->scene->GetRoot()->DrawWithChilds();
+
+	// Draw Scene Debug
+	App->scene->DrawDebug();
+
+	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
+	// draw skybox as last
+
+	// Set shader and uniforms
+	ShaderManager::use(skyboxShader);
+	ShaderManager::setFloat4x4(skyboxShader, "view", current_camera->GetViewPtr());
+	ShaderManager::setFloat4x4(skyboxShader, "projection", current_camera->GetProjectionPtr());
+	ShaderManager::setInt(skyboxShader, "skybox", 0);
+
+	// change depth function so depth test passes when values are equal to depth buffer's content
+	glDepthFunc(GL_LEQUAL);
 	
+	// Render skybox cube
+	glBindVertexArray(App->internalResources->GetSkyBoxVAO());
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	glDepthFunc(GL_LESS); // set depth function back to default
+
 	// Draw Editor
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	if(App->editor != nullptr) App->editor->Draw();
+	App->editor->Draw();
 
 	//Swap buffers
 	SDL_GL_SwapWindow(App->window->GetWindow());
@@ -122,8 +166,6 @@ bool ModuleRenderer3D::CleanUp()
 {
 	//Delete context
 	SDL_GL_DeleteContext(mainContext);
-
-	DEL(editor_camera);
 
 	return true;
 }
@@ -152,6 +194,8 @@ void ModuleRenderer3D::DrawEditor()
 
 		if (ImGui::Checkbox((wireframe) ? "Disable Wireframe" : "Enable Wireframe", &wireframe))
 			SetWireframe(wireframe);
+
+		ImGui::Checkbox("Camera Frustum Culling", &cull_scene);
 	}
 }
 
@@ -239,56 +283,6 @@ bool ModuleRenderer3D::GetLighting() const
 	return lighting;
 }
 
-RE_CompCamera * ModuleRenderer3D::CurrentCamera() const
-{
-	return (App->GetState() == GS_STOP ? editor_camera : main_camera);
-}
-
-void ModuleRenderer3D::ResetAspectRatio(float width, float height)
-{
-	glViewport(0, 0, width, height);
-	editor_camera->ResetAspectRatio(width, height);
-	if (main_camera != nullptr)
-		main_camera->ResetAspectRatio(width, height);
-}
-
-bool ModuleRenderer3D::HasMainCamera() const
-{
-	return main_camera != nullptr;
-}
-
-void ModuleRenderer3D::AddMainCamera(RE_CompCamera* cam)
-{
-	if (scene_cameras.empty())
-		main_camera = cam;
-
-	scene_cameras.push_back(cam);
-}
-
-const std::list<RE_CompCamera*>& ModuleRenderer3D::GetCameras() const
-{
-	return scene_cameras;
-}
-
-void ModuleRenderer3D::ResetSceneCameras()
-{
-	main_camera = nullptr;
-	scene_cameras.clear();
-	scene_cameras = App->scene->GetCameras();
-	if (!scene_cameras.empty())
-	{
-		for (std::list<RE_CompCamera*>::iterator cam = scene_cameras.begin();
-			cam != scene_cameras.end(); cam++)
-		{
-			if (main_camera == nullptr)
-				main_camera = (*cam);
-
-			/*if ((*cam)->isMain)
-			else: more than 1 main cameras*/
-		}
-	}
-}
-
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
 {
 	int nrAttributes;
@@ -304,7 +298,7 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	model.InverseTranspose();
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((CurrentCamera()->GetView() * model).ptr());
+	glLoadMatrixf((RE_CameraManager::CurrentCamera()->GetView() * model).ptr());
 
 	glBegin(GL_TRIANGLES);
 	glVertex3f(-1.0f, -1.0f, -1.0f);
@@ -354,4 +348,20 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 void * ModuleRenderer3D::GetWindowContext() const
 {
 	return mainContext;
+}
+
+void ModuleRenderer3D::WindowSizeChanged(int width, int height)
+{
+	// Change cameras
+	App->cams->OnWindowChangeSize(width, height);
+
+	// Set new main Viewport
+	int w, h;
+	RE_CameraManager::CurrentCamera()->GetTargetWidthHeight(w,h);
+	glViewport(width-w, height-h, w, h);
+}
+
+uint ModuleRenderer3D::GetShaderScene() const
+{
+	return sceneShader;
 }
