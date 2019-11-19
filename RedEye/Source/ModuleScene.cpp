@@ -3,14 +3,12 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleInput.h"
-#include "ModuleEditor.h"
 
 #include "EditorWindows.h"
 #include "FileSystem.h"
 #include "RE_PrimitiveManager.h"
-#include "RE_InternalResources.h"
 #include "ResourceManager.h"
-
+#include "RE_CameraManager.h"
 #include "ShaderManager.h"
 #include "RE_ModelImporter.h"
 #include "RE_TextureImporter.h"
@@ -40,8 +38,10 @@
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
-	all_aabb_color = math::vec(0.f, 225.f, 0.f);
-	sel_aabb_color = math::vec(255.f, 255.f, 0.f);
+	all_aabb_color = math::vec(0.f, 1.f, 0.f);
+	sel_aabb_color = math::vec(1.f, 1.f, 1.f);
+	quad_tree_color = math::vec(1.f, 1.f, 0.f);
+	frustum_color = math::vec(0.f, 1.f, 1.f);
 }
 
 ModuleScene::~ModuleScene()
@@ -56,9 +56,6 @@ bool ModuleScene::Init(JSONNode * node)
 bool ModuleScene::Start()
 {
 	bool ret = true;
-
-	sceneShader = App->internalResources->GetDefaultShader();
-	skyboxShader = App->internalResources->GetSkyBoxShader();
 
 	// Load scene
 	Timer timer;
@@ -107,27 +104,33 @@ bool ModuleScene::Start()
 		}
 	}
 
+	// Error Handling
 	App->handlerrors->StopHandling();
-
 	if (App->handlerrors->AnyErrorHandled()) {
 		App->handlerrors->ActivatePopUp();
 	}
 
+	// Grid Plane
 	root->AddComponent(C_PLANE);
+
+	// Render Camera Management
+	App->cams->RecallCameras(root);
+	if (!RE_CameraManager::HasMainCamera())
+		CreateCamera();
 
 	// Setup AABB
 	root->TransformModified();
 	root->ResetBoundingBoxFromChilds();
-	aabb_need_reset = false;
+	static_gos_modified = false;
 
 	// FOCUS CAMERA
 	if (!root->GetChilds().empty()) {
 		App->scene->SetSelected(root->GetChilds().begin()._Ptr->_Myval);
-		App->editor->FocusSelected();
+		RE_CameraManager::CurrentCamera()->Focus(selected);
 	}
 
 	// Quadtree
-	//quad_tree.Build(root);
+	quad_tree.Build(root);
 
 	return ret;
 }
@@ -169,6 +172,11 @@ void ModuleScene::RecieveEvent(const Event& e)
 {
 }
 
+RE_GameObject * ModuleScene::GetRoot() const
+{
+	return root;
+}
+
 RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent)
 {
 	return new RE_GameObject(name, GUID_NULL, parent ? parent : root);
@@ -181,7 +189,8 @@ void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
 
 void ModuleScene::DuplicateSelectedObject()
 {
-	if(selected != nullptr) selected->GetParent()->AddChild(new RE_GameObject(*selected));
+	if(selected != nullptr)
+		selected->GetParent()->AddChild(new RE_GameObject(*selected));
 }
 
 void ModuleScene::CreateCube()
@@ -196,100 +205,105 @@ void ModuleScene::CreateSphere()
 	sphere_go->AddComponent(App->primitives->CreateSphere(sphere_go));
 }
 
+void ModuleScene::CreateCamera()
+{
+	RE_GameObject* cam_go = AddGO("Camera", root);
+	cam_go->AddCompCamera();
+}
+
 void ModuleScene::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
 	{
 		// AABB Controls
 		ImGui::Text("Last AABB Reset took: %f", aabb_reset_time);
-		if (aabb_need_reset && ImGui::Button("Reset All AABB"))
+		if (static_gos_modified && ImGui::Button("Reset All AABB"))
 		{
 			root->ResetBoundingBoxFromChilds();
-			aabb_need_reset = false;
+			static_gos_modified = false;
 		}
 
 		// AABB All
 		ImGui::Checkbox("Draw All AABB", &draw_all_aabb);
 		if (draw_all_aabb)
 		{
-			// Color 
 			float p[3] = { all_aabb_color.x, all_aabb_color.y, all_aabb_color.z };
-			if (ImGui::DragFloat3("Color All", p, 0.1f, 0.f, 255.f, "%.2f"))
+			if (ImGui::ColorEdit3("Color All", p))
 				all_aabb_color = math::vec(p[0], p[1], p[2]);
-
-			// Width
-			ImGui::DragFloat("Width All", &all_aabb_width, 01.f, 0.1f, 100.f, "%.1f");
 		}
 
 		// AABB Selected
 		ImGui::Checkbox("Draw Selected AABB", &draw_selected_aabb);
 		if (draw_selected_aabb)
 		{
-			// Color 
 			float p[3] = { sel_aabb_color.x, sel_aabb_color.y, sel_aabb_color.z };
-			if (ImGui::DragFloat3("Color Selected", p, 0.1f, 0.f, 255.f, "%.2f"))
+			if (ImGui::ColorEdit3("Color Selected", p))
 				sel_aabb_color = math::vec(p[0], p[1], p[2]);
+		}
 
-			// Width
-			ImGui::DragFloat("Width Selected", &sel_aabb_width, 01.f, 0.1f, 100.f, "%.1f");
+		// Camera Fustrums
+		ImGui::Checkbox("Draw Camera Fustrums", &draw_cameras);
+		if (draw_cameras)
+		{
+			float p[3] = { frustum_color.x, frustum_color.y, frustum_color.z };
+			if (ImGui::ColorEdit3("Color Fustrum", p))
+				frustum_color = math::vec(p[0], p[1], p[2]);
 		}
 
 		ImGui::Checkbox("Focus on Select", &focus_on_select);
-
-		//ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
+		ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
 	}
 }
 
-void ModuleScene::DrawScene()
+void ModuleScene::DrawDebug() const
 {
-	OPTICK_CATEGORY("Scene Draw", Optick::Category::Rendering);
+	OPTICK_CATEGORY("Scene Debug Draw", Optick::Category::Debug);
 
-	OPTICK_CATEGORY("AABB Draw", Optick::Category::Debug);
 	// Draw Bounding Boxes
-	if (draw_all_aabb)
-		for (RE_GameObject* go : root->GetChilds())
-			go->DrawAllAABB(all_aabb_color, all_aabb_width);
+	if (draw_all_aabb || draw_selected_aabb || draw_quad_tree)
+	{
+		ShaderManager::use(0);
+		bool resetLight = App->renderer3d->GetLighting();
 
-	if (draw_selected_aabb && selected != nullptr && selected != root)
-		selected->DrawGlobalAABB(sel_aabb_color, sel_aabb_width);
+		if (resetLight)
+			glDisable(GL_LIGHTING);
 
-	/*/ Draw Quadtree
-	if (draw_quad_tree)
-		quad_tree.Draw();*/
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixf(RE_CameraManager::CurrentCamera()->GetProjectionPtr());
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf((RE_CameraManager::CurrentCamera()->GetView()).ptr());
+		glBegin(GL_LINES);
 
-	OPTICK_CATEGORY("Hiteracy Draw", Optick::Category::Rendering);
-	// Load Shader Uniforms
-	ShaderManager::use(sceneShader);
-	ShaderManager::setFloat4x4(sceneShader, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(sceneShader, "projection", App->editor->GetCamera()->GetProjectionPtr());
+		if (draw_all_aabb)
+		{
+			glColor3f(all_aabb_color.x, all_aabb_color.y, all_aabb_color.z);
+			root->DrawAllAABB();
+		}
 
-	/*/ Frustum Culling
-	std::vector<RE_GameObject*> objects;
-	quad_tree.CollectIntersections(objects, App->editor->GetCamera()->GetFrustum());
-	drawn_go = objects.size();
-	for (auto object : objects) object->Draw(false);*/
+		if (draw_selected_aabb && selected != nullptr && selected != root)
+		{
+			glColor3f(sel_aabb_color.x, sel_aabb_color.y, sel_aabb_color.z);
+			selected->DrawGlobalAABB();
+		}
 
-	root->Draw();
+		if (draw_quad_tree)
+		{
+			glColor3f(quad_tree_color.x, quad_tree_color.y, quad_tree_color.z);
+			quad_tree.Draw();
+		}
 
+		if (draw_cameras)
+		{
+			glColor3f(frustum_color.x, frustum_color.y, frustum_color.z);
+			for(auto cam : App->cams->GetCameras())
+				cam->DrawFrustum();
+		}
 
-	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
+		glEnd();
 
-	ShaderManager::use(skyboxShader);
-	ShaderManager::setFloat4x4(skyboxShader, "view", App->editor->GetCamera()->GetViewPtr());
-	ShaderManager::setFloat4x4(skyboxShader, "projection", App->editor->GetCamera()->GetProjectionPtr());
-	ShaderManager::setInt(skyboxShader, "skybox", 0);
-	// draw skybox as last
-	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-	// skybox cube
-	glBindVertexArray(App->internalResources->GetSkyBoxVAO());
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	glDepthFunc(GL_LESS); // set depth function back to default
-	ShaderManager::use(0);
-
+		if (resetLight)
+			glEnable(GL_LIGHTING);
+	}
 }
 
 void ModuleScene::DrawHeriarchy()
@@ -313,7 +327,7 @@ void ModuleScene::SetSelected(RE_GameObject * select)
 	selected = (select != nullptr) ? select : root;
 
 	if (focus_on_select)
-		App->editor->FocusSelected();
+		RE_CameraManager::CurrentCamera()->Focus(selected);
 }
 
 RE_GameObject * ModuleScene::GetSelected() const
@@ -329,7 +343,7 @@ void ModuleScene::RayCastSelect(math::Ray & ray)
 	{
 		float closest_distance = -1.f;
 		RE_GameObject* new_selection = nullptr;
-		math::float4 camera_pos = math::float4(App->editor->GetCamera()->GetTransform()->GetGlobalPosition(), 0.f);
+		math::float4 camera_pos = math::float4(RE_CameraManager::CurrentCamera()->GetTransform()->GetGlobalPosition(), 0.f);
 
 		for (auto object : objects)
 		{
@@ -416,10 +430,10 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 
 		root->TransformModified();
 		root->ResetBoundingBoxFromChilds();
-		aabb_need_reset = false;
+		static_gos_modified = false;
 		// FOCUS CAMERA ON DROPPED GEOMETRY
-		App->scene->SetSelected(toAdd);
-		App->editor->FocusSelected();
+		SetSelected(toAdd);
+		RE_CameraManager::CurrentCamera()->Focus(selected);
 	}
 	else
 		LOG_ERROR("Error to load dropped fbx");
@@ -504,12 +518,17 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 	}
 }
 
-void ModuleScene::SceneModified()
+void ModuleScene::StaticTransformed()
 {
-	aabb_need_reset = true;
+	static_gos_modified = true;
 }
 
-uint ModuleScene::GetShaderScene() const
+bool ModuleScene::DrawingSelAABB() const
 {
-	return sceneShader;
+	return draw_selected_aabb;
+}
+
+const QTree* ModuleScene::GetQuadTree() const
+{
+	return &quad_tree;
 }

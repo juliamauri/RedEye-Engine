@@ -26,7 +26,8 @@ public:
 	void PreUpdate();
 	void Update();
 	void PostUpdate();
-	void Draw(bool recursive = true);
+	void DrawWithChilds() const;
+	void DrawItselfOnly() const;
 
 	void Serialize(JSONNode* node);
 
@@ -50,6 +51,8 @@ public:
 	// Static
 	bool IsStatic() const;
 	void SetStatic(bool value);
+	void IterativeSetActive(bool val);
+	void IterativeSetStatic(bool val);
 
 	// Editor Controls
 	void OnPlay();
@@ -66,8 +69,7 @@ public:
 	RE_CompTransform* AddCompTransform();
 	RE_CompMesh* AddCompMesh(const char* file_path_data = nullptr, const bool dropped = false);
 	void AddCompMesh(RE_CompMesh* comp_mesh);
-	RE_CompCamera* AddCompCamera();
-	RE_CompCamera* AddCompCamera(bool prespective, float near_plane, float far_plane, float h_fov_rads, float v_fov_rads, float h_fov_degrees, float v_fov_degrees, math::vec position, math::vec rotation, math::vec scale);
+	RE_CompCamera* AddCompCamera(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 0.523599f, short aspect_ratio_t = 0, bool draw_frustum = true);
 
 	RE_CompTransform* GetTransform() const;
 	RE_CompMesh* GetMesh() const;
@@ -82,9 +84,9 @@ public:
 	const char* GetName() const;
 
 	// AABB
-	void DrawAABB(math::vec color, float width);
-	void DrawGlobalAABB(math::vec color, float width);
-	void DrawAllAABB(math::vec color, float width);
+	void DrawAABB(math::vec color);
+	void DrawGlobalAABB();
+	void DrawAllAABB();
 	void AddToBoundingBox(math::AABB box);
 	void ResetBoundingBoxFromChilds();
 	void ResetGlobalBoundingBox();
@@ -98,7 +100,7 @@ public:
 private:
 
 	bool active = true;
-	bool isStatic = false;
+	bool isStatic = true;
 
 	UUID uuid;
 

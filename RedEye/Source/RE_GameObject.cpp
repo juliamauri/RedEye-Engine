@@ -11,11 +11,13 @@
 #include "RE_CompCamera.h"
 #include "RE_CompParticleEmiter.h"
 #include "ShaderManager.h"
-#include "ModuleEditor.h"
+#include "ModuleRenderer3D.h"
 #include "OutputLog.h"
+#include "RE_CameraManager.h"
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
 #include "ImGui\imgui.h"
+#include <stack>
 
 RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, bool start_active, bool isStatic)
 	: name(name), parent(p), active(start_active), isStatic(isStatic)
@@ -44,6 +46,8 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 
 	local_bounding_box = go.local_bounding_box;
 	global_bounding_box = go.global_bounding_box;
+
+	RE_CompCamera* comp_camera;
 	
 	for (RE_Component* cmpGO : go.components)
 	{
@@ -53,7 +57,9 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 			components.push_back(transform = new RE_CompTransform(*(RE_CompTransform*)cmpGO, this));
 			break;
 		case C_CAMERA:
-			components.push_back(new RE_CompCamera(*(RE_CompCamera*)cmpGO, this));
+			comp_camera = new RE_CompCamera(*(RE_CompCamera*)cmpGO, this);
+			App->cams->AddMainCamera(comp_camera);
+			components.push_back(comp_camera);
 			break;
 		case C_MESH:
 			components.push_back(new RE_CompMesh(*(RE_CompMesh*)cmpGO, this));
@@ -101,15 +107,35 @@ void RE_GameObject::PostUpdate()
 	for (auto child : childs) child->PostUpdate();
 }
 
-void RE_GameObject::Draw(bool recursive)
+void RE_GameObject::DrawWithChilds() const
 {
 	if (active)
 	{
-		if (recursive)
-			for (auto child : childs) child->Draw();
+		for (auto component : components)
+			component->Draw();
 
-		for (auto component : components) component->Draw();
+		std::stack<const RE_GameObject*> gos;
+		gos.push(this);
+		while (!gos.empty())
+		{
+			const RE_GameObject * go = gos.top();
+			gos.pop();
+
+			for (auto component : go->components)
+				component->Draw();
+
+			for (auto child : go->GetChilds())
+				if (child->IsActive())
+					gos.push(child);
+		}
 	}
+}
+
+void RE_GameObject::DrawItselfOnly() const
+{
+	if (active)
+		for (auto component : components)
+			component->Draw();
 }
 
 void RE_GameObject::Serialize(JSONNode * node)
@@ -219,6 +245,44 @@ void RE_GameObject::SetStatic(bool value)
 	isStatic = value;
 }
 
+void RE_GameObject::IterativeSetActive(bool val)
+{
+	bool tmp = active;
+	std::stack<RE_GameObject*> gos;
+	gos.push(this);
+
+	while (!gos.empty())
+	{
+		RE_GameObject * go = gos.top();
+		go->active = val;
+		gos.pop();
+
+		for (auto child : go->childs)
+			gos.push(child);
+	}
+
+	active = tmp;
+}
+
+void RE_GameObject::IterativeSetStatic(bool val)
+{
+	bool tmp = isStatic;
+	std::stack<RE_GameObject*> gos;
+	gos.push(this);
+
+	while (!gos.empty())
+	{
+		RE_GameObject * go = gos.top();
+		go->isStatic = val;
+		gos.pop();
+
+		for (auto child : go->childs)
+			gos.push(child);
+	}
+
+	isStatic = tmp;
+}
+
 void RE_GameObject::OnPlay()
 {
 	for (auto component : components) component->OnPlay();
@@ -237,10 +301,11 @@ void RE_GameObject::OnStop()
 	for (auto child : childs) child->OnStop();
 }
 
-RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float h_fov_rads, float v_fov_rads, float h_fov_degrees, float v_fov_degrees, math::vec position, math::vec rotation, math::vec scale)
+RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float v_fov_rads, short aspect_ratio_t, bool draw_frustum)
 {
-	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, h_fov_rads, v_fov_rads, h_fov_degrees, v_fov_degrees, position, rotation, scale);
+	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, v_fov_rads, aspect_ratio_t, draw_frustum);
 	components.push_back((RE_Component*)comp_camera);
+	App->cams->AddMainCamera(comp_camera);
 	return comp_camera;
 }
 
@@ -272,7 +337,9 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 	}
 	else if (ComponentType(type) == C_CAMERA)
 	{
-		ret = (RE_Component*)new RE_CompCamera(this);
+		RE_CompCamera* comp_camera = new RE_CompCamera(this);
+		App->cams->AddMainCamera(comp_camera);
+		ret = (RE_Component*)comp_camera;
 	}
 	else if (ComponentType(type) == C_PARTICLEEMITER)
 	{
@@ -385,14 +452,6 @@ void RE_GameObject::AddCompMesh(RE_CompMesh * comp_mesh)
 	components.push_back((RE_Component*)comp_mesh);
 }
 
-
-RE_CompCamera * RE_GameObject::AddCompCamera()
-{
-	RE_CompCamera* ret = new RE_CompCamera();
-	components.push_back(ret->AsComponent());
-	return ret;
-}
-
 RE_Component* RE_GameObject::GetComponent(const ushortint type) const
 {
 	RE_Component* ret = nullptr;
@@ -440,7 +499,7 @@ RE_CompCamera * RE_GameObject::GetCamera() const
 
 	for (auto component : components)
 	{
-		if (component->GetType() == ComponentType::C_MESH)
+		if (component->GetType() == ComponentType::C_CAMERA)
 		{
 			ret = (RE_CompCamera*)component;
 			break;
@@ -469,7 +528,9 @@ RE_GameObject * RE_GameObject::GetGoFromUUID(UUID parent)
 
 void RE_GameObject::TransformModified()
 {
-	App->scene->SceneModified();
+	if (isStatic)
+		App->scene->StaticTransformed();
+
 	ResetGlobalBoundingBox();
 
 	for (auto component : components)
@@ -484,18 +545,14 @@ const char * RE_GameObject::GetName() const
 	return name.c_str();
 }
 
-void RE_GameObject::DrawAABB(math::vec color, float width)
+void RE_GameObject::DrawAABB(math::vec color)
 {
 	ShaderManager::use(0);
 
-	math::float4x4 model = transform->GetMatrixModel();
-	RE_CompCamera* camera = App->editor->GetCamera();
-
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((model * camera->GetView()).ptr());
+	glLoadMatrixf((transform->GetMatrixModel() * RE_CameraManager::CurrentCamera()->GetView()).ptr());
 
 	glColor3f(color.x, color.y, color.z);
-	glLineWidth(width);
 	glBegin(GL_LINES);
 
 	for (uint i = 0; i < 12; i++)
@@ -511,20 +568,10 @@ void RE_GameObject::DrawAABB(math::vec color, float width)
 	}
 
 	glEnd();
-	glLineWidth(1.0f);
 }
 
-void RE_GameObject::DrawGlobalAABB(math::vec color, float width)
+void RE_GameObject::DrawGlobalAABB()
 {
-	ShaderManager::use(0);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((App->editor->GetCamera()->GetView()).ptr());
-
-	glColor3f(color.x, color.y, color.z);
-	glLineWidth(width);
-	glBegin(GL_LINES);
-
 	for (uint i = 0; i < 12; i++)
 	{
 		glVertex3f(
@@ -536,20 +583,22 @@ void RE_GameObject::DrawGlobalAABB(math::vec color, float width)
 			global_bounding_box.Edge(i).b.y,
 			global_bounding_box.Edge(i).b.z);
 	}
-
-	glEnd();
-	glLineWidth(1.0f);
 }
 
-void RE_GameObject::DrawAllAABB(math::vec color, float width)
+void RE_GameObject::DrawAllAABB()
 {
 	if (active)
 	{
-		if (App->scene->GetSelected() != this)
-			DrawGlobalAABB(color, width);
+		if (App->scene->GetSelected() == this)
+		{
+			if (!App->scene->DrawingSelAABB())
+				DrawGlobalAABB();
+		}
+		else if (parent != nullptr)
+			DrawGlobalAABB();
 
 		for (auto child : childs)
-			child->DrawAllAABB(color, width);
+			child->DrawAllAABB();
 	}
 }
 
@@ -562,7 +611,7 @@ void RE_GameObject::AddToBoundingBox(math::AABB box)
 void RE_GameObject::ResetBoundingBoxFromChilds()
 {
 	// Local Bounding Box
-	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::one * 0.1f);
 
 	for (RE_Component* comp : components)
 	{
@@ -590,14 +639,6 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 		{
 			// Update child AABB
 			(*child)->ResetBoundingBoxFromChilds();
-
-			/*math::float4x4 trs = (*child)->transform->GetLocalMatrixModel();
-			math::AABB child_aabb = (*child)->GetLocalBoundingBox();
-
-			child_aabb.SetFromCenterAndSize(
-				trs.Row3(3) + trs.TransformPos(child_aabb.CenterPoint()),
-				trs.TransformPos(child_aabb.Size()));*/
-
 
 			math::AABB child_aabb = (*child)->GetLocalBoundingBox();
 			child_aabb.TransformAsAABB((*child)->transform->GetLocalMatrixModel().Transposed());
@@ -632,25 +673,34 @@ math::AABB RE_GameObject::GetGlobalBoundingBox() const
 
 void RE_GameObject::DrawProperties()
 {
-	/*if (ImGui::BeginMenu("Options"))
+	if (ImGui::BeginMenu("Child Options"))
 	{
 		// if (ImGui::MenuItem("Save as prefab")) {}
 
+		if (ImGui::MenuItem("Activate Childs"))
+			IterativeSetActive(true);
+		if (ImGui::MenuItem("Deactivate Childs"))
+			IterativeSetActive(false);
+
+		if (ImGui::MenuItem("Childs to Static"))
+			IterativeSetStatic(true);
+		if (ImGui::MenuItem("Childs to non-Static"))
+			IterativeSetStatic(false);
+
 		ImGui::EndMenu();
-	}*/
+	}
 
 	char name_holder[64];
 	sprintf_s(name_holder, 64, "%s", name.c_str());
 	if (ImGui::InputText("Name", name_holder, 64))
 		name = name_holder;
 
-	if (ImGui::Checkbox("Active", &active))
-		active != active;
+	ImGui::Checkbox("Active", &active);
 
 	ImGui::SameLine();
 
 	if (ImGui::Checkbox("Static", &isStatic))
-		isStatic != isStatic;
+		App->scene->StaticTransformed();
 
 	if (ImGui::TreeNode("Local Bounding Box"))
 	{

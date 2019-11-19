@@ -12,6 +12,7 @@
 #include "RE_PrimitiveManager.h"
 #include "ResourceManager.h"
 
+#include "RE_CameraManager.h"
 #include "ShaderManager.h"
 #include "RE_TextureImporter.h"
 #include "RE_ModelImporter.h"
@@ -45,6 +46,7 @@ Application::Application()
 	modules.push_back(editor = new ModuleEditor("Editor"));
 	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
 
+	cams = new RE_CameraManager();
 	textures = new RE_TextureImporter("Images/");
 	shaders = new ShaderManager("Assets/Shaders/");
 	primitives = new RE_PrimitiveManager();
@@ -56,6 +58,7 @@ Application::Application()
 
 Application::~Application()
 {
+	DEL(cams);
 	DEL(textures);
 	DEL(shaders);
 	DEL(primitives);
@@ -124,6 +127,7 @@ bool Application::Init(int argc, char* argv[])
 			if (ret)
 			{
 				// Initiallize Indenpendent Modules
+				if (cams) cams->Init();
 				if (time) time->Init(/*TODO get max fps from node*/);
 				if (sys_info) sys_info->Init();
 				if (math) math->Init();
@@ -343,36 +347,32 @@ void Application::RecieveEvent(const Event& e)
 	{
 	case PLAY: 
 	{
-		state = GS_PLAY;
-		time->StartGameTimer();
-
 		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive() == true)
 				(*it)->OnPlay();
-		
+
+		time->StartGameTimer();
+		state = GS_PLAY;
 		break;
 	}
 	case PAUSE:
 	{
-		state = GS_PAUSE;
-		time->PauseGameTimer();
-
 		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive() == true)
 				(*it)->OnPause();
 
+		time->PauseGameTimer();
+		state = GS_PAUSE;
 		break;
 	}
 	case STOP:
 	{
-		state = GS_STOP;
-		time->StopGameTimer();
-
 		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive() == true)
 				(*it)->OnStop();
 
-		// load saved scene
+		time->StopGameTimer();
+		state = GS_STOP;
 		break;
 	}
 	case REQUEST_DEFAULT_CONF: want_to_load_def = true; break;

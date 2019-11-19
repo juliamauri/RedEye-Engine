@@ -151,6 +151,9 @@
     <ClCompile Include="RE_Shader.cpp">
       <Filter>Modules\Resource Managers\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="RE_CameraManager.cpp">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -455,6 +458,9 @@
     </ClInclude>
     <ClInclude Include="RE_SkyBox.h">
       <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CameraManager.h">
+      <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

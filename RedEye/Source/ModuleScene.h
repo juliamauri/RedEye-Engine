@@ -24,15 +24,17 @@ public:
 
 	void RecieveEvent(const Event& e) override;
 
+	RE_GameObject* GetRoot() const;
 	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
 	void AddGoToRoot(RE_GameObject* toAdd);
 	void DuplicateSelectedObject();
 
 	void CreateCube();
 	void CreateSphere();
+	void CreateCamera();
 
 	void DrawEditor() override;
-	void DrawScene();
+	void DrawDebug() const;
 	void DrawHeriarchy();
 	void DrawFocusedProperties();
 
@@ -43,9 +45,12 @@ public:
 	void Serialize();
 	void LoadFBXOnScene(const char* fbxPath);
 	void LoadTextureOnSelectedGO(const char* texturePath);
-	void SceneModified();
+	
+	void StaticTransformed();
 
-	uint GetShaderScene()const;
+	bool DrawingSelAABB() const;
+
+	const QTree* GetQuadTree() const;
 
 private:
 	//init values
@@ -55,26 +60,26 @@ private:
 	RE_GameObject* selected = nullptr;
 
 	// Bounding Boxes
-	bool aabb_need_reset = false;
+	bool static_gos_modified = false;
 	unsigned int aabb_reset_time = 0;
+
+	bool draw_all_aabb = false;
+	math::vec all_aabb_color;
+
+	bool draw_selected_aabb = false;
+	math::vec sel_aabb_color;
 
 	// Quadtree
 	QTree quad_tree;
-	bool draw_quad_tree = false;
+	bool draw_quad_tree = true;
+	math::vec quad_tree_color;
+
+	// Camera Frustums
+	bool draw_cameras = true;
+	math::vec frustum_color;
 
 	// Config
-	bool draw_all_aabb = true;
-	math::vec all_aabb_color;
-	float all_aabb_width = 1.0f;
-
-	bool draw_selected_aabb = true;
-	math::vec sel_aabb_color;
-	float sel_aabb_width = 5.0f;
-
 	bool focus_on_select = false;
-
-	unsigned int sceneShader = 0;
-	unsigned int skyboxShader = 0;
 };
 
 

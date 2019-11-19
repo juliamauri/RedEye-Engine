@@ -5,98 +5,65 @@
 #include "FileSystem.h"
 #include "RE_CompTransform.h"
 #include "ModuleWindow.h"
-#include "ModuleEditor.h"
+#include "ModuleRenderer3D.h"
 #include "OutputLog.h"
 #include "ShaderManager.h"
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
 
-RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float near_plane, float far_plane)
-	: RE_Component(C_CAMERA, go), isPerspective(toPerspective)
+RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool draw_frustum) :
+	RE_Component(C_CAMERA, go),
+	right(math::vec(1.f, 0.f, 0.f)),
+	up(math::vec(0.f, 1.f, 0.f)),
+	front(math::vec(0.f, 0.f, 1.f)),
+	draw_frustum(draw_frustum)
 {
+	// Fustrum - Kind
+	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+
+	// Fustrum - Plane distance
+	SetPlanesDistance(n_plane, f_plane);
+
+	// Fustrum - Perspective & Aspect Ratio
+	isPerspective = toPerspective;
+	v_fov_rads = v_fov;
+	SetAspectRatio(AspectRatioTYPE(aspect));
+
+	// Transform
 	transform = (go == nullptr) ? new RE_CompTransform() : go->GetTransform();
 
-	frustum.SetKind(
-		math::FrustumProjectiveSpace::FrustumSpaceGL,
-		math::FrustumHandedness::FrustumRightHanded);
-
-	if (isPerspective)
-		frustum.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
-	else
-		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
-
-	frustum.SetViewPlaneDistances(near_plane, far_plane);
-
-	SetVerticalFOV(30.f);
-
-	right = math::vec(1.f, 0.f, 0.f);
-	up = math::vec(0.f, 1.f, 0.f);
-	front = math::vec(0.f, 0.f, 1.f);
-
 	OnTransformModified();
-
-	RecalculateMatrixes();
-}
-RE_CompCamera::RE_CompCamera(RE_GameObject * go, bool toPerspective, float near_plane, float far_plane, float h_fov_rads, float v_fov_rads, float h_fov_degrees, float v_fov_degrees, math::vec position, math::vec rotation, math::vec scale)
-	: RE_Component(C_CAMERA, go), isPerspective(toPerspective), near_plane(near_plane), far_plane(far_plane), h_fov_rads(h_fov_rads), v_fov_rads(v_fov_rads), h_fov_degrees(h_fov_degrees), v_fov_degrees(v_fov_degrees)
-{
-	transform = go->GetTransform();
-	transform->SetPosition(position);
-	transform->SetRotation(rotation);
-	transform->SetScale(scale);
-
-	frustum.SetKind(
-		math::FrustumProjectiveSpace::FrustumSpaceGL,
-		math::FrustumHandedness::FrustumRightHanded);
-
-	if (isPerspective)
-		frustum.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
-	else
-		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
-
-	frustum.SetViewPlaneDistances(near_plane, far_plane);
-
-	SetVerticalFOV(30.f);
-
-	right = math::vec(1.f, 0.f, 0.f);
-	up = math::vec(0.f, 1.f, 0.f);
-	front = math::vec(0.f, 0.f, 1.f);
-
-	OnTransformModified();
-
 	RecalculateMatrixes();
 }
 
-RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go) : RE_Component(C_CAMERA, go)
+RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go) :
+	RE_Component(C_CAMERA, go),
+	right(cmpCamera.right),
+	up(cmpCamera.up),
+	front(cmpCamera.front),
+	draw_frustum(cmpCamera.draw_frustum)
 {
+	// Fustrum - Kind
+	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+
+	// Fustrum - Plane distance
+	SetPlanesDistance(cmpCamera.near_plane, cmpCamera.far_plane);
+
+	// Fustrum - Perspective & Aspect Ratio
+	isPerspective = cmpCamera.isPerspective;
+	v_fov_rads = cmpCamera.v_fov_rads;
+	SetAspectRatio(cmpCamera.target_ar);
+
+	// Transform
 	if (cmpCamera.GetGO() == nullptr && go == nullptr)
 		transform = new RE_CompTransform(*cmpCamera.transform);
 	else
 		transform = (go == nullptr) ? new RE_CompTransform() : go->GetTransform();
 
-	near_plane = cmpCamera.near_plane;
-	far_plane = cmpCamera.far_plane;
-
-	h_fov_rads = cmpCamera.h_fov_rads;
-	v_fov_rads = cmpCamera.v_fov_rads;
-
-	h_fov_degrees = cmpCamera.h_fov_degrees;
-	v_fov_degrees = cmpCamera.v_fov_degrees;
-
-	isPerspective = cmpCamera.isPerspective;
-
-	frustum = cmpCamera.frustum;
-
-	right = cmpCamera.right;
-	up = cmpCamera.up;
-	front = cmpCamera.front;
-
 	OnTransformModified();
-
 	RecalculateMatrixes();
 }
-
 
 RE_CompCamera::~RE_CompCamera()
 {
@@ -116,47 +83,49 @@ void RE_CompCamera::Update()
 			OnTransformModified();
 		}
 	}
+	else if (transform == nullptr)
+		transform = go->GetTransform();
 	
 	if (need_recalculation)
 		RecalculateMatrixes();
-}
-
-void RE_CompCamera::Draw()
-{
-	if (draw_frustum)
-	{
-		ShaderManager::use(0);
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf((transform->GetMatrixModel() * App->editor->GetCamera()->GetView()).ptr());
-
-		glColor3f(0.f, 255.f, 165.f);
-		glLineWidth(3.0f);
-		glBegin(GL_LINES);
-
-		for (uint i = 0; i < 12; i++)
-		{
-			glVertex3f(frustum.Edge(i).a.x, frustum.Edge(i).a.y, frustum.Edge(i).a.z);
-			glVertex3f(frustum.Edge(i).b.x, frustum.Edge(i).b.y, frustum.Edge(i).b.z);
-		}
-
-		glEnd();
-		glLineWidth(1.0f);
-	}
 }
 
 void RE_CompCamera::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Camera"))
 	{
-		float r[3] = { right.x, right.y, right.z };
-		ImGui::DragFloat3("Right", r, 0.1f, -10, 10, "%.2f");
+		ImGui::Checkbox("Draw Frustum", &draw_frustum);
+		ImGui::Checkbox("Override Culling", &override_cull);
 
-		float u[3] = { up.x, up.y, up.z };
-		ImGui::DragFloat3("Up", u, 0.1f, -10, 10, "%.2f");
+		if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f"))
+			SetPlanesDistance(near_plane, far_plane);
 
-		float f[3] = { front.x, front.y, front.z };
-		ImGui::DragFloat3("Front", f, 0.1f, -10, 10, "%.2f");
+		if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane, 65000.0f, "%.1f"))
+			SetPlanesDistance(near_plane, far_plane);
+
+		const char* items[] = { "Perspective", "Orthographic" };
+		int item_current = isPerspective? 0 : 1;
+		if (ImGui::Combo("Type", &item_current, items, 2))
+		{
+			if (isPerspective != (item_current == 0))
+				SwapCameraType();
+		}
+
+		if (isPerspective)
+			if (ImGui::DragFloat("FOV", &v_fov_degrees, 1.0f, 0.0f, 180.0f, "%.1f"))
+				SetFOV(v_fov_degrees);
+	}
+}
+
+void RE_CompCamera::DrawFrustum() const
+{
+	if (draw_frustum)
+	{
+		for (uint i = 0; i < 12; i++)
+		{
+			glVertex3f(frustum.Edge(i).a.x, frustum.Edge(i).a.y, frustum.Edge(i).a.z);
+			glVertex3f(frustum.Edge(i).b.x, frustum.Edge(i).b.y, frustum.Edge(i).b.z);
+		}
 	}
 }
 
@@ -199,30 +168,150 @@ RE_CompTransform * RE_CompCamera::GetTransform() const
 
 void RE_CompCamera::OnTransformModified()
 {
-	math::float4x4 global_transform = transform->GetMatrixModel();
+	math::float4x4 trs = transform->GetMatrixModel();
 	frustum.SetFrame(
-		global_transform.Row3(3),
-		front,
-		up);
+		trs.Row3(3),
+		trs.MulDir(front),
+		trs.MulDir(up));
 
 	need_recalculation = true;
 }
 
-void RE_CompCamera::SetPlanesDistance(float near_plane, float far_plane)
+void RE_CompCamera::SetPlanesDistance(float n_plane, float f_plane)
 {
+	near_plane = n_plane;
+	far_plane = f_plane;
 	frustum.SetViewPlaneDistances(near_plane, far_plane);
+}
+
+void RE_CompCamera::SetFOV(float vertical_fov_degrees)
+{
+	RE_CAPTO(vertical_fov_degrees, 180.0f);
+
+	v_fov_rads = vertical_fov_degrees * DEGTORAD;
+	h_fov_rads = 2.0f * math::Atan(math::Tan(v_fov_rads / 2.0f) * (width / height));
+
+	h_fov_degrees = h_fov_rads * RADTODEG;
+	v_fov_degrees = vertical_fov_degrees;
+
+	if (isPerspective)
+	{
+		frustum.SetPerspective(h_fov_rads, v_fov_rads);
+		need_recalculation = true;
+	}
+}
+
+void RE_CompCamera::SetAspectRatio(AspectRatioTYPE aspect_ratio, bool use_main_window)
+{
+	target_ar = aspect_ratio;
+	if (use_main_window)
+		SetBounds(App->window->GetWidth(), App->window->GetHeight());
+	else
+		SetBounds(width, height);
+}
+
+void RE_CompCamera::SetBounds(float w, float h)
+{
+	switch (target_ar)
+	{
+	case Fit_Window:
+	{
+		width = w;
+		height = h;
+		break;
+	}
+	case Square_1x1:
+	{
+		if (w >= h)
+			width = height = h;
+		else
+			width = height = w;
+
+		break;
+	}
+	case TraditionalTV_4x3:
+	{
+		if (w / 4.0f >= h / 3.0f)
+		{
+			width = (h * 4.0f) / 3.0f;
+			height = h;
+		}
+		else
+		{
+			width = w;
+			height = (w * 3.0f) / 4.0f;
+		}
+
+		break;
+	}
+	case Movietone_16x9:
+	{
+		if (w / 16.0f >= h / 9.0f)
+		{
+			width = (h * 16.0f) / 9.0f;
+			height = h;
+		}
+		else
+		{
+			width = w;
+			height = (w * 9.0f) / 16.0f;
+		}
+		break;
+	}
+	}
+
+	SetFOV(v_fov_rads * RADTODEG);
+
+	if (!isPerspective)
+		frustum.SetOrthographic(width, height);
+
+	need_recalculation = true;
+}
+
+float RE_CompCamera::GetTargetWidth() const
+{
+	return width;
+}
+
+float RE_CompCamera::GetTargetHeight() const
+{
+	return height;
+}
+
+void RE_CompCamera::GetTargetWidthHeight(int & w, int & h) const
+{
+	w = width;
+	h = height;
+}
+
+void RE_CompCamera::GetTargetWidthHeight(float & w, float & h) const
+{
+	w = width;
+	h = height;
+}
+
+void RE_CompCamera::SetPerspective()
+{
+	isPerspective = true;
+	frustum.SetVerticalFovAndAspectRatio(v_fov_rads, width / height);
+	need_recalculation = true;
+}
+
+void RE_CompCamera::SetOrthographic()
+{
+	isPerspective = false;
+	frustum.SetOrthographic(width, height);
+	need_recalculation = true;
 }
 
 void RE_CompCamera::SwapCameraType()
 {
-	if (isPerspective)
-		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
-	else
-		frustum.SetPerspective(1.0f, (float)App->window->GetHeight() / (float)App->window->GetWidth());
-	
-	isPerspective = !isPerspective;
+	isPerspective ? SetOrthographic() : SetPerspective();
+}
 
-	need_recalculation = true;
+const math::Frustum RE_CompCamera::GetFrustum() const
+{
+	return frustum;
 }
 
 float RE_CompCamera::GetVFOVDegrees() const
@@ -233,34 +322,6 @@ float RE_CompCamera::GetVFOVDegrees() const
 float RE_CompCamera::GetHFOVDegrees() const
 {
 	return h_fov_degrees;
-}
-
-void RE_CompCamera::SetVerticalFOV(float vertical_fov_degrees)
-{
-	if (isPerspective)
-	{
-		RE_CAPTO(vertical_fov_degrees, 180.0f);
-
-		v_fov_rads = vertical_fov_degrees * DEGTORAD;
-		h_fov_rads = 2.0f * math::Atan(math::Tan(v_fov_rads / 2.0f) * App->window->GetAspectRatio());
-
-		h_fov_degrees = h_fov_rads * RADTODEG;
-		v_fov_degrees = vertical_fov_degrees;
-
-		frustum.SetPerspective(h_fov_rads, v_fov_rads);
-
-		need_recalculation = true;
-	}
-}
-
-void RE_CompCamera::ResetAspectRatio()
-{
-	if (isPerspective)
-		frustum.SetVerticalFovAndAspectRatio(v_fov_rads, App->window->GetAspectRatio());
-	else
-		frustum.SetOrthographic((float)App->window->GetWidth(), (float)App->window->GetHeight());
-
-	need_recalculation = true;
 }
 
 math::float4x4 RE_CompCamera::GetView() const
@@ -283,9 +344,9 @@ float* RE_CompCamera::GetProjectionPtr() const
 	return (float*)calculated_projection.v;
 }
 
-math::Frustum RE_CompCamera::GetFrustum() const
+bool RE_CompCamera::OverridesCulling() const
 {
-	return frustum;
+	return override_cull;
 }
 
 void RE_CompCamera::RecalculateMatrixes()
@@ -377,25 +438,11 @@ void RE_CompCamera::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 	val.AddMember(rapidjson::Value::StringRefType("near_plane"), rapidjson::Value().SetFloat(near_plane), node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("far_plane"), rapidjson::Value().SetFloat(far_plane), node->GetDocument()->GetAllocator());
 
-	val.AddMember(rapidjson::Value::StringRefType("h_fov_rads"), rapidjson::Value().SetFloat(h_fov_rads), node->GetDocument()->GetAllocator());
 	val.AddMember(rapidjson::Value::StringRefType("v_fov_rads"), rapidjson::Value().SetFloat(v_fov_rads), node->GetDocument()->GetAllocator());
 
-	val.AddMember(rapidjson::Value::StringRefType("h_fov_degrees"), rapidjson::Value().SetFloat(h_fov_degrees), node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("v_fov_degrees"), rapidjson::Value().SetFloat(v_fov_degrees), node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("aspect_ratio"), rapidjson::Value().SetInt((int)target_ar), node->GetDocument()->GetAllocator());
 
-
-	rapidjson::Value float_array(rapidjson::kArrayType);
-
-	float_array.PushBack(GetTransform()->GetLocalPosition().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().z, node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("position"), float_array.Move(), node->GetDocument()->GetAllocator());
-
-	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetLocalEulerRotation().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalEulerRotation().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalEulerRotation().z, node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("rotation"), float_array.Move(), node->GetDocument()->GetAllocator());
-
-	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetLocalScale().x, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().y, node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().z, node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("draw_frustum"), rapidjson::Value().SetBool(draw_frustum), node->GetDocument()->GetAllocator());
 
 	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
 }

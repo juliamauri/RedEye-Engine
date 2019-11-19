@@ -1399,26 +1399,12 @@ RE_GameObject * JSONNode::FillGO()
 						}
 						break;
 					case C_CAMERA:
-						vector = c.FindMember("position")->value;
-						position.Set(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
-
-						vector = c.FindMember("rotation")->value;
-						rotation.Set(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
-
-						vector = c.FindMember("scale")->value;
-						scale.Set(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
-
 						new_go->AddCompCamera(
 							c.FindMember("isPrespective")->value.GetBool(),
 							c.FindMember("near_plane")->value.GetFloat(),
 							c.FindMember("far_plane")->value.GetFloat(),
-							c.FindMember("h_fov_rads")->value.GetFloat(),
 							c.FindMember("v_fov_rads")->value.GetFloat(),
-							c.FindMember("h_fov_degrees")->value.GetFloat(),
-							c.FindMember("v_fov_degrees")->value.GetFloat(),
-							position,
-							rotation,
-							scale);
+							c.FindMember("draw_frustum")->value.GetBool());
 						break;
 					case C_SPHERE:
 					{

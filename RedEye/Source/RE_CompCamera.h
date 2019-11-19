@@ -5,52 +5,56 @@
 #include "RE_Math.h"
 #include "Globals.h"
 
+enum AspectRatioTYPE : short
+{
+	Fit_Window = 0,
+	Square_1x1,
+	TraditionalTV_4x3,
+	Movietone_16x9,
+	Personalized
+};
+
 class RE_CompTransform;
 
 class RE_CompCamera : public RE_Component
 {
 public:
-	//Camera initialize world origin at (0, 0, 0) and planes distance 0.1f near and 100.0f far
-	//@param toPerspective -> true = Prespective | false = Orthographic
-	//@param near and @far -> distances of planes from camera position
 	RE_CompCamera(
 		RE_GameObject* go = nullptr,
-		bool toPerspective = true, 
+		bool toPerspective = true,
 		float near_plane = 1.0f,
-		float far_plane = 5000.0f);
-
-	RE_CompCamera(
-		RE_GameObject* go,
-		bool toPerspective,
-		float near_plane,
-		float far_plane,
-		float h_fov_rads, float v_fov_rads, 
-		float h_fov_degrees, float v_fov_degrees, 
-		math::vec position, math::vec rotation, math::vec scale);
-
-	RE_CompCamera(
-		const RE_CompCamera& cmpCamera,
-		RE_GameObject* go);
-
+		float far_plane = 5000.0f,
+		float v_fov = 0.523599f,
+		short aspect_ratio_t = 0, 
+		bool draw_frustum = true);
+	RE_CompCamera(const RE_CompCamera& cmpCamera, RE_GameObject* go);
 	~RE_CompCamera();
 	
 	void Update() override;
-	void Draw() override;
 	void DrawProperties() override;
+	void DrawFrustum() const;
 
 	RE_CompTransform* GetTransform() const;
 	void OnTransformModified() override;
 
 	void SetPlanesDistance(float near_plane, float far_plane);
+	void SetFOV(float vertical_fov_degrees);
+	void SetAspectRatio(AspectRatioTYPE aspect_ratio, bool use_main_window = true);
+	void SetBounds(float width, float height);
+
+	float GetTargetWidth() const;
+	float GetTargetHeight() const;
+	void GetTargetWidthHeight(int &width, int &height) const;
+	void GetTargetWidthHeight(float &width, float &height) const;
+
+	void SetPerspective();
+	void SetOrthographic();
 	void SwapCameraType();
 
-	// FOV
+	const math::Frustum GetFrustum() const;
+
 	float GetVFOVDegrees() const;
 	float GetHFOVDegrees() const;
-	void SetVerticalFOV(float vertical_fov_degrees);
-
-	// Call this function if window size changed.
-	void ResetAspectRatio();
 
 	math::float4x4 GetView() const;
 	float* GetViewPtr() const;
@@ -58,13 +62,13 @@ public:
 	math::float4x4 GetProjection() const;
 	float* GetProjectionPtr() const;
 
-	math::Frustum GetFrustum() const;
+	bool OverridesCulling() const;
 
 	// Camera Controls
 	void LocalRotate(float dx, float dy);
 	void LocalMove(Dir dir, float speed);
 	void Orbit(float dx, float dy, RE_GameObject* focus);
-	void Focus(RE_GameObject* focus, float min_dist);
+	void Focus(RE_GameObject* focus, float min_dist = 3.0f);
 
 	// local camera Axis
 	math::vec GetRight() const;
@@ -93,17 +97,21 @@ private:
 	// Camera frustum
 	math::Frustum frustum;
 
-	// Values from frustum
-	bool isPerspective = true;
-
+	// Panes
 	float near_plane = 0.0f;
 	float far_plane = 0.0f;
 
+	// Field of View
+	bool isPerspective = true;
 	float h_fov_rads = 0.0f;
-	float v_fov_rads = 0.0f;
-
+	float v_fov_rads = 30.0f;
 	float h_fov_degrees = 0.0f;
 	float v_fov_degrees = 0.0f;
+
+	// Aspect Ratio
+	AspectRatioTYPE target_ar = Fit_Window;
+	float width = 0.f;
+	float height = 0.f;
 
 	// View & Projection
 	bool need_recalculation = false;
@@ -112,6 +120,7 @@ private:
 
 	// Debug Drawing
 	bool draw_frustum = true;
+	bool override_cull = false;
 };
 
 #endif // !__RE_CCOMPAMERA_H__

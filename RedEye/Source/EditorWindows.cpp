@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
+#include "ModuleRenderer3d.h"
 #include "TimeManager.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
@@ -12,6 +13,7 @@
 #include "RE_HandleErrors.h"
 #include "RE_TextureImporter.h"
 #include "RE_InternalResources.h"
+#include "RE_CameraManager.h"
 
 #include "RE_Prefab.h"
 
@@ -415,29 +417,6 @@ void TexturesWindow::Draw(bool secondary)
 	ImGui::End();
 }
 
-EditorSettingsWindow::EditorSettingsWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
-
-void EditorSettingsWindow::Draw(bool secondary)
-{
-	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
-	{
-		if (secondary) {
-			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-		}
-
-		RE_CompCamera* cam = App->editor->GetCamera();
-		cam->DrawProperties();
-		cam->GetTransform()->DrawProperties();
-
-		if (secondary) {
-			ImGui::PopItemFlag();
-			ImGui::PopStyleVar();
-		}
-	}
-	ImGui::End();
-}
-
 PlayPauseWindow::PlayPauseWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
 
 void PlayPauseWindow::Draw(bool secondary)
@@ -451,15 +430,18 @@ void PlayPauseWindow::Draw(bool secondary)
 
 		float seconds = App->time->GetGameTimer();
 		if (ImGui::Button(App->GetState() == GS_PLAY ? "Restart" : "Play"))
-			App->ScenePlay();
+		{
+			// check main camera
+			if (RE_CameraManager::HasMainCamera())
+				App->ScenePlay();
+			// else { report problems }
+		}
 		ImGui::SameLine();
-		if (ImGui::Button("Pause"))
-			App->ScenePause();
+		if (ImGui::Button("Pause")) App->ScenePause();
 		ImGui::SameLine();
-		if (ImGui::Button("Stop"))
-			App->SceneStop();
+		if (ImGui::Button("Stop")) App->SceneStop();
 		ImGui::SameLine();
-		ImGui::Text("%f", seconds);
+		ImGui::Text("%.2f", seconds);
 
 		if (secondary) {
 			ImGui::PopItemFlag();
