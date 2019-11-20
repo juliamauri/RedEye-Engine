@@ -24,6 +24,7 @@ public:
 	void Serialize(JSONNode* node, rapidjson::Value* val) override;
 
 	math::AABB GetAABB() const;
+	bool CheckFaceCollision(const math::Ray &ray, float &distance) const;
 
 protected:
 
