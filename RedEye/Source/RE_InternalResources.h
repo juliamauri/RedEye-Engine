@@ -1,6 +1,8 @@
 #ifndef __INTERNALRESOURCCES_H__
 #define __INTERNALRESOURCCES_H__
 
+class RE_SkyBox;
+
 class RE_InternalResources
 {
 public:
@@ -16,8 +18,6 @@ public:
 
 	unsigned int GetSkyBoxVAO() const;
 	unsigned int GetSkyBoxTexturesID() const;
-	void ChangeSkyBoxTexturesID(unsigned int id);
-	void CreateSkyBoxCube(float cubeSize);
 
 private:
 	bool InitShaders();
@@ -30,9 +30,7 @@ private:
 
 	unsigned int checkerTexture = 0;
 
-	unsigned int skyBoxVAO = 0;
-	unsigned int skyBoxVBO = 0;
-	unsigned int skyBoxTexturesID = 0;
+	RE_SkyBox* defaultSkybox = nullptr;
 };
 
 #endif // !__INTERNALRESOURCCES_H__
