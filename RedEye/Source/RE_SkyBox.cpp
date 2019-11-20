@@ -89,7 +89,10 @@ void RE_SkyBox::Draw()
 			if (ResourceContainer::inMemory) {
 				if (applySize) LoadSkyBoxCube();
 
-				if (applyTextures) App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
+				if (applyTextures) {
+					if (ID != 0) glDeleteTextures(1, &ID);
+					App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
+				}
 
 				applySize = false;
 				applyTextures = false;
@@ -194,7 +197,10 @@ void RE_SkyBox::Draw()
 
 		if (applySize) LoadSkyBoxCube();
 
-		if (applyTextures) App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
+		if (applyTextures) {
+			if (ID != 0) glDeleteTextures(1, &ID);
+			App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
+		}
 
 		applySize = false;
 		applyTextures = false;
