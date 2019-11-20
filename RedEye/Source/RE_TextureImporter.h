@@ -9,6 +9,7 @@ class RE_FileIO;
 class RE_Texture;
 struct RE_TextureSettings;
 enum TextureType;
+struct RE_SkyBoxSettings;
 
 class RE_TextureImporter
 {
@@ -20,15 +21,13 @@ public:
 
 	const char* AddNewTextureOnResources(const char* assetsPath);
 
+	std::string TransformToDDS(const char* assetBuffer, unsigned int assetSize, TextureType assetType, unsigned int* newSize);
+
 	void LoadTextureInMemory(const char* buffer, unsigned int size, TextureType type, unsigned int* ID, int* width, int* height, RE_TextureSettings settings);
 	void SaveOwnFormat(const char* assetBuffer, unsigned int assetSize, TextureType assetType, RE_FileIO* toSave);
 
-	unsigned int LoadSkyBoxTextures(const char* texturesPath, const char* extension);
-	unsigned int LoadSkyBoxTextures(const char* texturesPath[6]);
-
-private:
-
-	int GetExtensionIL(const char* extension);
+	void LoadSkyBoxInMemory(RE_SkyBoxSettings settings, unsigned int* ID);
+	void LoadSkyBoxInMemory(char* textures[6], unsigned int texturesSize[6], RE_SkyBoxSettings settings, unsigned int* ID);
 
 private:
 	const char* folderPath = nullptr;

@@ -2,6 +2,8 @@
 #define __RE_SKYBOX_H__
 
 #include "Resource.h"
+struct RE_SkyBoxSettings {
+};
 class RE_SkyBox :
 	public ResourceContainer
 {

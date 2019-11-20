@@ -130,8 +130,8 @@ void ResourceContainer::SaveMeta()
 	JSONNode* metaNode = metaSerialize.GetRootNode("meta");
 
 	metaNode->PushString("Name", name.c_str());
-	metaNode->PushString("AssetPath", assetPath.c_str);
-	metaNode->PushString("LibraryPath", libraryPath.c_str);
+	metaNode->PushString("AssetPath", assetPath.c_str());
+	metaNode->PushString("LibraryPath", libraryPath.c_str());
 	metaNode->PushString("MD5", md5);
 	metaNode->PushInt("Type", type);
 

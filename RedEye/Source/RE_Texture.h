@@ -69,6 +69,12 @@ public:
 	void DrawTextureImGui();
 	unsigned int GetID()const { return ID; }
 
+	static int GetComboFilter(RE_TextureFilters filter);
+	static RE_TextureFilters GetFilterCombo(int combo);
+
+	static int GetComboWrap(RE_TextureWrap wrap);
+	static RE_TextureWrap GetWrapCombo(int combo);
+
 private:
 	void Draw() override;
 	void SaveResourceMeta(JSONNode* metaNode) override; 
@@ -77,12 +83,6 @@ private:
 	void AssetLoad();
 	void LibraryLoad();
 	void LibrarySave();
-
-	int GetComboFilter(RE_TextureFilters filter);
-	RE_TextureFilters GetFilterCombo(int combo);
-
-	int GetComboWrap(RE_TextureWrap wrap);
-	RE_TextureWrap GetWrapCombo(int combo);
 
 	void TexParameteri(unsigned int pname, int param);
 	void TexParameterfv(unsigned int pname, float* param);
