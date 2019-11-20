@@ -29,8 +29,6 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(heriarchy = new HeriarchyWindow());
 	windows.push_back(properties = new PropertiesWindow());
 	windows.push_back(play_pause = new PlayPauseWindow());
-	windows.push_back(skyBoxWindow = new SkyBoxWindow());
-	windows.push_back(prefabsPanel = new PrefabsPanel());
 	about = new AboutWindow();
 	select_file = new SelectFile();
 

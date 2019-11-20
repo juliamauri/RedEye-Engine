@@ -16,9 +16,7 @@ class RandomTest;
 class TexturesWindow;
 class PlayPauseWindow;
 class SelectFile;
-class PrefabsPanel;
 class PopUpWindow;
-class SkyBoxWindow;
 
 struct SoftwareInfo;
 class RE_CompCamera;
@@ -48,7 +46,6 @@ public:
 
 	void PopUpFocus(bool focus);
 	PopUpWindow* popupWindow = nullptr;
-	SkyBoxWindow* skyBoxWindow = nullptr;
 
 private:
 
@@ -71,7 +68,6 @@ private:
 	HeriarchyWindow* heriarchy = nullptr;
 	PropertiesWindow* properties = nullptr;
 	PlayPauseWindow* play_pause = nullptr;
-	PrefabsPanel* prefabsPanel = nullptr;
 
 	AboutWindow* about = nullptr;
 	SelectFile* select_file = nullptr;

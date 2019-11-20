@@ -213,28 +213,4 @@ private:
 
 };
 
-class SkyBoxWindow : public EditorWindow {
-public:
-	SkyBoxWindow(const char* name = "SkyBox", bool start_active = false);
-
-	void SetSkyBoxPath(const char* path);
-	void SetTextures(std::string texturesname[6]);
-
-private:
-	void Draw(bool secondary = false) override;
-
-private:
-	float skyBoxSize = 0.0f;
-	std::string skyboxesPath;
-	std::string skyboxPathSelected;
-
-	bool applySize = false;
-	bool applyTextures = false;
-
-	//Textures
-	std::string texturesPath[6] = { "", "", "", "", "", "" };
-	const char* texturesname[6] = { "Right", "Left", "Top", "Bottom", "Front", "Back" };
-};
-
-
 #endif // !__EDITORWINDOWS__
