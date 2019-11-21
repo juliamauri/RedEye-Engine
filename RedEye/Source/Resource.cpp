@@ -19,6 +19,8 @@ ResourceContainer::ResourceContainer(const char * _metaPath)
 
 ResourceContainer::~ResourceContainer()
 {
+	if (isInMemory()) UnloadMemory();
+
 	if (md5)
 		DEL_A(md5);
 }

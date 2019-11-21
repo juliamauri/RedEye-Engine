@@ -4,20 +4,19 @@
 #include "RE_Math.h"
 #include "Resource.h"
 
-struct Vertex
-{
-	math::vec Position = math::vec::zero;
-	math::vec Normal = math::vec::zero;
-	math::float2 TexCoords = math::float2::zero;
-};
-
 class RE_Mesh : public ResourceContainer
 {
 public:
-	RE_Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, const char* materialMD5, unsigned int triangles);
+	RE_Mesh();
+	RE_Mesh(const char* metaPath);
 	~RE_Mesh();
 
-	void Draw(const float* transform, unsigned int shader, unsigned int checker, bool use_checkers = false);
+	void LoadInMemory() override;
+	void UnloadMemory() override;
+
+	const char* CheckAndSave(bool* exists);
+
+	void DrawMesh(const float* transform, unsigned int shader, const char* materialMD5, unsigned int checker,  bool use_checkers = false);
 
 	math::AABB GetAABB() const;
 
@@ -26,17 +25,13 @@ public:
 	void clearVertexNormals();
 	void clearFaceNormals();
 
-public:
+	void SetVerticesAndIndex(float* vertex, unsigned int* index = nullptr, unsigned int triangleCount = 0, float* textureCoords = nullptr, float* normals = nullptr, float* tangents = nullptr, float* bitangents = nullptr);
 
-	std::string name;
-	unsigned int VAO;
-	unsigned int triangle_count = 0;
-	const char* materialMD5 = nullptr;
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
+public:
 	bool lVertexNormals = false, lFaceNormals = false;
 
 private:
+	void Draw() override;
 
 	void SetupAABB();
 	void SetupMesh();
@@ -44,11 +39,25 @@ private:
 	void LoadVertex();
 	void ClearVertex();
 
+	void LibraryLoad();
+
 private:
+	float* vertex = nullptr;
+	float* normals = nullptr;
+	float* tangents = nullptr;
+	float* bitangents = nullptr;
+	float* texturecoords = nullptr;
+	unsigned int* index = nullptr;
+
+	unsigned int triangle_count = 0;
 
 	math::AABB bounding_box;
 
-	unsigned int VBO, EBO;
+	unsigned int VAO,VBO, EBO;
+
+	float* vertexNormals = nullptr;
+	float* faceNormals = nullptr;
+	float* faceCenters = nullptr;
 	unsigned int VAO_Vertex, VAO_FaceNormals, VAO_VertexNormals, VAO_FaceCenters;
 	unsigned int VBO_Vertex, VBO_FaceNormals, VBO_VertexNormals, VBO_FaceCenters;
 };

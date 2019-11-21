@@ -35,6 +35,8 @@ protected:
 	
 	uint shaderForDraw = 0;
 	uint checkerTexture = 0;
+
+	const char* materialMD5 = nullptr;
 };
 
 

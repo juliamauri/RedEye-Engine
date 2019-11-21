@@ -200,9 +200,6 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 
 		aiMesh* mesh = scene->mMeshes[i];
 
-		std::vector<Vertex> vertices;
-		std::vector<unsigned int> indices;
-
 		LOG_TERCIARY("Mesh %u: %s (%u vertices | %u faces | %u material index)",
 			i,
 			mesh->mName.C_Str(),
@@ -210,76 +207,66 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 			mesh->mNumFaces,
 			mesh->mMaterialIndex);
 
-		// process vertices
-		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-		{
-			// process vertex positions, normals and texture coordinates
-			Vertex vertex;
+		if (mesh->mNumVertices > 0) {
+			float* verticesArray = new float[mesh->mNumVertices * 3];
+			float* normalsArray = nullptr;
+			float* tangentsArray = nullptr;
+			float* bitangentsArray = nullptr;
+			float* textureCoordsArray = nullptr;
+			uint* indexArray = nullptr;
 
-			vertex.Position.x = mesh->mVertices[i].x;
-			vertex.Position.y = mesh->mVertices[i].y;
-			vertex.Position.z = mesh->mVertices[i].z;
+			if (mesh->HasNormals()) {
+				normalsArray = new float[mesh->mNumVertices * 3];
+				memcpy(normalsArray, mesh->mNormals, mesh->mNumVertices * 3);
+			}
 
-			vertex.Normal.x = mesh->mNormals[i].x;
-			vertex.Normal.y = mesh->mNormals[i].y;
-			vertex.Normal.z = mesh->mNormals[i].z;
+			if (mesh->HasTangentsAndBitangents()) {
+				tangentsArray = new float[mesh->mNumVertices * 3];
+				memcpy(tangentsArray, mesh->mTangents, mesh->mNumVertices * 3);
 
-			if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
-			{
-				vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
-				vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
+				bitangentsArray = new float[mesh->mNumVertices * 3];
+				memcpy(bitangentsArray, mesh->mBitangents, mesh->mNumVertices * 3);
+			}
+
+			if (mesh->mTextureCoords[0]){ // does the mesh contain texture coordinates?
+				textureCoordsArray = new float[mesh->mNumVertices * 2];
+				memcpy(textureCoordsArray, mesh->mTextureCoords, mesh->mNumVertices * 2);
+			}
+
+			if (mesh->HasFaces()) {
+				uint indexSize = mesh->mNumFaces * 3;
+				indexArray = new uint[indexSize];
+				uint* cursor = indexArray;
+				std::fill(indexArray, indexArray + indexSize, 0);
+
+				for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+				{
+					aiFace face = mesh->mFaces[i];
+
+					if (face.mNumIndices != 3)
+						LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face.mNumIndices);
+
+					memcpy(cursor, face.mIndices, face.mNumIndices * sizeof(uint));
+					cursor += sizeof(uint) * 3;
+				}
+			}
+
+			bool exists = false;
+			RE_Mesh* newMesh = new RE_Mesh();
+			newMesh->SetVerticesAndIndex(verticesArray, indexArray, mesh->mNumFaces, textureCoordsArray, normalsArray, tangentsArray, bitangentsArray);
+
+			const char* meshMD5 = newMesh->CheckAndSave(&exists);
+			if (!exists) {
+				newMesh->SetName(mesh->mName.C_Str());
+				newMesh->SetType(Resource_Type::R_MESH);
+				newMesh->SetAssetPath(aditionalData->workingfilepath.c_str());
+				App->resources->Reference(newMesh);
 			}
 			else
-				vertex.TexCoords = math::float2::zero;
+				DEL(newMesh);
 
-			vertices.push_back(vertex);
+			aditionalData->meshesLoaded.insert(std::pair<aiMesh*, const char*>(mesh, meshMD5));
 		}
-
-		std::string vertex_buffer;
-
-		for (auto vertice : vertices)
-		{
-			vertex_buffer += vertice.Position.ToString();
-		}
-
-		std::string meshMD5 = md5(vertex_buffer.c_str());
-		const char* exists = App->resources->IsReference(meshMD5.c_str());
-		if (exists == nullptr)
-		{
-			// process indices
-			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-			{
-				aiFace face = mesh->mFaces[i];
-
-				if (face.mNumIndices != 3)
-					LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face.mNumIndices);
-
-				for (unsigned int j = 0; j < face.mNumIndices; j++)
-					indices.push_back(face.mIndices[j]);
-			}
-
-			std::string save_path("Library/Meshes/");
-			save_path += meshMD5;
-			save_path += ".red";
-			Config save_mesh(save_path.c_str(), App->fs->GetZipPath());
-			JSONNode* mesh_serialize = save_mesh.GetRootNode("mesh");
-			mesh_serialize->SetObject();
-			mesh_serialize->PushMeshVertex(vertices, indices);
-			save_mesh.Save();
-			DEL(mesh_serialize);
-
-			RE_Mesh* meshResource = new RE_Mesh(vertices, indices, aditionalData->materialsLoaded[scene->mMaterials[mesh->mMaterialIndex]], mesh->mNumFaces);
-			meshResource->SetType(Resource_Type::R_MESH);
-			meshResource->SetMD5(meshMD5.c_str());
-			meshResource->SetLibraryPath(aditionalData->workingfilepath.c_str());
-
-			App->resources->Reference(meshResource);
-			exists = meshResource->GetMD5();
-		}
-		else
-			LOG("Getting %s from resources, already exits\nmd5: %s\n", mesh->mName.C_Str(), exists);
-
-		aditionalData->meshesLoaded.insert(std::pair<aiMesh*, const char*>(mesh, exists));
 	}
 }
 

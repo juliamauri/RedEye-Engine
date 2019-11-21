@@ -15,6 +15,7 @@
 
 #include "RE_Mesh.h"
 #include "RE_Material.h"
+#include "RE_Texture.h"
 
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
@@ -46,7 +47,7 @@ RE_CompMesh::~RE_CompMesh()
 
 void RE_CompMesh::Draw()
 {
-	ptr->Draw(go->GetTransform()->GetShaderModel(), shaderForDraw, checkerTexture, show_checkers);
+	ptr->DrawMesh(go->GetTransform()->GetShaderModel(), shaderForDraw, materialMD5, checkerTexture, show_checkers);
 }
 
 void RE_CompMesh::DrawProperties()
@@ -55,20 +56,7 @@ void RE_CompMesh::DrawProperties()
 	{
 		if (!reference.empty())
 		{
-			ImGui::Text("Name: %s", ptr->GetName());
-			ImGui::TextWrapped("Reference: %s", reference.c_str());
-			ImGui::TextWrapped("Directory: %s", ptr->GetLibraryPath());
-			ImGui::Text("Vertex count: %u", ptr->vertices.size());
-			ImGui::Text("Triangle Face count: %u", ptr->triangle_count);
-			ImGui::Text("VAO: %u", ptr->VAO);
-
-			if (ImGui::TreeNodeEx("Bounding Box"))
-			{
-				math::AABB box = ptr->GetAABB();
-				ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", box.minPoint.x, box.minPoint.y, box.minPoint.z);
-				ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", box.maxPoint.x, box.maxPoint.y, box.maxPoint.z);
-				ImGui::TreePop();
-			}
+			ptr->DrawPropieties();
 
 			if (ImGui::Button(show_f_normals ? "Hide Face Normals" : "Show Face Normals"))
 				show_f_normals = !show_f_normals;
@@ -84,27 +72,12 @@ void RE_CompMesh::DrawProperties()
 
 	if (ImGui::CollapsingHeader("Material"))
 	{
-		if (!reference.empty() && ptr->materialMD5)
+		if (materialMD5)
 		{
 			ImGui::Checkbox("Use checkers texture", &show_checkers);
 
-			RE_Material* meshMaterial = (RE_Material*)App->resources->At(ptr->materialMD5);
-			if (meshMaterial && !meshMaterial->tDiffuse.empty())
-			{
-				for (unsigned int i = 0; i < meshMaterial->tDiffuse.size(); i++)
-				{
-					int width = 0;
-					int height = 0;
-					Texture2D* texture = (Texture2D*)App->resources->At(meshMaterial->tDiffuse[i]);
-					texture->GetWithHeight(&width, &height);
-
-					ImGui::Text("Type: Diffuse");
-					ImGui::Text("Size: %ux%u", width, height);
-					ImGui::TextWrapped("Path: %s", texture->GetLibraryPath());
-					ImGui::Text("MD5: %s", texture->GetMD5());
-					texture->DrawTextureImGui();
-				}
-			}
+			ResourceContainer* meshMaterial = App->resources->At(materialMD5);
+			if (meshMaterial)  meshMaterial->DrawPropieties();
 		}
 		else
 			ImGui::Text("Mesh don't contain Material.");
@@ -113,12 +86,12 @@ void RE_CompMesh::DrawProperties()
 
 void RE_CompMesh::SetMaterial(const char * md5)
 {
-	ptr->materialMD5 = md5;
+	materialMD5 = md5;
 }
 
 const char * RE_CompMesh::GetMaterial() const
 {
-	return ptr->materialMD5;
+	return materialMD5;
 }
 
 void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
@@ -130,7 +103,7 @@ void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 	val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(((ResourceContainer*)App->resources->At(reference.c_str()))->GetLibraryPath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
 
 	rapidjson::Value texture_array(rapidjson::kArrayType);
-	RE_Material* meshMaterial = (RE_Material*)App->resources->At(ptr->materialMD5);
+	RE_Material* meshMaterial = (RE_Material*)App->resources->At(materialMD5);
 	if (meshMaterial)
 	{
 		rapidjson::Value texture_val(rapidjson::kObjectType);

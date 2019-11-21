@@ -351,7 +351,7 @@ void RE_Material::PushTexturesJson(JSONNode * texturesNode, std::vector<const ch
 	for (uint i = 0; i < texturesSize; i++) {
 		std::string idref = "MetaPath";
 		idref += std::to_string(i).c_str();
-		texturesNode->PushString(idref.c_str(), (App->resources->At(textures->at[i]))->GetMetaPath());
+		texturesNode->PushString(idref.c_str(), App->resources->At(textures->operator[](i))->GetMetaPath());
 	}
 }
 
