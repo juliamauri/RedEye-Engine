@@ -7,7 +7,6 @@ struct aiScene;
 struct aiMaterial;
 struct aiString;
 enum aiTextureType;
-class RE_Mesh;
 class RE_GameObject;
 class RE_Prefab;
 

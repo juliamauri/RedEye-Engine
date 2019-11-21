@@ -4,7 +4,6 @@
 #include "FileSystem.h"
 
 #include "Globals.h"
-#include "RE_Mesh.h"
 
 #include "ImGui/imgui.h"
 

@@ -5,13 +5,6 @@
 #include "Module.h"
 #include <list>
 
-class ShaderManager;
-class Texture2DManager;
-class Texture2D;
-class RE_CompCamera;
-class RE_CompMesh;
-class RE_Mesh;
-
 class ModuleRenderer3D : public Module 
 {
 

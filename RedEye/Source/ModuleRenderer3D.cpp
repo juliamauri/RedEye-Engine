@@ -14,7 +14,6 @@
 #include "RE_CompCamera.h"
 #include "RE_CameraManager.h"
 #include "RE_CompTransform.h"
-#include "RE_Mesh.h"
 #include "ModuleScene.h"
 #include "ShaderManager.h"
 #include "RE_InternalResources.h"
