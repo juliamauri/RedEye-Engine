@@ -10,7 +10,7 @@
 #include "RE_CompMesh.h"
 #include "RE_CompCamera.h"
 #include "RE_CompParticleEmiter.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "ModuleRenderer3D.h"
 #include "OutputLog.h"
 #include "RE_CameraManager.h"
@@ -547,7 +547,7 @@ const char * RE_GameObject::GetName() const
 
 void RE_GameObject::DrawAABB(math::vec color)
 {
-	ShaderManager::use(0);
+	RE_ShaderImporter::use(0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf((transform->GetMatrixModel() * RE_CameraManager::CurrentCamera()->GetView()).ptr());

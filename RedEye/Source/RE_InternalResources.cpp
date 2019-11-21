@@ -5,10 +5,11 @@
 #include "FileSystem.h"
 #include "ResourceManager.h"
 
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "RE_TextureImporter.h"
 
 #include "RE_SkyBox.h"
+#include "RE_Shader.h"
 
 #include "OutputLog.h"
 
@@ -49,15 +50,19 @@ bool RE_InternalResources::InitShaders()
 	//Loading Shaders
 	if (App->shaders)
 	{
-		if (!App->shaders->Load("default", &defaultShader, true)) {
-			LOG("%s\n", App->shaders->GetShaderError());
-			ret = false;
-		}
+		defaultShader = new RE_Shader();
+		defaultShader->SetName("Default Shader");
+		defaultShader->SetType(Resource_Type::R_SHADER);
+		defaultShader->SetInternal(true);
+		defaultShader->SetPaths("Library/Shaders/default.vert", "Library/Shaders/default.frag");
+		defaultShader->LoadInMemory();
 
-		if (!App->shaders->Load("skybox", &skyboxShader, true)) {
-			LOG("%s\n", App->shaders->GetShaderError());
-			ret = false;
-		}
+		skyboxShader = new RE_Shader();
+		skyboxShader->SetName("SkyBox Shader");
+		skyboxShader->SetType(Resource_Type::R_SHADER);
+		skyboxShader->SetInternal(true);
+		skyboxShader->SetPaths("Library/Shaders/skybox.vert", "Library/Shaders/skybox.frag");
+		skyboxShader->LoadInMemory();
 	}
 
 	return ret;
@@ -105,17 +110,18 @@ bool RE_InternalResources::InitSkyBox()
 	defaultSkybox->AddTexture(RE_TextureFace::RE_BACK, "Assets/Skyboxes/default/6back.jpg");
 	defaultSkybox->AssetSave();
 	defaultSkybox->SaveMeta();
+	defaultSkybox->LoadInMemory();
 	return true;
 }
 
 unsigned int RE_InternalResources::GetDefaultShader() const
 {
-	return defaultShader;
+	return defaultShader->GetID();
 }
 
 unsigned int RE_InternalResources::GetSkyBoxShader() const
 {
-	return skyboxShader;
+	return skyboxShader->GetID();
 }
 
 unsigned int RE_InternalResources::GetTextureChecker() const

@@ -2,6 +2,7 @@
 #define __INTERNALRESOURCCES_H__
 
 class RE_SkyBox;
+class RE_Shader;
 
 class RE_InternalResources
 {
@@ -25,8 +26,8 @@ private:
 	bool InitSkyBox();
 
 private:
-	unsigned int defaultShader = 0;
-	unsigned int skyboxShader = 0;
+	RE_Shader* defaultShader = nullptr;
+	RE_Shader* skyboxShader = nullptr;
 
 	unsigned int checkerTexture = 0;
 

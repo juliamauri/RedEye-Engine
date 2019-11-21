@@ -8,7 +8,7 @@
 #include "RE_InternalResources.h"
 #include "ResourceManager.h"
 
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "RE_TextureImporter.h"
 
 #include "RE_Material.h"
@@ -167,8 +167,8 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 void RE_Mesh::DrawMesh(const float* transform, unsigned int shader, const char* materialMD5, unsigned int checker, bool use_checkers)
 {
 	// Set Shader uniforms
-	ShaderManager::use(shader);
-	ShaderManager::setFloat4x4(shader, "model", transform);
+	RE_ShaderImporter::use(shader);
+	RE_ShaderImporter::setFloat4x4(shader, "model", transform);
 
 	RE_Material* meshMaterial = nullptr;
 	if(materialMD5) meshMaterial = (RE_Material*)App->resources->At(materialMD5);
@@ -176,13 +176,13 @@ void RE_Mesh::DrawMesh(const float* transform, unsigned int shader, const char* 
 	// Bind Textures
 	if (use_checkers || !materialMD5 || meshMaterial->tDiffuse.empty())
 	{
-		ShaderManager::setFloat(shader, "useColor", 0.0f);
-		ShaderManager::setFloat(shader, "useTexture", 1.0f);
+		RE_ShaderImporter::setFloat(shader, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(shader, "useTexture", 1.0f);
 
 		use_checkers = true;
 		glActiveTexture(GL_TEXTURE0);
 		std::string name = "texture_diffuse0";
-		ShaderManager::setUnsignedInt(shader, name.c_str(), 0);
+		RE_ShaderImporter::setUnsignedInt(shader, name.c_str(), 0);
 		glBindTexture(GL_TEXTURE_2D, checker);
 	}
 	else if (materialMD5)
@@ -191,15 +191,15 @@ void RE_Mesh::DrawMesh(const float* transform, unsigned int shader, const char* 
 		unsigned int diffuseNr = 1;
 		if (!meshMaterial->tDiffuse.empty())
 		{
-			ShaderManager::setFloat(shader, "useColor", 0.0f);
-			ShaderManager::setFloat(shader, "useTexture", 1.0f);
+			RE_ShaderImporter::setFloat(shader, "useColor", 0.0f);
+			RE_ShaderImporter::setFloat(shader, "useTexture", 1.0f);
 
 			for (unsigned int i = 0; i < meshMaterial->tDiffuse.size(); i++)
 			{
 				glActiveTexture(GL_TEXTURE0 + i);
 				std::string name = "texture_diffuse";
 				name += std::to_string(diffuseNr++);
-				ShaderManager::setUnsignedInt(shader, name.c_str(), i);
+				RE_ShaderImporter::setUnsignedInt(shader, name.c_str(), i);
 				((RE_Texture*)App->resources->At(meshMaterial->tDiffuse[i]))->use();
 			}
 		}
@@ -235,20 +235,20 @@ void RE_Mesh::DrawMesh(const float* transform, unsigned int shader, const char* 
 	// MESH DEBUG DRAWING
 	if (lFaceNormals || lVertexNormals)
 	{
-		ShaderManager::setFloat(shader, "useColor", 1.0f);
-		ShaderManager::setFloat(shader, "useTexture", 0.0f);
+		RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
+		RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
 
 		if (lFaceNormals)
 		{
 			math::vec color(0.f, 0.f, 1.f);
-			ShaderManager::setFloat(shader, "objectColor", color);
+			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 
 			glBindVertexArray(VAO_FaceNormals);
 			glDrawArrays(GL_LINES, 0, triangle_count * 2);
 			glBindVertexArray(0);
 
 			color.Set(1.f, 1.f, 1.f);
-			ShaderManager::setFloat(shader, "objectColor", color);
+			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
@@ -264,14 +264,14 @@ void RE_Mesh::DrawMesh(const float* transform, unsigned int shader, const char* 
 		if (lVertexNormals)
 		{
 			math::vec color(0.f, 1.f, 0.f);
-			ShaderManager::setFloat(shader, "objectColor", color);
+			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 
 			glBindVertexArray(VAO_VertexNormals);
 			glDrawArrays(GL_LINES, 0, triangle_count * 3 * 2);
 			glBindVertexArray(0);
 
 			color.Set(1.f, 1.f, 1.f);
-			ShaderManager::setFloat(shader, "objectColor", color);
+			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
@@ -285,7 +285,7 @@ void RE_Mesh::DrawMesh(const float* transform, unsigned int shader, const char* 
 		}
 	}
 
-	ShaderManager::use(0);
+	RE_ShaderImporter::use(0);
 }
 
 void RE_Mesh::Draw()

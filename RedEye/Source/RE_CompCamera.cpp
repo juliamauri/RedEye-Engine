@@ -7,7 +7,7 @@
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
 #include "OutputLog.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"

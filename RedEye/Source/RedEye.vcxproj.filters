@@ -76,9 +76,6 @@
     <ClCompile Include="RE_PrimitiveManager.cpp">
       <Filter>Modules\Resource Managers</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderManager.cpp">
-      <Filter>Modules\Resource Managers</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
       <Filter>Modules\Resource Managers</Filter>
     </ClCompile>
@@ -153,6 +150,9 @@
     </ClCompile>
     <ClCompile Include="RE_CameraManager.cpp">
       <Filter>Modules\Independent App Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ShaderImporter.cpp">
+      <Filter>Modules\Resource Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -372,9 +372,6 @@
     <ClInclude Include="RE_PrimitiveManager.h">
       <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderManager.h">
-      <Filter>Modules\Resource Managers</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceManager.h">
       <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
@@ -461,6 +458,9 @@
     </ClInclude>
     <ClInclude Include="RE_CameraManager.h">
       <Filter>Modules\Independent App Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ShaderImporter.h">
+      <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

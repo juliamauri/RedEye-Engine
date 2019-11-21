@@ -5,7 +5,7 @@
 #include "RE_CompParticleEmiter.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "RE_Mesh.h"
 
 void Particle::Update()
@@ -55,7 +55,7 @@ void Particle::Draw(unsigned int shader)
 		if (parent_emiter->LocalEmission())
 			transform_matrix = transform_matrix * parent_emiter->GetGO()->GetTransform()->GetMatrixModel();
 
-		ShaderManager::setFloat4x4(shader, "model", transform_matrix.ptr());
+		RE_ShaderImporter::setFloat4x4(shader, "model", transform_matrix.ptr());
 		//mesh->Draw(shader);
 	}
 }

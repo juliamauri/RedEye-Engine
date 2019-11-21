@@ -38,7 +38,9 @@ public:
 	void SetMD5(const char* md5);
 	void SetLibraryPath(const char* path);
 	void SetAssetPath(const char* originPath);
+	void SetMetaPath(const char* originPath);
 	void SetName(const char* name);
+	void SetInternal(bool is_internal);
 
 	bool isInternal()const { return isinternal; }
 

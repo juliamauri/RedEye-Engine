@@ -6,7 +6,7 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
@@ -52,11 +52,11 @@ RE_CompPoint::~RE_CompPoint()
 void RE_CompPoint::Draw()
 {
 	RE_CompPrimitive::RE_Component::go->GetTransform()->SetPosition(point);
-	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
+	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	glPointSize(10.0f);
@@ -80,11 +80,11 @@ RE_CompLine::~RE_CompLine()
 
 void RE_CompLine::Draw()
 {
-	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
+	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glLineWidth(2.0f);
 
@@ -115,11 +115,11 @@ RE_CompTriangle::~RE_CompTriangle()
 
 void RE_CompTriangle::Draw()
 {
-	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
+	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
@@ -134,11 +134,11 @@ RE_CompPlane::~RE_CompPlane()
 
 void RE_CompPlane::Draw()
 {
-	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-	ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
+	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
 	glBindVertexArray(RE_CompPrimitive::VAO);
 	glDrawArrays(GL_LINES, 0, 400);
@@ -166,15 +166,15 @@ RE_CompCube::~RE_CompCube()
 
 void RE_CompCube::Draw()
 {
-	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
 	if (!show_checkers)
 	{
 		// Apply Diffuse Color
-		ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
-		ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-		ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
 
 		// Draw
 		glBindVertexArray(RE_CompPrimitive::VAO);
@@ -184,9 +184,9 @@ void RE_CompCube::Draw()
 	{
 		// Apply Checkers Texture
 		glActiveTexture(GL_TEXTURE0);
-		ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
-		ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
-		ShaderManager::setUnsignedInt(RE_CompPrimitive::shader, "texture_diffuse0", 0);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
+		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "texture_diffuse0", 0);
 		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw
@@ -199,7 +199,7 @@ void RE_CompCube::Draw()
 	}
 
 	glBindVertexArray(0);
-	ShaderManager::use(0);
+	RE_ShaderImporter::use(0);
 }
 
 void RE_CompCube::DrawProperties()
@@ -262,15 +262,15 @@ RE_CompSphere::~RE_CompSphere()
 
 void RE_CompSphere::Draw()
 {
-	ShaderManager::use(RE_CompPrimitive::shader);
-	ShaderManager::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
 	if (!show_checkers)
 	{
 		// Apply Diffuse Color
-		ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
-		ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-		ShaderManager::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
 
 		// Draw
 		glBindVertexArray(RE_CompPrimitive::VAO);
@@ -280,9 +280,9 @@ void RE_CompSphere::Draw()
 	{
 		// Apply Checkers Texture
 		glActiveTexture(GL_TEXTURE0);
-		ShaderManager::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
-		ShaderManager::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
-		ShaderManager::setUnsignedInt(RE_CompPrimitive::shader, "texture_diffuse0", 0);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
+		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "texture_diffuse0", 0);
 		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw
@@ -295,7 +295,7 @@ void RE_CompSphere::Draw()
 	}
 
 	glBindVertexArray(0);
-	ShaderManager::use(0);
+	RE_ShaderImporter::use(0);
 }
 
 void RE_CompSphere::DrawProperties()

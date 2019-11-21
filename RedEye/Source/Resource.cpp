@@ -119,9 +119,21 @@ void ResourceContainer::SetAssetPath(const char * originPath)
 	metaPath = ".meta";
 }
 
+void ResourceContainer::SetMetaPath(const char* originPath)
+{
+	metaPath = originPath;
+	metaPath += name;
+	metaPath += ".meta";
+}
+
 void ResourceContainer::SetName(const char * _name)
 {
 	name = _name;
+}
+
+void ResourceContainer::SetInternal(bool is_internal)
+{
+	isinternal = is_internal;
 }
 
 void ResourceContainer::SaveMeta()

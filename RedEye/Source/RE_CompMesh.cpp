@@ -10,7 +10,7 @@
 #include "RE_PrimitiveManager.h"
 #include "ResourceManager.h"
 #include "RE_TextureImporter.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "ModuleRenderer3D.h"
 
 #include "RE_Mesh.h"

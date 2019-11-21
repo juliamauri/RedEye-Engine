@@ -1,7 +1,7 @@
 #include "RE_PrimitiveManager.h"
 
 #include "Application.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "RE_InternalResources.h"
 #include "OutputLog.h"
 #include "RE_Math.h"

@@ -13,7 +13,7 @@
 #include "ResourceManager.h"
 
 #include "RE_CameraManager.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "RE_TextureImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_InternalResources.h"
@@ -48,7 +48,7 @@ Application::Application()
 
 	cams = new RE_CameraManager();
 	textures = new RE_TextureImporter("Images/");
-	shaders = new ShaderManager("Assets/Shaders/");
+	shaders = new RE_ShaderImporter("Assets/Shaders/");
 	primitives = new RE_PrimitiveManager();
 	modelImporter = new RE_ModelImporter("Assets/Meshes/");
 	resources = new ResourceManager();

@@ -15,7 +15,7 @@
 #include "RE_CameraManager.h"
 #include "RE_CompTransform.h"
 #include "ModuleScene.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "RE_InternalResources.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
@@ -116,9 +116,9 @@ update_status ModuleRenderer3D::PostUpdate()
 	current_camera->Update();
 
 	// Load Shader Uniforms
-	ShaderManager::use(sceneShader);
-	ShaderManager::setFloat4x4(sceneShader, "view", current_camera->GetViewPtr());
-	ShaderManager::setFloat4x4(sceneShader, "projection", current_camera->GetProjectionPtr());
+	RE_ShaderImporter::use(sceneShader);
+	RE_ShaderImporter::setFloat4x4(sceneShader, "view", current_camera->GetViewPtr());
+	RE_ShaderImporter::setFloat4x4(sceneShader, "projection", current_camera->GetProjectionPtr());
 
 	// Frustum Culling
 	if (cull_scene)
@@ -134,10 +134,10 @@ update_status ModuleRenderer3D::PostUpdate()
 	// draw skybox as last
 
 	// Set shader and uniforms
-	ShaderManager::use(skyboxShader);
-	ShaderManager::setFloat4x4(skyboxShader, "view", current_camera->GetViewPtr());
-	ShaderManager::setFloat4x4(skyboxShader, "projection", current_camera->GetProjectionPtr());
-	ShaderManager::setInt(skyboxShader, "skybox", 0);
+	RE_ShaderImporter::use(skyboxShader);
+	RE_ShaderImporter::setFloat4x4(skyboxShader, "view", current_camera->GetViewPtr());
+	RE_ShaderImporter::setFloat4x4(skyboxShader, "projection", current_camera->GetProjectionPtr());
+	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);
 
 	// change depth function so depth test passes when values are equal to depth buffer's content
 	glDepthFunc(GL_LEQUAL);

@@ -5,7 +5,7 @@
 #include "RE_CompCamera.h"
 #include "RE_GameObject.h"
 #include "Globals.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
 

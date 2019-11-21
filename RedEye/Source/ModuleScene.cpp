@@ -9,7 +9,7 @@
 #include "RE_PrimitiveManager.h"
 #include "ResourceManager.h"
 #include "RE_CameraManager.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_TextureImporter.h"
 
@@ -262,7 +262,7 @@ void ModuleScene::DrawDebug() const
 	// Draw Bounding Boxes
 	if (draw_all_aabb || draw_selected_aabb || draw_quad_tree)
 	{
-		ShaderManager::use(0);
+		RE_ShaderImporter::use(0);
 		bool resetLight = App->renderer3d->GetLighting();
 
 		if (resetLight)

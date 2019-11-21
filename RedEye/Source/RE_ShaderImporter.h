@@ -1,26 +1,30 @@
-#ifndef __SHADERMANAGER_H__
-#define __SHADERMANAGER_H__
+#ifndef __RE_SHADERIMPORTER_H__
+#define __RE_SHADERIMPORTER_H__
 
 #include "RE_Math.h"
 
 #include <string>
 #include <vector>
 
-class ShaderManager
+class RE_ShaderImporter
 {
 public:
 	// constructor reads and builds the shader
-	ShaderManager(const char* folderPath);
+	RE_ShaderImporter(const char* folderPath);
 
 	//delete all programs loaded
-	~ShaderManager();
+	~RE_ShaderImporter();
 
 	bool Init();
 
 	//Load shaders and put in vector
-	bool Load(const char* name, unsigned int* ID, bool fromLibrary = false);
+	bool LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
+	bool LoadFromBinary(const char* buffer, unsigned int size, unsigned int* ID);
+	bool GetBinaryProgram(unsigned int ID, char** buffer, int* size);
+
 	//get last error
 	const char* GetShaderError();
+
 	// use/activate the shader
 	static void use(unsigned int ID);
 	//Delete manually shader
@@ -53,10 +57,11 @@ public:
 
 private:
 	const char* folderPath;
-	// the program ID
-	std::vector<unsigned int> shaders;
+
 	//Last error
 	std::string last_error;
+
+	int* binaryFormats = nullptr;
 };
 
-#endif // __SHADERMANAGER_H__
+#endif // __RE_SHADERIMPORTER_H__

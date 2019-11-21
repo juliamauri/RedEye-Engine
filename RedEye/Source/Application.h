@@ -22,7 +22,7 @@ class RE_Math;
 class OutputLogHolder;
 class RE_CameraManager;
 class RE_TextureImporter;
-class ShaderManager;
+class RE_ShaderImporter;
 class RE_PrimitiveManager;
 class RE_ModelImporter;
 class ResourceManager;
@@ -82,7 +82,7 @@ public:
 
 	RE_CameraManager* cams = nullptr;
 	RE_TextureImporter* textures = nullptr;
-	ShaderManager* shaders = nullptr;
+	RE_ShaderImporter* shaders = nullptr;
 	RE_PrimitiveManager* primitives = nullptr;
 	RE_ModelImporter* modelImporter = nullptr;
 

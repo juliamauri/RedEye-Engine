@@ -4,7 +4,7 @@
 #include "FileSystem.h"
 #include "ResourceManager.h"
 #include "RE_TextureImporter.h"
-#include "ShaderManager.h"
+#include "RE_ShaderImporter.h"
 
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
