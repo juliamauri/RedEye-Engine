@@ -1056,44 +1056,6 @@ void JSONNode::PushValue(rapidjson::Value * val)
 		val_push->PushBack(*val, config->document.GetAllocator());
 }
 
-void JSONNode::PushMeshVertex(std::vector<Vertex>& vertexes, std::vector<unsigned int>& indeces)
-{
-	rapidjson::Value position(rapidjson::kArrayType);
-	rapidjson::Value normals(rapidjson::kArrayType);
-	rapidjson::Value TextCoods(rapidjson::kArrayType);
-	rapidjson::Value indeces_val(rapidjson::kArrayType);
-
-	unsigned int i = 0;
-	for (auto vertex : vertexes)
-	{
-		rapidjson::Value float_array(rapidjson::kArrayType);
-
-		float_array.PushBack(vertex.Position.x, config->document.GetAllocator()).PushBack(vertex.Position.y, config->document.GetAllocator()).PushBack(vertex.Position.z, config->document.GetAllocator());
-		position.PushBack(float_array.Move(), config->document.GetAllocator());
-		
-		float_array.SetArray();
-		float_array.PushBack(vertex.Normal.x, config->document.GetAllocator()).PushBack(vertex.Normal.y, config->document.GetAllocator()).PushBack(vertex.Normal.z, config->document.GetAllocator());
-		normals.PushBack(float_array.Move(), config->document.GetAllocator());
-		
-		float_array.SetArray();
-		float_array.PushBack(vertex.TexCoords.x, config->document.GetAllocator()).PushBack(vertex.TexCoords.y, config->document.GetAllocator());
-		TextCoods.PushBack(float_array.Move(), config->document.GetAllocator());
-
-		i++;
-	}
-	
-	for (unsigned int index : indeces)
-		indeces_val.PushBack(index, config->document.GetAllocator());
-
-	rapidjson::Value* mesh = rapidjson::Pointer(pointerPath.c_str()).Get(config->document);
-
-	mesh->AddMember(rapidjson::Value::StringRefType("num_vertexes"), rapidjson::Value().SetUint(i), config->document.GetAllocator());
-	mesh->AddMember(rapidjson::Value::StringRefType("positions"), position, config->document.GetAllocator());
-	mesh->AddMember(rapidjson::Value::StringRefType("normals"), normals, config->document.GetAllocator());
-	mesh->AddMember(rapidjson::Value::StringRefType("texturecoods"), TextCoods, config->document.GetAllocator());
-	mesh->AddMember(rapidjson::Value::StringRefType("indexes"), indeces_val, config->document.GetAllocator());
-}
-
 JSONNode* JSONNode::PushJObject(const char* name)
 {
 	JSONNode* ret = nullptr;
@@ -1262,53 +1224,6 @@ const char*	JSONNode::PullString(const char* name, const char* deflt)
 	}
 
 	return ret;
-}
-
-void JSONNode::PullMeshVertex(std::vector<Vertex>* vertexes, std::vector<unsigned int>* indeces)
-{
-	std::string path(pointerPath);
-	path += "/";
-
-	std::string num_vertexess_path(path);
-	num_vertexess_path += "num_vertexes";
-	unsigned int num_vertexes = rapidjson::Pointer(num_vertexess_path.c_str()).Get(config->document)->GetUint();
-
-	std::string positions_path(path);
-	positions_path += "positions";
-	rapidjson::Value* positions_val = rapidjson::Pointer(positions_path.c_str()).Get(config->document);
-
-	std::string normals_path(path);
-	normals_path += "normals";
-	rapidjson::Value* normals_val = rapidjson::Pointer(normals_path.c_str()).Get(config->document);
-
-	std::string texturecoods_path(path);
-	texturecoods_path += "texturecoods";
-	rapidjson::Value* texturecoods_val = rapidjson::Pointer(texturecoods_path.c_str()).Get(config->document);
-
-	std::string indexes_path(path);
-	indexes_path += "indexes";
-	rapidjson::Value* indexes_val = rapidjson::Pointer(indexes_path.c_str()).Get(config->document);
-
-	if (positions_val->IsArray() && normals_val->IsArray() && texturecoods_val->IsArray() && indexes_val->IsArray())
-	{
-		for (unsigned int i = 0; i < num_vertexes; i++)
-		{
-			Vertex vert;
-			rapidjson::Value fill = positions_val->GetArray()[i].GetArray();
-			vert.Position.Set(fill[0].GetFloat(), fill[1].GetFloat(), fill[2].GetFloat());
-
-			fill = normals_val->GetArray()[i].GetArray();
-			vert.Normal.Set(fill[0].GetFloat(), fill[1].GetFloat(), fill[2].GetFloat());
-
-			fill = texturecoods_val->GetArray()[i].GetArray();
-			vert.TexCoords.Set(fill[0].GetFloat(), fill[1].GetFloat());
-
-			vertexes->push_back(vert);
-		}
-
-		for (auto& index : indexes_val->GetArray())
-			indeces->push_back(index.GetUint());
-	}
 }
 
 JSONNode* JSONNode::PullJObject(const char * name)

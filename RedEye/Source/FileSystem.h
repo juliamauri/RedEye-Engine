@@ -137,7 +137,6 @@ public:
 	void		PushDouble(const char* name, const double value);
 	void		PushString(const char* name, const char* value);
 	void		PushValue(rapidjson::Value* val);
-	void		PushMeshVertex(std::vector<Vertex>& vertexes, std::vector<unsigned int>& indeces);
 	JSONNode*	PushJObject(const char* name);
 
 	// Pull
@@ -149,7 +148,6 @@ public:
 	math::float4		PullFloat4(const char* name, math::float4 deflt);
 	double			PullDouble(const char* name, double deflt);
 	const char*		PullString(const char* name, const char* deflt);
-	void			PullMeshVertex(std::vector<Vertex>* vertexes, std::vector<unsigned int>* indeces);
 	JSONNode*		PullJObject(const char* name);
 
 	//GameObject
