@@ -5,8 +5,6 @@
 #include "MathGeoLib/include/Geometry/AABB.h"
 #include <string>
 
-class RE_Mesh;
-
 class RE_CompMesh : public RE_Component
 {
 public:
@@ -21,22 +19,23 @@ public:
 	void SetMaterial(const char* md5);
 	const char* GetMaterial()const;
 
+	std::vector<const char*> GetAllResources() override;
+
 	void Serialize(JSONNode* node, rapidjson::Value* val) override;
 
 	math::AABB GetAABB() const;
 
 protected:
 
-	std::string reference;
-	RE_Mesh* ptr = nullptr;
+	const char* meshMD5 = nullptr;
+	const char* materialMD5 = nullptr;
+
 	bool show_checkers = false;
 	bool show_f_normals = false;
 	bool show_v_normals = false;
 	
 	uint shaderForDraw = 0;
 	uint checkerTexture = 0;
-
-	const char* materialMD5 = nullptr;
 };
 
 

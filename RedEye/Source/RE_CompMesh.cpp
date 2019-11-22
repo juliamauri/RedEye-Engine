@@ -23,18 +23,16 @@
 #include "ImGui\imgui.h"
 
 RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool start_active)
-	: RE_Component(C_MESH, go, start_active), reference(reference)
+	: RE_Component(C_MESH, go, start_active), meshMD5(reference)
 {
-	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
 	if (!(shaderForDraw = App->renderer3d->GetShaderScene()))
 		shaderForDraw = App->internalResources->GetDefaultShader();
 	checkerTexture = App->internalResources->GetTextureChecker();
 }
 
 RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go)
-	: RE_Component(C_MESH, go, cmpMesh.active), reference(cmpMesh.reference)
+	: RE_Component(C_MESH, go, cmpMesh.active), meshMD5(cmpMesh.meshMD5)
 {
-	ptr = (RE_Mesh*)App->resources->At(this->reference.c_str());
 	if (!(shaderForDraw = App->renderer3d->GetShaderScene()))
 		shaderForDraw = App->internalResources->GetDefaultShader();
 	checkerTexture = App->internalResources->GetTextureChecker();
@@ -47,25 +45,26 @@ RE_CompMesh::~RE_CompMesh()
 
 void RE_CompMesh::Draw()
 {
-	ptr->DrawMesh(go->GetTransform()->GetShaderModel(), shaderForDraw, materialMD5, checkerTexture, show_checkers);
+	((RE_Mesh*)App->resources->At(meshMD5))->DrawMesh(go->GetTransform()->GetShaderModel(), shaderForDraw, materialMD5, checkerTexture, show_checkers);
 }
 
 void RE_CompMesh::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Mesh"))
 	{
-		if (!reference.empty())
+		if (meshMD5)
 		{
-			ptr->DrawPropieties();
+			RE_Mesh* mesh = (RE_Mesh*)App->resources->At(meshMD5);
+			mesh->DrawPropieties();
 
 			if (ImGui::Button(show_f_normals ? "Hide Face Normals" : "Show Face Normals"))
 				show_f_normals = !show_f_normals;
 			if (ImGui::Button(show_v_normals ? "Hide Vertex Normals" : "Show Vertex Normals"))
 				show_v_normals = !show_v_normals;
-			if (show_f_normals && !ptr->lFaceNormals)	ptr->loadFaceNormals();
-			if (show_v_normals && !ptr->lVertexNormals)	ptr->loadVertexNormals();
-			if (!show_f_normals && ptr->lFaceNormals) ptr->clearFaceNormals();
-			if (!show_v_normals && ptr->lVertexNormals) ptr->clearVertexNormals();
+			if (show_f_normals && !mesh->lFaceNormals)	mesh->loadFaceNormals();
+			if (show_v_normals && !mesh->lVertexNormals)	mesh->loadVertexNormals();
+			if (!show_f_normals && mesh->lFaceNormals) mesh->clearFaceNormals();
+			if (!show_v_normals && mesh->lVertexNormals) mesh->clearVertexNormals();
 		}
 		else ImGui::TextWrapped("Empty Mesh Component");
 	}
@@ -94,13 +93,23 @@ const char * RE_CompMesh::GetMaterial() const
 	return materialMD5;
 }
 
+std::vector<const char*> RE_CompMesh::GetAllResources()
+{
+	std::vector<const char*> ret;
+
+	if (meshMD5) ret.push_back(meshMD5);
+	if (materialMD5) ret.push_back(materialMD5);
+
+	return ret;
+}
+
 void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 {
 	rapidjson::Value val(rapidjson::kObjectType);
 
 	val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetInt((int)type), node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("reference"), rapidjson::Value().SetString(reference.c_str(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(((ResourceContainer*)App->resources->At(reference.c_str()))->GetLibraryPath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("reference"), rapidjson::Value().SetString(meshMD5, node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
+	val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(((ResourceContainer*)App->resources->At(meshMD5))->GetLibraryPath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
 
 	rapidjson::Value texture_array(rapidjson::kArrayType);
 	RE_Material* meshMaterial = (RE_Material*)App->resources->At(materialMD5);
@@ -118,6 +127,6 @@ void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
 
 math::AABB RE_CompMesh::GetAABB() const
 {
-	return ptr->GetAABB();
+	return ((RE_Mesh*)App->resources->At(meshMD5))->GetAABB();
 }
 
