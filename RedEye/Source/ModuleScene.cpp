@@ -375,7 +375,7 @@ void ModuleScene::Serialize()
 	JSONNode* node = scene_file.GetRootNode("Game Objects");
 
 	node->SetArray();
-	root->Serialize(node);
+	root->SerializeJson(node);
 
 	DEL(node);
 

@@ -4,6 +4,8 @@
 #include "Globals.h"
 #include "MathGeoLib\include\MathGeoLib.h"
 #include <list>
+#include <vector>
+#include <map>
 
 #pragma comment(lib, "rpcrt4.lib")  // UuidCreate - Minimum supported OS Win 2000
 #include <windows.h>
@@ -29,7 +31,12 @@ public:
 	void DrawWithChilds() const;
 	void DrawItselfOnly() const;
 
-	void Serialize(JSONNode* node);
+	std::vector<const char*> GetAllResources(bool root = true);
+	void SerializeJson(JSONNode* node, std::map<int, const char*>* resources);
+	void SerializeBinary(char*& cursor, std::map<int, const char*>* resources);
+
+	static RE_GameObject* DeserializeJSON(JSONNode* node, std::map<int, const char*>* resources);
+	static RE_GameObject* DeserializeBinary(JSONNode* node, std::map<int, const char*>* resources);
 
 	// Children
 	void AddChild(RE_GameObject* child);

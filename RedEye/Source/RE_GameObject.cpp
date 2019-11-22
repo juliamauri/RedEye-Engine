@@ -18,6 +18,7 @@
 #include "Glew\include\glew.h"
 #include "ImGui\imgui.h"
 #include <stack>
+#include <unordered_set>
 
 RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, bool start_active, bool isStatic)
 	: name(name), parent(p), active(start_active), isStatic(isStatic)
@@ -138,7 +139,28 @@ void RE_GameObject::DrawItselfOnly() const
 			component->Draw();
 }
 
-void RE_GameObject::Serialize(JSONNode * node)
+std::vector<const char*> RE_GameObject::GetAllResources(bool root)
+{
+	std::vector<const char*> ret;
+	for (auto child : childs) { 
+
+		std::vector<const char*> childRet = child->GetAllResources(false);
+		if(!childRet.empty())
+			ret.insert(ret.end(), childRet.begin(), childRet.end());
+	}
+
+	if (root) { //unique resources
+		//https://stackoverflow.com/questions/1041620/whats-the-most-efficient-way-to-erase-duplicates-and-sort-a-vector
+		std::unordered_set<const char*> s;
+		for (const char* i : ret)
+			s.insert(i);
+		ret.assign(s.begin(), s.end());
+	}
+
+	return ret;
+}
+
+void RE_GameObject::SerializeJson(JSONNode * node, std::map<int, const char*>* resources)
 {
 	JSONNode* fill_node = node;
 
@@ -172,12 +194,128 @@ void RE_GameObject::Serialize(JSONNode * node)
 	val_go.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
 
 	rapidjson::Value val_comp(rapidjson::kArrayType);
-	for (auto component : components) component->Serialize(node, &val_comp);
+	for (auto component : components) component->SerializeJson(node, resources);
 	val_go.AddMember(rapidjson::Value::StringRefType("components"), val_comp, fill_node->GetDocument()->GetAllocator());
 
 	node->PushValue(&val_go);
 
-	for (auto child : childs) { child->Serialize(node); }
+	for (auto child : childs) { child->SerializeJson(node, resources); }
+}
+
+void RE_GameObject::SerializeBinary(char*& cursor, std::map<int, const char*>* resources)
+{
+
+
+
+}
+
+RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, const char*>* resources)
+{
+	RE_GameObject* rootGo = nullptr;
+	RE_GameObject* new_go = nullptr;
+	rapidjson::Value* val = rapidjson::Pointer(pointerPath.c_str()).Get(config->document);
+
+	if (val->IsArray())
+	{
+		for (auto& v : val->GetArray())
+		{
+			UUID uuid;
+			UUID parent_uuid;
+
+			UuidFromStringA((RPC_CSTR)v.FindMember("UUID")->value.GetString(), &uuid);
+			if (rootGo != nullptr) UuidFromStringA((RPC_CSTR)v.FindMember("Parent UUID")->value.GetString(), &parent_uuid);
+			(rootGo == nullptr) ? rootGo = new_go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid) : new_go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid, rootGo->GetGoFromUUID(parent_uuid));
+
+			rapidjson::Value& vector = v.FindMember("position")->value;
+			new_go->GetTransform()->SetPosition({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+
+			vector = v.FindMember("scale")->value;
+			new_go->GetTransform()->SetScale({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+
+			vector = v.FindMember("rotation")->value;
+			new_go->GetTransform()->SetRotation({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+
+			rapidjson::Value& components = v.FindMember("components")->value;
+			if (components.IsArray())
+			{
+				for (auto& c : components.GetArray())
+				{
+					ComponentType type = (ComponentType)c.FindMember("type")->value.GetInt();
+
+					RE_CompMesh* mesh = nullptr;
+					rapidjson::Value* textures_val = nullptr;
+					math::vec position = math::vec::zero;
+					math::vec scale = math::vec::zero;
+					math::vec rotation = math::vec::zero;
+					std::string file;
+					const char* materialResource = nullptr;
+					const char* meshResource = nullptr;
+					const char* reference = nullptr;
+					switch (type)
+					{
+					case C_MESH:
+						file = c.FindMember("file")->value.GetString();
+						reference = c.FindMember("reference")->value.GetString();
+						meshResource = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MESH);
+						if (meshResource)
+						{
+							mesh = new RE_CompMesh(new_go, meshResource);
+							textures_val = &c.FindMember("material")->value;
+							if (textures_val->IsArray())
+								for (auto& t : textures_val->GetArray())
+								{
+									file = t.FindMember("path")->value.GetString();
+									reference = t.FindMember("md5")->value.GetString();
+									materialResource = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MATERIAL);
+									if (materialResource) {
+										mesh->SetMaterial(materialResource);
+									}
+									else {
+										LOG_ERROR("Can't Load Material from mesh.\nmd5: %s\nAsset path: ", reference, file.c_str());
+									}
+								}
+							new_go->AddCompMesh(mesh);
+						}
+						else {
+							LOG_ERROR("Can't load mesh from Scene Serialized.\nmd5: %s\nAsset path: %s\n", reference, file.c_str());
+						}
+						break;
+					case C_CAMERA:
+						new_go->AddCompCamera(
+							c.FindMember("isPrespective")->value.GetBool(),
+							c.FindMember("near_plane")->value.GetFloat(),
+							c.FindMember("far_plane")->value.GetFloat(),
+							c.FindMember("v_fov_rads")->value.GetFloat(),
+							c.FindMember("draw_frustum")->value.GetBool());
+						break;
+					case C_SPHERE:
+					{
+						RE_CompPrimitive* newSphere = nullptr;
+						new_go->AddComponent(newSphere = App->primitives->CreateSphere(new_go, c.FindMember("slices")->value.GetInt(), c.FindMember("stacks")->value.GetInt()));
+						vector = c.FindMember("color")->value;
+						newSphere->SetColor(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
+					}
+					break;
+					case C_CUBE:
+					{
+						RE_CompPrimitive* newCube = nullptr;
+						new_go->AddComponent(newCube = App->primitives->CreateCube(new_go));
+						vector = c.FindMember("color")->value;
+						newCube->SetColor(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
+					}
+					break;
+					}
+				}
+			}
+		}
+	}
+
+	return rootGo;
+}
+
+RE_GameObject* RE_GameObject::DeserializeBinary(JSONNode* node, std::map<int, const char*>* resources)
+{
+	return nullptr;
 }
 
 void RE_GameObject::AddChild(RE_GameObject * child)
