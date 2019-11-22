@@ -27,7 +27,7 @@ RE_Prefab::RE_Prefab(RE_GameObject* toBePrefab, bool isInternal) : ResourceConta
 	JSONNode* node = prefab_file.GetRootNode("Game Objects");
 
 	node->SetArray();
-	toBePrefab->Serialize(node);
+	toBePrefab->SerializeJson(node);
 
 	DEL(node);
 

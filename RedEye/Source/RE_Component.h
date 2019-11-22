@@ -7,6 +7,9 @@
 #include "RapidJson\include\document.h"
 #include "RapidJson\include\allocators.h"
 
+#include <vector>
+#include <map>
+
 class RE_GameObject;
 class JSONNode;
 
@@ -35,7 +38,8 @@ enum ComponentType : ushortint
 class RE_Component
 {
 public:
-	RE_Component(const ComponentType type = C_EMPTY, RE_GameObject* go = nullptr, const bool start_active = true);
+	RE_Component(const ComponentType type = C_EMPTY, RE_GameObject* go = nullptr, const bool start_active = true) : 
+		type(type), go(go), active(start_active) {}
 	virtual ~RE_Component() {}
 
 	virtual void Init() {}
@@ -58,15 +62,18 @@ public:
 
 	virtual void OnTransformModified() {}
 
-	bool IsActive() const;
-	void SetActive(const bool value);
+	bool IsActive() const { return active; }
+	void SetActive(const bool value) { active = value; }
 
-	ComponentType GetType() const;
-	RE_GameObject* GetGO() const;
+	ComponentType GetType() const { return type; }
+	RE_GameObject* GetGO() const { return go; }
 
-	RE_Component* AsComponent() const;
+	RE_Component* AsComponent() const { return (RE_Component*)this; }
 
-	virtual void Serialize(JSONNode* node, rapidjson::Value* val);
+	virtual std::vector<const char*> GetAllResources() { return std::vector<const char*>(); }
+
+	virtual void SerializeJson(JSONNode* node, std::map<int, const char*>* resources) {}
+	virtual void SerializeBinary(char*& cursor, std::map<int, const char*>* resources) {}
 
 protected:
 

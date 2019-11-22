@@ -354,9 +354,6 @@
     <ClInclude Include="Globals.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="RE_GameObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompPrimitive.h">
       <Filter>GameObject\Components</Filter>
     </ClInclude>
@@ -461,6 +458,9 @@
     </ClInclude>
     <ClInclude Include="RE_ShaderImporter.h">
       <Filter>Modules\Resource Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_GameObject.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
