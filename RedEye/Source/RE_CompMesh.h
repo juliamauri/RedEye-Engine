@@ -21,7 +21,7 @@ public:
 
 	std::vector<const char*> GetAllResources() override;
 
-	void Serialize(JSONNode* node, rapidjson::Value* val) override;
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 
 	math::AABB GetAABB() const;
 

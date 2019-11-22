@@ -75,7 +75,7 @@ public:
 	math::vec GetUp() const;
 	math::vec GetFront() const;
 
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override;
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 
 private:
 	

@@ -139,6 +139,19 @@ void RE_GameObject::DrawItselfOnly() const
 			component->Draw();
 }
 
+std::vector<RE_GameObject*> RE_GameObject::GetAllGO()
+{
+	std::vector<RE_GameObject*> ret;
+	ret.push_back(this);
+	for (auto child : childs) {
+
+		std::vector<RE_GameObject*> childRet = child->GetAllGO();
+		if (!childRet.empty())
+			ret.insert(ret.end(), childRet.begin(), childRet.end());
+	}
+	return ret;
+}
+
 std::vector<const char*> RE_GameObject::GetAllResources(bool root)
 {
 	std::vector<const char*> ret;
@@ -160,49 +173,53 @@ std::vector<const char*> RE_GameObject::GetAllResources(bool root)
 	return ret;
 }
 
-void RE_GameObject::SerializeJson(JSONNode * node, std::map<int, const char*>* resources)
+void RE_GameObject::SerializeJson(JSONNode * node, std::map<const char*, int>* resources)
 {
-	JSONNode* fill_node = node;
+	std::vector<RE_GameObject*> allGOs = GetAllGO();
+	JSONNode* gameObjects = node->PushJObject("gameobjects");
+	gameObjects->PushUInt("gameobjectsSize", allGOs.size());
 
-	rapidjson::Value val_go(rapidjson::kObjectType);
+	uint count = 0;
+	std::string ref;
+	for (RE_GameObject* go : allGOs) {
+		ref = "go" + std::to_string(count++);
+		JSONNode* goNode = gameObjects->PushJObject(ref.c_str());
 
-	val_go.AddMember(rapidjson::Value::StringRefType("name"), rapidjson::Value().SetString(GetName(), fill_node->GetDocument()->GetAllocator()), fill_node->GetDocument()->GetAllocator());
+		goNode->PushString("name", go->GetName());
 
-	char* str = nullptr;
-	UuidToStringA(&uuid, (RPC_CSTR*)&str);
-	val_go.AddMember(rapidjson::Value::StringRefType("UUID"), rapidjson::Value().SetString(str, fill_node->GetDocument()->GetAllocator()), fill_node->GetDocument()->GetAllocator());
-	RpcStringFreeA((RPC_CSTR*)&str);
-
-	if (parent != nullptr)
-	{
-		UuidToStringA(&parent->uuid, (RPC_CSTR*)&str);
-		val_go.AddMember(rapidjson::Value::StringRefType("Parent UUID"), rapidjson::Value().SetString(str, fill_node->GetDocument()->GetAllocator()), fill_node->GetDocument()->GetAllocator());
+		char* str = nullptr;
+		UuidToStringA(&go->uuid, (RPC_CSTR*)&str);
+		goNode->PushString("UUID", str);
 		RpcStringFreeA((RPC_CSTR*)&str);
+
+		if (go->parent != nullptr)
+		{
+			UuidToStringA(&go->parent->uuid, (RPC_CSTR*)&str);
+			goNode->PushString("Parent UUID", str);
+			RpcStringFreeA((RPC_CSTR*)&str);
+		}
+
+		goNode->PushFloatVector("position", go->GetTransform()->GetLocalPosition());
+		goNode->PushFloatVector("rotation", go->GetTransform()->GetLocalEulerRotation());
+		goNode->PushFloatVector("scale", go->GetTransform()->GetLocalScale());
+
+		JSONNode* comps = goNode->PushJObject("components");
+		comps->PushUInt("ComponentsSize", go->components.size());
+		uint count = 0;
+		for (auto component : go->components) {
+			ref = "cmp" + std::to_string(count++);
+			JSONNode* comp = comps->PushJObject(ref.c_str());
+			comp->PushInt("type", component->GetType());
+			component->SerializeJson(comp, resources);
+			DEL(comp);
+		}
+		DEL(comps);
+		DEL(goNode);
 	}
-
-	rapidjson::Value float_array(rapidjson::kArrayType);
-
-	float_array.PushBack(GetTransform()->GetLocalPosition().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalPosition().z, fill_node->GetDocument()->GetAllocator());
-	val_go.AddMember(rapidjson::Value::StringRefType("position"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
-
-	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetLocalEulerRotation().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalEulerRotation().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalEulerRotation().z, fill_node->GetDocument()->GetAllocator());
-	val_go.AddMember(rapidjson::Value::StringRefType("rotation"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
-
-	float_array.SetArray();
-	float_array.PushBack(GetTransform()->GetLocalScale().x, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().y, fill_node->GetDocument()->GetAllocator()).PushBack(GetTransform()->GetLocalScale().z, fill_node->GetDocument()->GetAllocator());
-	val_go.AddMember(rapidjson::Value::StringRefType("scale"), float_array.Move(), fill_node->GetDocument()->GetAllocator());
-
-	rapidjson::Value val_comp(rapidjson::kArrayType);
-	for (auto component : components) component->SerializeJson(node, resources);
-	val_go.AddMember(rapidjson::Value::StringRefType("components"), val_comp, fill_node->GetDocument()->GetAllocator());
-
-	node->PushValue(&val_go);
-
-	for (auto child : childs) { child->SerializeJson(node, resources); }
+	DEL(gameObjects);
 }
 
-void RE_GameObject::SerializeBinary(char*& cursor, std::map<int, const char*>* resources)
+void RE_GameObject::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
 {
 
 
@@ -213,102 +230,86 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, cons
 {
 	RE_GameObject* rootGo = nullptr;
 	RE_GameObject* new_go = nullptr;
-	rapidjson::Value* val = rapidjson::Pointer(pointerPath.c_str()).Get(config->document);
+	JSONNode* gameObjects = node->PullJObject("gameobjects");
+	uint GOCount = gameObjects->PullUInt("gameobjectsSize", 0);
 
-	if (val->IsArray())
-	{
-		for (auto& v : val->GetArray())
-		{
-			UUID uuid;
-			UUID parent_uuid;
+	std::string ref;
+	for (uint count = 0; count < GOCount; count++) {
+		ref = "go" + std::to_string(count);
+		JSONNode* goNode = gameObjects->PullJObject(ref.c_str());
 
-			UuidFromStringA((RPC_CSTR)v.FindMember("UUID")->value.GetString(), &uuid);
-			if (rootGo != nullptr) UuidFromStringA((RPC_CSTR)v.FindMember("Parent UUID")->value.GetString(), &parent_uuid);
-			(rootGo == nullptr) ? rootGo = new_go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid) : new_go = new RE_GameObject(v.FindMember("name")->value.GetString(), uuid, rootGo->GetGoFromUUID(parent_uuid));
+		UUID uuid;
+		UUID parent_uuid;
 
-			rapidjson::Value& vector = v.FindMember("position")->value;
-			new_go->GetTransform()->SetPosition({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+		UuidFromStringA((RPC_CSTR)goNode->PullString("UUID", ""), &uuid);
+		if (rootGo != nullptr) UuidFromStringA((RPC_CSTR)goNode->PullString("Parent UUID",""), &parent_uuid);
+		(rootGo == nullptr) ? rootGo = new_go = new RE_GameObject(goNode->PullString("name", "GameObject"), uuid) : new_go = new RE_GameObject(goNode->PullString("name", "GameObject"), uuid, rootGo->GetGoFromUUID(parent_uuid));
 
-			vector = v.FindMember("scale")->value;
-			new_go->GetTransform()->SetScale({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+		new_go->GetTransform()->SetPosition(goNode->PullFloatVector("position", math::vec::zero));
+		new_go->GetTransform()->SetRotation(goNode->PullFloatVector("rotation", math::vec::zero));
+		new_go->GetTransform()->SetScale(goNode->PullFloatVector("scale", math::vec::one));
 
-			vector = v.FindMember("rotation")->value;
-			new_go->GetTransform()->SetRotation({ vector.GetArray()[0].GetFloat() , vector.GetArray()[1].GetFloat() , vector.GetArray()[2].GetFloat() });
+		JSONNode* comps = goNode->PullJObject("components");
+		uint compCount = comps->PullUInt("ComponentsSize", 0);
+		for (uint count = 0; count < compCount; count++) {
+			ref = "cmp" + std::to_string(count);
+			JSONNode* cmpNode = comps->PullJObject(ref.c_str());
 
-			rapidjson::Value& components = v.FindMember("components")->value;
-			if (components.IsArray())
+			ComponentType type = (ComponentType)cmpNode->PullInt("type", ComponentType::C_EMPTY);
+
+			switch (type)
 			{
-				for (auto& c : components.GetArray())
-				{
-					ComponentType type = (ComponentType)c.FindMember("type")->value.GetInt();
+			case C_CUBE:
+			{
+				RE_CompPrimitive* newCube = nullptr;
+				new_go->AddComponent(newCube = App->primitives->CreateCube(new_go));
+				newCube->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
+			}
+				break;
+			case C_SPHERE:
+			{
+				RE_CompPrimitive* newSphere = nullptr;
+				new_go->AddComponent(newSphere = App->primitives->CreateSphere(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3)));
+				newSphere->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
+			}
+				break;
+			case C_MESH:
+			{
+				RE_CompMesh* newMesh = nullptr;
+				int meshID = cmpNode->PullInt("meshResource", -1);
+				const char* meshMD5 = nullptr;
+				if (meshID != -1) {
+					meshMD5 = resources->at(meshID);
 
-					RE_CompMesh* mesh = nullptr;
-					rapidjson::Value* textures_val = nullptr;
-					math::vec position = math::vec::zero;
-					math::vec scale = math::vec::zero;
-					math::vec rotation = math::vec::zero;
-					std::string file;
-					const char* materialResource = nullptr;
-					const char* meshResource = nullptr;
-					const char* reference = nullptr;
-					switch (type)
-					{
-					case C_MESH:
-						file = c.FindMember("file")->value.GetString();
-						reference = c.FindMember("reference")->value.GetString();
-						meshResource = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MESH);
-						if (meshResource)
-						{
-							mesh = new RE_CompMesh(new_go, meshResource);
-							textures_val = &c.FindMember("material")->value;
-							if (textures_val->IsArray())
-								for (auto& t : textures_val->GetArray())
-								{
-									file = t.FindMember("path")->value.GetString();
-									reference = t.FindMember("md5")->value.GetString();
-									materialResource = App->resources->CheckFileLoaded(file.c_str(), reference, Resource_Type::R_MATERIAL);
-									if (materialResource) {
-										mesh->SetMaterial(materialResource);
-									}
-									else {
-										LOG_ERROR("Can't Load Material from mesh.\nmd5: %s\nAsset path: ", reference, file.c_str());
-									}
-								}
-							new_go->AddCompMesh(mesh);
-						}
-						else {
-							LOG_ERROR("Can't load mesh from Scene Serialized.\nmd5: %s\nAsset path: %s\n", reference, file.c_str());
-						}
-						break;
-					case C_CAMERA:
-						new_go->AddCompCamera(
-							c.FindMember("isPrespective")->value.GetBool(),
-							c.FindMember("near_plane")->value.GetFloat(),
-							c.FindMember("far_plane")->value.GetFloat(),
-							c.FindMember("v_fov_rads")->value.GetFloat(),
-							c.FindMember("draw_frustum")->value.GetBool());
-						break;
-					case C_SPHERE:
-					{
-						RE_CompPrimitive* newSphere = nullptr;
-						new_go->AddComponent(newSphere = App->primitives->CreateSphere(new_go, c.FindMember("slices")->value.GetInt(), c.FindMember("stacks")->value.GetInt()));
-						vector = c.FindMember("color")->value;
-						newSphere->SetColor(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
-					}
-					break;
-					case C_CUBE:
-					{
-						RE_CompPrimitive* newCube = nullptr;
-						new_go->AddComponent(newCube = App->primitives->CreateCube(new_go));
-						vector = c.FindMember("color")->value;
-						newCube->SetColor(vector.GetArray()[0].GetFloat(), vector.GetArray()[1].GetFloat(), vector.GetArray()[2].GetFloat());
-					}
-					break;
+					newMesh = new RE_CompMesh(new_go, meshMD5);
+
+					const char* materialMD5 = nullptr;
+					int materialID = cmpNode->PullInt("materialResource", -1);
+					if (materialID != -1) {
+						materialMD5 = resources->at(materialID);
+						newMesh->SetMaterial(materialMD5);
 					}
 				}
 			}
+				break;
+			case C_CAMERA:
+			{
+				new_go->AddCompCamera(
+					cmpNode->PullBool("isPrespective", true),
+					cmpNode->PullFloat("near_plane", 1),
+					cmpNode->PullFloat("far_plane", 10000),
+					cmpNode->PullFloat("v_fov_rads", 30.0f),
+					cmpNode->PullInt("aspect_ratio", AspectRatioTYPE::Fit_Window),
+					cmpNode->PullBool("draw_frustum", true));
+			}
+				break;
+			}
+			DEL(cmpNode);
 		}
+		DEL(comps);
+		DEL(goNode);
 	}
+	DEL(gameObjects);
 
 	return rootGo;
 }

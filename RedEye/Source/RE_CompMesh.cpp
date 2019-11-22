@@ -103,26 +103,10 @@ std::vector<const char*> RE_CompMesh::GetAllResources()
 	return ret;
 }
 
-void RE_CompMesh::Serialize(JSONNode * node, rapidjson::Value * comp_array)
+void RE_CompMesh::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
 {
-	rapidjson::Value val(rapidjson::kObjectType);
-
-	val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetInt((int)type), node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("reference"), rapidjson::Value().SetString(meshMD5, node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("file"), rapidjson::Value().SetString(((ResourceContainer*)App->resources->At(meshMD5))->GetLibraryPath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
-
-	rapidjson::Value texture_array(rapidjson::kArrayType);
-	RE_Material* meshMaterial = (RE_Material*)App->resources->At(materialMD5);
-	if (meshMaterial)
-	{
-		rapidjson::Value texture_val(rapidjson::kObjectType);
-		texture_val.AddMember(rapidjson::Value::StringRefType("path"), rapidjson::Value().SetString(((ResourceContainer*)meshMaterial)->GetLibraryPath(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
-		texture_val.AddMember(rapidjson::Value::StringRefType("md5"), rapidjson::Value().SetString(((ResourceContainer*)meshMaterial)->GetMD5(), node->GetDocument()->GetAllocator()), node->GetDocument()->GetAllocator());
-		texture_array.PushBack(texture_val, node->GetDocument()->GetAllocator());
-	}
-	val.AddMember(rapidjson::Value::StringRefType("material"), texture_array, node->GetDocument()->GetAllocator());
-
-	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
+	node->PushInt("meshResource", (meshMD5) ? resources->at(meshMD5) : -1);
+	node->PushInt("materialResource", (materialMD5) ? resources->at(materialMD5) : -1);
 }
 
 math::AABB RE_CompMesh::GetAABB() const

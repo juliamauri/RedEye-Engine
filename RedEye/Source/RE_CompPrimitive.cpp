@@ -212,17 +212,9 @@ void RE_CompCube::DrawProperties()
 	}
 }
 
-void RE_CompCube::Serialize(JSONNode * node, rapidjson::Value * comp_array)
+void RE_CompCube::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
 {
-	rapidjson::Value val(rapidjson::kObjectType);
-	val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetInt((int)ComponentType::C_CUBE), node->GetDocument()->GetAllocator());
-
-	rapidjson::Value float_array(rapidjson::kArrayType);
-
-	float_array.PushBack(RE_CompPrimitive::color.x, node->GetDocument()->GetAllocator()).PushBack(RE_CompPrimitive::color.y, node->GetDocument()->GetAllocator()).PushBack(RE_CompPrimitive::color.z, node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("color"), float_array.Move(), node->GetDocument()->GetAllocator());
-
-	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
+	node->PushFloatVector("color", RE_CompPrimitive::color);
 }
 
 RE_CompFustrum::RE_CompFustrum(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_FUSTRUM, game_obj, VAO, shader) {}
@@ -329,20 +321,16 @@ void RE_CompSphere::DrawProperties()
 	}
 }
 
-void RE_CompSphere::Serialize(JSONNode * node, rapidjson::Value * comp_array)
+void RE_CompSphere::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
 {
 	rapidjson::Value val(rapidjson::kObjectType);
 	val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetInt((int)ComponentType::C_SPHERE), node->GetDocument()->GetAllocator());
 
 	rapidjson::Value float_array(rapidjson::kArrayType);
 
-	float_array.PushBack(RE_CompPrimitive::color.x, node->GetDocument()->GetAllocator()).PushBack(RE_CompPrimitive::color.y, node->GetDocument()->GetAllocator()).PushBack(RE_CompPrimitive::color.z, node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("color"), float_array.Move(), node->GetDocument()->GetAllocator());
-
-	val.AddMember(rapidjson::Value::StringRefType("slices"), rapidjson::Value().SetInt((int)slice), node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("stacks"), rapidjson::Value().SetInt((int)stacks), node->GetDocument()->GetAllocator());
-
-	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
+	node->PushFloatVector("color", RE_CompPrimitive::color);
+	node->PushInt("slices", slice);
+	node->PushInt("stacks", stacks);
 }
 
 void RE_CompSphere::GenerateNewSphere(int _slice, int _stacks)

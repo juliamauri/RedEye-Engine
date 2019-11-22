@@ -13,9 +13,10 @@ public:
 	ComponentType GetType() const;
 	virtual void Draw() override = 0;
 	virtual void DrawProperties() override = 0;
-	virtual void Serialize(JSONNode* node, rapidjson::Value* comp_array) override { }
+	virtual void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override { }
 
 	void SetColor(float r, float g, float b) { color.Set(r, g, b); }
+	void SetColor(math::vec nColor) { color = nColor; }
 
 protected:
 	ComponentType type;
@@ -39,7 +40,7 @@ public:
 	~RE_CompAxis();
 	void Draw() override;
 	void DrawProperties() override {}
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 
 private:
 	math::float4x4 basis;
@@ -56,7 +57,7 @@ public:
 	~RE_CompPoint();
 	void Draw() override;
 	void DrawProperties() override {}
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 
 private:
 	math::vec point;
@@ -73,7 +74,7 @@ public:
 	~RE_CompLine();
 	void Draw() override;
 	void DrawProperties() override {}
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 
 private:
 	math::vec origin;
@@ -91,7 +92,7 @@ public:
 	~RE_CompRay();
 	void Draw() override;
 	void DrawProperties() override {}
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 };
 
 /**************************************************
@@ -105,7 +106,7 @@ public:
 	~RE_CompTriangle();
 	void Draw() override;
 	void DrawProperties() override {}
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 };
 
 /**************************************************
@@ -119,7 +120,7 @@ public:
 	~RE_CompPlane();
 	void Draw() override;
 	void DrawProperties() override {}
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 };
 
 /**************************************************
@@ -134,7 +135,7 @@ public:
 	~RE_CompCube();
 	void Draw() override;
 	void DrawProperties() override;
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override;
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 
 private:
 	bool show_checkers = false;
@@ -153,7 +154,7 @@ public:
 	~RE_CompFustrum();
 	void Draw() override;
 	void DrawProperties() override {}
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 };
 
 /**************************************************
@@ -168,7 +169,7 @@ public:
 	~RE_CompSphere();
 	void Draw() override;
 	void DrawProperties() override;
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override;
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 
 private:
 	void GenerateNewSphere(int slice, int stacks);
@@ -194,7 +195,7 @@ public:
 	~RE_CompCylinder();
 	void Draw() override;
 	void DrawProperties() override {}
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 };
 
 
@@ -209,7 +210,7 @@ public:
 	~RE_CompCapsule();
 	void Draw() override;
 	void DrawProperties() override {}
-	void Serialize(JSONNode* node, rapidjson::Value* comp_array) override {}
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 };
 
 #endif // !__RE_COMPPRIMITIVE_H__

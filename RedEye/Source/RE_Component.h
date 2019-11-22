@@ -72,8 +72,8 @@ public:
 
 	virtual std::vector<const char*> GetAllResources() { return std::vector<const char*>(); }
 
-	virtual void SerializeJson(JSONNode* node, std::map<int, const char*>* resources) {}
-	virtual void SerializeBinary(char*& cursor, std::map<int, const char*>* resources) {}
+	virtual void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) {}
+	virtual void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) {}
 
 protected:
 

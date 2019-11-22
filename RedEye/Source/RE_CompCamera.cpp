@@ -427,22 +427,12 @@ math::vec RE_CompCamera::GetFront() const
 	return front;
 }
 
-void RE_CompCamera::Serialize(JSONNode * node, rapidjson::Value * comp_array)
+void RE_CompCamera::SerializeJson(JSONNode * node, std::map<const char*, int>* resources)
 {
-	rapidjson::Value val(rapidjson::kObjectType);
-
-	val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetInt((int)type), node->GetDocument()->GetAllocator());
-	
-	val.AddMember(rapidjson::Value::StringRefType("isPrespective"), rapidjson::Value().SetBool(isPerspective), node->GetDocument()->GetAllocator());
-
-	val.AddMember(rapidjson::Value::StringRefType("near_plane"), rapidjson::Value().SetFloat(near_plane), node->GetDocument()->GetAllocator());
-	val.AddMember(rapidjson::Value::StringRefType("far_plane"), rapidjson::Value().SetFloat(far_plane), node->GetDocument()->GetAllocator());
-
-	val.AddMember(rapidjson::Value::StringRefType("v_fov_rads"), rapidjson::Value().SetFloat(v_fov_rads), node->GetDocument()->GetAllocator());
-
-	val.AddMember(rapidjson::Value::StringRefType("aspect_ratio"), rapidjson::Value().SetInt((int)target_ar), node->GetDocument()->GetAllocator());
-
-	val.AddMember(rapidjson::Value::StringRefType("draw_frustum"), rapidjson::Value().SetBool(draw_frustum), node->GetDocument()->GetAllocator());
-
-	comp_array->PushBack(val, node->GetDocument()->GetAllocator());
+	node->PushBool("isPrespective", isPerspective);
+	node->PushFloat("near_plane", near_plane);
+	node->PushFloat("far_plane", far_plane);
+	node->PushFloat("v_fov_rads", v_fov_rads);
+	node->PushInt("aspect_ratio", target_ar);
+	node->PushBool("draw_frustum", draw_frustum);
 }
