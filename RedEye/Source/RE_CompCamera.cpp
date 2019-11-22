@@ -436,3 +436,29 @@ void RE_CompCamera::SerializeJson(JSONNode * node, std::map<const char*, int>* r
 	node->PushInt("aspect_ratio", target_ar);
 	node->PushBool("draw_frustum", draw_frustum);
 }
+
+void RE_CompCamera::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+{
+	size_t size = sizeof(bool);
+	memcpy(cursor, &isPerspective, size);
+	cursor += size;
+
+	size = sizeof(float);
+	memcpy(cursor, &near_plane, size);
+	cursor += size;
+
+	memcpy(cursor, &far_plane, size);
+	cursor += size;
+
+	memcpy(cursor, &v_fov_rads, size);
+	cursor += size;
+
+	size = sizeof(int);
+	int aspectRatioInt = (int)target_ar;
+	memcpy(cursor, &aspectRatioInt, size);
+	cursor += size;
+
+	size = sizeof(bool);
+	memcpy(cursor, &draw_frustum, size);
+	cursor += size;
+}

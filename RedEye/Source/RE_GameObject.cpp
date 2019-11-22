@@ -221,9 +221,62 @@ void RE_GameObject::SerializeJson(JSONNode * node, std::map<const char*, int>* r
 
 void RE_GameObject::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
 {
+	std::vector<RE_GameObject*> allGOs = GetAllGO();
 
+	size_t size = sizeof(uint);
+	uint goSize = allGOs.size();
+	memcpy(cursor, &goSize, size);
+	cursor += size;
+	
+	for (RE_GameObject* go : allGOs) {
+		uint strLenght = std::strlen(go->GetName());
+		size = sizeof(uint);
+		memcpy(cursor, &strLenght, size);
+		cursor += size;
 
+		size = sizeof(char) * strLenght;
+		memcpy(cursor, go->GetName(), size);
+		cursor += size;
 
+		size = sizeof(char) * 36;
+		char* strUUID = nullptr;
+		UuidToStringA(&go->uuid, (RPC_CSTR*)&strUUID);
+		memcpy(cursor, strUUID, size);
+		cursor += size;
+		RpcStringFreeA((RPC_CSTR*)&strUUID);
+
+		if (go->parent != nullptr)
+		{
+			UuidToStringA(&go->parent->uuid, (RPC_CSTR*)&strUUID);
+			memcpy(cursor, strUUID, size);
+			cursor += size;
+			RpcStringFreeA((RPC_CSTR*)&strUUID);
+		}
+
+		size = sizeof(float) * 3;
+		memcpy(cursor, &go->GetTransform()->GetLocalPosition()[0], size);
+		cursor += size;
+
+		memcpy(cursor, &go->GetTransform()->GetLocalEulerRotation()[0], size);
+		cursor += size;
+
+		memcpy(cursor, &go->GetTransform()->GetLocalScale()[0], size);
+		cursor += size;
+
+		size = sizeof(uint);
+		uint cmpSize = allGOs.size();
+		memcpy(cursor, &cmpSize, size);
+		cursor += size;
+
+		for (auto component : go->components) {
+			size = sizeof(int);
+			int type = component->GetType();
+			memcpy(cursor, &type, size);
+			cursor += size;
+
+			component->SerializeBinary(cursor, resources);
+		}
+	}
 }
 
 RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, const char*>* resources)
@@ -314,9 +367,183 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, cons
 	return rootGo;
 }
 
-RE_GameObject* RE_GameObject::DeserializeBinary(JSONNode* node, std::map<int, const char*>* resources)
+RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, const char*>* resources)
 {
-	return nullptr;
+	RE_GameObject* rootGo = nullptr;
+	RE_GameObject* new_go = nullptr;
+
+	size_t size = sizeof(uint);
+	uint GOCount = 0;
+	memcpy(&GOCount, cursor, size);
+	cursor += size;
+
+	for (uint count = 0; count < GOCount; count++) {
+
+		uint strLenght = 0;
+		size = sizeof(uint);
+		memcpy(&strLenght, cursor, size);
+		cursor += size;
+
+		char* strName = new char[strLenght + 1];
+		size = sizeof(char) * strLenght;
+		memcpy(strName, cursor, size);
+		cursor += size;
+		strName[strLenght] = '\0';
+
+		UUID uuid;
+		UUID parent_uuid;
+
+		size = sizeof(char) * 36;
+		char* strUUID = new char[36 +1];
+		memcpy(strUUID, cursor, size);
+		cursor += size;
+		strUUID[36] = '\0';
+		UuidFromStringA((RPC_CSTR)strUUID, &uuid);
+		DEL_A(strUUID);
+
+		if (rootGo != nullptr) { 
+			char* strUUID = new char[36 + 1];
+			memcpy(strUUID, cursor, size);
+			cursor += size;
+			strUUID[36] = '\0';
+			UuidFromStringA((RPC_CSTR)strUUID, &parent_uuid);
+			DEL_A(strUUID);
+		}
+
+		(rootGo == nullptr) ? rootGo = new_go = new RE_GameObject(strName, uuid) : new_go = new RE_GameObject(strName, uuid, rootGo->GetGoFromUUID(parent_uuid));
+		DEL_A(strName);
+
+		float vec[3] = { 0.0, 0.0, 0.0 };
+		size = sizeof(float) * 3;
+
+		memcpy(vec, cursor, size);
+		cursor += size;
+		new_go->GetTransform()->SetPosition(math::vec(vec));
+		
+		memcpy(vec, cursor, size);
+		cursor += size;
+		new_go->GetTransform()->SetRotation(math::vec(vec));
+
+		memcpy(vec, cursor, size);
+		cursor += size;
+		new_go->GetTransform()->SetScale(math::vec(vec));
+
+		size = sizeof(uint);
+		uint compCount = 0;
+		memcpy(&compCount, cursor, size);
+		cursor += size;
+		for (uint count = 0; count < compCount; count++) {
+
+			int typeInt = 0;
+			size = sizeof(int);
+			memcpy(&typeInt, cursor, size);
+			cursor += size;
+
+			ComponentType type = (ComponentType)typeInt;
+			switch (type)
+			{
+			case C_CUBE:
+			{
+				RE_CompPrimitive* newCube = nullptr;
+				new_go->AddComponent(newCube = App->primitives->CreateCube(new_go));
+
+				size = sizeof(float) * 3;
+				memcpy(vec, cursor, size);
+				cursor += size;
+				newCube->SetColor(math::vec(vec));
+			}
+			break;
+			case C_SPHERE:
+			{
+				RE_CompPrimitive* newSphere = nullptr;
+
+				int slices = 0, stacks = 0;
+				size = sizeof(int);
+				memcpy(&slices, cursor, size);
+				cursor += size;
+
+				memcpy(&stacks, cursor, size);
+				cursor += size;
+
+				new_go->AddComponent(newSphere = App->primitives->CreateSphere(new_go, slices, stacks));
+
+				size = sizeof(float) * 3;
+				memcpy(vec, cursor, size);
+				cursor += size;
+
+				newSphere->SetColor(math::vec(vec));
+			}
+			break;
+			case C_MESH:
+			{
+				RE_CompMesh* newMesh = nullptr;
+
+				int meshID = -1;
+				size = sizeof(int);
+				memcpy(cursor, &meshID, size);
+				cursor += size;
+
+				const char* meshMD5 = nullptr;
+				if (meshID != -1) {
+					meshMD5 = resources->at(meshID);
+					newMesh = new RE_CompMesh(new_go, meshMD5);
+
+					const char* materialMD5 = nullptr;
+					int materialID = -1;
+					memcpy(cursor, &materialID, size);
+					cursor += size;
+					if (materialID != -1) {
+						materialMD5 = resources->at(materialID);
+						newMesh->SetMaterial(materialMD5);
+					}
+				}
+			}
+			break;
+			case C_CAMERA:
+			{
+				bool isPrespective = true;
+				size = sizeof(bool);
+				memcpy(&isPrespective, cursor, size);
+				cursor += size;
+
+				float nearPlane = 1.0;
+				size = sizeof(float);
+				memcpy(&nearPlane, cursor, size);
+				cursor += size;
+
+				float farPlane = 10000.0;
+				memcpy(&farPlane, cursor, size);
+				cursor += size;
+
+				float vfovrads = 30.0;
+				memcpy(&vfovrads, cursor, size);
+				cursor += size;
+
+				int aspectRatioInt = 0;
+				size = sizeof(bool);
+				memcpy(&aspectRatioInt, cursor, size);
+				cursor += size;
+				AspectRatioTYPE aspectRatio = (AspectRatioTYPE)aspectRatioInt;
+
+				bool drawFrustum = true;
+				size = sizeof(bool);
+				memcpy(&drawFrustum, cursor, size);
+				cursor += size;
+
+				new_go->AddCompCamera(
+					isPrespective,
+					nearPlane,
+					farPlane,
+					vfovrads,
+					aspectRatio,
+					drawFrustum);
+			}
+			break;
+			}
+		}
+	}
+
+	return rootGo;
 }
 
 void RE_GameObject::AddChild(RE_GameObject * child)

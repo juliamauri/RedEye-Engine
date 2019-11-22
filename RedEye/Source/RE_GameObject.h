@@ -38,7 +38,7 @@ public:
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources);
 
 	static RE_GameObject* DeserializeJSON(JSONNode* node, std::map<int, const char*>* resources);
-	static RE_GameObject* DeserializeBinary(JSONNode* node, std::map<int, const char*>* resources);
+	static RE_GameObject* DeserializeBinary(char*& cursor, std::map<int, const char*>* resources);
 
 	// Children
 	void AddChild(RE_GameObject* child);

@@ -109,6 +109,18 @@ void RE_CompMesh::SerializeJson(JSONNode* node, std::map<const char*, int>* reso
 	node->PushInt("materialResource", (materialMD5) ? resources->at(materialMD5) : -1);
 }
 
+void RE_CompMesh::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+{
+	size_t size = sizeof(int);
+	int md5 = (meshMD5) ? resources->at(meshMD5) : -1;
+	memcpy(cursor, &md5, size);
+	cursor += size;
+
+	md5 = (materialMD5) ? resources->at(materialMD5) : -1;
+	memcpy(cursor, &md5, size);
+	cursor += size;
+}
+
 math::AABB RE_CompMesh::GetAABB() const
 {
 	return ((RE_Mesh*)App->resources->At(meshMD5))->GetAABB();

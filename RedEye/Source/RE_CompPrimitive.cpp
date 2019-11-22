@@ -217,6 +217,13 @@ void RE_CompCube::SerializeJson(JSONNode* node, std::map<const char*, int>* reso
 	node->PushFloatVector("color", RE_CompPrimitive::color);
 }
 
+void RE_CompCube::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+{
+	size_t size = sizeof(float) * 3;
+	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+}
+
 RE_CompFustrum::RE_CompFustrum(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_FUSTRUM, game_obj, VAO, shader) {}
 
 RE_CompFustrum::~RE_CompFustrum()
@@ -323,14 +330,24 @@ void RE_CompSphere::DrawProperties()
 
 void RE_CompSphere::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
 {
-	rapidjson::Value val(rapidjson::kObjectType);
-	val.AddMember(rapidjson::Value::StringRefType("type"), rapidjson::Value().SetInt((int)ComponentType::C_SPHERE), node->GetDocument()->GetAllocator());
-
-	rapidjson::Value float_array(rapidjson::kArrayType);
-
 	node->PushFloatVector("color", RE_CompPrimitive::color);
 	node->PushInt("slices", slice);
 	node->PushInt("stacks", stacks);
+}
+
+void RE_CompSphere::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+{
+	size_t size = sizeof(float) * 3;
+	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(cursor, &slice, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(cursor, &stacks, size);
+	cursor += size;
 }
 
 void RE_CompSphere::GenerateNewSphere(int _slice, int _stacks)

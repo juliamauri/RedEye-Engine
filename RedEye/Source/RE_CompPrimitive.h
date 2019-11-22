@@ -14,6 +14,7 @@ public:
 	virtual void Draw() override = 0;
 	virtual void DrawProperties() override = 0;
 	virtual void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override { }
+	virtual void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
 	void SetColor(float r, float g, float b) { color.Set(r, g, b); }
 	void SetColor(math::vec nColor) { color = nColor; }
@@ -41,6 +42,7 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
 private:
 	math::float4x4 basis;
@@ -58,6 +60,7 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
 private:
 	math::vec point;
@@ -75,6 +78,7 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
 private:
 	math::vec origin;
@@ -93,6 +97,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+
 };
 
 /**************************************************
@@ -107,6 +113,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+
 };
 
 /**************************************************
@@ -121,6 +129,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+
 };
 
 /**************************************************
@@ -136,6 +146,7 @@ public:
 	void Draw() override;
 	void DrawProperties() override;
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
 
 private:
 	bool show_checkers = false;
@@ -155,6 +166,7 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 };
 
 /**************************************************
@@ -170,6 +182,7 @@ public:
 	void Draw() override;
 	void DrawProperties() override;
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
 
 private:
 	void GenerateNewSphere(int slice, int stacks);
@@ -196,6 +209,7 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 };
 
 
@@ -211,6 +225,7 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 };
 
 #endif // !__RE_COMPPRIMITIVE_H__
