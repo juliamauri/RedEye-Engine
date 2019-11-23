@@ -24,6 +24,9 @@ typedef enum : unsigned short int
 	TRANSFORM_MODIFIED,
 	STATIC_TRANSFORM_MODIFIED,
 
+	// Renderer
+	CURRENT_CAM_VIEWPORT_CHANGED,
+
 	// Gameobject
 	PARENT_TRANSFORM_MODIFIED,
 

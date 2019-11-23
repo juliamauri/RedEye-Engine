@@ -75,8 +75,6 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 bool ModuleRenderer3D::Start()
 {
-	WindowSizeChanged(App->window->GetWidth(), App->window->GetHeight());
-
 	sceneShader = App->internalResources->GetDefaultShader();
 	skyboxShader = App->internalResources->GetSkyBoxShader();
 
@@ -171,6 +169,12 @@ bool ModuleRenderer3D::CleanUp()
 	SDL_GL_DeleteContext(mainContext);
 
 	return true;
+}
+
+void ModuleRenderer3D::RecieveEvent(const Event & e)
+{
+	if (e.GetType() == CURRENT_CAM_VIEWPORT_CHANGED)
+		UpdateViewPort(App->window->GetWidth(), App->window->GetHeight());
 }
 
 void ModuleRenderer3D::DrawEditor()
@@ -355,16 +359,21 @@ void * ModuleRenderer3D::GetWindowContext() const
 
 void ModuleRenderer3D::WindowSizeChanged(int width, int height)
 {
-	// Change cameras
 	App->cams->OnWindowChangeSize(width, height);
-
-	// Set new main Viewport
-	int w, h;
-	RE_CameraManager::CurrentCamera()->GetTargetWidthHeight(w,h);
-	glViewport(width-w, height-h, w, h);
 }
+
+void ModuleRenderer3D::UpdateViewPort(int width, int height) const
+{
+	int w, h;
+	RE_CameraManager::CurrentCamera()->GetTargetWidthHeight(w, h);
+	const int x = (width - w) / 2;
+	const int y = (height - h) / 2;
+	glViewport(x, y, w, h);
+}
+
 
 uint ModuleRenderer3D::GetShaderScene() const
 {
 	return sceneShader;
 }
+

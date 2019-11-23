@@ -25,7 +25,8 @@ public:
 	update_status PostUpdate() override;
 	bool CleanUp() override;
 
-	void DrawEditor();
+	void RecieveEvent(const Event& e) override;
+	void DrawEditor() override;
 
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
@@ -46,11 +47,13 @@ public:
 	// Draws
 	void DirectDrawCube(math::vec position, math::vec color);
 
-	// Context
+	// Context & Viewport
 	void* GetWindowContext()const;
 	void WindowSizeChanged(int width, int height);
+	void UpdateViewPort(int width, int height) const;
 
 	uint GetShaderScene() const;
+
 
 private:
 
