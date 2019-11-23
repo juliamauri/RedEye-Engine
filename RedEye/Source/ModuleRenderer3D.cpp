@@ -103,9 +103,12 @@ update_status ModuleRenderer3D::PostUpdate()
 	update_status ret = UPDATE_CONTINUE;
 
 	OPTICK_CATEGORY("Culling", Optick::Category::Rendering);
-	std::vector<RE_GameObject*> objects;
+	std::vector<const RE_GameObject*> objects;
 	if (cull_scene)
-		App->scene->GetQuadTree()->CollectIntersections(objects, App->cams->GetCullingFrustum());
+	{
+		math::Frustum frustum = App->cams->GetCullingFrustum();
+		App->scene->FustrumCulling(objects, frustum);
+	}
 
 	OPTICK_CATEGORY("Scene Draw", Optick::Category::Rendering);
 
@@ -128,8 +131,8 @@ update_status ModuleRenderer3D::PostUpdate()
 	else
 		App->scene->GetRoot()->DrawWithChilds();
 
-	// Draw Scene Debug
-	App->scene->DrawDebug();
+	// Draw Debug Geometry
+	App->editor->DrawDebug(lighting);
 
 	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
 	// draw skybox as last
