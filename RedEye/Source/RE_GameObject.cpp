@@ -12,7 +12,6 @@
 #include "RE_CompParticleEmiter.h"
 #include "RE_ShaderImporter.h"
 #include "ModuleRenderer3D.h"
-#include "ModuleInput.h"
 #include "ModuleEditor.h"
 #include "OutputLog.h"
 #include "RE_CameraManager.h"
@@ -930,10 +929,10 @@ void RE_GameObject::RecieveEvent(const Event & e)
 
 void RE_GameObject::TransformModified()
 {
-	App->input->AddEvent(Event(STATIC_TRANSFORM_MODIFIED, App->scene));
+	Event::Push(STATIC_TRANSFORM_MODIFIED, App->scene);
 
 	if (isStatic)
-		App->input->AddEvent(Event(STATIC_TRANSFORM_MODIFIED, App->scene));
+		Event::Push(STATIC_TRANSFORM_MODIFIED, App->scene);
 
 	ResetGlobalBoundingBox();
 
@@ -941,7 +940,7 @@ void RE_GameObject::TransformModified()
 		component->OnTransformModified();
 
 	for (auto child : childs)
-		App->input->AddEvent(Event(PARENT_TRANSFORM_MODIFIED, child));
+		Event::Push(PARENT_TRANSFORM_MODIFIED, child);
 }
 
 const char * RE_GameObject::GetName() const
@@ -1087,7 +1086,7 @@ void RE_GameObject::DrawProperties()
 	ImGui::SameLine();
 
 	if (ImGui::Checkbox("Static", &isStatic))
-		App->input->AddEvent(Event(STATIC_TRANSFORM_MODIFIED, App->scene));
+		Event::Push(STATIC_TRANSFORM_MODIFIED, App->scene);
 
 	if (ImGui::TreeNode("Local Bounding Box"))
 	{

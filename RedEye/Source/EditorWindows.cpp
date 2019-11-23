@@ -22,6 +22,7 @@
 
 #include <map>
 
+std::queue<Event> Event::events_queue;
 
 EditorWindow::EditorWindow(const char* name, bool start_enabled)
 	: name(name), active(start_enabled), lock_pos(false)
@@ -434,13 +435,13 @@ void PlayPauseWindow::Draw(bool secondary)
 		{
 			// check main camera
 			if (RE_CameraManager::HasMainCamera())
-				App->ScenePlay();
+				Event::Push(PLAY, App);
 			// else { report problems }
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Pause")) App->ScenePause();
+		if (ImGui::Button("Pause")) Event::Push(PAUSE, App);
 		ImGui::SameLine();
-		if (ImGui::Button("Stop")) App->SceneStop();
+		if (ImGui::Button("Stop")) Event::Push(STOP, App);
 		ImGui::SameLine();
 		ImGui::Text("%.2f", seconds);
 

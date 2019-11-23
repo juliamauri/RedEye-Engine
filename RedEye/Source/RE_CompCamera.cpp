@@ -6,6 +6,7 @@
 #include "RE_CompTransform.h"
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
+#include "RE_CameraManager.h"
 #include "OutputLog.h"
 #include "RE_ShaderImporter.h"
 
@@ -93,55 +94,14 @@ void RE_CompCamera::Update()
 void RE_CompCamera::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Camera"))
-	{
-		ImGui::Checkbox("Draw Frustum", &draw_frustum);
-		ImGui::Checkbox("Override Culling", &override_cull);
-
-		if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f"))
-			SetPlanesDistance(near_plane, far_plane);
-
-		if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane, 65000.0f, "%.1f"))
-			SetPlanesDistance(near_plane, far_plane);
-
-		const char* items[] = { "Perspective", "Orthographic" };
-		int item_current = isPerspective? 0 : 1;
-		if (ImGui::Combo("Type", &item_current, items, 2))
-		{
-			if (isPerspective != (item_current == 0))
-				SwapCameraType();
-		}
-
-		if (isPerspective)
-			if (ImGui::DragFloat("FOV", &v_fov_degrees, 1.0f, 0.0f, 180.0f, "%.1f"))
-				SetFOV(v_fov_degrees);
-	}
+		DrawItsProperties();
 }
 
 void RE_CompCamera::DrawAsEditorProperties()
 {
 	if (ImGui::TreeNodeEx("Camera", ImGuiTreeNodeFlags_(ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)))
 	{
-		ImGui::Checkbox("Draw Frustum", &draw_frustum);
-		ImGui::Checkbox("Override Culling", &override_cull);
-
-		if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f"))
-			SetPlanesDistance(near_plane, far_plane);
-
-		if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane, 65000.0f, "%.1f"))
-			SetPlanesDistance(near_plane, far_plane);
-
-		const char* items[] = { "Perspective", "Orthographic" };
-		int item_current = isPerspective ? 0 : 1;
-		if (ImGui::Combo("Type", &item_current, items, 2))
-		{
-			if (isPerspective != (item_current == 0))
-				SwapCameraType();
-		}
-
-		if (isPerspective)
-			if (ImGui::DragFloat("FOV", &v_fov_degrees, 1.0f, 0.0f, 180.0f, "%.1f"))
-				SetFOV(v_fov_degrees);
-
+		DrawItsProperties();
 		ImGui::TreePop();
 	}
 }
@@ -230,13 +190,10 @@ void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 	}
 }
 
-void RE_CompCamera::SetAspectRatio(AspectRatioTYPE aspect_ratio, bool use_main_window)
+void RE_CompCamera::SetAspectRatio(AspectRatioTYPE aspect_ratio)
 {
 	target_ar = aspect_ratio;
-	if (use_main_window)
-		SetBounds(App->window->GetWidth(), App->window->GetHeight());
-	else
-		SetBounds(width, height);
+	SetBounds(App->window->GetWidth(), App->window->GetHeight());
 }
 
 void RE_CompCamera::SetBounds(float w, float h)
@@ -287,12 +244,21 @@ void RE_CompCamera::SetBounds(float w, float h)
 		}
 		break;
 	}
+	case Personalized:
+	{
+		width = w;
+		height = h;
+		break;
+	}
 	}
 
 	SetFOV(v_fov_rads * RADTODEG);
 
 	if (!isPerspective)
 		frustum.SetOrthographic(width, height);
+
+	if (RE_CameraManager::CurrentCamera() == this)
+		Event::Push(CURRENT_CAM_VIEWPORT_CHANGED, App->renderer3d);
 
 	need_recalculation = true;
 }
@@ -387,6 +353,39 @@ void RE_CompCamera::RecalculateMatrixes()
 	calculated_projection.Transpose();
 
 	need_recalculation = false;
+}
+
+void RE_CompCamera::DrawItsProperties()
+{
+	ImGui::Checkbox("Draw Frustum", &draw_frustum);
+	ImGui::Checkbox("Override Culling", &override_cull);
+
+	if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f"))
+		SetPlanesDistance(near_plane, far_plane);
+
+	if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane, 65000.0f, "%.1f"))
+		SetPlanesDistance(near_plane, far_plane);
+
+	int aspect_ratio = target_ar;
+	if (ImGui::Combo("Aspect Ratio", &aspect_ratio, "Fit Window\0Square 1x1\0TraditionalTV 4x3\0Movietone 16x9\0Personalized\0"))
+		SetAspectRatio(AspectRatioTYPE(aspect_ratio));
+
+	if (target_ar == Personalized)
+	{
+		int w = width;
+		int h = height;
+		if (ImGui::DragInt("Width", &w, 4.0f, 1, App->window->GetWidth(), "%.1f") ||
+			ImGui::DragInt("Height", &h, 4.0f, 1, App->window->GetMaxHeight(), "%.1f"))
+			SetBounds(w,h);
+	}
+
+	int item_current = isPerspective ? 0 : 1;
+	if (ImGui::Combo("Type", &item_current, "Perspective\0Orthographic\0") && (isPerspective != (item_current == 0)))
+		SwapCameraType();
+
+	if (isPerspective)
+		if (ImGui::DragFloat("FOV", &v_fov_degrees, 1.0f, 0.0f, 180.0f, "%.1f"))
+			SetFOV(v_fov_degrees);
 }
 
 void RE_CompCamera::LocalMove(Dir dir, float speed)

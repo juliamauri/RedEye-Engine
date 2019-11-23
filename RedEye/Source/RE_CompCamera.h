@@ -5,19 +5,21 @@
 #include "RE_Math.h"
 #include "Globals.h"
 
-enum AspectRatioTYPE : short
-{
-	Fit_Window = 0,
-	Square_1x1,
-	TraditionalTV_4x3,
-	Movietone_16x9,
-	Personalized
-};
-
 class RE_CompTransform;
 
 class RE_CompCamera : public RE_Component
 {
+private:
+
+	enum AspectRatioTYPE : short
+	{
+		Fit_Window = 0,
+		Square_1x1,
+		TraditionalTV_4x3,
+		Movietone_16x9,
+		Personalized
+	} target_ar = Fit_Window;
+
 public:
 	RE_CompCamera(
 		RE_GameObject* go = nullptr,
@@ -40,7 +42,7 @@ public:
 
 	void SetPlanesDistance(float near_plane, float far_plane);
 	void SetFOV(float vertical_fov_degrees);
-	void SetAspectRatio(AspectRatioTYPE aspect_ratio, bool use_main_window = true);
+	void SetAspectRatio(AspectRatioTYPE aspect_ratio);
 	void SetBounds(float width, float height);
 
 	float GetTargetWidth() const;
@@ -83,6 +85,7 @@ public:
 private:
 	
 	void RecalculateMatrixes();
+	void DrawItsProperties();
 
 private:
 
@@ -112,7 +115,6 @@ private:
 	float v_fov_degrees = 0.0f;
 
 	// Aspect Ratio
-	AspectRatioTYPE target_ar = Fit_Window;
 	float width = 0.f;
 	float height = 0.f;
 

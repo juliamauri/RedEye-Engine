@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModuleEditor.h"
 #include "ModuleWindow.h"
+#include "ModuleRenderer3D.h"
 
 #include "FileSystem.h"
 
@@ -56,8 +57,11 @@ update_status ModuleInput::PreUpdate()
 	// Keyboard
 	UpdateKeyboard();
 
-	// Other Events
-	HandleEventQueue();
+	// Events SDL (and send to Editor's ImGui)
+	HandleSDLEventQueue();
+
+	// Call all own events' listeners
+	Event::PumpAll();
 
 	return ret;
 }
@@ -73,17 +77,9 @@ void ModuleInput::DrawEditor()
 	}
 }
 
-bool ModuleInput::AddEvent(const Event e)
-{
-	bool ret;
-	if (ret = e.IsValid()) re_events.push(e);
-	return ret;
-}
-
 // Called before quitting
 bool ModuleInput::CleanUp()
 {
-	//console->LogConsole("Quitting SDL input event subsystem\n");
 	SDL_QuitSubSystem(SDL_INIT_EVENTS);
 	return true;
 }
@@ -131,12 +127,9 @@ void ModuleInput::UpdateKeyboard()
 				keyboard[i] = KEY_IDLE;
 		}
 	}
-
-	if (keyboard[SDL_SCANCODE_ESCAPE] == KEY_UP)
-		AddEvent(Event(REQUEST_QUIT, SDL_GetTicks(), App));
 }
 
-void ModuleInput::HandleEventQueue()
+void ModuleInput::HandleSDLEventQueue()
 {
 	// SDL Events
 	SDL_Event e;
@@ -146,7 +139,7 @@ void ModuleInput::HandleEventQueue()
 		{
 /* Application events */
 		case SDL_QUIT:/**< User-requested quit */
-			AddEvent(Event(REQUEST_QUIT, e.quit.timestamp, App));
+			Event::Push(REQUEST_QUIT, App);
 			break;
 		case SDL_APP_TERMINATING:/**< The application is being terminated by the OS
 								Called on iOS in applicationWillTerminate()
@@ -175,7 +168,43 @@ void ModuleInput::HandleEventQueue()
 
 /* Window events */
 		case SDL_WINDOWEVENT:/**< System specific event */
-			App->window->WindowEvent(&e);
+			switch (e.window.event)
+			{
+			case SDL_WINDOWEVENT_SHOWN:/**< Window has been shown */
+				break;
+			case SDL_WINDOWEVENT_HIDDEN:/**< Window has been hidden */
+				break;
+			case SDL_WINDOWEVENT_EXPOSED:/**< Window has been exposed and should be redrawn */
+				break;
+			case SDL_WINDOWEVENT_MOVED:/**< Window has been moved to data1, data2 */
+				Event::Push(WINDOW_MOVED, App->window, Cvar(e.window.data1), Cvar(e.window.data2));
+				break;
+			case SDL_WINDOWEVENT_RESIZED:/**< Window has been resized to data1xdata2 */
+				// this sneaky event is always preceded by SDL_WINDOWEVENT_SIZE_CHANGED
+				//App->renderer3d->MainContextChanged(width = e->window.data1, height = e->window.data2);
+				break;
+			case SDL_WINDOWEVENT_SIZE_CHANGED:/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
+				Event::Push(WINDOW_SIZE_CHANGED, App->window, Cvar(e.window.data1), Cvar(e.window.data2));
+				Event::Push(WINDOW_SIZE_CHANGED, App->renderer3d, Cvar(e.window.data1), Cvar(e.window.data2));
+				break;
+			case SDL_WINDOWEVENT_MINIMIZED:/**< Window has been minimized */
+				break;
+			case SDL_WINDOWEVENT_MAXIMIZED:/**< Window has been maximized */
+				break;
+			case SDL_WINDOWEVENT_RESTORED:/**< Window has been restored to normal size and position */
+				break;
+			case SDL_WINDOWEVENT_ENTER:/**< Window has gained mouse focus */
+				break;
+			case SDL_WINDOWEVENT_LEAVE:/**< Window has lost mouse focus */
+				break;
+			case SDL_WINDOWEVENT_FOCUS_GAINED:/**< Window has gained keyboard focus */
+				break;
+			case SDL_WINDOWEVENT_FOCUS_LOST:/**< Window has lost keyboard focus */
+				break;
+			case SDL_WINDOWEVENT_CLOSE:/**< The window manager requests that the window be closed */
+				Event::Push(REQUEST_QUIT, App);
+				break;
+			}
 			break;
 		case SDL_SYSWMEVENT:/**< System specific event */
 			break;
@@ -278,17 +307,7 @@ void ModuleInput::HandleEventQueue()
 		}
 	}
 
-	if(App->editor && App->editor->IsActive()) App->editor->HandleSDLEvent(&e);
-
-	// RE Events
-	Event* re_e = nullptr;
-	while (!re_events.empty())
-	{
-		if (re_events.front().IsValid())
-			re_events.front().CallListener();
-
-		re_events.pop();
-	}
+	App->editor->HandleSDLEvent(&e);
 }
 
 // --------------------- SDL Event Types ---------------------

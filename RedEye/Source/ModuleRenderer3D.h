@@ -18,7 +18,8 @@ public:
 	update_status PostUpdate() override;
 	bool CleanUp() override;
 
-	void DrawEditor();
+	void RecieveEvent(const Event& e) override;
+	void DrawEditor() override;
 
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
@@ -31,7 +32,6 @@ public:
 	void SetTexture2D(bool enable);
 	void SetColorMaterial(bool enable);
 	void SetWireframe(bool enable);
-	bool GetLighting() const;
 
 	// Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
@@ -39,11 +39,13 @@ public:
 	// Draws
 	void DirectDrawCube(math::vec position, math::vec color);
 
-	// Context
+	// Context & Viewport
 	void* GetWindowContext()const;
 	void WindowSizeChanged(int width, int height);
+	void UpdateViewPort(int width, int height) const;
 
 	uint GetShaderScene() const;
+
 
 private:
 

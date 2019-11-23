@@ -2,27 +2,13 @@
 #include "EventListener.h"
 #include "SDL2\include\SDL_timer.h"
 
-Event::Event(RE_EventType t, EventListener* lis) : listener(lis), type(t)
-{
-	IsValid() ? timestamp = SDL_GetTicks() : Clear();
-}
+Event::Event(RE_EventType t, EventListener * lis, Cvar d1, Cvar d2)
+	: type(t), listener(lis), data1(d1), data2(d2), timestamp(SDL_GetTicks())
+{}
 
-Event::Event(RE_EventType t, unsigned int ts, EventListener* lis) : listener(lis), type(t)
-{
-	IsValid() ? timestamp = ts : Clear();
-}
-
-Event::Event(RE_EventType t, Cvar data, EventListener* lis) : listener(lis), type(t), data(data)
-{
-	IsValid() ? timestamp = SDL_GetTicks() : Clear();
-}
-
-Event::Event(RE_EventType t, Cvar data, unsigned int ts, EventListener* lis) : listener(lis), type(t), data(data)
-{
-	IsValid() ? timestamp = ts : Clear();
-}
-
-Event::Event(const Event& e) : listener(e.listener), type(e.type), timestamp(e.timestamp) {}
+Event::Event(const Event& e)
+	: type(e.type), listener(e.listener), data1(e.data1), data2(e.data2), timestamp(SDL_GetTicks())
+{}
 
 Event::~Event()
 {
@@ -49,14 +35,36 @@ RE_EventType Event::GetType() const
 	return type;
 }
 
-const Cvar* Event::GetData() const
+const Cvar& Event::GetData() const
 {
-	return &data;
+	return data1;
+}
+
+const Cvar & Event::GetDataNext() const
+{
+	return data2;
+}
+
+void Event::Push(RE_EventType t, EventListener * lis, Cvar d1, Cvar d2)
+{
+	events_queue.push(Event(t, lis, d1, d2));
+}
+
+void Event::PumpAll()
+{
+	while (!events_queue.empty())
+	{
+		const Event e = events_queue.front();
+
+		if (e.IsValid())
+			e.CallListener();
+
+		Event::events_queue.pop();
+	}
 }
 
 void Event::Clear()
 {
 	type = MAX_EVENT_TYPES;
 	listener = nullptr;
-	timestamp = 0u;
 }

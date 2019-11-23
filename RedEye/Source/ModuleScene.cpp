@@ -5,7 +5,6 @@
 #include "ModuleEditor.h"
 #include "ModuleInput.h"
 
-//#include "EditorWindows.h"
 #include "FileSystem.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_ResourceManager.h"
@@ -154,10 +153,19 @@ void ModuleScene::OnStop()
 
 void ModuleScene::RecieveEvent(const Event& e)
 {
-	if (e.GetType() == STATIC_TRANSFORM_MODIFIED)
-		static_gos_modified = true;
-	else if (e.GetType() == TRANSFORM_MODIFIED)
+	switch (e.GetType())
+	{
+	case TRANSFORM_MODIFIED:
+	{
 		scene_modified = true;
+		break;
+	}
+	case STATIC_TRANSFORM_MODIFIED:
+	{
+		static_gos_modified = true;
+		break;
+	}
+	}
 }
 
 RE_GameObject * ModuleScene::GetRoot() const
@@ -204,6 +212,8 @@ void ModuleScene::DrawEditor()
 	{
 		if (static_gos_modified && ImGui::Button("Reset AABB and Quadtree"))
 			UpdateQuadTree();
+
+		ImGui::Checkbox("Automatic Quadtree Update", &update_qt);
 
 		int quadtree_drawing = quad_tree.GetDrawMode();
 		if (ImGui::Combo("QuadTree Drawing", &quadtree_drawing, "Disable draw\0Top\0Bottom\0Top and Bottom\0All\0"))

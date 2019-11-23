@@ -74,8 +74,6 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 bool ModuleRenderer3D::Start()
 {
-	WindowSizeChanged(App->window->GetWidth(), App->window->GetHeight());
-
 	sceneShader = App->internalResources->GetDefaultShader();
 	skyboxShader = App->internalResources->GetSkyBoxShader();
 
@@ -170,6 +168,58 @@ bool ModuleRenderer3D::CleanUp()
 	SDL_GL_DeleteContext(mainContext);
 
 	return true;
+}
+
+void ModuleRenderer3D::RecieveEvent(const Event & e)
+{
+	switch (e.GetType())
+	{
+	case WINDOW_SIZE_CHANGED:
+	{
+		WindowSizeChanged(e.GetData().AsInt(), e.GetDataNext().AsInt());
+		break;
+	}
+	case SET_VSYNC:
+	{
+		SetVSync(e.GetData().AsBool());
+		break;
+	}
+	case SET_DEPTH_TEST:
+	{
+		SetDepthTest(e.GetData().AsBool());
+		break;
+	}
+	case SET_FACE_CULLING:
+	{
+		SetFaceCulling(e.GetData().AsBool());
+		break;
+	}
+	case SET_LIGHTNING:
+	{
+		SetLighting(e.GetData().AsBool());
+		break;
+	}
+	case SET_TEXTURE_TWO_D:
+	{
+		SetTexture2D(e.GetData().AsBool());
+		break;
+	}
+	case SET_COLOR_MATERIAL:
+	{
+		SetColorMaterial(e.GetData().AsBool());
+		break;
+	}
+	case SET_WIRE_FRAME:
+	{
+		SetWireframe(e.GetData().AsBool());
+		break;
+	}
+	case CURRENT_CAM_VIEWPORT_CHANGED:
+	{
+		UpdateViewPort(e.GetData().AsInt(), e.GetDataNext().AsInt());
+		break;
+	}
+	}
 }
 
 void ModuleRenderer3D::DrawEditor()
@@ -280,11 +330,6 @@ void ModuleRenderer3D::SetWireframe(bool enable)
 	wireframe = enable;
 }
 
-bool ModuleRenderer3D::GetLighting() const
-{
-	return lighting;
-}
-
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
 {
 	int nrAttributes;
@@ -354,16 +399,21 @@ void * ModuleRenderer3D::GetWindowContext() const
 
 void ModuleRenderer3D::WindowSizeChanged(int width, int height)
 {
-	// Change cameras
 	App->cams->OnWindowChangeSize(width, height);
-
-	// Set new main Viewport
-	int w, h;
-	RE_CameraManager::CurrentCamera()->GetTargetWidthHeight(w,h);
-	glViewport(width-w, height-h, w, h);
 }
+
+void ModuleRenderer3D::UpdateViewPort(int width, int height) const
+{
+	int w, h;
+	RE_CameraManager::CurrentCamera()->GetTargetWidthHeight(w, h);
+	const int x = (width - w) / 2;
+	const int y = (height - h) / 2;
+	glViewport(x, y, w, h);
+}
+
 
 uint ModuleRenderer3D::GetShaderScene() const
 {
 	return sceneShader;
 }
+

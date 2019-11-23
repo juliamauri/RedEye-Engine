@@ -9,7 +9,7 @@
 
 enum KEY_STATE : short unsigned int
 {
-	KEY_IDLE = 0u,
+	KEY_IDLE = 0,
 	KEY_DOWN,
 	KEY_REPEAT,
 	KEY_UP
@@ -44,8 +44,6 @@ public:
 	void DrawEditor() override;
 	bool CleanUp() override;
 
-	bool AddEvent(const Event e);
-
 	KEY_STATE GetKey(const unsigned int id) const;
 	bool CheckKey(const unsigned int id, const KEY_STATE state = KEY_UP) const;
 	const MouseData& GetMouse() const;
@@ -55,13 +53,12 @@ public:
 private:
 
 	void UpdateKeyboard();
-	void HandleEventQueue();
+	void HandleSDLEventQueue();
 
 private:
 
 	KEY_STATE* keyboard;
 	MouseData mouse;
-	std::queue<Event> re_events;
 };
 
 #endif // !__MODULEINPUT_H__
