@@ -37,6 +37,7 @@
     <ClCompile Include="RE_CameraManager.cpp" />
     <ClCompile Include="RE_HandleErrors.cpp" />
     <ClCompile Include="RE_InternalResources.cpp" />
+    <ClCompile Include="RE_Model.cpp" />
     <ClCompile Include="RE_ModelImporter.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="RE_CompParticleEmiter.cpp" />
@@ -54,7 +55,6 @@
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="RE_CompCamera.cpp" />
     <ClCompile Include="RE_CompMesh.cpp" />
-    <ClCompile Include="RE_Component.cpp" />
     <ClCompile Include="RE_GameObject.cpp" />
     <ClCompile Include="RE_Material.cpp" />
     <ClCompile Include="RE_Math.cpp" />
@@ -101,6 +101,7 @@
     <ClInclude Include="Optick\include\optick.h" />
     <ClInclude Include="par_shapes.h" />
     <ClInclude Include="RE_InternalResources.h" />
+    <ClInclude Include="RE_Model.h" />
     <ClInclude Include="RE_ModelImporter.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="RE_CompParticleEmiter.h" />

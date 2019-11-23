@@ -6,9 +6,9 @@ struct aiMesh;
 struct aiScene;
 struct aiMaterial;
 struct aiString;
+struct RE_ModelSettings;
 enum aiTextureType;
 class RE_GameObject;
-class RE_Prefab;
 
 #include "MathGeoLib/include/Math/float4x4.h"
 
@@ -17,6 +17,7 @@ class RE_Prefab;
 #include <map>
 
 struct currentlyImporting {
+	RE_ModelSettings* settings = nullptr;
 	std::map<aiMesh*, const char*> meshesLoaded;
 	std::map<aiMaterial*, const char*> materialsLoaded;
 	std::string workingfilepath;
@@ -30,13 +31,11 @@ public:
 	~RE_ModelImporter();
 
 	bool Init(const char* def_shader = nullptr);
-	RE_Prefab* LoadModelFromAssets(const char * path);
-	const char* ProcessMeshFromLibrary(const char* file_library, const char* reference, const char* file_assets);
 
 	std::vector<std::string> GetOutsideResourcesAssetsPath(const char * path);
+	RE_GameObject* ProcessModel(const char* buffer, unsigned int size, const char* assetPayh, RE_ModelSettings* mSettings);
 
 private:
-	RE_Prefab* ProcessModel(const char* buffer, unsigned int size);
 	void ProcessMaterials(const aiScene* scene);
 	void ProcessMeshes(const aiScene* scene);
 	void ProcessNode(aiNode* node, const aiScene* scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot = false);

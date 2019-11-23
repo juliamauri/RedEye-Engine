@@ -64,9 +64,6 @@
     <ClCompile Include="RE_CompMesh.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Component.cpp">
-      <Filter>GameObject\Components</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompPrimitive.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
@@ -156,6 +153,9 @@
     </ClCompile>
     <ClCompile Include="RE_ResouceAndGOImporter.cpp">
       <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Model.cpp">
+      <Filter>Modules\Resource Managers\Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -467,6 +467,9 @@
     </ClInclude>
     <ClInclude Include="RE_ResouceAndGOImporter.h">
       <Filter>Modules\Resource Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Model.h">
+      <Filter>Modules\Resource Managers\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

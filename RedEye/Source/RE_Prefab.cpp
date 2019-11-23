@@ -1,5 +1,4 @@
 #include "RE_Prefab.h"
-#include "Globals.h"
 
 #include "Application.h"
 #include "RE_GameObject.h"
@@ -8,8 +7,9 @@
 #include  "OutputLog.h"
 
 #include "md5.h"
-#include "ResourceManager.h"
 #include "RE_ResouceAndGOImporter.h"
+
+#include "Globals.h"
 
 #include <map>
 

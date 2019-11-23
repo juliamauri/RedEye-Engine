@@ -10,7 +10,7 @@
 #include "RE_CompTransform.h"
 #include "RE_CompMesh.h"
 
-#include "RE_Prefab.h"
+#include "RE_Model.h"
 #include "RE_Mesh.h"
 #include "RE_Material.h"
 
@@ -51,43 +51,18 @@ bool RE_ModelImporter::Init(const char * def_shader)
 	return true;
 }
 
-RE_Prefab* RE_ModelImporter::LoadModelFromAssets(const char * path)
+RE_GameObject*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
 {
-	Timer timer;
-	LOG("Importing Model from: %s", path);
-	RE_Prefab* modelreturn = nullptr;
-	RE_FileIO* mesh_file = nullptr;
+	aditionalData = new currentlyImporting();
+	aditionalData->settings = mSettings;
+	aditionalData->workingfilepath = assetPath;
+	uint l = 0;
+	aditionalData->name = aditionalData->workingfilepath.substr(l = aditionalData->workingfilepath.find_last_of("/") + 1, aditionalData->workingfilepath.find_last_of(".") - l);
 
-	std::string assetsPath(path);
-	mesh_file = new RE_FileIO(assetsPath.c_str());
-	if (!mesh_file->Load())
-	{
-		LOG_ERROR("Error when load mesh file:\n%s", assetsPath.c_str());
-		DEL(mesh_file);
-	}
-
-	if (mesh_file != nullptr)
-	{
-		LOG("Loading Model");
-		aditionalData = new currentlyImporting();
-		aditionalData->workingfilepath = assetsPath;
-		uint l;
-		aditionalData->name = assetsPath.substr(l = assetsPath.find_last_of("/") + 1, assetsPath.find_last_of(".") - l);
-		modelreturn = ProcessModel(mesh_file->GetBuffer(), mesh_file->GetSize());
-		DEL(aditionalData);
-		DEL(mesh_file);
-		LOG("Time imported model from assets: %u ms\n", timer.Read());
-	}
-
-	return modelreturn;
-}
-
-RE_Prefab*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size)
-{
-	RE_Prefab* newModelPrefab = nullptr;
+	RE_GameObject* ret = nullptr;
 
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFileFromMemory(buffer, size, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | /*aiProcess_PreTransformVertices |*/ aiProcess_SortByPType | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFileFromMemory(buffer, size, mSettings->GetFlags()/*aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | /*aiProcess_PreTransformVertices | aiProcess_SortByPType | aiProcess_FlipUVs */);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
@@ -103,15 +78,12 @@ RE_Prefab*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int siz
 
 		LOG_SECONDARY("Processing model hierarchy");
 		//Mount a go hiteracy with nodes from model
-		RE_GameObject* rootGO = new RE_GameObject(aditionalData->name.c_str(), GUID_NULL);
-		ProcessNode(scene->mRootNode, scene, rootGO, math::float4x4::identity, true);
+		ret = new RE_GameObject(aditionalData->name.c_str(), GUID_NULL);
+		ProcessNode(scene->mRootNode, scene, ret, math::float4x4::identity, true);
 
-		LOG_SECONDARY("Saving model as internal prefab.");
-		//We save own format of model as internal prefab
-		newModelPrefab = new RE_Prefab(rootGO, true);
-		//App->resources->Reference(newModelPrefab);
 	}
-	return newModelPrefab;
+	DEL(aditionalData);
+	return ret;
 }
 
 void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot)
@@ -265,40 +237,12 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 			else
 				DEL(newMesh);
 
+			aditionalData->settings->libraryMeshes.push_back(meshMD5);
 			aditionalData->meshesLoaded.insert(std::pair<aiMesh*, const char*>(mesh, meshMD5));
 		}
 	}
 }
 
-const char* RE_ModelImporter::ProcessMeshFromLibrary(const char * file_library, const char * reference, const char * file_assets)
-{
-	Timer timer;
-	LOG("Processing mesh from library:\nLibrary path: %s\nOrigin asset: %s\n", file_library, file_assets);
-	std::vector<Vertex> vertexes;
-	std::vector<unsigned int> indexes;
-
-	Config mesh_serialized(file_library, App->fs->GetZipPath());
-	ResourceContainer* mesh_resource = nullptr;
-	if (mesh_serialized.Load())
-	{
-		JSONNode* mesh_json = mesh_serialized.GetRootNode("mesh");
-		mesh_json->PullMeshVertex(&vertexes, &indexes);
-
-		RE_Mesh* mesh = new RE_Mesh(vertexes, indexes, nullptr, indexes.size() / 3);
-		mesh_resource = (ResourceContainer*)mesh;
-		mesh_resource->SetType(Resource_Type::R_MESH);
-		mesh_resource->SetMD5(reference);
-		mesh_resource->SetLibraryPath(file_assets);
-		App->resources->Reference(mesh_resource);
-
-		DEL(mesh_json);
-		LOG("Time imported mesh from library: %u ms\n", timer.Read());
-	}
-	else {
-		LOG_ERROR("Can't load mesh from library. Path: %s", file_library);
-	}
-	return (mesh_resource) ? mesh_resource->GetMD5() : nullptr;
-}
 
 std::vector<std::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(const char * path)
 {

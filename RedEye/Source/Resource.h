@@ -18,7 +18,8 @@ enum Resource_Type : short unsigned int
 	R_PREFAB,
 	R_SKYBOX,
 	R_INTERNALPREFAB,
-	R_MATERIAL
+	R_MATERIAL,
+	R_MODEL
 };
 
 class ResourceContainer
@@ -37,7 +38,7 @@ public:
 	void SetType(Resource_Type type);
 	void SetMD5(const char* md5);
 	void SetLibraryPath(const char* path);
-	void SetAssetPath(const char* originPath);
+	virtual void SetAssetPath(const char* originPath);
 	void SetMetaPath(const char* originPath);
 	virtual void SetName(const char* name);
 	void SetInternal(bool is_internal);

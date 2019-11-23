@@ -3,10 +3,6 @@
 
 #include "Globals.h"
 
-#include "RapidJson\include\rapidjson.h"
-#include "RapidJson\include\document.h"
-#include "RapidJson\include\allocators.h"
-
 #include <vector>
 #include <map>
 
