@@ -396,18 +396,3 @@ GameState Application::GetState() const
 {
 	return state;
 }
-
-void Application::ScenePlay()
-{
-	input->AddEvent(Event(PLAY, this));
-}
-
-void Application::ScenePause()
-{
-	input->AddEvent(Event(PAUSE, this));
-}
-
-void Application::SceneStop()
-{
-	input->AddEvent(Event(STOP, this));
-}

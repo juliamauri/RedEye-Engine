@@ -58,9 +58,6 @@ public:
 	const char* GetOrganization() const;
 
 	GameState GetState() const;
-	void ScenePlay();
-	void ScenePause();
-	void SceneStop();
 
 private:
 
