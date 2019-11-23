@@ -25,62 +25,43 @@ public:
 	void RecieveEvent(const Event& e) override;
 
 	RE_GameObject* GetRoot() const;
+	const RE_GameObject* GetRoot_c() const;
 	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
 	void AddGoToRoot(RE_GameObject* toAdd);
-	void DuplicateSelectedObject();
 
 	void CreateCube();
 	void CreateSphere();
 	void CreateCamera();
 
 	void DrawEditor() override;
-	void DrawDebug() const;
-	void DrawHeriarchy();
-	void DrawFocusedProperties();
 
-	void SetSelected(RE_GameObject* selected);
-	RE_GameObject* GetSelected() const;
-	void RayCastSelect(math::Ray& ls);
+	void DrawQTree() const;
+	RE_GameObject* RayCastSelect(math::Ray& ray);
+	void FustrumCulling(std::vector<const RE_GameObject*>& container, math::Frustum& frustum);
 
 	void Serialize();
 	void LoadFBXOnScene(const char* fbxPath);
 	void LoadTextureOnSelectedGO(const char* texturePath);
-	
-	void StaticTransformed();
-
-	bool DrawingSelAABB() const;
-
-	const QTree* GetQuadTree() const;
 
 private:
-	//init values
-	std::string defaultModel;
+
+	void GetActive(std::vector<const RE_GameObject*>& objects) const;
+	void GetActiveStatic(std::vector<const RE_GameObject*>& objects) const;
+	void GetActiveNonStatic(std::vector<const RE_GameObject*>& objects) const;
+
+	void UpdateQuadTree();
+
+private:
 
 	RE_GameObject* root = nullptr;
-	RE_GameObject* selected = nullptr;
 
-	// Bounding Boxes
-	bool static_gos_modified = false;
-	unsigned int aabb_reset_time = 0;
-
-	bool draw_all_aabb = false;
-	math::vec all_aabb_color;
-
-	bool draw_selected_aabb = false;
-	math::vec sel_aabb_color;
-
-	// Quadtree
 	QTree quad_tree;
-	bool draw_quad_tree = true;
-	math::vec quad_tree_color;
 
-	// Camera Frustums
-	bool draw_cameras = true;
-	math::vec frustum_color;
+	bool update_qt = true;
+	bool static_gos_modified = false;
+	bool scene_modified = false;
 
-	// Config
-	bool focus_on_select = false;
+	std::string defaultModel;
 };
-
 
 #endif // !__MODULESCENE_H__

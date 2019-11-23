@@ -7,7 +7,7 @@ class EventListener;
 
 typedef enum : unsigned short int
 {
-	//SDL_EVENT = 0x00,
+	// APP
 	PLAY,
 	PAUSE,
 	UNPAUSE,
@@ -18,7 +18,14 @@ typedef enum : unsigned short int
 	REQUEST_SAVE,
 	REQUEST_QUIT,
 
-	FILE_DROP,
+	//FILE_DROP,
+
+	// Scene
+	TRANSFORM_MODIFIED,
+	STATIC_TRANSFORM_MODIFIED,
+
+	// Gameobject
+	PARENT_TRANSFORM_MODIFIED,
 
 	MAX_EVENT_TYPES
 } RE_EventType;

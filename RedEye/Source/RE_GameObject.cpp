@@ -12,6 +12,8 @@
 #include "RE_CompParticleEmiter.h"
 #include "RE_ShaderImporter.h"
 #include "ModuleRenderer3D.h"
+#include "ModuleInput.h"
+#include "ModuleEditor.h"
 #include "OutputLog.h"
 #include "RE_CameraManager.h"
 #include "SDL2\include\SDL_assert.h"
@@ -49,7 +51,7 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 	global_bounding_box = go.global_bounding_box;
 
 	RE_CompCamera* comp_camera;
-	
+
 	for (RE_Component* cmpGO : go.components)
 	{
 		switch (cmpGO->GetType())
@@ -155,7 +157,7 @@ std::vector<RE_GameObject*> RE_GameObject::GetAllGO()
 std::vector<const char*> RE_GameObject::GetAllResources(bool root)
 {
 	std::vector<const char*> ret;
-	for (auto child : childs) { 
+	for (auto child : childs) {
 
 		std::vector<const char*> childRet = child->GetAllResources(false);
 		if(!childRet.empty())
@@ -219,7 +221,7 @@ void RE_GameObject::SerializeJson(JSONNode * node, std::map<const char*, int>* r
 	DEL(gameObjects);
 }
 
-unsigned int RE_GameObject::GetBinarySize()const 
+unsigned int RE_GameObject::GetBinarySize()const
 {
 	uint size = sizeof(uint) * 3 + 36 * sizeof(char) + sizeof(float) * 9 + sizeof(int);
 	if (parent != nullptr) size += 36 * sizeof(char);
@@ -240,7 +242,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, std::map<const char*, int>* r
 	uint goSize = allGOs.size();
 	memcpy(cursor, &goSize, size);
 	cursor += size;
-	
+
 	for (RE_GameObject* go : allGOs) {
 		uint strLenght = std::strlen(go->GetName());
 		size = sizeof(uint);
@@ -414,7 +416,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 		UuidFromStringA((RPC_CSTR)strUUID, &uuid);
 		DEL_A(strUUID);
 
-		if (rootGo != nullptr) { 
+		if (rootGo != nullptr) {
 			char* strUUID = new char[36 + 1];
 			memcpy(strUUID, cursor, size);
 			cursor += size;
@@ -432,7 +434,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 		memcpy(vec, cursor, size);
 		cursor += size;
 		new_go->GetTransform()->SetPosition(math::vec(vec));
-		
+
 		memcpy(vec, cursor, size);
 		cursor += size;
 		new_go->GetTransform()->SetRotation(math::vec(vec));
@@ -593,10 +595,22 @@ const std::list<RE_GameObject*>& RE_GameObject::GetChilds() const
 	return childs;
 }
 
+void RE_GameObject::GetChilds(std::list<const RE_GameObject*>& out_childs) const
+{
+	for (auto child : childs)
+		out_childs.push_back(child);
+}
 
 unsigned int RE_GameObject::ChildCount() const { return childs.size(); }
 
+bool RE_GameObject::IsLastChild() const
+{
+	return parent != nullptr && (parent->childs.back() == this);
+}
+
 RE_GameObject * RE_GameObject::GetParent() const { return parent; }
+
+const RE_GameObject * RE_GameObject::GetParent_c() const { return parent; }
 
 void RE_GameObject::SetParent(RE_GameObject * p)
 {
@@ -617,6 +631,11 @@ void RE_GameObject::SetActiveAll(bool value)
 bool RE_GameObject::IsStatic() const
 {
 	return isStatic;
+}
+
+bool RE_GameObject::IsActiveStatic() const
+{
+	return active && isStatic;
 }
 
 void RE_GameObject::SetStatic(bool value)
@@ -820,14 +839,12 @@ RE_CompTransform * RE_GameObject::AddCompTransform()
 RE_CompMesh * RE_GameObject::AddCompMesh(const char * file_path_data, const bool dropped)
 {
 	RE_CompMesh* ret = new RE_CompMesh(this, file_path_data, dropped);
-	//AddToBoundingBox(ret->GetAABB());
 	components.push_back(ret->AsComponent());
 	return ret;
 }
 
 void RE_GameObject::AddCompMesh(RE_CompMesh * comp_mesh)
 {
-	//AddToBoundingBox(comp_mesh->GetAABB());
 	components.push_back((RE_Component*)comp_mesh);
 }
 
@@ -905,10 +922,18 @@ RE_GameObject * RE_GameObject::GetGoFromUUID(UUID parent)
 	return ret;
 }
 
+void RE_GameObject::RecieveEvent(const Event & e)
+{
+	if (e.GetType() == PARENT_TRANSFORM_MODIFIED)
+		TransformModified();
+}
+
 void RE_GameObject::TransformModified()
 {
+	App->input->AddEvent(Event(STATIC_TRANSFORM_MODIFIED, App->scene));
+
 	if (isStatic)
-		App->scene->StaticTransformed();
+		App->input->AddEvent(Event(STATIC_TRANSFORM_MODIFIED, App->scene));
 
 	ResetGlobalBoundingBox();
 
@@ -916,69 +941,12 @@ void RE_GameObject::TransformModified()
 		component->OnTransformModified();
 
 	for (auto child : childs)
-		child->TransformModified();
+		App->input->AddEvent(Event(PARENT_TRANSFORM_MODIFIED, child));
 }
 
 const char * RE_GameObject::GetName() const
 {
 	return name.c_str();
-}
-
-void RE_GameObject::DrawAABB(math::vec color)
-{
-	RE_ShaderImporter::use(0);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((transform->GetMatrixModel() * RE_CameraManager::CurrentCamera()->GetView()).ptr());
-
-	glColor3f(color.x, color.y, color.z);
-	glBegin(GL_LINES);
-
-	for (uint i = 0; i < 12; i++)
-	{
-		glVertex3f(
-			local_bounding_box.Edge(i).a.x,
-			local_bounding_box.Edge(i).a.y,
-			local_bounding_box.Edge(i).a.z);
-		glVertex3f(
-			local_bounding_box.Edge(i).b.x,
-			local_bounding_box.Edge(i).b.y,
-			local_bounding_box.Edge(i).b.z);
-	}
-
-	glEnd();
-}
-
-void RE_GameObject::DrawGlobalAABB()
-{
-	for (uint i = 0; i < 12; i++)
-	{
-		glVertex3f(
-			global_bounding_box.Edge(i).a.x,
-			global_bounding_box.Edge(i).a.y,
-			global_bounding_box.Edge(i).a.z);
-		glVertex3f(
-			global_bounding_box.Edge(i).b.x,
-			global_bounding_box.Edge(i).b.y,
-			global_bounding_box.Edge(i).b.z);
-	}
-}
-
-void RE_GameObject::DrawAllAABB()
-{
-	if (active)
-	{
-		if (App->scene->GetSelected() == this)
-		{
-			if (!App->scene->DrawingSelAABB())
-				DrawGlobalAABB();
-		}
-		else if (parent != nullptr)
-			DrawGlobalAABB();
-
-		for (auto child : childs)
-			child->DrawAllAABB();
-	}
 }
 
 void RE_GameObject::AddToBoundingBox(math::AABB box)
@@ -1040,6 +1008,46 @@ void RE_GameObject::ResetGlobalBoundingBox()
 	global_bounding_box.TransformAsAABB(transform->GetMatrixModel().Transposed());
 }
 
+void RE_GameObject::DrawAABB(math::vec color) const
+{
+	ShaderManager::use(0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf((transform->GetMatrixModel() * RE_CameraManager::CurrentCamera()->GetView()).ptr());
+
+	glColor3f(color.x, color.y, color.z);
+	glBegin(GL_LINES);
+
+	for (uint i = 0; i < 12; i++)
+	{
+		glVertex3f(
+			local_bounding_box.Edge(i).a.x,
+			local_bounding_box.Edge(i).a.y,
+			local_bounding_box.Edge(i).a.z);
+		glVertex3f(
+			local_bounding_box.Edge(i).b.x,
+			local_bounding_box.Edge(i).b.y,
+			local_bounding_box.Edge(i).b.z);
+	}
+
+	glEnd();
+}
+
+void RE_GameObject::DrawGlobalAABB() const
+{
+	for (uint i = 0; i < 12; i++)
+	{
+		glVertex3f(
+			global_bounding_box.Edge(i).a.x,
+			global_bounding_box.Edge(i).a.y,
+			global_bounding_box.Edge(i).a.z);
+		glVertex3f(
+			global_bounding_box.Edge(i).b.x,
+			global_bounding_box.Edge(i).b.y,
+			global_bounding_box.Edge(i).b.z);
+	}
+}
+
 math::AABB RE_GameObject::GetLocalBoundingBox() const
 {
 	return local_bounding_box;
@@ -1079,7 +1087,7 @@ void RE_GameObject::DrawProperties()
 	ImGui::SameLine();
 
 	if (ImGui::Checkbox("Static", &isStatic))
-		App->scene->StaticTransformed();
+		App->input->AddEvent(Event(STATIC_TRANSFORM_MODIFIED, App->scene));
 
 	if (ImGui::TreeNode("Local Bounding Box"))
 	{
@@ -1098,27 +1106,4 @@ void RE_GameObject::DrawProperties()
 
 	for (auto component : components)
 		component->DrawProperties();
-}
-
-void RE_GameObject::DrawHeriarchy()
-{
-	if (ImGui::TreeNodeEx(name.c_str(),
-		(App->scene->GetSelected() == this ?
-			ImGuiTreeNodeFlags_(childs.empty() ?
-				ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_Leaf :
-				ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick) :
-			ImGuiTreeNodeFlags_(childs.empty() ?
-				ImGuiTreeNodeFlags_None | ImGuiTreeNodeFlags_Leaf :
-				ImGuiTreeNodeFlags_None | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick))))
-	{
-		if (ImGui::IsItemClicked(0))
-			App->scene->SetSelected(this);
-
-		for (auto child : childs)
-			child->DrawHeriarchy();
-
-		ImGui::TreePop();
-	}
-	else if (ImGui::IsItemClicked(0))
-		App->scene->SetSelected(this);
 }

@@ -2,6 +2,7 @@
 #define __RE_GAMEOBJECT_H__
 
 #include "Globals.h"
+#include "EventListener.h"
 #include "MathGeoLib\include\MathGeoLib.h"
 #include <list>
 #include <vector>
@@ -18,7 +19,7 @@ class RE_CompMesh;
 class RE_CompCamera;
 class JSONNode;
 
-class RE_GameObject
+class RE_GameObject : public EventListener
 {
 public:
 	RE_GameObject(const char* name, UUID uuid = GUID_NULL, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
@@ -47,10 +48,13 @@ public:
 	void RemoveAllChilds();
 	std::list<RE_GameObject*>& GetChilds();
 	const std::list<RE_GameObject*>& GetChilds() const;
+	void GetChilds(std::list<const RE_GameObject*>& out_childs) const;
 	unsigned int ChildCount() const;
+	bool IsLastChild() const;
 
 	// Parent
 	RE_GameObject* GetParent() const;
+	const RE_GameObject* GetParent_c() const;
 	void SetParent(RE_GameObject* parent);
 
 	// Active
@@ -60,6 +64,7 @@ public:
 
 	// Static
 	bool IsStatic() const;
+	bool IsActiveStatic() const;
 	void SetStatic(bool value);
 	void IterativeSetActive(bool val);
 	void IterativeSetStatic(bool val);
@@ -87,6 +92,8 @@ public:
 
 	RE_GameObject* GetGoFromUUID(UUID parent);
 
+	void RecieveEvent(const Event& e) override;
+
 	// Transform
 	void TransformModified();
 
@@ -94,18 +101,16 @@ public:
 	const char* GetName() const;
 
 	// AABB
-	void DrawAABB(math::vec color);
-	void DrawGlobalAABB();
-	void DrawAllAABB();
 	void AddToBoundingBox(math::AABB box);
 	void ResetBoundingBoxFromChilds();
 	void ResetGlobalBoundingBox();
+	void DrawAABB(math::vec color) const;
+	void DrawGlobalAABB() const;
 	math::AABB GetLocalBoundingBox() const;
 	math::AABB GetGlobalBoundingBox() const;
 
 	// Editor
 	void DrawProperties();
-	void DrawHeriarchy();
 
 private:
 

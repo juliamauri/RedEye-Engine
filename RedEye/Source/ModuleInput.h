@@ -48,7 +48,7 @@ public:
 
 	KEY_STATE GetKey(const unsigned int id) const;
 	bool CheckKey(const unsigned int id, const KEY_STATE state = KEY_UP) const;
-	const MouseData* GetMouse() const;
+	const MouseData& GetMouse() const;
 
 	void SetMouseAtCenter();
 

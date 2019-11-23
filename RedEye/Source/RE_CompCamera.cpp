@@ -117,6 +117,35 @@ void RE_CompCamera::DrawProperties()
 	}
 }
 
+void RE_CompCamera::DrawAsEditorProperties()
+{
+	if (ImGui::TreeNodeEx("Camera", ImGuiTreeNodeFlags_(ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)))
+	{
+		ImGui::Checkbox("Draw Frustum", &draw_frustum);
+		ImGui::Checkbox("Override Culling", &override_cull);
+
+		if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f"))
+			SetPlanesDistance(near_plane, far_plane);
+
+		if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane, 65000.0f, "%.1f"))
+			SetPlanesDistance(near_plane, far_plane);
+
+		const char* items[] = { "Perspective", "Orthographic" };
+		int item_current = isPerspective ? 0 : 1;
+		if (ImGui::Combo("Type", &item_current, items, 2))
+		{
+			if (isPerspective != (item_current == 0))
+				SwapCameraType();
+		}
+
+		if (isPerspective)
+			if (ImGui::DragFloat("FOV", &v_fov_degrees, 1.0f, 0.0f, 180.0f, "%.1f"))
+				SetFOV(v_fov_degrees);
+
+		ImGui::TreePop();
+	}
+}
+
 void RE_CompCamera::DrawFrustum() const
 {
 	if (draw_frustum)
@@ -376,9 +405,9 @@ void RE_CompCamera::LocalMove(Dir dir, float speed)
 	}
 }
 
-void RE_CompCamera::Orbit(float dx, float dy, RE_GameObject * focus)
+void RE_CompCamera::Orbit(float dx, float dy, const RE_GameObject& focus)
 {
-	focus_global_pos = focus->GetGlobalBoundingBox().CenterPoint();
+	focus_global_pos = focus.GetGlobalBoundingBox().CenterPoint();
 	math::vec position = transform->GetGlobalPosition();
 	float distance = position.Distance(focus_global_pos);
 
@@ -388,7 +417,7 @@ void RE_CompCamera::Orbit(float dx, float dy, RE_GameObject * focus)
 	transform->SetGlobalPosition(focus_global_pos - (front * distance));
 }
 
-void RE_CompCamera::Focus(RE_GameObject * focus, float min_dist)
+void RE_CompCamera::Focus(const RE_GameObject* focus, float min_dist)
 {
 	float camDistance = min_dist;
 	math::AABB box = focus->GetGlobalBoundingBox();

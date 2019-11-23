@@ -14,15 +14,14 @@
 #include "RE_TextureImporter.h"
 #include "RE_InternalResources.h"
 #include "RE_CameraManager.h"
-
 #include "RE_Prefab.h"
 #include "RE_Texture.h"
 
 #include "PhysFS\include\physfs.h"
+#include "ImGui/imgui_internal.h"
 
 #include <map>
 
-#include "ImGui/imgui_internal.h"
 
 EditorWindow::EditorWindow(const char* name, bool start_enabled)
 	: name(name), active(start_enabled), lock_pos(false)
@@ -213,7 +212,7 @@ void HeriarchyWindow::Draw(bool secondary)
 		}
 
 		if(App->scene)
-			App->scene->DrawHeriarchy();
+			App->editor->DrawHeriarchy();
 
 		if (secondary) {
 			ImGui::PopItemFlag();
@@ -240,7 +239,8 @@ void PropertiesWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (App->scene) App->scene->DrawFocusedProperties();
+		if (App->editor && App->editor->GetSelected() != nullptr)
+			App->editor->GetSelected()->DrawProperties();
 
 		if (secondary) {
 			ImGui::PopItemFlag();
@@ -596,14 +596,18 @@ void PrefabsPanel::Draw(bool secondary)
 
 		if (ImGui::Button("Create Prefab"))
 		{
-			if (App->scene->GetSelected() != nullptr)
+			if (App->editor->GetSelected() != nullptr)
 			{
+<<<<<<< HEAD
 				RE_Prefab* newPrefab = new RE_Prefab();
 				RE_GameObject* selected = App->scene->GetSelected();
 				newPrefab->SetName(selected->GetName());
 				newPrefab->Save(selected);
 				newPrefab->SaveMeta();
 				App->resources->Reference(newPrefab);
+=======
+				App->resources->Reference(new RE_Prefab(App->editor->GetSelected()));
+>>>>>>> master
 				prefabs = App->resources->GetResourcesByType(Resource_Type::R_PREFAB);
 			}
 		}

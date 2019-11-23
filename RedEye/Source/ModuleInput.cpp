@@ -100,9 +100,9 @@ bool ModuleInput::CheckKey(const unsigned int id, const KEY_STATE state) const
 	return keyboard[id] == state;
 }
 
-const MouseData* ModuleInput::GetMouse() const
+const MouseData& ModuleInput::GetMouse() const
 {
-	return &mouse;
+	return mouse;
 }
 
 void ModuleInput::SetMouseAtCenter()
