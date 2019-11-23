@@ -39,7 +39,6 @@ public:
 	void SetTexture2D(bool enable);
 	void SetColorMaterial(bool enable);
 	void SetWireframe(bool enable);
-	bool GetLighting() const;
 
 	// Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16

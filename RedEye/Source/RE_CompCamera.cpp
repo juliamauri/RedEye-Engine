@@ -7,7 +7,6 @@
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
 #include "RE_CameraManager.h"
-#include "ModuleInput.h"
 #include "OutputLog.h"
 #include "ShaderManager.h"
 
@@ -259,7 +258,7 @@ void RE_CompCamera::SetBounds(float w, float h)
 		frustum.SetOrthographic(width, height);
 
 	if (RE_CameraManager::CurrentCamera() == this)
-		App->input->AddEvent(Event(CURRENT_CAM_VIEWPORT_CHANGED, App->renderer3d));
+		Event::Push(CURRENT_CAM_VIEWPORT_CHANGED, App->renderer3d);
 
 	need_recalculation = true;
 }

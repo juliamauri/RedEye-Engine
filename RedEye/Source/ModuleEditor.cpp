@@ -125,7 +125,7 @@ update_status ModuleEditor::Update()
 			if (ImGui::BeginMenu("File"))
 			{
 				if (ImGui::MenuItem(" Exit", "	Esc"))
-					App->input->AddEvent(Event(REQUEST_QUIT, App));
+					Event::Push(REQUEST_QUIT, App);
 
 				ImGui::EndMenu();
 			}

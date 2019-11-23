@@ -173,8 +173,54 @@ bool ModuleRenderer3D::CleanUp()
 
 void ModuleRenderer3D::RecieveEvent(const Event & e)
 {
-	if (e.GetType() == CURRENT_CAM_VIEWPORT_CHANGED)
-		UpdateViewPort(App->window->GetWidth(), App->window->GetHeight());
+	switch (e.GetType())
+	{
+	case WINDOW_SIZE_CHANGED:
+	{
+		WindowSizeChanged(e.GetData().AsInt(), e.GetDataNext().AsInt());
+		break;
+	}
+	case SET_VSYNC:
+	{
+		SetVSync(e.GetData().AsBool());
+		break;
+	}
+	case SET_DEPTH_TEST:
+	{
+		SetDepthTest(e.GetData().AsBool());
+		break;
+	}
+	case SET_FACE_CULLING:
+	{
+		SetFaceCulling(e.GetData().AsBool());
+		break;
+	}
+	case SET_LIGHTNING:
+	{
+		SetLighting(e.GetData().AsBool());
+		break;
+	}
+	case SET_TEXTURE_TWO_D:
+	{
+		SetTexture2D(e.GetData().AsBool());
+		break;
+	}
+	case SET_COLOR_MATERIAL:
+	{
+		SetColorMaterial(e.GetData().AsBool());
+		break;
+	}
+	case SET_WIRE_FRAME:
+	{
+		SetWireframe(e.GetData().AsBool());
+		break;
+	}
+	case CURRENT_CAM_VIEWPORT_CHANGED:
+	{
+		UpdateViewPort(e.GetData().AsInt(), e.GetDataNext().AsInt());
+		break;
+	}
+	}
 }
 
 void ModuleRenderer3D::DrawEditor()
@@ -283,11 +329,6 @@ void ModuleRenderer3D::SetColorMaterial(bool enable)
 void ModuleRenderer3D::SetWireframe(bool enable)
 {
 	wireframe = enable;
-}
-
-bool ModuleRenderer3D::GetLighting() const
-{
-	return lighting;
 }
 
 unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
