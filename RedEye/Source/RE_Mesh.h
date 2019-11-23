@@ -8,7 +8,6 @@ class RE_Mesh : public ResourceContainer
 {
 public:
 	RE_Mesh();
-	RE_Mesh(const char* metaPath);
 	~RE_Mesh();
 
 	void LoadInMemory() override;

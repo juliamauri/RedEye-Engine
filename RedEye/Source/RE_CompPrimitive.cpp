@@ -212,6 +212,11 @@ void RE_CompCube::DrawProperties()
 	}
 }
 
+unsigned int RE_CompCube::GetBinarySize() const
+{
+	return sizeof(float) * 3;
+}
+
 void RE_CompCube::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
 {
 	node->PushFloatVector("color", RE_CompPrimitive::color);
@@ -326,6 +331,11 @@ void RE_CompSphere::DrawProperties()
 
 		if (ImGui::Button("Apply")) GenerateNewSphere(slice, stacks);
 	}
+}
+
+unsigned int RE_CompSphere::GetBinarySize() const
+{
+	return sizeof(float) * 3 + sizeof(int) * 2;
 }
 
 void RE_CompSphere::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)

@@ -35,6 +35,7 @@ public:
 
 	std::vector<const char*> GetAllResources(bool root = true);
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources);
+	unsigned int GetBinarySize()const;
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources);
 
 	static RE_GameObject* DeserializeJSON(JSONNode* node, std::map<int, const char*>* resources);

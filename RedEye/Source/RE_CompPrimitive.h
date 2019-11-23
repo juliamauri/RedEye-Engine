@@ -13,6 +13,7 @@ public:
 	ComponentType GetType() const;
 	virtual void Draw() override = 0;
 	virtual void DrawProperties() override = 0;
+	virtual unsigned int GetBinarySize()const override { return 0; }
 	virtual void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override { }
 	virtual void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
@@ -41,6 +42,7 @@ public:
 	~RE_CompAxis();
 	void Draw() override;
 	void DrawProperties() override {}
+	unsigned int GetBinarySize()const override { return 0; }
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
@@ -59,6 +61,7 @@ public:
 	~RE_CompPoint();
 	void Draw() override;
 	void DrawProperties() override {}
+	unsigned int GetBinarySize()const override { return 0; }
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
@@ -77,6 +80,7 @@ public:
 	~RE_CompLine();
 	void Draw() override;
 	void DrawProperties() override {}
+	unsigned int GetBinarySize()const override { return 0; }
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
@@ -96,6 +100,7 @@ public:
 	~RE_CompRay();
 	void Draw() override;
 	void DrawProperties() override {}
+	unsigned int GetBinarySize()const override { return 0; }
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
@@ -112,6 +117,7 @@ public:
 	~RE_CompTriangle();
 	void Draw() override;
 	void DrawProperties() override {}
+	unsigned int GetBinarySize()const override { return 0; }
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
@@ -128,6 +134,7 @@ public:
 	~RE_CompPlane();
 	void Draw() override;
 	void DrawProperties() override {}
+	unsigned int GetBinarySize()const override { return 0; }
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
@@ -145,6 +152,7 @@ public:
 	~RE_CompCube();
 	void Draw() override;
 	void DrawProperties() override;
+	unsigned int GetBinarySize()const override;
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
 
@@ -165,6 +173,7 @@ public:
 	~RE_CompFustrum();
 	void Draw() override;
 	void DrawProperties() override {}
+	unsigned int GetBinarySize()const override { return 0; }
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 };
@@ -181,6 +190,7 @@ public:
 	~RE_CompSphere();
 	void Draw() override;
 	void DrawProperties() override;
+	unsigned int GetBinarySize()const override;
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
 
@@ -208,6 +218,7 @@ public:
 	~RE_CompCylinder();
 	void Draw() override;
 	void DrawProperties() override {}
+	unsigned int GetBinarySize()const override { return 0; }
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 };
@@ -224,6 +235,7 @@ public:
 	~RE_CompCapsule();
 	void Draw() override;
 	void DrawProperties() override {}
+	unsigned int GetBinarySize()const override { return 0; }
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 };

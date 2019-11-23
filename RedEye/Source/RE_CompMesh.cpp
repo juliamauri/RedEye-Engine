@@ -103,6 +103,14 @@ std::vector<const char*> RE_CompMesh::GetAllResources()
 	return ret;
 }
 
+unsigned int RE_CompMesh::GetBinarySize() const
+{
+	uint count = 0;
+	if (meshMD5)count++;
+	if (materialMD5)count++;
+	return sizeof(int) * count;
+}
+
 void RE_CompMesh::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
 {
 	node->PushInt("meshResource", (meshMD5) ? resources->at(meshMD5) : -1);

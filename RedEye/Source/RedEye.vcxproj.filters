@@ -154,6 +154,9 @@
     <ClCompile Include="RE_ShaderImporter.cpp">
       <Filter>Modules\Resource Managers</Filter>
     </ClCompile>
+    <ClCompile Include="RE_ResouceAndGOImporter.cpp">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -461,6 +464,9 @@
     </ClInclude>
     <ClInclude Include="RE_GameObject.h">
       <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ResouceAndGOImporter.h">
+      <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

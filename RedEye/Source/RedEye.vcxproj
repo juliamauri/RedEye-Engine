@@ -62,6 +62,7 @@
     <ClCompile Include="RE_CompPrimitive.cpp" />
     <ClCompile Include="RE_Prefab.cpp" />
     <ClCompile Include="RE_PrimitiveManager.cpp" />
+    <ClCompile Include="RE_ResouceAndGOImporter.cpp" />
     <ClCompile Include="RE_Scene.cpp" />
     <ClCompile Include="RE_Shader.cpp" />
     <ClCompile Include="RE_SkyBox.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="RE_CompPrimitive.h" />
     <ClInclude Include="RE_Prefab.h" />
     <ClInclude Include="RE_PrimitiveManager.h" />
+    <ClInclude Include="RE_ResouceAndGOImporter.h" />
     <ClInclude Include="RE_Scene.h" />
     <ClInclude Include="RE_Shader.h" />
     <ClInclude Include="RE_SkyBox.h" />

@@ -427,6 +427,11 @@ math::vec RE_CompCamera::GetFront() const
 	return front;
 }
 
+unsigned int RE_CompCamera::GetBinarySize() const
+{
+	return sizeof(bool) * 2 + sizeof(int) + sizeof(float) * 3;
+}
+
 void RE_CompCamera::SerializeJson(JSONNode * node, std::map<const char*, int>* resources)
 {
 	node->PushBool("isPrespective", isPerspective);

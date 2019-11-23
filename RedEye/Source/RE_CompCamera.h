@@ -75,6 +75,7 @@ public:
 	math::vec GetUp() const;
 	math::vec GetFront() const;
 
+	unsigned int GetBinarySize()const override;
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
 

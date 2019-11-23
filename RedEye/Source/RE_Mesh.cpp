@@ -34,7 +34,6 @@
 
 
 RE_Mesh::RE_Mesh() { }
-RE_Mesh::RE_Mesh(const char* metaPath) : ResourceContainer(metaPath) { }
 
 RE_Mesh::~RE_Mesh() { }
 

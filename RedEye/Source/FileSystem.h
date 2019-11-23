@@ -150,9 +150,6 @@ public:
 	const char*		PullString(const char* name, const char* deflt);
 	JSONNode*		PullJObject(const char* name);
 
-	//GameObject
-	RE_GameObject* FillGO();
-
 	// Utility
 	inline bool operator!() const;
 	const char* GetDocumentPath() const;

@@ -72,6 +72,7 @@ public:
 
 	virtual std::vector<const char*> GetAllResources() { return std::vector<const char*>(); }
 
+	virtual unsigned int GetBinarySize()const {  return 0; }
 	virtual void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) {}
 	virtual void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) {}
 

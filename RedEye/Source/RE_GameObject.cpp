@@ -219,6 +219,19 @@ void RE_GameObject::SerializeJson(JSONNode * node, std::map<const char*, int>* r
 	DEL(gameObjects);
 }
 
+unsigned int RE_GameObject::GetBinarySize()const 
+{
+	uint size = sizeof(uint) * 3 + 36 * sizeof(char) + sizeof(float) * 9 + sizeof(int);
+	if (parent != nullptr) size += 36 * sizeof(char);
+	size += std::strlen(GetName()) * sizeof(char);
+
+	for (auto component : components) size += component->GetBinarySize();
+
+	for (auto child : childs) size += child->GetBinarySize();
+
+	return size;
+}
+
 void RE_GameObject::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
 {
 	std::vector<RE_GameObject*> allGOs = GetAllGO();
