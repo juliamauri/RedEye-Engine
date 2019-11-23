@@ -32,6 +32,7 @@ public:
 	
 	void Update() override;
 	void DrawProperties() override;
+	void DrawAsEditorProperties();
 	void DrawFrustum() const;
 
 	RE_CompTransform* GetTransform() const;
@@ -67,8 +68,8 @@ public:
 	// Camera Controls
 	void LocalRotate(float dx, float dy);
 	void LocalMove(Dir dir, float speed);
-	void Orbit(float dx, float dy, RE_GameObject* focus);
-	void Focus(RE_GameObject* focus, float min_dist = 3.0f);
+	void Orbit(float dx, float dy, const RE_GameObject& focus);
+	void Focus(const RE_GameObject* focus, float min_dist = 3.0f);
 
 	// local camera Axis
 	math::vec GetRight() const;
