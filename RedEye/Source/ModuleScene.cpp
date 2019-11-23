@@ -444,18 +444,15 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 					else
 						selectedMaterial->tDiffuse[0] = textureResource;
 
-				selectedMaterial->Save();
+					selectedMaterial->Save();
+				}
 			}
 		}
 		else
-		{
 			LOG_ERROR("Selected GameObject does not have a mesh");
-		}
 	}
 	else
-	{
 		LOG_ERROR("No Selected GameObject");
-	}
 }
 
 void ModuleScene::GetActive(std::vector<const RE_GameObject*>& objects) const

@@ -1010,7 +1010,7 @@ void RE_GameObject::ResetGlobalBoundingBox()
 
 void RE_GameObject::DrawAABB(math::vec color) const
 {
-	ShaderManager::use(0);
+	RE_ShaderImporter::use(0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf((transform->GetMatrixModel() * RE_CameraManager::CurrentCamera()->GetView()).ptr());

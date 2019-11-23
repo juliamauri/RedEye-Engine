@@ -599,7 +599,7 @@ void PrefabsPanel::Draw(bool secondary)
 			if (App->editor->GetSelected() != nullptr)
 			{
 				RE_Prefab* newPrefab = new RE_Prefab();
-				RE_GameObject* selected = App->scene->GetSelected();
+				RE_GameObject* selected = App->editor->GetSelected();
 				newPrefab->SetName(selected->GetName());
 				newPrefab->Save(selected);
 				newPrefab->SaveMeta();
