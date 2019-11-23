@@ -26,7 +26,7 @@
 EditorWindow::EditorWindow(const char* name, bool start_enabled)
 	: name(name), active(start_enabled), lock_pos(false)
 {
-	/*default_flags = default_flags = 
+	/*default_flags = default_flags =
 		  ImGuiWindowFlags_NoFocusOnAppearing
 		| ImGuiWindowFlags_NoResize
 		| ImGuiWindowFlags_NoMove;*/
@@ -99,7 +99,7 @@ void ConsoleWindow::Draw(bool secondary)
 
 			ImGui::EndMenuBar();
 		}
-		
+
 		//Draw console buffer //TODO print parcial buffer, play with cursors
 		ImGui::TextEx(console_buffer.begin(), console_buffer.end(), ImGuiTextFlags_NoWidthForLargeClippedText);
 
@@ -591,23 +591,19 @@ void PrefabsPanel::Draw(bool secondary)
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
-		
+
 		ImGui::SameLine();
 
 		if (ImGui::Button("Create Prefab"))
 		{
 			if (App->editor->GetSelected() != nullptr)
 			{
-<<<<<<< HEAD
 				RE_Prefab* newPrefab = new RE_Prefab();
 				RE_GameObject* selected = App->scene->GetSelected();
 				newPrefab->SetName(selected->GetName());
 				newPrefab->Save(selected);
 				newPrefab->SaveMeta();
 				App->resources->Reference(newPrefab);
-=======
-				App->resources->Reference(new RE_Prefab(App->editor->GetSelected()));
->>>>>>> master
 				prefabs = App->resources->GetResourcesByType(Resource_Type::R_PREFAB);
 			}
 		}
@@ -668,7 +664,7 @@ void PopUpWindow::Draw(bool secondary)
 			ImGui::TextColored(ImVec4(255.f, 0.f, 0.f, 1.f), !App->handlerrors->AnyErrorHandled() ?
 				"No errors" :
 				App->handlerrors->GetErrors(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
-			
+
 			ImGui::Separator();
 
 			// Solution
