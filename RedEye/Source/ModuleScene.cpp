@@ -2,9 +2,10 @@
 
 #include "Application.h"
 #include "ModuleRenderer3D.h"
+#include "ModuleEditor.h"
 #include "ModuleInput.h"
 
-#include "EditorWindows.h"
+//#include "EditorWindows.h"
 #include "FileSystem.h"
 #include "RE_PrimitiveManager.h"
 #include "ResourceManager.h"
@@ -27,8 +28,6 @@
 #include "TimeManager.h"
 
 #include "md5.h"
-#include "Glew/include/glew.h"
-#include <gl/GL.h>
 #include <string>
 
 #include "SDL2\include\SDL.h"
@@ -37,12 +36,7 @@
 #define DEFAULTMODEL "Assets/Meshes/BakerHouse/BakerHouse.fbx"
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
-{
-	all_aabb_color = math::vec(0.f, 1.f, 0.f);
-	sel_aabb_color = math::vec(1.f, 1.f, 1.f);
-	quad_tree_color = math::vec(1.f, 1.f, 0.f);
-	frustum_color = math::vec(0.f, 1.f, 1.f);
-}
+{}
 
 ModuleScene::~ModuleScene()
 {}
@@ -118,19 +112,9 @@ bool ModuleScene::Start()
 	if (!RE_CameraManager::HasMainCamera())
 		CreateCamera();
 
-	// Setup AABB
+	// Setup AABB + Quadtree
 	root->TransformModified();
-	root->ResetBoundingBoxFromChilds();
-	static_gos_modified = false;
-
-	// FOCUS CAMERA
-	if (!root->GetChilds().empty()) {
-		App->scene->SetSelected(root->GetChilds().begin()._Ptr->_Myval);
-		RE_CameraManager::CurrentCamera()->Focus(selected);
-	}
-
-	// Quadtree
-	quad_tree.Build(root);
+	UpdateQuadTree();
 
 	return ret;
 }
@@ -170,9 +154,18 @@ void ModuleScene::OnStop()
 
 void ModuleScene::RecieveEvent(const Event& e)
 {
+	if (e.GetType() == STATIC_TRANSFORM_MODIFIED)
+		static_gos_modified = true;
+	else if (e.GetType() == TRANSFORM_MODIFIED)
+		scene_modified = true;
 }
 
 RE_GameObject * ModuleScene::GetRoot() const
+{
+	return root;
+}
+
+const RE_GameObject * ModuleScene::GetRoot_c() const
 {
 	return root;
 }
@@ -185,12 +178,6 @@ RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent)
 void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
 {
 	root->AddChild(toAdd);
-}
-
-void ModuleScene::DuplicateSelectedObject()
-{
-	if(selected != nullptr)
-		selected->GetParent()->AddChild(new RE_GameObject(*selected));
 }
 
 void ModuleScene::CreateCube()
@@ -215,131 +202,37 @@ void ModuleScene::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
 	{
-		// AABB Controls
-		ImGui::Text("Last AABB Reset took: %f", aabb_reset_time);
-		if (static_gos_modified && ImGui::Button("Reset All AABB"))
-		{
-			root->ResetBoundingBoxFromChilds();
-			static_gos_modified = false;
-		}
+		if (static_gos_modified && ImGui::Button("Reset AABB and Quadtree"))
+			UpdateQuadTree();
 
-		// AABB All
-		ImGui::Checkbox("Draw All AABB", &draw_all_aabb);
-		if (draw_all_aabb)
-		{
-			float p[3] = { all_aabb_color.x, all_aabb_color.y, all_aabb_color.z };
-			if (ImGui::ColorEdit3("Color All", p))
-				all_aabb_color = math::vec(p[0], p[1], p[2]);
-		}
-
-		// AABB Selected
-		ImGui::Checkbox("Draw Selected AABB", &draw_selected_aabb);
-		if (draw_selected_aabb)
-		{
-			float p[3] = { sel_aabb_color.x, sel_aabb_color.y, sel_aabb_color.z };
-			if (ImGui::ColorEdit3("Color Selected", p))
-				sel_aabb_color = math::vec(p[0], p[1], p[2]);
-		}
-
-		// Camera Fustrums
-		ImGui::Checkbox("Draw Camera Fustrums", &draw_cameras);
-		if (draw_cameras)
-		{
-			float p[3] = { frustum_color.x, frustum_color.y, frustum_color.z };
-			if (ImGui::ColorEdit3("Color Fustrum", p))
-				frustum_color = math::vec(p[0], p[1], p[2]);
-		}
-
-		ImGui::Checkbox("Focus on Select", &focus_on_select);
-		ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
+		int quadtree_drawing = quad_tree.GetDrawMode();
+		if (ImGui::Combo("QuadTree Drawing", &quadtree_drawing, "Disable draw\0Top\0Bottom\0Top and Bottom\0All\0"))
+			quad_tree.SetDrawMode(quadtree_drawing);
 	}
 }
 
-void ModuleScene::DrawDebug() const
+void ModuleScene::DrawQTree() const
 {
-	OPTICK_CATEGORY("Scene Debug Draw", Optick::Category::Debug);
+	quad_tree.Draw();
+}
 
-	// Draw Bounding Boxes
-	if (draw_all_aabb || draw_selected_aabb || draw_quad_tree)
+RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
+{
+	RE_GameObject* ret = nullptr;
+
+	if (static_gos_modified && update_qt)
+		UpdateQuadTree();
+
+	std::vector<const RE_GameObject*> objects;
+	if (static_gos_modified)
 	{
-		ShaderManager::use(0);
-		bool resetLight = App->renderer3d->GetLighting();
-
-		if (resetLight)
-			glDisable(GL_LIGHTING);
-
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(RE_CameraManager::CurrentCamera()->GetProjectionPtr());
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf((RE_CameraManager::CurrentCamera()->GetView()).ptr());
-		glBegin(GL_LINES);
-
-		if (draw_all_aabb)
-		{
-			glColor3f(all_aabb_color.x, all_aabb_color.y, all_aabb_color.z);
-			root->DrawAllAABB();
-		}
-
-		if (draw_selected_aabb && selected != nullptr && selected != root)
-		{
-			glColor3f(sel_aabb_color.x, sel_aabb_color.y, sel_aabb_color.z);
-			selected->DrawGlobalAABB();
-		}
-
-		if (draw_quad_tree)
-		{
-			glColor3f(quad_tree_color.x, quad_tree_color.y, quad_tree_color.z);
-			quad_tree.Draw();
-		}
-
-		if (draw_cameras)
-		{
-			glColor3f(frustum_color.x, frustum_color.y, frustum_color.z);
-			for(auto cam : App->cams->GetCameras())
-				cam->DrawFrustum();
-		}
-
-		glEnd();
-
-		if (resetLight)
-			glEnable(GL_LIGHTING);
+		GetActive(objects);
 	}
-}
-
-void ModuleScene::DrawHeriarchy()
-{
-	if (root != nullptr)
+	else
 	{
-		for (auto child : root->GetChilds())
-			child->DrawHeriarchy();
+		GetActiveNonStatic(objects);
+		quad_tree.CollectIntersections(objects, ray);
 	}
-}
-
-// DRAW SELECTED GO
-void ModuleScene::DrawFocusedProperties()
-{
-	if (selected != nullptr && selected != root)
-		selected->DrawProperties();
-}
-
-void ModuleScene::SetSelected(RE_GameObject * select)
-{
-	selected = (select != nullptr) ? select : root;
-
-	if (focus_on_select)
-		RE_CameraManager::CurrentCamera()->Focus(selected);
-}
-
-RE_GameObject * ModuleScene::GetSelected() const
-{
-	return selected;
-}
-
-void ModuleScene::RayCastSelect(math::Ray & ray)
-{
-	std::vector<RE_GameObject*> objects;
-
-	quad_tree.CollectIntersections(objects, ray);
 
 	if (!objects.empty())
 	{
@@ -373,19 +266,38 @@ void ModuleScene::RayCastSelect(math::Ray & ray)
 				if (mesh->CheckFaceCollision(ray, res_distance)
 					&& (!collision || closest_distance > res_distance))
 				{
-					new_selection = mesh->GetGO();
+					ret = mesh->GetGO();
 					closest_distance = res_distance;
 					collision = true;
 				}
 			}
-
-			if (new_selection != nullptr)
-			{
-				SetSelected(new_selection);
-				LOG("Raycast Hit %s, (%f)", new_selection->GetName(), closest_distance);
-			}
 		}
 	}
+
+	return ret;
+}
+
+void ModuleScene::FustrumCulling(std::vector<const RE_GameObject*>& container, math::Frustum & frustum)
+{
+	std::vector<const RE_GameObject*> objects;
+
+	if (static_gos_modified && update_qt)
+		UpdateQuadTree();
+
+	if (static_gos_modified)
+	{
+		GetActive(objects);
+	}
+	else
+	{
+		GetActiveNonStatic(objects);
+		quad_tree.CollectIntersections(container, frustum);
+	}
+
+	// Check Frustum-AABB
+	for (auto object : objects)
+		if (frustum.Intersects(object->GetGlobalBoundingBox()))
+			container.push_back(object);
 }
 
 void ModuleScene::Serialize()
@@ -448,18 +360,13 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 
 	}
 
-	if (toAdd) {
-		if (root) DEL(root);
-		selected = nullptr;
-		root = new RE_GameObject("root");
+	if (toAdd)
+	{
 		root->AddChild(toAdd);
-
 		root->TransformModified();
 		root->ResetBoundingBoxFromChilds();
-		static_gos_modified = false;
-		// FOCUS CAMERA ON DROPPED GEOMETRY
-		SetSelected(toAdd);
-		RE_CameraManager::CurrentCamera()->Focus(selected);
+		quad_tree.Build(root);
+		App->editor->SetSelected(toAdd, true);
 	}
 	else
 		LOG_ERROR("Error to load dropped fbx");
@@ -467,105 +374,168 @@ void ModuleScene::LoadFBXOnScene(const char * fbxPath)
 
 void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 {
-	RE_CompMesh* selectedMesh = nullptr;
-	if (selected && (selectedMesh = (RE_CompMesh*)selected->GetComponent(ComponentType::C_MESH)) != nullptr ) {
-		std::string path(texturePath);
-		std::string fileName = path.substr(path.find_last_of("/") + 1);
-		fileName = fileName.substr(0, fileName.find_last_of("."));
+	RE_GameObject* selected = App->editor->GetSelected();
+	if (selected != nullptr)
+	{
+		RE_CompMesh* selectedMesh = selected->GetMesh();
+		if (selectedMesh != nullptr) {
+			std::string path(texturePath);
+			std::string fileName = path.substr(path.find_last_of("/") + 1);
+			fileName = fileName.substr(0, fileName.find_last_of("."));
 
-		std::string md5Generated = md5(texturePath);
-		const char* textureResource = App->resources->CheckFileLoaded(texturePath, md5Generated.c_str(), Resource_Type::R_TEXTURE);
+			std::string md5Generated = md5(texturePath);
+			const char* textureResource = App->resources->CheckFileLoaded(texturePath, md5Generated.c_str(), Resource_Type::R_TEXTURE);
 
-		bool createMaterial = false;
-		std::string filePath("Assets/Materials/");
-		filePath += fileName;
-		filePath += ".pupil";
-		const char* materialMD5 = selectedMesh->GetMaterial();
-		if (!materialMD5) {
-			LOG_SECONDARY("Material don't exists on mesh creating a new one: %s", filePath.c_str());
-			if (!App->fs->Exists(filePath.c_str())) {
-				createMaterial = true;
-			}
-			else {
-				Config materialToLoad(filePath.c_str(), App->fs->GetZipPath());
-				if (materialToLoad.Load()) {
-					materialMD5 = App->resources->CheckFileLoaded(filePath.c_str(), materialToLoad.GetMd5().c_str(), Resource_Type::R_MATERIAL);
-					selectedMesh->SetMaterial(materialMD5);
-				}
-				else {
-					std::string newFile("Assets/Materials/");
-					newFile += fileName;
-					uint count = 0;
-
-					do {
-						count++;
-						filePath = newFile;
-						filePath += " ";
-						filePath += std::to_string(count);
-						filePath += ".pupil";
-					} while (!App->fs->Exists(filePath.c_str()));
-
+			bool createMaterial = false;
+			std::string filePath("Assets/Materials/");
+			filePath += fileName;
+			filePath += ".pupil";
+			const char* materialMD5 = selectedMesh->GetMaterial();
+			if (!materialMD5) {
+				LOG_SECONDARY("Mesh missing Material. Creating new material: %s", filePath.c_str());
+				if (!App->fs->Exists(filePath.c_str())) {
 					createMaterial = true;
 				}
+				else {
+					Config materialToLoad(filePath.c_str(), App->fs->GetZipPath());
+					if (materialToLoad.Load()) {
+						materialMD5 = App->resources->CheckFileLoaded(filePath.c_str(), materialToLoad.GetMd5().c_str(), Resource_Type::R_MATERIAL);
+						selectedMesh->SetMaterial(materialMD5);
+					}
+					else {
+						std::string newFile("Assets/Materials/");
+						newFile += fileName;
+						uint count = 0;
+
+						do {
+							count++;
+							filePath = newFile;
+							filePath += " ";
+							filePath += std::to_string(count);
+							filePath += ".pupil";
+						} while (!App->fs->Exists(filePath.c_str()));
+
+						createMaterial = true;
+					}
+				}
+
+				if (createMaterial) {
+					LOG_SECONDARY("Creating new material: %s", filePath.c_str());
+					RE_Material* newMaterial = new RE_Material(fileName.c_str());
+
+					newMaterial->tDiffuse.push_back(textureResource);
+
+					Config materialSerialize(filePath.c_str(), App->fs->GetZipPath());
+					JSONNode* materialNode = materialSerialize.GetRootNode("Material");
+					materialNode->SetArray();
+					newMaterial->Serialize(materialNode, &materialNode->GetDocument()->FindMember("Material")->value);
+
+					((ResourceContainer*)newMaterial)->SetFilePath(filePath.c_str());
+					((ResourceContainer*)newMaterial)->SetMD5(materialSerialize.GetMd5().c_str());
+					((ResourceContainer*)newMaterial)->SetType(Resource_Type::R_MATERIAL);
+
+					materialSerialize.Save();
+
+					materialMD5 = App->resources->Reference((ResourceContainer*)newMaterial);
+					selectedMesh->SetMaterial(materialMD5);
+				}
 			}
+			else {
+				LOG_SECONDARY("Material on mesh found, changing texture and saving.");
 
-			if (createMaterial) {
-				LOG_SECONDARY("Creating new material: %s", filePath.c_str());
-				RE_Material* newMaterial = new RE_Material(fileName.c_str());
+				RE_Material* selectedMaterial = (RE_Material*)App->resources->At(materialMD5);
+				if (selectedMaterial) {
+					if (selectedMaterial->tDiffuse.empty())
+						selectedMaterial->tDiffuse.push_back(textureResource);
+					else
+						selectedMaterial->tDiffuse[0] = textureResource;
 
-				newMaterial->tDiffuse.push_back(textureResource);
+					Config materialSerialize(((ResourceContainer*)selectedMaterial)->GetFilePath(), App->fs->GetZipPath());
 
-				Config materialSerialize(filePath.c_str(), App->fs->GetZipPath());
-				JSONNode* materialNode = materialSerialize.GetRootNode("Material");
-				materialNode->SetArray();
-				newMaterial->Serialize(materialNode, &materialNode->GetDocument()->FindMember("Material")->value);
-
-				((ResourceContainer*)newMaterial)->SetFilePath(filePath.c_str());
-				((ResourceContainer*)newMaterial)->SetMD5(materialSerialize.GetMd5().c_str());
-				((ResourceContainer*)newMaterial)->SetType(Resource_Type::R_MATERIAL);
-
-				materialSerialize.Save();
-
-				materialMD5 = App->resources->Reference((ResourceContainer*)newMaterial);
-				selectedMesh->SetMaterial(materialMD5);
+					JSONNode* materialNode = materialSerialize.GetRootNode("Material");
+					materialNode->SetArray();
+					selectedMaterial->Serialize(materialNode, &materialNode->GetDocument()->FindMember("Material")->value);
+					materialSerialize.Save();
+				}
 			}
-		} 
-		else {
-			LOG_SECONDARY("Material on mesh found, changing texture and saving.");
-
-			RE_Material* selectedMaterial = (RE_Material*)App->resources->At(materialMD5);
-			if (selectedMaterial) {
-				if (selectedMaterial->tDiffuse.empty())
-					selectedMaterial->tDiffuse.push_back(textureResource);
-				else
-					selectedMaterial->tDiffuse[0] = textureResource;
-
-				Config materialSerialize(((ResourceContainer*)selectedMaterial)->GetFilePath(), App->fs->GetZipPath());
-
-				JSONNode* materialNode = materialSerialize.GetRootNode("Material");
-				materialNode->SetArray();
-				selectedMaterial->Serialize(materialNode, &materialNode->GetDocument()->FindMember("Material")->value);
-				materialSerialize.Save();
-			}
+		}
+		else
+		{
+			LOG_ERROR("Selected GameObject does not have a mesh");
 		}
 	}
 	else
 	{
-		LOG_ERROR("Selected GameObject don't have mesh");
+		LOG_ERROR("No Selected GameObject");
 	}
 }
 
-void ModuleScene::StaticTransformed()
+void ModuleScene::GetActive(std::vector<const RE_GameObject*>& objects) const
 {
-	static_gos_modified = true;
+	std::queue<const RE_GameObject*> queue;
+
+	for (auto child : root->GetChilds())
+		if (child->IsActive())
+			queue.push(child);
+
+	while (!queue.empty())
+	{
+		const RE_GameObject* obj = queue.front();
+		objects.push_back(obj);
+
+		for (auto child : obj->GetChilds())
+			if (child->IsActive())
+				queue.push(child);
+
+		queue.pop();
+	}
 }
 
-bool ModuleScene::DrawingSelAABB() const
+void ModuleScene::GetActiveStatic(std::vector<const RE_GameObject*>& objects) const
 {
-	return draw_selected_aabb;
+	std::queue<const RE_GameObject*> queue;
+
+	for (auto child : root->GetChilds())
+		if (child->IsActive() && child->IsStatic())
+			queue.push(child);
+
+	while (!queue.empty())
+	{
+		const RE_GameObject* obj = queue.front();
+		objects.push_back(obj);
+
+		for (auto child : obj->GetChilds())
+			if (child->IsActive() && child->IsStatic())
+				queue.push(child);
+
+		queue.pop();
+	}
 }
 
-const QTree* ModuleScene::GetQuadTree() const
+void ModuleScene::GetActiveNonStatic(std::vector<const RE_GameObject*>& objects) const
 {
-	return &quad_tree;
+	std::queue<const RE_GameObject*> queue;
+
+	for (auto child : root->GetChilds())
+		if (child->IsActive() && !child->IsStatic())
+			queue.push(child);
+
+	while (!queue.empty())
+	{
+		const RE_GameObject* obj = queue.front();
+		objects.push_back(obj);
+
+		for (auto child : obj->GetChilds())
+			if (child->IsActive() && !child->IsStatic())
+				queue.push(child);
+
+		queue.pop();
+	}
+}
+
+void ModuleScene::UpdateQuadTree()
+{
+	root->ResetBoundingBoxFromChilds();
+	quad_tree.Build(root);
+	static_gos_modified = false;
 }

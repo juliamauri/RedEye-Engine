@@ -12,6 +12,7 @@
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
 #include "RE_CameraManager.h"
+#include "QuadTree.h"
 
 #include "MathGeoLib\include\MathGeoLib.h"
 #include "ImGui\imgui_impl_opengl3.h"
@@ -20,6 +21,8 @@
 #include "ImGui/imgui_internal.h"
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
+
+#include <stack>
 
 ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
@@ -66,7 +69,36 @@ bool ModuleEditor::Init(JSONNode* node)
 	else
 		LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
 
+
+	all_aabb_color[0] = 0.f;
+	all_aabb_color[1] = 1.f;
+	all_aabb_color[2] = 0.f;
+
+	sel_aabb_color[0] = 1.f;
+	sel_aabb_color[1] = 1.f;
+	sel_aabb_color[2] = 1.f;
+
+	quad_tree_color[0] = 1.f;
+	quad_tree_color[1] = 1.f;
+	quad_tree_color[2] = 0.f;
+
+	frustum_color[0] = 0.f;
+	frustum_color[1] = 1.f;
+	frustum_color[2] = 1.f;
+
 	return ret;
+}
+
+bool ModuleEditor::Start()
+{
+	// FOCUS CAMERA
+	const RE_GameObject* root = App->scene->GetRoot();
+	if (!root->GetChilds().empty()) {
+		SetSelected(root->GetChilds().begin()._Ptr->_Myval);
+		RE_CameraManager::EditorCamera()->Focus(selected);
+	}
+
+	return true;
 }
 
 update_status ModuleEditor::PreUpdate()
@@ -93,9 +125,8 @@ update_status ModuleEditor::Update()
 			if (ImGui::BeginMenu("File"))
 			{
 				if (ImGui::MenuItem(" Exit", "	Esc"))
-				{
 					App->input->AddEvent(Event(REQUEST_QUIT, App));
-				}
+
 				ImGui::EndMenu();
 			}
 
@@ -226,11 +257,207 @@ void ModuleEditor::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
 	{
+		ImGui::Checkbox("Select on mouse click", &select_on_mc);
+		ImGui::Checkbox("Focus on Select", &focus_on_select);
+
 		ImGui::DragFloat("Camera speed", &cam_speed, 0.1f, 0.1f, 100.0f, "%.1f");
 		ImGui::DragFloat("Camera sensitivity", &cam_sensitivity, 0.01f, 0.01f, 1.0f, "%.2f");
 
-		RE_CameraManager::EditorCamera()->DrawProperties();
+		RE_CameraManager::EditorCamera()->DrawAsEditorProperties();
+
+		// Debug Drawing
+		ImGui::Checkbox("Debug Draw", &debug_drawing);
+		if (debug_drawing)
+		{
+			int aabb_d = aabb_drawing;
+			if (ImGui::Combo("Draw AABB", &aabb_d, "None\0Selected only\0All\0All w/ different selected\0"))
+				aabb_drawing = AABBDebugDrawing(aabb_d);
+			
+			if (aabb_drawing > SELECTED_ONLY) ImGui::ColorEdit3("Color AABB", all_aabb_color);
+			if (aabb_drawing%2 == 1) ImGui::ColorEdit3("Color Selected", sel_aabb_color);
+
+			ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
+			if (draw_quad_tree) ImGui::ColorEdit3("Color Quadtree", quad_tree_color);
+
+			ImGui::Checkbox("Draw Camera Fustrums", &draw_cameras);
+			if (draw_cameras) ImGui::ColorEdit3("Color Fustrum", frustum_color);
+		}
 	}
+}
+
+void ModuleEditor::DrawDebug(bool resetLight) const
+{
+	OPTICK_CATEGORY("Debug Draw", Optick::Category::Debug);
+
+	AABBDebugDrawing adapted_AABBdraw = (selected != nullptr ? aabb_drawing : AABBDebugDrawing(aabb_drawing - 1));
+
+	// Draw Bounding Boxes
+	if (debug_drawing && ((adapted_AABBdraw != AABBDebugDrawing::NONE) || draw_quad_tree || draw_cameras))
+	{
+		const RE_GameObject* root = App->scene->GetRoot();
+		RE_CompCamera* current_camera = RE_CameraManager::CurrentCamera();
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixf(current_camera->GetProjectionPtr());
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf((current_camera->GetView()).ptr());
+
+		if (resetLight)
+			glDisable(GL_LIGHTING);
+
+		glBegin(GL_LINES);
+
+		switch (adapted_AABBdraw)
+		{
+		case SELECTED_ONLY:
+		{
+			glColor3f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2]);
+			selected->DrawGlobalAABB();
+			break;
+		}
+		case ALL:
+		{
+			std::queue<const RE_GameObject*> objects;
+			for (auto child : root->GetChilds())
+				objects.push(child);
+
+			if (!objects.empty())
+			{
+				const RE_GameObject* object = nullptr;
+
+				glColor3f(all_aabb_color[0], all_aabb_color[1], all_aabb_color[2]);
+
+				while (!objects.empty())
+				{
+					object = objects.front();
+					object->DrawGlobalAABB();
+					objects.pop();
+
+					if (object->ChildCount() > 0)
+						for (auto child : object->GetChilds())
+							objects.push(child);
+				}
+			}
+
+			break;
+		}
+		case ALL_AND_SELECTED:
+		{
+			glColor3f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2]);
+			selected->DrawGlobalAABB();
+
+			std::queue<const RE_GameObject*> objects;
+			for (auto child : root->GetChilds())
+				objects.push(child);
+
+			if (!objects.empty())
+			{
+				glColor3f(all_aabb_color[0], all_aabb_color[1], all_aabb_color[2]);
+
+				const RE_GameObject* object = nullptr;
+				while (!objects.empty())
+				{
+					object = objects.front();
+					objects.pop();
+
+					if (object != selected)
+						object->DrawGlobalAABB();
+
+					if (object->ChildCount() > 0)
+						for (auto child : object->GetChilds())
+							objects.push(child);
+				}
+			}
+
+			break;
+		}
+		}
+
+		if (draw_quad_tree)
+		{
+			glColor3f(quad_tree_color[0], quad_tree_color[1], quad_tree_color[2]);
+			App->scene->DrawQTree();
+		}
+
+		if (draw_cameras)
+		{
+			glColor3f(frustum_color[0], frustum_color[1], frustum_color[2]);
+			for (auto cam : App->cams->GetCameras())
+				cam->DrawFrustum();
+		}
+
+		glEnd();
+
+		if (resetLight)
+			glEnable(GL_LIGHTING);
+	}
+}
+
+void ModuleEditor::DrawHeriarchy()
+{
+	RE_GameObject* to_select = nullptr;
+	const RE_GameObject* root = App->scene->GetRoot_c();
+	if (root->ChildCount() > 0)
+	{
+		// Add root children
+		std::stack<RE_GameObject*> objects;
+		std::list<RE_GameObject*> childs;
+		childs = root->GetChilds();
+		for (std::list<RE_GameObject*>::reverse_iterator it = childs.rbegin(); it != childs.rend(); it++)
+			objects.push(*it);
+
+		bool is_leaf;
+		while (!objects.empty())
+		{
+			RE_GameObject* object = objects.top();
+			objects.pop();
+			childs.clear();
+			childs = object->GetChilds();
+			is_leaf = childs.empty();
+
+			if (ImGui::TreeNodeEx(object->GetName(), ImGuiTreeNodeFlags_(selected == object ?
+				(is_leaf ? ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_Leaf :
+				ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick) :
+				(is_leaf ? ImGuiTreeNodeFlags_Leaf :
+					ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick))))
+			{
+				if (is_leaf)
+					ImGui::TreePop();
+				else
+					for (std::list<RE_GameObject*>::reverse_iterator it = childs.rbegin(); it != childs.rend(); it++)
+						objects.push(*it);
+			}
+
+			if (ImGui::IsItemClicked(0))
+				to_select = object;
+
+			if (object->IsLastChild() && object->GetParent_c() != root)
+				ImGui::TreePop();
+		}
+	}
+
+	if (to_select != nullptr)
+		SetSelected(to_select);
+}
+
+RE_GameObject * ModuleEditor::GetSelected() const
+{
+	return selected;
+}
+
+void ModuleEditor::SetSelected(RE_GameObject* go, bool force_focus)
+{
+	selected = go;
+
+	if (force_focus || (focus_on_select && selected != nullptr))
+		RE_CameraManager::CurrentCamera()->Focus(selected);
+}
+
+void ModuleEditor::DuplicateSelectedObject()
+{
+	if (selected != nullptr)
+		selected->GetParent()->AddChild(new RE_GameObject(*selected));
+
 }
 
 void ModuleEditor::LogToEditorConsole()
@@ -281,39 +508,45 @@ void ModuleEditor::UpdateCamera()
 	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
 	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
 	{
-		const MouseData* mouse = App->input->GetMouse();
+		const MouseData mouse = App->input->GetMouse();
 
-		if (mouse->GetButton(1) == KEY_DOWN)
+		if (mouse.GetButton(1) == KEY_DOWN || mouse.GetButton(1) == KEY_REPEAT)
 		{
-			// Mouse Pick
-			int width, height;
-			camera->GetTargetWidthHeight(width, height);
-
-			App->scene->RayCastSelect(
-				math::Ray(camera->GetFrustum().UnProjectLineSegment(
-				(mouse->mouse_x - (width / 2.0f)) / (width / 2.0f),
-					((height - mouse->mouse_y) - (height / 2.0f)) / (height / 2.0f))));
-		}
-		else if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse->GetButton(1) == KEY_REPEAT)
-		{
-			// Orbit
-			if (App->scene->GetSelected() != nullptr
-				&& (mouse->mouse_x_motion || mouse->mouse_y_motion))
+			if(App->input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE)
 			{
-				camera->Orbit(
-					cam_sensitivity * -mouse->mouse_x_motion,
-					cam_sensitivity * mouse->mouse_y_motion,
-					App->scene->GetSelected());
+				// Mouse Pick
+				int width, height;
+				camera->GetTargetWidthHeight(width, height);
+
+				RE_GameObject* hit = App->scene->RayCastSelect(
+					math::Ray(camera->GetFrustum().UnProjectLineSegment(
+					(mouse.mouse_x - (width / 2.0f)) / (width / 2.0f),
+						((height - mouse.mouse_y) - (height / 2.0f)) / (height / 2.0f))));
+
+				if (hit != nullptr)
+					SetSelected(hit);
+			}
+			else if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT)
+			{
+				// Orbit
+				if (selected != nullptr
+					&& (mouse.mouse_x_motion || mouse.mouse_y_motion))
+				{
+					camera->Orbit(
+						cam_sensitivity * -mouse.mouse_x_motion,
+						cam_sensitivity * mouse.mouse_y_motion,
+						*selected);
+				}
 			}
 		}
-		else if ((App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && App->scene->GetSelected() != nullptr)
+		else if ((App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && selected != nullptr)
 		{
 			// Focus
-			camera->Focus(App->scene->GetSelected());
+			camera->Focus(selected);
 		}
 		else
 		{
-			if (mouse->GetButton(3) == KEY_REPEAT)
+			if (mouse.GetButton(3) == KEY_REPEAT)
 			{
 				// Camera Speed
 				float cameraSpeed = cam_speed * App->time->GetDeltaTime();
@@ -335,17 +568,17 @@ void ModuleEditor::UpdateCamera()
 					camera->LocalMove(Dir::DOWN, cameraSpeed);
 
 				// Rotate
-				if (mouse->mouse_x_motion != 0 || mouse->mouse_y_motion != 0)
+				if (mouse.mouse_x_motion != 0 || mouse.mouse_y_motion != 0)
 				{
 					camera->LocalRotate(
-						cam_sensitivity * -mouse->mouse_x_motion,
-						cam_sensitivity * mouse->mouse_y_motion);
+						cam_sensitivity * -mouse.mouse_x_motion,
+						cam_sensitivity * mouse.mouse_y_motion);
 				}
 			}
 
 			// Zoom
-			if (mouse->mouse_wheel_motion != 0)
-				camera->SetFOV(camera->GetVFOVDegrees() - mouse->mouse_wheel_motion);
+			if (mouse.mouse_wheel_motion != 0)
+				camera->SetFOV(camera->GetVFOVDegrees() - mouse.mouse_wheel_motion);
 		}
 	}
 
