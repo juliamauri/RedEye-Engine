@@ -26,6 +26,7 @@ public:
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
 
 	math::AABB GetAABB() const;
+	bool CheckFaceCollision(const math::Ray &ray, float &distance) const;
 
 protected:
 

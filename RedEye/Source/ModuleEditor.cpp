@@ -284,10 +284,13 @@ void ModuleEditor::UpdateCamera()
 		if (mouse->GetButton(1) == KEY_DOWN)
 		{
 			// Mouse Pick
+			int width, height;
+			camera->GetTargetWidthHeight(width, height);
+
 			App->scene->RayCastSelect(
 				math::Ray(camera->GetFrustum().UnProjectLineSegment(
-				(2.f * mouse->mouse_x) / App->window->GetWidth() - 1.f,
-					1.f - (2.f * mouse->mouse_y) / App->window->GetHeight())));
+				(mouse->mouse_x - (width / 2.0f)) / (width / 2.0f),
+					((height - mouse->mouse_y) - (height / 2.0f)) / (height / 2.0f))));
 		}
 		else if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse->GetButton(1) == KEY_REPEAT)
 		{

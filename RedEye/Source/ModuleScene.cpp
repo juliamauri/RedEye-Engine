@@ -338,25 +338,51 @@ RE_GameObject * ModuleScene::GetSelected() const
 void ModuleScene::RayCastSelect(math::Ray & ray)
 {
 	std::vector<RE_GameObject*> objects;
-	//quad_tree.CollectIntersections(objects, ray);
+
+	quad_tree.CollectIntersections(objects, ray);
+
 	if (!objects.empty())
 	{
-		float closest_distance = -1.f;
-		RE_GameObject* new_selection = nullptr;
-		math::float4 camera_pos = math::float4(RE_CameraManager::CurrentCamera()->GetTransform()->GetGlobalPosition(), 0.f);
+		// Check Ray-AABB
+		float res_distance;
+		float res_distance2;
+		std::vector<RE_CompMesh*> meshes;
+		const math::float3 camera_pos = RE_CameraManager::CurrentCamera()->GetTransform()->GetGlobalPosition();
 
 		for (auto object : objects)
 		{
 			RE_CompMesh* comp_mesh = object->GetMesh();
 			if (comp_mesh != nullptr)
 			{
-				/*math::vec pos =	comp_mesh->GetClosestTriangleIntersectPos(ray, App->editor->GetCamera());
-				float res_distance = math::Distance3(math::float4(pos, 0.f), camera_pos);
-				if (closest_distance < 0.f || closest_distance > res_distance)
+				res_distance = 0.0f;
+				res_distance2 = FLOAT_INF;
+				if (object->GetGlobalBoundingBox().IntersectLineAABB_CPP(camera_pos, ray.dir, res_distance, res_distance2))
+					meshes.push_back(comp_mesh);
+			}
+		}
+
+		// Check Ray-Triangle
+		RE_GameObject* new_selection = nullptr;
+		if (!meshes.empty())
+		{
+			bool collision = false;
+			float closest_distance = -1.f;
+			for (auto mesh : meshes)
+			{
+				res_distance = 0.0f;
+				if (mesh->CheckFaceCollision(ray, res_distance)
+					&& (!collision || closest_distance > res_distance))
 				{
-					new_selection = object;
+					new_selection = mesh->GetGO();
 					closest_distance = res_distance;
-				}*/
+					collision = true;
+				}
+			}
+
+			if (new_selection != nullptr)
+			{
+				SetSelected(new_selection);
+				LOG("Raycast Hit %s, (%f)", new_selection->GetName(), closest_distance);
 			}
 		}
 	}
