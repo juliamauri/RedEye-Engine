@@ -7,12 +7,18 @@
 
 #include "ImGui/imgui.h"
 
+#define MD5SIZE 32
+
 ResourceContainer::ResourceContainer()
 {
+	md5 = new char[MD5SIZE + 1];
+	md5[MD5SIZE] = '\0';
 }
 
 ResourceContainer::ResourceContainer(const char * _metaPath)
 {
+	md5 = new char[MD5SIZE + 1];
+	md5[MD5SIZE] = '\0';
 	metaPath = _metaPath;
 	LoadMeta();
 }
@@ -92,19 +98,8 @@ void ResourceContainer::SetType(Resource_Type type)
 
 void ResourceContainer::SetMD5(const char * _md5)
 {
-	if (md5)
-	{
-		DEL_A(md5);
-		md5 = nullptr;
-	}
 	if (_md5)
-	{
-		std::string str(_md5);
-		char* writtable = new char[str.size() + 1];
-		std::copy(str.begin(), str.end(), writtable);
-		writtable[str.size()] = '\0';
-		md5 = writtable;
-	}
+		memcpy(md5, _md5, sizeof(char) * MD5SIZE);
 }
 
 void ResourceContainer::SetLibraryPath(const char * path)

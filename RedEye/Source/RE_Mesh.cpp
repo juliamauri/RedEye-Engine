@@ -567,7 +567,7 @@ void RE_Mesh::SetVerticesAndIndex(float* v, unsigned int* i, unsigned int triang
 	vertex = v; index = i; triangle_count = triangleCount; texturecoords = tC; normals = n; tangents = t; bitangents = bT;
 }
 
-bool RE_Mesh::CheckFaceCollision(const math::Ray& ray, float& distance) const
+bool RE_Mesh::CheckFaceCollision(const math::Ray& local_ray, float& distance) const
 {
 	bool ret = false;
 	float res_dist;
@@ -579,7 +579,7 @@ bool RE_Mesh::CheckFaceCollision(const math::Ray& ray, float& distance) const
 		face.b = math::vec(&vertex[index[(3 * i) + 1]]);
 		face.c = math::vec(&vertex[index[(3 * i) + 2]]);
 
-		if (face.Intersects(ray, &res_dist) && (!ret || distance > res_dist))
+		if (face.Intersects(local_ray, &res_dist) && (!ret || distance > res_dist))
 		{
 			distance = res_dist;
 			ret = true;

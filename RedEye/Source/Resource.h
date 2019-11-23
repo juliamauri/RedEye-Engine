@@ -65,7 +65,7 @@ private:
 	std::string assetPath;
 	std::string libraryPath;
 	std::string metaPath;
-	const char* md5 = nullptr;
+	char* md5 = nullptr;
 	Resource_Type type;
 
 
