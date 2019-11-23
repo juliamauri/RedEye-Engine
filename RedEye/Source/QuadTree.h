@@ -5,41 +5,6 @@
 #include "MathGeoLib\include\Geometry\AABB.h"
 #include <list>
 
-class QTreeNode
-{
-public:
-	QTreeNode();
-	QTreeNode(const AABB& box, QTreeNode* parent = nullptr);
-	~QTreeNode();
-
-	void Push(const RE_GameObject* g_obj);
-	void Pop(const RE_GameObject* g_obj);
-	void Clear();
-
-	void Draw(const int* edges, int count) const;
-
-	void SetBox(const AABB& bounding_box);
-	const AABB& GetBox() const;
-	QTreeNode* GetNode(uint index) const;
-
-	template<typename TYPE>
-	inline void CollectIntersections(std::vector<const RE_GameObject*>& objects, const TYPE & primitive) const;
-
-private:
-
-	void AddNodes();
-	void Distribute();
-
-private:
-
-	QTreeNode* nodes[4];
-	QTreeNode* parent = nullptr;
-
-	std::list<const RE_GameObject*> g_objs;
-	bool is_leaf = true;
-	AABB box;
-};
-
 class QTree
 {
 public:
@@ -65,7 +30,39 @@ private:
 
 private:
 
-	QTreeNode root;
+	class QTreeNode
+	{
+	public:
+		QTreeNode();
+		QTreeNode(const AABB& box, QTreeNode* parent = nullptr);
+		~QTreeNode();
+
+		void Push(const RE_GameObject* g_obj);
+		void Pop(const RE_GameObject* g_obj);
+		void Clear();
+
+		void Draw(const int* edges, int count) const;
+
+		void SetBox(const AABB& bounding_box);
+		const AABB& GetBox() const;
+
+		template<typename TYPE>
+		inline void CollectIntersections(std::vector<const RE_GameObject*>& objects, const TYPE & primitive) const;
+
+	private:
+
+		void AddNodes();
+		void Distribute();
+
+	private:
+
+		QTreeNode* nodes[4];
+		QTreeNode* parent = nullptr;
+
+		std::list<const RE_GameObject*> g_objs;
+		bool is_leaf = true;
+		AABB box;
+	} root;
 
 	enum DrawMode : short
 	{
@@ -81,7 +78,7 @@ private:
 };
 
 template<typename TYPE>
-inline void QTreeNode::CollectIntersections(std::vector<const RE_GameObject*>& objects, const TYPE & primitive) const
+inline void QTree::QTreeNode::CollectIntersections(std::vector<const RE_GameObject*>& objects, const TYPE & primitive) const
 {
 	if (primitive.Intersects(box))
 	{

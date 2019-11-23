@@ -10,7 +10,7 @@
 #include "Glew\include\glew.h"
 #include <stack>
 
-QTreeNode::QTreeNode()
+QTree::QTreeNode::QTreeNode()
 {
 	box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 
@@ -18,30 +18,27 @@ QTreeNode::QTreeNode()
 		nodes[i] = nullptr;
 }
 
-QTreeNode::QTreeNode(const AABB& box, QTreeNode* parent) :
+QTree::QTreeNode::QTreeNode(const AABB& box, QTreeNode* parent) :
 	box(box), parent(parent)
 {
 	for (int i = 0; i < 4; i++)
 		nodes[i] = nullptr;
 }
 
-QTreeNode::~QTreeNode()
+QTree::QTreeNode::~QTreeNode()
 {
 	Clear();
 }
 
-void QTreeNode::Push(const RE_GameObject* g_obj)
+void QTree::QTreeNode::Push(const RE_GameObject* g_obj)
 {
 	if (is_leaf)
 	{
-		if (g_objs.size() < 4)
-		{
-			g_objs.push_back(g_obj);
-		}
-		else
+		g_objs.push_back(g_obj);
+
+		if (g_objs.size() >= 4)
 		{
 			AddNodes();
-			g_objs.push_back(g_obj);
 			Distribute();
 		}
 	}
@@ -53,7 +50,7 @@ void QTreeNode::Push(const RE_GameObject* g_obj)
 	}
 }
 
-void QTreeNode::Pop(const RE_GameObject* g_obj)
+void QTree::QTreeNode::Pop(const RE_GameObject* g_obj)
 {
 	std::list<const RE_GameObject*>::iterator it = std::find(g_objs.begin(), g_objs.end(), g_obj);
 	if (it != g_objs.end())
@@ -64,7 +61,7 @@ void QTreeNode::Pop(const RE_GameObject* g_obj)
 			nodes[i]->Pop(g_obj);
 }
 
-void QTreeNode::Clear()
+void QTree::QTreeNode::Clear()
 {
 	for (int i = 0; i < 4; i++)
 		DEL(nodes[i]);
@@ -73,7 +70,7 @@ void QTreeNode::Clear()
 	is_leaf = true;
 }
 
-void QTreeNode::Draw(const int* edges, int count) const
+void QTree::QTreeNode::Draw(const int* edges, int count) const
 {
 	for (int i = 0; i < count; i++)
 	{
@@ -92,22 +89,17 @@ void QTreeNode::Draw(const int* edges, int count) const
 			nodes[i]->Draw(edges, count);
 }
 
-void QTreeNode::SetBox(const AABB & bounding_box)
+void QTree::QTreeNode::SetBox(const AABB & bounding_box)
 {
 	box = bounding_box;
 }
 
-const AABB& QTreeNode::GetBox() const
+const AABB& QTree::QTreeNode::GetBox() const
 {
 	return box;
 }
 
-QTreeNode * QTreeNode::GetNode(uint index) const
-{
-	return nodes[index];
-}
-
-void QTreeNode::AddNodes()
+void QTree::QTreeNode::AddNodes()
 {
 	AABB target_box;
 	float3 center(box.CenterPoint());
@@ -129,7 +121,7 @@ void QTreeNode::AddNodes()
 	is_leaf = false;
 }
 
-void QTreeNode::Distribute()
+void QTree::QTreeNode::Distribute()
 {
 	std::list<const RE_GameObject*>::iterator it = g_objs.begin();
 	
