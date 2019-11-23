@@ -29,7 +29,7 @@ void RE_Prefab::LoadInMemory()
 		LibrarySave();
 	}
 	else {
-		LOG_ERROR("SkyBox %s not found on project", GetName());
+		LOG_ERROR("Prefab %s not found on project", GetName());
 	}
 }
 

@@ -1,8 +1,8 @@
 #ifndef __RE_PREFAB_H__
 #define __RE_PREFAB_H__
 
-class RE_GameObject;
 #include "Resource.h"
+class RE_GameObject;
 
 // .refab
 class RE_Prefab : public ResourceContainer
