@@ -8,11 +8,21 @@
 #include "ShaderManager.h"
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
+#include <stack>
 
-QTreeNode::QTreeNode(const AABB& box, QTreeNode* parent) : 
+QTreeNode::QTreeNode()
+{
+	box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+
+	for (int i = 0; i < 4; i++)
+		nodes[i] = nullptr;
+}
+
+QTreeNode::QTreeNode(const AABB& box, QTreeNode* parent) :
 	box(box), parent(parent)
 {
-	for (auto node : nodes) node = nullptr;
+	for (int i = 0; i < 4; i++)
+		nodes[i] = nullptr;
 }
 
 QTreeNode::~QTreeNode()
@@ -20,9 +30,9 @@ QTreeNode::~QTreeNode()
 	Clear();
 }
 
-void QTreeNode::Push(RE_GameObject* g_obj)
+void QTreeNode::Push(const RE_GameObject* g_obj)
 {
-	if (IsLeaf())
+	if (is_leaf)
 	{
 		if (g_objs.size() < 4)
 		{
@@ -37,53 +47,54 @@ void QTreeNode::Push(RE_GameObject* g_obj)
 	}
 	else
 	{
-		for (auto node : nodes)
-		{
-			if (node->box.Intersects(g_obj->GetGlobalBoundingBox()))
-				node->Push(g_obj);
-		}
+		for (int i = 0; i < 4; i++)
+			if (nodes[i]->box.Intersects(g_obj->GetGlobalBoundingBox()))
+				nodes[i]->Push(g_obj);
 	}
 }
 
-void QTreeNode::Pop(RE_GameObject* g_obj)
+void QTreeNode::Pop(const RE_GameObject* g_obj)
 {
-	std::list<RE_GameObject*>::iterator it = std::find(g_objs.begin(), g_objs.end(), g_obj);
+	std::list<const RE_GameObject*>::iterator it = std::find(g_objs.begin(), g_objs.end(), g_obj);
 	if (it != g_objs.end())
 		g_objs.erase(it);
 
-	if (nodes[0] != nullptr)
-		for (auto node : nodes)
-			node->Pop(g_obj);
+	if (!is_leaf)
+		for (int i = 0; i < 4; i++)
+			nodes[i]->Pop(g_obj);
 }
 
 void QTreeNode::Clear()
 {
-	if (nodes[0] != nullptr)
-	{
-		for (auto node : nodes)
-			DEL(node);
-	}
+	for (int i = 0; i < 4; i++)
+		DEL(nodes[i]);
 
 	g_objs.clear();
+	is_leaf = true;
 }
 
-void QTreeNode::Draw() const
+void QTreeNode::Draw(const int* edges, int count) const
 {
-	for (uint i = 0; i < 12; i++)
+	for (int i = 0; i < count; i++)
 	{
 		glVertex3f(
-			box.Edge(i).a.x,
-			box.Edge(i).a.y,
-			box.Edge(i).a.z);
+			box.Edge(edges[i]).a.x,
+			box.Edge(edges[i]).a.y,
+			box.Edge(edges[i]).a.z);
 		glVertex3f(
-			box.Edge(i).b.x,
-			box.Edge(i).b.y,
-			box.Edge(i).b.z);
+			box.Edge(edges[i]).b.x,
+			box.Edge(edges[i]).b.y,
+			box.Edge(edges[i]).b.z);
 	}
 
-	if (nodes[0] != nullptr)
-		for (auto node : nodes)
-			node->Draw();
+	if (!is_leaf)
+		for (int i = 0; i < 4; i++)
+			nodes[i]->Draw(edges, count);
+}
+
+void QTreeNode::SetBox(const AABB & bounding_box)
+{
+	box = bounding_box;
 }
 
 const AABB& QTreeNode::GetBox() const
@@ -91,9 +102,9 @@ const AABB& QTreeNode::GetBox() const
 	return box;
 }
 
-bool QTreeNode::IsLeaf() const
+QTreeNode * QTreeNode::GetNode(uint index) const
 {
-	return (nodes[0] == nullptr);
+	return nodes[index];
 }
 
 void QTreeNode::AddNodes()
@@ -114,11 +125,13 @@ void QTreeNode::AddNodes()
 
 		nodes[i] = new QTreeNode(target_box, this);
 	}
+
+	is_leaf = false;
 }
 
 void QTreeNode::Distribute()
 {
-	std::list<RE_GameObject*>::iterator it = g_objs.begin();
+	std::list<const RE_GameObject*>::iterator it = g_objs.begin();
 	
 	while (it != g_objs.end())
 	{
@@ -150,89 +163,108 @@ void QTreeNode::Distribute()
 }
 
 QTree::QTree()
-{}
-
-QTree::~QTree()
 {
-	DEL(root);
+	SetDrawMode(ALL);
+	SetDrawMode(BOTTOM);
 }
 
-void QTree::Build(RE_GameObject * root_g_obj)
+QTree::~QTree()
+{}
+
+void QTree::Build(const RE_GameObject * root_g_obj)
 {
 	assert(root_g_obj != nullptr);
 
-	if (root != nullptr) DEL(root);
+	root.Clear();
 
-	box = root_g_obj->GetGlobalBoundingBox();
-	//box.Scale(box.CenterPoint(), 1000.f);
-
-	root = new QTreeNode(box);
-
-	RecursiveBuildFromRoot(root_g_obj);
+	PushWithChilds(root_g_obj);
 }
 
 void QTree::Draw() const
 {
-	if (root != nullptr)
-		root->Draw();
+	root.Draw(edges, count);
 }
 
-void QTree::Push(RE_GameObject * g_obj)
+void QTree::SetDrawMode(short mode)
 {
-	assert(g_obj != nullptr);
-
-	if (root != nullptr)
+	switch (draw_mode = DrawMode(mode))
 	{
-		if (g_obj->GetGlobalBoundingBox().IsFinite())
-		{
-			if (g_obj->GetGlobalBoundingBox().Intersects(root->GetBox()))
-			{
-				root->Push(g_obj);
-			}
-			else
-			{
-				//LOG("GameObject %s could not be added to QuadTree: Invalid AABB - no intersection with root AABB", g_obj->GetName());
-			}
-		}
-		else
-		{
-			//LOG("GameObject %s could not be added to QuadTree: Invalid AABB - infinite", g_obj->GetName());
-		}
+	case QTree::DISABLED:
+		count = 0;
+	case QTree::TOP:
+		count = 4;
+		edges[0] = 5;
+		edges[1] = 6;
+		edges[2] = 7;
+		edges[3] = 11;
+		break;
+	case QTree::BOTTOM:
+		count = 4;
+		edges[0] = 0;
+		edges[1] = 2;
+		edges[2] = 4;
+		edges[3] = 8;
+		break;
+	case QTree::TOP_BOTTOM:
+		count = 8;
+		edges[0] = 0;
+		edges[1] = 2;
+		edges[2] = 4;
+		edges[3] = 8;
+		edges[4] = 0;
+		edges[5] = 2;
+		edges[6] = 4;
+		edges[7] = 8;
+		break;
+	case QTree::ALL:
+		count = 12;
+		for (int i = 0; i < 12; i++)
+			edges[i] = i;
+		break;
 	}
 }
 
-void QTree::Pop(RE_GameObject * g_obj)
+short QTree::GetDrawMode() const
 {
-	assert(g_obj != nullptr);
+	return draw_mode;
+}
 
-	root->Pop(g_obj);
+void QTree::Push(const RE_GameObject * g_obj)
+{
+	if (g_obj->GetGlobalBoundingBox().Intersects(root.GetBox()))
+		root.Push(g_obj);
+}
+
+void QTree::Pop(const RE_GameObject * g_obj)
+{
+	root.Pop(g_obj);
 }
 
 void QTree::Clear()
 {
-	if (root != nullptr)
-	{
-		root->Clear();
-		DEL(root);
-	}
+	root.Clear();
 }
 
-void QTree::RecursiveBuildFromRoot(RE_GameObject * g_obj)
+void QTree::PushWithChilds(const RE_GameObject * g_obj)
 {
-	std::list<RE_GameObject*> childs = g_obj->GetChilds();
-	std::list<RE_GameObject*>::iterator it = childs.begin();
+	root.SetBox(g_obj->GetGlobalBoundingBox());
 
-	while (it != childs.end())
+	std::stack<const RE_GameObject*> objects;
+
+	for (auto child : g_obj->GetChilds())
+		objects.push(child);
+
+	while (!objects.empty())
 	{
-		if ((*it)->IsActive())
+		const RE_GameObject* obj = objects.top();
+		objects.pop();
+
+		if (obj->IsActiveStatic())
 		{
-			if ((*it)->IsStatic())
-				Push(*it);
+			root.Push(obj);
 
-			if ((*it)->ChildCount() > 0)
-				RecursiveBuildFromRoot(*it);
+			for (auto child : obj->GetChilds())
+				objects.push(child);
 		}
-
-		it++;
 	}
 }
