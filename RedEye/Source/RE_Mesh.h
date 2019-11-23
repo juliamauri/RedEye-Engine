@@ -26,6 +26,8 @@ public:
 
 	void SetVerticesAndIndex(float* vertex, unsigned int* index = nullptr, unsigned int triangleCount = 0, float* textureCoords = nullptr, float* normals = nullptr, float* tangents = nullptr, float* bitangents = nullptr);
 
+	bool CheckFaceCollision(const math::Ray& ray, float& distance) const;
+
 public:
 	bool lVertexNormals = false, lFaceNormals = false;
 

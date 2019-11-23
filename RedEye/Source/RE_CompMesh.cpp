@@ -136,26 +136,8 @@ math::AABB RE_CompMesh::GetAABB() const
 
 bool RE_CompMesh::CheckFaceCollision(const math::Ray &ray, float & distance) const
 {
-	bool ret = false;
-	float res_dist;
-	math::Triangle face;
-
 	math::Ray local_ray = ray;
 	local_ray.Transform(go->GetTransform()->GetMatrixModel().Transposed().Inverted());
-
-	for (int i = 0; i < ptr->triangle_count; i++)
-	{
-		face.a = ptr->vertices[ptr->indices[(3 * i)]].Position;
-		face.b = ptr->vertices[ptr->indices[(3 * i) + 1]].Position;
-		face.c = ptr->vertices[ptr->indices[(3 * i) + 2]].Position;
-
-		if (face.Intersects(local_ray, &res_dist) && (!ret || distance > res_dist))
-		{
-			distance = res_dist;
-			ret = true;
-		}
-	}
-
-	return ret;
+	return ((RE_Mesh*)App->resources->At(meshMD5))->CheckFaceCollision(local_ray, distance);
 }
 
