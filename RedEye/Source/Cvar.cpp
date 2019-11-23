@@ -2,7 +2,7 @@
 
 Cvar::Cvar() : type(UNDEFINED) { value.int_v = 0; }
 
-Cvar::Cvar(Cvar & copy) : type(copy.type)
+Cvar::Cvar(const Cvar & copy) : type(copy.type)
 {
 	switch (copy.type)
 	{
@@ -139,24 +139,24 @@ bool Cvar::SetValue(const char * char_p_v, bool force_type)
 
 Cvar::VAR_TYPE Cvar::GetType() const { return type; }
 
-bool Cvar::ReadAsBool() const { return value.bool_v; }
+bool Cvar::AsBool() const { return value.bool_v; }
 
-int Cvar::ReadAsInt() const { return value.int_v; }
+int Cvar::AsInt() const { return value.int_v; }
 
-unsigned int Cvar::ReadAsUInt() const { return value.uint_v; }
+unsigned int Cvar::AsUInt() const { return value.uint_v; }
 
-long long int Cvar::ReadAsInt64() const { return value.int64_v; }
+long long int Cvar::AsInt64() const { return value.int64_v; }
 
-unsigned long long int Cvar::ReadAsUInt64() const { return value.uint64_v; }
+unsigned long long int Cvar::AsUInt64() const { return value.uint64_v; }
 
-double Cvar::ReadAsDouble() const { return value.double_v; }
+double Cvar::AsDouble() const { return value.double_v; }
 
-float Cvar::ReadAsFloat() const { return value.float_v; }
+float Cvar::AsFloat() const { return value.float_v; }
 
-const char * Cvar::ReadAsCharP() const { return value.char_p_v; }
+const char * Cvar::AsCharP() const { return value.char_p_v; }
 
 // --- DoubleCvar ------------------------------------------------------------------------------
-
+/*
 DoubleCvar::DoubleCvar(bool bool_v) : Cvar(bool_v) { original_value.bool_v = bool_v; }
 
 DoubleCvar::DoubleCvar(int int_v) : Cvar(int_v) { original_value.int_v = int_v; }
@@ -319,3 +319,4 @@ bool DoubleCvar::SetValue(const char * char_p_v, bool force_type)
 
 	return ret;
 }
+*/

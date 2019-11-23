@@ -5,7 +5,7 @@ class Cvar // Global Value Container
 {
 public:
 	Cvar();
-	Cvar(Cvar& copy);
+	Cvar(const Cvar& copy);
 	Cvar(bool bool_v);
 	Cvar(int int_v);
 	Cvar(unsigned int uint_v);
@@ -52,17 +52,17 @@ public:
 	virtual bool SetValue(const char* char_p_v, bool force_type = false);
 
 	VAR_TYPE				GetType() const;
-	bool					ReadAsBool() const;
-	int						ReadAsInt() const;
-	unsigned int			ReadAsUInt() const;
-	long long int			ReadAsInt64() const;
-	unsigned long long int	ReadAsUInt64() const;
-	double					ReadAsDouble() const;
-	float					ReadAsFloat() const;
-	const char*				ReadAsCharP() const;
+	bool					AsBool() const;
+	int						AsInt() const;
+	unsigned int			AsUInt() const;
+	long long int			AsInt64() const;
+	unsigned long long int	AsUInt64() const;
+	double					AsDouble() const;
+	float					AsFloat() const;
+	const char*				AsCharP() const;
 };
 
-class DoubleCvar : public Cvar
+/*class DoubleCvar : public Cvar
 {
 public:
 	DoubleCvar(bool bool_v);
@@ -88,6 +88,6 @@ public:
 private:
 	VAR_data original_value;
 };
-
+*/
 
 #endif // !__CVAR__
