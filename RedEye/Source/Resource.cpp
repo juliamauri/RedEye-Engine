@@ -157,7 +157,7 @@ void ResourceContainer::LoadMeta()
 		name = metaNode->PullString("Name", "unkown");
 		libraryPath = metaNode->PullString("AssetPath", "Assets/");
 		assetPath = metaNode->PullString("LibraryPath", "Library/");
-		md5 = metaNode->PullString("MD5", "no MD5");
+		SetMD5(metaNode->PullString("MD5", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		type = (Resource_Type)metaNode->PullInt("Type", Resource_Type::R_UNDEFINED);
 
 		LoadResourceMeta(metaNode);
