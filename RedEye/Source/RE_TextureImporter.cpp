@@ -1,7 +1,7 @@
 #include "RE_TextureImporter.h"
 
 #include "Application.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 #include "FileSystem.h"
 
 #include "RE_SkyBox.h"

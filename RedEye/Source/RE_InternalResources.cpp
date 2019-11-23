@@ -3,7 +3,7 @@
 #include "Application.h"
 
 #include "FileSystem.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 
 #include "RE_ShaderImporter.h"
 #include "RE_TextureImporter.h"

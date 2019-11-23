@@ -10,7 +10,7 @@
 #include "RE_Math.h"
 #include "FileSystem.h"
 #include "RE_PrimitiveManager.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 
 #include "RE_CameraManager.h"
 #include "RE_ShaderImporter.h"
@@ -51,7 +51,7 @@ Application::Application()
 	shaders = new RE_ShaderImporter("Assets/Shaders/");
 	primitives = new RE_PrimitiveManager();
 	modelImporter = new RE_ModelImporter("Assets/Meshes/");
-	resources = new ResourceManager();
+	resources = new RE_ResourceManager();
 	internalResources = new RE_InternalResources();
 	handlerrors = new RE_HandleErrors();
 }

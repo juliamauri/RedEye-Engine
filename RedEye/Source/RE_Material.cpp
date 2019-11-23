@@ -3,7 +3,7 @@
 #include "Application.h"
 #include "FileSystem.h"
 #include "OutputLog.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 
 #include "ModuleEditor.h"
 #include "EditorWindows.h"

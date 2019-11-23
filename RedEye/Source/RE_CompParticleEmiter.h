@@ -40,7 +40,7 @@ public:
 
 	RE_Mesh* GetMesh() const;
 
-	void Serialize(JSONNode* node, rapidjson::Value* val) override;
+	//void Serialize(JSONNode* node, rapidjson::Value* val) override;
 
 	void SetUp(RE_Mesh* paticle, unsigned int shader);
 

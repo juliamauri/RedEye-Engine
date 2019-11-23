@@ -8,7 +8,7 @@
 
 #include "RE_InternalResources.h"
 #include "RE_PrimitiveManager.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 #include "RE_TextureImporter.h"
 #include "RE_ShaderImporter.h"
 #include "ModuleRenderer3D.h"

@@ -7,7 +7,7 @@
 #include "EditorWindows.h"
 #include "FileSystem.h"
 #include "RE_PrimitiveManager.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 #include "RE_CameraManager.h"
 #include "RE_ShaderImporter.h"
 #include "RE_ModelImporter.h"

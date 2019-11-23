@@ -11,7 +11,7 @@
 #include "RE_CompTransform.h"
 #include "RE_CompMesh.h"
 #include "RE_Mesh.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 #include "RE_ModelImporter.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_CompPrimitive.h"

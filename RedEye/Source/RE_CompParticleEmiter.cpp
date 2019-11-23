@@ -1,7 +1,7 @@
 #include "RE_CompParticleEmiter.h"
 
 #include "Application.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 #include "TimeManager.h"
 #include "RE_Mesh.h"
 #include "RE_TextureImporter.h"
@@ -139,7 +139,7 @@ void RE_CompParticleEmitter::DrawProperties()
 		if (mParticle)
 		{
 			ImGui::Text("Particle Texture");
-			((Texture2D*)App->resources->At(mParticle->materialMD5))->DrawTextureImGui();
+			//((RE_Texture*)App->resources->At(mParticle->ma))->DrawTextureImGui();
 		}
 	}
 }
@@ -159,9 +159,9 @@ RE_Mesh * RE_CompParticleEmitter::GetMesh() const
 	return mParticle;
 }
 
-void RE_CompParticleEmitter::Serialize(JSONNode * node, rapidjson::Value * val)
-{
-}
+//void RE_CompParticleEmitter::Serialize(JSONNode * node, rapidjson::Value * val)
+//{
+//}
 
 void RE_CompParticleEmitter::SetUp(RE_Mesh * particle, unsigned int shader)
 {

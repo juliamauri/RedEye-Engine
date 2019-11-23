@@ -6,7 +6,7 @@
 
 #include "FileSystem.h"
 #include "RE_InternalResources.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 
 #include "RE_ShaderImporter.h"
 #include "RE_TextureImporter.h"

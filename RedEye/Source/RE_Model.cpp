@@ -2,7 +2,7 @@
 
 #include "Application.h"
 #include "FileSystem.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 
 #include "RE_ResouceAndGOImporter.h"
 #include "RE_ModelImporter.h"

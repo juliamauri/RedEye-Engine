@@ -73,9 +73,6 @@
     <ClCompile Include="RE_PrimitiveManager.cpp">
       <Filter>Modules\Resource Managers</Filter>
     </ClCompile>
-    <ClCompile Include="ResourceManager.cpp">
-      <Filter>Modules\Resource Managers</Filter>
-    </ClCompile>
     <ClCompile Include="QuadTree.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
@@ -156,6 +153,9 @@
     </ClCompile>
     <ClCompile Include="RE_Model.cpp">
       <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ResourceManager.cpp">
+      <Filter>Modules\Resource Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -372,9 +372,6 @@
     <ClInclude Include="RE_PrimitiveManager.h">
       <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceManager.h">
-      <Filter>Modules\Resource Managers</Filter>
-    </ClInclude>
     <ClInclude Include="QuadTree.h">
       <Filter>Containers</Filter>
     </ClInclude>
@@ -470,6 +467,9 @@
     </ClInclude>
     <ClInclude Include="RE_Model.h">
       <Filter>Modules\Resource Managers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ResourceManager.h">
+      <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

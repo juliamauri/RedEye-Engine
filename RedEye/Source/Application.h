@@ -25,7 +25,7 @@ class RE_TextureImporter;
 class RE_ShaderImporter;
 class RE_PrimitiveManager;
 class RE_ModelImporter;
-class ResourceManager;
+class RE_ResourceManager;
 class RE_HandleErrors;
 class RE_InternalResources;
 
@@ -86,7 +86,7 @@ public:
 	RE_PrimitiveManager* primitives = nullptr;
 	RE_ModelImporter* modelImporter = nullptr;
 
-	ResourceManager* resources = nullptr;
+	RE_ResourceManager* resources = nullptr;
 	RE_InternalResources* internalResources = nullptr;
 
 	RE_HandleErrors* handlerrors = nullptr;

@@ -9,13 +9,14 @@
 #include "RE_CompCamera.h"
 #include "RE_Math.h"
 #include "OutputLog.h"
-#include "ResourceManager.h"
+#include "RE_ResourceManager.h"
 #include "RE_HandleErrors.h"
 #include "RE_TextureImporter.h"
 #include "RE_InternalResources.h"
 #include "RE_CameraManager.h"
 
 #include "RE_Prefab.h"
+#include "RE_Texture.h"
 
 #include "PhysFS\include\physfs.h"
 
@@ -397,7 +398,7 @@ void TexturesWindow::Draw(bool secondary)
 
 				if (ImGui::TreeNode((*it)->GetName()))
 				{
-					Texture2D* texture = (Texture2D*)(*it);
+					RE_Texture* texture = (RE_Texture*)(*it);
 					int widht, height;
 					texture->GetWithHeight(&widht, &height);
 					ImGui::Text("GL ID: %u", texture->GetID());
@@ -597,7 +598,12 @@ void PrefabsPanel::Draw(bool secondary)
 		{
 			if (App->scene->GetSelected() != nullptr)
 			{
-				App->resources->Reference(new RE_Prefab(App->scene->GetSelected()));
+				RE_Prefab* newPrefab = new RE_Prefab();
+				RE_GameObject* selected = App->scene->GetSelected();
+				newPrefab->SetName(selected->GetName());
+				newPrefab->Save(selected);
+				newPrefab->SaveMeta();
+				App->resources->Reference(newPrefab);
 				prefabs = App->resources->GetResourcesByType(Resource_Type::R_PREFAB);
 			}
 		}
