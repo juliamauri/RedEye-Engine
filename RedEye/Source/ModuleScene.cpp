@@ -205,6 +205,8 @@ void ModuleScene::DrawEditor()
 		if (static_gos_modified && ImGui::Button("Reset AABB and Quadtree"))
 			UpdateQuadTree();
 
+		ImGui::Checkbox("Automatic Quadtree Update", &update_qt);
+
 		int quadtree_drawing = quad_tree.GetDrawMode();
 		if (ImGui::Combo("QuadTree Drawing", &quadtree_drawing, "Disable draw\0Top\0Bottom\0Top and Bottom\0All\0"))
 			quad_tree.SetDrawMode(quadtree_drawing);

@@ -257,13 +257,15 @@ void ModuleEditor::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
 	{
-		ImGui::Checkbox("Select on mouse click", &select_on_mc);
-		ImGui::Checkbox("Focus on Select", &focus_on_select);
-
 		ImGui::DragFloat("Camera speed", &cam_speed, 0.1f, 0.1f, 100.0f, "%.1f");
 		ImGui::DragFloat("Camera sensitivity", &cam_sensitivity, 0.01f, 0.01f, 1.0f, "%.2f");
 
 		RE_CameraManager::EditorCamera()->DrawAsEditorProperties();
+
+		ImGui::Separator();
+		ImGui::Checkbox("Select on mouse click", &select_on_mc);
+		ImGui::Checkbox("Focus on Select", &focus_on_select);
+		ImGui::Separator();
 
 		// Debug Drawing
 		ImGui::Checkbox("Debug Draw", &debug_drawing);
