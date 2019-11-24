@@ -39,7 +39,6 @@ Using the events system, scene can control where all root gameobjects are. If an
 Default skybox loads on start. Using glDepthFunc(GL_LEQUAL) instead of glDepthFunc(GL_LESS) and rendered last, the skybox always draws the furthest away. For passing the 6 different textures,GL_TEXTURE_CUBE_MAP binds on draw call.
 ### Console & Error Handler
 Engine logs all startup and importing procedures and can be accessed through the console window. This window contains a menu to filter logs shown by category and by file. Upon having to log an error report, a Pop Up appears showing the error description and the solution opted for. Additional logs and warnings about this procedure can be seen inside the same Pop Up.
-
 ### Bounding Boxes
 Game Objects have local and global bounding boxes and are updated when applying transformations. Parent Game Objects enclose their child's bounding boxes but don't reset on applying transformations to a child. This step is manual and a Button for reseting them will appear in the scene's Configuration Window. Reset is automatically applied on importing new geometry to scene.
 
@@ -71,6 +70,7 @@ Importing .fbx files may trigger errors while checking the materials' texture pa
 ### Create
 * **Cube**: creates a Game Object with a Cube Primitive component using par_shapes.
 * **Sphere**: creates a Game Object with a Sphere Primitive component using par_shapes.
+* **Camera**: creates a Game Object with a Camera component.
 ### View
 Each option toggles a hide/view window from a list of available windows:
 * **Console**: Shows Engine's logs.
