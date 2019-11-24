@@ -22,6 +22,7 @@ class SkyBoxWindow;
 
 struct SoftwareInfo;
 class RE_GameObject;
+class RE_Component;
 class RE_CompCamera;
 
 union SDL_Event;
@@ -104,9 +105,14 @@ private:
 	// Debug Drawing
 	bool debug_drawing = true;
 	AABBDebugDrawing aabb_drawing = AABBDebugDrawing::ALL_AND_SELECTED;
-	bool draw_grid = true;
 	bool draw_quad_tree = true;
 	bool draw_cameras = true;
+
+	// Grid
+	bool draw_grid = true;
+	RE_Component* grid = nullptr;
+	RE_GameObject* grid_go = nullptr;
+	float grid_size[2];
 
 	float all_aabb_color[3];
 	float sel_aabb_color[3];
