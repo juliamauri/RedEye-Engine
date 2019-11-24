@@ -172,51 +172,51 @@ bool ModuleRenderer3D::CleanUp()
 
 void ModuleRenderer3D::RecieveEvent(const Event & e)
 {
-	switch (e.GetType())
+	switch (e.type)
 	{
 	case WINDOW_SIZE_CHANGED:
 	{
-		WindowSizeChanged(e.GetData().AsInt(), e.GetDataNext().AsInt());
+		WindowSizeChanged(e.data1.AsInt(), e.data2.AsInt());
 		break;
 	}
 	case SET_VSYNC:
 	{
-		SetVSync(e.GetData().AsBool());
+		SetVSync(e.data1.AsBool());
 		break;
 	}
 	case SET_DEPTH_TEST:
 	{
-		SetDepthTest(e.GetData().AsBool());
+		SetDepthTest(e.data1.AsBool());
 		break;
 	}
 	case SET_FACE_CULLING:
 	{
-		SetFaceCulling(e.GetData().AsBool());
+		SetFaceCulling(e.data1.AsBool());
 		break;
 	}
 	case SET_LIGHTNING:
 	{
-		SetLighting(e.GetData().AsBool());
+		SetLighting(e.data1.AsBool());
 		break;
 	}
 	case SET_TEXTURE_TWO_D:
 	{
-		SetTexture2D(e.GetData().AsBool());
+		SetTexture2D(e.data1.AsBool());
 		break;
 	}
 	case SET_COLOR_MATERIAL:
 	{
-		SetColorMaterial(e.GetData().AsBool());
+		SetColorMaterial(e.data1.AsBool());
 		break;
 	}
 	case SET_WIRE_FRAME:
 	{
-		SetWireframe(e.GetData().AsBool());
+		SetWireframe(e.data1.AsBool());
 		break;
 	}
 	case CURRENT_CAM_VIEWPORT_CHANGED:
 	{
-		UpdateViewPort(e.GetData().AsInt(), e.GetDataNext().AsInt());
+		UpdateViewPort(e.data1.AsInt(), e.data1.AsInt());
 		break;
 	}
 	}

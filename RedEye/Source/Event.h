@@ -6,12 +6,11 @@
 
 class EventListener;
 
-typedef enum : unsigned short int
+typedef enum RE_EventType : unsigned short int
 {
 	// APP
 	PLAY,
 	PAUSE,
-	UNPAUSE,
 	TICK,
 	STOP,
 
@@ -42,7 +41,7 @@ typedef enum : unsigned short int
 	PARENT_TRANSFORM_MODIFIED,
 
 	MAX_EVENT_TYPES
-} RE_EventType;
+};
 
 class Event
 {
@@ -50,33 +49,37 @@ public:
 
 	Event(RE_EventType t, EventListener* lis = nullptr, Cvar data = Cvar(), Cvar data2 = Cvar());
 	Event(const Event& e);
-	~Event();
-
-	void CallListener() const;
-	bool IsValid() const;
-
-	unsigned int GetTimeStamp() const;
-	RE_EventType GetType() const;
-
-	const Cvar& GetData() const;
-	const Cvar& GetDataNext() const;
+	virtual ~Event();
 
 	static void Push(RE_EventType t, EventListener* lis = nullptr, Cvar data = Cvar(), Cvar data2 = Cvar());
 	static void PumpAll();
 
-private:
+protected:
 
+	void CallListener() const;
+	bool IsValid() const;
 	void Clear();
 
-private:
+public:
 
 	RE_EventType type;
 	EventListener* listener;
-	const Cvar data1;
-	const Cvar data2;
+	Cvar data1;
+	Cvar data2;
 	const unsigned int timestamp;
 
+private:
+
 	static std::queue<Event> events_queue;
+};
+
+class InstantEvent : public Event
+{
+public:
+
+	InstantEvent(RE_EventType t, EventListener* lis = nullptr, Cvar data = Cvar(), Cvar data2 = Cvar());
+	InstantEvent(InstantEvent& e);
+	~InstantEvent();
 };
 
 #endif

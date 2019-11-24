@@ -20,6 +20,7 @@ class PopUpWindow;
 
 struct SoftwareInfo;
 class RE_GameObject;
+class RE_Component;
 class RE_CompCamera;
 
 union SDL_Event;
@@ -67,6 +68,10 @@ private:
 
 	void UpdateCamera();
 
+public:
+
+	bool debug_drawing = true;
+
 private:
 
 	bool show_all = true;
@@ -98,9 +103,7 @@ private:
 	RE_GameObject* selected = nullptr;
 
 	// Debug Drawing
-	bool debug_drawing = true;
 	AABBDebugDrawing aabb_drawing = AABBDebugDrawing::ALL_AND_SELECTED;
-	bool draw_grid = true;
 	bool draw_quad_tree = true;
 	bool draw_cameras = true;
 
@@ -108,6 +111,11 @@ private:
 	float sel_aabb_color[3];
 	float quad_tree_color[3];
 	float frustum_color[3];
+
+	// Grid
+	RE_Component* grid = nullptr;
+	RE_GameObject* grid_go = nullptr;
+	float grid_size[2];
 
 	//crtd security
 	bool isDuplicated = false;

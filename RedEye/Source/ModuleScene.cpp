@@ -103,9 +103,6 @@ bool ModuleScene::Start()
 		App->handlerrors->ActivatePopUp();
 	}
 
-	// Grid Plane
-	root->AddComponent(C_PLANE);
-
 	// Render Camera Management
 	App->cams->RecallCameras(root);
 	if (!RE_CameraManager::HasMainCamera())
@@ -153,7 +150,7 @@ void ModuleScene::OnStop()
 
 void ModuleScene::RecieveEvent(const Event& e)
 {
-	switch (e.GetType())
+	switch (e.type)
 	{
 	case TRANSFORM_MODIFIED:
 	{
