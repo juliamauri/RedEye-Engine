@@ -28,7 +28,7 @@ float TimeManager::UpdateDeltaTime()
 	return dt;
 }
 
-void TimeManager::ManageFrameTimers()
+unsigned int TimeManager::ManageFrameTimers()
 {
 	// Recap on framecount and fps
 	++frames_counter;
@@ -43,9 +43,17 @@ void TimeManager::ManageFrameTimers()
 
 	last_ms_count = ms_timer.Read();
 
-	// cap fps
-	if (capped_ms > 0 && last_ms_count < capped_ms)
-		SDL_Delay(capped_ms - last_ms_count);
+	unsigned int ret = 1u;
+
+	if (capped_ms > 0 && capped_ms > last_ms_count)
+		ret = capped_ms - last_ms_count;
+
+	return ret;
+}
+
+void TimeManager::Delay(unsigned int ms) const
+{
+	SDL_Delay(ms);
 }
 
 void TimeManager::DrawEditor()
@@ -124,7 +132,6 @@ void TimeManager::ClearArrays()
 		ms[i] = 0.f;
 	}
 }
-
 
 // TIME =======================================================================================
 Timer::Timer(const bool start_active) : paused(!start_active)

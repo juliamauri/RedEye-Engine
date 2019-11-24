@@ -199,7 +199,12 @@ void Application::FinishUpdate()
 	if (want_to_save)
 		Save();
 
-	time->ManageFrameTimers();
+	unsigned int extra_ms = time->ManageFrameTimers();
+	
+	//extra_ms = fs->ReadAssetChanges(extra_ms);
+
+	if (extra_ms > 0)
+		time->Delay(extra_ms);
 }
 
 bool Application::CleanUp()
@@ -343,7 +348,7 @@ void Application::ReportSoftware(const char * name, const char * version, const 
 
 void Application::RecieveEvent(const Event& e)
 {
-	switch (e.GetType())
+	switch (e.type)
 	{
 	case PLAY: 
 	{

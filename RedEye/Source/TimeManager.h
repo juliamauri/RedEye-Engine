@@ -32,8 +32,10 @@ public:
 
 	void Init(float max_fps = 60.f);
 
-	float	UpdateDeltaTime(); // Called before updating modules
-	void	ManageFrameTimers(); // Called after modules update
+	float UpdateDeltaTime(); // returns updated dt
+	unsigned int ManageFrameTimers(); // returns extra ms for frame
+
+	void	Delay(unsigned int ms) const;
 	void	DrawEditor(); // Draws graphs on time stats
 	
 	void	SetMaxFPS(float max_fps); // Set to 0 uncap fps
