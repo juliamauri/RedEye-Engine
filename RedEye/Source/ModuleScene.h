@@ -58,7 +58,7 @@ private:
 
 	QTree quad_tree;
 
-	bool update_qt = true;
+	bool update_qt = false;
 	bool static_gos_modified = false;
 	bool scene_modified = false;
 
