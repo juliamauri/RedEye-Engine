@@ -24,6 +24,7 @@ public:
 	bool	TryPushingWithChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
 	bool	TryAdapting(RE_GameObject* g_obj);
 	bool	TryAdaptingWithChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
+	bool	TryAdaptingPushingChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
 
 	void	Pop(const RE_GameObject* g_obj);
 
