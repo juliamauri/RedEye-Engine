@@ -30,7 +30,7 @@ QTree::QTreeNode::~QTreeNode()
 	Clear();
 }
 
-void QTree::QTreeNode::Push(const RE_GameObject* g_obj)
+void QTree::QTreeNode::Push(RE_GameObject* g_obj)
 {
 	if (is_leaf)
 	{
@@ -52,13 +52,35 @@ void QTree::QTreeNode::Push(const RE_GameObject* g_obj)
 
 void QTree::QTreeNode::Pop(const RE_GameObject* g_obj)
 {
-	std::list<const RE_GameObject*>::iterator it = std::find(g_objs.begin(), g_objs.end(), g_obj);
+	std::list<RE_GameObject*>::iterator it = std::find(g_objs.begin(), g_objs.end(), g_obj);
 	if (it != g_objs.end())
 		g_objs.erase(it);
 
 	if (!is_leaf)
+	{
 		for (int i = 0; i < 4; i++)
 			nodes[i]->Pop(g_obj);
+
+		// delete nodes if node can be leaf
+		int count = g_objs.size();
+		if (count <= 4)
+		{
+			for (int i = 0; i < 4; i++)
+				count += nodes[i]->g_objs.size();
+
+			if (count <= 4)
+			{
+				for (int i = 0; i < 4; i++)
+					for (auto objs : nodes[i]->g_objs)
+						g_objs.push_back(objs);
+
+				for (int i = 0; i < 4; i++)
+					DEL(nodes[i]);
+
+				is_leaf = true;
+			}
+		}
+	}
 }
 
 void QTree::QTreeNode::Clear()
@@ -123,7 +145,7 @@ void QTree::QTreeNode::AddNodes()
 
 void QTree::QTreeNode::Distribute()
 {
-	std::list<const RE_GameObject*>::iterator it = g_objs.begin();
+	std::list<RE_GameObject*>::iterator it = g_objs.begin();
 	
 	while (it != g_objs.end())
 	{
@@ -163,13 +185,22 @@ QTree::QTree()
 QTree::~QTree()
 {}
 
-void QTree::Build(const RE_GameObject * root_g_obj)
+void QTree::Build(RE_GameObject * root_g_obj)
 {
 	assert(root_g_obj != nullptr);
 
 	root.Clear();
 
 	PushWithChilds(root_g_obj);
+}
+
+void QTree::BuildFromList(const AABB& box, const std::list<RE_GameObject*>& gos)
+{
+	root.Clear();
+	root.SetBox(box);
+
+	for (auto go : gos)
+		root.Push(go);
 }
 
 void QTree::Draw() const
@@ -221,10 +252,96 @@ short QTree::GetDrawMode() const
 	return draw_mode;
 }
 
-void QTree::Push(const RE_GameObject * g_obj)
+bool QTree::Contains(const math::AABB bounding_box) const
 {
-	if (g_obj->GetGlobalBoundingBox().Intersects(root.GetBox()))
+	return (root.GetBox().Contains(bounding_box.minPoint)
+		&& root.GetBox().Contains(bounding_box.maxPoint));
+}
+
+bool QTree::TryPushing(RE_GameObject * g_obj)
+{
+	bool ret = Contains(g_obj->GetGlobalBoundingBox());
+
+	if (ret)
 		root.Push(g_obj);
+
+	return ret;
+}
+
+bool QTree::TryPushingWithChilds(RE_GameObject * g_obj, std::list<RE_GameObject*>& out_childs)
+{
+	bool ret = TryPushing(g_obj);
+
+	if (ret)
+	{
+		out_childs.push_back(g_obj);
+
+		std::queue<RE_GameObject*> queue;
+		for (auto child : g_obj->GetChilds())
+			queue.push(child);
+
+		while (!queue.empty())
+		{
+			RE_GameObject* obj = queue.front();
+			queue.pop();
+
+			if (obj->IsActiveStatic())
+			{
+				root.Push(obj);
+				out_childs.push_back(obj);
+			}
+
+			for (auto child : obj->GetChilds())
+				queue.push(child);
+		}
+	}
+
+	return ret;
+}
+
+bool QTree::TryAdapting(RE_GameObject * g_obj)
+{
+	bool ret = Contains(g_obj->GetGlobalBoundingBox());
+
+	if (ret)
+	{
+		root.Pop(g_obj);
+		root.Push(g_obj);
+	}
+
+	return ret;
+}
+
+bool QTree::TryAdaptingWithChilds(RE_GameObject * g_obj, std::list<RE_GameObject*>& out_childs)
+{
+	bool ret = TryAdapting(g_obj);
+
+	if (ret)
+	{
+		out_childs.push_back(g_obj);
+
+		std::queue<RE_GameObject*> queue;
+		for (auto child : g_obj->GetChilds())
+			queue.push(child);
+
+		while (!queue.empty())
+		{
+			RE_GameObject* obj = queue.front();
+			queue.pop();
+
+			if (obj->IsActiveStatic())
+			{
+				root.Pop(obj);
+				root.Push(obj);
+				out_childs.push_back(obj);
+			}
+
+			for (auto child : obj->GetChilds())
+				queue.push(child);
+		}
+	}
+
+	return ret;
 }
 
 void QTree::Pop(const RE_GameObject * g_obj)
@@ -232,23 +349,29 @@ void QTree::Pop(const RE_GameObject * g_obj)
 	root.Pop(g_obj);
 }
 
+void QTree::Push(RE_GameObject * g_obj)
+{
+	if (g_obj->GetGlobalBoundingBox().Intersects(root.GetBox()))
+		root.Push(g_obj);
+}
+
 void QTree::Clear()
 {
 	root.Clear();
 }
 
-void QTree::PushWithChilds(const RE_GameObject * g_obj)
+void QTree::PushWithChilds(RE_GameObject * g_obj)
 {
 	root.SetBox(g_obj->GetGlobalBoundingBox());
 
-	std::stack<const RE_GameObject*> objects;
+	std::stack<RE_GameObject*> objects;
 
 	for (auto child : g_obj->GetChilds())
 		objects.push(child);
 
 	while (!objects.empty())
 	{
-		const RE_GameObject* obj = objects.top();
+		RE_GameObject* obj = objects.top();
 		objects.pop();
 
 		if (obj->IsActiveStatic())

@@ -35,7 +35,7 @@ RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, boo
 	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 
 	if (parent != nullptr)
-		parent->AddChild(this);
+		parent->AddChild(this, false);
 }
 
 RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : parent(p)
@@ -75,7 +75,7 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 	}
 
 	if (parent != nullptr)
-		parent->AddChild(this);
+		parent->AddChild(this, false);
 
 	if (!go.childs.empty()) {
 		for (RE_GameObject* childGO : go.childs) {
@@ -181,18 +181,39 @@ void RE_GameObject::Serialize(JSONNode * node)
 	for (auto child : childs) { child->Serialize(node); }
 }
 
-void RE_GameObject::AddChild(RE_GameObject * child)
+void RE_GameObject::AddChild(RE_GameObject * child, bool broadcast)
 {
 	SDL_assert(child != nullptr);
-	child->parent = this;
 
+	child->parent = this;
 	childs.push_back(child);
+
+	if (broadcast)
+		Event::Push(GO_HAS_NEW_CHILD, App->scene, this, child);
 }
 
-void RE_GameObject::RemoveChild(RE_GameObject * child)
+void RE_GameObject::AddChildsFromGO(RE_GameObject * go, bool broadcast)
+{
+	SDL_assert(go != nullptr);
+
+	if (!go->childs.empty())
+	{
+		for (auto child : go->childs)
+			AddChild(child, false);
+
+		if (broadcast)
+			Event::Push(GO_HAS_NEW_CHILDS, App->scene, this);
+	}
+}
+
+void RE_GameObject::RemoveChild(RE_GameObject * child, bool broadcast)
 {
 	SDL_assert(child != nullptr);
-	childs.remove(child);
+
+	if (!broadcast)
+		childs.remove(child);
+	else
+		Event::Push(GO_REMOVE_CHILD, App->scene, this, child);
 }
 
 void RE_GameObject::RemoveAllChilds()
@@ -240,12 +261,42 @@ void RE_GameObject::SetParent(RE_GameObject * p)
 
 bool RE_GameObject::IsActive() const { return active; }
 
-void RE_GameObject::SetActive(bool value) { active = value; }
+void RE_GameObject::SetActive(const bool value, const bool broadcast)
+{
+	if (active != value)
+	{
+		active = value;
 
-void RE_GameObject::SetActiveAll(bool value)
+		if (broadcast)
+			Event::Push(active ? GO_CHANGED_TO_ACTIVE : GO_CHANGED_TO_INACTIVE, App->scene);
+	}
+}
+
+void RE_GameObject::SetActiveRecursive(bool value)
 {
 	active = value;
-	for (auto child : childs) child->SetActiveAll(active);
+
+	for (auto child : childs)
+		child->SetActiveRecursive(active);
+}
+
+void RE_GameObject::IterativeSetActive(bool val)
+{
+	bool tmp = active;
+	std::stack<RE_GameObject*> gos;
+	gos.push(this);
+
+	while (!gos.empty())
+	{
+		RE_GameObject * go = gos.top();
+		go->SetActive(val);
+		gos.pop();
+
+		for (auto child : go->childs)
+			gos.push(child);
+	}
+
+	active = tmp;
 }
 
 bool RE_GameObject::IsStatic() const
@@ -258,47 +309,34 @@ bool RE_GameObject::IsActiveStatic() const
 	return active && isStatic;
 }
 
-void RE_GameObject::SetStatic(bool value)
+void RE_GameObject::SetStatic(const bool value, const bool broadcast)
 {
-	isStatic = value;
-}
-
-void RE_GameObject::IterativeSetActive(bool val)
-{
-	bool tmp = active;
-	std::stack<RE_GameObject*> gos;
-	gos.push(this);
-
-	while (!gos.empty())
+	if (isStatic != value)
 	{
-		RE_GameObject * go = gos.top();
-		go->active = val;
-		gos.pop();
+		isStatic = value;
 
-		for (auto child : go->childs)
-			gos.push(child);
+		if (active && broadcast)
+			Event::Push(isStatic ? GO_CHANGED_TO_STATIC : GO_CHANGED_TO_NON_STATIC, App->scene);
 	}
-
-	active = tmp;
 }
 
 void RE_GameObject::IterativeSetStatic(bool val)
 {
-	bool tmp = isStatic;
+	SetStatic(val);
+
 	std::stack<RE_GameObject*> gos;
-	gos.push(this);
+	for (auto child : childs)
+		gos.push(child);
 
 	while (!gos.empty())
 	{
 		RE_GameObject * go = gos.top();
-		go->isStatic = val;
+		go->SetStatic(val, false);
 		gos.pop();
 
 		for (auto child : go->childs)
 			gos.push(child);
 	}
-
-	isStatic = tmp;
 }
 
 void RE_GameObject::OnPlay()
@@ -544,24 +582,23 @@ RE_GameObject * RE_GameObject::GetGoFromUUID(UUID parent)
 
 void RE_GameObject::RecieveEvent(const Event & e)
 {
-	if (e.type == PARENT_TRANSFORM_MODIFIED)
-		TransformModified();
 }
 
-void RE_GameObject::TransformModified()
+void RE_GameObject::TransformModified(bool broadcast)
 {
-	Event::Push(STATIC_TRANSFORM_MODIFIED, App->scene);
-	
-	if (isStatic)
-		Event::Push(STATIC_TRANSFORM_MODIFIED, App->scene);
-
 	ResetGlobalBoundingBox();
 
 	for (auto component : components)
 		component->OnTransformModified();
 
-	for (auto child : childs)
-		Event::Push(PARENT_TRANSFORM_MODIFIED, child);
+	if (!broadcast)
+	{
+		for (auto child : childs)
+			if (!child->IsActive())
+				child->TransformModified(false);
+	}
+	else
+		Event::Push(TRANSFORM_MODIFIED, App->scene, this);
 }
 
 const char * RE_GameObject::GetName() const
@@ -707,7 +744,7 @@ void RE_GameObject::DrawProperties()
 	ImGui::SameLine();
 
 	if (ImGui::Checkbox("Static", &isStatic))
-		Event::Push(STATIC_TRANSFORM_MODIFIED, App->scene);
+		Event::Push(isStatic ? GO_CHANGED_TO_STATIC : GO_CHANGED_TO_NON_STATIC, App->scene);
 
 	if (ImGui::TreeNode("Local Bounding Box"))
 	{

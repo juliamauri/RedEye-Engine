@@ -4,6 +4,7 @@
 #include "RE_GameObject.h"
 #include "MathGeoLib\include\Geometry\AABB.h"
 #include <list>
+#include <iterator>
 
 class QTree
 {
@@ -11,22 +12,29 @@ public:
 	QTree();
 	~QTree();
 
-	void Build(const RE_GameObject* root_g_obj);
-	void Draw() const;
+	void	Build(RE_GameObject* root_g_obj);
+	void	BuildFromList(const AABB& box, const std::list<RE_GameObject*>& gos);
+	void	Draw() const;
 
-	void SetDrawMode(short mode);
-	short GetDrawMode() const;
+	void	SetDrawMode(short mode);
+	short	GetDrawMode() const;
+
+	bool	Contains(const math::AABB bounding_box) const;
+	bool	TryPushing( RE_GameObject* g_obj);
+	bool	TryPushingWithChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
+	bool	TryAdapting(RE_GameObject* g_obj);
+	bool	TryAdaptingWithChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
+
+	void	Pop(const RE_GameObject* g_obj);
 
 	template<typename TYPE>
-	inline void CollectIntersections(std::vector<const RE_GameObject*>& objects, const TYPE & primitive) const;
+	inline void CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
 
 private:
 
-	void Push(const RE_GameObject* g_obj);
-	void Pop(const RE_GameObject* g_obj);
+	void Push(RE_GameObject* g_obj);
 	void Clear();
-
-	void PushWithChilds(const RE_GameObject* g_obj);
+	void PushWithChilds(RE_GameObject* g_obj);
 
 private:
 
@@ -37,7 +45,7 @@ private:
 		QTreeNode(const AABB& box, QTreeNode* parent = nullptr);
 		~QTreeNode();
 
-		void Push(const RE_GameObject* g_obj);
+		void Push(RE_GameObject* g_obj);
 		void Pop(const RE_GameObject* g_obj);
 		void Clear();
 
@@ -47,7 +55,7 @@ private:
 		const AABB& GetBox() const;
 
 		template<typename TYPE>
-		inline void CollectIntersections(std::vector<const RE_GameObject*>& objects, const TYPE & primitive) const;
+		inline void CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
 
 	private:
 
@@ -59,7 +67,7 @@ private:
 		QTreeNode* nodes[4];
 		QTreeNode* parent = nullptr;
 
-		std::list<const RE_GameObject*> g_objs;
+		std::list<RE_GameObject*> g_objs;
 		bool is_leaf = true;
 		AABB box;
 	} root;
@@ -75,16 +83,18 @@ private:
 
 	int edges[12];
 	int count = 0;
+
+	std::list<RE_GameObject*>::iterator it;
 };
 
 template<typename TYPE>
-inline void QTree::QTreeNode::CollectIntersections(std::vector<const RE_GameObject*>& objects, const TYPE & primitive) const
+inline void QTree::QTreeNode::CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const
 {
 	if (primitive.Intersects(box))
 	{
-		for (std::list<const RE_GameObject*>::const_iterator it = g_objs.begin(); it != g_objs.end(); ++it)
-			if (primitive.Intersects((*it)->GetGlobalBoundingBox()))
-				objects.push_back(*it);
+		for (auto go : g_objs)
+			if (primitive.Intersects(go->GetGlobalBoundingBox()))
+				objects.push_back(go);
 
 		if (!is_leaf)
 			for (int i = 0; i < 4; ++i)
@@ -93,7 +103,7 @@ inline void QTree::QTreeNode::CollectIntersections(std::vector<const RE_GameObje
 }
 
 template<typename TYPE>
-inline void QTree::CollectIntersections(std::vector<const RE_GameObject*>& objects, const TYPE & primitive) const
+inline void QTree::CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const
 {
 	root.CollectIntersections(objects, primitive);
 }
