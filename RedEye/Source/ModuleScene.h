@@ -45,9 +45,9 @@ public:
 
 private:
 
-	void GetActive(std::vector<const RE_GameObject*>& objects) const;
-	void GetActiveStatic(std::vector<const RE_GameObject*>& objects) const;
-	void GetActiveNonStatic(std::vector<const RE_GameObject*>& objects) const;
+	void GetActive(std::list<RE_GameObject*>& objects) const;
+	void GetActiveStatic(std::list<RE_GameObject*>& objects) const;
+	void GetActiveNonStatic(std::list<RE_GameObject*>& objects) const;
 
 	void UpdateQuadTree();
 
@@ -60,6 +60,10 @@ private:
 	bool update_qt = true;
 	bool static_gos_modified = false;
 	bool scene_modified = false;
+
+	std::list<RE_GameObject*> active_static_gos;
+	std::list<RE_GameObject*> active_non_static_gos; //
+	std::list<RE_GameObject*> tree_free_static_gos;
 
 	std::string defaultModel;
 

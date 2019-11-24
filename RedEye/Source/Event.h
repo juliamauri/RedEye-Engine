@@ -24,8 +24,14 @@ typedef enum RE_EventType : unsigned short int
 	WINDOW_SIZE_CHANGED,
 
 	// Scene
+	GO_CHANGED_TO_ACTIVE,
+	GO_CHANGED_TO_INACTIVE,
+	GO_CHANGED_TO_STATIC,
+	GO_CHANGED_TO_NON_STATIC,
+	GO_HAS_NEW_CHILD,
+	GO_HAS_NEW_CHILDS,
+	GO_REMOVE_CHILD,
 	TRANSFORM_MODIFIED,
-	STATIC_TRANSFORM_MODIFIED,
 
 	// Renderer
 	SET_VSYNC,
@@ -37,9 +43,6 @@ typedef enum RE_EventType : unsigned short int
 	SET_WIRE_FRAME,
 	CURRENT_CAM_VIEWPORT_CHANGED,
 
-	// Gameobject
-	PARENT_TRANSFORM_MODIFIED,
-
 	MAX_EVENT_TYPES
 };
 
@@ -47,11 +50,11 @@ class Event
 {
 public:
 
-	Event(RE_EventType t, EventListener* lis = nullptr, Cvar data = Cvar(), Cvar data2 = Cvar());
-	Event(const Event& e);
+	Event(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
+	Event(Event& e);
 	virtual ~Event();
 
-	static void Push(RE_EventType t, EventListener* lis = nullptr, Cvar data = Cvar(), Cvar data2 = Cvar());
+	static void Push(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
 	static void PumpAll();
 
 protected:
@@ -77,7 +80,7 @@ class InstantEvent : public Event
 {
 public:
 
-	InstantEvent(RE_EventType t, EventListener* lis = nullptr, Cvar data = Cvar(), Cvar data2 = Cvar());
+	InstantEvent(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
 	InstantEvent(InstantEvent& e);
 	~InstantEvent();
 };

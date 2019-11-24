@@ -1,8 +1,10 @@
 #include "Cvar.h"
 
+#include "RE_GameObject.h"
+
 Cvar::Cvar() : type(UNDEFINED) { value.int_v = 0; }
 
-Cvar::Cvar(const Cvar & copy) : type(copy.type)
+Cvar::Cvar(Cvar & copy) : type(copy.type)
 {
 	switch (copy.type)
 	{
@@ -14,6 +16,7 @@ Cvar::Cvar(const Cvar & copy) : type(copy.type)
 	case DOUBLE: value.double_v = copy.value.double_v; break;
 	case FLOAT: value.float_v = copy.value.float_v; break;
 	case CHAR_P: value.char_p_v = copy.value.char_p_v; break;
+	case GAMEOBJECT: value.go_v = copy.value.go_v; break;
 	}
 }
 
@@ -32,6 +35,8 @@ Cvar::Cvar(double double_v) : type(DOUBLE) { value.double_v = double_v; }
 Cvar::Cvar(float float_v) : type(FLOAT) { value.float_v = float_v; }
 
 Cvar::Cvar(const char * char_p_v) : type(CHAR_P) { value.char_p_v = char_p_v; }
+
+Cvar::Cvar(RE_GameObject * go_v) : type(GAMEOBJECT) { value.go_v = go_v; }
 
 bool Cvar::SetValue(bool bool_v, bool force_type)
 {
@@ -137,6 +142,19 @@ bool Cvar::SetValue(const char * char_p_v, bool force_type)
 	return ret;
 }
 
+bool Cvar::SetValue(RE_GameObject * go_v, bool force_type)
+{
+	bool ret = false;
+
+	if (force_type)
+		type = GAMEOBJECT;
+
+	if (ret = (type == GAMEOBJECT))
+		value.go_v = go_v;
+
+	return ret;
+}
+
 Cvar::VAR_TYPE Cvar::GetType() const { return type; }
 
 bool Cvar::AsBool() const { return value.bool_v; }
@@ -154,6 +172,11 @@ double Cvar::AsDouble() const { return value.double_v; }
 float Cvar::AsFloat() const { return value.float_v; }
 
 const char * Cvar::AsCharP() const { return value.char_p_v; }
+
+RE_GameObject * Cvar::AsGO() const
+{
+	return value.go_v;
+}
 
 // --- DoubleCvar ------------------------------------------------------------------------------
 /*

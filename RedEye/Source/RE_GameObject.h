@@ -43,8 +43,9 @@ public:
 	static RE_GameObject* DeserializeBinary(char*& cursor, std::map<int, const char*>* resources);
 
 	// Children
-	void AddChild(RE_GameObject* child);
-	void RemoveChild(RE_GameObject* child); //Breaks the link with the parent but does not delete the child.
+	void AddChild(RE_GameObject* child, bool broadcast = true);
+	void AddChildsFromGO(RE_GameObject* go, bool broadcast = true);
+	void RemoveChild(RE_GameObject* child, bool broadcast = true); //Breaks the link with the parent but does not delete the child.
 	void RemoveAllChilds();
 	std::list<RE_GameObject*>& GetChilds();
 	const std::list<RE_GameObject*>& GetChilds() const;
@@ -59,14 +60,14 @@ public:
 
 	// Active
 	bool IsActive() const;
-	void SetActive(const bool value);
-	void SetActiveAll(const bool value);
+	void SetActive(const bool value, const bool broadcast = true);
+	void SetActiveRecursive(const bool value);
+	void IterativeSetActive(bool val);
 
 	// Static
 	bool IsStatic() const;
 	bool IsActiveStatic() const;
-	void SetStatic(bool value);
-	void IterativeSetActive(bool val);
+	void SetStatic(const bool value, const bool broadcast = true);
 	void IterativeSetStatic(bool val);
 
 	// Editor Controls
@@ -95,7 +96,7 @@ public:
 	void RecieveEvent(const Event& e) override;
 
 	// Transform
-	void TransformModified();
+	void TransformModified(bool broadcast = true);
 
 	// Name
 	const char* GetName() const;

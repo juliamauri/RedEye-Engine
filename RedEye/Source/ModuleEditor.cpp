@@ -528,37 +528,34 @@ void ModuleEditor::UpdateCamera()
 {
 	OPTICK_CATEGORY("Update ModuleEditor Camera", Optick::Category::Camera);
 	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
-	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
+	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && !ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow))
 	{
 		const MouseData mouse = App->input->GetMouse();
 
-		if (mouse.GetButton(1) == KEY_DOWN || mouse.GetButton(1) == KEY_REPEAT)
+		if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && mouse.GetButton(1) == KEY_DOWN)
 		{
-			if(App->input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE)
-			{
-				// Mouse Pick
-				int width, height;
-				camera->GetTargetWidthHeight(width, height);
+			// Mouse Pick
+			int width, height;
+			camera->GetTargetWidthHeight(width, height);
 
-				RE_GameObject* hit = App->scene->RayCastSelect(
-					math::Ray(camera->GetFrustum().UnProjectLineSegment(
-					(mouse.mouse_x - (width / 2.0f)) / (width / 2.0f),
-						((height - mouse.mouse_y) - (height / 2.0f)) / (height / 2.0f))));
+			RE_GameObject* hit = App->scene->RayCastSelect(
+				math::Ray(camera->GetFrustum().UnProjectLineSegment(
+				(mouse.mouse_x - (width / 2.0f)) / (width / 2.0f),
+					((height - mouse.mouse_y) - (height / 2.0f)) / (height / 2.0f))));
 
-				if (hit != nullptr)
-					SetSelected(hit);
-			}
-			else if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT)
+			if (hit != nullptr)
+				SetSelected(hit);
+		}
+		else if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse.GetButton(1) == KEY_REPEAT)
+		{
+			// Orbit
+			if (selected != nullptr
+				&& (mouse.mouse_x_motion || mouse.mouse_y_motion))
 			{
-				// Orbit
-				if (selected != nullptr
-					&& (mouse.mouse_x_motion || mouse.mouse_y_motion))
-				{
-					camera->Orbit(
-						cam_sensitivity * -mouse.mouse_x_motion,
-						cam_sensitivity * mouse.mouse_y_motion,
-						*selected);
-				}
+				camera->Orbit(
+					cam_sensitivity * -mouse.mouse_x_motion,
+					cam_sensitivity * mouse.mouse_y_motion,
+					*selected);
 			}
 		}
 		else if ((App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && selected != nullptr)
