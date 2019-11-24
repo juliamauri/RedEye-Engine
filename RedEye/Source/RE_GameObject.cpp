@@ -508,7 +508,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 
 				int meshID = -1;
 				size = sizeof(int);
-				memcpy(cursor, &meshID, size);
+				memcpy(&meshID, cursor, size);
 				cursor += size;
 
 				const char* meshMD5 = nullptr;
@@ -518,7 +518,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 
 					const char* materialMD5 = nullptr;
 					int materialID = -1;
-					memcpy(cursor, &materialID, size);
+					memcpy( &materialID, cursor, size);
 					cursor += size;
 					if (materialID != -1) {
 						materialMD5 = resources->at(materialID);
