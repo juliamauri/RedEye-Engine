@@ -540,6 +540,7 @@ void ModuleEditor::UpdateCamera()
 			int width, height;
 			camera->GetTargetWidthHeight(width, height);
 
+			OPTICK_CATEGORY("Update ModuleEditor Camera RayCast", Optick::Category::Camera);
 			RE_GameObject* hit = App->scene->RayCastSelect(
 				math::Ray(camera->GetFrustum().UnProjectLineSegment(
 				(mouse.mouse_x - (width / 2.0f)) / (width / 2.0f),
