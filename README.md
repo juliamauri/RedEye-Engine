@@ -78,7 +78,7 @@ Each option toggles a hide/view window from a list of available windows:
     * **Application**: Allows for frame capping (set to 0 to ignore cap) and shows framerate & milliseconds plot.
     * **Input**
     * **Window**
-    * **Scene**: Allows activate/deactivate quadtree update to enclose all childs on when its added, set as static, set static as active or applying a transformation. Shows management over scene gameobjects and allows for different ways to visualize Quadtree (Bottom, Top, Top & Bottom or Full).
+    * **Scene**: Shows management over scene gameobjects and allows for different ways to visualize Quadtree (Bottom, Top, Top & Bottom or Full).
     * **Editor**: Allows to configure editor camera and debug drawing.
     * **Renderer 3D**: Allows to enable/disable gl flags and frustum culling.
     * **Memomy**: Shows current memory usage.
