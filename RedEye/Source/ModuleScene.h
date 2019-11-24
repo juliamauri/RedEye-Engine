@@ -26,7 +26,7 @@ public:
 
 	RE_GameObject* GetRoot() const;
 	const RE_GameObject* GetRoot_c() const;
-	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
+	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr, bool broadcast = true);
 	void AddGoToRoot(RE_GameObject* toAdd);
 
 	void CreateCube();
@@ -62,7 +62,7 @@ private:
 	bool scene_modified = false;
 
 	std::list<RE_GameObject*> active_static_gos;
-	std::list<RE_GameObject*> active_non_static_gos; //
+	std::list<RE_GameObject*> active_non_static_gos;
 	std::list<RE_GameObject*> tree_free_static_gos;
 
 	std::string defaultModel;

@@ -409,11 +409,11 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 
 		glEnd();
 
-		if (grid->IsActive())
-			grid->Draw();
-
 		if (resetLight)
 			glEnable(GL_LIGHTING);
+
+		if (grid->IsActive())
+			grid->Draw();
 	}
 }
 
