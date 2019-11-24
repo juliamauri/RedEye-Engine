@@ -1,11 +1,13 @@
 #ifndef __CVAR__
 #define __CVAR__
 
+class RE_GameObject;
+
 class Cvar // Global Value Container
 {
 public:
 	Cvar();
-	Cvar(const Cvar& copy);
+	Cvar(Cvar& copy);
 	Cvar(bool bool_v);
 	Cvar(int int_v);
 	Cvar(unsigned int uint_v);
@@ -14,6 +16,7 @@ public:
 	Cvar(double double_v);
 	Cvar(float float_v);
 	Cvar(const char* char_p_v);
+	Cvar(RE_GameObject* go_v);
 
 protected:
 	enum VAR_TYPE : unsigned short int
@@ -26,7 +29,8 @@ protected:
 		UINT64,
 		DOUBLE,
 		FLOAT,
-		CHAR_P
+		CHAR_P,
+		GAMEOBJECT
 	}  type;
 
 	union VAR_data
@@ -39,6 +43,7 @@ protected:
 		double double_v;
 		float float_v;
 		const char* char_p_v;
+		RE_GameObject* go_v;
 	} value;
 
 public:
@@ -50,6 +55,7 @@ public:
 	virtual bool SetValue(double double_v, bool force_type = false);
 	virtual bool SetValue(float float_v, bool force_type = false);
 	virtual bool SetValue(const char* char_p_v, bool force_type = false);
+	virtual bool SetValue(RE_GameObject* go_v, bool force_type = false);
 
 	VAR_TYPE				GetType() const;
 	bool					AsBool() const;
@@ -60,6 +66,7 @@ public:
 	double					AsDouble() const;
 	float					AsFloat() const;
 	const char*				AsCharP() const;
+	RE_GameObject*			AsGO() const;
 };
 
 /*class DoubleCvar : public Cvar
