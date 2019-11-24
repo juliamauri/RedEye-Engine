@@ -116,6 +116,7 @@ Each option toggles a hide/view window from a list of available windows:
 ## Version Notes
 
 ### v2.0
+* Added **Scene Serialization** on Play. Scene's root is saved as prefab until stop resets scene from prefab.
 * Added **Mouse Picking** using Raycast optimized using a **Quadtree**.
 * Added **Frustum Culling**. Activating camera's "_override cull_" will swap the frustum used for culling scene. Frustum culling can be disabled through configuration window. It uses Quadtree to collect intersections quicker.
 * Added **Camera Aspect Ratio**. Options include: Fit Window, Square 1x1, Traditional TV 4x3, Movietone 16x9 and Personalized. Personalized aspect ratio allows user to freely set camera's aspect ratio. Window resize adapts camera and viewport.
