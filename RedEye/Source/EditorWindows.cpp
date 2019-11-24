@@ -430,19 +430,35 @@ void PlayPauseWindow::Draw(bool secondary)
 		}
 
 		float seconds = App->time->GetGameTimer();
-		if (ImGui::Button(App->GetState() == GS_PLAY ? "Restart" : "Play"))
+		const GameState state = App->GetState();
+
+		// PLAY / RESTART
+		if (ImGui::Button(state == GS_PLAY ? "Restart" : " Play  "))
 		{
 			// check main camera
 			if (RE_CameraManager::HasMainCamera())
 				Event::Push(PLAY, App);
 			// else { report problems }
 		}
+
 		ImGui::SameLine();
-		if (ImGui::Button("Pause")) Event::Push(PAUSE, App);
+
+		// PAUSE / TICK
+		if (ImGui::Button(state != GS_PLAY ? "Tick " : "Pause"))
+			Event::Push(state != GS_PLAY ? TICK : PAUSE, App);
+
 		ImGui::SameLine();
-		if (ImGui::Button("Stop")) Event::Push(STOP, App);
+
+		// STOP
+		if (ImGui::Button("Stop") && state != GS_STOP)
+			Event::Push(STOP, App);
+
 		ImGui::SameLine();
+
 		ImGui::Text("%.2f", seconds);
+
+		ImGui::SameLine();
+		ImGui::Checkbox("Draw Gizmos", &App->editor->debug_drawing);
 
 		if (secondary) {
 			ImGui::PopItemFlag();

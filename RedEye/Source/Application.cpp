@@ -168,18 +168,20 @@ int Application::Update()
 
 	int ret = UPDATE_CONTINUE;
 
+	list<Module*>::iterator it;
+
 	OPTICK_CATEGORY("PreUpdate Application", Optick::Category::GameLogic);
-	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
+	for (it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)
 			ret = (*it)->PreUpdate();
 
 	OPTICK_CATEGORY("Update Application", Optick::Category::GameLogic);
-	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
+	for (it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)
 			ret = (*it)->Update();
 
 	OPTICK_CATEGORY("PostUpdate Application", Optick::Category::GameLogic);
-	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
+	for (it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if ((*it)->IsActive() == true)
 			ret = (*it)->PostUpdate();
 
@@ -198,6 +200,12 @@ void Application::FinishUpdate()
 
 	if (want_to_save)
 		Save();
+
+	if (ticking)
+	{
+		InstantEvent(PAUSE, this);
+		ticking = false;
+	}
 
 	unsigned int extra_ms = time->ManageFrameTimers();
 	
@@ -353,27 +361,39 @@ void Application::RecieveEvent(const Event& e)
 	case PLAY: 
 	{
 		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
-			if ((*it)->IsActive() == true)
+			if ((*it)->IsActive())
 				(*it)->OnPlay();
 
 		time->StartGameTimer();
 		state = GS_PLAY;
+		ticking = false;
 		break;
 	}
 	case PAUSE:
 	{
 		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
-			if ((*it)->IsActive() == true)
+			if ((*it)->IsActive())
 				(*it)->OnPause();
 
 		time->PauseGameTimer();
 		state = GS_PAUSE;
 		break;
 	}
+	case TICK:
+	{
+		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
+			if ((*it)->IsActive())
+				(*it)->OnPlay();
+
+		time->StartGameTimer();
+		state = GS_PLAY;
+		ticking = true;
+		break;
+	}
 	case STOP:
 	{
 		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
-			if ((*it)->IsActive() == true)
+			if ((*it)->IsActive())
 				(*it)->OnStop();
 
 		time->StopGameTimer();

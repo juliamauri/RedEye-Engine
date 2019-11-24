@@ -71,6 +71,10 @@ private:
 
 	void UpdateCamera();
 
+public:
+
+	bool debug_drawing = true;
+
 private:
 
 	bool show_all = true;
@@ -103,7 +107,6 @@ private:
 	RE_GameObject* selected = nullptr;
 
 	// Debug Drawing
-	bool debug_drawing = true;
 	AABBDebugDrawing aabb_drawing = AABBDebugDrawing::ALL_AND_SELECTED;
 	bool draw_quad_tree = true;
 	bool draw_cameras = true;

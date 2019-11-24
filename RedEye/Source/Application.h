@@ -94,6 +94,7 @@ private:
 	bool want_to_load = false;
 	bool want_to_save = false;
 	bool want_to_quit = false;
+	bool ticking = false;
 
 	std::string app_name = "RedEye Engine";
 	std::string organization = "RedEye";

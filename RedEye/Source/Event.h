@@ -11,7 +11,6 @@ typedef enum RE_EventType : unsigned short int
 	// APP
 	PLAY,
 	PAUSE,
-	UNPAUSE,
 	TICK,
 	STOP,
 
