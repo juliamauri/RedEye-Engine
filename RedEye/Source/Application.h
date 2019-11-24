@@ -15,7 +15,7 @@ class ModuleScene;
 class ModuleEditor;
 class ModuleRenderer3D;
 
-class FileSystem;
+class RE_FileSystem;
 class TimeManager;
 class SystemInfo;
 class RE_Math;
@@ -71,7 +71,7 @@ public:
 	ModuleEditor* editor = nullptr;
 	ModuleRenderer3D* renderer3d = nullptr;
 
-	FileSystem* fs = nullptr;
+	RE_FileSystem* fs = nullptr;
 	TimeManager* time = nullptr;
 	SystemInfo* sys_info = nullptr;
 	RE_Math* math = nullptr;

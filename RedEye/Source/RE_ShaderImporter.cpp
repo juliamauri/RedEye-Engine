@@ -2,7 +2,7 @@
 
 #include "Application.h"
 #include "ModuleEditor.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "OutputLog.h"
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"

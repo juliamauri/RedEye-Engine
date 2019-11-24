@@ -16,6 +16,8 @@ public:
 	void LoadInMemory() override;
 	void UnloadMemory() override;
 
+	void Import(bool keepInMemory = true) override;
+
 	void Save(RE_GameObject* go);
 
 	void SetName(const char* name) override;
@@ -27,7 +29,7 @@ private:
 	void Draw() override;
 
 	void AssetSave();
-	void AssetLoad();
+	void AssetLoad(bool generateLibraryPath = false);
 	void LibraryLoad();
 	void LibrarySave();
 

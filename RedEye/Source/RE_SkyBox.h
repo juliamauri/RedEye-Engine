@@ -72,6 +72,8 @@ public:
 	void LoadInMemory() override;
 	void UnloadMemory() override;
 
+	void Import(bool keepInMemory = true) override;
+
 	void use();
 	unsigned int GetID()const { return ID; }
 	unsigned int GetVAO()const { return VAO; }
@@ -84,7 +86,7 @@ private:
 	void SaveResourceMeta(JSONNode* metaNode) override;
 	void LoadResourceMeta(JSONNode* metaNode) override;
 
-	void AssetLoad();
+	void AssetLoad(bool generateLibraryPath = false);
 	void LibraryLoad();
 	void LibrarySave();
 

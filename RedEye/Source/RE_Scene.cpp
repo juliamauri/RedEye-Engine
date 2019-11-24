@@ -1,7 +1,7 @@
 #include "RE_Scene.h"
 
 #include "Application.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 
 #include "RE_GameObject.h"
 #include "RE_ResouceAndGOImporter.h"
@@ -33,6 +33,13 @@ void RE_Scene::UnloadMemory()
 {
 	if (loaded) DEL(loaded);
 	ResourceContainer::inMemory = false;
+}
+
+void RE_Scene::Import(bool keepInMemory)
+{
+	AssetLoad(true);
+	LibrarySave();
+	if (!keepInMemory) UnloadMemory();
 }
 
 void RE_Scene::Save(RE_GameObject* go)
@@ -90,7 +97,7 @@ void RE_Scene::AssetSave()
 	scene_SaveFile.Save();
 }
 
-void RE_Scene::AssetLoad()
+void RE_Scene::AssetLoad(bool generateLibraryPath)
 {
 	Config jsonLoad(GetAssetPath(), App->fs->GetZipPath());
 
@@ -98,6 +105,14 @@ void RE_Scene::AssetLoad()
 		JSONNode* scenebNode = jsonLoad.GetRootNode("scene");
 		loaded = RE_ResouceAndGOImporter::JsonDeserialize(scenebNode);
 		DEL(scenebNode);
+
+		if (generateLibraryPath) {
+			std::string md5 = jsonLoad.GetMd5();
+			SetMD5(md5.c_str());
+			std::string libraryPath("Library/Scene/");
+			libraryPath += md5;
+			SetLibraryPath(libraryPath.c_str());
+		}
 	}
 
 	ResourceContainer::inMemory = true;

@@ -8,7 +8,7 @@
 #include "ModuleRenderer3D.h"
 
 #include "RE_Math.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_ResourceManager.h"
 
@@ -34,7 +34,7 @@ using namespace std;
 
 Application::Application()
 {
-	fs = new FileSystem();
+	fs = new RE_FileSystem();
 	time = new TimeManager();
 	sys_info = new SystemInfo();
 	math = new RE_Math();

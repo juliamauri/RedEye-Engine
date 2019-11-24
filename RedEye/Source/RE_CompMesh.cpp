@@ -4,7 +4,7 @@
 #include "ModuleScene.h"
 
 #include "RE_Math.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 
 #include "RE_InternalResources.h"
 #include "RE_PrimitiveManager.h"

@@ -12,7 +12,7 @@
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
 #include "ModuleScene.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "RE_InternalResources.h"
 
 #include "par_shapes.h"

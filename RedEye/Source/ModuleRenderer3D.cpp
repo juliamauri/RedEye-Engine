@@ -10,7 +10,7 @@
 #include "ModuleEditor.h"
 #include "TimeManager.h"
 #include "ModuleInput.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "RE_CompCamera.h"
 #include "RE_CameraManager.h"
 #include "RE_CompTransform.h"

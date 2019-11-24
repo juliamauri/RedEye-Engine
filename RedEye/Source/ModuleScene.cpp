@@ -5,7 +5,7 @@
 #include "ModuleEditor.h"
 #include "ModuleInput.h"
 
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_ResourceManager.h"
 #include "RE_CameraManager.h"

@@ -10,21 +10,96 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <stack>
 
 class Config;
 class RE_FileIO;
 class RE_GameObject;
+class ResourceContainer;
 struct Vertex;
 
-class FileSystem
+class RE_FileSystem
 {
+private:
+
+	enum PathType {
+		D_NULL = -1,
+		D_FOLDER,
+		D_FILE
+	};
+
+	enum FileType {
+		F_NOTSUPPORTED = -1,
+		F_NONE,
+		F_MODEL,
+		F_TEXTURE,
+		F_MATERIAL,
+		F_SKYBOX,
+		F_PREFAB,
+		F_SCENE,
+		F_META
+	};
+
+	enum PathProcessType {
+		P_ADDFILE,
+		P_DELETE,
+		P_REIMPORT,
+		P_ADDFOLDER
+	};
+
+	struct RE_Path {
+		std::string path;
+		PathType pType;
+	};
+
+	struct RE_File : public RE_Path
+	{
+		FileType fType = F_NONE;
+		const char* extension = nullptr;
+		signed long long lastModified = 0;
+		signed long long lastSize = 0;
+
+		static FileType DetectExtensionAndType(const char* _path, const char*& _extension);
+	};
+
+	struct RE_Meta :public RE_File
+	{
+		RE_File* fromFile = nullptr;
+		const char* resource = nullptr;
+
+		bool IsModified()const;
+	};
+
+	struct RE_ProcessPath {
+		PathProcessType whatToDo;
+		RE_Path* toProcess;
+	};
+
+	struct RE_Directory : public RE_Path
+	{
+		typedef std::list<RE_Path*>::iterator pathIterator;
+		RE_Directory* parent = nullptr;
+		std::list<RE_Path*> tree;
+
+		void AddBeforeOf(RE_Path* toAdd, pathIterator to) { tree.insert(to, toAdd); }
+		void Delete(std::list<RE_Path*>::iterator del) { tree.erase(del); }
+
+		void SetPath(const char* path);
+		std::list< RE_Directory*> MountTreeFolders();
+		std::stack<RE_ProcessPath*> CheckAndApply();
+
+		void DrawProperties();
+	};
+
 public:
 
-	FileSystem();
-	~FileSystem();
+	RE_FileSystem();
+	~RE_FileSystem();
 
 	bool Init(int argc, char* argv[]);
 	Config* GetConfig() const;
+
+	unsigned int ReadAssetChanges(unsigned int extra_ms, bool doAll = false);
 
 	void DrawEditor();
 	bool AddPath(const char* path_or_zip, const char* mount_point = nullptr);
@@ -64,6 +139,19 @@ private:
 	std::string assets_path;
 	std::string zip_path;
 	std::string write_path;
+
+	RE_Directory* rootAssetDirectory = nullptr;
+	std::list< RE_Directory*> assetsDirectories;
+	std::list< RE_Directory*>::iterator dirIter;
+	std::stack<RE_ProcessPath*> assetsToProcess;
+
+	std::vector<RE_File*> filesToFindMeta;
+	std::vector<RE_Meta*> metaToFindFile;
+
+	std::vector<const char*> metaRecentlyChanged;
+
+	std::vector<const char*> resourcesRecentlyImported;
+	std::vector<RE_File*> filesRecentlyImported;
 };
 
 class RE_FileIO
@@ -135,6 +223,7 @@ public:
 	void		PushFloatVector(const char* name, math::vec vector);
 	void		PushFloat4(const char* name, math::float4 vector);
 	void		PushDouble(const char* name, const double value);
+	void		PushSignedLongLong(const char* name, const signed long long value);
 	void		PushString(const char* name, const char* value);
 	void		PushValue(rapidjson::Value* val);
 	JSONNode*	PushJObject(const char* name);
@@ -147,6 +236,8 @@ public:
 	math::vec		PullFloatVector(const char* name, math::vec deflt);
 	math::float4		PullFloat4(const char* name, math::float4 deflt);
 	double			PullDouble(const char* name, double deflt);
+	signed long long	PullSignedLongLong(const char* name, signed long long deflt);
+
 	const char*		PullString(const char* name, const char* deflt);
 	JSONNode*		PullJObject(const char* name);
 

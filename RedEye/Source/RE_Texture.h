@@ -64,6 +64,8 @@ public:
 	void LoadInMemory() override;
 	void UnloadMemory() override;
 
+	void Import(bool keepInMemory = true) override;
+
 	void use();
 	void GetWithHeight(int* w, int* h);
 	void DrawTextureImGui();

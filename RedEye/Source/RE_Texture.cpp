@@ -1,7 +1,7 @@
 #include "RE_Texture.h"
 
 #include "Application.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "RE_TextureImporter.h"
 
 #include "OutputLog.h"
@@ -81,6 +81,13 @@ void RE_Texture::UnloadMemory()
 	glDeleteTextures(1, &ID);
 	ID = 0;
 	ResourceContainer::inMemory = false;
+}
+
+void RE_Texture::Import(bool keepInMemory)
+{
+	AssetLoad();
+	LibrarySave();
+	if (!keepInMemory) UnloadMemory();
 }
 
 void RE_Texture::use()
@@ -336,6 +343,12 @@ void RE_Texture::AssetLoad()
 	RE_FileIO assetFile(GetAssetPath());
 	if (assetFile.Load()) {
 		App->textures->LoadTextureInMemory(assetFile.GetBuffer(), assetFile.GetSize(), texType, &ID, &width, &height, texSettings);
+		
+		SetMD5(assetFile.GetMd5().c_str());
+		std::string libraryPath("Library/Textures/");
+		libraryPath += GetMD5();
+		SetLibraryPath(libraryPath.c_str());
+
 		ResourceContainer::inMemory = true;
 	}
 }

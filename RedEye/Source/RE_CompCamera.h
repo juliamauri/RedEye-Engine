@@ -9,7 +9,7 @@ class RE_CompTransform;
 
 class RE_CompCamera : public RE_Component
 {
-private:
+public:
 
 	enum AspectRatioTYPE : short
 	{

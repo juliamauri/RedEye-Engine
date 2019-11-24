@@ -4,7 +4,7 @@
 #include "ModuleRenderer3D.h"
 #include "ModuleScene.h"
 
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "RE_InternalResources.h"
 #include "RE_ResourceManager.h"
 

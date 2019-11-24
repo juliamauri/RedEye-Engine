@@ -2,7 +2,7 @@
 
 #include "Application.h"
 
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 
 #include "Globals.h"
 #include "OutputLog.h"
@@ -229,7 +229,14 @@ void RE_SkyBox::LoadResourceMeta(JSONNode* metaNode)
 	skyBoxSettings.wrap_r = (RE_TextureWrap)metaNode->PullInt("wrapR", RE_CLAMP_TO_EDGE);
 }
 
-void RE_SkyBox::AssetLoad()
+void RE_SkyBox::Import(bool keepInMemory)
+{
+	AssetLoad(true);
+	LibrarySave();
+	if (!keepInMemory) UnloadMemory();
+}
+
+void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 {
 	Config toLoad(GetAssetPath(),App->fs->GetZipPath());
 	if (toLoad.Load()) {
@@ -244,6 +251,14 @@ void RE_SkyBox::AssetLoad()
 		}
 		DEL(node);
 		DEL(nodeTex);
+
+		if (generateLibraryPath) {
+			std::string newMd5 = toLoad.GetMd5();
+			SetMD5(newMd5.c_str());
+			std::string libraryPath("Library/SkyBoxes/");
+			libraryPath += newMd5.c_str();
+			SetLibraryPath(libraryPath.c_str());
+		}
 	}
 	App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
 	LoadSkyBoxCube();

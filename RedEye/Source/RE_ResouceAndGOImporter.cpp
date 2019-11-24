@@ -1,7 +1,7 @@
 #include "RE_ResouceAndGOImporter.h"
 
 #include "Application.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
 #include "Resource.h"
 

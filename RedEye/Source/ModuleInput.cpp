@@ -5,7 +5,7 @@
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
 
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 
 #include "Event.h"
 #include "OutputLog.h"

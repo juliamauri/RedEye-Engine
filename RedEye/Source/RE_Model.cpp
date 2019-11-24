@@ -1,7 +1,7 @@
 #include "RE_Model.h"
 
 #include "Application.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
 
 #include "RE_ResouceAndGOImporter.h"
@@ -92,6 +92,11 @@ void RE_Model::AssetLoad()
 
 	if (assetload.Load()) {
 		loaded = App->modelImporter->ProcessModel(assetload.GetBuffer(), assetload.GetSize(),GetAssetPath(), &modelSettings);
+
+		SetMD5(assetload.GetMd5().c_str());
+		std::string libraryPath("Library/Models/");
+		libraryPath += GetMD5();
+		SetLibraryPath(libraryPath.c_str());
 
 		ResourceContainer::inMemory = true;
 	}

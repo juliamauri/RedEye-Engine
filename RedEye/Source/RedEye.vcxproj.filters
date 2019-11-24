@@ -40,9 +40,6 @@
     <ClCompile Include="Cvar.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
-    <ClCompile Include="FileSystem.cpp">
-      <Filter>Modules\Independent App Modules\FileSystem</Filter>
-    </ClCompile>
     <ClCompile Include="TimeManager.cpp">
       <Filter>Modules\Independent App Modules\TimeManager</Filter>
     </ClCompile>
@@ -156,6 +153,9 @@
     </ClCompile>
     <ClCompile Include="RE_ResourceManager.cpp">
       <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_FileSystem.cpp">
+      <Filter>Modules\Independent App Modules\FileSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -336,9 +336,6 @@
     <ClInclude Include="Cvar.h">
       <Filter>Containers</Filter>
     </ClInclude>
-    <ClInclude Include="FileSystem.h">
-      <Filter>Modules\Independent App Modules\FileSystem</Filter>
-    </ClInclude>
     <ClInclude Include="TimeManager.h">
       <Filter>Modules\Independent App Modules\TimeManager</Filter>
     </ClInclude>
@@ -470,6 +467,9 @@
     </ClInclude>
     <ClInclude Include="RE_ResourceManager.h">
       <Filter>Modules\Resource Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_FileSystem.h">
+      <Filter>Modules\Independent App Modules\FileSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

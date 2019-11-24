@@ -2,7 +2,7 @@
 
 #include "Application.h"
 #include "RE_GameObject.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 
 #include  "OutputLog.h"
 
@@ -37,6 +37,13 @@ void RE_Prefab::UnloadMemory()
 {
 	if (loaded) DEL(loaded);
 	ResourceContainer::inMemory = false;
+}
+
+void RE_Prefab::Import(bool keepInMemory)
+{
+	AssetLoad();
+	LibrarySave();
+	if (!keepInMemory) UnloadMemory();
 }
 
 void RE_Prefab::Save(RE_GameObject* go)
@@ -87,7 +94,7 @@ void RE_Prefab::AssetSave()
 	prefab_SaveFile.Save();
 }
 
-void RE_Prefab::AssetLoad()
+void RE_Prefab::AssetLoad(bool generateLibraryPath)
 {
 	Config jsonLoad(GetAssetPath(), App->fs->GetZipPath());
 
@@ -95,6 +102,14 @@ void RE_Prefab::AssetLoad()
 		JSONNode* prefabNode = jsonLoad.GetRootNode("prefab");
 		loaded = RE_ResouceAndGOImporter::JsonDeserialize(prefabNode);
 		DEL(prefabNode);
+
+		if (generateLibraryPath) {
+			std::string md5 = jsonLoad.GetMd5();
+			SetMD5(md5.c_str());
+			std::string libraryPath("Library/Prefabs/");
+			libraryPath += md5;
+			SetLibraryPath(libraryPath.c_str());
+		}
 	}
 
 	ResourceContainer::inMemory = true;

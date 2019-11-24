@@ -2,7 +2,7 @@
 
 #include "Application.h"
 #include "ModuleScene.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_Component.h"
 #include "RE_CompTransform.h"
@@ -366,7 +366,7 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, cons
 					cmpNode->PullFloat("near_plane", 1),
 					cmpNode->PullFloat("far_plane", 10000),
 					cmpNode->PullFloat("v_fov_rads", 30.0f),
-					cmpNode->PullInt("aspect_ratio", AspectRatioTYPE::Fit_Window),
+					cmpNode->PullInt("aspect_ratio", RE_CompCamera::AspectRatioTYPE::Fit_Window),
 					cmpNode->PullBool("draw_frustum", true));
 			}
 				break;
@@ -537,7 +537,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 				size = sizeof(bool);
 				memcpy(&aspectRatioInt, cursor, size);
 				cursor += size;
-				AspectRatioTYPE aspectRatio = (AspectRatioTYPE)aspectRatioInt;
+				RE_CompCamera::AspectRatioTYPE aspectRatio = (RE_CompCamera::AspectRatioTYPE)aspectRatioInt;
 
 				bool drawFrustum = true;
 				size = sizeof(bool);

@@ -1,7 +1,7 @@
 #include "Resource.h"
 
 #include "Application.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 
 #include "Globals.h"
 
@@ -56,6 +56,11 @@ Resource_Type ResourceContainer::GetType() const
 	return type;
 }
 
+signed long long ResourceContainer::GetLastTimeModified() const
+{
+	return lastModified;
+}
+
 void ResourceContainer::SetType(Resource_Type type)
 {
 	this->type = type;
@@ -83,8 +88,8 @@ void ResourceContainer::SetType(Resource_Type type)
 	case R_SKYBOX:
 		propietiesName = "SkyBox";
 		break;
-	case R_INTERNALPREFAB:
-		propietiesName = "Internal preafab";
+	case R_SCENE:
+		propietiesName = "Scene";
 		break;
 	case R_MATERIAL:
 		propietiesName = "Material";
@@ -142,6 +147,8 @@ void ResourceContainer::SaveMeta()
 	metaNode->PushString("LibraryPath", libraryPath.c_str());
 	metaNode->PushString("MD5", md5);
 	metaNode->PushInt("Type", type);
+	metaNode->PushSignedLongLong("lastModified", lastModified);
+	
 
 	SaveResourceMeta(metaNode);
 	metaSerialize.Save();
@@ -159,6 +166,7 @@ void ResourceContainer::LoadMeta()
 		assetPath = metaNode->PullString("LibraryPath", "Library/");
 		SetMD5(metaNode->PullString("MD5", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		type = (Resource_Type)metaNode->PullInt("Type", Resource_Type::R_UNDEFINED);
+		lastModified  = metaNode->PullSignedLongLong("lastModified", 0);
 
 		LoadResourceMeta(metaNode);
 

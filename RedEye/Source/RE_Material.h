@@ -26,7 +26,7 @@ enum RE_ShadingMode { //from assimp documentation
 	S_FRESNEL
 };
 
-class RE_Material : ResourceContainer
+class RE_Material : public ResourceContainer
 {
 public:
 	RE_Material();
@@ -36,6 +36,8 @@ public:
 	void LoadInMemory() override;
 	void UnloadMemory() override;
 
+	void Import(bool keepInMemory = true) override;
+
 	void Save();
 
 private:
@@ -43,7 +45,7 @@ private:
 
 	void DrawTextures(const char* texturesName, std::vector<const char*>* textures);
 
-	void JsonDeserialize();
+	void JsonDeserialize(bool generateLibraryPath = false);
 	void JsonSerialize();
 
 	void PullTexturesJson(JSONNode * texturesNode, std::vector<const char*>* textures);

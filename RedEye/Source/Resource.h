@@ -17,9 +17,9 @@ enum Resource_Type : short unsigned int
 	R_MESH,
 	R_PREFAB,
 	R_SKYBOX,
-	R_INTERNALPREFAB,
 	R_MATERIAL,
-	R_MODEL
+	R_MODEL,
+	R_SCENE
 };
 
 class ResourceContainer
@@ -34,7 +34,8 @@ public:
 	const char* GetMetaPath() const;
 	const char* GetMD5() const;
 	Resource_Type GetType() const;
-	
+	signed long long GetLastTimeModified()const;
+
 	void SetType(Resource_Type type);
 	void SetMD5(const char* md5);
 	void SetLibraryPath(const char* path);
@@ -48,6 +49,8 @@ public:
 	bool isInMemory()const { return inMemory; }
 	virtual void LoadInMemory() = 0;
 	virtual void UnloadMemory() = 0;
+
+	virtual void Import(bool keepInMemory = true) { }
 
 	void SaveMeta();
 	void LoadMeta();
@@ -67,7 +70,7 @@ private:
 	std::string metaPath;
 	char* md5 = nullptr;
 	Resource_Type type;
-
+	signed long long lastModified = 0;
 
 	bool isinternal = false;
 

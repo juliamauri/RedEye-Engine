@@ -2,7 +2,7 @@
 
 #include "Application.h"
 #include "RE_ResourceManager.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 
 #include "RE_SkyBox.h"
 

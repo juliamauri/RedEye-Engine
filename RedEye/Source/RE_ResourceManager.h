@@ -13,8 +13,16 @@ public:
 	~RE_ResourceManager();
 
 	ResourceContainer* At(const char* md5) const;
+	const char* ReferenceByMeta(const char* path, Resource_Type type);
 	const char* Reference(ResourceContainer* rc);
 	unsigned int TotalReferences() const;
+
+	const char* ImportModel(const char* assetPath);
+	const char* ImportTexture(const char* assetPath);
+	const char* ImportMaterial(const char* assetPath);
+	const char* ImportSkyBox(const char* assetPath);
+	const char* ImportPrefab(const char* assetPath);
+	const char* ImportScene(const char* assetPath);
 
 	unsigned int TotalReferenceCount(const char* resMD5) const;
 	void Use(const char* resMD5);

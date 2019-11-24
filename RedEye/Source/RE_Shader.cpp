@@ -1,7 +1,7 @@
 #include "RE_Shader.h"
 
 #include "Application.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 
 #include "RE_ShaderImporter.h"
 
@@ -76,8 +76,8 @@ void RE_Shader::Draw()
 {
 	//Todo drag & drop of shader files
 	ImGui::Text("Vertex Shader path: %s", shaderSettings.vertexShader.c_str());
-	ImGui::Text("Fragment Shader path: %s", shaderSettings.vertexShader.c_str());
-	ImGui::Text("Geometry Shader path: %s", shaderSettings.vertexShader.c_str());
+	ImGui::Text("Fragment Shader path: %s", shaderSettings.fragmentShader.c_str());
+	ImGui::Text("Geometry Shader path: %s", shaderSettings.geometryShader.c_str());
 }
 
 void RE_Shader::SaveResourceMeta(JSONNode* metaNode)

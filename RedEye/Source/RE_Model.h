@@ -60,7 +60,7 @@ public:
 
 	void SetAssetPath(const char* originPath)override;
 
-	void Import(bool keepInMemory = true);
+	void Import(bool keepInMemory = true) override;
 	RE_GameObject* GetRoot();
 
 private:

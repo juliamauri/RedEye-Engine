@@ -1,4 +1,4 @@
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 
 #include "Application.h"
 #include "ModuleScene.h"
@@ -24,6 +24,7 @@
 
 #include "PhysFS\include\physfs.h"
 
+#include "TimeManager.h"
 #include "md5.h"
 
 #pragma comment( lib, "PhysFS/libx86/physfs.lib" )
@@ -43,10 +44,10 @@
 #include <fstream>
 #include <algorithm>
 
-FileSystem::FileSystem() : engine_config(nullptr)
+RE_FileSystem::RE_FileSystem() : engine_config(nullptr)
 {}
 
-FileSystem::~FileSystem()
+RE_FileSystem::~RE_FileSystem()
 {
 	DEL(engine_config);
 
@@ -54,7 +55,7 @@ FileSystem::~FileSystem()
 }
 
 
-bool FileSystem::Init(int argc, char* argv[])
+bool RE_FileSystem::Init(int argc, char* argv[])
 {
 	bool ret = false;
 
@@ -98,12 +99,230 @@ bool FileSystem::Init(int argc, char* argv[])
 	return ret;
 }
 
-Config* FileSystem::GetConfig() const
+Config* RE_FileSystem::GetConfig() const
 {
 	return engine_config;
 }
 
-void FileSystem::DrawEditor()
+unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
+{
+	Timer time;
+	bool run = true;
+
+	if (!assetsToProcess.empty() || !filesToFindMeta.empty() || !metaToFindFile.empty()) dirIter = assetsDirectories.end();
+
+	while (run && dirIter != assetsDirectories.end()) {
+		std::stack<RE_ProcessPath*> toProcess = (*dirIter)->CheckAndApply();
+		while (!toProcess.empty()) {
+			RE_ProcessPath* process = toProcess.top();
+			toProcess.pop();
+			assetsToProcess.push(process);
+		}
+
+		dirIter++;
+
+		//timer
+		if (extra_ms < time.Read()) run = false;
+	}
+
+	if (dirIter == assetsDirectories.end())
+	{
+		dirIter = assetsDirectories.begin();
+
+		while (run && !assetsToProcess.empty()) {
+			RE_ProcessPath* process = assetsToProcess.top();
+			assetsToProcess.pop();
+
+			switch (process->whatToDo)
+			{
+			case P_ADDFILE:
+			{
+				RE_File* file = (RE_File*)process->toProcess;
+
+				switch (file->fType)
+				{
+				case F_META:
+				{
+					if (metaRecentlyChanged.empty() && resourcesRecentlyImported.empty()) {
+						Config metaLoad(file->path.c_str(), App->fs->GetZipPath());
+						if (metaLoad.Load()) {
+							JSONNode* metaNode = metaLoad.GetRootNode("meta");
+							Resource_Type type = (Resource_Type)metaNode->PullInt("Type", Resource_Type::R_UNDEFINED);
+							DEL(metaNode);
+							RE_Meta* metaFile = (RE_Meta*)file;
+							if (type != Resource_Type::R_UNDEFINED) metaFile->resource = App->resources->ReferenceByMeta(file->path.c_str(), type);
+							if (metaFile->resource == nullptr)  metaFile->fType = F_NOTSUPPORTED;
+							else if (type != Resource_Type::R_SHADER) metaToFindFile.push_back(metaFile);
+						}
+					}
+					else{
+						bool done = false;
+						if (!metaRecentlyChanged.empty()) {
+							std::vector<const char*>::iterator md5Iter = metaRecentlyChanged.begin();
+
+							for (md5Iter; md5Iter != metaRecentlyChanged.end(); md5Iter++) {
+								ResourceContainer* res = App->resources->At(*md5Iter);
+
+								if (std::strcmp(res->GetMetaPath(), file->path.c_str()) == 0) {
+									std::vector<const char*>::iterator toDelete = md5Iter++;
+									metaRecentlyChanged.erase(toDelete);
+									done = true;
+									break;
+								}
+							}
+
+
+						}
+						if (!done && !resourcesRecentlyImported.empty()) {
+							std::vector<const char*>::iterator md5Iter = resourcesRecentlyImported.begin();
+							std::vector<RE_File*>::iterator fileIter = filesRecentlyImported.begin();
+							for (md5Iter; md5Iter != resourcesRecentlyImported.end(); md5Iter++, fileIter++) {
+								ResourceContainer* res = App->resources->At(*md5Iter);
+
+								if (std::strcmp(res->GetMetaPath(), file->path.c_str()) == 0) {
+									RE_Meta* metaFile = (RE_Meta*)file;
+									metaFile->resource = *md5Iter;
+									metaFile->fromFile = *fileIter;
+									std::vector<const char*>::iterator ctoDelete = md5Iter++;
+									std::vector<RE_File*>::iterator ftoDelete = fileIter++;
+									resourcesRecentlyImported.erase(ctoDelete);
+									filesRecentlyImported.erase(ftoDelete);
+									break;
+								}
+							}
+
+						}
+					}
+					break;
+				}
+				case F_MODEL:
+				case F_TEXTURE:
+				case F_MATERIAL:
+				case F_SKYBOX:
+				case F_PREFAB:
+				case F_SCENE:
+				{
+					filesToFindMeta.push_back(file);
+					break;
+				}
+				}
+			}
+			break;
+			case P_ADDFOLDER:
+			{
+				RE_Directory* dir = (RE_Directory*)process->toProcess;
+				std::stack<RE_ProcessPath*> toProcess = dir->CheckAndApply();
+				if (!toProcess.empty()) {
+					while (!toProcess.empty()) {
+						RE_ProcessPath* process = toProcess.top();
+							toProcess.pop();
+							assetsToProcess.push(process);
+					}
+				}
+				assetsDirectories.push_back(dir);
+				break;
+			}
+			}
+			DEL(process);
+
+			//timer
+			if (extra_ms < time.Read()) run = false;
+		}
+
+		if (run && !metaToFindFile.empty()) {
+
+			std::vector<RE_Meta*>::iterator metaIter = metaToFindFile.begin();
+
+			while (run && !metaToFindFile.empty())
+			{
+				ResourceContainer* res = App->resources->At((*metaIter)->resource);
+
+				if (!filesToFindMeta.empty()) {
+					std::vector<RE_File*>::iterator fileIter = filesToFindMeta.begin();
+
+					for (fileIter; fileIter != filesToFindMeta.end(); fileIter++) {
+						if (std::strcmp(res->GetAssetPath(), (*fileIter)->path.c_str()) == 0) {
+							(*metaIter)->fromFile = *fileIter;
+							break;
+						}
+					}
+					if (fileIter != filesToFindMeta.end()) filesToFindMeta.erase(fileIter);
+					else (*metaIter)->fType = FileType::F_NOTSUPPORTED;
+				}
+				else (*metaIter)->fType = FileType::F_NOTSUPPORTED;
+
+				std::vector<RE_Meta*>::iterator toDelete = metaIter;
+				metaIter++;
+				metaToFindFile.erase(metaIter);
+
+				//timer
+				if (extra_ms < time.Read()) run = false;
+			}
+
+			if (run && !filesToFindMeta.empty() && metaToFindFile.empty()) {
+				std::vector<RE_File*>::iterator fileIter = filesToFindMeta.begin();
+
+				//Importing
+				for (fileIter; fileIter != filesToFindMeta.end(); fileIter++) {
+					RE_File* file = (*fileIter);
+					const char* newRes = nullptr;
+					switch (file->fType)
+					{
+					case F_MODEL:
+					{
+						newRes = App->resources->ImportModel(file->path.c_str());
+						break;
+					}
+					case F_TEXTURE:
+					{
+						newRes = App->resources->ImportTexture(file->path.c_str());
+						break;
+					}
+					case F_MATERIAL:
+					{
+						newRes = App->resources->ImportMaterial(file->path.c_str());
+						break;
+					}
+					case F_SKYBOX:
+					{
+						newRes = App->resources->ImportSkyBox(file->path.c_str());
+						break;
+					}
+					case F_PREFAB:
+					{
+						newRes = App->resources->ImportPrefab(file->path.c_str());
+						break;
+					}
+					case F_SCENE:
+					{
+						newRes = App->resources->ImportScene(file->path.c_str());
+						break;
+					}
+					}
+
+					if (newRes != nullptr) {
+						resourcesRecentlyImported.push_back(newRes);
+						filesRecentlyImported.push_back(file);
+					}
+					else
+						file->fType = F_NOTSUPPORTED;
+
+					std::vector<RE_File*>::iterator toDelete = fileIter++;
+					filesToFindMeta.erase(toDelete);
+
+					if (extra_ms < time.Read()) {
+						run = false;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return (extra_ms < time.Read()) ? 0 : extra_ms - time.Read();
+}
+
+void RE_FileSystem::DrawEditor()
 {
 	ImGui::Text("Executable Directory:");
 	ImGui::TextWrappedV(GetExecutableDirectory(), "");
@@ -120,7 +339,7 @@ void FileSystem::DrawEditor()
 	ImGui::TextWrappedV(write_path.c_str(), "");
 }
 
-bool FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
+bool RE_FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
 {
 	bool ret = true;
 
@@ -137,7 +356,7 @@ bool FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
 	return ret;
 }
 
-bool FileSystem::RemovePath(const char * path_or_zip)
+bool RE_FileSystem::RemovePath(const char * path_or_zip)
 {
 	bool ret = true;
 
@@ -152,7 +371,7 @@ bool FileSystem::RemovePath(const char * path_or_zip)
 	return ret;
 }
 
-bool FileSystem::SetWritePath(const char * dir)
+bool RE_FileSystem::SetWritePath(const char * dir)
 {
 	bool ret = true;
 
@@ -169,12 +388,12 @@ bool FileSystem::SetWritePath(const char * dir)
 	return ret;
 }
 
-const char * FileSystem::GetWritePath() const
+const char * RE_FileSystem::GetWritePath() const
 {
 	return write_path.c_str();
 }
 
-void FileSystem::LogFolderItems(const char * folder)
+void RE_FileSystem::LogFolderItems(const char * folder)
 {
 	char **rc = PHYSFS_enumerateFiles(folder);
 	char **i;
@@ -186,7 +405,7 @@ void FileSystem::LogFolderItems(const char * folder)
 }
 
 // Quick Buffer From Platform-Dependent Path
-RE_FileIO* FileSystem::QuickBufferFromPDPath(const char * full_path)// , char** buffer, unsigned int size)
+RE_FileIO* RE_FileSystem::QuickBufferFromPDPath(const char * full_path)// , char** buffer, unsigned int size)
 {
 	RE_FileIO* ret = nullptr;
 
@@ -212,27 +431,27 @@ RE_FileIO* FileSystem::QuickBufferFromPDPath(const char * full_path)// , char** 
 	return ret;
 }
 
-bool FileSystem::Exists(const char* file) const
+bool RE_FileSystem::Exists(const char* file) const
 {
 	return PHYSFS_exists(file) != 0;
 }
 
-bool FileSystem::IsDirectory(const char* file) const
+bool RE_FileSystem::IsDirectory(const char* file) const
 {
 	return PHYSFS_isDirectory(file) != 0;
 }
 
-const char* FileSystem::GetExecutableDirectory() const
+const char* RE_FileSystem::GetExecutableDirectory() const
 {
 	return PHYSFS_getBaseDir();
 }
 
-const char * FileSystem::GetZipPath()
+const char * RE_FileSystem::GetZipPath()
 {
 	return zip_path.c_str();
 }
 
-void FileSystem::HandleDropedFile(const char * file)
+void RE_FileSystem::HandleDropedFile(const char * file)
 {
 	OPTICK_CATEGORY("Dropped File", Optick::Category::IO);
 	std::string full_path(file);
@@ -439,7 +658,7 @@ void FileSystem::HandleDropedFile(const char * file)
 	}
 }
 
-std::string FileSystem::RecursiveFindFbx(const char * path)
+std::string RE_FileSystem::RecursiveFindFbx(const char * path)
 {
 	std::string	fbxPathReturn;
 	std::string iterPath(path);
@@ -477,7 +696,7 @@ std::string FileSystem::RecursiveFindFbx(const char * path)
 	return fbxPathReturn;
 }
 
-std::string FileSystem::RecursiveFindFileOwnFileSystem(const char * directory_path, const char * fileToFind)
+std::string RE_FileSystem::RecursiveFindFileOwnFileSystem(const char * directory_path, const char * fileToFind)
 {
 	std::string	filePathReturn;
 	std::string	iterPath(directory_path);
@@ -516,7 +735,7 @@ std::string FileSystem::RecursiveFindFileOwnFileSystem(const char * directory_pa
 	return filePathReturn;
 }
 
-std::string FileSystem::RecursiveFindFileOutsideFileSystem(const char* directory_path, const char* exporting_path, const char* fileToFind)
+std::string RE_FileSystem::RecursiveFindFileOutsideFileSystem(const char* directory_path, const char* exporting_path, const char* fileToFind)
 {
 	std::string	filePathReturn;
 	std::string	directoryPath(directory_path);
@@ -559,7 +778,7 @@ std::string FileSystem::RecursiveFindFileOutsideFileSystem(const char* directory
 	return directoryPath;
 }
 
-std::vector<std::string> FileSystem::FindAllFilesByExtension(const char * path, const char * extension, bool repercusive)
+std::vector<std::string> RE_FileSystem::FindAllFilesByExtension(const char * path, const char * extension, bool repercusive)
 {
 	std::vector<std::string> ret;
 
@@ -597,7 +816,7 @@ std::vector<std::string> FileSystem::FindAllFilesByExtension(const char * path, 
 	return ret;
 }
 
-bool FileSystem::RecursiveComparePath(const char * path1, const char * path2)
+bool RE_FileSystem::RecursiveComparePath(const char * path1, const char * path2)
 {
 	bool isSame = true;
 	std::string iterPath1 = path1;
@@ -649,7 +868,7 @@ bool FileSystem::RecursiveComparePath(const char * path1, const char * path2)
 	return isSame;
 }
 
-void FileSystem::RecursiveCopy(const char * origin, const char * dest)
+void RE_FileSystem::RecursiveCopy(const char * origin, const char * dest)
 {
 	std::string iterOrigin(origin);
 	std::string iterDest(dest);
@@ -1037,6 +1256,18 @@ void JSONNode::PushDouble(const char* name, const double value)
 	}
 }
 
+void JSONNode::PushSignedLongLong(const char* name, const signed long long value)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, value);
+	}
+}
+
 void JSONNode::PushString(const char* name, const char* value)
 {
 	if (name != nullptr)
@@ -1208,6 +1439,23 @@ double JSONNode::PullDouble(const char* name, double deflt)
 	return ret;
 }
 
+signed long long JSONNode::PullSignedLongLong(const char* name, signed long long deflt)
+{
+	signed long long ret = 0;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+		ret = (val != nullptr) ? val->GetInt64() : deflt;
+	}
+
+	return ret;
+}
+
 const char*	JSONNode::PullString(const char* name, const char* deflt)
 {
 	const char* ret = nullptr;
@@ -1265,4 +1513,157 @@ void JSONNode::SetArray()
 void JSONNode::SetObject()
 {
 	rapidjson::Pointer(pointerPath.c_str()).Get(config->document)->SetObject();
+}
+
+RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const char* _path, const char*& _extension)
+{
+	static const char* extensionsSuported[12] = { "meta", "re","refab", "pupil", "sk",  "fbx", "jpg", "dds", "png", "tga", "tiff", "bmp" };
+	
+	RE_FileSystem::FileType ret = F_NOTSUPPORTED;
+	std::string modPath(_path);
+	std::string filename = modPath.substr(modPath.find_last_of("/") + 1);
+	std::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
+
+	for (uint i = 0; i < 12; i++) {
+		if (extensionStr.compare(extensionsSuported[i]) == 0)
+		{
+			_extension = extensionsSuported[i];
+			switch (i) {
+			case 0:
+				ret = F_META;
+				break;
+			case 1:
+				ret = F_SCENE;
+				break;
+			case 2:
+				ret = F_PREFAB;
+				break;
+			case 3:
+				ret = F_MATERIAL;
+				break;
+			case 4:
+				ret = F_SKYBOX;
+				break;
+			case 5:
+				ret = F_MODEL;
+				break;
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+			case 10:
+			case 11:
+				ret = F_TEXTURE;
+				break;
+			}
+		}
+	}
+	return ret;
+}
+
+bool RE_FileSystem::RE_Meta::IsModified() const
+{
+	return (App->resources->At(resource)->GetType() != Resource_Type::R_SHADER && fromFile->lastModified != App->resources->At(resource)->GetLastTimeModified());
+}
+
+void RE_FileSystem::RE_Directory::SetPath(const char* _path)
+{
+	path = _path;
+}
+
+std::list< RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::MountTreeFolders()
+{
+	std::list< RE_Directory*> ret;
+	if (App->fs->Exists(path.c_str())) {
+		std::string iterPath(path);
+
+		char** rc = PHYSFS_enumerateFiles(iterPath.c_str());
+		char** i;
+
+		for (i = rc; *i != NULL; i++)
+		{
+			std::string inPath(iterPath);
+			inPath += *i;
+
+			PHYSFS_Stat fileStat;
+			if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
+				if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
+					inPath += "/";
+					RE_Directory* newDirectory = new RE_Directory();
+					newDirectory->SetPath(inPath.c_str());
+					newDirectory->parent = this;
+					newDirectory->pType = D_FOLDER;
+					tree.push_back(newDirectory);
+					ret.push_back(newDirectory);
+				}
+			}
+		}
+		PHYSFS_freeList(rc);
+
+		if (!tree.empty()) for (RE_Path* path : tree) {
+			std::list< RE_Directory*> fromChild = ((RE_Directory*)path)->MountTreeFolders();
+			if (!fromChild.empty()) ret.insert(ret.end(), fromChild.begin(), fromChild.end());
+		}
+	}
+	return ret;
+}
+
+std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAndApply()
+{
+	std::stack<RE_ProcessPath*> ret;
+	if (App->fs->Exists(path.c_str())) {
+		std::string iterPath(path);
+
+		char** rc = PHYSFS_enumerateFiles(iterPath.c_str());
+		char** i;
+
+		pathIterator iter = tree.begin();
+		for (i = rc; *i != NULL; i++)
+		{
+			PathType iterTreeType = (iter != tree.end()) ? (*iter)->pType : PathType::D_NULL;
+
+			std::string inPath(iterPath);
+			inPath += *i;
+
+			PHYSFS_Stat fileStat;
+			if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
+				if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
+					inPath += "/";
+					
+					if (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FOLDER || (*iter)->path != inPath) {
+						RE_Directory* newDirectory = new RE_Directory();
+						newDirectory->SetPath(inPath.c_str());
+						newDirectory->parent = this;
+						newDirectory->pType = D_FOLDER;
+						AddBeforeOf((RE_Path*)newDirectory, iter);
+						RE_ProcessPath* newProcess = new RE_ProcessPath();
+						newProcess->whatToDo = P_ADDFOLDER;
+						newProcess->toProcess = (RE_Path*)newDirectory;
+						ret.push(newProcess);
+					}
+				}
+			}
+			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
+				const char* extension = nullptr;
+				FileType fileType = RE_File::DetectExtensionAndType(inPath.c_str(), extension);
+
+				if (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FILE || (*iter)->path != inPath || ((RE_File*)(*iter))->lastSize != fileStat.filesize) {
+					RE_ProcessPath* newProcess = new RE_ProcessPath();
+					RE_File* newFile = (fileType != FileType::F_META) ? new RE_File() : (RE_File*)new RE_Meta();
+					newFile->path = inPath;
+					newFile->lastSize = fileStat.filesize;
+					newFile->pType = PathType::D_FILE;
+					newFile->fType = fileType;
+					newFile->extension = extension;
+					newProcess->whatToDo = P_ADDFILE;
+					newProcess->toProcess = (RE_Path*)newFile;
+					ret.push(newProcess);
+					AddBeforeOf((RE_Path*)newFile, iter);
+				}
+			}
+			if (iter != tree.end()) iter++;
+		}
+		PHYSFS_freeList(rc);
+	}
+	return ret;
 }

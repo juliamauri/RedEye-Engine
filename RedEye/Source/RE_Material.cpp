@@ -1,7 +1,7 @@
 #include "RE_Material.h"
 
 #include "Application.h"
-#include "FileSystem.h"
+#include "RE_FileSystem.h"
 #include "OutputLog.h"
 #include "RE_ResourceManager.h"
 
@@ -63,6 +63,13 @@ void RE_Material::UnloadMemory()
 	refraccti = 1.0f;
 
 	ResourceContainer::inMemory = false;
+}
+
+void RE_Material::Import(bool keepInMemory)
+{
+	JsonDeserialize(true);
+	BinarySerialize();
+	if (!keepInMemory) UnloadMemory();
 }
 
 void RE_Material::Save()
@@ -188,7 +195,7 @@ void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*
 	}
 }
 
-void RE_Material::JsonDeserialize()
+void RE_Material::JsonDeserialize(bool generateLibraryPath)
 {
 	Config material(GetAssetPath(), App->fs->GetZipPath());
 	if (material.Load()) {
@@ -253,6 +260,13 @@ void RE_Material::JsonDeserialize()
 		DEL(unknownNode);
 
 		DEL(nodeMat);
+
+		if (generateLibraryPath) {
+			SetMD5(material.GetMd5().c_str());
+			std::string libraryPath("Library/Materials/");
+			libraryPath += GetMD5();
+			SetLibraryPath(libraryPath.c_str());
+		}
 
 		ResourceContainer::inMemory = true;
 	}
