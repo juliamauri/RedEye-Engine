@@ -544,7 +544,7 @@ RE_GameObject * RE_GameObject::GetGoFromUUID(UUID parent)
 
 void RE_GameObject::RecieveEvent(const Event & e)
 {
-	if (e.GetType() == PARENT_TRANSFORM_MODIFIED)
+	if (e.type == PARENT_TRANSFORM_MODIFIED)
 		TransformModified();
 }
 

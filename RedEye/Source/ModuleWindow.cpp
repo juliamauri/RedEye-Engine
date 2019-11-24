@@ -169,18 +169,18 @@ bool ModuleWindow::Save(JSONNode * node) const
 
 void ModuleWindow::RecieveEvent(const Event& e)
 {
-	switch (e.GetType())
+	switch (e.type)
 	{
 	case WINDOW_MOVED:
 	{
-		pos_x = e.GetData().AsInt();
-		pos_y = e.GetDataNext().AsInt();
+		pos_x = e.data1.AsInt();
+		pos_y = e.data2.AsInt();
 		break;
 	}
 	case WINDOW_SIZE_CHANGED:
 	{
-		width = e.GetData().AsInt();
-		height = e.GetDataNext().AsInt();
+		width = e.data1.AsInt();
+		height = e.data2.AsInt();
 		break;
 	}
 	}
