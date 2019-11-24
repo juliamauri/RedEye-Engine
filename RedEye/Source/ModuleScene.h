@@ -53,6 +53,7 @@ private:
 
 private:
 
+	RE_GameObject* savedState = nullptr;
 	RE_GameObject* root = nullptr;
 
 	QTree quad_tree;

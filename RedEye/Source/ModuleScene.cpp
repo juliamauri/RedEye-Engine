@@ -121,6 +121,22 @@ bool ModuleScene::Start()
 	UpdateQuadTree();
 	Event::ResumeEvents();
 
+	if (root)
+	{
+		savedState = new RE_GameObject(*root);
+
+		// Render Camera Management
+		App->cams->RecallCameras(root);
+		if (!RE_CameraManager::HasMainCamera())
+			CreateCamera();
+
+		// Setup AABB + Quadtree
+		root->TransformModified(true);
+		GetActiveStatic(active_static_gos);
+		GetActiveNonStatic(active_non_static_gos);
+		UpdateQuadTree();
+	}
+
 	return ret;
 }
 
@@ -138,12 +154,15 @@ bool ModuleScene::CleanUp()
 	Serialize();
 
 	DEL(root);
+	DEL(savedState);
 
 	return true;
 }
 
 void ModuleScene::OnPlay()
 {
+	if (savedState) DEL(savedState);
+	savedState = new RE_GameObject(*root);
 	root->OnPlay();
 }
 
@@ -155,6 +174,19 @@ void ModuleScene::OnPause()
 void ModuleScene::OnStop()
 {
 	root->OnStop();
+	DEL(root);
+	root = new RE_GameObject(*savedState);
+
+	// Render Camera Management
+	App->cams->RecallCameras(root);
+	if (!RE_CameraManager::HasMainCamera())
+		CreateCamera();
+
+	// Setup AABB + Quadtree
+	root->TransformModified(true);
+	GetActiveStatic(active_static_gos);
+	GetActiveNonStatic(active_non_static_gos);
+	UpdateQuadTree();
 }
 
 void ModuleScene::RecieveEvent(const Event& e)
@@ -695,7 +727,7 @@ void ModuleScene::Serialize()
 	JSONNode* node = scene_file.GetRootNode("Game Objects");
 
 	node->SetArray();
-	root->Serialize(node);
+	savedState->Serialize(node);
 
 	DEL(node);
 

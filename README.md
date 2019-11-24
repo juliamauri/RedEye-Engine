@@ -12,8 +12,8 @@
 ## User Actions
 ### Application Controls
 * F1 to toggle showing Editor
-* ESC closes application
 ### Camera Controls
+* Left click to select a game object.
 * While Right clicking, free look around
 * While Right clicking, WASD movement
 * While Right clicking, SPACE_BAR elevates camera
@@ -21,15 +21,24 @@
 * Mouse wheel zooms in and out
 * Alt + Left click orbits object
 * F focuses editor camera on selected Game Object enclosing its geometry.
+### Scene Playback Controls
+* Play: only needs a main camera in scene (created at scene start by default)
+* Tick: calls next frame and pauses
+* Restart/Pause/Stop...
 ### Supported Drag & Drop file extensions
 * **.zip**: If not already in /Library, file copies to /Assets and is iterated. Resources are saved in /Library with our own format and loaded to scene.
 * **.fbx**: If not already in /Library, file copies to /Assets. Then searches at origin path for other files needed and copies them too. Resources are saved in /Library with our own format and loaded to scene.
 * **.png, .dds, .jpg & .tga**: If not already in /Library, imports file to /Assets. If selected Game Object has a mesh, the meshes' texture is changed.
 
 ## Other Systems
+### Camera Manager & Target Aspect Ratio
+Cameras are handled through the new CameraManager class. Using static functions allows for clean getting of cameras anywhere in code. Using the also new events system, the cameras get the renderer's gl_Viewport updated given any window resizes.
+### Quadtree
+Using the events system, scene can control where all root gameobjects are. If any gameobjects exit the Quadtree boundaries after transformation, they get stored away from the quadtree (Pop) in a list with the rest of static objects outside the quadtree. If a gameobject re-enters the quadtre boundaries, its re-added to the quadtree (Push).
+### Skybox
+Default skybox loads on start. Using glDepthFunc(GL_LEQUAL) instead of glDepthFunc(GL_LESS) and rendered last, the skybox always draws the furthest away. For passing the 6 different textures,GL_TEXTURE_CUBE_MAP binds on draw call.
 ### Console & Error Handler
 Engine logs all startup and importing procedures and can be accessed through the console window. This window contains a menu to filter logs shown by category and by file. Upon having to log an error report, a Pop Up appears showing the error description and the solution opted for. Additional logs and warnings about this procedure can be seen inside the same Pop Up.
-
 ### Bounding Boxes
 Game Objects have local and global bounding boxes and are updated when applying transformations. Parent Game Objects enclose their child's bounding boxes but don't reset on applying transformations to a child. This step is manual and a Button for reseting them will appear in the scene's Configuration Window. Reset is automatically applied on importing new geometry to scene.
 
@@ -61,10 +70,20 @@ Importing .fbx files may trigger errors while checking the materials' texture pa
 ### Create
 * **Cube**: creates a Game Object with a Cube Primitive component using par_shapes.
 * **Sphere**: creates a Game Object with a Sphere Primitive component using par_shapes.
+* **Camera**: creates a Game Object with a Camera component.
 ### View
 Each option toggles a hide/view window from a list of available windows:
 * **Console**: Shows Engine's logs.
 * **Configuration**: Shows information about engine's modules and allows the user to edit some engine utility.
+    * **Application**: Allows for frame capping (set to 0 to ignore cap) and shows framerate & milliseconds plot.
+    * **Input**
+    * **Window**
+    * **Scene**: Allows activate/deactivate quadtree update to enclose all childs on when its added, set as static, set static as active or applying a transformation. Shows management over scene gameobjects and allows for different ways to visualize Quadtree (Bottom, Top, Top & Bottom or Full).
+    * **Editor**: Allows to configure editor camera and debug drawing.
+    * **Renderer 3D**: Allows to enable/disable gl flags and frustum culling.
+    * **Memomy**: Shows current memory usage.
+    * **Hardware**: Shows hardware specifications for running device.
+    * **File System**
 * **Hierarchy**: Shows distribution of Game Objects in scene.
 * **Properties**: Shows information about the selected Game Object and its components.
 * **Prefabs**: Allows prefab creation to duplicate scene's Game Objects.
@@ -94,6 +113,14 @@ Each option toggles a hide/view window from a list of available windows:
 * gpudetect
 * mmgr
 
+## Version Notes
+
+### v2.0
+* Added **Mouse Picking** using Raycast optimized using a **Quadtree**.
+* Added **Frustum Culling**. Activating camera's "_override cull_" will swap the frustum used for culling scene. Frustum culling can be disabled through configuration window. It uses Quadtree to collect intersections quicker.
+* Added **Camera Aspect Ratio**. Options include: Fit Window, Square 1x1, Traditional TV 4x3, Movietone 16x9 and Personalized. Personalized aspect ratio allows user to freely set camera's aspect ratio. Window resize adapts camera and viewport.
+* Added **Event System**. Used to dynamically control scene game objects and make calls between managers/modules/importers...
+* Added **Skybox**.
 
 ##
 ![University Logo](https://www.citm.upc.edu/templates/new/img/logoCITM.png?1401879059)    
