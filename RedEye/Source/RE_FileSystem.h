@@ -120,6 +120,9 @@ public:
 
 	std::vector<std::string> FindAllFilesByExtension(const char* path, const char* extension, bool repercusive = false);
 
+	std::vector<const char*> metaRecentlyChanged;
+
+
 private:
 
 	std::string RecursiveFindFbx(const char* path);
@@ -147,8 +150,6 @@ private:
 
 	std::vector<RE_File*> filesToFindMeta;
 	std::vector<RE_Meta*> metaToFindFile;
-
-	std::vector<const char*> metaRecentlyChanged;
 
 	std::vector<const char*> resourcesRecentlyImported;
 	std::vector<RE_File*> filesRecentlyImported;

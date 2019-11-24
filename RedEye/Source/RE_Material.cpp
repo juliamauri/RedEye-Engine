@@ -461,7 +461,7 @@ void RE_Material::BinarySerialize()
 	RE_FileIO libraryFile(GetLibraryPath(), App->fs->GetZipPath());
 
 	uint bufferSize = GetBinarySize();
-	char* buffer = new char[bufferSize];
+	char* buffer = new char[bufferSize + 1];
 	char* cursor = buffer;
 
 	size_t size = sizeof(RE_ShadingMode);
@@ -521,7 +521,11 @@ void RE_Material::BinarySerialize()
 
 	SerializeTexturesBinary(cursor, &tUnknown);
 
-	libraryFile.Save(buffer, bufferSize);
+	char nullchar = '\0';
+	memcpy(cursor, &nullchar, sizeof(char));
+
+	libraryFile.Save(buffer, bufferSize + 1);
+	DEL_A(buffer);
 }
 
 void RE_Material::SerializeTexturesBinary(char * &cursor, std::vector<const char*>* textures)

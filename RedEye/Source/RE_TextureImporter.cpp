@@ -104,7 +104,7 @@ std::string RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsigned
 		ilBindImage(0);
 		/* Delete used resources*/
 		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
-	} {
+	} else {
 		LOG_ERROR("Error when loading texture on DevIL");
 	}
 
@@ -164,11 +164,11 @@ void RE_TextureImporter::SaveOwnFormat(const char * assetBuffer, unsigned int as
 		ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
 
 		toSave->Save((char*)data, size);
-
+		DEL_A(data);
 		ilBindImage(0);
 		/* Delete used resources*/
 		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
-	} {
+	} else{
 		LOG_ERROR("Error when loading texture on DevIL");
 	}
 }

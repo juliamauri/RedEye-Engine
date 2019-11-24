@@ -343,7 +343,7 @@ void RE_SkyBox::LibrarySave()
 		}
 	}
 
-	char* libraryBuffer = new char[totalSize];
+	char* libraryBuffer = new char[totalSize + 1];
 	char* cursor = libraryBuffer;
 
 	size_t size = sizeof(float);
@@ -360,9 +360,13 @@ void RE_SkyBox::LibrarySave()
 		cursor += size;
 	}
 
+	char nullchar = '\0';
+	memcpy(cursor, &nullchar, sizeof(char));
+
 	RE_FileIO saveLibrary(GetLibraryPath(), App->fs->GetZipPath());
 
-	saveLibrary.Save(libraryBuffer, totalSize);
+	saveLibrary.Save(libraryBuffer, totalSize + 1);
+	DEL_A(libraryBuffer);
 }
 
 void RE_SkyBox::TexParameteri(unsigned int pname, int param)

@@ -51,11 +51,11 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsig
 		resC.push_back(App->resources->At(res));
 	}
 
-	*bufferSize = sizeof(uint) + ((sizeof(int) * 2 + sizeof(uint)) * resGo.size());
+	*bufferSize = sizeof(uint) + ((sizeof(int) + sizeof(unsigned int) + sizeof(uint)) * resGo.size());
 	for (ResourceContainer* res : resC) *bufferSize += std::strlen((res->GetType() == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
 	*bufferSize += toSerialize->GetBinarySize();
-
-	char* buffer = new char[*bufferSize];
+	*bufferSize += 1;
+	char* buffer = new char[*bufferSize + 1];
 	char* cursor = buffer;
 
 	size_t size = sizeof(uint);
@@ -71,11 +71,12 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsig
 		memcpy(cursor, &r, size);
 		cursor += size;
 
-		int typeI = rtype;
+		size = sizeof(unsigned int);
+		unsigned int typeI = rtype;
 		memcpy(cursor, &typeI, size);
 		cursor += size;
 
-		const char* toCopy = (res->GetType() == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath();
+		const char* toCopy = (rtype == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath();
 		uint strsize = std::strlen(toCopy);
 		size = sizeof(uint);
 		memcpy(cursor, &strsize, size);
@@ -88,6 +89,10 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsig
 
 	//GOs Serialize
 	toSerialize->SerializeBinary(cursor, &resourcesIndex);
+
+	char nullchar = '\0';
+	memcpy(cursor, &nullchar, sizeof(char));
+
 	return buffer;
 }
 
@@ -136,7 +141,8 @@ RE_GameObject* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 		memcpy(&index, cursor, size);
 		cursor += size;
 
-		int typeI = 0;
+		size = sizeof(unsigned int);
+		unsigned int typeI = 0;
 		memcpy(&typeI, cursor, size);
 		cursor += size;
 		Resource_Type rType = (Resource_Type)typeI;
@@ -147,10 +153,13 @@ RE_GameObject* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 		cursor += size;
 
 		char* str = new char[strsize + 1];
+		char* strCursor = str;
 		size = strsize * sizeof(char);
-		memcpy(&str, cursor, size);
+		memcpy(str, cursor, size);		
 		cursor += size;
-		str[strsize] = '/0';
+		strCursor += size;
+		char nullchar = '\0';
+		memcpy(strCursor, &nullchar, sizeof(char));
 
 		const char* resMD5 = (rType == Resource_Type::R_MESH) ? App->resources->FindMD5ByLibraryPath(str, rType) : App->resources->FindMD5ByMETAPath(str, rType);
 		if (resMD5) resourcesIndex.insert(std::pair< int, const char*>(index, resMD5));

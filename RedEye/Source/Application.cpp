@@ -139,6 +139,7 @@ bool Application::Init(int argc, char* argv[])
 				if (internalResources && !internalResources->Init())  LOG_WARNING("Won't be able to load internal Resources");
 				if (primitives && !primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
 				
+				fs->ReadAssetChanges(0.0, true);
 
 				LOG_SEPARATOR("Starting Application");
 

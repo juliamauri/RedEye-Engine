@@ -80,7 +80,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	if (texturecoords) size += sizeof(float) * 2 * triangle_count;
 	if (index) size += sizeof(uint) * 3 * triangle_count;
 
-	char* buffer = new char[size];
+	char* buffer = new char[size + 1];
 	char* cursor = buffer;
 
 	size_t cSize = sizeof(uint);
@@ -143,7 +143,10 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 		cursor += cSize;
 	}
 
-	std::string md5Generated = MD5(std::string(buffer, size)).hexdigest();
+	char nullchar = '\0';
+	memcpy(cursor, &nullchar, sizeof(char));
+
+	std::string md5Generated = MD5(std::string(buffer, size + 1)).hexdigest();
 	const char* existsMD5 = App->resources->IsReference(md5Generated.c_str());
 	if (!existsMD5) {
 		SetMD5(md5Generated.c_str());
@@ -154,12 +157,18 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 		SetLibraryPath(libraryPath.c_str());
 
 		RE_FileIO toSave(GetLibraryPath(), App->fs->GetZipPath());
-		toSave.Save(buffer, size);
+		toSave.Save(buffer, size + 1);
 	}
 	else
 		*exists = true;
 
-
+	if (vertex) DEL_A(vertex);
+	if (normals) DEL_A(normals);
+	if (tangents) DEL_A(tangents);
+	if (bitangents) DEL_A(bitangents);
+	if (texturecoords) DEL_A(texturecoords);
+	if (index) DEL_A(index);
+	DEL_A(buffer);
 	return existsMD5;
 }
 

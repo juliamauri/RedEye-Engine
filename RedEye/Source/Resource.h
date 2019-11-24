@@ -47,8 +47,8 @@ public:
 	bool isInternal()const { return isinternal; }
 
 	bool isInMemory()const { return inMemory; }
-	virtual void LoadInMemory() = 0;
-	virtual void UnloadMemory() = 0;
+	virtual void LoadInMemory(){}
+	virtual void UnloadMemory(){}
 
 	virtual void Import(bool keepInMemory = true) { }
 

@@ -27,6 +27,9 @@
 #include "TimeManager.h"
 #include "md5.h"
 
+#include <cctype>
+#include <algorithm>
+
 #pragma comment( lib, "PhysFS/libx86/physfs.lib" )
 
 #ifdef _DEBUG
@@ -90,6 +93,11 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 			ret = true;
 		else
 			LOG_ERROR("Error while loading Engine Configuration file: %s\nRed Eye Engine will initialize with default configuration parameters.", config_file);
+
+		rootAssetDirectory = new RE_Directory();
+		rootAssetDirectory->SetPath("Assets/");
+		assetsDirectories = rootAssetDirectory->MountTreeFolders();
+		dirIter = assetsDirectories.begin();
 	}
 	else
 	{
@@ -111,7 +119,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 	if (!assetsToProcess.empty() || !filesToFindMeta.empty() || !metaToFindFile.empty()) dirIter = assetsDirectories.end();
 
-	while (run && dirIter != assetsDirectories.end()) {
+	while ((doAll || run) && dirIter != assetsDirectories.end()) {
 		std::stack<RE_ProcessPath*> toProcess = (*dirIter)->CheckAndApply();
 		while (!toProcess.empty()) {
 			RE_ProcessPath* process = toProcess.top();
@@ -122,14 +130,14 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 		dirIter++;
 
 		//timer
-		if (extra_ms < time.Read()) run = false;
+		if (!doAll && extra_ms < time.Read()) run = false;
 	}
 
 	if (dirIter == assetsDirectories.end())
 	{
 		dirIter = assetsDirectories.begin();
 
-		while (run && !assetsToProcess.empty()) {
+		while ((doAll || run) && !assetsToProcess.empty()) {
 			RE_ProcessPath* process = assetsToProcess.top();
 			assetsToProcess.pop();
 
@@ -159,19 +167,15 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 						bool done = false;
 						if (!metaRecentlyChanged.empty()) {
 							std::vector<const char*>::iterator md5Iter = metaRecentlyChanged.begin();
-
-							for (md5Iter; md5Iter != metaRecentlyChanged.end(); md5Iter++) {
-								ResourceContainer* res = App->resources->At(*md5Iter);
-
+							for (auto md5Char : metaRecentlyChanged) {
+								ResourceContainer* res = App->resources->At(md5Char);
 								if (std::strcmp(res->GetMetaPath(), file->path.c_str()) == 0) {
-									std::vector<const char*>::iterator toDelete = md5Iter++;
-									metaRecentlyChanged.erase(toDelete);
 									done = true;
+									metaRecentlyChanged.erase(md5Iter);
 									break;
 								}
+								md5Iter++;
 							}
-
-
 						}
 						if (!done && !resourcesRecentlyImported.empty()) {
 							std::vector<const char*>::iterator md5Iter = resourcesRecentlyImported.begin();
@@ -226,96 +230,86 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			DEL(process);
 
 			//timer
-			if (extra_ms < time.Read()) run = false;
+			if (!doAll && extra_ms < time.Read()) run = false;
 		}
 
-		if (run && !metaToFindFile.empty()) {
+		if ((doAll || run) && !metaToFindFile.empty()) {
 
-			std::vector<RE_Meta*>::iterator metaIter = metaToFindFile.begin();
-
-			while (run && !metaToFindFile.empty())
-			{
-				ResourceContainer* res = App->resources->At((*metaIter)->resource);
+			for (RE_Meta* meta : metaToFindFile) {
+				ResourceContainer* res = App->resources->At(meta->resource);
 
 				if (!filesToFindMeta.empty()) {
 					std::vector<RE_File*>::iterator fileIter = filesToFindMeta.begin();
 
 					for (fileIter; fileIter != filesToFindMeta.end(); fileIter++) {
 						if (std::strcmp(res->GetAssetPath(), (*fileIter)->path.c_str()) == 0) {
-							(*metaIter)->fromFile = *fileIter;
+							meta->fromFile = *fileIter;
 							break;
 						}
 					}
 					if (fileIter != filesToFindMeta.end()) filesToFindMeta.erase(fileIter);
-					else (*metaIter)->fType = FileType::F_NOTSUPPORTED;
+					else meta->fType = FileType::F_NOTSUPPORTED;
 				}
-				else (*metaIter)->fType = FileType::F_NOTSUPPORTED;
-
-				std::vector<RE_Meta*>::iterator toDelete = metaIter;
-				metaIter++;
-				metaToFindFile.erase(metaIter);
+				else meta->fType = FileType::F_NOTSUPPORTED;
 
 				//timer
-				if (extra_ms < time.Read()) run = false;
+				if (!doAll && extra_ms < time.Read()) run = false;
 			}
+			filesToFindMeta.clear();
+		}
 
-			if (run && !filesToFindMeta.empty() && metaToFindFile.empty()) {
-				std::vector<RE_File*>::iterator fileIter = filesToFindMeta.begin();
+		if ((doAll || run) && !filesToFindMeta.empty() && metaToFindFile.empty()) {
 
-				//Importing
-				for (fileIter; fileIter != filesToFindMeta.end(); fileIter++) {
-					RE_File* file = (*fileIter);
-					const char* newRes = nullptr;
-					switch (file->fType)
-					{
-					case F_MODEL:
-					{
-						newRes = App->resources->ImportModel(file->path.c_str());
-						break;
-					}
-					case F_TEXTURE:
-					{
-						newRes = App->resources->ImportTexture(file->path.c_str());
-						break;
-					}
-					case F_MATERIAL:
-					{
-						newRes = App->resources->ImportMaterial(file->path.c_str());
-						break;
-					}
-					case F_SKYBOX:
-					{
-						newRes = App->resources->ImportSkyBox(file->path.c_str());
-						break;
-					}
-					case F_PREFAB:
-					{
-						newRes = App->resources->ImportPrefab(file->path.c_str());
-						break;
-					}
-					case F_SCENE:
-					{
-						newRes = App->resources->ImportScene(file->path.c_str());
-						break;
-					}
-					}
+			//Importing
+			for (RE_File* file : filesToFindMeta) {
+				const char* newRes = nullptr;
+				switch (file->fType)
+				{
+				case F_MODEL:
+				{
+					newRes = App->resources->ImportModel(file->path.c_str());
+					break;
+				}
+				case F_TEXTURE:
+				{
+					newRes = App->resources->ImportTexture(file->path.c_str());
+					break;
+				}
+				case F_MATERIAL:
+				{
+					newRes = App->resources->ImportMaterial(file->path.c_str());
+					break;
+				}
+				case F_SKYBOX:
+				{
+					newRes = App->resources->ImportSkyBox(file->path.c_str());
+					break;
+				}
+				case F_PREFAB:
+				{
+					newRes = App->resources->ImportPrefab(file->path.c_str());
+					break;
+				}
+				case F_SCENE:
+				{
+					newRes = App->resources->ImportScene(file->path.c_str());
+					break;
+				}
+				}
 
-					if (newRes != nullptr) {
-						resourcesRecentlyImported.push_back(newRes);
-						filesRecentlyImported.push_back(file);
-					}
-					else
-						file->fType = F_NOTSUPPORTED;
+				if (newRes != nullptr) {
+					resourcesRecentlyImported.push_back(newRes);
+					filesRecentlyImported.push_back(file);
+				}
+				else
+					file->fType = F_NOTSUPPORTED;
 
-					std::vector<RE_File*>::iterator toDelete = fileIter++;
-					filesToFindMeta.erase(toDelete);
-
-					if (extra_ms < time.Read()) {
-						run = false;
-						break;
-					}
+				if (!doAll && extra_ms < time.Read()) {
+					run = false;
+					break;
 				}
 			}
+			filesToFindMeta.clear();
 		}
 	}
 
@@ -1523,6 +1517,8 @@ RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const cha
 	std::string modPath(_path);
 	std::string filename = modPath.substr(modPath.find_last_of("/") + 1);
 	std::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
+	std::transform(extensionStr.begin(), extensionStr.end(), extensionStr.begin(),
+		[](unsigned char c) { return std::tolower(c); });
 
 	for (uint i = 0; i < 12; i++) {
 		if (extensionStr.compare(extensionsSuported[i]) == 0)
@@ -1642,23 +1638,23 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 						ret.push(newProcess);
 					}
 				}
-			}
-			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
-				const char* extension = nullptr;
-				FileType fileType = RE_File::DetectExtensionAndType(inPath.c_str(), extension);
+				else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
+					const char* extension = nullptr;
+					FileType fileType = RE_File::DetectExtensionAndType(inPath.c_str(), extension);
 
-				if (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FILE || (*iter)->path != inPath || ((RE_File*)(*iter))->lastSize != fileStat.filesize) {
-					RE_ProcessPath* newProcess = new RE_ProcessPath();
-					RE_File* newFile = (fileType != FileType::F_META) ? new RE_File() : (RE_File*)new RE_Meta();
-					newFile->path = inPath;
-					newFile->lastSize = fileStat.filesize;
-					newFile->pType = PathType::D_FILE;
-					newFile->fType = fileType;
-					newFile->extension = extension;
-					newProcess->whatToDo = P_ADDFILE;
-					newProcess->toProcess = (RE_Path*)newFile;
-					ret.push(newProcess);
-					AddBeforeOf((RE_Path*)newFile, iter);
+					if (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FILE || (*iter)->path != inPath || ((RE_File*)(*iter))->lastSize != fileStat.filesize) {
+						RE_ProcessPath* newProcess = new RE_ProcessPath();
+						RE_File* newFile = (fileType != FileType::F_META) ? new RE_File() : (RE_File*)new RE_Meta();
+						newFile->path = inPath;
+						newFile->lastSize = fileStat.filesize;
+						newFile->pType = PathType::D_FILE;
+						newFile->fType = fileType;
+						newFile->extension = extension;
+						newProcess->whatToDo = P_ADDFILE;
+						newProcess->toProcess = (RE_Path*)newFile;
+						ret.push(newProcess);
+						AddBeforeOf((RE_Path*)newFile, iter);
+					}
 				}
 			}
 			if (iter != tree.end()) iter++;

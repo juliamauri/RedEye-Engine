@@ -206,21 +206,24 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 			}
 
 			if (mesh->HasFaces()) {
-				uint indexSize = mesh->mNumFaces * 3;
-				indexArray = new uint[indexSize];
-				uint* cursor = indexArray;
-				std::fill(indexArray, indexArray + indexSize, 0);
+				std::vector<uint> index;
 
 				for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 				{
-					aiFace face = mesh->mFaces[i];
+					aiFace* face = &mesh->mFaces[i];
 
-					if (face.mNumIndices != 3)
-						LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face.mNumIndices);
+					if (face->mNumIndices != 3)
+						LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face->mNumIndices);
 
-					memcpy(cursor, face.mIndices, face.mNumIndices * sizeof(uint));
-					cursor += sizeof(uint) * 3;
+
+
+					for (uint i = 0; i < face->mNumIndices; i++) index.push_back(face->mIndices[i]);
+					uint rest = 0;
+					if ((rest = 3 - face->mNumIndices) > 0) for (uint i = 0; i < rest; i++)index.push_back(0);
+
 				}
+				indexArray = new uint[index.size()];
+				memcpy(indexArray, &index[0], index.size() * sizeof(uint));
 			}
 
 			bool exists = false;
@@ -433,10 +436,10 @@ void RE_ModelImporter::GetTexturesMaterial(aiMaterial * material, std::string &f
 				realAssetsPath += filename;
 				if (App->fs->Exists(realAssetsPath.c_str()))
 				{
-					const char* texture = App->resources->FindMD5ByAssetsPath(realAssetsPath.c_str());
-					if (texture == nullptr) {
-						texture = App->textures->AddNewTextureOnResources(realAssetsPath.c_str());
-					}
+					const char* texture = App->resources->FindMD5ByAssetsPath(realAssetsPath.c_str(), Resource_Type::R_TEXTURE);
+					//if (texture == nullptr) {
+					//	texture = App->resources->FindMD5ByAssetsPath(realAssetsPath.c_str(), Resource_Type::R_TEXTURE);
+					//}
 
 					if (texture != nullptr) {
 						vectorToFill->push_back(texture);

@@ -133,4 +133,5 @@ void RE_Prefab::LibrarySave()
 
 	RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
 	toLibrarySave.Save(buffer, size);
+	DEL_A(buffer);
 }

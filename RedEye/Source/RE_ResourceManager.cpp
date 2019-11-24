@@ -60,6 +60,9 @@ const char* RE_ResourceManager::Reference(ResourceContainer* rc)
 	case Resource_Type::R_MODEL:
 		resourceName = "model";
 		break;
+	case Resource_Type::R_SKYBOX:
+		resourceName = "skybox";
+		break;
 	case Resource_Type::R_UNDEFINED:
 		resourceName = "undefined";
 		break;
@@ -126,7 +129,7 @@ const char* RE_ResourceManager::ImportModel(const char* assetPath)
 {
 	std::string path(assetPath);
 	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of(".") - 1);
+	std::string name = filename.substr(0, filename.find_last_of("."));
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_Model* newModel = new RE_Model();
@@ -134,6 +137,7 @@ const char* RE_ResourceManager::ImportModel(const char* assetPath)
 	newModel->SetAssetPath(assetPath);
 	newModel->SetType(Resource_Type::R_MODEL);
 	newModel->Import(false);
+	newModel->SaveMeta();
 
 	return Reference(newModel);
 }
@@ -141,7 +145,7 @@ const char* RE_ResourceManager::ImportTexture(const char* assetPath)
 {
 	std::string path(assetPath);
 	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of(".") - 1);
+	std::string name = filename.substr(0, filename.find_last_of("."));
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_Texture* newTexture = new RE_Texture();
@@ -149,6 +153,7 @@ const char* RE_ResourceManager::ImportTexture(const char* assetPath)
 	newTexture->SetAssetPath(assetPath);
 	newTexture->SetType(Resource_Type::R_TEXTURE);
 	newTexture->Import(false);
+	newTexture->SaveMeta();
 
 	return Reference(newTexture);
 }
@@ -166,7 +171,7 @@ std::vector<ResourceContainer*> RE_ResourceManager::GetResourcesByType(Resource_
 const char* RE_ResourceManager::IsReference(const char* md5, Resource_Type type)
 {
 	const char* ret = nullptr;
-	if (type != Resource_Type::R_UNDEFINED) {
+	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
 			if (std::strcmp(resource.second->GetMD5(), md5) == 0)
@@ -188,7 +193,7 @@ const char* RE_ResourceManager::IsReference(const char* md5, Resource_Type type)
 const char * RE_ResourceManager::FindMD5ByMETAPath(const char * metaPath, Resource_Type type)
 {
 	const char* ret = nullptr;
-	if (type != Resource_Type::R_UNDEFINED) {
+	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
 			if (std::strcmp(resource.second->GetMetaPath(), metaPath) == 0)
@@ -210,7 +215,7 @@ const char * RE_ResourceManager::FindMD5ByMETAPath(const char * metaPath, Resour
 const char* RE_ResourceManager::FindMD5ByLibraryPath(const char* libraryPath, Resource_Type type)
 {
 	const char* ret = nullptr;
-	if (type != Resource_Type::R_UNDEFINED) {
+	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
 			if (std::strcmp(resource.second->GetLibraryPath(), libraryPath) == 0)
@@ -232,7 +237,7 @@ const char* RE_ResourceManager::FindMD5ByLibraryPath(const char* libraryPath, Re
 const char * RE_ResourceManager::FindMD5ByAssetsPath(const char * assetsPath, Resource_Type type)
 {
 	const char* ret = nullptr;
-	if (type != Resource_Type::R_UNDEFINED) {
+	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
 			if (std::strcmp(resource.second->GetAssetPath(), assetsPath) == 0)
@@ -255,7 +260,7 @@ const char* RE_ResourceManager::ImportMaterial(const char* assetPath)
 {
 	std::string path(assetPath);
 	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of(".") - 1);
+	std::string name = filename.substr(0, filename.find_last_of("."));
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_Material* newMaterial = new RE_Material();
@@ -263,6 +268,7 @@ const char* RE_ResourceManager::ImportMaterial(const char* assetPath)
 	newMaterial->SetAssetPath(assetPath);
 	newMaterial->SetType(Resource_Type::R_TEXTURE);
 	newMaterial->Import(false);
+	newMaterial->SaveMeta();
 
 	return Reference(newMaterial);
 }
@@ -271,7 +277,7 @@ const char* RE_ResourceManager::ImportSkyBox(const char* assetPath)
 {
 	std::string path(assetPath);
 	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of(".") - 1);
+	std::string name = filename.substr(0, filename.find_last_of("."));
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_SkyBox* newSkyBox = new RE_SkyBox();
@@ -279,6 +285,7 @@ const char* RE_ResourceManager::ImportSkyBox(const char* assetPath)
 	newSkyBox->SetAssetPath(assetPath);
 	newSkyBox->SetType(Resource_Type::R_SKYBOX);
 	newSkyBox->Import(false);
+	newSkyBox->SaveMeta();
 
 	return Reference(newSkyBox);
 }
@@ -287,32 +294,34 @@ const char* RE_ResourceManager::ImportPrefab(const char* assetPath)
 {
 	std::string path(assetPath);
 	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of(".") - 1);
+	std::string name = filename.substr(0, filename.find_last_of("."));
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 
-	RE_Prefab* newSkyBox = new RE_Prefab();
-	newSkyBox->SetName(name.c_str());
-	newSkyBox->SetAssetPath(assetPath);
-	newSkyBox->SetType(Resource_Type::R_PREFAB);
-	newSkyBox->Import(false);
+	RE_Prefab* newPrefab = new RE_Prefab();
+	newPrefab->SetName(name.c_str());
+	newPrefab->SetAssetPath(assetPath);
+	newPrefab->SetType(Resource_Type::R_PREFAB);
+	newPrefab->Import(false);
+	newPrefab->SaveMeta();
 
-	return Reference(newSkyBox);
+	return Reference(newPrefab);
 }
 
 const char* RE_ResourceManager::ImportScene(const char* assetPath)
 {
 	std::string path(assetPath);
 	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of(".") - 1);
+	std::string name = filename.substr(0, filename.find_last_of("."));
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 
-	RE_Scene* newSkyBox = new RE_Scene();
-	newSkyBox->SetName(name.c_str());
-	newSkyBox->SetAssetPath(assetPath);
-	newSkyBox->SetType(Resource_Type::R_SCENE);
-	newSkyBox->Import(false);
+	RE_Scene* newScene = new RE_Scene();
+	newScene->SetName(name.c_str());
+	newScene->SetAssetPath(assetPath);
+	newScene->SetType(Resource_Type::R_SCENE);
+	newScene->Import(false);
+	newScene->SaveMeta();
 
-	return Reference(newSkyBox);
+	return Reference(newScene);
 }
 
 unsigned int RE_ResourceManager::TotalReferenceCount(const char* resMD5) const

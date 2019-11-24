@@ -156,6 +156,13 @@ std::vector<RE_GameObject*> RE_GameObject::GetAllGO()
 std::vector<const char*> RE_GameObject::GetAllResources(bool root)
 {
 	std::vector<const char*> ret;
+
+	for (auto comp : components) {
+		std::vector<const char*> cmpRet = comp->GetAllResources();
+		if (!cmpRet.empty())
+			ret.insert(ret.end(), cmpRet.begin(), cmpRet.end());
+	}
+
 	for (auto child : childs) {
 
 		std::vector<const char*> childRet = child->GetAllResources(false);
@@ -222,7 +229,7 @@ void RE_GameObject::SerializeJson(JSONNode * node, std::map<const char*, int>* r
 
 unsigned int RE_GameObject::GetBinarySize()const
 {
-	uint size = sizeof(uint) * 3 + 36 * sizeof(char) + sizeof(float) * 9 + sizeof(int);
+	uint size = sizeof(uint) * 3 + 36 * sizeof(char) + sizeof(float) * 9 + sizeof(unsigned short);
 	if (parent != nullptr) size += 36 * sizeof(char);
 	size += std::strlen(GetName()) * sizeof(char);
 
@@ -278,13 +285,13 @@ void RE_GameObject::SerializeBinary(char*& cursor, std::map<const char*, int>* r
 		cursor += size;
 
 		size = sizeof(uint);
-		uint cmpSize = allGOs.size();
+		uint cmpSize = go->components.size();
 		memcpy(cursor, &cmpSize, size);
 		cursor += size;
 
 		for (auto component : go->components) {
-			size = sizeof(int);
-			int type = component->GetType();
+			size = sizeof(unsigned short);
+			unsigned short type = component->GetType();
 			memcpy(cursor, &type, size);
 			cursor += size;
 
@@ -392,6 +399,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 	cursor += size;
 
 	for (uint count = 0; count < GOCount; count++) {
+		char nullchar = '\0';
 
 		uint strLenght = 0;
 		size = sizeof(uint);
@@ -399,29 +407,35 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 		cursor += size;
 
 		char* strName = new char[strLenght + 1];
+		char* strNameCursor = strName;
 		size = sizeof(char) * strLenght;
 		memcpy(strName, cursor, size);
+		strNameCursor += size;
 		cursor += size;
-		strName[strLenght] = '\0';
+		memcpy(strNameCursor, &nullchar, sizeof(char));
 
 		UUID uuid;
 		UUID parent_uuid;
 
 		size = sizeof(char) * 36;
 		char* strUUID = new char[36 +1];
+		char* strUUIDCursor = strUUID;
 		memcpy(strUUID, cursor, size);
 		cursor += size;
-		strUUID[36] = '\0';
+		strUUIDCursor += size;
+		memcpy(strUUIDCursor, &nullchar, sizeof(char));
 		UuidFromStringA((RPC_CSTR)strUUID, &uuid);
 		DEL_A(strUUID);
 
 		if (rootGo != nullptr) {
-			char* strUUID = new char[36 + 1];
-			memcpy(strUUID, cursor, size);
+			char* strUUIDParent = new char[36 + 1];
+			char* strUUIDParentCursor = strUUIDParent;
+			memcpy(strUUIDParent, cursor, size);
 			cursor += size;
-			strUUID[36] = '\0';
-			UuidFromStringA((RPC_CSTR)strUUID, &parent_uuid);
-			DEL_A(strUUID);
+			strUUIDParentCursor += size;
+			memcpy(strUUIDParentCursor, &nullchar, sizeof(char));
+			UuidFromStringA((RPC_CSTR)strUUIDParent, &parent_uuid);
+			DEL_A(strUUIDParent);
 		}
 
 		(rootGo == nullptr) ? rootGo = new_go = new RE_GameObject(strName, uuid) : new_go = new RE_GameObject(strName, uuid, rootGo->GetGoFromUUID(parent_uuid));
@@ -448,8 +462,8 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 		cursor += size;
 		for (uint count = 0; count < compCount; count++) {
 
-			int typeInt = 0;
-			size = sizeof(int);
+			unsigned short typeInt = 0;
+			size = sizeof(unsigned short);
 			memcpy(&typeInt, cursor, size);
 			cursor += size;
 

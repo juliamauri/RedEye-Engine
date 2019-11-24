@@ -94,6 +94,9 @@ void ResourceContainer::SetType(Resource_Type type)
 	case R_MATERIAL:
 		propietiesName = "Material";
 		break;
+	case R_MODEL:
+		propietiesName = "Model";
+		break;
 	default:
 		propietiesName = "";
 		break;
@@ -114,9 +117,8 @@ void ResourceContainer::SetLibraryPath(const char * path)
 
 void ResourceContainer::SetAssetPath(const char * originPath)
 {
-	assetPath = originPath;
-	metaPath = assetPath.substr(0, assetPath.find_last_of(".") - 1);
-	metaPath = ".meta";
+	metaPath = assetPath = originPath;
+	metaPath += ".meta";
 }
 
 void ResourceContainer::SetMetaPath(const char* originPath)

@@ -62,6 +62,8 @@ private:
 	bool scene_modified = false;
 
 	std::string defaultModel;
+
+	const char* sceneLoadedMD5 = nullptr;
 };
 
 #endif // !__MODULESCENE_H__
