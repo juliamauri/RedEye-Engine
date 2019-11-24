@@ -108,16 +108,15 @@ private:
 	bool draw_quad_tree = true;
 	bool draw_cameras = true;
 
-	// Grid
-	bool draw_grid = true;
-	RE_Component* grid = nullptr;
-	RE_GameObject* grid_go = nullptr;
-	float grid_size[2];
-
 	float all_aabb_color[3];
 	float sel_aabb_color[3];
 	float quad_tree_color[3];
 	float frustum_color[3];
+
+	// Grid
+	RE_Component* grid = nullptr;
+	RE_GameObject* grid_go = nullptr;
+	float grid_size[2];
 
 	//crtd security
 	bool isDuplicated = false;

@@ -409,7 +409,7 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 
 		glEnd();
 
-		if (draw_grid)
+		if (grid->IsActive())
 			grid->Draw();
 
 		if (resetLight)
