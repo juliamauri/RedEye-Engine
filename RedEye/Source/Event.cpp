@@ -25,26 +25,6 @@ bool Event::IsValid() const
 	return type < MAX_EVENT_TYPES && listener != nullptr;
 }
 
-unsigned int Event::GetTimeStamp() const
-{
-	return timestamp;
-}
-
-RE_EventType Event::GetType() const
-{
-	return type;
-}
-
-const Cvar& Event::GetData() const
-{
-	return data1;
-}
-
-const Cvar & Event::GetDataNext() const
-{
-	return data2;
-}
-
 void Event::Push(RE_EventType t, EventListener * lis, Cvar d1, Cvar d2)
 {
 	events_queue.push(Event(t, lis, d1, d2));
@@ -67,4 +47,23 @@ void Event::Clear()
 {
 	type = MAX_EVENT_TYPES;
 	listener = nullptr;
+}
+
+InstantEvent::InstantEvent(RE_EventType t, EventListener * lis, Cvar d1, Cvar d2)
+	: Event(t,lis,d1,d2)
+{
+	if (IsValid())
+		CallListener();
+}
+
+InstantEvent::InstantEvent(InstantEvent & e)
+	: Event(e.type, e.listener, e.data1, e.data2)
+{
+	if (IsValid())
+		CallListener();
+}
+
+InstantEvent::~InstantEvent()
+{
+	Clear();
 }
