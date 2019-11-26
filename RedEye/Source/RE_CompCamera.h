@@ -49,6 +49,7 @@ public:
 	float GetTargetHeight() const;
 	void GetTargetWidthHeight(int &width, int &height) const;
 	void GetTargetWidthHeight(float &width, float &height) const;
+	void GetTargetViewPort(math::float4 &viewPort) const;
 
 	void SetPerspective();
 	void SetOrthographic();

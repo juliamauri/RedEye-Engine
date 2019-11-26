@@ -57,11 +57,18 @@ public:
 	static void Push(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
 	static void PumpAll();
 
+	static void ResumeEvents();
+	static void PauseEvents();
+
 protected:
 
 	void CallListener() const;
 	bool IsValid() const;
 	void Clear();
+
+protected:
+
+	static bool paused;
 
 public:
 

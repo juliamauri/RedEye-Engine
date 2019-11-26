@@ -2,6 +2,8 @@
 #include "EventListener.h"
 #include "SDL2\include\SDL_timer.h"
 
+bool Event::paused = false;
+
 Event::Event(RE_EventType t, EventListener * lis, Cvar d1, Cvar d2)
 	: type(t), listener(lis), data1(d1), data2(d2), timestamp(SDL_GetTicks())
 {}
@@ -27,7 +29,8 @@ bool Event::IsValid() const
 
 void Event::Push(RE_EventType t, EventListener * lis, Cvar d1, Cvar d2)
 {
-	events_queue.push(Event(t, lis, d1, d2));
+	if (!Event::paused)
+		events_queue.push(Event(t, lis, d1, d2));
 }
 
 void Event::PumpAll()
@@ -41,6 +44,16 @@ void Event::PumpAll()
 
 		Event::events_queue.pop();
 	}
+}
+
+void Event::ResumeEvents()
+{
+	paused = false;
+}
+
+void Event::PauseEvents()
+{
+	paused = true;
 }
 
 void Event::Clear()
@@ -59,7 +72,7 @@ InstantEvent::InstantEvent(RE_EventType t, EventListener * lis, Cvar d1, Cvar d2
 InstantEvent::InstantEvent(InstantEvent & e)
 	: Event(e.type, e.listener, e.data1, e.data2)
 {
-	if (IsValid())
+	if (IsValid() && !Event::paused)
 		CallListener();
 }
 

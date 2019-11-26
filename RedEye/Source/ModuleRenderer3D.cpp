@@ -404,11 +404,9 @@ void ModuleRenderer3D::WindowSizeChanged(int width, int height)
 
 void ModuleRenderer3D::UpdateViewPort(int width, int height) const
 {
-	int w, h;
-	RE_CameraManager::CurrentCamera()->GetTargetWidthHeight(w, h);
-	const int x = (width - w) / 2;
-	const int y = (height - h) / 2;
-	glViewport(x, y, w, h);
+	math::float4 viewP;
+	RE_CameraManager::CurrentCamera()->GetTargetViewPort(viewP);
+	glViewport(viewP.x, viewP.y, viewP.w, viewP.z);
 }
 
 

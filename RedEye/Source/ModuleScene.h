@@ -26,7 +26,7 @@ public:
 
 	RE_GameObject* GetRoot() const;
 	const RE_GameObject* GetRoot_c() const;
-	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr);
+	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr, bool broadcast = true);
 	void AddGoToRoot(RE_GameObject* toAdd);
 
 	void CreateCube();
@@ -53,16 +53,17 @@ private:
 
 private:
 
+	RE_GameObject* savedState = nullptr;
 	RE_GameObject* root = nullptr;
 
 	QTree quad_tree;
 
-	bool update_qt = true;
+	bool update_qt = false;
 	bool static_gos_modified = false;
 	bool scene_modified = false;
 
 	std::list<RE_GameObject*> active_static_gos;
-	std::list<RE_GameObject*> active_non_static_gos; //
+	std::list<RE_GameObject*> active_non_static_gos;
 	std::list<RE_GameObject*> tree_free_static_gos;
 
 	std::string defaultModel;

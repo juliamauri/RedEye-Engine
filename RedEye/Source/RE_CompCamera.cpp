@@ -285,6 +285,41 @@ void RE_CompCamera::GetTargetWidthHeight(float & w, float & h) const
 	h = height;
 }
 
+void RE_CompCamera::GetTargetViewPort(math::float4& viewPort) const
+{
+	viewPort.z = height;
+	viewPort.w = width;
+
+	int wH = App->window->GetHeight();
+	int wW = App->window->GetWidth();
+
+	switch (target_ar)
+	{
+	case RE_CompCamera::Fit_Window:
+		viewPort.x = 0;
+		viewPort.y = 0;
+		break;
+	case RE_CompCamera::Square_1x1:
+		viewPort.y = 0;
+		viewPort.x = (wW / 2) - (width / 2);
+		break;
+	case RE_CompCamera::TraditionalTV_4x3:
+		viewPort.y = 0;
+		viewPort.x = (wW / 2) - (width / 2);
+		break;
+	case RE_CompCamera::Movietone_16x9:
+	{
+		viewPort.x = 0;
+		if(height < wH) viewPort.y = (wH / 2) - (height / 2);
+	}
+		break;
+	case RE_CompCamera::Personalized:
+		viewPort.x = 0;
+		viewPort.y = 0;
+		break;
+	}
+}
+
 void RE_CompCamera::SetPerspective()
 {
 	isPerspective = true;

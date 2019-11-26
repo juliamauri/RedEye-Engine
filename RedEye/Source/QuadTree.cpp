@@ -344,6 +344,37 @@ bool QTree::TryAdaptingWithChilds(RE_GameObject * g_obj, std::list<RE_GameObject
 	return ret;
 }
 
+bool QTree::TryAdaptingPushingChilds(RE_GameObject * g_obj, std::list<RE_GameObject*>& out_childs)
+{
+	bool ret = TryAdapting(g_obj);
+
+	if (ret)
+	{
+		out_childs.push_back(g_obj);
+
+		std::queue<RE_GameObject*> queue;
+		for (auto child : g_obj->GetChilds())
+			queue.push(child);
+
+		while (!queue.empty())
+		{
+			RE_GameObject* obj = queue.front();
+			queue.pop();
+
+			if (obj->IsActiveStatic())
+			{
+				root.Push(obj);
+				out_childs.push_back(obj);
+			}
+
+			for (auto child : obj->GetChilds())
+				queue.push(child);
+		}
+	}
+
+	return ret;
+}
+
 void QTree::Pop(const RE_GameObject * g_obj)
 {
 	root.Pop(g_obj);

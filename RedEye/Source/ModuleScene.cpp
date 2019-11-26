@@ -53,6 +53,9 @@ bool ModuleScene::Start()
 {
 	bool ret = true;
 
+	root = new RE_GameObject("root");
+	root->SetStatic(false, false);
+
 	// Load scene
 	Timer timer;
 	std::string path_scene("Assets/Scenes/");
@@ -70,11 +73,12 @@ bool ModuleScene::Start()
 		App->handlerrors->StartHandling();
 
 		RE_Scene* scene = (RE_Scene * )App->resources->At(sceneLoadedMD5);
+				Event::PauseEvents();
 		RE_GameObject* loadedDO = scene->GetRoot();
+		Event::ResumeEvents();
 
 		if (loadedDO)
 		{
-			root = new RE_GameObject("root");
 			root->AddChildsFromGO(loadedDO);
 			DEL(node);
 		}
@@ -125,10 +129,23 @@ bool ModuleScene::Start()
 		CreateCamera();
 
 	// Setup AABB + Quadtree
-	root->TransformModified(true);
-	GetActiveStatic(active_static_gos);
-	GetActiveNonStatic(active_non_static_gos);
+	Event::PauseEvents();
 	UpdateQuadTree();
+	Event::ResumeEvents();
+
+	if (root)
+	{
+		savedState = new RE_GameObject(*root);
+
+		// Render Camera Management
+		App->cams->RecallCameras(root);
+		if (!RE_CameraManager::HasMainCamera())
+			CreateCamera();
+
+		// Setup AABB + Quadtree
+		root->TransformModified(false);
+		UpdateQuadTree();
+	}
 
 	return ret;
 }
@@ -147,12 +164,15 @@ bool ModuleScene::CleanUp()
 	Serialize();
 
 	DEL(root);
+	DEL(savedState);
 
 	return true;
 }
 
 void ModuleScene::OnPlay()
 {
+	if (savedState) DEL(savedState);
+	savedState = new RE_GameObject(*root);
 	root->OnPlay();
 }
 
@@ -164,6 +184,19 @@ void ModuleScene::OnPause()
 void ModuleScene::OnStop()
 {
 	root->OnStop();
+	DEL(root);
+	root = new RE_GameObject(*savedState);
+
+	// Render Camera Management
+	App->cams->RecallCameras(root);
+	if (!RE_CameraManager::HasMainCamera())
+		CreateCamera();
+
+	// Setup AABB + Quadtree
+	root->TransformModified(true);
+	GetActiveStatic(active_static_gos);
+	GetActiveNonStatic(active_non_static_gos);
+	UpdateQuadTree();
 }
 
 void ModuleScene::RecieveEvent(const Event& e)
@@ -362,7 +395,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 			{
 				go->ResetBoundingBoxFromChilds();
 
-				if (go->IsStatic())
+				if (to_add->IsStatic())
 				{
 					static_gos_modified = true;
 
@@ -428,64 +461,32 @@ void ModuleScene::RecieveEvent(const Event& e)
 		{
 			if (belongs_to_scene)
 			{
-				go->ResetBoundingBoxFromChilds();
+				active_static_gos.clear();
+				active_non_static_gos.clear();
+				tree_free_static_gos.clear();
 
-				if (go->IsStatic())
+				std::queue<RE_GameObject*> queue;
+				for (auto childs : root->GetChilds())
+					queue.push(childs);
+
+				while (!queue.empty())
 				{
-					std::list<RE_GameObject*> added_gos;
-					if (quad_tree.TryAdaptingWithChilds(go, added_gos))
+					RE_GameObject* obj = queue.front();
+					queue.pop();
+
+					if (obj->IsActive())
 					{
-						for (auto added_go : added_gos)
-							active_static_gos.push_back(added_go);
+						if (obj->IsStatic())
+							active_static_gos.push_back(obj);
+						else
+							active_non_static_gos.push_back(obj);
 					}
-					else
-					{
-						std::queue<RE_GameObject*> queue;
-						queue.push(go);
-						while (!queue.empty())
-						{
-							RE_GameObject* obj = queue.front();
-							queue.pop();
 
-							if (obj->IsStatic())
-							{
-								active_static_gos.push_back(obj);
-								tree_free_static_gos.push_back(obj);
-							}
-							else
-								active_non_static_gos.push_back(obj);
-
-							for (auto child : obj->GetChilds())
-								queue.push(child);
-						}
-
-						static_gos_modified = true;
-
-						if (update_qt)
-							UpdateQuadTree();
-					}
+					for (auto child : obj->GetChilds())
+						queue.push(child);
 				}
-				else
-				{
-					std::queue<RE_GameObject*> queue;
-					queue.push(go);
-					while (!queue.empty())
-					{
-						RE_GameObject* obj = queue.front();
-						queue.pop();
 
-						if (obj->IsActive())
-						{
-							if (obj->IsStatic())
-								active_static_gos.push_back(obj);
-							else
-								active_non_static_gos.push_back(obj);
-						}
-
-						for (auto child : obj->GetChilds())
-							queue.push(child);
-					}
-				}
+				UpdateQuadTree();
 			}
 			else if (go->GetParent() != nullptr)
 				go->GetParent()->ResetBoundingBoxFromChilds();
@@ -592,9 +593,11 @@ const RE_GameObject * ModuleScene::GetRoot_c() const
 	return root;
 }
 
-RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent)
+RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent, bool broadcast)
 {
-	return new RE_GameObject(name, GUID_NULL, parent ? parent : root);
+	RE_GameObject* ret = new RE_GameObject(name, GUID_NULL, parent ? parent : root);
+
+	return ret;
 }
 
 void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
@@ -632,7 +635,7 @@ void ModuleScene::DrawEditor()
 		if (!update_qt && static_gos_modified && ImGui::Button("Reset AABB and Quadtree"))
 			UpdateQuadTree();
 
-		ImGui::Checkbox("Automatic Quadtree Update", &update_qt);
+		//ImGui::Checkbox("Automatic Quadtree Update", &update_qt);
 
 		int quadtree_drawing = quad_tree.GetDrawMode();
 		if (ImGui::Combo("QuadTree Drawing", &quadtree_drawing, "Disable draw\0Top\0Bottom\0Top and Bottom\0All\0"))
@@ -947,6 +950,6 @@ void ModuleScene::UpdateQuadTree()
 		tree_free_static_gos.pop_back();
 	}
 
-	quad_tree.BuildFromList(root->GetGlobalBoundingBox(), active_static_gos);
+	quad_tree.Build(root);
 	static_gos_modified = false;
 }
