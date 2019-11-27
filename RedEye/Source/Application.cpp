@@ -213,7 +213,7 @@ void Application::FinishUpdate()
 	//extra_ms = fs->ReadAssetChanges(extra_ms);
 
 	if (extra_ms > 0)
-		time->Delay(extra_ms);
+		SDL_Delay(extra_ms);
 }
 
 bool Application::CleanUp()
