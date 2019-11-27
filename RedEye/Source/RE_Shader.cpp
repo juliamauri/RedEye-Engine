@@ -18,11 +18,8 @@ RE_Shader::~RE_Shader() { }
 
 void RE_Shader::LoadInMemory()
 {
-	if (App->fs->Exists(GetLibraryPath()))
-		LibraryLoad();
-	else if (App->fs->Exists(GetAssetPath())) {
+	if (App->fs->Exists(shaderSettings.vertexShader.c_str()) && App->fs->Exists(shaderSettings.fragmentShader.c_str())) {
 		AssetLoad();
-		LibrarySave();
 	}
 	else {
 		LOG_ERROR("Texture %s not found on project", GetName());

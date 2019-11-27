@@ -164,8 +164,8 @@ void ResourceContainer::LoadMeta()
 		JSONNode* metaNode = metaDeserialize.GetRootNode("meta");
 
 		name = metaNode->PullString("Name", "unkown");
-		libraryPath = metaNode->PullString("AssetPath", "Assets/");
-		assetPath = metaNode->PullString("LibraryPath", "Library/");
+		assetPath = metaNode->PullString("AssetPath", "Assets/");
+		libraryPath = metaNode->PullString("LibraryPath", "Library/");
 		SetMD5(metaNode->PullString("MD5", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		type = (Resource_Type)metaNode->PullInt("Type", Resource_Type::R_UNDEFINED);
 		lastModified  = metaNode->PullSignedLongLong("lastModified", 0);

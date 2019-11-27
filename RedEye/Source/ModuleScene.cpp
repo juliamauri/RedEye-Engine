@@ -73,14 +73,13 @@ bool ModuleScene::Start()
 		App->handlerrors->StartHandling();
 
 		RE_Scene* scene = (RE_Scene * )App->resources->At(sceneLoadedMD5);
-				Event::PauseEvents();
+		Event::PauseEvents();
 		RE_GameObject* loadedDO = scene->GetRoot();
-		Event::ResumeEvents();
 
 		if (loadedDO)
 		{
-			root->AddChildsFromGO(loadedDO);
-			DEL(node);
+			root = new RE_GameObject("root");
+			root->AddChild(loadedDO);
 		}
 		else {
 			LOG_ERROR("Own serialized scene can't be loaded");
@@ -101,7 +100,10 @@ bool ModuleScene::Start()
 
 			RE_Model* model = (RE_Model*)App->resources->At(defaultModelMD5);
 
+			Event::PauseEvents();
 			RE_GameObject* modelCopy = model->GetRoot();
+			Event::ResumeEvents();
+
 			if (modelCopy) {
 				root = new RE_GameObject("root");
 				root->AddChild(modelCopy);
@@ -135,7 +137,9 @@ bool ModuleScene::Start()
 
 	if (root)
 	{
+		Event::PauseEvents();
 		savedState = new RE_GameObject(*root);
+		Event::ResumeEvents();
 
 		// Render Camera Management
 		App->cams->RecallCameras(root);
@@ -171,8 +175,10 @@ bool ModuleScene::CleanUp()
 
 void ModuleScene::OnPlay()
 {
+	Event::PauseEvents();
 	if (savedState) DEL(savedState);
 	savedState = new RE_GameObject(*root);
+	Event::ResumeEvents(); 
 	root->OnPlay();
 }
 
@@ -730,6 +736,7 @@ void ModuleScene::Serialize()
 	if (sceneLoadedMD5 == nullptr) {
 		scene = new RE_Scene();
 		scene->SetName(GetName());
+		scene->SetType(Resource_Type::R_SCENE);
 	}
 	else
 		scene = (RE_Scene * )App->resources->At(sceneLoadedMD5);

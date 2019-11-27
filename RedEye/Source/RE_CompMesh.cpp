@@ -31,7 +31,7 @@ RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool s
 }
 
 RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go)
-	: RE_Component(C_MESH, go, cmpMesh.active), meshMD5(cmpMesh.meshMD5)
+	: RE_Component(C_MESH, go, cmpMesh.active), meshMD5(cmpMesh.meshMD5), materialMD5(cmpMesh.materialMD5)
 {
 	if (!(shaderForDraw = App->renderer3d->GetShaderScene()))
 		shaderForDraw = App->internalResources->GetDefaultShader();

@@ -155,30 +155,39 @@ std::vector<RE_GameObject*> RE_GameObject::GetAllGO()
 
 std::vector<const char*> RE_GameObject::GetAllResources(bool root)
 {
-	std::vector<const char*> ret;
+	std::vector<const char*> allResources;
 
 	for (auto comp : components) {
 		std::vector<const char*> cmpRet = comp->GetAllResources();
 		if (!cmpRet.empty())
-			ret.insert(ret.end(), cmpRet.begin(), cmpRet.end());
+			allResources.insert(allResources.end(), cmpRet.begin(), cmpRet.end());
 	}
 
 	for (auto child : childs) {
 
 		std::vector<const char*> childRet = child->GetAllResources(false);
 		if(!childRet.empty())
-			ret.insert(ret.end(), childRet.begin(), childRet.end());
+			allResources.insert(allResources.end(), childRet.begin(), childRet.end());
 	}
 
 	if (root) { //unique resources
-		//https://stackoverflow.com/questions/1041620/whats-the-most-efficient-way-to-erase-duplicates-and-sort-a-vector
-		std::unordered_set<const char*> s;
-		for (const char* i : ret)
-			s.insert(i);
-		ret.assign(s.begin(), s.end());
+		std::vector<const char*> ret;
+
+		for (auto res : allResources) {
+			bool repeat = false;
+			for (auto uniqueRes : ret) {
+				if (std::strcmp(res, uniqueRes) == 0) {
+					repeat = true;
+					break;
+				}
+			}
+			if (!repeat) ret.push_back(res);
+		}
+
+		return ret;
 	}
 
-	return ret;
+	return allResources;
 }
 
 void RE_GameObject::SerializeJson(JSONNode * node, std::map<const char*, int>* resources)
@@ -525,6 +534,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 						newMesh->SetMaterial(materialMD5);
 					}
 				}
+				new_go->AddCompMesh(newMesh);
 			}
 			break;
 			case C_CAMERA:

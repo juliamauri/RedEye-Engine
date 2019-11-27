@@ -14,7 +14,7 @@ void RE_ResouceAndGOImporter::JsonSerialize(JSONNode* node, RE_GameObject* toSer
 	std::vector<const char*>  resGo = toSerialize->GetAllResources();
 	std::map<const char*, int> resourcesIndex;
 	int count = 0;
-	for (const char* res : resGo) resourcesIndex.insert(std::pair<const char*, int>(res, count));
+	for (const char* res : resGo) resourcesIndex.insert(std::pair<const char*, int>(res, count++));
 
 	//Resources Serialize
 	JSONNode* resources = node->PushJObject("resources");
@@ -47,7 +47,7 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsig
 	std::map<const char*, int> resourcesIndex;
 	int count = 0;
 	for (const char* res : resGo) {
-		resourcesIndex.insert(std::pair<const char*, int>(res, count));
+		resourcesIndex.insert(std::pair<const char*, int>(res, count++));
 		resC.push_back(App->resources->At(res));
 	}
 

@@ -117,6 +117,9 @@ const char* RE_ResourceManager::ReferenceByMeta(const char* metaPath, Resource_T
 	case R_MODEL:
 		retMD5 = Reference((ResourceContainer*)new RE_Model(metaPath));
 		break;
+	case R_SCENE:
+		retMD5 = Reference((ResourceContainer*)new RE_Scene(metaPath));
+		break;
 	}
 	return retMD5;
 }
@@ -125,38 +128,7 @@ unsigned int RE_ResourceManager::TotalReferences() const
 {
 	return resources.size();
 }
-const char* RE_ResourceManager::ImportModel(const char* assetPath)
-{
-	std::string path(assetPath);
-	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of("."));
-	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 
-	RE_Model* newModel = new RE_Model();
-	newModel->SetName(name.c_str());
-	newModel->SetAssetPath(assetPath);
-	newModel->SetType(Resource_Type::R_MODEL);
-	newModel->Import(false);
-	newModel->SaveMeta();
-
-	return Reference(newModel);
-}
-const char* RE_ResourceManager::ImportTexture(const char* assetPath)
-{
-	std::string path(assetPath);
-	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of("."));
-	std::string extension = filename.substr(filename.find_last_of(".") + 1);
-
-	RE_Texture* newTexture = new RE_Texture();
-	newTexture->SetName(name.c_str());
-	newTexture->SetAssetPath(assetPath);
-	newTexture->SetType(Resource_Type::R_TEXTURE);
-	newTexture->Import(false);
-	newTexture->SaveMeta();
-
-	return Reference(newTexture);
-}
 std::vector<ResourceContainer*> RE_ResourceManager::GetResourcesByType(Resource_Type type)
 {
 	std::vector<ResourceContainer*> ret;
@@ -256,6 +228,41 @@ const char * RE_ResourceManager::FindMD5ByAssetsPath(const char * assetsPath, Re
 	return ret;
 }
 
+const char* RE_ResourceManager::ImportModel(const char* assetPath)
+{
+	Event::PauseEvents();
+	std::string path(assetPath);
+	std::string filename = path.substr(path.find_last_of("/") + 1);
+	std::string name = filename.substr(0, filename.find_last_of("."));
+	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+
+	RE_Model* newModel = new RE_Model();
+	newModel->SetName(name.c_str());
+	newModel->SetAssetPath(assetPath);
+	newModel->SetType(Resource_Type::R_MODEL);
+	newModel->Import(false);
+	newModel->SaveMeta();
+	Event::ResumeEvents();
+
+	return Reference(newModel);
+}
+const char* RE_ResourceManager::ImportTexture(const char* assetPath)
+{
+	std::string path(assetPath);
+	std::string filename = path.substr(path.find_last_of("/") + 1);
+	std::string name = filename.substr(0, filename.find_last_of("."));
+	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+
+	RE_Texture* newTexture = new RE_Texture();
+	newTexture->SetName(name.c_str());
+	newTexture->SetAssetPath(assetPath);
+	newTexture->SetType(Resource_Type::R_TEXTURE);
+	newTexture->Import(false);
+	newTexture->SaveMeta();
+
+	return Reference(newTexture);
+}
+
 const char* RE_ResourceManager::ImportMaterial(const char* assetPath)
 {
 	std::string path(assetPath);
@@ -292,6 +299,7 @@ const char* RE_ResourceManager::ImportSkyBox(const char* assetPath)
 
 const char* RE_ResourceManager::ImportPrefab(const char* assetPath)
 {
+	Event::PauseEvents();
 	std::string path(assetPath);
 	std::string filename = path.substr(path.find_last_of("/") + 1);
 	std::string name = filename.substr(0, filename.find_last_of("."));
@@ -303,12 +311,14 @@ const char* RE_ResourceManager::ImportPrefab(const char* assetPath)
 	newPrefab->SetType(Resource_Type::R_PREFAB);
 	newPrefab->Import(false);
 	newPrefab->SaveMeta();
+	Event::ResumeEvents();
 
 	return Reference(newPrefab);
 }
 
 const char* RE_ResourceManager::ImportScene(const char* assetPath)
 {
+	Event::PauseEvents();
 	std::string path(assetPath);
 	std::string filename = path.substr(path.find_last_of("/") + 1);
 	std::string name = filename.substr(0, filename.find_last_of("."));
@@ -320,6 +330,7 @@ const char* RE_ResourceManager::ImportScene(const char* assetPath)
 	newScene->SetType(Resource_Type::R_SCENE);
 	newScene->Import(false);
 	newScene->SaveMeta();
+	Event::ResumeEvents();
 
 	return Reference(newScene);
 }
