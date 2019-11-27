@@ -180,7 +180,11 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 			mesh->mMaterialIndex);
 
 		if (mesh->mNumVertices > 0) {
-			float* verticesArray = new float[mesh->mNumVertices * 3];
+			uint numVertices = mesh->mNumVertices;
+
+			float* verticesArray = new float[numVertices * 3];
+			memcpy(verticesArray, mesh->mVertices, numVertices * 3 * sizeof(float));
+
 			float* normalsArray = nullptr;
 			float* tangentsArray = nullptr;
 			float* bitangentsArray = nullptr;
@@ -188,25 +192,31 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 			uint* indexArray = nullptr;
 
 			if (mesh->HasNormals()) {
-				normalsArray = new float[mesh->mNumVertices * 3];
-				memcpy(normalsArray, mesh->mNormals, mesh->mNumVertices * 3);
+				normalsArray = new float[numVertices * 3];
+				memcpy(normalsArray, mesh->mNormals, numVertices * 3 * sizeof(float));
 			}
 
 			if (mesh->HasTangentsAndBitangents()) {
-				tangentsArray = new float[mesh->mNumVertices * 3];
-				memcpy(tangentsArray, mesh->mTangents, mesh->mNumVertices * 3);
+				tangentsArray = new float[numVertices * 3];
+				memcpy(tangentsArray, mesh->mTangents, numVertices * 3 * sizeof(float));
 
 				bitangentsArray = new float[mesh->mNumVertices * 3];
-				memcpy(bitangentsArray, mesh->mBitangents, mesh->mNumVertices * 3);
+				memcpy(bitangentsArray, mesh->mBitangents, numVertices * 3 * sizeof(float));
 			}
 
 			if (mesh->mTextureCoords[0]){ // does the mesh contain texture coordinates?
-				textureCoordsArray = new float[mesh->mNumVertices * 2];
-				memcpy(textureCoordsArray, mesh->mTextureCoords, mesh->mNumVertices * 2);
+				textureCoordsArray = new float[numVertices * 2];
+				float* cursor = textureCoordsArray;
+				size_t size = 2;
+				for (uint i = 0; i < numVertices; i++) {
+					memcpy(cursor, &mesh->mTextureCoords[0][i].x, size * sizeof(float));
+					cursor += size;
+				}
 			}
 
 			if (mesh->HasFaces()) {
-				std::vector<uint> index;
+				indexArray = new uint[mesh->mNumFaces * 3];
+				uint* cursor = indexArray;
 
 				for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 				{
@@ -215,20 +225,15 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 					if (face->mNumIndices != 3)
 						LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face->mNumIndices);
 
-
-
-					for (uint i = 0; i < face->mNumIndices; i++) index.push_back(face->mIndices[i]);
-					uint rest = 0;
-					if ((rest = 3 - face->mNumIndices) > 0) for (uint i = 0; i < rest; i++)index.push_back(0);
-
+					size_t size = 3;
+					memcpy(cursor, face->mIndices, size * sizeof(uint));
+					cursor += size;
 				}
-				indexArray = new uint[index.size()];
-				memcpy(indexArray, &index[0], index.size() * sizeof(uint));
 			}
 
 			bool exists = false;
 			RE_Mesh* newMesh = new RE_Mesh();
-			newMesh->SetVerticesAndIndex(verticesArray, indexArray, mesh->mNumFaces, textureCoordsArray, normalsArray, tangentsArray, bitangentsArray);
+			newMesh->SetVerticesAndIndex(verticesArray, indexArray, numVertices, mesh->mNumFaces, textureCoordsArray, normalsArray, tangentsArray, bitangentsArray);
 
 			const char* meshMD5 = newMesh->CheckAndSave(&exists);
 			if (!exists) {
@@ -320,7 +325,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 		filePath += name.C_Str();
 		filePath += ".pupil";
 
-		if (!App->fs->Exists(filePath.c_str())) {
+		materialMD5 = App->resources->FindMD5ByAssetsPath(filePath.c_str(), Resource_Type::R_MATERIAL);
+		if (!materialMD5) {
 
 			RE_Material* newMaterial = new RE_Material();
 
@@ -415,8 +421,6 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 			newMaterial->Save();
 			materialMD5 = App->resources->Reference((ResourceContainer*)newMaterial);
 		}
-		else
-			materialMD5 = App->resources->FindMD5ByAssetsPath(filePath.c_str(), Resource_Type::R_MATERIAL);
 
 		aditionalData->materialsLoaded.insert(std::pair<aiMaterial*,const char*>(material, materialMD5));
 	}
