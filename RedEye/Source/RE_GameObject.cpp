@@ -760,6 +760,18 @@ void RE_GameObject::OnStop()
 	for (auto child : childs) child->OnStop();
 }
 
+void RE_GameObject::UseResources()
+{
+	for (auto comp : components) comp->UseResources();
+	for (auto child : childs) child->UseResources();
+}
+
+void RE_GameObject::UnUseResources()
+{
+	for (auto comp : components) comp->UnUseResources();
+	for (auto child : childs) child->UnUseResources();
+}
+
 RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float v_fov_rads, short aspect_ratio_t, bool draw_frustum)
 {
 	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, v_fov_rads, aspect_ratio_t, draw_frustum);

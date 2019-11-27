@@ -138,3 +138,21 @@ bool RE_CompMesh::CheckFaceCollision(const math::Ray &ray, float & distance) con
 	return ((RE_Mesh*)App->resources->At(meshMD5))->CheckFaceCollision(local_ray, distance);
 }
 
+void RE_CompMesh::UseResources()
+{
+	if (meshMD5) App->resources->Use(meshMD5);
+	if (materialMD5) {
+		App->resources->Use(materialMD5);
+		((RE_Material*)App->resources->At(materialMD5))->UseTextureResources();
+	}
+}
+
+void RE_CompMesh::UnUseResources()
+{
+	if (meshMD5) App->resources->UnUse(meshMD5);
+	if (materialMD5) {
+		App->resources->UnUse(materialMD5);
+		((RE_Material*)App->resources->At(materialMD5))->UnUseTextureResources();
+	}
+}
+

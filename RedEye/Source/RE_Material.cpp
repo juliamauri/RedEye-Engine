@@ -22,12 +22,12 @@ RE_Material::~RE_Material() { }
 void RE_Material::LoadInMemory()
 {
 	//TODO ResourcesManager, apply count referending textures
-	if (App->fs->Exists(GetLibraryPath())) {
-		BinaryDeserialize();
-	}
-	else if (App->fs->Exists(GetAssetPath())) {
+	//if (App->fs->Exists(GetLibraryPath())) {
+		//BinaryDeserialize();
+	//}
+	if (App->fs->Exists(GetAssetPath())) {
 		JsonDeserialize();
-		BinarySerialize();
+		//BinarySerialize();
 	}
 	else {
 		LOG_ERROR("Material %s not found on project", GetName());
@@ -291,6 +291,8 @@ void RE_Material::JsonSerialize()
 
 	JSONNode* materialNode = materialSerialize.GetRootNode("Material");
 
+	materialNode->PushString("name", GetName()); //for get different md5
+
 	materialNode->PushInt("ShaderType", (int)shadingType);
 
 	JSONNode* diffuseNode = materialNode->PushJObject("DiffuseTextures");
@@ -541,10 +543,39 @@ void RE_Material::SerializeTexturesBinary(char * &cursor, std::vector<const char
 		size = sizeof(uint);
 		memcpy(cursor, &sizePath, size);
 		cursor += size;
-		size = sizeof(char) * std::strlen(metaPath);
+		size = sizeof(char) * sizePath;
 		memcpy(cursor, metaPath, size);
 		cursor += size;
 	}
+}
+
+void RE_Material::UseTextureResources()
+{
+	for (auto t : tDiffuse) App->resources->Use(t);
+	for (auto t : tSpecular) App->resources->Use(t);
+	for (auto t : tAmbient) App->resources->Use(t);
+	for (auto t : tEmissive) App->resources->Use(t);
+	for (auto t : tOpacity) App->resources->Use(t);
+	for (auto t : tShininess) App->resources->Use(t);
+	for (auto t : tHeight) App->resources->Use(t);
+	for (auto t : tNormals) App->resources->Use(t);
+	for (auto t : tReflection) App->resources->Use(t);
+	for (auto t : tUnknown) App->resources->Use(t);
+}
+
+void RE_Material::UnUseTextureResources()
+{
+	for (auto t : tDiffuse) App->resources->UnUse(t);
+	for (auto t : tSpecular) App->resources->UnUse(t);
+	for (auto t : tAmbient) App->resources->UnUse(t);
+	for (auto t : tEmissive) App->resources->UnUse(t);
+	for (auto t : tOpacity) App->resources->UnUse(t);
+	for (auto t : tShininess) App->resources->UnUse(t);
+	for (auto t : tHeight) App->resources->UnUse(t);
+	for (auto t : tNormals) App->resources->UnUse(t);
+	for (auto t : tReflection) App->resources->UnUse(t);
+	for (auto t : tUnknown) App->resources->UnUse(t);
+
 }
 
 unsigned int RE_Material::GetBinarySize()
@@ -553,42 +584,52 @@ unsigned int RE_Material::GetBinarySize()
 	
 	for (auto md5 : tDiffuse) {
 		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
+		charCount += sizeof(uint);
 	}
 
 	for (auto md5 : tSpecular) {
 		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
+		charCount += sizeof(uint);
 	}
 
 	for (auto md5 : tAmbient) {
 		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
+		charCount += sizeof(uint);
 	}
 
 	for (auto md5 : tEmissive) {
 		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
+		charCount += sizeof(uint);
 	}
 
 	for (auto md5 : tOpacity) {
 		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
+		charCount += sizeof(uint);
 	}
 
 	for (auto md5 : tShininess) {
 		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
+		charCount += sizeof(uint);
 	}
 
 	for (auto md5 : tHeight) {
 		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
+		charCount += sizeof(uint);
 	}
 
 	for (auto md5 : tNormals) {
 		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
+		charCount += sizeof(uint);
 	}
 
 	for (auto md5 : tReflection) {
 		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
+		charCount += sizeof(uint);
 	}
 
 	for (auto md5 : tUnknown) {
 		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
+		charCount += sizeof(uint);
 	}
 
 	return sizeof(uint) * 10 + sizeof(char) * charCount + sizeof(RE_ShadingMode) + sizeof(float) * 4 + sizeof(math::float3) * 5 + sizeof(bool) * 2;

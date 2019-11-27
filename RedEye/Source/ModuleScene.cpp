@@ -130,6 +130,7 @@ bool ModuleScene::Start()
 	if (!RE_CameraManager::HasMainCamera())
 		CreateCamera();
 
+	root->UseResources();
 	// Setup AABB + Quadtree
 	Event::PauseEvents();
 	UpdateQuadTree();

@@ -75,6 +75,10 @@ public:
 	void OnPause();
 	void OnStop();
 
+	//Resources
+	void UseResources();
+	void UnUseResources();
+
 	// Components
 	void AddComponent(RE_Component* component);
 	RE_Component* AddComponent(const ushortint type, const char* file_path_data = nullptr, const bool dropped = false);

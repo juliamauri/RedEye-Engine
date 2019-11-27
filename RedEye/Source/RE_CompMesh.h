@@ -28,6 +28,9 @@ public:
 	math::AABB GetAABB() const;
 	bool CheckFaceCollision(const math::Ray &ray, float &distance) const;
 
+	void UseResources();
+	void UnUseResources();
+
 protected:
 
 	const char* meshMD5 = nullptr;

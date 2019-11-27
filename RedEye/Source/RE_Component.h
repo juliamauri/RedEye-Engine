@@ -72,6 +72,9 @@ public:
 	virtual void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) {}
 	virtual void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) {}
 
+	virtual void UseResources() {  }
+	virtual void UnUseResources() {  }
+
 protected:
 
 	bool active = true;
