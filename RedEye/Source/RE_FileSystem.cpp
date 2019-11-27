@@ -30,6 +30,7 @@
 #include <cctype>
 #include <algorithm>
 
+
 #pragma comment( lib, "PhysFS/libx86/physfs.lib" )
 
 #ifdef _DEBUG
@@ -117,10 +118,10 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 	Timer time;
 	bool run = true;
 
-	if (!assetsToProcess.empty() || !filesToFindMeta.empty() || !metaToFindFile.empty()) dirIter = assetsDirectories.end();
+	if (!assetsToProcess.empty() || !filesToFindMeta.empty()) dirIter = assetsDirectories.end();
 
 	while ((doAll || run) && dirIter != assetsDirectories.end()) {
-		std::stack<RE_ProcessPath*> toProcess = (*dirIter)->CheckAndApply();
+		std::stack<RE_ProcessPath*> toProcess = (*dirIter)->CheckAndApply(&metaRecentlyAdded);
 		while (!toProcess.empty()) {
 			RE_ProcessPath* process = toProcess.top();
 			toProcess.pop();
@@ -146,57 +147,30 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			case P_ADDFILE:
 			{
 				RE_File* file = (RE_File*)process->toProcess;
+				RE_Meta* metaFile = (RE_Meta*)file;
 
 				switch (file->fType)
 				{
 				case F_META:
 				{
-					if (metaRecentlyChanged.empty() && resourcesRecentlyImported.empty()) {
+					const char* isReferenced = App->resources->FindMD5ByMETAPath(file->path.c_str());
+
+					if (!isReferenced) {
 						Config metaLoad(file->path.c_str(), App->fs->GetZipPath());
 						if (metaLoad.Load()) {
 							JSONNode* metaNode = metaLoad.GetRootNode("meta");
 							Resource_Type type = (Resource_Type)metaNode->PullInt("Type", Resource_Type::R_UNDEFINED);
 							DEL(metaNode);
-							RE_Meta* metaFile = (RE_Meta*)file;
-							if (type != Resource_Type::R_UNDEFINED) metaFile->resource = App->resources->ReferenceByMeta(file->path.c_str(), type);
-							if (metaFile->resource == nullptr)  metaFile->fType = F_NOTSUPPORTED;
-							else if (type != Resource_Type::R_SHADER) metaToFindFile.push_back(metaFile);
-						}
-					}
-					else{
-						bool done = false;
-						if (!metaRecentlyChanged.empty()) {
-							std::vector<const char*>::iterator md5Iter = metaRecentlyChanged.begin();
-							for (auto md5Char : metaRecentlyChanged) {
-								ResourceContainer* res = App->resources->At(md5Char);
-								if (std::strcmp(res->GetMetaPath(), file->path.c_str()) == 0) {
-									done = true;
-									metaRecentlyChanged.erase(md5Iter);
-									break;
-								}
-								md5Iter++;
+							if (type != Resource_Type::R_UNDEFINED) {
+								metaFile->resource = App->resources->ReferenceByMeta(file->path.c_str(), type);
 							}
 						}
-						if (!done && !resourcesRecentlyImported.empty()) {
-							std::vector<const char*>::iterator md5Iter = resourcesRecentlyImported.begin();
-							std::vector<RE_File*>::iterator fileIter = filesRecentlyImported.begin();
-							for (md5Iter; md5Iter != resourcesRecentlyImported.end(); md5Iter++, fileIter++) {
-								ResourceContainer* res = App->resources->At(*md5Iter);
-
-								if (std::strcmp(res->GetMetaPath(), file->path.c_str()) == 0) {
-									RE_Meta* metaFile = (RE_Meta*)file;
-									metaFile->resource = *md5Iter;
-									metaFile->fromFile = *fileIter;
-									std::vector<const char*>::iterator ctoDelete = md5Iter++;
-									std::vector<RE_File*>::iterator ftoDelete = fileIter++;
-									resourcesRecentlyImported.erase(ctoDelete);
-									filesRecentlyImported.erase(ftoDelete);
-									break;
-								}
-							}
-
-						}
 					}
+					else 
+						metaFile->resource = isReferenced;
+
+					metaToFindFile.push_back(metaFile);
+					
 					break;
 				}
 				case F_MODEL:
@@ -215,7 +189,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			case P_ADDFOLDER:
 			{
 				RE_Directory* dir = (RE_Directory*)process->toProcess;
-				std::stack<RE_ProcessPath*> toProcess = dir->CheckAndApply();
+				std::stack<RE_ProcessPath*> toProcess = dir->CheckAndApply(&metaRecentlyAdded);
 				if (!toProcess.empty()) {
 					while (!toProcess.empty()) {
 						RE_ProcessPath* process = toProcess.top();
@@ -234,31 +208,43 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 		}
 
 		if ((doAll || run) && !metaToFindFile.empty()) {
+			std::vector<RE_File*> toRemoveF;
+			std::vector<RE_Meta*> toRemoveM;
 
 			for (RE_Meta* meta : metaToFindFile) {
 				ResourceContainer* res = App->resources->At(meta->resource);
+				const char* assetPath = App->resources->At(meta->resource)->GetAssetPath();
 
-				if (!filesToFindMeta.empty()) {
-					std::vector<RE_File*>::iterator fileIter = filesToFindMeta.begin();
-
-					for (fileIter; fileIter != filesToFindMeta.end(); fileIter++) {
-						if (std::strcmp(res->GetAssetPath(), (*fileIter)->path.c_str()) == 0) {
-							meta->fromFile = *fileIter;
-							break;
+				if (!res->isInternal()) {
+					if (!filesToFindMeta.empty()) {
+						for (RE_File* file : filesToFindMeta) {
+							if (std::strcmp(assetPath, file->path.c_str()) == 0) {
+								meta->fromFile = file;
+								toRemoveF.push_back(file);
+								toRemoveM.push_back(meta);
+							}
 						}
 					}
-					if (fileIter != filesToFindMeta.end()) filesToFindMeta.erase(fileIter);
-					else meta->fType = FileType::F_NOTSUPPORTED;
 				}
-				else meta->fType = FileType::F_NOTSUPPORTED;
+				else
+					toRemoveM.push_back(meta);
 
 				//timer
 				if (!doAll && extra_ms < time.Read()) run = false;
 			}
-			filesToFindMeta.clear();
+			if (!toRemoveF.empty()) {
+				//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
+				filesToFindMeta.erase(std::remove_if(std::begin(filesToFindMeta), std::end(filesToFindMeta),
+					[&](auto x) {return std::find(begin(toRemoveF), end(toRemoveF), x) != end(toRemoveF); }), std::end(filesToFindMeta));
+			}
+			if (!toRemoveM.empty()) {
+				metaToFindFile.erase(std::remove_if(std::begin(metaToFindFile), std::end(metaToFindFile),
+					[&](auto x) {return std::find(begin(toRemoveM), end(toRemoveM), x) != end(toRemoveM); }), std::end(metaToFindFile));
+			}
 		}
 
-		if ((doAll || run) && !filesToFindMeta.empty() && metaToFindFile.empty()) {
+		if ((doAll || run) && !filesToFindMeta.empty()) {
+			std::vector<RE_File*> toRemoveF;
 
 			//Importing
 			for (RE_File* file : filesToFindMeta) {
@@ -298,22 +284,32 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				}
 
 				if (newRes != nullptr) {
-					resourcesRecentlyImported.push_back(newRes);
-					filesRecentlyImported.push_back(file);
+					RE_Meta* newMetaFile = new RE_Meta();
+					newMetaFile->resource = newRes;
+					newMetaFile->fromFile = file;
+					RE_File* fromMetaF = (RE_File*)newMetaFile;
+					fromMetaF->fType = FileType::F_META;
+					fromMetaF->path = App->resources->At(newRes)->GetMetaPath();
+					metaRecentlyAdded.push_back(newMetaFile);
 				}
 				else
 					file->fType = F_NOTSUPPORTED;
+				toRemoveF.push_back(file);
 
 				if (!doAll && extra_ms < time.Read()) {
 					run = false;
 					break;
 				}
 			}
-			filesToFindMeta.clear();
+			if (!toRemoveF.empty()) {
+				//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
+				filesToFindMeta.erase(std::remove_if(std::begin(filesToFindMeta), std::end(filesToFindMeta),
+					[&](auto x) {return std::find(begin(toRemoveF), end(toRemoveF), x) != end(toRemoveF); }), std::end(filesToFindMeta));
+			}
 		}
 	}
-
-	return (extra_ms < time.Read()) ? 0 : extra_ms - time.Read();
+	unsigned int realTime = time.Read();
+	return (extra_ms < realTime) ? 0 : extra_ms - realTime;
 }
 
 void RE_FileSystem::DrawEditor()
@@ -1604,11 +1600,13 @@ std::list< RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::MountTreeF
 	return ret;
 }
 
-std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAndApply()
+std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAndApply(std::vector<RE_Meta*>* metaRecentlyAdded)
 {
 	std::stack<RE_ProcessPath*> ret;
 	if (App->fs->Exists(path.c_str())) {
 		std::string iterPath(path);
+
+		std::vector<RE_Meta*> toRemoveM;
 
 		char** rc = PHYSFS_enumerateFiles(iterPath.c_str());
 		char** i;
@@ -1640,9 +1638,27 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 				}
 				else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
 					const char* extension = nullptr;
+					bool newProcess = true;
 					FileType fileType = RE_File::DetectExtensionAndType(inPath.c_str(), extension);
+					if (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FILE || (*iter)->path != inPath) {
+						if (fileType == FileType::F_META && !metaRecentlyAdded->empty()) {
+							for (RE_Meta* metaAdded : *metaRecentlyAdded) {
 
-					if (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FILE || (*iter)->path != inPath || ((RE_File*)(*iter))->lastSize != fileStat.filesize) {
+								if (std::strcmp(metaAdded->path.c_str(), inPath.c_str()) == 0) {
+									AddBeforeOf((RE_Path*)metaAdded, iter);
+
+									toRemoveM.push_back(metaAdded);
+									metaRecentlyAdded->erase(std::remove_if(std::begin(*metaRecentlyAdded), std::end(*metaRecentlyAdded),
+										[&](auto x) {return std::find(begin(toRemoveM), end(toRemoveM), x) != end(toRemoveM); }), std::end(*metaRecentlyAdded));
+									toRemoveM.clear();
+									newProcess = false;
+									break;
+								}
+							}
+						}
+					}
+
+					 if(newProcess) {
 						RE_ProcessPath* newProcess = new RE_ProcessPath();
 						RE_File* newFile = (fileType != FileType::F_META) ? new RE_File() : (RE_File*)new RE_Meta();
 						newFile->path = inPath;
@@ -1659,6 +1675,7 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 			}
 			if (iter != tree.end()) iter++;
 		}
+
 		PHYSFS_freeList(rc);
 	}
 	return ret;

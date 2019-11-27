@@ -112,7 +112,6 @@ bool RE_InternalResources::InitSkyBox()
 	defaultSkybox->SaveMeta();
 	defaultSkybox->LoadInMemory();
 	App->resources->Reference(defaultSkybox);
-	App->fs->metaRecentlyChanged.push_back(defaultSkybox->GetMD5());
 	return true;
 }
 

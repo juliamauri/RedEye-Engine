@@ -86,7 +86,7 @@ private:
 
 		void SetPath(const char* path);
 		std::list< RE_Directory*> MountTreeFolders();
-		std::stack<RE_ProcessPath*> CheckAndApply();
+		std::stack<RE_ProcessPath*> CheckAndApply(std::vector<RE_Meta*>* metaRecentlyAdded);
 
 		void DrawProperties();
 	};
@@ -120,9 +120,6 @@ public:
 
 	std::vector<std::string> FindAllFilesByExtension(const char* path, const char* extension, bool repercusive = false);
 
-	std::vector<const char*> metaRecentlyChanged;
-
-
 private:
 
 	std::string RecursiveFindFbx(const char* path);
@@ -148,11 +145,10 @@ private:
 	std::list< RE_Directory*>::iterator dirIter;
 	std::stack<RE_ProcessPath*> assetsToProcess;
 
-	std::vector<RE_File*> filesToFindMeta;
 	std::vector<RE_Meta*> metaToFindFile;
+	std::vector<RE_File*> filesToFindMeta;
 
-	std::vector<const char*> resourcesRecentlyImported;
-	std::vector<RE_File*> filesRecentlyImported;
+	std::vector<RE_Meta*> metaRecentlyAdded;
 };
 
 class RE_FileIO
