@@ -118,7 +118,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 	Timer time;
 	bool run = true;
 
-	if (!assetsToProcess.empty() || !filesToFindMeta.empty()) dirIter = assetsDirectories.end();
+	if ((dirIter == assetsDirectories.begin()) && (!assetsToProcess.empty() || !filesToFindMeta.empty() || !toImport.empty())) dirIter = assetsDirectories.end();
 
 	while ((doAll || run) && dirIter != assetsDirectories.end()) {
 		std::stack<RE_ProcessPath*> toProcess = (*dirIter)->CheckAndApply(&metaRecentlyAdded);
@@ -193,8 +193,8 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				if (!toProcess.empty()) {
 					while (!toProcess.empty()) {
 						RE_ProcessPath* process = toProcess.top();
-							toProcess.pop();
-							assetsToProcess.push(process);
+						toProcess.pop();
+						assetsToProcess.push(process);
 					}
 				}
 				assetsDirectories.push_back(dir);
@@ -244,10 +244,30 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 		}
 
 		if ((doAll || run) && !filesToFindMeta.empty()) {
-			std::vector<RE_File*> toRemoveF;
-
-			//Importing
 			for (RE_File* file : filesToFindMeta) {
+				switch (file->fType)
+				{
+				case F_MODEL:
+				case F_PREFAB:
+				case F_SCENE:
+					toImport.push_back(file);
+					break;
+				case F_TEXTURE:
+				case F_MATERIAL:
+				case F_SKYBOX:
+					toImport.push_front(file);
+					break;
+				}
+			}
+			filesToFindMeta.clear();
+		}
+
+		if ((doAll || run) && !toImport.empty()) {
+			std::vector<RE_File*> toRemoveF;
+			//Importing
+			for (RE_File* file : toImport) {
+				LOG("Importing %s", file->path.c_str());
+
 				const char* newRes = nullptr;
 				switch (file->fType)
 				{
@@ -303,8 +323,8 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			}
 			if (!toRemoveF.empty()) {
 				//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
-				filesToFindMeta.erase(std::remove_if(std::begin(filesToFindMeta), std::end(filesToFindMeta),
-					[&](auto x) {return std::find(begin(toRemoveF), end(toRemoveF), x) != end(toRemoveF); }), std::end(filesToFindMeta));
+				toImport.erase(std::remove_if(std::begin(toImport), std::end(toImport),
+					[&](auto x) {return std::find(begin(toRemoveF), end(toRemoveF), x) != end(toRemoveF); }), std::end(toImport));
 			}
 		}
 	}
@@ -1623,13 +1643,31 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 			if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
 				if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
 					inPath += "/";
-					
-					if (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FOLDER || (*iter)->path != inPath) {
+					bool newFolder = false;
+					if (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FOLDER || (*iter)->path != inPath)
+						newFolder = true;
+
+					if (newFolder && iter != tree.end()) {
+						pathIterator postPath = iter;
+						bool found = false;
+						while (postPath != tree.end())
+						{
+							if (inPath == (*postPath)->path) {
+								found = true;
+								break;
+							}
+							postPath++;
+						}
+						if (found) newFolder = false;
+					}
+
+					if (newFolder) {
 						RE_Directory* newDirectory = new RE_Directory();
 						newDirectory->SetPath(inPath.c_str());
 						newDirectory->parent = this;
 						newDirectory->pType = D_FOLDER;
 						AddBeforeOf((RE_Path*)newDirectory, iter);
+						iter--;
 						RE_ProcessPath* newProcess = new RE_ProcessPath();
 						newProcess->whatToDo = P_ADDFOLDER;
 						newProcess->toProcess = (RE_Path*)newDirectory;
@@ -1638,27 +1676,44 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 				}
 				else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
 					const char* extension = nullptr;
-					bool newProcess = true;
+					bool newFile = false;
 					FileType fileType = RE_File::DetectExtensionAndType(inPath.c_str(), extension);
-					if (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FILE || (*iter)->path != inPath) {
-						if (fileType == FileType::F_META && !metaRecentlyAdded->empty()) {
-							for (RE_Meta* metaAdded : *metaRecentlyAdded) {
+					if (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FILE || (*iter)->path != inPath)
+						newFile = true;
+					
 
-								if (std::strcmp(metaAdded->path.c_str(), inPath.c_str()) == 0) {
-									AddBeforeOf((RE_Path*)metaAdded, iter);
+					if (newFile && fileType == FileType::F_META && !metaRecentlyAdded->empty()) {
+						for (RE_Meta* metaAdded : *metaRecentlyAdded) {
 
-									toRemoveM.push_back(metaAdded);
-									metaRecentlyAdded->erase(std::remove_if(std::begin(*metaRecentlyAdded), std::end(*metaRecentlyAdded),
-										[&](auto x) {return std::find(begin(toRemoveM), end(toRemoveM), x) != end(toRemoveM); }), std::end(*metaRecentlyAdded));
-									toRemoveM.clear();
-									newProcess = false;
-									break;
-								}
+							if (std::strcmp(metaAdded->path.c_str(), inPath.c_str()) == 0) {
+								AddBeforeOf((RE_Path*)metaAdded, iter);
+								iter--;
+
+								toRemoveM.push_back(metaAdded);
+								metaRecentlyAdded->erase(std::remove_if(std::begin(*metaRecentlyAdded), std::end(*metaRecentlyAdded),
+									[&](auto x) {return std::find(begin(toRemoveM), end(toRemoveM), x) != end(toRemoveM); }), std::end(*metaRecentlyAdded));
+								toRemoveM.clear();
+								newFile = false;
+								break;
 							}
 						}
 					}
 
-					 if(newProcess) {
+					if (newFile && iter != tree.end()) {
+						pathIterator postPath = iter;
+						bool found = false;
+						while (postPath != tree.end())
+						{
+							if (inPath == (*postPath)->path) {
+								found = true;
+								break;
+							}
+							postPath++;
+						}
+						if (found) newFile = false;
+					}
+
+					 if(newFile) {
 						RE_ProcessPath* newProcess = new RE_ProcessPath();
 						RE_File* newFile = (fileType != FileType::F_META) ? new RE_File() : (RE_File*)new RE_Meta();
 						newFile->path = inPath;
@@ -1669,7 +1724,8 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 						newProcess->whatToDo = P_ADDFILE;
 						newProcess->toProcess = (RE_Path*)newFile;
 						ret.push(newProcess);
-						AddBeforeOf((RE_Path*)newFile, iter);
+						AddBeforeOf((RE_Path*)newFile,iter);
+						iter--;
 					}
 				}
 			}

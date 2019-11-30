@@ -47,9 +47,17 @@ private:
 		P_ADDFOLDER
 	};
 
+	struct RE_File;
+	struct RE_Meta;
+	struct RE_Directory;
+
 	struct RE_Path {
 		std::string path;
 		PathType pType;
+
+		RE_File* AsFile()const { return (RE_File*)this; }
+		RE_Meta* AsMeta()const { return (RE_Meta*)this; }
+		RE_Directory* AsDirectory()const { return (RE_Directory*)this; }
 	};
 
 	struct RE_File : public RE_Path
@@ -60,6 +68,9 @@ private:
 		signed long long lastSize = 0;
 
 		static FileType DetectExtensionAndType(const char* _path, const char*& _extension);
+
+		RE_Path* AsPath()const { return (RE_Path*)this; }
+		RE_Meta* AsMeta()const { return (RE_Meta*)this; }
 	};
 
 	struct RE_Meta :public RE_File
@@ -68,6 +79,9 @@ private:
 		const char* resource = nullptr;
 
 		bool IsModified()const;
+
+		RE_Path* AsPath()const { return (RE_Path*)this; }
+		RE_File* AsFile()const { return (RE_File*)this; }
 	};
 
 	struct RE_ProcessPath {
@@ -89,6 +103,8 @@ private:
 		std::stack<RE_ProcessPath*> CheckAndApply(std::vector<RE_Meta*>* metaRecentlyAdded);
 
 		void DrawProperties();
+
+		RE_Path* AsPath()const { return (RE_Path*)this; }
 	};
 
 public:
@@ -149,6 +165,8 @@ private:
 	std::vector<RE_File*> filesToFindMeta;
 
 	std::vector<RE_Meta*> metaRecentlyAdded;
+
+	std::list<RE_File*> toImport;
 };
 
 class RE_FileIO

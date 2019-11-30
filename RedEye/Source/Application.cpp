@@ -210,7 +210,7 @@ void Application::FinishUpdate()
 
 	unsigned int extra_ms = time->ManageFrameTimers();
 	
-	//extra_ms = fs->ReadAssetChanges(extra_ms);
+	extra_ms = fs->ReadAssetChanges(extra_ms);
 
 	if (extra_ms > 0)
 		SDL_Delay(extra_ms);
