@@ -168,7 +168,7 @@ void ResourceContainer::LoadMeta()
 		assetPath = metaNode->PullString("AssetPath", "Assets/");
 		libraryPath = metaNode->PullString("LibraryPath", "Library/");
 		SetMD5(metaNode->PullString("MD5", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
-		type = (Resource_Type)metaNode->PullInt("Type", Resource_Type::R_UNDEFINED);
+		SetType((Resource_Type)metaNode->PullInt("Type", Resource_Type::R_UNDEFINED));
 		lastModified  = metaNode->PullSignedLongLong("lastModified", 0);
 
 		LoadResourceMeta(metaNode);
@@ -179,7 +179,7 @@ void ResourceContainer::LoadMeta()
 
 void ResourceContainer::DrawPropieties()
 {
-	if (ImGui::CollapsingHeader(propietiesName.c_str())) {
+	if (ImGui::CollapsingHeader(std::string(propietiesName + name).c_str(), ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen)) {
 		if (ImGui::Button("Return")) App->resources->SetSelected(nullptr);
 		ImGui::Separator();
 		ImGui::Text("Name: %s", name.c_str());
