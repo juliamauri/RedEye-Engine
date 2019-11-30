@@ -737,6 +737,11 @@ void PopUpWindow::Draw(bool secondary)
 
 AssetsWindow::AssetsWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
 
+const char* AssetsWindow::GetCurrentDirPath() const
+{
+	return currentPath;
+}
+
 void AssetsWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
@@ -750,7 +755,10 @@ void AssetsWindow::Draw(bool secondary)
 		RE_FileSystem::RE_Directory* toChange = nullptr;
 
 		if (currentDir->parent == nullptr)
+		{
 			ImGui::Text("%s Folder", currentDir->name.c_str());
+			currentPath = currentDir->path.c_str();
+		}
 		else {
 			std::list<RE_FileSystem::RE_Directory*> folders = currentDir->FromParentToThis();
 			for (auto dir : folders) {
@@ -794,7 +802,10 @@ void AssetsWindow::Draw(bool secondary)
 			ImGui::PopStyleVar();
 		}
 
-		if (toChange) currentDir = toChange;
+		if (toChange) {
+			currentDir = toChange;
+			currentPath = currentDir->path.c_str();
+		}
 	}
 
 	ImGui::End();

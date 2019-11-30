@@ -65,6 +65,8 @@ public:
 	void PopUpFocus(bool focus);
 	PopUpWindow* popupWindow = nullptr;
 
+	const char* GetAssetsPanelPath()const;
+
 private:
 
 	void UpdateCamera();

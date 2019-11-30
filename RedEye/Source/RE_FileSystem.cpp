@@ -24,6 +24,8 @@
 
 #include "PhysFS\include\physfs.h"
 
+#include "ModuleEditor.h"
+
 #include "TimeManager.h"
 #include "md5.h"
 
@@ -98,6 +100,7 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		rootAssetDirectory = new RE_Directory();
 		rootAssetDirectory->SetPath("Assets/");
 		assetsDirectories = rootAssetDirectory->MountTreeFolders();
+		assetsDirectories.push_front(rootAssetDirectory);
 		dirIter = assetsDirectories.begin();
 	}
 	else
@@ -115,6 +118,8 @@ Config* RE_FileSystem::GetConfig() const
 
 unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 {
+	OPTICK_CATEGORY("Read Assets Cahnges", Optick::Category::IO);
+
 	Timer time;
 	bool run = true;
 
@@ -339,7 +344,6 @@ void RE_FileSystem::DrawEditor()
 	ImGui::TextWrappedV(GetExecutableDirectory(), "");
 
 	ImGui::Separator();
-
 	//ImGui::Text("Read Directories");
 	//for (std::list<std::string>::iterator it = paths.begin(); it != paths.end(); ++it)
 		//ImGui::TextWrappedV(it->c_str(), "");
@@ -471,201 +475,29 @@ void RE_FileSystem::HandleDropedFile(const char * file)
 	std::string fileName = fileNameExtension.substr(0, fileNameExtension.find_last_of("."));
 	std::string ext = full_path.substr(full_path.find_last_of(".") + 1);
 
-	std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-
-	if (ext.compare("zip") == 0)
-	{
-		bool canImport = true;
-		LOG_SECONDARY(".zip detected");
-		std::string exportPath("Exporting/");
-		App->fs->AddPath(file, exportPath.c_str());
-
-		std::string fbxToLoadInScene;
-
-		std::string fbxFound = RecursiveFindFbx(exportPath.c_str());
-
-		if (!fbxFound.empty()) {
-			LOG_TERCIARY("FBX in zip detected. File: %s",fbxFound.c_str());
-
-			char **rc = PHYSFS_enumerateFiles("Assets/Meshes/");
-			char **i;
-
-			bool existsinAssets = false;
-			bool sameFolder = false;
-			for (i = rc; *i != NULL; i++)
-			{
-				if (fileName.compare(*i) == 0) {
-					sameFolder = true;
-					std::string folderExport = exportPath + fileName + "/";
-					std::string folderAssets = "Assets/Meshes/" + fileName + "/";
-					if (RecursiveComparePath(folderExport.c_str(), folderAssets.c_str())) {
-						LOG_TERCIARY("Dropped .zip with .fbx exits in assets.");
-						existsinAssets = true;
-						fbxToLoadInScene = folderAssets + fbxFound.substr(fbxFound.find_last_of("/") + 1);
-						break;
-					}
-					else {
-						LOG_WARNING("Same folder as zip but differents contents");
-					}
-				}
-			}
-			PHYSFS_freeList(rc);
-
-			if (!existsinAssets) {
-				std::string folderToCopy("Assets/Meshes/");
-				std::string fileCount = fileName;
-				if(sameFolder){
-					uint countSame = 0;
-					char **rc = PHYSFS_enumerateFiles("Assets/Meshes/");
-					char **i;
-					for (i = rc; *i != NULL; i++)
-					{
-						if (fileName.compare(*i) == 0) {
-							fileCount = fileName + std::to_string(countSame++);
-						}
-					}
-					PHYSFS_freeList(rc);
-				}
-				folderToCopy += fileCount + "/";
-				exportPath += fileName + "/";
-				if (sameFolder) LOG_SOLUTION("Copying assets to new path: %s", folderToCopy.c_str());
-				RecursiveCopy(exportPath.c_str(), folderToCopy.c_str());
-				fbxToLoadInScene = folderToCopy + fbxFound.substr(fbxFound.find_last_of("/") + 1);
-			}
-		}
-		else {
-			LOG_ERROR("Dropped .zip don't contain any .fbx");
-			canImport = false;
-		}
-		App->fs->RemovePath(file);
-
-		if(canImport) App->scene->LoadFBXOnScene(fbxToLoadInScene.c_str());
-	}
-	else if (ext.compare("fbx") == 0)
-	{
-		bool canImport = true;
-		LOG_SECONDARY(".fbx detected");
-		std::string assetsPath("Assets/Meshes/");
-		assetsPath += fileName;
-		assetsPath += "/";
-
-		std::string fbxAssetsPath;
-		bool neededCopyToAssets = false;
-
-		if (Exists(assetsPath.c_str())) {
-			LOG_TERCIARY("Found a folder with same name as file");
-			fbxAssetsPath = RecursiveFindFbx(assetsPath.c_str());
-			if (fbxAssetsPath.empty()) {
-				//TODO user chose
-
-				//Replace folder TODO
-
-				//DEFAULT Creates another folder DONE
-				LOG_WARNING("Not .fbx found on assets.");
-
-				assetsPath = assetsPath.substr(0, assetsPath.find_last_of("/"));
-				uint count = 0;
-				std::string pathCount;
-				do {
-					count++;
-					pathCount = assetsPath;
-					pathCount += " "; 
-					pathCount += std::to_string(count);
-				} while (!Exists(pathCount.c_str()));
-				if (count > 0)
-				{
-					assetsPath += " ";	assetsPath += std::to_string(count);
-
-					fbxAssetsPath = assetsPath; fbxAssetsPath += fileName;
-					fbxAssetsPath += " ";  fbxAssetsPath += std::to_string(count);
-					fbxAssetsPath += ".";  fbxAssetsPath += ext;
-				}
-				else
-				{
-					assetsPath += "/";
-					fbxAssetsPath = assetsPath; fbxAssetsPath += fileNameExtension;
-				}
-				LOG_SOLUTION("Copying assets to new path: %s", fbxAssetsPath.c_str());
-				neededCopyToAssets = true;
-			}
-		}
-		else
-		{
-			fbxAssetsPath = assetsPath; fbxAssetsPath += fileNameExtension;
-			neededCopyToAssets = true;
-		}
-
-
-		if (neededCopyToAssets)
-		{
-			LOG_TERCIARY("Copying .fbx with textures found to assets");
-			std::vector<std::string> resourcesNames = App->modelImporter->GetOutsideResourcesAssetsPath(file);
-			std::vector<std::string> resourcesPath;
-			resourcesPath.resize(resourcesNames.size());
-
-			std::string exportPath("FindFile/");
-			AddPath(directory.c_str(), exportPath.c_str());
-			for (uint i = 0; i < resourcesNames.size(); i++)
-				resourcesPath[i] = RecursiveFindFileOutsideFileSystem(directory.c_str(), exportPath.c_str(), resourcesNames[i].c_str());
-			App->fs->RemovePath(directory.c_str());
-
-			//copiar a asssets
-			RE_FileIO* fbxFile = QuickBufferFromPDPath(file);
-			if (fbxFile) {
-
-				RE_FileIO fbxAssets(fbxAssetsPath.c_str(), GetZipPath());
-				fbxAssets.Save(fbxFile->GetBuffer(), fbxFile->GetSize());
-
-				DEL(fbxFile);
-
-				for (uint i = 0; i < resourcesPath.size(); i++) {
-					std::string resourceAssetsPath(assetsPath);
-					resourceAssetsPath += resourcesNames[i];
-
-					RE_FileIO* resourceFile = QuickBufferFromPDPath(resourcesPath[i].c_str());
-
-					if (resourceFile) {
-						RE_FileIO resourceAssets(resourceAssetsPath.c_str(), GetZipPath());
-						resourceAssets.Save(resourceFile->GetBuffer(), resourceFile->GetSize());
-						DEL(resourceFile);
-					}
-				}
-			}
-			else {
-				LOG_ERROR("Cannot open&copy dropped fbx");
-				canImport = false;
-			}
-		}
-		if(canImport) App->scene->LoadFBXOnScene(fbxAssetsPath.c_str());
-	}
-	else if (ext.compare("jpg") == 0 || ext.compare("png") == 0 || ext.compare("dds") == 0)
-	{
-		LOG_SECONDARY(".%s detected", ext.c_str());
-		std::string assetsTexturePath("Assets/Images/");
-		std::string textureToLoad = RecursiveFindFileOwnFileSystem(assetsTexturePath.c_str(), fileNameExtension.c_str());
-		bool canImport = true;
-		if (textureToLoad.empty()) {
-			LOG_TERCIARY("Copying texture to assets.", ext.c_str());
-			RE_FileIO* textureFile = QuickBufferFromPDPath(file);
-			if (textureFile) {
-				textureToLoad += assetsTexturePath;
-				textureToLoad += fileNameExtension;
-				RE_FileIO textureAssets(textureToLoad.c_str(), GetZipPath());
-				textureAssets.Save(textureFile->GetBuffer(), textureFile->GetSize());
-				DEL(textureFile);
-			}else {
-				canImport = false; 
-				LOG_ERROR("Cannot open&copy dropped texture");
-			}
-		}
-		else {
-			LOG_TERCIARY("Found existing texture in assets");
-		}
-		
-		if(canImport) App->scene->LoadTextureOnSelectedGO(textureToLoad.c_str());
+	std::string exportPath("Exporting/");
+	std::string finalPath = exportPath;
+	bool newDir = false;
+	if (ext.compare("zip") == 0 || ext.compare("7z") == 0 || ext.compare("iso") == 0) {
+		newDir = true;
 	}
 	else {
-		LOG_ERROR("File extension not suported.");
+		RE_FileIO* fileLoaded = QuickBufferFromPDPath(file);
+		if (fileLoaded) {
+			std::string destPath = App->editor->GetAssetsPanelPath();
+			destPath += fileNameExtension;
+			RE_FileIO toSave(destPath.c_str(), GetZipPath());
+			toSave.Save(fileLoaded->GetBuffer(), fileLoaded->GetSize());
+		}
+		else
+			newDir = true;
+	}
+
+	if (newDir) {
+		finalPath += fileName + "/";
+		App->fs->AddPath(file, finalPath.c_str());
+		RecursiveCopy(exportPath.c_str(), App->editor->GetAssetsPanelPath());
+		App->fs->RemovePath(file);
 	}
 }
 

@@ -106,8 +106,6 @@ public:
 
 		std::list<RE_Directory*> FromParentToThis();
 
-		void DrawProperties();
-
 		RE_Path* AsPath()const { return (RE_Path*)this; }
 	};
 

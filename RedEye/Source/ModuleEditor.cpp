@@ -526,6 +526,11 @@ void ModuleEditor::PopUpFocus(bool focus)
 	popUpFocus = focus;
 }
 
+const char* ModuleEditor::GetAssetsPanelPath() const
+{
+	return assets->GetCurrentDirPath();
+}
+
 void ModuleEditor::UpdateCamera()
 {
 	OPTICK_CATEGORY("Update ModuleEditor Camera", Optick::Category::Camera);

@@ -65,8 +65,12 @@ class AssetsWindow : public EditorWindow
 public:
 	AssetsWindow(const char* name = "Assets", bool start_active = true);
 
+	const char* GetCurrentDirPath()const;
+
 private:
 	void Draw(bool secondary = false) override;
+
+	const char* currentPath = nullptr;
 };
 
 class ConfigWindow : public EditorWindow
