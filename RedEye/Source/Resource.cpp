@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "RE_FileSystem.h"
+#include "RE_ResourceManager.h"
 
 #include "Globals.h"
 
@@ -179,12 +180,14 @@ void ResourceContainer::LoadMeta()
 void ResourceContainer::DrawPropieties()
 {
 	if (ImGui::CollapsingHeader(propietiesName.c_str())) {
-
+		if (ImGui::Button("Return")) App->resources->SetSelected(nullptr);
+		ImGui::Separator();
 		ImGui::Text("Name: %s", name.c_str());
 		ImGui::Text("Asset path: %s", assetPath.c_str());
 		ImGui::Text("Library path: %s", libraryPath.c_str());
 		ImGui::Text("Meta path: %s", metaPath.c_str());
 		ImGui::Text("MD5: %s", md5);
+		ImGui::Text("Times Counted: %u", App->resources->TotalReferenceCount(md5));
 
 		ImGui::Separator();
 

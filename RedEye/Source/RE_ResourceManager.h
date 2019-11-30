@@ -28,6 +28,9 @@ public:
 	void Use(const char* resMD5);
 	void UnUse(const char* resMD5);
 
+	void SetSelected(const char* resS);
+	const char* GetSelected()const;
+
 	std::vector<ResourceContainer*> GetResourcesByType(Resource_Type type);
 	const char* IsReference(const char* md5, Resource_Type type = Resource_Type::R_UNDEFINED);
 	const char* FindMD5ByMETAPath(const char* metaPath, Resource_Type type = Resource_Type::R_UNDEFINED);
@@ -46,6 +49,8 @@ public:
 private:
 	ResourceMap resources;
 	ResourceCounterMap resourcesCounter;
+
+	const char* resourceSelected = nullptr;
 };
 
 #endif // !__RESOURCEMANAGER_H__

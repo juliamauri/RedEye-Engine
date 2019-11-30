@@ -68,6 +68,8 @@ public:
 		signed long long lastModified = 0;
 		signed long long lastSize = 0;
 
+		RE_Meta* metaResource = nullptr;
+
 		static FileType DetectExtensionAndType(const char* _path, const char*& _extension);
 
 		RE_Path* AsPath()const { return (RE_Path*)this; }

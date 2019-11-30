@@ -241,7 +241,9 @@ void PropertiesWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (App->editor && App->editor->GetSelected() != nullptr)
+		if (App->resources && App->resources->GetSelected() != nullptr)
+			App->resources->At(App->resources->GetSelected())->DrawPropieties();
+		else if (App->editor && App->editor->GetSelected() != nullptr)
 			App->editor->GetSelected()->DrawProperties();
 
 		if (secondary) {
@@ -786,7 +788,8 @@ void AssetsWindow::Draw(bool secondary)
 					ImGui::Text(path->AsFile()->filename.c_str());
 					break;
 				default:
-					ImGui::Button(path->AsFile()->filename.c_str());
+					if (ImGui::Button(path->AsFile()->filename.c_str()))
+						App->resources->SetSelected(path->AsFile()->metaResource->resource);
 					break;
 				}
 				break;

@@ -4,6 +4,7 @@
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
+#include "RE_ResourceManager.h"
 #include "ModuleRenderer3D.h"
 #include "EditorWindows.h"
 #include "TimeManager.h"
@@ -472,6 +473,7 @@ RE_GameObject * ModuleEditor::GetSelected() const
 void ModuleEditor::SetSelected(RE_GameObject* go, bool force_focus)
 {
 	selected = go;
+	App->resources->SetSelected(nullptr);
 
 	if (force_focus || (focus_on_select && selected != nullptr))
 		RE_CameraManager::CurrentCamera()->Focus(selected);

@@ -90,6 +90,16 @@ void RE_ResourceManager::UnUse(const char* resMD5)
 	}
 }
 
+void RE_ResourceManager::SetSelected(const char* resS)
+{
+	resourceSelected = resS;
+}
+
+const char* RE_ResourceManager::GetSelected() const
+{
+	return resourceSelected;
+}
+
 ResourceContainer* RE_ResourceManager::At(const char* md5) const
 {
 	return resources.at(md5);

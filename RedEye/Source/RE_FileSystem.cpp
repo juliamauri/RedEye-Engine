@@ -225,6 +225,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 						for (RE_File* file : filesToFindMeta) {
 							if (std::strcmp(assetPath, file->path.c_str()) == 0) {
 								meta->fromFile = file;
+								file->metaResource = meta;
 								toRemoveF.push_back(file);
 								toRemoveM.push_back(meta);
 							}
@@ -323,6 +324,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					RE_Meta* newMetaFile = new RE_Meta();
 					newMetaFile->resource = newRes;
 					newMetaFile->fromFile = file;
+					file->metaResource = newMetaFile;
 					RE_File* fromMetaF = newMetaFile->AsFile();
 					fromMetaF->fType = FileType::F_META;
 					fromMetaF->path = App->resources->At(newRes)->GetMetaPath();
