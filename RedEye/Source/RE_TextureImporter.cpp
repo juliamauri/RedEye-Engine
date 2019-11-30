@@ -43,8 +43,11 @@ bool RE_TextureImporter::Init()
 
 	ILenum error = ilGetError();
 	bool ret = (error == IL_NO_ERROR);
-	if (ret)
+	if (ret) {
 		ilutRenderer(ILUT_OPENGL);
+		ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+		ilEnable(IL_ORIGIN_SET);
+	}
 	else
 		LOG_ERROR("DevIL could not initialice! DevIL Error %d - %s", error, iluErrorString(error));
 
