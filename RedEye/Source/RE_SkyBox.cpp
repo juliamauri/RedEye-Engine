@@ -3,6 +3,9 @@
 #include "Application.h"
 
 #include "RE_FileSystem.h"
+#include "RE_ResourceManager.h"
+
+#include "RE_Texture.h"
 
 #include "Globals.h"
 #include "OutputLog.h"
@@ -50,31 +53,9 @@ void RE_SkyBox::use()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 }
 
-void RE_SkyBox::AddTexture(RE_TextureFace face, const char* aPath)
+void RE_SkyBox::AddTexture(RE_TextureFace face, const char* textureMD5)
 {
-	std::string assetPath(aPath);
-	std::string filename = assetPath.substr(assetPath.find_last_of("/") + 1);
-	std::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
-	const char* extension = extensionStr.c_str();
-
-	TextureType texType;
-	if (std::strcmp(extension, "dds") == 0)
-		texType = RE_DDS;
-	else if (std::strcmp(extension, "png") == 0)
-		texType = RE_PNG;
-	else if (std::strcmp(extension, "jpg") == 0)
-		texType = RE_JPG;
-	else if (std::strcmp(extension, "tga") == 0)
-		texType = RE_TGA;
-	else if (std::strcmp(extension, "tiff") == 0)
-		texType = RE_TIFF;
-	else if (std::strcmp(extension, "bmp") == 0)
-		texType = RE_BMP;
-	else
-		texType = RE_TEXTURE_UNKNOWN;
-
-	skyBoxSettings.textures[face].assetPath = assetPath;
-	skyBoxSettings.textures[face].texType = texType;
+	skyBoxSettings.textures[face].textureMD5 = textureMD5;
 }
 
 void RE_SkyBox::Draw()
@@ -124,8 +105,8 @@ void RE_SkyBox::Draw()
 
 		if (ImGui::TreeNodeEx(texturesname[i], ImGuiTreeNodeFlags_None | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
 
-			if (!skyBoxSettings.textures[i].assetPath.empty())
-				ImGui::Text("Path: %s", skyBoxSettings.textures[i].assetPath.c_str());
+			if (skyBoxSettings.textures[i].textureMD5)
+				ImGui::Text("Path: %s", App->resources->At(skyBoxSettings.textures[i].textureMD5)->GetAssetPath());
 			else
 				ImGui::Text("%s texture don't exists", texturesname[i]);
 
@@ -218,6 +199,12 @@ void RE_SkyBox::SaveResourceMeta(JSONNode* metaNode)
 	metaNode->PushInt("wrapS", skyBoxSettings.wrap_s);
 	metaNode->PushInt("wrapT", skyBoxSettings.wrap_t);
 	metaNode->PushInt("wrapR", skyBoxSettings.wrap_r);
+
+	JSONNode* nodeTex = metaNode->PushJObject("textures");
+	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
+		std::string key(texturesname[i]);
+		nodeTex->PushString(std::string(key + "textureMD5").c_str(), skyBoxSettings.textures[i].textureMD5);
+	}
 }
 
 void RE_SkyBox::LoadResourceMeta(JSONNode* metaNode)
@@ -227,6 +214,13 @@ void RE_SkyBox::LoadResourceMeta(JSONNode* metaNode)
 	skyBoxSettings.wrap_s = (RE_TextureWrap)metaNode->PullInt("wrapS", RE_CLAMP_TO_EDGE);
 	skyBoxSettings.wrap_t = (RE_TextureWrap)metaNode->PullInt("wrapT", RE_CLAMP_TO_EDGE);
 	skyBoxSettings.wrap_r = (RE_TextureWrap)metaNode->PullInt("wrapR", RE_CLAMP_TO_EDGE);
+
+	JSONNode* nodeTex = metaNode->PullJObject("textures");
+	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
+		std::string key(texturesname[i]);
+		std::string texMD5 = nodeTex->PullString(std::string(key + "textureMD5").c_str(), "");
+		skyBoxSettings.textures[i].textureMD5 = App->resources->IsReference(texMD5.c_str(), Resource_Type::R_TEXTURE);
+	}
 }
 
 void RE_SkyBox::Import(bool keepInMemory)
@@ -242,16 +236,8 @@ void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 	if (toLoad.Load()) {
 		JSONNode* node = toLoad.GetRootNode("skybox");
 		skyBoxSettings.skyBoxSize = node->PullFloat("skyBoxSize", 5000);
-
-		JSONNode* nodeTex = node->PullJObject("textures");
-		for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-			std::string key(texturesname[i]);
-			skyBoxSettings.textures[i].assetPath = nodeTex->PullString(std::string(key + "assetPath").c_str(), "");
-			skyBoxSettings.textures[i].texType = (TextureType)nodeTex->PullInt(std::string(key + "Type").c_str(), TextureType::RE_TEXTURE_UNKNOWN);
-		}
 		DEL(node);
-		DEL(nodeTex);
-
+		
 		if (generateLibraryPath) {
 			std::string newMd5 = toLoad.GetMd5();
 			SetMD5(newMd5.c_str());
@@ -273,28 +259,18 @@ void RE_SkyBox::AssetSave()
 	SetAssetPath(assetPath.c_str());
 	Config toSave(assetPath.c_str(), App->fs->GetZipPath());
 	JSONNode* node = toSave.GetRootNode("skybox");
+	//For differentMD5
+	node->PushString("SKname", GetName());
+	node->PushString("SKPath", GetAssetPath());
+
 	node->PushFloat("skyBoxSize", skyBoxSettings.skyBoxSize);
-	JSONNode* nodeTex = node->PushJObject("textures");
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-		std::string key(texturesname[i]);
-		nodeTex->PushString(std::string(key + "assetPath").c_str(), skyBoxSettings.textures[i].assetPath.c_str());
-		nodeTex->PushInt(std::string(key + "Type").c_str(), skyBoxSettings.textures[i].texType);
-	}
-	toSave.Save();
-
-	if (App->fs->Exists(GetLibraryPath())) {
-
-		//TODO Delete existing Librari File
-	}
+	DEL(node);
 
 	std::string newMd5 = toSave.GetMd5();
 	SetMD5(newMd5.c_str());
 	std::string libraryPath("Library/SkyBoxes/");
 	libraryPath += newMd5.c_str();
 	SetLibraryPath(libraryPath.c_str());
-
-	DEL(node);
-	DEL(nodeTex);
 
 	LibrarySave();
 }
@@ -304,24 +280,13 @@ void RE_SkyBox::LibraryLoad()
 	RE_FileIO fileLibray(GetLibraryPath());
 
 	if (fileLibray.Load()) {
-		char* textures[6];
-		uint texturesSize[6];
 		char* cursor = fileLibray.GetBuffer();
 
 		size_t size = sizeof(float);
 		memcpy( &skyBoxSettings.skyBoxSize, cursor, size);
 		cursor += size;
 
-		for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-			size = sizeof(uint);
-			memcpy(&texturesSize[i], cursor, size);
-			cursor += size;
-
-			textures[i] = cursor;
-			cursor += texturesSize[i];
-		}
-
-		App->textures->LoadSkyBoxInMemory(textures, texturesSize, skyBoxSettings, &ID);
+		App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
 		LoadSkyBoxCube();
 		ResourceContainer::inMemory = true;
 	}
@@ -329,39 +294,14 @@ void RE_SkyBox::LibraryLoad()
 
 void RE_SkyBox::LibrarySave()
 {
-	std::string texturesBuffer[6];
-	uint texturesSize[6] = { 0,0,0,0,0,0 };
-	uint totalSize = 0;
-	totalSize += sizeof(uint) * 6;
-	totalSize += sizeof(float);
-
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-		RE_FileIO assetsTex(skyBoxSettings.textures[i].assetPath.c_str());
-		if (assetsTex.Load()) {
-			texturesBuffer[i] = App->textures->TransformToDDS(assetsTex.GetBuffer(), assetsTex.GetSize(), skyBoxSettings.textures[i].texType, &texturesSize[i]);
-			totalSize += texturesSize[i];
-		}
-	}
-
+	uint totalSize = sizeof(float);
+	
 	char* libraryBuffer = new char[totalSize + 1];
 	char* cursor = libraryBuffer;
 
 	size_t size = sizeof(float);
 	memcpy(cursor, &skyBoxSettings.skyBoxSize, size);
 	cursor += size;
-
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-		size = sizeof(uint);
-		memcpy(cursor, &texturesSize[i], size);
-		cursor += size;
-
-		size = texturesSize[i];
-		memcpy(cursor, texturesBuffer[i].c_str(), size);
-		cursor += size;
-	}
-
-	char nullchar = '\0';
-	memcpy(cursor, &nullchar, sizeof(char));
 
 	RE_FileIO saveLibrary(GetLibraryPath(), App->fs->GetZipPath());
 

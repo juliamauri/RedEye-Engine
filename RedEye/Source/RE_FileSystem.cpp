@@ -257,9 +257,20 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				case F_SCENE:
 					toImport.push_back(file);
 					break;
+				case F_SKYBOX:
+				{
+					std::list<RE_File*>::iterator iter = toImport.end();
+					if (!toImport.empty()) {
+						iter--;
+						while ((*iter)->fType != F_PREFAB || (*iter)->fType != F_SCENE || (*iter)->fType != F_MODEL || iter != toImport.begin())
+							iter--;
+						iter++;
+					}
+					toImport.insert(iter, file);
+					break;
+				}
 				case F_TEXTURE:
 				case F_MATERIAL:
-				case F_SKYBOX:
 					toImport.push_front(file);
 					break;
 				}

@@ -142,12 +142,15 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	// change depth function so depth test passes when values are equal to depth buffer's content
 	glDepthFunc(GL_LEQUAL);
-	
+
 	// Render skybox cube
 	glBindVertexArray(App->internalResources->GetSkyBoxVAO());
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
+
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	glDepthFunc(GL_LESS); // set depth function back to default

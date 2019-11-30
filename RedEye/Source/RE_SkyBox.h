@@ -20,18 +20,16 @@ enum RE_TextureFace {
 struct TexSkyBox {
 	TexSkyBox(RE_TextureFace f) { face = f; }
 
-	std::string assetPath;
-	int width, height;
-	TextureType texType = RE_TEXTURE_UNKNOWN;
+	const char* textureMD5 = nullptr;
 	RE_TextureFace face = RE_NOFACE;
 
 	inline bool operator==(const TexSkyBox& b) {
-		return (width == b.width && height == b.height && texType == b.texType && assetPath == b.assetPath && face == b.face);
+		return (textureMD5 == b.textureMD5 && face == b.face);
 	}
 
 
 	inline bool operator!=(const TexSkyBox& b) {
-		return (width != b.width || height != b.height || texType != b.texType || assetPath != b.assetPath || face != b.face);
+		return (textureMD5 != b.textureMD5 || face != b.face);
 	}
 };
 
@@ -43,7 +41,7 @@ struct RE_SkyBoxSettings {
 	RE_TextureWrap wrap_r = RE_CLAMP_TO_EDGE;
 
 	TexSkyBox textures[6] = { TexSkyBox(RE_RIGHT), TexSkyBox(RE_LEFT), TexSkyBox(RE_TOP), TexSkyBox(RE_BOTTOM), TexSkyBox(RE_FRONT), TexSkyBox(RE_BACK) };
-	float skyBoxSize = 0.0f;
+	float skyBoxSize = 10000.0f;
 
 	inline bool operator==(const RE_SkyBoxSettings& b) {
 		return (min_filter == b.min_filter && mag_filter == b.mag_filter && wrap_s == b.wrap_s && wrap_t == b.wrap_t && wrap_r == b.wrap_r && skyBoxSize == skyBoxSize
@@ -78,7 +76,7 @@ public:
 	unsigned int GetID()const { return ID; }
 	unsigned int GetVAO()const { return VAO; }
 
-	void AddTexture(RE_TextureFace face, const char* assetPath);
+	void AddTexture(RE_TextureFace face, const char* textureMD5);
 	void AssetSave();
 
 private:

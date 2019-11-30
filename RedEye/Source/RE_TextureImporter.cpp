@@ -176,19 +176,23 @@ void RE_TextureImporter::SaveOwnFormat(const char * assetBuffer, unsigned int as
 	}
 }
 
-void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings settings, unsigned int* ID)
+void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned int* ID)
 {
 	glGenTextures(1, ID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, *ID);
 
 	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-		RE_FileIO texture(settings.textures[i].assetPath.c_str());
-		if (texture.Load()) {
+
+		RE_FileIO librayTexture(App->resources->At(settings.textures[i].textureMD5)->GetLibraryPath());
+
+		if (librayTexture.Load()) {
 			uint imageID = 0;
 			ilGenImages(1, &imageID);
 			ilBindImage(imageID);
 
-			if (IL_FALSE != ilLoadL(settings.textures[i].texType, texture.GetBuffer(), texture.GetSize())) {
+			if (IL_FALSE != ilLoadL(RE_DDS, librayTexture.GetBuffer(), librayTexture.GetSize())) {
+
+				iluFlipImage();
 
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 					0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()
@@ -197,36 +201,6 @@ void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings settings, unsigned
 				ilBindImage(0);
 				ilDeleteImages(1, &imageID);
 			}
-		}
-	}
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, settings.min_filter);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, settings.mag_filter);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, settings.wrap_s);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, settings.wrap_t);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, settings.wrap_r);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-}
-
-void RE_TextureImporter::LoadSkyBoxInMemory(char* textures[6], unsigned int texturesSize[6], RE_SkyBoxSettings settings, unsigned int* ID)
-{
-	glGenTextures(1, ID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, *ID);
-
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-		uint imageID = 0;
-		ilGenImages(1, &imageID);
-		ilBindImage(imageID);
-
-		if (IL_FALSE != ilLoadL(TextureType::RE_DDS, textures[i], texturesSize[i])) {
-
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()
-			);
-
-			ilBindImage(0);
-			ilDeleteImages(1, &imageID);
 		}
 	}
 

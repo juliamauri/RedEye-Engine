@@ -99,19 +99,26 @@ bool RE_InternalResources::InitChecker()
 
 bool RE_InternalResources::InitSkyBox()
 {
+	const char* rightTex = App->resources->ImportTexture("Assets/Skyboxes/default/1right.jpg");
+	const char* leftTex = App->resources->ImportTexture("Assets/Skyboxes/default/2left.jpg");
+	const char* topTex = App->resources->ImportTexture("Assets/Skyboxes/default/3top.jpg");
+	const char* bottomTex = App->resources->ImportTexture("Assets/Skyboxes/default/4bottom.jpg");
+	const char* frontTex = App->resources->ImportTexture("Assets/Skyboxes/default/5front.jpg");
+	const char* backTex = App->resources->ImportTexture("Assets/Skyboxes/default/6back.jpg");
+
 	defaultSkybox = new RE_SkyBox();
 	defaultSkybox->SetName("defaultSkyBox");
 	defaultSkybox->SetType(Resource_Type::R_SKYBOX);
-	defaultSkybox->AddTexture(RE_TextureFace::RE_RIGHT, "Assets/Skyboxes/default/1right.jpg");
-	defaultSkybox->AddTexture(RE_TextureFace::RE_LEFT, "Assets/Skyboxes/default/2left.jpg");
-	defaultSkybox->AddTexture(RE_TextureFace::RE_TOP, "Assets/Skyboxes/default/3top.jpg");
-	defaultSkybox->AddTexture(RE_TextureFace::RE_BOTTOM, "Assets/Skyboxes/default/4bottom.jpg");
-	defaultSkybox->AddTexture(RE_TextureFace::RE_FRONT, "Assets/Skyboxes/default/5front.jpg");
-	defaultSkybox->AddTexture(RE_TextureFace::RE_BACK, "Assets/Skyboxes/default/6back.jpg");
+	defaultSkybox->AddTexture(RE_TextureFace::RE_RIGHT, rightTex);
+	defaultSkybox->AddTexture(RE_TextureFace::RE_LEFT, leftTex);
+	defaultSkybox->AddTexture(RE_TextureFace::RE_TOP, topTex);
+	defaultSkybox->AddTexture(RE_TextureFace::RE_BOTTOM, bottomTex);
+	defaultSkybox->AddTexture(RE_TextureFace::RE_FRONT, frontTex);
+	defaultSkybox->AddTexture(RE_TextureFace::RE_BACK, backTex);
 	defaultSkybox->AssetSave();
 	defaultSkybox->SaveMeta();
-	defaultSkybox->LoadInMemory();
 	App->resources->Reference(defaultSkybox);
+	App->resources->Use(defaultSkybox->GetMD5());
 	return true;
 }
 
