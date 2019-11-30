@@ -10,6 +10,8 @@ public:
 	RE_Mesh();
 	~RE_Mesh();
 
+	void SetLibraryPath(const char* path)override;
+
 	void LoadInMemory() override;
 	void UnloadMemory() override;
 

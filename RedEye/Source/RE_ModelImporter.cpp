@@ -183,7 +183,7 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 			uint numVertices = mesh->mNumVertices;
 
 			float* verticesArray = new float[numVertices * 3];
-			memcpy(verticesArray, mesh->mVertices, numVertices * 3 * sizeof(float));
+			memcpy(verticesArray, &mesh->mVertices[0].x, numVertices * 3 * sizeof(float));
 
 			float* normalsArray = nullptr;
 			float* tangentsArray = nullptr;
@@ -193,15 +193,15 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 
 			if (mesh->HasNormals()) {
 				normalsArray = new float[numVertices * 3];
-				memcpy(normalsArray, mesh->mNormals, numVertices * 3 * sizeof(float));
+				memcpy(normalsArray, &mesh->mNormals[0].x, numVertices * 3 * sizeof(float));
 			}
 
 			if (mesh->HasTangentsAndBitangents()) {
 				tangentsArray = new float[numVertices * 3];
-				memcpy(tangentsArray, mesh->mTangents, numVertices * 3 * sizeof(float));
+				memcpy(tangentsArray, &mesh->mTangents[0].x, numVertices * 3 * sizeof(float));
 
 				bitangentsArray = new float[mesh->mNumVertices * 3];
-				memcpy(bitangentsArray, mesh->mBitangents, numVertices * 3 * sizeof(float));
+				memcpy(bitangentsArray, &mesh->mBitangents[0].x, numVertices * 3 * sizeof(float));
 			}
 
 			if (mesh->mTextureCoords[0]){ // does the mesh contain texture coordinates?
@@ -226,7 +226,7 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 						LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face->mNumIndices);
 
 					size_t size = 3;
-					memcpy(cursor, face->mIndices, size * sizeof(uint));
+					memcpy(cursor, &face->mIndices[0], size * sizeof(uint));
 					cursor += size;
 				}
 			}

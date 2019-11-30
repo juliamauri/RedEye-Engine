@@ -33,6 +33,7 @@ public:
 	const char* FindMD5ByMETAPath(const char* metaPath, Resource_Type type = Resource_Type::R_UNDEFINED);
 	const char* FindMD5ByLibraryPath(const char* libraryPath, Resource_Type type = Resource_Type::R_UNDEFINED);
 	const char* FindMD5ByAssetsPath(const char* assetsPath, Resource_Type type = Resource_Type::R_UNDEFINED);
+	const char* CheckOrFindMeshOnLibrary(const char* librariPath);
 
 	typedef std::pair<const char*, ResourceContainer*> Resource;
 	typedef std::map<const char*, ResourceContainer*> ResourceMap;

@@ -114,7 +114,10 @@ RE_GameObject* RE_ResouceAndGOImporter::JsonDeserialize(JSONNode* node)
 		Resource_Type type = (Resource_Type)resN->PullInt("type", Resource_Type::R_UNDEFINED);
 		std::string mPath = resN->PullString("mPath", "");
 
-		const char* resMD5 = (type == Resource_Type::R_MESH) ? App->resources->FindMD5ByLibraryPath(mPath.c_str(), type) : App->resources->FindMD5ByMETAPath(mPath.c_str(), type);
+		const char* resMD5 = nullptr;
+		(type == Resource_Type::R_MESH) ?
+			resMD5 = App->resources->CheckOrFindMeshOnLibrary(mPath.c_str()) :
+			resMD5 = App->resources->FindMD5ByMETAPath(mPath.c_str(), type);
 
 		if (resMD5) resourcesIndex.insert(std::pair< int, const char*>(r, resMD5));
 
@@ -155,13 +158,17 @@ RE_GameObject* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 		char* str = new char[strsize + 1];
 		char* strCursor = str;
 		size = strsize * sizeof(char);
-		memcpy(str, cursor, size);		
+		memcpy(str, cursor, size);
 		cursor += size;
 		strCursor += size;
 		char nullchar = '\0';
 		memcpy(strCursor, &nullchar, sizeof(char));
 
-		const char* resMD5 = (rType == Resource_Type::R_MESH) ? App->resources->FindMD5ByLibraryPath(str, rType) : App->resources->FindMD5ByMETAPath(str, rType);
+		const char* resMD5 = nullptr;
+		(rType == Resource_Type::R_MESH) ?
+			resMD5 = App->resources->CheckOrFindMeshOnLibrary(str) :
+			resMD5= App->resources->FindMD5ByMETAPath(str, rType);
+
 		if (resMD5) resourcesIndex.insert(std::pair< int, const char*>(index, resMD5));
 
 		DEL_A(str);

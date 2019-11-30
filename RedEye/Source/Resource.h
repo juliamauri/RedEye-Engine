@@ -38,7 +38,7 @@ public:
 
 	void SetType(Resource_Type type);
 	void SetMD5(const char* md5);
-	void SetLibraryPath(const char* path);
+	virtual void SetLibraryPath(const char* path);
 	virtual void SetAssetPath(const char* originPath);
 	void SetMetaPath(const char* originPath);
 	virtual void SetName(const char* name);

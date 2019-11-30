@@ -37,6 +37,15 @@ RE_Mesh::RE_Mesh() { }
 
 RE_Mesh::~RE_Mesh() { }
 
+void RE_Mesh::SetLibraryPath(const char* path)
+{
+	ResourceContainer::SetLibraryPath(path);
+
+	std::string md5(path);
+	md5 = md5.substr(md5.find_last_of("/") + 1);
+	SetMD5(md5.c_str());
+}
+
 void RE_Mesh::LoadInMemory()
 {
 	if (App->fs->Exists(GetLibraryPath())) {
@@ -90,8 +99,8 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	memcpy(cursor, &vertex_count, cSize);
 	cursor += cSize;
 
+	cSize = sizeof(float) * 3 * vertex_count;
 	if (vertex) {
-		size_t cSize = sizeof(float) * 3 * vertex_count;
 		memcpy(cursor, vertex, cSize);
 		cursor += cSize;
 	}
@@ -100,8 +109,8 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	cSize = sizeof(bool);
 	memcpy(cursor, &toFill, cSize);
 	cursor += cSize;
+	cSize = sizeof(float) * 3 * vertex_count;
 	if (normals) {
-		size_t cSize = sizeof(float) * 3 * vertex_count;
 		memcpy(cursor, normals, cSize);
 		cursor += cSize;
 	}
@@ -110,8 +119,8 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	cSize = sizeof(bool);
 	memcpy(cursor, &toFill, cSize);
 	cursor += cSize;
+	cSize = sizeof(float) * 3 * vertex_count;
 	if (tangents) {
-		size_t cSize = sizeof(float) * 3 * vertex_count;
 		memcpy(cursor, tangents, cSize);
 		cursor += cSize;
 	}
@@ -120,8 +129,8 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	cSize = sizeof(bool);
 	memcpy(cursor, &toFill, cSize);
 	cursor += cSize;
+	cSize = sizeof(float) * 3 * vertex_count;
 	if (bitangents) {
-		size_t cSize = sizeof(float) * 3 * vertex_count;
 		memcpy(cursor, bitangents, cSize);
 		cursor += cSize;
 	}
@@ -130,8 +139,8 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	cSize = sizeof(bool);
 	memcpy(cursor, &toFill, cSize);
 	cursor += cSize;
+	cSize = sizeof(float) * 2 * vertex_count;
 	if (texturecoords) {
-		size_t cSize = sizeof(float) * 2 * vertex_count;
 		memcpy(cursor, texturecoords, cSize);
 		cursor += cSize;
 	}
@@ -140,8 +149,8 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	cSize = sizeof(bool);
 	memcpy(cursor, &toFill, cSize);
 	cursor += cSize;
+	cSize = sizeof(uint) * 3 * triangle_count;
 	if (index) {
-		size_t cSize = sizeof(uint) * 3 * triangle_count;
 		memcpy(cursor, index, cSize);
 		cursor += cSize;
 	}
@@ -157,7 +166,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 
 		std::string libraryPath("Library/Meshes/");
 		libraryPath += existsMD5;
-		SetLibraryPath(libraryPath.c_str());
+		ResourceContainer::SetLibraryPath(libraryPath.c_str());
 
 		RE_FileIO toSave(GetLibraryPath(), App->fs->GetZipPath());
 		toSave.Save(buffer, size + 1);
@@ -233,7 +242,7 @@ void RE_Mesh::DrawMesh(const float* transform, unsigned int shader, const char* 
 
 	// Draw mesh
 	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, nullptr);
 
 	// Release buffers
 	glBindVertexArray(0);
@@ -301,7 +310,8 @@ void RE_Mesh::DrawMesh(const float* transform, unsigned int shader, const char* 
 
 void RE_Mesh::Draw()
 {
-	ImGui::Text("%u triangles.", &triangle_count);
+	ImGui::Text("%u triangles.", triangle_count);
+	ImGui::Text("%u vertex.", vertex_count);
 	ImGui::Text("Bounding Box");
 	ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", bounding_box.minPoint.x, bounding_box.minPoint.y, bounding_box.minPoint.z);
 	ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", bounding_box.maxPoint.x, bounding_box.maxPoint.y, bounding_box.maxPoint.z);
@@ -330,54 +340,30 @@ void RE_Mesh::SetupMesh()
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	uint strideSize = 3 * sizeof(float);
-	uint meshSize = vertex_count * 3;
-
+	
+	int strideSize = 3;
+	uint meshSize = 3;
 	if (normals) {
-		meshSize += vertex_count * 3;
-		strideSize += 3 * sizeof(float);
+		meshSize += 3;
+		strideSize += 3;
 	}
 	if (tangents) {
-		meshSize += vertex_count * 3;
-		strideSize += 3 * sizeof(float);
+		meshSize += 3;
+		strideSize += 3;
 	}
 	if (bitangents) {
-		meshSize += vertex_count * 3;
-		strideSize += 3 * sizeof(float);
+		meshSize +=  3;
+		strideSize += 3;
 	}
 	if (texturecoords) {
-		meshSize += vertex_count * 2;
-		strideSize += 2 * sizeof(float);
+		meshSize += 2;
+		strideSize += 2;
 	}
+	strideSize *= sizeof(float);
+	meshSize *= vertex_count;
 
 	float* meshBuffer = new float[meshSize];
 	float* cursor = meshBuffer;
-
-	//size_t size = vertex_count * 3;
-	//memcpy(cursor, vertex, size * sizeof(float));
-	//cursor += size;
-
-	//if (normals) {
-	//	memcpy(cursor, normals, size * sizeof(float));
-	//	cursor += size;
-	//}
-
-	//if (tangents) {
-	//	memcpy(cursor, tangents, size * sizeof(float));
-	//	cursor += size;
-	//}
-
-	//if (bitangents) {
-	//	memcpy(cursor, bitangents, size * sizeof(float));
-	//	cursor += size;
-	//}
-
-	//if (texturecoords) {
-	//	size = vertex_count * 2;
-	//	memcpy(cursor, texturecoords, size * sizeof(float));
-	//	cursor += size;
-	//}
 
 	for (uint i = 0; i < vertex_count; i++) {
 		uint indexArray = i * 3;
@@ -409,43 +395,41 @@ void RE_Mesh::SetupMesh()
 		}
 	}
 
-	glBufferData(GL_ARRAY_BUFFER, meshSize, meshBuffer, GL_STATIC_DRAW);
-
+	glBufferData(GL_ARRAY_BUFFER, meshSize *  sizeof(float), &meshBuffer[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangle_count * 3 * sizeof(unsigned int), index, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangle_count * 3 * sizeof(unsigned int), &index[0], GL_STATIC_DRAW);
 
-	uint accumulativeOffset = 0;
-
+	int accumulativeOffset = 0;
 	// vertex positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, strideSize, &accumulativeOffset);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, strideSize, (void*)accumulativeOffset);
 	accumulativeOffset += sizeof(float) * 3;
 
 	// vertex normals
 	if (normals) {
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, strideSize, &accumulativeOffset);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, strideSize, (void*)accumulativeOffset);
 		accumulativeOffset += sizeof(float) * 3;
 	}
 
 	// vertex tangents
 	if (tangents) {
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, strideSize, &accumulativeOffset);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, strideSize, (void*)accumulativeOffset);
 		accumulativeOffset += sizeof(float) * 3;
 	}
 
 	// vertex bitangents
 	if (bitangents) {
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, strideSize, &accumulativeOffset);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, strideSize, (void*)accumulativeOffset);
 		accumulativeOffset += sizeof(float) * 3;
 	}
 
 	// vertex texture coords
 	if (texturecoords) {
 		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, strideSize, &accumulativeOffset);
+		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, strideSize, (void*)accumulativeOffset);
 	}
 
 	glBindVertexArray(0);

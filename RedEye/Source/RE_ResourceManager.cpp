@@ -12,6 +12,7 @@
 #include "RE_Scene.h"
 #include "RE_SkyBox.h"
 #include "RE_Texture.h"
+#include "RE_Mesh.h"
 
 #include "Globals.h"
 #include "OutputLog.h"
@@ -226,6 +227,25 @@ const char * RE_ResourceManager::FindMD5ByAssetsPath(const char * assetsPath, Re
 		}
 	}
 	return ret;
+}
+
+const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath)
+{
+	const char* meshMD5 = nullptr;
+
+	meshMD5 = FindMD5ByLibraryPath(librariPath, Resource_Type::R_MESH);
+
+	if (!meshMD5) {
+		if (App->fs->Exists(librariPath)) {
+			RE_Mesh* newMesh = new RE_Mesh();
+			newMesh->SetLibraryPath(librariPath);
+			meshMD5 = Reference(newMesh);
+		}
+	}
+
+	if (!meshMD5) LOG_ERROR("Error finding library mesh:\n%s", librariPath);
+
+	return meshMD5;
 }
 
 const char* RE_ResourceManager::ImportModel(const char* assetPath)

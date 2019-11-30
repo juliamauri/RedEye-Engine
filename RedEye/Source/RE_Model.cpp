@@ -81,7 +81,7 @@ void RE_Model::LoadResourceMeta(JSONNode* metaNode)
 	uint totalMeshes = metaNode->PullUInt("MeshesSize", 0);
 	for (uint i = 0; i < totalMeshes; i++) {
 		std::string libraryMesh = metaNode->PullString(std::to_string(i).c_str(), "");
-		const char* md5 = App->resources->FindMD5ByLibraryPath(libraryMesh.c_str(), Resource_Type::R_MESH);
+		const char* md5 = App->resources->CheckOrFindMeshOnLibrary(libraryMesh.c_str());
 		modelSettings.libraryMeshes.push_back(md5);
 	}
 }
