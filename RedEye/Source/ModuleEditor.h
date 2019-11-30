@@ -7,6 +7,7 @@
 
 class EditorWindow;
 class ConsoleWindow;
+class AssetsWindow;
 class DemoWindow;
 class ConfigWindow;
 class HeriarchyWindow;
@@ -82,6 +83,7 @@ private:
 
 	// Windows
 	ConsoleWindow* console = nullptr;
+	AssetsWindow* assets = nullptr;
 	ConfigWindow* config = nullptr;
 	HeriarchyWindow* heriarchy = nullptr;
 	PropertiesWindow* properties = nullptr;

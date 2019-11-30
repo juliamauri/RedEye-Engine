@@ -1,6 +1,7 @@
 #include "EditorWindows.h"
 
 #include "Application.h"
+#include "RE_FileSystem.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3d.h"
@@ -729,6 +730,71 @@ void PopUpWindow::Draw(bool secondary)
 				fromHandleError = false;
 			}
 		}
+	}
+
+	ImGui::End();
+}
+
+AssetsWindow::AssetsWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
+
+void AssetsWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		static RE_FileSystem::RE_Directory* currentDir = App->fs->GetRootDirectory();
+		RE_FileSystem::RE_Directory* toChange = nullptr;
+
+		if (currentDir->parent == nullptr)
+			ImGui::Text("%s Folder", currentDir->name.c_str());
+		else {
+			std::list<RE_FileSystem::RE_Directory*> folders = currentDir->FromParentToThis();
+			for (auto dir : folders) {
+				if (dir == currentDir)
+					ImGui::Text(currentDir->name.c_str());
+				else {
+					if (ImGui::Button(dir->name.c_str())) {
+						toChange = dir;
+					}
+				}
+				if(dir != *folders.rbegin()) ImGui::SameLine();
+			}
+		}
+		ImGui::Separator();
+		for (auto path : currentDir->tree) {
+			switch (path->pType)
+			{
+			case RE_FileSystem::PathType::D_FILE:
+				switch (path->AsFile()->fType)
+				{
+				case RE_FileSystem::FileType::F_META:
+				case RE_FileSystem::FileType::F_NONE:
+					break;
+				case RE_FileSystem::FileType::F_NOTSUPPORTED:
+					ImGui::Text(path->AsFile()->filename.c_str());
+					break;
+				default:
+					ImGui::Button(path->AsFile()->filename.c_str());
+					break;
+				}
+				break;
+			case RE_FileSystem::PathType::D_FOLDER:
+				if (ImGui::Button(path->AsDirectory()->name.c_str())) {
+					toChange = path->AsDirectory();
+				}
+			}
+		}
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+
+		if (toChange) currentDir = toChange;
 	}
 
 	ImGui::End();

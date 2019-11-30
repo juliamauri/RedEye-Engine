@@ -307,9 +307,10 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					RE_Meta* newMetaFile = new RE_Meta();
 					newMetaFile->resource = newRes;
 					newMetaFile->fromFile = file;
-					RE_File* fromMetaF = (RE_File*)newMetaFile;
+					RE_File* fromMetaF = newMetaFile->AsFile();
 					fromMetaF->fType = FileType::F_META;
 					fromMetaF->path = App->resources->At(newRes)->GetMetaPath();
+					newMetaFile->AsPath()->pType = PathType::D_FILE;
 					metaRecentlyAdded.push_back(newMetaFile);
 				}
 				else
@@ -666,6 +667,11 @@ void RE_FileSystem::HandleDropedFile(const char * file)
 	else {
 		LOG_ERROR("File extension not suported.");
 	}
+}
+
+RE_FileSystem::RE_Directory* RE_FileSystem::GetRootDirectory() const
+{
+	return rootAssetDirectory;
 }
 
 std::string RE_FileSystem::RecursiveFindFbx(const char * path)
@@ -1581,6 +1587,8 @@ bool RE_FileSystem::RE_Meta::IsModified() const
 void RE_FileSystem::RE_Directory::SetPath(const char* _path)
 {
 	path = _path;
+	name = std::string(path.c_str(), path.size() - 1);
+	name = name.substr(name.find_last_of("/") + 1);
 }
 
 std::list< RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::MountTreeFolders()
@@ -1605,7 +1613,7 @@ std::list< RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::MountTreeF
 					newDirectory->SetPath(inPath.c_str());
 					newDirectory->parent = this;
 					newDirectory->pType = D_FOLDER;
-					tree.push_back(newDirectory);
+					tree.push_back(newDirectory->AsPath());
 					ret.push_back(newDirectory);
 				}
 			}
@@ -1613,7 +1621,7 @@ std::list< RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::MountTreeF
 		PHYSFS_freeList(rc);
 
 		if (!tree.empty()) for (RE_Path* path : tree) {
-			std::list< RE_Directory*> fromChild = ((RE_Directory*)path)->MountTreeFolders();
+			std::list< RE_Directory*> fromChild = path->AsDirectory()->MountTreeFolders();
 			if (!fromChild.empty()) ret.insert(ret.end(), fromChild.begin(), fromChild.end());
 		}
 	}
@@ -1666,11 +1674,11 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 						newDirectory->SetPath(inPath.c_str());
 						newDirectory->parent = this;
 						newDirectory->pType = D_FOLDER;
-						AddBeforeOf((RE_Path*)newDirectory, iter);
+						AddBeforeOf(newDirectory->AsPath(), iter);
 						iter--;
 						RE_ProcessPath* newProcess = new RE_ProcessPath();
 						newProcess->whatToDo = P_ADDFOLDER;
-						newProcess->toProcess = (RE_Path*)newDirectory;
+						newProcess->toProcess = newDirectory->AsPath();
 						ret.push(newProcess);
 					}
 				}
@@ -1686,7 +1694,7 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 						for (RE_Meta* metaAdded : *metaRecentlyAdded) {
 
 							if (std::strcmp(metaAdded->path.c_str(), inPath.c_str()) == 0) {
-								AddBeforeOf((RE_Path*)metaAdded, iter);
+								AddBeforeOf(metaAdded->AsPath(), iter);
 								iter--;
 
 								toRemoveM.push_back(metaAdded);
@@ -1717,14 +1725,15 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 						RE_ProcessPath* newProcess = new RE_ProcessPath();
 						RE_File* newFile = (fileType != FileType::F_META) ? new RE_File() : (RE_File*)new RE_Meta();
 						newFile->path = inPath;
+						newFile->filename = inPath.substr(inPath.find_last_of("/") + 1);
 						newFile->lastSize = fileStat.filesize;
 						newFile->pType = PathType::D_FILE;
 						newFile->fType = fileType;
 						newFile->extension = extension;
 						newProcess->whatToDo = P_ADDFILE;
-						newProcess->toProcess = (RE_Path*)newFile;
+						newProcess->toProcess = newFile->AsPath();
 						ret.push(newProcess);
-						AddBeforeOf((RE_Path*)newFile,iter);
+						AddBeforeOf(newFile->AsPath(),iter);
 						iter--;
 					}
 				}
@@ -1733,6 +1742,18 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 		}
 
 		PHYSFS_freeList(rc);
+	}
+	return ret;
+}
+
+std::list<RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::FromParentToThis()
+{
+	std::list<RE_Directory*> ret;
+	RE_Directory* iter = this;
+	while (iter != nullptr)
+	{
+		ret.push_front(iter);
+		iter = iter->parent;
 	}
 	return ret;
 }

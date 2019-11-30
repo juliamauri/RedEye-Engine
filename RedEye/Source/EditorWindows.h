@@ -60,6 +60,15 @@ public:
 	const char* category_names[8] = { "Separator", "Global", "Secondary", "Terciary", "Error" , "Warning", "Solution" , "Software" };
 };
 
+class AssetsWindow : public EditorWindow
+{
+public:
+	AssetsWindow(const char* name = "Assets", bool start_active = true);
+
+private:
+	void Draw(bool secondary = false) override;
+};
+
 class ConfigWindow : public EditorWindow
 {
 public:

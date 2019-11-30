@@ -20,7 +20,7 @@ struct Vertex;
 
 class RE_FileSystem
 {
-private:
+public:
 
 	enum PathType {
 		D_NULL = -1,
@@ -62,6 +62,7 @@ private:
 
 	struct RE_File : public RE_Path
 	{
+		std::string filename;
 		FileType fType = F_NONE;
 		const char* extension = nullptr;
 		signed long long lastModified = 0;
@@ -91,6 +92,7 @@ private:
 
 	struct RE_Directory : public RE_Path
 	{
+		std::string name;
 		typedef std::list<RE_Path*>::iterator pathIterator;
 		RE_Directory* parent = nullptr;
 		std::list<RE_Path*> tree;
@@ -101,6 +103,8 @@ private:
 		void SetPath(const char* path);
 		std::list< RE_Directory*> MountTreeFolders();
 		std::stack<RE_ProcessPath*> CheckAndApply(std::vector<RE_Meta*>* metaRecentlyAdded);
+
+		std::list<RE_Directory*> FromParentToThis();
 
 		void DrawProperties();
 
@@ -133,6 +137,8 @@ public:
 	const char* GetZipPath();
 
 	void HandleDropedFile(const char* file);
+
+	RE_Directory* GetRootDirectory()const;
 
 	std::vector<std::string> FindAllFilesByExtension(const char* path, const char* extension, bool repercusive = false);
 
