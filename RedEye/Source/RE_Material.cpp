@@ -104,15 +104,21 @@ void RE_Material::Draw()
 		}
 	}
 
-	int shadingMode = shadingType;
-	if (ImGui::ListBox("Shader type", &shadingMode, shadingItems, 10)) {
+	static int shadingMode = shadingType;
+	ImGui::Text("Current Shader: %s", shadingItems[shadingMode]);
+	if (ImGui::BeginMenu("Shader Type"))
+	{
+		for (int i = 0; i < 10; i++) {
+			if (ImGui::MenuItem(shadingItems[i])) {
+				if (shadingMode != shadingType) {
+					shadingType = (RE_ShadingMode)shadingMode;
+					applySave = true;
 
-		if (shadingMode != shadingType) {
-			shadingType = (RE_ShadingMode)shadingMode;
-			applySave = true;
-
-			// TODO ResourcesManager count referending textures
+					// TODO ResourcesManager count referending textures
+				}
+			}
 		}
+		ImGui::EndMenu();
 	}
 
 	if (ImGui::ColorEdit3("Diffuse Color", &cDiffuse[0]))
