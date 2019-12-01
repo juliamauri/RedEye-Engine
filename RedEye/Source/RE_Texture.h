@@ -43,7 +43,6 @@ struct RE_TextureSettings {
 		return (min_filter == b.min_filter && mag_filter == b.mag_filter && wrap_s == b.wrap_s && wrap_t == b.wrap_t && borderColor.Equals(b.borderColor));
 	}
 
-
 	inline bool operator!=(const RE_TextureSettings &b) {
 		return (min_filter != b.min_filter || mag_filter != b.mag_filter || wrap_s != b.wrap_s || wrap_t != b.wrap_t || !borderColor.Equals(b.borderColor));
 	}

@@ -221,6 +221,8 @@ void RE_SkyBox::LoadResourceMeta(JSONNode* metaNode)
 		std::string texMD5 = nodeTex->PullString(std::string(key + "textureMD5").c_str(), "");
 		skyBoxSettings.textures[i].textureMD5 = App->resources->IsReference(texMD5.c_str(), Resource_Type::R_TEXTURE);
 	}
+
+	restoreSettings = skyBoxSettings;
 }
 
 void RE_SkyBox::Import(bool keepInMemory)

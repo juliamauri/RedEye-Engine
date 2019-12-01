@@ -61,9 +61,6 @@ private:
 
 	void DeserializeTexturesBinary(char * &cursor, std::vector<const char*>* textures);
 	void SerializeTexturesBinary(char * &cursor, std::vector<const char*>* textures);
-
-
-
 public:
 	RE_ShadingMode shadingType = S_FLAT;
 

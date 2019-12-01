@@ -219,6 +219,8 @@ void RE_Texture::LoadResourceMeta(JSONNode * metaNode)
 	texSettings.wrap_s = (RE_TextureWrap)metaNode->PullInt("wrapS", RE_REPEAT);
 	texSettings.wrap_t = (RE_TextureWrap)metaNode->PullInt("wrapT", RE_REPEAT);
 	texSettings.borderColor = metaNode->PullFloat4("borderColor", math::float4::zero);
+
+	restoreSettings = texSettings;
 }
 
 int RE_Texture::GetComboFilter(RE_TextureFilters filter)

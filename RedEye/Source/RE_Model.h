@@ -33,18 +33,55 @@ struct RE_ModelSettings {
 	// FindDegenerates
 	//15 FindInvalidData
 	// GenUVCoords
-	// GenUVCoords
 	// TransformUVCoords
 	// FindInstances
-	//20 OptimizeMeshes
-	// OptimizeGraph
+	// OptimizeMeshes
+	//20 OptimizeGraph
 	// FlipUVs
 	// FlipWindingOrder
 	// SplitByBoneCount
-	//25 Debone
-
+	//24 Debone
+	
+	int GetPresetSelected()const;
 	unsigned int GetFlags()const;
 	std::vector<const char*> libraryMeshes;
+
+	inline bool operator==(const RE_ModelSettings& b){
+		bool ret = true;
+		for (unsigned int i = 0; i < 3; i++) {
+			if (presets[i] != b.presets[i]) {
+				ret = false;
+				break;
+			}
+		}
+		if (ret) {
+			for (unsigned int i = 0; i < 25; i++) {
+				if (flags[i] != b.flags[i]) {
+					ret = false;
+					break;
+				}
+			}
+		}
+		return ret;
+	}
+	inline bool operator!=(const RE_ModelSettings& b){
+		bool ret = true;
+		for (unsigned int i = 0; i < 3; i++) {
+			if (presets[i] == b.presets[i]) {
+				ret = false;
+				break;
+			}
+		}
+		if (ret) {
+			for (unsigned int i = 0; i < 25; i++) {
+				if (flags[i] == b.flags[i]) {
+					ret = false;
+					break;
+				}
+			}
+		}
+		return ret;
+	}
 };
 
 class RE_Model :

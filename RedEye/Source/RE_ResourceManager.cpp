@@ -108,30 +108,33 @@ ResourceContainer* RE_ResourceManager::At(const char* md5) const
 const char* RE_ResourceManager::ReferenceByMeta(const char* metaPath, Resource_Type type)
 {
 	const char* retMD5 = nullptr;
+	ResourceContainer* newContainer = nullptr;
 	switch (type)
 	{
 	case R_SHADER:
-		retMD5 = Reference((ResourceContainer*)new RE_Shader(metaPath));
+		newContainer = (ResourceContainer*)new RE_Shader(metaPath);
 		break;
 	case R_TEXTURE:
-		retMD5 = Reference((ResourceContainer*)new RE_Texture(metaPath));
+		newContainer = (ResourceContainer*)new RE_Texture(metaPath);
 		break;
 	case R_PREFAB:
-		retMD5 = Reference((ResourceContainer*)new RE_Prefab(metaPath));
+		newContainer = (ResourceContainer*)new RE_Prefab(metaPath);
 		break;
 	case R_SKYBOX:
-		retMD5 = Reference((ResourceContainer*)new RE_SkyBox(metaPath));
+		newContainer = (ResourceContainer*)new RE_SkyBox(metaPath);
 		break;
 	case R_MATERIAL:
-		retMD5 = Reference((ResourceContainer*)new RE_Material(metaPath));
+		newContainer = (ResourceContainer*)new RE_Material(metaPath);
 		break;
 	case R_MODEL:
-		retMD5 = Reference((ResourceContainer*)new RE_Model(metaPath));
+		newContainer = (ResourceContainer*)new RE_Model(metaPath);
 		break;
 	case R_SCENE:
-		retMD5 = Reference((ResourceContainer*)new RE_Scene(metaPath));
+		newContainer = (ResourceContainer*)new RE_Scene(metaPath);
 		break;
 	}
+	newContainer->LoadMeta();
+	retMD5 = Reference(newContainer);
 	return retMD5;
 }
 

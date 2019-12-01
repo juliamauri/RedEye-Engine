@@ -21,7 +21,6 @@ ResourceContainer::ResourceContainer(const char * _metaPath)
 	md5 = new char[MD5SIZE + 1];
 	md5[MD5SIZE] = '\0';
 	metaPath = _metaPath;
-	LoadMeta();
 }
 
 ResourceContainer::~ResourceContainer()

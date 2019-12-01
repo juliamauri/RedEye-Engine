@@ -89,6 +89,8 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 	shaderSettings.vertexShader = metaNode->PullString("vertexPath", "");
 	shaderSettings.fragmentShader = metaNode->PullString("fragmentPath", "");
 	shaderSettings.geometryShader = metaNode->PullString("geometryPath", "");
+
+	restoreSettings = shaderSettings;
 }
 
 void RE_Shader::AssetLoad()
