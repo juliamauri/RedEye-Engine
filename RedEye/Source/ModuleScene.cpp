@@ -63,7 +63,7 @@ bool ModuleScene::Start()
 	path_scene += GetName();
 	path_scene += ".re";
 
-	App->internalResources->FindSkyBox();
+	App->internalResources->FindDefaultSkyBox();
 
 	sceneLoadedMD5 = App->resources->FindMD5ByAssetsPath(path_scene.c_str(), Resource_Type::R_SCENE);
 

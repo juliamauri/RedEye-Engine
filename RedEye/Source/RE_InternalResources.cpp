@@ -149,7 +149,7 @@ unsigned int RE_InternalResources::GetSkyBoxTexturesID() const
 	return ((RE_SkyBox*)App->resources->At(skyboxMD5))->GetID();
 }
 
-void RE_InternalResources::FindSkyBox()
+void RE_InternalResources::FindDefaultSkyBox()
 {
 	skyboxMD5 = App->resources->FindMD5ByAssetsPath("Assets/Skyboxes/defaultSkyBox.sk", Resource_Type::R_SKYBOX);
 	(!skyboxMD5) ? InitSkyBox() : App->resources->Use(skyboxMD5);

@@ -20,7 +20,7 @@ public:
 	unsigned int GetSkyBoxVAO() const;
 	unsigned int GetSkyBoxTexturesID() const;
 
-	void FindSkyBox();
+	void FindDefaultSkyBox();
 private:
 	bool InitShaders();
 	bool InitChecker();

@@ -15,6 +15,7 @@
 #include "RE_ModelImporter.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_CompPrimitive.h"
+#include "RE_HandleErrors.h"
 
 #include "RapidJson\include\pointer.h"
 #include "RapidJson\include\stringbuffer.h"
@@ -287,6 +288,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 		}
 
 		if ((doAll || run) && !toImport.empty()) {
+			App->handlerrors->StartHandling();
 			std::vector<RE_File*> toRemoveF;
 			//Importing
 			for (RE_File* file : toImport) {
@@ -351,6 +353,11 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
 				toImport.erase(std::remove_if(std::begin(toImport), std::end(toImport),
 					[&](auto x) {return std::find(begin(toRemoveF), end(toRemoveF), x) != end(toRemoveF); }), std::end(toImport));
+			}
+
+			App->handlerrors->StopHandling();
+			if (App->handlerrors->AnyErrorHandled()) {
+				App->handlerrors->ActivatePopUp();
 			}
 		}
 	}
