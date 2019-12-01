@@ -12,6 +12,7 @@
 #include "RE_Shader.h"
 
 #include "OutputLog.h"
+#include "Globals.h"
 
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
@@ -28,6 +29,8 @@ RE_InternalResources::RE_InternalResources()
 RE_InternalResources::~RE_InternalResources()
 {
 	if(checkerTexture != 0) glDeleteTextures(1, &checkerTexture);
+	DEL(defaultShader);
+	DEL(skyboxShader);
 }
 
 bool RE_InternalResources::Init()

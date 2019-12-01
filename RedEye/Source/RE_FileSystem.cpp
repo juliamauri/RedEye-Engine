@@ -55,6 +55,13 @@ RE_FileSystem::RE_FileSystem() : engine_config(nullptr)
 
 RE_FileSystem::~RE_FileSystem()
 {
+	for (auto dir : assetsDirectories) {
+		for (auto p : dir->tree) {
+			if (p->pType != PathType::D_FOLDER)DEL(p);
+		}
+	}
+	for (auto dir : assetsDirectories) DEL(dir);
+
 	DEL(engine_config);
 
 	PHYSFS_deinit();
@@ -118,7 +125,7 @@ Config* RE_FileSystem::GetConfig() const
 
 unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 {
-	OPTICK_CATEGORY("Read Assets Cahnges", Optick::Category::IO);
+	OPTICK_CATEGORY("Read Assets Changes", Optick::Category::IO);
 
 	Timer time;
 	bool run = true;
