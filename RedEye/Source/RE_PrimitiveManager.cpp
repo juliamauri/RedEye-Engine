@@ -8,6 +8,8 @@
 
 #include "RE_CompPrimitive.h"
 
+#include "RE_GLCache.h"
+
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
@@ -58,7 +60,7 @@ RE_CompPrimitive* RE_PrimitiveManager::CreatePoint(RE_GameObject* game_obj, math
 		glGenVertexArrays(1, &vao_point);
 		glGenBuffers(1, &vbo_point);
 
-		glBindVertexArray(vao_point);
+		RE_GLCache::ChangeVAO(vao_point);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_point);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(p), &p, GL_STATIC_DRAW);
@@ -66,7 +68,6 @@ RE_CompPrimitive* RE_PrimitiveManager::CreatePoint(RE_GameObject* game_obj, math
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
@@ -87,7 +88,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateLine(RE_GameObject* game_obj, math
 		glGenVertexArrays(1, &vao_line);
 		glGenBuffers(1, &vbo_line);
 
-		glBindVertexArray(vao_line);
+		RE_GLCache::ChangeVAO(vao_line);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_line);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vecline) * sizeof(math::vec), &vecline[0], GL_STATIC_DRAW);
@@ -95,7 +96,6 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateLine(RE_GameObject* game_obj, math
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vecline), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
@@ -130,7 +130,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateTriangle(RE_GameObject* game_obj)
 		glGenBuffers(1, &vbo_triangle);
 		glGenBuffers(1, &ebo_triangle);
 
-		glBindVertexArray(vao_triangle);
+		RE_GLCache::ChangeVAO(vao_triangle);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_triangle);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vPositionTriangle) * sizeof(math::vec), &vPositionTriangle[0], GL_STATIC_DRAW);
@@ -141,7 +141,6 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateTriangle(RE_GameObject* game_obj)
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vPositionTriangle), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -174,7 +173,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
 		glGenVertexArrays(1, &vao_plane);
 		glGenBuffers(1, &vbo_plane);
 
-		glBindVertexArray(vao_plane);
+		RE_GLCache::ChangeVAO(vao_plane);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_plane);
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
@@ -182,7 +181,6 @@ RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(0);
 
-		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -201,7 +199,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
 		glGenBuffers(1, &vbo_plane);
 		glGenBuffers(1, &ebo_plane);
 
-		glBindVertexArray(vao_plane);
+		RE_GLCache::ChangeVAO(vao_plane);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_plane);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vPositionPlane) * sizeof(math::vec), &vPositionPlane[0], GL_STATIC_DRAW);
@@ -212,7 +210,6 @@ RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vPositionPlane), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
 	}
@@ -229,7 +226,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateCube(RE_GameObject* game_obj)
 		glGenVertexArrays(1, &vao_cube);
 		glGenBuffers(1, &vbo_cube);
 
-		glBindVertexArray(vao_cube);
+		RE_GLCache::ChangeVAO(vao_cube);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_cube);
 		glBufferData(GL_ARRAY_BUFFER, cube->npoints * sizeof(float) * 3, cube->points, GL_STATIC_DRAW);
@@ -241,7 +238,6 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateCube(RE_GameObject* game_obj)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_cube);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube->ntriangles * sizeof(unsigned short) * 3, cube->triangles, GL_STATIC_DRAW);
 
-		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -294,7 +290,7 @@ unsigned int RE_PrimitiveManager::CheckCubeVAO()
 		glGenVertexArrays(1, &vao_cube);
 		glGenBuffers(1, &vbo_cube);
 
-		glBindVertexArray(vao_cube);
+		RE_GLCache::ChangeVAO(vao_cube);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_cube);
 		glBufferData(GL_ARRAY_BUFFER, cube->npoints * sizeof(float) * 3, cube->points, GL_STATIC_DRAW);
@@ -306,8 +302,6 @@ unsigned int RE_PrimitiveManager::CheckCubeVAO()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_cube);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube->ntriangles * sizeof(unsigned short) * 3, cube->triangles, GL_STATIC_DRAW);
 
-		glBindVertexArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		par_shapes_free_mesh(cube);

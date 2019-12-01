@@ -157,6 +157,9 @@
     <ClCompile Include="RE_FileSystem.cpp">
       <Filter>Modules\Independent App Modules\FileSystem</Filter>
     </ClCompile>
+    <ClCompile Include="RE_GLCache.cpp">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -470,6 +473,9 @@
     </ClInclude>
     <ClInclude Include="RE_FileSystem.h">
       <Filter>Modules\Independent App Modules\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_GLCache.h">
+      <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

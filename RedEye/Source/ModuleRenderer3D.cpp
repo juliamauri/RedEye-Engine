@@ -17,6 +17,7 @@
 #include "ModuleScene.h"
 #include "RE_ShaderImporter.h"
 #include "RE_InternalResources.h"
+#include "RE_GLCache.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -117,7 +118,7 @@ update_status ModuleRenderer3D::PostUpdate()
 	current_camera->Update();
 
 	// Load Shader Uniforms
-	RE_ShaderImporter::use(sceneShader);
+	RE_GLCache::ChangeShader(sceneShader);
 	RE_ShaderImporter::setFloat4x4(sceneShader, "view", current_camera->GetViewPtr());
 	RE_ShaderImporter::setFloat4x4(sceneShader, "projection", current_camera->GetProjectionPtr());
 
@@ -128,6 +129,7 @@ update_status ModuleRenderer3D::PostUpdate()
 	else
 		App->scene->GetRoot()->DrawWithChilds();
 
+	RE_GLCache::ChangeShader(0);
 	// Draw Debug Geometry
 	App->editor->DrawDebug(lighting);
 
@@ -135,7 +137,7 @@ update_status ModuleRenderer3D::PostUpdate()
 	// draw skybox as last
 
 	// Set shader and uniforms
-	RE_ShaderImporter::use(skyboxShader);
+	RE_GLCache::ChangeShader(skyboxShader);
 	RE_ShaderImporter::setFloat4x4(skyboxShader, "view", current_camera->GetViewPtr());
 	RE_ShaderImporter::setFloat4x4(skyboxShader, "projection", current_camera->GetProjectionPtr());
 	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);
@@ -144,14 +146,13 @@ update_status ModuleRenderer3D::PostUpdate()
 	glDepthFunc(GL_LEQUAL);
 
 	// Render skybox cube
-	glBindVertexArray(App->internalResources->GetSkyBoxVAO());
+	RE_GLCache::ChangeVAO(App->internalResources->GetSkyBoxVAO());
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
-	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	glDepthFunc(GL_LESS); // set depth function back to default
 

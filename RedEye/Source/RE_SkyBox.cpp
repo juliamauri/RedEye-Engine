@@ -12,6 +12,8 @@
 
 #include "RE_TextureImporter.h"
 
+#include "RE_GLCache.h"
+
 #include "Glew/include/glew.h"
 
 #include "ImGui/imgui.h"
@@ -378,7 +380,7 @@ void RE_SkyBox::LoadSkyBoxCube()
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	glBindVertexArray(VAO);
+	RE_GLCache::ChangeVAO(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);

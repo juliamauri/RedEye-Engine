@@ -27,6 +27,7 @@ class RE_ModelImporter;
 class RE_ResourceManager;
 class RE_HandleErrors;
 class RE_InternalResources;
+class RE_GLCache;
 
 enum GameState : char
 {
@@ -86,6 +87,8 @@ public:
 	RE_InternalResources* internalResources = nullptr;
 
 	RE_HandleErrors* handlerrors = nullptr;
+
+	RE_GLCache* glcache = nullptr;
 
 private:
 

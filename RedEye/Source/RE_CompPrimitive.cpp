@@ -14,6 +14,7 @@
 #include "ModuleScene.h"
 #include "RE_FileSystem.h"
 #include "RE_InternalResources.h"
+#include "RE_GLCache.h"
 
 #include "par_shapes.h"
 
@@ -52,7 +53,7 @@ RE_CompPoint::~RE_CompPoint()
 void RE_CompPoint::Draw()
 {
 	RE_CompPrimitive::RE_Component::go->GetTransform()->SetPosition(point);
-	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
@@ -61,10 +62,9 @@ void RE_CompPoint::Draw()
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	glPointSize(10.0f);
 
-	glBindVertexArray(RE_CompPrimitive::VAO);
+	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawArrays(GL_POINTS, 0, 1);
 
-	glBindVertexArray(0);
 
 	glPointSize(1.0f);
 	glDisable(GL_PROGRAM_POINT_SIZE);
@@ -80,7 +80,7 @@ RE_CompLine::~RE_CompLine()
 
 void RE_CompLine::Draw()
 {
-	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
@@ -88,9 +88,8 @@ void RE_CompLine::Draw()
 
 	glLineWidth(2.0f);
 
-	glBindVertexArray(RE_CompPrimitive::VAO);
+	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawArrays(GL_LINES, 0, 2);
-	glBindVertexArray(0);
 
 	glLineWidth(1.0f);
 }
@@ -115,15 +114,14 @@ RE_CompTriangle::~RE_CompTriangle()
 
 void RE_CompTriangle::Draw()
 {
-	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
-	glBindVertexArray(RE_CompPrimitive::VAO);
+	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
 }
 RE_CompPlane::RE_CompPlane(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_PLANE, game_obj, VAO, shader) {}
 
@@ -134,15 +132,14 @@ RE_CompPlane::~RE_CompPlane()
 
 void RE_CompPlane::Draw()
 {
-	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
 
-	glBindVertexArray(RE_CompPrimitive::VAO);
+	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawArrays(GL_LINES, 0, 400);
-	glBindVertexArray(0);
 }
 
 RE_CompCube::RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count) : 
@@ -166,7 +163,7 @@ RE_CompCube::~RE_CompCube()
 
 void RE_CompCube::Draw()
 {
-	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
 	if (!show_checkers)
@@ -177,7 +174,7 @@ void RE_CompCube::Draw()
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
 
 		// Draw
-		glBindVertexArray(RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 	}
 	else
@@ -190,16 +187,13 @@ void RE_CompCube::Draw()
 		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw
-		glBindVertexArray(RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 
 		// Release Texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
-
-	glBindVertexArray(0);
-	RE_ShaderImporter::use(0);
 }
 
 void RE_CompCube::DrawProperties()
@@ -266,7 +260,7 @@ RE_CompSphere::~RE_CompSphere()
 
 void RE_CompSphere::Draw()
 {
-	RE_ShaderImporter::use(RE_CompPrimitive::shader);
+	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
 	if (!show_checkers)
@@ -277,7 +271,7 @@ void RE_CompSphere::Draw()
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
 
 		// Draw
-		glBindVertexArray(RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 	}
 	else
@@ -290,16 +284,13 @@ void RE_CompSphere::Draw()
 		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw
-		glBindVertexArray(RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 
 		// Release Texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
-
-	glBindVertexArray(0);
-	RE_ShaderImporter::use(0);
 }
 
 void RE_CompSphere::DrawProperties()
@@ -373,7 +364,7 @@ void RE_CompSphere::GenerateNewSphere(int _slice, int _stacks)
 		par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(slice, stacks);
 
 		glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
-		glBindVertexArray(RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 
 		glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);

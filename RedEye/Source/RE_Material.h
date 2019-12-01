@@ -43,6 +43,10 @@ public:
 	void UseTextureResources();
 	void UnUseTextureResources();
 
+	void SetShader(const char* sMD5);
+	unsigned int GetShaderID()const;
+	void SetShaderUniforms()const;
+
 
 private:
 	void Draw() override;
@@ -96,6 +100,8 @@ private:
 	bool applySave = false;
 	std::vector<const char*>* whereToApply = nullptr;
 	std::vector<const char*>::iterator changeToApply;
+
+	const char* shaderMD5 = nullptr;
 };
 
 #endif // !__RE_MATERIAL_H__

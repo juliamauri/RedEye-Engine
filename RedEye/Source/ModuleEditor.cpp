@@ -15,6 +15,7 @@
 #include "RE_CameraManager.h"
 #include "RE_PrimitiveManager.h"
 #include "QuadTree.h"
+#include "RE_GLCache.h"
 
 #include "MathGeoLib\include\MathGeoLib.h"
 #include "ImGui\imgui_impl_opengl3.h"
@@ -316,6 +317,8 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 	// Draw Bounding Boxes
 	if (debug_drawing && ((adapted_AABBdraw != AABBDebugDrawing::NONE) || draw_quad_tree || draw_cameras))
 	{
+		RE_GLCache::ChangeShader(0);
+
 		const RE_GameObject* root = App->scene->GetRoot();
 		RE_CompCamera* current_camera = RE_CameraManager::CurrentCamera();
 

@@ -22,6 +22,7 @@
 #include "SystemInfo.h"
 #include "OutputLog.h"
 #include "RE_HandleErrors.h"
+#include "RE_GLCache.h"
 
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
@@ -54,6 +55,7 @@ Application::Application()
 	resources = new RE_ResourceManager();
 	internalResources = new RE_InternalResources();
 	handlerrors = new RE_HandleErrors();
+	glcache = new RE_GLCache();
 }
 
 Application::~Application()
@@ -66,6 +68,7 @@ Application::~Application()
 	DEL(resources);
 	DEL(internalResources);
 	DEL(handlerrors);
+	DEL(glcache);
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;

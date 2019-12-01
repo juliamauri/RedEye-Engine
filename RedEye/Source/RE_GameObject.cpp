@@ -11,6 +11,7 @@
 #include "RE_CompCamera.h"
 #include "RE_CompParticleEmiter.h"
 #include "RE_ShaderImporter.h"
+#include "RE_GLCache.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
 #include "OutputLog.h"
@@ -1082,7 +1083,7 @@ void RE_GameObject::ResetGlobalBoundingBox()
 
 void RE_GameObject::DrawAABB(math::vec color) const
 {
-	RE_ShaderImporter::use(0);
+	RE_GLCache::ChangeShader(0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf((transform->GetMatrixModel() * RE_CameraManager::CurrentCamera()->GetView()).ptr());
