@@ -356,9 +356,8 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			}
 
 			App->handlerrors->StopHandling();
-			if (App->handlerrors->AnyErrorHandled()) {
+			if (App->handlerrors->AnyErrorHandled())
 				App->handlerrors->ActivatePopUp();
-			}
 		}
 	}
 	unsigned int realTime = time.Read();
@@ -371,10 +370,8 @@ void RE_FileSystem::DrawEditor()
 	ImGui::TextWrappedV(GetExecutableDirectory(), "");
 
 	ImGui::Separator();
-	//ImGui::Text("Read Directories");
-	//for (std::list<std::string>::iterator it = paths.begin(); it != paths.end(); ++it)
-		//ImGui::TextWrappedV(it->c_str(), "");
-
+	ImGui::Text("All assets directories:");
+	for(auto dir : assetsDirectories)ImGui::Text(dir->path.c_str());
 	ImGui::Separator();
 
 	ImGui::Text("Write Directory");
@@ -390,11 +387,6 @@ bool RE_FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
 		LOG_ERROR("File System error while adding a path or zip(%s): %s\n", path_or_zip, PHYSFS_getLastError());
 		ret = false;
 	}
-	else
-	{
-		//paths.push_back(path_or_zip);
-	}
-
 	return ret;
 }
 
@@ -407,9 +399,6 @@ bool RE_FileSystem::RemovePath(const char * path_or_zip)
 		LOG_ERROR("Error removing PhysFS Directory (%s): %s", path_or_zip, PHYSFS_getLastError());
 		ret = false;
 	}
-
-	//paths.remove(path_or_zip);
-
 	return ret;
 }
 
@@ -465,9 +454,7 @@ RE_FileIO* RE_FileSystem::QuickBufferFromPDPath(const char * full_path)// , char
 			App->fs->RemovePath(file_path.c_str());
 		}
 		else
-		{
 			DEL(ret);
-		}
 	}
 
 	return ret;
@@ -531,216 +518,6 @@ void RE_FileSystem::HandleDropedFile(const char * file)
 RE_FileSystem::RE_Directory* RE_FileSystem::GetRootDirectory() const
 {
 	return rootAssetDirectory;
-}
-
-std::string RE_FileSystem::RecursiveFindFbx(const char * path)
-{
-	std::string	fbxPathReturn;
-	std::string iterPath(path);
-
-	char **rc = PHYSFS_enumerateFiles(iterPath.c_str());
-	char **i;
-
-	for (i = rc; *i != NULL; i++)
-	{
-		std::string inPath(iterPath);
-		inPath += *i;
-
-		PHYSFS_Stat fileStat;
-		if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
-			if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
-				inPath += "/";
-				fbxPathReturn = RecursiveFindFbx(inPath.c_str());
-				if (!fbxPathReturn.empty()) {
-					break;
-				}
-			}
-			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
-				std::string ext = inPath.substr(inPath.find_last_of(".") + 1);
-				std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-
-				if (ext.compare("fbx") == 0) {
-					fbxPathReturn = inPath;
-					break;
-				}
-			}
-		}
-	}
-
-	PHYSFS_freeList(rc);
-	return fbxPathReturn;
-}
-
-std::string RE_FileSystem::RecursiveFindFileOwnFileSystem(const char * directory_path, const char * fileToFind)
-{
-	std::string	filePathReturn;
-	std::string	iterPath(directory_path);
-
-	char **rc = PHYSFS_enumerateFiles(iterPath.c_str());
-	char **i;
-
-	for (i = rc; *i != NULL; i++)
-	{
-		std::string inPath(iterPath);
-		inPath += *i;
-
-		PHYSFS_Stat fileStat;
-		if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
-			if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
-				inPath += "/";
-
-				filePathReturn = RecursiveFindFileOwnFileSystem(inPath.c_str(), fileToFind);
-				if (!filePathReturn.empty()) {
-					break;
-				}
-			}
-			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
-
-				std::string fileName = inPath.substr(inPath.find_last_of("/") + 1);
-
-				if (fileName.compare(fileToFind) == 0) {
-					filePathReturn = inPath;
-					break;
-				}
-			}
-		}
-	}
-
-	PHYSFS_freeList(rc);
-	return filePathReturn;
-}
-
-std::string RE_FileSystem::RecursiveFindFileOutsideFileSystem(const char* directory_path, const char* exporting_path, const char* fileToFind)
-{
-	std::string	filePathReturn;
-	std::string	directoryPath(directory_path);
-	std::string iterPath(exporting_path);
-
-	char **rc = PHYSFS_enumerateFiles(iterPath.c_str());
-	char **i;
-
-	for (i = rc; *i != NULL; i++)
-	{
-		std::string inPath(iterPath);
-		inPath += *i;
-
-		PHYSFS_Stat fileStat;
-		if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
-			if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
-				inPath += "/";
-				directoryPath += *i; directoryPath += "\\";
-
-				filePathReturn = RecursiveFindFileOutsideFileSystem(directoryPath.c_str(), inPath.c_str(), fileToFind);
-				if (!filePathReturn.empty()) {
-					break;
-				}
-			}
-			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
-
-				std::string fileName = inPath.substr(inPath.find_last_of("/") + 1);
-				if (fileName.compare(fileToFind) == 0) {
-					directoryPath += fileName;
-					filePathReturn = directoryPath;
-					break;
-				}
-
-			}
-
-		}
-	}
-
-	PHYSFS_freeList(rc);
-	return directoryPath;
-}
-
-std::vector<std::string> RE_FileSystem::FindAllFilesByExtension(const char * path, const char * extension, bool repercusive)
-{
-	std::vector<std::string> ret;
-
-	std::string iterPath(path);
-
-	char **rc = PHYSFS_enumerateFiles(iterPath.c_str());
-	char **i;
-
-	for (i = rc; *i != NULL; i++)
-	{
-		std::string inPath(iterPath);
-		inPath += *i;
-
-		PHYSFS_Stat fileStat;
-		if (PHYSFS_stat(inPath.c_str(), &fileStat)) {
-			if (repercusive && fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
-				inPath += "/";
-				std::vector<std::string> fromFolder = FindAllFilesByExtension(inPath.c_str(), extension, repercusive);
-
-				if (!fromFolder.empty()) {
-					ret.insert(ret.end(), fromFolder.begin(), fromFolder.end());
-				}
-			}
-			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
-				std::string ext = inPath.substr(inPath.find_last_of(".") + 1);
-				std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-
-				if (ext.compare(extension) == 0) {
-					ret.push_back(inPath);
-				}
-			}
-		}
-	}
-
-	return ret;
-}
-
-bool RE_FileSystem::RecursiveComparePath(const char * path1, const char * path2)
-{
-	bool isSame = true;
-	std::string iterPath1 = path1;
-	std::string iterPath2 = path2;
-	char **rc1 = PHYSFS_enumerateFiles(path1);
-	char **rc2 = PHYSFS_enumerateFiles(path2);
-	char **i1;
-	char **i2;
-
-	for (i1 = rc1, i2 = rc2; *i1 != NULL && *i2 != NULL; i1++, i2++)
-	{
-		if (std::strcmp(*i1, *i2) == 0) {
-
-			std::string inPath1(iterPath1);
-			inPath1 += *i1;
-
-			std::string inPath2(iterPath2);
-			inPath2 += *i2;
-
-			PHYSFS_Stat fileStat1;
-			PHYSFS_Stat fileStat2;
-			if (PHYSFS_stat(inPath1.c_str(), &fileStat1) && PHYSFS_stat(inPath2.c_str(), &fileStat2)) {
-
-				if (fileStat1.filetype == fileStat2.filetype) {
-
-					if (fileStat1.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY) {
-						inPath1 += "/";
-						inPath2 += "/";
-						isSame = RecursiveComparePath(inPath1.c_str(), inPath2.c_str());
-					}
-					else if (fileStat1.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR) {
-						isSame = (fileStat1.filesize == fileStat2.filesize);
-					}
-
-				}
-				else
-					isSame = false;
-			}
-		}
-		else
-			isSame = false;
-
-		if (!isSame) break;
-	}
-
-	PHYSFS_freeList(rc1);
-	PHYSFS_freeList(rc2);
-
-	return isSame;
 }
 
 void RE_FileSystem::RecursiveCopy(const char * origin, const char * dest)

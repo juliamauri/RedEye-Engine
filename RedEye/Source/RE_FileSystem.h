@@ -140,17 +140,7 @@ public:
 
 	RE_Directory* GetRootDirectory()const;
 
-	std::vector<std::string> FindAllFilesByExtension(const char* path, const char* extension, bool repercusive = false);
-
 private:
-
-	std::string RecursiveFindFbx(const char* path);
-	std::string RecursiveFindFileOwnFileSystem(const char* directory_path, const char* fileToFind);
-	std::string RecursiveFindFileOutsideFileSystem(const char* directory_path, const char* exporting_path, const char* fileToFind);
-
-	//Returns true if same
-	bool RecursiveComparePath(const char* path1, const char* path2);
-
 	void RecursiveCopy(const char* origin, const char* dest);
 
 private:
