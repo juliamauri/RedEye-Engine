@@ -8,6 +8,7 @@
 #include "RE_FileSystem.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_ResourceManager.h"
+#include "RE_InternalResources.h"
 #include "RE_CameraManager.h"
 #include "RE_ShaderImporter.h"
 #include "RE_ModelImporter.h"
@@ -61,6 +62,8 @@ bool ModuleScene::Start()
 	std::string path_scene("Assets/Scenes/");
 	path_scene += GetName();
 	path_scene += ".re";
+
+	App->internalResources->FindSkyBox();
 
 	sceneLoadedMD5 = App->resources->FindMD5ByAssetsPath(path_scene.c_str(), Resource_Type::R_SCENE);
 

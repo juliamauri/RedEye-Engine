@@ -20,6 +20,7 @@ public:
 	unsigned int GetSkyBoxVAO() const;
 	unsigned int GetSkyBoxTexturesID() const;
 
+	void FindSkyBox();
 private:
 	bool InitShaders();
 	bool InitChecker();
@@ -31,7 +32,7 @@ private:
 
 	unsigned int checkerTexture = 0;
 
-	RE_SkyBox* defaultSkybox = nullptr;
+	const char* skyboxMD5 = nullptr;
 };
 
 #endif // !__INTERNALRESOURCCES_H__
