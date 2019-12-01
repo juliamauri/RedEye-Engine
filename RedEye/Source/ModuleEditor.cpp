@@ -473,7 +473,7 @@ RE_GameObject * ModuleEditor::GetSelected() const
 void ModuleEditor::SetSelected(RE_GameObject* go, bool force_focus)
 {
 	selected = go;
-	App->resources->SetSelected(nullptr);
+	App->resources->PopSelected(true);
 
 	if (force_focus || (focus_on_select && selected != nullptr))
 		RE_CameraManager::CurrentCamera()->Focus(selected);

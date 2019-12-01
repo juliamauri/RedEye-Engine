@@ -179,7 +179,7 @@ void ResourceContainer::LoadMeta()
 void ResourceContainer::DrawPropieties()
 {
 	if (ImGui::CollapsingHeader(std::string(propietiesName + name).c_str(), ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen)) {
-		if (ImGui::Button("Return")) App->resources->SetSelected(nullptr);
+		if (ImGui::Button("Return")) App->resources->PopSelected();
 		ImGui::Separator();
 		ImGui::Text("Name: %s", name.c_str());
 		ImGui::Text("Asset path: %s", assetPath.c_str());

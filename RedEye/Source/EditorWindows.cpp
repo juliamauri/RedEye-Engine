@@ -789,7 +789,7 @@ void AssetsWindow::Draw(bool secondary)
 					break;
 				default:
 					if (ImGui::Button(path->AsFile()->filename.c_str()))
-						App->resources->SetSelected(path->AsFile()->metaResource->resource);
+						App->resources->PushSelected(path->AsFile()->metaResource->resource, true);
 					break;
 				}
 				break;

@@ -54,17 +54,8 @@ void RE_CompMesh::DrawProperties()
 	{
 		if (meshMD5)
 		{
-			RE_Mesh* mesh = (RE_Mesh*)App->resources->At(meshMD5);
-			mesh->DrawPropieties();
-
-			if (ImGui::Button(show_f_normals ? "Hide Face Normals" : "Show Face Normals"))
-				show_f_normals = !show_f_normals;
-			if (ImGui::Button(show_v_normals ? "Hide Vertex Normals" : "Show Vertex Normals"))
-				show_v_normals = !show_v_normals;
-			if (show_f_normals && !mesh->lFaceNormals)	mesh->loadFaceNormals();
-			if (show_v_normals && !mesh->lVertexNormals)	mesh->loadVertexNormals();
-			if (!show_f_normals && mesh->lFaceNormals) mesh->clearFaceNormals();
-			if (!show_v_normals && mesh->lVertexNormals) mesh->clearVertexNormals();
+			if (ImGui::Button(std::string("Resource " + std::string(App->resources->At(meshMD5)->GetName())).c_str()))
+				App->resources->PushSelected(meshMD5, true);
 		}
 		else ImGui::TextWrapped("Empty Mesh Component");
 	}
@@ -75,8 +66,8 @@ void RE_CompMesh::DrawProperties()
 		{
 			ImGui::Checkbox("Use checkers texture", &show_checkers);
 
-			ResourceContainer* meshMaterial = App->resources->At(materialMD5);
-			if (meshMaterial)  meshMaterial->DrawPropieties();
+			if (ImGui::Button(std::string("Resource " + std::string(App->resources->At(materialMD5)->GetName())).c_str()))
+				App->resources->PushSelected(materialMD5, true);
 		}
 		else
 			ImGui::Text("Mesh don't contain Material.");

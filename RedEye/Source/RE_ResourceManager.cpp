@@ -90,14 +90,25 @@ void RE_ResourceManager::UnUse(const char* resMD5)
 	}
 }
 
-void RE_ResourceManager::SetSelected(const char* resS)
+void RE_ResourceManager::PushSelected(const char* resS, bool popAll)
 {
-	resourceSelected = resS;
+	if (popAll)PopSelected(true);
+	resourcesSelected.push(resS);
 }
 
 const char* RE_ResourceManager::GetSelected() const
 {
-	return resourceSelected;
+	return (resourcesSelected.empty()) ? nullptr : resourcesSelected.top();
+}
+
+void RE_ResourceManager::PopSelected(bool all)
+{
+	if (resourcesSelected.empty())
+		return;
+
+	do {
+		resourcesSelected.pop();
+	} while (all && !resourcesSelected.empty());
 }
 
 ResourceContainer* RE_ResourceManager::At(const char* md5) const

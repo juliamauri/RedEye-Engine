@@ -174,7 +174,8 @@ void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*
 		for (std::vector<const char*>::iterator md5 = textures->begin(); md5 != textures->end(); ++md5) {
 			ResourceContainer* resource = App->resources->At(*md5);
 
-			ImGui::Text("Texture Name: %s\nAssets path: %s", resource->GetName(), resource->GetAssetPath());
+			if (ImGui::Button(std::string("Texture " + std::string(resource->GetName())).c_str()))
+				App->resources->PushSelected(*md5);
 
 			if (ImGui::Button("Change Texture")) {
 				changeToApply = md5;

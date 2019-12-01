@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <stack> 
 
 #include "Resource.h"
 
@@ -28,8 +29,9 @@ public:
 	void Use(const char* resMD5);
 	void UnUse(const char* resMD5);
 
-	void SetSelected(const char* resS);
+	void PushSelected(const char* resS, bool popAll = false);
 	const char* GetSelected()const;
+	void PopSelected(bool all = false);
 
 	std::vector<ResourceContainer*> GetResourcesByType(Resource_Type type);
 	const char* IsReference(const char* md5, Resource_Type type = Resource_Type::R_UNDEFINED);
@@ -50,7 +52,7 @@ private:
 	ResourceMap resources;
 	ResourceCounterMap resourcesCounter;
 
-	const char* resourceSelected = nullptr;
+	std::stack< const char*> resourcesSelected;
 };
 
 #endif // !__RESOURCEMANAGER_H__
