@@ -106,7 +106,10 @@ void RE_SkyBox::Draw()
 		if (ImGui::TreeNodeEx(texturesname[i], ImGuiTreeNodeFlags_None | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
 
 			if (skyBoxSettings.textures[i].textureMD5)
-				ImGui::Text("Path: %s", App->resources->At(skyBoxSettings.textures[i].textureMD5)->GetAssetPath());
+			{
+				if (ImGui::Button(std::string("Texture " + std::string(App->resources->At(skyBoxSettings.textures[i].textureMD5)->GetName())).c_str()))
+					App->resources->PushSelected(skyBoxSettings.textures[i].textureMD5);
+			}
 			else
 				ImGui::Text("%s texture don't exists", texturesname[i]);
 
