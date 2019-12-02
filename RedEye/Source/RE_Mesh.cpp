@@ -9,10 +9,6 @@
 #include "RE_ResourceManager.h"
 
 #include "RE_ShaderImporter.h"
-#include "RE_TextureImporter.h"
-
-#include "RE_Material.h"
-#include "RE_Texture.h"
 
 #include "RE_GameObject.h"
 #include "RE_Component.h"
@@ -185,72 +181,11 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	return existsMD5;
 }
 
-void RE_Mesh::DrawMesh(const float* transform, unsigned int shader, const char* materialMD5, unsigned int checker, bool use_checkers)
+void RE_Mesh::DrawMesh(unsigned int shader)
 {
-	// Set Shader uniforms
-	RE_GLCache::ChangeShader(shader);
-	RE_ShaderImporter::setFloat4x4(shader, "model", transform);
-
-	RE_Material* meshMaterial = nullptr;
-	if(materialMD5) meshMaterial = (RE_Material*)App->resources->At(materialMD5);
-
-	// Bind Textures
-	if (use_checkers || !materialMD5 || meshMaterial->tDiffuse.empty())
-	{
-		RE_ShaderImporter::setFloat(shader, "useColor", 0.0f);
-		RE_ShaderImporter::setFloat(shader, "useTexture", 1.0f);
-
-		use_checkers = true;
-		glActiveTexture(GL_TEXTURE0);
-		std::string name = "texture_diffuse0";
-		RE_ShaderImporter::setUnsignedInt(shader, name.c_str(), 0);
-		glBindTexture(GL_TEXTURE_2D, checker);
-	}
-	else if (materialMD5)
-	{
-		// Bind diffuse textures
-		unsigned int diffuseNr = 1;
-		if (!meshMaterial->tDiffuse.empty())
-		{
-			RE_ShaderImporter::setFloat(shader, "useColor", 0.0f);
-			RE_ShaderImporter::setFloat(shader, "useTexture", 1.0f);
-
-			for (unsigned int i = 0; i < meshMaterial->tDiffuse.size(); i++)
-			{
-				glActiveTexture(GL_TEXTURE0 + i);
-				std::string name = "texture_diffuse";
-				name += std::to_string(diffuseNr++);
-				RE_ShaderImporter::setUnsignedInt(shader, name.c_str(), i);
-				((RE_Texture*)App->resources->At(meshMaterial->tDiffuse[i]))->use();
-			}
-		}
-		/* TODO DRAW WITH MATERIAL
-
-			unsigned int specularNr = 1;
-			unsigned int normalNr = 1;
-			unsigned int heightNr = 1;
-
-				if (name == "texture_diffuse")
-				number = std::to_string(diffuseNr++);
-			else if (name == "texture_specular")
-				number = std::to_string(specularNr++); // transfer unsigned int to stream
-			else if (name == "texture_normal")
-				number = std::to_string(normalNr++); // transfer unsigned int to stream
-			else if (name == "texture_height")
-				number = std::to_string(heightNr++); // transfer unsigned int to stream
-		*/
-	}
-
 	// Draw mesh
 	RE_GLCache::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, nullptr);
-
-	// Release buffers
-	if (use_checkers || (materialMD5 && !meshMaterial->tDiffuse.empty()))
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
 
 	// MESH DEBUG DRAWING
 	if (lFaceNormals || lVertexNormals)

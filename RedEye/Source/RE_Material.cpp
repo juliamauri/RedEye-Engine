@@ -4,6 +4,10 @@
 #include "RE_FileSystem.h"
 #include "OutputLog.h"
 #include "RE_ResourceManager.h"
+#include "RE_InternalResources.h"
+#include "RE_ShaderImporter.h"
+#include "RE_Shader.h"
+#include "RE_Texture.h"
 
 #include "ModuleEditor.h"
 #include "EditorWindows.h"
@@ -11,6 +15,7 @@
 #include "Globals.h"
 
 #include "ImGui/imgui.h"
+#include "Glew/include/glew.h"
 
 RE_Material::RE_Material() { }
 
@@ -29,6 +34,8 @@ void RE_Material::LoadInMemory()
 		JsonDeserialize();
 		//BinarySerialize();
 	}
+	else if (isInternal())
+		ResourceContainer::inMemory = true;
 	else {
 		LOG_ERROR("Material %s not found on project", GetName());
 	}
@@ -72,6 +79,11 @@ void RE_Material::Import(bool keepInMemory)
 	if (!keepInMemory) UnloadMemory();
 }
 
+void RE_Material::ProcessMD5()
+{
+	JsonSerialize(true);
+}
+
 void RE_Material::Save()
 {
 	JsonSerialize();
@@ -94,14 +106,10 @@ void RE_Material::Draw()
 		applySave = true;
 		whereToApply = nullptr;
 	}
-
-	if (ImGui::Button("Save Changes")) {
-		if (applySave) {
-
-			Save();
-
-			applySave = false;
-		}
+	
+	if (!isInternal() && applySave && ImGui::Button("Save Changes")) {
+		Save();
+		applySave = false;
 	}
 
 	static int shadingMode = shadingType;
@@ -292,7 +300,7 @@ void RE_Material::PullTexturesJson(JSONNode * texturesNode, std::vector<const ch
 	}
 }
 
-void RE_Material::JsonSerialize()
+void RE_Material::JsonSerialize(bool onlyMD5)
 {
 	Config materialSerialize(GetAssetPath(), App->fs->GetZipPath());
 
@@ -357,7 +365,7 @@ void RE_Material::JsonSerialize()
 	PushTexturesJson(unknownNode, &tUnknown);
 	DEL(unknownNode);
 
-	materialSerialize.Save();
+	if(!onlyMD5) materialSerialize.Save();
 	SetMD5(materialSerialize.GetMd5().c_str());
 
 	std::string libraryPath("Library/Materials/");
@@ -583,6 +591,66 @@ void RE_Material::UnUseTextureResources()
 	for (auto t : tReflection) App->resources->UnUse(t);
 	for (auto t : tUnknown) App->resources->UnUse(t);
 
+}
+
+void RE_Material::UploadToShader(float* model, bool usingChekers)
+{
+	const char* usingShader = (shaderMD5) ? shaderMD5 : App->internalResources->GetDefaultShader();
+	RE_Shader* shaderRes = (RE_Shader*)App->resources->At(usingShader);
+	shaderRes->UploadModel(model);
+
+	unsigned int ShaderID = shaderRes->GetID();
+	// Bind Textures
+	if (usingChekers || tDiffuse.empty())
+	{
+		RE_ShaderImporter::setFloat(ShaderID, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(ShaderID, "useTexture", 1.0f);
+
+		usingChekers = true;
+		glActiveTexture(GL_TEXTURE0);
+		std::string name = "texture_diffuse0";
+		RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), 0);
+		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
+	}
+	else if (!tDiffuse.empty())
+	{
+		// Bind diffuse textures
+		unsigned int diffuseNr = 1;
+
+		RE_ShaderImporter::setFloat(ShaderID, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(ShaderID, "useTexture", 1.0f);
+
+		for (unsigned int i = 0; i < tDiffuse.size(); i++)
+		{
+			glActiveTexture(GL_TEXTURE0 + i);
+			std::string name = "texture_diffuse";
+			name += std::to_string(diffuseNr++);
+			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), i);
+			((RE_Texture*)App->resources->At(tDiffuse[i]))->use();
+		}
+		/* TODO DRAW WITH MATERIAL
+
+			unsigned int specularNr = 1;
+			unsigned int normalNr = 1;
+			unsigned int heightNr = 1;
+
+				if (name == "texture_diffuse")
+				number = std::to_string(diffuseNr++);
+			else if (name == "texture_specular")
+				number = std::to_string(specularNr++); // transfer unsigned int to stream
+			else if (name == "texture_normal")
+				number = std::to_string(normalNr++); // transfer unsigned int to stream
+			else if (name == "texture_height")
+				number = std::to_string(heightNr++); // transfer unsigned int to stream
+		*/
+	}
+
+}
+
+unsigned int RE_Material::GetShaderID() const
+{
+	const char* usingShader = (shaderMD5) ? shaderMD5 : App->internalResources->GetDefaultShader();
+	return ((RE_Shader*)App->resources->At(usingShader))->GetID();
 }
 
 unsigned int RE_Material::GetBinarySize()

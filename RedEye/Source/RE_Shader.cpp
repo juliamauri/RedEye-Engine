@@ -4,6 +4,9 @@
 #include "RE_FileSystem.h"
 
 #include "RE_ShaderImporter.h"
+#include "RE_CompCamera.h"
+
+#include "RE_GLCache.h"
 
 #include "OutputLog.h"
 #include "md5.h"
@@ -69,12 +72,24 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	if (!isInternal()) SetMetaPath("Assets/Shaders/");
 }
 
+std::vector<Cvar> RE_Shader::GetUniformValues()
+{
+	return customUniform;
+}
+
 void RE_Shader::UploadCameraMatrices(RE_CompCamera* camera)
 {
 	RE_GLCache::ChangeShader(ID);
 	RE_ShaderImporter::setFloat4x4(ID, "view", camera->GetViewPtr());
 	RE_ShaderImporter::setFloat4x4(ID, "projection", camera->GetProjectionPtr());
 }
+
+void RE_Shader::UploadModel(float* model)
+{
+	RE_GLCache::ChangeShader(ID);
+	RE_ShaderImporter::setFloat4x4(ID, "model", model);
+}
+
 void RE_Shader::Draw()
 {
 	//Todo drag & drop of shader files

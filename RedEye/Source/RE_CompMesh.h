@@ -39,9 +39,6 @@ protected:
 	bool show_checkers = false;
 	bool show_f_normals = false;
 	bool show_v_normals = false;
-	
-	uint shaderForDraw = 0;
-	uint checkerTexture = 0;
 };
 
 

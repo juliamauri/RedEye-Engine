@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "RE_ShaderImporter.h"
+#include "RE_ResourceManager.h"
 #include "RE_InternalResources.h"
 #include "OutputLog.h"
 #include "RE_Math.h"
@@ -9,6 +10,7 @@
 #include "RE_CompPrimitive.h"
 
 #include "RE_GLCache.h"
+#include "RE_Shader.h"
 
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
@@ -319,7 +321,7 @@ void RE_PrimitiveManager::Rest(unsigned short int count)
 bool RE_PrimitiveManager::Init(const char* def_shader)
 {
 	
-	shaderPrimitive = App->internalResources->GetDefaultShader();
+	shaderPrimitive = ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID();
 
 	App->ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
 

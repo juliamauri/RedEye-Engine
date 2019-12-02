@@ -17,7 +17,7 @@ public:
 
 	const char* CheckAndSave(bool* exists);
 
-	void DrawMesh(const float* transform, unsigned int shader, const char* materialMD5, unsigned int checker,  bool use_checkers = false);
+	void DrawMesh(unsigned int shader);
 
 	math::AABB GetAABB() const;
 
@@ -29,6 +29,8 @@ public:
 	void SetVerticesAndIndex(float* vertex, unsigned int* index = nullptr, unsigned int vertexCount = 0, unsigned int triangleCount = 0, float* textureCoords = nullptr, float* normals = nullptr, float* tangents = nullptr, float* bitangents = nullptr);
 
 	bool CheckFaceCollision(const math::Ray& local_ray, float& distance) const;
+
+	
 
 public:
 	bool lVertexNormals = false, lFaceNormals = false;

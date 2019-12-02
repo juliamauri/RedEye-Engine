@@ -6,6 +6,7 @@
 
 #include "OutputLog.h"
 #include "Application.h"
+#include "RE_ResourceManager.h"
 #include "ModuleWindow.h"
 #include "ModuleEditor.h"
 #include "TimeManager.h"
@@ -16,6 +17,7 @@
 #include "RE_CompTransform.h"
 #include "ModuleScene.h"
 #include "RE_ShaderImporter.h"
+#include "RE_Shader.h"
 #include "RE_InternalResources.h"
 #include "RE_GLCache.h"
 
@@ -75,7 +77,6 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 bool ModuleRenderer3D::Start()
 {
-	sceneShader = App->internalResources->GetDefaultShader();
 	skyboxShader = App->internalResources->GetSkyBoxShader();
 
 	return true;
@@ -128,7 +129,6 @@ update_status ModuleRenderer3D::PostUpdate()
 	else
 		App->scene->GetRoot()->DrawWithChilds();
 
-	RE_GLCache::ChangeShader(0);
 	// Draw Debug Geometry
 	App->editor->DrawDebug(lighting);
 
@@ -409,10 +409,3 @@ void ModuleRenderer3D::UpdateViewPort(int width, int height) const
 	RE_CameraManager::CurrentCamera()->GetTargetViewPort(viewP);
 	glViewport(viewP.x, viewP.y, viewP.w, viewP.z);
 }
-
-
-uint ModuleRenderer3D::GetShaderScene() const
-{
-	return sceneShader;
-}
-

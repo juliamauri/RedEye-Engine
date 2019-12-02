@@ -44,9 +44,6 @@ public:
 	void WindowSizeChanged(int width, int height);
 	void UpdateViewPort(int width, int height) const;
 
-	uint GetShaderScene() const;
-
-
 private:
 
 	// Context
@@ -63,7 +60,6 @@ private:
 	bool cull_scene = true;
 
 	// Default Shaders
-	unsigned int sceneShader = 0;
 	unsigned int skyboxShader = 0;
 };
 

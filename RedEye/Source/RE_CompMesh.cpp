@@ -24,28 +24,22 @@
 
 RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool start_active)
 	: RE_Component(C_MESH, go, start_active), meshMD5(reference)
-{
-	if (!(shaderForDraw = App->renderer3d->GetShaderScene()))
-		shaderForDraw = App->internalResources->GetDefaultShader();
-	checkerTexture = App->internalResources->GetTextureChecker();
-}
+{ }
 
 RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go)
 	: RE_Component(C_MESH, go, cmpMesh.active), meshMD5(cmpMesh.meshMD5), materialMD5(cmpMesh.materialMD5)
-{
-	if (!(shaderForDraw = App->renderer3d->GetShaderScene()))
-		shaderForDraw = App->internalResources->GetDefaultShader();
-	checkerTexture = App->internalResources->GetTextureChecker();
-}
+{ }
 
 RE_CompMesh::~RE_CompMesh()
 {
-	//((ResourceManager*)App->meshes)->UnReference(reference);
 }
 
 void RE_CompMesh::Draw()
 {
-	((RE_Mesh*)App->resources->At(meshMD5))->DrawMesh(go->GetTransform()->GetShaderModel(), shaderForDraw, materialMD5, checkerTexture, show_checkers);
+	const char* materialToDraw = (materialMD5) ? materialMD5 : App->internalResources->GetDefaulMaterial();
+	RE_Material* material = (RE_Material *)App->resources->At(materialToDraw);
+	material->UploadToShader(go->GetTransform()->GetShaderModel(), show_checkers);
+	((RE_Mesh*)App->resources->At(meshMD5))->DrawMesh(material->GetShaderID());
 }
 
 void RE_CompMesh::DrawProperties()

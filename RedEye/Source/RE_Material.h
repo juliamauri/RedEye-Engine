@@ -2,10 +2,7 @@
 #define __RE_MATERIAL_H__
 
 #include "Resource.h"
-
-#include "RapidJson\include\rapidjson.h"
-#include "RapidJson\include\document.h"
-#include "RapidJson\include\allocators.h"
+#include "Cvar.h"
 
 #include "MathGeoLib/include/Math/float3.h"
 #include <string>
@@ -38,15 +35,17 @@ public:
 
 	void Import(bool keepInMemory = true) override;
 
+	void ProcessMD5();
+
 	void Save();
 
 	void UseTextureResources();
 	void UnUseTextureResources();
 
+	void UploadToShader(float* model, bool usingChekers);
+
 	void SetShader(const char* sMD5);
 	unsigned int GetShaderID()const;
-	void SetShaderUniforms()const;
-
 
 private:
 	void Draw() override;
@@ -54,7 +53,7 @@ private:
 	void DrawTextures(const char* texturesName, std::vector<const char*>* textures);
 
 	void JsonDeserialize(bool generateLibraryPath = false);
-	void JsonSerialize();
+	void JsonSerialize(bool onlyMD5 = false);
 
 	void PullTexturesJson(JSONNode * texturesNode, std::vector<const char*>* textures);
 	void PushTexturesJson(JSONNode * texturesNode, std::vector<const char*>* textures);
@@ -102,6 +101,7 @@ private:
 	std::vector<const char*>::iterator changeToApply;
 
 	const char* shaderMD5 = nullptr;
+	std::vector<Cvar> interactuableShaderValues;
 };
 
 #endif // !__RE_MATERIAL_H__
