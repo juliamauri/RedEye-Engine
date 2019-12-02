@@ -11,10 +11,11 @@ public:
 	~RE_InternalResources();
 
 	bool Init();
-
-	unsigned int GetDefaultShader() const;
-	unsigned int GetSkyBoxShader() const;
 	
+	const char* GetDefaultShader()const;
+	const char* GetDefaulMaterial()const;
+	unsigned int GetSkyBoxShader() const;
+
 	unsigned int GetTextureChecker() const;
 
 	unsigned int GetSkyBoxVAO() const;
@@ -23,12 +24,14 @@ public:
 	void FindDefaultSkyBox();
 private:
 	bool InitShaders();
+	bool InitMaterial();
 	bool InitChecker();
 	bool InitSkyBox();
 
 private:
-	RE_Shader* defaultShader = nullptr;
-	RE_Shader* skyboxShader = nullptr;
+	const char* defaultShader = nullptr;
+	const char* skyboxShader = nullptr;
+	const char* defaultMaterial = nullptr;
 
 	unsigned int checkerTexture = 0;
 

@@ -10,6 +10,7 @@
 
 #include "RE_SkyBox.h"
 #include "RE_Shader.h"
+#include "RE_Material.h"
 
 #include "OutputLog.h"
 #include "Globals.h"
@@ -29,8 +30,6 @@ RE_InternalResources::RE_InternalResources()
 RE_InternalResources::~RE_InternalResources()
 {
 	if(checkerTexture != 0) glDeleteTextures(1, &checkerTexture);
-	DEL(defaultShader);
-	DEL(skyboxShader);
 }
 
 bool RE_InternalResources::Init()
@@ -38,6 +37,8 @@ bool RE_InternalResources::Init()
 	bool ret = true;
 
 	ret = InitShaders();
+
+	ret = InitMaterial();
 
 	ret = InitChecker();
 
@@ -51,22 +52,36 @@ bool RE_InternalResources::InitShaders()
 	//Loading Shaders
 	if (App->shaders)
 	{
-		defaultShader = new RE_Shader();
-		defaultShader->SetName("Default Shader");
-		defaultShader->SetType(Resource_Type::R_SHADER);
-		defaultShader->SetInternal(true);
-		defaultShader->SetPaths("Library/Shaders/default.vert", "Library/Shaders/default.frag");
-		defaultShader->LoadInMemory();
+		RE_Shader* defSRes = new RE_Shader();
+		defSRes->SetName("Default Shader");
+		defSRes->SetType(Resource_Type::R_SHADER);
+		defSRes->SetInternal(true);
+		defSRes->SetPaths("Library/Shaders/default.vert", "Library/Shaders/default.frag");
+		defSRes->LoadInMemory();
+		defaultShader = App->resources->Reference(defSRes);
 
-		skyboxShader = new RE_Shader();
-		skyboxShader->SetName("SkyBox Shader");
-		skyboxShader->SetType(Resource_Type::R_SHADER);
-		skyboxShader->SetInternal(true);
-		skyboxShader->SetPaths("Library/Shaders/skybox.vert", "Library/Shaders/skybox.frag");
-		skyboxShader->LoadInMemory();
+		RE_Shader* defSKRes = new RE_Shader();
+		defSKRes->SetName("SkyBox Shader");
+		defSKRes->SetType(Resource_Type::R_SHADER);
+		defSKRes->SetInternal(true);
+		defSKRes->SetPaths("Library/Shaders/skybox.vert", "Library/Shaders/skybox.frag");
+		defSKRes->LoadInMemory();
+		skyboxShader = App->resources->Reference(defSKRes);
 	}
 
 	return ret;
+}
+
+bool RE_InternalResources::InitMaterial()
+{
+	RE_Material* defMaterial = new RE_Material();
+	defMaterial->SetName("Default Material");
+	defMaterial->cDiffuse.x = 1.0;
+	defMaterial->ProcessMD5();
+	defMaterial->SetInternal(true);
+	defMaterial->LoadInMemory();
+	defaultMaterial = App->resources->Reference(defMaterial);
+	return true;
 }
 
 bool RE_InternalResources::InitChecker()
@@ -124,14 +139,19 @@ bool RE_InternalResources::InitSkyBox()
 	return true;
 }
 
-unsigned int RE_InternalResources::GetDefaultShader() const
+const char* RE_InternalResources::GetDefaultShader() const
 {
-	return defaultShader->GetID();
+	return defaultShader;
+}
+
+const char* RE_InternalResources::GetDefaulMaterial() const
+{
+	return defaultMaterial;
 }
 
 unsigned int RE_InternalResources::GetSkyBoxShader() const
 {
-	return skyboxShader->GetID();
+	return ((RE_Shader*)App->resources->At(skyboxShader))->GetID();
 }
 
 unsigned int RE_InternalResources::GetTextureChecker() const
