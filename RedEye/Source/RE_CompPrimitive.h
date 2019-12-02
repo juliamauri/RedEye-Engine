@@ -143,7 +143,7 @@ public:
 /**************************************************
 ******	Plane
 **************************************************/
-class RE_Mesh;
+
 class RE_CompPlane : public RE_CompPrimitive
 {
 public:
@@ -156,7 +156,7 @@ public:
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
 
-	RE_Mesh* TransformAsMesh();
+	const char* TransformAsMeshResource();
 
 private:
 	void GenerateNewPlane(int slice, int stacks);

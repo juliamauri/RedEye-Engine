@@ -586,6 +586,16 @@ void ModuleScene::RecieveEvent(const Event& e)
 
 			break;
 		}
+		case PLANE_CHANGE_TO_MESH:
+		{
+			RE_CompPlane* plane = (RE_CompPlane * )go->GetComponent(C_PLANE);
+			const char* planeMD5 = plane->TransformAsMeshResource();
+			go->RemoveComponent(plane);
+			RE_CompMesh* newMesh = new RE_CompMesh(go, planeMD5);
+			newMesh->UseResources();
+			go->AddCompMesh(newMesh);
+			break;
+		}
 		}
 	}
 }

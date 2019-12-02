@@ -32,6 +32,7 @@ typedef enum RE_EventType : unsigned short int
 	GO_HAS_NEW_CHILDS,
 	GO_REMOVE_CHILD,
 	TRANSFORM_MODIFIED,
+	PLANE_CHANGE_TO_MESH,
 
 	// Renderer
 	SET_VSYNC,

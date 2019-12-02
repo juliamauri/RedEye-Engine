@@ -14,7 +14,9 @@
 #include "ModuleScene.h"
 #include "RE_FileSystem.h"
 #include "RE_InternalResources.h"
+#include "RE_ResourceManager.h"
 #include "RE_GLCache.h"
+#include "RE_Mesh.h"
 
 #include "par_shapes.h"
 
@@ -547,6 +549,8 @@ void RE_CompPlane::DrawProperties()
 		ImGui::PopItemWidth();
 
 		if (ImGui::Button("Apply")) GenerateNewPlane(slice, stacks);
+
+		if (ImGui::Button("Convert To Mesh")) Event::Push(RE_EventType::PLANE_CHANGE_TO_MESH, App->scene, Cvar(GetGO()));
 	}
 }
 
@@ -577,9 +581,53 @@ void RE_CompPlane::SerializeBinary(char*& cursor, std::map<const char*, int>* re
 	cursor += size;
 }
 
-RE_Mesh* RE_CompPlane::TransformAsMesh()
+const char* RE_CompPlane::TransformAsMeshResource()
 {
-	return nullptr;
+	par_shapes_mesh* plane = par_shapes_create_plane(slice, stacks);
+
+	float* points = new float[plane->npoints * 3];
+	float* normals = new float[plane->npoints * 3];
+	float* texCoords = new float[plane->npoints * 2];
+
+	uint meshSize = 0;
+	size_t size = plane->npoints * 3 * sizeof(float);
+	uint stride = 0;
+
+	memcpy(points, plane->points, size);
+	meshSize += 3 * plane->npoints;
+	stride += 3;
+
+	memcpy(normals, plane->normals, size);
+	meshSize += 3 * plane->npoints;
+	stride += 3;
+
+	size = plane->npoints * 2 * sizeof(float);
+	memcpy(texCoords, plane->tcoords, size);
+	meshSize += 2 * plane->npoints;
+	stride += 2;
+
+	std::vector<unsigned int> index;
+	for (uint i = 0; i < plane->ntriangles * 3; i++)
+		index.push_back(plane->triangles[i]);
+
+	uint* indexA = new uint[plane->ntriangles * 3];
+	memcpy(indexA, &index[0], index.size() * sizeof(uint));
+
+	bool exists = false;
+	RE_Mesh* newMesh = new RE_Mesh();
+	newMesh->SetVerticesAndIndex(points, indexA, plane->npoints, plane->ntriangles, texCoords, normals);
+
+	const char* meshMD5 = newMesh->CheckAndSave(&exists);
+	if (!exists) {
+		newMesh->SetName(std::string("Plane " + std::to_string(plane->ntriangles) + " triangles").c_str());
+		newMesh->SetType(Resource_Type::R_MESH);
+		App->resources->Reference(newMesh);
+	}
+	else
+		DEL(newMesh);
+
+	par_shapes_free_mesh(plane);
+	return meshMD5;
 }
 
 void RE_CompPlane::GenerateNewPlane(int slice, int stacks)
