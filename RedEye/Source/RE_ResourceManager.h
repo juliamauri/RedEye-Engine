@@ -18,6 +18,8 @@ public:
 	const char* Reference(ResourceContainer* rc);
 	unsigned int TotalReferences() const;
 
+	std::vector<const char*> GetAllResourcesActiveByType(Resource_Type resT);
+
 	const char* ImportModel(const char* assetPath);
 	const char* ImportTexture(const char* assetPath);
 	const char* ImportMaterial(const char* assetPath);

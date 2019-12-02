@@ -69,6 +69,12 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	if (!isInternal()) SetMetaPath("Assets/Shaders/");
 }
 
+void RE_Shader::UploadCameraMatrices(RE_CompCamera* camera)
+{
+	RE_GLCache::ChangeShader(ID);
+	RE_ShaderImporter::setFloat4x4(ID, "view", camera->GetViewPtr());
+	RE_ShaderImporter::setFloat4x4(ID, "projection", camera->GetProjectionPtr());
+}
 void RE_Shader::Draw()
 {
 	//Todo drag & drop of shader files

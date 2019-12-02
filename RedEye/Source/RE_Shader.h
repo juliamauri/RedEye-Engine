@@ -26,6 +26,7 @@ public:
 
 	void SetPaths(const char* vertex, const char* fragment, const char* geometry = nullptr);
 
+	void UploadCameraMatrices(RE_CompCamera* camera);
 private:
 	void Draw() override;
 	void SaveResourceMeta(JSONNode* metaNode) override;

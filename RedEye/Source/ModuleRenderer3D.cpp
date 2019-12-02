@@ -118,9 +118,8 @@ update_status ModuleRenderer3D::PostUpdate()
 	current_camera->Update();
 
 	// Load Shader Uniforms
-	RE_GLCache::ChangeShader(sceneShader);
-	RE_ShaderImporter::setFloat4x4(sceneShader, "view", current_camera->GetViewPtr());
-	RE_ShaderImporter::setFloat4x4(sceneShader, "projection", current_camera->GetProjectionPtr());
+	std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadCameraMatrices(current_camera);
 
 	// Frustum Culling
 	if (cull_scene)
@@ -138,8 +137,6 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	// Set shader and uniforms
 	RE_GLCache::ChangeShader(skyboxShader);
-	RE_ShaderImporter::setFloat4x4(skyboxShader, "view", current_camera->GetViewPtr());
-	RE_ShaderImporter::setFloat4x4(skyboxShader, "projection", current_camera->GetProjectionPtr());
 	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);
 
 	// change depth function so depth test passes when values are equal to depth buffer's content

@@ -154,6 +154,18 @@ unsigned int RE_ResourceManager::TotalReferences() const
 	return resources.size();
 }
 
+std::vector<const char*> RE_ResourceManager::GetAllResourcesActiveByType(Resource_Type resT)
+{
+	std::vector<ResourceContainer*> resourcesByType = GetResourcesByType(resT);
+	std::vector<const char*> ret;
+	while (!resourcesByType.empty()) {
+		const char* resMD5 = resourcesByType.back()->GetMD5();
+		if (resourcesCounter.at(resMD5) > 0) ret.push_back(resMD5);
+		resourcesByType.pop_back();
+	}
+	return ret;
+}
+
 std::vector<ResourceContainer*> RE_ResourceManager::GetResourcesByType(Resource_Type type)
 {
 	std::vector<ResourceContainer*> ret;
