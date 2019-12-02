@@ -47,8 +47,11 @@ public:
 	void SetShader(const char* sMD5);
 	unsigned int GetShaderID()const;
 
+	void DrawMaterialEdit();
+
 private:
 	void Draw() override;
+
 
 	void DrawTextures(const char* texturesName, std::vector<const char*>* textures);
 
@@ -97,8 +100,6 @@ private:
 	const char* shadingItems[10] = { "Flat", "Goraund", "Phong", "Phong Blinn", "Toon", "Oren Nayar", "Minnaert", "Cook Torrance", "No Shading", "Fresnel" };
 
 	bool applySave = false;
-	std::vector<const char*>* whereToApply = nullptr;
-	std::vector<const char*>::iterator changeToApply;
 
 	const char* shaderMD5 = nullptr;
 	std::vector<Cvar> interactuableShaderValues;

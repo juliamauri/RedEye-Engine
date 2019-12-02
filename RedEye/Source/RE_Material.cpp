@@ -89,29 +89,23 @@ void RE_Material::Save()
 	JsonSerialize();
 	BinarySerialize();
 	SaveMeta();
+	applySave = false;
+	UnloadMemory();
 }
 
 void RE_Material::Draw()
 {
-	if (whereToApply && !App->editor->GetSelectWindow()->IsActive()) {
-		ResourceContainer* textureToApply = App->editor->GetSelectWindow()->GetSelectedTexture();
-
-		if (changeToApply != whereToApply->end()) {
-			*changeToApply = textureToApply->GetMD5();
-			changeToApply = whereToApply->end();
-		}
-		else {
-			whereToApply->push_back(textureToApply->GetMD5());
-		}
-		applySave = true;
-		whereToApply = nullptr;
-	}
-	
 	if (!isInternal() && applySave && ImGui::Button("Save Changes")) {
 		Save();
 		applySave = false;
 	}
 
+	DrawMaterialEdit();
+}
+
+void RE_Material::DrawMaterialEdit()
+{
+	ImGui::Separator();
 	static int shadingMode = shadingType;
 	ImGui::Text("Current Shader: %s", shadingItems[shadingMode]);
 	if (ImGui::BeginMenu("Shader Type"))
@@ -129,54 +123,67 @@ void RE_Material::Draw()
 		ImGui::EndMenu();
 	}
 
+	ImGui::Separator();
 	if (ImGui::ColorEdit3("Diffuse Color", &cDiffuse[0]))
 		applySave = true;
 	DrawTextures("Diffuse textures", &tDiffuse);
 
+	ImGui::Separator();
 	if (ImGui::ColorEdit3("Specular Color", &cSpecular[0]))
 		applySave = true;
 	DrawTextures("Specular textures", &tSpecular);
 
+	ImGui::Separator();
 	if (ImGui::ColorEdit3("Ambient Color", &cAmbient[0]))
 		applySave = true;
 	DrawTextures("Ambient textures", &tAmbient);
 
+	ImGui::Separator();
 	if (ImGui::ColorEdit3("Emissive Color", &cEmissive[0]))
 		applySave = true;
 	DrawTextures("Emissive textures", &tEmissive);
 
+	ImGui::Separator();
 	if (ImGui::ColorEdit3("Transparent Color", &cTransparent[0]))
 		applySave = true;
 
-	if(ImGui::Checkbox("Back face culling", &backFaceCulling))
+	ImGui::Separator();
+	if (ImGui::Checkbox("Back face culling", &backFaceCulling))
 		applySave = true;
 
+	ImGui::Separator();
 	if (ImGui::Checkbox("Blend mode", &blendMode))
 		applySave = true;
 
-	if(ImGui::InputFloat("Opacity", &opacity))
+	ImGui::Separator();
+	if (ImGui::InputFloat("Opacity", &opacity))
 		applySave = true;
 	DrawTextures("Opacity textures", &tEmissive);
 
+	ImGui::Separator();
 	if (ImGui::InputFloat("Shininess", &shininess))
 		applySave = true;
 	if (ImGui::InputFloat("Shininess strenght", &shininessStrenght))
 		applySave = true;
 	DrawTextures("Shininess textures", &tShininess);
 
+	ImGui::Separator();
 	if (ImGui::InputFloat("Refraccti", &refraccti))
 		applySave = true;
 
+	ImGui::Separator();
 	DrawTextures("Height textures", &tHeight);
+	ImGui::Separator();
 	DrawTextures("Normals textures", &tNormals);
+	ImGui::Separator();
 	DrawTextures("Reflection textures", &tReflection);
+	ImGui::Separator();
 	DrawTextures("Unknown textures", &tUnknown);
 }
 
 void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*>* textures)
 {
 	ImGui::Text(texturesName);
-	ImGui::Separator();
 	if (!textures->empty()) {
 		std::vector<const char*>::iterator toDelete = textures->end();
 		for (std::vector<const char*>::iterator md5 = textures->begin(); md5 != textures->end(); ++md5) {
@@ -185,28 +192,52 @@ void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*
 			if (ImGui::Button(std::string("Texture " + std::string(resource->GetName())).c_str()))
 				App->resources->PushSelected(*md5);
 
-			if (ImGui::Button("Change Texture")) {
-				changeToApply = md5;
-				whereToApply = textures;
-				App->editor->GetSelectWindow()->SelectTexture();
-			}
-
-			if (ImGui::Button("Delete Texture")) {
+			ImGui::SameLine();
+			std::string deletetexture("Delete ");
+			deletetexture += resource->GetName();
+			deletetexture += " texture";
+			if (ImGui::Button(deletetexture.c_str())) {
 				toDelete = md5;
 				applySave = true;
 			}
+
+			std::string changetexture("Change ");
+			changetexture += resource->GetName();
+			changetexture += " texture";
+			if (ImGui::BeginMenu(changetexture.c_str()))
+			{
+				std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+				for (auto textRes : allTex) {
+					if (ImGui::MenuItem(textRes->GetName())) {
+						App->resources->UnUse(*md5);
+						*md5 = textRes->GetMD5();
+						App->resources->Use(*md5);
+					}
+				}
+				ImGui::EndMenu();
+			}
 		}
-		if (toDelete != textures->end()) textures->erase(toDelete);
-		ImGui::Separator();
+		if (toDelete != textures->end()) {
+			App->resources->UnUse(*toDelete);
+			textures->erase(toDelete);
+		}
 	}
 	else {
 		ImGui::Text("Empty textures");
 	}
 
-	if (ImGui::Button("Add Texture")) {
-		whereToApply = textures;
-		changeToApply = textures->end();
-		App->editor->GetSelectWindow()->SelectTexture();
+	std::string addtexture("Add Texture ");
+	addtexture += texturesName;
+	if (ImGui::BeginMenu(addtexture.c_str()))
+	{
+		std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+		for (auto textRes : allTex) {
+			if (ImGui::MenuItem(textRes->GetName())) {
+				textures->push_back(textRes->GetMD5());
+				App->resources->Use(textures->back());
+			}
+		}
+		ImGui::EndMenu();
 	}
 }
 
