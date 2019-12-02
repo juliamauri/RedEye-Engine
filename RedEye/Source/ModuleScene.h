@@ -29,6 +29,7 @@ public:
 	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr, bool broadcast = true);
 	void AddGoToRoot(RE_GameObject* toAdd);
 
+	void CreatePlane();
 	void CreateCube();
 	void CreateSphere();
 	void CreateCamera();

@@ -55,7 +55,7 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsig
 	for (ResourceContainer* res : resC) *bufferSize += std::strlen((res->GetType() == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
 	*bufferSize += toSerialize->GetBinarySize();
 	*bufferSize += 1;
-	char* buffer = new char[*bufferSize + 1];
+	char* buffer = new char[*bufferSize];
 	char* cursor = buffer;
 
 	size_t size = sizeof(uint);

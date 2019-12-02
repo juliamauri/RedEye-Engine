@@ -124,20 +124,48 @@ public:
 };
 
 /**************************************************
-******	Plane
+******	Grid
 **************************************************/
 
-class RE_CompPlane : public RE_CompPrimitive, RE_CompAxis
+class RE_CompGrid : public RE_CompPrimitive
 {
 public:
-	RE_CompPlane(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
-	~RE_CompPlane();
+	RE_CompGrid(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
+	~RE_CompGrid();
 	void Draw() override;
 	void DrawProperties() override {}
 	unsigned int GetBinarySize()const override { return 0; }
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
+};
+
+/**************************************************
+******	Plane
+**************************************************/
+class RE_Mesh;
+class RE_CompPlane : public RE_CompPrimitive
+{
+public:
+	RE_CompPlane(RE_GameObject* game_obj, unsigned int shader, int slice, int stacks);
+	RE_CompPlane(const RE_CompPlane& cmpPlane, RE_GameObject* go = nullptr);
+	~RE_CompPlane();
+	void Draw() override;
+	void DrawProperties() override;
+	unsigned int GetBinarySize()const override;
+	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
+
+	RE_Mesh* TransformAsMesh();
+
+private:
+	void GenerateNewPlane(int slice, int stacks);
+
+private:
+	bool show_checkers = false;
+	int triangle_count  = 0;
+	int slice, stacks;
+	bool canChange = true;
 };
 
 /**************************************************

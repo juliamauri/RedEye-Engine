@@ -123,14 +123,14 @@ void RE_CompTriangle::Draw()
 	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 }
-RE_CompPlane::RE_CompPlane(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_PLANE, game_obj, VAO, shader) {}
+RE_CompGrid::RE_CompGrid(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_GRID, game_obj, VAO, shader) {}
 
-RE_CompPlane::~RE_CompPlane()
+RE_CompGrid::~RE_CompGrid()
 {
 	App->primitives->Rest(RE_CompPrimitive::type);
 }
 
-void RE_CompPlane::Draw()
+void RE_CompGrid::Draw()
 {
 	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
@@ -158,7 +158,6 @@ RE_CompCube::RE_CompCube(const RE_CompCube & cmpCube, RE_GameObject * go) :
 
 RE_CompCube::~RE_CompCube()
 {
-	App->primitives->Rest(RE_CompPrimitive::type);
 }
 
 void RE_CompCube::Draw()
@@ -175,7 +174,7 @@ void RE_CompCube::Draw()
 
 		// Draw
 		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
-		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+		glDrawElements(GL_TRIANGLES, triangle_count, GL_UNSIGNED_SHORT, 0);
 	}
 	else
 	{
@@ -188,7 +187,7 @@ void RE_CompCube::Draw()
 
 		// Draw
 		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
-		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+		glDrawElements(GL_TRIANGLES, triangle_count, GL_UNSIGNED_SHORT, 0);
 
 		// Release Texture
 		glActiveTexture(GL_TEXTURE0);
@@ -338,16 +337,16 @@ void RE_CompSphere::SerializeJson(JSONNode* node, std::map<const char*, int>* re
 
 void RE_CompSphere::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
 {
-	size_t size = sizeof(float) * 3;
-	memcpy(cursor, &RE_CompPrimitive::color[0], size);
-	cursor += size;
-
-	size = sizeof(int);
+	size_t size = sizeof(int);
 	memcpy(cursor, &slice, size);
 	cursor += size;
 
 	size = sizeof(int);
 	memcpy(cursor, &stacks, size);
+	cursor += size;
+
+	size = sizeof(float) * 3;
+	memcpy(cursor, &RE_CompPrimitive::color[0], size);
 	cursor += size;
 }
 
@@ -363,20 +362,62 @@ void RE_CompSphere::GenerateNewSphere(int _slice, int _stacks)
 
 		par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(slice, stacks);
 
+		float* points = new float[sphere->npoints * 3];
+		float* normals = new float[sphere->npoints * 3];
+		float* texCoords = new float[sphere->npoints * 2];
+
+		uint meshSize = 0;
+		size_t size = sphere->npoints * 3 * sizeof(float);
+		uint stride = 0;
+
+		memcpy(points, sphere->points, size);
+		meshSize += 3 * sphere->npoints;
+		stride += 3;
+
+		memcpy(normals, sphere->normals, size);
+		meshSize += 3 * sphere->npoints;
+		stride += 3;
+
+		size = sphere->npoints * 2 * sizeof(float);
+		memcpy(texCoords, sphere->tcoords, size);
+		meshSize += 2 * sphere->npoints;
+		stride += 2;
+
+		stride *= sizeof(float);
+		float* meshBuffer = new float[meshSize];
+		float* cursor = meshBuffer;
+		for (uint i = 0; i < sphere->npoints; i++) {
+			uint cursorSize = 3;
+			size_t size = sizeof(float) * 3;
+
+			memcpy(cursor, &points[i * 3], size);
+			cursor += cursorSize;
+
+			memcpy(cursor, &normals[i * 3], size);
+			cursor += cursorSize;
+
+			cursorSize = 2;
+			size = sizeof(float) * 2;
+			memcpy(cursor, &texCoords[i * 2], size);
+			cursor += cursorSize;
+		}
+
+
 		glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
-		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);  
 
 		glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
-		glBufferData(GL_ARRAY_BUFFER, sphere->npoints * sizeof(float) * (3 + 2), NULL, GL_STATIC_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sphere->npoints * sizeof(float) * 3, sphere->points);
-		glBufferSubData(GL_ARRAY_BUFFER, sphere->npoints * sizeof(float) * 3, sphere->npoints * sizeof(float) * 2, sphere->tcoords);
+		glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
 
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)(sizeof(float) * 3));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
 
 		glGenBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RE_CompPrimitive::EBO);
@@ -385,6 +426,10 @@ void RE_CompSphere::GenerateNewSphere(int _slice, int _stacks)
 		triangle_count = sphere->ntriangles;
 
 		par_shapes_free_mesh(sphere);
+		DEL_A(points);
+		DEL_A(normals);
+		DEL_A(texCoords);
+		DEL_A(meshBuffer);
 
 		canChange = false;
 	}
@@ -410,4 +455,212 @@ RE_CompCapsule::~RE_CompCapsule()
 
 void RE_CompCapsule::Draw()
 {
+}
+
+RE_CompPlane::RE_CompPlane(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks)
+	: RE_CompPrimitive(C_PLANE, game_obj, NULL, shader)
+{
+	if (_slice < 3) _slice = 3;
+	if (_stacks < 3) _stacks = 3;
+	RE_CompPrimitive::color = math::vec(1.0f, 0.65f, 0.15f);
+	GenerateNewPlane(slice = _slice, stacks = _stacks);
+}
+RE_CompPlane::RE_CompPlane(const RE_CompPlane& cmpPlane, RE_GameObject* go)
+	: RE_CompPrimitive(C_PLANE, go, NULL, cmpPlane.RE_CompPrimitive::shader)
+{
+	RE_CompPrimitive::color = cmpPlane.RE_CompPrimitive::color;
+	GenerateNewPlane(slice = cmpPlane.slice, stacks = cmpPlane.stacks);
+}
+
+RE_CompPlane::~RE_CompPlane()
+{
+	glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+	glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+	glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+}
+
+void RE_CompPlane::Draw()
+{
+	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+
+	if (!show_checkers)
+	{
+		// Apply Diffuse Color
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
+
+		// Draw
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	}
+	else
+	{
+		// Apply Checkers Texture
+		glActiveTexture(GL_TEXTURE0);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
+		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "texture_diffuse0", 0);
+		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
+
+		// Draw
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	}
+}
+
+void RE_CompPlane::DrawProperties()
+{
+	if (ImGui::CollapsingHeader("Plane Primitive"))
+	{
+		ImGui::Checkbox("Use checkers texture", &show_checkers);
+
+		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
+
+		ImGui::PushItemWidth(75.0f);
+		static int tmpSl = slice;
+		if (ImGui::DragInt("Slices", &tmpSl, 1.0f, 3))
+		{
+			if (slice != tmpSl && tmpSl >= 3) {
+				slice = tmpSl;
+				canChange = true;
+			}
+			else if (tmpSl < 3) { 
+				canChange = (canChange || slice != tmpSl);
+				slice = tmpSl = 3;
+			}
+		}
+
+		static int tmpSt = stacks;
+		if (ImGui::DragInt("Stacks", &tmpSt, 1.0f, 3))
+		{
+			if (tmpSt >= 3 && stacks != tmpSt) {
+				stacks = tmpSt;
+				canChange = true;
+			}
+			else if (tmpSt < 3) {
+				canChange = (canChange || tmpSt != tmpSt);
+				tmpSt = tmpSt = 3;
+			}
+		}
+		ImGui::PopItemWidth();
+
+		if (ImGui::Button("Apply")) GenerateNewPlane(slice, stacks);
+	}
+}
+
+unsigned int RE_CompPlane::GetBinarySize() const
+{
+	return sizeof(float) * 3 + sizeof(int) * 2;
+}
+
+void RE_CompPlane::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
+{
+	node->PushFloatVector("color", RE_CompPrimitive::color);
+	node->PushInt("slices", slice);
+	node->PushInt("stacks", stacks);
+}
+
+void RE_CompPlane::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+{
+	size_t size = sizeof(int);
+	memcpy(cursor, &slice, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(cursor, &stacks, size);
+	cursor += size;
+
+	size = sizeof(float) * 3;
+	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+}
+
+RE_Mesh* RE_CompPlane::TransformAsMesh()
+{
+	return nullptr;
+}
+
+void RE_CompPlane::GenerateNewPlane(int slice, int stacks)
+{
+	if (canChange) {
+		if (RE_CompPrimitive::VAO != 0) {
+			glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		}
+
+		par_shapes_mesh* plane = par_shapes_create_plane(slice, stacks);
+
+		float* points = new float[plane->npoints * 3];
+		float* normals = new float[plane->npoints * 3];
+		float* texCoords = new float[plane->npoints * 2];
+
+		uint meshSize = 0;
+		size_t size = plane->npoints * 3 * sizeof(float);
+		uint stride = 0;
+
+		memcpy(points, plane->points, size);
+		meshSize += 3 * plane->npoints;
+		stride += 3;
+
+		memcpy(normals, plane->normals, size);
+		meshSize += 3 * plane->npoints;
+		stride += 3;
+
+		size = plane->npoints * 2 * sizeof(float);
+		memcpy(texCoords, plane->tcoords, size);
+		meshSize += 2 * plane->npoints;
+		stride += 2;
+
+		stride *= sizeof(float);
+		float* meshBuffer = new float[meshSize];
+		float* cursor = meshBuffer;
+		for (uint i = 0; i < plane->npoints; i++) {
+			uint cursorSize = 3;
+			size_t size = sizeof(float) * 3;
+
+			memcpy(cursor, &points[i * 3], size);
+			cursor += cursorSize;
+
+			memcpy(cursor, &normals[i * 3], size);
+			cursor += cursorSize;
+
+			cursorSize = 2;
+			size = sizeof(float) * 2;
+			memcpy(cursor, &texCoords[i * 2], size);
+			cursor += cursorSize;
+		}
+
+		glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
+		glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
+
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RE_CompPrimitive::EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, plane->ntriangles * sizeof(unsigned short) * 3, plane->triangles, GL_STATIC_DRAW);
+
+		triangle_count = plane->ntriangles;
+
+		par_shapes_free_mesh(plane);
+		DEL_A(points);
+		DEL_A(normals);
+		DEL_A(texCoords);
+		DEL_A(meshBuffer);
+
+		canChange = false;
+	}
 }

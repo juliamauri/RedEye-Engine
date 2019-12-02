@@ -23,7 +23,8 @@ public:
 	RE_CompPrimitive* CreateLine(RE_GameObject* game_obj, math::vec origin, math::vec end);
 	RE_CompPrimitive* CreateRay(RE_GameObject* game_obj);
 	RE_CompPrimitive* CreateTriangle(RE_GameObject* game_obj);
-	RE_CompPrimitive* CreatePlane(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreateGrid(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreatePlane(RE_GameObject* game_obj, int slices = 3, int stacks = 3);
 	RE_CompPrimitive* CreateCube(RE_GameObject* game_obj);
 	RE_CompPrimitive* CreateFustrum(RE_GameObject* game_obj);
 	RE_CompPrimitive* CreateSphere(RE_GameObject* game_obj, int slices  = 16, int stacks = 18);
@@ -38,15 +39,15 @@ public:
 
 private:
 	//Vertex Array Object
-	unsigned int vao_point = 0, vao_line = 0, vao_ray = 0, vao_axis = 0, vao_triangle = 0, vao_plane = 0,
+	unsigned int vao_point = 0, vao_line = 0, vao_ray = 0, vao_axis = 0, vao_triangle = 0, vao_grid = 0,
 		vao_cube = 0, vao_fustrum = 0, vao_cylinder = 0, vao_capsule = 0;
 	
 	//Vertex Buffer Object
-	unsigned int vbo_point = 0, vbo_line = 0, vbo_ray = 0, vbo_axis = 0, vbo_triangle = 0, vbo_plane = 0,
+	unsigned int vbo_point = 0, vbo_line = 0, vbo_ray = 0, vbo_axis = 0, vbo_triangle = 0, vbo_grid = 0,
 		vbo_cube = 0, vbo_fustrum = 0, vbo_cylinder = 0, vbo_capsule = 0;
 
 	//Element Buffer Objects
-	unsigned int ebo_triangle = 0, ebo_plane = 0, ebo_cube = 0, ebo_fustrum = 0, ebo_cylinder = 0, ebo_capsule = 0;
+	unsigned int ebo_triangle = 0, ebo_cube = 0, ebo_fustrum = 0, ebo_cylinder = 0, ebo_capsule = 0;
 
 	//Primitives Count
 	std::map<unsigned short int, unsigned int> primitives_count;

@@ -32,16 +32,21 @@ RE_PrimitiveManager::RE_PrimitiveManager()
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_RAY, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_AXIS, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_TRIANGLE, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_PLANE, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_GRID, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CUBE, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_FUSTRUM, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_SPHERE, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CYLINDER, 0));
 	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CAPSULE, 0));
+	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_PLANE, 0));
 }
 
 RE_PrimitiveManager::~RE_PrimitiveManager()
-{}
+{
+	glDeleteVertexArrays(1, &(GLuint)vao_cube);
+	glDeleteBuffers(1, &(GLuint)vbo_cube);
+	glDeleteBuffers(1, &(GLuint)ebo_cube);
+}
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateAxis(RE_GameObject* go)
 {
@@ -151,9 +156,9 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateTriangle(RE_GameObject* game_obj)
 	return ret;
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
+RE_CompPrimitive * RE_PrimitiveManager::CreateGrid(RE_GameObject* game_obj)
 {
-	if (primitives_count.find(C_PLANE)->second++ == 0)
+	if (primitives_count.find(C_GRID)->second++ == 0)
 	{
 		std::vector<float> vertices;
 		for (float f = 0.f; f < 50.f; f += 0.5f)
@@ -172,81 +177,32 @@ RE_CompPrimitive * RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj)
 			vertices.push_back((f * 5.f) - 125.f);
 		}
 
-		glGenVertexArrays(1, &vao_plane);
-		glGenBuffers(1, &vbo_plane);
+		glGenVertexArrays(1, &vao_grid);
+		glGenBuffers(1, &vbo_grid);
 
-		RE_GLCache::ChangeVAO(vao_plane);
+		RE_GLCache::ChangeVAO(vao_grid);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_plane);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_grid);
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		RE_GLCache::ChangeVAO(vao_grid);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		// 2 triangle plane
-		/*math::vec vPositionPlane[] = {
-			// positions       
-			math::vec(1.0f,  1.0f, 0.0f),  // top right
-			math::vec(1.0f, -1.0f, 0.0f),  // bottom right
-			math::vec(-1.0f, -1.0f, 0.0f), // bottom left
-			math::vec(-1.0f,  1.0f, 0.0f) // top left
-		};
-
-		unsigned int index[] = { 0,1,3,1,2,3 };
-
-		glGenVertexArrays(1, &vao_plane);
-		glGenBuffers(1, &vbo_plane);
-		glGenBuffers(1, &ebo_plane);
-
-		RE_GLCache::ChangeVAO(vao_plane);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_plane);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vPositionPlane) * sizeof(math::vec), &vPositionPlane[0], GL_STATIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_plane);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index), index, GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vPositionPlane), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
 	}
-	RE_CompPrimitive* ret = new RE_CompPlane(game_obj, vao_plane, shaderPrimitive);
+	RE_CompPrimitive* ret = new RE_CompGrid(game_obj, vao_grid, shaderPrimitive);
 	return ret;
+}
+
+RE_CompPrimitive* RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj, int slices, int stacks)
+{
+	return new RE_CompPlane(game_obj, shaderPrimitive, slices, stacks);
 }
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateCube(RE_GameObject* game_obj)
 {
-	if (primitives_count.find(C_CUBE)->second++ == 0) {
-
-		par_shapes_mesh* cube = par_shapes_create_cube();
-
-		glGenVertexArrays(1, &vao_cube);
-		glGenBuffers(1, &vbo_cube);
-
-		RE_GLCache::ChangeVAO(vao_cube);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_cube);
-		glBufferData(GL_ARRAY_BUFFER, cube->npoints * sizeof(float) * 3, cube->points, GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(0);
-
-		glGenBuffers(1, &ebo_cube);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_cube);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube->ntriangles * sizeof(unsigned short) * 3, cube->triangles, GL_STATIC_DRAW);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		par_shapes_free_mesh(cube);
-	}
-	RE_CompCube* ret = new RE_CompCube(game_obj, vao_cube, shaderPrimitive, CUBE_TRIANGLES);
-	return ret;
+	return new RE_CompCube(game_obj, vao_cube, shaderPrimitive, CUBE_TRIANGLES);
 }
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateFustrum(RE_GameObject* game_obj)
@@ -286,7 +242,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateCapsule(RE_GameObject* game_obj)
 
 unsigned int RE_PrimitiveManager::CheckCubeVAO()
 {
-	if (vao_cube == 0 && primitives_count.find(C_CUBE)->second++ == 0) {
+	if (vao_cube == 0) {
 		par_shapes_mesh* cube = par_shapes_create_cube();
 
 		glGenVertexArrays(1, &vao_cube);
@@ -297,7 +253,7 @@ unsigned int RE_PrimitiveManager::CheckCubeVAO()
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_cube);
 		glBufferData(GL_ARRAY_BUFFER, cube->npoints * sizeof(float) * 3, cube->points, GL_STATIC_DRAW);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
 		glEnableVertexAttribArray(0);
 
 		glGenBuffers(1, &ebo_cube);
@@ -322,6 +278,8 @@ bool RE_PrimitiveManager::Init(const char* def_shader)
 {
 	
 	shaderPrimitive = ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID();
+
+	CheckCubeVAO();
 
 	App->ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
 
@@ -358,16 +316,12 @@ void RE_PrimitiveManager::DeleteVAOPrimitive(unsigned short int primitive)
 		glGenBuffers(1, &(GLuint)ebo_triangle);
 		break;
 
-	case C_PLANE:
-		glDeleteVertexArrays(1, &(GLuint)vao_plane);
-		glDeleteBuffers(1, &(GLuint)vbo_plane);
-		glDeleteBuffers(1, &(GLuint)ebo_plane);
+	case C_GRID:
+		glDeleteVertexArrays(1, &(GLuint)vao_grid);
+		glDeleteBuffers(1, &(GLuint)vbo_grid);
 		break;
-
 	case C_CUBE:
-		glDeleteVertexArrays(1, &(GLuint)vao_cube);
-		glDeleteBuffers(1, &(GLuint)vbo_cube);
-		glDeleteBuffers(1, &(GLuint)ebo_cube);
+
 		break;
 
 	case C_FUSTRUM:

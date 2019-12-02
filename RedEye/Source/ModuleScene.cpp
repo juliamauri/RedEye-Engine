@@ -80,10 +80,7 @@ bool ModuleScene::Start()
 		RE_GameObject* loadedDO = scene->GetRoot();
 
 		if (loadedDO)
-		{
-			root = new RE_GameObject("root");
-			root->AddChild(loadedDO);
-		}
+			root = loadedDO;
 		else {
 			LOG_ERROR("Own serialized scene can't be loaded");
 			loadDefaultFBX = true;
@@ -615,6 +612,12 @@ void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
 	root->AddChild(toAdd);
 }
 
+void ModuleScene::CreatePlane()
+{
+	RE_GameObject* plane_go = AddGO("Plane", root);
+	plane_go->AddComponent(App->primitives->CreatePlane(plane_go));
+}
+
 void ModuleScene::CreateCube()
 {
 	RE_GameObject* cube_go = AddGO("Cube", root);
@@ -746,9 +749,9 @@ void ModuleScene::Serialize()
 		scene = (RE_Scene * )App->resources->At(sceneLoadedMD5);
 
 	scene->Save(root);
+	scene->SaveMeta();
 
 	if (sceneLoadedMD5 == nullptr) {
-		scene->SaveMeta();
 		sceneLoadedMD5 = App->resources->Reference(scene);
 	}
 }

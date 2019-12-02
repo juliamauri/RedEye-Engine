@@ -19,6 +19,7 @@ enum ComponentType : ushortint
 	C_LINE,
 	C_RAY,
 	C_TRIANGLE,
+	C_GRID,
 	C_PLANE,
 	C_CUBE,
 	C_FUSTRUM,

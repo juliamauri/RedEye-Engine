@@ -97,7 +97,7 @@ bool ModuleEditor::Start()
 	windows.push_back(assets = new AssetsWindow());
 
 	grid_go = new RE_GameObject("grid");
-	grid = (RE_Component*)App->primitives->CreatePlane(grid_go);
+	grid = (RE_Component*)App->primitives->CreateGrid(grid_go);
 
 	// FOCUS CAMERA
 	const RE_GameObject* root = App->scene->GetRoot();
@@ -141,6 +141,9 @@ update_status ModuleEditor::Update()
 			// Create
 			if (ImGui::BeginMenu("Create"))
 			{
+				if (ImGui::MenuItem("Plane"))
+					App->scene->CreatePlane();
+
 				if (ImGui::MenuItem("Cube"))
 					App->scene->CreateCube();
 

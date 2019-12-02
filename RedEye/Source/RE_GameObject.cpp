@@ -73,6 +73,9 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 		case C_SPHERE:
 			components.push_back((RE_CompPrimitive*)new RE_CompSphere(*(RE_CompSphere*)((RE_CompPrimitive*)cmpGO), this));
 			break;
+		case C_PLANE:
+			components.push_back((RE_CompPrimitive*)new RE_CompPlane(*(RE_CompPlane*)((RE_CompPrimitive*)cmpGO), this));
+			break;
 		}
 	}
 
@@ -222,12 +225,21 @@ void RE_GameObject::SerializeJson(JSONNode * node, std::map<const char*, int>* r
 		goNode->PushFloatVector("scale", go->GetTransform()->GetLocalScale());
 
 		JSONNode* comps = goNode->PushJObject("components");
-		comps->PushUInt("ComponentsSize", go->components.size());
+		uint cmpSize = 0;
+		for (auto component : go->components) {
+			unsigned short type = component->GetType();
+			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_MESH || type == C_CAMERA)
+				cmpSize++;
+		}
+		comps->PushUInt("ComponentsSize", cmpSize);
 		uint count = 0;
 		for (auto component : go->components) {
+			unsigned short type = component->GetType();
+			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_MESH && type != C_CAMERA)
+				continue;
 			ref = "cmp" + std::to_string(count++);
 			JSONNode* comp = comps->PushJObject(ref.c_str());
-			comp->PushInt("type", component->GetType());
+			comp->PushInt("type", type);
 			component->SerializeJson(comp, resources);
 			DEL(comp);
 		}
@@ -295,13 +307,20 @@ void RE_GameObject::SerializeBinary(char*& cursor, std::map<const char*, int>* r
 		cursor += size;
 
 		size = sizeof(uint);
-		uint cmpSize = go->components.size();
+		uint cmpSize = 0;
+		for (auto component : go->components) {
+			unsigned short type = component->GetType();
+			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_MESH || type == C_CAMERA)
+				cmpSize++;
+		}
 		memcpy(cursor, &cmpSize, size);
 		cursor += size;
 
 		for (auto component : go->components) {
-			size = sizeof(unsigned short);
 			unsigned short type = component->GetType();
+			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_MESH && type != C_CAMERA)
+				continue;
+			size = sizeof(unsigned short);
 			memcpy(cursor, &type, size);
 			cursor += size;
 
@@ -348,15 +367,22 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, cons
 				RE_CompPrimitive* newCube = nullptr;
 				new_go->AddComponent(newCube = App->primitives->CreateCube(new_go));
 				newCube->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-			}
 				break;
+			}
+			case C_PLANE:
+			{
+				RE_CompPrimitive* newPlane = nullptr;
+				new_go->AddComponent(newPlane = App->primitives->CreatePlane(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3)));
+				newPlane->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
+				break;
+			}
 			case C_SPHERE:
 			{
 				RE_CompPrimitive* newSphere = nullptr;
 				new_go->AddComponent(newSphere = App->primitives->CreateSphere(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3)));
 				newSphere->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-			}
 				break;
+			}
 			case C_MESH:
 			{
 				RE_CompMesh* newMesh = nullptr;
@@ -374,8 +400,8 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, cons
 						newMesh->SetMaterial(materialMD5);
 					}
 				}
-			}
 				break;
+			}
 			case C_CAMERA:
 			{
 				new_go->AddCompCamera(
@@ -385,8 +411,8 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, cons
 					cmpNode->PullFloat("v_fov_rads", 30.0f),
 					cmpNode->PullInt("aspect_ratio", RE_CompCamera::AspectRatioTYPE::Fit_Window),
 					cmpNode->PullBool("draw_frustum", true));
-			}
 				break;
+			}
 			}
 			DEL(cmpNode);
 		}
@@ -428,7 +454,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 		UUID parent_uuid;
 
 		size = sizeof(char) * 36;
-		char* strUUID = new char[36 +1];
+		char* strUUID = new char[36 + 1];
 		char* strUUIDCursor = strUUID;
 		memcpy(strUUID, cursor, size);
 		cursor += size;
@@ -489,8 +515,29 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 				memcpy(vec, cursor, size);
 				cursor += size;
 				newCube->SetColor(math::vec(vec));
+				break;
 			}
-			break;
+			case C_PLANE:
+			{
+				RE_CompPrimitive* newPlane = nullptr;
+
+				int slices = 0, stacks = 0;
+				size = sizeof(int);
+				memcpy(&slices, cursor, size);
+				cursor += size;
+
+				memcpy(&stacks, cursor, size);
+				cursor += size;
+
+				new_go->AddComponent(newPlane = App->primitives->CreatePlane(new_go, slices, stacks));
+
+				size = sizeof(float) * 3;
+				memcpy(vec, cursor, size);
+				cursor += size;
+
+				newPlane->SetColor(math::vec(vec));
+				break;
+			}
 			case C_SPHERE:
 			{
 				RE_CompPrimitive* newSphere = nullptr;
@@ -510,8 +557,8 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 				cursor += size;
 
 				newSphere->SetColor(math::vec(vec));
+				break;
 			}
-			break;
 			case C_MESH:
 			{
 				RE_CompMesh* newMesh = nullptr;
@@ -528,7 +575,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 
 					const char* materialMD5 = nullptr;
 					int materialID = -1;
-					memcpy( &materialID, cursor, size);
+					memcpy(&materialID, cursor, size);
 					cursor += size;
 					if (materialID != -1) {
 						materialMD5 = resources->at(materialID);
@@ -536,8 +583,8 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 					}
 				}
 				new_go->AddCompMesh(newMesh);
+				break;
 			}
-			break;
 			case C_CAMERA:
 			{
 				bool isPrespective = true;
@@ -559,7 +606,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 				cursor += size;
 
 				int aspectRatioInt = 0;
-				size = sizeof(bool);
+				size = sizeof(int);
 				memcpy(&aspectRatioInt, cursor, size);
 				cursor += size;
 				RE_CompCamera::AspectRatioTYPE aspectRatio = (RE_CompCamera::AspectRatioTYPE)aspectRatioInt;
@@ -576,8 +623,8 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 					vfovrads,
 					aspectRatio,
 					drawFrustum);
+				break;
 			}
-			break;
 			}
 		}
 	}
@@ -846,9 +893,9 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 			ret = (RE_Component*)(App->primitives->CreateTriangle(this));
 			break;
 		}
-		case C_PLANE:
+		case C_GRID:
 		{
-			ret = (RE_Component*)(App->primitives->CreatePlane(this));
+			ret = (RE_Component*)(App->primitives->CreateGrid(this));
 			break;
 		}
 		case C_CUBE:
