@@ -48,7 +48,7 @@ void RE_CompMesh::DrawProperties()
 	{
 		if (meshMD5)
 		{
-			if (ImGui::Button(std::string("Resource " + std::string(App->resources->At(meshMD5)->GetName())).c_str()))
+			if (ImGui::Button(std::string("Resource Mesh").c_str()))
 				App->resources->PushSelected(meshMD5, true);
 		}
 		else ImGui::TextWrapped("Empty Mesh Component");
@@ -60,7 +60,7 @@ void RE_CompMesh::DrawProperties()
 		{
 			ImGui::Checkbox("Use checkers texture", &show_checkers);
 
-			if (ImGui::Button(std::string("Resource Mesh").c_str()))
+			if (ImGui::Button(std::string("Resource " + std::string(App->resources->At(materialMD5)->GetName())).c_str()))
 				App->resources->PushSelected(materialMD5, true);
 		}
 		else
