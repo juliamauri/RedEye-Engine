@@ -1,46 +1,46 @@
 #ifndef __DEFAULTSHADERS_H__
 #define __DEFAULTSHADERS_H__
 
-#define DEFVERTEXSHADER											\
-"#version 330 core\n"											\
-"layout(location = 0) in vec3 aPos;"							\
-"layout(location = 1) in vec3 aNormal;"							\
-"layout(location = 2) in vec3 aTangent;"						\
-"layout(location = 3) in vec3 aBitangent;"						\
-"layout(location = 4) in vec2 aTexCoord;"						\
-""																\
-"out vec2 TexCoord;"											\
-""																\
-"uniform mat4 model;"											\
-"uniform mat4 view;"											\
-"uniform mat4 projection;"										\
-""																\
-"void main()"													\
-"{"																\
-"	gl_Position = projection * view * model * vec4(aPos, 1.0);"	\
-"	TexCoord = aTexCoord;"										\
+#define DEFVERTEXSHADER												\
+"#version 330 core\n"												\
+"layout(location = 0) in vec3 aPos;\n"								\
+"layout(location = 1) in vec3 aNormal;\n"							\
+"layout(location = 2) in vec3 aTangent;\n"							\
+"layout(location = 3) in vec3 aBitangent;\n"						\
+"layout(location = 4) in vec2 aTexCoord;\n"							\
+"\n"																\
+"out vec2 TexCoord;\n"												\
+"\n"																\
+"uniform mat4 model;\n"												\
+"uniform mat4 view;\n"												\
+"uniform mat4 projection;\n"										\
+"\n"																\
+"void main()\n"														\
+"{\n"																\
+"	gl_Position = projection * view * model * vec4(aPos, 1.0);\n"	\
+"	TexCoord = aTexCoord;\n"										\
 "}\0"																  
 
-#define DEFFRAGMENTSHADER														   \
-"#version 330 core\n"															   \
-"out vec4 FragColor;"															   \
-""																				   \
-"in vec2 TexCoord;"																   \
-""																				   \
-"uniform float useTexture;"														   \
-"uniform sampler2D texture_diffuse1;"											   \
-""																				   \
-"uniform float useColor;"														   \
-"uniform vec3 objectColor;"														   \
-""																				   \
-"void main()"																	   \
-"{"																				   \
-"	if (useTexture > 0.0f && useColor > 0.0f)"									   \
-"		FragColor = texture(texture_diffuse1, TexCoord) * vec4(objectColor, 1.0);" \
-"	else if (useTexture > 0.0f)"												   \
-"		FragColor = texture(texture_diffuse1, TexCoord);"						   \
-"	else if (useColor > 0.0f)"													   \
-"		FragColor = vec4(objectColor, 1.0);"									   \
+#define DEFFRAGMENTSHADER														       \
+"#version 330 core\n"															       \
+"out vec4 FragColor;\n"															       \
+"\n"																				   \
+"in vec2 TexCoord;\n"																   \
+"\n"																				   \
+"uniform float useTexture;\n"														   \
+"uniform sampler2D texture_diffuse1;\n"											       \
+"\n"																				   \
+"uniform float useColor;\n"														       \
+"uniform vec3 objectColor;\n"													       \
+"\n"																			       \
+"void main()\n"																	       \
+"{\n"																				   \
+"	if (useTexture > 0.0f && useColor > 0.0f)\n"									   \
+"		FragColor = texture(texture_diffuse1, TexCoord) * vec4(objectColor, 1.0);\n"   \
+"	else if (useTexture > 0.0f)\n"												       \
+"		FragColor = texture(texture_diffuse1, TexCoord);\n"						       \
+"	else if (useColor > 0.0f)\n"													   \
+"		FragColor = vec4(objectColor, 1.0);\n"									       \
 "}\0"
 
 #define SKYBOXVERTEXSHADER							  \

@@ -20,6 +20,7 @@
 #include "RE_Texture.h"
 #include "RE_Material.h"
 #include "RE_Shader.h"
+#include "RE_DefaultShaders.h"
 
 #include "PhysFS\include\physfs.h"
 
@@ -1169,8 +1170,12 @@ void ShaderEditorWindow::Draw(bool secondary)
 
 	ImGui::End();
 
-	if (!sTextEditor && newShaderFile) 
+	if (!sTextEditor && newShaderFile) {
 		sTextEditor = new TextEditor();
+		if (newPathfile == &vertexPath) sTextEditor->SetText(DEFVERTEXSHADER);
+		else if(newPathfile == &fragmentPath)sTextEditor->SetText(DEFFRAGMENTSHADER);
+	}
+
 
 	if (sTextEditor) {
 		static bool save = false;

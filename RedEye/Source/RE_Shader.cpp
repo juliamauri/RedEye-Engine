@@ -39,9 +39,9 @@ void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuff
 {
 	SetInternal(true);
 	
-	uint vertexLenght = strlen(vertexBuffer) + 1;
-	uint fragmentLenght = strlen(fragmentBuffer) + 1;
-	uint geometryLenght = (geometryBuffer) ? strlen(fragmentBuffer) + 1 : 0;
+	uint vertexLenght = strlen(vertexBuffer);
+	uint fragmentLenght = strlen(fragmentBuffer);
+	uint geometryLenght = (geometryBuffer) ? strlen(fragmentBuffer) : 0;
 	std::string vbuffer(vertexBuffer, vertexLenght);
 	std::string fbuffer(vertexBuffer, vertexLenght);
 	std::string gbuffer;
