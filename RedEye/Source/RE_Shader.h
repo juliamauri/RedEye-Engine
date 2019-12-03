@@ -25,6 +25,8 @@ public:
 	void LoadInMemory() override;
 	void UnloadMemory() override;
 
+	void SetAsInternal(const char* vertexBuffer, const char* fragmentBuffer, const char* geometryBuffer = nullptr);
+
 	unsigned int GetID()const { return ID; }
 
 	void SetPaths(const char* vertex, const char* fragment, const char* geometry = nullptr);

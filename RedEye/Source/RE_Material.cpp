@@ -187,10 +187,11 @@ void RE_Material::DrawMaterialEdit()
 	if (ImGui::BeginMenu("Change shader"))
 	{
 		std::vector<ResourceContainer*> shaders = App->resources->GetResourcesByType(Resource_Type::R_SHADER);
+		bool none = true;
 		for (auto  shader :  shaders) {
 			if (shader->isInternal())
 				continue;
-
+			none = false;
 			if (ImGui::MenuItem(shader->GetName())) {
 				if (ResourceContainer::inMemory && shaderMD5) App->resources->UnUse(shaderMD5);
 				shaderMD5 = shader->GetMD5();
@@ -198,6 +199,7 @@ void RE_Material::DrawMaterialEdit()
 				applySave = true;
 			}
 		}
+		if (none) ImGui::Text("No custom shaders on assets");
 		ImGui::EndMenu();
 	}
 

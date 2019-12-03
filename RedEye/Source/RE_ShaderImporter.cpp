@@ -176,6 +176,109 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 	return ret;
 }
 
+bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffer, unsigned int vSize, const char* fragmentBuffer, unsigned int fSize, const char* geometryBuffer, unsigned int gSize)
+{
+	bool ret = true;
+	last_error.clear();
+
+	const char* buffer = nullptr;
+	int  success;
+	char infoLog[512];
+
+	unsigned int vertexShader = 0;
+	unsigned int fragmentShader = 0;
+	unsigned int geometryShader = 0;
+
+	if (vertexBuffer) {
+		//compiling vertex shader
+		vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+		int vbsize = vSize;
+		glShaderSource(vertexShader, 1, &vertexBuffer, &vbsize);
+		glCompileShader(vertexShader);
+
+		//check
+		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+		if (!success)
+		{
+			glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+			last_error += "\nVertex compilation failed from\n";
+			last_error += infoLog;
+			last_error += "\n";
+			ret = false;
+		}
+     
+	}
+
+	if (fragmentBuffer) {
+		//compiling fragment shader
+		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+		int fbSize = fSize;
+		glShaderSource(fragmentShader, 1, &fragmentBuffer, &fbSize);
+		glCompileShader(fragmentShader);
+
+		//check
+		glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+		if (!success)
+		{
+			glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+			last_error += "\nFragment compilation failed from\n";
+			last_error += infoLog;
+			last_error += "\n";
+			ret = false;
+		}
+	}
+
+	if (geometryBuffer) {
+		//compiling geometry shader
+		geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+
+		int gbSize = gSize;
+		glShaderSource(geometryShader, 1, &buffer, &gbSize);
+		glCompileShader(geometryShader);
+
+		//check
+		glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
+		if (!success)
+		{
+			glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
+			last_error += "\nFragment compilation failed from\n";
+			last_error += infoLog;
+			last_error += "\n";
+			ret = false;
+		}
+
+	}
+
+	//creating Shader program, link the once shaders types
+	*ID = glCreateProgram();
+
+	if (vertexShader != 0) glAttachShader(*ID, vertexShader);
+	if (fragmentShader != 0) glAttachShader(*ID, fragmentShader);
+	if (geometryShader != 0) glAttachShader(*ID, geometryShader);
+	glLinkProgram(*ID);
+
+	//check
+	glGetProgramiv(*ID, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(*ID, 512, NULL, infoLog);
+		last_error += "\nShader program compilation failed";
+		last_error += ":\n";
+		last_error += infoLog;
+		last_error += "\n";
+		glDeleteProgram(*ID);
+		ret = false;
+	}
+
+	//deleting shaders, no needed after link
+	if (vertexShader != 0) glDeleteShader(vertexShader);
+	if (fragmentShader != 0) glDeleteShader(fragmentShader);
+	if (geometryShader != 0) glDeleteShader(geometryShader);
+
+	return ret;
+}
+
 bool RE_ShaderImporter::LoadFromBinary(const char* buffer, unsigned int size, unsigned int* ID)
 {
 	bool ret = false;

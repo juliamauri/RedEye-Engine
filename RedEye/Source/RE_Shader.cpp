@@ -35,6 +35,31 @@ void RE_Shader::UnloadMemory()
 	ResourceContainer::inMemory = false;
 }
 
+void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuffer, const char* geometryBuffer)
+{
+	SetInternal(true);
+	
+	uint vertexLenght = strlen(vertexBuffer) + 1;
+	uint fragmentLenght = strlen(fragmentBuffer) + 1;
+	uint geometryLenght = (geometryBuffer) ? strlen(fragmentBuffer) + 1 : 0;
+	std::string vbuffer(vertexBuffer, vertexLenght);
+	std::string fbuffer(vertexBuffer, vertexLenght);
+	std::string gbuffer;
+	if (geometryBuffer) gbuffer = std::string(geometryBuffer, geometryLenght);
+
+	std::string totalBuffer = vbuffer;
+	totalBuffer += fbuffer;
+	totalBuffer += gbuffer;
+
+	SetMD5(MD5(totalBuffer).hexdigest().c_str());
+	std::string libraryPath("Library/Shaders/");
+	libraryPath += GetMD5();
+
+	App->shaders->LoadFromBuffer(&ID, vertexBuffer, vertexLenght, fragmentBuffer, fragmentLenght, geometryBuffer, geometryLenght);
+
+	ResourceContainer::inMemory = true;
+}
+
 void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* geometry)
 {
 	shaderSettings.vertexShader = vertex;

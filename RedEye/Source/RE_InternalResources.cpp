@@ -5,6 +5,7 @@
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
 
+#include "RE_DefaultShaders.h"
 #include "RE_ShaderImporter.h"
 #include "RE_TextureImporter.h"
 
@@ -55,17 +56,13 @@ bool RE_InternalResources::InitShaders()
 		RE_Shader* defSRes = new RE_Shader();
 		defSRes->SetName("Default Shader");
 		defSRes->SetType(Resource_Type::R_SHADER);
-		defSRes->SetInternal(true);
-		defSRes->SetPaths("Library/Shaders/default.vert", "Library/Shaders/default.frag");
-		defSRes->LoadInMemory();
+		defSRes->SetAsInternal(DEFVERTEXSHADER, DEFFRAGMENTSHADER);
 		defaultShader = App->resources->Reference(defSRes);
 
 		RE_Shader* defSKRes = new RE_Shader();
-		defSKRes->SetName("SkyBox Shader");
+		defSKRes->SetName("Default SkyBox Shader");
 		defSKRes->SetType(Resource_Type::R_SHADER);
-		defSKRes->SetInternal(true);
-		defSKRes->SetPaths("Library/Shaders/skybox.vert", "Library/Shaders/skybox.frag");
-		defSKRes->LoadInMemory();
+		defSKRes->SetAsInternal(SKYBOXVERTEXSHADER, SKYBOXFRAGMENTSHADER);
 		skyboxShader = App->resources->Reference(defSKRes);
 	}
 

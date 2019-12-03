@@ -109,9 +109,6 @@
     <ClCompile Include="RE_HandleErrors.cpp">
       <Filter>Modules\Independent App Modules</Filter>
     </ClCompile>
-    <ClCompile Include="RE_InternalResources.cpp">
-      <Filter>Modules\Independent App Modules</Filter>
-    </ClCompile>
     <ClCompile Include="Globals.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
@@ -165,6 +162,9 @@
     </ClCompile>
     <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp">
       <Filter>3rd Party\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_InternalResources.cpp">
+      <Filter>Modules\Resource Managers\InternalResources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -432,9 +432,6 @@
     <ClInclude Include="RE_HandleErrors.h">
       <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
-    <ClInclude Include="RE_InternalResources.h">
-      <Filter>Modules\Independent App Modules</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Modules\Resource Managers\Resources</Filter>
     </ClInclude>
@@ -488,6 +485,12 @@
     </ClInclude>
     <ClInclude Include="ImGuiColorTextEdit\TextEditor.h">
       <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_InternalResources.h">
+      <Filter>Modules\Resource Managers\InternalResources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_DefaultShaders.h">
+      <Filter>Modules\Resource Managers\InternalResources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -563,9 +566,6 @@
     <Filter Include="GameObject\Components">
       <UniqueIdentifier>{a1265e59-2843-4b5a-abaf-37c926bb38a7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\Resource Managers">
-      <UniqueIdentifier>{c7fdb747-bf4e-4864-8336-d13e49a20d25}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Modules\Editor">
       <UniqueIdentifier>{355a2309-34fd-415d-af8a-c2ca6f635028}</UniqueIdentifier>
     </Filter>
@@ -578,8 +578,14 @@
     <Filter Include="3rd Party\PAR Shapes">
       <UniqueIdentifier>{9fe0d206-8ee0-4092-b453-1b77011f1006}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\Resource Managers">
+      <UniqueIdentifier>{c7fdb747-bf4e-4864-8336-d13e49a20d25}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Modules\Resource Managers\Resources">
       <UniqueIdentifier>{138e3b14-77d4-440e-872a-1d54ebdae46f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Resource Managers\InternalResources">
+      <UniqueIdentifier>{ba777deb-5c4f-4673-ab51-944abbdad942}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
