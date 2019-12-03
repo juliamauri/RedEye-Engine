@@ -105,7 +105,6 @@ void RE_Material::Draw()
 
 void RE_Material::DrawMaterialEdit()
 {
-	ImGui::Separator();
 	static int shadingMode = shadingType;
 	ImGui::Text("Current Shader: %s", shadingItems[shadingMode]);
 	if (ImGui::BeginMenu("Shader Type"))

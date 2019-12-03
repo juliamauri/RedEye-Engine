@@ -942,7 +942,7 @@ void MaterialEditorWindow::Draw(bool secondary)
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
 		}
-
+		ImGui::Separator();
 		editingMaerial->DrawMaterialEdit();
 
 		if (secondary) {
