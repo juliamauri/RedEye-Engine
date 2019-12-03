@@ -28,9 +28,9 @@ bool RE_ShaderImporter::Init()
 	return ret;
 }
 
-bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath, bool compileTest)
 {
-	LOG("Loading %s\n%s\n%s shaders.", vertexPath, fragmentPath, (geometryPath) ? geometryPath : "No geometry shader");
+	LOG("%s %s\n%s\n%s shaders.",(!compileTest) ? "Loading" : "Compile Test", vertexPath, fragmentPath, (geometryPath) ? geometryPath : "No geometry shader");
 
 	bool ret = true;
 	last_error.clear();
@@ -163,7 +163,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 		last_error += ":\n";
 		last_error += infoLog;
 		last_error += "\n";
-		glDeleteProgram(*ID);
+		if(!compileTest) glDeleteProgram(*ID);
 		ret = false;
 	}
 
@@ -171,6 +171,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 	if (vertexShader != 0) glDeleteShader(vertexShader);
 	if (fragmentShader != 0) glDeleteShader(fragmentShader);
 	if (geometryShader != 0) glDeleteShader(geometryShader);
+	if(compileTest) glDeleteProgram(*ID);
 
 	return ret;
 }

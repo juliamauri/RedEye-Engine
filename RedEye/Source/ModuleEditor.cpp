@@ -41,6 +41,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	tools.push_back(rng = new RandomTest());
 	tools.push_back(textures = new TexturesWindow());
 	tools.push_back(materialeditor = new MaterialEditorWindow());
+	tools.push_back(shadereditor = new ShaderEditorWindow());
 
 	grid_size[0] = grid_size[1] = 1.0f;
 }
@@ -539,6 +540,11 @@ void ModuleEditor::PopUpFocus(bool focus)
 const char* ModuleEditor::GetAssetsPanelPath() const
 {
 	return assets->GetCurrentDirPath();
+}
+
+void ModuleEditor::SelectUndefinedFile(std::string* toSelect) const
+{
+	assets->SelectUndefined(toSelect);
 }
 
 void ModuleEditor::UpdateCamera()

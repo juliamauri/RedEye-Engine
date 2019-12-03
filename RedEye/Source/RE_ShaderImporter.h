@@ -18,7 +18,7 @@ public:
 	bool Init();
 
 	//Load shaders and put in vector
-	bool LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
+	bool LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr, bool compileTest = false);
 	bool LoadFromBinary(const char* buffer, unsigned int size, unsigned int* ID);
 	bool GetBinaryProgram(unsigned int ID, char** buffer, int* size);
 

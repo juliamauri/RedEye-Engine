@@ -19,6 +19,7 @@ class PlayPauseWindow;
 class SelectFile;
 class PopUpWindow;
 class MaterialEditorWindow;
+class ShaderEditorWindow;
 
 struct SoftwareInfo;
 class RE_GameObject;
@@ -68,6 +69,8 @@ public:
 
 	const char* GetAssetsPanelPath()const;
 
+	void SelectUndefinedFile(std::string* toSelect)const;
+
 private:
 
 	void UpdateCamera();
@@ -94,6 +97,7 @@ private:
 	AboutWindow* about = nullptr;
 	SelectFile* select_file = nullptr;
 	MaterialEditorWindow* materialeditor = nullptr;
+	ShaderEditorWindow* shadereditor = nullptr;
 
 	// Tools
 	RandomTest* rng = nullptr;

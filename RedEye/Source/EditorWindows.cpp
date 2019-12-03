@@ -11,6 +11,7 @@
 #include "RE_Math.h"
 #include "OutputLog.h"
 #include "RE_ResourceManager.h"
+#include "RE_ShaderImporter.h"
 #include "RE_HandleErrors.h"
 #include "RE_TextureImporter.h"
 #include "RE_InternalResources.h"
@@ -18,6 +19,7 @@
 #include "RE_Prefab.h"
 #include "RE_Texture.h"
 #include "RE_Material.h"
+#include "RE_Shader.h"
 
 #include "PhysFS\include\physfs.h"
 
@@ -795,6 +797,11 @@ const char* AssetsWindow::GetCurrentDirPath() const
 	return currentPath;
 }
 
+void AssetsWindow::SelectUndefined(std::string* toFill)
+{
+	selectingUndefFile = toFill;
+}
+
 void AssetsWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
@@ -833,10 +840,26 @@ void AssetsWindow::Draw(bool secondary)
 				switch (path->AsFile()->fType)
 				{
 				case RE_FileSystem::FileType::F_META:
+				{
+					if (path->AsMeta()->resource) {
+						ResourceContainer* res = App->resources->At(path->AsMeta()->resource);
+						if (res->GetType() == R_SHADER && ImGui::Button(res->GetName()))
+							App->resources->PushSelected(path->AsMeta()->resource, true);
+					}
+					break;
+				}
 				case RE_FileSystem::FileType::F_NONE:
 					break;
 				case RE_FileSystem::FileType::F_NOTSUPPORTED:
-					ImGui::Text(path->AsFile()->filename.c_str());
+					if (selectingUndefFile) {
+						if (ImGui::Button(std::string("Undefined: " + path->AsFile()->filename).c_str())) {
+							*selectingUndefFile = path->path;
+							selectingUndefFile = nullptr;
+						}
+					}
+					else
+						ImGui::Text(path->AsFile()->filename.c_str());
+
 					break;
 				default:
 					if (ImGui::Button(path->AsFile()->filename.c_str()))
@@ -926,6 +949,156 @@ void MaterialEditorWindow::Draw(bool secondary)
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
 		}
+	}
+
+	ImGui::End();
+}
+
+ShaderEditorWindow::ShaderEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active)
+{
+	editingShader = new RE_Shader();
+	shaderName = "New Shader";
+	vertexPath = "";
+	fragmentPath = "";
+	geometryPath = "";
+}
+
+ShaderEditorWindow::~ShaderEditorWindow()
+{
+	DEL(editingShader);
+}
+
+void ShaderEditorWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		ImGui::Text("Shader name:");
+		ImGui::SameLine();
+		ImGui::InputText("##shadername", &shaderName);
+
+		assetPath = "Assets/Shaders/";
+		assetPath += shaderName;
+		assetPath += ".meta";
+		ImGui::Text("Save path: %s", assetPath.c_str());
+
+		static bool compilePass = false;
+
+		bool exits = App->fs->Exists(assetPath.c_str());
+		if (exits) ImGui::Text("This shader exits, change the name.");
+		bool neededVertexAndFragment = (vertexPath.empty() || fragmentPath.empty());
+		if (neededVertexAndFragment) ImGui::Text("The vertex or fragment file path is empty.");
+
+		static std::string* waitingPath = nullptr;
+		if (waitingPath) ImGui::Text("Select Shader file from assets panel");
+
+		bool pop2 = false;
+		if (!compilePass) {
+			ImGui::Text("Nedded pass the compile test.");
+			pop2 = true;
+		}
+		if ((neededVertexAndFragment || exits || pop2) && !secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Save")) {
+			if (!shaderName.empty() && !exits) {
+				editingShader->SetName(shaderName.c_str());
+				editingShader->SetType(Resource_Type::R_SHADER);
+				editingShader->SetPaths(vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr);
+				editingShader->SaveMeta();
+				App->resources->Reference((ResourceContainer*)editingShader);
+
+				editingShader = new RE_Shader();
+				shaderName = "New Shader";
+				vertexPath = "";
+				fragmentPath = "";
+				geometryPath = "";
+				compilePass = false;
+			}
+		}
+
+		if ((neededVertexAndFragment || exits || pop2) && !secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+		ImGui::Separator();
+		ImGui::Text("The files that contains the script is an undefined file.");
+		ImGui::Text("Select the script type and undefined file on panel assets.");
+		ImGui::Text("When activate the selection, the undefied files from assets panel can be selected.");
+
+		bool pop = (waitingPath);
+		if (pop && !secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+		ImGui::Separator();
+		ImGui::Text("Vertex Shader Path:\n%s", (vertexPath.empty()) ? "No path." : vertexPath.c_str());
+		if (ImGui::Button("Select vertex path")) {
+			vertexPath.clear();
+			waitingPath = &vertexPath;
+			App->editor->SelectUndefinedFile(waitingPath);
+			compilePass = false;
+		}
+		ImGui::SameLine();
+		if(ImGui::Button("Clear vertex")) vertexPath.clear();
+
+		ImGui::Separator();
+		ImGui::Text("Fragment Shader Path:\n%s", (fragmentPath.empty()) ? "No path." : fragmentPath.c_str());
+		if (ImGui::Button("Select fragment path")) {
+			fragmentPath.clear();
+			waitingPath = &fragmentPath;
+			App->editor->SelectUndefinedFile(waitingPath);
+			compilePass = false;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Clear fragment")) fragmentPath.clear();
+
+		ImGui::Separator();
+		ImGui::Text("Geometry Shader Path:\n%s", (geometryPath.empty()) ? "No path." : geometryPath.c_str());
+		if (ImGui::Button("Select geometry path")) {
+			geometryPath.clear();
+			waitingPath = &geometryPath;
+			App->editor->SelectUndefinedFile(waitingPath);
+			compilePass = false;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Clear geometry")) geometryPath.clear();
+
+		ImGui::Separator();
+		if (neededVertexAndFragment) ImGui::Text("The vertex or fragment file path is empty.");
+
+		if (neededVertexAndFragment && !pop && !secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		if (!compilePass && ImGui::Button("Compile Test")) {
+			App->handlerrors->StartHandling();
+
+			uint sID = 0;
+			if (App->shaders->LoadFromAssets(&sID, vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr, true))
+				compilePass = true;
+			//Error at log  that buffer is too small for show the error
+			//else
+			//	LOG_ERROR("Shader Compilation Error:\n%s", App->shaders->GetShaderError());
+				
+			App->handlerrors->StopHandling();
+			if (App->handlerrors->AnyErrorHandled())
+				App->handlerrors->ActivatePopUp();
+		}
+
+		if (secondary || pop || neededVertexAndFragment) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+
+		if (waitingPath && !waitingPath->empty()) waitingPath = nullptr;
 	}
 
 	ImGui::End();

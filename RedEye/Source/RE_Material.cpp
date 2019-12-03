@@ -115,8 +115,6 @@ void RE_Material::DrawMaterialEdit()
 				if (shadingMode != shadingType) {
 					shadingType = (RE_ShadingMode)shadingMode;
 					applySave = true;
-
-					// TODO ResourcesManager count referending textures
 				}
 			}
 		}

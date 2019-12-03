@@ -61,20 +61,6 @@ public:
 	const char* category_names[8] = { "Separator", "Global", "Secondary", "Terciary", "Error" , "Warning", "Solution" , "Software" };
 };
 
-class AssetsWindow : public EditorWindow
-{
-public:
-	AssetsWindow(const char* name = "Assets Panel", bool start_active = true);
-	~AssetsWindow();
-
-	const char* GetCurrentDirPath()const;
-
-private:
-	void Draw(bool secondary = false) override;
-
-	const char* currentPath = nullptr;
-};
-
 class ConfigWindow : public EditorWindow
 {
 public:
@@ -238,6 +224,24 @@ private:
 
 };
 
+class AssetsWindow : public EditorWindow
+{
+public:
+	AssetsWindow(const char* name = "Assets Panel", bool start_active = true);
+	~AssetsWindow();
+
+	const char* GetCurrentDirPath()const;
+
+	void SelectUndefined(std::string* toFill);
+
+private:
+	void Draw(bool secondary = false) override;
+
+	const char* currentPath = nullptr;
+
+	std::string* selectingUndefFile = nullptr;
+};
+
 class RE_Material;
 class MaterialEditorWindow :public EditorWindow
 {
@@ -251,6 +255,25 @@ private:
 	RE_Material* editingMaerial = nullptr;
 	std::string matName;
 	std::string assetPath;
+};
+
+class RE_Shader;
+class ShaderEditorWindow :public EditorWindow
+{
+public:
+	ShaderEditorWindow(const char* name = "Shader Editor", bool start_active = false);
+	~ShaderEditorWindow();
+
+private:
+	void Draw(bool secondary = false) override;
+
+	RE_Shader* editingShader = nullptr;
+	std::string shaderName;
+	std::string assetPath;
+
+	std::string vertexPath;
+	std::string fragmentPath;
+	std::string geometryPath;
 };
 
 #endif // !__EDITORWINDOWS__
