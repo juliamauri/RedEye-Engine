@@ -18,6 +18,7 @@ class TexturesWindow;
 class PlayPauseWindow;
 class SelectFile;
 class PopUpWindow;
+class MaterialEditorWindow;
 
 struct SoftwareInfo;
 class RE_GameObject;
@@ -92,6 +93,7 @@ private:
 	PlayPauseWindow* play_pause = nullptr;
 	AboutWindow* about = nullptr;
 	SelectFile* select_file = nullptr;
+	MaterialEditorWindow* materialeditor = nullptr;
 
 	// Tools
 	RandomTest* rng = nullptr;

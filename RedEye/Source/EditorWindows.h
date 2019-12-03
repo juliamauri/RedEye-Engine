@@ -43,7 +43,8 @@ class ConsoleWindow : public EditorWindow
 {
 public:
 	ConsoleWindow(const char* name = "Console", bool start_active = true);
-	
+	~ConsoleWindow();
+
 	void ChangeFilter(const int new_filter);
 	void SwapCategory(const unsigned int category);
 
@@ -63,7 +64,8 @@ public:
 class AssetsWindow : public EditorWindow
 {
 public:
-	AssetsWindow(const char* name = "Assets", bool start_active = true);
+	AssetsWindow(const char* name = "Assets Panel", bool start_active = true);
+	~AssetsWindow();
 
 	const char* GetCurrentDirPath()const;
 
@@ -77,6 +79,7 @@ class ConfigWindow : public EditorWindow
 {
 public:
 	ConfigWindow(const char* name = "Configuration", bool start_active = true);
+	~ConfigWindow();
 
 private:
 
@@ -91,6 +94,7 @@ class HeriarchyWindow : public EditorWindow
 {
 public:
 	HeriarchyWindow(const char* name = "Heriarchy", bool start_active = true);
+	~HeriarchyWindow();
 
 private:
 
@@ -101,6 +105,7 @@ class PropertiesWindow : public EditorWindow
 {
 public:
 	PropertiesWindow(const char* name = "Properties", bool start_active = true);
+	~PropertiesWindow();
 
 private:
 
@@ -117,6 +122,7 @@ class AboutWindow : public EditorWindow
 {
 public:
 	AboutWindow(const char* name = "About", bool start_active = false);
+	~AboutWindow();
 
 private:
 
@@ -131,6 +137,7 @@ class RandomTest : public EditorWindow
 {
 public:
 	RandomTest(const char* name = "Random Test", bool start_active = false);
+	~RandomTest();
 
 private:
 
@@ -146,6 +153,7 @@ class TexturesWindow : public EditorWindow
 {
 public:
 	TexturesWindow(const char* name = "Texture Manager", bool start_active = false);
+	~TexturesWindow();
 
 private:
 
@@ -156,6 +164,7 @@ class PlayPauseWindow : public EditorWindow
 {
 public:
 	PlayPauseWindow(const char* name = "Play Controls", bool start_active = true);
+	~PlayPauseWindow();
 
 private:
 
@@ -166,6 +175,7 @@ class SelectFile : public EditorWindow
 {
 public:
 	SelectFile(const char* name = "Select File", bool start_active = false);
+	~SelectFile();
 
 	void Start(const char* windowName, const char* path, std::string* forFill, bool selectFolder = false);
 
@@ -198,6 +208,7 @@ class PrefabsPanel :public EditorWindow
 {
 public:
 	PrefabsPanel(const char* name = "Prefabs", bool start_active = false);
+	~PrefabsPanel();
 
 private:
 	void Draw(bool secondary = false) override;
@@ -211,6 +222,7 @@ class PopUpWindow :public EditorWindow
 {
 public:
 	PopUpWindow(const char* name = "PopUp", bool start_active = false);
+	~PopUpWindow();
 
 	void PopUp(const char* btnText = "Accept", const char* title = "PopUp", bool disableAllWindows = false);
 
@@ -224,6 +236,21 @@ private:
 	std::string btnText;
 	std::string titleText;
 
+};
+
+class RE_Material;
+class MaterialEditorWindow :public EditorWindow
+{
+public:
+	MaterialEditorWindow(const char* name = "Material Editor", bool start_active = false);
+	~MaterialEditorWindow();
+
+private:
+	void Draw(bool secondary = false) override;
+
+	RE_Material* editingMaerial = nullptr;
+	std::string matName;
+	std::string assetPath;
 };
 
 #endif // !__EDITORWINDOWS__

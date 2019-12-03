@@ -40,6 +40,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 
 	tools.push_back(rng = new RandomTest());
 	tools.push_back(textures = new TexturesWindow());
+	tools.push_back(materialeditor = new MaterialEditorWindow());
 
 	grid_size[0] = grid_size[1] = 1.0f;
 }

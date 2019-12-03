@@ -17,8 +17,11 @@
 #include "RE_CameraManager.h"
 #include "RE_Prefab.h"
 #include "RE_Texture.h"
+#include "RE_Material.h"
 
 #include "PhysFS\include\physfs.h"
+
+#include "ImGui/misc/cpp/imgui_stdlib.h"
 #include "ImGui/imgui_internal.h"
 
 #include <map>
@@ -64,6 +67,10 @@ ConsoleWindow::ConsoleWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {
 	pos.y = 500.f;
+}
+
+ConsoleWindow::~ConsoleWindow()
+{
 }
 
 void ConsoleWindow::Draw(bool secondary)
@@ -177,6 +184,10 @@ ConfigWindow::ConfigWindow(const char * name, bool start_active) :
 	pos.y = 400.f;
 }
 
+ConfigWindow::~ConfigWindow()
+{
+}
+
 void ConfigWindow::Draw(bool secondary)
 {
 	if(ImGui::Begin(name, 0, ImGuiWindowFlags_HorizontalScrollbar))
@@ -204,6 +215,10 @@ HeriarchyWindow::HeriarchyWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {}
 
+HeriarchyWindow::~HeriarchyWindow()
+{
+}
+
 void HeriarchyWindow::Draw(bool secondary)
 {
 	if(ImGui::Begin(name, 0, ImGuiWindowFlags_HorizontalScrollbar))
@@ -230,6 +245,10 @@ void HeriarchyWindow::Draw(bool secondary)
 PropertiesWindow::PropertiesWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {}
+
+PropertiesWindow::~PropertiesWindow()
+{
+}
 
 void PropertiesWindow::Draw(bool secondary)
 {
@@ -267,6 +286,10 @@ SoftwareInfo::SoftwareInfo(const char * name, const char * v, const char * w) :
 AboutWindow::AboutWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {}
+
+AboutWindow::~AboutWindow()
+{
+}
 
 void AboutWindow::Draw(bool secondary)
 {
@@ -343,6 +366,10 @@ RandomTest::RandomTest(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {}
 
+RandomTest::~RandomTest()
+{
+}
+
 void RandomTest::Draw(bool secondary)
 {
 	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
@@ -386,6 +413,10 @@ void RandomTest::Draw(bool secondary)
 ///////   Texture Manager  ////////////////////////////////////////////
 TexturesWindow::TexturesWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
 
+TexturesWindow::~TexturesWindow()
+{
+}
+
 void TexturesWindow::Draw(bool secondary)
 {
 	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
@@ -423,6 +454,10 @@ void TexturesWindow::Draw(bool secondary)
 }
 
 PlayPauseWindow::PlayPauseWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
+
+PlayPauseWindow::~PlayPauseWindow()
+{
+}
 
 void PlayPauseWindow::Draw(bool secondary)
 {
@@ -473,6 +508,10 @@ void PlayPauseWindow::Draw(bool secondary)
 }
 
 SelectFile::SelectFile(const char * name, bool start_active) : EditorWindow(name, start_active) {}
+
+SelectFile::~SelectFile()
+{
+}
 
 void SelectFile::Start(const char* windowName, const char * path, std::string* forFill, bool selectFolder)
 {
@@ -603,6 +642,10 @@ void SelectFile::SendSelected()
 
 PrefabsPanel::PrefabsPanel(const char * name, bool start_active) : EditorWindow(name, start_active) {}
 
+PrefabsPanel::~PrefabsPanel()
+{
+}
+
 void PrefabsPanel::Draw(bool secondary)
 {
 	if(ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
@@ -659,6 +702,10 @@ void PrefabsPanel::Draw(bool secondary)
 }
 
 PopUpWindow::PopUpWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
+
+PopUpWindow::~PopUpWindow()
+{
+}
 
 void PopUpWindow::PopUp(const char * _btnText, const char* title, bool _disableAllWindows)
 {
@@ -739,6 +786,10 @@ void PopUpWindow::Draw(bool secondary)
 
 AssetsWindow::AssetsWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
 
+AssetsWindow::~AssetsWindow()
+{
+}
+
 const char* AssetsWindow::GetCurrentDirPath() const
 {
 	return currentPath;
@@ -808,6 +859,72 @@ void AssetsWindow::Draw(bool secondary)
 		if (toChange) {
 			currentDir = toChange;
 			currentPath = currentDir->path.c_str();
+		}
+	}
+
+	ImGui::End();
+}
+
+MaterialEditorWindow::MaterialEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active) 
+{
+	editingMaerial = new RE_Material();
+	matName = "New Material";
+}
+
+MaterialEditorWindow::~MaterialEditorWindow()
+{
+	DEL(editingMaerial);
+}
+
+void MaterialEditorWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		ImGui::Text("Material name:");
+		ImGui::SameLine();
+		ImGui::InputText("##matname", &matName);
+
+		assetPath = "Assets/Materials/";
+		assetPath += matName;
+		assetPath += ".pupil";
+		ImGui::Text("Save path: %s", assetPath.c_str());
+
+		bool exits = App->fs->Exists(assetPath.c_str());
+		if (exits) ImGui::Text("This material exits, change the name.");
+	
+		if (exits && !secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Save")) {
+			if (!matName.empty() && !exits) {
+				editingMaerial->SetName(matName.c_str());
+				editingMaerial->SetAssetPath(assetPath.c_str());
+				editingMaerial->SetType(Resource_Type::R_MATERIAL);
+				editingMaerial->Save();
+				App->resources->Reference((ResourceContainer*)editingMaerial);
+				
+				editingMaerial = new RE_Material();
+				matName = "New Material";
+			}
+		}
+
+		if (exits && !secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+
+		editingMaerial->DrawMaterialEdit();
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
 		}
 	}
 
