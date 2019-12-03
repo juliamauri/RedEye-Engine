@@ -163,6 +163,9 @@
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -481,6 +484,9 @@
       <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h">
+      <Filter>3rd Party\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiColorTextEdit\TextEditor.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
   </ItemGroup>

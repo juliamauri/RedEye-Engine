@@ -22,6 +22,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Cvar.cpp" />
     <ClCompile Include="EditorWindows.cpp" />
+    <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp" />
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="RE_FileSystem.cpp" />
     <ClCompile Include="Event.cpp" />
@@ -78,6 +79,7 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="Cvar.h" />
     <ClInclude Include="EditorWindows.h" />
+    <ClInclude Include="ImGuiColorTextEdit\TextEditor.h" />
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="RE_FileSystem.h" />
     <ClInclude Include="Event.h" />

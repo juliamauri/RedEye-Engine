@@ -25,6 +25,7 @@
 
 #include "ImGui/misc/cpp/imgui_stdlib.h"
 #include "ImGui/imgui_internal.h"
+#include "ImGuiColorTextEdit/TextEditor.h"
 
 #include <map>
 
@@ -970,6 +971,10 @@ ShaderEditorWindow::~ShaderEditorWindow()
 
 void ShaderEditorWindow::Draw(bool secondary)
 {
+	static TextEditor* sTextEditor = nullptr;
+	static RE_FileIO* currentFile = nullptr;
+	static std::string* newPathfile = nullptr;
+	static bool newShaderFile = false;
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
 		if (secondary) {
@@ -1046,7 +1051,27 @@ void ShaderEditorWindow::Draw(bool secondary)
 			compilePass = false;
 		}
 		ImGui::SameLine();
-		if(ImGui::Button("Clear vertex")) vertexPath.clear();
+		if (!vertexPath.empty() && !sTextEditor && !currentFile) {
+			if (ImGui::Button("Edit Vertex Shader")) {
+				currentFile = new RE_FileIO(vertexPath.c_str(), App->fs->GetZipPath());
+				if (currentFile->Load()) {
+					sTextEditor = new TextEditor();
+					sTextEditor->InsertText(currentFile->GetBuffer());
+					newPathfile = &vertexPath;
+				}
+				else
+					DEL(currentFile);
+			}
+
+			ImGui::SameLine();
+			if (ImGui::Button("Clear vertex")) vertexPath.clear();
+		}
+		else if (!newShaderFile) {
+			if (ImGui::Button("New vertex shader")) {
+				newShaderFile = true;
+				newPathfile = &vertexPath;
+			}
+		}
 
 		ImGui::Separator();
 		ImGui::Text("Fragment Shader Path:\n%s", (fragmentPath.empty()) ? "No path." : fragmentPath.c_str());
@@ -1057,7 +1082,28 @@ void ShaderEditorWindow::Draw(bool secondary)
 			compilePass = false;
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Clear fragment")) fragmentPath.clear();
+		if (!fragmentPath.empty() && !sTextEditor && !currentFile) {
+			if (ImGui::Button("Edit Fragment Shader")) {
+				currentFile = new RE_FileIO(fragmentPath.c_str(), App->fs->GetZipPath());
+				if (currentFile->Load()) {
+					sTextEditor = new TextEditor();
+					sTextEditor->InsertText(currentFile->GetBuffer());
+					newPathfile = &fragmentPath;
+				}
+				else
+					DEL(currentFile);
+			}
+
+			ImGui::SameLine();
+			if (ImGui::Button("Clear fragment")) fragmentPath.clear();
+		}
+		else if (!newShaderFile) {
+			if (ImGui::Button("New fragment shader")) {
+				newShaderFile = true;
+				newPathfile = &fragmentPath;
+			}
+		}
+
 
 		ImGui::Separator();
 		ImGui::Text("Geometry Shader Path:\n%s", (geometryPath.empty()) ? "No path." : geometryPath.c_str());
@@ -1068,7 +1114,27 @@ void ShaderEditorWindow::Draw(bool secondary)
 			compilePass = false;
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Clear geometry")) geometryPath.clear();
+		if (!geometryPath.empty() && !sTextEditor && !currentFile) {
+			if (ImGui::Button("Edit Geometry Shader")) {
+				currentFile = new RE_FileIO(geometryPath.c_str(), App->fs->GetZipPath());
+				if (currentFile->Load()) {
+					sTextEditor = new TextEditor();
+					sTextEditor->InsertText(currentFile->GetBuffer());
+					newPathfile = &geometryPath;
+				}
+				else
+					DEL(currentFile);
+			}
+
+			ImGui::SameLine();
+			if (ImGui::Button("Clear geometry")) geometryPath.clear();
+		}
+		else if(!newShaderFile) {
+			if (ImGui::Button("New geometry shader")) {
+				newShaderFile = true;
+				newPathfile = &geometryPath;
+			}
+		}
 
 		ImGui::Separator();
 		if (neededVertexAndFragment) ImGui::Text("The vertex or fragment file path is empty.");
@@ -1102,4 +1168,83 @@ void ShaderEditorWindow::Draw(bool secondary)
 	}
 
 	ImGui::End();
+
+	if (!sTextEditor && newShaderFile) 
+		sTextEditor = new TextEditor();
+
+	if (sTextEditor) {
+		static bool save = false;
+		bool close = false;
+		if (ImGui::Begin("Text Editor", 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		{
+			if (secondary) {
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+			bool pop = false;
+			if (!currentFile && newShaderFile) {
+				ImGui::Text("Shader name:");
+				ImGui::SameLine();
+				ImGui::InputText("##newshadername", newPathfile);
+
+				assetPath = "Assets/Shaders/";
+				assetPath += *newPathfile;
+				ImGui::Text("Save path: %s", assetPath.c_str());
+
+				bool exits = App->fs->Exists(assetPath.c_str());
+				if (pop = exits) ImGui::Text("This shader exits, change the name.");
+			}
+			else
+				ImGui::Text("Editting %s", newPathfile->c_str());
+
+			if (pop && !secondary) {
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			if (save) {
+				ImGui::Text("Be sure to save before close!");
+				if (ImGui::Button("Save")) {
+					std::string text = sTextEditor->GetText();
+					if (newShaderFile) {
+						currentFile = new RE_FileIO(assetPath.c_str(), App->fs->GetZipPath());
+						*newPathfile = assetPath;
+					}
+					currentFile->Save((char*)text.c_str(), text.size());
+					
+					save = false;
+				}
+				ImGui::SameLine();
+			}
+
+			if (pop && !secondary) {
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+
+			if (ImGui::Button("Quit")) {
+				close = true;
+			}
+
+			sTextEditor->Render("Shader Text Editor");
+
+			if (secondary) {
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+
+		ImGui::End();
+
+		if (sTextEditor->IsTextChanged())
+			save = true;
+
+		if (close) {
+			DEL(sTextEditor);
+			if(currentFile) DEL(currentFile);
+			newShaderFile = false;
+			save = false;
+			newPathfile = nullptr;
+		}
+	}
 }
