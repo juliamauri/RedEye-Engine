@@ -52,6 +52,8 @@ public:
 private:
 	void Draw() override;
 
+	void SaveResourceMeta(JSONNode* metaNode)override;
+	void LoadResourceMeta(JSONNode* metaNode)override;
 
 	void DrawTextures(const char* texturesName, std::vector<const char*>* textures);
 
@@ -64,9 +66,6 @@ private:
 	void BinaryDeserialize();
 	void BinarySerialize();
 	unsigned int GetBinarySize();
-
-	void DeserializeTexturesBinary(char * &cursor, std::vector<const char*>* textures);
-	void SerializeTexturesBinary(char * &cursor, std::vector<const char*>* textures);
 
 public:
 	RE_ShadingMode shadingType = S_FLAT;

@@ -27,12 +27,12 @@ RE_Material::~RE_Material() { }
 void RE_Material::LoadInMemory()
 {
 	//TODO ResourcesManager, apply count referending textures
-	//if (App->fs->Exists(GetLibraryPath())) {
-		//BinaryDeserialize();
-	//}
+	if (App->fs->Exists(GetLibraryPath())) {
+		BinaryDeserialize();
+	}
 	if (App->fs->Exists(GetAssetPath())) {
 		JsonDeserialize();
-		//BinarySerialize();
+		BinarySerialize();
 	}
 	else if (isInternal())
 		ResourceContainer::inMemory = true;
@@ -43,18 +43,6 @@ void RE_Material::LoadInMemory()
 
 void RE_Material::UnloadMemory()
 {
-	//TODO ResourcesManager, apply count referending textures
-	tDiffuse.clear();
-	tSpecular.clear();
-	tAmbient.clear();
-	tEmissive.clear();
-	tOpacity.clear();
-	tShininess.clear();
-	tHeight.clear();
-	tNormals.clear();
-	tReflection.clear();
-	tUnknown.clear();
-
 	cDiffuse = math::float3::zero;
 	cSpecular = math::float3::zero;
 	cAmbient = math::float3::zero;
@@ -103,18 +91,111 @@ void RE_Material::Draw()
 	DrawMaterialEdit();
 }
 
+void RE_Material::SaveResourceMeta(JSONNode* metaNode)
+{
+	metaNode->PushString("shaderMeta", (shaderMD5) ? App->resources->At(shaderMD5)->GetMetaPath() : "NOMETAPATH");
+
+	JSONNode* diffuseNode = metaNode->PushJObject("DiffuseTextures");
+	PushTexturesJson(diffuseNode, &tDiffuse);
+	DEL(diffuseNode);
+	JSONNode* specularNode = metaNode->PushJObject("SpecularTextures");
+	PushTexturesJson(specularNode, &tSpecular);
+	DEL(specularNode);
+	JSONNode* ambientNode = metaNode->PushJObject("AmbientTextures");
+	PushTexturesJson(ambientNode, &tAmbient);
+	DEL(ambientNode);
+	JSONNode* emissiveNode = metaNode->PushJObject("EmissiveTextures");
+	PushTexturesJson(emissiveNode, &tEmissive);
+	DEL(emissiveNode);
+	JSONNode* opacityNode = metaNode->PushJObject("OpacityTextures");
+	PushTexturesJson(opacityNode, &tOpacity);
+	DEL(opacityNode);
+	JSONNode* shininessNode = metaNode->PushJObject("ShininessTextures");
+	PushTexturesJson(shininessNode, &tShininess);
+	DEL(shininessNode);
+	JSONNode* heightNode = metaNode->PushJObject("HeightTextures");
+	PushTexturesJson(heightNode, &tHeight);
+	DEL(heightNode);
+	JSONNode* normalsNode = metaNode->PushJObject("NormalsTextures");
+	PushTexturesJson(normalsNode, &tNormals);
+	DEL(normalsNode);
+	JSONNode* reflectionNode = metaNode->PushJObject("ReflectionTextures");
+	PushTexturesJson(reflectionNode, &tReflection);
+	DEL(reflectionNode);
+	JSONNode* unknownNode = metaNode->PushJObject("UnknownTextures");
+	PushTexturesJson(unknownNode, &tUnknown);
+	DEL(unknownNode);
+}
+
+void RE_Material::LoadResourceMeta(JSONNode* metaNode)
+{
+	std::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
+	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = App->resources->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
+
+	JSONNode* diffuseNode = metaNode->PullJObject("DiffuseTextures");
+	PullTexturesJson(diffuseNode, &tDiffuse);
+	DEL(diffuseNode);
+	JSONNode* specularNode = metaNode->PullJObject("SpecularTextures");
+	PullTexturesJson(specularNode, &tSpecular);
+	DEL(specularNode);
+	JSONNode* ambientNode = metaNode->PullJObject("AmbientTextures");
+	PullTexturesJson(ambientNode, &tAmbient);
+	DEL(ambientNode);
+	JSONNode* emissiveNode = metaNode->PullJObject("EmissiveTextures");
+	PullTexturesJson(emissiveNode, &tEmissive);
+	DEL(emissiveNode);
+	JSONNode* opacityNode = metaNode->PullJObject("OpacityTextures");
+	PullTexturesJson(opacityNode, &tOpacity);
+	DEL(opacityNode);
+	JSONNode* shininessNode = metaNode->PullJObject("ShininessTextures");
+	PullTexturesJson(shininessNode, &tShininess);
+	DEL(shininessNode);
+	JSONNode* heightNode = metaNode->PullJObject("HeightTextures");
+	PullTexturesJson(heightNode, &tHeight);
+	DEL(heightNode);
+	JSONNode* normalsNode = metaNode->PullJObject("NormalsTextures");
+	PullTexturesJson(normalsNode, &tNormals);
+	DEL(normalsNode);
+	JSONNode* reflectionNode = metaNode->PullJObject("ReflectionTextures");
+	PullTexturesJson(reflectionNode, &tReflection);
+	DEL(reflectionNode);
+	JSONNode* unknownNode = metaNode->PullJObject("UnknownTextures");
+	PullTexturesJson(unknownNode, &tUnknown);
+	DEL(unknownNode);
+}
+
 void RE_Material::DrawMaterialEdit()
 {
 	static int shadingMode = shadingType;
-	ImGui::Text("Current Shader: %s", shadingItems[shadingMode]);
-	if (ImGui::BeginMenu("Shader Type"))
+	RE_Shader* matShader = (shaderMD5) ? (RE_Shader*)App->resources->At(shaderMD5) : (RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader());
+	
+	ImGui::Text("Shader selected: %s", matShader->GetMD5());
+	
+	if (!shaderMD5) ImGui::Text("This shader is using the default shader.");
+
+	if (ImGui::Button(matShader->GetName()))
+		App->resources->PushSelected(matShader->GetMD5(), (App->resources->GetSelected() != nullptr && (App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_TEXTURE || App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_SHADER)));
+
+	if (shaderMD5) {
+		ImGui::SameLine();
+		if (ImGui::Button("Back to Default Shader")) {
+			shaderMD5 = nullptr;
+			applySave = true;
+		}
+	}
+
+	if (ImGui::BeginMenu("Change shader"))
 	{
-		for (int i = 0; i < 10; i++) {
-			if (ImGui::MenuItem(shadingItems[i])) {
-				if (shadingMode != shadingType) {
-					shadingType = (RE_ShadingMode)shadingMode;
-					applySave = true;
-				}
+		std::vector<ResourceContainer*> shaders = App->resources->GetResourcesByType(Resource_Type::R_SHADER);
+		for (auto  shader :  shaders) {
+			if (shader->isInternal())
+				continue;
+
+			if (ImGui::MenuItem(shader->GetName())) {
+				if (ResourceContainer::inMemory && shaderMD5) App->resources->UnUse(shaderMD5);
+				shaderMD5 = shader->GetMD5();
+				if (ResourceContainer::inMemory && shaderMD5) App->resources->Use(shaderMD5);
+				applySave = true;
 			}
 		}
 		ImGui::EndMenu();
@@ -217,7 +298,7 @@ void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*
 			ResourceContainer* resource = App->resources->At(*md5);
 
 			if (ImGui::Button(std::string("Texture #" + std::to_string(count) + " " + std::string(resource->GetName())).c_str()))
-				App->resources->PushSelected(*md5, (App->resources->GetSelected() != nullptr && App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_TEXTURE));
+				App->resources->PushSelected(*md5, (App->resources->GetSelected() != nullptr && (App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_TEXTURE || App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_SHADER)));
 			
 			ImGui::SameLine();
 			std::string deletetexture("Delete #");
@@ -273,63 +354,19 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 	if (material.Load()) {
 		JSONNode* nodeMat = material.GetRootNode("Material");
 
-		shadingType = (RE_ShadingMode)nodeMat->PullInt("Shader Type", RE_ShadingMode::S_FLAT);
+		shadingType = (RE_ShadingMode)nodeMat->PullInt("ShaderType", RE_ShadingMode::S_FLAT);
 
-		JSONNode* diffuseNode = nodeMat->PullJObject("DiffuseTextures");
-		PullTexturesJson(diffuseNode, &tDiffuse);
-		DEL(diffuseNode);
 		cDiffuse = nodeMat->PullFloatVector("DiffuseColor", math::vec::zero);
-
-		JSONNode* specularNode = nodeMat->PullJObject("SpecularTextures");
-		PullTexturesJson(specularNode, &tSpecular);
-		DEL(specularNode);
 		cSpecular = nodeMat->PullFloatVector("SpecularColor", math::vec::zero);
-
-		JSONNode* ambientNode = nodeMat->PullJObject("AmbientTextures");
-		PullTexturesJson(ambientNode, &tAmbient);
-		DEL(ambientNode);
 		cAmbient = nodeMat->PullFloatVector("AmbientColor", math::vec::zero);
-
-		JSONNode* emissiveNode = nodeMat->PullJObject("EmissiveTextures");
-		PullTexturesJson(emissiveNode, &tEmissive);
-		DEL(emissiveNode);
 		cEmissive = nodeMat->PullFloatVector("EmissiveColor", math::vec::zero);
-
 		cTransparent = nodeMat->PullFloatVector("TransparentColor", math::vec::zero);
-
 		backFaceCulling = nodeMat->PullBool("BackFaceCulling", true);
-
 		blendMode = nodeMat->PullBool("BlendMode", false);
-
-		JSONNode* opacityNode = nodeMat->PullJObject("OpacityTextures");
-		uint opacitySize = opacityNode->PullInt("Size", 0);
-		PullTexturesJson(opacityNode, &tOpacity);
-		DEL(opacityNode);
 		opacity = nodeMat->PullFloat("Opacity", 1.0f);
-
-		JSONNode* shininessNode = nodeMat->PullJObject("ShininessTextures");
-		PullTexturesJson(shininessNode, &tShininess);
-		DEL(shininessNode);
 		shininess = nodeMat->PullFloat("Shininess", 0.0f);
 		shininessStrenght = nodeMat->PullFloat("ShininessStrenght", 1.0f);
-
 		refraccti = nodeMat->PullFloat("Refraccti", 1.0f);
-
-		JSONNode* heightNode = nodeMat->PullJObject("HeightTextures");
-		PullTexturesJson(heightNode, &tHeight);
-		DEL(heightNode);
-
-		JSONNode* normalsNode = nodeMat->PullJObject("NormalsTextures");
-		PullTexturesJson(normalsNode, &tNormals);
-		DEL(normalsNode);
-
-		JSONNode* reflectionNode = nodeMat->PullJObject("ReflectionTextures");
-		PullTexturesJson(reflectionNode, &tReflection);
-		DEL(reflectionNode);
-
-		JSONNode* unknownNode = nodeMat->PullJObject("UnknownTextures");
-		PullTexturesJson(unknownNode, &tUnknown);
-		DEL(unknownNode);
 
 		DEL(nodeMat);
 
@@ -367,60 +404,17 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 
 	materialNode->PushInt("ShaderType", (int)shadingType);
 
-	JSONNode* diffuseNode = materialNode->PushJObject("DiffuseTextures");
-	PushTexturesJson(diffuseNode, &tDiffuse);
-	DEL(diffuseNode);
 	materialNode->PushFloatVector("DiffuseColor", cDiffuse);
-
-	JSONNode* specularNode = materialNode->PushJObject("SpecularTextures");
-	PushTexturesJson(specularNode, &tSpecular);
-	DEL(specularNode);
 	materialNode->PushFloatVector("SpecularColor", cSpecular);
-
-	JSONNode* ambientNode = materialNode->PushJObject("SpecularTextures");
-	PushTexturesJson(ambientNode, &tAmbient);
-	DEL(ambientNode);
 	materialNode->PushFloatVector("AmbientColor", cAmbient);
-
-	JSONNode* emissiveNode = materialNode->PushJObject("EmissiveTextures");
-	PushTexturesJson(emissiveNode, &tEmissive);
-	DEL(emissiveNode);
 	materialNode->PushFloatVector("EmissiveColor", cEmissive);
-
 	materialNode->PushFloatVector("TransparentColor", cTransparent);
-
 	materialNode->PushBool("BackFaceCulling", backFaceCulling);
-
 	materialNode->PushBool("BlendMode", blendMode);
-
-	JSONNode*opacityNode = materialNode->PushJObject("OpacityTextures");
-	PushTexturesJson(opacityNode, &tOpacity);
-	DEL(opacityNode);
 	materialNode->PushFloat("Opacity", opacity);
-	
-	JSONNode* shininessNode = materialNode->PushJObject("ShininessTextures");
-	PushTexturesJson(shininessNode, &tShininess);
-	DEL(shininessNode);
 	materialNode->PushFloat("Shininess", shininess);
 	materialNode->PushFloat("ShininessStrenght", shininessStrenght);
-
 	materialNode->PushFloat("Refraccti", refraccti);
-
-	JSONNode* heightNode = materialNode->PushJObject("HeightTextures");
-	PushTexturesJson(heightNode, &tHeight);
-	DEL(heightNode);
-
-	JSONNode* normalsNode = materialNode->PushJObject("NormalsTextures");
-	PushTexturesJson(normalsNode, &tNormals);
-	DEL(normalsNode);
-
-	JSONNode* reflectionNode = materialNode->PushJObject("ReflectionTextures");
-	PushTexturesJson(reflectionNode, &tReflection);
-	DEL(reflectionNode);
-
-	JSONNode* unknownNode = materialNode->PushJObject("UnknownTextures");
-	PushTexturesJson(unknownNode, &tUnknown);
-	DEL(unknownNode);
 
 	if(!onlyMD5) materialSerialize.Save();
 	SetMD5(materialSerialize.GetMd5().c_str());
@@ -453,27 +447,20 @@ void RE_Material::BinaryDeserialize()
 		memcpy(&shadingType, cursor, size);
 		cursor += size;
 
-		DeserializeTexturesBinary(cursor, &tDiffuse);
-		size = sizeof(math::float3);
-		memcpy(&cDiffuse, cursor, size);
+		size = sizeof(float) * 3;
+		cDiffuse = math::vec((float*)cursor);
 		cursor += size;
 
-		DeserializeTexturesBinary(cursor, &tSpecular);
-		size = sizeof(math::float3);
-		memcpy(&cSpecular, cursor, size);
+		cSpecular = math::vec((float*)cursor);
 		cursor += size;
 
-		DeserializeTexturesBinary(cursor, &tAmbient);
-		size = sizeof(math::float3);
-		memcpy(&cAmbient, cursor, size);
+		cAmbient = math::vec((float*)cursor);
 		cursor += size;
 
-		DeserializeTexturesBinary(cursor, &tEmissive);
-		size = sizeof(math::float3);
-		memcpy(&cEmissive, cursor, size);
+		cEmissive = math::vec((float*)cursor);
 		cursor += size;
 
-		memcpy(&cTransparent, cursor, size);
+		cTransparent = math::vec((float*)cursor);
 		cursor += size;
 
 		size = sizeof(bool);
@@ -483,50 +470,20 @@ void RE_Material::BinaryDeserialize()
 		memcpy(&blendMode, cursor, size);
 		cursor += size;
 
-		DeserializeTexturesBinary(cursor, &tOpacity);
 		size = sizeof(float);
 		memcpy(&opacity, cursor, size);
 		cursor += size;
 
-		DeserializeTexturesBinary(cursor, &tShininess);
-		size = sizeof(float);
 		memcpy(&shininess, cursor, size);
 		cursor += size;
+
 		memcpy(&shininessStrenght, cursor, size);
 		cursor += size;
 
 		memcpy(&refraccti, cursor, size);
 		cursor += size;
 
-		DeserializeTexturesBinary(cursor, &tHeight);
-
-		DeserializeTexturesBinary(cursor, &tNormals);
-
-		DeserializeTexturesBinary(cursor, &tReflection);
-
-		DeserializeTexturesBinary(cursor, &tUnknown);
-
 		ResourceContainer::inMemory = true;
-	}
-}
-
-void RE_Material::DeserializeTexturesBinary(char * &cursor, std::vector<const char*>* textures)
-{
-	size_t size = sizeof(uint);
-	uint vectorSize = 0;
-	memcpy(&vectorSize, cursor, size);
-	cursor += size;
-	for (uint i = 0; i < vectorSize; i++) {
-		size = sizeof(uint);
-		uint pathSize = 0;
-		memcpy(&pathSize, cursor, size);
-		cursor += size;
-		size = sizeof(char) * pathSize;
-		std::string metaPath(cursor, pathSize);
-		cursor += size;
-		const char* textureMD5 = App->resources->FindMD5ByMETAPath(metaPath.c_str());
-		if (textureMD5) textures->push_back(textureMD5);
-		else LOG_ERROR("No texture found.\nPath: %s", metaPath.c_str());
 	}
 }
 
@@ -542,27 +499,20 @@ void RE_Material::BinarySerialize()
 	memcpy(cursor, &shadingType, size);
 	cursor += size;
 
-	SerializeTexturesBinary(cursor, &tDiffuse);
-	size = sizeof(math::float3);
-	memcpy(cursor, &cDiffuse, size);
+	size = sizeof(float) * 3;
+	memcpy(cursor, &cDiffuse.x, size);
 	cursor += size;
 
-	SerializeTexturesBinary(cursor, &tSpecular);
-	size = sizeof(math::float3);
-	memcpy(cursor, &cSpecular, size);
+	memcpy(cursor, &cSpecular.x, size);
 	cursor += size;
 
-	SerializeTexturesBinary(cursor, &tAmbient);
-	size = sizeof(math::float3);
-	memcpy(cursor, &cAmbient, size);
+	memcpy(cursor, &cAmbient.x, size);
 	cursor += size;
 
-	SerializeTexturesBinary(cursor, &tEmissive);
-	size = sizeof(math::float3);
-	memcpy(cursor, &cEmissive, size);
+	memcpy(cursor, &cEmissive.x, size);
 	cursor += size;
 
-	memcpy(cursor, &cTransparent, size);
+	memcpy(cursor, &cTransparent.x, size);
 	cursor += size;
 
 	size = sizeof(bool);
@@ -572,53 +522,24 @@ void RE_Material::BinarySerialize()
 	memcpy(cursor, &blendMode, size);
 	cursor += size;
 
-	SerializeTexturesBinary(cursor, &tOpacity);
 	size = sizeof(float);
 	memcpy(cursor, &opacity, size);
 	cursor += size;
 
-	SerializeTexturesBinary(cursor, &tShininess);
-	size = sizeof(float);
 	memcpy(cursor, &shininess, size);
 	cursor += size;
+
 	memcpy(cursor, &shininessStrenght, size);
 	cursor += size;
 
 	memcpy(cursor, &refraccti, size);
 	cursor += size;
 
-	SerializeTexturesBinary(cursor, &tHeight);
-
-	SerializeTexturesBinary(cursor, &tNormals);
-
-	SerializeTexturesBinary(cursor, &tReflection);
-
-	SerializeTexturesBinary(cursor, &tUnknown);
-
 	char nullchar = '\0';
 	memcpy(cursor, &nullchar, sizeof(char));
 
 	libraryFile.Save(buffer, bufferSize + 1);
 	DEL_A(buffer);
-}
-
-void RE_Material::SerializeTexturesBinary(char * &cursor, std::vector<const char*>* textures)
-{
-	size_t size = sizeof(uint);
-	uint vectorSize = tDiffuse.size();
-	memcpy(cursor, &vectorSize, size);
-	cursor += size;
-	for (auto md5 : *textures) {
-		ResourceContainer* resource = App->resources->At(md5);
-		const char* metaPath = resource->GetMetaPath();
-		uint sizePath = std::strlen(metaPath);
-		size = sizeof(uint);
-		memcpy(cursor, &sizePath, size);
-		cursor += size;
-		size = sizeof(char) * sizePath;
-		memcpy(cursor, metaPath, size);
-		cursor += size;
-	}
 }
 
 void RE_Material::UseTextureResources()
@@ -713,56 +634,11 @@ unsigned int RE_Material::GetShaderID() const
 unsigned int RE_Material::GetBinarySize()
 {
 	uint charCount = 0;
-	
-	for (auto md5 : tDiffuse) {
-		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
-		charCount += sizeof(uint);
-	}
 
-	for (auto md5 : tSpecular) {
-		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
-		charCount += sizeof(uint);
-	}
+	charCount += sizeof(RE_ShadingMode);
+	charCount += sizeof(float) * 15;
+	charCount += sizeof(bool) * 2;
+	charCount += sizeof(float) * 4;
 
-	for (auto md5 : tAmbient) {
-		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
-		charCount += sizeof(uint);
-	}
-
-	for (auto md5 : tEmissive) {
-		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
-		charCount += sizeof(uint);
-	}
-
-	for (auto md5 : tOpacity) {
-		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
-		charCount += sizeof(uint);
-	}
-
-	for (auto md5 : tShininess) {
-		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
-		charCount += sizeof(uint);
-	}
-
-	for (auto md5 : tHeight) {
-		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
-		charCount += sizeof(uint);
-	}
-
-	for (auto md5 : tNormals) {
-		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
-		charCount += sizeof(uint);
-	}
-
-	for (auto md5 : tReflection) {
-		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
-		charCount += sizeof(uint);
-	}
-
-	for (auto md5 : tUnknown) {
-		charCount += std::strlen(App->resources->At(md5)->GetMetaPath());
-		charCount += sizeof(uint);
-	}
-
-	return sizeof(uint) * 10 + sizeof(char) * charCount + sizeof(RE_ShadingMode) + sizeof(float) * 4 + sizeof(math::float3) * 5 + sizeof(bool) * 2;
+	return charCount;
 }

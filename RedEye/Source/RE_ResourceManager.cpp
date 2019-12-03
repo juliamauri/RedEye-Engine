@@ -275,6 +275,7 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 		if (App->fs->Exists(librariPath)) {
 			RE_Mesh* newMesh = new RE_Mesh();
 			newMesh->SetLibraryPath(librariPath);
+			newMesh->SetType(Resource_Type::R_MESH);
 			meshMD5 = Reference(newMesh);
 		}
 	}
