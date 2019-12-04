@@ -580,24 +580,29 @@ void RE_Material::UploadToShader(float* model, bool usingChekers)
 
 	unsigned int ShaderID = shaderRes->GetID();
 	// Bind Textures
-	if (usingChekers || tDiffuse.empty())
+	if (tDiffuse.empty() && !cDiffuse.IsZero()) {
+		RE_ShaderImporter::setFloat(ShaderID, "useColor", 1.0f);
+		RE_ShaderImporter::setFloat(ShaderID, "useTexture", 0.0f);
+		RE_ShaderImporter::setFloat(ShaderID, "objectColor", cDiffuse);
+	}
+	else if (usingChekers || (tDiffuse.empty() && cDiffuse.IsZero()))
 	{
 		RE_ShaderImporter::setFloat(ShaderID, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(ShaderID, "useTexture", 1.0f);
 
-		usingChekers = true;
 		glActiveTexture(GL_TEXTURE0);
 		std::string name = "texture_diffuse0";
 		RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), 0);
 		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 	}
-	else if (!tDiffuse.empty())
+	else
 	{
 		// Bind diffuse textures
 		unsigned int diffuseNr = 1;
 
-		RE_ShaderImporter::setFloat(ShaderID, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(ShaderID, "useColor", 1.0f);
 		RE_ShaderImporter::setFloat(ShaderID, "useTexture", 1.0f);
+		RE_ShaderImporter::setFloat(ShaderID, "objectColor", cDiffuse);
 
 		for (unsigned int i = 0; i < tDiffuse.size(); i++)
 		{
