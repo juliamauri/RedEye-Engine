@@ -44,27 +44,46 @@ void RE_CompMesh::Draw()
 
 void RE_CompMesh::DrawProperties()
 {
-	if (ImGui::CollapsingHeader("Mesh"))
-	{
+	if (ImGui::CollapsingHeader("Component Mesh")) {
 		if (meshMD5)
 		{
 			if (ImGui::Button(std::string("Resource Mesh").c_str()))
 				App->resources->PushSelected(meshMD5, true);
 		}
 		else ImGui::TextWrapped("Empty Mesh Component");
-	}
+		ImGui::Separator();
+		ImGui::Checkbox("Use checkers texture", &show_checkers);
+		ImGui::Separator();
+		RE_Material* matRes = (materialMD5) ? (RE_Material*)App->resources->At(materialMD5) : (RE_Material*)App->resources->At(App->internalResources->GetDefaulMaterial());
 
-	if (ImGui::CollapsingHeader("Material"))
-	{
-		if (materialMD5)
-		{
-			ImGui::Checkbox("Use checkers texture", &show_checkers);
+		if (!materialMD5) ImGui::Text("This component mesh is using the default material.");
 
-			if (ImGui::Button(std::string("Resource " + std::string(App->resources->At(materialMD5)->GetName())).c_str()))
-				App->resources->PushSelected(materialMD5, true);
+		if (ImGui::Button(matRes->GetName()))
+			App->resources->PushSelected(matRes->GetMD5(), true);
+
+		if (materialMD5) {
+			ImGui::SameLine();
+			if (ImGui::Button("Back to Default Material"))
+				materialMD5 = nullptr;
 		}
-		else
-			ImGui::Text("Mesh don't contain Material.");
+
+		if (ImGui::BeginMenu("Change material"))
+		{
+			std::vector<ResourceContainer*> materials = App->resources->GetResourcesByType(Resource_Type::R_MATERIAL);
+			bool none = true;
+			for (auto material : materials) {
+				if (material->isInternal())
+					continue;
+				none = false;
+				if (ImGui::MenuItem(material->GetName())) {
+					if (materialMD5) App->resources->UnUse(materialMD5);
+					materialMD5 = material->GetMD5();
+					if (materialMD5) App->resources->Use(materialMD5);
+				}
+			}
+			if (none) ImGui::Text("No custom materials on assets");
+			ImGui::EndMenu();
+		}
 	}
 }
 

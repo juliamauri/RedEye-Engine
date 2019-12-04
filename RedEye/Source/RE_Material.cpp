@@ -166,7 +166,6 @@ void RE_Material::LoadResourceMeta(JSONNode* metaNode)
 
 void RE_Material::DrawMaterialEdit()
 {
-	static int shadingMode = shadingType;
 	RE_Shader* matShader = (shaderMD5) ? (RE_Shader*)App->resources->At(shaderMD5) : (RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader());
 	
 	ImGui::Text("Shader selected: %s", matShader->GetMD5());
