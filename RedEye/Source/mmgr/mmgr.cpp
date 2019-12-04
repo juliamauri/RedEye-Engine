@@ -257,6 +257,7 @@ static		void		doCleanupLogOnFirstRun();
 
 static	void	log(const char *format, ...)
 {
+#ifdef DEBUG
 	// Cleanup the log?
 
 	if (cleanupLogOnFirstRun) doCleanupLogOnFirstRun();
@@ -271,7 +272,7 @@ static	void	log(const char *format, ...)
 
 	// Open the log file
 
-	FILE	*fp = fopen(memoryLogFile, "ab");
+	FILE* fp = fopen(memoryLogFile, "ab");
 
 	// If you hit this assert, then the memory logger is unable to log information to a file (can't open the file for some
 	// reason.) You can interrogate the variable 'buffer' to see what was supposed to be logged (but won't be.)
@@ -283,6 +284,7 @@ static	void	log(const char *format, ...)
 
 	fprintf(fp, "%s\r\n", buffer);
 	fclose(fp);
+#endif // DEBUG
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------
@@ -531,9 +533,10 @@ static	void	dumpAllocations(FILE *fp)
 // ---------------------------------------------------------------------------------------------------------------------------------
 static	void	dumpLeakReport()
 {
+#ifdef DEBUG
 	// Open the report file
 
-	FILE	*fp = fopen(memoryLeakLogFile, "w+b");
+	FILE* fp = fopen(memoryLeakLogFile, "w+b");
 
 	// If you hit this assert, then the memory report generator is unable to log information to a file (can't open the file for
 	// some reason.)
@@ -547,7 +550,7 @@ static	void	dumpLeakReport()
 	static  char    timeString[25];
 	memset(timeString, 0, sizeof(timeString));
 	time_t  t = time(NULL);
-	struct  tm *tme = localtime(&t);
+	struct  tm* tme = localtime(&t);
 	fprintf(fp, " ---------------------------------------------------------------------------------------------------------------------------------- \r\n");
 	fprintf(fp, "|                                          Memory leak report for:  %02d/%02d/%04d %02d:%02d:%02d                                            |\r\n", tme->tm_mon + 1, tme->tm_mday, tme->tm_year + 1900, tme->tm_hour, tme->tm_min, tme->tm_sec);
 	fprintf(fp, " ---------------------------------------------------------------------------------------------------------------------------------- \r\n");
@@ -555,7 +558,7 @@ static	void	dumpLeakReport()
 	fprintf(fp, "\r\n");
 	if (stats.totalAllocUnitCount)
 	{
-		fprintf(fp, "%d memory leak%s found:\r\n", stats.totalAllocUnitCount, stats.totalAllocUnitCount == 1 ? "":"s");
+		fprintf(fp, "%d memory leak%s found:\r\n", stats.totalAllocUnitCount, stats.totalAllocUnitCount == 1 ? "" : "s");
 	}
 	else
 	{
@@ -583,6 +586,7 @@ static	void	dumpLeakReport()
 	}
 
 	fclose(fp);
+#endif // DEBUG
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------
@@ -1680,10 +1684,11 @@ void	m_dumpAllocUnit(const sAllocUnit *allocUnit, const char *prefix)
 
 void	m_dumpMemoryReport(const char *filename, const bool overwrite)
 {
+#ifdef DEBUG
 	// Open the report file
 
-	FILE	*fp = NULL;
-	
+	FILE* fp = NULL;
+
 	if (overwrite)	fp = fopen(filename, "w+b");
 	else		fp = fopen(filename, "ab");
 
@@ -1692,14 +1697,14 @@ void	m_dumpMemoryReport(const char *filename, const bool overwrite)
 	m_assert(fp);
 	if (!fp) return;
 
-        // Header
+	// Header
 
-        static  char    timeString[25];
-        memset(timeString, 0, sizeof(timeString));
-        time_t  t = time(NULL);
-        struct  tm *tme = localtime(&t);
+	static  char    timeString[25];
+	memset(timeString, 0, sizeof(timeString));
+	time_t  t = time(NULL);
+	struct  tm* tme = localtime(&t);
 	fprintf(fp, " ---------------------------------------------------------------------------------------------------------------------------------- \r\n");
-        fprintf(fp, "|                                             Memory report for: %02d/%02d/%04d %02d:%02d:%02d                                               |\r\n", tme->tm_mon + 1, tme->tm_mday, tme->tm_year + 1900, tme->tm_hour, tme->tm_min, tme->tm_sec);
+	fprintf(fp, "|                                             Memory report for: %02d/%02d/%04d %02d:%02d:%02d                                               |\r\n", tme->tm_mon + 1, tme->tm_mday, tme->tm_year + 1900, tme->tm_hour, tme->tm_min, tme->tm_sec);
 	fprintf(fp, " ---------------------------------------------------------------------------------------------------------------------------------- \r\n");
 	fprintf(fp, "\r\n");
 	fprintf(fp, "\r\n");
@@ -1741,6 +1746,7 @@ void	m_dumpMemoryReport(const char *filename, const bool overwrite)
 	dumpAllocations(fp);
 
 	fclose(fp);
+#endif // DEBUG
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------
