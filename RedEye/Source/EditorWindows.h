@@ -276,4 +276,27 @@ private:
 	std::string geometryPath;
 };
 
+class TextEditor;
+class RE_FileIO;
+class TextEditorManagerWindow :public EditorWindow
+{
+public:
+	TextEditorManagerWindow(const char* name = "TExt Editor Manager", bool start_active = false);
+	~TextEditorManagerWindow();
+
+	void PushEditor(const char* filePath, std::string* newFile = nullptr, const char* shadertTemplate = nullptr, bool* open = nullptr);
+
+private:
+	void Draw(bool secondary = false) override;
+
+	struct editor {
+		std::string* toModify = nullptr;
+		TextEditor* textEditor = nullptr;
+		RE_FileIO* file = nullptr;
+		bool save = false;
+		bool* open = nullptr;
+	};
+	std::vector<editor*> editors;
+};
+
 #endif // !__EDITORWINDOWS__

@@ -545,6 +545,8 @@ void RE_Material::BinarySerialize()
 
 void RE_Material::UseTextureResources()
 {
+	if(shaderMD5) App->resources->Use(shaderMD5);
+
 	for (auto t : tDiffuse) App->resources->Use(t);
 	for (auto t : tSpecular) App->resources->Use(t);
 	for (auto t : tAmbient) App->resources->Use(t);
@@ -559,6 +561,8 @@ void RE_Material::UseTextureResources()
 
 void RE_Material::UnUseTextureResources()
 {
+	if (shaderMD5) App->resources->UnUse(shaderMD5);
+
 	for (auto t : tDiffuse) App->resources->UnUse(t);
 	for (auto t : tSpecular) App->resources->UnUse(t);
 	for (auto t : tAmbient) App->resources->UnUse(t);

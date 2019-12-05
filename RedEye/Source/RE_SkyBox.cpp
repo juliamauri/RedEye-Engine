@@ -273,6 +273,8 @@ void RE_SkyBox::AssetSave()
 	node->PushFloat("skyBoxSize", skyBoxSettings.skyBoxSize);
 	DEL(node);
 
+	toSave.Save();
+
 	std::string newMd5 = toSave.GetMd5();
 	SetMD5(newMd5.c_str());
 	std::string libraryPath("Library/SkyBoxes/");

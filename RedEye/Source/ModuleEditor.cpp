@@ -42,6 +42,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	tools.push_back(textures = new TexturesWindow());
 	tools.push_back(materialeditor = new MaterialEditorWindow());
 	tools.push_back(shadereditor = new ShaderEditorWindow());
+	texteditormanager = new TextEditorManagerWindow();
 
 	grid_size[0] = grid_size[1] = 1.0f;
 }
@@ -227,6 +228,8 @@ update_status ModuleEditor::Update()
 			if (tool->IsActive())
 				tool->DrawWindow(popUpFocus);
 		}
+
+		texteditormanager->DrawWindow();
 	}
 	
 	// Toggle show editor on F1
@@ -258,6 +261,7 @@ bool ModuleEditor::CleanUp()
 	DEL(popupWindow);
 	DEL(about);
 	DEL(select_file);
+	DEL(texteditormanager);
 
 	DEL(grid_go);
 	grid = nullptr;
@@ -545,6 +549,11 @@ const char* ModuleEditor::GetAssetsPanelPath() const
 void ModuleEditor::SelectUndefinedFile(std::string* toSelect) const
 {
 	assets->SelectUndefined(toSelect);
+}
+
+void ModuleEditor::OpenTextEditor(const char* filePath, std::string* filePathStr, const char* shadertTemplate, bool* open)
+{
+	texteditormanager->PushEditor(filePath, filePathStr, shadertTemplate, open);
 }
 
 void ModuleEditor::UpdateCamera()

@@ -972,10 +972,6 @@ ShaderEditorWindow::~ShaderEditorWindow()
 
 void ShaderEditorWindow::Draw(bool secondary)
 {
-	static TextEditor* sTextEditor = nullptr;
-	static RE_FileIO* currentFile = nullptr;
-	static std::string* newPathfile = nullptr;
-	static bool newShaderFile = false;
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
 		if (secondary) {
@@ -993,6 +989,9 @@ void ShaderEditorWindow::Draw(bool secondary)
 		ImGui::Text("Save path: %s", assetPath.c_str());
 
 		static bool compilePass = false;
+		static bool vertexModify = false;
+		static bool fragmentModify = false;
+		static bool geometryModify = false;
 
 		bool exits = App->fs->Exists(assetPath.c_str());
 		if (exits) ImGui::Text("This shader exits, change the name.");
@@ -1052,26 +1051,18 @@ void ShaderEditorWindow::Draw(bool secondary)
 			compilePass = false;
 		}
 		ImGui::SameLine();
-		if (!vertexPath.empty() && !sTextEditor && !currentFile) {
-			if (ImGui::Button("Edit Vertex Shader")) {
-				currentFile = new RE_FileIO(vertexPath.c_str(), App->fs->GetZipPath());
-				if (currentFile->Load()) {
-					sTextEditor = new TextEditor();
-					sTextEditor->InsertText(currentFile->GetBuffer());
-					newPathfile = &vertexPath;
-				}
-				else
-					DEL(currentFile);
-			}
+		if (!vertexPath.empty() && !vertexModify) {
+			if (ImGui::Button("Edit Vertex Shader"))
+				App->editor->OpenTextEditor(vertexPath.c_str(), &vertexPath);
 
 			ImGui::SameLine();
 			if (ImGui::Button("Clear vertex")) vertexPath.clear();
 		}
-		else if (!newShaderFile) {
+		else if (vertexPath.empty() && !vertexModify) {
 			if (ImGui::Button("New vertex shader")) {
-				newShaderFile = true;
-				newPathfile = &vertexPath;
+				App->editor->OpenTextEditor(nullptr, &vertexPath, DEFVERTEXSHADER);\
 			}
+			vertexModify = true;
 		}
 
 		ImGui::Separator();
@@ -1083,25 +1074,19 @@ void ShaderEditorWindow::Draw(bool secondary)
 			compilePass = false;
 		}
 		ImGui::SameLine();
-		if (!fragmentPath.empty() && !sTextEditor && !currentFile) {
+		if (!fragmentPath.empty() && !fragmentModify) {
 			if (ImGui::Button("Edit Fragment Shader")) {
-				currentFile = new RE_FileIO(fragmentPath.c_str(), App->fs->GetZipPath());
-				if (currentFile->Load()) {
-					sTextEditor = new TextEditor();
-					sTextEditor->InsertText(currentFile->GetBuffer());
-					newPathfile = &fragmentPath;
-				}
-				else
-					DEL(currentFile);
+				App->editor->OpenTextEditor(fragmentPath.c_str(), &fragmentPath);
+				fragmentModify = true;
 			}
 
 			ImGui::SameLine();
 			if (ImGui::Button("Clear fragment")) fragmentPath.clear();
 		}
-		else if (!newShaderFile) {
+		else if (fragmentPath.empty() && !fragmentModify) {
 			if (ImGui::Button("New fragment shader")) {
-				newShaderFile = true;
-				newPathfile = &fragmentPath;
+				App->editor->OpenTextEditor(nullptr, &fragmentPath, DEFVERTEXSHADER);
+				fragmentModify = true;
 			}
 		}
 
@@ -1115,25 +1100,19 @@ void ShaderEditorWindow::Draw(bool secondary)
 			compilePass = false;
 		}
 		ImGui::SameLine();
-		if (!geometryPath.empty() && !sTextEditor && !currentFile) {
+		if (!geometryPath.empty() && !geometryModify) {
 			if (ImGui::Button("Edit Geometry Shader")) {
-				currentFile = new RE_FileIO(geometryPath.c_str(), App->fs->GetZipPath());
-				if (currentFile->Load()) {
-					sTextEditor = new TextEditor();
-					sTextEditor->InsertText(currentFile->GetBuffer());
-					newPathfile = &geometryPath;
-				}
-				else
-					DEL(currentFile);
+				App->editor->OpenTextEditor(geometryPath.c_str(), &geometryPath);
+				geometryModify = true;
 			}
 
 			ImGui::SameLine();
 			if (ImGui::Button("Clear geometry")) geometryPath.clear();
 		}
-		else if(!newShaderFile) {
+		else if(!geometryPath.empty() && !geometryModify) {
 			if (ImGui::Button("New geometry shader")) {
-				newShaderFile = true;
-				newPathfile = &geometryPath;
+				App->editor->OpenTextEditor(nullptr, &geometryPath);
+				geometryModify = true;
 			}
 		}
 
@@ -1169,55 +1148,99 @@ void ShaderEditorWindow::Draw(bool secondary)
 	}
 
 	ImGui::End();
+}
 
-	if (!sTextEditor && newShaderFile) {
-		sTextEditor = new TextEditor();
-		if (newPathfile == &vertexPath) sTextEditor->SetText(DEFVERTEXSHADER);
-		else if(newPathfile == &fragmentPath)sTextEditor->SetText(DEFFRAGMENTSHADER);
+TextEditorManagerWindow::TextEditorManagerWindow(const char* name, bool start_active) : EditorWindow(name, start_active)  {}
+
+TextEditorManagerWindow::~TextEditorManagerWindow()
+{
+	for (auto e : editors) {
+		if (e->file) DEL(e->file);
+		if (e->textEditor) DEL(e->textEditor);
+		DEL(e);
+	}
+}
+
+void TextEditorManagerWindow::PushEditor(const char* filePath, std::string* newFile, const char* shadertTemplate, bool* open)
+{
+	for (auto e : editors) if (strcmp(e->toModify->c_str(), filePath) == 0) return;
+
+	editor* e = new editor();
+	if (filePath) {
+		RE_FileIO* file = new RE_FileIO(filePath, App->fs->GetZipPath());
+
+		if (file->Load()) {
+			e->textEditor = new TextEditor();
+			e->toModify = newFile;
+			e->file = file;
+			e->textEditor->SetText(file->GetBuffer());
+		}
+	}
+	else {
+		e->textEditor = new TextEditor();
+		e->toModify = newFile;
+		if (shadertTemplate) {
+			e->textEditor->SetText(shadertTemplate);
+			e->save = true;
+		}
+	}
+	if(e->textEditor) editors.push_back(e);
+	else {
+		if (filePath) DEL(e->file);
+		DEL(e);
 	}
 
+	if (e)e->open = open;
+}
 
-	if (sTextEditor) {
-		static bool save = false;
+void TextEditorManagerWindow::Draw(bool secondary)
+{
+	static std::vector<editor*> toRemoveE;
+	static std::string assetPath;
+	static std::string panelName;
+	uint count = 0;
+	for (auto e : editors) {
 		bool close = false;
-		if (ImGui::Begin("Text Editor", 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		panelName = "Text Editor ";
+		panelName += std::to_string(count++);
+		if (ImGui::Begin(panelName.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 		{
 			if (secondary) {
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 			bool pop = false;
-			if (!currentFile && newShaderFile) {
+			if (!e->file) {
 				ImGui::Text("Shader name:");
 				ImGui::SameLine();
-				ImGui::InputText("##newshadername", newPathfile);
+				ImGui::InputText("##newshadername", e->toModify);
 
 				assetPath = "Assets/Shaders/";
-				assetPath += *newPathfile;
+				assetPath += *e->toModify;
 				ImGui::Text("Save path: %s", assetPath.c_str());
 
 				bool exits = App->fs->Exists(assetPath.c_str());
 				if (pop = exits) ImGui::Text("This shader exits, change the name.");
 			}
 			else
-				ImGui::Text("Editting %s", newPathfile->c_str());
+				ImGui::Text("Editting %s", e->toModify->c_str());
 
 			if (pop && !secondary) {
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (save) {
+			if (e->save) {
 				ImGui::Text("Be sure to save before close!");
 				if (ImGui::Button("Save")) {
-					std::string text = sTextEditor->GetText();
-					if (newShaderFile) {
-						currentFile = new RE_FileIO(assetPath.c_str(), App->fs->GetZipPath());
-						*newPathfile = assetPath;
+					std::string text = e->textEditor->GetText();
+					if (!e->file) {
+						e->file = new RE_FileIO(assetPath.c_str(), App->fs->GetZipPath());
+						*e->toModify = assetPath;
 					}
-					currentFile->Save((char*)text.c_str(), text.size());
-					
-					save = false;
+					e->file->Save((char*)text.c_str(), text.size());
+
+					e->save = false;
 				}
 				ImGui::SameLine();
 			}
@@ -1231,7 +1254,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 				close = true;
 			}
 
-			sTextEditor->Render("Shader Text Editor");
+			e->textEditor->Render("Shader Text Editor");
 
 			if (secondary) {
 				ImGui::PopItemFlag();
@@ -1241,15 +1264,22 @@ void ShaderEditorWindow::Draw(bool secondary)
 
 		ImGui::End();
 
-		if (sTextEditor->IsTextChanged())
-			save = true;
+		if (e->textEditor->IsTextChanged())
+			e->save = true;
 
 		if (close) {
-			DEL(sTextEditor);
-			if(currentFile) DEL(currentFile);
-			newShaderFile = false;
-			save = false;
-			newPathfile = nullptr;
+			if(e->open) *e->open = false;
+			DEL(e->textEditor);
+			if (e->file) DEL(e->file);
+			toRemoveE.push_back(e);
 		}
+	}
+
+	if (!toRemoveE.empty()) {
+		//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
+		editors.erase(std::remove_if(std::begin(editors), std::end(editors),
+			[&](auto x) {return std::find(begin(toRemoveE), end(toRemoveE), x) != end(toRemoveE); }), std::end(editors));
+		for (auto e : toRemoveE) DEL(e);
+		toRemoveE.clear();
 	}
 }

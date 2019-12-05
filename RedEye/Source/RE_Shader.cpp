@@ -5,6 +5,7 @@
 
 #include "RE_ShaderImporter.h"
 #include "RE_CompCamera.h"
+#include "ModuleEditor.h"
 
 #include "RE_GLCache.h"
 
@@ -12,6 +13,7 @@
 #include "md5.h"
 
 #include "ImGui/imgui.h"
+#include "PhysFS\include\physfs.h"
 
 RE_Shader::RE_Shader() { }
 
@@ -119,8 +121,17 @@ void RE_Shader::Draw()
 {
 	//Todo drag & drop of shader files
 	ImGui::Text("Vertex Shader path: %s", shaderSettings.vertexShader.c_str());
+	if (!shaderSettings.vertexShader.empty())
+		if (ImGui::Button("Edit vertex"))
+			App->editor->OpenTextEditor(shaderSettings.vertexShader.c_str(), &shaderSettings.vertexShader);
 	ImGui::Text("Fragment Shader path: %s", shaderSettings.fragmentShader.c_str());
+	if (!shaderSettings.fragmentShader.empty())
+		if (ImGui::Button("Edit fragment"))
+			App->editor->OpenTextEditor(shaderSettings.fragmentShader.c_str(), &shaderSettings.fragmentShader);
 	ImGui::Text("Geometry Shader path: %s", shaderSettings.geometryShader.c_str());
+	if (!shaderSettings.geometryShader.empty())
+		if (ImGui::Button("Edit geometry"))
+			App->editor->OpenTextEditor(shaderSettings.geometryShader.c_str(), &shaderSettings.geometryShader);
 }
 
 void RE_Shader::SaveResourceMeta(JSONNode* metaNode)

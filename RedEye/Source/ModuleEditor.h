@@ -20,6 +20,7 @@ class SelectFile;
 class PopUpWindow;
 class MaterialEditorWindow;
 class ShaderEditorWindow;
+class TextEditorManagerWindow;
 
 struct SoftwareInfo;
 class RE_GameObject;
@@ -71,6 +72,8 @@ public:
 
 	void SelectUndefinedFile(std::string* toSelect)const;
 
+	void OpenTextEditor(const char* filePath, std::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
+
 private:
 
 	void UpdateCamera();
@@ -98,6 +101,7 @@ private:
 	SelectFile* select_file = nullptr;
 	MaterialEditorWindow* materialeditor = nullptr;
 	ShaderEditorWindow* shadereditor = nullptr;
+	TextEditorManagerWindow* texteditormanager = nullptr;
 
 	// Tools
 	RandomTest* rng = nullptr;
