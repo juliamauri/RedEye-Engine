@@ -23,6 +23,8 @@ public:
 	bool LoadFromBinary(const char* buffer, unsigned int size, unsigned int* ID);
 	bool GetBinaryProgram(unsigned int ID, char** buffer, int* size);
 
+	bool Compile(const char* buffer, unsigned int size, unsigned int GLCompile = 0x8B31);
+
 	//get last error
 	const char* GetShaderError();
 

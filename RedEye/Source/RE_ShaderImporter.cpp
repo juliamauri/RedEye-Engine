@@ -64,7 +64,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 				last_error += "\nVertex compilation failed from ";
 				last_error += vertexPath;
 				last_error += ":\n";
-				last_error += infoLog;
+				last_error += std::string(infoLog);
 				last_error += "\n";
 				ret = false;
 			}
@@ -99,7 +99,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 				last_error += "\nFragment compilation failed from ";
 				last_error += fragmentPath;
 				last_error += ":\n";
-				last_error += infoLog;
+				last_error += std::string(infoLog);
 				last_error += "\n";
 				ret = false;
 			}
@@ -133,7 +133,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 				last_error += "\nFragment compilation failed from ";
 				last_error += geometryPath;
 				last_error += ":\n";
-				last_error += infoLog;
+				last_error += std::string(infoLog);
 				last_error += "\n";
 				ret = false;
 			}
@@ -305,6 +305,34 @@ bool RE_ShaderImporter::GetBinaryProgram(unsigned int ID, char** buffer, int* si
 			ret = true;
 		}
 	}
+
+	return ret;
+}
+
+bool RE_ShaderImporter::Compile(const char* buffer, unsigned int size, unsigned int GLCompile)
+{
+	bool ret = true;
+	last_error.clear();
+
+	uint shaderScript = glCreateShader(GLCompile);
+
+	int bSize = size;
+	glShaderSource(shaderScript, 1, &buffer, &bSize);
+	glCompileShader(shaderScript);
+
+	int  success;
+	char infoLog[512];
+	//check
+	glGetShaderiv(shaderScript, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(shaderScript, 512, NULL, infoLog);
+		last_error += "\nVertex compilation failed from\n";
+		last_error += infoLog;
+		last_error += "\n";
+		ret = false;
+	}
+	glDeleteShader(shaderScript);
 
 	return ret;
 }

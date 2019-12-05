@@ -1016,6 +1016,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 				editingShader->SetName(shaderName.c_str());
 				editingShader->SetType(Resource_Type::R_SHADER);
 				editingShader->SetPaths(vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr);
+				editingShader->isShaderFilesChanged();
 				editingShader->SaveMeta();
 				App->resources->Reference((ResourceContainer*)editingShader);
 
@@ -1130,9 +1131,8 @@ void ShaderEditorWindow::Draw(bool secondary)
 			uint sID = 0;
 			if (App->shaders->LoadFromAssets(&sID, vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr, true))
 				compilePass = true;
-			//Error at log  that buffer is too small for show the error
-			//else
-			//	LOG_ERROR("Shader Compilation Error:\n%s", App->shaders->GetShaderError());
+			else
+				LOG_ERROR("Shader Compilation Error:\n%s", App->shaders->GetShaderError());
 				
 			App->handlerrors->StopHandling();
 			if (App->handlerrors->AnyErrorHandled())
@@ -1195,15 +1195,17 @@ void TextEditorManagerWindow::PushEditor(const char* filePath, std::string* newF
 
 void TextEditorManagerWindow::Draw(bool secondary)
 {
+	static const char* compileAsStr[4] = { "None", "Vertex", "Fragment", "Geometry"};
 	static std::vector<editor*> toRemoveE;
 	static std::string assetPath;
-	static std::string panelName;
-	uint count = 0;
+	static std::string names;
+	int count = -1;
 	for (auto e : editors) {
+		count++;
 		bool close = false;
-		panelName = "Text Editor ";
-		panelName += std::to_string(count++);
-		if (ImGui::Begin(panelName.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		names = "Text Editor #";
+		names += std::to_string(count);
+		if (ImGui::Begin(names.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 		{
 			if (secondary) {
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -1225,6 +1227,25 @@ void TextEditorManagerWindow::Draw(bool secondary)
 			else
 				ImGui::Text("Editting %s", e->toModify->c_str());
 
+			names = "Compile as shader script #";
+			names += std::to_string(count);
+			if (ImGui::Button(names.c_str())) {
+				App->handlerrors->StartHandling();
+
+				std::string text = e->textEditor->GetText();
+
+				if (!(e->works = App->shaders->Compile(text.c_str(), text.size())))
+					LOG_ERROR("%s", App->shaders->GetShaderError());
+				
+				e->compiled = true;
+
+				App->handlerrors->StopHandling();
+				if (App->handlerrors->AnyErrorHandled())
+					App->handlerrors->ActivatePopUp();
+			}
+
+			if (e->compiled) ImGui::Text((e->works) ? "Succeful compile" : "Error compile");
+
 			if (pop && !secondary) {
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -1232,7 +1253,9 @@ void TextEditorManagerWindow::Draw(bool secondary)
 
 			if (e->save) {
 				ImGui::Text("Be sure to save before close!");
-				if (ImGui::Button("Save")) {
+				names = "Save #";
+				names += std::to_string(count);
+				if (ImGui::Button(names.c_str())) {
 					std::string text = e->textEditor->GetText();
 					if (!e->file) {
 						e->file = new RE_FileIO(assetPath.c_str(), App->fs->GetZipPath());
@@ -1250,11 +1273,15 @@ void TextEditorManagerWindow::Draw(bool secondary)
 				ImGui::PopStyleVar();
 			}
 
-			if (ImGui::Button("Quit")) {
+			names = "Quit #";
+			names += std::to_string(count);
+			if (ImGui::Button(names.c_str())) {
 				close = true;
 			}
 
-			e->textEditor->Render("Shader Text Editor");
+			names = "Shader Text Editor #";
+			names += std::to_string(count);
+			e->textEditor->Render(names.c_str());
 
 			if (secondary) {
 				ImGui::PopItemFlag();
@@ -1264,8 +1291,10 @@ void TextEditorManagerWindow::Draw(bool secondary)
 
 		ImGui::End();
 
-		if (e->textEditor->IsTextChanged())
+		if (e->textEditor->IsTextChanged()) {
+			e->compiled = false;
 			e->save = true;
+		}
 
 		if (close) {
 			if(e->open) *e->open = false;

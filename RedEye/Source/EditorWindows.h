@@ -295,7 +295,10 @@ private:
 		RE_FileIO* file = nullptr;
 		bool save = false;
 		bool* open = nullptr;
+		bool compiled = false;
+		bool works = false;
 	};
+
 	std::vector<editor*> editors;
 };
 
