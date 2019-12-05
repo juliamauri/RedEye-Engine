@@ -10,8 +10,11 @@ class RE_CompCamera;
 
 struct RE_ShaderSettings {
 	std::string vertexShader;
+	signed long long vlastModified = 0;
 	std::string fragmentShader;
+	signed long long flastModified = 0;
 	std::string geometryShader;
+	signed long long glastModified = 0;
 };
 
 class RE_Shader :
@@ -39,6 +42,10 @@ public:
 	void UploadModel(float* model);
 	void UploadCustomUniforms(std::vector<Cvar>* FromMatValues);
 
+	bool isShaderFilesChanged();
+
+	void ReImport()override;
+
 private:
 	void Draw() override;
 	void SaveResourceMeta(JSONNode* metaNode) override;
@@ -47,6 +54,10 @@ private:
 	void AssetLoad();
 	void LibraryLoad();
 	void LibrarySave();
+
+	void GetVertexFileInfo(const char*& path, signed long long* lastTimeModified)const;
+	void GetFragmentFileInfo(const char*& path, signed long long* lastTimeModified)const;
+	void GetGeometryFileInfo(const char*& path, signed long long* lastTimeModified)const;
 
 private:
 	unsigned int ID = 0;

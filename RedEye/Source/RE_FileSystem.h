@@ -44,7 +44,7 @@ public:
 		P_ADDFILE,
 		P_DELETE,
 		P_REIMPORT,
-		P_ADDFOLDER
+		P_ADDFOLDER,
 	};
 
 	struct RE_File;
@@ -163,6 +163,7 @@ private:
 	std::vector<RE_Meta*> metaRecentlyAdded;
 
 	std::list<RE_File*> toImport;
+	std::list<RE_Meta*> toReImport;
 };
 
 class RE_FileIO

@@ -117,6 +117,77 @@ void RE_Shader::UploadModel(float* model)
 	RE_ShaderImporter::setFloat4x4(ID, "model", model);
 }
 
+bool RE_Shader::isShaderFilesChanged()
+{
+	bool ret = false;
+
+	const char* shaderpath;
+	signed long long lastTimeModified = 0;
+	if (!shaderSettings.vertexShader.empty()) {
+		GetVertexFileInfo(shaderpath, &lastTimeModified);
+		PHYSFS_Stat shaderfilestat;
+		if (PHYSFS_stat(shaderpath, &shaderfilestat)) {
+			if (lastTimeModified != shaderfilestat.modtime) {
+				shaderSettings.vlastModified = shaderfilestat.modtime;
+				ret = true;
+			}
+		}
+	}
+
+	if (!shaderSettings.fragmentShader.empty()) {
+		GetFragmentFileInfo(shaderpath, &lastTimeModified);
+		PHYSFS_Stat shaderfilestat;
+		if (PHYSFS_stat(shaderpath, &shaderfilestat)) {
+			if (lastTimeModified != shaderfilestat.modtime) {
+				shaderSettings.flastModified = shaderfilestat.modtime;
+				ret = true;
+			}
+		}
+	}
+
+	if (!shaderSettings.geometryShader.empty()) {
+	GetGeometryFileInfo(shaderpath, &lastTimeModified);
+		PHYSFS_Stat shaderfilestat;
+		if (PHYSFS_stat(shaderpath, &shaderfilestat)) {
+			if (lastTimeModified != shaderfilestat.modtime) {
+				shaderSettings.glastModified = shaderfilestat.modtime;
+				ret = true;
+			}
+		}
+	}
+
+	return ret;
+}
+
+void RE_Shader::ReImport()
+{
+	bool reload = (ResourceContainer::inMemory);
+	if (reload) UnloadMemory();
+	SetPaths(shaderSettings.vertexShader.c_str(), shaderSettings.fragmentShader.c_str(), (!shaderSettings.geometryShader.empty()) ? shaderSettings.geometryShader.c_str() : nullptr);
+	AssetLoad();
+	SaveMeta();
+	//LibrarySave();
+	if(!reload) UnloadMemory();
+}
+
+void RE_Shader::GetVertexFileInfo(const char*& path, signed long long* lastTimeModified) const
+{
+	path = shaderSettings.vertexShader.c_str();
+	*lastTimeModified = shaderSettings.vlastModified;
+}
+
+void RE_Shader::GetFragmentFileInfo(const char*& path, signed long long* lastTimeModified) const
+{
+	path = shaderSettings.fragmentShader.c_str();
+	*lastTimeModified = shaderSettings.flastModified;
+}
+
+void RE_Shader::GetGeometryFileInfo(const char*& path, signed long long* lastTimeModified) const
+{
+	path = shaderSettings.geometryShader.c_str();
+	*lastTimeModified = shaderSettings.glastModified;
+}
+
 void RE_Shader::Draw()
 {
 	//Todo drag & drop of shader files
@@ -137,15 +208,21 @@ void RE_Shader::Draw()
 void RE_Shader::SaveResourceMeta(JSONNode* metaNode)
 {
 	metaNode->PushString("vertexPath", shaderSettings.vertexShader.c_str());
+	metaNode->PushSignedLongLong("vLastModified", shaderSettings.vlastModified);
 	metaNode->PushString("fragmentPath", shaderSettings.fragmentShader.c_str());
+	metaNode->PushSignedLongLong("fLastModified", shaderSettings.flastModified);
 	metaNode->PushString("geometryPath", shaderSettings.geometryShader.c_str());
+	metaNode->PushSignedLongLong("gLastModified", shaderSettings.glastModified);
 }
 
 void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 {
 	shaderSettings.vertexShader = metaNode->PullString("vertexPath", "");
+	shaderSettings.vlastModified = metaNode->PullSignedLongLong("vLastModified", 0);
 	shaderSettings.fragmentShader = metaNode->PullString("fragmentPath", "");
+	shaderSettings.flastModified = metaNode->PullSignedLongLong("fLastModified", 0);
 	shaderSettings.geometryShader = metaNode->PullString("geometryPath", "");
+	shaderSettings.glastModified = metaNode->PullSignedLongLong("gLastModified", 0);
 
 	restoreSettings = shaderSettings;
 }

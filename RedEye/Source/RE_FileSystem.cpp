@@ -11,6 +11,7 @@
 #include "RE_CompTransform.h"
 #include "RE_CompMesh.h"
 #include "RE_Mesh.h"
+#include "RE_Shader.h"
 #include "RE_ResourceManager.h"
 #include "RE_ModelImporter.h"
 #include "RE_PrimitiveManager.h"
@@ -131,7 +132,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 	Timer time;
 	bool run = true;
 
-	if ((dirIter == assetsDirectories.begin()) && (!assetsToProcess.empty() || !filesToFindMeta.empty() || !toImport.empty())) dirIter = assetsDirectories.end();
+	if ((dirIter == assetsDirectories.begin()) && (!assetsToProcess.empty() || !filesToFindMeta.empty() || !toImport.empty() || !toReImport.empty())) dirIter = assetsDirectories.end();
 
 	while ((doAll || run) && dirIter != assetsDirectories.end()) {
 		std::stack<RE_ProcessPath*> toProcess = (*dirIter)->CheckAndApply(&metaRecentlyAdded);
@@ -211,6 +212,11 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					}
 				}
 				assetsDirectories.push_back(dir);
+				break;
+			}
+			case P_REIMPORT:
+			{
+				toReImport.push_back(process->toProcess->AsMeta());
 				break;
 			}
 			}
@@ -358,6 +364,29 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			App->handlerrors->StopHandling();
 			if (App->handlerrors->AnyErrorHandled())
 				App->handlerrors->ActivatePopUp();
+		}
+
+		if ((doAll || run) && !toReImport.empty()) {
+			std::vector<RE_Meta*> toRemoveM;
+
+			for (RE_Meta* meta : toReImport) {
+				LOG("ReImporting %s", meta->path.c_str());
+
+				App->resources->At(meta->resource)->ReImport();
+
+				toRemoveM.push_back(meta);
+
+				if (!doAll && extra_ms < time.Read()) {
+					run = false;
+					break;
+				}
+			}
+
+			if (!toRemoveM.empty()) {
+				//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
+				toReImport.erase(std::remove_if(std::begin(toReImport), std::end(toReImport),
+					[&](auto x) {return std::find(begin(toRemoveM), end(toRemoveM), x) != end(toRemoveM); }), std::end(toReImport));
+			}
 		}
 	}
 	unsigned int realTime = time.Read();
@@ -1371,6 +1400,20 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 						ret.push(newProcess);
 						AddBeforeOf(newFile->AsPath(),iter);
 						iter--;
+					}
+					else if ((*iter)->AsFile()->fType == FileType::F_META)
+					{
+						 bool reimport = false;
+						 ResourceContainer* res = App->resources->At((*iter)->AsFile()->AsMeta()->resource);
+						 if (res->GetType() == Resource_Type::R_SHADER) {
+							 RE_Shader* shadeRes = (RE_Shader*)res;
+							 if (shadeRes->isShaderFilesChanged()) {
+								 RE_ProcessPath* newProcess = new RE_ProcessPath();
+								 newProcess->whatToDo = P_REIMPORT;
+								 newProcess->toProcess = (*iter);
+								 ret.push(newProcess);
+							 }
+						 }
 					}
 				}
 			}

@@ -51,6 +51,7 @@ public:
 	virtual void UnloadMemory(){}
 
 	virtual void Import(bool keepInMemory = true) { }
+	virtual void ReImport() { }
 
 	void SaveMeta();
 	void LoadMeta();
