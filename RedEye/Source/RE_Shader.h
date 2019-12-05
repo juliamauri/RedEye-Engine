@@ -67,7 +67,7 @@ private:
 	bool applySave = false;
 	RE_ShaderSettings restoreSettings;
 
-	std::vector<Cvar> customUniform;
+	std::vector<ShaderCvar> uniforms;
 };
 
 #endif // !__RE_SHADER_H__

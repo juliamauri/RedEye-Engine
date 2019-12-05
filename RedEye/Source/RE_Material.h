@@ -101,7 +101,7 @@ private:
 	bool applySave = false;
 
 	const char* shaderMD5 = nullptr;
-	std::vector<Cvar> interactuableShaderValues;
+	std::vector<ShaderCvar> fromShaderUniforms;
 };
 
 #endif // !__RE_MATERIAL_H__

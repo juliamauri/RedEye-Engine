@@ -352,9 +352,19 @@ void RE_ShaderImporter::Delete(unsigned int ID)
 	glUseProgram(ID);
 }
 
+int RE_ShaderImporter::getLocation(unsigned int ID, const char* name)
+{
+	return glGetUniformLocation(ID, name);
+}
+
 void RE_ShaderImporter::setBool(unsigned int ID, const char* name, bool value)
 {
 	glUniform1i(glGetUniformLocation(ID, name), (int)value);
+}
+
+void RE_ShaderImporter::setBool(int loc, bool value)
+{
+	glUniform1i(loc, (int)value);
 }
 
 void RE_ShaderImporter::setBool(unsigned int ID, const char* name, bool value, bool value2)
@@ -362,9 +372,19 @@ void RE_ShaderImporter::setBool(unsigned int ID, const char* name, bool value, b
 	glUniform2i(glGetUniformLocation(ID, name), (int)value, (int)value2);
 }
 
+void RE_ShaderImporter::setBool(int loc, bool value, bool value2)
+{
+	glUniform2i(loc, (int)value, (int)value2);
+}
+
 void RE_ShaderImporter::setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3) 
 {
 	glUniform3i(glGetUniformLocation(ID, name), (int)value, (int)value2, (int)value3);
+}
+
+void RE_ShaderImporter::setBool(int loc, bool value, bool value2, bool value3)
+{
+	glUniform3i(loc, (int)value, (int)value2, (int)value3);
 }
 
 void RE_ShaderImporter::setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3, bool value4) 
@@ -372,9 +392,19 @@ void RE_ShaderImporter::setBool(unsigned int ID, const char* name, bool value, b
 	glUniform4i(glGetUniformLocation(ID, name), (int)value, (int)value2, (int)value3, (int)value4);
 }
 
+void RE_ShaderImporter::setBool(int loc, bool value, bool value2, bool value3, bool value4)
+{
+	glUniform4i(loc, (int)value, (int)value2, (int)value3, (int)value4);
+}
+
 void RE_ShaderImporter::setInt(unsigned int ID, const char* name, int value) 
 {
 	glUniform1i(glGetUniformLocation(ID, name), value);
+}
+
+void RE_ShaderImporter::setInt(int loc, int value)
+{
+	glUniform1i(loc, value);
 }
 
 void RE_ShaderImporter::setInt(unsigned int ID, const char * name, int value, int value2) 
@@ -382,9 +412,19 @@ void RE_ShaderImporter::setInt(unsigned int ID, const char * name, int value, in
 	glUniform2i(glGetUniformLocation(ID, name), value, value2);
 }
 
+void RE_ShaderImporter::setInt(int loc, int value, int value2)
+{
+	glUniform2i(loc, value, value2);
+}
+
 void RE_ShaderImporter::setInt(unsigned int ID, const char * name, int value, int value2, int value3) 
 {
 	glUniform3i(glGetUniformLocation(ID, name), value, value2, value3);
+}
+
+void RE_ShaderImporter::setInt(int loc, int value, int value2, int value3)
+{
+	glUniform3i(loc, value, value2, value3);
 }
 
 void RE_ShaderImporter::setInt(unsigned int ID, const char * name, int value, int value2, int value3, int value4) 
@@ -392,9 +432,19 @@ void RE_ShaderImporter::setInt(unsigned int ID, const char * name, int value, in
 	glUniform4i(glGetUniformLocation(ID, name), value, value2, value3, value4);
 }
 
+void RE_ShaderImporter::setInt(int loc, int value, int value2, int value3, int value4)
+{
+	glUniform4i(loc, value, value2, value3, value4);
+}
+
 void RE_ShaderImporter::setFloat(unsigned int ID, const char*name, float value) 
 {
 	glUniform1f(glGetUniformLocation(ID, name), value);
+}
+
+void RE_ShaderImporter::setFloat(int loc, float value)
+{
+	glUniform1f(loc, value);
 }
 
 void RE_ShaderImporter::setFloat(unsigned int ID, const char * name, float value, float value2) 
@@ -402,9 +452,19 @@ void RE_ShaderImporter::setFloat(unsigned int ID, const char * name, float value
 	glUniform2f(glGetUniformLocation(ID, name), value, value2);
 }
 
+void RE_ShaderImporter::setFloat(int loc, float value, float value2)
+{
+	glUniform2f(loc, value, value2);
+}
+
 void RE_ShaderImporter::setFloat(unsigned int ID, const char * name, float value, float value2, float value3) 
 {
 	glUniform3f(glGetUniformLocation(ID, name), value, value2, value3);
+}
+
+void RE_ShaderImporter::setFloat(int loc, float value, float value2, float value3)
+{
+	glUniform3f(loc, value, value2, value3);
 }
 
 void RE_ShaderImporter::setFloat(unsigned int ID, const char * name, float value, float value2, float value3, float value4) 
@@ -412,9 +472,19 @@ void RE_ShaderImporter::setFloat(unsigned int ID, const char * name, float value
 	glUniform4f(glGetUniformLocation(ID, name), value, value2, value3, value4);
 }
 
+void RE_ShaderImporter::setFloat(int loc, float value, float value2, float value3, float value4)
+{
+	glUniform4f(loc, value, value2, value3, value4);
+}
+
 void RE_ShaderImporter::setFloat(unsigned int ID, const char * name, math::vec value) 
 {
 	glUniform3f(glGetUniformLocation(ID, name), value.x, value.y, value.z);
+}
+
+void RE_ShaderImporter::setFloat(int loc, math::vec value)
+{
+	glUniform3f(loc, value.x, value.y, value.z);
 }
 
 void RE_ShaderImporter::setUnsignedInt(unsigned int ID, const char * name, unsigned int value)
@@ -422,9 +492,19 @@ void RE_ShaderImporter::setUnsignedInt(unsigned int ID, const char * name, unsig
 	glUniform1ui(glGetUniformLocation(ID, name), value);
 }
 
+void RE_ShaderImporter::setUnsignedInt(int loc, unsigned int value)
+{
+	glUniform1ui(loc, value);
+}
+
 void RE_ShaderImporter::setUnsignedInt(unsigned int ID, const char * name, unsigned int value, unsigned int value2)
 {
 	glUniform2ui(glGetUniformLocation(ID, name), value, value2);
+}
+
+void RE_ShaderImporter::setUnsignedInt(int loc, unsigned int value, unsigned int value2)
+{
+	glUniform2ui(loc, value, value2);
 }
 
 void RE_ShaderImporter::setUnsignedInt(unsigned int ID, const char * name, unsigned int value, unsigned int value2, unsigned int value3)
@@ -432,9 +512,19 @@ void RE_ShaderImporter::setUnsignedInt(unsigned int ID, const char * name, unsig
 	glUniform3ui(glGetUniformLocation(ID, name), value, value2, value3);
 }
 
+void RE_ShaderImporter::setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3)
+{
+	glUniform3ui(loc, value, value2, value3);
+}
+
 void RE_ShaderImporter::setUnsignedInt(unsigned int ID, const char * name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4)
 {
 	glUniform4ui(glGetUniformLocation(ID, name), value, value2, value3, value4);
+}
+
+void RE_ShaderImporter::setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4)
+{
+	glUniform4ui(loc, value, value2, value3, value4);
 }
 
 void RE_ShaderImporter::setFloat3x3(unsigned int ID, const char * name, const float * trans)
@@ -442,7 +532,17 @@ void RE_ShaderImporter::setFloat3x3(unsigned int ID, const char * name, const fl
 	glUniformMatrix3fv(glGetUniformLocation(ID, name), 1, GL_FALSE, trans);
 }
 
+void RE_ShaderImporter::setFloat3x3(int loc, const float* trans)
+{
+	glUniformMatrix3fv(loc, 1, GL_FALSE, trans);
+}
+
 void RE_ShaderImporter::setFloat4x4(unsigned int ID, const char * name, const float* trans)
 {
 	glUniformMatrix4fv(glGetUniformLocation(ID, name), 1, GL_FALSE, trans);
+}
+
+void RE_ShaderImporter::setFloat4x4(int loc, const float* trans)
+{
+	glUniformMatrix4fv(loc, 1, GL_FALSE, trans);
 }

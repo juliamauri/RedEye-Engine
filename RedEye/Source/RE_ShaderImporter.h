@@ -32,6 +32,8 @@ public:
 	static void use(unsigned int ID);
 	//Delete manually shader
 	static void Delete(unsigned int ID);
+	//Returns location
+	static int getLocation(unsigned int ID, const char* name);
 
 	// utility uniform functions
 	static void setBool(unsigned int ID, const char* name, bool value);
@@ -39,24 +41,49 @@ public:
 	static void setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3);
 	static void setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3, bool value4);
 
+	static void setBool(int loc, bool value);
+	static void setBool(int loc, bool value, bool value2);
+	static void setBool(int loc, bool value, bool value2, bool value3);
+	static void setBool(int loc, bool value, bool value2, bool value3, bool value4);
+
 	static void setInt(unsigned int ID, const char* name, int value);
 	static void setInt(unsigned int ID, const char* name, int value, int value2);
 	static void setInt(unsigned int ID, const char* name, int value, int value2, int value3);
 	static void setInt(unsigned int ID, const char* name, int value, int value2, int value3, int value4);
+
+	static void setInt(int loc, int value);
+	static void setInt(int loc, int value, int value2);
+	static void setInt(int loc, int value, int value2, int value3);
+	static void setInt(int loc, int value, int value2, int value3, int value4);
 
 	static void setFloat(unsigned int ID, const char* name, float value);
 	static void setFloat(unsigned int ID, const char* name, float value, float value2);
 	static void setFloat(unsigned int ID, const char* name, float value, float value2, float value3);
 	static void setFloat(unsigned int ID, const char* name, float value, float value2, float value3, float value4);
 	static void setFloat(unsigned int ID, const char* name, math::vec value);
+
+	static void setFloat(int loc, float value);
+	static void setFloat(int loc, float value, float value2);
+	static void setFloat(int loc, float value, float value2, float value3);
+	static void setFloat(int loc, float value, float value2, float value3, float value4);
+	static void setFloat(int loc, math::vec value);
 	
 	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value);
 	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2);
 	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3);
 	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
 
+	static void setUnsignedInt(int loc, unsigned int value);
+	static void setUnsignedInt(int loc, unsigned int value, unsigned int value2);
+	static void setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3);
+	static void setUnsignedInt(int loc, const char* name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
+
 	static void setFloat3x3(unsigned int ID, const char* name, const float* trans);
 	static void setFloat4x4(unsigned int ID, const char* name, const float* trans);
+
+	static void setFloat3x3(int loc, const float* trans);
+	static void setFloat4x4(int loc, const float* trans);
+
 
 private:
 	const char* folderPath;

@@ -69,6 +69,14 @@ public:
 	RE_GameObject*			AsGO() const;
 };
 
+class ShaderCvar
+{
+	std::string name;
+	int location;
+	Cvar var;
+	bool custom;
+};
+
 /*class DoubleCvar : public Cvar
 {
 public:
