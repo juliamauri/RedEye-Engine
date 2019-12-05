@@ -1053,17 +1053,19 @@ void ShaderEditorWindow::Draw(bool secondary)
 		}
 		ImGui::SameLine();
 		if (!vertexPath.empty() && !vertexModify) {
-			if (ImGui::Button("Edit Vertex Shader"))
-				App->editor->OpenTextEditor(vertexPath.c_str(), &vertexPath);
+			if (ImGui::Button("Edit Vertex Shader")) {
+				vertexModify = true;
+				App->editor->OpenTextEditor(vertexPath.c_str(), &vertexPath, nullptr, &vertexModify);
+			}
 
 			ImGui::SameLine();
 			if (ImGui::Button("Clear vertex")) vertexPath.clear();
 		}
 		else if (vertexPath.empty() && !vertexModify) {
 			if (ImGui::Button("New vertex shader")) {
-				App->editor->OpenTextEditor(nullptr, &vertexPath, DEFVERTEXSHADER);\
+				vertexModify = true;
+				App->editor->OpenTextEditor(nullptr, &vertexPath, DEFVERTEXSHADER, &vertexModify);
 			}
-			vertexModify = true;
 		}
 
 		ImGui::Separator();
@@ -1077,8 +1079,8 @@ void ShaderEditorWindow::Draw(bool secondary)
 		ImGui::SameLine();
 		if (!fragmentPath.empty() && !fragmentModify) {
 			if (ImGui::Button("Edit Fragment Shader")) {
-				App->editor->OpenTextEditor(fragmentPath.c_str(), &fragmentPath);
 				fragmentModify = true;
+				App->editor->OpenTextEditor(fragmentPath.c_str(), &fragmentPath, nullptr, &fragmentModify);
 			}
 
 			ImGui::SameLine();
@@ -1086,11 +1088,10 @@ void ShaderEditorWindow::Draw(bool secondary)
 		}
 		else if (fragmentPath.empty() && !fragmentModify) {
 			if (ImGui::Button("New fragment shader")) {
-				App->editor->OpenTextEditor(nullptr, &fragmentPath, DEFVERTEXSHADER);
 				fragmentModify = true;
+				App->editor->OpenTextEditor(nullptr, &fragmentPath, DEFVERTEXSHADER, &fragmentModify);
 			}
 		}
-
 
 		ImGui::Separator();
 		ImGui::Text("Geometry Shader Path:\n%s", (geometryPath.empty()) ? "No path." : geometryPath.c_str());
@@ -1103,17 +1104,17 @@ void ShaderEditorWindow::Draw(bool secondary)
 		ImGui::SameLine();
 		if (!geometryPath.empty() && !geometryModify) {
 			if (ImGui::Button("Edit Geometry Shader")) {
-				App->editor->OpenTextEditor(geometryPath.c_str(), &geometryPath);
 				geometryModify = true;
+				App->editor->OpenTextEditor(geometryPath.c_str(), &geometryPath, nullptr, &geometryModify);
 			}
 
 			ImGui::SameLine();
 			if (ImGui::Button("Clear geometry")) geometryPath.clear();
 		}
-		else if(!geometryPath.empty() && !geometryModify) {
+		else if(geometryPath.empty() && !geometryModify) {
 			if (ImGui::Button("New geometry shader")) {
-				App->editor->OpenTextEditor(nullptr, &geometryPath);
 				geometryModify = true;
+				App->editor->OpenTextEditor(nullptr, &geometryPath, nullptr, &geometryModify);
 			}
 		}
 
@@ -1144,7 +1145,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 			ImGui::PopStyleVar();
 		}
 
-		if (waitingPath && !waitingPath->empty()) waitingPath = nullptr;
+		if(waitingPath) waitingPath = nullptr;
 	}
 
 	ImGui::End();
