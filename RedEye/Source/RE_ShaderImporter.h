@@ -76,7 +76,7 @@ public:
 	static void setUnsignedInt(int loc, unsigned int value);
 	static void setUnsignedInt(int loc, unsigned int value, unsigned int value2);
 	static void setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3);
-	static void setUnsignedInt(int loc, const char* name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
+	static void setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
 
 	static void setFloat3x3(unsigned int ID, const char* name, const float* trans);
 	static void setFloat4x4(unsigned int ID, const char* name, const float* trans);

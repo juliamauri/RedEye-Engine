@@ -99,9 +99,9 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	if (!isInternal()) SetMetaPath("Assets/Shaders/");
 }
 
-std::vector<Cvar> RE_Shader::GetUniformValues()
+std::vector<ShaderCvar> RE_Shader::GetUniformValues()
 {
-	return customUniform;
+	return uniforms;
 }
 
 void RE_Shader::UploadCameraMatrices(RE_CompCamera* camera)

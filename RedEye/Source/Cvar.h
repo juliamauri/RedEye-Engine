@@ -1,6 +1,8 @@
 #ifndef __CVAR__
 #define __CVAR__
 
+#include <string>
+
 class RE_GameObject;
 
 class Cvar // Global Value Container

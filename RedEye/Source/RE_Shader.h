@@ -34,7 +34,7 @@ public:
 
 	void SetPaths(const char* vertex, const char* fragment, const char* geometry = nullptr);
 
-	std::vector<Cvar> GetUniformValues();
+	std::vector<ShaderCvar> GetUniformValues();
 
 	void DrawCustomUniforms(std::vector<Cvar>* FromMatValues);
 
