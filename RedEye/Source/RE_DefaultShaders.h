@@ -28,19 +28,19 @@
 "in vec2 TexCoord;\n"																   \
 "\n"																				   \
 "uniform float useTexture;\n"														   \
-"uniform sampler2D texture_diffuse1;\n"											       \
+"uniform sampler2D tdiffuse0;\n"											       \
 "\n"																				   \
 "uniform float useColor;\n"														       \
-"uniform vec3 objectColor;\n"													       \
+"uniform vec3 cdiffuse;\n"													       \
 "\n"																			       \
 "void main()\n"																	       \
 "{\n"																				   \
 "	if (useTexture > 0.0f && useColor > 0.0f)\n"									   \
-"		FragColor = texture(texture_diffuse1, TexCoord) * vec4(objectColor, 1.0);\n"   \
+"		FragColor = texture(tdiffuse0, TexCoord) * vec4(cdiffuse, 1.0);\n"   \
 "	else if (useTexture > 0.0f)\n"												       \
-"		FragColor = texture(texture_diffuse1, TexCoord);\n"						       \
+"		FragColor = texture(tdiffuse0, TexCoord);\n"						       \
 "	else if (useColor > 0.0f)\n"													   \
-"		FragColor = vec4(objectColor, 1.0);\n"									       \
+"		FragColor = vec4(cdiffuse, 1.0);\n"									       \
 "}\0"
 
 #define SKYBOXVERTEXSHADER							  \

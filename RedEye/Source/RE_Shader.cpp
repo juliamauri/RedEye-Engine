@@ -25,6 +25,7 @@ void RE_Shader::LoadInMemory()
 {
 	if (App->fs->Exists(shaderSettings.vertexShader.c_str()) && App->fs->Exists(shaderSettings.fragmentShader.c_str())) {
 		AssetLoad();
+		GetLocations();
 	}
 	else {
 		LOG_ERROR("Texture %s not found on project", GetName());
@@ -59,6 +60,23 @@ void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuff
 
 	App->shaders->LoadFromBuffer(&ID, vertexBuffer, vertexLenght, fragmentBuffer, fragmentLenght, geometryBuffer, geometryLenght);
 
+	uniforms.clear();
+	std::vector<std::string> lines;
+	if (vertexBuffer) {
+		std::vector<std::string> slines = GetUniformLines(vertexBuffer);
+		if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
+	}
+	if (fragmentBuffer) {
+		std::vector<std::string> slines = GetUniformLines(fragmentBuffer);
+		if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
+	}
+	if (geometryBuffer) {
+		std::vector<std::string> slines = GetUniformLines(geometryBuffer);
+		if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
+	}
+	MountShaderCvar(lines);
+	GetLocations();
+
 	ResourceContainer::inMemory = true;
 }
 
@@ -91,6 +109,8 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 			buffer += gbuffer;
 		}
 	}
+
+	ParseAndGetUniforms();
 
 	SetMD5(MD5(buffer).hexdigest().c_str());
 	std::string libraryPath("Library/Shaders/");
@@ -188,6 +208,135 @@ void RE_Shader::GetGeometryFileInfo(const char*& path, signed long long* lastTim
 	*lastTimeModified = shaderSettings.glastModified;
 }
 
+void RE_Shader::ParseAndGetUniforms()
+{
+	uniforms.clear();
+	std::vector<std::string> lines;
+	if (!shaderSettings.vertexShader.empty()) {
+		RE_FileIO sFile(shaderSettings.vertexShader.c_str());
+		if (sFile.Load()) {
+			std::vector<std::string> slines = GetUniformLines(sFile.GetBuffer());
+			if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
+		}
+	}
+	if (!shaderSettings.fragmentShader.empty()) {
+		RE_FileIO sFile(shaderSettings.fragmentShader.c_str());
+		if (sFile.Load()) {
+			std::vector<std::string> slines = GetUniformLines(sFile.GetBuffer());
+			if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
+		}
+	}
+	if (!shaderSettings.geometryShader.empty()) {
+		RE_FileIO sFile(shaderSettings.geometryShader.c_str());
+		if (sFile.Load()) {
+			std::vector<std::string> slines = GetUniformLines(sFile.GetBuffer());
+			if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
+		}
+	}
+	MountShaderCvar(lines);
+}
+
+std::vector<std::string> RE_Shader::GetUniformLines(const char* buffer)
+{
+	std::vector<std::string> lines;
+	std::string parse(buffer);
+	int linePos = parse.find_first_of('\n');
+	while (linePos != std::string::npos){
+		std::string line = parse.substr(0, linePos);
+		int exitsUniform = line.find("uniform");
+		if (exitsUniform != std::string::npos) lines.push_back(line);
+		parse.erase(0, linePos + 1);
+		linePos = parse.find_first_of('\n');
+	} 
+	return lines;
+}
+
+void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
+{
+	static const char* internalNames[23] = { "useTexture", "useColor", "time", "dt", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "treflection" };
+	for (auto uniform : uniformLines){
+		int pos = uniform.find_first_of(" ");
+		if (pos != std::string::npos) {
+			ShaderCvar sVar;
+
+			pos++;
+			std::string typeAndName = uniform.substr(pos);
+
+			std::string varType = typeAndName.substr(0, pos = typeAndName.find_first_of(" "));
+
+			sVar.name = typeAndName.substr(pos + 1, typeAndName.size() - pos - 2);
+
+			bool b2[2] = { false, false };
+			bool b3[3] = { false, false, false };
+			bool b4[4] = { false, false, false, false };
+
+			int i2[2] = { 0, 0 };
+			int i3[3] = { 0, 0, 0 };
+			int i4[4] = { 0, 0, 0, 0 };
+			float f = 0.0;
+
+			//Find type
+			if (varType.compare("bool") == 0)
+				sVar.SetValue(true, true);
+			else if (varType.compare("int") == 0)
+				sVar.SetValue(-1, true);
+			else if (varType.compare("sampler2DShadow") == 0 || varType.compare("sampler1DShadow") == 0 || varType.compare("samplerCube") == 0 || varType.compare("sampler3D") == 0 || varType.compare("sampler1D") == 0 || varType.compare("sampler2D") == 0)
+				sVar.SetSampler(-1, true);
+			else if (varType.compare("float") == 0)
+				sVar.SetValue(f, true);
+			else if (varType.compare("vec2") == 0)
+				sVar.SetValue(math::float2::zero, true);
+			else if (varType.compare("vec3") == 0)
+				sVar.SetValue(math::float3::zero, true);
+			else if (varType.compare("vec4") == 0)
+				sVar.SetValue(math::float4::zero, false, true);
+			else if (varType.compare("bvec2") == 0)
+				sVar.SetValue(b2, 2, true);
+			else if (varType.compare("bvec3") == 0)
+				sVar.SetValue(b3, 3, true);
+			else if (varType.compare("bvec4") == 0)
+				sVar.SetValue(b4, 4, true);
+			else if (varType.compare("ivec2") == 0)
+				sVar.SetValue(i2, 2, true);
+			else if (varType.compare("ivec3") == 0)
+				sVar.SetValue(i3, 3, true);
+			else if (varType.compare("ivec4") == 0)
+				sVar.SetValue(i4, 4, true);
+			else if (varType.compare("mat2") == 0)
+				sVar.SetValue(math::float4::zero, true, true);
+			else if (varType.compare("mat3") == 0)
+				sVar.SetValue(math::float3x3::zero, true);
+			else if (varType.compare("mat4") == 0)
+				sVar.SetValue(math::float4x4::zero, true);
+			else
+				continue;
+
+			//Custom or internal variables
+			for (uint i = 0; i < 23; i++) {
+				if (sVar.name.compare(internalNames[i]) >= 0) {
+					sVar.custom = false;
+					break;
+				}
+			}
+
+			uniforms.push_back(sVar);
+
+			if (!sVar.custom) {
+				if (!projection && sVar.name.compare("projection") == 0)
+					projection = &uniforms.back();
+				else if (!view && sVar.name.compare("view") == 0)
+					view = &uniforms.back();
+			}
+		}
+	}
+}
+
+void RE_Shader::GetLocations()
+{
+	for (unsigned int i = 0; i < uniforms.size(); i++) 
+		uniforms[i].location = RE_ShaderImporter::getLocation(ID, uniforms[i].name.c_str());
+}
+
 void RE_Shader::Draw()
 {
 	//Todo drag & drop of shader files
@@ -213,6 +362,25 @@ void RE_Shader::SaveResourceMeta(JSONNode* metaNode)
 	metaNode->PushSignedLongLong("fLastModified", shaderSettings.flastModified);
 	metaNode->PushString("geometryPath", shaderSettings.geometryShader.c_str());
 	metaNode->PushSignedLongLong("gLastModified", shaderSettings.glastModified);
+
+	JSONNode* nuniforms = metaNode->PushJObject("uniforms");
+	nuniforms->PushUInt("size", uniforms.size());
+	if (!uniforms.empty()) {
+		std::string id;
+		for (uint i = 0; i < uniforms.size(); i++)
+		{
+			id = "name";
+			id += std::to_string(i);
+			nuniforms->PushString(id.c_str(), uniforms[i].name.c_str());
+			id = "type";
+			id += std::to_string(i);
+			nuniforms->PushUInt(id.c_str(), uniforms[i].GetType());
+			id = "custom";
+			id += std::to_string(i);
+			nuniforms->PushBool(id.c_str(), uniforms[i].custom);
+		}
+	}
+	DEL(nuniforms);
 }
 
 void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
@@ -223,6 +391,95 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 	shaderSettings.flastModified = metaNode->PullSignedLongLong("fLastModified", 0);
 	shaderSettings.geometryShader = metaNode->PullString("geometryPath", "");
 	shaderSettings.glastModified = metaNode->PullSignedLongLong("gLastModified", 0);
+
+	JSONNode* nuniforms = metaNode->PullJObject("uniforms");
+	uint size = nuniforms->PullUInt("size", 0);
+	if (size) {
+		std::string id;
+		for (uint i = 0; i < size; i++)
+		{
+			ShaderCvar sVar;
+			id = "name";
+			id += std::to_string(i);
+			sVar.name = nuniforms->PullString(id.c_str(), "");
+			id = "type";
+			id += std::to_string(i);
+			Cvar::VAR_TYPE vT = (Cvar::VAR_TYPE)nuniforms->PullUInt(id.c_str(), ShaderCvar::UNDEFINED);
+			id = "custom";
+			id += std::to_string(i);
+			sVar.custom = nuniforms->PullBool(id.c_str(), true);
+			uniforms.push_back(sVar);
+
+			bool b2[2] = { false, false };
+			bool b3[3] = { false, false, false };
+			bool b4[4] = { false, false, false, false };
+
+			int i2[2] = { 0, 0 };
+			int i3[3] = { 0, 0, 0 };
+			int i4[4] = { 0, 0, 0, 0 };
+			float f = 0.0;
+
+			switch (vT)
+			{
+			case Cvar::BOOL:
+				sVar.SetValue(true, true);
+				break;
+			case Cvar::BOOL2:
+				sVar.SetValue(b2, 2, true);
+				break;
+			case Cvar::BOOL3:
+				sVar.SetValue(b3, 3, true);
+				break;
+			case Cvar::BOOL4:
+				sVar.SetValue(b4, 4, true);
+				break;
+			case Cvar::INT:
+				sVar.SetValue(-1, true);
+				break;
+			case Cvar::INT2:
+				sVar.SetValue(i2, 2, true);
+				break;
+			case Cvar::INT3:
+				sVar.SetValue(i3, 3, true);
+				break;
+			case Cvar::INT4:
+				sVar.SetValue(i4, 4, true);
+				break;
+			case Cvar::FLOAT:
+				sVar.SetValue(f, true);
+				break;
+			case Cvar::FLOAT2:
+				sVar.SetValue(math::float2::zero, true);
+				break;
+			case Cvar::FLOAT3:
+				sVar.SetValue(math::float3::zero, true);
+				break;
+			case Cvar::FLOAT4:
+				sVar.SetValue(math::float4::zero, false, true);
+				break;
+			case Cvar::MAT2:
+				sVar.SetValue(math::float4::zero, true, true);
+				break;
+			case Cvar::MAT3:
+				sVar.SetValue(math::float3x3::zero, true);
+				break;
+			case Cvar::MAT4:
+				sVar.SetValue(math::float4x4::zero, true);
+				break;
+			case Cvar::SAMPLER:
+				sVar.SetSampler(-1, true);
+				break;
+			}
+
+			if (!sVar.custom) {
+				if (!projection && sVar.name.compare("projection") == 0)
+					projection = &uniforms.back();
+				else if (!view && sVar.name.compare("view") == 0)
+					view = &uniforms.back();
+			}
+		}
+	}
+	DEL(nuniforms);
 
 	restoreSettings = shaderSettings;
 }

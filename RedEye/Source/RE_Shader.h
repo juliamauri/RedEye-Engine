@@ -36,11 +36,8 @@ public:
 
 	std::vector<ShaderCvar> GetUniformValues();
 
-	void DrawCustomUniforms(std::vector<Cvar>* FromMatValues);
-
 	void UploadCameraMatrices(RE_CompCamera* camera);
 	void UploadModel(float* model);
-	void UploadCustomUniforms(std::vector<Cvar>* FromMatValues);
 
 	bool isShaderFilesChanged();
 
@@ -59,6 +56,11 @@ private:
 	void GetFragmentFileInfo(const char*& path, signed long long* lastTimeModified)const;
 	void GetGeometryFileInfo(const char*& path, signed long long* lastTimeModified)const;
 
+	void ParseAndGetUniforms();
+	std::vector<std::string> GetUniformLines(const char* buffer);
+	void MountShaderCvar(std::vector<std::string> uniformLines);
+	void GetLocations();
+
 private:
 	unsigned int ID = 0;
 
@@ -67,6 +69,8 @@ private:
 	bool applySave = false;
 	RE_ShaderSettings restoreSettings;
 
+	ShaderCvar* projection = nullptr;
+	ShaderCvar* view = nullptr;
 	std::vector<ShaderCvar> uniforms;
 };
 

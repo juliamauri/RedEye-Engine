@@ -59,7 +59,7 @@ void RE_CompPoint::Draw()
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 1.0f, 1.0f));
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", math::vec(1.0f, 1.0f, 1.0f));
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	glPointSize(10.0f);
@@ -86,7 +86,7 @@ void RE_CompLine::Draw()
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", math::vec(1.0f, 0.0f, 0.0f));
 
 	glLineWidth(2.0f);
 
@@ -120,7 +120,7 @@ void RE_CompTriangle::Draw()
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", math::vec(1.0f, 0.0f, 0.0f));
 
 	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
@@ -138,7 +138,7 @@ void RE_CompGrid::Draw()
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", math::vec(1.0f, 0.0f, 0.0f));
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", math::vec(1.0f, 0.0f, 0.0f));
 
 	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawArrays(GL_LINES, 0, 400);
@@ -172,7 +172,7 @@ void RE_CompCube::Draw()
 		// Apply Diffuse Color
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
 
 		// Draw
 		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
@@ -184,7 +184,7 @@ void RE_CompCube::Draw()
 		glActiveTexture(GL_TEXTURE0);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
-		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "texture_diffuse0", 0);
+		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse0", 0);
 		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw
@@ -269,7 +269,7 @@ void RE_CompSphere::Draw()
 		// Apply Diffuse Color
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
 
 		// Draw
 		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
@@ -281,7 +281,7 @@ void RE_CompSphere::Draw()
 		glActiveTexture(GL_TEXTURE0);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
-		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "texture_diffuse0", 0);
+		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse", 0);
 		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw
@@ -491,7 +491,7 @@ void RE_CompPlane::Draw()
 		// Apply Diffuse Color
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "objectColor", RE_CompPrimitive::color);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
 
 		// Draw
 		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
@@ -503,7 +503,7 @@ void RE_CompPlane::Draw()
 		glActiveTexture(GL_TEXTURE0);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
-		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "texture_diffuse0", 0);
+		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse0", 0);
 		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
 
 		// Draw

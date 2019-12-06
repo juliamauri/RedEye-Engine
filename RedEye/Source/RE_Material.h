@@ -70,6 +70,8 @@ private:
 public:
 	RE_ShadingMode shadingType = S_FLAT;
 
+	unsigned int usingOnMat[21] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
 	std::vector<const char*> tDiffuse;
 	math::float3 cDiffuse = math::float3::zero;
 	std::vector<const char*> tSpecular;
