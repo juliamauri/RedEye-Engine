@@ -44,7 +44,6 @@ public:
 
 	void UploadToShader(float* model, bool usingChekers);
 
-	void SetShader(const char* sMD5);
 	unsigned int GetShaderID()const;
 
 	void DrawMaterialEdit();
@@ -67,10 +66,15 @@ private:
 	void BinarySerialize();
 	unsigned int GetBinarySize();
 
+	void GetAndProcessUniformsFromShader();
+
 public:
 	RE_ShadingMode shadingType = S_FLAT;
 
-	unsigned int usingOnMat[21] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	enum MaterialUINT { UNDEFINED = -1, CDIFFUSE, TDIFFUSE, CSPECULAR, TSPACULAR, CAMBIENT, TAMBIENT, CEMISSIVE, 
+		TEMISSIVE, CTRANSPARENT, OPACITY, TOPACITY, SHININESS, SHININESSSTRENGHT, TSHININESS, REFRACCTI, 
+		THEIGHT, TNORMALS, TREFLECTION };
+	unsigned int usingOnMat[18] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	std::vector<const char*> tDiffuse;
 	math::float3 cDiffuse = math::float3::zero;
@@ -103,7 +107,7 @@ private:
 	bool applySave = false;
 
 	const char* shaderMD5 = nullptr;
-	std::vector<ShaderCvar> fromShaderUniforms;
+	std::vector<ShaderCvar> fromShaderCustomUniforms;
 };
 
 #endif // !__RE_MATERIAL_H__

@@ -185,9 +185,11 @@ void RE_Shader::ReImport()
 	if (reload) UnloadMemory();
 	SetPaths(shaderSettings.vertexShader.c_str(), shaderSettings.fragmentShader.c_str(), (!shaderSettings.geometryShader.empty()) ? shaderSettings.geometryShader.c_str() : nullptr);
 	AssetLoad();
+	ParseAndGetUniforms();
 	SaveMeta();
 	//LibrarySave();
-	if(!reload) UnloadMemory();
+	if (!reload) UnloadMemory();
+	else GetLocations();
 }
 
 void RE_Shader::GetVertexFileInfo(const char*& path, signed long long* lastTimeModified) const
@@ -253,7 +255,7 @@ std::vector<std::string> RE_Shader::GetUniformLines(const char* buffer)
 
 void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
 {
-	static const char* internalNames[23] = { "useTexture", "useColor", "time", "dt", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "treflection" };
+	static const char* internalNames[25] = { "useTexture", "useColor", "time", "dt", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "tnormals", "treflection" };
 	for (auto uniform : uniformLines){
 		int pos = uniform.find_first_of(" ");
 		if (pos != std::string::npos) {
@@ -312,7 +314,7 @@ void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
 				continue;
 
 			//Custom or internal variables
-			for (uint i = 0; i < 23; i++) {
+			for (uint i = 0; i < 25; i++) {
 				if (sVar.name.compare(internalNames[i]) >= 0) {
 					sVar.custom = false;
 					break;
