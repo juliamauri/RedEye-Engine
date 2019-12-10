@@ -515,9 +515,9 @@ bool RE_Mesh::CheckFaceCollision(const math::Ray& local_ray, float& distance) co
 
 	for (int i = 0; i < triangle_count; i++)
 	{
-		face.a = math::vec(&vertex[index[3 * i]]);
-		face.b = math::vec(&vertex[index[(3 * i) + 1]]);
-		face.c = math::vec(&vertex[index[(3 * i) + 2]]);
+		face.a = math::vec(&vertex[3 * index[3 * i]]);
+		face.b = math::vec(&vertex[3 * index[(3 * i) + 1]]);
+		face.c = math::vec(&vertex[3 * index[(3 * i) + 2]]);
 
 		if (face.Intersects(local_ray, &res_dist) && (!ret || distance > res_dist))
 		{
