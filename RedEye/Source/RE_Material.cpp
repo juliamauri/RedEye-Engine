@@ -644,7 +644,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers)
 		glActiveTexture(GL_TEXTURE0);
 		std::string name = "tdiffuse0";
 		RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), 0);
-		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
+		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
 	}
 	else
 	{

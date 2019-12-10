@@ -185,15 +185,11 @@ void RE_CompCube::Draw()
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
 		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse0", 0);
-		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
+		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
 
 		// Draw
 		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 		glDrawElements(GL_TRIANGLES, triangle_count, GL_UNSIGNED_SHORT, 0);
-
-		// Release Texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
 
@@ -282,15 +278,11 @@ void RE_CompSphere::Draw()
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
 		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse", 0);
-		glBindTexture(GL_TEXTURE_2D, App->internalResources->GetTextureChecker());
+		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
 
 		// Draw
 		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
 		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
-
-		// Release Texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
 

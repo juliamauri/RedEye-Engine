@@ -12,6 +12,7 @@
 #include "Globals.h"
 #include "OutputLog.h"
 #include "TimeManager.h"
+#include "RE_GLCache.h"
 
 #include "md5.h"
 
@@ -127,7 +128,7 @@ void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int s
 
 		/* OpenGL texture binding of the image loaded by DevIL  */
 		glGenTextures(1, ID); /* Texture name generation */
-		glBindTexture(GL_TEXTURE_2D, *ID); /* Binding of texture name */
+		RE_GLCache::ChangeTextureBind(*ID); /* Binding of texture name */
 		
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.mag_filter); /* We will use linear interpolation for magnification filter */
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.min_filter); /* We will use linear interpolation for minifying filter */
@@ -178,6 +179,7 @@ void RE_TextureImporter::SaveOwnFormat(const char * assetBuffer, unsigned int as
 
 void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned int* ID)
 {
+	RE_GLCache::ChangeTextureBind(0);
 	glGenTextures(1, ID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, *ID);
 

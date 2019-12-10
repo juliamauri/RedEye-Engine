@@ -15,3 +15,9 @@ void RE_GLCache::ChangeVAO(unsigned int VAO)
 	static unsigned int currenVAO = 0;
 	if (currenVAO != VAO) glBindVertexArray(currenVAO = VAO);
 }
+
+void RE_GLCache::ChangeTextureBind(unsigned int tID)
+{
+	static unsigned int currenTexID = 0;
+	if (currenTexID != tID) glBindTexture(GL_TEXTURE_2D, currenTexID = tID);
+}

@@ -137,6 +137,7 @@ update_status ModuleRenderer3D::PostUpdate()
 	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
 	// draw skybox as last
 
+	RE_GLCache::ChangeTextureBind(0);
 	// Set shader and uniforms
 	RE_GLCache::ChangeShader(skyboxShader);
 	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);

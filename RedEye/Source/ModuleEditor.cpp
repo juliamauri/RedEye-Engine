@@ -327,7 +327,7 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 	if (debug_drawing && ((adapted_AABBdraw != AABBDebugDrawing::NONE) || draw_quad_tree || draw_cameras))
 	{
 		RE_GLCache::ChangeShader(0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		RE_GLCache::ChangeTextureBind(0);
 
 		const RE_GameObject* root = App->scene->GetRoot();
 		RE_CompCamera* current_camera = RE_CameraManager::CurrentCamera();

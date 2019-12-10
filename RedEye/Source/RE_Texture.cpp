@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_TextureImporter.h"
+#include "RE_GLCache.h"
 
 #include "OutputLog.h"
 
@@ -92,7 +93,7 @@ void RE_Texture::Import(bool keepInMemory)
 
 void RE_Texture::use()
 {
-	glBindTexture(GL_TEXTURE_2D, ID);
+	RE_GLCache::ChangeTextureBind(ID);
 }
 
 void RE_Texture::GetWithHeight(int * w, int * h)
