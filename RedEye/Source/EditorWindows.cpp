@@ -1089,7 +1089,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 		else if (fragmentPath.empty() && !fragmentModify) {
 			if (ImGui::Button("New fragment shader")) {
 				fragmentModify = true;
-				App->editor->OpenTextEditor(nullptr, &fragmentPath, DEFVERTEXSHADER, &fragmentModify);
+				App->editor->OpenTextEditor(nullptr, &fragmentPath, DEFFRAGMENTSHADER, &fragmentModify);
 			}
 		}
 
