@@ -69,10 +69,11 @@ private:
 	bool applySave = false;
 	RE_ShaderSettings restoreSettings;
 
-	ShaderCvar* projection = nullptr;
-	ShaderCvar* view = nullptr;
-	ShaderCvar* time = nullptr;
-	ShaderCvar* dt = nullptr;
+	int projection = -1;
+	int view = -1;
+	int model = -1;
+	int time = -1;
+	int dt = -1;
 	std::vector<ShaderCvar> uniforms;
 };
 

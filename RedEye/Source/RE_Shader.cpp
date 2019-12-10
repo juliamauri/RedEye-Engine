@@ -128,16 +128,16 @@ std::vector<ShaderCvar> RE_Shader::GetUniformValues()
 void RE_Shader::UploatMainUniforms(RE_CompCamera* camera, float _dt, float _time)
 {
 	RE_GLCache::ChangeShader(ID);
-	if(view) RE_ShaderImporter::setFloat4x4(view->location, camera->GetViewPtr());
-	if(projection) RE_ShaderImporter::setFloat4x4(projection->location, camera->GetProjectionPtr());
-	if (dt) RE_ShaderImporter::setFloat(dt->location, _dt);
-	if (time) RE_ShaderImporter::setFloat(time->location, _time);
+	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
+	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera->GetProjectionPtr());
+	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, _dt);
+	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, _time);
 }
 
-void RE_Shader::UploadModel(float* model)
+void RE_Shader::UploadModel(float* _model)
 {
 	RE_GLCache::ChangeShader(ID);
-	RE_ShaderImporter::setFloat4x4(ID, "model", model);
+	if(model != -1) RE_ShaderImporter::setFloat4x4(uniforms[model].location, _model);
 }
 
 bool RE_Shader::isShaderFilesChanged()
@@ -258,6 +258,12 @@ std::vector<std::string> RE_Shader::GetUniformLines(const char* buffer)
 
 void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
 {
+	projection = -1;
+	view = -1;
+	model = -1;
+	time = -1;
+	dt = -1;
+	uniforms.clear();
 	static const char* internalNames[25] = { "useTexture", "useColor", "time", "dt", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "tnormals", "treflection" };
 	for (auto uniform : uniformLines){
 		int pos = uniform.find_first_of(" ");
@@ -327,15 +333,16 @@ void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
 			uniforms.push_back(sVar);
 
 			if (!sVar.custom) {
-				if (!projection && sVar.name.compare("projection") == 0)
-					projection = &uniforms.back();
-				else if (!view && sVar.name.compare("view") == 0)
-					view = &uniforms.back();
-
-				else if (!view && sVar.name.compare("dt") == 0)
-					dt = &uniforms.back();
-				else if (!view && sVar.name.compare("time") == 0)
-					time = &uniforms.back();
+				if (projection == -1 && sVar.name.compare("projection") == 0)
+					projection = uniforms.size() - 1;
+				else if (view == -1 && sVar.name.compare("view") == 0)
+					view = uniforms.size() - 1;
+				else if (model == -1 && sVar.name.compare("model") == 0)
+					model = uniforms.size() - 1;
+				else if (dt == -1 && sVar.name.compare("dt") == 0)
+					dt = uniforms.size() - 1;
+				else if (time == -1 && sVar.name.compare("time") == 0)
+					time = uniforms.size() - 1;
 			}
 		}
 	}
@@ -402,6 +409,12 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 	shaderSettings.geometryShader = metaNode->PullString("geometryPath", "");
 	shaderSettings.glastModified = metaNode->PullSignedLongLong("gLastModified", 0);
 
+	projection = -1;
+	view = -1;
+	model = -1;
+	time = -1;
+	dt = -1;
+	uniforms.clear();
 	JSONNode* nuniforms = metaNode->PullJObject("uniforms");
 	uint size = nuniforms->PullUInt("size", 0);
 	if (size) {
@@ -482,14 +495,16 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 			}
 
 			if (!sVar.custom) {
-				if (!projection && sVar.name.compare("projection") == 0)
-					projection = &uniforms.back();
-				else if (!view && sVar.name.compare("view") == 0)
-					view = &uniforms.back();
-				else if (!view && sVar.name.compare("dt") == 0)
-					dt = &uniforms.back();
-				else if (!view && sVar.name.compare("time") == 0)
-					time = &uniforms.back();
+				if (projection == -1 && sVar.name.compare("projection") == 0)
+					projection = uniforms.size() -1;
+				else if (view == -1 && sVar.name.compare("view") == 0)
+					view = uniforms.size() - 1;
+				else if (model == -1 && sVar.name.compare("model") == 0)
+					model = uniforms.size() - 1;
+				else if (dt == -1 && sVar.name.compare("dt") == 0)
+					dt = uniforms.size() - 1;
+				else if (time == -1 && sVar.name.compare("time") == 0)
+					time = uniforms.size() - 1;
 			}
 		}
 	}

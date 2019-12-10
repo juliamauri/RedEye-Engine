@@ -71,11 +71,6 @@ private:
 public:
 	RE_ShadingMode shadingType = S_FLAT;
 
-	enum MaterialUINT { UNDEFINED = -1, CDIFFUSE, TDIFFUSE, CSPECULAR, TSPACULAR, CAMBIENT, TAMBIENT, CEMISSIVE, 
-		TEMISSIVE, CTRANSPARENT, OPACITY, TOPACITY, SHININESS, SHININESSSTRENGHT, TSHININESS, REFRACCTI, 
-		THEIGHT, TNORMALS, TREFLECTION };
-	unsigned int usingOnMat[18] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
 	std::vector<const char*> tDiffuse;
 	math::float3 cDiffuse = math::float3::zero;
 	std::vector<const char*> tSpecular;
@@ -108,6 +103,13 @@ private:
 
 	const char* shaderMD5 = nullptr;
 	std::vector<ShaderCvar> fromShaderCustomUniforms;
+
+	enum MaterialUINT {
+		UNDEFINED = -1, CDIFFUSE, TDIFFUSE, CSPECULAR, TSPECULAR, CAMBIENT, TAMBIENT, CEMISSIVE,
+		TEMISSIVE, CTRANSPARENT, OPACITY, TOPACITY, SHININESS, SHININESSSTRENGHT, TSHININESS, REFRACCTI,
+		THEIGHT, TNORMALS, TREFLECTION
+	};
+	unsigned int usingOnMat[18] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 };
 
 #endif // !__RE_MATERIAL_H__

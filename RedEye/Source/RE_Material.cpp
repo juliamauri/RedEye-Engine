@@ -9,6 +9,8 @@
 #include "RE_Shader.h"
 #include "RE_Texture.h"
 
+#include "RE_GLCache.h"
+
 #include "ModuleEditor.h"
 #include "EditorWindows.h"
 
@@ -41,7 +43,7 @@ void RE_Material::LoadInMemory()
 	}
 
 	if (isInMemory()) {
-
+		GetAndProcessUniformsFromShader();
 	}
 }
 
@@ -198,7 +200,11 @@ void RE_Material::DrawMaterialEdit()
 			if (ImGui::MenuItem(shader->GetName())) {
 				if (ResourceContainer::inMemory && shaderMD5) App->resources->UnUse(shaderMD5);
 				shaderMD5 = shader->GetMD5();
-				if (ResourceContainer::inMemory && shaderMD5) App->resources->Use(shaderMD5);
+				if (ResourceContainer::inMemory && shaderMD5) {
+					App->resources->Use(shaderMD5);
+					GetAndProcessUniformsFromShader();
+				}
+
 				applySave = true;
 			}
 		}
@@ -206,87 +212,124 @@ void RE_Material::DrawMaterialEdit()
 		ImGui::EndMenu();
 	}
 
-	ImGui::Separator();
-	if (ImGui::BeginMenu("Diffuse values")) {
-		if (ImGui::ColorEdit3("Diffuse Color", &cDiffuse[0]))
-			applySave = true;
-		DrawTextures("Diffuse", &tDiffuse);
+	if (usingOnMat[CDIFFUSE] || usingOnMat[TDIFFUSE]) {
+		ImGui::Separator();
+		if (ImGui::BeginMenu("Diffuse values")) {
+			if (usingOnMat[CDIFFUSE]) {
+				if (ImGui::ColorEdit3("Diffuse Color", &cDiffuse[0]))
+					applySave = true;
+			}
+			if(usingOnMat[TDIFFUSE]) DrawTextures("Diffuse", &tDiffuse);
 
-		ImGui::EndMenu();
-	}
-
-	ImGui::Separator();
-	if (ImGui::BeginMenu("Specular values")) {
-		if (ImGui::ColorEdit3("Specular Color", &cSpecular[0]))
-			applySave = true;
-		DrawTextures("Specular", &tSpecular);
-		ImGui::EndMenu();
+			ImGui::EndMenu();
+		}
 	}
 
-	ImGui::Separator();
-	if (ImGui::BeginMenu("Ambient values")) {
-		if (ImGui::ColorEdit3("Ambient Color", &cAmbient[0]))
-			applySave = true;
-		DrawTextures("Ambient", &tAmbient);
-		ImGui::EndMenu();
+	if (usingOnMat[CSPECULAR] || usingOnMat[TSPECULAR]) {
+		ImGui::Separator();
+		if (ImGui::BeginMenu("Specular values")) {
+			if (usingOnMat[CSPECULAR]) {
+				if (ImGui::ColorEdit3("Specular Color", &cSpecular[0]))
+					applySave = true;
+			}
+			if(usingOnMat[TSPECULAR]) DrawTextures("Specular", &tSpecular);
+			ImGui::EndMenu();
+		}
 	}
 
-	ImGui::Separator();
-	if (ImGui::BeginMenu("Emissive values")) {
-		if (ImGui::ColorEdit3("Emissive Color", &cEmissive[0]))
-			applySave = true;
-		DrawTextures("Emissive", &tEmissive);
-		ImGui::EndMenu();
+	if (usingOnMat[CAMBIENT] || usingOnMat[TAMBIENT]) {
+		ImGui::Separator();
+		if (ImGui::BeginMenu("Ambient values")) {
+			if (usingOnMat[CAMBIENT]) {
+				if (ImGui::ColorEdit3("Ambient Color", &cAmbient[0]))
+					applySave = true;
+			}
+
+			if (usingOnMat[TAMBIENT]) DrawTextures("Ambient", &tAmbient);
+			ImGui::EndMenu();
+		}
 	}
 
-	ImGui::Separator();
-	if (ImGui::BeginMenu("Opacity values")) {
-		if (ImGui::InputFloat("Opacity", &opacity))
-			applySave = true;
-		DrawTextures("Opacity", &tOpacity);
-		ImGui::EndMenu();
+	if (usingOnMat[CEMISSIVE] || usingOnMat[TEMISSIVE]) {
+		ImGui::Separator();
+		if (ImGui::BeginMenu("Emissive values")) {
+			if (usingOnMat[CEMISSIVE]) {
+				if (ImGui::ColorEdit3("Emissive Color", &cEmissive[0]))
+					applySave = true;
+			}
+			if(usingOnMat[TEMISSIVE]) DrawTextures("Emissive", &tEmissive);
+			ImGui::EndMenu();
+		}
 	}
 
-	ImGui::Separator();
-	if (ImGui::BeginMenu("Shininess values")) {
-		if (ImGui::InputFloat("Shininess", &shininess))
-			applySave = true;
-		if (ImGui::InputFloat("Shininess strenght", &shininessStrenght))
-			applySave = true;
-		DrawTextures("Shininess", &tShininess);
-		ImGui::EndMenu();
+	if (usingOnMat[OPACITY] || usingOnMat[TOPACITY]) {
+		ImGui::Separator();
+		if (ImGui::BeginMenu("Opacity values")) {
+			if (usingOnMat[OPACITY]) {
+				if (ImGui::InputFloat("Opacity", &opacity))
+					applySave = true;
+			}
+			if(usingOnMat[TOPACITY]) DrawTextures("Opacity", &tOpacity);
+			ImGui::EndMenu();
+		}
 	}
 
-	ImGui::Separator();
-	if (ImGui::BeginMenu("Height values")) {
-		DrawTextures("Height", &tHeight);
-		ImGui::EndMenu();
+	if (usingOnMat[SHININESS] || usingOnMat[SHININESSSTRENGHT] || usingOnMat[TSHININESS]) {
+		ImGui::Separator();
+		if (ImGui::BeginMenu("Shininess values")) {
+			if (usingOnMat[SHININESS]) {
+				if (ImGui::InputFloat("Shininess", &shininess))
+					applySave = true;
+			}
+			if (usingOnMat[SHININESSSTRENGHT]) {
+				if (ImGui::InputFloat("Shininess strenght", &shininessStrenght))
+					applySave = true;
+			}
+			if(usingOnMat[TSHININESS]) DrawTextures("Shininess", &tShininess);
+			ImGui::EndMenu();
+		}
 	}
-	ImGui::Separator();
-	if (ImGui::BeginMenu("Normals values")) {
-		DrawTextures("Normals", &tNormals);
-		ImGui::EndMenu();
+
+	if (usingOnMat[THEIGHT]) {
+		ImGui::Separator();
+		if (ImGui::BeginMenu("Height values")) {
+			DrawTextures("Height", &tHeight);
+			ImGui::EndMenu();
+		}
 	}
-	ImGui::Separator();
-	if (ImGui::BeginMenu("Reflection values")) {
-		DrawTextures("Reflection", &tReflection);
-		ImGui::EndMenu();
+	if (usingOnMat[TNORMALS]) {
+		ImGui::Separator();
+		if (ImGui::BeginMenu("Normals values")) {
+			DrawTextures("Normals", &tNormals);
+			ImGui::EndMenu();
+		}
+	}
+	if (usingOnMat[TREFLECTION]) {
+		ImGui::Separator();
+		if (ImGui::BeginMenu("Reflection values")) {
+			DrawTextures("Reflection", &tReflection);
+			ImGui::EndMenu();
+		}
 	}
 
 	ImGui::Separator();
 	if (ImGui::BeginMenu("Others values")) {
-		if (ImGui::ColorEdit3("Transparent", &cTransparent[0]))
-			applySave = true;
-		ImGui::Separator();
+		if (usingOnMat[CTRANSPARENT]) {
+			if (ImGui::ColorEdit3("Transparent", &cTransparent[0]))
+				applySave = true;
+			ImGui::Separator();
+		}
 		if (ImGui::Checkbox("Back face culling", &backFaceCulling))
 			applySave = true;
 		ImGui::Separator();
 		if (ImGui::Checkbox("Blend mode", &blendMode))
 			applySave = true;
 		ImGui::Separator();
-		if (ImGui::InputFloat("Refraccti", &refraccti))
-			applySave = true;
-		ImGui::Separator();
+		if (usingOnMat[REFRACCTI]) {
+			if (ImGui::InputFloat("Refraccti", &refraccti))
+				applySave = true;
+			ImGui::Separator();
+		}
 		DrawTextures("Unknown", &tUnknown);
 		ImGui::EndMenu();
 	}
@@ -660,6 +703,7 @@ unsigned int RE_Material::GetBinarySize()
 void RE_Material::GetAndProcessUniformsFromShader()
 {
 	static const char* materialNames[18] = {  "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient",  "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity",  "shininess", "shininessST", "tshininess", "refraccti", "theight",  "tnormals", "treflection" };
+	for (uint i = 0; i < 18; i++) usingOnMat[i] = 0;
 
 	if (shaderMD5) {
 		std::vector<ShaderCvar> fromShader = ((RE_Shader*)App->resources->At(shaderMD5))->GetUniformValues();

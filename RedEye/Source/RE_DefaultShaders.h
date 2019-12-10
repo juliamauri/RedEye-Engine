@@ -45,31 +45,31 @@
 
 #define SKYBOXVERTEXSHADER							  \
 "#version 330 core\n"								  \
-"layout(location = 0) in vec3 aPos;"				  \
-""													  \
-"out vec3 TexCoords;"								  \
-""													  \
-"uniform mat4 projection;"							  \
-"uniform mat4 view;"								  \
-""													  \
-"void main()"										  \
-"{"													  \
-"	TexCoords = aPos;"								  \
-"	vec4 pos = projection * view * vec4(aPos, 1.0);"  \
-"	gl_Position = pos.xyww;"						  \
+"layout(location = 0) in vec3 aPos;\n"				  \
+"\n"													  \
+"out vec3 TexCoords;\n"								  \
+"\n"													  \
+"uniform mat4 projection;\n"							  \
+"uniform mat4 view;\n"								  \
+"\n"													  \
+"void main()\n"										  \
+"{\n"													  \
+"	TexCoords = aPos;\n"								  \
+"	vec4 pos = projection * view * vec4(aPos, 1.0);\n"  \
+"	gl_Position = pos.xyww;\n"						  \
 "}\0"
 
 #define SKYBOXFRAGMENTSHADER				  \
 "#version 330 core\n"						  \
-"out vec4 FragColor;"						  \
-""											  \
-"in vec3 TexCoords;"						  \
-""											  \
-"uniform samplerCube skybox;"				  \
-""											  \
-"void main()"								  \
-"{"											  \
-"	FragColor = texture(skybox, TexCoords);"  \
+"out vec4 FragColor;\n"						  \
+"\n"											  \
+"in vec3 TexCoords;\n"						  \
+"\n"											  \
+"uniform samplerCube skybox;\n"				  \
+"\n"											  \
+"void main()\n"								  \
+"{\n"											  \
+"	FragColor = texture(skybox, TexCoords);\n"  \
 "}\0"
 
 
