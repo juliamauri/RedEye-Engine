@@ -118,9 +118,11 @@ update_status ModuleRenderer3D::PostUpdate()
 	RE_CompCamera* current_camera = RE_CameraManager::CurrentCamera();
 	current_camera->Update();
 
+	float time = App->time->GetGameTimer();
+	float dt = App->time->GetDeltaTime();
 	// Load Shader Uniforms
 	std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadCameraMatrices(current_camera);
+	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(current_camera, dt, time);
 
 	// Frustum Culling
 	if (cull_scene)

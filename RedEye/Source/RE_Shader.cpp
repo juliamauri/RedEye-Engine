@@ -8,6 +8,7 @@
 #include "ModuleEditor.h"
 
 #include "RE_GLCache.h"
+#include "TimeManager.h"
 
 #include "OutputLog.h"
 #include "md5.h"
@@ -124,11 +125,13 @@ std::vector<ShaderCvar> RE_Shader::GetUniformValues()
 	return uniforms;
 }
 
-void RE_Shader::UploadCameraMatrices(RE_CompCamera* camera)
+void RE_Shader::UploatMainUniforms(RE_CompCamera* camera, float _dt, float _time)
 {
 	RE_GLCache::ChangeShader(ID);
-	RE_ShaderImporter::setFloat4x4(ID, "view", camera->GetViewPtr());
-	RE_ShaderImporter::setFloat4x4(ID, "projection", camera->GetProjectionPtr());
+	if(view) RE_ShaderImporter::setFloat4x4(view->location, camera->GetViewPtr());
+	if(projection) RE_ShaderImporter::setFloat4x4(projection->location, camera->GetProjectionPtr());
+	if (dt) RE_ShaderImporter::setFloat(dt->location, _dt);
+	if (time) RE_ShaderImporter::setFloat(time->location, _time);
 }
 
 void RE_Shader::UploadModel(float* model)
@@ -328,6 +331,11 @@ void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
 					projection = &uniforms.back();
 				else if (!view && sVar.name.compare("view") == 0)
 					view = &uniforms.back();
+
+				else if (!view && sVar.name.compare("dt") == 0)
+					dt = &uniforms.back();
+				else if (!view && sVar.name.compare("time") == 0)
+					time = &uniforms.back();
 			}
 		}
 	}
@@ -478,6 +486,10 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 					projection = &uniforms.back();
 				else if (!view && sVar.name.compare("view") == 0)
 					view = &uniforms.back();
+				else if (!view && sVar.name.compare("dt") == 0)
+					dt = &uniforms.back();
+				else if (!view && sVar.name.compare("time") == 0)
+					time = &uniforms.back();
 			}
 		}
 	}

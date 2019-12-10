@@ -36,7 +36,7 @@ public:
 
 	std::vector<ShaderCvar> GetUniformValues();
 
-	void UploadCameraMatrices(RE_CompCamera* camera);
+	void UploatMainUniforms(RE_CompCamera* camera, float dt, float time);
 	void UploadModel(float* model);
 
 	bool isShaderFilesChanged();
@@ -71,6 +71,8 @@ private:
 
 	ShaderCvar* projection = nullptr;
 	ShaderCvar* view = nullptr;
+	ShaderCvar* time = nullptr;
+	ShaderCvar* dt = nullptr;
 	std::vector<ShaderCvar> uniforms;
 };
 
