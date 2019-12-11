@@ -859,6 +859,22 @@ void JSONNode::PushBool(const char* name, const bool value)
 	}
 }
 
+void JSONNode::PushBool(const char* name, const bool* value, unsigned int quantity)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value float_array(rapidjson::kArrayType);
+		for (uint i = 0; i < quantity; i++)
+			float_array.PushBack(value[i], config->document.GetAllocator());
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
+	}
+}
+
 void JSONNode::PushInt(const char* name, const int value)
 {
 	if (name != nullptr)
@@ -868,6 +884,22 @@ void JSONNode::PushInt(const char* name, const int value)
 		path += name;
 		
 		rapidjson::Pointer(path.c_str()).Set(config->document, value);
+	}
+}
+
+void JSONNode::PushInt(const char* name, const int* value, unsigned int quantity)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value float_array(rapidjson::kArrayType);
+		for (uint i = 0; i < quantity; i++)
+			float_array.PushBack(value[i], config->document.GetAllocator());
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
 	}
 }
 
@@ -883,6 +915,22 @@ void JSONNode::PushUInt(const char* name, const unsigned int value)
 	}
 }
 
+void JSONNode::PushUInt(const char* name, const unsigned int* value, unsigned int quantity)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value float_array(rapidjson::kArrayType);
+		for (uint i = 0; i < quantity; i++)
+			float_array.PushBack(value[i], config->document.GetAllocator());
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
+	}
+}
+
 void JSONNode::PushFloat(const char* name, const float value)
 {
 	if (name != nullptr)
@@ -892,6 +940,21 @@ void JSONNode::PushFloat(const char* name, const float value)
 		path += name;
 
 		rapidjson::Pointer(path.c_str()).Set(config->document, value);
+	}
+}
+
+void JSONNode::PushFloat(const char* name, math::float2 value)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value float_array(rapidjson::kArrayType);
+		float_array.PushBack(value.x, config->document.GetAllocator()).PushBack(value.y, config->document.GetAllocator());
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
 	}
 }
 
@@ -920,6 +983,38 @@ void JSONNode::PushFloat4(const char * name, math::float4 vector)
 
 		rapidjson::Value float_array(rapidjson::kArrayType);
 		float_array.PushBack(vector.x, config->document.GetAllocator()).PushBack(vector.y, config->document.GetAllocator()).PushBack(vector.z, config->document.GetAllocator()).PushBack(vector.w, config->document.GetAllocator());
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
+	}
+}
+
+void JSONNode::PushMat3(const char* name, math::float3x3 mat3)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value float_array(rapidjson::kArrayType);
+		for (uint i = 0; i < 9; i++)
+			float_array.PushBack(mat3.ptr()[i], config->document.GetAllocator());
+
+		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
+	}
+}
+
+void JSONNode::PushMat4(const char* name, math::float4x4 mat4)
+{
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value float_array(rapidjson::kArrayType);
+		for (uint i = 0; i < 16; i++)
+			float_array.PushBack(mat4.ptr()[i], config->document.GetAllocator());
 
 		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
 	}
@@ -1003,6 +1098,39 @@ bool JSONNode::PullBool(const char* name, bool deflt)
 	return ret;
 }
 
+bool* JSONNode::PullBool(const char* name, unsigned int quantity, bool deflt)
+{
+	bool* ret = nullptr;
+	ret = new bool[quantity];
+	bool* cursor = ret;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+
+		if (val != nullptr) {
+			for (uint i = 0; i < quantity; i++) {
+				bool f = val->GetArray()[i].GetBool();
+				memcpy(cursor, &f, sizeof(bool));
+				cursor++;
+			}
+		}
+		else {
+			bool f = deflt;
+			for (uint i = 0; i < quantity; i++) {
+				memcpy(cursor, &f, sizeof(bool));
+				cursor++;
+			}
+		}
+	}
+
+	return ret;
+}
+
 int JSONNode::PullInt(const char* name, int deflt)
 {
 	int ret = 0;
@@ -1020,6 +1148,39 @@ int JSONNode::PullInt(const char* name, int deflt)
 	return ret;
 }
 
+int* JSONNode::PullInt(const char* name, unsigned int quantity, int deflt)
+{
+	int* ret = nullptr;
+	ret = new int[quantity];
+	int* cursor = ret;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+
+		if (val != nullptr) {
+			for (uint i = 0; i < quantity; i++) {
+				int f = val->GetArray()[i].GetInt();
+				memcpy(cursor, &f, sizeof(int));
+				cursor++;
+			}
+		}
+		else {
+			int f = deflt;
+			for (uint i = 0; i < quantity; i++) {
+				memcpy(cursor, &f, sizeof(int));
+				cursor++;
+			}
+		}
+	}
+
+	return ret;
+}
+
 unsigned int JSONNode::PullUInt(const char* name, const unsigned int deflt)
 {
 	unsigned int ret = 0;
@@ -1032,6 +1193,39 @@ unsigned int JSONNode::PullUInt(const char* name, const unsigned int deflt)
 
 		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
 		ret = (val != nullptr) ? val->GetUint() : deflt;
+	}
+
+	return ret;
+}
+
+unsigned int* JSONNode::PullUInt(const char* name, unsigned int quantity, unsigned int deflt)
+{
+	unsigned int* ret = nullptr;
+	ret = new unsigned int[quantity];
+	unsigned int* cursor = ret;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+
+		if (val != nullptr) {
+			for (uint i = 0; i < quantity; i++) {
+				int f = val->GetArray()[i].GetUint();
+				memcpy(cursor, &f, sizeof(unsigned int));
+				cursor++;
+			}
+		}
+		else {
+			int f = deflt;
+			for (uint i = 0; i < quantity; i++) {
+				memcpy(cursor, &f, sizeof(unsigned int));
+				cursor++;
+			}
+		}
 	}
 
 	return ret;
@@ -1055,9 +1249,30 @@ float JSONNode::PullFloat(const char* name, float deflt)
 	return ret;
 }
 
+math::float2 JSONNode::PullFloat(const char* name, math::float2 deflt)
+{
+	math::float2 ret = math::float2::zero;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+
+		if (val != nullptr)
+			ret.Set(val->GetArray()[0].GetFloat(),
+				val->GetArray()[1].GetFloat());
+		else
+			ret = deflt;
+	}
+
+	return ret;
+}
+
 math::vec JSONNode::PullFloatVector(const char * name, math::vec deflt)
 {
-
 	math::vec ret = math::vec::zero;
 
 	if (name != nullptr)
@@ -1101,6 +1316,66 @@ math::float4 JSONNode::PullFloat4(const char * name, math::float4 deflt)
 	}
 
 	return ret;
+}
+
+math::float3x3 JSONNode::PullMat3(const char* name, math::float3x3 deflt)
+{
+	math::float3x3 ret;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+
+		if (val != nullptr) {
+			float* fBuffer = new float[9];
+			float* cursor = fBuffer;
+			for (uint i = 0; i < 9; i++) {
+				int f = val->GetArray()[i].GetInt();
+				memcpy(cursor, &f, sizeof(int));
+				cursor++;
+			}
+			ret.Set(fBuffer);
+			DEL_A(fBuffer);
+		}
+		else
+			ret = deflt;
+	}
+
+	return ret;
+}
+
+math::float4x4 JSONNode::PullMat4(const char* name, math::float4x4 deflt)
+{
+	math::float4x4 ret;
+
+	if (name != nullptr)
+	{
+		std::string path(pointerPath);
+		path += "/";
+		path += name;
+
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+
+		if (val != nullptr) {
+			float* fBuffer = new float[16];
+			float* cursor = fBuffer;
+			for (uint i = 0; i < 16; i++) {
+				int f = val->GetArray()[i].GetInt();
+				memcpy(cursor, &f, sizeof(int));
+				cursor++;
+			}
+			ret.Set(fBuffer);
+			DEL_A(fBuffer);
+		}
+		else
+			ret = deflt;
+	}
+
+		return ret;
 }
 
 double JSONNode::PullDouble(const char* name, double deflt)

@@ -273,7 +273,7 @@ float* Cvar::AsFloatPointer()
 		break;
 	}
 
-	return nullptr;
+	return ret;
 }
 
 const char * Cvar::AsCharP() const { return value.char_p_v; }

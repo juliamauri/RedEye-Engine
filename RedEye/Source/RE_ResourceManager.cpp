@@ -330,7 +330,7 @@ const char* RE_ResourceManager::ImportMaterial(const char* assetPath)
 	RE_Material* newMaterial = new RE_Material();
 	newMaterial->SetName(name.c_str());
 	newMaterial->SetAssetPath(assetPath);
-	newMaterial->SetType(Resource_Type::R_TEXTURE);
+	newMaterial->SetType(Resource_Type::R_MATERIAL);
 	newMaterial->Import(false);
 	newMaterial->SaveMeta();
 

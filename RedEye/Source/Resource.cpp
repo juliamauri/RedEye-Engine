@@ -68,40 +68,40 @@ void ResourceContainer::SetType(Resource_Type type)
 	switch (type)
 	{
 	case R_UNDEFINED:
-		propietiesName = "Undefined";
+		propietiesName = "Undefined ";
 		break;
 	case R_SHADER:
-		propietiesName = "Shader";
+		propietiesName = "Shader ";
 		break;
 	case R_PRIMITIVE:
-		propietiesName = "Primitive";
+		propietiesName = "Primitive ";
 		break;
 	case R_TEXTURE:
-		propietiesName = "Texture";
+		propietiesName = "Texture ";
 		break;
 	case R_MESH:
-		propietiesName = "Mesh";
+		propietiesName = "Mesh ";
 		break;
 	case R_PREFAB:
-		propietiesName = "Prefab";
+		propietiesName = "Prefab ";
 		break;
 	case R_SKYBOX:
-		propietiesName = "SkyBox";
+		propietiesName = "SkyBox ";
 		break;
 	case R_SCENE:
-		propietiesName = "Scene";
+		propietiesName = "Scene ";
 		break;
 	case R_MATERIAL:
-		propietiesName = "Material";
+		propietiesName = "Material ";
 		break;
 	case R_MODEL:
-		propietiesName = "Model";
+		propietiesName = "Model ";
 		break;
 	default:
-		propietiesName = "";
+		propietiesName = " ";
 		break;
 	}
-	propietiesName += "resource";
+	propietiesName += "resource ";
 }
 
 void ResourceContainer::SetMD5(const char * _md5)
@@ -150,7 +150,6 @@ void ResourceContainer::SaveMeta()
 	metaNode->PushString("MD5", md5);
 	metaNode->PushInt("Type", type);
 	metaNode->PushSignedLongLong("lastModified", lastModified);
-	
 
 	SaveResourceMeta(metaNode);
 	metaSerialize.Save();
