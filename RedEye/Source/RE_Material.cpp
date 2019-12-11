@@ -86,7 +86,7 @@ void RE_Material::Save()
 	BinarySerialize();
 	SaveMeta();
 	applySave = false;
-	UnloadMemory();
+	//UnloadMemory();
 }
 
 void RE_Material::Draw()

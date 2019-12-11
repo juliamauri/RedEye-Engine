@@ -104,6 +104,11 @@ unsigned int TimeManager::GetFpsCounter() const { return fps_counter; }
 unsigned int TimeManager::GetLastMs() const { return last_ms_count; }
 unsigned int TimeManager::GetLastFPS() const { return last_fps_count; }
 
+float TimeManager::GetEngineTimer() const
+{
+	return engine_timer.ReadF()/1000.f;
+}
+
 float TimeManager::GetGameTimer() const
 {
 	return game_timer.ReadF()/1000.f;

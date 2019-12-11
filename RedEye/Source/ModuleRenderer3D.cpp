@@ -118,7 +118,7 @@ update_status ModuleRenderer3D::PostUpdate()
 	RE_CompCamera* current_camera = RE_CameraManager::CurrentCamera();
 	current_camera->Update();
 
-	float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetLastMs() : App->time->GetGameTimer();
+	float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
 	float dt = App->time->GetDeltaTime();
 	// Load Shader Uniforms
 	std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
