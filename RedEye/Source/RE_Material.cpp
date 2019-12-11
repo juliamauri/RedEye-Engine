@@ -33,7 +33,7 @@ void RE_Material::LoadInMemory()
 	if (App->fs->Exists(GetLibraryPath())) {
 		BinaryDeserialize();
 	}
-	if (App->fs->Exists(GetAssetPath())) {
+	else if (App->fs->Exists(GetAssetPath())) {
 		JsonDeserialize();
 		BinarySerialize();
 	}
@@ -94,6 +94,16 @@ void RE_Material::Draw()
 	if (!isInternal() && applySave && ImGui::Button("Save Changes")) {
 		Save();
 		applySave = false;
+	}
+
+	if (App->resources->TotalReferenceCount(GetMD5()) == 0) {
+		ImGui::Text("Material is unloaded, load for watch and modify values.");
+		if (ImGui::Button("Load")) {
+			LoadInMemory();
+			applySave = false;
+			ResourceContainer::inMemory = false;
+		}
+		ImGui::Separator();
 	}
 
 	DrawMaterialEdit();
@@ -174,16 +184,6 @@ void RE_Material::LoadResourceMeta(JSONNode* metaNode)
 
 void RE_Material::DrawMaterialEdit()
 {
-	if (App->resources->TotalReferenceCount(GetMD5()) == 0) {
-		ImGui::Text("Material is unloaded, load for watch and modify values.");
-		if (ImGui::Button("Load")) {
-			LoadInMemory();
-			ResourceContainer::inMemory = false;
-		}
-		ImGui::Separator();
-	}
-
-
 	RE_Shader* matShader = (shaderMD5) ? (RE_Shader*)App->resources->At(shaderMD5) : (RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader());
 	
 	ImGui::Text("Shader selected: %s", matShader->GetMD5());
@@ -637,16 +637,16 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 				break;
 			case Cvar::FLOAT4:
 			case Cvar::MAT2:
-				nuniforms->PullFloat4(id.c_str(), fromShaderCustomUniforms[i].AsFloat4());
+				nuniforms->PushFloat4(id.c_str(), fromShaderCustomUniforms[i].AsFloat4());
 				break;
 			case Cvar::MAT3:
-				nuniforms->PullMat3(id.c_str(), fromShaderCustomUniforms[i].AsMat3());
+				nuniforms->PushMat3(id.c_str(), fromShaderCustomUniforms[i].AsMat3());
 				break;
 			case Cvar::MAT4:
-				nuniforms->PullMat4(id.c_str(), fromShaderCustomUniforms[i].AsMat4());
+				nuniforms->PushMat4(id.c_str(), fromShaderCustomUniforms[i].AsMat4());
 				break;
 			case Cvar::SAMPLER:
-				nuniforms->PullString(id.c_str(), (fromShaderCustomUniforms[i].AsCharP()) ? fromShaderCustomUniforms[i].AsCharP() : "");
+				nuniforms->PushString(id.c_str(), (fromShaderCustomUniforms[i].AsCharP()) ? fromShaderCustomUniforms[i].AsCharP() : "");
 				break;
 			}
 		}
@@ -867,6 +867,8 @@ void RE_Material::BinaryDeserialize()
 						sVar.SetSampler(nullptr, true);
 					break;
 				}
+
+				fromShaderCustomUniforms.push_back(sVar);
 			}
 		}
 

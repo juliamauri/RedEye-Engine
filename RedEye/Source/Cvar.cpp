@@ -875,9 +875,19 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 		ImGui::Text("Sampler: %s", name.c_str());
 		if (!value.char_p_v)  ImGui::Text("No texture selected:");
 		else {
-			if (ImGui::Button(name.c_str())) App->resources->PushSelected(value.char_p_v);
+			ResourceContainer* res = App->resources->At((value.char_p_v));
+			if (ImGui::Button(res->GetName())) App->resources->PushSelected(res->GetMD5());
+
+			ImGui::SameLine();
+			if (ImGui::Button(std::string("Delete Sampler Texture #" + name).c_str())) {
+				if (isInMemory) App->resources->UnUse(value.char_p_v);
+				value.char_p_v = nullptr;
+				ret = true;
+			}
+
 		}
-		if (ImGui::BeginMenu(std::string("Change Sampler Texture " + name).c_str()))
+
+		if (ImGui::BeginMenu(std::string("Change Sampler Texture #" + name).c_str()))
 		{
 			std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
 			for (auto textRes : allTex) {
@@ -889,14 +899,6 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 				}
 			}
 			ImGui::EndMenu();
-		}
-		if (value.char_p_v) {
-			ImGui::SameLine();
-			if (ImGui::Button(std::string("Delete Sampler Texture " + name).c_str())) {
-				if (isInMemory) App->resources->UnUse(value.char_p_v);
-				value.char_p_v = nullptr;
-				ret = true;
-			}
 		}
 		break;
 	}
