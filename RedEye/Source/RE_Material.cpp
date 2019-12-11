@@ -211,6 +211,17 @@ void RE_Material::DrawMaterialEdit()
 		ImGui::EndMenu();
 	}
 
+	if (!fromShaderCustomUniforms.empty()) {
+		ImGui::Separator();
+		if (ImGui::BeginMenu("Custom values from shader")) {
+			for (uint i = 0; i < fromShaderCustomUniforms.size(); i++) {
+				if (fromShaderCustomUniforms[i].DrawPropieties(ResourceContainer::inMemory))
+					applySave = true;
+			}
+			ImGui::EndMenu();
+		}
+	}
+
 	if (usingOnMat[CDIFFUSE] || usingOnMat[TDIFFUSE]) {
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Diffuse values")) {
@@ -795,7 +806,7 @@ void RE_Material::GetAndProcessUniformsFromShader()
 			int pos = sVar.name.find_first_of("0123456789");
 
 			std::string name = (pos != std::string::npos) ? sVar.name.substr(0,pos) : sVar.name;
-			if (sVar.custom) fromShaderCustomUniforms.push_back(sVar.custom);
+			if (sVar.custom) fromShaderCustomUniforms.push_back(sVar);
 			else {
 				MaterialUINT index = UNDEFINED;
 				for (uint i = 0; i < 18; i++) {

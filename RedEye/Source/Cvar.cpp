@@ -1,6 +1,11 @@
 #include "Cvar.h"
 
+#include "Application.h"
+#include "RE_ResourceManager.h"
+
 #include "RE_GameObject.h"
+
+#include "ImGui/imgui.h"
 
 Cvar::Cvar() : type(UNDEFINED) { value.int_v = 0; }
 
@@ -727,7 +732,7 @@ bool ShaderCvar::SetValue(math::float4x4 mat4_v, bool force_type)
 	return ret;
 }
 
-bool ShaderCvar::SetSampler(int int_v, bool force_type)
+bool ShaderCvar::SetSampler(const char* res_ptr, bool force_type)
 {
 	bool ret = false;
 
@@ -735,7 +740,165 @@ bool ShaderCvar::SetSampler(int int_v, bool force_type)
 		type = SAMPLER;
 
 	if (ret = (type == SAMPLER))
-		value.int_v = int_v;
+		value.char_p_v = res_ptr;
 
+	return ret;
+}
+
+bool ShaderCvar::DrawPropieties(bool isInMemory)
+{
+	bool ret = false;
+	std::string n = name;
+	uint count = 0;
+	float* fPtr = nullptr;
+	switch (type)
+	{
+	case Cvar::BOOL:
+		if(ImGui::Checkbox(name.c_str(), &value.bool_v))
+			ret = true;
+		break;
+	case Cvar::BOOL2:
+		n += std::to_string(count++);
+		if (ImGui::Checkbox(n.c_str(), &value.bool2_v[0]))
+			ret = true;
+		n = name;		
+		n += std::to_string(count++);
+		if (ImGui::Checkbox(n.c_str(), &value.bool2_v[1]))
+			ret = true;
+		break;
+	case Cvar::BOOL3:
+		n += std::to_string(count++);
+		if (ImGui::Checkbox(n.c_str(), &value.bool3_v[0]))
+			ret = true;
+		n = name;
+		n += std::to_string(count++);
+		if (ImGui::Checkbox(n.c_str(), &value.bool3_v[1]))
+			ret = true;
+		n = name;
+		n += std::to_string(count++);
+		if (ImGui::Checkbox(n.c_str(), &value.bool3_v[2]))
+			ret = true;
+		break;
+	case Cvar::BOOL4:
+		n += std::to_string(count++);
+		if (ImGui::Checkbox(n.c_str(), &value.bool4_v[0]))
+			ret = true;
+		n = name;
+		n += std::to_string(count++);
+		if (ImGui::Checkbox(n.c_str(), &value.bool4_v[1]))
+			ret = true;
+		n = name;
+		n += std::to_string(count++);
+		if (ImGui::Checkbox(n.c_str(), &value.bool4_v[2]))
+			ret = true;
+		n = name;
+		n += std::to_string(count++);
+		if (ImGui::Checkbox(n.c_str(), &value.bool4_v[3]))
+			ret = true;
+		break;
+	case Cvar::INT:
+		if (ImGui::DragInt(name.c_str(), &value.int_v))
+			ret = true;
+		break;
+	case Cvar::INT2:
+		if (ImGui::DragInt2(name.c_str(), value.int2_v))
+			ret = true;
+		break;
+	case Cvar::INT3:
+		if (ImGui::DragInt3(name.c_str(), value.int3_v))
+			ret = true;
+		break;
+	case Cvar::INT4:
+		if (ImGui::DragInt4(name.c_str(), value.int4_v))
+			ret = true;
+		break;
+	case Cvar::FLOAT:
+		if (ImGui::DragFloat(name.c_str(), &value.float_v))
+			ret = true;
+		break;
+	case Cvar::FLOAT2:
+		if (ImGui::DragFloat2(name.c_str(), value.float2_v.ptr()))
+			ret = true;
+		break;
+	case Cvar::FLOAT3:
+		if (ImGui::DragFloat3(name.c_str(), value.float3_v.ptr()))
+			ret = true;
+		break;
+	case Cvar::FLOAT4:
+		if (ImGui::DragFloat4(name.c_str(), value.float4_v.ptr()))
+			ret = true;
+		break;
+	case Cvar::MAT2:
+		fPtr = value.float4_v.ptr();
+		n += std::to_string(count++);
+		if (ImGui::DragFloat2(n.c_str(), fPtr))
+			ret = true;
+		n = name;
+		n += std::to_string(count++);
+		fPtr +=  2;
+		if (ImGui::DragFloat2(n.c_str(), fPtr))
+			ret = true;
+		break;
+	case Cvar::MAT3:
+		fPtr = value.mat3_v.ptr();
+		n += std::to_string(count++);
+		if (ImGui::DragFloat3(n.c_str(), fPtr))
+			ret = true;
+		fPtr += 3;
+		n = name;
+		n += std::to_string(count++);
+		if (ImGui::DragFloat3(n.c_str(), fPtr))
+			ret = true;
+		fPtr += 3;
+		n = name;
+		n += std::to_string(count++);
+		if (ImGui::DragFloat3(n.c_str(), fPtr))
+			ret = true;
+		break;
+	case Cvar::MAT4:
+		fPtr = value.mat4_v.ptr();
+		n += std::to_string(count++);
+		if (ImGui::DragFloat4(n.c_str(), fPtr))
+			ret = true;
+		fPtr += 4;
+		n = name;
+		n += std::to_string(count++);
+		if (ImGui::DragFloat4(n.c_str(), fPtr))
+			ret = true;
+		fPtr += 4;
+		n = name;
+		n += std::to_string(count++);
+		if (ImGui::DragFloat4(n.c_str(), fPtr))
+			ret = true;
+		break;
+	case Cvar::SAMPLER:
+		ImGui::Text("Sampler: %s", name.c_str());
+		if (!value.char_p_v)  ImGui::Text("No texture selected:");
+		else {
+			if (ImGui::Button(name.c_str())) App->resources->PushSelected(value.char_p_v);
+		}
+		if (ImGui::BeginMenu(std::string("Change Sampler Texture " + name).c_str()))
+		{
+			std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+			for (auto textRes : allTex) {
+				if (ImGui::MenuItem(textRes->GetName())) {
+					if (isInMemory) App->resources->UnUse(value.char_p_v);
+					value.char_p_v = textRes->GetMD5();
+					if (isInMemory) App->resources->Use(value.char_p_v);
+					ret = true;
+				}
+			}
+			ImGui::EndMenu();
+		}
+		if (value.char_p_v) {
+			ImGui::SameLine();
+			if (ImGui::Button(std::string("Delete Sampler Texture " + name).c_str())) {
+				if (isInMemory) App->resources->UnUse(value.char_p_v);
+				value.char_p_v = nullptr;
+				ret = true;
+			}
+		}
+		break;
+	}
 	return ret;
 }

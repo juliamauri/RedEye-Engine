@@ -292,7 +292,7 @@ void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
 			else if (varType.compare("int") == 0)
 				sVar.SetValue(-1, true);
 			else if (varType.compare("sampler2DShadow") == 0 || varType.compare("sampler1DShadow") == 0 || varType.compare("samplerCube") == 0 || varType.compare("sampler3D") == 0 || varType.compare("sampler1D") == 0 || varType.compare("sampler2D") == 0)
-				sVar.SetSampler(-1, true);
+				sVar.SetSampler(nullptr, true);
 			else if (varType.compare("float") == 0)
 				sVar.SetValue(f, true);
 			else if (varType.compare("vec2") == 0)
@@ -322,9 +322,13 @@ void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
 			else
 				continue;
 
+			int pos = sVar.name.find_first_of("0123456789");
+
+			std::string name = (pos != std::string::npos) ? sVar.name.substr(0, pos) : sVar.name;
+
 			//Custom or internal variables
 			for (uint i = 0; i < 25; i++) {
-				if (sVar.name.compare(internalNames[i]) >= 0) {
+				if (name.compare(internalNames[i]) == 0) {
 					sVar.custom = false;
 					break;
 				}
@@ -431,7 +435,6 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 			id = "custom";
 			id += std::to_string(i);
 			sVar.custom = nuniforms->PullBool(id.c_str(), true);
-			uniforms.push_back(sVar);
 
 			bool b2[2] = { false, false };
 			bool b3[3] = { false, false, false };
@@ -490,10 +493,11 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 				sVar.SetValue(math::float4x4::zero, true);
 				break;
 			case Cvar::SAMPLER:
-				sVar.SetSampler(-1, true);
+				sVar.SetSampler(nullptr, true);
 				break;
 			}
 
+			uniforms.push_back(sVar);
 			if (!sVar.custom) {
 				if (projection == -1 && sVar.name.compare("projection") == 0)
 					projection = uniforms.size() -1;

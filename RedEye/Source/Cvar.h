@@ -27,7 +27,7 @@ public:
 	Cvar(RE_GameObject* go_v);
 
 public:
-	enum VAR_TYPE : unsigned short int
+	enum VAR_TYPE : unsigned int
 	{
 		UNDEFINED,
 		BOOL,
@@ -144,7 +144,9 @@ public:
 	bool SetValue(math::float4 float4_v, bool mat2 = false, bool force_type = false);
 	bool SetValue(math::float3x3 mat3_v, bool force_type = false);
 	bool SetValue(math::float4x4 mat4_v, bool force_type = false);
-	bool SetSampler(int int_v, bool force_type = false);
+	bool SetSampler(const char* res_ptr, bool force_type = false);
+
+	bool DrawPropieties(bool isInMemory);
 
 	std::string name;
 	int location = 0;
