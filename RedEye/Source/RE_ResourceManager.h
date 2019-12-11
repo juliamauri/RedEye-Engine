@@ -5,13 +5,17 @@
 #include <vector>
 #include <stack> 
 
+#include "Module.h"
+
 #include "Resource.h"
 
-class RE_ResourceManager
+class RE_ResourceManager : public Module
 {
 public:
 	RE_ResourceManager();
 	~RE_ResourceManager();
+
+	void RecieveEvent(const Event& e) override;
 
 	ResourceContainer* At(const char* md5) const;
 	const char* ReferenceByMeta(const char* path, Resource_Type type);

@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "RE_FileSystem.h"
+#include "RE_ResourceManager.h"
 
 #include "RE_ShaderImporter.h"
 #include "RE_CompCamera.h"
@@ -9,6 +10,7 @@
 
 #include "RE_GLCache.h"
 #include "TimeManager.h"
+#include "Event.h"
 
 #include "OutputLog.h"
 #include "md5.h"
@@ -193,6 +195,9 @@ void RE_Shader::ReImport()
 	//LibrarySave();
 	if (!reload) UnloadMemory();
 	else GetLocations();
+
+	//Send Resource Event
+	Event::Push(RE_EventType::RESOURCE_CHANGED, App->resources, Cvar(GetMD5()));
 }
 
 void RE_Shader::GetVertexFileInfo(const char*& path, signed long long* lastTimeModified) const

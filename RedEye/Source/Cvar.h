@@ -134,6 +134,7 @@ public:
 	ShaderCvar(math::float3x3 mat3_v);
 	ShaderCvar(math::float4x4 mat4_v);
 
+	bool SetValue(const ShaderCvar& copyValue, bool force_type = false);
 	bool SetValue(bool bool_v, bool force_type = false) override;
 	bool SetValue(bool boola_v[], unsigned int count, bool force_type = false);
 	bool SetValue(int int_v, bool force_type = false) override;

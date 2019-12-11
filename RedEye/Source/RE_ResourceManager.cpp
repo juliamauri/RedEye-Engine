@@ -20,7 +20,7 @@
 
 #include <string>
 
-RE_ResourceManager::RE_ResourceManager()
+RE_ResourceManager::RE_ResourceManager() : Module("Resource Manager", true)
 {}
 
 RE_ResourceManager::~RE_ResourceManager()
@@ -32,6 +32,19 @@ RE_ResourceManager::~RE_ResourceManager()
 			//resources.begin()->second.first->GetOrigin());
 		DEL(resources.begin()->second);
 		resources.erase(resources.begin());
+	}
+}
+
+void RE_ResourceManager::RecieveEvent(const Event& e)
+{
+	if (e.type == RE_EventType::RESOURCE_CHANGED) {
+		ResourceContainer* res = resources.at(e.data1.AsCharP());
+		if (res->GetType() == Resource_Type::R_SHADER) {
+			std::vector<ResourceContainer*> materials = GetResourcesByType(Resource_Type::R_MATERIAL);
+			for (auto material : materials) {
+				material->SomeResourceChanged(res->GetMD5());
+			}
+		}
 	}
 }
 

@@ -48,6 +48,8 @@ public:
 
 	void DrawMaterialEdit();
 
+	void SomeResourceChanged(const char* resMD5)override;
+
 private:
 	void Draw() override;
 

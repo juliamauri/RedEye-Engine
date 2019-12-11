@@ -52,6 +52,7 @@ public:
 
 	virtual void Import(bool keepInMemory = true) { }
 	virtual void ReImport() { }
+	virtual void SomeResourceChanged(const char* resMD5) { }
 
 	void SaveMeta();
 	void LoadMeta();

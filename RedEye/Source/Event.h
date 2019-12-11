@@ -44,6 +44,9 @@ typedef enum RE_EventType : unsigned short int
 	SET_WIRE_FRAME,
 	CURRENT_CAM_VIEWPORT_CHANGED,
 
+	// Resources
+	RESOURCE_CHANGED,
+
 	MAX_EVENT_TYPES
 };
 

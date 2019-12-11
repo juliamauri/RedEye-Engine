@@ -358,6 +358,27 @@ void RE_Material::DrawMaterialEdit()
 	}
 }
 
+void RE_Material::SomeResourceChanged(const char* resMD5)
+{
+	if (shaderMD5 == resMD5) {
+		if (!isInMemory()) {
+			LoadInMemory();
+			ResourceContainer::inMemory = false;
+		}
+		std::vector<ShaderCvar> beforeCustomUniforms = fromShaderCustomUniforms;
+		GetAndProcessUniformsFromShader();
+		for (uint b = 0; b < beforeCustomUniforms.size(); b++) {
+			for (uint i = 0; i < fromShaderCustomUniforms.size(); i++) {
+				if (beforeCustomUniforms[b].name == fromShaderCustomUniforms[i].name && beforeCustomUniforms[b].GetType() == fromShaderCustomUniforms[i].GetType()) {
+					fromShaderCustomUniforms[i].SetValue(beforeCustomUniforms[b]);
+					break;
+				}
+			}
+		}
+		Save();
+	}
+}
+
 void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*>* textures)
 {
 	ImGui::Text(std::string(texturesName + std::string(" textures:")).c_str());
@@ -1031,7 +1052,7 @@ void RE_Material::BinarySerialize()
 				cursor += size;	
 				break;
 			case Cvar::SAMPLER:
-				nSize = strlen(fromShaderCustomUniforms[i].AsCharP());
+				nSize = (fromShaderCustomUniforms[i].AsCharP()) ? strlen(fromShaderCustomUniforms[i].AsCharP()) : 0;
 				size = sizeof(uint);
 				memcpy(cursor, &nSize, size);
 				cursor += size;	
@@ -1366,7 +1387,7 @@ unsigned int RE_Material::GetBinarySize()
 				break;
 			case Cvar::SAMPLER:
 				charCount += sizeof(uint);
-				charCount += sizeof(char) * strlen(fromShaderCustomUniforms[i].AsCharP());
+				if(fromShaderCustomUniforms[i].AsCharP()) charCount += sizeof(char) * strlen(fromShaderCustomUniforms[i].AsCharP());
 				break;
 			}
 		}

@@ -538,6 +538,70 @@ ShaderCvar::ShaderCvar(math::float4x4 mat4_v)
 	Cvar::value.mat4_v = mat4_v;
 }
 
+bool ShaderCvar::SetValue(const ShaderCvar& copyValue, bool force_type)
+{
+	bool ret = false;
+
+	if (force_type)
+		type = copyValue.type;
+
+	if (ret = (type == copyValue.type)) {
+		switch (type)
+		{
+		case Cvar::BOOL:
+			SetValue(copyValue.value.bool_v);
+			break;
+		case Cvar::BOOL2:
+			SetValue(copyValue.value.bool2_v, 2);
+			break;
+		case Cvar::BOOL3:
+			SetValue(copyValue.value.bool3_v, 3);
+			break;
+		case Cvar::BOOL4:
+			SetValue(copyValue.value.bool4_v, 4);
+			break;
+		case Cvar::INT:
+			SetValue(copyValue.value.int_v);
+			break;
+		case Cvar::INT2:
+			SetValue(copyValue.value.int2_v, 2);
+			break;
+		case Cvar::INT3:
+			SetValue(copyValue.value.int3_v, 3);
+			break;
+		case Cvar::INT4:
+			SetValue(copyValue.value.int4_v, 4);
+			break;
+		case Cvar::FLOAT:
+			SetValue(copyValue.value.float_v);
+			break;
+		case Cvar::FLOAT2:
+			SetValue(copyValue.value.float2_v);
+			break;
+		case Cvar::FLOAT3:
+			SetValue(copyValue.value.float3_v);
+			break;
+		case Cvar::FLOAT4:
+			SetValue(copyValue.value.float4_v);
+			break;
+		case Cvar::MAT2:
+			SetValue(copyValue.value.float4_v);
+			break;
+		case Cvar::MAT3:
+			SetValue(copyValue.value.mat3_v);
+			break;
+		case Cvar::MAT4:
+			SetValue(copyValue.value.mat4_v);
+			break;
+		case Cvar::SAMPLER:
+			SetSampler(copyValue.value.char_p_v);
+			break;
+		}
+	}
+
+	return ret;
+}
+
 bool ShaderCvar::SetValue(bool bool_v, bool force_type)
 {
 	bool ret = false;
