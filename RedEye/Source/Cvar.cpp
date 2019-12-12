@@ -885,11 +885,21 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 			ret = true;
 		break;
 	case Cvar::FLOAT3:
-		if (ImGui::DragFloat3(name.c_str(), value.float3_v.ptr(), 0.1f))
+		n += " as vector";
+		if (ImGui::DragFloat3(n.c_str(), value.float3_v.ptr(), 0.1f))
+			ret = true;
+		n = name;
+		n += " as color";
+		if (ImGui::ColorEdit3(n.c_str(), value.float3_v.ptr()))
 			ret = true;
 		break;
 	case Cvar::FLOAT4:
-		if (ImGui::DragFloat4(name.c_str(), value.float4_v.ptr(), 0.1f))
+		n += " as vector";
+		if (ImGui::DragFloat4(n.c_str(), value.float4_v.ptr(), 0.1f))
+			ret = true;
+		n = name;
+		n += " as color";
+		if (ImGui::ColorEdit4(n.c_str(), value.float4_v.ptr(), ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaPreview))
 			ret = true;
 		break;
 	case Cvar::MAT2:
