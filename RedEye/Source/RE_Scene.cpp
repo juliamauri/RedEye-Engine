@@ -109,7 +109,7 @@ void RE_Scene::AssetLoad(bool generateLibraryPath)
 		if (generateLibraryPath) {
 			std::string md5 = jsonLoad.GetMd5();
 			SetMD5(md5.c_str());
-			std::string libraryPath("Library/Scene/");
+			std::string libraryPath("Library/Scenes/");
 			libraryPath += md5;
 			SetLibraryPath(libraryPath.c_str());
 		}

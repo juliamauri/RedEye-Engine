@@ -193,6 +193,7 @@ void ModuleScene::OnStop()
 	root->OnStop();
 	DEL(root);
 	root = new RE_GameObject(*savedState);
+	App->editor->SetSelected(nullptr);
 
 	// Render Camera Management
 	App->cams->RecallCameras(root);
