@@ -877,62 +877,62 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 			ret = true;
 		break;
 	case Cvar::FLOAT:
-		if (ImGui::DragFloat(name.c_str(), &value.float_v))
+		if (ImGui::DragFloat(name.c_str(), &value.float_v, 0.1f))
 			ret = true;
 		break;
 	case Cvar::FLOAT2:
-		if (ImGui::DragFloat2(name.c_str(), value.float2_v.ptr()))
+		if (ImGui::DragFloat2(name.c_str(), value.float2_v.ptr(), 0.1f))
 			ret = true;
 		break;
 	case Cvar::FLOAT3:
-		if (ImGui::DragFloat3(name.c_str(), value.float3_v.ptr()))
+		if (ImGui::DragFloat3(name.c_str(), value.float3_v.ptr(), 0.1f))
 			ret = true;
 		break;
 	case Cvar::FLOAT4:
-		if (ImGui::DragFloat4(name.c_str(), value.float4_v.ptr()))
+		if (ImGui::DragFloat4(name.c_str(), value.float4_v.ptr(), 0.1f))
 			ret = true;
 		break;
 	case Cvar::MAT2:
 		fPtr = value.float4_v.ptr();
 		n += std::to_string(count++);
-		if (ImGui::DragFloat2(n.c_str(), fPtr))
+		if (ImGui::DragFloat2(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		n = name;
 		n += std::to_string(count++);
 		fPtr +=  2;
-		if (ImGui::DragFloat2(n.c_str(), fPtr))
+		if (ImGui::DragFloat2(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		break;
 	case Cvar::MAT3:
 		fPtr = value.mat3_v.ptr();
 		n += std::to_string(count++);
-		if (ImGui::DragFloat3(n.c_str(), fPtr))
+		if (ImGui::DragFloat3(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		fPtr += 3;
 		n = name;
 		n += std::to_string(count++);
-		if (ImGui::DragFloat3(n.c_str(), fPtr))
+		if (ImGui::DragFloat3(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		fPtr += 3;
 		n = name;
 		n += std::to_string(count++);
-		if (ImGui::DragFloat3(n.c_str(), fPtr))
+		if (ImGui::DragFloat3(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		break;
 	case Cvar::MAT4:
 		fPtr = value.mat4_v.ptr();
 		n += std::to_string(count++);
-		if (ImGui::DragFloat4(n.c_str(), fPtr))
+		if (ImGui::DragFloat4(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		fPtr += 4;
 		n = name;
 		n += std::to_string(count++);
-		if (ImGui::DragFloat4(n.c_str(), fPtr))
+		if (ImGui::DragFloat4(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		fPtr += 4;
 		n = name;
 		n += std::to_string(count++);
-		if (ImGui::DragFloat4(n.c_str(), fPtr))
+		if (ImGui::DragFloat4(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		break;
 	case Cvar::SAMPLER:
