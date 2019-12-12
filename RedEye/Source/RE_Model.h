@@ -10,12 +10,12 @@ enum aiPostProcessSteps;
 
 struct RE_ModelSettings {
 	//presets
-	bool presets[3] = { false, false, true };
+	bool presets[3] = { false, false, false };
 	//bool Preset_TargetRealtime_Fast
 	//bool Preset_TargetRealtime_MaxQuality
 	//bool Preset_TargetRealtime_Quality
 
-	bool flags[25] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
+	bool flags[25] = { true, true, true, false, true, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false };
 	//0 CalcTangentSpace
 	//1 JoinIdenticalVertices
 	//2 Triangulate
