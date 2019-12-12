@@ -1061,7 +1061,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 			ImGui::SameLine();
 			if (ImGui::Button("Clear vertex")) vertexPath.clear();
 		}
-		else if (vertexPath.empty() && !vertexModify) {
+		else if (vertexPath.empty() && !vertexModify && !fragmentModify && !geometryModify) {
 			if (ImGui::Button("New vertex shader")) {
 				vertexModify = true;
 				App->editor->OpenTextEditor(nullptr, &vertexPath, DEFVERTEXSHADER, &vertexModify);
@@ -1086,7 +1086,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 			ImGui::SameLine();
 			if (ImGui::Button("Clear fragment")) fragmentPath.clear();
 		}
-		else if (fragmentPath.empty() && !fragmentModify) {
+		else if (fragmentPath.empty() && !vertexModify && !fragmentModify && !geometryModify) {
 			if (ImGui::Button("New fragment shader")) {
 				fragmentModify = true;
 				App->editor->OpenTextEditor(nullptr, &fragmentPath, DEFFRAGMENTSHADER, &fragmentModify);
@@ -1111,7 +1111,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 			ImGui::SameLine();
 			if (ImGui::Button("Clear geometry")) geometryPath.clear();
 		}
-		else if(geometryPath.empty() && !geometryModify) {
+		else if(geometryPath.empty() && !vertexModify && !fragmentModify && !geometryModify) {
 			if (ImGui::Button("New geometry shader")) {
 				geometryModify = true;
 				App->editor->OpenTextEditor(nullptr, &geometryPath, nullptr, &geometryModify);
@@ -1298,6 +1298,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 		}
 
 		if (close) {
+			if (!e->file) e->toModify->clear();
 			if(e->open) *e->open = false;
 			DEL(e->textEditor);
 			if (e->file) DEL(e->file);
