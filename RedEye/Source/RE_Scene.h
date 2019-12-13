@@ -31,7 +31,7 @@ private:
 	void AssetSave();
 	void AssetLoad(bool generateLibraryPath = false);
 	void LibraryLoad();
-	void LibrarySave();
+	void LibrarySave(bool fromLoaded = false);
 
 private:
 	RE_GameObject* loaded = nullptr;

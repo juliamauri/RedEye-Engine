@@ -22,7 +22,7 @@ void RE_Scene::LoadInMemory()
 		LibraryLoad();
 	else if (App->fs->Exists(GetAssetPath())) {
 		AssetLoad();
-		LibrarySave();
+		LibrarySave(true);
 	}
 	else {
 		LOG_ERROR("Scene %s not found on project", GetName());
@@ -38,7 +38,7 @@ void RE_Scene::UnloadMemory()
 void RE_Scene::Import(bool keepInMemory)
 {
 	AssetLoad(true);
-	LibrarySave();
+	LibrarySave(true);
 	if (!keepInMemory) UnloadMemory();
 }
 
@@ -129,10 +129,10 @@ void RE_Scene::LibraryLoad()
 	ResourceContainer::inMemory = true;
 }
 
-void RE_Scene::LibrarySave()
+void RE_Scene::LibrarySave(bool fromLoaded)
 {
 	uint size = 0;
-	char* buffer = RE_ResouceAndGOImporter::BinarySerialize(toSave, &size);
+	char* buffer = RE_ResouceAndGOImporter::BinarySerialize((fromLoaded) ? loaded : toSave, &size);
 
 	RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
 	toLibrarySave.Save(buffer, size);

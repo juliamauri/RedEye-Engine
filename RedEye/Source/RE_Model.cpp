@@ -167,10 +167,8 @@ void RE_Model::LoadResourceMeta(JSONNode* metaNode)
 			App->resources->At(md5)->SetAssetPath(GetAssetPath());
 			App->resources->At(md5)->SetMetaPath(GetMetaPath());
 			modelSettings.libraryMeshes.push_back(md5);
-
 		}
 	}
-
 	restoreSettings = modelSettings;
 }
 

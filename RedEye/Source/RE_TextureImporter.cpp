@@ -185,7 +185,11 @@ void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigne
 
 	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
 
-		RE_FileIO librayTexture(App->resources->At(settings.textures[i].textureMD5)->GetLibraryPath());
+		const char* texPath = App->resources->At(settings.textures[i].textureMD5)->GetLibraryPath();
+		if(!App->fs->Exists(texPath))
+			App->resources->At(settings.textures[i].textureMD5)->ReImport();
+
+		RE_FileIO librayTexture(texPath);
 
 		if (librayTexture.Load()) {
 			uint imageID = 0;

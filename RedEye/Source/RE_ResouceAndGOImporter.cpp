@@ -119,8 +119,7 @@ RE_GameObject* RE_ResouceAndGOImporter::JsonDeserialize(JSONNode* node)
 			resMD5 = App->resources->CheckOrFindMeshOnLibrary(mPath.c_str()) :
 			resMD5 = App->resources->FindMD5ByMETAPath(mPath.c_str(), type);
 
-		if (resMD5) resourcesIndex.insert(std::pair< int, const char*>(r, resMD5));
-
+		resourcesIndex.insert(std::pair< int, const char*>(r, resMD5));
 		DEL(resN);
 	}
 	DEL(resources);
@@ -169,8 +168,7 @@ RE_GameObject* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 			resMD5 = App->resources->CheckOrFindMeshOnLibrary(str) :
 			resMD5= App->resources->FindMD5ByMETAPath(str, rType);
 
-		if (resMD5) resourcesIndex.insert(std::pair< int, const char*>(index, resMD5));
-
+		resourcesIndex.insert(std::pair< int, const char*>(index, resMD5));
 		DEL_A(str);
 	}
 	return RE_GameObject::DeserializeBinary(cursor, &resourcesIndex);;

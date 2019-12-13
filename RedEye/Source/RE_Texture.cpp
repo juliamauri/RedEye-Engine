@@ -319,6 +319,18 @@ RE_TextureWrap RE_Texture::GetWrapCombo(int combo)
 	return ret;
 }
 
+void RE_Texture::ReImport()
+{
+	bool unload = false;
+	if (isInMemory()) {
+		unload = true;
+		UnloadMemory();
+	}
+	AssetLoad();
+	LibrarySave();
+	if (!unload) UnloadMemory();
+}
+
 void RE_Texture::TexParameteri(unsigned int pname, int param)
 {
 	if (ResourceContainer::inMemory) {

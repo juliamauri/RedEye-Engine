@@ -76,6 +76,9 @@ public:
 	static int GetComboWrap(RE_TextureWrap wrap);
 	static RE_TextureWrap GetWrapCombo(int combo);
 
+	void ReImport()override;
+
+
 private:
 	void Draw() override;
 	void SaveResourceMeta(JSONNode* metaNode) override; 
