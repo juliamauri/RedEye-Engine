@@ -57,7 +57,7 @@
 static SDL_Window*  g_Window = NULL;
 static Uint64       g_Time = 0;
 static bool         g_MousePressed[3] = { false, false, false };
-static SDL_Cursor*  g_MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
+static SDL_Cursor*  g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 static char*        g_ClipboardTextData = NULL;
 
 static const char* ImGui_ImplSDL2_GetClipboardText(void*)
@@ -170,7 +170,7 @@ static bool ImGui_ImplSDL2_Init(SDL_Window* window)
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
     SDL_GetWindowWMInfo(window, &wmInfo);
-    io.ImeWindowHandle = wmInfo.info.win.window;
+    //io.ImeWindowHandle = wmInfo.info.win.window;
 #else
     (void)window;
 #endif
