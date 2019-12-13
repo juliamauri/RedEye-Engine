@@ -23,7 +23,8 @@
 
 #define DEFFRAGMENTSHADER														       \
 "#version 330 core\n"															       \
-"out vec4 FragColor;\n"															       \
+"#extension GL_ARB_separate_shader_objects : enable\n"						  \
+"layout(location = 0) out vec4 color;\n"															       \
 "\n"																				   \
 "in vec2 TexCoord;\n"																   \
 "\n"																				   \
@@ -36,11 +37,11 @@
 "void main()\n"																	       \
 "{\n"																				   \
 "	if (useTexture > 0.0f && useColor > 0.0f)\n"									   \
-"		FragColor = texture(tdiffuse0, TexCoord) * vec4(cdiffuse, 1.0);\n"   \
+"		color = vec4(texture(tdiffuse0, TexCoord) * vec4(cdiffuse, 1.0));\n"   \
 "	else if (useTexture > 0.0f)\n"												       \
-"		FragColor = texture(tdiffuse0, TexCoord);\n"						       \
+"		color = texture(tdiffuse0, TexCoord);\n"						       \
 "	else if (useColor > 0.0f)\n"													   \
-"		FragColor = vec4(cdiffuse, 1.0);\n"									       \
+"		color = vec4(cdiffuse, 1.0);\n"									       \
 "}\0"
 
 #define SKYBOXVERTEXSHADER							  \
@@ -61,7 +62,8 @@
 
 #define SKYBOXFRAGMENTSHADER				  \
 "#version 330 core\n"						  \
-"out vec4 FragColor;\n"						  \
+"#extension GL_ARB_separate_shader_objects : enable\n"						  \
+"layout(location = 0) out vec4 color;\n"		\
 "\n"											  \
 "in vec3 TexCoords;\n"						  \
 "\n"											  \
@@ -69,7 +71,7 @@
 "\n"											  \
 "void main()\n"								  \
 "{\n"											  \
-"	FragColor = texture(skybox, TexCoords);\n"  \
+"	color = texture(skybox, TexCoords);\n"  \
 "}\0"
 
 

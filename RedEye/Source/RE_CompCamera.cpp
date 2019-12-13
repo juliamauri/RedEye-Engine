@@ -6,6 +6,7 @@
 #include "RE_CompTransform.h"
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
+#include "ModuleEditor.h"
 #include "RE_CameraManager.h"
 #include "OutputLog.h"
 #include "RE_ShaderImporter.h"

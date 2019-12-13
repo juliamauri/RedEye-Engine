@@ -44,6 +44,8 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	tools.push_back(shadereditor = new ShaderEditorWindow());
 	texteditormanager = new TextEditorManagerWindow();
 
+	sceneWindow = new SceneWindow();
+
 	grid_size[0] = grid_size[1] = 1.0f;
 }
 
@@ -225,8 +227,8 @@ update_status ModuleEditor::Update()
 
 			ImGui::EndMainMenuBar();
 		}
-		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None | ImGuiDockNodeFlags_PassthruCentralNode;
 
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None; // | ImGuiDockNodeFlags_PassthruCentralNode;
 		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
@@ -297,6 +299,8 @@ update_status ModuleEditor::Update()
 	if (App->GetState() == GS_STOP)
 		UpdateCamera();
 
+	sceneWindow->DrawWindow();
+
 	ImGui::End();
 
 	return UPDATE_CONTINUE;
@@ -321,6 +325,8 @@ bool ModuleEditor::CleanUp()
 	DEL(about);
 	DEL(select_file);
 	DEL(texteditormanager);
+
+	DEL(sceneWindow);
 
 	DEL(grid_go);
 	grid = nullptr;
@@ -624,11 +630,17 @@ void ModuleEditor::OpenTextEditor(const char* filePath, std::string* filePathStr
 	texteditormanager->PushEditor(filePath, filePathStr, shadertTemplate, open);
 }
 
+void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
+{
+	*widht = sceneWindow->GetSceneWidht();
+	*height = sceneWindow->GetSceneHeight();
+}
+
 void ModuleEditor::UpdateCamera()
 {
 	OPTICK_CATEGORY("Update ModuleEditor Camera", Optick::Category::Camera);
 	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
-	if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && !ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow))
+	if (true)//!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && !ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow))
 	{
 		const MouseData mouse = App->input->GetMouse();
 

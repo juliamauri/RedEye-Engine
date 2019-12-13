@@ -21,6 +21,7 @@ class PopUpWindow;
 class MaterialEditorWindow;
 class ShaderEditorWindow;
 class TextEditorManagerWindow;
+class SceneWindow;
 
 struct SoftwareInfo;
 class RE_GameObject;
@@ -74,8 +75,9 @@ public:
 
 	void OpenTextEditor(const char* filePath, std::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
 
-private:
+	void GetSceneWindowSize(unsigned int* widht, unsigned int* height);
 
+private:
 	void UpdateCamera();
 
 public:
@@ -102,6 +104,8 @@ private:
 	MaterialEditorWindow* materialeditor = nullptr;
 	ShaderEditorWindow* shadereditor = nullptr;
 	TextEditorManagerWindow* texteditormanager = nullptr;
+
+	SceneWindow* sceneWindow = nullptr;
 
 	// Tools
 	RandomTest* rng = nullptr;

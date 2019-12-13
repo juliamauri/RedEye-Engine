@@ -44,6 +44,8 @@ public:
 	void WindowSizeChanged(int width, int height);
 	void UpdateViewPort(int width, int height) const;
 
+	unsigned int GetRenderedSceneTexture()const;
+
 private:
 
 	// Context
@@ -61,6 +63,10 @@ private:
 
 	// Default Shaders
 	unsigned int skyboxShader = 0;
+
+	unsigned int FramebufferName = 0;
+	unsigned int renderedTexture;
+	unsigned int depthrenderbuffer;
 };
 
 #endif // !__MODULERENDER3D_H__

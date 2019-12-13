@@ -26,7 +26,6 @@ public:
 	ImGui::SetWindowSize(ImVec2(1230.0f, 220.0f));*/
 
 private:
-
 	virtual void Draw(bool secondary = false) = 0;
 
 protected:
@@ -300,6 +299,22 @@ private:
 	};
 
 	std::vector<editor*> editors;
+};
+
+class SceneWindow :public EditorWindow
+{
+public:
+	SceneWindow(const char* name = "Scene window", bool start_active = true);
+	~SceneWindow();
+
+	unsigned int GetSceneWidht()const { return (width == 0) ? 500 : width; }
+	unsigned int GetSceneHeight()const { return (heigth == 0) ? 500 : heigth; }
+
+private:
+	void Draw(bool secondary = false) override;
+
+	unsigned int width = 0;
+	unsigned int heigth = 0;
 };
 
 #endif // !__EDITORWINDOWS__

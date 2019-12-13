@@ -1314,3 +1314,32 @@ void TextEditorManagerWindow::Draw(bool secondary)
 		toRemoveE.clear();
 	}
 }
+
+SceneWindow::SceneWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
+
+SceneWindow::~SceneWindow()
+{
+}
+
+void SceneWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		ImVec2 size = ImGui::GetWindowSize();
+		width = size.x;
+		heigth = size.y - 35;
+		ImGui::Image((void*)App->renderer3d->GetRenderedSceneTexture(), { (float)width, (float)heigth }, { 0.0, 1.0 }, { 1.0, 0.0 });
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+	}
+
+	ImGui::End();
+}
