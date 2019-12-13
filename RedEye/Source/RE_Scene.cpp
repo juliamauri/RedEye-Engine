@@ -89,7 +89,7 @@ void RE_Scene::AssetSave()
 	//Setting LibraryPath and MD5
 	std::string md5 = scene_SaveFile.GetMd5();
 	SetMD5(md5.c_str());
-	std::string libraryPath("Library/Scene/");
+	std::string libraryPath("Library/Scenes/");
 	libraryPath += md5;
 	SetLibraryPath(libraryPath.c_str());
 

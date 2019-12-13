@@ -76,9 +76,15 @@ void RE_CompMesh::DrawProperties()
 					continue;
 				none = false;
 				if (ImGui::MenuItem(material->GetName())) {
-					if (materialMD5) App->resources->UnUse(materialMD5);
+					if (materialMD5) {
+						App->resources->UnUse(materialMD5);
+						((RE_Material*)App->resources->At(materialMD5))->UnUseTextureResources();
+					}
 					materialMD5 = material->GetMD5();
-					if (materialMD5) App->resources->Use(materialMD5);
+					if (materialMD5) {
+						App->resources->Use(materialMD5);
+						((RE_Material*)App->resources->At(materialMD5))->UseTextureResources();
+					}
 				}
 			}
 			if (none) ImGui::Text("No custom materials on assets");

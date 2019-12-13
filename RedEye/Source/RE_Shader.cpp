@@ -26,13 +26,19 @@ RE_Shader::~RE_Shader() { }
 
 void RE_Shader::LoadInMemory()
 {
-	if (App->fs->Exists(shaderSettings.vertexShader.c_str()) && App->fs->Exists(shaderSettings.fragmentShader.c_str())) {
+	if (App->fs->Exists(GetLibraryPath())) {
+		LibraryLoad();
+	}
+	else if (App->fs->Exists(shaderSettings.vertexShader.c_str()) && App->fs->Exists(shaderSettings.fragmentShader.c_str())) {
 		AssetLoad();
-		GetLocations();
+		LibrarySave();
 	}
 	else {
 		LOG_ERROR("Texture %s not found on project", GetName());
 	}
+
+	if (isInMemory()) 
+		GetLocations();
 }
 
 void RE_Shader::UnloadMemory()
@@ -60,6 +66,7 @@ void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuff
 	SetMD5(MD5(totalBuffer).hexdigest().c_str());
 	std::string libraryPath("Library/Shaders/");
 	libraryPath += GetMD5();
+	SetLibraryPath(libraryPath.c_str());
 
 	App->shaders->LoadFromBuffer(&ID, vertexBuffer, vertexLenght, fragmentBuffer, fragmentLenght, geometryBuffer, geometryLenght);
 
@@ -79,6 +86,8 @@ void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuff
 	}
 	MountShaderCvar(lines);
 	GetLocations();
+
+	LibrarySave();
 
 	ResourceContainer::inMemory = true;
 }
@@ -118,6 +127,7 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	SetMD5(MD5(buffer).hexdigest().c_str());
 	std::string libraryPath("Library/Shaders/");
 	libraryPath += GetMD5();
+	SetLibraryPath(libraryPath.c_str());
 
 	if (!isInternal()) SetMetaPath("Assets/Shaders/");
 }
@@ -191,8 +201,8 @@ void RE_Shader::ReImport()
 	SetPaths(shaderSettings.vertexShader.c_str(), shaderSettings.fragmentShader.c_str(), (!shaderSettings.geometryShader.empty()) ? shaderSettings.geometryShader.c_str() : nullptr);
 	AssetLoad();
 	ParseAndGetUniforms();
+	LibrarySave();
 	SaveMeta();
-	//LibrarySave();
 	if (!reload) UnloadMemory();
 	else GetLocations();
 
@@ -540,7 +550,10 @@ void RE_Shader::LibraryLoad()
 {
 	RE_FileIO libraryLoad(GetLibraryPath());
 	if (libraryLoad.Load()) {
-		App->shaders->LoadFromBinary(libraryLoad.GetBuffer(), libraryLoad.GetSize(), &ID);
+		if (!App->shaders->LoadFromBinary(libraryLoad.GetBuffer(), libraryLoad.GetSize(), &ID)) {
+			AssetLoad();
+			LibrarySave();
+		}
 		ResourceContainer::inMemory = true;
 	}
 }
@@ -549,8 +562,9 @@ void RE_Shader::LibrarySave()
 {
 	RE_FileIO librarySave(GetLibraryPath(), App->fs->GetZipPath());
 
-	char** buffer = nullptr;
+	char* buffer = nullptr;
 	int size = 0;
-	if (App->shaders->GetBinaryProgram(ID, buffer, &size))
-		librarySave.Save(*buffer, size);
+	if (App->shaders->GetBinaryProgram(ID, &buffer, &size))
+		librarySave.Save(buffer, size);
+	DEL_A(buffer);
 }

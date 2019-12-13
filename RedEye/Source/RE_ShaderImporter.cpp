@@ -22,7 +22,7 @@ bool RE_ShaderImporter::Init()
 
 	GLint formats = 0;
 	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
-	binaryFormats = new GLint[formats];
+	binaryFormats = new int[formats];
 	glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, binaryFormats);
 
 	return ret;
@@ -281,13 +281,18 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 
 bool RE_ShaderImporter::LoadFromBinary(const char* buffer, unsigned int size, unsigned int* ID)
 {
-	bool ret = false;
+	bool ret = true;
 
 	*ID = glCreateProgram();
 	glProgramBinary(*ID, binaryFormats[0], buffer, size);
 
-	if (*ID != 0)
-		ret = true;
+	int  success;
+	glValidateProgram(*ID);
+	glGetProgramiv(*ID, GL_VALIDATE_STATUS, &success);
+	if (!success) {
+		glDeleteProgram(*ID);
+		ret = false;
+	}
 
 	return ret;
 }
@@ -301,7 +306,7 @@ bool RE_ShaderImporter::GetBinaryProgram(unsigned int ID, char** buffer, int* si
 
 		if (*size > 0) {
 			*buffer = new char[*size];
-			glProgramBinary(ID, binaryFormats[0], *buffer, *size);
+			glGetProgramBinary(ID, *size, size, (GLenum*)binaryFormats, *buffer);
 			ret = true;
 		}
 	}
