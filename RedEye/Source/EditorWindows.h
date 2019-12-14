@@ -310,11 +310,15 @@ public:
 	unsigned int GetSceneWidht()const { return (width == 0) ? 500 : width; }
 	unsigned int GetSceneHeight()const { return (heigth == 0) ? 500 : heigth; }
 
+	bool isSelected()const { return isWindowSelected; }
+
 private:
 	void Draw(bool secondary = false) override;
 
 	unsigned int width = 0;
 	unsigned int heigth = 0;
+
+	bool isWindowSelected = false;
 };
 
 #endif // !__EDITORWINDOWS__

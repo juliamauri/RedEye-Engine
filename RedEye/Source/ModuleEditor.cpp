@@ -640,7 +640,7 @@ void ModuleEditor::UpdateCamera()
 {
 	OPTICK_CATEGORY("Update ModuleEditor Camera", Optick::Category::Camera);
 	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
-	if (true)//!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && !ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow))
+	if (sceneWindow->isSelected())//!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && !ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow))
 	{
 		const MouseData mouse = App->input->GetMouse();
 

@@ -5,6 +5,8 @@
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3d.h"
+#include "ModuleWindow.h"
+#include "ModuleInput.h"
 #include "TimeManager.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
@@ -1333,7 +1335,19 @@ void SceneWindow::Draw(bool secondary)
 		ImVec2 size = ImGui::GetWindowSize();
 		width = size.x;
 		heigth = size.y - 35;
+
+		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
+
 		ImGui::Image((void*)App->renderer3d->GetRenderedSceneTexture(), { (float)width, (float)heigth }, { 0.0, 1.0 }, { 1.0, 0.0 });
+		
+		if(isWindowSelected && App->input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN){
+			ImVec2 mousePosOnThis = ImGui::GetMousePos();
+			mousePosOnThis.x = mousePosOnThis.x - ImGui::GetCursorScreenPos().x;
+			mousePosOnThis.y = (ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y < 0) ? 0 : ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y;
+		
+			//TODO RAYCAST
+
+		}
 
 		if (secondary) {
 			ImGui::PopItemFlag();
