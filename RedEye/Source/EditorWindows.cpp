@@ -1317,13 +1317,13 @@ void TextEditorManagerWindow::Draw(bool secondary)
 	}
 }
 
-SceneWindow::SceneWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
+SceneEditorWindow::SceneEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
 
-SceneWindow::~SceneWindow()
+SceneEditorWindow::~SceneEditorWindow()
 {
 }
 
-void SceneWindow::Draw(bool secondary)
+void SceneEditorWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
@@ -1338,13 +1338,54 @@ void SceneWindow::Draw(bool secondary)
 
 		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 
-		ImGui::Image((void*)App->renderer3d->GetRenderedSceneTexture(), { (float)width, (float)heigth }, { 0.0, 1.0 }, { 1.0, 0.0 });
+		ImGui::Image((void*)App->renderer3d->GetRenderedEditorSceneTexture(), { (float)width, (float)heigth }, { 0.0, 1.0 }, { 1.0, 0.0 });
 		
 		if(isWindowSelected && App->input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN){
 			ImVec2 mousePosOnThis = ImGui::GetMousePos();
 			mousePosOnThis.x = mousePosOnThis.x - ImGui::GetCursorScreenPos().x;
 			mousePosOnThis.y = (ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y < 0) ? 0 : ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y;
 		
+			//TODO RAYCAST
+
+		}
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+	}
+
+	ImGui::End();
+}
+
+SceneGameWindow::SceneGameWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
+
+SceneGameWindow::~SceneGameWindow()
+{
+}
+
+void SceneGameWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		ImVec2 size = ImGui::GetWindowSize();
+		width = size.x;
+		heigth = size.y - 35;
+
+		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
+
+		ImGui::Image((void*)App->renderer3d->GetRenderedGameSceneTexture(), { (float)width, (float)heigth }, { 0.0, 1.0 }, { 1.0, 0.0 });
+
+		if (isWindowSelected && App->input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN) {
+			ImVec2 mousePosOnThis = ImGui::GetMousePos();
+			mousePosOnThis.x = mousePosOnThis.x - ImGui::GetCursorScreenPos().x;
+			mousePosOnThis.y = (ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y < 0) ? 0 : ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y;
+
 			//TODO RAYCAST
 
 		}

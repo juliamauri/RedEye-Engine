@@ -301,11 +301,31 @@ private:
 	std::vector<editor*> editors;
 };
 
-class SceneWindow :public EditorWindow
+class SceneEditorWindow :public EditorWindow
 {
 public:
-	SceneWindow(const char* name = "Scene window", bool start_active = true);
-	~SceneWindow();
+	SceneEditorWindow(const char* name = "Editor Scene", bool start_active = true);
+	~SceneEditorWindow();
+
+	unsigned int GetSceneWidht()const { return (width == 0) ? 500 : width; }
+	unsigned int GetSceneHeight()const { return (heigth == 0) ? 500 : heigth; }
+
+	bool isSelected()const { return isWindowSelected; }
+
+private:
+	void Draw(bool secondary = false) override;
+
+	unsigned int width = 0;
+	unsigned int heigth = 0;
+
+	bool isWindowSelected = false;
+};
+
+class SceneGameWindow :public EditorWindow
+{
+public:
+	SceneGameWindow(const char* name = "Game Scene", bool start_active = true);
+	~SceneGameWindow();
 
 	unsigned int GetSceneWidht()const { return (width == 0) ? 500 : width; }
 	unsigned int GetSceneHeight()const { return (heigth == 0) ? 500 : heigth; }

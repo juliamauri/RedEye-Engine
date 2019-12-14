@@ -1,5 +1,7 @@
 #include "RE_FBOManager.h"
 
+#include "OutputLog.h"
+
 #include "Glew/include/glew.h"
 
 RE_FBOManager::RE_FBOManager() { }
@@ -8,6 +10,7 @@ RE_FBOManager::~RE_FBOManager() {
 	for (auto fbo : fbos) {
 		if (fbo.second.stencilBuffer != 0) glDeleteRenderbuffers(1, &fbo.second.stencilBuffer);
 		if (fbo.second.depthBuffer != 0) glDeleteRenderbuffers(1, &fbo.second.depthBuffer);
+		if (fbo.second.depthstencilBuffer != 0) glDeleteRenderbuffers(1, &fbo.second.depthstencilBuffer);
 		for(auto c : fbo.second.texturesID) glDeleteTextures(1, &c);
 		glDeleteFramebuffers(1, &fbo.second.ID);
 	}
@@ -48,19 +51,28 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 		newFbo.texturesID.push_back(tex);
 	}
 
-	if (depth) {
-		glGenRenderbuffers(1, &newFbo.depthBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthBuffer);
+	if (depth && stencil) {
+		glGenRenderbuffers(1, &newFbo.depthstencilBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthstencilBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthstencilBuffer);
+	}
+	else {
+		if (depth) {
+			glGenRenderbuffers(1, &newFbo.depthBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthBuffer);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthBuffer);
+		}
+
+		if (stencil) {
+			glGenRenderbuffers(1, &newFbo.stencilBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, newFbo.stencilBuffer);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL, width, height);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, newFbo.stencilBuffer);
+		}
 	}
 
-	if (stencil) {
-		glGenRenderbuffers(1, &newFbo.stencilBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, newFbo.stencilBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL, width, height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, newFbo.stencilBuffer);
-	}
 	
 	unsigned int drawFubbersize = newFbo.texturesID.size();
 	GLenum* DrawBuffers = new GLenum[drawFubbersize];
@@ -71,9 +83,12 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 
 	if (glCheckFramebufferStatus(newFbo.ID) != GL_FRAMEBUFFER_COMPLETE)
 		ret = newFbo.ID;
-	else
+	else {
 		ClearFBO(newFbo.ID);
+		LOG_ERROR("FBO can't be created.");
+	}
 
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	ChangeFBOBind(0);
 
@@ -93,6 +108,7 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 	bool depth = false;
 	if (stencil = (toChange.stencilBuffer != 0)) glDeleteRenderbuffers(1, &toChange.stencilBuffer);
 	if (depth = (toChange.depthBuffer != 0)) glDeleteRenderbuffers(1, &toChange.depthBuffer);
+	if (depth = stencil = (toChange.depthstencilBuffer != 0)) glDeleteRenderbuffers(1, &toChange.depthstencilBuffer);
 	for (auto c : toChange.texturesID) glDeleteTextures(1, &c);
 
 	for (unsigned int i = 0; i < texturesNum; i++) {
@@ -118,18 +134,26 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 		toChange.texturesID.push_back(tex);
 	}
 
-	if (depth) {
-		glGenRenderbuffers(1, &toChange.depthBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, toChange.depthBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, toChange.depthBuffer);
+	if (depth && stencil) {
+		glGenRenderbuffers(1, &toChange.depthstencilBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, toChange.depthstencilBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, toChange.depthstencilBuffer);
 	}
+	else {
+		if (depth) {
+			glGenRenderbuffers(1, &toChange.depthBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, toChange.depthBuffer);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, toChange.depthBuffer);
+		}
 
-	if (stencil) {
-		glGenRenderbuffers(1, &toChange.stencilBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, toChange.stencilBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL, width, height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, toChange.stencilBuffer);
+		if (stencil) {
+			glGenRenderbuffers(1, &toChange.stencilBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, toChange.stencilBuffer);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL, width, height);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, toChange.stencilBuffer);
+		}
 	}
 
 	fbos.erase(ID);

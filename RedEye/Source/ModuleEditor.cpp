@@ -44,7 +44,8 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	tools.push_back(shadereditor = new ShaderEditorWindow());
 	texteditormanager = new TextEditorManagerWindow();
 
-	sceneWindow = new SceneWindow();
+	sceneEditorWindow = new SceneEditorWindow();
+	sceneGameWindow = new SceneGameWindow();
 
 	grid_size[0] = grid_size[1] = 1.0f;
 }
@@ -299,7 +300,8 @@ update_status ModuleEditor::Update()
 	if (App->GetState() == GS_STOP)
 		UpdateCamera();
 
-	sceneWindow->DrawWindow();
+	sceneEditorWindow->DrawWindow();
+	sceneGameWindow->DrawWindow();
 
 	ImGui::End();
 
@@ -326,7 +328,8 @@ bool ModuleEditor::CleanUp()
 	DEL(select_file);
 	DEL(texteditormanager);
 
-	DEL(sceneWindow);
+	DEL(sceneEditorWindow);
+	DEL(sceneGameWindow);
 
 	DEL(grid_go);
 	grid = nullptr;
@@ -632,15 +635,15 @@ void ModuleEditor::OpenTextEditor(const char* filePath, std::string* filePathStr
 
 void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
 {
-	*widht = sceneWindow->GetSceneWidht();
-	*height = sceneWindow->GetSceneHeight();
+	*widht = sceneEditorWindow->GetSceneWidht();
+	*height = sceneEditorWindow->GetSceneHeight();
 }
 
 void ModuleEditor::UpdateCamera()
 {
 	OPTICK_CATEGORY("Update ModuleEditor Camera", Optick::Category::Camera);
 	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
-	if (sceneWindow->isSelected())//!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && !ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow))
+	if (sceneEditorWindow->isSelected())//!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && !ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow))
 	{
 		const MouseData mouse = App->input->GetMouse();
 

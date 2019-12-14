@@ -11,9 +11,7 @@ struct RE_FBO {
 	std::vector<unsigned int> texturesID;
 	unsigned int depthBuffer = 0;
 	unsigned int stencilBuffer = 0;
-
-	//TO UPGRADE IF NECESSARY
-	//GL_DEPTH_STENCIL_ATTACHMENT
+	unsigned int depthstencilBuffer = 0;
 };
 
 class RE_FBOManager :
@@ -34,7 +32,6 @@ public:
 	unsigned int GetHeight(unsigned int ID)const;
 
 	static void ChangeFBOBind(unsigned int tID, unsigned int width = 0, unsigned int height = 0);
-
 
 private:
 	std::map<unsigned int, RE_FBO> fbos;

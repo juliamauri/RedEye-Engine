@@ -19,6 +19,7 @@ public:
 
 	static RE_CompCamera * CurrentCamera();
 	static RE_CompCamera * EditorCamera();
+	static RE_CompCamera * MainCamera();
 	static bool HasMainCamera();
 
 	void OnWindowChangeSize(float width, float height);

@@ -21,7 +21,8 @@ class PopUpWindow;
 class MaterialEditorWindow;
 class ShaderEditorWindow;
 class TextEditorManagerWindow;
-class SceneWindow;
+class SceneEditorWindow;
+class SceneGameWindow;
 
 struct SoftwareInfo;
 class RE_GameObject;
@@ -105,8 +106,8 @@ private:
 	ShaderEditorWindow* shadereditor = nullptr;
 	TextEditorManagerWindow* texteditormanager = nullptr;
 
-	SceneWindow* sceneWindow = nullptr;
-
+	SceneEditorWindow* sceneEditorWindow = nullptr;
+	SceneGameWindow* sceneGameWindow = nullptr;
 	// Tools
 	RandomTest* rng = nullptr;
 	TexturesWindow* textures = nullptr;

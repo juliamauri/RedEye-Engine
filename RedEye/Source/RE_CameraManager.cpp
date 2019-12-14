@@ -43,6 +43,11 @@ RE_CompCamera * RE_CameraManager::EditorCamera()
 	return editor_camera;
 }
 
+RE_CompCamera* RE_CameraManager::MainCamera()
+{
+	return main_camera;
+}
+
 bool RE_CameraManager::HasMainCamera()
 {
 	return main_camera != nullptr;

@@ -80,7 +80,8 @@ bool ModuleRenderer3D::Start()
 {
 	skyboxShader = App->internalResources->GetSkyBoxShader();
 
-	sceneFBO = App->fbomanager->CreateFBO(1024, 768);
+	sceneEditorFBO = App->fbomanager->CreateFBO(1024, 768, 1, true, true);
+	sceneGameFBO = App->fbomanager->CreateFBO(1024, 768);
 
 	return true;
 }
@@ -91,12 +92,6 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	update_status ret = UPDATE_CONTINUE;
 
-	RE_FBOManager::ChangeFBOBind(sceneFBO, App->fbomanager->GetWidth(sceneFBO), App->fbomanager->GetHeight(sceneFBO));
-
-	// Reset background with a clear color
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	return ret;
 }
 
@@ -106,27 +101,37 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	update_status ret = UPDATE_CONTINUE;
 
-	OPTICK_CATEGORY("Culling", Optick::Category::Rendering);
-	std::vector<const RE_GameObject*> objects;
-	if (cull_scene)
-	{
-		math::Frustum frustum = App->cams->GetCullingFrustum();
-		App->scene->FustrumCulling(objects, frustum);
-	}
-
-	OPTICK_CATEGORY("Scene Draw", Optick::Category::Rendering);
 	// Prepare if using wireframe
-	if(wireframe)
+	if (wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	RE_CompCamera* current_camera = RE_CameraManager::CurrentCamera();
-	current_camera->Update();
 
 	float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
 	float dt = App->time->GetDeltaTime();
+
+	OPTICK_CATEGORY("Scene Editor Draw", Optick::Category::Rendering);
+
+	OPTICK_CATEGORY("Culling Editor", Optick::Category::Rendering);
+
+	RE_CompCamera* current_camera = RE_CameraManager::EditorCamera();
+	current_camera->Update();
+
+	std::vector<const RE_GameObject*> objects;
+	if (cull_scene)
+	{
+		math::Frustum frustum = current_camera->GetFrustum();
+		App->scene->FustrumCulling(objects, frustum);
+	}
+
 	// Load Shader Uniforms
 	std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(current_camera, dt, time);
+
+
+	RE_FBOManager::ChangeFBOBind(sceneEditorFBO, App->fbomanager->GetWidth(sceneEditorFBO), App->fbomanager->GetHeight(sceneEditorFBO));
+
+	// Reset background with a clear color
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	// Frustum Culling
 	if (cull_scene)
@@ -159,6 +164,59 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	glDepthFunc(GL_LESS); // set depth function back to default
+
+	OPTICK_CATEGORY("Scene Game Draw", Optick::Category::Rendering);
+	OPTICK_CATEGORY("Culling Game", Optick::Category::Rendering);
+
+	current_camera = RE_CameraManager::MainCamera();
+	current_camera->Update();
+
+	objects.clear();
+	if (cull_scene)
+	{
+		math::Frustum frustum = current_camera->GetFrustum();
+		App->scene->FustrumCulling(objects, frustum);
+	}
+
+	// Load Shader Uniforms
+	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(current_camera, dt, time);
+
+
+	RE_FBOManager::ChangeFBOBind(sceneGameFBO, App->fbomanager->GetWidth(sceneGameFBO), App->fbomanager->GetHeight(sceneGameFBO));
+
+	// Reset background with a clear color
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Frustum Culling
+	if (cull_scene)
+		for (auto object : objects)
+			object->DrawItselfOnly();
+	else
+		App->scene->GetRoot()->DrawWithChilds();
+
+	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
+	// draw skybox as last
+
+	RE_GLCache::ChangeTextureBind(0);
+	// Set shader and uniforms
+	RE_GLCache::ChangeShader(skyboxShader);
+	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);
+
+	// change depth function so depth test passes when values are equal to depth buffer's content
+	glDepthFunc(GL_LEQUAL);
+
+	// Render skybox cube
+	RE_GLCache::ChangeVAO(App->internalResources->GetSkyBoxVAO());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	glDepthFunc(GL_LESS); // set depth function back to default
+
 
 	RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
 
@@ -419,7 +477,12 @@ void ModuleRenderer3D::UpdateViewPort(int width, int height) const
 	glViewport(viewP.x, viewP.y, viewP.w, viewP.z);
 }
 
-unsigned int ModuleRenderer3D::GetRenderedSceneTexture() const
+unsigned int ModuleRenderer3D::GetRenderedEditorSceneTexture() const
 {
-	return App->fbomanager->GetTextureID(sceneFBO, 0);
+	return App->fbomanager->GetTextureID(sceneEditorFBO, 0);
+}
+
+unsigned int ModuleRenderer3D::GetRenderedGameSceneTexture() const
+{
+	return App->fbomanager->GetTextureID(sceneGameFBO, 0);
 }
