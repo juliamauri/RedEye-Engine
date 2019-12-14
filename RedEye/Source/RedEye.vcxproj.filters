@@ -166,6 +166,9 @@
     <ClCompile Include="RE_InternalResources.cpp">
       <Filter>Modules\Resource Managers\InternalResources</Filter>
     </ClCompile>
+    <ClCompile Include="RE_FBOManager.cpp">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -491,6 +494,9 @@
     </ClInclude>
     <ClInclude Include="RE_DefaultShaders.h">
       <Filter>Modules\Resource Managers\InternalResources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_FBOManager.h">
+      <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -28,6 +28,7 @@ class RE_ResourceManager;
 class RE_HandleErrors;
 class RE_InternalResources;
 class RE_GLCache;
+class RE_FBOManager;
 
 enum GameState : char
 {
@@ -89,6 +90,7 @@ public:
 	RE_HandleErrors* handlerrors = nullptr;
 
 	RE_GLCache* glcache = nullptr;
+	RE_FBOManager* fbomanager = nullptr;
 
 private:
 

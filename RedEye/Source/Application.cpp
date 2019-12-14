@@ -23,6 +23,7 @@
 #include "OutputLog.h"
 #include "RE_HandleErrors.h"
 #include "RE_GLCache.h"
+#include "RE_FBOManager.h"
 
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
@@ -56,6 +57,7 @@ Application::Application()
 	internalResources = new RE_InternalResources();
 	handlerrors = new RE_HandleErrors();
 	glcache = new RE_GLCache();
+	fbomanager = new RE_FBOManager();
 }
 
 Application::~Application()
@@ -69,6 +71,7 @@ Application::~Application()
 	DEL(internalResources);
 	DEL(handlerrors);
 	DEL(glcache);
+	DEL(fbomanager);
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;

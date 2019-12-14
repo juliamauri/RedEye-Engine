@@ -5,11 +5,11 @@
 #include <vector>
 #include <stack> 
 
-#include "Module.h"
+#include "EventListener.h"
 
 #include "Resource.h"
 
-class RE_ResourceManager : public Module
+class RE_ResourceManager : public EventListener
 {
 public:
 	RE_ResourceManager();

@@ -20,8 +20,7 @@
 
 #include <string>
 
-RE_ResourceManager::RE_ResourceManager() : Module("Resource Manager", true)
-{}
+RE_ResourceManager::RE_ResourceManager() {}
 
 RE_ResourceManager::~RE_ResourceManager()
 {

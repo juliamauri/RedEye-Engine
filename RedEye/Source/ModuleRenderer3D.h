@@ -64,9 +64,7 @@ private:
 	// Default Shaders
 	unsigned int skyboxShader = 0;
 
-	unsigned int FramebufferName = 0;
-	unsigned int renderedTexture;
-	unsigned int depthrenderbuffer;
+	unsigned int sceneFBO = 0;
 };
 
 #endif // !__MODULERENDER3D_H__
