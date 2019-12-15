@@ -1700,6 +1700,41 @@ std::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAnd
 	return ret;
 }
 
+std::stack<RE_FileSystem::RE_Path*> RE_FileSystem::RE_Directory::GetDisplayingFiles() const
+{
+	std::stack<RE_FileSystem::RE_Path*> ret;
+
+	for (auto path : tree) {
+		switch (path->pType)
+		{
+		case RE_FileSystem::PathType::D_FILE:
+			switch (path->AsFile()->fType)
+			{
+			case RE_FileSystem::FileType::F_META:
+			{
+				if (path->AsMeta()->resource) {
+					ResourceContainer* res = App->resources->At(path->AsMeta()->resource);
+					if (res->GetType() == R_SHADER)
+						ret.push(path);
+				}
+				break;
+			}
+			case RE_FileSystem::FileType::F_NONE:
+				//nothing
+				break;
+			default:
+				ret.push(path);
+				break;
+			}
+			break;
+		case RE_FileSystem::PathType::D_FOLDER:
+			ret.push(path);
+		}
+	}
+
+	return ret;
+}
+
 std::list<RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::FromParentToThis()
 {
 	std::list<RE_Directory*> ret;

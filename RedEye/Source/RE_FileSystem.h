@@ -83,7 +83,7 @@ public:
 	{
 		RE_File* fromFile = nullptr;
 		const char* resource = nullptr;
-
+		
 		bool IsModified()const;
 
 		RE_Path* AsPath()const { return (RE_Path*)this; }
@@ -108,6 +108,8 @@ public:
 		void SetPath(const char* path);
 		std::list< RE_Directory*> MountTreeFolders();
 		std::stack<RE_ProcessPath*> CheckAndApply(std::vector<RE_Meta*>* metaRecentlyAdded);
+
+		std::stack<RE_Path*> GetDisplayingFiles()const;
 
 		std::list<RE_Directory*> FromParentToThis();
 
