@@ -296,14 +296,10 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 	else
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	RE_GameObject* stencilGO = (stencilToSelected) ? App->editor->GetSelected() : nullptr;
 	std::stack<RE_Component*> comptsToDraw;
 	// Frustum Culling
 	if (cull_scene) {
 		for (auto object : objects) {
-			if (object == stencilGO)
-				continue;
-
 			std::stack<RE_Component*> fromO = object->GetDrawableComponentsItselfOnly();
 			while (!fromO.empty())
 			{
@@ -313,7 +309,7 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 		}
 	}
 	else
-		comptsToDraw = App->scene->GetRoot()->GetDrawableComponentsWithChilds(stencilGO);
+		comptsToDraw = App->scene->GetRoot()->GetDrawableComponentsWithChilds();
 
 	while (!comptsToDraw.empty())
 	{
@@ -348,11 +344,17 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 	glDepthFunc(GL_LESS); // set depth function back to default
 
 	if (stencilToSelected) {
-		OPTICK_CATEGORY("Stencil Draw", Optick::Category::Rendering);
+		RE_GameObject* stencilGO = App->editor->GetSelected();
+		if (stencilGO == nullptr)
+			return;
 
+		std::stack<RE_Component*> stackComponents = stencilGO->GetDrawableComponentsItselfOnly();
+		if (stackComponents.empty())
+			return;
+
+		OPTICK_CATEGORY("Stencil Draw", Optick::Category::Rendering);
 		std::stack<unsigned int> vaoToStencil;
 		std::stack<unsigned int> triangleToStencil;
-		std::stack<RE_Component*> stackComponents = stencilGO->GetDrawableComponentsItselfOnly();
 		std::stack<RE_Component*> stackTemp;
 		while (!stackComponents.empty())
 		{
@@ -377,41 +379,41 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 
 		while (!vaoToStencil.empty())
 		{
-			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // Make sure we draw on the backbuffer again.
-			glStencilFunc(GL_ALWAYS, 1, 0xFF);
-			glStencilMask(0xFF);
-			glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-
+			//Getting the scale shader and setting some values
 			const char* scaleShader = App->internalResources->GetDefaultScaleShader();
 			RE_Shader* sShader = (RE_Shader*)App->resources->At(scaleShader);
 			unsigned int shaderiD = sShader->GetID();
-
 			RE_GLCache::ChangeShader(shaderiD);
 			RE_GLCache::ChangeVAO(vaoToStencil.top());
 			sShader->UploadModel(stencilGO->GetTransform()->GetShaderModel());
-
-			//Scaled mesh draw
 			RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
 			RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
 			RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
 			RE_ShaderImporter::setFloat(shaderiD, "center", (stackTemp.top()->GetType() == ComponentType::C_MESH) ? ((RE_CompMesh*)stackTemp.top())->GetAABB().CenterPoint() : math::vec::zero);
 
+			//Prepare stencil for detect
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); //don't draw to color buffer
+			glStencilFunc(GL_ALWAYS, 1, 0xFF); //mark to 1 where pass
+			glStencilMask(0xFF);
+			glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+
+			//Draw scaled mesh 
 			RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5 / stencilGO->GetTransform()->GetLocalScale().Length());
 			stackComponents.push(stackTemp.top());
 			stackTemp.pop();
 			glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
 
-			glStencilFunc(GL_ALWAYS, 0, 0x00);
-			//Noraml mesh draw
+			glStencilFunc(GL_ALWAYS, 0, 0x00);//change stencil to draw 0
+			//Draw normal mesh for empty the inside of stencil
 			RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.0);
-
 			glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
 
+			//Turn on the draw and only draw where stencil buffer marks 1
 			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Make sure we draw on the backbuffer again.
 			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Make sure you will no longer (over)write stencil values, even if any test succeeds
 			glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
+			//Draw scaled mesh 
 			RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5 / stencilGO->GetTransform()->GetLocalScale().Length());
-
 			glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
 
 			vaoToStencil.pop();
@@ -420,12 +422,6 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_STENCIL_TEST);
-
-		while (!stackComponents.empty())
-		{
-			stackComponents.top()->Draw();
-			stackComponents.pop();
-		}
 	}
 }
 
