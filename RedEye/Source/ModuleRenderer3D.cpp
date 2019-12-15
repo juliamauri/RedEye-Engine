@@ -288,6 +288,7 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 
 	// Reset background with a clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	if (stencilToSelected) glClearStencil(0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	RE_GameObject* stencilGO = (stencilToSelected) ? App->editor->GetSelected() : nullptr;
 	std::stack<RE_Component*> comptsToDraw;
@@ -342,9 +343,6 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 
 	if (stencilToSelected) {
 		OPTICK_CATEGORY("Stencil Draw", Optick::Category::Rendering);
-		glEnable(GL_STENCIL_TEST);
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilMask(0xFF);
 
 		std::stack<unsigned int> vaoToStencil;
 		std::stack<unsigned int> triangleToStencil;
@@ -357,33 +355,67 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 			if (cT == ComponentType::C_MESH) {
 				vaoToStencil.push(((RE_CompMesh*)dC)->GetVAOMesh());
 				triangleToStencil.push(((RE_CompMesh*)dC)->GetTriangleMesh());
+				reDraw.push(dC);
 			}
 			else if (cT > ComponentType::C_PRIMIVE_MIN&& cT < ComponentType::C_PRIMIVE_MAX) {
 				vaoToStencil.push(((RE_CompPrimitive*)dC)->GetVAO());
 				triangleToStencil.push(((RE_CompPrimitive*)dC)->GetTriangleCount());
+				reDraw.push(dC);
 			}
-
-			dC->Draw();
 			fromStencil.pop();
-			reDraw.push(dC);
 		}
 
-		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-		glStencilMask(0x00);
+
+		glEnable(GL_STENCIL_TEST);
+
 		glDisable(GL_DEPTH_TEST);
 
 		while (!vaoToStencil.empty())
 		{
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // Make sure we draw on the backbuffer again.
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
+			glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+
 			const char* defShader = App->internalResources->GetDefaultShader();
-			RE_Shader* dShader = (RE_Shader * )App->resources->At(defShader);
+			RE_Shader* dShader = (RE_Shader*)App->resources->At(defShader);
 			unsigned int shaderiD = dShader->GetID();
 
 			RE_CompTransform* trans = stencilGO->GetTransform();
-			math::float3 lastScale= trans->GetLocalScale();
+			math::float3 lastScale = trans->GetLocalScale();
 			math::float3 scale = lastScale * 1.1;
 			trans->SetScale(scale);
 
 			RE_GLCache::ChangeShader(shaderiD);
+			Event::PauseEvents();
+			dShader->UploadModel(trans->GetShaderModel());
+			trans->SetScale(lastScale);
+			trans->Update();
+			Event::ResumeEvents();
+
+			//Scaled mesh draw
+			RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
+			RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
+			RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
+
+			RE_GLCache::ChangeVAO(vaoToStencil.top());
+			glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
+
+			glStencilFunc(GL_ALWAYS, 0, 0x00);
+			//Noraml mesh draw
+			dShader->UploadModel(trans->GetShaderModel());
+			RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
+			RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
+			RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
+
+			RE_GLCache::ChangeVAO(vaoToStencil.top());
+			glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
+
+
+			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Make sure we draw on the backbuffer again.
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Make sure you will no longer (over)write stencil values, even if any test succeeds
+			glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
+			trans->SetScale(scale);
 			Event::PauseEvents();
 			dShader->UploadModel(trans->GetShaderModel());
 			trans->SetScale(lastScale);
@@ -396,24 +428,19 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 			RE_GLCache::ChangeVAO(vaoToStencil.top());
 			glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
 
+
 			vaoToStencil.pop();
 			triangleToStencil.pop();
 		}
 
+		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_STENCIL_TEST);
-		//glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		//glStencilMask(0x00);
-		//glDepthFunc(GL_GREATER);
 
-		while(!reDraw.empty())
+		while (!reDraw.empty())
 		{
 			reDraw.top()->Draw();
 			reDraw.pop();
 		}
-
-		glEnable(GL_DEPTH_TEST);
-		//glDepthFunc(GL_LESS); // set depth function back to default
-
 	}
 }
 
