@@ -13,6 +13,7 @@ public:
 	bool Init();
 	
 	const char* GetDefaultShader()const;
+	const char* GetDefaultScaleShader()const;
 	const char* GetDefaulMaterial()const;
 	unsigned int GetSkyBoxShader() const;
 
@@ -30,6 +31,7 @@ private:
 
 private:
 	const char* defaultShader = nullptr;
+	const char* defaultScaleShader = nullptr;
 	const char* skyboxShader = nullptr;
 	const char* defaultMaterial = nullptr;
 

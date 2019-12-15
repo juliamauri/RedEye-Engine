@@ -1,6 +1,35 @@
 #ifndef __DEFAULTSHADERS_H__
 #define __DEFAULTSHADERS_H__
 
+#define DEFVERTEXSCALESHADER																\
+"#version 330 core\n"																		\
+"layout(location = 0) in vec3 aPos;\n"														\
+"layout(location = 1) in vec3 aNormal;\n"													\
+"layout(location = 2) in vec3 aTangent;\n"													\
+"layout(location = 3) in vec3 aBitangent;\n"												\
+"layout(location = 4) in vec2 aTexCoord;\n"													\
+"\n"																						\
+"out vec2 TexCoord;\n"																		\
+"\n"																						\
+"uniform mat4 model;\n"																		\
+"uniform mat4 view;\n"																		\
+"uniform mat4 projection;\n"																\
+"\n"																						\
+"uniform float scaleFactor;\n"																\
+"uniform vec3 center;\n"																	\
+"\n"																						\
+"void main()\n"																				\
+"{\n"																						\
+"	mat4 modelviewMatrix = view*model;\n"													\
+"	mat3 normalMatrix = mat3(modelviewMatrix[0].xyz,\n"										\
+"		modelviewMatrix[1].xyz,\n"															\
+"		modelviewMatrix[2].xyz);\n"															\
+"	vec3 viewSpaceNormal = normalMatrix * normalize(aPos - center);\n"						\
+"	vec4 replacementPosition = projection * vec4(viewSpaceNormal, 0.0) * scaleFactor;\n"	\
+"	gl_Position = projection * modelviewMatrix * vec4(aPos,1.0) + replacementPosition;\n"	\
+"	TexCoord = aTexCoord;\n"																\
+"}\0"
+
 #define DEFVERTEXSHADER												\
 "#version 330 core\n"												\
 "layout(location = 0) in vec3 aPos;\n"								\
@@ -21,57 +50,57 @@
 "	TexCoord = aTexCoord;\n"										\
 "}\0"																  
 
-#define DEFFRAGMENTSHADER														       \
-"#version 330 core\n"															       \
-"#extension GL_ARB_separate_shader_objects : enable\n"						  \
-"layout(location = 0) out vec4 color;\n"															       \
-"\n"																				   \
-"in vec2 TexCoord;\n"																   \
-"\n"																				   \
-"uniform float useTexture;\n"														   \
-"uniform sampler2D tdiffuse0;\n"											       \
-"\n"																				   \
-"uniform float useColor;\n"														       \
-"uniform vec3 cdiffuse;\n"													       \
-"\n"																			       \
-"void main()\n"																	       \
-"{\n"																				   \
-"	if (useTexture > 0.0f && useColor > 0.0f)\n"									   \
-"		color = vec4(texture(tdiffuse0, TexCoord) * vec4(cdiffuse, 1.0));\n"   \
-"	else if (useTexture > 0.0f)\n"												       \
-"		color = texture(tdiffuse0, TexCoord);\n"						       \
-"	else if (useColor > 0.0f)\n"													   \
-"		color = vec4(cdiffuse, 1.0);\n"									       \
+#define DEFFRAGMENTSHADER														\
+"#version 330 core\n"															\
+"#extension GL_ARB_separate_shader_objects : enable\n"						   	\
+"layout(location = 0) out vec4 color;\n"										\
+"\n"																			\
+"in vec2 TexCoord;\n"															\
+"\n"																			\
+"uniform float useTexture;\n"													\
+"uniform sampler2D tdiffuse0;\n"											   	\
+"\n"																			\
+"uniform float useColor;\n"														\
+"uniform vec3 cdiffuse;\n"													   	\
+"\n"																			\
+"void main()\n"																	\
+"{\n"																			\
+"	if (useTexture > 0.0f && useColor > 0.0f)\n"								\
+"		color = vec4(texture(tdiffuse0, TexCoord) * vec4(cdiffuse, 1.0));\n"   	\
+"	else if (useTexture > 0.0f)\n"												\
+"		color = texture(tdiffuse0, TexCoord);\n"						       	\
+"	else if (useColor > 0.0f)\n"												\
+"		color = vec4(cdiffuse, 1.0);\n"									       	\
 "}\0"
 
-#define SKYBOXVERTEXSHADER							  \
-"#version 330 core\n"								  \
-"layout(location = 0) in vec3 aPos;\n"				  \
-"\n"													  \
-"out vec3 TexCoords;\n"								  \
-"\n"													  \
-"uniform mat4 projection;\n"							  \
-"uniform mat4 view;\n"								  \
-"\n"													  \
-"void main()\n"										  \
-"{\n"													  \
-"	TexCoords = aPos;\n"								  \
-"	vec4 pos = projection * view * vec4(aPos, 1.0);\n"  \
-"	gl_Position = pos.xyww;\n"						  \
+#define SKYBOXVERTEXSHADER								\
+"#version 330 core\n"									\
+"layout(location = 0) in vec3 aPos;\n"					\
+"\n"													\
+"out vec3 TexCoords;\n"									\
+"\n"													\
+"uniform mat4 projection;\n"							\
+"uniform mat4 view;\n"									\
+"\n"													\
+"void main()\n"											\
+"{\n"													\
+"	TexCoords = aPos;\n"								\
+"	vec4 pos = projection * view * vec4(aPos, 1.0);\n"	\
+"	gl_Position = pos.xyww;\n"							\
 "}\0"
 
-#define SKYBOXFRAGMENTSHADER				  \
-"#version 330 core\n"						  \
-"#extension GL_ARB_separate_shader_objects : enable\n"						  \
-"layout(location = 0) out vec4 color;\n"		\
-"\n"											  \
-"in vec3 TexCoords;\n"						  \
-"\n"											  \
-"uniform samplerCube skybox;\n"				  \
-"\n"											  \
-"void main()\n"								  \
-"{\n"											  \
-"	color = texture(skybox, TexCoords);\n"  \
+#define SKYBOXFRAGMENTSHADER							\
+"#version 330 core\n"									\
+"#extension GL_ARB_separate_shader_objects : enable\n"	\
+"layout(location = 0) out vec4 color;\n"				\
+"\n"													\
+"in vec3 TexCoords;\n"									\
+"\n"													\
+"uniform samplerCube skybox;\n"							\
+"\n"													\
+"void main()\n"											\
+"{\n"													\
+"	color = texture(skybox, TexCoords);\n"				\
 "}\0"
 
 

@@ -101,8 +101,8 @@ bool ModuleEditor::Init(JSONNode* node)
 	all_aabb_color[2] = 0.f;
 
 	sel_aabb_color[0] = 1.f;
-	sel_aabb_color[1] = 1.f;
-	sel_aabb_color[2] = 1.f;
+	sel_aabb_color[1] = .5f;
+	sel_aabb_color[2] = 0.f;
 
 	quad_tree_color[0] = 1.f;
 	quad_tree_color[1] = 1.f;

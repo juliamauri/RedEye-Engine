@@ -60,6 +60,12 @@ bool RE_InternalResources::InitShaders()
 		defSRes->SetAsInternal(DEFVERTEXSHADER, DEFFRAGMENTSHADER);
 		defaultShader = App->resources->Reference(defSRes);
 
+		RE_Shader* defScaleRes = new RE_Shader();
+		defScaleRes->SetName("Default Scale Shader");
+		defScaleRes->SetType(Resource_Type::R_SHADER);
+		defScaleRes->SetAsInternal(DEFVERTEXSCALESHADER, DEFFRAGMENTSHADER);
+		defaultScaleShader = App->resources->Reference(defScaleRes);
+
 		RE_Shader* defSKRes = new RE_Shader();
 		defSKRes->SetName("Default SkyBox Shader");
 		defSKRes->SetType(Resource_Type::R_SHADER);
@@ -138,6 +144,11 @@ bool RE_InternalResources::InitSkyBox()
 const char* RE_InternalResources::GetDefaultShader() const
 {
 	return defaultShader;
+}
+
+const char* RE_InternalResources::GetDefaultScaleShader() const
+{
+	return defaultScaleShader;
 }
 
 const char* RE_InternalResources::GetDefaulMaterial() const

@@ -288,8 +288,14 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 
 	// Reset background with a clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	if (stencilToSelected) glClearStencil(0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	if (stencilToSelected)
+	{
+		glClearStencil(0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	}
+	else
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	RE_GameObject* stencilGO = (stencilToSelected) ? App->editor->GetSelected() : nullptr;
 	std::stack<RE_Component*> comptsToDraw;
 	// Frustum Culling
@@ -346,25 +352,24 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 
 		std::stack<unsigned int> vaoToStencil;
 		std::stack<unsigned int> triangleToStencil;
-		std::stack<RE_Component*> fromStencil = stencilGO->GetDrawableComponentsItselfOnly();
-		std::stack<RE_Component*> reDraw;
-		while (!fromStencil.empty())
+		std::stack<RE_Component*> stackComponents = stencilGO->GetDrawableComponentsItselfOnly();
+		std::stack<RE_Component*> stackTemp;
+		while (!stackComponents.empty())
 		{
-			RE_Component* dC = fromStencil.top();
+			RE_Component* dC = stackComponents.top();
 			ComponentType cT = dC->GetType();
 			if (cT == ComponentType::C_MESH) {
 				vaoToStencil.push(((RE_CompMesh*)dC)->GetVAOMesh());
 				triangleToStencil.push(((RE_CompMesh*)dC)->GetTriangleMesh());
-				reDraw.push(dC);
+				stackTemp.push(dC);
 			}
 			else if (cT > ComponentType::C_PRIMIVE_MIN&& cT < ComponentType::C_PRIMIVE_MAX) {
 				vaoToStencil.push(((RE_CompPrimitive*)dC)->GetVAO());
 				triangleToStencil.push(((RE_CompPrimitive*)dC)->GetTriangleCount());
-				reDraw.push(dC);
+				stackTemp.push(dC);
 			}
-			fromStencil.pop();
+			stackComponents.pop();
 		}
-
 
 		glEnable(GL_STENCIL_TEST);
 
@@ -377,57 +382,37 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 			glStencilMask(0xFF);
 			glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
-			const char* defShader = App->internalResources->GetDefaultShader();
-			RE_Shader* dShader = (RE_Shader*)App->resources->At(defShader);
-			unsigned int shaderiD = dShader->GetID();
-
-			RE_CompTransform* trans = stencilGO->GetTransform();
-			math::float3 lastScale = trans->GetLocalScale();
-			math::float3 scale = lastScale * 1.1;
-			trans->SetScale(scale);
+			const char* scaleShader = App->internalResources->GetDefaultScaleShader();
+			RE_Shader* sShader = (RE_Shader*)App->resources->At(scaleShader);
+			unsigned int shaderiD = sShader->GetID();
 
 			RE_GLCache::ChangeShader(shaderiD);
-			Event::PauseEvents();
-			dShader->UploadModel(trans->GetShaderModel());
-			trans->SetScale(lastScale);
-			trans->Update();
-			Event::ResumeEvents();
+			RE_GLCache::ChangeVAO(vaoToStencil.top());
+			sShader->UploadModel(stencilGO->GetTransform()->GetShaderModel());
 
 			//Scaled mesh draw
 			RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
 			RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
 			RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
+			RE_ShaderImporter::setFloat(shaderiD, "center", (stackTemp.top()->GetType() == ComponentType::C_MESH) ? ((RE_CompMesh*)stackTemp.top())->GetAABB().CenterPoint() : math::vec::zero);
 
-			RE_GLCache::ChangeVAO(vaoToStencil.top());
+			RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5 / stencilGO->GetTransform()->GetLocalScale().Length());
+			stackComponents.push(stackTemp.top());
+			stackTemp.pop();
 			glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
 
 			glStencilFunc(GL_ALWAYS, 0, 0x00);
 			//Noraml mesh draw
-			dShader->UploadModel(trans->GetShaderModel());
-			RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
-			RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
-			RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
+			RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.0);
 
-			RE_GLCache::ChangeVAO(vaoToStencil.top());
 			glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
-
 
 			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Make sure we draw on the backbuffer again.
 			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Make sure you will no longer (over)write stencil values, even if any test succeeds
 			glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
-			trans->SetScale(scale);
-			Event::PauseEvents();
-			dShader->UploadModel(trans->GetShaderModel());
-			trans->SetScale(lastScale);
-			trans->Update();
-			Event::ResumeEvents();
-			RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
-			RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
-			RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
+			RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5 / stencilGO->GetTransform()->GetLocalScale().Length());
 
-			RE_GLCache::ChangeVAO(vaoToStencil.top());
 			glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
-
 
 			vaoToStencil.pop();
 			triangleToStencil.pop();
@@ -436,10 +421,10 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_STENCIL_TEST);
 
-		while (!reDraw.empty())
+		while (!stackComponents.empty())
 		{
-			reDraw.top()->Draw();
-			reDraw.pop();
+			stackComponents.top()->Draw();
+			stackComponents.pop();
 		}
 	}
 }
