@@ -90,10 +90,6 @@ bool ModuleRenderer3D::Start()
 	sceneEditorFBO = App->fbomanager->CreateFBO(1024, 768, 1, true, true);
 	sceneGameFBO = App->fbomanager->CreateFBO(1024, 768);
 
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
 	return true;
 }
 
@@ -312,8 +308,6 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 	else
 		comptsToDraw = App->scene->GetRoot()->GetDrawableComponentsWithChilds(stencilGO);
 
-	glStencilMask(0x00);
-
 	while (!comptsToDraw.empty())
 	{
 		comptsToDraw.top()->Draw();
@@ -321,12 +315,14 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 	}
 
 	if (stencilToSelected) {
+		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
 
 		std::stack<unsigned int> vaoToStencil;
 		std::stack<unsigned int> triangleToStencil;
 		std::stack<RE_Component*> fromStencil = stencilGO->GetDrawableComponentsItselfOnly();
+		std::stack<RE_Component*> reDraw;
 		while (!fromStencil.empty())
 		{
 			RE_Component* dC = fromStencil.top();
@@ -342,11 +338,12 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 
 			dC->Draw();
 			fromStencil.pop();
+			reDraw.push(dC);
 		}
 
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 		glStencilMask(0x00);
-		glDisable(GL_DEPTH_TEST);
+		//glDisable(GL_DEPTH_TEST);
 
 		while (!vaoToStencil.empty())
 		{
@@ -355,15 +352,16 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 			unsigned int shaderiD = dShader->GetID();
 
 			RE_CompTransform* trans = stencilGO->GetTransform();
-			math::float3 pos; math::Quat rot; math::float3 scale;
-			pos = trans->GetGlobalPosition();
-			scale = trans->GetLocalScale() * 1.1;
-			rot = trans->GetLocalQuaternionRotation();
-			math::float4x4 model = math::float4x4::FromTRS(pos, rot, scale);
-			model.Transpose();
+			math::float3 lastScale= trans->GetLocalScale();
+			math::float3 scale = lastScale * 1.1;
+			trans->SetScale(scale);
 
 			RE_GLCache::ChangeShader(shaderiD);
-			dShader->UploadModel(model.ptr());
+			Event::PauseEvents();
+			dShader->UploadModel(trans->GetShaderModel());
+			trans->SetScale(lastScale);
+			trans->Update();
+			Event::ResumeEvents();
 			RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
 			RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
 			RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
@@ -375,7 +373,20 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 			triangleToStencil.pop();
 		}
 
-		glEnable(GL_DEPTH_TEST);
+		//glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		//glStencilMask(0x00);
+		glDepthFunc(GL_GREATER); 
+		
+		while(!reDraw.empty())
+		{
+			reDraw.top()->Draw();
+			reDraw.pop();
+		}
+
+		glDepthFunc(GL_LESS); // set depth function back to default
+
+		glDisable(GL_STENCIL_TEST);
+		//glEnable(GL_DEPTH_TEST);
 	}
 
 	// Draw Debug Geometry
