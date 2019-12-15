@@ -16,6 +16,9 @@ public:
 
 	void DrawProperties() override;
 
+	unsigned int GetVAOMesh()const;
+	unsigned int GetTriangleMesh()const;
+
 	void SetMaterial(const char* md5);
 	const char* GetMaterial()const;
 

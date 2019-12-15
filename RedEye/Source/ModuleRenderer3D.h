@@ -5,6 +5,8 @@
 #include "Module.h"
 #include <list>
 
+class RE_CompCamera;
+
 class ModuleRenderer3D : public Module 
 {
 
@@ -23,6 +25,8 @@ public:
 
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
+
+	void DrawScene(RE_CompCamera* camera, unsigned int fbo, bool debugDraw = false, bool stencilToSelected = false);
 
 	// Editor Values
 	void SetVSync(bool enable);

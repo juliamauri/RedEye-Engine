@@ -20,6 +20,9 @@ public:
 	void SetColor(float r, float g, float b) { color.Set(r, g, b); }
 	void SetColor(math::vec nColor) { color = nColor; }
 
+	unsigned int GetVAO()const { return VAO; }
+	virtual unsigned int GetTriangleCount()const { return 0; }
+
 protected:
 	ComponentType type;
 	unsigned int VAO = 0;
@@ -121,6 +124,7 @@ public:
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
 
+	unsigned int GetTriangleCount()const override { return 1; }
 };
 
 /**************************************************
@@ -158,6 +162,8 @@ public:
 
 	const char* TransformAsMeshResource();
 
+	unsigned int GetTriangleCount()const override { return triangle_count; }
+
 private:
 	void GenerateNewPlane(int slice, int stacks);
 
@@ -183,6 +189,8 @@ public:
 	unsigned int GetBinarySize()const override;
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
+
+	unsigned int GetTriangleCount()const override { return triangle_count; }
 
 private:
 	bool show_checkers = false;
@@ -221,6 +229,8 @@ public:
 	unsigned int GetBinarySize()const override;
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
+
+	unsigned int GetTriangleCount()const override { return triangle_count; }
 
 private:
 	void GenerateNewSphere(int slice, int stacks);

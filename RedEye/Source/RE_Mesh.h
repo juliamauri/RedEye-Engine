@@ -30,7 +30,8 @@ public:
 
 	bool CheckFaceCollision(const math::Ray& local_ray, float& distance) const;
 
-	
+	unsigned int GetVAO()const { return VAO; }
+	unsigned int GetTriangleCount()const { return triangle_count; }
 
 public:
 	bool lVertexNormals = false, lFaceNormals = false;

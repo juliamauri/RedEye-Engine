@@ -117,9 +117,6 @@ void RE_GameObject::DrawWithChilds() const
 {
 	if (active)
 	{
-		for (auto component : components)
-			component->Draw();
-
 		std::stack<const RE_GameObject*> gos;
 		gos.push(this);
 		while (!gos.empty())
@@ -142,6 +139,46 @@ void RE_GameObject::DrawItselfOnly() const
 	if (active)
 		for (auto component : components)
 			component->Draw();
+}
+
+std::stack<RE_Component*> RE_GameObject::GetDrawableComponentsWithChilds(RE_GameObject* ignoreStencil) const
+{
+	std::stack<RE_Component*> ret;
+
+	if (active)
+	{
+		std::stack<const RE_GameObject*> gos;
+		gos.push(this);
+		while (!gos.empty())
+		{
+			const RE_GameObject* go = gos.top();
+			gos.pop();
+			
+			if (go != ignoreStencil) {
+				for (auto component : go->components)
+				{
+					ComponentType cT = component->GetType();
+					if (cT == ComponentType::C_MESH || (cT > ComponentType::C_PRIMIVE_MIN&& cT < ComponentType::C_PRIMIVE_MAX)) ret.push(component);
+				}
+			}
+
+			for (auto child : go->GetChilds())
+				if (child->IsActive())
+					gos.push(child);
+		}
+	}
+	return ret;
+}
+
+std::stack<RE_Component*> RE_GameObject::GetDrawableComponentsItselfOnly() const
+{
+	std::stack<RE_Component*> ret;
+	for (auto component : components)
+	{
+		ComponentType cT = component->GetType();
+		if (cT == ComponentType::C_MESH || (cT > ComponentType::C_PRIMIVE_MIN && cT < ComponentType::C_PRIMIVE_MAX)) ret.push(component);
+	}
+	return ret;
 }
 
 std::vector<RE_GameObject*> RE_GameObject::GetAllGO()

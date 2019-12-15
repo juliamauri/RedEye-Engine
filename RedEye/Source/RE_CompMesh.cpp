@@ -93,6 +93,16 @@ void RE_CompMesh::DrawProperties()
 	}
 }
 
+unsigned int RE_CompMesh::GetVAOMesh() const
+{
+	return (meshMD5) ? ((RE_Mesh*)App->resources->At(meshMD5))->GetVAO() : 0;
+}
+
+unsigned int RE_CompMesh::GetTriangleMesh() const
+{
+	return (meshMD5) ? ((RE_Mesh*)App->resources->At(meshMD5))->GetTriangleCount() : 0;
+}
+
 void RE_CompMesh::SetMaterial(const char * md5)
 {
 	materialMD5 = md5;

@@ -7,6 +7,7 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <stack>
 
 #pragma comment(lib, "rpcrt4.lib")  // UuidCreate - Minimum supported OS Win 2000
 #include <windows.h>
@@ -31,6 +32,9 @@ public:
 	void PostUpdate();
 	void DrawWithChilds() const;
 	void DrawItselfOnly() const;
+
+	std::stack<RE_Component*> GetDrawableComponentsWithChilds(RE_GameObject* ignoreStencil = nullptr)const;
+	std::stack<RE_Component*> GetDrawableComponentsItselfOnly()const;
 
 	std::vector<RE_GameObject*> GetAllGO();
 

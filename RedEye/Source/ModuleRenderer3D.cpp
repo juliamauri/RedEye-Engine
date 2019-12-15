@@ -1,9 +1,5 @@
 #include "ModuleRenderer3D.h"
 
-#include "SDL2/include/SDL.h"
-#include "Glew/include/glew.h"
-#include <gl/GL.h>
-
 #include "OutputLog.h"
 #include "Application.h"
 #include "RE_ResourceManager.h"
@@ -13,6 +9,8 @@
 #include "ModuleInput.h"
 #include "RE_FileSystem.h"
 #include "RE_CompCamera.h"
+#include "RE_CompMesh.h"
+#include "RE_CompPrimitive.h"
 #include "RE_CameraManager.h"
 #include "RE_CompTransform.h"
 #include "ModuleScene.h"
@@ -21,6 +19,15 @@
 #include "RE_InternalResources.h"
 #include "RE_GLCache.h"
 #include "RE_FBOManager.h"
+
+#include <stack>
+
+#include "SDL2/include/SDL.h"
+#include "Glew/include/glew.h"
+#include <gl/GL.h>
+
+#include "MathGeoLib/include/Math/float3.h"
+#include "MathGeoLib/include/Math/Quat.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -83,6 +90,10 @@ bool ModuleRenderer3D::Start()
 	sceneEditorFBO = App->fbomanager->CreateFBO(1024, 768, 1, true, true);
 	sceneGameFBO = App->fbomanager->CreateFBO(1024, 768);
 
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
 	return true;
 }
 
@@ -107,116 +118,21 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
 	float dt = App->time->GetDeltaTime();
+	std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 
 	OPTICK_CATEGORY("Scene Editor Draw", Optick::Category::Rendering);
-
 	OPTICK_CATEGORY("Culling Editor", Optick::Category::Rendering);
-
 	RE_CompCamera* current_camera = RE_CameraManager::EditorCamera();
 	current_camera->Update();
-
-	std::vector<const RE_GameObject*> objects;
-	if (cull_scene)
-	{
-		math::Frustum frustum = current_camera->GetFrustum();
-		App->scene->FustrumCulling(objects, frustum);
-	}
-
-	// Load Shader Uniforms
-	std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(current_camera, dt, time);
-
-
-	RE_FBOManager::ChangeFBOBind(sceneEditorFBO, App->fbomanager->GetWidth(sceneEditorFBO), App->fbomanager->GetHeight(sceneEditorFBO));
-
-	// Reset background with a clear color
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	// Frustum Culling
-	if (cull_scene)
-		for (auto object : objects)
-			object->DrawItselfOnly();
-	else
-		App->scene->GetRoot()->DrawWithChilds();
-
-	// Draw Debug Geometry
-	App->editor->DrawDebug(lighting);
-
-	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
-	// draw skybox as last
-
-	RE_GLCache::ChangeTextureBind(0);
-	// Set shader and uniforms
-	RE_GLCache::ChangeShader(skyboxShader);
-	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);
-
-	// change depth function so depth test passes when values are equal to depth buffer's content
-	glDepthFunc(GL_LEQUAL);
-
-	// Render skybox cube
-	RE_GLCache::ChangeVAO(App->internalResources->GetSkyBoxVAO());
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
-
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	glDepthFunc(GL_LESS); // set depth function back to default
+	DrawScene(current_camera, sceneEditorFBO, true, true);
 
 	OPTICK_CATEGORY("Scene Game Draw", Optick::Category::Rendering);
 	OPTICK_CATEGORY("Culling Game", Optick::Category::Rendering);
-
 	current_camera = RE_CameraManager::MainCamera();
 	current_camera->Update();
-
-	objects.clear();
-	if (cull_scene)
-	{
-		math::Frustum frustum = current_camera->GetFrustum();
-		App->scene->FustrumCulling(objects, frustum);
-	}
-
-	// Load Shader Uniforms
 	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(current_camera, dt, time);
-
-
-	RE_FBOManager::ChangeFBOBind(sceneGameFBO, App->fbomanager->GetWidth(sceneGameFBO), App->fbomanager->GetHeight(sceneGameFBO));
-
-	// Reset background with a clear color
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Frustum Culling
-	if (cull_scene)
-		for (auto object : objects)
-			object->DrawItselfOnly();
-	else
-		App->scene->GetRoot()->DrawWithChilds();
-
-	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
-	// draw skybox as last
-
-	RE_GLCache::ChangeTextureBind(0);
-	// Set shader and uniforms
-	RE_GLCache::ChangeShader(skyboxShader);
-	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);
-
-	// change depth function so depth test passes when values are equal to depth buffer's content
-	glDepthFunc(GL_LEQUAL);
-
-	// Render skybox cube
-	RE_GLCache::ChangeVAO(App->internalResources->GetSkyBoxVAO());
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
-
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	glDepthFunc(GL_LESS); // set depth function back to default
-
+	DrawScene(current_camera, sceneGameFBO);
 
 	RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
 
@@ -361,6 +277,131 @@ bool ModuleRenderer3D::Save(JSONNode * node) const
 	}
 
 	return ret;
+}
+
+void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool debugDraw, bool stencilToSelected)
+{
+	std::vector<const RE_GameObject*> objects;
+	if (cull_scene)
+	{
+		math::Frustum frustum = camera->GetFrustum();
+		App->scene->FustrumCulling(objects, frustum);
+	}
+
+	RE_FBOManager::ChangeFBOBind(fbo, App->fbomanager->GetWidth(fbo), App->fbomanager->GetHeight(fbo));
+
+	// Reset background with a clear color
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	RE_GameObject* stencilGO = (stencilToSelected) ? App->editor->GetSelected() : nullptr;
+	std::stack<RE_Component*> comptsToDraw;
+	// Frustum Culling
+	if (cull_scene) {
+		for (auto object : objects) {
+			if (object == stencilGO)
+				continue;
+
+			std::stack<RE_Component*> fromO = object->GetDrawableComponentsItselfOnly();
+			while (!fromO.empty())
+			{
+				comptsToDraw.push(fromO.top());
+				fromO.pop();
+			}
+		}
+	}
+	else
+		comptsToDraw = App->scene->GetRoot()->GetDrawableComponentsWithChilds(stencilGO);
+
+	glStencilMask(0x00);
+
+	while (!comptsToDraw.empty())
+	{
+		comptsToDraw.top()->Draw();
+		comptsToDraw.pop();
+	}
+
+	if (stencilToSelected) {
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+
+		std::stack<unsigned int> vaoToStencil;
+		std::stack<unsigned int> triangleToStencil;
+		std::stack<RE_Component*> fromStencil = stencilGO->GetDrawableComponentsItselfOnly();
+		while (!fromStencil.empty())
+		{
+			RE_Component* dC = fromStencil.top();
+			ComponentType cT = dC->GetType();
+			if (cT == ComponentType::C_MESH) {
+				vaoToStencil.push(((RE_CompMesh*)dC)->GetVAOMesh());
+				triangleToStencil.push(((RE_CompMesh*)dC)->GetTriangleMesh());
+			}
+			else if (cT > ComponentType::C_PRIMIVE_MIN&& cT < ComponentType::C_PRIMIVE_MAX) {
+				vaoToStencil.push(((RE_CompPrimitive*)dC)->GetVAO());
+				triangleToStencil.push(((RE_CompPrimitive*)dC)->GetTriangleCount());
+			}
+
+			dC->Draw();
+			fromStencil.pop();
+		}
+
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDisable(GL_DEPTH_TEST);
+
+		while (!vaoToStencil.empty())
+		{
+			const char* defShader = App->internalResources->GetDefaultShader();
+			RE_Shader* dShader = (RE_Shader * )App->resources->At(defShader);
+			unsigned int shaderiD = dShader->GetID();
+
+			RE_CompTransform* trans = stencilGO->GetTransform();
+			math::float3 pos; math::Quat rot; math::float3 scale;
+			pos = trans->GetGlobalPosition();
+			scale = trans->GetLocalScale() * 1.1;
+			rot = trans->GetLocalQuaternionRotation();
+			math::float4x4 model = math::float4x4::FromTRS(pos, rot, scale);
+			model.Transpose();
+
+			RE_GLCache::ChangeShader(shaderiD);
+			dShader->UploadModel(model.ptr());
+			RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
+			RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
+			RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
+
+			RE_GLCache::ChangeVAO(vaoToStencil.top());
+			glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
+
+			vaoToStencil.pop();
+			triangleToStencil.pop();
+		}
+
+		glEnable(GL_DEPTH_TEST);
+	}
+
+	// Draw Debug Geometry
+	if(debugDraw) App->editor->DrawDebug(lighting);
+
+	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
+	// draw skybox as last
+
+	RE_GLCache::ChangeTextureBind(0);
+	// Set shader and uniforms
+	RE_GLCache::ChangeShader(skyboxShader);
+	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);
+
+	// change depth function so depth test passes when values are equal to depth buffer's content
+	glDepthFunc(GL_LEQUAL);
+
+	// Render skybox cube
+	RE_GLCache::ChangeVAO(App->internalResources->GetSkyBoxVAO());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	glDepthFunc(GL_LESS); // set depth function back to default
 }
 
 void ModuleRenderer3D::SetVSync(bool enable)

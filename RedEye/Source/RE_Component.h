@@ -13,6 +13,11 @@ enum ComponentType : ushortint
 {
 	C_EMPTY = 0x00,
 	C_TRANSFORM,
+	C_MESH = 15,
+	C_CAMERA,
+	C_PARTICLEEMITER,
+
+	C_PRIMIVE_MIN = 20,
 	C_PRIMITIVE,
 	C_AXIS,
 	C_POINT,
@@ -26,9 +31,8 @@ enum ComponentType : ushortint
 	C_SPHERE,
 	C_CYLINDER,
 	C_CAPSULE,
-	C_MESH,
-	C_CAMERA,
-	C_PARTICLEEMITER,
+	C_PRIMIVE_MAX,
+
 	MAX_COMPONENT_TYPES
 };
 
