@@ -314,7 +314,34 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 		comptsToDraw.pop();
 	}
 
+
+	// Draw Debug Geometry
+	if (debugDraw) App->editor->DrawDebug(lighting);
+
+	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
+	// draw skybox as last
+
+	RE_GLCache::ChangeTextureBind(0);
+	// Set shader and uniforms
+	RE_GLCache::ChangeShader(skyboxShader);
+	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);
+
+	// change depth function so depth test passes when values are equal to depth buffer's content
+	glDepthFunc(GL_LEQUAL);
+
+	// Render skybox cube
+	RE_GLCache::ChangeVAO(App->internalResources->GetSkyBoxVAO());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	glDepthFunc(GL_LESS); // set depth function back to default
+
 	if (stencilToSelected) {
+		OPTICK_CATEGORY("Stencil Draw", Optick::Category::Rendering);
 		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
@@ -343,7 +370,7 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 		glStencilMask(0x00);
-		//glDisable(GL_DEPTH_TEST);
+		glDisable(GL_DEPTH_TEST);
 
 		while (!vaoToStencil.empty())
 		{
@@ -373,46 +400,21 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 			triangleToStencil.pop();
 		}
 
+		glDisable(GL_STENCIL_TEST);
 		//glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		//glStencilMask(0x00);
-		glDepthFunc(GL_GREATER); 
-		
+		//glDepthFunc(GL_GREATER);
+
 		while(!reDraw.empty())
 		{
 			reDraw.top()->Draw();
 			reDraw.pop();
 		}
 
-		glDepthFunc(GL_LESS); // set depth function back to default
+		glEnable(GL_DEPTH_TEST);
+		//glDepthFunc(GL_LESS); // set depth function back to default
 
-		glDisable(GL_STENCIL_TEST);
-		//glEnable(GL_DEPTH_TEST);
 	}
-
-	// Draw Debug Geometry
-	if(debugDraw) App->editor->DrawDebug(lighting);
-
-	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
-	// draw skybox as last
-
-	RE_GLCache::ChangeTextureBind(0);
-	// Set shader and uniforms
-	RE_GLCache::ChangeShader(skyboxShader);
-	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);
-
-	// change depth function so depth test passes when values are equal to depth buffer's content
-	glDepthFunc(GL_LEQUAL);
-
-	// Render skybox cube
-	RE_GLCache::ChangeVAO(App->internalResources->GetSkyBoxVAO());
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
-
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	glDepthFunc(GL_LESS); // set depth function back to default
 }
 
 void ModuleRenderer3D::SetVSync(bool enable)
