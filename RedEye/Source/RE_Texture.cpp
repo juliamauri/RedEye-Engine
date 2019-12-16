@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_TextureImporter.h"
+#include "RE_ThumbnailManager.h"
 #include "RE_GLCache.h"
 
 #include "OutputLog.h"
@@ -64,6 +65,11 @@ TextureType RE_Texture::DetectExtension()
 	return texType;
 }
 
+TextureType RE_Texture::GetTextureType() const
+{
+	return texType;
+}
+
 void RE_Texture::LoadInMemory()
 {
 	if (App->fs->Exists(GetLibraryPath()))
@@ -104,7 +110,7 @@ void RE_Texture::GetWithHeight(int * w, int * h)
 
 void RE_Texture::DrawTextureImGui()
 {
-	if (ResourceContainer::inMemory) ImGui::Image((void *)ID, ImVec2(200, 200));
+	ImGui::Image((void*)App->thumbnail->At(GetMD5()), ImVec2(256, 256), { 0.0, 1.0 }, {1.0, 0.0});
 }
 
 void RE_Texture::Draw()

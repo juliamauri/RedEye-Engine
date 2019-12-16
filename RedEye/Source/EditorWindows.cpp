@@ -840,10 +840,9 @@ void AssetsWindow::Draw(bool secondary)
 			}
 		}
 		ImGui::SameLine();
-		ImGui::SetNextItemWidth(25);
+		ImGui::SetNextItemWidth(100);
 		static float iconsSize = 100;
-		if (ImGui::DragFloat("Icons size", &iconsSize, 1.0, 0.0, 256.0, "%.0f"))
-			iconsSize = (iconsSize < 25) ? 25 : iconsSize;
+		ImGui::SliderFloat("Icons size", &iconsSize, 25, 256, "%.0f");
 		if (selectingUndefFile) {
 			ImGui::SameLine();
 			if (ImGui::Button("Cancel selection")) {
@@ -907,13 +906,16 @@ void AssetsWindow::Draw(bool secondary)
 						ImGui::PopStyleVar();
 					}
 				}
-
 					break;
 				default:
-					if (ImGui::ImageButton((void*)0, { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
+				{
+					ResourceContainer* res = App->resources->At(p->AsFile()->metaResource->resource);
+					if (ImGui::ImageButton((res->GetType() == Resource_Type::R_TEXTURE) ? (void*)App->thumbnail->At(p->AsFile()->metaResource->resource) : (void*)0, { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
 						App->resources->PushSelected(p->AsFile()->metaResource->resource, true);
 					ImGui::PopID();
 					ImGui::Text(p->AsFile()->filename.c_str());
+
+				}
 					break;
 				}
 				break;

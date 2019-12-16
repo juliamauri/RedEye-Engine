@@ -59,6 +59,7 @@ public:
 
 	const char* GenerateMD5();
 	TextureType DetectExtension();
+	TextureType GetTextureType()const;
 
 	void LoadInMemory() override;
 	void UnloadMemory() override;

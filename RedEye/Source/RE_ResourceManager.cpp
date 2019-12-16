@@ -4,6 +4,7 @@
 #include "RE_FileSystem.h"
 #include "RE_TextureImporter.h"
 #include "RE_ModelImporter.h"
+#include "RE_ThumbnailManager.h"
 
 #include "RE_Material.h"
 #include "RE_Shader.h"
@@ -13,6 +14,7 @@
 #include "RE_SkyBox.h"
 #include "RE_Texture.h"
 #include "RE_Mesh.h"
+
 
 #include "Globals.h"
 #include "OutputLog.h"
@@ -83,6 +85,9 @@ const char* RE_ResourceManager::Reference(ResourceContainer* rc)
 	LOG("Referencing the %s %s resource from %s\nAsset file: %s\nmd5 generated: %s\n", rc->GetName(), resourceName.c_str(), rc->GetAssetPath(), rc->GetLibraryPath(), rc->GetMD5());
 	resources.insert(Resource(rc->GetMD5(), rc));
 	resourcesCounter.insert(ResourceCounter(rc->GetMD5(), (rc->isInMemory()) ? 1 : 0));
+
+	if(rc->GetType() == Resource_Type::R_TEXTURE) App->thumbnail->Add(rc->GetMD5());
+
 	return rc->GetMD5();
 }
 

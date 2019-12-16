@@ -23,6 +23,8 @@ public:
 private:
 	unsigned int LoadDefIcon(const char* filename);
 
+	unsigned int ThumbnailTexture(const char* ref);
+
 private:
 	std::map<const char*, unsigned int> thumbnails;
 
