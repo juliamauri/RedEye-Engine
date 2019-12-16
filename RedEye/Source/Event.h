@@ -63,6 +63,7 @@ public:
 
 	static void ResumeEvents();
 	static void PauseEvents();
+	static bool isPaused();
 
 protected:
 

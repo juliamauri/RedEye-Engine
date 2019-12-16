@@ -46,6 +46,8 @@ public:
 	const char* FindMD5ByAssetsPath(const char* assetsPath, Resource_Type type = Resource_Type::R_UNDEFINED);
 	const char* CheckOrFindMeshOnLibrary(const char* librariPath);
 
+	void ThumbnailResources();
+
 	typedef std::pair<const char*, ResourceContainer*> Resource;
 	typedef std::map<const char*, ResourceContainer*> ResourceMap;
 	typedef ResourceMap::iterator ResourceIter;

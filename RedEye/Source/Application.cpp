@@ -159,6 +159,7 @@ bool Application::Init(int argc, char* argv[])
 						LOG_SEPARATOR("Starting Module %s", (*it)->GetName());
 						ret = (*it)->Start();
 					}
+				resources->ThumbnailResources();
 			}
 		}
 	}
@@ -414,7 +415,11 @@ void Application::RecieveEvent(const Event& e)
 	case REQUEST_DEFAULT_CONF: want_to_load_def = true; break;
 	case REQUEST_LOAD: want_to_load = true; break;
 	case REQUEST_SAVE: want_to_save = true; break;
-	case REQUEST_QUIT: want_to_quit = true; break;
+	case REQUEST_QUIT: {
+		scene->Serialize();
+		want_to_quit = true;
+	}
+					 break;
 	}
 }
 

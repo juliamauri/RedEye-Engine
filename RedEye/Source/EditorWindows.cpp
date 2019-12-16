@@ -909,8 +909,7 @@ void AssetsWindow::Draw(bool secondary)
 					break;
 				default:
 				{
-					ResourceContainer* res = App->resources->At(p->AsFile()->metaResource->resource);
-					if (ImGui::ImageButton((res->GetType() == Resource_Type::R_TEXTURE) ? (void*)App->thumbnail->At(p->AsFile()->metaResource->resource) : (void*)0, { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
+					if (ImGui::ImageButton((void*)App->thumbnail->At(p->AsFile()->metaResource->resource), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
 						App->resources->PushSelected(p->AsFile()->metaResource->resource, true);
 					ImGui::PopID();
 					ImGui::Text(p->AsFile()->filename.c_str());

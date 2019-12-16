@@ -4,6 +4,7 @@
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
 #include "ModuleInput.h"
+#include "RE_ThumbnailManager.h"
 
 #include "RE_FileSystem.h"
 #include "RE_PrimitiveManager.h"
@@ -166,7 +167,7 @@ update_status ModuleScene::Update()
 
 bool ModuleScene::CleanUp()
 {
-	Serialize();
+	//Serialize();
 
 	DEL(root);
 	DEL(savedState);
@@ -764,7 +765,10 @@ void ModuleScene::Serialize()
 
 	if (sceneLoadedMD5 == nullptr) {
 		sceneLoadedMD5 = App->resources->Reference(scene);
+		App->thumbnail->Add(scene->GetMD5());
 	}
+	else
+		App->thumbnail->Change(scene->GetMD5());
 }
 
 void ModuleScene::LoadFBXOnScene(const char * fbxPath)

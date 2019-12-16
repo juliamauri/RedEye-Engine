@@ -44,6 +44,7 @@ public:
 	void LoadFBXOnScene(const char* fbxPath);
 	void LoadTextureOnSelectedGO(const char* texturePath);
 
+
 private:
 
 	void GetActive(std::list<RE_GameObject*>& objects) const;

@@ -2,11 +2,28 @@
 
 #include "Application.h"
 #include "RE_FileSystem.h"
+#include "ModuleWindow.h"
 #include "RE_ResourceManager.h"
+#include "RE_InternalResources.h"
 #include "RE_TextureImporter.h"
-#include "RE_GLCache.h"
 
+#include "RE_GLCache.h"
+#include "RE_FBOManager.h"
+#include "Event.h"
+#include "TimeManager.h"
+
+#include "RE_GameObject.h"
+#include "RE_CompTransform.h"
+#include "RE_CompCamera.h"
+
+#include "RE_Shader.h"
 #include "RE_Texture.h"
+#include "RE_Model.h"
+#include "RE_Scene.h"
+#include "RE_Prefab.h"
+#include "RE_Model.h"
+
+#include "QuadTree.h"
 
 #include "Glew/include/glew.h"
 
@@ -22,6 +39,7 @@
 #define DEFTHUMBNAILS "Settings/Icons/"
 
 #define THUMBNAILSIZE 256
+#define THUMBNAILDATASIZE THUMBNAILSIZE * THUMBNAILSIZE * 4
 
 RE_ThumbnailManager::RE_ThumbnailManager()
 {
@@ -33,6 +51,7 @@ RE_ThumbnailManager::~RE_ThumbnailManager()
 	glDeleteTextures(1, &file);
 	glDeleteTextures(1, &selectfile);
 	glDeleteTextures(1, &shaderFile);
+	for (auto thumb : thumbnails) glDeleteTextures(1, &thumb.second);
 }
 
 void RE_ThumbnailManager::Init()
@@ -41,6 +60,19 @@ void RE_ThumbnailManager::Init()
 	file = LoadDefIcon("file.dds");
 	selectfile = LoadDefIcon("selectfile.dds");
 	shaderFile = LoadDefIcon("shaderFile.dds");
+
+	singleRenderFBO = App->fbomanager->CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE);
+	Event::PauseEvents();
+	internalCamera = new RE_CompCamera();
+	internalCamera->SetBounds(THUMBNAILSIZE, THUMBNAILSIZE);
+	internalCamera->LocalRotate(0, 0.5);
+	internalCamera->Update();
+	Event::ResumeEvents();
+
+	glGenBuffersARB(1, &pboRender);
+	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboRender);
+	glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, THUMBNAILDATASIZE, 0, GL_STREAM_READ_ARB);
+	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
 }
 
 void RE_ThumbnailManager::Add(const char* ref)
@@ -52,25 +84,30 @@ void RE_ThumbnailManager::Add(const char* ref)
 	case Resource_Type::R_TEXTURE:
 		thumbnails.insert(std::pair<const char*, unsigned int>(ref, ThumbnailTexture(ref)));
 		break;
-	case Resource_Type::R_MATERIAL:
-		break;
 	case Resource_Type::R_MODEL:
 	case Resource_Type::R_PREFAB:
 	case Resource_Type::R_SCENE:
-		break;
-	case Resource_Type::R_SHADER:
-		break;
-	case Resource_Type::R_SKYBOX:
+		thumbnails.insert(std::pair<const char*, unsigned int>(ref, ThumbnailGameObject(ref)));
 		break;
 	}
-
-	std::string tPath = THUMBNAILPATH;
-	tPath += ref;
 }
 
-unsigned int RE_ThumbnailManager::At(const char* ref)const
+void RE_ThumbnailManager::Change(const char* ref)
 {
-	return thumbnails.at(ref);
+	if (thumbnails.find(ref) == thumbnails.end())
+		Add(ref);
+	else
+	{
+		thumbnails.find(ref)._Ptr->_Myval.second = ThumbnailGameObject(ref);
+	}
+}
+
+unsigned int RE_ThumbnailManager::At(const char* ref)
+{
+	if(thumbnails.find(ref) == thumbnails.end())
+		return 0;
+	else
+		return thumbnails.at(ref);
 }
 
 unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
@@ -105,25 +142,6 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 			ilBindImage(imageID);
 
 			if (IL_FALSE != ilLoadL(tex->DetectExtension(), texFile.GetBuffer(), texFile.GetSize())) {
-
-				//ILubyte* bytes = ilGetData();
-				//ilTexImage(
-				//
-				//	THUMBNAILSIZE,
-				//	THUMBNAILSIZE,
-				//
-				//	1,  // OpenIL supports 3d textures!  but we don't want it to be 3d.  so
-				//	// we just set this to be 1
-				//
-				//	3,  // 3 channels:  one for R , one for G, one for B
-				//
-				//	TextureType::RE_DDS,  // duh, yeah use rgb!  coulda been rgba if we wanted trans
-				//
-				//	IL_UNSIGNED_BYTE,  // the type of data the imData array contains (next)
-				//
-				//	bytes  // and the array of bytes represneting the actual image data
-				//
-				//);
 				iluScale(THUMBNAILSIZE, THUMBNAILSIZE, 1);
 
 				RE_FileIO saveThumb(path.c_str(), App->fs->GetZipPath());
@@ -133,16 +151,117 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 
 				ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
 				saveThumb.Save((char*)data, size);
+				DEL_A(data);	
+			}
+
+			ilBindImage(0);
+			/* Delete used resources*/
+			ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
+		}
+	}
+
+	ret = LoadLibraryTexThumbnail(ref);
+
+	return ret;
+}
+
+unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
+{
+	uint ret = 0;
+
+	std::string path(THUMBNAILPATH);
+	path += ref;
+
+	if (!App->fs->Exists(path.c_str())) {
+		Event::PauseEvents();
+
+		RE_GameObject* goToThumbnail = nullptr;
+
+		ResourceContainer* res = App->resources->At(ref);
+		switch (res->GetType())
+		{
+		case Resource_Type::R_MODEL:
+			goToThumbnail = ((RE_Model*)res)->GetRoot();
+			break;
+		case Resource_Type::R_PREFAB:
+			goToThumbnail = ((RE_Prefab*)res)->GetRoot();
+			break;
+		case Resource_Type::R_SCENE:
+			goToThumbnail = ((RE_Scene*)res)->GetRoot();
+			break;
+		}
+
+		if (goToThumbnail) {
+			goToThumbnail->UseResources();
+			goToThumbnail->ResetBoundingBoxFromChilds();
+			goToThumbnail->TransformModified(false);
+			
+			internalCamera->Focus(goToThumbnail);
+			internalCamera->Update();
+
+			float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
+			float dt = App->time->GetDeltaTime();
+			std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+			for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(internalCamera, dt, time);
+
+			RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
+			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			goToThumbnail->DrawWithChilds();
+
+			goToThumbnail->UnUseResources();
+			DEL(goToThumbnail);
+
+			glReadBuffer(GL_COLOR_ATTACHMENT0);
+			glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboRender);
+			glReadPixels(0, 0, THUMBNAILSIZE, THUMBNAILSIZE, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+			GLubyte* ptr = (GLubyte*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+			if (ptr)
+			{
+				uint imageID = 0;
+				ilGenImages(1, &imageID);
+				ilBindImage(imageID);
+
+				if (IL_FALSE == ilTexImage(THUMBNAILSIZE, THUMBNAILSIZE, 1, 4, IL_RGBA, GL_UNSIGNED_BYTE, ptr)) {
+					int i = 0;
+				}
+
+				ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
+				ILubyte* data = new ILubyte[size];
+
+				ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
+				RE_FileIO saveThumb(path.c_str(), App->fs->GetZipPath());
+				saveThumb.Save((char*)data, size);
 				DEL_A(data);
-				
+
 				ilBindImage(0);
 				/* Delete used resources*/
 				ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
+
+				glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 			}
+			glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
+			RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
 		}
+
+		Event::ResumeEvents();
 	}
+
+	ret = LoadLibraryTexThumbnail(ref);
+
+	return ret;
+}
+
+unsigned int RE_ThumbnailManager::LoadLibraryTexThumbnail(const char* ref)
+{
+	uint ret = 0;
+
+	std::string path(THUMBNAILPATH);
+	path += ref;
+
 	RE_FileIO thumbFile(path.c_str());
-	if(thumbFile.Load()) {
+	if (thumbFile.Load()) {
 		RE_TextureSettings defSettings;
 		uint imageID = 0;
 		ilGenImages(1, &imageID);
@@ -160,13 +279,13 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, defSettings.wrap_s); /* We will use linear interpolation for minifying filter */
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, defSettings.wrap_t); /* We will use linear interpolation for minifying filter */
 
-			glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
+			glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), THUMBNAILSIZE, THUMBNAILSIZE, 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
 
+			RE_GLCache::ChangeTextureBind(0);
 			ilBindImage(0);
 			/* Delete used resources*/
 			ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
 		}
 	}
-
 	return ret;
 }

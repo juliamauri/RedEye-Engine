@@ -61,7 +61,7 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 			break;
 		case C_CAMERA:
 			comp_camera = new RE_CompCamera(*(RE_CompCamera*)cmpGO, this);
-			App->cams->AddMainCamera(comp_camera);
+			if(!Event::isPaused()) App->cams->AddMainCamera(comp_camera);
 			components.push_back(comp_camera);
 			break;
 		case C_MESH:
@@ -861,7 +861,7 @@ RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane,
 {
 	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, v_fov_rads, aspect_ratio_t, draw_frustum);
 	components.push_back((RE_Component*)comp_camera);
-	App->cams->AddMainCamera(comp_camera);
+	if(!Event::isPaused()) App->cams->AddMainCamera(comp_camera);
 	return comp_camera;
 }
 

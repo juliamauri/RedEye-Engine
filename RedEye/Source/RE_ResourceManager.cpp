@@ -57,6 +57,9 @@ const char* RE_ResourceManager::Reference(ResourceContainer* rc)
 	case Resource_Type::R_TEXTURE:
 		resourceName = "texture";
 		break;
+	case Resource_Type::R_SCENE:
+		resourceName = "scene";
+		break;
 	case Resource_Type::R_MATERIAL:
 		resourceName = "material";
 		break;
@@ -85,8 +88,6 @@ const char* RE_ResourceManager::Reference(ResourceContainer* rc)
 	LOG("Referencing the %s %s resource from %s\nAsset file: %s\nmd5 generated: %s\n", rc->GetName(), resourceName.c_str(), rc->GetAssetPath(), rc->GetLibraryPath(), rc->GetMD5());
 	resources.insert(Resource(rc->GetMD5(), rc));
 	resourcesCounter.insert(ResourceCounter(rc->GetMD5(), (rc->isInMemory()) ? 1 : 0));
-
-	if(rc->GetType() == Resource_Type::R_TEXTURE) App->thumbnail->Add(rc->GetMD5());
 
 	return rc->GetMD5();
 }
@@ -300,6 +301,11 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 	if (!meshMD5) LOG_ERROR("Error finding library mesh:\n%s", librariPath);
 
 	return meshMD5;
+}
+
+void RE_ResourceManager::ThumbnailResources()
+{
+	for (auto res : resources) App->thumbnail->Add(res.first);
 }
 
 const char* RE_ResourceManager::ImportModel(const char* assetPath)

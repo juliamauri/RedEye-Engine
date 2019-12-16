@@ -56,6 +56,11 @@ void Event::PauseEvents()
 	paused = true;
 }
 
+bool Event::isPaused()
+{
+	return paused;
+}
+
 void Event::Clear()
 {
 	type = MAX_EVENT_TYPES;
