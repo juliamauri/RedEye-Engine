@@ -169,6 +169,9 @@
     <ClCompile Include="RE_FBOManager.cpp">
       <Filter>Modules\Independent App Modules</Filter>
     </ClCompile>
+    <ClCompile Include="RE_ThumbnailManager.cpp">
+      <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mmgr\mmgr.h">
@@ -497,6 +500,9 @@
     </ClInclude>
     <ClInclude Include="RE_FBOManager.h">
       <Filter>Modules\Independent App Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ThumbnailManager.h">
+      <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

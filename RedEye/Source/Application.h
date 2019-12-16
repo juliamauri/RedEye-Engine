@@ -29,6 +29,7 @@ class RE_HandleErrors;
 class RE_InternalResources;
 class RE_GLCache;
 class RE_FBOManager;
+class RE_ThumbnailManager;
 
 enum GameState : char
 {
@@ -91,6 +92,8 @@ public:
 
 	RE_GLCache* glcache = nullptr;
 	RE_FBOManager* fbomanager = nullptr;
+
+	RE_ThumbnailManager* thumbnail = nullptr;
 
 private:
 

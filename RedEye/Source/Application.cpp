@@ -24,6 +24,7 @@
 #include "RE_HandleErrors.h"
 #include "RE_GLCache.h"
 #include "RE_FBOManager.h"
+#include "RE_ThumbnailManager.h"
 
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
@@ -58,6 +59,7 @@ Application::Application()
 	handlerrors = new RE_HandleErrors();
 	glcache = new RE_GLCache();
 	fbomanager = new RE_FBOManager();
+	thumbnail = new RE_ThumbnailManager();
 }
 
 Application::~Application()
@@ -72,6 +74,7 @@ Application::~Application()
 	DEL(handlerrors);
 	DEL(glcache);
 	DEL(fbomanager);
+	DEL(thumbnail);
 
 	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;
@@ -144,7 +147,8 @@ bool Application::Init(int argc, char* argv[])
 				if (modelImporter && !modelImporter->Init())  LOG_WARNING("Won't be able to import model");
 				if (internalResources && !internalResources->Init())  LOG_WARNING("Won't be able to load internal Resources");
 				if (primitives && !primitives->Init("primitive"))  LOG_WARNING("Won't be able to use primitives");
-				
+				if (thumbnail) thumbnail->Init();
+
 				fs->ReadAssetChanges(0.0, true);
 
 				LOG_SEPARATOR("Starting Application");

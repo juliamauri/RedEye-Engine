@@ -23,6 +23,7 @@
 #include "RE_Material.h"
 #include "RE_Shader.h"
 #include "RE_DefaultShaders.h"
+#include "RE_ThumbnailManager.h"
 
 #include "PhysFS\include\physfs.h"
 
@@ -838,10 +839,18 @@ void AssetsWindow::Draw(bool secondary)
 				}
 			}
 		}
+		ImGui::SameLine();
 		ImGui::SetNextItemWidth(25);
 		static float iconsSize = 100;
-		if (ImGui::DragFloat("Icons size", &iconsSize, 1.0, 0.0, 0.0, "%.0f"))
+		if (ImGui::DragFloat("Icons size", &iconsSize, 1.0, 0.0, 256.0, "%.0f"))
 			iconsSize = (iconsSize < 25) ? 25 : iconsSize;
+		if (selectingUndefFile) {
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel selection")) {
+				selectingUndefFile = nullptr;
+			}
+		}
+		
 		ImGui::Separator();
 
 		float width = ImGui::GetWindowWidth();
@@ -859,7 +868,7 @@ void AssetsWindow::Draw(bool secondary)
 			switch (p->pType)
 			{
 			case RE_FileSystem::PathType::D_FOLDER:
-				if (ImGui::ImageButton((void*)0, { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
+				if (ImGui::ImageButton((void*)App->thumbnail->GetFolderID(), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
 					toChange = p->AsDirectory();
 				ImGui::PopID();
 				ImGui::Text(p->AsDirectory()->name.c_str());
@@ -870,22 +879,35 @@ void AssetsWindow::Draw(bool secondary)
 				case RE_FileSystem::FileType::F_META:
 				{
 					ResourceContainer* res = App->resources->At(p->AsMeta()->resource);
-					if (ImGui::ImageButton((void*)0, { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
+					if (ImGui::ImageButton((void*)App->thumbnail->GetShaderFileID(), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
 						App->resources->PushSelected(p->AsMeta()->resource, true);
 					ImGui::PopID();
 					ImGui::Text(res->GetName());
 				}
 					break;
 				case RE_FileSystem::FileType::F_NOTSUPPORTED:
+				{
+					bool pop = (!selectingUndefFile && !secondary);
+					if (pop) {
+						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+						ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+					}
 
-					if (ImGui::ImageButton((void*)0, { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, (selectingUndefFile) ? -1 : 0)) {
-							if (selectingUndefFile) {
-								*selectingUndefFile = p->path;
-								selectingUndefFile = nullptr;
-							}
+					if (ImGui::ImageButton((selectingUndefFile) ? (void*)App->thumbnail->GetSelectFileID() : (void*)App->thumbnail->GetFileID(), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, (selectingUndefFile) ? -1 : 0)) {
+						if (selectingUndefFile) {
+							*selectingUndefFile = p->path;
+							selectingUndefFile = nullptr;
+						}
 					}
 					ImGui::PopID();
 					ImGui::Text(p->AsFile()->filename.c_str());
+
+					if (pop) {
+						ImGui::PopItemFlag();
+						ImGui::PopStyleVar();
+					}
+				}
+
 					break;
 				default:
 					if (ImGui::ImageButton((void*)0, { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))

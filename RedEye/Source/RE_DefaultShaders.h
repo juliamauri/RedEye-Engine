@@ -21,10 +21,10 @@
 "void main()\n"																				\
 "{\n"																						\
 "	mat4 modelviewMatrix = view*model;\n"													\
-"	mat3 normalMatrix = mat3(modelviewMatrix[0].xyz,\n"										\
+"	mat3 transformMatrix = mat3(modelviewMatrix[0].xyz,\n"									\
 "		modelviewMatrix[1].xyz,\n"															\
 "		modelviewMatrix[2].xyz);\n"															\
-"	vec3 viewSpaceNormal = normalMatrix * normalize(aPos - center);\n"						\
+"	vec3 viewSpaceNormal = transformMatrix * normalize(aPos - center);\n"					\
 "	vec4 replacementPosition = projection * vec4(viewSpaceNormal, 0.0) * scaleFactor;\n"	\
 "	gl_Position = projection * modelviewMatrix * vec4(aPos,1.0) + replacementPosition;\n"	\
 "	TexCoord = aTexCoord;\n"																\
