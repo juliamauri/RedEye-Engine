@@ -22,6 +22,7 @@ struct TexSkyBox {
 
 	const char* textureMD5 = nullptr;
 	RE_TextureFace face = RE_NOFACE;
+	std::string path;
 
 	inline bool operator==(const TexSkyBox& b) {
 		return (textureMD5 == b.textureMD5 && face == b.face);
@@ -76,7 +77,10 @@ public:
 	unsigned int GetID()const { return ID; }
 	unsigned int GetVAO()const { return VAO; }
 
+	void SetAsInternal();
+
 	void AddTexture(RE_TextureFace face, const char* textureMD5);
+	void AddTexturePath(RE_TextureFace face, const char* path);
 	void AssetSave();
 
 	void DrawSkybox()const;

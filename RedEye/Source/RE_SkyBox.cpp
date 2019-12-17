@@ -57,9 +57,35 @@ void RE_SkyBox::use()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 }
 
+void RE_SkyBox::SetAsInternal()
+{
+	SetInternal(true);
+
+	Config toMD5("", "");
+	JSONNode* node = toMD5.GetRootNode("skybox");
+	//For differentMD5
+	node->PushString("SKname", GetName());
+	node->PushString("SKPath", GetAssetPath());
+
+	node->PushFloat("skyBoxSize", skyBoxSettings.skyBoxSize);
+	DEL(node);
+
+	SetMD5(toMD5.GetMd5().c_str());
+
+	App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID, true);
+	LoadSkyBoxSphere();
+
+	ResourceContainer::inMemory = true;
+}
+
 void RE_SkyBox::AddTexture(RE_TextureFace face, const char* textureMD5)
 {
 	skyBoxSettings.textures[face].textureMD5 = textureMD5;
+}
+
+void RE_SkyBox::AddTexturePath(RE_TextureFace face, const char* path)
+{
+	skyBoxSettings.textures[face].path = path;
 }
 
 void RE_SkyBox::Draw()

@@ -177,7 +177,7 @@ void RE_TextureImporter::SaveOwnFormat(const char * assetBuffer, unsigned int as
 	}
 }
 
-void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned int* ID)
+void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned int* ID, bool isDDS)
 {
 	RE_GLCache::ChangeTextureBind(0);
 	glGenTextures(1, ID);
@@ -185,9 +185,15 @@ void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigne
 
 	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
 
-		const char* texPath = App->resources->At(settings.textures[i].textureMD5)->GetLibraryPath();
-		if(!App->fs->Exists(texPath))
-			App->resources->At(settings.textures[i].textureMD5)->ReImport();
+		const char* texPath = nullptr;
+		if (!isDDS) {
+			texPath = App->resources->At(settings.textures[i].textureMD5)->GetLibraryPath();
+			if (!App->fs->Exists(texPath))
+				App->resources->At(settings.textures[i].textureMD5)->ReImport();
+		}
+		else {
+			texPath = settings.textures[i].path.c_str();
+		}
 
 		RE_FileIO librayTexture(texPath);
 

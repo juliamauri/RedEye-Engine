@@ -20,8 +20,6 @@ public:
 
 	unsigned int GetTextureChecker() const;
 
-	void FindDefaultSkyBox();
-
 private:
 	bool InitShaders();
 	bool InitMaterial();
