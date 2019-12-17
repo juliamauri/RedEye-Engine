@@ -29,7 +29,10 @@ private:
 
 	unsigned int ThumbnailTexture(const char* ref);
 	unsigned int ThumbnailGameObject(const char* ref);
-	unsigned int LoadLibraryTexThumbnail(const char* ref);
+	unsigned int ThumbnailMaterial(const char* ref);
+	unsigned int ThumbnailSkyBox(const char* ref);
+	void SaveTextureFromFBO(const char* path);
+	unsigned int LoadLibraryThumbnail(const char* ref);
 
 private:
 	std::map<const char*, unsigned int> thumbnails;
@@ -42,6 +45,11 @@ private:
 	unsigned int file = 0;
 	unsigned int selectfile = 0;
 	unsigned int shaderFile = 0;
+
+	unsigned int VAOSphere = 0;
+	unsigned int VBOSphere = 0;
+	unsigned int EBOSphere = 0;
+	unsigned int sphere_triangle_count = 0;
 };
 
 #endif // !__RETHUMBNAILMANAGER_H__
