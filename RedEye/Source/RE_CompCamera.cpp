@@ -264,6 +264,24 @@ void RE_CompCamera::SetBounds(float w, float h)
 	need_recalculation = true;
 }
 
+void RE_CompCamera::ForceFOV(float vertical_fov_degrees, float horizontal_fov_degrees)
+{
+	RE_CAPTO(vertical_fov_degrees, 180.0f);
+	RE_CAPTO(horizontal_fov_degrees, 180.0f);
+
+	v_fov_rads = vertical_fov_degrees * DEGTORAD;
+	h_fov_rads = horizontal_fov_degrees * DEGTORAD;
+
+	h_fov_degrees = horizontal_fov_degrees;
+	v_fov_degrees = vertical_fov_degrees;
+
+	if (isPerspective)
+	{
+		frustum.SetPerspective(h_fov_rads, v_fov_rads);
+		need_recalculation = true;
+	}
+}
+
 float RE_CompCamera::GetTargetWidth() const
 {
 	return width;

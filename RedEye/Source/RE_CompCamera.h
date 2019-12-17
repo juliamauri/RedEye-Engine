@@ -45,6 +45,8 @@ public:
 	void SetAspectRatio(AspectRatioTYPE aspect_ratio);
 	void SetBounds(float width, float height);
 
+	void ForceFOV(float vertical_fov_degrees, float horizontal_fov_degrees);
+
 	float GetTargetWidth() const;
 	float GetTargetHeight() const;
 	void GetTargetWidthHeight(int &width, int &height) const;
