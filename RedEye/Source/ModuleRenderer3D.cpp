@@ -1,22 +1,26 @@
 #include "ModuleRenderer3D.h"
 
-#include "OutputLog.h"
 #include "Application.h"
-#include "RE_ResourceManager.h"
-#include "ModuleWindow.h"
-#include "ModuleEditor.h"
-#include "TimeManager.h"
-#include "ModuleInput.h"
 #include "RE_FileSystem.h"
+#include "ModuleWindow.h"
+#include "ModuleInput.h"
+#include "ModuleEditor.h"
+#include "ModuleScene.h"
+#include "RE_InternalResources.h"
+#include "RE_ResourceManager.h"
+#include "RE_ShaderImporter.h"
+
+#include "RE_Shader.h"
+#include "RE_SkyBox.h"
+
 #include "RE_CompCamera.h"
 #include "RE_CompMesh.h"
 #include "RE_CompPrimitive.h"
 #include "RE_CameraManager.h"
 #include "RE_CompTransform.h"
-#include "ModuleScene.h"
-#include "RE_ShaderImporter.h"
-#include "RE_Shader.h"
-#include "RE_InternalResources.h"
+
+#include "OutputLog.h"
+#include "TimeManager.h"
 #include "RE_GLCache.h"
 #include "RE_FBOManager.h"
 
@@ -85,8 +89,6 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 bool ModuleRenderer3D::Start()
 {
-	skyboxShader = App->internalResources->GetSkyBoxShader();
-
 	sceneEditorFBO = App->fbomanager->CreateFBO(1024, 768, 1, true, true);
 	sceneGameFBO = App->fbomanager->CreateFBO(1024, 768);
 
@@ -325,22 +327,15 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 	// draw skybox as last
 
 	RE_GLCache::ChangeTextureBind(0);
-	// Set shader and uniforms
-	RE_GLCache::ChangeShader(skyboxShader);
-	RE_ShaderImporter::setInt(skyboxShader, "skybox", 0);
 
-	// change depth function so depth test passes when values are equal to depth buffer's content
+
+	RE_Shader* skyboxShader = (RE_Shader*)App->resources->At(App->internalResources->GetDefaultSkyBoxShader());
+	uint skysphereshader = skyboxShader->GetID();
+	RE_GLCache::ChangeShader(skysphereshader);
+	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
 	glDepthFunc(GL_LEQUAL);
-
-	// Render skybox cube
-	RE_GLCache::ChangeVAO(App->internalResources->GetSkyBoxVAO());
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, App->internalResources->GetSkyBoxTexturesID());
-
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	RE_SkyBox* defSK = (RE_SkyBox*)App->resources->At(App->internalResources->GetDefaultSkyBox());
+	defSK->DrawSkybox();
 	glDepthFunc(GL_LESS); // set depth function back to default
 
 	if (stencilToSelected) {

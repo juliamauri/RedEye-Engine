@@ -73,36 +73,34 @@
 "		color = vec4(cdiffuse, 1.0);\n"									       	\
 "}\0"
 
-#define SKYBOXVERTEXSHADER								\
-"#version 330 core\n"									\
-"layout(location = 0) in vec3 aPos;\n"					\
-"\n"													\
-"out vec3 TexCoords;\n"									\
-"\n"													\
-"uniform mat4 projection;\n"							\
-"uniform mat4 view;\n"									\
-"\n"													\
-"void main()\n"											\
-"{\n"													\
-"	TexCoords = aPos;\n"								\
-"	vec4 pos = projection * view * vec4(aPos, 1.0);\n"	\
-"	gl_Position = pos.xyww;\n"							\
+#define SKYBOXVERTEXSHADER									\
+"#version 330 core\n"										\
+"layout(location = 0) in vec3 aPos;\n"						\
+"\n"														\
+"out vec3 pos;\n"											\
+"\n"														\
+"uniform mat4 projection;\n"								\
+"uniform mat4 view;\n"										\
+"\n"														\
+"void main()\n"												\
+"{\n"														\
+"	pos = aPos;\n"											\
+"	gl_Position = projection * view * vec4(aPos, 1.0);\n"	\
 "}\0"
 
-#define SKYBOXFRAGMENTSHADER							\
-"#version 330 core\n"									\
-"#extension GL_ARB_separate_shader_objects : enable\n"	\
-"layout(location = 0) out vec4 color;\n"				\
-"\n"													\
-"in vec3 TexCoords;\n"									\
-"\n"													\
-"uniform samplerCube skybox;\n"							\
-"\n"													\
-"void main()\n"											\
-"{\n"													\
-"	color = texture(skybox, TexCoords);\n"				\
+#define SKYBOXFRAGMENTSHADER								\
+"#version 330 core\n"										\
+"#extension GL_ARB_separate_shader_objects : enable\n"		\
+"#extension GL_NV_shadow_samplers_cube : enable\n"			\
+"layout(location = 0) out vec4 color;\n"					\
+"\n"														\
+"in vec3 pos;\n"											\
+"\n"														\
+"uniform samplerCube cubemap;\n"							\
+"\n"														\
+"void main()\n"												\
+"{\n"														\
+"	color = textureCube(cubemap, normalize(pos).stp);\n"	\
 "}\0"
-
-
 
 #endif // !__DEFAULTSHADERS_H__

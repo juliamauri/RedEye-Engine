@@ -41,7 +41,7 @@ struct RE_SkyBoxSettings {
 	RE_TextureWrap wrap_r = RE_CLAMP_TO_EDGE;
 
 	TexSkyBox textures[6] = { TexSkyBox(RE_RIGHT), TexSkyBox(RE_LEFT), TexSkyBox(RE_TOP), TexSkyBox(RE_BOTTOM), TexSkyBox(RE_FRONT), TexSkyBox(RE_BACK) };
-	float skyBoxSize = 10000.0f;
+	float skyBoxSize = 2000.0f;
 
 	inline bool operator==(const RE_SkyBoxSettings& b) {
 		return (min_filter == b.min_filter && mag_filter == b.mag_filter && wrap_s == b.wrap_s && wrap_t == b.wrap_t && wrap_r == b.wrap_r && skyBoxSize == skyBoxSize
@@ -79,6 +79,8 @@ public:
 	void AddTexture(RE_TextureFace face, const char* textureMD5);
 	void AssetSave();
 
+	void DrawSkybox()const;
+
 private:
 	void Draw() override;
 	void SaveResourceMeta(JSONNode* metaNode) override;
@@ -90,12 +92,14 @@ private:
 
 	void TexParameteri(unsigned int pname, int param);
 
-	void LoadSkyBoxCube();
+	void LoadSkyBoxSphere();
 
 private:
 	unsigned int ID = 0;
 	unsigned int VAO = 0;
 	unsigned int VBO = 0;
+	unsigned int EBO = 0;
+	unsigned int triangle_count = 0;
 
 	RE_SkyBoxSettings skyBoxSettings;
 

@@ -66,9 +66,7 @@ private:
 	bool wireframe = false;
 	bool cull_scene = true;
 
-	// Default Shaders
-	unsigned int skyboxShader = 0;
-
+	// FBOs
 	unsigned int sceneEditorFBO = 0;
 	unsigned int sceneGameFBO = 0;
 };

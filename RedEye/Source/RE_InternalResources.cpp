@@ -23,8 +23,6 @@
 #include <vector>
 #include <string>
 
-#define SKYBOXDEFSIZE 2000.0f
-
 RE_InternalResources::RE_InternalResources()
 {
 }
@@ -44,7 +42,7 @@ bool RE_InternalResources::Init()
 
 	ret = InitChecker();
 
-	return false;
+	return ret;
 }
 
 bool RE_InternalResources::InitShaders()
@@ -124,19 +122,19 @@ bool RE_InternalResources::InitSkyBox()
 	const char* frontTex = App->resources->FindMD5ByAssetsPath("Assets/Skyboxes/default/5front.jpg");
 	const char* backTex = App->resources->FindMD5ByAssetsPath("Assets/Skyboxes/default/6back.jpg");
 
-	RE_SkyBox* defaultSkybox = new RE_SkyBox();
-	defaultSkybox->SetName("defaultSkyBox");
-	defaultSkybox->SetType(Resource_Type::R_SKYBOX);
-	defaultSkybox->AddTexture(RE_TextureFace::RE_RIGHT, rightTex);
-	defaultSkybox->AddTexture(RE_TextureFace::RE_LEFT, leftTex);
-	defaultSkybox->AddTexture(RE_TextureFace::RE_TOP, topTex);
-	defaultSkybox->AddTexture(RE_TextureFace::RE_BOTTOM, bottomTex);
-	defaultSkybox->AddTexture(RE_TextureFace::RE_FRONT, frontTex);
-	defaultSkybox->AddTexture(RE_TextureFace::RE_BACK, backTex);
-	defaultSkybox->AssetSave();
-	defaultSkybox->SaveMeta();
-	skyboxMD5 = App->resources->Reference(defaultSkybox);
-	App->resources->Use(skyboxMD5);
+	RE_SkyBox* rdefaultSkybox = new RE_SkyBox();
+	rdefaultSkybox->SetName("defaultSkyBox");
+	rdefaultSkybox->SetType(Resource_Type::R_SKYBOX);
+	rdefaultSkybox->AddTexture(RE_TextureFace::RE_RIGHT, rightTex);
+	rdefaultSkybox->AddTexture(RE_TextureFace::RE_LEFT, leftTex);
+	rdefaultSkybox->AddTexture(RE_TextureFace::RE_TOP, topTex);
+	rdefaultSkybox->AddTexture(RE_TextureFace::RE_BOTTOM, bottomTex);
+	rdefaultSkybox->AddTexture(RE_TextureFace::RE_FRONT, frontTex);
+	rdefaultSkybox->AddTexture(RE_TextureFace::RE_BACK, backTex);
+	rdefaultSkybox->AssetSave();
+	rdefaultSkybox->SaveMeta();
+	defaultSkybox = App->resources->Reference(rdefaultSkybox);
+	App->resources->Use(defaultSkybox);
 
 	return true;
 }
@@ -156,9 +154,14 @@ const char* RE_InternalResources::GetDefaulMaterial() const
 	return defaultMaterial;
 }
 
-unsigned int RE_InternalResources::GetSkyBoxShader() const
+const char* RE_InternalResources::GetDefaultSkyBox() const
 {
-	return ((RE_Shader*)App->resources->At(skyboxShader))->GetID();
+	return defaultSkybox;
+}
+
+const char* RE_InternalResources::GetDefaultSkyBoxShader() const
+{
+	return skyboxShader;
 }
 
 unsigned int RE_InternalResources::GetTextureChecker() const
@@ -166,18 +169,8 @@ unsigned int RE_InternalResources::GetTextureChecker() const
 	return checkerTexture;
 }
 
-unsigned int RE_InternalResources::GetSkyBoxVAO() const
-{
-	return ((RE_SkyBox*)App->resources->At(skyboxMD5))->GetVAO();
-}
-
-unsigned int RE_InternalResources::GetSkyBoxTexturesID() const
-{
-	return ((RE_SkyBox*)App->resources->At(skyboxMD5))->GetID();
-}
-
 void RE_InternalResources::FindDefaultSkyBox()
 {
-	skyboxMD5 = App->resources->FindMD5ByAssetsPath("Assets/Skyboxes/defaultSkyBox.sk", Resource_Type::R_SKYBOX);
-	(!skyboxMD5) ? InitSkyBox() : App->resources->Use(skyboxMD5);
+	defaultSkybox = App->resources->FindMD5ByAssetsPath("Assets/Skyboxes/defaultSkyBox.sk", Resource_Type::R_SKYBOX);
+	(!defaultSkybox) ? InitSkyBox() : App->resources->Use(defaultSkybox);
 }

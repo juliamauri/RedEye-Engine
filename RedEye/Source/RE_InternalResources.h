@@ -13,16 +13,15 @@ public:
 	bool Init();
 	
 	const char* GetDefaultShader()const;
+	const char* GetDefaultSkyBoxShader()const;
 	const char* GetDefaultScaleShader()const;
 	const char* GetDefaulMaterial()const;
-	unsigned int GetSkyBoxShader() const;
+	const char* GetDefaultSkyBox()const;
 
 	unsigned int GetTextureChecker() const;
 
-	unsigned int GetSkyBoxVAO() const;
-	unsigned int GetSkyBoxTexturesID() const;
-
 	void FindDefaultSkyBox();
+
 private:
 	bool InitShaders();
 	bool InitMaterial();
@@ -34,10 +33,9 @@ private:
 	const char* defaultScaleShader = nullptr;
 	const char* skyboxShader = nullptr;
 	const char* defaultMaterial = nullptr;
+	const char* defaultSkybox = nullptr;
 
 	unsigned int checkerTexture = 0;
-
-	const char* skyboxMD5 = nullptr;
 };
 
 #endif // !__INTERNALRESOURCCES_H__

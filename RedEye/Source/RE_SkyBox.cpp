@@ -18,6 +18,8 @@
 
 #include "ImGui/imgui.h"
 
+#include "par_shapes.h"
+
 #define MINFCOMBO "Nearest\0Linear\0Nearest Mipmap Nearest\0Linear Mipmap Nearest\0Nearest Mipmap Linear\0Linear Mipmap Linear"
 #define MAGFOMBO "Nearest\0Linear"
 #define WRAPOMBO "Repeat\0Clamp to border\0Clamp to edge\0Mirrored Repeat"
@@ -70,7 +72,7 @@ void RE_SkyBox::Draw()
 			SaveMeta();
 
 			if (ResourceContainer::inMemory) {
-				if (applySize) LoadSkyBoxCube();
+				if (applySize) LoadSkyBoxSphere();
 
 				if (applyTextures) {
 					if (ID != 0) glDeleteTextures(1, &ID);
@@ -181,7 +183,7 @@ void RE_SkyBox::Draw()
 
 	if (ResourceContainer::inMemory && (applySize || applyTextures) && ImGui::Button("Texture/Size Changes")) {
 
-		if (applySize) LoadSkyBoxCube();
+		if (applySize) LoadSkyBoxSphere();
 
 		if (applyTextures) {
 			if (ID != 0) glDeleteTextures(1, &ID);
@@ -254,7 +256,7 @@ void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 		}
 	}
 	App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
-	LoadSkyBoxCube();
+	LoadSkyBoxSphere();
 	ResourceContainer::inMemory = true;
 }
 
@@ -284,6 +286,15 @@ void RE_SkyBox::AssetSave()
 	LibrarySave();
 }
 
+void RE_SkyBox::DrawSkybox() const
+{
+	RE_GLCache::ChangeVAO(VAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
+	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
 void RE_SkyBox::LibraryLoad()
 {
 	RE_FileIO fileLibray(GetLibraryPath());
@@ -296,7 +307,7 @@ void RE_SkyBox::LibraryLoad()
 		cursor += size;
 
 		App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
-		LoadSkyBoxCube();
+		LoadSkyBoxSphere();
 		ResourceContainer::inMemory = true;
 	}
 }
@@ -329,62 +340,35 @@ void RE_SkyBox::TexParameteri(unsigned int pname, int param)
 	}
 }
 
-void RE_SkyBox::LoadSkyBoxCube()
+void RE_SkyBox::LoadSkyBoxSphere()
 {
 	if (VAO != 0) glDeleteBuffers(1, &VAO);
 	if (VBO != 0) glDeleteBuffers(1, &VBO);
+	if (EBO != 0) glDeleteBuffers(1, &EBO);
 
-	float cubeSize = skyBoxSettings.skyBoxSize;
-	float skyboxVertices[] = {
-		// positions          
-		-cubeSize,  cubeSize, -cubeSize,
-		-cubeSize, -cubeSize, -cubeSize,
-		 cubeSize, -cubeSize, -cubeSize,
-		 cubeSize, -cubeSize, -cubeSize,
-		 cubeSize,  cubeSize, -cubeSize,
-		-cubeSize,  cubeSize, -cubeSize,
 
-		-cubeSize, -cubeSize,  cubeSize,
-		-cubeSize, -cubeSize, -cubeSize,
-		-cubeSize,  cubeSize, -cubeSize,
-		-cubeSize,  cubeSize, -cubeSize,
-		-cubeSize,  cubeSize,  cubeSize,
-		-cubeSize, -cubeSize,  cubeSize,
-
-		 cubeSize, -cubeSize, -cubeSize,
-		 cubeSize, -cubeSize,  cubeSize,
-		 cubeSize,  cubeSize,  cubeSize,
-		 cubeSize,  cubeSize,  cubeSize,
-		 cubeSize,  cubeSize, -cubeSize,
-		 cubeSize, -cubeSize, -cubeSize,
-
-		-cubeSize, -cubeSize,  cubeSize,
-		-cubeSize,  cubeSize,  cubeSize,
-		 cubeSize,  cubeSize,  cubeSize,
-		 cubeSize,  cubeSize,  cubeSize,
-		 cubeSize, -cubeSize,  cubeSize,
-		-cubeSize, -cubeSize,  cubeSize,
-
-		-cubeSize,  cubeSize, -cubeSize,
-		 cubeSize,  cubeSize, -cubeSize,
-		 cubeSize,  cubeSize,  cubeSize,
-		 cubeSize,  cubeSize,  cubeSize,
-		-cubeSize,  cubeSize,  cubeSize,
-		-cubeSize,  cubeSize, -cubeSize,
-
-		-cubeSize, -cubeSize, -cubeSize,
-		-cubeSize, -cubeSize,  cubeSize,
-		 cubeSize, -cubeSize, -cubeSize,
-		 cubeSize, -cubeSize, -cubeSize,
-		-cubeSize, -cubeSize,  cubeSize,
-		 cubeSize, -cubeSize,  cubeSize
-	};
+	par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(24, 24);
+	par_shapes_scale(sphere, skyBoxSettings.skyBoxSize, skyBoxSettings.skyBoxSize, skyBoxSettings.skyBoxSize);
 
 	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
 	RE_GLCache::ChangeVAO(VAO);
+
+	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 3 * sphere->npoints * sizeof(float), sphere->points, GL_STATIC_DRAW);
+
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
+
+	//Invert triangle face
+	std::vector<unsigned short> indexes;
+	for (int i = sphere->ntriangles * 3 - 1; i >= 0; i--)indexes.push_back(sphere->triangles[i]);
+
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, &indexes[0], GL_STATIC_DRAW);
+
+	triangle_count =  sphere->ntriangles;
+
+	par_shapes_free_mesh(sphere);
 }
