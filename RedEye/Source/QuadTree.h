@@ -109,4 +109,47 @@ inline void QTree::CollectIntersections(std::vector<RE_GameObject*>& objects, co
 	root.CollectIntersections(objects, primitive);
 }
 
+
+
+
+
+
+class AABBDynamicTree
+{
+private:
+
+	struct AABBDynamicTreeNode
+	{
+		AABB box;
+		int object_index;
+		int parent_index;
+		int child1;
+		int child2;
+		bool is_leaf;
+	}* nodes = nullptr;
+
+	int size;
+	int node_count;
+	int root_index;
+
+public:
+
+	AABBDynamicTree();
+	~AABBDynamicTree();
+
+	void Push(int index, AABB box, const int size_increment = 10);
+	void Pop(int index);
+	void Clear();
+	void CollectIntersections(Ray ray, std::stack<int>& indexes) const;
+
+private:
+
+	int AllocateLeafNode(AABB box, int index, const int size_increment = 10);
+	int AllocateInternalNode(const int size_increment = 10);
+
+	static inline AABB Union(AABB box1, AABB box2);
+	static inline void SetLeaf(AABBDynamicTreeNode& node, AABB box, int index);
+	static inline void SetInternal(AABBDynamicTreeNode& node);
+};
+
 #endif // !__QUADTREE_H__
