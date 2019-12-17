@@ -4,8 +4,21 @@
 #include "Module.h"
 #include "Event.h"
 #include "QuadTree.h"
+#include "PoolMapped.h"
+
+#include <windows.h>
 
 class RE_GameObject;
+
+class GameObjectManager : public PoolMapped<RE_GameObject*, int> {
+public:
+	GameObjectManager() { }
+	~GameObjectManager() { }
+
+	std::map< RE_GameObject *,int> PushWithChilds(RE_GameObject* val, bool root = true);
+	int Push(RE_GameObject* val)override;
+};
+
 
 class ModuleScene : public Module
 {
@@ -58,6 +71,7 @@ private:
 	RE_GameObject* root = nullptr;
 
 	QTree quad_tree;
+	GameObjectManager goManager;
 
 	bool update_qt = false;
 	bool static_gos_modified = false;

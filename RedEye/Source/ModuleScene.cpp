@@ -138,6 +138,8 @@ bool ModuleScene::Start()
 
 	if (root)
 	{
+		//GO Manager!!!
+		std::map< RE_GameObject*, int> gosID = goManager.PushWithChilds(root);
 		Event::PauseEvents();
 		savedState = new RE_GameObject(*root);
 		Event::ResumeEvents();
@@ -977,4 +979,20 @@ void ModuleScene::UpdateQuadTree()
 
 	quad_tree.Build(root);
 	static_gos_modified = false;
+}
+
+std::map< RE_GameObject*, int> GameObjectManager::PushWithChilds(RE_GameObject* val, bool root)
+{
+	std::map< RE_GameObject*, int> ret;
+	 std::vector<RE_GameObject*> gos =  val->GetAllGO();
+	 if (!root) gos.erase(gos.begin());
+	 for (auto go : gos) ret.insert(std::pair<RE_GameObject*,int>(go, Push(go)));
+	 return ret;
+}
+
+int GameObjectManager::Push(RE_GameObject* val)
+{
+	int ret = lastAvaibleIndex;
+	PoolMapped::Push(val, ret);
+	return ret;
 }
