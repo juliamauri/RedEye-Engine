@@ -378,9 +378,6 @@
     <ClInclude Include="RE_PrimitiveManager.h">
       <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
-    <ClInclude Include="QuadTree.h">
-      <Filter>Containers</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleEditor.h">
       <Filter>Modules\Editor</Filter>
     </ClInclude>
@@ -491,6 +488,12 @@
     </ClInclude>
     <ClInclude Include="RE_DefaultShaders.h">
       <Filter>Modules\Resource Managers\InternalResources</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadTree.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="PoolMapped.h">
+      <Filter>Containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
