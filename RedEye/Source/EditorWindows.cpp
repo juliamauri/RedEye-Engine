@@ -849,7 +849,10 @@ void AssetsWindow::Draw(bool secondary)
 				selectingUndefFile = nullptr;
 			}
 		}
-		
+		ImGui::SameLine();
+		if(ImGui::Button("Goto DefaultSkyBox"))
+			App->resources->PushSelected(App->internalResources->GetDefaultSkyBox(), true);
+
 		ImGui::Separator();
 
 		float width = ImGui::GetWindowWidth();

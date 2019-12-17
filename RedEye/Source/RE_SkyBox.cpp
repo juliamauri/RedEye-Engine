@@ -13,6 +13,7 @@
 #include "RE_TextureImporter.h"
 
 #include "RE_GLCache.h"
+#include "RE_ThumbnailManager.h"
 
 #include "Glew/include/glew.h"
 
@@ -48,6 +49,7 @@ void RE_SkyBox::UnloadMemory()
 	glDeleteTextures(1, &ID);
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 
 	ResourceContainer::inMemory = false;
 }
@@ -90,7 +92,7 @@ void RE_SkyBox::AddTexturePath(RE_TextureFace face, const char* path)
 
 void RE_SkyBox::Draw()
 {
-	if (applySave) {
+	if (applySave && !isInternal()) {
 		if (ImGui::Button("Save")) {
 			restoreSettings = skyBoxSettings;
 			if (skyBoxSettings.texturesChanged(restoreSettings) || skyBoxSettings.skyBoxSize != restoreSettings.skyBoxSize)
@@ -131,7 +133,7 @@ void RE_SkyBox::Draw()
 	}
 		
 
-	for (uint i = 0; i < 6; i++) {
+	for (uint i = 0; i < 6 && !isInternal(); i++) {
 
 		if (ImGui::TreeNodeEx(texturesname[i], ImGuiTreeNodeFlags_None | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
 
@@ -158,9 +160,11 @@ void RE_SkyBox::Draw()
 		if (skyBoxSettings.min_filter != newfilter) {
 			if (ResourceContainer::inMemory && ((skyBoxSettings.min_filter <= RE_LINEAR && newfilter > RE_LINEAR)
 				|| (newfilter <= RE_LINEAR && skyBoxSettings.min_filter > RE_LINEAR))) {
-				skyBoxSettings.min_filter = newfilter;
-				UnloadMemory();
-				LoadInMemory();
+				if (!isInternal()) {
+					skyBoxSettings.min_filter = newfilter;
+					UnloadMemory();
+					LoadInMemory();
+				}
 			}
 			else if (ResourceContainer::inMemory) {
 				TexParameteri(GL_TEXTURE_MIN_FILTER, skyBoxSettings.min_filter = newfilter);
@@ -207,11 +211,11 @@ void RE_SkyBox::Draw()
 		}
 	}
 
-	if (ResourceContainer::inMemory && (applySize || applyTextures) && ImGui::Button("Texture/Size Changes")) {
+	if (ResourceContainer::inMemory && (applySize || applyTextures) && ImGui::Button((!isInternal()) ? "Apply Texture/Size Changes" : "Apply Size Changes")) {
 
 		if (applySize) LoadSkyBoxSphere();
 
-		if (applyTextures) {
+		if (applyTextures && !isInternal()) {
 			if (ID != 0) glDeleteTextures(1, &ID);
 			App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
 		}
@@ -219,6 +223,8 @@ void RE_SkyBox::Draw()
 		applySize = false;
 		applyTextures = false;
 	}
+
+	ImGui::Image((void*)App->thumbnail->At(GetMD5()), { 256, 256 }, { 0,1 }, { 1, 0 });
 
 	if (applySave && skyBoxSettings == restoreSettings) {
 		applySave = false;
