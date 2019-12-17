@@ -28,14 +28,13 @@ public:
 		std::map<TYPEKEY, unsigned int>::iterator w = poolmapped_.find(key);
 		unsigned int index = w->second;
 		TYPEVALUE ret = pool_[index];
-		memcpy(pool_ + index, pool_ + lastAvaibleIndex, sizeof(TYPEVALUE*) * (lastAvaibleIndex - index));
+		memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE*) * (lastAvaibleIndex - index - 1));
 		while (w != poolmapped_.end())
 		{
 			w->second--;
 			w++;
 		}
 		lastAvaibleIndex--;
-
 		return ret;
 	}
 
