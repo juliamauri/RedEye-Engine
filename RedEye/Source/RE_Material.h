@@ -39,10 +39,10 @@ public:
 
 	void Save();
 
-	void UseTextureResources();
-	void UnUseTextureResources();
+	void UseResources();
+	void UnUseResources();
 
-	void UploadToShader(float* model, bool usingChekers);
+	void UploadToShader(float* model, bool usingChekers, bool defaultShader = false);
 
 	unsigned int GetShaderID()const;
 

@@ -10,6 +10,7 @@
 #include "RE_Texture.h"
 
 #include "RE_GLCache.h"
+#include "RE_ThumbnailManager.h"
 
 #include "ModuleEditor.h"
 #include "EditorWindows.h"
@@ -107,6 +108,8 @@ void RE_Material::Draw()
 	}
 
 	DrawMaterialEdit();
+
+	ImGui::Image((void*)App->thumbnail->At(GetMD5()), { 256, 256 }, { 0,1 }, { 1, 0 });
 }
 
 void RE_Material::SaveResourceMeta(JSONNode* metaNode)
@@ -1073,7 +1076,7 @@ void RE_Material::BinarySerialize()
 	DEL_A(buffer);
 }
 
-void RE_Material::UseTextureResources()
+void RE_Material::UseResources()
 {
 	if(shaderMD5) App->resources->Use(shaderMD5);
 
@@ -1089,7 +1092,7 @@ void RE_Material::UseTextureResources()
 	for (auto t : tUnknown) App->resources->Use(t);
 }
 
-void RE_Material::UnUseTextureResources()
+void RE_Material::UnUseResources()
 {
 	if (shaderMD5) App->resources->UnUse(shaderMD5);
 
@@ -1106,10 +1109,11 @@ void RE_Material::UnUseTextureResources()
 
 }
 
-void RE_Material::UploadToShader(float* model, bool usingChekers)
+void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultShader)
 {
-	const char* usingShader = (shaderMD5) ? shaderMD5 : App->internalResources->GetDefaultShader();
+	const char* usingShader = (shaderMD5 && !defaultShader) ? shaderMD5 : App->internalResources->GetDefaultShader();
 	RE_Shader* shaderRes = (RE_Shader*)App->resources->At(usingShader);
+	RE_GLCache::ChangeShader(shaderRes->GetID());
 	shaderRes->UploadModel(model);
 
 	unsigned int ShaderID = shaderRes->GetID();
