@@ -494,6 +494,28 @@ void RE_CompCamera::Focus(const RE_GameObject* focus, float min_dist)
 	LOG("FocusPos = (%.1f,%.1f,%.1f)", focus_global_pos.x, focus_global_pos.y, focus_global_pos.z);
 }
 
+void RE_CompCamera::Focus(math::vec center, float radius, float min_dist)
+{
+	float camDistance = min_dist;
+	focus_global_pos = center;
+
+	if (radius > 0)
+	{
+		// Vertical distance
+		float v_dist = radius / math::Sin(v_fov_rads / 2.0f);
+		if (v_dist > camDistance)
+			camDistance = v_dist;
+
+		// Horizontal distance
+		float h_dist = radius / math::Sin(h_fov_rads / 2.0f);
+		if (h_dist > camDistance)
+			camDistance = h_dist;
+	}
+
+	transform->SetGlobalPosition(focus_global_pos - (front * camDistance));
+	LOG("FocusPos = (%.1f,%.1f,%.1f)", focus_global_pos.x, focus_global_pos.y, focus_global_pos.z);
+}
+
 math::vec RE_CompCamera::GetRight() const
 {
 	return right;
