@@ -3,8 +3,12 @@
 
 #include "RE_GameObject.h"
 #include "MathGeoLib\include\Geometry\AABB.h"
+
+#include "PoolMapped.h"
+
 #include <list>
 #include <iterator>
+#include <stack>
 
 class QTree
 {
@@ -111,36 +115,53 @@ inline void QTree::CollectIntersections(std::vector<RE_GameObject*>& objects, co
 
 
 
+struct AABBDynamicTreeNode
+{
+	AABB box;
+	int object_index;
+	int parent_index;
+	int child1;
+	int child2;
+	bool is_leaf;
+};
 
-
-
-class AABBDynamicTree
+class AABBDynamicTree : public PoolMapped<AABBDynamicTreeNode,int>
 {
 private:
 
-	struct AABBDynamicTreeNode
-	{
-		AABB box;
-		int object_index;
-		int parent_index;
-		int child1;
-		int child2;
-		bool is_leaf;
-	}* nodes = nullptr;
+
 
 	int size;
 	int node_count;
 	int root_index;
+
+	enum DrawMode : short
+	{
+		DISABLED,
+		TOP,
+		BOTTOM,
+		TOP_BOTTOM,
+		ALL
+	} draw_mode;
+
+	int edges[12];
+	int count;
 
 public:
 
 	AABBDynamicTree();
 	~AABBDynamicTree();
 
-	void Push(int index, AABB box, const int size_increment = 10);
-	void Pop(int index);
+	void PushNode(int index, AABB box, const int size_increment = 10);
+	void PopNode(int index);
 	void Clear();
 	void CollectIntersections(Ray ray, std::stack<int>& indexes) const;
+	void CollectIntersections(Frustum frustum, std::stack<int>& indexes) const;
+
+	void	SetDrawMode(short mode);
+	short	GetDrawMode() const;
+
+	void Draw()const;
 
 private:
 

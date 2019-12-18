@@ -17,6 +17,7 @@ public:
 
 	std::map< RE_GameObject *,int> PushWithChilds(RE_GameObject* val, bool root = true);
 	int Push(RE_GameObject* val)override;
+
 };
 
 
@@ -70,7 +71,7 @@ private:
 	RE_GameObject* savedState = nullptr;
 	RE_GameObject* root = nullptr;
 
-	QTree quad_tree;
+	AABBDynamicTree dynamic_quad_tree;
 	GameObjectManager goManager;
 
 	bool update_qt = false;
