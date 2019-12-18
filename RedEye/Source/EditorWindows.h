@@ -256,6 +256,23 @@ private:
 	std::string assetPath;
 };
 
+class RE_SkyBox;
+class SkyBoxEditorWindow :public EditorWindow
+{
+public:
+	SkyBoxEditorWindow(const char* name = "Skybox Editor", bool start_active = false);
+	~SkyBoxEditorWindow();
+
+private:
+	void Draw(bool secondary = false) override;
+
+	RE_SkyBox* editingSkybox = nullptr;
+	std::string sbName;
+	std::string assetPath;
+
+	unsigned int previewImage = 0;
+};
+
 class RE_Shader;
 class ShaderEditorWindow :public EditorWindow
 {

@@ -1,25 +1,33 @@
 #include "RE_CompCamera.h"
 
 #include "Application.h"
-#include "RE_GameObject.h"
-#include "RE_FileSystem.h"
-#include "RE_CompTransform.h"
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
+#include "RE_FileSystem.h"
+#include "RE_ShaderImporter.h"
 #include "ModuleEditor.h"
+#include "RE_InternalResources.h"
+#include "RE_ResourceManager.h"
+
+#include "RE_SkyBox.h"
+
+#include "RE_GameObject.h"
+#include "RE_CompTransform.h"
+
 #include "RE_CameraManager.h"
 #include "OutputLog.h"
-#include "RE_ShaderImporter.h"
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
 
-RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool draw_frustum) :
+RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool draw_frustum,bool usingSkybox, const char* skyboxMD5) :
 	RE_Component(C_CAMERA, go),
 	right(math::vec(1.f, 0.f, 0.f)),
 	up(math::vec(0.f, 1.f, 0.f)),
 	front(math::vec(0.f, 0.f, 1.f)),
-	draw_frustum(draw_frustum)
+	draw_frustum(draw_frustum),
+	usingSkybox(usingSkybox),
+	skyboxMD5(skyboxMD5)
 {
 	// Fustrum - Kind
 	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
@@ -44,7 +52,9 @@ RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go
 	right(cmpCamera.right),
 	up(cmpCamera.up),
 	front(cmpCamera.front),
-	draw_frustum(cmpCamera.draw_frustum)
+	draw_frustum(cmpCamera.draw_frustum),
+	usingSkybox(cmpCamera.usingSkybox),
+	skyboxMD5(cmpCamera.skyboxMD5)
 {
 	// Fustrum - Kind
 	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
@@ -94,8 +104,46 @@ void RE_CompCamera::Update()
 
 void RE_CompCamera::DrawProperties()
 {
-	if (ImGui::CollapsingHeader("Camera"))
+	if (ImGui::CollapsingHeader("Camera")) {
 		DrawItsProperties();
+
+		ImGui::Separator();
+		
+		ImGui::Checkbox("Use skybox", &usingSkybox);
+
+		if (usingSkybox) {
+			RE_SkyBox* skyRes = (skyboxMD5) ? (RE_SkyBox*)App->resources->At(skyboxMD5) : (RE_SkyBox*)App->resources->At(App->internalResources->GetDefaultSkyBox());
+
+			if (!skyboxMD5) ImGui::Text("This component camera is using the default skybox.");
+
+			if (ImGui::Button(skyRes->GetName()))
+				App->resources->PushSelected(skyRes->GetMD5(), true);
+
+			if (skyboxMD5) {
+				ImGui::SameLine();
+				if (ImGui::Button("Back to Default Skybox"))
+					skyboxMD5 = nullptr;
+			}
+
+			if (ImGui::BeginMenu("Change skybox"))
+			{
+				std::vector<ResourceContainer*> materials = App->resources->GetResourcesByType(Resource_Type::R_SKYBOX);
+				bool none = true;
+				for (auto material : materials) {
+					if (material->isInternal())
+						continue;
+					none = false;
+					if (ImGui::MenuItem(material->GetName())) {
+						if (skyboxMD5) App->resources->UnUse(skyboxMD5);
+						skyboxMD5 = material->GetMD5();
+						if (skyboxMD5) App->resources->Use(skyboxMD5);
+					}
+				}
+				if (none) ImGui::Text("No custom skyboxes on assets");
+				ImGui::EndMenu();
+			}
+		}
+	}
 }
 
 void RE_CompCamera::DrawAsEditorProperties()
@@ -531,9 +579,18 @@ math::vec RE_CompCamera::GetFront() const
 	return front;
 }
 
+std::vector<const char*> RE_CompCamera::GetAllResources()
+{
+	std::vector<const char*> ret;
+
+	if (skyboxMD5) ret.push_back(skyboxMD5);
+
+	return ret;
+}
+
 unsigned int RE_CompCamera::GetBinarySize() const
 {
-	return sizeof(bool) * 2 + sizeof(int) + sizeof(float) * 3;
+	return sizeof(bool) * 3 + sizeof(int) * 2 + sizeof(float) * 3;
 }
 
 void RE_CompCamera::SerializeJson(JSONNode * node, std::map<const char*, int>* resources)
@@ -544,6 +601,8 @@ void RE_CompCamera::SerializeJson(JSONNode * node, std::map<const char*, int>* r
 	node->PushFloat("v_fov_rads", v_fov_rads);
 	node->PushInt("aspect_ratio", target_ar);
 	node->PushBool("draw_frustum", draw_frustum);
+	node->PushBool("usingSkybox", usingSkybox);
+	node->PushInt("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
 }
 
 void RE_CompCamera::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
@@ -570,4 +629,33 @@ void RE_CompCamera::SerializeBinary(char*& cursor, std::map<const char*, int>* r
 	size = sizeof(bool);
 	memcpy(cursor, &draw_frustum, size);
 	cursor += size;
+
+	memcpy(cursor, &usingSkybox, size);
+	cursor += size;
+
+	size = sizeof(int);
+	int sbres = (skyboxMD5) ? resources->at(skyboxMD5) : -1;
+	memcpy(cursor, &sbres, size);
+	cursor += size;
+}
+
+bool RE_CompCamera::isUsingSkybox() const
+{
+	return usingSkybox;
+}
+
+void RE_CompCamera::DrawSkybox() const
+{
+	RE_SkyBox* skyRes = (skyboxMD5) ? (RE_SkyBox*)App->resources->At(skyboxMD5) : (RE_SkyBox*)App->resources->At(App->internalResources->GetDefaultSkyBox());
+	skyRes->DrawSkybox();
+}
+
+void RE_CompCamera::UseResources()
+{
+	if (skyboxMD5) App->resources->Use(skyboxMD5);
+}
+
+void RE_CompCamera::UnUseResources()
+{
+	if (skyboxMD5) App->resources->UnUse(skyboxMD5);
 }

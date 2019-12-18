@@ -126,33 +126,99 @@ void RE_SkyBox::Draw()
 		}
 	}
 	
+	DrawEditSkyBox();
+
+	if (ResourceContainer::inMemory && (applySize || applyTextures) && ImGui::Button((!isInternal()) ? "Apply Texture/Size Changes" : "Apply Size Changes")) {
+
+		if (applySize) LoadSkyBoxSphere();
+
+		if (applyTextures && !isInternal()) {
+			if (ID != 0) glDeleteTextures(1, &ID);
+			App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
+		}
+
+		applySize = false;
+		applyTextures = false;
+	}
+
+	ImGui::Image((void*)App->thumbnail->At(GetMD5()), { 256, 256 }, { 0,1 }, { 1, 0 });
+
+	if (applySave && skyBoxSettings == restoreSettings) {
+		applySave = false;
+	}
+}
+
+void RE_SkyBox::DrawEditSkyBox()
+{
 	if (ImGui::SliderFloat("SkyBox size", &skyBoxSettings.skyBoxSize, 0.0f, 10000.0f)) {
 
-		if(ResourceContainer::inMemory) applySize = true;
+		if (ResourceContainer::inMemory) applySize = true;
 		applySave = true;
 	}
-		
 
+	ImGui::Separator();
+	ImGui::Text("Textures by face:");
+	static std::string texture = "Texture ";
+	static std::string id;
+	static RE_TextureFace toDelete = RE_NOFACE;
 	for (uint i = 0; i < 6 && !isInternal(); i++) {
-
-		if (ImGui::TreeNodeEx(texturesname[i], ImGuiTreeNodeFlags_None | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) {
-
+		if (ImGui::BeginMenu(texturesname[i])) {
 			if (skyBoxSettings.textures[i].textureMD5)
 			{
-				if (ImGui::Button(std::string("Texture " + std::string(App->resources->At(skyBoxSettings.textures[i].textureMD5)->GetName())).c_str()))
-					App->resources->PushSelected(skyBoxSettings.textures[i].textureMD5);
-			}
-			else
-				ImGui::Text("%s texture don't exists", texturesname[i]);
+				ResourceContainer* resource = App->resources->At(skyBoxSettings.textures[i].textureMD5);
+				id = texture + resource->GetName();
+				if (ImGui::Button(id.c_str()))
+					App->resources->PushSelected(resource->GetMD5());
 
-			//TODO Drag&Drop
-			if (NULL) {
-				if (ResourceContainer::inMemory) applyTextures = true;
-				applySave = true;
+				ImGui::SameLine();
+				id = "Delete";
+				if (ImGui::Button(id.c_str())) {
+					if (ResourceContainer::inMemory) App->resources->Use(resource->GetMD5());
+					toDelete = skyBoxSettings.textures[i].face;
+					applySave = true;
+				}
+
+				id = "Change";
+				if (ImGui::BeginMenu(id.c_str()))
+				{
+					std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+					for (auto textRes : allTex) {
+						if (ImGui::MenuItem(textRes->GetName())) {
+							if (ResourceContainer::inMemory) App->resources->UnUse(resource->GetMD5());
+							skyBoxSettings.textures[i].textureMD5 = textRes->GetMD5();
+							if (ResourceContainer::inMemory) App->resources->Use(textRes->GetMD5());
+							applySave = true;
+						}
+					}
+					ImGui::EndMenu();
+				}
 			}
-			ImGui::TreePop();
+			else {
+				ImGui::Text("%s texture don't exists", texturesname[i]);
+				id = "Add";
+				if (ImGui::BeginMenu(id.c_str()))
+				{
+					std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+					for (auto textRes : allTex) {
+						if (ImGui::MenuItem(textRes->GetName())) {
+							skyBoxSettings.textures[i].textureMD5 = textRes->GetMD5();
+							if (ResourceContainer::inMemory) App->resources->Use(textRes->GetMD5());
+						}
+					}
+					ImGui::EndMenu();
+				}
+			}
+			ImGui::Separator();
+			ImGui::EndMenu();
+
+			if (toDelete != RE_TextureFace::RE_NOFACE) {
+				skyBoxSettings.textures[toDelete].textureMD5 = nullptr;
+				toDelete = RE_NOFACE;
+			}
 		}
 	}
+	ImGui::Separator();
+	ImGui::Text("OpenGL texture settings:");
 
 	int minIndex = RE_Texture::GetComboFilter(skyBoxSettings.min_filter);
 	if (ImGui::Combo("Minify filter", &minIndex, MINFCOMBO)) {
@@ -210,25 +276,18 @@ void RE_SkyBox::Draw()
 			applySave = true;
 		}
 	}
+}
 
-	if (ResourceContainer::inMemory && (applySize || applyTextures) && ImGui::Button((!isInternal()) ? "Apply Texture/Size Changes" : "Apply Size Changes")) {
-
-		if (applySize) LoadSkyBoxSphere();
-
-		if (applyTextures && !isInternal()) {
-			if (ID != 0) glDeleteTextures(1, &ID);
-			App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
+bool RE_SkyBox::isFacesFilled() const
+{
+	bool ret = true;
+	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
+		if (skyBoxSettings.textures[i].textureMD5 == nullptr) {
+			ret = false;
+			break;
 		}
-
-		applySize = false;
-		applyTextures = false;
 	}
-
-	ImGui::Image((void*)App->thumbnail->At(GetMD5()), { 256, 256 }, { 0,1 }, { 1, 0 });
-
-	if (applySave && skyBoxSettings == restoreSettings) {
-		applySave = false;
-	}
+	return ret;
 }
 
 void RE_SkyBox::SaveResourceMeta(JSONNode* metaNode)

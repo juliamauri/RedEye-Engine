@@ -63,6 +63,8 @@ RE_ThumbnailManager::~RE_ThumbnailManager()
 	glDeleteBuffers(1, &VAOSphere);
 	glDeleteBuffers(1, &VBOSphere);
 	glDeleteBuffers(1, &EBOSphere);
+
+	DEL(internalCamera);
 }
 
 void RE_ThumbnailManager::Init()

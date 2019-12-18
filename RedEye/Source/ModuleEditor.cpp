@@ -41,6 +41,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	tools.push_back(rng = new RandomTest());
 	tools.push_back(textures = new TexturesWindow());
 	tools.push_back(materialeditor = new MaterialEditorWindow());
+	tools.push_back(skyboxeditor = new SkyBoxEditorWindow());
 	tools.push_back(shadereditor = new ShaderEditorWindow());
 	texteditormanager = new TextEditorManagerWindow();
 

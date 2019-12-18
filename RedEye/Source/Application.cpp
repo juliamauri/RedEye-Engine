@@ -199,8 +199,10 @@ int Application::Update()
 
 	FinishUpdate();
 
-	if (want_to_quit && ret != UPDATE_ERROR)
+	if (want_to_quit && ret != UPDATE_ERROR) {
+		scene->Serialize();
 		ret = UPDATE_STOP;
+	}
 
 	return ret;
 }
@@ -415,11 +417,7 @@ void Application::RecieveEvent(const Event& e)
 	case REQUEST_DEFAULT_CONF: want_to_load_def = true; break;
 	case REQUEST_LOAD: want_to_load = true; break;
 	case REQUEST_SAVE: want_to_save = true; break;
-	case REQUEST_QUIT: {
-		scene->Serialize();
-		want_to_quit = true;
-	}
-					 break;
+	case REQUEST_QUIT: want_to_quit = true; break;
 	}
 }
 

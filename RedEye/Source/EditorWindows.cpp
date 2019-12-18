@@ -22,6 +22,7 @@
 #include "RE_Texture.h"
 #include "RE_Material.h"
 #include "RE_Shader.h"
+#include "RE_SkyBox.h"
 #include "RE_DefaultShaders.h"
 #include "RE_ThumbnailManager.h"
 
@@ -30,6 +31,8 @@
 #include "ImGui/misc/cpp/imgui_stdlib.h"
 #include "ImGui/imgui_internal.h"
 #include "ImGuiColorTextEdit/TextEditor.h"
+
+#include "Glew/include/glew.h"
 
 #include <map>
 
@@ -849,10 +852,6 @@ void AssetsWindow::Draw(bool secondary)
 				selectingUndefFile = nullptr;
 			}
 		}
-		ImGui::SameLine();
-		if(ImGui::Button("Goto DefaultSkyBox"))
-			App->resources->PushSelected(App->internalResources->GetDefaultSkyBox(), true);
-
 		ImGui::Separator();
 
 		float width = ImGui::GetWindowWidth();
@@ -1442,6 +1441,74 @@ void SceneGameWindow::Draw(bool secondary)
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
 		}
+	}
+
+	ImGui::End();
+}
+
+SkyBoxEditorWindow::SkyBoxEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active)
+{
+	editingSkybox = new RE_SkyBox();
+	sbName = "New Skybox";
+}
+
+SkyBoxEditorWindow::~SkyBoxEditorWindow()
+{
+	DEL(editingSkybox);
+	if(previewImage != 0) glDeleteTextures(1, &previewImage);
+}
+
+void SkyBoxEditorWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		ImGui::Text("Skybox name:");
+		ImGui::SameLine();
+		ImGui::InputText("##sbname", &sbName);
+
+		assetPath = "Assets/Skyboxes/";
+		assetPath += sbName;
+		assetPath += ".pupil";
+		ImGui::Text("Save path: %s", assetPath.c_str());
+
+		bool isTexturesFilled = editingSkybox->isFacesFilled();
+		bool exits = App->fs->Exists(assetPath.c_str());
+		if (exits) ImGui::Text("This skybox exits, change the name.");
+
+		if (isTexturesFilled) ImGui::Text("Needed set all textures before save.");
+
+		if ((exits || !isTexturesFilled) && !secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Save")) {
+			if (!sbName.empty() && !exits) {
+
+				editingSkybox->SetName(sbName.c_str());
+				editingSkybox->SetAssetPath(assetPath.c_str());
+				editingSkybox->SetType(Resource_Type::R_SKYBOX);
+				editingSkybox->AssetSave();
+				editingSkybox->SaveMeta();
+
+				App->thumbnail->Add(App->resources->Reference((ResourceContainer*)editingSkybox));
+
+				editingSkybox = new RE_SkyBox();
+				sbName = "New Skybox";
+			}
+		}
+
+		if ((exits || !isTexturesFilled) && !secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+		ImGui::Separator();
+		editingSkybox->DrawEditSkyBox();
 	}
 
 	ImGui::End();

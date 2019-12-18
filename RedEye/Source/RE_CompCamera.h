@@ -28,7 +28,9 @@ public:
 		float far_plane = 5000.0f,
 		float v_fov = 0.523599f,
 		short aspect_ratio_t = 0, 
-		bool draw_frustum = true);
+		bool draw_frustum = true,
+		bool usingSkybox =  true,
+		const char* skyboxMD5 = nullptr);
 	RE_CompCamera(const RE_CompCamera& cmpCamera, RE_GameObject* go);
 	~RE_CompCamera();
 	
@@ -82,12 +84,20 @@ public:
 	math::vec GetUp() const;
 	math::vec GetFront() const;
 
+	std::vector<const char*> GetAllResources() override;
+
 	unsigned int GetBinarySize()const override;
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
 	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
 
+	//Skybox
+	bool isUsingSkybox()const;
+	void DrawSkybox()const;
+
+	void UseResources()override;
+	void UnUseResources()override;
+
 private:
-	
 	void RecalculateMatrixes();
 	void DrawItsProperties();
 
@@ -130,6 +140,10 @@ private:
 	// Debug Drawing
 	bool draw_frustum = true;
 	bool override_cull = false;
+
+	//skybox
+	bool usingSkybox = true;
+	const char* skyboxMD5 = nullptr;
 };
 
 #endif // !__RE_CCOMPAMERA_H__

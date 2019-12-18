@@ -441,13 +441,16 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, cons
 			}
 			case C_CAMERA:
 			{
+				int skyboxid = cmpNode->PullInt("skyboxResource", -1);
 				new_go->AddCompCamera(
 					cmpNode->PullBool("isPrespective", true),
 					cmpNode->PullFloat("near_plane", 1),
 					cmpNode->PullFloat("far_plane", 10000),
 					cmpNode->PullFloat("v_fov_rads", 30.0f),
 					cmpNode->PullInt("aspect_ratio", RE_CompCamera::AspectRatioTYPE::Fit_Window),
-					cmpNode->PullBool("draw_frustum", true));
+					cmpNode->PullBool("draw_frustum", true),
+					cmpNode->PullBool("usingSkybox", true),
+					(skyboxid != -1) ? resources->at(skyboxid) : nullptr);
 				break;
 			}
 			}
@@ -653,13 +656,24 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, con
 				memcpy(&drawFrustum, cursor, size);
 				cursor += size;
 
+				bool usingSkybox = true;
+				memcpy(&usingSkybox, cursor, size);
+				cursor += size;
+
+				int skyboxid = -1;
+				size = sizeof(int);
+				memcpy(&skyboxid, cursor, size);
+				cursor += size;
+
 				new_go->AddCompCamera(
 					isPrespective,
 					nearPlane,
 					farPlane,
 					vfovrads,
 					aspectRatio,
-					drawFrustum);
+					drawFrustum,
+					usingSkybox,
+					(skyboxid != -1) ? resources->at(skyboxid) : nullptr);
 				break;
 			}
 			}
@@ -857,9 +871,9 @@ void RE_GameObject::UnUseResources()
 	for (auto child : childs) child->UnUseResources();
 }
 
-RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float v_fov_rads, short aspect_ratio_t, bool draw_frustum)
+RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float v_fov_rads, short aspect_ratio_t, bool draw_frustum, bool usingSkybox, const char* skyboxMD5)
 {
-	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, v_fov_rads, aspect_ratio_t, draw_frustum);
+	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, v_fov_rads, aspect_ratio_t, draw_frustum, usingSkybox, skyboxMD5);
 	components.push_back((RE_Component*)comp_camera);
 	if(!Event::isPaused()) App->cams->AddMainCamera(comp_camera);
 	return comp_camera;

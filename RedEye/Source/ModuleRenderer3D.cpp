@@ -118,19 +118,21 @@ update_status ModuleRenderer3D::PostUpdate()
 	float dt = App->time->GetDeltaTime();
 	std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 
+	RE_CompCamera* mainSkybox = (RE_CameraManager::MainCamera()->isUsingSkybox()) ? RE_CameraManager::MainCamera() : nullptr;
+
 	OPTICK_CATEGORY("Scene Editor Draw", Optick::Category::Rendering);
 	OPTICK_CATEGORY("Culling Editor", Optick::Category::Rendering);
 	RE_CompCamera* current_camera = RE_CameraManager::EditorCamera();
 	current_camera->Update();
 	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(current_camera, dt, time);
-	DrawScene(current_camera, sceneEditorFBO, true, true);
+	DrawScene(current_camera, sceneEditorFBO, mainSkybox, true, true);
 
 	OPTICK_CATEGORY("Scene Game Draw", Optick::Category::Rendering);
 	OPTICK_CATEGORY("Culling Game", Optick::Category::Rendering);
 	current_camera = RE_CameraManager::MainCamera();
 	current_camera->Update();
 	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(current_camera, dt, time);
-	DrawScene(current_camera, sceneGameFBO);
+	DrawScene(current_camera, sceneGameFBO, mainSkybox);
 
 	RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
 
@@ -277,7 +279,7 @@ bool ModuleRenderer3D::Save(JSONNode * node) const
 	return ret;
 }
 
-void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool debugDraw, bool stencilToSelected)
+void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, RE_CompCamera* mainSkybox, bool debugDraw, bool stencilToSelected)
 {
 	std::vector<const RE_GameObject*> objects;
 	if (cull_scene)
@@ -323,20 +325,19 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, bool d
 	// Draw Debug Geometry
 	if (debugDraw) App->editor->DrawDebug(lighting);
 
-	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
-	// draw skybox as last
+	// Draw skybox as last
+	if (mainSkybox) {
+		OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
+		RE_GLCache::ChangeTextureBind(0);
+		RE_Shader* skyboxShader = (RE_Shader*)App->resources->At(App->internalResources->GetDefaultSkyBoxShader());
+		uint skysphereshader = skyboxShader->GetID();
+		RE_GLCache::ChangeShader(skysphereshader);
+		RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
+		glDepthFunc(GL_LEQUAL);
+		mainSkybox->DrawSkybox();
+		glDepthFunc(GL_LESS); // set depth function back to default
 
-	RE_GLCache::ChangeTextureBind(0);
-
-
-	RE_Shader* skyboxShader = (RE_Shader*)App->resources->At(App->internalResources->GetDefaultSkyBoxShader());
-	uint skysphereshader = skyboxShader->GetID();
-	RE_GLCache::ChangeShader(skysphereshader);
-	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
-	glDepthFunc(GL_LEQUAL);
-	RE_SkyBox* defSK = (RE_SkyBox*)App->resources->At(App->internalResources->GetDefaultSkyBox());
-	defSK->DrawSkybox();
-	glDepthFunc(GL_LESS); // set depth function back to default
+	}
 
 	if (stencilToSelected) {
 		RE_GameObject* stencilGO = App->editor->GetSelected();

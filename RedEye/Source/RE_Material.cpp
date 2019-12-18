@@ -13,7 +13,6 @@
 #include "RE_ThumbnailManager.h"
 
 #include "ModuleEditor.h"
-#include "EditorWindows.h"
 
 #include "Globals.h"
 
@@ -399,10 +398,11 @@ void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*
 			std::string deletetexture("Delete #");
 			deletetexture += std::to_string(count);
 			if (ImGui::Button(deletetexture.c_str())) {
+				if (ResourceContainer::inMemory) App->resources->UnUse(*md5);
 				toDelete = md5;
 				applySave = true;
 			}
-			ImGui::SameLine();
+
 			std::string changetexture("Change #");
 			changetexture += std::to_string(count++);
 			if (ImGui::BeginMenu(changetexture.c_str()))
@@ -413,16 +413,15 @@ void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*
 						if (ResourceContainer::inMemory) App->resources->UnUse(*md5);
 						*md5 = textRes->GetMD5();
 						if (ResourceContainer::inMemory) App->resources->Use(*md5);
+						applySave = true;
 					}
 				}
 				ImGui::EndMenu();
 			}
 			ImGui::Separator();
 		}
-		if (toDelete != textures->end()) {
-			if(ResourceContainer::inMemory) App->resources->UnUse(*toDelete);
+		if (toDelete != textures->end())
 			textures->erase(toDelete);
-		}
 	}
 	else {
 		ImGui::Text("Empty textures");

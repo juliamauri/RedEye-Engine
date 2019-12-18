@@ -85,6 +85,10 @@ public:
 
 	void DrawSkybox()const;
 
+	void DrawEditSkyBox();
+
+	bool isFacesFilled()const;
+
 private:
 	void Draw() override;
 	void SaveResourceMeta(JSONNode* metaNode) override;

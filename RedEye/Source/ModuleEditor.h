@@ -20,6 +20,7 @@ class SelectFile;
 class PopUpWindow;
 class MaterialEditorWindow;
 class ShaderEditorWindow;
+class SkyBoxEditorWindow;
 class TextEditorManagerWindow;
 class SceneEditorWindow;
 class SceneGameWindow;
@@ -104,6 +105,7 @@ private:
 	SelectFile* select_file = nullptr;
 	MaterialEditorWindow* materialeditor = nullptr;
 	ShaderEditorWindow* shadereditor = nullptr;
+	SkyBoxEditorWindow* skyboxeditor = nullptr;
 	TextEditorManagerWindow* texteditormanager = nullptr;
 
 	SceneEditorWindow* sceneEditorWindow = nullptr;

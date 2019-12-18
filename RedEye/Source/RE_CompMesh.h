@@ -31,8 +31,8 @@ public:
 	math::AABB GetAABB() const;
 	bool CheckFaceCollision(const math::Ray &ray, float &distance) const;
 
-	void UseResources();
-	void UnUseResources();
+	void UseResources()override;
+	void UnUseResources()override;
 
 protected:
 
