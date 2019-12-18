@@ -76,9 +76,6 @@
     <ClCompile Include="ModuleEditor.cpp">
       <Filter>Modules\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="EditorWindows.cpp">
-      <Filter>Modules\Editor</Filter>
-    </ClCompile>
     <ClCompile Include="md5.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
@@ -171,6 +168,12 @@
     </ClCompile>
     <ClCompile Include="RE_ThumbnailManager.cpp">
       <Filter>Modules\Resource Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorWindows.cpp">
+      <Filter>Modules\Editor\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceEditorsWindows.cpp">
+      <Filter>Modules\Editor\Windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -390,9 +393,6 @@
     <ClInclude Include="ModuleEditor.h">
       <Filter>Modules\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="EditorWindows.h">
-      <Filter>Modules\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="md5.h">
       <Filter>Utility</Filter>
     </ClInclude>
@@ -504,6 +504,9 @@
     <ClInclude Include="RE_ThumbnailManager.h">
       <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
+    <ClInclude Include="EditorWindows.h">
+      <Filter>Modules\Editor\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -598,6 +601,9 @@
     </Filter>
     <Filter Include="Modules\Resource Managers\InternalResources">
       <UniqueIdentifier>{ba777deb-5c4f-4673-ab51-944abbdad942}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Editor\Windows">
+      <UniqueIdentifier>{a18935b7-c464-42a4-915b-e5d7df5fc839}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

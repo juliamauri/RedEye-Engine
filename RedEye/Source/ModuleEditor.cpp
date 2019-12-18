@@ -36,10 +36,8 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	windows.push_back(properties = new PropertiesWindow());
 	windows.push_back(play_pause = new PlayPauseWindow());
 	about = new AboutWindow();
-	select_file = new SelectFile();
 
 	tools.push_back(rng = new RandomTest());
-	tools.push_back(textures = new TexturesWindow());
 	tools.push_back(materialeditor = new MaterialEditorWindow());
 	tools.push_back(skyboxeditor = new SkyBoxEditorWindow());
 	tools.push_back(shadereditor = new ShaderEditorWindow());
@@ -272,8 +270,6 @@ update_status ModuleEditor::Update()
 
 		if (popupWindow->IsActive()) popupWindow->DrawWindow();
 
-		if (select_file->IsActive()) select_file->DrawWindow();
-
 		// Draw Windows
 		for (auto window : windows)
 		{
@@ -326,7 +322,6 @@ bool ModuleEditor::CleanUp()
 
 	DEL(popupWindow);
 	DEL(about);
-	DEL(select_file);
 	DEL(texteditormanager);
 
 	DEL(sceneEditorWindow);
@@ -607,11 +602,6 @@ void ModuleEditor::Draw()
 void ModuleEditor::HandleSDLEvent(SDL_Event* e)
 {
 	ImGui_ImplSDL2_ProcessEvent(e);
-}
-
-SelectFile * ModuleEditor::GetSelectWindow()const
-{
-	return select_file;
 }
 
 void ModuleEditor::PopUpFocus(bool focus)

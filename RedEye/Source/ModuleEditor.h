@@ -14,9 +14,7 @@ class HeriarchyWindow;
 class PropertiesWindow;
 class AboutWindow;
 class RandomTest;
-class TexturesWindow;
 class PlayPauseWindow;
-class SelectFile;
 class PopUpWindow;
 class MaterialEditorWindow;
 class ShaderEditorWindow;
@@ -65,9 +63,6 @@ public:
 	void Draw();
 	void HandleSDLEvent(SDL_Event* e);
 
-	//Select file
-	SelectFile* GetSelectWindow()const;
-
 	void PopUpFocus(bool focus);
 	PopUpWindow* popupWindow = nullptr;
 
@@ -102,7 +97,6 @@ private:
 	PropertiesWindow* properties = nullptr;
 	PlayPauseWindow* play_pause = nullptr;
 	AboutWindow* about = nullptr;
-	SelectFile* select_file = nullptr;
 	MaterialEditorWindow* materialeditor = nullptr;
 	ShaderEditorWindow* shadereditor = nullptr;
 	SkyBoxEditorWindow* skyboxeditor = nullptr;
@@ -112,7 +106,6 @@ private:
 	SceneGameWindow* sceneGameWindow = nullptr;
 	// Tools
 	RandomTest* rng = nullptr;
-	TexturesWindow* textures = nullptr;
 
 	// Camera Controls
 	bool select_on_mc = true;

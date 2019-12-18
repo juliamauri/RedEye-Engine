@@ -134,17 +134,6 @@ public:
 	float minF = 0.f, maxF = 1.f, resultF = 0.f;
 };
 
-class TexturesWindow : public EditorWindow
-{
-public:
-	TexturesWindow(const char* name = "Texture Manager", bool start_active = false);
-	~TexturesWindow();
-
-private:
-
-	void Draw(bool secondary = false) override;
-};
-
 class PlayPauseWindow : public EditorWindow
 {
 public:
@@ -154,39 +143,6 @@ public:
 private:
 
 	void Draw(bool secondary = false) override;
-};
-
-class SelectFile : public EditorWindow
-{
-public:
-	SelectFile(const char* name = "Select File", bool start_active = false);
-	~SelectFile();
-
-	void Start(const char* windowName, const char* path, std::string* forFill, bool selectFolder = false);
-
-	void SelectTexture();
-
-	ResourceContainer* GetSelectedTexture();
-
-private:
-	void Draw(bool secondary = false) override;
-
-	void SendSelected();
-	void Clear();
-
-private:
-	bool selectingFolder = false;
-
-	std::string windowName;
-	std::string path;
-	std::string selected;
-	char **rc = nullptr;
-	char **selectedPointer = nullptr;
-
-	std::string* toFill = nullptr;
-
-	ResourceContainer* selectedTexture = nullptr;
-	std::vector<ResourceContainer*> textures;
 };
 
 class PrefabsPanel :public EditorWindow

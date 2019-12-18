@@ -348,6 +348,7 @@ unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
 		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(internalCamera, dt, time);
 
 		App->resources->Use(ref);
+		mat->UseResources();
 
 		RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -357,6 +358,7 @@ unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
 		RE_GLCache::ChangeVAO(VAOSphere);
 		glDrawElements(GL_TRIANGLES, sphere_triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 
+		mat->UnUseResources();
 		App->resources->UnUse(ref);
 
 		SaveTextureFromFBO(path.c_str());

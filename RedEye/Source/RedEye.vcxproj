@@ -24,6 +24,7 @@
     <ClCompile Include="EditorWindows.cpp" />
     <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp" />
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp" />
+    <ClCompile Include="ResourceEditorsWindows.cpp" />
     <ClCompile Include="RE_FBOManager.cpp" />
     <ClCompile Include="RE_FileSystem.cpp" />
     <ClCompile Include="Event.cpp" />
