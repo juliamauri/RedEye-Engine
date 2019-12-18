@@ -17,7 +17,7 @@ public:
 		DEL_A(pool_);
 	}
 
-	virtual TYPEKEY Push(TYPEVALUE val) = 0;
+	virtual TYPEKEY Push(TYPEVALUE val) { return TYPEKEY(); };
 
 	virtual void Push(TYPEVALUE val, TYPEKEY key) {
 		pool_[lastAvaibleIndex] = val;
@@ -38,13 +38,17 @@ public:
 		return ret;
 	}
 
-	RE_GameObject* At(UUID key)const { return pool_[poolmapped_.at(key)]; }
+	const TYPEVALUE At(TYPEKEY key)const { return pool_[poolmapped_.at(key)]; }
+
+	int GetLastIndex()const {
+		return lastAvaibleIndex - 1;
+	}
 
 protected:
 	TYPEVALUE* pool_;
 	std::map<TYPEKEY, unsigned int> poolmapped_;
 
-	unsigned int lastAvaibleIndex = 0;
+	int lastAvaibleIndex = 0;
 };
 
 #endif // !__POOL_H__
