@@ -3,8 +3,12 @@
 
 #include "RE_GameObject.h"
 #include "MathGeoLib\include\Geometry\AABB.h"
+
+#include "PoolMapped.h"
+
 #include <list>
 #include <iterator>
+#include <stack>
 
 class QTree
 {
@@ -18,13 +22,6 @@ public:
 
 	void	SetDrawMode(short mode);
 	short	GetDrawMode() const;
-
-	bool	Contains(const math::AABB bounding_box) const;
-	bool	TryPushing( RE_GameObject* g_obj);
-	bool	TryPushingWithChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
-	bool	TryAdapting(RE_GameObject* g_obj);
-	bool	TryAdaptingWithChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
-	bool	TryAdaptingPushingChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
 
 	void	Pop(const RE_GameObject* g_obj);
 
@@ -108,5 +105,45 @@ inline void QTree::CollectIntersections(std::vector<RE_GameObject*>& objects, co
 {
 	root.CollectIntersections(objects, primitive);
 }
+
+struct AABBDynamicTreeNode
+{
+	AABB box;
+	int object_index;
+	int parent_index;
+	int child1;
+	int child2;
+	bool is_leaf;
+};
+
+class AABBDynamicTree : public PoolMapped<AABBDynamicTreeNode,int>
+{
+private:
+	int size;
+	int node_count;
+	int root_index;
+
+public:
+
+	AABBDynamicTree();
+	~AABBDynamicTree();
+
+	void PushNode(int index, AABB box, const int size_increment = 10);
+	void PopNode(int index);
+	void Clear();
+	void CollectIntersections(Ray ray, std::stack<int>& indexes) const;
+	void CollectIntersections(Frustum frustum, std::stack<int>& indexes) const;
+
+	void Draw()const;
+
+private:
+
+	int AllocateLeafNode(AABB box, int index, const int size_increment = 10);
+	int AllocateInternalNode(const int size_increment = 10);
+
+	static inline AABB Union(AABB box1, AABB box2);
+	static inline void SetLeaf(AABBDynamicTreeNode& node, AABB box, int index);
+	static inline void SetInternal(AABBDynamicTreeNode& node);
+};
 
 #endif // !__QUADTREE_H__

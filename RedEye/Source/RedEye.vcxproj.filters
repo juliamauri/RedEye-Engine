@@ -387,9 +387,6 @@
     <ClInclude Include="RE_PrimitiveManager.h">
       <Filter>Modules\Resource Managers</Filter>
     </ClInclude>
-    <ClInclude Include="QuadTree.h">
-      <Filter>Containers</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleEditor.h">
       <Filter>Modules\Editor</Filter>
     </ClInclude>
@@ -506,6 +503,12 @@
     </ClInclude>
     <ClInclude Include="EditorWindows.h">
       <Filter>Modules\Editor\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadTree.h">
+      <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="PoolMapped.h">
+      <Filter>Containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

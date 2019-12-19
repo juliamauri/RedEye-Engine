@@ -84,6 +84,7 @@
     <ClInclude Include="EditorWindows.h" />
     <ClInclude Include="ImGuiColorTextEdit\TextEditor.h" />
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h" />
+    <ClInclude Include="PoolMapped.h" />
     <ClInclude Include="RE_DefaultShaders.h" />
     <ClInclude Include="RE_FBOManager.h" />
     <ClInclude Include="RE_FileSystem.h" />
