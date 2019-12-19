@@ -39,6 +39,7 @@ public:
 	}
 
 	const TYPEVALUE At(TYPEKEY key)const { return pool_[poolmapped_.at(key)]; }
+	TYPEVALUE* AtPtr(TYPEKEY key)const { return &pool_[poolmapped_.at(key)]; }
 
 	int GetLastIndex()const {
 		return lastAvaibleIndex - 1;

@@ -71,7 +71,7 @@ private:
 	RE_GameObject* savedState = nullptr;
 	RE_GameObject* root = nullptr;
 
-	AABBDynamicTree dynamic_quad_tree;
+	AABBDynamicTree dynamic_tree;
 	GameObjectManager goManager;
 
 	bool update_qt = false;

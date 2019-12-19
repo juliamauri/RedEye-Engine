@@ -252,129 +252,6 @@ short QTree::GetDrawMode() const
 	return draw_mode;
 }
 
-bool QTree::Contains(const math::AABB bounding_box) const
-{
-	return (root.GetBox().Contains(bounding_box.minPoint)
-		&& root.GetBox().Contains(bounding_box.maxPoint));
-}
-
-bool QTree::TryPushing(RE_GameObject * g_obj)
-{
-	bool ret = Contains(g_obj->GetGlobalBoundingBox());
-
-	if (ret)
-		root.Push(g_obj);
-
-	return ret;
-}
-
-bool QTree::TryPushingWithChilds(RE_GameObject * g_obj, std::list<RE_GameObject*>& out_childs)
-{
-	bool ret = TryPushing(g_obj);
-
-	if (ret)
-	{
-		out_childs.push_back(g_obj);
-
-		std::queue<RE_GameObject*> queue;
-		for (auto child : g_obj->GetChilds())
-			queue.push(child);
-
-		while (!queue.empty())
-		{
-			RE_GameObject* obj = queue.front();
-			queue.pop();
-
-			if (obj->IsActiveStatic())
-			{
-				root.Push(obj);
-				out_childs.push_back(obj);
-			}
-
-			for (auto child : obj->GetChilds())
-				queue.push(child);
-		}
-	}
-
-	return ret;
-}
-
-bool QTree::TryAdapting(RE_GameObject * g_obj)
-{
-	bool ret = Contains(g_obj->GetGlobalBoundingBox());
-
-	if (ret)
-	{
-		root.Pop(g_obj);
-		root.Push(g_obj);
-	}
-
-	return ret;
-}
-
-bool QTree::TryAdaptingWithChilds(RE_GameObject * g_obj, std::list<RE_GameObject*>& out_childs)
-{
-	bool ret = TryAdapting(g_obj);
-
-	if (ret)
-	{
-		out_childs.push_back(g_obj);
-
-		std::queue<RE_GameObject*> queue;
-		for (auto child : g_obj->GetChilds())
-			queue.push(child);
-
-		while (!queue.empty())
-		{
-			RE_GameObject* obj = queue.front();
-			queue.pop();
-
-			if (obj->IsActiveStatic())
-			{
-				root.Pop(obj);
-				root.Push(obj);
-				out_childs.push_back(obj);
-			}
-
-			for (auto child : obj->GetChilds())
-				queue.push(child);
-		}
-	}
-
-	return ret;
-}
-
-bool QTree::TryAdaptingPushingChilds(RE_GameObject * g_obj, std::list<RE_GameObject*>& out_childs)
-{
-	bool ret = TryAdapting(g_obj);
-
-	if (ret)
-	{
-		out_childs.push_back(g_obj);
-
-		std::queue<RE_GameObject*> queue;
-		for (auto child : g_obj->GetChilds())
-			queue.push(child);
-
-		while (!queue.empty())
-		{
-			RE_GameObject* obj = queue.front();
-			queue.pop();
-
-			if (obj->IsActiveStatic())
-			{
-				root.Push(obj);
-				out_childs.push_back(obj);
-			}
-
-			for (auto child : obj->GetChilds())
-				queue.push(child);
-		}
-	}
-
-	return ret;
-}
-
 void QTree::Pop(const RE_GameObject * g_obj)
 {
 	root.Pop(g_obj);
@@ -420,8 +297,6 @@ void QTree::PushWithChilds(RE_GameObject * g_obj)
 
 AABBDynamicTree::AABBDynamicTree() :  size(0), node_count(0), root_index(NullIndex)
 {
-	SetDrawMode(ALL);
-	SetDrawMode(BOTTOM);
 }
 
 AABBDynamicTree::~AABBDynamicTree()
@@ -436,28 +311,34 @@ void AABBDynamicTree::PushNode(int index, AABB box, const int size_increment)
 	if (root_index != NullIndex)
 	{
 		// Stage 1: find the best sibling for the new leaf
+		AABBDynamicTreeNode rootNode = At(root_index);
 		int best_sibling = root_index;
-		float best_cost = Union(At(root_index).box, box).SurfaceArea();
+		float best_cost = Union(rootNode.box, box).SurfaceArea();
 		float box_sa = box.SurfaceArea();
 
 		std::queue<int> potential_siblings;
-		if (At(root_index).child1 != NullIndex) potential_siblings.push(At(root_index).child1);
-		if (At(root_index).child2 != NullIndex) potential_siblings.push(At(root_index).child2);
+		if (rootNode.child1 != NullIndex) potential_siblings.push(rootNode.child1);
+		if (rootNode.child2 != NullIndex) potential_siblings.push(rootNode.child2);
 
 		while (!potential_siblings.empty())
 		{
 			int current_sibling = potential_siblings.front();
 			potential_siblings.pop();
 
+			AABBDynamicTreeNode currentSNode = At(current_sibling);
+
 			// C     = direct_cost                + inherited_cost
 			// C     = SA (box U current_sibling) + SUM (Dif_SA (current_sibling parents))
 			// Dif_SA (node) = SA (box U node) - SA (node)
 
-			float direct_cost = Union(At(current_sibling).box, box).SurfaceArea();
+			float direct_cost = Union(currentSNode.box, box).SurfaceArea();
 
 			float inherited_cost = 0.f;
-			for (int i = At(current_sibling).parent_index; i != NullIndex; i = At(i).parent_index)
-				inherited_cost += Union(At(i).box, box).SurfaceArea() - At(i).box.SurfaceArea();
+			AABBDynamicTreeNode iNode;
+			for (int i = currentSNode.parent_index; i != NullIndex; i = iNode.parent_index) {
+				iNode = At(i);
+				inherited_cost += Union(iNode.box, box).SurfaceArea() - iNode.box.SurfaceArea();
+			}
 
 			if (direct_cost + inherited_cost < best_cost)
 			{
@@ -466,11 +347,11 @@ void AABBDynamicTree::PushNode(int index, AABB box, const int size_increment)
 
 				// C_low = SA (box) + direct_cost             + inherited_cost
 				// C_low = SA (box) + Dif_SA(current_sibling) + SUM (Dif_SA (current_sibling parents))
-				float lower_cost = box_sa + direct_cost - At(current_sibling).box.SurfaceArea();
+				float lower_cost = box_sa + direct_cost - currentSNode.box.SurfaceArea();
 				if (lower_cost + inherited_cost < best_cost)
 				{
-					if (At(current_sibling).child1 != NullIndex) potential_siblings.push(At(current_sibling).child1);
-					if (At(current_sibling).child2 != NullIndex) potential_siblings.push(At(current_sibling).child2);
+					if (currentSNode.child1 != NullIndex) potential_siblings.push(currentSNode.child1);
+					if (currentSNode.child2 != NullIndex) potential_siblings.push(currentSNode.child2);
 				}
 			}
 		}
@@ -481,26 +362,31 @@ void AABBDynamicTree::PushNode(int index, AABB box, const int size_increment)
 
 		if (old_parent == NullIndex) // Sibling is root
 			root_index = new_parent;
-		else if (At(old_parent).child1 == best_sibling) // Sibling not root
-			pool_[old_parent].child1 = new_parent;
-		else
-			pool_[old_parent].child2 = new_parent;
+		else {
+			AABBDynamicTreeNode* oldParentNode = AtPtr(old_parent);
+			if (oldParentNode->child1 == best_sibling) // Sibling not root
+				oldParentNode->child1 = new_parent;
+			else
+				oldParentNode->child2 = new_parent;
+		}
 
-		pool_[new_parent].parent_index = old_parent;
-		pool_[new_parent].child1 = best_sibling;
-		pool_[new_parent].child2 = leafIndex;
-		pool_[best_sibling].parent_index = new_parent;
-		pool_[leafIndex].parent_index = new_parent;
+		AABBDynamicTreeNode* newParentNode = AtPtr(new_parent);
+		newParentNode->parent_index = old_parent;
+		newParentNode->child1 = best_sibling;
+		newParentNode->child2 = leafIndex;
+		AtPtr(best_sibling)->parent_index = new_parent;
+		AtPtr(leafIndex)->parent_index = new_parent;
 
 		// Stage 3: walk back up the tree refitting AABBs
 		int index = At(leafIndex).parent_index;
 		while (index != NullIndex)
 		{
-			pool_[index].box = Union(
-				At(At(index).child1).box,
-				At(At(index).child2).box);
+			AABBDynamicTreeNode iN = At(index);
+			AtPtr(index)->box = Union(
+				At(iN.child1).box,
+				At(iN.child2).box);
 
-			index = At(index).parent_index;
+			index = iN.parent_index;
 		}
 	}
 	else
@@ -521,36 +407,36 @@ void AABBDynamicTree::PopNode(int index)
 		else
 		{
 			int parent_index = At(index).parent_index;
-			AABBDynamicTreeNode& parent_node = pool_[parent_index];
+			AABBDynamicTreeNode* parent_node = AtPtr(parent_index);
 
 			if (parent_index == root_index) // son of root
 			{
-				if (parent_node.child1 == index) // left child
-					root_index = parent_node.child2;
+				if (parent_node->child1 == index) // left child
+					root_index = parent_node->child2;
 				else // right child
-					root_index = parent_node.child1;
+					root_index = parent_node->child1;
 			}
 			else // has grand parent
 			{
-				AABBDynamicTreeNode& grand_parent_node = pool_[parent_index];
+				AABBDynamicTreeNode* grand_parent_node =  AtPtr(parent_node->parent_index);
 
-				if (parent_node.child1 == index) // left child
+				if (parent_node->child1 == index) // left child
 				{
-					if (grand_parent_node.child1 == parent_index) // left grand child
-						grand_parent_node.child1 = parent_node.child2;
+					if (grand_parent_node->child1 == parent_index) // left grand child
+						grand_parent_node->child1 = parent_node->child2;
 					else // right grand child
-						grand_parent_node.child2 = parent_node.child2;
+						grand_parent_node->child2 = parent_node->child2;
 
-					pool_[parent_node.child2].parent_index = parent_node.parent_index;
+					AtPtr(parent_node->child2)->parent_index = parent_node->parent_index;
 				}
 				else // right child
 				{
-					if (grand_parent_node.child1 == parent_index)  // left grand child
-						grand_parent_node.child1 = parent_node.child1;
+					if (grand_parent_node->child1 == parent_index)  // left grand child
+						grand_parent_node->child1 = parent_node->child1;
 					else // right grand child
-						grand_parent_node.child2 = parent_node.child1;
+						grand_parent_node->child2 = parent_node->child1;
 
-					pool_[parent_node.child1].parent_index = parent_node.parent_index;
+					AtPtr(parent_node->child1)->parent_index = parent_node->parent_index;
 				}
 			}
 		}
@@ -573,25 +459,25 @@ void AABBDynamicTree::CollectIntersections(Ray ray, std::stack<int>& indexes) co
 {
 	if (node_count > 0)
 	{
-		int index = NullIndex;
+		AABBDynamicTreeNode node;
 		std::stack<int> node_stack;
 		node_stack.push(root_index);
 
 		while (!node_stack.empty())
 		{
-			index = node_stack.top();
+			node = At(node_stack.top());
 			node_stack.pop();
 
-			if (ray.Intersects(At(index).box))
+			if (ray.Intersects(node.box))
 			{
-				if (At(index).is_leaf)
+				if (node.is_leaf)
 				{
-					indexes.push(At(index).object_index);
+					indexes.push(node.object_index);
 				}
 				else
 				{
-					if (At(index).child1 != NullIndex) node_stack.push(At(index).child1);
-					if (At(index).child2 != NullIndex) node_stack.push(At(index).child2);
+					if (node.child1 != NullIndex) node_stack.push(node.child1);
+					if (node.child2 != NullIndex) node_stack.push(node.child2);
 				}
 			}
 		}
@@ -602,77 +488,54 @@ void AABBDynamicTree::CollectIntersections(Frustum frustum, std::stack<int>& ind
 {
 	if (node_count > 0)
 	{
-		int index = NullIndex;
+		AABBDynamicTreeNode node;
 		std::stack<int> node_stack;
 		node_stack.push(root_index);
 
+
 		while (!node_stack.empty())
 		{
-			index = node_stack.top();
+			node = At(node_stack.top());
 			node_stack.pop();
 
-			if (frustum.Intersects(At(index).box))
+			if (frustum.Intersects(node.box))
 			{
-				if (At(index).is_leaf)
+				if (node.is_leaf)
 				{
-					indexes.push(At(index).object_index);
+					indexes.push(node.object_index);
 				}
 				else
 				{
-					if (At(index).child1 != NullIndex) node_stack.push(At(index).child1);
-					if (At(index).child2 != NullIndex) node_stack.push(At(index).child2);
+					if (node.child1 != NullIndex) node_stack.push(node.child1);
+					if (node.child2 != NullIndex) node_stack.push(node.child2);
 				}
 			}
 		}
 	}
 }
 
-void AABBDynamicTree::SetDrawMode(short mode)
-{
-	switch (draw_mode = DrawMode(mode))
-	{
-	case AABBDynamicTree::DISABLED:
-		count = 0;
-	case AABBDynamicTree::TOP:
-		count = 4;
-		edges[0] = 5;
-		edges[1] = 6;
-		edges[2] = 7;
-		edges[3] = 11;
-		break;
-	case AABBDynamicTree::BOTTOM:
-		count = 4;
-		edges[0] = 0;
-		edges[1] = 2;
-		edges[2] = 4;
-		edges[3] = 8;
-		break;
-	case AABBDynamicTree::TOP_BOTTOM:
-		count = 8;
-		edges[0] = 0;
-		edges[1] = 2;
-		edges[2] = 4;
-		edges[3] = 8;
-		edges[4] = 0;
-		edges[5] = 2;
-		edges[6] = 4;
-		edges[7] = 8;
-		break;
-	case AABBDynamicTree::ALL:
-		count = 12;
-		for (int i = 0; i < 12; i++)
-			edges[i] = i;
-		break;
-	}
-}
-
-short AABBDynamicTree::GetDrawMode() const
-{
-	return draw_mode;
-}
-
 void AABBDynamicTree::Draw() const
 {
+	int lastIndex = GetLastIndex();
+	for (int i = 0; i <= lastIndex; i++) {
+		AABBDynamicTreeNode node = At(i);
+		if (!node.is_leaf && (node.parent_index != NullIndex || i == root_index))
+		{
+			for (int a = 0; a < 12; a++)
+			{
+			glVertex3f(
+				node.box.Edge(a).a.x,
+				node.box.Edge(a).a.y,
+				node.box.Edge(a).a.z);
+			glVertex3f(
+				node.box.Edge(a).b.x,
+				node.box.Edge(a).b.y,
+				node.box.Edge(a).b.z);
+		
+			}
+
+		}
+	}
 }
 
 AABB AABBDynamicTree::Union(AABB box1, AABB box2)

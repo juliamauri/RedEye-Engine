@@ -23,13 +23,6 @@ public:
 	void	SetDrawMode(short mode);
 	short	GetDrawMode() const;
 
-	bool	Contains(const math::AABB bounding_box) const;
-	bool	TryPushing( RE_GameObject* g_obj);
-	bool	TryPushingWithChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
-	bool	TryAdapting(RE_GameObject* g_obj);
-	bool	TryAdaptingWithChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
-	bool	TryAdaptingPushingChilds(RE_GameObject* g_obj, std::list<RE_GameObject*>& out_childs);
-
 	void	Pop(const RE_GameObject* g_obj);
 
 	template<typename TYPE>
@@ -113,8 +106,6 @@ inline void QTree::CollectIntersections(std::vector<RE_GameObject*>& objects, co
 	root.CollectIntersections(objects, primitive);
 }
 
-
-
 struct AABBDynamicTreeNode
 {
 	AABB box;
@@ -128,24 +119,9 @@ struct AABBDynamicTreeNode
 class AABBDynamicTree : public PoolMapped<AABBDynamicTreeNode,int>
 {
 private:
-
-
-
 	int size;
 	int node_count;
 	int root_index;
-
-	enum DrawMode : short
-	{
-		DISABLED,
-		TOP,
-		BOTTOM,
-		TOP_BOTTOM,
-		ALL
-	} draw_mode;
-
-	int edges[12];
-	int count;
 
 public:
 
@@ -157,9 +133,6 @@ public:
 	void Clear();
 	void CollectIntersections(Ray ray, std::stack<int>& indexes) const;
 	void CollectIntersections(Frustum frustum, std::stack<int>& indexes) const;
-
-	void	SetDrawMode(short mode);
-	short	GetDrawMode() const;
 
 	void Draw()const;
 

@@ -662,18 +662,12 @@ void ModuleScene::DrawEditor()
 
 		if (!update_qt && static_gos_modified && ImGui::Button("Reset AABB and Quadtree"))
 			UpdateQuadTree();
-
-		//ImGui::Checkbox("Automatic Quadtree Update", &update_qt);
-
-		int quadtree_drawing = dynamic_quad_tree.GetDrawMode();
-		if (ImGui::Combo("QuadTree Drawing", &quadtree_drawing, "Disable draw\0Top\0Bottom\0Top and Bottom\0All\0"))
-			dynamic_quad_tree.SetDrawMode(quadtree_drawing);
 	}
 }
 
 void ModuleScene::DrawQTree() const
 {
-	dynamic_quad_tree.Draw();
+	dynamic_tree.Draw();
 }
 
 RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
@@ -687,7 +681,7 @@ RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 
 	std::stack<int> goIndex;
 	// Add static
-	dynamic_quad_tree.CollectIntersections(ray, goIndex);
+	dynamic_tree.CollectIntersections(ray, goIndex);
 	while (!goIndex.empty())
 	{
 		int index = goIndex.top();
@@ -749,25 +743,20 @@ void ModuleScene::FustrumCulling(std::vector<const RE_GameObject*>& container, m
 	for (auto go : active_non_static_gos)
 		objects.push_back(go);
 
-	std::stack<int> goIndex;
-
-	// Add static
-	dynamic_quad_tree.CollectIntersections(frustum, goIndex);
-
-	while (!goIndex.empty())
-	{
-		int index = goIndex.top();
-		goIndex.pop();
-		objects.push_back(goManager.At(index));
-	}
-
-	for (auto go : tree_free_static_gos)
-		objects.push_back(go);
-
 	// Check Frustum-AABB
 	for (auto object : objects)
 		if (frustum.Intersects(object->GetGlobalBoundingBox()))
 			container.push_back(object);
+
+	// Add static
+	std::stack<int> goIndex;
+	dynamic_tree.CollectIntersections(frustum, goIndex);
+	while (!goIndex.empty())
+	{
+		int index = goIndex.top();
+		goIndex.pop();
+		container.push_back(goManager.At(index));
+	}
 }
 
 void ModuleScene::Serialize()
@@ -997,11 +986,11 @@ void ModuleScene::UpdateQuadTree()
 		tree_free_static_gos.pop_back();
 	}
 
-	dynamic_quad_tree.Clear();
+	dynamic_tree.Clear();
 
 	int lastIndex = goManager.GetLastIndex();
 	for (int i = 0; i <= lastIndex; i++)
-		dynamic_quad_tree.PushNode(i, goManager.At(i)->GetGlobalBoundingBox());
+		dynamic_tree.PushNode(i, goManager.At(i)->GetGlobalBoundingBox());
 	
 	static_gos_modified = false;
 }
