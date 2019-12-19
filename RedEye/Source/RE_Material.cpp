@@ -227,13 +227,27 @@ void RE_Material::DrawMaterialEdit()
 
 	if (!fromShaderCustomUniforms.empty()) {
 		ImGui::Separator();
-		if (ImGui::BeginMenu("Custom values from shader")) {
+		static bool displayShaderValues = false;
+		ImGui::Checkbox("Display all custom shader values", &displayShaderValues);
+		ImGui::Separator();
+
+		if (!displayShaderValues) {
+			if (ImGui::BeginMenu("Custom values from shader")) {
+				for (uint i = 0; i < fromShaderCustomUniforms.size(); i++) {
+					if (fromShaderCustomUniforms[i].DrawPropieties(ResourceContainer::inMemory))
+						applySave = true;
+					ImGui::Separator();
+				}
+				ImGui::EndMenu();
+			}
+		}
+		else {
 			for (uint i = 0; i < fromShaderCustomUniforms.size(); i++) {
 				if (fromShaderCustomUniforms[i].DrawPropieties(ResourceContainer::inMemory))
 					applySave = true;
 				ImGui::Separator();
 			}
-			ImGui::EndMenu();
+
 		}
 	}
 
@@ -248,6 +262,15 @@ void RE_Material::DrawMaterialEdit()
 
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginDragDropTarget()) {
+
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				tDiffuse.push_back(*static_cast<const char**>(dropped->Data));
+				if (ResourceContainer::inMemory) App->resources->Use(tDiffuse.back());
+				applySave = true;
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 
 	if (usingOnMat[CSPECULAR] || usingOnMat[TSPECULAR]) {
@@ -259,6 +282,15 @@ void RE_Material::DrawMaterialEdit()
 			}
 			if(usingOnMat[TSPECULAR]) DrawTextures("Specular", &tSpecular);
 			ImGui::EndMenu();
+		}
+		if (ImGui::BeginDragDropTarget()) {
+
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				tSpecular.push_back(*static_cast<const char**>(dropped->Data));
+				if (ResourceContainer::inMemory) App->resources->Use(tSpecular.back());
+				applySave = true;
+			}
+			ImGui::EndDragDropTarget();
 		}
 	}
 
@@ -273,6 +305,15 @@ void RE_Material::DrawMaterialEdit()
 			if (usingOnMat[TAMBIENT]) DrawTextures("Ambient", &tAmbient);
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginDragDropTarget()) {
+
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				tAmbient.push_back(*static_cast<const char**>(dropped->Data));
+				if (ResourceContainer::inMemory) App->resources->Use(tAmbient.back());
+				applySave = true;
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 
 	if (usingOnMat[CEMISSIVE] || usingOnMat[TEMISSIVE]) {
@@ -285,6 +326,15 @@ void RE_Material::DrawMaterialEdit()
 			if(usingOnMat[TEMISSIVE]) DrawTextures("Emissive", &tEmissive);
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginDragDropTarget()) {
+
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				tAmbient.push_back(*static_cast<const char**>(dropped->Data));
+				if (ResourceContainer::inMemory) App->resources->Use(tEmissive.back());
+				applySave = true;
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 
 	if (usingOnMat[OPACITY] || usingOnMat[TOPACITY]) {
@@ -296,6 +346,14 @@ void RE_Material::DrawMaterialEdit()
 			}
 			if(usingOnMat[TOPACITY]) DrawTextures("Opacity", &tOpacity);
 			ImGui::EndMenu();
+		}
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				tOpacity.push_back(*static_cast<const char**>(dropped->Data));
+				if (ResourceContainer::inMemory) App->resources->Use(tOpacity.back());
+				applySave = true;
+			}
+			ImGui::EndDragDropTarget();
 		}
 	}
 
@@ -313,6 +371,14 @@ void RE_Material::DrawMaterialEdit()
 			if(usingOnMat[TSHININESS]) DrawTextures("Shininess", &tShininess);
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				tShininess.push_back(*static_cast<const char**>(dropped->Data));
+				if (ResourceContainer::inMemory) App->resources->Use(tShininess.back());
+				applySave = true;
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 
 	if (usingOnMat[THEIGHT]) {
@@ -321,6 +387,14 @@ void RE_Material::DrawMaterialEdit()
 			DrawTextures("Height", &tHeight);
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				tHeight.push_back(*static_cast<const char**>(dropped->Data));
+				if (ResourceContainer::inMemory) App->resources->Use(tHeight.back());
+				applySave = true;
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 	if (usingOnMat[TNORMALS]) {
 		ImGui::Separator();
@@ -328,12 +402,28 @@ void RE_Material::DrawMaterialEdit()
 			DrawTextures("Normals", &tNormals);
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				tNormals.push_back(*static_cast<const char**>(dropped->Data));
+				if (ResourceContainer::inMemory) App->resources->Use(tNormals.back());
+				applySave = true;
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 	if (usingOnMat[TREFLECTION]) {
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Reflection values")) {
 			DrawTextures("Reflection", &tReflection);
 			ImGui::EndMenu();
+		}
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				tReflection.push_back(*static_cast<const char**>(dropped->Data));
+				if (ResourceContainer::inMemory) App->resources->Use(tReflection.back());
+				applySave = true;
+			}
+			ImGui::EndDragDropTarget();
 		}
 	}
 
@@ -357,6 +447,14 @@ void RE_Material::DrawMaterialEdit()
 		}
 		DrawTextures("Unknown", &tUnknown);
 		ImGui::EndMenu();
+	}
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+			tUnknown.push_back(*static_cast<const char**>(dropped->Data));
+			if (ResourceContainer::inMemory) App->resources->Use(tUnknown.back());
+			applySave = true;
+		}
+		ImGui::EndDragDropTarget();
 	}
 }
 
@@ -436,6 +534,7 @@ void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*
 			if (ImGui::MenuItem(textRes->GetName())) {
 				textures->push_back(textRes->GetMD5());
 				if (ResourceContainer::inMemory) App->resources->Use(textures->back());
+				applySave = true;
 			}
 		}
 		ImGui::EndMenu();

@@ -225,8 +225,6 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 	ImGui::End();
 }
 
-
-
 ShaderEditorWindow::ShaderEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active)
 {
 	editingShader = new RE_Shader();

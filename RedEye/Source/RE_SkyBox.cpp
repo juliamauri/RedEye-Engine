@@ -216,6 +216,17 @@ void RE_SkyBox::DrawEditSkyBox()
 				toDelete = RE_NOFACE;
 			}
 		}
+
+		if (ImGui::BeginDragDropTarget()) {
+
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				if (ResourceContainer::inMemory && skyBoxSettings.textures[i].textureMD5) App->resources->UnUse(skyBoxSettings.textures[i].textureMD5);
+				skyBoxSettings.textures[i].textureMD5 = *static_cast<const char**>(dropped->Data);
+				if (ResourceContainer::inMemory) App->resources->Use(skyBoxSettings.textures[i].textureMD5);
+				applySave = true;
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 	ImGui::Separator();
 	ImGui::Text("OpenGL texture settings:");

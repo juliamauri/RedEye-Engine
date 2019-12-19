@@ -627,7 +627,12 @@ void AssetsWindow::Draw(bool secondary)
 				{
 					ResourceContainer* res = App->resources->At(p->AsMeta()->resource);
 					if (ImGui::ImageButton((void*)App->thumbnail->GetShaderFileID(), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
-						App->resources->PushSelected(p->AsMeta()->resource, true);
+						App->resources->PushSelected(res->GetMD5(), true);
+					if (ImGui::BeginDragDropSource()) {
+						ImGui::SetDragDropPayload("#ShadereReference", &p->AsMeta()->resource, sizeof(const char**));
+						ImGui::Image((void*)App->thumbnail->GetShaderFileID(), { 50,50 }, { 0.0, 1.0 }, { 1.0, 0.0 });
+						ImGui::EndDragDropSource();
+					}
 					ImGui::PopID();
 					ImGui::Text(res->GetName());
 				}
@@ -657,9 +662,48 @@ void AssetsWindow::Draw(bool secondary)
 					break;
 				default:
 				{
-					if (ImGui::ImageButton((void*)App->thumbnail->At(p->AsFile()->metaResource->resource), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
-						App->resources->PushSelected(p->AsFile()->metaResource->resource, true);
+					ResourceContainer* res = App->resources->At(p->AsFile()->metaResource->resource);
+					if (ImGui::ImageButton((void*)App->thumbnail->At(res->GetMD5()), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
+						App->resources->PushSelected(res->GetMD5(), true);
 					ImGui::PopID();
+
+					std::string dragID("#");
+					
+					switch (res->GetType())
+					{
+					case R_TEXTURE:
+						dragID += "Texture";
+						break;
+
+					case R_PREFAB:
+						dragID += "Prefab";
+						break;
+
+					case R_SKYBOX:
+						dragID += "Skybox";
+						break;
+
+					case R_MATERIAL:
+						dragID += "Material";
+						break;
+
+					case R_MODEL:
+						dragID += "Model";
+						break;
+
+					case R_SCENE:
+						dragID += "Scene";
+						break;
+
+					}
+					dragID += "Reference";
+
+					if (ImGui::BeginDragDropSource()) {
+						ImGui::SetDragDropPayload("#TextureReference", &p->AsFile()->metaResource->resource, sizeof(const char**));
+						ImGui::Image((void*)App->thumbnail->At(p->AsFile()->metaResource->resource), { 50,50 }, { 0.0, 1.0 }, { 1.0, 0.0 });
+						ImGui::EndDragDropSource();
+					}
+
 					ImGui::Text(p->AsFile()->filename.c_str());
 
 				}

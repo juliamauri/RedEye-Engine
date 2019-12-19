@@ -974,6 +974,17 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 			}
 			ImGui::EndMenu();
 		}
+
+		if (ImGui::BeginDragDropTarget()) {
+
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+				if (isInMemory) App->resources->UnUse(value.char_p_v);
+				value.char_p_v = *static_cast<const char**>(dropped->Data);
+				if (isInMemory) App->resources->Use(value.char_p_v);
+				ret = true;
+			}
+			ImGui::EndDragDropTarget();
+		}
 		break;
 	}
 	return ret;
