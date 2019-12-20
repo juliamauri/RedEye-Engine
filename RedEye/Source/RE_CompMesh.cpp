@@ -90,6 +90,16 @@ void RE_CompMesh::DrawProperties()
 			if (none) ImGui::Text("No custom materials on assets");
 			ImGui::EndMenu();
 		}
+
+		if (ImGui::BeginDragDropTarget()) {
+
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#MaterialReference")) {
+				if (materialMD5) App->resources->UnUse(materialMD5);
+				materialMD5 = *static_cast<const char**>(dropped->Data);
+				if (materialMD5) App->resources->Use(materialMD5);
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 }
 

@@ -56,7 +56,7 @@ bool RE_CameraManager::HasMainCamera()
 void RE_CameraManager::OnWindowChangeSize(float width, float height)
 {
 	// Adapt cameras to knew window dimensions
-	editor_camera->SetBounds(width, height);
+	//editor_camera->SetBounds(width, height);
 	for (auto cam : scene_cameras)
 		cam->SetBounds(width, height);
 }

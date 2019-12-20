@@ -158,11 +158,6 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 {
 	switch (e.type)
 	{
-	case WINDOW_SIZE_CHANGED:
-	{
-		WindowSizeChanged(e.data1.AsInt(), e.data2.AsInt());
-		break;
-	}
 	case SET_VSYNC:
 	{
 		SetVSync(e.data1.AsBool());
@@ -198,9 +193,16 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 		SetWireframe(e.data1.AsBool());
 		break;
 	}
-	case CURRENT_CAM_VIEWPORT_CHANGED:
+	case EDITORWINDOWCHANGED:
 	{
-		UpdateViewPort(e.data1.AsInt(), e.data1.AsInt());
+		RE_CameraManager::EditorCamera()->SetBounds(e.data1.AsInt(), e.data2.AsInt());
+		ChangeFBOSize(e.data1.AsInt(), e.data2.AsInt(), true);
+		break;
+	}
+	case GAMEWINDOWCHANGED:
+	{
+		App->cams->OnWindowChangeSize(e.data1.AsInt(), e.data2.AsInt());
+		ChangeFBOSize(e.data1.AsInt(), e.data2.AsInt());
 		break;
 	}
 	}
@@ -523,16 +525,10 @@ void * ModuleRenderer3D::GetWindowContext() const
 	return mainContext;
 }
 
-void ModuleRenderer3D::WindowSizeChanged(int width, int height)
+void ModuleRenderer3D::ChangeFBOSize(int width, int height, bool editor)
 {
-	App->cams->OnWindowChangeSize(width, height);
-}
-
-void ModuleRenderer3D::UpdateViewPort(int width, int height) const
-{
-	math::float4 viewP;
-	RE_CameraManager::CurrentCamera()->GetTargetViewPort(viewP);
-	glViewport(viewP.x, viewP.y, viewP.w, viewP.z);
+	static const int options[2] = { sceneGameFBO, sceneEditorFBO }; 
+	App->fbomanager->ChangeFBOSize(options[editor], width, height);
 }
 
 unsigned int ModuleRenderer3D::GetRenderedEditorSceneTexture() const

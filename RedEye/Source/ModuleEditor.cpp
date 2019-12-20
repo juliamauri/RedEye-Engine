@@ -381,6 +381,31 @@ void ModuleEditor::DrawEditor()
 	}
 }
 
+void ModuleEditor::RecieveEvent(const Event& e)
+{
+	switch (e.type)
+	{
+	case EDITORWINDOWCHANGED:
+	{
+		sceneEditorWindow->UpdateViewPort();
+		break;
+	}
+	case GAMEWINDOWCHANGED:
+	{
+		sceneGameWindow->UpdateViewPort();
+		break;
+	}
+	case UPDATE_SCENE_WINDOWS:
+	{
+		if(e.data1.AsGO() == nullptr)
+			sceneEditorWindow->Recalc();
+		else
+			sceneGameWindow->Recalc();
+		break;
+	}
+	}
+}
+
 void ModuleEditor::DrawDebug(bool resetLight) const
 {
 	OPTICK_CATEGORY("Debug Draw", Optick::Category::Debug);

@@ -185,7 +185,6 @@ void ModuleInput::HandleSDLEventQueue()
 				break;
 			case SDL_WINDOWEVENT_SIZE_CHANGED:/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
 				Event::Push(WINDOW_SIZE_CHANGED, App->window, Cvar(e.window.data1), Cvar(e.window.data2));
-				Event::Push(WINDOW_SIZE_CHANGED, App->renderer3d, Cvar(e.window.data1), Cvar(e.window.data2));
 				break;
 			case SDL_WINDOWEVENT_MINIMIZED:/**< Window has been minimized */
 				break;

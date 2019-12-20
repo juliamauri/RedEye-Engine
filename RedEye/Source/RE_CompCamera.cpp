@@ -142,6 +142,14 @@ void RE_CompCamera::DrawProperties()
 				if (none) ImGui::Text("No custom skyboxes on assets");
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginDragDropTarget()) {
+				if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#SkyboxReference")) {
+					if (skyboxMD5) App->resources->UnUse(skyboxMD5);
+					skyboxMD5 = *static_cast<const char**>(dropped->Data);
+					if (skyboxMD5) App->resources->Use(skyboxMD5);
+				}
+				ImGui::EndDragDropTarget();
+			}
 		}
 	}
 }
@@ -306,9 +314,6 @@ void RE_CompCamera::SetBounds(float w, float h)
 	if (!isPerspective)
 		frustum.SetOrthographic(width, height);
 
-	if (RE_CameraManager::CurrentCamera() == this)
-		Event::Push(CURRENT_CAM_VIEWPORT_CHANGED, App->renderer3d);
-
 	need_recalculation = true;
 }
 
@@ -354,8 +359,8 @@ void RE_CompCamera::GetTargetWidthHeight(float & w, float & h) const
 
 void RE_CompCamera::GetTargetViewPort(math::float4& viewPort) const
 {
-	viewPort.z = height;
-	viewPort.w = width;
+	viewPort.z = width;
+	viewPort.w = height;
 
 	int wH = App->window->GetHeight();
 	int wW = App->window->GetWidth();
@@ -469,17 +474,19 @@ void RE_CompCamera::DrawItsProperties()
 		SetPlanesDistance(near_plane, far_plane);
 
 	int aspect_ratio = target_ar;
-	if (ImGui::Combo("Aspect Ratio", &aspect_ratio, "Fit Window\0Square 1x1\0TraditionalTV 4x3\0Movietone 16x9\0Personalized\0"))
-		SetAspectRatio(AspectRatioTYPE(aspect_ratio));
-
-	if (target_ar == Personalized)
-	{
-		int w = width;
-		int h = height;
-		if (ImGui::DragInt("Width", &w, 4.0f, 1, App->window->GetWidth(), "%.1f") ||
-			ImGui::DragInt("Height", &h, 4.0f, 1, App->window->GetMaxHeight(), "%.1f"))
-			SetBounds(w,h);
+	if (ImGui::Combo("Aspect Ratio", &aspect_ratio, "Fit Window\0Square 1x1\0TraditionalTV 4x3\0Movietone 16x9\0Personalized\0")) {
+		target_ar = AspectRatioTYPE(aspect_ratio);
+		Event::Push(RE_EventType::UPDATE_SCENE_WINDOWS, App->editor, Cvar(GetGO()));
 	}
+
+	//if (target_ar == Personalized)
+	//{
+	//	int w = width;
+	//	int h = height;
+	//	if (ImGui::DragInt("Width", &w, 4.0f, 1, App->window->GetWidth(), "%.1f") ||
+	//		ImGui::DragInt("Height", &h, 4.0f, 1, App->window->GetMaxHeight(), "%.1f"))
+	//		SetBounds(w,h);
+	//}
 
 	int item_current = isPerspective ? 0 : 1;
 	if (ImGui::Combo("Type", &item_current, "Perspective\0Orthographic\0") && (isPerspective != (item_current == 0)))

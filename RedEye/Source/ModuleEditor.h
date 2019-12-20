@@ -51,6 +51,8 @@ public:
 	bool CleanUp() override;
 	void DrawEditor() override;
 
+	void RecieveEvent(const Event& e) override;
+
 	void DrawDebug(bool resetLight) const;
 	void DrawHeriarchy();
 

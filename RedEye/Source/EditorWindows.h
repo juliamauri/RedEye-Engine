@@ -3,6 +3,9 @@
 
 #include "Resource.h"
 
+#include "MathGeoLib/include/Math/float4.h"
+#include "MathGeoLib/include/Math/float2.h"
+
 #include "ImGui\imgui.h"
 #include <list>
 #include <string>
@@ -285,13 +288,18 @@ public:
 
 	bool isSelected()const { return isWindowSelected; }
 
+	void UpdateViewPort();
+	void Recalc();
+
 private:
 	void Draw(bool secondary = false) override;
 
-	unsigned int width = 0;
-	unsigned int heigth = 0;
+	math::float4 viewport = math::float4::zero;
+	int width = 0;
+	int heigth = 0;
 
 	bool isWindowSelected = false;
+	bool recalc = false;
 };
 
 class SceneGameWindow :public EditorWindow
@@ -305,13 +313,18 @@ public:
 
 	bool isSelected()const { return isWindowSelected; }
 
+	void UpdateViewPort();
+	void Recalc();
+
 private:
 	void Draw(bool secondary = false) override;
 
-	unsigned int width = 0;
-	unsigned int heigth = 0;
+	math::float4 viewport = math::float4::zero;
+	int width = 0;
+	int heigth = 0;
 
 	bool isWindowSelected = false;
+	bool recalc = false;
 };
 
 #endif // !__EDITORWINDOWS__

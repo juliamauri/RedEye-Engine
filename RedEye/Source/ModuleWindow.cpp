@@ -263,7 +263,6 @@ void ModuleWindow::SetTitle(const char* new_title)
 void ModuleWindow::SetWindowSize(unsigned int new_width, unsigned int new_height)
 {
 	SDL_SetWindowSize(window, width = new_width, height = new_height);
-	App->renderer3d->WindowSizeChanged(width, height);
 }
 
 void ModuleWindow::SetResizeable(const bool flag_value)
@@ -295,7 +294,6 @@ void ModuleWindow::SetFullScreen(bool flag_value)
 		}
 
 		SDL_SetWindowFullscreen(window, SDL_bool(flag_value));
-		App->renderer3d->WindowSizeChanged(width, height);
 	}
 }
 
@@ -322,7 +320,6 @@ void ModuleWindow::SetFullDesktop(bool flag_value)
 			flags -= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
 		SDL_SetWindowFullscreen(window, flag_value ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_FALSE);
-		App->renderer3d->WindowSizeChanged(width, height);
 	}
 }
 

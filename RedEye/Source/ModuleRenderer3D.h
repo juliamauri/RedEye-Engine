@@ -45,8 +45,8 @@ public:
 
 	// Context & Viewport
 	void* GetWindowContext()const;
-	void WindowSizeChanged(int width, int height);
-	void UpdateViewPort(int width, int height) const;
+
+	void ChangeFBOSize(int width, int height, bool editor = false);
 
 	unsigned int GetRenderedEditorSceneTexture()const;
 	unsigned int GetRenderedGameSceneTexture()const;

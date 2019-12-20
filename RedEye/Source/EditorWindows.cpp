@@ -699,7 +699,7 @@ void AssetsWindow::Draw(bool secondary)
 					dragID += "Reference";
 
 					if (ImGui::BeginDragDropSource()) {
-						ImGui::SetDragDropPayload("#TextureReference", &p->AsFile()->metaResource->resource, sizeof(const char**));
+						ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
 						ImGui::Image((void*)App->thumbnail->At(p->AsFile()->metaResource->resource), { 50,50 }, { 0.0, 1.0 }, { 1.0, 0.0 });
 						ImGui::EndDragDropSource();
 					}
@@ -735,6 +735,18 @@ SceneEditorWindow::~SceneEditorWindow()
 {
 }
 
+void SceneEditorWindow::UpdateViewPort()
+{
+	RE_CameraManager::EditorCamera()->GetTargetViewPort(viewport);
+	viewport.x = (width - viewport.z) * 0.5f;
+	viewport.y = (heigth - viewport.w) * 0.5f + 20;
+}
+
+void SceneEditorWindow::Recalc()
+{
+	recalc = true;
+}
+
 void SceneEditorWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
@@ -744,13 +756,21 @@ void SceneEditorWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
+		static int lastWidht = 0;
+		static int lastHeight = 0;
 		ImVec2 size = ImGui::GetWindowSize();
-		width = size.x;
-		heigth = size.y - 35;
+		width = (int)size.x;
+		heigth = (int)size.y - 28;
+		if (recalc || lastWidht != width || lastHeight != heigth) {
+			Event::Push(RE_EventType::EDITORWINDOWCHANGED, App->renderer3d, Cvar(lastWidht = width), Cvar(lastHeight = heigth));
+			Event::Push(RE_EventType::EDITORWINDOWCHANGED, App->editor);
+			recalc = false;
+		}
 
 		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 
-		ImGui::Image((void*)App->renderer3d->GetRenderedEditorSceneTexture(), { (float)width, (float)heigth }, { 0.0, 1.0 }, { 1.0, 0.0 });
+		ImGui::SetCursorPos({ viewport.x, viewport.y });
+		ImGui::Image((void*)App->renderer3d->GetRenderedEditorSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 		
 		if(isWindowSelected && App->input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN){
 			ImVec2 mousePosOnThis = ImGui::GetMousePos();
@@ -776,6 +796,18 @@ SceneGameWindow::~SceneGameWindow()
 {
 }
 
+void SceneGameWindow::UpdateViewPort()
+{
+	RE_CameraManager::MainCamera()->GetTargetViewPort(viewport);
+	viewport.x = (width - viewport.z) * 0.5f;
+	viewport.y = (heigth - viewport.w) * 0.5f + 20;
+}
+
+void SceneGameWindow::Recalc()
+{
+	recalc = true;
+}
+
 void SceneGameWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
@@ -785,13 +817,21 @@ void SceneGameWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
+		static int lastWidht = 0;
+		static int lastHeight = 0;
 		ImVec2 size = ImGui::GetWindowSize();
-		width = size.x;
-		heigth = size.y - 35;
+		width = (int)size.x;
+		heigth = (int)size.y - 28;
+		if (recalc || lastWidht != width || lastHeight != heigth) {
+			Event::Push(RE_EventType::GAMEWINDOWCHANGED, App->renderer3d, Cvar(lastWidht = width), Cvar(lastHeight = heigth));
+			Event::Push(RE_EventType::GAMEWINDOWCHANGED, App->editor);
+			recalc = false;
+		}
 
 		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 
-		ImGui::Image((void*)App->renderer3d->GetRenderedGameSceneTexture(), { (float)width, (float)heigth }, { 0.0, 1.0 }, { 1.0, 0.0 });
+		ImGui::SetCursorPos({ viewport.x, viewport.y });
+		ImGui::Image((void*)App->renderer3d->GetRenderedGameSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 
 		if (isWindowSelected && App->input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN) {
 			ImVec2 mousePosOnThis = ImGui::GetMousePos();

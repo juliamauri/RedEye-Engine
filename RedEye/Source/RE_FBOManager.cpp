@@ -97,7 +97,7 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 
 void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned int height)
 {
-	RE_FBO toChange = fbos.at(ID);
+	RE_FBO& toChange = fbos.at(ID);
 
 	ChangeFBOBind(ID);
 	toChange.widht = width;
@@ -108,8 +108,12 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 	bool depth = false;
 	if (stencil = (toChange.stencilBuffer != 0)) glDeleteRenderbuffers(1, &toChange.stencilBuffer);
 	if (depth = (toChange.depthBuffer != 0)) glDeleteRenderbuffers(1, &toChange.depthBuffer);
-	if (depth = stencil = (toChange.depthstencilBuffer != 0)) glDeleteRenderbuffers(1, &toChange.depthstencilBuffer);
+	if (toChange.depthstencilBuffer != 0) {
+		glDeleteRenderbuffers(1, &toChange.depthstencilBuffer);
+		depth = stencil = true;
+	}
 	for (auto c : toChange.texturesID) glDeleteTextures(1, &c);
+	toChange.texturesID.clear();
 
 	for (unsigned int i = 0; i < texturesNum; i++) {
 		unsigned int tex = 0;
@@ -156,8 +160,6 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 		}
 	}
 
-	fbos.erase(ID);
-	fbos.insert(std::pair<unsigned int, RE_FBO>(ID, toChange));
 	glBindTexture(GL_TEXTURE_2D, 0);
 	ChangeFBOBind(0);
 }
