@@ -403,6 +403,22 @@ void ModuleEditor::RecieveEvent(const Event& e)
 			sceneGameWindow->Recalc();
 		break;
 	}
+	case EDITOR_SCENE_RAYCAST:
+	{
+		RE_CompCamera* camera = RE_CameraManager::EditorCamera();
+		// Mouse Pick
+		int width, height;
+		camera->GetTargetWidthHeight(width, height);
+
+		OPTICK_CATEGORY("Update ModuleEditor Camera RayCast", Optick::Category::Camera);
+		RE_GameObject* hit = App->scene->RayCastSelect(
+			math::Ray(camera->GetFrustum().UnProjectLineSegment(
+			(e.data1.AsFloat() -(width / 2.0f)) / (width / 2.0f),
+				((height - e.data2.AsFloat()) - (height / 2.0f)) / (height / 2.0f))));
+
+		if (hit != nullptr)
+			SetSelected(hit);
+	}
 	}
 }
 
@@ -663,22 +679,7 @@ void ModuleEditor::UpdateCamera()
 	{
 		const MouseData mouse = App->input->GetMouse();
 
-		if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && mouse.GetButton(1) == KEY_DOWN)
-		{
-			// Mouse Pick
-			int width, height;
-			camera->GetTargetWidthHeight(width, height);
-
-			OPTICK_CATEGORY("Update ModuleEditor Camera RayCast", Optick::Category::Camera);
-			RE_GameObject* hit = App->scene->RayCastSelect(
-				math::Ray(camera->GetFrustum().UnProjectLineSegment(
-				(mouse.mouse_x - (width / 2.0f)) / (width / 2.0f),
-					((height - mouse.mouse_y) - (height / 2.0f)) / (height / 2.0f))));
-
-			if (hit != nullptr)
-				SetSelected(hit);
-		}
-		else if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse.GetButton(1) == KEY_REPEAT)
+		if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse.GetButton(1) == KEY_REPEAT)
 		{
 			// Orbit
 			if (selected != nullptr

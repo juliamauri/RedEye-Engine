@@ -47,6 +47,7 @@ typedef enum RE_EventType : unsigned short int
 
 	//Editor
 	UPDATE_SCENE_WINDOWS,
+	EDITOR_SCENE_RAYCAST,
 
 	// Resources
 	RESOURCE_CHANGED,
