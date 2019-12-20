@@ -91,7 +91,6 @@
 #define SKYBOXFRAGMENTSHADER								\
 "#version 330 core\n"										\
 "#extension GL_ARB_separate_shader_objects : enable\n"		\
-"#extension GL_NV_shadow_samplers_cube : enable\n"			\
 "layout(location = 0) out vec4 color;\n"					\
 "\n"														\
 "in vec3 pos;\n"											\
@@ -100,7 +99,7 @@
 "\n"														\
 "void main()\n"												\
 "{\n"														\
-"	color = textureCube(cubemap, normalize(pos).stp);\n"	\
+"	color = texture(cubemap, normalize(pos).stp);\n"	\
 "}\0"
 
 #endif // !__DEFAULTSHADERS_H__
