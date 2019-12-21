@@ -293,7 +293,7 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, RE_Com
 	RE_FBOManager::ChangeFBOBind(fbo, App->fbomanager->GetWidth(fbo), App->fbomanager->GetHeight(fbo));
 
 	// Reset background with a clear color
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	if (stencilToSelected)
 	{
 		glClearStencil(0);
@@ -317,9 +317,17 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, RE_Com
 	else
 		comptsToDraw = App->scene->GetRoot()->GetDrawableComponentsWithChilds();
 
+	std::stack<RE_Component*> drawAsLast;
+	RE_Component* drawing = nullptr;
 	while (!comptsToDraw.empty())
 	{
-		comptsToDraw.top()->Draw();
+		drawing = comptsToDraw.top();
+		bool blend = false;
+		if (drawing->GetType() == C_MESH) {
+			 blend = ((RE_CompMesh*)drawing)->isBlend();
+		}
+		if (!blend) drawing->Draw();
+		else drawAsLast.push(drawing);
 		comptsToDraw.pop();
 	}
 
@@ -340,6 +348,17 @@ void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, RE_Com
 		glDepthFunc(GL_LESS); // set depth function back to default
 
 	}
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	while (!drawAsLast.empty())
+	{
+		drawAsLast.top()->Draw();
+		drawAsLast.pop();
+	}
+
+	glDisable(GL_BLEND);
 
 	if (stencilToSelected) {
 		RE_GameObject* stencilGO = App->editor->GetSelected();

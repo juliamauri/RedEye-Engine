@@ -186,3 +186,10 @@ void RE_CompMesh::UnUseResources()
 	}
 }
 
+bool RE_CompMesh::isBlend() const
+{
+	const char* materialToDraw = (materialMD5) ? materialMD5 : App->internalResources->GetDefaulMaterial();
+	RE_Material* material = (RE_Material*)App->resources->At(materialToDraw);
+	return material->blendMode;
+}
+

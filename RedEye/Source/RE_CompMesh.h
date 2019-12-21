@@ -34,6 +34,8 @@ public:
 	void UseResources()override;
 	void UnUseResources()override;
 
+	bool isBlend()const;
+
 protected:
 
 	const char* meshMD5 = nullptr;
