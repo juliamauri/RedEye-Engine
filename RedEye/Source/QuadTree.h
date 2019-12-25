@@ -128,7 +128,7 @@ public:
 	AABBDynamicTree();
 	~AABBDynamicTree();
 
-	void PushNode(int index, AABB box, const int size_increment = 10);
+	void PushNode(int index, AABB box);
 	void PopNode(int index);
 	void Clear();
 	void CollectIntersections(Ray ray, std::stack<int>& indexes) const;
@@ -138,8 +138,10 @@ public:
 
 private:
 
-	int AllocateLeafNode(AABB box, int index, const int size_increment = 10);
-	int AllocateInternalNode(const int size_increment = 10);
+	void Rotate(int index);
+
+	int AllocateLeafNode(AABB box, int index);
+	int AllocateInternalNode();
 
 	static inline AABB Union(AABB box1, AABB box2);
 	static inline void SetLeaf(AABBDynamicTreeNode& node, AABB box, int index);

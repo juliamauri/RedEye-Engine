@@ -516,7 +516,7 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 		if (draw_quad_tree)
 		{
 			glColor3f(quad_tree_color[0], quad_tree_color[1], quad_tree_color[2]);
-			App->scene->DrawQTree();
+			App->scene->DrawTrees();
 		}
 
 		if (draw_cameras)

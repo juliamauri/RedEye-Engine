@@ -73,23 +73,17 @@ private:
 	void GetActiveStatic(std::list<RE_GameObject*>& objects) const;
 	void GetActiveNonStatic(std::list<RE_GameObject*>& objects) const;
 
-	void UpdateQuadTree();
+	void ResetTrees();
 
 private:
 
 	RE_GameObject* savedState = nullptr;
 	RE_GameObject* root = nullptr;
 
-	AABBDynamicTree dynamic_tree;
 	GameObjectManager goManager;
 
-	bool update_qt = false;
-	bool static_gos_modified = false;
-	bool scene_modified = false;
-
-	std::list<RE_GameObject*> active_static_gos;
-	std::list<RE_GameObject*> active_non_static_gos;
-	std::list<RE_GameObject*> tree_free_static_gos;
+	AABBDynamicTree static_tree;
+	AABBDynamicTree dynamic_tree;
 
 	std::string defaultModel;
 

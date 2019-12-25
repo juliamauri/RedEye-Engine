@@ -132,6 +132,7 @@ private:
 	math::AABB local_bounding_box;
 	math::AABB global_bounding_box;
 
+	RE_GameObject* root = nullptr;
 	RE_GameObject* parent = nullptr;
 	RE_CompTransform* transform = nullptr;
 

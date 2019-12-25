@@ -296,17 +296,15 @@ void QTree::PushWithChilds(RE_GameObject * g_obj)
 #define NullIndex -1
 
 AABBDynamicTree::AABBDynamicTree() :  size(0), node_count(0), root_index(NullIndex)
-{
-}
+{}
 
 AABBDynamicTree::~AABBDynamicTree()
-{
-}
+{}
 
-void AABBDynamicTree::PushNode(int index, AABB box, const int size_increment)
+void AABBDynamicTree::PushNode(int index, AABB box)
 {
 	// Stage 0: Allocate Leaf Node
-	int leafIndex = AllocateLeafNode(box, index, size_increment);
+	int leafIndex = AllocateLeafNode(box, index);
 	
 	if (root_index != NullIndex)
 	{
@@ -357,7 +355,7 @@ void AABBDynamicTree::PushNode(int index, AABB box, const int size_increment)
 		}
 
 		// Stage 2: create a new parent
-		int new_parent = AllocateInternalNode(size_increment);
+		int new_parent = AllocateInternalNode();
 		int old_parent = At(best_sibling).parent_index;
 
 		if (old_parent == NullIndex) // Sibling is root
@@ -385,6 +383,8 @@ void AABBDynamicTree::PushNode(int index, AABB box, const int size_increment)
 			AtPtr(index)->box = Union(
 				At(iN.child1).box,
 				At(iN.child2).box);
+
+			Rotate(index);
 
 			index = iN.parent_index;
 		}
@@ -492,7 +492,6 @@ void AABBDynamicTree::CollectIntersections(Frustum frustum, std::stack<int>& ind
 		std::stack<int> node_stack;
 		node_stack.push(root_index);
 
-
 		while (!node_stack.empty())
 		{
 			node = At(node_stack.top());
@@ -517,7 +516,8 @@ void AABBDynamicTree::CollectIntersections(Frustum frustum, std::stack<int>& ind
 void AABBDynamicTree::Draw() const
 {
 	int lastIndex = GetLastIndex();
-	for (int i = 0; i <= lastIndex; i++) {
+	for (int i = 0; i <= lastIndex; i++)
+	{
 		AABBDynamicTreeNode node = At(i);
 		if (!node.is_leaf && (node.parent_index != NullIndex || i == root_index))
 		{
@@ -531,9 +531,7 @@ void AABBDynamicTree::Draw() const
 				node.box.Edge(a).b.x,
 				node.box.Edge(a).b.y,
 				node.box.Edge(a).b.z);
-		
 			}
-
 		}
 	}
 }
@@ -549,7 +547,12 @@ AABB AABBDynamicTree::Union(AABB box1, AABB box2)
 	return AABB::MinimalEnclosingAABB(&point_array[0], 4);
 }
 
-int AABBDynamicTree::AllocateLeafNode(AABB box, int index, const int size_increment)
+void AABBDynamicTree::Rotate(int index)
+{
+	aasdfgh
+}
+
+int AABBDynamicTree::AllocateLeafNode(AABB box, int index)
 {
 	AABBDynamicTreeNode newNode;
 	SetLeaf(newNode, box, index);
@@ -562,7 +565,7 @@ int AABBDynamicTree::AllocateLeafNode(AABB box, int index, const int size_increm
 	return node_index;
 }
 
-int AABBDynamicTree::AllocateInternalNode(const int size_increment)
+int AABBDynamicTree::AllocateInternalNode()
 {
 	AABBDynamicTreeNode newNode;
 	SetInternal(newNode);

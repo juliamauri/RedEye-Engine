@@ -132,7 +132,7 @@ bool ModuleScene::Start()
 	root->UseResources();
 	// Setup AABB + Quadtree
 	Event::PauseEvents();
-	UpdateQuadTree();
+	ResetTrees();
 	Event::ResumeEvents();
 
 	if (root)
@@ -151,7 +151,7 @@ bool ModuleScene::Start()
 
 		// Setup AABB + Quadtree
 		root->TransformModified(false);
-		UpdateQuadTree();
+		ResetTrees();
 	}
 
 	return ret;
@@ -204,9 +204,7 @@ void ModuleScene::OnStop()
 
 	// Setup AABB + Quadtree
 	root->TransformModified(true);
-	GetActiveStatic(active_static_gos);
-	GetActiveNonStatic(active_non_static_gos);
-	UpdateQuadTree();
+	ResetTrees();
 }
 
 void ModuleScene::RecieveEvent(const Event& e)
@@ -214,186 +212,65 @@ void ModuleScene::RecieveEvent(const Event& e)
 	RE_GameObject* go = e.data1.AsGO();
 	if (go != nullptr)
 	{
-		bool belongs_to_scene = false;
-
-		for (const RE_GameObject* parent = go;
-			parent != nullptr && !belongs_to_scene;
-			parent = parent->GetParent_c())
-		{
-			if (belongs_to_scene = (parent == root))
-				break;
-		}
-
-		if (belongs_to_scene)
-			scene_modified = belongs_to_scene;
+		bool belongs_to_scene = (go->root == root);
 
 		switch (e.type)
 		{
 		case GO_CHANGED_TO_ACTIVE:
 		{
+			std::vector<RE_GameObject*> all = go->GetAllActiveGOWithMesh();
+
 			if (belongs_to_scene)
 			{
-				if (go->GetParent())
-					go->GetParent()->ResetBoundingBoxFromChilds();
-				else
-					go->ResetGlobalBoundingBox();
-
-				if (go->IsStatic())
+				for (auto child : all)
 				{
-					static_gos_modified = true;
+					child->ResetGlobalBoundingBox();
 
-					std::list<RE_GameObject*> added_gos;
-					if (true) //quad_tree.TryPushingWithChilds(go, added_gos))
-					{
-						for (auto added_go : added_gos)
-						{
-							active_static_gos.push_back(added_go);
-							tree_free_static_gos.remove(added_go);
-						}
-					}
+					if (child->IsStatic())
+						static_tree.PushNode(goManager.WhatID(child), child->GetGlobalBoundingBox());
 					else
-					{
-						std::queue<RE_GameObject*> queue;
-						queue.push(go);
-						while (!queue.empty())
-						{
-							RE_GameObject* obj = queue.front();
-							queue.pop();
-
-							if (obj->IsActive())
-							{
-								if (obj->IsStatic())
-								{
-									active_static_gos.push_back(obj);
-									tree_free_static_gos.push_back(obj);
-								}
-								else
-									active_static_gos.push_back(obj);
-							}
-
-							for (auto child : obj->GetChilds())
-								queue.push(child);
-						}
-
-						if (update_qt)
-							UpdateQuadTree();
-					}
-				}
-				else
-				{
-					std::queue<RE_GameObject*> queue;
-					queue.push(go);
-					while (!queue.empty())
-					{
-						RE_GameObject* obj = queue.front();
-						queue.pop();
-
-						if (obj->IsActive())
-							active_non_static_gos.push_back(obj);
-
-						for (auto child : obj->GetChilds())
-							queue.push(child);
-					}
+						dynamic_tree.PushNode(goManager.WhatID(child), child->GetGlobalBoundingBox());
 				}
 			}
-			else if (go->GetParent() != nullptr)
-				go->GetParent()->ResetBoundingBoxFromChilds();
 			else
-				go->ResetGlobalBoundingBox();
+				for (auto child : all)
+					child->ResetGlobalBoundingBox();
 
 			break;
 		}
 		case GO_CHANGED_TO_INACTIVE:
 		{
+			std::vector<RE_GameObject*> all = go->GetAllActiveGOWithMesh();
+
 			if (belongs_to_scene)
 			{
-				std::queue<RE_GameObject*> queue;
-				queue.push(go);
-				while (!queue.empty())
+				for (auto child : all)
 				{
-					RE_GameObject* obj = queue.front();
-					queue.pop();
-
-					if (obj->IsStatic())
-					{
-						if (true)//quad_tree.Contains(obj->GetGlobalBoundingBox()))
-						{
-							//quad_tree.Pop(obj);
-							active_static_gos.remove(obj);
-						}
-						else
-							tree_free_static_gos.remove(obj);
-					}
+					if (child->IsStatic())
+						static_tree.PopNode(goManager.WhatID(child));
 					else
-						active_non_static_gos.remove(obj);
-
-					for (auto child : obj->GetChilds())
-						queue.push(child);
+						dynamic_tree.PopNode(goManager.WhatID(child));
 				}
 			}
 			break;
 		}
 		case GO_CHANGED_TO_STATIC:
 		{
-			if (belongs_to_scene)
+			if (go->IsActive() && belongs_to_scene)
 			{
-				static_gos_modified = true;
-
-				std::list<RE_GameObject*> added_gos;
-				if (true)//quad_tree.TryPushingWithChilds(go, added_gos))
-				{
-					for (auto added_go : added_gos)
-					{
-						active_static_gos.push_back(added_go);
-						active_non_static_gos.remove(added_go);
-					}
-				}
-				else
-				{
-					std::queue<RE_GameObject*> queue;
-					queue.push(go);
-					while (!queue.empty())
-					{
-						RE_GameObject* obj = queue.front();
-						queue.pop();
-
-						active_static_gos.push_back(obj);
-						tree_free_static_gos.push_back(obj);
-						active_non_static_gos.remove(obj);
-
-						for (auto child : obj->GetChilds())
-							if (!go->IsActive())
-								queue.push(child);
-					}
-
-					if (update_qt)
-						UpdateQuadTree();
-				}
+				int index = goManager.WhatID(go);
+				dynamic_tree.PopNode(index);
+				static_tree.PushNode(index, go->GetGlobalBoundingBox());
 			}
 			break;
 		}
 		case GO_CHANGED_TO_NON_STATIC:
 		{
-			if (belongs_to_scene)
+			if (go->IsActive() && belongs_to_scene)
 			{
-				std::queue<RE_GameObject*> queue;
-				queue.push(go);
-				while (!queue.empty())
-				{
-					RE_GameObject* obj = queue.front();
-					queue.pop();
-
-					//if (quad_tree.Contains(obj->GetGlobalBoundingBox()))
-					//	quad_tree.Pop(obj);
-					//else
-					//	tree_free_static_gos.remove(obj);
-
-					active_static_gos.remove(obj);
-					active_non_static_gos.push_back(obj);
-
-					for (auto child : obj->GetChilds())
-						queue.push(child);
-				}
+				int index = goManager.WhatID(go);
+				static_tree.PopNode(index);
+				dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
 			}
 			break;
 		}
@@ -401,190 +278,59 @@ void ModuleScene::RecieveEvent(const Event& e)
 		{
 			RE_GameObject* to_add = e.data2.AsGO();
 
-			if (belongs_to_scene)
+			if (go->IsActive() && to_add->IsActive() && belongs_to_scene)
 			{
-				go->ResetBoundingBoxFromChilds();
-
-				if (to_add->IsStatic())
+				std::vector<RE_GameObject*> all = to_add->GetAllActiveGOWithMesh();
+				for (auto child : all)
 				{
-					static_gos_modified = true;
+					child->ResetGlobalBoundingBox();
 
-					std::list<RE_GameObject*> added_gos;
-					//if (quad_tree.TryAdapting(go) &&
-					//	quad_tree.TryPushingWithChilds(to_add, added_gos))
-					//{
-					//	for (auto added_go : added_gos)
-					//		active_static_gos.push_back(added_go);
-					//}
-					//else
-					//{
-					//	std::queue<RE_GameObject*> queue;
-					//	queue.push(go);
-					//	while (!queue.empty())
-					//	{
-					//		RE_GameObject* obj = queue.front();
-					//		queue.pop();
-					//
-					//		if (obj->IsActive())
-					//		{
-					//			active_static_gos.push_back(obj);
-					//			tree_free_static_gos.push_back(obj);
-					//		}
-					//
-					//		for (auto child : obj->GetChilds())
-					//			queue.push(child);
-					//	}
-					//
-					//	if (update_qt)
-					//		UpdateQuadTree();
-					//}
-				}
-				else
-				{
-					std::queue<RE_GameObject*> queue;
-					queue.push(go);
-					while (!queue.empty())
-					{
-						RE_GameObject* obj = queue.front();
-						queue.pop();
-
-						if (obj->IsActive())
-						{
-							if (obj->IsStatic())
-								active_static_gos.push_back(obj);
-							else
-								active_non_static_gos.push_back(obj);
-						}
-
-						for (auto child : obj->GetChilds())
-							queue.push(child);
-					}
+					if (child->IsStatic())
+						static_tree.PushNode(goManager.WhatID(child), child->GetGlobalBoundingBox());
+					else
+						dynamic_tree.PushNode(goManager.WhatID(child), child->GetGlobalBoundingBox());
 				}
 			}
-			else if (go->GetParent() != nullptr)
-				go->GetParent()->ResetBoundingBoxFromChilds();
-			else
-				go->ResetGlobalBoundingBox();
-			break;
-		}
-		case GO_HAS_NEW_CHILDS:
-		{
-			if (belongs_to_scene)
-			{
-				active_static_gos.clear();
-				active_non_static_gos.clear();
-				tree_free_static_gos.clear();
 
-				std::queue<RE_GameObject*> queue;
-				for (auto childs : root->GetChilds())
-					queue.push(childs);
-
-				while (!queue.empty())
-				{
-					RE_GameObject* obj = queue.front();
-					queue.pop();
-
-					if (obj->IsActive())
-					{
-						if (obj->IsStatic())
-							active_static_gos.push_back(obj);
-						else
-							active_non_static_gos.push_back(obj);
-					}
-
-					for (auto child : obj->GetChilds())
-						queue.push(child);
-				}
-
-				UpdateQuadTree();
-			}
-			else if (go->GetParent() != nullptr)
-				go->GetParent()->ResetBoundingBoxFromChilds();
-			else
-				go->ResetGlobalBoundingBox();
 			break;
 		}
 		case GO_REMOVE_CHILD:
 		{
 			RE_GameObject* to_remove = e.data2.AsGO();
-			if (belongs_to_scene)
+			go->GetChilds().remove(to_remove);
+
+			if (to_remove->IsActive() && belongs_to_scene)
 			{
-				std::queue<RE_GameObject*> queue;
-				queue.push(to_remove);
-				while (!queue.empty())
+				std::vector<RE_GameObject*> all = go->GetAllActiveGOWithMesh();
+				for (auto child : all)
 				{
-					RE_GameObject* obj = queue.front();
-					queue.pop();
-
-					if (obj->IsStatic())
-					{
-						//if (quad_tree.Contains(obj->GetGlobalBoundingBox()))
-						//{
-						//	quad_tree.Pop(obj);
-						//	active_static_gos.remove(obj);
-						//}
-						//else
-						//	tree_free_static_gos.remove(obj);
-					}
+					if (child->IsStatic())
+						static_tree.PopNode(goManager.WhatID(child));
 					else
-						active_non_static_gos.remove(obj);
-
-					for (auto child : obj->GetChilds())
-						queue.push(child);
+						dynamic_tree.PopNode(goManager.WhatID(child));
 				}
 			}
-
-			go->GetChilds().remove(to_remove);
 
 			break;
 		}
 		case TRANSFORM_MODIFIED:
 		{
-			for (auto child : go->GetChilds())
-				child->TransformModified(true);
+			if (go->IsActive())
+				for (auto child : go->GetChilds())
+					child->TransformModified();
 
 			if (belongs_to_scene)
 			{
+				int index = goManager.WhatID(go);
 				if (go->IsStatic())
 				{
-					UpdateQuadTree();
-					//static_gos_modified = true;
-					//std::list<RE_GameObject*> adapted_gos;
-					//if (!quad_tree.TryAdaptingWithChilds(go, adapted_gos))
-					//{
-					//	if (update_qt)
-					//		UpdateQuadTree();
-					//	else
-					//	{
-					//		bool was_out_of_qtree = false;
-					//		std::list<RE_GameObject*>::iterator it = tree_free_static_gos.begin();
-					//		for (; it != tree_free_static_gos.end(); it++)
-					//			if (was_out_of_qtree = (it._Ptr->_Myval == go))
-					//				break;
-					//
-					//		if (!was_out_of_qtree)
-					//		{
-					//			std::queue<RE_GameObject*> queue;
-					//			queue.push(go);
-					//			while (!queue.empty())
-					//			{
-					//				RE_GameObject* obj = queue.front();
-					//				queue.pop();
-					//
-					//				quad_tree.Pop(obj);
-					//				tree_free_static_gos.push_back(obj);
-					//
-					//				for (auto child : obj->GetChilds())
-					//					queue.push(child);
-					//			}
-					//		}
-					//	}
-					//}
-					//else
-					//{
-					//	for (auto adapted_go : adapted_gos)
-					//		tree_free_static_gos.remove(adapted_go);
-					//}
+					static_tree.PopNode(index);
+					static_tree.PushNode(index, go->GetGlobalBoundingBox());
+				}
+				else
+				{
+					dynamic_tree.PopNode(index);
+					dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
 				}
 			}
 
@@ -654,13 +400,15 @@ void ModuleScene::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
 	{
-		ImGui::Text("Total active: %i", active_non_static_gos.size() + active_static_gos.size());
-		ImGui::Text(" - Non Static: %i", active_non_static_gos.size());
-		ImGui::Text(" - Static: %i", active_static_gos.size());
-		ImGui::Text(" - Static outside QTree: %i", tree_free_static_gos.size());
+		int total_count = goManager.GetCount();
+		int static_count = static_tree.GetCount();
+		int dynamic_count = dynamic_tree.GetCount();
 
-		if (!update_qt && static_gos_modified && ImGui::Button("Reset AABB and Quadtree"))
-			UpdateQuadTree();
+		ImGui::Text("Total Scene GOs: %i", total_count);
+		ImGui::Text("Total Active: %i", static_count + dynamic_count);
+		ImGui::Text(" - Static: %i", static_count);
+		ImGui::Text(" - Non Static: %i", dynamic_count);
+		ImGui::Text("Total Inacive: %i", total_count - (static_count + dynamic_count));
 	}
 }
 
@@ -672,15 +420,12 @@ void ModuleScene::DrawQTree() const
 RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 {
 	RE_GameObject* ret = nullptr;
-	std::vector<RE_GameObject*> objects;
-
-	// Add non static
-	for (auto go : active_non_static_gos)
-		objects.push_back(go);
 
 	std::stack<int> goIndex;
-	// Add static
+	static_tree.CollectIntersections(ray, goIndex);
 	dynamic_tree.CollectIntersections(ray, goIndex);
+
+	std::vector<RE_GameObject*> objects;
 	while (!goIndex.empty())
 	{
 		int index = goIndex.top();
@@ -688,38 +433,21 @@ RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 		objects.push_back(goManager.At(index));
 	}
 
-	for (auto go : tree_free_static_gos)
-		objects.push_back(go);
-
 	if (!objects.empty())
 	{
-		// Check Ray-AABB
-		float res_distance;
-		float res_distance2;
-		std::vector<RE_CompMesh*> meshes;
-		const math::float3 camera_pos = RE_CameraManager::CurrentCamera()->GetTransform()->GetGlobalPosition();
-
-		for (auto object : objects)
-		{
-			RE_CompMesh* comp_mesh = object->GetMesh();
-			if (comp_mesh != nullptr)
-			{
-				res_distance = 0.0f;
-				res_distance2 = FLOAT_INF;
-				if (object->GetGlobalBoundingBox().IntersectLineAABB_CPP(camera_pos, ray.dir, res_distance, res_distance2))
-					meshes.push_back(comp_mesh);
-			}
-		}
-
 		// Check Ray-Triangle
-		RE_GameObject* new_selection = nullptr;
-		if (!meshes.empty())
+		bool collision = false;
+		float closest_distance = -1.f;
+		float res_distance = 0.0f;
+
+		for (auto ob : objects)
 		{
-			bool collision = false;
-			float closest_distance = -1.f;
-			for (auto mesh : meshes)
+			RE_CompMesh* mesh = ob->GetMesh();
+
+			if (mesh != nullptr)
 			{
 				res_distance = 0.0f;
+
 				if (mesh->CheckFaceCollision(ray, res_distance)
 					&& (!collision || closest_distance > res_distance))
 				{
@@ -736,25 +464,16 @@ RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 
 void ModuleScene::FustrumCulling(std::vector<const RE_GameObject*>& container, math::Frustum & frustum)
 {
-	std::vector<RE_GameObject*> objects;
-
-	// Add non static
-	for (auto go : active_non_static_gos)
-		objects.push_back(go);
-
-	// Check Frustum-AABB
-	for (auto object : objects)
-		if (frustum.Intersects(object->GetGlobalBoundingBox()))
-			container.push_back(object);
-
-	// Add static
 	std::stack<int> goIndex;
+	static_tree.CollectIntersections(frustum, goIndex);
 	dynamic_tree.CollectIntersections(frustum, goIndex);
+
+	std::vector<RE_GameObject*> objects;
 	while (!goIndex.empty())
 	{
 		int index = goIndex.top();
 		goIndex.pop();
-		container.push_back(goManager.At(index));
+		objects.push_back(goManager.At(index));
 	}
 }
 
@@ -978,23 +697,24 @@ void ModuleScene::GetActiveNonStatic(std::list<RE_GameObject*>& objects) const
 	}
 }
 
-void ModuleScene::UpdateQuadTree()
+void ModuleScene::ResetTrees()
 {
-	root->ResetBoundingBoxFromChilds();
-
-	while(!tree_free_static_gos.empty())
-	{
-		active_static_gos.push_front(tree_free_static_gos.back());
-		tree_free_static_gos.pop_back();
-	}
-
+	static_tree.Clear();
 	dynamic_tree.Clear();
 
 	int lastIndex = goManager.GetLastIndex();
 	for (int i = 0; i <= lastIndex; i++)
-		dynamic_tree.PushNode(i, goManager.At(i)->GetGlobalBoundingBox());
-	
-	static_gos_modified = false;
+	{
+		RE_GameObject* go = goManager.At(i);
+
+		if (go->IsActive())
+		{
+			if (go->IsStatic())
+				static_tree.PushNode(i, go->GetGlobalBoundingBox());
+			else
+				dynamic_tree.PushNode(i, go->GetGlobalBoundingBox());
+		}
+	}
 }
 
 std::map< RE_GameObject*, int> GameObjectManager::PushWithChilds(RE_GameObject* val, bool root)

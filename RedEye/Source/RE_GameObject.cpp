@@ -701,10 +701,7 @@ void RE_GameObject::AddChildsFromGO(RE_GameObject * go, bool broadcast)
 	if (!go->childs.empty())
 	{
 		for (auto child : go->childs)
-			AddChild(child, false);
-
-		if (broadcast)
-			Event::Push(GO_HAS_NEW_CHILDS, App->scene, this);
+			AddChild(child);
 	}
 }
 
