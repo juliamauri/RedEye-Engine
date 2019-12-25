@@ -1009,6 +1009,27 @@ std::map< RE_GameObject*, int> GameObjectManager::PushWithChilds(RE_GameObject* 
 int GameObjectManager::Push(RE_GameObject* val)
 {
 	int ret = lastAvaibleIndex;
+	goToID.insert(std::pair<RE_GameObject*, int>(val, ret));
 	PoolMapped::Push(val, ret);
 	return ret;
+}
+
+std::vector<RE_GameObject*> GameObjectManager::PopWithChilds(int id, bool root)
+{
+	std::vector<RE_GameObject*> gos = At(id)->GetAllGO();
+	if (!root) gos.erase(gos.begin());
+	for (auto go : gos) Pop(goToID.at(go));
+	return gos;
+}
+
+RE_GameObject* GameObjectManager::Pop(int id)
+{
+	RE_GameObject* ret = PoolMapped::Pop(id);
+	goToID.erase(ret);
+	return ret;
+}
+
+int GameObjectManager::WhatID(RE_GameObject* go) const
+{
+	return goToID.at(go);
 }

@@ -18,6 +18,14 @@ public:
 	std::map< RE_GameObject *,int> PushWithChilds(RE_GameObject* val, bool root = true);
 	int Push(RE_GameObject* val)override;
 
+	std::vector< RE_GameObject*> PopWithChilds(int id, bool root = true);
+	RE_GameObject* Pop(int id)override;
+
+	int WhatID(RE_GameObject* go)const;
+
+private:
+	std::map< RE_GameObject*, int> goToID;
+
 };
 
 
