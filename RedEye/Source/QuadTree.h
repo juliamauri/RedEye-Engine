@@ -135,10 +135,11 @@ public:
 	void CollectIntersections(Frustum frustum, std::stack<int>& indexes) const;
 
 	void Draw()const;
+	int GetCount() const;
 
 private:
 
-	void Rotate(int index);
+	void Rotate(AABBDynamicTreeNode& node, int index);
 
 	int AllocateLeafNode(AABB box, int index);
 	int AllocateInternalNode();

@@ -194,6 +194,46 @@ std::vector<RE_GameObject*> RE_GameObject::GetAllGO()
 	return ret;
 }
 
+std::vector<RE_GameObject*> RE_GameObject::GetActiveChildsWithDrawComponents()
+{
+	std::vector<RE_GameObject*> ret;
+
+	if (active)
+	{
+		std::queue<RE_GameObject*> go_queue;
+		go_queue.push(this);
+		
+		while (!go_queue.empty())
+		{
+			RE_GameObject* go = go_queue.front();
+			go_queue.pop();
+
+			if (go->HasDrawComponents())
+				ret.push_back(go);
+
+			for (auto child : go->childs)
+				if (child->active)
+					go_queue.push(child);
+		}
+	}
+
+	return ret;
+}
+
+bool RE_GameObject::HasDrawComponents() const
+{
+	for (auto component : components)
+	{
+		ComponentType cT = component->GetType();
+
+		if (cT == ComponentType::C_MESH ||
+			(cT > ComponentType::C_PRIMIVE_MIN && cT < ComponentType::C_PRIMIVE_MAX))
+			return true;
+	}
+
+	return false;
+}
+
 std::vector<const char*> RE_GameObject::GetAllResources(bool root)
 {
 	std::vector<const char*> allResources;
@@ -211,7 +251,9 @@ std::vector<const char*> RE_GameObject::GetAllResources(bool root)
 			allResources.insert(allResources.end(), childRet.begin(), childRet.end());
 	}
 
-	if (root) { //unique resources
+	if (root)
+	{
+		//unique resources
 		std::vector<const char*> ret;
 
 		for (auto res : allResources) {
@@ -1123,20 +1165,12 @@ void RE_GameObject::AddToBoundingBox(math::AABB box)
 		local_bounding_box.Enclose(box);
 }
 
-void RE_GameObject::ResetBoundingBoxFromChilds()
+math::AABB RE_GameObject::GetGlobalBoundingBoxWithChilds()
 {
-	// Local Bounding Box
-	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::one * 0.1f);
+	math::AABB ret;
+	ret.SetNegativeInfinity();
 
-	for (RE_Component* comp : components)
-	{
-		switch (comp->GetType())
-		{
-		case C_MESH: local_bounding_box = GetMesh()->GetAABB(); break;
-		case C_SPHERE: local_bounding_box = math::AABB(-math::vec::one, math::vec::one); break;
-		case C_CUBE: local_bounding_box = math::AABB(math::vec::zero, math::vec::one); break;
-		}
-	}
+	ResetLocalBoundingBox();
 
 	if (!childs.empty())
 	{
@@ -1150,23 +1184,36 @@ void RE_GameObject::ResetBoundingBoxFromChilds()
 		points[cursor++].Set(local_bounding_box.maxPoint.x, local_bounding_box.maxPoint.y, local_bounding_box.maxPoint.z);
 
 		// Store child AABBs max and min points
-		for (std::list<RE_GameObject*>::iterator child = childs.begin(); child != childs.end(); child++)
+		for (auto child : childs)
 		{
 			// Update child AABB
-			(*child)->ResetBoundingBoxFromChilds();
-
-			math::AABB child_aabb = (*child)->GetLocalBoundingBox();
-			child_aabb.TransformAsAABB((*child)->transform->GetLocalMatrixModel().Transposed());
+			math::AABB child_aabb = child->GetGlobalBoundingBoxWithChilds();
 
 			points[cursor++].Set(child_aabb.minPoint.x, child_aabb.minPoint.y, child_aabb.minPoint.z);
 			points[cursor++].Set(child_aabb.maxPoint.x, child_aabb.maxPoint.y, child_aabb.maxPoint.z);
 		}
 
 		// Enclose stored points
-		local_bounding_box.SetFrom(&points[0], points.size());
+		ret.SetFrom(&points[0], points.size());
 	}
 
-	ResetGlobalBoundingBox();
+	return ret;
+}
+
+void RE_GameObject::ResetLocalBoundingBox()
+{
+	// Local Bounding Box
+	local_bounding_box.SetNegativeInfinity();
+
+	for (RE_Component* comp : components)
+	{
+		switch (comp->GetType())
+		{
+		case C_MESH: local_bounding_box.Enclose(((RE_CompMesh*)comp)->GetAABB()); break;
+		case C_SPHERE: local_bounding_box.Enclose(math::AABB(-math::vec::one, math::vec::one)); break;
+		case C_CUBE: local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one)); break;
+		}
+	}
 }
 
 void RE_GameObject::ResetGlobalBoundingBox()
@@ -1174,6 +1221,23 @@ void RE_GameObject::ResetGlobalBoundingBox()
 	// Global Bounding Box
 	global_bounding_box = local_bounding_box;
 	global_bounding_box.TransformAsAABB(transform->GetMatrixModel().Transposed());
+}
+
+void RE_GameObject::ResetGlobalBoundingBoxForAllChilds()
+{
+	std::queue<RE_GameObject*> go_queue;
+	go_queue.push(this);
+
+	while (!go_queue.empty())
+	{
+		RE_GameObject* go = go_queue.front();
+		go_queue.pop();
+
+		go->ResetGlobalBoundingBox();
+
+		for (auto child : go->childs)
+			go_queue.push(child);
+	}
 }
 
 void RE_GameObject::DrawAABB(math::vec color) const

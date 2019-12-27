@@ -58,14 +58,13 @@ public:
 
 	void DrawEditor() override;
 
-	void DrawQTree() const;
+	void DrawTrees() const;
 	RE_GameObject* RayCastSelect(math::Ray& ray);
 	void FustrumCulling(std::vector<const RE_GameObject*>& container, math::Frustum& frustum);
 
 	void Serialize();
 	void LoadFBXOnScene(const char* fbxPath);
 	void LoadTextureOnSelectedGO(const char* texturePath);
-
 
 private:
 

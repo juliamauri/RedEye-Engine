@@ -37,6 +37,9 @@ public:
 	std::stack<RE_Component*> GetDrawableComponentsItselfOnly()const;
 
 	std::vector<RE_GameObject*> GetAllGO();
+	std::vector<RE_GameObject*> GetActiveChildsWithDrawComponents();
+
+	bool HasDrawComponents() const;
 
 	std::vector<const char*> GetAllResources(bool root = true);
 	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources);
@@ -110,13 +113,16 @@ public:
 	const char* GetName() const;
 
 	// AABB
-	void AddToBoundingBox(math::AABB box);
-	void ResetBoundingBoxFromChilds();
+	inline void AddToBoundingBox(math::AABB box);
+	void ResetLocalBoundingBox();
 	void ResetGlobalBoundingBox();
+	void ResetGlobalBoundingBoxForAllChilds();
 	void DrawAABB(math::vec color) const;
 	void DrawGlobalAABB() const;
+
 	math::AABB GetLocalBoundingBox() const;
 	math::AABB GetGlobalBoundingBox() const;
+	math::AABB GetGlobalBoundingBoxWithChilds();
 
 	// Editor
 	void DrawProperties();

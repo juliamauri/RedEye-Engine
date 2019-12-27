@@ -280,7 +280,7 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 
 		if (goToThumbnail) {
 			goToThumbnail->UseResources();
-			goToThumbnail->ResetBoundingBoxFromChilds();
+			goToThumbnail->ResetGlobalBoundingBoxForAllChilds();
 			goToThumbnail->TransformModified(false);
 
 			internalCamera->SetFOV(math::RadToDeg(0.523599f));

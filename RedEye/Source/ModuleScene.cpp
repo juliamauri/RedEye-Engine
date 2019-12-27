@@ -212,51 +212,68 @@ void ModuleScene::RecieveEvent(const Event& e)
 	RE_GameObject* go = e.data1.AsGO();
 	if (go != nullptr)
 	{
-		bool belongs_to_scene = (go->root == root);
+		bool belongs_to_scene = false;// = (go->root == root);
+
+		for (const RE_GameObject* parent = go;
+			parent != nullptr && !belongs_to_scene;
+			parent = parent->GetParent_c())
+		{
+			if (parent == root)
+			{
+				belongs_to_scene = true;
+				break;
+			}
+		}
 
 		switch (e.type)
 		{
 		case GO_CHANGED_TO_ACTIVE:
 		{
-			std::vector<RE_GameObject*> all = go->GetAllActiveGOWithMesh();
+			std::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
+
+			if (go->HasDrawComponents())
+				all.insert(all.cbegin(), go);
 
 			if (belongs_to_scene)
 			{
-				for (auto child : all)
+				for (auto draw_go : all)
 				{
-					child->ResetGlobalBoundingBox();
+					draw_go->ResetGlobalBoundingBox();
 
-					if (child->IsStatic())
-						static_tree.PushNode(goManager.WhatID(child), child->GetGlobalBoundingBox());
+					if (draw_go->IsStatic())
+						static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
 					else
-						dynamic_tree.PushNode(goManager.WhatID(child), child->GetGlobalBoundingBox());
+						dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
 				}
 			}
 			else
-				for (auto child : all)
-					child->ResetGlobalBoundingBox();
+				for (auto draw_go : all)
+					draw_go->ResetGlobalBoundingBox();
 
 			break;
 		}
 		case GO_CHANGED_TO_INACTIVE:
 		{
-			std::vector<RE_GameObject*> all = go->GetAllActiveGOWithMesh();
-
 			if (belongs_to_scene)
 			{
-				for (auto child : all)
+				std::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
+
+				if (go->HasDrawComponents())
+					all.insert(all.cbegin(), go);
+
+				for (auto draw_go : all)
 				{
-					if (child->IsStatic())
-						static_tree.PopNode(goManager.WhatID(child));
+					if (draw_go->IsStatic())
+						static_tree.PopNode(goManager.WhatID(draw_go));
 					else
-						dynamic_tree.PopNode(goManager.WhatID(child));
+						dynamic_tree.PopNode(goManager.WhatID(draw_go));
 				}
 			}
 			break;
 		}
 		case GO_CHANGED_TO_STATIC:
 		{
-			if (go->IsActive() && belongs_to_scene)
+			if (belongs_to_scene && go->IsActive())
 			{
 				int index = goManager.WhatID(go);
 				dynamic_tree.PopNode(index);
@@ -266,7 +283,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		}
 		case GO_CHANGED_TO_NON_STATIC:
 		{
-			if (go->IsActive() && belongs_to_scene)
+			if (belongs_to_scene && go->IsActive())
 			{
 				int index = goManager.WhatID(go);
 				static_tree.PopNode(index);
@@ -278,17 +295,21 @@ void ModuleScene::RecieveEvent(const Event& e)
 		{
 			RE_GameObject* to_add = e.data2.AsGO();
 
-			if (go->IsActive() && to_add->IsActive() && belongs_to_scene)
+			if (belongs_to_scene && go->IsActive() && to_add->IsActive())
 			{
-				std::vector<RE_GameObject*> all = to_add->GetAllActiveGOWithMesh();
-				for (auto child : all)
-				{
-					child->ResetGlobalBoundingBox();
+				std::vector<RE_GameObject*> all = to_add->GetActiveChildsWithDrawComponents();
 
-					if (child->IsStatic())
-						static_tree.PushNode(goManager.WhatID(child), child->GetGlobalBoundingBox());
+				if (to_add->HasDrawComponents())
+					all.insert(all.cbegin(), to_add);
+
+				for (auto draw_go : all)
+				{
+					draw_go->ResetGlobalBoundingBox();
+
+					if (draw_go->IsStatic())
+						static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
 					else
-						dynamic_tree.PushNode(goManager.WhatID(child), child->GetGlobalBoundingBox());
+						dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
 				}
 			}
 
@@ -297,19 +318,24 @@ void ModuleScene::RecieveEvent(const Event& e)
 		case GO_REMOVE_CHILD:
 		{
 			RE_GameObject* to_remove = e.data2.AsGO();
-			go->GetChilds().remove(to_remove);
 
-			if (to_remove->IsActive() && belongs_to_scene)
+			if (belongs_to_scene && to_remove->IsActive())
 			{
-				std::vector<RE_GameObject*> all = go->GetAllActiveGOWithMesh();
-				for (auto child : all)
+				std::vector<RE_GameObject*> all = to_remove->GetActiveChildsWithDrawComponents();
+
+				if (to_remove->HasDrawComponents())
+					all.insert(all.cbegin(), to_remove);
+
+				for (auto draw_go : all)
 				{
-					if (child->IsStatic())
-						static_tree.PopNode(goManager.WhatID(child));
+					if (draw_go->IsStatic())
+						static_tree.PopNode(goManager.WhatID(draw_go));
 					else
-						dynamic_tree.PopNode(goManager.WhatID(child));
+						dynamic_tree.PopNode(goManager.WhatID(draw_go));
 				}
 			}
+
+			// TODO: Delete to_remove & childs from GO Pool
 
 			break;
 		}
@@ -412,8 +438,9 @@ void ModuleScene::DrawEditor()
 	}
 }
 
-void ModuleScene::DrawQTree() const
+void ModuleScene::DrawTrees() const
 {
+	static_tree.Draw();
 	dynamic_tree.Draw();
 }
 

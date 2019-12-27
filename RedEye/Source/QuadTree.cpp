@@ -384,9 +384,11 @@ void AABBDynamicTree::PushNode(int index, AABB box)
 				At(iN.child1).box,
 				At(iN.child2).box);
 
-			Rotate(index);
+			int next = iN.parent_index;;
 
-			index = iN.parent_index;
+			Rotate(iN, index);
+
+			index = next;
 		}
 	}
 	else
@@ -536,6 +538,11 @@ void AABBDynamicTree::Draw() const
 	}
 }
 
+int AABBDynamicTree::GetCount() const
+{
+	return node_count;
+}
+
 AABB AABBDynamicTree::Union(AABB box1, AABB box2)
 {
 	vec point_array[4];
@@ -547,9 +554,131 @@ AABB AABBDynamicTree::Union(AABB box1, AABB box2)
 	return AABB::MinimalEnclosingAABB(&point_array[0], 4);
 }
 
-void AABBDynamicTree::Rotate(int index)
+void AABBDynamicTree::Rotate(AABBDynamicTreeNode& node, int index)
 {
-	aasdfgh
+	if (node.parent_index != NullIndex)
+	{
+		AABBDynamicTreeNode parent = At(node.parent_index);
+
+		bool node_is_child1 = (parent.child1 == index);
+		AABBDynamicTreeNode sibling = At(node_is_child1 ? parent.child2 : parent.child1);
+
+		// rotation[0] = sibling <-> child1;
+		// rotation[1] = sibling <-> child2;
+		// rotation[2] = current <-> sibling child1;
+		// rotation[3] = current <-> sibling child2;
+
+		float rotation_sa[4];
+		int count = 2;
+
+		rotation_sa[0] = Union(sibling.box, At(node.child2).box).SurfaceArea();
+		rotation_sa[1] = Union(sibling.box, At(node.child1).box).SurfaceArea();
+
+		if (!sibling.is_leaf)
+		{
+			count = 4;
+			rotation_sa[2] = Union(node.box, At(sibling.child2).box).SurfaceArea();
+			rotation_sa[3] = Union(node.box, At(sibling.child1).box).SurfaceArea();
+		}
+
+		int rotation_index = -1;
+		float lowest = node.box.SurfaceArea();
+		for (int i = 0; i < count; ++i)
+		{
+			if (rotation_sa[i] < lowest)
+			{
+				lowest = rotation_sa[i];
+				rotation_index = i;
+			}
+		}
+
+		if (rotation_index >= 0)
+		{
+			switch (rotation_index)
+			{
+			case 0: // sibling <-> child1;
+			{
+				sibling.parent_index = index;
+				At(node.child1).parent_index = node.parent_index;
+
+				int child_node_index = node.child1;
+
+				if (node_is_child1)
+				{
+					node.child1 = parent.child2;
+					parent.child2 = child_node_index;
+				}
+				else
+				{
+					node.child1 = parent.child1;
+					parent.child1 = child_node_index;
+				}
+
+				break;
+			}
+			case 1: // sibling <-> child2;
+			{
+				sibling.parent_index = index;
+				At(node.child2).parent_index = node.parent_index;
+
+				int child_node_index = node.child2;
+
+				if (node_is_child1)
+				{
+					node.child2 = parent.child2;
+					parent.child2 = child_node_index;
+				}
+				else
+				{
+					node.child2 = parent.child1;
+					parent.child1 = child_node_index;
+				}
+
+				break;
+			}
+			case 2: // current <-> sibling child1;
+			{
+				int parent_node_index = node.parent_index;
+
+				if (node_is_child1)
+				{
+					node.parent_index = parent.child2;
+					parent.child1 = sibling.child1;
+				}
+				else
+				{
+					node.parent_index = parent.child1;
+					parent.child2 = sibling.child1;
+				}
+
+				At(sibling.child1).parent_index = parent_node_index;
+				sibling.child1 = index;
+
+				break;
+			}
+			case 3: // current <-> sibling child2;
+			{
+				int parent_node_index = node.parent_index;
+
+				if (node_is_child1)
+				{
+					node.parent_index = parent.child2;
+					parent.child1 = sibling.child2;
+				}
+				else
+				{
+					node.parent_index = parent.child1;
+					parent.child2 = sibling.child2;
+				}
+
+				At(sibling.child2).parent_index = parent_node_index;
+				sibling.child2 = index;
+
+				break;
+			}
+			}
+		}
+	}
 }
 
 int AABBDynamicTree::AllocateLeafNode(AABB box, int index)

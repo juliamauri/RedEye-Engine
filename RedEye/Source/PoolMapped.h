@@ -46,6 +46,11 @@ public:
 		return lastAvaibleIndex - 1;
 	}
 
+	int GetCount()
+	{
+		return 0;// poolmapped_.count();
+	}
+
 protected:
 	TYPEVALUE* pool_;
 	std::map<TYPEKEY, unsigned int> poolmapped_;
