@@ -301,79 +301,97 @@ AABBDynamicTree::AABBDynamicTree() :  size(0), node_count(0), root_index(NullInd
 AABBDynamicTree::~AABBDynamicTree()
 {}
 
-void AABBDynamicTree::PushNode(int index, AABB box)
+void AABBDynamicTree::PushNode(int go_index, AABB box)
 {
+	if (box.Size().Length() == 0.f)
+	{
+		int hgfd = go_index;
+	}
+
+
 	// Stage 0: Allocate Leaf Node
-	int leafIndex = AllocateLeafNode(box, index);
+	int leafIndex = AllocateLeafNode(box, go_index);
 	
 	if (root_index != NullIndex)
 	{
 		// Stage 1: find the best sibling for the new leaf
 		AABBDynamicTreeNode rootNode = At(root_index);
-		int best_sibling = root_index;
+		int best_sibling_index = root_index;
 		float best_cost = Union(rootNode.box, box).SurfaceArea();
 		float box_sa = box.SurfaceArea();
 
-		std::queue<int> potential_siblings;
-		if (rootNode.child1 != NullIndex) potential_siblings.push(rootNode.child1);
-		if (rootNode.child2 != NullIndex) potential_siblings.push(rootNode.child2);
-
-		while (!potential_siblings.empty())
+		if (!rootNode.is_leaf)
 		{
-			int current_sibling = potential_siblings.front();
-			potential_siblings.pop();
-
-			AABBDynamicTreeNode currentSNode = At(current_sibling);
-
-			// C     = direct_cost                + inherited_cost
-			// C     = SA (box U current_sibling) + SUM (Dif_SA (current_sibling parents))
-			// Dif_SA (node) = SA (box U node) - SA (node)
-
-			float direct_cost = Union(currentSNode.box, box).SurfaceArea();
-
-			float inherited_cost = 0.f;
-			AABBDynamicTreeNode iNode;
-			for (int i = currentSNode.parent_index; i != NullIndex; i = iNode.parent_index) {
-				iNode = At(i);
-				inherited_cost += Union(iNode.box, box).SurfaceArea() - iNode.box.SurfaceArea();
-			}
-
-			if (direct_cost + inherited_cost < best_cost)
+			std::queue<int> potential_siblings;
+			potential_siblings.push(rootNode.child1);
+			potential_siblings.push(rootNode.child2);
+			
+			while (!potential_siblings.empty())
 			{
-				best_cost = direct_cost + inherited_cost;
-				best_sibling = current_sibling;
+				int current_sibling = potential_siblings.front();
+				potential_siblings.pop();
 
-				// C_low = SA (box) + direct_cost             + inherited_cost
-				// C_low = SA (box) + Dif_SA(current_sibling) + SUM (Dif_SA (current_sibling parents))
-				float lower_cost = box_sa + direct_cost - currentSNode.box.SurfaceArea();
-				if (lower_cost + inherited_cost < best_cost)
+				AABBDynamicTreeNode currentSNode = At(current_sibling);
+
+				// C     = direct_cost                + inherited_cost
+				// C     = SA (box U current_sibling) + SUM (Dif_SA (current_sibling parents))
+				// Dif_SA (node) = SA (box U node) - SA (node)
+
+				float direct_cost = Union(currentSNode.box, box).SurfaceArea();
+				float inherited_cost = 0.f;
+
+				AABBDynamicTreeNode iNode;
+				for (int i = currentSNode.parent_index; i != NullIndex; i = iNode.parent_index)
 				{
-					if (currentSNode.child1 != NullIndex) potential_siblings.push(currentSNode.child1);
-					if (currentSNode.child2 != NullIndex) potential_siblings.push(currentSNode.child2);
+					iNode = At(i);
+					inherited_cost += Union(iNode.box, box).SurfaceArea() - iNode.box.SurfaceArea();
+				}
+
+				if (direct_cost + inherited_cost < best_cost)
+				{
+					best_cost = direct_cost + inherited_cost;
+					best_sibling_index = current_sibling;
+
+					// C_low = SA (box) + direct_cost             + inherited_cost
+					// C_low = SA (box) + Dif_SA(current_sibling) + SUM (Dif_SA (current_sibling parents))
+					float lower_cost = box_sa + direct_cost - currentSNode.box.SurfaceArea();
+					if (lower_cost + inherited_cost < best_cost && !iNode.is_leaf)
+					{
+						potential_siblings.push(currentSNode.child1);
+						potential_siblings.push(currentSNode.child2);
+					}
 				}
 			}
 		}
 
 		// Stage 2: create a new parent
-		int new_parent = AllocateInternalNode();
-		int old_parent = At(best_sibling).parent_index;
+		int new_parent_index = AllocateInternalNode();
+		int old_parent = At(best_sibling_index).parent_index;
 
-		if (old_parent == NullIndex) // Sibling is root
-			root_index = new_parent;
-		else {
+		if (old_parent != NullIndex)
+		{
+			// Connect old parent's child new parent
 			AABBDynamicTreeNode* oldParentNode = AtPtr(old_parent);
-			if (oldParentNode->child1 == best_sibling) // Sibling not root
-				oldParentNode->child1 = new_parent;
+			if (oldParentNode->child1 == best_sibling_index)
+				oldParentNode->child1 = new_parent_index;
 			else
-				oldParentNode->child2 = new_parent;
+				oldParentNode->child2 = new_parent_index;
+		}
+		else
+		{
+			// Sibling is root and has no parent
+			root_index = new_parent_index;
 		}
 
-		AABBDynamicTreeNode* newParentNode = AtPtr(new_parent);
+		// Connect new parent
+		AABBDynamicTreeNode* newParentNode = AtPtr(new_parent_index);
 		newParentNode->parent_index = old_parent;
-		newParentNode->child1 = best_sibling;
+		newParentNode->child1 = best_sibling_index;
 		newParentNode->child2 = leafIndex;
-		AtPtr(best_sibling)->parent_index = new_parent;
-		AtPtr(leafIndex)->parent_index = new_parent;
+
+		// Connect sibling & new node to new parent
+		AtPtr(best_sibling_index)->parent_index = new_parent_index;
+		AtPtr(leafIndex)->parent_index = new_parent_index;
 
 		// Stage 3: walk back up the tree refitting AABBs
 		int parent_index = At(leafIndex).parent_index;

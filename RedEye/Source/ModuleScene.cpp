@@ -136,9 +136,8 @@ bool ModuleScene::Start()
 	goManager.PushWithChilds(root);
 
 	savedState = new RE_GameObject(*root);
-	root->TransformModified(false);
 
-	// Setup AABB + Quadtree
+	// Setup Tree AABBs
 	ResetTrees();
 
 	Event::ResumeEvents();
@@ -221,9 +220,6 @@ void ModuleScene::RecieveEvent(const Event& e)
 		{
 			std::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
 
-			if (go->HasDrawComponents())
-				all.insert(all.cbegin(), go);
-
 			if (belongs_to_scene)
 			{
 				for (auto draw_go : all)
@@ -247,9 +243,6 @@ void ModuleScene::RecieveEvent(const Event& e)
 			if (belongs_to_scene)
 			{
 				std::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
-
-				if (go->HasDrawComponents())
-					all.insert(all.cbegin(), go);
 
 				for (auto draw_go : all)
 				{
@@ -289,9 +282,6 @@ void ModuleScene::RecieveEvent(const Event& e)
 			{
 				std::vector<RE_GameObject*> all = to_add->GetActiveChildsWithDrawComponents();
 
-				if (to_add->HasDrawComponents())
-					all.insert(all.cbegin(), to_add);
-
 				for (auto draw_go : all)
 				{
 					draw_go->ResetGlobalBoundingBox();
@@ -312,9 +302,6 @@ void ModuleScene::RecieveEvent(const Event& e)
 			if (belongs_to_scene && to_remove->IsActive())
 			{
 				std::vector<RE_GameObject*> all = to_remove->GetActiveChildsWithDrawComponents();
-
-				if (to_remove->HasDrawComponents())
-					all.insert(all.cbegin(), to_remove);
 
 				for (auto draw_go : all)
 				{
@@ -716,6 +703,9 @@ void ModuleScene::GetActiveNonStatic(std::list<RE_GameObject*>& objects) const
 
 void ModuleScene::ResetTrees()
 {
+	root->TransformModified(false);
+	root->ResetBoundingBoxForAllChilds();
+
 	static_tree.Clear();
 	dynamic_tree.Clear();
 

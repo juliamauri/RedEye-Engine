@@ -116,6 +116,8 @@ public:
 	inline void AddToBoundingBox(math::AABB box);
 	void ResetLocalBoundingBox();
 	void ResetGlobalBoundingBox();
+	void ResetBoundingBoxes();
+	void ResetBoundingBoxForAllChilds();
 	void ResetGlobalBoundingBoxForAllChilds();
 	void DrawAABB(math::vec color) const;
 	void DrawGlobalAABB() const;

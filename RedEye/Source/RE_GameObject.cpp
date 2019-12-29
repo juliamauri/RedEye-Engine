@@ -224,7 +224,7 @@ bool RE_GameObject::HasDrawComponents() const
 {
 	for (auto component : components)
 	{
-		ComponentType cT = component->GetType();
+		ushortint cT = component->GetType();
 
 		if (cT == ComponentType::C_MESH ||
 			(cT > ComponentType::C_PRIMIVE_MIN && cT < ComponentType::C_PRIMIVE_MAX))
@@ -1222,11 +1222,32 @@ void RE_GameObject::ResetLocalBoundingBox()
 
 void RE_GameObject::ResetGlobalBoundingBox()
 {
-	ResetLocalBoundingBox();
-
 	// Global Bounding Box
 	global_bounding_box = local_bounding_box;
 	global_bounding_box.TransformAsAABB(transform->GetMatrixModel().Transposed());
+}
+
+void RE_GameObject::ResetBoundingBoxes()
+{
+	ResetLocalBoundingBox();
+	ResetGlobalBoundingBox();
+}
+
+void RE_GameObject::ResetBoundingBoxForAllChilds()
+{
+	std::queue<RE_GameObject*> go_queue;
+	go_queue.push(this);
+
+	while (!go_queue.empty())
+	{
+		RE_GameObject* go = go_queue.front();
+		go_queue.pop();
+
+		go->ResetBoundingBoxes();
+
+		for (auto child : go->childs)
+			go_queue.push(child);
+	}
 }
 
 void RE_GameObject::ResetGlobalBoundingBoxForAllChilds()
