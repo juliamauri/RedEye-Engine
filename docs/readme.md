@@ -26,8 +26,9 @@ What’s special about it? The code was written from scratch using a total of 15
 # The Team
 ![us](https://i.gyazo.com/a921f5ed3b659798393a16a1e6021e66.jpg)
 
-Julià (right): shader pipeline and the resource management.
-Rubén (left): transforms, cameras and space partitioning.
+Job focus:
+* Julià (right): shader pipeline and the resource management.
+* Rubén (left): transforms, cameras and space partitioning.
 
 We are good friends and passionate programmers and have been in a constant fight with one another to keep on track with milestones. We both had amazing new ideas for the engine every week but had to write them down for another time as we had a fixed delivery date. We split or tasks as much as possible but there where always dependencies in the way and for most of the time we spent side by side tackling all the bugs.
 
