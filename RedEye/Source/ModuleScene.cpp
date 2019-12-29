@@ -124,8 +124,11 @@ bool ModuleScene::Start()
 
 	// Render Camera Management
 	App->cams->RecallCameras(root);
-	if (!RE_CameraManager::HasMainCamera())
+	if (!RE_CameraManager::HasMainCamera()) {
+		Event::ResumeEvents();
 		CreateCamera();
+		Event::PauseEvents();
+	}
 
 	root->UseResources();
 	goManager.PushWithChilds(root);
@@ -188,8 +191,11 @@ void ModuleScene::OnStop()
 
 	// Render Camera Management
 	App->cams->RecallCameras(root);
-	if (!RE_CameraManager::HasMainCamera())
+	if (!RE_CameraManager::HasMainCamera()) {
+		Event::ResumeEvents();
 		CreateCamera();
+		Event::PauseEvents();
+	}
 
 	// Setup Tree AABBs
 	goManager.Clear();
