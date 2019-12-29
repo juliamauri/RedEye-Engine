@@ -355,7 +355,7 @@ void AABBDynamicTree::PushNode(int go_index, AABB box)
 					// C_low = SA (box) + direct_cost             + inherited_cost
 					// C_low = SA (box) + Dif_SA(current_sibling) + SUM (Dif_SA (current_sibling parents))
 					float lower_cost = box_sa + direct_cost - currentSNode.box.SurfaceArea();
-					if (lower_cost + inherited_cost < best_cost && !iNode.is_leaf)
+					if (lower_cost + inherited_cost < best_cost && !currentSNode.is_leaf)
 					{
 						potential_siblings.push(currentSNode.child1);
 						potential_siblings.push(currentSNode.child2);
@@ -418,7 +418,7 @@ void AABBDynamicTree::PopNode(int objectIndex)
 {
 	int index = objectToNode.at(objectIndex);
 
-	if (node_count > 0 && index < lastAvaibleIndex && At(index).is_leaf)
+	if (node_count > 0 && index < randomCount && At(index).is_leaf)
 	{
 		if (index == root_index)
 		{
@@ -542,22 +542,20 @@ void AABBDynamicTree::CollectIntersections(Frustum frustum, std::stack<int>& ind
 
 void AABBDynamicTree::Draw() const
 {
-	int lastIndex = GetLastIndex();
-	for (int i = 0; i <= lastIndex; i++)
-	{
-		AABBDynamicTreeNode node = At(i);
-		if (!node.is_leaf && (node.parent_index != NullIndex || i == root_index))
+	for (auto pm_ : poolmapped_) {
+		AABBDynamicTreeNode node = At(pm_.first);
+		if (!node.is_leaf && (node.parent_index != NullIndex || pm_.first == root_index))
 		{
 			for (int a = 0; a < 12; a++)
 			{
-			glVertex3f(
-				node.box.Edge(a).a.x,
-				node.box.Edge(a).a.y,
-				node.box.Edge(a).a.z);
-			glVertex3f(
-				node.box.Edge(a).b.x,
-				node.box.Edge(a).b.y,
-				node.box.Edge(a).b.z);
+				glVertex3f(
+					node.box.Edge(a).a.x,
+					node.box.Edge(a).a.y,
+					node.box.Edge(a).a.z);
+				glVertex3f(
+					node.box.Edge(a).b.x,
+					node.box.Edge(a).b.y,
+					node.box.Edge(a).b.z);
 			}
 		}
 	}
@@ -711,7 +709,7 @@ int AABBDynamicTree::AllocateLeafNode(AABB box, int index)
 	AABBDynamicTreeNode newNode;
 	SetLeaf(newNode, box, index);
 
-	int node_index = lastAvaibleIndex;
+	int node_index = randomCount++;
 	Push(newNode, node_index);
 	objectToNode.insert(std::pair<int, int>(index, node_index));
 
@@ -725,7 +723,7 @@ int AABBDynamicTree::AllocateInternalNode()
 	AABBDynamicTreeNode newNode;
 	SetInternal(newNode);
 
-	int node_index = lastAvaibleIndex;
+	int node_index = randomCount++;
 	Push(newNode, node_index);
 
 	node_count++;

@@ -35,7 +35,7 @@ public:
 			i->second--;
 			i++;
 		}
-		poolmapped_.erase(key);
+		poolmapped_.erase(poolmapped_.find(key));
 		lastAvaibleIndex--;
 		return ret;
 	}

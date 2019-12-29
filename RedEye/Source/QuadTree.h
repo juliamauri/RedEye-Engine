@@ -119,6 +119,7 @@ struct AABBDynamicTreeNode
 class AABBDynamicTree : public PoolMapped<AABBDynamicTreeNode,int>
 {
 private:
+	int randomCount = 0;
 	int size;
 	int node_count;
 	int root_index;

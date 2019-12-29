@@ -472,12 +472,11 @@ void ModuleScene::FustrumCulling(std::vector<const RE_GameObject*>& container, m
 	static_tree.CollectIntersections(frustum, goIndex);
 	dynamic_tree.CollectIntersections(frustum, goIndex);
 
-	std::vector<RE_GameObject*> objects;
 	while (!goIndex.empty())
 	{
 		int index = goIndex.top();
 		goIndex.pop();
-		objects.push_back(goManager.At(index));
+		container.push_back(goManager.At(index));
 	}
 }
 
