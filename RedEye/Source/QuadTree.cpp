@@ -396,8 +396,10 @@ void AABBDynamicTree::PushNode(int index, AABB box)
 	}
 }
 
-void AABBDynamicTree::PopNode(int index)
+void AABBDynamicTree::PopNode(int objectIndex)
 {
+	int index = objectToNode.at(objectIndex);
+
 	if (node_count > 0 && index < lastAvaibleIndex && At(index).is_leaf)
 	{
 		if (index == root_index)
@@ -447,6 +449,7 @@ void AABBDynamicTree::PopNode(int index)
 
 		Pop(index);
 		node_count--;
+		objectToNode.erase(objectIndex);
 	}
 }
 
@@ -692,6 +695,7 @@ int AABBDynamicTree::AllocateLeafNode(AABB box, int index)
 
 	int node_index = lastAvaibleIndex;
 	Push(newNode, node_index);
+	objectToNode.insert(std::pair<int, int>(index, node_index));
 
 	node_count++;
 

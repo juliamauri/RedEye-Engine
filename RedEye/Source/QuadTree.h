@@ -137,6 +137,8 @@ public:
 	void Draw()const;
 	int GetCount() const;
 
+	std::map<int, int> objectToNode;
+
 private:
 
 	void Rotate(AABBDynamicTreeNode& node, int index);
