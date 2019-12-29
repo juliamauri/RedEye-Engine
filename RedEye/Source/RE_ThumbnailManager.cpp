@@ -280,8 +280,9 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 
 		if (goToThumbnail) {
 			goToThumbnail->UseResources();
-			goToThumbnail->ResetGlobalBoundingBoxForAllChilds();
 			goToThumbnail->TransformModified(false);
+			goToThumbnail->Update();
+			goToThumbnail->ResetGlobalBoundingBoxForAllChilds();
 
 			internalCamera->SetFOV(math::RadToDeg(0.523599f));
 			internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
@@ -330,9 +331,7 @@ unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
 		
 		Event::PauseEvents();
 		internalCamera->SetFOV(math::RadToDeg( 0.523599f));
-		internalCamera->Update();
 		internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
-		internalCamera->Update();
 		internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f,  0.f));
 		internalCamera->Update();
 		internalCamera->LocalRotate(0, 1);
@@ -380,9 +379,7 @@ unsigned int RE_ThumbnailManager::ThumbnailSkyBox(const char* ref)
 
 		Event::PauseEvents();
 		internalCamera->ForceFOV(125, 140);
-		internalCamera->Update();
 		internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
-		internalCamera->Update();
 		internalCamera->GetTransform()->SetPosition(math::vec(0.f, 0.f, 0.f));
 		internalCamera->Update();
 		Event::ResumeEvents();
