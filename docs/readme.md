@@ -1,17 +1,19 @@
 # Red Eye Engine [![Build status](https://ci.appveyor.com/api/projects/status/swrp9sgx89yxl493?svg=true)](https://ci.appveyor.com/project/cumus/redeye-engine)
 
-![Frustum Culling](https://i.gyazo.com/340473d1ddace10fb78c592ee0232359.gif)
-![Dynamic AABB Tree](https://i.gyazo.com/7aecf65fdd396ddcc73ab2c1be5183b7.gif)
-
-# Click to watch a video
-[![Youtube](https://img.youtube.com/vi/kDCOSGXkqL4/0.jpg)](https://www.youtube.com/watch?v=kDCOSGXkqL4)
-
 Red Eye is a 3D Game Engine written in C++ as an assignment for a university course.
+
+![Frustum Culling](https://i.gyazo.com/340473d1ddace10fb78c592ee0232359.gif)
 
 What’s special about it? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we:
 * Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly.
 * Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses.
 * Added Unity-like resource management with binary save/load for all the engines resources.
+
+![Dynamic AABB Tree](https://i.gyazo.com/7aecf65fdd396ddcc73ab2c1be5183b7.gif)
+
+# Click to watch a video
+[![Youtube](https://img.youtube.com/vi/kDCOSGXkqL4/0.jpg)](https://www.youtube.com/watch?v=kDCOSGXkqL4)
+
 
 ## Links:
 * Repository [Github](https://github.com/juliamauri/RedEye-Engine)
