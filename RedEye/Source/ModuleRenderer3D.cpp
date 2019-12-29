@@ -304,11 +304,13 @@ void ModuleRenderer3D::DrawScene(const math::Frustum& frustum, unsigned int fbo,
 	// Frustum Culling
 	if (cull_scene) {
 		for (auto object : objects) {
-			std::stack<RE_Component*> fromO = object->GetDrawableComponentsItselfOnly();
-			while (!fromO.empty())
-			{
-				comptsToDraw.push(fromO.top());
-				fromO.pop();
+			if (object->IsActive()) {
+				std::stack<RE_Component*> fromO = object->GetDrawableComponentsItselfOnly();
+				while (!fromO.empty())
+				{
+					comptsToDraw.push(fromO.top());
+					fromO.pop();
+				}
 			}
 		}
 	}
