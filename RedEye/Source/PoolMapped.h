@@ -25,21 +25,17 @@ public:
 	}
 
 	virtual TYPEVALUE Pop(TYPEKEY key) {
-		std::map<TYPEKEY, unsigned int>::iterator w = poolmapped_.find(key);
-		unsigned int index = w->second;
+		unsigned int index = poolmapped_.at(key);
 		TYPEVALUE ret = pool_[index];
-		memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE) * (lastAvaibleIndex - index));
-
-		std::map<TYPEKEY, unsigned int>::iterator i = w;
-		i++;
-
-		poolmapped_.erase(key);
-
+		for (unsigned int i = index; i < lastAvaibleIndex; i++)
+			pool_[i] = pool_[i + 1];
+		std::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.find(key);
 		while (i != poolmapped_.end())
 		{
 			i->second--;
 			i++;
 		}
+		poolmapped_.erase(key);
 		lastAvaibleIndex--;
 		return ret;
 	}
