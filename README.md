@@ -1,7 +1,13 @@
 # Red Eye Engine [![Build status](https://ci.appveyor.com/api/projects/status/swrp9sgx89yxl493?svg=true)](https://ci.appveyor.com/project/cumus/redeye-engine)
 
-3D Game Engine Sofware for academic purposes. Loads geometry onto a Game Object Hierarchy with its materials. Same meshes only load once. Orbital camera encloses selected geometry on focus using bounding boxes.
+Red Eye is a 3D Game Engine written in C++ as an assignment for a university course.
 
+What’s special about it? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we:
+* Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly.
+* Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses.
+* Added Unity-like resource management with binary save/load for all the engines resources.
+
+## Links:
 * Repository [Github](https://github.com/juliamauri/RedEye-Engine)
 * Webpage: https://juliamauri.github.io/RedEye-Engine/
 * Authors: [Julià Mauri Costa](https://github.com/juliamauri) & [Rubén Sardón](https://github.com/cumus)
@@ -30,11 +36,17 @@
 
 ## Other Systems
 ### Shaders
-All geometry is rendered through shaders except bounding boxes. Just using for now 2 shaders that draw geometry with a given diffuse texture or a diffuse color.
+Shaders are used through the shader manager. This manager contains the large opengl calls making rendering code easier to read. The programs are parsed to identify uniforms and be able to modify then using the editor.
+### GL Cache
+This subsystem stores recent gl calls in order to evade repeating code. Now that we render more stuff we need to make sure we don’t overflow the graphics card.
+### Shader Editor
+Using ImGui’s text editor shaders can be edited in-editor. With File system reading changes on the extra milliseconds of each frame, any changes are detected and trigger the shader (or another resource) to be updated.
+### Thumbnails
+In order to view the Assets more easily than just text, FBOs are used to render the resource into a texture. Materials, textures, scenes, prefabs and models have the rendered textures for thumbnails.
+### Water Shader
+The sample shader we made has several uniforms to modify behavior and color for the wave. It's a Gerstner wave shader.Try changing the values to see what happens!
 ### SkyBox
-Default skybox loads on start. Using glDepthFunc(GL_LEQUAL) instead of glDepthFunc(GL_LESS) and rendered last, the skybox always draws the furthest away. For passing the 6 different textures,GL_TEXTURE_CUBE_MAP binds on draw call.
-### Console & Error Handler
-Engine logs all startup and importing procedures and can be accessed through the console window. This window contains a menu to filter logs shown by category and by file. Upon having to log an error report, a Pop Up appears showing the error description and the solution opted for. Additional logs and warnings about this procedure can be seen inside the same Pop Up.
+Default skybox loads on start. Using glDepthFunc(GL_LEQUAL) instead of glDepthFunc(GL_LESS) and rendered last, the skybox always draws the furthest away. For passing the 6 different textures,GL_TEXTURE_CUBE_MAP binds on draw call. Geometry used to render is a primitive sphere (smoother than squared).
 ### Dynamic AABB Tree
 Scene module manages 2 Dynamic AABB Trees: one for static gameobjects and another for dynamic ones. Using the events system, scene gets broadcasted gameobjects' changes (active/inactive, static/dynamic, new child, remove child, transform modified...) and updates the trees acordingly to optimize **Frustum Culling** and **Mouse Picking**. Previously a quadtree was used but keeping it updated each frame was too costly. Dynamic Trees allow for fast element Push & Pop. [Reference used](http://box2d.org/files/GDC2019/ErinCatto_DynamicBVH_GDC2019.pdf).
 ### Bounding Boxes
@@ -55,6 +67,8 @@ All importabe files will generate a .meta file that indicats it's imported and d
 When importing geometry, all materials used are saved to /Assets/Materials as a Rapidjson file. Any textures contained by them are saved to /Library/Images.
 ### Camera Manager & Target Aspect Ratio
 Cameras are handled through the new CameraManager class. Using static functions allows for clean getting of cameras anywhere in code. Using the also new events system, the cameras get the renderer's gl_Viewport updated given any window resizes.
+### Console & Error Handler
+Engine logs all startup and importing procedures and can be accessed through the console window. This window contains a menu to filter logs shown by category and by file. Upon having to log an error report, a Pop Up appears showing the error description and the solution opted for. Additional logs and warnings about this procedure can be seen inside the same Pop Up.
 ### ZIP
 When droping and .fbx file, its path will vary depending on which platform de engine is running on and there must be a 
 Importing .fbx files may trigger errors while checking the materials' texture paths. These paths vary depending on which platform de engine is running and there must be a conversion if needed. When importing a .zip file containing all resources allows for LibZip and PhysFS to create a virtual directory through which access is already handled. This system allows cross-platform imports through .zip files.
@@ -113,6 +127,14 @@ Each option toggles a hide/view window from a list of available windows:
 * mmgr
 
 ## Version Notes
+
+### Release v3.1
+* Added **shader parsing** for uniform values.
+* Added **Dynamic AABB Tree**
+* Added **Gerstner Wave Shader**
+* Added **Spherical Skybox**
+* Added **Thumbnails** for assets panel
+
 
 ### PreRelease v3.0
 * Added **Default Material and Shader resources** for a little start.
