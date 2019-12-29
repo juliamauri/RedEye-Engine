@@ -1,0 +1,94 @@
+.highlight table td { padding: 5px; }
+
+.highlight table pre { margin: 0; }
+
+.highlight { word-wrap: break-word; color: #25c33a; background-color: black; }
+
+/* comment */
+.highlight .c, .highlight .cd, .highlight .cm, .highlight .c1, .highlight .cs { color: #a7a895; font-style: italic; }
+
+.highlight .cp { color: #7934fa; font-weight: bold; font-style: italic; }
+
+.highlight .err { color: #cc0000; background-color: #250f0f; }
+
+.highlight .gr { color: #cc0000; background-color: #250f0f; }
+
+/* keyword */
+.highlight .k, .highlight .kd, .highlight .kv { color: #7934fa; font-weight: bold; }
+
+.highlight .o, .highlight .ow { color: #3dc2ff; }
+
+.highlight .p, .highlight .pi { color: #3dc2ff; }
+
+.highlight .gd { color: #cc0000; }
+
+.highlight .gi { color: #25c33a; }
+
+.highlight .ge { font-style: italic; }
+
+.highlight .gs { font-weight: bold; }
+
+.highlight .gt { color: #cc0000; }
+
+.highlight .gl { color: black; background: text-primary; }
+
+.highlight .kc { color: #b4c013; font-weight: bold; }
+
+.highlight .kn { color: violet; font-weight: bold; }
+
+.highlight .kp { color: violet; font-weight: bold; }
+
+.highlight .kr { color: violet; font-weight: bold; }
+
+.highlight .gh { color: violet; font-weight: bold; }
+
+.highlight .gu { color: violet; font-weight: bold; }
+
+.highlight .kt { color: #a1ff35; font-weight: bold; }
+
+.highlight .no { color: #a1ff35; font-weight: bold; }
+
+.highlight .nc { color: #c23766; font-weight: bold; }
+
+.highlight .nd { color: #c23766; font-weight: bold; }
+
+.highlight .nn { color: #c23766; font-weight: bold; }
+
+.highlight .bp { color: #c23766; font-weight: bold; }
+
+.highlight .ne { color: #c23766; font-weight: bold; }
+
+.highlight .nl { color: #b4c013; font-weight: bold; }
+
+.highlight .nt { color: #b4c013; font-weight: bold; }
+
+.highlight .m, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mb, .highlight .mx { color: #b4c013; font-weight: bold; }
+
+.highlight .ld { color: #b4c013; font-weight: bold; }
+
+.highlight .ss { color: #b4c013; font-weight: bold; }
+
+.highlight .s, .highlight .sb, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .sr, .highlight .s1 { color: #ffc547; font-weight: bold; }
+
+.highlight .se { color: #a1ff35; font-weight: bold; }
+
+.highlight .sc { color: #a1ff35; font-weight: bold; }
+
+.highlight .si { color: #a1ff35; font-weight: bold; }
+
+.highlight .nb { font-weight: bold; }
+
+.highlight .ni { color: #b4c013; font-weight: bold; }
+
+.highlight .w { color: #c4ffcc; }
+
+/* funtion delaration */
+.highlight .nf { color: #25c33a; font-weight: bold; }
+
+.highlight .py { color: #d44639; }
+
+.highlight .na { color: #25c33a; }
+
+.highlight .nv, .highlight .vc, .highlight .vg, .highlight .vi { color: #d44639; font-weight: bold; }
+
+/*# sourceMappingURL=rouge-bg.css.map */
