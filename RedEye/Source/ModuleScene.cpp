@@ -361,6 +361,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 			newMesh->UseResources();
 			go->AddCompMesh(newMesh);
 			go->ResetBoundingBoxes();
+			go->TransformModified();
 			break;
 		}
 		}
@@ -392,25 +393,39 @@ void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
 void ModuleScene::CreatePlane()
 {
 	RE_GameObject* plane_go = AddGO("Plane", root);
+	Event::Push(GO_HAS_NEW_CHILD, this, root, plane_go);
 	plane_go->AddComponent(App->primitives->CreatePlane(plane_go));
+	plane_go->ResetBoundingBoxes();
+	plane_go->TransformModified(false);
+	goManager.Push(plane_go);
 }
 
 void ModuleScene::CreateCube()
 {
 	RE_GameObject* cube_go = AddGO("Cube", root);
+	Event::Push(GO_HAS_NEW_CHILD, this, root, cube_go);
 	cube_go->AddComponent(App->primitives->CreateCube(cube_go));
+	cube_go->ResetBoundingBoxes();
+	cube_go->TransformModified(false);
+	goManager.Push(cube_go);
 }
 
 void ModuleScene::CreateSphere()
 {
 	RE_GameObject* sphere_go = AddGO("Sphere", root);
+	Event::Push(GO_HAS_NEW_CHILD, this, root, sphere_go);
 	sphere_go->AddComponent(App->primitives->CreateSphere(sphere_go));
+	sphere_go->ResetBoundingBoxes();
+	sphere_go->TransformModified(false);
+	goManager.Push(sphere_go);
 }
 
 void ModuleScene::CreateCamera()
 {
 	RE_GameObject* cam_go = AddGO("Camera", root);
+	Event::Push(GO_HAS_NEW_CHILD, this, root, cam_go);
 	cam_go->AddCompCamera();
+	goManager.Push(cam_go);
 }
 
 void ModuleScene::DrawEditor()
