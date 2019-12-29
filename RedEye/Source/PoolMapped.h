@@ -28,11 +28,17 @@ public:
 		std::map<TYPEKEY, unsigned int>::iterator w = poolmapped_.find(key);
 		unsigned int index = w->second;
 		TYPEVALUE ret = pool_[index];
-		memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE*) * (lastAvaibleIndex - index));
-		while (w != poolmapped_.end())
+		memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE) * (lastAvaibleIndex - index));
+
+		std::map<TYPEKEY, unsigned int>::iterator i = w;
+		i++;
+
+		poolmapped_.erase(key);
+
+		while (i != poolmapped_.end())
 		{
-			w->second--;
-			w++;
+			i->second--;
+			i++;
 		}
 		lastAvaibleIndex--;
 		return ret;
@@ -42,13 +48,14 @@ public:
 	TYPEVALUE& At(TYPEKEY key) { return pool_[poolmapped_.at(key)]; }
 	TYPEVALUE* AtPtr(TYPEKEY key)const { return &pool_[poolmapped_.at(key)]; }
 
-	int GetLastIndex()const {
+	int GetLastIndex() const
+	{
 		return lastAvaibleIndex - 1;
 	}
 
-	int GetCount()
+	int GetCount() const
 	{
-		return 0;// poolmapped_.count();
+		return lastAvaibleIndex;
 	}
 
 protected:

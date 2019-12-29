@@ -284,11 +284,8 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 			goToThumbnail->TransformModified(false);
 
 			internalCamera->SetFOV(math::RadToDeg(0.523599f));
-			internalCamera->Update();
 			internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
-			internalCamera->Update();
 			internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
-			internalCamera->Update();
 			internalCamera->LocalRotate(0, -0.5);
 			internalCamera->Update();
 			internalCamera->Focus(goToThumbnail);

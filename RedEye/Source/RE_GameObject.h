@@ -122,7 +122,7 @@ public:
 
 	math::AABB GetLocalBoundingBox() const;
 	math::AABB GetGlobalBoundingBox() const;
-	math::AABB GetGlobalBoundingBoxWithChilds();
+	math::AABB GetGlobalBoundingBoxWithChilds() const;
 
 	// Editor
 	void DrawProperties();

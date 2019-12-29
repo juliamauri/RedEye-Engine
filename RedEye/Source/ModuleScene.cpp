@@ -103,11 +103,12 @@ bool ModuleScene::Start()
 			RE_GameObject* modelCopy = model->GetRoot();
 			Event::ResumeEvents();
 
-			if (modelCopy) {
-				root = new RE_GameObject("root");
+			if (modelCopy) 
+			{
 				root->AddChild(modelCopy);
 			}
-			else {
+			else 
+			{
 				LOG_ERROR("Cannot be lodadded the default model.\nAssetsPath: %s", defaultModel.c_str());
 			}
 
@@ -124,35 +125,24 @@ bool ModuleScene::Start()
 		App->handlerrors->ActivatePopUp();
 	}
 
+	Event::PauseEvents();
+
 	// Render Camera Management
 	App->cams->RecallCameras(root);
 	if (!RE_CameraManager::HasMainCamera())
 		CreateCamera();
 
 	root->UseResources();
+	goManager.PushWithChilds(root);
+
+	savedState = new RE_GameObject(*root);
+	root->TransformModified(false);
+
 	// Setup AABB + Quadtree
-	Event::PauseEvents();
 	ResetTrees();
+
 	Event::ResumeEvents();
 
-	if (root)
-	{
-		//GO Manager!!!
-		goManager.PushWithChilds(root);
-
-		Event::PauseEvents();
-		savedState = new RE_GameObject(*root);
-		Event::ResumeEvents();
-
-		// Render Camera Management
-		App->cams->RecallCameras(root);
-		if (!RE_CameraManager::HasMainCamera())
-			CreateCamera();
-
-		// Setup AABB + Quadtree
-		root->TransformModified(false);
-		ResetTrees();
-	}
 
 	return ret;
 }
@@ -345,7 +335,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 				for (auto child : go->GetChilds())
 					child->TransformModified();
 
-			if (belongs_to_scene)
+			if (belongs_to_scene && go->HasDrawComponents())
 			{
 				int index = goManager.WhatID(go);
 				if (go->IsStatic())
@@ -734,7 +724,7 @@ void ModuleScene::ResetTrees()
 	{
 		RE_GameObject* go = goManager.At(i);
 
-		if (go->IsActive())
+		if (go->IsActive() && go->HasDrawComponents())
 		{
 			if (go->IsStatic())
 				static_tree.PushNode(i, go->GetGlobalBoundingBox());

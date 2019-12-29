@@ -1139,10 +1139,10 @@ void RE_GameObject::RecieveEvent(const Event & e)
 
 void RE_GameObject::TransformModified(bool broadcast)
 {
-	ResetGlobalBoundingBox();
-
 	for (auto component : components)
 		component->OnTransformModified();
+
+	ResetGlobalBoundingBox();
 
 	if (!broadcast)
 	{
@@ -1165,12 +1165,16 @@ void RE_GameObject::AddToBoundingBox(math::AABB box)
 		local_bounding_box.Enclose(box);
 }
 
-math::AABB RE_GameObject::GetGlobalBoundingBoxWithChilds()
+math::AABB RE_GameObject::GetGlobalBoundingBoxWithChilds() const
 {
 	math::AABB ret;
-	ret.SetNegativeInfinity();
 
-	ResetLocalBoundingBox();
+	if (HasDrawComponents())
+	{
+		ret = global_bounding_box;
+	}
+	else
+		ret.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 
 	if (!childs.empty())
 	{
@@ -1180,8 +1184,8 @@ math::AABB RE_GameObject::GetGlobalBoundingBoxWithChilds()
 		points.resize(2 + (childs.size() * 2));
 
 		// Store local mesh AABB max and min points
-		points[cursor++].Set(local_bounding_box.minPoint.x, local_bounding_box.minPoint.y, local_bounding_box.minPoint.z);
-		points[cursor++].Set(local_bounding_box.maxPoint.x, local_bounding_box.maxPoint.y, local_bounding_box.maxPoint.z);
+		points[cursor++].Set(ret.minPoint.x, ret.minPoint.y, ret.minPoint.z);
+		points[cursor++].Set(ret.maxPoint.x, ret.maxPoint.y, ret.maxPoint.z);
 
 		// Store child AABBs max and min points
 		for (auto child : childs)
@@ -1203,7 +1207,7 @@ math::AABB RE_GameObject::GetGlobalBoundingBoxWithChilds()
 void RE_GameObject::ResetLocalBoundingBox()
 {
 	// Local Bounding Box
-	local_bounding_box.SetNegativeInfinity();
+	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 
 	for (RE_Component* comp : components)
 	{
@@ -1218,6 +1222,8 @@ void RE_GameObject::ResetLocalBoundingBox()
 
 void RE_GameObject::ResetGlobalBoundingBox()
 {
+	ResetLocalBoundingBox();
+
 	// Global Bounding Box
 	global_bounding_box = local_bounding_box;
 	global_bounding_box.TransformAsAABB(transform->GetMatrixModel().Transposed());

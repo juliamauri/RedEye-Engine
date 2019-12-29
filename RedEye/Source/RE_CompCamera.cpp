@@ -528,7 +528,7 @@ void RE_CompCamera::Orbit(float dx, float dy, const RE_GameObject& focus)
 void RE_CompCamera::Focus(const RE_GameObject* focus, float min_dist)
 {
 	float camDistance = min_dist;
-	math::AABB box = focus->GetGlobalBoundingBox();
+	math::AABB box = focus->GetGlobalBoundingBoxWithChilds();
 	float radius = box.HalfSize().Length();
 	focus_global_pos = box.CenterPoint();
 

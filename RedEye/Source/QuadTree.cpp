@@ -376,19 +376,17 @@ void AABBDynamicTree::PushNode(int index, AABB box)
 		AtPtr(leafIndex)->parent_index = new_parent;
 
 		// Stage 3: walk back up the tree refitting AABBs
-		int index = At(leafIndex).parent_index;
-		while (index != NullIndex)
+		int parent_index = At(leafIndex).parent_index;
+		while (parent_index != NullIndex)
 		{
-			AABBDynamicTreeNode iN = At(index);
-			AtPtr(index)->box = Union(
+			AABBDynamicTreeNode& iN = At(parent_index);
+			iN.box = Union(
 				At(iN.child1).box,
 				At(iN.child2).box);
 
 			int next = iN.parent_index;;
-
-			Rotate(iN, index);
-
-			index = next;
+			//Rotate(iN, index);
+			parent_index = next;
 		}
 	}
 	else
@@ -441,7 +439,12 @@ void AABBDynamicTree::PopNode(int index)
 					AtPtr(parent_node->child1)->parent_index = parent_node->parent_index;
 				}
 			}
+
+			Pop(parent_index);
+			node_count--;
+
 		}
+
 		Pop(index);
 		node_count--;
 	}
@@ -496,7 +499,8 @@ void AABBDynamicTree::CollectIntersections(Frustum frustum, std::stack<int>& ind
 
 		while (!node_stack.empty())
 		{
-			node = At(node_stack.top());
+			int index = node_stack.top();
+			node = At(index);
 			node_stack.pop();
 
 			if (frustum.Intersects(node.box))
@@ -558,10 +562,10 @@ void AABBDynamicTree::Rotate(AABBDynamicTreeNode& node, int index)
 {
 	if (node.parent_index != NullIndex)
 	{
-		AABBDynamicTreeNode parent = At(node.parent_index);
+		AABBDynamicTreeNode& parent = At(node.parent_index);
 
 		bool node_is_child1 = (parent.child1 == index);
-		AABBDynamicTreeNode sibling = At(node_is_child1 ? parent.child2 : parent.child1);
+		AABBDynamicTreeNode& sibling = At(node_is_child1 ? parent.child2 : parent.child1);
 
 		// rotation[0] = sibling <-> child1;
 		// rotation[1] = sibling <-> child2;
