@@ -115,6 +115,6 @@ const math::Frustum RE_CameraManager::GetCullingFrustum() const
 		if (cam->OverridesCulling())
 			return cam->GetFrustum();
 
-	return CurrentCamera()->GetFrustum();
+	return editor_camera->GetFrustum();
 }
 

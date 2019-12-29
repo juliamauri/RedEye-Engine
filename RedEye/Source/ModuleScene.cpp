@@ -55,8 +55,7 @@ bool ModuleScene::Start()
 {
 	bool ret = true;
 
-	root = new RE_GameObject("root");
-	root->SetStatic(false, false);
+	Event::PauseEvents();
 
 	// Load scene
 	Timer timer;
@@ -64,9 +63,8 @@ bool ModuleScene::Start()
 	path_scene += GetName();
 	path_scene += ".re";
 
-	sceneLoadedMD5 = App->resources->FindMD5ByAssetsPath(path_scene.c_str(), Resource_Type::R_SCENE);
-
 	bool loadDefaultFBX = false;
+	sceneLoadedMD5 = App->resources->FindMD5ByAssetsPath(path_scene.c_str(), Resource_Type::R_SCENE);
 
 	if (sceneLoadedMD5 != nullptr)
 	{
@@ -74,8 +72,7 @@ bool ModuleScene::Start()
 
 		App->handlerrors->StartHandling();
 
-		RE_Scene* scene = (RE_Scene * )App->resources->At(sceneLoadedMD5);
-		Event::PauseEvents();
+		RE_Scene* scene = (RE_Scene*)App->resources->At(sceneLoadedMD5);
 		RE_GameObject* loadedDO = scene->GetRoot();
 
 		if (loadedDO)
@@ -92,16 +89,16 @@ bool ModuleScene::Start()
 
 	if(loadDefaultFBX)
 	{
+		root = new RE_GameObject("root");
+		root->SetStatic(false);
+
 		const char* defaultModelMD5 = App->resources->FindMD5ByAssetsPath(defaultModel.c_str(), Resource_Type::R_MODEL);
 
 		if (defaultModelMD5) {
 			App->handlerrors->StartHandling();
 
 			RE_Model* model = (RE_Model*)App->resources->At(defaultModelMD5);
-
-			Event::PauseEvents();
 			RE_GameObject* modelCopy = model->GetRoot();
-			Event::ResumeEvents();
 
 			if (modelCopy) 
 			{
@@ -125,8 +122,6 @@ bool ModuleScene::Start()
 		App->handlerrors->ActivatePopUp();
 	}
 
-	Event::PauseEvents();
-
 	// Render Camera Management
 	App->cams->RecallCameras(root);
 	if (!RE_CameraManager::HasMainCamera())
@@ -138,10 +133,12 @@ bool ModuleScene::Start()
 	savedState = new RE_GameObject(*root);
 
 	// Setup Tree AABBs
+	root->TransformModified(false);
+	root->Update();
+	root->ResetBoundingBoxForAllChilds();
 	ResetTrees();
 
 	Event::ResumeEvents();
-
 
 	return ret;
 }
@@ -182,6 +179,9 @@ void ModuleScene::OnPause()
 void ModuleScene::OnStop()
 {
 	root->OnStop();
+
+	Event::PauseEvents();
+
 	DEL(root);
 	root = new RE_GameObject(*savedState);
 	App->editor->SetSelected(nullptr);
@@ -191,9 +191,16 @@ void ModuleScene::OnStop()
 	if (!RE_CameraManager::HasMainCamera())
 		CreateCamera();
 
-	// Setup AABB + Quadtree
-	root->TransformModified(true);
+	// Setup Tree AABBs
+	goManager.Clear();
+	goManager.PushWithChilds(root);
+
+	root->TransformModified(false);
+	root->Update();
+	root->ResetBoundingBoxForAllChilds();
 	ResetTrees();
+
+	Event::ResumeEvents();
 }
 
 void ModuleScene::RecieveEvent(const Event& e)
@@ -347,6 +354,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 			RE_CompMesh* newMesh = new RE_CompMesh(go, planeMD5);
 			newMesh->UseResources();
 			go->AddCompMesh(newMesh);
+			go->ResetBoundingBoxes();
 			break;
 		}
 		}
@@ -407,6 +415,9 @@ void ModuleScene::DrawEditor()
 		int static_count = static_tree.GetCount();
 		int dynamic_count = dynamic_tree.GetCount();
 
+		static_count = static_count <= 1 ? static_count : (static_count - 1) / 2;
+		dynamic_count = dynamic_count <= 1 ? dynamic_count : (dynamic_count - 1) / 2;
+
 		ImGui::Text("Total Scene GOs: %i", total_count);
 		ImGui::Text("Total Active: %i", static_count + dynamic_count);
 		ImGui::Text(" - Static: %i", static_count);
@@ -466,7 +477,7 @@ RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 	return ret;
 }
 
-void ModuleScene::FustrumCulling(std::vector<const RE_GameObject*>& container, math::Frustum & frustum)
+void ModuleScene::FustrumCulling(std::vector<const RE_GameObject*>& container, const math::Frustum & frustum)
 {
 	std::stack<int> goIndex;
 	static_tree.CollectIntersections(frustum, goIndex);
@@ -702,9 +713,6 @@ void ModuleScene::GetActiveNonStatic(std::list<RE_GameObject*>& objects) const
 
 void ModuleScene::ResetTrees()
 {
-	root->TransformModified(false);
-	root->ResetBoundingBoxForAllChilds();
-
 	static_tree.Clear();
 	dynamic_tree.Clear();
 
@@ -721,6 +729,13 @@ void ModuleScene::ResetTrees()
 				dynamic_tree.PushNode(i, go->GetGlobalBoundingBox());
 		}
 	}
+}
+
+void GameObjectManager::Clear()
+{
+	goToID.clear();
+	poolmapped_.clear();
+	lastAvaibleIndex = 0;
 }
 
 std::map< RE_GameObject*, int> GameObjectManager::PushWithChilds(RE_GameObject* val, bool root)

@@ -26,7 +26,7 @@ public:
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
 
-	void DrawScene(RE_CompCamera* camera, unsigned int fbo, RE_CompCamera* mainSkybox = nullptr, bool debugDraw = false, bool stencilToSelected = false);
+	void DrawScene(const math::Frustum& frustum, unsigned int fbo, RE_CompCamera* mainSkybox = nullptr, bool debugDraw = false, bool stencilToSelected = false);
 
 	// Editor Values
 	void SetVSync(bool enable);

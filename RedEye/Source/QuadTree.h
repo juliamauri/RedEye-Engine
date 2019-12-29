@@ -133,7 +133,7 @@ public:
 	void PopNode(int index);
 	void Clear();
 	void CollectIntersections(Ray ray, std::stack<int>& indexes) const;
-	void CollectIntersections(Frustum frustum, std::stack<int>& indexes) const;
+	void CollectIntersections(const Frustum frustum, std::stack<int>& indexes) const;
 
 	void Draw()const;
 	int GetCount() const;

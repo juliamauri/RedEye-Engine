@@ -125,14 +125,14 @@ update_status ModuleRenderer3D::PostUpdate()
 	RE_CompCamera* current_camera = RE_CameraManager::EditorCamera();
 	current_camera->Update();
 	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(current_camera, dt, time);
-	DrawScene(current_camera, sceneEditorFBO, mainSkybox, true, true);
+	DrawScene(App->cams->GetCullingFrustum(), sceneEditorFBO, mainSkybox, true, true);
 
 	OPTICK_CATEGORY("Scene Game Draw", Optick::Category::Rendering);
 	OPTICK_CATEGORY("Culling Game", Optick::Category::Rendering);
 	current_camera = RE_CameraManager::MainCamera();
 	current_camera->Update();
 	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(current_camera, dt, time);
-	DrawScene(current_camera, sceneGameFBO, mainSkybox);
+	DrawScene(current_camera->GetFrustum(), sceneGameFBO, mainSkybox);
 
 	RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
 
@@ -281,14 +281,12 @@ bool ModuleRenderer3D::Save(JSONNode * node) const
 	return ret;
 }
 
-void ModuleRenderer3D::DrawScene(RE_CompCamera* camera, unsigned int fbo, RE_CompCamera* mainSkybox, bool debugDraw, bool stencilToSelected)
+void ModuleRenderer3D::DrawScene(const math::Frustum& frustum, unsigned int fbo, RE_CompCamera* mainSkybox, bool debugDraw, bool stencilToSelected)
 {
 	std::vector<const RE_GameObject*> objects;
+
 	if (cull_scene)
-	{
-		math::Frustum frustum = camera->GetFrustum();
 		App->scene->FustrumCulling(objects, frustum);
-	}
 
 	RE_FBOManager::ChangeFBOBind(fbo, App->fbomanager->GetWidth(fbo), App->fbomanager->GetHeight(fbo));
 

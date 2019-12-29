@@ -809,7 +809,7 @@ void RE_GameObject::SetActive(const bool value, const bool broadcast)
 		active = value;
 
 		if (broadcast)
-			Event::Push(active ? GO_CHANGED_TO_ACTIVE : GO_CHANGED_TO_INACTIVE, App->scene);
+			Event::Push(active ? GO_CHANGED_TO_ACTIVE : GO_CHANGED_TO_INACTIVE, App->scene, this);
 	}
 }
 
@@ -857,7 +857,7 @@ void RE_GameObject::SetStatic(const bool value, const bool broadcast)
 		isStatic = value;
 
 		if (active && broadcast)
-			Event::Push(isStatic ? GO_CHANGED_TO_STATIC : GO_CHANGED_TO_NON_STATIC, App->scene);
+			Event::Push(isStatic ? GO_CHANGED_TO_STATIC : GO_CHANGED_TO_NON_STATIC, App->scene, this);
 	}
 }
 
@@ -872,7 +872,7 @@ void RE_GameObject::IterativeSetStatic(bool val)
 	while (!gos.empty())
 	{
 		RE_GameObject * go = gos.top();
-		go->SetStatic(val, false);
+		go->SetStatic(val);
 		gos.pop();
 
 		for (auto child : go->childs)
@@ -1341,25 +1341,26 @@ void RE_GameObject::DrawProperties()
 	if (ImGui::InputText("Name", name_holder, 64))
 		name = name_holder;
 
-	ImGui::Checkbox("Active", &active);
+	bool tmp_active = active;
+	if (ImGui::Checkbox("Active", &tmp_active))
+		SetActive(tmp_active);
 
 	ImGui::SameLine();
 
-	if (ImGui::Checkbox("Static", &isStatic))
-		Event::Push(isStatic ? GO_CHANGED_TO_STATIC : GO_CHANGED_TO_NON_STATIC, App->scene);
+	bool tmp_static = isStatic;
+	if (ImGui::Checkbox("Static", &tmp_static))
+		SetStatic(tmp_static);
 
 	if (ImGui::TreeNode("Local Bounding Box"))
 	{
 		ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", local_bounding_box.minPoint.x, local_bounding_box.minPoint.y, local_bounding_box.minPoint.z);
 		ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", local_bounding_box.maxPoint.x, local_bounding_box.maxPoint.y, local_bounding_box.maxPoint.z);
-
 		ImGui::TreePop();
 	}
 	if (ImGui::TreeNode("Global Bounding Box"))
 	{
 		ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", global_bounding_box.minPoint.x, global_bounding_box.minPoint.y, global_bounding_box.minPoint.z);
 		ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", global_bounding_box.maxPoint.x, global_bounding_box.maxPoint.y, global_bounding_box.maxPoint.z);
-
 		ImGui::TreePop();
 	}
 

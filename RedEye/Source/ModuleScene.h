@@ -15,6 +15,8 @@ public:
 	GameObjectManager() { }
 	~GameObjectManager() { }
 
+	void Clear();
+
 	std::map< RE_GameObject *,int> PushWithChilds(RE_GameObject* val, bool root = true);
 	int Push(RE_GameObject* val)override;
 
@@ -60,7 +62,7 @@ public:
 
 	void DrawTrees() const;
 	RE_GameObject* RayCastSelect(math::Ray& ray);
-	void FustrumCulling(std::vector<const RE_GameObject*>& container, math::Frustum& frustum);
+	void FustrumCulling(std::vector<const RE_GameObject*>& container, const math::Frustum& frustum);
 
 	void Serialize();
 	void LoadFBXOnScene(const char* fbxPath);

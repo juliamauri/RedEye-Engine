@@ -403,7 +403,7 @@ void AABBDynamicTree::PushNode(int go_index, AABB box)
 				At(iN.child2).box);
 
 			int next = iN.parent_index;;
-			//Rotate(iN, index);
+			Rotate(iN, parent_index);
 			parent_index = next;
 		}
 	}
@@ -476,8 +476,9 @@ void AABBDynamicTree::Clear()
 	size = 0;
 	node_count = 0;
 	root_index = -1;
-
+	randomCount = 0;
 	lastAvaibleIndex = 0;
+	objectToNode.clear();
 	poolmapped_.clear();
 }
 
@@ -502,15 +503,15 @@ void AABBDynamicTree::CollectIntersections(Ray ray, std::stack<int>& indexes) co
 				}
 				else
 				{
-					if (node.child1 != NullIndex) node_stack.push(node.child1);
-					if (node.child2 != NullIndex) node_stack.push(node.child2);
+					node_stack.push(node.child1);
+					node_stack.push(node.child2);
 				}
 			}
 		}
 	}
 }
 
-void AABBDynamicTree::CollectIntersections(Frustum frustum, std::stack<int>& indexes) const
+void AABBDynamicTree::CollectIntersections(const Frustum frustum, std::stack<int>& indexes) const
 {
 	if (node_count > 0)
 	{
@@ -532,8 +533,8 @@ void AABBDynamicTree::CollectIntersections(Frustum frustum, std::stack<int>& ind
 				}
 				else
 				{
-					if (node.child1 != NullIndex) node_stack.push(node.child1);
-					if (node.child2 != NullIndex) node_stack.push(node.child2);
+					node_stack.push(node.child1);
+					node_stack.push(node.child2);
 				}
 			}
 		}

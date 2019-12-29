@@ -294,8 +294,7 @@ update_status ModuleEditor::Update()
 		show_all = !show_all;
 
 	// CAMERA CONTROLS
-	if (App->GetState() == GS_STOP)
-		UpdateCamera();
+	UpdateCamera();
 
 	sceneEditorWindow->DrawWindow();
 	sceneGameWindow->DrawWindow();
@@ -435,7 +434,7 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 		RE_GLCache::ChangeTextureBind(0);
 
 		const RE_GameObject* root = App->scene->GetRoot();
-		RE_CompCamera* current_camera = RE_CameraManager::CurrentCamera();
+		RE_CompCamera* current_camera = RE_CameraManager::EditorCamera();
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(current_camera->GetProjectionPtr());
