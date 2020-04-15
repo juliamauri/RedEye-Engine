@@ -435,6 +435,7 @@ void AABBDynamicTree::PopNode(int objectIndex)
 					root_index = parent_node->child2;
 				else // right child
 					root_index = parent_node->child1;
+				AtPtr(root_index)->parent_index = NullIndex;
 			}
 			else // has grand parent
 			{

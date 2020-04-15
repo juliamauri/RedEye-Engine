@@ -33,6 +33,7 @@
 #include "md5.h"
 #include <string>
 #include <queue>
+#include <vector>
 
 #include "SDL2\include\SDL.h"
 
@@ -737,17 +738,17 @@ void ModuleScene::ResetTrees()
 	static_tree.Clear();
 	dynamic_tree.Clear();
 
-	int lastIndex = goManager.GetLastIndex();
-	for (int i = 0; i <= lastIndex; i++)
+	std::vector<int> goIndex = goManager.GetAllKeys();
+	for (int i = 0; i < goIndex.size(); i++)
 	{
-		RE_GameObject* go = goManager.At(i);
+		RE_GameObject* go = goManager.At(goIndex[i]);
 
 		if (go->IsActive() && go->HasDrawComponents())
 		{
 			if (go->IsStatic())
-				static_tree.PushNode(i, go->GetGlobalBoundingBox());
+				static_tree.PushNode(goIndex[i], go->GetGlobalBoundingBox());
 			else
-				dynamic_tree.PushNode(i, go->GetGlobalBoundingBox());
+				dynamic_tree.PushNode(goIndex[i], go->GetGlobalBoundingBox());
 		}
 	}
 }
