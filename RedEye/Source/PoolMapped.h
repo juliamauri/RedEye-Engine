@@ -14,22 +14,25 @@ public:
 		pool_ = new TYPEVALUE[MAX_POOL];
 	}
 	virtual ~PoolMapped() {
-		DEL_A(pool_);
+		delete[] pool_;
 	}
 
 	virtual TYPEKEY Push(TYPEVALUE val) { return TYPEKEY(); };
 
-	virtual void Push(TYPEVALUE val, TYPEKEY key) {
-		pool_[lastAvaibleIndex] = val;
-		poolmapped_.insert(std::pair<TYPEKEY, unsigned int>(key, lastAvaibleIndex++));
+	virtual bool Push(TYPEVALUE val, TYPEKEY key) {
+		if (poolmapped_.find(key) == poolmapped_.end()) {
+			pool_[lastAvaibleIndex] = val;
+			poolmapped_.insert(std::pair<TYPEKEY, unsigned int>(key, lastAvaibleIndex++));
+			return true;
+		}
+		return false;
 	}
 
 	virtual TYPEVALUE Pop(TYPEKEY key) {
 		unsigned int index = poolmapped_.at(key);
 		TYPEVALUE ret = pool_[index];
-		for (unsigned int i = index; i < lastAvaibleIndex; i++)
-			pool_[i] = pool_[i + 1];
-		std::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.find(key);
+		memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE) * (lastAvaibleIndex - 1 - index));
+		typename std::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.find(key);
 		while (i != poolmapped_.end())
 		{
 			i->second--;
@@ -44,15 +47,18 @@ public:
 	TYPEVALUE& At(TYPEKEY key) { return pool_[poolmapped_.at(key)]; }
 	TYPEVALUE* AtPtr(TYPEKEY key)const { return &pool_[poolmapped_.at(key)]; }
 
-	int GetLastIndex() const
-	{
-		return lastAvaibleIndex - 1;
+	std::vector<TYPEKEY> GetAllKeys() {
+		std::vector<TYPEKEY> ret;
+		typename std::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.begin();
+		while (i != poolmapped_.end())
+		{
+			ret.push_back(i->first);
+			i++;
+		}
+		return ret;
 	}
 
-	int GetCount() const
-	{
-		return lastAvaibleIndex;
-	}
+	int GetCount()const { return poolmapped_.size(); }
 
 protected:
 	TYPEVALUE* pool_;
