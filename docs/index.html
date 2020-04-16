@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="style.css" />
+
+    <title>Red Eye Engine</title>
+</head>
+
+<body>
+    <div class="jumbotron jumbotron-fluid mb-0">
+        <div class="container-left ml-3">
+            <h1 class="display-4">Welcome to RedEye Engine!</h1>
+            <p class="lead">Red Eye is a 3D Game Engine written in C++ as an assignment for a university course.</p>
+        </div>
+    </div>
+
+    <img src="https://i.gyazo.com/340473d1ddace10fb78c592ee0232359.gif" class="img-fluid w-100" alt="Frustum Culling">
+
+    <div class="container p-5">
+        <p class="text-justify">What’s special about it? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we:</p>
+        <ul>
+            <li>Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly.</li>
+            <li>Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses.</li>
+            <li>Added Unity-like resource management with binary save/load for all the engines resources.</li>
+        </ul>
+    </div>
+
+    <div class="mx-auto">
+        <img src="https://i.gyazo.com/7aecf65fdd396ddcc73ab2c1be5183b7.gif" class="img-fluid mx-auto d-block" alt="Frustum Culling">
+    </div>
+
+    <hr>
+
+    <div class="embed-responsive embed-responsive-16by9">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/kDCOSGXkqL4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+
+    <div class="list-group mt-2">
+
+        <a href="https://github.com/juliamauri/RedEye-Engine" class="list-group-item list-group-item-action">Github repository</a>
+        <a href="https://juliamauri.github.io/RedEye-Engine/" class="list-group-item list-group-item-action">Webpage</a>
+        <div class="btn-group dropright">
+            <div class="text-left">
+                <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Authors
+
+                </button>
+
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="https://github.com/juliamauri">Julià Mauri Costa</a>
+                    <a class="dropdown-item" href="https://github.com/cumus">Rubén Sardón</a>
+                </div>
+            </div>
+        </div>
+        <a href="https://github.com/markitus18" class="list-group-item list-group-item-action">Tutor: Marc Garrigó</a>
+        <a href="https://www.citm.upc.edu/" class="list-group-item list-group-item-action">University: CITM UPC</a>
+        <a href="https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE" class="list-group-item list-group-item-action">GNU General Public License v3.0</a>
+    </div>
+
+    <div class="card mb-3 mt-2">
+        <div class="card-header font-weight-bold h4">
+            The Team
+        </div>
+        <img src="https://i.gyazo.com/a921f5ed3b659798393a16a1e6021e66.jpg" class="card-img-top" alt="us">
+        <div class="card-body">
+            <p class="card-text">Job focus:
+                <li>Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses.</li>
+                <li>Added Unity-like resource management with binary save/load for all the engines resources.</li>
+            </p>
+            <p class="card-text text-justify">We are good friends and passionate programmers and have been in a constant fight with one another to keep on track with milestones. We both had amazing new ideas for the engine every week but had to write them down for another time as we had a fixed delivery date. We split or tasks as much as possible but there where always dependencies in the way and for most of the time we spent side by side tackling all the bugs.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-auto">
+            <div class="list-group" id="list-tab" role="tablist">
+                <a class="list-group-item list-group-item-action active" id="list-appsystem-list" data-toggle="list" href="#list-appsystem" role="tab" aria-controls="appsystem">Application Systems</a>
+                <a class="list-group-item list-group-item-action" id="list-shaderpipe-list" data-toggle="list" href="#list-shaderpipe" role="tab" aria-controls="shaderpipe">Shader Pipeline</a>
+            </div>
+        </div>
+        <div class="col-8 text-justify">
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="list-appsystem" role="tabpanel" aria-labelledby="list-appsystem-list">
+                    <p>Our application has 5 main modules that are updated each frame:
+                        <li>Input</li>
+                        <li>Window</li>
+                        <li>Scene</li>
+                        <li>Editor</li>
+                        <li>Renderer</li>
+                    </p>
+
+                    <p>Then there are a bunch of independent modules that require no update and are used all over the place:
+                        <li>File system</li>
+                        <li>Managers for: timers, cameras, primitives, frame buffer objects, resources and thumbnails.</li>
+                        <li>Importers for: models, textures and shaders.</li>
+                        <li>Other: system specs, math, internal resources, error handler, glcache (optimizes repeated opengl calls).</li>
+                    </p>
+
+                </div>
+                <div class="tab-pane fade" id="list-shaderpipe" role="tabpanel" aria-labelledby="list-shaderpipe-list">
+                    <p>
+                        The sub-system we focused on is quite simple. It’s a shader manager that uses static functions to ease their handling and to make it more fun we:
+                        <li>Added a frame buffer object manager to allow for multiple rendering targets.</li>
+                        <li>Made selected gameobjects render with a thin border using the stencil buffer.</li>
+                        <li>Made a sample <a href="https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models"> Gerstner Wave</a> shader.</li>
+                        <li>Added Dynamic AABB Trees to further optimize the renderer as it was starting to get laggy. These trees calculate the bounding boxes the enclose the scene using always the combination with least surface area.</li>
+                        <img src="https://i.gyazo.com/fd1f8c59aa2b05a0e1ccb38f164ddc28.gif" class="img-fluid w-100" alt="Waves">
+
+
+                    </p>
+                    File system uses frame’s extra milliseconds to iterate the virtual directory looking for any changes in file last modification date. Thanks to this little detail we are able to detect any changes in our assets and update the shaders as soon as they are modified in-editor or outside.
+                    <p>
+                    </p>
+                    <p>
+                        Mesh components store geometry and its associated material. The material contains the shader it's going to be rendered with and the shader contains the actual program and its uniforms. Everything except debug drawing and editor UI renders using the shader pipeline.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    
+     <div class="card mb-3 mt-2">
+        <div class="card-header font-weight-bold h4">
+            License
+        </div>
+        <img src="https://i.gyazo.com/6eda7e6f16542e198c312c36dbd8c1a2.png" class="card-img-top" alt="GNU General Public License v3.0">
+    </div>
+    
+    
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+
+</html>
