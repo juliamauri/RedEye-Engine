@@ -10,37 +10,51 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
     <link rel="stylesheet" href="style.css" />
-    
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-    
-    <meta name="keywords" content="C++, Game Engine, RedEye Game Development, Graphics Programming, Video Game Engines, Game Programming, Unity Like, Shader, OpenGL, SDL, RedEye Engine">
-    
+
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+
+    <meta name="keywords" content="C++, Game Engine, RedEye Game Development, Graphics Programming, Video Game Engines, Game Programming, Unity Like, Shader, OpenGL, SDL, RedEye Engine" />
+
+    <meta property="og:title" content="RedEye Engine, a Video Game Development C++ Engine" />
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we: Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly. Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses. Added Unity-like resource management with binary save/load for all the engines resources." />
+    <meta property="og:image" content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png" />
+
+    <meta property="og:site_name" content="RedEye Engine" />
+
+    <meta name="Twitter:card" content="summary with large image" />
+    <meta name="Twitter:url" content="https://juliamauri.github.io/RedEye-Engine/" />
+    <meta name="Twitter:title" content="RedEye Engine, a Video Game Development C++ Engine" />
+    <meta name="Twitter:description" content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries." />
+    <meta name="Twitter:image" content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png" />
+
     <script type="application/ld+json">
-    {
-      "@context": "http://schema.org",
-      "@type": "SoftwareSourceCode",
-      "name": "RedEye Engine",
-      "alternateName" : "Red Eye Engine",
-      "url": "https://juliamauri.github.io/RedEye-Engine/",
-      "codeRepository": "https://github.com/juliamauri/RedEye-Engine",
-      "description" : "Engine 3D(OpenGL)",
-      "codeSampleType": "full (compile ready) solution",
-      "programmingLanguage": "c++",
-      "runtimePlatform" : "Microsoft Visual C++",
-      "targetProduct" :{
-      	"name" : "RedEye Engine",
-        "operatingSystem": "Windows",
-        "applicationCategory" : "Video Game Engines"
-      },
-      "about" : "What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we: Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly. Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses. Added Unity-like resource management with binary save/load for all the engines resources.",
-      "abstract" : "Red Eye is a 3D Game Engine written in C++ as an assignment for a university course.",
-      "accessModeSufficient" : ["textual", "visual"],
-      "acquireLicensePage" : "https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE",
-      "video" : "https://www.youtube.com/watch?v=kDCOSGXkqL4",
-      "image" : "https://i.gyazo.com/7aecf65fdd396ddcc73ab2c1be5183b7.gif",
-      "author" : "Julià Mauri Costa & Ruben Sardón"
-      }
-  </script>
+        {
+            "@context": "http://schema.org",
+            "@type": "SoftwareSourceCode",
+            "name": "RedEye Engine",
+            "alternateName": "Red Eye Engine",
+            "url": "https://juliamauri.github.io/RedEye-Engine/",
+            "codeRepository": "https://github.com/juliamauri/RedEye-Engine",
+            "description": "Engine 3D(OpenGL)",
+            "codeSampleType": "full (compile ready) solution",
+            "programmingLanguage": "c++",
+            "runtimePlatform": "Microsoft Visual C++",
+            "targetProduct": {
+                "name": "RedEye Engine",
+                "operatingSystem": "Windows",
+                "applicationCategory": "Video Game Engines"
+            },
+            "about": "What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we: Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly. Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses. Added Unity-like resource management with binary save/load for all the engines resources.",
+            "abstract": "Red Eye is a 3D Game Engine written in C++ as an assignment for a university course.",
+            "accessModeSufficient": ["textual", "visual"],
+            "acquireLicensePage": "https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE",
+            "video": "https://www.youtube.com/watch?v=kDCOSGXkqL4",
+            "image": "https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png",
+            "author": "Julià Mauri Costa & Ruben Sardón"
+        }
+
+    </script>
 
 
     <title>RedEye Engine</title>
@@ -159,8 +173,8 @@
             </div>
         </div>
     </div>
-    
-     <div class="card mb-3 mt-2">
+
+    <div class="card mb-3 mt-2">
         <div class="card-header font-weight-bold h4">
             License
         </div>
@@ -173,7 +187,11 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
     <!-- Seo Scout -->
-    <script type="text/javascript">var abr_id = 1450;</script><script src="https://cdn.abrankings.com/js/client.js"></script>
+    <script type="text/javascript">
+        var abr_id = 1450;
+
+    </script>
+    <script src="https://cdn.abrankings.com/js/client.js"></script>
 </body>
 
 </html>
