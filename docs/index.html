@@ -55,7 +55,17 @@
             "acquireLicensePage": "https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE",
             "video": "https://www.youtube.com/watch?v=kDCOSGXkqL4",
             "image": "https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png",
-            "author": "Julià Mauri Costa & Ruben Sardón"
+            "author": [{
+                "@type": "Person",
+                "familyName": "Mauri Costa",
+                "givenName": "Julià",
+                "name": "Julià Mauri Costa"
+            }, {
+                "@type": "Person",
+                "familyName": "Sardón",
+                "givenName": "Ruben",
+                "name": "Ruben Sardón"
+            }]
         }
     </script>
 
@@ -67,7 +77,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: #203F59;">
         <a class="navbar-brand" href="https://juliamauri.github.io/RedEye-Engine/" style="color: #4ECBD9">
-                <img src="favicon-32x32.png" width="30" height="30" class="d-inline-block align-top" alt="">
+            <img src="favicon-32x32.png" width="30" height="30" class="d-inline-block align-top" alt="">
             RedEye Engine</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -225,6 +235,9 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         firebase.analytics();
+
     </script>
 
-</body></html>
+</body>
+
+</html>
