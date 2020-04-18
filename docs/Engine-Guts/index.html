@@ -9,13 +9,13 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="../style.css" />
 
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
-    <link rel="manifest" href="site.webmanifest" />
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
 
     <meta name="keywords" content="C++, Game Engine, RedEye Game Development, Graphics Programming, Video Game Engines, Game Programming, Unity Like, Shader, OpenGL, SDL, RedEye Engine" />
 
@@ -70,14 +70,14 @@
     </script>
 
 
-    <title>RedEye Engine</title>
+    <title>RedEye Engine - Engine Guts</title>
 </head>
 
-<body>
+<body style="background-color: #0D0D0D;">
 
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: #203F59;">
         <a class="navbar-brand" href="https://juliamauri.github.io/RedEye-Engine/" style="color: #4ECBD9">
-            <img src="favicon-32x32.png" width="30" height="30" class="d-inline-block align-top" alt="">
+            <img src="../favicon-32x32.png" width="30" height="30" class="d-inline-block align-top" alt="">
             RedEye Engine</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -91,66 +91,74 @@
         </div>
     </nav>
 
-    <div style="background-color: #0D0D0D;">
-        <div class="jumbotron jumbotron-fluid mb-0">
-            <div class="container-left ml-3">
-                <h1 class="display-4">Welcome to RedEye Engine!</h1>
-                <p class="lead" style="color: #1F248C">RedEye is a 3D Game Engine written in C++ as an assignment for a university course.</p>
-            </div>
+
+
+    <div class="jumbotron jumbotron-fluid mb-0">
+        <div class="container-left ml-3">
+            <h1 class="display-4">The Engine Guts!</h1>
+            <p class="lead" style="color: #1F248C">Discovery how the engine works.</p>
         </div>
+    </div>
 
-        <img src="https://i.gyazo.com/340473d1ddace10fb78c592ee0232359.gif" class="img-fluid mx-auto d-block" alt="Frustum Culling">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="application-tab" data-toggle="tab" href="#application" role="tab" aria-controls="application" aria-selected="true">Application Systems</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="shader-tab" data-toggle="tab" href="#shader" role="tab" aria-controls="shader" aria-selected="false">Shader Pipeline</a>
+        </li>
+    </ul>
 
-        <div class="container p-5" style="color: #1F248C">
-            <p class="text-justify">What’s special about it? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we:</p>
-            <ul>
-                <li>Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly.</li>
-                <li>Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses.</li>
-                <li>Added Unity-like resource management with binary save/load for all the engines resources.</li>
-            </ul>
-        </div>
+    <div class="container p-5">
 
-        <img src="https://i.gyazo.com/7aecf65fdd396ddcc73ab2c1be5183b7.gif" class="img-fluid mx-auto d-block" alt="Frustum Culling" />
-
-        <hr>
-
-        <div class="container w-70">
-            <div class="embed-responsive embed-responsive-16by9">
-                <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/kDCOSGXkqL4" allowfullscreen></iframe>
-            </div>
-
-
-            <div class="list-group mt-2">
-
-                <a href="https://github.com/juliamauri/RedEye-Engine" class="list-group-item list-group-item-action">Github repository</a>
-                <a href="https://juliamauri.github.io/RedEye-Engine/" class="list-group-item list-group-item-action">Webpage</a>
-                <div class="btn-group dropright">
-                    <div class="text-left">
-                        <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Authors
-
-                        </button>
-
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="https://github.com/juliamauri">Julià Mauri Costa</a>
-                            <a class="dropdown-item" href="https://github.com/cumus">Rubén Sardón</a>
-                        </div>
+        <div class="tab-content text-justify" id="myTabContent" style="color: #1F248C">
+            <div class="tab-pane fade show active" id="application" role="tabpanel" aria-labelledby="application-tab">
+                <div class="tab-pane fade show active" id="list-appsystem" role="tabpanel" aria-labelledby="list-appsystem-list">
+                    <div>Our application has 5 main modules that are updated each frame:
+                        <ul>
+                            <li>Input</li>
+                            <li>Window</li>
+                            <li>Scene</li>
+                            <li>Editor</li>
+                            <li>Renderer</li>
+                        </ul>
                     </div>
-                </div>
-                <a href="https://github.com/markitus18" class="list-group-item list-group-item-action">Tutor: Marc Garrigó</a>
-                <a href="https://www.citm.upc.edu/" class="list-group-item list-group-item-action">University: CITM UPC</a>
-                <a href="https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE" class="list-group-item list-group-item-action">GNU General Public License v3.0</a>
-            </div>
-        </div>
 
-        <div class="card mb-3 mt-2">
-            <div class="card-header font-weight-bold h4">
-                License
+                    Then there are a bunch of independent modules that require no update and are used all over the place:
+                    <ul>
+                        <li>File system</li>
+                        <li>Managers for: timers, cameras, primitives, frame buffer objects, resources and thumbnails.</li>
+                        <li>Importers for: models, textures and shaders.</li>
+                        <li>Other: system specs, math, internal resources, error handler, glcache (optimizes repeated opengl calls).</li>
+                    </ul>
+
+
+                </div>
             </div>
-            <img src="https://i.gyazo.com/6eda7e6f16542e198c312c36dbd8c1a2.png" class="card-img-top" alt="GNU General Public License v3.0">
+            <div class="tab-pane fade" id="shader" role="tabpanel" aria-labelledby="shader-tab">
+
+
+                The sub-system we focused on is quite simple. It’s a shader manager that uses static functions to ease their handling and to make it more fun we:
+                <ul>
+
+                    <li>Added a frame buffer object manager to allow for multiple rendering targets.</li>
+                    <li>Made selected gameobjects render with a thin border using the stencil buffer.</li>
+                    <li>Made a sample <a href="https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models"> Gerstner Wave</a> shader.</li>
+                    <li>Added Dynamic AABB Trees to further optimize the renderer as it was starting to get laggy. These trees calculate the bounding boxes the enclose the scene using always the combination with least surface area.</li>
+                </ul>
+                <img src="https://i.gyazo.com/fd1f8c59aa2b05a0e1ccb38f164ddc28.gif" class="img-fluid w-100" alt="Waves" />
+                <p>
+
+                    File system uses frame’s extra milliseconds to iterate the virtual directory looking for any changes in file last modification date. Thanks to this little detail we are able to detect any changes in our assets and update the shaders as soon as they are modified in-editor or outside.
+                </p>
+                <p>
+                    Mesh components store geometry and its associated material. The material contains the shader it's going to be rendered with and the shader contains the actual program and its uniforms. Everything except debug drawing and editor UI renders using the shader pipeline.
+                </p>
+            </div>
         </div>
 
     </div>
+
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -181,9 +189,6 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         firebase.analytics();
-
     </script>
 
-</body>
-
-</html>
+</body></html>

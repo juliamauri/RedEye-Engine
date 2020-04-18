@@ -1,11 +1,34 @@
-h1{
+h1 {
     color: #8C0F1A;
 }
 
-.card{
+.card {
     background-color: #0D0D0D;
 }
 
-.jumbotron{
+.jumbotron {
     background-color: #0D0D0D;
+}
+
+
+.nav-item .nav-link.active{
+    color: #0D0D0D;
+    font-weight: bold;
+    background-color:  #8C0F1A;
+    border-color: #4ECBD9;
+}
+
+.nav-item:hover .nav-link {
+    color: #0D0D0D;
+    font-weight: bold;
+    background-color:  #8C0F1A;
+    border-color: #4ECBD9;
+}
+
+.nav-item .nav-link {
+    color: #4ECBD9;
+}
+
+.nav{
+    border-color: #4ECBD9;
 }
