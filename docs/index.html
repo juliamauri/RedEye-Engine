@@ -57,7 +57,6 @@
             "image": "https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png",
             "author": "Julià Mauri Costa & Ruben Sardón"
         }
-
     </script>
 
 
@@ -125,10 +124,13 @@
             </div>
             <img src="https://i.gyazo.com/5890de46474b12576915c0c5aca1adc6.jpg" class="card-img-top" alt="us">
             <div class="card-body">
-                <p class="card-text">Job focus:
-                    <li>Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses.</li>
-                    <li>Added Unity-like resource management with binary save/load for all the engines resources.</li>
-                </p>
+                <div class="card-text">Job focus:
+                    <ul>
+                        <li>Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses.</li>
+                        <li>Added Unity-like resource management with binary save/load for all the engines resources.</li>
+                    </ul>
+
+                </div>
                 <p class="card-text text-justify">We are good friends and passionate programmers and have been in a constant fight with one another to keep on track with milestones. We both had amazing new ideas for the engine every week but had to write them down for another time as we had a fixed delivery date. We split or tasks as much as possible but there where always dependencies in the way and for most of the time we spent side by side tackling all the bugs.</p>
             </div>
         </div>
@@ -144,31 +146,37 @@
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="list-appsystem" role="tabpanel" aria-labelledby="list-appsystem-list">
                         <p>Our application has 5 main modules that are updated each frame:
-                            <li>Input</li>
-                            <li>Window</li>
-                            <li>Scene</li>
-                            <li>Editor</li>
-                            <li>Renderer</li>
+                            <ul>
+                                <li>Input</li>
+                                <li>Window</li>
+                                <li>Scene</li>
+                                <li>Editor</li>
+                                <li>Renderer</li>
+                            </ul>
                         </p>
 
                         <p>Then there are a bunch of independent modules that require no update and are used all over the place:
-                            <li>File system</li>
-                            <li>Managers for: timers, cameras, primitives, frame buffer objects, resources and thumbnails.</li>
-                            <li>Importers for: models, textures and shaders.</li>
-                            <li>Other: system specs, math, internal resources, error handler, glcache (optimizes repeated opengl calls).</li>
+                            <ul>
+                                <li>File system</li>
+                                <li>Managers for: timers, cameras, primitives, frame buffer objects, resources and thumbnails.</li>
+                                <li>Importers for: models, textures and shaders.</li>
+                                <li>Other: system specs, math, internal resources, error handler, glcache (optimizes repeated opengl calls).</li>
+                            </ul>
+
                         </p>
 
                     </div>
                     <div class="tab-pane fade" id="list-shaderpipe" role="tabpanel" aria-labelledby="list-shaderpipe-list">
                         <p>
                             The sub-system we focused on is quite simple. It’s a shader manager that uses static functions to ease their handling and to make it more fun we:
-                            <li>Added a frame buffer object manager to allow for multiple rendering targets.</li>
-                            <li>Made selected gameobjects render with a thin border using the stencil buffer.</li>
-                            <li>Made a sample <a href="https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models"> Gerstner Wave</a> shader.</li>
-                            <li>Added Dynamic AABB Trees to further optimize the renderer as it was starting to get laggy. These trees calculate the bounding boxes the enclose the scene using always the combination with least surface area.</li>
-                            <img src="https://i.gyazo.com/fd1f8c59aa2b05a0e1ccb38f164ddc28.gif" class="img-fluid w-100" alt="Waves">
+                            <ul>
 
-
+                                <li>Added a frame buffer object manager to allow for multiple rendering targets.</li>
+                                <li>Made selected gameobjects render with a thin border using the stencil buffer.</li>
+                                <li>Made a sample <a href="https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models"> Gerstner Wave</a> shader.</li>
+                                <li>Added Dynamic AABB Trees to further optimize the renderer as it was starting to get laggy. These trees calculate the bounding boxes the enclose the scene using always the combination with least surface area.</li>
+                            </ul>
+                            <img src="https://i.gyazo.com/fd1f8c59aa2b05a0e1ccb38f164ddc28.gif" class="img-fluid w-100" alt="Waves" />
                         </p>
                         File system uses frame’s extra milliseconds to iterate the virtual directory looking for any changes in file last modification date. Thanks to this little detail we are able to detect any changes in our assets and update the shaders as soon as they are modified in-editor or outside.
                         <p>
@@ -220,9 +228,6 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         firebase.analytics();
-
     </script>
 
-</body>
-
-</html>
+</body></html>
