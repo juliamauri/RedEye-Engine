@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="../style.css" />
+
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+    <link rel="manifest" href="../site.webmanifest" />
+
+    <meta name="keywords" content="C++, Game Engine, RedEye Game Development, Graphics Programming, Video Game Engines, Game Programming, Unity Like, Shader, OpenGL, SDL, RedEye Engine" />
+
+    <meta property="og:title" content="RedEye Engine, a Video Game Development C++ Engine" />
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we: Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly. Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses. Added Unity-like resource management with binary save/load for all the engines resources." />
+    <meta property="og:image" content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png" />
+
+    <meta property="og:site_name" content="RedEye Engine" />
+
+    <meta name="Twitter:card" content="summary with large image" />
+    <meta name="Twitter:url" content="https://juliamauri.github.io/RedEye-Engine/" />
+    <meta name="Twitter:title" content="RedEye Engine, a Video Game Development C++ Engine" />
+    <meta name="Twitter:description" content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries." />
+    <meta name="Twitter:image" content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png" />
+
+    <script type="application/ld+json">
+        {
+            "@context": "http://schema.org",
+            "@type": "SoftwareSourceCode",
+            "name": "RedEye Engine",
+            "alternateName": "Red Eye Engine",
+            "url": "https://juliamauri.github.io/RedEye-Engine/",
+            "codeRepository": "https://github.com/juliamauri/RedEye-Engine",
+            "description": "Engine 3D(OpenGL)",
+            "codeSampleType": "full (compile ready) solution",
+            "programmingLanguage": "c++",
+            "runtimePlatform": "Microsoft Visual C++",
+            "targetProduct": {
+                "name": "RedEye Engine",
+                "operatingSystem": "Windows",
+                "applicationCategory": "Video Game Engines"
+            },
+            "about": "What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we: Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly. Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses. Added Unity-like resource management with binary save/load for all the engines resources.",
+            "abstract": "Red Eye is a 3D Game Engine written in C++ as an assignment for a university course.",
+            "accessModeSufficient": ["textual", "visual"],
+            "acquireLicensePage": "https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE",
+            "video": "https://www.youtube.com/watch?v=kDCOSGXkqL4",
+            "image": "https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png",
+            "author": "Julià Mauri Costa & Ruben Sardón"
+        }
+    </script>
+
+
+    <title>RedEye Engine</title>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: #203F59;">
+        <a class="navbar-brand" href="https://juliamauri.github.io/RedEye-Engine/" style="color: #4ECBD9">
+            <img src="../favicon-32x32.png" width="30" height="30" class="d-inline-block align-top" alt="">
+            RedEye Engine</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link" href="https://juliamauri.github.io/RedEye-Engine/" style="color: #4ECBD9">Home</a>
+                <a class="nav-item nav-link" href="https://juliamauri.github.io/RedEye-Engine/The-Team/" style="color: #4ECBD9">The Team</a>
+                <a class="nav-item nav-link" href="#" style="color: #4ECBD9">Application Systems</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="card" style="color: #4ECBD9">
+        <div class="card-header font-weight-bold h4">
+            The Team
+        </div>
+        <img src="https://i.gyazo.com/5890de46474b12576915c0c5aca1adc6.jpg" class="card-img-top" alt="us">
+        <div class="card-body">
+            <div class="card-text">Job focus:
+                <ul>
+                    <li>Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses.</li>
+                    <li>Added Unity-like resource management with binary save/load for all the engines resources.</li>
+                </ul>
+
+            </div>
+            <p class="card-text text-justify">We are good friends and passionate programmers and have been in a constant fight with one another to keep on track with milestones. We both had amazing new ideas for the engine every week but had to write them down for another time as we had a fixed delivery date. We split or tasks as much as possible but there where always dependencies in the way and for most of the time we spent side by side tackling all the bugs.</p>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha384-vk5WoKIaW/vJyUAd9n/wmopsmNhiy+L2Z+SBxGYnUkunIxVxAv/UtMOhba/xskxh" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-analytics.js"></script>
+
+
+    <script crossorigin="anonymous">
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyCMOTl92hbee8U9CXHkVDeBxUpGeKDTMWU",
+            authDomain: "redeye-4bb97.firebaseapp.com",
+            databaseURL: "https://redeye-4bb97.firebaseio.com",
+            projectId: "redeye-4bb97",
+            storageBucket: "redeye-4bb97.appspot.com",
+            messagingSenderId: "85997841293",
+            appId: "1:85997841293:web:ce16a597b1baac17fb2bc4",
+            measurementId: "G-PE3716BLNW"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+    </script>
+
+</body></html>
