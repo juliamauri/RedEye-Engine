@@ -9,7 +9,18 @@
 
 <url>
   <loc>https://juliamauri.github.io/RedEye-Engine/</loc>
-  <lastmod>2020-04-17T11:48:33+00:00</lastmod>
+  <lastmod>2020-04-18T18:05:26+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://juliamauri.github.io/RedEye-Engine/The-Team/</loc>
+  <lastmod>2020-04-18T18:05:26+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://juliamauri.github.io/RedEye-Engine/Engine-Guts/</loc>
+  <lastmod>2020-04-18T18:05:26+00:00</lastmod>
+  <priority>0.80</priority>
 </url>
 
 
