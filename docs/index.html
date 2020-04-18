@@ -135,57 +135,58 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-auto">
-                <div class="list-group" id="list-tab" role="tablist">
-                    <a class="list-group-item list-group-item-action active" id="list-appsystem-list" data-toggle="list" href="#list-appsystem" role="tab" aria-controls="appsystem">Application Systems</a>
-                    <a class="list-group-item list-group-item-action" id="list-shaderpipe-list" data-toggle="list" href="#list-shaderpipe" role="tab" aria-controls="shaderpipe">Shader Pipeline</a>
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="application-tab" data-toggle="tab" href="#application" role="tab" aria-controls="application" aria-selected="true">Application Systems</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="shader-tab" data-toggle="tab" href="#shader" role="tab" aria-controls="shader" aria-selected="false">Shader Pipeline</a>
+            </li>
+        </ul>
+        <div class="tab-content text-justify" id="myTabContent">
+            <div class="tab-pane fade show active" id="application" role="tabpanel" aria-labelledby="application-tab">
+                <div class="tab-pane fade show active" id="list-appsystem" role="tabpanel" aria-labelledby="list-appsystem-list">
+                    <div>Our application has 5 main modules that are updated each frame:
+                        <ul>
+                            <li>Input</li>
+                            <li>Window</li>
+                            <li>Scene</li>
+                            <li>Editor</li>
+                            <li>Renderer</li>
+                        </ul>
+                    </div>
+
+                    Then there are a bunch of independent modules that require no update and are used all over the place:
+                    <ul>
+                        <li>File system</li>
+                        <li>Managers for: timers, cameras, primitives, frame buffer objects, resources and thumbnails.</li>
+                        <li>Importers for: models, textures and shaders.</li>
+                        <li>Other: system specs, math, internal resources, error handler, glcache (optimizes repeated opengl calls).</li>
+                    </ul>
+
+
                 </div>
             </div>
-            <div class="col-8 text-justify">
-                <div class="tab-content" id="nav-tabContent">
-                    <div class="tab-pane fade show active" id="list-appsystem" role="tabpanel" aria-labelledby="list-appsystem-list">
-                        <div>Our application has 5 main modules that are updated each frame:
-                            <ul>
-                                <li>Input</li>
-                                <li>Window</li>
-                                <li>Scene</li>
-                                <li>Editor</li>
-                                <li>Renderer</li>
-                            </ul>
-                        </div>
-
-                        Then there are a bunch of independent modules that require no update and are used all over the place:
-                        <ul>
-                            <li>File system</li>
-                            <li>Managers for: timers, cameras, primitives, frame buffer objects, resources and thumbnails.</li>
-                            <li>Importers for: models, textures and shaders.</li>
-                            <li>Other: system specs, math, internal resources, error handler, glcache (optimizes repeated opengl calls).</li>
-                        </ul>
+            <div class="tab-pane fade" id="shader" role="tabpanel" aria-labelledby="shader-tab">
 
 
-                    </div>
-                    <div class="tab-pane fade" id="list-shaderpipe" role="tabpanel" aria-labelledby="list-shaderpipe-list">
+                The sub-system we focused on is quite simple. It’s a shader manager that uses static functions to ease their handling and to make it more fun we:
+                <ul>
 
-                        The sub-system we focused on is quite simple. It’s a shader manager that uses static functions to ease their handling and to make it more fun we:
-                        <ul>
+                    <li>Added a frame buffer object manager to allow for multiple rendering targets.</li>
+                    <li>Made selected gameobjects render with a thin border using the stencil buffer.</li>
+                    <li>Made a sample <a href="https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models"> Gerstner Wave</a> shader.</li>
+                    <li>Added Dynamic AABB Trees to further optimize the renderer as it was starting to get laggy. These trees calculate the bounding boxes the enclose the scene using always the combination with least surface area.</li>
+                </ul>
+                <img src="https://i.gyazo.com/fd1f8c59aa2b05a0e1ccb38f164ddc28.gif" class="img-fluid w-100" alt="Waves" />
+                <p>
 
-                            <li>Added a frame buffer object manager to allow for multiple rendering targets.</li>
-                            <li>Made selected gameobjects render with a thin border using the stencil buffer.</li>
-                            <li>Made a sample <a href="https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models"> Gerstner Wave</a> shader.</li>
-                            <li>Added Dynamic AABB Trees to further optimize the renderer as it was starting to get laggy. These trees calculate the bounding boxes the enclose the scene using always the combination with least surface area.</li>
-                        </ul>
-                        <img src="https://i.gyazo.com/fd1f8c59aa2b05a0e1ccb38f164ddc28.gif" class="img-fluid w-100" alt="Waves" />
-                        <p>
-
-                        File system uses frame’s extra milliseconds to iterate the virtual directory looking for any changes in file last modification date. Thanks to this little detail we are able to detect any changes in our assets and update the shaders as soon as they are modified in-editor or outside.
-                        </p>
-                        <p>
-                            Mesh components store geometry and its associated material. The material contains the shader it's going to be rendered with and the shader contains the actual program and its uniforms. Everything except debug drawing and editor UI renders using the shader pipeline.
-                        </p>
-
-                    </div>
-                </div>
+                    File system uses frame’s extra milliseconds to iterate the virtual directory looking for any changes in file last modification date. Thanks to this little detail we are able to detect any changes in our assets and update the shaders as soon as they are modified in-editor or outside.
+                </p>
+                <p>
+                    Mesh components store geometry and its associated material. The material contains the shader it's going to be rendered with and the shader contains the actual program and its uniforms. Everything except debug drawing and editor UI renders using the shader pipeline.
+                </p>
             </div>
         </div>
 
