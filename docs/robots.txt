@@ -1,6 +1,9 @@
 User-agent: Googlebot
 Allow: /
 
+User-agent: Googlebot smartphone
+Allow: /
+
 User-agent: *
 Disallow: /
 
