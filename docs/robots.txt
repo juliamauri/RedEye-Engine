@@ -1,0 +1,7 @@
+User-agent: Googlebot
+Allow: /
+
+User-agent: *
+Disallow: /
+
+Sitemap: https://www.redeye-engine.es/sitemap.xml
