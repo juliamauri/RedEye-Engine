@@ -3,9 +3,8 @@
 
 #include "EventListener.h"
 #include "Optick/include/optick.h"
-#include <string>
-#include <list>
-#include <map>
+#include <EASTL/string.h>
+#include <EASTL/list.h>
 
 class Module;
 class ModuleInput;
@@ -96,16 +95,15 @@ public:
 	RE_ThumbnailManager* thumbnail = nullptr;
 
 private:
-
-	std::list<Module*> modules;
+	eastl::list<Module*> modules;
 	bool want_to_load_def = false;
 	bool want_to_load = false;
 	bool want_to_save = false;
 	bool want_to_quit = false;
 	bool ticking = false;
 
-	std::string app_name = "RedEye Engine";
-	std::string organization = "RedEye";
+	eastl::string app_name;
+	eastl::string organization;
 
 	GameState state = GS_STOP;
 };

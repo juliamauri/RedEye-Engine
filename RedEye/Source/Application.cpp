@@ -33,10 +33,11 @@
 #include "IL/include/ilut.h"
 #include "Optick/include/optick.h"
 
-using namespace std;
-
 Application::Application()
 {
+	app_name = "RedEye Engine";
+	organization = "RedEye";
+
 	fs = new RE_FileSystem();
 	time = new TimeManager();
 	sys_info = new SystemInfo();
@@ -76,7 +77,7 @@ Application::~Application()
 	DEL(fbomanager);
 	DEL(thumbnail);
 
-	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
+	for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;
 
 	DEL(fs);
@@ -119,7 +120,7 @@ bool Application::Init(int argc, char* argv[])
 			DEL(node);
 
 			// Initiallize Updating Modules
-			for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
+			for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 				if ((*it)->IsActive() == true)
 				{
 					node = config->GetRootNode((*it)->GetName());
@@ -153,7 +154,7 @@ bool Application::Init(int argc, char* argv[])
 
 				LOG_SEPARATOR("Starting Application");
 
-				for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
+				for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 					if ((*it)->IsActive() == true)
 					{
 						LOG_SEPARATOR("Starting Module %s", (*it)->GetName());
@@ -180,7 +181,7 @@ int Application::Update()
 
 	int ret = UPDATE_CONTINUE;
 
-	list<Module*>::iterator it;
+	eastl::list<Module*>::iterator it;
 
 	OPTICK_CATEGORY("PreUpdate Application", Optick::Category::GameLogic);
 	for (it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
@@ -235,7 +236,7 @@ bool Application::CleanUp()
 
 	fs->GetConfig()->Save();
 
-	for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend() && ret; ++it)
+	for (eastl::list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend() && ret; ++it)
 		if ((*it)->IsActive() == true)
 			ret = (*it)->CleanUp();
 
@@ -254,7 +255,7 @@ bool Application::Load()
 	organization = node->PullString("Organization", organization.c_str());
 	DEL(node);
 
-	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
+	for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 		if ((*it)->IsActive() == true)
 		{
 			node = config->GetRootNode((*it)->GetName());
@@ -279,7 +280,7 @@ bool Application::Save()
 	node->PushString("Organization", organization.c_str());
 	DEL(node);
 
-	for (list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
+	for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 		if ((*it)->IsActive() == true)
 		{
 			node = config->GetRootNode((*it)->GetName());
@@ -320,7 +321,7 @@ void Application::DrawEditor()
 		time->DrawEditor();
 	}
 
-	for (list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
+	for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		if ((*it)->IsActive() == true)
 			(*it)->DrawEditor();
 
@@ -374,7 +375,7 @@ void Application::RecieveEvent(const Event& e)
 	{
 	case PLAY: 
 	{
-		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
+		for (eastl::list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive())
 				(*it)->OnPlay();
 
@@ -385,7 +386,7 @@ void Application::RecieveEvent(const Event& e)
 	}
 	case PAUSE:
 	{
-		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
+		for (eastl::list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive())
 				(*it)->OnPause();
 
@@ -395,7 +396,7 @@ void Application::RecieveEvent(const Event& e)
 	}
 	case TICK:
 	{
-		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
+		for (eastl::list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive())
 				(*it)->OnPlay();
 
@@ -406,7 +407,7 @@ void Application::RecieveEvent(const Event& e)
 	}
 	case STOP:
 	{
-		for (list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
+		for (eastl::list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive())
 				(*it)->OnStop();
 

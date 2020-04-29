@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="mmgr\mmgr.cpp">
-      <Filter>3rd Party\mmgr</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Main</Filter>
     </ClCompile>
@@ -177,12 +174,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mmgr\mmgr.h">
-      <Filter>3rd Party\mmgr</Filter>
-    </ClInclude>
-    <ClInclude Include="mmgr\nommgr.h">
-      <Filter>3rd Party\mmgr</Filter>
-    </ClInclude>
     <ClInclude Include="Application.h">
       <Filter>Main</Filter>
     </ClInclude>
@@ -510,403 +501,400 @@
     <ClInclude Include="PoolMapped.h">
       <Filter>Containers</Filter>
     </ClInclude>
-    <ClInclude Include="EASTL\bonus\adaptors.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\call_traits.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\compressed_pair.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\fixed_ring_buffer.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\fixed_tuple_vector.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\intrusive_sdlist.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\intrusive_slist.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\list_map.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\lru_cache.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\ring_buffer.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\sort_extra.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\sparse_matrix.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bonus\tuple_vector.h">
-      <Filter>3rd Party\EA\STL\Bonus</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\allocator_traits.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\allocator_traits_fwd_decls.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\char_traits.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\config.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\copy_help.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\enable_shared.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\fill_help.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\fixed_pool.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\function.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\function_detail.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\function_help.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\functional_base.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\generic_iterator.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\hashtable.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\in_place_t.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\integer_sequence.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\intrusive_hashtable.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\mem_fn.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\memory_base.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\move_help.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\pair_fwd_decls.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\piecewise_construct_t.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\red_black_tree.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\smart_ptr.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\thread_support.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\tuple_fwd_decls.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\type_compound.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\type_fundamental.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\type_pod.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\type_properties.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\internal\type_transformations.h">
-      <Filter>3rd Party\EA\STL\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\algorithm.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\allocator.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\allocator_malloc.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\any.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\array.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bitset.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\bitvector.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\chrono.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\core_allocator.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\core_allocator_adapter.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\deque.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\finally.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_allocator.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_function.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_hash_map.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_hash_set.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_list.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_map.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_set.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_slist.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_string.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_substring.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\fixed_vector.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\functional.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\hash_map.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\hash_set.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\heap.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\initializer_list.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\intrusive_hash_map.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\intrusive_hash_set.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\intrusive_list.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\intrusive_ptr.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\iterator.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\linked_array.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\linked_ptr.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\list.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\map.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\memory.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\meta.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\numeric.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\numeric_limits.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\optional.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\priority_queue.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\queue.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\random.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\ratio.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\safe_ptr.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\scoped_array.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\scoped_ptr.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\segmented_vector.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\set.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\shared_array.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\shared_ptr.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\slist.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\sort.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\span.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\stack.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\string.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\string_hash_map.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\string_map.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\string_view.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\tuple.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\type_traits.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\unique_ptr.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\unordered_map.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\unordered_set.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\utility.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\variant.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\vector.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\vector_map.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\vector_multimap.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\vector_multiset.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\vector_set.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\version.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EASTL\weak_ptr.h">
-      <Filter>3rd Party\EA\STL</Filter>
-    </ClInclude>
-    <ClInclude Include="EABase\config\eacompiler.h">
+    <ClInclude Include="EA\EABase\config\eacompiler.h">
       <Filter>3rd Party\EA\Base\config</Filter>
     </ClInclude>
-    <ClInclude Include="EABase\config\eacompilertraits.h">
+    <ClInclude Include="EA\EABase\config\eacompilertraits.h">
       <Filter>3rd Party\EA\Base\config</Filter>
     </ClInclude>
-    <ClInclude Include="EABase\config\eaplatform.h">
+    <ClInclude Include="EA\EABase\config\eaplatform.h">
       <Filter>3rd Party\EA\Base\config</Filter>
     </ClInclude>
-    <ClInclude Include="EABase\eabase.h">
+    <ClInclude Include="EA\EABase\eabase.h">
       <Filter>3rd Party\EA\Base</Filter>
     </ClInclude>
-    <ClInclude Include="EABase\eahave.h">
+    <ClInclude Include="EA\EABase\eahave.h">
       <Filter>3rd Party\EA\Base</Filter>
     </ClInclude>
-    <ClInclude Include="EABase\earesult.h">
+    <ClInclude Include="EA\EABase\earesult.h">
       <Filter>3rd Party\EA\Base</Filter>
     </ClInclude>
-    <ClInclude Include="EABase\eastdarg.h">
+    <ClInclude Include="EA\EABase\eastdarg.h">
       <Filter>3rd Party\EA\Base</Filter>
     </ClInclude>
-    <ClInclude Include="EABase\eaunits.h">
+    <ClInclude Include="EA\EABase\eaunits.h">
       <Filter>3rd Party\EA\Base</Filter>
     </ClInclude>
-    <ClInclude Include="EABase\int128.h">
+    <ClInclude Include="EA\EABase\int128.h">
       <Filter>3rd Party\EA\Base</Filter>
     </ClInclude>
-    <ClInclude Include="EABase\nullptr.h">
+    <ClInclude Include="EA\EABase\nullptr.h">
       <Filter>3rd Party\EA\Base</Filter>
     </ClInclude>
-    <ClInclude Include="EABase\version.h">
+    <ClInclude Include="EA\EABase\version.h">
       <Filter>3rd Party\EA\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\algorithm.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\allocator.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\allocator_malloc.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\any.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\array.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bitset.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bitvector.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\chrono.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\core_allocator.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\core_allocator_adapter.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\deque.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\finally.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_allocator.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_function.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_hash_map.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_hash_set.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_list.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_map.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_set.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_slist.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_string.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_substring.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\fixed_vector.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\functional.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\hash_map.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\hash_set.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\heap.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\initializer_list.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\intrusive_hash_map.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\intrusive_hash_set.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\intrusive_list.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\intrusive_ptr.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\iterator.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\linked_array.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\linked_ptr.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\list.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\map.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\memory.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\meta.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\numeric.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\numeric_limits.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\optional.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\priority_queue.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\queue.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\random.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\ratio.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\safe_ptr.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\scoped_array.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\scoped_ptr.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\segmented_vector.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\set.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\shared_array.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\shared_ptr.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\slist.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\sort.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\span.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\stack.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\string.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\string_hash_map.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\string_map.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\string_view.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\tuple.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\type_traits.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\unique_ptr.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\unordered_map.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\unordered_set.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\utility.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\variant.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\vector.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\vector_map.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\vector_multimap.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\vector_multiset.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\vector_set.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\version.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\weak_ptr.h">
+      <Filter>3rd Party\EA\STL</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\adaptors.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\call_traits.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\compressed_pair.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\fixed_ring_buffer.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\fixed_tuple_vector.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\intrusive_sdlist.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\intrusive_slist.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\list_map.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\lru_cache.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\ring_buffer.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\sort_extra.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\sparse_matrix.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\bonus\tuple_vector.h">
+      <Filter>3rd Party\EA\STL\Bonus</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\allocator_traits.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\allocator_traits_fwd_decls.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\char_traits.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\config.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\copy_help.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\enable_shared.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\fill_help.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\fixed_pool.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\function.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\function_detail.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\function_help.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\functional_base.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\generic_iterator.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\hashtable.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\in_place_t.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\integer_sequence.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\intrusive_hashtable.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\mem_fn.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\memory_base.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\move_help.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\pair_fwd_decls.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\piecewise_construct_t.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\red_black_tree.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\smart_ptr.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\thread_support.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\tuple_fwd_decls.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\type_compound.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\type_fundamental.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\type_pod.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\type_properties.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EASTL\internal\type_transformations.h">
+      <Filter>3rd Party\EA\STL\internal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
       <UniqueIdentifier>{6ee59120-7d58-46db-9b83-6553b3f6afae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="3rd Party\mmgr">
-      <UniqueIdentifier>{bc8263be-7628-473f-8ffe-937631d6a567}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules">
       <UniqueIdentifier>{dbb90943-cf3a-483e-b9a2-928baf328345}</UniqueIdentifier>

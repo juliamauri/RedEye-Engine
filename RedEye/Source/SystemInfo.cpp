@@ -5,7 +5,6 @@
 #include "OutputLog.h"
 #include "SDL2\include\SDL.h"
 #include "imgui\imgui.h"
-#include "mmgr\mmgr.h"
 #include "gpudetect\DeviceId.h"
 #include "Glew\include\glew.h"
 #include <gl\GL.h>
@@ -76,7 +75,8 @@ void SystemInfo::WhatAreWeRunningOn()
 
 void SystemInfo::MemoryDraw()
 {
-	sMStats stats = m_getMemoryStatistics();
+	/*
+		sMStats stats = m_getMemoryStatistics();
 
 	PlotMemory(stats.totalReportedMemory);
 	ImGui::Separator();
@@ -90,6 +90,9 @@ void SystemInfo::MemoryDraw()
 	ImGui::Text("Accumulated Alloc Unit Count: %u", stats.accumulatedAllocUnitCount);
 	ImGui::Text("Total Alloc Unit Count: %u", stats.totalAllocUnitCount);
 	ImGui::Text("Peak Alloc Unit Count: %u", stats.peakAllocUnitCount);
+	
+	*/
+
 }
 
 void SystemInfo::HardwareDraw()

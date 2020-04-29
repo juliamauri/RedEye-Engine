@@ -2,29 +2,11 @@
 #include "OutputLog.h"
 
 /*  HELLO EASTL! 
-  needed to disable mmgr and add the new redefinition:
-void* __cdecl operator new[](size_t size, const char* name, int flags, unsigned debugFlags, const char* file, int line)
-{
-	return new uint8_t[size];
-}
 
 //How to track the memory:
 https://stackoverflow.com/questions/42565582/how-to-track-memory-usage-using-eastlç
 https://www.swardle.com/sweb/img/Memory%20and%20C++%20debuging%20at%20EA%20-%20Scott%20Wardle%20-%20CppCon%202015.pdf
-
-//Example
-	#include <EASTL/array.h>
-
-	eastl::array<int, 30> test;
-
-	test.size();
-
-	test.begin();
 */
-
-#ifdef _DEBUG
-//#include "mmgr\mmgr.h"
-#endif
 
 #include "SDL2\include\SDL.h"
 #pragma comment( lib, "SDL2/libx86/SDL2.lib" )
@@ -39,12 +21,20 @@ https://www.swardle.com/sweb/img/Memory%20and%20C++%20debuging%20at%20EA%20-%20S
 #pragma comment( lib, "EA/EASTL/libx86/Release/EASTL.lib" )
 #endif
 
+void* operator new[](size_t size, const char* pName, int flags, unsigned     debugFlags, const char* file, int line)
+{
+	return new uint8_t[size];
+}
+
+void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* pName, int flags, unsigned debugFlags, const char* file, int line)
+{
+	return new uint8_t[size];
+}
+
 Application* App = nullptr;
 
 int main(int argc, char* argv[])
 {
-
-
 	int main_return = EXIT_FAILURE;
 
 	App = new Application();
@@ -89,10 +79,6 @@ int main(int argc, char* argv[])
 
 	delete App;
 	App = nullptr;
-
-#ifdef _DEBUG
-	//LOG("With %d memory leaks!\n", (m_getMemoryStatistics().totalAllocUnitCount));
-#endif
 
 	return main_return;
 }
