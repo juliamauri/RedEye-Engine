@@ -43,7 +43,7 @@ void RE_Model::UnloadMemory()
 void RE_Model::SetAssetPath(const char* originPath)
 {
 	ResourceContainer::SetAssetPath(originPath);
-	std::string assetPath(originPath);
+	eastl::string assetPath(originPath);
 	uint l = 0;
 	SetName(assetPath.substr(l = assetPath.find_last_of("/") + 1, assetPath.find_last_of(".") - l).c_str());
 }
@@ -134,34 +134,34 @@ void RE_Model::Draw()
 void RE_Model::SaveResourceMeta(JSONNode* metaNode)
 {
 	JSONNode* presets = metaNode->PushJObject("presets");
-	for (uint i = 0; i < 3; i++) presets->PushBool(std::to_string(i).c_str(), modelSettings.presets[i]);
+	for (uint i = 0; i < 3; i++) presets->PushBool(eastl::to_string(i).c_str(), modelSettings.presets[i]);
 	DEL(presets);
 
 	JSONNode* flags = metaNode->PushJObject("flags");
-	for (uint i = 0; i < 25; i++) flags->PushBool(std::to_string(i).c_str(), modelSettings.flags[i]);
+	for (uint i = 0; i < 25; i++) flags->PushBool(eastl::to_string(i).c_str(), modelSettings.flags[i]);
 	DEL(flags);
 
 	metaNode->PushUInt("MeshesSize", modelSettings.libraryMeshes.size());
 	uint count = 0;
 	for (const char* mesh : modelSettings.libraryMeshes) {
 		ResourceContainer* rM = App->resources->At(mesh);
-		metaNode->PushString(std::to_string(count++).c_str(), rM->GetLibraryPath());
+		metaNode->PushString(eastl::to_string(count++).c_str(), rM->GetLibraryPath());
 	}
 }
 
 void RE_Model::LoadResourceMeta(JSONNode* metaNode)
 {
 	JSONNode* presets = metaNode->PullJObject("presets");
-	for (uint i = 0; i < 3; i++) modelSettings.presets[i] = presets->PullBool(std::to_string(i).c_str(), false);
+	for (uint i = 0; i < 3; i++) modelSettings.presets[i] = presets->PullBool(eastl::to_string(i).c_str(), false);
 	DEL(presets);
 
 	JSONNode* flags = metaNode->PullJObject("flags");
-	for (uint i = 0; i < 25; i++) modelSettings.flags[i] = flags->PullBool(std::to_string(i).c_str(), false);
+	for (uint i = 0; i < 25; i++) modelSettings.flags[i] = flags->PullBool(eastl::to_string(i).c_str(), false);
 	DEL(flags);
 
 	uint totalMeshes = metaNode->PullUInt("MeshesSize", 0);
 	for (uint i = 0; i < totalMeshes; i++) {
-		std::string libraryMesh = metaNode->PullString(std::to_string(i).c_str(), "");
+		eastl::string libraryMesh = metaNode->PullString(eastl::to_string(i).c_str(), "");
 		const char* md5 = App->resources->CheckOrFindMeshOnLibrary(libraryMesh.c_str());
 		if (md5) {
 			App->resources->At(md5)->SetAssetPath(GetAssetPath());
@@ -180,7 +180,7 @@ void RE_Model::AssetLoad()
 		loaded = App->modelImporter->ProcessModel(assetload.GetBuffer(), assetload.GetSize(),GetAssetPath(), &modelSettings);
 
 		SetMD5(assetload.GetMd5().c_str());
-		std::string libraryPath("Library/Models/");
+		eastl::string libraryPath("Library/Models/");
 		libraryPath += GetMD5();
 		SetLibraryPath(libraryPath.c_str());
 
@@ -252,7 +252,7 @@ unsigned int RE_ModelSettings::GetFlags() const
 	}
 	else
 	{
-		std::stack<unsigned int> toAdd;
+		eastl::stack<unsigned int> toAdd;
 		for (uint i = 0; i < 25; i++) 
 			if (flags[i]) toAdd.push(i);
 		

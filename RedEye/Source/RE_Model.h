@@ -3,7 +3,7 @@
 
 #include "Resource.h"
 
-#include <vector>
+#include <EASTL/vector.h>
 
 class RE_GameObject;
 enum aiPostProcessSteps;
@@ -44,7 +44,7 @@ struct RE_ModelSettings {
 	
 	int GetPresetSelected()const;
 	unsigned int GetFlags()const;
-	std::vector<const char*> libraryMeshes;
+	eastl::vector<const char*> libraryMeshes;
 
 	inline bool operator==(const RE_ModelSettings& b){
 		bool ret = true;

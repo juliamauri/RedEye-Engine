@@ -84,11 +84,11 @@ public:
 	math::vec GetUp() const;
 	math::vec GetFront() const;
 
-	std::vector<const char*> GetAllResources() override;
+	eastl::vector<const char*> GetAllResources() override;
 
 	unsigned int GetBinarySize()const override;
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
 
 	//Skybox
 	bool isUsingSkybox()const;

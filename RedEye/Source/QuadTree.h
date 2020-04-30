@@ -6,9 +6,9 @@
 
 #include "PoolMapped.h"
 
-#include <list>
-#include <iterator>
-#include <stack>
+#include <EASTL/list.h>
+#include <EASTL/iterator.h>
+#include <EASTL/stack.h>
 
 class QTree
 {
@@ -17,7 +17,7 @@ public:
 	~QTree();
 
 	void	Build(RE_GameObject* root_g_obj);
-	void	BuildFromList(const AABB& box, const std::list<RE_GameObject*>& gos);
+	void	BuildFromList(const AABB& box, const eastl::list<RE_GameObject*>& gos);
 	void	Draw() const;
 
 	void	SetDrawMode(short mode);
@@ -26,7 +26,7 @@ public:
 	void	Pop(const RE_GameObject* g_obj);
 
 	template<typename TYPE>
-	inline void CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
+	inline void CollectIntersections(eastl::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
 
 private:
 
@@ -53,7 +53,7 @@ private:
 		const AABB& GetBox() const;
 
 		template<typename TYPE>
-		inline void CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
+		inline void CollectIntersections(eastl::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
 
 	private:
 
@@ -65,7 +65,7 @@ private:
 		QTreeNode* nodes[4];
 		QTreeNode* parent = nullptr;
 
-		std::list<RE_GameObject*> g_objs;
+		eastl::list<RE_GameObject*> g_objs;
 		bool is_leaf = true;
 		AABB box;
 	} root;
@@ -82,11 +82,11 @@ private:
 	int edges[12];
 	int count = 0;
 
-	std::list<RE_GameObject*>::iterator it;
+	eastl::list<RE_GameObject*>::iterator it;
 };
 
 template<typename TYPE>
-inline void QTree::QTreeNode::CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const
+inline void QTree::QTreeNode::CollectIntersections(eastl::vector<RE_GameObject*>& objects, const TYPE & primitive) const
 {
 	if (primitive.Intersects(box))
 	{
@@ -101,7 +101,7 @@ inline void QTree::QTreeNode::CollectIntersections(std::vector<RE_GameObject*>& 
 }
 
 template<typename TYPE>
-inline void QTree::CollectIntersections(std::vector<RE_GameObject*>& objects, const TYPE & primitive) const
+inline void QTree::CollectIntersections(eastl::vector<RE_GameObject*>& objects, const TYPE & primitive) const
 {
 	root.CollectIntersections(objects, primitive);
 }
@@ -132,13 +132,13 @@ public:
 	void PushNode(int index, AABB box);
 	void PopNode(int index);
 	void Clear();
-	void CollectIntersections(Ray ray, std::stack<int>& indexes) const;
-	void CollectIntersections(const Frustum frustum, std::stack<int>& indexes) const;
+	void CollectIntersections(Ray ray, eastl::stack<int>& indexes) const;
+	void CollectIntersections(const Frustum frustum, eastl::stack<int>& indexes) const;
 
 	void Draw()const;
 	int GetCount() const;
 
-	std::map<int, int> objectToNode;
+	eastl::map<int, int> objectToNode;
 
 private:
 

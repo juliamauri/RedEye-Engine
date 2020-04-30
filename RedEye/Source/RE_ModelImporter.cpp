@@ -110,7 +110,7 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 	RE_GameObject* go_haschildren = nullptr;
 	if (node->mNumChildren > 0 || (node->mNumChildren == 0 && node->mNumMeshes == 0))
 	{
-		if (isRoot || std::string(node->mName.C_Str()).find("_$Assimp") == std::string::npos)
+		if (isRoot || eastl::string(node->mName.C_Str()).find("_$Assimp") == eastl::string::npos)
 		{
 			go_haschildren = (!isRoot) ? new RE_GameObject(node->mName.C_Str(), GUID_NULL, currentGO) : currentGO;
 
@@ -246,15 +246,15 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 				DEL(newMesh);
 
 			aditionalData->settings->libraryMeshes.push_back(meshMD5);
-			aditionalData->meshesLoaded.insert(std::pair<aiMesh*, const char*>(mesh, meshMD5));
+			aditionalData->meshesLoaded.insert(eastl::pair<aiMesh*, const char*>(mesh, meshMD5));
 		}
 	}
 }
 
 
-std::vector<std::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(const char * path)
+eastl::vector<eastl::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(const char * path)
 {
-	std::vector<std::string> retPaths;
+	eastl::vector<eastl::string> retPaths;
 	RE_FileIO* fbxloaded = App->fs->QuickBufferFromPDPath(path);
 
 	if (fbxloaded != nullptr)
@@ -288,7 +288,7 @@ std::vector<std::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(const c
 	return retPaths;
 }
 
-void RE_ModelImporter::GetTexturePath(aiMaterial * material, std::vector<std::string> &retPaths, aiTextureType textureType)
+void RE_ModelImporter::GetTexturePath(aiMaterial * material, eastl::vector<eastl::string> &retPaths, aiTextureType textureType)
 {
 	if (uint textures = material->GetTextureCount(textureType) > 0)
 	{
@@ -296,8 +296,8 @@ void RE_ModelImporter::GetTexturePath(aiMaterial * material, std::vector<std::st
 		{
 			aiString texturePath;
 			if (AI_SUCCESS == material->GetTexture(textureType, t, &texturePath)) {
-				std::string file_path(texturePath.C_Str());
-				std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+				eastl::string file_path(texturePath.C_Str());
+				eastl::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 				retPaths.push_back(filename);
 			}
 		}
@@ -306,7 +306,7 @@ void RE_ModelImporter::GetTexturePath(aiMaterial * material, std::vector<std::st
 
 void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 {
-	std::string fileTexturePath = aditionalData->workingfilepath.substr(0, aditionalData->workingfilepath.find_last_of("/") + 1);
+	eastl::string fileTexturePath = aditionalData->workingfilepath.substr(0, aditionalData->workingfilepath.find_last_of("/") + 1);
 
 	for (int i = scene->mNumMaterials - 1; i > -1; i--)
 	{
@@ -319,7 +319,7 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 		}
 		LOG_TERCIARY("Loadinig %s material.", name.C_Str());
 
-		std::string filePath("Assets/Materials/");
+		eastl::string filePath("Assets/Materials/");
 		filePath += aditionalData->name.c_str();
 		filePath += "/";
 		filePath += name.C_Str();
@@ -422,11 +422,11 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 			materialMD5 = App->resources->Reference((ResourceContainer*)newMaterial);
 		}
 
-		aditionalData->materialsLoaded.insert(std::pair<aiMaterial*,const char*>(material, materialMD5));
+		aditionalData->materialsLoaded.insert(eastl::pair<aiMaterial*,const char*>(material, materialMD5));
 	}
 }
 
-void RE_ModelImporter::GetTexturesMaterial(aiMaterial * material, std::string &fileTexturePath, aiTextureType textureType, std::vector<const char*>* vectorToFill, aiString &name)
+void RE_ModelImporter::GetTexturesMaterial(aiMaterial * material, eastl::string &fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString &name)
 {
 	if (uint textures = material->GetTextureCount(textureType) > 0)
 	{
@@ -434,9 +434,9 @@ void RE_ModelImporter::GetTexturesMaterial(aiMaterial * material, std::string &f
 		{
 			aiString texturePath;
 			if (AI_SUCCESS == material->GetTexture(textureType, t, &texturePath)) {
-				std::string file_path(texturePath.C_Str());
-				std::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
-				std::string realAssetsPath(fileTexturePath);
+				eastl::string file_path(texturePath.C_Str());
+				eastl::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
+				eastl::string realAssetsPath(fileTexturePath);
 				realAssetsPath += filename;
 				if (App->fs->Exists(realAssetsPath.c_str()))
 				{

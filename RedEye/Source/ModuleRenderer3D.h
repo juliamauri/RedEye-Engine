@@ -3,7 +3,6 @@
 
 #include "RE_Math.h"
 #include "Module.h"
-#include <list>
 
 class RE_CompCamera;
 

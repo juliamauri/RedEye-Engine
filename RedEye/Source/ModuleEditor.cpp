@@ -25,7 +25,8 @@
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
 
-#include <stack>
+#include <EASTL/stack.h>
+#include <EASTL/queue.h>
 
 ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
@@ -124,7 +125,7 @@ bool ModuleEditor::Start()
 	// FOCUS CAMERA
 	const RE_GameObject* root = App->scene->GetRoot();
 	if (!root->GetChilds().empty()) {
-		SetSelected(root->GetChilds().begin()._Ptr->_Myval);
+		SetSelected(root->GetChilds().begin().mpNode->mValue);
 		RE_CameraManager::EditorCamera()->Focus(selected);
 	}
 
@@ -456,7 +457,7 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 		}
 		case ALL:
 		{
-			std::queue<const RE_GameObject*> objects;
+			eastl::queue<const RE_GameObject*> objects;
 			for (auto child : root->GetChilds())
 				objects.push(child);
 
@@ -485,7 +486,7 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 			glColor3f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2]);
 			selected->DrawGlobalAABB();
 
-			std::queue<const RE_GameObject*> objects;
+			eastl::queue<const RE_GameObject*> objects;
 			for (auto child : root->GetChilds())
 				objects.push(child);
 
@@ -542,10 +543,10 @@ void ModuleEditor::DrawHeriarchy()
 	if (root->ChildCount() > 0)
 	{
 		// Add root children
-		std::stack<RE_GameObject*> objects;
-		std::list<RE_GameObject*> childs;
+		eastl::stack<RE_GameObject*> objects;
+		eastl::list<RE_GameObject*> childs;
 		childs = root->GetChilds();
-		for (std::list<RE_GameObject*>::reverse_iterator it = childs.rbegin(); it != childs.rend(); it++)
+		for (eastl::list<RE_GameObject*>::reverse_iterator it = childs.rbegin(); it != childs.rend(); it++)
 			objects.push(*it);
 
 		bool is_leaf;
@@ -566,7 +567,7 @@ void ModuleEditor::DrawHeriarchy()
 				if (is_leaf)
 					ImGui::TreePop();
 				else
-					for (std::list<RE_GameObject*>::reverse_iterator it = childs.rbegin(); it != childs.rend(); it++)
+					for (eastl::list<RE_GameObject*>::reverse_iterator it = childs.rbegin(); it != childs.rend(); it++)
 						objects.push(*it);
 			}
 
@@ -654,12 +655,12 @@ const char* ModuleEditor::GetAssetsPanelPath() const
 	return assets->GetCurrentDirPath();
 }
 
-void ModuleEditor::SelectUndefinedFile(std::string* toSelect) const
+void ModuleEditor::SelectUndefinedFile(eastl::string* toSelect) const
 {
 	assets->SelectUndefined(toSelect);
 }
 
-void ModuleEditor::OpenTextEditor(const char* filePath, std::string* filePathStr, const char* shadertTemplate, bool* open)
+void ModuleEditor::OpenTextEditor(const char* filePath, eastl::string* filePathStr, const char* shadertTemplate, bool* open)
 {
 	texteditormanager->PushEditor(filePath, filePathStr, shadertTemplate, open);
 }

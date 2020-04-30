@@ -3,7 +3,6 @@
 
 #include "Module.h"
 #include "Event.h"
-#include <queue>
 
 #define MAX_MOUSE_BUTTONS 5
 

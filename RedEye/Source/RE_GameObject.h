@@ -4,10 +4,10 @@
 #include "Globals.h"
 #include "EventListener.h"
 #include "MathGeoLib\include\MathGeoLib.h"
-#include <list>
-#include <vector>
-#include <map>
-#include <stack>
+#include <EASTL/list.h>
+#include <EASTL/vector.h>
+#include <EASTL/map.h>
+#include <EASTL/stack.h>
 
 #pragma comment(lib, "rpcrt4.lib")  // UuidCreate - Minimum supported OS Win 2000
 #include <windows.h>
@@ -33,30 +33,30 @@ public:
 	void DrawWithChilds() const;
 	void DrawItselfOnly() const;
 
-	std::stack<RE_Component*> GetDrawableComponentsWithChilds(RE_GameObject* ignoreStencil = nullptr)const;
-	std::stack<RE_Component*> GetDrawableComponentsItselfOnly()const;
+	eastl::stack<RE_Component*> GetDrawableComponentsWithChilds(RE_GameObject* ignoreStencil = nullptr)const;
+	eastl::stack<RE_Component*> GetDrawableComponentsItselfOnly()const;
 
-	std::vector<RE_GameObject*> GetAllGO();
-	std::vector<RE_GameObject*> GetActiveChildsWithDrawComponents();
+	eastl::vector<RE_GameObject*> GetAllGO();
+	eastl::vector<RE_GameObject*> GetActiveChildsWithDrawComponents();
 
 	bool HasDrawComponents() const;
 
-	std::vector<const char*> GetAllResources(bool root = true);
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources);
+	eastl::vector<const char*> GetAllResources(bool root = true);
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources);
 	unsigned int GetBinarySize()const;
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources);
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
 
-	static RE_GameObject* DeserializeJSON(JSONNode* node, std::map<int, const char*>* resources);
-	static RE_GameObject* DeserializeBinary(char*& cursor, std::map<int, const char*>* resources);
+	static RE_GameObject* DeserializeJSON(JSONNode* node, eastl::map<int, const char*>* resources);
+	static RE_GameObject* DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources);
 
 	// Children
 	void AddChild(RE_GameObject* child, bool broadcast = true);
 	void AddChildsFromGO(RE_GameObject* go, bool broadcast = true);
 	void RemoveChild(RE_GameObject* child, bool broadcast = true); //Breaks the link with the parent but does not delete the child.
 	void RemoveAllChilds();
-	std::list<RE_GameObject*>& GetChilds();
-	const std::list<RE_GameObject*>& GetChilds() const;
-	void GetChilds(std::list<const RE_GameObject*>& out_childs) const;
+	eastl::list<RE_GameObject*>& GetChilds();
+	const eastl::list<RE_GameObject*>& GetChilds() const;
+	void GetChilds(eastl::list<const RE_GameObject*>& out_childs) const;
 	unsigned int ChildCount() const;
 	bool IsLastChild() const;
 
@@ -136,7 +136,7 @@ private:
 
 	UUID uuid;
 
-	std::string name;
+	eastl::string name;
 	math::AABB local_bounding_box;
 	math::AABB global_bounding_box;
 
@@ -144,8 +144,8 @@ private:
 	RE_GameObject* parent = nullptr;
 	RE_CompTransform* transform = nullptr;
 
-	std::list<RE_GameObject*> childs;
-	std::list<RE_Component*> components;
+	eastl::list<RE_GameObject*> childs;
+	eastl::list<RE_Component*> components;
 };
 
 #endif // !__RE_GAMEOBJECT_H__

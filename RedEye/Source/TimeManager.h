@@ -1,7 +1,6 @@
 #ifndef __TIMEMANAGER_H__
 #define __TIMEMANAGER_H__
 
-#include <list>
 
 class Timer
 {

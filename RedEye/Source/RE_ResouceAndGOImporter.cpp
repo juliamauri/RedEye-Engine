@@ -7,22 +7,23 @@
 
 #include "RE_GameObject.h"
 
+#include <EASTL/internal/char_traits.h>
 
 void RE_ResouceAndGOImporter::JsonSerialize(JSONNode* node, RE_GameObject* toSerialize)
 {
 	//Get resources
-	std::vector<const char*>  resGo = toSerialize->GetAllResources();
-	std::map<const char*, int> resourcesIndex;
+	eastl::vector<const char*>  resGo = toSerialize->GetAllResources();
+	eastl::map<const char*, int> resourcesIndex;
 	int count = 0;
-	for (const char* res : resGo) resourcesIndex.insert(std::pair<const char*, int>(res, count++));
+	for (const char* res : resGo) resourcesIndex.insert(eastl::pair<const char*, int>(res, count++));
 
 	//Resources Serialize
 	JSONNode* resources = node->PushJObject("resources");
 	resources->PushUInt("resSize", resGo.size());
-	std::string ref;
+	eastl::string ref;
 	for (int r = 0; r < resGo.size(); r++) {
 		ref = "r";
-		ref += std::to_string(r);
+		ref += eastl::to_string(r);
 		JSONNode* resN = resources->PushJObject(ref.c_str());
 		ResourceContainer* res = App->resources->At(resGo.at(r));
 		Resource_Type rtype = res->GetType();
@@ -42,17 +43,17 @@ void RE_ResouceAndGOImporter::JsonSerialize(JSONNode* node, RE_GameObject* toSer
 char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsigned int* bufferSize)
 {
 	//Get resources
-	std::vector<const char*>  resGo = toSerialize->GetAllResources();
-	std::vector<ResourceContainer*>  resC;
-	std::map<const char*, int> resourcesIndex;
+	eastl::vector<const char*>  resGo = toSerialize->GetAllResources();
+	eastl::vector<ResourceContainer*>  resC;
+	eastl::map<const char*, int> resourcesIndex;
 	int count = 0;
 	for (const char* res : resGo) {
-		resourcesIndex.insert(std::pair<const char*, int>(res, count++));
+		resourcesIndex.insert(eastl::pair<const char*, int>(res, count++));
 		resC.push_back(App->resources->At(res));
 	}
 
 	*bufferSize = sizeof(uint) + ((sizeof(int) + sizeof(unsigned int) + sizeof(uint)) * resGo.size());
-	for (ResourceContainer* res : resC) *bufferSize += std::strlen((res->GetType() == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
+	for (ResourceContainer* res : resC) *bufferSize += eastl::CharStrlen((res->GetType() == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
 	*bufferSize += toSerialize->GetBinarySize();
 	*bufferSize += 1;
 	char* buffer = new char[*bufferSize];
@@ -77,7 +78,7 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsig
 		cursor += size;
 
 		const char* toCopy = (rtype == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath();
-		uint strsize = std::strlen(toCopy);
+		uint strsize = eastl::CharStrlen(toCopy);
 		size = sizeof(uint);
 		memcpy(cursor, &strsize, size);
 		cursor += size;
@@ -101,25 +102,25 @@ RE_GameObject* RE_ResouceAndGOImporter::JsonDeserialize(JSONNode* node)
 	//Get resources
 	JSONNode* resources = node->PullJObject("resources");
 
-	std::map< int, const char*> resourcesIndex;
+	eastl::map< int, const char*> resourcesIndex;
 
 	uint resSize = resources->PullUInt("resSize", 0);
-	std::string ref;
+	eastl::string ref;
 	for (uint r = 0; r < resSize; r++) {
 		ref = "r";
-		ref += std::to_string(r);
+		ref += eastl::to_string(r);
 		JSONNode* resN = resources->PullJObject(ref.c_str());
 
 		int index = resN->PullInt("index", -1);
 		Resource_Type type = (Resource_Type)resN->PullInt("type", Resource_Type::R_UNDEFINED);
-		std::string mPath = resN->PullString("mPath", "");
+		eastl::string mPath = resN->PullString("mPath", "");
 
 		const char* resMD5 = nullptr;
 		(type == Resource_Type::R_MESH) ?
 			resMD5 = App->resources->CheckOrFindMeshOnLibrary(mPath.c_str()) :
 			resMD5 = App->resources->FindMD5ByMETAPath(mPath.c_str(), type);
 
-		resourcesIndex.insert(std::pair< int, const char*>(r, resMD5));
+		resourcesIndex.insert(eastl::pair< int, const char*>(r, resMD5));
 		DEL(resN);
 	}
 	DEL(resources);
@@ -129,7 +130,7 @@ RE_GameObject* RE_ResouceAndGOImporter::JsonDeserialize(JSONNode* node)
 
 RE_GameObject* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 {
-	std::map< int, const char*> resourcesIndex;
+	eastl::map< int, const char*> resourcesIndex;
 	//Get resources
 	size_t size = sizeof(uint);
 	uint resSize = 0;
@@ -168,7 +169,7 @@ RE_GameObject* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 			resMD5 = App->resources->CheckOrFindMeshOnLibrary(str) :
 			resMD5= App->resources->FindMD5ByMETAPath(str, rType);
 
-		resourcesIndex.insert(std::pair< int, const char*>(index, resMD5));
+		resourcesIndex.insert(eastl::pair< int, const char*>(index, resMD5));
 		DEL_A(str);
 	}
 	return RE_GameObject::DeserializeBinary(cursor, &resourcesIndex);;

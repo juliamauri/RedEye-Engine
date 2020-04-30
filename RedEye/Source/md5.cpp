@@ -107,7 +107,7 @@ MD5::MD5()
 //////////////////////////////////////////////
 
 // nifty shortcut ctor, compute MD5 for string and finalize it right away
-MD5::MD5(const std::string &text)
+MD5::MD5(const eastl::string &text)
 {
 	init();
 	update(text.c_str(), text.length());
@@ -331,7 +331,7 @@ MD5& MD5::finalize()
 //////////////////////////////
 
 // return hex representation of digest as string
-std::string MD5::hexdigest() const
+eastl::string MD5::hexdigest() const
 {
 	if (!finalized)
 		return "";
@@ -341,7 +341,7 @@ std::string MD5::hexdigest() const
 		sprintf(buf + i * 2, "%02x", digest[i]);
 	buf[32] = 0;
 
-	return std::string(buf);
+	return eastl::string(buf);
 }
 
 //////////////////////////////
@@ -353,7 +353,7 @@ std::ostream& operator<<(std::ostream& out, MD5 md5)
 
 //////////////////////////////
 
-std::string md5(const std::string str)
+eastl::string md5(const eastl::string str)
 {
 	MD5 md5 = MD5(str);
 

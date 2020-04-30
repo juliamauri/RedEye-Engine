@@ -3,12 +3,13 @@
 
 #include "EventListener.h"
 
-#include <map>
+#include <EASTL/map.h>
+#include <EASTL/vector.h>
 
 struct RE_FBO {
 	unsigned int ID = 0;
 	unsigned int widht = 0, height = 0;
-	std::vector<unsigned int> texturesID;
+	eastl::vector<unsigned int> texturesID;
 	unsigned int depthBuffer = 0;
 	unsigned int stencilBuffer = 0;
 	unsigned int depthstencilBuffer = 0;
@@ -34,7 +35,7 @@ public:
 	static void ChangeFBOBind(unsigned int tID, unsigned int width = 0, unsigned int height = 0);
 
 private:
-	std::map<unsigned int, RE_FBO> fbos;
+	eastl::map<unsigned int, RE_FBO> fbos;
 };
 
 #endif // !__REFBOMANAGER__

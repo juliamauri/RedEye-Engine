@@ -3,8 +3,7 @@
 
 #include "RE_Math.h"
 
-#include <string>
-#include <vector>
+#include <EASTL/string.h>
 
 class RE_ShaderImporter
 {
@@ -89,7 +88,7 @@ private:
 	const char* folderPath;
 
 	//Last error
-	std::string last_error;
+	eastl::string last_error;
 
 	int* binaryFormats = nullptr;
 };

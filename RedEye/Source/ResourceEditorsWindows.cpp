@@ -74,7 +74,7 @@ void PrefabsPanel::Draw(bool secondary)
 
 			for (ResourceContainer* currentPrefab : prefabs)
 			{
-				if (ImGui::Button((selected == currentPrefab) ? std::string(std::string("Selected -> ") + std::string(currentPrefab->GetName())).c_str() : currentPrefab->GetName()))
+				if (ImGui::Button((selected == currentPrefab) ? eastl::string(eastl::string("Selected -> ") + eastl::string(currentPrefab->GetName())).c_str() : currentPrefab->GetName()))
 					selected = currentPrefab;
 			}
 
@@ -112,7 +112,9 @@ void MaterialEditorWindow::Draw(bool secondary)
 
 		ImGui::Text("Material name:");
 		ImGui::SameLine();
-		ImGui::InputText("##matname", &matName);
+		std::string tmp(matName.c_str(), matName.size());
+		if (ImGui::InputText("##matname", &tmp))
+			matName = eastl::string(tmp.c_str(), tmp.size());
 
 		assetPath = "Assets/Materials/";
 		assetPath += matName;
@@ -180,7 +182,9 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 
 		ImGui::Text("Skybox name:");
 		ImGui::SameLine();
-		ImGui::InputText("##sbname", &sbName);
+		std::string tmp(sbName.c_str(), sbName.size());
+		if (ImGui::InputText("##sbname", &tmp))
+			sbName = eastl::string(tmp.c_str(), tmp.size());
 
 		assetPath = "Assets/Skyboxes/";
 		assetPath += sbName;
@@ -250,7 +254,9 @@ void ShaderEditorWindow::Draw(bool secondary)
 
 		ImGui::Text("Shader name:");
 		ImGui::SameLine();
-		ImGui::InputText("##shadername", &shaderName);
+		std::string tmp(shaderName.c_str(), shaderName.size());
+		if (ImGui::InputText("##shadername", &tmp))
+			shaderName = eastl::string(tmp.c_str(), tmp.size());
 
 		assetPath = "Assets/Shaders/";
 		assetPath += shaderName;
@@ -267,7 +273,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 		bool neededVertexAndFragment = (vertexPath.empty() || fragmentPath.empty());
 		if (neededVertexAndFragment) ImGui::Text("The vertex or fragment file path is empty.");
 
-		static std::string* waitingPath = nullptr;
+		static eastl::string* waitingPath = nullptr;
 		if (waitingPath) ImGui::Text("Select Shader file from assets panel");
 
 		bool pop2 = false;
@@ -431,7 +437,7 @@ TextEditorManagerWindow::~TextEditorManagerWindow()
 	}
 }
 
-void TextEditorManagerWindow::PushEditor(const char* filePath, std::string* newFile, const char* shadertTemplate, bool* open)
+void TextEditorManagerWindow::PushEditor(const char* filePath, eastl::string* newFile, const char* shadertTemplate, bool* open)
 {
 	for (auto e : editors) if (strcmp(e->toModify->c_str(), filePath) == 0) return;
 
@@ -466,15 +472,15 @@ void TextEditorManagerWindow::PushEditor(const char* filePath, std::string* newF
 void TextEditorManagerWindow::Draw(bool secondary)
 {
 	static const char* compileAsStr[4] = { "None", "Vertex", "Fragment", "Geometry" };
-	static std::vector<editor*> toRemoveE;
-	static std::string assetPath;
-	static std::string names;
+	static eastl::vector<editor*> toRemoveE;
+	static eastl::string assetPath;
+	static eastl::string names;
 	int count = -1;
 	for (auto e : editors) {
 		count++;
 		bool close = false;
 		names = "Text Editor #";
-		names += std::to_string(count);
+		names += eastl::to_string(count);
 		if (ImGui::Begin(names.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 		{
 			if (secondary) {
@@ -485,8 +491,9 @@ void TextEditorManagerWindow::Draw(bool secondary)
 			if (!e->file) {
 				ImGui::Text("Shader name:");
 				ImGui::SameLine();
-				ImGui::InputText("##newshadername", e->toModify);
-
+				std::string tmp(e->toModify->c_str(),e->toModify->size());
+				if (ImGui::InputText("##newshadername", &tmp))
+					*e->toModify = eastl::string(tmp.c_str(), tmp.size());
 				assetPath = "Assets/Shaders/";
 				assetPath += *e->toModify;
 				ImGui::Text("Save path: %s", assetPath.c_str());
@@ -498,11 +505,11 @@ void TextEditorManagerWindow::Draw(bool secondary)
 				ImGui::Text("Editting %s", e->toModify->c_str());
 
 			names = "Compile as shader script #";
-			names += std::to_string(count);
+			names += eastl::to_string(count);
 			if (ImGui::Button(names.c_str())) {
 				App->handlerrors->StartHandling();
-
-				std::string text = e->textEditor->GetText();
+				std::string tmp = e->textEditor->GetText();
+				eastl::string text(tmp.c_str(), tmp.size());
 
 				if (!(e->works = App->shaders->Compile(text.c_str(), text.size())))
 					LOG_ERROR("%s", App->shaders->GetShaderError());
@@ -524,9 +531,10 @@ void TextEditorManagerWindow::Draw(bool secondary)
 			if (e->save) {
 				ImGui::Text("Be sure to save before close!");
 				names = "Save #";
-				names += std::to_string(count);
+				names += eastl::to_string(count);
 				if (ImGui::Button(names.c_str())) {
-					std::string text = e->textEditor->GetText();
+					std::string tmp = e->textEditor->GetText();
+					eastl::string text(tmp.c_str(), tmp.size());
 					if (!e->file) {
 						e->file = new RE_FileIO(assetPath.c_str(), App->fs->GetZipPath());
 						*e->toModify = assetPath;
@@ -544,13 +552,13 @@ void TextEditorManagerWindow::Draw(bool secondary)
 			}
 
 			names = "Quit #";
-			names += std::to_string(count);
+			names += eastl::to_string(count);
 			if (ImGui::Button(names.c_str())) {
 				close = true;
 			}
 
 			names = "Shader Text Editor #";
-			names += std::to_string(count);
+			names += eastl::to_string(count);
 			e->textEditor->Render(names.c_str());
 
 			if (secondary) {
@@ -577,8 +585,8 @@ void TextEditorManagerWindow::Draw(bool secondary)
 
 	if (!toRemoveE.empty()) {
 		//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
-		editors.erase(std::remove_if(std::begin(editors), std::end(editors),
-			[&](auto x) {return std::find(begin(toRemoveE), end(toRemoveE), x) != end(toRemoveE); }), std::end(editors));
+		editors.erase(eastl::remove_if(eastl::begin(editors), eastl::end(editors),
+			[&](auto x) {return eastl::find(begin(toRemoveE), end(toRemoveE), x) != end(toRemoveE); }), eastl::end(editors));
 		for (auto e : toRemoveE) DEL(e);
 		toRemoveE.clear();
 	}

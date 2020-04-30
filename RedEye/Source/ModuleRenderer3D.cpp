@@ -24,7 +24,8 @@
 #include "RE_GLCache.h"
 #include "RE_FBOManager.h"
 
-#include <stack>
+#include <EASTL/list.h>
+#include <EASTL/stack.h>
 
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
@@ -116,7 +117,7 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
 	float dt = App->time->GetDeltaTime();
-	std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+	eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 
 	RE_CompCamera* mainSkybox = (RE_CameraManager::MainCamera()->isUsingSkybox()) ? RE_CameraManager::MainCamera() : nullptr;
 
@@ -283,7 +284,7 @@ bool ModuleRenderer3D::Save(JSONNode * node) const
 
 void ModuleRenderer3D::DrawScene(const math::Frustum& frustum, unsigned int fbo, RE_CompCamera* mainSkybox, bool debugDraw, bool stencilToSelected)
 {
-	std::vector<const RE_GameObject*> objects;
+	eastl::vector<const RE_GameObject*> objects;
 
 	if (cull_scene)
 		App->scene->FustrumCulling(objects, frustum);
@@ -300,12 +301,12 @@ void ModuleRenderer3D::DrawScene(const math::Frustum& frustum, unsigned int fbo,
 	else
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	std::stack<RE_Component*> comptsToDraw;
+	eastl::stack<RE_Component*> comptsToDraw;
 	// Frustum Culling
 	if (cull_scene) {
 		for (auto object : objects) {
 			if (object->IsActive()) {
-				std::stack<RE_Component*> fromO = object->GetDrawableComponentsItselfOnly();
+				eastl::stack<RE_Component*> fromO = object->GetDrawableComponentsItselfOnly();
 				while (!fromO.empty())
 				{
 					comptsToDraw.push(fromO.top());
@@ -317,7 +318,7 @@ void ModuleRenderer3D::DrawScene(const math::Frustum& frustum, unsigned int fbo,
 	else
 		comptsToDraw = App->scene->GetRoot()->GetDrawableComponentsWithChilds();
 
-	std::stack<RE_Component*> drawAsLast;
+	eastl::stack<RE_Component*> drawAsLast;
 	RE_Component* drawing = nullptr;
 	while (!comptsToDraw.empty())
 	{
@@ -365,14 +366,14 @@ void ModuleRenderer3D::DrawScene(const math::Frustum& frustum, unsigned int fbo,
 		if (stencilGO == nullptr)
 			return;
 
-		std::stack<RE_Component*> stackComponents = stencilGO->GetDrawableComponentsItselfOnly();
+		eastl::stack<RE_Component*> stackComponents = stencilGO->GetDrawableComponentsItselfOnly();
 		if (stackComponents.empty())
 			return;
 
 		OPTICK_CATEGORY("Stencil Draw", Optick::Category::Rendering);
-		std::stack<unsigned int> vaoToStencil;
-		std::stack<unsigned int> triangleToStencil;
-		std::stack<RE_Component*> stackTemp;
+		eastl::stack<unsigned int> vaoToStencil;
+		eastl::stack<unsigned int> triangleToStencil;
+		eastl::stack<RE_Component*> stackTemp;
 		while (!stackComponents.empty())
 		{
 			RE_Component* dC = stackComponents.top();

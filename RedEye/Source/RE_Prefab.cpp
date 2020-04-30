@@ -11,7 +11,7 @@
 
 #include "Globals.h"
 
-#include <map>
+#include <EASTL/map.h>
 
 
 RE_Prefab::RE_Prefab() { }
@@ -59,7 +59,7 @@ void RE_Prefab::SetName(const char* _name)
 {
 	ResourceContainer::SetName(_name);
 
-	std::string assetPath("Assets/Prefabs/");
+	eastl::string assetPath("Assets/Prefabs/");
 	assetPath += _name;
 	assetPath += ".refab";
 	SetAssetPath(assetPath.c_str());
@@ -84,9 +84,9 @@ void RE_Prefab::AssetSave()
 	DEL(prefabNode);
 
 	//Setting LibraryPath and MD5
-	std::string md5 = prefab_SaveFile.GetMd5();
+	eastl::string md5 = prefab_SaveFile.GetMd5();
 	SetMD5(md5.c_str());
-	std::string libraryPath("Library/Prefabs/");
+	eastl::string libraryPath("Library/Prefabs/");
 	libraryPath += md5;
 	SetLibraryPath(libraryPath.c_str());
 
@@ -104,9 +104,9 @@ void RE_Prefab::AssetLoad(bool generateLibraryPath)
 		DEL(prefabNode);
 
 		if (generateLibraryPath) {
-			std::string md5 = jsonLoad.GetMd5();
+			eastl::string md5 = jsonLoad.GetMd5();
 			SetMD5(md5.c_str());
-			std::string libraryPath("Library/Prefabs/");
+			eastl::string libraryPath("Library/Prefabs/");
 			libraryPath += md5;
 			SetLibraryPath(libraryPath.c_str());
 		}

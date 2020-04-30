@@ -6,7 +6,7 @@
 
 class JSONNode;
 
-#include <string>
+#include <EASTL/string.h>
 
 enum Resource_Type : short unsigned int
 {
@@ -65,11 +65,11 @@ private:
 	virtual void LoadResourceMeta(JSONNode* metaNode) {}
 
 private:
-	std::string name;
-	std::string propietiesName;
-	std::string assetPath;
-	std::string libraryPath;
-	std::string metaPath;
+	eastl::string name;
+	eastl::string propietiesName;
+	eastl::string assetPath;
+	eastl::string libraryPath;
+	eastl::string metaPath;
 	char* md5 = nullptr;
 	Resource_Type type;
 	signed long long lastModified = 0;

@@ -54,34 +54,34 @@ void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuff
 	uint vertexLenght = strlen(vertexBuffer);
 	uint fragmentLenght = strlen(fragmentBuffer);
 	uint geometryLenght = (geometryBuffer) ? strlen(fragmentBuffer) : 0;
-	std::string vbuffer(vertexBuffer, vertexLenght);
-	std::string fbuffer(vertexBuffer, vertexLenght);
-	std::string gbuffer;
-	if (geometryBuffer) gbuffer = std::string(geometryBuffer, geometryLenght);
+	eastl::string vbuffer(vertexBuffer, vertexLenght);
+	eastl::string fbuffer(fragmentBuffer, fragmentLenght);
+	eastl::string gbuffer;
+	if (geometryBuffer) gbuffer = eastl::string(geometryBuffer, geometryLenght);
 
-	std::string totalBuffer = vbuffer;
+	eastl::string totalBuffer = vbuffer;
 	totalBuffer += fbuffer;
 	totalBuffer += gbuffer;
 
 	SetMD5(MD5(totalBuffer).hexdigest().c_str());
-	std::string libraryPath("Library/Shaders/");
+	eastl::string libraryPath("Library/Shaders/");
 	libraryPath += GetMD5();
 	SetLibraryPath(libraryPath.c_str());
 
 	App->shaders->LoadFromBuffer(&ID, vertexBuffer, vertexLenght, fragmentBuffer, fragmentLenght, geometryBuffer, geometryLenght);
 
 	uniforms.clear();
-	std::vector<std::string> lines;
+	eastl::vector<eastl::string> lines;
 	if (vertexBuffer) {
-		std::vector<std::string> slines = GetUniformLines(vertexBuffer);
+		eastl::vector<eastl::string> slines = GetUniformLines(vertexBuffer);
 		if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
 	}
 	if (fragmentBuffer) {
-		std::vector<std::string> slines = GetUniformLines(fragmentBuffer);
+		eastl::vector<eastl::string> slines = GetUniformLines(fragmentBuffer);
 		if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
 	}
 	if (geometryBuffer) {
-		std::vector<std::string> slines = GetUniformLines(geometryBuffer);
+		eastl::vector<eastl::string> slines = GetUniformLines(geometryBuffer);
 		if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
 	}
 	MountShaderCvar(lines);
@@ -98,26 +98,26 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	shaderSettings.fragmentShader = fragment;
 	if (geometry) shaderSettings.geometryShader = geometry;
 
-	std::string buffer = "";
+	eastl::string buffer = "";
 
 	if (!shaderSettings.vertexShader.empty()) {
 		RE_FileIO vertexBuffer(shaderSettings.vertexShader.c_str());
 		if (vertexBuffer.Load()) {
-			std::string vbuffer(vertexBuffer.GetBuffer(), vertexBuffer.GetSize());
+			eastl::string vbuffer(vertexBuffer.GetBuffer(), vertexBuffer.GetSize());
 			buffer += vbuffer;
 		}
 	}
 	if (!shaderSettings.fragmentShader.empty()) {
 		RE_FileIO fragmentBuffer(shaderSettings.fragmentShader.c_str());
 		if (fragmentBuffer.Load()) {
-			std::string fbuffer(fragmentBuffer.GetBuffer(), fragmentBuffer.GetSize());
+			eastl::string fbuffer(fragmentBuffer.GetBuffer(), fragmentBuffer.GetSize());
 			buffer += fbuffer;
 		}
 	}
 	if (!shaderSettings.geometryShader.empty()) {
 		RE_FileIO geometryBuffer(shaderSettings.geometryShader.c_str());
 		if (geometryBuffer.Load()) {
-			std::string gbuffer(geometryBuffer.GetBuffer(), geometryBuffer.GetSize());
+			eastl::string gbuffer(geometryBuffer.GetBuffer(), geometryBuffer.GetSize());
 			buffer += gbuffer;
 		}
 	}
@@ -125,14 +125,14 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	ParseAndGetUniforms();
 
 	SetMD5(MD5(buffer).hexdigest().c_str());
-	std::string libraryPath("Library/Shaders/");
+	eastl::string libraryPath("Library/Shaders/");
 	libraryPath += GetMD5();
 	SetLibraryPath(libraryPath.c_str());
 
 	if (!isInternal()) SetMetaPath("Assets/Shaders/");
 }
 
-std::vector<ShaderCvar> RE_Shader::GetUniformValues()
+eastl::vector<ShaderCvar> RE_Shader::GetUniformValues()
 {
 	return uniforms;
 }
@@ -231,47 +231,47 @@ void RE_Shader::GetGeometryFileInfo(const char*& path, signed long long* lastTim
 void RE_Shader::ParseAndGetUniforms()
 {
 	uniforms.clear();
-	std::vector<std::string> lines;
+	eastl::vector<eastl::string> lines;
 	if (!shaderSettings.vertexShader.empty()) {
 		RE_FileIO sFile(shaderSettings.vertexShader.c_str());
 		if (sFile.Load()) {
-			std::vector<std::string> slines = GetUniformLines(sFile.GetBuffer());
+			eastl::vector<eastl::string> slines = GetUniformLines(sFile.GetBuffer());
 			if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
 		}
 	}
 	if (!shaderSettings.fragmentShader.empty()) {
 		RE_FileIO sFile(shaderSettings.fragmentShader.c_str());
 		if (sFile.Load()) {
-			std::vector<std::string> slines = GetUniformLines(sFile.GetBuffer());
+			eastl::vector<eastl::string> slines = GetUniformLines(sFile.GetBuffer());
 			if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
 		}
 	}
 	if (!shaderSettings.geometryShader.empty()) {
 		RE_FileIO sFile(shaderSettings.geometryShader.c_str());
 		if (sFile.Load()) {
-			std::vector<std::string> slines = GetUniformLines(sFile.GetBuffer());
+			eastl::vector<eastl::string> slines = GetUniformLines(sFile.GetBuffer());
 			if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
 		}
 	}
 	MountShaderCvar(lines);
 }
 
-std::vector<std::string> RE_Shader::GetUniformLines(const char* buffer)
+eastl::vector<eastl::string> RE_Shader::GetUniformLines(const char* buffer)
 {
-	std::vector<std::string> lines;
-	std::string parse(buffer);
+	eastl::vector<eastl::string> lines;
+	eastl::string parse(buffer);
 	int linePos = parse.find_first_of('\n');
-	while (linePos != std::string::npos){
-		std::string line = parse.substr(0, linePos);
+	while (linePos != eastl::string::npos){
+		eastl::string line = parse.substr(0, linePos);
 		int exitsUniform = line.find("uniform");
-		if (exitsUniform != std::string::npos) lines.push_back(line);
+		if (exitsUniform != eastl::string::npos) lines.push_back(line);
 		parse.erase(0, linePos + 1);
 		linePos = parse.find_first_of('\n');
 	} 
 	return lines;
 }
 
-void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
+void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
 {
 	projection = -1;
 	view = -1;
@@ -282,13 +282,13 @@ void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
 	static const char* internalNames[25] = { "useTexture", "useColor", "time", "dt", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "tnormals", "treflection" };
 	for (auto uniform : uniformLines){
 		int pos = uniform.find_first_of(" ");
-		if (pos != std::string::npos) {
+		if (pos != eastl::string::npos) {
 			ShaderCvar sVar;
 
 			pos++;
-			std::string typeAndName = uniform.substr(pos);
+			eastl::string typeAndName = uniform.substr(pos);
 
-			std::string varType = typeAndName.substr(0, pos = typeAndName.find_first_of(" "));
+			eastl::string varType = typeAndName.substr(0, pos = typeAndName.find_first_of(" "));
 
 			sVar.name = typeAndName.substr(pos + 1, typeAndName.size() - pos - 2);
 
@@ -339,7 +339,7 @@ void RE_Shader::MountShaderCvar(std::vector<std::string> uniformLines)
 
 			int pos = sVar.name.find_first_of("0123456789");
 
-			std::string name = (pos != std::string::npos) ? sVar.name.substr(0, pos) : sVar.name;
+			eastl::string name = (pos != eastl::string::npos) ? sVar.name.substr(0, pos) : sVar.name;
 
 			//Custom or internal variables
 			for (uint i = 0; i < 25; i++) {
@@ -402,17 +402,17 @@ void RE_Shader::SaveResourceMeta(JSONNode* metaNode)
 	JSONNode* nuniforms = metaNode->PushJObject("uniforms");
 	nuniforms->PushUInt("size", uniforms.size());
 	if (!uniforms.empty()) {
-		std::string id;
+		eastl::string id;
 		for (uint i = 0; i < uniforms.size(); i++)
 		{
 			id = "name";
-			id += std::to_string(i);
+			id += eastl::to_string(i);
 			nuniforms->PushString(id.c_str(), uniforms[i].name.c_str());
 			id = "type";
-			id += std::to_string(i);
+			id += eastl::to_string(i);
 			nuniforms->PushUInt(id.c_str(), uniforms[i].GetType());
 			id = "custom";
-			id += std::to_string(i);
+			id += eastl::to_string(i);
 			nuniforms->PushBool(id.c_str(), uniforms[i].custom);
 		}
 	}
@@ -437,18 +437,18 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 	JSONNode* nuniforms = metaNode->PullJObject("uniforms");
 	uint size = nuniforms->PullUInt("size", 0);
 	if (size) {
-		std::string id;
+		eastl::string id;
 		for (uint i = 0; i < size; i++)
 		{
 			ShaderCvar sVar;
 			id = "name";
-			id += std::to_string(i);
+			id += eastl::to_string(i);
 			sVar.name = nuniforms->PullString(id.c_str(), "");
 			id = "type";
-			id += std::to_string(i);
+			id += eastl::to_string(i);
 			Cvar::VAR_TYPE vT = (Cvar::VAR_TYPE)nuniforms->PullUInt(id.c_str(), ShaderCvar::UNDEFINED);
 			id = "custom";
-			id += std::to_string(i);
+			id += eastl::to_string(i);
 			sVar.custom = nuniforms->PullBool(id.c_str(), true);
 
 			bool b2[2] = { false, false };

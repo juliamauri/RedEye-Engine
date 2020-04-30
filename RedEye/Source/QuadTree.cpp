@@ -8,7 +8,8 @@
 #include "RE_ShaderImporter.h"
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
-#include <stack>
+
+#include <EASTL/queue.h>
 
 QTree::QTreeNode::QTreeNode()
 {
@@ -52,7 +53,7 @@ void QTree::QTreeNode::Push(RE_GameObject* g_obj)
 
 void QTree::QTreeNode::Pop(const RE_GameObject* g_obj)
 {
-	std::list<RE_GameObject*>::iterator it = std::find(g_objs.begin(), g_objs.end(), g_obj);
+	eastl::list<RE_GameObject*>::iterator it = eastl::find(g_objs.begin(), g_objs.end(), g_obj);
 	if (it != g_objs.end())
 		g_objs.erase(it);
 
@@ -145,7 +146,7 @@ void QTree::QTreeNode::AddNodes()
 
 void QTree::QTreeNode::Distribute()
 {
-	std::list<RE_GameObject*>::iterator it = g_objs.begin();
+	eastl::list<RE_GameObject*>::iterator it = g_objs.begin();
 	
 	while (it != g_objs.end())
 	{
@@ -194,7 +195,7 @@ void QTree::Build(RE_GameObject * root_g_obj)
 	PushWithChilds(root_g_obj);
 }
 
-void QTree::BuildFromList(const AABB& box, const std::list<RE_GameObject*>& gos)
+void QTree::BuildFromList(const AABB& box, const eastl::list<RE_GameObject*>& gos)
 {
 	root.Clear();
 	root.SetBox(box);
@@ -272,7 +273,7 @@ void QTree::PushWithChilds(RE_GameObject * g_obj)
 {
 	root.SetBox(g_obj->GetGlobalBoundingBox());
 
-	std::stack<RE_GameObject*> objects;
+	eastl::stack<RE_GameObject*> objects;
 
 	for (auto child : g_obj->GetChilds())
 		objects.push(child);
@@ -322,7 +323,7 @@ void AABBDynamicTree::PushNode(int go_index, AABB box)
 
 		if (!rootNode.is_leaf)
 		{
-			std::queue<int> potential_siblings;
+			eastl::queue<int> potential_siblings;
 			potential_siblings.push(rootNode.child1);
 			potential_siblings.push(rootNode.child2);
 			
@@ -483,12 +484,12 @@ void AABBDynamicTree::Clear()
 	poolmapped_.clear();
 }
 
-void AABBDynamicTree::CollectIntersections(Ray ray, std::stack<int>& indexes) const
+void AABBDynamicTree::CollectIntersections(Ray ray, eastl::stack<int>& indexes) const
 {
 	if (node_count > 0)
 	{
 		AABBDynamicTreeNode node;
-		std::stack<int> node_stack;
+		eastl::stack<int> node_stack;
 		node_stack.push(root_index);
 
 		while (!node_stack.empty())
@@ -512,12 +513,12 @@ void AABBDynamicTree::CollectIntersections(Ray ray, std::stack<int>& indexes) co
 	}
 }
 
-void AABBDynamicTree::CollectIntersections(const Frustum frustum, std::stack<int>& indexes) const
+void AABBDynamicTree::CollectIntersections(const Frustum frustum, eastl::stack<int>& indexes) const
 {
 	if (node_count > 0)
 	{
 		AABBDynamicTreeNode node;
-		std::stack<int> node_stack;
+		eastl::stack<int> node_stack;
 		node_stack.push(root_index);
 
 		while (!node_stack.empty())
@@ -713,7 +714,7 @@ int AABBDynamicTree::AllocateLeafNode(AABB box, int index)
 
 	int node_index = randomCount++;
 	Push(newNode, node_index);
-	objectToNode.insert(std::pair<int, int>(index, node_index));
+	objectToNode.insert(eastl::pair<int, int>(index, node_index));
 
 	node_count++;
 

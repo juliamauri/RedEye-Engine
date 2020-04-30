@@ -28,12 +28,12 @@ const char* RE_Texture::GenerateMD5()
 {
 	const char* ret = nullptr;
 	RE_FileIO generateMD5(GetAssetPath());
-	std::string newMD5(generateMD5.GetMd5());
+	eastl::string newMD5 = generateMD5.GetMd5();
 	if (!newMD5.empty())
 	{
 		SetMD5(newMD5.c_str());
 		ret = GetMD5();
-		std::string libraryPath("Library/Textures/");
+		eastl::string libraryPath("Library/Textures/");
 		libraryPath += ret;
 		SetLibraryPath(libraryPath.c_str());
 	}
@@ -42,22 +42,22 @@ const char* RE_Texture::GenerateMD5()
 
 TextureType RE_Texture::DetectExtension()
 {
-	std::string assetPath(GetAssetPath());
-	std::string filename = assetPath.substr(assetPath.find_last_of("/") + 1);
-	std::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
+	eastl::string assetPath(GetAssetPath());
+	eastl::string filename = assetPath.substr(assetPath.find_last_of("/") + 1);
+	eastl::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
 	const char* extension = extensionStr.c_str();
 
-	if (std::strcmp(extension, "dds") == 0)
+	if (eastl::Compare(extension, "dds", 3) == 0)
 		texType = RE_DDS;
-	else if (std::strcmp(extension, "png") == 0)
+	else if (eastl::Compare(extension, "png", 3) == 0)
 		texType = RE_PNG;
-	else if (std::strcmp(extension, "jpg") == 0)
+	else if (eastl::Compare(extension, "jpg", 3) == 0)
 		texType = RE_JPG;
-	else if (std::strcmp(extension, "tga") == 0)
+	else if (eastl::Compare(extension, "tga", 3) == 0)
 		texType = RE_TGA;
-	else if (std::strcmp(extension, "tiff") == 0)
+	else if (eastl::Compare(extension, "tiff", 3) == 0)
 		texType = RE_TIFF;
-	else if (std::strcmp(extension, "bmp") == 0)
+	else if (eastl::Compare(extension, "bmp", 3) == 0)
 		texType = RE_BMP;
 	else
 		texType = RE_TEXTURE_UNKNOWN;
@@ -366,7 +366,7 @@ void RE_Texture::AssetLoad()
 		App->textures->LoadTextureInMemory(assetFile.GetBuffer(), assetFile.GetSize(), texType, &ID, &width, &height, texSettings);
 		
 		SetMD5(assetFile.GetMd5().c_str());
-		std::string libraryPath("Library/Textures/");
+		eastl::string libraryPath("Library/Textures/");
 		libraryPath += GetMD5();
 		SetLibraryPath(libraryPath.c_str());
 

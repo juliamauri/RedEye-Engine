@@ -1,7 +1,7 @@
 #ifndef __RETHUMBNAILMANAGER_H__
 #define __RETHUMBNAILMANAGER_H__
 
-#include <map>
+#include <EASTL/map.h>
 
 class RE_CompCamera;
 
@@ -35,7 +35,7 @@ private:
 	unsigned int LoadLibraryThumbnail(const char* ref);
 
 private:
-	std::map<const char*, unsigned int> thumbnails;
+	eastl::map<const char*, unsigned int> thumbnails;
 
 	unsigned int singleRenderFBO = 0;
 	unsigned int pboRender = 0;

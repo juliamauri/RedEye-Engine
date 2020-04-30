@@ -5,8 +5,8 @@
 #include "Cvar.h"
 
 #include "MathGeoLib/include/Math/float3.h"
-#include <string>
-#include <vector>
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
 
 class JSONNode;
 
@@ -56,13 +56,13 @@ private:
 	void SaveResourceMeta(JSONNode* metaNode)override;
 	void LoadResourceMeta(JSONNode* metaNode)override;
 
-	void DrawTextures(const char* texturesName, std::vector<const char*>* textures);
+	void DrawTextures(const char* texturesName, eastl::vector<const char*>* textures);
 
 	void JsonDeserialize(bool generateLibraryPath = false);
 	void JsonSerialize(bool onlyMD5 = false);
 
-	void PullTexturesJson(JSONNode * texturesNode, std::vector<const char*>* textures);
-	void PushTexturesJson(JSONNode * texturesNode, std::vector<const char*>* textures);
+	void PullTexturesJson(JSONNode * texturesNode, eastl::vector<const char*>* textures);
+	void PushTexturesJson(JSONNode * texturesNode, eastl::vector<const char*>* textures);
 
 	void BinaryDeserialize();
 	void BinarySerialize();
@@ -73,30 +73,30 @@ private:
 public:
 	RE_ShadingMode shadingType = S_FLAT;
 
-	std::vector<const char*> tDiffuse;
+	eastl::vector<const char*> tDiffuse;
 	math::float3 cDiffuse = math::float3::zero;
-	std::vector<const char*> tSpecular;
+	eastl::vector<const char*> tSpecular;
 	math::float3 cSpecular = math::float3::zero;
-	std::vector<const char*> tAmbient;
+	eastl::vector<const char*> tAmbient;
 	math::float3 cAmbient = math::float3::zero;
-	std::vector<const char*> tEmissive;
+	eastl::vector<const char*> tEmissive;
 	math::float3 cEmissive = math::float3::zero;
 	math::float3 cTransparent = math::float3::zero;
 
 	bool backFaceCulling = true;
 	bool blendMode = false;
 
-	std::vector<const char*> tOpacity;
+	eastl::vector<const char*> tOpacity;
 	float opacity = 1.0f;
-	std::vector<const char*> tShininess;
+	eastl::vector<const char*> tShininess;
 	float shininess = 0.f;
 	float shininessStrenght = 1.0f;
 	float refraccti = 1.0f;
 
-	std::vector<const char*> tHeight;
-	std::vector<const char*> tNormals;
-	std::vector<const char*> tReflection;
-	std::vector<const char*> tUnknown;
+	eastl::vector<const char*> tHeight;
+	eastl::vector<const char*> tNormals;
+	eastl::vector<const char*> tReflection;
+	eastl::vector<const char*> tUnknown;
 
 private:
 	const char* shadingItems[10] = { "Flat", "Goraund", "Phong", "Phong Blinn", "Toon", "Oren Nayar", "Minnaert", "Cook Torrance", "No Shading", "Fresnel" };
@@ -104,7 +104,7 @@ private:
 	bool applySave = false;
 
 	const char* shaderMD5 = nullptr;
-	std::vector<ShaderCvar> fromShaderCustomUniforms;
+	eastl::vector<ShaderCvar> fromShaderCustomUniforms;
 
 	enum MaterialUINT {
 		UNDEFINED = -1, CDIFFUSE, TDIFFUSE, CSPECULAR, TSPECULAR, CAMBIENT, TAMBIENT, CEMISSIVE,

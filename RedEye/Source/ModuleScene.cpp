@@ -31,9 +31,9 @@
 #include "TimeManager.h"
 
 #include "md5.h"
-#include <string>
-#include <queue>
-#include <vector>
+#include <EASTL/string.h>
+#include <EASTL/queue.h>
+#include <EASTL/vector.h>
 
 #include "SDL2\include\SDL.h"
 
@@ -60,7 +60,7 @@ bool ModuleScene::Start()
 
 	// Load scene
 	Timer timer;
-	std::string path_scene("Assets/Scenes/");
+	eastl::string path_scene("Assets/Scenes/");
 	path_scene += GetName();
 	path_scene += ".re";
 
@@ -232,7 +232,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		{
 		case GO_CHANGED_TO_ACTIVE:
 		{
-			std::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
+			eastl::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
 
 			if (belongs_to_scene)
 			{
@@ -256,7 +256,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		{
 			if (belongs_to_scene)
 			{
-				std::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
+				eastl::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
 
 				for (auto draw_go : all)
 				{
@@ -294,7 +294,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 
 			if (belongs_to_scene && go->IsActive() && to_add->IsActive())
 			{
-				std::vector<RE_GameObject*> all = to_add->GetActiveChildsWithDrawComponents();
+				eastl::vector<RE_GameObject*> all = to_add->GetActiveChildsWithDrawComponents();
 
 				for (auto draw_go : all)
 				{
@@ -315,7 +315,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 
 			if (belongs_to_scene && to_remove->IsActive())
 			{
-				std::vector<RE_GameObject*> all = to_remove->GetActiveChildsWithDrawComponents();
+				eastl::vector<RE_GameObject*> all = to_remove->GetActiveChildsWithDrawComponents();
 
 				for (auto draw_go : all)
 				{
@@ -458,11 +458,11 @@ RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 {
 	RE_GameObject* ret = nullptr;
 
-	std::stack<int> goIndex;
+	eastl::stack<int> goIndex;
 	static_tree.CollectIntersections(ray, goIndex);
 	dynamic_tree.CollectIntersections(ray, goIndex);
 
-	std::vector<RE_GameObject*> objects;
+	eastl::vector<RE_GameObject*> objects;
 	while (!goIndex.empty())
 	{
 		int index = goIndex.top();
@@ -499,9 +499,9 @@ RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 	return ret;
 }
 
-void ModuleScene::FustrumCulling(std::vector<const RE_GameObject*>& container, const math::Frustum & frustum)
+void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum & frustum)
 {
-	std::stack<int> goIndex;
+	eastl::stack<int> goIndex;
 	static_tree.CollectIntersections(frustum, goIndex);
 	dynamic_tree.CollectIntersections(frustum, goIndex);
 
@@ -670,9 +670,9 @@ void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
 	//	LOG_ERROR("No Selected GameObject");
 }
 
-void ModuleScene::GetActive(std::list<RE_GameObject*>& objects) const
+void ModuleScene::GetActive(eastl::list<RE_GameObject*>& objects) const
 {
-	std::queue<RE_GameObject*> queue;
+	eastl::queue<RE_GameObject*> queue;
 
 	for (auto child : root->GetChilds())
 		if (child->IsActive())
@@ -691,9 +691,9 @@ void ModuleScene::GetActive(std::list<RE_GameObject*>& objects) const
 	}
 }
 
-void ModuleScene::GetActiveStatic(std::list<RE_GameObject*>& objects) const
+void ModuleScene::GetActiveStatic(eastl::list<RE_GameObject*>& objects) const
 {
-	std::queue<RE_GameObject*> queue;
+	eastl::queue<RE_GameObject*> queue;
 
 	for (auto child : root->GetChilds())
 		if (child->IsActive() && child->IsStatic())
@@ -712,9 +712,9 @@ void ModuleScene::GetActiveStatic(std::list<RE_GameObject*>& objects) const
 	}
 }
 
-void ModuleScene::GetActiveNonStatic(std::list<RE_GameObject*>& objects) const
+void ModuleScene::GetActiveNonStatic(eastl::list<RE_GameObject*>& objects) const
 {
-	std::queue<RE_GameObject*> queue;
+	eastl::queue<RE_GameObject*> queue;
 
 	for (auto child : root->GetChilds())
 		if (child->IsActive() && !child->IsStatic())
@@ -738,7 +738,7 @@ void ModuleScene::ResetTrees()
 	static_tree.Clear();
 	dynamic_tree.Clear();
 
-	std::vector<int> goIndex = goManager.GetAllKeys();
+	eastl::vector<int> goIndex = goManager.GetAllKeys();
 	for (int i = 0; i < goIndex.size(); i++)
 	{
 		RE_GameObject* go = goManager.At(goIndex[i]);
@@ -760,26 +760,26 @@ void GameObjectManager::Clear()
 	lastAvaibleIndex = 0;
 }
 
-std::map< RE_GameObject*, int> GameObjectManager::PushWithChilds(RE_GameObject* val, bool root)
+eastl::map< RE_GameObject*, int> GameObjectManager::PushWithChilds(RE_GameObject* val, bool root)
 {
-	std::map< RE_GameObject*, int> ret;
-	 std::vector<RE_GameObject*> gos =  val->GetAllGO();
+	eastl::map< RE_GameObject*, int> ret;
+	eastl::vector<RE_GameObject*> gos =  val->GetAllGO();
 	 if (!root) gos.erase(gos.begin());
-	 for (auto go : gos) ret.insert(std::pair<RE_GameObject*,int>(go, Push(go)));
+	 for (auto go : gos) ret.insert(eastl::pair<RE_GameObject*,int>(go, Push(go)));
 	 return ret;
 }
 
 int GameObjectManager::Push(RE_GameObject* val)
 {
 	int ret = lastAvaibleIndex;
-	goToID.insert(std::pair<RE_GameObject*, int>(val, ret));
+	goToID.insert(eastl::pair<RE_GameObject*, int>(val, ret));
 	PoolMapped::Push(val, ret);
 	return ret;
 }
 
-std::vector<RE_GameObject*> GameObjectManager::PopWithChilds(int id, bool root)
+eastl::vector<RE_GameObject*> GameObjectManager::PopWithChilds(int id, bool root)
 {
-	std::vector<RE_GameObject*> gos = At(id)->GetAllGO();
+	eastl::vector<RE_GameObject*> gos = At(id)->GetAllGO();
 	if (!root) gos.erase(gos.begin());
 	for (auto go : gos) Pop(goToID.at(go));
 	return gos;

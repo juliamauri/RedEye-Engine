@@ -20,8 +20,6 @@
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 
-#include <vector>
-#include <string>
 
 RE_InternalResources::RE_InternalResources()
 {

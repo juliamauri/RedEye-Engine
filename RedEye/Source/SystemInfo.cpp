@@ -25,7 +25,7 @@ void SystemInfo::WhatAreWeRunningOn()
 {
 	// CPU
 	cpus = "CPUs: ";
-	cpus += std::to_string(SDL_GetCPUCount());
+	cpus += eastl::to_string(SDL_GetCPUCount());
 	cpus += " cores";
 
 	// RAM
@@ -174,28 +174,28 @@ void SystemInfo::CheckVRAM()
 	vram_reserved = "VRAM reserved: "; MemValAsString(vram_reserved, reserved);
 }
 
-void SystemInfo::MemValAsString(std::string& stat, const unsigned long long val) const
+void SystemInfo::MemValAsString(eastl::string& stat, const unsigned long long val) const
 {
 	// TODO: eliminate ghost leaks
 	
 	if (val >= GIGABYTE)
 	{
-		stat += std::to_string(val / GIGABYTE_F);
+		stat += eastl::to_string(val / GIGABYTE_F);
 		stat += " Gbs";
 	}
 	else if (val >= MEGABYTE)
 	{
-		stat += std::to_string(val / MEGABYTE_F);
+		stat += eastl::to_string(val / MEGABYTE_F);
 		stat += " Mbs";
 	}
 	else if (val >= KILOBYTE)
 	{
-		stat += std::to_string(val / KILOBYTE_F);
+		stat += eastl::to_string(val / KILOBYTE_F);
 		stat += " Kbs";
 	}
 	else
 	{
-		stat += std::to_string(val);
+		stat += eastl::to_string(val);
 		stat += " bytes";
 	}
 }

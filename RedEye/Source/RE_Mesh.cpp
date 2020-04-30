@@ -38,7 +38,7 @@ void RE_Mesh::SetLibraryPath(const char* path)
 {
 	ResourceContainer::SetLibraryPath(path);
 
-	std::string md5(path);
+	eastl::string md5(path);
 	md5 = md5.substr(md5.find_last_of("/") + 1);
 	SetMD5(md5.c_str());
 }
@@ -155,13 +155,13 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	char nullchar = '\0';
 	memcpy(cursor, &nullchar, sizeof(char));
 
-	std::string md5Generated = MD5(std::string(buffer, size + 1)).hexdigest();
+	eastl::string md5Generated = MD5(eastl::string(buffer, size + 1)).hexdigest();
 	const char* existsMD5 = App->resources->IsReference(md5Generated.c_str());
 	if (!existsMD5) {
 		SetMD5(md5Generated.c_str());
 		existsMD5 = GetMD5();
 
-		std::string libraryPath("Library/Meshes/");
+		eastl::string libraryPath("Library/Meshes/");
 		libraryPath += existsMD5;
 		ResourceContainer::SetLibraryPath(libraryPath.c_str());
 
@@ -252,7 +252,7 @@ void RE_Mesh::Draw()
 
 void RE_Mesh::SetupAABB()
 {
-	std::vector<math::vec> vertex_pos;
+	eastl::vector<math::vec> vertex_pos;
 	vertex_pos.resize(vertex_count * 3);
 
 	for (int i = 0; i < vertex_count; i++)
@@ -427,7 +427,7 @@ void RE_Mesh::loadFaceNormals()
 	uint triangleA = 0;
 	uint triangleB = 0;
 	uint triangleC = 0;
-	std::vector<math::vec> lines, face_centers;
+	eastl::vector<math::vec> lines, face_centers;
 	for (unsigned int i = 0; i < triangle_count; i += 3)
 	{
 		uint triangleA = index[i] * 3;

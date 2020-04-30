@@ -17,16 +17,16 @@ public:
 
 	void Clear();
 
-	std::map< RE_GameObject *,int> PushWithChilds(RE_GameObject* val, bool root = true);
+	eastl::map< RE_GameObject *,int> PushWithChilds(RE_GameObject* val, bool root = true);
 	int Push(RE_GameObject* val)override;
 
-	std::vector< RE_GameObject*> PopWithChilds(int id, bool root = true);
+	eastl::vector< RE_GameObject*> PopWithChilds(int id, bool root = true);
 	RE_GameObject* Pop(int id)override;
 
 	int WhatID(RE_GameObject* go)const;
 
 private:
-	std::map< RE_GameObject*, int> goToID;
+	eastl::map< RE_GameObject*, int> goToID;
 
 };
 
@@ -62,7 +62,7 @@ public:
 
 	void DrawTrees() const;
 	RE_GameObject* RayCastSelect(math::Ray& ray);
-	void FustrumCulling(std::vector<const RE_GameObject*>& container, const math::Frustum& frustum);
+	void FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum& frustum);
 
 	void Serialize();
 	void LoadFBXOnScene(const char* fbxPath);
@@ -70,9 +70,9 @@ public:
 
 private:
 
-	void GetActive(std::list<RE_GameObject*>& objects) const;
-	void GetActiveStatic(std::list<RE_GameObject*>& objects) const;
-	void GetActiveNonStatic(std::list<RE_GameObject*>& objects) const;
+	void GetActive(eastl::list<RE_GameObject*>& objects) const;
+	void GetActiveStatic(eastl::list<RE_GameObject*>& objects) const;
+	void GetActiveNonStatic(eastl::list<RE_GameObject*>& objects) const;
 
 	void ResetTrees();
 
@@ -86,7 +86,7 @@ private:
 	AABBDynamicTree static_tree;
 	AABBDynamicTree dynamic_tree;
 
-	std::string defaultModel;
+	eastl::string defaultModel;
 
 	const char* sceneLoadedMD5 = nullptr;
 };

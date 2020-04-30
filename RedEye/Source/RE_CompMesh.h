@@ -3,7 +3,6 @@
 
 #include "RE_Component.h"
 #include "MathGeoLib/include/Geometry/AABB.h"
-#include <string>
 
 class RE_CompMesh : public RE_Component
 {
@@ -22,11 +21,11 @@ public:
 	void SetMaterial(const char* md5);
 	const char* GetMaterial()const;
 
-	std::vector<const char*> GetAllResources() override;
+	eastl::vector<const char*> GetAllResources() override;
 
 	unsigned int GetBinarySize()const override;
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
 
 	math::AABB GetAABB() const;
 	bool CheckFaceCollision(const math::Ray &ray, float &distance) const;

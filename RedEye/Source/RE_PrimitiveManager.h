@@ -1,7 +1,7 @@
 #ifndef __RE_PRIMITVEMANAGER_H__
 #define __RE_PRIMITVEMANAGER_H__
 
-#include <map>
+#include <EASTL/map.h>
 
 #include "MathGeoLib/include/Math/float3.h"
 
@@ -50,7 +50,7 @@ private:
 	unsigned int ebo_triangle = 0, ebo_cube = 0, ebo_fustrum = 0, ebo_cylinder = 0, ebo_capsule = 0;
 
 	//Primitives Count
-	std::map<unsigned short int, unsigned int> primitives_count;
+	eastl::map<unsigned short int, unsigned int> primitives_count;
 
 	//Delete VAO of primitive when its count is 0
 	void DeleteVAOPrimitive(unsigned short int primitive);

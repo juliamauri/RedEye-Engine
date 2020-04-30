@@ -1,9 +1,9 @@
 #ifndef __RESOURCEMANAGER_H__
 #define __RESOURCEMANAGER_H__
 
-#include <map>
-#include <vector>
-#include <stack> 
+#include <EASTL/map.h>
+#include <EASTL/vector.h>
+#include <EASTL/stack.h> 
 
 #include "EventListener.h"
 
@@ -22,7 +22,7 @@ public:
 	const char* Reference(ResourceContainer* rc);
 	unsigned int TotalReferences() const;
 
-	std::vector<const char*> GetAllResourcesActiveByType(Resource_Type resT);
+	eastl::vector<const char*> GetAllResourcesActiveByType(Resource_Type resT);
 
 	const char* ImportModel(const char* assetPath);
 	const char* ImportTexture(const char* assetPath);
@@ -39,7 +39,7 @@ public:
 	const char* GetSelected()const;
 	void PopSelected(bool all = false);
 
-	std::vector<ResourceContainer*> GetResourcesByType(Resource_Type type);
+	eastl::vector<ResourceContainer*> GetResourcesByType(Resource_Type type);
 	const char* IsReference(const char* md5, Resource_Type type = Resource_Type::R_UNDEFINED);
 	const char* FindMD5ByMETAPath(const char* metaPath, Resource_Type type = Resource_Type::R_UNDEFINED);
 	const char* FindMD5ByLibraryPath(const char* libraryPath, Resource_Type type = Resource_Type::R_UNDEFINED);
@@ -48,19 +48,19 @@ public:
 
 	void ThumbnailResources();
 
-	typedef std::pair<const char*, ResourceContainer*> Resource;
-	typedef std::map<const char*, ResourceContainer*> ResourceMap;
+	typedef eastl::pair<const char*, ResourceContainer*> Resource;
+	typedef eastl::map<const char*, ResourceContainer*> ResourceMap;
 	typedef ResourceMap::iterator ResourceIter;
 	typedef ResourceMap::const_iterator ResourceConstIter;
 	
-	typedef std::pair<const char*, unsigned int> ResourceCounter;
-	typedef std::map<const char*, unsigned int> ResourceCounterMap;
+	typedef eastl::pair<const char*, unsigned int> ResourceCounter;
+	typedef eastl::map<const char*, unsigned int> ResourceCounterMap;
 
 private:
 	ResourceMap resources;
 	ResourceCounterMap resourcesCounter;
 
-	std::stack< const char*> resourcesSelected;
+	eastl::stack< const char*> resourcesSelected;
 };
 
 #endif // !__RESOURCEMANAGER_H__

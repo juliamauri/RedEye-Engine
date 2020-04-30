@@ -2,8 +2,8 @@
 #define __SYSTEMINFO_H__
 
 #include "EventListener.h"
-#include <vector>
-#include <string>
+#include <EASTL/vector.h>
+#include <EASTL/string.h>
 
 class SystemInfo : public EventListener
 {
@@ -25,7 +25,7 @@ private:
 	void PlotMemory(const unsigned int current_mem);
 
 	void CheckVRAM();
-	void MemValAsString(std::string& stat, const unsigned long long val) const;
+	void MemValAsString(eastl::string& stat, const unsigned long long val) const;
 
 private:
 
@@ -33,23 +33,23 @@ private:
 	bool pause_plotting = false;
 
 	// Hardware
-	std::string cpus;
-	std::string ram;
-	std::string caps1;
-	std::string caps2;
-	std::string drivers;
+	eastl::string cpus;
+	eastl::string ram;
+	eastl::string caps1;
+	eastl::string caps2;
+	eastl::string drivers;
 
 	// GPU
-	std::string gpu_renderer;
-	std::string gpu_vendor;
-	std::string gpu_version;
-	std::string gpu_shading;
+	eastl::string gpu_renderer;
+	eastl::string gpu_vendor;
+	eastl::string gpu_version;
+	eastl::string gpu_shading;
 
 	//VRAM
-	std::string vram_total;
-	std::string vram_used;
-	std::string vram_available;
-	std::string vram_reserved;
+	eastl::string vram_total;
+	eastl::string vram_used;
+	eastl::string vram_available;
+	eastl::string vram_reserved;
 };
 
 /* extra functions
@@ -57,15 +57,15 @@ private:
 bool getGraphicsDeviceInfo(
 	unsigned int* VendorId,
 	unsigned int* DeviceId,
-	std::wstring* GFXBrand,
+	eastl::wstring* GFXBrand,
 	unsigned __int64* VideoMemoryBudget,
 	unsigned __int64* VideoMemoryCurrentUsage,
 	unsigned __int64* VideoMemoryAvailable,
 	unsigned __int64* VideoMemoryReserved)
 
 getCPUInfo(
-	std::string* cpubrand,
-	std::string* cpuvendor)
+	eastl::string* cpubrand,
+	eastl::string* cpuvendor)
 
 getGTGeneration(unsigned int deviceId) */
 

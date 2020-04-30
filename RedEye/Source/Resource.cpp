@@ -177,7 +177,7 @@ void ResourceContainer::LoadMeta()
 
 void ResourceContainer::DrawPropieties()
 {
-	if (ImGui::CollapsingHeader(std::string(propietiesName + name).c_str(), ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen)) {
+	if (ImGui::CollapsingHeader(eastl::string(propietiesName + name).c_str(), ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen)) {
 		if (ImGui::Button("Return")) App->resources->PopSelected();
 		ImGui::Separator();
 		ImGui::Text("Name: %s", name.c_str());

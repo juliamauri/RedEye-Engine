@@ -7,6 +7,8 @@
 
 #include "ImGui/imgui.h"
 
+#include <EASTL/vector.h>
+
 Cvar::Cvar() : type(UNDEFINED) { value.int_v = 0; }
 
 Cvar::Cvar(const Cvar & copy) : type(copy.type)
@@ -812,7 +814,7 @@ bool ShaderCvar::SetSampler(const char* res_ptr, bool force_type)
 bool ShaderCvar::DrawPropieties(bool isInMemory)
 {
 	bool ret = false;
-	std::string n = name;
+	eastl::string n = name;
 	uint count = 0;
 	float* fPtr = nullptr;
 	switch (type)
@@ -822,41 +824,41 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 			ret = true;
 		break;
 	case Cvar::BOOL2:
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool2_v[0]))
 			ret = true;
 		n = name;		
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool2_v[1]))
 			ret = true;
 		break;
 	case Cvar::BOOL3:
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool3_v[0]))
 			ret = true;
 		n = name;
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool3_v[1]))
 			ret = true;
 		n = name;
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool3_v[2]))
 			ret = true;
 		break;
 	case Cvar::BOOL4:
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool4_v[0]))
 			ret = true;
 		n = name;
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool4_v[1]))
 			ret = true;
 		n = name;
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool4_v[2]))
 			ret = true;
 		n = name;
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool4_v[3]))
 			ret = true;
 		break;
@@ -904,44 +906,44 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 		break;
 	case Cvar::MAT2:
 		fPtr = value.float4_v.ptr();
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::DragFloat2(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		n = name;
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		fPtr +=  2;
 		if (ImGui::DragFloat2(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		break;
 	case Cvar::MAT3:
 		fPtr = value.mat3_v.ptr();
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::DragFloat3(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		fPtr += 3;
 		n = name;
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::DragFloat3(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		fPtr += 3;
 		n = name;
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::DragFloat3(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		break;
 	case Cvar::MAT4:
 		fPtr = value.mat4_v.ptr();
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::DragFloat4(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		fPtr += 4;
 		n = name;
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::DragFloat4(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		fPtr += 4;
 		n = name;
-		n += std::to_string(count++);
+		n += eastl::to_string(count++);
 		if (ImGui::DragFloat4(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		break;
@@ -953,7 +955,7 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 			if (ImGui::Button(res->GetName())) App->resources->PushSelected(res->GetMD5());
 
 			ImGui::SameLine();
-			if (ImGui::Button(std::string("Delete Sampler Texture #" + name).c_str())) {
+			if (ImGui::Button(eastl::string("Delete Sampler Texture #" + name).c_str())) {
 				if (isInMemory) App->resources->UnUse(value.char_p_v);
 				value.char_p_v = nullptr;
 				ret = true;
@@ -961,9 +963,9 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 
 		}
 
-		if (ImGui::BeginMenu(std::string("Change Sampler Texture #" + name).c_str()))
+		if (ImGui::BeginMenu(eastl::string("Change Sampler Texture #" + name).c_str()))
 		{
-			std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+			eastl::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
 			for (auto textRes : allTex) {
 				if (ImGui::MenuItem(textRes->GetName())) {
 					if (isInMemory) App->resources->UnUse(value.char_p_v);

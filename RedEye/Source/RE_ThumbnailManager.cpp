@@ -38,7 +38,7 @@
 
 
 
-#include <string>
+#include <EASTL/string.h>
 
 #define THUMBNAILPATH "Library/Thumbnails/"
 
@@ -166,18 +166,18 @@ void RE_ThumbnailManager::Add(const char* ref)
 	switch (res->GetType())
 	{
 	case Resource_Type::R_MATERIAL:
-		thumbnails.insert(std::pair<const char*, unsigned int>(ref, ThumbnailMaterial(ref)));
+		thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailMaterial(ref)));
 		break;
 	case Resource_Type::R_SKYBOX:
-		thumbnails.insert(std::pair<const char*, unsigned int>(ref, ThumbnailSkyBox(ref)));
+		thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailSkyBox(ref)));
 		break;
 	case Resource_Type::R_TEXTURE:
-		thumbnails.insert(std::pair<const char*, unsigned int>(ref, ThumbnailTexture(ref)));
+		thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailTexture(ref)));
 		break;
 	case Resource_Type::R_MODEL:
 	case Resource_Type::R_PREFAB:
 	case Resource_Type::R_SCENE:
-		thumbnails.insert(std::pair<const char*, unsigned int>(ref, ThumbnailGameObject(ref)));
+		thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailGameObject(ref)));
 		break;
 	}
 }
@@ -188,7 +188,7 @@ void RE_ThumbnailManager::Change(const char* ref)
 		Add(ref);
 	else
 	{
-		thumbnails.find(ref)._Ptr->_Myval.second = ThumbnailGameObject(ref);
+		thumbnails.find(ref).mpNode->mValue.second = ThumbnailGameObject(ref);
 	}
 }
 
@@ -200,7 +200,7 @@ unsigned int RE_ThumbnailManager::At(const char* ref)
 unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
 {
 	uint ret = 0;
-	std::string path(DEFTHUMBNAILS);
+	eastl::string path(DEFTHUMBNAILS);
 	path += filename;
 	RE_FileIO filderIcon(path.c_str());
 	if (filderIcon.Load()) {
@@ -215,7 +215,7 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 {
 	uint ret = 0;
 
-	std::string path(THUMBNAILPATH);
+	eastl::string path(THUMBNAILPATH);
 	path += ref;
 
 	if (!App->fs->Exists(path.c_str())) {
@@ -256,7 +256,7 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 {
 	uint ret = 0;
 
-	std::string path(THUMBNAILPATH);
+	eastl::string path(THUMBNAILPATH);
 	path += ref;
 
 	if (!App->fs->Exists(path.c_str())) {
@@ -294,7 +294,7 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 
 			float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
 			float dt = App->time->GetDeltaTime();
-			std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+			eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 			for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(internalCamera, dt, time);
 
 			RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
@@ -323,7 +323,7 @@ unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
 {
 	uint ret = 0;
 
-	std::string path(THUMBNAILPATH);
+	eastl::string path(THUMBNAILPATH);
 	path += ref;
 
 	if (!App->fs->Exists(path.c_str())) {
@@ -340,7 +340,7 @@ unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
 
 		float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
 		float dt = App->time->GetDeltaTime();
-		std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+		eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(internalCamera, dt, time);
 
 		App->resources->Use(ref);
@@ -371,7 +371,7 @@ unsigned int RE_ThumbnailManager::ThumbnailSkyBox(const char* ref)
 {
 	uint ret = 0;
 
-	std::string path(THUMBNAILPATH);
+	eastl::string path(THUMBNAILPATH);
 	path += ref;
 
 	if (!App->fs->Exists(path.c_str())) {
@@ -386,7 +386,7 @@ unsigned int RE_ThumbnailManager::ThumbnailSkyBox(const char* ref)
 
 		float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
 		float dt = App->time->GetDeltaTime();
-		std::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+		eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(internalCamera, dt, time);
 
 		RE_GLCache::ChangeTextureBind(0);
@@ -452,7 +452,7 @@ unsigned int RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 {
 	uint ret = 0;
 
-	std::string path(THUMBNAILPATH);
+	eastl::string path(THUMBNAILPATH);
 	path += ref;
 
 	RE_FileIO thumbFile(path.c_str());

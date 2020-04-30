@@ -64,7 +64,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 				last_error += "\nVertex compilation failed from ";
 				last_error += vertexPath;
 				last_error += ":\n";
-				last_error += std::string(infoLog);
+				last_error += eastl::string(infoLog);
 				last_error += "\n";
 				ret = false;
 			}
@@ -99,7 +99,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 				last_error += "\nFragment compilation failed from ";
 				last_error += fragmentPath;
 				last_error += ":\n";
-				last_error += std::string(infoLog);
+				last_error += eastl::string(infoLog);
 				last_error += "\n";
 				ret = false;
 			}
@@ -133,7 +133,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 				last_error += "\nFragment compilation failed from ";
 				last_error += geometryPath;
 				last_error += ":\n";
-				last_error += std::string(infoLog);
+				last_error += eastl::string(infoLog);
 				last_error += "\n";
 				ret = false;
 			}

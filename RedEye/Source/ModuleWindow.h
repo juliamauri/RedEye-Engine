@@ -2,7 +2,7 @@
 #define __ModuleWindow_H__
 
 #include "Module.h"
-#include <string>
+#include <EASTL/string.h>
 
 struct SDL_Window;
 class SDL_Surface;
@@ -59,7 +59,7 @@ public:
 
 private:
 
-	std::string title = "RedEye";
+	eastl::string title = "RedEye";
 	int pos_x;
 	int pos_y;
 	int width = 1280;

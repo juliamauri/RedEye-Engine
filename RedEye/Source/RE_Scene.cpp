@@ -55,7 +55,7 @@ void RE_Scene::SetName(const char* _name)
 {
 	ResourceContainer::SetName(_name);
 
-	std::string assetPath("Assets/Scenes/");
+	eastl::string assetPath("Assets/Scenes/");
 	assetPath += _name;
 	assetPath += ".re";
 	SetAssetPath(assetPath.c_str());
@@ -87,9 +87,9 @@ void RE_Scene::AssetSave()
 	DEL(scenebNode);
 
 	//Setting LibraryPath and MD5
-	std::string md5 = scene_SaveFile.GetMd5();
+	eastl::string md5 = scene_SaveFile.GetMd5();
 	SetMD5(md5.c_str());
-	std::string libraryPath("Library/Scenes/");
+	eastl::string libraryPath("Library/Scenes/");
 	libraryPath += md5;
 	SetLibraryPath(libraryPath.c_str());
 
@@ -107,9 +107,9 @@ void RE_Scene::AssetLoad(bool generateLibraryPath)
 		DEL(scenebNode);
 
 		if (generateLibraryPath) {
-			std::string md5 = jsonLoad.GetMd5();
+			eastl::string md5 = jsonLoad.GetMd5();
 			SetMD5(md5.c_str());
-			std::string libraryPath("Library/Scenes/");
+			eastl::string libraryPath("Library/Scenes/");
 			libraryPath += md5;
 			SetLibraryPath(libraryPath.c_str());
 		}

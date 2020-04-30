@@ -30,16 +30,16 @@ void _log(const int category, const char file[], int line, const char* format, .
 
 void _RequestBrowser(const char* link);
 
-#include <list>
-#include <string>
-#include <map>
+#include <EASTL/list.h>
+#include <EASTL/string.h>
+#include <EASTL/map.h>
 
 struct RE_Log
 {
 	RE_Log(unsigned int caller_id, LogCategory category, const char* data);
 	unsigned int caller_id;
 	LogCategory category;
-	std::string data;
+	eastl::string data;
 };
 
 class OutputLogHolder
@@ -52,8 +52,8 @@ public:
 	void Add(int category, const char * text, const char* file);
 	void SaveLogs();
 
-	std::list<RE_Log> logHistory;
-	std::map<std::string, unsigned int> callers;
+	eastl::list<RE_Log> logHistory;
+	eastl::map<eastl::string, unsigned int> callers;
 
 private:
 

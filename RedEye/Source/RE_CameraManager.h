@@ -3,7 +3,7 @@
 
 #include "RE_CompCamera.h"
 #include "MathGeoLib/include/Geometry/Frustum.h"
-#include <list>
+#include <EASTL/list.h>
 
 class RE_GameObject;
 	
@@ -26,7 +26,7 @@ public:
 	void AddMainCamera(RE_CompCamera* cam);
 	void RecallCameras(const RE_GameObject * root);
 
-	std::list<RE_CompCamera*> GetCameras() const;
+	eastl::list<RE_CompCamera*> GetCameras() const;
 	const math::Frustum GetCullingFrustum() const;
 
 private:
@@ -34,7 +34,7 @@ private:
 	static RE_CompCamera* editor_camera;
 	static RE_CompCamera* main_camera;
 
-	std::list<RE_CompCamera*> scene_cameras;
+	eastl::list<RE_CompCamera*> scene_cameras;
 	bool cull_scene = true;
 };
 

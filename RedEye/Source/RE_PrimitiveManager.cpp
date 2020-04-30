@@ -27,18 +27,18 @@
 
 RE_PrimitiveManager::RE_PrimitiveManager()
 {
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_POINT, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_LINE, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_RAY, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_AXIS, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_TRIANGLE, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_GRID, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CUBE, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_FUSTRUM, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_SPHERE, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CYLINDER, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_CAPSULE, 0));
-	primitives_count.insert(std::pair<ComponentType, unsigned int>(C_PLANE, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_POINT, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_LINE, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_RAY, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_AXIS, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_TRIANGLE, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_GRID, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_CUBE, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_FUSTRUM, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_SPHERE, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_CYLINDER, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_CAPSULE, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_PLANE, 0));
 }
 
 RE_PrimitiveManager::~RE_PrimitiveManager()
@@ -160,7 +160,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateGrid(RE_GameObject* game_obj)
 {
 	if (primitives_count.find(C_GRID)->second++ == 0)
 	{
-		std::vector<float> vertices;
+		eastl::vector<float> vertices;
 		for (float f = 0.f; f < 50.f; f += 0.5f)
 		{
 			vertices.push_back((f * 5.f) - 125.f);

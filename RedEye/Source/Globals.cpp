@@ -4,7 +4,7 @@
 
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
-#include <string>
+#include <EASTL/string.h>
 
 void _CheckGLError(const char* file, int line)
 {
@@ -12,7 +12,7 @@ void _CheckGLError(const char* file, int line)
 
 	while (err != GL_NO_ERROR)
 	{
-		std::string error;
+		eastl::string error;
 		switch (err)
 		{
 		case GL_INVALID_OPERATION:  error = "INVALID_OPERATION";      break;

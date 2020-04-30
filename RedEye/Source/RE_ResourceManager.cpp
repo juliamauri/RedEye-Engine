@@ -20,7 +20,8 @@
 #include "OutputLog.h"
 #include "SDL2\include\SDL_assert.h"
 
-#include <string>
+#include <EASTL/string.h>
+#include <EASTL/internal/char_traits.h>
 
 RE_ResourceManager::RE_ResourceManager() {}
 
@@ -41,7 +42,7 @@ void RE_ResourceManager::RecieveEvent(const Event& e)
 	if (e.type == RE_EventType::RESOURCE_CHANGED) {
 		ResourceContainer* res = resources.at(e.data1.AsCharP());
 		if (res->GetType() == Resource_Type::R_SHADER) {
-			std::vector<ResourceContainer*> materials = GetResourcesByType(Resource_Type::R_MATERIAL);
+			eastl::vector<ResourceContainer*> materials = GetResourcesByType(Resource_Type::R_MATERIAL);
 			for (auto material : materials) {
 				material->SomeResourceChanged(res->GetMD5());
 			}
@@ -51,7 +52,7 @@ void RE_ResourceManager::RecieveEvent(const Event& e)
 
 const char* RE_ResourceManager::Reference(ResourceContainer* rc)
 {
-	std::string resourceName;
+	eastl::string resourceName;
 	switch (rc->GetType())
 	{
 	case Resource_Type::R_TEXTURE:
@@ -172,10 +173,10 @@ unsigned int RE_ResourceManager::TotalReferences() const
 	return resources.size();
 }
 
-std::vector<const char*> RE_ResourceManager::GetAllResourcesActiveByType(Resource_Type resT)
+eastl::vector<const char*> RE_ResourceManager::GetAllResourcesActiveByType(Resource_Type resT)
 {
-	std::vector<ResourceContainer*> resourcesByType = GetResourcesByType(resT);
-	std::vector<const char*> ret;
+	eastl::vector<ResourceContainer*> resourcesByType = GetResourcesByType(resT);
+	eastl::vector<const char*> ret;
 	while (!resourcesByType.empty()) {
 		const char* resMD5 = resourcesByType.back()->GetMD5();
 		if (resourcesCounter.at(resMD5) > 0) ret.push_back(resMD5);
@@ -184,9 +185,9 @@ std::vector<const char*> RE_ResourceManager::GetAllResourcesActiveByType(Resourc
 	return ret;
 }
 
-std::vector<ResourceContainer*> RE_ResourceManager::GetResourcesByType(Resource_Type type)
+eastl::vector<ResourceContainer*> RE_ResourceManager::GetResourcesByType(Resource_Type type)
 {
-	std::vector<ResourceContainer*> ret;
+	eastl::vector<ResourceContainer*> ret;
 	for (auto resource : resources)
 	{
 		if (resource.second->GetType() == type)
@@ -201,16 +202,16 @@ const char* RE_ResourceManager::IsReference(const char* md5, Resource_Type type)
 	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
-			if (std::strcmp(resource.second->GetMD5(), md5) == 0)
+			if (eastl::Compare(resource.second->GetMD5(), md5, 32) == 0)
 				ret = resource.first;
 		}
 	}
 	else
 	{
-		std::vector<ResourceContainer*> tResources = GetResourcesByType(type);
+		eastl::vector<ResourceContainer*> tResources = GetResourcesByType(type);
 		for (auto resource : tResources)
 		{
-			if (std::strcmp(resource->GetMD5(), md5) == 0)
+			if (eastl::Compare(resource->GetMD5(), md5, 32) == 0)
 				ret = resource->GetMD5();
 		}
 	}
@@ -223,16 +224,16 @@ const char * RE_ResourceManager::FindMD5ByMETAPath(const char * metaPath, Resour
 	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
-			if (std::strcmp(resource.second->GetMetaPath(), metaPath) == 0)
+			if (eastl::Compare(resource.second->GetMetaPath(), metaPath, eastl::CharStrlen(resource.second->GetMetaPath())) == 0)
 				ret = resource.first;
 		}
 	}
 	else
 	{
-		std::vector<ResourceContainer*> tResources = GetResourcesByType(type);
+		eastl::vector<ResourceContainer*> tResources = GetResourcesByType(type);
 		for (auto resource : tResources)
 		{
-			if (std::strcmp(resource->GetMetaPath(), metaPath) == 0)
+			if (eastl::Compare(resource->GetMetaPath(), metaPath, eastl::CharStrlen(resource->GetMetaPath())) == 0)
 				ret = resource->GetMD5();
 		}
 	}
@@ -245,16 +246,16 @@ const char* RE_ResourceManager::FindMD5ByLibraryPath(const char* libraryPath, Re
 	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
-			if (std::strcmp(resource.second->GetLibraryPath(), libraryPath) == 0)
+			if (eastl::Compare(resource.second->GetLibraryPath(), libraryPath, eastl::CharStrlen(resource.second->GetLibraryPath())) == 0)
 				ret = resource.first;
 		}
 	}
 	else
 	{
-		std::vector<ResourceContainer*> tResources = GetResourcesByType(type);
+		eastl::vector<ResourceContainer*> tResources = GetResourcesByType(type);
 		for (auto resource : tResources)
 		{
-			if (std::strcmp(resource->GetLibraryPath(), libraryPath) == 0)
+			if (eastl::Compare(resource->GetLibraryPath(), libraryPath, eastl::CharStrlen(resource->GetLibraryPath())) == 0)
 				ret = resource->GetMD5();
 		}
 	}
@@ -267,16 +268,16 @@ const char * RE_ResourceManager::FindMD5ByAssetsPath(const char * assetsPath, Re
 	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
-			if (std::strcmp(resource.second->GetAssetPath(), assetsPath) == 0)
+			if (eastl::Compare(resource.second->GetAssetPath(), assetsPath, eastl::CharStrlen(resource.second->GetAssetPath())) == 0)
 				ret = resource.first;
 		}
 	}
 	else
 	{
-		std::vector<ResourceContainer*> tResources = GetResourcesByType(type);
+		eastl::vector<ResourceContainer*> tResources = GetResourcesByType(type);
 		for (auto resource : tResources)
 		{
-			if (std::strcmp(resource->GetAssetPath(), assetsPath) == 0)
+			if (eastl::Compare(resource->GetAssetPath(), assetsPath, eastl::CharStrlen(resource->GetAssetPath())) == 0)
 				ret = resource->GetMD5();
 		}
 	}
@@ -311,10 +312,10 @@ void RE_ResourceManager::ThumbnailResources()
 const char* RE_ResourceManager::ImportModel(const char* assetPath)
 {
 	Event::PauseEvents();
-	std::string path(assetPath);
-	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of("."));
-	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+	eastl::string path(assetPath);
+	eastl::string filename = path.substr(path.find_last_of("/") + 1);
+	eastl::string name = filename.substr(0, filename.find_last_of("."));
+	eastl::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_Model* newModel = new RE_Model();
 	newModel->SetName(name.c_str());
@@ -328,10 +329,10 @@ const char* RE_ResourceManager::ImportModel(const char* assetPath)
 }
 const char* RE_ResourceManager::ImportTexture(const char* assetPath)
 {
-	std::string path(assetPath);
-	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of("."));
-	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+	eastl::string path(assetPath);
+	eastl::string filename = path.substr(path.find_last_of("/") + 1);
+	eastl::string name = filename.substr(0, filename.find_last_of("."));
+	eastl::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_Texture* newTexture = new RE_Texture();
 	newTexture->SetName(name.c_str());
@@ -345,10 +346,10 @@ const char* RE_ResourceManager::ImportTexture(const char* assetPath)
 
 const char* RE_ResourceManager::ImportMaterial(const char* assetPath)
 {
-	std::string path(assetPath);
-	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of("."));
-	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+	eastl::string path(assetPath);
+	eastl::string filename = path.substr(path.find_last_of("/") + 1);
+	eastl::string name = filename.substr(0, filename.find_last_of("."));
+	eastl::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_Material* newMaterial = new RE_Material();
 	newMaterial->SetName(name.c_str());
@@ -362,10 +363,10 @@ const char* RE_ResourceManager::ImportMaterial(const char* assetPath)
 
 const char* RE_ResourceManager::ImportSkyBox(const char* assetPath)
 {
-	std::string path(assetPath);
-	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of("."));
-	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+	eastl::string path(assetPath);
+	eastl::string filename = path.substr(path.find_last_of("/") + 1);
+	eastl::string name = filename.substr(0, filename.find_last_of("."));
+	eastl::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_SkyBox* newSkyBox = new RE_SkyBox();
 	newSkyBox->SetName(name.c_str());
@@ -380,10 +381,10 @@ const char* RE_ResourceManager::ImportSkyBox(const char* assetPath)
 const char* RE_ResourceManager::ImportPrefab(const char* assetPath)
 {
 	Event::PauseEvents();
-	std::string path(assetPath);
-	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of("."));
-	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+	eastl::string path(assetPath);
+	eastl::string filename = path.substr(path.find_last_of("/") + 1);
+	eastl::string name = filename.substr(0, filename.find_last_of("."));
+	eastl::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_Prefab* newPrefab = new RE_Prefab();
 	newPrefab->SetName(name.c_str());
@@ -399,10 +400,10 @@ const char* RE_ResourceManager::ImportPrefab(const char* assetPath)
 const char* RE_ResourceManager::ImportScene(const char* assetPath)
 {
 	Event::PauseEvents();
-	std::string path(assetPath);
-	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of("."));
-	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+	eastl::string path(assetPath);
+	eastl::string filename = path.substr(path.find_last_of("/") + 1);
+	eastl::string name = filename.substr(0, filename.find_last_of("."));
+	eastl::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_Scene* newScene = new RE_Scene();
 	newScene->SetName(name.c_str());

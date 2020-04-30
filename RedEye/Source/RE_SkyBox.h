@@ -3,7 +3,7 @@
 
 #include "RE_Texture.h"
 
-#include <string>
+#include <EASTL/string.h>
 
 #define MAXSKYBOXTEXTURES  6
 

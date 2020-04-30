@@ -19,8 +19,10 @@
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
 #include "ImGui\imgui.h"
-#include <stack>
-#include <unordered_set>
+
+#include <EASTL/unordered_set.h>
+#include <EASTL/queue.h>
+#include <EASTL/internal/char_traits.h>
 
 RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, bool start_active, bool isStatic)
 	: name(name), parent(p), active(start_active), isStatic(isStatic)
@@ -117,7 +119,7 @@ void RE_GameObject::DrawWithChilds() const
 {
 	if (active)
 	{
-		std::stack<const RE_GameObject*> gos;
+		eastl::stack<const RE_GameObject*> gos;
 		gos.push(this);
 		while (!gos.empty())
 		{
@@ -141,13 +143,13 @@ void RE_GameObject::DrawItselfOnly() const
 			component->Draw();
 }
 
-std::stack<RE_Component*> RE_GameObject::GetDrawableComponentsWithChilds(RE_GameObject* ignoreStencil) const
+eastl::stack<RE_Component*> RE_GameObject::GetDrawableComponentsWithChilds(RE_GameObject* ignoreStencil) const
 {
-	std::stack<RE_Component*> ret;
+	eastl::stack<RE_Component*> ret;
 
 	if (active)
 	{
-		std::stack<const RE_GameObject*> gos;
+		eastl::stack<const RE_GameObject*> gos;
 		gos.push(this);
 		while (!gos.empty())
 		{
@@ -170,9 +172,9 @@ std::stack<RE_Component*> RE_GameObject::GetDrawableComponentsWithChilds(RE_Game
 	return ret;
 }
 
-std::stack<RE_Component*> RE_GameObject::GetDrawableComponentsItselfOnly() const
+eastl::stack<RE_Component*> RE_GameObject::GetDrawableComponentsItselfOnly() const
 {
-	std::stack<RE_Component*> ret;
+	eastl::stack<RE_Component*> ret;
 	for (auto component : components)
 	{
 		ComponentType cT = component->GetType();
@@ -181,26 +183,26 @@ std::stack<RE_Component*> RE_GameObject::GetDrawableComponentsItselfOnly() const
 	return ret;
 }
 
-std::vector<RE_GameObject*> RE_GameObject::GetAllGO()
+eastl::vector<RE_GameObject*> RE_GameObject::GetAllGO()
 {
-	std::vector<RE_GameObject*> ret;
+	eastl::vector<RE_GameObject*> ret;
 	ret.push_back(this);
 	for (auto child : childs) {
 
-		std::vector<RE_GameObject*> childRet = child->GetAllGO();
+		eastl::vector<RE_GameObject*> childRet = child->GetAllGO();
 		if (!childRet.empty())
 			ret.insert(ret.end(), childRet.begin(), childRet.end());
 	}
 	return ret;
 }
 
-std::vector<RE_GameObject*> RE_GameObject::GetActiveChildsWithDrawComponents()
+eastl::vector<RE_GameObject*> RE_GameObject::GetActiveChildsWithDrawComponents()
 {
-	std::vector<RE_GameObject*> ret;
+	eastl::vector<RE_GameObject*> ret;
 
 	if (active)
 	{
-		std::queue<RE_GameObject*> go_queue;
+		eastl::queue<RE_GameObject*> go_queue;
 		go_queue.push(this);
 		
 		while (!go_queue.empty())
@@ -234,19 +236,19 @@ bool RE_GameObject::HasDrawComponents() const
 	return false;
 }
 
-std::vector<const char*> RE_GameObject::GetAllResources(bool root)
+eastl::vector<const char*> RE_GameObject::GetAllResources(bool root)
 {
-	std::vector<const char*> allResources;
+	eastl::vector<const char*> allResources;
 
 	for (auto comp : components) {
-		std::vector<const char*> cmpRet = comp->GetAllResources();
+		eastl::vector<const char*> cmpRet = comp->GetAllResources();
 		if (!cmpRet.empty())
 			allResources.insert(allResources.end(), cmpRet.begin(), cmpRet.end());
 	}
 
 	for (auto child : childs) {
 
-		std::vector<const char*> childRet = child->GetAllResources(false);
+		eastl::vector<const char*> childRet = child->GetAllResources(false);
 		if(!childRet.empty())
 			allResources.insert(allResources.end(), childRet.begin(), childRet.end());
 	}
@@ -254,12 +256,12 @@ std::vector<const char*> RE_GameObject::GetAllResources(bool root)
 	if (root)
 	{
 		//unique resources
-		std::vector<const char*> ret;
+		eastl::vector<const char*> ret;
 
 		for (auto res : allResources) {
 			bool repeat = false;
 			for (auto uniqueRes : ret) {
-				if (std::strcmp(res, uniqueRes) == 0) {
+				if (eastl::Compare(res, uniqueRes, eastl::CharStrlen(res)) == 0) {
 					repeat = true;
 					break;
 				}
@@ -273,16 +275,16 @@ std::vector<const char*> RE_GameObject::GetAllResources(bool root)
 	return allResources;
 }
 
-void RE_GameObject::SerializeJson(JSONNode * node, std::map<const char*, int>* resources)
+void RE_GameObject::SerializeJson(JSONNode * node, eastl::map<const char*, int>* resources)
 {
-	std::vector<RE_GameObject*> allGOs = GetAllGO();
+	eastl::vector<RE_GameObject*> allGOs = GetAllGO();
 	JSONNode* gameObjects = node->PushJObject("gameobjects");
 	gameObjects->PushUInt("gameobjectsSize", allGOs.size());
 
 	uint count = 0;
-	std::string ref;
+	eastl::string ref;
 	for (RE_GameObject* go : allGOs) {
-		ref = "go" + std::to_string(count++);
+		ref = "go" + eastl::to_string(count++);
 		JSONNode* goNode = gameObjects->PushJObject(ref.c_str());
 
 		goNode->PushString("name", go->GetName());
@@ -316,7 +318,7 @@ void RE_GameObject::SerializeJson(JSONNode * node, std::map<const char*, int>* r
 			unsigned short type = component->GetType();
 			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_MESH && type != C_CAMERA)
 				continue;
-			ref = "cmp" + std::to_string(count++);
+			ref = "cmp" + eastl::to_string(count++);
 			JSONNode* comp = comps->PushJObject(ref.c_str());
 			comp->PushInt("type", type);
 			component->SerializeJson(comp, resources);
@@ -332,7 +334,7 @@ unsigned int RE_GameObject::GetBinarySize()const
 {
 	uint size = sizeof(uint) * 3 + 36 * sizeof(char) + sizeof(float) * 9 + sizeof(unsigned short);
 	if (parent != nullptr) size += 36 * sizeof(char);
-	size += std::strlen(GetName()) * sizeof(char);
+	size += eastl::CharStrlen(GetName()) * sizeof(char);
 
 	for (auto component : components) size += component->GetBinarySize();
 
@@ -341,9 +343,9 @@ unsigned int RE_GameObject::GetBinarySize()const
 	return size;
 }
 
-void RE_GameObject::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
 {
-	std::vector<RE_GameObject*> allGOs = GetAllGO();
+	eastl::vector<RE_GameObject*> allGOs = GetAllGO();
 
 	size_t size = sizeof(uint);
 	uint goSize = allGOs.size();
@@ -351,7 +353,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, std::map<const char*, int>* r
 	cursor += size;
 
 	for (RE_GameObject* go : allGOs) {
-		uint strLenght = std::strlen(go->GetName());
+		uint strLenght = eastl::CharStrlen(go->GetName());
 		size = sizeof(uint);
 		memcpy(cursor, &strLenght, size);
 		cursor += size;
@@ -408,16 +410,16 @@ void RE_GameObject::SerializeBinary(char*& cursor, std::map<const char*, int>* r
 	}
 }
 
-RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, const char*>* resources)
+RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, eastl::map<int, const char*>* resources)
 {
 	RE_GameObject* rootGo = nullptr;
 	RE_GameObject* new_go = nullptr;
 	JSONNode* gameObjects = node->PullJObject("gameobjects");
 	uint GOCount = gameObjects->PullUInt("gameobjectsSize", 0);
 
-	std::string ref;
+	eastl::string ref;
 	for (uint count = 0; count < GOCount; count++) {
-		ref = "go" + std::to_string(count);
+		ref = "go" + eastl::to_string(count);
 		JSONNode* goNode = gameObjects->PullJObject(ref.c_str());
 
 		UUID uuid;
@@ -434,7 +436,7 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, cons
 		JSONNode* comps = goNode->PullJObject("components");
 		uint compCount = comps->PullUInt("ComponentsSize", 0);
 		for (uint count = 0; count < compCount; count++) {
-			ref = "cmp" + std::to_string(count);
+			ref = "cmp" + eastl::to_string(count);
 			JSONNode* cmpNode = comps->PullJObject(ref.c_str());
 
 			ComponentType type = (ComponentType)cmpNode->PullInt("type", ComponentType::C_EMPTY);
@@ -506,7 +508,7 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, std::map<int, cons
 	return rootGo;
 }
 
-RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, std::map<int, const char*>* resources)
+RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	RE_GameObject* rootGo = nullptr;
 	RE_GameObject* new_go = nullptr;
@@ -767,17 +769,17 @@ void RE_GameObject::RemoveAllChilds()
 	}
 }
 
-std::list<RE_GameObject*>& RE_GameObject::GetChilds()
+eastl::list<RE_GameObject*>& RE_GameObject::GetChilds()
 {
 	return childs;
 }
 
-const std::list<RE_GameObject*>& RE_GameObject::GetChilds() const
+const eastl::list<RE_GameObject*>& RE_GameObject::GetChilds() const
 {
 	return childs;
 }
 
-void RE_GameObject::GetChilds(std::list<const RE_GameObject*>& out_childs) const
+void RE_GameObject::GetChilds(eastl::list<const RE_GameObject*>& out_childs) const
 {
 	for (auto child : childs)
 		out_childs.push_back(child);
@@ -824,7 +826,7 @@ void RE_GameObject::SetActiveRecursive(bool value)
 void RE_GameObject::IterativeSetActive(bool val)
 {
 	bool tmp = active;
-	std::stack<RE_GameObject*> gos;
+	eastl::stack<RE_GameObject*> gos;
 	gos.push(this);
 
 	while (!gos.empty())
@@ -865,7 +867,7 @@ void RE_GameObject::IterativeSetStatic(bool val)
 {
 	SetStatic(val);
 
-	std::stack<RE_GameObject*> gos;
+	eastl::stack<RE_GameObject*> gos;
 	for (auto child : childs)
 		gos.push(child);
 
@@ -1180,7 +1182,7 @@ math::AABB RE_GameObject::GetGlobalBoundingBoxWithChilds() const
 	{
 		// Create vector to store all contained points
 		unsigned int cursor = 0;
-		std::vector<math::vec> points;
+		eastl::vector<math::vec> points;
 		points.resize(2 + (childs.size() * 2));
 
 		// Store local mesh AABB max and min points
@@ -1235,7 +1237,7 @@ void RE_GameObject::ResetBoundingBoxes()
 
 void RE_GameObject::ResetBoundingBoxForAllChilds()
 {
-	std::queue<RE_GameObject*> go_queue;
+	eastl::queue<RE_GameObject*> go_queue;
 	go_queue.push(this);
 
 	while (!go_queue.empty())
@@ -1252,7 +1254,7 @@ void RE_GameObject::ResetBoundingBoxForAllChilds()
 
 void RE_GameObject::ResetGlobalBoundingBoxForAllChilds()
 {
-	std::queue<RE_GameObject*> go_queue;
+	eastl::queue<RE_GameObject*> go_queue;
 	go_queue.push(this);
 
 	while (!go_queue.empty())

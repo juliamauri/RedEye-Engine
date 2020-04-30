@@ -14,8 +14,8 @@ public:
 	virtual void Draw() override = 0;
 	virtual void DrawProperties() override = 0;
 	virtual unsigned int GetBinarySize()const override { return 0; }
-	virtual void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override { }
-	virtual void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+	virtual void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override { }
+	virtual void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
 
 	void SetColor(float r, float g, float b) { color.Set(r, g, b); }
 	void SetColor(math::vec nColor) { color = nColor; }
@@ -46,8 +46,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
 
 private:
 	math::float4x4 basis;
@@ -65,8 +65,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
 
 private:
 	math::vec point;
@@ -84,8 +84,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
 
 private:
 	math::vec origin;
@@ -104,8 +104,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
 
 };
 
@@ -121,8 +121,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
 
 	unsigned int GetTriangleCount()const override { return 1; }
 };
@@ -139,8 +139,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
 
 };
 
@@ -157,8 +157,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override;
 	unsigned int GetBinarySize()const override;
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
 
 	const char* TransformAsMeshResource();
 
@@ -187,8 +187,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override;
 	unsigned int GetBinarySize()const override;
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
 
 	unsigned int GetTriangleCount()const override { return triangle_count; }
 
@@ -210,8 +210,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
 };
 
 /**************************************************
@@ -227,8 +227,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override;
 	unsigned int GetBinarySize()const override;
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override;
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
 
 	unsigned int GetTriangleCount()const override { return triangle_count; }
 
@@ -257,8 +257,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
 };
 
 
@@ -274,8 +274,8 @@ public:
 	void Draw() override;
 	void DrawProperties() override {}
 	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, std::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, std::map<const char*, int>* resources) override { }
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
 };
 
 #endif // !__RE_COMPPRIMITIVE_H__

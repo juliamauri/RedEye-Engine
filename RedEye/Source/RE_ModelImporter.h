@@ -12,16 +12,16 @@ class RE_GameObject;
 
 #include "MathGeoLib/include/Math/float4x4.h"
 
-#include <vector>
-#include <string>
-#include <map>
+#include <EASTL/vector.h>
+#include <EASTL/string.h>
+#include <EASTL/map.h>
 
 struct currentlyImporting {
 	RE_ModelSettings* settings = nullptr;
-	std::map<aiMesh*, const char*> meshesLoaded;
-	std::map<aiMaterial*, const char*> materialsLoaded;
-	std::string workingfilepath;
-	std::string name;
+	eastl::map<aiMesh*, const char*> meshesLoaded;
+	eastl::map<aiMaterial*, const char*> materialsLoaded;
+	eastl::string workingfilepath;
+	eastl::string name;
 };
 
 class RE_ModelImporter
@@ -32,7 +32,7 @@ public:
 
 	bool Init(const char* def_shader = nullptr);
 
-	std::vector<std::string> GetOutsideResourcesAssetsPath(const char * path);
+	eastl::vector<eastl::string> GetOutsideResourcesAssetsPath(const char * path);
 	RE_GameObject* ProcessModel(const char* buffer, unsigned int size, const char* assetPayh, RE_ModelSettings* mSettings);
 
 private:
@@ -40,8 +40,8 @@ private:
 	void ProcessMeshes(const aiScene* scene);
 	void ProcessNode(aiNode* node, const aiScene* scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot = false);
 
-	void GetTexturesMaterial(aiMaterial * material, std::string &fileTexturePath, aiTextureType textureType, std::vector<const char*>* vectorToFill, aiString &name);
-	void GetTexturePath(aiMaterial * material, std::vector<std::string> &retPaths, aiTextureType textureType);
+	void GetTexturesMaterial(aiMaterial * material, eastl::string &fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString &name);
+	void GetTexturePath(aiMaterial * material, eastl::vector<eastl::string> &retPaths, aiTextureType textureType);
 
 private:
 	const char* folderPath = nullptr;

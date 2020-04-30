@@ -208,12 +208,12 @@ unsigned int RE_CompCube::GetBinarySize() const
 	return sizeof(float) * 3;
 }
 
-void RE_CompCube::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
+void RE_CompCube::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
 {
 	node->PushFloatVector("color", RE_CompPrimitive::color);
 }
 
-void RE_CompCube::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+void RE_CompCube::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
 {
 	size_t size = sizeof(float) * 3;
 	memcpy(cursor, &RE_CompPrimitive::color[0], size);
@@ -322,14 +322,14 @@ unsigned int RE_CompSphere::GetBinarySize() const
 	return sizeof(float) * 3 + sizeof(int) * 2;
 }
 
-void RE_CompSphere::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
+void RE_CompSphere::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
 {
 	node->PushFloatVector("color", RE_CompPrimitive::color);
 	node->PushInt("slices", slice);
 	node->PushInt("stacks", stacks);
 }
 
-void RE_CompSphere::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+void RE_CompSphere::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
 {
 	size_t size = sizeof(int);
 	memcpy(cursor, &slice, size);
@@ -551,14 +551,14 @@ unsigned int RE_CompPlane::GetBinarySize() const
 	return sizeof(float) * 3 + sizeof(int) * 2;
 }
 
-void RE_CompPlane::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
+void RE_CompPlane::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
 {
 	node->PushFloatVector("color", RE_CompPrimitive::color);
 	node->PushInt("slices", slice);
 	node->PushInt("stacks", stacks);
 }
 
-void RE_CompPlane::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+void RE_CompPlane::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
 {
 	size_t size = sizeof(int);
 	memcpy(cursor, &slice, size);
@@ -598,7 +598,7 @@ const char* RE_CompPlane::TransformAsMeshResource()
 	meshSize += 2 * plane->npoints;
 	stride += 2;
 
-	std::vector<unsigned int> index;
+	eastl::vector<unsigned int> index;
 	for (uint i = 0; i < plane->ntriangles * 3; i++)
 		index.push_back(plane->triangles[i]);
 
@@ -611,7 +611,7 @@ const char* RE_CompPlane::TransformAsMeshResource()
 
 	const char* meshMD5 = newMesh->CheckAndSave(&exists);
 	if (!exists) {
-		newMesh->SetName(std::string("Plane " + std::to_string(plane->ntriangles) + " triangles").c_str());
+		newMesh->SetName(eastl::string("Plane " + eastl::to_string(plane->ntriangles) + " triangles").c_str());
 		newMesh->SetType(Resource_Type::R_MESH);
 		App->resources->Reference(newMesh);
 	}

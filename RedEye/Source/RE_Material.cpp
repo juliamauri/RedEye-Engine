@@ -149,7 +149,7 @@ void RE_Material::SaveResourceMeta(JSONNode* metaNode)
 
 void RE_Material::LoadResourceMeta(JSONNode* metaNode)
 {
-	std::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
+	eastl::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
 	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = App->resources->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
 
 	JSONNode* diffuseNode = metaNode->PullJObject("DiffuseTextures");
@@ -206,7 +206,7 @@ void RE_Material::DrawMaterialEdit()
 
 	if (ImGui::BeginMenu("Change shader"))
 	{
-		std::vector<ResourceContainer*> shaders = App->resources->GetResourcesByType(Resource_Type::R_SHADER);
+		eastl::vector<ResourceContainer*> shaders = App->resources->GetResourcesByType(Resource_Type::R_SHADER);
 		bool none = true;
 		for (auto  shader :  shaders) {
 			if (shader->isInternal())
@@ -465,7 +465,7 @@ void RE_Material::SomeResourceChanged(const char* resMD5)
 			LoadInMemory();
 			ResourceContainer::inMemory = false;
 		}
-		std::vector<ShaderCvar> beforeCustomUniforms = fromShaderCustomUniforms;
+		eastl::vector<ShaderCvar> beforeCustomUniforms = fromShaderCustomUniforms;
 		GetAndProcessUniformsFromShader();
 		for (uint b = 0; b < beforeCustomUniforms.size(); b++) {
 			for (uint i = 0; i < fromShaderCustomUniforms.size(); i++) {
@@ -479,33 +479,33 @@ void RE_Material::SomeResourceChanged(const char* resMD5)
 	}
 }
 
-void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*>* textures)
+void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const char*>* textures)
 {
-	ImGui::Text(std::string(texturesName + std::string(" textures:")).c_str());
+	ImGui::Text(eastl::string(texturesName + eastl::string(" textures:")).c_str());
 	if (!textures->empty()) {
 		ImGui::Separator();
-		std::vector<const char*>::iterator toDelete = textures->end();
+		eastl::vector<const char*>::iterator toDelete = textures->end();
 		uint count = 1;
-		for (std::vector<const char*>::iterator md5 = textures->begin(); md5 != textures->end(); ++md5) {
+		for (eastl::vector<const char*>::iterator md5 = textures->begin(); md5 != textures->end(); ++md5) {
 			ResourceContainer* resource = App->resources->At(*md5);
 
-			if (ImGui::Button(std::string("Texture #" + std::to_string(count) + " " + std::string(resource->GetName())).c_str()))
+			if (ImGui::Button(eastl::string("Texture #" + eastl::to_string(count) + " " + eastl::string(resource->GetName())).c_str()))
 				App->resources->PushSelected(*md5, (App->resources->GetSelected() != nullptr && (App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_TEXTURE || App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_SHADER)));
 			
 			ImGui::SameLine();
-			std::string deletetexture("Delete #");
-			deletetexture += std::to_string(count);
+			eastl::string deletetexture("Delete #");
+			deletetexture += eastl::to_string(count);
 			if (ImGui::Button(deletetexture.c_str())) {
 				if (ResourceContainer::inMemory) App->resources->UnUse(*md5);
 				toDelete = md5;
 				applySave = true;
 			}
 
-			std::string changetexture("Change #");
-			changetexture += std::to_string(count++);
+			eastl::string changetexture("Change #");
+			changetexture += eastl::to_string(count++);
 			if (ImGui::BeginMenu(changetexture.c_str()))
 			{
-				std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+				eastl::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
 				for (auto textRes : allTex) {
 					if (ImGui::MenuItem(textRes->GetName())) {
 						if (ResourceContainer::inMemory) App->resources->UnUse(*md5);
@@ -524,12 +524,12 @@ void RE_Material::DrawTextures(const char* texturesName, std::vector<const char*
 	else {
 		ImGui::Text("Empty textures");
 	}
-	std::string addtexture("Add #");
+	eastl::string addtexture("Add #");
 	addtexture += texturesName;
 	addtexture += " texture";
 	if (ImGui::BeginMenu(addtexture.c_str()))
 	{
-		std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+		eastl::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
 		for (auto textRes : allTex) {
 			if (ImGui::MenuItem(textRes->GetName())) {
 				textures->push_back(textRes->GetMD5());
@@ -571,22 +571,22 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 		if (size) {
 			bool* b = nullptr;
 			int* intPtr = nullptr;
-			std::string id;
+			eastl::string id;
 			for (uint i = 0; i < size; i++)
 			{
 				ShaderCvar sVar;
 				id = "name";
-				id += std::to_string(i);
+				id += eastl::to_string(i);
 				sVar.name = nuniforms->PullString(id.c_str(), "");
 				id = "type";
-				id += std::to_string(i);
+				id += eastl::to_string(i);
 				Cvar::VAR_TYPE vT = (Cvar::VAR_TYPE)nuniforms->PullUInt(id.c_str(), ShaderCvar::UNDEFINED);
 				id = "custom";
-				id += std::to_string(i);
+				id += eastl::to_string(i);
 				sVar.custom = nuniforms->PullBool(id.c_str(), true);
 
 				id = "value";
-				id += std::to_string(i);
+				id += eastl::to_string(i);
 				switch (vT)
 				{
 				case Cvar::BOOL:
@@ -658,7 +658,7 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 
 		if (generateLibraryPath) {
 			SetMD5(material.GetMd5().c_str());
-			std::string libraryPath("Library/Materials/");
+			eastl::string libraryPath("Library/Materials/");
 			libraryPath += GetMD5();
 			SetLibraryPath(libraryPath.c_str());
 		}
@@ -667,13 +667,13 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 	}
 }
 
-void RE_Material::PullTexturesJson(JSONNode * texturesNode, std::vector<const char*>* textures)
+void RE_Material::PullTexturesJson(JSONNode * texturesNode, eastl::vector<const char*>* textures)
 {
 	uint texturesSize = texturesNode->PullInt("Size", 0);
 	for (uint i = 0; i < texturesSize; i++) {
-		std::string idref = "MetaPath";
-		idref += std::to_string(i).c_str();
-		std::string textureMaT = texturesNode->PullString(idref.c_str(), "");
+		eastl::string idref = "MetaPath";
+		idref += eastl::to_string(i).c_str();
+		eastl::string textureMaT = texturesNode->PullString(idref.c_str(), "");
 		const char* textureMD5 = App->resources->FindMD5ByMETAPath(textureMaT.c_str());
 		if (textureMD5) textures->push_back(textureMD5);
 		else LOG_ERROR("No texture found.\nPath: %s", textureMaT.c_str());
@@ -707,21 +707,21 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 	JSONNode* nuniforms = materialNode->PushJObject("uniforms");
 	nuniforms->PushUInt("size", fromShaderCustomUniforms.size());
 	if (!fromShaderCustomUniforms.empty()) {
-		std::string id;
+		eastl::string id;
 		for (uint i = 0; i < fromShaderCustomUniforms.size(); i++)
 		{
 			id = "name";
-			id += std::to_string(i);
+			id += eastl::to_string(i);
 			nuniforms->PushString(id.c_str(), fromShaderCustomUniforms[i].name.c_str());
 			id = "type";
-			id += std::to_string(i);
+			id += eastl::to_string(i);
 			nuniforms->PushUInt(id.c_str(), fromShaderCustomUniforms[i].GetType());
 			id = "custom";
-			id += std::to_string(i);
+			id += eastl::to_string(i);
 			nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].custom);
 
 			id = "value";
-			id += std::to_string(i);
+			id += eastl::to_string(i);
 			switch (fromShaderCustomUniforms[i].GetType())
 			{
 			case Cvar::BOOL:
@@ -777,7 +777,7 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 	if(!onlyMD5) materialSerialize.Save();
 	SetMD5(materialSerialize.GetMd5().c_str());
 
-	std::string libraryPath("Library/Materials/");
+	eastl::string libraryPath("Library/Materials/");
 	libraryPath += GetMD5();
 	SetLibraryPath(libraryPath.c_str());
 
@@ -785,13 +785,13 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 	DEL(materialNode);
 }
 
-void RE_Material::PushTexturesJson(JSONNode * texturesNode, std::vector<const char*>* textures)
+void RE_Material::PushTexturesJson(JSONNode * texturesNode, eastl::vector<const char*>* textures)
 {
 	uint texturesSize = textures->size();
 	texturesNode->PushUInt("Size", texturesSize);
 	for (uint i = 0; i < texturesSize; i++) {
-		std::string idref = "MetaPath";
-		idref += std::to_string(i).c_str();
+		eastl::string idref = "MetaPath";
+		idref += eastl::to_string(i).c_str();
 		texturesNode->PushString(idref.c_str(), App->resources->At(textures->operator[](i))->GetMetaPath());
 	}
 }
@@ -861,7 +861,7 @@ void RE_Material::BinaryDeserialize()
 				cursor += size;
 
 				size = sizeof(char) * nSize;
-				sVar.name = std::string(cursor, nSize);
+				sVar.name = eastl::string(cursor, nSize);
 				cursor += size;
 
 				uint uType = 0;
@@ -982,7 +982,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					if (nSize > 0) {
 						size = sizeof(char) * nSize;
-						sVar.SetSampler(App->resources->IsReference(std::string(cursor, nSize).c_str()), true);
+						sVar.SetSampler(App->resources->IsReference(eastl::string(cursor, nSize).c_str()), true);
 						cursor += size;
 					}
 					else
@@ -1258,7 +1258,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 	else if (usingChekers)
 	{
 		glActiveTexture(GL_TEXTURE0);
-		std::string name = "tdiffuse0";
+		eastl::string name = "tdiffuse0";
 		RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), 0);
 		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
 	}
@@ -1277,72 +1277,72 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 		for (unsigned int i = 0; i < tDiffuse.size() || i < usingOnMat[TDIFFUSE]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			std::string name = "tdiffuse";
-			name += std::to_string(i);
+			eastl::string name = "tdiffuse";
+			name += eastl::to_string(i);
 			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tDiffuse[i]))->use();
 		}
 		for (unsigned int i = 0; i < tSpecular.size() || i < usingOnMat[TSPECULAR]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			std::string name = "tspecular";
-			name += std::to_string(i);
+			eastl::string name = "tspecular";
+			name += eastl::to_string(i);
 			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tSpecular[i]))->use();
 		}
 		for (unsigned int i = 0; i < tAmbient.size() || i < usingOnMat[TAMBIENT]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			std::string name = "tambient";
-			name += std::to_string(i);
+			eastl::string name = "tambient";
+			name += eastl::to_string(i);
 			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tAmbient[i]))->use();
 		}
 		for (unsigned int i = 0; i < tEmissive.size() || i < usingOnMat[TEMISSIVE]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			std::string name = "temissive";
-			name += std::to_string(i);
+			eastl::string name = "temissive";
+			name += eastl::to_string(i);
 			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tEmissive[i]))->use();
 		}
 		for (unsigned int i = 0; i < tOpacity.size() || i < usingOnMat[TOPACITY]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			std::string name = "topacity";
-			name += std::to_string(i);
+			eastl::string name = "topacity";
+			name += eastl::to_string(i);
 			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tOpacity[i]))->use();
 		}
 		for (unsigned int i = 0; i < tShininess.size() || i < usingOnMat[TSHININESS]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			std::string name = "tshininess";
-			name += std::to_string(i);
+			eastl::string name = "tshininess";
+			name += eastl::to_string(i);
 			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tShininess[i]))->use();
 		}
 		for (unsigned int i = 0; i < tHeight.size() || i < usingOnMat[THEIGHT]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			std::string name = "theight";
-			name += std::to_string(i);
+			eastl::string name = "theight";
+			name += eastl::to_string(i);
 			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tHeight[i]))->use();
 		}
 		for (unsigned int i = 0; i < tNormals.size() || i < usingOnMat[TNORMALS]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			std::string name = "tnormals";
-			name += std::to_string(i);
+			eastl::string name = "tnormals";
+			name += eastl::to_string(i);
 			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tNormals[i]))->use();
 		}
 		for (unsigned int i = 0; i < tReflection.size() || i < usingOnMat[TREFLECTION]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			std::string name = "treflection";
-			name += std::to_string(i);
+			eastl::string name = "treflection";
+			name += eastl::to_string(i);
 			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tReflection[i]))->use();
 		}
@@ -1505,11 +1505,11 @@ void RE_Material::GetAndProcessUniformsFromShader()
 	fromShaderCustomUniforms.clear();
 
 	if (shaderMD5) {
-		std::vector<ShaderCvar> fromShader = ((RE_Shader*)App->resources->At(shaderMD5))->GetUniformValues();
+		eastl::vector<ShaderCvar> fromShader = ((RE_Shader*)App->resources->At(shaderMD5))->GetUniformValues();
 		for (auto sVar : fromShader) {
 			int pos = sVar.name.find_first_of("0123456789");
 
-			std::string name = (pos != std::string::npos) ? sVar.name.substr(0,pos) : sVar.name;
+			eastl::string name = (pos != eastl::string::npos) ? sVar.name.substr(0,pos) : sVar.name;
 			if (sVar.custom) fromShaderCustomUniforms.push_back(sVar);
 			else {
 				MaterialUINT index = UNDEFINED;

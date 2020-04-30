@@ -1,8 +1,8 @@
 #ifndef __POOL_H__
 #define __POOL_H__
 
-#include <vector>
-#include <map>
+#include <EASTL/vector.h>
+#include <EASTL/map.h>
 
 #define MAX_POOL 1024
 
@@ -22,7 +22,7 @@ public:
 	virtual bool Push(TYPEVALUE val, TYPEKEY key) {
 		if (poolmapped_.find(key) == poolmapped_.end()) {
 			pool_[lastAvaibleIndex] = val;
-			poolmapped_.insert(std::pair<TYPEKEY, unsigned int>(key, lastAvaibleIndex++));
+			poolmapped_.insert(eastl::pair<TYPEKEY, unsigned int>(key, lastAvaibleIndex++));
 			return true;
 		}
 		return false;
@@ -32,7 +32,7 @@ public:
 		unsigned int index = poolmapped_.at(key);
 		TYPEVALUE ret = pool_[index];
 		memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE) * (lastAvaibleIndex - 1 - index));
-		typename std::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.find(key);
+		typename eastl::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.find(key);
 		while (i != poolmapped_.end())
 		{
 			i->second--;
@@ -47,9 +47,9 @@ public:
 	TYPEVALUE& At(TYPEKEY key) { return pool_[poolmapped_.at(key)]; }
 	TYPEVALUE* AtPtr(TYPEKEY key)const { return &pool_[poolmapped_.at(key)]; }
 
-	std::vector<TYPEKEY> GetAllKeys() {
-		std::vector<TYPEKEY> ret;
-		typename std::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.begin();
+	eastl::vector<TYPEKEY> GetAllKeys() {
+		eastl::vector<TYPEKEY> ret;
+		typename eastl::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.begin();
 		while (i != poolmapped_.end())
 		{
 			ret.push_back(i->first);
@@ -62,7 +62,7 @@ public:
 
 protected:
 	TYPEVALUE* pool_;
-	std::map<TYPEKEY, unsigned int> poolmapped_;
+	eastl::map<TYPEKEY, unsigned int> poolmapped_;
 
 	int lastAvaibleIndex = 0;
 };

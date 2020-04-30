@@ -4,7 +4,7 @@
 #include "ModuleScene.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
-#include <stack>
+#include <EASTL/stack.h>
 
 RE_CompCamera* RE_CameraManager::editor_camera = nullptr;
 RE_CompCamera* RE_CameraManager::main_camera = nullptr;
@@ -69,7 +69,7 @@ void RE_CameraManager::AddMainCamera(RE_CompCamera* cam)
 	scene_cameras.push_back(cam);
 }
 
-std::list<RE_CompCamera*> RE_CameraManager::GetCameras() const
+eastl::list<RE_CompCamera*> RE_CameraManager::GetCameras() const
 {
 	return scene_cameras;
 }
@@ -78,7 +78,7 @@ void RE_CameraManager::RecallCameras(const RE_GameObject * root)
 {
 	scene_cameras.clear();
 
-	std::stack<const RE_GameObject*> gos;
+	eastl::stack<const RE_GameObject*> gos;
 	gos.push(root);
 	while (!gos.empty())
 	{
@@ -97,7 +97,7 @@ void RE_CameraManager::RecallCameras(const RE_GameObject * root)
 	main_camera = nullptr;
 	if (!scene_cameras.empty())
 	{
-		for (std::list<RE_CompCamera*>::iterator cam = scene_cameras.begin();
+		for (eastl::list<RE_CompCamera*>::iterator cam = scene_cameras.begin();
 			cam != scene_cameras.end(); cam++)
 		{
 			if (main_camera == nullptr)

@@ -79,7 +79,7 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 	for (unsigned int i = 0; i < drawFubbersize; i++) DrawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
 	glDrawBuffers(drawFubbersize, DrawBuffers);
 
-	fbos.insert(std::pair<unsigned int, RE_FBO>(newFbo.ID, newFbo));
+	fbos.insert(eastl::pair<unsigned int, RE_FBO>(newFbo.ID, newFbo));
 
 	if (glCheckFramebufferStatus(newFbo.ID) != GL_FRAMEBUFFER_COMPLETE)
 		ret = newFbo.ID;

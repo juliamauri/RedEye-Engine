@@ -127,7 +127,7 @@ void RE_CompCamera::DrawProperties()
 
 			if (ImGui::BeginMenu("Change skybox"))
 			{
-				std::vector<ResourceContainer*> materials = App->resources->GetResourcesByType(Resource_Type::R_SKYBOX);
+				eastl::vector<ResourceContainer*> materials = App->resources->GetResourcesByType(Resource_Type::R_SKYBOX);
 				bool none = true;
 				for (auto material : materials) {
 					if (material->isInternal())
@@ -586,9 +586,9 @@ math::vec RE_CompCamera::GetFront() const
 	return front;
 }
 
-std::vector<const char*> RE_CompCamera::GetAllResources()
+eastl::vector<const char*> RE_CompCamera::GetAllResources()
 {
-	std::vector<const char*> ret;
+	eastl::vector<const char*> ret;
 
 	if (skyboxMD5) ret.push_back(skyboxMD5);
 
@@ -600,7 +600,7 @@ unsigned int RE_CompCamera::GetBinarySize() const
 	return sizeof(bool) * 3 + sizeof(int) * 2 + sizeof(float) * 3;
 }
 
-void RE_CompCamera::SerializeJson(JSONNode * node, std::map<const char*, int>* resources)
+void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>* resources)
 {
 	node->PushBool("isPrespective", isPerspective);
 	node->PushFloat("near_plane", near_plane);
@@ -612,7 +612,7 @@ void RE_CompCamera::SerializeJson(JSONNode * node, std::map<const char*, int>* r
 	node->PushInt("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
 }
 
-void RE_CompCamera::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+void RE_CompCamera::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
 {
 	size_t size = sizeof(bool);
 	memcpy(cursor, &isPerspective, size);

@@ -7,9 +7,9 @@
 #include "MathGeoLib/include/Math/float2.h"
 
 #include "ImGui\imgui.h"
-#include <list>
-#include <string>
-#include <vector>
+#include <EASTL/list.h>
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
 
 class EditorWindow
 {
@@ -103,7 +103,7 @@ private:
 struct SoftwareInfo
 {
 	SoftwareInfo(const char * name, const char * version = nullptr, const char * website = nullptr);
-	std::string name, version, website;
+	eastl::string name, version, website;
 };
 
 class AboutWindow : public EditorWindow
@@ -118,7 +118,7 @@ private:
 
 public:
 
-	std::list<SoftwareInfo> sw_info;
+	eastl::list<SoftwareInfo> sw_info;
 };
 
 class RandomTest : public EditorWindow
@@ -157,7 +157,7 @@ public:
 private:
 	void Draw(bool secondary = false) override;
 
-	std::vector<ResourceContainer*> prefabs;
+	eastl::vector<ResourceContainer*> prefabs;
 
 	ResourceContainer* selected = nullptr;
 };
@@ -177,8 +177,8 @@ private:
 
 	bool disableAllWindows = false;
 	bool fromHandleError = false;
-	std::string btnText;
-	std::string titleText;
+	eastl::string btnText;
+	eastl::string titleText;
 
 };
 
@@ -190,14 +190,14 @@ public:
 
 	const char* GetCurrentDirPath()const;
 
-	void SelectUndefined(std::string* toFill);
+	void SelectUndefined(eastl::string* toFill);
 
 private:
 	void Draw(bool secondary = false) override;
 
 	const char* currentPath = nullptr;
 
-	std::string* selectingUndefFile = nullptr;
+	eastl::string* selectingUndefFile = nullptr;
 };
 
 class RE_Material;
@@ -211,8 +211,8 @@ private:
 	void Draw(bool secondary = false) override;
 
 	RE_Material* editingMaerial = nullptr;
-	std::string matName;
-	std::string assetPath;
+	eastl::string matName;
+	eastl::string assetPath;
 };
 
 class RE_SkyBox;
@@ -226,8 +226,8 @@ private:
 	void Draw(bool secondary = false) override;
 
 	RE_SkyBox* editingSkybox = nullptr;
-	std::string sbName;
-	std::string assetPath;
+	eastl::string sbName;
+	eastl::string assetPath;
 
 	unsigned int previewImage = 0;
 };
@@ -243,12 +243,12 @@ private:
 	void Draw(bool secondary = false) override;
 
 	RE_Shader* editingShader = nullptr;
-	std::string shaderName;
-	std::string assetPath;
+	eastl::string shaderName;
+	eastl::string assetPath;
 
-	std::string vertexPath;
-	std::string fragmentPath;
-	std::string geometryPath;
+	eastl::string vertexPath;
+	eastl::string fragmentPath;
+	eastl::string geometryPath;
 };
 
 class TextEditor;
@@ -259,13 +259,13 @@ public:
 	TextEditorManagerWindow(const char* name = "TExt Editor Manager", bool start_active = false);
 	~TextEditorManagerWindow();
 
-	void PushEditor(const char* filePath, std::string* newFile = nullptr, const char* shadertTemplate = nullptr, bool* open = nullptr);
+	void PushEditor(const char* filePath, eastl::string* newFile = nullptr, const char* shadertTemplate = nullptr, bool* open = nullptr);
 
 private:
 	void Draw(bool secondary = false) override;
 
 	struct editor {
-		std::string* toModify = nullptr;
+		eastl::string* toModify = nullptr;
 		TextEditor* textEditor = nullptr;
 		RE_FileIO* file = nullptr;
 		bool save = false;
@@ -274,7 +274,7 @@ private:
 		bool works = false;
 	};
 
-	std::vector<editor*> editors;
+	eastl::vector<editor*> editors;
 };
 
 class SceneEditorWindow :public EditorWindow

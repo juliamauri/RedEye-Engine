@@ -3,7 +3,7 @@
 
 #include "Module.h"
 
-#include <string>
+#include <EASTL/string.h>
 
 enum LogCategory;
 
@@ -31,10 +31,10 @@ public:
 	void ActivatePopUp();
 
 private:
-	std::string logs;
-	std::string warnings;
-	std::string errors;
-	std::string solutions;
+	eastl::string logs;
+	eastl::string warnings;
+	eastl::string errors;
+	eastl::string solutions;
 	bool recLogs = false;
 };
 

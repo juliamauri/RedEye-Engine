@@ -67,10 +67,10 @@ bool RE_TextureImporter::Init()
 const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPath)
 {
 	const char* retMD5 = nullptr;
-	std::string path(assetsPath);
-	std::string filename = path.substr(path.find_last_of("/") + 1);
-	std::string name = filename.substr(0, filename.find_last_of(".") - 1);
-	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+	eastl::string path(assetsPath);
+	eastl::string filename = path.substr(path.find_last_of("/") + 1);
+	eastl::string name = filename.substr(0, filename.find_last_of(".") - 1);
+	eastl::string extension = filename.substr(filename.find_last_of(".") + 1);
 
 	RE_Texture* newTexture = new RE_Texture();
 	newTexture->SetAssetPath(path.c_str());
@@ -87,9 +87,9 @@ const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPat
 	return retMD5;
 }
 
-std::string RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsigned int assetSize, TextureType assetType, unsigned int* newSize)
+eastl::string RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsigned int assetSize, TextureType assetType, unsigned int* newSize)
 {
-	std::string ret;
+	eastl::string ret;
 	uint imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
@@ -103,7 +103,7 @@ std::string RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsigned
 		ILubyte* data = new ILubyte[*newSize];
 
 		ilSaveL(IL_DDS, data, *newSize); // Save with the ilSaveIL function
-		ret = std::string((char*)data, *newSize);
+		ret = eastl::string((char*)data, *newSize);
 		ilBindImage(0);
 		/* Delete used resources*/
 		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */

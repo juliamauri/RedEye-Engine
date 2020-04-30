@@ -47,7 +47,7 @@ void RE_CompMesh::DrawProperties()
 	if (ImGui::CollapsingHeader("Component Mesh")) {
 		if (meshMD5)
 		{
-			if (ImGui::Button(std::string("Resource Mesh").c_str()))
+			if (ImGui::Button(eastl::string("Resource Mesh").c_str()))
 				App->resources->PushSelected(meshMD5, true);
 		}
 		else ImGui::TextWrapped("Empty Mesh Component");
@@ -69,7 +69,7 @@ void RE_CompMesh::DrawProperties()
 
 		if (ImGui::BeginMenu("Change material"))
 		{
-			std::vector<ResourceContainer*> materials = App->resources->GetResourcesByType(Resource_Type::R_MATERIAL);
+			eastl::vector<ResourceContainer*> materials = App->resources->GetResourcesByType(Resource_Type::R_MATERIAL);
 			bool none = true;
 			for (auto material : materials) {
 				if (material->isInternal())
@@ -123,9 +123,9 @@ const char * RE_CompMesh::GetMaterial() const
 	return materialMD5;
 }
 
-std::vector<const char*> RE_CompMesh::GetAllResources()
+eastl::vector<const char*> RE_CompMesh::GetAllResources()
 {
-	std::vector<const char*> ret;
+	eastl::vector<const char*> ret;
 
 	if (meshMD5) ret.push_back(meshMD5);
 	if (materialMD5) ret.push_back(materialMD5);
@@ -138,13 +138,13 @@ unsigned int RE_CompMesh::GetBinarySize() const
 	return sizeof(int) * 2;
 }
 
-void RE_CompMesh::SerializeJson(JSONNode* node, std::map<const char*, int>* resources)
+void RE_CompMesh::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
 {
 	node->PushInt("meshResource", (meshMD5) ? resources->at(meshMD5) : -1);
 	node->PushInt("materialResource", (materialMD5) ? resources->at(materialMD5) : -1);
 }
 
-void RE_CompMesh::SerializeBinary(char*& cursor, std::map<const char*, int>* resources)
+void RE_CompMesh::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
 {
 	size_t size = sizeof(int);
 	int md5 = (meshMD5) ? resources->at(meshMD5) : -1;

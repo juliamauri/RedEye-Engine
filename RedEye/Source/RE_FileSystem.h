@@ -10,10 +10,10 @@
 #include "MathGeoLib/include/Math/float4.h"
 #include "MathGeoLib/include/Math/float3x3.h"
 #include "MathGeoLib/include/Math/float4x4.h"
-#include <list>
-#include <string>
-#include <vector>
-#include <stack>
+#include <EASTL/list.h>
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
+#include <EASTL/stack.h>
 
 class Config;
 class RE_FileIO;
@@ -55,7 +55,7 @@ public:
 	struct RE_Directory;
 
 	struct RE_Path {
-		std::string path;
+		eastl::string path;
 		PathType pType;
 
 		RE_File* AsFile()const { return (RE_File*)this; }
@@ -65,7 +65,7 @@ public:
 
 	struct RE_File : public RE_Path
 	{
-		std::string filename;
+		eastl::string filename;
 		FileType fType = F_NONE;
 		const char* extension = nullptr;
 		signed long long lastModified = 0;
@@ -97,21 +97,21 @@ public:
 
 	struct RE_Directory : public RE_Path
 	{
-		std::string name;
-		typedef std::list<RE_Path*>::iterator pathIterator;
+		eastl::string name;
+		typedef eastl::list<RE_Path*>::iterator pathIterator;
 		RE_Directory* parent = nullptr;
-		std::list<RE_Path*> tree;
+		eastl::list<RE_Path*> tree;
 
 		void AddBeforeOf(RE_Path* toAdd, pathIterator to) { tree.insert(to, toAdd); }
-		void Delete(std::list<RE_Path*>::iterator del) { tree.erase(del); }
+		void Delete(eastl::list<RE_Path*>::iterator del) { tree.erase(del); }
 
 		void SetPath(const char* path);
-		std::list< RE_Directory*> MountTreeFolders();
-		std::stack<RE_ProcessPath*> CheckAndApply(std::vector<RE_Meta*>* metaRecentlyAdded);
+		eastl::list< RE_Directory*> MountTreeFolders();
+		eastl::stack<RE_ProcessPath*> CheckAndApply(eastl::vector<RE_Meta*>* metaRecentlyAdded);
 
-		std::stack<RE_Path*> GetDisplayingFiles()const;
+		eastl::stack<RE_Path*> GetDisplayingFiles()const;
 
-		std::list<RE_Directory*> FromParentToThis();
+		eastl::list<RE_Directory*> FromParentToThis();
 
 		RE_Path* AsPath()const { return (RE_Path*)this; }
 	};
@@ -151,24 +151,24 @@ private:
 private:
 
 	Config* engine_config;
-	std::string engine_path;
-	std::string library_path;
-	std::string assets_path;
-	std::string zip_path;
-	std::string write_path;
+	eastl::string engine_path;
+	eastl::string library_path;
+	eastl::string assets_path;
+	eastl::string zip_path;
+	eastl::string write_path;
 
 	RE_Directory* rootAssetDirectory = nullptr;
-	std::list< RE_Directory*> assetsDirectories;
-	std::list< RE_Directory*>::iterator dirIter;
-	std::stack<RE_ProcessPath*> assetsToProcess;
+	eastl::list< RE_Directory*> assetsDirectories;
+	eastl::list< RE_Directory*>::iterator dirIter;
+	eastl::stack<RE_ProcessPath*> assetsToProcess;
 
-	std::vector<RE_Meta*> metaToFindFile;
-	std::vector<RE_File*> filesToFindMeta;
+	eastl::vector<RE_Meta*> metaToFindFile;
+	eastl::vector<RE_File*> filesToFindMeta;
 
-	std::vector<RE_Meta*> metaRecentlyAdded;
+	eastl::vector<RE_Meta*> metaRecentlyAdded;
 
-	std::list<RE_File*> toImport;
-	std::list<RE_Meta*> toReImport;
+	eastl::list<RE_File*> toImport;
+	eastl::list<RE_Meta*> toReImport;
 };
 
 class RE_FileIO
@@ -189,7 +189,7 @@ public:
 
 	virtual unsigned int GetSize();
 
-	virtual std::string GetMd5();
+	virtual eastl::string GetMd5();
 
 protected:
 
@@ -218,10 +218,10 @@ public:
 	JSONNode* GetRootNode(const char* member);
 	inline bool operator!() const override;
 
-	std::string GetMd5() override;
+	eastl::string GetMd5() override;
 
 public:
-	std::string zip_path;
+	eastl::string zip_path;
 	rapidjson::Document document;
 };
 
@@ -284,7 +284,7 @@ private:
 
 private:
 	Config* config;
-	std::string pointerPath;
+	eastl::string pointerPath;
 };
 
 #endif // !__FILESYSTEM_H__

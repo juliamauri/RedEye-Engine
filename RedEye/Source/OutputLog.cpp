@@ -57,10 +57,10 @@ OutputLogHolder::~OutputLogHolder()
 
 void OutputLogHolder::Add(int category, const char * text, const char* file)
 {
-	std::string file_path = file;
-	std::string file_name = file_path.substr(file_path.find_last_of("\\") + 1);
+	eastl::string file_path = file;
+	eastl::string file_name = file_path.substr(file_path.find_last_of("\\") + 1);
 
-	std::map<std::string, unsigned int>::iterator caller_id = callers.find(file_name);
+	eastl::map<eastl::string, unsigned int>::iterator caller_id = callers.find(file_name);
 
 	if (caller_id != callers.end())
 	{
@@ -68,7 +68,7 @@ void OutputLogHolder::Add(int category, const char * text, const char* file)
 	}
 	else
 	{
-		callers.insert({ file_name, next_caller_id });
+		callers.insert(eastl::pair<eastl::string, unsigned int>(file_name, next_caller_id ));
 		logHistory.push_back(RE_Log(next_caller_id, LogCategory(category), text));
 		next_caller_id++;
 	}

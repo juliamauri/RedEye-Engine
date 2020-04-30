@@ -3,7 +3,7 @@
 
 #include "Module.h"
 #include "ImGui\imgui.h"
-#include <list>
+#include <EASTL/list.h>
 
 class EditorWindow;
 class ConsoleWindow;
@@ -70,9 +70,9 @@ public:
 
 	const char* GetAssetsPanelPath()const;
 
-	void SelectUndefinedFile(std::string* toSelect)const;
+	void SelectUndefinedFile(eastl::string* toSelect)const;
 
-	void OpenTextEditor(const char* filePath, std::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
+	void OpenTextEditor(const char* filePath, eastl::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
 
 	void GetSceneWindowSize(unsigned int* widht, unsigned int* height);
 
@@ -89,7 +89,7 @@ private:
 	bool show_demo = false;
 	bool popUpFocus = false;
 
-	std::list<EditorWindow*> windows, tools;
+	eastl::list<EditorWindow*> windows, tools;
 
 	// Windows
 	ConsoleWindow* console = nullptr;

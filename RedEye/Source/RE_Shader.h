@@ -3,17 +3,17 @@
 
 #include "Resource.h"
 #include "Cvar.h"
-#include <string>
-#include <vector>
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
 
 class RE_CompCamera;
 
 struct RE_ShaderSettings {
-	std::string vertexShader;
+	eastl::string vertexShader;
 	signed long long vlastModified = 0;
-	std::string fragmentShader;
+	eastl::string fragmentShader;
 	signed long long flastModified = 0;
-	std::string geometryShader;
+	eastl::string geometryShader;
 	signed long long glastModified = 0;
 };
 
@@ -34,7 +34,7 @@ public:
 
 	void SetPaths(const char* vertex, const char* fragment, const char* geometry = nullptr);
 
-	std::vector<ShaderCvar> GetUniformValues();
+	eastl::vector<ShaderCvar> GetUniformValues();
 
 	void UploatMainUniforms(RE_CompCamera* camera, float dt, float time);
 	void UploadModel(float* model);
@@ -57,8 +57,8 @@ private:
 	void GetGeometryFileInfo(const char*& path, signed long long* lastTimeModified)const;
 
 	void ParseAndGetUniforms();
-	std::vector<std::string> GetUniformLines(const char* buffer);
-	void MountShaderCvar(std::vector<std::string> uniformLines);
+	eastl::vector<eastl::string> GetUniformLines(const char* buffer);
+	void MountShaderCvar(eastl::vector<eastl::string> uniformLines);
 	void GetLocations();
 
 private:
@@ -74,7 +74,7 @@ private:
 	int model = -1;
 	int time = -1;
 	int dt = -1;
-	std::vector<ShaderCvar> uniforms;
+	eastl::vector<ShaderCvar> uniforms;
 };
 
 #endif // !__RE_SHADER_H__

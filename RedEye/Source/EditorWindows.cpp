@@ -19,7 +19,7 @@
 #include "ImGuiColorTextEdit/TextEditor.h"
 #include "SDL2/include/SDL_scancode.h"
 
-std::queue<Event> Event::events_queue;
+std::queue<Event> events_queue;
 
 EditorWindow::EditorWindow(const char* name, bool start_enabled)
 	: name(name), active(start_enabled), lock_pos(false)
@@ -81,7 +81,7 @@ void ConsoleWindow::Draw(bool secondary)
 			{
 				if (ImGui::MenuItem("All")) ChangeFilter(-1);
 
-				std::map<std::string, unsigned int>::iterator it = App->log->callers.begin();
+				eastl::map<eastl::string, unsigned int>::iterator it = App->log->callers.begin();
 				for (int i = 0; it != App->log->callers.end(); i++, it++)
 				{
 					if (ImGui::MenuItem(it->first.c_str())) ChangeFilter(it->second);
@@ -127,7 +127,7 @@ void ConsoleWindow::ChangeFilter(const int new_filter)
 		console_buffer.clear();
 		scroll_to_bot = true;
 
-		std::list<RE_Log>::iterator it = App->log->logHistory.begin();
+		eastl::list<RE_Log>::iterator it = App->log->logHistory.begin();
 
 		if (file_filter < 0)
 		{
@@ -150,7 +150,7 @@ void ConsoleWindow::SwapCategory(const unsigned int c)
 	console_buffer.clear();
 	scroll_to_bot = true;
 
-	std::list<RE_Log>::iterator it = App->log->logHistory.begin();
+	eastl::list<RE_Log>::iterator it = App->log->logHistory.begin();
 
 	if (file_filter < 0)
 	{
@@ -314,7 +314,7 @@ void AboutWindow::Draw(bool secondary)
 		ImGui::Separator();
 		if (ImGui::CollapsingHeader("3rd Party Software:"))
 		{
-			std::list<SoftwareInfo>::iterator it = sw_info.begin();
+			eastl::list<SoftwareInfo>::iterator it = sw_info.begin();
 			for (; it != sw_info.end(); ++it)
 			{
 				if (!it->name.empty())
@@ -326,7 +326,7 @@ void AboutWindow::Draw(bool secondary)
 
 					if (!it->website.empty())
 					{
-						std::string button_name = "Open ";
+						eastl::string button_name = "Open ";
 						button_name += it->name;
 						button_name += " Website";
 						ImGui::SameLine();
@@ -552,7 +552,7 @@ const char* AssetsWindow::GetCurrentDirPath() const
 	return currentPath;
 }
 
-void AssetsWindow::SelectUndefined(std::string* toFill)
+void AssetsWindow::SelectUndefined(eastl::string* toFill)
 {
 	selectingUndefFile = toFill;
 }
@@ -575,7 +575,7 @@ void AssetsWindow::Draw(bool secondary)
 			currentPath = currentDir->path.c_str();
 		}
 		else {
-			std::list<RE_FileSystem::RE_Directory*> folders = currentDir->FromParentToThis();
+			eastl::list<RE_FileSystem::RE_Directory*> folders = currentDir->FromParentToThis();
 			for (auto dir : folders) {
 				if (dir == currentDir)
 					ImGui::Text(currentDir->name.c_str());
@@ -603,15 +603,15 @@ void AssetsWindow::Draw(bool secondary)
 
 		float width = ImGui::GetWindowWidth();
 		int itemsColum = width / iconsSize;
-		std::stack<RE_FileSystem::RE_Path*> filesToDisplay = currentDir->GetDisplayingFiles();
+		eastl::stack<RE_FileSystem::RE_Path*> filesToDisplay = currentDir->GetDisplayingFiles();
 
 		ImGui::Columns(itemsColum, NULL, false);
-		std::string idName = "#AssetImage";
+		eastl::string idName = "#AssetImage";
 		uint idCount = 0;
 		while (!filesToDisplay.empty()) {
 			RE_FileSystem::RE_Path* p = filesToDisplay.top();
 			filesToDisplay.pop();
-			std::string id = idName + std::to_string(idCount++);
+			eastl::string id = idName + eastl::to_string(idCount++);
 			ImGui::PushID(id.c_str());
 			switch (p->pType)
 			{
@@ -668,7 +668,7 @@ void AssetsWindow::Draw(bool secondary)
 						App->resources->PushSelected(res->GetMD5(), true);
 					ImGui::PopID();
 
-					std::string dragID("#");
+					eastl::string dragID("#");
 					
 					switch (res->GetType())
 					{

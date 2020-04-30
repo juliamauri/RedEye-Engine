@@ -1,7 +1,7 @@
 #ifndef __CVAR__
 #define __CVAR__
 
-#include <string>
+#include <EASTL/string.h>
 
 #include "MathGeoLib/include/Math/float2.h"
 #include "MathGeoLib/include/Math/float3.h"
@@ -149,7 +149,7 @@ public:
 
 	bool DrawPropieties(bool isInMemory);
 
-	std::string name;
+	eastl::string name;
 	int location = 0;
 	bool custom = true;
 };

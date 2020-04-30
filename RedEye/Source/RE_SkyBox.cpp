@@ -21,6 +21,8 @@
 
 #include "par_shapes.h"
 
+#include <EASTL/vector.h>
+
 #define MINFCOMBO "Nearest\0Linear\0Nearest Mipmap Nearest\0Linear Mipmap Nearest\0Nearest Mipmap Linear\0Linear Mipmap Linear"
 #define MAGFOMBO "Nearest\0Linear"
 #define WRAPOMBO "Repeat\0Clamp to border\0Clamp to edge\0Mirrored Repeat"
@@ -158,8 +160,8 @@ void RE_SkyBox::DrawEditSkyBox()
 
 	ImGui::Separator();
 	ImGui::Text("Textures by face:");
-	static std::string texture = "Texture ";
-	static std::string id;
+	static eastl::string texture = "Texture ";
+	static eastl::string id;
 	static RE_TextureFace toDelete = RE_NOFACE;
 	for (uint i = 0; i < 6 && !isInternal(); i++) {
 		if (ImGui::BeginMenu(texturesname[i])) {
@@ -181,7 +183,7 @@ void RE_SkyBox::DrawEditSkyBox()
 				id = "Change";
 				if (ImGui::BeginMenu(id.c_str()))
 				{
-					std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+					eastl::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
 					for (auto textRes : allTex) {
 						if (ImGui::MenuItem(textRes->GetName())) {
 							if (ResourceContainer::inMemory) App->resources->UnUse(resource->GetMD5());
@@ -198,7 +200,7 @@ void RE_SkyBox::DrawEditSkyBox()
 				id = "Add";
 				if (ImGui::BeginMenu(id.c_str()))
 				{
-					std::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+					eastl::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
 					for (auto textRes : allTex) {
 						if (ImGui::MenuItem(textRes->GetName())) {
 							skyBoxSettings.textures[i].textureMD5 = textRes->GetMD5();
@@ -311,8 +313,8 @@ void RE_SkyBox::SaveResourceMeta(JSONNode* metaNode)
 
 	JSONNode* nodeTex = metaNode->PushJObject("textures");
 	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-		std::string key(texturesname[i]);
-		nodeTex->PushString(std::string(key + "textureMD5").c_str(), skyBoxSettings.textures[i].textureMD5);
+		eastl::string key(texturesname[i]);
+		nodeTex->PushString(eastl::string(key + "textureMD5").c_str(), skyBoxSettings.textures[i].textureMD5);
 	}
 }
 
@@ -326,8 +328,8 @@ void RE_SkyBox::LoadResourceMeta(JSONNode* metaNode)
 
 	JSONNode* nodeTex = metaNode->PullJObject("textures");
 	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-		std::string key(texturesname[i]);
-		std::string texMD5 = nodeTex->PullString(std::string(key + "textureMD5").c_str(), "");
+		eastl::string key(texturesname[i]);
+		eastl::string texMD5 = nodeTex->PullString(eastl::string(key + "textureMD5").c_str(), "");
 		skyBoxSettings.textures[i].textureMD5 = App->resources->IsReference(texMD5.c_str(), Resource_Type::R_TEXTURE);
 	}
 
@@ -350,9 +352,9 @@ void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 		DEL(node);
 		
 		if (generateLibraryPath) {
-			std::string newMd5 = toLoad.GetMd5();
+			eastl::string newMd5 = toLoad.GetMd5();
 			SetMD5(newMd5.c_str());
-			std::string libraryPath("Library/SkyBoxes/");
+			eastl::string libraryPath("Library/SkyBoxes/");
 			libraryPath += newMd5.c_str();
 			SetLibraryPath(libraryPath.c_str());
 		}
@@ -364,7 +366,7 @@ void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 
 void RE_SkyBox::AssetSave()
 {
-	std::string assetPath("Assets/Skyboxes/");
+	eastl::string assetPath("Assets/Skyboxes/");
 	assetPath += GetName();
 	assetPath += ".sk";
 	SetAssetPath(assetPath.c_str());
@@ -379,9 +381,9 @@ void RE_SkyBox::AssetSave()
 
 	toSave.Save();
 
-	std::string newMd5 = toSave.GetMd5();
+	eastl::string newMd5 = toSave.GetMd5();
 	SetMD5(newMd5.c_str());
-	std::string libraryPath("Library/SkyBoxes/");
+	eastl::string libraryPath("Library/SkyBoxes/");
 	libraryPath += newMd5.c_str();
 	SetLibraryPath(libraryPath.c_str());
 
@@ -463,7 +465,7 @@ void RE_SkyBox::LoadSkyBoxSphere()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
 
 	//Invert triangle face
-	std::vector<unsigned short> indexes;
+	eastl::vector<unsigned short> indexes;
 	for (int i = sphere->ntriangles * 3 - 1; i >= 0; i--)indexes.push_back(sphere->triangles[i]);
 
 	glGenBuffers(1, &EBO);
