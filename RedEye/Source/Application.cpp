@@ -33,6 +33,10 @@
 #include "IL/include/ilut.h"
 #include "Optick/include/optick.h"
 
+#include <EAAssert/version.h>
+#include <EAStdC/internal/Config.h>
+#include <eathread/internal/config.h>
+
 Application::Application()
 {
 	app_name = "RedEye Engine";
@@ -101,9 +105,17 @@ bool Application::Init(int argc, char* argv[])
 	}
 	else
 	{
+		char tmp[8];
+
+		App->ReportSoftware("EABase", EABASE_VERSION, "https://github.com/electronicarts/EABase");
+		App->ReportSoftware("EASTL", EASTL_VERSION, "https://github.com/electronicarts/EASTL");
+		App->ReportSoftware("EAStdC", EASTDC_VERSION, "https://github.com/electronicarts/EAStdC");
+		sprintf_s(tmp, 8, "%u.%u.%u", (int)EAASSERT_VERSION_MAJOR, (int)EAASSERT_VERSION_MINOR, (int)EAASSERT_VERSION_PATCH);
+		App->ReportSoftware("EAAssert", tmp, "https://github.com/electronicarts/EAAssert");
+		App->ReportSoftware("EAAssert", EATHREAD_VERSION, "https://github.com/electronicarts/EAThread");
+
 		SDL_version sdl_version;
 		SDL_VERSION(&sdl_version);
-		char tmp[8];
 		sprintf_s(tmp, 8, "%u.%u.%u", (int)sdl_version.major, (int)sdl_version.minor, (int)sdl_version.patch);
 		App->ReportSoftware("SDL", tmp, "https://www.libsdl.org/");
 
