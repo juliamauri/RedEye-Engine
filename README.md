@@ -133,7 +133,7 @@ Each option toggles a hide/view window from a list of available windows:
 
 ## Version Notes
 
-### Release v3.1
+### Release v3.2
 * Added and implemented **EASTL** and dependence EA libraries. Bye STD.
 * Fixed **Dynamic AABB Tree** crash
 
