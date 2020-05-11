@@ -9,7 +9,7 @@ What’s special about it? The code was written from scratch using a total of 15
 
 ## Links:
 * Repository [Github](https://github.com/juliamauri/RedEye-Engine)
-* Webpage: https://juliamauri.github.io/RedEye-Engine/
+* Webpage: https://redeye-engine.es/
 * Authors: [Julià Mauri Costa](https://github.com/juliamauri) & [Rubén Sardón](https://github.com/cumus)
 * Tutor: [Marc Garrigó](https://github.com/markitus18)
 * University: [CITM UPC](https://www.citm.upc.edu/)
@@ -110,12 +110,17 @@ Each option toggles a hide/view window from a list of available windows:
 * **About**: Shows engine info and 3rd party software.
 
 ## Libraries Used
+* EABase v2.09.05
+* EASTL v3.16.05
+* EAStdC v1.26.03
+* EAAssert v1.5.8
+* EAThread v1.32.09
 * SDL v2.0.7
 * Optick v1.2.9
 * PhysFS v3.0.2
 * Rapidjason v1.1.0
 * LibZip v1.5.0
-* ImGui v1.72b
+* ImGui v1.74
 * OpenGL v3.1.0
 * Glew v2.1.0
 * MathGeoLib v1.8.0
@@ -127,6 +132,10 @@ Each option toggles a hide/view window from a list of available windows:
 * mmgr
 
 ## Version Notes
+
+### Release v3.1
+* Added and implemented **EASTL** and dependence EA libraries. Bye STD.
+* Fixed **Dynamic AABB Tree** crash
 
 ### Release v3.1
 * Added **shader parsing** for uniform values.

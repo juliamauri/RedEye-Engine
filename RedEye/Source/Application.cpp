@@ -112,7 +112,7 @@ bool Application::Init(int argc, char* argv[])
 		App->ReportSoftware("EAStdC", EASTDC_VERSION, "https://github.com/electronicarts/EAStdC");
 		sprintf_s(tmp, 8, "%u.%u.%u", (int)EAASSERT_VERSION_MAJOR, (int)EAASSERT_VERSION_MINOR, (int)EAASSERT_VERSION_PATCH);
 		App->ReportSoftware("EAAssert", tmp, "https://github.com/electronicarts/EAAssert");
-		App->ReportSoftware("EAAssert", EATHREAD_VERSION, "https://github.com/electronicarts/EAThread");
+		App->ReportSoftware("EAThread", EATHREAD_VERSION, "https://github.com/electronicarts/EAThread");
 
 		SDL_version sdl_version;
 		SDL_VERSION(&sdl_version);
