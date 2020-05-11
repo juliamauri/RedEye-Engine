@@ -39,9 +39,9 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	about = new AboutWindow();
 
 	tools.push_back(rng = new RandomTest());
-	tools.push_back(materialeditor = new MaterialEditorWindow());
-	tools.push_back(skyboxeditor = new SkyBoxEditorWindow());
-	tools.push_back(shadereditor = new ShaderEditorWindow());
+	materialeditor = new MaterialEditorWindow();
+	skyboxeditor = new SkyBoxEditorWindow();
+	shadereditor = new ShaderEditorWindow();
 	texteditormanager = new TextEditorManagerWindow();
 
 	sceneEditorWindow = new SceneEditorWindow();
@@ -164,17 +164,34 @@ update_status ModuleEditor::Update()
 			// Create
 			if (ImGui::BeginMenu("Create"))
 			{
-				if (ImGui::MenuItem("Plane"))
-					App->scene->CreatePlane();
+				if (ImGui::BeginMenu("Gameobject")) {
 
-				if (ImGui::MenuItem("Cube"))
-					App->scene->CreateCube();
+					if (ImGui::MenuItem("Plane"))
+						App->scene->CreatePlane();
 
-				if (ImGui::MenuItem("Sphere"))
-					App->scene->CreateSphere();
+					if (ImGui::MenuItem("Cube"))
+						App->scene->CreateCube();
 
-				if (ImGui::MenuItem("Camera"))
-					App->scene->CreateCamera();
+					if (ImGui::MenuItem("Sphere"))
+						App->scene->CreateSphere();
+
+					if (ImGui::MenuItem("Camera"))
+						App->scene->CreateCamera();
+					ImGui::EndMenu();
+				}
+				if (ImGui::BeginMenu("Resource")) {
+
+					if (ImGui::MenuItem("Material", materialeditor->IsActive() ? "Hide" : "Open"))
+						materialeditor->SwitchActive();
+
+					if (ImGui::MenuItem("Shader", shadereditor->IsActive() ? "Hide" : "Open"))
+						shadereditor->SwitchActive();
+
+					if (ImGui::MenuItem("Skybox", skyboxeditor->IsActive() ? "Hide" : "Open"))
+						skyboxeditor->SwitchActive();
+
+					ImGui::EndMenu();
+				}
 
 				ImGui::EndMenu();
 			}
@@ -287,7 +304,11 @@ update_status ModuleEditor::Update()
 				tool->DrawWindow(popUpFocus);
 		}
 
-		texteditormanager->DrawWindow();
+		if (materialeditor->IsActive()) materialeditor->DrawWindow(popUpFocus);
+		if (shadereditor->IsActive()) shadereditor->DrawWindow(popUpFocus);
+		if (skyboxeditor->IsActive()) skyboxeditor->DrawWindow(popUpFocus);
+
+		texteditormanager->DrawWindow(popUpFocus);
 	}
 	
 	// Toggle show editor on F1
@@ -319,6 +340,10 @@ bool ModuleEditor::CleanUp()
 		delete *(tools.rbegin());
 		tools.pop_back();
 	}
+
+	DEL(materialeditor);
+	DEL(skyboxeditor);
+	DEL(shadereditor);
 
 	DEL(popupWindow);
 	DEL(about);

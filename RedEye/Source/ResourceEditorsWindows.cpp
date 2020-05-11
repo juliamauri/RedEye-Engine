@@ -103,7 +103,7 @@ MaterialEditorWindow::~MaterialEditorWindow()
 
 void MaterialEditorWindow::Draw(bool secondary)
 {
-	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	if (ImGui::Begin(name, &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
 		if (secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -173,7 +173,7 @@ SkyBoxEditorWindow::~SkyBoxEditorWindow()
 
 void SkyBoxEditorWindow::Draw(bool secondary)
 {
-	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	if (ImGui::Begin(name, &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
 		if (secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -245,7 +245,7 @@ ShaderEditorWindow::~ShaderEditorWindow()
 
 void ShaderEditorWindow::Draw(bool secondary)
 {
-	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	if (ImGui::Begin(name, &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
 		if (secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
