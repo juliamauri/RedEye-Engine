@@ -2,7 +2,11 @@
 #include "EventListener.h"
 #include "SDL2\include\SDL_timer.h"
 
+#include <EASTL/queue.h>
+
 bool Event::paused = false;
+static eastl::queue<Event> events_queue;
+
 
 Event::Event(RE_EventType t, EventListener * lis, Cvar d1, Cvar d2)
 	: type(t), listener(lis), data1(d1), data2(d2), timestamp(SDL_GetTicks())
@@ -42,7 +46,7 @@ void Event::PumpAll()
 		if (e.IsValid())
 			e.CallListener();
 
-		Event::events_queue.pop();
+		events_queue.pop();
 	}
 }
 

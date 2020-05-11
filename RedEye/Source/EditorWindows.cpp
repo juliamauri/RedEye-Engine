@@ -19,8 +19,6 @@
 #include "ImGuiColorTextEdit/TextEditor.h"
 #include "SDL2/include/SDL_scancode.h"
 
-std::queue<Event> events_queue;
-
 EditorWindow::EditorWindow(const char* name, bool start_enabled)
 	: name(name), active(start_enabled), lock_pos(false)
 {

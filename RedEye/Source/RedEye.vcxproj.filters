@@ -172,6 +172,108 @@
     <ClCompile Include="ResourceEditorsWindows.cpp">
       <Filter>Modules\Editor\Windows</Filter>
     </ClCompile>
+    <ClCompile Include="EA\EAStdC\EACallback.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EACType.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EADateTime.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAFixedPoint.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAGlobal.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAHashCRC.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAHashString.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAMemory.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAProcess.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EARandom.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAScanf.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAScanfCore.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EASprintf.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EASprintfCore.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EASprintfOrdered.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAStdC.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAStopwatch.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EAString.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\EATextUtil.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAStdC\Int128_t.cpp">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\EAAssert\eaassert.cpp">
+      <Filter>3rd Party\EA\Assert</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_barrier.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_callstack.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_condition.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_futex.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_mutex.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_pool.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_rwmutex.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_rwmutex_ip.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_semaphore.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_storage.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\eathread_thread.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="EA\eathread\version.cpp">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -891,6 +993,216 @@
     <ClInclude Include="EA\EASTL\internal\type_transformations.h">
       <Filter>3rd Party\EA\STL\internal</Filter>
     </ClInclude>
+    <ClInclude Include="EA\EAAssert\eaassert.h">
+      <Filter>3rd Party\EA\Assert</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAAssert\version.h">
+      <Filter>3rd Party\EA\Assert</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAAlignment.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EABitTricks.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAByteCrackers.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EACallback.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EACType.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EADateTime.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAEndian.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAFixedPoint.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAGlobal.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAHashCRC.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAHashString.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAMathHelp.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAMemory.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAProcess.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EARandom.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EARandomDistribution.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAScanf.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EASingleton.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EASprintf.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EASprintfOrdered.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAStdC.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAStopwatch.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EAString.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\EATextUtil.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\Int128_t.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\version.h">
+      <Filter>3rd Party\EA\StdC</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\internal\Config.h">
+      <Filter>3rd Party\EA\StdC\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\internal\IntrusiveList.h">
+      <Filter>3rd Party\EA\StdC\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\internal\ScanfCore.h">
+      <Filter>3rd Party\EA\StdC\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\internal\SprintfCore.h">
+      <Filter>3rd Party\EA\StdC\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\internal\stdioEA.h">
+      <Filter>3rd Party\EA\StdC\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\EAStdC\internal\Thread.h">
+      <Filter>3rd Party\EA\StdC\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_atomic.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_barrier.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_callstack.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_callstack_context.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_condition.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_futex.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_list.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_mutex.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_pool.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_rwmutex.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_rwmutex_ip.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_rwsemalock.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_rwspinlock.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_rwspinlockw.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_semaphore.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_spinlock.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_storage.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_sync.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\eathread_thread.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\shared_array_mt.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\shared_ptr_mt.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\version.h">
+      <Filter>3rd Party\EA\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\gcc\eathread_atomic_gcc.h">
+      <Filter>3rd Party\EA\thread\gcc</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\gcc\eathread_sync_gcc.h">
+      <Filter>3rd Party\EA\thread\gcc</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\internal\atomic.h">
+      <Filter>3rd Party\EA\thread\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\internal\config.h">
+      <Filter>3rd Party\EA\thread\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\internal\dllinfo.h">
+      <Filter>3rd Party\EA\thread\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\internal\eathread_atomic.h">
+      <Filter>3rd Party\EA\thread\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\internal\eathread_atomic_standalone.h">
+      <Filter>3rd Party\EA\thread\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\internal\eathread_atomic_standalone_gcc.h">
+      <Filter>3rd Party\EA\thread\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\internal\eathread_atomic_standalone_msvc.h">
+      <Filter>3rd Party\EA\thread\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\internal\eathread_global.h">
+      <Filter>3rd Party\EA\thread\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\internal\timings.h">
+      <Filter>3rd Party\EA\thread\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\x86-64\eathread_atomic_x86-64.h">
+      <Filter>3rd Party\EA\thread\x86-64</Filter>
+    </ClInclude>
+    <ClInclude Include="EA\eathread\x86-64\eathread_sync_x86-64.h">
+      <Filter>3rd Party\EA\thread\x86-64</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -1004,10 +1316,40 @@
     <Filter Include="3rd Party\EA\Base\config">
       <UniqueIdentifier>{b6b9ddd4-16c0-4e01-9cdf-5f44fd80589b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="3rd Party\EA\Assert">
+      <UniqueIdentifier>{c892b0dd-5141-48d9-b5a4-2cdb6727bd88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\EA\StdC">
+      <UniqueIdentifier>{be28a145-9432-4d97-9458-5304dd2c7a5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\EA\StdC\internal">
+      <UniqueIdentifier>{8b457b99-e912-4507-90eb-69b29b02e707}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\EA\StdC\Win32">
+      <UniqueIdentifier>{a01f61b0-e613-4669-8c58-0834732b4499}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\EA\thread">
+      <UniqueIdentifier>{ba147c28-ca68-478f-af21-47ed4ec523fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\EA\thread\gcc">
+      <UniqueIdentifier>{f88c6237-b359-44d4-84bb-5c4a48bb4bbb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\EA\thread\internal">
+      <UniqueIdentifier>{869ad6d5-396e-47c6-818a-c2b093783363}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\EA\thread\x86-64">
+      <UniqueIdentifier>{c86c5439-a0e1-48ce-a530-9f7797fd16f8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Build\Assets\Settings\config.json">
       <Filter>Utility</Filter>
+    </None>
+    <None Include="EA\EAStdC\internal\EAMemory.inl">
+      <Filter>3rd Party\EA\StdC\internal</Filter>
+    </None>
+    <None Include="EA\EAStdC\Win32\EAMathHelpWin32.inl">
+      <Filter>3rd Party\EA\StdC\Win32</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -34,6 +34,7 @@
 
 #include <EASTL/internal/char_traits.h>
 #include <EASTL/algorithm.h>
+#include <EASTL/iterator.h>
 
 
 #pragma comment( lib, "PhysFS/libx86/physfs.lib" )
@@ -275,11 +276,14 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					break;
 				case F_SKYBOX:
 				{
-					eastl::list<RE_File*>::iterator iter = toImport.end();
+					eastl::list<RE_File*>::const_iterator iter = toImport.end();
 					if (!toImport.empty()) {
+						int count = toImport.size();
 						iter--;
-						while ((*iter)->fType != F_PREFAB || (*iter)->fType != F_SCENE || (*iter)->fType != F_MODEL || iter != toImport.begin())
+						while (((*iter)->fType != F_PREFAB || (*iter)->fType != F_SCENE || (*iter)->fType != F_MODEL) && count > 1) {
+							count--;
 							iter--;
+						}
 						iter++;
 					}
 					toImport.insert(iter, file);

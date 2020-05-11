@@ -2,7 +2,6 @@
 #define __EVENT_H__
 
 #include "Cvar.h"
-#include <queue>
 
 class EventListener;
 
@@ -86,10 +85,6 @@ public:
 	Cvar data1;
 	Cvar data2;
 	const unsigned int timestamp;
-
-private:
-
-	static std::queue<Event> events_queue;
 };
 
 class InstantEvent : public Event
