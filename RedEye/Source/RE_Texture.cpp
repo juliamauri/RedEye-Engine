@@ -47,18 +47,24 @@ TextureType RE_Texture::DetectExtension()
 	eastl::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
 	const char* extension = extensionStr.c_str();
 
-	if (eastl::Compare(extension, "dds", 3) == 0)
-		texType = RE_DDS;
-	else if (eastl::Compare(extension, "png", 3) == 0)
-		texType = RE_PNG;
-	else if (eastl::Compare(extension, "jpg", 3) == 0)
-		texType = RE_JPG;
-	else if (eastl::Compare(extension, "tga", 3) == 0)
-		texType = RE_TGA;
-	else if (eastl::Compare(extension, "tiff", 3) == 0)
-		texType = RE_TIFF;
-	else if (eastl::Compare(extension, "bmp", 3) == 0)
-		texType = RE_BMP;
+	int size = eastl::CharStrlen(extension);
+
+	if (size > 0) {
+		if (eastl::Compare(extension, "dds", 3) == 0)
+			texType = RE_DDS;
+		else if (eastl::Compare(extension, "png", 3) == 0)
+			texType = RE_PNG;
+		else if (eastl::Compare(extension, "jpg", 3) == 0)
+			texType = RE_JPG;
+		else if (eastl::Compare(extension, "tga", 3) == 0)
+			texType = RE_TGA;
+		else if (eastl::Compare(extension, "tiff", 4) == 0)
+			texType = RE_TIFF;
+		else if (eastl::Compare(extension, "bmp", 3) == 0)
+			texType = RE_BMP;
+		else
+			texType = RE_TEXTURE_UNKNOWN;
+	}
 	else
 		texType = RE_TEXTURE_UNKNOWN;
 

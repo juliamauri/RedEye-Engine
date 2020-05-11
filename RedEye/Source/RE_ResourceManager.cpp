@@ -221,10 +221,12 @@ const char* RE_ResourceManager::IsReference(const char* md5, Resource_Type type)
 const char * RE_ResourceManager::FindMD5ByMETAPath(const char * metaPath, Resource_Type type)
 {
 	const char* ret = nullptr;
+	int sizemeta = 0;
 	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
-			if (eastl::Compare(resource.second->GetMetaPath(), metaPath, eastl::CharStrlen(resource.second->GetMetaPath())) == 0)
+			sizemeta = eastl::CharStrlen(resource.second->GetMetaPath());
+			if (sizemeta > 0 && eastl::Compare(resource.second->GetMetaPath(), metaPath, sizemeta) == 0)
 				ret = resource.first;
 		}
 	}
@@ -233,7 +235,8 @@ const char * RE_ResourceManager::FindMD5ByMETAPath(const char * metaPath, Resour
 		eastl::vector<ResourceContainer*> tResources = GetResourcesByType(type);
 		for (auto resource : tResources)
 		{
-			if (eastl::Compare(resource->GetMetaPath(), metaPath, eastl::CharStrlen(resource->GetMetaPath())) == 0)
+			sizemeta = eastl::CharStrlen(resource->GetMetaPath());
+			if (sizemeta > 0 && eastl::Compare(resource->GetMetaPath(), metaPath, sizemeta) == 0)
 				ret = resource->GetMD5();
 		}
 	}
@@ -243,10 +246,12 @@ const char * RE_ResourceManager::FindMD5ByMETAPath(const char * metaPath, Resour
 const char* RE_ResourceManager::FindMD5ByLibraryPath(const char* libraryPath, Resource_Type type)
 {
 	const char* ret = nullptr;
+	int sizelibrary = 0;
 	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
-			if (eastl::Compare(resource.second->GetLibraryPath(), libraryPath, eastl::CharStrlen(resource.second->GetLibraryPath())) == 0)
+			sizelibrary = eastl::CharStrlen(resource.second->GetLibraryPath());
+			if (sizelibrary > 0 && eastl::Compare(resource.second->GetLibraryPath(), libraryPath, sizelibrary) == 0)
 				ret = resource.first;
 		}
 	}
@@ -255,7 +260,8 @@ const char* RE_ResourceManager::FindMD5ByLibraryPath(const char* libraryPath, Re
 		eastl::vector<ResourceContainer*> tResources = GetResourcesByType(type);
 		for (auto resource : tResources)
 		{
-			if (eastl::Compare(resource->GetLibraryPath(), libraryPath, eastl::CharStrlen(resource->GetLibraryPath())) == 0)
+			sizelibrary = eastl::CharStrlen(resource->GetLibraryPath());
+			if (sizelibrary > 0 && eastl::Compare(resource->GetLibraryPath(), libraryPath, sizelibrary) == 0)
 				ret = resource->GetMD5();
 		}
 	}
@@ -265,10 +271,12 @@ const char* RE_ResourceManager::FindMD5ByLibraryPath(const char* libraryPath, Re
 const char * RE_ResourceManager::FindMD5ByAssetsPath(const char * assetsPath, Resource_Type type)
 {
 	const char* ret = nullptr;
+	int sizeassets = 0;
 	if (type == Resource_Type::R_UNDEFINED) {
 		for (auto resource : resources)
 		{
-			if (eastl::Compare(resource.second->GetAssetPath(), assetsPath, eastl::CharStrlen(resource.second->GetAssetPath())) == 0)
+			sizeassets = eastl::CharStrlen(resource.second->GetAssetPath());
+			if (sizeassets > 0 && eastl::Compare(resource.second->GetAssetPath(), assetsPath, sizeassets) == 0)
 				ret = resource.first;
 		}
 	}
@@ -277,7 +285,8 @@ const char * RE_ResourceManager::FindMD5ByAssetsPath(const char * assetsPath, Re
 		eastl::vector<ResourceContainer*> tResources = GetResourcesByType(type);
 		for (auto resource : tResources)
 		{
-			if (eastl::Compare(resource->GetAssetPath(), assetsPath, eastl::CharStrlen(resource->GetAssetPath())) == 0)
+			sizeassets = eastl::CharStrlen(resource->GetAssetPath());
+			if (sizeassets > 0 && eastl::Compare(resource->GetAssetPath(), assetsPath, sizeassets) == 0)
 				ret = resource->GetMD5();
 		}
 	}

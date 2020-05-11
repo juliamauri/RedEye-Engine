@@ -258,10 +258,12 @@ eastl::vector<const char*> RE_GameObject::GetAllResources(bool root)
 		//unique resources
 		eastl::vector<const char*> ret;
 
+		int resSize = 0;
 		for (auto res : allResources) {
 			bool repeat = false;
 			for (auto uniqueRes : ret) {
-				if (eastl::Compare(res, uniqueRes, eastl::CharStrlen(res)) == 0) {
+				resSize = eastl::CharStrlen(res);
+				if (resSize > 0 && eastl::Compare(res, uniqueRes, resSize) == 0) {
 					repeat = true;
 					break;
 				}

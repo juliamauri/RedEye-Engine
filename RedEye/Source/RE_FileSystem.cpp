@@ -237,9 +237,11 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				const char* assetPath = App->resources->At(meta->resource)->GetAssetPath();
 
 				if (!res->isInternal()) {
+					int sizefile = 0;
 					if (!filesToFindMeta.empty()) {
 						for (RE_File* file : filesToFindMeta) {
-							if (eastl::Compare(assetPath, file->path.c_str(), eastl::CharStrlen(assetPath)) == 0) {
+							sizefile = eastl::CharStrlen(assetPath);
+							if (sizefile > 0 && eastl::Compare(assetPath, file->path.c_str(), sizefile) == 0) {
 								meta->fromFile = file;
 								file->metaResource = meta;
 								toRemoveF.push_back(file);
@@ -1636,10 +1638,10 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 					
 
 					if (newFile && fileType == FileType::F_META && !metaRecentlyAdded->empty()) {
+						int sizemetap = 0;
 						for (RE_Meta* metaAdded : *metaRecentlyAdded) {
-
-							if (eastl::Compare(metaAdded->path.c_str(), inPath.c_str(), eastl
-							::CharStrlen(metaAdded->path.c_str())) == 0) {
+							sizemetap = eastl::CharStrlen(metaAdded->path.c_str());
+							if (sizemetap > 0 && eastl::Compare(metaAdded->path.c_str(), inPath.c_str(), sizemetap) == 0) {
 								AddBeforeOf(metaAdded->AsPath(), iter);
 								iter--;
 
