@@ -171,15 +171,20 @@ public:
 	void PopUp(const char* btnText = "Accept", const char* title = "PopUp", bool disableAllWindows = false);
 
 	void PopUpError();
+	void PopUpSave(bool fromExit = false, bool newScene = false);
 
 private:
 	void Draw(bool secondary = false) override;
 
 	bool disableAllWindows = false;
 	bool fromHandleError = false;
+	bool fromSaveScene = false;
+	bool exitAfter = false;
+	bool inputName = false;
+	bool spawnNewScene = false;
 	eastl::string btnText;
 	eastl::string titleText;
-
+	eastl::string sceneName;
 };
 
 class AssetsWindow : public EditorWindow

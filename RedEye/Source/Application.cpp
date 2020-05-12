@@ -212,10 +212,8 @@ int Application::Update()
 
 	FinishUpdate();
 
-	if (want_to_quit && ret != UPDATE_ERROR) {
-		scene->Serialize();
+	if (want_to_quit && ret != UPDATE_ERROR)
 		ret = UPDATE_STOP;
-	}
 
 	return ret;
 }

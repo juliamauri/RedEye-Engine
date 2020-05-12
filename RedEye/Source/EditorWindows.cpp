@@ -475,6 +475,15 @@ void PopUpWindow::PopUpError()
 	PopUp("Accept", "Error", true);
 }
 
+void PopUpWindow::PopUpSave(bool fromExit, bool newScene)
+{
+	fromSaveScene = true;
+	exitAfter = fromExit;
+	spawnNewScene = newScene;
+	if (inputName = App->scene->isNewScene()) sceneName = "New Scene";
+	PopUp("Save", "Scene have changes", true);
+}
+
 void PopUpWindow::Draw(bool secondary)
 {
 	if(ImGui::Begin(titleText.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
@@ -521,6 +530,35 @@ void PopUpWindow::Draw(bool secondary)
 					"No warnings" :
 					App->handlerrors->GetWarnings(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
 				ImGui::TreePop();
+			}
+		}
+		else if (fromSaveScene) {
+			if (inputName) {
+				char name_holder[64];
+				sprintf_s(name_holder, 64, "%s", sceneName.c_str());
+				if (ImGui::InputText("Name", name_holder, 64))
+					sceneName = name_holder;
+			}
+			if (ImGui::Button(btnText.c_str())) {
+				App->scene->SaveScene((inputName) ? sceneName.c_str() : nullptr);
+				active = false;
+				fromSaveScene = false;
+				disableAllWindows = false;
+				inputName = false;
+				App->editor->PopUpFocus(disableAllWindows);
+				if (exitAfter) Event::Push(RE_EventType::REQUEST_QUIT, App);
+				else if (spawnNewScene) App->scene->NewEmptyScene();
+				spawnNewScene = false;
+			}
+			if (ImGui::Button("Cancel")) {
+				active = false;
+				fromSaveScene = false;
+				disableAllWindows = false;
+				inputName = false;
+				App->editor->PopUpFocus(disableAllWindows);
+				if (exitAfter) Event::Push(RE_EventType::REQUEST_QUIT, App);
+				else if (spawnNewScene) App->scene->NewEmptyScene();
+				spawnNewScene = false;
 			}
 		}
 		else if (ImGui::Button(btnText.c_str()))

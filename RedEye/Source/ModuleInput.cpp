@@ -1,11 +1,13 @@
 #include "ModuleInput.h"
 
 #include "Application.h"
-#include "ModuleEditor.h"
+#include "ModuleScene.h"
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
-
 #include "RE_FileSystem.h"
+
+#include "ModuleEditor.h"
+#include "EditorWindows.h"
 
 #include "Event.h"
 #include "OutputLog.h"
@@ -139,7 +141,10 @@ void ModuleInput::HandleSDLEventQueue()
 		{
 /* Application events */
 		case SDL_QUIT:/**< User-requested quit */
-			Event::Push(REQUEST_QUIT, App);
+			if (App->scene->HasChanges())
+				App->editor->popupWindow->PopUpSave(true);
+			else
+				Event::Push(REQUEST_QUIT, App);
 			break;
 		case SDL_APP_TERMINATING:/**< The application is being terminated by the OS
 								Called on iOS in applicationWillTerminate()
@@ -201,8 +206,14 @@ void ModuleInput::HandleSDLEventQueue()
 			case SDL_WINDOWEVENT_FOCUS_LOST:/**< Window has lost keyboard focus */
 				break;
 			case SDL_WINDOWEVENT_CLOSE:/**< The window manager requests that the window be closed */
-				Event::Push(REQUEST_QUIT, App);
+			{
+				if (App->scene->HasChanges())
+					App->editor->popupWindow->PopUpSave(true);
+				else
+					Event::Push(REQUEST_QUIT, App);
 				break;
+			}
+
 			}
 			break;
 		case SDL_SYSWMEVENT:/**< System specific event */

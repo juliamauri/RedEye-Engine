@@ -9,6 +9,7 @@
 #include <windows.h>
 
 class RE_GameObject;
+class RE_Scene;
 
 class GameObjectManager : public PoolMapped<RE_GameObject*, int> {
 public:
@@ -64,10 +65,16 @@ public:
 	RE_GameObject* RayCastSelect(math::Ray& ray);
 	void FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum& frustum);
 
-	void Serialize();
-	void LoadFBXOnScene(const char* fbxPath);
-	void LoadTextureOnSelectedGO(const char* texturePath);
+	void NewEmptyScene(const char* name = "New Scene");
 
+	void LoadScene(const char* sceneMD5);
+	void SaveScene(const char* newName = nullptr);
+
+	void AddGameobject(RE_GameObject* toAdd);
+
+	bool HasChanges()const;
+	bool isNewScene() const;
+	
 private:
 
 	void GetActive(eastl::list<RE_GameObject*>& objects) const;
@@ -75,6 +82,8 @@ private:
 	void GetActiveNonStatic(eastl::list<RE_GameObject*>& objects) const;
 
 	void ResetTrees();
+
+	void SetupScene();
 
 private:
 
@@ -86,9 +95,10 @@ private:
 	AABBDynamicTree static_tree;
 	AABBDynamicTree dynamic_tree;
 
-	eastl::string defaultModel;
+	RE_Scene* unsavedScene = nullptr;
+	const char* currentScene = nullptr;
 
-	const char* sceneLoadedMD5 = nullptr;
+	bool haschanges = false;
 };
 
 #endif // !__MODULESCENE_H__

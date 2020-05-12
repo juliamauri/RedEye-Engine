@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
+#include "ModuleScene.h"
 
 #include "RE_ResouceAndGOImporter.h"
 #include "RE_ModelImporter.h"
@@ -124,6 +125,10 @@ void RE_Model::Draw()
 					applySave = true;
 		}
 		ImGui::ListBoxFooter();
+	}
+
+	if (ImGui::Button("Add to Scene")) {
+		App->scene->AddGameobject(GetRoot());
 	}
 
 	if (applySave && modelSettings == restoreSettings) {

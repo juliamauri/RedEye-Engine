@@ -155,8 +155,30 @@ update_status ModuleEditor::Update()
 			// File
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem(" Exit", "	Esc"))
-					Event::Push(REQUEST_QUIT, App);
+
+				if (ImGui::MenuItem(" New Scene")) {
+					if (App->scene->HasChanges())
+						App->editor->popupWindow->PopUpSave(false, true);
+					else
+						App->scene->NewEmptyScene();
+				}
+
+				if (ImGui::MenuItem(" Save Scene")) {
+					if (App->scene->HasChanges()) {
+
+						if (App->scene->isNewScene())
+							App->editor->popupWindow->PopUpSave();
+						else
+							App->scene->SaveScene();
+					}
+				}
+
+				if (ImGui::MenuItem(" Exit", "	Esc")) {
+					if (App->scene->HasChanges())
+						App->editor->popupWindow->PopUpSave(true);
+					else
+						Event::Push(REQUEST_QUIT, App);
+				}
 
 				ImGui::EndMenu();
 			}

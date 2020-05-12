@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "RE_FileSystem.h"
+#include "ModuleScene.h"
 
 #include "RE_GameObject.h"
 #include "RE_ResouceAndGOImporter.h"
@@ -73,7 +74,7 @@ RE_GameObject* RE_Scene::GetRoot()
 void RE_Scene::Draw()
 {
 	if (ImGui::Button("Load Scene")) {
-		//TODO Reset Scene
+		App->scene->LoadScene(GetMD5());
 	}
 }
 

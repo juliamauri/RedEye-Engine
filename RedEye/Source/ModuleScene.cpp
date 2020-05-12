@@ -48,7 +48,6 @@ ModuleScene::~ModuleScene()
 
 bool ModuleScene::Init(JSONNode * node)
 {
-	defaultModel = node->PullString("defaultModel", DEFAULTMODEL);
 	return true;
 }
 
@@ -56,93 +55,11 @@ bool ModuleScene::Start()
 {
 	bool ret = true;
 
-	Event::PauseEvents();
-
-	// Load scene
-	Timer timer;
-	eastl::string path_scene("Assets/Scenes/");
-	path_scene += GetName();
-	path_scene += ".re";
-
-	bool loadDefaultFBX = false;
-	sceneLoadedMD5 = App->resources->FindMD5ByAssetsPath(path_scene.c_str(), Resource_Type::R_SCENE);
-
-	if (sceneLoadedMD5 != nullptr)
-	{
-		LOG("Importing scene from own format:");
-
-		App->handlerrors->StartHandling();
-
-		RE_Scene* scene = (RE_Scene*)App->resources->At(sceneLoadedMD5);
-		RE_GameObject* loadedDO = scene->GetRoot();
-
-		if (loadedDO)
-			root = loadedDO;
-		else {
-			LOG_ERROR("Own serialized scene can't be loaded");
-			loadDefaultFBX = true;
-		}
-
-		LOG("Time imported scene: %u ms", timer.Read());
-	}
+	eastl::vector<ResourceContainer*> scenes = App->resources->GetResourcesByType(Resource_Type::R_SCENE);
+	if (!scenes.empty())
+		LoadScene(scenes[0]->GetMD5());
 	else
-		loadDefaultFBX = true;
-
-	if(loadDefaultFBX)
-	{
-		root = new RE_GameObject("root");
-		root->SetStatic(false);
-
-		const char* defaultModelMD5 = App->resources->FindMD5ByAssetsPath(defaultModel.c_str(), Resource_Type::R_MODEL);
-
-		if (defaultModelMD5) {
-			App->handlerrors->StartHandling();
-
-			RE_Model* model = (RE_Model*)App->resources->At(defaultModelMD5);
-			RE_GameObject* modelCopy = model->GetRoot();
-
-			if (modelCopy) 
-			{
-				root->AddChild(modelCopy);
-			}
-			else 
-			{
-				LOG_ERROR("Cannot be lodadded the default model.\nAssetsPath: %s", defaultModel.c_str());
-			}
-
-		}
-		else {
-			LOG_ERROR("Default Model can't be loaded");
-		}
-		LOG("Time importing main model: %u ms", timer.Read());
-	}
-
-	// Error Handling
-	App->handlerrors->StopHandling();
-	if (App->handlerrors->AnyErrorHandled()) {
-		App->handlerrors->ActivatePopUp();
-	}
-
-	// Render Camera Management
-	App->cams->RecallCameras(root);
-	if (!RE_CameraManager::HasMainCamera()) {
-		Event::ResumeEvents();
-		CreateCamera();
-		Event::PauseEvents();
-	}
-
-	root->UseResources();
-	goManager.PushWithChilds(root);
-
-	savedState = new RE_GameObject(*root);
-
-	// Setup Tree AABBs
-	root->TransformModified(false);
-	root->Update();
-	root->ResetBoundingBoxForAllChilds();
-	ResetTrees();
-
-	Event::ResumeEvents();
+		NewEmptyScene();
 
 	return ret;
 }
@@ -158,10 +75,9 @@ update_status ModuleScene::Update()
 
 bool ModuleScene::CleanUp()
 {
-	//Serialize();
-
 	DEL(root);
 	DEL(savedState);
+	if (unsavedScene) DEL(unsavedScene);
 
 	return true;
 }
@@ -169,7 +85,7 @@ bool ModuleScene::CleanUp()
 void ModuleScene::OnPlay()
 {
 	Event::PauseEvents();
-	if (savedState) DEL(savedState);
+	DEL(savedState);
 	savedState = new RE_GameObject(*root);
 	Event::ResumeEvents(); 
 	root->OnPlay();
@@ -190,23 +106,7 @@ void ModuleScene::OnStop()
 	root = new RE_GameObject(*savedState);
 	App->editor->SetSelected(nullptr);
 
-	// Render Camera Management
-	App->cams->RecallCameras(root);
-	if (!RE_CameraManager::HasMainCamera()) {
-		Event::ResumeEvents();
-		CreateCamera();
-		Event::PauseEvents();
-	}
-
-	// Setup Tree AABBs
-	goManager.Clear();
-	goManager.PushWithChilds(root);
-
-	root->TransformModified(false);
-	root->Update();
-	root->ResetBoundingBoxForAllChilds();
-	ResetTrees();
-
+	SetupScene();
 	Event::ResumeEvents();
 }
 
@@ -350,7 +250,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 					dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
 				}
 			}
-
+			haschanges = true;
 			break;
 		}
 		case PLANE_CHANGE_TO_MESH:
@@ -363,6 +263,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 			go->AddCompMesh(newMesh);
 			go->ResetBoundingBoxes();
 			go->TransformModified();
+			haschanges = true;
 			break;
 		}
 		}
@@ -513,161 +414,149 @@ void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container,
 	}
 }
 
-void ModuleScene::Serialize()
+void ModuleScene::SaveScene(const char* newName)
 {
-	RE_Scene* scene = nullptr;
-	if (sceneLoadedMD5 == nullptr) {
-		scene = new RE_Scene();
-		scene->SetName(GetName());
-		scene->SetType(Resource_Type::R_SCENE);
-	}
-	else
-		scene = (RE_Scene * )App->resources->At(sceneLoadedMD5);
+	RE_Scene* scene = (unsavedScene) ? unsavedScene : (RE_Scene*)App->resources->At(currentScene);
 
+	scene->SetName((unsavedScene) ? (newName) ? newName : root->GetName() : scene->GetName());
 	scene->Save(root);
 	scene->SaveMeta();
 
-	if (sceneLoadedMD5 == nullptr) {
-		sceneLoadedMD5 = App->resources->Reference(scene);
-		App->thumbnail->Add(scene->GetMD5());
+	if (unsavedScene) {
+		currentScene = App->resources->Reference(scene);
+		App->thumbnail->Add(currentScene);
+		unsavedScene = nullptr;
 	}
 	else
 		App->thumbnail->Change(scene->GetMD5());
+
+	haschanges = false;
 }
 
-void ModuleScene::LoadFBXOnScene(const char * fbxPath)
+void ModuleScene::NewEmptyScene(const char* name)
 {
-	//std::string path(fbxPath);
-	//std::string fileName = path.substr(path.find_last_of("/") + 1);
-	//fileName = fileName.substr(0, fileName.find_last_of("."));
+	Event::PauseEvents();
 
-	//std::string fbxOnLibrary("Library/Scenes/");
-	//fbxOnLibrary += fileName + ".efab";
-	//bool reloadFBX = false;
-	//RE_GameObject* toAdd = nullptr;
-	//if (App->fs->Exists(fbxOnLibrary.c_str())) {
-	//	LOG_SECONDARY("Internal prefab of fbx exits. Loading from it.\nPath: %s", fbxOnLibrary.c_str());
-	//	Config fbxPrefab(fbxOnLibrary.c_str(), App->fs->GetZipPath());
-	//	if (fbxPrefab.Load()) {
-	//		JSONNode* node = fbxPrefab.GetRootNode("Game Objects");
-	//		toAdd = node->FillGO();
-	//		DEL(node);
-	//	}
-	//	else {
-	//		LOG_WARNING("Can't open internal prefab, reload from .fbx");
-	//		reloadFBX = true;
-	//	}
-	//}
-	//else
-	//	reloadFBX = true;
+	if (unsavedScene)  //TODO Needs popUp for alert to save or not.
+	{
+		DEL(unsavedScene);
+	}
+	else if (currentScene) { //TODO popup save
+		currentScene = nullptr;
+	}
+	
+	unsavedScene = new RE_Scene();
+	unsavedScene->SetName(name);
+	unsavedScene->SetType(Resource_Type::R_SCENE);
 
-	//if(reloadFBX)
-	//{
-	//	LOG_SECONDARY("Loading fbx on scene: %s", fbxPath);
-	//	RE_Prefab* toLoad = App->modelImporter->LoadModelFromAssets(fbxPath);
-	//	if (toLoad) {
-	//		toAdd = toLoad->GetRoot();
-	//		DEL(toLoad);
-	//	}
-	//	else {
-	//		LOG_ERROR("Can't load the .fbx.\nAssetsPath: %s", fbxPath);
-	//	}
+	root->UnUseResources();
+	if (root) DEL(root);
+	if (savedState) DEL(savedState);
+	goManager.Clear();
 
-	//}
+	root = new RE_GameObject("root");
+	root->SetStatic(false);
 
-	//if (toAdd)
-	//{
-	//	root->AddChild(toAdd);
-	//	root->TransformModified();
-	//	root->ResetBoundingBoxFromChilds();
-	//	quad_tree.Build(root);
-	//	App->editor->SetSelected(toAdd, true);
-	//}
-	//else
-	//	LOG_ERROR("Error to load dropped fbx");
+	SetupScene();
+	App->editor->SetSelected(root);
+
+	Event::ResumeEvents();
+
+	haschanges = false;
 }
 
-void ModuleScene::LoadTextureOnSelectedGO(const char * texturePath)
+void ModuleScene::LoadScene(const char* sceneMD5)
 {
-	//RE_GameObject* selected = App->editor->GetSelected();
-	//if (selected != nullptr)
-	//{
-	//	RE_CompMesh* selectedMesh = selected->GetMesh();
-	//	if (selectedMesh != nullptr) {
-	//		std::string path(texturePath);
-	//		std::string fileName = path.substr(path.find_last_of("/") + 1);
-	//		fileName = fileName.substr(0, fileName.find_last_of("."));
+	Event::PauseEvents();
 
-	//		std::string md5Generated = md5(texturePath);
-	//		const char* textureResource = App->resources->CheckFileLoaded(texturePath, md5Generated.c_str(), Resource_Type::R_TEXTURE);
+	if (unsavedScene) {
+		DEL(unsavedScene);
+	}
+	else if(root){
+		root->UnUseResources();
+	}
 
-	//		bool createMaterial = false;
-	//		std::string filePath("Assets/Materials/");
-	//		filePath += fileName;
-	//		filePath += ".pupil";
-	//		const char* materialMD5 = selectedMesh->GetMaterial();
-	//		if (!materialMD5) {
-	//			LOG_SECONDARY("Mesh missing Material. Creating new material: %s", filePath.c_str());
-	//			if (!App->fs->Exists(filePath.c_str())) {
-	//				createMaterial = true;
-	//			}
-	//			else {
-	//				Config materialToLoad(filePath.c_str(), App->fs->GetZipPath());
-	//				if (materialToLoad.Load()) {
-	//					materialMD5 = App->resources->IsReference(materialToLoad.GetMd5().c_str(), Resource_Type::R_MATERIAL);
-	//					selectedMesh->SetMaterial(materialMD5);
-	//				}
-	//				else {
-	//					std::string newFile("Assets/Materials/");
-	//					newFile += fileName;
-	//					uint count = 0;
+	if(root) DEL(root);
+	if (savedState) DEL(savedState);
+	goManager.Clear();
 
-	//					do {
-	//						count++;
-	//						filePath = newFile;
-	//						filePath += " ";
-	//						filePath += std::to_string(count);
-	//						filePath += ".pupil";
-	//					} while (!App->fs->Exists(filePath.c_str()));
+	LOG("Loading scene from own format:");
+	App->handlerrors->StartHandling();
 
-	//					createMaterial = true;
-	//				}
-	//			}
+	Timer timer;
 
-	//		if (createMaterial) {
-	//			LOG_SECONDARY("Creating new material: %s", filePath.c_str());
-	//			RE_Material* newMaterial = new RE_Material();
+	currentScene = sceneMD5;
+	RE_Scene* scene = (RE_Scene*)App->resources->At(currentScene);
+	RE_GameObject* loadedDO = scene->GetRoot();
 
-	//				newMaterial->tDiffuse.push_back(textureResource);
+	if (loadedDO)
+		root = loadedDO;
+	else 
+		LOG_ERROR("Can´t Load Scene");
 
-	//			((ResourceContainer*)newMaterial)->SetName(fileName.c_str());
-	//			((ResourceContainer*)newMaterial)->SetAssetPath(filePath.c_str());
-	//			((ResourceContainer*)newMaterial)->SetType(Resource_Type::R_MATERIAL);
-	//			newMaterial->Save();
+	root->UseResources();
+	SetupScene();
+	App->editor->SetSelected(root);
 
-	//				materialMD5 = App->resources->Reference((ResourceContainer*)newMaterial);
-	//				selectedMesh->SetMaterial(materialMD5);
-	//			}
-	//		}
-	//		else {
-	//			LOG_SECONDARY("Material on mesh found, changing texture and saving.");
+	LOG("Time loading scene: %u ms", timer.Read());
 
-	//			RE_Material* selectedMaterial = (RE_Material*)App->resources->At(materialMD5);
-	//			if (selectedMaterial) {
-	//				if (selectedMaterial->tDiffuse.empty())
-	//					selectedMaterial->tDiffuse.push_back(textureResource);
-	//				else
-	//					selectedMaterial->tDiffuse[0] = textureResource;
+	// Error Handling
+	App->handlerrors->StopHandling();
+	if (App->handlerrors->AnyErrorHandled()) {
+		App->handlerrors->ActivatePopUp();
+	}
 
-	//				selectedMaterial->Save();
-	//			}
-	//		}
-	//	}
-	//	else
-	//		LOG_ERROR("Selected GameObject does not have a mesh");
-	//}
-	//else
-	//	LOG_ERROR("No Selected GameObject");
+	Event::ResumeEvents();
+}
+
+void ModuleScene::SetupScene()
+{
+	Event::PauseEvents();
+
+	// Render Camera Management
+	App->cams->RecallCameras(root);
+	if (!RE_CameraManager::HasMainCamera()) {
+		Event::ResumeEvents();
+		CreateCamera();
+		Event::PauseEvents();
+	}
+
+	goManager.PushWithChilds(root);
+
+	if (savedState) DEL(savedState);
+	savedState = new RE_GameObject(*root);
+
+	// Setup Tree AABBs
+	root->TransformModified(false);
+	root->Update();
+	root->ResetBoundingBoxForAllChilds();
+	ResetTrees();
+
+	Event::ResumeEvents();
+}
+
+void ModuleScene::AddGameobject(RE_GameObject* toAdd)
+{
+	//TODO don't use SetupScene, only setup toAdd
+	//goManager.PushWithChilds(toAdd);
+	toAdd->UseResources();
+	root->AddChild(toAdd);
+	goManager.Clear();
+
+	SetupScene();
+	App->editor->SetSelected(toAdd);
+
+	haschanges = true;
+}
+
+bool ModuleScene::HasChanges() const
+{
+	return haschanges;
+}
+
+bool ModuleScene::isNewScene() const
+{
+	return (unsavedScene);
 }
 
 void ModuleScene::GetActive(eastl::list<RE_GameObject*>& objects) const
