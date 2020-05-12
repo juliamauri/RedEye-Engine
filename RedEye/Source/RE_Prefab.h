@@ -18,7 +18,7 @@ public:
 
 	void Import(bool keepInMemory = true) override;
 
-	void Save(RE_GameObject* go);
+	void Save(RE_GameObject* go, bool rootidentity, bool keepInMemory = false);
 
 	//Override from container, when setting name sets the assets path to Assets/Prefabs/name.refab
 	//If you want in another path, set directly all path on SetAsetsPath
@@ -32,6 +32,9 @@ private:
 	void AssetLoad(bool generateLibraryPath = false);
 	void LibraryLoad();
 	void LibrarySave();
+
+	void Draw() override;
+
 
 private:
 	RE_GameObject* loaded = nullptr;

@@ -4,7 +4,6 @@
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
-#include "RE_ResourceManager.h"
 #include "ModuleRenderer3D.h"
 #include "EditorWindows.h"
 #include "TimeManager.h"
@@ -16,6 +15,11 @@
 #include "RE_PrimitiveManager.h"
 #include "QuadTree.h"
 #include "RE_GLCache.h"
+#include "RE_ThumbnailManager.h"
+#include "RE_FileSystem.h"
+
+#include "RE_ResourceManager.h"
+#include "RE_Prefab.h"
 
 #include "MathGeoLib\include\MathGeoLib.h"
 #include "ImGui\imgui_impl_opengl3.h"
@@ -621,6 +625,15 @@ void ModuleEditor::DrawHeriarchy()
 			if (ImGui::IsItemClicked(0))
 				to_select = object;
 
+			if (ImGui::BeginPopupContextItem()) {
+
+				if (ImGui::MenuItem("Create Prefab")) {
+					popupWindow->PopUpPrefab(object);
+				}
+
+				ImGui::EndPopup();
+			}
+
 			if (object->IsLastChild() && object->GetParent_c() != root)
 				ImGui::TreePop();
 		}
@@ -716,6 +729,18 @@ void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
 {
 	*widht = sceneEditorWindow->GetSceneWidht();
 	*height = sceneEditorWindow->GetSceneHeight();
+}
+
+void ModuleEditor::CreatePrefab(RE_GameObject* go, const char* name, bool identityRoot)
+{
+	RE_Prefab* newPrefab = new RE_Prefab();
+	newPrefab->SetName(name);
+	newPrefab->SetType(Resource_Type::R_PREFAB);
+	Event::PauseEvents();
+	newPrefab->Save(go, identityRoot, true);
+	Event::ResumeEvents();
+	newPrefab->SaveMeta();
+	App->thumbnail->Add(App->resources->Reference(newPrefab));
 }
 
 void ModuleEditor::UpdateCamera()

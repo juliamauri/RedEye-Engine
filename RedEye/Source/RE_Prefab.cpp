@@ -1,7 +1,9 @@
 #include "RE_Prefab.h"
 
 #include "Application.h"
+#include "ModuleScene.h"
 #include "RE_GameObject.h"
+#include "RE_CompTransform.h"
 #include "RE_FileSystem.h"
 
 #include  "OutputLog.h"
@@ -10,6 +12,8 @@
 #include "RE_ResouceAndGOImporter.h"
 
 #include "Globals.h"
+
+#include "ImGui/imgui.h"
 
 #include <EASTL/map.h>
 
@@ -46,12 +50,23 @@ void RE_Prefab::Import(bool keepInMemory)
 	if (!keepInMemory) UnloadMemory();
 }
 
-void RE_Prefab::Save(RE_GameObject* go)
+void RE_Prefab::Save(RE_GameObject* go, bool rootidentity, bool keepInMemory)
 {
 	if (go) {
-		toSave = go;
+		loaded = toSave = new RE_GameObject(*go);
+		if (rootidentity) {
+			loaded->GetTransform()->SetPosition(math::vec::zero);
+			loaded->GetTransform()->SetRotation(math::vec::zero);
+			loaded->GetTransform()->SetScale(math::vec::one);
+			loaded->TransformModified(false);
+			loaded->Update();
+			loaded->ResetGlobalBoundingBoxForAllChilds();
+		}
 		AssetSave();
 		LibrarySave();
+		if (!keepInMemory) DEL(loaded);
+		ResourceContainer::inMemory = keepInMemory;
+
 	}
 }
 
@@ -134,4 +149,11 @@ void RE_Prefab::LibrarySave()
 	RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
 	toLibrarySave.Save(buffer, size);
 	DEL_A(buffer);
+}
+
+void RE_Prefab::Draw()
+{
+	if (ImGui::Button("Add to Scene")) {
+		App->scene->AddGameobject(GetRoot());
+	}
 }

@@ -27,69 +27,6 @@
 
 #include "Glew/include/glew.h"
 
-
-//Needed to redo, deprecated
-PrefabsPanel::PrefabsPanel(const char* name, bool start_active) : EditorWindow(name, start_active) {}
-
-PrefabsPanel::~PrefabsPanel()
-{
-}
-
-void PrefabsPanel::Draw(bool secondary)
-{
-	if (ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
-	{
-		if (secondary) {
-			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-		}
-
-		ImGui::SameLine();
-
-		if (ImGui::Button("Create Prefab"))
-		{
-			if (App->editor->GetSelected() != nullptr)
-			{
-				RE_Prefab* newPrefab = new RE_Prefab();
-				RE_GameObject* selected = App->editor->GetSelected();
-				newPrefab->SetName(selected->GetName());
-				newPrefab->Save(selected);
-				newPrefab->SaveMeta();
-				App->resources->Reference(newPrefab);
-				prefabs = App->resources->GetResourcesByType(Resource_Type::R_PREFAB);
-			}
-		}
-
-		if (ImGui::Button("Clone selected to Scene"))
-		{
-			if (selected != nullptr)
-				App->scene->AddGoToRoot(((RE_Prefab*)selected)->GetRoot());
-		}
-
-		ImGui::NewLine();
-
-		if (!prefabs.empty())
-		{
-			ImGui::Text("Current Prefabs");
-
-			for (ResourceContainer* currentPrefab : prefabs)
-			{
-				if (ImGui::Button((selected == currentPrefab) ? eastl::string(eastl::string("Selected -> ") + eastl::string(currentPrefab->GetName())).c_str() : currentPrefab->GetName()))
-					selected = currentPrefab;
-			}
-
-		}
-		else
-			ImGui::Text("Empty");
-
-		if (secondary) {
-			ImGui::PopItemFlag();
-			ImGui::PopStyleVar();
-		}
-	}
-	ImGui::End();
-}
-
 MaterialEditorWindow::MaterialEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active)
 {
 	editingMaerial = new RE_Material();

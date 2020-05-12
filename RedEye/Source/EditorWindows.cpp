@@ -14,6 +14,8 @@
 #include "OutputLog.h"
 #include "RE_HandleErrors.h"
 
+#include "RE_GameObject.h"
+
 #include "ImGui/misc/cpp/imgui_stdlib.h"
 #include "ImGui/imgui_internal.h"
 #include "ImGuiColorTextEdit/TextEditor.h"
@@ -480,8 +482,17 @@ void PopUpWindow::PopUpSave(bool fromExit, bool newScene)
 	fromSaveScene = true;
 	exitAfter = fromExit;
 	spawnNewScene = newScene;
-	if (inputName = App->scene->isNewScene()) sceneName = "New Scene";
+	if (inputName = App->scene->isNewScene()) nameStr = "New Scene";
 	PopUp("Save", "Scene have changes", true);
+}
+
+void PopUpWindow::PopUpPrefab(RE_GameObject* go)
+{
+	fromCreatePrefab = true;
+	inputName = true;
+	nameStr = "New Prefab";
+	goPrefab = go;
+	PopUp("Save", "Create prefab", false);
 }
 
 void PopUpWindow::Draw(bool secondary)
@@ -535,12 +546,12 @@ void PopUpWindow::Draw(bool secondary)
 		else if (fromSaveScene) {
 			if (inputName) {
 				char name_holder[64];
-				sprintf_s(name_holder, 64, "%s", sceneName.c_str());
+				sprintf_s(name_holder, 64, "%s", nameStr.c_str());
 				if (ImGui::InputText("Name", name_holder, 64))
-					sceneName = name_holder;
+					nameStr = name_holder;
 			}
 			if (ImGui::Button(btnText.c_str())) {
-				App->scene->SaveScene((inputName) ? sceneName.c_str() : nullptr);
+				App->scene->SaveScene((inputName) ? nameStr.c_str() : nullptr);
 				active = false;
 				fromSaveScene = false;
 				disableAllWindows = false;
@@ -559,6 +570,35 @@ void PopUpWindow::Draw(bool secondary)
 				if (exitAfter) Event::Push(RE_EventType::REQUEST_QUIT, App);
 				else if (spawnNewScene) App->scene->NewEmptyScene();
 				spawnNewScene = false;
+			}
+		}
+		else if (fromCreatePrefab) {
+			if (inputName) {
+				char name_holder[64];
+				sprintf_s(name_holder, 64, "%s", nameStr.c_str());
+				if (ImGui::InputText("Name", name_holder, 64))
+					nameStr = name_holder;
+			}
+
+			static bool identityRoot = false;
+			ImGui::Checkbox("Make Root Identity", &identityRoot);
+
+			if (ImGui::Button(btnText.c_str())) {
+				active = false;
+				fromSaveScene = false;
+				disableAllWindows = false;
+				inputName = false;
+				App->editor->PopUpFocus(disableAllWindows);
+				App->editor->CreatePrefab(goPrefab, nameStr.c_str(), identityRoot);
+				goPrefab = nullptr;
+			}
+			if (ImGui::Button("Cancel")) {
+				active = false;
+				fromCreatePrefab = false;
+				disableAllWindows = false;
+				inputName = false;
+				App->editor->PopUpFocus(disableAllWindows);
+				goPrefab = nullptr;
 			}
 		}
 		else if (ImGui::Button(btnText.c_str()))
@@ -699,50 +739,53 @@ void AssetsWindow::Draw(bool secondary)
 					break;
 				default:
 				{
-					ResourceContainer* res = App->resources->At(p->AsFile()->metaResource->resource);
-					if (ImGui::ImageButton((void*)App->thumbnail->At(res->GetMD5()), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
-						App->resources->PushSelected(res->GetMD5(), true);
-					ImGui::PopID();
+					if (p->AsFile()->metaResource != nullptr) {
+						ResourceContainer* res = App->resources->At(p->AsFile()->metaResource->resource);
+						if (ImGui::ImageButton((void*)App->thumbnail->At(res->GetMD5()), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
+							App->resources->PushSelected(res->GetMD5(), true);
+						ImGui::PopID();
 
-					eastl::string dragID("#");
-					
-					switch (res->GetType())
-					{
-					case R_TEXTURE:
-						dragID += "Texture";
-						break;
+						eastl::string dragID("#");
 
-					case R_PREFAB:
-						dragID += "Prefab";
-						break;
+						switch (res->GetType())
+						{
+						case R_TEXTURE:
+							dragID += "Texture";
+							break;
 
-					case R_SKYBOX:
-						dragID += "Skybox";
-						break;
+						case R_PREFAB:
+							dragID += "Prefab";
+							break;
 
-					case R_MATERIAL:
-						dragID += "Material";
-						break;
+						case R_SKYBOX:
+							dragID += "Skybox";
+							break;
 
-					case R_MODEL:
-						dragID += "Model";
-						break;
+						case R_MATERIAL:
+							dragID += "Material";
+							break;
 
-					case R_SCENE:
-						dragID += "Scene";
-						break;
+						case R_MODEL:
+							dragID += "Model";
+							break;
 
+						case R_SCENE:
+							dragID += "Scene";
+							break;
+
+						}
+						dragID += "Reference";
+
+						if (ImGui::BeginDragDropSource()) {
+							ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
+							ImGui::Image((void*)App->thumbnail->At(p->AsFile()->metaResource->resource), { 50,50 }, { 0.0, 1.0 }, { 1.0, 0.0 });
+							ImGui::EndDragDropSource();
+						}
+
+						ImGui::Text(p->AsFile()->filename.c_str());
 					}
-					dragID += "Reference";
-
-					if (ImGui::BeginDragDropSource()) {
-						ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
-						ImGui::Image((void*)App->thumbnail->At(p->AsFile()->metaResource->resource), { 50,50 }, { 0.0, 1.0 }, { 1.0, 0.0 });
-						ImGui::EndDragDropSource();
-					}
-
-					ImGui::Text(p->AsFile()->filename.c_str());
-
+					else
+						ImGui::PopID();
 				}
 					break;
 				}

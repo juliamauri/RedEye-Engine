@@ -76,6 +76,8 @@ public:
 
 	void GetSceneWindowSize(unsigned int* widht, unsigned int* height);
 
+	void CreatePrefab(RE_GameObject* go, const char* name, bool identityRoot);
+
 private:
 	void UpdateCamera();
 

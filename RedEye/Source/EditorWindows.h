@@ -11,6 +11,8 @@
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 
+class RE_GameObject;
+
 class EditorWindow
 {
 public:
@@ -148,20 +150,6 @@ private:
 	void Draw(bool secondary = false) override;
 };
 
-class PrefabsPanel :public EditorWindow
-{
-public:
-	PrefabsPanel(const char* name = "Prefabs", bool start_active = false);
-	~PrefabsPanel();
-
-private:
-	void Draw(bool secondary = false) override;
-
-	eastl::vector<ResourceContainer*> prefabs;
-
-	ResourceContainer* selected = nullptr;
-};
-
 class PopUpWindow :public EditorWindow
 {
 public:
@@ -172,6 +160,7 @@ public:
 
 	void PopUpError();
 	void PopUpSave(bool fromExit = false, bool newScene = false);
+	void PopUpPrefab(RE_GameObject* go);
 
 private:
 	void Draw(bool secondary = false) override;
@@ -179,12 +168,14 @@ private:
 	bool disableAllWindows = false;
 	bool fromHandleError = false;
 	bool fromSaveScene = false;
+	bool fromCreatePrefab = false;
 	bool exitAfter = false;
 	bool inputName = false;
 	bool spawnNewScene = false;
 	eastl::string btnText;
 	eastl::string titleText;
-	eastl::string sceneName;
+	eastl::string nameStr;
+	RE_GameObject* goPrefab = nullptr;
 };
 
 class AssetsWindow : public EditorWindow
