@@ -181,6 +181,8 @@ public:
 	virtual void Save();
 	virtual void Save(char* buffer, unsigned int size = 0);
 
+	void Delete();
+
 	void ClearBuffer();
 	char* GetBuffer();
 	const char* GetBuffer() const;

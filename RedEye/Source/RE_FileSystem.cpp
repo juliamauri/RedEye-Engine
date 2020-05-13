@@ -617,6 +617,28 @@ void RE_FileIO::Save(char * buffer, unsigned int size)
 	WriteFile(from_zip, file_name, buffer, this->size = ((size == 0) ? strnlen_s(buffer, 0xffff) : size));
 }
 
+void RE_FileIO::Delete()
+{
+	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
+		LOG_ERROR("Ettot when unmount: %s", PHYSFS_getLastError());
+
+	struct zip* f_zip = NULL;
+	int error = 0;
+	f_zip = zip_open(from_zip, ZIP_CHECKCONS, &error); /* on ouvre l'archive zip */
+	if (error)	LOG_ERROR("could not open or create archive: %s", from_zip);
+
+	zip_int64_t index = zip_name_locate(f_zip, file_name, NULL);
+	if(index == -1) LOG_ERROR("file culdn't locate: %s", file_name);
+	else {
+		if(zip_delete(f_zip, index) == -1) LOG_ERROR("file culdn't delete: %s", file_name);
+	}
+
+	zip_close(f_zip);
+	f_zip = NULL;
+
+	PHYSFS_mount(from_zip, NULL, 1);
+}
+
 void RE_FileIO::ClearBuffer()
 {
 	delete[] buffer;
