@@ -15,6 +15,9 @@
 #include "RE_Texture.h"
 #include "RE_Mesh.h"
 
+#include "RE_GameObject.h"
+#include "RE_CompCamera.h"
+#include "RE_CompMesh.h"
 
 #include "Globals.h"
 #include "OutputLog.h"
@@ -183,6 +186,313 @@ eastl::vector<const char*> RE_ResourceManager::GetAllResourcesActiveByType(Resou
 		resourcesByType.pop_back();
 	}
 	return ret;
+}
+
+eastl::vector<const char*> RE_ResourceManager::WhereUndefinedFileIsUsed(const char* assetPath)
+{
+	eastl::vector<const char*> shadersUsed;
+	eastl::vector<ResourceContainer*> temp_resources = GetResourcesByType(R_SHADER);
+
+	RE_Shader* shader = nullptr;
+	for (auto res : temp_resources) {
+		shader = (RE_Shader*)res;
+		if (!res->isInternal()) {
+			if (shader->IsPathOnShader(assetPath))
+				shadersUsed.push_back(res->GetMD5());
+		}
+	}
+
+	eastl::vector<const char*> ret;
+	for (auto s : shadersUsed) {
+		ret.push_back(s);
+		eastl::vector<const char*> sret = WhereIsUsed(s);
+		if (!sret.empty()) {
+			ret.insert(ret.end(), sret.begin(), sret.end());
+		}
+	}
+
+	return ret;
+}
+
+eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
+{
+	eastl::vector<const char*> ret;
+	eastl::vector<ResourceContainer*> temp_resources;
+
+	ResourceContainer* resource = resources.at(res);
+
+	switch (resource->GetType())
+	{
+	case R_SHADER:
+		//search on materials.
+	{
+		temp_resources = GetResourcesByType(R_MATERIAL);
+
+		RE_Material* mat = nullptr;
+		for (auto resource : temp_resources) {
+			mat = (RE_Material*)resource;
+			if (mat->ExitsOnShader(res))
+				ret.push_back(resource->GetMD5());
+		}
+
+		break;
+	}
+	case R_TEXTURE:
+		//search on materials.
+	{
+		temp_resources = GetResourcesByType(R_MATERIAL);
+
+		RE_Material* mat = nullptr;
+		for (auto resource : temp_resources) {
+			mat = (RE_Material*)resource;
+			if (mat->ExitsOnTexture(res))
+				ret.push_back(resource->GetMD5());
+		}
+
+		break;
+	}
+
+	case R_SKYBOX:
+		//search on cameras from scenes or prefabs
+	{
+		temp_resources = GetResourcesByType(R_SCENE);
+		RE_Scene* scene = nullptr;
+		for (auto resource : temp_resources) {
+			scene = (RE_Scene*)resource;
+
+			Event::PauseEvents();
+			RE_GameObject* GOScene = scene->GetRoot();
+
+			eastl::stack<const RE_GameObject*> gos;
+			gos.push(GOScene);
+			while (!gos.empty())
+			{
+				const RE_GameObject* go = gos.top();
+				RE_CompCamera* cam = go->GetCamera();
+
+				bool skip = false;
+
+				if (cam != nullptr) {
+					if (cam->isUsingSkybox()) {
+						if (cam->GetSkybox() == res)
+						{
+							ret.push_back(resource->GetMD5());
+							skip = true;
+						}
+					}
+				}
+
+				gos.pop();
+
+				if (!skip) {
+					for (auto child : go->GetChilds())
+						gos.push(child);
+				}
+				else {
+					gos = eastl::stack<const RE_GameObject*>();
+				}
+			}
+
+			temp_resources = GetResourcesByType(R_PREFAB);
+			RE_Prefab* prefab = nullptr;
+			for (auto resource : temp_resources) {
+				prefab = (RE_Prefab*)resource;
+
+				Event::PauseEvents();
+				RE_GameObject* GOPrefab = prefab->GetRoot();
+
+				eastl::stack<const RE_GameObject*> gos;
+				gos.push(GOPrefab);
+				while (!gos.empty())
+				{
+					const RE_GameObject* go = gos.top();
+					RE_CompCamera* cam = go->GetCamera();
+
+					bool skip = false;
+
+					if (cam != nullptr) {
+						if (cam->isUsingSkybox()) {
+							if (cam->GetSkybox() == res)
+							{
+								ret.push_back(resource->GetMD5());
+								skip = true;
+							}
+						}
+					}
+
+					gos.pop();
+
+					if (!skip) {
+						for (auto child : go->GetChilds())
+							gos.push(child);
+					}
+					else {
+						gos = eastl::stack<const RE_GameObject*>();
+					}
+				}
+			}
+
+			Event::ResumeEvents();
+		}
+
+		break;
+	}
+	case R_MATERIAL:
+		//search on scenes, prefabs and models(models advise you need to reimport)
+		temp_resources = GetResourcesByType(R_SCENE);
+		RE_Scene* scene = nullptr;
+		for (auto resource : temp_resources) {
+			scene = (RE_Scene*)resource;
+
+			Event::PauseEvents();
+			RE_GameObject* GOScene = scene->GetRoot();
+
+			eastl::stack<const RE_GameObject*> gos;
+			gos.push(GOScene);
+			while (!gos.empty())
+			{
+				const RE_GameObject* go = gos.top();
+				RE_CompMesh* mesh = go->GetMesh();
+
+				bool skip = false;
+
+				if (mesh != nullptr) {
+					if (mesh->GetMaterial() == res) {
+						ret.push_back(resource->GetMD5());
+						skip = true;
+					}
+				}
+
+				gos.pop();
+
+				if (!skip) {
+					for (auto child : go->GetChilds())
+						gos.push(child);
+				}
+				else {
+					gos = eastl::stack<const RE_GameObject*>();
+				}
+			}
+
+			temp_resources = GetResourcesByType(R_PREFAB);
+			RE_Prefab* prefab = nullptr;
+			for (auto resource : temp_resources) {
+				prefab = (RE_Prefab*)resource;
+
+				Event::PauseEvents();
+				RE_GameObject* GOPrefab = prefab->GetRoot();
+
+				eastl::stack<const RE_GameObject*> gos;
+				gos.push(GOPrefab);
+				while (!gos.empty())
+				{
+					const RE_GameObject* go = gos.top();
+					RE_CompMesh* mesh = go->GetMesh();
+
+					bool skip = false;
+
+					if (mesh != nullptr) {
+						if (mesh->GetMaterial() == res) {
+							ret.push_back(resource->GetMD5());
+							skip = true;
+						}
+					}
+
+					gos.pop();
+
+					if (!skip) {
+						for (auto child : go->GetChilds())
+							gos.push(child);
+					}
+					else {
+						gos = eastl::stack<const RE_GameObject*>();
+					}
+				}
+			}
+
+			temp_resources = GetResourcesByType(R_MODEL);
+			RE_Model* model = nullptr;
+			for (auto resource : temp_resources) {
+				model = (RE_Model*)resource;
+
+				Event::PauseEvents();
+				RE_GameObject* GOModel = model->GetRoot();
+
+				eastl::stack<const RE_GameObject*> gos;
+				gos.push(GOModel);
+				while (!gos.empty())
+				{
+					const RE_GameObject* go = gos.top();
+					RE_CompMesh* mesh = go->GetMesh();
+
+					bool skip = false;
+
+					if (mesh != nullptr) {
+						if (mesh->GetMaterial() == res) {
+							ret.push_back(resource->GetMD5());
+							skip = true;
+						}
+					}
+
+					gos.pop();
+
+					if (!skip) {
+						for (auto child : go->GetChilds())
+							gos.push(child);
+					}
+					else {
+						gos = eastl::stack<const RE_GameObject*>();
+					}
+				}
+			}
+
+			Event::ResumeEvents();
+		}
+
+		break;
+
+	}
+
+	return ret;
+}
+
+void RE_ResourceManager::DeleteResource(const char* res)
+{
+	ResourceContainer* resource = resources.at(res);
+
+	switch (resource->GetType())
+	{
+	case R_SHADER:
+		//search on materials.
+
+		break;
+	case R_TEXTURE:
+		//search on materials.
+
+		break;
+	case R_PREFAB:
+		//only delete
+		//TODO if prefab is referenced on gameobjects scene will be needed to search
+
+		break;
+	case R_SKYBOX:
+		//search on cameras from scenes or prefabs
+
+		break;
+	case R_MATERIAL:
+		//search on scenes, prefabs and models(models advise you need to reimport)
+
+		break;
+	case R_MODEL:
+		//only delete
+
+		break;
+	case R_SCENE:
+		//if current scene, clear and put empty scene
+
+		break;
+	}
+
 }
 
 eastl::vector<ResourceContainer*> RE_ResourceManager::GetResourcesByType(Resource_Type type)

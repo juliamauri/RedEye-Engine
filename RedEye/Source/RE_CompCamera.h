@@ -92,6 +92,7 @@ public:
 
 	//Skybox
 	bool isUsingSkybox()const;
+	const char* GetSkybox()const;
 	void DrawSkybox()const;
 
 	void UseResources()override;

@@ -210,6 +210,14 @@ void RE_Shader::ReImport()
 	Event::Push(RE_EventType::RESOURCE_CHANGED, App->resources, Cvar(GetMD5()));
 }
 
+bool RE_Shader::IsPathOnShader(const char* assetPath)
+{
+	eastl::string path = assetPath;
+	if(path == shaderSettings.vertexShader || path == shaderSettings.fragmentShader || path == shaderSettings.geometryShader)
+		return true;
+	return false;
+}
+
 void RE_Shader::GetVertexFileInfo(const char*& path, signed long long* lastTimeModified) const
 {
 	path = shaderSettings.vertexShader.c_str();

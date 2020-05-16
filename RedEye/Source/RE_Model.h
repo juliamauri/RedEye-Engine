@@ -109,6 +109,8 @@ private:
 	void LibraryLoad();
 	void LibrarySave();
 
+	bool CheckResourcesIsOnAssets();
+
 private:
 	RE_GameObject* loaded = nullptr;
 
@@ -116,6 +118,8 @@ private:
 
 	bool applySave = false;
 	RE_ModelSettings restoreSettings;
+
+	bool needReImport = false;
 };
 
 #endif // !__RE_MODEL_H__

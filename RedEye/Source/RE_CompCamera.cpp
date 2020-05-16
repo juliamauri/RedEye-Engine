@@ -651,6 +651,11 @@ bool RE_CompCamera::isUsingSkybox() const
 	return usingSkybox;
 }
 
+const char* RE_CompCamera::GetSkybox() const
+{
+	return skyboxMD5;
+}
+
 void RE_CompCamera::DrawSkybox() const
 {
 	RE_SkyBox* skyRes = (skyboxMD5) ? (RE_SkyBox*)App->resources->At(skyboxMD5) : (RE_SkyBox*)App->resources->At(App->internalResources->GetDefaultSkyBox());

@@ -174,3 +174,83 @@ RE_GameObject* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 	}
 	return RE_GameObject::DeserializeBinary(cursor, &resourcesIndex);;
 }
+
+bool RE_ResouceAndGOImporter::JsonCheckResources(JSONNode* node)
+{
+	bool ret = true;
+	JSONNode* resources = node->PullJObject("resources");
+	uint resSize = resources->PullUInt("resSize", 0);
+	eastl::string ref;
+	for (uint r = 0; r < resSize && ret; r++) {
+		ref = "r";
+		ref += eastl::to_string(r);
+		JSONNode* resN = resources->PullJObject(ref.c_str());
+
+		int index = resN->PullInt("index", -1);
+		Resource_Type type = (Resource_Type)resN->PullInt("type", Resource_Type::R_UNDEFINED);
+		eastl::string mPath = resN->PullString("mPath", "");
+
+		const char* resMD5 = nullptr;
+		(type == Resource_Type::R_MESH) ?
+			resMD5 = App->resources->CheckOrFindMeshOnLibrary(mPath.c_str()) :
+			resMD5 = App->resources->FindMD5ByMETAPath(mPath.c_str(), type);
+
+		if (resMD5 == nullptr)
+			ret = false;
+
+		DEL(resN);
+	}
+	DEL(resources);
+
+
+	return ret;
+}
+
+bool RE_ResouceAndGOImporter::BinaryCheckResources(char*& cursor)
+{
+	bool ret = true;
+
+	size_t size = sizeof(uint);
+	uint resSize = 0;
+	memcpy(&resSize, cursor, size);
+	cursor += size;
+
+	for (uint r = 0; r < resSize && ret; r++) {
+
+		size = sizeof(int);
+		int index = 0;
+		memcpy(&index, cursor, size);
+		cursor += size;
+
+		size = sizeof(unsigned int);
+		unsigned int typeI = 0;
+		memcpy(&typeI, cursor, size);
+		cursor += size;
+		Resource_Type rType = (Resource_Type)typeI;
+
+		size = sizeof(uint);
+		uint strsize = 0;
+		memcpy(&strsize, cursor, size);
+		cursor += size;
+
+		char* str = new char[strsize + 1];
+		char* strCursor = str;
+		size = strsize * sizeof(char);
+		memcpy(str, cursor, size);
+		cursor += size;
+		strCursor += size;
+		char nullchar = '\0';
+		memcpy(strCursor, &nullchar, sizeof(char));
+
+		const char* resMD5 = nullptr;
+		(rType == Resource_Type::R_MESH) ?
+			resMD5 = App->resources->CheckOrFindMeshOnLibrary(str) :
+			resMD5 = App->resources->FindMD5ByMETAPath(str, rType);
+
+		if (resMD5 == nullptr)
+			ret = false;
+
+		DEL_A(str);
+	}
+	return ret;
+}

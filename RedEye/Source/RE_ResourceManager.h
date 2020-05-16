@@ -24,6 +24,10 @@ public:
 
 	eastl::vector<const char*> GetAllResourcesActiveByType(Resource_Type resT);
 
+	eastl::vector<const char*> WhereUndefinedFileIsUsed(const char* assetPath);
+	eastl::vector<const char*> WhereIsUsed(const char* res);
+	void DeleteResource(const char* res);
+
 	const char* ImportModel(const char* assetPath);
 	const char* ImportTexture(const char* assetPath);
 	const char* ImportMaterial(const char* assetPath);

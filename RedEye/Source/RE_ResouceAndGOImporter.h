@@ -12,6 +12,9 @@ public:
 
 	static RE_GameObject* JsonDeserialize(JSONNode* node);
 	static RE_GameObject* BinaryDeserialize(char*& cursor);
+
+	static bool JsonCheckResources(JSONNode* node);
+	static bool BinaryCheckResources(char*& cursor);
 };
 
 #endif // !__RE_RESOURCEANDGOIMPORTER_H__

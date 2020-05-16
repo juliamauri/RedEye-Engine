@@ -10,6 +10,7 @@
 
 #include "RE_GameObject.h"
 
+#include "RE_HandleErrors.h"
 #include "OutputLog.h"
 #include "Globals.h"
 #include "assimp\include\postprocess.h"
@@ -121,14 +122,41 @@ void RE_Model::Draw()
 	if (currentPresset == -1) {
 		if (ImGui::ListBoxHeader("Flags")) {
 			for (uint i = 0; i < 25; i++)
-				if(ImGui::Selectable(flagsStr[i], &modelSettings.flags[i]))
+				if (ImGui::Selectable(flagsStr[i], &modelSettings.flags[i]))
 					applySave = true;
 		}
 		ImGui::ListBoxFooter();
 	}
+		
 
-	if (ImGui::Button("Add to Scene")) {
-		App->scene->AddGameobject(GetRoot());
+	if (!needReImport && ImGui::Button("Add to Scene")) {
+
+		App->handlerrors->StartHandling();
+
+		if (CheckResourcesIsOnAssets()) {
+			App->scene->AddGameobject(GetRoot());
+		}
+		else {
+			LOG_ERROR("Missing Resources on Model");
+			LOG_SOLUTION("Needed ReImport");
+			needReImport = true;
+		}
+
+		App->handlerrors->StopHandling();
+		if (App->handlerrors->AnyErrorHandled()) {
+			App->handlerrors->ActivatePopUp();
+		}
+	}
+	else if(ImGui::Button("ReImport before add")){
+		bool neededReLoad = false;
+		if (ResourceContainer::inMemory) neededReLoad = true;
+		Event::PauseEvents();
+		if (neededReLoad) UnloadMemory();
+		AssetLoad();
+		LibrarySave();
+		SaveMeta();
+		if (!neededReLoad) UnloadMemory();
+		Event::ResumeEvents();
 	}
 
 	if (applySave && modelSettings == restoreSettings) {
@@ -213,6 +241,19 @@ void RE_Model::LibrarySave()
 	RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
 	toLibrarySave.Save(buffer, size);
 	DEL_A(buffer);
+}
+
+bool RE_Model::CheckResourcesIsOnAssets()
+{
+	bool ret = false;
+	RE_FileIO binaryLoad(GetLibraryPath());
+
+	if (binaryLoad.Load()) {
+		char* cursor = binaryLoad.GetBuffer();
+		ret = RE_ResouceAndGOImporter::BinaryCheckResources(cursor);
+	}
+
+	return ret;
 }
 
 int RE_ModelSettings::GetPresetSelected() const

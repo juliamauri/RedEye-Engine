@@ -479,6 +479,29 @@ void RE_Material::SomeResourceChanged(const char* resMD5)
 	}
 }
 
+bool RE_Material::ExitsOnShader(const char* shader)
+{
+	return (shaderMD5 == shader);
+}
+
+bool RE_Material::ExitsOnTexture(const char* texture)
+{
+	bool ret = false;
+
+	ret = ExitsOnTexture(texture, &tDiffuse);
+	if(!ret) ret = ExitsOnTexture(texture, &tSpecular);
+	if(!ret) ret = ExitsOnTexture(texture, &tAmbient);
+	if(!ret) ret = ExitsOnTexture(texture, &tEmissive);
+	if(!ret) ret = ExitsOnTexture(texture, &tOpacity);
+	if(!ret) ret = ExitsOnTexture(texture, &tShininess);
+	if(!ret) ret = ExitsOnTexture(texture, &tHeight);
+	if(!ret) ret = ExitsOnTexture(texture, &tNormals);
+	if(!ret) ret = ExitsOnTexture(texture, &tReflection);
+	if(!ret) ret = ExitsOnTexture(texture, &tUnknown);
+
+	return ret;
+}
+
 void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const char*>* textures)
 {
 	ImGui::Text(eastl::string(texturesName + eastl::string(" textures:")).c_str());
@@ -1542,4 +1565,13 @@ void RE_Material::GetAndProcessUniformsFromShader()
 		usingOnMat[CDIFFUSE] = 1;
 		usingOnMat[TDIFFUSE] = 1;
 	}
+}
+
+bool RE_Material::ExitsOnTexture(const char* texture, eastl::vector<const char*>* textures)
+{
+	for (auto tex : *textures) {
+		if (tex == texture)
+			return true;
+	}
+	return false;
 }

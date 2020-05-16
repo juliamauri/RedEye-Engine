@@ -50,6 +50,9 @@ public:
 
 	void SomeResourceChanged(const char* resMD5)override;
 
+	bool ExitsOnShader(const char* shader);
+	bool ExitsOnTexture(const char* texture);
+
 private:
 	void Draw() override;
 
@@ -69,6 +72,8 @@ private:
 	unsigned int GetBinarySize();
 
 	void GetAndProcessUniformsFromShader();
+
+	bool ExitsOnTexture(const char* texture, eastl::vector<const char*>* textures);
 
 public:
 	RE_ShadingMode shadingType = S_FLAT;

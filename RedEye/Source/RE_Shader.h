@@ -43,6 +43,8 @@ public:
 
 	void ReImport()override;
 
+	bool IsPathOnShader(const char* assetPath);
+
 private:
 	void Draw() override;
 	void SaveResourceMeta(JSONNode* metaNode) override;
