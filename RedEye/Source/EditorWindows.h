@@ -152,6 +152,16 @@ private:
 
 class PopUpWindow :public EditorWindow
 {
+private:
+	enum PU_STATE {
+		PU_NONE = -1,
+		PU_ERROR,
+		PU_SAVE,
+		PU_PREFAB,
+		PU_DELETERESOURCE,
+		PU_DELETEUNDEFINEDFILE
+	};
+
 public:
 	PopUpWindow(const char* name = "PopUp", bool start_active = false);
 	~PopUpWindow();
@@ -161,14 +171,13 @@ public:
 	void PopUpError();
 	void PopUpSave(bool fromExit = false, bool newScene = false);
 	void PopUpPrefab(RE_GameObject* go);
+	void PopUpDelRes(const char* res);
+	void PopUpDelUndeFile(const char* assetPath);
 
 private:
 	void Draw(bool secondary = false) override;
 
-	bool disableAllWindows = false;
-	bool fromHandleError = false;
-	bool fromSaveScene = false;
-	bool fromCreatePrefab = false;
+	PU_STATE state = PU_NONE;
 	bool exitAfter = false;
 	bool inputName = false;
 	bool spawnNewScene = false;
@@ -176,6 +185,8 @@ private:
 	eastl::string titleText;
 	eastl::string nameStr;
 	RE_GameObject* goPrefab = nullptr;
+	const char* resourceToDelete = nullptr;
+	eastl::vector<const char*> resourcesUsing;
 };
 
 class AssetsWindow : public EditorWindow

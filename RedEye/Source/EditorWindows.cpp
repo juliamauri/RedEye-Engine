@@ -467,19 +467,19 @@ void PopUpWindow::PopUp(const char * _btnText, const char* title, bool _disableA
 {
 	btnText = _btnText;
 	titleText = title;
-	if (disableAllWindows = _disableAllWindows) App->editor->PopUpFocus(disableAllWindows);
+	App->editor->PopUpFocus(_disableAllWindows);
 	active = true;
 }
 
 void PopUpWindow::PopUpError()
 {
-	fromHandleError = true;
+	state = PU_ERROR;
 	PopUp("Accept", "Error", true);
 }
 
 void PopUpWindow::PopUpSave(bool fromExit, bool newScene)
 {
-	fromSaveScene = true;
+	state = PU_SAVE;
 	exitAfter = fromExit;
 	spawnNewScene = newScene;
 	if (inputName = App->scene->isNewScene()) nameStr = "New Scene";
@@ -488,19 +488,39 @@ void PopUpWindow::PopUpSave(bool fromExit, bool newScene)
 
 void PopUpWindow::PopUpPrefab(RE_GameObject* go)
 {
-	fromCreatePrefab = true;
+	state = PU_PREFAB;
 	inputName = true;
 	nameStr = "New Prefab";
 	goPrefab = go;
 	PopUp("Save", "Create prefab", false);
 }
 
+void PopUpWindow::PopUpDelRes(const char* res)
+{
+	state = PU_DELETERESOURCE;
+	resourceToDelete = res;
+	resourcesUsing = App->resources->WhereIsUsed(res);
+	PopUp("Delete", "Do you want to delete that resource?", false);
+}
+
+void PopUpWindow::PopUpDelUndeFile(const char* assetPath)
+{
+	state = PU_DELETEUNDEFINEDFILE;
+	nameStr = assetPath;
+	resourcesUsing = App->resources->WhereUndefinedFileIsUsed(assetPath);
+	PopUp("Delete", "Do you want to delete that file?", false);
+}
+
 void PopUpWindow::Draw(bool secondary)
 {
 	if(ImGui::Begin(titleText.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
-		if (fromHandleError)
+		switch (state)
 		{
+		case PopUpWindow::PU_NONE:
+			break;
+		case PopUpWindow::PU_ERROR: {
+
 			// Error
 			ImGui::TextColored(ImVec4(255.f, 0.f, 0.f, 1.f), !App->handlerrors->AnyErrorHandled() ?
 				"No errors" :
@@ -519,12 +539,9 @@ void PopUpWindow::Draw(bool secondary)
 			if (ImGui::Button(btnText.c_str()))
 			{
 				active = false;
-				disableAllWindows = false;
-				App->editor->PopUpFocus(disableAllWindows);
-				if (fromHandleError) {
-					App->handlerrors->ClearAll();
-					fromHandleError = false;
-				}
+				state = PU_NONE;
+				App->editor->PopUpFocus(false);
+				App->handlerrors->ClearAll();
 			}
 
 			// Logs
@@ -542,37 +559,41 @@ void PopUpWindow::Draw(bool secondary)
 					App->handlerrors->GetWarnings(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
 				ImGui::TreePop();
 			}
+
+			break;
 		}
-		else if (fromSaveScene) {
+		case PopUpWindow::PU_SAVE: {
 			if (inputName) {
 				char name_holder[64];
 				sprintf_s(name_holder, 64, "%s", nameStr.c_str());
 				if (ImGui::InputText("Name", name_holder, 64))
 					nameStr = name_holder;
 			}
+			
+			bool clicked = false;
+
 			if (ImGui::Button(btnText.c_str())) {
 				App->scene->SaveScene((inputName) ? nameStr.c_str() : nullptr);
-				active = false;
-				fromSaveScene = false;
-				disableAllWindows = false;
-				inputName = false;
-				App->editor->PopUpFocus(disableAllWindows);
-				if (exitAfter) Event::Push(RE_EventType::REQUEST_QUIT, App);
-				else if (spawnNewScene) App->scene->NewEmptyScene();
-				spawnNewScene = false;
+				clicked = true;
 			}
 			if (ImGui::Button("Cancel")) {
+				clicked = true;
+			}
+
+			if (clicked) {
 				active = false;
-				fromSaveScene = false;
-				disableAllWindows = false;
+				state = PU_NONE;
 				inputName = false;
-				App->editor->PopUpFocus(disableAllWindows);
+				App->editor->PopUpFocus(false);
 				if (exitAfter) Event::Push(RE_EventType::REQUEST_QUIT, App);
 				else if (spawnNewScene) App->scene->NewEmptyScene();
 				spawnNewScene = false;
+
 			}
+			break;
 		}
-		else if (fromCreatePrefab) {
+		case PopUpWindow::PU_PREFAB: {
+
 			if (inputName) {
 				char name_holder[64];
 				sprintf_s(name_holder, 64, "%s", nameStr.c_str());
@@ -583,34 +604,226 @@ void PopUpWindow::Draw(bool secondary)
 			static bool identityRoot = false;
 			ImGui::Checkbox("Make Root Identity", &identityRoot);
 
+			bool clicked = false;
+
 			if (ImGui::Button(btnText.c_str())) {
-				active = false;
-				fromSaveScene = false;
-				disableAllWindows = false;
-				inputName = false;
-				App->editor->PopUpFocus(disableAllWindows);
+				clicked = true;
 				App->editor->CreatePrefab(goPrefab, nameStr.c_str(), identityRoot);
-				goPrefab = nullptr;
 			}
 			if (ImGui::Button("Cancel")) {
+				clicked = true;
+			}
+
+			if (clicked) {
 				active = false;
-				fromCreatePrefab = false;
-				disableAllWindows = false;
+				state = PU_NONE;
 				inputName = false;
-				App->editor->PopUpFocus(disableAllWindows);
+				App->editor->PopUpFocus(false);
 				goPrefab = nullptr;
+
 			}
+
+			break;
 		}
-		else if (ImGui::Button(btnText.c_str()))
-		{
-			active = false;
-			disableAllWindows = false;
-			App->editor->PopUpFocus(disableAllWindows);
-			if (fromHandleError) {
-				App->handlerrors->ClearAll();
-				fromHandleError = false;
+		case PopUpWindow::PU_DELETERESOURCE:{
+
+			ResourceContainer* res = App->resources->At(resourceToDelete);
+
+			ImGui::Text("Name: %s", res->GetName());
+
+			eastl::string type;
+			switch (res->GetType())
+			{
+			case R_TEXTURE:
+				type += "texture.";
+				break;
+
+			case R_PREFAB:
+				type += "prefab.";
+				break;
+
+			case R_SKYBOX:
+				type += "skybox.";
+				break;
+
+			case R_MATERIAL:
+				type += "material.";
+				break;
+
+			case R_MODEL:
+				type += "model.";
+				break;
+
+			case R_SCENE:
+				type += "scene.";
+				break;
+
+			case R_SHADER:
+				type += "shader.";
+				break;
 			}
+
+			ImGui::Text("Type: %s", type.c_str());
+
+			ImGui::Separator();
+
+
+			bool clicked = false;
+
+			if (ImGui::Button(btnText.c_str())) {
+				clicked = true;
+				//TODO Delete at resource and filesystem
+			}
+			if (ImGui::Button("Cancel")) {
+				clicked = true;
+			}
+
+			if (clicked) {
+				active = false;
+				state = PU_NONE;
+				App->editor->PopUpFocus(false);
+				goPrefab = nullptr;
+				resourceToDelete = nullptr;
+				resourcesUsing.clear();
+			}
+
+			ImGui::Separator();
+			ImGui::Text((resourcesUsing.empty()) ? "No resources will be afected." : "The next resources will be afected and changed to default:");
+
+			uint count = 0;
+			for (auto resource : resourcesUsing) {
+				ResourceContainer* resConflict = App->resources->At(resource);
+
+				eastl::string btnname = eastl::to_string(count++);
+				btnname += ". ";
+				switch (resConflict->GetType())
+				{
+				case R_TEXTURE:
+					btnname += "Texture | ";
+					break;
+
+				case R_PREFAB:
+					btnname += "Prefab | ";
+					break;
+
+				case R_SKYBOX:
+					btnname += "Skybox | ";
+					break;
+
+				case R_MATERIAL:
+					btnname += "Material | ";
+					break;
+
+				case R_MODEL:
+					btnname += "Model (need ReImport for future use) | ";
+					break;
+
+				case R_SCENE:
+					btnname += "Scene | ";
+					break;
+
+				case R_SHADER:
+					btnname += "Shader | ";
+					break;
+				}
+				btnname += resConflict->GetName();
+
+				if (ImGui::Button(btnname.c_str())) {
+					App->resources->PushSelected(resource, true);
+				}
+			}
+
+			break;
 		}
+		case PopUpWindow::PU_DELETEUNDEFINEDFILE: {
+			
+			ImGui::Text("File: %s", nameStr.c_str());
+			ImGui::Separator();
+
+			bool clicked = false;
+
+			if (ImGui::Button(btnText.c_str())) {
+				clicked = true;
+				//TODO Delete file at used resource and filesystem
+			}
+			if (ImGui::Button("Cancel")) {
+				clicked = true;
+			}
+
+			if (clicked) {
+				active = false;
+				state = PU_NONE;
+				App->editor->PopUpFocus(false);
+				resourcesUsing.clear();
+			}
+
+			ImGui::Separator();
+
+			ImGui::Text((resourcesUsing.empty()) ? "No resources will be afected." : "The next resources will be afected:");
+
+			uint count = 0;
+			for (auto resource : resourcesUsing) {
+				ResourceContainer* resConflict = App->resources->At(resource);
+
+				eastl::string btnname = eastl::to_string(count++);
+				btnname += ". ";
+				switch (resConflict->GetType())
+				{
+				case R_TEXTURE:
+					btnname += "Texture | ";
+					break;
+
+				case R_PREFAB:
+					btnname += "Prefab | ";
+					break;
+
+				case R_SKYBOX:
+					btnname += "Skybox | ";
+					break;
+
+				case R_MATERIAL:
+					btnname += "Material | ";
+					break;
+
+				case R_MODEL:
+					btnname += "Model (need ReImport for future use) | ";
+					break;
+
+				case R_SCENE:
+					btnname += "Scene | ";
+					break;
+
+				case R_SHADER: {
+					ImGui::Separator();
+					btnname += "Shader | ";
+					break;
+				}
+				}
+				btnname += resConflict->GetName();
+
+				if (ImGui::Button(btnname.c_str())) {
+					App->resources->PushSelected(resource, true);
+				}
+
+				if (resConflict->GetType() == R_SHADER) ImGui::Text("%s will be deleted and the next resources will be affected:", resConflict->GetName());
+			}
+
+
+			break;
+
+		}
+		default: {
+
+			if (ImGui::Button(btnText.c_str()))
+			{
+				active = false;
+				state = PU_NONE;
+				App->editor->PopUpFocus(false);
+			}
+			break;
+		}
+		}
+
 	}
 
 	ImGui::End();
@@ -711,6 +924,19 @@ void AssetsWindow::Draw(bool secondary)
 						ImGui::EndDragDropSource();
 					}
 					ImGui::PopID();
+
+					id = idName + eastl::to_string(idCount) + "Delete";
+					ImGui::PushID(id.c_str());
+					if(ImGui::BeginPopupContextItem())
+					{
+						if (ImGui::Button("Delete")) {
+							App->editor->popupWindow->PopUpDelRes(res->GetMD5());
+						}
+
+						ImGui::EndPopup();
+					}
+					ImGui::PopID();
+
 					ImGui::Text(res->GetName());
 				}
 					break;
@@ -729,6 +955,30 @@ void AssetsWindow::Draw(bool secondary)
 						}
 					}
 					ImGui::PopID();
+
+					if (pop) {
+						ImGui::PopItemFlag();
+						ImGui::PopStyleVar();
+					}
+
+					id = idName + eastl::to_string(idCount) + "Delete";
+					ImGui::PushID(id.c_str());
+					if (ImGui::BeginPopupContextItem())
+					{
+						if (ImGui::Button("Delete")) {
+							App->editor->popupWindow->PopUpDelUndeFile(p->path.c_str());
+						}
+
+						ImGui::EndPopup();
+					}
+					ImGui::PopID();
+
+					pop = (!selectingUndefFile && !secondary);
+					if (pop) {
+						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+						ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+					}
+
 					ImGui::Text(p->AsFile()->filename.c_str());
 
 					if (pop) {
@@ -743,6 +993,18 @@ void AssetsWindow::Draw(bool secondary)
 						ResourceContainer* res = App->resources->At(p->AsFile()->metaResource->resource);
 						if (ImGui::ImageButton((void*)App->thumbnail->At(res->GetMD5()), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
 							App->resources->PushSelected(res->GetMD5(), true);
+						ImGui::PopID();
+
+						id = idName + eastl::to_string(idCount) + "Delete";
+						ImGui::PushID(id.c_str());
+						if (ImGui::BeginPopupContextItem())
+						{
+							if (ImGui::Button("Delete")) {
+								App->editor->popupWindow->PopUpDelRes(res->GetMD5());
+							}
+
+							ImGui::EndPopup();
+						}
 						ImGui::PopID();
 
 						eastl::string dragID("#");
