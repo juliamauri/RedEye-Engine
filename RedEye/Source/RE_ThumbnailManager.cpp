@@ -192,6 +192,17 @@ void RE_ThumbnailManager::Change(const char* ref)
 	}
 }
 
+void RE_ThumbnailManager::Delete(const char* ref)
+{
+	thumbnails.erase(ref);
+	eastl::string path(THUMBNAILPATH);
+	path += ref;
+	if (App->fs->Exists(path.c_str())) {
+		RE_FileIO fileToDelete(path.c_str(), App->fs->GetZipPath());
+		fileToDelete.Delete();
+	}
+}
+
 unsigned int RE_ThumbnailManager::At(const char* ref)
 {
 	return thumbnails.at(ref);

@@ -147,7 +147,7 @@ void RE_Model::Draw()
 			App->handlerrors->ActivatePopUp();
 		}
 	}
-	else if(ImGui::Button("ReImport before add")){
+	else if(needReImport && ImGui::Button("ReImport before add")){
 		bool neededReLoad = false;
 		if (ResourceContainer::inMemory) neededReLoad = true;
 		Event::PauseEvents();
@@ -157,6 +157,7 @@ void RE_Model::Draw()
 		SaveMeta();
 		if (!neededReLoad) UnloadMemory();
 		Event::ResumeEvents();
+		needReImport = false;
 	}
 
 	if (applySave && modelSettings == restoreSettings) {

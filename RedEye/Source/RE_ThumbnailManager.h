@@ -15,6 +15,7 @@ public:
 
 	void Add(const char* ref);
 	void Change(const char* ref);
+	void Delete(const char* ref);
 
 	unsigned int At(const char* ref);
 

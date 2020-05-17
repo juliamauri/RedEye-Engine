@@ -53,6 +53,9 @@ public:
 	bool ExitsOnShader(const char* shader);
 	bool ExitsOnTexture(const char* texture);
 
+	void DeleteShader();
+	void DeleteTexture(const char* texMD5);
+
 private:
 	void Draw() override;
 
@@ -74,6 +77,7 @@ private:
 	void GetAndProcessUniformsFromShader();
 
 	bool ExitsOnTexture(const char* texture, eastl::vector<const char*>* textures);
+	void DeleteTexture(const char* texMD5, eastl::vector<const char*>* textures);
 
 public:
 	RE_ShadingMode shadingType = S_FLAT;

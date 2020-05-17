@@ -662,6 +662,12 @@ void RE_CompCamera::DrawSkybox() const
 	skyRes->DrawSkybox();
 }
 
+void RE_CompCamera::DeleteSkybox()
+{
+	usingSkybox = false;
+	skyboxMD5 = nullptr;
+}
+
 void RE_CompCamera::UseResources()
 {
 	if (skyboxMD5) App->resources->Use(skyboxMD5);

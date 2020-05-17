@@ -69,6 +69,8 @@ public:
 
 	void LoadScene(const char* sceneMD5);
 	void SaveScene(const char* newName = nullptr);
+	const char* GetCurrentScene()const;
+	void ClearScene();
 
 	void AddGameobject(RE_GameObject* toAdd);
 

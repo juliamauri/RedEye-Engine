@@ -112,160 +112,165 @@ void ModuleScene::OnStop()
 
 void ModuleScene::RecieveEvent(const Event& e)
 {
-	RE_GameObject* go = e.data1.AsGO();
-	if (go != nullptr)
-	{
-		bool belongs_to_scene = false;// = (go->root == root);
-
-		for (const RE_GameObject* parent = go;
-			parent != nullptr && !belongs_to_scene;
-			parent = parent->GetParent_c())
+	if (e.type == LOAD_SCENE) {
+		LoadScene(e.data1.AsCharP());
+	}
+	else {
+		RE_GameObject* go = e.data1.AsGO();
+		if (go != nullptr)
 		{
-			if (parent == root)
+			bool belongs_to_scene = false;// = (go->root == root);
+
+			for (const RE_GameObject* parent = go;
+				parent != nullptr && !belongs_to_scene;
+				parent = parent->GetParent_c())
 			{
-				belongs_to_scene = true;
-				break;
-			}
-		}
-
-		switch (e.type)
-		{
-		case GO_CHANGED_TO_ACTIVE:
-		{
-			eastl::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
-
-			if (belongs_to_scene)
-			{
-				for (auto draw_go : all)
+				if (parent == root)
 				{
-					draw_go->ResetGlobalBoundingBox();
-
-					if (draw_go->IsStatic())
-						static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
-					else
-						dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+					belongs_to_scene = true;
+					break;
 				}
 			}
-			else
-				for (auto draw_go : all)
-					draw_go->ResetGlobalBoundingBox();
 
-			break;
-		}
-		case GO_CHANGED_TO_INACTIVE:
-		{
-			if (belongs_to_scene)
+			switch (e.type)
+			{
+			case GO_CHANGED_TO_ACTIVE:
 			{
 				eastl::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
 
-				for (auto draw_go : all)
+				if (belongs_to_scene)
 				{
-					if (draw_go->IsStatic())
-						static_tree.PopNode(goManager.WhatID(draw_go));
-					else
-						dynamic_tree.PopNode(goManager.WhatID(draw_go));
-				}
-			}
-			break;
-		}
-		case GO_CHANGED_TO_STATIC:
-		{
-			if (belongs_to_scene && go->IsActive())
-			{
-				int index = goManager.WhatID(go);
-				dynamic_tree.PopNode(index);
-				static_tree.PushNode(index, go->GetGlobalBoundingBox());
-			}
-			break;
-		}
-		case GO_CHANGED_TO_NON_STATIC:
-		{
-			if (belongs_to_scene && go->IsActive())
-			{
-				int index = goManager.WhatID(go);
-				static_tree.PopNode(index);
-				dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
-			}
-			break;
-		}
-		case GO_HAS_NEW_CHILD:
-		{
-			RE_GameObject* to_add = e.data2.AsGO();
+					for (auto draw_go : all)
+					{
+						draw_go->ResetGlobalBoundingBox();
 
-			if (belongs_to_scene && go->IsActive() && to_add->IsActive())
-			{
-				eastl::vector<RE_GameObject*> all = to_add->GetActiveChildsWithDrawComponents();
-
-				for (auto draw_go : all)
-				{
-					draw_go->ResetGlobalBoundingBox();
-
-					if (draw_go->IsStatic())
-						static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
-					else
-						dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
-				}
-			}
-
-			break;
-		}
-		case GO_REMOVE_CHILD:
-		{
-			RE_GameObject* to_remove = e.data2.AsGO();
-
-			if (belongs_to_scene && to_remove->IsActive())
-			{
-				eastl::vector<RE_GameObject*> all = to_remove->GetActiveChildsWithDrawComponents();
-
-				for (auto draw_go : all)
-				{
-					if (draw_go->IsStatic())
-						static_tree.PopNode(goManager.WhatID(draw_go));
-					else
-						dynamic_tree.PopNode(goManager.WhatID(draw_go));
-				}
-			}
-
-			// TODO: Delete to_remove & childs from GO Pool
-
-			break;
-		}
-		case TRANSFORM_MODIFIED:
-		{
-			if (go->IsActive())
-				for (auto child : go->GetChilds())
-					child->TransformModified();
-
-			if (belongs_to_scene && go->HasDrawComponents())
-			{
-				int index = goManager.WhatID(go);
-				if (go->IsStatic())
-				{
-					static_tree.PopNode(index);
-					static_tree.PushNode(index, go->GetGlobalBoundingBox());
+						if (draw_go->IsStatic())
+							static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+						else
+							dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+					}
 				}
 				else
+					for (auto draw_go : all)
+						draw_go->ResetGlobalBoundingBox();
+
+				break;
+			}
+			case GO_CHANGED_TO_INACTIVE:
+			{
+				if (belongs_to_scene)
 				{
+					eastl::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
+
+					for (auto draw_go : all)
+					{
+						if (draw_go->IsStatic())
+							static_tree.PopNode(goManager.WhatID(draw_go));
+						else
+							dynamic_tree.PopNode(goManager.WhatID(draw_go));
+					}
+				}
+				break;
+			}
+			case GO_CHANGED_TO_STATIC:
+			{
+				if (belongs_to_scene && go->IsActive())
+				{
+					int index = goManager.WhatID(go);
 					dynamic_tree.PopNode(index);
+					static_tree.PushNode(index, go->GetGlobalBoundingBox());
+				}
+				break;
+			}
+			case GO_CHANGED_TO_NON_STATIC:
+			{
+				if (belongs_to_scene && go->IsActive())
+				{
+					int index = goManager.WhatID(go);
+					static_tree.PopNode(index);
 					dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
 				}
+				break;
 			}
-			haschanges = true;
-			break;
-		}
-		case PLANE_CHANGE_TO_MESH:
-		{
-			RE_CompPlane* plane = (RE_CompPlane * )go->GetComponent(C_PLANE);
-			const char* planeMD5 = plane->TransformAsMeshResource();
-			go->RemoveComponent(plane);
-			RE_CompMesh* newMesh = new RE_CompMesh(go, planeMD5);
-			newMesh->UseResources();
-			go->AddCompMesh(newMesh);
-			go->ResetBoundingBoxes();
-			go->TransformModified();
-			haschanges = true;
-			break;
-		}
+			case GO_HAS_NEW_CHILD:
+			{
+				RE_GameObject* to_add = e.data2.AsGO();
+
+				if (belongs_to_scene && go->IsActive() && to_add->IsActive())
+				{
+					eastl::vector<RE_GameObject*> all = to_add->GetActiveChildsWithDrawComponents();
+
+					for (auto draw_go : all)
+					{
+						draw_go->ResetGlobalBoundingBox();
+
+						if (draw_go->IsStatic())
+							static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+						else
+							dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+					}
+				}
+
+				break;
+			}
+			case GO_REMOVE_CHILD:
+			{
+				RE_GameObject* to_remove = e.data2.AsGO();
+
+				if (belongs_to_scene && to_remove->IsActive())
+				{
+					eastl::vector<RE_GameObject*> all = to_remove->GetActiveChildsWithDrawComponents();
+
+					for (auto draw_go : all)
+					{
+						if (draw_go->IsStatic())
+							static_tree.PopNode(goManager.WhatID(draw_go));
+						else
+							dynamic_tree.PopNode(goManager.WhatID(draw_go));
+					}
+				}
+
+				// TODO: Delete to_remove & childs from GO Pool
+
+				break;
+			}
+			case TRANSFORM_MODIFIED:
+			{
+				if (go->IsActive())
+					for (auto child : go->GetChilds())
+						child->TransformModified();
+
+				if (belongs_to_scene && go->HasDrawComponents())
+				{
+					int index = goManager.WhatID(go);
+					if (go->IsStatic())
+					{
+						static_tree.PopNode(index);
+						static_tree.PushNode(index, go->GetGlobalBoundingBox());
+					}
+					else
+					{
+						dynamic_tree.PopNode(index);
+						dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
+					}
+				}
+				haschanges = true;
+				break;
+			}
+			case PLANE_CHANGE_TO_MESH:
+			{
+				RE_CompPlane* plane = (RE_CompPlane*)go->GetComponent(C_PLANE);
+				const char* planeMD5 = plane->TransformAsMeshResource();
+				go->RemoveComponent(plane);
+				RE_CompMesh* newMesh = new RE_CompMesh(go, planeMD5);
+				newMesh->UseResources();
+				go->AddCompMesh(newMesh);
+				go->ResetBoundingBoxes();
+				go->TransformModified();
+				haschanges = true;
+				break;
+			}
+			}
 		}
 	}
 }
@@ -433,6 +438,34 @@ void ModuleScene::SaveScene(const char* newName)
 	haschanges = false;
 }
 
+const char* ModuleScene::GetCurrentScene() const
+{
+	return currentScene;
+}
+
+void ModuleScene::ClearScene()
+{
+	Event::PauseEvents();
+
+	goManager.Clear();
+	static_tree.Clear();
+	dynamic_tree.Clear();
+
+	if (root) {
+		root->UnUseResources();
+		DEL(root);
+	}
+	if (savedState) DEL(savedState);
+
+	root = new RE_GameObject("root");
+	App->editor->SetSelected(root);
+	RE_GameObject* cam_go = AddGO("Camera", root);
+	cam_go->AddCompCamera();
+	App->cams->RecallCameras(root);
+
+	Event::ResumeEvents();
+}
+
 void ModuleScene::NewEmptyScene(const char* name)
 {
 	Event::PauseEvents();
@@ -449,8 +482,10 @@ void ModuleScene::NewEmptyScene(const char* name)
 	unsavedScene->SetName(name);
 	unsavedScene->SetType(Resource_Type::R_SCENE);
 
-	root->UnUseResources();
-	if (root) DEL(root);
+	if (root) {
+		root->UnUseResources();
+		DEL(root);
+	}
 	if (savedState) DEL(savedState);
 	goManager.Clear();
 
@@ -472,11 +507,11 @@ void ModuleScene::LoadScene(const char* sceneMD5)
 	if (unsavedScene) {
 		DEL(unsavedScene);
 	}
-	else if(root){
-		root->UnUseResources();
-	}
 
-	if(root) DEL(root);
+	if (root) {
+		root->UnUseResources();
+		DEL(root);
+	}
 	if (savedState) DEL(savedState);
 	goManager.Clear();
 

@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "RE_FileSystem.h"
+#include "ModuleScene.h"
 #include "RE_TextureImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_ThumbnailManager.h"
@@ -224,7 +225,7 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 	switch (resource->GetType())
 	{
 	case R_SHADER:
-		//search on materials.
+		//search on materials
 	{
 		temp_resources = GetResourcesByType(R_MATERIAL);
 
@@ -238,7 +239,7 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 		break;
 	}
 	case R_TEXTURE:
-		//search on materials.
+		//search on materials. no scenes will be afected
 	{
 		temp_resources = GetResourcesByType(R_MATERIAL);
 
@@ -456,43 +457,196 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 	return ret;
 }
 
-void RE_ResourceManager::DeleteResource(const char* res)
+ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::vector<const char*> resourcesWillChange)
 {
 	ResourceContainer* resource = resources.at(res);
+	Resource_Type rType = resource->GetType();
 
-	switch (resource->GetType())
+	const char* currentScene = nullptr;
+	bool reloadCurrentScene = (((currentScene = App->scene->GetCurrentScene()) == res && rType == R_SCENE) || (TotalReferenceCount(res) > 0 && rType != R_TEXTURE));
+
+	if (reloadCurrentScene) {
+		App->scene->ClearScene();
+	}
+
+	if (TotalReferenceCount(res) > 0) resource->UnloadMemory();
+
+	switch (rType)
 	{
 	case R_SHADER:
 		//search on materials.
+	{
+		RE_Material* resChange = nullptr;
+		for (auto resToChange : resourcesWillChange) {
+			resChange = (RE_Material*)App->resources->At(resToChange);
 
+			resChange->LoadInMemory();
+			resChange->DeleteShader();
+			resChange->UnloadMemory();
+		}
 		break;
+	}
+
 	case R_TEXTURE:
-		//search on materials.
+		//search on materials. No will afect on scene because the textures are saved on meta
+	{
+		RE_Material* resChange = nullptr;
+		for (auto resToChange : resourcesWillChange) {
+			resChange = (RE_Material*)App->resources->At(resToChange);
 
+			resChange->LoadInMemory();
+			resChange->DeleteTexture(res);
+			resChange->UnloadMemory();
+		}
 		break;
-	case R_PREFAB:
-		//only delete
-		//TODO if prefab is referenced on gameobjects scene will be needed to search
-
-		break;
+	}
 	case R_SKYBOX:
 		//search on cameras from scenes or prefabs
 
-		break;
-	case R_MATERIAL:
-		//search on scenes, prefabs and models(models advise you need to reimport)
+	{
+		for (auto resToChange : resourcesWillChange) {
+			ResourceContainer* resChange = App->resources->At(resToChange);
+			Resource_Type goType = resChange->GetType();
+			Event::PauseEvents();
 
-		break;
-	case R_MODEL:
-		//only delete
+			RE_GameObject* goRes = nullptr;
+			switch (goType)
+			{
+			case R_SCENE:
+				goRes = ((RE_Scene*)resChange)->GetRoot();
+				break;
+			case R_PREFAB:
+				goRes = ((RE_Prefab*)resChange)->GetRoot();
+				break;
+			}
 
-		break;
-	case R_SCENE:
-		//if current scene, clear and put empty scene
+
+			eastl::stack<const RE_GameObject*> gos;
+			gos.push(goRes);
+			while (!gos.empty())
+			{
+				const RE_GameObject* go = gos.top();
+				RE_CompCamera* cam = go->GetCamera();
+
+				if (cam != nullptr) {
+					if (cam->isUsingSkybox()) {
+						if (cam->GetSkybox() == res)
+						{
+							cam->DeleteSkybox();
+						}
+					}
+				}
+				gos.pop();
+
+				for (auto child : go->GetChilds())
+					gos.push(child);
+			}
+
+			goRes->TransformModified(false);
+			goRes->Update();
+			goRes->ResetBoundingBoxForAllChilds();
+
+			switch (goType)
+			{
+			case R_SCENE:
+				((RE_Scene*)resChange)->Save(goRes);
+				((RE_Scene*)resChange)->SaveMeta();
+				break;
+			case R_PREFAB:
+				((RE_Prefab*)resChange)->Save(goRes, false);
+				((RE_Prefab*)resChange)->SaveMeta();
+				break;
+			}
+			App->thumbnail->Change(resToChange);
+
+			DEL(goRes);
+
+			Event::ResumeEvents();
+		}
 
 		break;
 	}
 
+	case R_MATERIAL:
+		//search on scenes, prefabs and models(models advise you need to reimport)
+	{
+		for (auto resToChange : resourcesWillChange) {
+			ResourceContainer* resChange = App->resources->At(resToChange);
+			Resource_Type goType = resChange->GetType();
+
+			if (goType != R_MODEL) {
+				Event::PauseEvents();
+
+				RE_GameObject* goRes = nullptr;
+				switch (goType)
+				{
+				case R_SCENE:
+					goRes = ((RE_Scene*)resChange)->GetRoot();
+					break;
+				case R_PREFAB:
+					goRes = ((RE_Prefab*)resChange)->GetRoot();
+					break;
+				}
+
+				eastl::stack<const RE_GameObject*> gos;
+				gos.push(goRes);
+				while (!gos.empty())
+				{
+					const RE_GameObject* go = gos.top();
+					RE_CompMesh* mesh = go->GetMesh();
+
+					if (mesh != nullptr) {
+						if (mesh->GetMaterial() == res) {
+							mesh->SetMaterial(nullptr);
+						}
+					}
+					gos.pop();
+
+					for (auto child : go->GetChilds())
+						gos.push(child);
+				}
+
+				goRes->TransformModified(false);
+				goRes->Update();
+				goRes->ResetBoundingBoxForAllChilds();
+
+				switch (goType)
+				{
+				case R_SCENE:
+					((RE_Scene*)resChange)->Save(goRes);
+					((RE_Scene*)resChange)->SaveMeta();
+					break;
+				case R_PREFAB:
+					((RE_Prefab*)resChange)->Save(goRes, false);
+					((RE_Prefab*)resChange)->SaveMeta();
+					break;
+				}
+				App->thumbnail->Change(resToChange);
+
+
+				DEL(goRes);
+
+				Event::ResumeEvents();
+			}
+		}
+
+		break;
+	}
+	}
+
+	if (reloadCurrentScene && res != currentScene) {
+		Event::Push(LOAD_SCENE, App->scene, Cvar(currentScene));
+	}
+	else if (reloadCurrentScene) {
+		App->scene->NewEmptyScene("New Scene");
+	}
+
+	resourcesCounter.erase(res);
+	resources.erase(res);
+
+	if (rType != R_SHADER) App->thumbnail->Delete(res);
+
+	return resource;
 }
 
 eastl::vector<ResourceContainer*> RE_ResourceManager::GetResourcesByType(Resource_Type type)

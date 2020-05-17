@@ -19,7 +19,6 @@
 #include "ImGui/imgui.h"
 #include "Glew/include/glew.h"
 
-
 RE_Material::RE_Material() { }
 
 RE_Material::RE_Material(const char* metapath) : ResourceContainer(metapath) { }
@@ -500,6 +499,29 @@ bool RE_Material::ExitsOnTexture(const char* texture)
 	if(!ret) ret = ExitsOnTexture(texture, &tUnknown);
 
 	return ret;
+}
+
+void RE_Material::DeleteShader()
+{
+	shaderMD5 = nullptr;
+	GetAndProcessUniformsFromShader();
+	Save();
+}
+
+void RE_Material::DeleteTexture(const char* texMD5)
+{
+	DeleteTexture(texMD5, &tDiffuse);
+	DeleteTexture(texMD5, &tSpecular);
+	DeleteTexture(texMD5, &tAmbient);
+	DeleteTexture(texMD5, &tEmissive);
+	DeleteTexture(texMD5, &tOpacity);
+	DeleteTexture(texMD5, &tShininess);
+	DeleteTexture(texMD5, &tHeight);
+	DeleteTexture(texMD5, &tNormals);
+	DeleteTexture(texMD5, &tReflection);
+	DeleteTexture(texMD5, &tUnknown);
+
+	SaveMeta();
 }
 
 void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const char*>* textures)
@@ -1574,4 +1596,18 @@ bool RE_Material::ExitsOnTexture(const char* texture, eastl::vector<const char*>
 			return true;
 	}
 	return false;
+}
+
+void RE_Material::DeleteTexture(const char* texMD5, eastl::vector<const char*>* textures)
+{
+	auto iter = textures->begin();
+	
+	while (iter != textures->end())
+	{
+		if (*iter == texMD5) {
+			textures->erase(iter);
+		}
+		else
+			iter++;
+	}
 }
