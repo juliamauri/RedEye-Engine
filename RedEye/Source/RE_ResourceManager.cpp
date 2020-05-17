@@ -6,6 +6,7 @@
 #include "RE_TextureImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_ThumbnailManager.h"
+#include "ModuleRenderer3D.h"
 
 #include "RE_Material.h"
 #include "RE_Shader.h"
@@ -621,10 +622,9 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 					((RE_Prefab*)resChange)->SaveMeta();
 					break;
 				}
-				App->thumbnail->Change(resToChange);
-
-
 				DEL(goRes);
+				//TODO Fix Thumbnail whil scene or prefab changes
+				App->renderer3d->ReRenderThumbnail(resToChange);
 
 				Event::ResumeEvents();
 			}

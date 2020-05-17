@@ -9,6 +9,7 @@
 #include "RE_InternalResources.h"
 #include "RE_ResourceManager.h"
 #include "RE_ShaderImporter.h"
+#include "RE_ThumbnailManager.h"
 
 #include "RE_Shader.h"
 #include "RE_SkyBox.h"
@@ -143,6 +144,12 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	//Swap buffers
 	SDL_GL_SwapWindow(App->window->GetWindow());
+
+	//TODO Fix Thumbnail whil scene or prefabchanges
+	//while (!thumbnailsToRander.empty()) {
+	//	App->thumbnail->Change(thumbnailsToRander.top());
+	//	thumbnailsToRander.pop();
+	//}
 
 	return ret;
 }
@@ -559,4 +566,9 @@ unsigned int ModuleRenderer3D::GetRenderedEditorSceneTexture() const
 unsigned int ModuleRenderer3D::GetRenderedGameSceneTexture() const
 {
 	return App->fbomanager->GetTextureID(sceneGameFBO, 0);
+}
+
+void ModuleRenderer3D::ReRenderThumbnail(const char* res)
+{
+	thumbnailsToRander.push(res);
 }

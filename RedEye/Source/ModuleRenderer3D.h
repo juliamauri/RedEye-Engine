@@ -4,6 +4,8 @@
 #include "RE_Math.h"
 #include "Module.h"
 
+#include <EASTL/stack.h>
+
 class RE_CompCamera;
 
 class ModuleRenderer3D : public Module 
@@ -50,7 +52,10 @@ public:
 	unsigned int GetRenderedEditorSceneTexture()const;
 	unsigned int GetRenderedGameSceneTexture()const;
 
+	void ReRenderThumbnail(const char* res);
+
 private:
+	eastl::stack<const char*> thumbnailsToRander;
 
 	// Context
 	void* mainContext;
