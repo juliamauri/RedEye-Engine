@@ -899,7 +899,7 @@ void AssetsWindow::SelectUndefined(eastl::string* toFill)
 
 void AssetsWindow::Draw(bool secondary)
 {
-	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar))
 	{
 		if (secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -909,37 +909,43 @@ void AssetsWindow::Draw(bool secondary)
 		static RE_FileSystem::RE_Directory* currentDir = App->fs->GetRootDirectory();
 		RE_FileSystem::RE_Directory* toChange = nullptr;
 
-		if (currentDir->parent == nullptr)
-		{
-			ImGui::Text("%s Folder", currentDir->name.c_str());
-			currentPath = currentDir->path.c_str();
-		}
-		else {
-			eastl::list<RE_FileSystem::RE_Directory*> folders = currentDir->FromParentToThis();
-			for (auto dir : folders) {
-				if (dir == currentDir)
-					ImGui::Text(currentDir->name.c_str());
-				else {
-					if (ImGui::Button(dir->name.c_str())) {
-						toChange = dir;
+		static float iconsSize = 100;
+
+		if (ImGui::BeginMenuBar()) {
+
+			if (currentDir->parent == nullptr)
+			{
+				ImGui::Text("%s Folder", currentDir->name.c_str());
+				currentPath = currentDir->path.c_str();
+			}
+			else {
+				eastl::list<RE_FileSystem::RE_Directory*> folders = currentDir->FromParentToThis();
+				for (auto dir : folders) {
+					if (dir == currentDir)
+						ImGui::Text(currentDir->name.c_str());
+					else {
+						if (ImGui::Button(dir->name.c_str())) {
+							toChange = dir;
+						}
+					}
+					if (dir != *folders.rbegin()) {
+						ImGui::SameLine();
 					}
 				}
-				if (dir != *folders.rbegin()) {
-					ImGui::SameLine();
+			}
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(100);
+			
+			ImGui::SliderFloat("Icons size", &iconsSize, 25, 256, "%.0f");
+			if (selectingUndefFile) {
+				ImGui::SameLine();
+				if (ImGui::Button("Cancel selection")) {
+					selectingUndefFile = nullptr;
 				}
 			}
+
+			ImGui::EndMenuBar();
 		}
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth(100);
-		static float iconsSize = 100;
-		ImGui::SliderFloat("Icons size", &iconsSize, 25, 256, "%.0f");
-		if (selectingUndefFile) {
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel selection")) {
-				selectingUndefFile = nullptr;
-			}
-		}
-		ImGui::Separator();
 
 		float width = ImGui::GetWindowWidth();
 		int itemsColum = width / iconsSize;
