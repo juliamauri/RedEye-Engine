@@ -103,6 +103,12 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	update_status ret = UPDATE_CONTINUE;
 
+	//If some thumnail needs uodates
+	while (!thumbnailsToRander.empty()) {
+		App->thumbnail->Change(thumbnailsToRander.top());
+		thumbnailsToRander.pop();
+	}
+
 	return ret;
 }
 
@@ -144,12 +150,6 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	//Swap buffers
 	SDL_GL_SwapWindow(App->window->GetWindow());
-
-	//TODO Fix Thumbnail whil scene or prefabchanges
-	//while (!thumbnailsToRander.empty()) {
-	//	App->thumbnail->Change(thumbnailsToRander.top());
-	//	thumbnailsToRander.pop();
-	//}
 
 	return ret;
 }

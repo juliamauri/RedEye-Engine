@@ -623,7 +623,6 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 					break;
 				}
 				DEL(goRes);
-				//TODO Fix Thumbnail whil scene or prefab changes
 				App->renderer3d->ReRenderThumbnail(resToChange);
 
 				Event::ResumeEvents();
