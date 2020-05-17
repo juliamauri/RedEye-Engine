@@ -32,7 +32,7 @@ void RE_Model::LoadInMemory()
 		LibrarySave();
 	}
 	else {
-		LOG_ERROR("Prefab %s not found on project", GetName());
+		LOG_ERROR("Model %s not found on project", GetName());
 	}
 }
 
@@ -236,12 +236,16 @@ void RE_Model::LibraryLoad()
 
 void RE_Model::LibrarySave()
 {
-	uint size = 0;
-	char* buffer = RE_ResouceAndGOImporter::BinarySerialize(loaded, &size);
+	if (loaded != nullptr){
+		uint size = 0;
+		char* buffer = RE_ResouceAndGOImporter::BinarySerialize(loaded, &size);
 
-	RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
-	toLibrarySave.Save(buffer, size);
-	DEL_A(buffer);
+		RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
+		toLibrarySave.Save(buffer, size);
+		DEL_A(buffer);
+	}
+	else
+		LOG_ERROR("Error to save Model at library because culdn't be loaded from: %s", GetAssetPath());
 }
 
 bool RE_Model::CheckResourcesIsOnAssets()
