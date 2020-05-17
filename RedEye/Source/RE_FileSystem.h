@@ -145,6 +145,12 @@ public:
 
 	RE_Directory* GetRootDirectory()const;
 
+	void DeleteUndefinedFile(const char* filePath);
+	void DeleteResourceFiles(ResourceContainer* resContainer);
+
+	RE_Directory* FindDirectory(const char* pathToFind);
+	RE_Path* FindPath(const char* pathToFind, RE_Directory* dir = nullptr);
+
 private:
 	void RecursiveCopy(const char* origin, const char* dest);
 

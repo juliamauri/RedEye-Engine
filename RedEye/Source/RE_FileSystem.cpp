@@ -249,6 +249,9 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 							}
 						}
 					}
+					if (res->GetType() == R_SHADER) {
+						toRemoveM.push_back(meta);
+					}
 				}
 				else
 					toRemoveM.push_back(meta);
@@ -554,6 +557,87 @@ void RE_FileSystem::HandleDropedFile(const char * file)
 RE_FileSystem::RE_Directory* RE_FileSystem::GetRootDirectory() const
 {
 	return rootAssetDirectory;
+}
+
+void RE_FileSystem::DeleteUndefinedFile(const char* filePath)
+{
+	RE_FileSystem::RE_Directory* dir = FindDirectory(filePath);
+
+	if (dir != nullptr) {
+		RE_FileSystem::RE_Path* file = FindPath(filePath, dir);
+
+		if (file != nullptr) {
+			auto iterPath = dir->tree.begin();
+			while (iterPath != dir->tree.end()) {
+				if (*iterPath == file) {
+					dir->tree.erase(iterPath);
+					break;
+				}
+				iterPath++;
+			}
+
+			RE_FileIO fileToDelete(filePath, GetZipPath());
+			fileToDelete.Delete();
+			DEL(file);
+		}
+		else
+			LOG_ERROR("Error deleting file. The file culdn't be located: %s", filePath);
+	}
+	else
+		LOG_ERROR("Error deleting file. The dir culdn't be located: %s", filePath);
+}
+
+void RE_FileSystem::DeleteResourceFiles(ResourceContainer* resContainer)
+{
+	if (resContainer->GetType() != R_SHADER) {
+		DeleteUndefinedFile(resContainer->GetAssetPath());
+	}
+	DeleteUndefinedFile(resContainer->GetMetaPath());
+
+	if (Exists(resContainer->GetLibraryPath()))
+	{
+		RE_FileIO fileToDelete(resContainer->GetLibraryPath(), GetZipPath());
+		fileToDelete.Delete();
+	}
+}
+
+RE_FileSystem::RE_Directory* RE_FileSystem::FindDirectory(const char* pathToFind)
+{
+	RE_FileSystem::RE_Directory* ret = nullptr;
+
+	eastl::string fullpath(pathToFind);
+	eastl::string directoryStr = fullpath.substr(0, fullpath.find_last_of('/') + 1);
+
+	for (auto dir : assetsDirectories) {
+		if (dir->path == directoryStr) {
+			ret = dir;
+			break;
+		}
+	}
+
+	return ret;
+}
+
+RE_FileSystem::RE_Path* RE_FileSystem::FindPath(const char* pathToFind, RE_Directory* dir)
+{
+	RE_FileSystem::RE_Path* ret = nullptr;
+
+	eastl::string fullpath(pathToFind);
+	eastl::string directoryStr = fullpath.substr(0, fullpath.find_last_of('/') + 1);
+
+	if (dir == nullptr) dir = FindDirectory(pathToFind);
+
+	if (dir != nullptr) {
+		for (auto file : dir->tree) {
+			if (file->path == fullpath)
+			{
+				ret = file;
+				break;
+			}
+		}
+	}
+
+	return ret;
 }
 
 void RE_FileSystem::RecursiveCopy(const char * origin, const char * dest)
