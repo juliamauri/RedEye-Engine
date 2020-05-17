@@ -733,7 +733,7 @@ void PopUpWindow::Draw(bool secondary)
 
 				case R_SCENE:
 					if(resource == App->scene->GetCurrentScene())
-						btnname += "Scene ( will be ReLoaded )| ";
+						btnname += "Scene (current scene)| ";
 					else
 						btnname += "Scene | ";
 					break;

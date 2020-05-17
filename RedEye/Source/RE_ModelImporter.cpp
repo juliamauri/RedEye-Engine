@@ -5,6 +5,7 @@
 #include "RE_ResourceManager.h"
 #include "RE_TextureImporter.h"
 #include "RE_ShaderImporter.h"
+#include "RE_ThumbnailManager.h"
 
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
@@ -119,10 +120,15 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 			math::float3 scale;
 			transform.Decompose(position, rotation, scale);
 
+			bool paused = Event::isPaused();
+			if (!paused) Event::PauseEvents();
+
 			go_haschildren->GetTransform()->SetRotation(rotation);
 			go_haschildren->GetTransform()->SetPosition(position);
 			go_haschildren->GetTransform()->SetScale(scale);
 			go_haschildren->GetTransform()->Update();
+
+			if (!paused) Event::ResumeEvents();
 
 			transform = math::float4x4::identity;
 		}
@@ -144,10 +150,15 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 				math::float3 scale;
 				transform.Decompose(position, rotation, scale);
 
+				bool paused = Event::isPaused();
+				if (!paused) Event::PauseEvents();
+
 				goMesh->GetTransform()->SetRotation(rotation);
 				goMesh->GetTransform()->SetPosition(position);
 				goMesh->GetTransform()->SetScale(scale);
 				goMesh->GetTransform()->Update();
+
+				if (!paused) Event::ResumeEvents();
 
 				transform = math::float4x4::identity;
 			}
@@ -420,8 +431,8 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 			((ResourceContainer*)newMaterial)->SetType(Resource_Type::R_MATERIAL);
 			newMaterial->Save();
 			materialMD5 = App->resources->Reference((ResourceContainer*)newMaterial);
+			App->thumbnail->Add(materialMD5);
 		}
-
 		aditionalData->materialsLoaded.insert(eastl::pair<aiMaterial*,const char*>(material, materialMD5));
 	}
 }
