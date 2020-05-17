@@ -669,10 +669,17 @@ void PopUpWindow::Draw(bool secondary)
 
 
 			bool clicked = false;
+			bool checkError = false;
 
 			if (ImGui::Button(btnText.c_str())) {
 				clicked = true;
+				checkError = true;
+				App->handlerrors->StartHandling();
 				//TODO Delete at resource and filesystem
+				ResourceContainer* resAlone = App->resources->DeleteResource(resourceToDelete, resourcesUsing);
+				//Delete files
+				App->fs->DeleteResourceFiles(resAlone);
+				DEL(resAlone);
 			}
 			if (ImGui::Button("Cancel")) {
 				clicked = true;
@@ -685,6 +692,12 @@ void PopUpWindow::Draw(bool secondary)
 				goPrefab = nullptr;
 				resourceToDelete = nullptr;
 				resourcesUsing.clear();
+				App->resources->PopSelected(true);
+
+				App->handlerrors->StopHandling();
+				if (checkError && App->handlerrors->AnyErrorHandled()) {
+					App->handlerrors->ActivatePopUp();
+				}
 			}
 
 			ImGui::Separator();
@@ -741,10 +754,39 @@ void PopUpWindow::Draw(bool secondary)
 			ImGui::Separator();
 
 			bool clicked = false;
-
+			bool checkError = false;
 			if (ImGui::Button(btnText.c_str())) {
 				clicked = true;
+				checkError = true;
+
+				App->handlerrors->StartHandling();
 				//TODO Delete file at used resource and filesystem
+				if (!resourcesUsing.empty()) {
+					eastl::stack<ResourceContainer*> shadersDeleted;
+					for (auto resource : resourcesUsing) {
+						if (App->resources->At(resource)->GetType() == R_SHADER)
+							shadersDeleted.push(App->resources->DeleteResource(resource, App->resources->WhereIsUsed(resource)));
+					}
+
+					//Delete shader files
+					while (shadersDeleted.empty()) {
+						ResourceContainer* resS = shadersDeleted.top();
+						App->fs->DeleteResourceFiles(resS);
+						shadersDeleted.pop();
+						DEL(resS);
+					}
+				}
+
+				if (!App->handlerrors->AnyErrorHandled()) {
+
+					//Delete undefined file
+					App->fs->DeleteUndefinedFile(nameStr.c_str());
+				}
+				else
+					LOG_ERROR("File culdn't erased because the shaders culdn't deleted.");
+
+
+
 			}
 			if (ImGui::Button("Cancel")) {
 				clicked = true;
@@ -755,6 +797,12 @@ void PopUpWindow::Draw(bool secondary)
 				state = PU_NONE;
 				App->editor->PopUpFocus(false);
 				resourcesUsing.clear();
+				App->resources->PopSelected(true);
+
+				App->handlerrors->StopHandling();
+				if (checkError && App->handlerrors->AnyErrorHandled()) {
+					App->handlerrors->ActivatePopUp();
+				}
 			}
 
 			ImGui::Separator();
