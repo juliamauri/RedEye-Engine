@@ -112,165 +112,160 @@ void ModuleScene::OnStop()
 
 void ModuleScene::RecieveEvent(const Event& e)
 {
-	if (e.type == LOAD_SCENE) {
-		LoadScene(e.data1.AsCharP());
-	}
-	else {
-		RE_GameObject* go = e.data1.AsGO();
-		if (go != nullptr)
-		{
-			bool belongs_to_scene = false;// = (go->root == root);
+	RE_GameObject* go = e.data1.AsGO();
+	if (go != nullptr)
+	{
+		bool belongs_to_scene = false;// = (go->root == root);
 
-			for (const RE_GameObject* parent = go;
-				parent != nullptr && !belongs_to_scene;
-				parent = parent->GetParent_c())
+		for (const RE_GameObject* parent = go;
+			parent != nullptr && !belongs_to_scene;
+			parent = parent->GetParent_c())
+		{
+			if (parent == root)
 			{
-				if (parent == root)
+				belongs_to_scene = true;
+				break;
+			}
+		}
+
+		switch (e.type)
+		{
+		case GO_CHANGED_TO_ACTIVE:
+		{
+			eastl::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
+
+			if (belongs_to_scene)
+			{
+				for (auto draw_go : all)
 				{
-					belongs_to_scene = true;
-					break;
+					draw_go->ResetGlobalBoundingBox();
+
+					if (draw_go->IsStatic())
+						static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+					else
+						dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
 				}
 			}
+			else
+				for (auto draw_go : all)
+					draw_go->ResetGlobalBoundingBox();
 
-			switch (e.type)
-			{
-			case GO_CHANGED_TO_ACTIVE:
+			break;
+		}
+		case GO_CHANGED_TO_INACTIVE:
+		{
+			if (belongs_to_scene)
 			{
 				eastl::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
 
-				if (belongs_to_scene)
+				for (auto draw_go : all)
 				{
-					for (auto draw_go : all)
-					{
-						draw_go->ResetGlobalBoundingBox();
-
-						if (draw_go->IsStatic())
-							static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
-						else
-							dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
-					}
+					if (draw_go->IsStatic())
+						static_tree.PopNode(goManager.WhatID(draw_go));
+					else
+						dynamic_tree.PopNode(goManager.WhatID(draw_go));
 				}
-				else
-					for (auto draw_go : all)
-						draw_go->ResetGlobalBoundingBox();
-
-				break;
 			}
-			case GO_CHANGED_TO_INACTIVE:
+			break;
+		}
+		case GO_CHANGED_TO_STATIC:
+		{
+			if (belongs_to_scene && go->IsActive())
 			{
-				if (belongs_to_scene)
-				{
-					eastl::vector<RE_GameObject*> all = go->GetActiveChildsWithDrawComponents();
+				int index = goManager.WhatID(go);
+				dynamic_tree.PopNode(index);
+				static_tree.PushNode(index, go->GetGlobalBoundingBox());
+			}
+			break;
+		}
+		case GO_CHANGED_TO_NON_STATIC:
+		{
+			if (belongs_to_scene && go->IsActive())
+			{
+				int index = goManager.WhatID(go);
+				static_tree.PopNode(index);
+				dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
+			}
+			break;
+		}
+		case GO_HAS_NEW_CHILD:
+		{
+			RE_GameObject* to_add = e.data2.AsGO();
 
-					for (auto draw_go : all)
-					{
-						if (draw_go->IsStatic())
-							static_tree.PopNode(goManager.WhatID(draw_go));
-						else
-							dynamic_tree.PopNode(goManager.WhatID(draw_go));
-					}
+			if (belongs_to_scene && go->IsActive() && to_add->IsActive())
+			{
+				eastl::vector<RE_GameObject*> all = to_add->GetActiveChildsWithDrawComponents();
+
+				for (auto draw_go : all)
+				{
+					draw_go->ResetGlobalBoundingBox();
+
+					if (draw_go->IsStatic())
+						static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+					else
+						dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
 				}
-				break;
 			}
-			case GO_CHANGED_TO_STATIC:
+
+			break;
+		}
+		case GO_REMOVE_CHILD:
+		{
+			RE_GameObject* to_remove = e.data2.AsGO();
+
+			if (belongs_to_scene && to_remove->IsActive())
 			{
-				if (belongs_to_scene && go->IsActive())
+				eastl::vector<RE_GameObject*> all = to_remove->GetActiveChildsWithDrawComponents();
+
+				for (auto draw_go : all)
 				{
-					int index = goManager.WhatID(go);
-					dynamic_tree.PopNode(index);
+					if (draw_go->IsStatic())
+						static_tree.PopNode(goManager.WhatID(draw_go));
+					else
+						dynamic_tree.PopNode(goManager.WhatID(draw_go));
+				}
+			}
+
+			// TODO: Delete to_remove & childs from GO Pool
+
+			break;
+		}
+		case TRANSFORM_MODIFIED:
+		{
+			if (go->IsActive())
+				for (auto child : go->GetChilds())
+					child->TransformModified();
+
+			if (belongs_to_scene && go->HasDrawComponents())
+			{
+				int index = goManager.WhatID(go);
+				if (go->IsStatic())
+				{
+					static_tree.PopNode(index);
 					static_tree.PushNode(index, go->GetGlobalBoundingBox());
 				}
-				break;
-			}
-			case GO_CHANGED_TO_NON_STATIC:
-			{
-				if (belongs_to_scene && go->IsActive())
+				else
 				{
-					int index = goManager.WhatID(go);
-					static_tree.PopNode(index);
+					dynamic_tree.PopNode(index);
 					dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
 				}
-				break;
 			}
-			case GO_HAS_NEW_CHILD:
-			{
-				RE_GameObject* to_add = e.data2.AsGO();
-
-				if (belongs_to_scene && go->IsActive() && to_add->IsActive())
-				{
-					eastl::vector<RE_GameObject*> all = to_add->GetActiveChildsWithDrawComponents();
-
-					for (auto draw_go : all)
-					{
-						draw_go->ResetGlobalBoundingBox();
-
-						if (draw_go->IsStatic())
-							static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
-						else
-							dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
-					}
-				}
-
-				break;
-			}
-			case GO_REMOVE_CHILD:
-			{
-				RE_GameObject* to_remove = e.data2.AsGO();
-
-				if (belongs_to_scene && to_remove->IsActive())
-				{
-					eastl::vector<RE_GameObject*> all = to_remove->GetActiveChildsWithDrawComponents();
-
-					for (auto draw_go : all)
-					{
-						if (draw_go->IsStatic())
-							static_tree.PopNode(goManager.WhatID(draw_go));
-						else
-							dynamic_tree.PopNode(goManager.WhatID(draw_go));
-					}
-				}
-
-				// TODO: Delete to_remove & childs from GO Pool
-
-				break;
-			}
-			case TRANSFORM_MODIFIED:
-			{
-				if (go->IsActive())
-					for (auto child : go->GetChilds())
-						child->TransformModified();
-
-				if (belongs_to_scene && go->HasDrawComponents())
-				{
-					int index = goManager.WhatID(go);
-					if (go->IsStatic())
-					{
-						static_tree.PopNode(index);
-						static_tree.PushNode(index, go->GetGlobalBoundingBox());
-					}
-					else
-					{
-						dynamic_tree.PopNode(index);
-						dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
-					}
-				}
-				haschanges = true;
-				break;
-			}
-			case PLANE_CHANGE_TO_MESH:
-			{
-				RE_CompPlane* plane = (RE_CompPlane*)go->GetComponent(C_PLANE);
-				const char* planeMD5 = plane->TransformAsMeshResource();
-				go->RemoveComponent(plane);
-				RE_CompMesh* newMesh = new RE_CompMesh(go, planeMD5);
-				newMesh->UseResources();
-				go->AddCompMesh(newMesh);
-				go->ResetBoundingBoxes();
-				go->TransformModified();
-				haschanges = true;
-				break;
-			}
-			}
+			haschanges = true;
+			break;
+		}
+		case PLANE_CHANGE_TO_MESH:
+		{
+			RE_CompPlane* plane = (RE_CompPlane*)go->GetComponent(C_PLANE);
+			const char* planeMD5 = plane->TransformAsMeshResource();
+			go->RemoveComponent(plane);
+			RE_CompMesh* newMesh = new RE_CompMesh(go, planeMD5);
+			newMesh->UseResources();
+			go->AddCompMesh(newMesh);
+			go->ResetBoundingBoxes();
+			go->TransformModified();
+			haschanges = true;
+			break;
+		}
 		}
 	}
 }
@@ -500,7 +495,7 @@ void ModuleScene::NewEmptyScene(const char* name)
 	haschanges = false;
 }
 
-void ModuleScene::LoadScene(const char* sceneMD5)
+void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 {
 	Event::PauseEvents();
 
@@ -516,7 +511,7 @@ void ModuleScene::LoadScene(const char* sceneMD5)
 	goManager.Clear();
 
 	LOG("Loading scene from own format:");
-	App->handlerrors->StartHandling();
+	if(!ignorehandle) App->handlerrors->StartHandling();
 
 	Timer timer;
 
@@ -535,10 +530,12 @@ void ModuleScene::LoadScene(const char* sceneMD5)
 
 	LOG("Time loading scene: %u ms", timer.Read());
 
-	// Error Handling
-	App->handlerrors->StopHandling();
-	if (App->handlerrors->AnyErrorHandled()) {
-		App->handlerrors->ActivatePopUp();
+	if (!ignorehandle) {
+		// Error Handling
+		App->handlerrors->StopHandling();
+		if (App->handlerrors->AnyErrorHandled()) {
+			App->handlerrors->ActivatePopUp();
+		}
 	}
 
 	Event::ResumeEvents();

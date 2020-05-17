@@ -67,7 +67,7 @@ public:
 
 	void NewEmptyScene(const char* name = "New Scene");
 
-	void LoadScene(const char* sceneMD5);
+	void LoadScene(const char* sceneMD5, bool ignorehandle = false);
 	void SaveScene(const char* newName = nullptr);
 	const char* GetCurrentScene()const;
 	void ClearScene();

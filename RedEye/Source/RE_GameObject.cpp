@@ -22,6 +22,7 @@
 
 #include <EASTL/unordered_set.h>
 #include <EASTL/queue.h>
+#include <EASTL/stack.h>
 #include <EASTL/internal/char_traits.h>
 
 RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, bool start_active, bool isStatic)
@@ -180,6 +181,30 @@ eastl::stack<RE_Component*> RE_GameObject::GetDrawableComponentsItselfOnly() con
 		ComponentType cT = component->GetType();
 		if (cT == ComponentType::C_MESH || (cT > ComponentType::C_PRIMIVE_MIN && cT < ComponentType::C_PRIMIVE_MAX)) ret.push(component);
 	}
+	return ret;
+}
+
+eastl::stack<RE_Component*> RE_GameObject::GetAllComponentWithChilds(unsigned short type) const
+{
+	eastl::stack<RE_Component*> ret;
+
+	eastl::stack<const RE_GameObject*> gos;
+	gos.push(this);
+	while (!gos.empty())
+	{
+		const RE_GameObject* go = gos.top();
+		gos.pop();
+
+			for (auto component : go->components)
+			{
+				ComponentType cT = component->GetType();
+				if (cT == type) ret.push(component);
+			}
+
+		for (auto child : go->GetChilds())
+			gos.push(child);
+	}
+
 	return ret;
 }
 

@@ -35,6 +35,7 @@ public:
 
 	eastl::stack<RE_Component*> GetDrawableComponentsWithChilds(RE_GameObject* ignoreStencil = nullptr)const;
 	eastl::stack<RE_Component*> GetDrawableComponentsItselfOnly()const;
+	eastl::stack<RE_Component*> GetAllComponentWithChilds(unsigned short type)const;
 
 	eastl::vector<RE_GameObject*> GetAllGO();
 	eastl::vector<RE_GameObject*> GetActiveChildsWithDrawComponents();

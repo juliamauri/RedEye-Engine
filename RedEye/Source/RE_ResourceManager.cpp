@@ -220,25 +220,15 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 {
 	eastl::vector<const char*> ret;
 	eastl::vector<ResourceContainer*> temp_resources;
+	eastl::vector<ResourceContainer*> temp;
 
 	ResourceContainer* resource = resources.at(res);
+	Resource_Type rType = resource->GetType();
 
-	switch (resource->GetType())
+	switch (rType)
 	{
 	case R_SHADER:
 		//search on materials
-	{
-		temp_resources = GetResourcesByType(R_MATERIAL);
-
-		RE_Material* mat = nullptr;
-		for (auto resource : temp_resources) {
-			mat = (RE_Material*)resource;
-			if (mat->ExitsOnShader(res))
-				ret.push_back(resource->GetMD5());
-		}
-
-		break;
-	}
 	case R_TEXTURE:
 		//search on materials. no scenes will be afected
 	{
@@ -247,71 +237,66 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 		RE_Material* mat = nullptr;
 		for (auto resource : temp_resources) {
 			mat = (RE_Material*)resource;
-			if (mat->ExitsOnTexture(res))
-				ret.push_back(resource->GetMD5());
+			if (rType == R_SHADER) {
+				if (mat->ExitsOnShader(res))
+					ret.push_back(resource->GetMD5());
+			}
+			else {
+				if (mat->ExitsOnTexture(res))
+					ret.push_back(resource->GetMD5());
+			}
 		}
 
 		break;
 	}
-
 	case R_SKYBOX:
 		//search on cameras from scenes or prefabs
+	case R_MATERIAL:
+		//search on scenes, prefabs and models(models advise you need to reimport)
 	{
 		temp_resources = GetResourcesByType(R_SCENE);
-		RE_Scene* scene = nullptr;
+		temp = GetResourcesByType(R_PREFAB);
+		temp_resources.insert(temp_resources.end(), temp.begin(), temp.end());
+		if (rType == R_MATERIAL) {
+			temp = GetResourcesByType(R_MODEL);
+			temp_resources.insert(temp_resources.end(), temp.begin(), temp.end());
+		}
+
+		Event::PauseEvents();
 		for (auto resource : temp_resources) {
-			scene = (RE_Scene*)resource;
 
-			Event::PauseEvents();
-			RE_GameObject* GOScene = scene->GetRoot();
-
-			eastl::stack<const RE_GameObject*> gos;
-			gos.push(GOScene);
-			while (!gos.empty())
+			RE_GameObject* goRes = nullptr;
+			
+			switch (resource->GetType())
 			{
-				const RE_GameObject* go = gos.top();
-				RE_CompCamera* cam = go->GetCamera();
+			case R_SCENE:
+				goRes = ((RE_Scene*)resource)->GetRoot();
+				break;
+			case R_PREFAB:
+				goRes = ((RE_Prefab*)resource)->GetRoot();
+				break;
+			case R_MODEL:
+				goRes = ((RE_Model*)resource)->GetRoot();
+				break;
+			}
+			eastl::stack<RE_Component*> comps = goRes->GetAllComponentWithChilds((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 
-				bool skip = false;
+			
+			bool skip = false;
 
-				if (cam != nullptr) {
-					if (cam->isUsingSkybox()) {
-						if (cam->GetSkybox() == res)
-						{
+			while (!comps.empty() && !skip)
+			{
+				if (rType == R_MATERIAL) {
+					RE_CompMesh* mesh = (RE_CompMesh*)comps.top();
+					if (mesh != nullptr) {
+						if (mesh->GetMaterial() == res) {
 							ret.push_back(resource->GetMD5());
 							skip = true;
 						}
 					}
 				}
-
-				gos.pop();
-
-				if (!skip) {
-					for (auto child : go->GetChilds())
-						gos.push(child);
-				}
 				else {
-					gos = eastl::stack<const RE_GameObject*>();
-				}
-			}
-
-			temp_resources = GetResourcesByType(R_PREFAB);
-			RE_Prefab* prefab = nullptr;
-			for (auto resource : temp_resources) {
-				prefab = (RE_Prefab*)resource;
-
-				Event::PauseEvents();
-				RE_GameObject* GOPrefab = prefab->GetRoot();
-
-				eastl::stack<const RE_GameObject*> gos;
-				gos.push(GOPrefab);
-				while (!gos.empty())
-				{
-					const RE_GameObject* go = gos.top();
-					RE_CompCamera* cam = go->GetCamera();
-
-					bool skip = false;
-
+					RE_CompCamera* cam = (RE_CompCamera*)comps.top();
 					if (cam != nullptr) {
 						if (cam->isUsingSkybox()) {
 							if (cam->GetSkybox() == res)
@@ -321,138 +306,15 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 							}
 						}
 					}
-
-					gos.pop();
-
-					if (!skip) {
-						for (auto child : go->GetChilds())
-							gos.push(child);
-					}
-					else {
-						gos = eastl::stack<const RE_GameObject*>();
-					}
 				}
+				comps.pop();
 			}
 
-			Event::ResumeEvents();
 		}
+		Event::ResumeEvents();
 
 		break;
 	}
-	case R_MATERIAL:
-		//search on scenes, prefabs and models(models advise you need to reimport)
-		temp_resources = GetResourcesByType(R_SCENE);
-		RE_Scene* scene = nullptr;
-		for (auto resource : temp_resources) {
-			scene = (RE_Scene*)resource;
-
-			Event::PauseEvents();
-			RE_GameObject* GOScene = scene->GetRoot();
-
-			eastl::stack<const RE_GameObject*> gos;
-			gos.push(GOScene);
-			while (!gos.empty())
-			{
-				const RE_GameObject* go = gos.top();
-				RE_CompMesh* mesh = go->GetMesh();
-
-				bool skip = false;
-
-				if (mesh != nullptr) {
-					if (mesh->GetMaterial() == res) {
-						ret.push_back(resource->GetMD5());
-						skip = true;
-					}
-				}
-
-				gos.pop();
-
-				if (!skip) {
-					for (auto child : go->GetChilds())
-						gos.push(child);
-				}
-				else {
-					gos = eastl::stack<const RE_GameObject*>();
-				}
-			}
-
-			temp_resources = GetResourcesByType(R_PREFAB);
-			RE_Prefab* prefab = nullptr;
-			for (auto resource : temp_resources) {
-				prefab = (RE_Prefab*)resource;
-
-				Event::PauseEvents();
-				RE_GameObject* GOPrefab = prefab->GetRoot();
-
-				eastl::stack<const RE_GameObject*> gos;
-				gos.push(GOPrefab);
-				while (!gos.empty())
-				{
-					const RE_GameObject* go = gos.top();
-					RE_CompMesh* mesh = go->GetMesh();
-
-					bool skip = false;
-
-					if (mesh != nullptr) {
-						if (mesh->GetMaterial() == res) {
-							ret.push_back(resource->GetMD5());
-							skip = true;
-						}
-					}
-
-					gos.pop();
-
-					if (!skip) {
-						for (auto child : go->GetChilds())
-							gos.push(child);
-					}
-					else {
-						gos = eastl::stack<const RE_GameObject*>();
-					}
-				}
-			}
-
-			temp_resources = GetResourcesByType(R_MODEL);
-			RE_Model* model = nullptr;
-			for (auto resource : temp_resources) {
-				model = (RE_Model*)resource;
-
-				Event::PauseEvents();
-				RE_GameObject* GOModel = model->GetRoot();
-
-				eastl::stack<const RE_GameObject*> gos;
-				gos.push(GOModel);
-				while (!gos.empty())
-				{
-					const RE_GameObject* go = gos.top();
-					RE_CompMesh* mesh = go->GetMesh();
-
-					bool skip = false;
-
-					if (mesh != nullptr) {
-						if (mesh->GetMaterial() == res) {
-							ret.push_back(resource->GetMD5());
-							skip = true;
-						}
-					}
-
-					gos.pop();
-
-					if (!skip) {
-						for (auto child : go->GetChilds())
-							gos.push(child);
-					}
-					else {
-						gos = eastl::stack<const RE_GameObject*>();
-					}
-				}
-			}
-
-			Event::ResumeEvents();
-		}
-
-		break;
-
 	}
 
 	return ret;
@@ -466,28 +328,12 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	const char* currentScene = nullptr;
 	bool reloadCurrentScene = (((currentScene = App->scene->GetCurrentScene()) == res && rType == R_SCENE) || (TotalReferenceCount(res) > 0 && rType != R_TEXTURE));
 
-	if (reloadCurrentScene) {
-		App->scene->ClearScene();
-	}
-
 	if (TotalReferenceCount(res) > 0) resource->UnloadMemory();
 
 	switch (rType)
 	{
 	case R_SHADER:
 		//search on materials.
-	{
-		RE_Material* resChange = nullptr;
-		for (auto resToChange : resourcesWillChange) {
-			resChange = (RE_Material*)App->resources->At(resToChange);
-
-			resChange->LoadInMemory();
-			resChange->DeleteShader();
-			resChange->UnloadMemory();
-		}
-		break;
-	}
-
 	case R_TEXTURE:
 		//search on materials. No will afect on scene because the textures are saved on meta
 	{
@@ -496,78 +342,17 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 			resChange = (RE_Material*)App->resources->At(resToChange);
 
 			resChange->LoadInMemory();
-			resChange->DeleteTexture(res);
+			if(rType == R_SHADER)
+				resChange->DeleteShader();
+			else
+				resChange->DeleteTexture(res);
 			resChange->UnloadMemory();
+			App->renderer3d->ReRenderThumbnail(resToChange);
 		}
 		break;
 	}
 	case R_SKYBOX:
 		//search on cameras from scenes or prefabs
-
-	{
-		for (auto resToChange : resourcesWillChange) {
-			ResourceContainer* resChange = App->resources->At(resToChange);
-			Resource_Type goType = resChange->GetType();
-			Event::PauseEvents();
-
-			RE_GameObject* goRes = nullptr;
-			switch (goType)
-			{
-			case R_SCENE:
-				goRes = ((RE_Scene*)resChange)->GetRoot();
-				break;
-			case R_PREFAB:
-				goRes = ((RE_Prefab*)resChange)->GetRoot();
-				break;
-			}
-
-
-			eastl::stack<const RE_GameObject*> gos;
-			gos.push(goRes);
-			while (!gos.empty())
-			{
-				const RE_GameObject* go = gos.top();
-				RE_CompCamera* cam = go->GetCamera();
-
-				if (cam != nullptr) {
-					if (cam->isUsingSkybox()) {
-						if (cam->GetSkybox() == res)
-						{
-							cam->DeleteSkybox();
-						}
-					}
-				}
-				gos.pop();
-
-				for (auto child : go->GetChilds())
-					gos.push(child);
-			}
-
-			goRes->TransformModified(false);
-			goRes->Update();
-			goRes->ResetBoundingBoxForAllChilds();
-
-			switch (goType)
-			{
-			case R_SCENE:
-				((RE_Scene*)resChange)->Save(goRes);
-				((RE_Scene*)resChange)->SaveMeta();
-				break;
-			case R_PREFAB:
-				((RE_Prefab*)resChange)->Save(goRes, false);
-				((RE_Prefab*)resChange)->SaveMeta();
-				break;
-			}
-			App->thumbnail->Change(resToChange);
-
-			DEL(goRes);
-
-			Event::ResumeEvents();
-		}
-
-		break;
-	}
-
 	case R_MATERIAL:
 		//search on scenes, prefabs and models(models advise you need to reimport)
 	{
@@ -579,38 +364,57 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 				Event::PauseEvents();
 
 				RE_GameObject* goRes = nullptr;
-				switch (goType)
+				if (currentScene == resToChange)
 				{
-				case R_SCENE:
-					goRes = ((RE_Scene*)resChange)->GetRoot();
-					break;
-				case R_PREFAB:
-					goRes = ((RE_Prefab*)resChange)->GetRoot();
-					break;
+					goRes = App->scene->GetRoot();
+				}
+				else {
+					switch (goType)
+					{
+					case R_SCENE:
+						goRes = ((RE_Scene*)resChange)->GetRoot();
+						break;
+					case R_PREFAB:
+						goRes = ((RE_Prefab*)resChange)->GetRoot();
+						break;
+					}
 				}
 
-				eastl::stack<const RE_GameObject*> gos;
-				gos.push(goRes);
-				while (!gos.empty())
+				eastl::stack<RE_Component*> comps = goRes->GetAllComponentWithChilds((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+				while (!comps.empty())
 				{
-					const RE_GameObject* go = gos.top();
-					RE_CompMesh* mesh = go->GetMesh();
+					RE_Component* go = comps.top();
 
-					if (mesh != nullptr) {
-						if (mesh->GetMaterial() == res) {
-							mesh->SetMaterial(nullptr);
+					if (rType == R_MATERIAL) {
+						RE_CompMesh* mesh = (RE_CompMesh*)go;
+						if (mesh != nullptr) {
+							if (mesh->GetMaterial() == res) {
+								mesh->SetMaterial(nullptr);
+							}
 						}
 					}
-					gos.pop();
+					else {
+						RE_CompCamera* cam = (RE_CompCamera*)go;
 
-					for (auto child : go->GetChilds())
-						gos.push(child);
+						if (cam != nullptr) {
+							if (cam->isUsingSkybox()) {
+								if (cam->GetSkybox() == res)
+								{
+									cam->DeleteSkybox();
+								}
+							}
+						}
+
+					}
+
+					comps.pop();
 				}
 
-				goRes->TransformModified(false);
-				goRes->Update();
-				goRes->ResetBoundingBoxForAllChilds();
-
+				if (currentScene != resToChange) {
+					goRes->TransformModified(false);
+					goRes->Update();
+					goRes->ResetBoundingBoxForAllChilds();
+				}
 				switch (goType)
 				{
 				case R_SCENE:
@@ -622,8 +426,8 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 					((RE_Prefab*)resChange)->SaveMeta();
 					break;
 				}
-				DEL(goRes);
 				App->renderer3d->ReRenderThumbnail(resToChange);
+				if (currentScene != resToChange) DEL(goRes);
 
 				Event::ResumeEvents();
 			}
@@ -633,10 +437,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	}
 	}
 
-	if (reloadCurrentScene && res != currentScene) {
-		Event::Push(LOAD_SCENE, App->scene, Cvar(currentScene));
-	}
-	else if (reloadCurrentScene) {
+	if (reloadCurrentScene && res == currentScene) {
 		App->scene->NewEmptyScene("New Scene");
 	}
 
