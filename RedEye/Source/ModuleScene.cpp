@@ -105,6 +105,7 @@ void ModuleScene::OnStop()
 	DEL(root);
 	root = new RE_GameObject(*savedState);
 	App->editor->SetSelected(nullptr);
+	goManager.Clear();
 
 	SetupScene();
 	Event::ResumeEvents();
