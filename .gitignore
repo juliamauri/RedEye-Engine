@@ -7,6 +7,7 @@
 !RedEye/DebugData/*
 !RedEye/ReleaseData/*
 !RedEye/Source/libzip/*
+!RedEye/Source/EA/eathread/x86/*
 
 # User-specific files
 *.suo
