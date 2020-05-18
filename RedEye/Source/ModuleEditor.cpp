@@ -58,6 +58,7 @@ ModuleEditor::~ModuleEditor()
 {
 	windows.clear();
 	tools.clear();
+	editorCommands.Clear();
 }
 
 // Load assets
@@ -183,6 +184,18 @@ update_status ModuleEditor::Update()
 					else
 						Event::Push(REQUEST_QUIT, App);
 				}
+
+				ImGui::EndMenu();
+			}
+
+			//Edit
+			if (ImGui::BeginMenu("Edit")) {
+
+				if (ImGui::MenuItem("Undo", "LCTRL + Z", false, editorCommands.canUndo()))
+					editorCommands.undo();
+
+				if (ImGui::MenuItem("Redo", "LCTRL + Y", false, editorCommands.canRedo()))
+					editorCommands.redo();
 
 				ImGui::EndMenu();
 			}
@@ -343,6 +356,15 @@ update_status ModuleEditor::Update()
 
 	// CAMERA CONTROLS
 	UpdateCamera();
+
+	if (App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_STATE::KEY_REPEAT) {
+
+		if (App->input->GetKey(SDL_SCANCODE_Z) == KEY_STATE::KEY_DOWN)
+			editorCommands.undo();
+
+		if (App->input->GetKey(SDL_SCANCODE_Y) == KEY_STATE::KEY_DOWN)
+			editorCommands.redo();
+	}
 
 	sceneEditorWindow->DrawWindow();
 	sceneGameWindow->DrawWindow();
@@ -741,6 +763,16 @@ void ModuleEditor::CreatePrefab(RE_GameObject* go, const char* name, bool identi
 	Event::ResumeEvents();
 	newPrefab->SaveMeta();
 	App->thumbnail->Add(App->resources->Reference(newPrefab));
+}
+
+void ModuleEditor::PushCommand(RE_Command* cmd)
+{
+	editorCommands.PushCommand(cmd);
+}
+
+void ModuleEditor::ClearCommands()
+{
+	editorCommands.Clear();
 }
 
 void ModuleEditor::UpdateCamera()

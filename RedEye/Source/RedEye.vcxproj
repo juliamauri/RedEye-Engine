@@ -59,6 +59,8 @@
     <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp" />
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="ResourceEditorsWindows.cpp" />
+    <ClCompile Include="RE_Command.cpp" />
+    <ClCompile Include="RE_CommandManager.cpp" />
     <ClCompile Include="RE_FBOManager.cpp" />
     <ClCompile Include="RE_FileSystem.cpp" />
     <ClCompile Include="Event.cpp" />
@@ -318,6 +320,8 @@
     <ClInclude Include="ImGuiColorTextEdit\TextEditor.h" />
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="PoolMapped.h" />
+    <ClInclude Include="RE_Command.h" />
+    <ClInclude Include="RE_CommandManager.h" />
     <ClInclude Include="RE_DefaultShaders.h" />
     <ClInclude Include="RE_FBOManager.h" />
     <ClInclude Include="RE_FileSystem.h" />

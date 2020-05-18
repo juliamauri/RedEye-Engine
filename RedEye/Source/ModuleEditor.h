@@ -2,6 +2,9 @@
 #define __MODULEEDITOR__
 
 #include "Module.h"
+
+#include "RE_CommandManager.h"
+
 #include "ImGui\imgui.h"
 #include <EASTL/list.h>
 
@@ -78,6 +81,9 @@ public:
 
 	void CreatePrefab(RE_GameObject* go, const char* name, bool identityRoot);
 
+	void PushCommand(RE_Command* cmd);
+	void ClearCommands();
+
 private:
 	void UpdateCamera();
 
@@ -92,6 +98,8 @@ private:
 	bool popUpFocus = false;
 
 	eastl::list<EditorWindow*> windows, tools;
+
+	RE_CommandManager editorCommands;
 
 	// Windows
 	ConsoleWindow* console = nullptr;

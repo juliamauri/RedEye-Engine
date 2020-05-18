@@ -274,6 +274,12 @@
     <ClCompile Include="EA\eathread\version.cpp">
       <Filter>3rd Party\EA\thread</Filter>
     </ClCompile>
+    <ClCompile Include="RE_Command.cpp">
+      <Filter>Modules\Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CommandManager.cpp">
+      <Filter>Modules\Editor\Commands</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -1203,6 +1209,12 @@
     <ClInclude Include="EA\eathread\x86-64\eathread_sync_x86-64.h">
       <Filter>3rd Party\EA\thread\x86-64</Filter>
     </ClInclude>
+    <ClInclude Include="RE_Command.h">
+      <Filter>Modules\Editor\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CommandManager.h">
+      <Filter>Modules\Editor\Commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -1339,6 +1351,9 @@
     </Filter>
     <Filter Include="3rd Party\EA\thread\x86-64">
       <UniqueIdentifier>{c86c5439-a0e1-48ce-a530-9f7797fd16f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Editor\Commands">
+      <UniqueIdentifier>{619773c4-4576-417f-a33f-3d381f2a958a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

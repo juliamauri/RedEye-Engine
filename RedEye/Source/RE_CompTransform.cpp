@@ -1,5 +1,10 @@
 #include "RE_CompTransform.h"
 
+#include "Application.h"
+#include "ModuleInput.h"
+#include "ModuleEditor.h"
+#include "RE_Command.h"
+
 #include "RE_GameObject.h"
 #include "ImGui\imgui.h"
 #include "RE_Math.h"
@@ -140,20 +145,89 @@ void RE_CompTransform::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 	{
+		static bool watchingChange = false;
+		static bool frameWatched = false;
+		static math::vec before = math::vec::zero;
+		static math::vec last = math::vec::zero;
+
+		static bool pFrom = false;
+		static bool rFrom = false;
+		static bool sFrom = false;
+
 		// Position -----------------------------------------------------
 		float p[3] = { pos.x, pos.y, pos.z };
-		if (ImGui::DragFloat3("Position", p, 0.1f, -10000.f, 10000.f, "%.2f"))
+		if (ImGui::DragFloat3("Position", p, 0.1f, -10000.f, 10000.f, "%.2f")) {
+			
+			if (!watchingChange) {
+				watchingChange = true;
+				before = pos;
+				pFrom = true;
+			}
+
 			SetPosition({ p[0], p[1], p[2] });
+
+			if (watchingChange) {
+				frameWatched = true;
+				last = pos;
+			}
+
+		}
 
 		// Rotation -----------------------------------------------------
 		float r[3] = { math::RadToDeg(rot_eul.x), math::RadToDeg(rot_eul.y), math::RadToDeg(rot_eul.z) };
-		if (ImGui::DragFloat3("Rotation", r, 1.f, -360.f, 360.f, "%.2f"))
+		if (ImGui::DragFloat3("Rotation", r, 1.f, -360.f, 360.f, "%.2f")) {
+
+			if (!watchingChange) {
+				watchingChange = true;
+				before = rot_eul;
+				rFrom = true;
+			}
+
 			SetRotation({ math::DegToRad(r[0]), math::DegToRad(r[1]), math::DegToRad(r[2]) });
+
+			if (watchingChange) {
+				frameWatched = true;
+				last = rot_eul;
+			}
+		}
 
 		// Scale -----------------------------------------------------
 		float s[3] = { scale.scale.x, scale.scale.y, scale.scale.z };
-		if (ImGui::DragFloat3("Scale", s, 0.1f, -10000.f, 10000.f, "%.2f"))
+		if (ImGui::DragFloat3("Scale", s, 0.1f, -10000.f, 10000.f, "%.2f")) {
+
+			if (!watchingChange) {
+				watchingChange = true;
+				before = scale.scale;
+				sFrom = true;
+			}
+
 			SetScale({ s[0], s[1], s[2] });
+
+			if (watchingChange) {
+				frameWatched = true;
+				last = scale.scale;
+			}
+		}
+
+		if (watchingChange && (App->input->GetMouse().GetButton(1) == KEY_STATE::KEY_UP || !frameWatched)) {
+
+			if (pFrom) {
+				App->editor->PushCommand(new RE_CMDTransformPosition(go, before, last));
+			}
+			else if (rFrom) {
+				App->editor->PushCommand(new RE_CMDTransformRotation(go, before, last));
+			}
+			else if (sFrom) {
+				App->editor->PushCommand(new RE_CMDTransformScale(go, before, last));
+			}
+			
+			watchingChange = false;
+			before = math::vec::zero;
+			last = math::vec::zero;
+			pFrom = false;
+			rFrom = false;
+			sFrom = false;
+		}
 	}
 }
 
