@@ -466,6 +466,8 @@ void ModuleScene::NewEmptyScene(const char* name)
 {
 	Event::PauseEvents();
 
+	App->editor->ClearCommands();
+
 	if (unsavedScene)  //TODO Needs popUp for alert to save or not.
 	{
 		DEL(unsavedScene);
@@ -499,6 +501,8 @@ void ModuleScene::NewEmptyScene(const char* name)
 void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 {
 	Event::PauseEvents();
+
+	App->editor->ClearCommands();
 
 	if (unsavedScene) {
 		DEL(unsavedScene);
