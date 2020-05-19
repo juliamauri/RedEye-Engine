@@ -252,13 +252,27 @@ public:
 class RE_CompCylinder : public RE_CompPrimitive, RE_CompAxis
 {
 public:
-	RE_CompCylinder(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
+	RE_CompCylinder(RE_GameObject* game_obj, unsigned int shader, int slice, int stacks);
+	RE_CompCylinder(const RE_CompCylinder& cmpCylinder, RE_GameObject* go = nullptr);
 	~RE_CompCylinder();
 	void Draw() override;
-	void DrawProperties() override {}
-	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
+	void DrawProperties() override;
+	unsigned int GetBinarySize()const override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
+
+	unsigned int GetTriangleCount()const override { return triangle_count; }
+
+private:
+	void GenerateNewCylinder(int slice, int stacks);
+
+private:
+	bool show_checkers = false;
+	int triangle_count;
+	int slice, stacks;
+	bool canChange = true;
+public:
+	int tmpSl, tmpSt;
 };
 
 
@@ -266,16 +280,30 @@ public:
 ******	Capsule
 **************************************************/
 
-class RE_CompCapsule : public RE_CompPrimitive, RE_CompAxis
+class RE_CompHemiSphere : public RE_CompPrimitive, RE_CompAxis
 {
 public:
-	RE_CompCapsule(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
-	~RE_CompCapsule();
+	RE_CompHemiSphere(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks);
+	RE_CompHemiSphere(const RE_CompHemiSphere& cmpHemiSphere, RE_GameObject* go = nullptr);
+	~RE_CompHemiSphere();
 	void Draw() override;
-	void DrawProperties() override {}
-	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
+	void DrawProperties() override;
+	unsigned int GetBinarySize()const override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
+
+	unsigned int GetTriangleCount()const override { return triangle_count; }
+
+private:
+	void GenerateNewHemiSphere(int slice, int stacks);
+
+private:
+	bool show_checkers = false;
+	int triangle_count;
+	int slice, stacks;
+	bool canChange = true;
+public:
+	int tmpSl, tmpSt;
 };
 
 #endif // !__RE_COMPPRIMITIVE_H__

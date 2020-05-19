@@ -30,7 +30,7 @@ enum ComponentType : ushortint
 	C_FUSTRUM,
 	C_SPHERE,
 	C_CYLINDER,
-	C_CAPSULE,
+	C_HEMISHPERE,
 	C_PRIMIVE_MAX,
 
 	MAX_COMPONENT_TYPES

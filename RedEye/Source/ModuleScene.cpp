@@ -323,6 +323,26 @@ void ModuleScene::CreateSphere()
 	goManager.Push(sphere_go);
 }
 
+void ModuleScene::CreateCylinder()
+{
+	RE_GameObject* cylinder_go = AddGO("Cylinder", root);
+	Event::Push(GO_HAS_NEW_CHILD, this, root, cylinder_go);
+	cylinder_go->AddComponent(App->primitives->CreateCylinder(cylinder_go));
+	cylinder_go->ResetBoundingBoxes();
+	cylinder_go->TransformModified(false);
+	goManager.Push(cylinder_go);
+}
+
+void ModuleScene::CreateHemiSphere()
+{
+	RE_GameObject* hemisphere_go = AddGO("HemiSphere", root);
+	Event::Push(GO_HAS_NEW_CHILD, this, root, hemisphere_go);
+	hemisphere_go->AddComponent(App->primitives->CreateHemiSphere(hemisphere_go));
+	hemisphere_go->ResetBoundingBoxes();
+	hemisphere_go->TransformModified(false);
+	goManager.Push(hemisphere_go);
+}
+
 void ModuleScene::CreateCamera()
 {
 	RE_GameObject* cam_go = AddGO("Camera", root);

@@ -28,8 +28,8 @@ public:
 	RE_CompPrimitive* CreateCube(RE_GameObject* game_obj);
 	RE_CompPrimitive* CreateFustrum(RE_GameObject* game_obj);
 	RE_CompPrimitive* CreateSphere(RE_GameObject* game_obj, int slices  = 16, int stacks = 18);
-	RE_CompPrimitive* CreateCylinder(RE_GameObject* game_obj);
-	RE_CompPrimitive* CreateCapsule(RE_GameObject* game_obj);
+	RE_CompPrimitive* CreateCylinder(RE_GameObject* game_obj, int slices = 30, int stacks = 3);
+	RE_CompPrimitive* CreateHemiSphere(RE_GameObject* game_obj, int slices = 10, int stacks = 10);
 
 	//Check
 	unsigned int CheckCubeVAO();

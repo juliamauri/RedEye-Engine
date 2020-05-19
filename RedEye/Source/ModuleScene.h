@@ -57,6 +57,8 @@ public:
 	void CreatePlane();
 	void CreateCube();
 	void CreateSphere();
+	void CreateCylinder();
+	void CreateHemiSphere();
 	void CreateCamera();
 
 	void DrawEditor() override;

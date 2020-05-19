@@ -214,6 +214,12 @@ update_status ModuleEditor::Update()
 					if (ImGui::MenuItem("Sphere"))
 						App->scene->CreateSphere();
 
+					if (ImGui::MenuItem("Cylinder"))
+						App->scene->CreateCylinder();
+
+					if (ImGui::MenuItem("HemiSphere"))
+						App->scene->CreateHemiSphere();
+
 					if (ImGui::MenuItem("Camera"))
 						App->scene->CreateCamera();
 					ImGui::EndMenu();

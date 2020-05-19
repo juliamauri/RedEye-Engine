@@ -167,7 +167,7 @@ void RE_CompCube::Draw()
 	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
-	if (!show_checkers)
+	if (show_checkers)
 	{
 		// Apply Diffuse Color
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
@@ -429,26 +429,390 @@ void RE_CompSphere::GenerateNewSphere(int _slice, int _stacks)
 	}
 }
 
-RE_CompCylinder::RE_CompCylinder(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_CYLINDER, game_obj, VAO, shader) {}
+RE_CompCylinder::RE_CompCylinder(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks)
+	: RE_CompPrimitive(C_CYLINDER, game_obj, NULL, shader) {
+	if (_slice < 3) _slice = 3;
+	if (_stacks < 3) _stacks = 3;
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+	GenerateNewCylinder(slice = tmpSl = _slice, stacks = tmpSt = _stacks);
+}
+
+RE_CompCylinder::RE_CompCylinder(const RE_CompCylinder& cmpCylinder, RE_GameObject* go)
+	: RE_CompPrimitive(C_CYLINDER, go, NULL, cmpCylinder.RE_CompPrimitive::shader)
+{
+	RE_CompPrimitive::color = cmpCylinder.RE_CompPrimitive::color;
+	GenerateNewCylinder(slice = tmpSl = cmpCylinder.slice, stacks = tmpSt = cmpCylinder.stacks);
+}
 
 RE_CompCylinder::~RE_CompCylinder()
 {
-	App->primitives->Rest(RE_CompPrimitive::type);
 }
 
 void RE_CompCylinder::Draw()
 {
+	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+
+	if (!show_checkers)
+	{
+		// Apply Diffuse Color
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
+
+		// Draw
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	}
+	else
+	{
+		// Apply Checkers Texture
+		glActiveTexture(GL_TEXTURE0);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
+		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse", 0);
+		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
+
+		// Draw
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	}
 }
 
-RE_CompCapsule::RE_CompCapsule(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_CAPSULE, game_obj, VAO, shader) {}
-
-RE_CompCapsule::~RE_CompCapsule()
+void RE_CompCylinder::DrawProperties()
 {
-	App->primitives->Rest(RE_CompPrimitive::type);
+	if (ImGui::CollapsingHeader("Cylinder Primitive"))
+	{
+		ImGui::Checkbox("Use checkers texture", &show_checkers);
+
+		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
+
+		ImGui::PushItemWidth(75.0f);
+		if (ImGui::DragInt("Slices", &tmpSl, 1.0f, 3))
+		{
+			if (slice != tmpSl && tmpSl >= 3) {
+				slice = tmpSl;
+				canChange = true;
+			}
+			else if (tmpSl < 3) tmpSl = 3;
+		}
+		if (ImGui::DragInt("Stacks", &tmpSt, 1.0f, 3))
+		{
+			if (tmpSt >= 3 && stacks != tmpSt) {
+				stacks = tmpSt;
+				canChange = true;
+			}
+			else if (tmpSt < 3) tmpSt = 3;
+		}
+		ImGui::PopItemWidth();
+
+		if (ImGui::Button("Apply")) GenerateNewCylinder(slice, stacks);
+	}
 }
 
-void RE_CompCapsule::Draw()
+unsigned int RE_CompCylinder::GetBinarySize() const
 {
+	return sizeof(float) * 3 + sizeof(int) * 2;
+}
+
+void RE_CompCylinder::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
+{
+	node->PushFloatVector("color", RE_CompPrimitive::color);
+	node->PushInt("slices", slice);
+	node->PushInt("stacks", stacks);
+}
+
+void RE_CompCylinder::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+{
+	size_t size = sizeof(int);
+	memcpy(cursor, &slice, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(cursor, &stacks, size);
+	cursor += size;
+
+	size = sizeof(float) * 3;
+	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+}
+
+void RE_CompCylinder::GenerateNewCylinder(int slice, int stacks)
+{
+	if (canChange)
+	{
+		if (RE_CompPrimitive::VAO != 0) {
+			glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		}
+
+		par_shapes_mesh* cylinder = par_shapes_create_cylinder(slice, stacks);
+
+		float* points = new float[cylinder->npoints * 3];
+		float* normals = new float[cylinder->npoints * 3];
+		float* texCoords = new float[cylinder->npoints * 2];
+
+		uint meshSize = 0;
+		size_t size = cylinder->npoints * 3 * sizeof(float);
+		uint stride = 0;
+
+		memcpy(points, cylinder->points, size);
+		meshSize += 3 * cylinder->npoints;
+		stride += 3;
+
+		memcpy(normals, cylinder->normals, size);
+		meshSize += 3 * cylinder->npoints;
+		stride += 3;
+
+		size = cylinder->npoints * 2 * sizeof(float);
+		memcpy(texCoords, cylinder->tcoords, size);
+		meshSize += 2 * cylinder->npoints;
+		stride += 2;
+
+		stride *= sizeof(float);
+		float* meshBuffer = new float[meshSize];
+		float* cursor = meshBuffer;
+		for (uint i = 0; i < cylinder->npoints; i++) {
+			uint cursorSize = 3;
+			size_t size = sizeof(float) * 3;
+
+			memcpy(cursor, &points[i * 3], size);
+			cursor += cursorSize;
+
+			memcpy(cursor, &normals[i * 3], size);
+			cursor += cursorSize;
+
+			cursorSize = 2;
+			size = sizeof(float) * 2;
+			memcpy(cursor, &texCoords[i * 2], size);
+			cursor += cursorSize;
+		}
+
+
+		glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
+		glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
+
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RE_CompPrimitive::EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cylinder->ntriangles * sizeof(unsigned short) * 3, cylinder->triangles, GL_STATIC_DRAW);
+
+		triangle_count = cylinder->ntriangles;
+
+		par_shapes_free_mesh(cylinder);
+		DEL_A(points);
+		DEL_A(normals);
+		DEL_A(texCoords);
+		DEL_A(meshBuffer);
+
+		canChange = false;
+	}
+}
+
+RE_CompHemiSphere::RE_CompHemiSphere(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks)
+	: RE_CompPrimitive(C_CYLINDER, game_obj, NULL, shader) {
+	if (_slice < 3) _slice = 3;
+	if (_stacks < 3) _stacks = 3;
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+	GenerateNewHemiSphere(slice = tmpSl = _slice, stacks = tmpSt = _stacks);
+}
+
+RE_CompHemiSphere::RE_CompHemiSphere(const RE_CompHemiSphere& cmpHemiSphere, RE_GameObject* go)
+	: RE_CompPrimitive(C_CYLINDER, go, NULL, cmpHemiSphere.RE_CompPrimitive::shader)
+{
+	RE_CompPrimitive::color = cmpHemiSphere.RE_CompPrimitive::color;
+	GenerateNewHemiSphere(slice = tmpSl = cmpHemiSphere.slice, stacks = tmpSt = cmpHemiSphere.stacks);
+}
+
+
+RE_CompHemiSphere::~RE_CompHemiSphere()
+{
+}
+
+void RE_CompHemiSphere::Draw()
+{
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+
+	if (!show_checkers)
+	{
+		// Apply Diffuse Color
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
+
+		// Draw
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	}
+	else
+	{
+		// Apply Checkers Texture
+		glActiveTexture(GL_TEXTURE0);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
+		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse", 0);
+		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
+
+		// Draw
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	}
+}
+
+void RE_CompHemiSphere::DrawProperties()
+{
+	if (ImGui::CollapsingHeader("HemiSphere Primitive"))
+	{
+		ImGui::Checkbox("Use checkers texture", &show_checkers);
+
+		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
+
+		ImGui::PushItemWidth(75.0f);
+		if (ImGui::DragInt("Slices", &tmpSl, 1.0f, 3))
+		{
+			if (slice != tmpSl && tmpSl >= 3) {
+				slice = tmpSl;
+				canChange = true;
+			}
+			else if (tmpSl < 3) tmpSl = 3;
+		}
+		if (ImGui::DragInt("Stacks", &tmpSt, 1.0f, 3))
+		{
+			if (tmpSt >= 3 && stacks != tmpSt) {
+				stacks = tmpSt;
+				canChange = true;
+			}
+			else if (tmpSt < 3) tmpSt = 3;
+		}
+		ImGui::PopItemWidth();
+
+		if (ImGui::Button("Apply")) GenerateNewHemiSphere(slice, stacks);
+	}
+}
+
+unsigned int RE_CompHemiSphere::GetBinarySize() const
+{
+	return sizeof(float) * 3 + sizeof(int) * 2;
+}
+
+void RE_CompHemiSphere::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
+{
+	node->PushFloatVector("color", RE_CompPrimitive::color);
+	node->PushInt("slices", slice);
+	node->PushInt("stacks", stacks);
+}
+
+void RE_CompHemiSphere::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+{
+	size_t size = sizeof(int);
+	memcpy(cursor, &slice, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(cursor, &stacks, size);
+	cursor += size;
+
+	size = sizeof(float) * 3;
+	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+}
+
+void RE_CompHemiSphere::GenerateNewHemiSphere(int slice, int stacks)
+{
+	if (canChange)
+	{
+		if (RE_CompPrimitive::VAO != 0) {
+			glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		}
+
+		par_shapes_mesh* hemishpere = par_shapes_create_hemisphere(slice, stacks);
+
+		float* points = new float[hemishpere->npoints * 3];
+		float* normals = new float[hemishpere->npoints * 3];
+		float* texCoords = new float[hemishpere->npoints * 2];
+
+		uint meshSize = 0;
+		size_t size = hemishpere->npoints * 3 * sizeof(float);
+		uint stride = 0;
+
+		memcpy(points, hemishpere->points, size);
+		meshSize += 3 * hemishpere->npoints;
+		stride += 3;
+
+		memcpy(normals, hemishpere->normals, size);
+		meshSize += 3 * hemishpere->npoints;
+		stride += 3;
+
+		size = hemishpere->npoints * 2 * sizeof(float);
+		memcpy(texCoords, hemishpere->tcoords, size);
+		meshSize += 2 * hemishpere->npoints;
+		stride += 2;
+
+		stride *= sizeof(float);
+		float* meshBuffer = new float[meshSize];
+		float* cursor = meshBuffer;
+		for (uint i = 0; i < hemishpere->npoints; i++) {
+			uint cursorSize = 3;
+			size_t size = sizeof(float) * 3;
+
+			memcpy(cursor, &points[i * 3], size);
+			cursor += cursorSize;
+
+			memcpy(cursor, &normals[i * 3], size);
+			cursor += cursorSize;
+
+			cursorSize = 2;
+			size = sizeof(float) * 2;
+			memcpy(cursor, &texCoords[i * 2], size);
+			cursor += cursorSize;
+		}
+
+
+		glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
+		glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
+
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RE_CompPrimitive::EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, hemishpere->ntriangles * sizeof(unsigned short) * 3, hemishpere->triangles, GL_STATIC_DRAW);
+
+		triangle_count = hemishpere->ntriangles;
+
+		par_shapes_free_mesh(hemishpere);
+		DEL_A(points);
+		DEL_A(normals);
+		DEL_A(texCoords);
+		DEL_A(meshBuffer);
+
+		canChange = false;
+	}
 }
 
 RE_CompPlane::RE_CompPlane(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks)

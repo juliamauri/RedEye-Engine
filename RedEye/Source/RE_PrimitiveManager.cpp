@@ -37,7 +37,7 @@ RE_PrimitiveManager::RE_PrimitiveManager()
 	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_FUSTRUM, 0));
 	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_SPHERE, 0));
 	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_CYLINDER, 0));
-	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_CAPSULE, 0));
+	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_HEMISHPERE, 0));
 	primitives_count.insert(eastl::pair<ComponentType, unsigned int>(C_PLANE, 0));
 }
 
@@ -220,24 +220,14 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateSphere(RE_GameObject* game_obj, in
 	return new RE_CompSphere(game_obj, shaderPrimitive, slices, stacks);
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateCylinder(RE_GameObject* game_obj)
+RE_CompPrimitive * RE_PrimitiveManager::CreateCylinder(RE_GameObject* game_obj, int slices, int stacks)
 {
-	if (primitives_count.find(C_CYLINDER)->second++ == 0)
-	{
-
-	}
-	RE_CompPrimitive* ret = new RE_CompCylinder(game_obj, vao_cylinder, shaderPrimitive);
-	return ret;
+	return new RE_CompCylinder(game_obj, shaderPrimitive, slices, stacks);
 }
 
-RE_CompPrimitive * RE_PrimitiveManager::CreateCapsule(RE_GameObject* game_obj)
+RE_CompPrimitive * RE_PrimitiveManager::CreateHemiSphere(RE_GameObject* game_obj, int slices, int stacks)
 {
-	if (primitives_count.find(C_CAPSULE)->second++ == 0)
-	{
-
-	}
-	RE_CompPrimitive* ret = new RE_CompCapsule(game_obj, vao_capsule, shaderPrimitive);
-	return ret;
+	return new RE_CompHemiSphere(game_obj, shaderPrimitive, slices, stacks);
 }
 
 unsigned int RE_PrimitiveManager::CheckCubeVAO()
@@ -336,7 +326,7 @@ void RE_PrimitiveManager::DeleteVAOPrimitive(unsigned short int primitive)
 		glDeleteBuffers(1, &(GLuint)ebo_cylinder);
 		break;
 
-	case C_CAPSULE:
+	case C_HEMISHPERE:
 		glDeleteVertexArrays(1, &(GLuint)vao_capsule);
 		glDeleteBuffers(1, &(GLuint)vbo_capsule);
 		glDeleteBuffers(1, &(GLuint)ebo_capsule);

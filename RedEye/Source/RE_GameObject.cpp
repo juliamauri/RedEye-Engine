@@ -76,6 +76,12 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 		case C_SPHERE:
 			components.push_back((RE_CompPrimitive*)new RE_CompSphere(*(RE_CompSphere*)((RE_CompPrimitive*)cmpGO), this));
 			break;
+		case C_CYLINDER:
+			components.push_back((RE_CompPrimitive*)new RE_CompCylinder(*(RE_CompCylinder*)((RE_CompPrimitive*)cmpGO), this));
+			break;
+		case C_HEMISHPERE:
+			components.push_back((RE_CompPrimitive*)new RE_CompHemiSphere(*(RE_CompHemiSphere*)((RE_CompPrimitive*)cmpGO), this));
+			break;
 		case C_PLANE:
 			components.push_back((RE_CompPrimitive*)new RE_CompPlane(*(RE_CompPlane*)((RE_CompPrimitive*)cmpGO), this));
 			break;
@@ -336,14 +342,14 @@ void RE_GameObject::SerializeJson(JSONNode * node, eastl::map<const char*, int>*
 		uint cmpSize = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_MESH || type == C_CAMERA)
+			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_CYLINDER || type == C_HEMISHPERE || type == C_MESH || type == C_CAMERA)
 				cmpSize++;
 		}
 		comps->PushUInt("ComponentsSize", cmpSize);
 		uint count = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_MESH && type != C_CAMERA)
+			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_CYLINDER && type != C_HEMISHPERE && type != C_MESH && type != C_CAMERA)
 				continue;
 			ref = "cmp" + eastl::to_string(count++);
 			JSONNode* comp = comps->PushJObject(ref.c_str());
@@ -418,7 +424,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 		uint cmpSize = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_MESH || type == C_CAMERA)
+			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_CYLINDER || type == C_HEMISHPERE || type == C_MESH || type == C_CAMERA)
 				cmpSize++;
 		}
 		memcpy(cursor, &cmpSize, size);
@@ -426,7 +432,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_MESH && type != C_CAMERA)
+			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_CYLINDER && type != C_HEMISHPERE && type != C_MESH && type != C_CAMERA)
 				continue;
 			size = sizeof(unsigned short);
 			memcpy(cursor, &type, size);
@@ -489,6 +495,20 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, eastl::map<int, co
 				RE_CompPrimitive* newSphere = nullptr;
 				new_go->AddComponent(newSphere = App->primitives->CreateSphere(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3)));
 				newSphere->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
+				break;
+			}
+			case C_CYLINDER:
+			{
+				RE_CompPrimitive* newCylinder = nullptr;
+				new_go->AddComponent(newCylinder = App->primitives->CreateCylinder(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3)));
+				newCylinder->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
+				break;
+			}
+			case C_HEMISHPERE:
+			{
+				RE_CompPrimitive* newHemiSphere = nullptr;
+				new_go->AddComponent(newHemiSphere = App->primitives->CreateHemiSphere(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3)));
+				newHemiSphere->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_MESH:
@@ -668,6 +688,48 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, eastl::map<int, c
 				cursor += size;
 
 				newSphere->SetColor(math::vec(vec));
+				break;
+			}
+			case C_CYLINDER:
+			{
+				RE_CompPrimitive* newCylinder = nullptr;
+
+				int slices = 0, stacks = 0;
+				size = sizeof(int);
+				memcpy(&slices, cursor, size);
+				cursor += size;
+
+				memcpy(&stacks, cursor, size);
+				cursor += size;
+
+				new_go->AddComponent(newCylinder = App->primitives->CreateCylinder(new_go, slices, stacks));
+
+				size = sizeof(float) * 3;
+				memcpy(vec, cursor, size);
+				cursor += size;
+
+				newCylinder->SetColor(math::vec(vec));
+				break;
+			}
+			case C_HEMISHPERE:
+			{
+				RE_CompPrimitive* newHemiSphere = nullptr;
+
+				int slices = 0, stacks = 0;
+				size = sizeof(int);
+				memcpy(&slices, cursor, size);
+				cursor += size;
+
+				memcpy(&stacks, cursor, size);
+				cursor += size;
+
+				new_go->AddComponent(newHemiSphere = App->primitives->CreateHemiSphere(new_go, slices, stacks));
+
+				size = sizeof(float) * 3;
+				memcpy(vec, cursor, size);
+				cursor += size;
+
+				newHemiSphere->SetColor(math::vec(vec));
 				break;
 			}
 			case C_MESH:
@@ -1037,9 +1099,9 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 			ret = (RE_Component*)(App->primitives->CreateCylinder(this));
 			break;
 		}
-		case C_CAPSULE:
+		case C_HEMISHPERE:
 		{
-			ret = (RE_Component*)(App->primitives->CreateCapsule(this));
+			ret = (RE_Component*)(App->primitives->CreateHemiSphere(this));
 			break;
 		}
 		default:
@@ -1244,6 +1306,8 @@ void RE_GameObject::ResetLocalBoundingBox()
 		{
 		case C_MESH: local_bounding_box.Enclose(((RE_CompMesh*)comp)->GetAABB()); break;
 		case C_SPHERE: local_bounding_box.Enclose(math::AABB(-math::vec::one, math::vec::one)); break;
+		case C_CYLINDER: local_bounding_box.Enclose(math::AABB(-math::vec::one, math::vec::one)); break;
+		case C_HEMISHPERE: local_bounding_box.Enclose(math::AABB(-math::vec::one, math::vec::one)); break;
 		case C_CUBE: local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one)); break;
 		}
 	}
