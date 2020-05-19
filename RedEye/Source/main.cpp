@@ -14,10 +14,10 @@ https://www.swardle.com/sweb/img/Memory%20and%20C++%20debuging%20at%20EA%20-%20S
 #include "Optick/include/optick.h"
 #ifdef _DEBUG
 #pragma comment( lib, "Optick/libx86/OptickCore_debug.lib" )
-#pragma comment( lib, "EA/EASTL/libx86/Debug/EASTL.lib" )
+#pragma comment( lib, "EA/EASTL/libx86/DebugLib/EASTL.lib" )
 #else
 #pragma comment( lib, "Optick/libx86/OptickCore_release.lib" )
-#pragma comment( lib, "EA/EASTL/libx86/Release/EASTL.lib" )
+#pragma comment( lib, "EA/EASTL/libx86/ReleaseLib/EASTL.lib" )
 #endif
 
 void* operator new[](size_t size, const char* pName, int flags, unsigned     debugFlags, const char* file, int line)
