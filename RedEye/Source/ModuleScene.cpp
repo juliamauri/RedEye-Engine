@@ -353,6 +353,16 @@ void ModuleScene::CreateTorus()
 	goManager.Push(torus_go);
 }
 
+void ModuleScene::CreateTrefoilKnot()
+{
+	RE_GameObject* trefoilknot_go = AddGO("Trefoil Knot", root);
+	Event::Push(GO_HAS_NEW_CHILD, this, root, trefoilknot_go);
+	trefoilknot_go->AddComponent(App->primitives->CreateTrefoilKnot(trefoilknot_go));
+	trefoilknot_go->ResetBoundingBoxes();
+	trefoilknot_go->TransformModified(false);
+	goManager.Push(trefoilknot_go);
+}
+
 void ModuleScene::CreateCamera()
 {
 	RE_GameObject* cam_go = AddGO("Camera", root);

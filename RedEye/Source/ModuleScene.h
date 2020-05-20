@@ -60,6 +60,7 @@ public:
 	void CreateCylinder();
 	void CreateHemiSphere();
 	void CreateTorus();
+	void CreateTrefoilKnot();
 	void CreateCamera();
 
 	void DrawEditor() override;

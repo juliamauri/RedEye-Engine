@@ -235,6 +235,11 @@ RE_CompPrimitive* RE_PrimitiveManager::CreateTorus(RE_GameObject* game_obj, int 
 	return new RE_CompTorus(game_obj, shaderPrimitive, slices, stacks, radius);
 }
 
+RE_CompPrimitive* RE_PrimitiveManager::CreateTrefoilKnot(RE_GameObject* game_obj, int slices, int stacks, float radius)
+{
+	return new RE_CompTrefoiKnot(game_obj, shaderPrimitive, slices, stacks, radius);
+}
+
 unsigned int RE_PrimitiveManager::CheckCubeVAO()
 {
 	if (vao_cube == 0) {

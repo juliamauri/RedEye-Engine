@@ -1278,3 +1278,213 @@ void RE_CompTorus::GenerateNewTorus(int slice, int stacks, float radius)
 		canChange = false;
 	}
 }
+
+RE_CompTrefoiKnot::RE_CompTrefoiKnot(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks, float _radius)
+	: RE_CompPrimitive(C_TREFOILKNOT, game_obj, NULL, shader)
+{
+	if (_slice < 3) _slice = 3;
+	if (_stacks < 3) _stacks = 3;
+	if (_radius < 0.5f) _radius = 0.5f;
+	else if (_radius > 3.0f) _radius = 3.0f;
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+	GenerateNewTrefoiKnot(slice = tmpSl = _slice, stacks = tmpSt = _stacks, radius = tmpR = _radius);
+}
+
+RE_CompTrefoiKnot::RE_CompTrefoiKnot(const RE_CompTrefoiKnot& cmpTrefoiKnot, RE_GameObject* go)
+	: RE_CompPrimitive(C_TREFOILKNOT, go, NULL, cmpTrefoiKnot.RE_CompPrimitive::shader)
+
+{
+	RE_CompPrimitive::color = cmpTrefoiKnot.RE_CompPrimitive::color;
+	GenerateNewTrefoiKnot(slice = tmpSl = cmpTrefoiKnot.slice, stacks = tmpSt = cmpTrefoiKnot.stacks, radius = tmpR = cmpTrefoiKnot.radius);
+}
+
+RE_CompTrefoiKnot::~RE_CompTrefoiKnot()
+{
+}
+
+void RE_CompTrefoiKnot::Draw()
+{
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+
+	if (!show_checkers)
+	{
+		// Apply Diffuse Color
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
+
+		// Draw
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	}
+	else
+	{
+		// Apply Checkers Texture
+		glActiveTexture(GL_TEXTURE0);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
+		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse", 0);
+		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
+
+		// Draw
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	}
+}
+
+void RE_CompTrefoiKnot::DrawProperties()
+{
+	if (ImGui::CollapsingHeader("Trefoil Knot Primitive"))
+	{
+		ImGui::Checkbox("Use checkers texture", &show_checkers);
+
+		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
+
+		ImGui::PushItemWidth(75.0f);
+		if (ImGui::DragInt("Slices", &tmpSl, 1.0f, 3))
+		{
+			if (slice != tmpSl && tmpSl >= 3) {
+				slice = tmpSl;
+				canChange = true;
+			}
+			else if (tmpSl < 3) tmpSl = 3;
+		}
+		if (ImGui::DragInt("Stacks", &tmpSt, 1.0f, 3))
+		{
+			if (tmpSt >= 3 && stacks != tmpSt) {
+				stacks = tmpSt;
+				canChange = true;
+			}
+			else if (tmpSt < 3) tmpSt = 3;
+		}
+		if (ImGui::DragFloat("Radius", &tmpR, 0.1f, 0.5f, 3.0f))
+		{
+			if (tmpR >= 0.5f && tmpR <= 3.0f && radius != tmpR) {
+				radius = tmpR;
+				canChange = true;
+			}
+			else if (tmpR < 0.5f) tmpR = 0.5f;
+			else if (tmpR > 3.0f) tmpR = 3.0f;
+		}
+		ImGui::PopItemWidth();
+
+		if (ImGui::Button("Apply")) GenerateNewTrefoiKnot(slice, stacks, radius);
+	}
+}
+
+unsigned int RE_CompTrefoiKnot::GetBinarySize() const
+{
+	return sizeof(float) * 4 + sizeof(int) * 2;
+}
+
+void RE_CompTrefoiKnot::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
+{
+	node->PushFloatVector("color", RE_CompPrimitive::color);
+	node->PushInt("slices", slice);
+	node->PushInt("stacks", stacks);
+	node->PushFloat("radius", radius);
+}
+
+void RE_CompTrefoiKnot::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+{
+	size_t size = sizeof(int);
+	memcpy(cursor, &slice, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(cursor, &stacks, size);
+	cursor += size;
+
+	size = sizeof(float);
+	memcpy(cursor, &radius, size);
+	cursor += size;
+
+	size = sizeof(float) * 3;
+	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+}
+
+void RE_CompTrefoiKnot::GenerateNewTrefoiKnot(int slice, int stacks, float radius)
+{
+	if (canChange)
+	{
+		if (RE_CompPrimitive::VAO != 0) {
+			glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		}
+
+		par_shapes_mesh* torus = par_shapes_create_trefoil_knot(slice, stacks, radius);
+
+		float* points = new float[torus->npoints * 3];
+		float* normals = new float[torus->npoints * 3];
+		float* texCoords = new float[torus->npoints * 2];
+
+		uint meshSize = 0;
+		size_t size = torus->npoints * 3 * sizeof(float);
+		uint stride = 0;
+
+		memcpy(points, torus->points, size);
+		meshSize += 3 * torus->npoints;
+		stride += 3;
+
+		memcpy(normals, torus->normals, size);
+		meshSize += 3 * torus->npoints;
+		stride += 3;
+
+		size = torus->npoints * 2 * sizeof(float);
+		memcpy(texCoords, torus->tcoords, size);
+		meshSize += 2 * torus->npoints;
+		stride += 2;
+
+		stride *= sizeof(float);
+		float* meshBuffer = new float[meshSize];
+		float* cursor = meshBuffer;
+		for (uint i = 0; i < torus->npoints; i++) {
+			uint cursorSize = 3;
+			size_t size = sizeof(float) * 3;
+
+			memcpy(cursor, &points[i * 3], size);
+			cursor += cursorSize;
+
+			memcpy(cursor, &normals[i * 3], size);
+			cursor += cursorSize;
+
+			cursorSize = 2;
+			size = sizeof(float) * 2;
+			memcpy(cursor, &texCoords[i * 2], size);
+			cursor += cursorSize;
+		}
+
+
+		glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
+		glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
+
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RE_CompPrimitive::EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, torus->ntriangles * sizeof(unsigned short) * 3, torus->triangles, GL_STATIC_DRAW);
+
+		triangle_count = torus->ntriangles;
+
+		par_shapes_free_mesh(torus);
+		DEL_A(points);
+		DEL_A(normals);
+		DEL_A(texCoords);
+		DEL_A(meshBuffer);
+
+		canChange = false;
+	}
+}

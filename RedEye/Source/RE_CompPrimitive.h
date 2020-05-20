@@ -339,4 +339,37 @@ public:
 
 };
 
+/**************************************************
+******	Torus
+**************************************************/
+
+class RE_CompTrefoiKnot : public RE_CompPrimitive
+{
+public:
+	RE_CompTrefoiKnot(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks, float _radius);
+	RE_CompTrefoiKnot(const RE_CompTrefoiKnot& cmpTrefoiKnot, RE_GameObject* go = nullptr);
+	~RE_CompTrefoiKnot();
+	void Draw() override;
+	void DrawProperties() override;
+	unsigned int GetBinarySize()const override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
+
+	unsigned int GetTriangleCount()const override { return triangle_count; }
+
+private:
+	void GenerateNewTrefoiKnot(int slice, int stacks, float radius);
+
+private:
+	bool show_checkers = false;
+	int triangle_count;
+	int slice, stacks;
+	float radius;
+	bool canChange = true;
+public:
+	int tmpSl, tmpSt;
+	float tmpR;
+
+};
+
 #endif // !__RE_COMPPRIMITIVE_H__

@@ -223,6 +223,9 @@ update_status ModuleEditor::Update()
 					if (ImGui::MenuItem("Torus"))
 						App->scene->CreateTorus();
 
+					if (ImGui::MenuItem("Trefoil Knot"))
+						App->scene->CreateTrefoilKnot();
+
 					if (ImGui::MenuItem("Camera"))
 						App->scene->CreateCamera();
 					ImGui::EndMenu();
