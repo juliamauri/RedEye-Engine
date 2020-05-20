@@ -293,90 +293,142 @@ void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
 	root->AddChild(toAdd);
 }
 
-void ModuleScene::CreatePlane()
+void ModuleScene::CreateCube(RE_GameObject* parent)
 {
-	RE_GameObject* plane_go = AddGO("Plane", root);
-	Event::Push(GO_HAS_NEW_CHILD, this, root, plane_go);
-	plane_go->AddComponent(App->primitives->CreatePlane(plane_go));
-	plane_go->ResetBoundingBoxes();
-	plane_go->TransformModified(false);
-	goManager.Push(plane_go);
-}
-
-void ModuleScene::CreateCube()
-{
-	RE_GameObject* cube_go = AddGO("Cube", root);
-	Event::Push(GO_HAS_NEW_CHILD, this, root, cube_go);
+	parent = (parent) ? parent : root;
+	RE_GameObject* cube_go = AddGO("Cube", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, cube_go);
 	cube_go->AddComponent(App->primitives->CreateCube(cube_go));
 	cube_go->ResetBoundingBoxes();
 	cube_go->TransformModified(false);
 	goManager.Push(cube_go);
 }
 
-void ModuleScene::CreateSphere()
+void ModuleScene::CreateDodecahedron(RE_GameObject* parent)
 {
-	RE_GameObject* sphere_go = AddGO("Sphere", root);
-	Event::Push(GO_HAS_NEW_CHILD, this, root, sphere_go);
+	parent = (parent) ? parent : root;
+	RE_GameObject* dode_go = AddGO("Dodecahedron", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, dode_go);
+	dode_go->AddComponent(App->primitives->CreateDodecahedron(dode_go));
+	dode_go->ResetBoundingBoxes();
+	dode_go->TransformModified(false);
+	goManager.Push(dode_go);
+}
+
+void ModuleScene::CreateTetrahedron(RE_GameObject* parent)
+{
+	parent = (parent) ? parent : root;
+	RE_GameObject* tetra_go = AddGO("Tetrahedron", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, tetra_go);
+	tetra_go->AddComponent(App->primitives->CreateTetrahedron(tetra_go));
+	tetra_go->ResetBoundingBoxes();
+	tetra_go->TransformModified(false);
+	goManager.Push(tetra_go);
+}
+
+void ModuleScene::CreateOctohedron(RE_GameObject* parent)
+{
+	parent = (parent) ? parent : root;
+	RE_GameObject* octo_go = AddGO("Octohedron", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, octo_go);
+	octo_go->AddComponent(App->primitives->CreateOctohedron(octo_go));
+	octo_go->ResetBoundingBoxes();
+	octo_go->TransformModified(false);
+	goManager.Push(octo_go);
+}
+
+void ModuleScene::CreateIcosahedron(RE_GameObject* parent)
+{
+	RE_GameObject* icosa_go = AddGO("Icosahedron", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, icosa_go);
+	icosa_go->AddComponent(App->primitives->CreateIcosahedron(icosa_go));
+	icosa_go->ResetBoundingBoxes();
+	icosa_go->TransformModified(false);
+	goManager.Push(icosa_go);
+}
+
+void ModuleScene::CreatePlane(RE_GameObject* parent)
+{
+	parent = (parent) ? parent : root;
+	RE_GameObject* plane_go = AddGO("Plane", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, plane_go);
+	plane_go->AddComponent(App->primitives->CreatePlane(plane_go));
+	plane_go->ResetBoundingBoxes();
+	plane_go->TransformModified(false);
+	goManager.Push(plane_go);
+}
+
+void ModuleScene::CreateSphere(RE_GameObject* parent)
+{
+	parent = (parent) ? parent : root;
+	RE_GameObject* sphere_go = AddGO("Sphere", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, sphere_go);
 	sphere_go->AddComponent(App->primitives->CreateSphere(sphere_go));
 	sphere_go->ResetBoundingBoxes();
 	sphere_go->TransformModified(false);
 	goManager.Push(sphere_go);
 }
 
-void ModuleScene::CreateCylinder()
+void ModuleScene::CreateCylinder(RE_GameObject* parent)
 {
-	RE_GameObject* cylinder_go = AddGO("Cylinder", root);
-	Event::Push(GO_HAS_NEW_CHILD, this, root, cylinder_go);
+	parent = (parent) ? parent : root;
+	RE_GameObject* cylinder_go = AddGO("Cylinder", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, cylinder_go);
 	cylinder_go->AddComponent(App->primitives->CreateCylinder(cylinder_go));
 	cylinder_go->ResetBoundingBoxes();
 	cylinder_go->TransformModified(false);
 	goManager.Push(cylinder_go);
 }
 
-void ModuleScene::CreateHemiSphere()
+void ModuleScene::CreateHemiSphere(RE_GameObject* parent)
 {
-	RE_GameObject* hemisphere_go = AddGO("HemiSphere", root);
-	Event::Push(GO_HAS_NEW_CHILD, this, root, hemisphere_go);
+	parent = (parent) ? parent : root;
+	RE_GameObject* hemisphere_go = AddGO("HemiSphere", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, hemisphere_go);
 	hemisphere_go->AddComponent(App->primitives->CreateHemiSphere(hemisphere_go));
 	hemisphere_go->ResetBoundingBoxes();
 	hemisphere_go->TransformModified(false);
 	goManager.Push(hemisphere_go);
 }
 
-void ModuleScene::CreateTorus()
+void ModuleScene::CreateTorus(RE_GameObject* parent)
 {
-	RE_GameObject* torus_go = AddGO("Torus", root);
-	Event::Push(GO_HAS_NEW_CHILD, this, root, torus_go);
+	parent = (parent) ? parent : root;
+	RE_GameObject* torus_go = AddGO("Torus", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, torus_go);
 	torus_go->AddComponent(App->primitives->CreateTorus(torus_go));
 	torus_go->ResetBoundingBoxes();
 	torus_go->TransformModified(false);
 	goManager.Push(torus_go);
 }
 
-void ModuleScene::CreateTrefoilKnot()
+void ModuleScene::CreateTrefoilKnot(RE_GameObject* parent)
 {
-	RE_GameObject* trefoilknot_go = AddGO("Trefoil Knot", root);
-	Event::Push(GO_HAS_NEW_CHILD, this, root, trefoilknot_go);
+	parent = (parent) ? parent : root;
+	RE_GameObject* trefoilknot_go = AddGO("Trefoil Knot", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, trefoilknot_go);
 	trefoilknot_go->AddComponent(App->primitives->CreateTrefoilKnot(trefoilknot_go));
 	trefoilknot_go->ResetBoundingBoxes();
 	trefoilknot_go->TransformModified(false);
 	goManager.Push(trefoilknot_go);
 }
 
-void ModuleScene::CreateRock()
+void ModuleScene::CreateRock(RE_GameObject* parent)
 {
-	RE_GameObject* rock_go = AddGO("Rock", root);
-	Event::Push(GO_HAS_NEW_CHILD, this, root, rock_go);
+	parent = (parent) ? parent : root;
+	RE_GameObject* rock_go = AddGO("Rock", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, rock_go);
 	rock_go->AddComponent(App->primitives->CreateRock(rock_go));
 	rock_go->ResetBoundingBoxes();
 	rock_go->TransformModified(false);
 	goManager.Push(rock_go);
 }
 
-void ModuleScene::CreateCamera()
+void ModuleScene::CreateCamera(RE_GameObject* parent)
 {
-	RE_GameObject* cam_go = AddGO("Camera", root);
-	Event::Push(GO_HAS_NEW_CHILD, this, root, cam_go);
+	parent = (parent) ? parent : root;
+	RE_GameObject* cam_go = AddGO("Camera", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, cam_go);
 	cam_go->AddCompCamera();
 	goManager.Push(cam_go);
 }

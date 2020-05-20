@@ -200,40 +200,9 @@ update_status ModuleEditor::Update()
 				ImGui::EndMenu();
 			}
 
-			// Create
-			if (ImGui::BeginMenu("Create"))
+			if (ImGui::BeginMenu("Assets"))
 			{
-				if (ImGui::BeginMenu("Gameobject")) {
-
-					if (ImGui::MenuItem("Plane"))
-						App->scene->CreatePlane();
-
-					if (ImGui::MenuItem("Cube"))
-						App->scene->CreateCube();
-
-					if (ImGui::MenuItem("Sphere"))
-						App->scene->CreateSphere();
-
-					if (ImGui::MenuItem("Cylinder"))
-						App->scene->CreateCylinder();
-
-					if (ImGui::MenuItem("HemiSphere"))
-						App->scene->CreateHemiSphere();
-
-					if (ImGui::MenuItem("Torus"))
-						App->scene->CreateTorus();
-
-					if (ImGui::MenuItem("Trefoil Knot"))
-						App->scene->CreateTrefoilKnot();
-
-					if (ImGui::MenuItem("Rock"))
-						App->scene->CreateRock();
-
-					if (ImGui::MenuItem("Camera"))
-						App->scene->CreateCamera();
-					ImGui::EndMenu();
-				}
-				if (ImGui::BeginMenu("Resource")) {
+				if (ImGui::BeginMenu("Create")) {
 
 					if (ImGui::MenuItem("Material", materialeditor->IsActive() ? "Hide" : "Open"))
 						materialeditor->SwitchActive();
@@ -246,6 +215,12 @@ update_status ModuleEditor::Update()
 
 					ImGui::EndMenu();
 				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Gameobject")) {
+
+				DrawGameObjectItems();
 
 				ImGui::EndMenu();
 			}
@@ -668,6 +643,10 @@ void ModuleEditor::DrawHeriarchy()
 					popupWindow->PopUpPrefab(object);
 				}
 
+				ImGui::Separator();
+
+				DrawGameObjectItems(object);
+
 				ImGui::EndPopup();
 			}
 
@@ -854,4 +833,52 @@ void ModuleEditor::UpdateCamera()
 	}
 
 	camera->Update();
+}
+
+void ModuleEditor::DrawGameObjectItems(RE_GameObject* parent)
+{
+	if (ImGui::BeginMenu("3D Object")) {
+
+		if (ImGui::MenuItem("Rock"))
+			App->scene->CreateRock(parent);
+
+		if (ImGui::MenuItem("Cube"))
+			App->scene->CreateCube(parent);
+
+		if (ImGui::MenuItem("Dodecahedron"))
+			App->scene->CreateDodecahedron(parent);
+
+		if (ImGui::MenuItem("Tetrahedron"))
+			App->scene->CreateTetrahedron(parent);
+
+		if (ImGui::MenuItem("Octohedron"))
+			App->scene->CreateOctohedron(parent);
+
+		if (ImGui::MenuItem("Icosahedron"))
+			App->scene->CreateIcosahedron(parent);
+
+		if (ImGui::MenuItem("Plane"))
+			App->scene->CreatePlane(parent);
+
+		if (ImGui::MenuItem("Sphere"))
+			App->scene->CreateSphere(parent);
+
+		if (ImGui::MenuItem("Cylinder"))
+			App->scene->CreateCylinder(parent);
+
+		if (ImGui::MenuItem("HemiSphere"))
+			App->scene->CreateHemiSphere(parent);
+
+		if (ImGui::MenuItem("Torus"))
+			App->scene->CreateTorus(parent);
+
+		if (ImGui::MenuItem("Trefoil Knot"))
+			App->scene->CreateTrefoilKnot(parent);
+
+		ImGui::EndMenu();
+	}
+
+	if (ImGui::MenuItem("Camera"))
+		App->scene->CreateCamera(parent);
+
 }

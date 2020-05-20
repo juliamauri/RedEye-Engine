@@ -12,7 +12,6 @@ public:
 	RE_CompPrimitive(ComponentType t, RE_GameObject* game_obj, unsigned int VAO = 0, unsigned int shader = 0);
 	virtual ~RE_CompPrimitive();
 	
-	ComponentType GetType() const;
 	virtual void Draw() override = 0;
 	virtual void DrawProperties() override = 0;
 	virtual unsigned int GetBinarySize()const override { return 0; }
@@ -55,15 +54,15 @@ public:
 };
 
 /**************************************************
-******	Cube
+******	Rock
 **************************************************/
 
-class RE_CompCube : public RE_CompPrimitive
+class RE_CompRock : public RE_CompPrimitive
 {
 public:
-	RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
-	RE_CompCube(const RE_CompCube& cmpCube, RE_GameObject* go = nullptr);
-	~RE_CompCube();
+	RE_CompRock(RE_GameObject* game_obj, unsigned int shader, int _seed, int _subdivions);
+	RE_CompRock(const RE_CompRock& cmpRock, RE_GameObject* go = nullptr);
+	~RE_CompRock();
 	void Draw() override;
 	void DrawProperties() override;
 	unsigned int GetBinarySize()const override;
@@ -73,9 +72,96 @@ public:
 	unsigned int GetTriangleCount()const override { return triangle_count; }
 
 private:
-	bool show_checkers = false;
-	int triangle_count;
+	void GenerateNewRock(int seed, int subdivisions);
 
+private:
+	int triangle_count;
+	int seed, nsubdivisions;
+	bool canChange = true;
+public:
+	int tmpSe, tmpSb;
+};
+
+/**************************************************
+******	Platonic
+**************************************************/
+
+class RE_CompPlatonic : public RE_CompPrimitive
+{
+public:
+	RE_CompPlatonic(ComponentType t, const char* name, RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
+	~RE_CompPlatonic();
+	void Draw() override;
+	void DrawProperties() override;
+	unsigned int GetBinarySize()const override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
+
+	unsigned int GetTriangleCount()const override { return triangle_count; }
+
+protected:
+	int triangle_count;
+	eastl::string pName;
+};
+
+/**************************************************
+******	Cube
+**************************************************/
+
+class RE_CompCube : public RE_CompPlatonic
+{
+public:
+	RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
+	RE_CompCube(const RE_CompCube& cmpCube, RE_GameObject* go = nullptr);
+	~RE_CompCube();
+};
+
+/**************************************************
+******	Dodecahedron
+**************************************************/
+
+class RE_CompDodecahedron : public RE_CompPlatonic
+{
+public:
+	RE_CompDodecahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
+	RE_CompDodecahedron(const RE_CompDodecahedron& cmpDodecahedron, RE_GameObject* go = nullptr);
+	~RE_CompDodecahedron();
+};
+
+/**************************************************
+******	Tetrahedron
+**************************************************/
+
+class RE_CompTetrahedron : public RE_CompPlatonic
+{
+public:
+	RE_CompTetrahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
+	RE_CompTetrahedron(const RE_CompTetrahedron& cmpTetrahedron, RE_GameObject* go = nullptr);
+	~RE_CompTetrahedron();
+};
+
+/**************************************************
+******	Octohedron
+**************************************************/
+
+class RE_CompOctohedron : public RE_CompPlatonic
+{
+public:
+	RE_CompOctohedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
+	RE_CompOctohedron(const RE_CompOctohedron& cmpOctohedron, RE_GameObject* go = nullptr);
+	~RE_CompOctohedron();
+};
+
+/**************************************************
+******	Icosahedron
+**************************************************/
+
+class RE_CompIcosahedron : public RE_CompPlatonic
+{
+public:
+	RE_CompIcosahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
+	RE_CompIcosahedron(const RE_CompIcosahedron& cmpIcosahedron, RE_GameObject* go = nullptr);
+	~RE_CompIcosahedron();
 };
 
 /**************************************************
@@ -206,36 +292,6 @@ public:
 
 private:
 	void GenerateParametric()override;
-};
-
-/**************************************************
-******	Rock
-**************************************************/
-
-class RE_CompRock : public RE_CompPrimitive
-{
-public:
-	RE_CompRock(RE_GameObject* game_obj, unsigned int shader, int _seed, int _subdivions);
-	RE_CompRock(const RE_CompRock& cmpRock, RE_GameObject* go = nullptr);
-	~RE_CompRock();
-	void Draw() override;
-	void DrawProperties() override;
-	unsigned int GetBinarySize()const override;
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
-
-	unsigned int GetTriangleCount()const override { return triangle_count; }
-
-private:
-	void GenerateNewRock(int seed, int subdivisions);
-
-private:
-	bool show_checkers = false;
-	int triangle_count;
-	int seed, nsubdivisions;
-	bool canChange = true;
-public:
-	int tmpSe, tmpSb;
 };
 
 #endif // !__RE_COMPPRIMITIVE_H__

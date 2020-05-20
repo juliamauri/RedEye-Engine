@@ -73,6 +73,18 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 		case C_CUBE:
 			components.push_back((RE_CompPrimitive*)new RE_CompCube(*(RE_CompCube*)((RE_CompPrimitive*)cmpGO), this));
 			break;
+		case C_DODECAHEDRON:
+			components.push_back((RE_CompPrimitive*)new RE_CompDodecahedron(*(RE_CompDodecahedron*)((RE_CompPrimitive*)cmpGO), this));
+			break;
+		case C_TETRAHEDRON:
+			components.push_back((RE_CompPrimitive*)new RE_CompTetrahedron(*(RE_CompTetrahedron*)((RE_CompPrimitive*)cmpGO), this));
+			break;
+		case C_OCTOHEDRON:
+			components.push_back((RE_CompPrimitive*)new RE_CompOctohedron(*(RE_CompOctohedron*)((RE_CompPrimitive*)cmpGO), this));
+			break;
+		case C_ICOSAHEDRON:
+			components.push_back((RE_CompPrimitive*)new RE_CompIcosahedron(*(RE_CompIcosahedron*)((RE_CompPrimitive*)cmpGO), this));
+			break;
 		case C_SPHERE:
 			components.push_back((RE_CompPrimitive*)new RE_CompSphere(*(RE_CompSphere*)((RE_CompPrimitive*)cmpGO), this));
 			break;
@@ -351,14 +363,14 @@ void RE_GameObject::SerializeJson(JSONNode * node, eastl::map<const char*, int>*
 		uint cmpSize = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_CYLINDER || type == C_HEMISHPERE || type == C_TORUS || type == C_TREFOILKNOT || type == C_ROCK || type == C_MESH || type == C_CAMERA)
+			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA)
 				cmpSize++;
 		}
 		comps->PushUInt("ComponentsSize", cmpSize);
 		uint count = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_CYLINDER && type != C_HEMISHPERE && type != C_TORUS && type != C_TREFOILKNOT && type != C_ROCK && type != C_MESH && type != C_CAMERA)
+			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA)
 				continue;
 			ref = "cmp" + eastl::to_string(count++);
 			JSONNode* comp = comps->PushJObject(ref.c_str());
@@ -433,7 +445,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 		uint cmpSize = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_CYLINDER || type == C_HEMISHPERE || type == C_TORUS || type == C_TREFOILKNOT || type == C_ROCK || type == C_MESH || type == C_CAMERA)
+			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA)
 				cmpSize++;
 		}
 		memcpy(cursor, &cmpSize, size);
@@ -441,7 +453,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_CYLINDER && type != C_HEMISHPERE && type != C_TORUS && type != C_TREFOILKNOT && type != C_ROCK && type != C_MESH && type != C_CAMERA)
+			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA)
 				continue;
 			size = sizeof(unsigned short);
 			memcpy(cursor, &type, size);
@@ -490,6 +502,34 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, eastl::map<int, co
 				RE_CompPrimitive* newCube = nullptr;
 				new_go->AddComponent(newCube = App->primitives->CreateCube(new_go));
 				newCube->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
+				break;
+			}
+			case C_DODECAHEDRON:
+			{
+				RE_CompPrimitive* newDode = nullptr;
+				new_go->AddComponent(newDode = App->primitives->CreateDodecahedron(new_go));
+				newDode->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
+				break;
+			}
+			case C_TETRAHEDRON:
+			{
+				RE_CompPrimitive* newTetra = nullptr;
+				new_go->AddComponent(newTetra = App->primitives->CreateTetrahedron(new_go));
+				newTetra->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
+				break;
+			}
+			case C_OCTOHEDRON:
+			{
+				RE_CompPrimitive* newOcto = nullptr;
+				new_go->AddComponent(newOcto = App->primitives->CreateOctohedron(new_go));
+				newOcto->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
+				break;
+			}
+			case C_ICOSAHEDRON:
+			{
+				RE_CompPrimitive* newIcosa = nullptr;
+				new_go->AddComponent(newIcosa = App->primitives->CreateIcosahedron(new_go));
+				newIcosa->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_PLANE:
@@ -676,6 +716,50 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, eastl::map<int, c
 				memcpy(vec, cursor, size);
 				cursor += size;
 				newCube->SetColor(math::vec(vec));
+				break;
+			}
+			case C_DODECAHEDRON:
+			{
+				RE_CompPrimitive* newDode = nullptr;
+				new_go->AddComponent(newDode = App->primitives->CreateDodecahedron(new_go));
+
+				size = sizeof(float) * 3;
+				memcpy(vec, cursor, size);
+				cursor += size;
+				newDode->SetColor(math::vec(vec));
+				break;
+			}
+			case C_TETRAHEDRON:
+			{
+				RE_CompPrimitive* newTetra = nullptr;
+				new_go->AddComponent(newTetra = App->primitives->CreateTetrahedron(new_go));
+
+				size = sizeof(float) * 3;
+				memcpy(vec, cursor, size);
+				cursor += size;
+				newTetra->SetColor(math::vec(vec));
+				break;
+			}
+			case C_OCTOHEDRON:
+			{
+				RE_CompPrimitive* newOcto = nullptr;
+				new_go->AddComponent(newOcto = App->primitives->CreateOctohedron(new_go));
+
+				size = sizeof(float) * 3;
+				memcpy(vec, cursor, size);
+				cursor += size;
+				newOcto->SetColor(math::vec(vec));
+				break;
+			}
+			case C_ICOSAHEDRON:
+			{
+				RE_CompPrimitive* newIcosa = nullptr;
+				new_go->AddComponent(newIcosa = App->primitives->CreateIcosahedron(new_go));
+
+				size = sizeof(float) * 3;
+				memcpy(vec, cursor, size);
+				cursor += size;
+				newIcosa->SetColor(math::vec(vec));
 				break;
 			}
 			case C_PLANE:
@@ -1162,6 +1246,26 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 			ret = (RE_Component*)(App->primitives->CreateCube(this));
 			break;
 		}
+		case C_DODECAHEDRON:
+		{
+			ret = (RE_Component*)(App->primitives->CreateDodecahedron(this));
+			break;
+		}
+		case C_TETRAHEDRON:
+		{
+			ret = (RE_Component*)(App->primitives->CreateTetrahedron(this));
+			break;
+		}
+		case C_OCTOHEDRON:
+		{
+			ret = (RE_Component*)(App->primitives->CreateOctohedron(this));
+			break;
+		}
+		case C_ICOSAHEDRON:
+		{
+			ret = (RE_Component*)(App->primitives->CreateIcosahedron(this));
+			break;
+		}
 		case C_SPHERE:
 		{
 			ret = (RE_Component*)(App->primitives->CreateSphere(this));
@@ -1400,6 +1504,10 @@ void RE_GameObject::ResetLocalBoundingBox()
 		case C_TREFOILKNOT: local_bounding_box.Enclose(math::AABB(-math::vec::one, math::vec::one)); break;
 		case C_ROCK: local_bounding_box.Enclose(math::AABB(-math::vec::one, math::vec::one)); break;
 		case C_CUBE: local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one)); break;
+		case C_DODECAHEDRON: local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one)); break;
+		case C_TETRAHEDRON: local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one)); break;
+		case C_OCTOHEDRON: local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one)); break;
+		case C_ICOSAHEDRON: local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one)); break;
 		}
 	}
 }

@@ -54,15 +54,19 @@ public:
 	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr, bool broadcast = true);
 	void AddGoToRoot(RE_GameObject* toAdd);
 
-	void CreatePlane();
-	void CreateCube();
-	void CreateSphere();
-	void CreateCylinder();
-	void CreateHemiSphere();
-	void CreateTorus();
-	void CreateTrefoilKnot();
-	void CreateRock();
-	void CreateCamera();
+	void CreateCube(RE_GameObject* parent = nullptr);
+	void CreateDodecahedron(RE_GameObject* parent = nullptr);
+	void CreateTetrahedron(RE_GameObject* parent = nullptr);
+	void CreateOctohedron(RE_GameObject* parent = nullptr);
+	void CreateIcosahedron(RE_GameObject* parent = nullptr);
+	void CreatePlane(RE_GameObject* parent = nullptr);
+	void CreateSphere(RE_GameObject* parent = nullptr);
+	void CreateCylinder(RE_GameObject* parent = nullptr);
+	void CreateHemiSphere(RE_GameObject* parent = nullptr);
+	void CreateTorus(RE_GameObject* parent = nullptr);
+	void CreateTrefoilKnot(RE_GameObject* parent = nullptr);
+	void CreateRock(RE_GameObject* parent = nullptr);
+	void CreateCamera(RE_GameObject* parent = nullptr);
 
 	void DrawEditor() override;
 

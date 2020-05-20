@@ -84,8 +84,11 @@ public:
 	void PushCommand(RE_Command* cmd);
 	void ClearCommands();
 
+	void DrawGameObjectItems(RE_GameObject* parent = nullptr);
+
 private:
 	void UpdateCamera();
+
 
 public:
 

@@ -30,11 +30,6 @@ RE_CompPrimitive::~RE_CompPrimitive()
 {
 }
 
-ComponentType RE_CompPrimitive::GetType() const
-{
-	return type;
-}
-
 RE_CompGrid::RE_CompGrid(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_GRID, game_obj, VAO, shader) {}
 
 RE_CompGrid::~RE_CompGrid()
@@ -53,81 +48,6 @@ void RE_CompGrid::Draw()
 	glDrawArrays(GL_LINES, 0, 400);
 }
 
-RE_CompCube::RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count) : 
-	RE_CompPrimitive(C_CUBE, game_obj, VAO, shader), triangle_count(triangle_count) 
-{
-	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-}
-
-RE_CompCube::RE_CompCube(const RE_CompCube & cmpCube, RE_GameObject * go) :
-	RE_CompPrimitive(C_CUBE, go, cmpCube.RE_CompPrimitive::VAO, cmpCube.RE_CompPrimitive::shader)
-{
-	RE_CompPrimitive::color = cmpCube.RE_CompPrimitive::color;
-	triangle_count = cmpCube.triangle_count;
-	RE_CompPrimitive::VAO = App->primitives->CheckCubeVAO();
-}
-
-RE_CompCube::~RE_CompCube()
-{
-}
-
-void RE_CompCube::Draw()
-{
-	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
-	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
-
-	if (!show_checkers)
-	{
-		// Apply Diffuse Color
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
-
-		// Draw
-		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
-		glDrawElements(GL_TRIANGLES, triangle_count, GL_UNSIGNED_SHORT, 0);
-	}
-	else
-	{
-		// Apply Checkers Texture
-		glActiveTexture(GL_TEXTURE0);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
-		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse0", 0);
-		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
-
-		// Draw
-		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
-		glDrawElements(GL_TRIANGLES, triangle_count, GL_UNSIGNED_SHORT, 0);
-	}
-}
-
-void RE_CompCube::DrawProperties()
-{
-	if (ImGui::CollapsingHeader("Cube Primitive"))
-	{
-		ImGui::Checkbox("Use checkers texture", &show_checkers);
-
-		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
-	}
-}
-
-unsigned int RE_CompCube::GetBinarySize() const
-{
-	return sizeof(float) * 3;
-}
-
-void RE_CompCube::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
-{
-	node->PushFloatVector("color", RE_CompPrimitive::color);
-}
-
-void RE_CompCube::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
-{
-	size_t size = sizeof(float) * 3;
-	memcpy(cursor, &RE_CompPrimitive::color[0], size);
-	cursor += size;
-}
 
 RE_CompRock::RE_CompRock(RE_GameObject* game_obj, unsigned int shader, int _seed, int _subdivions)
 	: RE_CompPrimitive(C_ROCK, game_obj, NULL, shader)
@@ -157,37 +77,22 @@ void RE_CompRock::Draw()
 	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
-	if (!show_checkers)
-	{
-		// Apply Diffuse Color
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
+	// Apply Diffuse Color
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
 
-		// Draw
-		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
-		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
-	}
-	else
-	{
-		// Apply Checkers Texture
-		glActiveTexture(GL_TEXTURE0);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
-		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
-		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse", 0);
-		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
+	// Draw
+	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 
-		// Draw
-		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
-		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
-	}
 }
 
 void RE_CompRock::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Rock Primitive"))
 	{
-		ImGui::Checkbox("Use checkers texture", &show_checkers);
+		ImGui::Text("Can't checker because don't support Texture Coords");
 
 		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
 
@@ -309,6 +214,142 @@ void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
 
 		canChange = false;
 	}
+}
+
+RE_CompPlatonic::RE_CompPlatonic(ComponentType t, const char* name, RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
+	: RE_CompPrimitive(t, game_obj, VAO, shader), triangle_count(triangle_count), pName(name) { }
+
+RE_CompPlatonic::~RE_CompPlatonic() { }
+
+void RE_CompPlatonic::Draw()
+{
+	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+
+	// Apply Diffuse Color
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
+
+	// Draw
+	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+
+}
+
+void RE_CompPlatonic::DrawProperties()
+{
+	eastl::string title(pName);
+	title += " Primitive";
+	if (ImGui::CollapsingHeader(pName.c_str()))
+	{
+		ImGui::Text("Can't checker because don't support Texture Coords");
+
+		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
+	}
+}
+
+unsigned int RE_CompPlatonic::GetBinarySize() const
+{
+	return sizeof(float) * 3;
+}
+
+void RE_CompPlatonic::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
+{
+	node->PushFloatVector("color", RE_CompPrimitive::color);
+}
+
+void RE_CompPlatonic::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+{
+	size_t size = sizeof(float) * 3;
+	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+}
+
+
+RE_CompCube::RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count) : 
+	RE_CompPlatonic(C_CUBE,"Cube", game_obj, VAO, shader, triangle_count)
+{
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+}
+
+RE_CompCube::RE_CompCube(const RE_CompCube & cmpCube, RE_GameObject * go) :
+	RE_CompPlatonic(C_CUBE, "Cube", go, cmpCube.RE_CompPrimitive::VAO, cmpCube.RE_CompPrimitive::shader, cmpCube.RE_CompPlatonic::triangle_count)
+{
+	RE_CompPrimitive::color = cmpCube.RE_CompPrimitive::color;
+	RE_CompPrimitive::VAO = App->primitives->CheckCubeVAO();
+}
+
+RE_CompCube::~RE_CompCube()
+{
+}
+
+RE_CompDodecahedron::RE_CompDodecahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
+ : RE_CompPlatonic(C_DODECAHEDRON, "Dodecahedron", game_obj, VAO, shader, triangle_count)
+{
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+}
+
+RE_CompDodecahedron::RE_CompDodecahedron(const RE_CompDodecahedron& cmpDodecahedron, RE_GameObject* go)
+ : RE_CompPlatonic(C_DODECAHEDRON, "Dodecahedron", go, cmpDodecahedron.RE_CompPrimitive::VAO, cmpDodecahedron.RE_CompPrimitive::shader, cmpDodecahedron.RE_CompPlatonic::triangle_count)
+{
+	RE_CompPrimitive::color = cmpDodecahedron.RE_CompPrimitive::color;
+	RE_CompPrimitive::VAO = App->primitives->CheckDodecahedronVAO();
+}
+
+RE_CompDodecahedron::~RE_CompDodecahedron()
+{
+}
+
+RE_CompTetrahedron::RE_CompTetrahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
+	: RE_CompPlatonic(C_TETRAHEDRON, "Tetrahedron", game_obj, VAO, shader, triangle_count)
+{
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+}
+
+RE_CompTetrahedron::RE_CompTetrahedron(const RE_CompTetrahedron& cmpTetrahedron, RE_GameObject* go)
+	: RE_CompPlatonic(C_TETRAHEDRON, "Tetrahedron", go, cmpTetrahedron.RE_CompPrimitive::VAO, cmpTetrahedron.RE_CompPrimitive::shader, cmpTetrahedron.RE_CompPlatonic::triangle_count)
+{
+	RE_CompPrimitive::color = cmpTetrahedron.RE_CompPrimitive::color;
+	RE_CompPrimitive::VAO = App->primitives->CheckTetrahedronVAO();
+}
+
+RE_CompTetrahedron::~RE_CompTetrahedron()
+{
+}
+
+RE_CompOctohedron::RE_CompOctohedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
+	: RE_CompPlatonic(C_OCTOHEDRON, "Octohedron", game_obj, VAO, shader, triangle_count)
+{
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+}
+
+RE_CompOctohedron::RE_CompOctohedron(const RE_CompOctohedron& cmpOctohedron, RE_GameObject* go)
+	: RE_CompPlatonic(C_OCTOHEDRON, "Octohedron", go, cmpOctohedron.RE_CompPrimitive::VAO, cmpOctohedron.RE_CompPrimitive::shader, cmpOctohedron.RE_CompPlatonic::triangle_count)
+{
+	RE_CompPrimitive::color = cmpOctohedron.RE_CompPrimitive::color;
+	RE_CompPrimitive::VAO = App->primitives->CheckOctohedronVAO();
+}
+
+RE_CompOctohedron::~RE_CompOctohedron()
+{
+}
+
+RE_CompIcosahedron::RE_CompIcosahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
+	: RE_CompPlatonic(C_ICOSAHEDRON, "Icosahedron", game_obj, VAO, shader, triangle_count)
+{
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+}
+
+RE_CompIcosahedron::RE_CompIcosahedron(const RE_CompIcosahedron& cmpIcosahedron, RE_GameObject* go)
+	: RE_CompPlatonic(C_ICOSAHEDRON, "Icosahedron", go, cmpIcosahedron.RE_CompPrimitive::VAO, cmpIcosahedron.RE_CompPrimitive::shader, cmpIcosahedron.RE_CompPlatonic::triangle_count)
+{
+	RE_CompPrimitive::color = cmpIcosahedron.RE_CompPrimitive::color;
+	RE_CompPrimitive::VAO = App->primitives->CheckIcosahedronVAO();
+}
+
+RE_CompIcosahedron::~RE_CompIcosahedron()
+{
 }
 
 RE_CompParametric::RE_CompParametric(ComponentType t, const char* _name, RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks, bool _useRadius, float _radius, float _minR, float _maxR)
