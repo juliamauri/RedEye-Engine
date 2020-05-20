@@ -30,6 +30,7 @@ public:
 	RE_CompPrimitive* CreateSphere(RE_GameObject* game_obj, int slices  = 16, int stacks = 18);
 	RE_CompPrimitive* CreateCylinder(RE_GameObject* game_obj, int slices = 30, int stacks = 3);
 	RE_CompPrimitive* CreateHemiSphere(RE_GameObject* game_obj, int slices = 10, int stacks = 10);
+	RE_CompPrimitive* CreateTorus(RE_GameObject* game_obj, int slices = 30, int stacks = 40, float radius = 0.1f);
 
 	//Check
 	unsigned int CheckCubeVAO();

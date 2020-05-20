@@ -343,6 +343,16 @@ void ModuleScene::CreateHemiSphere()
 	goManager.Push(hemisphere_go);
 }
 
+void ModuleScene::CreateTorus()
+{
+	RE_GameObject* torus_go = AddGO("Torus", root);
+	Event::Push(GO_HAS_NEW_CHILD, this, root, torus_go);
+	torus_go->AddComponent(App->primitives->CreateTorus(torus_go));
+	torus_go->ResetBoundingBoxes();
+	torus_go->TransformModified(false);
+	goManager.Push(torus_go);
+}
+
 void ModuleScene::CreateCamera()
 {
 	RE_GameObject* cam_go = AddGO("Camera", root);

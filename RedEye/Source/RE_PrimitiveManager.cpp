@@ -230,6 +230,11 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateHemiSphere(RE_GameObject* game_obj
 	return new RE_CompHemiSphere(game_obj, shaderPrimitive, slices, stacks);
 }
 
+RE_CompPrimitive* RE_PrimitiveManager::CreateTorus(RE_GameObject* game_obj, int slices, int stacks, float radius)
+{
+	return new RE_CompTorus(game_obj, shaderPrimitive, slices, stacks, radius);
+}
+
 unsigned int RE_PrimitiveManager::CheckCubeVAO()
 {
 	if (vao_cube == 0) {

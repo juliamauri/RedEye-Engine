@@ -220,6 +220,9 @@ update_status ModuleEditor::Update()
 					if (ImGui::MenuItem("HemiSphere"))
 						App->scene->CreateHemiSphere();
 
+					if (ImGui::MenuItem("Torus"))
+						App->scene->CreateTorus();
+
 					if (ImGui::MenuItem("Camera"))
 						App->scene->CreateCamera();
 					ImGui::EndMenu();

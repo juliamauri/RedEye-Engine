@@ -59,6 +59,7 @@ public:
 	void CreateSphere();
 	void CreateCylinder();
 	void CreateHemiSphere();
+	void CreateTorus();
 	void CreateCamera();
 
 	void DrawEditor() override;

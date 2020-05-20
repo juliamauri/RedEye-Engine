@@ -277,7 +277,7 @@ public:
 
 
 /**************************************************
-******	Capsule
+******	HemiSphere
 **************************************************/
 
 class RE_CompHemiSphere : public RE_CompPrimitive, RE_CompAxis
@@ -304,6 +304,39 @@ private:
 	bool canChange = true;
 public:
 	int tmpSl, tmpSt;
+};
+
+/**************************************************
+******	Torus
+**************************************************/
+
+class RE_CompTorus : public RE_CompPrimitive
+{
+public:
+	RE_CompTorus(RE_GameObject* game_obj, unsigned int shader, int slice, int stacks, float radius);
+	RE_CompTorus(const RE_CompTorus& cmpSphere, RE_GameObject* go = nullptr);
+	~RE_CompTorus();
+	void Draw() override;
+	void DrawProperties() override;
+	unsigned int GetBinarySize()const override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
+
+	unsigned int GetTriangleCount()const override { return triangle_count; }
+
+private:
+	void GenerateNewTorus(int slice, int stacks, float radius);
+
+private:
+	bool show_checkers = false;
+	int triangle_count;
+	int slice, stacks;
+	float radius;
+	bool canChange = true;
+public:
+	int tmpSl, tmpSt;
+	float tmpR;
+
 };
 
 #endif // !__RE_COMPPRIMITIVE_H__
