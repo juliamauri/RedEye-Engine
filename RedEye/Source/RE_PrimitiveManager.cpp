@@ -234,25 +234,77 @@ unsigned int RE_PrimitiveManager::CheckCubeVAO()
 {
 	if (vao_cube == 0) {
 		par_shapes_mesh* cube = par_shapes_create_cube();
+		par_shapes_unweld(cube, true);
+		par_shapes_compute_normals(cube);
+
+		float* points = new float[cube->npoints * 3];
+		float* normals = new float[cube->npoints * 3];
+		//float* texCoords = new float[cube->npoints * 2];
+
+		uint meshSize = 0;
+		size_t size = cube->npoints * 3 * sizeof(float);
+		uint stride = 0;
+
+		memcpy(points, cube->points, size);
+		meshSize += 3 * cube->npoints;
+		stride += 3;
+
+		memcpy(normals, cube->normals, size);
+		meshSize += 3 * cube->npoints;
+		stride += 3;
+
+		//size = cube->npoints * 2 * sizeof(float);
+		//memcpy(texCoords, cube->tcoords, size);
+		//meshSize += 2 * cube->npoints;
+		//stride += 2;
+
+		stride *= sizeof(float);
+		float* meshBuffer = new float[meshSize];
+		float* cursor = meshBuffer;
+		for (uint i = 0; i < cube->npoints; i++) {
+			uint cursorSize = 3;
+			size_t size = sizeof(float) * 3;
+
+			memcpy(cursor, &points[i * 3], size);
+			cursor += cursorSize;
+
+			memcpy(cursor, &normals[i * 3], size);
+			cursor += cursorSize;
+
+			//cursorSize = 2;
+			//size = sizeof(float) * 2;
+			//memcpy(cursor, &texCoords[i * 2], size);
+			//cursor += cursorSize;
+		}
+
 
 		glGenVertexArrays(1, &vao_cube);
-		glGenBuffers(1, &vbo_cube);
-
 		RE_GLCache::ChangeVAO(vao_cube);
 
+		glGenBuffers(1, &vbo_cube);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_cube);
-		glBufferData(GL_ARRAY_BUFFER, cube->npoints * sizeof(float) * 3, cube->points, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
 		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
+
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+
+		//glEnableVertexAttribArray(4);
+		//glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
 
 		glGenBuffers(1, &ebo_cube);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_cube);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube->ntriangles * sizeof(unsigned short) * 3, cube->triangles, GL_STATIC_DRAW);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		par_shapes_free_mesh(cube);
+		DEL_A(points);
+		DEL_A(normals);
+		//DEL_A(texCoords);
+		DEL_A(meshBuffer);
+
 	}
 	return vao_cube;
 }

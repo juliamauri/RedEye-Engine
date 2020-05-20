@@ -167,7 +167,7 @@ void RE_CompCube::Draw()
 	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
-	if (show_checkers)
+	if (!show_checkers)
 	{
 		// Apply Diffuse Color
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
