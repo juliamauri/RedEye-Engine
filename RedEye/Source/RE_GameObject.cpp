@@ -1152,31 +1152,6 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 	{
 		switch (ComponentType(type))
 		{
-		case C_AXIS:
-		{
-			ret = (RE_Component*)(App->primitives->CreateAxis(this));
-			break;
-		}
-		case C_POINT:
-		{
-			ret = (RE_Component*)(App->primitives->CreatePoint(this, math::vec::zero));
-			break;
-		}
-		case C_LINE:
-		{
-			ret = (RE_Component*)(App->primitives->CreateLine(this, math::vec::zero, math::vec::one));
-			break;
-		}
-		case C_RAY:
-		{
-			ret = (RE_Component*)(App->primitives->CreateRay(this));
-			break;
-		}
-		case C_TRIANGLE:
-		{
-			ret = (RE_Component*)(App->primitives->CreateTriangle(this));
-			break;
-		}
 		case C_GRID:
 		{
 			ret = (RE_Component*)(App->primitives->CreateGrid(this));
@@ -1185,11 +1160,6 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 		case C_CUBE:
 		{
 			ret = (RE_Component*)(App->primitives->CreateCube(this));
-			break;
-		}
-		case C_FUSTRUM:
-		{
-			ret = (RE_Component*)(App->primitives->CreateFustrum(this));
 			break;
 		}
 		case C_SPHERE:
