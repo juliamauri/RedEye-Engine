@@ -226,6 +226,9 @@ update_status ModuleEditor::Update()
 					if (ImGui::MenuItem("Trefoil Knot"))
 						App->scene->CreateTrefoilKnot();
 
+					if (ImGui::MenuItem("Rock"))
+						App->scene->CreateRock();
+
 					if (ImGui::MenuItem("Camera"))
 						App->scene->CreateCamera();
 					ImGui::EndMenu();

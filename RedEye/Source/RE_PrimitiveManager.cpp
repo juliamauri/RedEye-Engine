@@ -240,6 +240,11 @@ RE_CompPrimitive* RE_PrimitiveManager::CreateTrefoilKnot(RE_GameObject* game_obj
 	return new RE_CompTrefoiKnot(game_obj, shaderPrimitive, slices, stacks, radius);
 }
 
+RE_CompPrimitive* RE_PrimitiveManager::CreateRock(RE_GameObject* game_obj, int seed, int nsubdivisions)
+{
+	return new RE_CompRock(game_obj, shaderPrimitive, seed, nsubdivisions);
+}
+
 unsigned int RE_PrimitiveManager::CheckCubeVAO()
 {
 	if (vao_cube == 0) {

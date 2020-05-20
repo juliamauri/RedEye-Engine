@@ -340,7 +340,7 @@ public:
 };
 
 /**************************************************
-******	Torus
+******	Trefoi Knot
 **************************************************/
 
 class RE_CompTrefoiKnot : public RE_CompPrimitive
@@ -370,6 +370,36 @@ public:
 	int tmpSl, tmpSt;
 	float tmpR;
 
+};
+
+/**************************************************
+******	Rock
+**************************************************/
+
+class RE_CompRock : public RE_CompPrimitive, RE_CompAxis
+{
+public:
+	RE_CompRock(RE_GameObject* game_obj, unsigned int shader, int _seed, int _subdivions);
+	RE_CompRock(const RE_CompRock& cmpRock, RE_GameObject* go = nullptr);
+	~RE_CompRock();
+	void Draw() override;
+	void DrawProperties() override;
+	unsigned int GetBinarySize()const override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
+
+	unsigned int GetTriangleCount()const override { return triangle_count; }
+
+private:
+	void GenerateNewRock(int seed, int subdivisions);
+
+private:
+	bool show_checkers = false;
+	int triangle_count;
+	int seed, nsubdivisions;
+	bool canChange = true;
+public:
+	int tmpSe, tmpSb;
 };
 
 #endif // !__RE_COMPPRIMITIVE_H__

@@ -61,6 +61,7 @@ public:
 	void CreateHemiSphere();
 	void CreateTorus();
 	void CreateTrefoilKnot();
+	void CreateRock();
 	void CreateCamera();
 
 	void DrawEditor() override;

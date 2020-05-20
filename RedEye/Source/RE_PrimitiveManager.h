@@ -32,6 +32,7 @@ public:
 	RE_CompPrimitive* CreateHemiSphere(RE_GameObject* game_obj, int slices = 10, int stacks = 10);
 	RE_CompPrimitive* CreateTorus(RE_GameObject* game_obj, int slices = 30, int stacks = 40, float radius = 0.1f);
 	RE_CompPrimitive* CreateTrefoilKnot(RE_GameObject* game_obj, int slices = 30, int stacks = 40, float radius = 0.5f);
+	RE_CompPrimitive* CreateRock(RE_GameObject* game_obj, int seed = 44891516, int nsubdivisions = 1);
 
 	//Check
 	unsigned int CheckCubeVAO();

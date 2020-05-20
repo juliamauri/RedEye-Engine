@@ -88,6 +88,9 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 		case C_TREFOILKNOT:
 			components.push_back((RE_CompPrimitive*)new RE_CompTrefoiKnot(*(RE_CompTrefoiKnot*)((RE_CompPrimitive*)cmpGO), this));
 			break;
+		case C_ROCK:
+			components.push_back((RE_CompPrimitive*)new RE_CompRock(*(RE_CompRock*)((RE_CompPrimitive*)cmpGO), this));
+			break;
 		case C_PLANE:
 			components.push_back((RE_CompPrimitive*)new RE_CompPlane(*(RE_CompPlane*)((RE_CompPrimitive*)cmpGO), this));
 			break;
@@ -348,14 +351,14 @@ void RE_GameObject::SerializeJson(JSONNode * node, eastl::map<const char*, int>*
 		uint cmpSize = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_CYLINDER || type == C_HEMISHPERE || type == C_TORUS || type == C_TREFOILKNOT || type == C_MESH || type == C_CAMERA)
+			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_CYLINDER || type == C_HEMISHPERE || type == C_TORUS || type == C_TREFOILKNOT || type == C_ROCK || type == C_MESH || type == C_CAMERA)
 				cmpSize++;
 		}
 		comps->PushUInt("ComponentsSize", cmpSize);
 		uint count = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_CYLINDER && type != C_HEMISHPERE && type != C_TORUS && type != C_TREFOILKNOT && type != C_MESH && type != C_CAMERA)
+			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_CYLINDER && type != C_HEMISHPERE && type != C_TORUS && type != C_TREFOILKNOT && type != C_ROCK && type != C_MESH && type != C_CAMERA)
 				continue;
 			ref = "cmp" + eastl::to_string(count++);
 			JSONNode* comp = comps->PushJObject(ref.c_str());
@@ -430,7 +433,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 		uint cmpSize = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_CYLINDER || type == C_HEMISHPERE || type == C_TORUS || type == C_TREFOILKNOT || type == C_MESH || type == C_CAMERA)
+			if (type == C_CUBE || type == C_PLANE || type == C_SPHERE || type == C_CYLINDER || type == C_HEMISHPERE || type == C_TORUS || type == C_TREFOILKNOT || type == C_ROCK || type == C_MESH || type == C_CAMERA)
 				cmpSize++;
 		}
 		memcpy(cursor, &cmpSize, size);
@@ -438,7 +441,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_CYLINDER && type != C_HEMISHPERE && type != C_TORUS && type != C_TREFOILKNOT && type != C_MESH && type != C_CAMERA)
+			if (type != C_CUBE && type != C_PLANE && type != C_SPHERE && type != C_CYLINDER && type != C_HEMISHPERE && type != C_TORUS && type != C_TREFOILKNOT && type != C_ROCK && type != C_MESH && type != C_CAMERA)
 				continue;
 			size = sizeof(unsigned short);
 			memcpy(cursor, &type, size);
@@ -529,6 +532,13 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, eastl::map<int, co
 				RE_CompPrimitive* newTrefoilKnot = nullptr;
 				new_go->AddComponent(newTrefoilKnot = App->primitives->CreateTrefoilKnot(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3), cmpNode->PullFloat("radius", 0.1f)));
 				newTrefoilKnot->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
+				break;
+			}
+			case C_ROCK:
+			{
+				RE_CompPrimitive* newRock = nullptr;
+				new_go->AddComponent(newRock = App->primitives->CreateRock(new_go, cmpNode->PullInt("seed", 5), cmpNode->PullInt("nsubdivisions", 20)));
+				newRock->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_MESH:
@@ -802,6 +812,27 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, eastl::map<int, c
 				cursor += size;
 
 				newTrefoilKnot->SetColor(math::vec(vec));
+				break;
+			}
+			case C_ROCK:
+			{
+				RE_CompPrimitive* newRock = nullptr;
+
+				int seed = 0, nsubdivisions = 0;
+				size = sizeof(int);
+				memcpy(&seed, cursor, size);
+				cursor += size;
+
+				memcpy(&nsubdivisions, cursor, size);
+				cursor += size;
+
+				new_go->AddComponent(newRock = App->primitives->CreateRock(new_go, seed, nsubdivisions));
+
+				size = sizeof(float) * 3;
+				memcpy(vec, cursor, size);
+				cursor += size;
+
+				newRock->SetColor(math::vec(vec));
 				break;
 			}
 			case C_MESH:
@@ -1186,6 +1217,11 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 			ret = (RE_Component*)(App->primitives->CreateTrefoilKnot(this));
 			break;
 		}
+		case C_ROCK:
+		{
+			ret = (RE_Component*)(App->primitives->CreateRock(this));
+			break;
+		}
 		default:
 			LOG_ERROR("Component of type %u is unsupported", type);
 		}
@@ -1392,6 +1428,7 @@ void RE_GameObject::ResetLocalBoundingBox()
 		case C_HEMISHPERE: local_bounding_box.Enclose(math::AABB(-math::vec::one, math::vec::one)); break;
 		case C_TORUS: local_bounding_box.Enclose(math::AABB(-math::vec::one, math::vec::one)); break;
 		case C_TREFOILKNOT: local_bounding_box.Enclose(math::AABB(-math::vec::one, math::vec::one)); break;
+		case C_ROCK: local_bounding_box.Enclose(math::AABB(-math::vec::one, math::vec::one)); break;
 		case C_CUBE: local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one)); break;
 		}
 	}

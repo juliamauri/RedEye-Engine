@@ -1488,3 +1488,185 @@ void RE_CompTrefoiKnot::GenerateNewTrefoiKnot(int slice, int stacks, float radiu
 		canChange = false;
 	}
 }
+
+RE_CompRock::RE_CompRock(RE_GameObject* game_obj, unsigned int shader, int _seed, int _subdivions)
+	: RE_CompPrimitive(C_ROCK, game_obj, NULL, shader)
+{
+	if (_subdivions < 1) _subdivions = 1;
+	if (_subdivions > 5) _subdivions = 5;
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+	GenerateNewRock(seed = tmpSe = _seed, nsubdivisions = tmpSb = _subdivions);
+}
+RE_CompRock::RE_CompRock(const RE_CompRock& cmpRock, RE_GameObject* go)
+	: RE_CompPrimitive(C_ROCK, go, NULL, cmpRock.RE_CompPrimitive::shader)
+{
+	RE_CompPrimitive::color = cmpRock.RE_CompPrimitive::color;
+	GenerateNewRock(seed = tmpSe = cmpRock.seed, nsubdivisions = tmpSb = cmpRock.nsubdivisions);
+}
+
+
+RE_CompRock::~RE_CompRock()
+{
+	glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+	glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+	glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+}
+
+void RE_CompRock::Draw()
+{
+	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
+	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
+
+	if (!show_checkers)
+	{
+		// Apply Diffuse Color
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
+
+		// Draw
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	}
+	else
+	{
+		// Apply Checkers Texture
+		glActiveTexture(GL_TEXTURE0);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
+		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
+		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse", 0);
+		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
+
+		// Draw
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	}
+}
+
+void RE_CompRock::DrawProperties()
+{
+	if (ImGui::CollapsingHeader("Rock Primitive"))
+	{
+		ImGui::Checkbox("Use checkers texture", &show_checkers);
+
+		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
+
+		ImGui::PushItemWidth(75.0f);
+		if (ImGui::DragInt("Seed", &tmpSe, 1.0f))
+		{
+			if (seed != tmpSe) {
+				seed = tmpSe;
+				canChange = true;
+			}
+		}
+		if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
+		{
+			if (tmpSb >= 3 && nsubdivisions != tmpSb) {
+				nsubdivisions = tmpSb;
+				canChange = true;
+			}
+			else if (tmpSb < 1) tmpSb = 1;
+			else if (tmpSb > 5) tmpSb = 5;
+		}
+		ImGui::PopItemWidth();
+
+		if (ImGui::Button("Apply")) GenerateNewRock(seed, nsubdivisions);
+	}
+}
+
+unsigned int RE_CompRock::GetBinarySize() const
+{
+	return sizeof(float) * 3 + sizeof(int) * 2;
+}
+
+void RE_CompRock::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
+{
+	node->PushFloatVector("color", RE_CompPrimitive::color);
+	node->PushInt("seed", seed);
+	node->PushInt("nsubdivisions", nsubdivisions);
+}
+
+void RE_CompRock::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+{
+	size_t size = sizeof(int);
+	memcpy(cursor, &seed, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(cursor, &nsubdivisions, size);
+	cursor += size;
+
+	size = sizeof(float) * 3;
+	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+}
+
+void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
+{
+	if (canChange)
+	{
+		if (RE_CompPrimitive::VAO != 0) {
+			glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		}
+
+		par_shapes_mesh* rock = par_shapes_create_rock(seed, subdivisions);
+
+		float* points = new float[rock->npoints * 3];
+		float* normals = new float[rock->npoints * 3];
+
+		uint meshSize = 0;
+		size_t size = rock->npoints * 3 * sizeof(float);
+		uint stride = 0;
+
+		memcpy(points, rock->points, size);
+		meshSize += 3 * rock->npoints;
+		stride += 3;
+
+		memcpy(normals, rock->normals, size);
+		meshSize += 3 * rock->npoints;
+		stride += 3;
+
+		stride *= sizeof(float);
+		float* meshBuffer = new float[meshSize];
+		float* cursor = meshBuffer;
+		for (uint i = 0; i < rock->npoints; i++) {
+			uint cursorSize = 3;
+			size_t size = sizeof(float) * 3;
+
+			memcpy(cursor, &points[i * 3], size);
+			cursor += cursorSize;
+
+			memcpy(cursor, &normals[i * 3], size);
+			cursor += cursorSize;
+		}
+
+
+		glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
+		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
+		glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
+
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+
+		glGenBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RE_CompPrimitive::EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, rock->ntriangles * sizeof(unsigned short) * 3, rock->triangles, GL_STATIC_DRAW);
+
+		triangle_count = rock->ntriangles;
+
+		par_shapes_free_mesh(rock);
+		DEL_A(points);
+		DEL_A(normals);
+		DEL_A(meshBuffer);
+
+		canChange = false;
+	}
+}

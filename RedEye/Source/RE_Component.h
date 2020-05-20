@@ -33,6 +33,7 @@ enum ComponentType : ushortint
 	C_HEMISHPERE,
 	C_TORUS,
 	C_TREFOILKNOT,
+	C_ROCK,
 	C_PRIMIVE_MAX,
 
 	MAX_COMPONENT_TYPES

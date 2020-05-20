@@ -363,6 +363,16 @@ void ModuleScene::CreateTrefoilKnot()
 	goManager.Push(trefoilknot_go);
 }
 
+void ModuleScene::CreateRock()
+{
+	RE_GameObject* rock_go = AddGO("Rock", root);
+	Event::Push(GO_HAS_NEW_CHILD, this, root, rock_go);
+	rock_go->AddComponent(App->primitives->CreateRock(rock_go));
+	rock_go->ResetBoundingBoxes();
+	rock_go->TransformModified(false);
+	goManager.Push(rock_go);
+}
+
 void ModuleScene::CreateCamera()
 {
 	RE_GameObject* cam_go = AddGO("Camera", root);
