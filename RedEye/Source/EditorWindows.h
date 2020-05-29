@@ -192,7 +192,7 @@ private:
 class AssetsWindow : public EditorWindow
 {
 public:
-	AssetsWindow(const char* name = "Assets Panel", bool start_active = true);
+	AssetsWindow(const char* name = "Assets", bool start_active = true);
 	~AssetsWindow();
 
 	const char* GetCurrentDirPath()const;
@@ -205,6 +205,16 @@ private:
 	const char* currentPath = nullptr;
 
 	eastl::string* selectingUndefFile = nullptr;
+};
+
+class WwiseWindow : public EditorWindow
+{
+public:
+	WwiseWindow(const char* name = "Wwise", bool start_active = true);
+	~WwiseWindow();
+
+private:
+	void Draw(bool secondary = false) override;
 };
 
 class RE_Material;

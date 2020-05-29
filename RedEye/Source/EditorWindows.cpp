@@ -6,6 +6,7 @@
 #include "ModuleRenderer3d.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
+#include "ModuleWwise.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_ResourceManager.h"
 
@@ -1127,6 +1128,33 @@ void AssetsWindow::Draw(bool secondary)
 
 	ImGui::End();
 }
+
+///////   Wwise Window   ////////////////////////////////////////////
+WwiseWindow::WwiseWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
+
+WwiseWindow::~WwiseWindow()
+{
+}
+
+void WwiseWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		if (secondary) {
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		App->wwise->DrawWwiseElementsDetected();
+
+		if (secondary) {
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+	}
+	ImGui::End();
+}
+
 
 SceneEditorWindow::SceneEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
 

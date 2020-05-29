@@ -40,12 +40,12 @@ public:
 	void RecieveEvent(const Event& e) override;
 	void DrawEditor() override;
 
+	void DrawWwiseElementsDetected();
+
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
 
 	void ReadBanksChanges();
-
-	static unsigned long LoadBank(const char* buffer, unsigned int size);
 
 private:
 	eastl::string audioBanksFolderPath;
@@ -55,5 +55,6 @@ private:
 	bool  located_SoundBanksInfo = false;
 	
 	eastl::vector<SoundBank> soundbanks;
+	bool initBnkLoaded = false;
 
 };

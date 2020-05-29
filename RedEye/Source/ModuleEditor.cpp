@@ -123,6 +123,7 @@ bool ModuleEditor::Init(JSONNode* node)
 bool ModuleEditor::Start()
 {
 	windows.push_back(assets = new AssetsWindow());
+	windows.push_back(wwise = new WwiseWindow());
 
 	grid_go = new RE_GameObject("grid");
 	grid = (RE_Component*)App->primitives->CreateGrid(grid_go);

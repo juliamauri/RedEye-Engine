@@ -54,6 +54,8 @@
 #include <AK/Comm/AkCommunication.h>
 #endif // AK_OPTIMIZED
 
+#define INITBNKSTR "Init.bnk"
+
 ModuleWwise::ModuleWwise(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
 }
@@ -140,15 +142,6 @@ bool ModuleWwise::Start()
 	AkSoundPosition position;
 	position.Set(0, 0, 0,1,0,0,0,1,0);
 	AK::SoundEngine::SetPosition(MY_DEFAULT_LISTENER, position);
-	RE_FileIO initbank("Settings/DefaultAssets/Init.bnk", App->fs->GetZipPath());
-	if (initbank.Load()) {
-		LoadBank(initbank.GetBuffer(), initbank.GetSize());
-	}
-	RE_FileIO bankTest("Settings/DefaultAssets/Music.bnk", App->fs->GetZipPath());
-	if (bankTest.Load()) {
-		LoadBank(bankTest.GetBuffer(), bankTest.GetSize());
-		AK::SoundEngine::PostEvent("PlayVentoAureo", NULL);
-	}
 	return true;
 }
 
@@ -166,6 +159,7 @@ update_status ModuleWwise::PostUpdate()
 
 bool ModuleWwise::CleanUp()
 {
+	soundbanks.clear();
 	AK::SoundEngine::ClearBanks();
 #ifndef AK_OPTIMIZED
 	AK::Comm::Term();
@@ -198,6 +192,7 @@ void ModuleWwise::DrawEditor()
 		else {
 			ImGui::Text("The actual audio bank Path is: \n%s%s \n", rootPath.c_str(), audioBanksFolderPath.c_str());
 			ImGui::Text((located_SoundBanksInfo) ? "SoundBanksInfo.json located at:\n%s\\Windows\\SoundBanksInfo.json" : "Don't located SoundBanksInfo.json.", audioBanksFolderPath.c_str());
+			ImGui::Text((initBnkLoaded) ? "Init.bnk is loaded." : "Init.bnk culdn't be loaded.");
 			located_banksFolder = true;
 		}
 
@@ -240,6 +235,70 @@ void ModuleWwise::DrawEditor()
 	}
 }
 
+void ModuleWwise::DrawWwiseElementsDetected()
+{
+	if (!located_banksFolder || !located_SoundBanksInfo) {
+
+		if (!located_banksFolder) ImGui::Text("Needed to set the sound banks folder on engine folder.");
+		if (!located_SoundBanksInfo) ImGui::Text("Can not locate SoundBanksInfo.json");
+		return;
+	}
+
+	eastl::string id;
+	unsigned int count = 0;
+	for (auto& sB : soundbanks) {
+		ImGui::Text("SoundBank: %s", sB.name.c_str());
+		ImGui::SameLine();
+		id = eastl::to_string(count);
+		id += ". ";
+		if (sB.name == INITBNKSTR)
+			ImGui::Text("Could not be unloaded.");
+		else if(sB.loaded)
+		{
+			id += "Unload";
+			if (ImGui::Button(id.c_str())) {
+				sB.Unload();
+			}
+		}
+		else if (!sB.loaded) {
+			id += "Load";
+			if (ImGui::Button(id.c_str())) {
+				sB.LoadBank();
+			}
+		}
+
+		if (!sB.events.empty()) {
+			id = eastl::to_string(count++);
+			id += ". Events";
+
+			unsigned int eventCnt = 0;
+			if (ImGui::TreeNode(id.c_str())) {
+
+				for (auto& e : sB.events) {
+	
+					ImGui::Text("Event: %s", e.name.c_str());
+					id = eastl::to_string(eventCnt++);
+					id += ". ";
+					id += "Send Event";
+					if (sB.loaded) {
+						ImGui::SameLine();
+						if (ImGui::Button(id.c_str())) {
+							AK::SoundEngine::PostEvent(e.ID, NULL);
+						}
+					}
+				}
+				ImGui::TreePop();
+			}
+
+		}
+		else
+			ImGui::Text("This sound bank don't contain events.");
+
+		ImGui::Separator();
+	}
+
+}
+
 bool ModuleWwise::Load(JSONNode* node)
 {
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
@@ -275,6 +334,7 @@ void ModuleWwise::ReadBanksChanges()
 			unsigned long lastMod = App->fs->GetLastTimeModified(soundbankInfoPath.c_str());
 			if (lastMod != 0 && lastSoundBanksInfoModified != lastMod) {
 				soundbanks.clear();
+				initBnkLoaded = false;
 
 				Config soundbanksInfo(soundbankInfoPath.c_str(), "None");
 				if (soundbanksInfo.LoadFromWindowsPath()) {
@@ -283,7 +343,11 @@ void ModuleWwise::ReadBanksChanges()
 					rapidjson::Value* soundBanks = &rootNode->GetDocument()->FindMember("SoundBanksInfo")->value.FindMember("SoundBanks")->value;
 					for (auto& v : soundBanks->GetArray()) {
 						SoundBank newSB(v.FindMember("Path")->value.GetString(), EA::StdC::Atof(v.FindMember("Id")->value.GetString()));
-						
+						newSB.path = App->fs->GetExecutableDirectory();
+						newSB.path += audioBanksFolderPath;
+						newSB.path += platformPath;
+						newSB.path += newSB.name;
+
 						if (v.FindMember("IncludedEvents") != v.MemberEnd()) {
 							rapidjson::Value* events = &v.FindMember("IncludedEvents")->value;
 							for (auto& e : events->GetArray()) {
@@ -296,6 +360,13 @@ void ModuleWwise::ReadBanksChanges()
 
 					DEL(rootNode);
 					lastSoundBanksInfoModified = lastMod;
+
+					for (auto& sB : soundbanks) {
+						if (sB.name == INITBNKSTR) {
+							sB.LoadBank();
+							initBnkLoaded = true;
+						}
+					}
 				}
 			}
 
@@ -307,17 +378,6 @@ void ModuleWwise::ReadBanksChanges()
 
 }
 
-unsigned long ModuleWwise::LoadBank(const char* buffer, unsigned int size)
-{
-	unsigned long ID = 0;
-	//Using LoadBankMemoryView, for keeping the buffer on RE_FileIO sometimes throws AK_DataAlignmentError.
-	AKRESULT result = AK::SoundEngine::LoadBankMemoryCopy(buffer, (unsigned long)size, ID);
-	if (result != AK_Success) {
-		LOG_ERROR("Error while loading bank sound.");
-	}
-	return ID;
-}
-
 SoundBank::~SoundBank()
 {
 	if (loaded) Unload();
@@ -325,14 +385,15 @@ SoundBank::~SoundBank()
 
 void SoundBank::LoadBank()
 {
-	RE_FileIO bankToLoad(path.c_str(), App->fs->GetZipPath());
-	if (bankToLoad.Load()) {
-		AKRESULT result = AK::SoundEngine::LoadBankMemoryCopy(bankToLoad.GetBuffer(), bankToLoad.GetSize(), ID);
+	RE_FileIO* bnkLoaded = App->fs->QuickBufferFromPDPath(path.c_str());
+	if (bnkLoaded != nullptr) {
+		AKRESULT result = AK::SoundEngine::LoadBankMemoryCopy(bnkLoaded->GetBuffer(), bnkLoaded->GetSize(), ID);
 		if (result != AK_Success) {
 			LOG_ERROR("Error while loading bank sound: %s", name.c_str());
 		}
 		else
 			loaded = true;
+		DEL(bnkLoaded);
 	}
 }
 
