@@ -58,6 +58,7 @@
     <ClCompile Include="EditorWindows.cpp" />
     <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp" />
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp" />
+    <ClCompile Include="ModuleWwise.cpp" />
     <ClCompile Include="ResourceEditorsWindows.cpp" />
     <ClCompile Include="RE_Command.cpp" />
     <ClCompile Include="RE_CommandManager.cpp" />
@@ -319,6 +320,7 @@
     <ClInclude Include="EditorWindows.h" />
     <ClInclude Include="ImGuiColorTextEdit\TextEditor.h" />
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h" />
+    <ClInclude Include="ModuleWwise.h" />
     <ClInclude Include="PoolMapped.h" />
     <ClInclude Include="RE_Command.h" />
     <ClInclude Include="RE_CommandManager.h" />
@@ -498,13 +500,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StructMemberAlignment>Default</StructMemberAlignment>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\EA\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\EA\;$(MSBuildProjectDirectory)\WWISESDK\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -522,12 +525,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\EA\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\EA\;$(MSBuildProjectDirectory)\WWISESDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

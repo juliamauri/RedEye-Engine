@@ -6,6 +6,7 @@
 #include "ModuleWindow.h"
 #include "ModuleEditor.h"
 #include "ModuleRenderer3D.h"
+#include "ModuleWwise.h"
 
 #include "RE_Math.h"
 #include "RE_FileSystem.h"
@@ -53,6 +54,7 @@ Application::Application()
 	modules.push_back(scene = new ModuleScene("Scene"));
 	modules.push_back(editor = new ModuleEditor("Editor"));
 	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
+	modules.push_back(wwise = new ModuleWwise("Wwise"));
 
 	cams = new RE_CameraManager();
 	textures = new RE_TextureImporter("Images/");

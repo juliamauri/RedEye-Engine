@@ -280,6 +280,9 @@
     <ClCompile Include="RE_CommandManager.cpp">
       <Filter>Modules\Editor\Commands</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleWwise.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -1214,6 +1217,9 @@
     </ClInclude>
     <ClInclude Include="RE_CommandManager.h">
       <Filter>Modules\Editor\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleWwise.h">
+      <Filter>Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

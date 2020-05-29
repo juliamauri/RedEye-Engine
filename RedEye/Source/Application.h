@@ -12,6 +12,7 @@ class ModuleWindow;
 class ModuleScene;
 class ModuleEditor;
 class ModuleRenderer3D;
+class ModuleWwise;
 
 class RE_FileSystem;
 class TimeManager;
@@ -71,6 +72,7 @@ public:
 	ModuleScene* scene = nullptr;
 	ModuleEditor* editor = nullptr;
 	ModuleRenderer3D* renderer3d = nullptr;
+	ModuleWwise* wwise = nullptr;
 
 	RE_FileSystem* fs = nullptr;
 	TimeManager* time = nullptr;
