@@ -49,9 +49,7 @@ void MaterialEditorWindow::Draw(bool secondary)
 
 		ImGui::Text("Material name:");
 		ImGui::SameLine();
-		std::string tmp(matName.c_str(), matName.size());
-		if (ImGui::InputText("##matname", &tmp))
-			matName = eastl::string(tmp.c_str(), tmp.size());
+		ImGui::InputText("##matname", &matName);
 
 		assetPath = "Assets/Materials/";
 		assetPath += matName;
@@ -119,9 +117,7 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 
 		ImGui::Text("Skybox name:");
 		ImGui::SameLine();
-		std::string tmp(sbName.c_str(), sbName.size());
-		if (ImGui::InputText("##sbname", &tmp))
-			sbName = eastl::string(tmp.c_str(), tmp.size());
+		ImGui::InputText("##sbname", &sbName);
 
 		assetPath = "Assets/Skyboxes/";
 		assetPath += sbName;
@@ -191,9 +187,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 
 		ImGui::Text("Shader name:");
 		ImGui::SameLine();
-		std::string tmp(shaderName.c_str(), shaderName.size());
-		if (ImGui::InputText("##shadername", &tmp))
-			shaderName = eastl::string(tmp.c_str(), tmp.size());
+		ImGui::InputText("##shadername", &shaderName);
 
 		assetPath = "Assets/Shaders/";
 		assetPath += shaderName;
@@ -428,9 +422,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 			if (!e->file) {
 				ImGui::Text("Shader name:");
 				ImGui::SameLine();
-				std::string tmp(e->toModify->c_str(),e->toModify->size());
-				if (ImGui::InputText("##newshadername", &tmp))
-					*e->toModify = eastl::string(tmp.c_str(), tmp.size());
+				ImGui::InputText("##newshadername", e->toModify);
 				assetPath = "Assets/Shaders/";
 				assetPath += *e->toModify;
 				ImGui::Text("Save path: %s", assetPath.c_str());
