@@ -1,5 +1,6 @@
 #pragma once
 #include "Module.h"
+
 class ModuleWwise :
 	public Module
 {
@@ -19,5 +20,6 @@ public:
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
 
+	static unsigned long LoadBank(const char* buffer, unsigned int size);
 };
 

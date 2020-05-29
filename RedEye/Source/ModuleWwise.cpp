@@ -1,19 +1,17 @@
 #include "ModuleWwise.h"
 
 #include "Application.h"
+#include "RE_FileSystem.h"
 #include "OutputLog.h"
 
+#include "ImGui/imgui.h"
 
-#include <AK/SoundEngine/Common/AkTypes.h>
-
+#include <AK/SoundEngine/Platforms/Windows/AkTypes.h>
 #include <AK/SoundEngine/Common/AkMemoryMgr.h>                  // Memory Manager interface
 #include <AK/SoundEngine/Common/AkModule.h>                     // Default memory manager
-
-
 #include <AK/SoundEngine/Common/IAkStreamMgr.h>                 // Streaming Manager
 #include <AK/SoundEngine/Common/AkStreamMgrModule.h>                 // Streaming Manager
 #include <AK/Tools/Common/AkPlatformFuncs.h>                    // Thread defines
-
 #include <AK/SoundEngine/Common/AkSoundEngine.h>                // Sound engine
 #include <AK/MusicEngine/Common/AkMusicEngine.h>                // Music Engine
 #include <AK/SpatialAudio/Common/AkSpatialAudio.h>              // Spatial Audio
@@ -69,21 +67,15 @@ bool ModuleWwise::Init(JSONNode * node)
 	if (AK::MemoryMgr::Init(&memSettings) != AK_Success)
 	{
 		LOG_ERROR("Could not create the audio memory manager.");
-
 		ret = false;
 	}
-
 
 	AkStreamMgrSettings stmSettings;
 	AK::StreamMgr::GetDefaultSettings(stmSettings);
 	if (!AK::StreamMgr::Create(stmSettings))
-
 	{
-
 		LOG_ERROR("Could not create the audio Streaming Manager");
-
 		ret = false;
-
 	}
 
 	AkInitSettings initSettings;
@@ -91,13 +83,9 @@ bool ModuleWwise::Init(JSONNode * node)
 	AK::SoundEngine::GetDefaultInitSettings(initSettings);
 	AK::SoundEngine::GetDefaultPlatformInitSettings(platformInitSettings);
 	if (AK::SoundEngine::Init(&initSettings, &platformInitSettings) != AK_Success)
-
 	{
-
 		LOG_ERROR("Could not initialize the audio Sound Engine.");
-
 		ret = false;
-
 	}
 
 	AkMusicSettings musicInit;
@@ -120,11 +108,8 @@ bool ModuleWwise::Init(JSONNode * node)
 #ifndef AK_OPTIMIZED
 
 	AkCommSettings commSettings;
-
 	AK::Comm::GetDefaultInitSettings(commSettings);
-
 	if (AK::Comm::Init(commSettings) != AK_Success)
-
 	{
 		LOG_ERROR("Could not initialize audio communication.");
 		ret = false;
@@ -137,6 +122,25 @@ bool ModuleWwise::Init(JSONNode * node)
 
 bool ModuleWwise::Start()
 {
+	AK::StreamMgr::SetCurrentLanguage(AKTEXT("English(US)"));
+
+	AkGameObjectID MY_DEFAULT_LISTENER = 0;
+	// Register the main listener.
+	AK::SoundEngine::RegisterGameObj(MY_DEFAULT_LISTENER, "My Default Listener");
+	// Set one listener as the default.
+	AK::SoundEngine::SetDefaultListeners(&MY_DEFAULT_LISTENER, 1);
+	AkSoundPosition position;
+	position.Set(0, 0, 0,1,0,0,0,1,0);
+	AK::SoundEngine::SetPosition(MY_DEFAULT_LISTENER, position);
+	RE_FileIO initbank("Settings/DefaultAssets/Init.bnk", App->fs->GetZipPath());
+	if (initbank.Load()) {
+		LoadBank(initbank.GetBuffer(), initbank.GetSize());
+	}
+	RE_FileIO bankTest("Settings/DefaultAssets/Music.bnk", App->fs->GetZipPath());
+	if (bankTest.Load()) {
+		LoadBank(bankTest.GetBuffer(), bankTest.GetSize());
+		AK::SoundEngine::PostEvent("PlayVentoAureo", NULL);
+	}
 	return true;
 }
 
@@ -147,11 +151,14 @@ update_status ModuleWwise::PreUpdate()
 
 update_status ModuleWwise::PostUpdate()
 {
+	OPTICK_CATEGORY("Render Audio", Optick::Category::Audio);
+	AK::SoundEngine::RenderAudio();
 	return update_status::UPDATE_CONTINUE;
 }
 
 bool ModuleWwise::CleanUp()
 {
+	AK::SoundEngine::ClearBanks();
 #ifndef AK_OPTIMIZED
 	AK::Comm::Term();
 #endif // AK_OPTIMIZED
@@ -170,6 +177,9 @@ void ModuleWwise::RecieveEvent(const Event& e)
 
 void ModuleWwise::DrawEditor()
 {
+	if (ImGui::CollapsingHeader("Wwise Audio Engine"))
+	{
+	}
 }
 
 bool ModuleWwise::Load(JSONNode* node)
@@ -180,4 +190,15 @@ bool ModuleWwise::Load(JSONNode* node)
 bool ModuleWwise::Save(JSONNode* node) const
 {
 	return true;
+}
+
+unsigned long ModuleWwise::LoadBank(const char* buffer, unsigned int size)
+{
+	unsigned long ID = 0;
+	//Using LoadBankMemoryView, for keeping the buffer on RE_FileIO sometimes throws AK_DataAlignmentError.
+	AKRESULT result = AK::SoundEngine::LoadBankMemoryCopy(buffer, (unsigned long)size, ID);
+	if (result != AK_Success) {
+		LOG_ERROR("Error while loading bank sound.");
+	}
+	return ID;
 }
