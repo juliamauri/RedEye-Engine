@@ -486,8 +486,10 @@ RE_FileIO* RE_FileSystem::QuickBufferFromPDPath(const char * full_path)// , char
 		eastl::string ext = file_name.substr(file_name.find_last_of(".") + 1);
 		file_path.erase(file_path.length() - file_name.length(), file_path.length());
 
-		ret = new RE_FileIO(file_name.c_str());
-		if (App->fs->AddPath(file_path.c_str()))
+		eastl::string tmp = "/Export/";
+		tmp += file_name;
+		ret = new RE_FileIO(tmp.c_str());
+		if (App->fs->AddPath(file_path.c_str(), "/Export/"))
 		{
 			if (!ret->Load()) DEL(ret);
 			App->fs->RemovePath(file_path.c_str());
@@ -497,6 +499,28 @@ RE_FileIO* RE_FileSystem::QuickBufferFromPDPath(const char * full_path)// , char
 	}
 
 	return ret;
+}
+
+bool RE_FileSystem::ExistsOnOSFileSystem(const char* path, bool isFolder) const
+{
+	eastl::string full_path(path);
+	eastl::string directory = full_path.substr(0, full_path.find_last_of('\\') + 1);
+	eastl::string fileNameExtension = full_path.substr(full_path.find_last_of("\\") + 1);
+
+	eastl::string tempPath("/Check/");
+	if (PHYSFS_mount(directory.c_str(), "/Check/", 1) != 0) {
+
+		if (!isFolder) {
+			tempPath += fileNameExtension;
+			if (Exists(tempPath.c_str())) {
+				PHYSFS_removeFromSearchPath(directory.c_str());
+				return true;
+			}
+		}
+		PHYSFS_removeFromSearchPath(directory.c_str());
+		return true;
+	}
+	return false;
 }
 
 bool RE_FileSystem::Exists(const char* file) const
@@ -638,6 +662,27 @@ RE_FileSystem::RE_Path* RE_FileSystem::FindPath(const char* pathToFind, RE_Direc
 	}
 
 	return ret;
+}
+
+unsigned long RE_FileSystem::GetLastTimeModified(const char* path)
+{
+	PHYSFS_Stat stat;
+
+	eastl::string full_path(path);
+	eastl::string directory = full_path.substr(0, full_path.find_last_of('\\') + 1);
+	eastl::string fileNameExtension = full_path.substr(full_path.find_last_of("\\") + 1);
+
+	eastl::string tempPath("/Check/");
+	if (PHYSFS_mount(directory.c_str(), "/Check/", 1) != 0) {
+		tempPath += fileNameExtension;
+		if (PHYSFS_stat(tempPath.c_str(), &stat) != 0) {
+			PHYSFS_removeFromSearchPath(directory.c_str());
+			return stat.modtime;
+		}
+		PHYSFS_removeFromSearchPath(directory.c_str());
+	}
+
+	return 0;
 }
 
 void RE_FileSystem::RecursiveCopy(const char * origin, const char * dest)
@@ -810,9 +855,6 @@ void RE_FileIO::HardSave(const char* buffer)
 
 	PHYSFS_file* file = PHYSFS_openWrite(file_name);
 
-
-
-
 	if (file != NULL)
 	{
 		long long written = PHYSFS_write(file, (const void*)buffer, 1, size = (strnlen_s(buffer, 0xffff)));
@@ -880,6 +922,20 @@ bool Config::Load()
 		document.ParseStream(s);
 	}
 
+	return ret;
+}
+
+bool Config::LoadFromWindowsPath()
+{
+	// Open file
+	bool ret = false;
+	RE_FileIO* fileToLoad =  App->fs->QuickBufferFromPDPath(file_name);
+	if (fileToLoad != nullptr) {
+		rapidjson::StringStream s(fileToLoad->GetBuffer());
+		document.ParseStream(s);
+		ret = true;
+		DEL(fileToLoad);
+	}
 	return ret;
 }
 
@@ -1557,6 +1613,11 @@ JSONNode* JSONNode::PullJObject(const char * name)
 	}
 
 	return ret;
+}
+
+rapidjson::Value::Array JSONNode::PullValueArray()
+{
+	return config->document.FindMember(pointerPath.c_str())->value.GetArray();
 }
 
 inline bool JSONNode::operator!() const

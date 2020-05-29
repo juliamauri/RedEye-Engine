@@ -165,6 +165,7 @@ bool Application::Init(int argc, char* argv[])
 				if (thumbnail) thumbnail->Init();
 
 				fs->ReadAssetChanges(0.0, true);
+				wwise->ReadBanksChanges();
 
 				LOG_SEPARATOR("Starting Application");
 
@@ -237,6 +238,8 @@ void Application::FinishUpdate()
 	unsigned int extra_ms = time->ManageFrameTimers();
 	
 	extra_ms = fs->ReadAssetChanges(extra_ms);
+
+	if (extra_ms > 0) wwise->ReadBanksChanges();
 
 	if (extra_ms > 0)
 		SDL_Delay(extra_ms);

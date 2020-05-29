@@ -135,6 +135,7 @@ public:
 
 	RE_FileIO* QuickBufferFromPDPath(const char* full_path); // , char** buffer, unsigned int size);
 
+	bool ExistsOnOSFileSystem(const char* file, bool isFolder = true) const;
 	bool Exists(const char* file) const;
 	bool IsDirectory(const char* file) const;
 	const char* GetExecutableDirectory() const;
@@ -150,6 +151,8 @@ public:
 
 	RE_Directory* FindDirectory(const char* pathToFind);
 	RE_Path* FindPath(const char* pathToFind, RE_Directory* dir = nullptr);
+
+	unsigned long GetLastTimeModified(const char* path);
 
 private:
 	void RecursiveCopy(const char* origin, const char* dest);
@@ -221,6 +224,7 @@ public:
 	Config(const char* file_name, const char* from_zip);
 
 	bool Load() override;
+	bool LoadFromWindowsPath();
 	void Save() override;	
 
 	JSONNode* GetRootNode(const char* member);
@@ -277,6 +281,8 @@ public:
 
 	const char*		PullString(const char* name, const char* deflt);
 	JSONNode*		PullJObject(const char* name);
+
+	rapidjson::Value::Array PullValueArray();
 
 	// Utility
 	inline bool operator!() const;
