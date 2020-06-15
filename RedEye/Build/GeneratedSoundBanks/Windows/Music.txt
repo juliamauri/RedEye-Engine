@@ -1,0 +1,9 @@
+Event	ID	Name			Wwise Object Path	Notes
+	1011492060	ResumeVentoAureo			\Default Work Unit\ResumeVentoAureo	
+	1852333605	PauseVentoAureo			\Default Work Unit\PauseVentoAureo	
+	3465855275	PlayVentoAureo			\Default Work Unit\PlayVentoAureo	
+	4201657005	StopVentoAureo			\Default Work Unit\StopVentoAureo	
+
+In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
+	60980868	Jojos Part 5 Vento Aureo   Opening 2 (GER Version) With SFX	D:\Wwise Projects\RedEye_Testing\.cache\Windows\SFX\Jojos Part 5 Vento Aureo   Opening 2 (GER Version) With SFX_D79FB2B7.wem		\Interactive Music Hierarchy\Default Work Unit\Jojos Part 5 Vento Aureo   Opening 2 (GER Version) With SFX\Jojos Part 5 Vento Aureo   Opening 2 (GER Version) With SFX		20245780
+

@@ -47,6 +47,10 @@ public:
 
 	void ReadBanksChanges();
 
+	static void SendRTPC(const char* name, float value);
+	static void SendState(const char* stateGroupName, const char* stateName);
+	static void SendSwitch(const char* switchName, const char* switchStateName);
+
 private:
 	eastl::string audioBanksFolderPath;
 	bool located_banksFolder = false;
@@ -56,5 +60,4 @@ private:
 	
 	eastl::vector<SoundBank> soundbanks;
 	bool initBnkLoaded = false;
-
 };

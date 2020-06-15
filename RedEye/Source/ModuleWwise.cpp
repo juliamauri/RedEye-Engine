@@ -130,11 +130,13 @@ bool ModuleWwise::Init(JSONNode * node)
 	return ret;
 }
 
+static AkGameObjectID MY_DEFAULT_LISTENER = 0;
+
 bool ModuleWwise::Start()
 {
 	AK::StreamMgr::SetCurrentLanguage(AKTEXT("English(US)"));
-
-	AkGameObjectID MY_DEFAULT_LISTENER = 0;
+	
+	MY_DEFAULT_LISTENER = 0;
 	// Register the main listener.
 	AK::SoundEngine::RegisterGameObj(MY_DEFAULT_LISTENER, "My Default Listener");
 	// Set one listener as the default.
@@ -376,6 +378,21 @@ void ModuleWwise::ReadBanksChanges()
 			located_SoundBanksInfo = false;
 	}
 
+}
+
+void ModuleWwise::SendRTPC(const char* name, float value)
+{	
+	AK::SoundEngine::SetRTPCValue(name, value);
+}
+
+void ModuleWwise::SendState(const char* stateGroupName, const char* stateName)
+{
+	AK::SoundEngine::SetState(stateGroupName, stateName);
+}
+
+void ModuleWwise::SendSwitch(const char* switchName, const char* switchStateName)
+{
+	AK::SoundEngine::SetSwitch(switchName, switchStateName, MY_DEFAULT_LISTENER);
 }
 
 SoundBank::~SoundBank()
