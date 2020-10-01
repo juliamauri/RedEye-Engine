@@ -4,32 +4,12 @@
 #include "Module.h"
 #include "Event.h"
 #include "QuadTree.h"
-#include "PoolMapped.h"
 
 #include <windows.h>
 
 class RE_GameObject;
 class RE_Scene;
 
-class GameObjectManager : public PoolMapped<RE_GameObject*, int> {
-public:
-	GameObjectManager() { }
-	~GameObjectManager() { }
-
-	void Clear();
-
-	eastl::map< RE_GameObject *,int> PushWithChilds(RE_GameObject* val, bool root = true);
-	int Push(RE_GameObject* val)override;
-
-	eastl::vector< RE_GameObject*> PopWithChilds(int id, bool root = true);
-	RE_GameObject* Pop(int id)override;
-
-	int WhatID(RE_GameObject* go)const;
-
-private:
-	eastl::map< RE_GameObject*, int> goToID;
-
-};
 
 
 class ModuleScene : public Module
@@ -51,7 +31,6 @@ public:
 
 	RE_GameObject* GetRoot() const;
 	const RE_GameObject* GetRoot_c() const;
-	RE_GameObject* AddGO(const char* name = nullptr, RE_GameObject* parent = nullptr, bool broadcast = true);
 	void AddGoToRoot(RE_GameObject* toAdd);
 
 	void CreateCube(RE_GameObject* parent = nullptr);
@@ -101,7 +80,6 @@ private:
 	RE_GameObject* savedState = nullptr;
 	RE_GameObject* root = nullptr;
 
-	GameObjectManager goManager;
 
 	AABBDynamicTree static_tree;
 	AABBDynamicTree dynamic_tree;

@@ -77,6 +77,7 @@
     <ClCompile Include="md5.cpp" />
     <ClCompile Include="RE_CameraManager.cpp" />
     <ClCompile Include="RE_GLCache.cpp" />
+    <ClCompile Include="RE_GOManager.cpp" />
     <ClCompile Include="RE_HandleErrors.cpp" />
     <ClCompile Include="RE_InternalResources.cpp" />
     <ClCompile Include="RE_Model.cpp" />
@@ -347,6 +348,7 @@
     <ClInclude Include="md5.h" />
     <ClInclude Include="RE_CameraManager.h" />
     <ClInclude Include="RE_GLCache.h" />
+    <ClInclude Include="RE_GOManager.h" />
     <ClInclude Include="RE_HandleErrors.h" />
     <ClInclude Include="Optick\include\optick.config.h" />
     <ClInclude Include="Optick\include\optick.h" />

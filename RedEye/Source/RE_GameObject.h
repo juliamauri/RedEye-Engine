@@ -130,6 +130,10 @@ public:
 	// Editor
 	void DrawProperties();
 
+	//POOL
+	int GetPoolID()const;
+	void SetPoolID(int id);
+
 private:
 
 	bool active = true;
@@ -147,6 +151,8 @@ private:
 
 	eastl::list<RE_GameObject*> childs;
 	eastl::list<RE_Component*> components;
+
+	int poolID = 0;
 };
 
 #endif // !__RE_GAMEOBJECT_H__

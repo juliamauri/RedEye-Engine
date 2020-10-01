@@ -14,6 +14,7 @@
 #include "RE_ShaderImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_TextureImporter.h"
+#include "RE_GOManager.h"
 
 #include "RE_Material.h"
 #include "RE_Prefab.h"
@@ -105,8 +106,7 @@ void ModuleScene::OnStop()
 	DEL(root);
 	root = new RE_GameObject(*savedState);
 	App->editor->SetSelected(nullptr);
-	goManager.Clear();
-
+	App->goManager->sceneGOs.Clear();
 	SetupScene();
 	Event::ResumeEvents();
 }
@@ -142,9 +142,9 @@ void ModuleScene::RecieveEvent(const Event& e)
 					draw_go->ResetGlobalBoundingBox();
 
 					if (draw_go->IsStatic())
-						static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+						static_tree.PushNode(draw_go->GetPoolID(), draw_go->GetGlobalBoundingBox());
 					else
-						dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+						dynamic_tree.PushNode(draw_go->GetPoolID(), draw_go->GetGlobalBoundingBox());
 				}
 			}
 			else
@@ -162,9 +162,9 @@ void ModuleScene::RecieveEvent(const Event& e)
 				for (auto draw_go : all)
 				{
 					if (draw_go->IsStatic())
-						static_tree.PopNode(goManager.WhatID(draw_go));
+						static_tree.PopNode(draw_go->GetPoolID());
 					else
-						dynamic_tree.PopNode(goManager.WhatID(draw_go));
+						dynamic_tree.PopNode(draw_go->GetPoolID());
 				}
 			}
 			break;
@@ -173,7 +173,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		{
 			if (belongs_to_scene && go->IsActive())
 			{
-				int index = goManager.WhatID(go);
+				int index = go->GetPoolID();
 				dynamic_tree.PopNode(index);
 				static_tree.PushNode(index, go->GetGlobalBoundingBox());
 			}
@@ -183,7 +183,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		{
 			if (belongs_to_scene && go->IsActive())
 			{
-				int index = goManager.WhatID(go);
+				int index = go->GetPoolID();
 				static_tree.PopNode(index);
 				dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
 			}
@@ -202,9 +202,9 @@ void ModuleScene::RecieveEvent(const Event& e)
 					draw_go->ResetGlobalBoundingBox();
 
 					if (draw_go->IsStatic())
-						static_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+						static_tree.PushNode(draw_go->GetPoolID(), draw_go->GetGlobalBoundingBox());
 					else
-						dynamic_tree.PushNode(goManager.WhatID(draw_go), draw_go->GetGlobalBoundingBox());
+						dynamic_tree.PushNode(draw_go->GetPoolID(), draw_go->GetGlobalBoundingBox());
 				}
 			}
 
@@ -221,9 +221,9 @@ void ModuleScene::RecieveEvent(const Event& e)
 				for (auto draw_go : all)
 				{
 					if (draw_go->IsStatic())
-						static_tree.PopNode(goManager.WhatID(draw_go));
+						static_tree.PopNode(draw_go->GetPoolID());
 					else
-						dynamic_tree.PopNode(goManager.WhatID(draw_go));
+						dynamic_tree.PopNode(draw_go->GetPoolID());
 				}
 			}
 
@@ -239,7 +239,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 
 			if (belongs_to_scene && go->HasDrawComponents())
 			{
-				int index = goManager.WhatID(go);
+				int index = go->GetPoolID();
 				if (go->IsStatic())
 				{
 					static_tree.PopNode(index);
@@ -281,13 +281,6 @@ const RE_GameObject * ModuleScene::GetRoot_c() const
 	return root;
 }
 
-RE_GameObject * ModuleScene::AddGO(const char * name, RE_GameObject * parent, bool broadcast)
-{
-	RE_GameObject* ret = new RE_GameObject(name, GUID_NULL, parent ? parent : root);
-
-	return ret;
-}
-
 void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
 {
 	root->AddChild(toAdd);
@@ -296,12 +289,12 @@ void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
 void ModuleScene::CreateCube(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* cube_go = AddGO("Cube", parent);
+	RE_GameObject* cube_go = App->goManager->AddGOToScene("Cube", parent);
+
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, cube_go);
-	cube_go->AddComponent(App->primitives->CreateCube(cube_go));
-	cube_go->ResetBoundingBoxes();
-	cube_go->TransformModified(false);
-	goManager.Push(cube_go);
+	cube_go.AddComponent(App->primitives->CreateCube(cube_go));
+	cube_go.ResetBoundingBoxes();
+	cube_go.TransformModified(false);
 }
 
 void ModuleScene::CreateDodecahedron(RE_GameObject* parent)
@@ -312,7 +305,7 @@ void ModuleScene::CreateDodecahedron(RE_GameObject* parent)
 	dode_go->AddComponent(App->primitives->CreateDodecahedron(dode_go));
 	dode_go->ResetBoundingBoxes();
 	dode_go->TransformModified(false);
-	goManager.Push(dode_go);
+	App->goManager->sceneGOs.Push(dode_go);
 }
 
 void ModuleScene::CreateTetrahedron(RE_GameObject* parent)
@@ -323,7 +316,7 @@ void ModuleScene::CreateTetrahedron(RE_GameObject* parent)
 	tetra_go->AddComponent(App->primitives->CreateTetrahedron(tetra_go));
 	tetra_go->ResetBoundingBoxes();
 	tetra_go->TransformModified(false);
-	goManager.Push(tetra_go);
+	App->goManager->sceneGOs.Push(tetra_go);
 }
 
 void ModuleScene::CreateOctohedron(RE_GameObject* parent)
@@ -334,7 +327,7 @@ void ModuleScene::CreateOctohedron(RE_GameObject* parent)
 	octo_go->AddComponent(App->primitives->CreateOctohedron(octo_go));
 	octo_go->ResetBoundingBoxes();
 	octo_go->TransformModified(false);
-	goManager.Push(octo_go);
+	App->goManager->sceneGOs.Push(octo_go);
 }
 
 void ModuleScene::CreateIcosahedron(RE_GameObject* parent)
@@ -344,7 +337,7 @@ void ModuleScene::CreateIcosahedron(RE_GameObject* parent)
 	icosa_go->AddComponent(App->primitives->CreateIcosahedron(icosa_go));
 	icosa_go->ResetBoundingBoxes();
 	icosa_go->TransformModified(false);
-	goManager.Push(icosa_go);
+	App->goManager->sceneGOs.Push(icosa_go);
 }
 
 void ModuleScene::CreatePlane(RE_GameObject* parent)
@@ -355,7 +348,7 @@ void ModuleScene::CreatePlane(RE_GameObject* parent)
 	plane_go->AddComponent(App->primitives->CreatePlane(plane_go));
 	plane_go->ResetBoundingBoxes();
 	plane_go->TransformModified(false);
-	goManager.Push(plane_go);
+	App->goManager->sceneGOs.Push(plane_go);
 }
 
 void ModuleScene::CreateSphere(RE_GameObject* parent)
@@ -366,7 +359,7 @@ void ModuleScene::CreateSphere(RE_GameObject* parent)
 	sphere_go->AddComponent(App->primitives->CreateSphere(sphere_go));
 	sphere_go->ResetBoundingBoxes();
 	sphere_go->TransformModified(false);
-	goManager.Push(sphere_go);
+	App->goManager->sceneGOs.Push(sphere_go);
 }
 
 void ModuleScene::CreateCylinder(RE_GameObject* parent)
@@ -377,7 +370,7 @@ void ModuleScene::CreateCylinder(RE_GameObject* parent)
 	cylinder_go->AddComponent(App->primitives->CreateCylinder(cylinder_go));
 	cylinder_go->ResetBoundingBoxes();
 	cylinder_go->TransformModified(false);
-	goManager.Push(cylinder_go);
+	App->goManager->sceneGOs.Push(cylinder_go);
 }
 
 void ModuleScene::CreateHemiSphere(RE_GameObject* parent)
@@ -388,7 +381,7 @@ void ModuleScene::CreateHemiSphere(RE_GameObject* parent)
 	hemisphere_go->AddComponent(App->primitives->CreateHemiSphere(hemisphere_go));
 	hemisphere_go->ResetBoundingBoxes();
 	hemisphere_go->TransformModified(false);
-	goManager.Push(hemisphere_go);
+	App->goManager->sceneGOs.Push(hemisphere_go);
 }
 
 void ModuleScene::CreateTorus(RE_GameObject* parent)
@@ -399,7 +392,7 @@ void ModuleScene::CreateTorus(RE_GameObject* parent)
 	torus_go->AddComponent(App->primitives->CreateTorus(torus_go));
 	torus_go->ResetBoundingBoxes();
 	torus_go->TransformModified(false);
-	goManager.Push(torus_go);
+	App->goManager->sceneGOs.Push(torus_go);
 }
 
 void ModuleScene::CreateTrefoilKnot(RE_GameObject* parent)
@@ -410,7 +403,7 @@ void ModuleScene::CreateTrefoilKnot(RE_GameObject* parent)
 	trefoilknot_go->AddComponent(App->primitives->CreateTrefoilKnot(trefoilknot_go));
 	trefoilknot_go->ResetBoundingBoxes();
 	trefoilknot_go->TransformModified(false);
-	goManager.Push(trefoilknot_go);
+	App->goManager->sceneGOs.Push(trefoilknot_go);
 }
 
 void ModuleScene::CreateRock(RE_GameObject* parent)
@@ -421,7 +414,7 @@ void ModuleScene::CreateRock(RE_GameObject* parent)
 	rock_go->AddComponent(App->primitives->CreateRock(rock_go));
 	rock_go->ResetBoundingBoxes();
 	rock_go->TransformModified(false);
-	goManager.Push(rock_go);
+	App->goManager->sceneGOs.Push(rock_go);
 }
 
 void ModuleScene::CreateCamera(RE_GameObject* parent)
@@ -430,14 +423,14 @@ void ModuleScene::CreateCamera(RE_GameObject* parent)
 	RE_GameObject* cam_go = AddGO("Camera", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, cam_go);
 	cam_go->AddCompCamera();
-	goManager.Push(cam_go);
+	App->goManager->sceneGOs.Push(cam_go);
 }
 
 void ModuleScene::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
 	{
-		int total_count = goManager.GetCount();
+		int total_count = App->goManager->sceneGOs.GetCount();
 		int static_count = static_tree.GetCount();
 		int dynamic_count = dynamic_tree.GetCount();
 
@@ -471,7 +464,7 @@ RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 	{
 		int index = goIndex.top();
 		goIndex.pop();
-		objects.push_back(goManager.At(index));
+		objects.push_back(App->goManager->sceneGOs.At(index));
 	}
 
 	if (!objects.empty())
@@ -513,7 +506,7 @@ void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container,
 	{
 		int index = goIndex.top();
 		goIndex.pop();
-		container.push_back(goManager.At(index));
+		container.push_back(App->goManager->sceneGOs.At(index));
 	}
 }
 
@@ -545,7 +538,7 @@ void ModuleScene::ClearScene()
 {
 	Event::PauseEvents();
 
-	goManager.Clear();
+	App->goManager->sceneGOs.Clear();
 	static_tree.Clear();
 	dynamic_tree.Clear();
 
@@ -587,7 +580,7 @@ void ModuleScene::NewEmptyScene(const char* name)
 		DEL(root);
 	}
 	if (savedState) DEL(savedState);
-	goManager.Clear();
+	App->goManager->sceneGOs.Clear();
 
 	root = new RE_GameObject("root");
 	root->SetStatic(false);
@@ -615,7 +608,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 		DEL(root);
 	}
 	if (savedState) DEL(savedState);
-	goManager.Clear();
+	App->goManager->sceneGOs.Clear();
 
 	LOG("Loading scene from own format:");
 	if(!ignorehandle) App->handlerrors->StartHandling();
@@ -660,7 +653,7 @@ void ModuleScene::SetupScene()
 		Event::PauseEvents();
 	}
 
-	goManager.PushWithChilds(root);
+	App->goManager->sceneGOs.PushWithChilds(root);
 
 	if (savedState) DEL(savedState);
 	savedState = new RE_GameObject(*root);
@@ -677,10 +670,10 @@ void ModuleScene::SetupScene()
 void ModuleScene::AddGameobject(RE_GameObject* toAdd)
 {
 	//TODO don't use SetupScene, only setup toAdd
-	//goManager.PushWithChilds(toAdd);
+	//App->goManager->sceneGOs.PushWithChilds(toAdd);
 	toAdd->UseResources();
 	root->AddChild(toAdd);
-	goManager.Clear();
+	App->goManager->sceneGOs.Clear();
 
 	SetupScene();
 	App->editor->SetSelected(toAdd);
@@ -766,10 +759,10 @@ void ModuleScene::ResetTrees()
 	static_tree.Clear();
 	dynamic_tree.Clear();
 
-	eastl::vector<int> goIndex = goManager.GetAllKeys();
+	eastl::vector<int> goIndex = App->goManager->sceneGOs.GetAllKeys();
 	for (int i = 0; i < goIndex.size(); i++)
 	{
-		RE_GameObject* go = goManager.At(goIndex[i]);
+		RE_GameObject* go = App->goManager->sceneGOs.At(goIndex[i]);
 
 		if (go->IsActive() && go->HasDrawComponents())
 		{
@@ -779,48 +772,4 @@ void ModuleScene::ResetTrees()
 				dynamic_tree.PushNode(goIndex[i], go->GetGlobalBoundingBox());
 		}
 	}
-}
-
-void GameObjectManager::Clear()
-{
-	goToID.clear();
-	poolmapped_.clear();
-	lastAvaibleIndex = 0;
-}
-
-eastl::map< RE_GameObject*, int> GameObjectManager::PushWithChilds(RE_GameObject* val, bool root)
-{
-	eastl::map< RE_GameObject*, int> ret;
-	eastl::vector<RE_GameObject*> gos =  val->GetAllGO();
-	 if (!root) gos.erase(gos.begin());
-	 for (auto go : gos) ret.insert(eastl::pair<RE_GameObject*,int>(go, Push(go)));
-	 return ret;
-}
-
-int GameObjectManager::Push(RE_GameObject* val)
-{
-	int ret = lastAvaibleIndex;
-	goToID.insert(eastl::pair<RE_GameObject*, int>(val, ret));
-	PoolMapped::Push(val, ret);
-	return ret;
-}
-
-eastl::vector<RE_GameObject*> GameObjectManager::PopWithChilds(int id, bool root)
-{
-	eastl::vector<RE_GameObject*> gos = At(id)->GetAllGO();
-	if (!root) gos.erase(gos.begin());
-	for (auto go : gos) Pop(goToID.at(go));
-	return gos;
-}
-
-RE_GameObject* GameObjectManager::Pop(int id)
-{
-	RE_GameObject* ret = PoolMapped::Pop(id);
-	goToID.erase(ret);
-	return ret;
-}
-
-int GameObjectManager::WhatID(RE_GameObject* go) const
-{
-	return goToID.at(go);
 }

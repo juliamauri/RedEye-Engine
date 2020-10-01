@@ -283,6 +283,9 @@
     <ClCompile Include="ModuleWwise.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="RE_GOManager.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -1219,6 +1222,9 @@
       <Filter>Modules\Editor\Commands</Filter>
     </ClInclude>
     <ClInclude Include="ModuleWwise.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_GOManager.h">
       <Filter>Modules</Filter>
     </ClInclude>
   </ItemGroup>

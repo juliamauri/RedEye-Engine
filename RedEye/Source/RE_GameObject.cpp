@@ -1659,3 +1659,13 @@ void RE_GameObject::DrawProperties()
 	for (auto component : components)
 		component->DrawProperties();
 }
+
+int RE_GameObject::GetPoolID() const
+{
+	return poolID;
+}
+
+void RE_GameObject::SetPoolID(int id)
+{
+	poolID = id;
+}
