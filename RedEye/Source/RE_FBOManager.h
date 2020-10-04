@@ -8,11 +8,16 @@
 
 struct RE_FBO {
 	unsigned int ID = 0;
-	unsigned int widht = 0, height = 0;
+	unsigned int width = 0, height = 0;
 	eastl::vector<unsigned int> texturesID;
 	unsigned int depthBuffer = 0;
 	unsigned int stencilBuffer = 0;
 	unsigned int depthstencilBuffer = 0;
+	enum FBO_Type : char
+	{
+		DEFAULT = 0,
+		DEFERRED
+	} type = DEFAULT;
 };
 
 class RE_FBOManager :
@@ -23,6 +28,7 @@ public:
 	~RE_FBOManager();
 
 	int CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize = 1, bool depth = true, bool stencil = false);
+	int CreateDeferredFBO(unsigned int width, unsigned int height);
 
 	void ChangeFBOSize(unsigned int ID, unsigned int width, unsigned int height);
 
@@ -35,6 +41,11 @@ public:
 	static void ChangeFBOBind(unsigned int tID, unsigned int width = 0, unsigned int height = 0);
 
 private:
+
+	void LoadDeferredTextures(RE_FBO &fbo);
+
+private:
+
 	eastl::map<unsigned int, RE_FBO> fbos;
 };
 

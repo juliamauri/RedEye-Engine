@@ -21,8 +21,8 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 	int ret = -1;
 
 	RE_FBO newFbo;
-
-	newFbo.widht = width;
+	newFbo.type = RE_FBO::FBO_Type::DEFAULT;
+	newFbo.width = width;
 	newFbo.height = height;
 
 	glGenFramebuffers(1, &newFbo.ID);
@@ -42,12 +42,11 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 			GL_UNSIGNED_BYTE,
 			NULL);
 
-
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, tex, 0);
-		
+
 		newFbo.texturesID.push_back(tex);
 	}
 
@@ -73,7 +72,6 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 		}
 	}
 
-	
 	unsigned int drawFubbersize = newFbo.texturesID.size();
 	GLenum* DrawBuffers = new GLenum[drawFubbersize];
 	for (unsigned int i = 0; i < drawFubbersize; i++) DrawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
@@ -95,12 +93,46 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 	return ret;
 }
 
+int RE_FBOManager::CreateDeferredFBO(unsigned int width, unsigned int height)
+{
+	int ret = -1;
+
+	RE_FBO newFbo;
+	newFbo.type = RE_FBO::FBO_Type::DEFERRED;
+	newFbo.width = width;
+	newFbo.height = height;
+	glGenFramebuffers(1, &newFbo.ID);
+	ChangeFBOBind(newFbo.ID);
+	LoadDeferredTextures(newFbo);
+
+	// Depth Buffer
+	glGenRenderbuffers(1, &newFbo.depthstencilBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthstencilBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthstencilBuffer);
+
+	// Check status
+	fbos.insert(eastl::pair<unsigned int, RE_FBO>(newFbo.ID, newFbo));
+	if (glCheckFramebufferStatus(newFbo.ID) != GL_FRAMEBUFFER_COMPLETE)
+		ret = newFbo.ID;
+	else {
+		ClearFBO(newFbo.ID);
+		LOG_ERROR("FBO can't be created.");
+	}
+
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	ChangeFBOBind(0);
+
+	return ret;
+}
+
 void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned int height)
 {
 	RE_FBO& toChange = fbos.at(ID);
 
 	ChangeFBOBind(ID);
-	toChange.widht = width;
+	toChange.width = width;
 	toChange.height = height;
 
 	unsigned int texturesNum = toChange.texturesID.size();
@@ -115,27 +147,34 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 	for (auto c : toChange.texturesID) glDeleteTextures(1, &c);
 	toChange.texturesID.clear();
 
-	for (unsigned int i = 0; i < texturesNum; i++) {
-		unsigned int tex = 0;
-		glGenTextures(1, &tex);
-		glBindTexture(GL_TEXTURE_2D, tex);
+	if (toChange.type == RE_FBO::FBO_Type::DEFERRED)
+	{
+		LoadDeferredTextures(toChange);
+	}
+	else
+	{
+		for (unsigned int i = 0; i < texturesNum; i++) {
+			unsigned int tex = 0;
+			glGenTextures(1, &tex);
+			glBindTexture(GL_TEXTURE_2D, tex);
 
-		glTexImage2D(GL_TEXTURE_2D,
-			0,
-			GL_RGBA,
-			width, height,
-			0,
-			GL_RGBA,
-			GL_UNSIGNED_BYTE,
-			NULL);
+			glTexImage2D(GL_TEXTURE_2D,
+				0,
+				GL_RGBA,
+				width, height,
+				0,
+				GL_RGBA,
+				GL_UNSIGNED_BYTE,
+				NULL);
 
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, tex, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, tex, 0);
 
-		toChange.texturesID.push_back(tex);
+			toChange.texturesID.push_back(tex);
+		}
 	}
 
 	if (depth && stencil) {
@@ -178,7 +217,7 @@ void RE_FBOManager::ClearFBO(unsigned int ID)
 
 unsigned int RE_FBOManager::GetWidth(unsigned int ID) const
 {
-	return fbos.at(ID).widht;
+	return fbos.at(ID).width;
 }
 
 unsigned int RE_FBOManager::GetHeight(unsigned int ID) const
@@ -196,4 +235,57 @@ void RE_FBOManager::ChangeFBOBind(unsigned int fID, unsigned int width, unsigned
 	static unsigned int currentFBOID = 0;
 	if (currentFBOID != fID) glBindFramebuffer(GL_FRAMEBUFFER, currentFBOID = fID);
 	if(width != 0 && height != 0) glViewport(0, 0, width, height);
+}
+
+void RE_FBOManager::LoadDeferredTextures(RE_FBO& fbo)
+{
+	// position
+	unsigned int tex = 0;
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, fbo.width, fbo.height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+	fbo.texturesID.push_back(tex);
+
+	// normal
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, fbo.width, fbo.height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, tex, 0);
+	fbo.texturesID.push_back(tex);
+
+	// Albedo
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, fbo.width, fbo.height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, tex, 0);
+	fbo.texturesID.push_back(tex);
+
+	// Specular
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, fbo.width, fbo.height, 0, GL_RED, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, tex, 0);
+	fbo.texturesID.push_back(tex);
+
+	// Result
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, fbo.width, fbo.height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, tex, 0);
+	fbo.texturesID.push_back(tex);
+
+	// Bind Attachments
+	unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(5, attachments);
 }

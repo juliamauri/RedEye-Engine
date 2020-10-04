@@ -8,6 +8,28 @@
 
 class RE_CompCamera;
 
+enum LightMode : int
+{
+	LIGHT_GL = 0,
+	LIGHT_DIRECT,
+	LIGHT_DEFERRED,
+};
+
+struct RenderMode
+{
+	RenderMode(LightMode mode, RE_CompCamera* camera, bool isGame = true, bool debug_draw = false, bool outline_selection = false, bool override_cull = false, bool skybox = true, bool wireframe = false, bool cull = true);
+
+	LightMode light_mode = LIGHT_GL;
+	RE_CompCamera* camera = nullptr;
+	bool isGame = true;
+	bool debug_draw = false;
+	bool outline_selection = false;
+	bool override_cull = true;
+	bool skybox = true;
+	bool wireframe = false;
+	bool cull = true;
+};
+
 class ModuleRenderer3D : public Module 
 {
 
@@ -26,8 +48,6 @@ public:
 
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
-
-	void DrawScene(const math::Frustum& frustum, unsigned int fbo, RE_CompCamera* mainSkybox = nullptr, bool debugDraw = false, bool stencilToSelected = false);
 
 	// Editor Values
 	void SetVSync(bool enable);
@@ -55,7 +75,16 @@ public:
 	void ReRenderThumbnail(const char* res);
 
 private:
-	eastl::stack<const char*> thumbnailsToRander;
+
+	void DrawScene(const RenderMode& mode);
+
+public:
+
+	static LightMode render_pass;
+
+private:
+
+	eastl::stack<const char*> thumbnailsToRender;
 
 	// Context
 	void* mainContext;
@@ -67,12 +96,18 @@ private:
 	bool lighting = false;
 	bool texture2d = false;
 	bool color_material = false;
-	bool wireframe = false;
+
+	bool wireframe_scene = false;
 	bool cull_scene = true;
+	bool deferred_light = false;
 
 	// FBOs
 	unsigned int sceneEditorFBO = 0;
 	unsigned int sceneGameFBO = 0;
+
+	unsigned int deferredEditorFBO = 0;
+	unsigned int lightPassFBO = 0;
+	//unsigned int deferredGameFBO = 0;
 };
 
 #endif // !__MODULERENDER3D_H__

@@ -357,9 +357,6 @@ update_status ModuleEditor::Update()
 			editorCommands.redo();
 	}
 
-	sceneEditorWindow->DrawWindow();
-	sceneGameWindow->DrawWindow();
-
 	ImGui::End();
 
 	return UPDATE_CONTINUE;
@@ -704,6 +701,10 @@ bool ModuleEditor::AddSoftwareUsed(const char * name, const char * version, cons
 void ModuleEditor::Draw()
 {
 	OPTICK_CATEGORY("ImGui Rend", Optick::Category::Rendering);
+
+	sceneEditorWindow->DrawWindow();
+	sceneGameWindow->DrawWindow();
+
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
