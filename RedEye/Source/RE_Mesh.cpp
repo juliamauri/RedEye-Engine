@@ -195,42 +195,42 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 
 		if (lFaceNormals)
 		{
+			// Draw lines
 			math::vec color(0.f, 0.f, 1.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
-
 			RE_GLCache::ChangeVAO(VAO_FaceNormals);
 			glDrawArrays(GL_LINES, 0, triangle_count * 2);
 
+			// Draw points
 			color.Set(1.f, 1.f, 1.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
-
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
-
 			RE_GLCache::ChangeVAO(VAO_FaceCenters);
 			glDrawArrays(GL_POINTS, 0, triangle_count);
 
+			// Reset Draw mode
 			glPointSize(1.0f);
 			glDisable(GL_PROGRAM_POINT_SIZE);
 		}
 
 		if (lVertexNormals)
 		{
+			// Draw lines
 			math::vec color(0.f, 1.f, 0.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
-
 			RE_GLCache::ChangeVAO(VAO_VertexNormals);
 			glDrawArrays(GL_LINES, 0, triangle_count * 3 * 2);
 
+			// Draw points
 			color.Set(1.f, 1.f, 1.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
-
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
-
 			RE_GLCache::ChangeVAO(VAO_Vertex);
 			glDrawArrays(GL_POINTS, 0, triangle_count * 3);
 
+			// Reset Draw mode
 			glPointSize(1.0f);
 			glDisable(GL_PROGRAM_POINT_SIZE);
 		}

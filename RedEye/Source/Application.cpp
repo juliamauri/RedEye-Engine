@@ -235,11 +235,10 @@ void Application::FinishUpdate()
 		ticking = false;
 	}
 
-	unsigned int extra_ms = time->ManageFrameTimers();
-	
-	extra_ms = fs->ReadAssetChanges(extra_ms);
+	unsigned int extra_ms = fs->ReadAssetChanges(time->ManageFrameTimers());
 
-	if (extra_ms > 0) wwise->ReadBanksChanges();
+	if (extra_ms > 0)
+		wwise->ReadBanksChanges();
 
 	if (extra_ms > 0)
 		SDL_Delay(extra_ms);
