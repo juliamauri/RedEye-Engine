@@ -17,6 +17,7 @@ public:
 	const char* GetDefaultScaleShader()const;
 	const char* GetDefaulMaterial()const;
 	const char* GetDefaultSkyBox()const;
+	const char* GetLightPassShader()const;
 
 	unsigned int GetTextureChecker() const;
 
@@ -30,6 +31,10 @@ private:
 	const char* defaultShader = nullptr;
 	const char* defaultScaleShader = nullptr;
 	const char* skyboxShader = nullptr;
+
+	const char* defGeoShader = nullptr;
+	const char* defLightShader = nullptr;
+
 	const char* defaultMaterial = nullptr;
 	const char* defaultSkybox = nullptr;
 
