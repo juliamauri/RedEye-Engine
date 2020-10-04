@@ -84,6 +84,7 @@ void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuff
 		eastl::vector<eastl::string> slines = GetUniformLines(geometryBuffer);
 		if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
 	}
+
 	MountShaderCvar(lines);
 	GetLocations();
 
@@ -137,7 +138,7 @@ eastl::vector<ShaderCvar> RE_Shader::GetUniformValues()
 	return uniforms;
 }
 
-void RE_Shader::UploatMainUniforms(RE_CompCamera* camera, float _dt, float _time)
+void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float _dt, float _time)
 {
 	RE_GLCache::ChangeShader(ID);
 	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
@@ -269,13 +270,16 @@ eastl::vector<eastl::string> RE_Shader::GetUniformLines(const char* buffer)
 	eastl::vector<eastl::string> lines;
 	eastl::string parse(buffer);
 	int linePos = parse.find_first_of('\n');
-	while (linePos != eastl::string::npos){
+
+	while (linePos != eastl::string::npos)
+	{
 		eastl::string line = parse.substr(0, linePos);
 		int exitsUniform = line.find("uniform");
 		if (exitsUniform != eastl::string::npos) lines.push_back(line);
 		parse.erase(0, linePos + 1);
 		linePos = parse.find_first_of('\n');
 	} 
+
 	return lines;
 }
 
@@ -287,10 +291,13 @@ void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
 	time = -1;
 	dt = -1;
 	uniforms.clear();
+
 	static const char* internalNames[25] = { "useTexture", "useColor", "time", "dt", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "tnormals", "treflection" };
-	for (auto uniform : uniformLines){
+	for (auto uniform : uniformLines)
+	{
 		int pos = uniform.find_first_of(" ");
-		if (pos != eastl::string::npos) {
+		if (pos != eastl::string::npos)
+		{
 			ShaderCvar sVar;
 
 			pos++;

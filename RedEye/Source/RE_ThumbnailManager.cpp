@@ -306,7 +306,7 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 			float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
 			float dt = App->time->GetDeltaTime();
 			eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-			for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(internalCamera, dt, time);
+			for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, dt, time);
 
 			RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -352,7 +352,7 @@ unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
 		float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
 		float dt = App->time->GetDeltaTime();
 		eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(internalCamera, dt, time);
+		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, dt, time);
 
 		App->resources->Use(ref);
 		mat->UseResources();
@@ -398,7 +398,7 @@ unsigned int RE_ThumbnailManager::ThumbnailSkyBox(const char* ref)
 		float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
 		float dt = App->time->GetDeltaTime();
 		eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploatMainUniforms(internalCamera, dt, time);
+		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, dt, time);
 
 		RE_GLCache::ChangeTextureBind(0);
 
