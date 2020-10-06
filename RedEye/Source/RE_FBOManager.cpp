@@ -109,10 +109,10 @@ int RE_FBOManager::CreateDeferredFBO(unsigned int width, unsigned int height)
 	LoadDeferredTextures(newFbo);
 
 	// Depth Buffer
-	glGenRenderbuffers(1, &newFbo.depthstencilBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthstencilBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthstencilBuffer);
+	glGenRenderbuffers(1, &newFbo.depthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthBuffer);
 
 	// Check status
 	fbos.insert(eastl::pair<unsigned int, RE_FBO>(newFbo.ID, newFbo));
@@ -211,10 +211,12 @@ void RE_FBOManager::ClearFBOBuffers(unsigned int ID, const float color[4])
 	RE_FBO fbo = fbos.at(ID);
 	GLbitfield mask = GL_COLOR_BUFFER_BIT;
 
-	if (fbo.depthBuffer != 0)
+	if (fbo.depthBuffer != 0 || fbo.stencilBuffer != 0)
+	{
 		mask |= GL_DEPTH_BUFFER_BIT;
-	
-	if (fbo.stencilBuffer != 0)
+	}
+
+	if (fbo.stencilBuffer != 0 || fbo.stencilBuffer != 0)
 	{
 		glClearStencil(0);
 		mask |= GL_STENCIL_BUFFER_BIT;
