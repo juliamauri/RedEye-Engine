@@ -39,6 +39,7 @@ public:
 	unsigned int GetHeight(unsigned int ID)const;
 
 	static void ChangeFBOBind(unsigned int tID, unsigned int width = 0, unsigned int height = 0);
+	static void ClearFBOBuffers(unsigned int ID, const float color[4]);
 
 private:
 
@@ -46,7 +47,7 @@ private:
 
 private:
 
-	eastl::map<unsigned int, RE_FBO> fbos;
+	static eastl::map<unsigned int, RE_FBO> fbos;
 };
 
 #endif // !__REFBOMANAGER__

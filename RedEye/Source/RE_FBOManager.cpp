@@ -4,6 +4,8 @@
 
 #include "Glew/include/glew.h"
 
+eastl::map<unsigned int, RE_FBO> RE_FBOManager::fbos;
+
 RE_FBOManager::RE_FBOManager() { }
 
 RE_FBOManager::~RE_FBOManager() {
@@ -103,6 +105,7 @@ int RE_FBOManager::CreateDeferredFBO(unsigned int width, unsigned int height)
 	newFbo.height = height;
 	glGenFramebuffers(1, &newFbo.ID);
 	ChangeFBOBind(newFbo.ID);
+
 	LoadDeferredTextures(newFbo);
 
 	// Depth Buffer
@@ -201,6 +204,24 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	ChangeFBOBind(0);
+}
+
+void RE_FBOManager::ClearFBOBuffers(unsigned int ID, const float color[4])
+{
+	RE_FBO fbo = fbos.at(ID);
+	GLbitfield mask = GL_COLOR_BUFFER_BIT;
+
+	if (fbo.depthBuffer != 0)
+		mask |= GL_DEPTH_BUFFER_BIT;
+	
+	if (fbo.stencilBuffer != 0)
+	{
+		glClearStencil(0);
+		mask |= GL_STENCIL_BUFFER_BIT;
+	}
+
+	glClear(mask);
+	glClearColor(color[0], color[1], color[2], color[3]);
 }
 
 void RE_FBOManager::ClearFBO(unsigned int ID)

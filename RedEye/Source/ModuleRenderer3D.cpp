@@ -38,7 +38,11 @@
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
 
-LightMode ModuleRenderer3D::render_pass = LIGHT_GL;
+LightMode ModuleRenderer3D::current_lighting = LIGHT_GL;
+
+const char* RenderView::labels[11] = {
+						"Fustrum Culling", "Override Culling", "Outline Selection", "Debug Draw", "Skybox", "Blending",
+						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", };
 
 ModuleRenderer3D::ModuleRenderer3D(const char * name, bool start_enabled) : Module(name, start_enabled)
 {}
@@ -79,6 +83,15 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		GLenum error = glewInit();
 		if (ret = (error == GLEW_OK))
 		{
+			render_views.push_back(RenderView("Scene", { 0, 0 },
+				FRUSTUM_CULLING | OVERRIDE_CULLING | OUTLINE_SELECTION | DEBUG_DRAW | BLENDED |
+				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL,
+				LIGHT_DEFERRED));
+
+			render_views.push_back(RenderView("Game", { 0, 0 },
+				FRUSTUM_CULLING | SKYBOX | BLENDED |
+				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST));
+
 			Load(node);
 			App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
 		}
@@ -93,11 +106,13 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 bool ModuleRenderer3D::Start()
 {
-	sceneEditorFBO = App->fbomanager->CreateFBO(1024, 768, 1, true, true);
-	sceneGameFBO = App->fbomanager->CreateFBO(1024, 768);
-	deferredEditorFBO = App->fbomanager->CreateDeferredFBO(1024, 768);
-	lightPassFBO = App->fbomanager->CreateFBO(1024, 768, 1, false);
-	//deferredGameFBO = App->fbomanager->CreateDeferredFBO(1024, 768);
+	render_views[VIEW_EDITOR].fbos = {
+		App->fbomanager->CreateFBO(1024, 768, 1, true, true),
+		App->fbomanager->CreateDeferredFBO(1024, 768) };
+
+	render_views[VIEW_GAME].fbos = {
+		App->fbomanager->CreateFBO(1024, 768),
+		App->fbomanager->CreateDeferredFBO(1024, 768) };;
 
 	return true;
 }
@@ -107,9 +122,6 @@ update_status ModuleRenderer3D::PreUpdate()
 	OPTICK_CATEGORY("PreUpdate Renderer3D", Optick::Category::GameLogic);
 
 	update_status ret = UPDATE_CONTINUE;
-
-	if (App->input->GetKey(SDL_SCANCODE_G) == KEY_STATE::KEY_DOWN)
-		deferred_light = !deferred_light;
 
 	//If some thumnail needs uodates
 	while (!thumbnailsToRender.empty())
@@ -126,25 +138,21 @@ update_status ModuleRenderer3D::PostUpdate()
 	OPTICK_CATEGORY("PostUpdate Renderer3D", Optick::Category::GameLogic);
 
 	update_status ret = UPDATE_CONTINUE;
-	
-	float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
-	float dt = App->time->GetDeltaTime();
-	eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 
-	OPTICK_CATEGORY("Scene Draw", Optick::Category::Rendering);
-	RenderMode scene_mode(deferred_light ? LIGHT_DEFERRED : LIGHT_GL, RE_CameraManager::EditorCamera(), false, true, true, true);
-	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(scene_mode.camera, dt, time);
-	DrawScene(scene_mode);
+	// Setup Draws
+	SetupShaders();
+	render_views[0].camera = RE_CameraManager::EditorCamera();
+	render_views[1].camera = RE_CameraManager::MainCamera();
 
-	OPTICK_CATEGORY("Game Draw", Optick::Category::Rendering);
-	RenderMode game_mode(LIGHT_GL, RE_CameraManager::MainCamera());
-	for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(game_mode.camera, dt, time);
-	DrawScene(game_mode);
+	// Draw Scene
+	for (RenderView view : render_views)
+		DrawScene(view);
 
+	// Set Render to Window
 	RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
 
 	// Draw Editor
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	SetWireframe(false);
 	App->editor->Draw();
 
 	//Swap buffers
@@ -219,28 +227,31 @@ void ModuleRenderer3D::DrawEditor()
 {
 	if(ImGui::CollapsingHeader("Renderer 3D"))
 	{
-		if (ImGui::Checkbox((vsync) ? "Disable VSync" : "Enable VSync", &vsync))
+		if (ImGui::Checkbox((vsync) ? "VSync Enabled" : "VSync Disabled", &vsync))
 			SetVSync(vsync);
 
-		if (ImGui::Checkbox((cullface) ? "Disable Cull Face" : "Enable Cull Face", &cullface))
-			SetDepthTest(cullface);
+		for (int i = 0; i < render_views.size(); ++i)
+		{
+			if (ImGui::TreeNodeEx((render_views[i].name + " View").c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
+			{
+				int light = render_views[i].light;
+				ImGui::PushID(eastl::string("light" + eastl::to_string(i)).c_str());
+				if (ImGui::Combo("Light Mode", &light, "LIGHT_DISABLED\0LIGHT_GL\0LIGHT_DIRECT\0LIGHT_DEFERRED"))
+					render_views[i].light = LightMode(light);
+				ImGui::PopID();
 
-		if (ImGui::Checkbox((depthtest) ? "Disable Depht Test" : "Enable Depht Test", &depthtest))
-			SetFaceCulling(depthtest);
+				for (short count = 0; count < 11; ++count)
+				{
+					bool temp = (render_views[i].flags & (1 << count));
+					ImGui::PushID(eastl::string(RenderView::labels[count] + eastl::to_string(i)).c_str());
+					if (ImGui::Checkbox(RenderView::labels[count], &temp))
+						temp ? render_views[i].flags |= (1 << count) : render_views[i].flags -= (1 << count);
+					ImGui::PopID();
+				}
 
-		if (ImGui::Checkbox((lighting) ? "Disable Lighting" : "Enable Lighting", &lighting))
-			SetLighting(lighting);
-
-		if (ImGui::Checkbox((texture2d) ? "Disable Texture2D" : "Enable Texture2D", &texture2d))
-			SetTexture2D(texture2d);
-
-		if (ImGui::Checkbox((color_material) ? "Disable Color Material" : "Enable Color Material", &color_material))
-			SetColorMaterial(color_material);
-
-		if (ImGui::Checkbox((wireframe_scene) ? "Disable Wireframe" : "Enable Wireframe", &wireframe_scene))
-			SetWireframe(wireframe_scene);
-
-		ImGui::Checkbox("Camera Frustum Culling", &cull_scene);
+				ImGui::TreePop();
+			}
+		}
 	}
 }
 
@@ -253,18 +264,17 @@ bool ModuleRenderer3D::Load(JSONNode * node)
 	{
 		SetVSync(node->PullBool("vsync", vsync));
 		LOG_TERCIARY((vsync)? "VSync enabled." : "VSync disabled");
-		SetFaceCulling(node->PullBool("cullface", cullface));
-		LOG_TERCIARY((cullface)? "CullFace enabled." : "CullFace disabled");
-		SetDepthTest(node->PullBool("depthtest", depthtest));
-		LOG_TERCIARY((depthtest)? "DepthTest enabled." : "DepthTest disabled");
-		SetLighting(node->PullBool("lighting", lighting));
-		LOG_TERCIARY((lighting)? "Lighting enabled." : "Lighting disabled");
-		SetTexture2D(node->PullBool("texture 2d", texture2d));
-		LOG_TERCIARY((texture2d)? "Textures enabled." : "Textures disabled");
-		SetColorMaterial(node->PullBool("color material", color_material));
-		LOG_TERCIARY((color_material)? "Color Material enabled." : "Color Material disabled");
-		SetWireframe(node->PullBool("wireframe", wireframe_scene));
-		LOG_TERCIARY((wireframe_scene)? "Wireframe enabled." : "Wireframe disabled");
+
+		/*for (int i = 0; i < render_views.size(); ++i)
+		{
+			render_views[i].name = node->PullString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
+			render_views[i].light = LightMode(node->PullInt(eastl::string(render_views[i].name + " - lightmode").c_str(), render_views[i].light));
+
+			render_views[i].flags = 0;
+			for (int i2 = 0; i2 < 11; ++i2)
+				if (node->PullBool(eastl::string(render_views[i].name + " - " + RenderView::labels[i2]).c_str(), render_views[i].flags & (1 << i2)))
+					render_views[i].flags &= (1 << i2);
+		}*/
 	}
 
 	return ret;
@@ -277,28 +287,92 @@ bool ModuleRenderer3D::Save(JSONNode * node) const
 	if (ret)
 	{
 		node->PushBool("vsync", vsync);
-		node->PushBool("cullface", cullface);
-		node->PushBool("depthtest", depthtest);
-		node->PushBool("lighting", lighting);
-		node->PushBool("texture 2d", texture2d);
-		node->PushBool("color material", color_material);
-		node->PushBool("wireframe", wireframe_scene);
+
+		for (int i = 0; i < render_views.size(); ++i)
+		{
+			node->PushString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
+			node->PushInt(eastl::string(render_views[i].name + " - lightmode").c_str(), int(render_views[i].light));
+
+			for (int i2 = 0; i2 < 11; ++i2)
+				node->PushBool(eastl::string(render_views[i].name + " - " + RenderView:: labels[i2]).c_str(), render_views[i].flags & (1 << i2));
+		}
 	}
 
 	return ret;
 }
-//void ModuleRenderer3D::DrawScene(const math::Frustum& frustum, unsigned int fbo, RE_CompCamera* mainSkybox, bool debugDraw, bool stencilToSelected, RenderMode mode)
 
-void ModuleRenderer3D::DrawScene(const RenderMode& mode)
+void ModuleRenderer3D::SetVSync(bool enable)
 {
+	SDL_GL_SetSwapInterval((vsync = enable) ? 1 : 0);
+}
+
+void* ModuleRenderer3D::GetWindowContext() const
+{
+	return mainContext;
+}
+
+unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
+{
+	int nrAttributes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+	return nrAttributes;
+}
+
+const LightMode ModuleRenderer3D::GetLightMode()
+{
+	return current_lighting;
+}
+
+void ModuleRenderer3D::ChangeFBOSize(int width, int height, bool isEditor)
+{
+	App->fbomanager->ChangeFBOSize(render_views[!isEditor].GetFBO(), width, height);
+}
+
+unsigned int ModuleRenderer3D::GetRenderedEditorSceneTexture() const
+{
+	return App->fbomanager->GetTextureID(render_views[0].GetFBO(), 4 * (render_views[0].light == LIGHT_DEFERRED));
+}
+
+unsigned int ModuleRenderer3D::GetRenderedGameSceneTexture() const
+{
+	return App->fbomanager->GetTextureID(render_views[1].GetFBO(), 4 * (render_views[1].light == LIGHT_DEFERRED));
+}
+
+void ModuleRenderer3D::ReRenderThumbnail(const char* res)
+{
+	thumbnailsToRender.push(res);
+}
+
+void ModuleRenderer3D::DrawScene(RenderView& render_view)
+{
+	OPTICK_CATEGORY(render_view.name.c_str(), Optick::Category::Rendering);
+
+	// Setup Frame Buffer
+	current_lighting = render_view.light;
+	unsigned int target_fbo = render_view.GetFBO();
+	RE_FBOManager::ChangeFBOBind(target_fbo, App->fbomanager->GetWidth(target_fbo), App->fbomanager->GetHeight(target_fbo));
+	RE_FBOManager::ClearFBOBuffers(target_fbo, render_view.clear_color);
+
+	// Setup Render Flags
+	SetWireframe(render_view.flags & WIREFRAME);
+	SetFaceCulling(render_view.flags & FACE_CULLING);
+	SetTexture2D(render_view.flags & TEXTURE_2D);
+	SetColorMaterial(render_view.flags & COLOR_MATERIAL);
+	SetDepthTest(render_view.flags & DEPTH_TEST);
+
+	// Upload Shader Uniforms
+	for (auto sMD5 : activeShaders)
+		((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(render_view.camera, dt, time);
+
 	// Frustum Culling
 	eastl::stack<RE_Component*> comptsToDraw;
-	if (mode.cull)
+	if (render_view.flags & FRUSTUM_CULLING)
 	{
 		eastl::vector<const RE_GameObject*> objects;
-		App->scene->FustrumCulling(objects, mode.override_cull ? App->cams->GetCullingFrustum() : mode.camera->GetFrustum());
+		App->scene->FustrumCulling(objects, render_view.flags & OVERRIDE_CULLING ?
+			App->cams->GetCullingFrustum() : render_view.camera->GetFrustum());
 
-		for (auto object : objects)
+		for (const RE_GameObject* object : objects)
 		{
 			if (object->IsActive())
 			{
@@ -314,25 +388,37 @@ void ModuleRenderer3D::DrawScene(const RenderMode& mode)
 	else
 		comptsToDraw = App->scene->GetRoot()->GetDrawableComponentsWithChilds();
 
-	static const unsigned int fbos[4] = { sceneEditorFBO, deferredEditorFBO, sceneGameFBO, sceneGameFBO };
-	unsigned int target_fbo = fbos[(mode.isGame * 2) + ((render_pass = mode.light_mode) == LIGHT_DEFERRED)];
-
-	RE_FBOManager::ChangeFBOBind(target_fbo, App->fbomanager->GetWidth(target_fbo), App->fbomanager->GetHeight(target_fbo));
-
-	// Reset background with a clear color
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	if (mode.outline_selection)
+	// Setup Lights
+	//eastl::stack<RE_CompLight*> scene_lights;
+	switch (render_view.light)
 	{
-		glClearStencil(0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	case LIGHT_DISABLED:
+	{
+		SetLighting(false);
+		break;
 	}
-	else
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	case LIGHT_GL:
+	{
+		SetLighting(true);
+		//scene_lights = App->scene->GetLights();
+		break;
+	}
+	case LIGHT_DIRECT:
+	{
+		SetLighting(false);
+		//scene_lights = App->scene->GetLights();
 
-	// Prepare if using wireframe
-	if (mode.wireframe)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		// TODO RUB: Upload Light uniforms
 
+		break;
+	}
+	case LIGHT_DEFERRED:
+	{
+		SetLighting(false);
+		//scene_lights = App->scene->GetLights();
+		break;
+	}
+	}
 
 	// Draw Scene
 	eastl::stack<RE_Component*> drawAsLast;
@@ -349,18 +435,17 @@ void ModuleRenderer3D::DrawScene(const RenderMode& mode)
 		comptsToDraw.pop();
 	}
 
-	if (mode.light_mode == LIGHT_DEFERRED)
+	// Deferred Light Pass
+	if (render_view.light == LIGHT_DEFERRED)
 	{
-		// Change to Lightpass FBO
-		RE_FBOManager::ChangeFBOBind(lightPassFBO, App->fbomanager->GetWidth(target_fbo), App->fbomanager->GetHeight(target_fbo));
-		glClear(GL_COLOR_BUFFER_BIT);
+		SetDepthTest(false);
 
 		// Setup Shader
 		unsigned int light_pass = ((RE_Shader*)App->resources->At(App->internalResources->GetLightPassShader()))->GetID();
 		RE_GLCache::ChangeShader(light_pass);
 
 		// Bind Textures
-		static const eastl::string textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec"};
+		static const eastl::string textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
 		for (unsigned int count = 0; count < 4; ++count)
 		{
 			glActiveTexture(GL_TEXTURE0 + count);
@@ -368,41 +453,20 @@ void ModuleRenderer3D::DrawScene(const RenderMode& mode)
 			RE_GLCache::ChangeTextureBind(App->fbomanager->GetTextureID(target_fbo, count));
 		}
 
-		// Setup Screen Quad
-		static unsigned int quadVAO = 0;
-		if (quadVAO == 0)
-		{
-			float quadVertices[] = {
-				// positions        // texture Coords
-				-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-				 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-				 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-			};
-			// setup plane VAO
-			unsigned int quadVBO;
-			glGenVertexArrays(1, &quadVAO);
-			glGenBuffers(1, &quadVBO);
-			glBindVertexArray(quadVAO);
-			glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		}
+		// TODO RUB: Setup Light Uniforms
 
-		// Render Quad
-		RE_GLCache::ChangeVAO(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		RE_GLCache::ChangeVAO(0);
+		// Render Lights
+		DrawQuad();
+
+		if (render_view.flags & DEPTH_TEST)
+			SetDepthTest(true);
 	}
 
 	// Draw Debug Geometry
-	if (mode.debug_draw) App->editor->DrawDebug(lighting);
+	if (render_view.flags & DEBUG_DRAW) App->editor->DrawDebug(lighting);
 
 	// Draw Skybox
-	if (false && RE_CameraManager::MainCamera()->isUsingSkybox())
+	if (render_view.flags & SKYBOX && RE_CameraManager::MainCamera()->isUsingSkybox())
 	{
 		OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
 		RE_GLCache::ChangeTextureBind(0);
@@ -416,7 +480,7 @@ void ModuleRenderer3D::DrawScene(const RenderMode& mode)
 	}
 
 	// Draw Blended elements
-	if (!drawAsLast.empty())
+	if (render_view.flags & BLENDED && !drawAsLast.empty())
 	{
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -431,7 +495,7 @@ void ModuleRenderer3D::DrawScene(const RenderMode& mode)
 	}
 
 	// Draw Stencil
-	if (mode.outline_selection)
+	if (render_view.flags & OUTLINE_SELECTION)
 	{
 		RE_GameObject* stencilGO = App->editor->GetSelected();
 		if (stencilGO != nullptr)
@@ -461,7 +525,7 @@ void ModuleRenderer3D::DrawScene(const RenderMode& mode)
 				}
 
 				glEnable(GL_STENCIL_TEST);
-				glDisable(GL_DEPTH_TEST);
+				SetDepthTest(false);
 
 				while (!vaoToStencil.empty())
 				{
@@ -507,56 +571,87 @@ void ModuleRenderer3D::DrawScene(const RenderMode& mode)
 					triangleToStencil.pop();
 				}
 
-				glEnable(GL_DEPTH_TEST);
 				glDisable(GL_STENCIL_TEST);
+				if (render_view.flags & DEPTH_TEST)
+					SetDepthTest(true);
 			}
 		}
 	}
-
-	if (mode.wireframe)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void ModuleRenderer3D::SetVSync(bool enable)
+inline void ModuleRenderer3D::SetupShaders()
 {
-	SDL_GL_SetSwapInterval((vsync = enable) ? 1 : 0);
+	activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+	time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
+	dt = App->time->GetDeltaTime();
 }
 
-void ModuleRenderer3D::SetDepthTest(bool enable)
+inline void ModuleRenderer3D::SetWireframe(bool enable)
 {
-	(cullface = enable) ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+	if (wireframe != enable)
+		glPolygonMode(GL_FRONT_AND_BACK, (wireframe = enable) ? GL_LINE : GL_FILL);
 }
 
-void ModuleRenderer3D::SetFaceCulling(bool enable)
+inline void ModuleRenderer3D::SetFaceCulling(bool enable)
 {
-	(depthtest = enable) ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+	if (cullface != enable)
+		(cullface = enable) ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
 }
 
-void ModuleRenderer3D::SetLighting(bool enable)
+inline void ModuleRenderer3D::SetTexture2D(bool enable)
 {
-	(lighting = enable) ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
+	if (texture2d != enable)
+		(texture2d = enable) ? glEnable(GL_TEXTURE_2D) : glDisable(GL_TEXTURE_2D);
 }
 
-void ModuleRenderer3D::SetTexture2D(bool enable)
+inline void ModuleRenderer3D::SetColorMaterial(bool enable)
 {
-	(texture2d = enable) ? glEnable(GL_TEXTURE_2D) : glDisable(GL_TEXTURE_2D);
+	if (color_material != enable)
+		(color_material = enable) ? glEnable(GL_COLOR_MATERIAL) : glDisable(GL_COLOR_MATERIAL);
 }
 
-void ModuleRenderer3D::SetColorMaterial(bool enable)
+inline void ModuleRenderer3D::SetDepthTest(bool enable)
 {
-	(color_material = enable) ? glEnable(GL_COLOR_MATERIAL) : glDisable(GL_COLOR_MATERIAL);
+	if (depthtest != enable)
+		(depthtest = enable) ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 }
 
-void ModuleRenderer3D::SetWireframe(bool enable)
+inline void ModuleRenderer3D::SetLighting(bool enable)
 {
-	wireframe_scene = enable;
+	if (lighting != enable)
+		(lighting = enable) ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
 }
 
-unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
+void ModuleRenderer3D::DrawQuad()
 {
-	int nrAttributes;
-	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-	return nrAttributes;
+	// Setup Screen Quad
+	static unsigned int quadVAO = 0;
+	if (quadVAO == 0)
+	{
+		float quadVertices[] = {
+			// positions        // texture Coords
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// setup plane VAO
+		unsigned int quadVBO;
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	}
+
+	// Render Quad
+	RE_GLCache::ChangeVAO(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	RE_GLCache::ChangeVAO(0);
 }
 
 void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
@@ -614,50 +709,13 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	glEnd();
 }
 
-void * ModuleRenderer3D::GetWindowContext() const
+RenderView::RenderView(eastl::string name, eastl::pair<unsigned int, unsigned int> fbos, short flags, LightMode light) :
+	name(name), fbos(fbos), flags(flags), light(light)
 {
-	return mainContext;
+	for (int i = 0; i < 4; ++i) clear_color[i] = 0.0f;
 }
 
-void ModuleRenderer3D::ChangeFBOSize(int width, int height, bool editor)
+const unsigned int RenderView::GetFBO() const
 {
-	if (editor)
-	{
-		if (deferred_light)
-		{
-			App->fbomanager->ChangeFBOSize(sceneEditorFBO, width, height);
-		}
-		else
-		{
-			App->fbomanager->ChangeFBOSize(deferredEditorFBO, width, height);
-			App->fbomanager->ChangeFBOSize(lightPassFBO, width, height);
-		}
-	}
-	else
-	{
-		App->fbomanager->ChangeFBOSize(sceneGameFBO, width, height);
-	}
-}
-
-unsigned int ModuleRenderer3D::GetRenderedEditorSceneTexture() const
-{
-	static const unsigned int fbo[2] = { sceneEditorFBO, lightPassFBO };
-	return App->fbomanager->GetTextureID(fbo[deferred_light], 0);
-}
-
-unsigned int ModuleRenderer3D::GetRenderedGameSceneTexture() const
-{
-	return App->fbomanager->GetTextureID(sceneGameFBO, 0);
-}
-
-void ModuleRenderer3D::ReRenderThumbnail(const char* res)
-{
-	thumbnailsToRender.push(res);
-}
-
-RenderMode::RenderMode(
-	LightMode m, RE_CompCamera* cam, bool isGame, bool oc, bool d, bool o,  bool s, bool w, bool c) :
-	light_mode(m), camera(cam), isGame(isGame), override_cull(oc), debug_draw(d), outline_selection(o), skybox(s), wireframe(w), cull(c)
-{
-	camera->Update();
+	return light != LIGHT_DEFERRED ? fbos.first : fbos.second;
 }

@@ -149,8 +149,8 @@ bool RE_InternalResources::InitSkyBox()
 
 const char* RE_InternalResources::GetDefaultShader() const
 {
-	static const char* shaders[3] = { defaultShader, defaultShader /* TODO RUB: add shader with light input*/, defGeoShader };
-	return shaders[App->renderer3d->render_pass];
+	static const char* shaders[4] = { defaultShader, defaultShader, defaultShader /* TODO RUB: add shader with light input*/, defGeoShader };
+	return shaders[ModuleRenderer3D::GetLightMode()];
 }
 
 const char* RE_InternalResources::GetDefaultScaleShader() const

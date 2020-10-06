@@ -1,38 +1,62 @@
 #ifndef __MODULERENDER3D_H__
 #define __MODULERENDER3D_H__
 
-#include "RE_Math.h"
 #include "Module.h"
-
 #include <EASTL/stack.h>
-
-class RE_CompCamera;
 
 enum LightMode : int
 {
-	LIGHT_GL = 0,
+	LIGHT_DISABLED = 0,
+	LIGHT_GL,
 	LIGHT_DIRECT,
 	LIGHT_DEFERRED,
 };
 
-struct RenderMode
+enum RenderViewFlags : short
 {
-	RenderMode(LightMode mode, RE_CompCamera* camera, bool isGame = true, bool debug_draw = false, bool outline_selection = false, bool override_cull = false, bool skybox = true, bool wireframe = false, bool cull = true);
+	FRUSTUM_CULLING = 0x1,	 // 000000000001
+	OVERRIDE_CULLING = 0x2,	 // 000000000010
+	OUTLINE_SELECTION = 0x4, // 000000000100
+	DEBUG_DRAW = 0x8,		 // 000000001000
+	SKYBOX = 0x10,			 // 000000010000
+	BLENDED = 0x20,			 // 000000100000
 
-	LightMode light_mode = LIGHT_GL;
+	WIREFRAME = 0x40,		 // 000001000000
+	FACE_CULLING = 0X80,	 // 000010000000
+	TEXTURE_2D = 0x100,		 // 000100000000
+	COLOR_MATERIAL = 0x200,	 // 001000000000
+	DEPTH_TEST = 0x400		 // 010000000000
+};
+
+class RE_CompCamera;
+
+struct RenderView
+{
+	RenderView(eastl::string name = "",
+		eastl::pair<unsigned int, unsigned int> fbos = { 0, 0 },
+		short flags = 0, LightMode light = LIGHT_GL);
+
+	eastl::string name;
+	eastl::pair<unsigned int, unsigned int> fbos;
+	short flags;
+	LightMode light;
+	float clear_color[4];
 	RE_CompCamera* camera = nullptr;
-	bool isGame = true;
-	bool debug_draw = false;
-	bool outline_selection = false;
-	bool override_cull = true;
-	bool skybox = true;
-	bool wireframe = false;
-	bool cull = true;
+
+	const unsigned int GetFBO() const;
+
+	static const char* labels[11];
+};
+
+enum RENDER_VIEWS : short
+{
+	VIEW_EDITOR,
+	VIEW_GAME,
+	VIEW_OTHER
 };
 
 class ModuleRenderer3D : public Module 
 {
-
 public:
 	ModuleRenderer3D(const char* name, bool start_enabled = true);
 	~ModuleRenderer3D();
@@ -51,63 +75,64 @@ public:
 
 	// Editor Values
 	void SetVSync(bool enable);
-	void SetDepthTest(bool enable);
-	void SetFaceCulling(bool enable);
-	void SetLighting(bool enable);
-	void SetTexture2D(bool enable);
-	void SetColorMaterial(bool enable);
-	void SetWireframe(bool enable);
-
-	// Shaders - A vector in GLSL contains 4 component
-	unsigned int GetMaxVertexAttributes(); //it's usually 16
-
-	// Draws
-	void DirectDrawCube(math::vec position, math::vec color);
 
 	// Context & Viewport
 	void* GetWindowContext()const;
 
-	void ChangeFBOSize(int width, int height, bool editor = false);
+	// Shaders - A vector in GLSL contains 4 component
+	unsigned int GetMaxVertexAttributes(); //it's usually 16
 
+	// Sets shader for unassigned geometry
+	static const LightMode GetLightMode();
+
+	void ChangeFBOSize(int width, int height, bool editor = false);
 	unsigned int GetRenderedEditorSceneTexture()const;
 	unsigned int GetRenderedGameSceneTexture()const;
 
+	// Thumbnail
 	void ReRenderThumbnail(const char* res);
 
 private:
 
-	void DrawScene(const RenderMode& mode);
+	void DrawScene(RenderView& render_view);
 
-public:
+	void inline SetupShaders();
 
-	static LightMode render_pass;
+	void inline SetWireframe(bool enable);
+	void inline SetFaceCulling(bool enable);
+	void inline SetTexture2D(bool enable);
+	void inline SetColorMaterial(bool enable);
+	void inline SetDepthTest(bool enable);
+	void inline SetLighting(bool enable);
+
+	void DrawQuad();
+	void DirectDrawCube(math::vec position, math::vec color);
 
 private:
 
-	eastl::stack<const char*> thumbnailsToRender;
+	// Scene Drawing
+	float time, dt;
+	eastl::vector<const char*> activeShaders;
 
 	// Context
 	void* mainContext;
 
-	// Configuration
+	// Renderer Flags
 	bool vsync = false;
+	bool wireframe = false;
 	bool cullface = false;
-	bool depthtest = true;
-	bool lighting = false;
 	bool texture2d = false;
 	bool color_material = false;
+	bool depthtest = false;
+	bool lighting = false;
 
-	bool wireframe_scene = false;
-	bool cull_scene = true;
-	bool deferred_light = false;
+	static LightMode current_lighting;
 
-	// FBOs
-	unsigned int sceneEditorFBO = 0;
-	unsigned int sceneGameFBO = 0;
+	// Rendering Views
+	eastl::vector<RenderView> render_views;
 
-	unsigned int deferredEditorFBO = 0;
-	unsigned int lightPassFBO = 0;
-	//unsigned int deferredGameFBO = 0;
+	// Thumbnails
+	eastl::stack<const char*> thumbnailsToRender;
 };
 
 #endif // !__MODULERENDER3D_H__
