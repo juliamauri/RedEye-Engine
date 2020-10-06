@@ -21,18 +21,11 @@ public:
 	} target_ar = Fit_Window;
 
 public:
-	RE_CompCamera(
-		RE_GameObject* go = nullptr,
-		bool toPerspective = true,
-		float near_plane = 1.0f,
-		float far_plane = 5000.0f,
-		float v_fov = 0.523599f,
-		short aspect_ratio_t = 0, 
-		bool draw_frustum = true,
-		bool usingSkybox =  true,
-		const char* skyboxMD5 = nullptr);
-	RE_CompCamera(const RE_CompCamera& cmpCamera, RE_GameObject* go);
+	RE_CompCamera();
 	~RE_CompCamera();
+
+	void SetUp(RE_GameObject* parent, bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 0.523599f, short aspect_ratio_t = 0, bool draw_frustum = true, bool usingSkybox = true, const char* skyboxMD5 = nullptr);
+	void SetUp(const RE_CompCamera& cmpCamera, RE_GameObject* parent);
 	
 	void Update() override;
 	void DrawProperties() override;

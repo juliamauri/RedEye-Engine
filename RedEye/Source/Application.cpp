@@ -26,7 +26,6 @@
 #include "RE_GLCache.h"
 #include "RE_FBOManager.h"
 #include "RE_ThumbnailManager.h"
-#include "RE_GOManager.h"
 
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
@@ -68,8 +67,6 @@ Application::Application()
 	glcache = new RE_GLCache();
 	fbomanager = new RE_FBOManager();
 	thumbnail = new RE_ThumbnailManager();
-
-	goManager = new RE_GOManager("GOManager");
 }
 
 Application::~Application()
@@ -85,8 +82,6 @@ Application::~Application()
 	DEL(glcache);
 	DEL(fbomanager);
 	DEL(thumbnail);
-
-	DEL(goManager);
 
 	for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;

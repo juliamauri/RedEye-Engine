@@ -19,13 +19,17 @@ class RE_CompTransform;
 class RE_CompMesh;
 class RE_CompCamera;
 class JSONNode;
+class ComponentsPool;
+class RE_GOManager;
 
 class RE_GameObject : public EventListener
 {
 public:
-	RE_GameObject(const char* name, UUID uuid = GUID_NULL, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
-	RE_GameObject(const RE_GameObject& go, RE_GameObject* parent = nullptr);
+	RE_GameObject();
 	~RE_GameObject();
+
+	void SetUp(ComponentsPool* compPool, const char* name, UUID uuid = GUID_NULL, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
+	void SetUp(ComponentsPool* compPool, const RE_GameObject& go, RE_GameObject* parent = nullptr);
 
 	void PreUpdate();
 	void Update();
@@ -36,6 +40,7 @@ public:
 	eastl::stack<RE_Component*> GetDrawableComponentsWithChilds(RE_GameObject* ignoreStencil = nullptr)const;
 	eastl::stack<RE_Component*> GetDrawableComponentsItselfOnly()const;
 	eastl::stack<RE_Component*> GetAllComponentWithChilds(unsigned short type)const;
+	eastl::list<RE_Component*> GetComponents()const;
 
 	eastl::vector<RE_GameObject*> GetAllGO();
 	eastl::vector<RE_GameObject*> GetActiveChildsWithDrawComponents();
@@ -47,8 +52,8 @@ public:
 	unsigned int GetBinarySize()const;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
 
-	static RE_GameObject* DeserializeJSON(JSONNode* node, eastl::map<int, const char*>* resources);
-	static RE_GameObject* DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources);
+	static void DeserializeJSON(RE_GOManager* goPool, JSONNode* node, eastl::map<int, const char*>* resources);
+	static void DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl::map<int, const char*>* resources);
 
 	// Children
 	void AddChild(RE_GameObject* child, bool broadcast = true);
@@ -89,14 +94,12 @@ public:
 
 	// Components
 	void AddComponent(RE_Component* component);
-	RE_Component* AddComponent(const ushortint type, const char* file_path_data = nullptr, const bool dropped = false);
+	RE_Component* AddComponent(const ushortint type);
 	RE_Component* GetComponent(const ushortint type) const;
 	void RemoveComponent(RE_Component* component);
-	void RemoveAllComponents();
 
 	RE_CompTransform* AddCompTransform();
-	RE_CompMesh* AddCompMesh(const char* file_path_data = nullptr, const bool dropped = false);
-	void AddCompMesh(RE_CompMesh* comp_mesh);
+	RE_CompMesh* AddCompMesh();
 	RE_CompCamera* AddCompCamera(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 0.523599f, short aspect_ratio_t = 0, bool draw_frustum = true, bool usingSkybox = true, const char* skyboxMD5 = nullptr);
 
 	RE_CompTransform* GetTransform() const;
@@ -133,6 +136,13 @@ public:
 	//POOL
 	int GetPoolID()const;
 	void SetPoolID(int id);
+	
+public:
+	struct cmpPoolID {
+		int poolId;
+		ushortint cType;
+		cmpPoolID(int id, ushortint type) : poolId(id), cType(type) { }
+	};
 
 private:
 
@@ -145,12 +155,12 @@ private:
 	math::AABB local_bounding_box;
 	math::AABB global_bounding_box;
 
-	RE_GameObject* root = nullptr;
 	RE_GameObject* parent = nullptr;
 	RE_CompTransform* transform = nullptr;
 
 	eastl::list<RE_GameObject*> childs;
-	eastl::list<RE_Component*> components;
+	ComponentsPool* poolComponents;
+	eastl::vector<cmpPoolID> componentsID;
 
 	int poolID = 0;
 };

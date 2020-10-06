@@ -19,6 +19,7 @@ RE_CameraManager::~RE_CameraManager()
 void RE_CameraManager::Init()
 {
 	editor_camera = new RE_CompCamera();
+	editor_camera->SetUp(nullptr);
 	editor_camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
 }
 

@@ -5,10 +5,9 @@
 #include "RE_FileSystem.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_Component.h"
-#include "RE_CompTransform.h"
 #include "RE_CompPrimitive.h"
 #include "RE_CompMesh.h"
-#include "RE_CompCamera.h"
+#include "RE_GOManager.h"
 #include "RE_CompParticleEmiter.h"
 #include "RE_ShaderImporter.h"
 #include "RE_GLCache.h"
@@ -25,16 +24,26 @@
 #include <EASTL/stack.h>
 #include <EASTL/internal/char_traits.h>
 
-RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, bool start_active, bool isStatic)
-	: name(name), parent(p), active(start_active), isStatic(isStatic)
+RE_GameObject::RE_GameObject()
 {
+}
+
+RE_GameObject::~RE_GameObject()
+{
+}
+
+void RE_GameObject::SetUp(ComponentsPool* compPool, const char* name, UUID uuid, RE_GameObject* parent, bool start_active, bool isStatic)
+{
+	poolComponents = compPool;
+	this->isStatic = isStatic;
+	this->name = name;
 	if (uuid == GUID_NULL)
 		UuidCreate(&this->uuid);
 	else
 		this->uuid = uuid;
 
-	transform = new RE_CompTransform(this);
-	components.push_back((RE_Component*)transform);
+	transform = poolComponents->GetNewTransform();
+	transform->SetUp(this);
 
 	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
@@ -43,8 +52,9 @@ RE_GameObject::RE_GameObject(const char* name, UUID uuid, RE_GameObject * p, boo
 		parent->AddChild(this, false);
 }
 
-RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : parent(p)
+void RE_GameObject::SetUp(ComponentsPool* compPool, const RE_GameObject& go, RE_GameObject* parent)
 {
+	poolComponents = compPool;
 	UuidCreate(&this->uuid);
 	isStatic = go.isStatic;
 	active = go.active;
@@ -53,93 +63,81 @@ RE_GameObject::RE_GameObject(const RE_GameObject & go, RE_GameObject * p) : pare
 	local_bounding_box = go.local_bounding_box;
 	global_bounding_box = go.global_bounding_box;
 
-	RE_CompCamera* comp_camera;
-
-	for (RE_Component* cmpGO : go.components)
+	for (RE_Component* cmpGO : go.GetComponents())
 	{
 		switch (cmpGO->GetType())
 		{
 		case C_TRANSFORM:
-			components.push_back(transform = new RE_CompTransform(*(RE_CompTransform*)cmpGO, this));
+			transform = poolComponents->CopyTransform((RE_CompTransform*)cmpGO, this);
 			break;
 		case C_CAMERA:
-			comp_camera = new RE_CompCamera(*(RE_CompCamera*)cmpGO, this);
-			if(!Event::isPaused()) App->cams->AddMainCamera(comp_camera);
-			components.push_back(comp_camera);
+		{
+			RE_CompCamera* comp_camera = poolComponents->CopyCamera((RE_CompCamera*)cmpGO, this);
+			if (!Event::isPaused()) App->cams->AddMainCamera(comp_camera);
+		}
 			break;
 		case C_MESH:
-			components.push_back(new RE_CompMesh(*(RE_CompMesh*)cmpGO, this));
+			poolComponents->CopyMesh((RE_CompMesh*)cmpGO, this);
 			break;
-		case C_CUBE:
-			components.push_back((RE_CompPrimitive*)new RE_CompCube(*(RE_CompCube*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_DODECAHEDRON:
-			components.push_back((RE_CompPrimitive*)new RE_CompDodecahedron(*(RE_CompDodecahedron*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_TETRAHEDRON:
-			components.push_back((RE_CompPrimitive*)new RE_CompTetrahedron(*(RE_CompTetrahedron*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_OCTOHEDRON:
-			components.push_back((RE_CompPrimitive*)new RE_CompOctohedron(*(RE_CompOctohedron*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_ICOSAHEDRON:
-			components.push_back((RE_CompPrimitive*)new RE_CompIcosahedron(*(RE_CompIcosahedron*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_SPHERE:
-			components.push_back((RE_CompPrimitive*)new RE_CompSphere(*(RE_CompSphere*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_CYLINDER:
-			components.push_back((RE_CompPrimitive*)new RE_CompCylinder(*(RE_CompCylinder*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_HEMISHPERE:
-			components.push_back((RE_CompPrimitive*)new RE_CompHemiSphere(*(RE_CompHemiSphere*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_TORUS:
-			components.push_back((RE_CompPrimitive*)new RE_CompTorus(*(RE_CompTorus*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_TREFOILKNOT:
-			components.push_back((RE_CompPrimitive*)new RE_CompTrefoiKnot(*(RE_CompTrefoiKnot*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_ROCK:
-			components.push_back((RE_CompPrimitive*)new RE_CompRock(*(RE_CompRock*)((RE_CompPrimitive*)cmpGO), this));
-			break;
-		case C_PLANE:
-			components.push_back((RE_CompPrimitive*)new RE_CompPlane(*(RE_CompPlane*)((RE_CompPrimitive*)cmpGO), this));
-			break;
+		//case C_CUBE:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompCube(*(RE_CompCube*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_DODECAHEDRON:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompDodecahedron(*(RE_CompDodecahedron*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_TETRAHEDRON:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompTetrahedron(*(RE_CompTetrahedron*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_OCTOHEDRON:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompOctohedron(*(RE_CompOctohedron*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_ICOSAHEDRON:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompIcosahedron(*(RE_CompIcosahedron*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_SPHERE:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompSphere(*(RE_CompSphere*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_CYLINDER:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompCylinder(*(RE_CompCylinder*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_HEMISHPERE:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompHemiSphere(*(RE_CompHemiSphere*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_TORUS:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompTorus(*(RE_CompTorus*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_TREFOILKNOT:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompTrefoiKnot(*(RE_CompTrefoiKnot*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_ROCK:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompRock(*(RE_CompRock*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
+		//case C_PLANE:
+		//	components.push_back((RE_CompPrimitive*)new RE_CompPlane(*(RE_CompPlane*)((RE_CompPrimitive*)cmpGO), this));
+		//	break;
 		}
 	}
+
 
 	if (parent != nullptr)
 		parent->AddChild(this, false);
-
-	if (!go.childs.empty()) {
-		for (RE_GameObject* childGO : go.childs) {
-			new RE_GameObject(*childGO, this);
-		}
-	}
-}
-
-RE_GameObject::~RE_GameObject()
-{
-	RemoveAllChilds();
-	RemoveAllComponents();
 }
 
 void RE_GameObject::PreUpdate()
 {
-	for (auto component : components) component->PreUpdate();
+	for (auto component : GetComponents()) component->PreUpdate();
 	for (auto child : childs) child->PreUpdate();
 }
 
 void RE_GameObject::Update()
 {
-	for (auto component : components) component->Update();
+	for (auto component : GetComponents()) component->Update();
 	for (auto child : childs) child->Update();
 }
 
 void RE_GameObject::PostUpdate()
 {
-	for (auto component : components) component->PostUpdate();
+	for (auto component : GetComponents()) component->PostUpdate();
 	for (auto child : childs) child->PostUpdate();
 }
 
@@ -154,7 +152,7 @@ void RE_GameObject::DrawWithChilds() const
 			const RE_GameObject * go = gos.top();
 			gos.pop();
 
-			for (auto component : go->components)
+			for (auto component : go->GetComponents())
 				component->Draw();
 
 			for (auto child : go->GetChilds())
@@ -167,7 +165,7 @@ void RE_GameObject::DrawWithChilds() const
 void RE_GameObject::DrawItselfOnly() const
 {
 	if (active)
-		for (auto component : components)
+		for (auto component : GetComponents())
 			component->Draw();
 }
 
@@ -185,7 +183,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetDrawableComponentsWithChilds(RE_Ga
 			gos.pop();
 			
 			if (go != ignoreStencil) {
-				for (auto component : go->components)
+				for (auto component : go->GetComponents())
 				{
 					ComponentType cT = component->GetType();
 					if (cT == ComponentType::C_MESH || (cT > ComponentType::C_PRIMIVE_MIN&& cT < ComponentType::C_PRIMIVE_MAX)) ret.push(component);
@@ -203,7 +201,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetDrawableComponentsWithChilds(RE_Ga
 eastl::stack<RE_Component*> RE_GameObject::GetDrawableComponentsItselfOnly() const
 {
 	eastl::stack<RE_Component*> ret;
-	for (auto component : components)
+	for (auto component : GetComponents())
 	{
 		ComponentType cT = component->GetType();
 		if (cT == ComponentType::C_MESH || (cT > ComponentType::C_PRIMIVE_MIN && cT < ComponentType::C_PRIMIVE_MAX)) ret.push(component);
@@ -222,7 +220,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllComponentWithChilds(unsigned sh
 		const RE_GameObject* go = gos.top();
 		gos.pop();
 
-			for (auto component : go->components)
+			for (auto component : go->GetComponents())
 			{
 				ComponentType cT = component->GetType();
 				if (cT == type) ret.push(component);
@@ -232,6 +230,14 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllComponentWithChilds(unsigned sh
 			gos.push(child);
 	}
 
+	return ret;
+}
+
+eastl::list<RE_Component*> RE_GameObject::GetComponents() const
+{
+	eastl::list<RE_Component*> ret;
+	for (const cmpPoolID compid : componentsID)
+		ret.push_back(poolComponents->GetComponent(compid.poolId, (ComponentType)compid.cType));
 	return ret;
 }
 
@@ -276,7 +282,7 @@ eastl::vector<RE_GameObject*> RE_GameObject::GetActiveChildsWithDrawComponents()
 
 bool RE_GameObject::HasDrawComponents() const
 {
-	for (auto component : components)
+	for (auto component : GetComponents())
 	{
 		ushortint cT = component->GetType();
 
@@ -292,7 +298,7 @@ eastl::vector<const char*> RE_GameObject::GetAllResources(bool root)
 {
 	eastl::vector<const char*> allResources;
 
-	for (auto comp : components) {
+	for (auto comp : GetComponents()) {
 		eastl::vector<const char*> cmpRet = comp->GetAllResources();
 		if (!cmpRet.empty())
 			allResources.insert(allResources.end(), cmpRet.begin(), cmpRet.end());
@@ -361,16 +367,16 @@ void RE_GameObject::SerializeJson(JSONNode * node, eastl::map<const char*, int>*
 
 		JSONNode* comps = goNode->PushJObject("components");
 		uint cmpSize = 0;
-		for (auto component : go->components) {
-			unsigned short type = component->GetType();
-			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA)
+		for (auto component : go->GetComponents()) {
+			ComponentType type = component->GetType();
+			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA || type != C_TRANSFORM)
 				cmpSize++;
 		}
 		comps->PushUInt("ComponentsSize", cmpSize);
 		uint count = 0;
-		for (auto component : go->components) {
-			unsigned short type = component->GetType();
-			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA)
+		for (auto component : go->GetComponents()) {
+			ComponentType type = component->GetType();
+			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA || type == C_TRANSFORM)
 				continue;
 			ref = "cmp" + eastl::to_string(count++);
 			JSONNode* comp = comps->PushJObject(ref.c_str());
@@ -390,7 +396,7 @@ unsigned int RE_GameObject::GetBinarySize()const
 	if (parent != nullptr) size += 36 * sizeof(char);
 	size += eastl::CharStrlen(GetName()) * sizeof(char);
 
-	for (auto component : components) size += component->GetBinarySize();
+	for (auto component : GetComponents()) size += component->GetBinarySize();
 
 	for (auto child : childs) size += child->GetBinarySize();
 
@@ -443,17 +449,17 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 
 		size = sizeof(uint);
 		uint cmpSize = 0;
-		for (auto component : go->components) {
+		for (auto component : go->GetComponents()) {
 			unsigned short type = component->GetType();
-			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA)
+			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA || type != C_TRANSFORM)
 				cmpSize++;
 		}
 		memcpy(cursor, &cmpSize, size);
 		cursor += size;
 
-		for (auto component : go->components) {
+		for (auto component : go->GetComponents()) {
 			unsigned short type = component->GetType();
-			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA)
+			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA || type == C_TRANSFORM)
 				continue;
 			size = sizeof(unsigned short);
 			memcpy(cursor, &type, size);
@@ -464,7 +470,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 	}
 }
 
-RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, eastl::map<int, const char*>* resources)
+void RE_GameObject::DeserializeJSON(RE_GOManager* goPool, JSONNode* node, eastl::map<int, const char*>* resources)
 {
 	RE_GameObject* rootGo = nullptr;
 	RE_GameObject* new_go = nullptr;
@@ -480,8 +486,14 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, eastl::map<int, co
 		UUID parent_uuid;
 
 		UuidFromStringA((RPC_CSTR)goNode->PullString("UUID", ""), &uuid);
-		if (rootGo != nullptr) UuidFromStringA((RPC_CSTR)goNode->PullString("Parent UUID",""), &parent_uuid);
-		(rootGo == nullptr) ? rootGo = new_go = new RE_GameObject(goNode->PullString("name", "GameObject"), uuid) : new_go = new RE_GameObject(goNode->PullString("name", "GameObject"), uuid, rootGo->GetGoFromUUID(parent_uuid));
+		if (rootGo != nullptr) {
+			UuidFromStringA((RPC_CSTR)goNode->PullString("Parent UUID", ""), &parent_uuid);
+		
+			new_go = goPool->AddGO(goNode->PullString("name", "GameObject"), uuid, rootGo->GetGoFromUUID(parent_uuid));
+		}
+		else {
+			rootGo = new_go = goPool->AddGO(goNode->PullString("name", "GameObject"), uuid, nullptr);
+		}
 
 		new_go->GetTransform()->SetPosition(goNode->PullFloatVector("position", math::vec::zero));
 		new_go->GetTransform()->SetRotation(goNode->PullFloatVector("rotation", math::vec::zero));
@@ -589,7 +601,8 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, eastl::map<int, co
 				if (meshID != -1) {
 					meshMD5 = resources->at(meshID);
 
-					newMesh = new RE_CompMesh(new_go, meshMD5);
+					newMesh = new_go->AddCompMesh();
+					newMesh->SetUp(new_go, meshMD5);
 
 					const char* materialMD5 = nullptr;
 					int materialID = cmpNode->PullInt("materialResource", -1);
@@ -621,11 +634,9 @@ RE_GameObject* RE_GameObject::DeserializeJSON(JSONNode* node, eastl::map<int, co
 		DEL(goNode);
 	}
 	DEL(gameObjects);
-
-	return rootGo;
 }
 
-RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
+void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl::map<int, const char*>* resources)
 {
 	RE_GameObject* rootGo = nullptr;
 	RE_GameObject* new_go = nullptr;
@@ -675,7 +686,7 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, eastl::map<int, c
 			DEL_A(strUUIDParent);
 		}
 
-		(rootGo == nullptr) ? rootGo = new_go = new RE_GameObject(strName, uuid) : new_go = new RE_GameObject(strName, uuid, rootGo->GetGoFromUUID(parent_uuid));
+		(rootGo == nullptr) ? rootGo = new_go = goPool->AddGO(strName, uuid, nullptr) : new_go = goPool->AddGO(strName, uuid, rootGo->GetGoFromUUID(parent_uuid));
 		DEL_A(strName);
 
 		float vec[3] = { 0.0, 0.0, 0.0 };
@@ -931,7 +942,8 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, eastl::map<int, c
 				const char* meshMD5 = nullptr;
 				if (meshID != -1) {
 					meshMD5 = resources->at(meshID);
-					newMesh = new RE_CompMesh(new_go, meshMD5);
+					newMesh = new_go->AddCompMesh();
+					newMesh->SetUp(new_go, meshMD5);
 
 					const char* materialMD5 = nullptr;
 					int materialID = -1;
@@ -942,7 +954,6 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, eastl::map<int, c
 						newMesh->SetMaterial(materialMD5);
 					}
 				}
-				new_go->AddCompMesh(newMesh);
 				break;
 			}
 			case C_CAMERA:
@@ -999,8 +1010,6 @@ RE_GameObject* RE_GameObject::DeserializeBinary(char*& cursor, eastl::map<int, c
 			}
 		}
 	}
-
-	return rootGo;
 }
 
 void RE_GameObject::AddChild(RE_GameObject * child, bool broadcast)
@@ -1160,71 +1169,73 @@ void RE_GameObject::IterativeSetStatic(bool val)
 
 void RE_GameObject::OnPlay()
 {
-	for (auto component : components) component->OnPlay();
+	for (auto component : GetComponents()) component->OnPlay();
 	for (auto child : childs) child->OnPlay();
 }
 
 void RE_GameObject::OnPause()
 {
-	for (auto component : components) component->OnPause();
+	for (auto component : GetComponents()) component->OnPause();
 	for (auto child : childs) child->OnPause();
 }
 
 void RE_GameObject::OnStop()
 {
-	for (auto component : components) component->OnStop();
+	for (auto component : GetComponents()) component->OnStop();
 	for (auto child : childs) child->OnStop();
 }
 
 void RE_GameObject::UseResources()
 {
-	for (auto comp : components) comp->UseResources();
+	for (auto comp : GetComponents()) comp->UseResources();
 	for (auto child : childs) child->UseResources();
 }
 
 void RE_GameObject::UnUseResources()
 {
-	for (auto comp : components) comp->UnUseResources();
+	for (auto comp : GetComponents()) comp->UnUseResources();
 	for (auto child : childs) child->UnUseResources();
 }
 
 RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float v_fov_rads, short aspect_ratio_t, bool draw_frustum, bool usingSkybox, const char* skyboxMD5)
 {
-	RE_CompCamera* comp_camera = new RE_CompCamera(this, prespective, near_plane, far_plane, v_fov_rads, aspect_ratio_t, draw_frustum, usingSkybox, skyboxMD5);
-	components.push_back((RE_Component*)comp_camera);
+	RE_CompCamera* comp_camera = poolComponents->GetNewCamera();
+	comp_camera->SetUp(this, prespective, near_plane, far_plane, v_fov_rads, aspect_ratio_t, draw_frustum, usingSkybox, skyboxMD5);
 	if(!Event::isPaused()) App->cams->AddMainCamera(comp_camera);
 	return comp_camera;
 }
 
 void RE_GameObject::AddComponent(RE_Component * component)
 {
-	components.push_back(component);
+	componentsID.push_back(cmpPoolID(component->GetPoolID(), component->GetType()));
 }
 
-RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file_path_data, const bool drop)
+RE_Component* RE_GameObject::AddComponent(const ushortint type)
 {
 	SDL_assert(type < MAX_COMPONENT_TYPES);
 	RE_Component* ret = nullptr;
 
 	if (ComponentType(type) == C_TRANSFORM)
 	{
-		if (transform != nullptr)
-		{
-			RemoveComponent((RE_Component*)transform);
-			transform = nullptr;
+		if (transform) {
+			RemoveComponent(transform);
+			poolComponents->DeleteTransform(transform->GetPoolID());
 		}
-		transform = new RE_CompTransform(this);
+		transform = poolComponents->GetNewTransform();
+		transform->SetUp(this);
 		ret = (RE_Component*)transform;
 	}
 	else if (ComponentType(type) == C_MESH)
 	{
-		RE_CompMesh* mesh_comp = new RE_CompMesh(this, file_path_data, drop);
+		RE_CompMesh* mesh_comp = poolComponents->GetNewMesh();
+		mesh_comp->SetUp(this);
 		//AddToBoundingBox(mesh_comp->GetAABB());
 		ret = (RE_Component*)mesh_comp;
 	}
 	else if (ComponentType(type) == C_CAMERA)
 	{
-		RE_CompCamera* comp_camera = new RE_CompCamera(this);
+		RE_CompCamera* comp_camera = poolComponents->GetNewCamera();
+		comp_camera->SetUp(this);
 		App->cams->AddMainCamera(comp_camera);
 		ret = (RE_Component*)comp_camera;
 	}
@@ -1302,7 +1313,7 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 	}
 
 	if (ret != nullptr)
-		components.push_back(ret);
+		AddComponent(ret);
 	else
 		LOG_ERROR("GameObject could not add type %u component", type);
 
@@ -1312,34 +1323,29 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type, const char* file
 void RE_GameObject::RemoveComponent(RE_Component * component)
 {
 	SDL_assert(component != nullptr);
-	components.remove(component);
-}
 
-void RE_GameObject::RemoveAllComponents()
-{
-	while (!components.empty())
-	{
-		DEL(*components.begin());
-		components.pop_front();
+	unsigned int count = 0;
+	for (cmpPoolID compid : componentsID) {
+		if(compid.poolId == component->GetPoolID() && compid.cType == component->GetType())
+			componentsID.erase(&componentsID[count]);
+		count++;
 	}
 }
 
 RE_CompTransform * RE_GameObject::AddCompTransform()
 {
-	DEL(transform);
-	return (transform = new RE_CompTransform(this));
+	if (transform) {
+		RemoveComponent(transform);
+		poolComponents->DeleteTransform(transform->GetPoolID());
+	}
+	transform = poolComponents->GetNewTransform();
+	transform->SetUp(this);
+	return transform;
 }
 
-RE_CompMesh * RE_GameObject::AddCompMesh(const char * file_path_data, const bool dropped)
+RE_CompMesh* RE_GameObject::AddCompMesh()
 {
-	RE_CompMesh* ret = new RE_CompMesh(this, file_path_data, dropped);
-	components.push_back(ret->AsComponent());
-	return ret;
-}
-
-void RE_GameObject::AddCompMesh(RE_CompMesh * comp_mesh)
-{
-	components.push_back((RE_Component*)comp_mesh);
+	return poolComponents->GetNewMesh();
 }
 
 RE_Component* RE_GameObject::GetComponent(const ushortint type) const
@@ -1352,7 +1358,7 @@ RE_Component* RE_GameObject::GetComponent(const ushortint type) const
 	}
 	else
 	{
-		for (auto component : components)
+		for (auto component : GetComponents())
 		{
 			if (component->GetType() == type)
 			{
@@ -1371,7 +1377,7 @@ RE_CompMesh * RE_GameObject::GetMesh() const
 {
 	RE_CompMesh* ret = nullptr;
 
-	for (auto component : components)
+	for (auto component : GetComponents())
 	{
 		if (component->GetType() == ComponentType::C_MESH)
 		{
@@ -1387,7 +1393,7 @@ RE_CompCamera * RE_GameObject::GetCamera() const
 {
 	RE_CompCamera* ret = nullptr;
 
-	for (auto component : components)
+	for (auto component : GetComponents())
 	{
 		if (component->GetType() == ComponentType::C_CAMERA)
 		{
@@ -1422,7 +1428,7 @@ void RE_GameObject::RecieveEvent(const Event & e)
 
 void RE_GameObject::TransformModified(bool broadcast)
 {
-	for (auto component : components)
+	for (auto component : GetComponents())
 		component->OnTransformModified();
 
 	ResetGlobalBoundingBox();
@@ -1492,7 +1498,7 @@ void RE_GameObject::ResetLocalBoundingBox()
 	// Local Bounding Box
 	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 
-	for (RE_Component* comp : components)
+	for (RE_Component* comp : GetComponents())
 	{
 		switch (comp->GetType())
 		{
@@ -1656,7 +1662,7 @@ void RE_GameObject::DrawProperties()
 		ImGui::TreePop();
 	}
 
-	for (auto component : components)
+	for (auto component : GetComponents())
 		component->DrawProperties();
 }
 

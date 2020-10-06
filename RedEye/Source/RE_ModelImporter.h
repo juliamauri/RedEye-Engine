@@ -8,6 +8,7 @@ struct aiMaterial;
 struct aiString;
 struct RE_ModelSettings;
 enum aiTextureType;
+class RE_GOManager;
 class RE_GameObject;
 
 #include "MathGeoLib/include/Math/float4x4.h"
@@ -33,12 +34,12 @@ public:
 	bool Init(const char* def_shader = nullptr);
 
 	eastl::vector<eastl::string> GetOutsideResourcesAssetsPath(const char * path);
-	RE_GameObject* ProcessModel(const char* buffer, unsigned int size, const char* assetPayh, RE_ModelSettings* mSettings);
+	RE_GOManager* ProcessModel(const char* buffer, unsigned int size, const char* assetPayh, RE_ModelSettings* mSettings);
 
 private:
 	void ProcessMaterials(const aiScene* scene);
 	void ProcessMeshes(const aiScene* scene);
-	void ProcessNode(aiNode* node, const aiScene* scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot = false);
+	void ProcessNode(RE_GOManager* goPool, aiNode* node, const aiScene* scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot = false);
 
 	void GetTexturesMaterial(aiMaterial * material, eastl::string &fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString &name);
 	void GetTexturePath(aiMaterial * material, eastl::vector<eastl::string> &retPaths, aiTextureType textureType);

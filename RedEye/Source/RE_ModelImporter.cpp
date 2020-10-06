@@ -7,9 +7,7 @@
 #include "RE_ShaderImporter.h"
 #include "RE_ThumbnailManager.h"
 
-#include "RE_GameObject.h"
-#include "RE_CompTransform.h"
-#include "RE_CompMesh.h"
+#include "RE_GOManager.h"
 
 #include "RE_Model.h"
 #include "RE_Mesh.h"
@@ -52,7 +50,7 @@ bool RE_ModelImporter::Init(const char * def_shader)
 	return true;
 }
 
-RE_GameObject*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
+RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
 {
 	aditionalData = new currentlyImporting();
 	aditionalData->settings = mSettings;
@@ -60,7 +58,7 @@ RE_GameObject*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int
 	uint l = 0;
 	aditionalData->name = aditionalData->workingfilepath.substr(l = aditionalData->workingfilepath.find_last_of("/") + 1, aditionalData->workingfilepath.find_last_of(".") - l);
 
-	RE_GameObject* ret = nullptr;
+	RE_GOManager* ret = nullptr;
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFileFromMemory(buffer, size, mSettings->GetFlags()/*aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | /*aiProcess_PreTransformVertices | aiProcess_SortByPType | aiProcess_FlipUVs */);
@@ -79,15 +77,18 @@ RE_GameObject*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int
 
 		LOG_SECONDARY("Processing model hierarchy");
 		//Mount a go hiteracy with nodes from model
-		ret = new RE_GameObject(aditionalData->name.c_str(), GUID_NULL);
-		ProcessNode(scene->mRootNode, scene, ret, math::float4x4::identity, true);
+		ret = new RE_GOManager();
+			
+		RE_GameObject* currentGO = ret->AddGO(aditionalData->name.c_str(), nullptr);
+
+		ProcessNode(ret, scene->mRootNode, scene, currentGO, math::float4x4::identity, true);
 
 	}
 	DEL(aditionalData);
 	return ret;
 }
 
-void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot)
+void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const aiScene * scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot)
 {
 	LOG_TERCIARY("%s Node: %s (%u meshes | %u children)",
 		node->mParent ? "SON" : "PARENT",
@@ -113,7 +114,11 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 	{
 		if (isRoot || eastl::string(node->mName.C_Str()).find("_$Assimp") == eastl::string::npos)
 		{
-			go_haschildren = (!isRoot) ? new RE_GameObject(node->mName.C_Str(), GUID_NULL, currentGO) : currentGO;
+			if (!isRoot) {
+				go_haschildren = goPool->AddGO(node->mName.C_Str(), currentGO);
+			}
+			else
+				go_haschildren = currentGO;
 
 			math::float3 position;
 			math::Quat rotation;
@@ -142,7 +147,13 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 	{
 		for (; i < node->mNumMeshes; i++)
 		{
-			RE_GameObject* goMesh = (go_haschildren == nullptr) ? new RE_GameObject(node->mName.C_Str(), GUID_NULL, currentGO) : go_haschildren;
+			RE_GameObject* goMesh;
+			if (go_haschildren == nullptr) {
+				goMesh = goPool->AddGO(node->mName.C_Str(), currentGO);
+			}
+			else
+				goMesh = go_haschildren;
+
 			if (go_haschildren == nullptr)
 			{
 				math::float3 position;
@@ -164,9 +175,9 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 			}
 
 			const char* md5Mesh = aditionalData->meshesLoaded.at(scene->mMeshes[node->mMeshes[i]]);
-			RE_CompMesh* comp_mesh = new RE_CompMesh(goMesh, md5Mesh);
+			RE_CompMesh* comp_mesh = goMesh->AddCompMesh();
+			comp_mesh->SetUp(goMesh, md5Mesh);
 			comp_mesh->SetMaterial(aditionalData->materialsLoaded.at(scene->mMaterials[scene->mMeshes[node->mMeshes[i]]->mMaterialIndex]));
-			goMesh->AddCompMesh(comp_mesh);
 			
 			//meshes.rbegin()->name = node->mName.C_Str();
 			//total_triangle_count += meshes.rbegin()->triangle_count;
@@ -174,7 +185,7 @@ void RE_ModelImporter::ProcessNode(aiNode * node, const aiScene * scene, RE_Game
 	}
 
 	for (i = 0; i < node->mNumChildren; i++)
-		ProcessNode(node->mChildren[i], scene, go_haschildren, transform);
+		ProcessNode(goPool, node->mChildren[i], scene, go_haschildren, transform);
 }
 
 void RE_ModelImporter::ProcessMeshes(const aiScene* scene)

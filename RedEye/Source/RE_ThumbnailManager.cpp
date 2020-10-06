@@ -7,15 +7,14 @@
 #include "RE_ShaderImporter.h"
 #include "RE_InternalResources.h"
 #include "RE_TextureImporter.h"
+#include "ModuleScene.h"
 
 #include "RE_GLCache.h"
 #include "RE_FBOManager.h"
 #include "Event.h"
 #include "TimeManager.h"
 
-#include "RE_GameObject.h"
-#include "RE_CompTransform.h"
-#include "RE_CompCamera.h"
+#include "RE_GOManager.h"
 
 #include "RE_Shader.h"
 #include "RE_Texture.h"
@@ -77,6 +76,7 @@ void RE_ThumbnailManager::Init()
 	singleRenderFBO = App->fbomanager->CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE);
 	Event::PauseEvents();
 	internalCamera = new RE_CompCamera();
+	internalCamera->SetUp(nullptr);
 	internalCamera->SetBounds(THUMBNAILSIZE, THUMBNAILSIZE);
 	internalCamera->Update();
 	Event::ResumeEvents();
@@ -273,34 +273,35 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 	if (!App->fs->Exists(path.c_str())) {
 		Event::PauseEvents();
 
-		RE_GameObject* goToThumbnail = nullptr;
+		RE_GOManager* poolGOThumbnail = nullptr;
 
 		ResourceContainer* res = App->resources->At(ref);
+		App->resources->Use(res->GetMD5());
 		switch (res->GetType())
 		{
 		case Resource_Type::R_MODEL:
-			goToThumbnail = ((RE_Model*)res)->GetRoot();
+			poolGOThumbnail = ((RE_Model*)res)->GetPool();
 			break;
 		case Resource_Type::R_PREFAB:
-			goToThumbnail = ((RE_Prefab*)res)->GetRoot();
+			poolGOThumbnail = ((RE_Prefab*)res)->GetPool();
 			break;
 		case Resource_Type::R_SCENE:
-			goToThumbnail = ((RE_Scene*)res)->GetRoot();
+			poolGOThumbnail = ((RE_Scene*)res)->GetPool();
 			break;
 		}
 
-		if (goToThumbnail) {
-			goToThumbnail->UseResources();
-			goToThumbnail->TransformModified(false);
-			goToThumbnail->Update();
-			goToThumbnail->ResetGlobalBoundingBoxForAllChilds();
+		if (poolGOThumbnail) {
+			poolGOThumbnail->GetGO(0)->UseResources();
+			poolGOThumbnail->GetGO(0)->TransformModified(false);
+			poolGOThumbnail->GetGO(0)->Update();
+			poolGOThumbnail->GetGO(0)->ResetGlobalBoundingBoxForAllChilds();
 
 			internalCamera->SetFOV(math::RadToDeg(0.523599f));
 			internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
 			internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
 			internalCamera->LocalRotate(0, -0.5);
 			internalCamera->Update();
-			internalCamera->Focus(goToThumbnail);
+			internalCamera->Focus(poolGOThumbnail->GetGO(0));
 			internalCamera->Update();
 
 			float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
@@ -312,16 +313,15 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			goToThumbnail->DrawWithChilds();
+			poolGOThumbnail->GetGO(0)->DrawWithChilds();
 
-			goToThumbnail->UnUseResources();
-			DEL(goToThumbnail);
+			poolGOThumbnail->GetGO(0)->UnUseResources();
 
 			SaveTextureFromFBO(path.c_str());
 
 			RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
 		}
-
+		App->resources->UnUse(res->GetMD5());
 		Event::ResumeEvents();
 	}
 

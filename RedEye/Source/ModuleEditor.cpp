@@ -125,8 +125,9 @@ bool ModuleEditor::Start()
 	windows.push_back(assets = new AssetsWindow());
 	windows.push_back(wwise = new WwiseWindow());
 
-	grid_go = new RE_GameObject("grid");
-	grid = (RE_Component*)App->primitives->CreateGrid(grid_go);
+	//grid_go = new RE_GameObject("grid");
+
+	//grid = (RE_Component*)App->primitives->CreateGrid(grid_go);
 
 	// FOCUS CAMERA
 	const RE_GameObject* root = App->scene->GetRoot();
@@ -391,7 +392,7 @@ bool ModuleEditor::CleanUp()
 	DEL(sceneEditorWindow);
 	DEL(sceneGameWindow);
 
-	DEL(grid_go);
+	//DEL(grid_go);
 	grid = nullptr;
 
 	ImGui_ImplOpenGL3_Shutdown();
@@ -419,15 +420,15 @@ void ModuleEditor::DrawEditor()
 		ImGui::Checkbox("Debug Draw", &debug_drawing);
 		if (debug_drawing)
 		{
-			bool active_grid = grid->IsActive();
-			if (ImGui::Checkbox("Draw Grid", &active_grid))
-				grid->SetActive(active_grid);
+			//bool active_grid = grid->IsActive();
+			//if (ImGui::Checkbox("Draw Grid", &active_grid))
+				//grid->SetActive(active_grid);
 
-			if (active_grid && ImGui::DragFloat2("Grid Size", grid_size, 0.2f, 0.01f, 100.0f, "%.1f"))
-			{
-				grid_go->GetTransform()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
-				grid_go->GetTransform()->Update();
-			}
+			//if (active_grid && ImGui::DragFloat2("Grid Size", grid_size, 0.2f, 0.01f, 100.0f, "%.1f"))
+			//{
+				//grid_go->GetTransform()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
+				//grid_go->GetTransform()->Update();
+			//}
 
 			int aabb_d = aabb_drawing;
 			if (ImGui::Combo("Draw AABB", &aabb_d, "None\0Selected only\0All\0All w/ different selected\0"))
@@ -595,8 +596,8 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 		if (resetLight)
 			glEnable(GL_LIGHTING);
 
-		if (grid->IsActive())
-			grid->Draw();
+		//if (grid->IsActive())
+			//grid->Draw();
 	}
 }
 
@@ -754,7 +755,8 @@ void ModuleEditor::CreatePrefab(RE_GameObject* go, const char* name, bool identi
 	newPrefab->SetName(name);
 	newPrefab->SetType(Resource_Type::R_PREFAB);
 	Event::PauseEvents();
-	newPrefab->Save(go, identityRoot, true);
+
+	newPrefab->Save(App->scene->GetScenePool()->GetNewPoolFromID(go->GetPoolID()), identityRoot, true);
 	Event::ResumeEvents();
 	newPrefab->SaveMeta();
 	App->thumbnail->Add(App->resources->Reference(newPrefab));

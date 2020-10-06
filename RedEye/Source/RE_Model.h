@@ -5,7 +5,7 @@
 
 #include <EASTL/vector.h>
 
-class RE_GameObject;
+class RE_GOManager;
 enum aiPostProcessSteps;
 
 struct RE_ModelSettings {
@@ -98,7 +98,7 @@ public:
 	void SetAssetPath(const char* originPath)override;
 
 	void Import(bool keepInMemory = true) override;
-	RE_GameObject* GetRoot();
+	RE_GOManager* GetPool();
 
 private:
 	void Draw() override;
@@ -112,7 +112,7 @@ private:
 	bool CheckResourcesIsOnAssets();
 
 private:
-	RE_GameObject* loaded = nullptr;
+	RE_GOManager* loaded = nullptr;
 
 	RE_ModelSettings modelSettings;
 

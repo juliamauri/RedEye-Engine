@@ -284,7 +284,7 @@
       <Filter>Modules</Filter>
     </ClCompile>
     <ClCompile Include="RE_GOManager.cpp">
-      <Filter>Modules</Filter>
+      <Filter>GameObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1225,7 +1225,7 @@
       <Filter>Modules</Filter>
     </ClInclude>
     <ClInclude Include="RE_GOManager.h">
-      <Filter>Modules</Filter>
+      <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

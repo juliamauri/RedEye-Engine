@@ -69,6 +69,7 @@ public:
 
 	ComponentType GetType() const { return type; }
 	RE_GameObject* GetGO() const { return go; }
+	void SetParent(RE_GameObject* parent) { go = parent; };
 
 	RE_Component* AsComponent() const { return (RE_Component*)this; }
 
@@ -81,11 +82,17 @@ public:
 	virtual void UseResources() {  }
 	virtual void UnUseResources() {  }
 
+	//POOL
+	int GetPoolID()const { return poolID; }
+	void SetPoolID(int id) { poolID = id; }
+
 protected:
 
 	bool active = true;
 	ComponentType type = C_EMPTY;
 	RE_GameObject* go = nullptr;
+
+	int poolID = 0;
 };
 
 #endif // !__RE_COMPONENT_H__

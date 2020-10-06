@@ -30,7 +30,6 @@ class RE_InternalResources;
 class RE_GLCache;
 class RE_FBOManager;
 class RE_ThumbnailManager;
-class RE_GOManager;
 
 enum GameState : char
 {
@@ -96,8 +95,6 @@ public:
 	RE_FBOManager* fbomanager = nullptr;
 
 	RE_ThumbnailManager* thumbnail = nullptr;
-
-	RE_GOManager* goManager = nullptr;
 
 private:
 	eastl::list<Module*> modules;

@@ -11,27 +11,35 @@
 
 #define MIN_SCALE 0.001f
 
-RE_CompTransform::RE_CompTransform(RE_GameObject * go) : RE_Component(C_TRANSFORM, go) 
+RE_CompTransform::RE_CompTransform() : RE_Component(C_TRANSFORM, nullptr)
 {
+}
+
+RE_CompTransform::~RE_CompTransform()
+{
+	
+}
+
+void RE_CompTransform::SetUp(RE_GameObject* parent)
+{
+	go = parent;
+	if (go) go->AddComponent(this);
 	scale.scale = math::vec::one;
 
 	if (go == nullptr)
 		useParent = false;
 }
 
-RE_CompTransform::RE_CompTransform(RE_CompTransform & cmptransform, RE_GameObject * go) : RE_Component(C_TRANSFORM, go)
+void RE_CompTransform::SetUp(const RE_CompTransform& cmptransform, RE_GameObject* parent)
 {
+	go = parent;
+	if (go) go->AddComponent(this);
 	if (go == nullptr)
 		useParent = false;
 
 	SetPosition(cmptransform.pos);
 	SetScale(cmptransform.scale.scale);
 	SetRotation(cmptransform.rot_quat);
-}
-
-RE_CompTransform::~RE_CompTransform()
-{
-	
 }
 
 void RE_CompTransform::Update()

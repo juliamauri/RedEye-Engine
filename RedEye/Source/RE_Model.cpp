@@ -8,7 +8,7 @@
 #include "RE_ResouceAndGOImporter.h"
 #include "RE_ModelImporter.h"
 
-#include "RE_GameObject.h"
+#include "RE_GOManager.h"
 
 #include "RE_HandleErrors.h"
 #include "OutputLog.h"
@@ -39,6 +39,7 @@ void RE_Model::LoadInMemory()
 void RE_Model::UnloadMemory()
 {
 	if (loaded) DEL(loaded);
+	loaded = nullptr;
 	ResourceContainer::inMemory = false;
 }
 
@@ -57,13 +58,9 @@ void RE_Model::Import(bool keepInMemory)
 	if(!keepInMemory) UnloadMemory();
 }
 
-RE_GameObject* RE_Model::GetRoot()
+RE_GOManager* RE_Model::GetPool()
 {
-	bool neededUnload = false;
-	if (neededUnload = !ResourceContainer::inMemory) LoadInMemory();
-	RE_GameObject* ret = (loaded) ? new RE_GameObject(*loaded) : nullptr;
-	if (neededUnload) UnloadMemory();
-	return ret;
+	return loaded;
 }
 
 void RE_Model::Draw()
@@ -134,7 +131,7 @@ void RE_Model::Draw()
 		App->handlerrors->StartHandling();
 
 		if (CheckResourcesIsOnAssets()) {
-			App->scene->AddGameobject(GetRoot());
+			App->scene->AddGOPool(GetPool());
 		}
 		else {
 			LOG_ERROR("Missing Resources on Model");
@@ -238,7 +235,7 @@ void RE_Model::LibrarySave()
 {
 	if (loaded != nullptr){
 		uint size = 0;
-		char* buffer = RE_ResouceAndGOImporter::BinarySerialize(loaded, &size);
+		char* buffer = RE_ResouceAndGOImporter::BinarySerialize(loaded->GetGO(0), &size);
 
 		RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
 		toLibrarySave.Save(buffer, size);

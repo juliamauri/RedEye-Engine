@@ -5,7 +5,7 @@
 #include "RE_ResourceManager.h"
 #include "Resource.h"
 
-#include "RE_GameObject.h"
+#include "RE_GOManager.h"
 
 #include <EASTL/internal/char_traits.h>
 
@@ -97,7 +97,7 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsig
 	return buffer;
 }
 
-RE_GameObject* RE_ResouceAndGOImporter::JsonDeserialize(JSONNode* node)
+RE_GOManager* RE_ResouceAndGOImporter::JsonDeserialize(JSONNode* node)
 {
 	//Get resources
 	JSONNode* resources = node->PullJObject("resources");
@@ -125,10 +125,12 @@ RE_GameObject* RE_ResouceAndGOImporter::JsonDeserialize(JSONNode* node)
 	}
 	DEL(resources);
 
-	return RE_GameObject::DeserializeJSON(node, &resourcesIndex);;
+	RE_GOManager* ret = new RE_GOManager();
+	RE_GameObject::DeserializeJSON(ret, node, &resourcesIndex);;
+	return ret;
 }
 
-RE_GameObject* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
+RE_GOManager* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 {
 	eastl::map< int, const char*> resourcesIndex;
 	//Get resources
@@ -172,7 +174,9 @@ RE_GameObject* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 		resourcesIndex.insert(eastl::pair< int, const char*>(index, resMD5));
 		DEL_A(str);
 	}
-	return RE_GameObject::DeserializeBinary(cursor, &resourcesIndex);;
+	RE_GOManager* ret = new RE_GOManager();
+	RE_GameObject::DeserializeBinary(ret, cursor, &resourcesIndex);
+	return ret;
 }
 
 bool RE_ResouceAndGOImporter::JsonCheckResources(JSONNode* node)

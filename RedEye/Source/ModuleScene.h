@@ -4,6 +4,7 @@
 #include "Module.h"
 #include "Event.h"
 #include "QuadTree.h"
+#include "RE_GOManager.h"
 
 #include <windows.h>
 
@@ -60,10 +61,12 @@ public:
 	const char* GetCurrentScene()const;
 	void ClearScene();
 
-	void AddGameobject(RE_GameObject* toAdd);
+	void AddGOPool(RE_GOManager* toAdd);
 
 	bool HasChanges()const;
 	bool isNewScene() const;
+
+	RE_GOManager* GetScenePool();
 	
 private:
 
@@ -77,9 +80,10 @@ private:
 
 private:
 
-	RE_GameObject* savedState = nullptr;
-	RE_GameObject* root = nullptr;
+	RE_GOManager scenePool;
+	RE_GOManager savedState;
 
+	RE_GameObject* root = nullptr;
 
 	AABBDynamicTree static_tree;
 	AABBDynamicTree dynamic_tree;

@@ -7,9 +7,11 @@
 class RE_CompMesh : public RE_Component
 {
 public:
-	RE_CompMesh(RE_GameObject* go = nullptr, const char* reference = nullptr, const bool start_active = true);
-	RE_CompMesh(const RE_CompMesh& cmpMesh, RE_GameObject* go = nullptr);
+	RE_CompMesh();
 	~RE_CompMesh();
+
+	void SetUp(RE_GameObject* parent, const char* reference = nullptr);
+	void SetUp(const RE_CompMesh& cmpMesh, RE_GameObject* parent = nullptr);
 
 	void Draw() override;
 

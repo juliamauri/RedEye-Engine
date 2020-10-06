@@ -76,18 +76,15 @@ update_status ModuleScene::Update()
 
 bool ModuleScene::CleanUp()
 {
-	DEL(root);
-	DEL(savedState);
 	if (unsavedScene) DEL(unsavedScene);
-
 	return true;
 }
 
 void ModuleScene::OnPlay()
 {
 	Event::PauseEvents();
-	DEL(savedState);
-	savedState = new RE_GameObject(*root);
+	savedState.ClearPool();
+	savedState.InsertPool(&scenePool);
 	Event::ResumeEvents(); 
 	root->OnPlay();
 }
@@ -103,10 +100,10 @@ void ModuleScene::OnStop()
 
 	Event::PauseEvents();
 
-	DEL(root);
-	root = new RE_GameObject(*savedState);
+	scenePool.ClearPool();
+	root = scenePool.InsertPool(&savedState);
 	App->editor->SetSelected(nullptr);
-	App->goManager->sceneGOs.Clear();
+	savedState.ClearPool();
 	SetupScene();
 	Event::ResumeEvents();
 }
@@ -259,9 +256,10 @@ void ModuleScene::RecieveEvent(const Event& e)
 			RE_CompPlane* plane = (RE_CompPlane*)go->GetComponent(C_PLANE);
 			const char* planeMD5 = plane->TransformAsMeshResource();
 			go->RemoveComponent(plane);
-			RE_CompMesh* newMesh = new RE_CompMesh(go, planeMD5);
+			RE_CompMesh* newMesh = new RE_CompMesh();
+			newMesh->SetUp(go, planeMD5);
 			newMesh->UseResources();
-			go->AddCompMesh(newMesh);
+			//go->AddCompMesh(newMesh);
 			go->ResetBoundingBoxes();
 			go->TransformModified();
 			haschanges = true;
@@ -289,148 +287,136 @@ void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
 void ModuleScene::CreateCube(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* cube_go = App->goManager->AddGOToScene("Cube", parent);
+	RE_GameObject* cube_go = scenePool.AddGO("Cube", parent);
 
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, cube_go);
-	cube_go.AddComponent(App->primitives->CreateCube(cube_go));
-	cube_go.ResetBoundingBoxes();
-	cube_go.TransformModified(false);
+	cube_go->AddComponent(App->primitives->CreateCube(cube_go));
+	cube_go->ResetBoundingBoxes();
+	cube_go->TransformModified(false);
 }
 
 void ModuleScene::CreateDodecahedron(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* dode_go = AddGO("Dodecahedron", parent);
+	RE_GameObject* dode_go = scenePool.AddGO("Dodecahedron", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, dode_go);
 	dode_go->AddComponent(App->primitives->CreateDodecahedron(dode_go));
 	dode_go->ResetBoundingBoxes();
 	dode_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(dode_go);
 }
 
 void ModuleScene::CreateTetrahedron(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* tetra_go = AddGO("Tetrahedron", parent);
+	RE_GameObject* tetra_go = scenePool.AddGO("Tetrahedron", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, tetra_go);
 	tetra_go->AddComponent(App->primitives->CreateTetrahedron(tetra_go));
 	tetra_go->ResetBoundingBoxes();
 	tetra_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(tetra_go);
 }
 
 void ModuleScene::CreateOctohedron(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* octo_go = AddGO("Octohedron", parent);
+	RE_GameObject* octo_go = scenePool.AddGO("Octohedron", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, octo_go);
 	octo_go->AddComponent(App->primitives->CreateOctohedron(octo_go));
 	octo_go->ResetBoundingBoxes();
 	octo_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(octo_go);
 }
 
 void ModuleScene::CreateIcosahedron(RE_GameObject* parent)
 {
-	RE_GameObject* icosa_go = AddGO("Icosahedron", parent);
+	RE_GameObject* icosa_go = scenePool.AddGO("Icosahedron", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, icosa_go);
 	icosa_go->AddComponent(App->primitives->CreateIcosahedron(icosa_go));
 	icosa_go->ResetBoundingBoxes();
 	icosa_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(icosa_go);
 }
 
 void ModuleScene::CreatePlane(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* plane_go = AddGO("Plane", parent);
+	RE_GameObject* plane_go = scenePool.AddGO("Plane", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, plane_go);
 	plane_go->AddComponent(App->primitives->CreatePlane(plane_go));
 	plane_go->ResetBoundingBoxes();
 	plane_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(plane_go);
 }
 
 void ModuleScene::CreateSphere(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* sphere_go = AddGO("Sphere", parent);
+	RE_GameObject* sphere_go = scenePool.AddGO("Sphere", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, sphere_go);
 	sphere_go->AddComponent(App->primitives->CreateSphere(sphere_go));
 	sphere_go->ResetBoundingBoxes();
 	sphere_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(sphere_go);
 }
 
 void ModuleScene::CreateCylinder(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* cylinder_go = AddGO("Cylinder", parent);
+	RE_GameObject* cylinder_go = scenePool.AddGO("Cylinder", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, cylinder_go);
 	cylinder_go->AddComponent(App->primitives->CreateCylinder(cylinder_go));
 	cylinder_go->ResetBoundingBoxes();
 	cylinder_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(cylinder_go);
 }
 
 void ModuleScene::CreateHemiSphere(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* hemisphere_go = AddGO("HemiSphere", parent);
+	RE_GameObject* hemisphere_go = scenePool.AddGO("HemiSphere", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, hemisphere_go);
 	hemisphere_go->AddComponent(App->primitives->CreateHemiSphere(hemisphere_go));
 	hemisphere_go->ResetBoundingBoxes();
 	hemisphere_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(hemisphere_go);
 }
 
 void ModuleScene::CreateTorus(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* torus_go = AddGO("Torus", parent);
+	RE_GameObject* torus_go = scenePool.AddGO("Torus", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, torus_go);
 	torus_go->AddComponent(App->primitives->CreateTorus(torus_go));
 	torus_go->ResetBoundingBoxes();
 	torus_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(torus_go);
 }
 
 void ModuleScene::CreateTrefoilKnot(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* trefoilknot_go = AddGO("Trefoil Knot", parent);
+	RE_GameObject* trefoilknot_go = scenePool.AddGO("Trefoil Knot", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, trefoilknot_go);
 	trefoilknot_go->AddComponent(App->primitives->CreateTrefoilKnot(trefoilknot_go));
 	trefoilknot_go->ResetBoundingBoxes();
 	trefoilknot_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(trefoilknot_go);
 }
 
 void ModuleScene::CreateRock(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* rock_go = AddGO("Rock", parent);
+	RE_GameObject* rock_go = scenePool.AddGO("Rock", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, rock_go);
 	rock_go->AddComponent(App->primitives->CreateRock(rock_go));
 	rock_go->ResetBoundingBoxes();
 	rock_go->TransformModified(false);
-	App->goManager->sceneGOs.Push(rock_go);
 }
 
 void ModuleScene::CreateCamera(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
-	RE_GameObject* cam_go = AddGO("Camera", parent);
+	RE_GameObject* cam_go = scenePool.AddGO("Camera", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, cam_go);
 	cam_go->AddCompCamera();
-	App->goManager->sceneGOs.Push(cam_go);
 }
 
 void ModuleScene::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))
 	{
-		int total_count = App->goManager->sceneGOs.GetCount();
+		int total_count = scenePool.TotalGameObjects();
 		int static_count = static_tree.GetCount();
 		int dynamic_count = dynamic_tree.GetCount();
 
@@ -464,7 +450,7 @@ RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 	{
 		int index = goIndex.top();
 		goIndex.pop();
-		objects.push_back(App->goManager->sceneGOs.At(index));
+		objects.push_back(scenePool.GetGO(index));
 	}
 
 	if (!objects.empty())
@@ -506,7 +492,7 @@ void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container,
 	{
 		int index = goIndex.top();
 		goIndex.pop();
-		container.push_back(App->goManager->sceneGOs.At(index));
+		container.push_back(scenePool.GetGO(index));
 	}
 }
 
@@ -514,8 +500,10 @@ void ModuleScene::SaveScene(const char* newName)
 {
 	RE_Scene* scene = (unsavedScene) ? unsavedScene : (RE_Scene*)App->resources->At(currentScene);
 
+	Event::PauseEvents();
+
 	scene->SetName((unsavedScene) ? (newName) ? newName : root->GetName() : scene->GetName());
-	scene->Save(root);
+	scene->Save(&scenePool);
 	scene->SaveMeta();
 
 	if (unsavedScene) {
@@ -527,6 +515,7 @@ void ModuleScene::SaveScene(const char* newName)
 		App->thumbnail->Change(scene->GetMD5());
 
 	haschanges = false;
+	Event::ResumeEvents();
 }
 
 const char* ModuleScene::GetCurrentScene() const
@@ -538,19 +527,18 @@ void ModuleScene::ClearScene()
 {
 	Event::PauseEvents();
 
-	App->goManager->sceneGOs.Clear();
+	if (root) root->UnUseResources();
+	savedState.ClearPool();
+
 	static_tree.Clear();
 	dynamic_tree.Clear();
+	scenePool.ClearPool();
 
-	if (root) {
-		root->UnUseResources();
-		DEL(root);
-	}
-	if (savedState) DEL(savedState);
-
-	root = new RE_GameObject("root");
+	root = scenePool.AddGO("root", nullptr);
+	root->SetStatic(false);
 	App->editor->SetSelected(root);
-	RE_GameObject* cam_go = AddGO("Camera", root);
+
+	RE_GameObject* cam_go = scenePool.AddGO("Camera", root);
 	cam_go->AddCompCamera();
 	App->cams->RecallCameras(root);
 
@@ -575,14 +563,11 @@ void ModuleScene::NewEmptyScene(const char* name)
 	unsavedScene->SetName(name);
 	unsavedScene->SetType(Resource_Type::R_SCENE);
 
-	if (root) {
-		root->UnUseResources();
-		DEL(root);
-	}
-	if (savedState) DEL(savedState);
-	App->goManager->sceneGOs.Clear();
+	if (root) root->UnUseResources();
+	savedState.ClearPool();
+	scenePool.ClearPool();
 
-	root = new RE_GameObject("root");
+	root = scenePool.AddGO("root", nullptr);
 	root->SetStatic(false);
 
 	SetupScene();
@@ -603,12 +588,9 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 		DEL(unsavedScene);
 	}
 
-	if (root) {
-		root->UnUseResources();
-		DEL(root);
-	}
-	if (savedState) DEL(savedState);
-	App->goManager->sceneGOs.Clear();
+	if (root) root->UnUseResources();
+	savedState.ClearPool();
+	scenePool.ClearPool();
 
 	LOG("Loading scene from own format:");
 	if(!ignorehandle) App->handlerrors->StartHandling();
@@ -617,12 +599,14 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 
 	currentScene = sceneMD5;
 	RE_Scene* scene = (RE_Scene*)App->resources->At(currentScene);
-	RE_GameObject* loadedDO = scene->GetRoot();
+	App->resources->Use(sceneMD5);
+	RE_GOManager* loadedDO = scene->GetPool();
 
 	if (loadedDO)
-		root = loadedDO;
+		root = scenePool.InsertPool(loadedDO);
 	else 
 		LOG_ERROR("Can´t Load Scene");
+	App->resources->UnUse(sceneMD5);
 
 	root->UseResources();
 	SetupScene();
@@ -653,10 +637,8 @@ void ModuleScene::SetupScene()
 		Event::PauseEvents();
 	}
 
-	App->goManager->sceneGOs.PushWithChilds(root);
-
-	if (savedState) DEL(savedState);
-	savedState = new RE_GameObject(*root);
+	savedState.ClearPool();
+	savedState.InsertPool(&scenePool);
 
 	// Setup Tree AABBs
 	root->TransformModified(false);
@@ -667,16 +649,17 @@ void ModuleScene::SetupScene()
 	Event::ResumeEvents();
 }
 
-void ModuleScene::AddGameobject(RE_GameObject* toAdd)
+void ModuleScene::AddGOPool(RE_GOManager* toAdd)
 {
 	//TODO don't use SetupScene, only setup toAdd
 	//App->goManager->sceneGOs.PushWithChilds(toAdd);
-	toAdd->UseResources();
-	root->AddChild(toAdd);
-	App->goManager->sceneGOs.Clear();
+
+	RE_GameObject* justAdded = scenePool.InsertPool(toAdd);
+
+	justAdded->UseResources();
 
 	SetupScene();
-	App->editor->SetSelected(toAdd);
+	App->editor->SetSelected(justAdded);
 
 	haschanges = true;
 }
@@ -689,6 +672,11 @@ bool ModuleScene::HasChanges() const
 bool ModuleScene::isNewScene() const
 {
 	return (unsavedScene);
+}
+
+RE_GOManager* ModuleScene::GetScenePool()
+{
+	return &scenePool;
 }
 
 void ModuleScene::GetActive(eastl::list<RE_GameObject*>& objects) const
@@ -759,10 +747,10 @@ void ModuleScene::ResetTrees()
 	static_tree.Clear();
 	dynamic_tree.Clear();
 
-	eastl::vector<int> goIndex = App->goManager->sceneGOs.GetAllKeys();
+	eastl::vector<int> goIndex = scenePool.GetAllGOs();
 	for (int i = 0; i < goIndex.size(); i++)
 	{
-		RE_GameObject* go = App->goManager->sceneGOs.At(goIndex[i]);
+		RE_GameObject* go = scenePool.GetGO(goIndex[i]);
 
 		if (go->IsActive() && go->HasDrawComponents())
 		{

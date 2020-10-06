@@ -2,9 +2,10 @@
 
 #include "Application.h"
 #include "ModuleScene.h"
-#include "RE_GameObject.h"
-#include "RE_CompTransform.h"
 #include "RE_FileSystem.h"
+#include "RE_ResourceManager.h"
+
+#include "RE_GOManager.h"
 
 #include  "OutputLog.h"
 
@@ -40,6 +41,9 @@ void RE_Prefab::LoadInMemory()
 void RE_Prefab::UnloadMemory()
 {
 	if (loaded) DEL(loaded);
+	if (toSave) DEL(toSave);
+	loaded = nullptr;
+	toSave = nullptr;
 	ResourceContainer::inMemory = false;
 }
 
@@ -50,17 +54,18 @@ void RE_Prefab::Import(bool keepInMemory)
 	if (!keepInMemory) UnloadMemory();
 }
 
-void RE_Prefab::Save(RE_GameObject* go, bool rootidentity, bool keepInMemory)
+void RE_Prefab::Save(RE_GOManager* pool, bool rootidentity, bool keepInMemory)
 {
-	if (go) {
-		loaded = toSave = new RE_GameObject(*go);
+	if (pool) {
+		loaded = toSave = pool;
+		RE_GameObject* root = loaded->GetGO(0);
 		if (rootidentity) {
-			loaded->GetTransform()->SetPosition(math::vec::zero);
-			loaded->GetTransform()->SetRotation(math::vec::zero);
-			loaded->GetTransform()->SetScale(math::vec::one);
-			loaded->TransformModified(false);
-			loaded->Update();
-			loaded->ResetGlobalBoundingBoxForAllChilds();
+			root->GetTransform()->SetPosition(math::vec::zero);
+			root->GetTransform()->SetRotation(math::vec::zero);
+			root->GetTransform()->SetScale(math::vec::one);
+			root->TransformModified(false);
+			root->Update();
+			root->ResetGlobalBoundingBoxForAllChilds();
 		}
 		AssetSave();
 		LibrarySave();
@@ -80,13 +85,10 @@ void RE_Prefab::SetName(const char* _name)
 	SetAssetPath(assetPath.c_str());
 }
 
-RE_GameObject * RE_Prefab::GetRoot()
+RE_GOManager* RE_Prefab::GetPool()
 {
-	bool neededUnload = false;
-	if (neededUnload = !ResourceContainer::inMemory) LoadInMemory();
-	RE_GameObject* ret = (loaded) ? new RE_GameObject(*loaded) : nullptr;
-	if (neededUnload) UnloadMemory();
-	return ret;
+	if (!ResourceContainer::inMemory) App->resources->Use(GetMD5());
+	return loaded;
 }
 
 void RE_Prefab::AssetSave()
@@ -95,7 +97,7 @@ void RE_Prefab::AssetSave()
 	Config prefab_SaveFile(GetAssetPath(), App->fs->GetZipPath());
 	JSONNode* prefabNode = prefab_SaveFile.GetRootNode("prefab");
 
-	RE_ResouceAndGOImporter::JsonSerialize(prefabNode, toSave);
+	RE_ResouceAndGOImporter::JsonSerialize(prefabNode, toSave->GetGO(0));
 	DEL(prefabNode);
 
 	//Setting LibraryPath and MD5
@@ -144,7 +146,7 @@ void RE_Prefab::LibraryLoad()
 void RE_Prefab::LibrarySave()
 {
 	uint size = 0;
-	char* buffer = RE_ResouceAndGOImporter::BinarySerialize(toSave, &size);
+	char* buffer = RE_ResouceAndGOImporter::BinarySerialize(toSave->GetGO(0), &size);
 
 	RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
 	toLibrarySave.Save(buffer, size);
@@ -154,6 +156,6 @@ void RE_Prefab::LibrarySave()
 void RE_Prefab::Draw()
 {
 	if (ImGui::Button("Add to Scene")) {
-		App->scene->AddGameobject(GetRoot());
+		App->scene->AddGOPool(GetPool());
 	}
 }

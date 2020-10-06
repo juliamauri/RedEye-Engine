@@ -20,15 +20,26 @@
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
 
-RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool draw_frustum,bool usingSkybox, const char* skyboxMD5) :
-	RE_Component(C_CAMERA, go),
-	right(math::vec(1.f, 0.f, 0.f)),
-	up(math::vec(0.f, 1.f, 0.f)),
-	front(math::vec(0.f, 0.f, 1.f)),
-	draw_frustum(draw_frustum),
-	usingSkybox(usingSkybox),
-	skyboxMD5(skyboxMD5)
+RE_CompCamera::RE_CompCamera() :RE_Component(C_CAMERA, nullptr){
+}
+
+RE_CompCamera::~RE_CompCamera()
 {
+	if(go == nullptr)
+		DEL(transform);
+}
+
+void RE_CompCamera::SetUp(RE_GameObject* parent, bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool draw_frustum, bool usingSkybox, const char* skyboxMD5)
+{
+	go = parent;
+	if(parent) parent->AddComponent(this);
+	right = math::vec(1.f, 0.f, 0.f);
+	up = math::vec(0.f, 1.f, 0.f);
+	front = math::vec(0.f, 0.f, 1.f);
+	this->draw_frustum = draw_frustum;
+	this->usingSkybox = usingSkybox;
+	this->skyboxMD5 = skyboxMD5;
+
 	// Fustrum - Kind
 	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
 
@@ -41,21 +52,50 @@ RE_CompCamera::RE_CompCamera(RE_GameObject* go, bool toPerspective, float n_plan
 	SetAspectRatio(AspectRatioTYPE(aspect));
 
 	// Transform
-	transform = (go == nullptr) ? new RE_CompTransform() : go->GetTransform();
+	if (go == nullptr) {
+		transform = new RE_CompTransform();
+		transform->SetUp(nullptr);
+	}
+	else {
+		transform = go->GetTransform();
+	}
+
+	OnTransformModified();
+	RecalculateMatrixes();	// Fustrum - Kind
+	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
+
+	// Fustrum - Plane distance
+	SetPlanesDistance(n_plane, f_plane);
+
+	// Fustrum - Perspective & Aspect Ratio
+	isPerspective = toPerspective;
+	v_fov_rads = v_fov;
+	SetAspectRatio(AspectRatioTYPE(aspect));
+
+	// Transform
+	if (go == nullptr) {
+		transform = new RE_CompTransform();
+		transform->SetUp(nullptr);
+	}
+	else {
+		transform = go->GetTransform();
+	}
 
 	OnTransformModified();
 	RecalculateMatrixes();
 }
 
-RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go) :
-	RE_Component(C_CAMERA, go),
-	right(cmpCamera.right),
-	up(cmpCamera.up),
-	front(cmpCamera.front),
-	draw_frustum(cmpCamera.draw_frustum),
-	usingSkybox(cmpCamera.usingSkybox),
-	skyboxMD5(cmpCamera.skyboxMD5)
+void RE_CompCamera::SetUp(const RE_CompCamera& cmpCamera, RE_GameObject* parent)
 {
+	go = parent;
+	parent->AddComponent(this);
+	right = cmpCamera.right;
+	up = cmpCamera.up;
+	front = cmpCamera.front;
+	draw_frustum = cmpCamera.draw_frustum;
+	usingSkybox = cmpCamera.usingSkybox;
+	skyboxMD5 = cmpCamera.skyboxMD5;
+
 	// Fustrum - Kind
 	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
 
@@ -68,19 +108,16 @@ RE_CompCamera::RE_CompCamera(const RE_CompCamera & cmpCamera, RE_GameObject * go
 	SetAspectRatio(cmpCamera.target_ar);
 
 	// Transform
-	if (cmpCamera.GetGO() == nullptr && go == nullptr)
-		transform = new RE_CompTransform(*cmpCamera.transform);
-	else
-		transform = (go == nullptr) ? new RE_CompTransform() : go->GetTransform();
+	if (go == nullptr) {
+		transform = new RE_CompTransform();
+		transform->SetUp(nullptr);
+	}
+	else {
+		transform = go->GetTransform();
+	}
 
 	OnTransformModified();
 	RecalculateMatrixes();
-}
-
-RE_CompCamera::~RE_CompCamera()
-{
-	if(go == nullptr)
-		DEL(transform);
 }
 
 void RE_CompCamera::Update()

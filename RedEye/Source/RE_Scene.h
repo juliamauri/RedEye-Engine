@@ -2,7 +2,7 @@
 #define __RE_SCENE_H__
 
 #include "Resource.h"
-class RE_GameObject;
+class RE_GOManager;
 
 class RE_Scene :
 	public ResourceContainer
@@ -18,12 +18,12 @@ public:
 
 	void Import(bool keepInMemory = true) override;
 
-	void Save(RE_GameObject* go);
+	void Save(RE_GOManager* pool);
 
 	void SetName(const char* name) override;
 
 	//returns a new, needed destroy after use.
-	RE_GameObject* GetRoot();
+	RE_GOManager* GetPool();
 
 private:
 	void Draw() override;
@@ -34,8 +34,8 @@ private:
 	void LibrarySave(bool fromLoaded = false);
 
 private:
-	RE_GameObject* loaded = nullptr;
-	RE_GameObject* toSave = nullptr;
+	RE_GOManager* loaded = nullptr;
+	RE_GOManager* toSave = nullptr;
 };
 
 #endif // !__RE_SCENE_H__

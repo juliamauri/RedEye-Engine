@@ -22,16 +22,27 @@
 
 #include "ImGui\imgui.h"
 
-RE_CompMesh::RE_CompMesh(RE_GameObject * go, const char* reference, const bool start_active)
-	: RE_Component(C_MESH, go, start_active), meshMD5(reference)
-{ }
-
-RE_CompMesh::RE_CompMesh(const RE_CompMesh & cmpMesh, RE_GameObject * go)
-	: RE_Component(C_MESH, go, cmpMesh.active), meshMD5(cmpMesh.meshMD5), materialMD5(cmpMesh.materialMD5)
-{ }
+RE_CompMesh::RE_CompMesh() : RE_Component(C_MESH, go)
+{
+}
 
 RE_CompMesh::~RE_CompMesh()
 {
+}
+
+void RE_CompMesh::SetUp(RE_GameObject* parent, const char* reference)
+{
+	go = parent;
+	parent->AddComponent(this);
+	meshMD5 = reference;
+}
+
+void RE_CompMesh::SetUp(const RE_CompMesh& cmpMesh, RE_GameObject* parent)
+{
+	go = parent;
+	parent->AddComponent(this);
+	meshMD5 = cmpMesh.meshMD5;
+	materialMD5 = cmpMesh.materialMD5;
 }
 
 void RE_CompMesh::Draw()

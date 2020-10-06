@@ -17,9 +17,7 @@
 #include "RE_Texture.h"
 #include "RE_Mesh.h"
 
-#include "RE_GameObject.h"
-#include "RE_CompCamera.h"
-#include "RE_CompMesh.h"
+#include "RE_GOManager.h"
 
 #include "Globals.h"
 #include "OutputLog.h"
@@ -265,21 +263,23 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 		Event::PauseEvents();
 		for (auto resource : temp_resources) {
 
-			RE_GameObject* goRes = nullptr;
-			
+			RE_GOManager* poolGORes = nullptr;
+
+			Use(resource->GetMD5());
+
 			switch (resource->GetType())
 			{
 			case R_SCENE:
-				goRes = ((RE_Scene*)resource)->GetRoot();
+				poolGORes = ((RE_Scene*)resource)->GetPool();
 				break;
 			case R_PREFAB:
-				goRes = ((RE_Prefab*)resource)->GetRoot();
+				poolGORes = ((RE_Prefab*)resource)->GetPool();
 				break;
 			case R_MODEL:
-				goRes = ((RE_Model*)resource)->GetRoot();
+				poolGORes = ((RE_Model*)resource)->GetPool();
 				break;
 			}
-			eastl::stack<RE_Component*> comps = goRes->GetAllComponentWithChilds((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+			eastl::stack<RE_Component*> comps = poolGORes->GetGO(0)->GetAllComponentWithChilds((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 
 			
 			bool skip = false;
@@ -309,7 +309,7 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 				}
 				comps.pop();
 			}
-
+			UnUse(resource->GetMD5());
 		}
 		Event::ResumeEvents();
 
@@ -363,24 +363,25 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 			if (goType != R_MODEL) {
 				Event::PauseEvents();
 
-				RE_GameObject* goRes = nullptr;
+				RE_GOManager* poolGORes = nullptr;
+				Use(resToChange);
 				if (currentScene == resToChange)
 				{
-					goRes = App->scene->GetRoot();
+					poolGORes = App->scene->GetScenePool();
 				}
 				else {
 					switch (goType)
 					{
 					case R_SCENE:
-						goRes = ((RE_Scene*)resChange)->GetRoot();
+						poolGORes = ((RE_Scene*)resChange)->GetPool();
 						break;
 					case R_PREFAB:
-						goRes = ((RE_Prefab*)resChange)->GetRoot();
+						poolGORes = ((RE_Prefab*)resChange)->GetPool();
 						break;
 					}
 				}
 
-				eastl::stack<RE_Component*> comps = goRes->GetAllComponentWithChilds((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+				eastl::stack<RE_Component*> comps = poolGORes->GetGO(0)->GetAllComponentWithChilds((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 				while (!comps.empty())
 				{
 					RE_Component* go = comps.top();
@@ -411,24 +412,23 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 				}
 
 				if (currentScene != resToChange) {
-					goRes->TransformModified(false);
-					goRes->Update();
-					goRes->ResetBoundingBoxForAllChilds();
+					poolGORes->GetGO(0)->TransformModified(false);
+					poolGORes->GetGO(0)->Update();
+					poolGORes->GetGO(0)->ResetBoundingBoxForAllChilds();
 				}
 				switch (goType)
 				{
 				case R_SCENE:
-					((RE_Scene*)resChange)->Save(goRes);
+					((RE_Scene*)resChange)->Save(poolGORes);
 					((RE_Scene*)resChange)->SaveMeta();
 					break;
 				case R_PREFAB:
-					((RE_Prefab*)resChange)->Save(goRes, false);
+					((RE_Prefab*)resChange)->Save(poolGORes, false);
 					((RE_Prefab*)resChange)->SaveMeta();
 					break;
 				}
 				App->renderer3d->ReRenderThumbnail(resToChange);
-				if (currentScene != resToChange) DEL(goRes);
-
+				UnUse(resToChange);
 				Event::ResumeEvents();
 			}
 		}
