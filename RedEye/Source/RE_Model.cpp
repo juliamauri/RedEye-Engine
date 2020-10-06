@@ -131,7 +131,9 @@ void RE_Model::Draw()
 		App->handlerrors->StartHandling();
 
 		if (CheckResourcesIsOnAssets()) {
+			App->resources->Use(GetMD5());
 			App->scene->AddGOPool(GetPool());
+			App->resources->UnUse(GetMD5());
 		}
 		else {
 			LOG_ERROR("Missing Resources on Model");
