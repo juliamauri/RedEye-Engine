@@ -60,9 +60,12 @@ public:
 class RE_CompRock : public RE_CompPrimitive
 {
 public:
-	RE_CompRock(RE_GameObject* game_obj, unsigned int shader, int _seed, int _subdivions);
-	RE_CompRock(const RE_CompRock& cmpRock, RE_GameObject* go = nullptr);
+	RE_CompRock();
 	~RE_CompRock();
+
+	void SetUp(RE_GameObject* parent, unsigned int shader, int _seed, int _subdivions);
+	void SetUp(const RE_CompRock& cmpRock, RE_GameObject* parent = nullptr);
+
 	void Draw() override;
 	void DrawProperties() override;
 	unsigned int GetBinarySize()const override;
@@ -97,6 +100,9 @@ public:
 	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
 
+	void SetUp(RE_GameObject* parent, unsigned int VAO, unsigned int shader, int triangle_count);
+	void SetUp(const RE_CompPlatonic& cmpPlat, RE_GameObject* parent = nullptr);
+
 	unsigned int GetTriangleCount()const override { return triangle_count; }
 
 protected:
@@ -111,8 +117,7 @@ protected:
 class RE_CompCube : public RE_CompPlatonic
 {
 public:
-	RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
-	RE_CompCube(const RE_CompCube& cmpCube, RE_GameObject* go = nullptr);
+	RE_CompCube();
 	~RE_CompCube();
 };
 
@@ -123,8 +128,7 @@ public:
 class RE_CompDodecahedron : public RE_CompPlatonic
 {
 public:
-	RE_CompDodecahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
-	RE_CompDodecahedron(const RE_CompDodecahedron& cmpDodecahedron, RE_GameObject* go = nullptr);
+	RE_CompDodecahedron();
 	~RE_CompDodecahedron();
 };
 
@@ -135,8 +139,7 @@ public:
 class RE_CompTetrahedron : public RE_CompPlatonic
 {
 public:
-	RE_CompTetrahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
-	RE_CompTetrahedron(const RE_CompTetrahedron& cmpTetrahedron, RE_GameObject* go = nullptr);
+	RE_CompTetrahedron();
 	~RE_CompTetrahedron();
 };
 
@@ -147,8 +150,7 @@ public:
 class RE_CompOctohedron : public RE_CompPlatonic
 {
 public:
-	RE_CompOctohedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
-	RE_CompOctohedron(const RE_CompOctohedron& cmpOctohedron, RE_GameObject* go = nullptr);
+	RE_CompOctohedron();
 	~RE_CompOctohedron();
 };
 
@@ -159,8 +161,7 @@ public:
 class RE_CompIcosahedron : public RE_CompPlatonic
 {
 public:
-	RE_CompIcosahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
-	RE_CompIcosahedron(const RE_CompIcosahedron& cmpIcosahedron, RE_GameObject* go = nullptr);
+	RE_CompIcosahedron();
 	~RE_CompIcosahedron();
 };
 
@@ -180,6 +181,10 @@ public:
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
 
 	unsigned int GetTriangleCount()const override { return triangle_count; }
+
+	void SetUp(RE_GameObject* parent, unsigned int shader, int _slice, int _stacks, bool _useRadius = false, float _radius = 0.0f);
+	void SetUp(const RE_CompParametric& cmpPara, RE_GameObject* parent = nullptr);
+
 
 protected:
 	virtual void GenerateParametric() = 0;
@@ -205,8 +210,7 @@ public:
 class RE_CompPlane : public RE_CompParametric
 {
 public:
-	RE_CompPlane(RE_GameObject* game_obj, unsigned int shader, int slice, int stacks);
-	RE_CompPlane(const RE_CompPlane& cmpPlane, RE_GameObject* go = nullptr);
+	RE_CompPlane();
 	~RE_CompPlane();
 
 	const char* TransformAsMeshResource();
@@ -223,8 +227,7 @@ private:
 class RE_CompSphere : public RE_CompParametric
 {
 public:
-	RE_CompSphere(RE_GameObject* game_obj, unsigned int shader, int slice, int stacks);
-	RE_CompSphere(const RE_CompSphere& cmpSphere, RE_GameObject* go = nullptr);
+	RE_CompSphere();
 	~RE_CompSphere();
 
 private:
@@ -239,8 +242,7 @@ private:
 class RE_CompCylinder : public RE_CompParametric
 {
 public:
-	RE_CompCylinder(RE_GameObject* game_obj, unsigned int shader, int slice, int stacks);
-	RE_CompCylinder(const RE_CompCylinder& cmpCylinder, RE_GameObject* go = nullptr);
+	RE_CompCylinder();
 	~RE_CompCylinder();
 
 private:
@@ -255,8 +257,7 @@ private:
 class RE_CompHemiSphere : public RE_CompParametric
 {
 public:
-	RE_CompHemiSphere(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks);
-	RE_CompHemiSphere(const RE_CompHemiSphere& cmpHemiSphere, RE_GameObject* go = nullptr);
+	RE_CompHemiSphere();
 	~RE_CompHemiSphere();
 
 private:
@@ -270,8 +271,7 @@ private:
 class RE_CompTorus : public RE_CompParametric
 {
 public:
-	RE_CompTorus(RE_GameObject* game_obj, unsigned int shader, int slice, int stacks, float radius);
-	RE_CompTorus(const RE_CompTorus& cmpSphere, RE_GameObject* go = nullptr);
+	RE_CompTorus();
 	~RE_CompTorus();
 
 private:
@@ -286,8 +286,7 @@ private:
 class RE_CompTrefoiKnot : public RE_CompParametric
 {
 public:
-	RE_CompTrefoiKnot(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks, float _radius);
-	RE_CompTrefoiKnot(const RE_CompTrefoiKnot& cmpTrefoiKnot, RE_GameObject* go = nullptr);
+	RE_CompTrefoiKnot();
 	~RE_CompTrefoiKnot();
 
 private:

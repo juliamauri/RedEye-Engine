@@ -51,11 +51,8 @@ RE_GameObject* RE_GOManager::CopyGO(RE_GameObject* copy, RE_GameObject* parent)
 			newGO->GetTransform()->SetScale(copy->GetTransform()->GetLocalScale());
 			newGO->GetTransform()->SetRotation(copy->GetTransform()->GetLocalQuaternionRotation());
 			break;
-		case ComponentType::C_CAMERA:
-			componentsPool.CopyCamera((RE_CompCamera*)copyC, newGO);
-			break;
-		case ComponentType::C_MESH:
-			componentsPool.CopyMesh((RE_CompMesh*)copyC, newGO);
+		default:
+			componentsPool.CopyComponent(copyC, newGO);
 			break;
 		}
 	}
@@ -139,47 +136,170 @@ RE_Component* ComponentsPool::GetComponent(int poolid, ComponentType cType)
 	case C_MESH:
 		ret = (RE_Component*)meshPool.AtPtr(poolid);
 		break;
+	case C_CUBE:
+		ret = (RE_Component*)pCubePool.AtPtr(poolid);
+		break;
+	case C_DODECAHEDRON:
+		ret = (RE_Component*)pDodecahedronPool.AtPtr(poolid);
+		break;
+	case C_TETRAHEDRON:
+		ret = (RE_Component*)pTetrahedronPool.AtPtr(poolid);
+		break;
+	case C_OCTOHEDRON:
+		ret = (RE_Component*)pOctohedronPool.AtPtr(poolid);
+		break;
+	case C_ICOSAHEDRON:
+		ret = (RE_Component*)pIcosahedronPool.AtPtr(poolid);
+		break;
+	case C_SPHERE:
+		ret = (RE_Component*)pSpherePool.AtPtr(poolid);
+		break;
+	case C_CYLINDER:
+		ret = (RE_Component*)pCylinderPool.AtPtr(poolid);
+		break;
+	case C_HEMISHPERE:
+		ret = (RE_Component*)pHemiSpherePool.AtPtr(poolid);
+		break;
+	case C_TORUS:
+		ret = (RE_Component*)pTorusPool.AtPtr(poolid);
+		break;
+	case C_TREFOILKNOT:
+		ret = (RE_Component*)pTrefoiKnotPool.AtPtr(poolid);
+		break;
+	case C_ROCK:
+		ret = (RE_Component*)pRockPool.AtPtr(poolid);
+		break;
+	case C_PLANE:
+		ret = (RE_Component*)pPlanePool.AtPtr(poolid);
+		break;
 	}
 	return ret;
 }
 
-RE_CompTransform* ComponentsPool::GetNewTransform()
+RE_Component* ComponentsPool::GetNewComponent(ComponentType cType)
 {
-	return transPool.AtPtr(transPool.GetNewComponent());
+	RE_Component* ret = nullptr;
+	switch (cType)
+	{
+	case C_TRANSFORM:
+		ret = (RE_Component*)transPool.AtPtr(transPool.GetNewComponent());
+		break;
+	case C_CAMERA:
+		ret = (RE_Component*)camPool.AtPtr(camPool.GetNewComponent());
+		break;
+	case C_MESH:
+		ret = (RE_Component*)meshPool.AtPtr(meshPool.GetNewComponent());
+		break;
+	case C_CUBE:
+		ret = (RE_Component*)pCubePool.AtPtr(pCubePool.GetNewComponent());
+		break;
+	case C_DODECAHEDRON:
+		ret = (RE_Component*)pDodecahedronPool.AtPtr(pDodecahedronPool.GetNewComponent());
+		break;
+	case C_TETRAHEDRON:
+		ret = (RE_Component*)pTetrahedronPool.AtPtr(pTetrahedronPool.GetNewComponent());
+		break;
+	case C_OCTOHEDRON:
+		ret = (RE_Component*)pOctohedronPool.AtPtr(pOctohedronPool.GetNewComponent());
+		break;
+	case C_ICOSAHEDRON:
+		ret = (RE_Component*)pIcosahedronPool.AtPtr(pIcosahedronPool.GetNewComponent());
+		break;
+	case C_SPHERE:
+		ret = (RE_Component*)pSpherePool.AtPtr(pSpherePool.GetNewComponent());
+		break;
+	case C_CYLINDER:
+		ret = (RE_Component*)pCylinderPool.AtPtr(pCylinderPool.GetNewComponent());
+		break;
+	case C_HEMISHPERE:
+		ret = (RE_Component*)pHemiSpherePool.AtPtr(pHemiSpherePool.GetNewComponent());
+		break;
+	case C_TORUS:
+		ret = (RE_Component*)pTorusPool.AtPtr(pTorusPool.GetNewComponent());
+		break;
+	case C_TREFOILKNOT:
+		ret = (RE_Component*)pTrefoiKnotPool.AtPtr(pTrefoiKnotPool.GetNewComponent());
+		break;
+	case C_ROCK:
+		ret = (RE_Component*)pRockPool.AtPtr(pRockPool.GetNewComponent());
+		break;
+	case C_PLANE:
+		ret = (RE_Component*)pPlanePool.AtPtr(pPlanePool.GetNewComponent());
+		break;
+	}
+	return ret;
 }
 
-RE_CompTransform* ComponentsPool::CopyTransform(RE_CompTransform* transComp, RE_GameObject* parent)
+RE_Component* ComponentsPool::CopyComponent(RE_Component* cmp, RE_GameObject* parent)
 {
-	RE_CompTransform* newTransform = transPool.AtPtr(transPool.GetNewComponent());
-	newTransform->SetUp(*transComp, parent);
-	return newTransform;
+	RE_Component* ret = nullptr;
+	switch (cmp->GetType())
+	{
+	case C_TRANSFORM:
+		ret = (RE_Component*)transPool.AtPtr(transPool.GetNewComponent());
+		((RE_CompTransform*)ret)->SetUp(*(RE_CompTransform*)cmp, parent);
+		break;
+	case C_CAMERA:
+		ret = (RE_Component*)camPool.AtPtr(camPool.GetNewComponent());
+		((RE_CompCamera*)ret)->SetUp(*(RE_CompCamera*)cmp, parent);
+		break;
+	case C_MESH:
+		ret = (RE_Component*)meshPool.AtPtr(meshPool.GetNewComponent());
+		((RE_CompMesh*)ret)->SetUp(*(RE_CompMesh*)cmp, parent);
+		break;
+	case C_CUBE:
+		ret = (RE_Component*)pCubePool.AtPtr(pCubePool.GetNewComponent());
+		((RE_CompCube*)ret)->SetUp(*(RE_CompCube*)cmp, parent);
+		break;
+	case C_DODECAHEDRON:
+		ret = (RE_Component*)pDodecahedronPool.AtPtr(pDodecahedronPool.GetNewComponent());
+		((RE_CompDodecahedron*)ret)->SetUp(*(RE_CompDodecahedron*)cmp, parent);
+		break;
+	case C_TETRAHEDRON:
+		ret = (RE_Component*)pTetrahedronPool.AtPtr(pTetrahedronPool.GetNewComponent());
+		((RE_CompTetrahedron*)ret)->SetUp(*(RE_CompTetrahedron*)cmp, parent);
+		break;
+	case C_OCTOHEDRON:
+		ret = (RE_Component*)pOctohedronPool.AtPtr(pOctohedronPool.GetNewComponent());
+		((RE_CompOctohedron*)ret)->SetUp(*(RE_CompOctohedron*)cmp, parent);
+		break;
+	case C_ICOSAHEDRON:
+		ret = (RE_Component*)pIcosahedronPool.AtPtr(pIcosahedronPool.GetNewComponent());
+		((RE_CompIcosahedron*)ret)->SetUp(*(RE_CompIcosahedron*)cmp, parent);
+		break;
+	case C_SPHERE:
+		ret = (RE_Component*)pSpherePool.AtPtr(pSpherePool.GetNewComponent());
+		((RE_CompSphere*)ret)->SetUp(*(RE_CompSphere*)cmp, parent);
+		break;
+	case C_CYLINDER:
+		ret = (RE_Component*)pCylinderPool.AtPtr(pCylinderPool.GetNewComponent());
+		((RE_CompCylinder*)ret)->SetUp(*(RE_CompCylinder*)cmp, parent);
+		break;
+	case C_HEMISHPERE:
+		ret = (RE_Component*)pHemiSpherePool.AtPtr(pHemiSpherePool.GetNewComponent());
+		((RE_CompHemiSphere*)ret)->SetUp(*(RE_CompHemiSphere*)cmp, parent);
+		break;
+	case C_TORUS:
+		ret = (RE_Component*)pTorusPool.AtPtr(pTorusPool.GetNewComponent());
+		((RE_CompTorus*)ret)->SetUp(*(RE_CompTorus*)cmp, parent);
+		break;
+	case C_TREFOILKNOT:
+		ret = (RE_Component*)pTrefoiKnotPool.AtPtr(pTrefoiKnotPool.GetNewComponent());
+		((RE_CompTrefoiKnot*)ret)->SetUp(*(RE_CompTrefoiKnot*)cmp, parent);
+		break;
+	case C_ROCK:
+		ret = (RE_Component*)pRockPool.AtPtr(pRockPool.GetNewComponent());
+		((RE_CompRock*)ret)->SetUp(*(RE_CompRock*)cmp, parent);
+		break;
+	case C_PLANE:
+		ret = (RE_Component*)pPlanePool.AtPtr(pPlanePool.GetNewComponent());
+		((RE_CompPlane*)ret)->SetUp(*(RE_CompPlane*)cmp, parent);
+		break;
+	}
+	return ret;
 }
 
 void ComponentsPool::DeleteTransform(int id)
 {
 	transPool.Pop(id);
-}
-
-RE_CompCamera* ComponentsPool::GetNewCamera()
-{
-	return camPool.AtPtr(camPool.GetNewComponent());
-}
-
-RE_CompCamera* ComponentsPool::CopyCamera(RE_CompCamera* camComp, RE_GameObject* parent)
-{
-	RE_CompCamera* newCamera = camPool.AtPtr(camPool.GetNewComponent());
-	newCamera->SetUp(*camComp, parent);
-	return newCamera;
-}
-
-RE_CompMesh* ComponentsPool::GetNewMesh()
-{
-	return meshPool.AtPtr(meshPool.GetNewComponent());;
-}
-
-RE_CompMesh* ComponentsPool::CopyMesh(RE_CompMesh* meshComp, RE_GameObject* parent)
-{
-	RE_CompMesh* newMesh = meshPool.AtPtr(meshPool.GetNewComponent());
-	newMesh->SetUp(*meshComp, parent);
-	return newMesh;
 }

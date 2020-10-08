@@ -20,6 +20,8 @@
 
 #define CUBE_TRIANGLES 36
 
+unsigned int RE_PrimitiveManager::shaderPrimitive = 0;
+
 RE_PrimitiveManager::RE_PrimitiveManager()
 { }
 
@@ -42,6 +44,64 @@ RE_PrimitiveManager::~RE_PrimitiveManager()
 	glDeleteVertexArrays(1, &(GLuint)vao_icosa);
 	glDeleteBuffers(1, &(GLuint)vbo_icosa);
 	glDeleteBuffers(1, &(GLuint)ebo_icosa);
+}
+
+bool RE_PrimitiveManager::Init(const char* def_shader)
+{
+	shaderPrimitive = ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID();
+
+	CheckPlatonicVAO(C_CUBE);
+	CheckPlatonicVAO(C_DODECAHEDRON);
+	CheckPlatonicVAO(C_TETRAHEDRON);
+	CheckPlatonicVAO(C_OCTOHEDRON);
+	CheckPlatonicVAO(C_ICOSAHEDRON);
+
+	App->ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
+
+	return true;
+}
+
+void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP, RE_GameObject* parent)
+{
+	switch (cmpP->GetType())
+	{
+	case C_CUBE:
+		((RE_CompCube*)cmpP)->SetUp(parent, vao_cube, shaderPrimitive, cube_triangles);
+		break;
+	case C_DODECAHEDRON:
+		((RE_CompDodecahedron*)cmpP)->SetUp(parent, vao_dodo, shaderPrimitive, dodo_triangles);
+		break;
+	case C_TETRAHEDRON:
+		((RE_CompTetrahedron*)cmpP)->SetUp(parent, vao_tetra, shaderPrimitive, tetra_triangles);
+		break;
+	case C_OCTOHEDRON:
+		((RE_CompOctohedron*)cmpP)->SetUp(parent, vao_octo, shaderPrimitive, octo_triangles);
+		break;
+	case C_ICOSAHEDRON:
+		((RE_CompIcosahedron*)cmpP)->SetUp(parent, vao_icosa, shaderPrimitive, icosa_triangles);
+		break;
+	case C_SPHERE:
+		((RE_CompSphere*)cmpP)->SetUp(parent, shaderPrimitive, 16, 18);
+		break;
+	case C_CYLINDER:
+		((RE_CompCylinder*)cmpP)->SetUp(parent, shaderPrimitive, 30, 3);
+		break;
+	case C_HEMISHPERE:
+		((RE_CompHemiSphere*)cmpP)->SetUp(parent, shaderPrimitive, 10, 10);
+		break;
+	case C_TORUS:
+		((RE_CompTorus*)cmpP)->SetUp(parent, shaderPrimitive, 30, 40, true, 0.1f);
+		break;
+	case C_TREFOILKNOT:
+		((RE_CompTrefoiKnot*)cmpP)->SetUp(parent, shaderPrimitive, 30, 40, true, 0.5f);
+		break;
+	case C_ROCK:
+		((RE_CompRock*)cmpP)->SetUp(parent, shaderPrimitive, 5, 20);
+		break;
+	case C_PLANE:
+		((RE_CompPlane*)cmpP)->SetUp(parent, shaderPrimitive, 3, 3);
+		break;
+	}
 }
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateGrid(RE_GameObject* game_obj)
@@ -83,114 +143,56 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateGrid(RE_GameObject* game_obj)
 	return ret;
 }
 
-RE_CompPrimitive* RE_PrimitiveManager::CreateRock(RE_GameObject* game_obj, int seed, int nsubdivisions)
+unsigned int RE_PrimitiveManager::CheckPlatonicVAO(unsigned short type)
 {
-	return new RE_CompRock(game_obj, shaderPrimitive, seed, nsubdivisions);
-}
-RE_CompPrimitive* RE_PrimitiveManager::CreateCube(RE_GameObject* game_obj)
-{
-	return new RE_CompCube(game_obj, vao_cube, shaderPrimitive, cube_triangles);
-}
+	unsigned int ret = 0;
+	switch (type)
+	{
 
-RE_CompPrimitive* RE_PrimitiveManager::CreateDodecahedron(RE_GameObject* game_obj)
-{
-	return new RE_CompDodecahedron(game_obj, vao_dodo, shaderPrimitive, dodo_triangles);
-}
-
-RE_CompPrimitive* RE_PrimitiveManager::CreateTetrahedron(RE_GameObject* game_obj)
-{
-	return new RE_CompTetrahedron(game_obj, vao_tetra, shaderPrimitive, tetra_triangles);
-}
-
-RE_CompPrimitive* RE_PrimitiveManager::CreateOctohedron(RE_GameObject* game_obj)
-{
-	return new RE_CompOctohedron(game_obj, vao_octo, shaderPrimitive, octo_triangles);
-}
-
-RE_CompPrimitive* RE_PrimitiveManager::CreateIcosahedron(RE_GameObject* game_obj)
-{
-	return new RE_CompIcosahedron(game_obj, vao_icosa, shaderPrimitive, icosa_triangles);
-}
-
-RE_CompPrimitive* RE_PrimitiveManager::CreatePlane(RE_GameObject* game_obj, int slices, int stacks)
-{
-	return new RE_CompPlane(game_obj, shaderPrimitive, slices, stacks);
-}
-
-RE_CompPrimitive * RE_PrimitiveManager::CreateSphere(RE_GameObject* game_obj, int slices, int stacks)
-{
-	return new RE_CompSphere(game_obj, shaderPrimitive, slices, stacks);
-}
-
-RE_CompPrimitive * RE_PrimitiveManager::CreateCylinder(RE_GameObject* game_obj, int slices, int stacks)
-{
-	return new RE_CompCylinder(game_obj, shaderPrimitive, slices, stacks);
-}
-
-RE_CompPrimitive * RE_PrimitiveManager::CreateHemiSphere(RE_GameObject* game_obj, int slices, int stacks)
-{
-	return new RE_CompHemiSphere(game_obj, shaderPrimitive, slices, stacks);
-}
-
-RE_CompPrimitive* RE_PrimitiveManager::CreateTorus(RE_GameObject* game_obj, int slices, int stacks, float radius)
-{
-	return new RE_CompTorus(game_obj, shaderPrimitive, slices, stacks, radius);
-}
-
-RE_CompPrimitive* RE_PrimitiveManager::CreateTrefoilKnot(RE_GameObject* game_obj, int slices, int stacks, float radius)
-{
-	return new RE_CompTrefoiKnot(game_obj, shaderPrimitive, slices, stacks, radius);
-}
-
-unsigned int RE_PrimitiveManager::CheckCubeVAO()
-{
-	if (vao_cube == 0) {
-		par_shapes_mesh* cube = par_shapes_create_cube();
-		UploadPlatonic(cube, &vao_cube, &vbo_cube, &ebo_cube, &cube_triangles);
-		par_shapes_free_mesh(cube);
+	case C_CUBE:
+		if (vao_cube == 0) {
+			par_shapes_mesh* cube = par_shapes_create_cube();
+			UploadPlatonic(cube, &vao_cube, &vbo_cube, &ebo_cube, &cube_triangles);
+			par_shapes_free_mesh(cube);
+		}
+		ret = vao_cube;
+		break;
+	case C_DODECAHEDRON:
+		if (vao_dodo == 0) {
+			par_shapes_mesh* dodecahedron = par_shapes_create_dodecahedron();
+			UploadPlatonic(dodecahedron, &vao_dodo, &vbo_dodo, &ebo_dodo, &dodo_triangles);
+			par_shapes_free_mesh(dodecahedron);
+		}
+		ret = vao_dodo;
+		break;
+	case C_TETRAHEDRON:
+		if (vao_tetra == 0) {
+			par_shapes_mesh* tetrahedron = par_shapes_create_tetrahedron();
+			UploadPlatonic(tetrahedron, &vao_tetra, &vbo_tetra, &ebo_tetra, &tetra_triangles);
+			par_shapes_free_mesh(tetrahedron);
+		}
+		ret = vao_tetra;
+		break;
+	case C_OCTOHEDRON:
+		if (vao_octo == 0) {
+			par_shapes_mesh* octohedron = par_shapes_create_octahedron();
+			UploadPlatonic(octohedron, &vao_octo, &vbo_octo, &ebo_octo, &octo_triangles);
+			par_shapes_free_mesh(octohedron);
+		}
+		ret = vao_octo;
+		break;
+	case C_ICOSAHEDRON:
+		if (vao_icosa == 0) {
+			par_shapes_mesh* icosahedron = par_shapes_create_icosahedron();
+			UploadPlatonic(icosahedron, &vao_icosa, &vbo_icosa, &ebo_icosa, &icosa_triangles);
+			par_shapes_free_mesh(icosahedron);
+		}
+		ret = vao_icosa;
+		break;
 	}
-	return vao_cube;
+	return ret;
 }
 
-unsigned int RE_PrimitiveManager::CheckDodecahedronVAO()
-{
-	if (vao_dodo == 0) {
-		par_shapes_mesh* dodecahedron = par_shapes_create_dodecahedron();
-		UploadPlatonic(dodecahedron, &vao_dodo, &vbo_dodo, &ebo_dodo, &dodo_triangles);
-		par_shapes_free_mesh(dodecahedron);
-	}
-	return vao_dodo;
-}
-
-unsigned int RE_PrimitiveManager::CheckTetrahedronVAO()
-{
-	if (vao_tetra == 0) {
-		par_shapes_mesh* tetrahedron = par_shapes_create_tetrahedron();
-		UploadPlatonic(tetrahedron, &vao_tetra, &vbo_tetra, &ebo_tetra, &tetra_triangles);
-		par_shapes_free_mesh(tetrahedron);
-	}
-	return vao_tetra;
-}
-
-unsigned int RE_PrimitiveManager::CheckOctohedronVAO()
-{
-	if (vao_octo == 0) {
-		par_shapes_mesh* octohedron = par_shapes_create_octahedron();
-		UploadPlatonic(octohedron, &vao_octo, &vbo_octo, &ebo_octo, &octo_triangles);
-		par_shapes_free_mesh(octohedron);
-	}
-	return vao_octo;
-}
-
-unsigned int RE_PrimitiveManager::CheckIcosahedronVAO()
-{
-	if (vao_icosa == 0) {
-		par_shapes_mesh* icosahedron = par_shapes_create_icosahedron();
-		UploadPlatonic(icosahedron, &vao_icosa, &vbo_icosa, &ebo_icosa, &icosa_triangles);
-		par_shapes_free_mesh(icosahedron);
-	}
-	return vao_icosa;
-}
 
 void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int* vao, unsigned int* vbo, unsigned int* ebo, int* triangles)
 {
@@ -249,19 +251,4 @@ void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int*
 	DEL_A(points);
 	DEL_A(normals);
 	DEL_A(meshBuffer);
-}
-
-bool RE_PrimitiveManager::Init(const char* def_shader)
-{
-	shaderPrimitive = ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID();
-
-	CheckCubeVAO();
-	CheckDodecahedronVAO();
-	CheckTetrahedronVAO();
-	CheckOctohedronVAO();
-	CheckIcosahedronVAO();
-
-	App->ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
-
-	return true;
 }

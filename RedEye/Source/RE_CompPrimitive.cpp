@@ -48,28 +48,35 @@ void RE_CompGrid::Draw()
 	glDrawArrays(GL_LINES, 0, 400);
 }
 
-
-RE_CompRock::RE_CompRock(RE_GameObject* game_obj, unsigned int shader, int _seed, int _subdivions)
-	: RE_CompPrimitive(C_ROCK, game_obj, NULL, shader)
+RE_CompRock::RE_CompRock() : RE_CompPrimitive(C_ROCK, nullptr, NULL, 0)
 {
-	if (_subdivions < 1) _subdivions = 1;
-	if (_subdivions > 5) _subdivions = 5;
-	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-	GenerateNewRock(seed = tmpSe = _seed, nsubdivisions = tmpSb = _subdivions);
 }
-RE_CompRock::RE_CompRock(const RE_CompRock& cmpRock, RE_GameObject* go)
-	: RE_CompPrimitive(C_ROCK, go, NULL, cmpRock.RE_CompPrimitive::shader)
-{
-	RE_CompPrimitive::color = cmpRock.RE_CompPrimitive::color;
-	GenerateNewRock(seed = tmpSe = cmpRock.seed, nsubdivisions = tmpSb = cmpRock.nsubdivisions);
-}
-
 
 RE_CompRock::~RE_CompRock()
 {
 	glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
 	glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 	glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
+}
+
+void RE_CompRock::SetUp(RE_GameObject* parent, unsigned int shader, int _seed, int _subdivions)
+{
+	go = parent;
+	RE_CompPrimitive::shader = shader;
+	if (_subdivions < 1) _subdivions = 1;
+	if (_subdivions > 5) _subdivions = 5;
+	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+	GenerateNewRock(seed = tmpSe = _seed, nsubdivisions = tmpSb = _subdivions);
+	go->AddComponent(this);
+}
+
+void RE_CompRock::SetUp(const RE_CompRock& cmpRock, RE_GameObject* parent)
+{
+	go = parent;
+	RE_CompPrimitive::shader = cmpRock.RE_CompPrimitive::shader;
+	RE_CompPrimitive::color = cmpRock.RE_CompPrimitive::color;
+	GenerateNewRock(seed = tmpSe = cmpRock.seed, nsubdivisions = tmpSb = cmpRock.nsubdivisions);
+	go->AddComponent(this);
 }
 
 void RE_CompRock::Draw()
@@ -266,104 +273,50 @@ void RE_CompPlatonic::SerializeBinary(char*& cursor, eastl::map<const char*, int
 	cursor += size;
 }
 
-
-RE_CompCube::RE_CompCube(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count) : 
-	RE_CompPlatonic(C_CUBE,"Cube", game_obj, VAO, shader, triangle_count)
+void RE_CompPlatonic::SetUp(RE_GameObject* parent, unsigned int VAO, unsigned int shader, int triangle_count)
 {
+	go = parent;
+	RE_CompPrimitive::VAO = VAO;
+	RE_CompPrimitive::shader = shader;
+	this->triangle_count = triangle_count;
 	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
+	go->AddComponent(this);
 }
 
-RE_CompCube::RE_CompCube(const RE_CompCube & cmpCube, RE_GameObject * go) :
-	RE_CompPlatonic(C_CUBE, "Cube", go, cmpCube.RE_CompPrimitive::VAO, cmpCube.RE_CompPrimitive::shader, cmpCube.RE_CompPlatonic::triangle_count)
+void RE_CompPlatonic::SetUp(const RE_CompPlatonic& cmpPlat, RE_GameObject* parent)
 {
-	RE_CompPrimitive::color = cmpCube.RE_CompPrimitive::color;
-	RE_CompPrimitive::VAO = App->primitives->CheckCubeVAO();
+	go = parent;
+	RE_CompPrimitive::color = cmpPlat.RE_CompPrimitive::color;
+	RE_CompPrimitive::VAO = App->primitives->CheckPlatonicVAO(GetType());
+	RE_CompPrimitive::shader = cmpPlat.RE_CompPrimitive::shader;
+	triangle_count = cmpPlat.triangle_count;
+	go->AddComponent(this);
 }
 
-RE_CompCube::~RE_CompCube()
-{
-}
 
-RE_CompDodecahedron::RE_CompDodecahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
- : RE_CompPlatonic(C_DODECAHEDRON, "Dodecahedron", game_obj, VAO, shader, triangle_count)
-{
-	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-}
+RE_CompCube::RE_CompCube() : RE_CompPlatonic(C_CUBE,"Cube", nullptr, 0, 0, 0) {	}
 
-RE_CompDodecahedron::RE_CompDodecahedron(const RE_CompDodecahedron& cmpDodecahedron, RE_GameObject* go)
- : RE_CompPlatonic(C_DODECAHEDRON, "Dodecahedron", go, cmpDodecahedron.RE_CompPrimitive::VAO, cmpDodecahedron.RE_CompPrimitive::shader, cmpDodecahedron.RE_CompPlatonic::triangle_count)
-{
-	RE_CompPrimitive::color = cmpDodecahedron.RE_CompPrimitive::color;
-	RE_CompPrimitive::VAO = App->primitives->CheckDodecahedronVAO();
-}
+RE_CompCube::~RE_CompCube() { }
 
-RE_CompDodecahedron::~RE_CompDodecahedron()
-{
-}
+RE_CompDodecahedron::RE_CompDodecahedron()  : RE_CompPlatonic(C_DODECAHEDRON, "Dodecahedron", nullptr, 0, 0, 0) { }
 
-RE_CompTetrahedron::RE_CompTetrahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
-	: RE_CompPlatonic(C_TETRAHEDRON, "Tetrahedron", game_obj, VAO, shader, triangle_count)
-{
-	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-}
+RE_CompDodecahedron::~RE_CompDodecahedron() { }
 
-RE_CompTetrahedron::RE_CompTetrahedron(const RE_CompTetrahedron& cmpTetrahedron, RE_GameObject* go)
-	: RE_CompPlatonic(C_TETRAHEDRON, "Tetrahedron", go, cmpTetrahedron.RE_CompPrimitive::VAO, cmpTetrahedron.RE_CompPrimitive::shader, cmpTetrahedron.RE_CompPlatonic::triangle_count)
-{
-	RE_CompPrimitive::color = cmpTetrahedron.RE_CompPrimitive::color;
-	RE_CompPrimitive::VAO = App->primitives->CheckTetrahedronVAO();
-}
+RE_CompTetrahedron::RE_CompTetrahedron() : RE_CompPlatonic(C_TETRAHEDRON, "Tetrahedron", nullptr, 0, 0, 0) { }
 
-RE_CompTetrahedron::~RE_CompTetrahedron()
-{
-}
+RE_CompTetrahedron::~RE_CompTetrahedron() { }
 
-RE_CompOctohedron::RE_CompOctohedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
-	: RE_CompPlatonic(C_OCTOHEDRON, "Octohedron", game_obj, VAO, shader, triangle_count)
-{
-	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-}
+RE_CompOctohedron::RE_CompOctohedron() : RE_CompPlatonic(C_OCTOHEDRON, "Octohedron", nullptr, 0, 0, 0) { }
 
-RE_CompOctohedron::RE_CompOctohedron(const RE_CompOctohedron& cmpOctohedron, RE_GameObject* go)
-	: RE_CompPlatonic(C_OCTOHEDRON, "Octohedron", go, cmpOctohedron.RE_CompPrimitive::VAO, cmpOctohedron.RE_CompPrimitive::shader, cmpOctohedron.RE_CompPlatonic::triangle_count)
-{
-	RE_CompPrimitive::color = cmpOctohedron.RE_CompPrimitive::color;
-	RE_CompPrimitive::VAO = App->primitives->CheckOctohedronVAO();
-}
+RE_CompOctohedron::~RE_CompOctohedron() { }
 
-RE_CompOctohedron::~RE_CompOctohedron()
-{
-}
+RE_CompIcosahedron::RE_CompIcosahedron() : RE_CompPlatonic(C_ICOSAHEDRON, "Icosahedron", nullptr, 0, 0, 0) { }
 
-RE_CompIcosahedron::RE_CompIcosahedron(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
-	: RE_CompPlatonic(C_ICOSAHEDRON, "Icosahedron", game_obj, VAO, shader, triangle_count)
-{
-	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-}
-
-RE_CompIcosahedron::RE_CompIcosahedron(const RE_CompIcosahedron& cmpIcosahedron, RE_GameObject* go)
-	: RE_CompPlatonic(C_ICOSAHEDRON, "Icosahedron", go, cmpIcosahedron.RE_CompPrimitive::VAO, cmpIcosahedron.RE_CompPrimitive::shader, cmpIcosahedron.RE_CompPlatonic::triangle_count)
-{
-	RE_CompPrimitive::color = cmpIcosahedron.RE_CompPrimitive::color;
-	RE_CompPrimitive::VAO = App->primitives->CheckIcosahedronVAO();
-}
-
-RE_CompIcosahedron::~RE_CompIcosahedron()
-{
-}
+RE_CompIcosahedron::~RE_CompIcosahedron() { }
 
 RE_CompParametric::RE_CompParametric(ComponentType t, const char* _name, RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks, bool _useRadius, float _radius, float _minR, float _maxR)
-	: RE_CompPrimitive(t,game_obj, NULL, shader)
-{
-	if (_slice < 3) _slice = 3;
-	if (_stacks < 3) _stacks = 3;
+	: RE_CompPrimitive(t,game_obj, NULL, shader) { 
 	pName = _name;
-	tmpSl = slice = _slice;
-	tmpSt = stacks = _stacks;
-	useRadius = _useRadius;
-	tmpR = radius = _radius;
-	minR = _minR;
-	maxR = maxR;
 }
 
 RE_CompParametric::~RE_CompParametric()
@@ -479,6 +432,36 @@ void RE_CompParametric::SerializeBinary(char*& cursor, eastl::map<const char*, i
 	cursor += size;
 }
 
+void RE_CompParametric::SetUp(RE_GameObject* parent, unsigned int shader, int _slice, int _stacks, bool _useRadius, float _radius)
+{
+	go = parent;
+	RE_CompPrimitive::shader = shader;
+	RE_CompPrimitive::color = math::vec(1.0f, 0.65f, 0.15f);
+	if (_slice < 3) _slice = 3;
+	if (_stacks < 3) _stacks = 3;
+	tmpSl = slice = _slice;
+	tmpSt = stacks = _stacks;
+	useRadius = _useRadius;
+	tmpR = radius = _radius;
+	GenerateParametric();
+	go->AddComponent(this);
+}
+
+void RE_CompParametric::SetUp(const RE_CompParametric& cmpPara, RE_GameObject* parent)
+{
+	go = parent;
+	RE_CompPrimitive::shader = cmpPara.RE_CompPrimitive::shader;
+	RE_CompPrimitive::color = cmpPara.RE_CompPrimitive::color;
+	tmpSl = slice = cmpPara.slice;
+	tmpSt = stacks = cmpPara.stacks;
+	useRadius = cmpPara.useRadius;
+	tmpR = radius = cmpPara.radius;
+	minR = cmpPara.minR;
+	maxR = cmpPara.maxR;
+	GenerateParametric();
+	go->AddComponent(this);
+}
+
 void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 {
 	if (RE_CompPrimitive::VAO != 0) {
@@ -530,23 +513,29 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 
 	glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
 	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+	CheckGLError();
 
 	glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
 	glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
+	CheckGLError();
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
+	CheckGLError();
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+	CheckGLError();
 
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
+	CheckGLError();
 
 	glGenBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RE_CompPrimitive::EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, param->ntriangles * sizeof(unsigned short) * 3, param->triangles, GL_STATIC_DRAW);
+	CheckGLError();
 
 	triangle_count = param->ntriangles;
 
@@ -557,22 +546,10 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 }
 
 
-RE_CompPlane::RE_CompPlane(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks)
-	: RE_CompParametric(C_PLANE, "Plane", game_obj, shader, _slice, _stacks)
-{
-	RE_CompPrimitive::color = math::vec(1.0f, 0.65f, 0.15f);
-	GenerateParametric();
-}
-RE_CompPlane::RE_CompPlane(const RE_CompPlane& cmpPlane, RE_GameObject* go)
-	: RE_CompParametric(C_PLANE, "Plane", go, cmpPlane.RE_CompPrimitive::shader, cmpPlane.RE_CompParametric::slice, cmpPlane.RE_CompParametric::stacks)
-{
-	RE_CompPrimitive::color = cmpPlane.RE_CompPrimitive::color;
-	GenerateParametric();
-}
+RE_CompPlane::RE_CompPlane()
+	: RE_CompParametric(C_PLANE, "Plane", nullptr, 0,0,0) { }
 
-RE_CompPlane::~RE_CompPlane()
-{
-}
+RE_CompPlane::~RE_CompPlane() { }
 
 const char* RE_CompPlane::TransformAsMeshResource()
 {
@@ -630,23 +607,10 @@ void RE_CompPlane::GenerateParametric()
 	par_shapes_free_mesh(plane);
 }
 
-RE_CompSphere::RE_CompSphere(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks)
-	: RE_CompParametric(C_SPHERE, "Sphere", game_obj, shader, _slice, _stacks)
-{
-	RE_CompPrimitive::color = math::vec(1.0f, 0.65f, 0.15f);
-	GenerateParametric();
-}
+RE_CompSphere::RE_CompSphere()
+	: RE_CompParametric(C_SPHERE, "Sphere", nullptr, 0, 0, 0) { }
 
-RE_CompSphere::RE_CompSphere(const RE_CompSphere& cmpSphere, RE_GameObject* go)
-	: RE_CompParametric(C_SPHERE, "Sphere", go, cmpSphere.RE_CompPrimitive::shader, cmpSphere.RE_CompParametric::slice, cmpSphere.RE_CompParametric::stacks)
-{
-	RE_CompPrimitive::color = math::vec(1.0f, 0.65f, 0.15f);
-	GenerateParametric();
-}
-
-RE_CompSphere::~RE_CompSphere()
-{
-}
+RE_CompSphere::~RE_CompSphere() { }
 
 void RE_CompSphere::GenerateParametric()
 {
@@ -656,22 +620,9 @@ void RE_CompSphere::GenerateParametric()
 }
 
 
-RE_CompCylinder::RE_CompCylinder(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks)
-	: RE_CompParametric(C_CYLINDER, "Cylinder", game_obj, shader, _slice, _stacks) {
-	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-	GenerateParametric();
-}
+RE_CompCylinder::RE_CompCylinder() : RE_CompParametric(C_CYLINDER, "Cylinder", nullptr, 0, 0, 0) { }
 
-RE_CompCylinder::RE_CompCylinder(const RE_CompCylinder& cmpCylinder, RE_GameObject* go)
-	: RE_CompParametric(C_CYLINDER, "Cylinder", go, cmpCylinder.RE_CompPrimitive::shader, cmpCylinder.RE_CompParametric::slice, cmpCylinder.RE_CompParametric::stacks)
-{
-	RE_CompPrimitive::color = cmpCylinder.RE_CompPrimitive::color;
-	GenerateParametric();
-}
-
-RE_CompCylinder::~RE_CompCylinder()
-{
-}
+RE_CompCylinder::~RE_CompCylinder() { }
 
 void RE_CompCylinder::GenerateParametric()
 {
@@ -680,23 +631,10 @@ void RE_CompCylinder::GenerateParametric()
 	par_shapes_free_mesh(cylinder);
 }
 
-RE_CompHemiSphere::RE_CompHemiSphere(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks)
-	: RE_CompParametric(C_HEMISHPERE, "HemiSphere", game_obj, shader, _slice, _stacks) {
-	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-	GenerateParametric();
-}
-
-RE_CompHemiSphere::RE_CompHemiSphere(const RE_CompHemiSphere& cmpHemiSphere, RE_GameObject* go)
-	: RE_CompParametric(C_CYLINDER, "HemiSphere", go, cmpHemiSphere.RE_CompPrimitive::shader, cmpHemiSphere.RE_CompParametric::slice, cmpHemiSphere.RE_CompParametric::stacks)
-{
-	RE_CompPrimitive::color = cmpHemiSphere.RE_CompPrimitive::color;
-	GenerateParametric();
-}
+RE_CompHemiSphere::RE_CompHemiSphere() : RE_CompParametric(C_HEMISHPERE, "HemiSphere", nullptr, 0, 0, 0) { }
 
 
-RE_CompHemiSphere::~RE_CompHemiSphere()
-{
-}
+RE_CompHemiSphere::~RE_CompHemiSphere() { }
 
 void RE_CompHemiSphere::GenerateParametric()
 {
@@ -705,24 +643,9 @@ void RE_CompHemiSphere::GenerateParametric()
 	par_shapes_free_mesh(hemishpere);
 }
 
-RE_CompTorus::RE_CompTorus(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks, float _radius)
-	: RE_CompParametric(C_TORUS, "Torus", game_obj, shader, _slice, _stacks, true, _radius, 0.1f, 1.0f)
-{
-	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-	GenerateParametric();
-}
+RE_CompTorus::RE_CompTorus() : RE_CompParametric(C_TORUS, "Torus", nullptr, 0, 0, 0, true, 0.1f, 0.1f, 1.0f) { }
 
-RE_CompTorus::RE_CompTorus(const RE_CompTorus& cmpTorus, RE_GameObject* go)
-	: RE_CompParametric(C_TORUS, "Torus", go, cmpTorus.RE_CompPrimitive::shader, cmpTorus.RE_CompParametric::slice, cmpTorus.RE_CompParametric::stacks, true, cmpTorus.RE_CompParametric::radius, 0.1f, 1.0f)
-
-{
-	RE_CompPrimitive::color = cmpTorus.RE_CompPrimitive::color;
-	GenerateParametric();
-}
-
-RE_CompTorus::~RE_CompTorus()
-{
-}
+RE_CompTorus::~RE_CompTorus() { }
 
 void RE_CompTorus::GenerateParametric()
 {
@@ -731,24 +654,9 @@ void RE_CompTorus::GenerateParametric()
 	par_shapes_free_mesh(torus);
 }
 
-RE_CompTrefoiKnot::RE_CompTrefoiKnot(RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks, float _radius)
-	: RE_CompParametric(C_TREFOILKNOT,"Trefoil Knot", game_obj, shader, _slice, _stacks, true, _radius, 0.5f, 3.0f)
-{
-	RE_CompPrimitive::color = math::vec(1.0f, 0.15f, 0.15f);
-	GenerateParametric();
-}
+RE_CompTrefoiKnot::RE_CompTrefoiKnot() : RE_CompParametric(C_TREFOILKNOT,"Trefoil Knot", nullptr, 0, 0, 0,true,0.5f, 0.5f, 3.0f) { }
 
-RE_CompTrefoiKnot::RE_CompTrefoiKnot(const RE_CompTrefoiKnot& cmpTrefoiKnot, RE_GameObject* go)
-	: RE_CompParametric(C_TREFOILKNOT, "Trefoil Knot", go, cmpTrefoiKnot.RE_CompPrimitive::shader, cmpTrefoiKnot.RE_CompParametric::slice, cmpTrefoiKnot.RE_CompParametric::stacks, true, cmpTrefoiKnot.RE_CompParametric::radius, 0.5f, 3.0f)
-
-{
-	RE_CompPrimitive::color = cmpTrefoiKnot.RE_CompPrimitive::color;
-	GenerateParametric();
-}
-
-RE_CompTrefoiKnot::~RE_CompTrefoiKnot()
-{
-}
+RE_CompTrefoiKnot::~RE_CompTrefoiKnot() { }
 
 void RE_CompTrefoiKnot::GenerateParametric()
 {

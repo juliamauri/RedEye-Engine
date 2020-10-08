@@ -32,7 +32,6 @@ public:
 
 	RE_GameObject* GetRoot() const;
 	const RE_GameObject* GetRoot_c() const;
-	void AddGoToRoot(RE_GameObject* toAdd);
 
 	void CreateCube(RE_GameObject* parent = nullptr);
 	void CreateDodecahedron(RE_GameObject* parent = nullptr);

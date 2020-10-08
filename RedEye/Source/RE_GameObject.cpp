@@ -42,82 +42,11 @@ void RE_GameObject::SetUp(ComponentsPool* compPool, const char* name, UUID uuid,
 	else
 		this->uuid = uuid;
 
-	transform = poolComponents->GetNewTransform();
+	transform = (RE_CompTransform*)poolComponents->GetNewComponent(ComponentType::C_TRANSFORM);
 	transform->SetUp(this);
 
 	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
-
-	if (parent != nullptr)
-		parent->AddChild(this, false);
-}
-
-void RE_GameObject::SetUp(ComponentsPool* compPool, const RE_GameObject& go, RE_GameObject* parent)
-{
-	poolComponents = compPool;
-	UuidCreate(&this->uuid);
-	isStatic = go.isStatic;
-	active = go.active;
-	name = go.name;
-
-	local_bounding_box = go.local_bounding_box;
-	global_bounding_box = go.global_bounding_box;
-
-	for (RE_Component* cmpGO : go.GetComponents())
-	{
-		switch (cmpGO->GetType())
-		{
-		case C_TRANSFORM:
-			transform = poolComponents->CopyTransform((RE_CompTransform*)cmpGO, this);
-			break;
-		case C_CAMERA:
-		{
-			RE_CompCamera* comp_camera = poolComponents->CopyCamera((RE_CompCamera*)cmpGO, this);
-			if (!Event::isPaused()) App->cams->AddMainCamera(comp_camera);
-		}
-			break;
-		case C_MESH:
-			poolComponents->CopyMesh((RE_CompMesh*)cmpGO, this);
-			break;
-		//case C_CUBE:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompCube(*(RE_CompCube*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_DODECAHEDRON:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompDodecahedron(*(RE_CompDodecahedron*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_TETRAHEDRON:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompTetrahedron(*(RE_CompTetrahedron*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_OCTOHEDRON:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompOctohedron(*(RE_CompOctohedron*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_ICOSAHEDRON:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompIcosahedron(*(RE_CompIcosahedron*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_SPHERE:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompSphere(*(RE_CompSphere*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_CYLINDER:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompCylinder(*(RE_CompCylinder*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_HEMISHPERE:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompHemiSphere(*(RE_CompHemiSphere*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_TORUS:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompTorus(*(RE_CompTorus*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_TREFOILKNOT:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompTrefoiKnot(*(RE_CompTrefoiKnot*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_ROCK:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompRock(*(RE_CompRock*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		//case C_PLANE:
-		//	components.push_back((RE_CompPrimitive*)new RE_CompPlane(*(RE_CompPlane*)((RE_CompPrimitive*)cmpGO), this));
-		//	break;
-		}
-	}
-
 
 	if (parent != nullptr)
 		parent->AddChild(this, false);
@@ -369,7 +298,7 @@ void RE_GameObject::SerializeJson(JSONNode * node, eastl::map<const char*, int>*
 		uint cmpSize = 0;
 		for (auto component : go->GetComponents()) {
 			ComponentType type = component->GetType();
-			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA || type != C_TRANSFORM)
+			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA && type != C_TRANSFORM)
 				cmpSize++;
 		}
 		comps->PushUInt("ComponentsSize", cmpSize);
@@ -451,7 +380,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 		uint cmpSize = 0;
 		for (auto component : go->GetComponents()) {
 			unsigned short type = component->GetType();
-			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA || type != C_TRANSFORM)
+			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA && type != C_TRANSFORM)
 				cmpSize++;
 		}
 		memcpy(cursor, &cmpSize, size);
@@ -511,85 +440,73 @@ void RE_GameObject::DeserializeJSON(RE_GOManager* goPool, JSONNode* node, eastl:
 			{
 			case C_CUBE:
 			{
-				RE_CompPrimitive* newCube = nullptr;
-				new_go->AddComponent(newCube = App->primitives->CreateCube(new_go));
+				RE_CompPrimitive* newCube = (RE_CompPrimitive * )new_go->AddComponent(C_CUBE);
 				newCube->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_DODECAHEDRON:
 			{
-				RE_CompPrimitive* newDode = nullptr;
-				new_go->AddComponent(newDode = App->primitives->CreateDodecahedron(new_go));
+				RE_CompPrimitive* newDode = (RE_CompPrimitive*)new_go->AddComponent(C_DODECAHEDRON);
 				newDode->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_TETRAHEDRON:
 			{
-				RE_CompPrimitive* newTetra = nullptr;
-				new_go->AddComponent(newTetra = App->primitives->CreateTetrahedron(new_go));
+				RE_CompPrimitive* newTetra = (RE_CompPrimitive*)new_go->AddComponent(C_TETRAHEDRON);
 				newTetra->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_OCTOHEDRON:
 			{
-				RE_CompPrimitive* newOcto = nullptr;
-				new_go->AddComponent(newOcto = App->primitives->CreateOctohedron(new_go));
+				RE_CompPrimitive* newOcto = (RE_CompPrimitive*)new_go->AddComponent(C_OCTOHEDRON);
 				newOcto->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_ICOSAHEDRON:
 			{
-				RE_CompPrimitive* newIcosa = nullptr;
-				new_go->AddComponent(newIcosa = App->primitives->CreateIcosahedron(new_go));
+				RE_CompPrimitive* newIcosa = (RE_CompPrimitive*)new_go->AddComponent(C_ICOSAHEDRON);
 				newIcosa->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_PLANE:
 			{
-				RE_CompPrimitive* newPlane = nullptr;
-				new_go->AddComponent(newPlane = App->primitives->CreatePlane(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3)));
+				RE_CompPrimitive* newPlane = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3));
 				newPlane->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_SPHERE:
 			{
-				RE_CompPrimitive* newSphere = nullptr;
-				new_go->AddComponent(newSphere = App->primitives->CreateSphere(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3)));
+				RE_CompPrimitive* newSphere = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 16), cmpNode->PullInt("stacks", 18));
 				newSphere->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_CYLINDER:
 			{
-				RE_CompPrimitive* newCylinder = nullptr;
-				new_go->AddComponent(newCylinder = App->primitives->CreateCylinder(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3)));
+				RE_CompPrimitive* newCylinder = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 30), cmpNode->PullInt("stacks", 30));
 				newCylinder->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_HEMISHPERE:
 			{
-				RE_CompPrimitive* newHemiSphere = nullptr;
-				new_go->AddComponent(newHemiSphere = App->primitives->CreateHemiSphere(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3)));
+				RE_CompPrimitive* newHemiSphere = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 10), cmpNode->PullInt("stacks", 10));
 				newHemiSphere->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_TORUS:
 			{
-				RE_CompPrimitive* newTorus = nullptr;
-				new_go->AddComponent(newTorus = App->primitives->CreateTorus(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3), cmpNode->PullFloat("radius", 0.1f)));
+				RE_CompPrimitive* newTorus = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 30), cmpNode->PullInt("stacks", 40), cmpNode->PullFloat("radius", 0.1f));
 				newTorus->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_TREFOILKNOT:
 			{
-				RE_CompPrimitive* newTrefoilKnot = nullptr;
-				new_go->AddComponent(newTrefoilKnot = App->primitives->CreateTrefoilKnot(new_go, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3), cmpNode->PullFloat("radius", 0.1f)));
+				RE_CompPrimitive* newTrefoilKnot = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 30), cmpNode->PullInt("stacks", 40), cmpNode->PullFloat("radius", 0.5f));
 				newTrefoilKnot->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
 			case C_ROCK:
 			{
-				RE_CompPrimitive* newRock = nullptr;
-				new_go->AddComponent(newRock = App->primitives->CreateRock(new_go, cmpNode->PullInt("seed", 5), cmpNode->PullInt("nsubdivisions", 20)));
+				RE_CompPrimitive* newRock = new_go->AddCompRock(cmpNode->PullInt("seed", 5), cmpNode->PullInt("nsubdivisions", 20));
 				newRock->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
 				break;
 			}
@@ -720,8 +637,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			{
 			case C_CUBE:
 			{
-				RE_CompPrimitive* newCube = nullptr;
-				new_go->AddComponent(newCube = App->primitives->CreateCube(new_go));
+				RE_CompPrimitive* newCube = (RE_CompPrimitive*)new_go->AddComponent(C_CUBE);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -731,8 +647,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_DODECAHEDRON:
 			{
-				RE_CompPrimitive* newDode = nullptr;
-				new_go->AddComponent(newDode = App->primitives->CreateDodecahedron(new_go));
+				RE_CompPrimitive* newDode = (RE_CompPrimitive*)new_go->AddComponent(C_DODECAHEDRON);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -742,8 +657,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_TETRAHEDRON:
 			{
-				RE_CompPrimitive* newTetra = nullptr;
-				new_go->AddComponent(newTetra = App->primitives->CreateTetrahedron(new_go));
+				RE_CompPrimitive* newTetra = (RE_CompPrimitive*)new_go->AddComponent(C_TETRAHEDRON);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -753,8 +667,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_OCTOHEDRON:
 			{
-				RE_CompPrimitive* newOcto = nullptr;
-				new_go->AddComponent(newOcto = App->primitives->CreateOctohedron(new_go));
+				RE_CompPrimitive* newOcto = (RE_CompPrimitive*)new_go->AddComponent(C_OCTOHEDRON);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -764,8 +677,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_ICOSAHEDRON:
 			{
-				RE_CompPrimitive* newIcosa = nullptr;
-				new_go->AddComponent(newIcosa = App->primitives->CreateIcosahedron(new_go));
+				RE_CompPrimitive* newIcosa = (RE_CompPrimitive*)new_go->AddComponent(C_ICOSAHEDRON);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -775,8 +687,6 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_PLANE:
 			{
-				RE_CompPrimitive* newPlane = nullptr;
-
 				int slices = 0, stacks = 0;
 				size = sizeof(int);
 				memcpy(&slices, cursor, size);
@@ -785,7 +695,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(&stacks, cursor, size);
 				cursor += size;
 
-				new_go->AddComponent(newPlane = App->primitives->CreatePlane(new_go, slices, stacks));
+				RE_CompPrimitive* newPlane = new_go->AddCompPrimitive(type, slices, stacks);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -796,8 +706,6 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_SPHERE:
 			{
-				RE_CompPrimitive* newSphere = nullptr;
-
 				int slices = 0, stacks = 0;
 				size = sizeof(int);
 				memcpy(&slices, cursor, size);
@@ -806,7 +714,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(&stacks, cursor, size);
 				cursor += size;
 
-				new_go->AddComponent(newSphere = App->primitives->CreateSphere(new_go, slices, stacks));
+				RE_CompPrimitive* newSphere = new_go->AddCompPrimitive(type, slices, stacks);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -817,8 +725,6 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_CYLINDER:
 			{
-				RE_CompPrimitive* newCylinder = nullptr;
-
 				int slices = 0, stacks = 0;
 				size = sizeof(int);
 				memcpy(&slices, cursor, size);
@@ -827,7 +733,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(&stacks, cursor, size);
 				cursor += size;
 
-				new_go->AddComponent(newCylinder = App->primitives->CreateCylinder(new_go, slices, stacks));
+				RE_CompPrimitive* newCylinder = new_go->AddCompPrimitive(type, slices, stacks);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -838,8 +744,6 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_HEMISHPERE:
 			{
-				RE_CompPrimitive* newHemiSphere = nullptr;
-
 				int slices = 0, stacks = 0;
 				size = sizeof(int);
 				memcpy(&slices, cursor, size);
@@ -848,7 +752,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(&stacks, cursor, size);
 				cursor += size;
 
-				new_go->AddComponent(newHemiSphere = App->primitives->CreateHemiSphere(new_go, slices, stacks));
+				RE_CompPrimitive* newHemiSphere = new_go->AddCompPrimitive(type, slices, stacks);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -859,7 +763,6 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_TORUS:
 			{
-				RE_CompPrimitive* newTorus = nullptr;
 
 				int slices = 0, stacks = 0;
 				float radius = 0;
@@ -874,7 +777,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(&radius, cursor, size);
 				cursor += size;
 
-				new_go->AddComponent(newTorus = App->primitives->CreateTorus(new_go, slices, stacks, radius));
+				RE_CompPrimitive* newTorus = new_go->AddCompPrimitive(type, slices, stacks, radius);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -885,7 +788,6 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_TREFOILKNOT:
 			{
-				RE_CompPrimitive* newTrefoilKnot = nullptr;
 
 				int slices = 0, stacks = 0;
 				float radius = 0;
@@ -900,7 +802,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(&radius, cursor, size);
 				cursor += size;
 
-				new_go->AddComponent(newTrefoilKnot = App->primitives->CreateTrefoilKnot(new_go, slices, stacks, radius));
+				RE_CompPrimitive* newTrefoilKnot = new_go->AddCompPrimitive(type, slices, stacks, radius);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -911,8 +813,6 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 			}
 			case C_ROCK:
 			{
-				RE_CompPrimitive* newRock = nullptr;
-
 				int seed = 0, nsubdivisions = 0;
 				size = sizeof(int);
 				memcpy(&seed, cursor, size);
@@ -921,7 +821,7 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(&nsubdivisions, cursor, size);
 				cursor += size;
 
-				new_go->AddComponent(newRock = App->primitives->CreateRock(new_go, seed, nsubdivisions));
+				RE_CompPrimitive* newRock = new_go->AddCompRock(seed, nsubdivisions);
 
 				size = sizeof(float) * 3;
 				memcpy(vec, cursor, size);
@@ -1199,10 +1099,44 @@ void RE_GameObject::UnUseResources()
 
 RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float v_fov_rads, short aspect_ratio_t, bool draw_frustum, bool usingSkybox, const char* skyboxMD5)
 {
-	RE_CompCamera* comp_camera = poolComponents->GetNewCamera();
+	RE_CompCamera* comp_camera = (RE_CompCamera*)poolComponents->GetNewComponent(ComponentType::C_CAMERA);
 	comp_camera->SetUp(this, prespective, near_plane, far_plane, v_fov_rads, aspect_ratio_t, draw_frustum, usingSkybox, skyboxMD5);
 	if(!Event::isPaused()) App->cams->AddMainCamera(comp_camera);
 	return comp_camera;
+}
+
+RE_CompPrimitive* RE_GameObject::AddCompPrimitive(ushortint type, int _slices, int _stacks, float _radius)
+{
+	RE_CompPrimitive* ret = nullptr;
+	ret = (RE_CompPrimitive * )poolComponents->GetNewComponent(ComponentType(type));
+
+	switch (ComponentType(type))
+	{
+	case C_CUBE:
+	case C_DODECAHEDRON:
+	case C_TETRAHEDRON:
+	case C_OCTOHEDRON:
+	case C_ICOSAHEDRON:
+		App->primitives->SetUpComponentPrimitive(ret, this);
+			break;
+	case C_PLANE:
+	case C_SPHERE:
+	case C_CYLINDER:
+	case C_HEMISHPERE:
+	case C_TORUS:
+	case C_TREFOILKNOT:
+		((RE_CompParametric*)ret)->SetUp(this, RE_PrimitiveManager::shaderPrimitive, _slices, _stacks, true, _radius);
+		break;
+	}
+	return ret;
+}
+
+RE_CompPrimitive* RE_GameObject::AddCompRock(int _rockSeed, int _rockNSubdivvisions)
+{
+	RE_CompPrimitive* ret = nullptr;
+	ret = (RE_CompPrimitive*)poolComponents->GetNewComponent(C_ROCK);
+	((RE_CompRock*)ret)->SetUp(this, RE_PrimitiveManager::shaderPrimitive, _rockSeed, _rockNSubdivvisions);
+	return ret;
 }
 
 void RE_GameObject::AddComponent(RE_Component * component)
@@ -1221,20 +1155,20 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type)
 			RemoveComponent(transform);
 			poolComponents->DeleteTransform(transform->GetPoolID());
 		}
-		transform = poolComponents->GetNewTransform();
+		transform = (RE_CompTransform*)poolComponents->GetNewComponent(ComponentType::C_TRANSFORM);
 		transform->SetUp(this);
 		ret = (RE_Component*)transform;
 	}
 	else if (ComponentType(type) == C_MESH)
 	{
-		RE_CompMesh* mesh_comp = poolComponents->GetNewMesh();
+		RE_CompMesh* mesh_comp = (RE_CompMesh * )poolComponents->GetNewComponent(ComponentType::C_MESH);
 		mesh_comp->SetUp(this);
 		//AddToBoundingBox(mesh_comp->GetAABB());
 		ret = (RE_Component*)mesh_comp;
 	}
 	else if (ComponentType(type) == C_CAMERA)
 	{
-		RE_CompCamera* comp_camera = poolComponents->GetNewCamera();
+		RE_CompCamera* comp_camera = (RE_CompCamera * )poolComponents->GetNewComponent(ComponentType::C_CAMERA);
 		comp_camera->SetUp(this);
 		App->cams->AddMainCamera(comp_camera);
 		ret = (RE_Component*)comp_camera;
@@ -1248,73 +1182,26 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type)
 		switch (ComponentType(type))
 		{
 		case C_GRID:
-		{
 			ret = (RE_Component*)(App->primitives->CreateGrid(this));
 			break;
-		}
 		case C_CUBE:
-		{
-			ret = (RE_Component*)(App->primitives->CreateCube(this));
-			break;
-		}
 		case C_DODECAHEDRON:
-		{
-			ret = (RE_Component*)(App->primitives->CreateDodecahedron(this));
-			break;
-		}
 		case C_TETRAHEDRON:
-		{
-			ret = (RE_Component*)(App->primitives->CreateTetrahedron(this));
-			break;
-		}
 		case C_OCTOHEDRON:
-		{
-			ret = (RE_Component*)(App->primitives->CreateOctohedron(this));
-			break;
-		}
 		case C_ICOSAHEDRON:
-		{
-			ret = (RE_Component*)(App->primitives->CreateIcosahedron(this));
-			break;
-		}
 		case C_SPHERE:
-		{
-			ret = (RE_Component*)(App->primitives->CreateSphere(this));
-			break;
-		}
 		case C_CYLINDER:
-		{
-			ret = (RE_Component*)(App->primitives->CreateCylinder(this));
-			break;
-		}
 		case C_HEMISHPERE:
-		{
-			ret = (RE_Component*)(App->primitives->CreateHemiSphere(this));
-			break;
-		}
 		case C_TORUS:
-		{
-			ret = (RE_Component*)(App->primitives->CreateTorus(this));
-			break;
-		}
 		case C_TREFOILKNOT:
-		{
-			ret = (RE_Component*)(App->primitives->CreateTrefoilKnot(this));
-			break;
-		}
 		case C_ROCK:
-		{
-			ret = (RE_Component*)(App->primitives->CreateRock(this));
-			break;
+			ret = poolComponents->GetNewComponent(ComponentType(type));
 		}
-		default:
-			LOG_ERROR("Component of type %u is unsupported", type);
-		}
+		if (type != C_GRID && ret != nullptr) App->primitives->SetUpComponentPrimitive((RE_CompPrimitive*)ret, this);
+
 	}
 
-	if (ret != nullptr)
-		AddComponent(ret);
-	else
+	if (ret == nullptr)
 		LOG_ERROR("GameObject could not add type %u component", type);
 
 	return ret;
@@ -1338,14 +1225,14 @@ RE_CompTransform * RE_GameObject::AddCompTransform()
 		RemoveComponent(transform);
 		poolComponents->DeleteTransform(transform->GetPoolID());
 	}
-	transform = poolComponents->GetNewTransform();
+	transform = (RE_CompTransform*)poolComponents->GetNewComponent(ComponentType::C_TRANSFORM);
 	transform->SetUp(this);
 	return transform;
 }
 
 RE_CompMesh* RE_GameObject::AddCompMesh()
 {
-	return poolComponents->GetNewMesh();
+	return (RE_CompMesh*)poolComponents->GetNewComponent(ComponentType::C_MESH);
 }
 
 RE_Component* RE_GameObject::GetComponent(const ushortint type) const

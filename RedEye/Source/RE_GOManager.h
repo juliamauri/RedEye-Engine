@@ -72,21 +72,27 @@ public:
 	void ClearComponents();
 
 	RE_Component* GetComponent(int poolid, ComponentType cType);
+	RE_Component* GetNewComponent(ComponentType cType);
+	RE_Component* CopyComponent(RE_Component* cmp, RE_GameObject* parent);
 
-	RE_CompTransform* GetNewTransform();
-	RE_CompTransform* CopyTransform(RE_CompTransform* camComp, RE_GameObject* parent);
 	void DeleteTransform(int id);
-
-	RE_CompCamera* GetNewCamera();
-	RE_CompCamera* CopyCamera(RE_CompCamera* camComp, RE_GameObject* parent);
-
-	RE_CompMesh* GetNewMesh();
-	RE_CompMesh* CopyMesh(RE_CompMesh* camComp, RE_GameObject* parent);
 
 private:
 	CamerasPool camPool;
 	TransformsPool transPool;
 	MeshesPool meshPool;
+	PRockPool pRockPool;
+	PCubePool pCubePool;
+	PDodecahedronPool pDodecahedronPool;
+	PTetrahedronPool pTetrahedronPool;
+	POctohedronPool pOctohedronPool;
+	PIcosahedronPool pIcosahedronPool;
+	PPlanePool pPlanePool;
+	PSpherePool pSpherePool;
+	PCylinderPool pCylinderPool;
+	PHemiSpherePool pHemiSpherePool;
+	PTorusPool pTorusPool;
+	PTrefoiKnotPool pTrefoiKnotPool;
 };
 
 class RE_GOManager

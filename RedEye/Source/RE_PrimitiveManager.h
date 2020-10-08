@@ -17,27 +17,17 @@ public:
 
 	bool Init(const char* def_shader);
 
+	void SetUpComponentPrimitive(RE_CompPrimitive* cmpP, RE_GameObject* parent);
+
 	 //Create
 	RE_CompPrimitive* CreateGrid(RE_GameObject* game_obj);
-	RE_CompPrimitive* CreateRock(RE_GameObject* game_obj, int seed = 44891516, int nsubdivisions = 1);
-	RE_CompPrimitive* CreateCube(RE_GameObject* game_obj);
-	RE_CompPrimitive* CreateDodecahedron(RE_GameObject* game_obj);
-	RE_CompPrimitive* CreateTetrahedron(RE_GameObject* game_obj);
-	RE_CompPrimitive* CreateOctohedron(RE_GameObject* game_obj);
-	RE_CompPrimitive* CreateIcosahedron(RE_GameObject* game_obj);
-	RE_CompPrimitive* CreatePlane(RE_GameObject* game_obj, int slices = 3, int stacks = 3);
-	RE_CompPrimitive* CreateSphere(RE_GameObject* game_obj, int slices  = 16, int stacks = 18);
-	RE_CompPrimitive* CreateCylinder(RE_GameObject* game_obj, int slices = 30, int stacks = 3);
-	RE_CompPrimitive* CreateHemiSphere(RE_GameObject* game_obj, int slices = 10, int stacks = 10);
-	RE_CompPrimitive* CreateTorus(RE_GameObject* game_obj, int slices = 30, int stacks = 40, float radius = 0.1f);
-	RE_CompPrimitive* CreateTrefoilKnot(RE_GameObject* game_obj, int slices = 30, int stacks = 40, float radius = 0.5f);
 
 	//Check Platonics
-	unsigned int CheckCubeVAO();
-	unsigned int CheckDodecahedronVAO();
-	unsigned int CheckTetrahedronVAO();
-	unsigned int CheckOctohedronVAO();
-	unsigned int CheckIcosahedronVAO();
+	unsigned int CheckPlatonicVAO(unsigned short type);
+
+
+	//Shader for primitives
+	static unsigned int shaderPrimitive;
 
 private:
 	void UploadPlatonic(struct par_shapes_mesh_s* param, unsigned int* vao, unsigned int* vbo, unsigned int * ebo, int* triangles);
@@ -53,9 +43,6 @@ private:
 	unsigned int vao_octo = 0, vbo_octo = 0, ebo_octo = 0;
 	unsigned int vao_icosa = 0, vbo_icosa = 0, ebo_icosa = 0;
 	int cube_triangles = 0, dodo_triangles = 0, tetra_triangles = 0, octo_triangles = 0, icosa_triangles = 0;
-
-	//Shader for primitives
-	unsigned int shaderPrimitive = 0;
 };
 
 #endif // !__RE_PRIMITVEMANAGER_H__#

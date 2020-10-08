@@ -279,18 +279,13 @@ const RE_GameObject * ModuleScene::GetRoot_c() const
 	return root;
 }
 
-void ModuleScene::AddGoToRoot(RE_GameObject * toAdd)
-{
-	root->AddChild(toAdd);
-}
-
 void ModuleScene::CreateCube(RE_GameObject* parent)
 {
 	parent = (parent) ? parent : root;
 	RE_GameObject* cube_go = scenePool.AddGO("Cube", parent);
-
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, cube_go);
-	cube_go->AddComponent(App->primitives->CreateCube(cube_go));
+
+	cube_go->AddComponent(C_CUBE);
 	cube_go->ResetBoundingBoxes();
 	cube_go->TransformModified(false);
 }
@@ -300,7 +295,8 @@ void ModuleScene::CreateDodecahedron(RE_GameObject* parent)
 	parent = (parent) ? parent : root;
 	RE_GameObject* dode_go = scenePool.AddGO("Dodecahedron", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, dode_go);
-	dode_go->AddComponent(App->primitives->CreateDodecahedron(dode_go));
+
+	dode_go->AddComponent(C_DODECAHEDRON);
 	dode_go->ResetBoundingBoxes();
 	dode_go->TransformModified(false);
 }
@@ -310,7 +306,8 @@ void ModuleScene::CreateTetrahedron(RE_GameObject* parent)
 	parent = (parent) ? parent : root;
 	RE_GameObject* tetra_go = scenePool.AddGO("Tetrahedron", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, tetra_go);
-	tetra_go->AddComponent(App->primitives->CreateTetrahedron(tetra_go));
+
+	tetra_go->AddComponent(C_TETRAHEDRON);
 	tetra_go->ResetBoundingBoxes();
 	tetra_go->TransformModified(false);
 }
@@ -320,16 +317,19 @@ void ModuleScene::CreateOctohedron(RE_GameObject* parent)
 	parent = (parent) ? parent : root;
 	RE_GameObject* octo_go = scenePool.AddGO("Octohedron", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, octo_go);
-	octo_go->AddComponent(App->primitives->CreateOctohedron(octo_go));
+
+	octo_go->AddComponent(C_OCTOHEDRON);
 	octo_go->ResetBoundingBoxes();
 	octo_go->TransformModified(false);
 }
 
 void ModuleScene::CreateIcosahedron(RE_GameObject* parent)
 {
+	parent = (parent) ? parent : root;
 	RE_GameObject* icosa_go = scenePool.AddGO("Icosahedron", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, icosa_go);
-	icosa_go->AddComponent(App->primitives->CreateIcosahedron(icosa_go));
+
+	icosa_go->AddComponent(C_ICOSAHEDRON);
 	icosa_go->ResetBoundingBoxes();
 	icosa_go->TransformModified(false);
 }
@@ -339,7 +339,8 @@ void ModuleScene::CreatePlane(RE_GameObject* parent)
 	parent = (parent) ? parent : root;
 	RE_GameObject* plane_go = scenePool.AddGO("Plane", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, plane_go);
-	plane_go->AddComponent(App->primitives->CreatePlane(plane_go));
+
+	plane_go->AddComponent(C_PLANE);
 	plane_go->ResetBoundingBoxes();
 	plane_go->TransformModified(false);
 }
@@ -349,7 +350,8 @@ void ModuleScene::CreateSphere(RE_GameObject* parent)
 	parent = (parent) ? parent : root;
 	RE_GameObject* sphere_go = scenePool.AddGO("Sphere", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, sphere_go);
-	sphere_go->AddComponent(App->primitives->CreateSphere(sphere_go));
+
+	sphere_go->AddComponent(C_SPHERE);
 	sphere_go->ResetBoundingBoxes();
 	sphere_go->TransformModified(false);
 }
@@ -359,7 +361,8 @@ void ModuleScene::CreateCylinder(RE_GameObject* parent)
 	parent = (parent) ? parent : root;
 	RE_GameObject* cylinder_go = scenePool.AddGO("Cylinder", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, cylinder_go);
-	cylinder_go->AddComponent(App->primitives->CreateCylinder(cylinder_go));
+
+	cylinder_go->AddComponent(C_CYLINDER);
 	cylinder_go->ResetBoundingBoxes();
 	cylinder_go->TransformModified(false);
 }
@@ -369,7 +372,8 @@ void ModuleScene::CreateHemiSphere(RE_GameObject* parent)
 	parent = (parent) ? parent : root;
 	RE_GameObject* hemisphere_go = scenePool.AddGO("HemiSphere", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, hemisphere_go);
-	hemisphere_go->AddComponent(App->primitives->CreateHemiSphere(hemisphere_go));
+
+	hemisphere_go->AddComponent(C_HEMISHPERE);
 	hemisphere_go->ResetBoundingBoxes();
 	hemisphere_go->TransformModified(false);
 }
@@ -379,7 +383,8 @@ void ModuleScene::CreateTorus(RE_GameObject* parent)
 	parent = (parent) ? parent : root;
 	RE_GameObject* torus_go = scenePool.AddGO("Torus", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, torus_go);
-	torus_go->AddComponent(App->primitives->CreateTorus(torus_go));
+
+	torus_go->AddComponent(C_TORUS);
 	torus_go->ResetBoundingBoxes();
 	torus_go->TransformModified(false);
 }
@@ -389,7 +394,8 @@ void ModuleScene::CreateTrefoilKnot(RE_GameObject* parent)
 	parent = (parent) ? parent : root;
 	RE_GameObject* trefoilknot_go = scenePool.AddGO("Trefoil Knot", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, trefoilknot_go);
-	trefoilknot_go->AddComponent(App->primitives->CreateTrefoilKnot(trefoilknot_go));
+
+	trefoilknot_go->AddComponent(C_TREFOILKNOT);
 	trefoilknot_go->ResetBoundingBoxes();
 	trefoilknot_go->TransformModified(false);
 }
@@ -399,7 +405,8 @@ void ModuleScene::CreateRock(RE_GameObject* parent)
 	parent = (parent) ? parent : root;
 	RE_GameObject* rock_go = scenePool.AddGO("Rock", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, rock_go);
-	rock_go->AddComponent(App->primitives->CreateRock(rock_go));
+
+	rock_go->AddComponent(C_ROCK);
 	rock_go->ResetBoundingBoxes();
 	rock_go->TransformModified(false);
 }
@@ -571,7 +578,7 @@ void ModuleScene::NewEmptyScene(const char* name)
 	root->SetStatic(false);
 
 	SetupScene();
-	App->editor->SetSelected(root);
+	App->editor->SetSelected(nullptr);
 
 	Event::ResumeEvents();
 
@@ -610,7 +617,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 
 	root->UseResources();
 	SetupScene();
-	App->editor->SetSelected(root);
+	App->editor->SetSelected(nullptr);
 
 	LOG("Time loading scene: %u ms", timer.Read());
 

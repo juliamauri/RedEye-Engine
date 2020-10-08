@@ -18,6 +18,7 @@ class RE_Component;
 class RE_CompTransform;
 class RE_CompMesh;
 class RE_CompCamera;
+class RE_CompPrimitive;
 class JSONNode;
 class ComponentsPool;
 class RE_GOManager;
@@ -29,7 +30,6 @@ public:
 	~RE_GameObject();
 
 	void SetUp(ComponentsPool* compPool, const char* name, UUID uuid = GUID_NULL, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
-	void SetUp(ComponentsPool* compPool, const RE_GameObject& go, RE_GameObject* parent = nullptr);
 
 	void PreUpdate();
 	void Update();
@@ -101,6 +101,8 @@ public:
 	RE_CompTransform* AddCompTransform();
 	RE_CompMesh* AddCompMesh();
 	RE_CompCamera* AddCompCamera(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 0.523599f, short aspect_ratio_t = 0, bool draw_frustum = true, bool usingSkybox = true, const char* skyboxMD5 = nullptr);
+	RE_CompPrimitive* AddCompPrimitive(ushortint type, int _slices = 3, int _stacks = 3, float _radius = 0.1);
+	RE_CompPrimitive* AddCompRock(int _rockSeed = 5, int _rockNSubdivvisions = 20);
 
 	RE_CompTransform* GetTransform() const;
 	RE_CompMesh* GetMesh() const;
