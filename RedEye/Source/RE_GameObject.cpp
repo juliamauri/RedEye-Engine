@@ -643,8 +643,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(vec, cursor, size);
 				cursor += size;
 				newCube->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_DODECAHEDRON:
 			{
 				RE_CompPrimitive* newDode = (RE_CompPrimitive*)new_go->AddComponent(C_DODECAHEDRON);
@@ -653,8 +653,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(vec, cursor, size);
 				cursor += size;
 				newDode->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_TETRAHEDRON:
 			{
 				RE_CompPrimitive* newTetra = (RE_CompPrimitive*)new_go->AddComponent(C_TETRAHEDRON);
@@ -663,8 +663,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(vec, cursor, size);
 				cursor += size;
 				newTetra->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_OCTOHEDRON:
 			{
 				RE_CompPrimitive* newOcto = (RE_CompPrimitive*)new_go->AddComponent(C_OCTOHEDRON);
@@ -673,8 +673,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(vec, cursor, size);
 				cursor += size;
 				newOcto->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_ICOSAHEDRON:
 			{
 				RE_CompPrimitive* newIcosa = (RE_CompPrimitive*)new_go->AddComponent(C_ICOSAHEDRON);
@@ -683,8 +683,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				memcpy(vec, cursor, size);
 				cursor += size;
 				newIcosa->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_PLANE:
 			{
 				int slices = 0, stacks = 0;
@@ -702,8 +702,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				cursor += size;
 
 				newPlane->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_SPHERE:
 			{
 				int slices = 0, stacks = 0;
@@ -721,8 +721,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				cursor += size;
 
 				newSphere->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_CYLINDER:
 			{
 				int slices = 0, stacks = 0;
@@ -740,8 +740,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				cursor += size;
 
 				newCylinder->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_HEMISHPERE:
 			{
 				int slices = 0, stacks = 0;
@@ -759,8 +759,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				cursor += size;
 
 				newHemiSphere->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_TORUS:
 			{
 
@@ -784,8 +784,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				cursor += size;
 
 				newTorus->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_TREFOILKNOT:
 			{
 
@@ -809,8 +809,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				cursor += size;
 
 				newTrefoilKnot->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_ROCK:
 			{
 				int seed = 0, nsubdivisions = 0;
@@ -828,8 +828,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 				cursor += size;
 
 				newRock->SetColor(math::vec(vec));
-				break;
 			}
+				break;
 			case C_MESH:
 			{
 				RE_CompMesh* newMesh = nullptr;
@@ -854,8 +854,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 						newMesh->SetMaterial(materialMD5);
 					}
 				}
-				break;
 			}
+				break;
 			case C_CAMERA:
 			{
 				bool isPrespective = true;
@@ -905,8 +905,8 @@ void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl
 					drawFrustum,
 					usingSkybox,
 					(skyboxid != -1) ? resources->at(skyboxid) : nullptr);
-				break;
 			}
+				break;
 			}
 		}
 	}
