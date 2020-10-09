@@ -58,7 +58,7 @@ public:
 
 	void RecieveEvent(const Event& e) override;
 
-	void DrawDebug(bool resetLight) const;
+	void DrawDebug(RE_CompCamera* cam) const;
 	void DrawHeriarchy();
 
 	RE_GameObject* GetSelected() const;

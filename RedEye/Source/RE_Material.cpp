@@ -1272,7 +1272,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			|| (usingOnMat[TAMBIENT] && !tAmbient.empty()) || (usingOnMat[TEMISSIVE] && !tEmissive.empty())
 			|| (usingOnMat[TOPACITY] && !tOpacity.empty() || (usingOnMat[TSHININESS] && !tShininess.empty())
 				|| (usingOnMat[THEIGHT] && !tHeight.empty()) || !usingOnMat[TNORMALS] && !tNormals.empty())
-			|| (usingOnMat[TREFLECTION] && tReflection.empty())) {
+			|| (usingOnMat[TREFLECTION] && !tReflection.empty())) {
 
 			RE_ShaderImporter::setFloat(ShaderID, "useTexture", 1.0f);
 			onlyColor = false;
@@ -1304,7 +1304,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 	{
 		glActiveTexture(GL_TEXTURE0);
 		eastl::string name = "tdiffuse0";
-		RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), 0);
+		RE_ShaderImporter::setInt(ShaderID, name.c_str(), 0);
 		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
 	}
 	else
@@ -1324,7 +1324,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			eastl::string name = "tdiffuse";
 			name += eastl::to_string(i);
-			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
+			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tDiffuse[i]))->use();
 		}
 		for (unsigned int i = 0; i < tSpecular.size() || i < usingOnMat[TSPECULAR]; i++)
@@ -1332,7 +1332,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			eastl::string name = "tspecular";
 			name += eastl::to_string(i);
-			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
+			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tSpecular[i]))->use();
 		}
 		for (unsigned int i = 0; i < tAmbient.size() || i < usingOnMat[TAMBIENT]; i++)
@@ -1340,7 +1340,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			eastl::string name = "tambient";
 			name += eastl::to_string(i);
-			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
+			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tAmbient[i]))->use();
 		}
 		for (unsigned int i = 0; i < tEmissive.size() || i < usingOnMat[TEMISSIVE]; i++)
@@ -1348,7 +1348,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			eastl::string name = "temissive";
 			name += eastl::to_string(i);
-			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
+			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tEmissive[i]))->use();
 		}
 		for (unsigned int i = 0; i < tOpacity.size() || i < usingOnMat[TOPACITY]; i++)
@@ -1356,7 +1356,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			eastl::string name = "topacity";
 			name += eastl::to_string(i);
-			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
+			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tOpacity[i]))->use();
 		}
 		for (unsigned int i = 0; i < tShininess.size() || i < usingOnMat[TSHININESS]; i++)
@@ -1364,7 +1364,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			eastl::string name = "tshininess";
 			name += eastl::to_string(i);
-			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
+			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tShininess[i]))->use();
 		}
 		for (unsigned int i = 0; i < tHeight.size() || i < usingOnMat[THEIGHT]; i++)
@@ -1372,7 +1372,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			eastl::string name = "theight";
 			name += eastl::to_string(i);
-			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
+			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tHeight[i]))->use();
 		}
 		for (unsigned int i = 0; i < tNormals.size() || i < usingOnMat[TNORMALS]; i++)
@@ -1380,7 +1380,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			eastl::string name = "tnormals";
 			name += eastl::to_string(i);
-			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
+			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tNormals[i]))->use();
 		}
 		for (unsigned int i = 0; i < tReflection.size() || i < usingOnMat[TREFLECTION]; i++)
@@ -1388,7 +1388,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			eastl::string name = "treflection";
 			name += eastl::to_string(i);
-			RE_ShaderImporter::setUnsignedInt(ShaderID, name.c_str(), textureCounter++);
+			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
 			((RE_Texture*)App->resources->At(tReflection[i]))->use();
 		}
 	}

@@ -523,8 +523,7 @@ void AABBDynamicTree::CollectIntersections(const Frustum frustum, eastl::stack<i
 
 		while (!node_stack.empty())
 		{
-			int index = node_stack.top();
-			node = At(index);
+			node = At(node_stack.top());
 			node_stack.pop();
 
 			if (frustum.Intersects(node.box))

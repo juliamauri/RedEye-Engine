@@ -201,7 +201,9 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
+			LOG_WARNING("Vertex compilation failed: ");
 			glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+			LOG_ERROR(&infoLog[0]);
 			last_error += "\nVertex compilation failed from\n";
 			last_error += infoLog;
 			last_error += "\n";
@@ -222,7 +224,9 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 		glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
+			LOG_WARNING("Fragment compilation failed: ");
 			glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+			LOG_ERROR(&infoLog[0]);
 			last_error += "\nFragment compilation failed from\n";
 			last_error += infoLog;
 			last_error += "\n";
@@ -242,8 +246,10 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 		glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
+			LOG_WARNING("Geometry compilation failed: ");
 			glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
-			last_error += "\nFragment compilation failed from\n";
+			LOG_ERROR(&infoLog[0]);
+			last_error += "\nGeometry compilation failed from\n";
 			last_error += infoLog;
 			last_error += "\n";
 			ret = false;
@@ -262,7 +268,9 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 	//check
 	glGetProgramiv(*ID, GL_LINK_STATUS, &success);
 	if (!success) {
+		LOG_WARNING("Shader program compilation failed:\n");
 		glGetProgramInfoLog(*ID, 512, NULL, infoLog);
+		LOG_ERROR(&infoLog[0]);
 		last_error += "\nShader program compilation failed";
 		last_error += ":\n";
 		last_error += infoLog;

@@ -73,6 +73,7 @@
 "		color = vec4(cdiffuse, 1.0);\n"									       	\
 "}\0"
 
+// Skybox
 #define SKYBOXVERTEXSHADER									\
 "#version 330 core\n"										\
 "layout(location = 0) in vec3 aPos;\n"						\
@@ -99,7 +100,106 @@
 "\n"														\
 "void main()\n"												\
 "{\n"														\
-"	color = texture(cubemap, normalize(pos).stp);\n"	\
+"	color = texture(cubemap, normalize(pos).stp);\n"	    \
 "}\0"
+
+// Deferred Geo Pass
+#define GEOPASSVERTEXSHADER									\
+"#version 330 core\n"										\
+"layout(location = 0) in vec3 aPos;\n"						\
+"layout(location = 1) in vec3 aNormal;\n"					\
+"layout(location = 4) in vec2 aTexCoord;\n"					\
+"\n"														\
+"out vec3 FragPos;\n"										\
+"out vec2 TexCoord;\n"										\
+"out vec3 Normal;\n"										\
+"\n"														\
+"uniform mat4 model;\n"										\
+"uniform mat4 view;\n"										\
+"uniform mat4 projection;\n"								\
+"\n"														\
+"void main()\n"												\
+"{\n"														\
+"	vec4 worldPos = model * vec4(aPos, 1.0);\n"				\
+"	FragPos = worldPos.xyz;\n"								\
+"	TexCoord = aTexCoord;\n"								\
+"	mat3 normalMatrix = transpose(inverse(mat3(model)));\n"	\
+"	Normal = normalMatrix * aNormal;\n"						\
+"	gl_Position = projection * view * worldPos;\n"			\
+"}\0"
+
+#define GEOPASSFRAGMENTSHADER										\
+"#version 330 core\n"												\
+"layout (location = 0) out vec3 gPosition;\n"						\
+"layout (location = 1) out vec3 gNormal;\n"							\
+"layout (location = 2) out vec3 gAlbedo;\n"							\
+"layout (location = 3) out float gSpec;\n"							\
+"\n"																\
+"in vec3 FragPos;\n"												\
+"in vec2 TexCoord;\n"												\
+"in vec3 Normal;\n"													\
+"\n"																\
+"uniform float useTexture;\n"										\
+"uniform sampler2D tdiffuse0;\n"									\
+"uniform sampler2D tspecular0;\n"									\
+"\n"																\
+"uniform float useColor;\n"											\
+"uniform vec3 cdiffuse;\n"											\
+"\n"																\
+"void main()\n"														\
+"{\n"																\
+"	gPosition = FragPos;\n"											\
+"	gNormal = normalize(Normal);\n"									\
+"\n"																\
+"	if (useTexture > 0.0f && useColor > 0.0f)\n"					\
+"	{\n"															\
+"		gAlbedo = texture(tdiffuse0, TexCoord).rgb * cdiffuse;\n"	\
+"		gSpec = texture(tspecular0, TexCoord).r;\n"				\
+"	}\n"															\
+"	else if (useTexture > 0.0f)\n"									\
+"	{\n"															\
+"		gAlbedo = texture(tdiffuse0, TexCoord).rgb;\n"				\
+"		gSpec = texture(tspecular0, TexCoord).r;\n"				\
+"	}\n"															\
+"	else if (useColor > 0.0f)\n"									\
+"		gAlbedo = cdiffuse;\n"									    \
+"}\0"
+
+// Deferred Light Pass
+#define LIGHTPASSVERTEXSHADER				\
+"#version 330 core\n"						\
+"layout(location = 0) in vec3 aPos;\n"		\
+"layout(location = 1) in vec2 aTexCoord;\n"	\
+"\n"										\
+"out vec2 TexCoord;\n"						\
+"\n"										\
+"void main()\n"								\
+"{\n"										\
+"	TexCoord = aTexCoord;\n"				\
+"	gl_Position = vec4(aPos, 1.0);\n"		\
+"}\0"
+
+#define LIGHTPASSFRAGMENTSHADER										\
+"#version 330 core\n"												\
+"layout (location = 4) out vec4 aRes;\n"							\
+"\n"																\
+"in vec2 TexCoord;\n"												\
+"\n"																\
+"uniform sampler2D gPosition;\n"									\
+"uniform sampler2D gNormal;\n"										\
+"uniform sampler2D gAlbedo;\n"										\
+"uniform sampler2D gSpec;\n"										\
+"\n"																\
+"void main()\n"														\
+"{\n"																\
+"	vec3 pos = normalize(texture(gPosition, TexCoord).rgb);\n"		\
+"	vec3 Normal = normalize(texture(gNormal, TexCoord).rgb);\n"		\
+"	vec3 Diffuse = texture(gAlbedo, TexCoord).rgb;\n"				\
+"	float Specular = texture(gSpec, TexCoord).r;\n"					\
+"	vec3 lighting = vec3(Specular, 0, 0);\n"						\
+"	aRes = vec4(Diffuse, 1.0);\n"										\
+"}\0"
+
+
 
 #endif // !__DEFAULTSHADERS_H__

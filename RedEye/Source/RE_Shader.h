@@ -36,7 +36,7 @@ public:
 
 	eastl::vector<ShaderCvar> GetUniformValues();
 
-	void UploatMainUniforms(RE_CompCamera* camera, float dt, float time);
+	void UploadMainUniforms(RE_CompCamera* camera, float dt, float time);
 	void UploadModel(float* model);
 
 	bool isShaderFilesChanged();

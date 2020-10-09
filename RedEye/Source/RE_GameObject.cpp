@@ -106,7 +106,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetDrawableComponentsWithChilds(RE_Ga
 		{
 			const RE_GameObject* go = gos.top();
 			gos.pop();
-			
+
 			if (go != ignoreStencil) {
 				for (auto component : go->GetComponents())
 				{
@@ -187,7 +187,7 @@ eastl::vector<RE_GameObject*> RE_GameObject::GetActiveChildsWithDrawComponents()
 	{
 		eastl::queue<RE_GameObject*> go_queue;
 		go_queue.push(this);
-		
+
 		while (!go_queue.empty())
 		{
 			RE_GameObject* go = go_queue.front();
@@ -309,7 +309,7 @@ void RE_GameObject::DeserializeBinary(char*& cursor, ComponentsPool* compPool, e
 		int goParentID;
 		memcpy(&goParentID, cursor, size);
 		cursor += size;
-		
+
 		SetUp(compPool, strName, idGO->at(goParentID));
 	}
 	else

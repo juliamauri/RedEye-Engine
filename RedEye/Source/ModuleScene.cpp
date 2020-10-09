@@ -85,7 +85,7 @@ void ModuleScene::OnPlay()
 	Event::PauseEvents();
 	savedState.ClearPool();
 	savedState.InsertPool(&scenePool);
-	Event::ResumeEvents(); 
+	Event::ResumeEvents();
 	root->OnPlay();
 }
 
@@ -496,9 +496,8 @@ void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container,
 
 	while (!goIndex.empty())
 	{
-		int index = goIndex.top();
+		container.push_back(goManager.At(goIndex.top()));
 		goIndex.pop();
-		container.push_back(scenePool.GetGO(index));
 	}
 }
 
@@ -564,7 +563,7 @@ void ModuleScene::NewEmptyScene(const char* name)
 	else if (currentScene) { //TODO popup save
 		currentScene = nullptr;
 	}
-	
+
 	unsavedScene = new RE_Scene();
 	unsavedScene->SetName(name);
 	unsavedScene->SetType(Resource_Type::R_SCENE);
@@ -610,8 +609,8 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 
 	if (loadedDO)
 		root = scenePool.InsertPool(loadedDO);
-	else 
-		LOG_ERROR("Can´t Load Scene");
+	else
+		LOG_ERROR("Canï¿½t Load Scene");
 	App->resources->UnUse(sceneMD5);
 
 	scenePool.UseResources();
