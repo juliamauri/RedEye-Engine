@@ -126,16 +126,22 @@ void RE_CompRock::DrawProperties()
 	}
 }
 
-unsigned int RE_CompRock::GetBinarySize() const
-{
-	return sizeof(float) * 3 + sizeof(int) * 2;
-}
-
 void RE_CompRock::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
 {
 	node->PushFloatVector("color", RE_CompPrimitive::color);
 	node->PushInt("seed", seed);
 	node->PushInt("nsubdivisions", nsubdivisions);
+}
+
+void RE_CompRock::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+{
+	SetUp(parent, RE_PrimitiveManager::shaderPrimitive, node->PullInt("seed", 251654), node->PullInt("nsubdivisions", 5));
+	RE_CompPrimitive::color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
+}
+
+unsigned int RE_CompRock::GetBinarySize() const
+{
+	return sizeof(float) * 3 + sizeof(int) * 2;
 }
 
 void RE_CompRock::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
@@ -150,6 +156,23 @@ void RE_CompRock::SerializeBinary(char*& cursor, eastl::map<const char*, int>* r
 
 	size = sizeof(float) * 3;
 	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+}
+
+void RE_CompRock::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+{
+	size_t size = sizeof(int);
+	memcpy(&seed, cursor, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(&nsubdivisions, cursor, size);
+	cursor += size;
+
+	SetUp(parent, RE_PrimitiveManager::shaderPrimitive, seed, nsubdivisions);
+
+	size = sizeof(float) * 3;
+	memcpy(&RE_CompPrimitive::color[0], cursor, size);
 	cursor += size;
 }
 
@@ -266,10 +289,25 @@ void RE_CompPlatonic::SerializeJson(JSONNode* node, eastl::map<const char*, int>
 	node->PushFloatVector("color", RE_CompPrimitive::color);
 }
 
+void RE_CompPlatonic::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+{
+	App->primitives->SetUpComponentPrimitive(this, parent);
+	RE_CompPrimitive::color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
+}
+
 void RE_CompPlatonic::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
 {
 	size_t size = sizeof(float) * 3;
 	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+}
+
+void RE_CompPlatonic::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+{
+	App->primitives->SetUpComponentPrimitive(this, parent);
+
+	size_t size = sizeof(float) * 3;
+	memcpy(&RE_CompPrimitive::color[0], cursor, size);
 	cursor += size;
 }
 
@@ -397,12 +435,12 @@ void RE_CompParametric::DrawProperties()
 			GenerateParametric();
 			canChange = false;
 		}
-	}
-}
 
-unsigned int RE_CompParametric::GetBinarySize() const
-{
-	return sizeof(float) * 4 + sizeof(int) * 2;
+		if (type == C_PLANE) {
+			if (ImGui::Button("Convert To Mesh")) 
+				Event::Push(RE_EventType::PLANE_CHANGE_TO_MESH, App->scene, Cvar(go));
+		}
+	}
 }
 
 void RE_CompParametric::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
@@ -411,6 +449,18 @@ void RE_CompParametric::SerializeJson(JSONNode* node, eastl::map<const char*, in
 	node->PushInt("slices", slice);
 	node->PushInt("stacks", stacks);
 	node->PushFloat("radius", radius);
+}
+
+void RE_CompParametric::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+{
+	useRadius = (radius = node->PullFloat("radius", 0) > 0);
+	SetUp(parent, RE_PrimitiveManager::shaderPrimitive, node->PullInt("slices", 3), node->PullInt("stacks", 3), useRadius, radius);
+	RE_CompPrimitive::color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
+}
+
+unsigned int RE_CompParametric::GetBinarySize() const
+{
+	return sizeof(float) * 4 + sizeof(int) * 2;
 }
 
 void RE_CompParametric::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
@@ -429,6 +479,28 @@ void RE_CompParametric::SerializeBinary(char*& cursor, eastl::map<const char*, i
 
 	size = sizeof(float) * 3;
 	memcpy(cursor, &RE_CompPrimitive::color[0], size);
+	cursor += size;
+}
+
+void RE_CompParametric::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+{
+	size_t size = sizeof(int);
+	memcpy(&slice, cursor, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(&stacks, cursor, size);
+	cursor += size;
+
+	size = sizeof(float);
+	memcpy(&radius, cursor, size);
+	cursor += size;
+
+	useRadius = (radius > 0);
+	SetUp(parent, RE_PrimitiveManager::shaderPrimitive, slice, stacks, useRadius, radius);
+
+	size = sizeof(float) * 3;
+	memcpy(&RE_CompPrimitive::color[0], cursor, size);
 	cursor += size;
 }
 
@@ -513,29 +585,23 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 
 	glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
 	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
-	CheckGLError();
 
 	glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
 	glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
-	CheckGLError();
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
-	CheckGLError();
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
-	CheckGLError();
 
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
-	CheckGLError();
 
 	glGenBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RE_CompPrimitive::EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, param->ntriangles * sizeof(unsigned short) * 3, param->triangles, GL_STATIC_DRAW);
-	CheckGLError();
 
 	triangle_count = param->ntriangles;
 

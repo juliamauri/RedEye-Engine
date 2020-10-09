@@ -1,7 +1,5 @@
 #include "RE_GOManager.h"
 
-#include "RE_GameObject.h"
-
 RE_GOManager::RE_GOManager()
 {
 }
@@ -17,18 +15,7 @@ RE_GameObject* RE_GOManager::AddGO(const char* name, RE_GameObject* parent)
 		goparent = parent ? parent : gameObjectsPool.AtPtr(0);
 
 	RE_GameObject* ret = gameObjectsPool.AtPtr(gameObjectsPool.Push({}));
-	ret->SetUp(&componentsPool, name, GUID_NULL, goparent);
-	return ret;
-}
-
-RE_GameObject* RE_GOManager::AddGO(const char* name, UUID uuid, RE_GameObject* parent)
-{
-	RE_GameObject* goparent = nullptr;
-	if (gameObjectsPool.GetCount() > 0)
-		goparent = parent ? parent : gameObjectsPool.AtPtr(0);
-
-	RE_GameObject* ret = gameObjectsPool.AtPtr(gameObjectsPool.Push({}));
-	ret->SetUp(&componentsPool, name, uuid, goparent);
+	ret->SetUp(&componentsPool, name, goparent);
 	return ret;
 }
 
@@ -41,7 +28,7 @@ RE_GameObject* RE_GOManager::CopyGO(RE_GameObject* copy, RE_GameObject* parent)
 	eastl::list<RE_Component*> copyComponents = copy->GetComponents();
 
 	RE_GameObject* newGO = gameObjectsPool.AtPtr(gameObjectsPool.Push({}));
-	newGO->SetUp(&componentsPool, copy->GetName(), GUID_NULL, goparent);
+	newGO->SetUp(&componentsPool, copy->GetName(), goparent);
 
 	for (RE_Component* copyC : copyComponents) {
 		switch (copyC->GetType())
@@ -83,10 +70,54 @@ RE_GOManager* RE_GOManager::GetNewPoolFromID(int id)
 	return ret;
 }
 
+eastl::vector<const char*> RE_GOManager::GetAllResources()
+{
+	return componentsPool.GetAllResources();
+}
+
+void RE_GOManager::UseResources()
+{
+	componentsPool.UseResources();
+}
+
+void RE_GOManager::UnUseResources()
+{
+	componentsPool.UnUseResources();
+}
+
 void RE_GOManager::ClearPool()
 {
 	gameObjectsPool.Clear();
 	componentsPool.ClearComponents();
+}
+
+unsigned int RE_GOManager::GetBinarySize() const
+{
+	return gameObjectsPool.GetBinarySize() + componentsPool.GetBinarySize();
+}
+
+void RE_GOManager::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
+{
+	gameObjectsPool.SerializeJson(node);
+	componentsPool.SerializeJson(node, resources);
+}
+
+void RE_GOManager::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
+{
+	gameObjectsPool.DeserializeJson(node, &componentsPool);
+	componentsPool.DeserializeJson(&gameObjectsPool, node, resources);
+}
+
+void RE_GOManager::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+{
+	gameObjectsPool.SerializeBinary(cursor);
+	componentsPool.SerializeBinary(cursor, resources);
+}
+
+void RE_GOManager::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
+{
+	gameObjectsPool.DeserializeBinary(cursor, &componentsPool);
+	componentsPool.DeserializeBinary(&gameObjectsPool, cursor, resources);
 }
 
 RE_GameObject* RE_GOManager::RepercusiveInsertGO(RE_GameObject* go, RE_GameObject* parent)
@@ -115,6 +146,65 @@ int GameObjectManager::Push(RE_GameObject val)
 	return ret;
 }
 
+unsigned int GameObjectManager::GetBinarySize() const
+{
+	uint size = sizeof(unsigned int), i = 0;
+	for (i; i < lastAvaibleIndex; i++)
+		size += pool_[i].GetBinarySize();
+	return size;
+}
+
+void GameObjectManager::SerializeBinary(char*& cursor)
+{
+	uint size = sizeof(unsigned int);
+	uint goSize = GetCount();
+	memcpy(cursor, &goSize, size);
+	cursor += size;
+
+	for (uint i = 0; i < goSize; i++)
+		pool_[i].SerializeBinary(cursor);
+}
+
+void GameObjectManager::DeserializeBinary(char*& cursor, ComponentsPool* cmpsPool)
+{
+	eastl::map<int, RE_GameObject*> idGO;
+
+	uint size = sizeof(unsigned int);
+	uint goSize;
+	memcpy(&goSize, cursor, size);
+	cursor += size;
+
+	for (uint i = 0; i < goSize; i++)
+		pool_[Push({})].DeserializeBinary(cursor, cmpsPool, &idGO);
+}
+
+void GameObjectManager::SerializeJson(JSONNode* node)
+{
+	JSONNode* goPool = node->PushJObject("gameobjects Pool");
+	uint goSize = GetCount();
+	goPool->PushUInt("gameobjectsSize", goSize);
+	for (uint i = 0; i < goSize; i++) {
+		JSONNode* goNode = goPool->PushJObject(eastl::to_string(i).c_str());
+		pool_[i].SerializeJson(goNode);
+		DEL(goNode);
+	}
+	DEL(goPool);
+}
+
+void GameObjectManager::DeserializeJson(JSONNode* node, ComponentsPool* cmpsPool)
+{
+	eastl::map<int, RE_GameObject*> idGO;
+	JSONNode* goPool = node->PullJObject("gameobjects Pool");
+	unsigned int goSize = goPool->PullUInt("gameobjectsSize",  0);
+
+	for (uint i = 0; i < goSize; i++) {
+		JSONNode* goNode = goPool->PullJObject(eastl::to_string(i).c_str());
+		pool_[Push({})].DeserializeJSON(goNode, cmpsPool, &idGO);
+		DEL(goNode);
+	}
+	DEL(goPool);
+}
+
 void ComponentsPool::ClearComponents()
 {
 	transPool.Clear();
@@ -132,7 +222,7 @@ RE_Component* ComponentsPool::GetComponent(int poolid, ComponentType cType)
 		break;
 	case C_CAMERA:
 		ret = (RE_Component*)camPool.AtPtr(poolid);
-	break;
+		break;
 	case C_MESH:
 		ret = (RE_Component*)meshPool.AtPtr(poolid);
 		break;
@@ -299,7 +389,140 @@ RE_Component* ComponentsPool::CopyComponent(RE_Component* cmp, RE_GameObject* pa
 	return ret;
 }
 
+eastl::vector<const char*> ComponentsPool::GetAllResources()
+{
+	eastl::vector<const char*> allResources;
+	eastl::vector<const char*> resources = camPool.GetAllResources();
+	if (!resources.empty()) allResources.insert(allResources.end(), resources.begin(), resources.end());
+	resources = meshPool.GetAllResources();
+	if (!resources.empty()) allResources.insert(allResources.end(), resources.begin(), resources.end());
+
+	eastl::vector<const char*> ret;
+	int resSize = 0;
+	for (auto res : allResources) {
+		bool repeat = false;
+		for (auto uniqueRes : ret) {
+			resSize = eastl::CharStrlen(res);
+			if (resSize > 0 && eastl::Compare(res, uniqueRes, resSize) == 0) {
+				repeat = true;
+				break;
+			}
+		}
+		if (!repeat) ret.push_back(res);
+	}
+
+	return ret;
+}
+
+void ComponentsPool::UseResources()
+{
+	camPool.UseResources();
+	meshPool.UseResources();
+}
+
+void ComponentsPool::UnUseResources()
+{
+	camPool.UnUseResources();
+	meshPool.UnUseResources();
+}
+
 void ComponentsPool::DeleteTransform(int id)
 {
 	transPool.Pop(id);
+}
+
+unsigned int ComponentsPool::GetBinarySize() const
+{
+	uint size = 0;
+	size += camPool.GetBinarySize();
+	size += meshPool.GetBinarySize();
+	size += pCubePool.GetBinarySize();
+	size += pDodecahedronPool.GetBinarySize();
+	size += pTetrahedronPool.GetBinarySize();
+	size += pOctohedronPool.GetBinarySize();
+	size += pIcosahedronPool.GetBinarySize();
+	size += pSpherePool.GetBinarySize();
+	size += pCylinderPool.GetBinarySize();
+	size += pHemiSpherePool.GetBinarySize();
+	size += pTorusPool.GetBinarySize();
+	size += pTrefoiKnotPool.GetBinarySize();
+	size += pRockPool.GetBinarySize();
+	size += pPlanePool.GetBinarySize();
+	return size;
+}
+
+void ComponentsPool::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+{
+	camPool.SerializeBinary(cursor, resources);
+	meshPool.SerializeBinary(cursor, resources);
+	pCubePool.SerializeBinary(cursor, resources);
+	pDodecahedronPool.SerializeBinary(cursor, resources);
+	pTetrahedronPool.SerializeBinary(cursor, resources);
+	pOctohedronPool.SerializeBinary(cursor, resources);
+	pIcosahedronPool.SerializeBinary(cursor, resources);
+	pSpherePool.SerializeBinary(cursor, resources);
+	pCylinderPool.SerializeBinary(cursor, resources);
+	pHemiSpherePool.SerializeBinary(cursor, resources);
+	pTorusPool.SerializeBinary(cursor, resources);
+	pTrefoiKnotPool.SerializeBinary(cursor, resources);
+	pRockPool.SerializeBinary(cursor, resources);
+	pPlanePool.SerializeBinary(cursor, resources);
+}
+
+void ComponentsPool::DeserializeBinary(GameObjectManager* goPool, char*& cursor, eastl::map<int, const char*>* resources)
+{
+	camPool.DeserializeBinary(goPool, cursor, resources);
+	meshPool.DeserializeBinary(goPool, cursor, resources);
+	pCubePool.DeserializeBinary(goPool, cursor, resources);
+	pDodecahedronPool.DeserializeBinary(goPool, cursor, resources);
+	pTetrahedronPool.DeserializeBinary(goPool, cursor, resources);
+	pOctohedronPool.DeserializeBinary(goPool, cursor, resources);
+	pIcosahedronPool.DeserializeBinary(goPool, cursor, resources);
+	pSpherePool.DeserializeBinary(goPool, cursor, resources);
+	pCylinderPool.DeserializeBinary(goPool, cursor, resources);
+	pHemiSpherePool.DeserializeBinary(goPool, cursor, resources);
+	pTorusPool.DeserializeBinary(goPool, cursor, resources);
+	pTrefoiKnotPool.DeserializeBinary(goPool, cursor, resources);
+	pRockPool.DeserializeBinary(goPool, cursor, resources);
+	pPlanePool.DeserializeBinary(goPool, cursor, resources);
+}
+
+void ComponentsPool::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
+{
+	JSONNode* comps = node->PushJObject("Components Pool");
+	camPool.SerializeJson(comps, resources);
+	meshPool.SerializeJson(comps, resources);
+	pCubePool.SerializeJson(comps, resources);
+	pDodecahedronPool.SerializeJson(comps, resources);
+	pTetrahedronPool.SerializeJson(comps, resources);
+	pOctohedronPool.SerializeJson(comps, resources);
+	pIcosahedronPool.SerializeJson(comps, resources);
+	pSpherePool.SerializeJson(comps, resources);
+	pCylinderPool.SerializeJson(comps, resources);
+	pHemiSpherePool.SerializeJson(comps, resources);
+	pTorusPool.SerializeJson(comps, resources);
+	pTrefoiKnotPool.SerializeJson(comps, resources);
+	pRockPool.SerializeJson(comps, resources);
+	pPlanePool.SerializeJson(comps, resources);
+	DEL(comps);
+}
+
+void ComponentsPool::DeserializeJson(GameObjectManager* goPool, JSONNode* node, eastl::map<int, const char*>* resources)
+{
+	JSONNode* comps = node->PullJObject("Components Pool");
+	camPool.DeserializeJson(goPool, comps, resources);
+	meshPool.DeserializeJson(goPool, comps, resources);
+	pCubePool.DeserializeJson(goPool, comps, resources);
+	pDodecahedronPool.DeserializeJson(goPool, comps, resources);
+	pTetrahedronPool.DeserializeJson(goPool, comps, resources);
+	pOctohedronPool.DeserializeJson(goPool, comps, resources);
+	pIcosahedronPool.DeserializeJson(goPool, comps, resources);
+	pSpherePool.DeserializeJson(goPool, comps, resources);
+	pCylinderPool.DeserializeJson(goPool, comps, resources);
+	pHemiSpherePool.DeserializeJson(goPool, comps, resources);
+	pTorusPool.DeserializeJson(goPool, comps, resources);
+	pTrefoiKnotPool.DeserializeJson(goPool, comps, resources);
+	pRockPool.DeserializeJson(goPool, comps, resources);
+	pPlanePool.DeserializeJson(goPool, comps, resources);
+	DEL(comps);
 }

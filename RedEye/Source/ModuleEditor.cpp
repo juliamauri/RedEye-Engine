@@ -8,9 +8,7 @@
 #include "EditorWindows.h"
 #include "TimeManager.h"
 #include "OutputLog.h"
-#include "RE_GameObject.h"
-#include "RE_CompTransform.h"
-#include "RE_CompCamera.h"
+#include "RE_GOManager.h"
 #include "RE_CameraManager.h"
 #include "RE_PrimitiveManager.h"
 #include "QuadTree.h"
@@ -125,9 +123,11 @@ bool ModuleEditor::Start()
 	windows.push_back(assets = new AssetsWindow());
 	windows.push_back(wwise = new WwiseWindow());
 
-	//grid_go = new RE_GameObject("grid");
+	editorCompsPool = new ComponentsPool();
+	grid_go = new RE_GameObject();
 
-	//grid = (RE_Component*)App->primitives->CreateGrid(grid_go);
+	grid_go->SetUp(editorCompsPool, "Grid");
+	grid = (RE_Component*)App->primitives->CreateGrid(grid_go);
 
 	// FOCUS CAMERA
 	const RE_GameObject* root = App->scene->GetRoot();
@@ -392,8 +392,9 @@ bool ModuleEditor::CleanUp()
 	DEL(sceneEditorWindow);
 	DEL(sceneGameWindow);
 
-	//DEL(grid_go);
-	grid = nullptr;
+	DEL(editorCompsPool);
+	DEL(grid_go);
+	DEL(grid);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
@@ -420,15 +421,15 @@ void ModuleEditor::DrawEditor()
 		ImGui::Checkbox("Debug Draw", &debug_drawing);
 		if (debug_drawing)
 		{
-			//bool active_grid = grid->IsActive();
-			//if (ImGui::Checkbox("Draw Grid", &active_grid))
-				//grid->SetActive(active_grid);
+			bool active_grid = grid->IsActive();
+			if (ImGui::Checkbox("Draw Grid", &active_grid))
+				grid->SetActive(active_grid);
 
-			//if (active_grid && ImGui::DragFloat2("Grid Size", grid_size, 0.2f, 0.01f, 100.0f, "%.1f"))
-			//{
-				//grid_go->GetTransform()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
-				//grid_go->GetTransform()->Update();
-			//}
+			if (active_grid && ImGui::DragFloat2("Grid Size", grid_size, 0.2f, 0.01f, 100.0f, "%.1f"))
+			{
+				grid_go->GetTransform()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
+				grid_go->GetTransform()->Update();
+			}
 
 			int aabb_d = aabb_drawing;
 			if (ImGui::Combo("Draw AABB", &aabb_d, "None\0Selected only\0All\0All w/ different selected\0"))
@@ -596,8 +597,8 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 		if (resetLight)
 			glEnable(GL_LIGHTING);
 
-		//if (grid->IsActive())
-			//grid->Draw();
+		if (grid->IsActive())
+			grid->Draw();
 	}
 }
 

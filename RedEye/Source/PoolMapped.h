@@ -4,7 +4,7 @@
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
 
-#define MAX_POOL 1024
+#define MAX_POOL 10240
 
 template<class TYPEVALUE, class TYPEKEY>
 class PoolMapped

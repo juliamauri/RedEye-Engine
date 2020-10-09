@@ -88,7 +88,7 @@ void RE_Scene::AssetSave()
 	JSONNode* scenebNode = scene_SaveFile.GetRootNode("scene");
 
 	if (toSave->TotalGameObjects() > 0)
-		RE_ResouceAndGOImporter::JsonSerialize(scenebNode, toSave->GetGO(0));
+		RE_ResouceAndGOImporter::JsonSerialize(scenebNode, toSave);
 	DEL(scenebNode);
 
 	//Setting LibraryPath and MD5
@@ -137,7 +137,7 @@ void RE_Scene::LibraryLoad()
 void RE_Scene::LibrarySave(bool fromLoaded)
 {
 	uint size = 0;
-	char* buffer = RE_ResouceAndGOImporter::BinarySerialize((fromLoaded) ? loaded->GetGO(0) : toSave->GetGO(0), &size);
+	char* buffer = RE_ResouceAndGOImporter::BinarySerialize((fromLoaded) ? loaded : toSave, &size);
 
 	RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
 	toLibrarySave.Save(buffer, size);

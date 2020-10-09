@@ -237,7 +237,7 @@ void RE_Model::LibrarySave()
 {
 	if (loaded != nullptr){
 		uint size = 0;
-		char* buffer = RE_ResouceAndGOImporter::BinarySerialize(loaded->GetGO(0), &size);
+		char* buffer = RE_ResouceAndGOImporter::BinarySerialize(loaded, &size);
 
 		RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
 		toLibrarySave.Save(buffer, size);

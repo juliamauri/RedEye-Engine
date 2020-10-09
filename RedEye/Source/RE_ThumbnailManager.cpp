@@ -291,7 +291,7 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 		}
 
 		if (poolGOThumbnail) {
-			poolGOThumbnail->GetGO(0)->UseResources();
+			poolGOThumbnail->UseResources();
 			poolGOThumbnail->GetGO(0)->TransformModified(false);
 			poolGOThumbnail->GetGO(0)->Update();
 			poolGOThumbnail->GetGO(0)->ResetGlobalBoundingBoxForAllChilds();
@@ -315,7 +315,7 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 
 			poolGOThumbnail->GetGO(0)->DrawWithChilds();
 
-			poolGOThumbnail->GetGO(0)->UnUseResources();
+			poolGOThumbnail->UnUseResources();
 
 			SaveTextureFromFBO(path.c_str());
 

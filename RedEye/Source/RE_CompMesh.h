@@ -24,10 +24,13 @@ public:
 	const char* GetMaterial()const;
 
 	eastl::vector<const char*> GetAllResources() override;
+	
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)override;
 
 	unsigned int GetBinarySize()const override;
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)override;
 
 	math::AABB GetAABB() const;
 	bool CheckFaceCollision(const math::Ray &ray, float &distance) const;
@@ -46,6 +49,5 @@ protected:
 	bool show_f_normals = false;
 	bool show_v_normals = false;
 };
-
 
 #endif // !__RE_COMPMESH_H__

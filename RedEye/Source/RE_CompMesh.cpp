@@ -144,15 +144,25 @@ eastl::vector<const char*> RE_CompMesh::GetAllResources()
 	return ret;
 }
 
-unsigned int RE_CompMesh::GetBinarySize() const
-{
-	return sizeof(int) * 2;
-}
-
 void RE_CompMesh::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
 {
 	node->PushInt("meshResource", (meshMD5) ? resources->at(meshMD5) : -1);
 	node->PushInt("materialResource", (materialMD5) ? resources->at(materialMD5) : -1);
+}
+
+void RE_CompMesh::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+{
+	go = parent;
+	int id = node->PullInt("meshResource", -1);
+	materialMD5 = (id != -1) ? resources->at(id) : nullptr;
+	id = node->PullInt("materialResource", -1);
+	materialMD5 = (id != -1) ? resources->at(id) : nullptr;
+	go->AddComponent(this);
+}
+
+unsigned int RE_CompMesh::GetBinarySize() const
+{
+	return sizeof(int) * 2;
 }
 
 void RE_CompMesh::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
@@ -165,6 +175,25 @@ void RE_CompMesh::SerializeBinary(char*& cursor, eastl::map<const char*, int>* r
 	md5 = (materialMD5) ? resources->at(materialMD5) : -1;
 	memcpy(cursor, &md5, size);
 	cursor += size;
+}
+
+void RE_CompMesh::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+{
+	go = parent;
+
+	size_t size = sizeof(int);
+	int md5 = -1;
+
+	memcpy(&md5, cursor, size);
+	cursor += size;
+	meshMD5 = (md5 != -1 ) ? resources->at(md5) : nullptr;
+
+	md5 = -1;
+	memcpy(&md5, cursor,  size);
+	cursor += size;
+	materialMD5 = (md5 != -1) ? resources->at(md5) : nullptr;
+
+	go->AddComponent(this);
 }
 
 math::AABB RE_CompMesh::GetAABB() const

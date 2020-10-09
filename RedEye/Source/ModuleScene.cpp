@@ -256,10 +256,9 @@ void ModuleScene::RecieveEvent(const Event& e)
 			RE_CompPlane* plane = (RE_CompPlane*)go->GetComponent(C_PLANE);
 			const char* planeMD5 = plane->TransformAsMeshResource();
 			go->RemoveComponent(plane);
-			RE_CompMesh* newMesh = new RE_CompMesh();
+			RE_CompMesh* newMesh = go->AddCompMesh();
 			newMesh->SetUp(go, planeMD5);
 			newMesh->UseResources();
-			//go->AddCompMesh(newMesh);
 			go->ResetBoundingBoxes();
 			go->TransformModified();
 			haschanges = true;
@@ -534,7 +533,7 @@ void ModuleScene::ClearScene()
 {
 	Event::PauseEvents();
 
-	if (root) root->UnUseResources();
+	if (root) scenePool.UnUseResources();
 	savedState.ClearPool();
 
 	static_tree.Clear();
@@ -570,7 +569,7 @@ void ModuleScene::NewEmptyScene(const char* name)
 	unsavedScene->SetName(name);
 	unsavedScene->SetType(Resource_Type::R_SCENE);
 
-	if (root) root->UnUseResources();
+	if (root) scenePool.UnUseResources();
 	savedState.ClearPool();
 	scenePool.ClearPool();
 
@@ -595,7 +594,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 		DEL(unsavedScene);
 	}
 
-	if (root) root->UnUseResources();
+	if (root) scenePool.UnUseResources();
 	savedState.ClearPool();
 	scenePool.ClearPool();
 
@@ -615,7 +614,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 		LOG_ERROR("Can´t Load Scene");
 	App->resources->UnUse(sceneMD5);
 
-	root->UseResources();
+	scenePool.UseResources();
 	SetupScene();
 	App->editor->SetSelected(nullptr);
 
@@ -663,7 +662,7 @@ void ModuleScene::AddGOPool(RE_GOManager* toAdd)
 
 	RE_GameObject* justAdded = scenePool.InsertPool(toAdd);
 
-	justAdded->UseResources();
+	scenePool.UseResources();
 
 	SetupScene();
 	App->editor->SetSelected(justAdded);

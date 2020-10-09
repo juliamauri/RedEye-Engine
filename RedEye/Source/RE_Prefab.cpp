@@ -97,7 +97,7 @@ void RE_Prefab::AssetSave()
 	Config prefab_SaveFile(GetAssetPath(), App->fs->GetZipPath());
 	JSONNode* prefabNode = prefab_SaveFile.GetRootNode("prefab");
 
-	RE_ResouceAndGOImporter::JsonSerialize(prefabNode, toSave->GetGO(0));
+	RE_ResouceAndGOImporter::JsonSerialize(prefabNode, toSave);
 	DEL(prefabNode);
 
 	//Setting LibraryPath and MD5
@@ -146,7 +146,7 @@ void RE_Prefab::LibraryLoad()
 void RE_Prefab::LibrarySave()
 {
 	uint size = 0;
-	char* buffer = RE_ResouceAndGOImporter::BinarySerialize(toSave->GetGO(0), &size);
+	char* buffer = RE_ResouceAndGOImporter::BinarySerialize(toSave, &size);
 
 	RE_FileIO toLibrarySave(GetLibraryPath(), App->fs->GetZipPath());
 	toLibrarySave.Save(buffer, size);

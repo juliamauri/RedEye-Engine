@@ -31,6 +31,7 @@ struct SoftwareInfo;
 class RE_GameObject;
 class RE_Component;
 class RE_CompCamera;
+class ComponentsPool;
 
 union SDL_Event;
 
@@ -144,6 +145,7 @@ private:
 	float frustum_color[3];
 
 	// Grid
+	ComponentsPool* editorCompsPool = nullptr;
 	RE_Component* grid = nullptr;
 	RE_GameObject* grid_go = nullptr;
 	float grid_size[2];

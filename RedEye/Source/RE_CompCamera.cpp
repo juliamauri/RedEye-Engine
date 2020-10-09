@@ -632,11 +632,6 @@ eastl::vector<const char*> RE_CompCamera::GetAllResources()
 	return ret;
 }
 
-unsigned int RE_CompCamera::GetBinarySize() const
-{
-	return sizeof(bool) * 3 + sizeof(int) * 2 + sizeof(float) * 3;
-}
-
 void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>* resources)
 {
 	node->PushBool("isPrespective", isPerspective);
@@ -648,6 +643,23 @@ void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>*
 	node->PushBool("usingSkybox", usingSkybox);
 	node->PushInt("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
 }
+
+void RE_CompCamera::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+{
+	usingSkybox = node->PullBool("usingSkybox", true);
+	int sbRes = node->PullInt("skyboxResource", -1);
+	SetUp(parent, node->PullBool("isPrespective", true),
+		node->PullFloat("near_plane", 1.0f), node->PullFloat("far_plane", 5000.0f),
+		node->PullFloat("v_fov_rads", 0.523599f), node->PullInt("aspect_ratio", 0),
+		node->PullBool("draw_frustum", true), usingSkybox,
+		(sbRes != -1) ? resources->at(sbRes) : nullptr);
+}
+
+unsigned int RE_CompCamera::GetBinarySize() const
+{
+	return sizeof(bool) * 3 + sizeof(int) * 2 + sizeof(float) * 3;
+}
+
 
 void RE_CompCamera::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
 {
@@ -681,6 +693,42 @@ void RE_CompCamera::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 	int sbres = (skyboxMD5) ? resources->at(skyboxMD5) : -1;
 	memcpy(cursor, &sbres, size);
 	cursor += size;
+}
+
+void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+{
+	size_t size = sizeof(bool);
+	memcpy(&isPerspective, cursor, size);
+	cursor += size;
+
+	size = sizeof(float);
+	memcpy(&near_plane, cursor, size);
+	cursor += size;
+
+	memcpy(&far_plane, cursor, size);
+	cursor += size;
+
+	memcpy(&v_fov_rads, cursor,  size);
+	cursor += size;
+
+	size = sizeof(int);
+	int aspectRatioInt;
+	memcpy(&aspectRatioInt, cursor, size);
+	cursor += size;
+
+	size = sizeof(bool);
+	memcpy(&draw_frustum, cursor, size);
+	cursor += size;
+
+	memcpy(&usingSkybox, cursor, size);
+	cursor += size;
+
+	size = sizeof(int);
+	int sbRes = -1;
+	memcpy(&sbRes, cursor,  size);
+	cursor += size;
+
+	SetUp(parent, isPerspective, near_plane, far_plane, v_fov_rads, aspectRatioInt, draw_frustum, usingSkybox, (sbRes != -1) ? resources->at(sbRes) : nullptr);
 }
 
 bool RE_CompCamera::isUsingSkybox() const

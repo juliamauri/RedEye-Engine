@@ -9,10 +9,10 @@
 
 #include <EASTL/internal/char_traits.h>
 
-void RE_ResouceAndGOImporter::JsonSerialize(JSONNode* node, RE_GameObject* toSerialize)
+void RE_ResouceAndGOImporter::JsonSerialize(JSONNode* node, RE_GOManager* pool)
 {
 	//Get resources
-	eastl::vector<const char*>  resGo = toSerialize->GetAllResources();
+	eastl::vector<const char*>  resGo = pool->GetAllResources();
 	eastl::map<const char*, int> resourcesIndex;
 	int count = 0;
 	for (const char* res : resGo) resourcesIndex.insert(eastl::pair<const char*, int>(res, count++));
@@ -37,13 +37,13 @@ void RE_ResouceAndGOImporter::JsonSerialize(JSONNode* node, RE_GameObject* toSer
 	DEL(resources);
 
 	//GOs Serialize
-	toSerialize->SerializeJson(node, &resourcesIndex);
+	pool->SerializeJson(node, &resourcesIndex);
 }
 
-char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsigned int* bufferSize)
+char* RE_ResouceAndGOImporter::BinarySerialize(RE_GOManager* pool, unsigned int* bufferSize)
 {
 	//Get resources
-	eastl::vector<const char*>  resGo = toSerialize->GetAllResources();
+	eastl::vector<const char*>  resGo = pool->GetAllResources();
 	eastl::vector<ResourceContainer*>  resC;
 	eastl::map<const char*, int> resourcesIndex;
 	int count = 0;
@@ -54,7 +54,7 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsig
 
 	*bufferSize = sizeof(uint) + ((sizeof(int) + sizeof(unsigned int) + sizeof(uint)) * resGo.size());
 	for (ResourceContainer* res : resC) *bufferSize += eastl::CharStrlen((res->GetType() == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
-	*bufferSize += toSerialize->GetBinarySize();
+	*bufferSize += pool->GetBinarySize();
 	*bufferSize += 1;
 	char* buffer = new char[*bufferSize];
 	char* cursor = buffer;
@@ -89,7 +89,7 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GameObject* toSerialize, unsig
 	}
 
 	//GOs Serialize
-	toSerialize->SerializeBinary(cursor, &resourcesIndex);
+	pool->SerializeBinary(cursor, &resourcesIndex);
 
 	char nullchar = '\0';
 	memcpy(cursor, &nullchar, sizeof(char));
@@ -126,7 +126,7 @@ RE_GOManager* RE_ResouceAndGOImporter::JsonDeserialize(JSONNode* node)
 	DEL(resources);
 
 	RE_GOManager* ret = new RE_GOManager();
-	RE_GameObject::DeserializeJSON(ret, node, &resourcesIndex);;
+	ret->DeserializeJson(node, &resourcesIndex);
 	return ret;
 }
 
@@ -175,7 +175,7 @@ RE_GOManager* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 		DEL_A(str);
 	}
 	RE_GOManager* ret = new RE_GOManager();
-	RE_GameObject::DeserializeBinary(ret, cursor, &resourcesIndex);
+	ret->DeserializeBinary(cursor, &resourcesIndex);
 	return ret;
 }
 

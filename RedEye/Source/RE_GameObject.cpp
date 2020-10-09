@@ -32,15 +32,11 @@ RE_GameObject::~RE_GameObject()
 {
 }
 
-void RE_GameObject::SetUp(ComponentsPool* compPool, const char* name, UUID uuid, RE_GameObject* parent, bool start_active, bool isStatic)
+void RE_GameObject::SetUp(ComponentsPool* compPool, const char* name, RE_GameObject* parent, bool start_active, bool isStatic)
 {
 	poolComponents = compPool;
 	this->isStatic = isStatic;
 	this->name = name;
-	if (uuid == GUID_NULL)
-		UuidCreate(&this->uuid);
-	else
-		this->uuid = uuid;
 
 	transform = (RE_CompTransform*)poolComponents->GetNewComponent(ComponentType::C_TRANSFORM);
 	transform->SetUp(this);
@@ -223,693 +219,119 @@ bool RE_GameObject::HasDrawComponents() const
 	return false;
 }
 
-eastl::vector<const char*> RE_GameObject::GetAllResources(bool root)
+void RE_GameObject::SerializeJson(JSONNode * node)
 {
-	eastl::vector<const char*> allResources;
+	node->PushString("name", GetName());
 
-	for (auto comp : GetComponents()) {
-		eastl::vector<const char*> cmpRet = comp->GetAllResources();
-		if (!cmpRet.empty())
-			allResources.insert(allResources.end(), cmpRet.begin(), cmpRet.end());
-	}
+	if (parent != nullptr)
+		node->PushInt("Parent Pool ID", parent->GetPoolID());
 
-	for (auto child : childs) {
+	node->PushFloatVector("position", transform->GetLocalPosition());
+	node->PushFloatVector("rotation", transform->GetLocalEulerRotation());
+	node->PushFloatVector("scale", transform->GetLocalScale());
 
-		eastl::vector<const char*> childRet = child->GetAllResources(false);
-		if(!childRet.empty())
-			allResources.insert(allResources.end(), childRet.begin(), childRet.end());
-	}
-
-	if (root)
-	{
-		//unique resources
-		eastl::vector<const char*> ret;
-
-		int resSize = 0;
-		for (auto res : allResources) {
-			bool repeat = false;
-			for (auto uniqueRes : ret) {
-				resSize = eastl::CharStrlen(res);
-				if (resSize > 0 && eastl::Compare(res, uniqueRes, resSize) == 0) {
-					repeat = true;
-					break;
-				}
-			}
-			if (!repeat) ret.push_back(res);
-		}
-
-		return ret;
-	}
-
-	return allResources;
 }
 
-void RE_GameObject::SerializeJson(JSONNode * node, eastl::map<const char*, int>* resources)
+void RE_GameObject::DeserializeJSON(JSONNode* node, ComponentsPool* cmpsPool, eastl::map<int, RE_GameObject*>* idGO)
 {
-	eastl::vector<RE_GameObject*> allGOs = GetAllGO();
-	JSONNode* gameObjects = node->PushJObject("gameobjects");
-	gameObjects->PushUInt("gameobjectsSize", allGOs.size());
+	if (!idGO->empty())
+		SetUp(cmpsPool, node->PullString("name", "GameObject"), idGO->at(node->PullInt("Parent Pool ID", -1)));
+	else
+		SetUp(cmpsPool, node->PullString("name", "GameObject"), nullptr);
 
-	uint count = 0;
-	eastl::string ref;
-	for (RE_GameObject* go : allGOs) {
-		ref = "go" + eastl::to_string(count++);
-		JSONNode* goNode = gameObjects->PushJObject(ref.c_str());
+	transform->SetPosition(node->PullFloatVector("position", math::vec::zero));
+	transform->SetRotation(node->PullFloatVector("rotation", math::vec::zero));
+	transform->SetScale(node->PullFloatVector("scale", math::vec::one));
 
-		goNode->PushString("name", go->GetName());
-
-		char* str = nullptr;
-		UuidToStringA(&go->uuid, (RPC_CSTR*)&str);
-		goNode->PushString("UUID", str);
-		RpcStringFreeA((RPC_CSTR*)&str);
-
-		if (go->parent != nullptr)
-		{
-			UuidToStringA(&go->parent->uuid, (RPC_CSTR*)&str);
-			goNode->PushString("Parent UUID", str);
-			RpcStringFreeA((RPC_CSTR*)&str);
-		}
-
-		goNode->PushFloatVector("position", go->GetTransform()->GetLocalPosition());
-		goNode->PushFloatVector("rotation", go->GetTransform()->GetLocalEulerRotation());
-		goNode->PushFloatVector("scale", go->GetTransform()->GetLocalScale());
-
-		JSONNode* comps = goNode->PushJObject("components");
-		uint cmpSize = 0;
-		for (auto component : go->GetComponents()) {
-			ComponentType type = component->GetType();
-			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA && type != C_TRANSFORM)
-				cmpSize++;
-		}
-		comps->PushUInt("ComponentsSize", cmpSize);
-		uint count = 0;
-		for (auto component : go->GetComponents()) {
-			ComponentType type = component->GetType();
-			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA || type == C_TRANSFORM)
-				continue;
-			ref = "cmp" + eastl::to_string(count++);
-			JSONNode* comp = comps->PushJObject(ref.c_str());
-			comp->PushInt("type", type);
-			component->SerializeJson(comp, resources);
-			DEL(comp);
-		}
-		DEL(comps);
-		DEL(goNode);
-	}
-	DEL(gameObjects);
+	idGO->insert(eastl::pair < int, RE_GameObject*>(poolID, this));
 }
+
 
 unsigned int RE_GameObject::GetBinarySize()const
 {
-	uint size = sizeof(uint) * 3 + 36 * sizeof(char) + sizeof(float) * 9 + sizeof(unsigned short);
-	if (parent != nullptr) size += 36 * sizeof(char);
-	size += eastl::CharStrlen(GetName()) * sizeof(char);
-
-	for (auto component : GetComponents()) size += component->GetBinarySize();
-
-	for (auto child : childs) size += child->GetBinarySize();
-
+	uint size = sizeof(uint) + sizeof(float) * 9;
+	size += eastl::CharStrlen(GetName());
+	if (parent != nullptr) size += sizeof(int);
 	return size;
 }
 
-void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+void RE_GameObject::SerializeBinary(char*& cursor)
 {
-	eastl::vector<RE_GameObject*> allGOs = GetAllGO();
-
-	size_t size = sizeof(uint);
-	uint goSize = allGOs.size();
-	memcpy(cursor, &goSize, size);
+	uint size = sizeof(uint);
+	const char* name = GetName();
+	uint strLenght = eastl::CharStrlen(name);
+	memcpy(cursor, &strLenght, size);
 	cursor += size;
 
-	for (RE_GameObject* go : allGOs) {
-		uint strLenght = eastl::CharStrlen(go->GetName());
-		size = sizeof(uint);
-		memcpy(cursor, &strLenght, size);
+	size = sizeof(char) * strLenght;
+	memcpy(cursor, name, size);
+	cursor += size;
+
+	if (parent != nullptr)
+	{
+		size = sizeof(int);
+		int parentID = parent->GetPoolID();
+		memcpy(cursor, &parentID, size);
 		cursor += size;
-
-		size = sizeof(char) * strLenght;
-		memcpy(cursor, go->GetName(), size);
-		cursor += size;
-
-		size = sizeof(char) * 36;
-		char* strUUID = nullptr;
-		UuidToStringA(&go->uuid, (RPC_CSTR*)&strUUID);
-		memcpy(cursor, strUUID, size);
-		cursor += size;
-		RpcStringFreeA((RPC_CSTR*)&strUUID);
-
-		if (go->parent != nullptr)
-		{
-			UuidToStringA(&go->parent->uuid, (RPC_CSTR*)&strUUID);
-			memcpy(cursor, strUUID, size);
-			cursor += size;
-			RpcStringFreeA((RPC_CSTR*)&strUUID);
-		}
-
-		size = sizeof(float) * 3;
-		memcpy(cursor, &go->GetTransform()->GetLocalPosition()[0], size);
-		cursor += size;
-
-		memcpy(cursor, &go->GetTransform()->GetLocalEulerRotation()[0], size);
-		cursor += size;
-
-		memcpy(cursor, &go->GetTransform()->GetLocalScale()[0], size);
-		cursor += size;
-
-		size = sizeof(uint);
-		uint cmpSize = 0;
-		for (auto component : go->GetComponents()) {
-			unsigned short type = component->GetType();
-			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA && type != C_TRANSFORM)
-				cmpSize++;
-		}
-		memcpy(cursor, &cmpSize, size);
-		cursor += size;
-
-		for (auto component : go->GetComponents()) {
-			unsigned short type = component->GetType();
-			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA || type == C_TRANSFORM)
-				continue;
-			size = sizeof(unsigned short);
-			memcpy(cursor, &type, size);
-			cursor += size;
-
-			component->SerializeBinary(cursor, resources);
-		}
 	}
+
+	size = sizeof(float) * 3;
+	memcpy(cursor, &transform->GetLocalPosition()[0], size);
+	cursor += size;
+
+	memcpy(cursor, &transform->GetLocalEulerRotation()[0], size);
+	cursor += size;
+
+	memcpy(cursor, &transform->GetLocalScale()[0], size);
+	cursor += size;
 }
 
-void RE_GameObject::DeserializeJSON(RE_GOManager* goPool, JSONNode* node, eastl::map<int, const char*>* resources)
+void RE_GameObject::DeserializeBinary(char*& cursor, ComponentsPool* compPool, eastl::map<int, RE_GameObject*>* idGO)
 {
-	RE_GameObject* rootGo = nullptr;
-	RE_GameObject* new_go = nullptr;
-	JSONNode* gameObjects = node->PullJObject("gameobjects");
-	uint GOCount = gameObjects->PullUInt("gameobjectsSize", 0);
+	char nullchar = '\0';
 
-	eastl::string ref;
-	for (uint count = 0; count < GOCount; count++) {
-		ref = "go" + eastl::to_string(count);
-		JSONNode* goNode = gameObjects->PullJObject(ref.c_str());
+	uint strLenght = 0;
+	uint size = sizeof(uint);
+	memcpy(&strLenght, cursor, size);
+	cursor += size;
 
-		UUID uuid;
-		UUID parent_uuid;
+	char* strName = new char[strLenght + 1];
+	char* strNameCursor = strName;
+	size = sizeof(char) * strLenght;
+	memcpy(strName, cursor, size);
+	strNameCursor += size;
+	cursor += size;
+	memcpy(strNameCursor, &nullchar, sizeof(char));
 
-		UuidFromStringA((RPC_CSTR)goNode->PullString("UUID", ""), &uuid);
-		if (rootGo != nullptr) {
-			UuidFromStringA((RPC_CSTR)goNode->PullString("Parent UUID", ""), &parent_uuid);
+
+	if (!idGO->empty()) {
+		size = sizeof(int);
+		int goParentID;
+		memcpy(&goParentID, cursor, size);
+		cursor += size;
 		
-			new_go = goPool->AddGO(goNode->PullString("name", "GameObject"), uuid, rootGo->GetGoFromUUID(parent_uuid));
-		}
-		else {
-			rootGo = new_go = goPool->AddGO(goNode->PullString("name", "GameObject"), uuid, nullptr);
-		}
-
-		new_go->GetTransform()->SetPosition(goNode->PullFloatVector("position", math::vec::zero));
-		new_go->GetTransform()->SetRotation(goNode->PullFloatVector("rotation", math::vec::zero));
-		new_go->GetTransform()->SetScale(goNode->PullFloatVector("scale", math::vec::one));
-
-		JSONNode* comps = goNode->PullJObject("components");
-		uint compCount = comps->PullUInt("ComponentsSize", 0);
-		for (uint count = 0; count < compCount; count++) {
-			ref = "cmp" + eastl::to_string(count);
-			JSONNode* cmpNode = comps->PullJObject(ref.c_str());
-
-			ComponentType type = (ComponentType)cmpNode->PullInt("type", ComponentType::C_EMPTY);
-
-			switch (type)
-			{
-			case C_CUBE:
-			{
-				RE_CompPrimitive* newCube = (RE_CompPrimitive * )new_go->AddComponent(C_CUBE);
-				newCube->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_DODECAHEDRON:
-			{
-				RE_CompPrimitive* newDode = (RE_CompPrimitive*)new_go->AddComponent(C_DODECAHEDRON);
-				newDode->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_TETRAHEDRON:
-			{
-				RE_CompPrimitive* newTetra = (RE_CompPrimitive*)new_go->AddComponent(C_TETRAHEDRON);
-				newTetra->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_OCTOHEDRON:
-			{
-				RE_CompPrimitive* newOcto = (RE_CompPrimitive*)new_go->AddComponent(C_OCTOHEDRON);
-				newOcto->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_ICOSAHEDRON:
-			{
-				RE_CompPrimitive* newIcosa = (RE_CompPrimitive*)new_go->AddComponent(C_ICOSAHEDRON);
-				newIcosa->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_PLANE:
-			{
-				RE_CompPrimitive* newPlane = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 3), cmpNode->PullInt("stacks", 3));
-				newPlane->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_SPHERE:
-			{
-				RE_CompPrimitive* newSphere = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 16), cmpNode->PullInt("stacks", 18));
-				newSphere->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_CYLINDER:
-			{
-				RE_CompPrimitive* newCylinder = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 30), cmpNode->PullInt("stacks", 30));
-				newCylinder->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_HEMISHPERE:
-			{
-				RE_CompPrimitive* newHemiSphere = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 10), cmpNode->PullInt("stacks", 10));
-				newHemiSphere->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_TORUS:
-			{
-				RE_CompPrimitive* newTorus = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 30), cmpNode->PullInt("stacks", 40), cmpNode->PullFloat("radius", 0.1f));
-				newTorus->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_TREFOILKNOT:
-			{
-				RE_CompPrimitive* newTrefoilKnot = new_go->AddCompPrimitive(type, cmpNode->PullInt("slices", 30), cmpNode->PullInt("stacks", 40), cmpNode->PullFloat("radius", 0.5f));
-				newTrefoilKnot->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_ROCK:
-			{
-				RE_CompPrimitive* newRock = new_go->AddCompRock(cmpNode->PullInt("seed", 5), cmpNode->PullInt("nsubdivisions", 20));
-				newRock->SetColor(cmpNode->PullFloatVector("color", math::vec::one));
-				break;
-			}
-			case C_MESH:
-			{
-				RE_CompMesh* newMesh = nullptr;
-				int meshID = cmpNode->PullInt("meshResource", -1);
-				const char* meshMD5 = nullptr;
-				if (meshID != -1) {
-					meshMD5 = resources->at(meshID);
-
-					newMesh = new_go->AddCompMesh();
-					newMesh->SetUp(new_go, meshMD5);
-
-					const char* materialMD5 = nullptr;
-					int materialID = cmpNode->PullInt("materialResource", -1);
-					if (materialID != -1) {
-						materialMD5 = resources->at(materialID);
-						newMesh->SetMaterial(materialMD5);
-					}
-				}
-				break;
-			}
-			case C_CAMERA:
-			{
-				int skyboxid = cmpNode->PullInt("skyboxResource", -1);
-				new_go->AddCompCamera(
-					cmpNode->PullBool("isPrespective", true),
-					cmpNode->PullFloat("near_plane", 1),
-					cmpNode->PullFloat("far_plane", 10000),
-					cmpNode->PullFloat("v_fov_rads", 30.0f),
-					cmpNode->PullInt("aspect_ratio", RE_CompCamera::AspectRatioTYPE::Fit_Window),
-					cmpNode->PullBool("draw_frustum", true),
-					cmpNode->PullBool("usingSkybox", true),
-					(skyboxid != -1) ? resources->at(skyboxid) : nullptr);
-				break;
-			}
-			}
-			DEL(cmpNode);
-		}
-		DEL(comps);
-		DEL(goNode);
+		SetUp(compPool, strName, idGO->at(goParentID));
 	}
-	DEL(gameObjects);
-}
+	else
+		SetUp(compPool, strName, nullptr);
+	DEL_A(strName);
 
-void RE_GameObject::DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl::map<int, const char*>* resources)
-{
-	RE_GameObject* rootGo = nullptr;
-	RE_GameObject* new_go = nullptr;
+	float vec[3] = { 0.0, 0.0, 0.0 };
+	size = sizeof(float) * 3;
 
-	size_t size = sizeof(uint);
-	uint GOCount = 0;
-	memcpy(&GOCount, cursor, size);
+	memcpy(vec, cursor, size);
 	cursor += size;
+	transform->SetPosition(math::vec(vec));
 
-	for (uint count = 0; count < GOCount; count++) {
-		char nullchar = '\0';
+	memcpy(vec, cursor, size);
+	cursor += size;
+	transform->SetRotation(math::vec(vec));
 
-		uint strLenght = 0;
-		size = sizeof(uint);
-		memcpy(&strLenght, cursor, size);
-		cursor += size;
+	memcpy(vec, cursor, size);
+	cursor += size;
+	transform->SetScale(math::vec(vec));
 
-		char* strName = new char[strLenght + 1];
-		char* strNameCursor = strName;
-		size = sizeof(char) * strLenght;
-		memcpy(strName, cursor, size);
-		strNameCursor += size;
-		cursor += size;
-		memcpy(strNameCursor, &nullchar, sizeof(char));
-
-		UUID uuid;
-		UUID parent_uuid;
-
-		size = sizeof(char) * 36;
-		char* strUUID = new char[36 + 1];
-		char* strUUIDCursor = strUUID;
-		memcpy(strUUID, cursor, size);
-		cursor += size;
-		strUUIDCursor += size;
-		memcpy(strUUIDCursor, &nullchar, sizeof(char));
-		UuidFromStringA((RPC_CSTR)strUUID, &uuid);
-		DEL_A(strUUID);
-
-		if (rootGo != nullptr) {
-			char* strUUIDParent = new char[36 + 1];
-			char* strUUIDParentCursor = strUUIDParent;
-			memcpy(strUUIDParent, cursor, size);
-			cursor += size;
-			strUUIDParentCursor += size;
-			memcpy(strUUIDParentCursor, &nullchar, sizeof(char));
-			UuidFromStringA((RPC_CSTR)strUUIDParent, &parent_uuid);
-			DEL_A(strUUIDParent);
-		}
-
-		(rootGo == nullptr) ? rootGo = new_go = goPool->AddGO(strName, uuid, nullptr) : new_go = goPool->AddGO(strName, uuid, rootGo->GetGoFromUUID(parent_uuid));
-		DEL_A(strName);
-
-		float vec[3] = { 0.0, 0.0, 0.0 };
-		size = sizeof(float) * 3;
-
-		memcpy(vec, cursor, size);
-		cursor += size;
-		new_go->GetTransform()->SetPosition(math::vec(vec));
-
-		memcpy(vec, cursor, size);
-		cursor += size;
-		new_go->GetTransform()->SetRotation(math::vec(vec));
-
-		memcpy(vec, cursor, size);
-		cursor += size;
-		new_go->GetTransform()->SetScale(math::vec(vec));
-
-		size = sizeof(uint);
-		uint compCount = 0;
-		memcpy(&compCount, cursor, size);
-		cursor += size;
-		for (uint count = 0; count < compCount; count++) {
-
-			unsigned short typeInt = 0;
-			size = sizeof(unsigned short);
-			memcpy(&typeInt, cursor, size);
-			cursor += size;
-
-			ComponentType type = (ComponentType)typeInt;
-			switch (type)
-			{
-			case C_CUBE:
-			{
-				RE_CompPrimitive* newCube = (RE_CompPrimitive*)new_go->AddComponent(C_CUBE);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-				newCube->SetColor(math::vec(vec));
-			}
-				break;
-			case C_DODECAHEDRON:
-			{
-				RE_CompPrimitive* newDode = (RE_CompPrimitive*)new_go->AddComponent(C_DODECAHEDRON);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-				newDode->SetColor(math::vec(vec));
-			}
-				break;
-			case C_TETRAHEDRON:
-			{
-				RE_CompPrimitive* newTetra = (RE_CompPrimitive*)new_go->AddComponent(C_TETRAHEDRON);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-				newTetra->SetColor(math::vec(vec));
-			}
-				break;
-			case C_OCTOHEDRON:
-			{
-				RE_CompPrimitive* newOcto = (RE_CompPrimitive*)new_go->AddComponent(C_OCTOHEDRON);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-				newOcto->SetColor(math::vec(vec));
-			}
-				break;
-			case C_ICOSAHEDRON:
-			{
-				RE_CompPrimitive* newIcosa = (RE_CompPrimitive*)new_go->AddComponent(C_ICOSAHEDRON);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-				newIcosa->SetColor(math::vec(vec));
-			}
-				break;
-			case C_PLANE:
-			{
-				int slices = 0, stacks = 0;
-				size = sizeof(int);
-				memcpy(&slices, cursor, size);
-				cursor += size;
-
-				memcpy(&stacks, cursor, size);
-				cursor += size;
-
-				RE_CompPrimitive* newPlane = new_go->AddCompPrimitive(type, slices, stacks);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-
-				newPlane->SetColor(math::vec(vec));
-			}
-				break;
-			case C_SPHERE:
-			{
-				int slices = 0, stacks = 0;
-				size = sizeof(int);
-				memcpy(&slices, cursor, size);
-				cursor += size;
-
-				memcpy(&stacks, cursor, size);
-				cursor += size;
-
-				RE_CompPrimitive* newSphere = new_go->AddCompPrimitive(type, slices, stacks);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-
-				newSphere->SetColor(math::vec(vec));
-			}
-				break;
-			case C_CYLINDER:
-			{
-				int slices = 0, stacks = 0;
-				size = sizeof(int);
-				memcpy(&slices, cursor, size);
-				cursor += size;
-
-				memcpy(&stacks, cursor, size);
-				cursor += size;
-
-				RE_CompPrimitive* newCylinder = new_go->AddCompPrimitive(type, slices, stacks);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-
-				newCylinder->SetColor(math::vec(vec));
-			}
-				break;
-			case C_HEMISHPERE:
-			{
-				int slices = 0, stacks = 0;
-				size = sizeof(int);
-				memcpy(&slices, cursor, size);
-				cursor += size;
-
-				memcpy(&stacks, cursor, size);
-				cursor += size;
-
-				RE_CompPrimitive* newHemiSphere = new_go->AddCompPrimitive(type, slices, stacks);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-
-				newHemiSphere->SetColor(math::vec(vec));
-			}
-				break;
-			case C_TORUS:
-			{
-
-				int slices = 0, stacks = 0;
-				float radius = 0;
-				size = sizeof(int);
-				memcpy(&slices, cursor, size);
-				cursor += size;
-
-				memcpy(&stacks, cursor, size);
-				cursor += size;
-
-				size = sizeof(float);
-				memcpy(&radius, cursor, size);
-				cursor += size;
-
-				RE_CompPrimitive* newTorus = new_go->AddCompPrimitive(type, slices, stacks, radius);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-
-				newTorus->SetColor(math::vec(vec));
-			}
-				break;
-			case C_TREFOILKNOT:
-			{
-
-				int slices = 0, stacks = 0;
-				float radius = 0;
-				size = sizeof(int);
-				memcpy(&slices, cursor, size);
-				cursor += size;
-
-				memcpy(&stacks, cursor, size);
-				cursor += size;
-
-				size = sizeof(float);
-				memcpy(&radius, cursor, size);
-				cursor += size;
-
-				RE_CompPrimitive* newTrefoilKnot = new_go->AddCompPrimitive(type, slices, stacks, radius);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-
-				newTrefoilKnot->SetColor(math::vec(vec));
-			}
-				break;
-			case C_ROCK:
-			{
-				int seed = 0, nsubdivisions = 0;
-				size = sizeof(int);
-				memcpy(&seed, cursor, size);
-				cursor += size;
-
-				memcpy(&nsubdivisions, cursor, size);
-				cursor += size;
-
-				RE_CompPrimitive* newRock = new_go->AddCompRock(seed, nsubdivisions);
-
-				size = sizeof(float) * 3;
-				memcpy(vec, cursor, size);
-				cursor += size;
-
-				newRock->SetColor(math::vec(vec));
-			}
-				break;
-			case C_MESH:
-			{
-				RE_CompMesh* newMesh = nullptr;
-
-				int meshID = -1;
-				size = sizeof(int);
-				memcpy(&meshID, cursor, size);
-				cursor += size;
-
-				const char* meshMD5 = nullptr;
-				if (meshID != -1) {
-					meshMD5 = resources->at(meshID);
-					newMesh = new_go->AddCompMesh();
-					newMesh->SetUp(new_go, meshMD5);
-
-					const char* materialMD5 = nullptr;
-					int materialID = -1;
-					memcpy(&materialID, cursor, size);
-					cursor += size;
-					if (materialID != -1) {
-						materialMD5 = resources->at(materialID);
-						newMesh->SetMaterial(materialMD5);
-					}
-				}
-			}
-				break;
-			case C_CAMERA:
-			{
-				bool isPrespective = true;
-				size = sizeof(bool);
-				memcpy(&isPrespective, cursor, size);
-				cursor += size;
-
-				float nearPlane = 1.0;
-				size = sizeof(float);
-				memcpy(&nearPlane, cursor, size);
-				cursor += size;
-
-				float farPlane = 10000.0;
-				memcpy(&farPlane, cursor, size);
-				cursor += size;
-
-				float vfovrads = 30.0;
-				memcpy(&vfovrads, cursor, size);
-				cursor += size;
-
-				int aspectRatioInt = 0;
-				size = sizeof(int);
-				memcpy(&aspectRatioInt, cursor, size);
-				cursor += size;
-				RE_CompCamera::AspectRatioTYPE aspectRatio = (RE_CompCamera::AspectRatioTYPE)aspectRatioInt;
-
-				bool drawFrustum = true;
-				size = sizeof(bool);
-				memcpy(&drawFrustum, cursor, size);
-				cursor += size;
-
-				bool usingSkybox = true;
-				memcpy(&usingSkybox, cursor, size);
-				cursor += size;
-
-				int skyboxid = -1;
-				size = sizeof(int);
-				memcpy(&skyboxid, cursor, size);
-				cursor += size;
-
-				new_go->AddCompCamera(
-					isPrespective,
-					nearPlane,
-					farPlane,
-					vfovrads,
-					aspectRatio,
-					drawFrustum,
-					usingSkybox,
-					(skyboxid != -1) ? resources->at(skyboxid) : nullptr);
-			}
-				break;
-			}
-		}
-	}
+	idGO->insert(eastl::pair < int, RE_GameObject*>(poolID, this));
 }
 
 void RE_GameObject::AddChild(RE_GameObject * child, bool broadcast)
@@ -1085,18 +507,6 @@ void RE_GameObject::OnStop()
 	for (auto child : childs) child->OnStop();
 }
 
-void RE_GameObject::UseResources()
-{
-	for (auto comp : GetComponents()) comp->UseResources();
-	for (auto child : childs) child->UseResources();
-}
-
-void RE_GameObject::UnUseResources()
-{
-	for (auto comp : GetComponents()) comp->UnUseResources();
-	for (auto child : childs) child->UnUseResources();
-}
-
 RE_CompCamera * RE_GameObject::AddCompCamera(bool prespective, float near_plane, float far_plane, float v_fov_rads, short aspect_ratio_t, bool draw_frustum, bool usingSkybox, const char* skyboxMD5)
 {
 	RE_CompCamera* comp_camera = (RE_CompCamera*)poolComponents->GetNewComponent(ComponentType::C_CAMERA);
@@ -1195,6 +605,7 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type)
 		case C_TORUS:
 		case C_TREFOILKNOT:
 		case C_ROCK:
+		case C_PLANE:
 			ret = poolComponents->GetNewComponent(ComponentType(type));
 		}
 		if (type != C_GRID && ret != nullptr) App->primitives->SetUpComponentPrimitive((RE_CompPrimitive*)ret, this);
@@ -1288,23 +699,6 @@ RE_CompCamera * RE_GameObject::GetCamera() const
 			break;
 		}
 	}
-
-	return ret;
-}
-
-RE_GameObject * RE_GameObject::GetGoFromUUID(UUID parent)
-{
-	RE_GameObject* ret = nullptr;
-
-	if (uuid == parent)
-		ret = this;
-	else
-		for (auto child : childs)
-		{
-			ret = child->GetGoFromUUID(parent);
-			if (ret)
-				break;
-		}
 
 	return ret;
 }

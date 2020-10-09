@@ -9,11 +9,6 @@
 #include <EASTL/map.h>
 #include <EASTL/stack.h>
 
-#pragma comment(lib, "rpcrt4.lib")  // UuidCreate - Minimum supported OS Win 2000
-#include <windows.h>
-#include <iostream>
-
-
 class RE_Component;
 class RE_CompTransform;
 class RE_CompMesh;
@@ -29,7 +24,7 @@ public:
 	RE_GameObject();
 	~RE_GameObject();
 
-	void SetUp(ComponentsPool* compPool, const char* name, UUID uuid = GUID_NULL, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
+	void SetUp(ComponentsPool* compPool, const char* name, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
 
 	void PreUpdate();
 	void Update();
@@ -47,13 +42,12 @@ public:
 
 	bool HasDrawComponents() const;
 
-	eastl::vector<const char*> GetAllResources(bool root = true);
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources);
-	unsigned int GetBinarySize()const;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
+	void SerializeJson(JSONNode* node);
+	void DeserializeJSON(JSONNode* node, ComponentsPool* cmpsPool, eastl::map<int, RE_GameObject*>* uuidGO);
 
-	static void DeserializeJSON(RE_GOManager* goPool, JSONNode* node, eastl::map<int, const char*>* resources);
-	static void DeserializeBinary(RE_GOManager* goPool, char*& cursor, eastl::map<int, const char*>* resources);
+	unsigned int GetBinarySize()const;
+	void SerializeBinary(char*& cursor);
+	void DeserializeBinary(char*& cursor, ComponentsPool* compPool, eastl::map<int, RE_GameObject*>* uuidGO);
 
 	// Children
 	void AddChild(RE_GameObject* child, bool broadcast = true);
@@ -88,10 +82,6 @@ public:
 	void OnPause();
 	void OnStop();
 
-	//Resources
-	void UseResources();
-	void UnUseResources();
-
 	// Components
 	void AddComponent(RE_Component* component);
 	RE_Component* AddComponent(const ushortint type);
@@ -107,8 +97,6 @@ public:
 	RE_CompTransform* GetTransform() const;
 	RE_CompMesh* GetMesh() const;
 	RE_CompCamera* GetCamera() const;
-
-	RE_GameObject* GetGoFromUUID(UUID parent);
 
 	void RecieveEvent(const Event& e) override;
 
@@ -150,8 +138,6 @@ private:
 
 	bool active = true;
 	bool isStatic = true;
-
-	UUID uuid;
 
 	eastl::string name;
 	math::AABB local_bounding_box;

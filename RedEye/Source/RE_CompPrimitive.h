@@ -17,6 +17,8 @@ public:
 	virtual unsigned int GetBinarySize()const override { return 0; }
 	virtual void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override { }
 	virtual void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
+	virtual void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override {}
+	virtual void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent) override {}
 
 	void SetColor(float r, float g, float b) { color.Set(r, g, b); }
 	void SetColor(math::vec nColor) { color = nColor; }
@@ -47,10 +49,13 @@ public:
 	~RE_CompGrid();
 	void Draw() override;
 	void DrawProperties() override {}
-	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override {}
 
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override {}
+
+	unsigned int GetBinarySize()const override { return 0; }
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override {}
+	
 };
 
 /**************************************************
@@ -68,9 +73,13 @@ public:
 
 	void Draw() override;
 	void DrawProperties() override;
-	unsigned int GetBinarySize()const override;
+
 	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
+
+	unsigned int GetBinarySize()const override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
 
 	unsigned int GetTriangleCount()const override { return triangle_count; }
 
@@ -96,9 +105,13 @@ public:
 	~RE_CompPlatonic();
 	void Draw() override;
 	void DrawProperties() override;
-	unsigned int GetBinarySize()const override;
+
 	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
+
+	unsigned int GetBinarySize()const override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
 
 	void SetUp(RE_GameObject* parent, unsigned int VAO, unsigned int shader, int triangle_count);
 	void SetUp(const RE_CompPlatonic& cmpPlat, RE_GameObject* parent = nullptr);
@@ -176,9 +189,13 @@ public:
 	virtual ~RE_CompParametric();
 	void Draw() override;
 	void DrawProperties() override;
-	unsigned int GetBinarySize()const override;
+
 	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
+
+	unsigned int GetBinarySize()const override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
 
 	unsigned int GetTriangleCount()const override { return triangle_count; }
 

@@ -8,8 +8,8 @@ class JSONNode;
 class RE_ResouceAndGOImporter
 {
 public:
-	static void JsonSerialize(JSONNode* node, RE_GameObject* toSerialize);
-	static char* BinarySerialize(RE_GameObject* toSerialize, unsigned int* bufferSize);
+	static void JsonSerialize(JSONNode* node, RE_GOManager* pool);
+	static char* BinarySerialize(RE_GOManager* pool, unsigned int* bufferSize);
 
 	static RE_GOManager* JsonDeserialize(JSONNode* node);
 	static RE_GOManager* BinaryDeserialize(char*& cursor);
