@@ -84,13 +84,22 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		if (ret = (error == GLEW_OK))
 		{
 			render_views.push_back(RenderView("Scene", { 0, 0 },
-				FRUSTUM_CULLING | OVERRIDE_CULLING | OUTLINE_SELECTION | DEBUG_DRAW | BLENDED |
-				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL,
+				FRUSTUM_CULLING | OVERRIDE_CULLING | DEBUG_DRAW | SKYBOX | BLENDED |
+				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
 				LIGHT_DEFERRED));
 
 			render_views.push_back(RenderView("Game", { 0, 0 },
 				FRUSTUM_CULLING | SKYBOX | BLENDED |
-				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST));
+				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
+				LIGHT_DEFERRED));
+
+			glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+			cullface ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+			texture2d ? glEnable(GL_TEXTURE_2D) : glDisable(GL_TEXTURE_2D);
+			color_material ? glEnable(GL_COLOR_MATERIAL) : glDisable(GL_COLOR_MATERIAL);
+			depthtest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+			lighting ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
+
 
 			Load(node);
 			App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
@@ -107,7 +116,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 bool ModuleRenderer3D::Start()
 {
 	render_views[VIEW_EDITOR].fbos = {
-		App->fbomanager->CreateFBO(1024, 768, 1, true, true),
+		App->fbomanager->CreateFBO(1024, 768, 1, true, false),
 		App->fbomanager->CreateDeferredFBO(1024, 768) };
 
 	render_views[VIEW_GAME].fbos = {
@@ -265,6 +274,7 @@ bool ModuleRenderer3D::Load(JSONNode * node)
 		SetVSync(node->PullBool("vsync", vsync));
 		LOG_TERCIARY((vsync)? "VSync enabled." : "VSync disabled");
 
+		//TODO RUB: Load render view loading
 		/*for (int i = 0; i < render_views.size(); ++i)
 		{
 			render_views[i].name = node->PullString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
@@ -356,7 +366,7 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 	// Setup Render Flags
 	SetWireframe(render_view.flags & WIREFRAME);
 	SetFaceCulling(render_view.flags & FACE_CULLING);
-	SetTexture2D(render_view.flags & TEXTURE_2D);
+	SetTexture2D(false);
 	SetColorMaterial(render_view.flags & COLOR_MATERIAL);
 	SetDepthTest(render_view.flags & DEPTH_TEST);
 
@@ -390,7 +400,7 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 
 	// Setup Lights
 	//eastl::stack<RE_CompLight*> scene_lights;
-	switch (render_view.light)
+	/*switch (render_view.light)
 	{
 	case LIGHT_DISABLED:
 	{
@@ -418,7 +428,7 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 		//scene_lights = App->scene->GetLights();
 		break;
 	}
-	}
+	}*/
 
 	// Draw Scene
 	eastl::stack<RE_Component*> drawAsLast;
@@ -438,18 +448,20 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 	// Deferred Light Pass
 	if (render_view.light == LIGHT_DEFERRED)
 	{
-		SetDepthTest(false);
-
 		// Setup Shader
 		unsigned int light_pass = ((RE_Shader*)App->resources->At(App->internalResources->GetLightPassShader()))->GetID();
 		RE_GLCache::ChangeShader(light_pass);
 
+		SetDepthTest(false);
+
+		glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
+
 		// Bind Textures
-		static const eastl::string textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
+		static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
 		for (unsigned int count = 0; count < 4; ++count)
 		{
 			glActiveTexture(GL_TEXTURE0 + count);
-			RE_ShaderImporter::setInt(light_pass, textures[count].c_str(), count);
+			RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
 			RE_GLCache::ChangeTextureBind(App->fbomanager->GetTextureID(target_fbo, count));
 		}
 
@@ -463,10 +475,23 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 	}
 
 	// Draw Debug Geometry
-	if (render_view.flags & DEBUG_DRAW) App->editor->DrawDebug(lighting);
+	if (render_view.flags & DEBUG_DRAW)
+	{
+		RE_GLCache::ChangeShader(0);
+		RE_GLCache::ChangeTextureBind(0);
+
+		bool reset_light = lighting;
+		SetLighting(false);
+		SetTexture2D(false);
+
+		App->editor->DrawDebug(render_view.camera);
+
+		if (reset_light) SetLighting(true);
+		SetTexture2D(render_view.flags & TEXTURE_2D);
+	}
 
 	// Draw Skybox
-	if (render_view.flags & SKYBOX && RE_CameraManager::MainCamera()->isUsingSkybox())
+	if (render_view.flags & SKYBOX && render_view.camera->isUsingSkybox())
 	{
 		OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
 		RE_GLCache::ChangeTextureBind(0);
@@ -712,7 +737,7 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 RenderView::RenderView(eastl::string name, eastl::pair<unsigned int, unsigned int> fbos, short flags, LightMode light) :
 	name(name), fbos(fbos), flags(flags), light(light)
 {
-	for (int i = 0; i < 4; ++i) clear_color[i] = 0.0f;
+	for (int i = 0; i < 4; ++i) clear_color[i] = 1.0f;
 }
 
 const unsigned int RenderView::GetFBO() const

@@ -483,7 +483,7 @@ void ModuleEditor::RecieveEvent(const Event& e)
 	}
 }
 
-void ModuleEditor::DrawDebug(bool resetLight) const
+void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 {
 	OPTICK_CATEGORY("Debug Draw", Optick::Category::Debug);
 
@@ -492,19 +492,12 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 	// Draw Bounding Boxes
 	if (debug_drawing && ((adapted_AABBdraw != AABBDebugDrawing::NONE) || draw_quad_tree || draw_cameras))
 	{
-		RE_GLCache::ChangeShader(0);
-		RE_GLCache::ChangeTextureBind(0);
-
 		const RE_GameObject* root = App->scene->GetRoot();
-		RE_CompCamera* current_camera = RE_CameraManager::EditorCamera();
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(current_camera->GetProjectionPtr());
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf((current_camera->GetView()).ptr());
-
-		if (resetLight)
-			glDisable(GL_LIGHTING);
 
 		glBegin(GL_LINES);
 
@@ -512,7 +505,7 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 		{
 		case SELECTED_ONLY:
 		{
-			glColor3f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2]);
+			glColor4f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2], 1.0f);
 			selected->DrawGlobalAABB();
 			break;
 		}
@@ -526,7 +519,7 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 			{
 				const RE_GameObject* object = nullptr;
 
-				glColor3f(all_aabb_color[0], all_aabb_color[1], all_aabb_color[2]);
+				glColor4f(all_aabb_color[0], all_aabb_color[1] * 255.0f, all_aabb_color[2], 1.0f);
 
 				while (!objects.empty())
 				{
@@ -544,7 +537,7 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 		}
 		case ALL_AND_SELECTED:
 		{
-			glColor3f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2]);
+			glColor4f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2], 1.0f);
 			selected->DrawGlobalAABB();
 
 			eastl::queue<const RE_GameObject*> objects;
@@ -553,7 +546,7 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 
 			if (!objects.empty())
 			{
-				glColor3f(all_aabb_color[0], all_aabb_color[1], all_aabb_color[2]);
+				glColor4f(all_aabb_color[0], all_aabb_color[1], all_aabb_color[2], 1.0f);
 
 				const RE_GameObject* object = nullptr;
 				while (!objects.empty())
@@ -576,21 +569,18 @@ void ModuleEditor::DrawDebug(bool resetLight) const
 
 		if (draw_quad_tree)
 		{
-			glColor3f(quad_tree_color[0], quad_tree_color[1], quad_tree_color[2]);
+			glColor4f(quad_tree_color[0], quad_tree_color[1], quad_tree_color[2], 1.0f);
 			App->scene->DrawTrees();
 		}
 
 		if (draw_cameras)
 		{
-			glColor3f(frustum_color[0], frustum_color[1], frustum_color[2]);
+			glColor4f(frustum_color[0], frustum_color[1], frustum_color[2], 1.0f);
 			for (auto cam : App->cams->GetCameras())
 				cam->DrawFrustum();
 		}
 
 		glEnd();
-
-		if (resetLight)
-			glEnable(GL_LIGHTING);
 
 		if (grid->IsActive())
 			grid->Draw();

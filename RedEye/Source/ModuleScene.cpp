@@ -511,9 +511,8 @@ void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container,
 
 	while (!goIndex.empty())
 	{
-		int index = goIndex.top();
+		container.push_back(goManager.At(goIndex.top()));
 		goIndex.pop();
-		container.push_back(goManager.At(index));
 	}
 }
 

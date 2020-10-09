@@ -192,12 +192,12 @@
 "\n"																\
 "void main()\n"														\
 "{\n"																\
-"	vec3 pos = texture(gPosition, TexCoord).rgb;\n"		\
+"	vec3 pos = normalize(texture(gPosition, TexCoord).rgb);\n"		\
 "	vec3 Normal = normalize(texture(gNormal, TexCoord).rgb);\n"		\
 "	vec3 Diffuse = texture(gAlbedo, TexCoord).rgb;\n"				\
 "	float Specular = texture(gSpec, TexCoord).r;\n"					\
 "	vec3 lighting = vec3(Specular, 0, 0);\n"						\
-"	aRes = vec4(Normal, 1.0);\n"										\
+"	aRes = vec4(Diffuse, 1.0);\n"										\
 "}\0"
 
 

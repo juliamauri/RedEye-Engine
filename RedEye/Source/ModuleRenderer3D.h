@@ -119,6 +119,7 @@ private:
 
 	// Renderer Flags
 	bool vsync = false;
+
 	bool wireframe = false;
 	bool cullface = false;
 	bool texture2d = false;

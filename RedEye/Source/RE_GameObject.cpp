@@ -363,14 +363,14 @@ void RE_GameObject::SerializeJson(JSONNode * node, eastl::map<const char*, int>*
 		uint cmpSize = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA)
+			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA && type != C_TRANSFORM)
 				cmpSize++;
 		}
 		comps->PushUInt("ComponentsSize", cmpSize);
 		uint count = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA)
+			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA && type == C_TRANSFORM)
 				continue;
 			ref = "cmp" + eastl::to_string(count++);
 			JSONNode* comp = comps->PushJObject(ref.c_str());
@@ -445,7 +445,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 		uint cmpSize = 0;
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA)
+			if ((type >= C_CUBE && type <= C_PRIMIVE_MAX) || type == C_MESH || type == C_CAMERA && type != C_TRANSFORM)
 				cmpSize++;
 		}
 		memcpy(cursor, &cmpSize, size);
@@ -453,7 +453,7 @@ void RE_GameObject::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 
 		for (auto component : go->components) {
 			unsigned short type = component->GetType();
-			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA)
+			if (type < C_CUBE && type > C_PRIMIVE_MAX && type != C_MESH && type != C_CAMERA && type == C_TRANSFORM)
 				continue;
 			size = sizeof(unsigned short);
 			memcpy(cursor, &type, size);
