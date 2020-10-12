@@ -4,6 +4,8 @@
 
 #include "Glew/include/glew.h"
 
+#include "RE_GLCache.h"
+
 eastl::map<unsigned int, RE_FBO> RE_FBOManager::fbos;
 
 RE_FBOManager::RE_FBOManager() { }
@@ -51,6 +53,14 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 
 		newFbo.texturesID.push_back(tex);
 	}
+
+	// Depth Texture
+	glGenTextures(1, &newFbo.depthBufferTexture);
+	glBindTexture(GL_TEXTURE_2D, newFbo.depthBufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, newFbo.width, newFbo.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, newFbo.depthBufferTexture, 0);
 
 	if (depth && stencil) {
 		glGenRenderbuffers(1, &newFbo.depthstencilBuffer);
@@ -108,6 +118,14 @@ int RE_FBOManager::CreateDeferredFBO(unsigned int width, unsigned int height)
 
 	LoadDeferredTextures(newFbo);
 
+	// Depth Texture
+	glGenTextures(1, &newFbo.depthBufferTexture);
+	glBindTexture(GL_TEXTURE_2D, newFbo.depthBufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, newFbo.width, newFbo.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, newFbo.depthBufferTexture, 0);
+
 	// Depth Buffer
 	glGenRenderbuffers(1, &newFbo.depthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthBuffer);
@@ -149,6 +167,7 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 	}
 	for (auto c : toChange.texturesID) glDeleteTextures(1, &c);
 	toChange.texturesID.clear();
+	glDeleteTextures(1, &toChange.depthBufferTexture);
 
 	if (toChange.type == RE_FBO::FBO_Type::DEFERRED)
 	{
@@ -179,6 +198,14 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 			toChange.texturesID.push_back(tex);
 		}
 	}
+
+	// Depth Texture
+	glGenTextures(1, &toChange.depthBufferTexture);
+	glBindTexture(GL_TEXTURE_2D, toChange.depthBufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, toChange.width, toChange.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, toChange.depthBufferTexture, 0);
 
 	if (depth && stencil) {
 		glGenRenderbuffers(1, &toChange.depthstencilBuffer);
@@ -246,6 +273,15 @@ unsigned int RE_FBOManager::GetWidth(unsigned int ID) const
 unsigned int RE_FBOManager::GetHeight(unsigned int ID) const
 {
 	return fbos.at(ID).height;
+}
+
+unsigned int RE_FBOManager::GetDepthTexture(unsigned int ID) const
+{
+	RE_FBO fbo = fbos.at(ID);
+	RE_GLCache::ChangeTextureBind(fbo.depthBufferTexture);
+	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 0, 0, fbo.width, fbo.height, 0);
+	RE_GLCache::ChangeTextureBind(0);
+	return fbo.depthBufferTexture;
 }
 
 unsigned int RE_FBOManager::GetTextureID(unsigned int ID, unsigned int texAttachment)const

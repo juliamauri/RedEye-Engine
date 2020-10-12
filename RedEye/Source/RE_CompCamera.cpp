@@ -762,3 +762,13 @@ void RE_CompCamera::UnUseResources()
 {
 	if (skyboxMD5) App->resources->UnUse(skyboxMD5);
 }
+
+float RE_CompCamera::GetNearPlane() const
+{
+	return near_plane;
+}
+
+float RE_CompCamera::GetFarPlane() const
+{
+	return far_plane;
+}

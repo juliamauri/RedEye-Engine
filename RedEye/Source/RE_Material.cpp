@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "RE_FileSystem.h"
+#include "ModuleRenderer3D.h"
 #include "OutputLog.h"
 #include "RE_ResourceManager.h"
 #include "RE_InternalResources.h"
@@ -1272,7 +1273,8 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 			|| (usingOnMat[TAMBIENT] && !tAmbient.empty()) || (usingOnMat[TEMISSIVE] && !tEmissive.empty())
 			|| (usingOnMat[TOPACITY] && !tOpacity.empty() || (usingOnMat[TSHININESS] && !tShininess.empty())
 				|| (usingOnMat[THEIGHT] && !tHeight.empty()) || !usingOnMat[TNORMALS] && !tNormals.empty())
-			|| (usingOnMat[TREFLECTION] && !tReflection.empty())) {
+			|| (usingOnMat[TREFLECTION] && !tReflection.empty())
+			|| shaderRes->NeedUploadDepth()) {
 
 			RE_ShaderImporter::setFloat(ShaderID, "useTexture", 1.0f);
 			onlyColor = false;
@@ -1288,6 +1290,12 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 	}
 
 	unsigned int textureCounter = 0;
+	if (shaderRes->NeedUploadDepth()) {
+		glActiveTexture(GL_TEXTURE0 + textureCounter);
+		RE_GLCache::ChangeTextureBind(App->renderer3d->GetDepthTexture());
+		shaderRes->UploadDepth(textureCounter++);
+	}
+
 	// Bind Textures
 	if (onlyColor){
 		if(usingOnMat[CDIFFUSE]) RE_ShaderImporter::setFloat(ShaderID, "cdiffuse", cDiffuse);
@@ -1302,9 +1310,9 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 	}
 	else if (usingChekers)
 	{
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0 + textureCounter);
 		eastl::string name = "tdiffuse0";
-		RE_ShaderImporter::setInt(ShaderID, name.c_str(), 0);
+		RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
 		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
 	}
 	else

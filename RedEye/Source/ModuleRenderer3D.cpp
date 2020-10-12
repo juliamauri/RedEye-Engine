@@ -39,6 +39,7 @@
 #pragma comment(lib, "opengl32.lib")
 
 LightMode ModuleRenderer3D::current_lighting = LIGHT_GL;
+unsigned int ModuleRenderer3D::current_fbo = 0;
 
 const char* RenderView::labels[11] = {
 						"Fustrum Culling", "Override Culling", "Outline Selection", "Debug Draw", "Skybox", "Blending",
@@ -343,6 +344,12 @@ unsigned int ModuleRenderer3D::GetRenderedEditorSceneTexture() const
 	return App->fbomanager->GetTextureID(render_views[0].GetFBO(), 4 * (render_views[0].light == LIGHT_DEFERRED));
 }
 
+unsigned int ModuleRenderer3D::GetDepthTexture() const
+{
+	RE_GLCache::ChangeTextureBind(0);
+	return App->fbomanager->GetDepthTexture(current_fbo);
+}
+
 unsigned int ModuleRenderer3D::GetRenderedGameSceneTexture() const
 {
 	return App->fbomanager->GetTextureID(render_views[1].GetFBO(), 4 * (render_views[1].light == LIGHT_DEFERRED));
@@ -359,7 +366,7 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 
 	// Setup Frame Buffer
 	current_lighting = render_view.light;
-	unsigned int target_fbo = render_view.GetFBO();
+	unsigned int target_fbo = current_fbo = render_view.GetFBO();
 	RE_FBOManager::ChangeFBOBind(target_fbo, App->fbomanager->GetWidth(target_fbo), App->fbomanager->GetHeight(target_fbo));
 	RE_FBOManager::ClearFBOBuffers(target_fbo, render_view.clear_color);
 
@@ -372,7 +379,7 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
-		((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(render_view.camera, dt, time);
+		((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(render_view.camera, dt, time, App->fbomanager->GetHeight(target_fbo), App->fbomanager->GetWidth(target_fbo));
 
 	// Frustum Culling
 	eastl::stack<RE_Component*> comptsToDraw;

@@ -13,6 +13,7 @@ struct RE_FBO {
 	unsigned int depthBuffer = 0;
 	unsigned int stencilBuffer = 0;
 	unsigned int depthstencilBuffer = 0;
+	unsigned int depthBufferTexture = 0;
 	enum FBO_Type : char
 	{
 		DEFAULT = 0,
@@ -34,6 +35,7 @@ public:
 
 	void ClearFBO(unsigned int ID);
 
+	unsigned int GetDepthTexture(unsigned int ID) const;
 	unsigned int GetTextureID(unsigned int ID, unsigned int texAttachment)const;
 	unsigned int GetWidth(unsigned int ID)const;
 	unsigned int GetHeight(unsigned int ID)const;

@@ -95,6 +95,9 @@ public:
 	void UseResources()override;
 	void UnUseResources()override;
 
+	float GetNearPlane()const;
+	float GetFarPlane()const;
+
 private:
 	void RecalculateMatrixes();
 	void DrawItsProperties();

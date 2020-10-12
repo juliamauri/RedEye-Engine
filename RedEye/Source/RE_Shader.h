@@ -36,14 +36,17 @@ public:
 
 	eastl::vector<ShaderCvar> GetUniformValues();
 
-	void UploadMainUniforms(RE_CompCamera* camera, float dt, float time);
+	void UploadMainUniforms(RE_CompCamera* camera, float dt, float time, float window_h, float window_w);
 	void UploadModel(float* model);
+	void UploadDepth(int texture);
 
 	bool isShaderFilesChanged();
 
 	void ReImport()override;
 
 	bool IsPathOnShader(const char* assetPath);
+
+	bool NeedUploadDepth()const;
 
 private:
 	void Draw() override;
@@ -76,6 +79,11 @@ private:
 	int model = -1;
 	int time = -1;
 	int dt = -1;
+	int depth = -1;
+	int viewport_w = -1;
+	int viewport_h = -1;
+	int near_plane = -1;
+	int far_plane = -1;
 	eastl::vector<ShaderCvar> uniforms;
 };
 

@@ -87,6 +87,7 @@ public:
 
 	void ChangeFBOSize(int width, int height, bool editor = false);
 	unsigned int GetRenderedEditorSceneTexture()const;
+	unsigned int GetDepthTexture()const;
 	unsigned int GetRenderedGameSceneTexture()const;
 
 	// Thumbnail
@@ -128,6 +129,7 @@ private:
 	bool lighting = false;
 
 	static LightMode current_lighting;
+	static unsigned int current_fbo;
 
 	// Rendering Views
 	eastl::vector<RenderView> render_views;

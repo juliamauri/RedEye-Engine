@@ -138,19 +138,29 @@ eastl::vector<ShaderCvar> RE_Shader::GetUniformValues()
 	return uniforms;
 }
 
-void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float _dt, float _time)
+void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float _dt, float _time, float window_h, float window_w)
 {
 	RE_GLCache::ChangeShader(ID);
 	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
 	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera->GetProjectionPtr());
 	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, _dt);
 	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, _time);
+	if (viewport_h != -1) RE_ShaderImporter::setFloat(uniforms[viewport_h].location, window_h);
+	if (viewport_w != -1) RE_ShaderImporter::setFloat(uniforms[viewport_w].location, window_w);
+	if (near_plane != -1) RE_ShaderImporter::setFloat(uniforms[near_plane].location, camera->GetNearPlane());
+	if (far_plane != -1) RE_ShaderImporter::setFloat(uniforms[far_plane].location, camera->GetFarPlane());
 }
 
 void RE_Shader::UploadModel(float* _model)
 {
 	RE_GLCache::ChangeShader(ID);
 	if(model != -1) RE_ShaderImporter::setFloat4x4(uniforms[model].location, _model);
+}
+
+void RE_Shader::UploadDepth(int texture)
+{
+	RE_GLCache::ChangeShader(ID);
+	if (depth != -1) RE_ShaderImporter::setInt(uniforms[depth].location, texture);
 }
 
 bool RE_Shader::isShaderFilesChanged()
@@ -290,9 +300,14 @@ void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
 	model = -1;
 	time = -1;
 	dt = -1;
+	depth = -1;
+	viewport_w = -1;
+	viewport_h = -1;
+	near_plane = -1;
+	far_plane = -1;
 	uniforms.clear();
 
-	static const char* internalNames[25] = { "useTexture", "useColor", "time", "dt", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "tnormals", "treflection" };
+	static const char* internalNames[30] = { "useTexture", "useColor", "time", "dt", "near_plane", "far_plane", "viewport_w", "viewport_h", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "tnormals", "treflection", "currentDepth" };
 	for (auto uniform : uniformLines)
 	{
 		int pos = uniform.find_first_of(" ");
@@ -357,7 +372,7 @@ void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
 			eastl::string name = (pos != eastl::string::npos) ? sVar.name.substr(0, pos) : sVar.name;
 
 			//Custom or internal variables
-			for (uint i = 0; i < 25; i++) {
+			for (uint i = 0; i < 30; i++) {
 				if (name.compare(internalNames[i]) == 0) {
 					sVar.custom = false;
 					break;
@@ -377,6 +392,16 @@ void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
 					dt = uniforms.size() - 1;
 				else if (time == -1 && sVar.name.compare("time") == 0)
 					time = uniforms.size() - 1;
+				else if (depth == -1 && sVar.name.compare("currentDepth") == 0)
+					depth = uniforms.size() - 1;
+				else if (viewport_w == -1 && sVar.name.compare("viewport_w") == 0)
+					viewport_w = uniforms.size() - 1;
+				else if (viewport_h == -1 && sVar.name.compare("viewport_h") == 0)
+					viewport_h = uniforms.size() - 1;
+				else if (near_plane == -1 && sVar.name.compare("near_plane") == 0)
+					near_plane = uniforms.size() - 1;
+				else if (far_plane == -1 && sVar.name.compare("far_plane") == 0)
+					far_plane = uniforms.size() - 1;
 			}
 		}
 	}
@@ -386,6 +411,11 @@ void RE_Shader::GetLocations()
 {
 	for (unsigned int i = 0; i < uniforms.size(); i++) 
 		uniforms[i].location = RE_ShaderImporter::getLocation(ID, uniforms[i].name.c_str());
+}
+
+bool RE_Shader::NeedUploadDepth() const
+{
+	return (depth != -1);
 }
 
 void RE_Shader::Draw()
@@ -448,6 +478,11 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 	model = -1;
 	time = -1;
 	dt = -1;
+	depth = -1;
+	viewport_w = -1;
+	viewport_h = -1;
+	near_plane = -1;
+	far_plane = -1;
 	uniforms.clear();
 	JSONNode* nuniforms = metaNode->PullJObject("uniforms");
 	uint size = nuniforms->PullUInt("size", 0);
@@ -539,6 +574,16 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 					dt = uniforms.size() - 1;
 				else if (time == -1 && sVar.name.compare("time") == 0)
 					time = uniforms.size() - 1;
+				else if (depth == -1 && sVar.name.compare("currentDepth") == 0)
+					depth = uniforms.size() - 1;
+				else if (viewport_w == -1 && sVar.name.compare("viewport_w") == 0)
+					viewport_w = uniforms.size() - 1;
+				else if (viewport_h == -1 && sVar.name.compare("viewport_h") == 0)
+					viewport_h = uniforms.size() - 1;
+				else if (near_plane == -1 && sVar.name.compare("near_plane") == 0)
+					near_plane = uniforms.size() - 1;
+				else if (far_plane == -1 && sVar.name.compare("far_plane") == 0)
+					far_plane = uniforms.size() - 1;
 			}
 		}
 	}
