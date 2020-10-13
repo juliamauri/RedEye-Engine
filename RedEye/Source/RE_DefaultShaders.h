@@ -44,8 +44,14 @@
 "uniform mat4 view;\n"												\
 "uniform mat4 projection;\n"										\
 "\n"																\
+"uniform float useClipPlane;\n"										\
+"uniform vec4 clip_plane;\n"										\
+"\n"																\
 "void main()\n"														\
 "{\n"																\
+"	vec4 worldPos = model * vec4(aPos, 1.0);\n"						\
+"	if (useClipPlane > 0.0f)\n"										\
+"		gl_ClipDistance[0] = dot(worldPos, clip_plane);\n"			\
 "	gl_Position = projection * view * model * vec4(aPos, 1.0);\n"	\
 "	TexCoord = aTexCoord;\n"										\
 "}\0"																  
@@ -118,9 +124,15 @@
 "uniform mat4 view;\n"										\
 "uniform mat4 projection;\n"								\
 "\n"														\
+"uniform float useClipPlane;\n"								\
+"uniform vec4 clip_plane;\n"								\
+"\n"														\
 "void main()\n"												\
 "{\n"														\
 "	vec4 worldPos = model * vec4(aPos, 1.0);\n"				\
+"	if (useClipPlane > 0.0f)\n"								\
+"		gl_ClipDistance[0] = dot(worldPos, clip_plane);\n"	\
+"\n"														\
 "	FragPos = worldPos.xyz;\n"								\
 "	TexCoord = aTexCoord;\n"								\
 "	mat3 normalMatrix = transpose(inverse(mat3(model)));\n"	\

@@ -41,9 +41,9 @@
 LightMode ModuleRenderer3D::current_lighting = LIGHT_GL;
 unsigned int ModuleRenderer3D::current_fbo = 0;
 
-const char* RenderView::labels[11] = {
+const char* RenderView::labels[12] = {
 						"Fustrum Culling", "Override Culling", "Outline Selection", "Debug Draw", "Skybox", "Blending",
-						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", };
+						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clip Distance"};
 
 ModuleRenderer3D::ModuleRenderer3D(const char * name, bool start_enabled) : Module(name, start_enabled)
 {}
@@ -88,7 +88,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 				FRUSTUM_CULLING | OVERRIDE_CULLING | DEBUG_DRAW | SKYBOX | BLENDED |
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
 				LIGHT_DEFERRED));
-
+			
 			render_views.push_back(RenderView("Game", { 0, 0 },
 				FRUSTUM_CULLING | SKYBOX | BLENDED |
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
@@ -250,7 +250,7 @@ void ModuleRenderer3D::DrawEditor()
 					render_views[i].light = LightMode(light);
 				ImGui::PopID();
 
-				for (short count = 0; count < 11; ++count)
+				for (short count = 0; count < 12; ++count)
 				{
 					bool temp = (render_views[i].flags & (1 << count));
 					ImGui::PushID(eastl::string(RenderView::labels[count] + eastl::to_string(i)).c_str());
@@ -368,7 +368,7 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 	current_lighting = render_view.light;
 	unsigned int target_fbo = current_fbo = render_view.GetFBO();
 	RE_FBOManager::ChangeFBOBind(target_fbo, App->fbomanager->GetWidth(target_fbo), App->fbomanager->GetHeight(target_fbo));
-	RE_FBOManager::ClearFBOBuffers(target_fbo, render_view.clear_color);
+	RE_FBOManager::ClearFBOBuffers(target_fbo, render_view.clear_color.ptr());
 
 	// Setup Render Flags
 	SetWireframe(render_view.flags & WIREFRAME);
@@ -376,10 +376,12 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 	SetTexture2D(false);
 	SetColorMaterial(render_view.flags & COLOR_MATERIAL);
 	SetDepthTest(render_view.flags & DEPTH_TEST);
+	bool usingClipDistance;
+	SetClipDistance(usingClipDistance = render_view.flags & CLIP_DISTANCE);
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
-		((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(render_view.camera, dt, time, App->fbomanager->GetHeight(target_fbo), App->fbomanager->GetWidth(target_fbo));
+		((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(render_view.camera, dt, time, App->fbomanager->GetHeight(target_fbo), App->fbomanager->GetWidth(target_fbo), usingClipDistance, render_view.clip_distance);
 
 	// Frustum Culling
 	eastl::stack<RE_Component*> comptsToDraw;
@@ -654,6 +656,12 @@ inline void ModuleRenderer3D::SetLighting(bool enable)
 		(lighting = enable) ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
 }
 
+inline void ModuleRenderer3D::SetClipDistance(bool enable)
+{
+	if (clip_distance != enable)
+		(clip_distance = enable) ? glEnable(GL_CLIP_DISTANCE0) : glDisable(GL_CLIP_DISTANCE0);
+}
+
 void ModuleRenderer3D::DrawQuad()
 {
 	// Setup Screen Quad
@@ -741,10 +749,11 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	glEnd();
 }
 
-RenderView::RenderView(eastl::string name, eastl::pair<unsigned int, unsigned int> fbos, short flags, LightMode light) :
+RenderView::RenderView(eastl::string name, eastl::pair<unsigned int, unsigned int> fbos, short flags, LightMode light, math::float4 clipDistance) :
 	name(name), fbos(fbos), flags(flags), light(light)
 {
-	for (int i = 0; i < 4; ++i) clear_color[i] = 1.0f;
+	clear_color = math::float4::one;
+	clip_distance = clipDistance;
 }
 
 const unsigned int RenderView::GetFBO() const

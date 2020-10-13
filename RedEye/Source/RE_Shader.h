@@ -5,6 +5,7 @@
 #include "Cvar.h"
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
+#include "MathGeoLib/include/Math/float4.h"
 
 class RE_CompCamera;
 
@@ -36,7 +37,7 @@ public:
 
 	eastl::vector<ShaderCvar> GetUniformValues();
 
-	void UploadMainUniforms(RE_CompCamera* camera, float dt, float time, float window_h, float window_w);
+	void UploadMainUniforms(RE_CompCamera* camera, float dt, float time, float window_h, float window_w, bool clipDistance, math::float4 clipPlane);
 	void UploadModel(float* model);
 	void UploadDepth(int texture);
 
@@ -84,6 +85,8 @@ private:
 	int viewport_h = -1;
 	int near_plane = -1;
 	int far_plane = -1;
+	int clip_plane = -1;
+	int using_clip_plane = -1;
 	eastl::vector<ShaderCvar> uniforms;
 };
 

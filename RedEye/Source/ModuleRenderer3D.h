@@ -3,6 +3,7 @@
 
 #include "Module.h"
 #include <EASTL/stack.h>
+#include "MathGeoLib/include/Math/float4.h"
 
 enum LightMode : int
 {
@@ -25,7 +26,8 @@ enum RenderViewFlags : short
 	FACE_CULLING = 0X80,	 // 000010000000
 	TEXTURE_2D = 0x100,		 // 000100000000
 	COLOR_MATERIAL = 0x200,	 // 001000000000
-	DEPTH_TEST = 0x400		 // 010000000000
+	DEPTH_TEST = 0x400,		 // 010000000000
+	CLIP_DISTANCE = 0x800	 // 100000000000
 };
 
 class RE_CompCamera;
@@ -34,18 +36,19 @@ struct RenderView
 {
 	RenderView(eastl::string name = "",
 		eastl::pair<unsigned int, unsigned int> fbos = { 0, 0 },
-		short flags = 0, LightMode light = LIGHT_GL);
+		short flags = 0, LightMode light = LIGHT_GL, math::float4 clipDistance = math::float4::zero);
 
 	eastl::string name;
 	eastl::pair<unsigned int, unsigned int> fbos;
 	short flags;
 	LightMode light;
-	float clear_color[4];
+	math::float4 clear_color;
+	math::float4 clip_distance;
 	RE_CompCamera* camera = nullptr;
 
 	const unsigned int GetFBO() const;
 
-	static const char* labels[11];
+	static const char* labels[12];
 };
 
 enum RENDER_VIEWS : short
@@ -105,6 +108,7 @@ private:
 	void inline SetColorMaterial(bool enable);
 	void inline SetDepthTest(bool enable);
 	void inline SetLighting(bool enable);
+	void inline SetClipDistance(bool enable);
 
 	void DrawQuad();
 	void DirectDrawCube(math::vec position, math::vec color);
@@ -127,6 +131,7 @@ private:
 	bool color_material = false;
 	bool depthtest = false;
 	bool lighting = false;
+	bool clip_distance = false;
 
 	static LightMode current_lighting;
 	static unsigned int current_fbo;
