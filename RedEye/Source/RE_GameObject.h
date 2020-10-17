@@ -13,6 +13,7 @@ class RE_Component;
 class RE_CompTransform;
 class RE_CompMesh;
 class RE_CompCamera;
+class RE_CompLight;
 class RE_CompPrimitive;
 class JSONNode;
 class ComponentsPool;
@@ -97,6 +98,7 @@ public:
 	RE_CompTransform* GetTransform() const;
 	RE_CompMesh* GetMesh() const;
 	RE_CompCamera* GetCamera() const;
+	RE_CompLight* GetLight() const;
 
 	void RecieveEvent(const Event& e) override;
 

@@ -286,6 +286,9 @@
     <ClCompile Include="RE_GOManager.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="RE_CompLight.cpp">
+      <Filter>GameObject\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -1226,6 +1229,9 @@
     </ClInclude>
     <ClInclude Include="RE_GOManager.h">
       <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompLight.h">
+      <Filter>GameObject\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

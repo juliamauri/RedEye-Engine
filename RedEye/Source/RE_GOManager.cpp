@@ -70,6 +70,11 @@ RE_GOManager* RE_GOManager::GetNewPoolFromID(int id)
 	return ret;
 }
 
+eastl::stack<RE_CompLight*> RE_GOManager::GetAllLights(bool check_active)
+{
+	return componentsPool.GetAllLights(check_active);
+}
+
 eastl::vector<const char*> RE_GOManager::GetAllResources()
 {
 	return componentsPool.GetAllResources();
@@ -226,6 +231,9 @@ RE_Component* ComponentsPool::GetComponent(int poolid, ComponentType cType)
 	case C_MESH:
 		ret = (RE_Component*)meshPool.AtPtr(poolid);
 		break;
+	case C_LIGHT:
+		ret = (RE_Component*)lightPool.AtPtr(poolid);
+		break;
 	case C_CUBE:
 		ret = (RE_Component*)pCubePool.AtPtr(poolid);
 		break;
@@ -279,6 +287,9 @@ RE_Component* ComponentsPool::GetNewComponent(ComponentType cType)
 		break;
 	case C_MESH:
 		ret = (RE_Component*)meshPool.AtPtr(meshPool.GetNewComponent());
+		break;
+	case C_LIGHT:
+		ret = (RE_Component*)lightPool.AtPtr(lightPool.GetNewComponent());
 		break;
 	case C_CUBE:
 		ret = (RE_Component*)pCubePool.AtPtr(pCubePool.GetNewComponent());
@@ -336,6 +347,10 @@ RE_Component* ComponentsPool::CopyComponent(RE_Component* cmp, RE_GameObject* pa
 	case C_MESH:
 		ret = (RE_Component*)meshPool.AtPtr(meshPool.GetNewComponent());
 		((RE_CompMesh*)ret)->SetUp(*(RE_CompMesh*)cmp, parent);
+		break;
+	case C_LIGHT:
+		ret = (RE_Component*)lightPool.AtPtr(lightPool.GetNewComponent());
+		((RE_CompLight*)ret)->SetUp(*(RE_CompLight*)cmp, parent);
 		break;
 	case C_CUBE:
 		ret = (RE_Component*)pCubePool.AtPtr(pCubePool.GetNewComponent());
@@ -431,11 +446,30 @@ void ComponentsPool::DeleteTransform(int id)
 	transPool.Pop(id);
 }
 
+eastl::stack<RE_CompLight*> ComponentsPool::GetAllLights(bool check_active)
+{
+	eastl::stack<RE_CompLight*> lights;
+
+	int count = lightPool.GetCount();
+	for (int i = 0; i < count; ++i)
+		if (check_active)
+		{
+			RE_CompLight* light = lightPool.AtPtr(i);
+			if (light->IsActive())
+				lights.push(light);
+		}
+		else
+			lights.push(lightPool.AtPtr(i));
+
+	return lights;
+}
+
 unsigned int ComponentsPool::GetBinarySize() const
 {
 	uint size = 0;
 	size += camPool.GetBinarySize();
 	size += meshPool.GetBinarySize();
+	size += lightPool.GetBinarySize();
 	size += pCubePool.GetBinarySize();
 	size += pDodecahedronPool.GetBinarySize();
 	size += pTetrahedronPool.GetBinarySize();
@@ -455,6 +489,7 @@ void ComponentsPool::SerializeBinary(char*& cursor, eastl::map<const char*, int>
 {
 	camPool.SerializeBinary(cursor, resources);
 	meshPool.SerializeBinary(cursor, resources);
+	//lightPool.SerializeBinary(cursor, resources);
 	pCubePool.SerializeBinary(cursor, resources);
 	pDodecahedronPool.SerializeBinary(cursor, resources);
 	pTetrahedronPool.SerializeBinary(cursor, resources);
@@ -473,6 +508,7 @@ void ComponentsPool::DeserializeBinary(GameObjectManager* goPool, char*& cursor,
 {
 	camPool.DeserializeBinary(goPool, cursor, resources);
 	meshPool.DeserializeBinary(goPool, cursor, resources);
+	//lightPool.DeserializeBinary(goPool, cursor, resources);
 	pCubePool.DeserializeBinary(goPool, cursor, resources);
 	pDodecahedronPool.DeserializeBinary(goPool, cursor, resources);
 	pTetrahedronPool.DeserializeBinary(goPool, cursor, resources);
@@ -492,6 +528,7 @@ void ComponentsPool::SerializeJson(JSONNode* node, eastl::map<const char*, int>*
 	JSONNode* comps = node->PushJObject("Components Pool");
 	camPool.SerializeJson(comps, resources);
 	meshPool.SerializeJson(comps, resources);
+	lightPool.SerializeJson(comps, resources);
 	pCubePool.SerializeJson(comps, resources);
 	pDodecahedronPool.SerializeJson(comps, resources);
 	pTetrahedronPool.SerializeJson(comps, resources);
@@ -512,6 +549,7 @@ void ComponentsPool::DeserializeJson(GameObjectManager* goPool, JSONNode* node, 
 	JSONNode* comps = node->PullJObject("Components Pool");
 	camPool.DeserializeJson(goPool, comps, resources);
 	meshPool.DeserializeJson(goPool, comps, resources);
+	lightPool.DeserializeJson(goPool, comps, resources);
 	pCubePool.DeserializeJson(goPool, comps, resources);
 	pDodecahedronPool.DeserializeJson(goPool, comps, resources);
 	pTetrahedronPool.DeserializeJson(goPool, comps, resources);

@@ -7,6 +7,7 @@
 #include "RE_Component.h"
 #include "RE_CompPrimitive.h"
 #include "RE_CompMesh.h"
+#include "RE_CompLight.h"
 #include "RE_GOManager.h"
 #include "RE_CompParticleEmiter.h"
 #include "RE_ShaderImporter.h"
@@ -578,10 +579,16 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type)
 	}
 	else if (ComponentType(type) == C_CAMERA)
 	{
-		RE_CompCamera* comp_camera = (RE_CompCamera * )poolComponents->GetNewComponent(ComponentType::C_CAMERA);
+		RE_CompCamera* comp_camera = (RE_CompCamera*)poolComponents->GetNewComponent(ComponentType::C_CAMERA);
 		comp_camera->SetUp(this);
 		App->cams->AddMainCamera(comp_camera);
 		ret = (RE_Component*)comp_camera;
+	}
+	else if (ComponentType(type) == C_LIGHT)
+	{
+		RE_CompLight* comp_light = (RE_CompLight*)poolComponents->GetNewComponent(ComponentType::C_LIGHT);
+		comp_light->SetUp(this);
+		ret = (RE_Component*)comp_light;
 	}
 	else if (ComponentType(type) == C_PARTICLEEMITER)
 	{
@@ -696,6 +703,22 @@ RE_CompCamera * RE_GameObject::GetCamera() const
 		if (component->GetType() == ComponentType::C_CAMERA)
 		{
 			ret = (RE_CompCamera*)component;
+			break;
+		}
+	}
+
+	return ret;
+}
+
+RE_CompLight* RE_GameObject::GetLight() const
+{
+	RE_CompLight* ret = nullptr;
+
+	for (auto component : GetComponents())
+	{
+		if (component->GetType() == ComponentType::C_LIGHT)
+		{
+			ret = (RE_CompLight*)component;
 			break;
 		}
 	}

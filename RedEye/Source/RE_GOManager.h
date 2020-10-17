@@ -4,6 +4,7 @@
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
 #include "RE_CompMesh.h"
+#include "RE_CompLight.h"
 #include "RE_CompPrimitive.h"
 #include "RE_FileSystem.h"
 
@@ -143,6 +144,7 @@ private:
 typedef ComponentPool<RE_CompTransform> TransformsPool;
 typedef ComponentPool<RE_CompCamera> CamerasPool;
 typedef ComponentPool<RE_CompMesh> MeshesPool;
+typedef ComponentPool<RE_CompLight> LightPool;
 //Primitives
 typedef ComponentPool<RE_CompRock> PRockPool;
 typedef ComponentPool<RE_CompCube> PCubePool;
@@ -164,6 +166,7 @@ public:
 		transPool.SetName("Transforms Pool");
 		camPool.SetName("Cameras Pool");
 		meshPool.SetName("Meshes Pool");
+		lightPool.SetName("Lights Pool");
 		pRockPool.SetName("PRocks Pool");
 		pCubePool.SetName("PCubes Pool");
 		pDodecahedronPool.SetName("PDodecahedrons Pool");
@@ -191,6 +194,8 @@ public:
 
 	void DeleteTransform(int id);
 
+	eastl::stack<RE_CompLight*> GetAllLights(bool check_active);
+
 	unsigned int GetBinarySize()const;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
 	void DeserializeBinary(GameObjectManager* goPool, char*& cursor, eastl::map<int, const char*>* resources);
@@ -202,6 +207,7 @@ private:
 	TransformsPool transPool;
 	CamerasPool camPool;
 	MeshesPool meshPool;
+	LightPool lightPool;
 	PRockPool pRockPool;
 	PCubePool pCubePool;
 	PDodecahedronPool pDodecahedronPool;
@@ -248,6 +254,8 @@ public:
 	RE_GameObject* InsertPool(RE_GOManager* pool);
 
 	RE_GOManager* GetNewPoolFromID(int id);
+
+	eastl::stack<RE_CompLight*> GetAllLights(bool check_active);
 
 	eastl::vector<const char*> GetAllResources();
 	void UseResources();
