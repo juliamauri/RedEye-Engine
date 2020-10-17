@@ -35,6 +35,13 @@ public:
 
 	math::vec GetGlobalPosition();
 
+	math::vec GetRight();
+	math::vec GetLeft();
+	math::vec GetUp();
+	math::vec GetDown();
+	math::vec GetFront();
+	math::vec GetBack();
+
 	void DrawProperties();
 
 	bool HasChanged() const;

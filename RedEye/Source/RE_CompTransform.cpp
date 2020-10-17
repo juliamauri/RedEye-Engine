@@ -149,6 +149,36 @@ math::vec RE_CompTransform::GetGlobalPosition()
 	return model_global.Row3(3);
 }
 
+math::vec RE_CompTransform::GetRight()
+{
+	return model_global.Row3(0);
+}
+
+math::vec RE_CompTransform::GetLeft()
+{
+	return -model_global.Row3(0);
+}
+
+math::vec RE_CompTransform::GetUp()
+{
+	return model_global.Row3(1);
+}
+
+math::vec RE_CompTransform::GetDown()
+{
+	return -model_global.Row3(1);
+}
+
+math::vec RE_CompTransform::GetFront()
+{
+	return -model_global.Row3(2);
+}
+
+math::vec RE_CompTransform::GetBack()
+{
+	return model_global.Row3(2);
+}
+
 void RE_CompTransform::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
