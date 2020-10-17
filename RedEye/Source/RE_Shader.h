@@ -87,6 +87,7 @@ private:
 	int far_plane = -1;
 	int clip_plane = -1;
 	int using_clip_plane = -1;
+	int view_pos = -1;
 	eastl::vector<ShaderCvar> uniforms;
 };
 

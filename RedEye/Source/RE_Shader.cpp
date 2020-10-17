@@ -6,6 +6,7 @@
 
 #include "RE_ShaderImporter.h"
 #include "RE_CompCamera.h"
+#include "RE_CompTransform.h"
 #include "ModuleEditor.h"
 
 #include "RE_GLCache.h"
@@ -151,6 +152,7 @@ void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float _dt, float _time
 	if (far_plane != -1) RE_ShaderImporter::setFloat(uniforms[far_plane].location, camera->GetFarPlane());
 	if (using_clip_plane != -1) RE_ShaderImporter::setFloat(uniforms[using_clip_plane].location, (clipDistance) ? 1.0f : -1.0f);
 	if (clip_plane != -1) RE_ShaderImporter::setFloat(uniforms[clip_plane].location, clipPlane.x, clipPlane.y, clipPlane.z, clipPlane.w);
+	if (view_pos != -1) RE_ShaderImporter::setFloat(uniforms[view_pos].location, camera->GetTransform()->GetGlobalPosition());
 }
 
 void RE_Shader::UploadModel(float* _model)
@@ -307,9 +309,10 @@ void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
 	viewport_h = -1;
 	near_plane = -1;
 	far_plane = -1;
+	view_pos = -1;
 	uniforms.clear();
 
-	static const char* internalNames[32] = { "useTexture", "useColor", "useClipPlane", "clip_plane", "time", "dt", "near_plane", "far_plane", "viewport_w", "viewport_h", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "tnormals", "treflection", "currentDepth" };
+	static const char* internalNames[33] = { "useTexture", "useColor", "useClipPlane", "clip_plane", "time", "dt", "near_plane", "far_plane", "viewport_w", "viewport_h", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "tnormals", "treflection", "currentDepth", "viewPos" };
 	for (auto uniform : uniformLines)
 	{
 		int pos = uniform.find_first_of(" ");
@@ -374,7 +377,7 @@ void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
 			eastl::string name = (pos != eastl::string::npos) ? sVar.name.substr(0, pos) : sVar.name;
 
 			//Custom or internal variables
-			for (uint i = 0; i < 32; i++) {
+			for (uint i = 0; i < 33; i++) {
 				if (name.compare(internalNames[i]) == 0) {
 					sVar.custom = false;
 					break;
@@ -408,6 +411,8 @@ void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
 					using_clip_plane = uniforms.size() - 1;
 				else if (clip_plane == -1 && sVar.name.compare("clip_plane") == 0)
 					clip_plane = uniforms.size() - 1;
+				else if (view_pos == -1 && sVar.name.compare("viewPos") == 0)
+					view_pos = uniforms.size() - 1;
 			}
 		}
 	}
@@ -489,6 +494,7 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 	viewport_h = -1;
 	near_plane = -1;
 	far_plane = -1;
+	view_pos = -1;
 	uniforms.clear();
 	JSONNode* nuniforms = metaNode->PullJObject("uniforms");
 	uint size = nuniforms->PullUInt("size", 0);
@@ -594,6 +600,8 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 					using_clip_plane = uniforms.size() - 1;
 				else if (clip_plane == -1 && sVar.name.compare("clip_plane") == 0)
 					clip_plane = uniforms.size() - 1;
+				else if (view_pos == -1 && sVar.name.compare("viewPos") == 0)
+					view_pos = uniforms.size() - 1;
 			}
 		}
 	}

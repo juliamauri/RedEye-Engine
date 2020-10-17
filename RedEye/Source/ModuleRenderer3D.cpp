@@ -408,8 +408,8 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 		comptsToDraw = App->scene->GetRoot()->GetDrawableComponentsWithChilds();
 
 	// Setup Lights
-	//eastl::stack<RE_CompLight*> scene_lights;
-	/*switch (render_view.light)
+	eastl::stack<RE_CompLight*> scene_lights;
+	switch (render_view.light)
 	{
 	case LIGHT_DISABLED:
 	{
@@ -419,13 +419,16 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 	case LIGHT_GL:
 	{
 		SetLighting(true);
-		//scene_lights = App->scene->GetLights();
+		scene_lights = App->scene->GetScenePool()->GetAllLights(true);
+
+		// TODO RUB: Bind GL Lights
+
 		break;
 	}
 	case LIGHT_DIRECT:
 	{
 		SetLighting(false);
-		//scene_lights = App->scene->GetLights();
+		scene_lights = App->scene->GetScenePool()->GetAllLights(true);
 
 		// TODO RUB: Upload Light uniforms
 
@@ -434,10 +437,10 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 	case LIGHT_DEFERRED:
 	{
 		SetLighting(false);
-		//scene_lights = App->scene->GetLights();
+		scene_lights = App->scene->GetScenePool()->GetAllLights(true);
 		break;
 	}
-	}*/
+	}
 
 	// Draw Scene
 	eastl::stack<RE_Component*> drawAsLast;
@@ -475,6 +478,68 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 		}
 
 		// TODO RUB: Setup Light Uniforms
+		for (unsigned int i = 0; i < min(scene_lights.size(), 32); i++)
+		{
+			eastl::string unif_name = "lights[" + eastl::to_string(i) + "].";
+
+			RE_CompLight* current = scene_lights.top();
+			RE_CompTransform* transform = current->GetGO()->GetTransform();
+			scene_lights.pop();
+
+			RE_ShaderImporter::setFloat(
+				RE_ShaderImporter::getLocation(light_pass, (unif_name + "type").c_str()),
+				current->type);
+
+			RE_ShaderImporter::setFloat(
+				RE_ShaderImporter::getLocation(light_pass, (unif_name + "intensity").c_str()),
+				current->intensity);
+
+			RE_ShaderImporter::setFloat(
+				RE_ShaderImporter::getLocation(light_pass, (unif_name + "ambient").c_str()),
+				current->ambient);
+
+			RE_ShaderImporter::setFloat(
+				RE_ShaderImporter::getLocation(light_pass, (unif_name + "diffuse").c_str()),
+				current->diffuse);
+
+			RE_ShaderImporter::setFloat(
+				RE_ShaderImporter::getLocation(light_pass, (unif_name + "specular").c_str()),
+				current->specular);
+
+			RE_ShaderImporter::setFloat(
+				RE_ShaderImporter::getLocation(light_pass, (unif_name + "direction").c_str()),
+				transform->GetFront());
+
+			if (current->type != L_DIRECTIONAL)
+			{
+				RE_ShaderImporter::setFloat(
+					RE_ShaderImporter::getLocation(light_pass, (unif_name + "position").c_str()),
+					transform->GetGlobalPosition());
+
+				RE_ShaderImporter::setFloat(
+					RE_ShaderImporter::getLocation(light_pass, (unif_name + "constant").c_str()),
+					current->constant);
+
+				RE_ShaderImporter::setFloat(
+					RE_ShaderImporter::getLocation(light_pass, (unif_name + "linear").c_str()),
+					current->linear);
+
+				RE_ShaderImporter::setFloat(
+					RE_ShaderImporter::getLocation(light_pass, (unif_name + "constant").c_str()),
+					current->quadratic);
+
+				if (current->type == L_SPOTLIGHT)
+				{
+					RE_ShaderImporter::setFloat(
+						RE_ShaderImporter::getLocation(light_pass, (unif_name + "cutOff").c_str()),
+						current->cutOff);
+
+					RE_ShaderImporter::setFloat(
+						RE_ShaderImporter::getLocation(light_pass, (unif_name + "outerCutOff").c_str()),
+						current->outerCutOff);
+				}
+			}
+		}
 
 		// Render Lights
 		DrawQuad();
