@@ -418,6 +418,15 @@ void ModuleScene::CreateCamera(RE_GameObject* parent)
 	cam_go->AddCompCamera();
 }
 
+void ModuleScene::CreateLight(RE_GameObject* parent)
+{
+	parent = (parent) ? parent : root;
+	RE_GameObject* light_go = scenePool.AddGO("Light", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, light_go);
+
+	light_go->AddComponent(C_LIGHT);
+}
+
 void ModuleScene::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(GetName()))

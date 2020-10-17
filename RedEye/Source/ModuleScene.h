@@ -46,6 +46,7 @@ public:
 	void CreateTrefoilKnot(RE_GameObject* parent = nullptr);
 	void CreateRock(RE_GameObject* parent = nullptr);
 	void CreateCamera(RE_GameObject* parent = nullptr);
+	void CreateLight(RE_GameObject* parent = nullptr);
 
 	void DrawEditor() override;
 

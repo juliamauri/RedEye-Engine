@@ -876,4 +876,6 @@ void ModuleEditor::DrawGameObjectItems(RE_GameObject* parent)
 	if (ImGui::MenuItem("Camera"))
 		App->scene->CreateCamera(parent);
 
+	if (ImGui::MenuItem("Light"))
+		App->scene->CreateLight(parent);
 }
