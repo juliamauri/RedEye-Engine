@@ -17,6 +17,7 @@
 #include "RE_ResourceManager.h"
 #include "RE_GLCache.h"
 #include "RE_Mesh.h"
+#include "RE_Shader.h"
 
 #ifndef PAR_SHAPES_IMPLEMENTATION
 #define PAR_SHAPES_IMPLEMENTATION
@@ -135,7 +136,7 @@ void RE_CompRock::SerializeJson(JSONNode* node, eastl::map<const char*, int>* re
 
 void RE_CompRock::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
 {
-	SetUp(parent, RE_PrimitiveManager::shaderPrimitive, node->PullInt("seed", 251654), node->PullInt("nsubdivisions", 5));
+	SetUp(parent, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID(), node->PullInt("seed", 251654), node->PullInt("nsubdivisions", 5));
 	RE_CompPrimitive::color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
 }
 
@@ -169,7 +170,7 @@ void RE_CompRock::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 	memcpy(&nsubdivisions, cursor, size);
 	cursor += size;
 
-	SetUp(parent, RE_PrimitiveManager::shaderPrimitive, seed, nsubdivisions);
+	SetUp(parent, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID(), seed, nsubdivisions);
 
 	size = sizeof(float) * 3;
 	memcpy(&RE_CompPrimitive::color[0], cursor, size);
@@ -454,7 +455,7 @@ void RE_CompParametric::SerializeJson(JSONNode* node, eastl::map<const char*, in
 void RE_CompParametric::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
 {
 	useRadius = (radius = node->PullFloat("radius", 0) > 0);
-	SetUp(parent, RE_PrimitiveManager::shaderPrimitive, node->PullInt("slices", 3), node->PullInt("stacks", 3), useRadius, radius);
+	SetUp(parent, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID(), node->PullInt("slices", 3), node->PullInt("stacks", 3), useRadius, radius);
 	RE_CompPrimitive::color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
 }
 
@@ -497,7 +498,7 @@ void RE_CompParametric::DeserializeBinary(char*& cursor, eastl::map<int, const c
 	cursor += size;
 
 	useRadius = (radius > 0);
-	SetUp(parent, RE_PrimitiveManager::shaderPrimitive, slice, stacks, useRadius, radius);
+	SetUp(parent, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID(), slice, stacks, useRadius, radius);
 
 	size = sizeof(float) * 3;
 	memcpy(&RE_CompPrimitive::color[0], cursor, size);

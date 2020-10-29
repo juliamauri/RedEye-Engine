@@ -25,10 +25,6 @@ public:
 	//Check Platonics
 	unsigned int CheckPlatonicVAO(unsigned short type);
 
-
-	//Shader for primitives
-	static unsigned int shaderPrimitive;
-
 private:
 	void UploadPlatonic(struct par_shapes_mesh_s* param, unsigned int* vao, unsigned int* vbo, unsigned int * ebo, int* triangles);
 

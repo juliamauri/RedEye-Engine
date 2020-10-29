@@ -12,6 +12,9 @@
 #include "RE_CompParticleEmiter.h"
 #include "RE_ShaderImporter.h"
 #include "RE_GLCache.h"
+#include "RE_Shader.h"
+#include "RE_InternalResources.h"
+#include "RE_ResourceManager.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
 #include "OutputLog.h"
@@ -536,7 +539,7 @@ RE_CompPrimitive* RE_GameObject::AddCompPrimitive(ushortint type, int _slices, i
 	case C_HEMISHPERE:
 	case C_TORUS:
 	case C_TREFOILKNOT:
-		((RE_CompParametric*)ret)->SetUp(this, RE_PrimitiveManager::shaderPrimitive, _slices, _stacks, true, _radius);
+		((RE_CompParametric*)ret)->SetUp(this, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID(), _slices, _stacks, true, _radius);
 		break;
 	}
 	return ret;
@@ -546,7 +549,7 @@ RE_CompPrimitive* RE_GameObject::AddCompRock(int _rockSeed, int _rockNSubdivvisi
 {
 	RE_CompPrimitive* ret = nullptr;
 	ret = (RE_CompPrimitive*)poolComponents->GetNewComponent(C_ROCK);
-	((RE_CompRock*)ret)->SetUp(this, RE_PrimitiveManager::shaderPrimitive, _rockSeed, _rockNSubdivvisions);
+	((RE_CompRock*)ret)->SetUp(this, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID(), _rockSeed, _rockNSubdivvisions);
 	return ret;
 }
 

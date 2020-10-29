@@ -20,10 +20,8 @@
 
 #define CUBE_TRIANGLES 36
 
-unsigned int RE_PrimitiveManager::shaderPrimitive = 0;
-
 RE_PrimitiveManager::RE_PrimitiveManager()
-{ }
+{}
 
 RE_PrimitiveManager::~RE_PrimitiveManager()
 {
@@ -48,8 +46,6 @@ RE_PrimitiveManager::~RE_PrimitiveManager()
 
 bool RE_PrimitiveManager::Init(const char* def_shader)
 {
-	shaderPrimitive = ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID();
-
 	CheckPlatonicVAO(C_CUBE);
 	CheckPlatonicVAO(C_DODECAHEDRON);
 	CheckPlatonicVAO(C_TETRAHEDRON);
@@ -63,6 +59,7 @@ bool RE_PrimitiveManager::Init(const char* def_shader)
 
 void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP, RE_GameObject* parent)
 {
+	unsigned int shaderPrimitive = ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID();
 	switch (cmpP->GetType())
 	{
 	case C_CUBE:
@@ -139,7 +136,9 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateGrid(RE_GameObject* game_obj)
 		RE_GLCache::ChangeVAO(vao_grid);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
-	RE_CompPrimitive* ret = new RE_CompGrid(game_obj, vao_grid, shaderPrimitive);
+
+	RE_CompPrimitive* ret = new RE_CompGrid(game_obj, vao_grid, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID());
+
 	return ret;
 }
 
@@ -192,7 +191,6 @@ unsigned int RE_PrimitiveManager::CheckPlatonicVAO(unsigned short type)
 	}
 	return ret;
 }
-
 
 void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int* vao, unsigned int* vbo, unsigned int* ebo, int* triangles)
 {
