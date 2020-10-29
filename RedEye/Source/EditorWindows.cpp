@@ -377,7 +377,7 @@ void RandomTest::Draw(bool secondary)
 		ImGui::SliderInt("Max Integer", &maxInt, minInt, 100);
 
 		if (ImGui::Button("Generate Int"))
-			resultInt = App->math->RandomInt(minInt, maxInt);
+			resultInt = RE_Math::RandomInt(minInt, maxInt);
 
 		ImGui::SameLine();
 		ImGui::Text("Random Integer: %u", resultInt);
@@ -389,7 +389,7 @@ void RandomTest::Draw(bool secondary)
 		ImGui::SliderFloat("Max Float", &maxF, minF, 100.f, "%.1f");
 
 		if (ImGui::Button("Generate Float"))
-			resultF = App->math->RandomF(minF, maxF);
+			resultF = RE_Math::RandomF(minF, maxF);
 
 		ImGui::SameLine();
 		ImGui::Text("Random Float: %.2f", resultF);

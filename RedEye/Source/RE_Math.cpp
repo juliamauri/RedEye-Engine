@@ -9,6 +9,8 @@
 #pragma comment(lib, "MathGeoLib/lib/MathGeoLib_release.lib")
 #endif
 
+math::LCG RE_Math::lcg;
+
 RE_Math::RE_Math()
 {}
 

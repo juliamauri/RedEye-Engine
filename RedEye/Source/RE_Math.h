@@ -12,21 +12,22 @@ public:
 
 	void Init();
 
-	float	RandomF();
-	int		RandomInt();
+	// Random number generation
+	static float	RandomF();
+	static int		RandomInt();
+	static float	RandomF(float min, float max);
+	static int		RandomInt(int min, int max);
 
-	float	RandomF(float min, float max);
-	int		RandomInt(int min, int max);
+	// Random seed
+	static void	SetRNGSeed(unsigned int seed);
 
-	void	SetRNGSeed(unsigned int seed);
-
+	// Geometry
 	static math::float4x4 Rotate(math::float3 axis, float radians);
-
 	static math::float4x4 Rotate(math::Quat quat);
 
 private:
 
-	math::LCG lcg;
+	static math::LCG lcg;
 };
 
 #endif // !__RE_MATH_H__
