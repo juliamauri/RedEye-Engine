@@ -47,6 +47,7 @@ public:
 	void CreateRock(RE_GameObject* parent = nullptr);
 	void CreateCamera(RE_GameObject* parent = nullptr);
 	void CreateLight(RE_GameObject* parent = nullptr);
+	void CreateMaxLights(RE_GameObject* parent = nullptr);
 
 	void DrawEditor() override;
 

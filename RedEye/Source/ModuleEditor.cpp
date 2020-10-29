@@ -878,4 +878,7 @@ void ModuleEditor::DrawGameObjectItems(RE_GameObject* parent)
 
 	if (ImGui::MenuItem("Light"))
 		App->scene->CreateLight(parent);
+
+	if (ImGui::MenuItem("Max Lights"))
+		App->scene->CreateMaxLights(parent);
 }

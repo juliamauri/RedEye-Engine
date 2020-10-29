@@ -424,7 +424,32 @@ void ModuleScene::CreateLight(RE_GameObject* parent)
 	RE_GameObject* light_go = scenePool.AddGO("Light", parent);
 	Event::Push(GO_HAS_NEW_CHILD, this, parent, light_go);
 
-	light_go->AddComponent(C_LIGHT);
+	static_cast<RE_CompPrimitive*>(light_go->AddComponent(C_SPHERE))->SetColor(
+		static_cast<RE_CompLight*>(light_go->AddComponent(C_LIGHT))->diffuse);
+}
+
+void ModuleScene::CreateMaxLights(RE_GameObject* parent)
+{
+	parent = (parent) ? parent : root;
+	RE_GameObject* container_go = scenePool.AddGO("Bunch of Lights", parent);
+	Event::Push(GO_HAS_NEW_CHILD, this, parent, container_go);
+
+	eastl::string name = "light ";
+	for (int x = 0; x < 8; ++x)
+	{
+		for (int y = 0; y < 8; ++y)
+		{
+			RE_GameObject* light_go = scenePool.AddGO((name + eastl::to_string(x) + "x" + eastl::to_string(y)).c_str(), container_go);
+			light_go->GetTransform()->SetPosition(math::vec((x * 12.5f) - 50.f, 0.f, (y * 12.5f) - 50.f));
+
+			static math::vec colors[5] = { math::vec(1.f,0.f,0.f), math::vec(0.f,1.f,0.f), math::vec(0.f,0.f,1.f), math::vec(1.f,1.f,0.f), math::vec(0.f,1.f,1.f) };
+			static_cast<RE_CompPrimitive*>(light_go->AddComponent(C_SPHERE))->SetColor(
+				static_cast<RE_CompLight*>(light_go->AddComponent(C_LIGHT))->diffuse = colors[RE_Math::RandomInt() % 5]);
+
+			light_go->ResetBoundingBoxes();
+			Event::Push(GO_HAS_NEW_CHILD, this, container_go, light_go);
+		}
+	}
 }
 
 void ModuleScene::DrawEditor()
