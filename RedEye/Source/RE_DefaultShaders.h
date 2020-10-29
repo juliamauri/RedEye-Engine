@@ -145,7 +145,7 @@
 "layout (location = 0) out vec3 gPosition;\n"						\
 "layout (location = 1) out vec3 gNormal;\n"							\
 "layout (location = 2) out vec3 gAlbedo;\n"							\
-"layout (location = 3) out float gSpec;\n"							\
+"layout (location = 3) out vec2 gSpec;\n"							\
 "\n"																\
 "in vec3 FragPos;\n"												\
 "in vec2 TexCoord;\n"												\
@@ -154,9 +154,11 @@
 "uniform float useTexture;\n"										\
 "uniform sampler2D tdiffuse0;\n"									\
 "uniform sampler2D tspecular0;\n"									\
+"uniform float shininess;\n"										\
 "\n"																\
 "uniform float useColor;\n"											\
 "uniform vec3 cdiffuse;\n"											\
+"uniform vec3 cspecular;\n"											\
 "\n"																\
 "void main()\n"														\
 "{\n"																\
@@ -166,15 +168,18 @@
 "	if (useTexture > 0.0f && useColor > 0.0f)\n"					\
 "	{\n"															\
 "		gAlbedo = texture(tdiffuse0, TexCoord).rgb * cdiffuse;\n"	\
-"		gSpec = texture(tspecular0, TexCoord).r;\n"				\
+"		gSpec = vec2(texture(tspecular0, TexCoord).r, shininess);\n"\
 "	}\n"															\
 "	else if (useTexture > 0.0f)\n"									\
 "	{\n"															\
 "		gAlbedo = texture(tdiffuse0, TexCoord).rgb;\n"				\
-"		gSpec = texture(tspecular0, TexCoord).r;\n"				\
+"		gSpec = vec2(texture(tspecular0, TexCoord).r, shininess);\n"\
 "	}\n"															\
 "	else if (useColor > 0.0f)\n"									\
+"	{\n"															\
 "		gAlbedo = cdiffuse;\n"									    \
+"		gSpec = vec2(cspecular.x, shininess);\n"					\
+"	}\n"															\
 "}\0"
 
 // Deferred Light Pass
@@ -191,75 +196,104 @@
 "	gl_Position = vec4(aPos, 1.0);\n"		\
 "}\0"
 
-#define LIGHTPASSFRAGMENTSHADER										\
-"#version 330 core\n"												\
-"layout (location = 4) out vec4 aRes;\n"							\
-"\n"																\
-"in vec2 TexCoord;\n"												\
-"\n"																\
-"struct Light {\n"													\
-"    float type;\n"													\
-"    float intensity;\n"											\
-"    vec3 position;\n"												\
-"    vec3 direction;\n"												\
-"    float cutOff;\n"												\
-"    float outerCutOff;\n"											\
-"\n"																\
-"    vec3 ambient;\n"												\
-"    vec3 diffuse;\n"												\
-"    vec3 specular;\n"												\
-"\n"																\
-"    float constant;\n"												\
-"    float linear;\n"												\
-"    float quadratic;\n"											\
-"};\n"																\
-"const int NR_LIGHTS = 32;\n"										\
-"uniform Light lights[NR_LIGHTS];\n"								\
-"uniform vec3 viewPos;\n"											\
-"\n"																\
-"uniform sampler2D gPosition;\n"									\
-"uniform sampler2D gNormal;\n"										\
-"uniform sampler2D gAlbedo;\n"										\
-"uniform sampler2D gSpec;\n"										\
-"\n"																\
-"void main()\n"														\
-"{\n"																\
-"	vec3 pos = normalize(texture(gPosition, TexCoord).rgb);\n"		\
-"	vec3 Normal = normalize(texture(gNormal, TexCoord).rgb);\n"		\
-"	vec3 Diffuse = texture(gAlbedo, TexCoord).rgb;\n"				\
-"	float Specular = texture(gSpec, TexCoord).r;\n"					\
-"   vec3 ambient  = vec3(0.0, 0.0, 0.0);\n"					        \
-"   vec3 lighting  = vec3(0.0, 0.0, 0.0);\n"				    	\
-"	vec3 viewDir  = normalize(viewPos - pos);\n"					\
-"	for (int i = 0; i < NR_LIGHTS; ++i)\n"				        	\
-"   {\n"															\
-"       ambient += lights[i].ambient;\n"					\
-"	    vec3 lightDir = normalize(lights[i].position - pos);\n"					\
-"	    vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * lights[i].diffuse;\n"					\
-"	    vec3 halfwayDir = normalize(lightDir + viewDir);\n"					\
-"	    float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);\n"					\
-"	    vec3 specular = lights[i].specular * spec * Specular;\n"					\
-"	    if (type >= 1.0)\n"					\
-"       {\n"															\
-"	        if (type >= 2.0)\n"					\
-"           {\n"															\
-"			float theta = dot(lightDir, normalize(-lights[i].direction));\n"					\
-"			float epsilon = (lights[i].cutOff - lights[i].outerCutOff);\n"					\
-"			float intensity = clamp((theta - lights[i].outerCutOff) / epsilon, 0.0, 1.0);\n"					\
-"			diffuse *= intensity;\n"					\
-"			specular *= intensity;\n"					\
-"           }\n"															\
-"	    float distance = length(lights[i].position - pos);\n"					\
-"	    float attenuation = 1.0 / (1.0 + lights[i].linear * distance + lights[i].quadratic * distance * distance);\n"\
-"	    diffuse *= attenuation;\n"					\
-"	    specular *= attenuation;\n"					\
-"       }\n"															\
-"	    lighting += diffuse + specular;\n"					\
-"   }\n"															\
-"	aRes = vec4(normalize(ambient + lighting), 1.0);\n"									\
+#define LIGHTPASSFRAGMENTSHADER																														\
+"#version 330 core\n"																																\
+"layout (location = 4) out vec3 aRes;\n"																											\
+"\n"																																				\
+"in vec2 TexCoord;\n"																																\
+"\n"																																				\
+"struct Light {\n"																																	\
+"    float type;\n"																																	\
+"    float intensity;\n"																															\
+"\n"																																				\
+"    vec3 position;\n"																																\
+"    vec3 direction;\n"																																\
+"\n"																																				\
+"    float cutOff;\n"																																\
+"    float outerCutOff;\n"																															\
+"\n"																																				\
+"    vec3 diffuse;\n"																																\
+"    float specular;\n"																																\
+"\n"																																				\
+"    float constant;\n"																																\
+"    float linear;\n"																																\
+"    float quadratic;\n"																															\
+"};\n"																																				\
+"const int NR_LIGHTS = 64;\n"																														\
+"uniform Light lights[NR_LIGHTS];\n"																												\
+"uniform vec3 viewPos;\n"																															\
+"\n"																																				\
+"uniform sampler2D gPosition;\n"																													\
+"uniform sampler2D gNormal;\n"																														\
+"uniform sampler2D gAlbedo;\n"																														\
+"uniform sampler2D gSpec;\n"																														\
+"\n"																																				\
+"void main()\n"																																		\
+"{\n"																																				\
+"	vec3 Position = texture(gPosition, TexCoord).rgb;\n"																							\
+"	vec3 Normal = normalize(texture(gNormal, TexCoord).rgb);\n"																						\
+"	vec3 Diffuse = texture(gAlbedo, TexCoord).rgb;\n"																								\
+"	float Specular = texture(gSpec, TexCoord).r;\n"																									\
+"	float shininess = 1.0; //texture(gSpec, TexCoord).g;\n"																							\
+"	\n"																																				\
+"   vec3 lighting = vec3(0.0, 0.0, 0.0);\n"				    																						\
+"	vec3 viewDir = normalize(viewPos - Position);\n"																								\
+"	\n"																																				\
+"	for (int i = 0; i < NR_LIGHTS; ++i)\n"				        																					\
+"   {\n"																																			\
+"       if (lights[i].type >= 0)\n"																													\
+"		{\n"																																		\
+"			vec3 lightDir = normalize(lights[i].position - Position);\n"																			\
+"			vec3 specular = vec3(0.0, 0.0, 0.0);\n"																									\
+"			vec3 res_light = vec3(0.0, 0.0, 0.0);\n"																								\
+"			\n"																																		\
+"			if (lights[i].type == 0.0) // DIRECTIONAL_LIGHT\n"																						\
+"			{\n"																																	\
+"				vec3 diffuse = lights[i].diffuse * max(dot(Normal, lightDir), 0.0) * Diffuse;\n"													\
+"				\n"																																	\
+"				if (dot(Normal, lightDir) > 0.0)\n"																									\
+"					specular = vec3(pow(max(dot(viewDir, reflect(-lightDir, Normal)), 0.0), shininess) * lights[i].specular * Specular);\n"			\
+"				\n"																																	\
+"				res_light = diffuse + specular;\n"																									\
+"			}\n"																																	\
+"			else if (lights[i].type == 1.0) // POINT_LIGHT\n"																						\
+"			{\n"																																	\
+"				vec3 diffuse = lights[i].diffuse * max(dot(Normal, lightDir), 0.0) * Diffuse;\n"													\
+"				\n"																																	\
+"				if (dot(Normal, lightDir) > 0.0)\n"																									\
+"					specular = vec3(pow(max(dot(viewDir, reflect(-lightDir, Normal)), 0.0), shininess) * lights[i].specular * Specular);\n"			\
+"				\n"																																	\
+"				float distance = length(lights[i].position - Position);\n"																			\
+"				float attenuation = 1.0 / (lights[i].constant + lights[i].linear * distance + lights[i].quadratic * (distance * distance));\n"		\
+"				\n"																																	\
+"				diffuse *= attenuation;\n"																											\
+"				specular *= attenuation;\n"																											\
+"				res_light = diffuse + specular;\n"																									\
+"			}\n"																																	\
+"			else if (lights[i].type == 2.0) // SPOT_LIGHT\n"																						\
+"			{\n"																																	\
+"				float theta = dot(lightDir, normalize(-lights[i].direction));\n"																	\
+"				if(theta > lights[i].outerCutOff)\n"																								\
+"				{\n"																																\
+"					vec3 diffuse = lights[i].diffuse * max(dot(Normal, lightDir), 0.0) * Diffuse;\n"												\
+"					\n"																																\
+"					if (dot(Normal, lightDir) > 0.0)\n"																								\
+"						specular = vec3(pow(max(dot(viewDir, reflect(-lightDir, Normal)), 0.0), shininess) * lights[i].specular * Specular);\n"		\
+"					\n"																																\
+"					float smoothness = clamp((theta - lights[i].outerCutOff) / (lights[i].cutOff - lights[i].outerCutOff), 0.0, 1.0);\n"			\
+"					\n"																																\
+"					float distance = length(lights[i].position - Position);\n"																		\
+"					float attenuation = 1.0 / (lights[i].constant + lights[i].linear * distance + lights[i].quadratic * (distance * distance));\n"	\
+"					\n"																																\
+"					diffuse *= attenuation * smoothness;\n"																							\
+"					specular *= attenuation * smoothness;\n"																						\
+"					res_light = diffuse + specular;\n"																								\
+"				}\n"																																\
+"			}\n"																																	\
+"			lighting += res_light * lights[i].intensity;\n"																							\
+"		}\n"																																		\
+"   }\n"																																			\
+"	aRes = lighting;\n"																																\
 "}\0"
-
-/*"	    diffuse *= lights[i].intensity;\n"					\*/
-
 
 #endif // !__DEFAULTSHADERS_H__

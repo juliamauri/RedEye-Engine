@@ -96,11 +96,11 @@ public:
 	bool blendMode = false;
 
 	eastl::vector<const char*> tOpacity;
-	float opacity = 1.0f;
+	float opacity = 1.f;
 	eastl::vector<const char*> tShininess;
-	float shininess = 0.f;
-	float shininessStrenght = 1.0f;
-	float refraccti = 1.0f;
+	float shininess = 1.f;
+	float shininessStrenght = 1.f;
+	float refraccti = 1.f;
 
 	eastl::vector<const char*> tHeight;
 	eastl::vector<const char*> tNormals;

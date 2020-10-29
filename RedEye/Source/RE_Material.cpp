@@ -1554,46 +1554,50 @@ void RE_Material::GetAndProcessUniformsFromShader()
 {
 	static const char* materialNames[18] = {  "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient",  "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity",  "shininess", "shininessST", "tshininess", "refraccti", "theight",  "tnormals", "treflection" };
 	static const char* materialTextures[9] = {  "tdiffuse", "tspecular", "tambient", "temissive", "topacity", "tshininess", "theight", "tnormals", "treflection" };
-	for (uint i = 0; i < 18; i++) usingOnMat[i] = 0;
+	
+	for (uint i = 0; i < 18; i++)
+		usingOnMat[i] = 0;
+
 	fromShaderCustomUniforms.clear();
+	eastl::vector<ShaderCvar> fromShader = ((RE_Shader*)App->resources->At(shaderMD5 ? shaderMD5 : App->internalResources->GetDefaultShader()))->GetUniformValues();
 
-	if (shaderMD5) {
-		eastl::vector<ShaderCvar> fromShader = ((RE_Shader*)App->resources->At(shaderMD5))->GetUniformValues();
-		for (auto sVar : fromShader) {
+	for (auto sVar : fromShader)
+	{
+		if (sVar.custom)
+			fromShaderCustomUniforms.push_back(sVar);
+		else
+		{
 			int pos = sVar.name.find_first_of("0123456789");
+			eastl::string name = (pos != eastl::string::npos) ? sVar.name.substr(0, pos) : sVar.name;
 
-			eastl::string name = (pos != eastl::string::npos) ? sVar.name.substr(0,pos) : sVar.name;
-			if (sVar.custom) fromShaderCustomUniforms.push_back(sVar);
-			else {
-				MaterialUINT index = UNDEFINED;
-				for (uint i = 0; i < 18; i++) {
-					if (name.compare(materialNames[i]) == 0) {
-						index = (MaterialUINT)i;
+			MaterialUINT index = UNDEFINED;
+			for (uint i = 0; i < 18; i++)
+				if (name.compare(materialNames[i]) == 0)
+				{
+					index = (MaterialUINT)i;
+					break;
+				}
+
+			if (index != UNDEFINED)
+			{
+				bool texture = false;
+				for (uint i = 0; i < 9; i++)
+					if (name.compare(materialTextures[i]) == 0)
+					{
+						texture = true;
 						break;
 					}
+
+				if (texture)
+				{
+					int count = std::stoi(&sVar.name.back()) + 1;
+					if (usingOnMat[index] < count)
+						usingOnMat[index] = count;
 				}
-				if (index != UNDEFINED) {
-					bool texture = false;
-					for (uint i = 0; i < 9; i++) {
-						if (name.compare(materialTextures[i]) == 0) {
-							texture = true;
-							break;
-						}
-					}	
-					if (texture) {
-						int count = std::stoi(&sVar.name.back()) + 1;
-						if (usingOnMat[index] < count) usingOnMat[index] = count;
-					}
-					else
-						usingOnMat[index] = 1;
-				}
+				else
+					usingOnMat[index] = 1;
 			}
 		}
-	}
-	else {
-		//Default Shader
-		usingOnMat[CDIFFUSE] = 1;
-		usingOnMat[TDIFFUSE] = 1;
 	}
 }
 
