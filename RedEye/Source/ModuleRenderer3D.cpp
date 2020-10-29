@@ -85,7 +85,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		if (ret = (error == GLEW_OK))
 		{
 			render_views.push_back(RenderView("Scene", { 0, 0 },
-				FRUSTUM_CULLING | OVERRIDE_CULLING | DEBUG_DRAW | SKYBOX | BLENDED |
+				FRUSTUM_CULLING | OVERRIDE_CULLING /*| DEBUG_DRAW*/ | SKYBOX | BLENDED |
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
 				LIGHT_DEFERRED));
 			
@@ -449,11 +449,13 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 	{
 		drawing = comptsToDraw.top();
 		bool blend = false;
-		if (drawing->GetType() == C_MESH) {
+
+		if (drawing->GetType() == C_MESH)
 			 blend = ((RE_CompMesh*)drawing)->isBlend();
-		}
+
 		if (!blend) drawing->Draw();
 		else drawAsLast.push(drawing);
+
 		comptsToDraw.pop();
 	}
 
@@ -478,67 +480,18 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 		}
 
 		// TODO RUB: Setup Light Uniforms
-		for (unsigned int i = 0; i < min(scene_lights.size(), 32); i++)
+		int count = scene_lights.size();
+		for (unsigned int i = 0; i < 64; i++)
 		{
 			eastl::string unif_name = "lights[" + eastl::to_string(i) + "].";
 
-			RE_CompLight* current = scene_lights.top();
-			RE_CompTransform* transform = current->GetGO()->GetTransform();
-			scene_lights.pop();
-
-			RE_ShaderImporter::setFloat(
-				RE_ShaderImporter::getLocation(light_pass, (unif_name + "type").c_str()),
-				current->type);
-
-			RE_ShaderImporter::setFloat(
-				RE_ShaderImporter::getLocation(light_pass, (unif_name + "intensity").c_str()),
-				current->intensity);
-
-			RE_ShaderImporter::setFloat(
-				RE_ShaderImporter::getLocation(light_pass, (unif_name + "ambient").c_str()),
-				current->ambient);
-
-			RE_ShaderImporter::setFloat(
-				RE_ShaderImporter::getLocation(light_pass, (unif_name + "diffuse").c_str()),
-				current->diffuse);
-
-			RE_ShaderImporter::setFloat(
-				RE_ShaderImporter::getLocation(light_pass, (unif_name + "specular").c_str()),
-				current->specular);
-
-			RE_ShaderImporter::setFloat(
-				RE_ShaderImporter::getLocation(light_pass, (unif_name + "direction").c_str()),
-				transform->GetFront());
-
-			if (current->type != L_DIRECTIONAL)
+			if (i < count)
 			{
-				RE_ShaderImporter::setFloat(
-					RE_ShaderImporter::getLocation(light_pass, (unif_name + "position").c_str()),
-					transform->GetGlobalPosition());
-
-				RE_ShaderImporter::setFloat(
-					RE_ShaderImporter::getLocation(light_pass, (unif_name + "constant").c_str()),
-					current->constant);
-
-				RE_ShaderImporter::setFloat(
-					RE_ShaderImporter::getLocation(light_pass, (unif_name + "linear").c_str()),
-					current->linear);
-
-				RE_ShaderImporter::setFloat(
-					RE_ShaderImporter::getLocation(light_pass, (unif_name + "constant").c_str()),
-					current->quadratic);
-
-				if (current->type == L_SPOTLIGHT)
-				{
-					RE_ShaderImporter::setFloat(
-						RE_ShaderImporter::getLocation(light_pass, (unif_name + "cutOff").c_str()),
-						current->cutOff);
-
-					RE_ShaderImporter::setFloat(
-						RE_ShaderImporter::getLocation(light_pass, (unif_name + "outerCutOff").c_str()),
-						current->outerCutOff);
-				}
+				scene_lights.top()->CallShaderUniforms(light_pass, unif_name.c_str());
+				scene_lights.pop();
 			}
+			else
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "type").c_str()), -1.0f);
 		}
 
 		// Render Lights

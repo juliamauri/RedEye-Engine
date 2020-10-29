@@ -489,7 +489,7 @@ void ComponentsPool::SerializeBinary(char*& cursor, eastl::map<const char*, int>
 {
 	camPool.SerializeBinary(cursor, resources);
 	meshPool.SerializeBinary(cursor, resources);
-	//lightPool.SerializeBinary(cursor, resources);
+	lightPool.SerializeBinary(cursor, resources);
 	pCubePool.SerializeBinary(cursor, resources);
 	pDodecahedronPool.SerializeBinary(cursor, resources);
 	pTetrahedronPool.SerializeBinary(cursor, resources);
@@ -508,7 +508,7 @@ void ComponentsPool::DeserializeBinary(GameObjectManager* goPool, char*& cursor,
 {
 	camPool.DeserializeBinary(goPool, cursor, resources);
 	meshPool.DeserializeBinary(goPool, cursor, resources);
-	//lightPool.DeserializeBinary(goPool, cursor, resources);
+	lightPool.DeserializeBinary(goPool, cursor, resources);
 	pCubePool.DeserializeBinary(goPool, cursor, resources);
 	pDodecahedronPool.DeserializeBinary(goPool, cursor, resources);
 	pTetrahedronPool.DeserializeBinary(goPool, cursor, resources);

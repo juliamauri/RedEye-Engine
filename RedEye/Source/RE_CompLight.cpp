@@ -1,10 +1,17 @@
 #include "RE_CompLight.h"
 
 #include "RE_GameObject.h"
+#include "RE_CompTransform.h"
+#include "RE_ShaderImporter.h"
+#include "RE_FileSystem.h"
 #include "ImGui\imgui.h"
 
-RE_CompLight::RE_CompLight() :RE_Component(C_LIGHT, nullptr)
-{}
+RE_CompLight::RE_CompLight() : RE_Component(C_LIGHT, nullptr)
+{
+	diffuse = math::vec(0.8f);
+	cutOff[0] = 12.5f;
+	outerCutOff[0] = 17.5f;
+}
 
 RE_CompLight::~RE_CompLight()
 {}
@@ -13,17 +20,53 @@ void RE_CompLight::SetUp(RE_GameObject* parent)
 {
 	go = parent;
 	parent->AddComponent(this);
+
+	UpdateCutOff();
 }
 
 void RE_CompLight::SetUp(const RE_CompLight& cmpLight, RE_GameObject* parent)
 {
 	go = parent;
 	parent->AddComponent(this);
+
+	type = cmpLight.type;
+	intensity = cmpLight.intensity;
+	constant = cmpLight.constant;
+	linear = cmpLight.linear;
+	quadratic = cmpLight.quadratic;
+	diffuse = cmpLight.diffuse;
+	specular = cmpLight.specular;
+
+	cutOff[0] = cmpLight.cutOff[0];
+	outerCutOff[0] = cmpLight.outerCutOff[0];
+	UpdateCutOff();
 }
 
-LightType RE_CompLight::GetType() const
+void RE_CompLight::CallShaderUniforms(unsigned int shader, const char* name) const
 {
-	return type;
+	eastl::string unif_name = name;
+
+	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "type").c_str()), float(type));
+	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "intensity").c_str()), intensity);
+	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuse").c_str()), diffuse);
+	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "specular").c_str()), specular);
+
+	RE_CompTransform* transform = GetGO()->GetTransform();
+	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "direction").c_str()), transform->GetFront());
+
+	if (type != L_DIRECTIONAL)
+	{
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "position").c_str()), transform->GetGlobalPosition());
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "constant").c_str()), constant);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "linear").c_str()), linear);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "quadratic").c_str()), quadratic);
+
+		if (type == L_SPOTLIGHT)
+		{
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "cutOff").c_str()), cutOff[1]);
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "outerCutOff").c_str()), outerCutOff[1]);
+		}
+	}
 }
 
 void RE_CompLight::DrawProperties()
@@ -32,56 +75,112 @@ void RE_CompLight::DrawProperties()
 	{
 		ImGui::Combo("Light Type", (int*)&type, "DIRECTIONAL\0POINT\0SPOTLIGHT");
 
-		ImGui::DragFloat("Intensity", &intensity, 1.0f, 0.0f, 5.0f, "%.1f");
-		ImGui::DragFloat("Constant", &constant, 1.0f, 0.0f, 5.0f, "%.1f");
-		ImGui::DragFloat("Linear", &linear, 1.0f, 0.0f, 5.0f, "%.1f");
-		ImGui::DragFloat("Quadratic", &quadratic, 1.0f, 0.0f, 5.0f, "%.1f");
+		ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f");
+		ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f");
+		ImGui::DragFloat("Linear", &linear, 0.01f, 0.001f, 5.0f, "%.3f");
+		ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
 
-		ImGui::ColorEdit3("Ambient Color", &ambient[0]);
 		ImGui::ColorEdit3("Diffuse Color", &diffuse[0]);
-		ImGui::ColorEdit3("Specular Color", &specular[0]);
+		ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f");
 
 		if (type == L_SPOTLIGHT)
 		{
-			ImGui::DragFloat("CutOff", &cutOff, 1.0f, 0.0f, 5.0f, "%.1f");
-			ImGui::DragFloat("OuterCutOff", &outerCutOff, 1.0f, 0.0f, 5.0f, "%.1f");
+			if (ImGui::DragFloat("CutOff", &cutOff[0], 1.0f, 0.0f, 90.0f, "%.0f"))
+				cutOff[1] = math::Cos(math::DegToRad(cutOff[0]));
+			if (ImGui::DragFloat("OuterCutOff", &outerCutOff[0], 1.0f, 0.0f, 90.0f, "%.0f"))
+				outerCutOff[1] = math::Cos(math::DegToRad(outerCutOff[0]));
 		}
 	}
 }
 
 void RE_CompLight::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
 {
-	//node->PushBool("isPrespective", isPerspective);
+	node->PushInt("type", type);
+	node->PushFloat("intensity", intensity);
+	node->PushFloat("constant", constant);
+	node->PushFloat("linear", linear);
+	node->PushFloat("quadratic", quadratic);
+	node->PushFloatVector("diffuse", diffuse);
+	node->PushFloat("specular", specular);
+	node->PushFloat("cutOff", cutOff[0]);
+	node->PushFloat("outerCutOff", outerCutOff[0]);
 }
 
 void RE_CompLight::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
 {
-	//usingSkybox = node->PullBool("usingSkybox", true);
+	type = static_cast<LightType>(node->PullInt("type", L_POINT));
+
+	intensity = node->PullFloat("intensity", intensity);
+	constant = node->PullFloat("constant", constant);
+	linear = node->PullFloat("linear", linear);
+	quadratic = node->PullFloat("quadratic", quadratic);
+	diffuse = node->PullFloatVector("diffuse", diffuse);
+	specular = node->PullFloat("specular", specular);
+	cutOff[0] = node->PullFloat("cutOff", cutOff[0]);
+	outerCutOff[0] = node->PullFloat("outerCutOff", outerCutOff[0]);
+
+	SetUp(parent);
 }
 
 unsigned int RE_CompLight::GetBinarySize() const
 {
-	return 0; // sizeof(bool) * 3 + sizeof(int) * 2 + sizeof(float) * 3;
+	return sizeof(int) + sizeof(float) * 10;
 }
 
 void RE_CompLight::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
 {
-	/*size_t size = sizeof(bool);
-	memcpy(cursor, &isPerspective, size);
+	size_t size = sizeof(int);
+	memcpy(cursor, &type, size);
 	cursor += size;
 
 	size = sizeof(float);
-	memcpy(cursor, &near_plane, size);
-	cursor += size;*/
+	memcpy(cursor, &intensity, size);
+	cursor += size;
+	memcpy(cursor, &constant, size);
+	cursor += size;
+	memcpy(cursor, &linear, size);
+	cursor += size;
+	memcpy(cursor, &quadratic, size);
+	cursor += size;
+	memcpy(cursor, &diffuse[0], size * 3);
+	cursor += size * 3;
+	memcpy(cursor, &specular, size);
+	cursor += size;
+	memcpy(cursor, &cutOff[0], size);
+	cursor += size;
+	memcpy(cursor, &outerCutOff[0], size);
+	cursor += size;
 }
 
 void RE_CompLight::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)
 {
-	/*size_t size = sizeof(bool);
-	memcpy(&isPerspective, cursor, size);
+	size_t size = sizeof(int);
+	memcpy(&type, cursor, size);
 	cursor += size;
 
 	size = sizeof(float);
-	memcpy(&near_plane, cursor, size);
-	cursor += size;*/
+	memcpy(&intensity, cursor, size);
+	cursor += size;
+	memcpy(&constant, cursor, size);
+	cursor += size;
+	memcpy(&linear, cursor, size);
+	cursor += size;
+	memcpy(&quadratic, cursor, size);
+	cursor += size;
+	memcpy(&diffuse[0], cursor, size * 3);
+	cursor += size * 3;
+	memcpy(&specular, cursor, size);
+	cursor += size;
+	memcpy(&cutOff[0], cursor, size);
+	cursor += size;
+	memcpy(&outerCutOff[0], cursor, size);
+	cursor += size;
+
+	SetUp(parent);
+}
+
+inline void RE_CompLight::UpdateCutOff()
+{
+	cutOff[1] = math::Cos(math::DegToRad(cutOff[0]));
+	outerCutOff[1] = math::Cos(math::DegToRad(outerCutOff[0]));
 }

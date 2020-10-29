@@ -21,7 +21,7 @@ public:
 	void SetUp(RE_GameObject* parent);
 	void SetUp(const RE_CompLight& cmpLight, RE_GameObject* parent);
 
-	LightType GetType() const;
+	void CallShaderUniforms(unsigned int shader, const char* unif_name) const;
 
 	void DrawProperties() override;
 
@@ -32,24 +32,27 @@ public:
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)override;
 
+private:
+
+	inline void UpdateCutOff();
+
 public:
 
-	LightType type = L_DIRECTIONAL;
+	LightType type = L_POINT;
 
 	// Attenuattion
 	float intensity = 1.0f;
 	float constant = 1.0f;
-	float linear = 0.7f;
-	float quadratic = 1.8f;
+	float linear = 0.091f;
+	float quadratic = 0.011f;
 
-	// colors
-	math::vec ambient; // 0.1
+	// color
 	math::vec diffuse; // 0.8
-	math::vec specular; // 1.0
+	float specular = 0.2f;
 
 	// Spotlight
-	float cutOff; // cos(radians(12.5f))
-	float outerCutOff; // cos(radians(17.5f))
+	float cutOff[2]; // cos(radians(12.5f))
+	float outerCutOff[2]; // cos(radians(17.5f))
 };
 
 #endif // !__RE_COMPLIGHT_H__

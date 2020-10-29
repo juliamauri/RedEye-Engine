@@ -151,31 +151,49 @@ math::vec RE_CompTransform::GetGlobalPosition()
 
 math::vec RE_CompTransform::GetRight()
 {
+	if (needed_update_transform)
+		CalcGlobalTransform();
+
 	return model_global.Row3(0);
 }
 
 math::vec RE_CompTransform::GetLeft()
 {
+	if (needed_update_transform)
+		CalcGlobalTransform();
+
 	return -model_global.Row3(0);
 }
 
 math::vec RE_CompTransform::GetUp()
 {
+	if (needed_update_transform)
+		CalcGlobalTransform();
+
 	return model_global.Row3(1);
 }
 
 math::vec RE_CompTransform::GetDown()
 {
+	if (needed_update_transform)
+		CalcGlobalTransform();
+
 	return -model_global.Row3(1);
 }
 
 math::vec RE_CompTransform::GetFront()
 {
+	if (needed_update_transform)
+		CalcGlobalTransform();
+
 	return -model_global.Row3(2);
 }
 
 math::vec RE_CompTransform::GetBack()
 {
+	if (needed_update_transform)
+		CalcGlobalTransform();
+
 	return model_global.Row3(2);
 }
 
