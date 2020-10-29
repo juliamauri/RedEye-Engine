@@ -70,7 +70,6 @@ void SystemInfo::WhatAreWeRunningOn()
 	}
 
 	App->ReportSoftware("gpudetect");
-	App->ReportSoftware("mmgr");
 }
 
 void SystemInfo::MemoryDraw()
