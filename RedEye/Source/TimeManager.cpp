@@ -4,6 +4,10 @@
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
 
+float TimeManager::dt;
+Timer TimeManager::engine_timer(false);
+Timer TimeManager::game_timer(false);
+
 TimeManager::TimeManager()
 {
 	capped_ms = 1000.f / capped_fps;
@@ -98,18 +102,18 @@ void TimeManager::SetMaxFPS(float max_fps)
 }
 
 float TimeManager::GetMaxFPS() const { return capped_fps; }
-float TimeManager::GetDeltaTime() const { return dt; }
+float TimeManager::GetDeltaTime() { return dt; }
 unsigned int TimeManager::GetCappedMS() const { return capped_ms; }
 unsigned int TimeManager::GetFpsCounter() const { return fps_counter; }
 unsigned int TimeManager::GetLastMs() const { return last_ms_count; }
 unsigned int TimeManager::GetLastFPS() const { return last_fps_count; }
 
-float TimeManager::GetEngineTimer() const
+float TimeManager::GetEngineTimer()
 {
 	return engine_timer.ReadF()/1000.f;
 }
 
-float TimeManager::GetGameTimer() const
+float TimeManager::GetGameTimer()
 {
 	return game_timer.ReadF()/1000.f;
 }
@@ -187,5 +191,5 @@ unsigned int Timer::Read() const
 
 float Timer::ReadF() const
 {
-	return (float)Read();
+	return static_cast<float>(Read());
 }

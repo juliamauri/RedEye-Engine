@@ -37,7 +37,7 @@ public:
 
 	eastl::vector<ShaderCvar> GetUniformValues();
 
-	void UploadMainUniforms(RE_CompCamera* camera, float dt, float time, float window_h, float window_w, bool clipDistance, math::float4 clipPlane);
+	void UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane);
 	void UploadModel(float* model);
 	void UploadDepth(int texture);
 

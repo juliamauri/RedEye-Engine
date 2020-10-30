@@ -85,7 +85,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		if (ret = (error == GLEW_OK))
 		{
 			render_views.push_back(RenderView("Scene", { 0, 0 },
-				FRUSTUM_CULLING | OVERRIDE_CULLING /*| DEBUG_DRAW*/ | SKYBOX | BLENDED |
+				FRUSTUM_CULLING | OVERRIDE_CULLING | OUTLINE_SELECTION /*| DEBUG_DRAW*/ | SKYBOX | BLENDED |
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
 				LIGHT_DEFERRED));
 			
@@ -150,7 +150,8 @@ update_status ModuleRenderer3D::PostUpdate()
 	update_status ret = UPDATE_CONTINUE;
 
 	// Setup Draws
-	SetupShaders();
+	activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+
 	render_views[0].camera = RE_CameraManager::EditorCamera();
 	render_views[1].camera = RE_CameraManager::MainCamera();
 
@@ -360,15 +361,16 @@ void ModuleRenderer3D::ReRenderThumbnail(const char* res)
 	thumbnailsToRender.push(res);
 }
 
-void ModuleRenderer3D::DrawScene(RenderView& render_view)
+void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 {
 	OPTICK_CATEGORY(render_view.name.c_str(), Optick::Category::Rendering);
 
 	// Setup Frame Buffer
 	current_lighting = render_view.light;
-	unsigned int target_fbo = current_fbo = render_view.GetFBO();
-	RE_FBOManager::ChangeFBOBind(target_fbo, App->fbomanager->GetWidth(target_fbo), App->fbomanager->GetHeight(target_fbo));
-	RE_FBOManager::ClearFBOBuffers(target_fbo, render_view.clear_color.ptr());
+	current_fbo = render_view.GetFBO();
+
+	RE_FBOManager::ChangeFBOBind(current_fbo, App->fbomanager->GetWidth(current_fbo), App->fbomanager->GetHeight(current_fbo));
+	RE_FBOManager::ClearFBOBuffers(current_fbo, render_view.clear_color.ptr());
 
 	// Setup Render Flags
 	SetWireframe(render_view.flags & WIREFRAME);
@@ -381,7 +383,7 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
-		((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(render_view.camera, dt, time, App->fbomanager->GetHeight(target_fbo), App->fbomanager->GetWidth(target_fbo), usingClipDistance, render_view.clip_distance);
+		((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(render_view.camera, App->fbomanager->GetHeight(current_fbo), App->fbomanager->GetWidth(current_fbo), usingClipDistance, render_view.clip_distance);
 
 	// Frustum Culling
 	eastl::stack<RE_Component*> comptsToDraw;
@@ -476,10 +478,10 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 		{
 			glActiveTexture(GL_TEXTURE0 + count);
 			RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
-			RE_GLCache::ChangeTextureBind(App->fbomanager->GetTextureID(target_fbo, count));
+			RE_GLCache::ChangeTextureBind(App->fbomanager->GetTextureID(current_fbo, count));
 		}
 
-		// TODO RUB: Setup Light Uniforms
+		// Setup Light Uniforms
 		int count = scene_lights.size();
 		for (unsigned int i = 0; i < 64; i++)
 		{
@@ -521,11 +523,13 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 	if (render_view.flags & SKYBOX && render_view.camera->isUsingSkybox())
 	{
 		OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
+
 		RE_GLCache::ChangeTextureBind(0);
-		RE_Shader* skyboxShader = (RE_Shader*)App->resources->At(App->internalResources->GetDefaultSkyBoxShader());
-		uint skysphereshader = skyboxShader->GetID();
+
+		uint skysphereshader = static_cast<RE_Shader*>(App->resources->At(App->internalResources->GetDefaultSkyBoxShader()))->GetID();
 		RE_GLCache::ChangeShader(skysphereshader);
 		RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
+
 		glDepthFunc(GL_LEQUAL);
 		RE_CameraManager::MainCamera()->DrawSkybox();
 		glDepthFunc(GL_LESS); // set depth function back to default
@@ -629,13 +633,6 @@ void ModuleRenderer3D::DrawScene(RenderView& render_view)
 			}
 		}
 	}
-}
-
-inline void ModuleRenderer3D::SetupShaders()
-{
-	activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-	time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
-	dt = App->time->GetDeltaTime();
 }
 
 inline void ModuleRenderer3D::SetWireframe(bool enable)

@@ -418,7 +418,6 @@ void PlayPauseWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		float seconds = App->time->GetGameTimer();
 		const GameState state = App->GetState();
 
 		// PLAY / RESTART
@@ -444,7 +443,7 @@ void PlayPauseWindow::Draw(bool secondary)
 
 		ImGui::SameLine();
 
-		ImGui::Text("%.2f", seconds);
+		ImGui::Text("%.2f", TimeManager::GetGameTimer());
 
 		ImGui::SameLine();
 		ImGui::Checkbox("Draw Gizmos", &App->editor->debug_drawing);

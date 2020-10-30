@@ -794,7 +794,7 @@ void ModuleEditor::UpdateCamera()
 			if (mouse.GetButton(3) == KEY_REPEAT)
 			{
 				// Camera Speed
-				float cameraSpeed = cam_speed * App->time->GetDeltaTime();
+				float cameraSpeed = cam_speed * TimeManager::GetDeltaTime();
 				if (App->input->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT))
 					cameraSpeed *= 2.0f;
 

@@ -39,14 +39,17 @@ public:
 	
 	void	SetMaxFPS(float max_fps); // Set to 0 uncap fps
 	float	GetMaxFPS() const;
-	float	GetDeltaTime() const;
+
+	static float GetDeltaTime();
+
 	unsigned int GetCappedMS() const;
 	unsigned int GetFpsCounter() const;
 	unsigned int GetLastMs() const;
 	unsigned int GetLastFPS() const;
-	float GetEngineTimer() const;
 
-	float GetGameTimer() const;
+	static float GetEngineTimer();
+	static float GetGameTimer();
+
 	void StartGameTimer();
 	void PauseGameTimer();
 	void StopGameTimer();
@@ -62,15 +65,16 @@ private:
 	unsigned int	last_fps_count = 0u;
 	unsigned int	last_ms_count = 0u;
 
-	float	dt = 0.f;
+	static float dt;
+
 	float	capped_fps = 60.f;
 	unsigned int	capped_ms = 0u;
 
 	Timer	ms_timer; // read every frame
 	Timer	fps_timer; // read every second
 
-	Timer	engine_timer;
-	Timer	game_timer;
+	static Timer	engine_timer;
+	static Timer	game_timer;
 
 	float	fps[100] = {};
 	float	ms[100] = {};

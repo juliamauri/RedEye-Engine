@@ -34,14 +34,15 @@ void RE_CompParticleEmitter::PreUpdate()
 void RE_CompParticleEmitter::Update()
 {
 	int spawns_needed = 0;
+	float dt = TimeManager::GetDeltaTime();
 
 	if (emissor_life > 0.f)
 	{
-		time_counter += App->time->GetDeltaTime();
+		time_counter += dt;
 
 		if (time_counter <= emissor_life)
 		{
-			spawn_counter += App->time->GetDeltaTime();
+			spawn_counter += dt;
 
 			while (spawn_counter > 1000.f / emissionRate)
 			{
@@ -52,7 +53,7 @@ void RE_CompParticleEmitter::Update()
 	}
 	else
 	{
-		spawn_counter += App->time->GetDeltaTime();
+		spawn_counter += dt;
 
 		while (spawn_counter > 1.f / emissionRate)
 		{

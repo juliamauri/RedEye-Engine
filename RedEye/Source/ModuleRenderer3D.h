@@ -15,19 +15,20 @@ enum LightMode : int
 
 enum RenderViewFlags : short
 {
-	FRUSTUM_CULLING = 0x1,	 // 000000000001
-	OVERRIDE_CULLING = 0x2,	 // 000000000010
-	OUTLINE_SELECTION = 0x4, // 000000000100
-	DEBUG_DRAW = 0x8,		 // 000000001000
-	SKYBOX = 0x10,			 // 000000010000
-	BLENDED = 0x20,			 // 000000100000
+	FRUSTUM_CULLING = 0x1,	 // 0000 0000 0001
+	OVERRIDE_CULLING = 0x2,	 // 0000 0000 0010
+	OUTLINE_SELECTION = 0x4, // 0000 0000 0100
+	DEBUG_DRAW = 0x8,		 // 0000 0000 1000
 
-	WIREFRAME = 0x40,		 // 000001000000
-	FACE_CULLING = 0X80,	 // 000010000000
-	TEXTURE_2D = 0x100,		 // 000100000000
-	COLOR_MATERIAL = 0x200,	 // 001000000000
-	DEPTH_TEST = 0x400,		 // 010000000000
-	CLIP_DISTANCE = 0x800	 // 100000000000
+	SKYBOX = 0x10,			 // 0000 0001 0000
+	BLENDED = 0x20,			 // 0000 0010 0000
+	WIREFRAME = 0x40,		 // 0000 0100 0000
+	FACE_CULLING = 0X80,	 // 0000 1000 0000
+
+	TEXTURE_2D = 0x100,		 // 0001 0000 0000
+	COLOR_MATERIAL = 0x200,	 // 0010 0000 0000
+	DEPTH_TEST = 0x400,		 // 0100 0000 0000
+	CLIP_DISTANCE = 0x800	 // 1000 0000 0000
 };
 
 class RE_CompCamera;
@@ -98,10 +99,9 @@ public:
 
 private:
 
-	void DrawScene(RenderView& render_view);
+	void DrawScene(const RenderView& render_view);
 
-	void inline SetupShaders();
-
+	// Render Flags
 	void inline SetWireframe(bool enable);
 	void inline SetFaceCulling(bool enable);
 	void inline SetTexture2D(bool enable);
@@ -110,13 +110,14 @@ private:
 	void inline SetLighting(bool enable);
 	void inline SetClipDistance(bool enable);
 
+	// Direct Draws
 	void DrawQuad();
 	void DirectDrawCube(math::vec position, math::vec color);
 
 private:
 
 	// Scene Drawing
-	float time, dt;
+	//float time, dt;
 	eastl::vector<const char*> activeShaders;
 
 	// Context

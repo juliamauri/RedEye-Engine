@@ -28,24 +28,24 @@ public:
 	RE_FBOManager();
 	~RE_FBOManager();
 
-	int CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize = 1, bool depth = true, bool stencil = false);
-	int CreateDeferredFBO(unsigned int width, unsigned int height);
+	static int CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize = 1, bool depth = true, bool stencil = false);
+	static int CreateDeferredFBO(unsigned int width, unsigned int height);
 
-	void ChangeFBOSize(unsigned int ID, unsigned int width, unsigned int height);
+	static void ChangeFBOSize(unsigned int ID, unsigned int width, unsigned int height);
 
-	void ClearFBO(unsigned int ID);
+	static void ClearFBO(unsigned int ID);
 
-	unsigned int GetDepthTexture(unsigned int ID) const;
-	unsigned int GetTextureID(unsigned int ID, unsigned int texAttachment)const;
-	unsigned int GetWidth(unsigned int ID)const;
-	unsigned int GetHeight(unsigned int ID)const;
+	static unsigned int GetDepthTexture(unsigned int ID);
+	static unsigned int GetTextureID(unsigned int ID, unsigned int texAttachment);
+	static unsigned int GetWidth(unsigned int ID);
+	static unsigned int GetHeight(unsigned int ID);
 
 	static void ChangeFBOBind(unsigned int tID, unsigned int width = 0, unsigned int height = 0);
 	static void ClearFBOBuffers(unsigned int ID, const float color[4]);
 
 private:
 
-	void LoadDeferredTextures(RE_FBO &fbo);
+	static void LoadDeferredTextures(RE_FBO &fbo);
 
 private:
 

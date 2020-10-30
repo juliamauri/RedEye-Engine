@@ -743,8 +743,9 @@ const char* RE_CompCamera::GetSkybox() const
 
 void RE_CompCamera::DrawSkybox() const
 {
-	RE_SkyBox* skyRes = (skyboxMD5) ? (RE_SkyBox*)App->resources->At(skyboxMD5) : (RE_SkyBox*)App->resources->At(App->internalResources->GetDefaultSkyBox());
-	skyRes->DrawSkybox();
+	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(App->resources->At(skyboxMD5 ? skyboxMD5 : App->internalResources->GetDefaultSkyBox()));
+
+	if (skyRes) skyRes->DrawSkybox();
 }
 
 void RE_CompCamera::DeleteSkybox()

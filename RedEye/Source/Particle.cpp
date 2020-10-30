@@ -10,12 +10,12 @@
 
 void Particle::Update()
 {
-	lifetime += App->time->GetDeltaTime();
+	lifetime += TimeManager::GetDeltaTime();
 
 	if (lifetime > 0)
 	{
-		/*speed += gravity * App->time->GetDeltaTime();
-		position += speed * App->time->GetDeltaTime();
+		/*speed += gravity * TimeManager::GetDeltaTime();
+		position += speed * TimeManager::GetDeltaTime();
 		transform.SetPosition(position);
 		transform.Update();*/
 

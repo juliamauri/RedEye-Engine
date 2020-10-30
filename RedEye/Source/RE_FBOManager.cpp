@@ -10,14 +10,18 @@ eastl::map<unsigned int, RE_FBO> RE_FBOManager::fbos;
 
 RE_FBOManager::RE_FBOManager() { }
 
-RE_FBOManager::~RE_FBOManager() {
-	for (auto fbo : fbos) {
-		if (fbo.second.stencilBuffer != 0) glDeleteRenderbuffers(1, &fbo.second.stencilBuffer);
-		if (fbo.second.depthBuffer != 0) glDeleteRenderbuffers(1, &fbo.second.depthBuffer);
-		if (fbo.second.depthstencilBuffer != 0) glDeleteRenderbuffers(1, &fbo.second.depthstencilBuffer);
-		for(auto c : fbo.second.texturesID) glDeleteTextures(1, &c);
-		glDeleteFramebuffers(1, &fbo.second.ID);
+RE_FBOManager::~RE_FBOManager()
+{
+	for (eastl::pair<unsigned int, RE_FBO> fbo : fbos)
+	{
+		const RE_FBO current = fbo.second;
+		if (current.stencilBuffer != 0) glDeleteRenderbuffers(1, &current.stencilBuffer);
+		if (current.depthBuffer != 0) glDeleteRenderbuffers(1, &current.depthBuffer);
+		if (current.depthstencilBuffer != 0) glDeleteRenderbuffers(1, &current.depthstencilBuffer);
+		for(auto c : current.texturesID) glDeleteTextures(1, &c);
+		glDeleteFramebuffers(1, &current.ID);
 	}
+	fbos.clear();
 }
 
 int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize, bool depth, bool stencil)
@@ -265,17 +269,17 @@ void RE_FBOManager::ClearFBO(unsigned int ID)
 	fbos.erase(ID);
 }
 
-unsigned int RE_FBOManager::GetWidth(unsigned int ID) const
+unsigned int RE_FBOManager::GetWidth(unsigned int ID)
 {
 	return fbos.at(ID).width;
 }
 
-unsigned int RE_FBOManager::GetHeight(unsigned int ID) const
+unsigned int RE_FBOManager::GetHeight(unsigned int ID)
 {
 	return fbos.at(ID).height;
 }
 
-unsigned int RE_FBOManager::GetDepthTexture(unsigned int ID) const
+unsigned int RE_FBOManager::GetDepthTexture(unsigned int ID)
 {
 	RE_FBO fbo = fbos.at(ID);
 	RE_GLCache::ChangeTextureBind(fbo.depthBufferTexture);
@@ -284,7 +288,7 @@ unsigned int RE_FBOManager::GetDepthTexture(unsigned int ID) const
 	return fbo.depthBufferTexture;
 }
 
-unsigned int RE_FBOManager::GetTextureID(unsigned int ID, unsigned int texAttachment)const
+unsigned int RE_FBOManager::GetTextureID(unsigned int ID, unsigned int texAttachment)
 {
 	return (fbos.at(ID).texturesID.size() < texAttachment) ? 0 : fbos.at(ID).texturesID[texAttachment];
 }

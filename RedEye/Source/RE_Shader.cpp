@@ -139,13 +139,15 @@ eastl::vector<ShaderCvar> RE_Shader::GetUniformValues()
 	return uniforms;
 }
 
-void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float _dt, float _time, float window_h, float window_w, bool clipDistance, math::float4 clipPlane)
+void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane)
 {
 	RE_GLCache::ChangeShader(ID);
 	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
 	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera->GetProjectionPtr());
-	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, _dt);
-	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, _time);
+
+	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, TimeManager::GetDeltaTime());
+	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, (App->GetState() == GameState::GS_STOP) ? TimeManager::GetEngineTimer() : TimeManager::GetGameTimer());
+
 	if (viewport_h != -1) RE_ShaderImporter::setFloat(uniforms[viewport_h].location, window_h);
 	if (viewport_w != -1) RE_ShaderImporter::setFloat(uniforms[viewport_w].location, window_w);
 	if (near_plane != -1) RE_ShaderImporter::setFloat(uniforms[near_plane].location, camera->GetNearPlane());

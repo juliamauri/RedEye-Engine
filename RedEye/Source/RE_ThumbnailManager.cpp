@@ -304,10 +304,8 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 			internalCamera->Focus(poolGOThumbnail->GetGO(0));
 			internalCamera->Update();
 
-			float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
-			float dt = App->time->GetDeltaTime();
 			eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-			for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, dt, time, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+			for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 
 			RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -349,10 +347,8 @@ unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
 		internalCamera->Update();
 		Event::ResumeEvents();
 
-		float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
-		float dt = App->time->GetDeltaTime();
 		eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, dt, time, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 
 		App->resources->Use(ref);
 		mat->UseResources();
@@ -395,10 +391,8 @@ unsigned int RE_ThumbnailManager::ThumbnailSkyBox(const char* ref)
 		internalCamera->Update();
 		Event::ResumeEvents();
 
-		float time = (App->GetState() == GameState::GS_STOP) ? App->time->GetEngineTimer() : App->time->GetGameTimer();
-		float dt = App->time->GetDeltaTime();
 		eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, dt, time, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 
 		RE_GLCache::ChangeTextureBind(0);
 
