@@ -357,25 +357,20 @@ void Application::Log(int category, const char * text, const char* file)
 
 void Application::ReportSoftware(const char * name, const char * version, const char * website)
 {
-	if (name != nullptr)
+	if (name)
 	{
-		if (version != nullptr)
+		if (version)
 		{
-			if (website != nullptr)
-				LOG_SOFTWARE("%s v%s (%s)", name, version, website);
-			else
-				LOG_SOFTWARE("%s v%s", name, version);
+			if (website) LOG_SOFTWARE("%s v%s (%s)", name, version, website);
+			else LOG_SOFTWARE("%s v%s", name, version);
 		}
 		else
 		{
-			if (website != nullptr)
-				LOG_SOFTWARE("%s (%s)", name, website);
-			else
-				LOG_SOFTWARE(name);
+			if (website) LOG_SOFTWARE("%s (%s)", name, website);
+			else LOG_SOFTWARE(name);
 		}
 
-		if (editor != nullptr)
-			editor->AddSoftwareUsed(name, version, website);
+		if (editor) editor->AddSoftwareUsed(name, version, website);
 	}
 	else
 	{

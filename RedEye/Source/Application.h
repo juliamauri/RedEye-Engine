@@ -67,6 +67,7 @@ private:
 	void FinishUpdate();
 
 public:
+
 	ModuleInput* input = nullptr;
 	ModuleWindow* window = nullptr;
 	ModuleScene* scene = nullptr;
