@@ -77,7 +77,7 @@ const char * RE_HandleErrors::GetWarnings()
 
 void RE_HandleErrors::ClearAll()
 {
-	if (!App->editor->popupWindow->IsActive()) {
+	if (!App::editor->popupWindow->IsActive()) {
 		logs.clear();
 		errors.clear();
 		warnings.clear();
@@ -87,5 +87,5 @@ void RE_HandleErrors::ClearAll()
 
 void RE_HandleErrors::ActivatePopUp()
 {
-	App->editor->popupWindow->PopUpError();
+	App::editor->popupWindow->PopUpError();
 }

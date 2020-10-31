@@ -1,7 +1,7 @@
-#ifndef __GLCACHE_H__
-#define __GLCACHE_H__
+#ifndef __RE_GLCACHEMANAGER_H__
+#define __RE_GLCACHEMANAGER_H__
 
-class RE_GLCache
+class RE_GLCacheManager
 {
 public:
 	static void ChangeShader(unsigned int ID);
@@ -9,4 +9,4 @@ public:
 	static void ChangeTextureBind(unsigned int tID);
 };
 
-#endif // !__GLCACHE_H__
+#endif // !__RE_GLCACHEMANAGER_H__

@@ -11,7 +11,7 @@
 #include "Globals.h"
 #include "OutputLog.h"
 #include "TimeManager.h"
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 
 #include "md5.h"
 
@@ -35,7 +35,7 @@ RE_TextureImporter::~RE_TextureImporter() {}
 
 bool RE_TextureImporter::Init()
 {
-	LOG("Initializing Texture Manager");
+	RE_LOG("Initializing Texture Manager");
 
 	ilInit();
 	iluInit();
@@ -49,11 +49,11 @@ bool RE_TextureImporter::Init()
 		ilEnable(IL_ORIGIN_SET);
 	}
 	else
-		LOG_ERROR("DevIL could not initialice! DevIL Error %d - %s", error, iluErrorString(error));
+		RE_LOG_ERROR("DevIL could not initialice! DevIL Error %d - %s", error, iluErrorString(error));
 
 	if (folderPath == nullptr)
 	{
-		LOG_ERROR("Texure Manager could not read folder path");
+		RE_LOG_ERROR("Texure Manager could not read folder path");
 		ret = false;
 	}
 
@@ -82,7 +82,7 @@ const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPat
 	}
 	else
 	{
-		LOG_ERROR("Error detecting texture extension. Don't suported %s", extension.c_str());
+		RE_LOG_ERROR("Error detecting texture extension. Don't suported %s", extension.c_str());
 	}
 	return retMD5;
 }
@@ -108,7 +108,7 @@ eastl::string RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsign
 		/* Delete used resources*/
 		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
 	} else {
-		LOG_ERROR("Error when loading texture on DevIL");
+		RE_LOG_ERROR("Error when loading texture on DevIL");
 	}
 
 	return ret;
@@ -127,7 +127,7 @@ void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int s
 
 		/* OpenGL texture binding of the image loaded by DevIL  */
 		glGenTextures(1, ID); /* Texture name generation */
-		RE_GLCache::ChangeTextureBind(*ID); /* Binding of texture name */
+		RE_GLCacheManager::ChangeTextureBind(*ID); /* Binding of texture name */
 		
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.mag_filter); /* We will use linear interpolation for magnification filter */
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.min_filter); /* We will use linear interpolation for minifying filter */
@@ -146,7 +146,7 @@ void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int s
 		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
 	}
 	else {
-		LOG_ERROR("Error when loading texture on DevIL");
+		RE_LOG_ERROR("Error when loading texture on DevIL");
 	}
 }
 
@@ -172,13 +172,13 @@ void RE_TextureImporter::SaveOwnFormat(const char * assetBuffer, unsigned int as
 		/* Delete used resources*/
 		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
 	} else{
-		LOG_ERROR("Error when loading texture on DevIL");
+		RE_LOG_ERROR("Error when loading texture on DevIL");
 	}
 }
 
 void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned int* ID, bool isDDS)
 {
-	RE_GLCache::ChangeTextureBind(0);
+	RE_GLCacheManager::ChangeTextureBind(0);
 	glGenTextures(1, ID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, *ID);
 

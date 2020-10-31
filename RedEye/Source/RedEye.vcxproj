@@ -58,7 +58,7 @@
     <ClCompile Include="EditorWindows.cpp" />
     <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp" />
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp" />
-    <ClCompile Include="ModuleWwise.cpp" />
+    <ClCompile Include="ModuleAudio.cpp" />
     <ClCompile Include="ResourceEditorsWindows.cpp" />
     <ClCompile Include="RE_Command.cpp" />
     <ClCompile Include="RE_CommandManager.cpp" />
@@ -77,7 +77,7 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="md5.cpp" />
     <ClCompile Include="RE_CameraManager.cpp" />
-    <ClCompile Include="RE_GLCache.cpp" />
+    <ClCompile Include="RE_GLCacheManager.cpp" />
     <ClCompile Include="RE_GOManager.cpp" />
     <ClCompile Include="RE_HandleErrors.cpp" />
     <ClCompile Include="RE_InternalResources.cpp" />
@@ -114,7 +114,7 @@
     <ClCompile Include="RE_ThumbnailManager.cpp" />
     <ClCompile Include="SystemInfo.cpp" />
     <ClCompile Include="RE_TextureImporter.cpp" />
-    <ClCompile Include="TimeManager.cpp" />
+    <ClCompile Include="RE_TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -322,7 +322,7 @@
     <ClInclude Include="EditorWindows.h" />
     <ClInclude Include="ImGuiColorTextEdit\TextEditor.h" />
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h" />
-    <ClInclude Include="ModuleWwise.h" />
+    <ClInclude Include="ModuleAudio.h" />
     <ClInclude Include="PoolMapped.h" />
     <ClInclude Include="RE_Command.h" />
     <ClInclude Include="RE_CommandManager.h" />
@@ -349,7 +349,7 @@
     <ClInclude Include="ImGui\stb_truetype.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="RE_CameraManager.h" />
-    <ClInclude Include="RE_GLCache.h" />
+    <ClInclude Include="RE_GLCacheManager.h" />
     <ClInclude Include="RE_GOManager.h" />
     <ClInclude Include="RE_HandleErrors.h" />
     <ClInclude Include="Optick\include\optick.config.h" />
@@ -430,7 +430,7 @@
     <ClInclude Include="RE_ThumbnailManager.h" />
     <ClInclude Include="SystemInfo.h" />
     <ClInclude Include="RE_TextureImporter.h" />
-    <ClInclude Include="TimeManager.h" />
+    <ClInclude Include="RE_TimeManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Build\Assets\Settings\config.json" />
@@ -491,10 +491,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(Configuration)\</IntDir>
-    <OutDir>..\Build</OutDir>
+    <OutDir>..\Build\</OutDir>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\Build</OutDir>
+    <OutDir>..\Build\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -506,6 +507,8 @@
       <StructMemberAlignment>Default</StructMemberAlignment>
       <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\EA\;$(MSBuildProjectDirectory)\WWISESDK\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EntryPointSymbol>
@@ -538,6 +541,10 @@
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

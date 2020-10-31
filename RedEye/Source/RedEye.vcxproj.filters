@@ -37,9 +37,6 @@
     <ClCompile Include="Cvar.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
-    <ClCompile Include="TimeManager.cpp">
-      <Filter>Modules\Independent App Modules\TimeManager</Filter>
-    </ClCompile>
     <ClCompile Include="SystemInfo.cpp">
       <Filter>Modules\Independent App Modules\SystemInfo</Filter>
     </ClCompile>
@@ -147,9 +144,6 @@
     </ClCompile>
     <ClCompile Include="RE_FileSystem.cpp">
       <Filter>Modules\Independent App Modules\FileSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_GLCache.cpp">
-      <Filter>Modules\Independent App Modules</Filter>
     </ClCompile>
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp">
       <Filter>3rd Party\ImGui</Filter>
@@ -280,14 +274,20 @@
     <ClCompile Include="RE_CommandManager.cpp">
       <Filter>Modules\Editor\Commands</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleWwise.cpp">
-      <Filter>Modules</Filter>
-    </ClCompile>
     <ClCompile Include="RE_GOManager.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="RE_CompLight.cpp">
       <Filter>GameObject\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_GLCacheManager.cpp">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleAudio.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_TimeManager.cpp">
+      <Filter>Modules\Independent App Modules\TimeManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -462,9 +462,6 @@
     <ClInclude Include="Cvar.h">
       <Filter>Containers</Filter>
     </ClInclude>
-    <ClInclude Include="TimeManager.h">
-      <Filter>Modules\Independent App Modules\TimeManager</Filter>
-    </ClInclude>
     <ClInclude Include="SystemInfo.h">
       <Filter>Modules\Independent App Modules\SystemInfo</Filter>
     </ClInclude>
@@ -587,9 +584,6 @@
     </ClInclude>
     <ClInclude Include="RE_FileSystem.h">
       <Filter>Modules\Independent App Modules\FileSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_GLCache.h">
-      <Filter>Modules\Independent App Modules</Filter>
     </ClInclude>
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h">
       <Filter>3rd Party\ImGui</Filter>
@@ -1224,14 +1218,20 @@
     <ClInclude Include="RE_CommandManager.h">
       <Filter>Modules\Editor\Commands</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleWwise.h">
-      <Filter>Modules</Filter>
-    </ClInclude>
     <ClInclude Include="RE_GOManager.h">
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="RE_CompLight.h">
       <Filter>GameObject\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_GLCacheManager.h">
+      <Filter>Modules\Independent App Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleAudio.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_TimeManager.h">
+      <Filter>Modules\Independent App Modules\TimeManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

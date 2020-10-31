@@ -35,7 +35,7 @@ class ModuleInput : public Module
 {
 public:
 	
-	ModuleInput(const char* name, bool start_enabled = true);
+	ModuleInput(const char* name = "Input", bool start_enabled = true);
 	~ModuleInput();
 
 	bool Init(JSONNode* config_module) override;

@@ -30,54 +30,52 @@ void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, cons
 	return new uint8_t[size];
 }
 
-Application* App = nullptr;
-
 int main(int argc, char* argv[])
 {
 	int main_return = EXIT_FAILURE;
 
-	App = new Application();
+	Application* app = new Application();
 
-	LOG_SEPARATOR("Initializing RedEye");
+	RE_LOG_SEPARATOR("Initializing RedEye");
 
-	if (App->Init(argc, argv))
+	if (app->Init(argc, argv))
 	{
-		int update_return = App->Update();
+		int update_return = app->Update();
 
-		LOG_SEPARATOR("Entering Application's Main Loop");
+		RE_LOG_SEPARATOR("Entering Application's Main Loop");
 
 		while (update_return == 1)
 		{
 			OPTICK_FRAME("MainThread RedEye");
-			update_return = App->Update();
+			update_return = app->Update();
 		}
 
 		if (update_return == 0)
 		{
-			LOG_SEPARATOR("Cleaning Up Application");
+			RE_LOG_SEPARATOR("Cleaning Up Application");
 
-			if (App->CleanUp())
+			if (app->CleanUp())
 			{
 				main_return = EXIT_SUCCESS;
-				LOG_SEPARATOR("EXIT SUCCESS");
+				RE_LOG_SEPARATOR("EXIT SUCCESS");
 			}
 			else
 			{
-				LOG_ERROR("Application CleanUp exits with ERROR");
+				RE_LOG_ERROR("Application CleanUp exits with ERROR");
 			}
 		}
 		else
 		{
-			LOG_ERROR("Application Update exits with ERROR");
+			RE_LOG_ERROR("Application Update exits with ERROR");
 		}
 	}
 	else
 	{
-		LOG_ERROR("Application Init exits with ERROR");
+		RE_LOG_ERROR("Application Init exits with ERROR");
 	}
 
-	delete App;
-	App = nullptr;
+	delete app;
+	app = nullptr;
 
 	return main_return;
 }

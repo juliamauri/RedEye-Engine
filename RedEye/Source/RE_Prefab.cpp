@@ -34,7 +34,7 @@ void RE_Prefab::LoadInMemory()
 		LibrarySave();
 	}
 	else {
-		LOG_ERROR("Prefab %s not found on project", GetName());
+		RE_LOG_ERROR("Prefab %s not found on project", GetName());
 	}
 }
 

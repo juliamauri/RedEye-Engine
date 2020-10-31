@@ -10,7 +10,7 @@
 #include "RE_Shader.h"
 #include "RE_Texture.h"
 
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 #include "RE_ThumbnailManager.h"
 
 #include "ModuleEditor.h"
@@ -19,6 +19,7 @@
 
 #include "ImGui/imgui.h"
 #include "Glew/include/glew.h"
+#include <EAStdC/EAString.h>
 
 RE_Material::RE_Material() { }
 
@@ -40,7 +41,7 @@ void RE_Material::LoadInMemory()
 	else if (isInternal())
 		ResourceContainer::inMemory = true;
 	else {
-		LOG_ERROR("Material %s not found on project", GetName());
+		RE_LOG_ERROR("Material %s not found on project", GetName());
 	}
 }
 
@@ -722,7 +723,7 @@ void RE_Material::PullTexturesJson(JSONNode * texturesNode, eastl::vector<const 
 		eastl::string textureMaT = texturesNode->PullString(idref.c_str(), "");
 		const char* textureMD5 = App->resources->FindMD5ByMETAPath(textureMaT.c_str());
 		if (textureMD5) textures->push_back(textureMD5);
-		else LOG_ERROR("No texture found.\nPath: %s", textureMaT.c_str());
+		else RE_LOG_ERROR("No texture found.\nPath: %s", textureMaT.c_str());
 	}
 }
 
@@ -1257,7 +1258,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 {
 	const char* usingShader = (shaderMD5 && !defaultShader) ? shaderMD5 : App->internalResources->GetDefaultShader();
 	RE_Shader* shaderRes = (RE_Shader*)App->resources->At(usingShader);
-	RE_GLCache::ChangeShader(shaderRes->GetID());
+	RE_GLCacheManager::ChangeShader(shaderRes->GetID());
 	shaderRes->UploadModel(model);
 
 	unsigned int ShaderID = shaderRes->GetID();
@@ -1292,7 +1293,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 	unsigned int textureCounter = 0;
 	if (shaderRes->NeedUploadDepth()) {
 		glActiveTexture(GL_TEXTURE0 + textureCounter);
-		RE_GLCache::ChangeTextureBind(App->renderer3d->GetDepthTexture());
+		RE_GLCacheManager::ChangeTextureBind(App->renderer3d->GetDepthTexture());
 		shaderRes->UploadDepth(textureCounter++);
 	}
 
@@ -1313,7 +1314,7 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 		glActiveTexture(GL_TEXTURE0 + textureCounter);
 		eastl::string name = "tdiffuse0";
 		RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
+		RE_GLCacheManager::ChangeTextureBind(App->internalResources->GetTextureChecker());
 	}
 	else
 	{
@@ -1590,7 +1591,7 @@ void RE_Material::GetAndProcessUniformsFromShader()
 
 				if (texture)
 				{
-					int count = std::stoi(&sVar.name.back()) + 1;
+					unsigned int count = EA::StdC::AtoU32(&sVar.name.back()) + 1;
 					if (usingOnMat[index] < count)
 						usingOnMat[index] = count;
 				}

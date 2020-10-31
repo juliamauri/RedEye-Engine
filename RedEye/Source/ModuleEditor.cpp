@@ -12,7 +12,7 @@
 #include "RE_CameraManager.h"
 #include "RE_PrimitiveManager.h"
 #include "QuadTree.h"
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_FileSystem.h"
 
@@ -65,7 +65,7 @@ bool ModuleEditor::Init(JSONNode* node)
 	bool ret = true;
 
 	// ImGui
-	LOG_SECONDARY("Init ImGui");
+	RE_LOG_SECONDARY("Init ImGui");
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -90,12 +90,12 @@ bool ModuleEditor::Init(JSONNode* node)
 		if (ret = ImGui_ImplOpenGL3_Init())
 			App->ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
 		else
-			LOG_ERROR("ImGui could not OpenGL3_Init!");
+			RE_LOG_ERROR("ImGui could not OpenGL3_Init!");
 
 
 	}
 	else
-		LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
+		RE_LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
 
 
 
@@ -794,7 +794,7 @@ void ModuleEditor::UpdateCamera()
 			if (mouse.GetButton(3) == KEY_REPEAT)
 			{
 				// Camera Speed
-				float cameraSpeed = cam_speed * TimeManager::GetDeltaTime();
+				float cameraSpeed = cam_speed * RE_TimeManager::GetDeltaTime();
 				if (App->input->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT))
 					cameraSpeed *= 2.0f;
 

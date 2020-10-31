@@ -44,7 +44,7 @@ public:
 
 	eastl::vector<const char*> GetAllResources() {
 		eastl::vector<const char*> ret;
-		for (uint i = 0; i < lastAvaibleIndex; i++) {
+		for (int i = 0; i < lastAvaibleIndex; i++) {
 			eastl::vector<const char*> cmpres = pool_[i].GetAllResources();
 			if (!cmpres.empty()) ret.insert(ret.end(), cmpres.begin(), cmpres.end());
 		}
@@ -52,13 +52,13 @@ public:
 	}
 
 	void UseResources() {
-		for (uint i = 0; i < lastAvaibleIndex; i++) 
+		for (int i = 0; i < lastAvaibleIndex; i++) 
 			pool_[i].UseResources();
 	}
 
 
 	void UnUseResources() {
-		for (uint i = 0; i < lastAvaibleIndex; i++) 
+		for (int i = 0; i < lastAvaibleIndex; i++) 
 			pool_[i].UnUseResources();
 	}
 

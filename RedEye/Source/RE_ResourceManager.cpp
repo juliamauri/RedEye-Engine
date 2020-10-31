@@ -32,7 +32,7 @@ RE_ResourceManager::~RE_ResourceManager()
 {
 	while (!resources.empty())
 	{
-		//LOG("WARNING: Deleating Unreferenced Resource: %s (from %s)",
+		//RE_LOG("WARNING: Deleating Unreferenced Resource: %s (from %s)",
 			//resources.begin()->second.first->GetName(),
 			//resources.begin()->second.first->GetOrigin());
 		DEL(resources.begin()->second);
@@ -89,7 +89,7 @@ const char* RE_ResourceManager::Reference(ResourceContainer* rc)
 		resourceName = "undefined";
 		break;
 	}
-	LOG("Referencing the %s %s resource from %s\nAsset file: %s\nmd5 generated: %s\n", rc->GetName(), resourceName.c_str(), rc->GetAssetPath(), rc->GetLibraryPath(), rc->GetMD5());
+	RE_LOG("Referencing the %s %s resource from %s\nAsset file: %s\nmd5 generated: %s\n", rc->GetName(), resourceName.c_str(), rc->GetAssetPath(), rc->GetLibraryPath(), rc->GetMD5());
 	resources.insert(Resource(rc->GetMD5(), rc));
 	resourcesCounter.insert(ResourceCounter(rc->GetMD5(), (rc->isInMemory()) ? 1 : 0));
 
@@ -106,7 +106,7 @@ void RE_ResourceManager::UnUse(const char* resMD5)
 {
 	if (--resourcesCounter.at(resMD5) == 0) resources.at(resMD5)->UnloadMemory();
 	else if (resourcesCounter.at(resMD5) < 0) {
-		LOG_WARNING("UnUse of resource already with no uses. Resource %s.",resources.at(resMD5)->GetName());
+		RE_LOG_WARNING("UnUse of resource already with no uses. Resource %s.",resources.at(resMD5)->GetName());
 		if(resources.at(resMD5)->isInMemory()) resources.at(resMD5)->UnloadMemory();
 		resourcesCounter.at(resMD5) = 0;
 	}
@@ -572,7 +572,7 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 		}
 	}
 
-	if (!meshMD5) LOG_ERROR("Error finding library mesh:\n%s", librariPath);
+	if (!meshMD5) RE_LOG_ERROR("Error finding library mesh:\n%s", librariPath);
 
 	return meshMD5;
 }

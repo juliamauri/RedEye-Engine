@@ -631,7 +631,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	savedState.ClearPool();
 	scenePool.ClearPool();
 
-	LOG("Loading scene from own format:");
+	RE_LOG("Loading scene from own format:");
 	if(!ignorehandle) App->handlerrors->StartHandling();
 
 	Timer timer;
@@ -644,14 +644,14 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	if (loadedDO)
 		root = scenePool.InsertPool(loadedDO);
 	else
-		LOG_ERROR("Can�t Load Scene");
+		RE_LOG_ERROR("Can�t Load Scene");
 	App->resources->UnUse(sceneMD5);
 
 	scenePool.UseResources();
 	SetupScene();
 	App->editor->SetSelected(nullptr);
 
-	LOG("Time loading scene: %u ms", timer.Read());
+	RE_LOG("Time loading scene: %u ms", timer.Read());
 
 	if (!ignorehandle) {
 		// Error Handling
@@ -787,7 +787,7 @@ void ModuleScene::ResetTrees()
 	dynamic_tree.Clear();
 
 	eastl::vector<int> goIndex = scenePool.GetAllGOs();
-	for (int i = 0; i < goIndex.size(); i++)
+	for (unsigned int i = 0; i < goIndex.size(); i++)
 	{
 		RE_GameObject* go = scenePool.GetGO(goIndex[i]);
 

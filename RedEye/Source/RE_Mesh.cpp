@@ -13,7 +13,7 @@
 #include "RE_GameObject.h"
 #include "RE_Component.h"
 #include "RE_CompTransform.h"
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 
 #include "OutputLog.h"
 
@@ -51,7 +51,7 @@ void RE_Mesh::LoadInMemory()
 		SetupMesh();
 	}
 	else {
-		LOG_ERROR("Texture %s not found on project", GetName());
+		RE_LOG_ERROR("Texture %s not found on project", GetName());
 	}
 }
 
@@ -184,7 +184,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 void RE_Mesh::DrawMesh(unsigned int shader)
 {
 	// Draw mesh
-	RE_GLCache::ChangeVAO(VAO);
+	RE_GLCacheManager::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, nullptr);
 
 	// MESH DEBUG DRAWING
@@ -198,7 +198,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			// Draw lines
 			math::vec color(0.f, 0.f, 1.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
-			RE_GLCache::ChangeVAO(VAO_FaceNormals);
+			RE_GLCacheManager::ChangeVAO(VAO_FaceNormals);
 			glDrawArrays(GL_LINES, 0, triangle_count * 2);
 
 			// Draw points
@@ -206,7 +206,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
-			RE_GLCache::ChangeVAO(VAO_FaceCenters);
+			RE_GLCacheManager::ChangeVAO(VAO_FaceCenters);
 			glDrawArrays(GL_POINTS, 0, triangle_count);
 
 			// Reset Draw mode
@@ -219,7 +219,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			// Draw lines
 			math::vec color(0.f, 1.f, 0.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
-			RE_GLCache::ChangeVAO(VAO_VertexNormals);
+			RE_GLCacheManager::ChangeVAO(VAO_VertexNormals);
 			glDrawArrays(GL_LINES, 0, triangle_count * 3 * 2);
 
 			// Draw points
@@ -227,7 +227,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
-			RE_GLCache::ChangeVAO(VAO_Vertex);
+			RE_GLCacheManager::ChangeVAO(VAO_Vertex);
 			glDrawArrays(GL_POINTS, 0, triangle_count * 3);
 
 			// Reset Draw mode
@@ -255,7 +255,7 @@ void RE_Mesh::SetupAABB()
 	eastl::vector<math::vec> vertex_pos;
 	vertex_pos.resize(vertex_count * 3);
 
-	for (int i = 0; i < vertex_count; i++)
+	for (unsigned int i = 0; i < vertex_count; i++)
 		vertex_pos[i] = math::vec(&vertex[i * 3]);
 
 	bounding_box.SetFrom(&vertex_pos[0], vertex_count);
@@ -267,7 +267,7 @@ void RE_Mesh::SetupMesh()
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
-	RE_GLCache::ChangeVAO(VAO);
+	RE_GLCacheManager::ChangeVAO(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	
 	int strideSize = 3;
@@ -372,7 +372,7 @@ void RE_Mesh::loadVertexNormals()
 	if (normals) {
 		LoadVertex();
 
-		int line_length = 1.5f;
+		float line_length = 1.5f;
 
 		vertexNormals = new float[2 * 3 * triangle_count];
 		float* cursor = vertexNormals;
@@ -398,7 +398,7 @@ void RE_Mesh::loadVertexNormals()
 		glGenVertexArrays(1, &VAO_VertexNormals);
 		glGenBuffers(1, &VBO_VertexNormals);
 
-		RE_GLCache::ChangeVAO(VAO_VertexNormals);
+		RE_GLCacheManager::ChangeVAO(VAO_VertexNormals);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO_VertexNormals);
 
 		glBufferData(GL_ARRAY_BUFFER, 2 * 3 * triangle_count * sizeof(float), vertexNormals, GL_STATIC_DRAW);
@@ -412,7 +412,7 @@ void RE_Mesh::loadVertexNormals()
 
 void RE_Mesh::loadFaceNormals()
 {
-	int line_length = 1.5f;
+	float line_length = 1.5f;
 
 	faceNormals = new float[2 * 3 * triangle_count];
 	faceCenters = new float[3 * triangle_count];
@@ -453,7 +453,7 @@ void RE_Mesh::loadFaceNormals()
 	glGenVertexArrays(1, &VAO_FaceNormals);
 	glGenBuffers(1, &VBO_FaceNormals);
 
-	RE_GLCache::ChangeVAO(VAO_FaceNormals);
+	RE_GLCacheManager::ChangeVAO(VAO_FaceNormals);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_FaceNormals);
 
 	glBufferData(GL_ARRAY_BUFFER, 2 * 3 * triangle_count * sizeof(float), faceNormals, GL_STATIC_DRAW);
@@ -464,7 +464,7 @@ void RE_Mesh::loadFaceNormals()
 	glGenVertexArrays(1, &VAO_FaceCenters);
 	glGenBuffers(1, &VBO_FaceCenters);
 
-	RE_GLCache::ChangeVAO(VAO_FaceCenters);
+	RE_GLCacheManager::ChangeVAO(VAO_FaceCenters);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_FaceCenters);
 
 	glBufferData(GL_ARRAY_BUFFER, 3 * triangle_count * sizeof(float), faceCenters, GL_STATIC_DRAW);
@@ -513,7 +513,7 @@ bool RE_Mesh::CheckFaceCollision(const math::Ray& local_ray, float& distance) co
 	float res_dist;
 	math::Triangle face;
 
-	for (int i = 0; i < triangle_count; i++)
+	for (unsigned int i = 0; i < triangle_count; i++)
 	{
 		face.a = math::vec(&vertex[3 * index[3 * i]]);
 		face.b = math::vec(&vertex[3 * index[(3 * i) + 1]]);
@@ -535,7 +535,7 @@ void RE_Mesh::LoadVertex()
 	glGenVertexArrays(1, &VAO_Vertex);
 	glGenBuffers(1, &VBO_Vertex);
 
-	RE_GLCache::ChangeVAO(VAO_Vertex);
+	RE_GLCacheManager::ChangeVAO(VAO_Vertex);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_Vertex);
 
 	glBufferData(GL_ARRAY_BUFFER, triangle_count * 3 * sizeof(float), vertex, GL_STATIC_DRAW);

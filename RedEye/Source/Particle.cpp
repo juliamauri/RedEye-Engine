@@ -10,7 +10,7 @@
 
 void Particle::Update()
 {
-	lifetime += TimeManager::GetDeltaTime();
+	lifetime += RE_TimeManager::GetDeltaTime();
 
 	if (lifetime > 0)
 	{

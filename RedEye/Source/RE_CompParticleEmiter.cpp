@@ -34,7 +34,7 @@ void RE_CompParticleEmitter::PreUpdate()
 void RE_CompParticleEmitter::Update()
 {
 	int spawns_needed = 0;
-	float dt = TimeManager::GetDeltaTime();
+	float dt = RE_TimeManager::GetDeltaTime();
 
 	if (emissor_life > 0.f)
 	{
@@ -71,7 +71,7 @@ void RE_CompParticleEmitter::PostUpdate()
 
 void RE_CompParticleEmitter::OnPlay()
 {
-	LOG_SECONDARY("particle emitter play");
+	RE_LOG_SECONDARY("particle emitter play");
 
 	if (particles)
 		DEL_A(particles);
@@ -81,7 +81,7 @@ void RE_CompParticleEmitter::OnPlay()
 	time_counter = 0.0f;
 	spawn_counter = 0.0f;
 
-	for (unsigned int i = 0; i < max_particles; i++)
+	for (int i = 0; i < max_particles; i++)
 		particles[i].SetUp(this);
 }
 
@@ -92,12 +92,12 @@ void RE_CompParticleEmitter::OnPause()
 
 void RE_CompParticleEmitter::OnStop()
 {
-	LOG_SECONDARY("particle emitter stop");
+	RE_LOG_SECONDARY("particle emitter stop");
 }
 
 void RE_CompParticleEmitter::Draw()
 {
-	for (unsigned int i = 0; i < max_particles; i++)
+	for (int i = 0; i < max_particles; i++)
 	{
 		if (particles[i].Alive())
 			particles[i].Draw(shader);
@@ -179,7 +179,7 @@ void RE_CompParticleEmitter::UpdateParticles(int spawns_needed)
 {
 	Particle* p = nullptr;
 
-	for (unsigned int i = 0; i < max_particles; i++)
+	for (int i = 0; i < max_particles; i++)
 	{
 		p = &particles[i];
 

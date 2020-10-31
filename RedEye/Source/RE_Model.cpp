@@ -32,7 +32,7 @@ void RE_Model::LoadInMemory()
 		LibrarySave();
 	}
 	else {
-		LOG_ERROR("Model %s not found on project", GetName());
+		RE_LOG_ERROR("Model %s not found on project", GetName());
 	}
 }
 
@@ -136,8 +136,8 @@ void RE_Model::Draw()
 			App->resources->UnUse(GetMD5());
 		}
 		else {
-			LOG_ERROR("Missing Resources on Model");
-			LOG_SOLUTION("Needed ReImport");
+			RE_LOG_ERROR("Missing Resources on Model");
+			RE_LOG_SOLUTION("Needed ReImport");
 			needReImport = true;
 		}
 
@@ -244,7 +244,7 @@ void RE_Model::LibrarySave()
 		DEL_A(buffer);
 	}
 	else
-		LOG_ERROR("Error to save Model at library because culdn't be loaded from: %s", GetAssetPath());
+		RE_LOG_ERROR("Error to save Model at library because culdn't be loaded from: %s", GetAssetPath());
 }
 
 bool RE_Model::CheckResourcesIsOnAssets()

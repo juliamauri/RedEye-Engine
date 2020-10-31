@@ -9,7 +9,7 @@
 #include "RE_CompTransform.h"
 #include "ModuleEditor.h"
 
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 #include "TimeManager.h"
 #include "Event.h"
 
@@ -35,7 +35,7 @@ void RE_Shader::LoadInMemory()
 		LibrarySave();
 	}
 	else {
-		LOG_ERROR("Texture %s not found on project", GetName());
+		RE_LOG_ERROR("Texture %s not found on project", GetName());
 	}
 
 	if (isInMemory()) 
@@ -141,11 +141,11 @@ eastl::vector<ShaderCvar> RE_Shader::GetUniformValues()
 
 void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane)
 {
-	RE_GLCache::ChangeShader(ID);
+	RE_GLCacheManager::ChangeShader(ID);
 	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
 	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera->GetProjectionPtr());
 
-	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, TimeManager::GetDeltaTime());
+	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, RE_TimeManager::GetDeltaTime());
 	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, (App->GetState() == GameState::GS_STOP) ? TimeManager::GetEngineTimer() : TimeManager::GetGameTimer());
 
 	if (viewport_h != -1) RE_ShaderImporter::setFloat(uniforms[viewport_h].location, window_h);
@@ -159,13 +159,13 @@ void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float 
 
 void RE_Shader::UploadModel(float* _model)
 {
-	RE_GLCache::ChangeShader(ID);
+	RE_GLCacheManager::ChangeShader(ID);
 	if(model != -1) RE_ShaderImporter::setFloat4x4(uniforms[model].location, _model);
 }
 
 void RE_Shader::UploadDepth(int texture)
 {
-	RE_GLCache::ChangeShader(ID);
+	RE_GLCacheManager::ChangeShader(ID);
 	if (depth != -1) RE_ShaderImporter::setInt(uniforms[depth].location, texture);
 }
 
@@ -620,7 +620,7 @@ void RE_Shader::AssetLoad()
 		(!shaderSettings.geometryShader.empty()) ? shaderSettings.geometryShader.c_str() : nullptr);
 
 	if (!loaded) {
-		LOG_ERROR("Error while loading shader %s on assets:\n%s\n", GetName(), App->shaders->GetShaderError());
+		RE_LOG_ERROR("Error while loading shader %s on assets:\n%s\n", GetName(), App->shaders->GetShaderError());
 	}
 	else
 		ResourceContainer::inMemory = true;

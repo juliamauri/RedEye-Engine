@@ -12,7 +12,7 @@
 
 #include "RE_TextureImporter.h"
 
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 #include "RE_ThumbnailManager.h"
 
 #include "Glew/include/glew.h"
@@ -42,7 +42,7 @@ void RE_SkyBox::LoadInMemory()
 		LibrarySave();
 	}
 	else {
-		LOG_ERROR("SkyBox %s not found on project", GetName());
+		RE_LOG_ERROR("SkyBox %s not found on project", GetName());
 	}
 }
 
@@ -392,7 +392,7 @@ void RE_SkyBox::AssetSave()
 
 void RE_SkyBox::DrawSkybox() const
 {
-	RE_GLCache::ChangeVAO(VAO);
+	RE_GLCacheManager::ChangeVAO(VAO);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
@@ -455,7 +455,7 @@ void RE_SkyBox::LoadSkyBoxSphere()
 	par_shapes_scale(sphere, skyBoxSettings.skyBoxSize, skyBoxSettings.skyBoxSize, skyBoxSettings.skyBoxSize);
 
 	glGenVertexArrays(1, &VAO);
-	RE_GLCache::ChangeVAO(VAO);
+	RE_GLCacheManager::ChangeVAO(VAO);
 
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);

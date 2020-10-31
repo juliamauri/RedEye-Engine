@@ -339,7 +339,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 			if (App->shaders->LoadFromAssets(&sID, vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr, true))
 				compilePass = true;
 			else
-				LOG_ERROR("Shader Compilation Error:\n%s", App->shaders->GetShaderError());
+				RE_LOG_ERROR("Shader Compilation Error:\n%s", App->shaders->GetShaderError());
 
 			App->handlerrors->StopHandling();
 			if (App->handlerrors->AnyErrorHandled())
@@ -441,7 +441,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 				eastl::string text(tmp.c_str(), tmp.size());
 
 				if (!(e->works = App->shaders->Compile(text.c_str(), text.size())))
-					LOG_ERROR("%s", App->shaders->GetShaderError());
+					RE_LOG_ERROR("%s", App->shaders->GetShaderError());
 
 				e->compiled = true;
 

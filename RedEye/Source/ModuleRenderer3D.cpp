@@ -22,7 +22,7 @@
 
 #include "OutputLog.h"
 #include "TimeManager.h"
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 #include "RE_FBOManager.h"
 
 #include <EASTL/list.h>
@@ -54,33 +54,33 @@ ModuleRenderer3D::~ModuleRenderer3D()
 bool ModuleRenderer3D::Init(JSONNode * node)
 {
 	bool ret = false;
-	LOG_SECONDARY("Seting SDL/GL Attributes.");
+	RE_LOG_SECONDARY("Seting SDL/GL Attributes.");
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) < 0)
-		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_PROFILE_MASK: SDL_GL_CONTEXT_PROFILE_CORE'");
+		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_PROFILE_MASK: SDL_GL_CONTEXT_PROFILE_CORE'");
 	if (SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1) < 0)
-		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_DOUBLEBUFFER: 1'");
+		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_DOUBLEBUFFER: 1'");
 	if (SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24) < 0)
-		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_DEPTH_SIZE: 24'");
+		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_DEPTH_SIZE: 24'");
 	if (SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8) < 0)
-		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_STENCIL_SIZE: 8'");
+		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_STENCIL_SIZE: 8'");
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3) < 0)
-		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MAJOR_VERSION: 3'");
+		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MAJOR_VERSION: 3'");
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1) < 0)
-		LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MINOR_VERSION: 1'");
+		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MINOR_VERSION: 1'");
 	
 	if (App->window)
 	{
-		LOG_SECONDARY("Creating SDL GL Context");
+		RE_LOG_SECONDARY("Creating SDL GL Context");
 		mainContext = SDL_GL_CreateContext(App->window->GetWindow());
 		if (ret = (mainContext != nullptr))
 			App->ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
 		else
-			LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
+			RE_LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
 	}
 
 	if (ret)
 	{
-		LOG_SECONDARY("Initializing Glew");
+		RE_LOG_SECONDARY("Initializing Glew");
 		GLenum error = glewInit();
 		if (ret = (error == GLEW_OK))
 		{
@@ -107,7 +107,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		}
 		else
 		{
-			LOG_ERROR("Glew could not initialize! Glew_Error: %s", glewGetErrorString(error));
+			RE_LOG_ERROR("Glew could not initialize! Glew_Error: %s", glewGetErrorString(error));
 		}
 	}
 
@@ -117,12 +117,12 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 bool ModuleRenderer3D::Start()
 {
 	render_views[VIEW_EDITOR].fbos = {
-		App->fbomanager->CreateFBO(1024, 768, 1, true, false),
-		App->fbomanager->CreateDeferredFBO(1024, 768) };
+		RE_FBOManager::CreateFBO(1024, 768, 1, true, false),
+		RE_FBOManager::CreateDeferredFBO(1024, 768) };
 
 	render_views[VIEW_GAME].fbos = {
-		App->fbomanager->CreateFBO(1024, 768),
-		App->fbomanager->CreateDeferredFBO(1024, 768) };;
+		RE_FBOManager::CreateFBO(1024, 768),
+		RE_FBOManager::CreateDeferredFBO(1024, 768) };;
 
 	return true;
 }
@@ -221,14 +221,16 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 	}
 	case EDITORWINDOWCHANGED:
 	{
-		RE_CameraManager::EditorCamera()->SetBounds(e.data1.AsInt(), e.data2.AsInt());
-		ChangeFBOSize(e.data1.AsInt(), e.data2.AsInt(), true);
+		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
+		RE_CameraManager::EditorCamera()->SetBounds(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
+		ChangeFBOSize(window_size[0], window_size[1], true);
 		break;
 	}
 	case GAMEWINDOWCHANGED:
 	{
-		App->cams->OnWindowChangeSize(e.data1.AsInt(), e.data2.AsInt());
-		ChangeFBOSize(e.data1.AsInt(), e.data2.AsInt());
+		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
+		App->cams->OnWindowChangeSize(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
+		ChangeFBOSize(window_size[0], window_size[1]);
 		break;
 	}
 	}
@@ -241,7 +243,7 @@ void ModuleRenderer3D::DrawEditor()
 		if (ImGui::Checkbox((vsync) ? "VSync Enabled" : "VSync Disabled", &vsync))
 			SetVSync(vsync);
 
-		for (int i = 0; i < render_views.size(); ++i)
+		for (unsigned int i = 0; i < render_views.size(); ++i)
 		{
 			if (ImGui::TreeNodeEx((render_views[i].name + " View").c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
 			{
@@ -269,12 +271,12 @@ void ModuleRenderer3D::DrawEditor()
 bool ModuleRenderer3D::Load(JSONNode * node)
 {
 	bool ret = (node != nullptr);
-	LOG_SECONDARY("Loading Render3D config values:");
+	RE_LOG_SECONDARY("Loading Render3D config values:");
 
 	if (ret)
 	{
 		SetVSync(node->PullBool("vsync", vsync));
-		LOG_TERCIARY((vsync)? "VSync enabled." : "VSync disabled");
+		RE_LOG_TERCIARY((vsync)? "VSync enabled." : "VSync disabled");
 
 		//TODO RUB: Load render view loading
 		/*for (int i = 0; i < render_views.size(); ++i)
@@ -300,7 +302,7 @@ bool ModuleRenderer3D::Save(JSONNode * node) const
 	{
 		node->PushBool("vsync", vsync);
 
-		for (int i = 0; i < render_views.size(); ++i)
+		for (unsigned int i = 0; i < render_views.size(); ++i)
 		{
 			node->PushString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
 			node->PushInt(eastl::string(render_views[i].name + " - lightmode").c_str(), int(render_views[i].light));
@@ -330,6 +332,16 @@ unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
 	return nrAttributes;
 }
 
+const char* ModuleRenderer3D::GetGPURenderer() const
+{
+	return reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+}
+
+const char* ModuleRenderer3D::GetGPUVendor() const
+{
+	return reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+}
+
 const LightMode ModuleRenderer3D::GetLightMode()
 {
 	return current_lighting;
@@ -337,23 +349,23 @@ const LightMode ModuleRenderer3D::GetLightMode()
 
 void ModuleRenderer3D::ChangeFBOSize(int width, int height, bool isEditor)
 {
-	App->fbomanager->ChangeFBOSize(render_views[!isEditor].GetFBO(), width, height);
+	RE_FBOManager::ChangeFBOSize(render_views[!isEditor].GetFBO(), width, height);
 }
 
 unsigned int ModuleRenderer3D::GetRenderedEditorSceneTexture() const
 {
-	return App->fbomanager->GetTextureID(render_views[0].GetFBO(), 4 * (render_views[0].light == LIGHT_DEFERRED));
+	return RE_FBOManager::GetTextureID(render_views[0].GetFBO(), 4 * (render_views[0].light == LIGHT_DEFERRED));
 }
 
 unsigned int ModuleRenderer3D::GetDepthTexture() const
 {
-	RE_GLCache::ChangeTextureBind(0);
-	return App->fbomanager->GetDepthTexture(current_fbo);
+	RE_GLCacheManager::ChangeTextureBind(0);
+	return RE_FBOManager::GetDepthTexture(current_fbo);
 }
 
 unsigned int ModuleRenderer3D::GetRenderedGameSceneTexture() const
 {
-	return App->fbomanager->GetTextureID(render_views[1].GetFBO(), 4 * (render_views[1].light == LIGHT_DEFERRED));
+	return RE_FBOManager::GetTextureID(render_views[1].GetFBO(), 4 * (render_views[1].light == LIGHT_DEFERRED));
 }
 
 void ModuleRenderer3D::ReRenderThumbnail(const char* res)
@@ -369,7 +381,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	current_lighting = render_view.light;
 	current_fbo = render_view.GetFBO();
 
-	RE_FBOManager::ChangeFBOBind(current_fbo, App->fbomanager->GetWidth(current_fbo), App->fbomanager->GetHeight(current_fbo));
+	RE_FBOManager::ChangeFBOBind(current_fbo, RE_FBOManager::GetWidth(current_fbo), RE_FBOManager::GetHeight(current_fbo));
 	RE_FBOManager::ClearFBOBuffers(current_fbo, render_view.clear_color.ptr());
 
 	// Setup Render Flags
@@ -383,7 +395,12 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
-		((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(render_view.camera, App->fbomanager->GetHeight(current_fbo), App->fbomanager->GetWidth(current_fbo), usingClipDistance, render_view.clip_distance);
+		static_cast<RE_Shader*>(App->resources->At(sMD5))->UploadMainUniforms(
+			render_view.camera,
+			static_cast<float>(RE_FBOManager::GetHeight(current_fbo)),
+			static_cast<float>(RE_FBOManager::GetWidth(current_fbo)),
+			usingClipDistance,
+			render_view.clip_distance);
 
 	// Frustum Culling
 	eastl::stack<RE_Component*> comptsToDraw;
@@ -466,7 +483,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	{
 		// Setup Shader
 		unsigned int light_pass = ((RE_Shader*)App->resources->At(App->internalResources->GetLightPassShader()))->GetID();
-		RE_GLCache::ChangeShader(light_pass);
+		RE_GLCacheManager::ChangeShader(light_pass);
 
 		SetDepthTest(false);
 
@@ -478,11 +495,11 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		{
 			glActiveTexture(GL_TEXTURE0 + count);
 			RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
-			RE_GLCache::ChangeTextureBind(App->fbomanager->GetTextureID(current_fbo, count));
+			RE_GLCacheManager::ChangeTextureBind(RE_FBOManager::GetTextureID(current_fbo, count));
 		}
 
 		// Setup Light Uniforms
-		int count = scene_lights.size();
+		unsigned int count = scene_lights.size();
 		for (unsigned int i = 0; i < 64; i++)
 		{
 			eastl::string unif_name = "lights[" + eastl::to_string(i) + "].";
@@ -506,8 +523,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	// Draw Debug Geometry
 	if (render_view.flags & DEBUG_DRAW)
 	{
-		RE_GLCache::ChangeShader(0);
-		RE_GLCache::ChangeTextureBind(0);
+		RE_GLCacheManager::ChangeShader(0);
+		RE_GLCacheManager::ChangeTextureBind(0);
 
 		bool reset_light = lighting;
 		SetLighting(false);
@@ -524,10 +541,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	{
 		OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
 
-		RE_GLCache::ChangeTextureBind(0);
+		RE_GLCacheManager::ChangeTextureBind(0);
 
 		uint skysphereshader = static_cast<RE_Shader*>(App->resources->At(App->internalResources->GetDefaultSkyBoxShader()))->GetID();
-		RE_GLCache::ChangeShader(skysphereshader);
+		RE_GLCacheManager::ChangeShader(skysphereshader);
 		RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
 
 		glDepthFunc(GL_LEQUAL);
@@ -589,8 +606,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 					const char* scaleShader = App->internalResources->GetDefaultScaleShader();
 					RE_Shader* sShader = (RE_Shader*)App->resources->At(scaleShader);
 					unsigned int shaderiD = sShader->GetID();
-					RE_GLCache::ChangeShader(shaderiD);
-					RE_GLCache::ChangeVAO(vaoToStencil.top());
+					RE_GLCacheManager::ChangeShader(shaderiD);
+					RE_GLCacheManager::ChangeVAO(vaoToStencil.top());
 					sShader->UploadModel(stencilGO->GetTransform()->GetShaderModel());
 					RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
 					RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
@@ -604,7 +621,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 					glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
 					//Draw scaled mesh 
-					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5 / stencilGO->GetTransform()->GetLocalScale().Length());
+					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilGO->GetTransform()->GetLocalScale().Length());
 					stackComponents.push(stackTemp.top());
 					stackTemp.pop();
 					glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
@@ -620,7 +637,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 					glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
 
 					//Draw scaled mesh 
-					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5 / stencilGO->GetTransform()->GetLocalScale().Length());
+					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilGO->GetTransform()->GetLocalScale().Length());
 					glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
 
 					vaoToStencil.pop();
@@ -704,9 +721,9 @@ void ModuleRenderer3D::DrawQuad()
 	}
 
 	// Render Quad
-	RE_GLCache::ChangeVAO(quadVAO);
+	RE_GLCacheManager::ChangeVAO(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	RE_GLCache::ChangeVAO(0);
+	RE_GLCacheManager::ChangeVAO(0);
 }
 
 void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)

@@ -183,7 +183,7 @@ extern "C" {
 		int slices);
 
 #ifndef PAR_PI
-#define PAR_PI (3.14159265359)
+#define PAR_PI (3.14159265359f)
 #define PAR_MIN(a, b) (a > b ? b : a)
 #define PAR_MAX(a, b) (a > b ? a : b)
 #define PAR_CLAMP(v, lo, hi) PAR_MAX(lo, PAR_MIN(hi, v))
@@ -214,8 +214,8 @@ extern "C" {
 #include <math.h>
 #include <errno.h>
 
-static float par_shapes__epsilon_welded_normals = 0.001;
-static float par_shapes__epsilon_degenerate_sphere = 0.0001;
+static float par_shapes__epsilon_welded_normals = 0.001f;
+static float par_shapes__epsilon_degenerate_sphere = 0.0001f;
 
 static void par_shapes__sphere(float const* uv, float* xyz, void*);
 static void par_shapes__hemisphere(float const* uv, float* xyz, void*);
@@ -266,9 +266,9 @@ static void par_shapes__cross3(float* result, float const* a, float const* b)
 
 static void par_shapes__mix3(float* d, float const* a, float const* b, float t)
 {
-	float x = b[0] * t + a[0] * (1 - t);
-	float y = b[1] * t + a[1] * (1 - t);
-	float z = b[2] * t + a[2] * (1 - t);
+	float x = b[0] * t + a[0] * (1.f - t);
+	float y = b[1] * t + a[1] * (1.f - t);
+	float z = b[2] * t + a[2] * (1.f - t);
 	d[0] = x;
 	d[1] = y;
 	d[2] = z;
@@ -558,7 +558,7 @@ void par_shapes_export(par_shapes_mesh const* mesh, char const* filename)
 static void par_shapes__sphere(float const* uv, float* xyz, void* userdata)
 {
 	float phi = uv[0] * PAR_PI;
-	float theta = uv[1] * 2 * PAR_PI;
+	float theta = uv[1] * 2.f * PAR_PI;
 	xyz[0] = cosf(theta) * sinf(phi);
 	xyz[1] = sinf(theta) * sinf(phi);
 	xyz[2] = cosf(phi);
@@ -583,24 +583,24 @@ static void par_shapes__plane(float const* uv, float* xyz, void* userdata)
 static void par_shapes__klein(float const* uv, float* xyz, void* userdata)
 {
 	float u = uv[0] * PAR_PI;
-	float v = uv[1] * 2 * PAR_PI;
+	float v = uv[1] * 2.f * PAR_PI;
 	u = u * 2;
 	if (u < PAR_PI) {
-		xyz[0] = 3 * cosf(u) * (1 + sinf(u)) + (2 * (1 - cosf(u) / 2)) *
+		xyz[0] = 3.f * cosf(u) * (1.f + sinf(u)) + (2.f * (1.f - cosf(u) / 2.f)) *
 			cosf(u) * cosf(v);
-		xyz[2] = -8 * sinf(u) - 2 * (1 - cosf(u) / 2) * sinf(u) * cosf(v);
+		xyz[2] = -8.f * sinf(u) - 2.f * (1.f - cosf(u) / 2.f) * sinf(u) * cosf(v);
 	}
 	else {
-		xyz[0] = 3 * cosf(u) * (1 + sinf(u)) + (2 * (1 - cosf(u) / 2)) *
+		xyz[0] = 3.f * cosf(u) * (1.f + sinf(u)) + (2.f * (1.f - cosf(u) / 2.f)) *
 			cosf(v + PAR_PI);
-		xyz[2] = -8 * sinf(u);
+		xyz[2] = -8.f * sinf(u);
 	}
-	xyz[1] = -2 * (1 - cosf(u) / 2) * sinf(v);
+	xyz[1] = -2.f * (1.f - cosf(u) / 2.f) * sinf(v);
 }
 
 static void par_shapes__cylinder(float const* uv, float* xyz, void* userdata)
 {
-	float theta = uv[1] * 2 * PAR_PI;
+	float theta = uv[1] * 2.f * PAR_PI;
 	xyz[0] = sinf(theta);
 	xyz[1] = cosf(theta);
 	xyz[2] = uv[0];
@@ -609,7 +609,7 @@ static void par_shapes__cylinder(float const* uv, float* xyz, void* userdata)
 static void par_shapes__cone(float const* uv, float* xyz, void* userdata)
 {
 	float r = 1.0f - uv[0];
-	float theta = uv[1] * 2 * PAR_PI;
+	float theta = uv[1] * 2.f * PAR_PI;
 	xyz[0] = r * sinf(theta);
 	xyz[1] = r * cosf(theta);
 	xyz[2] = uv[0];
@@ -619,8 +619,8 @@ static void par_shapes__torus(float const* uv, float* xyz, void* userdata)
 {
 	float major = 1;
 	float minor = *((float*)userdata);
-	float theta = uv[0] * 2 * PAR_PI;
-	float phi = uv[1] * 2 * PAR_PI;
+	float theta = uv[0] * 2.f * PAR_PI;
+	float phi = uv[1] * 2.f * PAR_PI;
 	float beta = major + minor * cosf(phi);
 	xyz[0] = cosf(theta) * beta;
 	xyz[1] = sinf(theta) * beta;
@@ -634,8 +634,8 @@ static void par_shapes__trefoil(float const* uv, float* xyz, void* userdata)
 	const float b = 0.3f;
 	const float c = 0.5f;
 	const float d = minor * 0.1f;
-	const float u = (1 - uv[0]) * 4 * PAR_PI;
-	const float v = uv[1] * 2 * PAR_PI;
+	const float u = (1.f - uv[0]) * 4.f * PAR_PI;
+	const float v = uv[1] * 2.f * PAR_PI;
 	const float r = a + b * cos(1.5f * u);
 	const float x = r * cos(u);
 	const float y = r * sin(u);
@@ -647,7 +647,7 @@ static void par_shapes__trefoil(float const* uv, float* xyz, void* userdata)
 		-1.5f * b * sin(1.5f * u) * sin(u) + (a + b * cos(1.5f * u)) * cos(u);
 	q[2] = 1.5f * c * cos(1.5f * u);
 	par_shapes__normalize3(q);
-	float qvn[3] = { q[1], -q[0], 0 };
+	float qvn[3] = { q[1], -q[0], 0.f };
 	par_shapes__normalize3(qvn);
 	float ww[3];
 	par_shapes__cross3(ww, q, qvn);
@@ -706,11 +706,11 @@ par_shapes_mesh* par_shapes_create_disk(float radius, int slices,
 	mesh->npoints = slices + 1;
 	mesh->points = PAR_MALLOC(float, 3 * mesh->npoints);
 	float* points = mesh->points;
-	*points++ = 0;
-	*points++ = 0;
-	*points++ = 0;
+	*points++ = 0.f;
+	*points++ = 0.f;
+	*points++ = 0.f;
 	for (int i = 0; i < slices; i++) {
-		float theta = i * PAR_PI * 2 / slices;
+		float theta = PAR_PI * static_cast<float>(i * 2) / static_cast<float>(slices);
 		*points++ = radius * cos(theta);
 		*points++ = radius * sin(theta);
 		*points++ = 0;
@@ -732,7 +732,7 @@ par_shapes_mesh* par_shapes_create_disk(float radius, int slices,
 		*triangles++ = 1 + i;
 		*triangles++ = 1 + (i + 1) % slices;
 	}
-	float k[3] = { 0, 0, -1 };
+	float k[3] = { 0.f, 0.f, -1.f };
 	float axis[3];
 	par_shapes__cross3(axis, nnormal, k);
 	par_shapes__normalize3(axis);
@@ -859,18 +859,18 @@ void par_shapes_invert(par_shapes_mesh* m, int face, int nfaces)
 par_shapes_mesh* par_shapes_create_icosahedron()
 {
 	static float verts[] = {
-		0.000,  0.000,  1.000,
-		0.894,  0.000,  0.447,
-		0.276,  0.851,  0.447,
-		-0.724,  0.526,  0.447,
-		-0.724, -0.526,  0.447,
-		0.276, -0.851,  0.447,
-		0.724,  0.526, -0.447,
-		-0.276,  0.851, -0.447,
-		-0.894,  0.000, -0.447,
-		-0.276, -0.851, -0.447,
-		0.724, -0.526, -0.447,
-		0.000,  0.000, -1.000
+		 0.000f,  0.000f,  1.000f,
+		 0.894f,  0.000f,  0.447f,
+		 0.276f,  0.851f,  0.447f,
+		-0.724f,  0.526f,  0.447f,
+		-0.724f, -0.526f,  0.447f,
+		 0.276f, -0.851f,  0.447f,
+		 0.724f,  0.526f, -0.447f,
+		-0.276f,  0.851f, -0.447f,
+		-0.894f,  0.000f, -0.447f,
+		-0.276f, -0.851f, -0.447f,
+		 0.724f, -0.526f, -0.447f,
+		 0.000f,  0.000f, -1.000f
 	};
 	static PAR_SHAPES_T faces[] = {
 		0,1,2,
@@ -907,26 +907,26 @@ par_shapes_mesh* par_shapes_create_icosahedron()
 par_shapes_mesh* par_shapes_create_dodecahedron()
 {
 	static float verts[20 * 3] = {
-		0.607, 0.000, 0.795,
-		0.188, 0.577, 0.795,
-		-0.491, 0.357, 0.795,
-		-0.491, -0.357, 0.795,
-		0.188, -0.577, 0.795,
-		0.982, 0.000, 0.188,
-		0.304, 0.934, 0.188,
-		-0.795, 0.577, 0.188,
-		-0.795, -0.577, 0.188,
-		0.304, -0.934, 0.188,
-		0.795, 0.577, -0.188,
-		-0.304, 0.934, -0.188,
-		-0.982, 0.000, -0.188,
-		-0.304, -0.934, -0.188,
-		0.795, -0.577, -0.188,
-		0.491, 0.357, -0.795,
-		-0.188, 0.577, -0.795,
-		-0.607, 0.000, -0.795,
-		-0.188, -0.577, -0.795,
-		0.491, -0.357, -0.795,
+		 0.607f,  0.000f,  0.795f,
+		 0.188f,  0.577f,  0.795f,
+		-0.491f,  0.357f,  0.795f,
+		-0.491f, -0.357f,  0.795f,
+		 0.188f, -0.577f,  0.795f,
+		 0.982f,  0.000f,  0.188f,
+		 0.304f,  0.934f,  0.188f,
+		-0.795f,  0.577f,  0.188f,
+		-0.795f, -0.577f,  0.188f,
+		 0.304f, -0.934f,  0.188f,
+		 0.795f,  0.577f, -0.188f,
+		-0.304f,  0.934f, -0.188f,
+		-0.982f,  0.000f, -0.188f,
+		-0.304f, -0.934f, -0.188f,
+		 0.795f, -0.577f, -0.188f,
+		 0.491f,  0.357f, -0.795f,
+		-0.188f,  0.577f, -0.795f,
+		-0.607f,  0.000f, -0.795f,
+		-0.188f, -0.577f, -0.795f,
+		 0.491f, -0.357f, -0.795f,
 	};
 	static PAR_SHAPES_T pentagons[12 * 5] = {
 		0,1,2,3,4,
@@ -969,12 +969,12 @@ par_shapes_mesh* par_shapes_create_dodecahedron()
 par_shapes_mesh* par_shapes_create_octahedron()
 {
 	static float verts[6 * 3] = {
-		0.000, 0.000, 1.000,
-		1.000, 0.000, 0.000,
-		0.000, 1.000, 0.000,
-		-1.000, 0.000, 0.000,
-		0.000, -1.000, 0.000,
-		0.000, 0.000, -1.000
+		 0.000f,  0.000f,  1.000f,
+		 1.000f,  0.000f,  0.000f,
+		 0.000f,  1.000f,  0.000f,
+		-1.000f,  0.000f,  0.000f,
+		 0.000f, -1.000f,  0.000f,
+		 0.000f,  0.000f, -1.000f
 	};
 	static PAR_SHAPES_T triangles[8 * 3] = {
 		0,1,2,
@@ -1007,10 +1007,10 @@ par_shapes_mesh* par_shapes_create_octahedron()
 par_shapes_mesh* par_shapes_create_tetrahedron()
 {
 	static float verts[4 * 3] = {
-		0.000, 1.333, 0,
-		0.943, 0, 0,
-		-0.471, 0, 0.816,
-		-0.471, 0, -0.816,
+		 0.000f, 1.333f, 0.f,
+		 0.943f, 0.f,	 0.f,
+		-0.471f, 0.f,	 0.816f,
+		-0.471f, 0.f,	 -0.816f,
 	};
 	static PAR_SHAPES_T triangles[4 * 3] = {
 		2,1,0,
@@ -1039,14 +1039,14 @@ par_shapes_mesh* par_shapes_create_tetrahedron()
 par_shapes_mesh* par_shapes_create_cube()
 {
 	static float verts[8 * 3] = {
-		0, 0, 0, // 0
-		0, 1, 0, // 1
-		1, 1, 0, // 2
-		1, 0, 0, // 3
-		0, 0, 1, // 4
-		0, 1, 1, // 5
-		1, 1, 1, // 6
-		1, 0, 1, // 7
+		0.f, 0.f, 0.f, // 0
+		0.f, 1.f, 0.f, // 1
+		1.f, 1.f, 0.f, // 2
+		1.f, 0.f, 0.f, // 3
+		0.f, 0.f, 1.f, // 4
+		0.f, 1.f, 1.f, // 5
+		1.f, 1.f, 1.f, // 6
+		1.f, 0.f, 1.f, // 7
 	};
 	static PAR_SHAPES_T quads[6 * 4] = {
 		7,6,5,4, // front
@@ -1124,9 +1124,9 @@ static par_shapes__rule* par_shapes__pick_rule(const char* name,
 
 static par_shapes_mesh* par_shapes__create_turtle()
 {
-	const float xaxis[] = { 1, 0, 0 };
-	const float yaxis[] = { 0, 1, 0 };
-	const float zaxis[] = { 0, 0, 1 };
+	const float xaxis[] = { 1.f, 0.f, 0.f };
+	const float yaxis[] = { 0.f, 1.f, 0.f };
+	const float zaxis[] = { 0.f, 0.f, 1.f };
 	par_shapes_mesh* turtle = PAR_CALLOC(par_shapes_mesh, 1);
 	turtle->npoints = 3;
 	turtle->points = PAR_CALLOC(float, turtle->npoints * 3);
@@ -1145,8 +1145,7 @@ static par_shapes_mesh* par_shapes__apply_turtle(par_shapes_mesh* mesh,
 		pt[0] *= scale[0];
 		pt[1] *= scale[1];
 		pt[2] *= scale[2];
-		par_shapes__transform3(pt,
-			turtle->points + 0, turtle->points + 3, turtle->points + 6);
+		par_shapes__transform3(pt, turtle->points + 0, turtle->points + 3, turtle->points + 6);
 		pt[0] += pos[0];
 		pt[1] += pos[1];
 		pt[2] += pos[2];
@@ -1290,10 +1289,10 @@ par_shapes_mesh* par_shapes_create_lsystem(char const* text, int slices,
 	tube->normals = 0;
 	tube->tcoords = 0;
 
-	const float xaxis[] = { 1, 0, 0 };
-	const float yaxis[] = { 0, 1, 0 };
-	const float zaxis[] = { 0, 0, 1 };
-	const float units[] = { 1, 1, 1 };
+	const float xaxis[] = { 1.f, 0.f, 0.f };
+	const float yaxis[] = { 0.f, 1.f, 0.f };
+	const float zaxis[] = { 0.f, 0.f, 1.f };
+	const float units[] = { 1.f, 1.f, 1.f };
 
 	// Execute the L-system program until the stack size is 0.
 	par_shapes__stackframe* stack =
@@ -1343,15 +1342,15 @@ par_shapes_mesh* par_shapes_create_lsystem(char const* text, int slices,
 			continue;
 		}
 		else {
-			value = atof(cmd->arg);
+			value = static_cast<float>(atof(cmd->arg));
 			if (!strcmp(cmd->cmd, "rx")) {
-				par_shapes_rotate(turtle, value * PAR_PI / 180.0, xaxis);
+				par_shapes_rotate(turtle, value * PAR_PI / 180.0f, xaxis);
 			}
 			else if (!strcmp(cmd->cmd, "ry")) {
-				par_shapes_rotate(turtle, value * PAR_PI / 180.0, yaxis);
+				par_shapes_rotate(turtle, value * PAR_PI / 180.0f, yaxis);
 			}
 			else if (!strcmp(cmd->cmd, "rz")) {
-				par_shapes_rotate(turtle, value * PAR_PI / 180.0, zaxis);
+				par_shapes_rotate(turtle, value * PAR_PI / 180.0f, zaxis);
 			}
 			else if (!strcmp(cmd->cmd, "tx")) {
 				float vec[3] = { value, 0, 0 };
@@ -1515,7 +1514,7 @@ par_shapes_mesh* par_shapes_create_subdivided_sphere(int nsubd)
 		mesh->triangles[i] = i;
 	}
 	par_shapes_mesh* tmp = mesh;
-	mesh = par_shapes_weld(mesh, 0.01, 0);
+	mesh = par_shapes_weld(mesh, 0.01f, 0);
 	par_shapes_free_mesh(tmp);
 	par_shapes_compute_normals(mesh);
 	return mesh;
@@ -1532,11 +1531,11 @@ par_shapes_mesh* par_shapes_create_rock(int seed, int subd)
 		double n = a * par__simplex_noise2(ctx, f * pt[0], f * pt[2]);
 		a *= 0.5; f *= 2;
 		n += a * par__simplex_noise2(ctx, f * pt[0], f * pt[2]);
-		pt[0] *= 1 + 2 * n;
-		pt[1] *= 1 + n;
-		pt[2] *= 1 + 2 * n;
-		if (pt[1] < 0) {
-			pt[1] = -pow(-pt[1], 0.5) / 2;
+		pt[0] *= static_cast<float>(1 + 2 * n);
+		pt[1] *= static_cast<float>(1 + n);
+		pt[2] *= static_cast<float>(1 + 2 * n);
+		if (pt[1] < 0.f) {
+			pt[1] = -pow(-pt[1], 0.5f) / 2.f;
 		}
 	}
 	par__simplex_noise_free(ctx);
@@ -1790,7 +1789,7 @@ par_shapes_mesh* par_shapes_weld(par_shapes_mesh const* mesh, float epsilon,
 	par_shapes_mesh* clone = par_shapes_clone(mesh, 0);
 	float aabb[6];
 	int gridsize = 20;
-	float maxcell = gridsize - 1;
+	float maxcell = static_cast<float>(gridsize - 1);
 	par_shapes_compute_aabb(clone, aabb);
 	float scale[3] = {
 		aabb[3] == aabb[0] ? 1.0f : maxcell / (aabb[3] - aabb[0]),
@@ -1822,7 +1821,7 @@ par_shapes_mesh* par_shapes_weld(par_shapes_mesh const* mesh, float epsilon,
 		PAR_FREE(newmap);
 	}
 	PAR_FREE(sortmap);
-	par_shapes_scale(clone, 1.0 / scale[0], 1.0 / scale[1], 1.0 / scale[2]);
+	par_shapes_scale(clone, 1.0f / scale[0], 1.0f / scale[1], 1.0f / scale[2]);
 	par_shapes_translate(clone, aabb[0], aabb[1], aabb[2]);
 	return clone;
 }
@@ -1848,8 +1847,6 @@ struct osn_context {
 	int16_t* perm;
 	int16_t* permGradIndex3D;
 };
-
-#define ARRAYSIZE(x) (sizeof((x)) / sizeof((x)[0]))
 
 /*
  * Gradients for 2D. They approximate the directions to the
@@ -1956,7 +1953,7 @@ static int par__simplex_noise(int64_t seed, struct osn_context** ctx)
 			r += (i + 1);
 		perm[i] = source[r];
 		permGradIndex3D[i] =
-			(short)((perm[i] % (ARRAYSIZE(gradients3D) / 3)) * 3);
+			(short)((perm[i] % ((sizeof(gradients3D) / sizeof(gradients3D[0])) / 3)) * 3);
 		source[r] = source[i];
 	}
 	return 0;

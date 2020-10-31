@@ -1,4 +1,4 @@
-#include "ModuleWwise.h"
+#include "ModuleAudio.h"
 
 #include "Application.h"
 #include "RE_FileSystem.h"
@@ -56,24 +56,24 @@
 
 #define INITBNKSTR "Init.bnk"
 
-ModuleWwise::ModuleWwise(const char* name, bool start_enabled) : Module(name, start_enabled)
+ModuleAudio::ModuleAudio(const char* name, bool start_enabled) : Module(name, start_enabled)
 {
 }
 
-ModuleWwise::~ModuleWwise()
+ModuleAudio::~ModuleAudio()
 {}
 
-bool ModuleWwise::Init(JSONNode * node)
+bool ModuleAudio::Init(JSONNode * node)
 {
 	bool ret = true;
 
-	App->ReportSoftware("Wwise SDK", AK_WWISESDK_VERSIONNAME, "https://www.audiokinetic.com/products/wwise/");
+	App::ReportSoftware("Wwise SDK", AK_WWISESDK_VERSIONNAME, "https://www.audiokinetic.com/products/wwise/");
 
 	AkMemSettings memSettings;
 	AK::MemoryMgr::GetDefaultSettings(memSettings);
 	if (AK::MemoryMgr::Init(&memSettings) != AK_Success)
 	{
-		LOG_ERROR("Could not create the audio memory manager.");
+		RE_LOG_ERROR("Could not create the audio memory manager.");
 		ret = false;
 	}
 
@@ -81,7 +81,7 @@ bool ModuleWwise::Init(JSONNode * node)
 	AK::StreamMgr::GetDefaultSettings(stmSettings);
 	if (!AK::StreamMgr::Create(stmSettings))
 	{
-		LOG_ERROR("Could not create the audio Streaming Manager");
+		RE_LOG_ERROR("Could not create the audio Streaming Manager");
 		ret = false;
 	}
 
@@ -91,7 +91,7 @@ bool ModuleWwise::Init(JSONNode * node)
 	AK::SoundEngine::GetDefaultPlatformInitSettings(platformInitSettings);
 	if (AK::SoundEngine::Init(&initSettings, &platformInitSettings) != AK_Success)
 	{
-		LOG_ERROR("Could not initialize the audio Sound Engine.");
+		RE_LOG_ERROR("Could not initialize the audio Sound Engine.");
 		ret = false;
 	}
 
@@ -100,7 +100,7 @@ bool ModuleWwise::Init(JSONNode * node)
 	if (AK::MusicEngine::Init(&musicInit) != AK_Success)
 
 	{
-		LOG_ERROR("Could not initialize the audio Music Engine.");
+		RE_LOG_ERROR("Could not initialize the audio Music Engine.");
 		ret = false;
 	}
 
@@ -108,7 +108,7 @@ bool ModuleWwise::Init(JSONNode * node)
 	if (AK::SpatialAudio::Init(settings) != AK_Success)
 
 	{
-		LOG_ERROR("Could not initialize the Spatial Audio.");
+		RE_LOG_ERROR("Could not initialize the Spatial Audio.");
 		ret = false;
 	}
 
@@ -118,7 +118,7 @@ bool ModuleWwise::Init(JSONNode * node)
 	AK::Comm::GetDefaultInitSettings(commSettings);
 	if (AK::Comm::Init(commSettings) != AK_Success)
 	{
-		LOG_ERROR("Could not initialize audio communication.");
+		RE_LOG_ERROR("Could not initialize audio communication.");
 		ret = false;
 	}
 
@@ -132,7 +132,7 @@ bool ModuleWwise::Init(JSONNode * node)
 
 static AkGameObjectID MY_DEFAULT_LISTENER = 0;
 
-bool ModuleWwise::Start()
+bool ModuleAudio::Start()
 {
 	AK::StreamMgr::SetCurrentLanguage(AKTEXT("English(US)"));
 	
@@ -147,19 +147,19 @@ bool ModuleWwise::Start()
 	return true;
 }
 
-update_status ModuleWwise::PreUpdate()
+update_status ModuleAudio::PreUpdate()
 {
 	return update_status::UPDATE_CONTINUE;
 }
 
-update_status ModuleWwise::PostUpdate()
+update_status ModuleAudio::PostUpdate()
 {
 	OPTICK_CATEGORY("Render Audio", Optick::Category::Audio);
 	AK::SoundEngine::RenderAudio();
 	return update_status::UPDATE_CONTINUE;
 }
 
-bool ModuleWwise::CleanUp()
+bool ModuleAudio::CleanUp()
 {
 	soundbanks.clear();
 	AK::SoundEngine::ClearBanks();
@@ -175,11 +175,11 @@ bool ModuleWwise::CleanUp()
 	return true;
 }
 
-void ModuleWwise::RecieveEvent(const Event& e)
+void ModuleAudio::RecieveEvent(const Event& e)
 {
 }
 
-void ModuleWwise::DrawEditor()
+void ModuleAudio::DrawEditor()
 {
 	if (ImGui::CollapsingHeader("Wwise Audio Engine"))
 	{
@@ -222,7 +222,7 @@ void ModuleWwise::DrawEditor()
 				if (App->fs->ExistsOnOSFileSystem(tmp.c_str()))
 					audioBanksFolderPath = tempPath;
 				else {
-					LOG_ERROR("This Folder don't exist: \n%s%s", rootPath.c_str(), tempPath.c_str());
+					RE_LOG_ERROR("This Folder don't exist: \n%s%s", rootPath.c_str(), tempPath.c_str());
 					tempPath = audioBanksFolderPath;
 				}
 
@@ -237,7 +237,7 @@ void ModuleWwise::DrawEditor()
 	}
 }
 
-void ModuleWwise::DrawWwiseElementsDetected()
+void ModuleAudio::DrawWwiseElementsDetected()
 {
 	if (!located_banksFolder || !located_SoundBanksInfo) {
 
@@ -301,7 +301,7 @@ void ModuleWwise::DrawWwiseElementsDetected()
 
 }
 
-bool ModuleWwise::Load(JSONNode* node)
+bool ModuleAudio::Load(JSONNode* node)
 {
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
 	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
@@ -309,20 +309,21 @@ bool ModuleWwise::Load(JSONNode* node)
 	return true;
 }
 
-bool ModuleWwise::Save(JSONNode* node) const
+bool ModuleAudio::Save(JSONNode* node) const
 {
 	node->PushString("FolderBanks", audioBanksFolderPath.c_str());
 	return true;
 }
 
-void ModuleWwise::ReadBanksChanges()
+void ModuleAudio::ReadBanksChanges()
 {
+	// TODO Julius: recieve uint extra_ms & return extra_ms (substracting used time)
 	if (located_banksFolder) {
 
 		static const char* platformPath = "Windows\\";
 		eastl::string soundbankInfoPath(App->fs->GetExecutableDirectory());
 
-		eastl_size_t posOfBack = soundbankInfoPath.find_last_of('\\..');
+		eastl_size_t posOfBack = soundbankInfoPath.find_last_of((char)'\\..');
 		if (posOfBack != eastl::string::npos) {
 			eastl_size_t toBack = soundbankInfoPath.find_last_of('\\', posOfBack - 3);
 			soundbankInfoPath.erase(toBack + 1, posOfBack - toBack + 1);	
@@ -333,7 +334,7 @@ void ModuleWwise::ReadBanksChanges()
 		soundbankInfoPath += "SoundbanksInfo.json";
 
 		if (App->fs->ExistsOnOSFileSystem(soundbankInfoPath.c_str(), false)) {
-			unsigned long lastMod = App->fs->GetLastTimeModified(soundbankInfoPath.c_str());
+			signed long long lastMod = App->fs->GetLastTimeModified(soundbankInfoPath.c_str());
 			if (lastMod != 0 && lastSoundBanksInfoModified != lastMod) {
 				soundbanks.clear();
 				initBnkLoaded = false;
@@ -344,7 +345,7 @@ void ModuleWwise::ReadBanksChanges()
 
 					rapidjson::Value* soundBanks = &rootNode->GetDocument()->FindMember("SoundBanksInfo")->value.FindMember("SoundBanks")->value;
 					for (auto& v : soundBanks->GetArray()) {
-						SoundBank newSB(v.FindMember("Path")->value.GetString(), EA::StdC::Atof(v.FindMember("Id")->value.GetString()));
+						SoundBank newSB(v.FindMember("Path")->value.GetString(), static_cast<unsigned long>(EA::StdC::AtoU64(v.FindMember("Id")->value.GetString())));
 						newSB.path = App->fs->GetExecutableDirectory();
 						newSB.path += audioBanksFolderPath;
 						newSB.path += platformPath;
@@ -353,7 +354,7 @@ void ModuleWwise::ReadBanksChanges()
 						if (v.FindMember("IncludedEvents") != v.MemberEnd()) {
 							rapidjson::Value* events = &v.FindMember("IncludedEvents")->value;
 							for (auto& e : events->GetArray()) {
-								newSB.AddEvent(e.FindMember("Name")->value.GetString(), EA::StdC::Atof(e.FindMember("Id")->value.GetString()));
+								newSB.AddEvent(e.FindMember("Name")->value.GetString(), static_cast<unsigned long>(EA::StdC::AtoU64(e.FindMember("Id")->value.GetString())));
 							}
 						}
 
@@ -380,17 +381,17 @@ void ModuleWwise::ReadBanksChanges()
 
 }
 
-void ModuleWwise::SendRTPC(const char* name, float value)
+void ModuleAudio::SendRTPC(const char* name, float value)
 {	
 	AK::SoundEngine::SetRTPCValue(name, value);
 }
 
-void ModuleWwise::SendState(const char* stateGroupName, const char* stateName)
+void ModuleAudio::SendState(const char* stateGroupName, const char* stateName)
 {
 	AK::SoundEngine::SetState(stateGroupName, stateName);
 }
 
-void ModuleWwise::SendSwitch(const char* switchName, const char* switchStateName)
+void ModuleAudio::SendSwitch(const char* switchName, const char* switchStateName)
 {
 	AK::SoundEngine::SetSwitch(switchName, switchStateName, MY_DEFAULT_LISTENER);
 }
@@ -406,7 +407,7 @@ void SoundBank::LoadBank()
 	if (bnkLoaded != nullptr) {
 		AKRESULT result = AK::SoundEngine::LoadBankMemoryCopy(bnkLoaded->GetBuffer(), bnkLoaded->GetSize(), ID);
 		if (result != AK_Success) {
-			LOG_ERROR("Error while loading bank sound: %s", name.c_str());
+			RE_LOG_ERROR("Error while loading bank sound: %s", name.c_str());
 		}
 		else
 			loaded = true;

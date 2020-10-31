@@ -6,7 +6,7 @@
 #include "ModuleRenderer3d.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
-#include "ModuleWwise.h"
+#include "ModuleAudio.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_ResourceManager.h"
 
@@ -443,7 +443,7 @@ void PlayPauseWindow::Draw(bool secondary)
 
 		ImGui::SameLine();
 
-		ImGui::Text("%.2f", TimeManager::GetGameTimer());
+		ImGui::Text("%.2f", RE_TimeManager::GetGameTimer());
 
 		ImGui::SameLine();
 		ImGui::Checkbox("Draw Gizmos", &App->editor->debug_drawing);
@@ -786,7 +786,7 @@ void PopUpWindow::Draw(bool secondary)
 					App->fs->DeleteUndefinedFile(nameStr.c_str());
 				}
 				else
-					LOG_ERROR("File culdn't erased because the shaders culdn't deleted.");
+					RE_LOG_ERROR("File culdn't erased because the shaders culdn't deleted.");
 
 
 
@@ -948,7 +948,7 @@ void AssetsWindow::Draw(bool secondary)
 		}
 
 		float width = ImGui::GetWindowWidth();
-		int itemsColum = width / iconsSize;
+		int itemsColum = static_cast<int>(width / iconsSize);
 		eastl::stack<RE_FileSystem::RE_Path*> filesToDisplay = currentDir->GetDisplayingFiles();
 
 		ImGui::Columns(itemsColum, NULL, false);
@@ -1180,7 +1180,7 @@ void WwiseWindow::Draw(bool secondary)
 				ImGui::InputFloat("Insert RTPC value", &value);
 
 				if (ImGui::Button("Send RTPC Value")) {
-					ModuleWwise::SendRTPC(name.c_str(), value);
+					ModuleAudio::SendRTPC(name.c_str(), value);
 				}
 			}
 			else if (usingState) {
@@ -1191,7 +1191,7 @@ void WwiseWindow::Draw(bool secondary)
 				ImGui::InputText("Insert State name", &state);
 
 				if (ImGui::Button("Send State Value")) {
-					ModuleWwise::SendState(group.c_str(), state.c_str());
+					ModuleAudio::SendState(group.c_str(), state.c_str());
 				}
 			}
 			else if (usingSwitch) {
@@ -1202,14 +1202,14 @@ void WwiseWindow::Draw(bool secondary)
 				ImGui::InputText("Insert Switch state name", &switchstate);
 
 				if (ImGui::Button("Send Switch Value")) {
-					ModuleWwise::SendSwitch(switchname.c_str(), switchstate.c_str());
+					ModuleAudio::SendSwitch(switchname.c_str(), switchstate.c_str());
 				}
 			}
 
 			ImGui::Separator();
 		}
 
-		App->wwise->DrawWwiseElementsDetected();
+		App->audio->DrawWwiseElementsDetected();
 
 		if (secondary) {
 			ImGui::PopItemFlag();

@@ -16,14 +16,13 @@
 
 #include "OutputLog.h"
 #include "Globals.h"
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 
 RE_InternalResources::RE_InternalResources()
-{
-}
+{}
 
 RE_InternalResources::~RE_InternalResources()
 {
@@ -121,7 +120,7 @@ bool RE_InternalResources::InitChecker()
 	}
 	
 	glGenTextures(1, &checkerTexture);
-	RE_GLCache::ChangeTextureBind(checkerTexture);
+	RE_GLCacheManager::ChangeTextureBind(checkerTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, IMAGE_COLS, IMAGE_ROWS, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

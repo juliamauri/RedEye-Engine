@@ -21,11 +21,11 @@ void RE_ResouceAndGOImporter::JsonSerialize(JSONNode* node, RE_GOManager* pool)
 	JSONNode* resources = node->PushJObject("resources");
 	resources->PushUInt("resSize", resGo.size());
 	eastl::string ref;
-	for (int r = 0; r < resGo.size(); r++) {
+	for (int r = 0; r < static_cast<int>(resGo.size()); r++) {
 		ref = "r";
 		ref += eastl::to_string(r);
 		JSONNode* resN = resources->PushJObject(ref.c_str());
-		ResourceContainer* res = App->resources->At(resGo.at(r));
+		ResourceContainer* res = App->resources->At(resGo.at(static_cast<unsigned int>(r)));
 		Resource_Type rtype = res->GetType();
 
 		resN->PushInt("index", r);
@@ -64,8 +64,8 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GOManager* pool, unsigned int*
 	memcpy(cursor, &resSize, size);
 	cursor += size;
 
-	for (int r = 0; r < resGo.size(); r++) {
-		ResourceContainer* res = resC.at(r);
+	for (int r = 0; r < static_cast<int>(resGo.size()); r++) {
+		ResourceContainer* res = resC.at(static_cast<unsigned int>(r));
 		Resource_Type rtype = res->GetType();
 
 		size = sizeof(int);

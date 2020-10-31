@@ -27,7 +27,7 @@ void RE_Scene::LoadInMemory()
 		LibrarySave(true);
 	}
 	else {
-		LOG_ERROR("Scene %s not found on project", GetName());
+		RE_LOG_ERROR("Scene %s not found on project", GetName());
 	}
 }
 

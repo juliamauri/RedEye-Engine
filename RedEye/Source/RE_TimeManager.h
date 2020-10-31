@@ -1,7 +1,6 @@
 #ifndef __TIMEMANAGER_H__
 #define __TIMEMANAGER_H__
 
-
 class Timer
 {
 public:
@@ -22,31 +21,55 @@ private:
 	unsigned int paused_at;
 };
 
-class TimeManager
+struct TimePlotting
+{
+	TimePlotting();
+
+	void DrawEditor();
+	unsigned int ManageFrameTimers(unsigned int ms_count);
+	void SetMaxFPS(float max_fps);
+	inline void ClearArrays();
+
+	Timer	fps_timer; // read every second
+
+	unsigned long	frames_counter = 0u;
+	unsigned int	fps_counter = 0u;
+	unsigned int	last_fps_count = 0u;
+	unsigned int	last_ms_count = 0u;
+
+	float			capped_fps = 60.f;
+	unsigned int	capped_ms = 0u;
+
+	bool	pause_plotting = false;
+	float	fps[100] = {};
+	float	ms[100] = {};
+};
+
+class RE_TimeManager
 {
 public:
 
-	TimeManager();
-	~TimeManager();
+	RE_TimeManager();
+	~RE_TimeManager();
 
 	void Init(float max_fps = 60.f);
 
 	float UpdateDeltaTime(); // returns updated dt
 	unsigned int ManageFrameTimers(); // returns extra ms for frame
 
-	void	Delay(unsigned int ms) const;
 	void	DrawEditor(); // Draws graphs on time stats
 	
 	void	SetMaxFPS(float max_fps); // Set to 0 uncap fps
 	float	GetMaxFPS() const;
-
-	static float GetDeltaTime();
 
 	unsigned int GetCappedMS() const;
 	unsigned int GetFpsCounter() const;
 	unsigned int GetLastMs() const;
 	unsigned int GetLastFPS() const;
 
+	static void	Delay(unsigned int ms);
+
+	static float GetDeltaTime();
 	static float GetEngineTimer();
 	static float GetGameTimer();
 
@@ -56,29 +79,13 @@ public:
 
 private:
 
-	void ClearArrays();
-
-private:
-
-	unsigned long	frames_counter = 0u;
-	unsigned int	fps_counter = 0u;
-	unsigned int	last_fps_count = 0u;
-	unsigned int	last_ms_count = 0u;
-
 	static float dt;
-
-	float	capped_fps = 60.f;
-	unsigned int	capped_ms = 0u;
-
-	Timer	ms_timer; // read every frame
-	Timer	fps_timer; // read every second
-
 	static Timer	engine_timer;
 	static Timer	game_timer;
 
-	float	fps[100] = {};
-	float	ms[100] = {};
-	bool	pause_plotting = false;
+	Timer	ms_timer; // read every frame
+
+	TimePlotting* plot_data = nullptr;
 };
 
 #endif // !__TIMEMANAGER_H__

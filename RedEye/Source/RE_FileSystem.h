@@ -152,14 +152,15 @@ public:
 	RE_Directory* FindDirectory(const char* pathToFind);
 	RE_Path* FindPath(const char* pathToFind, RE_Directory* dir = nullptr);
 
-	unsigned long GetLastTimeModified(const char* path);
+	signed long long GetLastTimeModified(const char* path);
 
 private:
 	void RecursiveCopy(const char* origin, const char* dest);
 
 private:
 
-	Config* engine_config;
+	Config* engine_config = nullptr;
+
 	eastl::string engine_path;
 	eastl::string library_path;
 	eastl::string assets_path;

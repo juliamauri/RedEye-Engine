@@ -8,12 +8,10 @@
 #include "RE_InternalResources.h"
 #include "RE_TextureImporter.h"
 #include "ModuleScene.h"
-
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 #include "RE_FBOManager.h"
 #include "Event.h"
 #include "TimeManager.h"
-
 #include "RE_GOManager.h"
 
 #include "RE_Shader.h"
@@ -24,18 +22,12 @@
 #include "RE_Model.h"
 #include "RE_Material.h"
 #include "RE_SkyBox.h"
-
 #include "Globals.h"
 
-
 #include "Glew/include/glew.h"
-
 #include "IL/include/il.h"
 #include "IL/include/ilu.h"
-
 #include "par_shapes.h"
-
-
 
 #include <EASTL/string.h>
 
@@ -112,7 +104,7 @@ void RE_ThumbnailManager::Init()
 	stride *= sizeof(float);
 	float* meshBuffer = new float[meshSize];
 	float* cursor = meshBuffer;
-	for (uint i = 0; i < sphere->npoints; i++) {
+	for (int i = 0; i < sphere->npoints; i++) {
 		uint cursorSize = 3;
 		size_t size = sizeof(float) * 3;
 
@@ -130,7 +122,7 @@ void RE_ThumbnailManager::Init()
 
 
 	glGenVertexArrays(1, &VAOSphere);
-	RE_GLCache::ChangeVAO(VAOSphere);
+	RE_GLCacheManager::ChangeVAO(VAOSphere);
 
 	glGenBuffers(1, &VBOSphere);
 	glBindBuffer(GL_ARRAY_BUFFER, VBOSphere);
@@ -233,7 +225,7 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 		ResourceContainer* res = App->resources->At(ref);
 		RE_Texture* tex = (RE_Texture*)res;
 		RE_FileIO texFile(res->GetAssetPath());
-		if (texFile.Load());
+		if (texFile.Load())
 		{
 			unsigned int imageID = 0;
 			ilGenImages(1, &imageID);
@@ -358,7 +350,7 @@ unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		mat->UploadToShader((float*)math::float4x4::identity.ptr(), false, true);
-		RE_GLCache::ChangeVAO(VAOSphere);
+		RE_GLCacheManager::ChangeVAO(VAOSphere);
 		glDrawElements(GL_TRIANGLES, sphere_triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 
 		mat->UnUseResources();
@@ -394,7 +386,7 @@ unsigned int RE_ThumbnailManager::ThumbnailSkyBox(const char* ref)
 		eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 
-		RE_GLCache::ChangeTextureBind(0);
+		RE_GLCacheManager::ChangeTextureBind(0);
 
 		App->resources->Use(ref);
 
@@ -404,7 +396,7 @@ unsigned int RE_ThumbnailManager::ThumbnailSkyBox(const char* ref)
 
 		RE_Shader* skyboxShader = (RE_Shader*)App->resources->At(App->internalResources->GetDefaultSkyBoxShader());
 		uint skysphereshader = skyboxShader->GetID();
-		RE_GLCache::ChangeShader(skysphereshader);
+		RE_GLCacheManager::ChangeShader(skysphereshader);
 		RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
 		skybox->DrawSkybox();
 		
@@ -470,7 +462,7 @@ unsigned int RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 		if (IL_FALSE != ilLoadL(TextureType::RE_DDS, thumbFile.GetBuffer(), thumbFile.GetSize())) {
 			/* OpenGL texture binding of the image loaded by DevIL  */
 			glGenTextures(1, &ret); /* Texture name generation */
-			RE_GLCache::ChangeTextureBind(ret); /* Binding of texture name */
+			RE_GLCacheManager::ChangeTextureBind(ret); /* Binding of texture name */
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, defSettings.mag_filter); /* We will use linear interpolation for magnification filter */
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, defSettings.min_filter); /* We will use linear interpolation for minifying filter */
@@ -479,7 +471,7 @@ unsigned int RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 
 			glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), THUMBNAILSIZE, THUMBNAILSIZE, 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
 
-			RE_GLCache::ChangeTextureBind(0);
+			RE_GLCacheManager::ChangeTextureBind(0);
 			ilBindImage(0);
 			/* Delete used resources*/
 			ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */

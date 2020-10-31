@@ -123,28 +123,28 @@ class ShaderCvar : public Cvar
 public: 
 	ShaderCvar();
 	ShaderCvar(const ShaderCvar& copy);
-	ShaderCvar(bool bool_v);
-	ShaderCvar(int int_v, bool sampler = false);
-	ShaderCvar(float float_v);
-	ShaderCvar(bool boola_v[], unsigned int count);
-	ShaderCvar(int inta_v[], unsigned int count);
-	ShaderCvar(math::float2 float2_v);
-	ShaderCvar(math::float3 float3_v);
-	ShaderCvar(math::float4 float4_v, bool mat2 = false);
-	ShaderCvar(math::float3x3 mat3_v);
-	ShaderCvar(math::float4x4 mat4_v);
+	ShaderCvar(const bool bool_v);
+	ShaderCvar(const int int_v, bool sampler = false);
+	ShaderCvar(const float float_v);
+	ShaderCvar(const bool boola_v[], unsigned int count);
+	ShaderCvar(const int inta_v[], unsigned int count);
+	ShaderCvar(const math::float2 float2_v);
+	ShaderCvar(const math::float3 float3_v);
+	ShaderCvar(const math::float4 float4_v, bool mat2 = false);
+	ShaderCvar(const math::float3x3 mat3_v);
+	ShaderCvar(const math::float4x4 mat4_v);
 
 	bool SetValue(const ShaderCvar& copyValue, bool force_type = false);
-	bool SetValue(bool bool_v, bool force_type = false) override;
-	bool SetValue(bool boola_v[], unsigned int count, bool force_type = false);
-	bool SetValue(int int_v, bool force_type = false) override;
-	bool SetValue(int inta_v[], unsigned int count, bool force_type = false);
-	bool SetValue(float float_v, bool force_type = false) override;
-	bool SetValue(math::float2 float2_v, bool force_type = false);
-	bool SetValue(math::float3 float3_v, bool force_type = false);
-	bool SetValue(math::float4 float4_v, bool mat2 = false, bool force_type = false);
-	bool SetValue(math::float3x3 mat3_v, bool force_type = false);
-	bool SetValue(math::float4x4 mat4_v, bool force_type = false);
+	bool SetValue(const bool bool_v, bool force_type = false) override;
+	bool SetValue(const bool boola_v[], unsigned int count, bool force_type = false);
+	bool SetValue(const int int_v, bool force_type = false) override;
+	bool SetValue(const int inta_v[], unsigned int count, bool force_type = false);
+	bool SetValue(const float float_v, bool force_type = false) override;
+	bool SetValue(const math::float2 float2_v, bool force_type = false);
+	bool SetValue(const math::float3 float3_v, bool force_type = false);
+	bool SetValue(const math::float4 float4_v, bool mat2 = false, bool force_type = false);
+	bool SetValue(const math::float3x3 mat3_v, bool force_type = false);
+	bool SetValue(const math::float4x4 mat4_v, bool force_type = false);
 	bool SetSampler(const char* res_ptr, bool force_type = false);
 
 	bool DrawPropieties(bool isInMemory);

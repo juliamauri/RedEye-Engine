@@ -10,12 +10,9 @@
 #define INV_TWO_PI 0.15915494309189533576f
 #define HAVE_M_PI
 
-#define KILOBYTE 1024
-#define MEGABYTE 1048576
-#define GIGABYTE 1073741824
-#define KILOBYTE_F 1024.0
-#define MEGABYTE_F 1048576.0
-#define GIGABYTE_F 1073741824.0
+#define KILOBYTE 1024.0
+#define MEGABYTE 1048576.0
+#define GIGABYTE 1073741824.0
 
 // New useful types
 typedef unsigned int uint;

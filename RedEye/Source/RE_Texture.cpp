@@ -4,7 +4,7 @@
 #include "RE_FileSystem.h"
 #include "RE_TextureImporter.h"
 #include "RE_ThumbnailManager.h"
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 
 #include "OutputLog.h"
 
@@ -85,7 +85,7 @@ void RE_Texture::LoadInMemory()
 		LibrarySave();
 	}
 	else {
-		LOG_ERROR("Texture %s not found on project", GetName());
+		RE_LOG_ERROR("Texture %s not found on project", GetName());
 	}
 }
 
@@ -105,7 +105,7 @@ void RE_Texture::Import(bool keepInMemory)
 
 void RE_Texture::use()
 {
-	RE_GLCache::ChangeTextureBind(ID);
+	RE_GLCacheManager::ChangeTextureBind(ID);
 }
 
 void RE_Texture::GetWithHeight(int * w, int * h)

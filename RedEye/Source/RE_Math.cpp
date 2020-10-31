@@ -16,7 +16,7 @@ RE_Math::RE_Math()
 
 void RE_Math::Init()
 {
-	LOG("Initializing Math");
+	RE_LOG("Initializing Math");
 	App->ReportSoftware("MathGeoLib", nullptr, "https://github.com/juj/MathGeoLib");
 	lcg.Seed(Clock::TickU32());
 }

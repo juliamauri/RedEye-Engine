@@ -46,7 +46,7 @@ enum AABBDebugDrawing : int
 class ModuleEditor : public Module
 {
 public:
-	ModuleEditor(const char* name, bool start_enabled = true);
+	ModuleEditor(const char* name = "Editor", bool start_enabled = true);
 	~ModuleEditor();
 
 	bool Init(JSONNode* node) override;

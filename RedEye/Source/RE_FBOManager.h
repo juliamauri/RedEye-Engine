@@ -1,8 +1,6 @@
 #ifndef __REFBOMANAGER__
 #define __REFBOMANAGER__
 
-#include "EventListener.h"
-
 #include <EASTL/map.h>
 #include <EASTL/vector.h>
 
@@ -21,8 +19,7 @@ struct RE_FBO {
 	} type = DEFAULT;
 };
 
-class RE_FBOManager :
-	public EventListener
+class RE_FBOManager
 {
 public:
 	RE_FBOManager();

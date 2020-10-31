@@ -15,7 +15,7 @@
 #include "RE_FileSystem.h"
 #include "RE_InternalResources.h"
 #include "RE_ResourceManager.h"
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 #include "RE_Mesh.h"
 #include "RE_Shader.h"
 
@@ -39,13 +39,13 @@ RE_CompGrid::~RE_CompGrid()
 
 void RE_CompGrid::Draw()
 {
-	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
+	RE_GLCacheManager::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", math::vec(1.0f, 0.0f, 0.0f));
 
-	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+	RE_GLCacheManager::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawArrays(GL_LINES, 0, 400);
 }
 
@@ -82,7 +82,7 @@ void RE_CompRock::SetUp(const RE_CompRock& cmpRock, RE_GameObject* parent)
 
 void RE_CompRock::Draw()
 {
-	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
+	RE_GLCacheManager::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
 	// Apply Diffuse Color
@@ -91,7 +91,7 @@ void RE_CompRock::Draw()
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
 
 	// Draw
-	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+	RE_GLCacheManager::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 
 }
@@ -207,7 +207,7 @@ void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
 		stride *= sizeof(float);
 		float* meshBuffer = new float[meshSize];
 		float* cursor = meshBuffer;
-		for (uint i = 0; i < rock->npoints; i++) {
+		for (int i = 0; i < rock->npoints; i++) {
 			uint cursorSize = 3;
 			size_t size = sizeof(float) * 3;
 
@@ -220,7 +220,7 @@ void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
 
 
 		glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
-		RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+		RE_GLCacheManager::ChangeVAO(RE_CompPrimitive::VAO);
 
 		glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
@@ -254,7 +254,7 @@ RE_CompPlatonic::~RE_CompPlatonic() { }
 
 void RE_CompPlatonic::Draw()
 {
-	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
+	RE_GLCacheManager::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
 	// Apply Diffuse Color
@@ -263,7 +263,7 @@ void RE_CompPlatonic::Draw()
 	RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
 
 	// Draw
-	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+	RE_GLCacheManager::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 
 }
@@ -367,7 +367,7 @@ RE_CompParametric::~RE_CompParametric()
 
 void RE_CompParametric::Draw()
 {
-	RE_GLCache::ChangeShader(RE_CompPrimitive::shader);
+	RE_GLCacheManager::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
 	if (!show_checkers)
@@ -384,11 +384,11 @@ void RE_CompParametric::Draw()
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
 		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse", 0);
-		RE_GLCache::ChangeTextureBind(App->internalResources->GetTextureChecker());
+		RE_GLCacheManager::ChangeTextureBind(App->internalResources->GetTextureChecker());
 	}
 
 	// Draw
-	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+	RE_GLCacheManager::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 
 }
@@ -567,7 +567,7 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 	stride *= sizeof(float);
 	float* meshBuffer = new float[meshSize];
 	float* cursor = meshBuffer;
-	for (uint i = 0; i < param->npoints; i++) {
+	for (int i = 0; i < param->npoints; i++) {
 		uint cursorSize = 3;
 		size_t size = sizeof(float) * 3;
 
@@ -585,7 +585,7 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 
 
 	glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
-	RE_GLCache::ChangeVAO(RE_CompPrimitive::VAO);
+	RE_GLCacheManager::ChangeVAO(RE_CompPrimitive::VAO);
 
 	glGenBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, RE_CompPrimitive::VBO);
@@ -644,7 +644,7 @@ const char* RE_CompPlane::TransformAsMeshResource()
 	stride += 2;
 
 	eastl::vector<unsigned int> index;
-	for (uint i = 0; i < plane->ntriangles * 3; i++)
+	for (int i = 0; i < plane->ntriangles * 3; i++)
 		index.push_back(plane->triangles[i]);
 
 	uint* indexA = new uint[plane->ntriangles * 3];

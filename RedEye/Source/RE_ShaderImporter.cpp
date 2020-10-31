@@ -13,12 +13,12 @@ RE_ShaderImporter::~RE_ShaderImporter() { }
 
 bool RE_ShaderImporter::Init()
 {
-	LOG("Initializing Shader Manager");
+	RE_LOG("Initializing Shader Manager");
 
 	App->ReportSoftware("GLSLang", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
 	
 	bool ret = (folderPath != nullptr);
-	if (!ret) LOG_ERROR("Shader Manager could not read folder path");
+	if (!ret) RE_LOG_ERROR("Shader Manager could not read folder path");
 
 	GLint formats = 0;
 	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
@@ -30,7 +30,7 @@ bool RE_ShaderImporter::Init()
 
 bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath, bool compileTest)
 {
-	LOG("%s %s\n%s\n%s shaders.",(!compileTest) ? "Loading" : "Compile Test", vertexPath, fragmentPath, (geometryPath) ? geometryPath : "No geometry shader");
+	RE_LOG("%s %s\n%s\n%s shaders.",(!compileTest) ? "Loading" : "Compile Test", vertexPath, fragmentPath, (geometryPath) ? geometryPath : "No geometry shader");
 
 	bool ret = true;
 	last_error.clear();
@@ -201,9 +201,9 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
-			LOG_WARNING("Vertex compilation failed: ");
+			RE_LOG_WARNING("Vertex compilation failed: ");
 			glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-			LOG_ERROR(&infoLog[0]);
+			RE_LOG_ERROR(&infoLog[0]);
 			last_error += "\nVertex compilation failed from\n";
 			last_error += infoLog;
 			last_error += "\n";
@@ -224,9 +224,9 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 		glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
-			LOG_WARNING("Fragment compilation failed: ");
+			RE_LOG_WARNING("Fragment compilation failed: ");
 			glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-			LOG_ERROR(&infoLog[0]);
+			RE_LOG_ERROR(&infoLog[0]);
 			last_error += "\nFragment compilation failed from\n";
 			last_error += infoLog;
 			last_error += "\n";
@@ -246,9 +246,9 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 		glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
-			LOG_WARNING("Geometry compilation failed: ");
+			RE_LOG_WARNING("Geometry compilation failed: ");
 			glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
-			LOG_ERROR(&infoLog[0]);
+			RE_LOG_ERROR(&infoLog[0]);
 			last_error += "\nGeometry compilation failed from\n";
 			last_error += infoLog;
 			last_error += "\n";
@@ -268,9 +268,9 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 	//check
 	glGetProgramiv(*ID, GL_LINK_STATUS, &success);
 	if (!success) {
-		LOG_WARNING("Shader program compilation failed:\n");
+		RE_LOG_WARNING("Shader program compilation failed:\n");
 		glGetProgramInfoLog(*ID, 512, NULL, infoLog);
-		LOG_ERROR(&infoLog[0]);
+		RE_LOG_ERROR(&infoLog[0]);
 		last_error += "\nShader program compilation failed";
 		last_error += ":\n";
 		last_error += infoLog;

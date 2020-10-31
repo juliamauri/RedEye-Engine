@@ -32,12 +32,12 @@ ModuleInput::~ModuleInput()
 // Called before render is available
 bool ModuleInput::Init(JSONNode* config_module)
 {
-	LOG_SECONDARY("Init SDL input & event subsystems");
+	RE_LOG_SECONDARY("Init SDL input & event subsystems");
 	bool ret = true;
 
 	if(SDL_InitSubSystem(SDL_INIT_EVENTS) < 0)
 	{
-		LOG_ERROR("SDL_EVENTS could not initialize! SDL_Error: %s", SDL_GetError());
+		RE_LOG_ERROR("SDL_EVENTS could not initialize! SDL_Error: %s", SDL_GetError());
 		ret = false;
 	}
 
@@ -297,7 +297,7 @@ void ModuleInput::HandleSDLEventQueue()
 
 /* Drag and drop events */
 		case SDL_DROPFILE:/**< The system requests a file open */
-			LOG("File Dropped: %s", e.drop.file);
+			RE_LOG("File Dropped: %s", e.drop.file);
 			App->fs->HandleDropedFile(e.drop.file);
 			break;
 

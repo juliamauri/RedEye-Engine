@@ -9,7 +9,7 @@
 
 #include "RE_CompPrimitive.h"
 
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 #include "RE_Shader.h"
 
 #include "SDL2/include/SDL.h"
@@ -20,8 +20,7 @@
 
 #define CUBE_TRIANGLES 36
 
-RE_PrimitiveManager::RE_PrimitiveManager()
-{}
+RE_PrimitiveManager::RE_PrimitiveManager() {}
 
 RE_PrimitiveManager::~RE_PrimitiveManager()
 {
@@ -125,7 +124,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateGrid(RE_GameObject* game_obj)
 		glGenVertexArrays(1, &vao_grid);
 		glGenBuffers(1, &vbo_grid);
 
-		RE_GLCache::ChangeVAO(vao_grid);
+		RE_GLCacheManager::ChangeVAO(vao_grid);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_grid);
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
@@ -133,7 +132,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateGrid(RE_GameObject* game_obj)
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(0);
 
-		RE_GLCache::ChangeVAO(vao_grid);
+		RE_GLCacheManager::ChangeVAO(vao_grid);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
@@ -215,7 +214,7 @@ void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int*
 	stride *= sizeof(float);
 	float* meshBuffer = new float[meshSize];
 	float* cursor = meshBuffer;
-	for (uint i = 0; i < plato->npoints; i++) {
+	for (int i = 0; i < plato->npoints; i++) {
 		uint cursorSize = 3;
 		size_t size = sizeof(float) * 3;
 
@@ -228,7 +227,7 @@ void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int*
 
 
 	glGenVertexArrays(1, vao);
-	RE_GLCache::ChangeVAO(*vao);
+	RE_GLCacheManager::ChangeVAO(*vao);
 
 	glGenBuffers(1, vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, *vbo);

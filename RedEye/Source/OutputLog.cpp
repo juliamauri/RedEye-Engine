@@ -32,7 +32,7 @@ void _log(const int category, const char file[], int line, const char* format, .
 		case L_TERCIARY: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t\t+ %s", tmp_string); break;
 		case L_ERROR: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nERROR: %s", tmp_string); break;
 		case L_WARNING: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nWARNING: %s", tmp_string); break;
-		case L_SOLUTION: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\Solution: %s", tmp_string); break;
+		case L_SOLUTION: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nSolution: %s", tmp_string); break;
 		case L_SOFTWARE: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t* 3rd party software report: %s", tmp_string); break;
 		}
 		

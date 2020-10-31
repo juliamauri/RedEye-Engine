@@ -2,6 +2,19 @@
 #define __APP_H__
 
 #include "EventListener.h"
+
+#include "RE_Math.h"
+#include "RE_HandleErrors.h"
+#include "RE_InternalResources.h"
+
+#include "RE_TextureImporter.h"
+#include "RE_ShaderImporter.h"
+#include "RE_ModelImporter.h"
+
+#include "RE_TimeManager.h"
+#include "RE_CameraManager.h"
+#include "RE_PrimitiveManager.h"
+
 #include "Optick/include/optick.h"
 #include <EASTL/string.h>
 #include <EASTL/list.h>
@@ -12,10 +25,10 @@ class ModuleWindow;
 class ModuleScene;
 class ModuleEditor;
 class ModuleRenderer3D;
-class ModuleWwise;
+class ModuleAudio;
 
 class RE_FileSystem;
-class TimeManager;
+class RE_TimeManager;
 class SystemInfo;
 class RE_Math;
 class OutputLogHolder;
@@ -27,7 +40,7 @@ class RE_ModelImporter;
 class RE_ResourceManager;
 class RE_HandleErrors;
 class RE_InternalResources;
-class RE_GLCache;
+class RE_GLCacheManager;
 class RE_FBOManager;
 class RE_ThumbnailManager;
 
@@ -48,69 +61,75 @@ public:
 	int Update();
 	bool CleanUp();
 
-	bool Load();
-	bool Save();
-
 	void DrawEditor();
-	void Log(const int category, const char* text, const char* file);
-	void ReportSoftware(const char * name, const char * version = nullptr, const char * website = nullptr);
 	void RecieveEvent(const Event& e) override;
 
-	const char* GetName() const;
-	const char* GetOrganization() const;
+	static void Log(const int category, const char* text, const char* file);
+	static void ReportSoftware(const char * name, const char * version = nullptr, const char * website = nullptr);
 
-	GameState GetState() const;
+	static const char* GetName();
+	static const char* GetOrganization();
+	static GameState GetState();
 
 private:
+
+	bool Load();
+	bool Save();
 
 	void PrepareUpdate();
 	void FinishUpdate();
 
 public:
 
-	ModuleInput* input = nullptr;
-	ModuleWindow* window = nullptr;
-	ModuleScene* scene = nullptr;
-	ModuleEditor* editor = nullptr;
-	ModuleRenderer3D* renderer3d = nullptr;
-	ModuleWwise* wwise = nullptr;
+	// Utility
+	static RE_Math math;
+	static RE_HandleErrors handlerrors;
+	static RE_InternalResources internalResources;
 
-	RE_FileSystem* fs = nullptr;
-	TimeManager* time = nullptr;
-	SystemInfo* sys_info = nullptr;
-	RE_Math* math = nullptr;
-	OutputLogHolder* log = nullptr;
+	static RE_FileSystem* fs;
+	static OutputLogHolder* log;
 
-	RE_CameraManager* cams = nullptr;
-	RE_TextureImporter* textures = nullptr;
-	RE_ShaderImporter* shaders = nullptr;
-	RE_PrimitiveManager* primitives = nullptr;
-	RE_ModelImporter* modelImporter = nullptr;
+	// Modules
+	static ModuleInput* input;
+	static ModuleWindow* window;
+	static ModuleScene* scene;
+	static ModuleEditor* editor;
+	static ModuleRenderer3D* renderer3d;
+	static ModuleAudio* audio;
 
-	RE_ResourceManager* resources = nullptr;
-	RE_InternalResources* internalResources = nullptr;
+	// Importers
+	static RE_TextureImporter textures;
+	static RE_ShaderImporter shaders;
+	static RE_ModelImporter modelImporter;
 
-	RE_HandleErrors* handlerrors = nullptr;
+	// Managers
+	static RE_TimeManager time;
+	static RE_CameraManager cams;
+	static RE_PrimitiveManager primitives;
 
-	RE_GLCache* glcache = nullptr;
-	RE_FBOManager* fbomanager = nullptr;
+	static RE_ResourceManager* resources;
+	static RE_ThumbnailManager* thumbnail;
 
-	RE_ThumbnailManager* thumbnail = nullptr;
+#ifdef _DEBUG
+	static SystemInfo* sys_info;
+#endif // _DEBUG
 
 private:
-	eastl::list<Module*> modules;
+
+	static eastl::string app_name;
+	static eastl::string organization;
+
+	static eastl::list<Module*> modules;
+
+	static GameState state;
+
 	bool want_to_load_def = false;
 	bool want_to_load = false;
 	bool want_to_save = false;
 	bool want_to_quit = false;
 	bool ticking = false;
-
-	eastl::string app_name;
-	eastl::string organization;
-
-	GameState state = GS_STOP;
 };
 
-extern Application* App;
+typedef Application App;
 
 #endif // !__APP_H__

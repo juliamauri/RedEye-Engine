@@ -2,6 +2,7 @@
 #define __MODULERENDER3D_H__
 
 #include "Module.h"
+#include "RE_FBOManager.h"
 #include <EASTL/stack.h>
 #include "MathGeoLib/include/Math/float4.h"
 
@@ -62,7 +63,7 @@ enum RENDER_VIEWS : short
 class ModuleRenderer3D : public Module 
 {
 public:
-	ModuleRenderer3D(const char* name, bool start_enabled = true);
+	ModuleRenderer3D(const char* name = "Renderer3D", bool start_enabled = true);
 	~ModuleRenderer3D();
 
 	bool Init(JSONNode* node) override;
@@ -86,6 +87,10 @@ public:
 	// Shaders - A vector in GLSL contains 4 component
 	unsigned int GetMaxVertexAttributes(); //it's usually 16
 
+	// GPU Specs
+	const char* GetGPURenderer() const;
+	const char* GetGPUVendor() const;
+
 	// Sets shader for unassigned geometry
 	static const LightMode GetLightMode();
 
@@ -96,6 +101,8 @@ public:
 
 	// Thumbnail
 	void ReRenderThumbnail(const char* res);
+
+	static RE_FBOManager fbomanager;
 
 private:
 

@@ -153,8 +153,8 @@ int GameObjectManager::Push(RE_GameObject val)
 
 unsigned int GameObjectManager::GetBinarySize() const
 {
-	uint size = sizeof(unsigned int), i = 0;
-	for (i; i < lastAvaibleIndex; i++)
+	uint size = sizeof(unsigned int);
+	for (int i = 0; i < lastAvaibleIndex; i++)
 		size += pool_[i].GetBinarySize();
 	return size;
 }

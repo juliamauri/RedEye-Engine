@@ -43,7 +43,7 @@ RE_ModelImporter::~RE_ModelImporter()
 
 bool RE_ModelImporter::Init(const char * def_shader)
 {
-	LOG("Initializing Model Importer");
+	RE_LOG("Initializing Model Importer");
 
 	App->ReportSoftware("Assimp", "4.0.1", "http://www.assimp.org/");
 
@@ -64,18 +64,18 @@ RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int 
 	const aiScene* scene = importer.ReadFileFromMemory(buffer, size, mSettings->GetFlags()/*aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | /*aiProcess_PreTransformVertices | aiProcess_SortByPType | aiProcess_FlipUVs */);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-		LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
+		RE_LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 	else
 	{
-		LOG_SECONDARY("Loading all materials");
+		RE_LOG_SECONDARY("Loading all materials");
 		//First loading all materials
 		if(scene->HasMaterials()) ProcessMaterials(scene);
 
-		LOG_SECONDARY("Loading all meshes");
+		RE_LOG_SECONDARY("Loading all meshes");
 		//Second loading all meshes
 		if (scene->HasMeshes()) ProcessMeshes(scene);
 
-		LOG_SECONDARY("Processing model hierarchy");
+		RE_LOG_SECONDARY("Processing model hierarchy");
 		//Mount a go hiteracy with nodes from model
 		ret = new RE_GOManager();
 			
@@ -90,7 +90,7 @@ RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int 
 
 void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const aiScene * scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot)
 {
-	LOG_TERCIARY("%s Node: %s (%u meshes | %u children)",
+	RE_LOG_TERCIARY("%s Node: %s (%u meshes | %u children)",
 		node->mParent ? "SON" : "PARENT",
 		node->mName.C_Str(),
 		node->mNumMeshes,
@@ -194,7 +194,7 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 
 		aiMesh* mesh = scene->mMeshes[i];
 
-		LOG_TERCIARY("Mesh %u: %s (%u vertices | %u faces | %u material index)",
+		RE_LOG_TERCIARY("Mesh %u: %s (%u vertices | %u faces | %u material index)",
 			i,
 			mesh->mName.C_Str(),
 			mesh->mNumVertices,
@@ -245,7 +245,7 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 					aiFace* face = &mesh->mFaces[i];
 
 					if (face->mNumIndices != 3)
-						LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face->mNumIndices);
+						RE_LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face->mNumIndices);
 
 					size_t size = 3;
 					memcpy(cursor, &face->mIndices[0], size * sizeof(uint));
@@ -285,7 +285,7 @@ eastl::vector<eastl::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(con
 		const aiScene *scene = importer.ReadFileFromMemory(fbxloaded->GetBuffer(), fbxloaded->GetSize(), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | /*aiProcess_PreTransformVertices |*/ aiProcess_SortByPType | aiProcess_FlipUVs);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-			LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
+			RE_LOG_ERROR("ASSIMP couldn't import file from memory! Assimp error: %s", importer.GetErrorString());
 		else
 		{
 			if (scene->HasMaterials()) {
@@ -339,7 +339,7 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 		{
 			int i = 0;
 		}
-		LOG_TERCIARY("Loadinig %s material.", name.C_Str());
+		RE_LOG_TERCIARY("Loadinig %s material.", name.C_Str());
 
 		eastl::string filePath("Assets/Materials/");
 		filePath += aditionalData->name.c_str();
@@ -471,11 +471,11 @@ void RE_ModelImporter::GetTexturesMaterial(aiMaterial * material, eastl::string 
 						vectorToFill->push_back(texture);
 					}
 					else {
-						LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+						RE_LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
 					}
 				}
 				else {
-					LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
+					RE_LOG_ERROR("Texture don't exists on assets.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
 				}
 			}
 		}

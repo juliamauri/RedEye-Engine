@@ -5,7 +5,7 @@
 
 class EventListener;
 
-typedef enum RE_EventType : unsigned short int
+enum RE_EventType : unsigned short int
 {
 	// APP
 	PLAY,

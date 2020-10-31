@@ -5,14 +5,14 @@
 #include <EASTL/string.h>
 
 struct SDL_Window;
-class SDL_Surface;
+struct SDL_Surface;
 union SDL_Event;
 
 class ModuleWindow : public Module
 {
 public:
 
-	ModuleWindow(const char* name, bool start_enabled = true);
+	ModuleWindow(const char* name = "Window", bool start_enabled = true);
 	~ModuleWindow();
 
 	bool Init(JSONNode* node) override;

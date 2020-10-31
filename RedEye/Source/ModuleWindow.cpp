@@ -17,12 +17,12 @@ ModuleWindow::~ModuleWindow()
 
 bool ModuleWindow::Init(JSONNode* node)
 {
-	LOG_SECONDARY("Init SDL video subsystem");
+	RE_LOG_SECONDARY("Init SDL video subsystem");
 	bool ret = true;
 
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
 	{
-		LOG_ERROR("SDL_VIDEO could not initialize! SDL_Error: %s", SDL_GetError());
+		RE_LOG_ERROR("SDL_VIDEO could not initialize! SDL_Error: %s", SDL_GetError());
 		ret = false;
 	}
 	else
@@ -104,7 +104,7 @@ bool ModuleWindow::Load(JSONNode * node)
 {
 	bool ret = true;
 
-	LOG_SECONDARY("Loading Window propieties from config:");
+	RE_LOG_SECONDARY("Loading Window propieties from config:");
 
 	//OpenGL context 
 	flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
@@ -127,7 +127,7 @@ bool ModuleWindow::Load(JSONNode * node)
 
 	if (!window)
 	{
-		LOG("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+		RE_LOG("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 		ret = false;
 	}
 	else
@@ -267,7 +267,7 @@ void ModuleWindow::SetWindowSize(unsigned int new_width, unsigned int new_height
 
 void ModuleWindow::SetResizeable(const bool flag_value)
 {
-	if ((flags & SDL_WINDOW_RESIZABLE) != flag_value)
+	if (static_cast<bool>(flags & SDL_WINDOW_RESIZABLE) != flag_value)
 	{
 		if (flag_value)
 			flags |= SDL_WINDOW_RESIZABLE;
@@ -278,9 +278,9 @@ void ModuleWindow::SetResizeable(const bool flag_value)
 	}
 }
 
-void ModuleWindow::SetFullScreen(bool flag_value)
+void ModuleWindow::SetFullScreen(const bool flag_value)
 {
-	if ((flags & SDL_WINDOW_FULLSCREEN) != flag_value)
+	if (static_cast<bool>(flags & SDL_WINDOW_FULLSCREEN) != flag_value)
 	{
 		if (flag_value)
 		{
@@ -297,9 +297,9 @@ void ModuleWindow::SetFullScreen(bool flag_value)
 	}
 }
 
-void ModuleWindow::SetBorderless(bool flag_value)
+void ModuleWindow::SetBorderless(const bool flag_value)
 {
-	if ((flags & SDL_WINDOW_BORDERLESS) != flag_value)
+	if (static_cast<bool>(flags & SDL_WINDOW_BORDERLESS) != flag_value)
 	{
 		if (flag_value)
 			flags |= SDL_WINDOW_BORDERLESS;
@@ -310,9 +310,9 @@ void ModuleWindow::SetBorderless(bool flag_value)
 	}
 }
 
-void ModuleWindow::SetFullDesktop(bool flag_value)
+void ModuleWindow::SetFullDesktop(const bool flag_value)
 {
-	if ((flags & SDL_WINDOW_FULLSCREEN) != flag_value)
+	if (static_cast<bool>(flags & SDL_WINDOW_FULLSCREEN) != flag_value)
 	{
 		if (flag_value)
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -323,7 +323,7 @@ void ModuleWindow::SetFullDesktop(bool flag_value)
 	}
 }
 
-void ModuleWindow::SetWindowPos(int x, int y)
+void ModuleWindow::SetWindowPos(const int x, const int y)
 {
 	SDL_SetWindowPosition(window, pos_x = x, pos_y = y);
 }
@@ -351,7 +351,7 @@ void ModuleWindow::SetWindowProperties()
 {
 	if (window == nullptr)
 	{
-		LOG_SECONDARY("Creating new window: %s | Width: %i | Height: %i", title.c_str(), width, height);
+		RE_LOG_SECONDARY("Creating new window: %s | Width: %i | Height: %i", title.c_str(), width, height);
 		window = SDL_CreateWindow(title.c_str(), pos_x, pos_y, width, height, flags);
 	}
 	else

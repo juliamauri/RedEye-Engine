@@ -23,7 +23,7 @@ void _CheckGLError(const char* file, int line)
 		case GL_STACK_OVERFLOW:  error = "STACK_OVERFLOW";  break;
 		default: error = "error not tracked"; break;
 		}
-		LOG_ERROR("GL_%s - %s:%i", error.c_str(), file, line);
+		RE_LOG_ERROR("GL_%s - %s:%i", error.c_str(), file, line);
 		err = glGetError();
 	}
 

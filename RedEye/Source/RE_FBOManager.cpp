@@ -4,7 +4,7 @@
 
 #include "Glew/include/glew.h"
 
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 
 eastl::map<unsigned int, RE_FBO> RE_FBOManager::fbos;
 
@@ -99,7 +99,7 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 		ret = newFbo.ID;
 	else {
 		ClearFBO(newFbo.ID);
-		LOG_ERROR("FBO can't be created.");
+		RE_LOG_ERROR("FBO can't be created.");
 	}
 
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
@@ -142,7 +142,7 @@ int RE_FBOManager::CreateDeferredFBO(unsigned int width, unsigned int height)
 		ret = newFbo.ID;
 	else {
 		ClearFBO(newFbo.ID);
-		LOG_ERROR("FBO can't be created.");
+		RE_LOG_ERROR("FBO can't be created.");
 	}
 
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
@@ -282,9 +282,9 @@ unsigned int RE_FBOManager::GetHeight(unsigned int ID)
 unsigned int RE_FBOManager::GetDepthTexture(unsigned int ID)
 {
 	RE_FBO fbo = fbos.at(ID);
-	RE_GLCache::ChangeTextureBind(fbo.depthBufferTexture);
+	RE_GLCacheManager::ChangeTextureBind(fbo.depthBufferTexture);
 	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 0, 0, fbo.width, fbo.height, 0);
-	RE_GLCache::ChangeTextureBind(0);
+	RE_GLCacheManager::ChangeTextureBind(0);
 	return fbo.depthBufferTexture;
 }
 

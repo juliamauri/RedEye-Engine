@@ -11,7 +11,7 @@
 #include "RE_GOManager.h"
 #include "RE_CompParticleEmiter.h"
 #include "RE_ShaderImporter.h"
-#include "RE_GLCache.h"
+#include "RE_GLCacheManager.h"
 #include "RE_Shader.h"
 #include "RE_InternalResources.h"
 #include "RE_ResourceManager.h"
@@ -623,7 +623,7 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type)
 	}
 
 	if (ret == nullptr)
-		LOG_ERROR("GameObject could not add type %u component", type);
+		RE_LOG_ERROR("GameObject could not add type %u component", type);
 
 	return ret;
 }
@@ -874,7 +874,7 @@ void RE_GameObject::ResetGlobalBoundingBoxForAllChilds()
 
 void RE_GameObject::DrawAABB(math::vec color) const
 {
-	RE_GLCache::ChangeShader(0);
+	RE_GLCacheManager::ChangeShader(0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf((transform->GetMatrixModel() * RE_CameraManager::CurrentCamera()->GetView()).ptr());

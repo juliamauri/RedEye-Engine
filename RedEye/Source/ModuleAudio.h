@@ -25,11 +25,11 @@ struct SoundBank {
 	void Unload();
 };
 
-class ModuleWwise : public Module
+class ModuleAudio : public Module
 {
 public:
-	ModuleWwise(const char* name, bool start_enabled = true);
-	~ModuleWwise();
+	ModuleAudio(const char* name = "Audio", bool start_enabled = true);
+	~ModuleAudio();
 
 	bool Init(JSONNode* node) override;
 	bool Start() override;

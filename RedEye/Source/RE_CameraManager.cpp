@@ -9,12 +9,8 @@
 RE_CompCamera* RE_CameraManager::editor_camera = nullptr;
 RE_CompCamera* RE_CameraManager::main_camera = nullptr;
 
-RE_CameraManager::RE_CameraManager()
-{
-}
-
-RE_CameraManager::~RE_CameraManager()
-{}
+RE_CameraManager::RE_CameraManager() {}
+RE_CameraManager::~RE_CameraManager() {}
 
 void RE_CameraManager::Init()
 {

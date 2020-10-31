@@ -16,7 +16,7 @@ class RE_Scene;
 class ModuleScene : public Module
 {
 public:
-	ModuleScene(const char* name, bool start_enabled = true);
+	ModuleScene(const char* name = "Scene", bool start_enabled = true);
 	~ModuleScene();
 
 	bool Init(JSONNode* node) override;

@@ -98,7 +98,7 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		char **i;
 
 		for (i = PHYSFS_getSearchPath(); *i != NULL; i++)
-			LOG("[%s] is in the search path.\n", *i);
+			RE_LOG("[%s] is in the search path.\n", *i);
 		PHYSFS_freeList(*i);
 
 		const char* config_file = "Settings/config.json";
@@ -106,7 +106,7 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		if (engine_config->Load())
 			ret = true;
 		else
-			LOG_ERROR("Error while loading Engine Configuration file: %s\nRed Eye Engine will initialize with default configuration parameters.", config_file);
+			RE_LOG_ERROR("Error while loading Engine Configuration file: %s\nRed Eye Engine will initialize with default configuration parameters.", config_file);
 
 		rootAssetDirectory = new RE_Directory();
 		rootAssetDirectory->SetPath("Assets/");
@@ -116,7 +116,7 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 	}
 	else
 	{
-		LOG_ERROR("PhysFS could not initialize! Error: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+		RE_LOG_ERROR("PhysFS could not initialize! Error: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 	}
 
 	return ret;
@@ -308,7 +308,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			eastl::vector<RE_File*> toRemoveF;
 			//Importing
 			for (RE_File* file : toImport) {
-				LOG("Importing %s", file->path.c_str());
+				RE_LOG("Importing %s", file->path.c_str());
 
 				const char* newRes = nullptr;
 				switch (file->fType)
@@ -380,7 +380,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			eastl::vector<RE_Meta*> toRemoveM;
 
 			for (RE_Meta* meta : toReImport) {
-				LOG("ReImporting %s", meta->path.c_str());
+				RE_LOG("ReImporting %s", meta->path.c_str());
 
 				App->resources->At(meta->resource)->ReImport();
 
@@ -405,16 +405,19 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 void RE_FileSystem::DrawEditor()
 {
-	ImGui::Text("Executable Directory:");
-	ImGui::TextWrappedV(GetExecutableDirectory(), "");
+	if (ImGui::CollapsingHeader("File System"))
+	{
+		ImGui::Text("Executable Directory:");
+		ImGui::TextWrappedV(GetExecutableDirectory(), "");
 
-	ImGui::Separator();
-	ImGui::Text("All assets directories:");
-	for(auto dir : assetsDirectories)ImGui::Text(dir->path.c_str());
-	ImGui::Separator();
+		ImGui::Separator();
+		ImGui::Text("All assets directories:");
+		for (auto dir : assetsDirectories)ImGui::Text(dir->path.c_str());
+		ImGui::Separator();
 
-	ImGui::Text("Write Directory");
-	ImGui::TextWrappedV(write_path.c_str(), "");
+		ImGui::Text("Write Directory");
+		ImGui::TextWrappedV(write_path.c_str(), "");
+	}
 }
 
 bool RE_FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
@@ -423,7 +426,7 @@ bool RE_FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
 
 	if (PHYSFS_mount(path_or_zip, mount_point, 1) == 0)
 	{
-		LOG_ERROR("File System error while adding a path or zip(%s): %s\n", path_or_zip, PHYSFS_getLastError());
+		RE_LOG_ERROR("File System error while adding a path or zip(%s): %s\n", path_or_zip, PHYSFS_getLastError());
 		ret = false;
 	}
 	return ret;
@@ -435,7 +438,7 @@ bool RE_FileSystem::RemovePath(const char * path_or_zip)
 
 	if (PHYSFS_removeFromSearchPath(path_or_zip) == 0)
 	{
-		LOG_ERROR("Error removing PhysFS Directory (%s): %s", path_or_zip, PHYSFS_getLastError());
+		RE_LOG_ERROR("Error removing PhysFS Directory (%s): %s", path_or_zip, PHYSFS_getLastError());
 		ret = false;
 	}
 	return ret;
@@ -447,7 +450,7 @@ bool RE_FileSystem::SetWritePath(const char * dir)
 
 	if (!PHYSFS_setWriteDir(dir))
 	{
-		LOG_ERROR("Error setting PhysFS Directory: %s", PHYSFS_getLastError());
+		RE_LOG_ERROR("Error setting PhysFS Directory: %s", PHYSFS_getLastError());
 		ret = false;
 	}
 	else
@@ -469,7 +472,7 @@ void RE_FileSystem::LogFolderItems(const char * folder)
 	char **i;
 
 	for (i = rc; *i != NULL; i++)
-		LOG(" * We've got [%s].\n", *i);
+		RE_LOG(" * We've got [%s].\n", *i);
 
 	PHYSFS_freeList(rc);
 }
@@ -605,10 +608,10 @@ void RE_FileSystem::DeleteUndefinedFile(const char* filePath)
 			DEL(file);
 		}
 		else
-			LOG_ERROR("Error deleting file. The file culdn't be located: %s", filePath);
+			RE_LOG_ERROR("Error deleting file. The file culdn't be located: %s", filePath);
 	}
 	else
-		LOG_ERROR("Error deleting file. The dir culdn't be located: %s", filePath);
+		RE_LOG_ERROR("Error deleting file. The dir culdn't be located: %s", filePath);
 }
 
 void RE_FileSystem::DeleteResourceFiles(ResourceContainer* resContainer)
@@ -664,7 +667,7 @@ RE_FileSystem::RE_Path* RE_FileSystem::FindPath(const char* pathToFind, RE_Direc
 	return ret;
 }
 
-unsigned long RE_FileSystem::GetLastTimeModified(const char* path)
+signed long long RE_FileSystem::GetLastTimeModified(const char* path)
 {
 	PHYSFS_Stat stat;
 
@@ -749,17 +752,17 @@ void RE_FileIO::Save(char * buffer, unsigned int size)
 void RE_FileIO::Delete()
 {
 	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
-		LOG_ERROR("Ettot when unmount: %s", PHYSFS_getLastError());
+		RE_LOG_ERROR("Ettot when unmount: %s", PHYSFS_getLastError());
 
 	struct zip* f_zip = NULL;
 	int error = 0;
 	f_zip = zip_open(from_zip, ZIP_CHECKCONS, &error); /* on ouvre l'archive zip */
-	if (error)	LOG_ERROR("could not open or create archive: %s", from_zip);
+	if (error)	RE_LOG_ERROR("could not open or create archive: %s", from_zip);
 
 	zip_int64_t index = zip_name_locate(f_zip, file_name, NULL);
-	if(index == -1) LOG_ERROR("file culdn't locate: %s", file_name);
+	if(index == -1) RE_LOG_ERROR("file culdn't locate: %s", file_name);
 	else {
-		if(zip_delete(f_zip, index) == -1) LOG_ERROR("file culdn't delete: %s", file_name);
+		if(zip_delete(f_zip, index) == -1) RE_LOG_ERROR("file culdn't delete: %s", file_name);
 	}
 
 	zip_close(f_zip);
@@ -822,7 +825,7 @@ unsigned int RE_FileIO::HardLoad()
 				
 				if (amountRead != sll_size)
 				{
-					LOG_ERROR("File System error while reading from file %s: %s", file_name, PHYSFS_getLastError());
+					RE_LOG_ERROR("File System error while reading from file %s: %s", file_name, PHYSFS_getLastError());
 					delete (buffer);
 				}
 				else
@@ -834,17 +837,17 @@ unsigned int RE_FileIO::HardLoad()
 
 			if (PHYSFS_close(fs_file) == 0)
 			{
-				LOG_ERROR("File System error while closing file %s: %s", file_name, PHYSFS_getLastError());
+				RE_LOG_ERROR("File System error while closing file %s: %s", file_name, PHYSFS_getLastError());
 			}
 		}
 		else
 		{
-			LOG_ERROR("File System error while opening file %s: %s", file_name, PHYSFS_getLastError());
+			RE_LOG_ERROR("File System error while opening file %s: %s", file_name, PHYSFS_getLastError());
 		}
 	}
 	else
 	{
-		LOG_ERROR("File System error while checking file %s: %s", file_name, PHYSFS_getLastError());
+		RE_LOG_ERROR("File System error while checking file %s: %s", file_name, PHYSFS_getLastError());
 	}
 
 	return ret;
@@ -860,25 +863,25 @@ void RE_FileIO::HardSave(const char* buffer)
 		long long written = PHYSFS_write(file, (const void*)buffer, 1, size = (strnlen_s(buffer, 0xffff)));
 		if (written != size)
 		{
-			LOG_ERROR("Error while writing to file %s: %s", file, PHYSFS_getLastError());
+			RE_LOG_ERROR("Error while writing to file %s: %s", file, PHYSFS_getLastError());
 		}
 
 		if (PHYSFS_close(file) == 0)
-			LOG_ERROR("Error while closing save file %s: %s", file, PHYSFS_getLastError());
+			RE_LOG_ERROR("Error while closing save file %s: %s", file, PHYSFS_getLastError());
 	}
 	else
-		LOG_ERROR("Error while opening save file %s: %s", file, PHYSFS_getLastError());
+		RE_LOG_ERROR("Error while opening save file %s: %s", file, PHYSFS_getLastError());
 }
 
 void RE_FileIO::WriteFile(const char * zip_path, const char * filename, const char * buffer, unsigned int size)
 {
 	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
-		LOG_ERROR("Ettot when unmount: %s", PHYSFS_getLastError());
+		RE_LOG_ERROR("Ettot when unmount: %s", PHYSFS_getLastError());
 
 	struct zip *f_zip = NULL;
 	int error = 0;
 	f_zip = zip_open(zip_path, ZIP_CHECKCONS, &error); /* on ouvre l'archive zip */
-	if (error)	LOG_ERROR("could not open or create archive: %s", zip_path);
+	if (error)	RE_LOG_ERROR("could not open or create archive: %s", zip_path);
 
 	zip_source_t *s;
 
@@ -887,7 +890,7 @@ void RE_FileIO::WriteFile(const char * zip_path, const char * filename, const ch
 	if (s == NULL ||
 		zip_file_add(f_zip, filename, s, ZIP_FL_OVERWRITE + ZIP_FL_ENC_UTF_8) < 0) {
 		zip_source_free(s);
-		LOG_ERROR("error adding file: %s\n", zip_strerror(f_zip));
+		RE_LOG_ERROR("error adding file: %s\n", zip_strerror(f_zip));
 	}
 
 	zip_close(f_zip);
@@ -965,14 +968,14 @@ JSONNode* Config::GetRootNode(const char* member)
 		if (value == nullptr)
 		{
 			value = &rapidjson::Pointer(path.c_str()).Create(document);
-			LOG("Configuration node not found for %s, created new pointer", path.c_str());
+			RE_LOG("Configuration node not found for %s, created new pointer", path.c_str());
 		}
 
 		ret = new JSONNode(path.c_str(), this);
 	}
 	else
 	{
-		LOG("Error Loading Configuration node: Empty Member Name");
+		RE_LOG("Error Loading Configuration node: Empty Member Name");
 	}
 
 	return ret;
