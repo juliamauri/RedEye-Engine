@@ -6,7 +6,7 @@
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
 #include "EditorWindows.h"
-#include "TimeManager.h"
+#include "RE_TimeManager.h"
 #include "OutputLog.h"
 #include "RE_GOManager.h"
 #include "RE_CameraManager.h"
@@ -54,6 +54,8 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 
 ModuleEditor::~ModuleEditor()
 {
+	// TODO: Delete unlisted windows
+
 	windows.clear();
 	tools.clear();
 	editorCommands.Clear();

@@ -11,54 +11,38 @@
 
 math::LCG RE_Math::lcg;
 
-RE_Math::RE_Math()
-{}
+RE_Math::RE_Math() {}
+RE_Math::~RE_Math() {}
 
 void RE_Math::Init()
 {
 	RE_LOG("Initializing Math");
-	App->ReportSoftware("MathGeoLib", nullptr, "https://github.com/juj/MathGeoLib");
-	lcg.Seed(Clock::TickU32());
+	App::ReportSoftware("MathGeoLib", nullptr, "https://github.com/juj/MathGeoLib");
+	lcg.Seed(math::Clock::TickU32());
 }
 
-float RE_Math::RandomF()
+math::float4x4 RE_Math::Rotate(const math::float3 axis, const float radians)
 {
-	// range [ 0, 1 )
-	return lcg.Float();
+	return math::float4x4(math::Quat::identity * math::Quat::RotateAxisAngle(axis.Normalized(), radians));
 }
 
-int RE_Math::RandomInt()
-{
-	// range [ 0, 2147483647 ]
-	return lcg.Int();
-}
-
-float RE_Math::RandomF(float min, float max)
-{
-	// @param a Lower bound, inclusive.
-	// @param b Upper bound, inclusive.
-	return lcg.Float(min, max);
-}
-
-int RE_Math::RandomInt(int min, int max)
-{
-	// @param a Lower bound, inclusive.
-	// @param b Upper bound, exclusive.
-	return lcg.Int(min, max);
-}
-
-void RE_Math::SetRNGSeed(unsigned int seed)
-{
-	lcg.Seed(seed);
-}
-
-math::float4x4 RE_Math::Rotate(math::float3 axis, float radians)
-{
-	axis.Normalize();
-	return math::float4x4(math::Quat::identity * math::Quat::RotateAxisAngle(axis, radians));
-}
-
-math::float4x4 RE_Math::Rotate(math::Quat quat)
+math::float4x4 RE_Math::Rotate(const math::Quat quat)
 {
 	return math::float4x4(math::Quat::identity * quat);
 }
+
+void RE_Math::SetRNGSeed(unsigned int seed) { lcg.Seed(seed); }
+
+// range [ 0, 1 )
+float RE_Math::RandomF() { return lcg.Float(); }
+
+// range [ 0, 2147483647 ]
+int RE_Math::RandomInt() { return lcg.Int(); }
+
+// @param a Lower bound, inclusive.
+// @param b Upper bound, inclusive.
+float RE_Math::RandomF(float min, float max) { return lcg.Float(min, max); }
+
+// @param a Lower bound, inclusive.
+// @param b Upper bound, exclusive.
+int RE_Math::RandomInt(int min, int max) { return lcg.Int(min, max); }

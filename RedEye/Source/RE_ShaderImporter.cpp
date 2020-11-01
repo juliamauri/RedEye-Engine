@@ -7,23 +7,22 @@
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 
-RE_ShaderImporter::RE_ShaderImporter(const char * folderPath) : folderPath(folderPath) {}
-
-RE_ShaderImporter::~RE_ShaderImporter() { }
+RE_ShaderImporter::RE_ShaderImporter(const char * folder) : folderPath(folder) {}
+RE_ShaderImporter::~RE_ShaderImporter() { DEL(folderPath); }
 
 bool RE_ShaderImporter::Init()
 {
+	bool ret;
 	RE_LOG("Initializing Shader Manager");
-
-	App->ReportSoftware("GLSLang", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
+	App::ReportSoftware("GLSLang", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
 	
-	bool ret = (folderPath != nullptr);
-	if (!ret) RE_LOG_ERROR("Shader Manager could not read folder path");
-
 	GLint formats = 0;
 	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
 	binaryFormats = new int[formats];
 	glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, binaryFormats);
+
+	if (!(ret = (folderPath != nullptr)))
+		RE_LOG_ERROR("Shader Importer could not read folder path");
 
 	return ret;
 }

@@ -16,7 +16,7 @@
 #include "OutputLog.h"
 #include "Globals.h"
 #include "md5.h"
-#include "TimeManager.h"
+#include "RE_TimeManager.h"
 
 #include "assimp\include\Importer.hpp"
 #include "assimp\include\scene.h"
@@ -32,22 +32,19 @@
 
 #include <Windows.h>
 
-RE_ModelImporter::RE_ModelImporter(const char* f) : folderPath(f)
-{
-}
+RE_ModelImporter::RE_ModelImporter(const char* folder) : folderPath(folder) {}
+RE_ModelImporter::~RE_ModelImporter() { DEL(folderPath); }
 
-
-RE_ModelImporter::~RE_ModelImporter()
+bool RE_ModelImporter::Init()
 {
-}
-
-bool RE_ModelImporter::Init(const char * def_shader)
-{
+	bool ret;
 	RE_LOG("Initializing Model Importer");
+	App::ReportSoftware("Assimp", "4.0.1", "http://www.assimp.org/");
 
-	App->ReportSoftware("Assimp", "4.0.1", "http://www.assimp.org/");
+	if (!(ret = (folderPath != nullptr)))
+		RE_LOG_ERROR("Model Importer could not read folder path");
 
-	return true;
+	return ret;
 }
 
 RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)

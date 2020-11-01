@@ -19,7 +19,9 @@ enum Resource_Type : short unsigned int
 	R_SKYBOX,
 	R_MATERIAL,
 	R_MODEL,
-	R_SCENE
+	R_SCENE,
+
+	MAX_R_TYPES
 };
 
 class ResourceContainer

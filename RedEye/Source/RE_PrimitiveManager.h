@@ -15,7 +15,7 @@ public:
 	RE_PrimitiveManager();
 	~RE_PrimitiveManager();
 
-	bool Init(const char* def_shader);
+	void Init();
 
 	void SetUpComponentPrimitive(RE_CompPrimitive* cmpP, RE_GameObject* parent);
 

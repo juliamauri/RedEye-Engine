@@ -11,7 +11,7 @@
 #include "RE_GLCacheManager.h"
 #include "RE_FBOManager.h"
 #include "Event.h"
-#include "TimeManager.h"
+#include "RE_TimeManager.h"
 #include "RE_GOManager.h"
 
 #include "RE_Shader.h"
@@ -38,9 +38,7 @@
 #define THUMBNAILSIZE 256
 #define THUMBNAILDATASIZE THUMBNAILSIZE * THUMBNAILSIZE * 4
 
-RE_ThumbnailManager::RE_ThumbnailManager()
-{
-}
+RE_ThumbnailManager::RE_ThumbnailManager() {}
 
 RE_ThumbnailManager::~RE_ThumbnailManager()
 {
@@ -120,7 +118,6 @@ void RE_ThumbnailManager::Init()
 		cursor += cursorSize;
 	}
 
-
 	glGenVertexArrays(1, &VAOSphere);
 	RE_GLCacheManager::ChangeVAO(VAOSphere);
 
@@ -148,7 +145,6 @@ void RE_ThumbnailManager::Init()
 	DEL_A(normals);
 	DEL_A(texCoords);
 	DEL_A(meshBuffer);
-
 }
 
 void RE_ThumbnailManager::Add(const char* ref)

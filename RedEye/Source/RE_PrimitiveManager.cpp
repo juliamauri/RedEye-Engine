@@ -43,17 +43,15 @@ RE_PrimitiveManager::~RE_PrimitiveManager()
 	glDeleteBuffers(1, &(GLuint)ebo_icosa);
 }
 
-bool RE_PrimitiveManager::Init(const char* def_shader)
+void RE_PrimitiveManager::Init()
 {
+	App::ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
+
 	CheckPlatonicVAO(C_CUBE);
 	CheckPlatonicVAO(C_DODECAHEDRON);
 	CheckPlatonicVAO(C_TETRAHEDRON);
 	CheckPlatonicVAO(C_OCTOHEDRON);
 	CheckPlatonicVAO(C_ICOSAHEDRON);
-
-	App->ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
-
-	return true;
 }
 
 void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP, RE_GameObject* parent)

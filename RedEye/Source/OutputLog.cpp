@@ -22,26 +22,18 @@ void _log(const int category, const char file[], int line, const char* format, .
 	sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n%s(%d) : %s", file, line, tmp_string);
 	OutputDebugString(tmp_string2);
 
-	if (App != nullptr)
-	{
-		switch (LogCategory(category))
-		{
-		case L_SEPARATOR: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\n=============\t%s\t=============", tmp_string); break;
-		case L_GLOBAL: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n%s", tmp_string); break;
-		case L_SECONDARY: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t- %s", tmp_string); break;
-		case L_TERCIARY: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t\t+ %s", tmp_string); break;
-		case L_ERROR: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nERROR: %s", tmp_string); break;
-		case L_WARNING: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nWARNING: %s", tmp_string); break;
-		case L_SOLUTION: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nSolution: %s", tmp_string); break;
-		case L_SOFTWARE: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t* 3rd party software report: %s", tmp_string); break;
-		}
-		
-		App->Log(category, tmp_string2, file);
+	switch (LogCategory(category)) {
+	case L_SEPARATOR: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\n=============\t%s\t=============", tmp_string); break;
+	case L_GLOBAL: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n%s", tmp_string); break;
+	case L_SECONDARY: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t- %s", tmp_string); break;
+	case L_TERCIARY: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t\t+ %s", tmp_string); break;
+	case L_ERROR: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nERROR: %s", tmp_string); break;
+	case L_WARNING: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nWARNING: %s", tmp_string); break;
+	case L_SOLUTION: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nSolution: %s", tmp_string); break;
+	case L_SOFTWARE: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t* 3rd party software report: %s", tmp_string); break; }
 
-		if (App->handlerrors != nullptr) {
-			App->handlerrors->HandleLog(tmp_string2, LogCategory(category));
-		}
-	}
+	App::Log(category, tmp_string2, file);
+	App::handlerrors.HandleLog(tmp_string2, LogCategory(category));
 }
 
 void _RequestBrowser(const char* link)
@@ -49,11 +41,8 @@ void _RequestBrowser(const char* link)
 	ShellExecute(NULL, "open", link, NULL, NULL, SW_SHOWNORMAL);
 }
 
-OutputLogHolder::OutputLogHolder(const char * log_dir) : dir(log_dir)
-{}
-
-OutputLogHolder::~OutputLogHolder()
-{}
+OutputLogHolder::OutputLogHolder(const char * log_dir) : dir(log_dir) {}
+OutputLogHolder::~OutputLogHolder() {}
 
 void OutputLogHolder::Add(int category, const char * text, const char* file)
 {
@@ -72,11 +61,6 @@ void OutputLogHolder::Add(int category, const char * text, const char* file)
 		logHistory.push_back(RE_Log(next_caller_id, LogCategory(category), text));
 		next_caller_id++;
 	}
-}
-
-void OutputLogHolder::SaveLogs()
-{
-	// TODO save log to file
 }
 
 RE_Log::RE_Log(unsigned int id, LogCategory cat, const char* text) :

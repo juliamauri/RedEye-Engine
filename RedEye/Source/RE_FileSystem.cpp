@@ -28,14 +28,12 @@
 
 #include "ModuleEditor.h"
 
-#include "TimeManager.h"
+#include "RE_TimeManager.h"
 #include "md5.h"
-
 
 #include <EASTL/internal/char_traits.h>
 #include <EASTL/algorithm.h>
 #include <EASTL/iterator.h>
-
 
 #pragma comment( lib, "PhysFS/libx86/physfs.lib" )
 
@@ -51,11 +49,11 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 #endif
+
 #include <fstream>
 #include <algorithm>
 
-RE_FileSystem::RE_FileSystem() : engine_config(nullptr)
-{}
+RE_FileSystem::RE_FileSystem() : engine_config(nullptr) {}
 
 RE_FileSystem::~RE_FileSystem()
 {

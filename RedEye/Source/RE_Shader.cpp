@@ -10,7 +10,7 @@
 #include "ModuleEditor.h"
 
 #include "RE_GLCacheManager.h"
-#include "TimeManager.h"
+#include "RE_TimeManager.h"
 #include "Event.h"
 
 #include "OutputLog.h"

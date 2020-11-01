@@ -7,10 +7,11 @@ class RE_Shader;
 class RE_InternalResources
 {
 public:
+
 	RE_InternalResources();
 	~RE_InternalResources();
 
-	bool Init();
+	void Init();
 	
 	const char* GetDefaultShader()const;
 	const char* GetDefaultSkyBoxShader()const;
@@ -22,12 +23,14 @@ public:
 	unsigned int GetTextureChecker() const;
 
 private:
+
+	void InitChecker();
 	bool InitShaders();
 	bool InitMaterial();
-	bool InitChecker();
 	bool InitSkyBox();
 
 private:
+
 	const char* defaultShader = nullptr;
 	const char* defaultScaleShader = nullptr;
 	const char* skyboxShader = nullptr;
@@ -38,7 +41,7 @@ private:
 	const char* defaultMaterial = nullptr;
 	const char* defaultSkybox = nullptr;
 
-	unsigned int checkerTexture = 0;
+	unsigned int checkerTexture = 0u;
 };
 
 #endif // !__INTERNALRESOURCCES_H__

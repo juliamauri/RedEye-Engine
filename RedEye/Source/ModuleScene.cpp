@@ -29,7 +29,7 @@
 
 #include "OutputLog.h"
 #include "RE_HandleErrors.h"
-#include "TimeManager.h"
+#include "RE_TimeManager.h"
 
 #include "md5.h"
 #include <EASTL/string.h>
@@ -41,16 +41,8 @@
 
 #define DEFAULTMODEL "Assets/Meshes/BakerHouse/BakerHouse.fbx"
 
-ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled)
-{}
-
-ModuleScene::~ModuleScene()
-{}
-
-bool ModuleScene::Init(JSONNode * node)
-{
-	return true;
-}
+ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled) {}
+ModuleScene::~ModuleScene() {}
 
 bool ModuleScene::Start()
 {
@@ -644,7 +636,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	if (loadedDO)
 		root = scenePool.InsertPool(loadedDO);
 	else
-		RE_LOG_ERROR("Can�t Load Scene");
+		RE_LOG_ERROR("Can't Load Scene");
 	App->resources->UnUse(sceneMD5);
 
 	scenePool.UseResources();

@@ -14,6 +14,7 @@ public:
 
 	void StartHandling();
 	void StopHandling();
+	void StopAndPresent();
 
 	void HandleLog(const char* log, LogCategory category);
 

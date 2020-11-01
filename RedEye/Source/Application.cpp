@@ -13,6 +13,7 @@
 
 #include "RE_ResourceManager.h"
 #include "RE_ThumbnailManager.h"
+#include "SystemInfo.h"
 
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
@@ -29,7 +30,6 @@
 RE_Math App::math;
 RE_HandleErrors App::handlerrors;
 RE_InternalResources App::internalResources;
-
 RE_FileSystem* App::fs = nullptr;
 OutputLogHolder* App::log = nullptr;
 
@@ -41,18 +41,17 @@ ModuleEditor* App::editor = nullptr;
 ModuleRenderer3D* App::renderer3d = nullptr;
 ModuleAudio* App::audio = nullptr;
 
-// Importers
-RE_TextureImporter App::textures;
-RE_ShaderImporter App::shaders;
-RE_ModelImporter App::modelImporter;
-
 // Managers
 RE_TimeManager App::time;
 RE_CameraManager App::cams;
 RE_PrimitiveManager App::primitives;
-
 RE_ResourceManager* Application::resources = nullptr;
 RE_ThumbnailManager* Application::thumbnail = nullptr;
+
+// Importers
+RE_TextureImporter App::textures;
+RE_ShaderImporter App::shaders;
+RE_ModelImporter App::modelImporter;
 
 #ifdef _DEBUG
 #include "SystemInfo.h"
@@ -64,6 +63,8 @@ eastl::string Application::organization;
 eastl::list<Module*> Application::modules;
 GameState Application::state = GS_STOP;
 
+Application* Application::instance = nullptr;
+
 Application::Application()
 {
 	app_name = "RedEye Engine";
@@ -72,55 +73,37 @@ Application::Application()
 	fs = new RE_FileSystem();
 	log = new OutputLogHolder();
 
-	modules.push_back(input = new ModuleInput("Input"));
-	modules.push_back(window = new ModuleWindow("Window"));
-	modules.push_back(scene = new ModuleScene("Scene"));
-	modules.push_back(editor = new ModuleEditor("Editor"));
-	modules.push_back(renderer3d = new ModuleRenderer3D("Renderer3D"));
-	modules.push_back(audio = new ModuleAudio("Wwise"));
+	modules.push_back(input = new ModuleInput());
+	modules.push_back(window = new ModuleWindow());
+	modules.push_back(scene = new ModuleScene());
+	modules.push_back(editor = new ModuleEditor());
+	modules.push_back(renderer3d = new ModuleRenderer3D());
+	modules.push_back(audio = new ModuleAudio());
 
-	cams = new RE_CameraManager();
-	textures = new RE_TextureImporter("Images/");
-	shaders = new RE_ShaderImporter("Assets/Shaders/");
-	primitives = new RE_PrimitiveManager();
-	modelImporter = new RE_ModelImporter("Assets/Meshes/");
 	resources = new RE_ResourceManager();
-	internalResources = new RE_InternalResources();
-	handlerrors = new RE_HandleErrors();
-	glcache = new RE_GLCacheManager();
-	fbomanager = new RE_FBOManager();
 	thumbnail = new RE_ThumbnailManager();
 
 #ifdef _DEBUG
 	sys_info = new SystemInfo();
 #endif // _DEBUG
+
+	instance = this;
 }
 
 Application::~Application()
 {
-	DEL(cams);
-	DEL(textures);
-	DEL(shaders);
-	DEL(primitives);
-	DEL(modelImporter);
-	DEL(resources);
-	DEL(internalResources);
-	DEL(handlerrors);
-	DEL(glcache);
-	DEL(fbomanager);
+#ifdef _DEBUG
+	DEL(sys_info);
+#endif // _DEBUG
+
 	DEL(thumbnail);
+	DEL(resources);
 
 	for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
 		delete *it;
 
-	DEL(fs);
-	DEL(time);
-	DEL(math);
 	DEL(log);
-
-#ifdef _DEBUG
-	DEL(sys_info);
-#endif // _DEBUG
+	DEL(fs);
 }
 
 bool Application::Init(int argc, char* argv[])
@@ -138,18 +121,18 @@ bool Application::Init(int argc, char* argv[])
 	else
 	{
 		char tmp[8];
+		SDL_version sdl_version;
+		SDL_VERSION(&sdl_version);
+		sprintf_s(tmp, 8, "%u.%u.%u", static_cast<int>(sdl_version.major), static_cast<int>(sdl_version.minor), static_cast<int>(sdl_version.patch));
+		ReportSoftware("SDL", tmp, "https://www.libsdl.org/");
 
 		ReportSoftware("EABase", EABASE_VERSION, "https://github.com/electronicarts/EABase");
 		ReportSoftware("EASTL", EASTL_VERSION, "https://github.com/electronicarts/EASTL");
 		ReportSoftware("EAStdC", EASTDC_VERSION, "https://github.com/electronicarts/EAStdC");
-		sprintf_s(tmp, 8, "%u.%u.%u", (int)EAASSERT_VERSION_MAJOR, (int)EAASSERT_VERSION_MINOR, (int)EAASSERT_VERSION_PATCH);
+
+		sprintf_s(tmp, 8, "%u.%u.%u", static_cast<int>(EAASSERT_VERSION_MAJOR), static_cast<int>(EAASSERT_VERSION_MINOR), static_cast<int>(EAASSERT_VERSION_PATCH));
 		ReportSoftware("EAAssert", tmp, "https://github.com/electronicarts/EAAssert");
 		ReportSoftware("EAThread", EATHREAD_VERSION, "https://github.com/electronicarts/EAThread");
-
-		SDL_version sdl_version;
-		SDL_VERSION(&sdl_version);
-		sprintf_s(tmp, 8, "%u.%u.%u", (int)sdl_version.major, (int)sdl_version.minor, (int)sdl_version.patch);
-		ReportSoftware("SDL", tmp, "https://www.libsdl.org/");
 
 		ReportSoftware("Optick", "1.2.9", "https://optick.dev/");
 
@@ -163,50 +146,50 @@ bool Application::Init(int argc, char* argv[])
 			organization = node->PullString("Organization", organization.c_str());
 			DEL(node);
 
-			// Initiallize Updating Modules
+			// Initialize Modules
 			for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
-				if ((*it)->IsActive() == true)
+			{
+				if ((*it)->IsActive())
 				{
-					node = config->GetRootNode((*it)->GetName());
-
-					if (node)
-						RE_LOG("Initializing Module %s (%s)", (*it)->GetName(), node->GetDocumentPath());
-					else
-						RE_LOG("Initializing Module %s (empty)", (*it)->GetName());
-
-					if (!(ret = (*it)->Init(node)))
-						DEL(node);
+					const char* name = (*it)->GetName();
+					RE_LOG("Initializing Module %s (%s)", name, (node = config->GetRootNode(name)) ? node->GetDocumentPath() : "empty json");
+					if (!(ret = (*it)->Init(node))) DEL(node);
 				}
+			}
 
 			if (ret)
 			{
-				// Initiallize Indenpendent Modules
-				if (cams) cams->Init();
-				if (time) time->Init(/*TODO get max fps from node*/);
-				if (math) math->Init();
+				// Initialize Utility
+				math.Init();
+				internalResources.Init();
 #ifdef _DEBUG
-				if (sys_info) sys_info->Init();
+				sys_info->Init();
 #endif // _DEBUG
 
-				// Initiallize Resource Managers
-				if (textures && !textures->Init()) RE_LOG_WARNING("Won't be able to use textures");
-				if (shaders && !shaders->Init()) RE_LOG_WARNING("Won't be able to use shaders");
-				if (modelImporter && !modelImporter->Init())  RE_LOG_WARNING("Won't be able to import model");
-				if (internalResources && !internalResources->Init())  RE_LOG_WARNING("Won't be able to load internal Resources");
-				if (primitives && !primitives->Init("primitive"))  RE_LOG_WARNING("Won't be able to use primitives");
+				// Initialize Managers
+				time.Init(60.f);
+				cams.Init();
+				primitives.Init();
 				if (thumbnail) thumbnail->Init();
+
+				// Initialize Importers
+				if (!textures.Init()) RE_LOG_WARNING("Won't be able to use/import textures");
+				if (!shaders.Init()) RE_LOG_WARNING("Won't be able to use/import shaders");
+				if (!modelImporter.Init()) RE_LOG_WARNING("Won't be able to use/import models");
 
 				fs->ReadAssetChanges(0, true);
 				audio->ReadBanksChanges();
 
+				// Start Modules
 				RE_LOG_SEPARATOR("Starting Application");
-
 				for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
-					if ((*it)->IsActive() == true)
+				{
+					if ((*it)->IsActive())
 					{
 						RE_LOG_SEPARATOR("Starting Module %s", (*it)->GetName());
 						ret = (*it)->Start();
 					}
+				}
 				resources->ThumbnailResources();
 			}
 		}
@@ -217,7 +200,7 @@ bool Application::Init(int argc, char* argv[])
 
 void Application::PrepareUpdate()
 {
-	time->UpdateDeltaTime();
+	time.UpdateDeltaTime();
 }
 
 int Application::Update()
@@ -264,7 +247,7 @@ void Application::FinishUpdate()
 	}
 
 	// Use extra miliseconds per frame
-	unsigned int extra_ms = fs->ReadAssetChanges(time->ManageFrameTimers());
+	unsigned int extra_ms = fs->ReadAssetChanges(time.ManageFrameTimers());
 	if (extra_ms > 0) audio->ReadBanksChanges();
 	if (extra_ms > 0) SDL_Delay(extra_ms);
 }
@@ -280,6 +263,11 @@ bool Application::CleanUp()
 
 	SDL_Quit();
 	return ret;
+}
+
+Application* Application::Ptr()
+{
+	return instance;
 }
 
 bool Application::Load()
@@ -349,11 +337,11 @@ void Application::DrawEditor()
 		if (ImGui::InputText("Organization", holder, size))
 			organization = holder;
 
-		time->DrawEditor();
+		time.DrawEditor();
 	}
 
 	for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
-		if ((*it)->IsActive() == true)
+		if ((*it)->IsActive())
 			(*it)->DrawEditor();
 
 	fs->DrawEditor();
@@ -394,7 +382,7 @@ void Application::RecieveEvent(const Event& e)
 		for (eastl::list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive()) (*it)->OnPlay();
 
-		time->StartGameTimer();
+		time.StartGameTimer();
 		state = GS_PLAY;
 		ticking = false;
 		break;
@@ -404,7 +392,7 @@ void Application::RecieveEvent(const Event& e)
 		for (eastl::list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive()) (*it)->OnPause();
 
-		time->PauseGameTimer();
+		time.PauseGameTimer();
 		state = GS_PAUSE;
 		break;
 	}
@@ -413,7 +401,7 @@ void Application::RecieveEvent(const Event& e)
 		for (eastl::list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive()) (*it)->OnPlay();
 
-		time->StartGameTimer();
+		time.StartGameTimer();
 		state = GS_PLAY;
 		ticking = true;
 		break;
@@ -423,7 +411,7 @@ void Application::RecieveEvent(const Event& e)
 		for (eastl::list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
 			if ((*it)->IsActive()) (*it)->OnStop();
 
-		time->StopGameTimer();
+		time.StopGameTimer();
 		state = GS_STOP;
 		break;
 	}

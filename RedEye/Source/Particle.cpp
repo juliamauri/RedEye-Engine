@@ -1,7 +1,7 @@
 #include "Particle.h"
 
 #include "Application.h"
-#include "TimeManager.h"
+#include "RE_TimeManager.h"
 #include "RE_CompParticleEmiter.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"

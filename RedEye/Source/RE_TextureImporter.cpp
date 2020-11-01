@@ -10,7 +10,7 @@
 
 #include "Globals.h"
 #include "OutputLog.h"
-#include "TimeManager.h"
+#include "RE_TimeManager.h"
 #include "RE_GLCacheManager.h"
 
 #include "md5.h"
@@ -30,11 +30,11 @@
 
 
 RE_TextureImporter::RE_TextureImporter(const char* folderPath) : folderPath(folderPath) {}
-
 RE_TextureImporter::~RE_TextureImporter() {}
 
 bool RE_TextureImporter::Init()
 {
+	bool ret;
 	RE_LOG("Initializing Texture Manager");
 
 	ilInit();
@@ -42,24 +42,24 @@ bool RE_TextureImporter::Init()
 	ilutInit();
 
 	ILenum error = ilGetError();
-	bool ret = (error == IL_NO_ERROR);
-	if (ret) {
+	if (ret = (error == IL_NO_ERROR))
+	{
 		ilutRenderer(ILUT_OPENGL);
 		ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 		ilEnable(IL_ORIGIN_SET);
+
+		char tmp[8];
+		sprintf_s(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
+		App::ReportSoftware("DevIL", tmp, "http://openil.sourceforge.net/");
 	}
 	else
 		RE_LOG_ERROR("DevIL could not initialice! DevIL Error %d - %s", error, iluErrorString(error));
 
-	if (folderPath == nullptr)
+	if (!folderPath)
 	{
 		RE_LOG_ERROR("Texure Manager could not read folder path");
 		ret = false;
 	}
-
-	char tmp[8];
-	sprintf_s(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
-	App->ReportSoftware("DevIL", tmp, "http://openil.sourceforge.net/");
 
 	return ret;
 }
@@ -186,9 +186,9 @@ void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigne
 
 		const char* texPath = nullptr;
 		if (!isDDS) {
-			texPath = App->resources->At(settings.textures[i].textureMD5)->GetLibraryPath();
-			if (!App->fs->Exists(texPath))
-				App->resources->At(settings.textures[i].textureMD5)->ReImport();
+			texPath = App::resources->At(settings.textures[i].textureMD5)->GetLibraryPath();
+			if (!App::fs->Exists(texPath))
+				App::resources->At(settings.textures[i].textureMD5)->ReImport();
 		}
 		else {
 			texPath = settings.textures[i].path.c_str();

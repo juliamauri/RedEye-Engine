@@ -42,7 +42,8 @@ void MaterialEditorWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
-		if (secondary) {
+		if (secondary)
+		{
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
@@ -56,36 +57,40 @@ void MaterialEditorWindow::Draw(bool secondary)
 		assetPath += ".pupil";
 		ImGui::Text("Save path: %s", assetPath.c_str());
 
-		bool exits = App->fs->Exists(assetPath.c_str());
+		bool exits = App::fs->Exists(assetPath.c_str());
 		if (exits) ImGui::Text("This material exits, change the name.");
 
-		if (exits && !secondary) {
+		if (exits && !secondary)
+		{
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
+
 		ImGui::SameLine();
-		if (ImGui::Button("Save")) {
-			if (!matName.empty() && !exits) {
-				editingMaerial->SetName(matName.c_str());
-				editingMaerial->SetAssetPath(assetPath.c_str());
-				editingMaerial->SetType(Resource_Type::R_MATERIAL);
-				editingMaerial->Save();
+		if (ImGui::Button("Save") && !matName.empty() && !exits)
+		{
+			editingMaerial->SetName(matName.c_str());
+			editingMaerial->SetAssetPath(assetPath.c_str());
+			editingMaerial->SetType(Resource_Type::R_MATERIAL);
+			editingMaerial->Save();
 
-				App->thumbnail->Add(App->resources->Reference((ResourceContainer*)editingMaerial));
+			App::thumbnail->Add(App::resources->Reference((ResourceContainer*)editingMaerial));
 
-				editingMaerial = new RE_Material();
-				matName = "New Material";
-			}
+			editingMaerial = new RE_Material();
+			matName = "New Material";
 		}
 
-		if (exits && !secondary) {
+		if (exits && !secondary)
+		{
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
 		}
+
 		ImGui::Separator();
 		editingMaerial->DrawMaterialEdit();
 
-		if (secondary) {
+		if (secondary)
+		{
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
 		}
@@ -110,7 +115,8 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
-		if (secondary) {
+		if (secondary)
+		{
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
@@ -125,36 +131,38 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 		ImGui::Text("Save path: %s", assetPath.c_str());
 
 		bool isTexturesFilled = editingSkybox->isFacesFilled();
-		bool exits = App->fs->Exists(assetPath.c_str());
+		bool exits = App::fs->Exists(assetPath.c_str());
 		if (exits) ImGui::Text("This skybox exits, change the name.");
 
 		if (isTexturesFilled) ImGui::Text("Needed set all textures before save.");
 
-		if ((exits || !isTexturesFilled) && !secondary) {
+		if ((exits || !isTexturesFilled) && !secondary)
+		{
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
+
 		ImGui::SameLine();
-		if (ImGui::Button("Save")) {
-			if (!sbName.empty() && !exits) {
+		if (ImGui::Button("Save") && !sbName.empty() && !exits)
+		{
+			editingSkybox->SetName(sbName.c_str());
+			editingSkybox->SetAssetPath(assetPath.c_str());
+			editingSkybox->SetType(Resource_Type::R_SKYBOX);
+			editingSkybox->AssetSave();
+			editingSkybox->SaveMeta();
 
-				editingSkybox->SetName(sbName.c_str());
-				editingSkybox->SetAssetPath(assetPath.c_str());
-				editingSkybox->SetType(Resource_Type::R_SKYBOX);
-				editingSkybox->AssetSave();
-				editingSkybox->SaveMeta();
+			App::thumbnail->Add(App::resources->Reference((ResourceContainer*)editingSkybox));
 
-				App->thumbnail->Add(App->resources->Reference((ResourceContainer*)editingSkybox));
-
-				editingSkybox = new RE_SkyBox();
-				sbName = "New Skybox";
-			}
+			editingSkybox = new RE_SkyBox();
+			sbName = "New Skybox";
 		}
 
-		if ((exits || !isTexturesFilled) && !secondary) {
+		if ((exits || !isTexturesFilled) && !secondary)
+		{
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
 		}
+
 		ImGui::Separator();
 		editingSkybox->DrawEditSkyBox();
 	}
@@ -180,7 +188,8 @@ void ShaderEditorWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
-		if (secondary) {
+		if (secondary)
+		{
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
@@ -199,8 +208,9 @@ void ShaderEditorWindow::Draw(bool secondary)
 		static bool fragmentModify = false;
 		static bool geometryModify = false;
 
-		bool exits = App->fs->Exists(assetPath.c_str());
-		if (exits) ImGui::Text("This shader exits, change the name.");
+		bool exists = App::fs->Exists(assetPath.c_str());
+		if (exists) ImGui::Text("This shader exits, change the name.");
+
 		bool neededVertexAndFragment = (vertexPath.empty() || fragmentPath.empty());
 		if (neededVertexAndFragment) ImGui::Text("The vertex or fragment file path is empty.");
 
@@ -212,19 +222,19 @@ void ShaderEditorWindow::Draw(bool secondary)
 			ImGui::Text("Nedded pass the compile test.");
 			pop2 = true;
 		}
-		if ((neededVertexAndFragment || exits || pop2) && !secondary) {
+		if ((neededVertexAndFragment || exists || pop2) && !secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Save")) {
-			if (!shaderName.empty() && !exits) {
+			if (!shaderName.empty() && !exists) {
 				editingShader->SetName(shaderName.c_str());
 				editingShader->SetType(Resource_Type::R_SHADER);
 				editingShader->SetPaths(vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr);
 				editingShader->isShaderFilesChanged();
 				editingShader->SaveMeta();
-				App->resources->Reference((ResourceContainer*)editingShader);
+				App::resources->Reference((ResourceContainer*)editingShader);
 
 				editingShader = new RE_Shader();
 				shaderName = "New Shader";
@@ -235,118 +245,129 @@ void ShaderEditorWindow::Draw(bool secondary)
 			}
 		}
 
-		if ((neededVertexAndFragment || exits || pop2) && !secondary) {
+		if ((neededVertexAndFragment || exists || pop2) && !secondary)
+		{
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
 		}
+
 		ImGui::Separator();
 		ImGui::Text("The files that contains the script is an undefined file.");
 		ImGui::Text("Select the script type and undefined file on panel assets.");
 		ImGui::Text("When activate the selection, the undefied files from assets panel can be selected.");
 
 		bool pop = (waitingPath);
-		if (pop && !secondary) {
+		if (pop && !secondary)
+		{
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
+
 		ImGui::Separator();
 		ImGui::Text("Vertex Shader Path:\n%s", (vertexPath.empty()) ? "No path." : vertexPath.c_str());
-		if (ImGui::Button("Select vertex path")) {
+		if (ImGui::Button("Select vertex path"))
+		{
 			vertexPath.clear();
 			waitingPath = &vertexPath;
-			App->editor->SelectUndefinedFile(waitingPath);
+			App::editor->SelectUndefinedFile(waitingPath);
 			compilePass = false;
 		}
+
 		ImGui::SameLine();
-		if (!vertexPath.empty() && !vertexModify) {
-			if (ImGui::Button("Edit Vertex Shader")) {
+		if (!vertexPath.empty() && !vertexModify)
+		{
+			if (ImGui::Button("Edit Vertex Shader"))
+			{
 				vertexModify = true;
-				App->editor->OpenTextEditor(vertexPath.c_str(), &vertexPath, nullptr, &vertexModify);
+				App::editor->OpenTextEditor(vertexPath.c_str(), &vertexPath, nullptr, &vertexModify);
 			}
 
 			ImGui::SameLine();
 			if (ImGui::Button("Clear vertex")) vertexPath.clear();
 		}
-		else if (vertexPath.empty() && !vertexModify && !fragmentModify && !geometryModify) {
-			if (ImGui::Button("New vertex shader")) {
-				vertexModify = true;
-				App->editor->OpenTextEditor(nullptr, &vertexPath, DEFVERTEXSHADER, &vertexModify);
-			}
+		else if (vertexPath.empty() && !vertexModify && !fragmentModify && !geometryModify && ImGui::Button("New vertex shader"))
+		{
+			vertexModify = true;
+			App::editor->OpenTextEditor(nullptr, &vertexPath, DEFVERTEXSHADER, &vertexModify);
 		}
 
 		ImGui::Separator();
 		ImGui::Text("Fragment Shader Path:\n%s", (fragmentPath.empty()) ? "No path." : fragmentPath.c_str());
-		if (ImGui::Button("Select fragment path")) {
+		if (ImGui::Button("Select fragment path"))
+		{
 			fragmentPath.clear();
 			waitingPath = &fragmentPath;
-			App->editor->SelectUndefinedFile(waitingPath);
+			App::editor->SelectUndefinedFile(waitingPath);
 			compilePass = false;
 		}
+
 		ImGui::SameLine();
-		if (!fragmentPath.empty() && !fragmentModify) {
-			if (ImGui::Button("Edit Fragment Shader")) {
+		if (!fragmentPath.empty() && !fragmentModify)
+		{
+			if (ImGui::Button("Edit Fragment Shader"))
+			{
 				fragmentModify = true;
-				App->editor->OpenTextEditor(fragmentPath.c_str(), &fragmentPath, nullptr, &fragmentModify);
+				App::editor->OpenTextEditor(fragmentPath.c_str(), &fragmentPath, nullptr, &fragmentModify);
 			}
 
 			ImGui::SameLine();
 			if (ImGui::Button("Clear fragment")) fragmentPath.clear();
 		}
-		else if (fragmentPath.empty() && !vertexModify && !fragmentModify && !geometryModify) {
-			if (ImGui::Button("New fragment shader")) {
-				fragmentModify = true;
-				App->editor->OpenTextEditor(nullptr, &fragmentPath, DEFFRAGMENTSHADER, &fragmentModify);
-			}
+		else if (fragmentPath.empty() && !vertexModify && !fragmentModify && !geometryModify && ImGui::Button("New fragment shader"))
+		{
+			fragmentModify = true;
+			App::editor->OpenTextEditor(nullptr, &fragmentPath, DEFFRAGMENTSHADER, &fragmentModify);
 		}
 
 		ImGui::Separator();
 		ImGui::Text("Geometry Shader Path:\n%s", (geometryPath.empty()) ? "No path." : geometryPath.c_str());
-		if (ImGui::Button("Select geometry path")) {
+		if (ImGui::Button("Select geometry path"))
+		{
 			geometryPath.clear();
 			waitingPath = &geometryPath;
-			App->editor->SelectUndefinedFile(waitingPath);
+			App::editor->SelectUndefinedFile(waitingPath);
 			compilePass = false;
 		}
+
 		ImGui::SameLine();
-		if (!geometryPath.empty() && !geometryModify) {
-			if (ImGui::Button("Edit Geometry Shader")) {
+		if (!geometryPath.empty() && !geometryModify)
+		{
+			if (ImGui::Button("Edit Geometry Shader"))
+			{
 				geometryModify = true;
-				App->editor->OpenTextEditor(geometryPath.c_str(), &geometryPath, nullptr, &geometryModify);
+				App::editor->OpenTextEditor(geometryPath.c_str(), &geometryPath, nullptr, &geometryModify);
 			}
 
 			ImGui::SameLine();
 			if (ImGui::Button("Clear geometry")) geometryPath.clear();
 		}
-		else if (geometryPath.empty() && !vertexModify && !fragmentModify && !geometryModify) {
-			if (ImGui::Button("New geometry shader")) {
-				geometryModify = true;
-				App->editor->OpenTextEditor(nullptr, &geometryPath, nullptr, &geometryModify);
-			}
+		else if (geometryPath.empty() && !vertexModify && !fragmentModify && !geometryModify && ImGui::Button("New geometry shader"))
+		{
+			geometryModify = true;
+			App::editor->OpenTextEditor(nullptr, &geometryPath, nullptr, &geometryModify);
 		}
 
 		ImGui::Separator();
 		if (neededVertexAndFragment) ImGui::Text("The vertex or fragment file path is empty.");
 
-		if (neededVertexAndFragment && !pop && !secondary) {
+		if (neededVertexAndFragment && !pop && !secondary)
+		{
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (!compilePass && ImGui::Button("Compile Test")) {
-			App->handlerrors->StartHandling();
-
+		if (!compilePass && ImGui::Button("Compile Test"))
+		{
+			App::handlerrors.StartHandling();
 			uint sID = 0;
-			if (App->shaders->LoadFromAssets(&sID, vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr, true))
-				compilePass = true;
-			else
-				RE_LOG_ERROR("Shader Compilation Error:\n%s", App->shaders->GetShaderError());
+			compilePass = App::shaders.LoadFromAssets(&sID, vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr, true);
+			if (!compilePass) RE_LOG_ERROR("Shader Compilation Error:\n%s", App::shaders.GetShaderError());
 
-			App->handlerrors->StopHandling();
-			if (App->handlerrors->AnyErrorHandled())
-				App->handlerrors->ActivatePopUp();
+			App::handlerrors.StopAndPresent();
 		}
 
-		if (secondary || pop || neededVertexAndFragment) {
+		if (secondary || pop || neededVertexAndFragment)
+		{
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
 		}
@@ -361,7 +382,8 @@ TextEditorManagerWindow::TextEditorManagerWindow(const char* name, bool start_ac
 
 TextEditorManagerWindow::~TextEditorManagerWindow()
 {
-	for (auto e : editors) {
+	for (auto e : editors)
+	{
 		if (e->file) DEL(e->file);
 		if (e->textEditor) DEL(e->textEditor);
 		DEL(e);
@@ -370,29 +392,39 @@ TextEditorManagerWindow::~TextEditorManagerWindow()
 
 void TextEditorManagerWindow::PushEditor(const char* filePath, eastl::string* newFile, const char* shadertTemplate, bool* open)
 {
-	for (auto e : editors) if (strcmp(e->toModify->c_str(), filePath) == 0) return;
+	for (auto e : editors)
+		if (strcmp(e->toModify->c_str(), filePath) == 0)
+			return;
 
 	editor* e = new editor();
-	if (filePath) {
-		RE_FileIO* file = new RE_FileIO(filePath, App->fs->GetZipPath());
-
-		if (file->Load()) {
+	if (filePath)
+	{
+		RE_FileIO* file = new RE_FileIO(filePath, App::fs->GetZipPath());
+		if (file->Load())
+		{
 			e->textEditor = new TextEditor();
 			e->toModify = newFile;
 			e->file = file;
 			e->textEditor->SetText(file->GetBuffer());
 		}
 	}
-	else {
+	else
+	{
 		e->textEditor = new TextEditor();
 		e->toModify = newFile;
-		if (shadertTemplate) {
+		if (shadertTemplate)
+		{
 			e->textEditor->SetText(shadertTemplate);
 			e->save = true;
 		}
 	}
-	if (e->textEditor) editors.push_back(e);
-	else {
+
+	if (e->textEditor)
+	{
+		editors.push_back(e);
+	}
+	else
+	{
 		if (filePath) DEL(e->file);
 		DEL(e);
 	}
@@ -407,90 +439,90 @@ void TextEditorManagerWindow::Draw(bool secondary)
 	static eastl::string assetPath;
 	static eastl::string names;
 	int count = -1;
-	for (auto e : editors) {
+	for (auto e : editors)
+	{
 		count++;
 		bool close = false;
 		names = "Text Editor #";
 		names += eastl::to_string(count);
 		if (ImGui::Begin(names.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 		{
-			if (secondary) {
+			if (secondary)
+			{
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
+
 			bool pop = false;
-			if (!e->file) {
+			if (!e->file)
+			{
 				ImGui::Text("Shader name:");
 				ImGui::SameLine();
 				ImGui::InputText("##newshadername", e->toModify);
-				assetPath = "Assets/Shaders/";
-				assetPath += *e->toModify;
+				(assetPath = "Assets/Shaders/") += *e->toModify;
 				ImGui::Text("Save path: %s", assetPath.c_str());
-
-				bool exits = App->fs->Exists(assetPath.c_str());
-				if (pop = exits) ImGui::Text("This shader exits, change the name.");
+				if (pop = App::fs->Exists(assetPath.c_str())) ImGui::Text("This shader exits, change the name.");
 			}
 			else
 				ImGui::Text("Editting %s", e->toModify->c_str());
 
-			names = "Compile as shader script #";
-			names += eastl::to_string(count);
-			if (ImGui::Button(names.c_str())) {
-				App->handlerrors->StartHandling();
+			names = "Compile as shader script #" + eastl::to_string(count);
+			if (ImGui::Button(names.c_str()))
+			{
+				App::handlerrors.StartHandling();
 				std::string tmp = e->textEditor->GetText();
 				eastl::string text(tmp.c_str(), tmp.size());
 
-				if (!(e->works = App->shaders->Compile(text.c_str(), text.size())))
-					RE_LOG_ERROR("%s", App->shaders->GetShaderError());
+				if (!(e->works = App::shaders.Compile(text.c_str(), text.size()))) RE_LOG_ERROR("%s", App::shaders.GetShaderError());
 
 				e->compiled = true;
-
-				App->handlerrors->StopHandling();
-				if (App->handlerrors->AnyErrorHandled())
-					App->handlerrors->ActivatePopUp();
+				App::handlerrors.StopAndPresent();
 			}
 
 			if (e->compiled) ImGui::Text((e->works) ? "Succeful compile" : "Error compile");
 
-			if (pop && !secondary) {
+			if (pop && !secondary)
+			{
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (e->save) {
+			if (e->save)
+			{
 				ImGui::Text("Be sure to save before close!");
 				names = "Save #";
 				names += eastl::to_string(count);
-				if (ImGui::Button(names.c_str())) {
-					std::string tmp = e->textEditor->GetText();
-					eastl::string text(tmp.c_str(), tmp.size());
-					if (!e->file) {
-						e->file = new RE_FileIO(assetPath.c_str(), App->fs->GetZipPath());
+
+				if (ImGui::Button(names.c_str()))
+				{
+					eastl::string text = e->textEditor->GetTextPtr();
+					if (!e->file)
+					{
+						e->file = new RE_FileIO(assetPath.c_str(), App::fs->GetZipPath());
 						*e->toModify = assetPath;
 					}
-					e->file->Save((char*)text.c_str(), text.size());
 
+					e->file->Save((char*)text.c_str(), text.size());
 					e->save = false;
 				}
+
 				ImGui::SameLine();
 			}
 
-			if (pop && !secondary) {
+			if (pop && !secondary)
+			{
 				ImGui::PopItemFlag();
 				ImGui::PopStyleVar();
 			}
 
-			names = "Quit #";
-			names += eastl::to_string(count);
-			if (ImGui::Button(names.c_str())) {
-				close = true;
-			}
+			names = "Quit #" + eastl::to_string(count);
+			if (ImGui::Button(names.c_str())) close = true;
 
-			names = "Shader Text Editor #";
-			names += eastl::to_string(count);
+			(names = "Shader Text Editor #") += eastl::to_string(count);
 			e->textEditor->Render(names.c_str());
 
-			if (secondary) {
+			if (secondary)
+			{
 				ImGui::PopItemFlag();
 				ImGui::PopStyleVar();
 			}
@@ -498,12 +530,14 @@ void TextEditorManagerWindow::Draw(bool secondary)
 
 		ImGui::End();
 
-		if (e->textEditor->IsTextChanged()) {
+		if (e->textEditor->IsTextChanged())
+		{
 			e->compiled = false;
 			e->save = true;
 		}
 
-		if (close) {
+		if (close)
+		{
 			if (!e->file) e->toModify->clear();
 			if (e->open) *e->open = false;
 			DEL(e->textEditor);
@@ -512,7 +546,8 @@ void TextEditorManagerWindow::Draw(bool secondary)
 		}
 	}
 
-	if (!toRemoveE.empty()) {
+	if (!toRemoveE.empty())
+	{
 		//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
 		editors.erase(eastl::remove_if(eastl::begin(editors), eastl::end(editors),
 			[&](auto x) {return eastl::find(begin(toRemoveE), end(toRemoveE), x) != end(toRemoveE); }), eastl::end(editors));

@@ -52,7 +52,7 @@ public:
 	RE_TimeManager();
 	~RE_TimeManager();
 
-	void Init(float max_fps = 60.f);
+	void Init(float max_fps);
 
 	float UpdateDeltaTime(); // returns updated dt
 	unsigned int ManageFrameTimers(); // returns extra ms for frame

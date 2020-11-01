@@ -28,10 +28,10 @@ struct currentlyImporting {
 class RE_ModelImporter
 {
 public:
-	RE_ModelImporter(const char* f);
+	RE_ModelImporter(const char* folder = "Assets/Meshes/");
 	~RE_ModelImporter();
 
-	bool Init(const char* def_shader = nullptr);
+	bool Init();
 
 	eastl::vector<eastl::string> GetOutsideResourcesAssetsPath(const char * path);
 	RE_GOManager* ProcessModel(const char* buffer, unsigned int size, const char* assetPayh, RE_ModelSettings* mSettings);

@@ -1,35 +1,16 @@
 #include "RE_CompParticleEmiter.h"
 
-#include "Application.h"
-#include "RE_ResourceManager.h"
-#include "TimeManager.h"
-#include "RE_Mesh.h"
-#include "RE_TextureImporter.h"
-#include "RE_GameObject.h"
-#include "RE_CompTransform.h"
-#include "ImGui\imgui.h"
+#include "RE_TimeManager.h"
 #include "OutputLog.h"
 
+#include "ImGui\imgui.h"
 
-RE_CompParticleEmitter::RE_CompParticleEmitter(RE_GameObject * go) : RE_Component(C_PARTICLEEMITER, go)
-{
-}
 
-RE_CompParticleEmitter::~RE_CompParticleEmitter()
-{
-}
-
-void RE_CompParticleEmitter::Init()
-{
-}
-
-void RE_CompParticleEmitter::CleanUp()
-{
-}
-
-void RE_CompParticleEmitter::PreUpdate()
-{
-}
+RE_CompParticleEmitter::RE_CompParticleEmitter(RE_GameObject * go) : RE_Component(C_PARTICLEEMITER, go) {}
+RE_CompParticleEmitter::~RE_CompParticleEmitter() {}
+void RE_CompParticleEmitter::Init() {}
+void RE_CompParticleEmitter::CleanUp() {}
+void RE_CompParticleEmitter::PreUpdate() {}
 
 void RE_CompParticleEmitter::Update()
 {
@@ -39,11 +20,9 @@ void RE_CompParticleEmitter::Update()
 	if (emissor_life > 0.f)
 	{
 		time_counter += dt;
-
 		if (time_counter <= emissor_life)
 		{
 			spawn_counter += dt;
-
 			while (spawn_counter > 1000.f / emissionRate)
 			{
 				spawn_counter -= (1000.f / emissionRate);
@@ -54,7 +33,6 @@ void RE_CompParticleEmitter::Update()
 	else
 	{
 		spawn_counter += dt;
-
 		while (spawn_counter > 1.f / emissionRate)
 		{
 			spawn_counter -= (1.f / emissionRate);
@@ -65,9 +43,7 @@ void RE_CompParticleEmitter::Update()
 	UpdateParticles(spawns_needed);
 }
 
-void RE_CompParticleEmitter::PostUpdate()
-{
-}
+void RE_CompParticleEmitter::PostUpdate() {}
 
 void RE_CompParticleEmitter::OnPlay()
 {
@@ -85,10 +61,7 @@ void RE_CompParticleEmitter::OnPlay()
 		particles[i].SetUp(this);
 }
 
-void RE_CompParticleEmitter::OnPause()
-{
-
-}
+void RE_CompParticleEmitter::OnPause() {}
 
 void RE_CompParticleEmitter::OnStop()
 {
@@ -98,10 +71,8 @@ void RE_CompParticleEmitter::OnStop()
 void RE_CompParticleEmitter::Draw()
 {
 	for (int i = 0; i < max_particles; i++)
-	{
 		if (particles[i].Alive())
 			particles[i].Draw(shader);
-	}
 }
 
 void RE_CompParticleEmitter::DrawProperties()
@@ -110,7 +81,6 @@ void RE_CompParticleEmitter::DrawProperties()
 	{
 		ImGui::SliderFloat("Emissor Life", &emissor_life, -1.0f, 10.0f, "%.2f");
 		ImGui::Separator();
-
 
 		ImGui::SliderFloat("Emission Rate", &emissionRate, 0.0f, 20.f, "%.2f");
 		float ps[3] = { spawn_position_offset.x, spawn_position_offset.y, spawn_position_offset.z };
@@ -145,24 +115,9 @@ void RE_CompParticleEmitter::DrawProperties()
 	}
 }
 
-bool RE_CompParticleEmitter::LocalEmission() const
-{
-	return local_emission;
-}
-
-bool RE_CompParticleEmitter::EmmissionFinished() const
-{
-	return emissor_life < 0.f ? false : time_counter <= emissor_life;
-}
-
-RE_Mesh * RE_CompParticleEmitter::GetMesh() const
-{
-	return mParticle;
-}
-
-//void RE_CompParticleEmitter::Serialize(JSONNode * node, rapidjson::Value * val)
-//{
-//}
+bool RE_CompParticleEmitter::LocalEmission() const { return local_emission; }
+bool RE_CompParticleEmitter::EmmissionFinished() const { return emissor_life < 0.f ? false : time_counter <= emissor_life; }
+RE_Mesh * RE_CompParticleEmitter::GetMesh() const { return mParticle; }
 
 void RE_CompParticleEmitter::SetUp(RE_Mesh * particle, unsigned int shader)
 {
@@ -170,20 +125,15 @@ void RE_CompParticleEmitter::SetUp(RE_Mesh * particle, unsigned int shader)
 	this->shader = shader;
 }
 
-void RE_CompParticleEmitter::ResetParticle(Particle * p)
-{
-	p->Emit();
-}
+void RE_CompParticleEmitter::ResetParticle(Particle * p) { p->Emit(); }
 
 void RE_CompParticleEmitter::UpdateParticles(int spawns_needed)
 {
 	Particle* p = nullptr;
-
 	for (int i = 0; i < max_particles; i++)
 	{
-		p = &particles[i];
-
-		if (!p->Alive())
+		;
+		if (!((p = &particles[i])->Alive()))
 		{
 			if (spawns_needed > 0)
 			{
@@ -192,8 +142,6 @@ void RE_CompParticleEmitter::UpdateParticles(int spawns_needed)
 			}
 		}
 		else
-		{
 			p->Update();
-		}
 	}
 }

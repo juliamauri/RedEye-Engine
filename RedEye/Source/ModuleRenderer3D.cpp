@@ -21,7 +21,7 @@
 #include "RE_CompTransform.h"
 
 #include "OutputLog.h"
-#include "TimeManager.h"
+#include "RE_TimeManager.h"
 #include "RE_GLCacheManager.h"
 #include "RE_FBOManager.h"
 
@@ -45,11 +45,8 @@ const char* RenderView::labels[12] = {
 						"Fustrum Culling", "Override Culling", "Outline Selection", "Debug Draw", "Skybox", "Blending",
 						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clip Distance"};
 
-ModuleRenderer3D::ModuleRenderer3D(const char * name, bool start_enabled) : Module(name, start_enabled)
-{}
-
-ModuleRenderer3D::~ModuleRenderer3D()
-{}
+ModuleRenderer3D::ModuleRenderer3D(const char * name, bool start_enabled) : Module(name, start_enabled) {}
+ModuleRenderer3D::~ModuleRenderer3D() {}
 
 bool ModuleRenderer3D::Init(JSONNode * node)
 {

@@ -14,8 +14,7 @@ RE_TimeManager::~RE_TimeManager() { delete plot_data; }
 void RE_TimeManager::Init(float max_fps)
 {
 	RE_LOG("Initializing Time Manager");
-	SetMaxFPS(max_fps);
-	game_timer.Stop();
+	plot_data->SetMaxFPS(max_fps);
 }
 
 float RE_TimeManager::UpdateDeltaTime()
@@ -112,11 +111,8 @@ void TimePlotting::DrawEditor()
 	sprintf_s(title, 25, "Milliseconds %.1f", ms[99]);
 	ImGui::PlotHistogram("##milliseconds", ms, ((int)(sizeof(ms) / sizeof(*ms))), 0, title, 0.0f, 40.0f, ImVec2(310, 100));
 
-	if (ImGui::Checkbox(pause_plotting ? "Restart Plotting" : "Pause Plotting", &pause_plotting))
-	{
-		if (!pause_plotting)
+	if (ImGui::Checkbox(pause_plotting ? "Restart Plotting" : "Pause Plotting", &pause_plotting) && !pause_plotting)
 			ClearArrays();
-	}
 }
 
 unsigned int TimePlotting::ManageFrameTimers(unsigned int ms_count)

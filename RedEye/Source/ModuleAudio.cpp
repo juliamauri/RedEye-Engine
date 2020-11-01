@@ -47,7 +47,6 @@
 #pragma comment( lib, "WWISESDK/binaries/libprofiler/AkSpatialAudio.lib" )
 #pragma comment( lib, "WWISESDK/binaries/libprofiler/CommunicationCentral.lib" )
 
-
 #endif // DEBUG
 
 #ifndef AK_OPTIMIZED
@@ -56,12 +55,8 @@
 
 #define INITBNKSTR "Init.bnk"
 
-ModuleAudio::ModuleAudio(const char* name, bool start_enabled) : Module(name, start_enabled)
-{
-}
-
-ModuleAudio::~ModuleAudio()
-{}
+ModuleAudio::ModuleAudio(const char* name, bool start_enabled) : Module(name, start_enabled) {}
+ModuleAudio::~ModuleAudio() {}
 
 bool ModuleAudio::Init(JSONNode * node)
 {
@@ -175,15 +170,13 @@ bool ModuleAudio::CleanUp()
 	return true;
 }
 
-void ModuleAudio::RecieveEvent(const Event& e)
-{
-}
+void ModuleAudio::RecieveEvent(const Event& e) {}
 
 void ModuleAudio::DrawEditor()
 {
 	if (ImGui::CollapsingHeader("Wwise Audio Engine"))
 	{
-		static eastl::string rootPath = App->fs->GetExecutableDirectory();
+		static eastl::string rootPath = App::fs->GetExecutableDirectory();
 		static eastl::string tempPath = audioBanksFolderPath;
 		static bool pathChanged = false;
 
@@ -212,25 +205,21 @@ void ModuleAudio::DrawEditor()
 			ImGui::Text("The path will changed to:\n%s%s\\ \n", rootPath.c_str(), tempPath.c_str());
 			if (ImGui::Button("Check and Apply Path")) {
 
-				App->handlerrors->StartHandling();
+				App::handlerrors.StartHandling();
 
-				if (tempPath[tempPath.size()] != '\\')
-					tempPath += "\\";
+				if (tempPath[tempPath.size()] != '\\') tempPath += "\\";
 
-				eastl::string tmp = rootPath;
-				tmp += tempPath;
-				if (App->fs->ExistsOnOSFileSystem(tmp.c_str()))
+				if (App::fs->ExistsOnOSFileSystem((rootPath + tempPath).c_str()))
+				{
 					audioBanksFolderPath = tempPath;
-				else {
+				}
+				else
+				{
 					RE_LOG_ERROR("This Folder don't exist: \n%s%s", rootPath.c_str(), tempPath.c_str());
 					tempPath = audioBanksFolderPath;
 				}
 
-				App->handlerrors->StopHandling();
-				if (App->handlerrors->AnyErrorHandled()) {
-					App->handlerrors->ActivatePopUp();
-				}
-
+				App::handlerrors.StopAndPresent();
 				pathChanged = false;
 			}
 		}
@@ -239,8 +228,8 @@ void ModuleAudio::DrawEditor()
 
 void ModuleAudio::DrawWwiseElementsDetected()
 {
-	if (!located_banksFolder || !located_SoundBanksInfo) {
-
+	if (!located_banksFolder || !located_SoundBanksInfo)
+	{
 		if (!located_banksFolder) ImGui::Text("Needed to set the sound banks folder on engine folder.");
 		if (!located_SoundBanksInfo) ImGui::Text("Can not locate SoundBanksInfo.json");
 		return;
@@ -248,64 +237,61 @@ void ModuleAudio::DrawWwiseElementsDetected()
 
 	eastl::string id;
 	unsigned int count = 0;
-	for (auto& sB : soundbanks) {
+	for (auto& sB : soundbanks)
+	{
 		ImGui::Text("SoundBank: %s", sB.name.c_str());
 		ImGui::SameLine();
 		id = eastl::to_string(count);
 		id += ". ";
 		if (sB.name == INITBNKSTR)
+		{
 			ImGui::Text("Could not be unloaded.");
+		}
 		else if(sB.loaded)
 		{
 			id += "Unload";
-			if (ImGui::Button(id.c_str())) {
-				sB.Unload();
-			}
+			if (ImGui::Button(id.c_str())) sB.Unload();
 		}
-		else if (!sB.loaded) {
+		else if (!sB.loaded)
+		{
 			id += "Load";
-			if (ImGui::Button(id.c_str())) {
-				sB.LoadBank();
-			}
+			if (ImGui::Button(id.c_str())) sB.LoadBank();
 		}
 
-		if (!sB.events.empty()) {
+		if (!sB.events.empty())
+		{
 			id = eastl::to_string(count++);
 			id += ". Events";
 
 			unsigned int eventCnt = 0;
-			if (ImGui::TreeNode(id.c_str())) {
-
-				for (auto& e : sB.events) {
-	
+			if (ImGui::TreeNode(id.c_str()))
+			{
+				for (auto& e : sB.events)
+				{
 					ImGui::Text("Event: %s", e.name.c_str());
 					id = eastl::to_string(eventCnt++);
 					id += ". ";
 					id += "Send Event";
-					if (sB.loaded) {
+					if (sB.loaded)
+					{
 						ImGui::SameLine();
-						if (ImGui::Button(id.c_str())) {
-							AK::SoundEngine::PostEvent(e.ID, NULL);
-						}
+						if (ImGui::Button(id.c_str())) AK::SoundEngine::PostEvent(e.ID, NULL);
 					}
 				}
 				ImGui::TreePop();
 			}
-
 		}
 		else
 			ImGui::Text("This sound bank don't contain events.");
 
 		ImGui::Separator();
 	}
-
 }
 
 bool ModuleAudio::Load(JSONNode* node)
 {
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
 	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
-	
 	return true;
 }
 
@@ -318,13 +304,14 @@ bool ModuleAudio::Save(JSONNode* node) const
 void ModuleAudio::ReadBanksChanges()
 {
 	// TODO Julius: recieve uint extra_ms & return extra_ms (substracting used time)
-	if (located_banksFolder) {
-
+	if (located_banksFolder)
+	{
 		static const char* platformPath = "Windows\\";
-		eastl::string soundbankInfoPath(App->fs->GetExecutableDirectory());
+		eastl::string soundbankInfoPath(App::fs->GetExecutableDirectory());
 
 		eastl_size_t posOfBack = soundbankInfoPath.find_last_of((char)'\\..');
-		if (posOfBack != eastl::string::npos) {
+		if (posOfBack != eastl::string::npos)
+		{
 			eastl_size_t toBack = soundbankInfoPath.find_last_of('\\', posOfBack - 3);
 			soundbankInfoPath.erase(toBack + 1, posOfBack - toBack + 1);	
 		}
@@ -333,29 +320,31 @@ void ModuleAudio::ReadBanksChanges()
 		soundbankInfoPath += platformPath;
 		soundbankInfoPath += "SoundbanksInfo.json";
 
-		if (App->fs->ExistsOnOSFileSystem(soundbankInfoPath.c_str(), false)) {
-			signed long long lastMod = App->fs->GetLastTimeModified(soundbankInfoPath.c_str());
-			if (lastMod != 0 && lastSoundBanksInfoModified != lastMod) {
+		if (App::fs->ExistsOnOSFileSystem(soundbankInfoPath.c_str(), false))
+		{
+			signed long long lastMod = App::fs->GetLastTimeModified(soundbankInfoPath.c_str());
+			if (lastMod != 0 && lastSoundBanksInfoModified != lastMod)
+			{
 				soundbanks.clear();
 				initBnkLoaded = false;
-
 				Config soundbanksInfo(soundbankInfoPath.c_str(), "None");
-				if (soundbanksInfo.LoadFromWindowsPath()) {
+				if (soundbanksInfo.LoadFromWindowsPath())
+				{
 					JSONNode* rootNode = soundbanksInfo.GetRootNode("SoundBanksInfo");
-
 					rapidjson::Value* soundBanks = &rootNode->GetDocument()->FindMember("SoundBanksInfo")->value.FindMember("SoundBanks")->value;
-					for (auto& v : soundBanks->GetArray()) {
+					for (auto& v : soundBanks->GetArray())
+					{
 						SoundBank newSB(v.FindMember("Path")->value.GetString(), static_cast<unsigned long>(EA::StdC::AtoU64(v.FindMember("Id")->value.GetString())));
-						newSB.path = App->fs->GetExecutableDirectory();
+						newSB.path = App::fs->GetExecutableDirectory();
 						newSB.path += audioBanksFolderPath;
 						newSB.path += platformPath;
 						newSB.path += newSB.name;
 
-						if (v.FindMember("IncludedEvents") != v.MemberEnd()) {
+						if (v.FindMember("IncludedEvents") != v.MemberEnd())
+						{
 							rapidjson::Value* events = &v.FindMember("IncludedEvents")->value;
-							for (auto& e : events->GetArray()) {
+							for (auto& e : events->GetArray())
 								newSB.AddEvent(e.FindMember("Name")->value.GetString(), static_cast<unsigned long>(EA::StdC::AtoU64(e.FindMember("Id")->value.GetString())));
-							}
 						}
 
 						soundbanks.push_back(newSB);
@@ -364,8 +353,10 @@ void ModuleAudio::ReadBanksChanges()
 					DEL(rootNode);
 					lastSoundBanksInfoModified = lastMod;
 
-					for (auto& sB : soundbanks) {
-						if (sB.name == INITBNKSTR) {
+					for (auto& sB : soundbanks)
+					{
+						if (sB.name == INITBNKSTR)
+						{
 							sB.LoadBank();
 							initBnkLoaded = true;
 						}
@@ -378,7 +369,6 @@ void ModuleAudio::ReadBanksChanges()
 		else
 			located_SoundBanksInfo = false;
 	}
-
 }
 
 void ModuleAudio::SendRTPC(const char* name, float value)
@@ -403,14 +393,12 @@ SoundBank::~SoundBank()
 
 void SoundBank::LoadBank()
 {
-	RE_FileIO* bnkLoaded = App->fs->QuickBufferFromPDPath(path.c_str());
-	if (bnkLoaded != nullptr) {
+	RE_FileIO* bnkLoaded = App::fs->QuickBufferFromPDPath(path.c_str());
+	if (bnkLoaded != nullptr)
+	{
 		AKRESULT result = AK::SoundEngine::LoadBankMemoryCopy(bnkLoaded->GetBuffer(), bnkLoaded->GetSize(), ID);
-		if (result != AK_Success) {
-			RE_LOG_ERROR("Error while loading bank sound: %s", name.c_str());
-		}
-		else
-			loaded = true;
+		if (result != AK_Success) RE_LOG_ERROR("Error while loading bank sound: %s", name.c_str());
+		else loaded = true;
 		DEL(bnkLoaded);
 	}
 }

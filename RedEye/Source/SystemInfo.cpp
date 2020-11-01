@@ -14,11 +14,8 @@
 
 #include <Psapi.h> // WINDOWS memory calls
 
-SystemInfo::SystemInfo()
-{}
-
-SystemInfo::~SystemInfo()
-{}
+SystemInfo::SystemInfo() {}
+SystemInfo::~SystemInfo() {}
 
 void SystemInfo::Init()
 {

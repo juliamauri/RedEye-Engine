@@ -2093,6 +2093,11 @@ std::string TextEditor::GetText() const
 	return GetText(Coordinates(), Coordinates((int)mLines.size(), 0));
 }
 
+const char* TextEditor::GetTextPtr() const
+{
+	return GetText().c_str();
+}
+
 std::vector<std::string> TextEditor::GetTextLines() const
 {
 	std::vector<std::string> result;

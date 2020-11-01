@@ -42,58 +42,31 @@ RE_ResourceManager::~RE_ResourceManager()
 
 void RE_ResourceManager::RecieveEvent(const Event& e)
 {
-	if (e.type == RE_EventType::RESOURCE_CHANGED) {
+	if (e.type == RE_EventType::RESOURCE_CHANGED)
+	{
 		ResourceContainer* res = resources.at(e.data1.AsCharP());
-		if (res->GetType() == Resource_Type::R_SHADER) {
+		if (res->GetType() == Resource_Type::R_SHADER)
+		{
 			eastl::vector<ResourceContainer*> materials = GetResourcesByType(Resource_Type::R_MATERIAL);
-			for (auto material : materials) {
+			for (auto material : materials)
 				material->SomeResourceChanged(res->GetMD5());
-			}
 		}
 	}
 }
 
 const char* RE_ResourceManager::Reference(ResourceContainer* rc)
 {
-	eastl::string resourceName;
-	switch (rc->GetType())
+	const char* retMD5 = nullptr;
+	if (rc)
 	{
-	case Resource_Type::R_TEXTURE:
-		resourceName = "texture";
-		break;
-	case Resource_Type::R_SCENE:
-		resourceName = "scene";
-		break;
-	case Resource_Type::R_MATERIAL:
-		resourceName = "material";
-		break;
-	case Resource_Type::R_MESH:
-		resourceName = "mesh";
-		break;
-	case Resource_Type::R_PREFAB:
-		resourceName = "prefab";
-		break;
-	case Resource_Type::R_PRIMITIVE:
-		resourceName = "primitive";
-		break;
-	case Resource_Type::R_SHADER:
-		resourceName = "shader";
-		break;
-	case Resource_Type::R_MODEL:
-		resourceName = "model";
-		break;
-	case Resource_Type::R_SKYBOX:
-		resourceName = "skybox";
-		break;
-	case Resource_Type::R_UNDEFINED:
-		resourceName = "undefined";
-		break;
-	}
-	RE_LOG("Referencing the %s %s resource from %s\nAsset file: %s\nmd5 generated: %s\n", rc->GetName(), resourceName.c_str(), rc->GetAssetPath(), rc->GetLibraryPath(), rc->GetMD5());
-	resources.insert(Resource(rc->GetMD5(), rc));
-	resourcesCounter.insert(ResourceCounter(rc->GetMD5(), (rc->isInMemory()) ? 1 : 0));
+		resources.insert(Resource(retMD5 = rc->GetMD5(), rc));
+		resourcesCounter.insert(ResourceCounter(retMD5, (rc->isInMemory()) ? 1 : 0));
 
-	return rc->GetMD5();
+		RE_LOG("Referenced %s %s resource from %s\nAsset file: %s\nmd5 generated: %s\n",
+			rc->GetName(), GetNameFromType(rc->GetType()), rc->GetAssetPath(), rc->GetLibraryPath(), rc->GetMD5());
+	}
+
+	return retMD5;
 }
 
 void RE_ResourceManager::Use(const char* resMD5)
@@ -140,34 +113,23 @@ ResourceContainer* RE_ResourceManager::At(const char* md5) const
 
 const char* RE_ResourceManager::ReferenceByMeta(const char* metaPath, Resource_Type type)
 {
-	const char* retMD5 = nullptr;
 	ResourceContainer* newContainer = nullptr;
-	switch (type)
+	switch (type) {
+	case R_SHADER:		newContainer = static_cast<ResourceContainer*>(new RE_Shader(metaPath));	break;
+	case R_TEXTURE:		newContainer = static_cast<ResourceContainer*>(new RE_Texture(metaPath));	break;
+	case R_PREFAB:		newContainer = static_cast<ResourceContainer*>(new RE_Prefab(metaPath));	break;
+	case R_SKYBOX:		newContainer = static_cast<ResourceContainer*>(new RE_SkyBox(metaPath));	break;
+	case R_MATERIAL:	newContainer = static_cast<ResourceContainer*>(new RE_Material(metaPath));	break;
+	case R_MODEL:		newContainer = static_cast<ResourceContainer*>(new RE_Model(metaPath));		break;
+	case R_SCENE:		newContainer = static_cast<ResourceContainer*>(new RE_Scene(metaPath));		break; }
+
+	const char* retMD5 = nullptr;
+	if (newContainer)
 	{
-	case R_SHADER:
-		newContainer = (ResourceContainer*)new RE_Shader(metaPath);
-		break;
-	case R_TEXTURE:
-		newContainer = (ResourceContainer*)new RE_Texture(metaPath);
-		break;
-	case R_PREFAB:
-		newContainer = (ResourceContainer*)new RE_Prefab(metaPath);
-		break;
-	case R_SKYBOX:
-		newContainer = (ResourceContainer*)new RE_SkyBox(metaPath);
-		break;
-	case R_MATERIAL:
-		newContainer = (ResourceContainer*)new RE_Material(metaPath);
-		break;
-	case R_MODEL:
-		newContainer = (ResourceContainer*)new RE_Model(metaPath);
-		break;
-	case R_SCENE:
-		newContainer = (ResourceContainer*)new RE_Scene(metaPath);
-		break;
+		newContainer->LoadMeta();
+		retMD5 = Reference(newContainer);
 	}
-	newContainer->LoadMeta();
-	retMD5 = Reference(newContainer);
+
 	return retMD5;
 }
 
@@ -580,6 +542,25 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 void RE_ResourceManager::ThumbnailResources()
 {
 	for (auto res : resources) App->thumbnail->Add(res.first);
+}
+
+const char* RE_ResourceManager::GetNameFromType(const Resource_Type type)
+{
+	eastl::string resourceName = "";
+
+	switch (type) {
+	case Resource_Type::R_TEXTURE: resourceName = "texture"; break;
+	case Resource_Type::R_SCENE: resourceName = "scene"; break;
+	case Resource_Type::R_MATERIAL: resourceName = "material"; break;
+	case Resource_Type::R_MESH: resourceName = "mesh"; break;
+	case Resource_Type::R_PREFAB: resourceName = "prefab"; break;
+	case Resource_Type::R_PRIMITIVE: resourceName = "primitive"; break;
+	case Resource_Type::R_SHADER: resourceName = "shader"; break;
+	case Resource_Type::R_MODEL: resourceName = "model"; break;
+	case Resource_Type::R_SKYBOX: resourceName = "skybox"; break;
+	case Resource_Type::R_UNDEFINED: resourceName = "undefined"; break;	}
+
+	return resourceName.c_str();
 }
 
 const char* RE_ResourceManager::ImportModel(const char* assetPath)

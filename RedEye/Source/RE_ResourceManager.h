@@ -61,6 +61,11 @@ public:
 	typedef eastl::map<const char*, unsigned int> ResourceCounterMap;
 
 private:
+
+	const char* GetNameFromType(const Resource_Type type);
+
+private:
+
 	ResourceMap resources;
 	ResourceCounterMap resourcesCounter;
 

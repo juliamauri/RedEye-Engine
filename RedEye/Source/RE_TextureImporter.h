@@ -12,7 +12,7 @@ struct RE_SkyBoxSettings;
 class RE_TextureImporter
 {
 public:
-	RE_TextureImporter(const char* folderPath);
+	RE_TextureImporter(const char* folderPath = "Images/");
 	~RE_TextureImporter();
 
 	bool Init();

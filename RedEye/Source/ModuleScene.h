@@ -19,7 +19,6 @@ public:
 	ModuleScene(const char* name = "Scene", bool start_enabled = true);
 	~ModuleScene();
 
-	bool Init(JSONNode* node) override;
 	bool Start() override;
 	update_status Update() override;
 	bool CleanUp() override;
