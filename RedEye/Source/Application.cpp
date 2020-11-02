@@ -248,7 +248,7 @@ void Application::FinishUpdate()
 
 	// Use extra miliseconds per frame
 	unsigned int extra_ms = fs->ReadAssetChanges(time.ManageFrameTimers());
-	if (extra_ms > 0) audio->ReadBanksChanges();
+	if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
 	if (extra_ms > 0) SDL_Delay(extra_ms);
 }
 

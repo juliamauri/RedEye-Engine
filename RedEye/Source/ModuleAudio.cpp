@@ -301,9 +301,9 @@ bool ModuleAudio::Save(JSONNode* node) const
 	return true;
 }
 
-void ModuleAudio::ReadBanksChanges()
+unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 {
-	// TODO Julius: recieve uint extra_ms & return extra_ms (substracting used time)
+	Timer time;
 	if (located_banksFolder)
 	{
 		static const char* platformPath = "Windows\\";
@@ -369,6 +369,9 @@ void ModuleAudio::ReadBanksChanges()
 		else
 			located_SoundBanksInfo = false;
 	}
+
+	unsigned int realTime = time.Read();
+	return (extra_ms < realTime) ? 0 : extra_ms - realTime;
 }
 
 void ModuleAudio::SendRTPC(const char* name, float value)
