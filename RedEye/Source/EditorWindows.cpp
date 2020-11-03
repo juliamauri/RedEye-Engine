@@ -331,6 +331,49 @@ void RandomTest::Draw(bool secondary)
 		ImGui::SameLine();
 		ImGui::Text("Random Float: %.2f", resultF);
 
+		ImGui::Separator();
+
+		ImGui::Text("Random UID");
+
+		ImGui::SliderInt("Loops 1 per frame", &loops[0], 1, 65535);
+		ImGui::SliderInt("Loops 2 per frame", &loops[1], 1, 65535);
+
+		ImGui::Text("First: %s", eastl::to_string(first).c_str());
+		ImGui::Text("Max: %s", eastl::to_string(max).c_str());
+		ImGui::Text("Min: %s", eastl::to_string(min).c_str());
+		ImGui::Text("Count: %s", eastl::to_string(count).c_str());
+		if (generating)
+		{
+			Timer timer;
+
+			for (int i = 0; i < loops[0]; ++i)
+			{
+				for (int i = 0; i < loops[1]; ++i)
+				{
+					UID r = RE_Math::RandomUID();
+					if (r == first)
+					{
+						generating = false;
+					}
+					else
+					{
+						count++;
+						if (r < min) min = r;
+						if (r > max) max = r;
+					}
+				}
+			}
+
+			ImGui::Text("Time per %d loops: %u", loops, timer.Read());
+		}
+		else if (ImGui::Button("Generate UID"))
+		{
+			generating = true;
+			first = RE_Math::RandomUID();
+			max = count = 0;
+			min = 0xffffffffffffffff;
+		}
+
 		if (secondary)
 		{
 			ImGui::PopItemFlag();

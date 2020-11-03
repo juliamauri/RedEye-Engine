@@ -3,7 +3,6 @@
 
 #include "RE_Component.h"
 #include "RE_Math.h"
-#include "Globals.h"
 
 class RE_CompTransform;
 

@@ -1,8 +1,8 @@
 #ifndef __RE_MATH_H__
 #define __RE_MATH_H__
 
-//#include "MathGeoLib/include/MathBuildConfig.h"
 #include "MathGeoLib/include/MathGeoLib.h"
+#include "Globals.h"
 
 class RE_Math
 {
@@ -25,6 +25,7 @@ public:
 	static int		RandomInt();
 	static float	RandomF(float min, float max);
 	static int		RandomInt(int min, int max);
+	static UID		RandomUID();
 
 private:
 

@@ -137,6 +137,10 @@ public:
 
 	int minInt = 0, maxInt = 10, resultInt = 0;
 	float minF = 0.f, maxF = 1.f, resultF = 0.f;
+
+	unsigned long long first = 0, max = 0, min = 0, count = 0;
+	bool generating = false;
+	int loops[2] = { 100, 100 };
 };
 
 class PlayPauseWindow : public EditorWindow

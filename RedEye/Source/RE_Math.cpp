@@ -46,3 +46,12 @@ float RE_Math::RandomF(float min, float max) { return lcg.Float(min, max); }
 // @param a Lower bound, inclusive.
 // @param b Upper bound, exclusive.
 int RE_Math::RandomInt(int min, int max) { return lcg.Int(min, max); }
+
+UID RE_Math::RandomUID()
+{
+	UID ret = static_cast<UID>(lcg.Int());
+	ret = ret << 32;
+	ret += static_cast<UID>(lcg.Int());
+
+	return ret;
+}
