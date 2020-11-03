@@ -210,6 +210,19 @@ void ComponentsPool::ClearComponents()
 	transPool.Clear();
 	camPool.Clear();
 	meshPool.Clear();
+	lightPool.Clear();
+	pCubePool.Clear();
+	pDodecahedronPool.Clear();
+	pTetrahedronPool.Clear();
+	pOctohedronPool.Clear();
+	pIcosahedronPool.Clear();
+	pSpherePool.Clear();
+	pCylinderPool.Clear();
+	pHemiSpherePool.Clear();
+	pTorusPool.Clear();
+	pTrefoiKnotPool.Clear();
+	pRockPool.Clear();
+	pPlanePool.Clear();
 }
 
 RE_Component* ComponentsPool::GetComponent(int poolid, ComponentType cType)
