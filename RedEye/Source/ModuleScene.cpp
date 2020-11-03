@@ -153,7 +153,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		{
 			if (belongs_to_scene && go->IsActive())
 			{
-				int index = go->GetPoolID();
+				UID index = go->GetPoolID();
 				dynamic_tree.PopNode(index);
 				static_tree.PushNode(index, go->GetGlobalBoundingBox());
 			}
@@ -163,7 +163,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		{
 			if (belongs_to_scene && go->IsActive())
 			{
-				int index = go->GetPoolID();
+				UID index = go->GetPoolID();
 				static_tree.PopNode(index);
 				dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
 			}
@@ -206,7 +206,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 
 			if (belongs_to_scene && go->HasDrawComponents())
 			{
-				int index = go->GetPoolID();
+				UID index = go->GetPoolID();
 				if (go->IsStatic())
 				{
 					static_tree.PopNode(index);
@@ -442,14 +442,14 @@ RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 {
 	RE_GameObject* ret = nullptr;
 
-	eastl::stack<int> goIndex;
+	eastl::stack<UID> goIndex;
 	static_tree.CollectIntersections(ray, goIndex);
 	dynamic_tree.CollectIntersections(ray, goIndex);
 
 	eastl::vector<RE_GameObject*> objects;
 	while (!goIndex.empty())
 	{
-		int index = goIndex.top();
+		UID index = goIndex.top();
 		goIndex.pop();
 		objects.push_back(scenePool.GetGO(index));
 	}
@@ -485,7 +485,7 @@ RE_GameObject* ModuleScene::RayCastSelect(math::Ray & ray)
 
 void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum & frustum)
 {
-	eastl::stack<int> goIndex;
+	eastl::stack<UID> goIndex;
 	static_tree.CollectIntersections(frustum, goIndex);
 	dynamic_tree.CollectIntersections(frustum, goIndex);
 
@@ -708,7 +708,7 @@ void ModuleScene::ResetTrees()
 	static_tree.Clear();
 	dynamic_tree.Clear();
 
-	eastl::vector<int> goIndex = scenePool.GetAllGOs();
+	eastl::vector<UID> goIndex = scenePool.GetAllGOs();
 	for (unsigned int i = 0; i < goIndex.size(); i++)
 	{
 		RE_GameObject* go = scenePool.GetGO(goIndex[i]);

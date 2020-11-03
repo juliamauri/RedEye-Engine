@@ -15,7 +15,7 @@ class JSONNode;
 class GameObjectManager;
 
 template<class COMPCLASS, unsigned int size>
-class ComponentPool : public PoolMapped<COMPCLASS, int, size>
+class ComponentPool : public PoolMapped<COMPCLASS, UID, size>
 {
 public:
 	ComponentPool() { }
@@ -30,15 +30,15 @@ public:
 		lastAvaibleIndex = 0;
 	}
 
-	int Push(COMPCLASS val)override
+	UID Push(COMPCLASS val)override
 	{
-		int ret = lastAvaibleIndex;
+		UID ret = RE_Math::RandomUID();
 		val.SetPoolID(ret);
 		PoolMapped::Push(val, ret);
 		return ret;
 	}
 
-	int GetNewComponent() {
+	UID GetNewComponent() {
 		return Push({});
 	}
 
@@ -72,7 +72,7 @@ public:
 
 		for (uint i = 0; i < cmpSize; i++) {
 			JSONNode* comp = compPool->PushJObject(eastl::to_string(i).c_str());
-			comp->PushUInt("parentPoolID", pool_[i].GetGO()->GetPoolID());
+			comp->PushUnsignedLongLong("parentPoolID", pool_[i].GetGO()->GetPoolID());
 			pool_[i].SerializeJson(comp, resources);
 			DEL(comp);
 		}
@@ -88,8 +88,8 @@ public:
 		for (unsigned int i = 0; i < cmpSize; i++) {
 			JSONNode* comp = compPool->PullJObject(eastl::to_string(i).c_str());
 
-			RE_GameObject* cParent = goPool->AtPtr(compPool->PullUInt("parentPoolID", 0));
-			pool_[Push({})].DeserializeJson(comp, resources, cParent);
+			RE_GameObject* cParent = goPool->AtPtr(compPool->PullUnsignedLongLong("parentPoolID", 0));
+			AtPtr(Push({}))->DeserializeJson(comp, resources, cParent);
 
 			DEL(comp);
 		}
@@ -99,7 +99,7 @@ public:
 	unsigned int GetBinarySize()const {
 		unsigned int size = sizeof(unsigned int);
 		unsigned int totalComps = GetCount();
-		if (totalComps > 0) size += (pool_[0].GetBinarySize() + sizeof(unsigned int)) * totalComps;
+		if (totalComps > 0) size += (pool_[0].GetBinarySize() + sizeof(UID)) * totalComps;
 		return size;
 	}
 
@@ -110,9 +110,9 @@ public:
 		memcpy(cursor, &cmpSize, size);
 		cursor += size;
 
-		size = sizeof(int);
+		size = sizeof(UID);
 		for (unsigned int i = 0; i < cmpSize; i++) {
-			int goID = pool_[i].GetGO()->GetPoolID();
+			UID goID = pool_[i].GetGO()->GetPoolID();
 			memcpy(cursor, &goID, size);
 			cursor += size;
 
@@ -127,12 +127,12 @@ public:
 		memcpy(&totalComps, cursor, size);
 		cursor += size;
 
+		size = sizeof(UID);
 		for (uint i = 0; i < totalComps; i++) {
-			unsigned int goID;
+			UID goID;
 			memcpy(&goID, cursor, size);
 			cursor += size;
-
-			pool_[Push({})].DeserializeBinary(cursor, resources, goPool->AtPtr(goID));
+			AtPtr(Push({}))->DeserializeBinary(cursor, resources, goPool->AtPtr(goID));
 		}
 	}
 
@@ -184,7 +184,7 @@ public:
 
 	void ClearComponents();
 
-	RE_Component* GetComponent(int poolid, ComponentType cType);
+	RE_Component* GetComponent(UID poolid, ComponentType cType);
 	RE_Component* GetNewComponent(ComponentType cType);
 	RE_Component* CopyComponent(RE_Component* cmp, RE_GameObject* parent);
 
@@ -192,7 +192,7 @@ public:
 	void UseResources();
 	void UnUseResources();
 
-	void DeleteTransform(int id);
+	void DeleteTransform(UID id);
 
 	eastl::stack<RE_CompLight*> GetAllLights(bool check_active);
 
@@ -222,14 +222,15 @@ private:
 	PTrefoiKnotPool pTrefoiKnotPool;
 };
 
-class GameObjectManager : public PoolMapped<RE_GameObject, int, 10240> {
+class GameObjectManager : public PoolMapped<RE_GameObject, UID, 10240> {
 public:
 	GameObjectManager() { }
 	~GameObjectManager() { }
 
 	void Clear();
 
-	int Push(RE_GameObject val)override;
+	UID Push(RE_GameObject val)override;
+	UID GetFirstGOUID();
 
 	unsigned int GetBinarySize()const;
 	void SerializeBinary(char*& cursor);
@@ -247,13 +248,14 @@ public:
 
 	RE_GameObject* AddGO(const char* name, RE_GameObject* parent);
 	RE_GameObject* CopyGO(RE_GameObject* copy, RE_GameObject* parent);
-	RE_GameObject* GetGO(int id)const;
-	eastl::vector<int> GetAllGOs();
+	RE_GameObject* GetGO(UID id)const;
+	UID GetFirstGOUID();
+	eastl::vector<UID> GetAllGOs();
 	unsigned int TotalGameObjects()const { return gameObjectsPool.GetCount(); };
 
 	RE_GameObject* InsertPool(RE_GOManager* pool);
 
-	RE_GOManager* GetNewPoolFromID(int id);
+	RE_GOManager* GetNewPoolFromID(UID id);
 
 	eastl::stack<RE_CompLight*> GetAllLights(bool check_active);
 

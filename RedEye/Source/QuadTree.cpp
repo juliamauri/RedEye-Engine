@@ -302,11 +302,11 @@ AABBDynamicTree::AABBDynamicTree() :  size(0), node_count(0), root_index(NullInd
 AABBDynamicTree::~AABBDynamicTree()
 {}
 
-void AABBDynamicTree::PushNode(int go_index, AABB box)
+void AABBDynamicTree::PushNode(UID go_index, AABB box)
 {
 	if (box.Size().Length() == 0.f)
 	{
-		int hgfd = go_index;
+		UID hgfd = go_index;
 	}
 
 
@@ -415,7 +415,7 @@ void AABBDynamicTree::PushNode(int go_index, AABB box)
 	}
 }
 
-void AABBDynamicTree::PopNode(int objectIndex)
+void AABBDynamicTree::PopNode(UID objectIndex)
 {
 	int index = objectToNode.at(objectIndex);
 
@@ -484,7 +484,7 @@ void AABBDynamicTree::Clear()
 	poolmapped_.clear();
 }
 
-void AABBDynamicTree::CollectIntersections(Ray ray, eastl::stack<int>& indexes) const
+void AABBDynamicTree::CollectIntersections(Ray ray, eastl::stack<UID>& indexes) const
 {
 	if (node_count > 0)
 	{
@@ -513,7 +513,7 @@ void AABBDynamicTree::CollectIntersections(Ray ray, eastl::stack<int>& indexes) 
 	}
 }
 
-void AABBDynamicTree::CollectIntersections(const Frustum frustum, eastl::stack<int>& indexes) const
+void AABBDynamicTree::CollectIntersections(const Frustum frustum, eastl::stack<UID>& indexes) const
 {
 	if (node_count > 0)
 	{
@@ -706,14 +706,14 @@ void AABBDynamicTree::Rotate(AABBDynamicTreeNode& node, int index)
 	}
 }
 
-int AABBDynamicTree::AllocateLeafNode(AABB box, int index)
+int AABBDynamicTree::AllocateLeafNode(AABB box, UID index)
 {
 	AABBDynamicTreeNode newNode;
 	SetLeaf(newNode, box, index);
 
 	int node_index = randomCount++;
 	Push(newNode, node_index);
-	objectToNode.insert(eastl::pair<int, int>(index, node_index));
+	objectToNode.insert(eastl::pair<UID, int>(index, node_index));
 
 	node_count++;
 
@@ -733,7 +733,7 @@ int AABBDynamicTree::AllocateInternalNode()
 	return node_index;
 }
 
-inline void AABBDynamicTree::SetLeaf(AABBDynamicTreeNode & node, AABB box, int index)
+inline void AABBDynamicTree::SetLeaf(AABBDynamicTreeNode & node, AABB box, UID index)
 {
 	node.box = box;
 	node.object_index = index;

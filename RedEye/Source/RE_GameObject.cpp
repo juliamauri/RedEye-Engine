@@ -212,28 +212,28 @@ bool RE_GameObject::HasDrawComponents() const
 void RE_GameObject::SerializeJson(JSONNode * node)
 {
 	node->PushString("name", GetName());
-	if (parent) node->PushInt("Parent Pool ID", parent->GetPoolID());
+	if (parent) node->PushUnsignedLongLong("Parent Pool ID", parent->GetPoolID());
 
 	node->PushFloatVector("position", transform->GetLocalPosition());
 	node->PushFloatVector("rotation", transform->GetLocalEulerRotation());
 	node->PushFloatVector("scale", transform->GetLocalScale());
 }
 
-void RE_GameObject::DeserializeJSON(JSONNode* node, ComponentsPool* cmpsPool, eastl::map<int, RE_GameObject*>* idGO)
+void RE_GameObject::DeserializeJSON(JSONNode* node, ComponentsPool* cmpsPool, eastl::map<UID, RE_GameObject*>* idGO)
 {
-	if (!idGO->empty()) SetUp(cmpsPool, node->PullString("name", "GameObject"), idGO->at(node->PullInt("Parent Pool ID", -1)));
+	if (!idGO->empty()) SetUp(cmpsPool, node->PullString("name", "GameObject"), idGO->at(node->PullUnsignedLongLong("Parent Pool ID", -1)));
 	else SetUp(cmpsPool, node->PullString("name", "GameObject"), nullptr);
 
 	transform->SetPosition(node->PullFloatVector("position", math::vec::zero));
 	transform->SetRotation(node->PullFloatVector("rotation", math::vec::zero));
 	transform->SetScale(node->PullFloatVector("scale", math::vec::one));
-	idGO->insert(eastl::pair < int, RE_GameObject*>(poolID, this));
+	idGO->insert(eastl::pair < UID, RE_GameObject*>(poolID, this));
 }
 
 unsigned int RE_GameObject::GetBinarySize()const
 {
-	uint size = (sizeof(uint) + sizeof(float) * 9) + eastl::CharStrlen(GetName());
-	if (parent != nullptr) size += sizeof(int);
+	uint size = (sizeof(float) * 9) + sizeof(uint) + eastl::CharStrlen(GetName());
+	if (parent != nullptr) size += sizeof(UID);
 	return size;
 }
 
@@ -251,8 +251,8 @@ void RE_GameObject::SerializeBinary(char*& cursor)
 
 	if (parent != nullptr)
 	{
-		size = sizeof(int);
-		int parentID = parent->GetPoolID();
+		size = sizeof(UID);
+		UID parentID = parent->GetPoolID();
 		memcpy(cursor, &parentID, size);
 		cursor += size;
 	}
@@ -268,7 +268,7 @@ void RE_GameObject::SerializeBinary(char*& cursor)
 	cursor += size;
 }
 
-void RE_GameObject::DeserializeBinary(char*& cursor, ComponentsPool* compPool, eastl::map<int, RE_GameObject*>* idGO)
+void RE_GameObject::DeserializeBinary(char*& cursor, ComponentsPool* compPool, eastl::map<UID, RE_GameObject*>* idGO)
 {
 	char nullchar = '\0';
 
@@ -287,8 +287,8 @@ void RE_GameObject::DeserializeBinary(char*& cursor, ComponentsPool* compPool, e
 
 	if (!idGO->empty())
 	{
-		size = sizeof(int);
-		int goParentID;
+		size = sizeof(UID);
+		UID goParentID;
 		memcpy(&goParentID, cursor, size);
 		cursor += size;
 		SetUp(compPool, strName, idGO->at(goParentID));
@@ -312,7 +312,7 @@ void RE_GameObject::DeserializeBinary(char*& cursor, ComponentsPool* compPool, e
 	cursor += size;
 	transform->SetScale(math::vec(vec));
 
-	idGO->insert(eastl::pair < int, RE_GameObject*>(poolID, this));
+	idGO->insert(eastl::pair < UID, RE_GameObject*>(poolID, this));
 }
 
 void RE_GameObject::AddChild(RE_GameObject * child, bool broadcast)
@@ -871,5 +871,5 @@ void RE_GameObject::DrawProperties()
 	for (auto component : GetComponents()) component->DrawProperties();
 }
 
-int RE_GameObject::GetPoolID() const { return poolID; }
-void RE_GameObject::SetPoolID(int id) { poolID = id; }
+UID RE_GameObject::GetPoolID() const { return poolID; }
+void RE_GameObject::SetPoolID(UID id) { poolID = id; }

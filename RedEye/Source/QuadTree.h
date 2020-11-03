@@ -109,7 +109,7 @@ inline void QTree::CollectIntersections(eastl::vector<RE_GameObject*>& objects, 
 struct AABBDynamicTreeNode
 {
 	AABB box;
-	int object_index;
+	UID object_index;
 	int parent_index;
 	int child1;
 	int child2;
@@ -129,26 +129,26 @@ public:
 	AABBDynamicTree();
 	~AABBDynamicTree();
 
-	void PushNode(int index, AABB box);
-	void PopNode(int index);
+	void PushNode(UID goUID, AABB box);
+	void PopNode(UID index);
 	void Clear();
-	void CollectIntersections(Ray ray, eastl::stack<int>& indexes) const;
-	void CollectIntersections(const Frustum frustum, eastl::stack<int>& indexes) const;
+	void CollectIntersections(Ray ray, eastl::stack<UID>& indexes) const;
+	void CollectIntersections(const Frustum frustum, eastl::stack<UID>& indexes) const;
 
 	void Draw()const;
 	int GetCount() const;
 
-	eastl::map<int, int> objectToNode;
+	eastl::map<UID, int> objectToNode;
 
 private:
 
 	void Rotate(AABBDynamicTreeNode& node, int index);
 
-	int AllocateLeafNode(AABB box, int index);
+	int AllocateLeafNode(AABB box, UID index);
 	int AllocateInternalNode();
 
 	static inline AABB Union(AABB box1, AABB box2);
-	static inline void SetLeaf(AABBDynamicTreeNode& node, AABB box, int index);
+	static inline void SetLeaf(AABBDynamicTreeNode& node, AABB box, UID index);
 	static inline void SetInternal(AABBDynamicTreeNode& node);
 };
 

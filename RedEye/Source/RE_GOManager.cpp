@@ -7,7 +7,7 @@ RE_GameObject* RE_GOManager::AddGO(const char* name, RE_GameObject* parent)
 {
 	RE_GameObject* goparent = nullptr;
 	if (gameObjectsPool.GetCount() > 0)
-		goparent = parent ? parent : gameObjectsPool.AtPtr(0);
+		goparent = parent ? parent : gameObjectsPool.AtPtr(gameObjectsPool.GetFirstGOUID());
 
 	RE_GameObject* ret = gameObjectsPool.AtPtr(gameObjectsPool.Push({}));
 	ret->SetUp(&componentsPool, name, goparent);
@@ -18,7 +18,7 @@ RE_GameObject* RE_GOManager::CopyGO(RE_GameObject* copy, RE_GameObject* parent)
 {
 	RE_GameObject* goparent = nullptr;
 	if (gameObjectsPool.GetCount() > 0)
-		goparent = parent ? parent : gameObjectsPool.AtPtr(0);
+		goparent = parent ? parent : gameObjectsPool.AtPtr(gameObjectsPool.GetFirstGOUID());
 
 	eastl::list<RE_Component*> copyComponents = copy->GetComponents();
 
@@ -41,22 +41,27 @@ RE_GameObject* RE_GOManager::CopyGO(RE_GameObject* copy, RE_GameObject* parent)
 	return newGO;
 }
 
-RE_GameObject* RE_GOManager::GetGO(int id) const
+RE_GameObject* RE_GOManager::GetGO(UID id) const
 {
 	return gameObjectsPool.AtPtr(id);
 }
 
-eastl::vector<int> RE_GOManager::GetAllGOs()
+UID RE_GOManager::GetFirstGOUID()
+{
+	return gameObjectsPool.GetFirstGOUID();
+}
+
+eastl::vector<UID> RE_GOManager::GetAllGOs()
 {
 	return gameObjectsPool.GetAllKeys();
 }
 
 RE_GameObject* RE_GOManager::InsertPool(RE_GOManager* pool)
 {
-	return RepercusiveInsertGO(pool->GetGO(0), (TotalGameObjects() > 0) ? GetGO(0) : nullptr);
+	return RepercusiveInsertGO(pool->GetGO(pool->GetFirstGOUID()), (TotalGameObjects() > 0) ? GetGO(GetFirstGOUID()) : nullptr);
 }
 
-RE_GOManager* RE_GOManager::GetNewPoolFromID(int id)
+RE_GOManager* RE_GOManager::GetNewPoolFromID(UID id)
 {
 	RE_GOManager* ret = new RE_GOManager();
 
@@ -138,17 +143,23 @@ void GameObjectManager::Clear()
 	lastAvaibleIndex = 0;
 }
 
-int GameObjectManager::Push(RE_GameObject val)
+UID GameObjectManager::Push(RE_GameObject val)
 {
-	int ret = lastAvaibleIndex;
+	UID ret = RE_Math::RandomUID();
 	val.SetPoolID(ret);
 	PoolMapped::Push(val, ret);
 	return ret;
 }
 
+UID GameObjectManager::GetFirstGOUID()
+{
+	return (lastAvaibleIndex > 0) ? pool_[0].GetPoolID() : 0;
+}
+
 unsigned int GameObjectManager::GetBinarySize() const
 {
-	uint size = sizeof(unsigned int);
+	uint size = sizeof(UID);
+	size += lastAvaibleIndex * sizeof(UID);
 	for (int i = 0; i < lastAvaibleIndex; i++)
 		size += pool_[i].GetBinarySize();
 	return size;
@@ -161,21 +172,34 @@ void GameObjectManager::SerializeBinary(char*& cursor)
 	memcpy(cursor, &goSize, size);
 	cursor += size;
 
-	for (uint i = 0; i < goSize; i++)
+	size = sizeof(UID);
+	for (uint i = 0; i < goSize; i++) {
+		UID goPoolID = pool_[i].GetPoolID();
+		memcpy(cursor, &goPoolID, size);
+		cursor += size;
+
 		pool_[i].SerializeBinary(cursor);
+	}
 }
 
 void GameObjectManager::DeserializeBinary(char*& cursor, ComponentsPool* cmpsPool)
 {
-	eastl::map<int, RE_GameObject*> idGO;
+	eastl::map<UID, RE_GameObject*> idGO;
 
 	uint size = sizeof(unsigned int);
 	uint goSize;
 	memcpy(&goSize, cursor, size);
 	cursor += size;
 
-	for (uint i = 0; i < goSize; i++)
-		pool_[Push({})].DeserializeBinary(cursor, cmpsPool, &idGO);
+	size = sizeof(UID);
+	for (uint i = 0; i < goSize; i++) {
+		RE_GameObject newGO; UID goUID;
+		memcpy(&goUID, cursor, size);
+		cursor += size;
+		newGO.SetPoolID(goUID);
+		PoolMapped::Push(newGO, goUID);
+		AtPtr(goUID)->DeserializeBinary(cursor, cmpsPool, &idGO);
+	}
 }
 
 void GameObjectManager::SerializeJson(JSONNode* node)
@@ -185,6 +209,7 @@ void GameObjectManager::SerializeJson(JSONNode* node)
 	goPool->PushUInt("gameobjectsSize", goSize);
 	for (uint i = 0; i < goSize; i++) {
 		JSONNode* goNode = goPool->PushJObject(eastl::to_string(i).c_str());
+		goNode->PushUnsignedLongLong("GOUID", pool_[i].GetPoolID());
 		pool_[i].SerializeJson(goNode);
 		DEL(goNode);
 	}
@@ -193,13 +218,16 @@ void GameObjectManager::SerializeJson(JSONNode* node)
 
 void GameObjectManager::DeserializeJson(JSONNode* node, ComponentsPool* cmpsPool)
 {
-	eastl::map<int, RE_GameObject*> idGO;
+	eastl::map<UID, RE_GameObject*> idGO;
 	JSONNode* goPool = node->PullJObject("gameobjects Pool");
 	unsigned int goSize = goPool->PullUInt("gameobjectsSize",  0);
 
 	for (uint i = 0; i < goSize; i++) {
 		JSONNode* goNode = goPool->PullJObject(eastl::to_string(i).c_str());
-		pool_[Push({})].DeserializeJSON(goNode, cmpsPool, &idGO);
+		UID goUID = goNode->PullUnsignedLongLong("GOUID", 0);
+		RE_GameObject newGO; newGO.SetPoolID(goUID);
+		PoolMapped::Push(newGO, goUID);
+		AtPtr(goUID)->DeserializeJSON(goNode, cmpsPool, &idGO);
 		DEL(goNode);
 	}
 	DEL(goPool);
@@ -225,7 +253,7 @@ void ComponentsPool::ClearComponents()
 	pPlanePool.Clear();
 }
 
-RE_Component* ComponentsPool::GetComponent(int poolid, ComponentType cType)
+RE_Component* ComponentsPool::GetComponent(UID poolid, ComponentType cType)
 {
 	RE_Component* ret = nullptr;
 	switch (cType)
@@ -449,7 +477,7 @@ void ComponentsPool::UnUseResources()
 	meshPool.UnUseResources();
 }
 
-void ComponentsPool::DeleteTransform(int id)
+void ComponentsPool::DeleteTransform(UID id)
 {
 	transPool.Pop(id);
 }
@@ -458,16 +486,18 @@ eastl::stack<RE_CompLight*> ComponentsPool::GetAllLights(bool check_active)
 {
 	eastl::stack<RE_CompLight*> lights;
 
-	int count = lightPool.GetCount();
+	eastl::vector<UID> lightsUID = lightPool.GetAllKeys();
+
+	int count = lightsUID.size();
 	for (int i = 0; i < count; ++i)
 		if (check_active)
 		{
-			RE_CompLight* light = lightPool.AtPtr(i);
+			RE_CompLight* light = lightPool.AtPtr(lightsUID[i]);
 			if (light->IsActive())
 				lights.push(light);
 		}
 		else
-			lights.push(lightPool.AtPtr(i));
+			lights.push(lightPool.AtPtr(lightsUID[i]));
 
 	return lights;
 }

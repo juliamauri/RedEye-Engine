@@ -260,6 +260,7 @@ public:
 	void		PushMat4(const char* name, math::float4x4 mat4);
 	void		PushDouble(const char* name, const double value);
 	void		PushSignedLongLong(const char* name, const signed long long value);
+	void		PushUnsignedLongLong(const char* name, const unsigned long long value);
 	void		PushString(const char* name, const char* value);
 	void		PushValue(rapidjson::Value* val);
 	JSONNode*	PushJObject(const char* name);
@@ -279,6 +280,7 @@ public:
 	math::float4x4	PullMat4(const char* name, math::float4x4 deflt);
 	double			PullDouble(const char* name, double deflt);
 	signed long long	PullSignedLongLong(const char* name, signed long long deflt);
+	unsigned long long	PullUnsignedLongLong(const char* name, unsigned long long deflt);
 
 	const char*		PullString(const char* name, const char* deflt);
 	JSONNode*		PullJObject(const char* name);

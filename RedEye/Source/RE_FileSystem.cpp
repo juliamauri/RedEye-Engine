@@ -1037,6 +1037,15 @@ void JSONNode::PushSignedLongLong(const char* name, const signed long long value
 	}
 }
 
+void JSONNode::PushUnsignedLongLong(const char* name, const unsigned long long value)
+{
+	if (name)
+	{
+		eastl::string path = pointerPath + "/" + name;
+		rapidjson::Pointer(path.c_str()).Set(config->document, value);
+	}
+}
+
 void JSONNode::PushString(const char* name, const char* value)
 {
 	if (name)
@@ -1328,6 +1337,20 @@ signed long long JSONNode::PullSignedLongLong(const char* name, signed long long
 		eastl::string path = pointerPath + "/" + name;
 		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
 		if (val) ret = val->GetInt64();
+	}
+
+	return ret;
+}
+
+unsigned long long JSONNode::PullUnsignedLongLong(const char* name, unsigned long long deflt)
+{
+	unsigned long long ret = deflt;
+
+	if (name)
+	{
+		eastl::string path = pointerPath + "/" + name;
+		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+		if (val) ret = val->GetUint64();
 	}
 
 	return ret;

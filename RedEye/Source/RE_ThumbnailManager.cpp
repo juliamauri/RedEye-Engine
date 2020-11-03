@@ -249,16 +249,17 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 		if (poolGOThumbnail)
 		{
 			poolGOThumbnail->UseResources();
-			poolGOThumbnail->GetGO(0)->TransformModified(false);
-			poolGOThumbnail->GetGO(0)->Update();
-			poolGOThumbnail->GetGO(0)->ResetGlobalBoundingBoxForAllChilds();
+			RE_GameObject* root = poolGOThumbnail->GetGO(poolGOThumbnail->GetFirstGOUID());
+			root->TransformModified(false);
+			root->Update();
+			root->ResetGlobalBoundingBoxForAllChilds();
 
 			internalCamera->SetFOV(math::RadToDeg(0.523599f));
 			internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
 			internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
 			internalCamera->LocalRotate(0, -0.5);
 			internalCamera->Update();
-			internalCamera->Focus(poolGOThumbnail->GetGO(0));
+			internalCamera->Focus(root);
 			internalCamera->Update();
 
 			eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
@@ -267,7 +268,7 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 			RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			poolGOThumbnail->GetGO(0)->DrawWithChilds();
+			root->DrawWithChilds();
 			poolGOThumbnail->UnUseResources();
 			SaveTextureFromFBO(path.c_str());
 			RE_FBOManager::ChangeFBOBind(0, App::window->GetWidth(), App::window->GetHeight());

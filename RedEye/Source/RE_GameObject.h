@@ -45,11 +45,11 @@ public:
 	bool HasDrawComponents() const;
 
 	void SerializeJson(JSONNode* node);
-	void DeserializeJSON(JSONNode* node, ComponentsPool* cmpsPool, eastl::map<int, RE_GameObject*>* uuidGO);
+	void DeserializeJSON(JSONNode* node, ComponentsPool* cmpsPool, eastl::map<UID, RE_GameObject*>* uuidGO);
 
 	unsigned int GetBinarySize()const;
 	void SerializeBinary(char*& cursor);
-	void DeserializeBinary(char*& cursor, ComponentsPool* compPool, eastl::map<int, RE_GameObject*>* uuidGO);
+	void DeserializeBinary(char*& cursor, ComponentsPool* compPool, eastl::map<UID, RE_GameObject*>* uuidGO);
 
 	// Children
 	void AddChild(RE_GameObject* child, bool broadcast = true);
@@ -127,15 +127,15 @@ public:
 	void DrawProperties();
 
 	//POOL
-	int GetPoolID()const;
-	void SetPoolID(int id);
+	UID GetPoolID()const;
+	void SetPoolID(UID id);
 	
 public:
 	struct cmpPoolID
 	{
-		int poolId;
+		UID poolId;
 		ushortint cType;
-		cmpPoolID(int id, ushortint type) : poolId(id), cType(type) { }
+		cmpPoolID(UID id, ushortint type) : poolId(id), cType(type) { }
 	};
 
 private:
@@ -154,7 +154,7 @@ private:
 	ComponentsPool* poolComponents;
 	eastl::vector<cmpPoolID> componentsID;
 
-	int poolID = 0;
+	UID poolID = 0;
 };
 
 #endif // !__RE_GAMEOBJECT_H__

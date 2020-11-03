@@ -87,8 +87,8 @@ public:
 	virtual void UnUseResources() {  }
 
 	//POOL
-	int GetPoolID()const { return poolID; }
-	void SetPoolID(int id) { poolID = id; }
+	UID GetPoolID()const { return poolID; }
+	void SetPoolID(UID id) { poolID = id; }
 
 protected:
 
@@ -96,7 +96,7 @@ protected:
 	ComponentType type = C_EMPTY;
 	RE_GameObject* go = nullptr;
 
-	int poolID = 0;
+	UID poolID = 0;
 };
 
 #endif // !__RE_COMPONENT_H__
