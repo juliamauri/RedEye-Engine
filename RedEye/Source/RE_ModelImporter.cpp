@@ -26,10 +26,8 @@
 #pragma comment(lib, "assimp/libx86/assimp-vc140-mt-release.lib")
 #endif
 
-#include <Windows.h>
-
 RE_ModelImporter::RE_ModelImporter(const char* folder) : folderPath(folder) {}
-RE_ModelImporter::~RE_ModelImporter() { DEL(folderPath); }
+RE_ModelImporter::~RE_ModelImporter() {}
 
 bool RE_ModelImporter::Init()
 {

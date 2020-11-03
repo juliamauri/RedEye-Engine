@@ -29,6 +29,7 @@
 #include <EASTL/internal/char_traits.h>
 #include <EASTL/algorithm.h>
 #include <EASTL/iterator.h>
+#include <EAStdC/EASprintf.h>
 
 #pragma comment( lib, "PhysFS/libx86/physfs.lib" )
 
@@ -38,15 +39,6 @@
 #else
 #pragma comment( lib, "libzip/zip_r.lib" )
 #endif // _DEBUG
-
-#ifdef _MSC_VER
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#endif
-
-#include <fstream>
-#include <algorithm>
 
 RE_FileSystem::RE_FileSystem() : engine_config(nullptr) {}
 
@@ -74,7 +66,7 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		PHYSFS_Version physfs_version;
 		PHYSFS_VERSION(&physfs_version);
 		char tmp[8];
-		sprintf_s(tmp, 8, "%u.%u.%u", static_cast<int>(physfs_version.major), static_cast<int>(physfs_version.minor), static_cast<int>(physfs_version.patch));
+		EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", static_cast<int>(physfs_version.major), static_cast<int>(physfs_version.minor), static_cast<int>(physfs_version.patch));
 		App::ReportSoftware("PhysFS", tmp, "https://icculus.org/physfs/");
 		App::ReportSoftware("Rapidjson", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
 		App::ReportSoftware("LibZip", "1.5.0", "https://libzip.org/");

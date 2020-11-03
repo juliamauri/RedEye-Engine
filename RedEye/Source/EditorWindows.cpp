@@ -9,18 +9,17 @@
 #include "ModuleAudio.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_ResourceManager.h"
-
 #include "RE_CameraManager.h"
 #include "RE_TimeManager.h"
 #include "OutputLog.h"
 #include "RE_HandleErrors.h"
-
 #include "RE_GameObject.h"
 
 #include "ImGui/misc/cpp/imgui_stdlib.h"
 #include "ImGui/imgui_internal.h"
 #include "ImGuiColorTextEdit/TextEditor.h"
 #include "SDL2/include/SDL_scancode.h"
+#include <EAStdC/EASprintf.h>
 
 EditorWindow::EditorWindow(const char* name, bool start_enabled) : name(name), active(start_enabled), lock_pos(false) {}
 EditorWindow::~EditorWindow() {}
@@ -501,7 +500,7 @@ void PopUpWindow::Draw(bool secondary)
 			if (inputName)
 			{
 				char name_holder[64];
-				sprintf_s(name_holder, 64, "%s", nameStr.c_str());
+				EA::StdC::Snprintf(name_holder, 64, "%s", nameStr.c_str());
 				if (ImGui::InputText("Name", name_holder, 64)) nameStr = name_holder;
 			}
 			
@@ -533,7 +532,7 @@ void PopUpWindow::Draw(bool secondary)
 			if (inputName)
 			{
 				char name_holder[64];
-				sprintf_s(name_holder, 64, "%s", nameStr.c_str());
+				EA::StdC::Snprintf(name_holder, 64, "%s", nameStr.c_str());
 				if (ImGui::InputText("Name", name_holder, 64)) nameStr = name_holder;
 			}
 
@@ -755,6 +754,7 @@ void AssetsWindow::Draw(bool secondary)
 
 		float width = ImGui::GetWindowWidth();
 		int itemsColum = static_cast<int>(width / iconsSize);
+		if (itemsColum == 0) itemsColum = 1;
 		eastl::stack<RE_FileSystem::RE_Path*> filesToDisplay = currentDir->GetDisplayingFiles();
 
 		ImGui::Columns(itemsColum, NULL, false);

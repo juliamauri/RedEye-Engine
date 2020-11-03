@@ -67,7 +67,7 @@ void SystemInfo::Init()
 	// GPU
 	unsigned int VendorId, DeviceId; std::wstring GFXBrand;
 	unsigned long long total, used, available, reserved;
-	if (getGraphicsDeviceInfo(&VendorId, &DeviceId, &GFXBrand, nullptr, nullptr, nullptr, nullptr))
+	if (getGraphicsDeviceInfo(&VendorId, &DeviceId, &GFXBrand, &total, &used, &available, &reserved))
 	{
 		vendor_id = "Vendor ID: " + eastl::to_string(VendorId);
 		device_id = "Device ID: " + eastl::to_string(DeviceId);

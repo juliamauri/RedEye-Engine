@@ -3,25 +3,20 @@
 #include "Application.h"
 #include "RE_ResourceManager.h"
 #include "RE_FileSystem.h"
-
 #include "RE_SkyBox.h"
-
 #include "ModuleEditor.h"
-
 #include "Globals.h"
 #include "OutputLog.h"
 #include "RE_TimeManager.h"
 #include "RE_GLCacheManager.h"
 
 #include "md5.h"
-
 #include "ImGui\imgui.h"
-
 #include "Glew/include/glew.h"
-
 #include "IL/include/il.h"
 #include "IL/include/ilu.h"
 #include "IL/include/ilut.h"
+#include <EAStdC/EASprintf.h>
 
 #pragma comment(lib, "IL/libx86/DevIL.lib")
 #pragma comment(lib, "IL/libx86/ILU.lib")
@@ -49,7 +44,7 @@ bool RE_TextureImporter::Init()
 		ilEnable(IL_ORIGIN_SET);
 
 		char tmp[8];
-		sprintf_s(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
+		EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
 		App::ReportSoftware("DevIL", tmp, "http://openil.sourceforge.net/");
 	}
 	else

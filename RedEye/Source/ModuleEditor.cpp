@@ -54,8 +54,6 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 
 ModuleEditor::~ModuleEditor()
 {
-	// TODO: Delete unlisted windows
-
 	windows.clear();
 	tools.clear();
 	editorCommands.Clear();
@@ -452,8 +450,6 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 	OPTICK_CATEGORY("Debug Draw", Optick::Category::Debug);
 	AABBDebugDrawing adapted_AABBdraw = (selected != nullptr ? aabb_drawing : AABBDebugDrawing(aabb_drawing - 1));
 
-	if (grid->IsActive()) grid->Draw();
-
 	if (debug_drawing && ((adapted_AABBdraw != AABBDebugDrawing::NONE) || draw_quad_tree || draw_cameras))
 	{
 		glMatrixMode(GL_PROJECTION);
@@ -540,6 +536,8 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 		}
 
 		glEnd();
+
+		if (grid->IsActive()) grid->Draw();
 	}
 }
 

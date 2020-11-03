@@ -23,11 +23,11 @@
 #include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
 #include "ImGui\imgui.h"
-
 #include <EASTL/unordered_set.h>
 #include <EASTL/queue.h>
 #include <EASTL/stack.h>
 #include <EASTL/internal/char_traits.h>
+#include <EAStdC/EASprintf.h>
 
 RE_GameObject::RE_GameObject() {}
 RE_GameObject::~RE_GameObject() {}
@@ -844,7 +844,7 @@ void RE_GameObject::DrawProperties()
 	}
 
 	char name_holder[64];
-	sprintf_s(name_holder, 64, "%s", name.c_str());
+	EA::StdC::Snprintf(name_holder, 64, "%s", name.c_str());
 	if (ImGui::InputText("Name", name_holder, 64)) name = name_holder;
 
 	bool tmp_active = active;

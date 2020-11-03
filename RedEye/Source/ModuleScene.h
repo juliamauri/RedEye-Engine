@@ -6,12 +6,8 @@
 #include "QuadTree.h"
 #include "RE_GOManager.h"
 
-#include <windows.h>
-
 class RE_GameObject;
 class RE_Scene;
-
-
 
 class ModuleScene : public Module
 {

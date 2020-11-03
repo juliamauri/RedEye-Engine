@@ -3,10 +3,11 @@
 #include "Application.h"
 #include "RE_HandleErrors.h"
 
-#include <windows.h>
-#include <stdio.h>
+#include <EAStdC/EASprintf.h>
 
-#define WIN32_MEAN_AND_LEAN
+// TODO Julius: Destruir Windows. Reventarlo quitandote la camiseta. Que no lo reconozca ni Billy el Puertas.
+#include <windows.h>
+
 #define LOG_STATEMENT_MAX_LENGTH 512
 
 void _log(const int category, const char file[], int line, const char* format, ...)
@@ -17,20 +18,20 @@ void _log(const int category, const char file[], int line, const char* format, .
 
 	// Construct the string from variable arguments
 	va_start(ap, format);
-	vsprintf_s(tmp_string, LOG_STATEMENT_MAX_LENGTH, format, ap);
+	EA::StdC::Vsnprintf(tmp_string, LOG_STATEMENT_MAX_LENGTH, format, ap);
 	va_end(ap);
-	sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n%s(%d) : %s", file, line, tmp_string);
+	EA::StdC::Snprintf(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n%s(%d) : %s", file, line, tmp_string);
 	OutputDebugString(tmp_string2);
 
 	switch (LogCategory(category)) {
-	case L_SEPARATOR: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\n=============\t%s\t=============", tmp_string); break;
-	case L_GLOBAL: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n%s", tmp_string); break;
-	case L_SECONDARY: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t- %s", tmp_string); break;
-	case L_TERCIARY: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t\t+ %s", tmp_string); break;
-	case L_ERROR: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nERROR: %s", tmp_string); break;
-	case L_WARNING: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nWARNING: %s", tmp_string); break;
-	case L_SOLUTION: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nSolution: %s", tmp_string); break;
-	case L_SOFTWARE: sprintf_s(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t* 3rd party software report: %s", tmp_string); break; }
+	case L_SEPARATOR: EA::StdC::Snprintf(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\n=============\t%s\t=============", tmp_string); break;
+	case L_GLOBAL: EA::StdC::Snprintf(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n%s", tmp_string); break;
+	case L_SECONDARY: EA::StdC::Snprintf(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t- %s", tmp_string); break;
+	case L_TERCIARY: EA::StdC::Snprintf(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t\t+ %s", tmp_string); break;
+	case L_ERROR: EA::StdC::Snprintf(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nERROR: %s", tmp_string); break;
+	case L_WARNING: EA::StdC::Snprintf(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nWARNING: %s", tmp_string); break;
+	case L_SOLUTION: EA::StdC::Snprintf(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\nSolution: %s", tmp_string); break;
+	case L_SOFTWARE: EA::StdC::Snprintf(tmp_string2, LOG_STATEMENT_MAX_LENGTH, "\n\t* 3rd party software report: %s", tmp_string); break; }
 
 	App::Log(category, tmp_string2, file);
 	App::handlerrors.HandleLog(tmp_string2, LogCategory(category));

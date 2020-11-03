@@ -8,7 +8,7 @@
 #include "Glew/include/glew.h"
 
 RE_ShaderImporter::RE_ShaderImporter(const char * folder) : folderPath(folder) {}
-RE_ShaderImporter::~RE_ShaderImporter() { DEL(folderPath); }
+RE_ShaderImporter::~RE_ShaderImporter() {}
 
 bool RE_ShaderImporter::Init()
 {
@@ -308,10 +308,11 @@ bool RE_ShaderImporter::GetBinaryProgram(unsigned int ID, char** buffer, int* si
 {
 	bool ret = false;
 
-	if (ID > 0) {
+	if (ID > 0)
+	{
 		glGetProgramiv(ID, GL_PROGRAM_BINARY_LENGTH, size);
-
-		if (*size > 0) {
+		if (*size > 0)
+		{
 			*buffer = new char[*size];
 			glGetProgramBinary(ID, *size, size, (GLenum*)binaryFormats, *buffer);
 			ret = true;

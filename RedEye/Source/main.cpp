@@ -74,8 +74,7 @@ int main(int argc, char* argv[])
 		RE_LOG_ERROR("Application Init exits with ERROR");
 	}
 
-	delete app;
-	app = nullptr;
+	DEL(app);
 
 	return main_return;
 }

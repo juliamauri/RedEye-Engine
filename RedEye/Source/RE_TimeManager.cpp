@@ -3,6 +3,7 @@
 #include "OutputLog.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
+#include <EAStdC/EASprintf.h>
 
 float RE_TimeManager::dt;
 Timer RE_TimeManager::engine_timer(false);
@@ -106,9 +107,9 @@ void TimePlotting::DrawEditor()
 		SetMaxFPS(capped_fps);
 
 	char title[25];
-	sprintf_s(title, 25, "Framerate %.1f", fps[99]);
+	EA::StdC::Snprintf(title, 25, "Framerate %.1f", fps[99]);
 	ImGui::PlotHistogram("##framerate", fps, ((int)(sizeof(fps) / sizeof(*fps))), 0, title, 0.0f, capped_fps, ImVec2(310, 100));
-	sprintf_s(title, 25, "Milliseconds %.1f", ms[99]);
+	EA::StdC::Snprintf(title, 25, "Milliseconds %.1f", ms[99]);
 	ImGui::PlotHistogram("##milliseconds", ms, ((int)(sizeof(ms) / sizeof(*ms))), 0, title, 0.0f, 40.0f, ImVec2(310, 100));
 
 	if (ImGui::Checkbox(pause_plotting ? "Restart Plotting" : "Pause Plotting", &pause_plotting) && !pause_plotting)

@@ -50,7 +50,8 @@ public:
 	~OutputLogHolder();
 
 	void Add(int category, const char * text, const char* file);
-	void SaveLogs();
+	
+	// TODO Rub: void SaveLogs();
 
 	eastl::list<RE_Log> logHistory;
 	eastl::map<eastl::string, unsigned int> callers;

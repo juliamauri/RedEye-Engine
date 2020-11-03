@@ -21,9 +21,9 @@
 #include "IL/include/ilu.h"
 #include "IL/include/ilut.h"
 #include "Optick/include/optick.h"
-
 #include <EAAssert/version.h>
 #include <EAStdC/internal/Config.h>
+#include <EAStdC/EASprintf.h>
 #include <eathread/internal/config.h>
 
 // Utility
@@ -124,15 +124,14 @@ bool Application::Init(int argc, char* argv[])
 	{
 		char tmp[8];
 		SDL_version sdl_version;
-		SDL_VERSION(&sdl_version);
-		sprintf_s(tmp, 8, "%u.%u.%u", static_cast<int>(sdl_version.major), static_cast<int>(sdl_version.minor), static_cast<int>(sdl_version.patch));
+		SDL_GetVersion(&sdl_version);
+		EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", sdl_version.major, sdl_version.minor, sdl_version.patch);
 		ReportSoftware("SDL", tmp, "https://www.libsdl.org/");
 
 		ReportSoftware("EABase", EABASE_VERSION, "https://github.com/electronicarts/EABase");
 		ReportSoftware("EASTL", EASTL_VERSION, "https://github.com/electronicarts/EASTL");
 		ReportSoftware("EAStdC", EASTDC_VERSION, "https://github.com/electronicarts/EAStdC");
-
-		sprintf_s(tmp, 8, "%u.%u.%u", static_cast<int>(EAASSERT_VERSION_MAJOR), static_cast<int>(EAASSERT_VERSION_MINOR), static_cast<int>(EAASSERT_VERSION_PATCH));
+		EA::StdC::Snprintf(tmp, 8, "%i.%i.%i", EAASSERT_VERSION_MAJOR, EAASSERT_VERSION_MINOR, EAASSERT_VERSION_PATCH);
 		ReportSoftware("EAAssert", tmp, "https://github.com/electronicarts/EAAssert");
 		ReportSoftware("EAThread", EATHREAD_VERSION, "https://github.com/electronicarts/EAThread");
 
@@ -163,7 +162,6 @@ bool Application::Init(int argc, char* argv[])
 			{
 				// Initialize Utility
 				math.Init();
-				internalResources.Init();
 #ifdef _DEBUG
 				sys_info->Init();
 #endif // _DEBUG
@@ -178,6 +176,8 @@ bool Application::Init(int argc, char* argv[])
 				if (!textures.Init()) RE_LOG_WARNING("Won't be able to use/import textures");
 				if (!shaders.Init()) RE_LOG_WARNING("Won't be able to use/import shaders");
 				if (!modelImporter.Init()) RE_LOG_WARNING("Won't be able to use/import models");
+
+				internalResources.Init();
 
 				fs->ReadAssetChanges(0, true);
 				audio->ReadBanksChanges();
