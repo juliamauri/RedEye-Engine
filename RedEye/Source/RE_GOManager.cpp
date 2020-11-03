@@ -1,12 +1,7 @@
 #include "RE_GOManager.h"
 
-RE_GOManager::RE_GOManager()
-{
-}
-
-RE_GOManager::~RE_GOManager()
-{
-}
+RE_GOManager::RE_GOManager() {}
+RE_GOManager::~RE_GOManager() {}
 
 RE_GameObject* RE_GOManager::AddGO(const char* name, RE_GameObject* parent)
 {

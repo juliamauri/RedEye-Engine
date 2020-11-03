@@ -28,48 +28,29 @@ void RE_CameraManager::Clear()
 RE_CompCamera * RE_CameraManager::CurrentCamera()
 {
 	RE_CompCamera * ret = editor_camera;
-
-	if (App->GetState() != GS_STOP && main_camera != nullptr)
-		ret = main_camera;
-
+	if (App::GetState() != GS_STOP && main_camera) ret = main_camera;
 	return ret;
 }
 
-RE_CompCamera * RE_CameraManager::EditorCamera()
-{
-	return editor_camera;
-}
-
-RE_CompCamera* RE_CameraManager::MainCamera()
-{
-	return main_camera;
-}
-
-bool RE_CameraManager::HasMainCamera()
-{
-	return main_camera != nullptr;
-}
+RE_CompCamera * RE_CameraManager::EditorCamera() { return editor_camera; }
+RE_CompCamera* RE_CameraManager::MainCamera() { return main_camera; }
+bool RE_CameraManager::HasMainCamera() { return main_camera != nullptr; }
 
 void RE_CameraManager::OnWindowChangeSize(float width, float height)
 {
 	// Adapt cameras to knew window dimensions
-	//editor_camera->SetBounds(width, height);
+	// editor_camera->SetBounds(width, height);
 	for (auto cam : scene_cameras)
 		cam->SetBounds(width, height);
 }
 
 void RE_CameraManager::AddMainCamera(RE_CompCamera* cam)
 {
-	if (scene_cameras.empty())
-		main_camera = cam;
-
+	if (scene_cameras.empty()) main_camera = cam;
 	scene_cameras.push_back(cam);
 }
 
-eastl::list<RE_CompCamera*> RE_CameraManager::GetCameras() const
-{
-	return scene_cameras;
-}
+eastl::list<RE_CompCamera*> RE_CameraManager::GetCameras() const { return scene_cameras; }
 
 void RE_CameraManager::RecallCameras(const RE_GameObject * root)
 {
@@ -97,10 +78,10 @@ void RE_CameraManager::RecallCameras(const RE_GameObject * root)
 		for (eastl::list<RE_CompCamera*>::iterator cam = scene_cameras.begin();
 			cam != scene_cameras.end(); cam++)
 		{
-			if (main_camera == nullptr)
-				main_camera = (*cam);
+			if (!main_camera) main_camera = (*cam);
 
-			/*if ((*cam)->isMain)
+			/* TODO:
+			if ((*cam)->isMain)
 			else: more than 1 main cameras*/
 		}
 	}

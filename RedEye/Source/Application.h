@@ -81,7 +81,7 @@ public:
 	static RE_FileSystem* fs;
 	static RE_Math math;
 	static RE_HandleErrors handlerrors;
-	static RE_InternalResources internalResources;
+	static RE_InternalResources internalResources; // TODO Rub: send to Resources
 #ifdef _DEBUG
 	static SystemInfo* sys_info;
 #endif // _DEBUG

@@ -38,6 +38,7 @@
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
 
+RE_FBOManager ModuleRenderer3D::fbomanager;
 LightMode ModuleRenderer3D::current_lighting = LIGHT_GL;
 unsigned int ModuleRenderer3D::current_fbo = 0;
 
@@ -65,12 +66,12 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1) < 0)
 		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MINOR_VERSION: 1'");
 	
-	if (App->window)
+	if (App::window)
 	{
 		RE_LOG_SECONDARY("Creating SDL GL Context");
-		mainContext = SDL_GL_CreateContext(App->window->GetWindow());
+		mainContext = SDL_GL_CreateContext(App::window->GetWindow());
 		if (ret = (mainContext != nullptr))
-			App->ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
+			App::ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
 		else
 			RE_LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
 	}
@@ -100,7 +101,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 
 			Load(node);
-			App->ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
+			App::ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
 		}
 		else
 		{
@@ -133,7 +134,7 @@ update_status ModuleRenderer3D::PreUpdate()
 	//If some thumnail needs uodates
 	while (!thumbnailsToRender.empty())
 	{
-		App->thumbnail->Change(thumbnailsToRender.top());
+		App::thumbnail->Change(thumbnailsToRender.top());
 		thumbnailsToRender.pop();
 	}
 
@@ -147,7 +148,7 @@ update_status ModuleRenderer3D::PostUpdate()
 	update_status ret = UPDATE_CONTINUE;
 
 	// Setup Draws
-	activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+	activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 
 	render_views[0].camera = RE_CameraManager::EditorCamera();
 	render_views[1].camera = RE_CameraManager::MainCamera();
@@ -157,14 +158,14 @@ update_status ModuleRenderer3D::PostUpdate()
 		DrawScene(view);
 
 	// Set Render to Window
-	RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
+	RE_FBOManager::ChangeFBOBind(0, App::window->GetWidth(), App::window->GetHeight());
 
 	// Draw Editor
 	SetWireframe(false);
-	App->editor->Draw();
+	App::editor->Draw();
 
 	//Swap buffers
-	SDL_GL_SwapWindow(App->window->GetWindow());
+	SDL_GL_SwapWindow(App::window->GetWindow());
 
 	return ret;
 }
@@ -226,7 +227,7 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 	case GAMEWINDOWCHANGED:
 	{
 		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
-		App->cams->OnWindowChangeSize(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
+		App::cams.OnWindowChangeSize(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
 		ChangeFBOSize(window_size[0], window_size[1]);
 		break;
 	}
@@ -298,7 +299,6 @@ bool ModuleRenderer3D::Save(JSONNode * node) const
 	if (ret)
 	{
 		node->PushBool("vsync", vsync);
-
 		for (unsigned int i = 0; i < render_views.size(); ++i)
 		{
 			node->PushString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
@@ -392,7 +392,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
-		static_cast<RE_Shader*>(App->resources->At(sMD5))->UploadMainUniforms(
+		static_cast<RE_Shader*>(App::resources->At(sMD5))->UploadMainUniforms(
 			render_view.camera,
 			static_cast<float>(RE_FBOManager::GetHeight(current_fbo)),
 			static_cast<float>(RE_FBOManager::GetWidth(current_fbo)),
@@ -404,8 +404,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	if (render_view.flags & FRUSTUM_CULLING)
 	{
 		eastl::vector<const RE_GameObject*> objects;
-		App->scene->FustrumCulling(objects, render_view.flags & OVERRIDE_CULLING ?
-			App->cams->GetCullingFrustum() : render_view.camera->GetFrustum());
+		App::scene->FustrumCulling(objects, render_view.flags & OVERRIDE_CULLING ?
+			App::cams.GetCullingFrustum() : render_view.camera->GetFrustum());
 
 		for (const RE_GameObject* object : objects)
 		{
@@ -421,7 +421,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		}
 	}
 	else
-		comptsToDraw = App->scene->GetRoot()->GetDrawableComponentsWithChilds();
+		comptsToDraw = App::scene->GetRoot()->GetDrawableComponentsWithChilds();
 
 	// Setup Lights
 	eastl::stack<RE_CompLight*> scene_lights;
@@ -435,7 +435,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case LIGHT_GL:
 	{
 		SetLighting(true);
-		scene_lights = App->scene->GetScenePool()->GetAllLights(true);
+		scene_lights = App::scene->GetScenePool()->GetAllLights(true);
 
 		// TODO RUB: Bind GL Lights
 
@@ -444,7 +444,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case LIGHT_DIRECT:
 	{
 		SetLighting(false);
-		scene_lights = App->scene->GetScenePool()->GetAllLights(true);
+		scene_lights = App::scene->GetScenePool()->GetAllLights(true);
 
 		// TODO RUB: Upload Light uniforms
 
@@ -453,7 +453,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case LIGHT_DEFERRED:
 	{
 		SetLighting(false);
-		scene_lights = App->scene->GetScenePool()->GetAllLights(true);
+		scene_lights = App::scene->GetScenePool()->GetAllLights(true);
 		break;
 	}
 	}
@@ -479,7 +479,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	if (render_view.light == LIGHT_DEFERRED)
 	{
 		// Setup Shader
-		unsigned int light_pass = ((RE_Shader*)App->resources->At(App->internalResources->GetLightPassShader()))->GetID();
+		unsigned int light_pass = ((RE_Shader*)App::resources->At(App::internalResources.GetLightPassShader()))->GetID();
 		RE_GLCacheManager::ChangeShader(light_pass);
 
 		SetDepthTest(false);
@@ -527,7 +527,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		SetLighting(false);
 		SetTexture2D(false);
 
-		App->editor->DrawDebug(render_view.camera);
+		App::editor->DrawDebug(render_view.camera);
 
 		if (reset_light) SetLighting(true);
 		SetTexture2D(render_view.flags & TEXTURE_2D);
@@ -540,7 +540,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 		RE_GLCacheManager::ChangeTextureBind(0);
 
-		uint skysphereshader = static_cast<RE_Shader*>(App->resources->At(App->internalResources->GetDefaultSkyBoxShader()))->GetID();
+		uint skysphereshader = static_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultSkyBoxShader()))->GetID();
 		RE_GLCacheManager::ChangeShader(skysphereshader);
 		RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
 
@@ -567,7 +567,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	// Draw Stencil
 	if (render_view.flags & OUTLINE_SELECTION)
 	{
-		RE_GameObject* stencilGO = App->editor->GetSelected();
+		RE_GameObject* stencilGO = App::editor->GetSelected();
 		if (stencilGO != nullptr)
 		{
 			eastl::stack<RE_Component*> stackComponents = stencilGO->GetDrawableComponentsItselfOnly();
@@ -600,8 +600,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 				while (!vaoToStencil.empty())
 				{
 					//Getting the scale shader and setting some values
-					const char* scaleShader = App->internalResources->GetDefaultScaleShader();
-					RE_Shader* sShader = (RE_Shader*)App->resources->At(scaleShader);
+					const char* scaleShader = App::internalResources.GetDefaultScaleShader();
+					RE_Shader* sShader = (RE_Shader*)App::resources->At(scaleShader);
 					unsigned int shaderiD = sShader->GetID();
 					RE_GLCacheManager::ChangeShader(shaderiD);
 					RE_GLCacheManager::ChangeVAO(vaoToStencil.top());

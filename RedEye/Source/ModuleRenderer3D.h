@@ -102,8 +102,6 @@ public:
 	// Thumbnail
 	void ReRenderThumbnail(const char* res);
 
-	static RE_FBOManager fbomanager;
-
 private:
 
 	void DrawScene(const RenderView& render_view);
@@ -120,6 +118,10 @@ private:
 	// Direct Draws
 	void DrawQuad();
 	void DirectDrawCube(math::vec position, math::vec color);
+
+public:
+
+	static RE_FBOManager fbomanager;
 
 private:
 

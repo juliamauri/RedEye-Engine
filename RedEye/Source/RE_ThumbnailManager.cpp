@@ -13,7 +13,6 @@
 #include "Event.h"
 #include "RE_TimeManager.h"
 #include "RE_GOManager.h"
-
 #include "RE_Shader.h"
 #include "RE_Texture.h"
 #include "RE_Model.h"
@@ -28,13 +27,10 @@
 #include "IL/include/il.h"
 #include "IL/include/ilu.h"
 #include "par_shapes.h"
-
 #include <EASTL/string.h>
 
 #define THUMBNAILPATH "Library/Thumbnails/"
-
 #define DEFTHUMBNAILS "Settings/Icons/"
-
 #define THUMBNAILSIZE 256
 #define THUMBNAILDATASIZE THUMBNAILSIZE * THUMBNAILSIZE * 4
 
@@ -63,7 +59,7 @@ void RE_ThumbnailManager::Init()
 	selectfile = LoadDefIcon("selectfile.dds");
 	shaderFile = LoadDefIcon("shaderFile.dds");
 
-	singleRenderFBO = App->fbomanager->CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE);
+	singleRenderFBO = RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE);
 	Event::PauseEvents();
 	internalCamera = new RE_CompCamera();
 	internalCamera->SetUp(nullptr);
@@ -102,7 +98,8 @@ void RE_ThumbnailManager::Init()
 	stride *= sizeof(float);
 	float* meshBuffer = new float[meshSize];
 	float* cursor = meshBuffer;
-	for (int i = 0; i < sphere->npoints; i++) {
+	for (int i = 0; i < sphere->npoints; i++)
+	{
 		uint cursorSize = 3;
 		size_t size = sizeof(float) * 3;
 
@@ -129,10 +126,10 @@ void RE_ThumbnailManager::Init()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 3u));
 
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 6u));
 
 	glGenBuffers(1, &EBOSphere);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOSphere);
@@ -149,52 +146,37 @@ void RE_ThumbnailManager::Init()
 
 void RE_ThumbnailManager::Add(const char* ref)
 {
-	ResourceContainer* res = App->resources->At(ref);
-
-	switch (res->GetType())
+	ResourceContainer* res = App::resources->At(ref);
+	if (res)
 	{
-	case Resource_Type::R_MATERIAL:
-		thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailMaterial(ref)));
-		break;
-	case Resource_Type::R_SKYBOX:
-		thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailSkyBox(ref)));
-		break;
-	case Resource_Type::R_TEXTURE:
-		thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailTexture(ref)));
-		break;
-	case Resource_Type::R_MODEL:
-	case Resource_Type::R_PREFAB:
-	case Resource_Type::R_SCENE:
-		thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailGameObject(ref)));
-		break;
+		switch (res->GetType()) {
+		case Resource_Type::R_MATERIAL: thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailMaterial(ref))); break;
+		case Resource_Type::R_SKYBOX: thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailSkyBox(ref))); break;
+		case Resource_Type::R_TEXTURE: thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailTexture(ref))); break;
+		case Resource_Type::R_MODEL:
+		case Resource_Type::R_PREFAB:
+		case Resource_Type::R_SCENE: thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailGameObject(ref))); break; }
 	}
 }
 
 void RE_ThumbnailManager::Change(const char* ref)
 {
-	if (thumbnails.find(ref) == thumbnails.end())
-		Add(ref);
-	else
-	{
-		thumbnails.find(ref).mpNode->mValue.second = ThumbnailGameObject(ref);
-	}
+	if (thumbnails.find(ref) == thumbnails.end()) Add(ref);
+	else thumbnails.find(ref).mpNode->mValue.second = ThumbnailGameObject(ref);
 }
 
 void RE_ThumbnailManager::Delete(const char* ref)
 {
 	thumbnails.erase(ref);
 	eastl::string path(THUMBNAILPATH);
-	path += ref;
-	if (App->fs->Exists(path.c_str())) {
-		RE_FileIO fileToDelete(path.c_str(), App->fs->GetZipPath());
+	if (App::fs->Exists((path += ref).c_str()))
+	{
+		RE_FileIO fileToDelete(path.c_str(), App::fs->GetZipPath());
 		fileToDelete.Delete();
 	}
 }
 
-unsigned int RE_ThumbnailManager::At(const char* ref)
-{
-	return thumbnails.at(ref);
-}
+unsigned int RE_ThumbnailManager::At(const char* ref) { return thumbnails.at(ref); }
 
 unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
 {
@@ -202,10 +184,11 @@ unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
 	eastl::string path(DEFTHUMBNAILS);
 	path += filename;
 	RE_FileIO filderIcon(path.c_str());
-	if (filderIcon.Load()) {
+	if (filderIcon.Load())
+	{
 		RE_TextureSettings defTexSettings;
 		int tmp1, tmp2;
-		App->textures->LoadTextureInMemory(filderIcon.GetBuffer(), filderIcon.GetSize(), TextureType::RE_DDS, &ret, &tmp1, &tmp2, defTexSettings);
+		App::textures.LoadTextureInMemory(filderIcon.GetBuffer(), filderIcon.GetSize(), TextureType::RE_DDS, &ret, &tmp1, &tmp2, defTexSettings);
 	}
 	return ret;
 }
@@ -213,13 +196,11 @@ unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
 unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 {
 	uint ret = 0;
-
 	eastl::string path(THUMBNAILPATH);
-	path += ref;
-
-	if (!App->fs->Exists(path.c_str())) {
-		ResourceContainer* res = App->resources->At(ref);
-		RE_Texture* tex = (RE_Texture*)res;
+	if (!App::fs->Exists((path += ref).c_str()))
+	{
+		ResourceContainer* res = App::resources->At(ref);
+		RE_Texture* tex = dynamic_cast<RE_Texture*>(res);
 		RE_FileIO texFile(res->GetAssetPath());
 		if (texFile.Load())
 		{
@@ -227,16 +208,14 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 			ilGenImages(1, &imageID);
 			ilBindImage(imageID);
 
-			if (IL_FALSE != ilLoadL(tex->DetectExtension(), texFile.GetBuffer(), texFile.GetSize())) {
+			if (IL_FALSE != ilLoadL(tex->DetectExtension(), texFile.GetBuffer(), texFile.GetSize()))
+			{
 				iluScale(THUMBNAILSIZE, THUMBNAILSIZE, 1);
-
-				RE_FileIO saveThumb(path.c_str(), App->fs->GetZipPath());
-
+				RE_FileIO saveThumb(path.c_str(), App::fs->GetZipPath());
 				ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
 				ILubyte* data = new ILubyte[size];
-
 				ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
-				saveThumb.Save((char*)data, size);
+				saveThumb.Save(reinterpret_cast<char*>(data), size);
 				DEL_A(data);	
 			}
 
@@ -254,31 +233,21 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 {
 	uint ret = 0;
-
 	eastl::string path(THUMBNAILPATH);
-	path += ref;
-
-	if (!App->fs->Exists(path.c_str())) {
+	if (!App::fs->Exists((path += ref).c_str()))
+	{
 		Event::PauseEvents();
 
 		RE_GOManager* poolGOThumbnail = nullptr;
+		ResourceContainer* res = App::resources->At(ref);
+		App::resources->Use(res->GetMD5());
+		switch (res->GetType()) {
+		case Resource_Type::R_MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
+		case Resource_Type::R_PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
+		case Resource_Type::R_SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break; }
 
-		ResourceContainer* res = App->resources->At(ref);
-		App->resources->Use(res->GetMD5());
-		switch (res->GetType())
+		if (poolGOThumbnail)
 		{
-		case Resource_Type::R_MODEL:
-			poolGOThumbnail = ((RE_Model*)res)->GetPool();
-			break;
-		case Resource_Type::R_PREFAB:
-			poolGOThumbnail = ((RE_Prefab*)res)->GetPool();
-			break;
-		case Resource_Type::R_SCENE:
-			poolGOThumbnail = ((RE_Scene*)res)->GetPool();
-			break;
-		}
-
-		if (poolGOThumbnail) {
 			poolGOThumbnail->UseResources();
 			poolGOThumbnail->GetGO(0)->TransformModified(false);
 			poolGOThumbnail->GetGO(0)->Update();
@@ -292,40 +261,30 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 			internalCamera->Focus(poolGOThumbnail->GetGO(0));
 			internalCamera->Update();
 
-			eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-			for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+			eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+			for (auto sMD5 : activeShaders) (dynamic_cast<RE_Shader*>(App::resources->At(sMD5)))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 
 			RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 			poolGOThumbnail->GetGO(0)->DrawWithChilds();
-
 			poolGOThumbnail->UnUseResources();
-
 			SaveTextureFromFBO(path.c_str());
-
-			RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
+			RE_FBOManager::ChangeFBOBind(0, App::window->GetWidth(), App::window->GetHeight());
 		}
-		App->resources->UnUse(res->GetMD5());
+		App::resources->UnUse(res->GetMD5());
 		Event::ResumeEvents();
 	}
 
 	ret = LoadLibraryThumbnail(ref);
-
 	return ret;
 }
 
 unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
 {
-	uint ret = 0;
-
 	eastl::string path(THUMBNAILPATH);
-	path += ref;
-
-	if (!App->fs->Exists(path.c_str())) {
-		RE_Material* mat = (RE_Material * )App->resources->At(ref);
-		
+	if (!App::fs->Exists((path += ref).c_str()))
+	{
 		Event::PauseEvents();
 		internalCamera->SetFOV(math::RadToDeg( 0.523599f));
 		internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
@@ -335,43 +294,36 @@ unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
 		internalCamera->Update();
 		Event::ResumeEvents();
 
-		eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+		eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+		for (auto sMD5 : activeShaders)
+			dynamic_cast<RE_Shader*>(App::resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 
-		App->resources->Use(ref);
+		App::resources->Use(ref);
+		RE_Material* mat = dynamic_cast<RE_Material*>(App::resources->At(ref));
 		mat->UseResources();
 
 		RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		mat->UploadToShader((float*)math::float4x4::identity.ptr(), false, true);
+		mat->UploadToShader(math::float4x4::identity.ptr(), false, true);
 		RE_GLCacheManager::ChangeVAO(VAOSphere);
 		glDrawElements(GL_TRIANGLES, sphere_triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 
 		mat->UnUseResources();
-		App->resources->UnUse(ref);
-
+		App::resources->UnUse(ref);
 		SaveTextureFromFBO(path.c_str());
-
-		RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
+		RE_FBOManager::ChangeFBOBind(0, App::window->GetWidth(), App::window->GetHeight());
 	}
 
-	ret = LoadLibraryThumbnail(ref);
-
-	return ret;
+	return LoadLibraryThumbnail(ref);
 }
 
 unsigned int RE_ThumbnailManager::ThumbnailSkyBox(const char* ref)
 {
-	uint ret = 0;
-
 	eastl::string path(THUMBNAILPATH);
-	path += ref;
-
-	if (!App->fs->Exists(path.c_str())) {
-		RE_SkyBox* skybox = (RE_SkyBox*)App->resources->At(ref);
-
+	if (!App::fs->Exists((path += ref).c_str()))
+	{
 		Event::PauseEvents();
 		internalCamera->ForceFOV(125, 140);
 		internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
@@ -379,33 +331,29 @@ unsigned int RE_ThumbnailManager::ThumbnailSkyBox(const char* ref)
 		internalCamera->Update();
 		Event::ResumeEvents();
 
-		eastl::vector<const char*> activeShaders = App->resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-		for (auto sMD5 : activeShaders) ((RE_Shader*)App->resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+		eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+		for (auto sMD5 : activeShaders)
+			dynamic_cast<RE_Shader*>(App::resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 
 		RE_GLCacheManager::ChangeTextureBind(0);
-
-		App->resources->Use(ref);
+		App::resources->Use(ref);
 
 		RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		RE_Shader* skyboxShader = (RE_Shader*)App->resources->At(App->internalResources->GetDefaultSkyBoxShader());
+		RE_Shader* skyboxShader = (RE_Shader*)App::resources->At(App::internalResources.GetDefaultSkyBoxShader());
 		uint skysphereshader = skyboxShader->GetID();
 		RE_GLCacheManager::ChangeShader(skysphereshader);
 		RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
-		skybox->DrawSkybox();
+		dynamic_cast<RE_SkyBox*>(App::resources->At(ref))->DrawSkybox();
 		
-		App->resources->UnUse(ref);
-
+		App::resources->UnUse(ref);
 		SaveTextureFromFBO(path.c_str());
-
-		RE_FBOManager::ChangeFBOBind(0, App->window->GetWidth(), App->window->GetHeight());
+		RE_FBOManager::ChangeFBOBind(0, App::window->GetWidth(), App::window->GetHeight());
 	}
 
-	ret = LoadLibraryThumbnail(ref);
-
-	return ret;
+	return LoadLibraryThumbnail(ref);
 }
 
 void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)
@@ -413,23 +361,20 @@ void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboRender);
 	glReadPixels(0, 0, THUMBNAILSIZE, THUMBNAILSIZE, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	GLubyte* ptr = (GLubyte*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+	GLubyte* ptr = static_cast<GLubyte*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
 	if (ptr)
 	{
 		uint imageID = 0;
 		ilGenImages(1, &imageID);
 		ilBindImage(imageID);
-
-		if (IL_FALSE == ilTexImage(THUMBNAILSIZE, THUMBNAILSIZE, 1, 4, IL_RGBA, GL_UNSIGNED_BYTE, ptr)) {
-			int i = 0;
-		}
+		ilTexImage(THUMBNAILSIZE, THUMBNAILSIZE, 1, 4, IL_RGBA, GL_UNSIGNED_BYTE, ptr);
 
 		ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
 		ILubyte* data = new ILubyte[size];
 
 		ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
-		RE_FileIO saveThumb(path, App->fs->GetZipPath());
-		saveThumb.Save((char*)data, size);
+		RE_FileIO saveThumb(path, App::fs->GetZipPath());
+		saveThumb.Save(reinterpret_cast<char*>(data), size);
 		DEL_A(data);
 
 		ilBindImage(0);
@@ -444,18 +389,17 @@ void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)
 unsigned int RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 {
 	uint ret = 0;
-
 	eastl::string path(THUMBNAILPATH);
-	path += ref;
-
-	RE_FileIO thumbFile(path.c_str());
-	if (thumbFile.Load()) {
+	RE_FileIO thumbFile((path += ref).c_str());
+	if (thumbFile.Load())
+	{
 		RE_TextureSettings defSettings;
 		uint imageID = 0;
 		ilGenImages(1, &imageID);
 		ilBindImage(imageID);
 
-		if (IL_FALSE != ilLoadL(TextureType::RE_DDS, thumbFile.GetBuffer(), thumbFile.GetSize())) {
+		if (IL_FALSE != ilLoadL(TextureType::RE_DDS, thumbFile.GetBuffer(), thumbFile.GetSize()))
+		{
 			/* OpenGL texture binding of the image loaded by DevIL  */
 			glGenTextures(1, &ret); /* Texture name generation */
 			RE_GLCacheManager::ChangeTextureBind(ret); /* Binding of texture name */

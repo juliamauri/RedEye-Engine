@@ -46,23 +46,16 @@ ModuleScene::~ModuleScene() {}
 
 bool ModuleScene::Start()
 {
-	bool ret = true;
-
-	eastl::vector<ResourceContainer*> scenes = App->resources->GetResourcesByType(Resource_Type::R_SCENE);
-	if (!scenes.empty())
-		LoadScene(scenes[0]->GetMD5());
-	else
-		NewEmptyScene();
-
-	return ret;
+	eastl::vector<ResourceContainer*> scenes = App::resources->GetResourcesByType(Resource_Type::R_SCENE);
+	if (!scenes.empty()) LoadScene(scenes[0]->GetMD5());
+	else NewEmptyScene();
+	return true;
 }
 
 update_status ModuleScene::Update()
 {
 	OPTICK_CATEGORY("Update Scene", Optick::Category::GameLogic);
-
 	root->Update();
-
 	return UPDATE_CONTINUE;
 }
 
@@ -89,12 +82,10 @@ void ModuleScene::OnPause()
 void ModuleScene::OnStop()
 {
 	root->OnStop();
-
 	Event::PauseEvents();
-
 	scenePool.ClearPool();
 	root = scenePool.InsertPool(&savedState);
-	App->editor->SetSelected(nullptr);
+	App::editor->SetSelected(nullptr);
 	savedState.ClearPool();
 	SetupScene();
 	Event::ResumeEvents();
@@ -181,19 +172,13 @@ void ModuleScene::RecieveEvent(const Event& e)
 		case GO_HAS_NEW_CHILD:
 		{
 			RE_GameObject* to_add = e.data2.AsGO();
-
 			if (belongs_to_scene && go->IsActive() && to_add->IsActive())
 			{
 				eastl::vector<RE_GameObject*> all = to_add->GetActiveChildsWithDrawComponents();
-
 				for (auto draw_go : all)
 				{
 					draw_go->ResetGlobalBoundingBox();
-
-					if (draw_go->IsStatic())
-						static_tree.PushNode(draw_go->GetPoolID(), draw_go->GetGlobalBoundingBox());
-					else
-						dynamic_tree.PushNode(draw_go->GetPoolID(), draw_go->GetGlobalBoundingBox());
+					(draw_go->IsStatic() ? static_tree : dynamic_tree).PushNode(draw_go->GetPoolID(), draw_go->GetGlobalBoundingBox());
 				}
 			}
 
@@ -206,14 +191,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 			if (belongs_to_scene && to_remove->IsActive())
 			{
 				eastl::vector<RE_GameObject*> all = to_remove->GetActiveChildsWithDrawComponents();
-
-				for (auto draw_go : all)
-				{
-					if (draw_go->IsStatic())
-						static_tree.PopNode(draw_go->GetPoolID());
-					else
-						dynamic_tree.PopNode(draw_go->GetPoolID());
-				}
+				for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetPoolID());
 			}
 
 			// TODO: Delete to_remove & childs from GO Pool
@@ -260,15 +238,8 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 }
 
-RE_GameObject * ModuleScene::GetRoot() const
-{
-	return root;
-}
-
-const RE_GameObject * ModuleScene::GetRoot_c() const
-{
-	return root;
-}
+RE_GameObject * ModuleScene::GetRoot() const { return root; }
+const RE_GameObject * ModuleScene::GetRoot_c() const { return root; }
 
 void ModuleScene::CreateCube(RE_GameObject* parent)
 {
@@ -432,7 +403,7 @@ void ModuleScene::CreateMaxLights(RE_GameObject* parent)
 		for (int y = 0; y < 8; ++y)
 		{
 			RE_GameObject* light_go = scenePool.AddGO((name + eastl::to_string(x) + "x" + eastl::to_string(y)).c_str(), container_go);
-			light_go->GetTransform()->SetPosition(math::vec((x * 12.5f) - 50.f, 0.f, (y * 12.5f) - 50.f));
+			light_go->GetTransform()->SetPosition(math::vec((static_cast<float>(x) * 12.5f) - 50.f, 0.f, (static_cast<float>(y) * 12.5f) - 50.f));
 
 			static math::vec colors[5] = { math::vec(1.f,0.f,0.f), math::vec(0.f,1.f,0.f), math::vec(0.f,0.f,1.f), math::vec(1.f,1.f,0.f), math::vec(0.f,1.f,1.f) };
 			static_cast<RE_CompPrimitive*>(light_go->AddComponent(C_SPHERE))->SetColor(
@@ -451,10 +422,8 @@ void ModuleScene::DrawEditor()
 		int total_count = scenePool.TotalGameObjects();
 		int static_count = static_tree.GetCount();
 		int dynamic_count = dynamic_tree.GetCount();
-
 		static_count = static_count <= 1 ? static_count : (static_count - 1) / 2;
 		dynamic_count = dynamic_count <= 1 ? dynamic_count : (dynamic_count - 1) / 2;
-
 		ImGui::Text("Total Scene GOs: %i", total_count);
 		ImGui::Text("Total Active: %i", static_count + dynamic_count);
 		ImGui::Text(" - Static: %i", static_count);
@@ -529,7 +498,7 @@ void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container,
 
 void ModuleScene::SaveScene(const char* newName)
 {
-	RE_Scene* scene = (unsavedScene) ? unsavedScene : (RE_Scene*)App->resources->At(currentScene);
+	RE_Scene* scene = (unsavedScene) ? unsavedScene : dynamic_cast<RE_Scene*>(App::resources->At(currentScene));
 
 	Event::PauseEvents();
 
@@ -537,22 +506,20 @@ void ModuleScene::SaveScene(const char* newName)
 	scene->Save(&scenePool);
 	scene->SaveMeta();
 
-	if (unsavedScene) {
-		currentScene = App->resources->Reference(scene);
-		App->thumbnail->Add(currentScene);
+	if (unsavedScene)
+	{
+		currentScene = App::resources->Reference(scene);
+		App::thumbnail->Add(currentScene);
 		unsavedScene = nullptr;
 	}
 	else
-		App->thumbnail->Change(scene->GetMD5());
+		App::thumbnail->Change(scene->GetMD5());
 
 	haschanges = false;
 	Event::ResumeEvents();
 }
 
-const char* ModuleScene::GetCurrentScene() const
-{
-	return currentScene;
-}
+const char* ModuleScene::GetCurrentScene() const { return currentScene; }
 
 void ModuleScene::ClearScene()
 {
@@ -567,11 +534,11 @@ void ModuleScene::ClearScene()
 
 	root = scenePool.AddGO("root", nullptr);
 	root->SetStatic(false);
-	App->editor->SetSelected(root);
+	App::editor->SetSelected(root);
 
 	RE_GameObject* cam_go = scenePool.AddGO("Camera", root);
 	cam_go->AddCompCamera();
-	App->cams->RecallCameras(root);
+	App::cams.RecallCameras(root);
 
 	Event::ResumeEvents();
 }
@@ -579,16 +546,10 @@ void ModuleScene::ClearScene()
 void ModuleScene::NewEmptyScene(const char* name)
 {
 	Event::PauseEvents();
+	App::editor->ClearCommands();
 
-	App->editor->ClearCommands();
-
-	if (unsavedScene)  //TODO Needs popUp for alert to save or not.
-	{
-		DEL(unsavedScene);
-	}
-	else if (currentScene) { //TODO popup save
-		currentScene = nullptr;
-	}
+	if (unsavedScene) { DEL(unsavedScene); }
+	else currentScene = nullptr; /* TODO popup save */
 
 	unsavedScene = new RE_Scene();
 	unsavedScene->SetName(name);
@@ -602,8 +563,7 @@ void ModuleScene::NewEmptyScene(const char* name)
 	root->SetStatic(false);
 
 	SetupScene();
-	App->editor->SetSelected(nullptr);
-
+	App::editor->SetSelected(nullptr);
 	Event::ResumeEvents();
 
 	haschanges = false;
@@ -612,47 +572,30 @@ void ModuleScene::NewEmptyScene(const char* name)
 void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 {
 	Event::PauseEvents();
-
-	App->editor->ClearCommands();
-
-	if (unsavedScene) {
-		DEL(unsavedScene);
-	}
-
+	App::editor->ClearCommands();
+	if (unsavedScene) DEL(unsavedScene);
 	if (root) scenePool.UnUseResources();
 	savedState.ClearPool();
 	scenePool.ClearPool();
 
 	RE_LOG("Loading scene from own format:");
-	if(!ignorehandle) App->handlerrors->StartHandling();
-
+	if(!ignorehandle) App::handlerrors.StartHandling();
 	Timer timer;
-
 	currentScene = sceneMD5;
-	RE_Scene* scene = (RE_Scene*)App->resources->At(currentScene);
-	App->resources->Use(sceneMD5);
+	RE_Scene* scene = (RE_Scene*)App::resources->At(currentScene);
+	App::resources->Use(sceneMD5);
 	RE_GOManager* loadedDO = scene->GetPool();
 
-	if (loadedDO)
-		root = scenePool.InsertPool(loadedDO);
-	else
-		RE_LOG_ERROR("Can't Load Scene");
-	App->resources->UnUse(sceneMD5);
+	if (loadedDO) root = scenePool.InsertPool(loadedDO);
+	else RE_LOG_ERROR("Can't Load Scene");
 
+	App::resources->UnUse(sceneMD5);
 	scenePool.UseResources();
 	SetupScene();
-	App->editor->SetSelected(nullptr);
+	App::editor->SetSelected(nullptr);
 
 	RE_LOG("Time loading scene: %u ms", timer.Read());
-
-	if (!ignorehandle) {
-		// Error Handling
-		App->handlerrors->StopHandling();
-		if (App->handlerrors->AnyErrorHandled()) {
-			App->handlerrors->ActivatePopUp();
-		}
-	}
-
+	if (!ignorehandle) App::handlerrors.StopAndPresent();
 	Event::ResumeEvents();
 }
 
@@ -661,8 +604,9 @@ void ModuleScene::SetupScene()
 	Event::PauseEvents();
 
 	// Render Camera Management
-	App->cams->RecallCameras(root);
-	if (!RE_CameraManager::HasMainCamera()) {
+	App::cams.RecallCameras(root);
+	if (!RE_CameraManager::HasMainCamera())
+	{
 		Event::ResumeEvents();
 		CreateCamera();
 		Event::PauseEvents();
@@ -683,32 +627,18 @@ void ModuleScene::SetupScene()
 void ModuleScene::AddGOPool(RE_GOManager* toAdd)
 {
 	//TODO don't use SetupScene, only setup toAdd
-	//App->goManager->sceneGOs.PushWithChilds(toAdd);
+	//App::goManager->sceneGOs.PushWithChilds(toAdd);
 
 	RE_GameObject* justAdded = scenePool.InsertPool(toAdd);
-
 	scenePool.UseResources();
-
 	SetupScene();
-	App->editor->SetSelected(justAdded);
-
+	App::editor->SetSelected(justAdded);
 	haschanges = true;
 }
 
-bool ModuleScene::HasChanges() const
-{
-	return haschanges;
-}
-
-bool ModuleScene::isNewScene() const
-{
-	return (unsavedScene);
-}
-
-RE_GOManager* ModuleScene::GetScenePool()
-{
-	return &scenePool;
-}
+bool ModuleScene::HasChanges() const { return haschanges; }
+bool ModuleScene::isNewScene() const { return (unsavedScene); }
+RE_GOManager* ModuleScene::GetScenePool() { return &scenePool; }
 
 void ModuleScene::GetActive(eastl::list<RE_GameObject*>& objects) const
 {
@@ -782,13 +712,7 @@ void ModuleScene::ResetTrees()
 	for (unsigned int i = 0; i < goIndex.size(); i++)
 	{
 		RE_GameObject* go = scenePool.GetGO(goIndex[i]);
-
 		if (go->IsActive() && go->HasDrawComponents())
-		{
-			if (go->IsStatic())
-				static_tree.PushNode(goIndex[i], go->GetGlobalBoundingBox());
-			else
-				dynamic_tree.PushNode(goIndex[i], go->GetGlobalBoundingBox());
-		}
+			(go->IsStatic() ? static_tree : dynamic_tree).PushNode(goIndex[i], go->GetGlobalBoundingBox());
 	}
 }

@@ -104,6 +104,8 @@ Application::~Application()
 
 	DEL(log);
 	DEL(fs);
+
+	instance = nullptr;
 }
 
 bool Application::Init(int argc, char* argv[])

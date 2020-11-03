@@ -4,7 +4,6 @@
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
 #include "Resource.h"
-
 #include "RE_GOManager.h"
 
 #include <EASTL/internal/char_traits.h>
@@ -20,12 +19,10 @@ void RE_ResouceAndGOImporter::JsonSerialize(JSONNode* node, RE_GOManager* pool)
 	//Resources Serialize
 	JSONNode* resources = node->PushJObject("resources");
 	resources->PushUInt("resSize", resGo.size());
-	eastl::string ref;
-	for (int r = 0; r < static_cast<int>(resGo.size()); r++) {
-		ref = "r";
-		ref += eastl::to_string(r);
-		JSONNode* resN = resources->PushJObject(ref.c_str());
-		ResourceContainer* res = App->resources->At(resGo.at(static_cast<unsigned int>(r)));
+	for (int r = 0; r < static_cast<int>(resGo.size()); r++)
+	{
+		JSONNode* resN = resources->PushJObject(("r" + eastl::to_string(r)).c_str());
+		ResourceContainer* res = App::resources->At(resGo.at(static_cast<unsigned int>(r)));
 		Resource_Type rtype = res->GetType();
 
 		resN->PushInt("index", r);
@@ -47,13 +44,15 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GOManager* pool, unsigned int*
 	eastl::vector<ResourceContainer*>  resC;
 	eastl::map<const char*, int> resourcesIndex;
 	int count = 0;
-	for (const char* res : resGo) {
+	for (const char* res : resGo)
+	{
 		resourcesIndex.insert(eastl::pair<const char*, int>(res, count++));
-		resC.push_back(App->resources->At(res));
+		resC.push_back(App::resources->At(res));
 	}
 
 	*bufferSize = sizeof(uint) + ((sizeof(int) + sizeof(unsigned int) + sizeof(uint)) * resGo.size());
-	for (ResourceContainer* res : resC) *bufferSize += eastl::CharStrlen((res->GetType() == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
+	for (ResourceContainer* res : resC)
+		*bufferSize += eastl::CharStrlen((res->GetType() == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
 	*bufferSize += pool->GetBinarySize();
 	*bufferSize += 1;
 	char* buffer = new char[*bufferSize];
@@ -64,7 +63,8 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GOManager* pool, unsigned int*
 	memcpy(cursor, &resSize, size);
 	cursor += size;
 
-	for (int r = 0; r < static_cast<int>(resGo.size()); r++) {
+	for (int r = 0; r < static_cast<int>(resGo.size()); r++)
+	{
 		ResourceContainer* res = resC.at(static_cast<unsigned int>(r));
 		Resource_Type rtype = res->GetType();
 
@@ -101,30 +101,27 @@ RE_GOManager* RE_ResouceAndGOImporter::JsonDeserialize(JSONNode* node)
 {
 	//Get resources
 	JSONNode* resources = node->PullJObject("resources");
-
 	eastl::map< int, const char*> resourcesIndex;
 
 	uint resSize = resources->PullUInt("resSize", 0);
-	eastl::string ref;
-	for (uint r = 0; r < resSize; r++) {
-		ref = "r";
-		ref += eastl::to_string(r);
-		JSONNode* resN = resources->PullJObject(ref.c_str());
+	for (uint r = 0; r < resSize; r++)
+	{
+		JSONNode* resN = resources->PullJObject(("r" + eastl::to_string(r)).c_str());
 
 		int index = resN->PullInt("index", -1);
 		Resource_Type type = (Resource_Type)resN->PullInt("type", Resource_Type::R_UNDEFINED);
 		eastl::string mPath = resN->PullString("mPath", "");
 
 		const char* resMD5 = nullptr;
-		(type == Resource_Type::R_MESH) ?
-			resMD5 = App->resources->CheckOrFindMeshOnLibrary(mPath.c_str()) :
-			resMD5 = App->resources->FindMD5ByMETAPath(mPath.c_str(), type);
+		resMD5 = (type == Resource_Type::R_MESH) ?
+			App::resources->CheckOrFindMeshOnLibrary(mPath.c_str()) :
+			App::resources->FindMD5ByMETAPath(mPath.c_str(), type);
 
 		resourcesIndex.insert(eastl::pair< int, const char*>(r, resMD5));
 		DEL(resN);
 	}
-	DEL(resources);
 
+	DEL(resources);
 	RE_GOManager* ret = new RE_GOManager();
 	ret->DeserializeJson(node, &resourcesIndex);
 	return ret;
@@ -132,15 +129,15 @@ RE_GOManager* RE_ResouceAndGOImporter::JsonDeserialize(JSONNode* node)
 
 RE_GOManager* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 {
-	eastl::map< int, const char*> resourcesIndex;
 	//Get resources
+	eastl::map< int, const char*> resourcesIndex;
 	size_t size = sizeof(uint);
 	uint resSize = 0;
 	memcpy(&resSize, cursor, size);
 	cursor += size;
 
-	for (uint r = 0; r < resSize; r++) {
-
+	for (uint r = 0; r < resSize; r++)
+	{
 		size = sizeof(int);
 		int index = 0;
 		memcpy(&index, cursor, size);
@@ -168,12 +165,13 @@ RE_GOManager* RE_ResouceAndGOImporter::BinaryDeserialize(char*& cursor)
 
 		const char* resMD5 = nullptr;
 		(rType == Resource_Type::R_MESH) ?
-			resMD5 = App->resources->CheckOrFindMeshOnLibrary(str) :
-			resMD5= App->resources->FindMD5ByMETAPath(str, rType);
+			resMD5 = App::resources->CheckOrFindMeshOnLibrary(str) :
+			resMD5= App::resources->FindMD5ByMETAPath(str, rType);
 
 		resourcesIndex.insert(eastl::pair< int, const char*>(index, resMD5));
 		DEL_A(str);
 	}
+
 	RE_GOManager* ret = new RE_GOManager();
 	ret->DeserializeBinary(cursor, &resourcesIndex);
 	return ret;
@@ -185,7 +183,9 @@ bool RE_ResouceAndGOImporter::JsonCheckResources(JSONNode* node)
 	JSONNode* resources = node->PullJObject("resources");
 	uint resSize = resources->PullUInt("resSize", 0);
 	eastl::string ref;
-	for (uint r = 0; r < resSize && ret; r++) {
+
+	for (uint r = 0; r < resSize && ret; r++)
+	{
 		ref = "r";
 		ref += eastl::to_string(r);
 		JSONNode* resN = resources->PullJObject(ref.c_str());
@@ -195,18 +195,15 @@ bool RE_ResouceAndGOImporter::JsonCheckResources(JSONNode* node)
 		eastl::string mPath = resN->PullString("mPath", "");
 
 		const char* resMD5 = nullptr;
-		(type == Resource_Type::R_MESH) ?
-			resMD5 = App->resources->CheckOrFindMeshOnLibrary(mPath.c_str()) :
-			resMD5 = App->resources->FindMD5ByMETAPath(mPath.c_str(), type);
+		resMD5 = (type == Resource_Type::R_MESH) ?
+			App::resources->CheckOrFindMeshOnLibrary(mPath.c_str()) :
+			App::resources->FindMD5ByMETAPath(mPath.c_str(), type);
 
-		if (resMD5 == nullptr)
-			ret = false;
-
+		if (!resMD5) ret = false;
 		DEL(resN);
 	}
+
 	DEL(resources);
-
-
 	return ret;
 }
 
@@ -219,8 +216,8 @@ bool RE_ResouceAndGOImporter::BinaryCheckResources(char*& cursor)
 	memcpy(&resSize, cursor, size);
 	cursor += size;
 
-	for (uint r = 0; r < resSize && ret; r++) {
-
+	for (uint r = 0; r < resSize && ret; r++)
+	{
 		size = sizeof(int);
 		int index = 0;
 		memcpy(&index, cursor, size);
@@ -247,13 +244,11 @@ bool RE_ResouceAndGOImporter::BinaryCheckResources(char*& cursor)
 		memcpy(strCursor, &nullchar, sizeof(char));
 
 		const char* resMD5 = nullptr;
-		(rType == Resource_Type::R_MESH) ?
-			resMD5 = App->resources->CheckOrFindMeshOnLibrary(str) :
-			resMD5 = App->resources->FindMD5ByMETAPath(str, rType);
+		resMD5 = (rType == Resource_Type::R_MESH) ?
+			App::resources->CheckOrFindMeshOnLibrary(str) :
+			App::resources->FindMD5ByMETAPath(str, rType);
 
-		if (resMD5 == nullptr)
-			ret = false;
-
+		if (!resMD5) ret = false;
 		DEL_A(str);
 	}
 	return ret;

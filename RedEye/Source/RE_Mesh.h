@@ -60,12 +60,12 @@ private:
 
 	math::AABB bounding_box;
 
-	unsigned int VAO,VBO, EBO;
+	unsigned int VAO = 0u, VBO = 0u, EBO = 0u;
 
 	float* vertexNormals = nullptr;
 	float* faceNormals = nullptr;
 	float* faceCenters = nullptr;
-	unsigned int VAO_Vertex, VAO_FaceNormals, VAO_VertexNormals, VAO_FaceCenters;
-	unsigned int VBO_Vertex, VBO_FaceNormals, VBO_VertexNormals, VBO_FaceCenters;
+	unsigned int VAO_Vertex = 0u, VAO_FaceNormals = 0u, VAO_VertexNormals = 0u, VAO_FaceCenters = 0u;
+	unsigned int VBO_Vertex = 0u, VBO_FaceNormals = 0u, VBO_VertexNormals = 0u, VBO_FaceCenters = 0u;
 };
 #endif // !__RE_MESH_H__

@@ -21,46 +21,37 @@
 #include "Glew/include/glew.h"
 #include <EAStdC/EAString.h>
 
-RE_Material::RE_Material() { }
-
-RE_Material::RE_Material(const char* metapath) : ResourceContainer(metapath) { }
-     
-
-RE_Material::~RE_Material() { }
+RE_Material::RE_Material() {}
+RE_Material::RE_Material(const char* metapath) : ResourceContainer(metapath) {}
+RE_Material::~RE_Material() {}
 
 void RE_Material::LoadInMemory()
 {
-	//TODO ResourcesManager, apply count referending textures
-	if (App->fs->Exists(GetLibraryPath())) {
+	if (App::fs->Exists(GetLibraryPath()))
+	{
 		BinaryDeserialize();
 	}
-	else if (App->fs->Exists(GetAssetPath())) {
+	else if (App::fs->Exists(GetAssetPath()))
+	{
 		JsonDeserialize();
 		BinarySerialize();
 	}
 	else if (isInternal())
+	{
 		ResourceContainer::inMemory = true;
-	else {
+	}
+	else
+	{
 		RE_LOG_ERROR("Material %s not found on project", GetName());
 	}
 }
 
 void RE_Material::UnloadMemory()
 {
-	cDiffuse = math::float3::zero;
-	cSpecular = math::float3::zero;
-	cAmbient = math::float3::zero;
-	cEmissive = math::float3::zero;
-	cTransparent = math::float3::zero;
-
+	cDiffuse = cSpecular = cAmbient = cEmissive = cTransparent = math::float3::zero;
 	backFaceCulling = true;
 	blendMode = false;
-
-	opacity = 1.0f;
-	shininess = 0.f;
-	shininessStrenght = 1.0f;
-	refraccti = 1.0f;
-
+	opacity = shininess = shininessStrenght = refraccti = 1.0f;
 	ResourceContainer::inMemory = false;
 }
 
@@ -78,7 +69,8 @@ void RE_Material::ProcessMD5()
 
 void RE_Material::Save()
 {
-	if(!shaderMD5) {
+	if(!shaderMD5)
+	{
 		//Default Shader
 		usingOnMat[CDIFFUSE] = 1;
 		usingOnMat[TDIFFUSE] = 1;
@@ -87,19 +79,21 @@ void RE_Material::Save()
 	BinarySerialize();
 	SaveMeta();
 	applySave = false;
-	//UnloadMemory();
 }
 
 void RE_Material::Draw()
 {
-	if (!isInternal() && applySave && ImGui::Button("Save Changes")) {
+	if (!isInternal() && applySave && ImGui::Button("Save Changes"))
+	{
 		Save();
 		applySave = false;
 	}
 
-	if (App->resources->TotalReferenceCount(GetMD5()) == 0) {
+	if (App::resources->TotalReferenceCount(GetMD5()) == 0)
+	{
 		ImGui::Text("Material is unloaded, load for watch and modify values.");
-		if (ImGui::Button("Load")) {
+		if (ImGui::Button("Load"))
+		{
 			LoadInMemory();
 			applySave = false;
 			ResourceContainer::inMemory = false;
@@ -108,13 +102,12 @@ void RE_Material::Draw()
 	}
 
 	DrawMaterialEdit();
-
-	ImGui::Image((void*)App->thumbnail->At(GetMD5()), { 256, 256 }, { 0,1 }, { 1, 0 });
+	ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
 }
 
 void RE_Material::SaveResourceMeta(JSONNode* metaNode)
 {
-	metaNode->PushString("shaderMeta", (shaderMD5) ? App->resources->At(shaderMD5)->GetMetaPath() : "NOMETAPATH");
+	metaNode->PushString("shaderMeta", (shaderMD5) ? App::resources->At(shaderMD5)->GetMetaPath() : "NOMETAPATH");
 
 	JSONNode* diffuseNode = metaNode->PushJObject("DiffuseTextures");
 	PushTexturesJson(diffuseNode, &tDiffuse);
@@ -151,7 +144,7 @@ void RE_Material::SaveResourceMeta(JSONNode* metaNode)
 void RE_Material::LoadResourceMeta(JSONNode* metaNode)
 {
 	eastl::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
-	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = App->resources->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
+	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = App::resources->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
 
 	JSONNode* diffuseNode = metaNode->PullJObject("DiffuseTextures");
 	PullTexturesJson(diffuseNode, &tDiffuse);
@@ -187,18 +180,29 @@ void RE_Material::LoadResourceMeta(JSONNode* metaNode)
 
 void RE_Material::DrawMaterialEdit()
 {
-	RE_Shader* matShader = (shaderMD5) ? (RE_Shader*)App->resources->At(shaderMD5) : (RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader());
-	
+	RE_Shader* matShader = dynamic_cast<RE_Shader*>(App::resources->At(shaderMD5 ? shaderMD5 : App::internalResources.GetDefaultShader()));
+
 	ImGui::Text("Shader selected: %s", matShader->GetMD5());
 	
 	if (!shaderMD5) ImGui::Text("This shader is using the default shader.");
 
 	if (ImGui::Button(matShader->GetName()))
-		App->resources->PushSelected(matShader->GetMD5(), (App->resources->GetSelected() != nullptr && (App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_TEXTURE || App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_SHADER)));
+	{
+		bool popAll = false;
+		const char* selected = App::resources->GetSelected();
+		if (selected)
+		{
+			Resource_Type t = App::resources->At(selected)->GetType();
+			popAll = (t == Resource_Type::R_SHADER || t == Resource_Type::R_TEXTURE);
+		}
+		App::resources->PushSelected(matShader->GetMD5(), popAll);
+	}
 
-	if (shaderMD5) {
+	if (shaderMD5)
+	{
 		ImGui::SameLine();
-		if (ImGui::Button("Back to Default Shader")) {
+		if (ImGui::Button("Back to Default Shader"))
+		{
 			shaderMD5 = nullptr;
 			applySave = true;
 			GetAndProcessUniformsFromShader();
@@ -207,18 +211,18 @@ void RE_Material::DrawMaterialEdit()
 
 	if (ImGui::BeginMenu("Change shader"))
 	{
-		eastl::vector<ResourceContainer*> shaders = App->resources->GetResourcesByType(Resource_Type::R_SHADER);
+		eastl::vector<ResourceContainer*> shaders = App::resources->GetResourcesByType(Resource_Type::R_SHADER);
 		bool none = true;
-		for (auto  shader :  shaders) {
-			if (shader->isInternal())
-				continue;
+		for (auto  shader :  shaders)
+		{
+			if (shader->isInternal()) continue;
 			none = false;
-			if (ImGui::MenuItem(shader->GetName())) {
-				if (ResourceContainer::inMemory && shaderMD5) App->resources->UnUse(shaderMD5);
+			if (ImGui::MenuItem(shader->GetName()))
+			{
+				if (ResourceContainer::inMemory && shaderMD5) App::resources->UnUse(shaderMD5);
 				shaderMD5 = shader->GetMD5();
-				if (ResourceContainer::inMemory && shaderMD5) App->resources->Use(shaderMD5);
+				if (ResourceContainer::inMemory && shaderMD5) App::resources->Use(shaderMD5);
 				GetAndProcessUniformsFromShader();
-
 				applySave = true;
 			}
 		}
@@ -226,202 +230,215 @@ void RE_Material::DrawMaterialEdit()
 		ImGui::EndMenu();
 	}
 
-	if (!fromShaderCustomUniforms.empty()) {
+	if (!fromShaderCustomUniforms.empty())
+	{
 		ImGui::Separator();
 		static bool displayShaderValues = false;
 		ImGui::Checkbox("Display all custom shader values", &displayShaderValues);
 		ImGui::Separator();
 
-		if (!displayShaderValues) {
-			if (ImGui::BeginMenu("Custom values from shader")) {
-				for (uint i = 0; i < fromShaderCustomUniforms.size(); i++) {
-					if (fromShaderCustomUniforms[i].DrawPropieties(ResourceContainer::inMemory))
-						applySave = true;
+		if (!displayShaderValues)
+		{
+			if (ImGui::BeginMenu("Custom values from shader"))
+			{
+				for (uint i = 0; i < fromShaderCustomUniforms.size(); i++)
+				{
+					if (fromShaderCustomUniforms[i].DrawPropieties(ResourceContainer::inMemory)) applySave = true;
 					ImGui::Separator();
 				}
 				ImGui::EndMenu();
 			}
 		}
-		else {
-			for (uint i = 0; i < fromShaderCustomUniforms.size(); i++) {
-				if (fromShaderCustomUniforms[i].DrawPropieties(ResourceContainer::inMemory))
-					applySave = true;
+		else
+		{
+			for (uint i = 0; i < fromShaderCustomUniforms.size(); i++)
+			{
+				if (fromShaderCustomUniforms[i].DrawPropieties(ResourceContainer::inMemory)) applySave = true;
 				ImGui::Separator();
 			}
-
 		}
 	}
 
-	if (usingOnMat[CDIFFUSE] || usingOnMat[TDIFFUSE]) {
+	if (usingOnMat[CDIFFUSE] || usingOnMat[TDIFFUSE])
+	{
 		ImGui::Separator();
-		if (ImGui::BeginMenu("Diffuse values")) {
-			if (usingOnMat[CDIFFUSE]) {
-				if (ImGui::ColorEdit3("Diffuse Color", &cDiffuse[0]))
-					applySave = true;
-			}
-			if(usingOnMat[TDIFFUSE]) DrawTextures("Diffuse", &tDiffuse);
+		if (ImGui::BeginMenu("Diffuse values"))
+		{
+			if (usingOnMat[CDIFFUSE] && ImGui::ColorEdit3("Diffuse Color", &cDiffuse[0])) applySave = true;
+			if (usingOnMat[TDIFFUSE]) DrawTextures("Diffuse", &tDiffuse);
 
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginDragDropTarget()) {
-
-			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+			{
 				tDiffuse.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App->resources->Use(tDiffuse.back());
+				if (ResourceContainer::inMemory) App::resources->Use(tDiffuse.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
 	}
 
-	if (usingOnMat[CSPECULAR] || usingOnMat[TSPECULAR]) {
+	if (usingOnMat[CSPECULAR] || usingOnMat[TSPECULAR])
+	{
 		ImGui::Separator();
-		if (ImGui::BeginMenu("Specular values")) {
-			if (usingOnMat[CSPECULAR]) {
-				if (ImGui::ColorEdit3("Specular Color", &cSpecular[0]))
-					applySave = true;
-			}
-			if(usingOnMat[TSPECULAR]) DrawTextures("Specular", &tSpecular);
+		if (ImGui::BeginMenu("Specular values"))
+		{
+			if (usingOnMat[CSPECULAR] && ImGui::ColorEdit3("Specular Color", &cSpecular[0])) applySave = true;
+			if (usingOnMat[TSPECULAR]) DrawTextures("Specular", &tSpecular);
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginDragDropTarget()) {
-
-			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+			{
 				tSpecular.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App->resources->Use(tSpecular.back());
+				if (ResourceContainer::inMemory) App::resources->Use(tSpecular.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
 	}
 
-	if (usingOnMat[CAMBIENT] || usingOnMat[TAMBIENT]) {
+	if (usingOnMat[CAMBIENT] || usingOnMat[TAMBIENT])
+	{
 		ImGui::Separator();
-		if (ImGui::BeginMenu("Ambient values")) {
-			if (usingOnMat[CAMBIENT]) {
-				if (ImGui::ColorEdit3("Ambient Color", &cAmbient[0]))
-					applySave = true;
-			}
-
+		if (ImGui::BeginMenu("Ambient values"))
+		{
+			if (usingOnMat[CAMBIENT] && ImGui::ColorEdit3("Ambient Color", &cAmbient[0])) applySave = true;
 			if (usingOnMat[TAMBIENT]) DrawTextures("Ambient", &tAmbient);
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginDragDropTarget()) {
-
-			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+			{
 				tAmbient.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App->resources->Use(tAmbient.back());
+				if (ResourceContainer::inMemory) App::resources->Use(tAmbient.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
 	}
 
-	if (usingOnMat[CEMISSIVE] || usingOnMat[TEMISSIVE]) {
+	if (usingOnMat[CEMISSIVE] || usingOnMat[TEMISSIVE])
+	{
 		ImGui::Separator();
-		if (ImGui::BeginMenu("Emissive values")) {
-			if (usingOnMat[CEMISSIVE]) {
-				if (ImGui::ColorEdit3("Emissive Color", &cEmissive[0]))
-					applySave = true;
-			}
-			if(usingOnMat[TEMISSIVE]) DrawTextures("Emissive", &tEmissive);
+		if (ImGui::BeginMenu("Emissive values"))
+		{
+			if (usingOnMat[CEMISSIVE] && ImGui::ColorEdit3("Emissive Color", &cEmissive[0])) applySave = true;
+			if (usingOnMat[TEMISSIVE]) DrawTextures("Emissive", &tEmissive);
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginDragDropTarget()) {
-
-			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+			{
 				tAmbient.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App->resources->Use(tEmissive.back());
+				if (ResourceContainer::inMemory) App::resources->Use(tEmissive.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
 	}
 
-	if (usingOnMat[OPACITY] || usingOnMat[TOPACITY]) {
+	if (usingOnMat[OPACITY] || usingOnMat[TOPACITY])
+	{
 		ImGui::Separator();
-		if (ImGui::BeginMenu("Opacity values")) {
-			if (usingOnMat[OPACITY]) {
-				if (ImGui::InputFloat("Opacity", &opacity))
-					applySave = true;
-			}
-			if(usingOnMat[TOPACITY]) DrawTextures("Opacity", &tOpacity);
+		if (ImGui::BeginMenu("Opacity values"))
+		{
+			if (usingOnMat[OPACITY] && ImGui::InputFloat("Opacity", &opacity)) applySave = true;
+			if (usingOnMat[TOPACITY]) DrawTextures("Opacity", &tOpacity);
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+			{
 				tOpacity.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App->resources->Use(tOpacity.back());
+				if (ResourceContainer::inMemory) App::resources->Use(tOpacity.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
 	}
 
-	if (usingOnMat[SHININESS] || usingOnMat[SHININESSSTRENGHT] || usingOnMat[TSHININESS]) {
+	if (usingOnMat[SHININESS] || usingOnMat[SHININESSSTRENGHT] || usingOnMat[TSHININESS])
+	{
 		ImGui::Separator();
-		if (ImGui::BeginMenu("Shininess values")) {
-			if (usingOnMat[SHININESS]) {
-				if (ImGui::InputFloat("Shininess", &shininess))
-					applySave = true;
-			}
-			if (usingOnMat[SHININESSSTRENGHT]) {
-				if (ImGui::InputFloat("Shininess strenght", &shininessStrenght))
-					applySave = true;
-			}
-			if(usingOnMat[TSHININESS]) DrawTextures("Shininess", &tShininess);
+		if (ImGui::BeginMenu("Shininess values"))
+		{
+			if (usingOnMat[SHININESS] && ImGui::InputFloat("Shininess", &shininess)) applySave = true;
+			if (usingOnMat[SHININESSSTRENGHT] && ImGui::InputFloat("Shininess strenght", &shininessStrenght)) applySave = true;
+			if (usingOnMat[TSHININESS]) DrawTextures("Shininess", &tShininess);
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+			{
 				tShininess.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App->resources->Use(tShininess.back());
+				if (ResourceContainer::inMemory) App::resources->Use(tShininess.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
 	}
 
-	if (usingOnMat[THEIGHT]) {
+	if (usingOnMat[THEIGHT])
+	{
 		ImGui::Separator();
-		if (ImGui::BeginMenu("Height values")) {
+		if (ImGui::BeginMenu("Height values"))
+		{
 			DrawTextures("Height", &tHeight);
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+			{
 				tHeight.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App->resources->Use(tHeight.back());
+				if (ResourceContainer::inMemory) App::resources->Use(tHeight.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
 	}
-	if (usingOnMat[TNORMALS]) {
+	if (usingOnMat[TNORMALS])
+	{
 		ImGui::Separator();
-		if (ImGui::BeginMenu("Normals values")) {
+		if (ImGui::BeginMenu("Normals values"))
+		{
 			DrawTextures("Normals", &tNormals);
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+			{
 				tNormals.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App->resources->Use(tNormals.back());
+				if (ResourceContainer::inMemory) App::resources->Use(tNormals.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
 	}
-	if (usingOnMat[TREFLECTION]) {
+	if (usingOnMat[TREFLECTION])
+	{
 		ImGui::Separator();
-		if (ImGui::BeginMenu("Reflection values")) {
+		if (ImGui::BeginMenu("Reflection values"))
+		{
 			DrawTextures("Reflection", &tReflection);
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+			{
 				tReflection.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App->resources->Use(tReflection.back());
+				if (ResourceContainer::inMemory) App::resources->Use(tReflection.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -429,30 +446,35 @@ void RE_Material::DrawMaterialEdit()
 	}
 
 	ImGui::Separator();
-	if (ImGui::BeginMenu("Others values")) {
-		if (usingOnMat[CTRANSPARENT]) {
-			if (ImGui::ColorEdit3("Transparent", &cTransparent[0]))
-				applySave = true;
+	if (ImGui::BeginMenu("Others values"))
+	{
+		if (usingOnMat[CTRANSPARENT])
+		{
+			if (ImGui::ColorEdit3("Transparent", &cTransparent[0])) applySave = true;
 			ImGui::Separator();
 		}
-		if (ImGui::Checkbox("Back face culling", &backFaceCulling))
-			applySave = true;
+
+		if (ImGui::Checkbox("Back face culling", &backFaceCulling)) applySave = true;
 		ImGui::Separator();
-		if (ImGui::Checkbox("Blend mode", &blendMode))
-			applySave = true;
+
+		if (ImGui::Checkbox("Blend mode", &blendMode)) applySave = true;
 		ImGui::Separator();
-		if (usingOnMat[REFRACCTI]) {
-			if (ImGui::InputFloat("Refraccti", &refraccti))
-				applySave = true;
+
+		if (usingOnMat[REFRACCTI])
+		{
+			if (ImGui::InputFloat("Refraccti", &refraccti)) applySave = true;
 			ImGui::Separator();
 		}
+
 		DrawTextures("Unknown", &tUnknown);
 		ImGui::EndMenu();
 	}
-	if (ImGui::BeginDragDropTarget()) {
-		if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+		{
 			tUnknown.push_back(*static_cast<const char**>(dropped->Data));
-			if (ResourceContainer::inMemory) App->resources->Use(tUnknown.back());
+			if (ResourceContainer::inMemory) App::resources->Use(tUnknown.back());
 			applySave = true;
 		}
 		ImGui::EndDragDropTarget();
@@ -461,34 +483,39 @@ void RE_Material::DrawMaterialEdit()
 
 void RE_Material::SomeResourceChanged(const char* resMD5)
 {
-	if (shaderMD5 == resMD5) {
-		if (!isInMemory()) {
+	if (shaderMD5 == resMD5)
+	{
+		if (!isInMemory())
+		{
 			LoadInMemory();
 			ResourceContainer::inMemory = false;
 		}
 		eastl::vector<ShaderCvar> beforeCustomUniforms = fromShaderCustomUniforms;
 		GetAndProcessUniformsFromShader();
-		for (uint b = 0; b < beforeCustomUniforms.size(); b++) {
-			for (uint i = 0; i < fromShaderCustomUniforms.size(); i++) {
-				if (beforeCustomUniforms[b].name == fromShaderCustomUniforms[i].name && beforeCustomUniforms[b].GetType() == fromShaderCustomUniforms[i].GetType()) {
+
+		for (uint b = 0; b < beforeCustomUniforms.size(); b++)
+		{
+			for (uint i = 0; i < fromShaderCustomUniforms.size(); i++)
+			{
+				if (beforeCustomUniforms[b].name == fromShaderCustomUniforms[i].name && beforeCustomUniforms[b].GetType() == fromShaderCustomUniforms[i].GetType())
+				{
 					fromShaderCustomUniforms[i].SetValue(beforeCustomUniforms[b]);
 					break;
 				}
 			}
 		}
+
 		Save();
 	}
 }
 
-bool RE_Material::ExitsOnShader(const char* shader)
-{
-	return (shaderMD5 == shader);
-}
+bool RE_Material::ExitsOnShader(const char* shader) { return (shaderMD5 == shader); }
 
 bool RE_Material::ExitsOnTexture(const char* texture)
 {
 	bool ret = false;
 
+	// TODO: Exits ->Exists
 	ret = ExitsOnTexture(texture, &tDiffuse);
 	if(!ret) ret = ExitsOnTexture(texture, &tSpecular);
 	if(!ret) ret = ExitsOnTexture(texture, &tAmbient);
@@ -522,28 +549,39 @@ void RE_Material::DeleteTexture(const char* texMD5)
 	DeleteTexture(texMD5, &tNormals);
 	DeleteTexture(texMD5, &tReflection);
 	DeleteTexture(texMD5, &tUnknown);
-
 	SaveMeta();
 }
 
 void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const char*>* textures)
 {
 	ImGui::Text(eastl::string(texturesName + eastl::string(" textures:")).c_str());
-	if (!textures->empty()) {
+	if (!textures->empty())
+	{
 		ImGui::Separator();
 		eastl::vector<const char*>::iterator toDelete = textures->end();
 		uint count = 1;
-		for (eastl::vector<const char*>::iterator md5 = textures->begin(); md5 != textures->end(); ++md5) {
-			ResourceContainer* resource = App->resources->At(*md5);
-
+		for (eastl::vector<const char*>::iterator md5 = textures->begin(); md5 != textures->end(); ++md5)
+		{
+			ResourceContainer* resource = App::resources->At(*md5);
 			if (ImGui::Button(eastl::string("Texture #" + eastl::to_string(count) + " " + eastl::string(resource->GetName())).c_str()))
-				App->resources->PushSelected(*md5, (App->resources->GetSelected() != nullptr && (App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_TEXTURE || App->resources->At(App->resources->GetSelected())->GetType() == Resource_Type::R_SHADER)));
-			
+			{
+
+				bool popAll = false;
+				const char* selected = App::resources->GetSelected();
+				if (selected)
+				{
+					Resource_Type t = App::resources->At(selected)->GetType();
+					popAll = (t == Resource_Type::R_SHADER || t == Resource_Type::R_TEXTURE);
+				}
+				App::resources->PushSelected(*md5, popAll);
+			}
+
 			ImGui::SameLine();
 			eastl::string deletetexture("Delete #");
 			deletetexture += eastl::to_string(count);
-			if (ImGui::Button(deletetexture.c_str())) {
-				if (ResourceContainer::inMemory) App->resources->UnUse(*md5);
+			if (ImGui::Button(deletetexture.c_str()))
+			{
+				if (ResourceContainer::inMemory) App::resources->UnUse(*md5);
 				toDelete = md5;
 				applySave = true;
 			}
@@ -552,12 +590,14 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 			changetexture += eastl::to_string(count++);
 			if (ImGui::BeginMenu(changetexture.c_str()))
 			{
-				eastl::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
-				for (auto textRes : allTex) {
-					if (ImGui::MenuItem(textRes->GetName())) {
-						if (ResourceContainer::inMemory) App->resources->UnUse(*md5);
+				eastl::vector<ResourceContainer*> allTex = App::resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+				for (auto textRes : allTex)
+				{
+					if (ImGui::MenuItem(textRes->GetName()))
+					{
+						if (ResourceContainer::inMemory) App::resources->UnUse(*md5);
 						*md5 = textRes->GetMD5();
-						if (ResourceContainer::inMemory) App->resources->Use(*md5);
+						if (ResourceContainer::inMemory) App::resources->Use(*md5);
 						applySave = true;
 					}
 				}
@@ -565,22 +605,24 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 			}
 			ImGui::Separator();
 		}
-		if (toDelete != textures->end())
-			textures->erase(toDelete);
+
+		if (toDelete != textures->end()) textures->erase(toDelete);
 	}
-	else {
+	else
+	{
 		ImGui::Text("Empty textures");
 	}
-	eastl::string addtexture("Add #");
-	addtexture += texturesName;
-	addtexture += " texture";
-	if (ImGui::BeginMenu(addtexture.c_str()))
+
+	eastl::string addtexture = "Add #";
+	if (ImGui::BeginMenu(((addtexture += texturesName) += " texture").c_str()))
 	{
-		eastl::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
-		for (auto textRes : allTex) {
-			if (ImGui::MenuItem(textRes->GetName())) {
+		eastl::vector<ResourceContainer*> allTex = App::resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+		for (auto textRes : allTex)
+		{
+			if (ImGui::MenuItem(textRes->GetName()))
+			{
 				textures->push_back(textRes->GetMD5());
-				if (ResourceContainer::inMemory) App->resources->Use(textures->back());
+				if (ResourceContainer::inMemory) App::resources->Use(textures->back());
 				applySave = true;
 			}
 		}
@@ -590,7 +632,7 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 
 void RE_Material::JsonDeserialize(bool generateLibraryPath)
 {
-	Config material(GetAssetPath(), App->fs->GetZipPath());
+	Config material(GetAssetPath(), App::fs->GetZipPath());
 	if (material.Load()) {
 		JSONNode* nodeMat = material.GetRootNode("Material");
 
@@ -615,95 +657,89 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 		fromShaderCustomUniforms.clear();
 		JSONNode* nuniforms = nodeMat->PullJObject("uniforms");
 		uint size = nuniforms->PullUInt("size", 0);
-		if (size) {
+		if (size)
+		{
 			bool* b = nullptr;
 			int* intPtr = nullptr;
 			eastl::string id;
 			for (uint i = 0; i < size; i++)
 			{
 				ShaderCvar sVar;
-				id = "name";
-				id += eastl::to_string(i);
+				id = "name" + eastl::to_string(i);
 				sVar.name = nuniforms->PullString(id.c_str(), "");
-				id = "type";
-				id += eastl::to_string(i);
+
+				id = "type" + eastl::to_string(i);
 				Cvar::VAR_TYPE vT = (Cvar::VAR_TYPE)nuniforms->PullUInt(id.c_str(), ShaderCvar::UNDEFINED);
-				id = "custom";
-				id += eastl::to_string(i);
+
+				id = "custom" + eastl::to_string(i);
 				sVar.custom = nuniforms->PullBool(id.c_str(), true);
 
-				id = "value";
-				id += eastl::to_string(i);
+				id = "value" + eastl::to_string(i);
 				switch (vT)
 				{
-				case Cvar::BOOL:
-					sVar.SetValue(nuniforms->PullBool(id.c_str(), true), true);
-					break;
-				case Cvar::BOOL2: 
+				case Cvar::BOOL: sVar.SetValue(nuniforms->PullBool(id.c_str(), true), true); break;
+				case Cvar::BOOL2:
+				{
 					b = nuniforms->PullBool(id.c_str(), 2, true);
 					sVar.SetValue(b, 2, true);
 					DEL_A(b);
 					break;
+				}
 				case Cvar::BOOL3:
+				{
 					b = nuniforms->PullBool(id.c_str(), 3, true);
 					sVar.SetValue(b, 3, true);
 					DEL_A(b);
-					break;
+					break; 
+				}
 				case Cvar::BOOL4:
+				{
 					b = nuniforms->PullBool(id.c_str(), 4, true);
 					sVar.SetValue(b, 4, true);
 					DEL_A(b);
-					break;
-				case Cvar::INT:
-					sVar.SetValue(-1, true);
-					break;
+					break; 
+				}
+				case Cvar::INT: sVar.SetValue(-1, true); break;
 				case Cvar::INT2:
+				{
 					intPtr = nuniforms->PullInt(id.c_str(), 2, true);
 					sVar.SetValue(intPtr, 2, true);
 					DEL_A(b);
 					break;
+				}
 				case Cvar::INT3:
+				{
 					intPtr = nuniforms->PullInt(id.c_str(), 3, true);
 					sVar.SetValue(intPtr, 3, true);
-					DEL_A(b)					
-					break;
+					DEL_A(b);
+					break; 
+				}
 				case Cvar::INT4:
+				{
 					intPtr = nuniforms->PullInt(id.c_str(), 4, true);
 					sVar.SetValue(intPtr, 4, true);
-					DEL_A(b)					
-					break;
-				case Cvar::FLOAT:
-					sVar.SetValue(nuniforms->PullFloat(id.c_str(), 0), true);
-					break;
-				case Cvar::FLOAT2:
-					sVar.SetValue(nuniforms->PullFloat(id.c_str(), math::float2::zero), true);
-					break;
-				case Cvar::FLOAT3:
-					sVar.SetValue(nuniforms->PullFloatVector(id.c_str(), math::float3::zero), true);
-					break;
+					DEL_A(b);
+					break; 
+				}
+				case Cvar::FLOAT: sVar.SetValue(nuniforms->PullFloat(id.c_str(), 0), true); break;
+				case Cvar::FLOAT2: sVar.SetValue(nuniforms->PullFloat(id.c_str(), math::float2::zero), true); break;
+				case Cvar::FLOAT3: sVar.SetValue(nuniforms->PullFloatVector(id.c_str(), math::float3::zero), true); break;
 				case Cvar::FLOAT4:
-				case Cvar::MAT2:
-					sVar.SetValue(nuniforms->PullFloat4(id.c_str(), math::float4::zero), true);
-					break;
-				case Cvar::MAT3:
-					sVar.SetValue(nuniforms->PullMat3(id.c_str(), math::float3x3::zero), true);
-					break;
-				case Cvar::MAT4:
-					sVar.SetValue(nuniforms->PullMat4(id.c_str(), math::float4x4::zero), true);
-					break;
-				case Cvar::SAMPLER:
-					sVar.SetSampler(App->resources->IsReference(nuniforms->PullString(id.c_str(),"")), true);
-					break;
+				case Cvar::MAT2: sVar.SetValue(nuniforms->PullFloat4(id.c_str(), math::float4::zero), true); break;
+				case Cvar::MAT3: sVar.SetValue(nuniforms->PullMat3(id.c_str(), math::float3x3::zero), true); break;
+				case Cvar::MAT4: sVar.SetValue(nuniforms->PullMat4(id.c_str(), math::float4x4::zero), true); break;
+				case Cvar::SAMPLER: sVar.SetSampler(App::resources->IsReference(nuniforms->PullString(id.c_str(),"")), true); break;
 				}
 
 				fromShaderCustomUniforms.push_back(sVar);
 			}
 		}
+
 		DEL(nuniforms);
 		DEL(nodeMat);
 
-
-		if (generateLibraryPath) {
+		if (generateLibraryPath)
+		{
 			SetMD5(material.GetMd5().c_str());
 			eastl::string libraryPath("Library/Materials/");
 			libraryPath += GetMD5();
@@ -717,11 +753,12 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 void RE_Material::PullTexturesJson(JSONNode * texturesNode, eastl::vector<const char*>* textures)
 {
 	uint texturesSize = texturesNode->PullInt("Size", 0);
-	for (uint i = 0; i < texturesSize; i++) {
+	for (uint i = 0; i < texturesSize; i++)
+	{
 		eastl::string idref = "MetaPath";
 		idref += eastl::to_string(i).c_str();
 		eastl::string textureMaT = texturesNode->PullString(idref.c_str(), "");
-		const char* textureMD5 = App->resources->FindMD5ByMETAPath(textureMaT.c_str());
+		const char* textureMD5 = App::resources->FindMD5ByMETAPath(textureMaT.c_str());
 		if (textureMD5) textures->push_back(textureMD5);
 		else RE_LOG_ERROR("No texture found.\nPath: %s", textureMaT.c_str());
 	}
@@ -729,16 +766,11 @@ void RE_Material::PullTexturesJson(JSONNode * texturesNode, eastl::vector<const 
 
 void RE_Material::JsonSerialize(bool onlyMD5)
 {
-	Config materialSerialize(GetAssetPath(), App->fs->GetZipPath());
-
+	Config materialSerialize(GetAssetPath(), App::fs->GetZipPath());
 	JSONNode* materialNode = materialSerialize.GetRootNode("Material");
-
 	materialNode->PushString("name", GetName()); //for get different md5
-
 	materialNode->PushInt("ShaderType", (int)shadingType);
-
 	materialNode->PushUInt("usingOnMat", usingOnMat, 18);
-
 	materialNode->PushFloatVector("DiffuseColor", cDiffuse);
 	materialNode->PushFloatVector("SpecularColor", cSpecular);
 	materialNode->PushFloatVector("AmbientColor", cAmbient);
@@ -757,66 +789,34 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 		eastl::string id;
 		for (uint i = 0; i < fromShaderCustomUniforms.size(); i++)
 		{
-			id = "name";
-			id += eastl::to_string(i);
+			id = "name" + eastl::to_string(i);
 			nuniforms->PushString(id.c_str(), fromShaderCustomUniforms[i].name.c_str());
-			id = "type";
-			id += eastl::to_string(i);
+
+			id = "type" + eastl::to_string(i);
 			nuniforms->PushUInt(id.c_str(), fromShaderCustomUniforms[i].GetType());
-			id = "custom";
-			id += eastl::to_string(i);
+
+			id = "custom" + eastl::to_string(i);
 			nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].custom);
 
-			id = "value";
-			id += eastl::to_string(i);
+			id = "value" + eastl::to_string(i);
 			switch (fromShaderCustomUniforms[i].GetType())
 			{
-			case Cvar::BOOL:
-				nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool());
-				break;
-			case Cvar::BOOL2:
-				nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool2(), 2);
-				break;
-			case Cvar::BOOL3:
-				nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool3(), 3);
-				break;
-			case Cvar::BOOL4:
-				nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool4(), 4);
-				break;
-			case Cvar::INT:
-				nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt());
-				break;
-			case Cvar::INT2:
-				nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt2(),2);
-				break;
-			case Cvar::INT3:
-				nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt3(), 3);
-				break;
-			case Cvar::INT4:
-				nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt4(), 4);
-					break;
-			case Cvar::FLOAT:
-				nuniforms->PushFloat(id.c_str(), fromShaderCustomUniforms[i].AsFloat());
-				break;
-			case Cvar::FLOAT2:
-				nuniforms->PushFloat(id.c_str(), fromShaderCustomUniforms[i].AsFloat2());
-				break;
-			case Cvar::FLOAT3:
-				nuniforms->PushFloatVector(id.c_str(), fromShaderCustomUniforms[i].AsFloat3());
-				break;
+			case Cvar::BOOL: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool()); break;
+			case Cvar::BOOL2: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool2(), 2); break;
+			case Cvar::BOOL3: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool3(), 3); break;
+			case Cvar::BOOL4: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool4(), 4); break;
+			case Cvar::INT: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt()); break;
+			case Cvar::INT2: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt2(),2); break;
+			case Cvar::INT3: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt3(), 3); break;
+			case Cvar::INT4: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt4(), 4); break;
+			case Cvar::FLOAT: nuniforms->PushFloat(id.c_str(), fromShaderCustomUniforms[i].AsFloat()); break;
+			case Cvar::FLOAT2: nuniforms->PushFloat(id.c_str(), fromShaderCustomUniforms[i].AsFloat2()); break;
+			case Cvar::FLOAT3: nuniforms->PushFloatVector(id.c_str(), fromShaderCustomUniforms[i].AsFloat3()); break;
 			case Cvar::FLOAT4:
-			case Cvar::MAT2:
-				nuniforms->PushFloat4(id.c_str(), fromShaderCustomUniforms[i].AsFloat4());
-				break;
-			case Cvar::MAT3:
-				nuniforms->PushMat3(id.c_str(), fromShaderCustomUniforms[i].AsMat3());
-				break;
-			case Cvar::MAT4:
-				nuniforms->PushMat4(id.c_str(), fromShaderCustomUniforms[i].AsMat4());
-				break;
-			case Cvar::SAMPLER:
-				nuniforms->PushString(id.c_str(), (fromShaderCustomUniforms[i].AsCharP()) ? fromShaderCustomUniforms[i].AsCharP() : "");
-				break;
+			case Cvar::MAT2: nuniforms->PushFloat4(id.c_str(), fromShaderCustomUniforms[i].AsFloat4()); break;
+			case Cvar::MAT3: nuniforms->PushMat3(id.c_str(), fromShaderCustomUniforms[i].AsMat3()); break;
+			case Cvar::MAT4: nuniforms->PushMat4(id.c_str(), fromShaderCustomUniforms[i].AsMat4()); break;
+			case Cvar::SAMPLER: nuniforms->PushString(id.c_str(), (fromShaderCustomUniforms[i].AsCharP()) ? fromShaderCustomUniforms[i].AsCharP() : ""); break;
 			}
 		}
 	}
@@ -836,17 +836,19 @@ void RE_Material::PushTexturesJson(JSONNode * texturesNode, eastl::vector<const 
 {
 	uint texturesSize = textures->size();
 	texturesNode->PushUInt("Size", texturesSize);
-	for (uint i = 0; i < texturesSize; i++) {
+	for (uint i = 0; i < texturesSize; i++)
+	{
 		eastl::string idref = "MetaPath";
 		idref += eastl::to_string(i).c_str();
-		texturesNode->PushString(idref.c_str(), App->resources->At(textures->operator[](i))->GetMetaPath());
+		texturesNode->PushString(idref.c_str(), App::resources->At(textures->operator[](i))->GetMetaPath());
 	}
 }
 
 void RE_Material::BinaryDeserialize()
 {
 	RE_FileIO libraryFile(GetLibraryPath());
-	if (libraryFile.Load()) {
+	if (libraryFile.Load())
+	{
 		char* cursor = libraryFile.GetBuffer();
 
 		size_t size = sizeof(RE_ShadingMode);
@@ -858,19 +860,19 @@ void RE_Material::BinaryDeserialize()
 		cursor += size;
 
 		size = sizeof(float) * 3;
-		cDiffuse = math::vec((float*)cursor);
+		cDiffuse = math::vec(reinterpret_cast<float*>(cursor));
 		cursor += size;
 
-		cSpecular = math::vec((float*)cursor);
+		cSpecular = math::vec(reinterpret_cast<float*>(cursor));
 		cursor += size;
 
-		cAmbient = math::vec((float*)cursor);
+		cAmbient = math::vec(reinterpret_cast<float*>(cursor));
 		cursor += size;
 
-		cEmissive = math::vec((float*)cursor);
+		cEmissive = math::vec(reinterpret_cast<float*>(cursor));
 		cursor += size;
 
-		cTransparent = math::vec((float*)cursor);
+		cTransparent = math::vec(reinterpret_cast<float*>(cursor));
 		cursor += size;
 
 		size = sizeof(bool);
@@ -899,8 +901,10 @@ void RE_Material::BinaryDeserialize()
 		memcpy( &uSize, cursor, size);
 		cursor += size;
 
-		if (uSize > 0) {
-			for (uint i = 0; i < uSize; i++) {
+		if (uSize > 0)
+		{
+			for (uint i = 0; i < uSize; i++)
+			{
 				ShaderCvar sVar;
 				uint nSize = 0;
 				size = sizeof(uint);
@@ -929,125 +933,152 @@ void RE_Material::BinaryDeserialize()
 				switch (Cvar::VAR_TYPE(uType))
 				{
 				case Cvar::BOOL:
+				{
 					size = sizeof(bool);
-					memcpy( &b, cursor, size);
+					memcpy(&b, cursor, size);
 					cursor += size;
 					sVar.SetValue(b, true);
-					break;
+					break; 
+				}
 				case Cvar::BOOL2:
+				{
 					size = sizeof(bool) * 2;
-					boolCursor = (bool*)cursor;
+					boolCursor = reinterpret_cast<bool*>(cursor);
 					sVar.SetValue(boolCursor, 2, true);
 					cursor += size;
-					break;
+					break; 
+				}
 				case Cvar::BOOL3:
+				{
 					size = sizeof(bool) * 3;
-					boolCursor = (bool*)cursor;
+					boolCursor = reinterpret_cast<bool*>(cursor);
 					sVar.SetValue(boolCursor, 3, true);
 					cursor += size;
-					break;
+					break; 
+				}
 				case Cvar::BOOL4:
+				{
 					size = sizeof(bool) * 4;
-					boolCursor = (bool*)cursor;
+					boolCursor = reinterpret_cast<bool*>(cursor);
 					sVar.SetValue(boolCursor, 4, true);
 					cursor += size;
-					break;
+					break; 
+				}
 				case Cvar::INT:
+				{
 					size = sizeof(int);
 					memcpy(&int_v, cursor, size);
 					cursor += size;
 					sVar.SetValue(int_v, true);
-					break;
+					break; 
+				}
 				case Cvar::INT2:
+				{
 					size = sizeof(int) * 2;
-					intCursor = (int*)cursor;
+					intCursor = reinterpret_cast<int*>(cursor);
 					sVar.SetValue(intCursor, 2, true);
 					cursor += size;
-					break;
+					break; 
+				}
 				case Cvar::INT3:
+				{
 					size = sizeof(int) * 3;
-					intCursor = (int*)cursor;
+					intCursor = reinterpret_cast<int*>(cursor);
 					sVar.SetValue(intCursor, 3, true);
 					cursor += size;
-					break;
+					break; 
+				}
 				case Cvar::INT4:
+				{
 					size = sizeof(int) * 4;
-					intCursor = (int*)cursor;
+					intCursor = reinterpret_cast<int*>(cursor);
 					sVar.SetValue(intCursor, 4, true);
 					cursor += size;
-					break;
+					break; 
+				}
 				case Cvar::FLOAT:
+				{
 					size = sizeof(float);
 					memcpy(&f, cursor, size);
 					cursor += size;
 					sVar.SetValue(f, true);
-					break;
-					break;
+					break; 
+				}
 				case Cvar::FLOAT2:
+				{
 					size = sizeof(float) * 2;
-					floatCursor = (float*)cursor;
+					floatCursor = reinterpret_cast<float*>(cursor);
 					sVar.SetValue(math::float2(floatCursor), true);
-					cursor += size;					
-					break;
+					cursor += size;
+					break; 
+				}
 				case Cvar::FLOAT3:
+				{
 					size = sizeof(float) * 3;
-					floatCursor = (float*)cursor;
+					floatCursor = reinterpret_cast<float*>(cursor);
 					sVar.SetValue(math::float3(floatCursor), true);
-					cursor += size;								
-					break;
+					cursor += size;
+					break; 
+				}
 				case Cvar::FLOAT4:
 				case Cvar::MAT2:
+				{
 					size = sizeof(float) * 4;
-					floatCursor = (float*)cursor;
+					floatCursor = reinterpret_cast<float*>(cursor);
 					sVar.SetValue(math::float4(floatCursor), true);
 					cursor += size;
-					break;
+					break; 
+				}
 				case Cvar::MAT3:
+				{
 					size = sizeof(float) * 9;
-					floatCursor = (float*)cursor;
+					floatCursor = reinterpret_cast<float*>(cursor);
 					{
 						math::float3x3 mat3;
 						mat3.Set(floatCursor);
 						sVar.SetValue(mat3, true);
 					}
-					cursor += size;								
-					break;
+					cursor += size;
+					break; 
+				}
 				case Cvar::MAT4:
+				{
 					size = sizeof(float) * 16;
-					floatCursor = (float*)cursor;
+					floatCursor = reinterpret_cast<float*>(cursor);
 					{
 						math::float4x4 mat4;
 						mat4.Set(floatCursor);
 						sVar.SetValue(mat4, true);
 					}
 					cursor += size;
-					break;
+					break; 
+				}
 				case Cvar::SAMPLER:
+				{
 					nSize = 0;
 					size = sizeof(uint);
-					memcpy( &nSize, cursor, size);
+					memcpy(&nSize, cursor, size);
 					cursor += size;
-					if (nSize > 0) {
+					if (nSize > 0)
+					{
 						size = sizeof(char) * nSize;
-						sVar.SetSampler(App->resources->IsReference(eastl::string(cursor, nSize).c_str()), true);
+						sVar.SetSampler(App::resources->IsReference(eastl::string(cursor, nSize).c_str()), true);
 						cursor += size;
 					}
-					else
-						sVar.SetSampler(nullptr, true);
-					break;
+					else sVar.SetSampler(nullptr, true);
+					break; 
 				}
-
+				}
 				fromShaderCustomUniforms.push_back(sVar);
 			}
 		}
-
 		ResourceContainer::inMemory = true;
 	}
 }
 
 void RE_Material::BinarySerialize()
 {
-	RE_FileIO libraryFile(GetLibraryPath(), App->fs->GetZipPath());
+	RE_FileIO libraryFile(GetLibraryPath(), App::fs->GetZipPath());
 
 	uint bufferSize = GetBinarySize();
 	char* buffer = new char[bufferSize + 1];
@@ -1102,8 +1133,10 @@ void RE_Material::BinarySerialize()
 	memcpy(cursor, &uSize, size);
 	cursor += size;
 
-	if (uSize > 0) {
-		for (uint i = 0; i < uSize; i++) {
+	if (uSize > 0)
+	{
+		for (uint i = 0; i < uSize; i++)
+		{
 			uint nSize = fromShaderCustomUniforms[i].name.size();
 			size = sizeof(uint);
 			memcpy(cursor, &nSize, size);
@@ -1127,89 +1160,120 @@ void RE_Material::BinarySerialize()
 			switch (fromShaderCustomUniforms[i].GetType())
 			{
 			case Cvar::BOOL:
+			{
 				b = fromShaderCustomUniforms[i].AsBool();
 				size = sizeof(bool);
 				memcpy(cursor, &b, size);
 				cursor += size;
-				break;
+				break; 
+			}
 			case Cvar::BOOL2:
-				size = sizeof(bool)* 2;
+			{
+				size = sizeof(bool) * 2;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsBool2(), size);
 				cursor += size;
-				break;
+				break; 
+			}
 			case Cvar::BOOL3:
+			{
 				size = sizeof(bool) * 3;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsBool3(), size);
 				cursor += size;
-				break;
+				break; 
+			}
 			case Cvar::BOOL4:
+			{
 				size = sizeof(bool) * 4;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsBool4(), size);
 				cursor += size;
-				break;
+				break; 
+			}
 			case Cvar::INT:
+			{
 				int_v = fromShaderCustomUniforms[i].AsInt();
 				size = sizeof(int);
 				memcpy(cursor, &int_v, size);
-				cursor += size;				
-				break;
+				cursor += size;
+				break; 
+			}
 			case Cvar::INT2:
+			{
 				size = sizeof(int) * 2;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsInt2(), size);
-				cursor += size;				
-				break;
+				cursor += size;
+				break; 
+			}
 			case Cvar::INT3:
+			{
 				size = sizeof(int) * 3;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsInt3(), size);
-				cursor += size;							
-				break;
+				cursor += size;
+				break; 
+			}
 			case Cvar::INT4:
+			{
 				size = sizeof(int) * 4;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsInt4(), size);
-				cursor += size;			
-				break;
+				cursor += size;
+				break; 
+			}
 			case Cvar::FLOAT:
+			{
 				size = sizeof(float);
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
-				cursor += size;		
-				break;
+				cursor += size;
+				break; 
+			}
 			case Cvar::FLOAT2:
+			{
 				size = sizeof(float) * 2;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
-				cursor += size;						
-				break;
+				cursor += size;
+				break; 
+			}
 			case Cvar::FLOAT3:
+			{
 				size = sizeof(float) * 3;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
-				cursor += size;					
-				break;
+				cursor += size;
+				break; 
+			}
 			case Cvar::FLOAT4:
 			case Cvar::MAT2:
+			{
 				size = sizeof(float) * 4;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
-				cursor += size;	
-				break;
+				cursor += size;
+				break; 
+			}
 			case Cvar::MAT3:
+			{
 				size = sizeof(float) * 9;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
-				cursor += size;	
-				break;
+				cursor += size;
+				break; 
+			}
 			case Cvar::MAT4:
+			{
 				size = sizeof(float) * 16;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
-				cursor += size;	
-				break;
+				cursor += size;
+				break; 
+			}
 			case Cvar::SAMPLER:
+			{
 				nSize = (fromShaderCustomUniforms[i].AsCharP()) ? strlen(fromShaderCustomUniforms[i].AsCharP()) : 0;
 				size = sizeof(uint);
 				memcpy(cursor, &nSize, size);
-				cursor += size;	
-				if (nSize > 0) {
+				cursor += size;
+				if (nSize > 0)
+				{
 					size = sizeof(char) * nSize;
 					memcpy(cursor, fromShaderCustomUniforms[i].AsCharP(), size);
 					cursor += size;
 				}
-				break;
+				break; 
+			}
 			}
 		}
 	}
@@ -1223,65 +1287,61 @@ void RE_Material::BinarySerialize()
 
 void RE_Material::UseResources()
 {
-	if(shaderMD5) App->resources->Use(shaderMD5);
-
-	for (auto t : tDiffuse) App->resources->Use(t);
-	for (auto t : tSpecular) App->resources->Use(t);
-	for (auto t : tAmbient) App->resources->Use(t);
-	for (auto t : tEmissive) App->resources->Use(t);
-	for (auto t : tOpacity) App->resources->Use(t);
-	for (auto t : tShininess) App->resources->Use(t);
-	for (auto t : tHeight) App->resources->Use(t);
-	for (auto t : tNormals) App->resources->Use(t);
-	for (auto t : tReflection) App->resources->Use(t);
-	for (auto t : tUnknown) App->resources->Use(t);
+	if(shaderMD5) App::resources->Use(shaderMD5);
+	for (auto t : tDiffuse) App::resources->Use(t);
+	for (auto t : tSpecular) App::resources->Use(t);
+	for (auto t : tAmbient) App::resources->Use(t);
+	for (auto t : tEmissive) App::resources->Use(t);
+	for (auto t : tOpacity) App::resources->Use(t);
+	for (auto t : tShininess) App::resources->Use(t);
+	for (auto t : tHeight) App::resources->Use(t);
+	for (auto t : tNormals) App::resources->Use(t);
+	for (auto t : tReflection) App::resources->Use(t);
+	for (auto t : tUnknown) App::resources->Use(t);
 }
 
 void RE_Material::UnUseResources()
 {
-	if (shaderMD5) App->resources->UnUse(shaderMD5);
-
-	for (auto t : tDiffuse) App->resources->UnUse(t);
-	for (auto t : tSpecular) App->resources->UnUse(t);
-	for (auto t : tAmbient) App->resources->UnUse(t);
-	for (auto t : tEmissive) App->resources->UnUse(t);
-	for (auto t : tOpacity) App->resources->UnUse(t);
-	for (auto t : tShininess) App->resources->UnUse(t);
-	for (auto t : tHeight) App->resources->UnUse(t);
-	for (auto t : tNormals) App->resources->UnUse(t);
-	for (auto t : tReflection) App->resources->UnUse(t);
-	for (auto t : tUnknown) App->resources->UnUse(t);
-
+	if (shaderMD5) App::resources->UnUse(shaderMD5);
+	for (auto t : tDiffuse) App::resources->UnUse(t);
+	for (auto t : tSpecular) App::resources->UnUse(t);
+	for (auto t : tAmbient) App::resources->UnUse(t);
+	for (auto t : tEmissive) App::resources->UnUse(t);
+	for (auto t : tOpacity) App::resources->UnUse(t);
+	for (auto t : tShininess) App::resources->UnUse(t);
+	for (auto t : tHeight) App::resources->UnUse(t);
+	for (auto t : tNormals) App::resources->UnUse(t);
+	for (auto t : tReflection) App::resources->UnUse(t);
+	for (auto t : tUnknown) App::resources->UnUse(t);
 }
 
-void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultShader)
+void RE_Material::UploadToShader(const float* model, bool usingChekers, bool defaultShader)
 {
-	const char* usingShader = (shaderMD5 && !defaultShader) ? shaderMD5 : App->internalResources->GetDefaultShader();
-	RE_Shader* shaderRes = (RE_Shader*)App->resources->At(usingShader);
+	const char* usingShader = (shaderMD5 && !defaultShader) ? shaderMD5 : App::internalResources.GetDefaultShader();
+	RE_Shader* shaderRes = dynamic_cast<RE_Shader*>(App::resources->At(usingShader));
 	RE_GLCacheManager::ChangeShader(shaderRes->GetID());
 	shaderRes->UploadModel(model);
 
 	unsigned int ShaderID = shaderRes->GetID();
-
 	bool onlyColor = true;
-	if (!usingChekers) {
-		if (usingOnMat[CDIFFUSE] || usingOnMat[CSPECULAR] || usingOnMat[CAMBIENT] || usingOnMat[CEMISSIVE] || usingOnMat[CTRANSPARENT] || usingOnMat[OPACITY] || usingOnMat[SHININESS] || usingOnMat[SHININESSSTRENGHT] || usingOnMat[REFRACCTI])
-			RE_ShaderImporter::setFloat(ShaderID, "useColor", 1.0f);
-		else
-			RE_ShaderImporter::setFloat(ShaderID, "useColor", 0.0f);
+	if (!usingChekers)
+	{
+		RE_ShaderImporter::setFloat(ShaderID, "useColor",
+			(usingOnMat[CDIFFUSE] || usingOnMat[CSPECULAR] || usingOnMat[CAMBIENT] ||
+			 usingOnMat[CEMISSIVE] || usingOnMat[CTRANSPARENT] || usingOnMat[OPACITY] ||
+			 usingOnMat[SHININESS] || usingOnMat[SHININESSSTRENGHT] || usingOnMat[REFRACCTI]) ? 1.0f : 0.0f);
 
 		if ((usingOnMat[TDIFFUSE] && !tDiffuse.empty()) || (usingOnMat[TSPECULAR] && !tSpecular.empty())
 			|| (usingOnMat[TAMBIENT] && !tAmbient.empty()) || (usingOnMat[TEMISSIVE] && !tEmissive.empty())
 			|| (usingOnMat[TOPACITY] && !tOpacity.empty() || (usingOnMat[TSHININESS] && !tShininess.empty())
-				|| (usingOnMat[THEIGHT] && !tHeight.empty()) || !usingOnMat[TNORMALS] && !tNormals.empty())
+			|| (usingOnMat[THEIGHT] && !tHeight.empty()) || !usingOnMat[TNORMALS] && !tNormals.empty())
 			|| (usingOnMat[TREFLECTION] && !tReflection.empty())
-			|| shaderRes->NeedUploadDepth()) {
-
+			|| shaderRes->NeedUploadDepth())
+		{
 			RE_ShaderImporter::setFloat(ShaderID, "useTexture", 1.0f);
 			onlyColor = false;
 		}
-		else
-			RE_ShaderImporter::setFloat(ShaderID, "useTexture", 0.0f);
+		else RE_ShaderImporter::setFloat(ShaderID, "useTexture", 0.0f);
 	}
 	else
 	{
@@ -1291,114 +1351,97 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 	}
 
 	unsigned int textureCounter = 0;
-	if (shaderRes->NeedUploadDepth()) {
+	if (shaderRes->NeedUploadDepth())
+	{
 		glActiveTexture(GL_TEXTURE0 + textureCounter);
-		RE_GLCacheManager::ChangeTextureBind(App->renderer3d->GetDepthTexture());
+		RE_GLCacheManager::ChangeTextureBind(App::renderer3d->GetDepthTexture());
 		shaderRes->UploadDepth(textureCounter++);
 	}
 
 	// Bind Textures
-	if (onlyColor){
-		if(usingOnMat[CDIFFUSE]) RE_ShaderImporter::setFloat(ShaderID, "cdiffuse", cDiffuse);
-		if(usingOnMat[CSPECULAR]) RE_ShaderImporter::setFloat(ShaderID, "cspecular", cSpecular);
-		if(usingOnMat[CAMBIENT]) RE_ShaderImporter::setFloat(ShaderID, "cambient", cAmbient);
-		if(usingOnMat[CEMISSIVE]) RE_ShaderImporter::setFloat(ShaderID, "cemissive", cEmissive);
-		if(usingOnMat[CTRANSPARENT]) RE_ShaderImporter::setFloat(ShaderID, "ctransparent", cTransparent);
-		if(usingOnMat[OPACITY]) RE_ShaderImporter::setFloat(ShaderID, "opacity", opacity);
-		if(usingOnMat[SHININESS]) RE_ShaderImporter::setFloat(ShaderID, "shininess", shininess);
-		if(usingOnMat[SHININESSSTRENGHT]) RE_ShaderImporter::setFloat(ShaderID, "shininessST", shininessStrenght);
-		if(usingOnMat[REFRACCTI]) RE_ShaderImporter::setFloat(ShaderID, "refraccti", refraccti);
+	if (onlyColor)
+	{
+		if(usingOnMat[CDIFFUSE])			RE_ShaderImporter::setFloat(ShaderID, "cdiffuse", cDiffuse);
+		if(usingOnMat[CSPECULAR])			RE_ShaderImporter::setFloat(ShaderID, "cspecular", cSpecular);
+		if(usingOnMat[CAMBIENT])			RE_ShaderImporter::setFloat(ShaderID, "cambient", cAmbient);
+		if(usingOnMat[CEMISSIVE])			RE_ShaderImporter::setFloat(ShaderID, "cemissive", cEmissive);
+		if(usingOnMat[CTRANSPARENT])		RE_ShaderImporter::setFloat(ShaderID, "ctransparent", cTransparent);
+		if(usingOnMat[OPACITY])				RE_ShaderImporter::setFloat(ShaderID, "opacity", opacity);
+		if(usingOnMat[SHININESS])			RE_ShaderImporter::setFloat(ShaderID, "shininess", shininess);
+		if(usingOnMat[SHININESSSTRENGHT])	RE_ShaderImporter::setFloat(ShaderID, "shininessST", shininessStrenght);
+		if(usingOnMat[REFRACCTI])			RE_ShaderImporter::setFloat(ShaderID, "refraccti", refraccti);
 	}
 	else if (usingChekers)
 	{
 		glActiveTexture(GL_TEXTURE0 + textureCounter);
-		eastl::string name = "tdiffuse0";
-		RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-		RE_GLCacheManager::ChangeTextureBind(App->internalResources->GetTextureChecker());
+		RE_ShaderImporter::setInt(ShaderID, "tdiffuse0", textureCounter++);
+		RE_GLCacheManager::ChangeTextureBind(App::internalResources.GetTextureChecker());
 	}
 	else
 	{
-		if (usingOnMat[CDIFFUSE]) RE_ShaderImporter::setFloat(ShaderID, "cdiffuse", cDiffuse);
-		if (usingOnMat[CSPECULAR]) RE_ShaderImporter::setFloat(ShaderID, "cspecular", cSpecular);
-		if (usingOnMat[CAMBIENT]) RE_ShaderImporter::setFloat(ShaderID, "cambient", cAmbient);
-		if (usingOnMat[CEMISSIVE]) RE_ShaderImporter::setFloat(ShaderID, "cemissive", cEmissive);
-		if (usingOnMat[CTRANSPARENT]) RE_ShaderImporter::setFloat(ShaderID, "ctransparent", cTransparent);
-		if (usingOnMat[OPACITY]) RE_ShaderImporter::setFloat(ShaderID, "opacity", opacity);
-		if (usingOnMat[SHININESS]) RE_ShaderImporter::setFloat(ShaderID, "shininess", shininess);
-		if (usingOnMat[SHININESSSTRENGHT]) RE_ShaderImporter::setFloat(ShaderID, "shininessST", shininessStrenght);
-		if (usingOnMat[REFRACCTI]) RE_ShaderImporter::setFloat(ShaderID, "refraccti", refraccti);
+		if (usingOnMat[CDIFFUSE])			RE_ShaderImporter::setFloat(ShaderID, "cdiffuse", cDiffuse);
+		if (usingOnMat[CSPECULAR])			RE_ShaderImporter::setFloat(ShaderID, "cspecular", cSpecular);
+		if (usingOnMat[CAMBIENT])			RE_ShaderImporter::setFloat(ShaderID, "cambient", cAmbient);
+		if (usingOnMat[CEMISSIVE])			RE_ShaderImporter::setFloat(ShaderID, "cemissive", cEmissive);
+		if (usingOnMat[CTRANSPARENT])		RE_ShaderImporter::setFloat(ShaderID, "ctransparent", cTransparent);
+		if (usingOnMat[OPACITY])			RE_ShaderImporter::setFloat(ShaderID, "opacity", opacity);
+		if (usingOnMat[SHININESS])			RE_ShaderImporter::setFloat(ShaderID, "shininess", shininess);
+		if (usingOnMat[SHININESSSTRENGHT])	RE_ShaderImporter::setFloat(ShaderID, "shininessST", shininessStrenght);
+		if (usingOnMat[REFRACCTI])			RE_ShaderImporter::setFloat(ShaderID, "refraccti", refraccti);
 
 		for (unsigned int i = 0; i < tDiffuse.size() || i < usingOnMat[TDIFFUSE]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			eastl::string name = "tdiffuse";
-			name += eastl::to_string(i);
-			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-			((RE_Texture*)App->resources->At(tDiffuse[i]))->use();
+			RE_ShaderImporter::setInt(ShaderID, ("tdiffuse" + eastl::to_string(i)).c_str(), textureCounter++);
+			dynamic_cast<RE_Texture*>(App::resources->At(tDiffuse[i]))->use();
 		}
 		for (unsigned int i = 0; i < tSpecular.size() || i < usingOnMat[TSPECULAR]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			eastl::string name = "tspecular";
-			name += eastl::to_string(i);
-			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-			((RE_Texture*)App->resources->At(tSpecular[i]))->use();
+			RE_ShaderImporter::setInt(ShaderID, ("tspecular" + eastl::to_string(i)).c_str(), textureCounter++);
+			dynamic_cast<RE_Texture*>(App::resources->At(tSpecular[i]))->use();
 		}
 		for (unsigned int i = 0; i < tAmbient.size() || i < usingOnMat[TAMBIENT]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			eastl::string name = "tambient";
-			name += eastl::to_string(i);
-			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-			((RE_Texture*)App->resources->At(tAmbient[i]))->use();
+			RE_ShaderImporter::setInt(ShaderID, ("tambient" + eastl::to_string(i)).c_str(), textureCounter++);
+			dynamic_cast<RE_Texture*>(App::resources->At(tAmbient[i]))->use();
 		}
 		for (unsigned int i = 0; i < tEmissive.size() || i < usingOnMat[TEMISSIVE]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			eastl::string name = "temissive";
-			name += eastl::to_string(i);
-			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-			((RE_Texture*)App->resources->At(tEmissive[i]))->use();
+			RE_ShaderImporter::setInt(ShaderID, ("temissive" + eastl::to_string(i)).c_str(), textureCounter++);
+			dynamic_cast<RE_Texture*>(App::resources->At(tEmissive[i]))->use();
 		}
 		for (unsigned int i = 0; i < tOpacity.size() || i < usingOnMat[TOPACITY]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			eastl::string name = "topacity";
-			name += eastl::to_string(i);
-			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-			((RE_Texture*)App->resources->At(tOpacity[i]))->use();
+			RE_ShaderImporter::setInt(ShaderID, ("topacity" + eastl::to_string(i)).c_str(), textureCounter++);
+			dynamic_cast<RE_Texture*>(App::resources->At(tOpacity[i]))->use();
 		}
 		for (unsigned int i = 0; i < tShininess.size() || i < usingOnMat[TSHININESS]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			eastl::string name = "tshininess";
-			name += eastl::to_string(i);
-			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-			((RE_Texture*)App->resources->At(tShininess[i]))->use();
+			RE_ShaderImporter::setInt(ShaderID, ("tshininess" + eastl::to_string(i)).c_str(), textureCounter++);
+			dynamic_cast<RE_Texture*>(App::resources->At(tShininess[i]))->use();
 		}
 		for (unsigned int i = 0; i < tHeight.size() || i < usingOnMat[THEIGHT]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			eastl::string name = "theight";
-			name += eastl::to_string(i);
-			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-			((RE_Texture*)App->resources->At(tHeight[i]))->use();
+			RE_ShaderImporter::setInt(ShaderID, ("theight" + eastl::to_string(i)).c_str(), textureCounter++);
+			dynamic_cast<RE_Texture*>(App::resources->At(tHeight[i]))->use();
 		}
 		for (unsigned int i = 0; i < tNormals.size() || i < usingOnMat[TNORMALS]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			eastl::string name = "tnormals";
-			name += eastl::to_string(i);
-			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-			((RE_Texture*)App->resources->At(tNormals[i]))->use();
+			RE_ShaderImporter::setInt(ShaderID, ("tnormals" + eastl::to_string(i)).c_str(), textureCounter++);
+			dynamic_cast<RE_Texture*>(App::resources->At(tNormals[i]))->use();
 		}
 		for (unsigned int i = 0; i < tReflection.size() || i < usingOnMat[TREFLECTION]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
-			eastl::string name = "treflection";
-			name += eastl::to_string(i);
-			RE_ShaderImporter::setInt(ShaderID, name.c_str(), textureCounter++);
-			((RE_Texture*)App->resources->At(tReflection[i]))->use();
+			RE_ShaderImporter::setInt(ShaderID, ("treflection" + eastl::to_string(i)).c_str(), textureCounter++);
+			dynamic_cast<RE_Texture*>(App::resources->At(tReflection[i]))->use();
 		}
 	}
 
@@ -1409,143 +1452,130 @@ void RE_Material::UploadToShader(float* model, bool usingChekers, bool defaultSh
 		float* f_ptr;
 		switch (fromShaderCustomUniforms[i].GetType())
 		{
-		case Cvar::BOOL:
-			RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsBool());
-			break;
+		case Cvar::BOOL: RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsBool()); break;
 		case Cvar::BOOL2:
+		{
 			b = fromShaderCustomUniforms[i].AsBool2();
 			RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), b[0], b[1]);
-			break;
+			break; 
+		}
 		case Cvar::BOOL3:
+		{
 			b = fromShaderCustomUniforms[i].AsBool3();
 			RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), b[0], b[1], b[2]);
-			break;
+			break; 
+		}
 		case Cvar::BOOL4:
+		{
 			b = fromShaderCustomUniforms[i].AsBool4();
 			RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), b[0], b[1], b[2], b[3]);
-			break;
-		case Cvar::INT:
-			RE_ShaderImporter::setInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsInt());
-			break;
+			break; 
+		}
+		case Cvar::INT: RE_ShaderImporter::setInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsInt()); break;
 		case Cvar::INT2:
+		{
 			int_pv = fromShaderCustomUniforms[i].AsInt2();
 			RE_ShaderImporter::setInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), int_pv[0], int_pv[1]);
-			break;
+			break; 
+		}
 		case Cvar::INT3:
+		{
 			int_pv = fromShaderCustomUniforms[i].AsInt3();
 			RE_ShaderImporter::setInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), int_pv[0], int_pv[1], int_pv[2]);
-			break;
+			break; 
+		}
 		case Cvar::INT4:
+		{
 			int_pv = fromShaderCustomUniforms[i].AsInt4();
 			RE_ShaderImporter::setInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), int_pv[0], int_pv[1], int_pv[2], int_pv[3]);
-			break;
-		case Cvar::FLOAT:
-			RE_ShaderImporter::setFloat(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsFloat());
-			break;
+			break; 
+		}
+		case Cvar::FLOAT: RE_ShaderImporter::setFloat(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsFloat()); break; 
 		case Cvar::FLOAT2:
+		{
 			f_ptr = fromShaderCustomUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat(ShaderID, fromShaderCustomUniforms[i].name.c_str(), f_ptr[0], f_ptr[1]);
-			break;
+			break; 
+		}
 		case Cvar::FLOAT3:
+		{
 			f_ptr = fromShaderCustomUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat(ShaderID, fromShaderCustomUniforms[i].name.c_str(), f_ptr[0], f_ptr[1], f_ptr[2]);
-			break;
+			break; 
+		}
 		case Cvar::FLOAT4:
 		case Cvar::MAT2:
+		{
 			f_ptr = fromShaderCustomUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat(ShaderID, fromShaderCustomUniforms[i].name.c_str(), f_ptr[0], f_ptr[1], f_ptr[2], f_ptr[3]);
-			break;
+			break; 
+		}
 		case Cvar::MAT3:
+		{
 			f_ptr = fromShaderCustomUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat3x3(ShaderID, fromShaderCustomUniforms[i].name.c_str(), f_ptr);
-			break;
+			break; 
+		}
 		case Cvar::MAT4:
+		{
 			f_ptr = fromShaderCustomUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat4x4(ShaderID, fromShaderCustomUniforms[i].name.c_str(), f_ptr);
 			break;
+		}
 		case Cvar::SAMPLER:
-			if (fromShaderCustomUniforms[i].AsCharP()) {
+		{
+			if (fromShaderCustomUniforms[i].AsCharP())
+			{
 				glActiveTexture(GL_TEXTURE0 + textureCounter);
 				RE_ShaderImporter::setUnsignedInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), textureCounter++);
-				((RE_Texture*)App->resources->At(fromShaderCustomUniforms[i].AsCharP()))->use();
+				dynamic_cast<RE_Texture*>(App::resources->At(fromShaderCustomUniforms[i].AsCharP()))->use();
 			}
 			break;
+		}
 		}
 	}
 }
 
 unsigned int RE_Material::GetShaderID() const
 {
-	const char* usingShader = (shaderMD5) ? shaderMD5 : App->internalResources->GetDefaultShader();
-	return ((RE_Shader*)App->resources->At(usingShader))->GetID();
+	const char* usingShader = (shaderMD5) ? shaderMD5 : App::internalResources.GetDefaultShader();
+	return dynamic_cast<RE_Shader*>(App::resources->At(usingShader))->GetID();
 }
 
 unsigned int RE_Material::GetBinarySize()
 {
-	uint charCount = 0;
-
-	charCount += sizeof(RE_ShadingMode);
-	charCount += sizeof(uint) * 18;
-	charCount += sizeof(float) * 15;
-	charCount += sizeof(bool) * 2;
-	charCount += sizeof(float) * 4;
+	uint charCount = sizeof(RE_ShadingMode) + (sizeof(uint) * 18) + (sizeof(float) * 15) + (sizeof(bool) * 2) + (sizeof(float) * 4);
 
 	//Custom uniforms
 	charCount += sizeof(uint);
-	if (!fromShaderCustomUniforms.empty()) {
+	if (!fromShaderCustomUniforms.empty())
+	{
 		charCount += (sizeof(uint) * 2 + sizeof(float)) * fromShaderCustomUniforms.size();
-		for (uint i = 0; i < fromShaderCustomUniforms.size(); i++) {
+		for (uint i = 0; i < fromShaderCustomUniforms.size(); i++)
+		{
 			charCount += sizeof(char) * fromShaderCustomUniforms[i].name.size();
-			switch (fromShaderCustomUniforms[i].GetType())
-			{
-			case Cvar::BOOL:
-				charCount += sizeof(bool);
-				break;
-			case Cvar::BOOL2:
-				charCount += sizeof(bool) * 2;
-				break;
-			case Cvar::BOOL3:
-				charCount += sizeof(bool) * 3;
-				break;
-			case Cvar::BOOL4:
-				charCount += sizeof(bool) * 4;
-				break;
-			case Cvar::INT:
-				charCount += sizeof(int);
-				break;
-			case Cvar::INT2:
-				charCount += sizeof(int) * 2;
-				break;
-			case Cvar::INT3:
-				charCount += sizeof(int) * 3;
-				break;
-			case Cvar::INT4:
-				charCount += sizeof(int) * 4;
-				break;
-			case Cvar::FLOAT:
-				charCount += sizeof(float);
-				break;
-			case Cvar::FLOAT2:
-				charCount += sizeof(float) * 2;
-				break;
-			case Cvar::FLOAT3:
-				charCount += sizeof(float) * 3;
-				break;
+			switch (fromShaderCustomUniforms[i].GetType()) {
+			case Cvar::BOOL: charCount += sizeof(bool); break;
+			case Cvar::BOOL2: charCount += sizeof(bool) * 2; break;
+			case Cvar::BOOL3: charCount += sizeof(bool) * 3; break;
+			case Cvar::BOOL4: charCount += sizeof(bool) * 4; break;
+			case Cvar::INT: charCount += sizeof(int); break;
+			case Cvar::INT2: charCount += sizeof(int) * 2; break;
+			case Cvar::INT3: charCount += sizeof(int) * 3; break;
+			case Cvar::INT4: charCount += sizeof(int) * 4; break;
+			case Cvar::FLOAT: charCount += sizeof(float); break;
+			case Cvar::FLOAT2: charCount += sizeof(float) * 2; break;
+			case Cvar::FLOAT3: charCount += sizeof(float) * 3; break;
 			case Cvar::FLOAT4:
-			case Cvar::MAT2:
-				charCount += sizeof(float) * 4;
-				break;
-			case Cvar::MAT3:
-				charCount += sizeof(float) * 9;
-				break;
-			case Cvar::MAT4:
-				charCount += sizeof(float) * 16;
-				break;
+			case Cvar::MAT2: charCount += sizeof(float) * 4; break;
+			case Cvar::MAT3: charCount += sizeof(float) * 9; break;
+			case Cvar::MAT4: charCount += sizeof(float) * 16; break;
 			case Cvar::SAMPLER:
+			{
 				charCount += sizeof(uint);
-				if(fromShaderCustomUniforms[i].AsCharP()) charCount += sizeof(char) * strlen(fromShaderCustomUniforms[i].AsCharP());
+				if (fromShaderCustomUniforms[i].AsCharP()) charCount += sizeof(char) * strlen(fromShaderCustomUniforms[i].AsCharP());
 				break;
-			}
+			}}
 		}
 	}
 	return charCount;
@@ -1553,50 +1583,51 @@ unsigned int RE_Material::GetBinarySize()
 
 void RE_Material::GetAndProcessUniformsFromShader()
 {
+	for (uint i = 0; i < 18; i++) usingOnMat[i] = 0;
+	fromShaderCustomUniforms.clear();
+
 	static const char* materialNames[18] = {  "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient",  "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity",  "shininess", "shininessST", "tshininess", "refraccti", "theight",  "tnormals", "treflection" };
 	static const char* materialTextures[9] = {  "tdiffuse", "tspecular", "tambient", "temissive", "topacity", "tshininess", "theight", "tnormals", "treflection" };
 	
-	for (uint i = 0; i < 18; i++)
-		usingOnMat[i] = 0;
-
-	fromShaderCustomUniforms.clear();
-	eastl::vector<ShaderCvar> fromShader = ((RE_Shader*)App->resources->At(shaderMD5 ? shaderMD5 : App->internalResources->GetDefaultShader()))->GetUniformValues();
-
+	eastl::vector<ShaderCvar> fromShader = dynamic_cast<RE_Shader*>(App::resources->At(shaderMD5 ? shaderMD5 : App::internalResources.GetDefaultShader()))->GetUniformValues();
 	for (auto sVar : fromShader)
 	{
 		if (sVar.custom)
+		{
 			fromShaderCustomUniforms.push_back(sVar);
+		}
 		else
 		{
 			int pos = sVar.name.find_first_of("0123456789");
 			eastl::string name = (pos != eastl::string::npos) ? sVar.name.substr(0, pos) : sVar.name;
-
 			MaterialUINT index = UNDEFINED;
 			for (uint i = 0; i < 18; i++)
+			{
 				if (name.compare(materialNames[i]) == 0)
 				{
 					index = (MaterialUINT)i;
 					break;
 				}
+			}
 
 			if (index != UNDEFINED)
 			{
 				bool texture = false;
 				for (uint i = 0; i < 9; i++)
+				{
 					if (name.compare(materialTextures[i]) == 0)
 					{
 						texture = true;
 						break;
 					}
+				}
 
 				if (texture)
 				{
 					unsigned int count = EA::StdC::AtoU32(&sVar.name.back()) + 1;
-					if (usingOnMat[index] < count)
-						usingOnMat[index] = count;
+					if (usingOnMat[index] < count) usingOnMat[index] = count;
 				}
-				else
-					usingOnMat[index] = 1;
+				else usingOnMat[index] = 1;
 			}
 		}
 	}
@@ -1604,7 +1635,8 @@ void RE_Material::GetAndProcessUniformsFromShader()
 
 bool RE_Material::ExitsOnTexture(const char* texture, eastl::vector<const char*>* textures)
 {
-	for (auto tex : *textures) {
+	for (auto tex : *textures)
+	{
 		if (tex == texture)
 			return true;
 	}
@@ -1614,13 +1646,9 @@ bool RE_Material::ExitsOnTexture(const char* texture, eastl::vector<const char*>
 void RE_Material::DeleteTexture(const char* texMD5, eastl::vector<const char*>* textures)
 {
 	auto iter = textures->begin();
-	
 	while (iter != textures->end())
 	{
-		if (*iter == texMD5) {
-			textures->erase(iter);
-		}
-		else
-			iter++;
+		if (*iter == texMD5) textures->erase(iter);
+		else iter++;
 	}
 }

@@ -6,16 +6,13 @@
 #include "RE_InternalResources.h"
 #include "OutputLog.h"
 #include "RE_Math.h"
-
 #include "RE_CompPrimitive.h"
-
 #include "RE_GLCacheManager.h"
 #include "RE_Shader.h"
 
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
-
 #include "par_shapes.h"
 
 #define CUBE_TRIANGLES 36
@@ -46,7 +43,6 @@ RE_PrimitiveManager::~RE_PrimitiveManager()
 void RE_PrimitiveManager::Init()
 {
 	App::ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
-
 	CheckPlatonicVAO(C_CUBE);
 	CheckPlatonicVAO(C_DODECAHEDRON);
 	CheckPlatonicVAO(C_TETRAHEDRON);
@@ -56,46 +52,21 @@ void RE_PrimitiveManager::Init()
 
 void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP, RE_GameObject* parent)
 {
-	unsigned int shaderPrimitive = ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID();
-	switch (cmpP->GetType())
-	{
-	case C_CUBE:
-		((RE_CompCube*)cmpP)->SetUp(parent, vao_cube, shaderPrimitive, cube_triangles);
-		break;
-	case C_DODECAHEDRON:
-		((RE_CompDodecahedron*)cmpP)->SetUp(parent, vao_dodo, shaderPrimitive, dodo_triangles);
-		break;
-	case C_TETRAHEDRON:
-		((RE_CompTetrahedron*)cmpP)->SetUp(parent, vao_tetra, shaderPrimitive, tetra_triangles);
-		break;
-	case C_OCTOHEDRON:
-		((RE_CompOctohedron*)cmpP)->SetUp(parent, vao_octo, shaderPrimitive, octo_triangles);
-		break;
-	case C_ICOSAHEDRON:
-		((RE_CompIcosahedron*)cmpP)->SetUp(parent, vao_icosa, shaderPrimitive, icosa_triangles);
-		break;
-	case C_SPHERE:
-		((RE_CompSphere*)cmpP)->SetUp(parent, shaderPrimitive, 16, 18);
-		break;
-	case C_CYLINDER:
-		((RE_CompCylinder*)cmpP)->SetUp(parent, shaderPrimitive, 30, 3);
-		break;
-	case C_HEMISHPERE:
-		((RE_CompHemiSphere*)cmpP)->SetUp(parent, shaderPrimitive, 10, 10);
-		break;
-	case C_TORUS:
-		((RE_CompTorus*)cmpP)->SetUp(parent, shaderPrimitive, 30, 40, true, 0.1f);
-		break;
-	case C_TREFOILKNOT:
-		((RE_CompTrefoiKnot*)cmpP)->SetUp(parent, shaderPrimitive, 30, 40, true, 0.5f);
-		break;
-	case C_ROCK:
-		((RE_CompRock*)cmpP)->SetUp(parent, shaderPrimitive, 5, 20);
-		break;
-	case C_PLANE:
-		((RE_CompPlane*)cmpP)->SetUp(parent, shaderPrimitive, 3, 3);
-		break;
-	}
+	unsigned int shaderPrimitive = dynamic_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultShader()))->GetID();
+	switch (cmpP->GetType()) {
+	case C_CUBE: dynamic_cast<RE_CompCube*>(cmpP)->SetUp(parent, vao_cube, shaderPrimitive, cube_triangles); break;
+	case C_DODECAHEDRON: dynamic_cast<RE_CompDodecahedron*>(cmpP)->SetUp(parent, vao_dodo, shaderPrimitive, dodo_triangles); break;
+	case C_TETRAHEDRON: dynamic_cast<RE_CompTetrahedron*>(cmpP)->SetUp(parent, vao_tetra, shaderPrimitive, tetra_triangles); break;
+	case C_OCTOHEDRON: dynamic_cast<RE_CompOctohedron*>(cmpP)->SetUp(parent, vao_octo, shaderPrimitive, octo_triangles); break;
+	case C_ICOSAHEDRON: dynamic_cast<RE_CompIcosahedron*>(cmpP)->SetUp(parent, vao_icosa, shaderPrimitive, icosa_triangles); break;
+	case C_PLANE: dynamic_cast<RE_CompPlane*>(cmpP)->SetUp(parent, shaderPrimitive, 3, 3); break;
+	case C_FUSTRUM: break;
+	case C_SPHERE: dynamic_cast<RE_CompSphere*>(cmpP)->SetUp(parent, shaderPrimitive, 16, 18); break;
+	case C_CYLINDER: dynamic_cast<RE_CompCylinder*>(cmpP)->SetUp(parent, shaderPrimitive, 30, 3); break;
+	case C_HEMISHPERE: dynamic_cast<RE_CompHemiSphere*>(cmpP)->SetUp(parent, shaderPrimitive, 10, 10); break;
+	case C_TORUS: dynamic_cast<RE_CompTorus*>(cmpP)->SetUp(parent, shaderPrimitive, 30, 40, true, 0.1f); break;
+	case C_TREFOILKNOT: dynamic_cast<RE_CompTrefoiKnot*>(cmpP)->SetUp(parent, shaderPrimitive, 30, 40, true, 0.5f); break;
+	case C_ROCK: dynamic_cast<RE_CompRock*>(cmpP)->SetUp(parent, shaderPrimitive, 5, 20); break; }
 }
 
 RE_CompPrimitive * RE_PrimitiveManager::CreateGrid(RE_GameObject* game_obj)
@@ -134,7 +105,7 @@ RE_CompPrimitive * RE_PrimitiveManager::CreateGrid(RE_GameObject* game_obj)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	RE_CompPrimitive* ret = new RE_CompGrid(game_obj, vao_grid, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID());
+	RE_CompPrimitive* ret = new RE_CompGrid(game_obj, vao_grid, dynamic_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultShader()))->GetID());
 
 	return ret;
 }
@@ -144,47 +115,61 @@ unsigned int RE_PrimitiveManager::CheckPlatonicVAO(unsigned short type)
 	unsigned int ret = 0;
 	switch (type)
 	{
-
 	case C_CUBE:
-		if (vao_cube == 0) {
+	{
+		if (vao_cube == 0)
+		{
 			par_shapes_mesh* cube = par_shapes_create_cube();
 			UploadPlatonic(cube, &vao_cube, &vbo_cube, &ebo_cube, &cube_triangles);
 			par_shapes_free_mesh(cube);
 		}
 		ret = vao_cube;
-		break;
+		break; 
+	}
 	case C_DODECAHEDRON:
-		if (vao_dodo == 0) {
+	{
+		if (vao_dodo == 0)
+		{
 			par_shapes_mesh* dodecahedron = par_shapes_create_dodecahedron();
 			UploadPlatonic(dodecahedron, &vao_dodo, &vbo_dodo, &ebo_dodo, &dodo_triangles);
 			par_shapes_free_mesh(dodecahedron);
 		}
 		ret = vao_dodo;
 		break;
+	}
 	case C_TETRAHEDRON:
-		if (vao_tetra == 0) {
+	{
+		if (vao_tetra == 0)
+		{
 			par_shapes_mesh* tetrahedron = par_shapes_create_tetrahedron();
 			UploadPlatonic(tetrahedron, &vao_tetra, &vbo_tetra, &ebo_tetra, &tetra_triangles);
 			par_shapes_free_mesh(tetrahedron);
 		}
 		ret = vao_tetra;
-		break;
+		break; 
+	}
 	case C_OCTOHEDRON:
-		if (vao_octo == 0) {
+	{
+		if (vao_octo == 0)
+		{
 			par_shapes_mesh* octohedron = par_shapes_create_octahedron();
 			UploadPlatonic(octohedron, &vao_octo, &vbo_octo, &ebo_octo, &octo_triangles);
 			par_shapes_free_mesh(octohedron);
 		}
 		ret = vao_octo;
-		break;
+		break; 
+	}
 	case C_ICOSAHEDRON:
-		if (vao_icosa == 0) {
+	{
+		if (vao_icosa == 0)
+		{
 			par_shapes_mesh* icosahedron = par_shapes_create_icosahedron();
 			UploadPlatonic(icosahedron, &vao_icosa, &vbo_icosa, &ebo_icosa, &icosa_triangles);
 			par_shapes_free_mesh(icosahedron);
 		}
 		ret = vao_icosa;
 		break;
+	}
 	}
 	return ret;
 }
@@ -212,7 +197,8 @@ void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int*
 	stride *= sizeof(float);
 	float* meshBuffer = new float[meshSize];
 	float* cursor = meshBuffer;
-	for (int i = 0; i < plato->npoints; i++) {
+	for (int i = 0; i < plato->npoints; i++)
+	{
 		uint cursorSize = 3;
 		size_t size = sizeof(float) * 3;
 
@@ -222,7 +208,6 @@ void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int*
 		memcpy(cursor, &normals[i * 3], size);
 		cursor += cursorSize;
 	}
-
 
 	glGenVertexArrays(1, vao);
 	RE_GLCacheManager::ChangeVAO(*vao);
@@ -235,11 +220,11 @@ void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int*
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 3));
 
 	glGenBuffers(1, ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, plato->ntriangles * sizeof(unsigned short) * 3, plato->triangles, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<unsigned int>(plato->ntriangles) * sizeof(unsigned short) * 3u, plato->triangles, GL_STATIC_DRAW);
 	
 	*triangles = plato->ntriangles;
 

@@ -74,16 +74,16 @@ void SystemInfo::Init()
 		(gfx_brand = "") += reinterpret_cast<const char*>(GFXBrand.c_str());
 		gt_generation = "GT generation: " + eastl::to_string(static_cast<int>(getGTGeneration(DeviceId)));
 
-		BytesString(vram_total = "Total VRAM: ", static_cast<double>(total));
-		BytesString(vram_used = "VRAM used: ", static_cast<double>(used));
-		BytesString(vram_available = "VRAM available: ", static_cast<double>(available));
-		BytesString(vram_reserved = "VRAM reserved: ", static_cast<double>(reserved));
+		BytesString((vram_total = "Total VRAM: "), static_cast<double>(total));
+		BytesString((vram_used = "VRAM used: "), static_cast<double>(used));
+		BytesString((vram_available = "VRAM available: "), static_cast<double>(available));
+		BytesString((vram_reserved = "VRAM reserved: "), static_cast<double>(reserved));
 	}
 
 	(gpu_renderer = "GPU: ") += App::renderer3d->GetGPURenderer();
 	(gpu_vendor = "Brand: ") += App::renderer3d->GetGPUVendor();
 
-	App->ReportSoftware("gpudetect");
+	App::ReportSoftware("gpudetect");
 }
 
 void SystemInfo::DrawEditor()

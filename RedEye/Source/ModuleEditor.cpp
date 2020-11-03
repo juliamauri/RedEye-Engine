@@ -85,20 +85,15 @@ bool ModuleEditor::Init(JSONNode* node)
 		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 	}
 
-
-
-	if (ret = ImGui_ImplSDL2_InitForOpenGL(App->window->GetWindow(), App->renderer3d->GetWindowContext()))
+	if (ret = ImGui_ImplSDL2_InitForOpenGL(App::window->GetWindow(), App::renderer3d->GetWindowContext()))
 	{
 		if (ret = ImGui_ImplOpenGL3_Init())
-			App->ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
+			App::ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
 		else
 			RE_LOG_ERROR("ImGui could not OpenGL3_Init!");
-
-
 	}
 	else
 		RE_LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
-
 
 
 	all_aabb_color[0] = 0.f;
@@ -129,11 +124,12 @@ bool ModuleEditor::Start()
 	grid_go = new RE_GameObject();
 
 	grid_go->SetUp(editorCompsPool, "Grid");
-	grid = (RE_Component*)App->primitives->CreateGrid(grid_go);
+	grid = (RE_Component*)App::primitives.CreateGrid(grid_go);
 
 	// FOCUS CAMERA
-	const RE_GameObject* root = App->scene->GetRoot();
-	if (!root->GetChilds().empty()) {
+	const RE_GameObject* root = App::scene->GetRoot();
+	if (!root->GetChilds().empty())
+	{
 		SetSelected(root->GetChilds().begin().mpNode->mValue);
 		RE_CameraManager::EditorCamera()->Focus(selected);
 	}
@@ -145,12 +141,11 @@ update_status ModuleEditor::PreUpdate()
 {
 	OPTICK_CATEGORY("PreUpdate ModuleEditor", Optick::Category::GameLogic);
 	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame(App->window->GetWindow());
+	ImGui_ImplSDL2_NewFrame(App::window->GetWindow());
 	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
 	return UPDATE_CONTINUE;
 }
-
 
 // Update
 update_status ModuleEditor::Update()
@@ -164,37 +159,27 @@ update_status ModuleEditor::Update()
 			// File
 			if (ImGui::BeginMenu("File"))
 			{
-
-				if (ImGui::MenuItem(" New Scene")) {
-					if (App->scene->HasChanges())
-						App->editor->popupWindow->PopUpSave(false, true);
-					else
-						App->scene->NewEmptyScene();
+				if (ImGui::MenuItem(" New Scene"))
+				{
+					if (App::scene->HasChanges()) App::editor->popupWindow->PopUpSave(false, true);
+					else App::scene->NewEmptyScene();
 				}
-
-				if (ImGui::MenuItem(" Save Scene")) {
-					if (App->scene->HasChanges()) {
-
-						if (App->scene->isNewScene())
-							App->editor->popupWindow->PopUpSave();
-						else
-							App->scene->SaveScene();
-					}
+				if (ImGui::MenuItem(" Save Scene") && App::scene->HasChanges())
+				{
+					if (App::scene->isNewScene()) App::editor->popupWindow->PopUpSave();
+					else App::scene->SaveScene();
 				}
-
-				if (ImGui::MenuItem(" Exit", "	Esc")) {
-					if (App->scene->HasChanges())
-						App->editor->popupWindow->PopUpSave(true);
-					else
-						Event::Push(REQUEST_QUIT, App);
+				if (ImGui::MenuItem(" Exit", "	Esc"))
+				{
+					if (App::scene->HasChanges()) App::editor->popupWindow->PopUpSave(true);
+					else Event::Push(REQUEST_QUIT, App::Ptr());
 				}
-
 				ImGui::EndMenu();
 			}
 
 			//Edit
-			if (ImGui::BeginMenu("Edit")) {
-
+			if (ImGui::BeginMenu("Edit"))
+			{
 				if (ImGui::MenuItem("Undo", "LCTRL + Z", false, editorCommands.canUndo()))
 					editorCommands.undo();
 
@@ -222,10 +207,9 @@ update_status ModuleEditor::Update()
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Gameobject")) {
-
+			if (ImGui::BeginMenu("Gameobject"))
+			{
 				DrawGameObjectItems();
-
 				ImGui::EndMenu();
 			}
 
@@ -233,23 +217,15 @@ update_status ModuleEditor::Update()
 			if (ImGui::BeginMenu("View"))
 			{
 				for (auto window : windows)
-				{
 					if (ImGui::MenuItem(window->Name(), window->IsActive() ? "Hide" : "Open"))
-					{
 						window->SwitchActive();
-					}
-				}
 
 				// Tools submenu
 				if (ImGui::BeginMenu("Tools"))
 				{
 					for (auto tool : tools)
-					{
 						if (ImGui::MenuItem(tool->Name(), tool->IsActive() ? "Hide" : "Open"))
-						{
 							tool->SwitchActive();
-						}
-					}
 
 					ImGui::EndMenu();
 				}
@@ -293,10 +269,8 @@ update_status ModuleEditor::Update()
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 		
-
 		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background 
 		// and handle the pass-thru hole, so we ask Begin() to not render a background.
-		
 		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
 			window_flags |= ImGuiWindowFlags_NoBackground;
 
@@ -308,7 +282,6 @@ update_status ModuleEditor::Update()
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("DockSpace Demo", (bool*)true, window_flags);
 		ImGui::PopStyleVar();
-
 		ImGui::PopStyleVar(2);
 
 		// DockSpace
@@ -323,19 +296,15 @@ update_status ModuleEditor::Update()
 
 		// Draw Windows
 		for (auto window : windows)
-		{
 			if (window->IsActive())
 				window->DrawWindow(popUpFocus);
-		}
 
-		if (about != nullptr && about->IsActive())
+		if (about && about->IsActive())
 			about->DrawWindow(popUpFocus); // (not in windows' list)
 
 		for (auto tool : tools)
-		{
 			if (tool->IsActive())
 				tool->DrawWindow(popUpFocus);
-		}
 
 		if (materialeditor->IsActive()) materialeditor->DrawWindow(popUpFocus);
 		if (shadereditor->IsActive()) shadereditor->DrawWindow(popUpFocus);
@@ -345,18 +314,18 @@ update_status ModuleEditor::Update()
 	}
 	
 	// Toggle show editor on F1
-	if(App->input->CheckKey(SDL_SCANCODE_F1))
+	if(App::input->CheckKey(SDL_SCANCODE_F1))
 		show_all = !show_all;
 
 	// CAMERA CONTROLS
 	UpdateCamera();
 
-	if (App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_STATE::KEY_REPEAT) {
-
-		if (App->input->GetKey(SDL_SCANCODE_Z) == KEY_STATE::KEY_DOWN)
+	if (App::input->GetKey(SDL_SCANCODE_LCTRL) == KEY_STATE::KEY_REPEAT)
+	{
+		if (App::input->GetKey(SDL_SCANCODE_Z) == KEY_STATE::KEY_DOWN)
 			editorCommands.undo();
 
-		if (App->input->GetKey(SDL_SCANCODE_Y) == KEY_STATE::KEY_DOWN)
+		if (App::input->GetKey(SDL_SCANCODE_Y) == KEY_STATE::KEY_DOWN)
 			editorCommands.redo();
 	}
 
@@ -450,39 +419,30 @@ void ModuleEditor::RecieveEvent(const Event& e)
 {
 	switch (e.type)
 	{
-	case EDITORWINDOWCHANGED:
-	{
-		sceneEditorWindow->UpdateViewPort();
-		break;
-	}
-	case GAMEWINDOWCHANGED:
-	{
-		sceneGameWindow->UpdateViewPort();
-		break;
-	}
+	case EDITORWINDOWCHANGED: sceneEditorWindow->UpdateViewPort(); break;
+	case GAMEWINDOWCHANGED: sceneGameWindow->UpdateViewPort(); break;
 	case UPDATE_SCENE_WINDOWS:
 	{
-		if(e.data1.AsGO() == nullptr)
-			sceneEditorWindow->Recalc();
-		else
-			sceneGameWindow->Recalc();
+		if(e.data1.AsGO()) sceneGameWindow->Recalc();
+		else sceneEditorWindow->Recalc();
 		break;
 	}
 	case EDITOR_SCENE_RAYCAST:
 	{
-		RE_CompCamera* camera = RE_CameraManager::EditorCamera();
 		// Mouse Pick
-		int width, height;
+		RE_CompCamera* camera = RE_CameraManager::EditorCamera();
+		float width, height;
 		camera->GetTargetWidthHeight(width, height);
 
 		OPTICK_CATEGORY("Update ModuleEditor Camera RayCast", Optick::Category::Camera);
-		RE_GameObject* hit = App->scene->RayCastSelect(
+		RE_GameObject* hit = App::scene->RayCastSelect(
 			math::Ray(camera->GetFrustum().UnProjectLineSegment(
 			(e.data1.AsFloat() -(width / 2.0f)) / (width / 2.0f),
 				((height - e.data2.AsFloat()) - (height / 2.0f)) / (height / 2.0f))));
 
-		if (hit != nullptr)
-			SetSelected(hit);
+		if (hit) SetSelected(hit);
+
+		break;
 	}
 	}
 }
@@ -490,21 +450,20 @@ void ModuleEditor::RecieveEvent(const Event& e)
 void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 {
 	OPTICK_CATEGORY("Debug Draw", Optick::Category::Debug);
-
 	AABBDebugDrawing adapted_AABBdraw = (selected != nullptr ? aabb_drawing : AABBDebugDrawing(aabb_drawing - 1));
 
-	// Draw Bounding Boxes
+	if (grid->IsActive()) grid->Draw();
+
 	if (debug_drawing && ((adapted_AABBdraw != AABBDebugDrawing::NONE) || draw_quad_tree || draw_cameras))
 	{
-		const RE_GameObject* root = App->scene->GetRoot();
-
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(current_camera->GetProjectionPtr());
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf((current_camera->GetView()).ptr());
-
 		glBegin(GL_LINES);
 
+		// Draw Bounding Boxes
+		const RE_GameObject* root = App::scene->GetRoot();
 		switch (adapted_AABBdraw)
 		{
 		case SELECTED_ONLY:
@@ -521,17 +480,15 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 
 			if (!objects.empty())
 			{
-				const RE_GameObject* object = nullptr;
-
 				glColor4f(all_aabb_color[0], all_aabb_color[1] * 255.0f, all_aabb_color[2], 1.0f);
 
+				const RE_GameObject* object = nullptr;
 				while (!objects.empty())
 				{
-					object = objects.front();
-					object->DrawGlobalAABB();
+					(object = objects.front())->DrawGlobalAABB();
 					objects.pop();
 
-					if (object->ChildCount() > 0)
+					if (object->ChildCount() > 0u)
 						for (auto child : object->GetChilds())
 							objects.push(child);
 				}
@@ -552,14 +509,12 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 			{
 				glColor4f(all_aabb_color[0], all_aabb_color[1], all_aabb_color[2], 1.0f);
 
-				const RE_GameObject* object = nullptr;
 				while (!objects.empty())
 				{
-					object = objects.front();
+					const RE_GameObject* object = objects.front();
 					objects.pop();
 
-					if (object != selected)
-						object->DrawGlobalAABB();
+					if (object != selected) object->DrawGlobalAABB();
 
 					if (object->ChildCount() > 0)
 						for (auto child : object->GetChilds())
@@ -574,27 +529,24 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 		if (draw_quad_tree)
 		{
 			glColor4f(quad_tree_color[0], quad_tree_color[1], quad_tree_color[2], 1.0f);
-			App->scene->DrawTrees();
+			App::scene->DrawTrees();
 		}
 
 		if (draw_cameras)
 		{
 			glColor4f(frustum_color[0], frustum_color[1], frustum_color[2], 1.0f);
-			for (auto cam : App->cams->GetCameras())
+			for (auto cam : App::cams.GetCameras())
 				cam->DrawFrustum();
 		}
 
 		glEnd();
-
-		if (grid->IsActive())
-			grid->Draw();
 	}
 }
 
 void ModuleEditor::DrawHeriarchy()
 {
 	RE_GameObject* to_select = nullptr;
-	const RE_GameObject* root = App->scene->GetRoot_c();
+	const RE_GameObject* root = App::scene->GetRoot_c();
 	if (root->ChildCount() > 0)
 	{
 		// Add root children
@@ -626,69 +578,53 @@ void ModuleEditor::DrawHeriarchy()
 						objects.push(*it);
 			}
 
-			if (ImGui::IsItemClicked(0))
-				to_select = object;
+			if (ImGui::IsItemClicked(0)) to_select = object;
 
 			if (ImGui::BeginPopupContextItem()) {
 
-				if (ImGui::MenuItem("Create Prefab")) {
-					popupWindow->PopUpPrefab(object);
-				}
-
+				if (ImGui::MenuItem("Create Prefab")) popupWindow->PopUpPrefab(object);
 				ImGui::Separator();
-
 				DrawGameObjectItems(object);
-
 				ImGui::EndPopup();
 			}
 
-			if (object->IsLastChild() && object->GetParent_c() != root)
-				ImGui::TreePop();
+			if (object->IsLastChild() && object->GetParent_c() != root) ImGui::TreePop();
 		}
 	}
 
-	if (to_select != nullptr)
-		SetSelected(to_select);
+	if (to_select) SetSelected(to_select);
 }
 
-RE_GameObject * ModuleEditor::GetSelected() const
-{
-	return selected;
-}
+RE_GameObject * ModuleEditor::GetSelected() const { return selected; }
 
 void ModuleEditor::SetSelected(RE_GameObject* go, bool force_focus)
 {
 	selected = go;
-	App->resources->PopSelected(true);
-
+	App::resources->PopSelected(true);
 	if (force_focus || (focus_on_select && selected != nullptr))
 		RE_CameraManager::CurrentCamera()->Focus(selected);
 }
 
 void ModuleEditor::DuplicateSelectedObject()
 {
-	if (selected != nullptr)
-		selected->GetParent()->AddChild(new RE_GameObject(*selected));
-
+	if (selected) selected->GetParent()->AddChild(new RE_GameObject(*selected));
 }
 
 void ModuleEditor::LogToEditorConsole()
 {
-	if (console != nullptr && !windows.empty()
-		&& (console->file_filter < 0 || App->log->logHistory.back().caller_id == console->file_filter)
-		&& console->categories[(int)App->log->logHistory.back().category])
+	if (console && !windows.empty()
+		&& (console->file_filter < 0 || App::log->logHistory.back().caller_id == console->file_filter)
+		&& console->categories[(int)App::log->logHistory.back().category])
 	{
-		console->console_buffer.append(App->log->logHistory.back().data.c_str());
+		console->console_buffer.append(App::log->logHistory.back().data.c_str());
 		console->scroll_to_bot = true;
 	}
 }
 
 bool ModuleEditor::AddSoftwareUsed(const char * name, const char * version, const char * website)
 {
-	bool ret = (about != nullptr);
-
-	if (ret) about->sw_info.push_back(SoftwareInfo(name, version, website));
-
+	bool ret;
+	if (ret = (about != nullptr)) about->sw_info.push_back(SoftwareInfo(name, version, website));
 	return ret;
 }
 
@@ -712,25 +648,10 @@ void ModuleEditor::Draw()
 	}
 }
 
-void ModuleEditor::HandleSDLEvent(SDL_Event* e)
-{
-	ImGui_ImplSDL2_ProcessEvent(e);
-}
-
-void ModuleEditor::PopUpFocus(bool focus)
-{
-	popUpFocus = focus;
-}
-
-const char* ModuleEditor::GetAssetsPanelPath() const
-{
-	return assets->GetCurrentDirPath();
-}
-
-void ModuleEditor::SelectUndefinedFile(eastl::string* toSelect) const
-{
-	assets->SelectUndefined(toSelect);
-}
+void ModuleEditor::HandleSDLEvent(SDL_Event* e) { ImGui_ImplSDL2_ProcessEvent(e); }
+void ModuleEditor::PopUpFocus(bool focus) { popUpFocus = focus; }
+const char* ModuleEditor::GetAssetsPanelPath() const { return assets->GetCurrentDirPath(); }
+void ModuleEditor::SelectUndefinedFile(eastl::string* toSelect) const { assets->SelectUndefined(toSelect); }
 
 void ModuleEditor::OpenTextEditor(const char* filePath, eastl::string* filePathStr, const char* shadertTemplate, bool* open)
 {
@@ -750,21 +671,14 @@ void ModuleEditor::CreatePrefab(RE_GameObject* go, const char* name, bool identi
 	newPrefab->SetType(Resource_Type::R_PREFAB);
 	Event::PauseEvents();
 
-	newPrefab->Save(App->scene->GetScenePool()->GetNewPoolFromID(go->GetPoolID()), identityRoot, true);
+	newPrefab->Save(App::scene->GetScenePool()->GetNewPoolFromID(go->GetPoolID()), identityRoot, true);
 	Event::ResumeEvents();
 	newPrefab->SaveMeta();
-	App->thumbnail->Add(App->resources->Reference(newPrefab));
+	App::thumbnail->Add(App::resources->Reference(newPrefab));
 }
 
-void ModuleEditor::PushCommand(RE_Command* cmd)
-{
-	editorCommands.PushCommand(cmd);
-}
-
-void ModuleEditor::ClearCommands()
-{
-	editorCommands.Clear();
-}
+void ModuleEditor::PushCommand(RE_Command* cmd) { editorCommands.PushCommand(cmd); }
+void ModuleEditor::ClearCommands() { editorCommands.Clear(); }
 
 void ModuleEditor::UpdateCamera()
 {
@@ -772,21 +686,15 @@ void ModuleEditor::UpdateCamera()
 	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
 	if (sceneEditorWindow->isSelected())//!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && !ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow))
 	{
-		const MouseData mouse = App->input->GetMouse();
+		const MouseData mouse = App::input->GetMouse();
 
-		if (App->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse.GetButton(1) == KEY_REPEAT)
+		if (App::input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse.GetButton(1) == KEY_REPEAT)
 		{
 			// Orbit
-			if (selected != nullptr
-				&& (mouse.mouse_x_motion || mouse.mouse_y_motion))
-			{
-				camera->Orbit(
-					cam_sensitivity * -mouse.mouse_x_motion,
-					cam_sensitivity * mouse.mouse_y_motion,
-					*selected);
-			}
+			if (selected && (mouse.mouse_x_motion || mouse.mouse_y_motion))
+				camera->Orbit(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion, *selected);
 		}
-		else if ((App->input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && selected != nullptr)
+		else if ((App::input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && selected)
 		{
 			// Focus
 			camera->Focus(selected);
@@ -797,35 +705,23 @@ void ModuleEditor::UpdateCamera()
 			{
 				// Camera Speed
 				float cameraSpeed = cam_speed * RE_TimeManager::GetDeltaTime();
-				if (App->input->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT))
-					cameraSpeed *= 2.0f;
+				if (App::input->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT)) cameraSpeed *= 2.0f;
 
 				// Move
-				if (App->input->CheckKey(SDL_SCANCODE_W, KEY_REPEAT))
-					camera->LocalMove(Dir::FORWARD, cameraSpeed);
-				if (App->input->CheckKey(SDL_SCANCODE_S, KEY_REPEAT))
-					camera->LocalMove(Dir::BACKWARD, cameraSpeed);
-				if (App->input->CheckKey(SDL_SCANCODE_A, KEY_REPEAT))
-					camera->LocalMove(Dir::LEFT, cameraSpeed);
-				if (App->input->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))
-					camera->LocalMove(Dir::RIGHT, cameraSpeed);
-				if (App->input->CheckKey(SDL_SCANCODE_SPACE, KEY_REPEAT))
-					camera->LocalMove(Dir::UP, cameraSpeed);
-				if (App->input->CheckKey(SDL_SCANCODE_C, KEY_REPEAT))
-					camera->LocalMove(Dir::DOWN, cameraSpeed);
+				if (App::input->CheckKey(SDL_SCANCODE_W, KEY_REPEAT))	  camera->LocalMove(Dir::FORWARD, cameraSpeed);
+				if (App::input->CheckKey(SDL_SCANCODE_S, KEY_REPEAT))	  camera->LocalMove(Dir::BACKWARD, cameraSpeed);
+				if (App::input->CheckKey(SDL_SCANCODE_A, KEY_REPEAT))	  camera->LocalMove(Dir::LEFT, cameraSpeed);
+				if (App::input->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))	  camera->LocalMove(Dir::RIGHT, cameraSpeed);
+				if (App::input->CheckKey(SDL_SCANCODE_SPACE, KEY_REPEAT)) camera->LocalMove(Dir::UP, cameraSpeed);
+				if (App::input->CheckKey(SDL_SCANCODE_C, KEY_REPEAT))	  camera->LocalMove(Dir::DOWN, cameraSpeed);
 
 				// Rotate
 				if (mouse.mouse_x_motion != 0 || mouse.mouse_y_motion != 0)
-				{
-					camera->LocalRotate(
-						cam_sensitivity * -mouse.mouse_x_motion,
-						cam_sensitivity * mouse.mouse_y_motion);
-				}
+					camera->LocalRotate(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion);
 			}
 
 			// Zoom
-			if (mouse.mouse_wheel_motion != 0)
-				camera->SetFOV(camera->GetVFOVDegrees() - mouse.mouse_wheel_motion);
+			if (mouse.mouse_wheel_motion != 0) camera->SetFOV(camera->GetVFOVDegrees() - mouse.mouse_wheel_motion);
 		}
 	}
 
@@ -834,53 +730,25 @@ void ModuleEditor::UpdateCamera()
 
 void ModuleEditor::DrawGameObjectItems(RE_GameObject* parent)
 {
-	if (ImGui::BeginMenu("3D Object")) {
-
-		if (ImGui::MenuItem("Rock"))
-			App->scene->CreateRock(parent);
-
-		if (ImGui::MenuItem("Cube"))
-			App->scene->CreateCube(parent);
-
-		if (ImGui::MenuItem("Dodecahedron"))
-			App->scene->CreateDodecahedron(parent);
-
-		if (ImGui::MenuItem("Tetrahedron"))
-			App->scene->CreateTetrahedron(parent);
-
-		if (ImGui::MenuItem("Octohedron"))
-			App->scene->CreateOctohedron(parent);
-
-		if (ImGui::MenuItem("Icosahedron"))
-			App->scene->CreateIcosahedron(parent);
-
-		if (ImGui::MenuItem("Plane"))
-			App->scene->CreatePlane(parent);
-
-		if (ImGui::MenuItem("Sphere"))
-			App->scene->CreateSphere(parent);
-
-		if (ImGui::MenuItem("Cylinder"))
-			App->scene->CreateCylinder(parent);
-
-		if (ImGui::MenuItem("HemiSphere"))
-			App->scene->CreateHemiSphere(parent);
-
-		if (ImGui::MenuItem("Torus"))
-			App->scene->CreateTorus(parent);
-
-		if (ImGui::MenuItem("Trefoil Knot"))
-			App->scene->CreateTrefoilKnot(parent);
+	if (ImGui::BeginMenu("3D Object"))
+	{
+		if (ImGui::MenuItem("Rock")) App::scene->CreateRock(parent);
+		if (ImGui::MenuItem("Cube")) App::scene->CreateCube(parent);
+		if (ImGui::MenuItem("Dodecahedron")) App::scene->CreateDodecahedron(parent);
+		if (ImGui::MenuItem("Tetrahedron")) App::scene->CreateTetrahedron(parent);
+		if (ImGui::MenuItem("Octohedron")) App::scene->CreateOctohedron(parent);
+		if (ImGui::MenuItem("Icosahedron")) App::scene->CreateIcosahedron(parent);
+		if (ImGui::MenuItem("Plane")) App::scene->CreatePlane(parent);
+		if (ImGui::MenuItem("Sphere")) App::scene->CreateSphere(parent);
+		if (ImGui::MenuItem("Cylinder")) App::scene->CreateCylinder(parent);
+		if (ImGui::MenuItem("HemiSphere")) App::scene->CreateHemiSphere(parent);
+		if (ImGui::MenuItem("Torus")) App::scene->CreateTorus(parent);
+		if (ImGui::MenuItem("Trefoil Knot")) App::scene->CreateTrefoilKnot(parent);
 
 		ImGui::EndMenu();
 	}
 
-	if (ImGui::MenuItem("Camera"))
-		App->scene->CreateCamera(parent);
-
-	if (ImGui::MenuItem("Light"))
-		App->scene->CreateLight(parent);
-
-	if (ImGui::MenuItem("Max Lights"))
-		App->scene->CreateMaxLights(parent);
+	if (ImGui::MenuItem("Camera")) App::scene->CreateCamera(parent);
+	if (ImGui::MenuItem("Light")) App::scene->CreateLight(parent);
+	if (ImGui::MenuItem("Max Lights")) App::scene->CreateMaxLights(parent);
 }

@@ -1,49 +1,40 @@
 #include "RE_SkyBox.h"
 
 #include "Application.h"
-
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
-
 #include "RE_Texture.h"
-
 #include "Globals.h"
 #include "OutputLog.h"
-
 #include "RE_TextureImporter.h"
-
 #include "RE_GLCacheManager.h"
 #include "RE_ThumbnailManager.h"
 
 #include "Glew/include/glew.h"
-
 #include "ImGui/imgui.h"
-
 #include "par_shapes.h"
-
 #include <EASTL/vector.h>
 
 #define MINFCOMBO "Nearest\0Linear\0Nearest Mipmap Nearest\0Linear Mipmap Nearest\0Nearest Mipmap Linear\0Linear Mipmap Linear"
 #define MAGFOMBO "Nearest\0Linear"
 #define WRAPOMBO "Repeat\0Clamp to border\0Clamp to edge\0Mirrored Repeat"
 
-RE_SkyBox::RE_SkyBox() { }
-
-RE_SkyBox::RE_SkyBox(const char* metaPath) :ResourceContainer(metaPath) { }
-
-RE_SkyBox::~RE_SkyBox() { }
+RE_SkyBox::RE_SkyBox() {}
+RE_SkyBox::RE_SkyBox(const char* metaPath) :ResourceContainer(metaPath) {}
+RE_SkyBox::~RE_SkyBox() {}
 
 void RE_SkyBox::LoadInMemory()
 {
-	if (App->fs->Exists(GetLibraryPath()))
+	if (App::fs->Exists(GetLibraryPath()))
+	{
 		LibraryLoad();
-	else if (App->fs->Exists(GetAssetPath())) {
+	}
+	else if (App::fs->Exists(GetAssetPath()))
+	{
 		AssetLoad();
 		LibrarySave();
 	}
-	else {
-		RE_LOG_ERROR("SkyBox %s not found on project", GetName());
-	}
+	else RE_LOG_ERROR("SkyBox %s not found in project", GetName());
 }
 
 void RE_SkyBox::UnloadMemory()
@@ -52,14 +43,10 @@ void RE_SkyBox::UnloadMemory()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-
 	ResourceContainer::inMemory = false;
 }
 
-void RE_SkyBox::use()
-{
-	glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
-}
+void RE_SkyBox::use() { glBindTexture(GL_TEXTURE_CUBE_MAP, ID); }
 
 void RE_SkyBox::SetAsInternal()
 {
@@ -76,7 +63,7 @@ void RE_SkyBox::SetAsInternal()
 
 	SetMD5(toMD5.GetMd5().c_str());
 
-	App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID, true);
+	App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID, true);
 	LoadSkyBoxSphere();
 
 	ResourceContainer::inMemory = true;
@@ -94,35 +81,37 @@ void RE_SkyBox::AddTexturePath(RE_TextureFace face, const char* path)
 
 void RE_SkyBox::Draw()
 {
-	if (applySave && !isInternal()) {
-		if (ImGui::Button("Save")) {
+	if (applySave && !isInternal())
+	{
+		if (ImGui::Button("Save"))
+		{
 			restoreSettings = skyBoxSettings;
-			if (skyBoxSettings.texturesChanged(restoreSettings) || skyBoxSettings.skyBoxSize != restoreSettings.skyBoxSize)
-				AssetSave();
+			if (skyBoxSettings.texturesChanged(restoreSettings) || skyBoxSettings.skyBoxSize != restoreSettings.skyBoxSize) AssetSave();
 			SaveMeta();
 
-			if (ResourceContainer::inMemory) {
+			if (ResourceContainer::inMemory)
+			{
 				if (applySize) LoadSkyBoxSphere();
-
-				if (applyTextures) {
+				if (applyTextures)
+				{
 					if (ID != 0) glDeleteTextures(1, &ID);
-					App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
+					App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID);
 				}
 
-				applySize = false;
-				applyTextures = false;
+				applySize = applyTextures = false;
 			}
 
 			applySave = false;
 		}
-		if (ImGui::Button("Restore")) {
-			if (ResourceContainer::inMemory) {
+		if (ImGui::Button("Restore"))
+		{
+			if (ResourceContainer::inMemory)
+			{
 				skyBoxSettings = restoreSettings;
 				UnloadMemory();
 				LoadInMemory();
 			}
-			else
-				skyBoxSettings = restoreSettings;
+			else skyBoxSettings = restoreSettings;
 
 			applySave = false;
 		}
@@ -133,27 +122,24 @@ void RE_SkyBox::Draw()
 	if (ResourceContainer::inMemory && (applySize || applyTextures) && ImGui::Button((!isInternal()) ? "Apply Texture/Size Changes" : "Apply Size Changes")) {
 
 		if (applySize) LoadSkyBoxSphere();
-
-		if (applyTextures && !isInternal()) {
+		if (applyTextures && !isInternal())
+		{
 			if (ID != 0) glDeleteTextures(1, &ID);
-			App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
+			App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID);
 		}
 
-		applySize = false;
-		applyTextures = false;
+		applySize = applyTextures = false;
 	}
 
-	ImGui::Image((void*)App->thumbnail->At(GetMD5()), { 256, 256 }, { 0,1 }, { 1, 0 });
+	ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
 
-	if (applySave && skyBoxSettings == restoreSettings) {
-		applySave = false;
-	}
+	if (applySave && skyBoxSettings == restoreSettings) applySave = false;
 }
 
 void RE_SkyBox::DrawEditSkyBox()
 {
-	if (ImGui::SliderFloat("SkyBox size", &skyBoxSettings.skyBoxSize, 0.0f, 10000.0f)) {
-
+	if (ImGui::SliderFloat("SkyBox size", &skyBoxSettings.skyBoxSize, 0.0f, 10000.0f))
+	{
 		if (ResourceContainer::inMemory) applySize = true;
 		applySave = true;
 	}
@@ -163,19 +149,21 @@ void RE_SkyBox::DrawEditSkyBox()
 	static eastl::string texture = "Texture ";
 	static eastl::string id;
 	static RE_TextureFace toDelete = RE_NOFACE;
-	for (uint i = 0; i < 6 && !isInternal(); i++) {
-		if (ImGui::BeginMenu(texturesname[i])) {
+	for (uint i = 0; i < 6 && !isInternal(); i++)
+	{
+		if (ImGui::BeginMenu(texturesname[i]))
+		{
 			if (skyBoxSettings.textures[i].textureMD5)
 			{
-				ResourceContainer* resource = App->resources->At(skyBoxSettings.textures[i].textureMD5);
+				ResourceContainer* resource = App::resources->At(skyBoxSettings.textures[i].textureMD5);
 				id = texture + resource->GetName();
-				if (ImGui::Button(id.c_str()))
-					App->resources->PushSelected(resource->GetMD5());
+				if (ImGui::Button(id.c_str())) App::resources->PushSelected(resource->GetMD5());
 
 				ImGui::SameLine();
 				id = "Delete";
-				if (ImGui::Button(id.c_str())) {
-					if (ResourceContainer::inMemory) App->resources->Use(resource->GetMD5());
+				if (ImGui::Button(id.c_str()))
+				{
+					if (ResourceContainer::inMemory) App::resources->Use(resource->GetMD5());
 					toDelete = skyBoxSettings.textures[i].face;
 					applySave = true;
 				}
@@ -183,28 +171,33 @@ void RE_SkyBox::DrawEditSkyBox()
 				id = "Change";
 				if (ImGui::BeginMenu(id.c_str()))
 				{
-					eastl::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
-					for (auto textRes : allTex) {
-						if (ImGui::MenuItem(textRes->GetName())) {
-							if (ResourceContainer::inMemory) App->resources->UnUse(resource->GetMD5());
+					eastl::vector<ResourceContainer*> allTex = App::resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+					for (auto textRes : allTex)
+					{
+						if (ImGui::MenuItem(textRes->GetName()))
+						{
+							if (ResourceContainer::inMemory) App::resources->UnUse(resource->GetMD5());
 							skyBoxSettings.textures[i].textureMD5 = textRes->GetMD5();
-							if (ResourceContainer::inMemory) App->resources->Use(textRes->GetMD5());
+							if (ResourceContainer::inMemory) App::resources->Use(textRes->GetMD5());
 							applySave = true;
 						}
 					}
 					ImGui::EndMenu();
 				}
 			}
-			else {
+			else
+			{
 				ImGui::Text("%s texture don't exists", texturesname[i]);
 				id = "Add";
 				if (ImGui::BeginMenu(id.c_str()))
 				{
-					eastl::vector<ResourceContainer*> allTex = App->resources->GetResourcesByType(Resource_Type::R_TEXTURE);
-					for (auto textRes : allTex) {
-						if (ImGui::MenuItem(textRes->GetName())) {
+					eastl::vector<ResourceContainer*> allTex = App::resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+					for (auto textRes : allTex)
+					{
+						if (ImGui::MenuItem(textRes->GetName()))
+						{
 							skyBoxSettings.textures[i].textureMD5 = textRes->GetMD5();
-							if (ResourceContainer::inMemory) App->resources->Use(textRes->GetMD5());
+							if (ResourceContainer::inMemory) App::resources->Use(textRes->GetMD5());
 						}
 					}
 					ImGui::EndMenu();
@@ -213,18 +206,20 @@ void RE_SkyBox::DrawEditSkyBox()
 			ImGui::Separator();
 			ImGui::EndMenu();
 
-			if (toDelete != RE_TextureFace::RE_NOFACE) {
+			if (toDelete != RE_TextureFace::RE_NOFACE)
+			{
 				skyBoxSettings.textures[toDelete].textureMD5 = nullptr;
 				toDelete = RE_NOFACE;
 			}
 		}
 
-		if (ImGui::BeginDragDropTarget()) {
-
-			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
-				if (ResourceContainer::inMemory && skyBoxSettings.textures[i].textureMD5) App->resources->UnUse(skyBoxSettings.textures[i].textureMD5);
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+			{
+				if (ResourceContainer::inMemory && skyBoxSettings.textures[i].textureMD5) App::resources->UnUse(skyBoxSettings.textures[i].textureMD5);
 				skyBoxSettings.textures[i].textureMD5 = *static_cast<const char**>(dropped->Data);
-				if (ResourceContainer::inMemory) App->resources->Use(skyBoxSettings.textures[i].textureMD5);
+				if (ResourceContainer::inMemory) App::resources->Use(skyBoxSettings.textures[i].textureMD5);
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -234,57 +229,64 @@ void RE_SkyBox::DrawEditSkyBox()
 	ImGui::Text("OpenGL texture settings:");
 
 	int minIndex = RE_Texture::GetComboFilter(skyBoxSettings.min_filter);
-	if (ImGui::Combo("Minify filter", &minIndex, MINFCOMBO)) {
+	if (ImGui::Combo("Minify filter", &minIndex, MINFCOMBO))
+	{
 		RE_TextureFilters newfilter = RE_Texture::GetFilterCombo(minIndex);
-		if (skyBoxSettings.min_filter != newfilter) {
-			if (ResourceContainer::inMemory && ((skyBoxSettings.min_filter <= RE_LINEAR && newfilter > RE_LINEAR)
-				|| (newfilter <= RE_LINEAR && skyBoxSettings.min_filter > RE_LINEAR))) {
-				if (!isInternal()) {
-					skyBoxSettings.min_filter = newfilter;
-					UnloadMemory();
-					LoadInMemory();
-				}
-			}
-			else if (ResourceContainer::inMemory) {
-				TexParameteri(GL_TEXTURE_MIN_FILTER, skyBoxSettings.min_filter = newfilter);
-			}
-			else
+		if (skyBoxSettings.min_filter != newfilter)
+		{
+			if ((ResourceContainer::inMemory && ((skyBoxSettings.min_filter <= RE_LINEAR && newfilter > RE_LINEAR)
+				|| (newfilter <= RE_LINEAR && skyBoxSettings.min_filter > RE_LINEAR))) && !isInternal())
+			{
 				skyBoxSettings.min_filter = newfilter;
+				UnloadMemory();
+				LoadInMemory();
+			}
+			else if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_MIN_FILTER, skyBoxSettings.min_filter = newfilter);
+			else skyBoxSettings.min_filter = newfilter;
+
 			applySave = true;
 		}
 	}
 
 	int magIndex = RE_Texture::GetComboFilter(skyBoxSettings.mag_filter);
-	if (ImGui::Combo("Magnify filter", &magIndex, MAGFOMBO)) {
+	if (ImGui::Combo("Magnify filter", &magIndex, MAGFOMBO))
+	{
 		RE_TextureFilters newfilter = RE_Texture::GetFilterCombo(magIndex);
-		if (skyBoxSettings.mag_filter != newfilter) {
+		if (skyBoxSettings.mag_filter != newfilter)
+		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_MAG_FILTER, skyBoxSettings.mag_filter = newfilter);
 			applySave = true;
 		}
 	}
 
 	int wrapSIndex = RE_Texture::GetComboWrap(skyBoxSettings.wrap_s);
-	if (ImGui::Combo("Wrap S", &wrapSIndex, WRAPOMBO)) {
+	if (ImGui::Combo("Wrap S", &wrapSIndex, WRAPOMBO))
+	{
 		RE_TextureWrap newwrap = RE_Texture::GetWrapCombo(wrapSIndex);
-		if (skyBoxSettings.wrap_s != newwrap) {
+		if (skyBoxSettings.wrap_s != newwrap)
+		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_S, skyBoxSettings.wrap_s = newwrap);
 			applySave = true;
 		}
 	}
 
 	int wrapTIndex = RE_Texture::GetComboWrap(skyBoxSettings.wrap_t);
-	if (ImGui::Combo("Wrap T", &wrapTIndex, WRAPOMBO)) {
+	if (ImGui::Combo("Wrap T", &wrapTIndex, WRAPOMBO))
+	{
 		RE_TextureWrap newwrap = RE_Texture::GetWrapCombo(wrapTIndex);
-		if (skyBoxSettings.wrap_t != newwrap) {
+		if (skyBoxSettings.wrap_t != newwrap)
+		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_T, skyBoxSettings.wrap_t = newwrap);
 			applySave = true;
 		}
 	}
 
 	int wrapRIndex = RE_Texture::GetComboWrap(skyBoxSettings.wrap_r);
-	if (ImGui::Combo("Wrap R", &wrapRIndex, WRAPOMBO)) {
+	if (ImGui::Combo("Wrap R", &wrapRIndex, WRAPOMBO))
+	{
 		RE_TextureWrap newwrap = RE_Texture::GetWrapCombo(wrapRIndex);
-		if (skyBoxSettings.wrap_r != newwrap) {
+		if (skyBoxSettings.wrap_r != newwrap)
+		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_R, skyBoxSettings.wrap_r = newwrap);
 			applySave = true;
 		}
@@ -294,8 +296,10 @@ void RE_SkyBox::DrawEditSkyBox()
 bool RE_SkyBox::isFacesFilled() const
 {
 	bool ret = true;
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-		if (skyBoxSettings.textures[i].textureMD5 == nullptr) {
+	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++)
+	{
+		if (!skyBoxSettings.textures[i].textureMD5)
+		{
 			ret = false;
 			break;
 		}
@@ -312,7 +316,8 @@ void RE_SkyBox::SaveResourceMeta(JSONNode* metaNode)
 	metaNode->PushInt("wrapR", skyBoxSettings.wrap_r);
 
 	JSONNode* nodeTex = metaNode->PushJObject("textures");
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
+	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++)
+	{
 		eastl::string key(texturesname[i]);
 		nodeTex->PushString(eastl::string(key + "textureMD5").c_str(), skyBoxSettings.textures[i].textureMD5);
 	}
@@ -327,10 +332,11 @@ void RE_SkyBox::LoadResourceMeta(JSONNode* metaNode)
 	skyBoxSettings.wrap_r = (RE_TextureWrap)metaNode->PullInt("wrapR", RE_CLAMP_TO_EDGE);
 
 	JSONNode* nodeTex = metaNode->PullJObject("textures");
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
+	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++)
+	{
 		eastl::string key(texturesname[i]);
 		eastl::string texMD5 = nodeTex->PullString(eastl::string(key + "textureMD5").c_str(), "");
-		skyBoxSettings.textures[i].textureMD5 = App->resources->IsReference(texMD5.c_str(), Resource_Type::R_TEXTURE);
+		skyBoxSettings.textures[i].textureMD5 = App::resources->IsReference(texMD5.c_str(), Resource_Type::R_TEXTURE);
 	}
 
 	restoreSettings = skyBoxSettings;
@@ -345,13 +351,15 @@ void RE_SkyBox::Import(bool keepInMemory)
 
 void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 {
-	Config toLoad(GetAssetPath(),App->fs->GetZipPath());
-	if (toLoad.Load()) {
+	Config toLoad(GetAssetPath(),App::fs->GetZipPath());
+	if (toLoad.Load())
+	{
 		JSONNode* node = toLoad.GetRootNode("skybox");
 		skyBoxSettings.skyBoxSize = node->PullFloat("skyBoxSize", 5000);
 		DEL(node);
 		
-		if (generateLibraryPath) {
+		if (generateLibraryPath)
+		{
 			eastl::string newMd5 = toLoad.GetMd5();
 			SetMD5(newMd5.c_str());
 			eastl::string libraryPath("Library/SkyBoxes/");
@@ -359,7 +367,7 @@ void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 			SetLibraryPath(libraryPath.c_str());
 		}
 	}
-	App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
+	App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID);
 	LoadSkyBoxSphere();
 	ResourceContainer::inMemory = true;
 }
@@ -367,26 +375,23 @@ void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 void RE_SkyBox::AssetSave()
 {
 	eastl::string assetPath("Assets/Skyboxes/");
-	assetPath += GetName();
-	assetPath += ".sk";
+	(assetPath += GetName()) += ".sk";
 	SetAssetPath(assetPath.c_str());
-	Config toSave(assetPath.c_str(), App->fs->GetZipPath());
+	Config toSave(assetPath.c_str(), App::fs->GetZipPath());
 	JSONNode* node = toSave.GetRootNode("skybox");
+
 	//For differentMD5
 	node->PushString("SKname", GetName());
 	node->PushString("SKPath", GetAssetPath());
-
 	node->PushFloat("skyBoxSize", skyBoxSettings.skyBoxSize);
 	DEL(node);
 
 	toSave.Save();
-
 	eastl::string newMd5 = toSave.GetMd5();
 	SetMD5(newMd5.c_str());
 	eastl::string libraryPath("Library/SkyBoxes/");
 	libraryPath += newMd5.c_str();
 	SetLibraryPath(libraryPath.c_str());
-
 	LibrarySave();
 }
 
@@ -403,14 +408,14 @@ void RE_SkyBox::LibraryLoad()
 {
 	RE_FileIO fileLibray(GetLibraryPath());
 
-	if (fileLibray.Load()) {
+	if (fileLibray.Load())
+	{
 		char* cursor = fileLibray.GetBuffer();
-
 		size_t size = sizeof(float);
 		memcpy( &skyBoxSettings.skyBoxSize, cursor, size);
 		cursor += size;
 
-		App->textures->LoadSkyBoxInMemory(skyBoxSettings, &ID);
+		App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID);
 		LoadSkyBoxSphere();
 		ResourceContainer::inMemory = true;
 	}
@@ -427,7 +432,7 @@ void RE_SkyBox::LibrarySave()
 	memcpy(cursor, &skyBoxSettings.skyBoxSize, size);
 	cursor += size;
 
-	RE_FileIO saveLibrary(GetLibraryPath(), App->fs->GetZipPath());
+	RE_FileIO saveLibrary(GetLibraryPath(), App::fs->GetZipPath());
 
 	saveLibrary.Save(libraryBuffer, totalSize + 1);
 	DEL_A(libraryBuffer);
@@ -435,9 +440,10 @@ void RE_SkyBox::LibrarySave()
 
 void RE_SkyBox::TexParameteri(unsigned int pname, int param)
 {
-	if (ResourceContainer::inMemory) {
+	if (ResourceContainer::inMemory)
+	{
 		GLuint boundTexture = 0;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&boundTexture);
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, reinterpret_cast<GLint*>(&boundTexture));
 		glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, pname, param);
 		glBindTexture(GL_TEXTURE_2D, boundTexture);
@@ -449,7 +455,6 @@ void RE_SkyBox::LoadSkyBoxSphere()
 	if (VAO != 0) glDeleteBuffers(1, &VAO);
 	if (VBO != 0) glDeleteBuffers(1, &VBO);
 	if (EBO != 0) glDeleteBuffers(1, &EBO);
-
 
 	par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(24, 24);
 	par_shapes_scale(sphere, skyBoxSettings.skyBoxSize, skyBoxSettings.skyBoxSize, skyBoxSettings.skyBoxSize);
@@ -472,7 +477,6 @@ void RE_SkyBox::LoadSkyBoxSphere()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, &indexes[0], GL_STATIC_DRAW);
 
-	triangle_count =  sphere->ntriangles;
-
+	triangle_count = sphere->ntriangles;
 	par_shapes_free_mesh(sphere);
 }

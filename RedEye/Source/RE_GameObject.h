@@ -1,8 +1,9 @@
 #ifndef __RE_GAMEOBJECT_H__
 #define __RE_GAMEOBJECT_H__
 
-#include "Globals.h"
 #include "EventListener.h"
+#include "Globals.h"
+
 #include "MathGeoLib\include\MathGeoLib.h"
 #include <EASTL/list.h>
 #include <EASTL/vector.h>
@@ -130,7 +131,8 @@ public:
 	void SetPoolID(int id);
 	
 public:
-	struct cmpPoolID {
+	struct cmpPoolID
+	{
 		int poolId;
 		ushortint cType;
 		cmpPoolID(int id, ushortint type) : poolId(id), cType(type) { }

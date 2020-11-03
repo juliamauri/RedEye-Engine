@@ -26,6 +26,7 @@ enum RE_ShadingMode { //from assimp documentation
 class RE_Material : public ResourceContainer
 {
 public:
+
 	RE_Material();
 	RE_Material(const char* metapath);
 	~RE_Material();
@@ -42,7 +43,7 @@ public:
 	void UseResources();
 	void UnUseResources();
 
-	void UploadToShader(float* model, bool usingChekers, bool defaultShader = false);
+	void UploadToShader(const float* model, bool usingChekers, bool defaultShader = false);
 
 	unsigned int GetShaderID()const;
 
@@ -57,6 +58,7 @@ public:
 	void DeleteTexture(const char* texMD5);
 
 private:
+
 	void Draw() override;
 
 	void SaveResourceMeta(JSONNode* metaNode)override;
@@ -80,6 +82,7 @@ private:
 	void DeleteTexture(const char* texMD5, eastl::vector<const char*>* textures);
 
 public:
+
 	RE_ShadingMode shadingType = S_FLAT;
 
 	eastl::vector<const char*> tDiffuse;
@@ -108,7 +111,8 @@ public:
 	eastl::vector<const char*> tUnknown;
 
 private:
-	const char* shadingItems[10] = { "Flat", "Goraund", "Phong", "Phong Blinn", "Toon", "Oren Nayar", "Minnaert", "Cook Torrance", "No Shading", "Fresnel" };
+
+	//const char* shadingItems[10] = { "Flat", "Goraund", "Phong", "Phong Blinn", "Toon", "Oren Nayar", "Minnaert", "Cook Torrance", "No Shading", "Fresnel" };
 
 	bool applySave = false;
 

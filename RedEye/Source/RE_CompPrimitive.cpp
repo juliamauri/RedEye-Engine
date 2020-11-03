@@ -25,17 +25,14 @@
 
 #include "par_shapes.h"
 
-RE_CompPrimitive::RE_CompPrimitive(ComponentType t, RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : VAO(VAO), type(t), shader(shader), RE_Component(t, game_obj) {}
+RE_CompPrimitive::RE_CompPrimitive(ComponentType t, RE_GameObject* game_obj, unsigned int VAO, unsigned int shader)
+	: VAO(VAO), type(t), shader(shader), RE_Component(t, game_obj) {}
 
-RE_CompPrimitive::~RE_CompPrimitive()
-{
-}
+RE_CompPrimitive::~RE_CompPrimitive() {}
 
+///////   Grid   ////////////////////////////////////////////
 RE_CompGrid::RE_CompGrid(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader) : RE_CompPrimitive(C_GRID, game_obj, VAO, shader) {}
-
-RE_CompGrid::~RE_CompGrid()
-{
-}
+RE_CompGrid::~RE_CompGrid() {}
 
 void RE_CompGrid::Draw()
 {
@@ -49,9 +46,8 @@ void RE_CompGrid::Draw()
 	glDrawArrays(GL_LINES, 0, 400);
 }
 
-RE_CompRock::RE_CompRock() : RE_CompPrimitive(C_ROCK, nullptr, NULL, 0)
-{
-}
+///////   Rock   ////////////////////////////////////////////
+RE_CompRock::RE_CompRock() : RE_CompPrimitive(C_ROCK, nullptr, NULL, 0){}
 
 RE_CompRock::~RE_CompRock()
 {
@@ -93,7 +89,6 @@ void RE_CompRock::Draw()
 	// Draw
 	RE_GLCacheManager::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
-
 }
 
 void RE_CompRock::DrawProperties()
@@ -101,28 +96,27 @@ void RE_CompRock::DrawProperties()
 	if (ImGui::CollapsingHeader("Rock Primitive"))
 	{
 		ImGui::Text("Can't checker because don't support Texture Coords");
-
 		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
-
 		ImGui::PushItemWidth(75.0f);
-		if (ImGui::DragInt("Seed", &tmpSe, 1.0f))
+
+		if (ImGui::DragInt("Seed", &tmpSe, 1.0f) && seed != tmpSe)
 		{
-			if (seed != tmpSe) {
-				seed = tmpSe;
-				canChange = true;
-			}
+			seed = tmpSe;
+			canChange = true;
 		}
+
 		if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
 		{
-			if (tmpSb >= 3 && nsubdivisions != tmpSb) {
+			if (tmpSb >= 3 && nsubdivisions != tmpSb)
+			{
 				nsubdivisions = tmpSb;
 				canChange = true;
 			}
 			else if (tmpSb < 1) tmpSb = 1;
 			else if (tmpSb > 5) tmpSb = 5;
 		}
-		ImGui::PopItemWidth();
 
+		ImGui::PopItemWidth();
 		if (ImGui::Button("Apply")) GenerateNewRock(seed, nsubdivisions);
 	}
 }
@@ -136,7 +130,7 @@ void RE_CompRock::SerializeJson(JSONNode* node, eastl::map<const char*, int>* re
 
 void RE_CompRock::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
 {
-	SetUp(parent, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID(), node->PullInt("seed", 251654), node->PullInt("nsubdivisions", 5));
+	SetUp(parent, (dynamic_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultShader())))->GetID(), node->PullInt("seed", 251654), node->PullInt("nsubdivisions", 5));
 	RE_CompPrimitive::color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
 }
 
@@ -170,7 +164,7 @@ void RE_CompRock::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 	memcpy(&nsubdivisions, cursor, size);
 	cursor += size;
 
-	SetUp(parent, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID(), seed, nsubdivisions);
+	SetUp(parent, (dynamic_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultShader())))->GetID(), seed, nsubdivisions);
 
 	size = sizeof(float) * 3;
 	memcpy(&RE_CompPrimitive::color[0], cursor, size);
@@ -181,7 +175,8 @@ void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
 {
 	if (canChange)
 	{
-		if (RE_CompPrimitive::VAO != 0) {
+		if (RE_CompPrimitive::VAO != 0)
+		{
 			glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
 			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 			glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
@@ -207,7 +202,8 @@ void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
 		stride *= sizeof(float);
 		float* meshBuffer = new float[meshSize];
 		float* cursor = meshBuffer;
-		for (int i = 0; i < rock->npoints; i++) {
+		for (int i = 0; i < rock->npoints; i++)
+		{
 			uint cursorSize = 3;
 			size_t size = sizeof(float) * 3;
 
@@ -247,10 +243,11 @@ void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
 	}
 }
 
+///////   Platonic   ////////////////////////////////////////////
 RE_CompPlatonic::RE_CompPlatonic(ComponentType t, const char* name, RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count)
-	: RE_CompPrimitive(t, game_obj, VAO, shader), triangle_count(triangle_count), pName(name) { }
+	: RE_CompPrimitive(t, game_obj, VAO, shader), triangle_count(triangle_count), pName(name) {}
 
-RE_CompPlatonic::~RE_CompPlatonic() { }
+RE_CompPlatonic::~RE_CompPlatonic() {}
 
 void RE_CompPlatonic::Draw()
 {
@@ -275,7 +272,6 @@ void RE_CompPlatonic::DrawProperties()
 	if (ImGui::CollapsingHeader(pName.c_str()))
 	{
 		ImGui::Text("Can't checker because don't support Texture Coords");
-
 		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
 	}
 }
@@ -292,7 +288,7 @@ void RE_CompPlatonic::SerializeJson(JSONNode* node, eastl::map<const char*, int>
 
 void RE_CompPlatonic::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
 {
-	App->primitives->SetUpComponentPrimitive(this, parent);
+	App::primitives.SetUpComponentPrimitive(this, parent);
 	RE_CompPrimitive::color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
 }
 
@@ -305,8 +301,7 @@ void RE_CompPlatonic::SerializeBinary(char*& cursor, eastl::map<const char*, int
 
 void RE_CompPlatonic::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)
 {
-	App->primitives->SetUpComponentPrimitive(this, parent);
-
+	App::primitives.SetUpComponentPrimitive(this, parent);
 	size_t size = sizeof(float) * 3;
 	memcpy(&RE_CompPrimitive::color[0], cursor, size);
 	cursor += size;
@@ -326,37 +321,35 @@ void RE_CompPlatonic::SetUp(const RE_CompPlatonic& cmpPlat, RE_GameObject* paren
 {
 	go = parent;
 	RE_CompPrimitive::color = cmpPlat.RE_CompPrimitive::color;
-	RE_CompPrimitive::VAO = App->primitives->CheckPlatonicVAO(GetType());
+	RE_CompPrimitive::VAO = App::primitives.CheckPlatonicVAO(GetType());
 	RE_CompPrimitive::shader = cmpPlat.RE_CompPrimitive::shader;
 	triangle_count = cmpPlat.triangle_count;
 	go->AddComponent(this);
 }
 
+///////   Cube   ////////////////////////////////////////////
+RE_CompCube::RE_CompCube() : RE_CompPlatonic(C_CUBE,"Cube", nullptr, 0, 0, 0) {}
+RE_CompCube::~RE_CompCube() {}
 
-RE_CompCube::RE_CompCube() : RE_CompPlatonic(C_CUBE,"Cube", nullptr, 0, 0, 0) {	}
+///////   Dodecahedron   ////////////////////////////////////////////
+RE_CompDodecahedron::RE_CompDodecahedron() : RE_CompPlatonic(C_DODECAHEDRON, "Dodecahedron", nullptr, 0, 0, 0) {}
+RE_CompDodecahedron::~RE_CompDodecahedron() {}
 
-RE_CompCube::~RE_CompCube() { }
+///////   Tetrahedron   ////////////////////////////////////////////
+RE_CompTetrahedron::RE_CompTetrahedron() : RE_CompPlatonic(C_TETRAHEDRON, "Tetrahedron", nullptr, 0, 0, 0) {}
+RE_CompTetrahedron::~RE_CompTetrahedron() {}
 
-RE_CompDodecahedron::RE_CompDodecahedron()  : RE_CompPlatonic(C_DODECAHEDRON, "Dodecahedron", nullptr, 0, 0, 0) { }
+///////   Octohedron   ////////////////////////////////////////////
+RE_CompOctohedron::RE_CompOctohedron() : RE_CompPlatonic(C_OCTOHEDRON, "Octohedron", nullptr, 0, 0, 0) {}
+RE_CompOctohedron::~RE_CompOctohedron() {}
 
-RE_CompDodecahedron::~RE_CompDodecahedron() { }
+///////   Icosahedron   ////////////////////////////////////////////
+RE_CompIcosahedron::RE_CompIcosahedron() : RE_CompPlatonic(C_ICOSAHEDRON, "Icosahedron", nullptr, 0, 0, 0) {}
+RE_CompIcosahedron::~RE_CompIcosahedron() {}
 
-RE_CompTetrahedron::RE_CompTetrahedron() : RE_CompPlatonic(C_TETRAHEDRON, "Tetrahedron", nullptr, 0, 0, 0) { }
-
-RE_CompTetrahedron::~RE_CompTetrahedron() { }
-
-RE_CompOctohedron::RE_CompOctohedron() : RE_CompPlatonic(C_OCTOHEDRON, "Octohedron", nullptr, 0, 0, 0) { }
-
-RE_CompOctohedron::~RE_CompOctohedron() { }
-
-RE_CompIcosahedron::RE_CompIcosahedron() : RE_CompPlatonic(C_ICOSAHEDRON, "Icosahedron", nullptr, 0, 0, 0) { }
-
-RE_CompIcosahedron::~RE_CompIcosahedron() { }
-
+///////   Parametric   ////////////////////////////////////////////
 RE_CompParametric::RE_CompParametric(ComponentType t, const char* _name, RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks, bool _useRadius, float _radius, float _minR, float _maxR)
-	: RE_CompPrimitive(t,game_obj, NULL, shader) { 
-	pName = _name;
-}
+	: RE_CompPrimitive(t,game_obj, NULL, shader), pName(_name) {}
 
 RE_CompParametric::~RE_CompParametric()
 {
@@ -370,27 +363,23 @@ void RE_CompParametric::Draw()
 	RE_GLCacheManager::ChangeShader(RE_CompPrimitive::shader);
 	RE_ShaderImporter::setFloat4x4(RE_CompPrimitive::shader, "model", RE_CompPrimitive::RE_Component::go->GetTransform()->GetShaderModel());
 
-	if (!show_checkers)
+	if (!show_checkers) // Apply Diffuse Color
 	{
-		// Apply Diffuse Color
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 1.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 0.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "cdiffuse", RE_CompPrimitive::color);
 	}
-	else
+	else // Apply Checkers Texture
 	{
-		// Apply Checkers Texture
 		glActiveTexture(GL_TEXTURE0);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(RE_CompPrimitive::shader, "useTexture", 1.0f);
 		RE_ShaderImporter::setUnsignedInt(RE_CompPrimitive::shader, "tdiffuse", 0);
-		RE_GLCacheManager::ChangeTextureBind(App->internalResources->GetTextureChecker());
+		RE_GLCacheManager::ChangeTextureBind(App::internalResources.GetTextureChecker());
 	}
 
-	// Draw
 	RE_GLCacheManager::ChangeVAO(RE_CompPrimitive::VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
-
 }
 
 void RE_CompParametric::DrawProperties()
@@ -400,21 +389,23 @@ void RE_CompParametric::DrawProperties()
 	if (ImGui::CollapsingHeader(title.c_str()))
 	{
 		ImGui::Checkbox("Use checkers texture", &show_checkers);
+		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
+		ImGui::PushItemWidth(75.0f);
 
-			ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
-
-			ImGui::PushItemWidth(75.0f);
-			if (ImGui::DragInt("Slices", &tmpSl, 1.0f, 3))
+		if (ImGui::DragInt("Slices", &tmpSl, 1.0f, 3))
+		{
+			if (slice != tmpSl && tmpSl >= 3)
 			{
-				if (slice != tmpSl && tmpSl >= 3) {
-					slice = tmpSl;
-						canChange = true;
-				}
-				else if (tmpSl < 3) tmpSl = 3;
+				slice = tmpSl;
+				canChange = true;
 			}
+			else if (tmpSl < 3) tmpSl = 3;
+		}
+
 		if (ImGui::DragInt("Stacks", &tmpSt, 1.0f, 3))
 		{
-			if (tmpSt >= 3 && stacks != tmpSt) {
+			if (tmpSt >= 3 && stacks != tmpSt)
+			{
 				stacks = tmpSt;
 				canChange = true;
 			}
@@ -423,7 +414,8 @@ void RE_CompParametric::DrawProperties()
 
 		if (useRadius && ImGui::DragFloat("Radius", &tmpR, 0.1f, minR, maxR))
 		{
-			if (tmpR >= 0.5f && tmpR <= 3.0f && radius != tmpR) {
+			if (tmpR >= 0.5f && tmpR <= 3.0f && radius != tmpR)
+			{
 				radius = tmpR;
 				canChange = true;
 			}
@@ -432,15 +424,14 @@ void RE_CompParametric::DrawProperties()
 		}
 		ImGui::PopItemWidth();
 
-		if (canChange && ImGui::Button("Apply")) {
+		if (canChange && ImGui::Button("Apply"))
+		{
 			GenerateParametric();
 			canChange = false;
 		}
 
-		if (type == C_PLANE) {
-			if (ImGui::Button("Convert To Mesh")) 
-				Event::Push(RE_EventType::PLANE_CHANGE_TO_MESH, App->scene, Cvar(go));
-		}
+		if (type == C_PLANE && ImGui::Button("Convert To Mesh")) 
+			Event::Push(RE_EventType::PLANE_CHANGE_TO_MESH, App::scene, Cvar(go));
 	}
 }
 
@@ -455,7 +446,7 @@ void RE_CompParametric::SerializeJson(JSONNode* node, eastl::map<const char*, in
 void RE_CompParametric::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
 {
 	useRadius = (radius = node->PullFloat("radius", 0) > 0);
-	SetUp(parent, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID(), node->PullInt("slices", 3), node->PullInt("stacks", 3), useRadius, radius);
+	SetUp(parent, (dynamic_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultShader())))->GetID(), node->PullInt("slices", 3), node->PullInt("stacks", 3), useRadius, radius);
 	RE_CompPrimitive::color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
 }
 
@@ -498,7 +489,7 @@ void RE_CompParametric::DeserializeBinary(char*& cursor, eastl::map<int, const c
 	cursor += size;
 
 	useRadius = (radius > 0);
-	SetUp(parent, ((RE_Shader*)App->resources->At(App->internalResources->GetDefaultShader()))->GetID(), slice, stacks, useRadius, radius);
+	SetUp(parent, (dynamic_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultShader())))->GetID(), slice, stacks, useRadius, radius);
 
 	size = sizeof(float) * 3;
 	memcpy(&RE_CompPrimitive::color[0], cursor, size);
@@ -537,7 +528,8 @@ void RE_CompParametric::SetUp(const RE_CompParametric& cmpPara, RE_GameObject* p
 
 void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 {
-	if (RE_CompPrimitive::VAO != 0) {
+	if (RE_CompPrimitive::VAO != 0)
+	{
 		glDeleteVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
 		glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::VBO);
 		glDeleteBuffers(1, &(GLuint)RE_CompPrimitive::EBO);
@@ -567,7 +559,9 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 	stride *= sizeof(float);
 	float* meshBuffer = new float[meshSize];
 	float* cursor = meshBuffer;
-	for (int i = 0; i < param->npoints; i++) {
+
+	for (int i = 0; i < param->npoints; i++)
+	{
 		uint cursorSize = 3;
 		size_t size = sizeof(float) * 3;
 
@@ -582,7 +576,6 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 		memcpy(cursor, &texCoords[i * 2], size);
 		cursor += cursorSize;
 	}
-
 
 	glGenVertexArrays(1, &(GLuint)RE_CompPrimitive::VAO);
 	RE_GLCacheManager::ChangeVAO(RE_CompPrimitive::VAO);
@@ -612,11 +605,9 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 	DEL_A(meshBuffer);
 }
 
-
-RE_CompPlane::RE_CompPlane()
-	: RE_CompParametric(C_PLANE, "Plane", nullptr, 0,0,0) { }
-
-RE_CompPlane::~RE_CompPlane() { }
+///////   Plane   ////////////////////////////////////////////
+RE_CompPlane::RE_CompPlane() : RE_CompParametric(C_PLANE, "Plane", nullptr, 0,0,0) {}
+RE_CompPlane::~RE_CompPlane() {}
 
 const char* RE_CompPlane::TransformAsMeshResource()
 {
@@ -655,13 +646,13 @@ const char* RE_CompPlane::TransformAsMeshResource()
 	newMesh->SetVerticesAndIndex(points, indexA, plane->npoints, plane->ntriangles, texCoords, normals);
 
 	const char* meshMD5 = newMesh->CheckAndSave(&exists);
-	if (!exists) {
+	if (!exists)
+	{
 		newMesh->SetName(eastl::string("Plane " + eastl::to_string(plane->ntriangles) + " triangles").c_str());
 		newMesh->SetType(Resource_Type::R_MESH);
-		App->resources->Reference(newMesh);
+		App::resources->Reference(newMesh);
 	}
-	else
-		DEL(newMesh);
+	else DEL(newMesh);
 
 	par_shapes_free_mesh(plane);
 	return meshMD5;
@@ -674,10 +665,9 @@ void RE_CompPlane::GenerateParametric()
 	par_shapes_free_mesh(plane);
 }
 
-RE_CompSphere::RE_CompSphere()
-	: RE_CompParametric(C_SPHERE, "Sphere", nullptr, 0, 0, 0) { }
-
-RE_CompSphere::~RE_CompSphere() { }
+///////   Sphere   ////////////////////////////////////////////
+RE_CompSphere::RE_CompSphere() : RE_CompParametric(C_SPHERE, "Sphere", nullptr, 0, 0, 0) {}
+RE_CompSphere::~RE_CompSphere() {}
 
 void RE_CompSphere::GenerateParametric()
 {
@@ -686,10 +676,9 @@ void RE_CompSphere::GenerateParametric()
 	par_shapes_free_mesh(sphere);
 }
 
-
-RE_CompCylinder::RE_CompCylinder() : RE_CompParametric(C_CYLINDER, "Cylinder", nullptr, 0, 0, 0) { }
-
-RE_CompCylinder::~RE_CompCylinder() { }
+///////   Cylinder   ////////////////////////////////////////////
+RE_CompCylinder::RE_CompCylinder() : RE_CompParametric(C_CYLINDER, "Cylinder", nullptr, 0, 0, 0) {}
+RE_CompCylinder::~RE_CompCylinder() {}
 
 void RE_CompCylinder::GenerateParametric()
 {
@@ -698,10 +687,9 @@ void RE_CompCylinder::GenerateParametric()
 	par_shapes_free_mesh(cylinder);
 }
 
-RE_CompHemiSphere::RE_CompHemiSphere() : RE_CompParametric(C_HEMISHPERE, "HemiSphere", nullptr, 0, 0, 0) { }
-
-
-RE_CompHemiSphere::~RE_CompHemiSphere() { }
+///////   HemiSphere   ////////////////////////////////////////////
+RE_CompHemiSphere::RE_CompHemiSphere() : RE_CompParametric(C_HEMISHPERE, "HemiSphere", nullptr, 0, 0, 0) {}
+RE_CompHemiSphere::~RE_CompHemiSphere() {}
 
 void RE_CompHemiSphere::GenerateParametric()
 {
@@ -710,9 +698,9 @@ void RE_CompHemiSphere::GenerateParametric()
 	par_shapes_free_mesh(hemishpere);
 }
 
-RE_CompTorus::RE_CompTorus() : RE_CompParametric(C_TORUS, "Torus", nullptr, 0, 0, 0, true, 0.1f, 0.1f, 1.0f) { }
-
-RE_CompTorus::~RE_CompTorus() { }
+///////   Torus   ////////////////////////////////////////////
+RE_CompTorus::RE_CompTorus() : RE_CompParametric(C_TORUS, "Torus", nullptr, 0, 0, 0, true, 0.1f, 0.1f, 1.0f) {}
+RE_CompTorus::~RE_CompTorus() {}
 
 void RE_CompTorus::GenerateParametric()
 {
@@ -721,9 +709,9 @@ void RE_CompTorus::GenerateParametric()
 	par_shapes_free_mesh(torus);
 }
 
-RE_CompTrefoiKnot::RE_CompTrefoiKnot() : RE_CompParametric(C_TREFOILKNOT,"Trefoil Knot", nullptr, 0, 0, 0,true,0.5f, 0.5f, 3.0f) { }
-
-RE_CompTrefoiKnot::~RE_CompTrefoiKnot() { }
+///////   TrefoiKnot   ////////////////////////////////////////////
+RE_CompTrefoiKnot::RE_CompTrefoiKnot() : RE_CompParametric(C_TREFOILKNOT,"Trefoil Knot", nullptr, 0, 0, 0,true,0.5f, 0.5f, 3.0f) {}
+RE_CompTrefoiKnot::~RE_CompTrefoiKnot() {}
 
 void RE_CompTrefoiKnot::GenerateParametric()
 {

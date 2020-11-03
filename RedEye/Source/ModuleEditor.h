@@ -89,8 +89,8 @@ public:
 	void DrawGameObjectItems(RE_GameObject* parent = nullptr);
 
 private:
-	void UpdateCamera();
 
+	void UpdateCamera();
 
 public:
 

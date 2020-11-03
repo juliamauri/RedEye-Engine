@@ -45,7 +45,7 @@ public:
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
 
-	unsigned int ReadBanksChanges(unsigned int extra_ms);
+	unsigned int ReadBanksChanges(unsigned int extra_ms = 0u);
 
 	static void SendRTPC(const char* name, float value);
 	static void SendState(const char* stateGroupName, const char* stateName);
