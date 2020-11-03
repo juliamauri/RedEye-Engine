@@ -770,7 +770,7 @@ void AssetsWindow::Draw(bool secondary)
 			{
 			case RE_FileSystem::PathType::D_FOLDER:
 			{
-				if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->GetFolderID()), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
+				if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
 					toChange = p->AsDirectory();
 				ImGui::PopID();
 				ImGui::Text(p->AsDirectory()->name.c_str());
@@ -783,13 +783,13 @@ void AssetsWindow::Draw(bool secondary)
 				case RE_FileSystem::FileType::F_META:
 				{
 					ResourceContainer* res = App::resources->At(p->AsMeta()->resource);
-					if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->GetShaderFileID()), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
+					if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->GetShaderFileID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
 						App::resources->PushSelected(res->GetMD5(), true);
 
 					if (ImGui::BeginDragDropSource())
 					{
 						ImGui::SetDragDropPayload("#ShadereReference", &p->AsMeta()->resource, sizeof(const char**));
-						ImGui::Image(reinterpret_cast<void*>(App::thumbnail->GetShaderFileID()), { 50,50 }, { 0.0, 1.0 }, { 1.0, 0.0 });
+						ImGui::Image(reinterpret_cast<void*>(App::thumbnail->GetShaderFileID()), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 						ImGui::EndDragDropSource();
 					}
 					ImGui::PopID();
@@ -817,7 +817,7 @@ void AssetsWindow::Draw(bool secondary)
 
 					if (ImGui::ImageButton(
 						reinterpret_cast<void*>(selectingUndefFile ? App::thumbnail->GetSelectFileID() : App::thumbnail->GetFileID()),
-						{ iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, (selectingUndefFile) ? -1 : 0))
+						{ iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, (selectingUndefFile) ? -1 : 0))
 					{
 						if (selectingUndefFile)
 						{
@@ -863,7 +863,7 @@ void AssetsWindow::Draw(bool secondary)
 					if (p->AsFile()->metaResource != nullptr)
 					{
 						ResourceContainer* res = App::resources->At(p->AsFile()->metaResource->resource);
-						if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->At(res->GetMD5())), { iconsSize, iconsSize }, { 0.0, 1.0 }, { 1.0, 0.0 }, 0))
+						if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->At(res->GetMD5())), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
 							App::resources->PushSelected(res->GetMD5(), true);
 						ImGui::PopID();
 
@@ -883,7 +883,7 @@ void AssetsWindow::Draw(bool secondary)
 						if (ImGui::BeginDragDropSource())
 						{
 							ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
-							ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(p->AsFile()->metaResource->resource)), { 50,50 }, { 0.0, 1.0 }, { 1.0, 0.0 });
+							ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(p->AsFile()->metaResource->resource)), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 							ImGui::EndDragDropSource();
 						}
 
