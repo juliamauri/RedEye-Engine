@@ -14,8 +14,8 @@
 class JSONNode;
 class GameObjectManager;
 
-template<class COMPCLASS>
-class ComponentPool : public PoolMapped<COMPCLASS, int>
+template<class COMPCLASS, unsigned int size>
+class ComponentPool : public PoolMapped<COMPCLASS, int, size>
 {
 public:
 	ComponentPool() { }
@@ -141,23 +141,23 @@ private:
 };
 
 //Components Pools
-typedef ComponentPool<RE_CompTransform> TransformsPool;
-typedef ComponentPool<RE_CompCamera> CamerasPool;
-typedef ComponentPool<RE_CompMesh> MeshesPool;
-typedef ComponentPool<RE_CompLight> LightPool;
+typedef ComponentPool<RE_CompTransform, 10240> TransformsPool;
+typedef ComponentPool<RE_CompCamera, 512> CamerasPool;
+typedef ComponentPool<RE_CompMesh, 2048> MeshesPool;
+typedef ComponentPool<RE_CompLight, 124> LightPool;
 //Primitives
-typedef ComponentPool<RE_CompRock> PRockPool;
-typedef ComponentPool<RE_CompCube> PCubePool;
-typedef ComponentPool<RE_CompDodecahedron> PDodecahedronPool;
-typedef ComponentPool<RE_CompTetrahedron> PTetrahedronPool;
-typedef ComponentPool<RE_CompOctohedron> POctohedronPool;
-typedef ComponentPool<RE_CompIcosahedron> PIcosahedronPool;
-typedef ComponentPool<RE_CompPlane> PPlanePool;
-typedef ComponentPool<RE_CompSphere> PSpherePool;
-typedef ComponentPool<RE_CompCylinder> PCylinderPool;
-typedef ComponentPool<RE_CompHemiSphere> PHemiSpherePool;
-typedef ComponentPool<RE_CompTorus> PTorusPool;
-typedef ComponentPool<RE_CompTrefoiKnot> PTrefoiKnotPool;
+typedef ComponentPool<RE_CompRock, 1024> PRockPool;
+typedef ComponentPool<RE_CompCube, 1024> PCubePool;
+typedef ComponentPool<RE_CompDodecahedron, 1024> PDodecahedronPool;
+typedef ComponentPool<RE_CompTetrahedron, 1024> PTetrahedronPool;
+typedef ComponentPool<RE_CompOctohedron, 1024> POctohedronPool;
+typedef ComponentPool<RE_CompIcosahedron, 1024> PIcosahedronPool;
+typedef ComponentPool<RE_CompPlane, 1024> PPlanePool;
+typedef ComponentPool<RE_CompSphere, 1024> PSpherePool;
+typedef ComponentPool<RE_CompCylinder, 1024> PCylinderPool;
+typedef ComponentPool<RE_CompHemiSphere, 1024> PHemiSpherePool;
+typedef ComponentPool<RE_CompTorus, 1024> PTorusPool;
+typedef ComponentPool<RE_CompTrefoiKnot, 1024> PTrefoiKnotPool;
 
 
 class ComponentsPool {
@@ -222,7 +222,7 @@ private:
 	PTrefoiKnotPool pTrefoiKnotPool;
 };
 
-class GameObjectManager : public PoolMapped<RE_GameObject, int> {
+class GameObjectManager : public PoolMapped<RE_GameObject, int, 10240> {
 public:
 	GameObjectManager() { }
 	~GameObjectManager() { }

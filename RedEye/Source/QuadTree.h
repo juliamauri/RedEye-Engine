@@ -116,7 +116,7 @@ struct AABBDynamicTreeNode
 	bool is_leaf;
 };
 
-class AABBDynamicTree : public PoolMapped<AABBDynamicTreeNode,int>
+class AABBDynamicTree : public PoolMapped<AABBDynamicTreeNode,int, 20480>
 {
 private:
 	int randomCount = 0;

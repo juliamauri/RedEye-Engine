@@ -4,14 +4,12 @@
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
 
-#define MAX_POOL 10240
-
-template<class TYPEVALUE, class TYPEKEY>
+template<class TYPEVALUE, class TYPEKEY, unsigned int size>
 class PoolMapped
 {
 public:
 	PoolMapped() {
-		pool_ = new TYPEVALUE[MAX_POOL];
+		pool_ = new TYPEVALUE[size];
 	}
 	virtual ~PoolMapped() {
 		delete[] pool_;
