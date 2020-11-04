@@ -188,11 +188,11 @@ public:
 	RE_Component* GetNewComponent(ComponentType cType);
 	RE_Component* CopyComponent(RE_Component* cmp, RE_GameObject* parent);
 
+	void DestroyComponent(ComponentType cType, UID toDelete);
+
 	eastl::vector<const char*> GetAllResources();
 	void UseResources();
 	void UnUseResources();
-
-	void DeleteTransform(UID id);
 
 	eastl::stack<RE_CompLight*> GetAllLights(bool check_active);
 
@@ -231,6 +231,9 @@ public:
 
 	UID Push(RE_GameObject val)override;
 	UID GetFirstGOUID();
+	RE_GameObject* GetFirstGO();
+
+	void DeleteGO(UID toDelete);
 
 	unsigned int GetBinarySize()const;
 	void SerializeBinary(char*& cursor);
@@ -250,8 +253,11 @@ public:
 	RE_GameObject* CopyGO(RE_GameObject* copy, RE_GameObject* parent);
 	RE_GameObject* GetGO(UID id)const;
 	UID GetFirstGOUID();
+	RE_GameObject* GetFirstGO();
 	eastl::vector<UID> GetAllGOs();
 	unsigned int TotalGameObjects()const { return gameObjectsPool.GetCount(); };
+
+	void DestroyGO(UID toDestroy);
 
 	RE_GameObject* InsertPool(RE_GOManager* pool);
 

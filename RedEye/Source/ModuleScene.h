@@ -17,6 +17,8 @@ public:
 
 	bool Start() override;
 	update_status Update() override;
+	update_status PostUpdate() override;
+
 	bool CleanUp() override;
 
 	void OnPlay() override;
@@ -78,6 +80,8 @@ private:
 
 	RE_GOManager scenePool;
 	RE_GOManager savedState;
+
+	eastl::stack<RE_GameObject*> GOsToDelete;
 
 	RE_GameObject* root = nullptr;
 

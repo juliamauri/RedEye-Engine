@@ -555,6 +555,7 @@ void ModuleEditor::DrawHeriarchy()
 			objects.push(*it);
 
 		bool is_leaf;
+		unsigned int count = 0;
 		while (!objects.empty())
 		{
 			RE_GameObject* object = objects.top();
@@ -563,6 +564,7 @@ void ModuleEditor::DrawHeriarchy()
 			childs = object->GetChilds();
 			is_leaf = childs.empty();
 
+			ImGui::PushID(eastl::string("#HyteracyGOID" + eastl::to_string(count++)).c_str());
 			if (ImGui::TreeNodeEx(object->GetName(), ImGuiTreeNodeFlags_(selected == object ?
 				(is_leaf ? ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_Leaf :
 				ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick) :
@@ -575,12 +577,15 @@ void ModuleEditor::DrawHeriarchy()
 					for (eastl::list<RE_GameObject*>::reverse_iterator it = childs.rbegin(); it != childs.rend(); it++)
 						objects.push(*it);
 			}
+			ImGui::PopID();
 
 			if (ImGui::IsItemClicked(0)) to_select = object;
 
 			if (ImGui::BeginPopupContextItem()) {
 
 				if (ImGui::MenuItem("Create Prefab")) popupWindow->PopUpPrefab(object);
+				ImGui::Separator();
+				if (ImGui::MenuItem("Destroy GameObject")) Event::Push(DESTROY_GO, App::scene, Cvar(object));
 				ImGui::Separator();
 				DrawGameObjectItems(object);
 				ImGui::EndPopup();

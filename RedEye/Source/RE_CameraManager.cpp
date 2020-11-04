@@ -80,7 +80,7 @@ void RE_CameraManager::RecallCameras(const RE_GameObject * root)
 		{
 			if (!main_camera) main_camera = (*cam);
 
-			/* TODO:
+			/* TODO Rub:
 			if ((*cam)->isMain)
 			else: more than 1 main cameras*/
 		}

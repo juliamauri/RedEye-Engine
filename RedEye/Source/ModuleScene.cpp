@@ -59,6 +59,20 @@ update_status ModuleScene::Update()
 	return UPDATE_CONTINUE;
 }
 
+update_status ModuleScene::PostUpdate()
+{
+	bool someDelete = !GOsToDelete.empty();
+	while (!GOsToDelete.empty()) {
+
+		GOsToDelete.top()->UnlinkParent();
+		scenePool.DestroyGO(GOsToDelete.top()->GetPoolID());
+		GOsToDelete.pop();
+	}
+	if (someDelete) SetupScene();
+
+	return UPDATE_CONTINUE;
+}
+
 bool ModuleScene::CleanUp()
 {
 	if (unsavedScene) DEL(unsavedScene);
@@ -184,9 +198,9 @@ void ModuleScene::RecieveEvent(const Event& e)
 
 			break;
 		}
-		case GO_REMOVE_CHILD:
+		case DESTROY_GO:
 		{
-			RE_GameObject* to_remove = e.data2.AsGO();
+			RE_GameObject* to_remove = e.data1.AsGO();
 
 			if (belongs_to_scene && to_remove->IsActive())
 			{
@@ -194,8 +208,11 @@ void ModuleScene::RecieveEvent(const Event& e)
 				for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetPoolID());
 			}
 
-			// TODO: Delete to_remove & childs from GO Pool
+			if (App::editor->GetSelected() == to_remove)
+				App::editor->SetSelected(nullptr);
 
+			GOsToDelete.push(to_remove);
+			haschanges = true;
 			break;
 		}
 		case TRANSFORM_MODIFIED:

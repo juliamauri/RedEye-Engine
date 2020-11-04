@@ -7,7 +7,7 @@ RE_GameObject* RE_GOManager::AddGO(const char* name, RE_GameObject* parent)
 {
 	RE_GameObject* goparent = nullptr;
 	if (gameObjectsPool.GetCount() > 0)
-		goparent = parent ? parent : gameObjectsPool.AtPtr(gameObjectsPool.GetFirstGOUID());
+		goparent = parent ? parent : gameObjectsPool.GetFirstGO();
 
 	RE_GameObject* ret = gameObjectsPool.AtPtr(gameObjectsPool.Push({}));
 	ret->SetUp(&componentsPool, name, goparent);
@@ -18,7 +18,7 @@ RE_GameObject* RE_GOManager::CopyGO(RE_GameObject* copy, RE_GameObject* parent)
 {
 	RE_GameObject* goparent = nullptr;
 	if (gameObjectsPool.GetCount() > 0)
-		goparent = parent ? parent : gameObjectsPool.AtPtr(gameObjectsPool.GetFirstGOUID());
+		goparent = parent ? parent : gameObjectsPool.GetFirstGO();
 
 	eastl::list<RE_Component*> copyComponents = copy->GetComponents();
 
@@ -51,14 +51,32 @@ UID RE_GOManager::GetFirstGOUID()
 	return gameObjectsPool.GetFirstGOUID();
 }
 
+RE_GameObject* RE_GOManager::GetFirstGO()
+{
+	return gameObjectsPool.GetFirstGO();;
+}
+
 eastl::vector<UID> RE_GOManager::GetAllGOs()
 {
 	return gameObjectsPool.GetAllKeys();
 }
 
+void RE_GOManager::DestroyGO(UID toDestroy)
+{
+	RE_GameObject* go = gameObjectsPool.AtPtr(toDestroy);
+
+	eastl::list<RE_GameObject*> childs = go->GetChilds();
+	for (auto child : childs) DestroyGO(child->GetPoolID());
+
+	eastl::list<RE_Component*> comps = go->GetComponents();
+	for (auto comp : comps) componentsPool.DestroyComponent(comp->GetType(), comp->GetPoolID());
+
+	gameObjectsPool.DeleteGO(toDestroy);
+}
+
 RE_GameObject* RE_GOManager::InsertPool(RE_GOManager* pool)
 {
-	return RepercusiveInsertGO(pool->GetGO(pool->GetFirstGOUID()), (TotalGameObjects() > 0) ? GetGO(GetFirstGOUID()) : nullptr);
+	return RepercusiveInsertGO(pool->GetFirstGO(), (TotalGameObjects() > 0) ? GetFirstGO() : nullptr);
 }
 
 RE_GOManager* RE_GOManager::GetNewPoolFromID(UID id)
@@ -154,6 +172,16 @@ UID GameObjectManager::Push(RE_GameObject val)
 UID GameObjectManager::GetFirstGOUID()
 {
 	return (lastAvaibleIndex > 0) ? pool_[0].GetPoolID() : 0;
+}
+
+RE_GameObject* GameObjectManager::GetFirstGO()
+{
+	return &pool_[0];
+}
+
+void GameObjectManager::DeleteGO(UID toDelete)
+{
+	Pop(toDelete);
 }
 
 unsigned int GameObjectManager::GetBinarySize() const
@@ -440,6 +468,31 @@ RE_Component* ComponentsPool::CopyComponent(RE_Component* cmp, RE_GameObject* pa
 	return ret;
 }
 
+void ComponentsPool::DestroyComponent(ComponentType cType, UID toDelete)
+{
+	RE_Component* cmp = GetComponent(toDelete, cType);
+	cmp->GetGO()->RemoveComponent(cmp);
+	switch (cType)
+	{
+	case C_TRANSFORM: transPool.Pop(toDelete); break;
+	case C_CAMERA: camPool.Pop(toDelete); break;
+	case C_MESH: meshPool.Pop(toDelete); break;
+	case C_LIGHT: lightPool.Pop(toDelete); break;
+	case C_CUBE: pCubePool.Pop(toDelete); break;
+	case C_DODECAHEDRON: pDodecahedronPool.Pop(toDelete); break;
+	case C_TETRAHEDRON: pTetrahedronPool.Pop(toDelete); break;
+	case C_OCTOHEDRON: pOctohedronPool.Pop(toDelete); break;
+	case C_ICOSAHEDRON: pIcosahedronPool.Pop(toDelete); break;
+	case C_SPHERE: pSpherePool.Pop(toDelete); break;
+	case C_CYLINDER: pCylinderPool.Pop(toDelete); break;
+	case C_HEMISHPERE: pHemiSpherePool.Pop(toDelete); break;
+	case C_TORUS: pTorusPool.Pop(toDelete); break;
+	case C_TREFOILKNOT: pTrefoiKnotPool.Pop(toDelete); break;
+	case C_ROCK: pRockPool.Pop(toDelete); break;
+	case C_PLANE: pPlanePool.Pop(toDelete); break;
+	}
+}
+
 eastl::vector<const char*> ComponentsPool::GetAllResources()
 {
 	eastl::vector<const char*> allResources;
@@ -475,11 +528,6 @@ void ComponentsPool::UnUseResources()
 {
 	camPool.UnUseResources();
 	meshPool.UnUseResources();
-}
-
-void ComponentsPool::DeleteTransform(UID id)
-{
-	transPool.Pop(id);
 }
 
 eastl::stack<RE_CompLight*> ComponentsPool::GetAllLights(bool check_active)

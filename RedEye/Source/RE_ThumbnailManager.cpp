@@ -249,7 +249,7 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 		if (poolGOThumbnail)
 		{
 			poolGOThumbnail->UseResources();
-			RE_GameObject* root = poolGOThumbnail->GetGO(poolGOThumbnail->GetFirstGOUID());
+			RE_GameObject* root = poolGOThumbnail->GetFirstGO();
 			root->TransformModified(false);
 			root->Update();
 			root->ResetGlobalBoundingBoxForAllChilds();

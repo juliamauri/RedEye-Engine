@@ -55,7 +55,7 @@ void RE_GameObject::PreUpdate()
 void RE_GameObject::Update()
 {
 	for (auto component : GetComponents()) component->Update();
-	for (auto child : childs) child->Update();
+	for (auto cIter = childs.begin(); cIter != childs.end(); cIter++) (*cIter)->Update();
 }
 
 void RE_GameObject::PostUpdate()
@@ -336,22 +336,10 @@ void RE_GameObject::AddChildsFromGO(RE_GameObject * go, bool broadcast)
 			AddChild(child);
 }
 
-void RE_GameObject::RemoveChild(RE_GameObject * child, bool broadcast)
+void RE_GameObject::RemoveChild(RE_GameObject * child)
 {
 	SDL_assert(child != nullptr);
-
-	if (!broadcast) childs.remove(child);
-	else Event::Push(GO_REMOVE_CHILD, App::scene, this, child);
-}
-
-void RE_GameObject::RemoveAllChilds()
-{
-	while (!childs.empty())
-	{
-		(*childs.begin())->RemoveAllChilds();
-		DEL(*childs.begin());
-		childs.pop_front();
-	}
+	childs.remove(child);
 }
 
 eastl::list<RE_GameObject*>& RE_GameObject::GetChilds() { return childs; }
@@ -371,6 +359,11 @@ void RE_GameObject::SetParent(RE_GameObject * p)
 {
 	SDL_assert(p != nullptr);
 	parent = p;
+}
+
+void RE_GameObject::UnlinkParent()
+{
+	if (parent) parent->RemoveChild(this);
 }
 
 bool RE_GameObject::IsActive() const { return active; }
@@ -504,10 +497,8 @@ RE_Component* RE_GameObject::AddComponent(const ushortint type)
 	case C_TRANSFORM:
 	{
 		if (transform)
-		{
-			RemoveComponent(transform);
-			poolComponents->DeleteTransform(transform->GetPoolID());
-		}
+			poolComponents->DestroyComponent(C_TRANSFORM,transform->GetPoolID());
+
 		transform = dynamic_cast<RE_CompTransform*>(poolComponents->GetNewComponent(ComponentType::C_TRANSFORM));
 		transform->SetUp(this);
 		ret = static_cast<RE_Component*>(transform);
@@ -591,7 +582,7 @@ RE_CompTransform * RE_GameObject::AddCompTransform()
 	if (transform)
 	{
 		RemoveComponent(transform);
-		poolComponents->DeleteTransform(transform->GetPoolID());
+		poolComponents->DestroyComponent(C_TRANSFORM, transform->GetPoolID());
 	}
 	transform = dynamic_cast<RE_CompTransform*>(poolComponents->GetNewComponent(ComponentType::C_TRANSFORM));
 	transform->SetUp(this);

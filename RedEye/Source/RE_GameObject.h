@@ -54,8 +54,7 @@ public:
 	// Children
 	void AddChild(RE_GameObject* child, bool broadcast = true);
 	void AddChildsFromGO(RE_GameObject* go, bool broadcast = true);
-	void RemoveChild(RE_GameObject* child, bool broadcast = true); //Breaks the link with the parent but does not delete the child.
-	void RemoveAllChilds();
+	void RemoveChild(RE_GameObject* child); //Breaks the link with the parent but does not delete the child.
 	eastl::list<RE_GameObject*>& GetChilds();
 	const eastl::list<RE_GameObject*>& GetChilds() const;
 	void GetChilds(eastl::list<const RE_GameObject*>& out_childs) const;
@@ -66,6 +65,7 @@ public:
 	RE_GameObject* GetParent() const;
 	const RE_GameObject* GetParent_c() const;
 	void SetParent(RE_GameObject* parent);
+	void UnlinkParent();
 
 	// Active
 	bool IsActive() const;
