@@ -98,10 +98,11 @@ public:
 		DEL(comp_objs);
 	}
 
-	unsigned int GetBinarySize()const {
+	unsigned int GetBinarySize(bool iterate = false)const {
 		unsigned int size = sizeof(unsigned int);
 		unsigned int totalComps = GetCount();
-		if (totalComps > 0) size += (pool_[0].GetBinarySize() + sizeof(UID)) * totalComps;
+		if (totalComps > 0 && !iterate) size += (pool_[0].GetBinarySize() + sizeof(UID)) * totalComps;
+		else for (unsigned int i = 0; i < totalComps; i++) size += pool_[i].GetBinarySize();
 		return size;
 	}
 
@@ -154,18 +155,58 @@ typedef ComponentPool<RE_CompCamera, 512> CamerasPool;
 typedef ComponentPool<RE_CompMesh, 2048> MeshesPool;
 typedef ComponentPool<RE_CompLight, 124> LightPool;
 //Primitives
-typedef ComponentPool<RE_CompRock, 1024> PRockPool;
-typedef ComponentPool<RE_CompCube, 1024> PCubePool;
-typedef ComponentPool<RE_CompDodecahedron, 1024> PDodecahedronPool;
-typedef ComponentPool<RE_CompTetrahedron, 1024> PTetrahedronPool;
-typedef ComponentPool<RE_CompOctohedron, 1024> POctohedronPool;
-typedef ComponentPool<RE_CompIcosahedron, 1024> PIcosahedronPool;
-typedef ComponentPool<RE_CompPlane, 1024> PPlanePool;
-typedef ComponentPool<RE_CompSphere, 1024> PSpherePool;
-typedef ComponentPool<RE_CompCylinder, 1024> PCylinderPool;
-typedef ComponentPool<RE_CompHemiSphere, 1024> PHemiSpherePool;
-typedef ComponentPool<RE_CompTorus, 1024> PTorusPool;
-typedef ComponentPool<RE_CompTrefoiKnot, 1024> PTrefoiKnotPool;
+
+
+class primitiveItem {
+public:
+	primitiveItem() {}
+	~primitiveItem() {}
+	
+	RE_Component* GetPtr();
+	const RE_Component* GetCPtr() const;
+
+	UID PoolSetUp(GameObjectsPool* pool, const UID parent, bool report_parent = false);
+
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources);
+
+	unsigned int GetBinarySize() const;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources);
+
+	UID GetPoolID()const { return GetCPtr()->GetPoolID(); }
+	void SetPoolID(UID id) { GetPtr()->SetPoolID(id); }
+
+	UID GetGOUID() const { return GetCPtr()->GetGOUID(); }
+
+	eastl::vector<const char*> GetAllResources() { return GetPtr()->GetAllResources(); }
+	void UseResources() { GetPtr()->UseResources(); }
+	void UnUseResources() { GetPtr()->UnUseResources(); }
+
+	ComponentType type;
+
+private:
+	union UniversalPrimitive {
+		RE_CompRock rock;
+		RE_CompCube cube;
+		RE_CompDodecahedron dodecahedron;
+		RE_CompTetrahedron tetrahedron;
+		RE_CompOctohedron octohedron;
+		RE_CompIcosahedron icosahedron;
+		RE_CompPlane plane;
+		RE_CompSphere sphere;
+		RE_CompCylinder cylinder;
+		RE_CompHemiSphere hemisphere;
+		RE_CompTorus torus;
+		RE_CompTrefoiKnot trefoiknot;
+
+		UniversalPrimitive(){}
+		~UniversalPrimitive(){}
+		
+	} primitive;
+};
+
+typedef ComponentPool<primitiveItem, 1024> PrimitivePool;
 
 class ComponentsPool {
 public:
@@ -174,18 +215,7 @@ public:
 		camPool.SetName("Cameras Pool");
 		meshPool.SetName("Meshes Pool");
 		lightPool.SetName("Lights Pool");
-		pRockPool.SetName("PRocks Pool");
-		pCubePool.SetName("PCubes Pool");
-		pDodecahedronPool.SetName("PDodecahedrons Pool");
-		pTetrahedronPool.SetName("PTetrahedrons Pool");
-		pOctohedronPool.SetName("POctohedron Pool");
-		pIcosahedronPool.SetName("PIcosahedron Pool");
-		pPlanePool.SetName("PPlane Pool");
-		pSpherePool.SetName("PSphere Pool");
-		pCylinderPool.SetName("PCylinder Pool");
-		pHemiSpherePool.SetName("PHemiSphere Pool");
-		pTorusPool.SetName("PTorus Pool");
-		pTrefoiKnotPool.SetName("PTrefoiKnot Pool");
+		primitivPool.SetName("Primitives Pool");
 	}
 	~ComponentsPool() { }
 
@@ -208,7 +238,7 @@ public:
 
 	// Component Getters
 	RE_Component* GetComponentPtr(UID poolid, ComponentType cType);
-	const RE_Component* GetComponentCPtr(UID poolid, ComponentType cType);
+	const RE_Component* GetComponentCPtr(UID poolid, ComponentType cType) const;
 
 	eastl::vector<UID> GetAllCompUID(ushortint type = 0) const;
 	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
@@ -228,18 +258,7 @@ private:
 	CamerasPool camPool;
 	MeshesPool meshPool;
 	LightPool lightPool;
-	PRockPool pRockPool;
-	PCubePool pCubePool;
-	PDodecahedronPool pDodecahedronPool;
-	PTetrahedronPool pTetrahedronPool;
-	POctohedronPool pOctohedronPool;
-	PIcosahedronPool pIcosahedronPool;
-	PPlanePool pPlanePool;
-	PSpherePool pSpherePool;
-	PCylinderPool pCylinderPool;
-	PHemiSpherePool pHemiSpherePool;
-	PTorusPool pTorusPool;
-	PTrefoiKnotPool pTrefoiKnotPool;
+	PrimitivePool primitivPool;
 };
 
 class GameObjectsPool : public PoolMapped<RE_GameObject, UID, 10240> {
