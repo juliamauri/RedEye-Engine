@@ -157,17 +157,18 @@ typedef ComponentPool<RE_CompLight, 124> LightPool;
 //Primitives
 
 
-class primitiveItem {
+class PrimitivePoolContainer
+{
 public:
-	primitiveItem() {}
-	primitiveItem(const primitiveItem& cPrimitive) {
+	PrimitivePoolContainer() {}
+	PrimitivePoolContainer(const PrimitivePoolContainer& cPrimitive) {
 		type = cPrimitive.type;
 		memcpy(GetPtr(), cPrimitive.GetCPtr(), sizeof(*cPrimitive.GetCPtr()));
 	}
-	~primitiveItem() {}
+	~PrimitivePoolContainer() {}
 
-	primitiveItem& operator=(const primitiveItem& cPrimitive) {
-		primitiveItem ret;
+	PrimitivePoolContainer& operator=(const PrimitivePoolContainer& cPrimitive) {
+		PrimitivePoolContainer ret;
 		ret.type = cPrimitive.type;
 		memcpy(ret.GetPtr(), cPrimitive.GetCPtr(), sizeof(*cPrimitive.GetCPtr()));
 		return ret;
@@ -217,7 +218,7 @@ private:
 	} primitive;
 };
 
-typedef ComponentPool<primitiveItem, 1024> PrimitivePool;
+typedef ComponentPool<PrimitivePoolContainer, 1024> PrimitivePool;
 
 class ComponentsPool {
 public:
@@ -253,7 +254,7 @@ public:
 
 	eastl::vector<UID> GetAllCompUID(ushortint type = 0) const;
 	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
-	eastl::vector<RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
+	eastl::vector<const RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
 	eastl::vector<eastl::pair<UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
 
 	// Serialization
@@ -343,7 +344,7 @@ public:
 	// Component Getters
 	eastl::vector<UID> GetAllCompUID(ushortint type = 0) const;
 	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
-	eastl::vector<RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
+	eastl::vector<const RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
 	eastl::vector<eastl::pair<UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
 	RE_GOManager* GetNewPoolFromID(UID id);
 

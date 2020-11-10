@@ -128,6 +128,26 @@ RE_GameObject* RE_GOManager::InsertPool(RE_GOManager* pool)
 	return RecusiveInsertGO(pool->GetRootPtr(), (TotalGameObjects() > 0) ? GetRootUID() : 0);
 }
 
+eastl::vector<UID> RE_GOManager::GetAllCompUID(ushortint type) const
+{
+	return componentsPool.GetAllCompUID(type);
+}
+
+eastl::vector<RE_Component*> RE_GOManager::GetAllCompPtr(ushortint type) const
+{
+	return componentsPool.GetAllCompPtr(type);
+}
+
+eastl::vector<const RE_Component*> RE_GOManager::GetAllCompCPtr(ushortint type) const
+{
+	return componentsPool.GetAllCompCPtr(type);
+}
+
+eastl::vector<eastl::pair<UID, RE_Component*>> RE_GOManager::GetAllCompData(ushortint type) const
+{
+	return componentsPool.GetAllCompData(type);
+}
+
 RE_GOManager* RE_GOManager::GetNewPoolFromID(UID id)
 {
 	RE_GOManager* ret = new RE_GOManager();
@@ -408,9 +428,6 @@ const RE_Component* ComponentsPool::GetComponentCPtr(UID poolid, ComponentType c
 eastl::pair<UID, RE_Component*> ComponentsPool::GetNewComponent(ComponentType cType)
 {
 	eastl::pair<UID, RE_Component*> ret = { 0, nullptr};
-
-
-
 	switch (cType)
 	{
 	case C_TRANSFORM:
@@ -470,7 +487,7 @@ UID ComponentsPool::GetNewComponentUID(ComponentType cType)
 	case C_LIGHT: ret = lightPool.GetNewCompUID(); break;
 	case C_PARTICLEEMITER: break;
 	case C_GRID: break;
-	case C_FUSTRUM:  break;
+	case C_FUSTRUM: break;
 	case C_CUBE:
 	case C_DODECAHEDRON:
 	case C_TETRAHEDRON:
@@ -594,15 +611,213 @@ void ComponentsPool::UnUseResources()
 	meshPool.UnUseResources();
 }
 
-eastl::stack<RE_CompLight*> ComponentsPool::GetAllLightsPtr() const
+eastl::vector<UID> ComponentsPool::GetAllCompUID(ushortint type) const
 {
-	eastl::stack<RE_CompLight*> lights;
+	eastl::vector<UID> ret;
+	switch (type) {
+	case C_TRANSFORM: ret = transPool.GetAllKeys(); break;
+	case C_CAMERA: ret = camPool.GetAllKeys(); break;
+	case C_MESH: ret = meshPool.GetAllKeys(); break;
+	case C_LIGHT: ret = lightPool.GetAllKeys(); break;
+	case C_PARTICLEEMITER: break;
+	case C_GRID: break;
+	case C_FUSTRUM: break;
+	case C_CUBE:
+	case C_DODECAHEDRON:
+	case C_TETRAHEDRON:
+	case C_OCTOHEDRON:
+	case C_ICOSAHEDRON:
+	case C_PLANE:
+	case C_SPHERE:
+	case C_CYLINDER:
+	case C_HEMISHPERE:
+	case C_TORUS:
+	case C_TREFOILKNOT:
+	case C_ROCK:
 
-	eastl::vector<UID> lightsUID = lightPool.GetAllKeys();
-	int count = lightsUID.size();
-	for (int i = 0; i < count; ++i) lights.push(lightPool.AtPtr(lightsUID[i]));
+		eastl::vector<UID> primitives = primitivPool.GetAllKeys();
+		for (auto id : primitives)
+			if (primitivPool.AtPtr(id)->type == type)
+				ret.push_back(id);
 
-	return lights;
+		break;
+	}
+
+	return ret;
+}
+
+eastl::vector<RE_Component*> ComponentsPool::GetAllCompPtr(ushortint type) const
+{
+	eastl::vector<RE_Component*> ret;
+	switch (type)
+	{
+	case C_TRANSFORM:
+	{
+		eastl::vector<UID> ids = transPool.GetAllKeys();
+		for (auto id : ids) ret.push_back(static_cast<RE_Component*>(transPool.AtPtr(id)));
+		break;
+	}
+	case C_CAMERA:
+	{
+		eastl::vector<UID> ids = camPool.GetAllKeys();
+		for (auto id : ids) ret.push_back(static_cast<RE_Component*>(camPool.AtPtr(id)));
+		break;
+	}
+	case C_MESH:
+	{
+		eastl::vector<UID> ids = meshPool.GetAllKeys();
+		for (auto id : ids) ret.push_back(static_cast<RE_Component*>(meshPool.AtPtr(id)));
+		break;
+	}
+	case C_LIGHT:
+	{
+		eastl::vector<UID> ids = lightPool.GetAllKeys();
+		for (auto id : ids) ret.push_back(static_cast<RE_Component*>(lightPool.AtPtr(id)));
+		break;
+	}
+	case C_PARTICLEEMITER: break;
+	case C_GRID: break;
+	case C_FUSTRUM: break;
+	case C_CUBE:
+	case C_DODECAHEDRON:
+	case C_TETRAHEDRON:
+	case C_OCTOHEDRON:
+	case C_ICOSAHEDRON:
+	case C_PLANE:
+	case C_SPHERE:
+	case C_CYLINDER:
+	case C_HEMISHPERE:
+	case C_TORUS:
+	case C_TREFOILKNOT:
+	case C_ROCK:
+
+		eastl::vector<UID> primitives = primitivPool.GetAllKeys();
+		for (auto id : primitives)
+		{
+			PrimitivePoolContainer* prim = primitivPool.AtPtr(id);
+			if (prim->type == type) ret.push_back(prim->GetPtr());
+		}
+
+		break;
+	}
+
+	return ret;
+}
+
+eastl::vector<const RE_Component*> ComponentsPool::GetAllCompCPtr(ushortint type) const
+{
+	eastl::vector<const RE_Component*> ret;
+	switch (type)
+	{
+	case C_TRANSFORM:
+	{
+		eastl::vector<UID> ids = transPool.GetAllKeys();
+		for (auto id : ids) ret.push_back(static_cast<const RE_Component*>(transPool.AtCPtr(id)));
+		break;
+	}
+	case C_CAMERA:
+	{
+		eastl::vector<UID> ids = camPool.GetAllKeys();
+		for (auto id : ids) ret.push_back(static_cast<const RE_Component*>(camPool.AtCPtr(id)));
+		break;
+	}
+	case C_MESH:
+	{
+		eastl::vector<UID> ids = meshPool.GetAllKeys();
+		for (auto id : ids) ret.push_back(static_cast<const RE_Component*>(meshPool.AtCPtr(id)));
+		break;
+	}
+	case C_LIGHT:
+	{
+		eastl::vector<UID> ids = lightPool.GetAllKeys();
+		for (auto id : ids) ret.push_back(static_cast<const RE_Component*>(lightPool.AtCPtr(id)));
+		break;
+	}
+	case C_PARTICLEEMITER: break;
+	case C_GRID: break;
+	case C_FUSTRUM: break;
+	case C_CUBE:
+	case C_DODECAHEDRON:
+	case C_TETRAHEDRON:
+	case C_OCTOHEDRON:
+	case C_ICOSAHEDRON:
+	case C_PLANE:
+	case C_SPHERE:
+	case C_CYLINDER:
+	case C_HEMISHPERE:
+	case C_TORUS:
+	case C_TREFOILKNOT:
+	case C_ROCK:
+
+		eastl::vector<UID> primitives = primitivPool.GetAllKeys();
+		for (auto id : primitives)
+		{
+			const PrimitivePoolContainer* prim = primitivPool.AtCPtr(id);
+			if (prim->type == type) ret.push_back(prim->GetCPtr());
+		}
+
+		break;
+	}
+
+	return ret;
+}
+
+eastl::vector<eastl::pair<UID, RE_Component*>> ComponentsPool::GetAllCompData(ushortint type) const
+{
+	eastl::vector<eastl::pair<UID, RE_Component*>> ret;
+	switch (type)
+	{
+	case C_TRANSFORM:
+	{
+		eastl::vector<UID> ids = transPool.GetAllKeys();
+		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(transPool.AtPtr(id)) });
+		break;
+	}
+	case C_CAMERA:
+	{
+		eastl::vector<UID> ids = camPool.GetAllKeys();
+		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(camPool.AtPtr(id)) });
+		break;
+	}
+	case C_MESH:
+	{
+		eastl::vector<UID> ids = meshPool.GetAllKeys();
+		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(meshPool.AtPtr(id)) });
+		break;
+	}
+	case C_LIGHT:
+	{
+		eastl::vector<UID> ids = lightPool.GetAllKeys();
+		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(lightPool.AtPtr(id)) });
+		break;
+	}
+	case C_PARTICLEEMITER: break;
+	case C_GRID: break;
+	case C_FUSTRUM: break;
+	case C_CUBE:
+	case C_DODECAHEDRON:
+	case C_TETRAHEDRON:
+	case C_OCTOHEDRON:
+	case C_ICOSAHEDRON:
+	case C_PLANE:
+	case C_SPHERE:
+	case C_CYLINDER:
+	case C_HEMISHPERE:
+	case C_TORUS:
+	case C_TREFOILKNOT:
+	case C_ROCK:
+
+		eastl::vector<UID> primitives = primitivPool.GetAllKeys();
+		for (auto id : primitives)
+		{
+			PrimitivePoolContainer* prim = primitivPool.AtPtr(id);
+			if (prim->type == type) ret.push_back({ id, prim->GetPtr() });
+		}
+
+		break;
+	}
+
+	return ret;
 }
 
 unsigned int ComponentsPool::GetBinarySize() const
@@ -651,7 +866,7 @@ void ComponentsPool::DeserializeJson(GameObjectsPool* goPool, JSONNode* node, ea
 	DEL(comps);
 }
 
-RE_Component* primitiveItem::GetPtr()
+RE_Component* PrimitivePoolContainer::GetPtr()
 {
 	RE_Component* ret = nullptr;
 	switch (type) {
@@ -670,7 +885,7 @@ RE_Component* primitiveItem::GetPtr()
 	return ret;
 }
 
-const RE_Component* primitiveItem::GetCPtr() const
+const RE_Component* PrimitivePoolContainer::GetCPtr() const
 {
 	const RE_Component* ret = nullptr;
 	switch (type) {
@@ -689,29 +904,29 @@ const RE_Component* primitiveItem::GetCPtr() const
 	return ret;
 }
 
-UID primitiveItem::PoolSetUp(GameObjectsPool* pool, const UID parent, bool report_parent)
+UID PrimitivePoolContainer::PoolSetUp(GameObjectsPool* pool, const UID parent, bool report_parent)
 {
 	return GetPtr()->PoolSetUp(pool, parent, report_parent);
 }
 
-void primitiveItem::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
+void PrimitivePoolContainer::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushUInt("ComponentType", static_cast<unsigned int>(type));
 	GetCPtr()->SerializeJson(node, resources);
 }
 
-void primitiveItem::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
+void PrimitivePoolContainer::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<ComponentType>(node->PullUInt("ComponentType", static_cast<unsigned int>(ComponentType::C_CUBE)));
 	GetPtr()->DeserializeJson(node, resources);
 }
 
-unsigned int primitiveItem::GetBinarySize() const
+unsigned int PrimitivePoolContainer::GetBinarySize() const
 {
 	return sizeof(ComponentType) + GetCPtr()->GetBinarySize();
 }
 
-void primitiveItem::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+void PrimitivePoolContainer::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
 {
 	size_t size = sizeof(ComponentType);
 	memcpy(cursor, &type, size);
@@ -719,7 +934,7 @@ void primitiveItem::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 	GetPtr()->SerializeBinary(cursor, resources);
 }
 
-void primitiveItem::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
+void PrimitivePoolContainer::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(ComponentType);
 	memcpy(&type, cursor, size);
