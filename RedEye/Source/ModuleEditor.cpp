@@ -120,12 +120,8 @@ bool ModuleEditor::Start()
 	grid->GridSetUp();
 
 	// FOCUS CAMERA
-	const RE_GameObject* root = ModuleScene::GetRootCPtr();
-	if (root->ChildCount() > 0)
-	{
-		SetSelected(root->GetChildsPtr().begin().mpNode->mValue);
-		RE_CameraManager::EditorCamera()->Focus(selected);
-	}
+	UID first = ModuleScene::GetRootCPtr()->GetFirstChildUID();
+	if (first) SetSelected(first);
 
 	return true;
 }
@@ -470,19 +466,18 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 		glBegin(GL_LINES);
 
 		// Draw Bounding Boxes
-		const RE_GameObject* root = App::scene->GetRoot();
 		switch (adapted_AABBdraw)
 		{
 		case SELECTED_ONLY:
 		{
 			glColor4f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2], 1.0f);
-			selected->DrawGlobalAABB();
+			ModuleScene::GetGOCPtr(selected)->DrawGlobalAABB();
 			break;
 		}
 		case ALL:
 		{
 			eastl::queue<const RE_GameObject*> objects;
-			for (auto child : root->GetChildsPtr())
+			for (auto child : ModuleScene::GetRootCPtr()->GetChildsPtr())
 				objects.push(child);
 
 			if (!objects.empty())
@@ -506,10 +501,10 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 		case ALL_AND_SELECTED:
 		{
 			glColor4f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2], 1.0f);
-			selected->DrawGlobalAABB();
+			ModuleScene::GetGOCPtr(selected)->DrawGlobalAABB();
 
 			eastl::queue<const RE_GameObject*> objects;
-			for (auto child : root->GetChildsPtr())
+			for (auto child : ModuleScene::GetRootCPtr()->GetChildsPtr())
 				objects.push(child);
 
 			if (!objects.empty())
@@ -521,7 +516,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 					const RE_GameObject* object = objects.front();
 					objects.pop();
 
-					if (object != selected) object->DrawGlobalAABB();
+					if (object->GetUID() != selected) object->DrawGlobalAABB();
 
 					if (object->ChildCount() > 0)
 						for (auto child : object->GetChildsPtr())
@@ -554,55 +549,48 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 
 void ModuleEditor::DrawHeriarchy()
 {
-	RE_GameObject* to_select = nullptr;
-	const RE_GameObject* root = App::scene->GetRoot_c();
+	UID to_select = 0;
+	const RE_GameObject* root = ModuleScene::GetRootCPtr();
+	UID root_uid = root->GetUID();
 	if (root->ChildCount() > 0)
 	{
-		// Add root children
-		eastl::stack<RE_GameObject*> objects;
-		eastl::list<RE_GameObject*> childs;
-		childs = root->GetChildsPtr();
-		for (eastl::list<RE_GameObject*>::reverse_iterator it = childs.rbegin(); it != childs.rend(); it++)
-			objects.push(*it);
+		eastl::stack<RE_GameObject*> gos;
+		for (auto child : root->GetChildsPtr()) gos.push(child);
 
-		bool is_leaf;
-		unsigned int count = 0;
-		while (!objects.empty())
+		bool is_leaf; unsigned int count = 0;
+		while (!gos.empty())
 		{
-			RE_GameObject* object = objects.top();
-			objects.pop();
-			childs.clear();
-			childs = object->GetChildsPtr();
-			is_leaf = childs.empty();
+			RE_GameObject* go = gos.top();
+			UID go_uid = go->GetUID();
+			gos.pop();
+
+			is_leaf = go->ChildCount();
 
 			ImGui::PushID(eastl::string("#HyteracyGOID" + eastl::to_string(count++)).c_str());
-			if (ImGui::TreeNodeEx(object->name.c_str(), ImGuiTreeNodeFlags_(selected == object ?
+			if (ImGui::TreeNodeEx(go->name.c_str(), ImGuiTreeNodeFlags_(selected == go_uid ?
 				(is_leaf ? ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_Leaf :
 					ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick) :
 				(is_leaf ? ImGuiTreeNodeFlags_Leaf :
 					ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick))))
 			{
-				if (is_leaf)
-					ImGui::TreePop();
-				else
-					for (eastl::list<RE_GameObject*>::reverse_iterator it = childs.rbegin(); it != childs.rend(); it++)
-						objects.push(*it);
+				if (is_leaf) ImGui::TreePop();
+				else for (auto child : go->GetChildsPtr()) gos.push(child);
 			}
 			ImGui::PopID();
 
-			if (ImGui::IsItemClicked(0)) to_select = object;
+			if (ImGui::IsItemClicked()) to_select = go_uid;
 
-			if (ImGui::BeginPopupContextItem()) {
-
-				if (ImGui::MenuItem("Create Prefab")) popupWindow->PopUpPrefab(object);
+			if (ImGui::BeginPopupContextItem())
+			{
+				if (ImGui::MenuItem("Create Prefab")) popupWindow->PopUpPrefab(go);
 				ImGui::Separator();
-				if (ImGui::MenuItem("Destroy GameObject")) Event::Push(DESTROY_GO, App::scene, Cvar(object));
+				if (ImGui::MenuItem("Destroy GameObject")) Event::Push(DESTROY_GO, App::scene, go_uid);
 				ImGui::Separator();
-				DrawGameObjectItems(object);
+				DrawGameObjectItems(go_uid);
 				ImGui::EndPopup();
 			}
 
-			if (object->IsLastChild() && object->GetParentCPtr() != root) ImGui::TreePop();
+			if (go->IsLastChild() && go->GetParentUID() != root_uid) ImGui::TreePop();
 		}
 	}
 
@@ -616,12 +604,19 @@ void ModuleEditor::SetSelected(const UID go, bool force_focus)
 	selected = go;
 	App::resources->PopSelected(true);
 	if (force_focus || (focus_on_select && selected))
-		RE_CameraManager::CurrentCamera()->Focus(selected);
+	{
+		math::AABB box = ModuleScene::GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds();
+		RE_CameraManager::EditorCamera()->Focus(box.CenterPoint(), box.HalfSize().Length());
+	}
 }
 
 void ModuleEditor::DuplicateSelectedObject()
 {
-	if (selected) selected->GetParentPtr()->LinkChild(new RE_GameObject(*selected));
+	if (selected)
+	{
+		const RE_GameObject* sel_go = ModuleScene::GetGOCPtr(selected);
+		ModuleScene::GetScenePool()->CopyGOandChilds(sel_go, sel_go->GetParentUID(), true);
+	}
 }
 
 void ModuleEditor::LogToEditorConsole()
@@ -679,7 +674,7 @@ void ModuleEditor::UpdateCamera()
 {
 	OPTICK_CATEGORY("Update ModuleEditor Camera", Optick::Category::Camera);
 	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
-	if (sceneEditorWindow->isSelected())//!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && !ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow))
+	if (sceneEditorWindow->isSelected())
 	{
 		const MouseData mouse = App::input->GetMouse();
 
@@ -687,12 +682,13 @@ void ModuleEditor::UpdateCamera()
 		{
 			// Orbit
 			if (selected && (mouse.mouse_x_motion || mouse.mouse_y_motion))
-				camera->Orbit(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion, *selected);
+				camera->Orbit(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion, ModuleScene::GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds().CenterPoint());
 		}
 		else if ((App::input->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && selected)
 		{
 			// Focus
-			camera->Focus(selected);
+			math::AABB box = ModuleScene::GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds();
+			camera->Focus(box.CenterPoint(), box.HalfSize().Length());
 		}
 		else
 		{

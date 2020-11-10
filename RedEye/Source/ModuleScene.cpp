@@ -131,125 +131,130 @@ void ModuleScene::OnStop()
 
 void ModuleScene::RecieveEvent(const Event& e)
 {
-	UID go_uid = e.data1.AsUInt64();
-	if (go_uid)
+	//UID go_uid = e.data1.AsUInt64();
+
+	switch (e.type)
 	{
-		switch (e.type)
-		{
-		case GO_CHANGED_TO_ACTIVE:
-		{
-			RE_GameObject* go = scenePool.GetGOPtr(go_uid);
-			eastl::vector<RE_GameObject*> all = go->GetActiveDrawableGOandChildsPtr();
+	case GO_CHANGED_TO_ACTIVE:
+	{
+		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
+		eastl::vector<RE_GameObject*> all = go->GetActiveDrawableGOandChildsPtr();
 
-			for (auto draw_go : all)
+		for (auto draw_go : all)
+		{
+			draw_go->ResetGlobalBoundingBox();
+			(draw_go->IsStatic() ? static_tree : dynamic_tree).PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
+		}
+
+		haschanges = true;
+		break;
+	}
+	case GO_CHANGED_TO_INACTIVE:
+	{
+		eastl::vector<RE_GameObject*> all = scenePool.GetGOPtr(e.data1.AsUInt64())->GetActiveDrawableGOandChildsPtr();
+
+		for (auto draw_go : all)
+			(draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
+
+		haschanges = true;
+		break;
+	}
+	case GO_CHANGED_TO_STATIC:
+	{
+		UID go_uid = e.data1.AsUInt64();
+		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
+		if (go->IsActive())
+		{
+			dynamic_tree.PopNode(go_uid);
+			static_tree.PushNode(go_uid, go->GetGlobalBoundingBox());
+		}
+
+		haschanges = true;
+		break;
+	}
+	case GO_CHANGED_TO_NON_STATIC:
+	{
+		UID go_uid = e.data1.AsUInt64();
+		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
+		if (go->IsActive())
+		{
+			static_tree.PopNode(go_uid);
+			dynamic_tree.PushNode(go_uid, go->GetGlobalBoundingBox());
+		}
+
+		haschanges = true;
+		break;
+	}
+	case GO_HAS_NEW_CHILD:
+	{
+		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
+		UID child_uid = e.data2.AsUInt64();
+		RE_GameObject* child = scenePool.GetGOPtr(child_uid);
+		if (go->IsActive() && child->IsActive())
+			(child->IsStatic() ? static_tree : dynamic_tree).PushNode(child_uid, child->GetGlobalBoundingBox());
+
+		haschanges = true;
+		break;
+	}
+	case DESTROY_GO:
+	{
+		UID go_uid = e.data1.AsUInt64();
+		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
+
+		if (go->IsActive())
+		{
+			eastl::vector<const RE_GameObject*> all = go->GetActiveDrawableGOandChildsCPtr();
+			for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
+		}
+
+		if (App::editor->GetSelected() == go_uid) App::editor->SetSelected(0);
+
+		to_delete.push(go_uid);
+		haschanges = true;
+		break;
+	}
+	case TRANSFORM_MODIFIED:
+	{
+		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
+		if (go->IsActive())
+			for (auto child : go->GetChildsPtr())
+				child->TransformModified();
+
+		if (go->HasRenderGeo())
+		{
+			UID index = go->GetUID();
+			if (go->IsStatic())
 			{
-				draw_go->ResetGlobalBoundingBox();
-				(draw_go->IsStatic() ? static_tree : dynamic_tree).PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
+				static_tree.PopNode(index);
+				static_tree.PushNode(index, go->GetGlobalBoundingBox());
 			}
-
-			break;
-		}
-		case GO_CHANGED_TO_INACTIVE:
-		{
-			eastl::vector<RE_GameObject*> all = scenePool.GetGOPtr(go_uid)->GetActiveDrawableGOandChildsPtr();
-
-			for (auto draw_go : all)
-				(draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
-
-			break;
-		}
-		case GO_CHANGED_TO_STATIC:
-		{
-			RE_GameObject* go = scenePool.GetGOPtr(go_uid);
-			if (go->IsActive())
+			else
 			{
-				dynamic_tree.PopNode(go_uid);
-				static_tree.PushNode(go_uid, go->GetGlobalBoundingBox());
+				dynamic_tree.PopNode(index);
+				dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
 			}
-			break;
 		}
-		case GO_CHANGED_TO_NON_STATIC:
-		{
-			RE_GameObject* go = scenePool.GetGOPtr(go_uid);
-			if (go->IsActive())
-			{
-				static_tree.PopNode(go_uid);
-				dynamic_tree.PushNode(go_uid, go->GetGlobalBoundingBox());
-			}
-			break;
-		}
-		case GO_HAS_NEW_CHILD:
-		{
-			RE_GameObject* to_add = e.data2.AsGO();
-			if (belongs_to_scene && go->IsActive() && to_add->IsActive())
-			{
-				eastl::vector<RE_GameObject*> all = to_add->GetActiveDrawableChilds();
-				for (auto draw_go : all)
-				{
-					draw_go->ResetGlobalBoundingBox();
-					(draw_go->IsStatic() ? static_tree : dynamic_tree).PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
-				}
-			}
-
-			break;
-		}
-		case DESTROY_GO:
-		{
-			RE_GameObject* to_remove = e.data1.AsGO();
-
-			if (belongs_to_scene && to_remove->IsActive())
-			{
-				eastl::vector<RE_GameObject*> all = to_remove->GetActiveDrawableChilds();
-				for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
-			}
-
-			if (App::editor->GetSelected() == to_remove)
-				App::editor->SetSelected(0);
-
-			GOsToDelete.push(to_remove);
-			haschanges = true;
-			break;
-		}
-		case TRANSFORM_MODIFIED:
-		{
-			if (go->IsActive())
-				for (auto child : go->GetChildsPtr())
-					child->TransformModified();
-
-			if (belongs_to_scene && go->HasRenderGeo())
-			{
-				UID index = go->GetUID();
-				if (go->IsStatic())
-				{
-					static_tree.PopNode(index);
-					static_tree.PushNode(index, go->GetGlobalBoundingBox());
-				}
-				else
-				{
-					dynamic_tree.PopNode(index);
-					dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
-				}
-			}
-			haschanges = true;
-			break;
-		}
-		case PLANE_CHANGE_TO_MESH:
-		{
-			RE_CompPlane* plane = (RE_CompPlane*)go->GetCompPtr(C_PLANE);
-			const char* planeMD5 = plane->TransformAsMeshResource();
-			go->RemoveComponent(plane);
-			RE_CompMesh* newMesh = go->AddNewMesh();
-			newMesh->SetUp(go, planeMD5);
-			newMesh->UseResources();
-			go->ResetBoundingBoxes();
-			go->TransformModified();
-			haschanges = true;
-			break;
-		}
-		}
+		haschanges = true;
+		break;
+	}
+	case PLANE_CHANGE_TO_MESH:
+	{
+		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
+		RE_CompPlane* plane = dynamic_cast<RE_CompPlane*>(go->GetCompPtr(C_PLANE));
+		const char* planeMD5 = plane->TransformAsMeshResource();
+		go->DestroyComponent(plane->GetPoolID(), C_PLANE);
+		RE_CompMesh* newMesh = dynamic_cast<RE_CompMesh*>(go->AddNewComponent(C_MESH));
+		newMesh->SetMesh(planeMD5);
+		newMesh->UseResources();
+		haschanges = true;
+		break;
+	}
 	}
 }
 
+RE_GOManager* ModuleScene::GetScenePool() { return &scenePool; }
+RE_GameObject* ModuleScene::GetGOPtr(UID id) { return scenePool.GetGOPtr(id); }
+const RE_GameObject* ModuleScene::GetGOCPtr(UID id) { return scenePool.GetGOCPtr(id); }
 UID ModuleScene::GetRootUID() { return scenePool.GetRootUID(); }
 RE_GameObject * ModuleScene::GetRootPtr() { return scenePool.GetRootPtr(); }
 const RE_GameObject * ModuleScene::GetRootCPtr() { return scenePool.GetRootCPtr(); }
@@ -496,7 +501,6 @@ inline UID ModuleScene::Validate(const UID id)
 
 bool ModuleScene::HasChanges() const { return haschanges; }
 bool ModuleScene::isNewScene() const { return (unsavedScene); }
-RE_GOManager* ModuleScene::GetScenePool() { return &scenePool; }
 
 /*void ModuleScene::GetActive(eastl::list<RE_GameObject*>& objects) const
 {

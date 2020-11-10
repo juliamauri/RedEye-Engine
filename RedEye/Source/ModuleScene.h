@@ -30,6 +30,11 @@ public:
 	void OnStop() override;
 	void RecieveEvent(const Event& e) override;
 
+	// Current Pool
+	static RE_GOManager* GetScenePool();
+	static RE_GameObject* GetGOPtr(UID id);
+	static const RE_GameObject* GetGOCPtr(UID id);
+
 	// Root
 	static UID GetRootUID();
 	static RE_GameObject* GetRootPtr();
@@ -58,9 +63,6 @@ public:
 
 	bool HasChanges()const;
 	bool isNewScene() const;
-
-	// Current Pool
-	static RE_GOManager* GetScenePool();
 	
 private:
 

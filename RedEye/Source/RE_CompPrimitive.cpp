@@ -132,6 +132,11 @@ void RE_CompGrid::DrawProperties()
 	}
 }
 
+RE_CompTransform* RE_CompGrid::GetTransformPtr() const
+{
+	return useParent ? GetGOCPtr()->GetTransformPtr() : transform;
+}
+
 unsigned int RE_CompGrid::GetBinarySize() const
 {
 	return sizeof(float) * 3u + sizeof(int);

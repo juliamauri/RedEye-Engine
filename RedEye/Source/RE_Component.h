@@ -101,7 +101,7 @@ protected:
 	UID id = 0;
 	UID go = 0;
 	GameObjectsPool* pool_gos = nullptr;
-	bool useParent = true;
+	bool useParent = false;
 };
 
 #endif // !__RE_COMPONENT_H__

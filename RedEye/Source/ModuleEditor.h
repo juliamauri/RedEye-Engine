@@ -31,6 +31,7 @@ struct SoftwareInfo;
 class RE_GameObject;
 class RE_Component;
 class RE_CompCamera;
+class RE_CompGrid;
 class ComponentsPool;
 
 union SDL_Event;
@@ -63,7 +64,7 @@ public:
 	void DrawHeriarchy();
 
 	// UI
-	void DrawGameObjectItems(const UID parent);
+	void DrawGameObjectItems(const UID parent = 0);
 	void CreatePrefab(const UID go, const char* name, bool identityRoot);
 
 	// Selection

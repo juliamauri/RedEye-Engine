@@ -27,7 +27,7 @@ RE_GameObject* RE_GOManager::AddGO(const char* name, UID parent, bool broadcast)
 	return ret;
 }
 
-RE_GameObject* RE_GOManager::CopyGO(RE_GameObject* copy, UID parent, bool broadcast)
+RE_GameObject* RE_GOManager::CopyGO(const RE_GameObject* copy, UID parent, bool broadcast)
 {
 	RE_GameObject* new_go = AddGO(copy->name.c_str(), parent, broadcast);
 
@@ -35,6 +35,30 @@ RE_GameObject* RE_GOManager::CopyGO(RE_GameObject* copy, UID parent, bool broadc
 		componentsPool.CopyComponent(&gameObjectsPool, copy->pool_comps->GetComponentPtr(copy_comp.uid, static_cast<ComponentType>(copy_comp.type)), new_go->go_uid);
 	
 	return new_go;
+}
+
+RE_GameObject* RE_GOManager::CopyGOandChilds(const RE_GameObject* copy, UID parent, bool broadcast)
+{
+	RE_GameObject* ret = CopyGO(copy, parent, broadcast);
+	UID ret_uid = ret->go_uid;
+
+	eastl::stack<eastl::pair<const RE_GameObject*, UID>> copy_gos;
+	for (auto copy_child : copy->GetChildsCPtr())
+		copy_gos.push({ copy_child, ret_uid });
+
+	while (!copy_gos.empty())
+	{
+		eastl::pair<const RE_GameObject*, UID> copy_go = copy_gos.top();
+		copy_gos.pop();
+
+		RE_GameObject* new_go = CopyGO(copy_go.first, copy_go.second, broadcast);
+		UID new_go_uid = new_go->go_uid;
+
+		for (auto copy_child : copy_go.first->GetChildsCPtr())
+			copy_gos.push({ copy_child, new_go_uid });
+	}
+
+	return ret;
 }
 
 RE_GameObject* RE_GOManager::GetGOPtr(UID id) const

@@ -75,13 +75,22 @@ public:
 	const eastl::vector<UID>& GetChilds() const;
 	eastl::list<RE_GameObject*> GetChildsPtr() const;
 	eastl::list<const RE_GameObject*> GetChildsCPtr() const;
+
 	eastl::vector<UID> GetGOandChilds() const;
 	eastl::vector<RE_GameObject*> GetGOandChildsPtr();
 	eastl::vector<const RE_GameObject*> GetGOandChildsCPtr() const;
+
 	eastl::vector<RE_GameObject*> GetActiveDrawableChilds() const;
 	eastl::vector<RE_GameObject*> GetActiveDrawableGOandChildsPtr();
 	eastl::vector<const RE_GameObject*> GetActiveDrawableGOandChildsCPtr() const;
-	const UID GetLastChild() const;
+
+	const UID GetFirstChildUID() const;
+	RE_GameObject* GetFirstChildPtr() const;
+	const RE_GameObject* GetFirstChildCPtr() const;
+
+	const UID GetLastChildUID() const;
+	RE_GameObject* GetLastChildPtr() const;
+	const RE_GameObject* GetLastChildCPtr() const;
 
 	// Children
 	RE_GameObject* AddNewChild(bool broadcast = true, const char* name = nullptr, const bool start_active = true, const bool isStatic = true);
@@ -92,6 +101,7 @@ public:
 	bool IsLastChild() const;
 
 	// Parent
+	UID GetParentUID() const;
 	RE_GameObject* GetParentPtr() const;
 	const RE_GameObject* GetParentCPtr() const;
 	void SetParent(const UID id, bool unlink_previous = true, bool link_new = true);

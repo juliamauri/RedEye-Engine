@@ -55,7 +55,7 @@ void RE_CompCamera::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const U
 	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);
 
 	RE_CompCamera* cmpCamera = dynamic_cast<RE_CompCamera*>(copy);
-	SetProperties(cmpCamera->isPerspective, cmpCamera->near_plane, cmpCamera->far_plane, cmpCamera->v_fov_rads, cmpCamera->target_ar, cmpCamera->draw_frustum, cmpCamera->usingSkybox, cmpCamera->skyboxMD5);
+	SetProperties(cmpCamera->isPerspective, cmpCamera->frustum.NearPlaneDistance(), cmpCamera->frustum.FarPlaneDistance(), cmpCamera->v_fov_rads, cmpCamera->target_ar, cmpCamera->draw_frustum, cmpCamera->usingSkybox, cmpCamera->skyboxMD5);
 }
 
 void RE_CompCamera::Update()
@@ -63,6 +63,8 @@ void RE_CompCamera::Update()
 	if (!useParent && transform.ptr->CheckUpdate()) need_recalculation = true;
 	if (need_recalculation) RecalculateMatrixes();
 }
+
+void RE_CompCamera::OnTransformModified() { need_recalculation = true; }
 
 void RE_CompCamera::DrawProperties()
 {
@@ -144,52 +146,15 @@ void RE_CompCamera::DrawFrustum() const
 	}
 }
 
-void RE_CompCamera::LocalRotate(float x_angle_rad, float y_angle_rad)
+void RE_CompCamera::DrawSkybox() const
 {
-	if (x_angle_rad != 0)
-	{
-		math::float3x3 rot = math::float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f), x_angle_rad);
-
-		right = rot * right;
-		up = rot * up;
-		front = rot * front;
-	}
-
-	if (y_angle_rad != 0)
-	{
-		math::float3x3 rot = math::float3x3::RotateAxisAngle(right, y_angle_rad);
-
-		up = rot * up;
-		front = rot * front;
-
-		if (up.y < 0.0f)
-		{
-			front = math::vec(0.f, front.y > 0.f ? 1.f : -1.f, 0.f);
-			up = front.Cross(right);
-		}
-	}
-	
-	right.Normalize();
-	up.Normalize();
-	front.Normalize();
-	need_recalculation = true;
-}
-
-RE_CompTransform * RE_CompCamera::GetTransform() const
-{
-	return useParent ? GetGOCPtr()->GetTransformPtr() : transform.ptr;
-}
-
-void RE_CompCamera::OnTransformModified()
-{
-	need_recalculation = true;
+	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(skyboxMD5 ? skyboxMD5 : App::internalResources.GetDefaultSkyBox()));
+	if (skyRes) skyRes->DrawSkybox();
 }
 
 void RE_CompCamera::SetPlanesDistance(float n_plane, float f_plane)
 {
-	near_plane = n_plane;
-	far_plane = f_plane;
-	frustum.SetViewPlaneDistances(near_plane, far_plane);
+	frustum.SetViewPlaneDistances(n_plane, f_plane);
 	need_recalculation = true;
 }
 
@@ -201,6 +166,22 @@ void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 	h_fov_rads = 2.0f * math::Atan(math::Tan(v_fov_rads / 2.0f) * (width / height));
 
 	h_fov_degrees = h_fov_rads * RADTODEG;
+	v_fov_degrees = vertical_fov_degrees;
+
+	if (isPerspective)
+	{
+		frustum.SetPerspective(h_fov_rads, v_fov_rads);
+		need_recalculation = true;
+	}
+}
+
+void RE_CompCamera::ForceFOV(float vertical_fov_degrees, float horizontal_fov_degrees)
+{
+	RE_CAPTO(vertical_fov_degrees, 180.0f);
+	RE_CAPTO(horizontal_fov_degrees, 180.0f);
+	v_fov_rads = vertical_fov_degrees * DEGTORAD;
+	h_fov_rads = horizontal_fov_degrees * DEGTORAD;
+	h_fov_degrees = horizontal_fov_degrees;
 	v_fov_degrees = vertical_fov_degrees;
 
 	if (isPerspective)
@@ -273,21 +254,21 @@ void RE_CompCamera::SetBounds(float w, float h)
 	need_recalculation = true;
 }
 
-void RE_CompCamera::ForceFOV(float vertical_fov_degrees, float horizontal_fov_degrees)
+void RE_CompCamera::SetPerspective()
 {
-	RE_CAPTO(vertical_fov_degrees, 180.0f);
-	RE_CAPTO(horizontal_fov_degrees, 180.0f);
-	v_fov_rads = vertical_fov_degrees * DEGTORAD;
-	h_fov_rads = horizontal_fov_degrees * DEGTORAD;
-	h_fov_degrees = horizontal_fov_degrees;
-	v_fov_degrees = vertical_fov_degrees;
-
-	if (isPerspective)
-	{
-		frustum.SetPerspective(h_fov_rads, v_fov_rads);
-		need_recalculation = true;
-	}
+	isPerspective = true;
+	frustum.SetVerticalFovAndAspectRatio(v_fov_rads, width / height);
+	need_recalculation = true;
 }
+
+void RE_CompCamera::SetOrthographic()
+{
+	isPerspective = false;
+	frustum.SetOrthographic(width, height);
+	need_recalculation = true;
+}
+
+void RE_CompCamera::SwapCameraType() { isPerspective ? SetOrthographic() : SetPerspective(); }
 
 float RE_CompCamera::GetTargetWidth() const { return width; }
 float RE_CompCamera::GetTargetHeight() const { return height; }
@@ -347,95 +328,71 @@ void RE_CompCamera::GetTargetViewPort(math::float4& viewPort) const
 	}
 }
 
-void RE_CompCamera::SetPerspective()
-{
-	isPerspective = true;
-	frustum.SetVerticalFovAndAspectRatio(v_fov_rads, width / height);
-	need_recalculation = true;
-}
-
-void RE_CompCamera::SetOrthographic()
-{
-	isPerspective = false;
-	frustum.SetOrthographic(width, height);
-	need_recalculation = true;
-}
-
-void RE_CompCamera::SwapCameraType() { isPerspective ? SetOrthographic() : SetPerspective(); }
-
+float RE_CompCamera::GetNearPlane() const { return frustum.NearPlaneDistance(); }
+float RE_CompCamera::GetFarPlane() const { return frustum.FarPlaneDistance(); }
+bool RE_CompCamera::OverridesCulling() const { return override_cull; }
 const math::Frustum RE_CompCamera::GetFrustum() const { return frustum; }
 float RE_CompCamera::GetVFOVDegrees() const { return v_fov_degrees; }
 float RE_CompCamera::GetHFOVDegrees() const { return h_fov_degrees; }
+
+RE_CompTransform* RE_CompCamera::GetTransform() const
+{
+	return useParent ? GetGOCPtr()->GetTransformPtr() : transform.ptr;
+}
 
 math::float4x4 RE_CompCamera::GetView()
 {
 	if (need_recalculation) RecalculateMatrixes();
 	return global_view;
 }
+
 const float* RE_CompCamera::GetViewPtr()
 {
 	if (need_recalculation) RecalculateMatrixes();
 	return global_view.ptr();
 }
+
 math::float4x4 RE_CompCamera::GetProjection()
 {
 	if (need_recalculation) RecalculateMatrixes();
 	return global_projection;
 }
+
 const float* RE_CompCamera::GetProjectionPtr()
 {
 	if (need_recalculation) RecalculateMatrixes();
 	return global_projection.ptr();
 }
 
-bool RE_CompCamera::OverridesCulling() const { return override_cull; }
-
-void RE_CompCamera::RecalculateMatrixes()
+void RE_CompCamera::LocalRotate(float x_angle_rad, float y_angle_rad)
 {
-	math::float4x4 trs = GetTransform()->GetGlobalMatrix();
-	frustum.SetFrame(trs.Row3(3), trs.MulDir(front), trs.MulDir(up));
+	if (x_angle_rad != 0)
+	{
+		math::float3x3 rot = math::float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f), x_angle_rad);
 
-	global_view = frustum.ViewMatrix();
-	global_view.Transpose();
-	global_projection = frustum.ProjectionMatrix();
-	global_projection.Transpose();
-
-	need_recalculation = false;
-}
-
-void RE_CompCamera::DrawItsProperties()
-{
-	ImGui::Checkbox("Draw Frustum", &draw_frustum);
-	ImGui::Checkbox("Override Culling", &override_cull);
-
-	if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f"))
-		SetPlanesDistance(near_plane, far_plane);
-
-	if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane, 65000.0f, "%.1f"))
-		SetPlanesDistance(near_plane, far_plane);
-
-	int aspect_ratio = target_ar;
-	if (ImGui::Combo("Aspect Ratio", &aspect_ratio, "Fit Window\0Square 1x1\0TraditionalTV 4x3\0Movietone 16x9\0Personalized\0")) {
-		target_ar = AspectRatioTYPE(aspect_ratio);
-		Event::Push(RE_EventType::UPDATE_SCENE_WINDOWS, App::editor, go);
+		right = rot * right;
+		up = rot * up;
+		front = rot * front;
 	}
 
-	// TODO Rub: Personalied Aspect Ratio
-	//if (target_ar == Personalized)
-	//{
-	//	int w = width;
-	//	int h = height;
-	//	if (ImGui::DragInt("Width", &w, 4.0f, 1, App->window->GetWidth(), "%.1f") ||
-	//		ImGui::DragInt("Height", &h, 4.0f, 1, App->window->GetMaxHeight(), "%.1f"))
-	//		SetBounds(w,h);
-	//}
+	if (y_angle_rad != 0)
+	{
+		math::float3x3 rot = math::float3x3::RotateAxisAngle(right, y_angle_rad);
 
-	int item_current = isPerspective ? 0 : 1;
-	if (ImGui::Combo("Type", &item_current, "Perspective\0Orthographic\0") && (isPerspective != (item_current == 0)))
-		SwapCameraType();
+		up = rot * up;
+		front = rot * front;
 
-	if (isPerspective && ImGui::DragFloat("FOV", &v_fov_degrees, 1.0f, 0.0f, 180.0f, "%.1f"))
-		SetFOV(v_fov_degrees);
+		if (up.y < 0.0f)
+		{
+			front = math::vec(0.f, front.y > 0.f ? 1.f : -1.f, 0.f);
+			up = front.Cross(right);
+		}
+	}
+	
+	right.Normalize();
+	up.Normalize();
+	front.Normalize();
+	need_recalculation = true;
 }
 
 void RE_CompCamera::LocalMove(Dir dir, float speed)
@@ -454,37 +411,15 @@ void RE_CompCamera::LocalMove(Dir dir, float speed)
 	}
 }
 
-void RE_CompCamera::Orbit(float dx, float dy, math::vec focus_global_pos)
+void RE_CompCamera::Orbit(float dx, float dy, math::vec center)
 {
 	RE_CompTransform* t = GetTransform();
-	float distance = t->GetGlobalPosition().Distance(focus_global_pos);
+	float distance = t->GetGlobalPosition().Distance(center);
 
-	t->SetGlobalPosition(focus_global_pos);
+	t->SetGlobalPosition(center);
 	t->Update();
 	LocalRotate(dx, dy);
-	t->SetGlobalPosition(focus_global_pos - (front * distance));
-	need_recalculation = true;
-}
-
-void RE_CompCamera::Focus(const RE_GameObject* focus, float min_dist)
-{
-	float camDistance = min_dist;
-	math::AABB box = focus->GetGlobalBoundingBoxWithChilds();
-	float radius = box.HalfSize().Length();
-	math::vec focus_global_pos = box.CenterPoint();
-
-	if (radius > 0)
-	{
-		// Vertical distance
-		float v_dist = radius / math::Sin(v_fov_rads / 2.0f);
-		if (v_dist > camDistance) camDistance = v_dist;
-
-		// Horizontal distance
-		float h_dist = radius / math::Sin(h_fov_rads / 2.0f);
-		if (h_dist > camDistance) camDistance = h_dist;
-	}
-
-	GetTransform()->SetGlobalPosition(focus_global_pos - (front * camDistance));
+	t->SetGlobalPosition(center - (front * distance));
 	need_recalculation = true;
 }
 
@@ -508,35 +443,17 @@ void RE_CompCamera::Focus(math::vec center, float radius, float min_dist)
 	need_recalculation = true;
 }
 
+bool RE_CompCamera::isUsingSkybox() const { return usingSkybox; }
+const char* RE_CompCamera::GetSkybox() const { return skyboxMD5; }
+void RE_CompCamera::DeleteSkybox() { usingSkybox = false; skyboxMD5 = nullptr; }
+void RE_CompCamera::UseResources() { if (skyboxMD5) App::resources->Use(skyboxMD5); }
+void RE_CompCamera::UnUseResources() { if (skyboxMD5) App::resources->UnUse(skyboxMD5); }
+
 eastl::vector<const char*> RE_CompCamera::GetAllResources()
 {
 	eastl::vector<const char*> ret;
 	if (skyboxMD5) ret.push_back(skyboxMD5);
 	return ret;
-}
-
-void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>* resources) const
-{
-	node->PushBool("isPrespective", isPerspective);
-	node->PushFloat("near_plane", near_plane);
-	node->PushFloat("far_plane", far_plane);
-	node->PushFloat("v_fov_rads", v_fov_rads);
-	node->PushInt("aspect_ratio", target_ar);
-	node->PushBool("draw_frustum", draw_frustum);
-	node->PushBool("usingSkybox", usingSkybox);
-	node->PushInt("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
-}
-
-void RE_CompCamera::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
-{
-	usingSkybox = node->PullBool("usingSkybox", true);
-	int sbRes = node->PullInt("skyboxResource", -1);
-
-	SetProperties(node->PullBool("isPrespective", true),
-		node->PullFloat("near_plane", 1.0f), node->PullFloat("far_plane", 5000.0f),
-		node->PullFloat("v_fov_rads", 0.523599f), node->PullInt("aspect_ratio", 0),
-		node->PullBool("draw_frustum", true), usingSkybox,
-		(sbRes != -1) ? resources->at(sbRes) : nullptr);
 }
 
 unsigned int RE_CompCamera::GetBinarySize() const
@@ -549,6 +466,9 @@ void RE_CompCamera::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 	size_t size = sizeof(bool);
 	memcpy(cursor, &isPerspective, size);
 	cursor += size;
+
+	float near_plane = frustum.NearPlaneDistance();
+	float far_plane = frustum.FarPlaneDistance();
 
 	size = sizeof(float);
 	memcpy(cursor, &near_plane, size);
@@ -584,6 +504,9 @@ void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*
 	memcpy(&isPerspective, cursor, size);
 	cursor += size;
 
+	float near_plane = frustum.NearPlaneDistance();
+	float far_plane = frustum.FarPlaneDistance();
+
 	size = sizeof(float);
 	memcpy(&near_plane, cursor, size);
 	cursor += size;
@@ -591,7 +514,7 @@ void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*
 	memcpy(&far_plane, cursor, size);
 	cursor += size;
 
-	memcpy(&v_fov_rads, cursor,  size);
+	memcpy(&v_fov_rads, cursor, size);
 	cursor += size;
 
 	size = sizeof(int);
@@ -608,28 +531,80 @@ void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*
 
 	size = sizeof(int);
 	int sbRes = -1;
-	memcpy(&sbRes, cursor,  size);
+	memcpy(&sbRes, cursor, size);
 	cursor += size;
 
 	SetProperties(isPerspective, near_plane, far_plane, v_fov_rads, aspectRatioInt, draw_frustum, usingSkybox, (sbRes != -1) ? resources->at(sbRes) : nullptr);
 }
 
-bool RE_CompCamera::isUsingSkybox() const { return usingSkybox; }
-const char* RE_CompCamera::GetSkybox() const { return skyboxMD5; }
-
-void RE_CompCamera::DrawSkybox() const
+void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>* resources) const
 {
-	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(skyboxMD5 ? skyboxMD5 : App::internalResources.GetDefaultSkyBox()));
-	if (skyRes) skyRes->DrawSkybox();
+	node->PushBool("isPrespective", isPerspective);
+	node->PushFloat("near_plane", near_plane);
+	node->PushFloat("far_plane", far_plane);
+	node->PushFloat("v_fov_rads", v_fov_rads);
+	node->PushInt("aspect_ratio", target_ar);
+	node->PushBool("draw_frustum", draw_frustum);
+	node->PushBool("usingSkybox", usingSkybox);
+	node->PushInt("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
 }
 
-void RE_CompCamera::DeleteSkybox()
+void RE_CompCamera::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
 {
-	usingSkybox = false;
-	skyboxMD5 = nullptr;
+	usingSkybox = node->PullBool("usingSkybox", true);
+	int sbRes = node->PullInt("skyboxResource", -1);
+
+	SetProperties(node->PullBool("isPrespective", true),
+		node->PullFloat("near_plane", 1.0f), node->PullFloat("far_plane", 5000.0f),
+		node->PullFloat("v_fov_rads", 0.523599f), node->PullInt("aspect_ratio", 0),
+		node->PullBool("draw_frustum", true), usingSkybox,
+		(sbRes != -1) ? resources->at(sbRes) : nullptr);
 }
 
-void RE_CompCamera::UseResources() { if (skyboxMD5) App::resources->Use(skyboxMD5); }
-void RE_CompCamera::UnUseResources() { if (skyboxMD5) App::resources->UnUse(skyboxMD5); }
-float RE_CompCamera::GetNearPlane() const { return near_plane; }
-float RE_CompCamera::GetFarPlane() const { return far_plane; }
+void RE_CompCamera::RecalculateMatrixes()
+{
+	math::float4x4 trs = GetTransform()->GetGlobalMatrix();
+	frustum.SetFrame(trs.Row3(3), trs.MulDir(front), trs.MulDir(up));
+
+	global_view = frustum.ViewMatrix();
+	global_view.Transpose();
+	global_projection = frustum.ProjectionMatrix();
+	global_projection.Transpose();
+
+	need_recalculation = false;
+}
+
+void RE_CompCamera::DrawItsProperties()
+{
+	ImGui::Checkbox("Draw Frustum", &draw_frustum);
+	ImGui::Checkbox("Override Culling", &override_cull);
+
+	float near_plane = frustum.NearPlaneDistance();
+	float far_plane = frustum.FarPlaneDistance();
+	if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f")) SetPlanesDistance(near_plane, far_plane);
+	if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane, 65000.0f, "%.1f")) SetPlanesDistance(near_plane, far_plane);
+
+	int aspect_ratio = target_ar;
+	if (ImGui::Combo("Aspect Ratio", &aspect_ratio, "Fit Window\0Square 1x1\0TraditionalTV 4x3\0Movietone 16x9\0Personalized\0"))
+	{
+		target_ar = AspectRatioTYPE(aspect_ratio);
+		Event::Push(RE_EventType::UPDATE_SCENE_WINDOWS, App::editor, go);
+	}
+
+	// TODO Rub: Personalied Aspect Ratio
+	//if (target_ar == Personalized)
+	//{
+	//	int w = width;
+	//	int h = height;
+	//	if (ImGui::DragInt("Width", &w, 4.0f, 1, App->window->GetWidth(), "%.1f") ||
+	//		ImGui::DragInt("Height", &h, 4.0f, 1, App->window->GetMaxHeight(), "%.1f"))
+	//		SetBounds(w,h);
+	//}
+
+	int item_current = isPerspective ? 0 : 1;
+	if (ImGui::Combo("Type", &item_current, "Perspective\0Orthographic\0") && (isPerspective != (item_current == 0)))
+		SwapCameraType();
+
+	if (isPerspective && ImGui::DragFloat("FOV", &v_fov_degrees, 1.0f, 0.0f, 180.0f, "%.1f"))
+		SetFOV(v_fov_degrees);
+}

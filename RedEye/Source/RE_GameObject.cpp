@@ -573,13 +573,11 @@ eastl::vector<RE_GameObject*> RE_GameObject::GetActiveDrawableChilds() const
 	{
 		RE_GameObject* go = go_queue.front();
 		go_queue.pop();
-		if (go->HasRenderGeo()) ret.push_back(go);
+		if (go->HasActiveRenderGeo()) ret.push_back(go);
 
-		for (auto child : go->childs)
-		{
-			RE_GameObject* child_go = pool_gos->AtPtr(child);
-			if (child_go->active) go_queue.push(child_go);
-		}
+		for (auto child : GetChildsPtr())
+			if (child->active)
+				go_queue.push(child);
 	}
 
 	return ret;
@@ -590,19 +588,17 @@ eastl::vector<RE_GameObject*> RE_GameObject::GetActiveDrawableGOandChildsPtr()
 	eastl::vector<RE_GameObject*> ret;
 
 	eastl::queue<RE_GameObject*> go_queue;
-	go_queue.push(this);
+	if (active) go_queue.push(this);
 
 	while (!go_queue.empty())
 	{
 		RE_GameObject* go = go_queue.front();
 		go_queue.pop();
-		if (go->HasRenderGeo()) ret.push_back(go);
+		if (go->HasActiveRenderGeo()) ret.push_back(go);
 
-		for (auto child : go->childs)
-		{
-			RE_GameObject* child_go = pool_gos->AtPtr(child);
-			if (child_go->active) go_queue.push(child_go);
-		}
+		for (auto child : GetChildsPtr())
+			if (child->active)
+				go_queue.push(child);
 	}
 
 	return ret;
@@ -613,27 +609,50 @@ eastl::vector<const RE_GameObject*> RE_GameObject::GetActiveDrawableGOandChildsC
 	eastl::vector<const RE_GameObject*> ret;
 
 	eastl::queue<const RE_GameObject*> go_queue;
-	go_queue.push(this);
+	if (active) go_queue.push(this);
 
 	while (!go_queue.empty())
 	{
 		const RE_GameObject* go = go_queue.front();
 		go_queue.pop();
-		if (go->HasRenderGeo()) ret.push_back(go);
+		if (go->HasActiveRenderGeo()) ret.push_back(go);
 
-		for (auto child : go->childs)
-		{
-			const RE_GameObject* child_go = pool_gos->AtCPtr(child);
-			if (child_go->active) go_queue.push(child_go);
-		}
+		for (auto child : go->GetChildsCPtr())
+			if (child->active)
+				go_queue.push(child);
 	}
 
 	return ret;
 }
 
-const UID RE_GameObject::GetLastChild() const
+const UID RE_GameObject::GetFirstChildUID() const
 {
-	return childs.back();
+	return childs.empty() ? 0 : childs.front();
+}
+
+RE_GameObject* RE_GameObject::GetFirstChildPtr() const
+{
+	return childs.empty() ? nullptr : pool_gos->AtPtr(childs.front());
+}
+
+const RE_GameObject* RE_GameObject::GetFirstChildCPtr() const
+{
+	return childs.empty() ? nullptr : pool_gos->AtCPtr(childs.front());
+}
+
+const UID RE_GameObject::GetLastChildUID() const
+{
+	return childs.empty() ? 0 : childs.back();
+}
+
+RE_GameObject* RE_GameObject::GetLastChildPtr() const
+{
+	return childs.empty() ? nullptr : pool_gos->AtPtr(childs.back());
+}
+
+const RE_GameObject* RE_GameObject::GetLastChildCPtr() const
+{
+	return childs.empty() ? nullptr : pool_gos->AtCPtr(childs.back());
 }
 
 RE_GameObject* RE_GameObject::AddNewChild(bool broadcast, const char* _name, const bool start_active, const bool isStatic)
@@ -684,7 +703,8 @@ void RE_GameObject::DestroyChild(const UID id)
 }
 
 unsigned int RE_GameObject::ChildCount() const { return childs.size(); }
-bool RE_GameObject::IsLastChild() const { return parent_uid && (GetParentCPtr()->GetLastChild() == go_uid); }
+bool RE_GameObject::IsLastChild() const { return parent_uid && (GetParentCPtr()->GetLastChildUID() == go_uid); }
+UID RE_GameObject::GetParentUID() const { return parent_uid; }
 RE_GameObject* RE_GameObject::GetParentPtr() const { return pool_gos->AtPtr(parent_uid); }
 const RE_GameObject* RE_GameObject::GetParentCPtr() const { return pool_gos->AtCPtr(parent_uid); }
 

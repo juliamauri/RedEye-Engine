@@ -28,12 +28,12 @@ public:
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 	
 	void Update() override;
+	void OnTransformModified() override;
 
 	void DrawProperties() override;
 	void DrawAsEditorProperties();
 	void DrawFrustum() const;
-
-	void OnTransformModified() override;
+	void DrawSkybox() const;
 
 	// Setters
 	void SetPlanesDistance(float near_plane, float far_plane);
@@ -61,7 +61,6 @@ public:
 	float GetHFOVDegrees() const;
 
 	RE_CompTransform* GetTransform() const;
-
 	math::float4x4 GetView();
 	const float* GetViewPtr();
 	math::float4x4 GetProjection();
@@ -70,26 +69,25 @@ public:
 	// Camera Controls
 	void LocalRotate(float dx, float dy);
 	void LocalMove(Dir dir, float speed);
-	void Orbit(float dx, float dy, math::vec global_pos);
-	void Focus(const UID focus, float min_dist = 3.0f);
-	void Focus(math::vec center, float radius = 1, float min_dist = 3.0f);
+	void Orbit(float dx, float dy, math::vec center);
+	void Focus(math::vec center, float radius = 1.f, float min_dist = 3.0f);
 
+	// Skybox
+	bool isUsingSkybox() const;
+	const char* GetSkybox() const;
+	void DeleteSkybox();
+
+	// Resources - Skybox
+	void UseResources() override;
+	void UnUseResources() override;
+	eastl::vector<const char*> GetAllResources() override;
+
+	// Serialization
 	unsigned int GetBinarySize() const override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)override;
 	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const override;
 	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) override;
-
-	// Skybox
-	bool isUsingSkybox() const;
-	const char* GetSkybox() const;
-	void DrawSkybox() const;
-	void DeleteSkybox();
-
-	void UseResources() override;
-	void UnUseResources() override;
-	eastl::vector<const char*> GetAllResources() override;
-
 
 private:
 
@@ -114,10 +112,6 @@ private:
 	// Camera frustum
 	math::Frustum frustum;
 
-	// Panes
-	float near_plane = 0.0f;
-	float far_plane = 0.0f;
-
 	// Field of View
 	bool isPerspective = true;
 	float h_fov_rads = 0.0f;
@@ -131,8 +125,8 @@ private:
 
 	// View & Projection
 	bool need_recalculation = true;
-	math::float4x4 global_view;
-	math::float4x4 global_projection;
+	math::float4x4 global_view = math::float4x4::identity;
+	math::float4x4 global_projection = math::float4x4::identity;
 
 	// Debug Drawing
 	bool draw_frustum = true;

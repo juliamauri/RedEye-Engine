@@ -308,7 +308,8 @@ public:
 
 	// Pool handling
 	RE_GameObject* AddGO(const char* name, UID parent, bool broadcast = false);
-	RE_GameObject* CopyGO(RE_GameObject* copy, UID parent, bool broadcast = false);
+	RE_GameObject* CopyGO(const RE_GameObject* copy, UID parent, bool broadcast = false);
+	RE_GameObject* CopyGOandChilds(const RE_GameObject* copy, UID parent, bool broadcast = false);
 	RE_GameObject* InsertPool(RE_GOManager* pool);
 
 	void DestroyGO(UID toDestroy);

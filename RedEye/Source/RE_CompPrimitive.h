@@ -56,6 +56,8 @@ public:
 	void Draw() const override;
 	void DrawProperties() override;
 
+	RE_CompTransform* GetTransformPtr() const;
+
 	unsigned int GetBinarySize() const override;
 	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const override;
 	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) override;
@@ -65,6 +67,7 @@ public:
 private:
 
 	int divisions = 0;
+	RE_CompTransform* transform = nullptr;
 };
 
 /**************************************************
