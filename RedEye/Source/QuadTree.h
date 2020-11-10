@@ -131,6 +131,7 @@ public:
 
 	void PushNode(UID goUID, AABB box);
 	void PopNode(UID index);
+	eastl::vector<int> GetAllKeys() const override;
 	void Clear();
 	void CollectIntersections(Ray ray, eastl::stack<UID>& indexes) const;
 	void CollectIntersections(const Frustum frustum, eastl::stack<UID>& indexes) const;

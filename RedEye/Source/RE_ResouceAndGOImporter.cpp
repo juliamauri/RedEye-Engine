@@ -88,8 +88,10 @@ char* RE_ResouceAndGOImporter::BinarySerialize(RE_GOManager* pool, unsigned int*
 		cursor += size;
 	}
 
+
 	//GOs Serialize
 	pool->SerializeBinary(cursor, &resourcesIndex);
+	
 
 	char nullchar = '\0';
 	memcpy(cursor, &nullchar, sizeof(char));

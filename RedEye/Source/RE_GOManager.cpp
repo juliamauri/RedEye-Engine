@@ -148,6 +148,16 @@ eastl::vector<eastl::pair<UID, RE_Component*>> RE_GOManager::GetAllCompData(usho
 	return componentsPool.GetAllCompData(type);
 }
 
+RE_Component* RE_GOManager::GetComponentPtr(UID poolid, ComponentType cType)
+{
+	return componentsPool.GetComponentPtr(poolid, cType);
+}
+
+const RE_Component* RE_GOManager::GetComponentCPtr(UID poolid, ComponentType cType) const
+{
+	return componentsPool.GetComponentCPtr(poolid, cType);
+}
+
 RE_GOManager* RE_GOManager::GetNewPoolFromID(UID id)
 {
 	RE_GOManager* ret = new RE_GOManager();
@@ -354,6 +364,13 @@ void GameObjectsPool::DeserializeJson(JSONNode* node, ComponentsPool* cmpsPool)
 		DEL(goNode);
 	}
 	DEL(goPool);
+}
+
+eastl::vector<UID> GameObjectsPool::GetAllKeys() const
+{
+	eastl::vector<UID> ret;
+	for (auto go : poolmapped_) ret.push_back(go.first);
+	return ret;
 }
 
 void ComponentsPool::Update()
@@ -826,7 +843,7 @@ unsigned int ComponentsPool::GetBinarySize() const
 	size += camPool.GetBinarySize();
 	size += meshPool.GetBinarySize();
 	size += lightPool.GetBinarySize();
-	size += primitivPool.GetBinarySize(true);
+	size += primitivPool.GetBinarySize();
 	return size;
 }
 

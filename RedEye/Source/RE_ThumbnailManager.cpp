@@ -259,7 +259,7 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 			internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
 			internalCamera->LocalRotate(0, -0.5);
 			internalCamera->Update();
-			internalCamera->Focus(root);
+			internalCamera->Focus(poolGOThumbnail->GetRootPtr()->GetGlobalBoundingBox().CenterPoint());
 			internalCamera->Update();
 
 			eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);

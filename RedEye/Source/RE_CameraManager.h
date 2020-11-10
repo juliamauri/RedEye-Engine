@@ -26,7 +26,6 @@ public:
 	void AddMainCamera(RE_CompCamera* cam);
 	static void RecallSceneCameras();
 
-	eastl::list<RE_CompCamera*> GetCameras() const;
 	const math::Frustum GetCullingFrustum() const;
 
 private:

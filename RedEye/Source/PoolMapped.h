@@ -46,16 +46,7 @@ public:
 	TYPEVALUE* AtPtr(TYPEKEY key) const { return &pool_[poolmapped_.at(key)]; }
 	const TYPEVALUE* AtCPtr(TYPEKEY key) const { return &pool_[poolmapped_.at(key)]; }
 
-	eastl::vector<TYPEKEY> GetAllKeys() const {
-		eastl::vector<TYPEKEY> ret;
-		typename eastl::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.begin();
-		while (i != poolmapped_.end())
-		{
-			ret.push_back(i->first);
-			i++;
-		}
-		return ret;
-	}
+	virtual eastl::vector<TYPEKEY> GetAllKeys() const = 0;
 
 	int GetCount() const { return poolmapped_.size(); }
 

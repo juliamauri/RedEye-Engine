@@ -88,8 +88,6 @@ public:
 	void PushCommand(RE_Command* cmd);
 	void ClearCommands();
 
-	void DrawGameObjectItems(RE_GameObject* parent = nullptr);
-
 	SceneEditorWindow* GetSceneEditor() { return sceneEditorWindow; }
 
 private:

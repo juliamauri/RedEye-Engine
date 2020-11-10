@@ -540,8 +540,8 @@ void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*
 void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>* resources) const
 {
 	node->PushBool("isPrespective", isPerspective);
-	node->PushFloat("near_plane", near_plane);
-	node->PushFloat("far_plane", far_plane);
+	node->PushFloat("near_plane", frustum.NearPlaneDistance());
+	node->PushFloat("far_plane", frustum.FarPlaneDistance());
 	node->PushFloat("v_fov_rads", v_fov_rads);
 	node->PushInt("aspect_ratio", target_ar);
 	node->PushBool("draw_frustum", draw_frustum);

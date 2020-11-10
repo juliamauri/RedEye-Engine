@@ -537,8 +537,8 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 		if (draw_cameras)
 		{
 			glColor4f(frustum_color[0], frustum_color[1], frustum_color[2], 1.0f);
-			for (auto cam : App::cams.GetCameras())
-				cam->DrawFrustum();
+			for (auto cam : ModuleScene::GetScenePool()->GetAllCompPtr(C_CAMERA))
+				static_cast<RE_CompCamera*>(cam)->DrawFrustum();
 		}
 
 		glEnd();

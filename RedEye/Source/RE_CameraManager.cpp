@@ -7,7 +7,7 @@
 #include <EASTL/stack.h>
 
 RE_CompCamera* RE_CameraManager::editor_camera = nullptr;
-RE_CompCamera* RE_CameraManager::main_camera = nullptr;
+UID RE_CameraManager::main_camera = 0ull;
 
 RE_CameraManager::RE_CameraManager() {}
 RE_CameraManager::~RE_CameraManager() {}
@@ -22,78 +22,55 @@ void RE_CameraManager::Init()
 void RE_CameraManager::Clear()
 {
 	DEL(editor_camera);
-	scene_cameras.clear();
 }
 
 RE_CompCamera * RE_CameraManager::CurrentCamera()
 {
 	RE_CompCamera * ret = editor_camera;
-	if (App::GetState() != GS_STOP && main_camera) ret = main_camera;
+	if (App::GetState() != GS_STOP && main_camera) ret = static_cast<RE_CompCamera*>(ModuleScene::GetScenePool()->GetComponentPtr(main_camera, C_CAMERA));
 	return ret;
 }
 
 RE_CompCamera * RE_CameraManager::EditorCamera() { return editor_camera; }
-RE_CompCamera* RE_CameraManager::MainCamera() { return main_camera; }
-bool RE_CameraManager::HasMainCamera() { return main_camera != nullptr; }
+RE_CompCamera* RE_CameraManager::MainCamera() { return static_cast<RE_CompCamera*>(ModuleScene::GetScenePool()->GetComponentPtr(main_camera, C_CAMERA)); }
+bool RE_CameraManager::HasMainCamera() { return main_camera != 0ull; }
 
 void RE_CameraManager::OnWindowChangeSize(float width, float height)
 {
 	// Adapt cameras to knew window dimensions
 	// editor_camera->SetBounds(width, height);
-	for (auto cam : scene_cameras)
-		cam->SetBounds(width, height);
+	for (auto cam : ModuleScene::GetScenePool()->GetAllCompPtr(C_CAMERA))
+		static_cast<RE_CompCamera*>(cam)->SetBounds(width, height);
 }
 
 void RE_CameraManager::AddMainCamera(RE_CompCamera* cam)
 {
-	if (scene_cameras.empty()) main_camera = cam;
-	scene_cameras.push_back(cam);
+	if (ModuleScene::GetScenePool()->GetAllCompPtr(C_CAMERA).empty()) main_camera = cam->GetPoolID();
 }
 
 void RE_CameraManager::RecallSceneCameras()
 {
-	scene_cameras.clear();
+	main_camera = 0ull;
+	eastl::vector<RE_Component*> allCameras = ModuleScene::GetScenePool()->GetAllCompPtr(C_CAMERA);
 
-	ModuleScene::GetScenePool().get
-
-	eastl::stack<const RE_GameObject*> gos;
-	gos.push(root);
-	while (!gos.empty())
+	for (auto cam : allCameras)
 	{
-		const RE_GameObject* go = gos.top();
-		RE_CompCamera* cam = go->GetCamera();
+		if (!main_camera) main_camera = static_cast<RE_CompCamera*>(cam)->GetPoolID();
 
-		if (cam != nullptr)
-			scene_cameras.push_back(cam);
-
-		gos.pop();
-
-		for (auto child : go->GetChildsPtr())
-			gos.push(child);
-	}
-
-	main_camera = nullptr;
-	if (!scene_cameras.empty())
-	{
-		for (eastl::list<RE_CompCamera*>::iterator cam = scene_cameras.begin();
-			cam != scene_cameras.end(); cam++)
-		{
-			if (!main_camera) main_camera = (*cam);
-
-			/* TODO Rub:
-			if ((*cam)->isMain)
-			else: more than 1 main cameras*/
-		}
+		/* TODO Rub:
+		if ((*cam)->isMain)
+		else: more than 1 main cameras*/
 	}
 }
 
-eastl::list<RE_CompCamera*> RE_CameraManager::GetCameras() const { return scene_cameras; }
-
 const math::Frustum RE_CameraManager::GetCullingFrustum() const
 {
-	for (auto cam : scene_cameras)
-		if (cam->OverridesCulling())
-			return cam->GetFrustum();
+	for (auto cam : ModuleScene::GetScenePool()->GetAllCompCPtr(C_CAMERA)) {
+		const RE_CompCamera* camera = static_cast<const RE_CompCamera*>(cam);
+
+		if (camera->OverridesCulling())
+			return camera->GetFrustum();
+	}
 
 	return editor_camera->GetFrustum();
 }

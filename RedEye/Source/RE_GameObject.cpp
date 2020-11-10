@@ -365,7 +365,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	case C_MESH:
 	{
 		if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
-		render_geo = { pool_comps->GetNewComponentPtr(_type)->PoolSetUp(pool_gos, go_uid), type };
+		render_geo = { (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type };
 		ResetBoundingBoxes();
 
 		break;
@@ -373,13 +373,13 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	case C_CAMERA:
 	{
 		if (camera) pool_comps->DestroyComponent(_type, camera);
-		camera = pool_comps->GetNewComponentPtr(_type)->PoolSetUp(pool_gos, go_uid);
+		camera = (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid);
 		break;
 	}
 	case C_LIGHT:
 	{
 		if (light) pool_comps->DestroyComponent(_type, light);
-		light = pool_comps->GetNewComponentPtr(_type)->PoolSetUp(pool_gos, go_uid);
+		light = (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid);
 		break;
 	}
 	case C_PARTICLEEMITER:
@@ -401,7 +401,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 		}
 		else
 		{
-			components.push_back({ pool_comps->GetNewComponentPtr(_type)->PoolSetUp(pool_gos, go_uid), type });
+			components.push_back({ (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type });
 		}
 
 		break;

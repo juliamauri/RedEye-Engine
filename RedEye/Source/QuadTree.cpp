@@ -473,6 +473,13 @@ void AABBDynamicTree::PopNode(UID objectIndex)
 	}
 }
 
+eastl::vector<int> AABBDynamicTree::GetAllKeys() const
+{
+	eastl::vector<int> ret;
+	for (auto go : poolmapped_) ret.push_back(go.first);
+	return ret;
+}
+
 void AABBDynamicTree::Clear()
 {
 	size = 0;

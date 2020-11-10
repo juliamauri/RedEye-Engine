@@ -144,7 +144,7 @@ void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const ai
 			}
 
 			const char* md5Mesh = aditionalData->meshesLoaded.at(scene->mMeshes[node->mMeshes[i]]);
-			RE_CompMesh* comp_mesh = dynamic_cast<RE_CompMesh*>( goMesh->AddNewComponent(C_MESH));
+			RE_CompMesh* comp_mesh = static_cast<RE_CompMesh*>( goMesh->AddNewComponent(C_MESH));
 			comp_mesh->SetMesh(md5Mesh);
 			comp_mesh->SetMaterial(aditionalData->materialsLoaded.at(scene->mMaterials[scene->mMeshes[node->mMeshes[i]]->mMaterialIndex]));
 		}

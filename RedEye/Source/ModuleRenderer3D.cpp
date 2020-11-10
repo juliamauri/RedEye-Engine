@@ -413,10 +413,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 				comptsToDraw.push(object->GetRenderGeo());
 	}
 	else
-		comptsToDraw = App::scene->GetRoot()->GetAllChildsActiveRenderGeos();
+		comptsToDraw = App::scene->GetScenePool()->GetRootPtr()->GetAllChildsActiveRenderGeos();
 
 	// Setup Lights
-	eastl::stack<RE_CompLight*> scene_lights;
+	eastl::vector<RE_Component*> scene_lights;
 	switch (render_view.light)
 	{
 	case LIGHT_DISABLED:
@@ -427,7 +427,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case LIGHT_GL:
 	{
 		SetLighting(true);
-		scene_lights = App::scene->GetScenePool()->GetAllLightsPtr(true);
+		scene_lights = App::scene->GetScenePool()->GetAllCompPtr(C_LIGHT);
 
 		// TODO RUB: Bind GL Lights
 
@@ -436,7 +436,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case LIGHT_DIRECT:
 	{
 		SetLighting(false);
-		scene_lights = App::scene->GetScenePool()->GetAllLightsPtr(true);
+		scene_lights = App::scene->GetScenePool()->GetAllCompPtr(C_LIGHT);
 
 		// TODO RUB: Upload Light uniforms
 
@@ -445,7 +445,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case LIGHT_DEFERRED:
 	{
 		SetLighting(false);
-		scene_lights = App::scene->GetScenePool()->GetAllLightsPtr(true);
+		scene_lights = App::scene->GetScenePool()->GetAllCompPtr(C_LIGHT);
 		break;
 	}
 	}
@@ -488,19 +488,16 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		}
 
 		// Setup Light Uniforms
-		unsigned int count = scene_lights.size();
-		for (unsigned int i = 0; i < 64; i++)
-		{
-			eastl::string unif_name = "lights[" + eastl::to_string(i) + "].";
+		unsigned int count = 0;
 
-			if (i < count)
-			{
-				scene_lights.top()->CallShaderUniforms(light_pass, unif_name.c_str());
-				scene_lights.pop();
-			}
-			else
-				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "type").c_str()), -1.0f);
+		eastl::string unif_name = "lights[" + eastl::to_string(count) + "].";
+
+		for (auto l : scene_lights) {
+			static_cast<RE_CompLight*>(l)->CallShaderUniforms(light_pass, unif_name.c_str());
+			count++;
 		}
+
+		for(count; count < 64; count++)RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "type").c_str()), -1.0f);
 
 		// Render Lights
 		DrawQuad();

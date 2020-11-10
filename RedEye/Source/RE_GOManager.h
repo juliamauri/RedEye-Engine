@@ -98,11 +98,9 @@ public:
 		DEL(comp_objs);
 	}
 
-	unsigned int GetBinarySize(bool iterate = false)const {
+	unsigned int GetBinarySize()const {
 		unsigned int size = sizeof(unsigned int);
-		unsigned int totalComps = GetCount();
-		if (totalComps > 0 && !iterate) size += (pool_[0].GetBinarySize() + sizeof(UID)) * totalComps;
-		else for (unsigned int i = 0; i < totalComps; i++) size += pool_[i].GetBinarySize();
+		for (unsigned int i = 0; i < lastAvaibleIndex; i++) size += pool_[i].GetBinarySize();
 		return size;
 	}
 
@@ -145,6 +143,12 @@ public:
 		}
 	}
 
+	eastl::vector<UID> GetAllKeys() const override {
+		eastl::vector<UID> ret;
+		for (auto cmp : poolmapped_) ret.push_back(cmp.first);
+		return ret;
+	}
+
 private:
 	eastl::string cName;
 };
@@ -155,8 +159,6 @@ typedef ComponentPool<RE_CompCamera, 512> CamerasPool;
 typedef ComponentPool<RE_CompMesh, 2048> MeshesPool;
 typedef ComponentPool<RE_CompLight, 124> LightPool;
 //Primitives
-
-
 class PrimitivePoolContainer
 {
 public:
@@ -303,6 +305,8 @@ public:
 	void SerializeJson(JSONNode* node);
 	void DeserializeJson(JSONNode* node, ComponentsPool* cmpsPool);
 
+	eastl::vector<UID> GetAllKeys() const override;
+
 private:
 
 	UID Push(RE_GameObject val) override;
@@ -346,7 +350,12 @@ public:
 	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
 	eastl::vector<const RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
 	eastl::vector<eastl::pair<UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
+
+	RE_Component* GetComponentPtr(UID poolid, ComponentType cType);
+	const RE_Component* GetComponentCPtr(UID poolid, ComponentType cType) const;
+
 	RE_GOManager* GetNewPoolFromID(UID id);
+
 
 	// Resources
 	eastl::vector<const char*> GetAllResources();
