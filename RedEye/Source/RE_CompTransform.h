@@ -11,50 +11,46 @@ public:
 	RE_CompTransform();
 	~RE_CompTransform();
 
-	void SetUp(RE_GameObject* parent);
-	void SetUp(const RE_CompTransform& cmptransform, RE_GameObject* parent);
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
 	void Update();
+	bool CheckUpdate();
 
-	math::float4x4 GetLocalMatrixModel();
-	math::float4x4 GetMatrixModel();
-	float* GetShaderModel();
-	
+	void DrawProperties();
+
+	void OnTransformModified();
+
+	// Setters
 	void SetRotation(math::Quat rotation);
 	void SetRotation(math::vec rotation);
 	void SetRotation(math::float3x3 rotation);
 	void SetScale(math::vec scale);
 	void SetPosition(math::vec position);
-
 	void SetGlobalPosition(math::vec global_position);
 
-	math::Quat GetLocalQuaternionRotation() const;
-	math::vec GetLocalEulerRotation() const;
-	math::vec GetLocalScale() const;
-	math::vec GetLocalPosition() const;
-
-	math::vec GetGlobalPosition();
-
+	// Getters
 	math::vec GetRight();
 	math::vec GetLeft();
 	math::vec GetUp();
 	math::vec GetDown();
 	math::vec GetFront();
 	math::vec GetBack();
-
-	void DrawProperties();
-
-	bool HasChanged() const;
-	void ConfirmChange();
-
-	void OnTransformModified();
+	math::Quat GetLocalQuaternionRotation() const;
+	math::vec GetLocalEulerRotation() const;
+	math::vec GetLocalScale() const;
+	math::vec GetLocalPosition() const;
+	math::vec GetGlobalPosition();
+	math::float4x4 GetLocalMatrix();
+	math::float4x4 GetGlobalMatrix();
+	const float* GetGlobalMatrixPtr();
 
 private:
 
 	void CalcGlobalTransform();
 
+private:
+
 	bool needed_update_transform = false;
-	bool has_changed = false;
 
 	// Position
 	math::vec pos = math::vec::zero;
@@ -71,8 +67,6 @@ private:
 	math::float4x4 model_local = math::float4x4::identity;
 	math::float4x4 model_global = math::float4x4::identity;
 
-	//Separate from parent
-	bool useParent = true;
 };
 
 #endif // !__NEW_RE_COMPTRANSFORM_H__

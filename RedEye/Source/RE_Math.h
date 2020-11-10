@@ -13,6 +13,9 @@ public:
 
 	void Init();
 
+	static int Cap(const int val = 0, const int min = 0, const int max = 1);
+	static float Cap(const float val = 0.f, const float min = 0.f, const float max = 1.f);
+
 	// Geometry
 	static math::float4x4 Rotate(const math::float3 axis, const float radians);
 	static math::float4x4 Rotate(const math::Quat quat);

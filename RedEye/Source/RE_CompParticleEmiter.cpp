@@ -6,7 +6,7 @@
 #include "ImGui\imgui.h"
 
 
-RE_CompParticleEmitter::RE_CompParticleEmitter(RE_GameObject * go) : RE_Component(C_PARTICLEEMITER, go) {}
+RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER) {}
 RE_CompParticleEmitter::~RE_CompParticleEmitter() {}
 void RE_CompParticleEmitter::Init() {}
 void RE_CompParticleEmitter::CleanUp() {}
@@ -68,7 +68,7 @@ void RE_CompParticleEmitter::OnStop()
 	RE_LOG_SECONDARY("particle emitter stop");
 }
 
-void RE_CompParticleEmitter::Draw()
+void RE_CompParticleEmitter::Draw() const
 {
 	for (int i = 0; i < max_particles; i++)
 		if (particles[i].Alive())

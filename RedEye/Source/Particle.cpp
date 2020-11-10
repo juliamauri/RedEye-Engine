@@ -43,7 +43,7 @@ void Particle::Draw(unsigned int shader)
 {
 	RE_Mesh* mesh = parent_emiter->GetMesh();
 
-	if (mesh != nullptr)
+	/*if (mesh != nullptr)
 	{
 		math::float4x4 transform_matrix = math::float4x4(
 			right.x, up.x, front.x, position.x,
@@ -53,11 +53,11 @@ void Particle::Draw(unsigned int shader)
 		transform_matrix.Transpose();
 
 		if (parent_emiter->LocalEmission())
-			transform_matrix = transform_matrix * parent_emiter->GetGO()->GetTransform()->GetMatrixModel();
+			transform_matrix = transform_matrix * parent_emiter->GetGOUID()->GetTransformPtr()->GetGlobalMatrix();
 
 		RE_ShaderImporter::setFloat4x4(shader, "model", transform_matrix.ptr());
 		//mesh->Draw(shader);
-	}
+	}*/
 }
 
 void Particle::SetUp(RE_CompParticleEmitter * pe)

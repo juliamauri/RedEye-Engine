@@ -54,14 +54,15 @@ void RE_Prefab::Save(RE_GOManager* pool, bool rootidentity, bool keepInMemory)
 	if (pool)
 	{
 		loaded = toSave = pool;
-		RE_GameObject* root = loaded->GetGO(0);
+		RE_GameObject* root = loaded->GetGOPtr(0);
 		if (rootidentity)
 		{
-			root->GetTransform()->SetPosition(math::vec::zero);
-			root->GetTransform()->SetRotation(math::vec::zero);
-			root->GetTransform()->SetScale(math::vec::one);
+			RE_CompTransform* t = root->GetTransformPtr();
+			t->SetPosition(math::vec::zero);
+			t->SetRotation(math::vec::zero);
+			t->SetScale(math::vec::one);
 			root->TransformModified(false);
-			root->Update();
+			loaded->Update();
 			root->ResetGlobalBoundingBoxForAllChilds();
 		}
 		AssetSave();

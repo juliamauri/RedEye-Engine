@@ -21,6 +21,16 @@ void RE_Math::Init()
 	lcg.Seed(math::Clock::TickU32());
 }
 
+int RE_Math::Cap(const int val, const int min, const int max)
+{
+	return val > max ? max : (val < min ? min : val);
+}
+
+float RE_Math::Cap(const float val, const float min, const float max)
+{
+	return val > max ? max : (val < min ? min : val);
+}
+
 math::float4x4 RE_Math::Rotate(const math::float3 axis, const float radians)
 {
 	return math::float4x4(math::Quat::identity * math::Quat::RotateAxisAngle(axis.Normalized(), radians));
@@ -51,7 +61,7 @@ UID RE_Math::RandomUID()
 {
 	UID ret = static_cast<UID>(lcg.Int());
 	ret = ret << 32;
-	ret += static_cast<UID>(lcg.Int());
+	ret += static_cast<UID>(lcg.Int()) + 1ull;
 
 	return ret;
 }

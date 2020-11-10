@@ -24,7 +24,7 @@ public:
 
 	void OnWindowChangeSize(float width, float height);
 	void AddMainCamera(RE_CompCamera* cam);
-	void RecallCameras(const RE_GameObject * root);
+	static void RecallSceneCameras();
 
 	eastl::list<RE_CompCamera*> GetCameras() const;
 	const math::Frustum GetCullingFrustum() const;
@@ -32,9 +32,8 @@ public:
 private:
 
 	static RE_CompCamera* editor_camera;
-	static RE_CompCamera* main_camera;
+	static UID main_camera;
 
-	eastl::list<RE_CompCamera*> scene_cameras;
 	bool cull_scene = true;
 };
 

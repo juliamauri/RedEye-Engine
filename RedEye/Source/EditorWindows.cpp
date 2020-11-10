@@ -1139,7 +1139,7 @@ void SceneGameWindow::Draw(bool secondary)
 
 		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 		ImGui::SetCursorPos({ viewport.x, viewport.y });
-		ImGui::Image((void*)App::renderer3d->GetRenderedGameSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
+		ImGui::Image(reinterpret_cast<void*>(App::renderer3d->GetRenderedGameSceneTexture()), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 
 		if (secondary)
 		{

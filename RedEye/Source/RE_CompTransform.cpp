@@ -6,50 +6,55 @@
 #include "RE_Command.h"
 
 #include "RE_GameObject.h"
+#include "RE_GOManager.h"
 #include "ImGui\imgui.h"
 #include "RE_Math.h"
 
 #define MIN_SCALE 0.001f
 
-RE_CompTransform::RE_CompTransform() : RE_Component(C_TRANSFORM, nullptr) {}
-RE_CompTransform::~RE_CompTransform() {}
-
-void RE_CompTransform::SetUp(RE_GameObject* parent)
+RE_CompTransform::RE_CompTransform() : RE_Component(C_TRANSFORM)
 {
 	scale.scale = math::vec::one;
-	if (go = parent) go->AddComponent(this);
-	if (!go) useParent = false;
 }
 
-void RE_CompTransform::SetUp(const RE_CompTransform& cmptransform, RE_GameObject* parent)
-{
-	if (go = parent) go->AddComponent(this);
-	if (!go) useParent = false;
+RE_CompTransform::~RE_CompTransform() {}
 
-	SetPosition(cmptransform.pos);
-	SetScale(cmptransform.scale.scale);
-	SetRotation(cmptransform.rot_quat);
+void RE_CompTransform::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
+{
+	pool_gos = pool;
+	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);
+
+	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(copy);
+	SetPosition(t->pos);
+	SetScale(t->scale.scale);
+	SetRotation(t->rot_quat);
 }
 
 void RE_CompTransform::Update()
 {
 	if (needed_update_transform) CalcGlobalTransform();
-	else ConfirmChange();
 }
 
-math::float4x4 RE_CompTransform::GetLocalMatrixModel()
+bool RE_CompTransform::CheckUpdate()
+{
+	bool ret = needed_update_transform;
+	if (needed_update_transform) CalcGlobalTransform();
+	return ret;
+}
+
+math::float4x4 RE_CompTransform::GetLocalMatrix()
 {
 	if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale);
 	return model_local;
 }
 
-math::float4x4 RE_CompTransform::GetMatrixModel()
+math::float4x4 RE_CompTransform::GetGlobalMatrix()
 {
 	if (needed_update_transform) CalcGlobalTransform();
 	return model_global;
 }
 
-float* RE_CompTransform::GetShaderModel()
+const float* RE_CompTransform::GetGlobalMatrixPtr()
 {
 	if (needed_update_transform) CalcGlobalTransform();
 	return model_global.ptr();
@@ -93,7 +98,16 @@ void RE_CompTransform::SetPosition(math::vec position)
 
 void RE_CompTransform::SetGlobalPosition(math::vec global_position)
 {
-	pos = (go && go->GetParent()) ? global_position - go->GetParent()->GetTransform()->GetGlobalPosition() : global_position;
+	pos = global_position;
+
+	if (go)
+	{
+		const RE_GameObject* p = pool_gos->AtCPtr(go)->GetParentCPtr();
+		if (p != nullptr)
+		{
+			pos -= p->GetTransformPtr()->GetGlobalPosition();
+		}
+	}
 	needed_update_transform = true;
 }
 
@@ -229,20 +243,25 @@ void RE_CompTransform::DrawProperties()
 	}
 }
 
-bool RE_CompTransform::HasChanged() const { return has_changed; }
-void RE_CompTransform::ConfirmChange() { has_changed = false; }
-
-void RE_CompTransform::OnTransformModified()
-{
-	if (!has_changed) needed_update_transform = true;
-}
+void RE_CompTransform::OnTransformModified() { needed_update_transform = true; }
 
 void RE_CompTransform::CalcGlobalTransform()
 {
 	model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
-	model_global = (useParent && go->GetParent()) ? model_local * go->GetParent()->GetTransform()->GetMatrixModel() : model_local;
 	needed_update_transform = false;
-	has_changed = true;
-	if (go) go->TransformModified();
+
+	if (useParent)
+	{
+		RE_GameObject* go_ptr = pool_gos->AtPtr(go);
+		const RE_GameObject* parent = go_ptr->GetParentCPtr();
+		if (parent != nullptr)
+		{
+			model_global = model_local * parent->GetTransformPtr()->GetGlobalMatrix();
+		}
+
+		go_ptr->TransformModified();
+	}
+	else
+		model_global = model_local;
 }
 

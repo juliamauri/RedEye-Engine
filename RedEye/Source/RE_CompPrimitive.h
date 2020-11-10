@@ -9,34 +9,35 @@
 class RE_CompPrimitive : public RE_Component
 {
 public:
-	RE_CompPrimitive(ComponentType t, RE_GameObject* game_obj, unsigned int VAO = 0, unsigned int shader = 0);
-	virtual ~RE_CompPrimitive();
-	
-	virtual void Draw() override = 0;
-	virtual void DrawProperties() override = 0;
-	virtual unsigned int GetBinarySize()const override { return 0; }
-	virtual void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override { }
-	virtual void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override { }
-	virtual void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override {}
-	virtual void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent) override {}
 
-	void SetColor(float r, float g, float b) { color.Set(r, g, b); }
-	void SetColor(math::vec nColor) { color = nColor; }
+	RE_CompPrimitive(ComponentType t);
+	virtual ~RE_CompPrimitive() {}
 
-	unsigned int GetVAO()const { return VAO; }
-	virtual unsigned int GetTriangleCount()const { return 0; }
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override {}
+
+	void Draw() const override {}
+	void DrawProperties() override {}
+
+	virtual bool CheckFaceCollision(const math::Ray& ray, float& distance) const;
+
+	void DeleteBuffers();
+
+	void SetColor(float r, float g, float b);
+	void SetColor(math::vec nColor);
+
+	unsigned int GetVAO() const;
+	virtual void SetVAO(unsigned int vao);
+
+	virtual unsigned int GetTriangleCount() const;
 
 protected:
-	ComponentType type;
+
 	unsigned int VAO = 0;
 	unsigned int VBO = 0;
 	unsigned int EBO = 0;
-
-	unsigned int shader;
-
+	unsigned int triangle_count = 0;
 	math::vec color = math::vec::one;
 };
-
 
 /**************************************************
 ******	Grid
@@ -45,17 +46,25 @@ protected:
 class RE_CompGrid : public RE_CompPrimitive
 {
 public:
-	RE_CompGrid(RE_GameObject* game_obj, unsigned int VAO, unsigned int shader);
+
+	RE_CompGrid() : RE_CompPrimitive(C_GRID) {}
 	~RE_CompGrid();
-	void Draw() override;
-	void DrawProperties() override {}
 
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override {}
-	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override {}
+	void GridSetUp(int divisions = 10);
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
-	unsigned int GetBinarySize()const override { return 0; }
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override {}
-	
+	void Draw() const override;
+	void DrawProperties() override;
+
+	unsigned int GetBinarySize() const override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const override;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
+
+private:
+
+	int divisions = 0;
 };
 
 /**************************************************
@@ -65,33 +74,30 @@ public:
 class RE_CompRock : public RE_CompPrimitive
 {
 public:
-	RE_CompRock();
+
+	RE_CompRock() : RE_CompPrimitive(C_ROCK) {}
 	~RE_CompRock();
 
-	void SetUp(RE_GameObject* parent, unsigned int shader, int _seed, int _subdivions);
-	void SetUp(const RE_CompRock& cmpRock, RE_GameObject* parent = nullptr);
+	void RockSetUp(int _seed = 251654, int _subdivions = 5);
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
-	void Draw() override;
+	void Draw() const override;
 	void DrawProperties() override;
 
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
-	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
-
-	unsigned int GetBinarySize()const override;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
-
-	unsigned int GetTriangleCount()const override { return triangle_count; }
+	unsigned int GetBinarySize() const override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const override;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
 private:
+
 	void GenerateNewRock(int seed, int subdivisions);
 
 private:
-	int triangle_count;
-	int seed, nsubdivisions;
+
+	int seed = 251654, nsubdivisions = 5;
 	bool canChange = true;
-public:
-	int tmpSe, tmpSb;
 };
 
 /**************************************************
@@ -101,81 +107,25 @@ public:
 class RE_CompPlatonic : public RE_CompPrimitive
 {
 public:
-	RE_CompPlatonic(ComponentType t, const char* name, RE_GameObject* game_obj, unsigned int VAO, unsigned int shader, int triangle_count);
+
+	RE_CompPlatonic(ComponentType t) : RE_CompPrimitive(t) {}
 	~RE_CompPlatonic();
-	void Draw() override;
+
+	void PlatonicSetUp(unsigned int vao = 0, unsigned int t_count = 0);
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
+
+	void Draw() const override;
 	void DrawProperties() override;
 
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
-	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
-
-	unsigned int GetBinarySize()const override;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
-
-	void SetUp(RE_GameObject* parent, unsigned int VAO, unsigned int shader, int triangle_count);
-	void SetUp(const RE_CompPlatonic& cmpPlat, RE_GameObject* parent = nullptr);
-
-	unsigned int GetTriangleCount()const override { return triangle_count; }
+	unsigned int GetBinarySize() const override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const override;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
 protected:
-	int triangle_count;
+
 	eastl::string pName;
-};
-
-/**************************************************
-******	Cube
-**************************************************/
-
-class RE_CompCube : public RE_CompPlatonic
-{
-public:
-	RE_CompCube();
-	~RE_CompCube();
-};
-
-/**************************************************
-******	Dodecahedron
-**************************************************/
-
-class RE_CompDodecahedron : public RE_CompPlatonic
-{
-public:
-	RE_CompDodecahedron();
-	~RE_CompDodecahedron();
-};
-
-/**************************************************
-******	Tetrahedron
-**************************************************/
-
-class RE_CompTetrahedron : public RE_CompPlatonic
-{
-public:
-	RE_CompTetrahedron();
-	~RE_CompTetrahedron();
-};
-
-/**************************************************
-******	Octohedron
-**************************************************/
-
-class RE_CompOctohedron : public RE_CompPlatonic
-{
-public:
-	RE_CompOctohedron();
-	~RE_CompOctohedron();
-};
-
-/**************************************************
-******	Icosahedron
-**************************************************/
-
-class RE_CompIcosahedron : public RE_CompPlatonic
-{
-public:
-	RE_CompIcosahedron();
-	~RE_CompIcosahedron();
 };
 
 /**************************************************
@@ -185,43 +135,63 @@ public:
 class RE_CompParametric : public RE_CompPrimitive
 {
 public:
-	RE_CompParametric(ComponentType t, const char* name, RE_GameObject* game_obj, unsigned int shader, int _slice, int _stacks, bool _useRadius = false, float _radius = 0.0f, float _minR = 0.0f, float _maxR = 0.0f);
+	RE_CompParametric(ComponentType t, const char* name);
 	virtual ~RE_CompParametric();
-	void Draw() override;
+
+	void ParametricSetUp(int _slices, int _stacks, float _radius = 0.0f);
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
+
+	void Draw() const override;
 	void DrawProperties() override;
 
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
-	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
-
-	unsigned int GetBinarySize()const override;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
-
-	unsigned int GetTriangleCount()const override { return triangle_count; }
-
-	void SetUp(RE_GameObject* parent, unsigned int shader, int _slice, int _stacks, bool _useRadius = false, float _radius = 0.0f);
-	void SetUp(const RE_CompParametric& cmpPara, RE_GameObject* parent = nullptr);
-
+	unsigned int GetBinarySize() const override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const override;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
 protected:
+
 	virtual void GenerateParametric() = 0;
 	void UploadParametric(struct par_shapes_mesh_s* param);
 
 protected:
+
+	eastl::string name;
+
 	bool show_checkers = false;
-	int triangle_count;
-	int slice, stacks;
-	bool useRadius = false;
-	float radius, minR, maxR;
-	bool canChange = true;
-	eastl::string pName;
-public:
-	int tmpSl, tmpSt;
-	float tmpR;
+	bool canChange = false;
+
+	int slices = 0, stacks = 0;
+	float radius = 0.f, min_r = 0.f, max_r = 0.f;
+
+private:
+
+	int target_slices, target_stacks;
+	float target_radius;
 };
 
 /**************************************************
-******	Plane
+******	Platonic
+**************************************************/
+
+class RE_CompCube : public RE_CompPlatonic
+{ public: RE_CompCube() : RE_CompPlatonic(C_CUBE) {} };
+
+class RE_CompDodecahedron : public RE_CompPlatonic
+{ public: RE_CompDodecahedron() : RE_CompPlatonic(C_DODECAHEDRON) {} };
+
+class RE_CompTetrahedron : public RE_CompPlatonic
+{ public: RE_CompTetrahedron() : RE_CompPlatonic(C_TETRAHEDRON) {} };
+
+class RE_CompOctohedron : public RE_CompPlatonic
+{ public: RE_CompOctohedron() : RE_CompPlatonic(C_OCTOHEDRON) {} };
+
+class RE_CompIcosahedron : public RE_CompPlatonic
+{ public: RE_CompIcosahedron() : RE_CompPlatonic(C_ICOSAHEDRON) {} };
+
+/**************************************************
+******	Plane - Parametric
 **************************************************/
 
 class RE_CompPlane : public RE_CompParametric
@@ -236,9 +206,8 @@ private:
 	void GenerateParametric()override;
 };
 
-
 /**************************************************
-******	Sphere
+******	Sphere - Parametric
 **************************************************/
 
 class RE_CompSphere : public RE_CompParametric
@@ -253,7 +222,7 @@ private:
 };
 
 /**************************************************
-******	Cylinder
+******	Cylinder - Parametric
 **************************************************/
 
 class RE_CompCylinder : public RE_CompParametric
@@ -266,9 +235,8 @@ private:
 	void GenerateParametric()override;
 };
 
-
 /**************************************************
-******	HemiSphere
+******	HemiSphere - Parametric
 **************************************************/
 
 class RE_CompHemiSphere : public RE_CompParametric
@@ -282,7 +250,7 @@ private:
 };
 
 /**************************************************
-******	Torus
+******	Torus - Parametric
 **************************************************/
 
 class RE_CompTorus : public RE_CompParametric
@@ -297,7 +265,7 @@ private:
 };
 
 /**************************************************
-******	Trefoi Knot
+******	Trefoi Knot - Parametric
 **************************************************/
 
 class RE_CompTrefoiKnot : public RE_CompParametric

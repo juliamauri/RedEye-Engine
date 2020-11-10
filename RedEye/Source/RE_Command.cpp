@@ -1,34 +1,35 @@
 #include "RE_Command.h"
 
+#include "ModuleScene.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 
 void RE_CMDTransformPosition::execute()
 {
-	go_->GetTransform()->SetPosition(p_);
+	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetPosition(p_);
 }
 
 void RE_CMDTransformPosition::undo()
 {
-	go_->GetTransform()->SetPosition(pBefore_);
+	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetPosition(pBefore_);
 }
 
 void RE_CMDTransformRotation::execute()
 {
-	go_->GetTransform()->SetRotation(r_);
+	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetRotation(r_);
 }
 
 void RE_CMDTransformRotation::undo()
 {
-	go_->GetTransform()->SetRotation(rBefore_);
+	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetRotation(rBefore_);
 }
 
 void RE_CMDTransformScale::execute()
 {
-	go_->GetTransform()->SetScale(s_);
+	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetScale(s_);
 }
 
 void RE_CMDTransformScale::undo()
 {
-	go_->GetTransform()->SetScale(sBefore_);
+	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetScale(sBefore_);
 }

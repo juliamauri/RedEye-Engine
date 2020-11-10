@@ -54,39 +54,38 @@ public:
 	update_status PreUpdate() override;
 	update_status Update() override;
 	bool CleanUp() override;
-	void DrawEditor() override;
-
 	void RecieveEvent(const Event& e) override;
 
-	void DrawDebug(RE_CompCamera* cam) const;
+	// Draws
+	void Draw() const;
+	void DrawEditor() override;
+	void DrawDebug(RE_CompCamera* current_camera) const;
 	void DrawHeriarchy();
 
-	RE_GameObject* GetSelected() const;
-	void SetSelected(RE_GameObject* go, bool force_focus = false);
+	// UI
+	void DrawGameObjectItems(const UID parent);
+	void CreatePrefab(const UID go, const char* name, bool identityRoot);
+
+	// Selection
+	UID GetSelected() const;
+	void SetSelected(const UID go, bool force_focus = false);
 	void DuplicateSelectedObject();
 
+	// Logs
 	void LogToEditorConsole();
 	bool AddSoftwareUsed(const char * name, const char * version, const char * website);
-	void Draw();
+
+	// Editor Windows
 	void HandleSDLEvent(SDL_Event* e);
-
 	void PopUpFocus(bool focus);
-	PopUpWindow* popupWindow = nullptr;
-
 	const char* GetAssetsPanelPath()const;
-
 	void SelectUndefinedFile(eastl::string* toSelect)const;
-
 	void OpenTextEditor(const char* filePath, eastl::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
-
 	void GetSceneWindowSize(unsigned int* widht, unsigned int* height);
-
-	void CreatePrefab(RE_GameObject* go, const char* name, bool identityRoot);
-
+	
+	// Commands
 	void PushCommand(RE_Command* cmd);
 	void ClearCommands();
-
-	void DrawGameObjectItems(RE_GameObject* parent = nullptr);
 
 private:
 
@@ -96,17 +95,22 @@ public:
 
 	bool debug_drawing = true;
 
+	PopUpWindow* popupWindow = nullptr;
+
 private:
 
+	// Flags
 	bool show_all = true;
 	bool show_demo = false;
 	bool popUpFocus = false;
 
-	eastl::list<EditorWindow*> windows, tools;
-
+	// Command Tracker
 	RE_CommandManager editorCommands;
 
-	// Windows
+	// Windows & Tools
+	eastl::list<EditorWindow*> windows, tools;
+
+	// General Windows
 	ConsoleWindow* console = nullptr;
 	AssetsWindow* assets = nullptr;
 	WwiseWindow* wwise = nullptr;
@@ -120,8 +124,10 @@ private:
 	SkyBoxEditorWindow* skyboxeditor = nullptr;
 	TextEditorManagerWindow* texteditormanager = nullptr;
 
+	// Scene views
 	SceneEditorWindow* sceneEditorWindow = nullptr;
 	SceneGameWindow* sceneGameWindow = nullptr;
+
 	// Tools
 	RandomTest* rng = nullptr;
 
@@ -132,7 +138,11 @@ private:
 	float cam_sensitivity = 0.01f;
 
 	// Selected GO
-	RE_GameObject* selected = nullptr;
+	UID selected = 0;
+
+	// Grid
+	RE_CompGrid* grid = nullptr;
+	float grid_size[2];
 
 	// Debug Drawing
 	AABBDebugDrawing aabb_drawing = AABBDebugDrawing::ALL_AND_SELECTED;
@@ -143,12 +153,6 @@ private:
 	float sel_aabb_color[3];
 	float quad_tree_color[3];
 	float frustum_color[3];
-
-	// Grid
-	ComponentsPool* editorCompsPool = nullptr;
-	RE_Component* grid = nullptr;
-	RE_GameObject* grid_go = nullptr;
-	float grid_size[2];
 
 	//crtd security
 	bool isDuplicated = false;

@@ -18,19 +18,17 @@ public:
 	RE_CompLight();
 	~RE_CompLight();
 
-	void SetUp(RE_GameObject* parent);
-	void SetUp(const RE_CompLight& cmpLight, RE_GameObject* parent);
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
 	void CallShaderUniforms(unsigned int shader, const char* unif_name) const;
 
 	void DrawProperties() override;
 
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
-	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) override;
-
 	unsigned int GetBinarySize()const override;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const override;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)override;
 
 private:
 

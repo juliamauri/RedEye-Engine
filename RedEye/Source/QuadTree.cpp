@@ -275,7 +275,7 @@ void QTree::PushWithChilds(RE_GameObject * g_obj)
 
 	eastl::stack<RE_GameObject*> objects;
 
-	for (auto child : g_obj->GetChilds())
+	for (auto child : g_obj->GetChildsPtr())
 		objects.push(child);
 
 	while (!objects.empty())
@@ -287,7 +287,7 @@ void QTree::PushWithChilds(RE_GameObject * g_obj)
 		{
 			root.Push(obj);
 
-			for (auto child : obj->GetChilds())
+			for (auto child : obj->GetChildsPtr())
 				objects.push(child);
 		}
 	}
@@ -403,7 +403,7 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 				At(iN.child1).box,
 				At(iN.child2).box);
 
-			int next = iN.parent_index;;
+			int next = iN.parent_index;
 			Rotate(iN, parent_index);
 			parent_index = next;
 		}

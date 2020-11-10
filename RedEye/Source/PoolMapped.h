@@ -41,11 +41,12 @@ public:
 		return ret;
 	}
 
-	const TYPEVALUE At(TYPEKEY key)const { return pool_[poolmapped_.at(key)]; }
+	const TYPEVALUE At(TYPEKEY key) const { return pool_[poolmapped_.at(key)]; }
 	TYPEVALUE& At(TYPEKEY key) { return pool_[poolmapped_.at(key)]; }
-	TYPEVALUE* AtPtr(TYPEKEY key)const { return &pool_[poolmapped_.at(key)]; }
+	TYPEVALUE* AtPtr(TYPEKEY key) const { return &pool_[poolmapped_.at(key)]; }
+	const TYPEVALUE* AtCPtr(TYPEKEY key) const { return &pool_[poolmapped_.at(key)]; }
 
-	eastl::vector<TYPEKEY> GetAllKeys() {
+	eastl::vector<TYPEKEY> GetAllKeys() const {
 		eastl::vector<TYPEKEY> ret;
 		typename eastl::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.begin();
 		while (i != poolmapped_.end())
@@ -56,7 +57,7 @@ public:
 		return ret;
 	}
 
-	int GetCount()const { return poolmapped_.size(); }
+	int GetCount() const { return poolmapped_.size(); }
 
 protected:
 	TYPEVALUE* pool_;

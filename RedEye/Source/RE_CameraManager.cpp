@@ -15,7 +15,7 @@ RE_CameraManager::~RE_CameraManager() {}
 void RE_CameraManager::Init()
 {
 	editor_camera = new RE_CompCamera();
-	editor_camera->SetUp(nullptr);
+	editor_camera->SetProperties();
 	editor_camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
 }
 
@@ -50,25 +50,25 @@ void RE_CameraManager::AddMainCamera(RE_CompCamera* cam)
 	scene_cameras.push_back(cam);
 }
 
-eastl::list<RE_CompCamera*> RE_CameraManager::GetCameras() const { return scene_cameras; }
-
-void RE_CameraManager::RecallCameras(const RE_GameObject * root)
+void RE_CameraManager::RecallSceneCameras()
 {
 	scene_cameras.clear();
+
+	ModuleScene::GetScenePool().get
 
 	eastl::stack<const RE_GameObject*> gos;
 	gos.push(root);
 	while (!gos.empty())
 	{
-		const RE_GameObject * go = gos.top();
-		RE_CompCamera * cam = go->GetCamera();
+		const RE_GameObject* go = gos.top();
+		RE_CompCamera* cam = go->GetCamera();
 
 		if (cam != nullptr)
 			scene_cameras.push_back(cam);
 
 		gos.pop();
 
-		for (auto child : go->GetChilds())
+		for (auto child : go->GetChildsPtr())
 			gos.push(child);
 	}
 
@@ -86,6 +86,8 @@ void RE_CameraManager::RecallCameras(const RE_GameObject * root)
 		}
 	}
 }
+
+eastl::list<RE_CompCamera*> RE_CameraManager::GetCameras() const { return scene_cameras; }
 
 const math::Frustum RE_CameraManager::GetCullingFrustum() const
 {

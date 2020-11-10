@@ -8,6 +8,7 @@
 
 class RE_GameObject;
 class JSONNode;
+class GameObjectsPool;
 
 enum ComponentType : ushortint
 {
@@ -41,9 +42,12 @@ enum ComponentType : ushortint
 class RE_Component
 {
 public:
-	RE_Component(const ComponentType type = C_EMPTY, RE_GameObject* go = nullptr, const bool start_active = true) : 
+	RE_Component(const ComponentType type = C_EMPTY, const UID go = 0, const bool start_active = true) :
 		type(type), go(go), active(start_active) {}
 	virtual ~RE_Component() {}
+
+	virtual UID PoolSetUp(GameObjectsPool* pool, const UID parent, bool report_parent = false);
+	virtual void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) {}
 
 	virtual void Init() {}
 	virtual void CleanUp() {}
@@ -52,7 +56,7 @@ public:
 	virtual void Update() {}
 	virtual void PostUpdate() {}
 
-	virtual void Draw() {}
+	virtual void Draw() const {}
 	virtual void DrawProperties() {}
 
 	virtual void OnPlay() {}
@@ -69,34 +73,35 @@ public:
 	void SetActive(const bool value) { active = value; }
 
 	ComponentType GetType() const { return type; }
-	RE_GameObject* GetGO() const { return go; }
-	void SetParent(RE_GameObject* parent) { go = parent; };
-
-	RE_Component* AsComponent() const { return (RE_Component*)this; }
+	UID GetGOUID() const { return go; }
+	RE_GameObject* GetGOPtr() const;
+	const RE_GameObject* GetGOCPtr() const;
+	void SetParent(const UID parent) { go = parent; };
 
 	virtual eastl::vector<const char*> GetAllResources() { return eastl::vector<const char*>(); }
 
-	virtual void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) {}
-	virtual void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent) {}
+	virtual void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const {}
+	virtual void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) {}
 
-	virtual unsigned int GetBinarySize()const {  return 0; }
-	virtual void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) {}
-	virtual void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent) {}
+	virtual unsigned int GetBinarySize() const {  return 0; }
+	virtual void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const {}
+	virtual void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) {}
 
 	virtual void UseResources() {  }
 	virtual void UnUseResources() {  }
 
 	//POOL
-	UID GetPoolID()const { return poolID; }
-	void SetPoolID(UID id) { poolID = id; }
+	UID GetPoolID()const { return id; }
+	void SetPoolID(UID id) { id = id; }
 
 protected:
 
 	bool active = true;
 	ComponentType type = C_EMPTY;
-	RE_GameObject* go = nullptr;
-
-	UID poolID = 0;
+	UID id = 0;
+	UID go = 0;
+	GameObjectsPool* pool_gos = nullptr;
+	bool useParent = true;
 };
 
 #endif // !__RE_COMPONENT_H__

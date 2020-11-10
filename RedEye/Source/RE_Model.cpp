@@ -34,8 +34,7 @@ void RE_Model::LoadInMemory()
 
 void RE_Model::UnloadMemory()
 {
-	if (loaded) DEL(loaded);
-	loaded = nullptr;
+	DEL(loaded);
 	ResourceContainer::inMemory = false;
 }
 

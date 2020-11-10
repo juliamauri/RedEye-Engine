@@ -4,41 +4,36 @@
 #include "RE_CompTransform.h"
 #include "RE_ShaderImporter.h"
 #include "RE_FileSystem.h"
+#include "RE_GOManager.h"
 #include "ImGui\imgui.h"
 
-RE_CompLight::RE_CompLight() : RE_Component(C_LIGHT, nullptr)
+RE_CompLight::RE_CompLight() : RE_Component(C_LIGHT)
 {
 	diffuse = math::vec(0.8f);
 	cutOff[0] = 12.5f;
 	outerCutOff[0] = 17.5f;
+	UpdateCutOff();
 }
 
 RE_CompLight::~RE_CompLight()
 {}
 
-void RE_CompLight::SetUp(RE_GameObject* parent)
+void RE_CompLight::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
 {
-	go = parent;
-	parent->AddComponent(this);
+	pool_gos = pool;
+	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_LIGHT);
 
-	UpdateCutOff();
-}
+	RE_CompLight* cmpLight = dynamic_cast<RE_CompLight*>(copy);
+	type = cmpLight->type;
+	intensity = cmpLight->intensity;
+	constant = cmpLight->constant;
+	linear = cmpLight->linear;
+	quadratic = cmpLight->quadratic;
+	diffuse = cmpLight->diffuse;
+	specular = cmpLight->specular;
 
-void RE_CompLight::SetUp(const RE_CompLight& cmpLight, RE_GameObject* parent)
-{
-	go = parent;
-	parent->AddComponent(this);
-
-	type = cmpLight.type;
-	intensity = cmpLight.intensity;
-	constant = cmpLight.constant;
-	linear = cmpLight.linear;
-	quadratic = cmpLight.quadratic;
-	diffuse = cmpLight.diffuse;
-	specular = cmpLight.specular;
-
-	cutOff[0] = cmpLight.cutOff[0];
-	outerCutOff[0] = cmpLight.outerCutOff[0];
+	cutOff[0] = cmpLight->cutOff[0];
+	outerCutOff[0] = cmpLight->outerCutOff[0];
 	UpdateCutOff();
 }
 
@@ -51,7 +46,7 @@ void RE_CompLight::CallShaderUniforms(unsigned int shader, const char* name) con
 	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuse").c_str()), diffuse);
 	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "specular").c_str()), specular);
 
-	RE_CompTransform* transform = GetGO()->GetTransform();
+	RE_CompTransform* transform = GetGOPtr()->GetTransformPtr();
 	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "direction").c_str()), transform->GetFront());
 
 	if (type != L_DIRECTIONAL)
@@ -93,7 +88,7 @@ void RE_CompLight::DrawProperties()
 	}
 }
 
-void RE_CompLight::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
+void RE_CompLight::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushInt("type", type);
 	node->PushFloat("intensity", intensity);
@@ -106,7 +101,7 @@ void RE_CompLight::SerializeJson(JSONNode* node, eastl::map<const char*, int>* r
 	node->PushFloat("outerCutOff", outerCutOff[0]);
 }
 
-void RE_CompLight::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+void RE_CompLight::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<LightType>(node->PullInt("type", L_POINT));
 
@@ -118,8 +113,7 @@ void RE_CompLight::DeserializeJson(JSONNode* node, eastl::map<int, const char*>*
 	specular = node->PullFloat("specular", specular);
 	cutOff[0] = node->PullFloat("cutOff", cutOff[0]);
 	outerCutOff[0] = node->PullFloat("outerCutOff", outerCutOff[0]);
-
-	SetUp(parent);
+	UpdateCutOff();
 }
 
 unsigned int RE_CompLight::GetBinarySize() const
@@ -127,7 +121,7 @@ unsigned int RE_CompLight::GetBinarySize() const
 	return sizeof(int) + sizeof(float) * 10;
 }
 
-void RE_CompLight::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+void RE_CompLight::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(int);
 	memcpy(cursor, &type, size);
@@ -142,7 +136,7 @@ void RE_CompLight::SerializeBinary(char*& cursor, eastl::map<const char*, int>* 
 	cursor += size;
 	memcpy(cursor, &quadratic, size);
 	cursor += size;
-	memcpy(cursor, &diffuse[0], size * 3);
+	memcpy(cursor, diffuse.ptr(), size * 3);
 	cursor += size * 3;
 	memcpy(cursor, &specular, size);
 	cursor += size;
@@ -152,7 +146,7 @@ void RE_CompLight::SerializeBinary(char*& cursor, eastl::map<const char*, int>* 
 	cursor += size;
 }
 
-void RE_CompLight::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+void RE_CompLight::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(int);
 	memcpy(&type, cursor, size);
@@ -176,7 +170,7 @@ void RE_CompLight::DeserializeBinary(char*& cursor, eastl::map<int, const char*>
 	memcpy(&outerCutOff[0], cursor, size);
 	cursor += size;
 
-	SetUp(parent);
+	UpdateCutOff();
 }
 
 inline void RE_CompLight::UpdateCutOff()

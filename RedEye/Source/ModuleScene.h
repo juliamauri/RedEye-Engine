@@ -18,80 +18,76 @@ public:
 	bool Start() override;
 	update_status Update() override;
 	update_status PostUpdate() override;
-
 	bool CleanUp() override;
 
+	// Draws
+	void DrawEditor() override;
+	void DebugDraw() const;
+	
+	// Events
 	void OnPlay() override;
 	void OnPause() override;
 	void OnStop() override;
-
 	void RecieveEvent(const Event& e) override;
 
-	RE_GameObject* GetRoot() const;
-	const RE_GameObject* GetRoot_c() const;
+	// Root
+	static UID GetRootUID();
+	static RE_GameObject* GetRootPtr();
+	static const RE_GameObject* GetRootCPtr();
 
-	void CreateCube(RE_GameObject* parent = nullptr);
-	void CreateDodecahedron(RE_GameObject* parent = nullptr);
-	void CreateTetrahedron(RE_GameObject* parent = nullptr);
-	void CreateOctohedron(RE_GameObject* parent = nullptr);
-	void CreateIcosahedron(RE_GameObject* parent = nullptr);
-	void CreatePlane(RE_GameObject* parent = nullptr);
-	void CreateSphere(RE_GameObject* parent = nullptr);
-	void CreateCylinder(RE_GameObject* parent = nullptr);
-	void CreateHemiSphere(RE_GameObject* parent = nullptr);
-	void CreateTorus(RE_GameObject* parent = nullptr);
-	void CreateTrefoilKnot(RE_GameObject* parent = nullptr);
-	void CreateRock(RE_GameObject* parent = nullptr);
-	void CreateCamera(RE_GameObject* parent = nullptr);
-	void CreateLight(RE_GameObject* parent = nullptr);
-	void CreateMaxLights(RE_GameObject* parent = nullptr);
-
-	void DrawEditor() override;
-
-	void DrawTrees() const;
-	RE_GameObject* RayCastSelect(math::Ray& ray);
-	void FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum& frustum);
-
-	void NewEmptyScene(const char* name = "New Scene");
-
-	void LoadScene(const char* sceneMD5, bool ignorehandle = false);
-	void SaveScene(const char* newName = nullptr);
-	const char* GetCurrentScene()const;
-	void ClearScene();
+	// Adding to scene
+	static void CreatePrimitive(ComponentType type, const UID parent = 0);
+	static void CreateCamera(const UID parent = 0);
+	static void CreateLight(const UID parent = 0);
+	static void CreateMaxLights(const UID parent = 0);
 
 	void AddGOPool(RE_GOManager* toAdd);
+
+	// Scene Gameobject Filtering
+	UID RayCastSelect(math::Ray& global_ray);
+	void FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum& frustum);
+
+	// Scene Management
+	const char* GetCurrentScene()const;
+	void ClearScene();
+	void NewEmptyScene(const char* name = "New Scene");
+
+	// Serialization
+	void LoadScene(const char* sceneMD5, bool ignorehandle = false);
+	void SaveScene(const char* newName = nullptr);
 
 	bool HasChanges()const;
 	bool isNewScene() const;
 
-	RE_GOManager* GetScenePool();
+	// Current Pool
+	static RE_GOManager* GetScenePool();
 	
 private:
 
-	void GetActive(eastl::list<RE_GameObject*>& objects) const;
+	// Trees
+	/*void GetActive(eastl::list<RE_GameObject*>& objects) const;
 	void GetActiveStatic(eastl::list<RE_GameObject*>& objects) const;
-	void GetActiveNonStatic(eastl::list<RE_GameObject*>& objects) const;
-
-	void ResetTrees();
+	void GetActiveNonStatic(eastl::list<RE_GameObject*>& objects) const;*/
 
 	void SetupScene();
 
+	static inline UID Validate(const UID id);
+
 private:
 
-	RE_GOManager scenePool;
+	static RE_GOManager scenePool;
 	RE_GOManager savedState;
+	bool haschanges;
 
-	eastl::stack<RE_GameObject*> GOsToDelete;
+	eastl::stack<UID> to_delete;
 
-	RE_GameObject* root = nullptr;
-
+	// Trees
 	AABBDynamicTree static_tree;
 	AABBDynamicTree dynamic_tree;
 
 	RE_Scene* unsavedScene = nullptr;
 	const char* currentScene = nullptr;
 
-	bool haschanges = false;
 };
 
 #endif // !__MODULESCENE_H__

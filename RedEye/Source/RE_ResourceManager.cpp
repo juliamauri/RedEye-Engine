@@ -212,7 +212,7 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 			case R_SCENE: poolGORes = dynamic_cast<RE_Scene*>(resource)->GetPool(); break;
 			case R_PREFAB: poolGORes = dynamic_cast<RE_Prefab*>(resource)->GetPool(); break;
 			case R_MODEL: poolGORes = dynamic_cast<RE_Model*>(resource)->GetPool(); break; }
-			eastl::stack<RE_Component*> comps = poolGORes->GetFirstGO()->GetAllComponentWithChilds((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+			eastl::stack<RE_Component*> comps = poolGORes->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 
 			bool skip = false;
 			while (!comps.empty() && !skip)
@@ -298,7 +298,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 					case R_PREFAB: poolGORes = dynamic_cast<RE_Prefab*>(resChange)->GetPool(); break; }
 				}
 
-				eastl::stack<RE_Component*> comps = poolGORes->GetFirstGO()->GetAllComponentWithChilds((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+				eastl::stack<RE_Component*> comps = poolGORes->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 				while (!comps.empty())
 				{
 					RE_Component* go = comps.top();
@@ -318,9 +318,9 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 
 				if (currentScene != resToChange)
 				{
-					poolGORes->GetGO(0)->TransformModified(false);
-					poolGORes->GetGO(0)->Update();
-					poolGORes->GetGO(0)->ResetBoundingBoxForAllChilds();
+					poolGORes->GetRootPtr()->TransformModified(false);
+					poolGORes->Update();
+					poolGORes->GetRootPtr()->ResetBoundingBoxForAllChilds();
 				}
 				switch (goType)
 				{

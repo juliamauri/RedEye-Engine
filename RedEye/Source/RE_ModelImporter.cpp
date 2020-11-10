@@ -64,7 +64,7 @@ RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int 
 		if (scene->HasMeshes()) ProcessMeshes(scene);
 
 		RE_LOG_SECONDARY("Processing model hierarchy"); // Mount a go hiteracy with nodes from model
-		RE_GameObject* currentGO = (ret = new RE_GOManager())->AddGO(aditionalData->name.c_str(), nullptr);
+		RE_GameObject* currentGO = (ret = new RE_GOManager())->AddGO(aditionalData->name.c_str(), 0);
 		ProcessNode(ret, scene->mRootNode, scene, currentGO, math::float4x4::identity, true);
 
 	}
@@ -95,7 +95,7 @@ void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const ai
 	{
 		if (isRoot || eastl::string(node->mName.C_Str()).find("_$Assimp") == eastl::string::npos)
 		{
-			go_haschildren = isRoot ? currentGO : goPool->AddGO(node->mName.C_Str(), currentGO);
+			go_haschildren = isRoot ? currentGO : goPool->AddGO(node->mName.C_Str(), currentGO->GetUID());
 
 			math::float3 position, scale;
 			math::Quat rotation;
@@ -104,7 +104,7 @@ void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const ai
 			bool paused = Event::isPaused();
 			if (!paused) Event::PauseEvents();
 
-			RE_CompTransform* t = go_haschildren->GetTransform();
+			RE_CompTransform* t = go_haschildren->GetTransformPtr();
 			t->SetRotation(rotation);
 			t->SetPosition(position);
 			t->SetScale(scale);
@@ -122,7 +122,7 @@ void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const ai
 	{
 		for (; i < node->mNumMeshes; i++)
 		{
-			RE_GameObject* goMesh = go_haschildren ? go_haschildren : goPool->AddGO(node->mName.C_Str(), currentGO);
+			RE_GameObject* goMesh = go_haschildren ? go_haschildren : goPool->AddGO(node->mName.C_Str(), currentGO->GetUID());
 			if (!go_haschildren)
 			{
 				math::float3 position, scale;
@@ -132,7 +132,7 @@ void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const ai
 				bool paused = Event::isPaused();
 				if (!paused) Event::PauseEvents();
 
-				RE_CompTransform* t = goMesh->GetTransform();
+				RE_CompTransform* t = goMesh->GetTransformPtr();
 				t->SetRotation(rotation);
 				t->SetPosition(position);
 				t->SetScale(scale);
@@ -144,14 +144,9 @@ void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const ai
 			}
 
 			const char* md5Mesh = aditionalData->meshesLoaded.at(scene->mMeshes[node->mMeshes[i]]);
-			RE_CompMesh* comp_mesh = goMesh->AddCompMesh();
-			comp_mesh->SetUp(goMesh, md5Mesh);
+			RE_CompMesh* comp_mesh = dynamic_cast<RE_CompMesh*>( goMesh->AddNewComponent(C_MESH));
+			comp_mesh->SetMesh(md5Mesh);
 			comp_mesh->SetMaterial(aditionalData->materialsLoaded.at(scene->mMaterials[scene->mMeshes[node->mMeshes[i]]->mMaterialIndex]));
-			
-			// TODO Julius: Qué hago con estos comenatarios?
-
-			//meshes.rbegin()->name = node->mName.C_Str();
-			//total_triangle_count += meshes.rbegin()->triangle_count;
 		}
 	}
 

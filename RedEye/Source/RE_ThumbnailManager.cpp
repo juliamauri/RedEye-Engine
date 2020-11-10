@@ -62,7 +62,7 @@ void RE_ThumbnailManager::Init()
 	singleRenderFBO = RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE);
 	Event::PauseEvents();
 	internalCamera = new RE_CompCamera();
-	internalCamera->SetUp(nullptr);
+	internalCamera->SetProperties();
 	internalCamera->SetBounds(THUMBNAILSIZE, THUMBNAILSIZE);
 	internalCamera->Update();
 	Event::ResumeEvents();
@@ -249,9 +249,9 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 		if (poolGOThumbnail)
 		{
 			poolGOThumbnail->UseResources();
-			RE_GameObject* root = poolGOThumbnail->GetFirstGO();
+			RE_GameObject* root = poolGOThumbnail->GetRootPtr();
 			root->TransformModified(false);
-			root->Update();
+			poolGOThumbnail->Update();
 			root->ResetGlobalBoundingBoxForAllChilds();
 
 			internalCamera->SetFOV(math::RadToDeg(0.523599f));
@@ -268,7 +268,7 @@ unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
 			RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			root->DrawWithChilds();
+			root->DrawChilds();
 			poolGOThumbnail->UnUseResources();
 			SaveTextureFromFBO(path.c_str());
 			RE_FBOManager::ChangeFBOBind(0, App::window->GetWidth(), App::window->GetHeight());

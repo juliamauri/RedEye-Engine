@@ -71,7 +71,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		RE_LOG_SECONDARY("Creating SDL GL Context");
 		mainContext = SDL_GL_CreateContext(App::window->GetWindow());
 		if (ret = (mainContext != nullptr))
-			App::ReportSoftware("OpenGL", (char*)glGetString(GL_VERSION), "https://www.opengl.org/");
+			App::ReportSoftware("OpenGL", reinterpret_cast<const char*>(glGetString(GL_VERSION)), "https://www.opengl.org/");
 		else
 			RE_LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
 	}
@@ -101,7 +101,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 
 			Load(node);
-			App::ReportSoftware("Glew", (char*)glewGetString(GLEW_VERSION), "http://glew.sourceforge.net/");
+			App::ReportSoftware("Glew", reinterpret_cast<const char*>(glewGetString(GLEW_VERSION)), "http://glew.sourceforge.net/");
 		}
 		else
 		{
@@ -120,7 +120,7 @@ bool ModuleRenderer3D::Start()
 
 	render_views[VIEW_GAME].fbos = {
 		RE_FBOManager::CreateFBO(1024, 768),
-		RE_FBOManager::CreateDeferredFBO(1024, 768) };;
+		RE_FBOManager::CreateDeferredFBO(1024, 768) };
 
 	return true;
 }
@@ -408,20 +408,11 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			App::cams.GetCullingFrustum() : render_view.camera->GetFrustum());
 
 		for (const RE_GameObject* object : objects)
-		{
 			if (object->IsActive())
-			{
-				eastl::stack<RE_Component*> fromO = object->GetDrawableComponentsItselfOnly();
-				while (!fromO.empty())
-				{
-					comptsToDraw.push(fromO.top());
-					fromO.pop();
-				}
-			}
-		}
+				comptsToDraw.push(object->GetRenderGeo());
 	}
 	else
-		comptsToDraw = App::scene->GetRoot()->GetDrawableComponentsWithChilds();
+		comptsToDraw = App::scene->GetRoot()->GetAllChildsActiveRenderGeos();
 
 	// Setup Lights
 	eastl::stack<RE_CompLight*> scene_lights;
@@ -435,7 +426,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case LIGHT_GL:
 	{
 		SetLighting(true);
-		scene_lights = App::scene->GetScenePool()->GetAllLights(true);
+		scene_lights = App::scene->GetScenePool()->GetAllLightsPtr(true);
 
 		// TODO RUB: Bind GL Lights
 
@@ -444,7 +435,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case LIGHT_DIRECT:
 	{
 		SetLighting(false);
-		scene_lights = App::scene->GetScenePool()->GetAllLights(true);
+		scene_lights = App::scene->GetScenePool()->GetAllLightsPtr(true);
 
 		// TODO RUB: Upload Light uniforms
 
@@ -453,7 +444,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case LIGHT_DEFERRED:
 	{
 		SetLighting(false);
-		scene_lights = App::scene->GetScenePool()->GetAllLights(true);
+		scene_lights = App::scene->GetScenePool()->GetAllLightsPtr(true);
 		break;
 	}
 	}
@@ -467,7 +458,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		bool blend = false;
 
 		if (drawing->GetType() == C_MESH)
-			 blend = ((RE_CompMesh*)drawing)->isBlend();
+			 blend = dynamic_cast<RE_CompMesh*>(drawing)->isBlend();
 
 		if (!blend) drawing->Draw();
 		else drawAsLast.push(drawing);
@@ -479,7 +470,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	if (render_view.light == LIGHT_DEFERRED)
 	{
 		// Setup Shader
-		unsigned int light_pass = ((RE_Shader*)App::resources->At(App::internalResources.GetLightPassShader()))->GetID();
+		unsigned int light_pass = dynamic_cast<RE_Shader*>(App::resources->At(App::internalResources.GetLightPassShader()))->GetID();
 		RE_GLCacheManager::ChangeShader(light_pass);
 
 		SetDepthTest(false);
@@ -565,7 +556,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	}
 
 	// Draw Stencil
-	if (render_view.flags & OUTLINE_SELECTION)
+	/*if (render_view.flags & OUTLINE_SELECTION)
 	{
 		RE_GameObject* stencilGO = App::editor->GetSelected();
 		if (stencilGO != nullptr)
@@ -581,14 +572,18 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 				{
 					RE_Component* dC = stackComponents.top();
 					ComponentType cT = dC->GetType();
-					if (cT == ComponentType::C_MESH) {
-						vaoToStencil.push(((RE_CompMesh*)dC)->GetVAOMesh());
-						triangleToStencil.push(((RE_CompMesh*)dC)->GetTriangleMesh());
+					if (cT == ComponentType::C_MESH)
+					{
+						RE_CompMesh* mesh_comp = dynamic_cast<RE_CompMesh*>(dC);
+						vaoToStencil.push(mesh_comp->GetVAOMesh());
+						triangleToStencil.push(mesh_comp->GetTriangleMesh());
 						stackTemp.push(dC);
 					}
-					else if (cT > ComponentType::C_PRIMIVE_MIN && cT < ComponentType::C_PRIMIVE_MAX) {
-						vaoToStencil.push(((RE_CompPrimitive*)dC)->GetVAO());
-						triangleToStencil.push(((RE_CompPrimitive*)dC)->GetTriangleCount());
+					else if (cT > ComponentType::C_PRIMIVE_MIN && cT < ComponentType::C_PRIMIVE_MAX)
+					{
+						RE_CompPrimitive* prim_comp = dynamic_cast<RE_CompPrimitive*>(dC);
+						vaoToStencil.push(prim_comp->GetVAO());
+						triangleToStencil.push(prim_comp->GetTriangleCount());
 						stackTemp.push(dC);
 					}
 					stackComponents.pop();
@@ -601,15 +596,15 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 				{
 					//Getting the scale shader and setting some values
 					const char* scaleShader = App::internalResources.GetDefaultScaleShader();
-					RE_Shader* sShader = (RE_Shader*)App::resources->At(scaleShader);
+					RE_Shader* sShader = dynamic_cast<RE_Shader*>(App::resources->At(scaleShader));
 					unsigned int shaderiD = sShader->GetID();
 					RE_GLCacheManager::ChangeShader(shaderiD);
 					RE_GLCacheManager::ChangeVAO(vaoToStencil.top());
-					sShader->UploadModel(stencilGO->GetTransform()->GetShaderModel());
+					sShader->UploadModel(stencilGO->GetTransformPtr()->GetGlobalMatrixPtr());
 					RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
 					RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
 					RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
-					RE_ShaderImporter::setFloat(shaderiD, "center", (stackTemp.top()->GetType() == ComponentType::C_MESH) ? ((RE_CompMesh*)stackTemp.top())->GetAABB().CenterPoint() : math::vec::zero);
+					RE_ShaderImporter::setFloat(shaderiD, "center", (stackTemp.top()->GetType() == ComponentType::C_MESH) ? dynamic_cast<RE_CompMesh*>(stackTemp.top())->GetAABB().CenterPoint() : math::vec::zero);
 
 					//Prepare stencil for detect
 					glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); //don't draw to color buffer
@@ -618,7 +613,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 					glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
 					//Draw scaled mesh 
-					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilGO->GetTransform()->GetLocalScale().Length());
+					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilGO->GetTransformPtr()->GetLocalScale().Length());
 					stackComponents.push(stackTemp.top());
 					stackTemp.pop();
 					glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
@@ -634,7 +629,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 					glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
 
 					//Draw scaled mesh 
-					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilGO->GetTransform()->GetLocalScale().Length());
+					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilGO->GetTransformPtr()->GetLocalScale().Length());
 					glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
 
 					vaoToStencil.pop();
@@ -646,7 +641,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 					SetDepthTest(true);
 			}
 		}
-	}
+	}*/
 }
 
 inline void ModuleRenderer3D::SetWireframe(bool enable)

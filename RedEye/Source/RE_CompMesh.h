@@ -7,15 +7,16 @@
 class RE_CompMesh : public RE_Component
 {
 public:
-	RE_CompMesh();
-	~RE_CompMesh();
+	RE_CompMesh() : RE_Component(C_MESH) {}
+	~RE_CompMesh() {}
+	
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
-	void SetUp(RE_GameObject* parent, const char* reference = nullptr);
-	void SetUp(const RE_CompMesh& cmpMesh, RE_GameObject* parent = nullptr);
-
-	void Draw() override;
-
+	void Draw() const override;
 	void DrawProperties() override;
+
+	void SetMesh(const char* mesh);
+	const char* GetMesh() const;
 
 	unsigned int GetVAOMesh()const;
 	unsigned int GetTriangleMesh()const;
@@ -25,15 +26,15 @@ public:
 
 	eastl::vector<const char*> GetAllResources() override;
 	
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) override;
-	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)override;
+	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const override;
+	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) override;
 
 	unsigned int GetBinarySize()const override;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) override;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
 	math::AABB GetAABB() const;
-	bool CheckFaceCollision(const math::Ray &ray, float &distance) const;
+	bool CheckFaceCollision(const math::Ray &local_ray, float &distance) const;
 
 	void UseResources()override;
 	void UnUseResources()override;

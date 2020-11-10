@@ -7,8 +7,8 @@
 #include "MathGeoLib\include\MathGeoLib.h"
 #include <EASTL/list.h>
 #include <EASTL/vector.h>
-#include <EASTL/map.h>
 #include <EASTL/stack.h>
+#include <EASTL/map.h>
 
 class RE_Component;
 class RE_CompTransform;
@@ -17,97 +17,108 @@ class RE_CompCamera;
 class RE_CompLight;
 class RE_CompPrimitive;
 class JSONNode;
+class GameObjectsPool;
 class ComponentsPool;
-class RE_GOManager;
+
+enum GO_Flags : char
+{
+	ACTIVE,
+	PARENT_ACTIVE,
+	STATIC,
+	DYNAMIC,
+	KINEMATIC,
+	HAS_CHILDS,
+	IS_ROOT
+};
 
 class RE_GameObject : public EventListener
 {
 public:
+
 	RE_GameObject();
 	~RE_GameObject();
+	void SetUp(GameObjectsPool* goPool, ComponentsPool* compPool, const char* name,
+		const UID parent = 0, const bool start_active = true, const bool isStatic = true);
 
-	void SetUp(ComponentsPool* compPool, const char* name, RE_GameObject* parent = nullptr, bool start_active = true, bool isStatic = true);
-
-	void PreUpdate();
-	void Update();
-	void PostUpdate();
-	void DrawWithChilds() const;
+	// Draws
+	void DrawProperties();
 	void DrawItselfOnly() const;
+	void DrawWithChilds() const;
+	void DrawChilds() const;
 
-	eastl::stack<RE_Component*> GetDrawableComponentsWithChilds(RE_GameObject* ignoreStencil = nullptr)const;
-	eastl::stack<RE_Component*> GetDrawableComponentsItselfOnly()const;
-	eastl::stack<RE_Component*> GetAllComponentWithChilds(unsigned short type)const;
-	eastl::list<RE_Component*> GetComponents()const;
+	// Component Getters
+	RE_Component* GetCompPtr(const ushortint type) const;
+	UID GetCompUID(const ushortint type) const;
+	bool HasRenderGeo() const;
+	bool HasActiveRenderGeo() const;
 
-	eastl::vector<RE_GameObject*> GetAllGO();
-	eastl::vector<RE_GameObject*> GetActiveChildsWithDrawComponents();
+	RE_CompTransform* GetTransformPtr() const;
+	RE_Component* GetRenderGeo() const;
+	RE_CompMesh* GetMesh() const;
+	RE_CompCamera* GetCamera() const;
+	RE_CompLight* GetLight() const;
+	RE_CompPrimitive* GetPrimitive() const;
 
-	bool HasDrawComponents() const;
+	eastl::list<RE_Component*> GetComponentsPtr() const;
+	eastl::list<RE_Component*> GetStackableComponentsPtr() const;
+	eastl::stack<RE_Component*> GetAllChildsComponents(const unsigned short type) const;
+	eastl::stack<RE_Component*> GetAllChildsActiveRenderGeos() const;
+	eastl::stack<RE_Component*> GetAllChildsActiveRenderGeos(const UID stencil_mask) const;
 
-	void SerializeJson(JSONNode* node);
-	void DeserializeJSON(JSONNode* node, ComponentsPool* cmpsPool, eastl::map<UID, RE_GameObject*>* uuidGO);
+	// Components
+	void ReportComponent(const UID id, const ushortint type);
+	RE_Component* AddNewComponent(const ushortint type);
+	void ReleaseComponent(const UID id, const ushortint type);
+	void DestroyComponent(const UID id, const ushortint type);
 
-	unsigned int GetBinarySize()const;
-	void SerializeBinary(char*& cursor);
-	void DeserializeBinary(char*& cursor, ComponentsPool* compPool, eastl::map<UID, RE_GameObject*>* uuidGO);
+	// Children Getters
+	const eastl::vector<UID>& GetChilds() const;
+	eastl::list<RE_GameObject*> GetChildsPtr() const;
+	eastl::list<const RE_GameObject*> GetChildsCPtr() const;
+	eastl::vector<UID> GetGOandChilds() const;
+	eastl::vector<RE_GameObject*> GetGOandChildsPtr();
+	eastl::vector<const RE_GameObject*> GetGOandChildsCPtr() const;
+	eastl::vector<RE_GameObject*> GetActiveDrawableChilds() const;
+	eastl::vector<RE_GameObject*> GetActiveDrawableGOandChildsPtr();
+	eastl::vector<const RE_GameObject*> GetActiveDrawableGOandChildsCPtr() const;
+	const UID GetLastChild() const;
 
 	// Children
-	void AddChild(RE_GameObject* child, bool broadcast = true);
-	void AddChildsFromGO(RE_GameObject* go, bool broadcast = true);
-	void RemoveChild(RE_GameObject* child); //Breaks the link with the parent but does not delete the child.
-	eastl::list<RE_GameObject*>& GetChilds();
-	const eastl::list<RE_GameObject*>& GetChilds() const;
-	void GetChilds(eastl::list<const RE_GameObject*>& out_childs) const;
+	RE_GameObject* AddNewChild(bool broadcast = true, const char* name = nullptr, const bool start_active = true, const bool isStatic = true);
+	void ReleaseChild(const UID id);
+	void DestroyChild(const UID id);
+
 	unsigned int ChildCount() const;
 	bool IsLastChild() const;
 
 	// Parent
-	RE_GameObject* GetParent() const;
-	const RE_GameObject* GetParent_c() const;
-	void SetParent(RE_GameObject* parent);
+	RE_GameObject* GetParentPtr() const;
+	const RE_GameObject* GetParentCPtr() const;
+	void SetParent(const UID id, bool unlink_previous = true, bool link_new = true);
 	void UnlinkParent();
 
-	// Active
-	bool IsActive() const;
-	void SetActive(const bool value, const bool broadcast = true);
-	void SetActiveRecursive(const bool value);
-	void IterativeSetActive(bool val);
+	UID GetRootUID() const;
+	RE_GameObject* GetRootPtr() const;
+	const RE_GameObject* GetRootCPtr() const;
 
-	// Static
+	// Flags
+	bool IsActive() const;
 	bool IsStatic() const;
 	bool IsActiveStatic() const;
-	void SetStatic(const bool value, const bool broadcast = true);
-	void IterativeSetStatic(bool val);
+	bool IsActiveNonStatic() const;
 
-	// Editor Controls
+	void SetActive(const bool value, bool broadcast = true);
+	void SetActiveWithChilds(bool val, bool broadcast = true);
+	
+	void SetStatic(const bool value, bool broadcast = true);
+	void SetStaticWithChilds(bool val, bool broadcast = true);
+
+	// Events
 	void OnPlay();
 	void OnPause();
 	void OnStop();
-
-	// Components
-	void AddComponent(RE_Component* component);
-	RE_Component* AddComponent(const ushortint type);
-	RE_Component* GetComponent(const ushortint type) const;
-	void RemoveComponent(RE_Component* component);
-
-	RE_CompTransform* AddCompTransform();
-	RE_CompMesh* AddCompMesh();
-	RE_CompCamera* AddCompCamera(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 0.523599f, short aspect_ratio_t = 0, bool draw_frustum = true, bool usingSkybox = true, const char* skyboxMD5 = nullptr);
-	RE_CompPrimitive* AddCompPrimitive(ushortint type, int _slices = 3, int _stacks = 3, float _radius = 0.1);
-	RE_CompPrimitive* AddCompRock(int _rockSeed = 5, int _rockNSubdivvisions = 20);
-
-	RE_CompTransform* GetTransform() const;
-	RE_CompMesh* GetMesh() const;
-	RE_CompCamera* GetCamera() const;
-	RE_CompLight* GetLight() const;
-
-	void RecieveEvent(const Event& e) override;
-
-	// Transform
 	void TransformModified(bool broadcast = true);
-
-	// Name
-	const char* GetName() const;
+	void OnTransformModified(bool broadcast = true);
 
 	// AABB
 	inline void AddToBoundingBox(math::AABB box);
@@ -119,42 +130,74 @@ public:
 	void DrawAABB(math::vec color) const;
 	void DrawGlobalAABB() const;
 
+	// AABB Getters
 	math::AABB GetLocalBoundingBox() const;
 	math::AABB GetGlobalBoundingBox() const;
 	math::AABB GetGlobalBoundingBoxWithChilds() const;
 
-	// Editor
-	void DrawProperties();
+	// Raycast
+	bool CheckRayCollision(const math::Ray& global_ray, float& distance) const;
+
+	// Serialization
+	unsigned int GetBinarySize() const;
+	void SerializeJson(JSONNode* node);
+	void DeserializeJSON(JSONNode* node, GameObjectsPool* goPool, ComponentsPool* cmpsPool);
+	void SerializeBinary(char*& cursor);
+	void DeserializeBinary(char*& cursor, GameObjectsPool* goPool, ComponentsPool* compPool);
 
 	//POOL
-	UID GetPoolID()const;
-	void SetPoolID(UID id);
-	
-public:
-	struct cmpPoolID
+	UID GetUID() const;
+
+	friend class GameObjectsPool;
+	friend class RE_GOManager;
+	struct ComponentData
 	{
-		UID poolId;
-		ushortint cType;
-		cmpPoolID(UID id, ushortint type) : poolId(id), cType(type) { }
+		ComponentData(UID id = 0ull, ushortint type = 0u) : uid(id), type(type) {}
+		UID uid;
+		ushortint type;
 	};
+
+private:
+
+	inline RE_Component* CompPtr(ComponentData comp) const;
+	inline RE_Component* CompPtr(UID id, ushortint type) const;
+	inline const RE_Component* CompCPtr(ComponentData comp) const;
+	inline const RE_Component* CompCPtr(UID id, ushortint type) const;
+	eastl::list<ComponentData> AllCompData() const;
+
+	inline bool IsRenderGeo(ushortint type) const;
+
+	void LinkChild(const UID child, bool broadcast = true);
+	inline RE_GameObject* ChildPtr(const UID child) const;
+	inline const RE_GameObject* ChildCPtr(const UID child) const;
+
+public:
+
+		eastl::string name;
 
 private:
 
 	bool active = true;
 	bool isStatic = true;
 
-	eastl::string name;
+	UID go_uid = 0ull;
+	UID parent_uid = 0ull;
+
+	ComponentData render_geo; // mesh or primitive
+	UID transform = 0ull;
+	UID camera = 0ull;
+	UID light = 0ull;
+	//UID p_emitter = 0ull;
+	//UID rigidbody = 0ull;
+
 	math::AABB local_bounding_box;
 	math::AABB global_bounding_box;
 
-	RE_GameObject* parent = nullptr;
-	RE_CompTransform* transform = nullptr;
+	eastl::vector<UID> childs;
+	eastl::vector<ComponentData> components;
 
-	eastl::list<RE_GameObject*> childs;
-	ComponentsPool* poolComponents;
-	eastl::vector<cmpPoolID> componentsID;
-
-	UID poolID = 0;
+	ComponentsPool* pool_comps = nullptr;
+	GameObjectsPool* pool_gos = nullptr;
 };
 
 #endif // !__RE_GAMEOBJECT_H__

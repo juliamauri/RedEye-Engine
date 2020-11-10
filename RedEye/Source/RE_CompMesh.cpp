@@ -22,29 +22,21 @@
 
 #include "ImGui\imgui.h"
 
-RE_CompMesh::RE_CompMesh() : RE_Component(C_MESH, go) {}
-RE_CompMesh::~RE_CompMesh() {}
-
-void RE_CompMesh::SetUp(RE_GameObject* parent, const char* reference)
+void RE_CompMesh::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
 {
-	go = parent;
-	parent->AddComponent(this);
-	meshMD5 = reference;
+	pool_gos = pool;
+	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_MESH);
+
+	RE_CompMesh* cmpMesh = dynamic_cast<RE_CompMesh*>(copy);
+	meshMD5 = cmpMesh->meshMD5;
+	materialMD5 = cmpMesh->materialMD5;
 }
 
-void RE_CompMesh::SetUp(const RE_CompMesh& cmpMesh, RE_GameObject* parent)
-{
-	go = parent;
-	parent->AddComponent(this);
-	meshMD5 = cmpMesh.meshMD5;
-	materialMD5 = cmpMesh.materialMD5;
-}
-
-void RE_CompMesh::Draw()
+void RE_CompMesh::Draw() const
 {
 	const char* materialToDraw = (materialMD5) ? materialMD5 : App::internalResources.GetDefaulMaterial();
 	RE_Material* material = dynamic_cast<RE_Material*>(App::resources->At(materialToDraw));
-	material->UploadToShader(go->GetTransform()->GetShaderModel(), show_checkers);
+	material->UploadToShader(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr(), show_checkers);
 	(dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->DrawMesh(material->GetShaderID());
 }
 
@@ -115,6 +107,16 @@ void RE_CompMesh::DrawProperties()
 	}
 }
 
+void RE_CompMesh::SetMesh(const char* mesh)
+{
+	meshMD5 = mesh;
+}
+
+const char* RE_CompMesh::GetMesh() const
+{
+	return meshMD5;
+}
+
 unsigned int RE_CompMesh::GetVAOMesh() const
 {
 	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->GetVAO() : 0u;
@@ -136,20 +138,18 @@ eastl::vector<const char*> RE_CompMesh::GetAllResources()
 	return ret;
 }
 
-void RE_CompMesh::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources)
+void RE_CompMesh::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushInt("meshResource", (meshMD5) ? resources->at(meshMD5) : -1);
 	node->PushInt("materialResource", (materialMD5) ? resources->at(materialMD5) : -1);
 }
 
-void RE_CompMesh::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+void RE_CompMesh::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
 {
-	go = parent;
 	int id = node->PullInt("meshResource", -1);
 	materialMD5 = (id != -1) ? resources->at(id) : nullptr;
 	id = node->PullInt("materialResource", -1);
 	materialMD5 = (id != -1) ? resources->at(id) : nullptr;
-	go->AddComponent(this);
 }
 
 unsigned int RE_CompMesh::GetBinarySize() const
@@ -157,7 +157,7 @@ unsigned int RE_CompMesh::GetBinarySize() const
 	return sizeof(int) * 2;
 }
 
-void RE_CompMesh::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+void RE_CompMesh::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(int);
 	int md5 = (meshMD5) ? resources->at(meshMD5) : -1;
@@ -169,10 +169,8 @@ void RE_CompMesh::SerializeBinary(char*& cursor, eastl::map<const char*, int>* r
 	cursor += size;
 }
 
-void RE_CompMesh::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+void RE_CompMesh::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
 {
-	go = parent;
-
 	size_t size = sizeof(int);
 	int md5 = -1;
 
@@ -184,8 +182,6 @@ void RE_CompMesh::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 	memcpy(&md5, cursor,  size);
 	cursor += size;
 	materialMD5 = (md5 != -1) ? resources->at(md5) : nullptr;
-
-	go->AddComponent(this);
 }
 
 math::AABB RE_CompMesh::GetAABB() const
@@ -193,11 +189,9 @@ math::AABB RE_CompMesh::GetAABB() const
 	return (dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->GetAABB();
 }
 
-bool RE_CompMesh::CheckFaceCollision(const math::Ray &ray, float & distance) const
+bool RE_CompMesh::CheckFaceCollision(const math::Ray & local_ray, float & distance) const
 {
-	math::Ray local_ray = ray;
-	local_ray.Transform(go->GetTransform()->GetMatrixModel().Transposed().Inverted());
-	return (dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->CheckFaceCollision(local_ray, distance);
+	return meshMD5 && (dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->CheckFaceCollision(local_ray, distance);
 }
 
 void RE_CompMesh::UseResources()

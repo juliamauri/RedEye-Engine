@@ -12,7 +12,7 @@
 #include "PoolMapped.h"
 
 class JSONNode;
-class GameObjectManager;
+class GameObjectsPool;
 
 template<class COMPCLASS, unsigned int size>
 class ComponentPool : public PoolMapped<COMPCLASS, UID, size>
@@ -23,6 +23,11 @@ public:
 
 	void SetName(const char* name) {
 		cName = name;
+	}
+
+	void Update()
+	{
+		for (int i = 0; i < lastAvaibleIndex; ++i) pool_[i].Update();
 	}
 
 	void Clear() {
@@ -38,7 +43,7 @@ public:
 		return ret;
 	}
 
-	UID GetNewComponent() {
+	UID GetNewCompUID() {
 		return Push({});
 	}
 
@@ -56,12 +61,10 @@ public:
 			pool_[i].UseResources();
 	}
 
-
 	void UnUseResources() {
 		for (int i = 0; i < lastAvaibleIndex; i++) 
 			pool_[i].UnUseResources();
 	}
-
 
 	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) {
 
@@ -72,28 +75,27 @@ public:
 
 		for (uint i = 0; i < cmpSize; i++) {
 			JSONNode* comp = compPool->PushJObject(eastl::to_string(i).c_str());
-			comp->PushUnsignedLongLong("parentPoolID", pool_[i].GetGO()->GetPoolID());
+			comp->PushUnsignedLongLong("parentPoolID", pool_[i].GetGOUID());
 			pool_[i].SerializeJson(comp, resources);
 			DEL(comp);
 		}
 		DEL(compPool);
 	}
 
-	void DeserializeJson(GameObjectManager* goPool, JSONNode* node, eastl::map<int, const char*>* resources) {
+	void DeserializeJson(GameObjectsPool* goPool, JSONNode* node, eastl::map<int, const char*>* resources)
+	{
+		JSONNode* comp_objs = node->PullJObject(cName.c_str());
+		unsigned int cmpSize = comp_objs->PullUInt("poolSize", 0);
+		for (unsigned int i = 0; i < cmpSize; i++)
+		{
+			COMPCLASS* comp_ptr = AtPtr(Push({}));
+			JSONNode* comp_obj = comp_objs->PullJObject(eastl::to_string(i).c_str());
+			comp_ptr->PoolSetUp(goPool, comp_obj->PullUnsignedLongLong("parentPoolID", 0), true);
+			comp_ptr->DeserializeJson(comp_obj, resources);
 
-		JSONNode* compPool = node->PullJObject(cName.c_str());
-
-		unsigned int cmpSize = compPool->PullUInt("poolSize", 0);
-
-		for (unsigned int i = 0; i < cmpSize; i++) {
-			JSONNode* comp = compPool->PullJObject(eastl::to_string(i).c_str());
-
-			RE_GameObject* cParent = goPool->AtPtr(compPool->PullUnsignedLongLong("parentPoolID", 0));
-			AtPtr(Push({}))->DeserializeJson(comp, resources, cParent);
-
-			DEL(comp);
+			DEL(comp_obj);
 		}
-		DEL(compPool);
+		DEL(comp_objs);
 	}
 
 	unsigned int GetBinarySize()const {
@@ -111,8 +113,9 @@ public:
 		cursor += size;
 
 		size = sizeof(UID);
-		for (unsigned int i = 0; i < cmpSize; i++) {
-			UID goID = pool_[i].GetGO()->GetPoolID();
+		for (unsigned int i = 0; i < cmpSize; i++)
+		{
+			UID goID = pool_[i].GetGOUID();
 			memcpy(cursor, &goID, size);
 			cursor += size;
 
@@ -120,7 +123,8 @@ public:
 		}
 	}
 
-	void DeserializeBinary(GameObjectManager* goPool, char*& cursor, eastl::map<int, const char*>* resources) {
+	void DeserializeBinary(GameObjectsPool* goPool, char*& cursor, eastl::map<int, const char*>* resources)
+	{
 		unsigned int size = sizeof(unsigned int);
 		unsigned int totalComps;
 
@@ -128,11 +132,15 @@ public:
 		cursor += size;
 
 		size = sizeof(UID);
-		for (uint i = 0; i < totalComps; i++) {
+		for (uint i = 0; i < totalComps; i++)
+		{
 			UID goID;
 			memcpy(&goID, cursor, size);
 			cursor += size;
-			AtPtr(Push({}))->DeserializeBinary(cursor, resources, goPool->AtPtr(goID));
+
+			COMPCLASS* comp_ptr = AtPtr(Push({}));
+			comp_ptr->PoolSetUp(goPool, goID, true);
+			comp_ptr->DeserializeBinary(cursor, resources);
 		}
 	}
 
@@ -159,7 +167,6 @@ typedef ComponentPool<RE_CompHemiSphere, 1024> PHemiSpherePool;
 typedef ComponentPool<RE_CompTorus, 1024> PTorusPool;
 typedef ComponentPool<RE_CompTrefoiKnot, 1024> PTrefoiKnotPool;
 
-
 class ComponentsPool {
 public:
 	ComponentsPool() { 
@@ -182,26 +189,39 @@ public:
 	}
 	~ComponentsPool() { }
 
+	// Content iteration
+	void Update();
 	void ClearComponents();
 
-	RE_Component* GetComponent(UID poolid, ComponentType cType);
-	RE_Component* GetNewComponent(ComponentType cType);
-	RE_Component* CopyComponent(RE_Component* cmp, RE_GameObject* parent);
-
-	void DestroyComponent(ComponentType cType, UID toDelete);
-
+	// Resources
 	eastl::vector<const char*> GetAllResources();
 	void UseResources();
 	void UnUseResources();
 
-	eastl::stack<RE_CompLight*> GetAllLights(bool check_active);
+	// Component Handling
+	eastl::pair<UID, RE_Component*> GetNewComponent(ComponentType cType);
+	UID GetNewComponentUID(ComponentType cType);
+	RE_Component* GetNewComponentPtr(ComponentType cType);
 
+	RE_Component* CopyComponent(GameObjectsPool* pool, RE_Component* copy, const UID parent);
+	void DestroyComponent(ComponentType cType, UID toDelete);
+
+	// Component Getters
+	RE_Component* GetComponentPtr(UID poolid, ComponentType cType);
+	const RE_Component* GetComponentCPtr(UID poolid, ComponentType cType);
+
+	eastl::vector<UID> GetAllCompUID(ushortint type = 0) const;
+	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
+	eastl::vector<RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
+	eastl::vector<eastl::pair<UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
+
+	// Serialization
 	unsigned int GetBinarySize()const;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
-	void DeserializeBinary(GameObjectManager* goPool, char*& cursor, eastl::map<int, const char*>* resources);
+	void DeserializeBinary(GameObjectsPool* goPool, char*& cursor, eastl::map<int, const char*>* resources);
 
 	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources);
-	void DeserializeJson(GameObjectManager* goPool, JSONNode* node, eastl::map<int, const char*>* resources);
+	void DeserializeJson(GameObjectsPool* goPool, JSONNode* node, eastl::map<int, const char*>* resources);
 
 private:
 	TransformsPool transPool;
@@ -222,25 +242,39 @@ private:
 	PTrefoiKnotPool pTrefoiKnotPool;
 };
 
-class GameObjectManager : public PoolMapped<RE_GameObject, UID, 10240> {
+class GameObjectsPool : public PoolMapped<RE_GameObject, UID, 10240> {
 public:
-	GameObjectManager() { }
-	~GameObjectManager() { }
+	GameObjectsPool() { }
+	~GameObjectsPool() { }
 
+	// Content iteration
 	void Clear();
 
-	UID Push(RE_GameObject val)override;
-	UID GetFirstGOUID();
-	RE_GameObject* GetFirstGO();
-
+	// Pool handling
+	UID GetNewGOUID();
+	RE_GameObject* GetNewGOPtr();
 	void DeleteGO(UID toDelete);
 
-	unsigned int GetBinarySize()const;
+	// Getters
+	eastl::vector<RE_GameObject*> GetAllPtrs() const;
+	eastl::vector<eastl::pair<UID, RE_GameObject*>> GetAllData() const;
+
+	// Root
+	UID GetRootUID() const;
+	RE_GameObject* GetRootPtr() const;
+	const RE_GameObject* GetRootCPtr() const;
+
+	// Serialization
+	unsigned int GetBinarySize() const;
 	void SerializeBinary(char*& cursor);
 	void DeserializeBinary(char*& cursor, ComponentsPool* cmpsPool);
 
 	void SerializeJson(JSONNode* node);
 	void DeserializeJson(JSONNode* node, ComponentsPool* cmpsPool);
+
+private:
+
+	UID Push(RE_GameObject val) override;
 };
 
 class RE_GOManager
@@ -249,28 +283,45 @@ public:
 	RE_GOManager();
 	~RE_GOManager();
 
-	RE_GameObject* AddGO(const char* name, RE_GameObject* parent);
-	RE_GameObject* CopyGO(RE_GameObject* copy, RE_GameObject* parent);
-	RE_GameObject* GetGO(UID id)const;
-	UID GetFirstGOUID();
-	RE_GameObject* GetFirstGO();
-	eastl::vector<UID> GetAllGOs();
-	unsigned int TotalGameObjects()const { return gameObjectsPool.GetCount(); };
+	// Content iteration
+	void Update();
+	void ClearPool();
+
+	// Pool handling
+	RE_GameObject* AddGO(const char* name, UID parent, bool broadcast = false);
+	RE_GameObject* CopyGO(RE_GameObject* copy, UID parent, bool broadcast = false);
+	RE_GameObject* InsertPool(RE_GOManager* pool);
 
 	void DestroyGO(UID toDestroy);
 
-	RE_GameObject* InsertPool(RE_GOManager* pool);
+	// Root
+	UID GetRootUID() const;
+	RE_GameObject* GetRootPtr() const;
+	const RE_GameObject* GetRootCPtr() const;
 
+	// GO Getters
+	RE_GameObject* GetGOPtr(UID id) const;
+	const RE_GameObject* GetGOCPtr(UID id) const;
+
+	eastl::vector<UID> GetAllGOUIDs() const;
+	eastl::vector<RE_GameObject*> GetAllGOPtrs() const;
+	eastl::vector<eastl::pair<UID, RE_GameObject*>> GetAllGOData() const;
+
+	unsigned int TotalGameObjects() const { return gameObjectsPool.GetCount(); };
+
+	// Component Getters
+	eastl::vector<UID> GetAllCompUID(ushortint type = 0) const;
+	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
+	eastl::vector<RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
+	eastl::vector<eastl::pair<UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
 	RE_GOManager* GetNewPoolFromID(UID id);
 
-	eastl::stack<RE_CompLight*> GetAllLights(bool check_active);
-
+	// Resources
 	eastl::vector<const char*> GetAllResources();
 	void UseResources();
 	void UnUseResources();
 
-	void ClearPool();
-
+	// Serialization
 	unsigned int GetBinarySize()const;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources);
@@ -279,9 +330,11 @@ public:
 	void DeserializeJson(JSONNode* node, eastl::map<int, const char* >* resources);
 	
 private:
-	RE_GameObject* RepercusiveInsertGO(RE_GameObject* go, RE_GameObject* parent);
+
+	RE_GameObject* RecusiveInsertGO(RE_GameObject* go, UID parent);
+	void RecursiveDestroyGO(UID toDestroy);
 
 private:
-	GameObjectManager gameObjectsPool;
+	GameObjectsPool gameObjectsPool;
 	ComponentsPool componentsPool;
 };

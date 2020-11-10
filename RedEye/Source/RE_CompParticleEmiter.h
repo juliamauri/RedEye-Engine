@@ -18,7 +18,7 @@ enum Particle_Stat
 class RE_CompParticleEmitter : public RE_Component
 {
 public:
-	RE_CompParticleEmitter(RE_GameObject* go = nullptr);
+	RE_CompParticleEmitter();
 	~RE_CompParticleEmitter();
 
 	void Init() override;
@@ -32,7 +32,7 @@ public:
 	void OnPause() override;
 	void OnStop() override;
 
-	void Draw() override;
+	void Draw() const override;
 	void DrawProperties() override;
 
 	bool LocalEmission() const;

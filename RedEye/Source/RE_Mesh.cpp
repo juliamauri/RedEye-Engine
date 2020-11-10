@@ -513,7 +513,7 @@ bool RE_Mesh::CheckFaceCollision(const math::Ray& local_ray, float& distance) co
 		face.b = math::vec(&vertex[3 * index[(3 * i) + 1]]);
 		face.c = math::vec(&vertex[3 * index[(3 * i) + 2]]);
 
-		if (face.Intersects(local_ray, &res_dist) && (!ret || distance < res_dist))
+		if (face.Intersects(local_ray, &res_dist) && (!ret || res_dist < distance))
 		{
 			distance = res_dist;
 			ret = true;

@@ -59,7 +59,6 @@ ModuleEditor::~ModuleEditor()
 	editorCommands.Clear();
 }
 
-// Load assets
 bool ModuleEditor::Init(JSONNode* node)
 {
 	bool ret = true;
@@ -93,7 +92,6 @@ bool ModuleEditor::Init(JSONNode* node)
 	else
 		RE_LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
 
-
 	all_aabb_color[0] = 0.f;
 	all_aabb_color[1] = 1.f;
 	all_aabb_color[2] = 0.f;
@@ -118,17 +116,14 @@ bool ModuleEditor::Start()
 	windows.push_back(assets = new AssetsWindow());
 	windows.push_back(wwise = new WwiseWindow());
 
-	editorCompsPool = new ComponentsPool();
-	grid_go = new RE_GameObject();
-
-	grid_go->SetUp(editorCompsPool, "Grid");
-	grid = (RE_Component*)App::primitives.CreateGrid(grid_go);
+	grid = new RE_CompGrid();
+	grid->GridSetUp();
 
 	// FOCUS CAMERA
-	const RE_GameObject* root = App::scene->GetRoot();
-	if (!root->GetChilds().empty())
+	const RE_GameObject* root = ModuleScene::GetRootCPtr();
+	if (root->ChildCount() > 0)
 	{
-		SetSelected(root->GetChilds().begin().mpNode->mValue);
+		SetSelected(root->GetChildsPtr().begin().mpNode->mValue);
 		RE_CameraManager::EditorCamera()->Focus(selected);
 	}
 
@@ -145,7 +140,6 @@ update_status ModuleEditor::PreUpdate()
 	return UPDATE_CONTINUE;
 }
 
-// Update
 update_status ModuleEditor::Update()
 {
 	OPTICK_CATEGORY("Update ModuleEditor", Optick::Category::UI);
@@ -332,7 +326,6 @@ update_status ModuleEditor::Update()
 	return UPDATE_CONTINUE;
 }
 
-// Load assets
 bool ModuleEditor::CleanUp()
 {
 	while (!windows.empty())
@@ -358,8 +351,6 @@ bool ModuleEditor::CleanUp()
 	DEL(sceneEditorWindow);
 	DEL(sceneGameWindow);
 
-	DEL(editorCompsPool);
-	DEL(grid_go);
 	DEL(grid);
 
 	ImGui_ImplOpenGL3_Shutdown();
@@ -367,6 +358,58 @@ bool ModuleEditor::CleanUp()
 	ImGui::DestroyContext();
 
 	return true;
+}
+
+void ModuleEditor::RecieveEvent(const Event& e)
+{
+	switch (e.type)
+	{
+	case EDITORWINDOWCHANGED: sceneEditorWindow->UpdateViewPort(); break;
+	case GAMEWINDOWCHANGED: sceneGameWindow->UpdateViewPort(); break;
+	case UPDATE_SCENE_WINDOWS:
+	{
+		if(e.data1.AsGO()) sceneGameWindow->Recalc();
+		else sceneEditorWindow->Recalc();
+		break;
+	}
+	case EDITOR_SCENE_RAYCAST:
+	{
+		// Mouse Pick
+		RE_CompCamera* camera = RE_CameraManager::EditorCamera();
+		float width, height;
+		camera->GetTargetWidthHeight(width, height);
+
+		OPTICK_CATEGORY("Update ModuleEditor Camera RayCast", Optick::Category::Camera);
+		UID hit = App::scene->RayCastSelect(
+			math::Ray(camera->GetFrustum().UnProjectLineSegment(
+			(e.data1.AsFloat() -(width / 2.0f)) / (width / 2.0f),
+				((height - e.data2.AsFloat()) - (height / 2.0f)) / (height / 2.0f))));
+
+		if (hit) SetSelected(hit);
+
+		break;
+	}
+	}
+}
+
+void ModuleEditor::Draw() const
+{
+	OPTICK_CATEGORY("ImGui Rend", Optick::Category::Rendering);
+
+	sceneEditorWindow->DrawWindow();
+	sceneGameWindow->DrawWindow();
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		//GLFWwindow* backup_current_context = glfwGetCurrentContext();
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+		//glfwMakeContextCurrent(backup_current_context);
+	}
 }
 
 void ModuleEditor::DrawEditor()
@@ -393,16 +436,16 @@ void ModuleEditor::DrawEditor()
 
 			if (active_grid && ImGui::DragFloat2("Grid Size", grid_size, 0.2f, 0.01f, 100.0f, "%.1f"))
 			{
-				grid_go->GetTransform()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
-				grid_go->GetTransform()->Update();
+				grid->GetTransformPtr()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
+				grid->GetTransformPtr()->Update();
 			}
 
 			int aabb_d = aabb_drawing;
 			if (ImGui::Combo("Draw AABB", &aabb_d, "None\0Selected only\0All\0All w/ different selected\0"))
 				aabb_drawing = AABBDebugDrawing(aabb_d);
-			
+
 			if (aabb_drawing > SELECTED_ONLY) ImGui::ColorEdit3("Color AABB", all_aabb_color);
-			if (aabb_drawing%2 == 1) ImGui::ColorEdit3("Color Selected", sel_aabb_color);
+			if (aabb_drawing % 2 == 1) ImGui::ColorEdit3("Color Selected", sel_aabb_color);
 
 			ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
 			if (draw_quad_tree) ImGui::ColorEdit3("Color Quadtree", quad_tree_color);
@@ -413,42 +456,10 @@ void ModuleEditor::DrawEditor()
 	}
 }
 
-void ModuleEditor::RecieveEvent(const Event& e)
-{
-	switch (e.type)
-	{
-	case EDITORWINDOWCHANGED: sceneEditorWindow->UpdateViewPort(); break;
-	case GAMEWINDOWCHANGED: sceneGameWindow->UpdateViewPort(); break;
-	case UPDATE_SCENE_WINDOWS:
-	{
-		if(e.data1.AsGO()) sceneGameWindow->Recalc();
-		else sceneEditorWindow->Recalc();
-		break;
-	}
-	case EDITOR_SCENE_RAYCAST:
-	{
-		// Mouse Pick
-		RE_CompCamera* camera = RE_CameraManager::EditorCamera();
-		float width, height;
-		camera->GetTargetWidthHeight(width, height);
-
-		OPTICK_CATEGORY("Update ModuleEditor Camera RayCast", Optick::Category::Camera);
-		RE_GameObject* hit = App::scene->RayCastSelect(
-			math::Ray(camera->GetFrustum().UnProjectLineSegment(
-			(e.data1.AsFloat() -(width / 2.0f)) / (width / 2.0f),
-				((height - e.data2.AsFloat()) - (height / 2.0f)) / (height / 2.0f))));
-
-		if (hit) SetSelected(hit);
-
-		break;
-	}
-	}
-}
-
 void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 {
 	OPTICK_CATEGORY("Debug Draw", Optick::Category::Debug);
-	AABBDebugDrawing adapted_AABBdraw = (selected != nullptr ? aabb_drawing : AABBDebugDrawing(aabb_drawing - 1));
+	AABBDebugDrawing adapted_AABBdraw = (selected ? aabb_drawing : AABBDebugDrawing(aabb_drawing - 1));
 
 	if (debug_drawing && ((adapted_AABBdraw != AABBDebugDrawing::NONE) || draw_quad_tree || draw_cameras))
 	{
@@ -471,7 +482,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 		case ALL:
 		{
 			eastl::queue<const RE_GameObject*> objects;
-			for (auto child : root->GetChilds())
+			for (auto child : root->GetChildsPtr())
 				objects.push(child);
 
 			if (!objects.empty())
@@ -485,7 +496,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 					objects.pop();
 
 					if (object->ChildCount() > 0u)
-						for (auto child : object->GetChilds())
+						for (auto child : object->GetChildsPtr())
 							objects.push(child);
 				}
 			}
@@ -498,7 +509,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 			selected->DrawGlobalAABB();
 
 			eastl::queue<const RE_GameObject*> objects;
-			for (auto child : root->GetChilds())
+			for (auto child : root->GetChildsPtr())
 				objects.push(child);
 
 			if (!objects.empty())
@@ -513,7 +524,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 					if (object != selected) object->DrawGlobalAABB();
 
 					if (object->ChildCount() > 0)
-						for (auto child : object->GetChilds())
+						for (auto child : object->GetChildsPtr())
 							objects.push(child);
 				}
 			}
@@ -525,7 +536,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 		if (draw_quad_tree)
 		{
 			glColor4f(quad_tree_color[0], quad_tree_color[1], quad_tree_color[2], 1.0f);
-			App::scene->DrawTrees();
+			App::scene->DebugDraw();
 		}
 
 		if (draw_cameras)
@@ -550,7 +561,7 @@ void ModuleEditor::DrawHeriarchy()
 		// Add root children
 		eastl::stack<RE_GameObject*> objects;
 		eastl::list<RE_GameObject*> childs;
-		childs = root->GetChilds();
+		childs = root->GetChildsPtr();
 		for (eastl::list<RE_GameObject*>::reverse_iterator it = childs.rbegin(); it != childs.rend(); it++)
 			objects.push(*it);
 
@@ -561,13 +572,13 @@ void ModuleEditor::DrawHeriarchy()
 			RE_GameObject* object = objects.top();
 			objects.pop();
 			childs.clear();
-			childs = object->GetChilds();
+			childs = object->GetChildsPtr();
 			is_leaf = childs.empty();
 
 			ImGui::PushID(eastl::string("#HyteracyGOID" + eastl::to_string(count++)).c_str());
-			if (ImGui::TreeNodeEx(object->GetName(), ImGuiTreeNodeFlags_(selected == object ?
+			if (ImGui::TreeNodeEx(object->name.c_str(), ImGuiTreeNodeFlags_(selected == object ?
 				(is_leaf ? ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_Leaf :
-				ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick) :
+					ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick) :
 				(is_leaf ? ImGuiTreeNodeFlags_Leaf :
 					ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick))))
 			{
@@ -591,26 +602,26 @@ void ModuleEditor::DrawHeriarchy()
 				ImGui::EndPopup();
 			}
 
-			if (object->IsLastChild() && object->GetParent_c() != root) ImGui::TreePop();
+			if (object->IsLastChild() && object->GetParentCPtr() != root) ImGui::TreePop();
 		}
 	}
 
 	if (to_select) SetSelected(to_select);
 }
 
-RE_GameObject * ModuleEditor::GetSelected() const { return selected; }
+UID ModuleEditor::GetSelected() const { return selected; }
 
-void ModuleEditor::SetSelected(RE_GameObject* go, bool force_focus)
+void ModuleEditor::SetSelected(const UID go, bool force_focus)
 {
 	selected = go;
 	App::resources->PopSelected(true);
-	if (force_focus || (focus_on_select && selected != nullptr))
+	if (force_focus || (focus_on_select && selected))
 		RE_CameraManager::CurrentCamera()->Focus(selected);
 }
 
 void ModuleEditor::DuplicateSelectedObject()
 {
-	if (selected) selected->GetParent()->AddChild(new RE_GameObject(*selected));
+	if (selected) selected->GetParentPtr()->LinkChild(new RE_GameObject(*selected));
 }
 
 void ModuleEditor::LogToEditorConsole()
@@ -631,25 +642,6 @@ bool ModuleEditor::AddSoftwareUsed(const char * name, const char * version, cons
 	return ret;
 }
 
-void ModuleEditor::Draw()
-{
-	OPTICK_CATEGORY("ImGui Rend", Optick::Category::Rendering);
-
-	sceneEditorWindow->DrawWindow();
-	sceneGameWindow->DrawWindow();
-
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		//GLFWwindow* backup_current_context = glfwGetCurrentContext();
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-		//glfwMakeContextCurrent(backup_current_context);
-	}
-}
 
 void ModuleEditor::HandleSDLEvent(SDL_Event* e) { ImGui_ImplSDL2_ProcessEvent(e); }
 void ModuleEditor::PopUpFocus(bool focus) { popUpFocus = focus; }
@@ -667,14 +659,14 @@ void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
 	*height = sceneEditorWindow->GetSceneHeight();
 }
 
-void ModuleEditor::CreatePrefab(RE_GameObject* go, const char* name, bool identityRoot)
+void ModuleEditor::CreatePrefab(const UID go, const char* name, bool identityRoot)
 {
 	RE_Prefab* newPrefab = new RE_Prefab();
 	newPrefab->SetName(name);
 	newPrefab->SetType(Resource_Type::R_PREFAB);
 	Event::PauseEvents();
 
-	newPrefab->Save(App::scene->GetScenePool()->GetNewPoolFromID(go->GetPoolID()), identityRoot, true);
+	newPrefab->Save(App::scene->GetScenePool()->GetNewPoolFromID(go), identityRoot, true);
 	Event::ResumeEvents();
 	newPrefab->SaveMeta();
 	App::thumbnail->Add(App::resources->Reference(newPrefab));
@@ -731,22 +723,24 @@ void ModuleEditor::UpdateCamera()
 	camera->Update();
 }
 
-void ModuleEditor::DrawGameObjectItems(RE_GameObject* parent)
+void ModuleEditor::DrawGameObjectItems(const UID parent)
 {
-	if (ImGui::BeginMenu("3D Object"))
+	if (ImGui::BeginMenu("Primitive"))
 	{
-		if (ImGui::MenuItem("Rock")) App::scene->CreateRock(parent);
-		if (ImGui::MenuItem("Cube")) App::scene->CreateCube(parent);
-		if (ImGui::MenuItem("Dodecahedron")) App::scene->CreateDodecahedron(parent);
-		if (ImGui::MenuItem("Tetrahedron")) App::scene->CreateTetrahedron(parent);
-		if (ImGui::MenuItem("Octohedron")) App::scene->CreateOctohedron(parent);
-		if (ImGui::MenuItem("Icosahedron")) App::scene->CreateIcosahedron(parent);
-		if (ImGui::MenuItem("Plane")) App::scene->CreatePlane(parent);
-		if (ImGui::MenuItem("Sphere")) App::scene->CreateSphere(parent);
-		if (ImGui::MenuItem("Cylinder")) App::scene->CreateCylinder(parent);
-		if (ImGui::MenuItem("HemiSphere")) App::scene->CreateHemiSphere(parent);
-		if (ImGui::MenuItem("Torus")) App::scene->CreateTorus(parent);
-		if (ImGui::MenuItem("Trefoil Knot")) App::scene->CreateTrefoilKnot(parent);
+		if (ImGui::MenuItem("Grid")) App::scene->CreatePrimitive(C_GRID, parent);
+		if (ImGui::MenuItem("Cube")) App::scene->CreatePrimitive(C_CUBE, parent);
+		if (ImGui::MenuItem("Dodecahedron")) App::scene->CreatePrimitive(C_DODECAHEDRON, parent);
+		if (ImGui::MenuItem("Tetrahedron")) App::scene->CreatePrimitive(C_TETRAHEDRON, parent);
+		if (ImGui::MenuItem("Octohedron")) App::scene->CreatePrimitive(C_OCTOHEDRON, parent);
+		if (ImGui::MenuItem("Icosahedron")) App::scene->CreatePrimitive(C_ICOSAHEDRON, parent);
+		if (ImGui::MenuItem("Plane")) App::scene->CreatePrimitive(C_PLANE, parent);
+		// if (ImGui::MenuItem("Frustum")) App::scene->CreatePrimitive(C_FUSTRUM, parent);
+		if (ImGui::MenuItem("Sphere")) App::scene->CreatePrimitive(C_SPHERE, parent);
+		if (ImGui::MenuItem("Cylinder")) App::scene->CreatePrimitive(C_CYLINDER, parent);
+		if (ImGui::MenuItem("HemiSphere")) App::scene->CreatePrimitive(C_HEMISHPERE, parent);
+		if (ImGui::MenuItem("Torus")) App::scene->CreatePrimitive(C_TORUS, parent);
+		if (ImGui::MenuItem("Trefoil Knot")) App::scene->CreatePrimitive(C_TREFOILKNOT, parent);
+		if (ImGui::MenuItem("Rock")) App::scene->CreatePrimitive(C_ROCK, parent);
 
 		ImGui::EndMenu();
 	}

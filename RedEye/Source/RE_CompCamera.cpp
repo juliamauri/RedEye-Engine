@@ -13,25 +13,22 @@
 #include "RE_SkyBox.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
-
+#include "RE_GOManager.h"
 #include "OutputLog.h"
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
 
-RE_CompCamera::RE_CompCamera() :RE_Component(C_CAMERA, nullptr) {}
-RE_CompCamera::~RE_CompCamera() { if(!go) DEL(transform); }
+RE_CompCamera::~RE_CompCamera() { if(!go) DEL(transform.ptr); }
 
-void RE_CompCamera::SetUp(RE_GameObject* parent, bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool draw_frustum, bool usingSkybox, const char* skyboxMD5)
+void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool _draw_frustum, bool _usingSkybox, const char* _skyboxMD5)
 {
-	go = parent;
-	if(parent) parent->AddComponent(this);
 	right = math::vec(1.f, 0.f, 0.f);
 	up = math::vec(0.f, 1.f, 0.f);
 	front = math::vec(0.f, 0.f, 1.f);
-	this->draw_frustum = draw_frustum;
-	this->usingSkybox = usingSkybox;
-	this->skyboxMD5 = skyboxMD5;
+	draw_frustum = _draw_frustum;
+	usingSkybox = _usingSkybox;
+	skyboxMD5 = _skyboxMD5;
 
 	// Fustrum - Kind
 	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
@@ -45,72 +42,25 @@ void RE_CompCamera::SetUp(RE_GameObject* parent, bool toPerspective, float n_pla
 	SetAspectRatio(AspectRatioTYPE(aspect));
 
 	// Transform
-	if (!go) (transform = new RE_CompTransform())->SetUp(nullptr);
-	else transform = go->GetTransform();
-
-	OnTransformModified();
-	RecalculateMatrixes();	// Fustrum - Kind
-	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
-
-	// Fustrum - Plane distance
-	SetPlanesDistance(n_plane, f_plane);
-
-	// Fustrum - Perspective & Aspect Ratio
-	isPerspective = toPerspective;
-	v_fov_rads = v_fov;
-	SetAspectRatio(AspectRatioTYPE(aspect));
-
-	// Transform
-	if (!go) (transform = new RE_CompTransform())->SetUp(nullptr);
-	else transform = go->GetTransform();
+	if (!useParent) transform.ptr = new RE_CompTransform();
+	else transform.uid = GetGOCPtr()->GetCompUID(C_TRANSFORM);
 
 	OnTransformModified();
 	RecalculateMatrixes();
 }
 
-void RE_CompCamera::SetUp(const RE_CompCamera& cmpCamera, RE_GameObject* parent)
+void RE_CompCamera::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
 {
-	go = parent;
-	parent->AddComponent(this);
-	right = cmpCamera.right;
-	up = cmpCamera.up;
-	front = cmpCamera.front;
-	draw_frustum = cmpCamera.draw_frustum;
-	usingSkybox = cmpCamera.usingSkybox;
-	skyboxMD5 = cmpCamera.skyboxMD5;
+	pool_gos = pool;
+	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);
 
-	// Fustrum - Kind
-	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
-
-	// Fustrum - Plane distance
-	SetPlanesDistance(cmpCamera.near_plane, cmpCamera.far_plane);
-
-	// Fustrum - Perspective & Aspect Ratio
-	isPerspective = cmpCamera.isPerspective;
-	v_fov_rads = cmpCamera.v_fov_rads;
-	SetAspectRatio(cmpCamera.target_ar);
-
-	// Transform
-	if (!go) (transform = new RE_CompTransform())->SetUp(nullptr);
-	else transform = go->GetTransform();
-
-	OnTransformModified();
-	RecalculateMatrixes();
+	RE_CompCamera* cmpCamera = dynamic_cast<RE_CompCamera*>(copy);
+	SetProperties(cmpCamera->isPerspective, cmpCamera->near_plane, cmpCamera->far_plane, cmpCamera->v_fov_rads, cmpCamera->target_ar, cmpCamera->draw_frustum, cmpCamera->usingSkybox, cmpCamera->skyboxMD5);
 }
 
 void RE_CompCamera::Update()
 {
-	if (!go)
-	{
-		transform->Update();
-		if (transform->HasChanged())
-		{
-			transform->ConfirmChange();
-			OnTransformModified();
-		}
-	}
-	else if (!transform) transform = go->GetTransform();
-	
+	if (!useParent && transform.ptr->CheckUpdate()) need_recalculation = true;
 	if (need_recalculation) RecalculateMatrixes();
 }
 
@@ -198,7 +148,7 @@ void RE_CompCamera::LocalRotate(float x_angle_rad, float y_angle_rad)
 {
 	if (x_angle_rad != 0)
 	{
-		float3x3 rot = float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f), x_angle_rad);
+		math::float3x3 rot = math::float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f), x_angle_rad);
 
 		right = rot * right;
 		up = rot * up;
@@ -207,14 +157,14 @@ void RE_CompCamera::LocalRotate(float x_angle_rad, float y_angle_rad)
 
 	if (y_angle_rad != 0)
 	{
-		float3x3 rot = float3x3::RotateAxisAngle(right, y_angle_rad);
+		math::float3x3 rot = math::float3x3::RotateAxisAngle(right, y_angle_rad);
 
 		up = rot * up;
 		front = rot * front;
 
 		if (up.y < 0.0f)
 		{
-			front = vec(0.0f, front.y > 0.0f ? 1.0f : -1.0f, 0.0f);
+			front = math::vec(0.f, front.y > 0.f ? 1.f : -1.f, 0.f);
 			up = front.Cross(right);
 		}
 	}
@@ -222,19 +172,16 @@ void RE_CompCamera::LocalRotate(float x_angle_rad, float y_angle_rad)
 	right.Normalize();
 	up.Normalize();
 	front.Normalize();
-
-	OnTransformModified();
+	need_recalculation = true;
 }
 
 RE_CompTransform * RE_CompCamera::GetTransform() const
 {
-	return go ? go->GetTransform() : transform;
+	return useParent ? GetGOCPtr()->GetTransformPtr() : transform.ptr;
 }
 
 void RE_CompCamera::OnTransformModified()
 {
-	math::float4x4 trs = transform->GetMatrixModel();
-	frustum.SetFrame(trs.Row3(3), trs.MulDir(front), trs.MulDir(up));
 	need_recalculation = true;
 }
 
@@ -243,6 +190,7 @@ void RE_CompCamera::SetPlanesDistance(float n_plane, float f_plane)
 	near_plane = n_plane;
 	far_plane = f_plane;
 	frustum.SetViewPlaneDistances(near_plane, far_plane);
+	need_recalculation = true;
 }
 
 void RE_CompCamera::SetFOV(float vertical_fov_degrees)
@@ -361,39 +309,39 @@ void RE_CompCamera::GetTargetViewPort(math::float4& viewPort) const
 	viewPort.z = width;
 	viewPort.w = height;
 
-	int wH = App::window->GetHeight();
-	int wW = App::window->GetWidth();
+	float wH = static_cast<float>(App::window->GetHeight());
+	float wW = static_cast<float>(App::window->GetWidth());
 
 	switch (target_ar)
 	{
 	case RE_CompCamera::Fit_Window:
 	{
-		viewPort.x = 0;
-		viewPort.y = 0;
+		viewPort.x = 0.f;
+		viewPort.y = 0.f;
 		break;
 	}
 	case RE_CompCamera::Square_1x1:
 	{
-		viewPort.y = 0;
-		viewPort.x = (wW / 2) - (width / 2);
+		viewPort.y = 0.f;
+		viewPort.x = (wW / 2.f) - (width / 2.f);
 		break; 
 	}
 	case RE_CompCamera::TraditionalTV_4x3:
 	{
-		viewPort.y = 0;
-		viewPort.x = (wW / 2) - (width / 2);
+		viewPort.y = 0.f;
+		viewPort.x = (wW / 2.f) - (width / 2.f);
 		break; 
 	}
 	case RE_CompCamera::Movietone_16x9:
 	{
-		viewPort.x = 0;
-		if (height < wH) viewPort.y = (wH / 2) - (height / 2);
+		viewPort.x = 0.f;
+		if (height < wH) viewPort.y = (wH / 2.f) - (height / 2.f);
 		break; 
 	}
 	case RE_CompCamera::Personalized:
 	{
-		viewPort.x = 0;
-		viewPort.y = 0;
+		viewPort.x = 0.f;
+		viewPort.y = 0.f;
 		break; 
 	}
 	}
@@ -413,25 +361,45 @@ void RE_CompCamera::SetOrthographic()
 	need_recalculation = true;
 }
 
-void RE_CompCamera::SwapCameraType()
-{ isPerspective ? SetOrthographic() : SetPerspective();
-}
+void RE_CompCamera::SwapCameraType() { isPerspective ? SetOrthographic() : SetPerspective(); }
 
 const math::Frustum RE_CompCamera::GetFrustum() const { return frustum; }
 float RE_CompCamera::GetVFOVDegrees() const { return v_fov_degrees; }
 float RE_CompCamera::GetHFOVDegrees() const { return h_fov_degrees; }
-math::float4x4 RE_CompCamera::GetView() const { return calculated_view; }
-float* RE_CompCamera::GetViewPtr() const { return (float*)calculated_view.v; }
-math::float4x4 RE_CompCamera::GetProjection() const { return calculated_projection; }
-float* RE_CompCamera::GetProjectionPtr() const { return (float*)calculated_projection.v; }
+
+math::float4x4 RE_CompCamera::GetView()
+{
+	if (need_recalculation) RecalculateMatrixes();
+	return global_view;
+}
+const float* RE_CompCamera::GetViewPtr()
+{
+	if (need_recalculation) RecalculateMatrixes();
+	return global_view.ptr();
+}
+math::float4x4 RE_CompCamera::GetProjection()
+{
+	if (need_recalculation) RecalculateMatrixes();
+	return global_projection;
+}
+const float* RE_CompCamera::GetProjectionPtr()
+{
+	if (need_recalculation) RecalculateMatrixes();
+	return global_projection.ptr();
+}
+
 bool RE_CompCamera::OverridesCulling() const { return override_cull; }
 
 void RE_CompCamera::RecalculateMatrixes()
 {
-	calculated_view = frustum.ViewMatrix();
-	calculated_view.Transpose();
-	calculated_projection = frustum.ProjectionMatrix();
-	calculated_projection.Transpose();
+	math::float4x4 trs = GetTransform()->GetGlobalMatrix();
+	frustum.SetFrame(trs.Row3(3), trs.MulDir(front), trs.MulDir(up));
+
+	global_view = frustum.ViewMatrix();
+	global_view.Transpose();
+	global_projection = frustum.ProjectionMatrix();
+	global_projection.Transpose();
+
 	need_recalculation = false;
 }
 
@@ -449,10 +417,10 @@ void RE_CompCamera::DrawItsProperties()
 	int aspect_ratio = target_ar;
 	if (ImGui::Combo("Aspect Ratio", &aspect_ratio, "Fit Window\0Square 1x1\0TraditionalTV 4x3\0Movietone 16x9\0Personalized\0")) {
 		target_ar = AspectRatioTYPE(aspect_ratio);
-		Event::Push(RE_EventType::UPDATE_SCENE_WINDOWS, App::editor, Cvar(GetGO()));
+		Event::Push(RE_EventType::UPDATE_SCENE_WINDOWS, App::editor, go);
 	}
 
-	// TODO: Personalied Aspect Ratio
+	// TODO Rub: Personalied Aspect Ratio
 	//if (target_ar == Personalized)
 	//{
 	//	int w = width;
@@ -474,26 +442,28 @@ void RE_CompCamera::LocalMove(Dir dir, float speed)
 {
 	if (speed != 0.f)
 	{
+		RE_CompTransform* t = GetTransform();
 		switch (dir) {
-		case FORWARD:	transform->SetPosition(transform->GetLocalPosition() + (front * speed)); break;
-		case BACKWARD:	transform->SetPosition(transform->GetLocalPosition() - (front * speed)); break;
-		case LEFT:		transform->SetPosition(transform->GetLocalPosition() + (right * speed)); break;
-		case RIGHT:		transform->SetPosition(transform->GetLocalPosition() - (right * speed)); break;
-		case UP:		transform->SetPosition(transform->GetLocalPosition() + (up * speed)); break;
-		case DOWN:		transform->SetPosition(transform->GetLocalPosition() - (up * speed)); break; }
+		case FORWARD:	t->SetPosition(t->GetLocalPosition() + (front * speed)); break;
+		case BACKWARD:	t->SetPosition(t->GetLocalPosition() - (front * speed)); break;
+		case LEFT:		t->SetPosition(t->GetLocalPosition() + (right * speed)); break;
+		case RIGHT:		t->SetPosition(t->GetLocalPosition() - (right * speed)); break;
+		case UP:		t->SetPosition(t->GetLocalPosition() + (up * speed)); break;
+		case DOWN:		t->SetPosition(t->GetLocalPosition() - (up * speed)); break; }
+		need_recalculation = true;
 	}
 }
 
-void RE_CompCamera::Orbit(float dx, float dy, const RE_GameObject& focus)
+void RE_CompCamera::Orbit(float dx, float dy, math::vec focus_global_pos)
 {
-	focus_global_pos = focus.GetGlobalBoundingBox().CenterPoint();
-	math::vec position = transform->GetGlobalPosition();
-	float distance = position.Distance(focus_global_pos);
+	RE_CompTransform* t = GetTransform();
+	float distance = t->GetGlobalPosition().Distance(focus_global_pos);
 
-	transform->SetGlobalPosition(focus_global_pos);
-	transform->Update();
+	t->SetGlobalPosition(focus_global_pos);
+	t->Update();
 	LocalRotate(dx, dy);
-	transform->SetGlobalPosition(focus_global_pos - (front * distance));
+	t->SetGlobalPosition(focus_global_pos - (front * distance));
+	need_recalculation = true;
 }
 
 void RE_CompCamera::Focus(const RE_GameObject* focus, float min_dist)
@@ -501,7 +471,7 @@ void RE_CompCamera::Focus(const RE_GameObject* focus, float min_dist)
 	float camDistance = min_dist;
 	math::AABB box = focus->GetGlobalBoundingBoxWithChilds();
 	float radius = box.HalfSize().Length();
-	focus_global_pos = box.CenterPoint();
+	math::vec focus_global_pos = box.CenterPoint();
 
 	if (radius > 0)
 	{
@@ -514,14 +484,14 @@ void RE_CompCamera::Focus(const RE_GameObject* focus, float min_dist)
 		if (h_dist > camDistance) camDistance = h_dist;
 	}
 
-	transform->SetGlobalPosition(focus_global_pos - (front * camDistance));
-	RE_LOG("FocusPos = (%.1f,%.1f,%.1f)", focus_global_pos.x, focus_global_pos.y, focus_global_pos.z);
+	GetTransform()->SetGlobalPosition(focus_global_pos - (front * camDistance));
+	need_recalculation = true;
 }
 
 void RE_CompCamera::Focus(math::vec center, float radius, float min_dist)
 {
 	float camDistance = min_dist;
-	focus_global_pos = center;
+	math::vec focus_global_pos = center;
 
 	if (radius > 0)
 	{
@@ -534,13 +504,9 @@ void RE_CompCamera::Focus(math::vec center, float radius, float min_dist)
 		if (h_dist > camDistance) camDistance = h_dist;
 	}
 
-	transform->SetGlobalPosition(focus_global_pos - (front * camDistance));
-	RE_LOG("FocusPos = (%.1f,%.1f,%.1f)", focus_global_pos.x, focus_global_pos.y, focus_global_pos.z);
+	GetTransform()->SetGlobalPosition(focus_global_pos - (front * camDistance));
+	need_recalculation = true;
 }
-
-math::vec RE_CompCamera::GetRight() const { return right; }
-math::vec RE_CompCamera::GetUp() const { return up; }
-math::vec RE_CompCamera::GetFront() const { return front; }
 
 eastl::vector<const char*> RE_CompCamera::GetAllResources()
 {
@@ -549,7 +515,7 @@ eastl::vector<const char*> RE_CompCamera::GetAllResources()
 	return ret;
 }
 
-void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>* resources)
+void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>* resources) const
 {
 	node->PushBool("isPrespective", isPerspective);
 	node->PushFloat("near_plane", near_plane);
@@ -561,11 +527,12 @@ void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>*
 	node->PushInt("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
 }
 
-void RE_CompCamera::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+void RE_CompCamera::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
 {
 	usingSkybox = node->PullBool("usingSkybox", true);
 	int sbRes = node->PullInt("skyboxResource", -1);
-	SetUp(parent, node->PullBool("isPrespective", true),
+
+	SetProperties(node->PullBool("isPrespective", true),
 		node->PullFloat("near_plane", 1.0f), node->PullFloat("far_plane", 5000.0f),
 		node->PullFloat("v_fov_rads", 0.523599f), node->PullInt("aspect_ratio", 0),
 		node->PullBool("draw_frustum", true), usingSkybox,
@@ -577,8 +544,7 @@ unsigned int RE_CompCamera::GetBinarySize() const
 	return sizeof(bool) * 3 + sizeof(int) * 2 + sizeof(float) * 3;
 }
 
-
-void RE_CompCamera::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+void RE_CompCamera::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(bool);
 	memcpy(cursor, &isPerspective, size);
@@ -612,7 +578,7 @@ void RE_CompCamera::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 	cursor += size;
 }
 
-void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources, RE_GameObject* parent)
+void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(bool);
 	memcpy(&isPerspective, cursor, size);
@@ -645,7 +611,7 @@ void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*
 	memcpy(&sbRes, cursor,  size);
 	cursor += size;
 
-	SetUp(parent, isPerspective, near_plane, far_plane, v_fov_rads, aspectRatioInt, draw_frustum, usingSkybox, (sbRes != -1) ? resources->at(sbRes) : nullptr);
+	SetProperties(isPerspective, near_plane, far_plane, v_fov_rads, aspectRatioInt, draw_frustum, usingSkybox, (sbRes != -1) ? resources->at(sbRes) : nullptr);
 }
 
 bool RE_CompCamera::isUsingSkybox() const { return usingSkybox; }
