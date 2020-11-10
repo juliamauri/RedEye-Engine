@@ -34,6 +34,7 @@
 
 #include "MathGeoLib/include/Math/float3.h"
 #include "MathGeoLib/include/Math/Quat.h"
+#include "ImGuizmo/ImGuizmo.h"
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")

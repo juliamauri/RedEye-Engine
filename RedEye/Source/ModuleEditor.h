@@ -88,6 +88,8 @@ public:
 
 	void DrawGameObjectItems(RE_GameObject* parent = nullptr);
 
+	SceneEditorWindow* GetSceneEditor() { return sceneEditorWindow; }
+
 private:
 	void UpdateCamera();
 

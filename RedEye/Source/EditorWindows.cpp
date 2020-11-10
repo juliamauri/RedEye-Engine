@@ -448,6 +448,85 @@ void PlayPauseWindow::Draw(bool secondary)
 		ImGui::SameLine();
 		ImGui::Checkbox("Draw Gizmos", &App->editor->debug_drawing);
 
+		ImGui::SameLine();
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
+
+		static ImGuizmo::OPERATION o = App->editor->GetSceneEditor()->GetOperation();
+		static bool changed = false;
+		static bool colored = false;
+		ImGui::SameLine();
+
+		if (!colored && o == ImGuizmo::OPERATION::TRANSLATE) {
+			ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, { 0.0f, 1.0f, 0.0f, 1.0f });
+			colored = true;
+		}
+
+		if (ImGui::Button("Translate")) {
+			o = ImGuizmo::OPERATION::TRANSLATE;
+			App->editor->GetSceneEditor()->SetOperation(o);
+			changed = true;
+		}
+
+		if (colored) {
+			ImGui::PopStyleColor();
+			colored = false;
+		}
+
+		if (!colored && !changed && o == ImGuizmo::OPERATION::ROTATE) {
+			ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, { 0.0f, 1.0f, 0.0f, 1.0f });
+			colored = true;
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Rotate")) {
+			o = ImGuizmo::OPERATION::ROTATE;
+			App->editor->GetSceneEditor()->SetOperation(o);
+			changed = true;
+		}
+
+		if (colored) {
+			ImGui::PopStyleColor();
+			colored = false;
+		}
+
+		if (!colored && !changed && o == ImGuizmo::OPERATION::SCALE) {
+			ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, { 0.0f, 1.0f, 0.0f, 1.0f });
+			colored = true;
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Scale")) {
+			o = ImGuizmo::OPERATION::SCALE;
+			App->editor->GetSceneEditor()->SetOperation(o);
+			changed = true;
+		}
+
+		if (colored) {
+			ImGui::PopStyleColor();
+			colored = false;
+		}
+
+		if (changed) {
+			App->editor->GetSceneEditor()->SetOperation(o);
+			changed = false;
+		}
+
+
+		ImGui::SameLine();
+		static ImGuizmo::MODE m = App->editor->GetSceneEditor()->GetMode();
+		if (ImGui::Button((m == ImGuizmo::MODE::LOCAL) ? "Local Transformation" : "Global Transformation")) {
+			switch (m)
+			{
+			case ImGuizmo::MODE::LOCAL:
+				m = ImGuizmo::MODE::WORLD;
+				break;
+			case ImGuizmo::MODE::WORLD:
+				m = ImGuizmo::MODE::LOCAL;
+				break;
+			}
+			App->editor->GetSceneEditor()->SetMode(m);
+		}
+
 		if (secondary) {
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
@@ -1231,6 +1310,7 @@ void SceneEditorWindow::UpdateViewPort()
 	RE_CameraManager::EditorCamera()->GetTargetViewPort(viewport);
 	viewport.x = (width - viewport.z) * 0.5f;
 	viewport.y = (heigth - viewport.w) * 0.5f + 20;
+	ImGuizmo::SetRect(0, 0, viewport.z, viewport.w);
 }
 
 void SceneEditorWindow::Recalc()
@@ -1263,11 +1343,83 @@ void SceneEditorWindow::Draw(bool secondary)
 		ImGui::SetCursorPos({ viewport.x, viewport.y });
 		ImGui::Image((void*)App->renderer3d->GetRenderedEditorSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 		
-		if(isWindowSelected && App->input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && App->input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN){
+		if(!ImGuizmo::IsOver() && isWindowSelected && App->input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && App->input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN){
 			ImVec2 mousePosOnThis = ImGui::GetMousePos();
 			mousePosOnThis.x = (mousePosOnThis.x - ImGui::GetCursorScreenPos().x + 4 < 0) ? 0 : mousePosOnThis.x - ImGui::GetCursorScreenPos().x + 4;
 			mousePosOnThis.y = (ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y + 4 < 0) ? 0 : ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y + 4;
 			Event::Push(EDITOR_SCENE_RAYCAST, App->editor, Cvar(mousePosOnThis.x), Cvar(mousePosOnThis.y));
+		}
+
+		RE_GameObject* selected;
+		if ((selected = App->editor->GetSelected()) != nullptr) {
+			ImGuizmo::SetDrawlist();
+
+			RE_CompTransform* sTransform = selected->GetTransform();
+			static float matA[16];
+			static float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+			static math::vec pos;
+			static math::float3x3 rot;
+			static math::vec scl;
+
+			if(mode == ImGuizmo::MODE::LOCAL)
+				ImGuizmo::RecomposeMatrixFromComponents(sTransform->GetLocalPosition().ptr(), sTransform->GetLocalEulerRotation().ptr(), sTransform->GetLocalScale().ptr(), matA);
+			else {
+				math::float4x4 mat = sTransform->GetMatrixModel();
+				mat.Transpose();
+				mat.Decompose(pos, rot, scl);
+				ImGuizmo::RecomposeMatrixFromComponents(pos.ptr(), rot.ToEulerXYZ().ptr(), scl.ptr(), matA);
+			}
+
+			RE_CompCamera* eCamera = RE_CameraManager::EditorCamera();
+			math::float4x4 deltamatrix = math::float4x4::identity * TimeManager::GetDeltaTime();
+
+			ImGuizmo::Manipulate(eCamera->GetViewPtr(), eCamera->GetProjectionPtr(), operation, mode, matA, deltamatrix.ptr());
+			if (ImGuizmo::IsUsing()) {
+
+				ImGuizmo::DecomposeMatrixToComponents(matA, matrixTranslation, matrixRotation, matrixScale);
+
+				if (mode == ImGuizmo::MODE::WORLD) {
+					math::float4x4 matParent = math::float4x4::identity;
+					RE_GameObject* parent = selected->GetParent();
+					if (parent != nullptr) matParent = parent->GetTransform()->GetMatrixModel();
+					matParent.Transpose();
+
+					math::float4x4 localMat = matParent.Inverted();
+					math::float4x4 globalMat = math::float4x4::FromTRS(math::vec(matrixTranslation), math::Quat::FromEulerXYZ(matrixRotation[0], matrixRotation[1], matrixRotation[2]), math::vec(matrixScale));
+					localMat = localMat * globalMat;
+
+					localMat.Decompose(pos, rot, scl);
+
+					switch (operation)
+					{
+					case ImGuizmo::TRANSLATE:
+						sTransform->SetPosition(pos);
+						break;
+					case ImGuizmo::ROTATE:
+						sTransform->SetRotation(rot.ToEulerXYZ());
+						break;
+					case ImGuizmo::SCALE:
+						sTransform->SetScale(scl);
+						break;
+					}
+
+				}
+				else {
+					switch (operation)
+					{
+					case ImGuizmo::TRANSLATE:
+						sTransform->SetPosition(math::vec(matrixTranslation));
+						break;
+					case ImGuizmo::ROTATE:
+						sTransform->SetRotation(math::vec(matrixRotation));
+						break;
+					case ImGuizmo::SCALE:
+						sTransform->SetScale(math::vec(matrixScale));
+						break;
+					}
+
+				}
+			}
 		}
 
 		if (secondary) {
