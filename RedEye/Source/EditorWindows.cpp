@@ -214,7 +214,7 @@ void PropertiesWindow::Draw(bool secondary)
 		}
 
 		if (App::resources->GetSelected() != nullptr) App::resources->At(App::resources->GetSelected())->DrawPropieties();
-		else if (App::editor->GetSelected() != nullptr) App::editor->GetSelected()->DrawProperties();
+		else if (App::editor->GetSelected()) ModuleScene::GetGOPtr(App::editor->GetSelected())->DrawProperties();
 
 		if (secondary)
 		{
@@ -430,7 +430,7 @@ void PlayPauseWindow::Draw(bool secondary)
 		ImGui::SameLine();
 		ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
 
-		static ImGuizmo::OPERATION o = App->editor->GetSceneEditor()->GetOperation();
+		static ImGuizmo::OPERATION o = App::editor->GetSceneEditor()->GetOperation();
 		static bool changed = false;
 		static bool colored = false;
 		ImGui::SameLine();
@@ -442,7 +442,6 @@ void PlayPauseWindow::Draw(bool secondary)
 
 		if (ImGui::Button("Translate")) {
 			o = ImGuizmo::OPERATION::TRANSLATE;
-			App->editor->GetSceneEditor()->SetOperation(o);
 			changed = true;
 		}
 
@@ -459,7 +458,6 @@ void PlayPauseWindow::Draw(bool secondary)
 		ImGui::SameLine();
 		if (ImGui::Button("Rotate")) {
 			o = ImGuizmo::OPERATION::ROTATE;
-			App->editor->GetSceneEditor()->SetOperation(o);
 			changed = true;
 		}
 
@@ -476,7 +474,6 @@ void PlayPauseWindow::Draw(bool secondary)
 		ImGui::SameLine();
 		if (ImGui::Button("Scale")) {
 			o = ImGuizmo::OPERATION::SCALE;
-			App->editor->GetSceneEditor()->SetOperation(o);
 			changed = true;
 		}
 
@@ -486,13 +483,13 @@ void PlayPauseWindow::Draw(bool secondary)
 		}
 
 		if (changed) {
-			App->editor->GetSceneEditor()->SetOperation(o);
+			App::editor->GetSceneEditor()->SetOperation(o);
 			changed = false;
 		}
 
 
 		ImGui::SameLine();
-		static ImGuizmo::MODE m = App->editor->GetSceneEditor()->GetMode();
+		static ImGuizmo::MODE m = App::editor->GetSceneEditor()->GetMode();
 		if (ImGui::Button((m == ImGuizmo::MODE::LOCAL) ? "Local Transformation" : "Global Transformation")) {
 			switch (m)
 			{
@@ -503,7 +500,7 @@ void PlayPauseWindow::Draw(bool secondary)
 				m = ImGuizmo::MODE::LOCAL;
 				break;
 			}
-			App->editor->GetSceneEditor()->SetMode(m);
+			App::editor->GetSceneEditor()->SetMode(m);
 		}
 
 		if (secondary) {
@@ -664,7 +661,7 @@ void PopUpWindow::Draw(bool secondary)
 			if (ImGui::Button(btnText.c_str()))
 			{
 				clicked = true;
-				App::editor->CreatePrefab(goPrefab, nameStr.c_str(), identityRoot);
+				App::editor->CreatePrefab(goPrefab->GetUID(), nameStr.c_str(), identityRoot);
 			}
 
 			if (ImGui::Button("Cancel")) clicked = true;
@@ -1160,20 +1157,21 @@ void SceneEditorWindow::Draw(bool secondary)
 
 		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 		ImGui::SetCursorPos({ viewport.x, viewport.y });
-		ImGui::Image((void*)App->renderer3d->GetRenderedEditorSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
+		ImGui::Image((void*)App::renderer3d->GetRenderedEditorSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 
-		if(!ImGuizmo::IsOver() && isWindowSelected && App->input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && App->input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN){
+		if(!ImGuizmo::IsOver() && isWindowSelected && App::input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && App::input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN){
 			ImVec2 mousePosOnThis = ImGui::GetMousePos();
 			mousePosOnThis.x = (mousePosOnThis.x - ImGui::GetCursorScreenPos().x + 4 < 0) ? 0 : mousePosOnThis.x - ImGui::GetCursorScreenPos().x + 4;
 			mousePosOnThis.y = (ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y + 4 < 0) ? 0 : ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y + 4;
 			Event::Push(EDITOR_SCENE_RAYCAST, App::editor, Cvar(mousePosOnThis.x), Cvar(mousePosOnThis.y));
 		}
 
-		RE_GameObject* selected;
-		if ((selected = App->editor->GetSelected()) != nullptr) {
+		UID selected_uid;
+		if (selected_uid = App::editor->GetSelected()) {
+			RE_GameObject* selected = ModuleScene::GetGOPtr(selected_uid);
 			ImGuizmo::SetDrawlist();
 
-			RE_CompTransform* sTransform = selected->GetTransform();
+			RE_CompTransform* sTransform = static_cast<RE_CompTransform*>(selected->GetCompPtr(C_TRANSFORM));
 			static float matA[16];
 			static float matrixTranslation[3], matrixRotation[3], matrixScale[3];
 			static math::vec pos;
@@ -1183,14 +1181,14 @@ void SceneEditorWindow::Draw(bool secondary)
 			if(mode == ImGuizmo::MODE::LOCAL)
 				ImGuizmo::RecomposeMatrixFromComponents(sTransform->GetLocalPosition().ptr(), sTransform->GetLocalEulerRotation().ptr(), sTransform->GetLocalScale().ptr(), matA);
 			else {
-				math::float4x4 mat = sTransform->GetMatrixModel();
+				math::float4x4 mat = sTransform->GetGlobalMatrix();
 				mat.Transpose();
 				mat.Decompose(pos, rot, scl);
 				ImGuizmo::RecomposeMatrixFromComponents(pos.ptr(), rot.ToEulerXYZ().ptr(), scl.ptr(), matA);
 			}
 
 			RE_CompCamera* eCamera = RE_CameraManager::EditorCamera();
-			math::float4x4 deltamatrix = math::float4x4::identity * TimeManager::GetDeltaTime();
+			math::float4x4 deltamatrix = math::float4x4::identity * RE_TimeManager::GetDeltaTime();
 
 			ImGuizmo::Manipulate(eCamera->GetViewPtr(), eCamera->GetProjectionPtr(), operation, mode, matA, deltamatrix.ptr());
 			if (ImGuizmo::IsUsing()) {
@@ -1199,8 +1197,8 @@ void SceneEditorWindow::Draw(bool secondary)
 
 				if (mode == ImGuizmo::MODE::WORLD) {
 					math::float4x4 matParent = math::float4x4::identity;
-					RE_GameObject* parent = selected->GetParent();
-					if (parent != nullptr) matParent = parent->GetTransform()->GetMatrixModel();
+					RE_GameObject* parent = selected->GetParentPtr();
+					if (parent != nullptr) matParent = static_cast<RE_CompTransform*>(parent->GetCompPtr(C_TRANSFORM))->GetGlobalMatrix();
 					matParent.Transpose();
 
 					math::float4x4 localMat = matParent.Inverted();

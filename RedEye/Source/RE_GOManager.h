@@ -160,7 +160,18 @@ typedef ComponentPool<RE_CompLight, 124> LightPool;
 class primitiveItem {
 public:
 	primitiveItem() {}
+	primitiveItem(const primitiveItem& cPrimitive) {
+		type = cPrimitive.type;
+		memcpy(GetPtr(), cPrimitive.GetCPtr(), sizeof(*cPrimitive.GetCPtr()));
+	}
 	~primitiveItem() {}
+
+	primitiveItem& operator=(const primitiveItem& cPrimitive) {
+		primitiveItem ret;
+		ret.type = cPrimitive.type;
+		memcpy(ret.GetPtr(), cPrimitive.GetCPtr(), sizeof(*cPrimitive.GetCPtr()));
+		return ret;
+	}
 	
 	RE_Component* GetPtr();
 	const RE_Component* GetCPtr() const;
