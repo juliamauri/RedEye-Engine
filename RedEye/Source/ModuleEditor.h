@@ -83,10 +83,14 @@ public:
 	void SelectUndefinedFile(eastl::string* toSelect)const;
 	void OpenTextEditor(const char* filePath, eastl::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
 	void GetSceneWindowSize(unsigned int* widht, unsigned int* height);
-	
+
 	// Commands
 	void PushCommand(RE_Command* cmd);
 	void ClearCommands();
+
+	void DrawGameObjectItems(RE_GameObject* parent = nullptr);
+
+	SceneEditorWindow* GetSceneEditor() { return sceneEditorWindow; }
 
 private:
 
