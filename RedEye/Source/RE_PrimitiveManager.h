@@ -3,6 +3,8 @@
 
 #include "MathGeoLib/include/Math/float3.h"
 
+#include <EASTL/utility.h>
+
 class RE_GameObject;
 class RE_CompPrimitive;
 

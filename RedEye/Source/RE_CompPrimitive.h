@@ -6,6 +6,8 @@
 
 #include <EASTL/string.h>
 
+class RE_CompTransform;
+
 class RE_CompPrimitive : public RE_Component
 {
 public:
