@@ -60,7 +60,7 @@ void ResourceContainer::SetMetaPath(const char* originPath)
 }
 
 void ResourceContainer::SetName(const char * _name) { name = _name; }
-void ResourceContainer::SetInternal(bool is_internal) { isinternal = is_internal; }
+void ResourceContainer::SetInternal(bool is_internal) { isinternal = is_internal; assetPath = "Internal Resources"; }
 
 void ResourceContainer::SaveMeta()
 {

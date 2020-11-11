@@ -57,8 +57,8 @@ const char* RE_ResourceManager::Reference(ResourceContainer* rc)
 	{
 		resources.insert(Resource(retMD5 = rc->GetMD5(), rc));
 		resourcesCounter.insert(ResourceCounter(retMD5, (rc->isInMemory()) ? 1 : 0));
-		RE_LOG("Referenced %s %s resource from %s\nAsset file: %s\nmd5 generated: %s\n",
-			rc->GetName(), GetNameFromType(rc->GetType()), rc->GetAssetPath(), rc->GetLibraryPath(), rc->GetMD5());
+		RE_LOG("%s referenced: %s\n\tAsset path: %s\n\tLibrary path: %s\n\tGenerated MD5: %s",
+			GetNameFromType(rc->GetType()), rc->GetName(), rc->GetAssetPath(), rc->GetLibraryPath(), rc->GetMD5());
 	}
 	return retMD5;
 }
@@ -485,21 +485,18 @@ void RE_ResourceManager::ThumbnailResources()
 
 const char* RE_ResourceManager::GetNameFromType(const Resource_Type type)
 {
-	eastl::string resourceName = "";
-
 	switch (type) {
-	case Resource_Type::R_TEXTURE: resourceName = "texture"; break;
-	case Resource_Type::R_SCENE: resourceName = "scene"; break;
-	case Resource_Type::R_MATERIAL: resourceName = "material"; break;
-	case Resource_Type::R_MESH: resourceName = "mesh"; break;
-	case Resource_Type::R_PREFAB: resourceName = "prefab"; break;
-	case Resource_Type::R_PRIMITIVE: resourceName = "primitive"; break;
-	case Resource_Type::R_SHADER: resourceName = "shader"; break;
-	case Resource_Type::R_MODEL: resourceName = "model"; break;
-	case Resource_Type::R_SKYBOX: resourceName = "skybox"; break;
-	case Resource_Type::R_UNDEFINED: resourceName = "undefined"; break;	}
-
-	return resourceName.c_str();
+	case Resource_Type::R_TEXTURE: return "Texture";
+	case Resource_Type::R_SCENE: return "Scene";
+	case Resource_Type::R_MATERIAL: return "Material";
+	case Resource_Type::R_MESH: return "Mesh";
+	case Resource_Type::R_PREFAB: return "Prefab";
+	case Resource_Type::R_PRIMITIVE: return "Primitive";
+	case Resource_Type::R_SHADER: return "Shader";
+	case Resource_Type::R_MODEL: return "Model";
+	case Resource_Type::R_SKYBOX: return "Skybox";
+	case Resource_Type::R_UNDEFINED: return "Undefined";
+	default: return "Invalid"; }
 }
 
 const char* RE_ResourceManager::ImportModel(const char* assetPath)

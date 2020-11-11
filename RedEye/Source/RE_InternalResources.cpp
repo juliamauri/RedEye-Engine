@@ -39,17 +39,16 @@ void RE_InternalResources::Init()
 void RE_InternalResources::InitChecker()
 {
 	// Checkers
-	int value;
-	int IMAGE_ROWS = 264;
-	int IMAGE_COLS = 264;
+	int IMAGE_ROWS = 264, IMAGE_COLS = 264;
 	GLubyte imageData[264][264][3];
-
-	for (int row = 0; row < IMAGE_ROWS; row++) {
-		for (int col = 0; col < IMAGE_COLS; col++) {
-			value = (((row & 0x8) == 0) ^ ((col & 0x8) == 0)) * 255; // Each cell is 8x8, value is 0 or 255 (black or white)
-			imageData[row][col][0] = (GLubyte)value;
-			imageData[row][col][1] = (GLubyte)value;
-			imageData[row][col][2] = (GLubyte)value;
+	for (int row = 0; row < IMAGE_ROWS; row++)
+	{
+		for (int col = 0; col < IMAGE_COLS; col++)
+		{
+			GLubyte value = (((row & 0x8) == 0) ^ ((col & 0x8) == 0)) * 255; // Each cell is 8x8, value is 0 or 255 (black or white)
+			imageData[row][col][0] = value;
+			imageData[row][col][1] = value;
+			imageData[row][col][2] = value;
 		}
 	}
 
