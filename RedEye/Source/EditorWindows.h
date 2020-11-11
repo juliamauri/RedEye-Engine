@@ -358,4 +358,14 @@ private:
 	bool recalc = false;
 };
 
+class TransformDebugWindow : public EditorWindow
+{
+public:
+	TransformDebugWindow(const char* name = "Transforms Debug Info", bool start_active = true);
+	~TransformDebugWindow();
+
+private:
+	void Draw(bool secondary = false) override;
+};
+
 #endif // !__EDITORWINDOWS__

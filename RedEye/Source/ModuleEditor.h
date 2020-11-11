@@ -27,6 +27,8 @@ class TextEditorManagerWindow;
 class SceneEditorWindow;
 class SceneGameWindow;
 
+class TransformDebugWindow;
+
 struct SoftwareInfo;
 class RE_GameObject;
 class RE_Component;
@@ -133,6 +135,9 @@ private:
 
 	// Tools
 	RandomTest* rng = nullptr;
+
+	//Debug info
+	TransformDebugWindow* transDebInfo = nullptr;
 
 	// Camera Controls
 	bool select_on_mc = true;

@@ -398,8 +398,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 		{
 			if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
 			ret = pool_comps->GetNewComponentPtr(_type);
-			UID wtf = ret->PoolSetUp(pool_gos, go_uid);
-			render_geo = { wtf, type };
+			render_geo = { ret->PoolSetUp(pool_gos, go_uid), type };
 			App::primitives.SetUpComponentPrimitive(dynamic_cast<RE_CompPrimitive*>(ret));
 			ResetBoundingBoxes();
 		}
@@ -407,7 +406,6 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 		{
 			components.push_back({ (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type });
 		}
-
 		break;
 	}
 	}

@@ -124,11 +124,13 @@ void RE_CompGrid::Draw() const
 void RE_CompGrid::DrawProperties()
 {
 	// TODO Rub: editor properties
-
-	int tmpSb = divisions;
-	if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
+	if (ImGui::CollapsingHeader("Grid Primitive"))
 	{
-		GridSetUp(tmpSb);
+		int tmpSb = divisions;
+		if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
+		{
+			GridSetUp(tmpSb);
+		}
 	}
 }
 
@@ -412,9 +414,7 @@ void RE_CompPlatonic::Draw() const
 
 void RE_CompPlatonic::DrawProperties()
 {
-	eastl::string title(pName);
-	title += " Primitive";
-	if (ImGui::CollapsingHeader(pName.c_str()))
+	if (ImGui::CollapsingHeader((pName + " Primitive").c_str()))
 	{
 		ImGui::Text("Can't checker because don't support Texture Coords");
 		ImGui::ColorEdit3("Diffuse Color", &color[0]);

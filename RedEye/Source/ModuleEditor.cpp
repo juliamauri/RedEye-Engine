@@ -49,6 +49,8 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	sceneEditorWindow = new SceneEditorWindow();
 	sceneGameWindow = new SceneGameWindow();
 
+	tools.push_back(transDebInfo = new TransformDebugWindow());
+	
 	grid_size[0] = grid_size[1] = 1.0f;
 }
 

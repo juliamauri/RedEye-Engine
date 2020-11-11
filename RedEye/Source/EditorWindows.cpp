@@ -1297,3 +1297,50 @@ void SceneGameWindow::Draw(bool secondary)
 
 	ImGui::End();
 }
+
+///////   Debug Transforms Window   ////////////////////////////////////////////
+TransformDebugWindow::TransformDebugWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
+TransformDebugWindow::~TransformDebugWindow() {}
+
+void TransformDebugWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		eastl::vector<RE_Component*> allTransforms = App::scene->GetScenePool()->GetAllCompPtr(C_TRANSFORM);
+		ImGui::Text("Total %u transforms.", allTransforms.size());
+		ImGui::Separator();
+		for (auto cmp = allTransforms.rbegin(); cmp != allTransforms.rend(); cmp++) {
+			RE_CompTransform* transform = dynamic_cast<RE_CompTransform*>(*cmp);
+
+			ImGui::Text("GO: %s", transform->GetGOPtr()->name.c_str());
+			math::vec pos, rotE, scl;
+			math::float3x3 rot;
+
+			math::float4x4 localM = transform->GetLocalMatrix();
+			localM.Decompose(pos, rot, scl);
+			rotE = rot.ToEulerXYZ();
+			ImGui::Text("Local Transform:");
+			ImGui::Text("Position:");
+			ImGui::Text("X %3.f | Y %3.f | Z %3.f", pos.x, pos.y, pos.z);
+			ImGui::Text("Rotation:");
+			ImGui::Text("X %3.f | Y %3.f | Z %3.f", rotE.x, rotE.y, rotE.z);
+			ImGui::Text("Scale:");
+			ImGui::Text("X %3.f | Y %3.f | Z %3.f", scl.x, scl.y, scl.z);
+
+			math::float4x4 globalM =  transform->GetGlobalMatrix();
+			globalM.Decompose(pos, rot, scl);
+			rotE = rot.ToEulerXYZ();
+			ImGui::Text("Global Transform:");
+			ImGui::Text("Position:");
+			ImGui::Text("X %3.f | Y %3.f | Z %3.f", pos.x, pos.y, pos.z);
+			ImGui::Text("Rotation:");
+			ImGui::Text("X %3.f | Y %3.f | Z %3.f", rotE.x, rotE.y, rotE.z);
+			ImGui::Text("Scale:");
+			ImGui::Text("X %3.f | Y %3.f | Z %3.f", scl.x, scl.y, scl.z);
+
+			ImGui::Separator();
+		}
+
+		ImGui::End();
+	}
+}
