@@ -147,7 +147,7 @@ void RE_CompMesh::SerializeJson(JSONNode* node, eastl::map<const char*, int>* re
 void RE_CompMesh::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
 {
 	int id = node->PullInt("meshResource", -1);
-	materialMD5 = (id != -1) ? resources->at(id) : nullptr;
+	meshMD5 = (id != -1) ? resources->at(id) : nullptr;
 	id = node->PullInt("materialResource", -1);
 	materialMD5 = (id != -1) ? resources->at(id) : nullptr;
 }

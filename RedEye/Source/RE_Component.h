@@ -72,11 +72,12 @@ public:
 	bool IsActive() const { return active; }
 	void SetActive(const bool value) { active = value; }
 
+	void SetType(ComponentType t) { type = t; }
 	ComponentType GetType() const { return type; }
 	UID GetGOUID() const { return go; }
 	RE_GameObject* GetGOPtr() const;
 	const RE_GameObject* GetGOCPtr() const;
-	void SetParent(const UID parent) { go = parent; };
+	void SetParent(const UID parent) { useParent = (go = parent); };
 
 	virtual eastl::vector<const char*> GetAllResources() { return eastl::vector<const char*>(); }
 
@@ -92,7 +93,7 @@ public:
 
 	//POOL
 	UID GetPoolID()const { return id; }
-	void SetPoolID(UID id) { id = id; }
+	void SetPoolID(UID uid) { id = uid; }
 
 protected:
 
@@ -101,7 +102,7 @@ protected:
 	UID id = 0;
 	UID go = 0;
 	GameObjectsPool* pool_gos = nullptr;
-	bool useParent = false;
+	bool useParent = true;
 };
 
 #endif // !__RE_COMPONENT_H__

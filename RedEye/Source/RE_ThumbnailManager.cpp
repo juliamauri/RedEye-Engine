@@ -62,6 +62,7 @@ void RE_ThumbnailManager::Init()
 	singleRenderFBO = RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE);
 	Event::PauseEvents();
 	internalCamera = new RE_CompCamera();
+	internalCamera->SetParent(0ull);
 	internalCamera->SetProperties();
 	internalCamera->SetBounds(THUMBNAILSIZE, THUMBNAILSIZE);
 	internalCamera->Update();

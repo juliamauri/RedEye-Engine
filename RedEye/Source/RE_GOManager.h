@@ -38,8 +38,8 @@ public:
 	UID Push(COMPCLASS val)override
 	{
 		UID ret = RE_Math::RandomUID();
-		val.SetPoolID(ret);
 		PoolMapped::Push(val, ret);
+		PoolMapped::pool_[PoolMapped::poolmapped_.at(ret)].SetPoolID(ret);
 		return ret;
 	}
 
@@ -100,7 +100,9 @@ public:
 
 	unsigned int GetBinarySize()const {
 		unsigned int size = sizeof(unsigned int);
-		for (unsigned int i = 0; i < lastAvaibleIndex; i++) size += pool_[i].GetBinarySize();
+		unsigned int cmpSize = GetCount();
+		size += sizeof(UID) * cmpSize;
+		for (unsigned int i = 0; i < cmpSize; i++) size += pool_[i].GetBinarySize();
 		return size;
 	}
 
@@ -159,68 +161,19 @@ typedef ComponentPool<RE_CompCamera, 512> CamerasPool;
 typedef ComponentPool<RE_CompMesh, 2048> MeshesPool;
 typedef ComponentPool<RE_CompLight, 124> LightPool;
 //Primitives
-class PrimitivePoolContainer
-{
-public:
-	PrimitivePoolContainer() {}
-	PrimitivePoolContainer(const PrimitivePoolContainer& cPrimitive) {
-		type = cPrimitive.type;
-		memcpy(GetPtr(), cPrimitive.GetCPtr(), sizeof(*cPrimitive.GetCPtr()));
-	}
-	~PrimitivePoolContainer() {}
-
-	PrimitivePoolContainer& operator=(const PrimitivePoolContainer& cPrimitive) {
-		PrimitivePoolContainer ret;
-		ret.type = cPrimitive.type;
-		memcpy(ret.GetPtr(), cPrimitive.GetCPtr(), sizeof(*cPrimitive.GetCPtr()));
-		return ret;
-	}
-	
-	RE_Component* GetPtr();
-	const RE_Component* GetCPtr() const;
-
-	UID PoolSetUp(GameObjectsPool* pool, const UID parent, bool report_parent = false);
-
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const;
-	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources);
-
-	unsigned int GetBinarySize() const;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources);
-
-	UID GetPoolID()const { return GetCPtr()->GetPoolID(); }
-	void SetPoolID(UID id) { GetPtr()->SetPoolID(id); }
-
-	UID GetGOUID() const { return GetCPtr()->GetGOUID(); }
-
-	eastl::vector<const char*> GetAllResources() { return GetPtr()->GetAllResources(); }
-	void UseResources() { GetPtr()->UseResources(); }
-	void UnUseResources() { GetPtr()->UnUseResources(); }
-
-	ComponentType type;
-
-private:
-	union UniversalPrimitive {
-		RE_CompRock rock;
-		RE_CompCube cube;
-		RE_CompDodecahedron dodecahedron;
-		RE_CompTetrahedron tetrahedron;
-		RE_CompOctohedron octohedron;
-		RE_CompIcosahedron icosahedron;
-		RE_CompPlane plane;
-		RE_CompSphere sphere;
-		RE_CompCylinder cylinder;
-		RE_CompHemiSphere hemisphere;
-		RE_CompTorus torus;
-		RE_CompTrefoiKnot trefoiknot;
-
-		UniversalPrimitive(){}
-		~UniversalPrimitive(){}
-		
-	} primitive;
-};
-
-typedef ComponentPool<PrimitivePoolContainer, 1024> PrimitivePool;
+typedef ComponentPool<RE_CompGrid, 1024> GridPool;
+typedef ComponentPool<RE_CompRock, 1024> RockPool;
+typedef ComponentPool<RE_CompCube, 1024> CubePool;
+typedef ComponentPool<RE_CompDodecahedron, 1024> DodecahedronPool;
+typedef ComponentPool<RE_CompTetrahedron, 1024> TetrahedronPool;
+typedef ComponentPool<RE_CompOctohedron, 1024> OctohedronPool;
+typedef ComponentPool<RE_CompIcosahedron, 1024> IcosahedronPool;
+typedef ComponentPool<RE_CompPlane, 1024> PlanePool;
+typedef ComponentPool<RE_CompSphere, 1024> SpherePool;
+typedef ComponentPool<RE_CompCylinder, 1024> CylinderPool;
+typedef ComponentPool<RE_CompHemiSphere, 1024> HemiSpherePool;
+typedef ComponentPool<RE_CompTorus, 1024> TorusPool;
+typedef ComponentPool<RE_CompTrefoiKnot, 1024> TrefoiKnotPool;
 
 class ComponentsPool {
 public:
@@ -229,7 +182,18 @@ public:
 		camPool.SetName("Cameras Pool");
 		meshPool.SetName("Meshes Pool");
 		lightPool.SetName("Lights Pool");
-		primitivPool.SetName("Primitives Pool");
+		pGridPool.SetName("Grid Pool");
+		pRockPool.SetName("Rock Pool");
+		pDodecahedronPool.SetName("Dodecahedron Pool");
+		pTetrahedronPool.SetName("Tetrahedron Pool");
+		pOctohedronPool.SetName("Octohedron Pool");
+		pIcosahedronPool.SetName("Icosahedron Pool");
+		pPlanePool.SetName("Plane Pool");
+		pSpherePool.SetName("Sphere Pool");
+		pCylinderPool.SetName("Cylinder Pool");
+		pHemiSpherePool.SetName("HemiSphere Pool");
+		pTorusPool.SetName("orus Pool");
+		pTrefoiKnotPool.SetName("TrefoiKnot Pool");
 	}
 	~ComponentsPool() { }
 
@@ -272,7 +236,20 @@ private:
 	CamerasPool camPool;
 	MeshesPool meshPool;
 	LightPool lightPool;
-	PrimitivePool primitivPool;
+	//Primitives
+	GridPool pGridPool;
+	RockPool pRockPool;
+	CubePool pCubePool;
+	DodecahedronPool pDodecahedronPool;
+	TetrahedronPool pTetrahedronPool;
+	OctohedronPool pOctohedronPool;
+	IcosahedronPool pIcosahedronPool;
+	PlanePool pPlanePool;
+	SpherePool pSpherePool;
+	CylinderPool pCylinderPool;
+	HemiSpherePool pHemiSpherePool;
+	TorusPool pTorusPool;
+	TrefoiKnotPool pTrefoiKnotPool;
 };
 
 class GameObjectsPool : public PoolMapped<RE_GameObject, UID, 10240> {

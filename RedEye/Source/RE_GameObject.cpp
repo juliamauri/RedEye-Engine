@@ -366,7 +366,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	{
 		if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
 		render_geo = { (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type };
-		ResetBoundingBoxes();
+		//ResetBoundingBoxes(); can't reset bounding boxes without adding meshMD5
 
 		break;
 	}
@@ -374,6 +374,9 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	{
 		if (camera) pool_comps->DestroyComponent(_type, camera);
 		camera = (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid);
+		RE_CompCamera* new_cam = dynamic_cast<RE_CompCamera*>(ret);
+		new_cam->SetProperties();
+		if (!Event::isPaused()) App::cams.AddMainCamera(new_cam);
 		break;
 	}
 	case C_LIGHT:
@@ -395,7 +398,8 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 		{
 			if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
 			ret = pool_comps->GetNewComponentPtr(_type);
-			render_geo = { ret->PoolSetUp(pool_gos, go_uid), type };
+			UID wtf = ret->PoolSetUp(pool_gos, go_uid);
+			render_geo = { wtf, type };
 			App::primitives.SetUpComponentPrimitive(dynamic_cast<RE_CompPrimitive*>(ret));
 			ResetBoundingBoxes();
 		}
@@ -986,8 +990,7 @@ math::AABB RE_GameObject::GetGlobalBoundingBox() const { return global_bounding_
 
 unsigned int RE_GameObject::GetBinarySize()const
 {
-	uint size = (sizeof(float) * 9) + sizeof(uint) + name.length();
-	if (parent_uid) size += sizeof(UID);
+	uint size = (sizeof(float) * 9) + sizeof(uint) + name.length() + sizeof(UID);
 	return size;
 }
 

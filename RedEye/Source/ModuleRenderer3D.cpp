@@ -409,8 +409,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			App::cams.GetCullingFrustum() : render_view.camera->GetFrustum());
 
 		for (const RE_GameObject* object : objects)
-			if (object->IsActive())
-				comptsToDraw.push(object->GetRenderGeo());
+			if (object->IsActive()) {
+				RE_Component* goRend = object->GetRenderGeo();
+				if(goRend) comptsToDraw.push(goRend);
+			}
 	}
 	else
 		comptsToDraw = App::scene->GetScenePool()->GetRootPtr()->GetAllChildsActiveRenderGeos();

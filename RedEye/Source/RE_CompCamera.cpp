@@ -19,7 +19,7 @@
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
 
-RE_CompCamera::~RE_CompCamera() { if(!go) DEL(transform.ptr); }
+RE_CompCamera::~RE_CompCamera() { if(!useParent) DEL(transform.ptr); }
 
 void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool _draw_frustum, bool _usingSkybox, const char* _skyboxMD5)
 {
@@ -42,7 +42,10 @@ void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_pla
 	SetAspectRatio(AspectRatioTYPE(aspect));
 
 	// Transform
-	if (!useParent) transform.ptr = new RE_CompTransform();
+	if (!useParent) {
+		transform.ptr = new RE_CompTransform();
+		transform.ptr->SetParent(0ull);
+	}
 	else transform.uid = GetGOCPtr()->GetCompUID(C_TRANSFORM);
 
 	OnTransformModified();

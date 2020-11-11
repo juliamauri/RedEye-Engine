@@ -261,14 +261,12 @@ const RE_GameObject * ModuleScene::GetRootCPtr() { return scenePool.GetRootCPtr(
 
 void ModuleScene::CreatePrimitive(ComponentType type, const UID parent)
 {
-	RE_GameObject* go = scenePool.AddGO("Rock", Validate(parent), true);
-	go->AddNewComponent(type);
+	scenePool.AddGO("Primitive", Validate(parent), true)->AddNewComponent(type);
 }
 
 void ModuleScene::CreateCamera(const UID parent)
 {
-	RE_GameObject* cam_go = scenePool.AddGO("Camera", Validate(parent), true);
-	cam_go->AddNewComponent(C_CAMERA);
+	scenePool.AddGO("Camera", Validate(parent), true)->AddNewComponent(C_CAMERA);
 }
 
 void ModuleScene::CreateLight(const UID parent)
@@ -472,7 +470,7 @@ void ModuleScene::SetupScene()
 	if (!RE_CameraManager::HasMainCamera())
 	{
 		Event::ResumeEvents();
-		CreateCamera(0);
+		CreateCamera(scenePool.GetRootUID());
 		Event::PauseEvents();
 	}
 

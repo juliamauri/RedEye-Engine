@@ -564,7 +564,7 @@ void ModuleEditor::DrawHeriarchy()
 			UID go_uid = go->GetUID();
 			gos.pop();
 
-			is_leaf = go->ChildCount();
+			is_leaf = (go->ChildCount() == 0);
 
 			ImGui::PushID(eastl::string("#HyteracyGOID" + eastl::to_string(count++)).c_str());
 			if (ImGui::TreeNodeEx(go->name.c_str(), ImGuiTreeNodeFlags_(selected == go_uid ?
