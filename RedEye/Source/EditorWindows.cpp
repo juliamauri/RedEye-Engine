@@ -1326,6 +1326,8 @@ void TransformDebugWindow::Draw(bool secondary)
 
 		if (ImGui::Button("Clear keeps")) keepTransforms.clear();
 		ImGui::PopItemWidth();
+		ImGui::SameLine();
+		ImGui::Text("Please, clear before delete or changing scene.");
 
 		
 		eastl::vector<RE_Component*> showTransform;
