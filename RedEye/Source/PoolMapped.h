@@ -29,11 +29,16 @@ public:
 	virtual TYPEVALUE Pop(TYPEKEY key) {
 		unsigned int index = poolmapped_.at(key);
 		TYPEVALUE ret = pool_[index];
-		memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE) * (lastAvaibleIndex - 1 - index));
+
+		if(index < lastAvaibleIndex - 1)
+			memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE) * (lastAvaibleIndex - 1 - index));
+
 		typename eastl::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.find(key);
 		while (i != poolmapped_.end())
 		{
-			i->second--;
+			if(i->second > index) 
+				i->second--;
+
 			i++;
 		}
 		poolmapped_.erase(poolmapped_.find(key));

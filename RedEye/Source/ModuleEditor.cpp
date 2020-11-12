@@ -551,7 +551,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 
 void ModuleEditor::DrawHeriarchy()
 {
-	UID to_select = 0;
+	UID to_select = 0ull, goToDelete_uid = 0ull;
 	const RE_GameObject* root = ModuleScene::GetRootCPtr();
 	UID root_uid = root->GetUID();
 	if (root->ChildCount() > 0)
@@ -586,7 +586,7 @@ void ModuleEditor::DrawHeriarchy()
 			{
 				if (ImGui::MenuItem("Create Prefab")) popupWindow->PopUpPrefab(go);
 				ImGui::Separator();
-				if (ImGui::MenuItem("Destroy GameObject")) Event::Push(DESTROY_GO, App::scene, go_uid);
+				if (ImGui::MenuItem("Destroy GameObject")) goToDelete_uid = go_uid;
 				ImGui::Separator();
 				DrawGameObjectItems(go_uid);
 				ImGui::EndPopup();
@@ -597,6 +597,10 @@ void ModuleEditor::DrawHeriarchy()
 	}
 
 	if (to_select) SetSelected(to_select);
+	if (goToDelete_uid != 0ull) {
+		Event::Push(DESTROY_GO, App::scene, goToDelete_uid);
+		if (selected == goToDelete_uid) selected = 0ull;
+	}
 }
 
 UID ModuleEditor::GetSelected() const { return selected; }

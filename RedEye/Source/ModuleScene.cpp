@@ -207,8 +207,6 @@ void ModuleScene::RecieveEvent(const Event& e)
 			for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
 		}
 
-		if (App::editor->GetSelected() == go_uid) App::editor->SetSelected(0);
-
 		to_delete.push(go_uid);
 		haschanges = true;
 		break;
