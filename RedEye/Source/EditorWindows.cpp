@@ -1306,41 +1306,91 @@ void TransformDebugWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
+
 		eastl::vector<RE_Component*> allTransforms = App::scene->GetScenePool()->GetAllCompPtr(C_TRANSFORM);
-		ImGui::Text("Total %u transforms.", allTransforms.size());
-		ImGui::Separator();
-		for (auto cmp = allTransforms.rbegin(); cmp != allTransforms.rend(); cmp++) {
-			RE_CompTransform* transform = dynamic_cast<RE_CompTransform*>(*cmp);
+		static eastl::vector<RE_Component*> keepTransforms;
+		
+		int transformCount = allTransforms.size();
+		ImGui::Text("Total %i transforms.", transformCount);
+		ImGui::SameLine();
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
+		static int range = 0, totalShowing = 8;
+		ImGui::SameLine();
+		int finalIndex = range + totalShowing;
+		ImGui::Text("Actual Range: %i - %i", range, (finalIndex < transformCount) ? finalIndex : transformCount);
 
-			ImGui::Text("GO: %s", transform->GetGOPtr()->name.c_str());
-			math::vec pos, rotE, scl;
-			math::float3x3 rot;
+		ImGui::PushItemWidth(50.f);
+		ImGui::DragInt("Position", &range, 1.f, 0, transformCount - totalShowing);
+		ImGui::SameLine();
+		ImGui::DragInt("List Size", &totalShowing);
 
-			math::float4x4 localM = transform->GetLocalMatrix();
-			localM.Decompose(pos, rot, scl);
-			rotE = rot.ToEulerXYZ();
-			ImGui::Text("Local Transform:");
-			ImGui::Text("Position:");
-			ImGui::Text("X %3.f | Y %3.f | Z %3.f", pos.x, pos.y, pos.z);
-			ImGui::Text("Rotation:");
-			ImGui::Text("X %3.f | Y %3.f | Z %3.f", rotE.x, rotE.y, rotE.z);
-			ImGui::Text("Scale:");
-			ImGui::Text("X %3.f | Y %3.f | Z %3.f", scl.x, scl.y, scl.z);
+		if (ImGui::Button("Clear keeps")) keepTransforms.clear();
+		ImGui::PopItemWidth();
 
-			math::float4x4 globalM =  transform->GetGlobalMatrix();
-			globalM.Decompose(pos, rot, scl);
-			rotE = rot.ToEulerXYZ();
-			ImGui::Text("Global Transform:");
-			ImGui::Text("Position:");
-			ImGui::Text("X %3.f | Y %3.f | Z %3.f", pos.x, pos.y, pos.z);
-			ImGui::Text("Rotation:");
-			ImGui::Text("X %3.f | Y %3.f | Z %3.f", rotE.x, rotE.y, rotE.z);
-			ImGui::Text("Scale:");
-			ImGui::Text("X %3.f | Y %3.f | Z %3.f", scl.x, scl.y, scl.z);
+		
+		eastl::vector<RE_Component*> showTransform;
+		showTransform.insert(showTransform.begin(), keepTransforms.begin(), keepTransforms.end());
+		auto iterC = allTransforms.begin();
+		for (int i = 1; i < range && iterC != allTransforms.end(); i++) iterC++;
+		for (int i = 0; i < totalShowing && iterC != allTransforms.end(); i++, iterC++) { 
+			
+			bool exists = false;
+			for(auto k : keepTransforms) 
+				if (k == *iterC) {
+					exists = true;
+					break;
+				}
 
-			ImGui::Separator();
+			if (!exists) showTransform.push_back(*iterC);
+			else i--;
 		}
 
-		ImGui::End();
+		unsigned int count = 0;
+		for (auto cmp = showTransform.begin(); cmp != showTransform.end(); cmp++, count++) {
+			RE_CompTransform* transform = dynamic_cast<RE_CompTransform*>(*cmp);
+
+			ImGui::PushID(("#TransformDebug" + eastl::to_string(count)).c_str());
+
+			if (ImGui::CollapsingHeader(("GO: " + transform->GetGOPtr()->name).c_str())) {
+				ImGui::PushID(("#TransformDebugPushButton" + eastl::to_string(count)).c_str());
+				if(ImGui::Button("Keep that transform"))
+					keepTransforms.push_back(*cmp);
+				ImGui::PopID();
+
+				ImGui::Columns(2);
+				static math::vec pos, rotE, scl;
+				static math::float3x3 rot;
+
+				static math::float4x4 localM;
+				localM = transform->GetLocalMatrix();
+				localM.Decompose(pos, rot, scl);
+				rotE = rot.ToEulerXYZ();
+				ImGui::Text("Local Transform:");
+				ImGui::Text("Position:");
+				ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
+				ImGui::Text("Rotation:");
+				ImGui::Text("X %.3f | Y %.3f | Z %.3f", rotE.x, rotE.y, rotE.z);
+				ImGui::Text("Scale:");
+				ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+
+				ImGui::NextColumn();
+
+				static math::float4x4 globalM;
+				globalM = transform->GetGlobalMatrix();
+				globalM.Decompose(pos, rot, scl);
+				rotE = rot.ToEulerXYZ();
+				ImGui::Text("Global Transform:");
+				ImGui::Text("Position:");
+				ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
+				ImGui::Text("Rotation:");
+				ImGui::Text("X %.3f | Y %.3f | Z %.3f", rotE.x, rotE.y, rotE.z);
+				ImGui::Text("Scale:");
+				ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+
+				ImGui::Columns(1);
+			}
+			ImGui::PopID();
+		}
 	}
+	ImGui::End();
 }
