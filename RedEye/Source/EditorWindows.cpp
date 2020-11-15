@@ -1371,7 +1371,7 @@ void TransformDebugWindow::Draw(bool secondary)
 				ImGui::Text("Position:");
 				ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
 				ImGui::Text("Rotation:");
-				ImGui::Text("X %.3f | Y %.3f | Z %.3f", rotE.x, rotE.y, rotE.z);
+				ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
 				ImGui::Text("Scale:");
 				ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
 
@@ -1385,7 +1385,7 @@ void TransformDebugWindow::Draw(bool secondary)
 				ImGui::Text("Position:");
 				ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
 				ImGui::Text("Rotation:");
-				ImGui::Text("X %.3f | Y %.3f | Z %.3f", rotE.x, rotE.y, rotE.z);
+				ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
 				ImGui::Text("Scale:");
 				ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
 

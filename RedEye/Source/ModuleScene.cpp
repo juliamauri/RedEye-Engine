@@ -216,7 +216,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
 		if (go->IsActive())
 			for (auto child : go->GetChildsPtr())
-				child->TransformModified();
+				child->OnTransformModified();
 
 		if (go->HasRenderGeo())
 		{
