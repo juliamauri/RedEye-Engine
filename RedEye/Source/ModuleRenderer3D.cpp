@@ -492,10 +492,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		// Setup Light Uniforms
 		unsigned int count = 0;
 
-		eastl::string unif_name = "lights[" + eastl::to_string(count) + "].";
-
+		eastl::string unif_name;
 		for (auto l : scene_lights) {
-			static_cast<RE_CompLight*>(l)->CallShaderUniforms(light_pass, unif_name.c_str());
+			unif_name = "lights[" + eastl::to_string(count) + "].";
+			dynamic_cast<RE_CompLight*>(l)->CallShaderUniforms(light_pass, unif_name.c_str());
 			count++;
 		}
 
