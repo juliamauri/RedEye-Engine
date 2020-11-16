@@ -102,6 +102,7 @@ public:
 	bool IsLastChild() const;
 
 	// Parent
+	bool isParent(UID parent)const;
 	UID GetParentUID() const;
 	RE_GameObject* GetParentPtr() const;
 	const RE_GameObject* GetParentCPtr() const;

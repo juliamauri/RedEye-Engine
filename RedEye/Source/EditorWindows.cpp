@@ -1307,8 +1307,7 @@ void TransformDebugWindow::Draw(bool secondary)
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
 
-		eastl::vector<RE_Component*> allTransforms = App::scene->GetScenePool()->GetAllCompPtr(C_TRANSFORM);
-		static eastl::vector<RE_Component*> keepTransforms;
+		eastl::vector<UID> allTransforms = App::scene->GetScenePool()->GetAllGOUIDs();
 		
 		int transformCount = allTransforms.size();
 		ImGui::Text("Total %i transforms.", transformCount);
@@ -1316,49 +1315,20 @@ void TransformDebugWindow::Draw(bool secondary)
 		ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
 		static int range = 0, totalShowing = 8;
 		ImGui::SameLine();
-		int finalIndex = range + totalShowing;
-		ImGui::Text("Actual Range: %i - %i", range, (finalIndex < transformCount) ? finalIndex : transformCount);
+
+		ImGui::Text("Actual Range: %i - %i", range, (range + totalShowing < transformCount) ? range + totalShowing : transformCount);
 
 		ImGui::PushItemWidth(50.f);
 		ImGui::DragInt("Position", &range, 1.f, 0, transformCount - totalShowing);
 		ImGui::SameLine();
-		ImGui::DragInt("List Size", &totalShowing);
+		ImGui::DragInt("List Size", &totalShowing, 1.f, 0);
 
-		if (ImGui::Button("Clear keeps")) keepTransforms.clear();
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
-		ImGui::Text("Please, clear before delete or changing scene.");
+		for (int i = range; i < totalShowing + range && i < transformCount; i++) {
+			RE_CompTransform* transform = ModuleScene::GetGOPtr(allTransforms[i])->GetTransformPtr();
 
-		
-		eastl::vector<RE_Component*> showTransform;
-		showTransform.insert(showTransform.begin(), keepTransforms.begin(), keepTransforms.end());
-		auto iterC = allTransforms.begin();
-		for (int i = 1; i < range && iterC != allTransforms.end(); i++) iterC++;
-		for (int i = 0; i < totalShowing && iterC != allTransforms.end(); i++, iterC++) { 
-			
-			bool exists = false;
-			for(auto k : keepTransforms) 
-				if (k == *iterC) {
-					exists = true;
-					break;
-				}
-
-			if (!exists) showTransform.push_back(*iterC);
-			else i--;
-		}
-
-		unsigned int count = 0;
-		for (auto cmp = showTransform.begin(); cmp != showTransform.end(); cmp++, count++) {
-			RE_CompTransform* transform = dynamic_cast<RE_CompTransform*>(*cmp);
-
-			ImGui::PushID(("#TransformDebug" + eastl::to_string(count)).c_str());
+			ImGui::PushID(("#TransformDebug" + eastl::to_string(i)).c_str());
 
 			if (ImGui::CollapsingHeader(("GO: " + transform->GetGOPtr()->name).c_str())) {
-				ImGui::PushID(("#TransformDebugPushButton" + eastl::to_string(count)).c_str());
-				if(ImGui::Button("Keep that transform"))
-					keepTransforms.push_back(*cmp);
-				ImGui::PopID();
-
 				ImGui::Columns(2);
 				static math::vec pos, rotE, scl;
 				static math::float3x3 rot;

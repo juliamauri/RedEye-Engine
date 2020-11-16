@@ -30,10 +30,12 @@ public:
 		unsigned int index = poolmapped_.at(key);
 		TYPEVALUE ret = pool_[index];
 
-		if(index < lastAvaibleIndex - 1)
-			memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE) * (lastAvaibleIndex - 1 - index));
+		int lastIndex = lastAvaibleIndex - 1;
+		memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE) * (lastIndex - index));
 
-		typename eastl::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.find(key);
+		poolmapped_.erase(poolmapped_.find(key));
+
+		typename eastl::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.begin();
 		while (i != poolmapped_.end())
 		{
 			if(i->second > index) 
@@ -41,7 +43,6 @@ public:
 
 			i++;
 		}
-		poolmapped_.erase(poolmapped_.find(key));
 		lastAvaibleIndex--;
 		return ret;
 	}

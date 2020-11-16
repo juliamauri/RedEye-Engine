@@ -603,7 +603,7 @@ void ModuleEditor::DrawHeriarchy()
 	if (to_select) SetSelected(to_select);
 	if (goToDelete_uid != 0ull) {
 		Event::Push(DESTROY_GO, App::scene, goToDelete_uid);
-		if (selected == goToDelete_uid) selected = 0ull;
+		if (selected == goToDelete_uid || ModuleScene::GetGOPtr(goToDelete_uid)->isParent(selected)) selected = 0ull;
 	}
 }
 

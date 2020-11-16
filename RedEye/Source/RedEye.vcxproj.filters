@@ -289,7 +289,9 @@
     <ClCompile Include="RE_TimeManager.cpp">
       <Filter>Modules\Independent App Modules\TimeManager</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Component.cpp" />
+    <ClCompile Include="RE_Component.cpp">
+      <Filter>GameObject\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">

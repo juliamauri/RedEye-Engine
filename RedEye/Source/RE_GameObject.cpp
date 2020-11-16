@@ -711,6 +711,15 @@ void RE_GameObject::DestroyChild(const UID id)
 
 unsigned int RE_GameObject::ChildCount() const { return childs.size(); }
 bool RE_GameObject::IsLastChild() const { return parent_uid && (GetParentCPtr()->GetLastChildUID() == go_uid); }
+bool RE_GameObject::isParent(UID parent) const
+{
+	bool ret = false;
+	if (parent_uid){
+		if(parent == parent_uid) ret = true;
+		else ret = GetParentPtr()->isParent(parent);
+	}
+	return ret;
+}
 UID RE_GameObject::GetParentUID() const { return parent_uid; }
 RE_GameObject* RE_GameObject::GetParentPtr() const { return pool_gos->AtPtr(parent_uid); }
 const RE_GameObject* RE_GameObject::GetParentCPtr() const { return pool_gos->AtCPtr(parent_uid); }
