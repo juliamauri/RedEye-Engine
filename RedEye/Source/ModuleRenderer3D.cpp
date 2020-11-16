@@ -132,21 +132,14 @@ update_status ModuleRenderer3D::PreUpdate()
 
 	update_status ret = UPDATE_CONTINUE;
 
-	//If some thumnail needs uodates
-	while (!thumbnailsToRender.empty())
-	{
-		App::thumbnail->Change(thumbnailsToRender.top());
-		thumbnailsToRender.pop();
-	}
-
 	return ret;
 }
 
 update_status ModuleRenderer3D::PostUpdate()
 {
 	OPTICK_CATEGORY("PostUpdate Renderer3D", Optick::Category::GameLogic);
-
 	update_status ret = UPDATE_CONTINUE;
+
 
 	// Setup Draws
 	activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
@@ -154,9 +147,27 @@ update_status ModuleRenderer3D::PostUpdate()
 	render_views[0].camera = RE_CameraManager::EditorCamera();
 	render_views[1].camera = RE_CameraManager::MainCamera();
 
-	// Draw Scene
-	for (RenderView view : render_views)
-		DrawScene(view);
+	PushSceneRend(render_views[1]);
+	PushSceneRend(render_views[0]);
+
+	while (!rendQueue.empty()) {
+		RenderQueue rend = rendQueue.top();
+		rendQueue.pop();
+
+		switch (rend.type)
+		{
+		case RenderType::R_SCENE:
+			DrawScene(rend.renderview);
+			break;
+		case RenderType::R_T_GO:
+		case RenderType::R_T_MAT:
+		case RenderType::R_T_TEX:
+		case RenderType::R_T_SKYBOX:
+			App::thumbnail->Change(rend.resMD5);
+			break;
+		}
+
+	}
 
 	// Set Render to Window
 	RE_FBOManager::ChangeFBOBind(0, App::window->GetWidth(), App::window->GetHeight());
@@ -366,9 +377,32 @@ unsigned int ModuleRenderer3D::GetRenderedGameSceneTexture() const
 	return RE_FBOManager::GetTextureID(render_views[1].GetFBO(), 4 * (render_views[1].light == LIGHT_DEFERRED));
 }
 
-void ModuleRenderer3D::ReRenderThumbnail(const char* res)
+void ModuleRenderer3D::PushSceneRend(RenderView& rV)
 {
-	thumbnailsToRender.push(res);
+	rendQueue.push({ RenderType::R_SCENE, rV, nullptr});
+}
+
+void ModuleRenderer3D::PushThumnailRend(const char* md5)
+{
+	RenderType t = RenderType::R_T_GO;
+	switch (App::resources->At(md5)->GetType())
+	{
+	case R_SCENE:
+	case R_MODEL:
+	case R_PREFAB:
+		t = RenderType::R_T_GO;
+		break;
+	case R_MATERIAL:
+		t = RenderType::R_T_MAT;
+		break;
+	case R_TEXTURE:
+		t = RenderType::R_T_TEX;
+		break;
+	case R_SKYBOX:
+		t = RenderType::R_T_SKYBOX;
+		break;
+	}
+	rendQueue.push({ t, thumbnailView, md5 });
 }
 
 void ModuleRenderer3D::DrawScene(const RenderView& render_view)

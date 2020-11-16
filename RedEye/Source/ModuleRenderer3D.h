@@ -99,8 +99,23 @@ public:
 	unsigned int GetDepthTexture()const;
 	unsigned int GetRenderedGameSceneTexture()const;
 
-	// Thumbnail
-	void ReRenderThumbnail(const char* res);
+	void PushSceneRend(RenderView& rV);
+	void PushThumnailRend(const char* md5);
+
+public:
+	enum RenderType {
+		R_SCENE,
+		R_T_GO,
+		R_T_MAT,
+		R_T_TEX,
+		R_T_SKYBOX
+	};
+	struct RenderQueue {
+		RenderQueue(RenderType t, RenderView& rv, const char* r) : type(t), renderview(rv), resMD5(r) {}
+		RenderType type;
+		RenderView& renderview;
+		const char* resMD5;
+	};
 
 private:
 
@@ -124,6 +139,8 @@ public:
 	static RE_FBOManager fbomanager;
 
 private:
+
+	eastl::stack<RenderQueue> rendQueue;
 
 	// Scene Drawing
 	//float time, dt;
@@ -149,8 +166,7 @@ private:
 	// Rendering Views
 	eastl::vector<RenderView> render_views;
 
-	// Thumbnails
-	eastl::stack<const char*> thumbnailsToRender;
+	RenderView thumbnailView;
 };
 
 #endif // !__MODULERENDER3D_H__

@@ -368,7 +368,7 @@ void ModuleScene::SaveScene(const char* newName)
 	if (unsavedScene)
 	{
 		currentScene = App::resources->Reference(scene);
-		App::thumbnail->Add(currentScene);
+		App::renderer3d->PushThumnailRend(currentScene);
 		unsavedScene = nullptr;
 	}
 	else

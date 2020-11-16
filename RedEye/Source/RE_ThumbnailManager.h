@@ -13,7 +13,6 @@ public:
 
 	void Init();
 
-	void Add(const char* ref);
 	void Change(const char* ref);
 	void Delete(const char* ref);
 
@@ -25,6 +24,8 @@ public:
 	unsigned int GetShaderFileID()const { return shaderFile; }
 
 private:
+	void Add(const char* ref);
+
 	unsigned int LoadDefIcon(const char* filename);
 
 

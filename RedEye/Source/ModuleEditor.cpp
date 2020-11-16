@@ -674,7 +674,7 @@ void ModuleEditor::CreatePrefab(const UID go, const char* name, bool identityRoo
 	newPrefab->Save(App::scene->GetScenePool()->GetNewPoolFromID(go), identityRoot, true);
 	Event::ResumeEvents();
 	newPrefab->SaveMeta();
-	App::thumbnail->Add(App::resources->Reference(newPrefab));
+	App::renderer3d->PushThumnailRend(App::resources->Reference(newPrefab));
 }
 
 void ModuleEditor::PushCommand(RE_Command* cmd) { editorCommands.PushCommand(cmd); }

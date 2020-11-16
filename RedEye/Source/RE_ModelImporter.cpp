@@ -5,7 +5,7 @@
 #include "RE_ResourceManager.h"
 #include "RE_TextureImporter.h"
 #include "RE_ShaderImporter.h"
-#include "RE_ThumbnailManager.h"
+#include "ModuleRenderer3D.h"
 #include "RE_GOManager.h"
 #include "RE_Model.h"
 #include "RE_Mesh.h"
@@ -381,7 +381,7 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 
 			newMaterial->Save();
 			materialMD5 = App::resources->Reference(container);
-			App::thumbnail->Add(materialMD5);
+			App::renderer3d->PushThumnailRend(materialMD5);
 		}
 		aditionalData->materialsLoaded.insert(eastl::pair<aiMaterial*,const char*>(material, materialMD5));
 	}

@@ -162,8 +162,20 @@ void RE_ThumbnailManager::Add(const char* ref)
 
 void RE_ThumbnailManager::Change(const char* ref)
 {
-	if (thumbnails.find(ref) == thumbnails.end()) Add(ref);
-	else thumbnails.find(ref).mpNode->mValue.second = ThumbnailGameObject(ref);
+	auto iter = thumbnails.find(ref);
+
+	if (iter == thumbnails.end()) Add(ref);
+	else {
+		ResourceContainer* res = App::resources->At(ref);
+		switch (res->GetType()) {
+		case Resource_Type::R_MATERIAL: iter->second =  ThumbnailMaterial(ref); break;
+		case Resource_Type::R_SKYBOX: iter->second = ThumbnailSkyBox(ref); break;
+		case Resource_Type::R_TEXTURE: iter->second = ThumbnailTexture(ref); break;
+		case Resource_Type::R_MODEL:
+		case Resource_Type::R_PREFAB:
+		case Resource_Type::R_SCENE: iter->second = ThumbnailGameObject(ref); break;
+		}
+	}
 }
 
 void RE_ThumbnailManager::Delete(const char* ref)

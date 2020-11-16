@@ -4,7 +4,7 @@
 #include "RE_FileSystem.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
-#include "RE_ThumbnailManager.h"
+#include "ModuleRenderer3D.h"
 #include "RE_ShaderImporter.h"
 #include "RE_ResourceManager.h"
 
@@ -74,7 +74,7 @@ void MaterialEditorWindow::Draw(bool secondary)
 			editingMaerial->SetType(Resource_Type::R_MATERIAL);
 			editingMaerial->Save();
 
-			App::thumbnail->Add(App::resources->Reference((ResourceContainer*)editingMaerial));
+			App::renderer3d->PushThumnailRend(App::resources->Reference((ResourceContainer*)editingMaerial));
 
 			editingMaerial = new RE_Material();
 			matName = "New Material";
@@ -151,7 +151,7 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 			editingSkybox->AssetSave();
 			editingSkybox->SaveMeta();
 
-			App::thumbnail->Add(App::resources->Reference((ResourceContainer*)editingSkybox));
+			App::renderer3d->PushThumnailRend(App::resources->Reference((ResourceContainer*)editingSkybox));
 
 			editingSkybox = new RE_SkyBox();
 			sbName = "New Skybox";

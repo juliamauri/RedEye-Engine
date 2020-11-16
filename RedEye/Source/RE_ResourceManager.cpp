@@ -269,7 +269,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 			if(rType == R_SHADER) resChange->DeleteShader();
 			else resChange->DeleteTexture(res);
 			resChange->UnloadMemory();
-			App::renderer3d->ReRenderThumbnail(resToChange);
+			App::renderer3d->PushThumnailRend(resToChange);
 		}
 		break;
 	}
@@ -339,7 +339,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 					break;
 				}
 				}
-				App::renderer3d->ReRenderThumbnail(resToChange);
+				App::renderer3d->PushThumnailRend(resToChange);
 				UnUse(resToChange);
 				Event::ResumeEvents();
 			}
@@ -480,7 +480,7 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 
 void RE_ResourceManager::ThumbnailResources()
 {
-	for (auto res : resources) App::thumbnail->Add(res.first);
+	for (auto res : resources) App::renderer3d->PushThumnailRend(res.first);
 }
 
 const char* RE_ResourceManager::GetNameFromType(const Resource_Type type)
