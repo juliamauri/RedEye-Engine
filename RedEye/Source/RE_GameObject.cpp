@@ -516,6 +516,12 @@ eastl::list<RE_GameObject*> RE_GameObject::GetChildsPtr() const
 	for (auto child : childs) ret.push_back(pool_gos->AtPtr(child));
 	return ret;
 }
+eastl::list<RE_GameObject*> RE_GameObject::GetChildsPtrReversed() const
+{
+	eastl::list<RE_GameObject*> ret;
+	for (auto child : childs) ret.push_front(pool_gos->AtPtr(child));
+	return ret;
+}
 eastl::list<const RE_GameObject*> RE_GameObject::GetChildsCPtr() const
 {
 	eastl::list<const RE_GameObject*> ret;
@@ -683,8 +689,7 @@ void RE_GameObject::ReleaseChild(const UID id)
 			childs.erase(&childs[count]);
 			break;
 		}
-
-		count++;
+		else count++;
 	}
 }
 

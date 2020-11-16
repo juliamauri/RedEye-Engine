@@ -545,40 +545,42 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 
 		glEnd();
 
-		if (grid->IsActive()) grid->Draw();
+		//if (grid->IsActive()) grid->Draw();
 	}
 }
 
 void ModuleEditor::DrawHeriarchy()
 {
+	unsigned int popids = 0, treepops = 0;
 	UID to_select = 0ull, goToDelete_uid = 0ull;
 	const RE_GameObject* root = ModuleScene::GetRootCPtr();
 	UID root_uid = root->GetUID();
 	if (root->ChildCount() > 0)
 	{
 		eastl::stack<RE_GameObject*> gos;
-		for (auto child : root->GetChildsPtr()) gos.push(child);
+		for (auto child : root->GetChildsPtrReversed()) gos.push(child);
 
-		bool is_leaf; unsigned int count = 0;
+		unsigned int count = 0;
 		while (!gos.empty())
 		{
 			RE_GameObject* go = gos.top();
-			UID go_uid = go->GetUID();
 			gos.pop();
 
-			is_leaf = (go->ChildCount() == 0);
+			UID go_uid = go->GetUID();
+			bool is_leaf = (go->ChildCount() == 0);
 
-			ImGui::PushID(eastl::string("#HyteracyGOID" + eastl::to_string(count++)).c_str());
+			ImGui::PushID(eastl::string("#HierarchyGOID" + eastl::to_string(count++)).c_str());
 			if (ImGui::TreeNodeEx(go->name.c_str(), ImGuiTreeNodeFlags_(selected == go_uid ?
 				(is_leaf ? ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_Leaf :
 					ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick) :
 				(is_leaf ? ImGuiTreeNodeFlags_Leaf :
 					ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick))))
 			{
-				if (is_leaf) ImGui::TreePop();
-				else for (auto child : go->GetChildsPtr()) gos.push(child);
+				if (is_leaf) { ImGui::TreePop(); treepops++; }
+				else for (auto child : go->GetChildsPtrReversed()) gos.push(child);
 			}
 			ImGui::PopID();
+			popids++;
 
 			if (ImGui::IsItemClicked()) to_select = go_uid;
 
@@ -592,9 +594,11 @@ void ModuleEditor::DrawHeriarchy()
 				ImGui::EndPopup();
 			}
 
-			if (go->IsLastChild() && go->GetParentUID() != root_uid) ImGui::TreePop();
+			if (go->IsLastChild() && go->GetParentUID() != root_uid) { ImGui::TreePop(); treepops++; }
 		}
 	}
+
+	RE_LOG("treepops: %i - id pops: %i", treepops, popids);
 
 	if (to_select) SetSelected(to_select);
 	if (goToDelete_uid != 0ull) {

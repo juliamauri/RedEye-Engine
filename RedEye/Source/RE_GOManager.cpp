@@ -116,7 +116,6 @@ void RE_GOManager::DestroyGO(UID toDestroy)
 void RE_GOManager::RecursiveDestroyGO(UID toDestroy)
 {
 	RE_GameObject* go = gameObjectsPool.AtPtr(toDestroy);
-
 	for (auto child : go->childs) RecursiveDestroyGO(child);
 	for (auto comp : go->AllCompData()) componentsPool.DestroyComponent(static_cast<ComponentType>(comp.type), comp.uid);
 
@@ -268,7 +267,7 @@ const RE_GameObject* GameObjectsPool::GetRootCPtr() const
 
 void GameObjectsPool::DeleteGO(UID toDelete)
 {
-	Pop(toDelete);
+	PoolMapped::Pop(toDelete);
 }
 
 eastl::vector<RE_GameObject*> GameObjectsPool::GetAllPtrs() const

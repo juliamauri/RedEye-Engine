@@ -75,6 +75,7 @@ public:
 	const eastl::vector<UID>& GetChilds() const;
 	eastl::list<RE_GameObject*> GetChildsPtr() const;
 	eastl::list<const RE_GameObject*> GetChildsCPtr() const;
+	eastl::list<RE_GameObject*> GetChildsPtrReversed() const;
 
 	eastl::vector<UID> GetGOandChilds() const;
 	eastl::vector<RE_GameObject*> GetGOandChildsPtr();

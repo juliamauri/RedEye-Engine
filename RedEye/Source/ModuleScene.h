@@ -79,7 +79,7 @@ private:
 
 	static RE_GOManager scenePool;
 	RE_GOManager savedState;
-	bool haschanges;
+	bool haschanges = false;
 
 	eastl::stack<UID> to_delete;
 
