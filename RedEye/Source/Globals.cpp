@@ -2,30 +2,32 @@
 
 #include "OutputLog.h"
 
-#include "Glew/include/glew.h"
 #include <gl/GL.h>
 #include <EASTL/string.h>
 
-void _CheckGLError(const char* file, int line)
-{
-	GLenum err(glGetError());
 
-	while (err != GL_NO_ERROR)
-	{
-		eastl::string error;
-		switch (err)
-		{
-		case GL_INVALID_OPERATION:  error = "INVALID_OPERATION";      break;
-		case GL_INVALID_ENUM:       error = "INVALID_ENUM";           break;
-		case GL_INVALID_VALUE:      error = "INVALID_VALUE";          break;
-		case GL_OUT_OF_MEMORY:      error = "OUT_OF_MEMORY";          break;
-		case GL_INVALID_FRAMEBUFFER_OPERATION:  error = "INVALID_FRAMEBUFFER_OPERATION";  break;
-		case GL_STACK_OVERFLOW:  error = "STACK_OVERFLOW";  break;
-		default: error = "error not tracked"; break;
-		}
-		RE_LOG_ERROR("GL_%s - %s:%i", error.c_str(), file, line);
-		err = glGetError();
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+	if (severity == GL_DEBUG_SEVERITY_NOTIFICATION || type == GL_DEBUG_TYPE_OTHER) return;
+
+	eastl::string severityStr = "Severiry ";
+	switch (severity) {
+	case GL_DEBUG_SEVERITY_LOW: severityStr += "low"; break;
+	case GL_DEBUG_SEVERITY_MEDIUM: severityStr += "medium"; break;
+	case GL_DEBUG_SEVERITY_HIGH: severityStr += "high"; break;
+	default: severityStr += "not specified."; break; }
+
+	eastl::string typeStr = "Type ";
+	switch (severity) {
+	case GL_DEBUG_TYPE_ERROR: typeStr += "GL ERROR"; break;
+	case GL_DEBUG_TYPE_PORTABILITY: typeStr += "GL PORTABILITY"; break;
+	case GL_DEBUG_TYPE_PERFORMANCE: typeStr += "GL PERFORMANCE"; break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: typeStr += "GL DEPRECATED"; break;
+	default: typeStr += "GL UNDEFINED"; break;
 	}
 
-	return;
+	if (type == GL_DEBUG_TYPE_ERROR) RE_LOG_ERROR("%s, %s, message = %s\n",
+		(typeStr.c_str()), severityStr.c_str(), message);
+	else RE_LOG_WARNING("%s, %s, message = %s\n",
+		(typeStr.c_str()), severityStr.c_str(), message);
 }

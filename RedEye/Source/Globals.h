@@ -1,4 +1,5 @@
 #pragma once
+#include "Glew/include/glew.h"
 
 #define DEGTORAD 0.0174532925199432957f
 #define RADTODEG 57.295779513082320876f
@@ -83,7 +84,12 @@ enum Dir
 #define _STATIC_CPPLIB
 #define _DISABLE_DEPRECATE_STATIC_CPPLIB
 
-//OpenGL GetError
-void _CheckGLError(const char* file, int line);
-
-#define CheckGLError() _CheckGLError(__FILE__, __LINE__)
+//OpenGL Output Debug
+void GLAPIENTRY MessageCallback(
+	GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam);

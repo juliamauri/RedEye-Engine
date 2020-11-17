@@ -114,6 +114,10 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 			mat_ebo = meshInfo.ebo;
 			mat_triangles = meshInfo.triangles;
 
+			//OpenGL Debug Output
+			glEnable(GL_DEBUG_OUTPUT);
+			glDebugMessageCallback(MessageCallback, 0);
+
 			glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 			cullface ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
 			texture2d ? glEnable(GL_TEXTURE_2D) : glDisable(GL_TEXTURE_2D);
