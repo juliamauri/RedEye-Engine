@@ -99,7 +99,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 			//Thumbnail Configuration
 			thumbnailView.fbos = { RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
-			thumbnailView.clear_color = math::float4::zero;
+			thumbnailView.clear_color = {0.f, 0.f, 0.f, 1.f};
 			Event::PauseEvents();
 			thumbnailView.camera = new RE_CompCamera();
 			thumbnailView.camera->SetParent(0ull);

@@ -18,7 +18,7 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 	default: severityStr += "not specified."; break; }
 
 	eastl::string typeStr = "Type ";
-	switch (severity) {
+	switch (type) {
 	case GL_DEBUG_TYPE_ERROR: typeStr += "GL ERROR"; break;
 	case GL_DEBUG_TYPE_PORTABILITY: typeStr += "GL PORTABILITY"; break;
 	case GL_DEBUG_TYPE_PERFORMANCE: typeStr += "GL PERFORMANCE"; break;

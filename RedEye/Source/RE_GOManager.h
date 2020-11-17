@@ -14,8 +14,8 @@
 class JSONNode;
 class GameObjectsPool;
 
-template<class COMPCLASS, unsigned int size>
-class ComponentPool : public PoolMapped<COMPCLASS, UID, size>
+template<class COMPCLASS, unsigned int size, unsigned int increment>
+class ComponentPool : public PoolMapped<COMPCLASS, UID, size, increment>
 {
 public:
 	ComponentPool() { }
@@ -156,24 +156,24 @@ private:
 };
 
 //Components Pools
-typedef ComponentPool<RE_CompTransform, 10240> TransformsPool;
-typedef ComponentPool<RE_CompCamera, 512> CamerasPool;
-typedef ComponentPool<RE_CompMesh, 2048> MeshesPool;
-typedef ComponentPool<RE_CompLight, 124> LightPool;
+typedef ComponentPool<RE_CompTransform, 1024, 512> TransformsPool;
+typedef ComponentPool<RE_CompCamera, 128, 64> CamerasPool;
+typedef ComponentPool<RE_CompMesh, 128, 64> MeshesPool;
+typedef ComponentPool<RE_CompLight, 128, 64> LightPool;
 //Primitives
-typedef ComponentPool<RE_CompGrid, 1024> GridPool;
-typedef ComponentPool<RE_CompRock, 1024> RockPool;
-typedef ComponentPool<RE_CompCube, 1024> CubePool;
-typedef ComponentPool<RE_CompDodecahedron, 1024> DodecahedronPool;
-typedef ComponentPool<RE_CompTetrahedron, 1024> TetrahedronPool;
-typedef ComponentPool<RE_CompOctohedron, 1024> OctohedronPool;
-typedef ComponentPool<RE_CompIcosahedron, 1024> IcosahedronPool;
-typedef ComponentPool<RE_CompPlane, 1024> PlanePool;
-typedef ComponentPool<RE_CompSphere, 1024> SpherePool;
-typedef ComponentPool<RE_CompCylinder, 1024> CylinderPool;
-typedef ComponentPool<RE_CompHemiSphere, 1024> HemiSpherePool;
-typedef ComponentPool<RE_CompTorus, 1024> TorusPool;
-typedef ComponentPool<RE_CompTrefoiKnot, 1024> TrefoiKnotPool;
+typedef ComponentPool<RE_CompGrid, 128, 64> GridPool;
+typedef ComponentPool<RE_CompRock, 128, 64> RockPool;
+typedef ComponentPool<RE_CompCube, 128, 64> CubePool;
+typedef ComponentPool<RE_CompDodecahedron, 128, 64> DodecahedronPool;
+typedef ComponentPool<RE_CompTetrahedron, 128, 64> TetrahedronPool;
+typedef ComponentPool<RE_CompOctohedron, 128, 64> OctohedronPool;
+typedef ComponentPool<RE_CompIcosahedron, 128, 64> IcosahedronPool;
+typedef ComponentPool<RE_CompPlane, 128, 64> PlanePool;
+typedef ComponentPool<RE_CompSphere, 128, 64> SpherePool;
+typedef ComponentPool<RE_CompCylinder, 128, 64> CylinderPool;
+typedef ComponentPool<RE_CompHemiSphere, 128, 64> HemiSpherePool;
+typedef ComponentPool<RE_CompTorus, 128, 64> TorusPool;
+typedef ComponentPool<RE_CompTrefoiKnot, 128, 64> TrefoiKnotPool;
 
 class ComponentsPool {
 public:
@@ -252,7 +252,7 @@ private:
 	TrefoiKnotPool pTrefoiKnotPool;
 };
 
-class GameObjectsPool : public PoolMapped<RE_GameObject, UID, 10240> {
+class GameObjectsPool : public PoolMapped<RE_GameObject, UID, 1024, 512> {
 public:
 	GameObjectsPool() { }
 	~GameObjectsPool() { }
@@ -301,9 +301,9 @@ public:
 
 	// Pool handling
 	RE_GameObject* AddGO(const char* name, UID parent, bool broadcast = false);
-	RE_GameObject* CopyGO(const RE_GameObject* copy, UID parent, bool broadcast = false);
-	RE_GameObject* CopyGOandChilds(const RE_GameObject* copy, UID parent, bool broadcast = false);
-	RE_GameObject* InsertPool(RE_GOManager* pool);
+	UID CopyGO(const RE_GameObject* copy, UID parent, bool broadcast = false);
+	UID CopyGOandChilds(const RE_GameObject* copy, UID parent, bool broadcast = false);
+	UID InsertPool(RE_GOManager* pool);
 
 	void DestroyGO(UID toDestroy);
 
@@ -348,8 +348,6 @@ public:
 	void DeserializeJson(JSONNode* node, eastl::map<int, const char* >* resources);
 	
 private:
-
-	RE_GameObject* RecusiveInsertGO(RE_GameObject* go, UID parent);
 	void RecursiveDestroyGO(UID toDestroy);
 
 private:

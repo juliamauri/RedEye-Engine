@@ -27,20 +27,19 @@ RE_GameObject* RE_GOManager::AddGO(const char* name, UID parent, bool broadcast)
 	return ret;
 }
 
-RE_GameObject* RE_GOManager::CopyGO(const RE_GameObject* copy, UID parent, bool broadcast)
+UID RE_GOManager::CopyGO(const RE_GameObject* copy, UID parent, bool broadcast)
 {
-	RE_GameObject* new_go = AddGO(copy->name.c_str(), parent, broadcast);
+	UID new_go = AddGO(copy->name.c_str(), parent, broadcast)->GetUID();
 
 	for (auto copy_comp : copy->AllCompData())
-		componentsPool.CopyComponent(&gameObjectsPool, copy->pool_comps->GetComponentPtr(copy_comp.uid, static_cast<ComponentType>(copy_comp.type)), new_go->go_uid);
+		componentsPool.CopyComponent(&gameObjectsPool, copy->pool_comps->GetComponentPtr(copy_comp.uid, static_cast<ComponentType>(copy_comp.type)), new_go);
 	
 	return new_go;
 }
 
-RE_GameObject* RE_GOManager::CopyGOandChilds(const RE_GameObject* copy, UID parent, bool broadcast)
+UID RE_GOManager::CopyGOandChilds(const RE_GameObject* copy, UID parent, bool broadcast)
 {
-	RE_GameObject* ret = CopyGO(copy, parent, broadcast);
-	UID ret_uid = ret->go_uid;
+	UID ret_uid = CopyGO(copy, parent, broadcast);
 
 	eastl::stack<eastl::pair<const RE_GameObject*, UID>> copy_gos;
 	for (auto copy_child : copy->GetChildsCPtr())
@@ -51,14 +50,13 @@ RE_GameObject* RE_GOManager::CopyGOandChilds(const RE_GameObject* copy, UID pare
 		eastl::pair<const RE_GameObject*, UID> copy_go = copy_gos.top();
 		copy_gos.pop();
 
-		RE_GameObject* new_go = CopyGO(copy_go.first, copy_go.second, broadcast);
-		UID new_go_uid = new_go->go_uid;
+		UID new_go_uid = CopyGO(copy_go.first, copy_go.second, broadcast);
 
 		for (auto copy_child : copy_go.first->GetChildsCPtr())
 			copy_gos.push({ copy_child, new_go_uid });
 	}
 
-	return ret;
+	return ret_uid;
 }
 
 RE_GameObject* RE_GOManager::GetGOPtr(UID id) const
@@ -122,9 +120,9 @@ void RE_GOManager::RecursiveDestroyGO(UID toDestroy)
 	gameObjectsPool.DeleteGO(toDestroy);
 }
 
-RE_GameObject* RE_GOManager::InsertPool(RE_GOManager* pool)
+UID RE_GOManager::InsertPool(RE_GOManager* pool)
 {
-	return RecusiveInsertGO(pool->GetRootPtr(), (TotalGameObjects() > 0) ? GetRootUID() : 0);
+	return CopyGOandChilds(pool->GetRootPtr(), (TotalGameObjects() > 0) ? GetRootUID() : 0);
 }
 
 eastl::vector<UID> RE_GOManager::GetAllCompUID(ushortint type) const
@@ -161,7 +159,7 @@ RE_GOManager* RE_GOManager::GetNewPoolFromID(UID id)
 {
 	RE_GOManager* ret = new RE_GOManager();
 
-	ret->RecusiveInsertGO(gameObjectsPool.AtPtr(id), 0);
+	ret->CopyGOandChilds(gameObjectsPool.AtPtr(id), 0);
 
 	return ret;
 }
@@ -214,17 +212,6 @@ void RE_GOManager::DeserializeBinary(char*& cursor, eastl::map<int, const char*>
 {
 	gameObjectsPool.DeserializeBinary(cursor, &componentsPool);
 	componentsPool.DeserializeBinary(&gameObjectsPool, cursor, resources);
-}
-
-RE_GameObject* RE_GOManager::RecusiveInsertGO(RE_GameObject* go, UID parent)
-{
-	RE_GameObject* ret = CopyGO(go, parent);
-
-	eastl::list<RE_GameObject*> childs = go->GetChildsPtr();
-	for (RE_GameObject* c : childs)
-			RecusiveInsertGO(c, ret->go_uid);
-
-	return ret;
 }
 
 void GameObjectsPool::Clear()

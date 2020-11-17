@@ -64,8 +64,7 @@ RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int 
 		if (scene->HasMeshes()) ProcessMeshes(scene);
 
 		RE_LOG_SECONDARY("Processing model hierarchy"); // Mount a go hiteracy with nodes from model
-		RE_GameObject* currentGO = (ret = new RE_GOManager())->AddGO(aditionalData->name.c_str(), 0);
-		ProcessNode(ret, scene->mRootNode, scene, currentGO, math::float4x4::identity, true);
+		ProcessNode(ret, scene->mRootNode, scene, (ret = new RE_GOManager())->AddGO(aditionalData->name.c_str(), 0)->GetUID() , math::float4x4::identity, true);
 
 	}
 
@@ -73,7 +72,7 @@ RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int 
 	return ret;
 }
 
-void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const aiScene * scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot)
+void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const aiScene * scene, UID currentGO, math::float4x4 transform, bool isRoot)
 {
 	RE_LOG_TERCIARY("%s Node: %s (%u meshes | %u children)",
 		node->mParent ? "SON" : "PARENT",
@@ -90,12 +89,12 @@ void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const ai
 		math::Quat(nRotationQuat.x, nRotationQuat.y, nRotationQuat.z, nRotationQuat.w),
 		{ nScale.x, nScale.y, nScale.z });
 
-	RE_GameObject* go_haschildren = nullptr;
+	UID go_haschildren = 0ull;
 	if (node->mNumChildren > 0 || (node->mNumChildren == 0 && node->mNumMeshes == 0))
 	{
 		if (isRoot || eastl::string(node->mName.C_Str()).find("_$Assimp") == eastl::string::npos)
 		{
-			go_haschildren = isRoot ? currentGO : goPool->AddGO(node->mName.C_Str(), currentGO->GetUID());
+			go_haschildren = isRoot ? currentGO : goPool->AddGO(node->mName.C_Str(), currentGO)->GetUID();
 
 			math::float3 position, scale;
 			math::Quat rotation;
@@ -104,12 +103,11 @@ void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const ai
 			bool paused = Event::isPaused();
 			if (!paused) Event::PauseEvents();
 
-			RE_CompTransform* t = go_haschildren->GetTransformPtr();
+			RE_CompTransform* t = goPool->GetGOPtr(go_haschildren)->GetTransformPtr();
 			t->SetRotation(rotation);
 			t->SetPosition(position);
 			t->SetScale(scale);
 			t->Update();
-
 			if (!paused) Event::ResumeEvents();
 
 			transform = math::float4x4::identity;
@@ -122,7 +120,7 @@ void RE_ModelImporter::ProcessNode(RE_GOManager* goPool, aiNode * node, const ai
 	{
 		for (; i < node->mNumMeshes; i++)
 		{
-			RE_GameObject* goMesh = go_haschildren ? go_haschildren : goPool->AddGO(node->mName.C_Str(), currentGO->GetUID());
+			RE_GameObject* goMesh = go_haschildren ? goPool->GetGOPtr(go_haschildren) : goPool->AddGO(node->mName.C_Str(), currentGO);
 			if (!go_haschildren)
 			{
 				math::float3 position, scale;

@@ -11,6 +11,7 @@ enum aiTextureType;
 class RE_GOManager;
 class RE_GameObject;
 
+#include "Globals.h"
 #include "MathGeoLib/include/Math/float4x4.h"
 
 #include <EASTL/vector.h>
@@ -39,7 +40,7 @@ public:
 private:
 	void ProcessMaterials(const aiScene* scene);
 	void ProcessMeshes(const aiScene* scene);
-	void ProcessNode(RE_GOManager* goPool, aiNode* node, const aiScene* scene, RE_GameObject* currentGO, math::float4x4 transform, bool isRoot = false);
+	void ProcessNode(RE_GOManager* goPool, aiNode* node, const aiScene* scene, UID currentGO, math::float4x4 transform, bool isRoot = false);
 
 	void GetTexturesMaterial(aiMaterial * material, eastl::string &fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString &name);
 	void GetTexturePath(aiMaterial * material, eastl::vector<eastl::string> &retPaths, aiTextureType textureType);

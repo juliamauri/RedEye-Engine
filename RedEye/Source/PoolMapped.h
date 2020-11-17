@@ -4,12 +4,13 @@
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
 
-template<class TYPEVALUE, class TYPEKEY, unsigned int size>
+template<class TYPEVALUE, class TYPEKEY, unsigned int size, unsigned int increment>
 class PoolMapped
 {
 public:
 	PoolMapped() {
-		pool_ = new TYPEVALUE[size];
+		currentSize = size;
+		pool_ = new TYPEVALUE[currentSize];
 	}
 	virtual ~PoolMapped() {
 		delete[] pool_;
@@ -19,6 +20,7 @@ public:
 
 	virtual bool Push(TYPEVALUE val, TYPEKEY key) {
 		if (poolmapped_.find(key) == poolmapped_.end()) {
+			if (static_cast<unsigned int>(lastAvaibleIndex) == currentSize) IncrementArray();
 			pool_[lastAvaibleIndex] = val;
 			poolmapped_.insert(eastl::pair<TYPEKEY, unsigned int>(key, lastAvaibleIndex++));
 			return true;
@@ -56,11 +58,23 @@ public:
 
 	int GetCount() const { return poolmapped_.size(); }
 
+private:
+	void IncrementArray() {
+		unsigned int newSize = currentSize + increment;
+		poolTmp_ = new TYPEVALUE[newSize];
+		eastl::copy(pool_, pool_ + currentSize, poolTmp_);
+		currentSize = newSize;
+		delete[] pool_;
+		pool_ = poolTmp_;
+	}
+
 protected:
 	TYPEVALUE* pool_;
+	TYPEVALUE* poolTmp_;
 	eastl::map<TYPEKEY, unsigned int> poolmapped_;
 
 	int lastAvaibleIndex = 0;
+	unsigned int currentSize;
 };
 
 #endif // !__POOL_H__

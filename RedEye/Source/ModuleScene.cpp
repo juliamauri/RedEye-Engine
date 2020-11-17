@@ -277,14 +277,14 @@ void ModuleScene::CreateLight(const UID parent)
 
 void ModuleScene::CreateMaxLights(const UID parent)
 {
-	RE_GameObject* container_go = scenePool.AddGO("Bunch of Lights", (parent) ? parent : GetRootUID());
+	UID container_go = scenePool.AddGO("Bunch of Lights", (parent) ? parent : GetRootUID())->GetUID();
 
 	eastl::string name = "light ";
 	for (int x = 0; x < 8; ++x)
 	{
 		for (int y = 0; y < 8; ++y)
 		{
-			RE_GameObject* light_go = scenePool.AddGO((name + eastl::to_string(x) + "x" + eastl::to_string(y)).c_str(), container_go->GetUID());
+			RE_GameObject* light_go = scenePool.AddGO((name + eastl::to_string(x) + "x" + eastl::to_string(y)).c_str(), container_go);
 			light_go->GetTransformPtr()->SetPosition(math::vec((static_cast<float>(x) * 12.5f) - 50.f, 0.f, (static_cast<float>(y) * 12.5f) - 50.f));
 
 			static math::vec colors[5] = { math::vec(1.f,0.f,0.f), math::vec(0.f,1.f,0.f), math::vec(0.f,0.f,1.f), math::vec(1.f,1.f,0.f), math::vec(0.f,1.f,1.f) };
@@ -299,10 +299,10 @@ void ModuleScene::AddGOPool(RE_GOManager* toAdd)
 	//TODO Julius don't use SetupScene, only setup toAdd
 	//App::goManager->sceneGOs.PushWithChilds(toAdd);
 
-	RE_GameObject* justAdded = scenePool.InsertPool(toAdd);
+	UID justAdded = scenePool.InsertPool(toAdd);
 	scenePool.UseResources();
 	SetupScene();
-	App::editor->SetSelected(justAdded->GetUID());
+	App::editor->SetSelected(justAdded);
 	haschanges = true;
 }
 
