@@ -482,7 +482,7 @@ void RE_ResourceManager::ThumbnailResources()
 {
 	for (auto res : resources) {
 		Resource_Type rT = res.second->GetType();
-		if(rT == R_SCENE || rT == R_PREFAB || rT == R_MODEL || rT == R_SKYBOX || rT == R_MATERIAL) 
+		if(rT == R_SCENE || rT == R_PREFAB || rT == R_MODEL || rT == R_SKYBOX || rT == R_MATERIAL || rT == R_TEXTURE)
 			App::renderer3d->PushThumnailRend(res.first);
 	}
 }

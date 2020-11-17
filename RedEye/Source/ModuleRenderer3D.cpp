@@ -99,6 +99,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 			//Thumbnail Configuration
 			thumbnailView.fbos = { RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
+			thumbnailView.clear_color = math::float4::zero;
 			Event::PauseEvents();
 			thumbnailView.camera = new RE_CompCamera();
 			thumbnailView.camera->SetParent(0ull);
@@ -164,21 +165,12 @@ update_status ModuleRenderer3D::PostUpdate()
 	// Setup Draws
 	activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 
-	render_views[0].camera = RE_CameraManager::EditorCamera();
-	render_views[1].camera = RE_CameraManager::MainCamera();
-
-	PushSceneRend(render_views[1]);
-	PushSceneRend(render_views[0]);
-
 	while (!rendQueue.empty()) {
 		RenderQueue rend = rendQueue.top();
 		rendQueue.pop();
 
 		switch (rend.type)
 		{
-		case RenderType::R_SCENE:
-			DrawScene(rend.renderview);
-			break;
 		case RenderType::R_T_GO:
 		{
 			Event::PauseEvents();
@@ -198,6 +190,7 @@ update_status ModuleRenderer3D::PostUpdate()
 				poolGOThumbnail->UnUseResources();
 				App::resources->UnUse(rend.resMD5);
 				App::thumbnail->SaveTextureFromFBO(path.c_str());
+				DEL(poolGOThumbnail);
 			}
 
 			App::thumbnail->Change(rend.resMD5, App::thumbnail->LoadLibraryThumbnail(rend.resMD5));
@@ -237,6 +230,23 @@ update_status ModuleRenderer3D::PostUpdate()
 			break;
 		}
 
+	}
+
+	render_views[0].camera = RE_CameraManager::EditorCamera();
+	render_views[1].camera = RE_CameraManager::MainCamera();
+	PushSceneRend(render_views[1]);
+	PushSceneRend(render_views[0]);
+
+	while (!rendQueue.empty()) {
+		RenderQueue rend = rendQueue.top();
+		rendQueue.pop();
+
+		switch (rend.type)
+		{
+		case RenderType::R_SCENE:
+			DrawScene(rend.renderview);
+			break;
+		}
 	}
 
 	// Set Render to Window
@@ -774,7 +784,6 @@ void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
 	internalCamera->Focus(go->GetGlobalBoundingBox().CenterPoint());
 	internalCamera->Update();
 
-	eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 	for (auto sMD5 : activeShaders) (dynamic_cast<RE_Shader*>(App::resources->At(sMD5)))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 
 	go->DrawChilds();
@@ -797,7 +806,6 @@ void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
 	internalCamera->Update();
 	Event::ResumeEvents();
 
-	eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 	for (auto sMD5 : activeShaders)
 		dynamic_cast<RE_Shader*>(App::resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 
@@ -822,7 +830,6 @@ void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
 	internalCamera->Update();
 	Event::ResumeEvents();
 
-	eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 	for (auto sMD5 : activeShaders)
 		dynamic_cast<RE_Shader*>(App::resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 
