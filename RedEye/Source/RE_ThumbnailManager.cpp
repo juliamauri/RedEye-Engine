@@ -16,9 +16,7 @@
 #include "RE_Shader.h"
 #include "RE_Texture.h"
 #include "RE_Model.h"
-#include "RE_Scene.h"
-#include "RE_Prefab.h"
-#include "RE_Model.h"
+
 #include "RE_Material.h"
 #include "RE_SkyBox.h"
 #include "Globals.h"
@@ -28,11 +26,6 @@
 #include "IL/include/ilu.h"
 #include "par_shapes.h"
 #include <EASTL/string.h>
-
-#define THUMBNAILPATH "Library/Thumbnails/"
-#define DEFTHUMBNAILS "Settings/Icons/"
-#define THUMBNAILSIZE 256
-#define THUMBNAILDATASIZE THUMBNAILSIZE * THUMBNAILSIZE * 4
 
 RE_ThumbnailManager::RE_ThumbnailManager() {}
 
@@ -45,11 +38,6 @@ RE_ThumbnailManager::~RE_ThumbnailManager()
 	for (auto thumb : thumbnails) glDeleteTextures(1, &thumb.second);
 
 	glDeleteBuffersARB(1, &pboRender);
-	glDeleteBuffers(1, &VAOSphere);
-	glDeleteBuffers(1, &VBOSphere);
-	glDeleteBuffers(1, &EBOSphere);
-
-	DEL(internalCamera);
 }
 
 void RE_ThumbnailManager::Init()
@@ -58,124 +46,18 @@ void RE_ThumbnailManager::Init()
 	file = LoadDefIcon("file.dds");
 	selectfile = LoadDefIcon("selectfile.dds");
 	shaderFile = LoadDefIcon("shaderFile.dds");
-
-	singleRenderFBO = RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE);
-	Event::PauseEvents();
-	internalCamera = new RE_CompCamera();
-	internalCamera->SetParent(0ull);
-	internalCamera->SetProperties();
-	internalCamera->SetBounds(THUMBNAILSIZE, THUMBNAILSIZE);
-	internalCamera->Update();
-	Event::ResumeEvents();
-
+	
 	glGenBuffersARB(1, &pboRender);
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboRender);
 	glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, THUMBNAILDATASIZE, 0, GL_STREAM_READ_ARB);
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
-
-	par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(24, 24);
-
-	float* points = new float[sphere->npoints * 3];
-	float* normals = new float[sphere->npoints * 3];
-	float* texCoords = new float[sphere->npoints * 2];
-
-	uint meshSize = 0;
-	size_t size = sphere->npoints * 3 * sizeof(float);
-	uint stride = 0;
-
-	memcpy(points, sphere->points, size);
-	meshSize += 3 * sphere->npoints;
-	stride += 3;
-
-	memcpy(normals, sphere->normals, size);
-	meshSize += 3 * sphere->npoints;
-	stride += 3;
-
-	size = sphere->npoints * 2 * sizeof(float);
-	memcpy(texCoords, sphere->tcoords, size);
-	meshSize += 2 * sphere->npoints;
-	stride += 2;
-
-	stride *= sizeof(float);
-	float* meshBuffer = new float[meshSize];
-	float* cursor = meshBuffer;
-	for (int i = 0; i < sphere->npoints; i++)
-	{
-		uint cursorSize = 3;
-		size_t size = sizeof(float) * 3;
-
-		memcpy(cursor, &points[i * 3], size);
-		cursor += cursorSize;
-
-		memcpy(cursor, &normals[i * 3], size);
-		cursor += cursorSize;
-
-		cursorSize = 2;
-		size = sizeof(float) * 2;
-		memcpy(cursor, &texCoords[i * 2], size);
-		cursor += cursorSize;
-	}
-
-	glGenVertexArrays(1, &VAOSphere);
-	RE_GLCacheManager::ChangeVAO(VAOSphere);
-
-	glGenBuffers(1, &VBOSphere);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOSphere);
-	glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 3u));
-
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 6u));
-
-	glGenBuffers(1, &EBOSphere);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOSphere);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, sphere->triangles, GL_STATIC_DRAW);
-
-	sphere_triangle_count = sphere->ntriangles;
-
-	par_shapes_free_mesh(sphere);
-	DEL_A(points);
-	DEL_A(normals);
-	DEL_A(texCoords);
-	DEL_A(meshBuffer);
 }
 
-void RE_ThumbnailManager::Add(const char* ref)
-{
-	ResourceContainer* res = App::resources->At(ref);
-	if (res)
-	{
-		switch (res->GetType()) {
-		case Resource_Type::R_MATERIAL: thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailMaterial(ref))); break;
-		case Resource_Type::R_SKYBOX: thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailSkyBox(ref))); break;
-		case Resource_Type::R_TEXTURE: thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailTexture(ref))); break;
-		case Resource_Type::R_MODEL:
-		case Resource_Type::R_PREFAB:
-		case Resource_Type::R_SCENE: thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, ThumbnailGameObject(ref))); break; }
-	}
-}
-
-void RE_ThumbnailManager::Change(const char* ref)
+void RE_ThumbnailManager::Change(const char* ref, unsigned int id)
 {
 	auto iter = thumbnails.find(ref);
-
-	if (iter == thumbnails.end()) Add(ref);
-	else {
-		ResourceContainer* res = App::resources->At(ref);
-		switch (res->GetType()) {
-		case Resource_Type::R_MATERIAL: iter->second =  ThumbnailMaterial(ref); break;
-		case Resource_Type::R_SKYBOX: iter->second = ThumbnailSkyBox(ref); break;
-		case Resource_Type::R_TEXTURE: iter->second = ThumbnailTexture(ref); break;
-		case Resource_Type::R_MODEL:
-		case Resource_Type::R_PREFAB:
-		case Resource_Type::R_SCENE: iter->second = ThumbnailGameObject(ref); break;
-		}
-	}
+	if (iter == thumbnails.end()) thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, id));
+	else iter->second = id;
 }
 
 void RE_ThumbnailManager::Delete(const char* ref)
@@ -241,133 +123,6 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 	ret = LoadLibraryThumbnail(ref);
 
 	return ret;
-}
-
-unsigned int RE_ThumbnailManager::ThumbnailGameObject(const char* ref)
-{
-	uint ret = 0;
-	eastl::string path(THUMBNAILPATH);
-	if (!App::fs->Exists((path += ref).c_str()))
-	{
-		Event::PauseEvents();
-
-		RE_GOManager* poolGOThumbnail = nullptr;
-		ResourceContainer* res = App::resources->At(ref);
-		App::resources->Use(res->GetMD5());
-		switch (res->GetType()) {
-		case Resource_Type::R_MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
-		case Resource_Type::R_PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
-		case Resource_Type::R_SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break; }
-
-		if (poolGOThumbnail)
-		{
-			poolGOThumbnail->UseResources();
-			RE_GameObject* root = poolGOThumbnail->GetRootPtr();
-			root->TransformModified(false);
-			poolGOThumbnail->Update();
-			root->ResetGlobalBoundingBoxForAllChilds();
-
-			internalCamera->SetFOV(math::RadToDeg(0.523599f));
-			internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
-			internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
-			internalCamera->LocalRotate(0, -0.5);
-			internalCamera->Update();
-			internalCamera->Focus(poolGOThumbnail->GetRootPtr()->GetGlobalBoundingBox().CenterPoint());
-			internalCamera->Update();
-
-			eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-			for (auto sMD5 : activeShaders) (dynamic_cast<RE_Shader*>(App::resources->At(sMD5)))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
-
-			RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
-			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			root->DrawChilds();
-			poolGOThumbnail->UnUseResources();
-			SaveTextureFromFBO(path.c_str());
-			RE_FBOManager::ChangeFBOBind(0, App::window->GetWidth(), App::window->GetHeight());
-		}
-		App::resources->UnUse(res->GetMD5());
-		Event::ResumeEvents();
-	}
-
-	ret = LoadLibraryThumbnail(ref);
-	return ret;
-}
-
-unsigned int RE_ThumbnailManager::ThumbnailMaterial(const char* ref)
-{
-	eastl::string path(THUMBNAILPATH);
-	if (!App::fs->Exists((path += ref).c_str()))
-	{
-		Event::PauseEvents();
-		internalCamera->SetFOV(math::RadToDeg( 0.523599f));
-		internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
-		internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f,  0.f));
-		internalCamera->Update();
-		internalCamera->LocalRotate(0, 1);
-		internalCamera->Update();
-		Event::ResumeEvents();
-
-		eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-		for (auto sMD5 : activeShaders)
-			dynamic_cast<RE_Shader*>(App::resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
-
-		App::resources->Use(ref);
-		RE_Material* mat = dynamic_cast<RE_Material*>(App::resources->At(ref));
-		mat->UseResources();
-
-		RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		mat->UploadToShader(math::float4x4::identity.ptr(), false, true);
-		RE_GLCacheManager::ChangeVAO(VAOSphere);
-		glDrawElements(GL_TRIANGLES, sphere_triangle_count * 3, GL_UNSIGNED_SHORT, 0);
-
-		mat->UnUseResources();
-		App::resources->UnUse(ref);
-		SaveTextureFromFBO(path.c_str());
-		RE_FBOManager::ChangeFBOBind(0, App::window->GetWidth(), App::window->GetHeight());
-	}
-
-	return LoadLibraryThumbnail(ref);
-}
-
-unsigned int RE_ThumbnailManager::ThumbnailSkyBox(const char* ref)
-{
-	eastl::string path(THUMBNAILPATH);
-	if (!App::fs->Exists((path += ref).c_str()))
-	{
-		Event::PauseEvents();
-		internalCamera->ForceFOV(125, 140);
-		internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
-		internalCamera->GetTransform()->SetPosition(math::vec(0.f, 0.f, 0.f));
-		internalCamera->Update();
-		Event::ResumeEvents();
-
-		eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-		for (auto sMD5 : activeShaders)
-			dynamic_cast<RE_Shader*>(App::resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
-
-		RE_GLCacheManager::ChangeTextureBind(0);
-		App::resources->Use(ref);
-
-		RE_FBOManager::ChangeFBOBind(singleRenderFBO, THUMBNAILSIZE, THUMBNAILSIZE);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		RE_Shader* skyboxShader = (RE_Shader*)App::resources->At(App::internalResources.GetDefaultSkyBoxShader());
-		uint skysphereshader = skyboxShader->GetID();
-		RE_GLCacheManager::ChangeShader(skysphereshader);
-		RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
-		dynamic_cast<RE_SkyBox*>(App::resources->At(ref))->DrawSkybox();
-		
-		App::resources->UnUse(ref);
-		SaveTextureFromFBO(path.c_str());
-		RE_FBOManager::ChangeFBOBind(0, App::window->GetWidth(), App::window->GetHeight());
-	}
-
-	return LoadLibraryThumbnail(ref);
 }
 
 void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)

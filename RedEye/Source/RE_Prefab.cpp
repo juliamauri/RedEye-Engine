@@ -82,8 +82,12 @@ void RE_Prefab::SetName(const char* _name)
 
 RE_GOManager* RE_Prefab::GetPool()
 {
-	if (!ResourceContainer::inMemory) App::resources->Use(GetMD5());
-	return loaded;
+	RE_GOManager* ret;
+	bool unload = false;
+	if (unload = (loaded == nullptr)) LoadInMemory();
+	ret = loaded->GetNewPoolFromID(loaded->GetRootUID());
+	if (unload) UnloadMemory();
+	return ret;
 }
 
 void RE_Prefab::AssetSave()
@@ -151,5 +155,8 @@ void RE_Prefab::LibrarySave()
 
 void RE_Prefab::Draw()
 {
-	if (ImGui::Button("Add to Scene")) App::scene->AddGOPool(GetPool());
+	if (ImGui::Button("Add to Scene")) {
+		if (loaded == nullptr) App::resources->Use(GetMD5());
+		App::scene->AddGOPool(loaded);
+	}
 }

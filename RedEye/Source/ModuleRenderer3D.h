@@ -6,6 +6,9 @@
 #include <EASTL/stack.h>
 #include "MathGeoLib/include/Math/float4.h"
 
+class RE_Material;
+class RE_SkyBox;
+
 enum LightMode : int
 {
 	LIGHT_DISABLED = 0,
@@ -120,6 +123,9 @@ public:
 private:
 
 	void DrawScene(const RenderView& render_view);
+	void ThumbnailGameObject(RE_GameObject* go);
+	void ThumbnailMaterial(RE_Material* mat);
+	void ThumbnailSkyBox(RE_SkyBox* skybox);
 
 	// Render Flags
 	void inline SetWireframe(bool enable);
@@ -166,7 +172,9 @@ private:
 	// Rendering Views
 	eastl::vector<RenderView> render_views;
 
+	//Thumbnail values
 	RenderView thumbnailView;
+	unsigned int mat_vao = 0, mat_vbo = 0, mat_ebo = 0, mat_triangles = 0;
 };
 
 #endif // !__MODULERENDER3D_H__

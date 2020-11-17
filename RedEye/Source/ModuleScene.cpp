@@ -372,7 +372,7 @@ void ModuleScene::SaveScene(const char* newName)
 		unsavedScene = nullptr;
 	}
 	else
-		App::thumbnail->Change(scene->GetMD5());
+		App::renderer3d->PushThumnailRend(scene->GetMD5());
 
 	haschanges = false;
 	Event::ResumeEvents();
@@ -448,6 +448,8 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	RE_GOManager* loadedDO = scene->GetPool();
 	if (loadedDO)scenePool.InsertPool(loadedDO);
 	else RE_LOG_ERROR("Can't Load Scene");
+
+	DEL(loadedDO);
 
 	App::resources->UnUse(sceneMD5);
 	scenePool.UseResources();

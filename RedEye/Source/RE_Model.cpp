@@ -55,7 +55,12 @@ void RE_Model::Import(bool keepInMemory)
 
 RE_GOManager* RE_Model::GetPool()
 {
-	return loaded;
+	RE_GOManager* ret;
+	bool unload = false;
+	if (unload = (loaded == nullptr)) LoadInMemory();
+	ret = loaded->GetNewPoolFromID(loaded->GetRootUID());
+	if (unload) UnloadMemory();
+	return ret;
 }
 
 void RE_Model::Draw()
@@ -132,9 +137,8 @@ void RE_Model::Draw()
 
 		if (CheckResourcesIsOnAssets())
 		{
-			App::resources->Use(GetMD5());
-			App::scene->AddGOPool(GetPool());
-			App::resources->UnUse(GetMD5());
+			if (loaded == nullptr) App::resources->Use(GetMD5());
+			App::scene->AddGOPool(loaded);
 		}
 		else
 		{

@@ -80,6 +80,87 @@ eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPlatonicData(uns
 	return { platonics[index].vao, platonics[index].triangles };
 }
 
+RE_PrimitiveManager::PlatonicData RE_PrimitiveManager::CreateSphere(int slices, int stacks)
+{
+	if (slices < 3) slices = 3;
+	if (stacks < 3) stacks = 3;
+
+	PlatonicData ret;
+
+	par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(slices, stacks);
+
+	float* points = new float[sphere->npoints * 3];
+	float* normals = new float[sphere->npoints * 3];
+	float* texCoords = new float[sphere->npoints * 2];
+
+	uint meshSize = 0;
+	size_t size = sphere->npoints * 3 * sizeof(float);
+	uint stride = 0;
+
+	memcpy(points, sphere->points, size);
+	meshSize += 3 * sphere->npoints;
+	stride += 3;
+
+	memcpy(normals, sphere->normals, size);
+	meshSize += 3 * sphere->npoints;
+	stride += 3;
+
+	size = sphere->npoints * 2 * sizeof(float);
+	memcpy(texCoords, sphere->tcoords, size);
+	meshSize += 2 * sphere->npoints;
+	stride += 2;
+
+	stride *= sizeof(float);
+	float* meshBuffer = new float[meshSize];
+	float* cursor = meshBuffer;
+	for (int i = 0; i < sphere->npoints; i++)
+	{
+		uint cursorSize = 3;
+		size_t size = sizeof(float) * 3;
+
+		memcpy(cursor, &points[i * 3], size);
+		cursor += cursorSize;
+
+		memcpy(cursor, &normals[i * 3], size);
+		cursor += cursorSize;
+
+		cursorSize = 2;
+		size = sizeof(float) * 2;
+		memcpy(cursor, &texCoords[i * 2], size);
+		cursor += cursorSize;
+	}
+
+	glGenVertexArrays(1, &ret.vao);
+	RE_GLCacheManager::ChangeVAO(ret.vao);
+
+	glGenBuffers(1, &ret.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, ret.vbo);
+	glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 3u));
+
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 6u));
+
+	glGenBuffers(1, &ret.ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ret.ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, sphere->triangles, GL_STATIC_DRAW);
+
+	ret.triangles = sphere->ntriangles;
+
+	par_shapes_free_mesh(sphere);
+	DEL_A(points);
+	DEL_A(normals);
+	DEL_A(texCoords);
+	DEL_A(meshBuffer);
+
+	return ret;
+}
+
 void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int* vao, unsigned int* vbo, unsigned int* ebo, unsigned int* triangles)
 {
 	*triangles = static_cast<unsigned int>(plato->ntriangles);

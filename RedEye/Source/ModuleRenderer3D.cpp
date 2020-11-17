@@ -13,6 +13,10 @@
 
 #include "RE_Shader.h"
 #include "RE_SkyBox.h"
+#include "RE_Scene.h"
+#include "RE_Prefab.h"
+#include "RE_Model.h"
+#include "RE_Material.h"
 
 #include "RE_CompCamera.h"
 #include "RE_CompMesh.h"
@@ -93,6 +97,22 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
 				LIGHT_DEFERRED));
 
+			//Thumbnail Configuration
+			thumbnailView.fbos = { RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
+			Event::PauseEvents();
+			thumbnailView.camera = new RE_CompCamera();
+			thumbnailView.camera->SetParent(0ull);
+			thumbnailView.camera->SetProperties();
+			thumbnailView.camera->SetBounds(THUMBNAILSIZE, THUMBNAILSIZE);
+			thumbnailView.camera->Update();
+			Event::ResumeEvents();
+
+			RE_PrimitiveManager::PlatonicData meshInfo = App::primitives.CreateSphere(24, 24);
+			mat_vao = meshInfo.vao;
+			mat_vbo = meshInfo.vbo;
+			mat_ebo = meshInfo.ebo;
+			mat_triangles = meshInfo.triangles;
+
 			glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 			cullface ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
 			texture2d ? glEnable(GL_TEXTURE_2D) : glDisable(GL_TEXTURE_2D);
@@ -160,10 +180,60 @@ update_status ModuleRenderer3D::PostUpdate()
 			DrawScene(rend.renderview);
 			break;
 		case RenderType::R_T_GO:
+		{
+			Event::PauseEvents();
+
+			RE_GOManager* poolGOThumbnail = nullptr;
+			eastl::string path(THUMBNAILPATH);
+			if (!App::fs->Exists((path += rend.resMD5).c_str())) {
+				ResourceContainer* res = App::resources->At(rend.resMD5);
+				App::resources->Use(rend.resMD5);
+				switch (res->GetType()) {
+				case Resource_Type::R_MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
+				case Resource_Type::R_PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
+				case Resource_Type::R_SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break;
+				}
+				poolGOThumbnail->UseResources();
+				ThumbnailGameObject(poolGOThumbnail->GetRootPtr());
+				poolGOThumbnail->UnUseResources();
+				App::resources->UnUse(rend.resMD5);
+				App::thumbnail->SaveTextureFromFBO(path.c_str());
+			}
+
+			App::thumbnail->Change(rend.resMD5, App::thumbnail->LoadLibraryThumbnail(rend.resMD5));
+			Event::ResumeEvents();
+
+			break;
+		}
 		case RenderType::R_T_MAT:
+		{
+			eastl::string path(THUMBNAILPATH);
+			if (!App::fs->Exists((path += rend.resMD5).c_str()))
+			{
+				ResourceContainer* res = App::resources->At(rend.resMD5);
+				App::resources->Use(rend.resMD5);
+				ThumbnailMaterial(dynamic_cast<RE_Material*>(res));
+				App::resources->UnUse(rend.resMD5);
+				App::thumbnail->SaveTextureFromFBO(path.c_str());
+			}
+
+			App::thumbnail->Change(rend.resMD5, App::thumbnail->LoadLibraryThumbnail(rend.resMD5));
+			break;
+		}
 		case RenderType::R_T_TEX:
+			App::thumbnail->Change(rend.resMD5,App::thumbnail->ThumbnailTexture(rend.resMD5));
+			break;
 		case RenderType::R_T_SKYBOX:
-			App::thumbnail->Change(rend.resMD5);
+			eastl::string path(THUMBNAILPATH);
+			if (!App::fs->Exists((path += rend.resMD5).c_str()))
+			{
+				ResourceContainer* res = App::resources->At(rend.resMD5);
+				App::resources->Use(rend.resMD5);
+				ThumbnailSkyBox(dynamic_cast<RE_SkyBox*>(res));
+				App::resources->UnUse(rend.resMD5);
+				App::thumbnail->SaveTextureFromFBO(path.c_str());
+			}
+			App::thumbnail->Change(rend.resMD5, App::thumbnail->ThumbnailTexture(rend.resMD5));
 			break;
 		}
 
@@ -391,18 +461,21 @@ void ModuleRenderer3D::PushThumnailRend(const char* md5)
 	case R_MODEL:
 	case R_PREFAB:
 		t = RenderType::R_T_GO;
+		rendQueue.push({ t, thumbnailView, md5 });
 		break;
 	case R_MATERIAL:
 		t = RenderType::R_T_MAT;
+		rendQueue.push({ t, thumbnailView, md5 });
 		break;
 	case R_TEXTURE:
 		t = RenderType::R_T_TEX;
+		rendQueue.push({ t, thumbnailView, md5 });
 		break;
 	case R_SKYBOX:
 		t = RenderType::R_T_SKYBOX;
+		rendQueue.push({ t, thumbnailView, md5 });
 		break;
 	}
-	rendQueue.push({ t, thumbnailView, md5 });
 }
 
 void ModuleRenderer3D::DrawScene(const RenderView& render_view)
@@ -679,6 +752,87 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			}
 		}
 	}*/
+}
+
+void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
+{
+	unsigned int c_fbo = thumbnailView.fbos.first;
+	RE_FBOManager::ChangeFBOBind(c_fbo, RE_FBOManager::GetWidth(c_fbo), RE_FBOManager::GetHeight(c_fbo));
+	RE_FBOManager::ClearFBOBuffers(c_fbo, thumbnailView.clear_color.ptr());
+
+	go->TransformModified(false);
+
+	go->ResetGlobalBoundingBoxForAllChilds();
+
+	RE_CompCamera* internalCamera = thumbnailView.camera;
+
+	internalCamera->SetFOV(math::RadToDeg(0.523599f));
+	internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
+	internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
+	internalCamera->LocalRotate(0, 0.5);
+	internalCamera->Update();
+	internalCamera->Focus(go->GetGlobalBoundingBox().CenterPoint());
+	internalCamera->Update();
+
+	eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+	for (auto sMD5 : activeShaders) (dynamic_cast<RE_Shader*>(App::resources->At(sMD5)))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+
+	go->DrawChilds();
+}
+
+void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
+{
+	unsigned int c_fbo = thumbnailView.fbos.first;
+	RE_FBOManager::ChangeFBOBind(c_fbo, RE_FBOManager::GetWidth(c_fbo), RE_FBOManager::GetHeight(c_fbo));
+	RE_FBOManager::ClearFBOBuffers(c_fbo, thumbnailView.clear_color.ptr());
+
+	RE_CompCamera* internalCamera = thumbnailView.camera;
+
+	Event::PauseEvents();
+	internalCamera->SetFOV(math::RadToDeg(0.523599f));
+	internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
+	internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f, 0.f));
+	internalCamera->Update();
+	internalCamera->LocalRotate(0, 1);
+	internalCamera->Update();
+	Event::ResumeEvents();
+
+	eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+	for (auto sMD5 : activeShaders)
+		dynamic_cast<RE_Shader*>(App::resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+
+	mat->UploadToShader(math::float4x4::identity.ptr(), false, true);
+
+	RE_GLCacheManager::ChangeVAO(mat_vao);
+	glDrawElements(GL_TRIANGLES, mat_triangles * 3, GL_UNSIGNED_SHORT, 0);
+}
+
+void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
+{
+	unsigned int c_fbo = thumbnailView.fbos.first;
+	RE_FBOManager::ChangeFBOBind(c_fbo, RE_FBOManager::GetWidth(c_fbo), RE_FBOManager::GetHeight(c_fbo));
+	RE_FBOManager::ClearFBOBuffers(c_fbo, thumbnailView.clear_color.ptr());
+
+	RE_CompCamera* internalCamera = thumbnailView.camera;
+
+	Event::PauseEvents();
+	internalCamera->ForceFOV(125, 140);
+	internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
+	internalCamera->GetTransform()->SetPosition(math::vec(0.f, 0.f, 0.f));
+	internalCamera->Update();
+	Event::ResumeEvents();
+
+	eastl::vector<const char*> activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+	for (auto sMD5 : activeShaders)
+		dynamic_cast<RE_Shader*>(App::resources->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+
+	RE_GLCacheManager::ChangeTextureBind(0);
+
+	RE_Shader* skyboxShader = (RE_Shader*)App::resources->At(App::internalResources.GetDefaultSkyBoxShader());
+	uint skysphereshader = skyboxShader->GetID();
+	RE_GLCacheManager::ChangeShader(skysphereshader);
+	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
+	skybox->DrawSkybox();
 }
 
 inline void ModuleRenderer3D::SetWireframe(bool enable)

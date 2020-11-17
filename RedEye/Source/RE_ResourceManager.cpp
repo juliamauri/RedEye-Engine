@@ -480,7 +480,11 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 
 void RE_ResourceManager::ThumbnailResources()
 {
-	for (auto res : resources) App::renderer3d->PushThumnailRend(res.first);
+	for (auto res : resources) {
+		Resource_Type rT = res.second->GetType();
+		if(rT == R_SCENE || rT == R_PREFAB || rT == R_MODEL || rT == R_SKYBOX || rT == R_MATERIAL) 
+			App::renderer3d->PushThumnailRend(res.first);
+	}
 }
 
 const char* RE_ResourceManager::GetNameFromType(const Resource_Type type)

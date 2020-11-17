@@ -3,6 +3,11 @@
 
 #include <EASTL/map.h>
 
+#define THUMBNAILPATH "Library/Thumbnails/"
+#define DEFTHUMBNAILS "Settings/Icons/"
+#define THUMBNAILSIZE 256
+#define THUMBNAILDATASIZE THUMBNAILSIZE * THUMBNAILSIZE * 4
+
 class RE_CompCamera;
 
 class RE_ThumbnailManager
@@ -13,7 +18,7 @@ public:
 
 	void Init();
 
-	void Change(const char* ref);
+	void Change(const char* ref, unsigned int id);
 	void Delete(const char* ref);
 
 	unsigned int At(const char* ref);
@@ -23,35 +28,25 @@ public:
 	unsigned int GetSelectFileID()const { return selectfile; }
 	unsigned int GetShaderFileID()const { return shaderFile; }
 
-private:
-	void Add(const char* ref);
-
-	unsigned int LoadDefIcon(const char* filename);
-
-
 	unsigned int ThumbnailTexture(const char* ref);
-	unsigned int ThumbnailGameObject(const char* ref);
-	unsigned int ThumbnailMaterial(const char* ref);
-	unsigned int ThumbnailSkyBox(const char* ref);
+
 	void SaveTextureFromFBO(const char* path);
 	unsigned int LoadLibraryThumbnail(const char* ref);
+
+private:
+	unsigned int LoadDefIcon(const char* filename);
+
 
 private:
 	eastl::map<const char*, unsigned int> thumbnails;
 
 	unsigned int singleRenderFBO = 0;
 	unsigned int pboRender = 0;
-	RE_CompCamera* internalCamera = nullptr;
 
 	unsigned int folder = 0;
 	unsigned int file = 0;
 	unsigned int selectfile = 0;
 	unsigned int shaderFile = 0;
-
-	unsigned int VAOSphere = 0;
-	unsigned int VBOSphere = 0;
-	unsigned int EBOSphere = 0;
-	unsigned int sphere_triangle_count = 0;
 };
 
 #endif // !__RETHUMBNAILMANAGER_H__

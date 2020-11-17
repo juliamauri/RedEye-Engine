@@ -65,7 +65,14 @@ void RE_Scene::SetName(const char* _name)
 	SetAssetPath(assetPath.c_str());
 }
 
-RE_GOManager* RE_Scene::GetPool() { return loaded; }
+RE_GOManager* RE_Scene::GetPool() { 
+	RE_GOManager* ret;
+	bool unload = false;
+	if (unload = (loaded == nullptr)) LoadInMemory();
+	ret = loaded->GetNewPoolFromID(loaded->GetRootUID());
+	if (unload) UnloadMemory();
+	return ret;
+}
 
 void RE_Scene::Draw()
 {
