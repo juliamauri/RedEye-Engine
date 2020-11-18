@@ -346,9 +346,6 @@ public:
 
 	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources);
 	void DeserializeJson(JSONNode* node, eastl::map<int, const char* >* resources);
-	
-private:
-	void RecursiveDestroyGO(UID toDestroy);
 
 private:
 	GameObjectsPool gameObjectsPool;

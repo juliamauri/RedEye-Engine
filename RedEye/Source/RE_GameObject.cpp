@@ -529,42 +529,63 @@ eastl::list<const RE_GameObject*> RE_GameObject::GetChildsCPtr() const
 	return ret;
 }
 
-// Recursive
 eastl::vector<UID> RE_GameObject::GetGOandChilds() const
 {
 	eastl::vector<UID> ret;
 	ret.push_back(go_uid);
-	for (auto child : childs)
-	{
-		eastl::vector<UID> childRet = pool_gos->AtPtr(child)->GetGOandChilds();
-		if (!childRet.empty()) ret.insert(ret.end(), childRet.begin(), childRet.end());
+	eastl::stack<UID> gos;
+	for (auto child : childs) gos.push(child);
+
+	while (!gos.empty()) {
+		UID go = gos.top();
+		gos.pop();
+
+		ret.push_back(go);
+
+		RE_GameObject* goPtr = pool_gos->AtPtr(go);
+		for (auto child : goPtr->childs) gos.push(child);
 	}
+
 	return ret;
 }
 
-// Recursive
 eastl::vector<RE_GameObject*> RE_GameObject::GetGOandChildsPtr()
 {
 	eastl::vector<RE_GameObject*> ret;
 	ret.push_back(this);
-	for (auto child : childs)
-	{
-		eastl::vector<RE_GameObject*> childRet = pool_gos->AtPtr(child)->GetGOandChildsPtr();
-		if (!childRet.empty()) ret.insert(ret.end(), childRet.begin(), childRet.end());
+	eastl::stack<UID> gos;
+	for (auto child : childs) gos.push(child);
+
+	while (!gos.empty()) {
+		UID go = gos.top();
+		gos.pop();
+
+		RE_GameObject* goPtr = pool_gos->AtPtr(go);
+		ret.push_back(goPtr);
+
+		for (auto child : goPtr->childs) gos.push(child);
 	}
+
 	return ret;
 }
 
-// Recursive
 eastl::vector<const RE_GameObject*> RE_GameObject::GetGOandChildsCPtr() const
 {
 	eastl::vector<const RE_GameObject*> ret;
 	ret.push_back(this);
-	for (auto child : childs)
-	{
-		eastl::vector<const RE_GameObject*> childRet = pool_gos->AtCPtr(child)->GetGOandChildsCPtr();
-		if (!childRet.empty()) ret.insert(ret.end(), childRet.begin(), childRet.end());
+	eastl::stack<UID> gos;
+	for (auto child : childs) gos.push(child);
+
+	while (!gos.empty()) {
+		UID go = gos.top();
+		gos.pop();
+
+		const RE_GameObject* goPtr = pool_gos->AtCPtr(go);
+		ret.push_back(goPtr);
+
+		for (auto child : goPtr->childs) gos.push(child);
 	}
+
 	return ret;
 }
 

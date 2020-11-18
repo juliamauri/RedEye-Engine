@@ -104,18 +104,22 @@ void RE_GOManager::DestroyGO(UID toDestroy)
 	RE_GameObject* go = gameObjectsPool.AtPtr(toDestroy);
 	go->UnlinkParent();
 
-	for (auto child : go->childs) RecursiveDestroyGO(child);
+	eastl::stack<UID> gos;
+	for (auto child : go->childs) gos.push(child);
 	for (auto comp : go->AllCompData()) componentsPool.DestroyComponent(static_cast<ComponentType>(comp.type), comp.uid);
 
-	gameObjectsPool.DeleteGO(toDestroy);
-}
+	while (!gos.empty()) {
 
-// Recursive
-void RE_GOManager::RecursiveDestroyGO(UID toDestroy)
-{
-	RE_GameObject* go = gameObjectsPool.AtPtr(toDestroy);
-	for (auto child : go->childs) RecursiveDestroyGO(child);
-	for (auto comp : go->AllCompData()) componentsPool.DestroyComponent(static_cast<ComponentType>(comp.type), comp.uid);
+		UID toD = gos.top();
+		gos.pop();
+
+		RE_GameObject* cGO = gameObjectsPool.AtPtr(toD);
+
+		for (auto child : cGO->childs) gos.push(child);
+		for (auto comp : cGO->AllCompData()) componentsPool.DestroyComponent(static_cast<ComponentType>(comp.type), comp.uid);
+
+		gameObjectsPool.DeleteGO(toD);
+	}
 
 	gameObjectsPool.DeleteGO(toDestroy);
 }
