@@ -40,7 +40,7 @@ public:
 private:
 	void ProcessMaterials(const aiScene* scene);
 	void ProcessMeshes(const aiScene* scene);
-	void ProcessNode(RE_GOManager* goPool, aiNode* node, const aiScene* scene, UID currentGO, math::float4x4 transform, bool isRoot = false);
+	void ProcessNodes(RE_GOManager* goPool, aiNode* parentNode, const aiScene* scene, UID parentGO, math::float4x4 patrentTansform);
 
 	void GetTexturesMaterial(aiMaterial * material, eastl::string &fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString &name);
 	void GetTexturePath(aiMaterial * material, eastl::vector<eastl::string> &retPaths, aiTextureType textureType);
