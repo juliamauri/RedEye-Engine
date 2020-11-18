@@ -155,7 +155,7 @@ public:
 	signed long long GetLastTimeModified(const char* path);
 
 private:
-	void RecursiveCopy(const char* origin, const char* dest);
+	void CopyDirectory(const char* origin, const char* dest);
 
 private:
 

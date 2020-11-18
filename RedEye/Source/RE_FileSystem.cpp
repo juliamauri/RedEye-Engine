@@ -184,14 +184,11 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				RE_Directory* dir = (RE_Directory*)process->toProcess;
 				eastl::stack<RE_ProcessPath*> toProcess = dir->CheckAndApply(&metaRecentlyAdded);
 
-				if (!toProcess.empty())
+				while (!toProcess.empty())
 				{
-					while (!toProcess.empty())
-					{
-						RE_ProcessPath* process = toProcess.top();
-						toProcess.pop();
-						assetsToProcess.push(process);
-					}
+					RE_ProcessPath* process = toProcess.top();
+					toProcess.pop();
+					assetsToProcess.push(process);
 				}
 
 				assetsDirectories.push_back(dir);
@@ -274,7 +271,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					{
 						int count = toImport.size();
 						iter--;
-						while ((((*iter)->fType != F_PREFAB) || ((*iter)->fType != F_SCENE) || ((*iter)->fType != F_MODEL)) && count > 1)
+						while (((*iter)->fType != F_PREFAB || (*iter)->fType != F_SCENE || (*iter)->fType != F_MODEL) && count > 1)
 						{
 							count--;
 							iter--;
@@ -521,7 +518,7 @@ void RE_FileSystem::HandleDropedFile(const char * file)
 	{
 		finalPath += fileName + "/";
 		App::fs->AddPath(file, finalPath.c_str());
-		RecursiveCopy(exportPath.c_str(), App::editor->GetAssetsPanelPath());
+		CopyDirectory(exportPath.c_str(), App::editor->GetAssetsPanelPath());
 		App::fs->RemovePath(file);
 	}
 }
@@ -636,36 +633,46 @@ signed long long RE_FileSystem::GetLastTimeModified(const char* path)
 	return 0;
 }
 
-void RE_FileSystem::RecursiveCopy(const char * origin, const char * dest)
+void RE_FileSystem::CopyDirectory(const char * origin, const char * dest)
 {
-	eastl::string iterOrigin(origin);
-	eastl::string iterDest(dest);
+	eastl::stack<eastl::pair< eastl::string, eastl::string>> copyDir;
+	copyDir.push({ origin , dest });
 
-	for (char** i = PHYSFS_enumerateFiles(iterOrigin.c_str()); *i != NULL; i++)
-	{
-		eastl::string inOrigin = iterOrigin + *i;
-		eastl::string inDest(iterDest);
-		inDest += *i;
+	while (!copyDir.empty()) {
 
-		PHYSFS_Stat fileStat;
-		if (PHYSFS_stat(inOrigin.c_str(), &fileStat))
+		eastl::string origin(copyDir.top().first);
+		eastl::string dest(copyDir.top().second);
+		copyDir.pop();
+
+		char** rc = PHYSFS_enumerateFiles(origin.c_str());
+		for (char** i = rc; *i != NULL; i++)
 		{
-			if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY)
+			eastl::string inOrigin = origin + *i;
+			eastl::string inDest(dest);
+
+			inDest += *i;
+
+			PHYSFS_Stat fileStat;
+			if (PHYSFS_stat(inOrigin.c_str(), &fileStat))
 			{
-				inOrigin += "/";
-				inDest += "/";
-				RecursiveCopy(inOrigin.c_str(), inDest.c_str());
-			}
-			else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR)
-			{
-				RE_FileIO fileOrigin(inOrigin.c_str());
-				if (fileOrigin.Load())
+				if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY)
 				{
-					RE_FileIO fileDest(inDest.c_str(), GetZipPath());
-					fileDest.Save(fileOrigin.GetBuffer(), fileOrigin.GetSize());
+					inOrigin += "/";
+					inDest += "/";
+					copyDir.push({ inOrigin, inDest });
+				}
+				else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR)
+				{
+					RE_FileIO fileOrigin(inOrigin.c_str());
+					if (fileOrigin.Load())
+					{
+						RE_FileIO fileDest(inDest.c_str(), GetZipPath());
+						fileDest.Save(fileOrigin.GetBuffer(), fileOrigin.GetSize());
+					}
 				}
 			}
 		}
+		PHYSFS_freeList(rc);
 	}
 }
 
@@ -1513,6 +1520,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 					if (newFolder)
 					{
 						RE_Directory* newDirectory = new RE_Directory();
+						if (inPath.find_last_of("/", inPath.size() - 1) != eastl::string::npos)inPath += "/";
 						newDirectory->SetPath(inPath.c_str());
 						newDirectory->parent = this;
 						newDirectory->pType = D_FOLDER;

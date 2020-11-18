@@ -71,7 +71,11 @@ void RE_ThumbnailManager::Delete(const char* ref)
 	}
 }
 
-unsigned int RE_ThumbnailManager::At(const char* ref) { return thumbnails.at(ref); }
+unsigned int RE_ThumbnailManager::At(const char* ref) { 
+
+	return (thumbnails.find(ref) != thumbnails.end()) ? thumbnails.at(ref) : 0;
+
+}
 
 unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
 {
