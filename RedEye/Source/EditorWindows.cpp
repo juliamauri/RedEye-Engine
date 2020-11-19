@@ -1168,84 +1168,61 @@ void SceneEditorWindow::Draw(bool secondary)
 		UID selected_uid;
 		if (selected_uid = App::editor->GetSelected()) {
 			RE_GameObject* selected = ModuleScene::GetGOPtr(selected_uid);
+			RE_GameObject* parent = selected->GetParentPtr();
+			RE_CompTransform* sTransform = selected->GetTransformPtr();
 
-			RE_CompTransform* sTransform = static_cast<RE_CompTransform*>(selected->GetCompPtr(C_TRANSFORM));
 			static float matA[16];
-			static float matrixTranslation[3], matrixRotation[3], matrixScale[3];
 			static math::vec pos;
-			static math::float3x3 rot;
+			static math::Quat rot;
 			static math::vec scl;
 
-			if (mode == ImGuizmo::MODE::LOCAL)
-				ImGuizmo::RecomposeMatrixFromComponents(sTransform->GetLocalPosition().ptr(), sTransform->GetLocalEulerRotation().ptr(), sTransform->GetLocalScale().ptr(), matA);
-			else {
-				math::float4x4 mat = sTransform->GetGlobalMatrix();
-				mat.Transpose();
-				mat.Decompose(pos, rot, scl);
-				ImGuizmo::RecomposeMatrixFromComponents(pos.ptr(), rot.ToEulerXYZ().ptr(), scl.ptr(), matA);
-			}
-
 			RE_CompCamera* eCamera = RE_CameraManager::EditorCamera();
+			math::float4x4 cameraView = eCamera->GetView();
+
+			//filling matA
+			sTransform->GetGlobalMatrix().Transposed().Decompose(pos, rot, scl);
+			if (mode == ImGuizmo::MODE::WORLD) {
+				rot = math::Quat::identity;
+				scl = math::vec::one;
+			}
+			ImGuizmo::RecomposeMatrixFromComponents(pos.ptr(), rot.ToEulerXYZ().ptr(), scl.ptr(), matA);
+
 			math::float4x4 deltamatrix = math::float4x4::identity * RE_TimeManager::GetDeltaTime();
 
-
+			//SetRect of window at imgizmo
 			ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 			ImVec2 vMax = ImGui::GetWindowContentRegionMax();
-
 			vMin.x += ImGui::GetWindowPos().x;
 			vMin.y += ImGui::GetWindowPos().y;
 			vMax.x += ImGui::GetWindowPos().x;
 			vMax.y += ImGui::GetWindowPos().y;
-
 			ImGuizmo::SetRect(vMin.x, vMin.y, vMax.x - vMin.x, vMax.y - vMin.y);
 
 
 			ImGuizmo::SetDrawlist();
-			ImGuizmo::Manipulate(eCamera->GetViewPtr(), eCamera->GetProjectionPtr(), operation, mode, matA, deltamatrix.ptr());
+			ImGuizmo::Manipulate(cameraView.ptr(), eCamera->GetProjectionPtr(), operation, mode, matA, deltamatrix.ptr());
 			if (ImGuizmo::IsUsing()) {
+				static float matrixTranslation[3], matrixRotation[3], matrixScale[3];
 
 				ImGuizmo::DecomposeMatrixToComponents(matA, matrixTranslation, matrixRotation, matrixScale);
 
-				RE_GameObject* parent = selected->GetParentPtr();
-				if (mode == ImGuizmo::MODE::WORLD) {
-					math::float4x4 matParent = math::float4x4::identity;
-					if (parent != nullptr) matParent = static_cast<RE_CompTransform*>(parent->GetCompPtr(C_TRANSFORM))->GetGlobalMatrix();
-					matParent.Transpose();
+				math::float4x4 localMat = parent->GetTransformPtr()->GetGlobalMatrix().InverseTransposed();
+				math::float4x4 globalMat = math::float4x4::FromTRS(math::vec(matrixTranslation), math::Quat::FromEulerXYZ(matrixRotation[0], matrixRotation[1], matrixRotation[2]), math::vec(matrixScale));
+				localMat = localMat * globalMat;
 
-					math::float4x4 localMat = matParent.Inverted();
-					math::float4x4 globalMat = math::float4x4::FromTRS(math::vec(matrixTranslation), math::Quat::FromEulerXYZ(matrixRotation[0], matrixRotation[1], matrixRotation[2]), math::vec(matrixScale));
-					localMat = localMat * globalMat;
+				localMat.Decompose(pos, rot, scl);
 
-					localMat.Decompose(pos, rot, scl);
-
-					switch (operation)
-					{
-					case ImGuizmo::TRANSLATE:
-						sTransform->SetPosition(pos);
-						break;
-					case ImGuizmo::ROTATE:
-						sTransform->SetRotation(rot.ToEulerXYZ());
-						break;
-					case ImGuizmo::SCALE:
-						sTransform->SetScale(scl);
-						break;
-					}
-
-				}
-				else {
-					switch (operation)
-					{
-					case ImGuizmo::TRANSLATE:
-						sTransform->SetPosition(math::vec(matrixTranslation));
-						break;
-					case ImGuizmo::ROTATE:
-						sTransform->SetRotation(math::vec(matrixRotation));
-						break;
-					case ImGuizmo::SCALE:
-						sTransform->SetScale(math::vec(matrixScale));
-						break;
-					}
-
+				switch (operation)
+				{
+				case ImGuizmo::TRANSLATE:
+					sTransform->SetPosition(pos);
+					break;
+				case ImGuizmo::ROTATE:
+					sTransform->SetRotation(rot.ToEulerXYZ());
+					break;
+				case ImGuizmo::SCALE:
+					sTransform->SetScale(scl);
+					break;
 				}
 			}
 		}
