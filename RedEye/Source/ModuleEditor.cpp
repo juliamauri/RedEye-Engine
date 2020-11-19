@@ -131,6 +131,7 @@ bool ModuleEditor::Start()
 update_status ModuleEditor::PreUpdate()
 {
 	OPTICK_CATEGORY("PreUpdate ModuleEditor", Optick::Category::GameLogic);
+	ImGuizmo::SetOrthographic(!RE_CameraManager::EditorCamera()->isPrespective());
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame(App::window->GetWindow());
 	ImGui::NewFrame();

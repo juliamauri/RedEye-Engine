@@ -371,7 +371,7 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 				newMaterial->opacity = opacity;
 
 			GetTexturesMaterial(material, fileTexturePath, aiTextureType_SHININESS, &newMaterial->tShininess, name);
-			float shininess = 0.f;
+			float shininess = 1.f;
 			if (AI_SUCCESS == material->Get(AI_MATKEY_SHININESS, shininess))
 				newMaterial->shininess = shininess;
 

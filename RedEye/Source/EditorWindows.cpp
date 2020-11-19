@@ -1128,7 +1128,6 @@ void SceneEditorWindow::UpdateViewPort()
 	RE_CameraManager::EditorCamera()->GetTargetViewPort(viewport);
 	viewport.x = (width - viewport.z) * 0.5f;
 	viewport.y = (heigth - viewport.w) * 0.5f + 20;
-	ImGuizmo::SetRect(0, 0, viewport.z, viewport.w);
 }
 
 void SceneEditorWindow::Recalc() { recalc = true; }
@@ -1169,7 +1168,6 @@ void SceneEditorWindow::Draw(bool secondary)
 		UID selected_uid;
 		if (selected_uid = App::editor->GetSelected()) {
 			RE_GameObject* selected = ModuleScene::GetGOPtr(selected_uid);
-			ImGuizmo::SetDrawlist();
 
 			RE_CompTransform* sTransform = static_cast<RE_CompTransform*>(selected->GetCompPtr(C_TRANSFORM));
 			static float matA[16];
@@ -1178,7 +1176,7 @@ void SceneEditorWindow::Draw(bool secondary)
 			static math::float3x3 rot;
 			static math::vec scl;
 
-			if(mode == ImGuizmo::MODE::LOCAL)
+			if (mode == ImGuizmo::MODE::LOCAL)
 				ImGuizmo::RecomposeMatrixFromComponents(sTransform->GetLocalPosition().ptr(), sTransform->GetLocalEulerRotation().ptr(), sTransform->GetLocalScale().ptr(), matA);
 			else {
 				math::float4x4 mat = sTransform->GetGlobalMatrix();
@@ -1190,14 +1188,27 @@ void SceneEditorWindow::Draw(bool secondary)
 			RE_CompCamera* eCamera = RE_CameraManager::EditorCamera();
 			math::float4x4 deltamatrix = math::float4x4::identity * RE_TimeManager::GetDeltaTime();
 
+
+			ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+			ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+
+			vMin.x += ImGui::GetWindowPos().x;
+			vMin.y += ImGui::GetWindowPos().y;
+			vMax.x += ImGui::GetWindowPos().x;
+			vMax.y += ImGui::GetWindowPos().y;
+
+			ImGuizmo::SetRect(vMin.x, vMin.y, vMax.x - vMin.x, vMax.y - vMin.y);
+
+
+			ImGuizmo::SetDrawlist();
 			ImGuizmo::Manipulate(eCamera->GetViewPtr(), eCamera->GetProjectionPtr(), operation, mode, matA, deltamatrix.ptr());
 			if (ImGuizmo::IsUsing()) {
 
 				ImGuizmo::DecomposeMatrixToComponents(matA, matrixTranslation, matrixRotation, matrixScale);
 
+				RE_GameObject* parent = selected->GetParentPtr();
 				if (mode == ImGuizmo::MODE::WORLD) {
 					math::float4x4 matParent = math::float4x4::identity;
-					RE_GameObject* parent = selected->GetParentPtr();
 					if (parent != nullptr) matParent = static_cast<RE_CompTransform*>(parent->GetCompPtr(C_TRANSFORM))->GetGlobalMatrix();
 					matParent.Transpose();
 

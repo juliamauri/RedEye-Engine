@@ -370,7 +370,7 @@ void RE_Material::DrawMaterialEdit()
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Shininess values"))
 		{
-			if (usingOnMat[SHININESS] && ImGui::InputFloat("Shininess", &shininess)) applySave = true;
+			if (usingOnMat[SHININESS] && ImGui::DragFloat("Shininess", &shininess, 0.1f, 1.0f, 32.0f)) applySave = true;
 			if (usingOnMat[SHININESSSTRENGHT] && ImGui::InputFloat("Shininess strenght", &shininessStrenght)) applySave = true;
 			if (usingOnMat[TSHININESS]) DrawTextures("Shininess", &tShininess);
 			ImGui::EndMenu();

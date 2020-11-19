@@ -51,7 +51,7 @@ public:
 	void GetTargetWidthHeight(int &width, int &height) const;
 	void GetTargetWidthHeight(float &width, float &height) const;
 	void GetTargetViewPort(math::float4 &viewPort) const;
-
+	bool isPrespective()const { return isPerspective;  }
 	float GetNearPlane() const;
 	float GetFarPlane() const;
 

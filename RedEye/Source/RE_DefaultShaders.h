@@ -234,7 +234,7 @@
 "	vec3 Normal = normalize(texture(gNormal, TexCoord).rgb);\n"																						\
 "	vec3 Diffuse = texture(gAlbedo, TexCoord).rgb;\n"																								\
 "	float Specular = texture(gSpec, TexCoord).r;\n"																									\
-"	float shininess = 1.0; //texture(gSpec, TexCoord).g;\n"																							\
+"	float shininess = texture(gSpec, TexCoord).g;\n"																							\
 "	\n"																																				\
 "   vec3 lighting = vec3(0.0, 0.0, 0.0);\n"				    																						\
 "	vec3 viewDir = normalize(viewPos - Position);\n"																								\
