@@ -435,6 +435,11 @@ void PlayPauseWindow::Draw(bool secondary)
 		static bool colored = false;
 		ImGui::SameLine();
 
+
+		if (App::input->GetKey(SDL_SCANCODE_Q) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::TRANSLATE; changed = true; }
+		if (App::input->GetKey(SDL_SCANCODE_W) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::ROTATE;    changed = true; }
+		if (App::input->GetKey(SDL_SCANCODE_E) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::SCALE;	    changed = true; }
+
 		if (!colored && o == ImGuizmo::OPERATION::TRANSLATE) {
 			ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, { 0.0f, 1.0f, 0.0f, 1.0f });
 			colored = true;
@@ -1191,7 +1196,7 @@ void SceneEditorWindow::Draw(bool secondary)
 		ImGui::SetCursorPos({ viewport.x, viewport.y });
 		ImGui::Image((void*)App::renderer3d->GetRenderedEditorSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 
-		if(!ImGuizmo::IsOver() && isWindowSelected && App::input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && App::input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN){
+		if(!ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && isWindowSelected && App::input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && App::input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN){
 			ImVec2 mousePosOnThis = ImGui::GetMousePos();
 			mousePosOnThis.x = (mousePosOnThis.x - ImGui::GetCursorScreenPos().x + 4 < 0) ? 0 : mousePosOnThis.x - ImGui::GetCursorScreenPos().x + 4;
 			mousePosOnThis.y = (ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y + 4 < 0) ? 0 : ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y + 4;
@@ -1206,17 +1211,19 @@ void SceneEditorWindow::Draw(bool secondary)
 
 			static float matA[16];
 			static math::vec pos;
-			static math::Quat rot;
+			static math::Quat rot, lastRot;
 			static math::vec scl;
 
 			RE_CompCamera* eCamera = RE_CameraManager::EditorCamera();
 			math::float4x4 cameraView = eCamera->GetView();
 
+			bool isGlobal = false;
+
 			//filling matA
 			sTransform->GetGlobalMatrix().Transposed().Decompose(pos, rot, scl);
-			if (mode == ImGuizmo::MODE::WORLD) {
+			if (isGlobal = (mode == ImGuizmo::MODE::WORLD)) {
+				lastRot = rot;
 				rot = math::Quat::identity;
-				scl = math::vec::one;
 			}
 			ImGuizmo::RecomposeMatrixFromComponents(pos.ptr(), rot.ToEulerXYZ().ptr(), scl.ptr(), matA);
 
@@ -1251,7 +1258,7 @@ void SceneEditorWindow::Draw(bool secondary)
 					sTransform->SetPosition(pos);
 					break;
 				case ImGuizmo::ROTATE:
-					sTransform->SetRotation(rot.ToEulerXYZ());
+					sTransform->SetRotation(isGlobal ? (rot * lastRot).ToEulerXYZ() : rot.ToEulerXYZ() );
 					break;
 				case ImGuizmo::SCALE:
 					sTransform->SetScale(scl);
