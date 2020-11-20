@@ -153,6 +153,8 @@ RE_PrimitiveManager::PlatonicData RE_PrimitiveManager::CreateSphere(int slices, 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ret.ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, sphere->triangles, GL_STATIC_DRAW);
 
+	RE_GLCacheManager::ChangeVAO(0);
+
 	ret.triangles = sphere->ntriangles;
 
 	par_shapes_free_mesh(sphere);
@@ -217,6 +219,8 @@ void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int*
 	glGenBuffers(1, ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, *triangles * sizeof(unsigned short) * 3u, plato->triangles, GL_STATIC_DRAW);
+
+	RE_GLCacheManager::ChangeVAO(0);
 	
 	DEL_A(points);
 	DEL_A(normals);

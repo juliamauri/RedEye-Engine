@@ -7,7 +7,8 @@
 void RE_GLCacheManager::ChangeShader(unsigned int ID)
 {
 	static unsigned int currentShaderID = 0;
-	if (currentShaderID != ID) RE_ShaderImporter::use(currentShaderID = ID);
+	if (currentShaderID != ID)
+		RE_ShaderImporter::use(currentShaderID = ID);
 }
 
 void RE_GLCacheManager::ChangeVAO(unsigned int VAO)

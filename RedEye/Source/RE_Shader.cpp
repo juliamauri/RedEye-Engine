@@ -151,6 +151,7 @@ void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float 
 	if (using_clip_plane != -1) RE_ShaderImporter::setFloat(uniforms[using_clip_plane].location, (clipDistance) ? 1.0f : -1.0f);
 	if (clip_plane != -1) RE_ShaderImporter::setFloat(uniforms[clip_plane].location, clipPlane.x, clipPlane.y, clipPlane.z, clipPlane.w);
 	if (view_pos != -1) RE_ShaderImporter::setFloat(uniforms[view_pos].location, camera->GetTransform()->GetGlobalPosition());
+	RE_GLCacheManager::ChangeShader(0);
 }
 
 void RE_Shader::UploadModel(const float* _model)

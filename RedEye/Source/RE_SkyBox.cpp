@@ -395,6 +395,8 @@ void RE_SkyBox::DrawSkybox() const
 	glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCacheManager::ChangeShader(0);
 }
 
 void RE_SkyBox::LibraryLoad()
@@ -469,6 +471,8 @@ void RE_SkyBox::LoadSkyBoxSphere()
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, &indexes[0], GL_STATIC_DRAW);
+
+	RE_GLCacheManager::ChangeVAO(0);
 
 	triangle_count = sphere->ntriangles;
 	par_shapes_free_mesh(sphere);

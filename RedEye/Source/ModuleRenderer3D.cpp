@@ -169,10 +169,12 @@ update_status ModuleRenderer3D::PostUpdate()
 	// Setup Draws
 	activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 
+	current_lighting = LightMode::LIGHT_DISABLED;
+
+
 	while (!rendQueue.empty()) {
 		RenderQueue rend = rendQueue.top();
 		rendQueue.pop();
-
 
 		RE_GOManager* poolGOThumbnail = nullptr;
 		eastl::string path(THUMBNAILPATH);
@@ -187,7 +189,7 @@ update_status ModuleRenderer3D::PostUpdate()
 
 		switch (rend.type)
 		{
-		case RenderType::R_T_GO:
+		case RenderType::T_R_GO:
 		{
 			Event::PauseEvents();
 			if (!exist) {
@@ -211,7 +213,7 @@ update_status ModuleRenderer3D::PostUpdate()
 
 			break;
 		}
-		case RenderType::R_T_MAT:
+		case RenderType::T_R_MAT:
 		{
 			if (!exist)
 			{
@@ -225,10 +227,10 @@ update_status ModuleRenderer3D::PostUpdate()
 			App::thumbnail->Change(rend.resMD5, App::thumbnail->LoadLibraryThumbnail(rend.resMD5));
 			break;
 		}
-		case RenderType::R_T_TEX:
+		case RenderType::T_R_TEX:
 			App::thumbnail->Change(rend.resMD5,App::thumbnail->ThumbnailTexture(rend.resMD5));
 			break;
-		case RenderType::R_T_SKYBOX:
+		case RenderType::T_R_SKYBOX:
 			if (!exist)
 			{
 				ResourceContainer* res = App::resources->At(rend.resMD5);
@@ -254,7 +256,7 @@ update_status ModuleRenderer3D::PostUpdate()
 
 		switch (rend.type)
 		{
-		case RenderType::R_SCENE:
+		case RenderType::R_R_SCENE:
 			DrawScene(rend.renderview);
 			break;
 		}
@@ -470,30 +472,31 @@ unsigned int ModuleRenderer3D::GetRenderedGameSceneTexture() const
 
 void ModuleRenderer3D::PushSceneRend(RenderView& rV)
 {
-	rendQueue.push({ RenderType::R_SCENE, rV, nullptr});
+	rendQueue.push({ RenderType::R_R_SCENE, rV, nullptr});
 }
 
 void ModuleRenderer3D::PushThumnailRend(const char* md5, bool redo)
 {
-	RenderType t = RenderType::R_T_GO;
-	switch (App::resources->At(md5)->GetType())
+	RenderType t = RenderType::T_R_GO;
+	Resource_Type rType = App::resources->At(md5)->GetType();
+	switch (rType)
 	{
 	case R_SCENE:
 	case R_MODEL:
 	case R_PREFAB:
-		t = RenderType::R_T_GO;
+		t = RenderType::T_R_GO;
 		rendQueue.push({ t, thumbnailView, md5, redo });
 		break;
 	case R_MATERIAL:
-		t = RenderType::R_T_MAT;
+		t = RenderType::T_R_MAT;
 		rendQueue.push({ t, thumbnailView, md5, redo });
 		break;
 	case R_TEXTURE:
-		t = RenderType::R_T_TEX;
+		t = RenderType::T_R_TEX;
 		rendQueue.push({ t, thumbnailView, md5, redo });
 		break;
 	case R_SKYBOX:
-		t = RenderType::R_T_SKYBOX;
+		t = RenderType::T_R_SKYBOX;
 		rendQueue.push({ t, thumbnailView, md5, redo });
 		break;
 	}
@@ -786,9 +789,6 @@ void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
 	RE_CompCamera* internalCamera = thumbnailView.camera;
 
 	internalCamera->SetFOV(math::RadToDeg(0.523599f));
-	internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
-	internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
-	internalCamera->LocalRotate(0, 0.5);
 	internalCamera->Update();
 	internalCamera->Focus(go->GetGlobalBoundingBox().CenterPoint());
 	internalCamera->Update();
@@ -808,8 +808,6 @@ void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
 
 	Event::PauseEvents();
 	internalCamera->SetFOV(math::RadToDeg(0.523599f));
-	internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
-	internalCamera->GetTransform()->SetPosition(math::vec(0.f, 5.f, 0.f));
 	internalCamera->Update();
 	internalCamera->LocalRotate(0, 1);
 	internalCamera->Update();
@@ -822,6 +820,8 @@ void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
 
 	RE_GLCacheManager::ChangeVAO(mat_vao);
 	glDrawElements(GL_TRIANGLES, mat_triangles * 3, GL_UNSIGNED_SHORT, 0);
+	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCacheManager::ChangeShader(0);
 }
 
 void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
@@ -923,6 +923,7 @@ void ModuleRenderer3D::DrawQuad()
 	RE_GLCacheManager::ChangeVAO(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCacheManager::ChangeShader(0);
 }
 
 void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)

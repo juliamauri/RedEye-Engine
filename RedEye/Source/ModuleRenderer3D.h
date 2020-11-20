@@ -107,11 +107,11 @@ public:
 
 public:
 	enum RenderType {
-		R_SCENE,
-		R_T_GO,
-		R_T_MAT,
-		R_T_TEX,
-		R_T_SKYBOX
+		R_R_SCENE,
+		T_R_GO,
+		T_R_MAT,
+		T_R_TEX,
+		T_R_SKYBOX
 	};
 	struct RenderQueue {
 		RenderQueue(RenderType t, RenderView& rv, const char* r, bool re = false) : type(t), renderview(rv), resMD5(r), redo(re) {}

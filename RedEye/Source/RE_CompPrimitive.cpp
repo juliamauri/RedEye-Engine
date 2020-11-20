@@ -94,7 +94,7 @@ void RE_CompGrid::GridSetUp(int divisions)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
 
-	RE_GLCacheManager::ChangeVAO(VAO);
+	RE_GLCacheManager::ChangeVAO(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
@@ -119,6 +119,7 @@ void RE_CompGrid::Draw() const
 
 	RE_GLCacheManager::ChangeVAO(VAO);
 	glDrawArrays(GL_LINES, 0, 400);
+	RE_GLCacheManager::ChangeVAO(0);
 }
 
 void RE_CompGrid::DrawProperties()
@@ -212,6 +213,7 @@ void RE_CompRock::Draw() const
 	// Draw
 	RE_GLCacheManager::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	RE_GLCacheManager::ChangeVAO(0);
 }
 
 void RE_CompRock::DrawProperties()
@@ -356,6 +358,8 @@ void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, rock->ntriangles * sizeof(unsigned short) * 3, rock->triangles, GL_STATIC_DRAW);
 
+		RE_GLCacheManager::ChangeVAO(0);
+
 		triangle_count = rock->ntriangles;
 
 		par_shapes_free_mesh(rock);
@@ -410,6 +414,7 @@ void RE_CompPlatonic::Draw() const
 	// Draw
 	RE_GLCacheManager::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	RE_GLCacheManager::ChangeVAO(0);
 }
 
 void RE_CompPlatonic::DrawProperties()
@@ -502,6 +507,7 @@ void RE_CompParametric::Draw() const
 
 	RE_GLCacheManager::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	RE_GLCacheManager::ChangeVAO(0);
 }
 
 void RE_CompParametric::DrawProperties()
@@ -651,6 +657,8 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 	glGenBuffers(1, &(GLuint)EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, param->ntriangles * sizeof(unsigned short) * 3u, param->triangles, GL_STATIC_DRAW);
+
+	RE_GLCacheManager::ChangeVAO(0);
 
 	triangle_count = param->ntriangles;
 

@@ -86,6 +86,7 @@ void RE_Material::Draw()
 	if (!isInternal() && applySave && ImGui::Button("Save Changes"))
 	{
 		Save();
+		App::renderer3d->PushThumnailRend(GetMD5(), true);
 		applySave = false;
 	}
 

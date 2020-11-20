@@ -195,6 +195,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 	// Draw mesh
 	RE_GLCacheManager::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, nullptr);
+	RE_GLCacheManager::ChangeVAO(0);
 
 	// MESH DEBUG DRAWING
 	if (lFaceNormals || lVertexNormals)
@@ -209,6 +210,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 			RE_GLCacheManager::ChangeVAO(VAO_FaceNormals);
 			glDrawArrays(GL_LINES, 0, triangle_count * 2);
+			RE_GLCacheManager::ChangeVAO(0);
 
 			// Draw points
 			color.Set(1.f, 1.f, 1.f);
@@ -217,6 +219,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			glPointSize(10.0f);
 			RE_GLCacheManager::ChangeVAO(VAO_FaceCenters);
 			glDrawArrays(GL_POINTS, 0, triangle_count);
+			RE_GLCacheManager::ChangeVAO(0);
 
 			// Reset Draw mode
 			glPointSize(1.0f);
@@ -230,6 +233,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 			RE_GLCacheManager::ChangeVAO(VAO_VertexNormals);
 			glDrawArrays(GL_LINES, 0, triangle_count * 3 * 2);
+			RE_GLCacheManager::ChangeVAO(0);
 
 			// Draw points
 			color.Set(1.f, 1.f, 1.f);
@@ -238,12 +242,15 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			glPointSize(10.0f);
 			RE_GLCacheManager::ChangeVAO(VAO_Vertex);
 			glDrawArrays(GL_POINTS, 0, triangle_count * 3);
+			RE_GLCacheManager::ChangeVAO(0);
 
 			// Reset Draw mode
 			glPointSize(1.0f);
 			glDisable(GL_PROGRAM_POINT_SIZE);
 		}
 	}
+
+	RE_GLCacheManager::ChangeShader(0);
 }
 
 void RE_Mesh::Draw()
@@ -370,6 +377,7 @@ void RE_Mesh::SetupMesh()
 		glEnableVertexAttribArray(4);
 		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, strideSize, reinterpret_cast<void*>(accumulativeOffset));
 	}
+	RE_GLCacheManager::ChangeVAO(0);
 }
 
 math::AABB RE_Mesh::GetAABB() const { return bounding_box; }
@@ -412,6 +420,8 @@ void RE_Mesh::loadVertexNormals()
 
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+
+		RE_GLCacheManager::ChangeVAO(0);
 
 		lVertexNormals = true;
 	}
@@ -462,6 +472,8 @@ void RE_Mesh::loadFaceNormals()
 	glGenVertexArrays(1, &VAO_FaceCenters);
 	glGenBuffers(1, &VBO_FaceCenters);
 
+	RE_GLCacheManager::ChangeVAO(0);
+
 	RE_GLCacheManager::ChangeVAO(VAO_FaceCenters);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_FaceCenters);
 
@@ -469,6 +481,8 @@ void RE_Mesh::loadFaceNormals()
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+
+	RE_GLCacheManager::ChangeVAO(0);
 
 	lFaceNormals = true;
 }
@@ -538,6 +552,8 @@ void RE_Mesh::LoadVertex()
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+
+	RE_GLCacheManager::ChangeVAO(0);
 }
 
 void RE_Mesh::ClearVertex()

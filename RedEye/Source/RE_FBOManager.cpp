@@ -94,12 +94,26 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 	glDrawBuffers(drawFubbersize, DrawBuffers);
 
 	fbos.insert(eastl::pair<unsigned int, RE_FBO>(newFbo.ID, newFbo));
-
-	if (glCheckFramebufferStatus(newFbo.ID) != GL_FRAMEBUFFER_COMPLETE)
+	int error = 0;
+	if ((error = glCheckFramebufferStatus(GL_FRAMEBUFFER)) == GL_FRAMEBUFFER_COMPLETE)
 		ret = newFbo.ID;
 	else {
 		ClearFBO(newFbo.ID);
-		RE_LOG_ERROR("FBO can't be created.");
+
+		switch (error) {
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+			RE_LOG_ERROR("Not all framebuffer attachment points are framebuffer attachment complete..");
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
+			RE_LOG_ERROR("Not all Not all attached images have the same width and height.");
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+			RE_LOG_ERROR("No images are attached to the framebuffer.");
+			break;
+		case GL_FRAMEBUFFER_UNSUPPORTED:
+			RE_LOG_ERROR("The combination of internal formats of the attached images violates an implementation-dependent set of restrictions.");
+			break;
+		}
 	}
 
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
@@ -138,11 +152,26 @@ int RE_FBOManager::CreateDeferredFBO(unsigned int width, unsigned int height)
 
 	// Check status
 	fbos.insert(eastl::pair<unsigned int, RE_FBO>(newFbo.ID, newFbo));
-	if (glCheckFramebufferStatus(newFbo.ID) != GL_FRAMEBUFFER_COMPLETE)
+	int error = 0;
+	if ((error = glCheckFramebufferStatus(GL_FRAMEBUFFER)) == GL_FRAMEBUFFER_COMPLETE)
 		ret = newFbo.ID;
 	else {
 		ClearFBO(newFbo.ID);
-		RE_LOG_ERROR("FBO can't be created.");
+
+		switch (error) {
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+			RE_LOG_ERROR("Not all framebuffer attachment points are framebuffer attachment complete..");
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
+			RE_LOG_ERROR("Not all Not all attached images have the same width and height.");
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+			RE_LOG_ERROR("No images are attached to the framebuffer.");
+			break;
+		case GL_FRAMEBUFFER_UNSUPPORTED:
+			RE_LOG_ERROR("The combination of internal formats of the attached images violates an implementation-dependent set of restrictions.");
+			break;
+		}
 	}
 
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
