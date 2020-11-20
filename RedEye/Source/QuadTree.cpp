@@ -147,7 +147,6 @@ void QTree::QTreeNode::AddNodes()
 void QTree::QTreeNode::Distribute()
 {
 	eastl::list<RE_GameObject*>::iterator it = g_objs.begin();
-	
 	while (it != g_objs.end())
 	{
 		bool intersecting[4];
@@ -177,11 +176,7 @@ void QTree::QTreeNode::Distribute()
 	}
 }
 
-QTree::QTree()
-{
-	SetDrawMode(ALL);
-	SetDrawMode(BOTTOM);
-}
+QTree::QTree() { SetDrawMode(BOTTOM); }
 
 QTree::~QTree()
 {}
@@ -293,27 +288,15 @@ void QTree::PushWithChilds(RE_GameObject * g_obj)
 	}
 }
 
-
-#define NullIndex -1
-
-AABBDynamicTree::AABBDynamicTree() :  size(0), node_count(0), root_index(NullIndex)
-{}
-
-AABBDynamicTree::~AABBDynamicTree()
-{}
+AABBDynamicTree::AABBDynamicTree() {}
+AABBDynamicTree::~AABBDynamicTree() {}
 
 void AABBDynamicTree::PushNode(UID go_index, AABB box)
 {
-	if (box.Size().Length() == 0.f)
-	{
-		UID hgfd = go_index;
-	}
-
-
 	// Stage 0: Allocate Leaf Node
 	int leafIndex = AllocateLeafNode(box, go_index);
 	
-	if (root_index != NullIndex)
+	if (root_index != -1)
 	{
 		// Stage 1: find the best sibling for the new leaf
 		AABBDynamicTreeNode rootNode = At(root_index);
@@ -342,7 +325,7 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 				float inherited_cost = 0.f;
 
 				AABBDynamicTreeNode iNode;
-				for (int i = currentSNode.parent_index; i != NullIndex; i = iNode.parent_index)
+				for (int i = currentSNode.parent_index; i != -1; i = iNode.parent_index)
 				{
 					iNode = At(i);
 					inherited_cost += Union(iNode.box, box).SurfaceArea() - iNode.box.SurfaceArea();
@@ -369,7 +352,7 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 		int new_parent_index = AllocateInternalNode();
 		int old_parent = At(best_sibling_index).parent_index;
 
-		if (old_parent != NullIndex)
+		if (old_parent != -1)
 		{
 			// Connect old parent's child new parent
 			AABBDynamicTreeNode* oldParentNode = AtPtr(old_parent);
@@ -396,7 +379,7 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 
 		// Stage 3: walk back up the tree refitting AABBs
 		int parent_index = At(leafIndex).parent_index;
-		while (parent_index != NullIndex)
+		while (parent_index != -1)
 		{
 			AABBDynamicTreeNode& iN = At(parent_index);
 			iN.box = Union(
@@ -423,7 +406,7 @@ void AABBDynamicTree::PopNode(UID objectIndex)
 	{
 		if (index == root_index)
 		{
-			root_index = NullIndex;
+			root_index = -1;
 		}
 		else
 		{
@@ -436,7 +419,7 @@ void AABBDynamicTree::PopNode(UID objectIndex)
 					root_index = parent_node->child2;
 				else // right child
 					root_index = parent_node->child1;
-				AtPtr(root_index)->parent_index = NullIndex;
+				AtPtr(root_index)->parent_index = -1;
 			}
 			else // has grand parent
 			{
@@ -553,7 +536,7 @@ void AABBDynamicTree::Draw() const
 {
 	for (auto pm_ : poolmapped_) {
 		AABBDynamicTreeNode node = At(pm_.first);
-		if (!node.is_leaf && (node.parent_index != NullIndex || pm_.first == root_index))
+		if (!node.is_leaf && (node.parent_index != -1 || pm_.first == root_index))
 		{
 			for (int a = 0; a < 12; a++)
 			{
@@ -577,18 +560,13 @@ int AABBDynamicTree::GetCount() const
 
 AABB AABBDynamicTree::Union(AABB box1, AABB box2)
 {
-	vec point_array[4];
-	point_array[0] = box1.minPoint;
-	point_array[1] = box1.maxPoint;
-	point_array[2] = box2.minPoint;
-	point_array[3] = box2.maxPoint;
-
+	vec point_array[4] = { box1.minPoint, box1.maxPoint, box2.minPoint, box2.maxPoint };
 	return AABB::MinimalEnclosingAABB(&point_array[0], 4);
 }
 
 void AABBDynamicTree::Rotate(AABBDynamicTreeNode& node, int index)
 {
-	if (node.parent_index != NullIndex)
+	if (node.parent_index != -1)
 	{
 		AABBDynamicTreeNode& parent = At(node.parent_index);
 
@@ -744,18 +722,18 @@ inline void AABBDynamicTree::SetLeaf(AABBDynamicTreeNode & node, AABB box, UID i
 {
 	node.box = box;
 	node.object_index = index;
-	node.parent_index = NullIndex;
-	node.child1 = NullIndex;
-	node.child2 = NullIndex;
+	node.parent_index = -1;
+	node.child1 = -1;
+	node.child2 = -1;
 	node.is_leaf = true;
 }
 
 inline void AABBDynamicTree::SetInternal(AABBDynamicTreeNode & node)
 {
 	node.box.SetNegativeInfinity();
-	node.object_index = NullIndex;
-	node.parent_index = NullIndex;
-	node.child1 = NullIndex;
-	node.child2 = NullIndex;
+	node.object_index = -1;
+	node.parent_index = -1;
+	node.child1 = -1;
+	node.child2 = -1;
 	node.is_leaf = false;
 }

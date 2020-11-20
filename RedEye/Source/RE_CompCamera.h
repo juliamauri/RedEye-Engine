@@ -21,7 +21,7 @@ public:
 
 public:
 
-	RE_CompCamera() : RE_Component(C_CAMERA) {}
+	RE_CompCamera();
 	~RE_CompCamera();
 
 	void SetProperties(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 0.523599f, short aspect_ratio_t = 0, bool draw_frustum = true, bool usingSkybox = true, const char* skyboxMD5 = nullptr);
@@ -98,12 +98,7 @@ private:
 private:
 
 	// Transform
-	union CamTransform
-	{
-		RE_CompTransform* ptr;
-		UID uid;
-
-	} transform;
+	RE_CompTransform* transform = nullptr;
 
 	// Axis
 	math::vec right = math::vec::zero;

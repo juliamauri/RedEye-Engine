@@ -61,9 +61,7 @@ void RE_Prefab::Save(RE_GOManager* pool, bool rootidentity, bool keepInMemory)
 			t->SetPosition(math::vec::zero);
 			t->SetRotation(math::vec::zero);
 			t->SetScale(math::vec::one);
-			root->TransformModified(false);
-			loaded->Update();
-			root->ResetGlobalBoundingBoxForAllChilds();
+			root->ResetGOandChildsAABB();
 		}
 		AssetSave();
 		LibrarySave();

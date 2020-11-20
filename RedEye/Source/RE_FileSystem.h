@@ -56,7 +56,7 @@ public:
 
 	struct RE_Path {
 		eastl::string path;
-		PathType pType;
+		PathType pType = D_NULL;
 
 		RE_File* AsFile()const { return (RE_File*)this; }
 		RE_Meta* AsMeta()const { return (RE_Meta*)this; }

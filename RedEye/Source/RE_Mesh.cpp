@@ -30,9 +30,12 @@
 #include "assimp/include/postprocess.h"
 
 
-RE_Mesh::RE_Mesh() { }
+RE_Mesh::RE_Mesh()
+{
+	bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+}
 
-RE_Mesh::~RE_Mesh() { }
+RE_Mesh::~RE_Mesh() {}
 
 void RE_Mesh::SetLibraryPath(const char* path)
 {
@@ -85,7 +88,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	char* cursor = buffer;
 
 	size_t cSize = sizeof(uint);
-	memcpy(cursor, &triangle_count, cSize);
+	memcpy(cursor, static_cast<const void*>(&triangle_count), cSize);
 	cursor += cSize;
 
 	memcpy(cursor, &vertex_count, cSize);

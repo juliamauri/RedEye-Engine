@@ -39,8 +39,8 @@ void RE_InternalResources::Init()
 void RE_InternalResources::InitChecker()
 {
 	// Checkers
+	unsigned char imageData[264][264][3];
 	int IMAGE_ROWS = 264, IMAGE_COLS = 264;
-	GLubyte imageData[264][264][3];
 	for (int row = 0; row < IMAGE_ROWS; row++)
 	{
 		for (int col = 0; col < IMAGE_COLS; col++)

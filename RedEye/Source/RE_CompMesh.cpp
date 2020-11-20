@@ -110,6 +110,7 @@ void RE_CompMesh::DrawProperties()
 void RE_CompMesh::SetMesh(const char* mesh)
 {
 	meshMD5 = mesh;
+	if (go) GetGOPtr()->ResetBoundingBoxes();
 }
 
 const char* RE_CompMesh::GetMesh() const
@@ -186,7 +187,11 @@ void RE_CompMesh::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 
 math::AABB RE_CompMesh::GetAABB() const
 {
-	return (dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->GetAABB();
+	math::AABB ret;
+	RE_Mesh* mesh;
+	if (meshMD5 && (mesh = dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))) ret = mesh->GetAABB();
+	else ret.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	return ret;
 }
 
 bool RE_CompMesh::CheckFaceCollision(const math::Ray & local_ray, float & distance) const

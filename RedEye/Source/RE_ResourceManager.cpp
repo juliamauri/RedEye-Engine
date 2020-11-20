@@ -186,7 +186,7 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 			{
 				if (mat->ExitsOnShader(res)) ret.push_back(resource->GetMD5());
 			}
-			else if (mat->ExitsOnTexture(res)) ret.push_back(resource->GetMD5());
+			else if (mat->ExistsOnTexture(res)) ret.push_back(resource->GetMD5());
 		}
 
 		break;
@@ -310,9 +310,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 					}
 				}
 
-				poolGORes->GetRootPtr()->TransformModified(false);
-				poolGORes->Update();
-				poolGORes->GetRootPtr()->ResetBoundingBoxForAllChilds();
+				poolGORes->GetRootPtr()->ResetGOandChildsAABB();
 
 				switch (goType)
 				{

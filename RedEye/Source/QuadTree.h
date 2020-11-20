@@ -77,12 +77,10 @@ private:
 		BOTTOM,
 		TOP_BOTTOM,
 		ALL
-	} draw_mode;
+	} draw_mode = DISABLED;
 
-	int edges[12];
+	int edges[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	int count = 0;
-
-	eastl::list<RE_GameObject*>::iterator it;
 };
 
 template<typename TYPE>
@@ -109,20 +107,16 @@ inline void QTree::CollectIntersections(eastl::vector<RE_GameObject*>& objects, 
 struct AABBDynamicTreeNode
 {
 	AABB box;
-	UID object_index;
-	int parent_index;
-	int child1;
-	int child2;
-	bool is_leaf;
+	UID object_index = 0;
+	int parent_index = -1, child1 = -1, child2 = -1;
+	bool is_leaf = true;
 };
 
 class AABBDynamicTree : public PoolMapped<AABBDynamicTreeNode,int, 1024, 512>
 {
 private:
-	int randomCount = 0;
-	int size;
-	int node_count;
-	int root_index;
+
+	int randomCount = 0, size = 0, node_count = 0, root_index = -1;
 
 public:
 

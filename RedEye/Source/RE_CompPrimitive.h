@@ -172,8 +172,8 @@ protected:
 
 private:
 
-	int target_slices, target_stacks;
-	float target_radius;
+	int target_slices = 0, target_stacks = 0;
+	float target_radius = 0.f;
 };
 
 /**************************************************

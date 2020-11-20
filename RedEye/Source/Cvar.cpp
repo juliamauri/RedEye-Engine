@@ -48,6 +48,8 @@ Cvar::Cvar(float float_v) : type(FLOAT) { value.float_v = float_v; }
 Cvar::Cvar(const char * char_p_v) : type(CHAR_P) { value.char_p_v = char_p_v; }
 Cvar::Cvar(RE_GameObject * go_v) : type(GAMEOBJECT) { value.go_v = go_v; }
 
+Cvar::Cvar(const math::float4x4 mat4_v) : type(MAT4) { value.mat4_v = mat4_v; }
+
 bool Cvar::SetValue(bool bool_v, bool force_type)
 {
 	bool ret = false;

@@ -25,6 +25,7 @@ public:
 	Cvar(float float_v);
 	Cvar(const char* char_p_v);
 	Cvar(RE_GameObject* go_v);
+	Cvar(const math::float4x4 mat4_v);
 
 public:
 	enum VAR_TYPE : unsigned int
@@ -59,7 +60,7 @@ protected:
 
 	union VAR_data
 	{
-		bool bool_v;
+		bool bool_v = false;
 		bool bool2_v[2];
 		bool bool3_v[3];
 		bool bool4_v[4];

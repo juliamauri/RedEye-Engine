@@ -242,12 +242,12 @@ void RE_FBOManager::ClearFBOBuffers(unsigned int ID, const float color[4])
 	RE_FBO fbo = fbos.at(ID);
 	GLbitfield mask = GL_COLOR_BUFFER_BIT;
 
-	if (fbo.depthBuffer != 0 || fbo.stencilBuffer != 0)
+	if (fbo.depthBuffer != 0 || fbo.depthstencilBuffer != 0)
 	{
 		mask |= GL_DEPTH_BUFFER_BIT;
 	}
 
-	if (fbo.stencilBuffer != 0 || fbo.stencilBuffer != 0)
+	if (fbo.stencilBuffer != 0 || fbo.depthstencilBuffer != 0)
 	{
 		glClearStencil(0);
 		mask |= GL_STENCIL_BUFFER_BIT;

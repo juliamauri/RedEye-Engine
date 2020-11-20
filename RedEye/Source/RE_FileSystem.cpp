@@ -271,7 +271,8 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					{
 						int count = toImport.size();
 						iter--;
-						while (((*iter)->fType != F_PREFAB || (*iter)->fType != F_SCENE || (*iter)->fType != F_MODEL) && count > 1)
+
+						while ((((*iter)->fType != F_PREFAB || (*iter)->fType != F_SCENE || (*iter)->fType != F_MODEL)) && count > 1)
 						{
 							count--;
 							iter--;

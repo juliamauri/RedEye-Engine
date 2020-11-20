@@ -131,20 +131,15 @@ void ModuleScene::OnStop()
 
 void ModuleScene::RecieveEvent(const Event& e)
 {
-	//UID go_uid = e.data1.AsUInt64();
-
 	switch (e.type)
 	{
 	case GO_CHANGED_TO_ACTIVE:
 	{
 		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
-		eastl::vector<RE_GameObject*> all = go->GetActiveDrawableGOandChildsPtr();
+		go->ResetGOandChildsAABB();
 
-		for (auto draw_go : all)
-		{
-			draw_go->ResetGlobalBoundingBox();
+		for (auto draw_go : go->GetActiveDrawableGOandChildsPtr())
 			(draw_go->IsStatic() ? static_tree : dynamic_tree).PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
-		}
 
 		haschanges = true;
 		break;
@@ -188,10 +183,15 @@ void ModuleScene::RecieveEvent(const Event& e)
 	case GO_HAS_NEW_CHILD:
 	{
 		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
-		UID child_uid = e.data2.AsUInt64();
-		RE_GameObject* child = scenePool.GetGOPtr(child_uid);
-		if (go->IsActive() && child->IsActive())
-			(child->IsStatic() ? static_tree : dynamic_tree).PushNode(child_uid, child->GetGlobalBoundingBox());
+		RE_GameObject* child_go = scenePool.GetGOPtr(e.data2.AsUInt64());
+		child_go->ResetGOandChildsAABB();
+		child_go->OnTransformModified();
+
+		if (go->IsActive() && child_go->IsActive())
+		{
+			eastl::vector<RE_GameObject*> all = child_go->GetActiveDrawableGOandChildsPtr();
+			for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
+		}
 
 		haschanges = true;
 		break;
@@ -215,23 +215,28 @@ void ModuleScene::RecieveEvent(const Event& e)
 	{
 		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
 		if (go->IsActive())
-			for (auto child : go->GetChildsPtr())
-				child->OnTransformModified();
-
-		if (go->HasRenderGeo())
 		{
-			UID index = go->GetUID();
-			if (go->IsStatic())
+			go->ResetGOandChildsAABB();
+			go->OnTransformModified();
+
+			eastl::vector<const RE_GameObject*> all = go->GetActiveDrawableGOandChildsCPtr();
+			for (auto draw_go : all)
 			{
-				static_tree.PopNode(index);
-				static_tree.PushNode(index, go->GetGlobalBoundingBox());
-			}
-			else
-			{
-				dynamic_tree.PopNode(index);
-				dynamic_tree.PushNode(index, go->GetGlobalBoundingBox());
+				UID index = draw_go->GetUID();
+
+				if (draw_go->IsStatic())
+				{
+					static_tree.PopNode(index);
+					static_tree.PushNode(index, draw_go->GetGlobalBoundingBox());
+				}
+				else
+				{
+					dynamic_tree.PopNode(index);
+					dynamic_tree.PushNode(index, draw_go->GetGlobalBoundingBox());
+				}
 			}
 		}
+
 		haschanges = true;
 		break;
 	}
@@ -277,7 +282,7 @@ void ModuleScene::CreateLight(const UID parent)
 
 void ModuleScene::CreateMaxLights(const UID parent)
 {
-	UID container_go = scenePool.AddGO("Bunch of Lights", (parent) ? parent : GetRootUID())->GetUID();
+	UID container_go = scenePool.AddGO("Bunch of Lights", (parent) ? parent : GetRootUID(), true)->GetUID();
 
 	eastl::string name = "light ";
 	for (int x = 0; x < 8; ++x)
@@ -296,12 +301,8 @@ void ModuleScene::CreateMaxLights(const UID parent)
 
 void ModuleScene::AddGOPool(RE_GOManager* toAdd)
 {
-	//TODO Julius don't use SetupScene, only setup toAdd
-	//App::goManager->sceneGOs.PushWithChilds(toAdd);
-
-	UID justAdded = scenePool.InsertPool(toAdd);
+	UID justAdded = scenePool.InsertPool(toAdd, true);
 	scenePool.UseResources();
-	SetupScene();
 	App::editor->SetSelected(justAdded);
 	haschanges = true;
 }
@@ -409,7 +410,7 @@ void ModuleScene::NewEmptyScene(const char* name)
 	App::editor->ClearCommands();
 
 	if (unsavedScene) { DEL(unsavedScene); }
-	else currentScene = nullptr; /* TODO Julius popup save */
+	else currentScene = nullptr;
 
 	unsavedScene = new RE_Scene();
 	unsavedScene->SetName(name);
@@ -480,9 +481,9 @@ void ModuleScene::SetupScene()
 	// Setup Tree AABBs¡
 	static_tree.Clear();
 	dynamic_tree.Clear();
-	GetRootPtr()->ResetBoundingBoxForAllChilds();
+	GetRootPtr()->ResetGOandChildsAABB();
 
-	eastl::vector<eastl::pair<UID, RE_GameObject*>> gos = scenePool.GetAllGOData();
+	eastl::vector<eastl::pair<const UID, RE_GameObject*>> gos = scenePool.GetAllGOData();
 	for (unsigned int i = 0; i < gos.size(); i++)
 	{
 		if (gos[i].second->HasActiveRenderGeo())
@@ -499,67 +500,3 @@ inline UID ModuleScene::Validate(const UID id)
 
 bool ModuleScene::HasChanges() const { return haschanges; }
 bool ModuleScene::isNewScene() const { return (unsavedScene); }
-
-/*void ModuleScene::GetActive(eastl::list<RE_GameObject*>& objects) const
-{
-	eastl::queue<RE_GameObject*> queue;
-
-	for (auto child : root->GetChildsPtr())
-		if (child->IsActive())
-			queue.push(child);
-
-	while (!queue.empty())
-	{
-		RE_GameObject* obj = queue.front();
-		objects.push_back(obj);
-
-		for (auto child : obj->GetChildsPtr())
-			if (child->IsActive())
-				queue.push(child);
-
-		queue.pop();
-	}
-}
-
-void ModuleScene::GetActiveStatic(eastl::list<RE_GameObject*>& objects) const
-{
-	eastl::queue<RE_GameObject*> queue;
-
-	for (auto child : root->GetChildsPtr())
-		if (child->IsActiveStatic())
-			queue.push(child);
-
-	while (!queue.empty())
-	{
-		RE_GameObject* obj = queue.front();
-		objects.push_back(obj);
-
-		for (auto child : obj->GetChildsPtr())
-			if (child->IsActiveStatic())
-				queue.push(child);
-
-		queue.pop();
-	}
-}
-
-void ModuleScene::GetActiveNonStatic(eastl::list<RE_GameObject*>& objects) const
-{
-	eastl::queue<RE_GameObject*> queue;
-
-	for (auto child : root->GetChildsPtr())
-		if (child->IsActiveNonStatic())
-			queue.push(child);
-
-	while (!queue.empty())
-	{
-		RE_GameObject* obj = queue.front();
-		objects.push_back(obj);
-
-		for (auto child : obj->GetChildsPtr())
-			if (child->IsActiveNonStatic())
-				queue.push(child);
-
-		queue.pop();
-	}
-}*/
-

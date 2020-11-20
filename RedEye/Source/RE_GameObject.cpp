@@ -42,7 +42,7 @@ void RE_GameObject::SetUp(GameObjectsPool* goPool, ComponentsPool* compPool, con
 
 	transform = pool_comps->GetNewComponentPtr(ComponentType::C_TRANSFORM)->PoolSetUp(pool_gos, go_uid);
 
-	if (parent_uid = parent) pool_gos->AtPtr(parent)->LinkChild(go_uid, false);
+	if (parent_uid = parent) pool_gos->AtPtr(parent)->childs.push_back(go_uid);
 
 	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
@@ -366,8 +366,6 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	{
 		if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
 		render_geo = { (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type };
-		//ResetBoundingBoxes(); can't reset bounding boxes without adding meshMD5
-
 		break;
 	}
 	case C_CAMERA:
@@ -400,7 +398,6 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 			ret = pool_comps->GetNewComponentPtr(_type);
 			render_geo = { ret->PoolSetUp(pool_gos, go_uid), type };
 			App::primitives.SetUpComponentPrimitive(dynamic_cast<RE_CompPrimitive*>(ret));
-			ResetBoundingBoxes();
 		}
 		else
 		{
@@ -617,17 +614,16 @@ eastl::vector<RE_GameObject*> RE_GameObject::GetActiveDrawableGOandChildsPtr()
 	eastl::vector<RE_GameObject*> ret;
 
 	eastl::queue<RE_GameObject*> go_queue;
-	if (active) go_queue.push(this);
+	go_queue.push(this);
 
 	while (!go_queue.empty())
 	{
 		RE_GameObject* go = go_queue.front();
 		go_queue.pop();
+
 		if (go->HasActiveRenderGeo()) ret.push_back(go);
 
-		for (auto child : GetChildsPtr())
-			if (child->active)
-				go_queue.push(child);
+		for (auto child : go->GetChildsPtr()) go_queue.push(child);
 	}
 
 	return ret;
@@ -684,14 +680,14 @@ const RE_GameObject* RE_GameObject::GetLastChildCPtr() const
 	return childs.empty() ? nullptr : pool_gos->AtCPtr(childs.back());
 }
 
-RE_GameObject* RE_GameObject::AddNewChild(bool broadcast, const char* _name, const bool start_active, const bool isStatic)
+RE_GameObject* RE_GameObject::AddNewChild(const char* _name, const bool start_active, const bool isStatic)
 {
 	RE_GameObject* ret = nullptr;
 
 	UID child = pool_gos->GetNewGOUID();
 	if (child)
 	{
-		LinkChild(child, broadcast);
+		childs.push_back(child);
 		(ret = ChildPtr(child))->SetUp(pool_gos, pool_comps,
 			_name ? ("Son " + eastl::to_string(childs.size()) + " of " + name).c_str() : _name,
 			start_active, isStatic);
@@ -749,7 +745,7 @@ void RE_GameObject::SetParent(const UID id, bool unlink_previous, bool link_new)
 {
 	if (unlink_previous && parent_uid) GetParentPtr()->ReleaseChild(go_uid);
 	parent_uid = id;
-	if (link_new && parent_uid) GetParentPtr()->LinkChild(go_uid);
+	if (link_new && parent_uid) GetParentPtr()->childs.push_back(go_uid);
 }
 
 void RE_GameObject::UnlinkParent()
@@ -833,39 +829,25 @@ void RE_GameObject::OnStop()
 	for (auto child : childs) ChildPtr(child)->OnStop();
 }
 
-void RE_GameObject::TransformModified(bool broadcast)
+void RE_GameObject::OnTransformModified()
 {
-	if (camera) CompPtr(camera, C_CAMERA)->OnTransformModified();
-	for (auto component : GetStackableComponentsPtr())
-		component->OnTransformModified();
+	eastl::queue<RE_GameObject*> gos;
+	gos.push(this);
 
-	ResetGlobalBoundingBox();
-
-	if (!broadcast)
+	while (!gos.empty())
 	{
-		for (auto child : GetChildsPtr())
+		RE_GameObject* go = gos.front();
+		gos.pop();
+
+		// Update components
+		if (go->camera) go->CompPtr(go->camera, C_CAMERA)->OnTransformModified();
+		for (auto component : go->GetStackableComponentsPtr()) component->OnTransformModified();
+
+		// Add active childs to queue
+		for (auto child : go->GetChildsPtr())
 			if (child->active)
-				child->OnTransformModified(false);
+				gos.push(child);
 	}
-	else Event::Push(TRANSFORM_MODIFIED, App::scene, go_uid);
-}
-
-void RE_GameObject::OnTransformModified(bool broadcast)
-{
-	CompPtr(transform, C_TRANSFORM)->OnTransformModified();
-	if (camera) CompPtr(camera, C_CAMERA)->OnTransformModified();
-	for (auto component : GetStackableComponentsPtr())
-		component->OnTransformModified();
-
-	ResetGlobalBoundingBox();
-
-	if (!broadcast)
-	{
-		for (auto child : GetChildsPtr())
-			if (child->active)
-				child->OnTransformModified(false);
-	}
-	else Event::Push(TRANSFORM_MODIFIED, App::scene, go_uid);
 }
 
 void RE_GameObject::AddToBoundingBox(math::AABB box)
@@ -962,31 +944,23 @@ void RE_GameObject::ResetBoundingBoxes()
 	ResetGlobalBoundingBox();
 }
 
-void RE_GameObject::ResetBoundingBoxForAllChilds()
+void RE_GameObject::ResetGOandChildsAABB()
 {
-	eastl::queue<RE_GameObject*> go_queue;
-	go_queue.push(this);
-
+	// Push queue of GO together with parent's global matrix
+	eastl::queue<eastl::pair<RE_GameObject*, math::float4x4>> go_queue;
+	go_queue.push({ this, parent_uid ? GetParentCPtr()->GetTransformPtr()->GetGlobalMatrix() : math::float4x4::identity });
 	while (!go_queue.empty())
 	{
-		RE_GameObject* go = go_queue.front();
+		eastl::pair<RE_GameObject*, math::float4x4> go = go_queue.front();
 		go_queue.pop();
-		go->ResetBoundingBoxes();
-		for (auto child : go->GetChildsPtr()) go_queue.push(child);
-	}
-}
 
-void RE_GameObject::ResetGlobalBoundingBoxForAllChilds()
-{
-	eastl::queue<RE_GameObject*> go_queue;
-	go_queue.push(this);
+		// Add Childs to queue with parent's new global matrix
+		math::float4x4 go_mat = go.first->GetTransformPtr()->UpdateGlobalMatrixFromParent(go.second);
+		for (auto child : go.first->GetChildsPtr()) go_queue.push({ child, go_mat });
 
-	while (!go_queue.empty())
-	{
-		RE_GameObject* go = go_queue.front();
-		go_queue.pop();
-		go->ResetGlobalBoundingBox();
-		for (auto child : go->GetChildsPtr()) go_queue.push(child);
+		// Update AABB with parent matrix
+		go.first->ResetLocalBoundingBox();
+		(go.first->global_bounding_box = go.first->local_bounding_box).TransformAsAABB(go_mat.Transposed());
 	}
 }
 
@@ -1145,13 +1119,6 @@ eastl::list<RE_GameObject::ComponentData> RE_GameObject::AllCompData() const
 	for (auto comp : components) ret.push_back(comp);
 
 	return ret;
-}
-
-void RE_GameObject::LinkChild(const UID child, bool broadcast)
-{
-	SDL_assert(child > 0);
-	childs.push_back(child);
-	if (broadcast) Event::Push(GO_HAS_NEW_CHILD, App::scene, go_uid, child);
 }
 
 inline RE_GameObject* RE_GameObject::ChildPtr(const UID child) const

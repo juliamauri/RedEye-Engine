@@ -22,7 +22,7 @@ RE_GameObject* RE_GOManager::AddGO(const char* name, UID parent, bool broadcast)
 	RE_GameObject* ret = gameObjectsPool.AtPtr(new_go_uid);
 	ret->SetUp(&gameObjectsPool, &componentsPool, name, parent);
 
-	Event::Push(GO_HAS_NEW_CHILD, App::scene, parent, new_go_uid);
+	if (broadcast) Event::Push(GO_HAS_NEW_CHILD, App::scene, parent, new_go_uid);
 
 	return ret;
 }
@@ -50,7 +50,7 @@ UID RE_GOManager::CopyGOandChilds(const RE_GameObject* copy, UID parent, bool br
 		eastl::pair<const RE_GameObject*, UID> copy_go = copy_gos.top();
 		copy_gos.pop();
 
-		UID new_go_uid = CopyGO(copy_go.first, copy_go.second, broadcast);
+		UID new_go_uid = CopyGO(copy_go.first, copy_go.second);
 
 		for (auto copy_child : copy_go.first->GetChildsCPtr())
 			copy_gos.push({ copy_child, new_go_uid });
@@ -94,7 +94,7 @@ eastl::vector<RE_GameObject*> RE_GOManager::GetAllGOPtrs() const
 	return gameObjectsPool.GetAllPtrs();
 }
 
-eastl::vector<eastl::pair<UID, RE_GameObject*>> RE_GOManager::GetAllGOData() const
+eastl::vector<eastl::pair<const UID, RE_GameObject*>> RE_GOManager::GetAllGOData() const
 {
 	return gameObjectsPool.GetAllData();
 }
@@ -124,9 +124,9 @@ void RE_GOManager::DestroyGO(UID toDestroy)
 	gameObjectsPool.DeleteGO(toDestroy);
 }
 
-UID RE_GOManager::InsertPool(RE_GOManager* pool)
+UID RE_GOManager::InsertPool(RE_GOManager* pool, bool broadcast)
 {
-	return CopyGOandChilds(pool->GetRootPtr(), (TotalGameObjects() > 0) ? GetRootUID() : 0);
+	return CopyGOandChilds(pool->GetRootPtr(), (TotalGameObjects() > 0) ? GetRootUID() : 0, broadcast);
 }
 
 eastl::vector<UID> RE_GOManager::GetAllCompUID(ushortint type) const
@@ -144,7 +144,7 @@ eastl::vector<const RE_Component*> RE_GOManager::GetAllCompCPtr(ushortint type) 
 	return componentsPool.GetAllCompCPtr(type);
 }
 
-eastl::vector<eastl::pair<UID, RE_Component*>> RE_GOManager::GetAllCompData(ushortint type) const
+eastl::vector<eastl::pair<const UID, RE_Component*>> RE_GOManager::GetAllCompData(ushortint type) const
 {
 	return componentsPool.GetAllCompData(type);
 }
@@ -258,7 +258,7 @@ const RE_GameObject* GameObjectsPool::GetRootCPtr() const
 
 void GameObjectsPool::DeleteGO(UID toDelete)
 {
-	PoolMapped::Pop(toDelete);
+	Pop(toDelete);
 }
 
 eastl::vector<RE_GameObject*> GameObjectsPool::GetAllPtrs() const
@@ -269,9 +269,9 @@ eastl::vector<RE_GameObject*> GameObjectsPool::GetAllPtrs() const
 	return ret;
 }
 
-eastl::vector<eastl::pair<UID, RE_GameObject*>> GameObjectsPool::GetAllData() const
+eastl::vector<eastl::pair<const UID, RE_GameObject*>> GameObjectsPool::GetAllData() const
 {
-	eastl::vector<eastl::pair<UID, RE_GameObject*>> ret;
+	eastl::vector<eastl::pair<const UID, RE_GameObject*>> ret;
 	eastl::vector<UID> uids = GetAllKeys();
 	for (auto uid : uids) ret.push_back({ uid, AtPtr(uid) });
 	return ret;
@@ -442,142 +442,122 @@ const RE_Component* ComponentsPool::GetComponentCPtr(UID poolid, ComponentType c
 	return ret;
 }
 
-eastl::pair<UID, RE_Component*> ComponentsPool::GetNewComponent(ComponentType cType)
+eastl::pair<const UID, RE_Component*> ComponentsPool::GetNewComponent(ComponentType cType)
 {
-	eastl::pair<UID, RE_Component*> ret = { 0, nullptr};
 	switch (cType)
 	{
 	case C_TRANSFORM:
 	{
-		ret.first = transPool.GetNewCompUID();
-		ret.second = transPool.AtPtr(ret.first);
-		break;
+		const UID id = transPool.GetNewCompUID();
+		return { id, transPool.AtPtr(id) };
 	}
 	case C_CAMERA:
 	{
-		ret.first = camPool.GetNewCompUID();
-		ret.second = camPool.AtPtr(ret.first);
-		break;
+		const UID id = camPool.GetNewCompUID();
+		return { id, camPool.AtPtr(id) };
 	}
 	case C_MESH:
 	{
-		ret.first = meshPool.GetNewCompUID();
-		ret.second = meshPool.AtPtr(ret.first);
-		break;
+		const UID id = meshPool.GetNewCompUID();
+		return { id, meshPool.AtPtr(id) };
 	}
 	case C_LIGHT:
 	{
-		ret.first = lightPool.GetNewCompUID();
-		ret.second = lightPool.AtPtr(ret.first);
-		break;
+		const UID id = lightPool.GetNewCompUID();
+		return { id, lightPool.AtPtr(id) };
 	}
 	case C_GRID:
 	{
-		ret.first = pGridPool.GetNewCompUID();
-		ret.second = pGridPool.AtPtr(ret.first);
-		break;
+		const UID id = pGridPool.GetNewCompUID();
+		return { id, pGridPool.AtPtr(id) };
 	}
 	case C_ROCK:
 	{
-		ret.first = pRockPool.GetNewCompUID();
-		ret.second = pRockPool.AtPtr(ret.first);
-		break;
+		const UID id = pRockPool.GetNewCompUID();
+		return { id, pRockPool.AtPtr(id) };
 	}
 	case C_CUBE:
 	{
-		ret.first = pCubePool.GetNewCompUID();
-		ret.second = pCubePool.AtPtr(ret.first);
-		break;
+		const UID id = pCubePool.GetNewCompUID();
+		return { id, pCubePool.AtPtr(id) };
 	}
 	case C_DODECAHEDRON:
 	{
-		ret.first = pDodecahedronPool.GetNewCompUID();
-		ret.second = pDodecahedronPool.AtPtr(ret.first);
-		break;
+		const UID id = pDodecahedronPool.GetNewCompUID();
+		return { id, pDodecahedronPool.AtPtr(id) };
 	}
 	case C_TETRAHEDRON:
 	{
-		ret.first = pTetrahedronPool.GetNewCompUID();
-		ret.second = pTetrahedronPool.AtPtr(ret.first);
-		break;
+		const UID id = pTetrahedronPool.GetNewCompUID();
+		return { id, pTetrahedronPool.AtPtr(id) };
 	}
 	case C_OCTOHEDRON:
 	{
-		ret.first = pOctohedronPool.GetNewCompUID();
-		ret.second = pOctohedronPool.AtPtr(ret.first);
-		break;
+		const UID id = pOctohedronPool.GetNewCompUID();
+		return { id, pOctohedronPool.AtPtr(id) };
 	}
 	case C_ICOSAHEDRON:
 	{
-		ret.first = pIcosahedronPool.GetNewCompUID();
-		ret.second = pIcosahedronPool.AtPtr(ret.first);
-		break;
+		const UID id = pIcosahedronPool.GetNewCompUID();
+		return { id, pIcosahedronPool.AtPtr(id) };
 	}
 	case C_PLANE:
 	{
-		ret.first = pPlanePool.GetNewCompUID();
-		ret.second = pPlanePool.AtPtr(ret.first);
-		break;
+		const UID id = pPlanePool.GetNewCompUID();
+		return { id, pPlanePool.AtPtr(id) };
 	}
 	case C_SPHERE:
 	{
-		ret.first = pSpherePool.GetNewCompUID();
-		ret.second = pSpherePool.AtPtr(ret.first);
-		break;
+		const UID id = pSpherePool.GetNewCompUID();
+		return { id, pSpherePool.AtPtr(id) };
 	}
 	case C_CYLINDER:
 	{
-		ret.first = pCylinderPool.GetNewCompUID();
-		ret.second = pCylinderPool.AtPtr(ret.first);
-		break;
+		const UID id = pCylinderPool.GetNewCompUID();
+		return { id, pCylinderPool.AtPtr(id) };
 	}
 	case C_HEMISHPERE:
 	{
-		ret.first = pHemiSpherePool.GetNewCompUID();
-		ret.second = pHemiSpherePool.AtPtr(ret.first);
-		break;
+		const UID id = pHemiSpherePool.GetNewCompUID();
+		return { id, pHemiSpherePool.AtPtr(id) };
 	}
 	case C_TORUS:
 	{
-		ret.first = pTorusPool.GetNewCompUID();
-		ret.second = pTorusPool.AtPtr(ret.first);
-		break;
+		const UID id = pTorusPool.GetNewCompUID();
+		return { id, pTorusPool.AtPtr(id) };
 	}
 	case C_TREFOILKNOT:
 	{
-		ret.first = pTrefoiKnotPool.GetNewCompUID();
-		ret.second = pTrefoiKnotPool.AtPtr(ret.first);
-		break;
+		const UID id = pTrefoiKnotPool.GetNewCompUID();
+		return { id, pTrefoiKnotPool.AtPtr(id) };
 	}
+	default: return { 0 , nullptr };
 	}
-
-	return ret;
 }
 
-UID ComponentsPool::GetNewComponentUID(ComponentType cType)
+const UID ComponentsPool::GetNewComponentUID(ComponentType cType)
 {
-	UID ret = 0;
 	switch (cType) {
-	case C_TRANSFORM: ret = transPool.GetNewCompUID(); break;
-	case C_CAMERA: ret = camPool.GetNewCompUID(); break;
-	case C_MESH: ret = meshPool.GetNewCompUID(); break;
-	case C_LIGHT: ret = lightPool.GetNewCompUID(); break;
-	case C_PARTICLEEMITER: break;
-	case C_FUSTRUM: break;
-	case C_GRID: ret = pGridPool.GetNewCompUID(); break;
-	case C_ROCK: ret = pRockPool.GetNewCompUID(); break;
-	case C_CUBE: ret = pCubePool.GetNewCompUID(); break;
-	case C_DODECAHEDRON: ret = pDodecahedronPool.GetNewCompUID(); break;
-	case C_TETRAHEDRON: ret = pTetrahedronPool.GetNewCompUID(); break;
-	case C_OCTOHEDRON: ret = pOctohedronPool.GetNewCompUID(); break;
-	case C_ICOSAHEDRON:  ret = pIcosahedronPool.GetNewCompUID(); break;
-	case C_PLANE: ret = pPlanePool.GetNewCompUID(); break;
-	case C_SPHERE: ret = pSpherePool.GetNewCompUID(); break;
-	case C_CYLINDER: ret = pCylinderPool.GetNewCompUID(); break;
-	case C_HEMISHPERE: ret = pHemiSpherePool.GetNewCompUID(); break;
-	case C_TORUS:  ret = pTorusPool.GetNewCompUID(); break;
-	case C_TREFOILKNOT: ret = pTrefoiKnotPool.GetNewCompUID(); break;}
-	return ret;
+	case C_TRANSFORM: return transPool.GetNewCompUID();
+	case C_CAMERA: return camPool.GetNewCompUID();
+	case C_MESH: return meshPool.GetNewCompUID();
+	case C_LIGHT: return lightPool.GetNewCompUID();
+		//case C_PARTICLEEMITER: break;
+		//case C_FUSTRUM: break;
+	case C_GRID: return pGridPool.GetNewCompUID();
+	case C_ROCK: return pRockPool.GetNewCompUID();
+	case C_CUBE: return pCubePool.GetNewCompUID();
+	case C_DODECAHEDRON: return pDodecahedronPool.GetNewCompUID();
+	case C_TETRAHEDRON: return pTetrahedronPool.GetNewCompUID();
+	case C_OCTOHEDRON: return pOctohedronPool.GetNewCompUID();
+	case C_ICOSAHEDRON:  return pIcosahedronPool.GetNewCompUID();
+	case C_PLANE: return pPlanePool.GetNewCompUID();
+	case C_SPHERE: return pSpherePool.GetNewCompUID();
+	case C_CYLINDER: return pCylinderPool.GetNewCompUID();
+	case C_HEMISHPERE: return pHemiSpherePool.GetNewCompUID();
+	case C_TORUS:  return pTorusPool.GetNewCompUID();
+	case C_TREFOILKNOT: return pTrefoiKnotPool.GetNewCompUID();
+	default: return 0; }
 }
 
 RE_Component* ComponentsPool::GetNewComponentPtr(ComponentType cType)
@@ -657,8 +637,7 @@ void ComponentsPool::DestroyComponent(ComponentType cType, UID toDelete)
 	case C_CYLINDER: pCylinderPool.Pop(toDelete); break;
 	case C_HEMISHPERE: pHemiSpherePool.Pop(toDelete); break;
 	case C_TORUS: pTorusPool.Pop(toDelete); break;
-	case C_TREFOILKNOT: pTrefoiKnotPool.Pop(toDelete); break;
-	}
+	case C_TREFOILKNOT: pTrefoiKnotPool.Pop(toDelete); break; }
 }
 
 eastl::vector<const char*> ComponentsPool::GetAllResources()
@@ -954,113 +933,113 @@ eastl::vector<const RE_Component*> ComponentsPool::GetAllCompCPtr(ushortint type
 	return ret;
 }
 
-eastl::vector<eastl::pair<UID, RE_Component*>> ComponentsPool::GetAllCompData(ushortint type) const
+eastl::vector<eastl::pair<const UID, RE_Component*>> ComponentsPool::GetAllCompData(ushortint type) const
 {
-	eastl::vector<eastl::pair<UID, RE_Component*>> ret;
+	eastl::vector<eastl::pair<const UID, RE_Component*>> ret;
 	switch (type)
 	{
 	case C_TRANSFORM:
 	{
-		eastl::vector<UID> ids = transPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(transPool.AtPtr(id)) });
+		for (auto id : transPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(transPool.AtPtr(id)) });
 		break;
 	}
 	case C_CAMERA:
 	{
-		eastl::vector<UID> ids = camPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(camPool.AtPtr(id)) });
+		for (auto id : camPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(camPool.AtPtr(id)) });
 		break;
 	}
 	case C_MESH:
 	{
-		eastl::vector<UID> ids = meshPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(meshPool.AtPtr(id)) });
+		for (auto id : meshPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(meshPool.AtPtr(id)) });
 		break;
 	}
 	case C_LIGHT:
 	{
-		eastl::vector<UID> ids = lightPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(lightPool.AtPtr(id)) });
+		for (auto id : lightPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(lightPool.AtPtr(id)) });
 		break;
 	}
 	case C_PARTICLEEMITER: break;
 	case C_FUSTRUM: break;
 	case C_GRID:
 	{
-		eastl::vector<UID> ids = pGridPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pGridPool.AtPtr(id)) });
+		for (auto id : pGridPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pGridPool.AtPtr(id)) });
 		break;
 	}
 	case C_ROCK:
 	{
-		eastl::vector<UID> ids = pRockPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pRockPool.AtPtr(id)) });
+		for (auto id : pRockPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pRockPool.AtPtr(id)) });
 		break;
 	}
 	case C_CUBE:
 	{
-		eastl::vector<UID> ids = pCubePool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pCubePool.AtPtr(id)) });
+		for (auto id : pCubePool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pCubePool.AtPtr(id)) });
 		break;
 	}
 	case C_DODECAHEDRON:
 	{
-		eastl::vector<UID> ids = pDodecahedronPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pDodecahedronPool.AtPtr(id)) });
+		for (auto id : pDodecahedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pDodecahedronPool.AtPtr(id)) });
 		break;
 	}
 	case C_TETRAHEDRON:
 	{
-		eastl::vector<UID> ids = pTetrahedronPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pTetrahedronPool.AtPtr(id)) });
+		for (auto id : pTetrahedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pTetrahedronPool.AtPtr(id)) });
 		break;
 	}
 	case C_OCTOHEDRON:
 	{
-		eastl::vector<UID> ids = pOctohedronPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pOctohedronPool.AtPtr(id)) });
+		for (auto id : pOctohedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pOctohedronPool.AtPtr(id)) });
 		break;
 	}
 	case C_ICOSAHEDRON:
 	{
-		eastl::vector<UID> ids = pIcosahedronPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pIcosahedronPool.AtPtr(id)) });
+		for (auto id : pIcosahedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pIcosahedronPool.AtPtr(id)) });
 		break;
 	}
 	case C_PLANE:
 	{
-		eastl::vector<UID> ids = pPlanePool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pPlanePool.AtPtr(id)) });
+		for (auto id : pPlanePool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pPlanePool.AtPtr(id)) });
 		break;
 	}
 	case C_SPHERE:
 	{
-		eastl::vector<UID> ids = pSpherePool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pSpherePool.AtPtr(id)) });
+		for (auto id : pSpherePool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pSpherePool.AtPtr(id)) });
 		break;
 	}
 	case C_CYLINDER:
 	{
-		eastl::vector<UID> ids = pCylinderPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pCylinderPool.AtPtr(id)) });
+		for (auto id : pCylinderPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pCylinderPool.AtPtr(id)) });
 		break;
 	}
 	case C_HEMISHPERE:
 	{
-		eastl::vector<UID> ids = pHemiSpherePool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pHemiSpherePool.AtPtr(id)) });
+		for (auto id : pHemiSpherePool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pHemiSpherePool.AtPtr(id)) });
 		break;
 	}
 	case C_TORUS:
 	{
-		eastl::vector<UID> ids = pTorusPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pTorusPool.AtPtr(id)) });
+		for (auto id : pTorusPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pTorusPool.AtPtr(id)) });
 		break;
 	}
 	case C_TREFOILKNOT:
 	{
-		eastl::vector<UID> ids = pTrefoiKnotPool.GetAllKeys();
-		for (auto id : ids) ret.push_back({ id, static_cast<RE_Component*>(pTrefoiKnotPool.AtPtr(id)) });
+		for (auto id : pTrefoiKnotPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pTrefoiKnotPool.AtPtr(id)) });
 		break;
 	}
 	}

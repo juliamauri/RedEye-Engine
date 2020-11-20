@@ -10,7 +10,7 @@
 
 class JSONNode;
 
-enum RE_ShadingMode { //from assimp documentation
+enum RE_ShadingMode : int { //from assimp documentation
 	S_FLAT = 0x1,
 	S_GORAUND,
 	S_PHONG,
@@ -52,7 +52,7 @@ public:
 	void SomeResourceChanged(const char* resMD5)override;
 
 	bool ExitsOnShader(const char* shader);
-	bool ExitsOnTexture(const char* texture);
+	bool ExistsOnTexture(const char* texture);
 
 	void DeleteShader();
 	void DeleteTexture(const char* texMD5);
@@ -78,7 +78,7 @@ private:
 
 	void GetAndProcessUniformsFromShader();
 
-	bool ExitsOnTexture(const char* texture, eastl::vector<const char*>* textures);
+	bool ExistsOnTexture(const char* texture, eastl::vector<const char*>* textures);
 	void DeleteTexture(const char* texMD5, eastl::vector<const char*>* textures);
 
 public:

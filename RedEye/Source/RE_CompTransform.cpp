@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "ModuleInput.h"
+#include "ModuleScene.h"
 #include "ModuleEditor.h"
 #include "RE_Command.h"
 
@@ -245,10 +246,17 @@ void RE_CompTransform::DrawProperties()
 
 void RE_CompTransform::OnTransformModified() { needed_update_transform = true; }
 
+math::float4x4 RE_CompTransform::UpdateGlobalMatrixFromParent(math::float4x4 parent)
+{
+	needed_update_transform = false;
+	model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
+	return model_global = model_local * parent;
+}
+
 void RE_CompTransform::CalcGlobalTransform()
 {
-	model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
 	needed_update_transform = false;
+	model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
 
 	if (useParent)
 	{
@@ -256,12 +264,11 @@ void RE_CompTransform::CalcGlobalTransform()
 		const RE_GameObject* parent = go_ptr->GetParentCPtr();
 		if (parent != nullptr)
 		{
-			model_global = model_local * parent->GetTransformPtr()->GetGlobalMatrix();
+			math::float4x4 next_global = model_local * parent->GetTransformPtr()->GetGlobalMatrix();
+			if (!next_global.Equals(model_global))
+				Event::Push(TRANSFORM_MODIFIED, App::scene, go, model_global = next_global);
 		}
-
-		go_ptr->TransformModified();
 	}
-	else
-		model_global = model_local;
+	else model_global = model_local;
 }
 

@@ -781,9 +781,7 @@ void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
 	RE_FBOManager::ChangeFBOBind(c_fbo, RE_FBOManager::GetWidth(c_fbo), RE_FBOManager::GetHeight(c_fbo));
 	RE_FBOManager::ClearFBOBuffers(c_fbo, thumbnailView.clear_color.ptr());
 
-	go->TransformModified(false);
-
-	go->ResetGlobalBoundingBoxForAllChilds();
+	go->ResetGOandChildsAABB();
 
 	RE_CompCamera* internalCamera = thumbnailView.camera;
 

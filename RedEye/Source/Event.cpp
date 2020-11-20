@@ -45,15 +45,3 @@ void Event::Clear()
 	type = MAX_EVENT_TYPES;
 	listener = nullptr;
 }
-
-InstantEvent::InstantEvent(RE_EventType t, EventListener * lis, Cvar d1, Cvar d2) : Event(t,lis,d1,d2)
-{
-	if (IsValid()) CallListener();
-}
-
-InstantEvent::InstantEvent(InstantEvent & e) : Event(e.type, e.listener, e.data1, e.data2)
-{
-	if (IsValid() && !Event::paused) CallListener();
-}
-
-InstantEvent::~InstantEvent() { Clear(); }

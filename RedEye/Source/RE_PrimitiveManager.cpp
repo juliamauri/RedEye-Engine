@@ -15,22 +15,27 @@
 #include <gl/GL.h>
 #include "par_shapes.h"
 
-RE_PrimitiveManager::RE_PrimitiveManager() {}
+RE_PrimitiveManager::RE_PrimitiveManager()
+{
+	for (auto platonic : platonics) platonic = { 0, 0, 0, 0 };
+}
 
 RE_PrimitiveManager::~RE_PrimitiveManager()
 {
 	for (auto platonic : platonics)
 	{
-		glDeleteVertexArrays(1, &platonic.vao);
-		glDeleteBuffers(1, &platonic.vbo);
-		glDeleteBuffers(1, &platonic.ebo);
+		if (platonic.triangles)
+		{
+			glDeleteVertexArrays(1, &platonic.vao);
+			glDeleteBuffers(1, &platonic.vbo);
+			glDeleteBuffers(1, &platonic.ebo);
+		}
 	}
 }
 
 void RE_PrimitiveManager::Init()
 {
 	App::ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
-	//for (unsigned short i = C_CUBE; i <= C_ICOSAHEDRON; ++i) GetPlatonicData(i);
 }
 
 void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP)
@@ -64,14 +69,12 @@ eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPlatonicData(uns
 	if (!platonics[index].vao)
 	{
 		par_shapes_mesh* mesh = nullptr;
-		switch (type)
-		{
+		switch (type) {
 		case C_CUBE: mesh = par_shapes_create_cube(); break;
 		case C_DODECAHEDRON: mesh = par_shapes_create_dodecahedron(); break;
 		case C_TETRAHEDRON: mesh = par_shapes_create_tetrahedron(); break;
 		case C_OCTOHEDRON: mesh = par_shapes_create_octahedron(); break;
-		case C_ICOSAHEDRON: mesh = par_shapes_create_icosahedron(); break;
-		}
+		case C_ICOSAHEDRON: mesh = par_shapes_create_icosahedron(); break; }
 
 		UploadPlatonic(mesh, &platonics[index].vao, &platonics[index].vbo, &platonics[index].ebo, &platonics[index].triangles);
 		par_shapes_free_mesh(mesh);

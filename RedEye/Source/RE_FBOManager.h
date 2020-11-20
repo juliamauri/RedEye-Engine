@@ -4,7 +4,8 @@
 #include <EASTL/map.h>
 #include <EASTL/vector.h>
 
-struct RE_FBO {
+struct RE_FBO
+{
 	unsigned int ID = 0;
 	unsigned int width = 0, height = 0;
 	eastl::vector<unsigned int> texturesID;

@@ -157,10 +157,7 @@ private:
 	bool draw_quad_tree = true;
 	bool draw_cameras = true;
 
-	float all_aabb_color[3];
-	float sel_aabb_color[3];
-	float quad_tree_color[3];
-	float frustum_color[3];
+	float all_aabb_color[3],  sel_aabb_color[3], quad_tree_color[3], frustum_color[3];
 
 	//crtd security
 	bool isDuplicated = false;

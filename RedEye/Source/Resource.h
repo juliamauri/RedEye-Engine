@@ -62,23 +62,27 @@ public:
 	void DrawPropieties();
 
 private:
+
 	virtual void Draw() {}
 	virtual void SaveResourceMeta(JSONNode* metaNode) {}
 	virtual void LoadResourceMeta(JSONNode* metaNode) {}
 
 private:
+
 	eastl::string name;
 	eastl::string propietiesName;
 	eastl::string assetPath;
 	eastl::string libraryPath;
 	eastl::string metaPath;
+
 	char* md5 = nullptr;
-	Resource_Type type;
+	Resource_Type type = R_UNDEFINED;
 	signed long long lastModified = 0;
 
 	bool isinternal = false;
 
 protected:
+
 	bool inMemory = false;
 };
 

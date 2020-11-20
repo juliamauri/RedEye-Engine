@@ -1327,7 +1327,6 @@ void TransformDebugWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
-
 		eastl::vector<UID> allTransforms = App::scene->GetScenePool()->GetAllGOUIDs();
 		
 		int transformCount = allTransforms.size();

@@ -244,7 +244,11 @@ void Application::FinishUpdate()
 	if (want_to_save) Save();
 	if (ticking)
 	{
-		InstantEvent(PAUSE, this);
+		for (eastl::list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend(); ++it)
+			if ((*it)->IsActive()) (*it)->OnPause();
+
+		time.PauseGameTimer();
+		state = GS_PAUSE;
 		ticking = false;
 	}
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PoolMapped.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
@@ -7,9 +8,6 @@
 #include "RE_CompLight.h"
 #include "RE_CompPrimitive.h"
 #include "RE_FileSystem.h"
-
-#include <EASTL/vector.h>
-#include "PoolMapped.h"
 
 class JSONNode;
 class GameObjectsPool;
@@ -207,8 +205,8 @@ public:
 	void UnUseResources();
 
 	// Component Handling
-	eastl::pair<UID, RE_Component*> GetNewComponent(ComponentType cType);
-	UID GetNewComponentUID(ComponentType cType);
+	eastl::pair<const UID, RE_Component*> GetNewComponent(ComponentType cType);
+	const UID GetNewComponentUID(ComponentType cType);
 	RE_Component* GetNewComponentPtr(ComponentType cType);
 
 	RE_Component* CopyComponent(GameObjectsPool* pool, RE_Component* copy, const UID parent);
@@ -221,7 +219,7 @@ public:
 	eastl::vector<UID> GetAllCompUID(ushortint type = 0) const;
 	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
 	eastl::vector<const RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
-	eastl::vector<eastl::pair<UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
+	eastl::vector<eastl::pair<const UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
 
 	// Serialization
 	unsigned int GetBinarySize()const;
@@ -267,7 +265,7 @@ public:
 
 	// Getters
 	eastl::vector<RE_GameObject*> GetAllPtrs() const;
-	eastl::vector<eastl::pair<UID, RE_GameObject*>> GetAllData() const;
+	eastl::vector<eastl::pair<const UID, RE_GameObject*>> GetAllData() const;
 
 	// Root
 	UID GetRootUID() const;
@@ -303,7 +301,7 @@ public:
 	RE_GameObject* AddGO(const char* name, UID parent, bool broadcast = false);
 	UID CopyGO(const RE_GameObject* copy, UID parent, bool broadcast = false);
 	UID CopyGOandChilds(const RE_GameObject* copy, UID parent, bool broadcast = false);
-	UID InsertPool(RE_GOManager* pool);
+	UID InsertPool(RE_GOManager* pool, bool broadcast = false);
 
 	void DestroyGO(UID toDestroy);
 
@@ -318,7 +316,7 @@ public:
 
 	eastl::vector<UID> GetAllGOUIDs() const;
 	eastl::vector<RE_GameObject*> GetAllGOPtrs() const;
-	eastl::vector<eastl::pair<UID, RE_GameObject*>> GetAllGOData() const;
+	eastl::vector<eastl::pair<const UID, RE_GameObject*>> GetAllGOData() const;
 
 	unsigned int TotalGameObjects() const { return gameObjectsPool.GetCount(); };
 
@@ -326,10 +324,10 @@ public:
 	eastl::vector<UID> GetAllCompUID(ushortint type = 0) const;
 	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
 	eastl::vector<const RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
-	eastl::vector<eastl::pair<UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
+	eastl::vector<eastl::pair<const UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
 
-	RE_Component* GetComponentPtr(UID poolid, ComponentType cType);
-	const RE_Component* GetComponentCPtr(UID poolid, ComponentType cType) const;
+	RE_Component* GetComponentPtr(const UID poolid, ComponentType cType);
+	const RE_Component* GetComponentCPtr(const UID poolid, ComponentType cType) const;
 
 	RE_GOManager* GetNewPoolFromID(UID id);
 
@@ -340,7 +338,7 @@ public:
 	void UnUseResources();
 
 	// Serialization
-	unsigned int GetBinarySize()const;
+	unsigned int GetBinarySize() const;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources);
 

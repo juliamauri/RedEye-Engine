@@ -87,15 +87,4 @@ public:
 	const unsigned int timestamp;
 };
 
-class InstantEvent : public Event
-{
-public:
-
-	InstantEvent(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
-	InstantEvent(InstantEvent& e);
-	~InstantEvent();
-};
-
 #endif
-
-// int SDL_EventFilter(void* userdata, SDL_Event* event)

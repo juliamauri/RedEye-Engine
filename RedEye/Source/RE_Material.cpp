@@ -511,22 +511,18 @@ void RE_Material::SomeResourceChanged(const char* resMD5)
 
 bool RE_Material::ExitsOnShader(const char* shader) { return (shaderMD5 == shader); }
 
-bool RE_Material::ExitsOnTexture(const char* texture)
+bool RE_Material::ExistsOnTexture(const char* texture)
 {
-	bool ret = false;
-
-	// TODO: Exits ->Exists
-	ret = ExitsOnTexture(texture, &tDiffuse);
-	if(!ret) ret = ExitsOnTexture(texture, &tSpecular);
-	if(!ret) ret = ExitsOnTexture(texture, &tAmbient);
-	if(!ret) ret = ExitsOnTexture(texture, &tEmissive);
-	if(!ret) ret = ExitsOnTexture(texture, &tOpacity);
-	if(!ret) ret = ExitsOnTexture(texture, &tShininess);
-	if(!ret) ret = ExitsOnTexture(texture, &tHeight);
-	if(!ret) ret = ExitsOnTexture(texture, &tNormals);
-	if(!ret) ret = ExitsOnTexture(texture, &tReflection);
-	if(!ret) ret = ExitsOnTexture(texture, &tUnknown);
-
+	bool ret = ExistsOnTexture(texture, &tDiffuse);
+	if(!ret) ret = ExistsOnTexture(texture, &tSpecular);
+	if(!ret) ret = ExistsOnTexture(texture, &tAmbient);
+	if(!ret) ret = ExistsOnTexture(texture, &tEmissive);
+	if(!ret) ret = ExistsOnTexture(texture, &tOpacity);
+	if(!ret) ret = ExistsOnTexture(texture, &tShininess);
+	if(!ret) ret = ExistsOnTexture(texture, &tHeight);
+	if(!ret) ret = ExistsOnTexture(texture, &tNormals);
+	if(!ret) ret = ExistsOnTexture(texture, &tReflection);
+	if(!ret) ret = ExistsOnTexture(texture, &tUnknown);
 	return ret;
 }
 
@@ -1633,7 +1629,7 @@ void RE_Material::GetAndProcessUniformsFromShader()
 	}
 }
 
-bool RE_Material::ExitsOnTexture(const char* texture, eastl::vector<const char*>* textures)
+bool RE_Material::ExistsOnTexture(const char* texture, eastl::vector<const char*>* textures)
 {
 	for (auto tex : *textures)
 	{

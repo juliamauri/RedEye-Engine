@@ -51,7 +51,23 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 
 	tools.push_back(transDebInfo = new TransformDebugWindow());
 	
-	grid_size[0] = grid_size[1] = 1.0f;
+	grid_size[0] = grid_size[1] = 1.f;
+
+	all_aabb_color[0] = 0.f;
+	all_aabb_color[1] = 1.f;
+	all_aabb_color[2] = 0.f;
+
+	sel_aabb_color[0] = 1.f;
+	sel_aabb_color[1] = .5f;
+	sel_aabb_color[2] = 0.f;
+
+	quad_tree_color[0] = 1.f;
+	quad_tree_color[1] = 1.f;
+	quad_tree_color[2] = 0.f;
+
+	frustum_color[0] = 0.f;
+	frustum_color[1] = 1.f;
+	frustum_color[2] = 1.f;
 }
 
 ModuleEditor::~ModuleEditor()
@@ -93,22 +109,6 @@ bool ModuleEditor::Init(JSONNode* node)
 	}
 	else
 		RE_LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
-
-	all_aabb_color[0] = 0.f;
-	all_aabb_color[1] = 1.f;
-	all_aabb_color[2] = 0.f;
-
-	sel_aabb_color[0] = 1.f;
-	sel_aabb_color[1] = .5f;
-	sel_aabb_color[2] = 0.f;
-
-	quad_tree_color[0] = 1.f;
-	quad_tree_color[1] = 1.f;
-	quad_tree_color[2] = 0.f;
-
-	frustum_color[0] = 0.f;
-	frustum_color[1] = 1.f;
-	frustum_color[2] = 1.f;
 
 	return ret;
 }
@@ -552,7 +552,6 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 
 void ModuleEditor::DrawHeriarchy()
 {
-	unsigned int popids = 0, treepops = 0;
 	UID to_select = 0ull, goToDelete_uid = 0ull;
 	const RE_GameObject* root = ModuleScene::GetRootCPtr();
 	UID root_uid = root->GetUID();
@@ -577,11 +576,10 @@ void ModuleEditor::DrawHeriarchy()
 				(is_leaf ? ImGuiTreeNodeFlags_Leaf :
 					ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick))))
 			{
-				if (is_leaf) { ImGui::TreePop(); treepops++; }
+				if (is_leaf) ImGui::TreePop();
 				else for (auto child : go->GetChildsPtrReversed()) gos.push(child);
 			}
 			ImGui::PopID();
-			popids++;
 
 			if (ImGui::IsItemClicked()) to_select = go_uid;
 
@@ -595,11 +593,9 @@ void ModuleEditor::DrawHeriarchy()
 				ImGui::EndPopup();
 			}
 
-			if (go->IsLastChild() && go->GetParentUID() != root_uid) { ImGui::TreePop(); treepops++; }
+			if (go->IsLastChild() && go->GetParentUID() != root_uid) ImGui::TreePop();
 		}
 	}
-
-	RE_LOG("treepops: %i - id pops: %i", treepops, popids);
 
 	if (to_select) SetSelected(to_select);
 	if (goToDelete_uid != 0ull) {

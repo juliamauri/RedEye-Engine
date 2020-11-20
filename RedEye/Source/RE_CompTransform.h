@@ -20,6 +20,8 @@ public:
 
 	void OnTransformModified();
 
+	math::float4x4 UpdateGlobalMatrixFromParent(math::float4x4 parent);
+
 	// Setters
 	void SetRotation(math::Quat rotation);
 	void SetRotation(math::vec rotation);

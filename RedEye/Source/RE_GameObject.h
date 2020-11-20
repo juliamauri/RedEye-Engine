@@ -94,7 +94,7 @@ public:
 	const RE_GameObject* GetLastChildCPtr() const;
 
 	// Children
-	RE_GameObject* AddNewChild(bool broadcast = true, const char* name = nullptr, const bool start_active = true, const bool isStatic = true);
+	RE_GameObject* AddNewChild(const char* name = nullptr, const bool start_active = true, const bool isStatic = true);
 	void ReleaseChild(const UID id);
 	void DestroyChild(const UID id);
 
@@ -129,16 +129,14 @@ public:
 	void OnPlay();
 	void OnPause();
 	void OnStop();
-	void TransformModified(bool broadcast = true);
-	void OnTransformModified(bool broadcast = true);
+	void OnTransformModified();
 
 	// AABB
 	inline void AddToBoundingBox(math::AABB box);
 	void ResetLocalBoundingBox();
 	void ResetGlobalBoundingBox();
 	void ResetBoundingBoxes();
-	void ResetBoundingBoxForAllChilds();
-	void ResetGlobalBoundingBoxForAllChilds();
+	void ResetGOandChildsAABB();
 	void DrawAABB(math::vec color) const;
 	void DrawGlobalAABB() const;
 
@@ -179,7 +177,6 @@ private:
 
 	inline bool IsRenderGeo(ushortint type) const;
 
-	void LinkChild(const UID child, bool broadcast = true);
 	inline RE_GameObject* ChildPtr(const UID child) const;
 	inline const RE_GameObject* ChildCPtr(const UID child) const;
 

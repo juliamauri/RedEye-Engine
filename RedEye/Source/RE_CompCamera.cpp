@@ -19,7 +19,12 @@
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
 
-RE_CompCamera::~RE_CompCamera() { if(!useParent) DEL(transform.ptr); }
+RE_CompCamera::RE_CompCamera() : RE_Component(C_CAMERA) {}
+
+RE_CompCamera::~RE_CompCamera()
+{
+	if(!useParent && transform != nullptr) DEL(transform);
+}
 
 void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool _draw_frustum, bool _usingSkybox, const char* _skyboxMD5)
 {
@@ -42,11 +47,7 @@ void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_pla
 	SetAspectRatio(AspectRatioTYPE(aspect));
 
 	// Transform
-	if (!useParent) {
-		transform.ptr = new RE_CompTransform();
-		transform.ptr->SetParent(0ull);
-	}
-	else transform.uid = GetGOCPtr()->GetCompUID(C_TRANSFORM);
+	if (!useParent) (transform = new RE_CompTransform())->PoolSetUp(nullptr, 0ull);
 
 	OnTransformModified();
 	RecalculateMatrixes();
@@ -63,7 +64,7 @@ void RE_CompCamera::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const U
 
 void RE_CompCamera::Update()
 {
-	if (!useParent && transform.ptr->CheckUpdate()) need_recalculation = true;
+	if (!useParent && transform->CheckUpdate()) need_recalculation = true;
 	if (need_recalculation) RecalculateMatrixes();
 }
 
@@ -340,7 +341,7 @@ float RE_CompCamera::GetHFOVDegrees() const { return h_fov_degrees; }
 
 RE_CompTransform* RE_CompCamera::GetTransform() const
 {
-	return useParent ? GetGOCPtr()->GetTransformPtr() : transform.ptr;
+	return useParent ? GetGOCPtr()->GetTransformPtr() : transform;
 }
 
 math::float4x4 RE_CompCamera::GetView()
