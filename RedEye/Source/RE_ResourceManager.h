@@ -26,7 +26,7 @@ public:
 
 	eastl::vector<const char*> WhereUndefinedFileIsUsed(const char* assetPath);
 	eastl::vector<const char*> WhereIsUsed(const char* res);
-	ResourceContainer* DeleteResource(const char* res, eastl::vector<const char*> resourcesWillChange);
+	ResourceContainer* DeleteResource(const char* res, eastl::vector<const char*> resourcesWillChange, bool resourceOnScene);
 
 	const char* ImportModel(const char* assetPath);
 	const char* ImportTexture(const char* assetPath);

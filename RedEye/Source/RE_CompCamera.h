@@ -76,6 +76,7 @@ public:
 	bool isUsingSkybox() const;
 	const char* GetSkybox() const;
 	void DeleteSkybox();
+	void SetSkyBox(const char* resS) { skyboxMD5 = resS; }
 
 	// Resources - Skybox
 	void UseResources() override;

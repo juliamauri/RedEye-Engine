@@ -192,6 +192,7 @@ private:
 	RE_GameObject* goPrefab = nullptr;
 	const char* resourceToDelete = nullptr;
 	eastl::vector<const char*> resourcesUsing;
+	bool resourceOnScene = false;
 };
 
 class AssetsWindow : public EditorWindow

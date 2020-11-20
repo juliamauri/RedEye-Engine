@@ -552,6 +552,33 @@ void PopUpWindow::PopUpDelRes(const char* res)
 	state = PU_DELETERESOURCE;
 	resourceToDelete = res;
 	resourcesUsing = App::resources->WhereIsUsed(res);
+
+	Resource_Type rType = App::resources->At(res)->GetType();
+	eastl::stack<RE_Component*> comps = App::scene->GetScenePool()->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+	bool skip = false;
+	while (!comps.empty() && !skip)
+	{
+		if (rType == R_MATERIAL)
+		{
+			RE_CompMesh* mesh = dynamic_cast<RE_CompMesh*>(comps.top());
+			if (mesh && mesh->GetMaterial() == res)
+			{
+				resourceOnScene = true;
+				skip = true;
+			}
+		}
+		else
+		{
+			RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(comps.top());
+			if (cam && cam->GetSkybox() == res)
+			{
+				resourceOnScene = true;
+				skip = true;
+			}
+		}
+		comps.pop();
+	}
+
 	PopUp("Delete", "Do you want to delete that resource?", false);
 }
 
@@ -694,7 +721,7 @@ void PopUpWindow::Draw(bool secondary)
 				App::handlerrors.StartHandling();
 
 				// Delete at resource & filesystem
-				ResourceContainer* resAlone = App::resources->DeleteResource(resourceToDelete, resourcesUsing);
+				ResourceContainer* resAlone = App::resources->DeleteResource(resourceToDelete, resourcesUsing, resourceOnScene);
 				App::fs->DeleteResourceFiles(resAlone);
 
 				DEL(resAlone);
@@ -710,10 +737,16 @@ void PopUpWindow::Draw(bool secondary)
 				goPrefab = nullptr;
 				resourceToDelete = nullptr;
 				resourcesUsing.clear();
+				resourceOnScene = false;
 				App::resources->PopSelected(true);
 
 				App::handlerrors.StopHandling();
 				if (checkError && App::handlerrors.AnyErrorHandled()) App::handlerrors.ActivatePopUp();
+			}
+
+			if (resourceOnScene) {
+				ImGui::Separator();
+				ImGui::Text("Your current scene will be affected.");
 			}
 
 			ImGui::Separator();
@@ -751,7 +784,7 @@ void PopUpWindow::Draw(bool secondary)
 					eastl::stack<ResourceContainer*> shadersDeleted;
 					for (auto resource : resourcesUsing)
 						if (App::resources->At(resource)->GetType() == R_SHADER)
-							shadersDeleted.push(App::resources->DeleteResource(resource, App::resources->WhereIsUsed(resource)));
+							shadersDeleted.push(App::resources->DeleteResource(resource, App::resources->WhereIsUsed(resource), false));
 
 					// Delete shader files
 					while (shadersDeleted.empty())

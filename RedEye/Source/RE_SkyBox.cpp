@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "RE_FileSystem.h"
+#include "ModuleRenderer3D.h"
 #include "RE_ResourceManager.h"
 #include "RE_Texture.h"
 #include "Globals.h"
@@ -98,10 +99,10 @@ void RE_SkyBox::Draw()
 					App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID);
 				}
 
-				applySize = applyTextures = false;
 			}
 
-			applySave = false;
+			App::renderer3d->PushThumnailRend(GetMD5(), true);
+			applySize = applyTextures = applySave = false;
 		}
 		if (ImGui::Button("Restore"))
 		{
@@ -113,7 +114,7 @@ void RE_SkyBox::Draw()
 			}
 			else skyBoxSettings = restoreSettings;
 
-			applySave = false;
+			applySize = applyTextures = applySave = false;
 		}
 	}
 	
@@ -139,10 +140,7 @@ void RE_SkyBox::Draw()
 void RE_SkyBox::DrawEditSkyBox()
 {
 	if (ImGui::SliderFloat("SkyBox size", &skyBoxSettings.skyBoxSize, 0.0f, 10000.0f))
-	{
-		if (ResourceContainer::inMemory) applySize = true;
-		applySave = true;
-	}
+		applySize = applySave = true;
 
 	ImGui::Separator();
 	ImGui::Text("Textures by face:");
@@ -163,9 +161,8 @@ void RE_SkyBox::DrawEditSkyBox()
 				id = "Delete";
 				if (ImGui::Button(id.c_str()))
 				{
-					if (ResourceContainer::inMemory) App::resources->Use(resource->GetMD5());
 					toDelete = skyBoxSettings.textures[i].face;
-					applySave = true;
+					applyTextures = applySave = true;
 				}
 
 				id = "Change";
@@ -176,10 +173,8 @@ void RE_SkyBox::DrawEditSkyBox()
 					{
 						if (ImGui::MenuItem(textRes->GetName()))
 						{
-							if (ResourceContainer::inMemory) App::resources->UnUse(resource->GetMD5());
 							skyBoxSettings.textures[i].textureMD5 = textRes->GetMD5();
-							if (ResourceContainer::inMemory) App::resources->Use(textRes->GetMD5());
-							applySave = true;
+							applyTextures = applySave = true;
 						}
 					}
 					ImGui::EndMenu();
@@ -197,7 +192,7 @@ void RE_SkyBox::DrawEditSkyBox()
 						if (ImGui::MenuItem(textRes->GetName()))
 						{
 							skyBoxSettings.textures[i].textureMD5 = textRes->GetMD5();
-							if (ResourceContainer::inMemory) App::resources->Use(textRes->GetMD5());
+							applyTextures = applySave = true;
 						}
 					}
 					ImGui::EndMenu();
@@ -217,10 +212,8 @@ void RE_SkyBox::DrawEditSkyBox()
 		{
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 			{
-				if (ResourceContainer::inMemory && skyBoxSettings.textures[i].textureMD5) App::resources->UnUse(skyBoxSettings.textures[i].textureMD5);
 				skyBoxSettings.textures[i].textureMD5 = *static_cast<const char**>(dropped->Data);
-				if (ResourceContainer::inMemory) App::resources->Use(skyBoxSettings.textures[i].textureMD5);
-				applySave = true;
+				applyTextures = applySave = true;
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -244,7 +237,7 @@ void RE_SkyBox::DrawEditSkyBox()
 			else if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_MIN_FILTER, skyBoxSettings.min_filter = newfilter);
 			else skyBoxSettings.min_filter = newfilter;
 
-			applySave = true;
+			applyTextures = applySave = true;
 		}
 	}
 
@@ -255,7 +248,7 @@ void RE_SkyBox::DrawEditSkyBox()
 		if (skyBoxSettings.mag_filter != newfilter)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_MAG_FILTER, skyBoxSettings.mag_filter = newfilter);
-			applySave = true;
+			applyTextures = applySave = true;
 		}
 	}
 
@@ -266,7 +259,7 @@ void RE_SkyBox::DrawEditSkyBox()
 		if (skyBoxSettings.wrap_s != newwrap)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_S, skyBoxSettings.wrap_s = newwrap);
-			applySave = true;
+			applyTextures = applySave = true;
 		}
 	}
 
@@ -277,7 +270,7 @@ void RE_SkyBox::DrawEditSkyBox()
 		if (skyBoxSettings.wrap_t != newwrap)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_T, skyBoxSettings.wrap_t = newwrap);
-			applySave = true;
+			applyTextures = applySave = true;
 		}
 	}
 
@@ -288,7 +281,7 @@ void RE_SkyBox::DrawEditSkyBox()
 		if (skyBoxSettings.wrap_r != newwrap)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_R, skyBoxSettings.wrap_r = newwrap);
-			applySave = true;
+			applyTextures = applySave = true;
 		}
 	}
 }

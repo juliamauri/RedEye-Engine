@@ -229,7 +229,7 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 				else
 				{
 					RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(comps.top());
-					if (cam && cam->isUsingSkybox() && cam->GetSkybox() == res)
+					if (cam && cam->GetSkybox() == res)
 					{
 						ret.push_back(resource->GetMD5());
 						skip = true;
@@ -247,13 +247,10 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 	return ret;
 }
 
-ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::vector<const char*> resourcesWillChange)
+ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::vector<const char*> resourcesWillChange, bool resourceOnScene)
 {
 	ResourceContainer* resource = resources.at(res);
 	Resource_Type rType = resource->GetType();
-
-	const char* currentScene = nullptr;
-	bool reloadCurrentScene = (((currentScene = App::scene->GetCurrentScene()) == res && rType == R_SCENE) || (TotalReferenceCount(res) > 0 && rType != R_TEXTURE));
 
 	if (TotalReferenceCount(res) > 0) resource->UnloadMemory();
 
@@ -269,7 +266,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 			if(rType == R_SHADER) resChange->DeleteShader();
 			else resChange->DeleteTexture(res);
 			resChange->UnloadMemory();
-			App::renderer3d->PushThumnailRend(resToChange);
+			App::renderer3d->PushThumnailRend(resToChange, true);
 		}
 		break;
 	}
@@ -281,22 +278,19 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 			ResourceContainer* resChange = App::resources->At(resToChange);
 			Resource_Type goType = resChange->GetType();
 
+			if (resourceOnScene && resToChange == App::scene->GetCurrentScene())
+				continue;
+
 			if (goType != R_MODEL)
 			{
 				Event::PauseEvents();
 
 				RE_GOManager* poolGORes = nullptr;
 				Use(resToChange);
-				if (currentScene == resToChange)
-				{
-					poolGORes = App::scene->GetScenePool();
-				}
-				else
-				{
-					switch (goType) {
-					case R_SCENE: poolGORes = dynamic_cast<RE_Scene*>(resChange)->GetPool(); break;
-					case R_PREFAB: poolGORes = dynamic_cast<RE_Prefab*>(resChange)->GetPool(); break; }
-				}
+
+				switch (goType) {
+				case R_SCENE: poolGORes = dynamic_cast<RE_Scene*>(resChange)->GetPool(); break;
+				case R_PREFAB: poolGORes = dynamic_cast<RE_Prefab*>(resChange)->GetPool(); break; }
 
 				eastl::stack<RE_Component*> comps = poolGORes->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 				while (!comps.empty())
@@ -312,16 +306,14 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 					else
 					{
 						RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(go);
-						if (cam && cam->isUsingSkybox() && cam->GetSkybox() == res) cam->DeleteSkybox();
+						if (cam && cam->isUsingSkybox() && cam->GetSkybox() == res) cam->SetSkyBox(nullptr);
 					}
 				}
 
-				if (currentScene != resToChange)
-				{
-					poolGORes->GetRootPtr()->TransformModified(false);
-					poolGORes->Update();
-					poolGORes->GetRootPtr()->ResetBoundingBoxForAllChilds();
-				}
+				poolGORes->GetRootPtr()->TransformModified(false);
+				poolGORes->Update();
+				poolGORes->GetRootPtr()->ResetBoundingBoxForAllChilds();
+
 				switch (goType)
 				{
 				case R_SCENE:
@@ -339,8 +331,9 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 					break;
 				}
 				}
-				App::renderer3d->PushThumnailRend(resToChange);
+				App::renderer3d->PushThumnailRend(resToChange, true);
 				UnUse(resToChange);
+				DEL(poolGORes);
 				Event::ResumeEvents();
 			}
 		}
@@ -349,7 +342,26 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	}
 	}
 
-	if (reloadCurrentScene && res == currentScene) App::scene->NewEmptyScene("New Scene");
+	if (resourceOnScene) {
+		eastl::stack<RE_Component*> comps = App::scene->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+		while (!comps.empty())
+		{
+			RE_Component* go = comps.top();
+			comps.pop();
+
+			if (rType == R_MATERIAL)
+			{
+				RE_CompMesh* mesh = dynamic_cast<RE_CompMesh*>(go);
+				if (mesh && mesh->GetMaterial() == res) mesh->SetMaterial(nullptr);
+			}
+			else
+			{
+				RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(go);
+				if (cam && cam->GetSkybox() == res) cam->SetSkyBox(nullptr);
+			}
+		}
+		App::scene->HasChanges();
+	}
 
 	resourcesCounter.erase(res);
 	resources.erase(res);

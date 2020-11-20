@@ -372,7 +372,7 @@ void ModuleScene::SaveScene(const char* newName)
 		unsavedScene = nullptr;
 	}
 	else
-		App::renderer3d->PushThumnailRend(scene->GetMD5());
+		App::renderer3d->PushThumnailRend(scene->GetMD5(), true);
 
 	haschanges = false;
 	Event::ResumeEvents();

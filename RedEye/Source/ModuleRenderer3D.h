@@ -103,7 +103,7 @@ public:
 	unsigned int GetRenderedGameSceneTexture()const;
 
 	void PushSceneRend(RenderView& rV);
-	void PushThumnailRend(const char* md5);
+	void PushThumnailRend(const char* md5, bool redo = false);
 
 public:
 	enum RenderType {
@@ -114,10 +114,11 @@ public:
 		R_T_SKYBOX
 	};
 	struct RenderQueue {
-		RenderQueue(RenderType t, RenderView& rv, const char* r) : type(t), renderview(rv), resMD5(r) {}
+		RenderQueue(RenderType t, RenderView& rv, const char* r, bool re = false) : type(t), renderview(rv), resMD5(r), redo(re) {}
 		RenderType type;
 		RenderView& renderview;
 		const char* resMD5;
+		bool redo = false;
 	};
 
 private:

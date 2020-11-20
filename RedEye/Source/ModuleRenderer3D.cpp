@@ -173,15 +173,24 @@ update_status ModuleRenderer3D::PostUpdate()
 		RenderQueue rend = rendQueue.top();
 		rendQueue.pop();
 
+
+		RE_GOManager* poolGOThumbnail = nullptr;
+		eastl::string path(THUMBNAILPATH);
+		path += rend.resMD5;
+
+		bool exist = App::fs->Exists(path.c_str());
+		if (rend.redo && exist) {
+			RE_FileIO fileToDelete(path.c_str(), App::fs->GetZipPath());
+			fileToDelete.Delete();
+			exist = false;
+		}
+
 		switch (rend.type)
 		{
 		case RenderType::R_T_GO:
 		{
 			Event::PauseEvents();
-
-			RE_GOManager* poolGOThumbnail = nullptr;
-			eastl::string path(THUMBNAILPATH);
-			if (!App::fs->Exists((path += rend.resMD5).c_str())) {
+			if (!exist) {
 				ResourceContainer* res = App::resources->At(rend.resMD5);
 				App::resources->Use(rend.resMD5);
 				switch (res->GetType()) {
@@ -204,8 +213,7 @@ update_status ModuleRenderer3D::PostUpdate()
 		}
 		case RenderType::R_T_MAT:
 		{
-			eastl::string path(THUMBNAILPATH);
-			if (!App::fs->Exists((path += rend.resMD5).c_str()))
+			if (!exist)
 			{
 				ResourceContainer* res = App::resources->At(rend.resMD5);
 				App::resources->Use(rend.resMD5);
@@ -221,8 +229,7 @@ update_status ModuleRenderer3D::PostUpdate()
 			App::thumbnail->Change(rend.resMD5,App::thumbnail->ThumbnailTexture(rend.resMD5));
 			break;
 		case RenderType::R_T_SKYBOX:
-			eastl::string path(THUMBNAILPATH);
-			if (!App::fs->Exists((path += rend.resMD5).c_str()))
+			if (!exist)
 			{
 				ResourceContainer* res = App::resources->At(rend.resMD5);
 				App::resources->Use(rend.resMD5);
@@ -230,7 +237,7 @@ update_status ModuleRenderer3D::PostUpdate()
 				App::resources->UnUse(rend.resMD5);
 				App::thumbnail->SaveTextureFromFBO(path.c_str());
 			}
-			App::thumbnail->Change(rend.resMD5, App::thumbnail->ThumbnailTexture(rend.resMD5));
+			App::thumbnail->Change(rend.resMD5, App::thumbnail->LoadLibraryThumbnail(rend.resMD5));
 			break;
 		}
 
@@ -466,7 +473,7 @@ void ModuleRenderer3D::PushSceneRend(RenderView& rV)
 	rendQueue.push({ RenderType::R_SCENE, rV, nullptr});
 }
 
-void ModuleRenderer3D::PushThumnailRend(const char* md5)
+void ModuleRenderer3D::PushThumnailRend(const char* md5, bool redo)
 {
 	RenderType t = RenderType::R_T_GO;
 	switch (App::resources->At(md5)->GetType())
@@ -475,19 +482,19 @@ void ModuleRenderer3D::PushThumnailRend(const char* md5)
 	case R_MODEL:
 	case R_PREFAB:
 		t = RenderType::R_T_GO;
-		rendQueue.push({ t, thumbnailView, md5 });
+		rendQueue.push({ t, thumbnailView, md5, redo });
 		break;
 	case R_MATERIAL:
 		t = RenderType::R_T_MAT;
-		rendQueue.push({ t, thumbnailView, md5 });
+		rendQueue.push({ t, thumbnailView, md5, redo });
 		break;
 	case R_TEXTURE:
 		t = RenderType::R_T_TEX;
-		rendQueue.push({ t, thumbnailView, md5 });
+		rendQueue.push({ t, thumbnailView, md5, redo });
 		break;
 	case R_SKYBOX:
 		t = RenderType::R_T_SKYBOX;
-		rendQueue.push({ t, thumbnailView, md5 });
+		rendQueue.push({ t, thumbnailView, md5, redo });
 		break;
 	}
 }
