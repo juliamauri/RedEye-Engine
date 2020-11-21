@@ -1521,7 +1521,8 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 					if (newFolder)
 					{
 						RE_Directory* newDirectory = new RE_Directory();
-						if (inPath.find_last_of("/", inPath.size() - 1) != eastl::string::npos)inPath += "/";
+						
+						if (inPath.back() != '/')inPath += "/";
 						newDirectory->SetPath(inPath.c_str());
 						newDirectory->parent = this;
 						newDirectory->pType = D_FOLDER;
