@@ -3,7 +3,7 @@
 
 #include "Module.h"
 #include "Event.h"
-#include "QuadTree.h"
+#include "AABBDynamicTree.h"
 #include "RE_GOManager.h"
 
 class RE_GameObject;

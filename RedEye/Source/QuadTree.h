@@ -4,11 +4,7 @@
 #include "RE_GameObject.h"
 #include "MathGeoLib\include\Geometry\AABB.h"
 
-#include "PoolMapped.h"
-
-#include <EASTL/list.h>
-#include <EASTL/iterator.h>
-#include <EASTL/stack.h>
+// Depricated class. GOs now use UIDs
 
 class QTree
 {
@@ -62,7 +58,7 @@ private:
 
 	private:
 
-		QTreeNode* nodes[4];
+		QTreeNode* nodes[4] = { nullptr, nullptr, nullptr, nullptr };
 		QTreeNode* parent = nullptr;
 
 		eastl::list<RE_GameObject*> g_objs;
@@ -104,47 +100,5 @@ inline void QTree::CollectIntersections(eastl::vector<RE_GameObject*>& objects, 
 	root.CollectIntersections(objects, primitive);
 }
 
-struct AABBDynamicTreeNode
-{
-	AABB box;
-	UID object_index = 0;
-	int parent_index = -1, child1 = -1, child2 = -1;
-	bool is_leaf = true;
-};
-
-class AABBDynamicTree : public PoolMapped<AABBDynamicTreeNode,int, 1024, 512>
-{
-private:
-
-	int randomCount = 0, size = 0, node_count = 0, root_index = -1;
-
-public:
-
-	AABBDynamicTree();
-	~AABBDynamicTree();
-
-	void PushNode(UID goUID, AABB box);
-	void PopNode(UID index);
-	eastl::vector<int> GetAllKeys() const override;
-	void Clear();
-	void CollectIntersections(Ray ray, eastl::stack<UID>& indexes) const;
-	void CollectIntersections(const Frustum frustum, eastl::stack<UID>& indexes) const;
-
-	void Draw()const;
-	int GetCount() const;
-
-	eastl::map<UID, int> objectToNode;
-
-private:
-
-	void Rotate(AABBDynamicTreeNode& node, int index);
-
-	int AllocateLeafNode(AABB box, UID index);
-	int AllocateInternalNode();
-
-	static inline AABB Union(AABB box1, AABB box2);
-	static inline void SetLeaf(AABBDynamicTreeNode& node, AABB box, UID index);
-	static inline void SetInternal(AABBDynamicTreeNode& node);
-};
 
 #endif // !__QUADTREE_H__

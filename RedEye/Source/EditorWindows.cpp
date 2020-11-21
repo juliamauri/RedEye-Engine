@@ -1196,11 +1196,18 @@ void SceneEditorWindow::Draw(bool secondary)
 		ImGui::SetCursorPos({ viewport.x, viewport.y });
 		ImGui::Image((void*)App::renderer3d->GetRenderedEditorSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 
-		if(!ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && isWindowSelected && App::input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && App::input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN){
+		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+		ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+		vMin.x += ImGui::GetWindowPos().x;
+		vMin.y += ImGui::GetWindowPos().y;
+		vMax.x += ImGui::GetWindowPos().x;
+		vMax.y += ImGui::GetWindowPos().y;
+
+		if(!ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && isWindowSelected && App::input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && App::input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN)
+		{
 			ImVec2 mousePosOnThis = ImGui::GetMousePos();
-			mousePosOnThis.x = (mousePosOnThis.x - ImGui::GetCursorScreenPos().x + 4 < 0) ? 0 : mousePosOnThis.x - ImGui::GetCursorScreenPos().x + 4;
-			mousePosOnThis.y = (ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y + 4 < 0) ? 0 : ImGui::GetItemRectSize().y + mousePosOnThis.y - ImGui::GetCursorScreenPos().y + 4;
-			Event::Push(EDITOR_SCENE_RAYCAST, App::editor, Cvar(mousePosOnThis.x), Cvar(mousePosOnThis.y));
+			if ((mousePosOnThis.x -= vMin.x - ImGui::GetStyle().WindowPadding.x) > 0.f && (mousePosOnThis.y -= vMin.y - ImGui::GetStyle().WindowPadding.y) > 0.f)
+				Event::Push(EDITOR_SCENE_RAYCAST, App::editor, mousePosOnThis.x, mousePosOnThis.y);
 		}
 
 		UID selected_uid;
@@ -1230,12 +1237,6 @@ void SceneEditorWindow::Draw(bool secondary)
 			math::float4x4 deltamatrix = math::float4x4::identity * RE_TimeManager::GetDeltaTime();
 
 			//SetRect of window at imgizmo
-			ImVec2 vMin = ImGui::GetWindowContentRegionMin();
-			ImVec2 vMax = ImGui::GetWindowContentRegionMax();
-			vMin.x += ImGui::GetWindowPos().x;
-			vMin.y += ImGui::GetWindowPos().y;
-			vMax.x += ImGui::GetWindowPos().x;
-			vMax.y += ImGui::GetWindowPos().y;
 			ImGuizmo::SetRect(vMin.x, vMin.y, vMax.x - vMin.x, vMax.y - vMin.y);
 
 

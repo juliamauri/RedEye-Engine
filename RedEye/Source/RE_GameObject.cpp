@@ -832,7 +832,7 @@ void RE_GameObject::OnStop()
 void RE_GameObject::OnTransformModified()
 {
 	eastl::queue<RE_GameObject*> gos;
-	gos.push(this);
+	if (active) gos.push(this);
 
 	while (!gos.empty())
 	{

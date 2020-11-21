@@ -292,6 +292,9 @@
     <ClCompile Include="RE_Component.cpp">
       <Filter>GameObject\Components</Filter>
     </ClCompile>
+    <ClCompile Include="AABBDynamicTree.cpp">
+      <Filter>Containers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -1235,6 +1238,9 @@
     </ClInclude>
     <ClInclude Include="RE_TimeManager.h">
       <Filter>Modules\Independent App Modules\TimeManager</Filter>
+    </ClInclude>
+    <ClInclude Include="AABBDynamicTree.h">
+      <Filter>Containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

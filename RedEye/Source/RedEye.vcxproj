@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AABBDynamicTree.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Cvar.cpp" />
     <ClCompile Include="EA\EAAssert\eaassert.cpp" />
@@ -118,6 +119,7 @@
     <ClCompile Include="RE_TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABBDynamicTree.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Cvar.h" />
     <ClInclude Include="EA\EAAssert\eaassert.h" />

@@ -67,7 +67,6 @@ update_status ModuleScene::PostUpdate()
 		scenePool.DestroyGO(to_delete.top());
 		to_delete.pop();
 	}
-	if (someDelete) SetupScene();
 
 	return UPDATE_CONTINUE;
 }
@@ -146,9 +145,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 	case GO_CHANGED_TO_INACTIVE:
 	{
-		eastl::vector<RE_GameObject*> all = scenePool.GetGOPtr(e.data1.AsUInt64())->GetActiveDrawableGOandChildsPtr();
-
-		for (auto draw_go : all)
+		for (auto draw_go : scenePool.GetGOPtr(e.data1.AsUInt64())->GetActiveDrawableGOandChildsPtr())
 			(draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
 
 		haschanges = true;
@@ -182,16 +179,13 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 	case GO_HAS_NEW_CHILD:
 	{
-		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
 		RE_GameObject* child_go = scenePool.GetGOPtr(e.data2.AsUInt64());
 		child_go->ResetGOandChildsAABB();
 		child_go->OnTransformModified();
 
-		if (go->IsActive() && child_go->IsActive())
-		{
-			eastl::vector<RE_GameObject*> all = child_go->GetActiveDrawableGOandChildsPtr();
-			for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
-		}
+		eastl::vector<RE_GameObject*> all = child_go->GetActiveDrawableGOandChildsPtr();
+		for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
+		for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).UpdateNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
 
 		haschanges = true;
 		break;
@@ -202,10 +196,8 @@ void ModuleScene::RecieveEvent(const Event& e)
 		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
 
 		if (go->IsActive())
-		{
-			eastl::vector<const RE_GameObject*> all = go->GetActiveDrawableGOandChildsCPtr();
-			for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
-		}
+			for (auto draw_go : go->GetActiveDrawableGOandChildsCPtr())
+				(draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
 
 		to_delete.push(go_uid);
 		haschanges = true;
@@ -219,22 +211,8 @@ void ModuleScene::RecieveEvent(const Event& e)
 			go->ResetGOandChildsAABB();
 			go->OnTransformModified();
 
-			eastl::vector<const RE_GameObject*> all = go->GetActiveDrawableGOandChildsCPtr();
-			for (auto draw_go : all)
-			{
-				UID index = draw_go->GetUID();
-
-				if (draw_go->IsStatic())
-				{
-					static_tree.PopNode(index);
-					static_tree.PushNode(index, draw_go->GetGlobalBoundingBox());
-				}
-				else
-				{
-					dynamic_tree.PopNode(index);
-					dynamic_tree.PushNode(index, draw_go->GetGlobalBoundingBox());
-				}
-			}
+			for (auto draw_go : go->GetActiveDrawableGOandChildsCPtr())
+				(draw_go->IsStatic() ? static_tree : dynamic_tree).UpdateNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
 		}
 
 		haschanges = true;
@@ -311,14 +289,14 @@ UID ModuleScene::RayCastSelect(math::Ray & global_ray)
 {
 	UID ret = 0;
 
-	eastl::stack<UID> aabb_collisions;
+	eastl::queue<UID> aabb_collisions;
 	static_tree.CollectIntersections(global_ray, aabb_collisions);
 	dynamic_tree.CollectIntersections(global_ray, aabb_collisions);
 
 	eastl::vector<eastl::pair<UID,const RE_GameObject*>> gos;
 	while (!aabb_collisions.empty())
 	{
-		UID id = aabb_collisions.top();
+		UID id = aabb_collisions.front();
 		aabb_collisions.pop();
 		gos.push_back({ id, scenePool.GetGOCPtr(id) });
 	}
@@ -345,13 +323,13 @@ UID ModuleScene::RayCastSelect(math::Ray & global_ray)
 
 void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum & frustum)
 {
-	eastl::stack<UID> goIndex;
+	eastl::queue<UID> goIndex;
 	static_tree.CollectIntersections(frustum, goIndex);
 	dynamic_tree.CollectIntersections(frustum, goIndex);
 
 	while (!goIndex.empty())
 	{
-		container.push_back(scenePool.GetGOCPtr(goIndex.top()));
+		container.push_back(scenePool.GetGOCPtr(goIndex.front()));
 		goIndex.pop();
 	}
 }

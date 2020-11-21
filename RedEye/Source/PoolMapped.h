@@ -20,7 +20,7 @@ public:
 		{
 			if (static_cast<unsigned int>(lastAvaibleIndex) == currentSize) IncrementArray();
 			pool_[lastAvaibleIndex] = val;
-			poolmapped_.insert(eastl::pair<TYPEKEY, unsigned int>(key, lastAvaibleIndex++));
+			poolmapped_.insert({ key, lastAvaibleIndex++ });
 			ret = true;
 		}
 		return ret;
