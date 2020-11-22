@@ -127,51 +127,10 @@ math::vec RE_CompTransform::GetGlobalPosition()
 
 void RE_CompTransform::LocalPan(float rad_dx, float rad_dy, float rad_dz)
 {
-	//rot_mat = math::float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f),			rad_dx) * rot_mat;
-	//rot_mat = math::float3x3::RotateAxisAngle(vec(-1.f, 0.f, 0.f) * rot_mat, rad_dy) * rot_mat;
-	//rot_eul = rot_mat.ToEulerXYZ();
-	//rot_quat = rot_mat.ToQuat();
-
-	//rot_quat = Quat::LookAt({ 0.f, 0.f, 1.f }, rot_quat.WorldZ(), { 0.f, 1.f, 0.f }, rot_quat.WorldY());
-
-	rot_quat = Quat::RotateY(rad_dx) * Quat::RotateX(-rad_dy) * rot_quat;
-	rot_eul = rot_quat.ToEulerXYZ();
+	rot_eul -= math::vec(rad_dy * -1, rad_dx, rad_dz);
+	rot_quat = math::Quat::FromEulerXYZ(rot_eul.x, rot_eul.y, rot_eul.z);
 	rot_mat = rot_quat.ToFloat3x3();
-
-
-
-
 	needed_update_transform = true;
-
-
-
-
-	/*math::vec right = model_global.Row3(0);
-	math::vec front = -model_global.Row3(2);
-	math::vec up = model_global.Row3(1);
-
-	math::float3x3 rot = math::float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f), rad_dx);
-	right = rot * right;
-	up = rot * up;
-	front = rot * front;
-
-	rot = math::float3x3::RotateAxisAngle(right, rad_dy);
-	up = rot * up;
-	front = rot * front;
-
-	if (up.y < 0.0f)
-	{
-		front = math::vec(0.f, front.y > 0.f ? 1.f : -1.f, 0.f);
-		up = front.Cross(right);
-	}
-
-	front.Normalize();
-	up.Normalize();
-	right.Normalize();*/
-
-	/*rot_eul = rot_quat.ToEulerXYZ();
-	rot_mat = rot_quat.ToFloat3x3();
-	needed_update_transform = true;*/
 }
 
 void RE_CompTransform::LocalMove(Dir dir, float speed)
@@ -179,12 +138,12 @@ void RE_CompTransform::LocalMove(Dir dir, float speed)
 	if (speed != 0.f)
 	{
 		switch (dir) {
-		case FORWARD:	pos -= rot_quat.WorldZ() * speed; break;
-		case BACKWARD:	pos += rot_quat.WorldZ() * speed; break;
-		case LEFT:		pos -= rot_quat.WorldX() * speed; break;
-		case RIGHT:		pos += rot_quat.WorldX() * speed; break;
-		case UP:		pos += rot_quat.WorldY() * speed; break;
-		case DOWN:		pos -= rot_quat.WorldY() * speed; break; }
+		case FORWARD:	pos -= model_global.WorldZ() * speed; break;
+		case BACKWARD:	pos += model_global.WorldZ() * speed; break;
+		case LEFT:		pos -= model_global.WorldX() * speed; break;
+		case RIGHT:		pos += model_global.WorldX() * speed; break;
+		case UP:		pos += model_global.WorldY() * speed; break;
+		case DOWN:		pos -= model_global.WorldY() * speed; break; }
 
 		needed_update_transform = true;
 	}
@@ -247,14 +206,14 @@ void RE_CompTransform::Focus(const math::vec center, float v_fov_rads, float h_f
 				if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
 				model_global = model_local * parent_global;
 
-				pos = (center + model_global.Row3(2).Normalized() * camDistance) - parent_global.Row3(3);
+				pos = (center + (model_global.Col3(2).Normalized() * camDistance)) - parent_global.Row3(3);
 			}
 		}
 
 		if (!has_parent)
 		{
 			if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
-			pos = center + model_local.Row3(2).Normalized() * camDistance;
+			pos = center + (model_local.Col3(2).Normalized() * camDistance);
 		}
 
 		needed_update_transform = true;

@@ -521,13 +521,9 @@ void RE_CompCamera::DeserializeJson(JSONNode* node, eastl::map<int, const char*>
 void RE_CompCamera::RecalculateMatrixes()
 {
 	math::float4x4 trs = GetTransform()->GetGlobalMatrix();
-
-	math::vec front = -trs.Row3(2).Normalized();
-	math::vec up = trs.Row3(1).Normalized();
-	//math::vec up = front.Cross(math::vec(1.f, 0.f, 0.f)).Normalized();
-
-	frustum.SetFrame(trs.Row3(3), front, up); //trs.Row3(1).Normalized());
-	//frustum.SetWorldMatrix(trs.Transposed().Float3x4Part());
+	math::vec front = trs.WorldZ().Normalized();
+	math::vec up = front.Cross(-trs.WorldX().Normalized()).Normalized();
+	frustum.SetFrame(GetTransform()->GetGlobalPosition(), -front, -up);
 
 	RE_LOG("CAMERA SetFrame(%s, front %s, up %s)", trs.Row3(3).ToString().c_str(), front.ToString().c_str(), up.ToString().c_str());
 
