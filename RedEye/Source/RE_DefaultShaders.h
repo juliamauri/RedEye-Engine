@@ -1,6 +1,8 @@
 #ifndef __DEFAULTSHADERS_H__
 #define __DEFAULTSHADERS_H__
 
+#pragma region NoLightShader&Scale
+
 #define DEFVERTEXSCALESHADER																\
 "#version 330 core\n"																		\
 "layout(location = 0) in vec3 aPos;\n"														\
@@ -79,6 +81,10 @@
 "		color = vec4(cdiffuse, 1.0);\n"									       	\
 "}\0"
 
+#pragma endregion NoLight&ScaleShader
+
+#pragma region SkyBoxShader
+
 // Skybox
 #define SKYBOXVERTEXSHADER									\
 "#version 330 core\n"										\
@@ -108,6 +114,10 @@
 "{\n"														\
 "	color = texture(cubemap, normalize(pos).stp);\n"	    \
 "}\0"
+
+#pragma endregion SkyBoxShader
+
+#pragma region DefferedShader
 
 // Deferred Geo Pass
 #define GEOPASSVERTEXSHADER									\
@@ -181,6 +191,8 @@
 "		gSpec = vec2(cspecular.x, shininess);\n"					\
 "	}\n"															\
 "}\0"
+
+#pragma region DefferedLightPassShader
 
 // Deferred Light Pass
 #define LIGHTPASSVERTEXSHADER				\
@@ -295,5 +307,327 @@
 "   }\n"																																			\
 "	aRes = lighting;\n"																																\
 "}\0"
+
+#pragma endregion DefferedLightPassShader
+
+#pragma endregion DefferedShader
+
+#pragma region WaterShader
+
+#pragma region NoLightWater
+
+#define WATERVERTEXSHADER											\
+"#version 330 core\n"												\
+"layout(location = 0) in vec3 aPos;\n"								\
+"layout(location = 1) in vec3 aNormal;\n"							\
+"layout(location = 2) in vec3 aTangent;\n"							\
+"layout(location = 3) in vec3 aBitangent;\n"						\
+"layout(location = 4) in vec2 aTexCoord;\n"							\
+"\n"																\
+"out vec2 TexCoord;\n"												\
+"out vec3 Normal;\n"												\
+"out vec3 FragPos;\n"												\
+"out float height;\n"												\
+"\n"																\
+"uniform mat4 model;\n"												\
+"uniform mat4 view;\n"												\
+"uniform mat4 projection;\n"										\
+"\n"																\
+"uniform float time;\n"												\
+"uniform float waveLength;\n"										\
+"uniform float amplitude;\n"										\
+"uniform float speed;\n"											\
+"uniform bool is_linear;\n"											\
+"uniform vec2 direction;\n"											\
+"uniform vec2 center;\n"											\
+"uniform float steepness;\n"										\
+"uniform int numWaves;\n"											\
+"\n"																\
+"float PI = 3.14;\n"												\
+"void main()\n"														\
+"{\n"																\
+"	float w = 2 * PI / waveLength;\n"								\
+"	float Q = steepness / (w * amplitude * numWaves);\n"			\
+"	float phi = speed * 2 * PI / waveLength;\n"						\
+"\n"																\
+"	vec2 D = vec2(0.0, 0.0);\n"										\
+"	float dist = 0;\n"												\
+"	if (is_linear) {\n"												\
+"		D = normalize(direction);\n"								\
+"		dist = dot(D, vec2(aPos.x, aPos.y));\n"						\
+"	}\n"															\
+"	else {\n"														\
+"		D = vec2(aPos.x, aPos.y) - center;\n"						\
+"		D = D / length(D);\n"										\
+"		dist = dot(D, vec2(aPos.x, aPos.y));\n"						\
+"	}\n"															\
+"\n"																\
+"	float QA = Q * amplitude;\n"									\
+"	float tmp = w * dist + phi * time;\n"							\
+"	float WA = w * amplitude;\n"									\
+"	float S = sin(tmp);\n"											\
+"	float C = cos(tmp);\n"											\
+"\n"																\
+"	vec3 pos = vec3(aPos.x + (QA * D.x * cos(tmp)),\n"				\
+"		aPos.y + (QA * D.y * cos(tmp)),\n"							\
+"		amplitude * sin(tmp));\n"									\
+"\n"																\
+"	vec3 bitangent = vec3(1 - (Q * pow(D.x, 2) * WA * S),\n"		\
+"		-(Q * D.x * D.y * WA * S),\n"								\
+"		D.x * WA * C);\n"											\
+"\n"																\
+"	vec3 tangent = vec3(bitangent.y,\n"								\
+"		1 - (Q * pow(D.y, 2) * WA * S),\n"							\
+"		D.y * WA * C);\n"											\
+"\n"																\
+"	Normal = mat3(transpose(inverse(model))) *\n"					\
+"		vec3(-(D.x * WA * C),\n"									\
+"			-(D.y * WA * C),\n"										\
+"			1 - (Q * WA * S));\n"									\
+"\n"																\
+"	gl_Position = projection * view * model * vec4(pos, 1.0);\n"	\
+"	TexCoord = aTexCoord;\n"										\
+"	FragPos = vec3(model * vec4(pos, 1.0));\n"						\
+"	height = normalize(pos.z);\n"									\
+"}\0"																\
+															 
+
+#define WATERFRAGMENTSHADER																		\
+"#version 330 core\n"																			\
+"#extension GL_ARB_separate_shader_objects : enable\n"											\
+"layout(location = 0) out vec4 color;\n"														\
+"\n"																							\
+"in vec2 TexCoord;\n"																			\
+"in vec3 Normal;\n"																				\
+"in vec3 FragPos;\n"																			\
+"in float height;\n"																			\
+"in vec4 gl_FragCoord;\n"																		\
+"\n"																							\
+"uniform float useTexture;\n"																	\
+"uniform float useColor;\n"																		\
+"uniform vec3 cdiffuse;\n"																		\
+"\n"																							\
+"uniform float foamMin;\n"																		\
+"uniform float foamMax;\n"																		\
+"uniform vec3 foam_color;\n"																	\
+"\n"																							\
+"uniform float alpha;\n"																		\
+"\n"																							\
+"uniform sampler2D currentDepth;\n"																\
+"uniform float viewport_h;\n"																	\
+"uniform float viewport_w;\n"																	\
+"uniform float near_plane;\n"																	\
+"uniform float far_plane;\n"																	\
+"\n"																							\
+"uniform float distanceTest;\n"																	\
+"\n"																							\
+"float LinearizeDepthTexture(vec2 uv)\n"														\
+"{\n"																							\
+"	float n = near_plane; // camera z near\n"													\
+"	float f = far_plane; // camera z far\n"														\
+"	float z = texture2D(currentDepth, uv).x;\n"													\
+"	return (2.0 * n) / (f + n - z * (f - n));\n"												\
+"}\n"																							\
+"\n"																							\
+"float LinearizeDepth()\n"																		\
+"{\n"																							\
+"	float n = near_plane; // camera z near\n"													\
+"	float f = far_plane; // camera z far\n"														\
+"	float z = gl_FragCoord.z;\n"																\
+"	return (2.0 * n) / (f + n - z * (f - n));\n"												\
+"}\n"																							\
+"\n"																							\
+"void main()\n"																					\
+"{\n"																							\
+"\n"																							\
+"	vec4 finalcolor;\n"																			\
+"	if (height > foamMax)\n"																	\
+"		finalcolor = vec4(foam_color, 1.0);\n"													\
+"	else if (height >= foamMin)\n"																\
+"	{\n"																						\
+"		float n_height = (height - foamMin) / foamMax;\n"										\
+"		finalcolor.x = ((1.0f - n_height) * cdiffuse.x) + (n_height * foam_color.x);\n"			\
+"		finalcolor.y = ((1.0f - n_height) * cdiffuse.y) + (n_height * foam_color.y);\n"			\
+"		finalcolor.z = ((1.0f - n_height) * cdiffuse.z) + (n_height * foam_color.z);\n"			\
+"		finalcolor.w = ((1.0f - n_height) * alpha) + n_height;\n"								\
+"	}\n"																						\
+"	else\n"																						\
+"		finalcolor = vec4(cdiffuse, alpha);\n"													\
+"\n"																							\
+"	vec2 uv = vec2(gl_FragCoord.x / viewport_w, gl_FragCoord.y / viewport_h);\n"				\
+"\n"																							\
+"	float td = LinearizeDepthTexture(uv);\n"													\
+"	float d = LinearizeDepth();\n"																\
+"\n"																							\
+"	if (td - d < distanceTest)\n"																\
+"		finalcolor = vec4(1.0);\n"																\
+"\n"																							\
+"	color = finalcolor;\n"																		\
+"}\n"																							\
+
+#pragma endregion NoLightWater
+
+#pragma region DefferedLightWater
+
+#define WATERPASSVERTEXSHADER										\
+"#version 330 core\n"												\
+"layout(location = 0) in vec3 aPos;\n"								\
+"layout(location = 1) in vec3 aNormal;\n"							\
+"layout(location = 4) in vec2 aTexCoord;\n"							\
+"\n"																\
+"out vec3 FragPos;\n"												\
+"out vec2 TexCoord;\n"												\
+"out vec3 Normal;\n"												\
+"\n"																\
+"out float height;\n"												\
+"\n"																\
+"uniform mat4 model;\n"												\
+"uniform mat4 view;\n"												\
+"uniform mat4 projection;\n"										\
+"\n"																\
+"uniform float time;\n"												\
+"uniform float waveLength;\n"										\
+"uniform float amplitude;\n"										\
+"uniform float speed;\n"											\
+"uniform bool is_linear;\n"											\
+"uniform vec2 direction;\n"											\
+"uniform vec2 center;\n"											\
+"uniform float steepness;\n"										\
+"uniform int numWaves;\n"											\
+"\n"																\
+"float PI = 3.14;\n"												\
+"void main()\n"														\
+"{\n"																\
+"	float w = 2 * PI / waveLength;\n"								\
+"	float Q = steepness / (w * amplitude * numWaves);\n"			\
+"	float phi = speed * 2 * PI / waveLength;\n"						\
+"\n"																\
+"	vec2 D = vec2(0.0, 0.0);\n"										\
+"	float dist = 0;\n"												\
+"	if (is_linear) {\n"												\
+"		D = normalize(direction);\n"								\
+"		dist = dot(D, vec2(aPos.x, aPos.y));\n"						\
+"	}\n"															\
+"	else {\n"														\
+"		D = vec2(aPos.x, aPos.y) - center;\n"						\
+"		D = D / length(D);\n"										\
+"		dist = dot(D, vec2(aPos.x, aPos.y));\n"						\
+"	}\n"															\
+"\n"																\
+"	float QA = Q * amplitude;\n"									\
+"	float tmp = w * dist + phi * time;\n"							\
+"	float WA = w * amplitude;\n"									\
+"	float S = sin(tmp);\n"											\
+"	float C = cos(tmp);\n"											\
+"\n"																\
+"	vec3 pos = vec3(aPos.x + (QA * D.x * cos(tmp)),\n"				\
+"		aPos.y + (QA * D.y * cos(tmp)),\n"							\
+"		amplitude * sin(tmp));\n"									\
+"\n"																\
+"	Normal = mat3(transpose(inverse(model))) *\n"					\
+"		vec3(-(D.x * WA * C),\n"									\
+"			-(D.y * WA * C),\n"										\
+"			1 - (Q * WA * S));\n"									\
+"\n"																\
+"	gl_Position = projection * view * model * vec4(pos, 1.0);\n"	\
+"	TexCoord = aTexCoord;\n"										\
+"	FragPos = vec3(model * vec4(pos, 1.0));\n"						\
+"	height = normalize(pos.z);\n"									\
+"}\0"																\
+
+#define WATERPASSFRAGMENTSHADER																	\
+"#version 330 core\n"																			\
+"#extension GL_ARB_separate_shader_objects : enable\n"											\
+"layout (location = 0) out vec3 gPosition;\n"													\
+"layout (location = 1) out vec3 gNormal;\n"														\
+"layout (location = 2) out vec3 gAlbedo;\n"														\
+"layout (location = 3) out vec2 gSpec;\n"														\
+"\n"																							\
+"in vec3 FragPos;\n"																			\
+"in vec2 TexCoord;\n"																			\
+"in vec3 Normal;\n"																				\
+"in float height;\n"																			\
+"\n"																							\
+"in vec4 gl_FragCoord;\n"																		\
+"\n"																							\
+"uniform float useTexture;\n"																	\
+"uniform float useColor;\n"																		\
+"uniform vec3 cdiffuse;\n"																		\
+"uniform float shininess;\n"																	\
+"\n"																							\
+"uniform float foamMin;\n"																		\
+"uniform float foamMax;\n"																		\
+"uniform vec3 foam_color;\n"																	\
+"\n"																							\
+"uniform float alpha;\n"																		\
+"\n"																							\
+"uniform sampler2D currentDepth;\n"																\
+"uniform float viewport_h;\n"																	\
+"uniform float viewport_w;\n"																	\
+"uniform float near_plane;\n"																	\
+"uniform float far_plane;\n"																	\
+"\n"																							\
+"uniform float distanceFoam;\n"																	\
+"\n"																							\
+"float LinearizeDepthTexture(vec2 uv)\n"														\
+"{\n"																							\
+"	float n = near_plane; // camera z near\n"													\
+"	float f = far_plane; // camera z far\n"														\
+"	float z = texture2D(currentDepth, uv).x;\n"													\
+"	return (2.0 * n) / (f + n - z * (f - n));\n"												\
+"}\n"																							\
+"\n"																							\
+"float LinearizeDepth()\n"																		\
+"{\n"																							\
+"	float n = near_plane; // camera z near\n"													\
+"	float f = far_plane; // camera z far\n"														\
+"	float z = gl_FragCoord.z;\n"																\
+"	return (2.0 * n) / (f + n - z * (f - n));\n"												\
+"}\n"																							\
+"\n"																							\
+"void main()\n"																					\
+"{\n"																							\
+"\n"																							\
+"	vec4 finalcolor;\n"																			\
+"	if (height > foamMax)\n"																	\
+"		finalcolor = vec4(foam_color, 1.0);\n"													\
+"	else if (height >= foamMin)\n"																\
+"	{\n"																						\
+"		float n_height = (height - foamMin) / foamMax;\n"										\
+"		finalcolor.x = ((1.0f - n_height) * cdiffuse.x) + (n_height * foam_color.x);\n"			\
+"		finalcolor.y = ((1.0f - n_height) * cdiffuse.y) + (n_height * foam_color.y);\n"			\
+"		finalcolor.z = ((1.0f - n_height) * cdiffuse.z) + (n_height * foam_color.z);\n"			\
+"		finalcolor.w = ((1.0f - n_height) * alpha) + n_height;\n"								\
+"	}\n"																						\
+"	else\n"																						\
+"		finalcolor = vec4(cdiffuse, alpha);\n"													\
+"\n"																							\
+"	vec2 uv = vec2(gl_FragCoord.x / viewport_w, gl_FragCoord.y / viewport_h);\n"				\
+"\n"																							\
+"	float td = LinearizeDepthTexture(uv);\n"													\
+"	float d = LinearizeDepth();\n"																\
+"\n"																							\
+"	if (td - d < distanceFoam)\n"																\
+"		finalcolor = vec4(1.0);\n"																\
+"\n"																							\
+"	gAlbedo = vec3(finalcolor.x, finalcolor.y, finalcolor.z);\n"								\
+"	gPosition = FragPos;\n"																		\
+"	gNormal = normalize(Normal);\n"																\
+"	gSpec = vec2(0.0f, shininess);\n"															\
+"}\n"																							\
+
+
+#pragma endregion DefferedLightWater
+
+/*"\n"		----Unused code but usefull for future uses----			\
+"	vec3 bitangent = vec3(1 - (Q * pow(D.x, 2) * WA * S),\n"		\
+"		-(Q * D.x * D.y * WA * S),\n"								\
+"		D.x * WA * C);\n"											\
+"\n"																\
+"	vec3 tangent = vec3(bitangent.y,\n"								\
+"		1 - (Q * pow(D.y, 2) * WA * S),\n"							\
+"		D.y * WA * C);\n"											\*/
+
+#pragma endregion WaterShader
 
 #endif // !__DEFAULTSHADERS_H__
