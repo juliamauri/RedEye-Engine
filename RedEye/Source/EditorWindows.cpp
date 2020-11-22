@@ -1362,7 +1362,7 @@ void TransformDebugWindow::Draw(bool secondary)
 				static math::float3x3 rot;
 
 				static math::float4x4 localM;
-				localM = transform->GetLocalMatrix();
+				localM = transform->GetLocalMatrix().Transposed();
 				localM.Decompose(pos, rot, scl);
 				rotE = rot.ToEulerXYZ();
 				ImGui::Text("Local Transform:");
@@ -1376,7 +1376,7 @@ void TransformDebugWindow::Draw(bool secondary)
 				ImGui::NextColumn();
 
 				static math::float4x4 globalM;
-				globalM = transform->GetGlobalMatrix();
+				globalM = transform->GetGlobalMatrix().Transposed();
 				globalM.Decompose(pos, rot, scl);
 				rotE = rot.ToEulerXYZ();
 				ImGui::Text("Global Transform:");

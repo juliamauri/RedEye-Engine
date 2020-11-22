@@ -30,6 +30,12 @@ public:
 	void SetPosition(math::vec position);
 	void SetGlobalPosition(math::vec global_position);
 
+	// Movement Controls
+	void LocalPan(float rad_dx, float rad_dy, float rad_dz = 0.f);
+	void LocalMove(Dir dir, float speed);
+	void Orbit(float dx, float dy, const math::vec center);
+	void Focus(const math::vec center, float v_fov_rads, float h_fov_rads, float radius = 1.f, float min_dist = 3.0f);
+
 	// Getters
 	math::vec GetRight();
 	math::vec GetLeft();

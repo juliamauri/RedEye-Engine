@@ -28,9 +28,6 @@ RE_CompCamera::~RE_CompCamera()
 
 void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool _draw_frustum, bool _usingSkybox, const char* _skyboxMD5)
 {
-	right = math::vec(1.f, 0.f, 0.f);
-	up = math::vec(0.f, 1.f, 0.f);
-	front = math::vec(0.f, 0.f, 1.f);
 	draw_frustum = _draw_frustum;
 	usingSkybox = _usingSkybox;
 	skyboxMD5 = _skyboxMD5;
@@ -332,6 +329,7 @@ void RE_CompCamera::GetTargetViewPort(math::float4& viewPort) const
 	}
 }
 
+bool RE_CompCamera::isPrespective() const { return isPerspective; }
 float RE_CompCamera::GetNearPlane() const { return frustum.NearPlaneDistance(); }
 float RE_CompCamera::GetFarPlane() const { return frustum.FarPlaneDistance(); }
 bool RE_CompCamera::OverridesCulling() const { return override_cull; }
@@ -368,88 +366,43 @@ const float* RE_CompCamera::GetProjectionPtr()
 	return global_projection.ptr();
 }
 
-void RE_CompCamera::LocalRotate(float x_angle_rad, float y_angle_rad)
+void RE_CompCamera::LocalPan(float x_angle_rad, float y_angle_rad)
 {
-	if (x_angle_rad != 0)
+	if (x_angle_rad != 0.f || y_angle_rad != 0.f)
 	{
-		math::float3x3 rot = math::float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f), x_angle_rad);
-
-		right = rot * right;
-		up = rot * up;
-		front = rot * front;
+		GetTransform()->LocalPan(x_angle_rad, y_angle_rad);
+		need_recalculation = true;
 	}
-
-	if (y_angle_rad != 0)
-	{
-		math::float3x3 rot = math::float3x3::RotateAxisAngle(right, y_angle_rad);
-
-		up = rot * up;
-		front = rot * front;
-
-		if (up.y < 0.0f)
-		{
-			front = math::vec(0.f, front.y > 0.f ? 1.f : -1.f, 0.f);
-			up = front.Cross(right);
-		}
-	}
-	
-	right.Normalize();
-	up.Normalize();
-	front.Normalize();
-	need_recalculation = true;
 }
 
 void RE_CompCamera::LocalMove(Dir dir, float speed)
 {
 	if (speed != 0.f)
 	{
-		RE_CompTransform* t = GetTransform();
-		switch (dir) {
-		case FORWARD:	t->SetPosition(t->GetLocalPosition() + (front * speed)); break;
-		case BACKWARD:	t->SetPosition(t->GetLocalPosition() - (front * speed)); break;
-		case LEFT:		t->SetPosition(t->GetLocalPosition() + (right * speed)); break;
-		case RIGHT:		t->SetPosition(t->GetLocalPosition() - (right * speed)); break;
-		case UP:		t->SetPosition(t->GetLocalPosition() + (up * speed)); break;
-		case DOWN:		t->SetPosition(t->GetLocalPosition() - (up * speed)); break; }
+		GetTransform()->LocalMove(dir, speed);
 		need_recalculation = true;
 	}
 }
 
 void RE_CompCamera::Orbit(float dx, float dy, math::vec center)
 {
-	RE_CompTransform* t = GetTransform();
-	float distance = t->GetGlobalPosition().Distance(center);
-
-	t->SetGlobalPosition(center);
-	t->Update();
-	LocalRotate(dx, dy);
-	t->SetGlobalPosition(center - (front * distance));
-	need_recalculation = true;
+	if (dx != 0.f || dy != 0.f)
+	{
+		GetTransform()->Orbit(dx, dy, center);
+		need_recalculation = true;
+	}
 }
 
 void RE_CompCamera::Focus(math::vec center, float radius, float min_dist)
 {
-	float camDistance = min_dist;
-	math::vec focus_global_pos = center;
-
-	if (radius > 0)
-	{
-		// Vertical distance
-		float v_dist = radius / math::Sin(v_fov_rads / 2.0f);
-		if (v_dist > camDistance) camDistance = v_dist;
-
-		// Horizontal distance
-		float h_dist = radius / math::Sin(h_fov_rads / 2.0f);
-		if (h_dist > camDistance) camDistance = h_dist;
-	}
-
-	GetTransform()->SetGlobalPosition(focus_global_pos - (front * camDistance));
+	GetTransform()->Focus(center, v_fov_rads, h_fov_rads, radius, min_dist);
 	need_recalculation = true;
 }
 
 bool RE_CompCamera::isUsingSkybox() const { return usingSkybox; }
 const char* RE_CompCamera::GetSkybox() const { return skyboxMD5; }
 void RE_CompCamera::DeleteSkybox() { usingSkybox = false; skyboxMD5 = nullptr; }
+void RE_CompCamera::SetSkyBox(const char* resS) { skyboxMD5 = resS; }
 void RE_CompCamera::UseResources() { if (skyboxMD5) App::resources->Use(skyboxMD5); }
 void RE_CompCamera::UnUseResources() { if (skyboxMD5) App::resources->UnUse(skyboxMD5); }
 
@@ -568,7 +521,15 @@ void RE_CompCamera::DeserializeJson(JSONNode* node, eastl::map<int, const char*>
 void RE_CompCamera::RecalculateMatrixes()
 {
 	math::float4x4 trs = GetTransform()->GetGlobalMatrix();
-	frustum.SetFrame(trs.Row3(3), trs.MulDir(front), trs.MulDir(up));
+
+	math::vec front = -trs.Row3(2).Normalized();
+	math::vec up = trs.Row3(1).Normalized();
+	//math::vec up = front.Cross(math::vec(1.f, 0.f, 0.f)).Normalized();
+
+	frustum.SetFrame(trs.Row3(3), front, up); //trs.Row3(1).Normalized());
+	//frustum.SetWorldMatrix(trs.Transposed().Float3x4Part());
+
+	RE_LOG("CAMERA SetFrame(%s, front %s, up %s)", trs.Row3(3).ToString().c_str(), front.ToString().c_str(), up.ToString().c_str());
 
 	global_view = frustum.ViewMatrix();
 	global_view.Transpose();

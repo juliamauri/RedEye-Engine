@@ -99,9 +99,10 @@ void RE_CompTransform::SetPosition(math::vec position)
 
 void RE_CompTransform::SetGlobalPosition(math::vec global_position)
 {
+	math::vec previous_pos = pos;
 	pos = global_position;
 
-	if (go)
+	if (useParent)
 	{
 		const RE_GameObject* p = pool_gos->AtCPtr(go)->GetParentCPtr();
 		if (p != nullptr)
@@ -109,7 +110,8 @@ void RE_CompTransform::SetGlobalPosition(math::vec global_position)
 			pos -= p->GetTransformPtr()->GetGlobalPosition();
 		}
 	}
-	needed_update_transform = true;
+
+	if (!pos.Equals(previous_pos)) needed_update_transform = true;
 }
 
 math::Quat RE_CompTransform::GetLocalQuaternionRotation() const { return rot_quat; }
@@ -121,6 +123,143 @@ math::vec RE_CompTransform::GetGlobalPosition()
 {
 	if (needed_update_transform) CalcGlobalTransform();
 	return model_global.Row3(3);
+}
+
+void RE_CompTransform::LocalPan(float rad_dx, float rad_dy, float rad_dz)
+{
+	//rot_mat = math::float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f),			rad_dx) * rot_mat;
+	//rot_mat = math::float3x3::RotateAxisAngle(vec(-1.f, 0.f, 0.f) * rot_mat, rad_dy) * rot_mat;
+	//rot_eul = rot_mat.ToEulerXYZ();
+	//rot_quat = rot_mat.ToQuat();
+
+	//rot_quat = Quat::LookAt({ 0.f, 0.f, 1.f }, rot_quat.WorldZ(), { 0.f, 1.f, 0.f }, rot_quat.WorldY());
+
+	rot_quat = Quat::RotateY(rad_dx) * Quat::RotateX(-rad_dy) * rot_quat;
+	rot_eul = rot_quat.ToEulerXYZ();
+	rot_mat = rot_quat.ToFloat3x3();
+
+
+
+
+	needed_update_transform = true;
+
+
+
+
+	/*math::vec right = model_global.Row3(0);
+	math::vec front = -model_global.Row3(2);
+	math::vec up = model_global.Row3(1);
+
+	math::float3x3 rot = math::float3x3::RotateAxisAngle(vec(0.f, 1.f, 0.f), rad_dx);
+	right = rot * right;
+	up = rot * up;
+	front = rot * front;
+
+	rot = math::float3x3::RotateAxisAngle(right, rad_dy);
+	up = rot * up;
+	front = rot * front;
+
+	if (up.y < 0.0f)
+	{
+		front = math::vec(0.f, front.y > 0.f ? 1.f : -1.f, 0.f);
+		up = front.Cross(right);
+	}
+
+	front.Normalize();
+	up.Normalize();
+	right.Normalize();*/
+
+	/*rot_eul = rot_quat.ToEulerXYZ();
+	rot_mat = rot_quat.ToFloat3x3();
+	needed_update_transform = true;*/
+}
+
+void RE_CompTransform::LocalMove(Dir dir, float speed)
+{
+	if (speed != 0.f)
+	{
+		switch (dir) {
+		case FORWARD:	pos -= rot_quat.WorldZ() * speed; break;
+		case BACKWARD:	pos += rot_quat.WorldZ() * speed; break;
+		case LEFT:		pos -= rot_quat.WorldX() * speed; break;
+		case RIGHT:		pos += rot_quat.WorldX() * speed; break;
+		case UP:		pos += rot_quat.WorldY() * speed; break;
+		case DOWN:		pos -= rot_quat.WorldY() * speed; break; }
+
+		needed_update_transform = true;
+	}
+}
+
+void RE_CompTransform::Orbit(float rad_dx, float rad_dy, const math::vec center)
+{
+	if (rad_dx != 0.f || rad_dy != 0.f)
+	{
+		bool has_parent = useParent;
+		if (has_parent)
+		{
+			const RE_GameObject* go_ptr = nullptr;
+			go_ptr = pool_gos->AtCPtr(go);
+			if (has_parent = go_ptr->GetParentUID())
+			{
+				math::float4x4 parent_global = go_ptr->GetParentCPtr()->GetTransformPtr()->GetGlobalMatrix();
+
+				if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
+				model_global = model_local * parent_global;
+
+				float distance = model_global.Row3(3).Distance(center);
+
+				LocalPan(rad_dx, rad_dy);
+				pos = center - parent_global.Row3(3) + ((math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed() * parent_global).Row3(2).Normalized() * distance);
+			}
+		}
+
+		if (!has_parent)
+		{
+			LocalPan(rad_dx, rad_dy);
+			pos = center + (math::float4x4::FromTRS(pos, rot_quat, scale.scale).Row3(2).Normalized() * pos.Distance(center));
+		}
+	}
+}
+
+void RE_CompTransform::Focus(const math::vec center, float v_fov_rads, float h_fov_rads, float radius, float min_dist)
+{
+	if (radius > 0)
+	{
+		float camDistance = min_dist;
+
+		// Vertical distance
+		float v_dist = radius / math::Sin(v_fov_rads / 2.0f);
+		if (v_dist > camDistance) camDistance = v_dist;
+
+		// Horizontal distance
+		float h_dist = radius / math::Sin(h_fov_rads / 2.0f);
+		if (h_dist > camDistance) camDistance = h_dist;
+
+		bool has_parent = useParent;
+		if (has_parent)
+		{
+			const RE_GameObject* go_ptr = nullptr;
+			go_ptr = pool_gos->AtCPtr(go);
+			if (has_parent = go_ptr->GetParentUID())
+			{
+				math::float4x4 parent_global = go_ptr->GetParentCPtr()->GetTransformPtr()->GetGlobalMatrix();
+
+				if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
+				model_global = model_local * parent_global;
+
+				pos = (center + model_global.Row3(2).Normalized() * camDistance) - parent_global.Row3(3);
+			}
+		}
+
+		if (!has_parent)
+		{
+			if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
+			pos = center + model_local.Row3(2).Normalized() * camDistance;
+		}
+
+		needed_update_transform = true;
+	}
+
 }
 
 math::vec RE_CompTransform::GetRight()

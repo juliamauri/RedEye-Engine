@@ -51,7 +51,7 @@ public:
 	void GetTargetWidthHeight(int &width, int &height) const;
 	void GetTargetWidthHeight(float &width, float &height) const;
 	void GetTargetViewPort(math::float4 &viewPort) const;
-	bool isPrespective()const { return isPerspective;  }
+	bool isPrespective() const;
 	float GetNearPlane() const;
 	float GetFarPlane() const;
 
@@ -67,7 +67,7 @@ public:
 	const float* GetProjectionPtr();
 
 	// Camera Controls
-	void LocalRotate(float dx, float dy);
+	void LocalPan(float dx, float dy);
 	void LocalMove(Dir dir, float speed);
 	void Orbit(float dx, float dy, math::vec center);
 	void Focus(math::vec center, float radius = 1.f, float min_dist = 3.0f);
@@ -76,7 +76,7 @@ public:
 	bool isUsingSkybox() const;
 	const char* GetSkybox() const;
 	void DeleteSkybox();
-	void SetSkyBox(const char* resS) { skyboxMD5 = resS; }
+	void SetSkyBox(const char* resS);
 
 	// Resources - Skybox
 	void UseResources() override;
@@ -96,14 +96,6 @@ private:
 	void DrawItsProperties();
 
 private:
-
-	// Transform
-	RE_CompTransform* transform = nullptr;
-
-	// Axis
-	math::vec right = math::vec::zero;
-	math::vec up = math::vec::zero;
-	math::vec front = math::vec::zero;
 
 	// Camera frustum
 	math::Frustum frustum;
@@ -131,6 +123,9 @@ private:
 	// Skybox
 	bool usingSkybox = true;
 	const char* skyboxMD5 = nullptr;
+
+	// Transform
+	RE_CompTransform* transform = nullptr;
 };
 
 #endif // !__RE_CCOMPAMERA_H__

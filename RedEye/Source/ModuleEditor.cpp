@@ -715,7 +715,7 @@ void ModuleEditor::UpdateCamera()
 
 				// Rotate
 				if (mouse.mouse_x_motion != 0 || mouse.mouse_y_motion != 0)
-					camera->LocalRotate(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion);
+					camera->LocalPan(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion);
 			}
 
 			// Zoom

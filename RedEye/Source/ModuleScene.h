@@ -1,10 +1,10 @@
 #ifndef __MODULESCENE_H__
 #define __MODULESCENE_H__
 
-#include "Module.h"
 #include "Event.h"
-#include "AABBDynamicTree.h"
 #include "RE_GOManager.h"
+#include "Module.h"
+#include "AABBDynamicTree.h"
 
 class RE_GameObject;
 class RE_Scene;
@@ -65,11 +65,6 @@ public:
 	bool isNewScene() const;
 	
 private:
-
-	// Trees
-	/*void GetActive(eastl::list<RE_GameObject*>& objects) const;
-	void GetActiveStatic(eastl::list<RE_GameObject*>& objects) const;
-	void GetActiveNonStatic(eastl::list<RE_GameObject*>& objects) const;*/
 
 	void SetupScene();
 

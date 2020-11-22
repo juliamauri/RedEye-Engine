@@ -809,7 +809,7 @@ void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
 	Event::PauseEvents();
 	internalCamera->SetFOV(math::RadToDeg(0.523599f));
 	internalCamera->Update();
-	internalCamera->LocalRotate(0, 1);
+	internalCamera->LocalPan(0, 1);
 	internalCamera->Update();
 	Event::ResumeEvents();
 
