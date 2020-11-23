@@ -348,10 +348,6 @@ Plane AABB::FacePlane(int faceIndex) const
 void AABB::GetCornerPoints(vec *outPointArray) const
 {
 	assume(outPointArray);
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!outPointArray)
-		return;
-#endif
 	for(int i = 0; i < 8; ++i)
 		outPointArray[i] = CornerPoint(i);
 }
@@ -359,10 +355,6 @@ void AABB::GetCornerPoints(vec *outPointArray) const
 void AABB::GetFacePlanes(Plane *outPlaneArray) const
 {
 	assume(outPlaneArray);
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!outPlaneArray)
-		return;
-#endif
 	for(int i = 0; i < 6; ++i)
 		outPlaneArray[i] = FacePlane(i);
 }
@@ -482,7 +474,9 @@ void AABBTransformAsAABB(AABB &aabb, Matrix &m)
 	vec newCenter = m.MulPos(centerPoint);
 
 	// The following is equal to taking the absolute value of the whole matrix m.
-	vec newDir = DIR_VEC(ABSDOT3(m[0], halfSize), ABSDOT3(m[1], halfSize), ABSDOT3(m[2], halfSize));
+	vec newDir = DIR_VEC(Abs(m[0][0] * halfSize.x) + Abs(m[0][1] * halfSize.y) + Abs(m[0][2] * halfSize.z),
+						 Abs(m[1][0] * halfSize.x) + Abs(m[1][1] * halfSize.y) + Abs(m[1][2] * halfSize.z),
+						 Abs(m[2][0] * halfSize.x) + Abs(m[2][1] * halfSize.y) + Abs(m[2][2] * halfSize.z));
 	aabb.minPoint = newCenter - newDir;
 	aabb.maxPoint = newCenter + newDir;
 }
@@ -1207,14 +1201,14 @@ void AABB::ToEdgeList(vec *outPos) const
 }
 
 #ifdef MATH_ENABLE_STL_SUPPORT
-std::string AABB::ToString() const
+StringT AABB::ToString() const
 {
 	char str[256];
 	sprintf(str, "AABB(Min:(%.2f, %.2f, %.2f) Max:(%.2f, %.2f, %.2f))", minPoint.x, minPoint.y, minPoint.z, maxPoint.x, maxPoint.y, maxPoint.z);
 	return str;
 }
 
-std::string AABB::SerializeToString() const
+StringT AABB::SerializeToString() const
 {
 	char str[256];
 	char *s = SerializeFloat(minPoint.x, str); *s = ','; ++s;
@@ -1228,7 +1222,7 @@ std::string AABB::SerializeToString() const
 	return str;
 }
 
-std::string AABB::SerializeToCodeString() const
+StringT AABB::SerializeToCodeString() const
 {
 	return "AABB(" + minPoint.SerializeToCodeString() + "," + maxPoint.SerializeToCodeString() + ")";
 }

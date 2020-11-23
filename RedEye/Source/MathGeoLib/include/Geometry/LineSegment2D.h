@@ -246,24 +246,17 @@ public:
 		@param outMax [out] Returns the maximum extent of this object along the projection axis. */
 	void ProjectToAxis(const vec2d &direction, float &outMin, float &outMax) const;
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns a human-readable representation of this LineSegment2D. Most useful for debugging purposes.
-	std::string ToString() const;
-	std::string SerializeToString() const;
+	StringT ToString() const;
+	StringT SerializeToString() const;
 
 	/// Returns a string of C++ code that can be used to construct this object. Useful for generating test cases from badly behaving objects.
-	std::string SerializeToCodeString() const;
+	StringT SerializeToCodeString() const;
+	static LineSegment2D FromString(const StringT &str) { return FromString(str.c_str()); }
 #endif
 
 	static LineSegment2D FromString(const char *str, const char **outEndStr = 0);
-#ifdef MATH_ENABLE_STL_SUPPORT
-	static LineSegment2D FromString(const std::string &str) { return FromString(str.c_str()); }
-#endif
-
-#ifdef MATH_QT_INTEROP
-	operator QString() const { return toString(); }
-	QString toString() const { return QString::fromStdString(ToString()); }
-#endif
 
 #ifdef MATH_GRAPHICSENGINE_INTEROP
 	void ToLineList(VertexBuffer &vb) const;
@@ -285,11 +278,6 @@ LineSegment2D operator *(const float3x3 &transform, const LineSegment2D &line);
 LineSegment2D operator *(const float3x4 &transform, const LineSegment2D &line);
 LineSegment2D operator *(const float4x4 &transform, const LineSegment2D &line);
 LineSegment2D operator *(const Quat &transform, const LineSegment2D &line);
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(LineSegment2D)
-Q_DECLARE_METATYPE(LineSegment2D*)
-#endif
 
 #ifdef MATH_ENABLE_STL_SUPPORT
 std::ostream &operator <<(std::ostream &o, const LineSegment2D &lineSegment);

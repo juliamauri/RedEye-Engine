@@ -37,85 +37,6 @@
 
 MATH_BEGIN_NAMESPACE
 
-/// Computes the dot product of two 2D vectors, the elements are accessed using array notation.
-/// @param v1 A vector of type float2, or a C array of two elements.
-/// @param v2 A vector of type float2, or a C array of two elements.
-/// @see DOT3(), DOT4().
-#define DOT2(v1, v2) ((v1)[0] * (v2)[0] + (v1)[1] * (v2)[1])
-
-/// Computes the dot product of a float2 and another vector given by two floats.
-/// @param v1 A vector of type float2, or a C array of two elements.
-/// @param x The x component of a second vector.
-/// @param y The y component of a second vector.
-/// @see DOT2().
-#define DOT2_xy(v1, x, y) ((v1)[0] * (x) + (v1)[1] * (y))
-
-/// Computes the dot product of two 3D vectors, the elements are accessed using array notation.
-/// @param v1 A vector of type float3, or a C array of three elements.
-/// @param v2 A vector of type float3, or a C array of three elements.
-/// @see DOT2(), DOT4(), ABSDOT3(), DOT3_xyz(), DOT3STRIDED().
-#define DOT3(v1, v2) ((v1)[0] * (v2)[0] + (v1)[1] * (v2)[1] + (v1)[2] * (v2)[2])
-
-/// Computes the dot product of two 3D vectors, but takes the absolute value of each element before summation.
-/// @param v1 A vector of type float3, or a C array of three elements.
-/// @param v2 A vector of type float3, or a C array of three elements.
-/// @see DOT3(), DOT3_xyz(), DOT3STRIDED().
-#define ABSDOT3(v1, v2) (Abs((v1)[0] * (v2)[0]) + Abs((v1)[1] * (v2)[1]) + Abs((v1)[2] * (v2)[2]))
-
-/// Computes the dot product of a float3 and another vector given by three floats.
-/// @param v1 A vector of type float3, or a C array of three elements.
-/// @param x The x component of a second vector.
-/// @param y The y component of a second vector.
-/// @param z The z component of a second vector.
-/// @see DOT3(), ABSDOT3(), DOT3STRIDED().
-#define DOT3_xyz(v1, x, y, z) ((v1)[0] * (x) + (v1)[1] * (y) + (v1)[2] * (z))
-
-/// Computes the dot product of two 3D vectors, but with the elements of the second vector being scattered noncontiguous in memory.
-/// @param v1 The first vector in the dot product. This can either be a C array or a float3.
-/// @param v2 The second vector in the dot product. As opposed to the DOT3() macro, which accesses the elements of this vector
-///	 as v2[0], v2[1], v2[2], this function accesses the elements as v2[0], v2[stride], v2[2*stride].
-/// @param stride The distance between between the subsequent vector elements in the array v2.
-/// @see DOT3(), ABSDOT3(), DOT3_xyz(), DOT4STRIDED().
-#define DOT3STRIDED(v1, v2, stride) ((v1)[0] * (v2)[0] + (v1)[1] * (v2)[stride] + (v1)[2] * (v2)[2*stride])
-
-/// Computes the dot product of two 4D vectors, the elements are accessed using array notation.
-/// @param v1 A vector of type float4, or a C array of four elements.
-/// @param v2 A vector of type float4, or a C array of four elements.
-/// @see DOT2(), DOT3(), DOT4STRIDED(), DOT4POS(), DOT4POS_xyz(), DOT4DIR(), DOT4DIR_xyz().
-#define DOT4(v1, v2) ((v1)[0] * (v2)[0] + (v1)[1] * (v2)[1] + (v1)[2] * (v2)[2] + (v1)[3] * (v2)[3])
-
-/// Computes the dot product of two 4D vectors, but with the elements of the second vector being scattered noncontiguous in memory.
-/// @param v1 The first vector in the dot product. This can either be a C array or a float4.
-/// @param v2 The second vector in the dot product. As opposed to the DOT4() macro, which accesses the elements of this vector
-///	 as v2[0], v2[1], v2[2], v2[3], this function accesses the elements as v2[0], v2[stride], v2[2*stride], v2[3*stride].
-/// @param stride The distance between between the subsequent vector elements in the array v2.
-/// @see DOT4(), DOT4POS(), DOT4POS_xyz(), DOT4DIR(), DOT4DIR_xyz().
-#define DOT4STRIDED(v1, v2, stride) ((v1)[0] * (v2)[0] + (v1)[1] * (v2)[stride] + (v1)[2] * (v2)[2*stride] + (v1)[3] * (v2)[3*stride])
-
-/// Computes the dot product of a 4D vector and a 3D position vector (w == 1).
-/// @param vec4D The 4D vector in the dot product, or a C array of four elements.
-/// @param vecPos The 3D vector in the dot product. This vector is expanded to a 4D vector by setting w == 1.
-/// @see DOT4(), DOT4STRIDED(), DOT4POS_xyz(), DOT4DIR(), DOT4DIR_xyz().
-#define DOT4POS(vec4D, vecPos) ((vec4D)[0] * (vecPos)[0] + (vec4D)[1] * (vecPos)[1] + (vec4D)[2] * (vecPos)[2] + (vec4D)[3])
-
-/// Computes the dot product of a 4D vector and a position vector (x,y,z,1).
-/// @param vec4D The 4D vector in the dot product, or a C array of four elements.
-/// @param x The x component of the second vector.
-/// @param y The y component of the second vector.
-/// @param z The z component of the second vector.
-/// @see DOT4(), DOT4STRIDED(), DOT4POS(), DOT4DIR(), DOT4DIR_xyz().
-#define DOT4POS_xyz(vec4D, x, y, z) ((vec4D)[0] * (x) + (vec4D)[1] * (y) + (vec4D)[2] * (z) + (vec4D)[3])
-
-/// Computes the dot product of a 4D vector and a direction vector (x,y,z,0).
-/// @note This function is only provided for convenience, since this is identical to DOT3.
-/// @see DOT3(), DOT4(), DOT4STRIDED(), DOT4POS(), DOT4POS_xyz().
-#define DOT4DIR(vec4D, vecDir) DOT3(vec4D, vecDir)
-
-/// Computes the dot product of a 4D vector and a direction vector (x,y,z,0).
-/// @note This function is only provided for convenience, since this is identical to DOT3_xyz.
-/// @see DOT3_xyz(), DOT4(), DOT4STRIDED(), DOT4POS(), DOT4POS_xyz(), DOT4DIR().
-#define DOT4DIR_xyz(vec4D, x, y, z) DOT3_xyz(vec4D, x, y, z)
-
 /// Converts the given amount of degrees into radians.
 /// 180 degrees equals pi, 360 degrees is a full circle, and equals 2pi.
 FORCE_INLINE float DegToRad(float degrees) { return degrees * (pi / 180.f); }
@@ -144,6 +65,12 @@ void SinCos2(const float4 &angleRadians, float4 &outSin, float4 &outCos);
 void SinCos3(const float4 &angleRadians, float4 &outSin, float4 &outCos);
 /// Computes sin and cos of the four components of angleRadians, stored to the corresponding components of outSin and outCos.
 void SinCos4(const float4 &angleRadians, float4 &outSin, float4 &outCos);
+
+/// Simultaneously computes both sin(x) and cos(x), which yields a small performance increase over to
+/// computing them separately. This function uses a pre-scaled units for angles, where
+/// 0...65535 matches 0...2pi radians.
+void SinCosU16ScaledRadians(u16 u16ScaledRadians, float &outSin, float &outCos);
+
 /// Computes the function arcsin(x), in radians.
 /** @see Sin(), Cos(), Tan(), SinCos(), Acos(), Atan(), Atan2(), Sinh(), Cosh(), Tanh(). */
 float Asin(float x);
@@ -171,21 +98,21 @@ float Tanh(float x);
 	@see RoundUpPow2(), RoundDownPow2(). */
 bool IsPow2(u32 number);
 bool IsPow2(u64 number);
-FORCE_INLINE bool IsPow2(int /*s32*/ number) { assert(number >= 0); return IsPow2((u32)number); }
+FORCE_INLINE bool IsPow2(s32 number) { assert(number >= 0); return IsPow2((u32)number); }
 FORCE_INLINE bool IsPow2(s64 number) { assert(number >= 0); return IsPow2((u64)number); }
 /// Returns the smallest power-of-2 number (1,2,4,8,16,32,...) greater or equal than the given number.
 /** @note RoundUpPow2(0) == 0. Also, note that RoundUpPow2(x) == 0 if x >= 0x80000001 for the u32 version, or if x >= 0x8000000000000001 for the u64 version.
 	@see IsPow2(), RoundDownPow2(). */
 u32 RoundUpPow2(u32 number);
 u64 RoundUpPow2(u64 number);
-FORCE_INLINE int /*s32*/ RoundUpPow2(int /*s32*/ number) { assert(number >= 0); return (int /*s32*/)RoundUpPow2((u32)number); }
+FORCE_INLINE s32 RoundUpPow2(s32 number) { assert(number >= 0); return (int /*s32*/)RoundUpPow2((u32)number); }
 FORCE_INLINE s64 RoundUpPow2(s64 number) { assert(number >= 0); return (s64)RoundUpPow2((u64)number); }
 /// Returns the largest power-of-2 number (1,2,4,8,16,32,...) smaller or equal than the given number.
 /** @note RoundDownPow2(0) == 0.
 	@see IsPow2(), RoundUpPow2(). */
 u32 RoundDownPow2(u32 number);
 u64 RoundDownPow2(u64 number);
-FORCE_INLINE int /*s32*/ RoundDownPow2(int /*s32*/ number) { assert(number >= 0); return (int /*s32*/)RoundDownPow2((u32)number); }
+FORCE_INLINE s32 RoundDownPow2(s32 number) { assert(number >= 0); return (int /*s32*/)RoundDownPow2((u32)number); }
 FORCE_INLINE s64 RoundDownPow2(s64 number) { assert(number >= 0); return (s64)RoundDownPow2((u64)number); }
 
 /// Returns the given number rounded up to the next multiple of n.
@@ -262,7 +189,7 @@ float InvLerp(float a, float b, float x);
 float Step(float y, float x);
 /// See http://msdn.microsoft.com/en-us/library/bb509658(v=vs.85).aspx
 /** @see Lerp(), LerpMod(), InvLerp(), Step(), PingPongMod(), Mod(), ModPos(), Frac(). */
-float SmoothStep(float min, float max, float x);
+float Ramp(float min, float max, float x);
 /// Limits x to the range [0, mod], but instead of wrapping around from mod to 0, the result will move back
 /// from mod to 0 as x goes from mod to 2*mod.
 /** @see Lerp(), LerpMod(), InvLerp(), Step(), SmoothStep(), Mod(), ModPos(), Frac(). */

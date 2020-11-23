@@ -70,12 +70,12 @@ vec TranslateOp::Offset() const
 	return offset;
 }
 
-#ifdef MATH_ENABLE_STL_SUPPORT
-std::string TranslateOp::ToString() const
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
+StringT TranslateOp::ToString() const
 {
 	char str[256];
 	sprintf(str, "(%.3f, %.3f, %.3f)", offset.x, offset.y, offset.z);
-	return std::string(str);
+	return str;
 }
 #endif
 
@@ -255,7 +255,7 @@ float4x4 operator *(const float4x4 &lhs, const ScaleOp &rhs)
 	ret[2][0] = lhs[2][0] * rhs.scale.x; ret[2][1] = lhs[2][1] * rhs.scale.y; ret[2][2] = lhs[2][2] * rhs.scale.z; ret[2][3] = lhs[2][3];
 	ret[3][0] = lhs[3][0] * rhs.scale.x; ret[3][1] = lhs[3][1] * rhs.scale.y; ret[3][2] = lhs[3][2] * rhs.scale.z; ret[3][3] = lhs[3][3];
 
-	mathassert(ret.Equals(lhs * rhs.ToFloat4x4()));
+	mathassert4(ret.Equals(lhs * rhs.ToFloat4x4()), lhs, rhs.ToFloat4x4(), ret, lhs * rhs.ToFloat4x4());
 	return ret;
 }
 
@@ -286,12 +286,12 @@ vec ScaleOp::Offset() const
 	return scale;
 }
 
-#ifdef MATH_ENABLE_STL_SUPPORT
-std::string ScaleOp::ToString() const
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
+StringT ScaleOp::ToString() const
 {
 	char str[256];
 	sprintf(str, "(%.3f, %.3f, %.3f)", scale.x, scale.y, scale.z);
-	return std::string(str);
+	return str;
 }
 #endif
 

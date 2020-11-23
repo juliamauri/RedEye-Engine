@@ -264,10 +264,6 @@ Sphere Sphere::FastEnclosingSphere(const vec *pts, int numPoints)
 		return s;
 	}
 	assume(pts || numPoints == 0);
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!pts)
-		return Sphere();
-#endif
 
 	// First pass: Pick the cardinal axis (X,Y or Z) which has the two most distant points.
 	int minx, maxx, miny, maxy, minz, maxz;
@@ -612,7 +608,7 @@ int Sphere::Intersects(const LineSegment &l, vec *intersectionPoint, vec *inters
 	if (d2)
 		*d2 = t2 / lineLength;
 
-	return true;
+	return numIntersections;
 }
 
 bool Sphere::Intersects(const Plane &plane) const
@@ -774,10 +770,6 @@ void Sphere::Enclose(const LineSegment &lineSegment)
 void Sphere::Enclose(const vec *pointArray, int numPoints)
 {
 	assume(pointArray || numPoints == 0);
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!pointArray)
-		return;
-#endif
 	Sphere_Enclose_pts(*this, pointArray, numPoints);
 }
 
@@ -840,10 +832,6 @@ int Sphere::Triangulate(vec *outPos, vec *outNormal, float2 *outUV, int numVerti
 	assume(numVertices >= 24 && "At minimum, sphere triangulation will contain at least 8 triangles, which is 24 vertices, but fewer were specified!");
 	assume(numVertices % 3 == 0 && "Warning:: The size of output should be divisible by 3 (each triangle takes up 3 vertices!)");
 
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!outPos)
-		return 0;
-#endif
 	assume(this->r > 0.f);
 
 	if (numVertices < 24)
@@ -1387,8 +1375,8 @@ Sphere Sphere::FitThroughPoints(const vec &a, const vec &b, const vec &c, const 
 	return sphere;
 }
 
-#ifdef MATH_ENABLE_STL_SUPPORT
-std::string Sphere::ToString() const
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
+StringT Sphere::ToString() const
 {
 	char str[256];
 	sprintf(str, "Sphere(pos:(%.2f, %.2f, %.2f) r:%.2f)",
@@ -1396,7 +1384,7 @@ std::string Sphere::ToString() const
 	return str;
 }
 
-std::string Sphere::SerializeToString() const
+StringT Sphere::SerializeToString() const
 {
 	char str[256];
 	char *s = SerializeFloat(pos.x, str); *s = ','; ++s;
@@ -1408,12 +1396,15 @@ std::string Sphere::SerializeToString() const
 	return str;
 }
 
-std::string Sphere::SerializeToCodeString() const
+StringT Sphere::SerializeToCodeString() const
 {
 	char str[256];
 	sprintf(str, "%.9g", r);
 	return "Sphere(" + pos.SerializeToCodeString() + "," + str + ")";
 }
+#endif
+
+#if defined(MATH_ENABLE_STL_SUPPORT)
 
 std::ostream &operator <<(std::ostream &o, const Sphere &sphere)
 {

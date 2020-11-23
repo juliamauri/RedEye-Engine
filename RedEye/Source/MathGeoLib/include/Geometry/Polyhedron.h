@@ -20,10 +20,10 @@
 #include "../MathGeoLibFwd.h"
 #include "../Math/float3.h"
 
-//#ifdef MATH_ENABLE_STL_SUPPORT
 #include <vector>
+#ifdef MATH_ENABLE_STL_SUPPORT
 #include <string>
-//#endif
+#endif
 
 MATH_BEGIN_NAMESPACE
 
@@ -46,7 +46,9 @@ public:
 		void FlipWindingOrder();
 
 		/// Returns a string of form "0,1,2,3,4" that refers to the indices of the vertices that this face uses.
+#if defined(MATH_ENABLE_STL_SUPPORT)
 		std::string ToString() const;
+#endif
 
 		static Face FromString(const char *str);
 	};
@@ -455,13 +457,16 @@ public:
 	///         Returns -1 if no such point is found. (no vertices in polyhedron, or all of them contained NaNs/Infs)
 	int FindClosestVertex(const vec &pt, float &outDistanceSq) const;
 
-	TriangleArray Triangulate() const;
+	TriangleArray TriangulateConvex() const;
 
+#if defined(MATH_ENABLE_STL_SUPPORT)
 	std::string ToString() const;
+#endif
+
 	void DumpStructure() const;
 
 #ifdef MATH_GRAPHICSENGINE_INTEROP
-	void Triangulate(VertexBuffer &vb, bool ccwIsFrontFacing, int faceStart = 0, int faceEnd = 0x7FFFFFFF) const;
+	void TriangulateConvex(VertexBuffer &vb, bool ccwIsFrontFacing, int faceStart = 0, int faceEnd = 0x7FFFFFFF) const;
 	void ToLineList(VertexBuffer &vb) const;
 #endif
 };
@@ -471,10 +476,6 @@ Polyhedron operator *(const float3x4 &transform, const Polyhedron &polyhedron);
 Polyhedron operator *(const float4x4 &transform, const Polyhedron &polyhedron);
 Polyhedron operator *(const Quat &transform, const Polyhedron &polyhedron);
 
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(Polyhedron)
-Q_DECLARE_METATYPE(Polyhedron*)
-#endif
 /*
 Polyhedron operator *(const float3x3 &m, const Polyhedron &s);
 Polyhedron operator *(const float3x4 &m, const Polyhedron &s);

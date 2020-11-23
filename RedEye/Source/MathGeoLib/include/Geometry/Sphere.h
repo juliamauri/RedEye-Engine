@@ -20,10 +20,6 @@
 #include "../MathGeoLibFwd.h"
 #include "../Math/float3.h"
 
-#ifdef MATH_URHO3D_INTEROP
-#include <Urho3D/Math/Sphere.h>
-#endif
-
 MATH_BEGIN_NAMESPACE
 
 /// A 3D sphere.
@@ -373,30 +369,20 @@ public:
 	static int IntersectLine(const vec &linePos, const vec &lineDir, const vec &sphereCenter,
 	                         float sphereRadius, float &t1, float &t2);
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns a human-readable representation of this Sphere. Most useful for debugging purposes.
-	std::string ToString() const;
-	std::string SerializeToString() const;
+	StringT ToString() const;
+	StringT SerializeToString() const;
 
 	/// Returns a string of C++ code that can be used to construct this object. Useful for generating test cases from badly behaving objects.
-	std::string SerializeToCodeString() const;
+	StringT SerializeToCodeString() const;
+	static Sphere FromString(const StringT &str) { return FromString(str.c_str()); }
 #endif
 
 	static Sphere FromString(const char *str, const char **outEndStr = 0);
-#ifdef MATH_ENABLE_STL_SUPPORT
-	static Sphere FromString(const std::string &str) { return FromString(str.c_str()); }
-#endif
 
-#ifdef MATH_QT_INTEROP
-	operator QString() const { return toString(); }
-	QString toString() const { return QString::fromStdString(ToString()); }
-#endif
 #ifdef MATH_GRAPHICSENGINE_INTEROP
 	void Triangulate(VertexBuffer &vb, int numVertices, bool ccwIsFrontFacing) const;
-#endif
-#ifdef MATH_URHO3D_INTEROP
-	Sphere(const Urho3D::Sphere &other) : pos(other.center_), r(other.radius_) {}
-	operator Urho3D::Sphere() const { return Urho3D::Sphere(pos, r); }
 #endif
 
 	bool Equals(const Sphere &rhs, float epsilon = 1e-3f) const { return pos.Equals(rhs.pos, epsilon) && EqualAbs(r, rhs.r, epsilon); }
@@ -405,11 +391,6 @@ public:
 	/** @note Prefer using this over e.g. memcmp, since there can be SSE-related padding in the structures. */
 	bool BitEquals(const Sphere &other) const;
 };
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(Sphere)
-Q_DECLARE_METATYPE(Sphere*)
-#endif
 
 Sphere operator *(const float3x3 &m, const Sphere &s);
 Sphere operator *(const float3x4 &m, const Sphere &s);

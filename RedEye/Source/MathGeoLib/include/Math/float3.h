@@ -24,22 +24,8 @@
 #endif
 
 #include "../MathGeoLibFwd.h"
-
-#ifdef MATH_QT_INTEROP
-#include <QVector3D>
-#endif
-#ifdef MATH_OGRE_INTEROP
-#include <OgreVector3.h>
-#endif
-#ifdef MATH_BULLET_INTEROP
-#include <LinearMath/btVector3.h>
-#endif
-#ifdef MATH_URHO3D_INTEROP
-#include <Urho3D/Math/Vector3.h>
-#endif
-#ifdef MATH_IRRKLANG_INTEROP
-#include <ik_vec3d.h>
-#endif
+#include "MathConstants.h"
+#include "assume.h"
 
 MATH_BEGIN_NAMESPACE
 
@@ -68,12 +54,8 @@ public:
 		@see x, y, z. */
 	float3() {}
 
-#ifdef MATH_EXPLICIT_COPYCTORS
 	/// The float3 copy constructor.
-	/** The copy constructor is a standard default copy-ctor, but it is explicitly written to be able to automatically pick up
-		this function for script bindings. */
 	float3(const float3 &rhs) { x = rhs.x; y = rhs.y; z = rhs.z; }
-#endif
 
 	/// Constructs a new float3 with the value (x, y, z).
 	/** @see x, y, z. */
@@ -109,16 +91,27 @@ public:
 		@note If you have a non-const instance of this class, you can use this notation to set the elements of
 			this vector as well, e.g. vec[1] = 10.f; would set the y-component of this vector.
 		@see ptr(), At(). */
-	float &operator [](int index) { return At(index); }
-	CONST_WIN32 float operator [](int index) const { return At(index); }
+	FORCE_INLINE float &operator [](int index) { return At(index); }
+	FORCE_INLINE CONST_WIN32 float operator [](int index) const { return At(index); }
 
 	/// Accesses an element of this vector.
 	/** @param index The element to get. Pass in 0 for x, 1 for y, and 2 for z.
 		@note If you have a non-const instance of this class, you can use this notation to set the elements of
 			this vector as well, e.g. vec.At(1) = 10.f; would set the y-component of this vector.
 		@see ptr(), operator [](). */
-	float &At(int index);
-	CONST_WIN32 float At(int index) const;
+	FORCE_INLINE CONST_WIN32 float At(int index) const
+	{
+		assume(index >= 0);
+		assume(index < Size);
+		return ptr()[index];
+	}
+	
+	FORCE_INLINE float &At(int index)
+	{
+		assume(index >= 0);
+		assume(index < Size);
+		return ptr()[index];
+	}
 
 	/// Adds two vectors. [indexTitle: operators +,-,*,/]
 	/** This function is identical to the member function Add().
@@ -143,6 +136,9 @@ public:
 	/// Unary operator + allows this structure to be used in an expression '+x'.
 	float3 operator +() const { return *this; }
 
+	/// Assigns a vector to another.
+	/** @return A reference to this. */
+	float3 &operator =(const float3 &v);
 	/// Adds a vector to this vector, in-place. [indexTitle: operators +=,-=,*=,/=]
 	/** @return A reference to this. */
 	float3 &operator +=(const float3 &v);
@@ -410,22 +406,20 @@ public:
 	/** @note Prefer using this over e.g. memcmp, since there can be SSE-related padding in the structures. */
 	bool BitEquals(const float3 &other) const;
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns "(x, y, z)".
-	std::string ToString() const;
+	StringT ToString() const;
 
 	/// Returns "x,y,z". This is the preferred format for the float3 if it has to be serialized to a string for machine transfer.
-	std::string SerializeToString() const;
+	StringT SerializeToString() const;
 
 	/// Returns a string of C++ code that can be used to construct this object. Useful for generating test cases from badly behaving objects.
-	std::string SerializeToCodeString() const;
+	StringT SerializeToCodeString() const;
+	static MUST_USE_RESULT float3 FromString(const StringT &str) { return FromString(str.c_str()); }
 #endif
 
 	/// Parses a string that is of form "x,y,z" or "(x,y,z)" or "(x;y;z)" or "x y z" to a new float3.
 	static MUST_USE_RESULT float3 FromString(const char *str, const char **outEndStr = 0);
-#ifdef MATH_ENABLE_STL_SUPPORT
-	static MUST_USE_RESULT float3 FromString(const std::string &str) { return FromString(str.c_str()); }
-#endif
 
 	/// @return x + y + z.
 	float SumOfElements() const;
@@ -692,32 +686,6 @@ public:
 	/** @note Due to static data initialization order being undefined in C++, do NOT use this
 			member to initialize other static data in other compilation units! */
 	static const float3 inf;
-
-#ifdef MATH_OGRE_INTEROP
-	float3(const Ogre::Vector3 &other):x(other.x), y(other.y), z(other.z) {}
-	operator Ogre::Vector3() const { return Ogre::Vector3(x, y, z); }
-#endif
-#ifdef MATH_QT_INTEROP
-	float3(const QVector3D &other):x(other.x()), y(other.y()), z(other.z()) {}
-	operator QVector3D() const { return QVector3D(x, y, z); }
-	operator QString() const { return "float3(" + QString::number(x) + "," + QString::number(y) + "," + QString::number(z) + ")"; }
-	QString toString() const { return (QString)*this; }
-	QVector3D ToQVector3D() const { return QVector3D(x, y, z); }
-	static float3 FromQVector3D(const QVector3D &v) { return (float3)v; }
-	static float3 FromString(const QString &str) { return FromString(str.toStdString()); }
-#endif
-#ifdef MATH_BULLET_INTEROP
-	float3(const btVector3 &other):x(other.x()), y(other.y()), z(other.z()) {}
-	operator btVector3() const { return btVector3(x, y, z); }
-#endif
-#ifdef MATH_URHO3D_INTEROP
-	float3(const Urho3D::Vector3 &other) : x(other.x_), y(other.y_), z(other.z_) {}
-	operator Urho3D::Vector3() const { return Urho3D::Vector3(x, y, z); }
-#endif
-#ifdef MATH_IRRKLANG_INTEROP
-    float3(const irrklang::vec3df &other) : x(other.X), y(other.Y), z(other.Z) {}
-    operator irrklang::vec3df() const { return irrklang::vec3df(x, y, z); }
-#endif
 };
 
 /// Prints this float3 to the given stream.
@@ -743,11 +711,6 @@ inline float3 Clamp(const float3 &a, const float3 &floor, const float3 &ceil) { 
 inline float3 Clamp01(const float3 &a) { return a.Clamp01(); }
 inline float3 Lerp(const float3 &a, const float3 &b, float t) { return a.Lerp(b, t); }
 
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(float3)
-Q_DECLARE_METATYPE(float3*)
-#endif
-
 MATH_END_NAMESPACE
 
 #include "float4.h"
@@ -758,17 +721,23 @@ MATH_BEGIN_NAMESPACE
 #ifdef MATH_AUTOMATIC_SSE
 bool EqualAbs(float a, float b, float epsilon);
 
+// Given a xyz triplet or a float3, constructs a vec object that represents a point vector.
 #define POINT_VEC(...) float4(__VA_ARGS__, 1.f)
+
+// Given a xyz triplet or a float3, constructs a vec object that represents a direction vector.
 #define DIR_VEC(...) float4(__VA_ARGS__, 0.f)
 
+// Given a xy pair or a float2d, constructs a vec object that represents a 2D point vector.
 #define POINT_VEC2D(...) float4(__VA_ARGS__, 0.f, 1.f)
+
+// Given a xy pair or a float2d, constructs a vec object that represents a 2D direction vector.
 #define DIR_VEC2D(...) float4(__VA_ARGS__, 0.f, 0.f)
 
 #define POINT_VEC_SCALAR(s) float4(pos_from_scalar_ps(s))
 #define DIR_VEC_SCALAR(s) float4(dir_from_scalar_ps(s))
 
-#define FLOAT4D_POINT_VEC(...) float4d(__VA_ARGS__)
-#define FLOAT4D_DIR_VEC(...) float4d(__VA_ARGS__)
+#define FLOAT4D_POINT_VEC(...) float4d(__VA_ARGS__, 1.0)
+#define FLOAT4D_DIR_VEC(...) float4d(__VA_ARGS__, 0.0)
 
 #define FLOAT4D_POINT_VEC_SCALAR(s) float4d(pos_from_scalar_ps(s))
 #define FLOAT4D_DIR_VEC_SCALAR(s) float4d(dir_from_scalar_ps(s))
@@ -779,8 +748,15 @@ bool EqualAbs(float a, float b, float epsilon);
 #define POINT_TO_FLOAT4(v) (v)
 #define DIR_TO_FLOAT4(v) (v)
 
+#define POINT_TO_FLOAT4D(v) float4d(v)
+#define DIR_TO_FLOAT4D(v) float4d(v)
+
 #define FLOAT4_TO_POINT(v) (v)
 #define FLOAT4_TO_DIR(v) (v)
+
+// TODO: SSE optimize double->float conversion
+#define FLOAT4D_TO_POINT(v) (float4((float)v.x, (float)v.y, (float)v.z, (float)v.w))
+#define FLOAT4D_TO_DIR(v) (float4((float)v.x, (float)v.y, (float)v.z, (float)v.w))
 
 /* /// TODO: Enable this:
 inline float3 POINT_TO_FLOAT3(const vec &v)
@@ -805,14 +781,18 @@ inline float3 DIR_TO_FLOAT3(const vec &v)
 #define DIR_VEC_SCALAR(s) float3::FromScalar(s)
 #define POINT_TO_FLOAT4(v) float4(v, 1.f)
 #define DIR_TO_FLOAT4(v) float4(v, 0.f)
+#define POINT_TO_FLOAT4D(v) float4d(v, 1.f)
+#define DIR_TO_FLOAT4D(v) float4d(v, 0.f)
 #define FLOAT4_TO_POINT(v) (v).xyz()
 #define FLOAT4_TO_DIR(v) (v).xyz()
+#define FLOAT4D_TO_POINT(v) (float3((float)v.x, (float)v.y, (float)v.z))
+#define FLOAT4D_TO_DIR(v) (float3((float)v.x, (float)v.y, (float)v.z))
 
-#define FLOAT4D_POINT_VEC(...) float4d(__VA_ARGS__, 1.f)
-#define FLOAT4D_DIR_VEC(...) float4d(__VA_ARGS__, 0.f)
+#define FLOAT4D_POINT_VEC(...) float4d(__VA_ARGS__)
+#define FLOAT4D_DIR_VEC(...) float4d(__VA_ARGS__)
 
-#define FLOAT4D_POINT_VEC_SCALAR(s) float4d::FromScalar(s, 1.f)
-#define FLOAT4D_DIR_VEC_SCALAR(s) float4d::FromScalar(s, 0.f)
+#define FLOAT4D_POINT_VEC_SCALAR(s) float4d::FromScalar(s)
+#define FLOAT4D_DIR_VEC_SCALAR(s) float4d::FromScalar(s)
 
 #endif
 

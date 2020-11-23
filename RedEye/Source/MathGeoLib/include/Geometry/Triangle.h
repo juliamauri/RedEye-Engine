@@ -374,24 +374,17 @@ public:
 		@see class LCG, RandomPointInside(), RandomVertex(), Edge(), class LineSegment, IsDegenerate(). */
 	vec RandomPointOnEdge(LCG &rng) const;
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns a human-readable representation of this Line. Most useful for debugging purposes.
-	std::string ToString() const;
-	std::string SerializeToString() const;
+	StringT ToString() const;
+	StringT SerializeToString() const;
 
 	/// Returns a string of C++ code that can be used to construct this object. Useful for generating test cases from badly behaving objects.
-	std::string SerializeToCodeString() const;
+	StringT SerializeToCodeString() const;
+	static Triangle FromString(const StringT &str) { return FromString(str.c_str()); }
 #endif
 
 	static Triangle FromString(const char *str, const char **outEndStr = 0);
-#ifdef MATH_ENABLE_STL_SUPPORT
-	static Triangle FromString(const std::string &str) { return FromString(str.c_str()); }
-#endif
-
-#ifdef MATH_QT_INTEROP
-	operator QString() const { return toString(); }
-	QString toString() const { return QString::fromStdString(ToString()); }
-#endif
 
 	bool Equals(const Triangle &rhs, float epsilon = 1e-3f) const { return a.Equals(rhs.a, epsilon) && b.Equals(rhs.b, epsilon) && c.Equals(rhs.c, epsilon); }
 
@@ -415,11 +408,6 @@ struct Triangle_storage
 	operator Triangle() const { return *reinterpret_cast<const Triangle*>(this); }
 };
 #define TRIANGLE(x) (*(Triangle*)&x)
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(Triangle)
-Q_DECLARE_METATYPE(Triangle*)
-#endif
 
 #ifdef MATH_ENABLE_STL_SUPPORT
 std::ostream &operator <<(std::ostream &o, const Triangle &triangle);

@@ -313,3 +313,6 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+
+#not ignore some pdb
+!RedEye/Source/MathGeoLib/lib/MathGeoLib.pdb

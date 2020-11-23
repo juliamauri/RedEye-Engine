@@ -43,10 +43,6 @@ MATH_BEGIN_NAMESPACE
 Quat::Quat(const float *data)
 {
 	assume(data);
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!data)
-		return;
-#endif
 #if defined(MATH_AUTOMATIC_SSE)
 	q = loadu_ps(data);
 #else
@@ -591,6 +587,30 @@ void Quat::Set(float x_, float y_, float z_, float w_)
 #endif
 }
 
+void Quat::Set(const Quat &q)
+{
+#ifdef MATH_AUTOMATIC_SSE
+	this->q = q.q;
+#else
+	x = q.x;
+	y = q.y;
+	z = q.z;
+	w = q.w;
+#endif
+}
+
+void Quat::Set(const float4 &vec)
+{
+#ifdef MATH_AUTOMATIC_SSE
+	q = vec.v;
+#else
+	x = vec.x;
+	y = vec.y;
+	z = vec.z;
+	w = vec.w;
+#endif
+}
+
 Quat MUST_USE_RESULT Quat::LookAt(const float3 &localForward, const float3 &targetDirection, const float3 &localUp, const float3 &worldUp)
 {
 	return float3x3::LookAt(localForward, targetDirection, localUp, worldUp).ToQuat();
@@ -765,15 +785,15 @@ float4x4 MUST_USE_RESULT Quat::ToFloat4x4(const float4 &translation) const
 
 bool IsNeutralCLocale();
 
-#ifdef MATH_ENABLE_STL_SUPPORT
-std::string MUST_USE_RESULT Quat::ToString() const
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
+StringT MUST_USE_RESULT Quat::ToString() const
 {
 	char str[256];
 	sprintf(str, "(%.3f, %.3f, %.3f, %.3f)", x, y, z, w);
 	return str;
 }
 
-std::string MUST_USE_RESULT Quat::ToString2() const
+StringT MUST_USE_RESULT Quat::ToString2() const
 {
 	float3 axis;
 	float angle;
@@ -783,7 +803,7 @@ std::string MUST_USE_RESULT Quat::ToString2() const
 	return str;
 }
 
-std::string MUST_USE_RESULT Quat::SerializeToString() const
+StringT MUST_USE_RESULT Quat::SerializeToString() const
 {
 	char str[256];
 	char *s = SerializeFloat(x, str); *s = ','; ++s;
@@ -795,7 +815,7 @@ std::string MUST_USE_RESULT Quat::SerializeToString() const
 	return str;
 }
 
-std::string Quat::SerializeToCodeString() const
+StringT Quat::SerializeToCodeString() const
 {
 	return "Quat(" + SerializeToString() + ")";
 }

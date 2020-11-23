@@ -43,7 +43,7 @@
 #include <iostream>
 #endif
 
-#if defined(MATH_TINYXML_INTEROP) && defined(MATH_CONTAINERLIB_SUPPORT)
+#if defined(MATH_CONTAINERLIB_SUPPORT)
 #include "Container/UString.h"
 #endif
 
@@ -783,10 +783,6 @@ void Frustum::Transform(const Quat &transform)
 void Frustum::GetPlanes(Plane *outArray) const
 {
 	assume(outArray);
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!outArray)
-		return;
-#endif
 	for(int i = 0; i < 6; ++i)
 		outArray[i] = GetPlane(i);
 }
@@ -799,10 +795,6 @@ vec Frustum::CenterPoint() const
 void Frustum::GetCornerPoints(vec *outPointArray) const
 {
 	assume(outPointArray);
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!outPointArray)
-		return;
-#endif
 
 	if (type == PerspectiveFrustum)
 	{
@@ -1109,25 +1101,7 @@ bool Frustum::Intersects(const Polyhedron &polyhedron) const
 	return this->ToPolyhedron().Intersects(polyhedron);
 }
 
-#if defined(MATH_TINYXML_INTEROP) && defined(MATH_CONTAINERLIB_SUPPORT)
-
-void Frustum::DeserializeFromXml(TiXmlElement *e)
-{
-	type = StrCaseEq(e->Attribute("orthographic"), "true") ? OrthographicFrustum : PerspectiveFrustum;
-	pos = POINT_VEC(float3::FromString(e->Attribute("pos")));
-	front = DIR_VEC(float3::FromString(e->Attribute("front")));
-	up = DIR_VEC(float3::FromString(e->Attribute("up")));
-	e->QueryFloatAttribute("nearPlaneDistance", &nearPlaneDistance);
-	e->QueryFloatAttribute("farPlaneDistance", &farPlaneDistance);
-	e->QueryFloatAttribute("horizontalFov", &horizontalFov);
-	e->QueryFloatAttribute("verticalFov", &verticalFov);
-}
-
-#endif
-
-#ifdef MATH_ENABLE_STL_SUPPORT
-
-std::string FrustumTypeToString(FrustumType t)
+const char *FrustumTypeToString(FrustumType t)
 {
 	if (t == InvalidFrustum) return "InvalidFrustum";
 	if (t == OrthographicFrustum) return "OrthographicFrustum";
@@ -1135,11 +1109,13 @@ std::string FrustumTypeToString(FrustumType t)
 	return "(invalid frustum type)";
 }
 
-std::string Frustum::ToString() const
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
+
+StringT Frustum::ToString() const
 {
 	char str[256];
 	sprintf(str, "Frustum(%s pos:(%.2f, %.2f, %.2f) front:(%.2f, %.2f, %.2f), up:(%.2f, %.2f, %.2f), near: %.2f, far: %.2f, %s: %.2f, %s: %.2f)",
-		FrustumTypeToString(type).c_str(), pos.x, pos.y, pos.z, front.x, front.y, front.z,
+		FrustumTypeToString(type), pos.x, pos.y, pos.z, front.x, front.y, front.z,
 		up.x, up.y, up.z, nearPlaneDistance, farPlaneDistance,
 		type == OrthographicFrustum ? "ortho width:" : "hFov",
 		horizontalFov,
@@ -1147,6 +1123,9 @@ std::string Frustum::ToString() const
 		verticalFov);
 	return str;
 }
+#endif
+
+#if defined(MATH_ENABLE_STL_SUPPORT)
 
 std::ostream &operator <<(std::ostream &o, const Frustum &frustum)
 {

@@ -20,13 +20,6 @@
 #include "../MathGeoLibFwd.h"
 #include "../Math/float3.h"
 
-#ifdef MATH_OGRE_INTEROP
-#include <OgreRay.h>
-#endif
-#ifdef MATH_URHO3D_INTEROP
-#include <Urho3D/Math/Ray.h>
-#endif
-
 MATH_BEGIN_NAMESPACE
 
 /// A ray in 3D space is a line that starts from an origin point and extends to infinity in one direction.
@@ -213,33 +206,18 @@ public:
 		@see pos, dir, Ray::Ray, class LineSegment, ToLine(). */
 	LineSegment ToLineSegment(float dStart, float dEnd) const;
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns a human-readable representation of this Ray.
 	/** The returned string specifies the position and direction of this Ray. */
-	std::string ToString() const;
-	std::string SerializeToString() const;
+	StringT ToString() const;
+	StringT SerializeToString() const;
 
 	/// Returns a string of C++ code that can be used to construct this object. Useful for generating test cases from badly behaving objects.
-	std::string SerializeToCodeString() const;
+	StringT SerializeToCodeString() const;
+	static Ray FromString(const StringT &str) { return FromString(str.c_str()); }
 #endif
 
 	static Ray FromString(const char *str, const char **outEndStr = 0);
-#ifdef MATH_ENABLE_STL_SUPPORT
-	static Ray FromString(const std::string &str) { return FromString(str.c_str()); }
-#endif
-
-#ifdef MATH_QT_INTEROP
-	operator QString() const { return toString(); }
-	QString toString() const { return QString::fromStdString(ToString()); }
-#endif
-#ifdef MATH_OGRE_INTEROP
-	Ray(const Ogre::Ray &other):pos(other.getOrigin()), dir(other.getDirection()) {}
-	operator Ogre::Ray() const { return Ogre::Ray(pos, dir); }
-#endif
-#ifdef MATH_URHO3D_INTEROP
-	Ray(const Urho3D::Ray &other) : pos(other.origin_), dir(other.direction_) {}
-	operator Urho3D::Ray() const { return Urho3D::Ray(pos, dir); }
-#endif
 };
 
 /// @note Assumes that transform may contain scaling, and re-normalizes the ray direction
@@ -252,11 +230,6 @@ Ray operator *(const float3x4 &transform, const Ray &ray);
 ///		after the transform.
 Ray operator *(const float4x4 &transform, const Ray &ray);
 Ray operator *(const Quat &transform, const Ray &ray);
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(Ray)
-Q_DECLARE_METATYPE(Ray*)
-#endif
 
 #ifdef MATH_ENABLE_STL_SUPPORT
 std::ostream &operator <<(std::ostream &o, const Ray &ray);

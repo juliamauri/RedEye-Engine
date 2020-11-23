@@ -66,8 +66,6 @@ MATH_BEGIN_NAMESPACE
 class float2;
 class float3;
 class float4;
-class float2x2;
-class float2x3;
 class float3x3;
 class float3x4;
 class float4x4;
@@ -214,8 +212,6 @@ class VertexBuffer;
 REGISTER_POD(MATH_NS::float2);
 REGISTER_POD(MATH_NS::float3);
 REGISTER_POD(MATH_NS::float4);
-REGISTER_POD(MATH_NS::float2x2);
-REGISTER_POD(MATH_NS::float2x3);
 REGISTER_POD(MATH_NS::float3x3);
 REGISTER_POD(MATH_NS::float3x4);
 REGISTER_POD(MATH_NS::float4x4);

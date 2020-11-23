@@ -26,19 +26,6 @@
 #endif
 #include "../MathGeoLibFwd.h"
 
-#ifdef MATH_QT_INTEROP
-#include <QQuaternion>
-#endif
-#ifdef MATH_OGRE_INTEROP
-#include <OgreQuaternion.h>
-#endif
-#ifdef MATH_BULLET_INTEROP
-#include <LinearMath/btQuaternion.h>
-#endif
-#ifdef MATH_URHO3D_INTEROP
-#include <Urho3D/Math/Quaternion.h>
-#endif
-
 MATH_BEGIN_NAMESPACE
 
 /// Represents a rotation or an orientation of a 3D object.
@@ -74,11 +61,7 @@ public:
 	/// @note The default ctor does not initialize any member values.
 	Quat() {}
 
-#ifdef MATH_EXPLICIT_COPYCTORS
-	/// The copy-ctor for Quat is the trivial copy-ctor, but it is explicitly written to be able to automatically pick up
-	/// this function for QtScript bindings.
-	Quat(const Quat &rhs) { x = rhs.x; y = rhs.y; z = rhs.z; w = rhs.w; }
-#endif
+	Quat(const Quat &rhs) = default; //{ Set(rhs); }
 
 	/// Constructs a quaternion from the given data buffer.
 	/// @param data An array of four floats to use for the quaternion, in the order 'x, y, z, w'. (== 'i, j, k, r')
@@ -230,6 +213,8 @@ public:
 	/// @note This sets the raw elements, which do *not* correspond directly to the axis and angle of the rotation. Use
 	///	   SetFromAxisAngle to define this Quat using a rotation axis and an angle.
 	void Set(float x, float y, float z, float w);
+	void Set(const Quat &q);
+	void Set(const float4 &v);
 
 	/// Creates a LookAt quaternion.
 	/** A LookAt quaternion is a quaternion that orients an object to face towards a specified target direction.
@@ -340,24 +325,22 @@ public:
 		represent a direction vector or a magnitude or similar. */
 	float4 CastToFloat4() const { return float4(x, y, z, w); }
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns "(x,y,z,w)".
-	std::string MUST_USE_RESULT ToString() const;
+	StringT MUST_USE_RESULT ToString() const;
 
 	/// Returns "Quat(axis:(x,y,z) angle:degrees)".
-	std::string MUST_USE_RESULT ToString2() const;
+	StringT MUST_USE_RESULT ToString2() const;
 
 	/// Returns "x,y,z,w". This is the preferred format for the quaternion if it has to be serialized to a string for machine transfer.
-	std::string MUST_USE_RESULT SerializeToString() const;
+	StringT MUST_USE_RESULT SerializeToString() const;
 
 	/// Returns a string of C++ code that can be used to construct this object. Useful for generating test cases from badly behaving objects.
-	std::string SerializeToCodeString() const;
+	StringT SerializeToCodeString() const;
+	static MUST_USE_RESULT Quat FromString(const StringT &str) { return FromString(str.c_str()); }
 #endif
 	/// Parses a string that is of form "x,y,z,w" or "(x,y,z,w)" or "(x;y;z;w)" or "x y z w" to a new quaternion.
 	static MUST_USE_RESULT Quat FromString(const char *str, const char **outEndStr = 0);
-#ifdef MATH_ENABLE_STL_SUPPORT
-	static MUST_USE_RESULT Quat FromString(const std::string &str) { return FromString(str.c_str()); }
-#endif
 
 	/// Multiplies two quaternions together.
 	/// The product q1 * q2 returns a quaternion that concatenates the two orientation rotations. The rotation
@@ -385,28 +368,6 @@ public:
 
 	/// Unary operator + allows this structure to be used in an expression '+x'.
 	Quat operator +() const { return *this; }
-
-#ifdef MATH_OGRE_INTEROP
-	Quat(const Ogre::Quaternion &other):x(other.x), y(other.y), z(other.z), w(other.w) {}
-	operator Ogre::Quaternion() const { return Ogre::Quaternion(w, x, y, z); }
-#endif
-#ifdef MATH_QT_INTEROP
-	Quat(const QQuaternion &other):x(other.x()), y(other.y()), z(other.z()), w(other.w()) {}
-	operator QQuaternion() const { return QQuaternion(w, x, y, z); }
-	operator QString() const { return toString(); }
-	QString toString() const { return ToString2().c_str(); }
-	QQuaternion ToQQuaternion() const { return (QQuaternion)*this; }
-	static MUST_USE_RESULT Quat FromQQuaternion(const QQuaternion &q) { return (Quat)q; }
-	static MUST_USE_RESULT Quat FromString(const QString &str) { return FromString(str.toStdString()); }
-#endif
-#ifdef MATH_BULLET_INTEROP
-	Quat(const btQuaternion &other):x(other.x()), y(other.y()), z(other.z()), w(other.w()) {}
-	operator btQuaternion() const { return btQuaternion(x, y, z, w); }
-#endif
-#ifdef MATH_URHO3D_INTEROP
-	Quat(const Urho3D::Quaternion &other) : x(other.x_), y(other.y_), z(other.z_), w(other.w_) {}
-	operator Urho3D::Quaternion() const { return Urho3D::Quaternion(w, x, y, z); }
-#endif
 
 	/// Multiplies two quaternions in the order 'this * rhs'.
 	/// This corresponds to the concatenation of the two operations ('this * rhs * vector' applies the rotation 'rhs' first, followed by the rotation 'this'.
@@ -453,10 +414,5 @@ std::ostream &operator <<(std::ostream &out, const Quat &rhs);
 
 FORCE_INLINE Quat Lerp(const Quat &a, const Quat &b, float t) { return a.Lerp(b, t); }
 FORCE_INLINE Quat Slerp(const Quat &a, const Quat &b, float t) { return a.Slerp(b, t); }
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(Quat)
-Q_DECLARE_METATYPE(Quat*)
-#endif
 
 MATH_END_NAMESPACE

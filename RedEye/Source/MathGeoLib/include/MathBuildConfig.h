@@ -36,11 +36,6 @@
 #endif
 #endif
 
-// If MATH_ENABLE_WINXP_SUPPORT is defined, we avoid using Windows symbols that require Vista or newer (e.g. GetTickCount64)
-#if !defined(WIN8) /* Win8 cannot build with XP support - GetTickCount() doesn't exist. */
-#define MATH_ENABLE_WINXP_SUPPORT
-#endif
-
 // If MATH_ASSERT_ON_ASSUME is defined, assume() resolves directly to assert().
 // When not defined, assume() prints out an error if the condition fails, but continues
 // execution.
@@ -52,11 +47,6 @@
 #ifndef MATH_SILENT_ASSUME
 #define MATH_SILENT_ASSUME
 #endif
-
-// If MATH_ENABLE_INSECURE_OPTIMIZATIONS, several security checks (unsafe index out of bounds accesses etc.) are disabled.
-// Use this for absolutely fastest performance on MathGeoLib, but only if you know your code is 100% well-formed and uses
-// MathGeoLib bug-free.
-// #define MATH_ENABLE_INSECURE_OPTIMIZATIONS
 
 #endif
 
@@ -75,14 +65,10 @@
 
 // If MATH_ENABLE_STL_SUPPORT is defined, MathGeoLib utilizes STL data structures. Otherwise,
 // features requiring STL are disabled (but the library can still be built).
-#ifndef MATH_ENABLE_STL_SUPPORT
+// Due to large increase in code size, when building for HTML5 platform, do not automatically
+// enable STL support
+#if !defined(MATH_ENABLE_STL_SUPPORT) && !defined(MATH_DISABLE_STL_SUPPORT)
 #define MATH_ENABLE_STL_SUPPORT
-#endif
-
-// If MATH_TINYXML_INTEROP is defined, MathGeoLib integrates with TinyXML to provide
-// serialization and deserialization to XML for the data structures.
-#ifndef MATH_TINYXML_INTEROP
-//#define MATH_TINYXML_INTEROP
 #endif
 
 // If MATH_CONTAINERLIB_SUPPORT is defined, MathGeoLib integrates with a certain
@@ -95,12 +81,6 @@
 // graphics engine. Do not enable, only for internal use.
 #ifndef MATH_GRAPHICSENGINE_INTEROP
 //#define MATH_GRAPHICSENGINE_INTEROP
-#endif
-
-// If KNET_LOGGING_SUPPORT_ENABLED is defined, MathGeoLib utilizes logging functions
-// from the kNet library.
-#ifndef KNET_LOGGING_SUPPORT_ENABLED
-//#define KNET_LOGGING_SUPPORT_ENABLED
 #endif
 
 // If MATH_USE_DIRECT3D is defined, the Frustum class defaults to creating Frustums with projectiveSpace = FrustumSpaceD3D.
@@ -119,6 +99,12 @@
 // If MATH_RIGHTHANDED_CAMERA is defined, the Frustum class defaults to creating Frustums with handedness = FrustumRightHanded.
 #ifndef MATH_RIGHTHANDED_CAMERA
 //#define MATH_RIGHTHANDED_CAMERA
+#endif
+
+// If MATH_COLMAJOR_MATRICES is defined, matrices use a column-major memory layout. If undefined, matrices
+// use a row-major memory layout.
+#ifndef MATH_COLMAJOR_MATRICES
+// #define MATH_COLMAJOR_MATRICES
 #endif
 
 #if defined(MATH_USE_DIRECT3D) && defined(MATH_USE_OPENGL)
@@ -217,6 +203,17 @@ typedef __m128 simd4f;
 // unaligned loads and stores and shuffling that is involved. You might want to
 // try benchmarking the effect of this being enabled vs disabled.
 #define MATH_AUTOMATIC_SIMD_FLOAT3
+#endif
+
+#ifdef __cplusplus
+
+#ifdef MATH_CONTAINERLIB_SUPPORT
+class String;
+#define StringT String
+#else
+#define StringT std::string
+#endif
+
 #endif
 
 #include "Math/MathTypes.h"

@@ -279,25 +279,19 @@ public:
 	bool Intersects(const Frustum &frustum) const;
 	bool Intersects(const Polyhedron &polyhedron) const;
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns a human-readable representation of this Capsule. Most useful for debugging purposes.
 	/** The returned string specifies the line segment and the radius of this Capsule. */
-	std::string ToString() const;
-	std::string SerializeToString() const;
+	StringT ToString() const;
+	StringT SerializeToString() const;
 
 	/// Returns a string of C++ code that can be used to construct this object. Useful for generating test cases from badly behaving objects.
-	std::string SerializeToCodeString() const;
+	StringT SerializeToCodeString() const;
+
+	static Capsule FromString(const StringT &str) { return FromString(str.c_str()); }
 #endif
 
 	static Capsule FromString(const char *str, const char **outEndStr = 0);
-#ifdef MATH_ENABLE_STL_SUPPORT
-	static Capsule FromString(const std::string &str) { return FromString(str.c_str()); }
-#endif
-
-#ifdef MATH_QT_INTEROP
-	operator QString() const { return toString(); }
-	QString toString() const { return QString::fromStdString(ToString()); }
-#endif
 
 	bool Equals(const Capsule &rhs, float epsilon = 1e-3f) const { return l.Equals(rhs.l, epsilon) && EqualAbs(r, rhs.r, epsilon); }
 
@@ -310,11 +304,6 @@ Capsule operator *(const float3x3 &transform, const Capsule &capsule);
 Capsule operator *(const float3x4 &transform, const Capsule &capsule);
 Capsule operator *(const float4x4 &transform, const Capsule &capsule);
 Capsule operator *(const Quat &transform, const Capsule &capsule);
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(Capsule)
-Q_DECLARE_METATYPE(Capsule*)
-#endif
 
 #ifdef MATH_ENABLE_STL_SUPPORT
 std::ostream &operator <<(std::ostream &o, const Capsule &capsule);

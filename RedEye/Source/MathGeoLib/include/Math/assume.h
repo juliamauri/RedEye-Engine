@@ -1,4 +1,4 @@
-/* Copyright Jukka Jyl‰nki
+/* Copyright Jukka Jyl√§nki
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,16 +13,23 @@
    limitations under the License. */
 
 /** @file assume.h
-	@author Jukka Jyl‰nki
+       @author Jukka Jyl√§nki
 	@brief Global compilation defines. */
 #pragma once
 
-#include <sstream>
 #include "../MathBuildConfig.h"
+#ifdef MATH_ENABLE_STL_SUPPORT
+#include <sstream>
+#include <string>
+#endif
 #include "MathNamespace.h"
 #include <stdio.h>
 #include "myassert.h"
 #include "MathLog.h"
+
+#ifdef MATH_CONTAINERLIB_SUPPORT
+#include "Container/UString.h"
+#endif
 
 #ifndef MARK_UNUSED
 /// If a variable is labelled with this directive, the compiler should not emit a warning even if it is unused in the code.
@@ -41,11 +48,26 @@
 #define ARRAY_LENGTH(x) (sizeof((x))/sizeof((x)[0]))
 #endif
 
+// MathGeoLib uses three types of runtime condition check macros:
+//  - assert(): the regular assert() check, that compiles out in release builds (when NDEBUG or OPTIMIZED_RELEASE is defined).
+//              Execution is aborted if an assert condition fails.
+//  - assume(): Performs a runtime condition check. If the check fails, prints out an error log entry. If MATH_ASSERT_ON_ASSUME
+//              is defined, behaves like assert(). (otherwise execution continues). If MathBreakOnAssume() is enabled, executes
+//              a statement on failure to invoke the system debugger. Unlike assert(), assume() macro checks are present in NDEBUG
+//              builds, but disabled in MATH_SILENT_ASSUME and OPTIMIZED_RELEASE modes.
+//  - mathassert(): Similar to assert(), but used internally by MathGeoLib to verify programming errors inside MathGeoLib implementation
+//              itself. MathAsserts are enabled if building with MATH_ASSERT_CORRECTNESS, otherwise disabled.
 // The assume() macro is used to check preconditions on the math-related functions, e.g. whether vectors are normalized, check that division by zero doesn't occur, orthonormal bases, and so on.
 
 // The assume() macro operates differently depending on which #defines are present:
+// #define FAIL_USING_EXCEPTIONS - the assume() macro throws an exception
+// #define BREAK_ON_ERROR_PRINTS - if an error message is printed (with LOGE()), it is treated as if an assume() had failed, breaking to debugger.
+// #define BREAK_ON_WARNING_PRINTS - if a warning message is printed (with LOGW()), it is treated as if an assume() had failed, breaking to debugger.
+//                                   Implies BREAK_ON_ERROR_PRINTS.
 // #define MATH_ASSERT_ON_ASSUME - the assume() macro resolves to the assert() macro.
-// #define MATH_DISABLE_ASSUME   - the assume() macro is silent, and disabled altogether. (no prints or breaks or anything, the checks by assume() are ignored)
+// #define MATH_STARTUP_BREAK_ON_ASSUME - MathGeoLib execution will start with MathBreakOnAssume() behavior enabled, i.e. assume() failures
+//                                        will invoke the debugger. (this behavior can be controlled at runtime with SetMathBreakOnAssume(bool))
+// #define MATH_SILENT_ASSUME   - the assume() macro is silent, and disabled altogether. (no prints or breaks or anything, the checks by assume() are ignored)
 // If neither of the above is defined (default), then
 //  - WIN32: if MathBreakOnAssume() == true, the system will break to debugger using a call to DebugBreak().
 //  - Other: if MathBreakOnAssume() == true, the assume() macro is equal to the assert() macro.
@@ -65,70 +87,90 @@ bool MathBreakOnAssume();
 bool AssumeFailed();
 
 template<typename T>
-inline std::string ObjToString(const T &obj)
+inline StringT ObjToString(const T &obj)
 {
 	return obj.ToString();
 }
-/*
+
 template<>
-inline std::string ObjToString<const char*>(const char * const & obj)
+inline StringT ObjToString<const char * const>(const char * const & obj)
+{
+	return StringT(obj);
+}
+
+template<>
+inline StringT ObjToString<StringT>(const StringT &obj)
 {
 	return obj;
 }
-*/
-template<>
-inline std::string ObjToString<std::string>(const std::string &obj)
-{
-	return obj;
-}
 
 template<>
-inline std::string ObjToString<float>(const float &obj)
+inline StringT ObjToString<float>(const float &obj)
 {
+#if defined(MATH_CONTAINERLIB_SUPPORT)
+	return String::FromFloat(obj);
+#else
 	std::stringstream ss;
 	ss << obj;
 	return ss.str();
+#endif
 }
 
 template<>
-inline std::string ObjToString<double>(const double &obj)
+inline StringT ObjToString<double>(const double &obj)
 {
+#if defined(MATH_CONTAINERLIB_SUPPORT)
+	return String::FromDouble(obj);
+#else
 	std::stringstream ss;
 	ss << obj;
 	return ss.str();
+#endif
 }
 
 template<>
-inline std::string ObjToString<int>(const int &obj)
+inline StringT ObjToString<int>(const int &obj)
 {
+#if defined(MATH_CONTAINERLIB_SUPPORT)
+	return String::FromInt(obj);
+#else
 	std::stringstream ss;
 	ss << obj;
 	return ss.str();
+#endif
 }
 
 template<>
-inline std::string ObjToString<bool>(const bool &obj)
+inline StringT ObjToString<bool>(const bool &obj)
 {
-	std::stringstream ss;
-	ss << obj;
-	return ss.str();
+	return obj ? "true" : "false";
 }
 
 template<>
-inline std::string ObjToString<u32>(const u32 &obj)
+inline StringT ObjToString<u32>(const u32 &obj)
 {
+#if defined(MATH_CONTAINERLIB_SUPPORT)
+	return String::FromUInt(obj);
+#else
 	std::stringstream ss;
 	ss << obj;
 	return ss.str();
+#endif
+}
+
+template<>
+inline StringT ObjToString<u64>(const u64 &obj)
+{
+#if defined(MATH_CONTAINERLIB_SUPPORT)
+	return String::FromUInt64(obj);
+#else
+	std::stringstream ss;
+	ss << obj;
+	return ss.str();
+#endif
 }
 
 MATH_END_NAMESPACE
-
-// If MATH_ENABLE_INSECURE_OPTIMIZATIONS is defined, all input data is assumed to be correct and will
-// not be checked against at runtime.
-// If this flag is undefined (the default), all input is sanity checked so that user cannot crash the system
-// e.g. with out-of-bounds accesses.
-//#define MATH_ENABLE_INSECURE_OPTIMIZATIONS
 
 #ifdef FAIL_USING_EXCEPTIONS
 #include <stdexcept>
@@ -143,7 +185,10 @@ MATH_END_NAMESPACE
 #define assume(x) ((void)0)
 #define assume_failed(message) ((void)0)
 #else
-#define assume_failed(message) LOGE("Assumption \"%s\" failed! in file %s, line %d!", message, __FILE__, __LINE__)
+#define assume_failed(message) do { \
+		LOGE("Assumption \"%s\" failed! in file %s, line %d!", message, __FILE__, __LINE__); \
+		AssumeFailed(); \
+	} while (0)
 #endif
 
 #ifndef assume
@@ -214,9 +259,63 @@ MATH_END_NAMESPACE
 #ifdef assume
 #undef assume
 #endif
+#ifdef assume1
+#undef assume1
+#endif
+#ifdef assume2
+#undef assume2
+#endif
+#ifdef assume3
+#undef assume3
+#endif
+#ifdef assume4
+#undef assume4
+#endif
+#ifdef assert
+#undef assert
+#endif
+#ifdef assert1
+#undef assert1
+#endif
+#ifdef assert2
+#undef assert2
+#endif
+#ifdef assert3
+#undef assert3
+#endif
+#ifdef assert4
+#undef assert4
+#endif
 #ifdef mathassert
 #undef mathassert
 #endif
-#define assume(x) ((void)0)
-#define mathassert(x) ((void)0)
+#ifdef mathassert1
+#undef mathassert1
+#endif
+#ifdef mathassert2
+#undef mathassert2
+#endif
+#ifdef mathassert3
+#undef mathassert3
+#endif
+#ifdef mathassert4
+#undef mathassert4
+#endif
+
+#define assume(...) ((void)0)
+#define assume1(...) ((void)0)
+#define assume2(...) ((void)0)
+#define assume3(...) ((void)0)
+#define assume4(...) ((void)0)
+#define assert(...) ((void)0)
+#define assert1(...) ((void)0)
+#define assert2(...) ((void)0)
+#define assert3(...) ((void)0)
+#define assert4(...) ((void)0)
+#define mathassert(...) ((void)0)
+#define mathassert1(...) ((void)0)
+#define mathassert2(...) ((void)0)
+#define mathassert3(...) ((void)0)
+#define mathassert4(...) ((void)0)
+
 #endif

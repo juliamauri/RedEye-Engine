@@ -180,7 +180,7 @@ public:
 	bool IntersectsDisc(const LineSegment &lineSegment) const;
 	bool IntersectsDisc(const Ray &ray) const;
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Tests if this circle intersects the faces of the given OBB.
 	/** @param obb The bounding box to test against. This box is treated as "hollow", i.e. only the faces of the OBB are considered to be
 			a part of the OBB.
@@ -193,12 +193,7 @@ public:
 
 	/// Returns a human-readable representation of this circle. Most useful for debugging purposes.
 	/** The returned string specifies the center position, normal direction and the radius of this circle. */
-	std::string ToString() const;
-#endif
-
-#ifdef MATH_QT_INTEROP
-	operator QString() const { return toString(); }
-	QString toString() const { return QString::fromStdString(ToString()); }
+	StringT ToString() const;
 #endif
 };
 
@@ -206,11 +201,6 @@ Circle operator *(const float3x3 &transform, const Circle &circle);
 Circle operator *(const float3x4 &transform, const Circle &circle);
 Circle operator *(const float4x4 &transform, const Circle &circle);
 Circle operator *(const Quat &transform, const Circle &circle);
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(Circle)
-Q_DECLARE_METATYPE(Circle*)
-#endif
 
 #ifdef MATH_ENABLE_STL_SUPPORT
 std::ostream &operator <<(std::ostream &o, const Circle &circle);

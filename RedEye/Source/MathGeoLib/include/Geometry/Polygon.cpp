@@ -59,10 +59,6 @@ vec Polygon::Vertex(int vertexIndex) const
 {
 	assume(vertexIndex >= 0);
 	assume(vertexIndex < (int)p.size());
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (vertexIndex < 0 || vertexIndex >= (int)p.size())
-		return vec::nan;
-#endif
 	return p[vertexIndex];
 }
 
@@ -91,10 +87,6 @@ bool Polygon::DiagonalExists(int i, int j) const
 	assume(j >= 0);
 	assume(i < (int)p.size());
 	assume(j < (int)p.size());
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (p.size() < 3 || i < 0 || j < 0 || i >= (int)p.size() || j >= (int)p.size())
-		return false;
-#endif
 	assume(IsPlanar());
 	assume(i != j);
 	if (i == j) // Degenerate if i == j.
@@ -139,10 +131,6 @@ LineSegment Polygon::Diagonal(int i, int j) const
 	assume(j >= 0);
 	assume(i < (int)p.size());
 	assume(j < (int)p.size());
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (i < 0 || j < 0 || i >= (int)p.size() || j >= (int)p.size())
-		return LineSegment(vec::nan, vec::nan);
-#endif
 	return LineSegment(p[i], p[j]);
 }
 
@@ -175,20 +163,12 @@ float2 Polygon::MapTo2D(int i) const
 {
 	assume(i >= 0);
 	assume(i < (int)p.size());
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (i < 0 || i >= (int)p.size())
-		return float2::nan;
-#endif
 	return MapTo2D(p[i]);
 }
 
 float2 Polygon::MapTo2D(const vec &point) const
 {
 	assume(!p.empty());
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (p.empty())
-		return float2::nan;
-#endif
 	vec basisU = BasisU();
 	vec basisV = BasisV();
 	vec pt = point - p[0];
@@ -198,10 +178,6 @@ float2 Polygon::MapTo2D(const vec &point) const
 vec Polygon::MapFrom2D(const float2 &point) const
 {
 	assume(!p.empty());
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (p.empty())
-		return vec::nan;
-#endif
 	return (vec)p[0] + point.x * BasisU() + point.y * BasisV();
 }
 
@@ -295,7 +271,12 @@ Plane Polygon::PlaneCCW() const
 			}
 
 #ifndef MATH_SILENT_ASSUME
+#ifdef MATH_ENABLE_STL_SUPPORT
 		LOGW("Polygon contains %d points, but they are all collinear! Cannot form a plane for the Polygon using three points! %s", (int)p.size(), this->SerializeToString().c_str());
+#else
+		// TODO: enable above
+		LOGW("Polygon contains %d points, but they are all collinear! Cannot form a plane for the Polygon using three points!", (int)p.size());
+#endif
 #endif
 		// Polygon contains multiple points, but they are all collinear.
 		// Pick an arbitrary plane along the line as the polygon plane (as if the polygon had only two points)
@@ -992,7 +973,8 @@ bool IsAnEar(const std::vector<float2> &poly, int i, int j)
 	The running time of this function is O(n^2). */
 TriangleArray Polygon::Triangulate() const
 {
-	assume1(IsPlanar(), this->SerializeToString());
+	assume(IsPlanar());
+//	assume1(IsPlanar(), this->SerializeToString()); // TODO: enable
 
 	TriangleArray t;
 	// Handle degenerate cases.
@@ -1072,6 +1054,7 @@ AABB Polygon::MinimalEnclosingAABB() const
 	return aabb;
 }
 
+#if defined(MATH_ENABLE_STL_SUPPORT)
 std::string Polygon::ToString() const
 {
 	if (p.empty())
@@ -1098,6 +1081,7 @@ std::string Polygon::SerializeToString() const
 	ss << ")";
 	return ss.str();
 }
+#endif
 
 Polygon Polygon::FromString(const char *str, const char **outEndStr)
 {

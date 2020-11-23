@@ -24,19 +24,10 @@
 #include <vector>
 #endif
 #include "../MathGeoLibFwd.h"
+#include "MathConstants.h"
 #include "float3.h"
 #include "SSEMath.h"
 #include "assume.h"
-
-#ifdef MATH_QT_INTEROP
-#include <QVector4D>
-#endif
-#ifdef MATH_OGRE_INTEROP
-#include <OgreVector4.h>
-#endif
-#ifdef MATH_URHO3D_INTEROP
-#include <Urho3D/Math/Vector4.h>
-#endif
 
 MATH_BEGIN_NAMESPACE
 
@@ -86,12 +77,8 @@ public:
 		@see x, y, z, w. */
 	float4() {}
 
-#ifdef MATH_EXPLICIT_COPYCTORS
 	/// The float4 copy constructor.
-	/** The copy constructor is a standard default copy-ctor, but it is explicitly written to be able to automatically pick up
-		this function for script bindings. */
-	float4(const float4 &rhs) { x = rhs.x; y = rhs.y; z = rhs.z; w = rhs.w; }
-#endif
+	float4(const float4 &rhs) { Set(rhs); }
 
 	/// Constructs a new float4 with the value (x, y, z, w).
 	/** @note If you are constructing a float4 from an array of consecutive values, always prefer calling "float4(ptr);" instead of "float4(ptr[0], ptr[1], ptr[2], ptr[3]);"
@@ -134,15 +121,26 @@ public:
 	/** @param index The element to get. Pass in 0 for x, 1 for y, 2 for z and 3 for w.
 		@note If you have a non-const instance of this class, you can use this notation to set the elements of
 			this vector as well, e.g. vec[1] = 10.f; would set the y-component of this vector. */
-	float &operator [](int index) { return At(index); }
-	CONST_WIN32 float operator [](int index) const { return At(index); }
+	FORCE_INLINE float &operator [](int index) { return At(index); }
+	FORCE_INLINE CONST_WIN32 float operator [](int index) const { return At(index); }
 
 	/// Accesses an element of this vector.
 	/** @param index The element to get. Pass in 0 for x, 1 for y, 2 for z and 3 for w.
 		@note If you have a non-const instance of this class, you can use this notation to set the elements of
 			this vector as well, e.g. vec.At(1) = 10.f; would set the y-component of this vector. */
-	float &At(int index);
-	CONST_WIN32 float At(int index) const;
+	FORCE_INLINE CONST_WIN32 float At(int index) const
+	{
+		assume(index >= 0);
+		assume(index < Size);
+		return ptr()[index];
+	}
+	
+	FORCE_INLINE float &At(int index)
+	{
+		assume(index >= 0);
+		assume(index < Size);
+		return ptr()[index];
+	}
 
 	/// Adds two vectors. [indexTitle: operators +,-,*,/]
 	/** This function is identical to the member function Add().
@@ -171,6 +169,10 @@ public:
 
 	/// Unary operator + allows this structure to be used in an expression '+x'.
 	float4 operator +() const { return *this; }
+
+	/// Assigns a vector to another.
+	/** @return A reference to this. */
+	float4 &operator =(const float4 &v);
 
 	/// Adds a vector to this vector, in-place. [indexTitle: operators +=,-=,*=,/=]
 	/** @return A reference to this. */
@@ -346,6 +348,7 @@ public:
 	/// Sets all elements of this vector.
 	/** @see x, y, z, w, At(). */
 	void Set(float x, float y, float z, float w);
+	void Set(const float4 &rhs);
 
 	/// Computes the squared length of the (x, y, z) part of this vector.
 	/** Calling this function is faster than calling Length3(), since this function avoids computing a square root.
@@ -505,22 +508,20 @@ public:
 	static MUST_USE_RESULT bool AreOrthonormal(const float4 &a, const float4 &b, float epsilon = 1e-3f);
 	static MUST_USE_RESULT bool AreOrthonormal(const float4 &a, const float4 &b, const float4 &c, float epsilon = 1e-3f);
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns "(x, y, z, w)".
-	std::string ToString() const;
+	StringT ToString() const;
 
 	/// Returns "x,y,z,w". This is the preferred format for the float4 if it has to be serialized to a string for machine transfer.
-	std::string SerializeToString() const;
+	StringT SerializeToString() const;
 
 	/// Returns a string of C++ code that can be used to construct this object. Useful for generating test cases from badly behaving objects.
-	std::string SerializeToCodeString() const;
+	StringT SerializeToCodeString() const;
+	static float4 FromString(const StringT &str) { return FromString(str.c_str()); }
 #endif
 
 	/// Parses a string that is of form "x,y,z,w" or "(x,y,z,w)" or "(x;y;z;w)" or "x y z w" to a new float4.
 	static float4 FromString(const char *str, const char **outEndStr = 0);
-#ifdef MATH_ENABLE_STL_SUPPORT
-	static float4 FromString(const std::string &str) { return FromString(str.c_str()); }
-#endif
 
 	/// @return x + y + z + w.
 	float SumOfElements() const;
@@ -810,30 +811,6 @@ public:
 			member to initialize other static data in other compilation units! */
 	static const float4 inf;
 
-#ifdef MATH_OGRE_INTEROP
-	float4(const Ogre::Vector4 &other): x(other.x), y(other.y), z(other.z), w(other.w) {}
-	float4 &operator =(const Ogre::Vector4 &other) { x = other.x; y = other.y; z = other.z; w = other.w; return *this; }
-	operator Ogre::Vector4() const { return Ogre::Vector4(x, y, z, w); }
-#endif
-#ifdef MATH_QT_INTEROP
-	float4(const QVector4D &other):x(other.x()), y(other.y()), z(other.z()), w(other.w()) {}
-	operator QVector4D() const { return QVector4D(x, y, z, w); }
-	operator QString() const { return "float4(" + QString::number(x) + "," + QString::number(y) + "," + QString::number(z) + "," + QString::number(w) + ")"; }
-	QString toString() const { return (QString)*this; }
-	QVector4D ToQVector4D() const { return QVector4D(x, y, z, w); }
-	static float4 FromQVector4D(const QVector4D &v) { return (float4)v; }
-	static float4 FromString(const QString &str) { return FromString(str.toStdString()); }
-#endif
-#ifdef MATH_BULLET_INTEROP
-	// Bullet uses the same btVector3 class for both 3- and 4 -tuples (due to SSE).
-	float4(const btVector3 &other):x(other.x()), y(other.y()), z(other.z()), w(other.w()) {}
-	operator btVector3() const { btVector3 v(x, y, z); v.setW(w); return v; }
-#endif
-#ifdef MATH_URHO3D_INTEROP
-	float4(const Urho3D::Vector4 &other) : x(other.x_), y(other.y_), z(other.z_), w(other.w_) {}
-	operator Urho3D::Vector4() const { return Urho3D::Vector4(x, y, z, w); }
-#endif
-
 #ifdef MATH_SIMD
 	float4(simd4f vec):v(vec) {}
 
@@ -910,10 +887,5 @@ float4 MulPos2D(const float3x4 &transform, const float4 &v);
 float4 MulPos2D(const float4x4 &transform, const float4 &v);
 float4 MulDir2D(const float3x4 &transform, const float4 &v);
 float4 MulDir2D(const float4x4 &transform, const float4 &v);
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(float4)
-Q_DECLARE_METATYPE(float4*)
-#endif
 
 MATH_END_NAMESPACE

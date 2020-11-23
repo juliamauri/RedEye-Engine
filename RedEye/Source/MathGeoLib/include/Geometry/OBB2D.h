@@ -87,7 +87,7 @@ public:
 		representing it as an oriented bounding box. The basis of this matrix is assumed to be orthogonal, which
 		means no projection or shear is allowed. Additionally, the matrix must contain only uniform scaling. */
 	void SetFrom(const AABB2D &aabb, float angle);
-	void SetFrom(const AABB2D &aabb, const float2x2 &transform);
+//	void SetFrom(const AABB2D &aabb, const float2x2 &transform);
 
 	/// Sets this OBB2D to enclose the given circle.
 	/** This function computes the tightest possible OBB2D (in terms of area) that contains the given circle, and stores the result in this structure.
@@ -335,12 +335,7 @@ public:
 	static OBB BruteEnclosingOBB(const Polyhedron &convexPolyhedron);
 
 	static OBB Brute2EnclosingOBB(const Polyhedron &convexPolyhedron);
-#if defined(_MSC_VER) && defined(MATH_SSE) && _MSC_VER < 1800 // < VS2013
-	// Work around a VS2010 bug "error C2719: 'q': formal parameter with __declspec(align('16')) won't be aligned"
 	static OBB Brute3EnclosingOBB(const Polyhedron &convexPolyhedron, const Quat &q);
-#else
-	static OBB Brute3EnclosingOBB(const Polyhedron &convexPolyhedron, Quat q);
-#endif
 
 	/// Returns an OBB that is oriented to the coordinate frame specified by vectors dir0 and dir1 and encloses the given point set.
 	static OBB FixedOrientationEnclosingOBB(const vec *pointArray, int numPoints, const vec &dir0, const vec &dir1);
@@ -499,25 +494,18 @@ public:
 		return 4*3*2;
 	}
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns a human-readable representation of this OBB. Most useful for debugging purposes.
 	/** The returned string specifies the center point and the half-axes of this OBB. */
-	std::string ToString() const;
-	std::string SerializeToString() const;
+	StringT ToString() const;
+	StringT SerializeToString() const;
 
 	/// Returns a string of C++ code that can be used to construct this object. Useful for generating test cases from badly behaving objects.
-	std::string SerializeToCodeString() const;
+	StringT SerializeToCodeString() const;
+	static OBB FromString(const StringT &str) { return FromString(str.c_str()); }
 #endif
 
 	static OBB FromString(const char *str, const char **outEndStr = 0);
-#ifdef MATH_ENABLE_STL_SUPPORT
-	static OBB FromString(const std::string &str) { return FromString(str.c_str()); }
-#endif
-
-#ifdef MATH_QT_INTEROP
-	operator QString() const { return toString(); }
-	QString toString() const { return QString::fromStdString(ToString()); }
-#endif
 
 	// Finds the set intersection of this and the given OBB.
 	/* @return This function returns the Polyhedron that is contained in both this and the given OBB. */
@@ -550,11 +538,6 @@ OBB operator *(const float3x3 &transform, const OBB &obb);
 OBB operator *(const float3x4 &transform, const OBB &obb);
 OBB operator *(const float4x4 &transform, const OBB &obb);
 OBB operator *(const Quat &transform, const OBB &obb);
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(OBB)
-Q_DECLARE_METATYPE(OBB*)
-#endif
 
 #ifdef MATH_ENABLE_STL_SUPPORT
 std::ostream &operator <<(std::ostream &o, const OBB &obb);

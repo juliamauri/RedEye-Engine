@@ -27,16 +27,6 @@
 #include "../MathGeoLibFwd.h"
 #include "MatrixProxy.h"
 
-#ifdef MATH_OGRE_INTEROP
-#include <OgreMatrix4.h>
-#endif
-#ifdef MATH_QT_INTEROP
-#include <QMatrix4x4>
-#endif
-#ifdef MATH_URHO3D_INTEROP
-#include <Urho3D/Math/Matrix4.h>
-#endif
-
 MATH_BEGIN_NAMESPACE
 
 /// A 4-by-4 matrix for affine transformations and perspective projections of 3D geometry.
@@ -63,8 +53,8 @@ MATH_BEGIN_NAMESPACE
 	The elements for a single row of the matrix hold successive memory addresses. This is the same memory layout as
 	 with C++ multidimensional arrays.
 
-	Contrast this with column-major storage, in which the elements are packed in the memory in
-	order m[0][0], m[1][0], m[2][0], m[3][0], m[0][1], m[1][1], ...
+ 	If preprocessor #define MATH_COLMAJOR_MATRICES is set, column-major storage is used instead, in which the elements
+ 	are packed in the memory in order m[0][0], m[1][0], m[2][0], m[3][0], m[0][1], m[1][1], ...
 	There the elements for a single column of the matrix hold successive memory addresses.
 	This is exactly opposite from the standard C++ multidimensional arrays, since if you have e.g.
 	int v[10][10], then v[0][9] comes in memory right before v[1][0]. ( [0][0], [0][1], [0][2], ... [1][0], [1][1], ...) */
@@ -81,6 +71,15 @@ public:
 	/** [noscript] */
 	union
 	{
+#ifdef MATH_COLMAJOR_MATRICES
+		float v[Cols][Rows];
+#ifdef MATH_AVX
+		__m256 col2[2];
+#endif
+#if defined(MATH_SIMD)
+		simd4f col[4];
+#endif
+#else
 		float v[Rows][Cols];
 #ifdef MATH_AVX
 		__m256 row2[2];
@@ -88,6 +87,8 @@ public:
 #if defined(MATH_SIMD)
 		simd4f row[4];
 #endif
+#endif
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable:4201) // warning C4201: nonstandard extension used: nameless struct/union
@@ -96,10 +97,17 @@ public:
 		// This gives human-readable names to the individual matrix elements:
 		struct
 		{
+#ifdef MATH_COLMAJOR_MATRICES
+			float  scaleX, shearYx, shearZx, shearWx;
+			float shearXy,  scaleY, shearZy, shearWy;
+			float shearXz, shearYz,  scaleZ, shearWz;
+			float       x,       y,       z,       w;
+#else
 			float  scaleX, shearXy, shearXz, x;
 			float shearYx,  scaleY, shearYz, y;
 			float shearZx, shearZy,  scaleZ, z;
 			float shearWx, shearWy, shearWz, w;
+#endif
 		};
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -131,11 +139,7 @@ public:
 	/** [opaque-qtscript] */
 	float4x4() {}
 
-#ifdef MATH_EXPLICIT_COPYCTORS
-	/// The copy-ctor for float4x4 is the trivial copy-ctor, but it is explicitly written to be able to automatically
-	/// pick up this function for QtScript bindings.
-	float4x4(const float4x4 &rhs) { Set(rhs); }
-#endif
+	float4x4(const float4x4 &rhs) = default;//{ Set(rhs); }
 
 	/// Constructs a new float4x4 by explicitly specifying all the matrix elements.
 	/// The elements are specified in row-major format, i.e. the first row first followed by the second and third row.
@@ -356,9 +360,31 @@ public:
 		@note MatrixProxy is a temporary helper class. Do not store references to it, but always
 		directly dereference it with the [] operator.
 		For example, m[0][3] Returns the last element on the first row, which is the amount
-		of translation in the x-direction. */
-	MatrixProxy<Cols> &operator[](int row);
-	const MatrixProxy<Cols> &operator[](int row) const;
+	 	of translation in the x-direction. This is true independent of
+	 	whether MATH_COLMAJOR_MATRICES is set, i.e. the notation is always m[y][x]. */
+	FORCE_INLINE MatrixProxy<Rows, Cols> &operator[](int row)
+	{
+		assume(row >= 0);
+		assume(row < Rows);
+
+#ifdef MATH_COLMAJOR_MATRICES
+		return *(reinterpret_cast<MatrixProxy<Rows, Cols>*>(&v[0][row]));
+#else
+		return *(reinterpret_cast<MatrixProxy<Rows, Cols>*>(v[row]));
+#endif
+	}
+	
+	FORCE_INLINE const MatrixProxy<Rows, Cols> &operator[](int row) const
+	{
+		assume(row >= 0);
+		assume(row < Rows);
+
+#ifdef MATH_COLMAJOR_MATRICES
+		return *(reinterpret_cast<const MatrixProxy<Rows, Cols>*>(&v[0][row]));
+#else
+		return *(reinterpret_cast<const MatrixProxy<Rows, Cols>*>(v[row]));
+#endif
+	}
 
 	/// Returns the given element. [noscript]
 	/** This function returns the element of this matrix at (row, col)==(i, j)==(y, x).
@@ -367,6 +393,21 @@ public:
 	float &At(int row, int col);
 	CONST_WIN32 float At(int row, int col) const;
 
+#ifdef MATH_COLMAJOR_MATRICES
+	/// Returns the given column. [noscript]
+	/** @param col The zero-based index [0, 3] of the column to get. */
+	float4 &Col(int col);
+	const float4 &Col(int col) const;
+	/// Returns the three first entries of the given row. [similarOverload: Col] [hideIndex]
+	float3 &Col3(int col); ///< [noscript]
+	const float3 &Col3(int col) const;
+	
+	/// Returns the given row.
+	/** @param row The zero-based index [0, 3] of the row to get. */
+	CONST_WIN32 float4 Row(int row) const;
+	/// Returns the three first entries of the given row. [similarOverload: Row] [hideIndex]
+	CONST_WIN32 float3 Row3(int row) const;
+#else
 	/// Returns the given row. [noscript]
 	/** @param row The zero-based index [0, 3] of the row to get. */
 	float4 &Row(int row);
@@ -380,6 +421,7 @@ public:
 	CONST_WIN32 float4 Col(int col) const;
 	/// Returns the three first entries of the given column. [similarOverload: Column] [hideIndex]
 	CONST_WIN32 float3 Col3(int col) const;
+#endif
 
 	/// Returns the main diagonal.
 	/** The main diagonal consists of the elements at m[0][0], m[1][1], m[2][2] and m[3][3]. */
@@ -403,9 +445,15 @@ public:
 	CONST_WIN32 float3x3 Float3x3Part() const;
 
 	/// Returns the upper-left 3-by-4 part. [noscript]
-	/// @note The float3x4 and float4x4 are bit-compatible, so this function simply casts.
+	/// @note If not building with MATH_COLMAJOR_MATRICES, the float3x4 and float4x4 are bit-compatible, so this function simply casts.
+#ifdef MATH_COLMAJOR_MATRICES
+	CONST_WIN32 float3x4 Float3x4Part() const;
+#else
 	float3x4 &Float3x4Part();
 	const float3x4 &Float3x4Part() const;
+#endif
+
+	void SetFloat3x4Part(const float3x4 &float3x4Part);
 
 	/// Returns the translation part.
 	/** The translation part is stored in the fourth column of this matrix.
@@ -624,7 +672,7 @@ public:
 	/// @note The remaining entries of this matrix are set to identity.
 	float4x4 &operator =(const float3x4 &rhs);
 
-	float4x4 &operator =(const float4x4 &rhs);
+	// float4x4 &operator =(const float4x4 &rhs);
 
 	float4x4 &operator =(const TranslateOp &rhs);
 
@@ -894,12 +942,12 @@ public:
 	/// matrix differs from [0 0 0 1].
 	bool ContainsProjection(float epsilon = 1e-3f) const;
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns a string representation of form "(m00, m01, m02, m03; m10, m11, m12, m13; ... )".
-	std::string ToString() const;
-	std::string SerializeToString() const;
+	StringT ToString() const;
+	StringT SerializeToString() const;
 
-	std::string ToString2() const;
+	StringT ToString2() const;
 #endif
 
 	/// Extracts the rotation part of this matrix into Euler rotation angles (in radians). [indexTitle: ToEuler***]
@@ -949,23 +997,6 @@ public:
 	/// Computes a new matrix with each element of this matrix replaced with their absolute value.
 	float4x4 Abs() const;
 
-#ifdef MATH_OGRE_INTEROP
-	float4x4(const Ogre::Matrix4 &m) { Set(&m[0][0]); }
-	operator Ogre::Matrix4() { return Ogre::Matrix4(v[0][0], v[0][1], v[0][2], v[0][3], v[1][0], v[1][1], v[1][2], v[1][3], v[2][0], v[2][1], v[2][2], v[2][3], v[3][0], v[3][1], v[3][2], v[3][3]); }
-#endif
-#ifdef MATH_QT_INTEROP
-	float4x4(const QMatrix4x4 &m) { Set(m(0,0), m(0,1), m(0,2), m(0,3), m(1,0), m(1,1), m(1,2), m(1,3), m(2,0), m(2,1), m(2,2), m(2,3), m(3,0), m(3,1), m(3,2), m(3,3)); }
-	operator QMatrix4x4() const { return QMatrix4x4(v[0][0], v[0][1], v[0][2], v[0][3], v[1][0], v[1][1], v[1][2], v[1][3], v[2][0], v[2][1], v[2][2], v[2][3], v[3][0], v[3][1], v[3][2], v[3][3]); }
-	operator QString() const { return toString(); }
-	QString toString() const { return ToString2().c_str(); }
-	QMatrix4x4 ToQMatrix4x4() const { return (QMatrix4x4)*this; }
-	static float4x4 FromQMatrix4x4(const QMatrix4x4 &m) { return (float4x4)m; }
-#endif
-#ifdef MATH_URHO3D_INTEROP
-	float4x4(const Urho3D::Matrix4 &m) { Set(m.m00_, m.m01_, m.m02_, m.m03_, m.m10_, m.m11_, m.m12_, m.m13_, m.m20_, m.m21_, m.m22_, m.m23_, m.m30_, m.m31_, m.m32_, m.m33_); }
-	operator Urho3D::Matrix4() { return Urho3D::Matrix4(ptr()); }
-#endif
-
 	float4x4 Mul(const float3x3 &rhs) const;
 	float4x4 Mul(const float3x4 &rhs) const;
 	float4x4 Mul(const float4x4 &rhs) const;
@@ -991,11 +1022,6 @@ float4x4 operator *(const float3x3 &lhs, const float4x4 &rhs);
 /// of multiplication is against the convention of this math system. Please use the M * v notation instead.
 /// (Remember that M * v != v * M in general).
 float4 operator *(const float4 &lhs, const float4x4 &rhs);
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(float4x4)
-Q_DECLARE_METATYPE(float4x4*)
-#endif
 
 #ifdef MATH_SIMD
 template<>

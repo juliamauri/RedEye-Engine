@@ -110,7 +110,7 @@ void OBB::SetFrom(const AABB &aabb)
 template<typename Matrix>
 void OBBSetFrom(OBB &obb, const AABB &aabb, const Matrix &m)
 {
-	assume(m.IsColOrthogonal()); // We cannot convert transform an AABB to OBB if it gets sheared in the process.
+	assume1(m.IsColOrthogonal(), m); // We cannot convert transform an AABB to OBB if it gets sheared in the process.
 	assume(m.HasUniformScale()); // Nonuniform scale will produce shear as well.
 	obb.pos = m.MulPos(aabb.CenterPoint());
 	obb.r = aabb.HalfSize();
@@ -447,10 +447,6 @@ Plane OBB::FacePlane(int faceIndex) const
 void OBB::GetCornerPoints(vec *outPointArray) const
 {
 	assume(outPointArray);
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!outPointArray)
-		return;
-#endif
 	for(int i = 0; i < 8; ++i)
 		outPointArray[i] = CornerPoint(i);
 }
@@ -458,10 +454,6 @@ void OBB::GetCornerPoints(vec *outPointArray) const
 void OBB::GetFacePlanes(Plane *outPlaneArray) const
 {
 	assume(outPlaneArray);
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!outPlaneArray)
-		return;
-#endif
 	for(int i = 0; i < 6; ++i)
 		outPlaneArray[i] = FacePlane(i);
 }
@@ -472,11 +464,6 @@ void OBB::ExtremePointsAlongDirection(const vec &dir, const vec *pointArray, int
 	assume(pointArray || numPoints == 0);
 
 	idxSmallest = idxLargest = 0;
-
-#ifndef MATH_ENABLE_INSECURE_OPTIMIZATIONS
-	if (!pointArray)
-		return;
-#endif
 
 	smallestD = FLOAT_INF;
 	largestD = -FLOAT_INF;
@@ -2144,12 +2131,7 @@ OBB OBB::Brute2EnclosingOBB(const Polyhedron &convexPolyhedron)
 	return minOBB;
 }
 
-#if defined(_MSC_VER) && defined(MATH_SSE) && _MSC_VER < 1800 // < VS2013
-// Work around a VS2010 bug "error C2719: 'q': formal parameter with __declspec(align('16')) won't be aligned"
 OBB OBB::Brute3EnclosingOBB(const Polyhedron &convexPolyhedron, const Quat &q)
-#else
-OBB OBB::Brute3EnclosingOBB(const Polyhedron &convexPolyhedron, Quat q)
-#endif
 {
 	OBB minOBB;
 	if (convexPolyhedron.v.size() == 0)
@@ -2652,7 +2634,7 @@ bool OBB::Intersects(const OBB &b, float epsilon) const
 	for(int i = 0; i < 3; ++i)
 	{
 		float ra = r[i];
-		float rb = DOT3(b.r, AbsR[i]);
+		float rb = b.r.x * AbsR[i][0] + b.r.y * AbsR[i][1] + b.r.z * AbsR[i][2];
 		if (Abs(t[i]) > ra + rb)
 			return false;
 	}
@@ -2821,8 +2803,8 @@ bool OBB::Intersects(const Polyhedron &polyhedron) const
 	return polyhedron.Intersects(*this);
 }
 
-#ifdef MATH_ENABLE_STL_SUPPORT
-std::string OBB::ToString() const
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
+StringT OBB::ToString() const
 {
 	char str[256];
 	sprintf(str, "OBB(Pos:(%.2f, %.2f, %.2f) Halfsize:(%.2f, %.2f, %.2f) X:(%.2f, %.2f, %.2f) Y:(%.2f, %.2f, %.2f) Z:(%.2f, %.2f, %.2f))",
@@ -2830,9 +2812,9 @@ std::string OBB::ToString() const
 	return str;
 }
 
-std::string OBB::SerializeToString() const
+StringT OBB::SerializeToString() const
 {
-	std::string s = pos.xyz().SerializeToString() + " "
+	StringT s = pos.xyz().SerializeToString() + " "
 	              + r.xyz().SerializeToString() + " "
 	              + axis[0].xyz().SerializeToString() + " "
 	              + axis[1].xyz().SerializeToString() + " "
@@ -2840,7 +2822,7 @@ std::string OBB::SerializeToString() const
 	return s;
 }
 
-std::string OBB::SerializeToCodeString() const
+StringT OBB::SerializeToCodeString() const
 {
 	return "OBB(" + pos.SerializeToCodeString() + ","
 	              + r.SerializeToCodeString() + ","
@@ -2848,6 +2830,9 @@ std::string OBB::SerializeToCodeString() const
 	              + axis[1].SerializeToCodeString() + ","
 	              + axis[2].SerializeToCodeString() + ")";
 }
+#endif
+
+#if defined(MATH_ENABLE_STL_SUPPORT)
 
 std::ostream &operator <<(std::ostream &o, const OBB &obb)
 {

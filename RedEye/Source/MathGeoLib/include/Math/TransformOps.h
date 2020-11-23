@@ -52,9 +52,9 @@ public:
 	/// Converts this TranslateOp object to a matrix.
 	operator float4x4() const;
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns "(x, y, z)".
-	std::string ToString() const;
+	StringT ToString() const;
 #endif
 };
 
@@ -101,9 +101,9 @@ public:
 	/// Converts this ScaleOp to a matrix.
 	float4x4 ToFloat4x4() const;
 
-#ifdef MATH_ENABLE_STL_SUPPORT
+#if defined(MATH_ENABLE_STL_SUPPORT) || defined(MATH_CONTAINERLIB_SUPPORT)
 	/// Returns "(x, y, z)".
-	std::string ToString() const;
+	StringT ToString() const;
 #endif
 };
 
@@ -116,12 +116,5 @@ float4x4 operator *(const float4x4 &lhs, const ScaleOp &rhs);
 
 float3x4 operator *(const ScaleOp &lhs, const TranslateOp &rhs);
 float3x4 operator *(const TranslateOp &lhs, const ScaleOp &rhs);
-
-#ifdef MATH_QT_INTEROP
-Q_DECLARE_METATYPE(TranslateOp)
-Q_DECLARE_METATYPE(TranslateOp*)
-Q_DECLARE_METATYPE(ScaleOp)
-Q_DECLARE_METATYPE(ScaleOp*)
-#endif
 
 MATH_END_NAMESPACE

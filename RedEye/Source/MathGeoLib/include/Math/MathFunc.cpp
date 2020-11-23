@@ -38,9 +38,19 @@
 #include "sse_mathfun.h"
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/em_math.h>
+#endif
+
 MATH_BEGIN_NAMESPACE
 
-bool mathBreakOnAssume = false;
+bool mathBreakOnAssume =
+#ifdef MATH_STARTUP_BREAK_ON_ASSUME
+	true;
+#else
+	false;
+#endif
 
 void SetMathBreakOnAssume(bool isEnabled)
 {
@@ -55,12 +65,22 @@ bool MathBreakOnAssume()
 
 bool AssumeFailed()
 {
+#ifndef OPTIMIZED_RELEASE
 	if (mathBreakOnAssume)
 	{
 #if defined(WIN32) && !defined(WIN8RT) // Win8 metro apps don't have DebugBreak.
 		DebugBreak();
+#elif defined(__EMSCRIPTEN__)
+		emscripten_debugger();
+// TODO: Test locally on Linux GCC and enable
+//#elif defined(__clang__) && __has_builtin(__builtin_debugtrap)
+//		__builtin_debugtrap();
 #endif
 	}
+#endif
+	// If your debugger is breaking in this function, it means that an assume() failure has occurred,
+	// or a LOGE()/LOGW() failure has occurred, and building with trap-to-debugger enabled. Navigate
+	// up the callstack to find the offending code that raised the error.
 	return mathBreakOnAssume;
 }
 
@@ -69,14 +89,15 @@ bool AssumeFailed()
 #define MATH_USE_SINCOS_LOOKUPTABLE
 #endif
 
-#ifdef MATH_USE_SINCOS_LOOKUPTABLE
-
-// A lookup table implementation adapted from http://www.flipcode.com/archives/Fast_Trigonometry_Functions_Using_Lookup_Tables.shtml
 #define MAX_CIRCLE_ANGLE           65536
 #define HALF_MAX_CIRCLE_ANGLE     (MAX_CIRCLE_ANGLE/2)
 #define QUARTER_MAX_CIRCLE_ANGLE  (MAX_CIRCLE_ANGLE/4)
 #define MASK_MAX_CIRCLE_ANGLE     (MAX_CIRCLE_ANGLE - 1)
 #define PI                        3.14159265358979323846f
+
+#ifdef MATH_USE_SINCOS_LOOKUPTABLE
+
+// A lookup table implementation adapted from http://www.flipcode.com/archives/Fast_Trigonometry_Functions_Using_Lookup_Tables.shtml
 static float fast_cossin_table[MAX_CIRCLE_ANGLE];           // Declare table of fast cosinus and sinus
 
 class Init_fast_cossin_table
@@ -86,7 +107,11 @@ public:
 	{
 		// Build cossin table
 		for(int i = 0; i < MAX_CIRCLE_ANGLE; i++)
+#ifdef __EMSCRIPTEN__
+			fast_cossin_table[i] = (float)emscripten_math_sin((double)i * PI / HALF_MAX_CIRCLE_ANGLE);
+#else
 			fast_cossin_table[i] = (float)sin((double)i * PI / HALF_MAX_CIRCLE_ANGLE);
+#endif
 	}
 };
 Init_fast_cossin_table static_initializer;
@@ -110,7 +135,13 @@ static inline void sincos_lookuptable(float n, float &sinOut, float &cosOut)
 	int i = (int)(n * (HALF_MAX_CIRCLE_ANGLE / PI));
 	i = (i >= 0) ? (i & MASK_MAX_CIRCLE_ANGLE) : (MAX_CIRCLE_ANGLE - ((-i) & MASK_MAX_CIRCLE_ANGLE));
 	sinOut = fast_cossin_table[i];
-	cosOut = fast_cossin_table[(MAX_CIRCLE_ANGLE + QUARTER_MAX_CIRCLE_ANGLE - i) & MASK_MAX_CIRCLE_ANGLE];
+	cosOut = fast_cossin_table[(QUARTER_MAX_CIRCLE_ANGLE + i) & MASK_MAX_CIRCLE_ANGLE];
+}
+
+static inline void sincos_lookuptable_u16ScaledRadians(u16 u16ScaledRadians, float &sinOut, float &cosOut)
+{
+	sinOut = fast_cossin_table[u16ScaledRadians];
+	cosOut = fast_cossin_table[(u16)(QUARTER_MAX_CIRCLE_ANGLE + u16ScaledRadians)];
 }
 
 #endif
@@ -145,7 +176,12 @@ float Cos(float angleRadians)
 
 float Tan(float angleRadians)
 {
+#ifdef __EMSCRIPTEN__
+	// Use Math.tan() for minimal code size
+	return emscripten_math_tan(angleRadians);
+#else
 	return tanf(angleRadians);
+#endif
 }
 
 void SinCos(float angleRadians, float &outSin, float &outCos)
@@ -159,6 +195,24 @@ void SinCos(float angleRadians, float &outSin, float &outCos)
 	outSin = s4f_x(sin);
 	outCos = s4f_x(cos);
 #else
+	outSin = Sin(angleRadians);
+	outCos = Cos(angleRadians);
+#endif
+}
+
+void SinCosU16ScaledRadians(u16 u16ScaledRadians, float &outSin, float &outCos)
+{
+#ifdef MATH_USE_SINCOS_LOOKUPTABLE
+	return sincos_lookuptable_u16ScaledRadians(u16ScaledRadians, outSin, outCos);
+#elif defined(MATH_SSE2)
+	float angleRadians = u16ScaledRadians * (PI / HALF_MAX_CIRCLE_ANGLE);
+	__m128 angle = modf_ps(setx_ps(angleRadians), pi2);
+	__m128 sin, cos;
+	sincos_ps(angle, &sin, &cos);
+	outSin = s4f_x(sin);
+	outCos = s4f_x(cos);
+#else
+	float angleRadians = u16ScaledRadians * (PI / HALF_MAX_CIRCLE_ANGLE);
 	outSin = Sin(angleRadians);
 	outCos = Cos(angleRadians);
 #endif
@@ -202,37 +256,72 @@ void SinCos4(const float4 &angleRadians, float4 &outSin, float4 &outCos)
 
 float Asin(float x)
 {
+#ifdef __EMSCRIPTEN__
+	// Use Math.asin() for minimal code size
+	return emscripten_math_asin(x);
+#else
 	return asinf(x);
+#endif
 }
 
 float Acos(float x)
 {
+#ifdef __EMSCRIPTEN__
+	// Use Math.acos() for minimal code size
+	return emscripten_math_acos(x);
+#else
 	return acosf(x);
+#endif
 }
 
 float Atan(float x)
 {
+#ifdef __EMSCRIPTEN__
+	// Use Math.atan() for minimal code size
+	return emscripten_math_atan(x);
+#else
 	return atanf(x);
+#endif
 }
 
 float Atan2(float y, float x)
 {
+#ifdef __EMSCRIPTEN__
+	// Use Math.atan2() for minimal code size
+	return emscripten_math_atan2(y, x);
+#else
 	return atan2f(y, x);
+#endif
 }
 
 float Sinh(float x)
 {
+#ifdef __EMSCRIPTEN__
+	// Use Math.sinh() for minimal code size
+	return emscripten_math_sinh(x);
+#else
 	return sinhf(x);
+#endif
 }
 
 float Cosh(float x)
 {
+#ifdef __EMSCRIPTEN__
+	// Use Math.atan() for minimal code size
+	return emscripten_math_cosh(x);
+#else
 	return coshf(x);
+#endif
 }
 
 float Tanh(float x)
 {
+#ifdef __EMSCRIPTEN__
+	// Use Math.tanh() for minimal code size
+	return emscripten_math_tanh(x);
+#else
 	return tanhf(x);
+#endif
 }
 
 bool IsPow2(u32 number)
@@ -410,7 +499,7 @@ float Step(float y, float x)
 	return (x >= y) ? 1.f : 0.f;
 }
 
-float SmoothStep(float min, float max, float x)
+float Ramp(float min, float max, float x)
 {
 	return x <= min ? 0.f : (x >= max ? 1.f : (x - min) / (max - min));
 }
