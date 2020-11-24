@@ -680,22 +680,11 @@ const char* RE_CompPlane::TransformAsMeshResource()
 	float* normals = new float[plane->npoints * 3];
 	float* texCoords = new float[plane->npoints * 2];
 
-	uint meshSize = 0;
 	size_t size = plane->npoints * 3 * sizeof(float);
-	uint stride = 0;
-
 	memcpy(points, plane->points, size);
-	meshSize += 3 * plane->npoints;
-	stride += 3;
-
 	memcpy(normals, plane->normals, size);
-	meshSize += 3 * plane->npoints;
-	stride += 3;
-
 	size = plane->npoints * 2 * sizeof(float);
 	memcpy(texCoords, plane->tcoords, size);
-	meshSize += 2 * plane->npoints;
-	stride += 2;
 
 	eastl::vector<unsigned int> index;
 	for (int i = 0; i < plane->ntriangles * 3; i++)

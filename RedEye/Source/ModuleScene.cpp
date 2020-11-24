@@ -277,10 +277,18 @@ void ModuleScene::CreateMaxLights(const UID parent)
 	}
 }
 
+void ModuleScene::CreateWater(const UID parent)
+{
+	RE_GameObject* water_go = scenePool.AddGO("Water", Validate(parent), true);
+	water_go->AddNewComponent(C_WATER)->UseResources();
+	water_go->GetTransformPtr()->SetRotation({ -(math::pi / 2.f), 0.0f, 0.0f });
+	water_go->GetTransformPtr()->SetScale({ 10.0f, 10.0f, 1.0f });
+}
+
 void ModuleScene::AddGOPool(RE_GOManager* toAdd)
 {
+	toAdd->UseResources();
 	UID justAdded = scenePool.InsertPool(toAdd, true);
-	scenePool.UseResources();
 	App::editor->SetSelected(justAdded);
 	haschanges = true;
 }

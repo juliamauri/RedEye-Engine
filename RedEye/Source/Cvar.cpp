@@ -158,6 +158,23 @@ float* Cvar::AsFloatPointer()
 	return ret;
 }
 
+const float* Cvar::AsFloatPointer() const
+{
+	const float* ret = nullptr;
+
+	switch (type) {
+	case Cvar::FLOAT: ret = &value.float_v; break;
+	case Cvar::FLOAT2: ret = value.float2_v.ptr(); break;
+	case Cvar::FLOAT3: ret = value.float3_v.ptr(); break;
+	case Cvar::FLOAT4:
+	case Cvar::MAT2: ret = value.float4_v.ptr(); break;
+	case Cvar::MAT3: ret = value.mat3_v.ptr(); break;
+	case Cvar::MAT4: ret = value.mat4_v.ptr(); break;
+	}
+
+	return ret;
+}
+
 const char * Cvar::AsCharP() const { return value.char_p_v; }
 RE_GameObject * Cvar::AsGO() const { return value.go_v; }
 
@@ -283,7 +300,7 @@ bool DoubleCvar::SetValue(const char * char_p_v, bool force_type)
 }*/
 
 ShaderCvar::ShaderCvar() : Cvar() {}
-ShaderCvar::ShaderCvar(const ShaderCvar& copy) : Cvar(copy), name(copy.name), location(copy.location), custom(copy.custom) { }
+ShaderCvar::ShaderCvar(const ShaderCvar& copy) : Cvar(copy), name(copy.name), location(copy.location), locationDeferred(copy.locationDeferred), custom(copy.custom) { }
 ShaderCvar::ShaderCvar(const bool bool_v) : Cvar(bool_v) {}
 ShaderCvar::ShaderCvar(const int int_v, bool sampler)
 {
@@ -328,6 +345,11 @@ ShaderCvar::ShaderCvar(const math::float3x3 mat3_v) {
 ShaderCvar::ShaderCvar(const math::float4x4 mat4_v) {
 	Cvar::type = Cvar::MAT4;
 	Cvar::value.mat4_v = mat4_v; }
+
+ShaderCvar ShaderCvar::operator=(const ShaderCvar& cpy)
+{
+	return ShaderCvar(cpy);
+}
 
 bool ShaderCvar::SetValue(const ShaderCvar& copyValue, bool force_type)
 {

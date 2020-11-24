@@ -375,6 +375,7 @@ void ComponentsPool::ClearComponents()
 	camPool.Clear();
 	meshPool.Clear();
 	lightPool.Clear();
+	waterPool.Clear();
 	pGridPool.Clear();
 	pRockPool.Clear();
 	pCubePool.Clear();
@@ -398,6 +399,7 @@ RE_Component* ComponentsPool::GetComponentPtr(UID poolid, ComponentType cType)
 	case C_CAMERA: ret = static_cast<RE_Component*>(camPool.AtPtr(poolid)); break;
 	case C_MESH: ret = static_cast<RE_Component*>(meshPool.AtPtr(poolid)); break;
 	case C_LIGHT: ret = static_cast<RE_Component*>(lightPool.AtPtr(poolid)); break;
+	case C_WATER: ret = static_cast<RE_Component*>(waterPool.AtPtr(poolid)); break;
 	case C_PARTICLEEMITER: break;
 	case C_FUSTRUM: break;
 	case C_GRID: ret = static_cast<RE_Component*>(pGridPool.AtPtr(poolid)); break;
@@ -424,6 +426,7 @@ const RE_Component* ComponentsPool::GetComponentCPtr(UID poolid, ComponentType c
 	case C_CAMERA: ret = static_cast<const RE_Component*>(camPool.AtCPtr(poolid)); break;
 	case C_MESH: ret = static_cast<const RE_Component*>(meshPool.AtCPtr(poolid)); break;
 	case C_LIGHT: ret = static_cast<const RE_Component*>(lightPool.AtCPtr(poolid)); break;
+	case C_WATER: ret = static_cast<const RE_Component*>(waterPool.AtCPtr(poolid)); break;
 	case C_PARTICLEEMITER: break;
 	case C_FUSTRUM:  break;
 	case C_GRID: ret = static_cast<const RE_Component*>(pGridPool.AtCPtr(poolid)); break;
@@ -465,6 +468,11 @@ eastl::pair<const UID, RE_Component*> ComponentsPool::GetNewComponent(ComponentT
 	{
 		const UID id = lightPool.GetNewCompUID();
 		return { id, lightPool.AtPtr(id) };
+	}
+	case C_WATER:
+	{
+		const UID id = waterPool.GetNewCompUID();
+		return { id, waterPool.AtPtr(id) };
 	}
 	case C_GRID:
 	{
@@ -542,6 +550,7 @@ const UID ComponentsPool::GetNewComponentUID(ComponentType cType)
 	case C_CAMERA: return camPool.GetNewCompUID();
 	case C_MESH: return meshPool.GetNewCompUID();
 	case C_LIGHT: return lightPool.GetNewCompUID();
+	case C_WATER: return waterPool.GetNewCompUID();
 		//case C_PARTICLEEMITER: break;
 		//case C_FUSTRUM: break;
 	case C_GRID: return pGridPool.GetNewCompUID();
@@ -568,6 +577,7 @@ RE_Component* ComponentsPool::GetNewComponentPtr(ComponentType cType)
 	case C_CAMERA: ret = static_cast<RE_Component*>(camPool.AtPtr(camPool.GetNewCompUID())); break;
 	case C_MESH: ret = static_cast<RE_Component*>(meshPool.AtPtr(meshPool.GetNewCompUID())); break;
 	case C_LIGHT: ret = static_cast<RE_Component*>(lightPool.AtPtr(lightPool.GetNewCompUID())); break;
+	case C_WATER: ret = static_cast<RE_Component*>(waterPool.AtPtr(waterPool.GetNewCompUID())); break;
 	case C_PARTICLEEMITER: break;
 	case C_FUSTRUM: break;
 	case C_GRID: ret = static_cast<RE_Component*>(pGridPool.AtPtr(pGridPool.GetNewCompUID())); break;
@@ -596,6 +606,7 @@ RE_Component* ComponentsPool::CopyComponent(GameObjectsPool* pool, RE_Component*
 	case C_CAMERA: ret = static_cast<RE_Component*>(camPool.AtPtr(camPool.GetNewCompUID())); break;
 	case C_MESH: ret = static_cast<RE_Component*>(meshPool.AtPtr(meshPool.GetNewCompUID())); break;
 	case C_LIGHT: ret = static_cast<RE_Component*>(lightPool.AtPtr(lightPool.GetNewCompUID())); break;
+	case C_WATER: ret = static_cast<RE_Component*>(waterPool.AtPtr(waterPool.GetNewCompUID())); break;
 	case C_PARTICLEEMITER: break;
 	case C_FUSTRUM: break;
 	case C_GRID: ret = static_cast<RE_Component*>(pGridPool.AtPtr(pGridPool.GetNewCompUID())); break;
@@ -625,6 +636,7 @@ void ComponentsPool::DestroyComponent(ComponentType cType, UID toDelete)
 	case C_CAMERA: camPool.Pop(toDelete); break;
 	case C_MESH: meshPool.Pop(toDelete); break;
 	case C_LIGHT: lightPool.Pop(toDelete); break;
+	case C_WATER: waterPool.Pop(toDelete); break;
 	case C_GRID: pGridPool.Pop(toDelete); break;
 	case C_ROCK: pRockPool.Pop(toDelete); break;
 	case C_CUBE: pCubePool.Pop(toDelete); break;
@@ -669,12 +681,14 @@ void ComponentsPool::UseResources()
 {
 	camPool.UseResources();
 	meshPool.UseResources();
+	waterPool.UseResources();
 }
 
 void ComponentsPool::UnUseResources()
 {
 	camPool.UnUseResources();
 	meshPool.UnUseResources();
+	waterPool.UnUseResources();
 }
 
 eastl::vector<UID> ComponentsPool::GetAllCompUID(ushortint type) const
@@ -685,6 +699,7 @@ eastl::vector<UID> ComponentsPool::GetAllCompUID(ushortint type) const
 	case C_CAMERA: ret = camPool.GetAllKeys(); break;
 	case C_MESH: ret = meshPool.GetAllKeys(); break;
 	case C_LIGHT: ret = lightPool.GetAllKeys(); break;
+	case C_WATER: ret = waterPool.GetAllKeys(); break;
 	case C_PARTICLEEMITER: break;
 	case C_FUSTRUM: break;
 	case C_GRID: ret = pGridPool.GetAllKeys(); break;
@@ -732,6 +747,12 @@ eastl::vector<RE_Component*> ComponentsPool::GetAllCompPtr(ushortint type) const
 	{
 		eastl::vector<UID> ids = lightPool.GetAllKeys();
 		for (auto id : ids) ret.push_back(static_cast<RE_Component*>(lightPool.AtPtr(id)));
+		break;
+	}
+	case C_WATER:
+	{
+		eastl::vector<UID> ids = waterPool.GetAllKeys();
+		for (auto id : ids) ret.push_back(static_cast<RE_Component*>(waterPool.AtPtr(id)));
 		break;
 	}
 	case C_PARTICLEEMITER: break;
@@ -848,6 +869,12 @@ eastl::vector<const RE_Component*> ComponentsPool::GetAllCompCPtr(ushortint type
 		for (auto id : ids) ret.push_back(static_cast<const RE_Component*>(lightPool.AtCPtr(id)));
 		break;
 	}
+	case C_WATER:
+	{
+		eastl::vector<UID> ids = waterPool.GetAllKeys();
+		for (auto id : ids) ret.push_back(static_cast<const RE_Component*>(waterPool.AtCPtr(id)));
+		break;
+	}
 	case C_PARTICLEEMITER: break;
 	case C_FUSTRUM: break;
 	case C_GRID:
@@ -962,6 +989,12 @@ eastl::vector<eastl::pair<const UID, RE_Component*>> ComponentsPool::GetAllCompD
 			ret.push_back({ id, static_cast<RE_Component*>(lightPool.AtPtr(id)) });
 		break;
 	}
+	case C_WATER:
+	{
+		for (auto id : waterPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(waterPool.AtPtr(id)) });
+		break;
+	}
 	case C_PARTICLEEMITER: break;
 	case C_FUSTRUM: break;
 	case C_GRID:
@@ -1053,6 +1086,7 @@ unsigned int ComponentsPool::GetBinarySize() const
 	size += camPool.GetBinarySize();
 	size += meshPool.GetBinarySize();
 	size += lightPool.GetBinarySize();
+	size += waterPool.GetBinarySize();
 	size += pGridPool.GetBinarySize();
 	size += pRockPool.GetBinarySize();
 	size += pCubePool.GetBinarySize();
@@ -1074,6 +1108,7 @@ void ComponentsPool::SerializeBinary(char*& cursor, eastl::map<const char*, int>
 	camPool.SerializeBinary(cursor, resources);
 	meshPool.SerializeBinary(cursor, resources);
 	lightPool.SerializeBinary(cursor, resources);
+	waterPool.SerializeBinary(cursor, resources);
 	pGridPool.SerializeBinary(cursor, resources);
 	pRockPool.SerializeBinary(cursor, resources);
 	pCubePool.SerializeBinary(cursor, resources);
@@ -1094,6 +1129,7 @@ void ComponentsPool::DeserializeBinary(GameObjectsPool* goPool, char*& cursor, e
 	camPool.DeserializeBinary(goPool, cursor, resources);
 	meshPool.DeserializeBinary(goPool, cursor, resources);
 	lightPool.DeserializeBinary(goPool, cursor, resources);
+	waterPool.DeserializeBinary(goPool, cursor, resources);
 	pGridPool.DeserializeBinary(goPool, cursor, resources);
 	pRockPool.DeserializeBinary(goPool, cursor, resources);
 	pCubePool.DeserializeBinary(goPool, cursor, resources);
@@ -1115,6 +1151,7 @@ void ComponentsPool::SerializeJson(JSONNode* node, eastl::map<const char*, int>*
 	camPool.SerializeJson(comps, resources);
 	meshPool.SerializeJson(comps, resources);
 	lightPool.SerializeJson(comps, resources);
+	waterPool.SerializeJson(comps, resources);
 	pGridPool.SerializeJson(comps, resources);
 	pRockPool.SerializeJson(comps, resources);
 	pCubePool.SerializeJson(comps, resources);
@@ -1137,6 +1174,7 @@ void ComponentsPool::DeserializeJson(GameObjectsPool* goPool, JSONNode* node, ea
 	camPool.DeserializeJson(goPool, comps, resources);
 	meshPool.DeserializeJson(goPool, comps, resources);
 	lightPool.DeserializeJson(goPool, comps, resources);
+	waterPool.DeserializeJson(goPool, comps, resources);
 	pGridPool.DeserializeJson(goPool, comps, resources);
 	pRockPool.DeserializeJson(goPool, comps, resources);
 	pCubePool.DeserializeJson(goPool, comps, resources);

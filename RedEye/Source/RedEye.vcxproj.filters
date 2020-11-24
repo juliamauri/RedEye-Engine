@@ -295,6 +295,9 @@
     <ClCompile Include="AABBDynamicTree.cpp">
       <Filter>Containers</Filter>
     </ClCompile>
+    <ClCompile Include="RE_CompWater.cpp">
+      <Filter>GameObject\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -1241,6 +1244,9 @@
     </ClInclude>
     <ClInclude Include="AABBDynamicTree.h">
       <Filter>Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompWater.h">
+      <Filter>GameObject\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

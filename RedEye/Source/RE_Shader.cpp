@@ -381,8 +381,10 @@ void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
 
 void RE_Shader::GetLocations()
 {
-	for (unsigned int i = 0; i < uniforms.size(); i++) 
+	RE_GLCacheManager::ChangeShader(ID);
+	for (unsigned int i = 0; i < uniforms.size(); i++)
 		uniforms[i].location = RE_ShaderImporter::getLocation(ID, uniforms[i].name.c_str());
+	RE_GLCacheManager::ChangeShader(0);
 }
 
 bool RE_Shader::NeedUploadDepth() const { return (depth != -1); }

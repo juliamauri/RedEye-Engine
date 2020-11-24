@@ -115,6 +115,7 @@ public:
 	math::float3x3			AsMat3()const;
 	math::float4x4			AsMat4()const;
 	float*					AsFloatPointer();
+	const float*					AsFloatPointer()const;
 	const char*				AsCharP() const;
 	RE_GameObject*			AsGO() const;
 };
@@ -135,6 +136,8 @@ public:
 	ShaderCvar(const math::float3x3 mat3_v);
 	ShaderCvar(const math::float4x4 mat4_v);
 
+	ShaderCvar operator=(const ShaderCvar& cpy);
+
 	bool SetValue(const ShaderCvar& copyValue, bool force_type = false);
 	bool SetValue(const bool bool_v, bool force_type = false) override;
 	bool SetValue(const bool boola_v[], unsigned int count, bool force_type = false);
@@ -151,7 +154,7 @@ public:
 	bool DrawPropieties(bool isInMemory);
 
 	eastl::string name;
-	int location = 0;
+	int location = 0, locationDeferred = 0;
 	bool custom = true;
 };
 

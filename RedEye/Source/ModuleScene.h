@@ -45,6 +45,7 @@ public:
 	static void CreateCamera(const UID parent = 0);
 	static void CreateLight(const UID parent = 0);
 	static void CreateMaxLights(const UID parent = 0);
+	static void CreateWater(const UID parent = 0);
 
 	void AddGOPool(RE_GOManager* toAdd);
 

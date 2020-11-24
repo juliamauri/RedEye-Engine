@@ -622,7 +622,7 @@ void ModuleEditor::DuplicateSelectedObject()
 	if (selected)
 	{
 		const RE_GameObject* sel_go = ModuleScene::GetGOCPtr(selected);
-		ModuleScene::GetScenePool()->CopyGOandChilds(sel_go, sel_go->GetParentUID(), true);
+		ModuleScene::GetGOPtr(ModuleScene::GetScenePool()->CopyGOandChilds(sel_go, sel_go->GetParentUID(), true))->UseResources();
 	}
 }
 
@@ -751,4 +751,5 @@ void ModuleEditor::DrawGameObjectItems(const UID parent)
 	if (ImGui::MenuItem("Camera")) App::scene->CreateCamera(parent);
 	if (ImGui::MenuItem("Light")) App::scene->CreateLight(parent);
 	if (ImGui::MenuItem("Max Lights")) App::scene->CreateMaxLights(parent);
+	if (ImGui::MenuItem("Water")) App::scene->CreateWater(parent);
 }

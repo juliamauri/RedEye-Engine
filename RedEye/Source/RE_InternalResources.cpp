@@ -21,17 +21,21 @@
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 
+#define WATER_FOAM_TEX_PATH "Settings/DefaultAssets/water_foam.png"
+
 RE_InternalResources::RE_InternalResources() {}
 
 RE_InternalResources::~RE_InternalResources()
 {
 	if(checkerTexture != 0) glDeleteTextures(1, &checkerTexture);
+	if(water_foam_texture != 0) glDeleteTextures(1, &water_foam_texture);
 }
 
 void RE_InternalResources::Init()
 {
 	InitChecker();
 	if (!InitShaders()) RE_LOG_WARNING("Could not initialize default shaders");
+	InitWaterResources();
 	if (!InitMaterial()) RE_LOG_WARNING("Could not initialize default materials");
 	if (!InitSkyBox()) RE_LOG_WARNING("Could not initialize default skybox");
 }
@@ -132,10 +136,61 @@ bool RE_InternalResources::InitSkyBox()
 	return defaultSkybox = App::resources->Reference(rdefaultSkybox);
 }
 
+void RE_InternalResources::InitWaterResources()
+{
+	// Deferred
+	RE_Shader* waterSr = new RE_Shader();
+	waterSr->SetName("Water Shader");
+	waterSr->SetType(Resource_Type::R_SHADER);
+	waterSr->SetAsInternal(WATERVERTEXSHADER, WATERFRAGMENTSHADER);
+	waterShader = App::resources->Reference(waterSr);
+
+	// Light Pass
+	RE_Shader* waterDefS = new RE_Shader();
+	waterDefS->SetName("Water Deferred Shader");
+	waterDefS->SetType(Resource_Type::R_SHADER);
+	waterDefS->SetAsInternal(WATERPASSVERTEXSHADER, WATERPASSFRAGMENTSHADER);
+	waterDefShader = App::resources->Reference(waterDefS);
+
+
+	static const char* internalNames[31] = { "useTexture", "useColor", "useClipPlane", "clip_plane", "time", "dt", "near_plane", "far_plane", "viewport_w", "viewport_h", "model", "view", "projection", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininessST", "refraccti", "theight", "tnormals", "treflection", "currentDepth", "viewPos" };
+	eastl::vector<ShaderCvar> uniformsWaterShader = waterSr->GetUniformValues(), uniformsWaterDefShader = waterDefS->GetUniformValues();
+	for (unsigned int i = 0; i < uniformsWaterShader.size(); i++) {
+		bool skip = false;
+		for (int iN = 0; iN < 31 && !skip; iN++)
+			if (uniformsWaterShader[i].name == internalNames[iN])
+				skip = true;
+		if (skip) continue;
+		
+		for (unsigned int j = 0; j < uniformsWaterDefShader.size(); j++) {
+			if (uniformsWaterShader[i].name == uniformsWaterDefShader[j].name) {
+				uniformsWaterShader[i].locationDeferred = uniformsWaterDefShader[j].location;
+				RE_LOG("%s -> L: %d | LD: %d", uniformsWaterShader[i].name.c_str(), uniformsWaterShader[i].location, uniformsWaterShader[i].locationDeferred);
+				waterUniforms.push_back(uniformsWaterShader[i]);
+				break;
+			}
+		}
+	}
+
+	RE_FileIO waterTexture(WATER_FOAM_TEX_PATH);
+	if (waterTexture.Load())
+	{
+		RE_TextureSettings defTexSettings;
+		int tmp1, tmp2;
+		App::textures.LoadTextureInMemory(waterTexture.GetBuffer(), waterTexture.GetSize(), TextureType::RE_PNG, &water_foam_texture, &tmp1, &tmp2, defTexSettings);
+	}
+}
+
 const char* RE_InternalResources::GetDefaultShader() const
 {
 	static const char* shaders[4] = { defaultShader, defaultShader, defaultShader /* TODO RUB: add shader with light input*/, defGeoShader };
 	return shaders[ModuleRenderer3D::GetLightMode()];
+}
+
+const char* RE_InternalResources::GetDefaultWaterShader() const
+{
+	static const char* waterShaders[4] = { waterShader, waterShader, waterShader /* TODO RUB: add shader with light input*/, waterDefShader };
+	return waterShaders[ModuleRenderer3D::GetLightMode()];
 }
 
 const char*	 RE_InternalResources::GetDefaultScaleShader() const { return defaultScaleShader; }
@@ -144,3 +199,5 @@ const char*	 RE_InternalResources::GetDefaultSkyBox() const { return defaultSkyb
 const char*	 RE_InternalResources::GetLightPassShader() const { return defLightShader; }
 const char*	 RE_InternalResources::GetDefaultSkyBoxShader() const { return skyboxShader; }
 unsigned int RE_InternalResources::GetTextureChecker() const { return checkerTexture; }
+unsigned int RE_InternalResources::GetTextureWaterFoam() const { return water_foam_texture; }
+eastl::vector<ShaderCvar> RE_InternalResources::GetWaterUniforms() const { return waterUniforms; }

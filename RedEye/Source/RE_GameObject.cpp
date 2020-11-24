@@ -13,9 +13,6 @@
 #include "RE_PrimitiveManager.h"
 #include "RE_ShaderImporter.h"
 #include "RE_Component.h"
-#include "RE_CompPrimitive.h"
-#include "RE_CompMesh.h"
-#include "RE_CompLight.h"
 #include "RE_GOManager.h"
 #include "RE_CompParticleEmiter.h"
 #include "RE_Shader.h"
@@ -221,6 +218,11 @@ RE_CompMesh* RE_GameObject::GetMesh() const
 	return (render_geo.type == ComponentType::C_MESH) ? dynamic_cast<RE_CompMesh*>(CompPtr(render_geo)) : nullptr;
 }
 
+RE_CompWater* RE_GameObject::GetWater() const
+{
+	return (render_geo.type == ComponentType::C_WATER) ? dynamic_cast<RE_CompWater*>(CompPtr(render_geo)) : nullptr;
+}
+
 RE_CompCamera* RE_GameObject::GetCamera() const
 {
 	return camera ? dynamic_cast<RE_CompCamera*>(CompPtr(camera, ComponentType::C_CAMERA)) : nullptr;
@@ -363,6 +365,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 		break;
 	}
 	case C_MESH:
+	case C_WATER:
 	{
 		if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
 		render_geo = { (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type };
@@ -899,12 +902,58 @@ bool RE_GameObject::CheckRayCollision(const math::Ray& global_ray, float& distan
 		math::Ray local_ray = global_ray;
 		local_ray.Transform(GetTransformPtr()->GetGlobalMatrix().Transposed().Inverted());
 
-		ret = (render_geo.type == C_MESH) ?
-			dynamic_cast<RE_CompMesh*>(CompPtr(render_geo))->CheckFaceCollision(local_ray, distance) :
-			dynamic_cast<RE_CompPrimitive*>(CompPtr(render_geo))->CheckFaceCollision(local_ray, distance);
+		switch (render_geo.type) {
+		case C_MESH:
+			ret = dynamic_cast<RE_CompMesh*>(CompPtr(render_geo))->CheckFaceCollision(local_ray, distance);
+			break;
+		case C_WATER:
+			ret = dynamic_cast<RE_CompWater*>(CompPtr(render_geo))->CheckFaceCollision(local_ray, distance);
+			break;		
+		default:
+			ret = dynamic_cast<RE_CompPrimitive*>(CompPtr(render_geo))->CheckFaceCollision(local_ray, distance);
+			break;
+		}
 	}
 
 	return ret;
+}
+
+void RE_GameObject::UseResources()
+{
+	eastl::stack<RE_Component*> cmps = GetAllChildsComponents(C_WATER);
+	while (!cmps.empty()) {
+		cmps.top()->UseResources();
+		cmps.pop();
+	}
+	cmps = GetAllChildsComponents(C_MESH);
+	while (!cmps.empty()) {
+		cmps.top()->UseResources();
+		cmps.pop();
+	}
+	cmps = GetAllChildsComponents(C_CAMERA);
+	while (!cmps.empty()) {
+		cmps.top()->UseResources();
+		cmps.pop();
+	}
+}
+
+void RE_GameObject::UnUseResources()
+{
+	eastl::stack<RE_Component*> cmps = GetAllChildsComponents(C_WATER);
+	while (!cmps.empty()) {
+		cmps.top()->UnUseResources();
+		cmps.pop();
+	}
+	cmps = GetAllChildsComponents(C_MESH);
+	while (!cmps.empty()) {
+		cmps.top()->UnUseResources();
+		cmps.pop();
+	}
+	cmps = GetAllChildsComponents(C_CAMERA);
+	while (!cmps.empty()) {
+		cmps.top()->UnUseResources();
+		cmps.pop();
+	}
 }
 
 void RE_GameObject::ResetLocalBoundingBox()
@@ -913,6 +962,7 @@ void RE_GameObject::ResetLocalBoundingBox()
 	{
 		switch (render_geo.type) {
 		case C_MESH:		 local_bounding_box = dynamic_cast<RE_CompMesh*>(CompPtr(render_geo))->GetAABB(); break;
+		case C_WATER:		 local_bounding_box = dynamic_cast<RE_CompWater*>(CompPtr(render_geo))->GetAABB(); break;
 		case C_GRID:		 /*local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one));*/ break;
 		case C_CUBE:		 local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
 		case C_DODECAHEDRON: local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
@@ -1133,5 +1183,5 @@ inline const RE_GameObject* RE_GameObject::ChildCPtr(const UID child) const
 
 inline bool RE_GameObject::IsRenderGeo(ushortint type) const
 {
-	return (type == ComponentType::C_MESH || (type > ComponentType::C_PRIMIVE_MIN && type < ComponentType::C_PRIMIVE_MAX));
+	return (type == ComponentType::C_MESH || type == ComponentType::C_WATER || (type > ComponentType::C_PRIMIVE_MIN && type < ComponentType::C_PRIMIVE_MAX));
 }

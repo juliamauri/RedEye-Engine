@@ -308,9 +308,9 @@
 "	aRes = lighting;\n"																																\
 "}\0"
 
-#pragma endregion DefferedLightPassShader
+#pragma endregion DeferredLightPassShader
 
-#pragma endregion DefferedShader
+#pragma endregion DeferredShader
 
 #pragma region WaterShader
 
@@ -403,13 +403,13 @@
 "in float height;\n"																			\
 "in vec4 gl_FragCoord;\n"																		\
 "\n"																							\
-"uniform float useTexture;\n"																	\
-"uniform float useColor;\n"																		\
 "uniform vec3 cdiffuse;\n"																		\
+"uniform float shininess;\n"																	\
 "\n"																							\
 "uniform float foamMin;\n"																		\
 "uniform float foamMax;\n"																		\
 "uniform vec3 foam_color;\n"																	\
+"uniform sampler2D water_foam;\n"																\
 "\n"																							\
 "uniform float alpha;\n"																		\
 "\n"																							\
@@ -419,7 +419,7 @@
 "uniform float near_plane;\n"																	\
 "uniform float far_plane;\n"																	\
 "\n"																							\
-"uniform float distanceTest;\n"																	\
+"uniform float distanceFoam;\n"																	\
 "\n"																							\
 "float LinearizeDepthTexture(vec2 uv)\n"														\
 "{\n"																							\
@@ -459,7 +459,7 @@
 "	float td = LinearizeDepthTexture(uv);\n"													\
 "	float d = LinearizeDepth();\n"																\
 "\n"																							\
-"	if (td - d < distanceTest)\n"																\
+"	if (td - d < distanceFoam)\n"																\
 "		finalcolor = vec4(1.0);\n"																\
 "\n"																							\
 "	color = finalcolor;\n"																		\
@@ -467,7 +467,7 @@
 
 #pragma endregion NoLightWater
 
-#pragma region DefferedLightWater
+#pragma region DeferredLightWater
 
 #define WATERPASSVERTEXSHADER										\
 "#version 330 core\n"												\
@@ -550,14 +550,13 @@
 "\n"																							\
 "in vec4 gl_FragCoord;\n"																		\
 "\n"																							\
-"uniform float useTexture;\n"																	\
-"uniform float useColor;\n"																		\
 "uniform vec3 cdiffuse;\n"																		\
 "uniform float shininess;\n"																	\
 "\n"																							\
 "uniform float foamMin;\n"																		\
 "uniform float foamMax;\n"																		\
 "uniform vec3 foam_color;\n"																	\
+"uniform sampler2D water_foam;\n"																\
 "\n"																							\
 "uniform float alpha;\n"																		\
 "\n"																							\

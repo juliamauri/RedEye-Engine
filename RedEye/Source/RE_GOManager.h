@@ -6,6 +6,7 @@
 #include "RE_CompCamera.h"
 #include "RE_CompMesh.h"
 #include "RE_CompLight.h"
+#include "RE_CompWater.h"
 #include "RE_CompPrimitive.h"
 #include "RE_FileSystem.h"
 
@@ -158,6 +159,7 @@ typedef ComponentPool<RE_CompTransform, 1024, 512> TransformsPool;
 typedef ComponentPool<RE_CompCamera, 128, 64> CamerasPool;
 typedef ComponentPool<RE_CompMesh, 128, 64> MeshesPool;
 typedef ComponentPool<RE_CompLight, 128, 64> LightPool;
+typedef ComponentPool<RE_CompWater, 8, 8> WaterPool;
 //Primitives
 typedef ComponentPool<RE_CompGrid, 128, 64> GridPool;
 typedef ComponentPool<RE_CompRock, 128, 64> RockPool;
@@ -180,6 +182,7 @@ public:
 		camPool.SetName("Cameras Pool");
 		meshPool.SetName("Meshes Pool");
 		lightPool.SetName("Lights Pool");
+		waterPool.SetName("Water Pool");
 		pGridPool.SetName("Grid Pool");
 		pRockPool.SetName("Rock Pool");
 		pDodecahedronPool.SetName("Dodecahedron Pool");
@@ -234,6 +237,7 @@ private:
 	CamerasPool camPool;
 	MeshesPool meshPool;
 	LightPool lightPool;
+	WaterPool waterPool;
 	//Primitives
 	GridPool pGridPool;
 	RockPool pRockPool;

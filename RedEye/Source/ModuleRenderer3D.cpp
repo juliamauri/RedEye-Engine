@@ -590,14 +590,32 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	{
 		drawing = comptsToDraw.top();
 		bool blend = false;
-
-		if (drawing->GetType() == C_MESH)
+		ComponentType dT = drawing->GetType();
+		if (dT == C_MESH)
 			 blend = dynamic_cast<RE_CompMesh*>(drawing)->isBlend();
 
-		if (!blend) drawing->Draw();
+		if (!blend && dT != C_WATER) drawing->Draw();
 		else drawAsLast.push(drawing);
 
 		comptsToDraw.pop();
+	}
+
+	// Draw Blended elements
+	if (!drawAsLast.empty())
+	{
+		//TODO RUB || JULIUS -> Add alpha vvalue on deffered fbo
+		//if (render_view.flags & BLENDED) {
+		//	glEnable(GL_BLEND);
+		//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//}
+
+		while (!drawAsLast.empty())
+		{
+			drawAsLast.top()->Draw();
+			drawAsLast.pop();
+		}
+
+		//if (render_view.flags & BLENDED) glDisable(GL_BLEND);
 	}
 
 	// Deferred Light Pass
@@ -672,21 +690,6 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		glDepthFunc(GL_LEQUAL);
 		RE_CameraManager::MainCamera()->DrawSkybox();
 		glDepthFunc(GL_LESS); // set depth function back to default
-	}
-
-	// Draw Blended elements
-	if (render_view.flags & BLENDED && !drawAsLast.empty())
-	{
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		while (!drawAsLast.empty())
-		{
-			drawAsLast.top()->Draw();
-			drawAsLast.pop();
-		}
-
-		glDisable(GL_BLEND);
 	}
 
 	// Draw Stencil

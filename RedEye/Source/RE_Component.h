@@ -17,6 +17,7 @@ enum ComponentType : ushortint
 	C_MESH = 15,
 	C_CAMERA,
 	C_LIGHT,
+	C_WATER,
 	C_PARTICLEEMITER,
 
 	C_PRIMIVE_MIN = 20,

@@ -13,6 +13,7 @@
 class RE_Component;
 class RE_CompTransform;
 class RE_CompMesh;
+class RE_CompWater;
 class RE_CompCamera;
 class RE_CompLight;
 class RE_CompPrimitive;
@@ -55,6 +56,7 @@ public:
 	RE_CompTransform* GetTransformPtr() const;
 	RE_Component* GetRenderGeo() const;
 	RE_CompMesh* GetMesh() const;
+	RE_CompWater* GetWater() const;
 	RE_CompCamera* GetCamera() const;
 	RE_CompLight* GetLight() const;
 	RE_CompPrimitive* GetPrimitive() const;
@@ -147,6 +149,10 @@ public:
 
 	// Raycast
 	bool CheckRayCollision(const math::Ray& global_ray, float& distance) const;
+
+	// Resources
+	void UseResources();
+	void UnUseResources();
 
 	// Serialization
 	unsigned int GetBinarySize() const;
