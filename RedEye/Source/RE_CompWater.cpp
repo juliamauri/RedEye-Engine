@@ -105,7 +105,6 @@ void RE_CompWater::Draw() const
 	case LIGHT_DEFERRED:
 		for (uint i = 0; i < waterUniforms.size(); i++)
 		{
-
 			switch (waterUniforms[i].GetType())
 			{
 			case Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].locationDeferred, waterUniforms[i].AsBool()); break;

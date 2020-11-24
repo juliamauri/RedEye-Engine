@@ -74,6 +74,7 @@ void RE_Material::Save()
 		//Default Shader
 		usingOnMat[CDIFFUSE] = 1;
 		usingOnMat[TDIFFUSE] = 1;
+		usingOnMat[SHININESS] = 1;
 	}
 	JsonSerialize();
 	BinarySerialize();
@@ -525,6 +526,13 @@ bool RE_Material::ExistsOnTexture(const char* texture)
 	if(!ret) ret = ExistsOnTexture(texture, &tReflection);
 	if(!ret) ret = ExistsOnTexture(texture, &tUnknown);
 	return ret;
+}
+
+void RE_Material::SetShader(const char* sMD5)
+{
+	shaderMD5 = sMD5;
+	GetAndProcessUniformsFromShader();
+	Save();
 }
 
 void RE_Material::DeleteShader()

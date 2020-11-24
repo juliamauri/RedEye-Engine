@@ -274,6 +274,19 @@ private:
 	eastl::string geometryPath;
 };
 
+class WaterPlaneResourceWindow : public EditorWindow
+{
+public: 
+	WaterPlaneResourceWindow(const char* name = "Water As Resource", bool start_active = false);
+	~WaterPlaneResourceWindow();
+
+private:
+	void Draw(bool secondary = false) override;
+
+	eastl::string waterResouceName;
+	bool deferred = false;
+};
+
 class TextEditor;
 class RE_FileIO;
 class TextEditorManagerWindow :public EditorWindow

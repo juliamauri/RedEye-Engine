@@ -54,6 +54,9 @@ public:
 	bool ExitsOnShader(const char* shader);
 	bool ExistsOnTexture(const char* texture);
 
+	//direct method, use it when creates the material.
+	void SetShader(const char* shaderMD5);
+
 	void DeleteShader();
 	void DeleteTexture(const char* texMD5);
 

@@ -45,6 +45,7 @@ ModuleEditor::ModuleEditor(const char* name, bool start_enabled) : Module(name, 
 	skyboxeditor = new SkyBoxEditorWindow();
 	shadereditor = new ShaderEditorWindow();
 	texteditormanager = new TextEditorManagerWindow();
+	waterplaneResourceWindow = new WaterPlaneResourceWindow();
 
 	sceneEditorWindow = new SceneEditorWindow();
 	sceneGameWindow = new SceneGameWindow();
@@ -193,6 +194,9 @@ update_status ModuleEditor::Update()
 					if (ImGui::MenuItem("Skybox", skyboxeditor->IsActive() ? "Hide" : "Open"))
 						skyboxeditor->SwitchActive();
 
+					if (ImGui::MenuItem("Water Resources", waterplaneResourceWindow->IsActive() ? "Hide" : "Open"))
+						waterplaneResourceWindow->SwitchActive();
+
 					ImGui::EndMenu();
 				}
 				ImGui::EndMenu();
@@ -300,6 +304,7 @@ update_status ModuleEditor::Update()
 		if (materialeditor->IsActive()) materialeditor->DrawWindow(popUpFocus);
 		if (shadereditor->IsActive()) shadereditor->DrawWindow(popUpFocus);
 		if (skyboxeditor->IsActive()) skyboxeditor->DrawWindow(popUpFocus);
+		if (waterplaneResourceWindow->IsActive()) waterplaneResourceWindow->DrawWindow(popUpFocus);
 
 		texteditormanager->DrawWindow(popUpFocus);
 	}
@@ -346,6 +351,7 @@ bool ModuleEditor::CleanUp()
 	DEL(popupWindow);
 	DEL(about);
 	DEL(texteditormanager);
+	DEL(waterplaneResourceWindow);
 
 	DEL(sceneEditorWindow);
 	DEL(sceneGameWindow);

@@ -127,7 +127,7 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 
 		assetPath = "Assets/Skyboxes/";
 		assetPath += sbName;
-		assetPath += ".pupil";
+		assetPath += ".sk";
 		ImGui::Text("Save path: %s", assetPath.c_str());
 
 		bool isTexturesFilled = editingSkybox->isFacesFilled();
@@ -198,6 +198,12 @@ void ShaderEditorWindow::Draw(bool secondary)
 		ImGui::SameLine();
 		ImGui::InputText("##shadername", &shaderName);
 
+		bool nameReserved = false;
+		if (shaderName == "WaterShader" || shaderName == "WaterDeferredShader") { 
+			nameReserved = true;
+			ImGui::Text("This name is reserved!");
+		}
+
 		assetPath = "Assets/Shaders/";
 		assetPath += shaderName;
 		assetPath += ".meta";
@@ -222,7 +228,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 			ImGui::Text("Nedded pass the compile test.");
 			pop2 = true;
 		}
-		if ((neededVertexAndFragment || exists || pop2) && !secondary) {
+		if ((neededVertexAndFragment || exists || pop2 || nameReserved) && !secondary) {
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
@@ -245,7 +251,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 			}
 		}
 
-		if ((neededVertexAndFragment || exists || pop2) && !secondary)
+		if ((neededVertexAndFragment || exists || pop2 || nameReserved) && !secondary)
 		{
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
@@ -453,7 +459,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			bool pop = false;
+			bool pop = false, nameReserved = false;
 			if (!e->file)
 			{
 				ImGui::Text("Shader name:");
@@ -462,6 +468,11 @@ void TextEditorManagerWindow::Draw(bool secondary)
 				(assetPath = "Assets/Shaders/") += *e->toModify;
 				ImGui::Text("Save path: %s", assetPath.c_str());
 				if (pop = App::fs->Exists(assetPath.c_str())) ImGui::Text("This shader exits, change the name.");
+
+				if (*e->toModify == "Water.vert" || *e->toModify == "Water.frag" || *e->toModify == "WaterDeferred.vert" || *e->toModify == "WaterDeferred.frag") {
+					nameReserved = true;
+					ImGui::Text("This name is reserved!");
+				}
 			}
 			else
 				ImGui::Text("Editting %s", e->toModify->c_str());
@@ -481,7 +492,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 
 			if (e->compiled) ImGui::Text((e->works) ? "Succeful compile" : "Error compile");
 
-			if (pop && !secondary)
+			if ((nameReserved || pop) && !secondary)
 			{
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
@@ -509,7 +520,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 				ImGui::SameLine();
 			}
 
-			if (pop && !secondary)
+			if ((nameReserved || pop) && !secondary)
 			{
 				ImGui::PopItemFlag();
 				ImGui::PopStyleVar();
@@ -554,4 +565,95 @@ void TextEditorManagerWindow::Draw(bool secondary)
 		for (auto e : toRemoveE) DEL(e);
 		toRemoveE.clear();
 	}
+}
+
+WaterPlaneResourceWindow::WaterPlaneResourceWindow(const char* name, bool start_active) : EditorWindow(name, start_active), waterResouceName("WaterMaterial") {}
+
+WaterPlaneResourceWindow::~WaterPlaneResourceWindow() { }
+
+void WaterPlaneResourceWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		if (secondary)
+		{
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+		ImGui::TextWrapped("After generate resource, create a primitive plane, set slices and stacks and finally transform as mesh, then you can add the new material.");
+
+		ImGui::Checkbox("Deferred", &deferred);
+
+		eastl::string shaderPath("Assets/Shaders/");
+
+		shaderPath += (deferred) ? "WaterDeferredShader" : "WaterShader";
+		shaderPath += ".meta";
+
+		const char* waterShader = App::resources->FindMD5ByMETAPath(shaderPath.c_str(), R_SHADER);
+		if (!waterShader) {
+			ImGui::Text((deferred) ? "Water Deferred Shader doesn't exists." : "Water Shader doesn't exists.");
+			ImGui::Text("Shader will generate when create.");
+		}
+		else ImGui::Text("Shader detected.");
+
+		eastl::string materialPath("Assets/Materials/");
+		ImGui::InputText("#WaterMaterialName", &waterResouceName);
+		materialPath += waterResouceName;
+		materialPath += ".pupil";
+
+		bool exists = App::fs->Exists(materialPath.c_str());
+		if (exists) ImGui::Text("That Material exists!");
+
+		if (exists && !secondary)
+		{
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		}
+
+		if (ImGui::Button("Create water resource")) {
+
+			if (!waterShader) {
+				eastl::string shaderVertexFile("Assets/Shaders/");
+				shaderVertexFile += (deferred) ? "WaterDeferred.vert" : "Water.vert";
+				if (!App::fs->Exists(shaderVertexFile.c_str())) {
+					RE_FileIO vertexFile(shaderVertexFile.c_str(), App::fs->GetZipPath());
+					vertexFile.Save((deferred) ? WATERPASSVERTEXSHADER : WATERVERTEXSHADER, 
+						eastl::CharStrlen((deferred) ? WATERPASSVERTEXSHADER : WATERVERTEXSHADER));
+				}
+
+				eastl::string shaderFragmentFile("Assets/Shaders/");
+				shaderFragmentFile += (deferred) ? "WaterDeferred.frag" : "Water.frag";
+				if (!App::fs->Exists(shaderFragmentFile.c_str())) {
+					RE_FileIO fragmentFile(shaderFragmentFile.c_str(), App::fs->GetZipPath());
+					fragmentFile.Save((deferred) ? WATERPASSFRAGMENTSHADER : WATERFRAGMENTSHADER,
+						eastl::CharStrlen((deferred) ? WATERPASSFRAGMENTSHADER : WATERFRAGMENTSHADER));
+				}
+				RE_Shader* waterShaderRes = new RE_Shader();
+				waterShaderRes->SetName((deferred) ? "WaterDeferredShader" : "WaterShader");
+				waterShaderRes->SetType(Resource_Type::R_SHADER);
+				waterShaderRes->SetPaths(shaderVertexFile.c_str(), shaderFragmentFile.c_str(), nullptr);
+				waterShaderRes->isShaderFilesChanged();
+				waterShaderRes->SaveMeta();
+				waterShader = App::resources->Reference(static_cast<ResourceContainer*>(waterShaderRes));
+			}
+
+			RE_Material* editingMaterialRes = new RE_Material();
+
+			editingMaterialRes->SetName(waterResouceName.c_str());
+			editingMaterialRes->SetAssetPath(materialPath.c_str());
+			editingMaterialRes->SetType(Resource_Type::R_MATERIAL);
+			editingMaterialRes->SetShader(waterShader); //save meta after add shader
+
+			App::renderer3d->PushThumnailRend(App::resources->Reference((ResourceContainer*)editingMaterialRes));
+
+			waterResouceName = "WaterMaterial";
+		}
+
+		if (exists || secondary)
+		{
+			ImGui::PopItemFlag();
+			ImGui::PopStyleVar();
+		}
+	}
+	ImGui::End();
 }

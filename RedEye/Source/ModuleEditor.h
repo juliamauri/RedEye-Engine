@@ -24,6 +24,7 @@ class MaterialEditorWindow;
 class ShaderEditorWindow;
 class SkyBoxEditorWindow;
 class TextEditorManagerWindow;
+class WaterPlaneResourceWindow;
 class SceneEditorWindow;
 class SceneGameWindow;
 
@@ -128,6 +129,7 @@ private:
 	ShaderEditorWindow* shadereditor = nullptr;
 	SkyBoxEditorWindow* skyboxeditor = nullptr;
 	TextEditorManagerWindow* texteditormanager = nullptr;
+	WaterPlaneResourceWindow* waterplaneResourceWindow = nullptr;
 
 	// Scene views
 	SceneEditorWindow* sceneEditorWindow = nullptr;
