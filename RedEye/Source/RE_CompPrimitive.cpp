@@ -517,8 +517,8 @@ void RE_CompParametric::DrawProperties()
 		ImGui::Checkbox("Use checkers texture", &show_checkers);
 		ImGui::ColorEdit3("Diffuse Color", &color[0]);
 		ImGui::PushItemWidth(75.0f);
-		if (ImGui::DragInt("Slices", &target_slices, 1.0f, 1, 3) && target_slices != slices) canChange = true;
-		if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 1, 3) && target_stacks != stacks) canChange = true;
+		if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) canChange = true;
+		if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) canChange = true;
 		if (radius > 0.f && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) canChange = true;
 
 		ImGui::PopItemWidth();

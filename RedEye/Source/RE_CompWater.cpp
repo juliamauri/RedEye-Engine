@@ -11,9 +11,7 @@
 #include "RE_Shader.h"
 
 #include "MathGeoLib/include/Math/float4.h"
-
 #include "par_shapes.h"
-
 #include "ImGui/imgui.h"
 
 RE_CompWater::RE_CompWater() : RE_Component(C_WATER) { box.SetFromCenterAndSize(math::vec::zero, math::vec::one); }
@@ -28,8 +26,8 @@ void RE_CompWater::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UI
 	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_WATER);
 
 	RE_CompWater* cmpWater = dynamic_cast<RE_CompWater*>(copy);
-	slices = cmpWater->slices;
-	stacks = cmpWater->stacks;
+	target_slices = slices = cmpWater->slices;
+	target_stacks = stacks = cmpWater->stacks;
 
 	waveLenght.second = cmpWater->waveLenght.second;
 	amplitude.second = cmpWater->amplitude.second;
@@ -77,11 +75,6 @@ void RE_CompWater::Draw() const
 	case LIGHT_DISABLED:
 	case LIGHT_GL:
 	case LIGHT_DIRECT:
-		glActiveTexture(GL_TEXTURE0 + textureCounter);
-		RE_GLCacheManager::ChangeTextureBind(waterFoam.second);
-		RE_ShaderImporter::setUnsignedInt(waterFoam.first->location, textureCounter++);
-
-
 		for (uint i = 0; i < waterUniforms.size(); i++)
 		{
 			switch (waterUniforms[i].GetType())
@@ -101,17 +94,18 @@ void RE_CompWater::Draw() const
 				RE_ShaderImporter::setFloat(waterUniforms[i].location, f_ptr[0], f_ptr[1], f_ptr[2]);
 				break;
 			}
+			case Cvar::SAMPLER: //Only one case
+				glActiveTexture(GL_TEXTURE0 + textureCounter);
+				RE_GLCacheManager::ChangeTextureBind(waterFoam.second);
+				RE_ShaderImporter::setUnsignedInt(waterUniforms[i].location, textureCounter++);
+				break;
 			}
 		}
-
 		break;
 	case LIGHT_DEFERRED:
-		glActiveTexture(GL_TEXTURE0 + textureCounter);
-		RE_GLCacheManager::ChangeTextureBind(waterFoam.second);
-		RE_ShaderImporter::setUnsignedInt(waterFoam.first->locationDeferred, textureCounter++);
-
 		for (uint i = 0; i < waterUniforms.size(); i++)
 		{
+
 			switch (waterUniforms[i].GetType())
 			{
 			case Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].locationDeferred, waterUniforms[i].AsBool()); break;
@@ -127,6 +121,13 @@ void RE_CompWater::Draw() const
 			{
 				const float* f_ptr = waterUniforms[i].AsFloatPointer();
 				RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, f_ptr[0], f_ptr[1], f_ptr[2]);
+				break;
+			}
+			{
+			case Cvar::SAMPLER: //Only one case
+				glActiveTexture(GL_TEXTURE0 + textureCounter);
+				RE_GLCacheManager::ChangeTextureBind(waterFoam.second);
+				RE_ShaderImporter::setUnsignedInt(waterUniforms[i].locationDeferred, textureCounter++);
 				break;
 			}
 			}
@@ -145,6 +146,22 @@ void RE_CompWater::DrawProperties()
 {
 	if (ImGui::CollapsingHeader("Water", ImGuiTreeNodeFlags_DefaultOpen))
 	{
+		ImGui::Text("Plane");
+
+		static bool canChange = false;
+		if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) canChange = true;
+		if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) canChange = true;
+		
+		if (canChange && ImGui::Button("Apply"))
+		{
+			slices = target_slices;
+			stacks = target_stacks;
+			GeneratePlane();
+			canChange = false;
+		}
+
+		ImGui::Separator();
+
 		ImGui::Text("Wave Vertex");
 
 		if (ImGui::DragFloat("Wave Lenght", &waveLenght.second, 0.1f, 0.0f)) 
@@ -192,8 +209,8 @@ void RE_CompWater::DrawProperties()
 
 		if (ImGui::DragFloat("Alpha", &alpha.second, 0.01f, 0.0f, 1.f))
 			alpha.first->SetValue(alpha.second);
-
-		if (ImGui::DragFloat("Distance Dynamic Foam", &distanceFoam.second, 0.01f, 0.0f))
+		
+		if (ImGui::DragFloat("Distance Dynamic Foam", &distanceFoam.second, 0.00001f, 0.0f, 0.0005f, "%.5f" ))
 			distanceFoam.first->SetValue(distanceFoam.second);
 	}
 }
@@ -220,8 +237,8 @@ void RE_CompWater::SerializeJson(JSONNode* node, eastl::map<const char*, int>* r
 
 void RE_CompWater::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
 {
-	slices = node->PullInt("slices", slices);
-	stacks = node->PullInt("stacks", stacks);
+	target_slices = slices = node->PullInt("slices", slices);
+	target_stacks = stacks = node->PullInt("stacks", stacks);
 	waveLenght.second = node->PullFloat("waveLenght", waveLenght.second);
 	amplitude.second = node->PullFloat("amplitude", amplitude.second);
 	speed.second = node->PullFloat("speed", speed.second);
@@ -283,6 +300,8 @@ void RE_CompWater::DeserializeBinary(char*& cursor, eastl::map<int, const char*>
 	size_t size = sizeof(int);
 	memcpy(&slices, cursor, size); cursor += size;
 	memcpy(&stacks, cursor, size); cursor += size;
+	target_slices = slices;
+	target_stacks = stacks;
 	size = sizeof(float);
 	memcpy(&waveLenght.second, cursor, size); cursor += size;
 	memcpy(&amplitude.second, cursor, size); cursor += size;
@@ -392,7 +411,7 @@ void RE_CompWater::GeneratePlane()
 	triangle_count = plane->ntriangles;
 
 	eastl::vector<unsigned int> index;
-	for (int i = 0; i < triangle_count * 3; i++)
+	for (unsigned int i = 0; i < triangle_count * 3; i++)
 		index.push_back(plane->triangles[i]);
 
 	uint* indexA = new uint[triangle_count * 3];
@@ -426,7 +445,7 @@ void RE_CompWater::GeneratePlane()
 	float* meshBuffer = new float[meshSize];
 	float* cursor = meshBuffer;
 
-	for (uint i = 0; i < plane->npoints; i++)
+	for (uint i = 0; i < static_cast<uint>(plane->npoints); i++)
 	{
 		uint indexArray = i * 3;
 		uint indexTexCoord = i * 2;
@@ -538,5 +557,4 @@ void RE_CompWater::SetUpWaterUniforms()
 			waterFoam.second = App::internalResources.GetTextureWaterFoam();
 		}
 	}
-	waterUniforms.erase(waterFoam.first);
 }
