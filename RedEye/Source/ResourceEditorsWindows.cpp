@@ -580,7 +580,8 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
-		ImGui::TextWrapped("After generate resource, create a primitive plane, set slices and stacks and finally transform as mesh, then you can add the new material.");
+		ImGui::TextWrapped("After generate resource, create a primitive plane, set slices and stacks and finally transform as mesh, then you can add the new material.\n\
+			Remember to set the values and save on the material generated. Important to set direction, not 0 - 0.");
 
 		ImGui::Checkbox("Deferred", &deferred);
 
@@ -631,6 +632,7 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 				RE_Shader* waterShaderRes = new RE_Shader();
 				waterShaderRes->SetName((deferred) ? "WaterDeferredShader" : "WaterShader");
 				waterShaderRes->SetType(Resource_Type::R_SHADER);
+				waterShaderRes->SetMetaPath(shaderPath.c_str());
 				waterShaderRes->SetPaths(shaderVertexFile.c_str(), shaderFragmentFile.c_str(), nullptr);
 				waterShaderRes->isShaderFilesChanged();
 				waterShaderRes->SaveMeta();
@@ -642,7 +644,7 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 			editingMaterialRes->SetName(waterResouceName.c_str());
 			editingMaterialRes->SetAssetPath(materialPath.c_str());
 			editingMaterialRes->SetType(Resource_Type::R_MATERIAL);
-			editingMaterialRes->SetShader(waterShader); //save meta after add shader
+			editingMaterialRes->SetShader(waterShader); //save meta after add to shader
 
 			App::renderer3d->PushThumnailRend(App::resources->Reference((ResourceContainer*)editingMaterialRes));
 
