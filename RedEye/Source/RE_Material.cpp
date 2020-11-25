@@ -74,6 +74,7 @@ void RE_Material::Save()
 		//Default Shader
 		usingOnMat[CDIFFUSE] = 1;
 		usingOnMat[TDIFFUSE] = 1;
+		usingOnMat[OPACITY] = 1;
 		usingOnMat[SHININESS] = 1;
 	}
 	JsonSerialize();

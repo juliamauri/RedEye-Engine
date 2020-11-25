@@ -127,7 +127,7 @@ private:
 		TEMISSIVE, CTRANSPARENT, OPACITY, TOPACITY, SHININESS, SHININESSSTRENGHT, TSHININESS, REFRACCTI,
 		THEIGHT, TNORMALS, TREFLECTION
 	};
-	unsigned int usingOnMat[18] = { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
+	unsigned int usingOnMat[18] = { 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 };
 };
 
 #endif // !__RE_MATERIAL_H__

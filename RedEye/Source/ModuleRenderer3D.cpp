@@ -98,7 +98,6 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 				LIGHT_DEFERRED));
 
 			//Thumbnail Configuration
-			thumbnailView.fbos = { RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
 			thumbnailView.clear_color = {0.f, 0.f, 0.f, 1.f};
 			Event::PauseEvents();
 			thumbnailView.camera = new RE_CompCamera();
@@ -140,6 +139,8 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 bool ModuleRenderer3D::Start()
 {
+	thumbnailView.fbos = { RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
+
 	render_views[VIEW_EDITOR].fbos = {
 		RE_FBOManager::CreateFBO(1024, 768, 1, true, false),
 		RE_FBOManager::CreateDeferredFBO(1024, 768) };
@@ -603,11 +604,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	// Draw Blended elements
 	if (!drawAsLast.empty())
 	{
-		//TODO RUB || JULIUS -> Add alpha vvalue on deffered fbo
-		//if (render_view.flags & BLENDED) {
-		//	glEnable(GL_BLEND);
-		//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//}
+		if (render_view.flags & BLENDED) {
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
 
 		while (!drawAsLast.empty())
 		{
@@ -615,7 +615,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			drawAsLast.pop();
 		}
 
-		//if (render_view.flags & BLENDED) glDisable(GL_BLEND);
+		if (render_view.flags & BLENDED) glDisable(GL_BLEND);
 	}
 
 	// Deferred Light Pass

@@ -153,11 +153,11 @@ void RE_InternalResources::InitWaterResources()
 	waterDefShader = App::resources->Reference(waterDefS);
 
 
-	static const char* internalNames[31] = { "useTexture", "useColor", "useClipPlane", "clip_plane", "time", "dt", "near_plane", "far_plane", "viewport_w", "viewport_h", "model", "view", "projection", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininessST", "refraccti", "theight", "tnormals", "treflection", "currentDepth", "viewPos" };
+	static const char* internalNames[30] = { "useTexture", "useColor", "useClipPlane", "clip_plane", "time", "dt", "near_plane", "far_plane", "viewport_w", "viewport_h", "model", "view", "projection", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "topacity", "tshininess", "shininessST", "refraccti", "theight", "tnormals", "treflection", "currentDepth", "viewPos" };
 	eastl::vector<ShaderCvar> uniformsWaterShader = waterSr->GetUniformValues(), uniformsWaterDefShader = waterDefS->GetUniformValues();
 	for (unsigned int i = 0; i < uniformsWaterShader.size(); i++) {
 		bool skip = false;
-		for (int iN = 0; iN < 31 && !skip; iN++)
+		for (int iN = 0; iN < 30 && !skip; iN++)
 			if (uniformsWaterShader[i].name == internalNames[iN])
 				skip = true;
 		if (skip) continue;
@@ -165,7 +165,6 @@ void RE_InternalResources::InitWaterResources()
 		for (unsigned int j = 0; j < uniformsWaterDefShader.size(); j++) {
 			if (uniformsWaterShader[i].name == uniformsWaterDefShader[j].name) {
 				uniformsWaterShader[i].locationDeferred = uniformsWaterDefShader[j].location;
-				RE_LOG("%s -> L: %d | LD: %d", uniformsWaterShader[i].name.c_str(), uniformsWaterShader[i].location, uniformsWaterShader[i].locationDeferred);
 				waterUniforms.push_back(uniformsWaterShader[i]);
 				break;
 			}

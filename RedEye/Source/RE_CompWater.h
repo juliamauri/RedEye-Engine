@@ -59,7 +59,7 @@ private:
 	eastl::pair<ShaderCvar*, float> foamMin = { nullptr, 0.65f };
 	eastl::pair<ShaderCvar*, float> foamMax = { nullptr, 1.0f };
 	eastl::pair<ShaderCvar*, math::vec> foam_color = { nullptr, math::vec::one };
-	eastl::pair<ShaderCvar*, float> alpha = { nullptr, 1.f };
+	eastl::pair<ShaderCvar*, float> opacity = { nullptr, 1.f };
 	eastl::pair<ShaderCvar*, float> distanceFoam = { nullptr, 0.0002f };
 };
 

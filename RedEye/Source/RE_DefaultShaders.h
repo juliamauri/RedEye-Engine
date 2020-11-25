@@ -70,15 +70,16 @@
 "\n"																			\
 "uniform float useColor;\n"														\
 "uniform vec3 cdiffuse;\n"													   	\
+"uniform float opacity;\n"													   	\
 "\n"																			\
 "void main()\n"																	\
 "{\n"																			\
 "	if (useTexture > 0.0f && useColor > 0.0f)\n"								\
-"		color = vec4(texture(tdiffuse0, TexCoord) * vec4(cdiffuse, 1.0));\n"   	\
+"		color = vec4(texture(tdiffuse0, TexCoord) * vec4(cdiffuse, opacity));\n"\
 "	else if (useTexture > 0.0f)\n"												\
 "		color = texture(tdiffuse0, TexCoord);\n"						       	\
 "	else if (useColor > 0.0f)\n"												\
-"		color = vec4(cdiffuse, 1.0);\n"									       	\
+"		color = vec4(cdiffuse, opacity);\n"									    \
 "}\0"
 
 #pragma endregion NoLight&ScaleShader
@@ -155,7 +156,7 @@
 "layout (location = 0) out vec3 gPosition;\n"						\
 "layout (location = 1) out vec3 gNormal;\n"							\
 "layout (location = 2) out vec3 gAlbedo;\n"							\
-"layout (location = 3) out vec2 gSpec;\n"							\
+"layout (location = 3) out vec3 gSpec;\n"							\
 "\n"																\
 "in vec3 FragPos;\n"												\
 "in vec2 TexCoord;\n"												\
@@ -169,6 +170,7 @@
 "uniform float useColor;\n"											\
 "uniform vec3 cdiffuse;\n"											\
 "uniform vec3 cspecular;\n"											\
+"uniform float opacity;\n"											\
 "\n"																\
 "void main()\n"														\
 "{\n"																\
@@ -178,17 +180,17 @@
 "	if (useTexture > 0.0f && useColor > 0.0f)\n"					\
 "	{\n"															\
 "		gAlbedo = texture(tdiffuse0, TexCoord).rgb * cdiffuse;\n"	\
-"		gSpec = vec2(texture(tspecular0, TexCoord).r, shininess);\n"\
+"		gSpec = vec3(texture(tspecular0, TexCoord).r, shininess,opacity);\n"\
 "	}\n"															\
 "	else if (useTexture > 0.0f)\n"									\
 "	{\n"															\
 "		gAlbedo = texture(tdiffuse0, TexCoord).rgb;\n"				\
-"		gSpec = vec2(texture(tspecular0, TexCoord).r, shininess);\n"\
+"		gSpec = vec3(texture(tspecular0, TexCoord).r, shininess,opacity);\n"\
 "	}\n"															\
 "	else if (useColor > 0.0f)\n"									\
 "	{\n"															\
 "		gAlbedo = cdiffuse;\n"									    \
-"		gSpec = vec2(cspecular.x, shininess);\n"					\
+"		gSpec = vec3(cspecular.x, shininess, opacity);\n"			\
 "	}\n"															\
 "}\0"
 
@@ -210,7 +212,7 @@
 
 #define LIGHTPASSFRAGMENTSHADER																														\
 "#version 330 core\n"																																\
-"layout (location = 4) out vec3 aRes;\n"																											\
+"layout (location = 4) out vec4 aRes;\n"																											\
 "\n"																																				\
 "in vec2 TexCoord;\n"																																\
 "\n"																																				\
@@ -246,7 +248,8 @@
 "	vec3 Normal = normalize(texture(gNormal, TexCoord).rgb);\n"																						\
 "	vec3 Diffuse = texture(gAlbedo, TexCoord).rgb;\n"																								\
 "	float Specular = texture(gSpec, TexCoord).r;\n"																									\
-"	float shininess = texture(gSpec, TexCoord).g;\n"																							\
+"	float shininess = texture(gSpec, TexCoord).g;\n"																								\
+"	float opacity = texture(gSpec, TexCoord).b;\n"																									\
 "	\n"																																				\
 "   vec3 lighting = vec3(0.0, 0.0, 0.0);\n"				    																						\
 "	vec3 viewDir = normalize(viewPos - Position);\n"																								\
@@ -305,7 +308,7 @@
 "			lighting += res_light * lights[i].intensity;\n"																							\
 "		}\n"																																		\
 "   }\n"																																			\
-"	aRes = lighting;\n"																																\
+"	aRes = vec4(lighting,opacity);\n"																												\
 "}\0"
 
 #pragma endregion DeferredLightPassShader
@@ -411,7 +414,7 @@
 "uniform vec3 foam_color;\n"																	\
 "uniform sampler2D water_foam;\n"																\
 "\n"																							\
-"uniform float alpha;\n"																		\
+"uniform float opacity;\n"																		\
 "\n"																							\
 "uniform sampler2D currentDepth;\n"																\
 "uniform float viewport_h;\n"																	\
@@ -449,10 +452,10 @@
 "		finalcolor.x = ((1.0f - n_height) * cdiffuse.x) + (n_height * foam_color.x);\n"			\
 "		finalcolor.y = ((1.0f - n_height) * cdiffuse.y) + (n_height * foam_color.y);\n"			\
 "		finalcolor.z = ((1.0f - n_height) * cdiffuse.z) + (n_height * foam_color.z);\n"			\
-"		finalcolor.w = ((1.0f - n_height) * alpha) + n_height;\n"								\
+"		finalcolor.w = ((1.0f - n_height) * opacity) + n_height;\n"								\
 "	}\n"																						\
 "	else\n"																						\
-"		finalcolor = vec4(cdiffuse, alpha);\n"													\
+"		finalcolor = vec4(cdiffuse, opacity);\n"												\
 "\n"																							\
 "	vec2 uv = vec2(gl_FragCoord.x / viewport_w, gl_FragCoord.y / viewport_h);\n"				\
 "\n"																							\
@@ -541,7 +544,7 @@
 "layout (location = 0) out vec3 gPosition;\n"													\
 "layout (location = 1) out vec3 gNormal;\n"														\
 "layout (location = 2) out vec3 gAlbedo;\n"														\
-"layout (location = 3) out vec2 gSpec;\n"														\
+"layout (location = 3) out vec3 gSpec;\n"														\
 "\n"																							\
 "in vec3 FragPos;\n"																			\
 "in vec2 TexCoord;\n"																			\
@@ -558,7 +561,7 @@
 "uniform vec3 foam_color;\n"																	\
 "uniform sampler2D water_foam;\n"																\
 "\n"																							\
-"uniform float alpha;\n"																		\
+"uniform float opacity;\n"																		\
 "\n"																							\
 "uniform sampler2D currentDepth;\n"																\
 "uniform float viewport_h;\n"																	\
@@ -589,17 +592,17 @@
 "\n"																							\
 "	vec4 finalcolor;\n"																			\
 "	if (height > foamMax)\n"																	\
-"		finalcolor = vec4(foam_color, 1.0);\n"													\
+"		finalcolor = vec4(foam_color, opacity);\n"												\
 "	else if (height >= foamMin)\n"																\
 "	{\n"																						\
 "		float n_height = (height - foamMin) / foamMax;\n"										\
 "		finalcolor.x = ((1.0f - n_height) * cdiffuse.x) + (n_height * foam_color.x);\n"			\
 "		finalcolor.y = ((1.0f - n_height) * cdiffuse.y) + (n_height * foam_color.y);\n"			\
 "		finalcolor.z = ((1.0f - n_height) * cdiffuse.z) + (n_height * foam_color.z);\n"			\
-"		finalcolor.w = ((1.0f - n_height) * alpha) + n_height;\n"								\
+"		finalcolor.w = ((1.0f - n_height) * opacity) + n_height;\n"								\
 "	}\n"																						\
 "	else\n"																						\
-"		finalcolor = vec4(cdiffuse, alpha);\n"													\
+"		finalcolor = vec4(cdiffuse, opacity);\n"												\
 "\n"																							\
 "	vec2 uv = vec2(gl_FragCoord.x / viewport_w, gl_FragCoord.y / viewport_h);\n"				\
 "\n"																							\
@@ -607,12 +610,12 @@
 "	float d = LinearizeDepth();\n"																\
 "\n"																							\
 "	if (td - d < distanceFoam)\n"																\
-"		finalcolor = vec4(1.0);\n"																\
+"		finalcolor = vec4(vec3(1.0), opacity);\n"												\
 "\n"																							\
 "	gAlbedo = vec3(finalcolor.x, finalcolor.y, finalcolor.z);\n"								\
 "	gPosition = FragPos;\n"																		\
 "	gNormal = normalize(Normal);\n"																\
-"	gSpec = vec2(0.0f, shininess);\n"															\
+"	gSpec = vec3(0.0f, shininess, finalcolor.w);\n"												\
 "}\n"																							\
 
 

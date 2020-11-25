@@ -640,7 +640,7 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 			}
 
 			RE_Material* editingMaterialRes = new RE_Material();
-
+			editingMaterialRes->blendMode = true;
 			editingMaterialRes->SetName(waterResouceName.c_str());
 			editingMaterialRes->SetAssetPath(materialPath.c_str());
 			editingMaterialRes->SetType(Resource_Type::R_MATERIAL);

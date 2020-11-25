@@ -42,7 +42,7 @@ void RE_CompWater::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UI
 	foamMin.second = cmpWater->foamMin.second;
 	foamMax.second = cmpWater->foamMax.second;
 	foam_color.second = cmpWater->foam_color.second;
-	alpha.second = cmpWater->alpha.second;
+	opacity.second = cmpWater->opacity.second;
 	distanceFoam.second = cmpWater->distanceFoam.second;
 
 	if (cmpWater->VAO) {
@@ -206,8 +206,8 @@ void RE_CompWater::DrawProperties()
 		if (ImGui::ColorEdit3("Foam Color", foam_color.second.ptr()))
 			foam_color.first->SetValue(foam_color.second);
 
-		if (ImGui::DragFloat("Alpha", &alpha.second, 0.01f, 0.0f, 1.f))
-			alpha.first->SetValue(alpha.second);
+		if (ImGui::DragFloat("Opacity", &opacity.second, 0.01f, 0.0f, 1.f))
+			opacity.first->SetValue(opacity.second);
 		
 		if (ImGui::DragFloat("Distance Dynamic Foam", &distanceFoam.second, 0.00001f, 0.0f, 0.0005f, "%.5f" ))
 			distanceFoam.first->SetValue(distanceFoam.second);
@@ -230,7 +230,7 @@ void RE_CompWater::SerializeJson(JSONNode* node, eastl::map<const char*, int>* r
 	node->PushFloat("foamMin", foamMin.second);
 	node->PushFloat("foamMax", foamMax.second);
 	node->PushFloatVector("foamColor", foam_color.second);
-	node->PushFloat("alpha", alpha.second);
+	node->PushFloat("opacity", opacity.second);
 	node->PushFloat("distanceFoam", distanceFoam.second);
 }
 
@@ -254,7 +254,7 @@ void RE_CompWater::DeserializeJson(JSONNode* node, eastl::map<int, const char*>*
 	foamMin.second = node->PullFloat("foamMin", foamMin.second);
 	foamMax.second = node->PullFloat("foamMax", foamMax.second);
 	foam_color.second = node->PullFloatVector("foamColor", foam_color.second);
-	alpha.second = node->PullFloat("alpha", alpha.second);
+	opacity.second = node->PullFloat("opacity", opacity.second);
 	distanceFoam.second = node->PullFloat("distanceFoam", distanceFoam.second);
 }
 
@@ -290,7 +290,7 @@ void RE_CompWater::SerializeBinary(char*& cursor, eastl::map<const char*, int>* 
 	size = sizeof(float) * 3;
 	memcpy(cursor, &foam_color.second, size); cursor += size;
 	size = sizeof(float);
-	memcpy(cursor, &alpha.second, size); cursor += size;
+	memcpy(cursor, &opacity.second, size); cursor += size;
 	memcpy(cursor, &distanceFoam.second, size); cursor += size;
 }
 
@@ -323,7 +323,7 @@ void RE_CompWater::DeserializeBinary(char*& cursor, eastl::map<int, const char*>
 	size = sizeof(float) * 3;
 	memcpy(&foam_color.second, cursor, size); cursor += size;
 	size = sizeof(float);
-	memcpy(&alpha.second, cursor, size); cursor += size;
+	memcpy(&opacity.second, cursor, size); cursor += size;
 	memcpy(&distanceFoam.second, cursor, size); cursor += size;
 }
 
@@ -359,7 +359,7 @@ void RE_CompWater::UnUseResources()
 	foamMin.first = nullptr;
 	foamMax.first = nullptr;
 	foam_color.first = nullptr;
-	alpha.first = nullptr;
+	opacity.first = nullptr;
 	distanceFoam.first = nullptr;
 	waterFoam.first = nullptr;
 
@@ -543,9 +543,9 @@ void RE_CompWater::SetUpWaterUniforms()
 			foam_color.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(foam_color.second);
 		}
-		else if (waterUniforms[i].name == "alpha") {
-			alpha.first = &waterUniforms[i];
-			waterUniforms[i].SetValue(alpha.second);
+		else if (waterUniforms[i].name == "opacity") {
+			opacity.first = &waterUniforms[i];
+			waterUniforms[i].SetValue(opacity.second);
 		}
 		else if (waterUniforms[i].name == "distanceFoam") {
 			distanceFoam.first = &waterUniforms[i];
