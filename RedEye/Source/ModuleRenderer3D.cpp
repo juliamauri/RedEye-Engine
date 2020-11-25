@@ -609,10 +609,6 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	// Deferred Light Pass
 	if (render_view.light == LIGHT_DEFERRED)
 	{
-		// Draw Skybox
-		if (render_view.flags & SKYBOX && render_view.camera->isUsingSkybox())
-			DrawSkyBox();
-
 		// Draw Blended elements
 		if (!drawAsLast.empty())
 		{
@@ -669,6 +665,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		// Draw Debug Geometry
 		if (render_view.flags & DEBUG_DRAW)
 			DrawDebug(render_view);
+
+		// Draw Skybox
+		if (render_view.flags & SKYBOX && render_view.camera->isUsingSkybox())
+			DrawSkyBox();
 	}
 	else {
 
@@ -811,6 +811,7 @@ void ModuleRenderer3D::DrawSkyBox()
 	uint skysphereshader = static_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultSkyBoxShader()))->GetID();
 	RE_GLCacheManager::ChangeShader(skysphereshader);
 	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
+	RE_ShaderImporter::setBool(skysphereshader, "deferred", (current_lighting == LightMode::LIGHT_DEFERRED));
 
 	glDepthFunc(GL_LEQUAL);
 	RE_CameraManager::MainCamera()->DrawSkybox();

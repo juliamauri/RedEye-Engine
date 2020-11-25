@@ -106,14 +106,19 @@
 "#version 330 core\n"										\
 "#extension GL_ARB_separate_shader_objects : enable\n"		\
 "layout(location = 0) out vec4 color;\n"					\
+"layout(location = 4) out vec4 colorDef;\n"					\
 "\n"														\
 "in vec3 pos;\n"											\
 "\n"														\
 "uniform samplerCube cubemap;\n"							\
+"uniform bool deferred;\n"									\
 "\n"														\
 "void main()\n"												\
 "{\n"														\
-"	color = texture(cubemap, normalize(pos).stp);\n"	    \
+"	if(deferred)\n"										    \
+"		colorDef = texture(cubemap, normalize(pos).stp);\n"	\
+"	else\n"													\
+"		color = texture(cubemap, normalize(pos).stp);\n"	\
 "}\0"
 
 #pragma endregion SkyBoxShader
