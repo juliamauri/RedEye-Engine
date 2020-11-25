@@ -382,6 +382,9 @@ void RE_CompWater::UnUseResources()
 	}
 }
 
+unsigned int RE_CompWater::GetVAO() const { return VAO; }
+unsigned int RE_CompWater::GetTriangles() const { return triangle_count; }
+
 void RE_CompWater::GeneratePlane()
 {
 	par_shapes_mesh* plane = par_shapes_create_plane(slices, stacks);

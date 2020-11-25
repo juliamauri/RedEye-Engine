@@ -35,6 +35,9 @@ public:
 	void UseResources()override;
 	void UnUseResources()override;
 
+	unsigned int GetVAO()const;
+	unsigned int GetTriangles()const;
+
 private:
 	void GeneratePlane();
 	void SetUpWaterUniforms();

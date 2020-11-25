@@ -590,6 +590,11 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	while (!comptsToDraw.empty())
 	{
 		drawing = comptsToDraw.top();
+		comptsToDraw.pop();
+
+		if (render_view.light != LIGHT_DEFERRED && drawing->GetGOUID() == App::editor->GetSelected())
+			continue;
+
 		bool blend = false;
 		ComponentType dT = drawing->GetType();
 		if (dT == C_MESH)
@@ -597,30 +602,27 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 		if (!blend && dT != C_WATER) drawing->Draw();
 		else drawAsLast.push(drawing);
-
-		comptsToDraw.pop();
 	}
 
-	// Draw Blended elements
-	if (!drawAsLast.empty())
-	{
-		if (render_view.flags & BLENDED) {
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
 
-		while (!drawAsLast.empty())
-		{
-			drawAsLast.top()->Draw();
-			drawAsLast.pop();
-		}
-
-		if (render_view.flags & BLENDED) glDisable(GL_BLEND);
-	}
 
 	// Deferred Light Pass
 	if (render_view.light == LIGHT_DEFERRED)
 	{
+		// Draw Skybox
+		if (render_view.flags & SKYBOX && render_view.camera->isUsingSkybox())
+			DrawSkyBox();
+
+		// Draw Blended elements
+		if (!drawAsLast.empty())
+		{
+			while (!drawAsLast.empty())
+			{
+				drawAsLast.top()->Draw();
+				drawAsLast.pop();
+			}
+		}
+
 		// Setup Shader
 		unsigned int light_pass = dynamic_cast<RE_Shader*>(App::resources->At(App::internalResources.GetLightPassShader()))->GetID();
 		RE_GLCacheManager::ChangeShader(light_pass);
@@ -653,132 +655,166 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "type").c_str()), -1.0f);
 		}
 
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		// Render Lights
 		DrawQuad();
 
+		glDisable(GL_BLEND);
+
 		if (render_view.flags & DEPTH_TEST)
 			SetDepthTest(true);
+
+		// Draw Debug Geometry
+		if (render_view.flags & DEBUG_DRAW)
+			DrawDebug(render_view);
+	}
+	else {
+
+		// Draw Debug Geometry
+		if (render_view.flags & DEBUG_DRAW)
+			DrawDebug(render_view);
+
+		// Draw Skybox
+		if (render_view.flags & SKYBOX && render_view.camera->isUsingSkybox())
+			DrawSkyBox();
+
+		// Draw Blended elements
+		if (!drawAsLast.empty())
+		{
+			if (render_view.flags & BLENDED) {
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			}
+
+			while (!drawAsLast.empty())
+			{
+				drawAsLast.top()->Draw();
+				drawAsLast.pop();
+			}
+
+			if (render_view.flags & BLENDED) glDisable(GL_BLEND);
+		}
 	}
 
-	// Draw Debug Geometry
-	if (render_view.flags & DEBUG_DRAW)
-	{
-		RE_GLCacheManager::ChangeShader(0);
-		RE_GLCacheManager::ChangeTextureBind(0);
-
-		bool reset_light = lighting;
-		SetLighting(false);
-		SetTexture2D(false);
-
-		App::editor->DrawDebug(render_view.camera);
-
-		if (reset_light) SetLighting(true);
-		SetTexture2D(render_view.flags & TEXTURE_2D);
-	}
-
-	// Draw Skybox
-	if (render_view.flags & SKYBOX && render_view.camera->isUsingSkybox())
-	{
-		OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
-
-		RE_GLCacheManager::ChangeTextureBind(0);
-
-		uint skysphereshader = static_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultSkyBoxShader()))->GetID();
-		RE_GLCacheManager::ChangeShader(skysphereshader);
-		RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
-
-		glDepthFunc(GL_LEQUAL);
-		RE_CameraManager::MainCamera()->DrawSkybox();
-		glDepthFunc(GL_LESS); // set depth function back to default
-	}
 
 	// Draw Stencil
-	/*if (render_view.flags & OUTLINE_SELECTION)
+	if (render_view.flags & OUTLINE_SELECTION && render_view.light != LIGHT_DEFERRED)
 	{
-		RE_GameObject* stencilGO = App::editor->GetSelected();
-		if (stencilGO != nullptr)
+		UID stencilGO = App::editor->GetSelected();
+		if (stencilGO)
 		{
-			eastl::stack<RE_Component*> stackComponents = stencilGO->GetDrawableComponentsItselfOnly();
-			if (!stackComponents.empty())
+			RE_GameObject* stencilPtr = App::scene->GetGOPtr(stencilGO);
+			RE_Component* rendComponent = stencilPtr->GetRenderGeo();
+			if (rendComponent)
 			{
 				OPTICK_CATEGORY("Stencil Draw", Optick::Category::Rendering);
-				eastl::stack<unsigned int> vaoToStencil;
-				eastl::stack<unsigned int> triangleToStencil;
-				eastl::stack<RE_Component*> stackTemp;
-				while (!stackComponents.empty())
+				unsigned int vaoToStencil;
+				unsigned int triangleToStencil;
+
+				ComponentType cT = rendComponent->GetType();
+				if (cT == ComponentType::C_MESH)
 				{
-					RE_Component* dC = stackComponents.top();
-					ComponentType cT = dC->GetType();
-					if (cT == ComponentType::C_MESH)
-					{
-						RE_CompMesh* mesh_comp = dynamic_cast<RE_CompMesh*>(dC);
-						vaoToStencil.push(mesh_comp->GetVAOMesh());
-						triangleToStencil.push(mesh_comp->GetTriangleMesh());
-						stackTemp.push(dC);
-					}
-					else if (cT > ComponentType::C_PRIMIVE_MIN && cT < ComponentType::C_PRIMIVE_MAX)
-					{
-						RE_CompPrimitive* prim_comp = dynamic_cast<RE_CompPrimitive*>(dC);
-						vaoToStencil.push(prim_comp->GetVAO());
-						triangleToStencil.push(prim_comp->GetTriangleCount());
-						stackTemp.push(dC);
-					}
-					stackComponents.pop();
+					RE_CompMesh* mesh_comp = dynamic_cast<RE_CompMesh*>(rendComponent);
+					vaoToStencil = mesh_comp->GetVAOMesh();
+					triangleToStencil = mesh_comp->GetTriangleMesh();
 				}
+				else if (cT > ComponentType::C_PRIMIVE_MIN && cT < ComponentType::C_PRIMIVE_MAX)
+				{
+					RE_CompPrimitive* prim_comp = dynamic_cast<RE_CompPrimitive*>(rendComponent);
+					vaoToStencil = prim_comp->GetVAO();
+					triangleToStencil = prim_comp->GetTriangleCount();
+				}
+				else if (cT == C_WATER) {
+					RE_CompWater* water_comp = dynamic_cast<RE_CompWater*>(rendComponent);
+					vaoToStencil = water_comp->GetVAO();
+					triangleToStencil = water_comp->GetTriangles();
+				}
+
 
 				glEnable(GL_STENCIL_TEST);
 				SetDepthTest(false);
 
-				while (!vaoToStencil.empty())
-				{
-					//Getting the scale shader and setting some values
-					const char* scaleShader = App::internalResources.GetDefaultScaleShader();
-					RE_Shader* sShader = dynamic_cast<RE_Shader*>(App::resources->At(scaleShader));
-					unsigned int shaderiD = sShader->GetID();
-					RE_GLCacheManager::ChangeShader(shaderiD);
-					RE_GLCacheManager::ChangeVAO(vaoToStencil.top());
-					sShader->UploadModel(stencilGO->GetTransformPtr()->GetGlobalMatrixPtr());
-					RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
-					RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
-					RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
-					RE_ShaderImporter::setFloat(shaderiD, "center", (stackTemp.top()->GetType() == ComponentType::C_MESH) ? dynamic_cast<RE_CompMesh*>(stackTemp.top())->GetAABB().CenterPoint() : math::vec::zero);
+				//Getting the scale shader and setting some values
+				const char* scaleShader = App::internalResources.GetDefaultScaleShader();
+				RE_Shader* sShader = dynamic_cast<RE_Shader*>(App::resources->At(scaleShader));
+				unsigned int shaderiD = sShader->GetID();
+				RE_GLCacheManager::ChangeShader(shaderiD);
+				RE_GLCacheManager::ChangeVAO(vaoToStencil);
+				sShader->UploadModel(stencilPtr->GetTransformPtr()->GetGlobalMatrixPtr());
+				RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
+				RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
+				RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
+				RE_ShaderImporter::setFloat(shaderiD, "opacity", 1.0f);
+				RE_ShaderImporter::setFloat(shaderiD, "center", stencilPtr->GetLocalBoundingBox().CenterPoint());
 
-					//Prepare stencil for detect
-					glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); //don't draw to color buffer
-					glStencilFunc(GL_ALWAYS, 1, 0xFF); //mark to 1 where pass
-					glStencilMask(0xFF);
-					glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+				//Prepare stencil for detect
+				glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); //don't draw to color buffer
+				glStencilFunc(GL_ALWAYS, 1, 0xFF); //mark to 1 where pass
+				glStencilMask(0xFF);
+				glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
-					//Draw scaled mesh 
-					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilGO->GetTransformPtr()->GetLocalScale().Length());
-					stackComponents.push(stackTemp.top());
-					stackTemp.pop();
-					glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
+				//Draw scaled mesh 
+				RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilPtr->GetTransformPtr()->GetLocalScale().Length());
 
-					glStencilFunc(GL_ALWAYS, 0, 0x00);//change stencil to draw 0
-					//Draw normal mesh for empty the inside of stencil
-					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.0);
-					glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
+				glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
 
-					//Turn on the draw and only draw where stencil buffer marks 1
-					glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Make sure we draw on the backbuffer again.
-					glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Make sure you will no longer (over)write stencil values, even if any test succeeds
-					glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
+				glStencilFunc(GL_ALWAYS, 0, 0x00);//change stencil to draw 0
+				//Draw normal mesh for empty the inside of stencil
+				RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.0);
+				glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
 
-					//Draw scaled mesh 
-					RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilGO->GetTransformPtr()->GetLocalScale().Length());
-					glDrawElements(GL_TRIANGLES, triangleToStencil.top() * 3, GL_UNSIGNED_INT, nullptr);
+				//Turn on the draw and only draw where stencil buffer marks 1
+				glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Make sure we draw on the backbuffer again.
+				glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Make sure you will no longer (over)write stencil values, even if any test succeeds
+				glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
 
-					vaoToStencil.pop();
-					triangleToStencil.pop();
-				}
+				//Draw scaled mesh 
+				RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilPtr->GetTransformPtr()->GetLocalScale().Length());
+				glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
+
+				RE_GLCacheManager::ChangeShader(0);
+
+				rendComponent->Draw();
 
 				glDisable(GL_STENCIL_TEST);
 				if (render_view.flags & DEPTH_TEST)
 					SetDepthTest(true);
+
 			}
 		}
-	}*/
+	}
+}
+
+void ModuleRenderer3D::DrawDebug(const RenderView& render_view)
+{
+	RE_GLCacheManager::ChangeShader(0);
+	RE_GLCacheManager::ChangeTextureBind(0);
+
+	bool reset_light = lighting;
+	SetLighting(false);
+	SetTexture2D(false);
+
+	App::editor->DrawDebug(render_view.camera);
+
+	if (reset_light) SetLighting(true);
+	SetTexture2D(render_view.flags & TEXTURE_2D);
+}
+
+void ModuleRenderer3D::DrawSkyBox()
+{
+	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
+
+	RE_GLCacheManager::ChangeTextureBind(0);
+
+	uint skysphereshader = static_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultSkyBoxShader()))->GetID();
+	RE_GLCacheManager::ChangeShader(skysphereshader);
+	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
+
+	glDepthFunc(GL_LEQUAL);
+	RE_CameraManager::MainCamera()->DrawSkybox();
+	glDepthFunc(GL_LESS); // set depth function back to default
 }
 
 void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)

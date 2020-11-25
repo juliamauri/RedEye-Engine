@@ -124,6 +124,8 @@ public:
 private:
 
 	void DrawScene(const RenderView& render_view);
+	void DrawDebug(const RenderView& render_view);
+	void DrawSkyBox();
 	void ThumbnailGameObject(RE_GameObject* go);
 	void ThumbnailMaterial(RE_Material* mat);
 	void ThumbnailSkyBox(RE_SkyBox* skybox);
