@@ -651,13 +651,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "type").c_str()), -1.0f);
 		}
 
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 		// Render Lights
 		DrawQuad();
-
-		glDisable(GL_BLEND);
 
 		if (render_view.flags & DEPTH_TEST)
 			SetDepthTest(true);
