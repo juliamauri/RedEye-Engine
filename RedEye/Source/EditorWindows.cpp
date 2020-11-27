@@ -1222,7 +1222,7 @@ void SceneEditorWindow::Draw(bool secondary)
 			static math::Quat rot, lastRot;
 			static math::vec scl;
 
-			static math::vec before = math::vec::zero;
+			static math::vec before = math::vec::zero, last = math::vec::zero;
 
 			RE_CompCamera* eCamera = RE_CameraManager::EditorCamera();
 			math::float4x4 cameraView = eCamera->GetView();
@@ -1236,9 +1236,9 @@ void SceneEditorWindow::Draw(bool secondary)
 
 			if (!watchingChange) {
 				switch (operation) {
-				case ImGuizmo::TRANSLATE: before = pos; break;
-				case ImGuizmo::ROTATE: before = rot.ToEulerXYZ(); break;
-				case ImGuizmo::SCALE: before = scl; break; }
+				case ImGuizmo::TRANSLATE: before = sTransform->GetLocalPosition(); break;
+				case ImGuizmo::ROTATE: before = sTransform->GetLocalEulerRotation(); break;
+				case ImGuizmo::SCALE: before = sTransform->GetLocalScale(); break; }
 			}
 
 			if (isGlobal = (mode == ImGuizmo::MODE::WORLD)) {
@@ -1275,9 +1275,19 @@ void SceneEditorWindow::Draw(bool secondary)
 				localMat.Decompose(pos, rot, scl);
 
 				switch (operation) {
-				case ImGuizmo::TRANSLATE: sTransform->SetPosition(pos); break;
-				case ImGuizmo::ROTATE: sTransform->SetRotation(isGlobal ? (rot * lastRot).ToEulerXYZ() : rot.ToEulerXYZ()); break;
-				case ImGuizmo::SCALE: sTransform->SetScale(scl); break;
+				case ImGuizmo::TRANSLATE: 
+					sTransform->SetPosition(pos);
+					last = pos;
+					break;
+				case ImGuizmo::ROTATE: 
+					last = isGlobal ? (rot * lastRot).ToEulerXYZ() : rot.ToEulerXYZ();
+					sTransform->SetRotation(last);
+
+					break;
+				case ImGuizmo::SCALE: 
+					sTransform->SetScale(scl); 
+					last = scl;
+					break;
 				}
 			}
 
@@ -1287,18 +1297,18 @@ void SceneEditorWindow::Draw(bool secondary)
 				switch (operation)
 				{
 				case ImGuizmo::TRANSLATE:
-					App::editor->PushCommand(new RE_CMDTransformPosition(selected_uid, before, pos));
+					App::editor->PushCommand(new RE_CMDTransformPosition(selected_uid, before, last));
 					break;
 				case ImGuizmo::ROTATE:
-					App::editor->PushCommand(new RE_CMDTransformRotation(selected_uid, before, isGlobal ? (rot * lastRot).ToEulerXYZ() : rot.ToEulerXYZ()));
+					App::editor->PushCommand(new RE_CMDTransformRotation(selected_uid, before, last));
 					break;
 				case ImGuizmo::SCALE:
-					App::editor->PushCommand(new RE_CMDTransformScale(selected_uid, before, scl));
+					App::editor->PushCommand(new RE_CMDTransformScale(selected_uid, before, last));
 					break;
 				}
 
 				watchingChange = false; 
-				before = math::vec::zero;
+				before = last = math::vec::zero;
 			}
 		}
 

@@ -262,7 +262,7 @@ void RE_CompTransform::DrawProperties()
 	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		static bool watchingChange = false;
-		static bool frameWatched = false;
+		bool frameWatched = false;
 		static math::vec before = math::vec::zero;
 		static math::vec last = math::vec::zero;
 
