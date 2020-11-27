@@ -695,7 +695,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 
 	// Draw Stencil
-	if (render_view.flags & OUTLINE_SELECTION && render_view.light != LIGHT_DEFERRED)
+	if (render_view.flags & OUTLINE_SELECTION)
 	{
 		UID stencilGO = App::editor->GetSelected();
 		if (stencilGO)

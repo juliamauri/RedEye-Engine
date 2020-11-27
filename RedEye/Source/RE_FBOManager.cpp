@@ -144,11 +144,11 @@ int RE_FBOManager::CreateDeferredFBO(unsigned int width, unsigned int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, newFbo.depthBufferTexture, 0);
 
-	// Depth Buffer
-	glGenRenderbuffers(1, &newFbo.depthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthBuffer);
+	// Depth/stencil Buffer
+	glGenRenderbuffers(1, &newFbo.depthstencilBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthstencilBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthstencilBuffer);
 
 	// Check status
 	fbos.insert(eastl::pair<unsigned int, RE_FBO>(newFbo.ID, newFbo));
