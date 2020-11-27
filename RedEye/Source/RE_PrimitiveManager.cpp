@@ -43,7 +43,7 @@ void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP)
 	ComponentType type = cmpP->GetType();
 	switch (type) {
 		// Grid
-	case C_GRID: dynamic_cast<RE_CompGrid*>(cmpP)->GridSetUp(); break;
+	case C_GRID: dynamic_cast<RE_CompGrid*>(cmpP)->GridSetUp(50); break;
 		// Platonics
 	case C_CUBE: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(platonics[0].vao, platonics[0].triangles); break;
 	case C_DODECAHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(platonics[1].vao, platonics[1].triangles); break;

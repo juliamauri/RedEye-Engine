@@ -963,7 +963,11 @@ void RE_GameObject::ResetLocalBoundingBox()
 		switch (render_geo.type) {
 		case C_MESH:		 local_bounding_box = dynamic_cast<RE_CompMesh*>(CompPtr(render_geo))->GetAABB(); break;
 		case C_WATER:		 local_bounding_box = dynamic_cast<RE_CompWater*>(CompPtr(render_geo))->GetAABB(); break;
-		case C_GRID:		 /*local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one));*/ break;
+		case C_GRID: {
+			float dist = dynamic_cast<RE_CompGrid*>(CompPtr(render_geo))->GetDistance();
+			local_bounding_box.FromCenterAndSize(math::vec::zero, { dist , 1.0f, dist }); 
+			break;
+		}
 		case C_CUBE:		 local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
 		case C_DODECAHEDRON: local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
 		case C_TETRAHEDRON:	 local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;

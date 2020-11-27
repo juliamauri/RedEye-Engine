@@ -64,24 +64,51 @@ unsigned int RE_CompPrimitive::GetTriangleCount() const { return triangle_count;
 ///////   Grid   ////////////////////////////////////////////
 RE_CompGrid::~RE_CompGrid() { DeleteBuffers(); }
 
-void RE_CompGrid::GridSetUp(int divisions)
+void RE_CompGrid::GridSetUp(int newD)
 {
-	eastl::vector<float> vertices;
-	for (float f = 0.f; f < 50.f; f += 0.5f)
-	{
-		vertices.push_back((f * 5.f) - 125.f);
-		vertices.push_back(0.f);
-		vertices.push_back(125.f);
-		vertices.push_back((f * 5.f) - 125.f);
-		vertices.push_back(0.f);
-		vertices.push_back(-125.f);
-		vertices.push_back(125.f);
-		vertices.push_back(0.f);
-		vertices.push_back((f * 5.f) - 125.f);
-		vertices.push_back(-125.f);
-		vertices.push_back(0.f);
-		vertices.push_back((f * 5.f) - 125.f);
+	if (!useParent && !transform) {
+		transform = new RE_CompTransform();
+		transform->SetParent(0ull);
 	}
+
+	if (newD < 0) newD = 10;
+	
+	if (VAO) DeleteBuffers();
+
+	tmpSb = divisions = newD;
+
+	eastl::vector<float> vertices;
+	float d = static_cast<float>(divisions);
+	float distance = d * 2.5f;
+	float f = 0.f;
+	for (; f < d; f += 0.5f)
+	{
+		vertices.push_back((f * 5.f) - distance);
+		vertices.push_back(0.f);
+		vertices.push_back(distance);
+		vertices.push_back((f * 5.f) - distance);
+		vertices.push_back(0.f);
+		vertices.push_back(-distance);
+		vertices.push_back(distance);
+		vertices.push_back(0.f);
+		vertices.push_back((f * 5.f) - distance);
+		vertices.push_back(-distance);
+		vertices.push_back(0.f);
+		vertices.push_back((f * 5.f) - distance);
+	}
+
+	vertices.push_back((f * 5.f) - distance);
+	vertices.push_back(0.f);
+	vertices.push_back(distance);
+	vertices.push_back((f * 5.f) - distance);
+	vertices.push_back(0.f);
+	vertices.push_back(-distance);
+	vertices.push_back(distance);
+	vertices.push_back(0.f);
+	vertices.push_back((f * 5.f) - distance);
+	vertices.push_back(-distance);
+	vertices.push_back(0.f);
+	vertices.push_back((f * 5.f) - distance);
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -112,13 +139,13 @@ void RE_CompGrid::Draw() const
 {
 	unsigned int shader = dynamic_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultShader()))->GetID();
 	RE_GLCacheManager::ChangeShader(shader);
-	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
+	RE_ShaderImporter::setFloat4x4(shader, "model", GetTransformPtr()->GetGlobalMatrixPtr());
 	RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
 	RE_ShaderImporter::setFloat(shader, "cdiffuse", color);
 
 	RE_GLCacheManager::ChangeVAO(VAO);
-	glDrawArrays(GL_LINES, 0, 400);
+	glDrawArrays(GL_LINES, 0, (divisions * 8) + 4);
 	RE_GLCacheManager::ChangeVAO(0);
 }
 
@@ -127,11 +154,14 @@ void RE_CompGrid::DrawProperties()
 	// TODO Rub: editor properties
 	if (ImGui::CollapsingHeader("Grid Primitive"))
 	{
-		int tmpSb = divisions;
-		if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
-		{
+		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
+
+		static bool apply = false;
+		if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1))
+			if(tmpSb != divisions) apply = true;
+
+		if (apply && ImGui::Button("Apply"))
 			GridSetUp(tmpSb);
-		}
 	}
 }
 
@@ -179,6 +209,11 @@ void RE_CompGrid::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 	cursor += size;
 
 	GridSetUp(divisions);
+}
+
+float RE_CompGrid::GetDistance() const
+{
+	return distance;
 }
 
 ///////   Rock   ////////////////////////////////////////////

@@ -66,9 +66,12 @@ public:
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
+	float GetDistance() const;
+
 private:
 
-	int divisions = 0;
+	int divisions = 50, tmpSb = 50;
+	float distance = 125.f;
 	RE_CompTransform* transform = nullptr;
 };
 

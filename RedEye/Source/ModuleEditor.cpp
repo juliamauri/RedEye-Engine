@@ -120,7 +120,8 @@ bool ModuleEditor::Start()
 	windows.push_back(wwise = new WwiseWindow());
 
 	grid = new RE_CompGrid();
-	grid->GridSetUp();
+	grid->SetParent(0ull);
+	grid->GridSetUp(50);
 
 	// FOCUS CAMERA
 	UID first = ModuleScene::GetRootCPtr()->GetFirstChildUID();
@@ -552,7 +553,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 
 		glEnd();
 
-		//if (grid->IsActive()) grid->Draw();
+		if (grid->IsActive()) grid->Draw();
 	}
 }
 
