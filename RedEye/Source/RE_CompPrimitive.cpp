@@ -559,6 +559,8 @@ void RE_CompParametric::DrawProperties()
 		ImGui::PopItemWidth();
 		if (canChange && ImGui::Button("Apply"))
 		{
+			slices = target_slices;
+			stacks = target_stacks;
 			GenerateParametric();
 			canChange = false;
 		}
