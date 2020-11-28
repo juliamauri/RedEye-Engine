@@ -142,11 +142,11 @@ bool ModuleRenderer3D::Start()
 	thumbnailView.fbos = { RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
 
 	render_views[VIEW_EDITOR].fbos = {
-		RE_FBOManager::CreateFBO(1024, 768, 1, true, false),
+		RE_FBOManager::CreateFBO(1024, 768, 1, true, true),
 		RE_FBOManager::CreateDeferredFBO(1024, 768) };
 
 	render_views[VIEW_GAME].fbos = {
-		RE_FBOManager::CreateFBO(1024, 768),
+		RE_FBOManager::CreateFBO(1024, 768, true, true),
 		RE_FBOManager::CreateDeferredFBO(1024, 768) };
 
 	return true;
@@ -592,9 +592,6 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		drawing = comptsToDraw.top();
 		comptsToDraw.pop();
 
-		if (render_view.light != LIGHT_DEFERRED && drawing->GetGOUID() == App::editor->GetSelected())
-			continue;
-
 		bool blend = false;
 		ComponentType dT = drawing->GetType();
 		if (dT == C_MESH)
@@ -764,14 +761,12 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 				glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Make sure we draw on the backbuffer again.
 				glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Make sure you will no longer (over)write stencil values, even if any test succeeds
 				glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
-
+				
 				//Draw scaled mesh 
 				RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilPtr->GetTransformPtr()->GetLocalScale().Length());
 				glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
 
 				RE_GLCacheManager::ChangeShader(0);
-
-				rendComponent->Draw();
 
 				glDisable(GL_STENCIL_TEST);
 				if (render_view.flags & DEPTH_TEST)
