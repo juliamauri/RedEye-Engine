@@ -75,12 +75,38 @@ Importing .fbx files may trigger errors while checking the materials' texture pa
 
 ## User Interface
 ### File
+* **New Scene**: Empty the scene with non scene resource linked.
+* **Save Scene**: Save current scene.
 * **Exit**: closes engine.
-### Create
-* **Plane**: creates a Game Object with a Plane Primitive component using par_shapes. It can be converted into mesh.
-* **Cube**: creates a Game Object with a Cube Primitive component using par_shapes.
-* **Sphere**: creates a Game Object with a Sphere Primitive component using par_shapes.
+### Edit
+* **Undo**: Undo transformations (CTRL + Z).
+* **Redo**: Redo transformations (CTRL + Y).
+* **Exit**: closes engine.
+### Assets
+* **Create**:
+    * **Material**:  Creates a new material.
+    * **Shader**: Creates a new shader with the script editor or scripts from assets.
+    * **Skybox**:  Creates a new skybox.
+    * **Water Resources**: Creates a water resource(component independent). 
+### Gameobjects
+* **Primitive**: List that you can select what primitive you want using par_shapes.
+    * **Grid**
+    * **Cube**
+    * **Dodecahedron**
+    * **Tetrahedron**
+    * **Octohedron**
+    * **Icosahedron**
+    * **Plane**
+    * **Sphere**
+    * **Cylinder**
+    * **HemiSphere**
+    * **Torus**
+    * **Trefoil Knot**
+    * **Rock**
 * **Camera**: creates a Game Object with a Camera component.
+* **Light**: creates a Game Object with a Light component.
+* **Max Lights**: creates a Game Object with a total childs from max light (64, debug prouposes).
+* **Water**: creates a Game Object with a Water component.
 ### View
 Each option toggles a hide/view window from a list of available windows:
 * **Console**: Shows Engine's logs.
@@ -97,11 +123,10 @@ Each option toggles a hide/view window from a list of available windows:
 * **Hierarchy**: Shows distribution of Game Objects in scene.
 * **Properties**: Shows information about the selected Game Object, its components and resources.
 * **Assets Panel**: Shows all resources from the assets folder, like explorer.exe.
-* **Prefabs**: Allows prefab creation to duplicate scene's Game Objects.
-* **Random Test**: For testing random number generation with ranges using ints and floats.
-* **Texture Manager**: Shows textures loaded.
-* **Material Editor**: Craete a new material.
-* **Shader Editor**: Create a new shader with the script editor or scripts from assets.
+* **Wwise**: You can send events to Wwise for reproduce your bank.
+* **Tools**:
+    * **Random Test**: For testing random number generation with ranges using ints, floats and unsigned long long (with bitwise operator).
+    * **Transforms Debug Info**: for show all transforms of current scene.
 ### Help
 * **Open/Close ImGui Demo**: Opens/closes ImGui Demo window
 * **Documentation**: opens browser to repository's wiki page
@@ -129,9 +154,50 @@ Each option toggles a hide/view window from a list of available windows:
 * Assimp v4.0.1
 * par_shapes
 * gpudetect
-* mmgr
 
 ## Version Notes
+
+### PreRelease v3.X ***Big Fucking Update***
+* Graphics:
+    * Added and implemented **Deferred Shading Lights**!
+        * New render pipeline that can change deferred and no light shader.
+        * **Added Component Light**!
+        * Shininess as defalut use on material.
+    * Added **Commponent Water**!
+        * Implemented **dynamic foam** to water!
+          * New internal values that our system detect and send it to the shader. You can request the depth texture.
+        * Because of new render pipeline, we configured a water component that works automatically with deferred and no lights.
+        * Implemented to auto generate your water resource. you can select if you want deferred or not (**engine escense**, everything we use on the engine you can implemented it with our tools!).
+* **Performance**:
+    * Implemented our PoolMapped to gameobjects and components (RE_GOManager class). 
+        * **Zero pointers and bye UUID** (windows), now works with UID (unsigned long long) generated with our random generator (playing with **bitwise operation**).
+        * PoolMapped becomes to **dynamic array**, increases when it's full.
+        * Implemented RE_GOManager on scene and gameobjects resources (Model, Scene and Prefab).
+        * **New serialization** based on pools.
+        * Using pools we can **avoiding unnecesary interations**, because we have more control on everything.
+    * Code CleanUp:
+        * **Removing warning**s.
+        * Implementing **C++ casts** (dynamic, static, const).
+        * **Zero recursivity** methods.
+        * **Removing App pointer**, welcome static values.
+    * Fixed some OpenGL errors and warnings.
+* Resources:
+    * Implemented **erase resources** and updates the other resources.
+    * Visual upgrade on panel assets.
+    * Fixed thumnails, actually gameobjects and material thumbnails don't render properly.
+* Usability
+    * Implemented **destroy GameObjects**!
+    * Added create prefab from any gameobject of hiteracy.
+    * Added **Gizmo** (ImGuizmo).
+    * Added and implemented **Commands!** You can do and redo all transformations!
+    * New window for watch all transforms of the scene (debug pruposes).
+    * Added **OpenGL Debug Output**. Now automatcally send logs to console!
+    * New Scene and Save Scene Buttons. PopUp window before closing if you did no save.
+* Implemented all primitives from **par_shapes.h**
+* Added functional Component Grid!
+* Added and implemented new AudioModule with **Wwise**!
+    * You can configure the folder of output from wwise editor inside of engine folder for **hot reaolanding** the new changes inmediatly!
+    * Added new panel of module audio that you can send calls to Wwise.
 
 ### Release v3.2
 * Added and implemented **EASTL** and dependence EA libraries. Bye STD.
