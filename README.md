@@ -1,4 +1,4 @@
-# Red Eye Engine [![Build status](https://ci.appveyor.com/api/projects/status/swrp9sgx89yxl493?svg=true)](https://ci.appveyor.com/project/cumus/redeye-engine)
+# Red Eye ![logo](https://github.com/juliamauri/RedEye-Engine/blob/master/docs/favicon-32x32.png?raw=true) Engine [![Build status](https://ci.appveyor.com/api/projects/status/swrp9sgx89yxl493?svg=true)](https://ci.appveyor.com/project/cumus/redeye-engine)
 
 Red Eye is a 3D Game Engine written in C++ as an assignment for a university course.
 
@@ -60,7 +60,7 @@ We put all asset data of a resource in a buffer and objtain the MD5. The name of
 ### GameObjects/Components with Resources Serialization
 When create a new scene or prefab resource, will be saved on assets as JSON and at library as Binary. Before the gameobject seraialization the importer will detect all unique resources from gameobject and mapped and serialized it.
 ### Read Assets Changes
-It detects any changes of assets folder and imports (no recursion). Use an own base Path struct with directory, file and meta. The directory will detect the changes and return a stack of changes to do. At start of engine this method will process all assets folder, after it enters at end of every frame with the extra seconds before the frame ends.
+It detects any changes of assets folder and imports (non-recursive). Use an own base Path struct with directory, file and meta. The directory will detect the changes and return a stack of changes to do. At start of engine this method will process all assets folder; after, it enters at end of every frame with the extra seconds before the frame ends.
 ### Meta files
 All importabe files will generate a .meta file that indicats it's imported and detected by the read assets changes at init, evading to import another time. Can contain import settings of any resource.
 ### Materials
@@ -81,7 +81,6 @@ Importing .fbx files may trigger errors while checking the materials' texture pa
 ### Edit
 * **Undo**: Undo transformations (CTRL + Z).
 * **Redo**: Redo transformations (CTRL + Y).
-* **Exit**: closes engine.
 ### Assets
 * **Create**:
     * **Material**:  Creates a new material.
@@ -105,7 +104,7 @@ Importing .fbx files may trigger errors while checking the materials' texture pa
     * **Rock**
 * **Camera**: creates a Game Object with a Camera component.
 * **Light**: creates a Game Object with a Light component.
-* **Max Lights**: creates a Game Object with a total childs from max light (64, debug prouposes).
+* **Max Lights**: creates a Game Object with a total childs from max light (64, debug purposes).
 * **Water**: creates a Game Object with a Water component.
 ### View
 Each option toggles a hide/view window from a list of available windows:
@@ -126,12 +125,12 @@ Each option toggles a hide/view window from a list of available windows:
 * **Wwise**: You can send events to Wwise for reproduce your bank.
 * **Tools**:
     * **Random Test**: For testing random number generation with ranges using ints, floats and unsigned long long (with bitwise operator).
-    * **Transforms Debug Info**: for show all transforms of current scene.
+    * **Transforms Debug Info**: for showing all transforms in thr current scene.
 ### Help
 * **Open/Close ImGui Demo**: Opens/closes ImGui Demo window
-* **Documentation**: opens browser to repository's wiki page
-* **Download Latest**: opens browser to repository's realeses page
-* **Report a Bug**: opens a browser to repository's issues page
+* **Documentation**: opens browser tab to repository's wiki page
+* **Download Latest**: opens browser tab to repository's releases page
+* **Report a Bug**: opens a browser tab to repository's issues page
 * **About**: Shows engine info and 3rd party software.
 
 ## Libraries Used
@@ -157,51 +156,51 @@ Each option toggles a hide/view window from a list of available windows:
 
 ## Version Notes
 
-### PreRelease v3.X ***Big Fucking Update***
+### Release v3.3 ***Big F---ing Update***
 * Graphics:
-    * Added and implemented **Deferred Shading Lights**!
-        * New render pipeline that can change deferred and no light shader.
+    * Added and implemented **Deferred Light Shading**!
+        * New render pipeline can toggle lighting modes.
         * **Added Component Light**!
-        * Shininess as defalut use on material.
+        * Support for material Shininess value.
     * Added **Commponent Water**!
-        * Implemented **dynamic foam** to water!
-          * New internal values that our system detect and send it to the shader. You can request the depth texture.
-        * Because of new render pipeline, we configured a water component that works automatically with deferred and no lights.
-        * Implemented to auto generate your water resource. you can select if you want deferred or not (**engine escense**, everything we use on the engine you can implemented it with our tools!).
+        * Implemented **dynamic foam** on water!
+          * New shader's internal values are parsed and uploaded to the shader. You may now request the depth texture generated each frame.
+        * Because of new render pipeline, we configured a water component that works automatically with and without deferring.
+        * Implemented procedure automatically generate your own water resource. You may select if you want deferred or not (**engine scene**, everything we use on the engine you can implemented it step by step with our editor tools!).
 * **Performance**:
-    * Implemented our PoolMapped to gameobjects and components (RE_GOManager class). 
-        * **Zero pointers and bye UUID** (windows), now works with UID (unsigned long long) generated with our random generator (playing with **bitwise operation**).
-        * PoolMapped becomes to **dynamic array**, increases when it's full.
+    * Implemented Gameobject's and components' Hash Table (RE_GOManager class). 
+        * **Hash Table removes using new's, delete's and UUID** (windows). Now using UID (unsigned long long) generated with our random generator (playing with **bitwise operators**) to reference any gamepbject or component.
+        * Upgraded Hash Table array's to **dynamic arrays**, increasing array size when full.
         * Implemented RE_GOManager on scene and gameobjects resources (Model, Scene and Prefab).
-        * **New serialization** based on pools.
-        * Using pools we can **avoiding unnecesary interations**, because we have more control on everything.
+        * **New serialization** based on Hash Table direct memory copying.
+        * Using Hash Tables allows **x3 faster iteration** in scene elements. All data is neatly stored together and removes using pointers to access all elements.
     * Code CleanUp:
         * **Removing warning**s.
-        * Implementing **C++ casts** (dynamic, static, const).
+        * Implementing **C++ casts** (dynamic, static, const and reinterpret).
         * **Zero recursivity** methods.
         * **Removing App pointer**, welcome static values.
-    * Fixed some OpenGL errors and warnings.
+    * Fixed some OpenGL errors and warnings. We found them thanks to adding new debug log polling from opengl.
 * Resources:
-    * Implemented **erase resources** and updates the other resources.
+    * Implemented **erase resources**. It updates other resources with dependencies.
     * Visual upgrade on panel assets.
-    * Fixed thumnails, actually gameobjects and material thumbnails don't render properly.
+    * Fixed thumbnails; although an issue remains where some gameobjects and material thumbnails don't render properly.
 * Usability
-    * Implemented **destroy GameObjects**!
-    * Added create prefab from any gameobject of hiteracy.
+    * Implemented **destroy GameObject**!
+    * Added create prefab from any gameobject of hierarchy.
     * Added **Gizmo** (ImGuizmo).
-    * Added and implemented **Commands!** You can do and redo all transformations!
-    * New window for watch all transforms of the scene (debug pruposes).
+    * Added and implemented **Commands!** You can do and redo all transformation changes!
+    * New window monitoring all scene transforms (debug pruposes).
     * Added **OpenGL Debug Output**. Now automatcally send logs to console!
-    * New Scene and Save Scene Buttons. PopUp window before closing if you did no save.
+    * "New Scene" and "Save Scene" Buttons. PopUp window opens before closing if current scene changes haven't been save.
 * Implemented all primitives from **par_shapes.h**
-* Added functional Component Grid!
+* Added functional Grid Component!
 * Added and implemented new AudioModule with **Wwise**!
-    * You can configure the folder of output from wwise editor inside of engine folder for **hot reaolanding** the new changes inmediatly!
-    * Added new panel of module audio that you can send calls to Wwise.
+    * You can configure the folder of output from wwise editor inside of engine folder for **hot reloading** new changes inmediatly!
+    * Added new audio module panel which to send calls to Wwise.
 
 ### Release v3.2
-* Added and implemented **EASTL** and dependence EA libraries. Bye STD.
-* Fixed **Dynamic AABB Tree** crash
+* Added and implemented **EASTL** and EA libraries' dependencies. Good bye STD.
+* Fixed **Dynamic AABB Tree** crash.
 
 ### Release v3.1
 * Added **shader parsing** for uniform values.
