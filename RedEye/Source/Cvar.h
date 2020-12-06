@@ -24,6 +24,7 @@ public:
 	Cvar(double double_v);
 	Cvar(float float_v);
 	Cvar(const char* char_p_v);
+	Cvar(eastl::string string_v);
 	Cvar(RE_GameObject* go_v);
 	Cvar(const math::float4x4 mat4_v);
 
@@ -51,6 +52,7 @@ public:
 		MAT3,
 		MAT4,
 		CHAR_P,
+		STRING,
 		GAMEOBJECT,
 		SAMPLER
 	};
@@ -60,7 +62,7 @@ protected:
 
 	union VAR_data
 	{
-		bool bool_v = false;
+		bool bool_v;
 		bool bool2_v[2];
 		bool bool3_v[3];
 		bool bool4_v[4];
@@ -77,6 +79,7 @@ protected:
 		math::float3 float3_v;
 		math::float4 float4_v;
 		const char* char_p_v;
+		eastl::string string_v = "";
 		RE_GameObject* go_v;
 		math::float3x3 mat3_v;
 		math::float4x4 mat4_v;
@@ -93,6 +96,7 @@ public:
 	virtual bool SetValue(double double_v, bool force_type = false);
 	virtual bool SetValue(float float_v, bool force_type = false);
 	virtual bool SetValue(const char* char_p_v, bool force_type = false);
+	virtual bool SetValue(eastl::string string_v, bool force_type = false);
 	virtual bool SetValue(RE_GameObject* go_v, bool force_type = false);
 
 	VAR_TYPE				GetType() const;
@@ -112,10 +116,10 @@ public:
 	math::float2			AsFloat2() const;
 	math::float3			AsFloat3() const;
 	math::float4			AsFloat4() const;
-	math::float3x3			AsMat3()const;
-	math::float4x4			AsMat4()const;
+	math::float3x3			AsMat3() const;
+	math::float4x4			AsMat4() const;
 	float*					AsFloatPointer();
-	const float*					AsFloatPointer()const;
+	const float*			AsFloatPointer() const;
 	const char*				AsCharP() const;
 	RE_GameObject*			AsGO() const;
 };

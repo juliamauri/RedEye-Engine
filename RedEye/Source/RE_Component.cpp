@@ -1,6 +1,6 @@
 #include "RE_Component.h"
 
-#include "RE_GOManager.h"
+#include "RE_ECS_Manager.h"
 
 UID RE_Component::PoolSetUp(GameObjectsPool* pool, const UID parent, bool report_parent)
 {

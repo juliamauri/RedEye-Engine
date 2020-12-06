@@ -2,7 +2,7 @@
 #define __RE_SCENE_H__
 
 #include "Resource.h"
-class RE_GOManager;
+class RE_ECS_Manager;
 
 class RE_Scene :
 	public ResourceContainer
@@ -18,12 +18,12 @@ public:
 
 	void Import(bool keepInMemory = true) override;
 
-	void Save(RE_GOManager* pool);
+	void Save(RE_ECS_Manager* pool);
 
 	void SetName(const char* name) override;
 
 	//returns a new, needed destroy after use.
-	RE_GOManager* GetPool();
+	RE_ECS_Manager* GetPool();
 
 private:
 	void Draw() override;
@@ -34,8 +34,8 @@ private:
 	void LibrarySave(bool fromLoaded = false);
 
 private:
-	RE_GOManager* loaded = nullptr;
-	RE_GOManager* toSave = nullptr;
+	RE_ECS_Manager* loaded = nullptr;
+	RE_ECS_Manager* toSave = nullptr;
 };
 
 #endif // !__RE_SCENE_H__

@@ -3,7 +3,7 @@
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "ModuleRenderer3D.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "RE_ResourceManager.h"
 #include "RE_InternalResources.h"
 #include "RE_ShaderImporter.h"
@@ -183,7 +183,7 @@ void RE_Material::LoadResourceMeta(JSONNode* metaNode)
 
 void RE_Material::DrawMaterialEdit()
 {
-	RE_Shader* matShader = dynamic_cast<RE_Shader*>(App::resources->At(shaderMD5 ? shaderMD5 : App::internalResources.GetDefaultShader()));
+	RE_Shader* matShader = dynamic_cast<RE_Shader*>(App::resources->At(shaderMD5 ? shaderMD5 : RE_ResourceManager::internalResources.GetDefaultShader()));
 
 	ImGui::Text("Shader selected: %s", matShader->GetMD5());
 	
@@ -1086,11 +1086,11 @@ void RE_Material::BinarySerialize()
 {
 	RE_FileIO libraryFile(GetLibraryPath(), App::fs->GetZipPath());
 
-	uint bufferSize = GetBinarySize();
-	char* buffer = new char[bufferSize + 1];
+	uint bufferSize = GetBinarySize() + 1;
+	char* buffer = new char[bufferSize];
 	char* cursor = buffer;
 
-	size_t size = sizeof(RE_ShadingMode);
+	size_t size = sizeof(int);
 	memcpy(cursor, &shadingType, size);
 	cursor += size;
 
@@ -1287,7 +1287,7 @@ void RE_Material::BinarySerialize()
 	char nullchar = '\0';
 	memcpy(cursor, &nullchar, sizeof(char));
 
-	libraryFile.Save(buffer, bufferSize + 1);
+	libraryFile.Save(buffer, bufferSize);
 	DEL_A(buffer);
 }
 
@@ -1323,7 +1323,7 @@ void RE_Material::UnUseResources()
 
 void RE_Material::UploadToShader(const float* model, bool usingChekers, bool defaultShader)
 {
-	const char* usingShader = (shaderMD5 && !defaultShader) ? shaderMD5 : App::internalResources.GetDefaultShader();
+	const char* usingShader = (shaderMD5 && !defaultShader) ? shaderMD5 : RE_ResourceManager::internalResources.GetDefaultShader();
 	RE_Shader* shaderRes = dynamic_cast<RE_Shader*>(App::resources->At(usingShader));
 	RE_GLCacheManager::ChangeShader(shaderRes->GetID());
 	shaderRes->UploadModel(model);
@@ -1381,7 +1381,7 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 	{
 		glActiveTexture(GL_TEXTURE0 + textureCounter);
 		RE_ShaderImporter::setInt(ShaderID, "tdiffuse0", textureCounter++);
-		RE_GLCacheManager::ChangeTextureBind(App::internalResources.GetTextureChecker());
+		RE_GLCacheManager::ChangeTextureBind(RE_ResourceManager::internalResources.GetTextureChecker());
 	}
 	else
 	{
@@ -1544,7 +1544,7 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 
 unsigned int RE_Material::GetShaderID() const
 {
-	const char* usingShader = (shaderMD5) ? shaderMD5 : App::internalResources.GetDefaultShader();
+	const char* usingShader = (shaderMD5) ? shaderMD5 : RE_ResourceManager::internalResources.GetDefaultShader();
 	return dynamic_cast<RE_Shader*>(App::resources->At(usingShader))->GetID();
 }
 
@@ -1595,7 +1595,7 @@ void RE_Material::GetAndProcessUniformsFromShader()
 	static const char* materialNames[18] = {  "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient",  "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity",  "shininess", "shininessST", "tshininess", "refraccti", "theight",  "tnormals", "treflection" };
 	static const char* materialTextures[9] = {  "tdiffuse", "tspecular", "tambient", "temissive", "topacity", "tshininess", "theight", "tnormals", "treflection" };
 	
-	eastl::vector<ShaderCvar> fromShader = dynamic_cast<RE_Shader*>(App::resources->At(shaderMD5 ? shaderMD5 : App::internalResources.GetDefaultShader()))->GetUniformValues();
+	eastl::vector<ShaderCvar> fromShader = dynamic_cast<RE_Shader*>(App::resources->At(shaderMD5 ? shaderMD5 : RE_ResourceManager::internalResources.GetDefaultShader()))->GetUniformValues();
 	for (auto sVar : fromShader)
 	{
 		if (sVar.custom)

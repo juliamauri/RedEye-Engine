@@ -58,7 +58,7 @@ void RE_CameraManager::RecallSceneCameras()
 	{
 		if (!main_camera) main_camera = dynamic_cast<RE_CompCamera*>(cam)->GetPoolID();
 
-		/* TODO Rub:
+		/* TODO Rub: handle several main cameras
 		if ((*cam)->isMain)
 		else: more than 1 main cameras*/
 	}

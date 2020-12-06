@@ -3,8 +3,7 @@
 #include "Application.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"
-#include "RE_HandleErrors.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "RE_ResourceManager.h"
 #include "RE_TimeManager.h"
 #include "RE_PrimitiveManager.h"
@@ -67,9 +66,9 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		PHYSFS_VERSION(&physfs_version);
 		char tmp[8];
 		EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", static_cast<int>(physfs_version.major), static_cast<int>(physfs_version.minor), static_cast<int>(physfs_version.patch));
-		App::ReportSoftware("PhysFS", tmp, "https://icculus.org/physfs/");
-		App::ReportSoftware("Rapidjson", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
-		App::ReportSoftware("LibZip", "1.5.0", "https://libzip.org/");
+		RE_SOFT_NVS("PhysFS", tmp, "https://icculus.org/physfs/");
+		RE_SOFT_NVS("Rapidjson", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
+		RE_SOFT_NVS("LibZip", "1.5.0", "https://libzip.org/");
 		
 		engine_path = "engine";
 		library_path = "Library";
@@ -269,13 +268,17 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					eastl::list<RE_File*>::const_iterator iter = toImport.end();
 					if (!toImport.empty())
 					{
-						int count = toImport.size();
 						iter--;
-
-						while ((((*iter)->fType != F_PREFAB || (*iter)->fType != F_SCENE || (*iter)->fType != F_MODEL)) && count > 1)
+						FileType type = (*iter)->fType;
+						int count = toImport.size();
+						while (count > 1)
 						{
+							if (type == F_PREFAB || type == F_SCENE || type == F_MODEL)
+								break;
+
 							count--;
 							iter--;
+							type = (*iter)->fType;
 						}
 						iter++;
 					}
@@ -293,7 +296,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 		if ((doAll || run) && !toImport.empty())
 		{
-			App::handlerrors.StartHandling();
+			RE_LogManager::ScopeProcedureLogging();
 			eastl::vector<RE_File*> toRemoveF;
 
 			//Importing
@@ -340,7 +343,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					[&](auto x) {return eastl::find(begin(toRemoveF), end(toRemoveF), x) != end(toRemoveF); }), eastl::end(toImport));
 			}
 
-			App::handlerrors.StopAndPresent();
+			RE_LogManager::EndScope();
 		}
 
 		if ((doAll || run) && !toReImport.empty())

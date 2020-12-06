@@ -11,8 +11,7 @@
 #include "RE_ResourceManager.h"
 #include "RE_CameraManager.h"
 #include "RE_TimeManager.h"
-#include "OutputLog.h"
-#include "RE_HandleErrors.h"
+#include "RE_LogManager.h"
 #include "RE_GameObject.h"
 #include "RE_Command.h"
 
@@ -46,6 +45,7 @@ ConsoleWindow::ConsoleWindow(const char * name, bool start_active) :
 	EditorWindow(name, start_active)
 {
 	pos.y = 500.f;
+	for (auto &c : categories) c = true;
 }
 
 ConsoleWindow::~ConsoleWindow() {}
@@ -66,8 +66,8 @@ void ConsoleWindow::Draw(bool secondary)
 			{
 				if (ImGui::MenuItem("All")) ChangeFilter(-1);
 
-				eastl::map<eastl::string, unsigned int>::iterator it = App::log->callers.begin();
-				for (int i = 0; it != App::log->callers.end(); i++, it++)
+				eastl::map<eastl::string, unsigned int>::iterator it = callers.begin();
+				for (int i = 0; it != callers.end(); i++, it++)
 					if (ImGui::MenuItem(it->first.c_str()))
 						ChangeFilter(it->second);
 
@@ -76,6 +76,7 @@ void ConsoleWindow::Draw(bool secondary)
 
 			if (ImGui::BeginMenu("Filter Categories"))
 			{
+				static const char* category_names[8] = { "Separator", "Global", "Secondary", "Terciary", "Software", "Error" , "Warning", "Solution" };
 				for (unsigned int j = 0; j < L_TOTAL_CATEGORIES; j++)
 					if (ImGui::MenuItem(category_names[j], categories[j] ? "Hide" : "Show"))
 						SwapCategory(j);
@@ -85,7 +86,8 @@ void ConsoleWindow::Draw(bool secondary)
 			ImGui::EndMenuBar();
 		}
 
-		//Draw console buffer //TODO print parcial buffer, play with cursors
+		//Draw console buffer
+		if (needs_rewriting) ResetBuffer();
 		ImGui::TextEx(console_buffer.begin(), console_buffer.end(), ImGuiTextFlags_NoWidthForLargeClippedText);
 
 		if (scroll_to_bot)
@@ -102,42 +104,73 @@ void ConsoleWindow::Draw(bool secondary)
 	ImGui::End();
 }
 
+void ConsoleWindow::ResetBuffer()
+{
+	needs_rewriting = false;
+	console_buffer.clear();
+
+	for (auto log : logHistory)
+	{
+		if (categories[log.category] && (file_filter < 0 || log.caller_id == file_filter))
+		{
+			console_buffer.append(log.data.c_str());
+
+			if (log.count > 1u)
+				console_buffer.append((" -> Called: " + eastl::to_string(log.count) + " times\n").c_str());
+		}
+	}
+}
+
 void ConsoleWindow::ChangeFilter(const int new_filter)
 {
 	if (new_filter != file_filter)
 	{
 		file_filter = new_filter;
-		console_buffer.clear();
-		scroll_to_bot = true;
-
-		eastl::list<RE_Log>::iterator it = App::log->logHistory.begin();
-
-		if (file_filter < 0)
-			for (; it != App::log->logHistory.end(); it++)
-				if (categories[it->category])
-					console_buffer.append(it->data.c_str());
-		else
-			for (; it != App::log->logHistory.end(); it++)
-				if (it->caller_id == file_filter && categories[it->category])
-					console_buffer.append(it->data.c_str());
+		scroll_to_bot = needs_rewriting = true;
 	}
 }
 
 void ConsoleWindow::SwapCategory(const unsigned int c)
 {
 	categories[c] = !categories[c];
-	console_buffer.clear();
-	scroll_to_bot = true;
+	scroll_to_bot = needs_rewriting = true;
+}
 
-	eastl::list<RE_Log>::iterator it = App::log->logHistory.begin();
-	if (file_filter < 0)
-		for (; it != App::log->logHistory.end(); it++)
-			if (categories[it->category])
-				console_buffer.append(it->data.c_str());
-	else
-		for (; it != App::log->logHistory.end(); it++)
-			if (it->caller_id == file_filter && categories[it->category])
-				console_buffer.append(it->data.c_str());
+void ConsoleWindow::AppendLog(unsigned int category, const char* text, const char* file_name)
+{
+	static unsigned int next_caller_id = 0u;
+	unsigned int count = 1u;
+	auto caller_id = callers.find(file_name);
+	if (caller_id != callers.end())
+	{
+		for (auto it = logHistory.rbegin(); it != logHistory.rend(); ++it)
+		{
+			if (it->caller_id == caller_id->second
+				&& it->category == category
+				&& (it->data.compare(text) == 0))
+			{
+				if (it != logHistory.rbegin())
+				{
+					count += it->count;
+					logHistory.erase(it);
+					logHistory.push_back({ caller_id->second, category, count, text });
+				}
+				else logHistory.rbegin()->count++;
+
+				scroll_to_bot = needs_rewriting = true;
+				return;
+			}
+		}
+	}
+	else callers.insert(eastl::pair<eastl::string, unsigned int>(file_name, ++next_caller_id));
+
+	logHistory.push_back({ next_caller_id, category, count, text });
+
+	if (!needs_rewriting && categories[category] && (file_filter < 0 || logHistory.back().caller_id == file_filter))
+	{
+		console_buffer.append(text);
+		scroll_to_bot = true;
+	}
 }
 
 
@@ -227,13 +260,6 @@ void PropertiesWindow::Draw(bool secondary)
 }
 
 ///////   About Window   ////////////////////////////////////////////
-SoftwareInfo::SoftwareInfo(const char * name, const char * v, const char * w) :
-	name(name)
-{
-	if (v != nullptr) version = v;
-	if (w != nullptr) website = w;
-}
-
 AboutWindow::AboutWindow(const char * name, bool start_active) : EditorWindow(name, start_active) {}
 AboutWindow::~AboutWindow() {}
 
@@ -266,22 +292,17 @@ void AboutWindow::Draw(bool secondary)
 		ImGui::Separator();
 		if (ImGui::CollapsingHeader("3rd Party Software:"))
 		{
-			eastl::list<SoftwareInfo>::iterator it = sw_info.begin();
-			for (; it != sw_info.end(); ++it)
+			for (auto software : sw_info)
 			{
-				if (!it->name.empty())
-				{
-					if (!it->version.empty()) ImGui::BulletText("%s: v%s ", it->name.c_str(), it->version.c_str());
-					else ImGui::BulletText("%s ", it->name.c_str());
+				if (software.version != nullptr) ImGui::BulletText("%s: v%s ", software.name, software.version);
+				else ImGui::BulletText("%s ", software.name);
 
-					if (!it->website.empty())
-					{
-						eastl::string button_name = "Open ";
-						button_name += it->name;
-						button_name += " Website";
-						ImGui::SameLine();
-						if (ImGui::Button(button_name.c_str())) BROWSER(it->website.c_str());
-					}
+				if (software.website != nullptr)
+				{
+					ImGui::SameLine();
+					char tmp[128];
+					EA::StdC::Snprintf(tmp, 128, "Open %s Website", software.name);
+					if (ImGui::Button(tmp)) BROWSER(software.website);
 				}
 			}
 		}
@@ -596,6 +617,27 @@ void PopUpWindow::PopUpDelUndeFile(const char* assetPath)
 	PopUp("Delete", "Do you want to delete that file?", false);
 }
 
+void PopUpWindow::AppendScopedLog(const char* log, unsigned int type)
+{
+	if (log != nullptr)
+	{
+		logs += log;
+		switch (type) {
+		case CONSOLE_LOG_SAVE_ERROR: errors += log; break;
+		case CONSOLE_LOG_SAVE_WARNING: warnings += log; break;
+		case CONSOLE_LOG_SAVE_SOLUTION: solutions += log; break;
+		default: break; }
+	}
+}
+
+void PopUpWindow::ClearScope()
+{
+	logs.clear();
+	errors.clear();
+	warnings.clear();
+	solutions.clear();
+}
+
 void PopUpWindow::Draw(bool secondary)
 {
 	if(ImGui::Begin(titleText.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
@@ -606,17 +648,13 @@ void PopUpWindow::Draw(bool secondary)
 		case PopUpWindow::PU_ERROR:
 		{
 			// Error
-			ImGui::TextColored(ImVec4(255.f, 0.f, 0.f, 1.f), !App::handlerrors.AnyErrorHandled() ?
-				"No errors" :
-				App::handlerrors.GetErrors(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
-
+			ImGui::TextColored(ImVec4(255.f, 0.f, 0.f, 1.f), errors.empty() ? "No errors" :
+				errors.c_str(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
 			ImGui::Separator();
 
 			// Solution
-			ImGui::TextColored(ImVec4(0.f, 255.f, 0.f, 1.f), !App::handlerrors.AnyErrorHandled() ?
-				"No solutions" :
-				App::handlerrors.GetSolutions(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
-
+			ImGui::TextColored(ImVec4(0.f, 255.f, 0.f, 1.f), solutions.empty() ? "No solutions" :
+				solutions.c_str(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
 			ImGui::Separator();
 
 			// Accept Button
@@ -625,22 +663,21 @@ void PopUpWindow::Draw(bool secondary)
 				active = false;
 				state = PU_NONE;
 				App::editor->PopUpFocus(false);
-				App::handlerrors.ClearAll();
+				ClearScope();
 			}
 
 			// Logs
 			if (ImGui::TreeNode("Show All Logs"))
 			{
-				ImGui::TextEx(App::handlerrors.GetLogs(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+				ImGui::TextEx(logs.c_str(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
 				ImGui::TreePop();
 			}
 
 			// Warnings
 			if (ImGui::TreeNode("Show Warnings"))
 			{
-				ImGui::TextEx(!App::handlerrors.AnyWarningHandled() ?
-					"No warnings" :
-					App::handlerrors.GetWarnings(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+				ImGui::TextEx(warnings.empty() ? "No warnings" :
+					warnings.c_str(), nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
 				ImGui::TreePop();
 			}
 
@@ -715,16 +752,15 @@ void PopUpWindow::Draw(bool secondary)
 			ResourceContainer* res = App::resources->At(resourceToDelete);
 			ImGui::Text("Name: %s", res->GetName());
 
-			static const char* names[MAX_R_TYPES] = { "undefined.", "shader.", "primitive.", "texture.", "mesh.", "prefab.", "skyBox.", "material.", "model.", "scene." };
+			static const char* names[MAX_R_TYPES] = { "undefined.", "shader.", "texture.", "mesh.", "prefab.", "skyBox.", "material.", "model.", "scene." };
 			ImGui::Text("Type: %s", names[res->GetType()]);
 
 			ImGui::Separator();
 
-			bool clicked = false, checkError = false;
-			if (ImGui::Button(btnText.c_str()))
+			bool clicked = ImGui::Button(btnText.c_str());
+			if (clicked)
 			{
-				clicked = checkError = true;
-				App::handlerrors.StartHandling();
+				RE_LogManager::ScopeProcedureLogging();
 
 				// Delete at resource & filesystem
 				ResourceContainer* resAlone = App::resources->DeleteResource(resourceToDelete, resourcesUsing, resourceOnScene);
@@ -745,9 +781,7 @@ void PopUpWindow::Draw(bool secondary)
 				resourcesUsing.clear();
 				resourceOnScene = false;
 				App::resources->PopSelected(true);
-
-				App::handlerrors.StopHandling();
-				if (checkError && App::handlerrors.AnyErrorHandled()) App::handlerrors.ActivatePopUp();
+				RE_LogManager::EndScope();
 			}
 
 			if (resourceOnScene) {
@@ -763,7 +797,7 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
 				ResourceContainer* resConflict = App::resources->At(resource);
-				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Primitive | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | " };
+				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | " };
 				btnname += (resource == App::scene->GetCurrentScene()) ? "Scene (current scene) | " : names[resConflict->GetType()];
 				btnname += resConflict->GetName();
 
@@ -778,13 +812,11 @@ void PopUpWindow::Draw(bool secondary)
 			ImGui::Separator();
 
 			bool clicked = false;
-			bool checkError = false;
 			if (ImGui::Button(btnText.c_str()))
 			{
 				clicked = true;
-				checkError = true;
 
-				App::handlerrors.StartHandling();
+				RE_LogManager::ScopeProcedureLogging();
 				if (!resourcesUsing.empty())
 				{
 					eastl::stack<ResourceContainer*> shadersDeleted;
@@ -802,8 +834,8 @@ void PopUpWindow::Draw(bool secondary)
 					}
 				}
 
-				if (!App::handlerrors.AnyErrorHandled()) App::fs->DeleteUndefinedFile(nameStr.c_str());
-				else RE_LOG_ERROR("File culdn't erased because the shaders culdn't deleted.");
+				if (!RE_LogManager::ScopedErrors()) App::fs->DeleteUndefinedFile(nameStr.c_str());
+				else RE_LOG_ERROR("File can't be erased; shaders can't be delete.");
 			}
 
 			if (ImGui::Button("Cancel")) clicked = true;
@@ -815,8 +847,7 @@ void PopUpWindow::Draw(bool secondary)
 				App::editor->PopUpFocus(false);
 				resourcesUsing.clear();
 				App::resources->PopSelected(true);
-				App::handlerrors.StopHandling();
-				if (checkError && App::handlerrors.AnyErrorHandled()) App::handlerrors.ActivatePopUp();
+				RE_LogManager::EndScope();
 			}
 
 			ImGui::Separator();
@@ -829,7 +860,7 @@ void PopUpWindow::Draw(bool secondary)
 				ResourceContainer* resConflict = App::resources->At(resource);
 				Resource_Type type = resConflict->GetType();
 
-				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Primitive | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | " };
+				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | " };
 				btnname += names[type];
 				btnname += resConflict->GetName();
 
@@ -851,7 +882,6 @@ void PopUpWindow::Draw(bool secondary)
 			break;
 		}
 		}
-
 	}
 
 	ImGui::End();
@@ -1033,7 +1063,7 @@ void AssetsWindow::Draw(bool secondary)
 						}
 						ImGui::PopID();
 
-						static const char* names[MAX_R_TYPES] = { "Undefined", "Shader", "Primitive", "Texture", "Mesh", "Prefab", "SkyBox", "Material", "Model", "Scene" };
+						static const char* names[MAX_R_TYPES] = { "Undefined", "Shader", "Texture", "Mesh", "Prefab", "SkyBox", "Material", "Model", "Scene" };
 						eastl::string dragID("#");
 						(dragID += names[res->GetType()]) += "Reference";
 

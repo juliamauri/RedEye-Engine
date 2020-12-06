@@ -24,7 +24,7 @@
 #include "RE_CameraManager.h"
 #include "RE_CompTransform.h"
 
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "RE_TimeManager.h"
 #include "RE_GLCacheManager.h"
 #include "RE_FBOManager.h"
@@ -76,7 +76,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		RE_LOG_SECONDARY("Creating SDL GL Context");
 		mainContext = SDL_GL_CreateContext(App::window->GetWindow());
 		if (ret = (mainContext != nullptr))
-			App::ReportSoftware("OpenGL", reinterpret_cast<const char*>(glGetString(GL_VERSION)), "https://www.opengl.org/");
+			RE_SOFT_NVS("OpenGL", reinterpret_cast<const char*>(glGetString(GL_VERSION)), "https://www.opengl.org/");
 		else
 			RE_LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
 	}
@@ -126,7 +126,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 
 			Load(node);
-			App::ReportSoftware("Glew", reinterpret_cast<const char*>(glewGetString(GLEW_VERSION)), "http://glew.sourceforge.net/");
+			RE_SOFT_NVS("Glew", reinterpret_cast<const char*>(glewGetString(GLEW_VERSION)), "http://glew.sourceforge.net/");
 		}
 		else
 		{
@@ -152,37 +152,27 @@ bool ModuleRenderer3D::Start()
 	return true;
 }
 
-update_status ModuleRenderer3D::PreUpdate()
-{
-	OPTICK_CATEGORY("PreUpdate Renderer3D", Optick::Category::GameLogic);
-
-	update_status ret = UPDATE_CONTINUE;
-
-	return ret;
-}
-
-update_status ModuleRenderer3D::PostUpdate()
+void ModuleRenderer3D::PostUpdate()
 {
 	OPTICK_CATEGORY("PostUpdate Renderer3D", Optick::Category::GameLogic);
-	update_status ret = UPDATE_CONTINUE;
-
 
 	// Setup Draws
 	activeShaders = App::resources->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 
 	current_lighting = LightMode::LIGHT_DISABLED;
 
-
-	while (!rendQueue.empty()) {
+	while (!rendQueue.empty())
+	{
 		RenderQueue rend = rendQueue.top();
 		rendQueue.pop();
 
-		RE_GOManager* poolGOThumbnail = nullptr;
+		RE_ECS_Manager* poolGOThumbnail = nullptr;
 		eastl::string path(THUMBNAILPATH);
 		path += rend.resMD5;
 
 		bool exist = App::fs->Exists(path.c_str());
-		if (rend.redo && exist) {
+		if (rend.redo && exist)
+		{
 			RE_FileIO fileToDelete(path.c_str(), App::fs->GetZipPath());
 			fileToDelete.Delete();
 			exist = false;
@@ -201,12 +191,15 @@ update_status ModuleRenderer3D::PostUpdate()
 				case Resource_Type::R_PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
 				case Resource_Type::R_SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break;
 				}
-				poolGOThumbnail->UseResources();
-				ThumbnailGameObject(poolGOThumbnail->GetRootPtr());
-				poolGOThumbnail->UnUseResources();
-				App::resources->UnUse(rend.resMD5);
-				App::thumbnail->SaveTextureFromFBO(path.c_str());
-				DEL(poolGOThumbnail);
+				if (poolGOThumbnail != nullptr)
+				{
+					poolGOThumbnail->UseResources();
+					ThumbnailGameObject(poolGOThumbnail->GetRootPtr());
+					poolGOThumbnail->UnUseResources();
+					App::resources->UnUse(rend.resMD5);
+					App::thumbnail->SaveTextureFromFBO(path.c_str());
+					DEL(poolGOThumbnail);
+				}
 			}
 
 			App::thumbnail->Change(rend.resMD5, App::thumbnail->LoadLibraryThumbnail(rend.resMD5));
@@ -272,16 +265,11 @@ update_status ModuleRenderer3D::PostUpdate()
 
 	//Swap buffers
 	SDL_GL_SwapWindow(App::window->GetWindow());
-
-	return ret;
 }
 
-bool ModuleRenderer3D::CleanUp()
+void ModuleRenderer3D::CleanUp()
 {
-	//Delete context
 	SDL_GL_DeleteContext(mainContext);
-
-	return true;
 }
 
 void ModuleRenderer3D::RecieveEvent(const Event & e)
@@ -617,7 +605,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		}
 
 		// Setup Shader
-		unsigned int light_pass = dynamic_cast<RE_Shader*>(App::resources->At(App::internalResources.GetLightPassShader()))->GetID();
+		unsigned int light_pass = dynamic_cast<RE_Shader*>(App::resources->At(RE_ResourceManager::internalResources.GetLightPassShader()))->GetID();
 		RE_GLCacheManager::ChangeShader(light_pass);
 
 		SetDepthTest(false);
@@ -702,8 +690,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			if (rendComponent)
 			{
 				OPTICK_CATEGORY("Stencil Draw", Optick::Category::Rendering);
-				unsigned int vaoToStencil;
-				unsigned int triangleToStencil;
+				unsigned int vaoToStencil = 0, triangleToStencil = 0;
 
 				ComponentType cT = rendComponent->GetType();
 				if (cT == ComponentType::C_MESH)
@@ -724,12 +711,11 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 					triangleToStencil = water_comp->GetTriangles();
 				}
 
-
 				glEnable(GL_STENCIL_TEST);
 				SetDepthTest(false);
 
 				//Getting the scale shader and setting some values
-				const char* scaleShader = App::internalResources.GetDefaultScaleShader();
+				const char* scaleShader = RE_ResourceManager::internalResources.GetDefaultScaleShader();
 				RE_Shader* sShader = dynamic_cast<RE_Shader*>(App::resources->At(scaleShader));
 				unsigned int shaderiD = sShader->GetID();
 				RE_GLCacheManager::ChangeShader(shaderiD);
@@ -798,7 +784,7 @@ void ModuleRenderer3D::DrawSkyBox()
 
 	RE_GLCacheManager::ChangeTextureBind(0);
 
-	uint skysphereshader = static_cast<RE_Shader*>(App::resources->At(App::internalResources.GetDefaultSkyBoxShader()))->GetID();
+	uint skysphereshader = static_cast<RE_Shader*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultSkyBoxShader()))->GetID();
 	RE_GLCacheManager::ChangeShader(skysphereshader);
 	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
 	RE_ShaderImporter::setBool(skysphereshader, "deferred", (current_lighting == LightMode::LIGHT_DEFERRED));
@@ -874,7 +860,7 @@ void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
 
 	RE_GLCacheManager::ChangeTextureBind(0);
 
-	RE_Shader* skyboxShader = (RE_Shader*)App::resources->At(App::internalResources.GetDefaultSkyBoxShader());
+	RE_Shader* skyboxShader = (RE_Shader*)App::resources->At(RE_ResourceManager::internalResources.GetDefaultSkyBoxShader());
 	uint skysphereshader = skyboxShader->GetID();
 	RE_GLCacheManager::ChangeShader(skysphereshader);
 	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);

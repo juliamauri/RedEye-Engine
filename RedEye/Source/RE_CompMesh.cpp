@@ -34,7 +34,7 @@ void RE_CompMesh::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID
 
 void RE_CompMesh::Draw() const
 {
-	const char* materialToDraw = (materialMD5) ? materialMD5 : App::internalResources.GetDefaulMaterial();
+	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_ResourceManager::internalResources.GetDefaulMaterial();
 	RE_Material* material = dynamic_cast<RE_Material*>(App::resources->At(materialToDraw));
 	material->UploadToShader(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr(), show_checkers);
 	(dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->DrawMesh(material->GetShaderID());
@@ -56,7 +56,7 @@ void RE_CompMesh::DrawProperties()
 		ImGui::Separator();
 		RE_Material* matRes = (materialMD5) ?
 			dynamic_cast<RE_Material*>(App::resources->At(materialMD5)) :
-			dynamic_cast<RE_Material*>(App::resources->At(App::internalResources.GetDefaulMaterial()));
+			dynamic_cast<RE_Material*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaulMaterial()));
 
 		if (!materialMD5) ImGui::Text("This component mesh is using the default material.");
 		if (ImGui::Button(matRes->GetName())) App::resources->PushSelected(matRes->GetMD5(), true);
@@ -221,7 +221,7 @@ void RE_CompMesh::UnUseResources()
 
 bool RE_CompMesh::isBlend() const
 {
-	const char* materialToDraw = (materialMD5) ? materialMD5 : App::internalResources.GetDefaulMaterial();
+	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_ResourceManager::internalResources.GetDefaulMaterial();
 	RE_Material* material = dynamic_cast<RE_Material*>(App::resources->At(materialToDraw));
 	return material->blendMode;
 }

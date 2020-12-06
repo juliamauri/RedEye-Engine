@@ -15,7 +15,7 @@
 #include "RE_CompTransform.h"
 #include "RE_GLCacheManager.h"
 
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 
 #include "ImGui\imgui.h"
 #include "Glew/include/glew.h"

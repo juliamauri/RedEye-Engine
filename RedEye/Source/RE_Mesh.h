@@ -34,9 +34,11 @@ public:
 	unsigned int GetTriangleCount()const { return triangle_count; }
 
 public:
+
 	bool lVertexNormals = false, lFaceNormals = false;
 
 private:
+
 	void Draw() override;
 
 	void SetupAABB();
@@ -48,23 +50,21 @@ private:
 	void LibraryLoad();
 
 private:
-	float* vertex = nullptr;
-	float* normals = nullptr;
-	float* tangents = nullptr;
-	float* bitangents = nullptr;
-	float* texturecoords = nullptr;
+
+	float *vertex = nullptr, *normals = nullptr,
+		*tangents = nullptr, *bitangents = nullptr,
+		*texturecoords = nullptr;
 	unsigned int* index = nullptr;
 
-	unsigned int triangle_count = 0;
-	unsigned int vertex_count = 0;
+	unsigned int triangle_count = 0, vertex_count = 0;
 
 	math::AABB bounding_box;
 
 	unsigned int VAO = 0u, VBO = 0u, EBO = 0u;
 
-	float* vertexNormals = nullptr;
-	float* faceNormals = nullptr;
-	float* faceCenters = nullptr;
+	float *vertexNormals = nullptr,
+		*faceNormals = nullptr,
+		*faceCenters = nullptr;
 	unsigned int VAO_Vertex = 0u, VAO_FaceNormals = 0u, VAO_VertexNormals = 0u, VAO_FaceCenters = 0u;
 	unsigned int VBO_Vertex = 0u, VBO_FaceNormals = 0u, VBO_VertexNormals = 0u, VBO_FaceCenters = 0u;
 };

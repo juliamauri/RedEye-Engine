@@ -12,7 +12,6 @@ enum Resource_Type : short unsigned int
 {
 	R_UNDEFINED = 0x00,
 	R_SHADER,
-	R_PRIMITIVE,
 	R_TEXTURE,
 	R_MESH,
 	R_PREFAB,

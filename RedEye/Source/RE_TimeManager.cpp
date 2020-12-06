@@ -1,6 +1,6 @@
 #include "RE_TimeManager.h"
 
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "SDL2\include\SDL.h"
 #include "ImGui\imgui.h"
 #include <EAStdC/EASprintf.h>
@@ -83,13 +83,13 @@ float Timer::ReadF() const { return static_cast<float>(Read()); }
 
 
 // TIME PLOTTING =======================================================================================
-TimePlotting::TimePlotting()
+RE_TimeManager::TimePlotting::TimePlotting()
 {
 	capped_ms = static_cast<unsigned int>(1000.f / capped_fps);
 	ClearArrays();
 }
 
-void TimePlotting::DrawEditor()
+void RE_TimeManager::TimePlotting::DrawEditor()
 {
 	if (!pause_plotting)
 	{
@@ -116,7 +116,7 @@ void TimePlotting::DrawEditor()
 			ClearArrays();
 }
 
-unsigned int TimePlotting::ManageFrameTimers(unsigned int ms_count)
+unsigned int RE_TimeManager::TimePlotting::ManageFrameTimers(unsigned int ms_count)
 {
 	++frames_counter;
 	++fps_counter;
@@ -136,11 +136,11 @@ unsigned int TimePlotting::ManageFrameTimers(unsigned int ms_count)
 	return ret;
 }
 
-void TimePlotting::SetMaxFPS(float max_fps)
+void RE_TimeManager::TimePlotting::SetMaxFPS(float max_fps)
 {
 	capped_fps = max_fps;
 	if (capped_fps == 0.f) capped_ms = 0u;
 	else capped_ms = static_cast<unsigned int>(1000.f / capped_fps);
 }
 
-void TimePlotting::ClearArrays() { for (int i = 0; i <= 99; i++) fps[i] = ms[i] = 0.f; }
+void RE_TimeManager::TimePlotting::ClearArrays() { for (int i = 0; i <= 99; i++) fps[i] = ms[i] = 0.f; }

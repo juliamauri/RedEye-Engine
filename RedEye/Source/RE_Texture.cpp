@@ -6,7 +6,7 @@
 #include "RE_ThumbnailManager.h"
 #include "RE_GLCacheManager.h"
 
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 
 #include "Glew/include/glew.h"
 
@@ -228,48 +228,45 @@ int RE_Texture::GetComboFilter(RE_TextureFilters filter)
 {
 	int comboIndex = 0;
 	switch (filter) {
-	case RE_TextureFilters::RE_NEAREST: comboIndex = 0; break;
-	case RE_TextureFilters::RE_LINEAR: comboIndex = 1; break;
-	case RE_TextureFilters::RE_NEAREST_MIPMAP_NEAREST: comboIndex = 2; break;
-	case RE_TextureFilters::RE_LINEAR_MIPMAP_NEAREST: comboIndex = 3; break;
-	case RE_TextureFilters::RE_NEAREST_MIPMAP_LINEAR: comboIndex = 4; break;
-	case RE_TextureFilters::RE_LINEAR_MIPMAP_LINEAR: comboIndex = 5; break; }
-	return comboIndex;
+	case RE_TextureFilters::RE_NEAREST: return 0;
+	case RE_TextureFilters::RE_LINEAR: return 1;
+	case RE_TextureFilters::RE_NEAREST_MIPMAP_NEAREST: return 2;
+	case RE_TextureFilters::RE_LINEAR_MIPMAP_NEAREST: return 3;
+	case RE_TextureFilters::RE_NEAREST_MIPMAP_LINEAR: return 4;
+	case RE_TextureFilters::RE_LINEAR_MIPMAP_LINEAR: return 5;
+	default: return 0; }
 }
 
 RE_TextureFilters RE_Texture::GetFilterCombo(int combo)
 {
-	RE_TextureFilters ret;
 	switch (combo) {
-	case 0: ret = RE_TextureFilters::RE_NEAREST; break;
-	case 1: ret = RE_TextureFilters::RE_LINEAR; break;
-	case 2: ret = RE_TextureFilters::RE_NEAREST_MIPMAP_NEAREST; break;
-	case 3: ret = RE_TextureFilters::RE_LINEAR_MIPMAP_NEAREST; break;
-	case 4: ret = RE_TextureFilters::RE_NEAREST_MIPMAP_LINEAR; break;
-	case 5: ret = RE_TextureFilters::RE_LINEAR_MIPMAP_LINEAR; break; }
-	return ret;
+	case 0: return RE_TextureFilters::RE_NEAREST;
+	case 1: return RE_TextureFilters::RE_LINEAR;
+	case 2: return RE_TextureFilters::RE_NEAREST_MIPMAP_NEAREST;
+	case 3: return RE_TextureFilters::RE_LINEAR_MIPMAP_NEAREST;
+	case 4: return RE_TextureFilters::RE_NEAREST_MIPMAP_LINEAR;
+	case 5: return RE_TextureFilters::RE_LINEAR_MIPMAP_LINEAR;
+	default: return RE_TextureFilters::RE_NEAREST; }
 }
 
 int RE_Texture::GetComboWrap(RE_TextureWrap wrap)
 {
-	int comboIndex = 0;
 	switch (wrap) {
-	case RE_TextureWrap::RE_REPEAT: comboIndex = 0; break;
-	case RE_TextureWrap::RE_CLAMP_TO_BORDER: comboIndex = 1; break;
-	case RE_TextureWrap::RE_CLAMP_TO_EDGE: comboIndex = 2; break;
-	case RE_TextureWrap::RE_MIRRORED_REPEAT: comboIndex = 3; break; }
-	return comboIndex;
+	case RE_TextureWrap::RE_REPEAT: return 0;
+	case RE_TextureWrap::RE_CLAMP_TO_BORDER: return 1;
+	case RE_TextureWrap::RE_CLAMP_TO_EDGE: return 2;
+	case RE_TextureWrap::RE_MIRRORED_REPEAT: return 3;
+	default: return 0; }
 }
 
 RE_TextureWrap RE_Texture::GetWrapCombo(int combo)
 {
-	RE_TextureWrap ret;
 	switch (combo) {
-	case 0: ret = RE_TextureWrap::RE_REPEAT; break;
-	case 1: ret = RE_TextureWrap::RE_CLAMP_TO_BORDER; break;
-	case 2: ret = RE_TextureWrap::RE_CLAMP_TO_EDGE; break;
-	case 3: ret = RE_TextureWrap::RE_MIRRORED_REPEAT; break; }
-	return ret;
+	case 0: return RE_TextureWrap::RE_REPEAT;
+	case 1: return RE_TextureWrap::RE_CLAMP_TO_BORDER;
+	case 2: return RE_TextureWrap::RE_CLAMP_TO_EDGE;
+	case 3: return RE_TextureWrap::RE_MIRRORED_REPEAT;
+	default: return RE_TextureWrap::RE_REPEAT; }
 }
 
 void RE_Texture::ReImport()

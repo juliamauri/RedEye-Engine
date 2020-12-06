@@ -14,7 +14,7 @@ enum ComponentType : ushortint
 {
 	C_EMPTY = 0x00,
 	C_TRANSFORM,
-	C_MESH = 15,
+	C_MESH,
 	C_CAMERA,
 	C_LIGHT,
 	C_WATER,

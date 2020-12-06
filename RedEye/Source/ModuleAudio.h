@@ -33,9 +33,8 @@ public:
 
 	bool Init(JSONNode* node) override;
 	bool Start() override;
-	update_status PreUpdate() override;
-	update_status PostUpdate() override;
-	bool CleanUp() override;
+	void PostUpdate() override;
+	void CleanUp() override;
 
 	void RecieveEvent(const Event& e) override;
 	void DrawEditor() override;

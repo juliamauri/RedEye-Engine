@@ -4,8 +4,6 @@
 #include "EventListener.h"
 
 #include "RE_Math.h"
-#include "RE_HandleErrors.h"
-#include "RE_InternalResources.h"
 
 #include "RE_TimeManager.h"
 #include "RE_CameraManager.h"
@@ -20,7 +18,7 @@
 #include <EASTL/list.h>
 
 class RE_FileSystem;
-class OutputLogHolder;
+class RE_Hardware;
 
 class Module;
 class ModuleInput;
@@ -32,9 +30,6 @@ class ModuleAudio;
 
 class RE_ResourceManager;
 class RE_ThumbnailManager;
-#ifdef _DEBUG
-class SystemInfo;
-#endif // _DEBUG
 
 enum GameState : char
 {
@@ -51,17 +46,13 @@ public:
 	~Application();
 
 	bool Init(int argc, char* argv[]);
-	int Update();
-	bool CleanUp();
-
-	static Application* Ptr();
+	void MainLoop();
+	void CleanUp();
 
 	void DrawEditor();
 	void RecieveEvent(const Event& e) override;
 
-	static void Log(const int category, const char* text, const char* file);
-	static void ReportSoftware(const char * name, const char * version = nullptr, const char * website = nullptr);
-
+	static Application* Ptr();
 	static const char* GetName();
 	static const char* GetOrganization();
 	static GameState GetState();
@@ -71,20 +62,12 @@ private:
 	bool Load();
 	bool Save();
 
-	void PrepareUpdate();
-	void FinishUpdate();
-
 public:
 
 	// Utility
-	static OutputLogHolder* log;
 	static RE_FileSystem* fs;
 	static RE_Math math;
-	static RE_HandleErrors handlerrors;
-	static RE_InternalResources internalResources; // TODO Rub: send to Resources
-#ifdef _DEBUG
-	static SystemInfo* sys_info;
-#endif // _DEBUG
+	static RE_Hardware* hardware;
 
 	// Modules
 	static ModuleInput* input;
@@ -108,20 +91,16 @@ public:
 
 private:
 
-	static eastl::string app_name;
-	static eastl::string organization;
-
-	static eastl::list<Module*> modules;
-
-	static GameState state;
-
-	bool want_to_load_def = false;
 	bool want_to_load = false;
 	bool want_to_save = false;
 	bool want_to_quit = false;
 	bool ticking = false;
 
+	static GameState state;
 	static Application* instance;
+	static eastl::string app_name;
+	static eastl::string organization;
+	static eastl::list<Module*> modules;
 };
 
 typedef Application App;

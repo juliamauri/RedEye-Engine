@@ -1,20 +1,21 @@
 #ifndef __RESOURCEMANAGER_H__
 #define __RESOURCEMANAGER_H__
 
+#include "EventListener.h"
+#include "Resource.h"
+#include "RE_InternalResources.h"
+
 #include <EASTL/map.h>
 #include <EASTL/vector.h>
 #include <EASTL/stack.h> 
 
-#include "EventListener.h"
-
-#include "Resource.h"
-
 class RE_ResourceManager : public EventListener
 {
 public:
-	RE_ResourceManager();
+	RE_ResourceManager() {}
 	~RE_ResourceManager();
 
+	void Init();
 	void RecieveEvent(const Event& e) override;
 
 	ResourceContainer* At(const char* md5) const;
@@ -63,6 +64,10 @@ public:
 private:
 
 	const char* GetNameFromType(const Resource_Type type);
+
+public:
+
+	static RE_InternalResources internalResources;
 
 private:
 

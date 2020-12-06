@@ -1,7 +1,7 @@
 #include "RE_CompParticleEmiter.h"
 
 #include "RE_TimeManager.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 
 #include "ImGui\imgui.h"
 

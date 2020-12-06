@@ -21,6 +21,7 @@ class JSONNode;
 class GameObjectsPool;
 class ComponentsPool;
 
+/* Todo Rub: bitmask go flags with properties
 enum GO_Flags : char
 {
 	ACTIVE,
@@ -30,7 +31,7 @@ enum GO_Flags : char
 	KINEMATIC,
 	HAS_CHILDS,
 	IS_ROOT
-};
+};*/
 
 class RE_GameObject : public EventListener
 {
@@ -165,7 +166,7 @@ public:
 	UID GetUID() const;
 
 	friend class GameObjectsPool;
-	friend class RE_GOManager;
+	friend class RE_ECS_Manager;
 	struct ComponentData
 	{
 		ComponentData(UID id = 0ull, ushortint type = 0u) : uid(id), type(type) {}
@@ -202,8 +203,6 @@ private:
 	UID transform = 0ull;
 	UID camera = 0ull;
 	UID light = 0ull;
-	//UID p_emitter = 0ull;
-	//UID rigidbody = 0ull;
 
 	math::AABB local_bounding_box;
 	math::AABB global_bounding_box;

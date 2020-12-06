@@ -3,7 +3,7 @@
 #include "Application.h"
 #include "ModuleEditor.h"
 #include "RE_FileSystem.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 
@@ -14,7 +14,7 @@ bool RE_ShaderImporter::Init()
 {
 	bool ret;
 	RE_LOG("Initializing Shader Manager");
-	App::ReportSoftware("GLSLang", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
+	RE_SOFT_NVS("GLSLang", reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
 	
 	GLint formats = 0;
 	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);

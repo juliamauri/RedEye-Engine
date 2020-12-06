@@ -13,7 +13,6 @@ enum RE_EventType : unsigned short int
 	TICK,
 	STOP,
 
-	REQUEST_DEFAULT_CONF,
 	REQUEST_LOAD,
 	REQUEST_SAVE,
 	REQUEST_QUIT,
@@ -47,6 +46,23 @@ enum RE_EventType : unsigned short int
 	UPDATE_SCENE_WINDOWS,
 	EDITOR_SCENE_RAYCAST,
 
+	SCOPE_PROCEDURE_START,
+	SCOPE_PROCEDURE_END,
+
+	CONSOLE_LOG_MIN,
+	CONSOLE_LOG_SEPARATOR,
+	CONSOLE_LOG_GLOBAL,
+	CONSOLE_LOG_SECONDARY,
+	CONSOLE_LOG_TERCIARY,
+	CONSOLE_LOG_SOFTWARE,
+	CONSOLE_LOG_ERROR,
+	CONSOLE_LOG_WARNING,
+	CONSOLE_LOG_SOLUTION,
+	CONSOLE_LOG_SAVE_ERROR,
+	CONSOLE_LOG_SAVE_WARNING,
+	CONSOLE_LOG_SAVE_SOLUTION,
+	CONSOLE_LOG_MAX,
+
 	// Resources
 	RESOURCE_CHANGED,
 
@@ -59,24 +75,20 @@ public:
 
 	Event(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
 	Event(Event& e);
-	virtual ~Event();
+	~Event() {}
 
 	static void Push(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
+	static void PushForced(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
 	static void PumpAll();
-
+	static void ClearQueue();
 	static void ResumeEvents();
 	static void PauseEvents();
 	static bool isPaused();
 
-protected:
+private:
 
 	void CallListener() const;
 	bool IsValid() const;
-	void Clear();
-
-protected:
-
-	static bool paused;
 
 public:
 
@@ -85,6 +97,10 @@ public:
 	Cvar data1;
 	Cvar data2;
 	const unsigned int timestamp;
+
+private:
+
+	static bool paused;
 };
 
 #endif

@@ -7,8 +7,8 @@
 #include "ModuleRenderer3D.h"
 #include "EditorWindows.h"
 #include "RE_TimeManager.h"
-#include "OutputLog.h"
-#include "RE_GOManager.h"
+#include "RE_LogManager.h"
+#include "RE_ECS_Manager.h"
 #include "RE_CameraManager.h"
 #include "RE_PrimitiveManager.h"
 #include "QuadTree.h"
@@ -101,10 +101,15 @@ bool ModuleEditor::Init(JSONNode* node)
 		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 	}
 
+	// TODO estilo imgui -> el más bravo: estilo propio de red eye
+	style.Colors[ImGuiCol_Header] = { 0.52f, 0.14f, 0.14f, 1.f };
+	//style.Colors[ImGuiCol_HeaderHovered] = { 158.f, 62.f, 62.f, 1.f };
+	//style.Colors[ImGuiCol_HeaderActive] = { 158.f, 62.f, 62.f, 1.f };
+
 	if (ret = ImGui_ImplSDL2_InitForOpenGL(App::window->GetWindow(), App::renderer3d->GetWindowContext()))
 	{
 		if (ret = ImGui_ImplOpenGL3_Init())
-			App::ReportSoftware("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
+			RE_SOFT_NVS("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
 		else
 			RE_LOG_ERROR("ImGui could not OpenGL3_Init!");
 	}
@@ -130,7 +135,7 @@ bool ModuleEditor::Start()
 	return true;
 }
 
-update_status ModuleEditor::PreUpdate()
+void ModuleEditor::PreUpdate()
 {
 	OPTICK_CATEGORY("PreUpdate ModuleEditor", Optick::Category::GameLogic);
 	ImGuizmo::SetOrthographic(!RE_CameraManager::EditorCamera()->isPrespective());
@@ -138,10 +143,9 @@ update_status ModuleEditor::PreUpdate()
 	ImGui_ImplSDL2_NewFrame(App::window->GetWindow());
 	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
-	return UPDATE_CONTINUE;
 }
 
-update_status ModuleEditor::Update()
+void ModuleEditor::Update()
 {
 	OPTICK_CATEGORY("Update ModuleEditor", Optick::Category::UI);
 	if (show_all)
@@ -327,11 +331,9 @@ update_status ModuleEditor::Update()
 	}
 
 	ImGui::End();
-
-	return UPDATE_CONTINUE;
 }
 
-bool ModuleEditor::CleanUp()
+void ModuleEditor::CleanUp()
 {
 	while (!windows.empty())
 	{
@@ -362,8 +364,6 @@ bool ModuleEditor::CleanUp()
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
-
-	return true;
 }
 
 void ModuleEditor::RecieveEvent(const Event& e)
@@ -386,7 +386,7 @@ void ModuleEditor::RecieveEvent(const Event& e)
 		camera->GetTargetWidthHeight(width, height);
 
 		OPTICK_CATEGORY("Update ModuleEditor Camera RayCast", Optick::Category::Camera);
-		UID hit = App::scene->RayCastSelect(
+		UID hit = App::scene->RayCastGeometry(
 			math::Ray(camera->GetFrustum().UnProjectLineSegment(
 			(e.data1.AsFloat() -(width / 2.0f)) / (width / 2.0f),
 				((height - e.data2.AsFloat()) - (height / 2.0f)) / (height / 2.0f))));
@@ -394,6 +394,27 @@ void ModuleEditor::RecieveEvent(const Event& e)
 		if (hit) SetSelected(hit);
 
 		break;
+	}
+	case SCOPE_PROCEDURE_END:
+	{
+		if (e.data1.AsBool()) popupWindow->PopUpError();
+		break;
+	}
+	default:
+	{
+		if (e.type > CONSOLE_LOG_MIN && e.type < CONSOLE_LOG_MAX)
+		{
+			unsigned int category = static_cast<unsigned int>(e.type - CONSOLE_LOG_SEPARATOR);
+			const char* text = e.data1.AsCharP();
+
+			if (e.type >= CONSOLE_LOG_SAVE_ERROR)
+			{
+				category -= 3u;
+				popupWindow->AppendScopedLog(text, e.type);
+			}
+
+			console->AppendLog(category, text, e.data2.AsCharP());
+		}
 	}
 	}
 }
@@ -633,24 +654,10 @@ void ModuleEditor::DuplicateSelectedObject()
 	}
 }
 
-void ModuleEditor::LogToEditorConsole()
+void ModuleEditor::ReportSoftawe(const char* name, const char* version, const char* website) const
 {
-	if (console && !windows.empty()
-		&& (console->file_filter < 0 || App::log->logHistory.back().caller_id == console->file_filter)
-		&& console->categories[(int)App::log->logHistory.back().category])
-	{
-		console->console_buffer.append(App::log->logHistory.back().data.c_str());
-		console->scroll_to_bot = true;
-	}
+	about->sw_info.push_back({ name, version, website });
 }
-
-bool ModuleEditor::AddSoftwareUsed(const char * name, const char * version, const char * website)
-{
-	bool ret;
-	if (ret = (about != nullptr)) about->sw_info.push_back(SoftwareInfo(name, version, website));
-	return ret;
-}
-
 
 void ModuleEditor::HandleSDLEvent(SDL_Event* e) { ImGui_ImplSDL2_ProcessEvent(e); }
 void ModuleEditor::PopUpFocus(bool focus) { popUpFocus = focus; }

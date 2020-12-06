@@ -13,8 +13,8 @@
 #include "RE_SkyBox.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
-#include "RE_GOManager.h"
-#include "OutputLog.h"
+#include "RE_ECS_Manager.h"
+#include "RE_LogManager.h"
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
@@ -89,7 +89,7 @@ void RE_CompCamera::DrawProperties()
 			else
 			{
 				ImGui::Text("This component camera is using the default skybox.");
-				skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(App::internalResources.GetDefaultSkyBox()));
+				skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultSkyBox()));
 				if (ImGui::Button(skyRes->GetName())) App::resources->PushSelected(skyRes->GetMD5(), true);
 			}
 
@@ -149,7 +149,7 @@ void RE_CompCamera::DrawFrustum() const
 
 void RE_CompCamera::DrawSkybox() const
 {
-	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(skyboxMD5 ? skyboxMD5 : App::internalResources.GetDefaultSkyBox()));
+	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(skyboxMD5 ? skyboxMD5 : RE_ResourceManager::internalResources.GetDefaultSkyBox()));
 	if (skyRes) skyRes->DrawSkybox();
 }
 
@@ -521,16 +521,10 @@ void RE_CompCamera::DeserializeJson(JSONNode* node, eastl::map<int, const char*>
 void RE_CompCamera::RecalculateMatrixes()
 {
 	math::float4x4 trs = GetTransform()->GetGlobalMatrix();
-	math::vec front = trs.WorldZ().Normalized();
-	math::vec up = front.Cross(-trs.WorldX().Normalized()).Normalized();
-	frustum.SetFrame(GetTransform()->GetGlobalPosition(), -front, -up);
+	frustum.SetFrame(trs.Row3(3), -trs.WorldZ(), trs.WorldY());
 
-	RE_LOG("CAMERA SetFrame(%s, front %s, up %s)", trs.Row3(3).ToString().c_str(), front.ToString().c_str(), up.ToString().c_str());
-
-	global_view = frustum.ViewMatrix();
-	global_view.Transpose();
-	global_projection = frustum.ProjectionMatrix();
-	global_projection.Transpose();
+	(global_view = frustum.ViewMatrix()).Transpose();
+	global_projection = frustum.ProjectionMatrix().Transposed();
 
 	need_recalculation = false;
 }

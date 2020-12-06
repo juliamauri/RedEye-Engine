@@ -1,7 +1,7 @@
 #include "RE_Math.h"
 
 #include "Application.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "MathGeoLib/lib/MathGeoLib_debug.lib")
@@ -17,7 +17,7 @@ RE_Math::~RE_Math() {}
 void RE_Math::Init()
 {
 	RE_LOG("Initializing Math");
-	App::ReportSoftware("MathGeoLib", nullptr, "https://github.com/juj/MathGeoLib");
+	RE_SOFT_NS("MathGeoLib", "https://github.com/juj/MathGeoLib");
 	lcg.Seed(math::Clock::TickU32());
 }
 

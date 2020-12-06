@@ -4,7 +4,7 @@
 #include "RE_CompTransform.h"
 #include "RE_ShaderImporter.h"
 #include "RE_FileSystem.h"
-#include "RE_GOManager.h"
+#include "RE_ECS_Manager.h"
 #include "ImGui\imgui.h"
 
 RE_CompLight::RE_CompLight() : RE_Component(C_LIGHT)

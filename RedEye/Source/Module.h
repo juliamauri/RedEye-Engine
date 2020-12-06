@@ -21,23 +21,19 @@ public:
 	bool IsActive() const { return enabled; }
 	const char* GetName() const { return name; }
 
-	EventListener* AsEventListener() { return this; }
-	const EventListener* AsEventListener() const { return this; }
-
 	virtual bool Init(JSONNode* node) { return true; } //SETTING OWN VALUES
 	virtual bool Start() { return true; } //ACCESS OTHER MODULES
+	virtual void CleanUp() {}
 	
-	virtual update_status PreUpdate() { return UPDATE_CONTINUE; }
-	virtual update_status Update() { return UPDATE_CONTINUE; }
-	virtual update_status PostUpdate() { return UPDATE_CONTINUE; }
+	virtual void PreUpdate() {}
+	virtual void Update() {}
+	virtual void PostUpdate() {}
 
 	virtual void OnPlay() {}
 	virtual void OnPause() {}
 	virtual void OnStop() {}
 
 	virtual void DrawEditor() {}
-
-	virtual bool CleanUp() { return true; }
 
 	virtual bool Load(JSONNode* node) { return true; }
 	virtual bool Save(JSONNode* node) const { return true; }

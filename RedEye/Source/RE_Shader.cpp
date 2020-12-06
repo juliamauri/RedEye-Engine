@@ -10,7 +10,7 @@
 #include "RE_GLCacheManager.h"
 #include "RE_TimeManager.h"
 #include "Event.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 
 #include "md5.h"
 #include "ImGui/imgui.h"
@@ -391,7 +391,7 @@ bool RE_Shader::NeedUploadDepth() const { return (depth != -1); }
 
 void RE_Shader::Draw()
 {
-	// TODO: drag & drop of shader files
+	// TODO Julius: drag & drop of shader files
 	ImGui::Text("Vertex Shader path: %s", shaderSettings.vertexShader.c_str());
 	if (!shaderSettings.vertexShader.empty())
 		if (ImGui::Button("Edit vertex"))

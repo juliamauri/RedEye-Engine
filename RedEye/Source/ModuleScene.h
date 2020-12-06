@@ -2,7 +2,7 @@
 #define __MODULESCENE_H__
 
 #include "Event.h"
-#include "RE_GOManager.h"
+#include "RE_ECS_Manager.h"
 #include "Module.h"
 #include "AABBDynamicTree.h"
 
@@ -16,9 +16,9 @@ public:
 	~ModuleScene();
 
 	bool Start() override;
-	update_status Update() override;
-	update_status PostUpdate() override;
-	bool CleanUp() override;
+	void Update() override;
+	void PostUpdate() override;
+	void CleanUp() override;
 
 	// Draws
 	void DrawEditor() override;
@@ -31,7 +31,7 @@ public:
 	void RecieveEvent(const Event& e) override;
 
 	// Current Pool
-	static RE_GOManager* GetScenePool();
+	static RE_ECS_Manager* GetScenePool();
 	static RE_GameObject* GetGOPtr(UID id);
 	static const RE_GameObject* GetGOCPtr(UID id);
 
@@ -47,10 +47,10 @@ public:
 	static void CreateMaxLights(const UID parent = 0);
 	static void CreateWater(const UID parent = 0);
 
-	void AddGOPool(RE_GOManager* toAdd);
+	void AddGOPool(RE_ECS_Manager* toAdd);
 
 	// Scene Gameobject Filtering
-	UID RayCastSelect(math::Ray& global_ray);
+	UID RayCastGeometry(math::Ray& global_ray);
 	void FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum& frustum);
 
 	// Scene Management
@@ -73,8 +73,8 @@ private:
 
 private:
 
-	static RE_GOManager scenePool;
-	RE_GOManager savedState;
+	static RE_ECS_Manager scenePool;
+	RE_ECS_Manager savedState;
 	bool haschanges = false;
 
 	eastl::stack<UID> to_delete;

@@ -83,9 +83,9 @@ public:
 	static void setFloat3x3(int loc, const float* trans);
 	static void setFloat4x4(int loc, const float* trans);
 
-
 private:
-	const char* folderPath;
+
+	const char* folderPath = nullptr;
 
 	//Last error
 	eastl::string last_error;

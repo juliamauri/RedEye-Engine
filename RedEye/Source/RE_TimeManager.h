@@ -17,32 +17,7 @@ public:
 private:
 
 	bool paused;
-	unsigned int started_at;
-	unsigned int paused_at;
-};
-
-struct TimePlotting
-{
-	TimePlotting();
-
-	void DrawEditor();
-	unsigned int ManageFrameTimers(unsigned int ms_count);
-	void SetMaxFPS(float max_fps);
-	inline void ClearArrays();
-
-	Timer	fps_timer; // read every second
-
-	unsigned long	frames_counter = 0u;
-	unsigned int	fps_counter = 0u;
-	unsigned int	last_fps_count = 0u;
-	unsigned int	last_ms_count = 0u;
-
-	float			capped_fps = 60.f;
-	unsigned int	capped_ms = 0u;
-
-	bool	pause_plotting = false;
-	float	fps[100] = {};
-	float	ms[100] = {};
+	unsigned int started_at = 0, paused_at = 0;
 };
 
 class RE_TimeManager
@@ -76,6 +51,30 @@ public:
 	void StartGameTimer();
 	void PauseGameTimer();
 	void StopGameTimer();
+
+	struct TimePlotting
+	{
+		TimePlotting();
+
+		void DrawEditor();
+		unsigned int ManageFrameTimers(unsigned int ms_count);
+		void SetMaxFPS(float max_fps);
+		inline void ClearArrays();
+
+		Timer	fps_timer; // read every second
+
+		unsigned long	frames_counter = 0u;
+		unsigned int	fps_counter = 0u;
+		unsigned int	last_fps_count = 0u;
+		unsigned int	last_ms_count = 0u;
+
+		float			capped_fps = 60.f;
+		unsigned int	capped_ms = 0u;
+
+		bool	pause_plotting = false;
+		float	fps[100] = {};
+		float	ms[100] = {};
+	};
 
 private:
 

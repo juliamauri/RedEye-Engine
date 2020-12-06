@@ -14,7 +14,7 @@
 #include "RE_Shader.h"
 #include "RE_Material.h"
 
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "Globals.h"
 #include "RE_GLCacheManager.h"
 
@@ -22,8 +22,6 @@
 #include <gl/GL.h>
 
 #define WATER_FOAM_TEX_PATH "Settings/DefaultAssets/water_foam.png"
-
-RE_InternalResources::RE_InternalResources() {}
 
 RE_InternalResources::~RE_InternalResources()
 {
@@ -68,43 +66,40 @@ void RE_InternalResources::InitChecker()
 bool RE_InternalResources::InitShaders()
 {
 	//Loading Shaders
-	if (App::resources)
-	{
-		// Default
-		RE_Shader* defSRes = new RE_Shader();
-		defSRes->SetName("Default Shader");
-		defSRes->SetType(Resource_Type::R_SHADER);
-		defSRes->SetAsInternal(DEFVERTEXSHADER, DEFFRAGMENTSHADER);
-		defaultShader = App::resources->Reference(defSRes);
+	// Default
+	RE_Shader* defSRes = new RE_Shader();
+	defSRes->SetName("Default Shader");
+	defSRes->SetType(Resource_Type::R_SHADER);
+	defSRes->SetAsInternal(DEFVERTEXSHADER, DEFFRAGMENTSHADER);
+	defaultShader = App::resources->Reference(defSRes);
 
-		// Scaled (for outline)
-		RE_Shader* defScaleRes = new RE_Shader();
-		defScaleRes->SetName("Default Scale Shader");
-		defScaleRes->SetType(Resource_Type::R_SHADER);
-		defScaleRes->SetAsInternal(DEFVERTEXSCALESHADER, DEFFRAGMENTSHADER);
-		defaultScaleShader = App::resources->Reference(defScaleRes);
+	// Scaled (for outline)
+	RE_Shader* defScaleRes = new RE_Shader();
+	defScaleRes->SetName("Default Scale Shader");
+	defScaleRes->SetType(Resource_Type::R_SHADER);
+	defScaleRes->SetAsInternal(DEFVERTEXSCALESHADER, DEFFRAGMENTSHADER);
+	defaultScaleShader = App::resources->Reference(defScaleRes);
 
-		// Skybox
-		RE_Shader* defSKRes = new RE_Shader();
-		defSKRes->SetName("Default SkyBox Shader");
-		defSKRes->SetType(Resource_Type::R_SHADER);
-		defSKRes->SetAsInternal(SKYBOXVERTEXSHADER, SKYBOXFRAGMENTSHADER);
-		skyboxShader = App::resources->Reference(defSKRes);
+	// Skybox
+	RE_Shader* defSKRes = new RE_Shader();
+	defSKRes->SetName("Default SkyBox Shader");
+	defSKRes->SetType(Resource_Type::R_SHADER);
+	defSKRes->SetAsInternal(SKYBOXVERTEXSHADER, SKYBOXFRAGMENTSHADER);
+	skyboxShader = App::resources->Reference(defSKRes);
 
-		// Deferred
-		RE_Shader* deferred = new RE_Shader();
-		deferred->SetName("Deferred Shader");
-		deferred->SetType(Resource_Type::R_SHADER);
-		deferred->SetAsInternal(GEOPASSVERTEXSHADER, GEOPASSFRAGMENTSHADER);
-		defGeoShader = App::resources->Reference(deferred);
+	// Deferred
+	RE_Shader* deferred = new RE_Shader();
+	deferred->SetName("Deferred Shader");
+	deferred->SetType(Resource_Type::R_SHADER);
+	deferred->SetAsInternal(GEOPASSVERTEXSHADER, GEOPASSFRAGMENTSHADER);
+	defGeoShader = App::resources->Reference(deferred);
 
-		// Light Pass
-		RE_Shader* lightPass = new RE_Shader();
-		lightPass->SetName("Light Pass Shader");
-		lightPass->SetType(Resource_Type::R_SHADER);
-		lightPass->SetAsInternal(LIGHTPASSVERTEXSHADER, LIGHTPASSFRAGMENTSHADER);
-		defLightShader = App::resources->Reference(lightPass);
-	}
+	// Light Pass
+	RE_Shader* lightPass = new RE_Shader();
+	lightPass->SetName("Light Pass Shader");
+	lightPass->SetType(Resource_Type::R_SHADER);
+	lightPass->SetAsInternal(LIGHTPASSVERTEXSHADER, LIGHTPASSFRAGMENTSHADER);
+	defLightShader = App::resources->Reference(lightPass);
 
 	return defaultShader && defaultScaleShader && skyboxShader && defGeoShader && defLightShader;
 }

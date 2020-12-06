@@ -6,7 +6,7 @@
 #include "RE_ResourceManager.h"
 #include "RE_Texture.h"
 #include "Globals.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "RE_TextureImporter.h"
 #include "RE_GLCacheManager.h"
 #include "RE_ThumbnailManager.h"
@@ -311,8 +311,11 @@ void RE_SkyBox::SaveResourceMeta(JSONNode* metaNode)
 	JSONNode* nodeTex = metaNode->PushJObject("textures");
 	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++)
 	{
-		eastl::string key(texturesname[i]);
-		nodeTex->PushString(eastl::string(key + "textureMD5").c_str(), skyBoxSettings.textures[i].textureMD5);
+		if (texturesname[i] != nullptr && skyBoxSettings.textures[i].textureMD5 != nullptr)
+		{
+			eastl::string key = texturesname[i];
+			nodeTex->PushString((key + "textureMD5").c_str(), skyBoxSettings.textures[i].textureMD5);
+		}
 	}
 }
 

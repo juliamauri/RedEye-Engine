@@ -1,6 +1,6 @@
 #include "Globals.h"
 
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 
 #include <gl/GL.h>
 #include <EASTL/string.h>

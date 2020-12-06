@@ -4,7 +4,7 @@
 #include "RE_ShaderImporter.h"
 #include "RE_ResourceManager.h"
 #include "RE_InternalResources.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "RE_Math.h"
 #include "RE_CompPrimitive.h"
 #include "RE_GLCacheManager.h"
@@ -35,7 +35,7 @@ RE_PrimitiveManager::~RE_PrimitiveManager()
 
 void RE_PrimitiveManager::Init()
 {
-	App::ReportSoftware("par_shapes.h", nullptr, "https://github.com/prideout/par");
+	RE_SOFT_NS("par_shapes.h", "https://github.com/prideout/par");
 }
 
 void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP)

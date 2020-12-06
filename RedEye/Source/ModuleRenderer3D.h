@@ -71,9 +71,8 @@ public:
 
 	bool Init(JSONNode* node) override;
 	bool Start() override;
-	update_status PreUpdate() override;
-	update_status PostUpdate() override;
-	bool CleanUp() override;
+	void PostUpdate() override;
+	void CleanUp() override;
 
 	void RecieveEvent(const Event& e) override;
 	void DrawEditor() override;
@@ -156,7 +155,7 @@ private:
 	eastl::vector<const char*> activeShaders;
 
 	// Context
-	void* mainContext;
+	void* mainContext = nullptr;
 
 	// Renderer Flags
 	bool vsync = false;

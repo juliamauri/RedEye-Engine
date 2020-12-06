@@ -4,11 +4,10 @@
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
 #include "ModuleScene.h"
-#include "RE_ResouceAndGOImporter.h"
+#include "RE_ECS_Importer.h"
 #include "RE_ModelImporter.h"
-#include "RE_GOManager.h"
-#include "RE_HandleErrors.h"
-#include "OutputLog.h"
+#include "RE_ECS_Manager.h"
+#include "RE_LogManager.h"
 #include "Globals.h"
 
 #include "assimp\include\postprocess.h"
@@ -53,9 +52,9 @@ void RE_Model::Import(bool keepInMemory)
 	if(!keepInMemory) UnloadMemory();
 }
 
-RE_GOManager* RE_Model::GetPool()
+RE_ECS_Manager* RE_Model::GetPool()
 {
-	RE_GOManager* ret;
+	RE_ECS_Manager* ret;
 	bool unload = false;
 	if (unload = (loaded == nullptr)) LoadInMemory();
 	ret = loaded->GetNewPoolFromID(loaded->GetRootUID());
@@ -133,7 +132,7 @@ void RE_Model::Draw()
 
 	if (!needReImport && ImGui::Button("Add to Scene"))
 	{
-		App::handlerrors.StartHandling();
+		RE_LogManager::ScopeProcedureLogging();
 
 		if (CheckResourcesIsOnAssets())
 		{
@@ -147,7 +146,7 @@ void RE_Model::Draw()
 			needReImport = true;
 		}
 
-		App::handlerrors.StopAndPresent();
+		RE_LogManager::EndScope();
 	}
 	else if(needReImport && ImGui::Button("ReImport before add"))
 	{
@@ -230,7 +229,7 @@ void RE_Model::LibraryLoad()
 	if (binaryLoad.Load())
 	{
 		char* cursor = binaryLoad.GetBuffer();
-		loaded = RE_ResouceAndGOImporter::BinaryDeserialize(cursor);
+		loaded = RE_ECS_Importer::BinaryDeserialize(cursor);
 		ResourceContainer::inMemory = true;
 	}
 }
@@ -240,7 +239,7 @@ void RE_Model::LibrarySave()
 	if (loaded != nullptr)
 	{
 		uint size = 0;
-		char* buffer = RE_ResouceAndGOImporter::BinarySerialize(loaded, &size);
+		char* buffer = RE_ECS_Importer::BinarySerialize(loaded, &size);
 
 		RE_FileIO toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
 		toLibrarySave.Save(buffer, size);
@@ -257,7 +256,7 @@ bool RE_Model::CheckResourcesIsOnAssets()
 	if (binaryLoad.Load())
 	{
 		char* cursor = binaryLoad.GetBuffer();
-		ret = RE_ResouceAndGOImporter::BinaryCheckResources(cursor);
+		ret = RE_ECS_Importer::BinaryCheckResources(cursor);
 	}
 
 	return ret;

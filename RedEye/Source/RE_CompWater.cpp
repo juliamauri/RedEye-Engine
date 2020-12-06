@@ -2,7 +2,7 @@
 
 #include "Application.h"
 #include "ModuleRenderer3D.h"
-#include "RE_GOManager.h"
+#include "RE_ECS_Manager.h"
 #include "RE_FileSystem.h"
 #include "RE_GLCacheManager.h"
 
@@ -58,7 +58,7 @@ void RE_CompWater::Draw() const
 {
 	unsigned int textureCounter = 0;
 
-	RE_Shader* shader = dynamic_cast<RE_Shader * >(App::resources->At(App::internalResources.GetDefaultWaterShader()));
+	RE_Shader* shader = dynamic_cast<RE_Shader * >(App::resources->At(RE_ResourceManager::internalResources.GetDefaultWaterShader()));
 	unsigned int shaderID = shader->GetID();
 	RE_GLCacheManager::ChangeShader(shaderID);
 	shader->UploadModel(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
@@ -490,7 +490,7 @@ void RE_CompWater::GeneratePlane()
 
 void RE_CompWater::SetUpWaterUniforms()
 {
-	waterUniforms = App::internalResources.GetWaterUniforms();
+	waterUniforms = RE_ResourceManager::internalResources.GetWaterUniforms();
 
 	for (unsigned int i = 0; i < waterUniforms.size(); i++) {
 		if (waterUniforms[i].name == "waveLength") {
@@ -556,7 +556,7 @@ void RE_CompWater::SetUpWaterUniforms()
 		}
 		else if (waterUniforms[i].name == "water_foam") {
 			waterFoam.first = &waterUniforms[i];
-			waterFoam.second = App::internalResources.GetTextureWaterFoam();
+			waterFoam.second = RE_ResourceManager::internalResources.GetTextureWaterFoam();
 		}
 	}
 }

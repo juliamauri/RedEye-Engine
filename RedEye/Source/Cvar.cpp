@@ -32,6 +32,7 @@ Cvar::Cvar(const Cvar & copy) : type(copy.type)
 	case MAT2:
 	case FLOAT4: value.float4_v = copy.value.float4_v; break;
 	case CHAR_P: value.char_p_v = copy.value.char_p_v; break;
+	case STRING: value.string_v = copy.value.string_v; break;
 	case GAMEOBJECT: value.go_v = copy.value.go_v; break;
 	case MAT3: value.mat3_v = copy.value.mat3_v; break;
 	case MAT4: value.mat4_v = copy.value.mat4_v; break;
@@ -46,6 +47,7 @@ Cvar::Cvar(unsigned long long int uint64_v) : type(UINT64) { value.uint64_v = ui
 Cvar::Cvar(double double_v) : type(DOUBLE) { value.double_v = double_v; }
 Cvar::Cvar(float float_v) : type(FLOAT) { value.float_v = float_v; }
 Cvar::Cvar(const char * char_p_v) : type(CHAR_P) { value.char_p_v = char_p_v; }
+Cvar::Cvar(eastl::string string_v) : type(STRING) { value.string_v = string_v; }
 Cvar::Cvar(RE_GameObject * go_v) : type(GAMEOBJECT) { value.go_v = go_v; }
 
 Cvar::Cvar(const math::float4x4 mat4_v) : type(MAT4) { value.mat4_v = mat4_v; }
@@ -114,6 +116,14 @@ bool Cvar::SetValue(const char * char_p_v, bool force_type)
 	return ret;
 }
 
+bool Cvar::SetValue(eastl::string string_v, bool force_type)
+{
+	bool ret = false;
+	if (force_type) type = STRING;
+	if (ret = (type == STRING)) value.string_v = string_v;
+	return ret;
+}
+
 bool Cvar::SetValue(RE_GameObject * go_v, bool force_type)
 {
 	bool ret = false;
@@ -175,7 +185,14 @@ const float* Cvar::AsFloatPointer() const
 	return ret;
 }
 
-const char * Cvar::AsCharP() const { return value.char_p_v; }
+const char * Cvar::AsCharP() const
+{
+	switch (type) {
+	case Cvar::CHAR_P: return value.char_p_v;
+	case Cvar::STRING: return value.string_v.c_str();
+	default: return nullptr; }
+}
+
 RE_GameObject * Cvar::AsGO() const { return value.go_v; }
 
 // --- DoubleCvar ------------------------------------------------------------------------------

@@ -63,12 +63,12 @@ private:
 
 protected:
 
-	TYPEVALUE* pool_;
-	TYPEVALUE* poolTmp_;
+	TYPEVALUE* pool_ = nullptr;
+	TYPEVALUE* poolTmp_ = nullptr;
 	eastl::map<TYPEKEY, unsigned int> poolmapped_;
 
 	int lastAvaibleIndex = 0;
-	unsigned int currentSize;
+	unsigned int currentSize = 0;
 };
 
 #endif // !__POOL_H__

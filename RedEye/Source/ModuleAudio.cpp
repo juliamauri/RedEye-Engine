@@ -2,8 +2,7 @@
 
 #include "Application.h"
 #include "RE_FileSystem.h"
-#include "OutputLog.h"
-#include "RE_HandleErrors.h"
+#include "RE_LogManager.h"
 
 #include "ImGui/imgui.h"
 #include "ImGui/misc/cpp/imgui_stdlib.h"
@@ -62,7 +61,7 @@ bool ModuleAudio::Init(JSONNode * node)
 {
 	bool ret = true;
 
-	App::ReportSoftware("Wwise SDK", AK_WWISESDK_VERSIONNAME, "https://www.audiokinetic.com/products/wwise/");
+	RE_SOFT_NVS("Wwise SDK", AK_WWISESDK_VERSIONNAME, "https://www.audiokinetic.com/products/wwise/");
 
 	AkMemSettings memSettings;
 	AK::MemoryMgr::GetDefaultSettings(memSettings);
@@ -142,19 +141,13 @@ bool ModuleAudio::Start()
 	return true;
 }
 
-update_status ModuleAudio::PreUpdate()
-{
-	return update_status::UPDATE_CONTINUE;
-}
-
-update_status ModuleAudio::PostUpdate()
+void ModuleAudio::PostUpdate()
 {
 	OPTICK_CATEGORY("Render Audio", Optick::Category::Audio);
 	AK::SoundEngine::RenderAudio();
-	return update_status::UPDATE_CONTINUE;
 }
 
-bool ModuleAudio::CleanUp()
+void ModuleAudio::CleanUp()
 {
 	soundbanks.clear();
 	AK::SoundEngine::ClearBanks();
@@ -166,8 +159,6 @@ bool ModuleAudio::CleanUp()
 	if (AK::IAkStreamMgr::Get())
 		AK::IAkStreamMgr::Get()->Destroy();
 	AK::MemoryMgr::Term();
-
-	return true;
 }
 
 void ModuleAudio::RecieveEvent(const Event& e) {}
@@ -205,7 +196,7 @@ void ModuleAudio::DrawEditor()
 			ImGui::Text("The path will changed to:\n%s%s\\ \n", rootPath.c_str(), tempPath.c_str());
 			if (ImGui::Button("Check and Apply Path")) {
 
-				App::handlerrors.StartHandling();
+				RE_LogManager::ScopeProcedureLogging();
 
 				if (tempPath[tempPath.size()] != '\\') tempPath += "\\";
 
@@ -219,7 +210,7 @@ void ModuleAudio::DrawEditor()
 					tempPath = audioBanksFolderPath;
 				}
 
-				App::handlerrors.StopAndPresent();
+				RE_LogManager::EndScope();
 				pathChanged = false;
 			}
 		}

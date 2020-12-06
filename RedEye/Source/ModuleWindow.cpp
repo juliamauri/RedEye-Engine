@@ -4,7 +4,7 @@
 #include "RE_FileSystem.h"
 #include "ModuleRenderer3D.h"
 #include "Event.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL.h"
 #include "RapidJson\include\document.h"
@@ -91,13 +91,10 @@ void ModuleWindow::DrawEditor()
 	}
 }
 
-bool ModuleWindow::CleanUp()
+void ModuleWindow::CleanUp()
 {
 	if (window) SDL_DestroyWindow(window);
-
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
-
-	return true;
 }
 
 bool ModuleWindow::Load(JSONNode * node)

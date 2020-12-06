@@ -8,9 +8,9 @@
 
 #include "ImGuizmo/ImGuizmo.h"
 #include "ImGui\imgui.h"
-#include <EASTL/list.h>
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
+#include <EASTL/map.h>
 
 class RE_GameObject;
 
@@ -27,21 +27,15 @@ public:
 
 	const char* Name() const;
 
-	// Set position/size for window
-	/*ImGui::SetNextWindowPos(ImVec2(0, 738));
-	ImGui::SetWindowSize(ImVec2(1230.0f, 220.0f));*/
-
 private:
+
 	virtual void Draw(bool secondary = false) = 0;
 
 protected:
 
-	const char* name;
-	bool active;
-	bool lock_pos;
-	ImVec2 pos;
-	ImVec2 size;
-	ImVec2 anchor;
+	bool active, lock_pos;
+	ImVec2 pos, size, anchor;
+	const char* name = nullptr;
 };
 
 class ConsoleWindow : public EditorWindow
@@ -53,17 +47,29 @@ public:
 	void ChangeFilter(const int new_filter);
 	void SwapCategory(const unsigned int category);
 
+	void AppendLog(unsigned int category, const char* text, const char* file_name);
+
 private:
 
 	void Draw(bool secondary = false) override;
+	void ResetBuffer();
 
-public:
+private:
 
 	ImGuiTextBuffer console_buffer;
+	bool needs_rewriting = false;
 	bool scroll_to_bot = true;
 	int file_filter = -1;
-	bool categories[8] = { true, true, true, true, true, true, true, true };
-	const char* category_names[8] = { "Separator", "Global", "Secondary", "Terciary", "Error" , "Warning", "Solution" , "Software" };
+	bool categories[8] = {};
+
+	struct RE_Log
+	{
+		unsigned int caller_id, category, count;
+		eastl::string data;
+	};
+
+	eastl::vector<RE_Log> logHistory;
+	eastl::map<eastl::string, unsigned int> callers;
 };
 
 class ConfigWindow : public EditorWindow
@@ -103,11 +109,6 @@ private:
 	void Draw(bool secondary = false) override;
 };
 
-struct SoftwareInfo
-{
-	SoftwareInfo(const char * name, const char * version = nullptr, const char * website = nullptr);
-	eastl::string name, version, website;
-};
 
 class AboutWindow : public EditorWindow
 {
@@ -121,7 +122,8 @@ private:
 
 public:
 
-	eastl::list<SoftwareInfo> sw_info;
+	struct SoftwareInfo { const char *name, *version, *website; };
+	eastl::vector<SoftwareInfo> sw_info;
 };
 
 class RandomTest : public EditorWindow
@@ -157,16 +159,6 @@ private:
 
 class PopUpWindow :public EditorWindow
 {
-private:
-	enum PU_STATE {
-		PU_NONE = -1,
-		PU_ERROR,
-		PU_SAVE,
-		PU_PREFAB,
-		PU_DELETERESOURCE,
-		PU_DELETEUNDEFINEDFILE
-	};
-
 public:
 	PopUpWindow(const char* name = "PopUp", bool start_active = false);
 	~PopUpWindow();
@@ -179,10 +171,27 @@ public:
 	void PopUpDelRes(const char* res);
 	void PopUpDelUndeFile(const char* assetPath);
 
+	void AppendScopedLog(const char* log, unsigned int type);
+	void ClearScope();
+
 private:
+
 	void Draw(bool secondary = false) override;
 
-	PU_STATE state = PU_NONE;
+public:
+
+	eastl::string logs, errors, warnings, solutions;
+
+private:
+
+	enum PU_STATE {
+		PU_NONE = -1,
+		PU_ERROR,
+		PU_SAVE,
+		PU_PREFAB,
+		PU_DELETERESOURCE,
+		PU_DELETEUNDEFINEDFILE
+	} state = PU_NONE;
 	bool exitAfter = false;
 	bool inputName = false;
 	bool spawnNewScene = false;
@@ -201,15 +210,13 @@ public:
 	AssetsWindow(const char* name = "Assets", bool start_active = true);
 	~AssetsWindow();
 
-	const char* GetCurrentDirPath()const;
-
+	const char* GetCurrentDirPath() const;
 	void SelectUndefined(eastl::string* toFill);
 
 private:
 	void Draw(bool secondary = false) override;
 
 	const char* currentPath = nullptr;
-
 	eastl::string* selectingUndefFile = nullptr;
 };
 
@@ -234,8 +241,7 @@ private:
 	void Draw(bool secondary = false) override;
 
 	RE_Material* editingMaerial = nullptr;
-	eastl::string matName;
-	eastl::string assetPath;
+	eastl::string matName, assetPath;
 };
 
 class RE_SkyBox;
@@ -249,8 +255,7 @@ private:
 	void Draw(bool secondary = false) override;
 
 	RE_SkyBox* editingSkybox = nullptr;
-	eastl::string sbName;
-	eastl::string assetPath;
+	eastl::string sbName, assetPath;
 
 	unsigned int previewImage = 0;
 };
@@ -266,12 +271,8 @@ private:
 	void Draw(bool secondary = false) override;
 
 	RE_Shader* editingShader = nullptr;
-	eastl::string shaderName;
-	eastl::string assetPath;
-
-	eastl::string vertexPath;
-	eastl::string fragmentPath;
-	eastl::string geometryPath;
+	eastl::string shaderName, assetPath;
+	eastl::string vertexPath, fragmentPath, geometryPath;
 };
 
 class WaterPlaneResourceWindow : public EditorWindow

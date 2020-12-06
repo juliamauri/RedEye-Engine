@@ -6,11 +6,11 @@
 #include "RE_TextureImporter.h"
 #include "RE_ShaderImporter.h"
 #include "ModuleRenderer3D.h"
-#include "RE_GOManager.h"
+#include "RE_ECS_Manager.h"
 #include "RE_Model.h"
 #include "RE_Mesh.h"
 #include "RE_Material.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "Globals.h"
 #include "md5.h"
 #include "RE_TimeManager.h"
@@ -33,12 +33,12 @@ bool RE_ModelImporter::Init()
 {
 	bool ret;
 	RE_LOG("Initializing Model Importer");
-	App::ReportSoftware("Assimp", "4.0.1", "http://www.assimp.org/");
+	RE_SOFT_NVS("Assimp", "4.0.1", "http://www.assimp.org/");
 	if (!(ret = (folderPath))) RE_LOG_ERROR("Model Importer could not read folder path");
 	return ret;
 }
 
-RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
+RE_ECS_Manager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
 {
 	aditionalData = new currentlyImporting();
 	aditionalData->settings = mSettings;
@@ -46,7 +46,7 @@ RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int 
 	uint l = 0;
 	aditionalData->name = aditionalData->workingfilepath.substr(l = aditionalData->workingfilepath.find_last_of("/") + 1, aditionalData->workingfilepath.find_last_of(".") - l);
 
-	RE_GOManager* ret = nullptr;
+	RE_ECS_Manager* ret = nullptr;
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFileFromMemory(buffer, size, mSettings->GetFlags()/*aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | /*aiProcess_PreTransformVertices | aiProcess_SortByPType | aiProcess_FlipUVs */);
@@ -64,7 +64,7 @@ RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int 
 		if (scene->HasMeshes()) ProcessMeshes(scene);
 
 		RE_LOG_SECONDARY("Processing model hierarchy"); // Mount a go hiteracy with nodes from model
-		ProcessNodes(ret, scene->mRootNode, scene, (ret = new RE_GOManager())->AddGO(aditionalData->name.c_str(), 0)->GetUID() , math::float4x4::identity);
+		ProcessNodes(ret, scene->mRootNode, scene, (ret = new RE_ECS_Manager())->AddGO(aditionalData->name.c_str(), 0)->GetUID() , math::float4x4::identity);
 
 	}
 
@@ -72,7 +72,7 @@ RE_GOManager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int 
 	return ret;
 }
 
-void RE_ModelImporter::ProcessNodes(RE_GOManager* goPool, aiNode * parentNode, const aiScene * scene, UID parentGO, math::float4x4 parentTransform)
+void RE_ModelImporter::ProcessNodes(RE_ECS_Manager* goPool, aiNode * parentNode, const aiScene * scene, UID parentGO, math::float4x4 parentTransform)
 {
 	aiVector3D nScale, nPosition;
 	aiQuaternion nRotationQuat;

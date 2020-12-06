@@ -1,0 +1,1004 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="ModuleAudio" Collapsed="true">
+    <Position X="1.75" Y="23.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAgIIAACIABAAAAgDAEAIQAAAAAAQAAEACCEEIQAA=</HashCode>
+      <FileName>ModuleAudio.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ModuleInput" Collapsed="true">
+    <Position X="1.75" Y="24.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAIAAAAAAIAAAAAAERAAAAgAAABAIAKAEEIAAA=</HashCode>
+      <FileName>ModuleInput.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ModuleRenderer3D" Collapsed="true">
+    <Position X="1.75" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAQApIFAACCo5wZQgIBAEgkgAAiQDAAABAECRGtMAE4=</HashCode>
+      <FileName>ModuleRenderer3D.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ModuleScene" Collapsed="true">
+    <Position X="1.75" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gKRAAABCAWCgAEohAALAOAgBAASAgAoQA0AAAFQKABg=</HashCode>
+      <FileName>ModuleScene.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ModuleWindow" Collapsed="true">
+    <Position X="1.75" Y="25.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AGAAgJCUQABAAAQEQACAFAHAAAAEAIAIEAiSAESYACQ=</HashCode>
+      <FileName>ModuleWindow.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Module" Collapsed="true">
+    <Position X="0.5" Y="15.5" Width="1.5" />
+    <InheritanceLine Type="EventListener" ManuallyRouted="true">
+      <Path>
+        <Point X="1.25" Y="1.062" />
+        <Point X="1.25" Y="1.635" />
+        <Point X="0.75" Y="1.635" />
+        <Point X="0.75" Y="15.125" />
+        <Point X="1.25" Y="15.125" />
+        <Point X="1.25" Y="15.5" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAQAgIAAACAACAAAEADAEAABAAAEAAAAAEACCFEIBAA=</HashCode>
+      <FileName>Module.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MD5" Collapsed="true">
+    <Position X="7.25" Y="3.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>ABAAAEAAAAAAIAgABEAEAAAAAAAGQAJEAIBAGGAEAAE=</HashCode>
+      <FileName>md5.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EventListener" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EventListener.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Event" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAEAgAAAACAoABEgAAABAAAARALAA=</HashCode>
+      <FileName>Event.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_LogManager" Collapsed="true">
+    <Position X="2.5" Y="12" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAACAABAAAAAAAAAAAAAAEAAAAAAAAAAAoAAE=</HashCode>
+      <FileName>RE_LogManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EditorWindow" Collapsed="true">
+    <Position X="10.5" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAgAAAgAAEIAgAIQAAEAEAAAwAAAAIAAAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ConsoleWindow" Collapsed="true">
+    <Position X="10.5" Y="21.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAEAAAAAAAQAAoAABAAQAAAQAAAAAAAAAAgAACAAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ConfigWindow" Collapsed="true">
+    <Position X="10.5" Y="22.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAAQAAAAAAAAAAAAAAQAAAAAQAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HeriarchyWindow" Collapsed="true">
+    <Position X="10.5" Y="24" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAAAgAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PropertiesWindow" Collapsed="true">
+    <Position X="10.5" Y="24.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAIAgAAAAAAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AboutWindow" Collapsed="true">
+    <Position X="15.25" Y="21.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAoAAAAAAAAAAABAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RandomTest" Collapsed="true">
+    <Position X="15.25" Y="23.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAEAAAAAAQAiAABAEAAAAAAAAABAAAgAAAACUoAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayPauseWindow" Collapsed="true">
+    <Position X="10.5" Y="23.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAAAAEAAAAAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PopUpWindow" Collapsed="true">
+    <Position X="15.25" Y="24" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAgAABAAkggAAAAiAgAIRAEAAAAEAEAEAAyAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AssetsWindow" Collapsed="true">
+    <Position X="10.5" Y="21" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAiAgAAAIAAAAAABAAAAAEAAAAAAAAQA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WwiseWindow" Collapsed="true">
+    <Position X="15.25" Y="22.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAQAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MaterialEditorWindow" Collapsed="true">
+    <Position X="17.5" Y="21" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAgAAAAAAAIAAAAAAAIAQAAAAAAQAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SkyBoxEditorWindow" Collapsed="true">
+    <Position X="17.5" Y="23.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAgAAAAACAAAAAAAAAgQAAAAAAEAAAAg=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ShaderEditorWindow" Collapsed="true">
+    <Position X="17.5" Y="21.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QGAAACAAAAAAAgAQAAAIAAAAAAAAAAAAAACABAAAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WaterPlaneResourceWindow" Collapsed="true">
+    <Position X="15.25" Y="21" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAAAAAAAgAAAAACAAAAAAAAAAIAAAAAAAAAgAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TextEditorManagerWindow" Collapsed="true">
+    <Position X="17.5" Y="22.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAiAAAAAAAAAAABAAAAgAAAAAAAAAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SceneEditorWindow" Collapsed="true">
+    <Position X="12.75" Y="21" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>IAEAAAAQIAgAQgDAREAQAIAAAAAAAAAAAAAAAEABFAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SceneGameWindow" Collapsed="true">
+    <Position X="12.75" Y="21.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAASAAAAQgBAREAAAIAAAAAAQAAAAAAAAAAAFAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TransformDebugWindow" Collapsed="true">
+    <Position X="15.25" Y="24.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAAAAQAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>EditorWindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ModuleEditor" Collapsed="true">
+    <Position X="1.75" Y="19.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>gsaWAChCgKIIig0JghSJEAEBACBBEDARzICCIkGYAKA=</HashCode>
+      <FileName>ModuleEditor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Application" Collapsed="true">
+    <Position X="1" Y="2" Width="1.75" />
+    <InheritanceLine Type="EventListener" ManuallyRouted="true" FixedToPoint="true">
+      <Path>
+        <Point X="1.25" Y="1.062" />
+        <Point X="1.25" Y="1.654" />
+        <Point X="0.75" Y="1.654" />
+        <Point X="0.75" Y="2.312" />
+        <Point X="1" Y="2.312" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>CIQRwOAAAFhDA2AIABxAGIABwAhCAFAcgIAiAEAIFAA=</HashCode>
+      <FileName>Application.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Command" Collapsed="true">
+    <Position X="5.75" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAAEEAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_Command.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CommandManager" Collapsed="true">
+    <Position X="3.5" Y="19.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAEAAAAAAAAAAEAgAEAAABAAAAAASACAABAAAA=</HashCode>
+      <FileName>RE_CommandManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AABBDynamicTree" Collapsed="true">
+    <Position X="2.25" Y="18.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAEQAAAAgCAAMAgAAEIUAAigCAAAQMAAQBAAAA=</HashCode>
+      <FileName>AABBDynamicTree.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Cvar" Collapsed="true">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAgAAACAAggABgAAIAAACYBABACEDABACAAAgAAg=</HashCode>
+      <FileName>Cvar.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ShaderCvar" Collapsed="true">
+    <Position X="7.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAIgAAAAAAAAACAAAEAAAAAAAgAQACAAE=</HashCode>
+      <FileName>Cvar.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PoolMapped&lt;TYPEVALUE, TYPEKEY, size, increment&gt;" Collapsed="true">
+    <Position X="8.25" Y="17.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAADgABCAAAgAAAAAACAIAAAAAMAAABADAA=</HashCode>
+      <FileName>PoolMapped.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_ThumbnailManager" Collapsed="true">
+    <Position X="8.75" Y="11.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>QgQkAACCgABBAAAAAAACQAAAIAGAABAABABCAAAgAAQ=</HashCode>
+      <FileName>RE_ThumbnailManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_TextureImporter" Collapsed="true">
+    <Position X="2.5" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAAAIAAAAAAIAACAAAAAJIACAAAABAA=</HashCode>
+      <FileName>RE_TextureImporter.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_ShaderImporter" Collapsed="true">
+    <Position X="2.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAJAAAEAAAAoAAAAIAYACAAAAAMJAAQABAACAAQAAEA=</HashCode>
+      <FileName>RE_ShaderImporter.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_PrimitiveManager" Collapsed="true">
+    <Position X="8.75" Y="12.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAQAAAQAAAAAAAAAAAUAAAAAAAAAACAAIBAAA=</HashCode>
+      <FileName>RE_PrimitiveManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_ECS_Importer" Collapsed="true">
+    <Position X="2.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAABAAAAAAACAAAAAKAAAAAAAAAEAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Importer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_ResourceManager" Collapsed="true">
+    <Position X="1.75" Y="3.75" Width="1.5" />
+    <InheritanceLine Type="EventListener" ManuallyRouted="true" FixedToPoint="true">
+      <Path>
+        <Point X="1.25" Y="1.062" />
+        <Point X="1.25" Y="1.655" />
+        <Point X="0.75" Y="1.655" />
+        <Point X="0.75" Y="4.062" />
+        <Point X="1.75" Y="4.062" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAEAyACAEAwJAigIhQEAUAAAAAGEIQAAIABAAhAABAA=</HashCode>
+      <FileName>RE_ResourceManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_ModelImporter" Collapsed="true">
+    <Position X="2.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACgAAAgABAAAAAAAIAAAIABAAAAAAAAAAAACCAAAAGE=</HashCode>
+      <FileName>RE_ModelImporter.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_InternalResources" Collapsed="true">
+    <Position X="2.5" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gIACACCQAACCCCQAIECIAAIEAABgAwYiAAQCAICAAAA=</HashCode>
+      <FileName>RE_InternalResources.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Material" Collapsed="true">
+    <Position X="4.75" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>DQgBCICAABIASgACIOAqCgEMSCQUZQEARFgAEAJ4wDA=</HashCode>
+      <FileName>RE_Material.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Mesh" Collapsed="true">
+    <Position X="4.75" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>hAgAAlK4IBAAChECW0AYMAIABwQQwAAAEAAAUAAVQCA=</HashCode>
+      <FileName>RE_Mesh.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Model" Collapsed="true">
+    <Position X="4.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAgIACAAAAIAAgABIAAIQAAAAAAAQAQgEAQAAABKAAA=</HashCode>
+      <FileName>RE_Model.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Prefab" Collapsed="true">
+    <Position X="4.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAKAAAAAAAgABMQAIEAAAAAAAQAAgEAAAQQACAAA=</HashCode>
+      <FileName>RE_Prefab.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Scene" Collapsed="true">
+    <Position X="4.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAKAAAAAAAwABMAAIEAAAAAAAYAAgEAAAQAACAAA=</HashCode>
+      <FileName>RE_Scene.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Shader" Collapsed="true">
+    <Position X="4.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>wBkBACACQEIAgjAEAEAIgCAAEIAAQIcgEQYKtgIKCAA=</HashCode>
+      <FileName>RE_Shader.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_SkyBox" Collapsed="true">
+    <Position X="4.75" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAgAQiAAAEIAggAGMAAYgAAAUAAARKIgFAQAAAgMACE=</HashCode>
+      <FileName>RE_SkyBox.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Texture" Collapsed="true">
+    <Position X="4.75" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAgAACCACAIAggRAZAAIgAABQBAAQAAgNAAQEAgMAII=</HashCode>
+      <FileName>RE_Texture.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResourceContainer" Collapsed="true">
+    <Position X="3.5" Y="3.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>BMgAAEAIIIIAAgAAIAAICAgBKAAFxiUUAgIAUAAiBIA=</HashCode>
+      <FileName>Resource.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_HandleErrors" Collapsed="true">
+    <Position X="2.5" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgACAAQEQDBAYEQAQAAAAAAAgAACEEAIAAAEAA=</HashCode>
+      <FileName>RE_HandleErrors.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_GLCacheManager" Collapsed="true">
+    <Position X="2.5" Y="22.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAAAAAAAAAAAEAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_GLCacheManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_FBOManager" Collapsed="true">
+    <Position X="2.5" Y="21.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAwEAAAAABAAAAAAAAAAAAIBEgCIAg=</HashCode>
+      <FileName>RE_FBOManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CameraManager" Collapsed="true">
+    <Position X="8.75" Y="13.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>BEAAAAAIAAAAAAAhAAIAAAAAAAAABAIEABECQABAAAA=</HashCode>
+      <FileName>RE_CameraManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Timer" Collapsed="true">
+    <Position X="11" Y="14" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAACAAAAAAAAAAAAAgQgAAAAAAoAAAAAAEIAA=</HashCode>
+      <FileName>RE_TimeManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_TimeManager" Collapsed="true">
+    <Position X="8.75" Y="14" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQABAAAAUAADwQASAAAAAAARABIAAIAAAQCgAEIGQA=</HashCode>
+      <FileName>RE_TimeManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Hardware" Collapsed="true">
+    <Position X="2.5" Y="14.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAQQQCAAEAQADEAACAIIgCAAAAAyAQAAACTAAIoAA=</HashCode>
+      <FileName>RE_Hardware.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Math" Collapsed="true">
+    <Position X="2.5" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAQAQAEAAAAAIAAAAAUAAAAAgAAAADAAAAAAA=</HashCode>
+      <FileName>RE_Math.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_FileSystem" Collapsed="true">
+    <Position X="1.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgIiAAI4gAABEAB4CBAQAABBiIAQAIAEAAEDoAEIFgA=</HashCode>
+      <FileName>RE_FileSystem.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_FileIO" Collapsed="true">
+    <Position X="5.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAgIAAAAAAAACAAIgAAAAAAAEEAAAACBBgKIAAABA=</HashCode>
+      <FileName>RE_FileSystem.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Config" Collapsed="true">
+    <Position X="2.5" Y="15.5" Width="1.5" />
+    <InheritanceLine Type="RE_FileIO" ManuallyRouted="true" FixedFromPoint="true">
+      <Path>
+        <Point X="6.75" Y="3.25" />
+        <Point X="13.007" Y="3.25" />
+        <Point X="13.007" Y="15.5" />
+        <Point X="3.281" Y="15.5" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAgIAAAgAAAAAAAAAAAAAAAAIAAAAAAAEgIAAAEAA=</HashCode>
+      <FileName>RE_FileSystem.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="JSONNode" Collapsed="true">
+    <Position X="3.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABCDCQAAQAQkABAIAoBIAAAAEAAAAGAGQgigAEQACS4=</HashCode>
+      <FileName>RE_FileSystem.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ComponentPool&lt;COMPCLASS, size, increment&gt;" Collapsed="true">
+    <Position X="12" Y="17.75" Width="3.25" />
+    <InheritanceLine Type="PoolMapped&lt;TYPEVALUE, TYPEKEY, size, increment&gt;" FixedToPoint="true">
+      <Path>
+        <Point X="10" Y="18" />
+        <Point X="12" Y="18" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>CAwCAACABAAAAAAAAAAAAAEEAQAEAAAASAEAQABACAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ComponentsPool" Collapsed="true">
+    <Position X="4.25" Y="17.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>DAwAQDLAAEAgABACABgCgGEhAYAFAAAAZAAQADQABgY=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameObjectsPool" Collapsed="true">
+    <Position X="6.25" Y="17.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AIgAAACEAEAAAAAAAAAAAAEAgQYAAAAAQAEAAgBACAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_ECS_Manager" Collapsed="true">
+    <Position X="2.25" Y="17.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>DIwCAACYgEQgAAAAAAEBAFEAAYQMAAAIRQCAAAQAABA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompWater" Collapsed="true">
+    <Position X="16" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>DAgBA4CAIAQCIgACQCBQIoEFASBMAYEAYIAAAAAFAXE=</HashCode>
+      <FileName>RE_CompWater.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompTransform" Collapsed="true">
+    <Position X="16" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ECwCMIAABIAAgIgAAAYJAIGCEQEAAgmAAAAQAoAggGA=</HashCode>
+      <FileName>RE_CompTransform.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompPrimitive" Collapsed="true">
+    <Position X="19" Y="7.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>hAAAAoAAABAAAgACAAAQIAAAAAAAAACAIAgAAAAEAWA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompGrid" Collapsed="true">
+    <Position X="16" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAIDAAAIABgAAAAAAEBECAUAEABAAQAAAAAAAAEA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompRock" Collapsed="true">
+    <Position X="16" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAkAAICAAAAAQgAAAAAAAAEAAQAQCAAAQAIAQAAAgEA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompPlatonic" Collapsed="true">
+    <Position X="18" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAICAAEABAgAAAAAAAAEAAQAAAAQAQAgAAAAAAEA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompParametric" Collapsed="true">
+    <Position X="18" Y="13" Width="1.75" />
+    <InheritanceLine Type="RE_CompPrimitive" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="19.875" Y="8.441" />
+        <Point X="19.875" Y="13.312" />
+        <Point X="19.75" Y="13.312" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>ACgAAICACAAAAgABAAgAAAEAAQAEAIAAQYAARqAJAUA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompCube" Collapsed="true">
+    <Position X="16" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompDodecahedron" Collapsed="true">
+    <Position X="16" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompTetrahedron" Collapsed="true">
+    <Position X="16" Y="12" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompOctohedron" Collapsed="true">
+    <Position X="16" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompIcosahedron" Collapsed="true">
+    <Position X="16" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompPlane" Collapsed="true">
+    <Position X="16" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAABEAAAAI=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompSphere" Collapsed="true">
+    <Position X="16" Y="16" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAE=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompCylinder" Collapsed="true">
+    <Position X="16" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompHemiSphere" Collapsed="true">
+    <Position X="16" Y="13" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAACAAAQAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompTorus" Collapsed="true">
+    <Position X="16" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAJAAAAAA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompTrefoiKnot" Collapsed="true">
+    <Position X="16" Y="15.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAACAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>RE_CompPrimitive.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_Component" Collapsed="true">
+    <Position X="18" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAwAwICAAAAIBgAAEABQAAEBAQAFAAERQFICINUBAlA=</HashCode>
+      <FileName>RE_Component.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompMesh" Collapsed="true">
+    <Position X="16" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>DAgAAMCEAQABEgAAQACAAAEAAQAGAAAEQCQAIAAIAEg=</HashCode>
+      <FileName>RE_CompMesh.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompLight" Collapsed="true">
+    <Position X="16" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAICAAAQAIAAAAAAAAAMAgSABCIAASAAIACBAEEA=</HashCode>
+      <FileName>RE_CompLight.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_CompCamera" Collapsed="true">
+    <Position X="16" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CKwEAYaUPAsKEKZIwIJMCBOAkQBEECAQQAABBIAJAUU=</HashCode>
+      <FileName>RE_CompCamera.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RE_GameObject" Collapsed="true">
+    <Position X="18" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>DZkhAEiiC1gJBQiCEhKCZFELBw7MnwOZVFEQIZBkDsA=</HashCode>
+      <FileName>RE_GameObject.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="WwiseEvent" Collapsed="true">
+    <Position X="5.25" Y="23.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAgAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ModuleAudio.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="SoundBank" Collapsed="true">
+    <Position X="3.5" Y="23.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACABAAAgABRAAACAAAAAAAEAAIAAAAAAAAAAAI=</HashCode>
+      <FileName>ModuleAudio.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="MouseData" Collapsed="true">
+    <Position X="3.5" Y="24.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAABgAAgACAAAAAAAAAARAAAAAAACEAAAAAAAQAA=</HashCode>
+      <FileName>ModuleInput.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="RenderView" Collapsed="true">
+    <Position X="3.5" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAABQAAAAAAAACAAIEAAAAAAAIAABAAAQ=</HashCode>
+      <FileName>ModuleRenderer3D.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="RE_Log" Collapsed="true">
+    <Position X="4.25" Y="12" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAYAAAAAAQ=</HashCode>
+      <FileName>RE_LogManager.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="RE_ModelSettings" Collapsed="true">
+    <Position X="6.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>JAAAAAAAAAAAAAAAAAACAQAAAAAAAAAAAABAAAAAAAQ=</HashCode>
+      <FileName>RE_Model.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="RE_ShaderSettings" Collapsed="true">
+    <Position X="6.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAABACAAIAAAAAAAAAAAAAAAAQAAAAAAACAAAAA=</HashCode>
+      <FileName>RE_Shader.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="TexSkyBox" Collapsed="true">
+    <Position X="8.25" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAEAAAAAAAAAACAQAAAAQAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_SkyBox.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="RE_SkyBoxSettings" Collapsed="true">
+    <Position X="6.5" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAgAAAEAAAgAAAABAAQAAAAAAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>RE_SkyBox.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="RE_TextureSettings" Collapsed="true">
+    <Position X="6.5" Y="10.25" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAgAAAAIAAQAAAAAAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>RE_Texture.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="RE_FBO" Collapsed="true">
+    <Position X="4.5" Y="21.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAgAQAQAAAAAAAAgABAAAAAEBAAAAAAEA=</HashCode>
+      <FileName>RE_FBOManager.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Typedef Name="TransformsPool" Collapsed="true">
+    <Position X="14.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="CamerasPool" Collapsed="true">
+    <Position X="14.25" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="MeshesPool" Collapsed="true">
+    <Position X="14.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="LightPool" Collapsed="true">
+    <Position X="14.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="WaterPool" Collapsed="true">
+    <Position X="14.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="GridPool" Collapsed="true">
+    <Position X="14.25" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="RockPool" Collapsed="true">
+    <Position X="14.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="CubePool" Collapsed="true">
+    <Position X="14.25" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="DodecahedronPool" Collapsed="true">
+    <Position X="14.25" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="TetrahedronPool" Collapsed="true">
+    <Position X="14.25" Y="12" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="OctohedronPool" Collapsed="true">
+    <Position X="14.25" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="IcosahedronPool" Collapsed="true">
+    <Position X="14.25" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="PlanePool" Collapsed="true">
+    <Position X="14.25" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="SpherePool" Collapsed="true">
+    <Position X="14.25" Y="16" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="CylinderPool" Collapsed="true">
+    <Position X="14.25" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="HemiSpherePool" Collapsed="true">
+    <Position X="14.25" Y="13" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="TorusPool" Collapsed="true">
+    <Position X="14.25" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="TrefoiKnotPool" Collapsed="true">
+    <Position X="14.25" Y="15.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RE_ECS_Manager.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Enum Name="KEY_STATE" Collapsed="true">
+    <Position X="5.25" Y="24.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAANAAAAAAAAAAAABAAA=</HashCode>
+      <FileName>ModuleInput.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="LightMode" Collapsed="true">
+    <Position X="7" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAAEAAAAAAAAAAAAAAAAABAAAAAAABA=</HashCode>
+      <FileName>ModuleRenderer3D.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="RenderViewFlags" Collapsed="true">
+    <Position X="5.25" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAABAQJAAAAAAAIAABAAAAAAiAABBAAAAgAA=</HashCode>
+      <FileName>ModuleRenderer3D.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="RE_EventType" Collapsed="true">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>KQQIAgAooBCBASAQAAEAAAQGAYgQIAAEEQAIAACEAAA=</HashCode>
+      <FileName>Event.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="LogCategory" Collapsed="true">
+    <Position X="5.75" Y="12" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AIIAAAAAAQAAAIAAAAAAAAAAAAAAAAAAMgAAAABAAIA=</HashCode>
+      <FileName>RE_LogManager.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="GameState" Collapsed="true">
+    <Position X="3" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAICAAAAAAAAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>Application.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="RE_ShadingMode" Collapsed="true">
+    <Position X="6.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAAABAABAAAAgAAAFAIABAAAAAAAQAAAAAA=</HashCode>
+      <FileName>RE_Material.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="RE_TextureFace" Collapsed="true">
+    <Position X="10" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAEAAAAAAAAQIABAAAAEAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>RE_SkyBox.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="TextureType" Collapsed="true">
+    <Position X="11.5" Y="10.25" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEBACAAAQAQAAAAAAAAAAAAAAAAAAIAAAACAA=</HashCode>
+      <FileName>RE_Texture.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="RE_TextureFilters" Collapsed="true">
+    <Position X="9.75" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAEAAAAQAAAIAQQAAAAIAAAA=</HashCode>
+      <FileName>RE_Texture.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="RE_TextureWrap" Collapsed="true">
+    <Position X="8" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAEAAAAAAAAAAAAAAAABAAAAAAAAAAAAAQAAAAA=</HashCode>
+      <FileName>RE_Texture.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Resource_Type" Collapsed="true">
+    <Position X="5.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIhAAAAAAAABBABAAAIAAAAAACAAAAAIAAAIA=</HashCode>
+      <FileName>Resource.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="ComponentType" Collapsed="true">
+    <Position X="19.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQQECgAgAAAEAEAAAAAECAAUEDEIiAgAGAAAAAAAAg=</HashCode>
+      <FileName>RE_Component.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

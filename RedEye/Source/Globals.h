@@ -22,13 +22,6 @@ typedef unsigned char uchar;
 typedef unsigned long ulong;
 typedef unsigned long long UID;
 
-enum update_status
-{
-	UPDATE_ERROR = -1,
-	UPDATE_STOP = 0,
-	UPDATE_CONTINUE = 1
-};
-
 enum Dir
 {
 	FORWARD,

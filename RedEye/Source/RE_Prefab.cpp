@@ -4,10 +4,10 @@
 #include "ModuleScene.h"
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
-#include "RE_GOManager.h"
-#include  "OutputLog.h"
+#include "RE_ECS_Manager.h"
+#include "RE_LogManager.h"
 #include "md5.h"
-#include "RE_ResouceAndGOImporter.h"
+#include "RE_ECS_Importer.h"
 #include "Globals.h"
 
 #include "ImGui/imgui.h"
@@ -35,10 +35,8 @@ void RE_Prefab::LoadInMemory()
 
 void RE_Prefab::UnloadMemory()
 {
-	if (loaded) DEL(loaded);
-	if (toSave) DEL(toSave);
-	loaded = nullptr;
-	toSave = nullptr;
+	DEL(loaded);
+	DEL(toSave);
 	ResourceContainer::inMemory = false;
 }
 
@@ -49,7 +47,7 @@ void RE_Prefab::Import(bool keepInMemory)
 	if (!keepInMemory) UnloadMemory();
 }
 
-void RE_Prefab::Save(RE_GOManager* pool, bool rootidentity, bool keepInMemory)
+void RE_Prefab::Save(RE_ECS_Manager* pool, bool rootidentity, bool keepInMemory)
 {
 	if (pool)
 	{
@@ -78,9 +76,9 @@ void RE_Prefab::SetName(const char* _name)
 	SetAssetPath(assetPath.c_str());
 }
 
-RE_GOManager* RE_Prefab::GetPool()
+RE_ECS_Manager* RE_Prefab::GetPool()
 {
-	RE_GOManager* ret;
+	RE_ECS_Manager* ret;
 	bool unload = false;
 	if (unload = (loaded == nullptr)) LoadInMemory();
 	ret = loaded->GetNewPoolFromID(loaded->GetRootUID());
@@ -94,7 +92,7 @@ void RE_Prefab::AssetSave()
 	Config prefab_SaveFile(GetAssetPath(), App::fs->GetZipPath());
 	JSONNode* prefabNode = prefab_SaveFile.GetRootNode("prefab");
 
-	RE_ResouceAndGOImporter::JsonSerialize(prefabNode, toSave);
+	RE_ECS_Importer::JsonSerialize(prefabNode, toSave);
 	DEL(prefabNode);
 
 	//Setting LibraryPath and MD5
@@ -115,7 +113,7 @@ void RE_Prefab::AssetLoad(bool generateLibraryPath)
 	if (jsonLoad.Load())
 	{
 		JSONNode* prefabNode = jsonLoad.GetRootNode("prefab");
-		loaded = RE_ResouceAndGOImporter::JsonDeserialize(prefabNode);
+		loaded = RE_ECS_Importer::JsonDeserialize(prefabNode);
 		DEL(prefabNode);
 
 		if (generateLibraryPath)
@@ -137,7 +135,7 @@ void RE_Prefab::LibraryLoad()
 	if (binaryLoad.Load())
 	{
 		char* cursor = binaryLoad.GetBuffer();
-		loaded = RE_ResouceAndGOImporter::BinaryDeserialize(cursor);
+		loaded = RE_ECS_Importer::BinaryDeserialize(cursor);
 	}
 	ResourceContainer::inMemory = true;
 }
@@ -145,7 +143,7 @@ void RE_Prefab::LibraryLoad()
 void RE_Prefab::LibrarySave()
 {
 	uint size = 0;
-	char* buffer = RE_ResouceAndGOImporter::BinarySerialize(toSave, &size);
+	char* buffer = RE_ECS_Importer::BinarySerialize(toSave, &size);
 	RE_FileIO toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
 	toLibrarySave.Save(buffer, size);
 	DEL_A(buffer);

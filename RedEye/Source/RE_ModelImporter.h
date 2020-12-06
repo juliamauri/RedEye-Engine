@@ -8,7 +8,7 @@ struct aiMaterial;
 struct aiString;
 struct RE_ModelSettings;
 enum aiTextureType;
-class RE_GOManager;
+class RE_ECS_Manager;
 class RE_GameObject;
 
 #include "Globals.h"
@@ -17,14 +17,6 @@ class RE_GameObject;
 #include <EASTL/vector.h>
 #include <EASTL/string.h>
 #include <EASTL/map.h>
-
-struct currentlyImporting {
-	RE_ModelSettings* settings = nullptr;
-	eastl::map<aiMesh*, const char*> meshesLoaded;
-	eastl::map<aiMaterial*, const char*> materialsLoaded;
-	eastl::string workingfilepath;
-	eastl::string name;
-};
 
 class RE_ModelImporter
 {
@@ -35,19 +27,26 @@ public:
 	bool Init();
 
 	eastl::vector<eastl::string> GetOutsideResourcesAssetsPath(const char * path);
-	RE_GOManager* ProcessModel(const char* buffer, unsigned int size, const char* assetPayh, RE_ModelSettings* mSettings);
+	RE_ECS_Manager* ProcessModel(const char* buffer, unsigned int size, const char* assetPayh, RE_ModelSettings* mSettings);
 
 private:
 	void ProcessMaterials(const aiScene* scene);
 	void ProcessMeshes(const aiScene* scene);
-	void ProcessNodes(RE_GOManager* goPool, aiNode* parentNode, const aiScene* scene, UID parentGO, math::float4x4 patrentTansform);
+	void ProcessNodes(RE_ECS_Manager* goPool, aiNode* parentNode, const aiScene* scene, UID parentGO, math::float4x4 patrentTansform);
 
 	void GetTexturesMaterial(aiMaterial * material, eastl::string &fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString &name);
 	void GetTexturePath(aiMaterial * material, eastl::vector<eastl::string> &retPaths, aiTextureType textureType);
 
 private:
 	const char* folderPath = nullptr;
-	currentlyImporting* aditionalData = nullptr;
+
+	struct currentlyImporting {
+		RE_ModelSettings* settings = nullptr;
+		eastl::map<aiMesh*, const char*> meshesLoaded;
+		eastl::map<aiMaterial*, const char*> materialsLoaded;
+		eastl::string workingfilepath;
+		eastl::string name;
+	} *aditionalData = nullptr;
 };
 
 #endif // !__REMODELIMPORTER_H__

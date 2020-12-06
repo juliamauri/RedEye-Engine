@@ -17,16 +17,16 @@
 #include "RE_Texture.h"
 #include "RE_Mesh.h"
 
-#include "RE_GOManager.h"
+#include "RE_ECS_Manager.h"
 
 #include "Globals.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "SDL2\include\SDL_assert.h"
 
 #include <EASTL/string.h>
 #include <EASTL/internal/char_traits.h>
 
-RE_ResourceManager::RE_ResourceManager() {}
+RE_InternalResources RE_ResourceManager::internalResources;
 
 RE_ResourceManager::~RE_ResourceManager()
 {
@@ -36,6 +36,8 @@ RE_ResourceManager::~RE_ResourceManager()
 		resources.erase(resources.begin());
 	}
 }
+
+void RE_ResourceManager::Init() { internalResources.Init(); }
 
 void RE_ResourceManager::RecieveEvent(const Event& e)
 {
@@ -206,13 +208,16 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 		Event::PauseEvents();
 		for (auto resource : temp_resources)
 		{
-			RE_GOManager* poolGORes = nullptr;
+			RE_ECS_Manager* poolGORes = nullptr;
 			Use(resource->GetMD5());
 			switch (resource->GetType()) {
 			case R_SCENE: poolGORes = dynamic_cast<RE_Scene*>(resource)->GetPool(); break;
 			case R_PREFAB: poolGORes = dynamic_cast<RE_Prefab*>(resource)->GetPool(); break;
 			case R_MODEL: poolGORes = dynamic_cast<RE_Model*>(resource)->GetPool(); break; }
-			eastl::stack<RE_Component*> comps = poolGORes->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+
+			eastl::stack<RE_Component*> comps;
+			if (poolGORes != nullptr)
+				comps = poolGORes->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 
 			bool skip = false;
 			while (!comps.empty() && !skip)
@@ -285,54 +290,58 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 			{
 				Event::PauseEvents();
 
-				RE_GOManager* poolGORes = nullptr;
+				RE_ECS_Manager* poolGORes = nullptr;
 				Use(resToChange);
 
 				switch (goType) {
 				case R_SCENE: poolGORes = dynamic_cast<RE_Scene*>(resChange)->GetPool(); break;
 				case R_PREFAB: poolGORes = dynamic_cast<RE_Prefab*>(resChange)->GetPool(); break; }
 
-				eastl::stack<RE_Component*> comps = poolGORes->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
-				while (!comps.empty())
+				if (poolGORes != nullptr)
 				{
-					RE_Component* go = comps.top();
-					comps.pop();
+					eastl::stack<RE_Component*> comps = poolGORes->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 
-					if (rType == R_MATERIAL)
+					while (!comps.empty())
 					{
-						RE_CompMesh* mesh = dynamic_cast<RE_CompMesh*>(go);
-						if (mesh && mesh->GetMaterial() == res) mesh->SetMaterial(nullptr);
+						RE_Component* go = comps.top();
+						comps.pop();
+
+						if (rType == R_MATERIAL)
+						{
+							RE_CompMesh* mesh = dynamic_cast<RE_CompMesh*>(go);
+							if (mesh && mesh->GetMaterial() == res) mesh->SetMaterial(nullptr);
+						}
+						else
+						{
+							RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(go);
+							if (cam && cam->isUsingSkybox() && cam->GetSkybox() == res) cam->SetSkyBox(nullptr);
+						}
 					}
-					else
+
+					poolGORes->GetRootPtr()->ResetGOandChildsAABB();
+
+					switch (goType)
 					{
-						RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(go);
-						if (cam && cam->isUsingSkybox() && cam->GetSkybox() == res) cam->SetSkyBox(nullptr);
+					case R_SCENE:
+					{
+						RE_Scene* s = dynamic_cast<RE_Scene*>(resChange);
+						s->Save(poolGORes);
+						s->SaveMeta();
+						break;
 					}
+					case R_PREFAB:
+					{
+						RE_Prefab* p = dynamic_cast<RE_Prefab*>(resChange);
+						p->Save(poolGORes, false);
+						p->SaveMeta();
+						break;
+					}
+					}
+					App::renderer3d->PushThumnailRend(resToChange, true);
+					UnUse(resToChange);
+					DEL(poolGORes);
+					Event::ResumeEvents();
 				}
-
-				poolGORes->GetRootPtr()->ResetGOandChildsAABB();
-
-				switch (goType)
-				{
-				case R_SCENE:
-				{
-					RE_Scene* s = dynamic_cast<RE_Scene*>(resChange);
-					s->Save(poolGORes);
-					s->SaveMeta();
-					break; 
-				}
-				case R_PREFAB:
-				{
-					RE_Prefab* p = dynamic_cast<RE_Prefab*>(resChange);
-					p->Save(poolGORes, false);
-					p->SaveMeta();
-					break;
-				}
-				}
-				App::renderer3d->PushThumnailRend(resToChange, true);
-				UnUse(resToChange);
-				DEL(poolGORes);
-				Event::ResumeEvents();
 			}
 		}
 
@@ -505,7 +514,6 @@ const char* RE_ResourceManager::GetNameFromType(const Resource_Type type)
 	case Resource_Type::R_MATERIAL: return "Material";
 	case Resource_Type::R_MESH: return "Mesh";
 	case Resource_Type::R_PREFAB: return "Prefab";
-	case Resource_Type::R_PRIMITIVE: return "Primitive";
 	case Resource_Type::R_SHADER: return "Shader";
 	case Resource_Type::R_MODEL: return "Model";
 	case Resource_Type::R_SKYBOX: return "Skybox";

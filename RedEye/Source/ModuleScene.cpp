@@ -14,7 +14,7 @@
 #include "RE_ShaderImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_TextureImporter.h"
-#include "RE_GOManager.h"
+#include "RE_ECS_Manager.h"
 
 #include "RE_Material.h"
 #include "RE_Prefab.h"
@@ -27,8 +27,7 @@
 #include "RE_CompCamera.h"
 #include "RE_CompPrimitive.h"
 
-#include "OutputLog.h"
-#include "RE_HandleErrors.h"
+#include "RE_LogManager.h"
 #include "RE_TimeManager.h"
 
 #include "md5.h"
@@ -39,7 +38,7 @@
 
 #define DEFAULTMODEL "Assets/Meshes/BakerHouse/BakerHouse.fbx"
 
-RE_GOManager ModuleScene::scenePool;
+RE_ECS_Manager ModuleScene::scenePool;
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled) {}
 ModuleScene::~ModuleScene() {}
@@ -52,14 +51,13 @@ bool ModuleScene::Start()
 	return true;
 }
 
-update_status ModuleScene::Update()
+void ModuleScene::Update()
 {
 	OPTICK_CATEGORY("Update Scene", Optick::Category::GameLogic);
 	scenePool.Update();
-	return UPDATE_CONTINUE;
 }
 
-update_status ModuleScene::PostUpdate()
+void ModuleScene::PostUpdate()
 {
 	bool someDelete = !to_delete.empty();
 	while (!to_delete.empty())
@@ -67,14 +65,11 @@ update_status ModuleScene::PostUpdate()
 		scenePool.DestroyGO(to_delete.top());
 		to_delete.pop();
 	}
-
-	return UPDATE_CONTINUE;
 }
 
-bool ModuleScene::CleanUp()
+void ModuleScene::CleanUp()
 {
 	if (unsavedScene) DEL(unsavedScene);
-	return true;
 }
 
 void ModuleScene::DrawEditor()
@@ -233,7 +228,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 }
 
-RE_GOManager* ModuleScene::GetScenePool() { return &scenePool; }
+RE_ECS_Manager* ModuleScene::GetScenePool() { return &scenePool; }
 RE_GameObject* ModuleScene::GetGOPtr(UID id) { return scenePool.GetGOPtr(id); }
 const RE_GameObject* ModuleScene::GetGOCPtr(UID id) { return scenePool.GetGOCPtr(id); }
 UID ModuleScene::GetRootUID() { return scenePool.GetRootUID(); }
@@ -285,7 +280,7 @@ void ModuleScene::CreateWater(const UID parent)
 	water_go->GetTransformPtr()->SetScale({ 10.0f, 10.0f, 1.0f });
 }
 
-void ModuleScene::AddGOPool(RE_GOManager* toAdd)
+void ModuleScene::AddGOPool(RE_ECS_Manager* toAdd)
 {
 	toAdd->UseResources();
 	UID justAdded = scenePool.InsertPool(toAdd, true);
@@ -293,7 +288,7 @@ void ModuleScene::AddGOPool(RE_GOManager* toAdd)
 	haschanges = true;
 }
 
-UID ModuleScene::RayCastSelect(math::Ray & global_ray)
+UID ModuleScene::RayCastGeometry(math::Ray & global_ray)
 {
 	UID ret = 0;
 
@@ -426,13 +421,13 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	scenePool.ClearPool();
 
 	RE_LOG("Loading scene from own format:");
-	if(!ignorehandle) App::handlerrors.StartHandling();
+	if(!ignorehandle) RE_LogManager::ScopeProcedureLogging();
 	Timer timer;
 	currentScene = sceneMD5;
 	RE_Scene* scene = dynamic_cast<RE_Scene*>(App::resources->At(currentScene));
 	App::resources->Use(sceneMD5);
 
-	RE_GOManager* loadedDO = scene->GetPool();
+	RE_ECS_Manager* loadedDO = scene->GetPool();
 	if (loadedDO)scenePool.InsertPool(loadedDO);
 	else RE_LOG_ERROR("Can't Load Scene");
 
@@ -444,7 +439,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	App::editor->SetSelected(0);
 
 	RE_LOG("Time loading scene: %u ms", timer.Read());
-	if (!ignorehandle) App::handlerrors.StopAndPresent();
+	if (!ignorehandle) RE_LogManager::EndScope();
 	Event::ResumeEvents();
 }
 

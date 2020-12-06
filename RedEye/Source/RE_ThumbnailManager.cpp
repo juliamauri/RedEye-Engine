@@ -12,7 +12,7 @@
 #include "RE_FBOManager.h"
 #include "Event.h"
 #include "RE_TimeManager.h"
-#include "RE_GOManager.h"
+#include "RE_ECS_Manager.h"
 #include "RE_Shader.h"
 #include "RE_Texture.h"
 #include "RE_Model.h"

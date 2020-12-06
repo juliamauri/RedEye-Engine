@@ -6,7 +6,7 @@
 #include "RE_SkyBox.h"
 #include "ModuleEditor.h"
 #include "Globals.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "RE_TimeManager.h"
 #include "RE_GLCacheManager.h"
 
@@ -45,7 +45,7 @@ bool RE_TextureImporter::Init()
 
 		char tmp[8];
 		EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
-		App::ReportSoftware("DevIL", tmp, "http://openil.sourceforge.net/");
+		RE_SOFT_NVS("DevIL", tmp, "http://openil.sourceforge.net/");
 	}
 	else
 		RE_LOG_ERROR("DevIL could not initialice! DevIL Error %d - %s", error, iluErrorString(error));

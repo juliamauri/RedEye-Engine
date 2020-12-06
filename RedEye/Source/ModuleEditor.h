@@ -39,14 +39,6 @@ class ComponentsPool;
 
 union SDL_Event;
 
-enum AABBDebugDrawing : int
-{
-	NONE = 0,
-	SELECTED_ONLY,
-	ALL,
-	ALL_AND_SELECTED,
-};
-
 class ModuleEditor : public Module
 {
 public:
@@ -55,9 +47,9 @@ public:
 
 	bool Init(JSONNode* node) override;
 	bool Start() override;
-	update_status PreUpdate() override;
-	update_status Update() override;
-	bool CleanUp() override;
+	void PreUpdate() override;
+	void Update() override;
+	void CleanUp() override;
 	void RecieveEvent(const Event& e) override;
 
 	// Draws
@@ -75,11 +67,8 @@ public:
 	void SetSelected(const UID go, bool force_focus = false);
 	void DuplicateSelectedObject();
 
-	// Logs
-	void LogToEditorConsole();
-	bool AddSoftwareUsed(const char * name, const char * version, const char * website);
-
 	// Editor Windows
+	void ReportSoftawe(const char* name, const char* version, const char* website) const;
 	void HandleSDLEvent(SDL_Event* e);
 	void PopUpFocus(bool focus);
 	const char* GetAssetsPanelPath()const;
@@ -144,7 +133,7 @@ private:
 	// Camera Controls
 	bool select_on_mc = true;
 	bool focus_on_select = false;
-	float cam_speed = 5.0f;
+	float cam_speed = 25.0f;
 	float cam_sensitivity = 0.01f;
 
 	// Selected GO
@@ -155,7 +144,13 @@ private:
 	float grid_size[2];
 
 	// Debug Drawing
-	AABBDebugDrawing aabb_drawing = AABBDebugDrawing::ALL_AND_SELECTED;
+	enum AABBDebugDrawing : int
+	{
+		NONE = 0,
+		SELECTED_ONLY,
+		ALL,
+		ALL_AND_SELECTED,
+	} aabb_drawing = AABBDebugDrawing::ALL_AND_SELECTED;
 	bool draw_quad_tree = true;
 	bool draw_cameras = true;
 

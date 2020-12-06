@@ -5,7 +5,7 @@
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 #include "RE_InternalResources.h"
 #include "RE_GLCacheManager.h"
 #include "RE_CameraManager.h"
@@ -13,7 +13,7 @@
 #include "RE_PrimitiveManager.h"
 #include "RE_ShaderImporter.h"
 #include "RE_Component.h"
-#include "RE_GOManager.h"
+#include "RE_ECS_Manager.h"
 #include "RE_CompParticleEmiter.h"
 #include "RE_Shader.h"
 
@@ -49,7 +49,6 @@ void RE_GameObject::DrawProperties()
 {
 	if (ImGui::BeginMenu("Child Options"))
 	{
-		// TODO Julius: if (ImGui::MenuItem("Save as prefab")) {}
 		if (ImGui::MenuItem("Activate Childs")) SetActiveWithChilds(true);
 		if (ImGui::MenuItem("Deactivate Childs")) SetActiveWithChilds(false);
 		if (ImGui::MenuItem("Childs to Static")) SetStaticWithChilds(true);
@@ -388,7 +387,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	}
 	case C_PARTICLEEMITER:
 	{
-		// TODO: particle emitter
+		// TODO Julius: particle emitter
 		// if (p_emitter) pool_comps->DestroyComponent(_type, p_emitter);
 		// p_emitter = pool_comps->GetNewComponentPtr(_type)->PoolSetUp(pool_gos, go_uid);
 		break;

@@ -10,8 +10,7 @@
 #include "EditorWindows.h"
 
 #include "Event.h"
-#include "OutputLog.h"
-#include "RE_HandleErrors.h"
+#include "RE_LogManager.h"
 
 #include "SDL2\include\SDL.h"
 
@@ -26,7 +25,7 @@ ModuleInput::ModuleInput(const char* name, bool start_enabled) : Module(name, st
 // Destructor
 ModuleInput::~ModuleInput()
 {
-	delete[] keyboard;
+	DEL_A(keyboard);
 }
 
 // Called before render is available
@@ -45,10 +44,9 @@ bool ModuleInput::Init(JSONNode* config_module)
 }
 
 // Called every draw update
-update_status ModuleInput::PreUpdate()
+void ModuleInput::PreUpdate()
 {
 	OPTICK_CATEGORY("UpdateInput", Optick::Category::Input);
-	update_status ret = UPDATE_CONTINUE;
 
 	SDL_PumpEvents();
 
@@ -64,8 +62,6 @@ update_status ModuleInput::PreUpdate()
 
 	// Call all own events' listeners
 	Event::PumpAll();
-
-	return ret;
 }
 
 void ModuleInput::DrawEditor()
@@ -80,10 +76,9 @@ void ModuleInput::DrawEditor()
 }
 
 // Called before quitting
-bool ModuleInput::CleanUp()
+void ModuleInput::CleanUp()
 {
 	SDL_QuitSubSystem(SDL_INIT_EVENTS);
-	return true;
 }
 
 KEY_STATE ModuleInput::GetKey(const unsigned int id) const
@@ -105,7 +100,7 @@ const MouseData& ModuleInput::GetMouse() const
 
 void ModuleInput::SetMouseAtCenter()
 {
-	// TODO: Differenciate between whole window and views
+	// TODO Rub: Differenciate between whole window and views
 	SDL_WarpMouseInWindow(App::window->GetWindow(), App::window->GetWidth() / 2, App::window->GetHeight() / 2);
 }
 

@@ -17,7 +17,7 @@ public:
 
 	bool Init(JSONNode* node) override;
 	void DrawEditor() override;
-	bool CleanUp() override;
+	void CleanUp() override;
 	bool Load(JSONNode* node) override;
 	bool Save(JSONNode* node) const override;
 	void RecieveEvent(const Event& e) override;
@@ -60,8 +60,8 @@ public:
 private:
 
 	eastl::string title = "RedEye";
-	int pos_x;
-	int pos_y;
+	int pos_x = -1;
+	int pos_y = -1;
 	int width = 1280;
 	int height = 720;
 	unsigned int flags = 0u;

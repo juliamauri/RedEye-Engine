@@ -4,9 +4,9 @@
 #include "RE_FileSystem.h"
 #include "ModuleScene.h"
 #include "RE_ResourceManager.h"
-#include "RE_GOManager.h"
-#include "RE_ResouceAndGOImporter.h"
-#include  "OutputLog.h"
+#include "RE_ECS_Manager.h"
+#include "RE_ECS_Importer.h"
+#include "RE_LogManager.h"
 
 #include "ImGui/imgui.h"
 
@@ -44,11 +44,11 @@ void RE_Scene::Import(bool keepInMemory)
 	if (!keepInMemory) UnloadMemory();
 }
 
-void RE_Scene::Save(RE_GOManager* pool)
+void RE_Scene::Save(RE_ECS_Manager* pool)
 {
 	if (pool)
 	{
-		toSave = new RE_GOManager();
+		toSave = new RE_ECS_Manager();
 		toSave->InsertPool(pool);
 		AssetSave();
 		LibrarySave();
@@ -65,8 +65,8 @@ void RE_Scene::SetName(const char* _name)
 	SetAssetPath(assetPath.c_str());
 }
 
-RE_GOManager* RE_Scene::GetPool() { 
-	RE_GOManager* ret;
+RE_ECS_Manager* RE_Scene::GetPool() { 
+	RE_ECS_Manager* ret;
 	bool unload = false;
 	if (unload = (loaded == nullptr)) LoadInMemory();
 	ret = loaded->GetNewPoolFromID(loaded->GetRootUID());
@@ -85,7 +85,7 @@ void RE_Scene::AssetSave()
 	Config scene_SaveFile(GetAssetPath(), App::fs->GetZipPath());
 	JSONNode* scenebNode = scene_SaveFile.GetRootNode("scene");
 
-	if (toSave->TotalGameObjects() > 0) RE_ResouceAndGOImporter::JsonSerialize(scenebNode, toSave);
+	if (toSave->TotalGameObjects() > 0) RE_ECS_Importer::JsonSerialize(scenebNode, toSave);
 	DEL(scenebNode);
 
 	//Setting LibraryPath and MD5
@@ -106,7 +106,7 @@ void RE_Scene::AssetLoad(bool generateLibraryPath)
 	if (jsonLoad.Load())
 	{
 		JSONNode* scenebNode = jsonLoad.GetRootNode("scene");
-		loaded = RE_ResouceAndGOImporter::JsonDeserialize(scenebNode);
+		loaded = RE_ECS_Importer::JsonDeserialize(scenebNode);
 		DEL(scenebNode);
 
 		if (generateLibraryPath)
@@ -126,7 +126,7 @@ void RE_Scene::LibraryLoad()
 	if (binaryLoad.Load())
 	{
 		char* cursor = binaryLoad.GetBuffer();
-		loaded = RE_ResouceAndGOImporter::BinaryDeserialize(cursor);
+		loaded = RE_ECS_Importer::BinaryDeserialize(cursor);
 	}
 	ResourceContainer::inMemory = true;
 }
@@ -134,7 +134,7 @@ void RE_Scene::LibraryLoad()
 void RE_Scene::LibrarySave(bool fromLoaded)
 {
 	uint size = 0;
-	char* buffer = RE_ResouceAndGOImporter::BinarySerialize((fromLoaded) ? loaded : toSave, &size);
+	char* buffer = RE_ECS_Importer::BinarySerialize((fromLoaded) ? loaded : toSave, &size);
 	RE_FileIO toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
 	toLibrarySave.Save(buffer, size);
 	DEL_A(buffer);

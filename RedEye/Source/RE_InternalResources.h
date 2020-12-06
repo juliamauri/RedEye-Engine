@@ -11,7 +11,7 @@ class RE_InternalResources
 {
 public:
 
-	RE_InternalResources();
+	RE_InternalResources() {}
 	~RE_InternalResources();
 
 	void Init();

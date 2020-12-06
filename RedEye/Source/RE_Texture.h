@@ -94,7 +94,7 @@ private:
 											  
 private:
 	unsigned int ID = 0;
-	int width, height;
+	int width = -1, height = -1;
 	TextureType texType = RE_TEXTURE_UNKNOWN;
 	RE_TextureSettings texSettings;
 

@@ -1,6 +1,6 @@
 #include "RE_FBOManager.h"
 
-#include "OutputLog.h"
+#include "RE_LogManager.h"
 
 #include "Glew/include/glew.h"
 

@@ -39,9 +39,9 @@ public:
 	~ModuleInput();
 
 	bool Init(JSONNode* config_module) override;
-	update_status PreUpdate() override;
+	void PreUpdate() override;
 	void DrawEditor() override;
-	bool CleanUp() override;
+	void CleanUp() override;
 
 	KEY_STATE GetKey(const unsigned int id) const;
 	bool CheckKey(const unsigned int id, const KEY_STATE state = KEY_UP) const;
@@ -56,7 +56,7 @@ private:
 
 private:
 
-	KEY_STATE* keyboard;
+	KEY_STATE* keyboard = nullptr;
 	MouseData mouse;
 };
 

@@ -16,8 +16,7 @@
 
 #include "RE_GameObject.h"
 
-#include "OutputLog.h"
-#include "RE_HandleErrors.h"
+#include "RE_LogManager.h"
 #include "RE_DefaultShaders.h"
 #include "Globals.h"
 
@@ -364,12 +363,13 @@ void ShaderEditorWindow::Draw(bool secondary)
 
 		if (!compilePass && ImGui::Button("Compile Test"))
 		{
-			App::handlerrors.StartHandling();
+			RE_LogManager::ScopeProcedureLogging();
+
 			uint sID = 0;
 			compilePass = App::shaders.LoadFromAssets(&sID, vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr, true);
 			if (!compilePass) RE_LOG_ERROR("Shader Compilation Error:\n%s", App::shaders.GetShaderError());
 
-			App::handlerrors.StopAndPresent();
+			RE_LogManager::EndScope();
 		}
 
 		if (secondary || pop || neededVertexAndFragment)
@@ -480,14 +480,15 @@ void TextEditorManagerWindow::Draw(bool secondary)
 			names = "Compile as shader script #" + eastl::to_string(count);
 			if (ImGui::Button(names.c_str()))
 			{
-				App::handlerrors.StartHandling();
+				RE_LogManager::ScopeProcedureLogging();
+
 				std::string tmp = e->textEditor->GetText();
 				eastl::string text(tmp.c_str(), tmp.size());
-
-				if (!(e->works = App::shaders.Compile(text.c_str(), text.size()))) RE_LOG_ERROR("%s", App::shaders.GetShaderError());
-
+				e->works = App::shaders.Compile(text.c_str(), text.size());
+				if (!e->works) RE_LOG_ERROR("%s", App::shaders.GetShaderError());
 				e->compiled = true;
-				App::handlerrors.StopAndPresent();
+
+				RE_LogManager::EndScope();
 			}
 
 			if (e->compiled) ImGui::Text((e->works) ? "Succeful compile" : "Error compile");
