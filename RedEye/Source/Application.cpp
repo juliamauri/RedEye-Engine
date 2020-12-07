@@ -85,8 +85,8 @@ Application::~Application()
 	DEL(thumbnail);
 	DEL(resources);
 
-	for (eastl::list<Module*>::iterator it = modules.begin(); it != modules.end(); ++it)
-		delete *it;
+	for (auto &mod : modules)
+		delete mod;
 
 	DEL(fs);
 

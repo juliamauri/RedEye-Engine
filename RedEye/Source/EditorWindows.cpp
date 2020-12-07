@@ -147,7 +147,7 @@ void ConsoleWindow::AppendLog(unsigned int category, const char* text, const cha
 		{
 			if (it->caller_id == caller_id->second
 				&& it->category == category
-				&& (it->data.compare(text) == 0))
+				&& (eastl::Compare(it->data.c_str(), text, it->data.size()) == 0))
 			{
 				if (it != logHistory.rbegin())
 				{
@@ -161,10 +161,14 @@ void ConsoleWindow::AppendLog(unsigned int category, const char* text, const cha
 				return;
 			}
 		}
-	}
-	else callers.insert(eastl::pair<eastl::string, unsigned int>(file_name, ++next_caller_id));
 
-	logHistory.push_back({ next_caller_id, category, count, text });
+		logHistory.push_back({ caller_id->second, category, count, text });
+	}
+	else 
+	{
+		callers.insert(eastl::pair<eastl::string, unsigned int>(file_name, ++next_caller_id));
+		logHistory.push_back({ next_caller_id, category, count, text });
+	}
 
 	if (!needs_rewriting && categories[category] && (file_filter < 0 || logHistory.back().caller_id == file_filter))
 	{

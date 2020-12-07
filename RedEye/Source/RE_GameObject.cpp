@@ -17,7 +17,6 @@
 #include "RE_CompParticleEmiter.h"
 #include "RE_Shader.h"
 
-#include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
 #include "ImGui\imgui.h"
 #include <EASTL/unordered_set.h>
@@ -334,7 +333,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const UI
 
 void RE_GameObject::ReportComponent(const UID id, const ushortint type)
 {
-	SDL_assert(id > 0);
+	RE_ASSERT(id > 0);
 	switch (static_cast<ComponentType>(type))
 	{
 	case ComponentType::C_TRANSFORM: transform = id; break;
@@ -353,7 +352,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 {
 	RE_Component* ret = nullptr;
 	ComponentType _type = static_cast<ComponentType>(type);
-	SDL_assert(_type < MAX_COMPONENT_TYPES);
+	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
 
 	switch (_type)
 	{
@@ -415,7 +414,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 void RE_GameObject::ReleaseComponent(const UID id, const ushortint type)
 {
 	ComponentType _type = static_cast<ComponentType>(type);
-	SDL_assert(_type < MAX_COMPONENT_TYPES);
+	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
 	switch (_type)
 	{
 	case C_TRANSFORM: transform = 0; break;
@@ -451,7 +450,7 @@ void RE_GameObject::ReleaseComponent(const UID id, const ushortint type)
 void RE_GameObject::DestroyComponent(const UID id, const ushortint type)
 {
 	ComponentType _type = static_cast<ComponentType>(type);
-	SDL_assert(_type < MAX_COMPONENT_TYPES);
+	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
 	switch (_type)
 	{
 	case C_TRANSFORM:

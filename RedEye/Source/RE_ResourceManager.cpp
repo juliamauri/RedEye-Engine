@@ -21,7 +21,6 @@
 
 #include "Globals.h"
 #include "RE_LogManager.h"
-#include "SDL2\include\SDL_assert.h"
 
 #include <EASTL/string.h>
 #include <EASTL/internal/char_traits.h>

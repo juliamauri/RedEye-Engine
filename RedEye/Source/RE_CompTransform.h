@@ -2,7 +2,7 @@
 #define __NEW_RE_COMPTRANSFORM_H__
 
 #include "RE_Component.h"
-#include "Globals.h"
+#include "RE_Math.h"
 #include "MathGeoLib\include\MathGeoLib.h"
 
 class RE_CompTransform: public RE_Component

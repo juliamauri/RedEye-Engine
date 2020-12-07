@@ -24,7 +24,6 @@
 #include "MathGeoLib\include\Math\Quat.h"
 #include "md5.h"
 
-#include "SDL2\include\SDL_assert.h"
 #include "assimp/include/Importer.hpp"
 #include "assimp/include/scene.h"
 #include "assimp/include/postprocess.h"

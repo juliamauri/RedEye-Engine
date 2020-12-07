@@ -161,7 +161,7 @@ void RE_CompCamera::SetPlanesDistance(float n_plane, float f_plane)
 
 void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 {
-	RE_CAPTO(vertical_fov_degrees, 180.0f);
+	RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f);
 
 	v_fov_rads = vertical_fov_degrees * DEGTORAD;
 	h_fov_rads = 2.0f * math::Atan(math::Tan(v_fov_rads / 2.0f) * (width / height));
@@ -178,8 +178,8 @@ void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 
 void RE_CompCamera::ForceFOV(float vertical_fov_degrees, float horizontal_fov_degrees)
 {
-	RE_CAPTO(vertical_fov_degrees, 180.0f);
-	RE_CAPTO(horizontal_fov_degrees, 180.0f);
+	RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f);
+	RE_Math::Cap(horizontal_fov_degrees, 1.f, 180.f);
 	v_fov_rads = vertical_fov_degrees * DEGTORAD;
 	h_fov_rads = horizontal_fov_degrees * DEGTORAD;
 	h_fov_degrees = horizontal_fov_degrees;
@@ -522,7 +522,6 @@ void RE_CompCamera::RecalculateMatrixes()
 {
 	math::float4x4 trs = GetTransform()->GetGlobalMatrix();
 	frustum.SetFrame(trs.Row3(3), -trs.WorldZ(), trs.WorldY());
-
 	(global_view = frustum.ViewMatrix()).Transpose();
 	global_projection = frustum.ProjectionMatrix().Transposed();
 

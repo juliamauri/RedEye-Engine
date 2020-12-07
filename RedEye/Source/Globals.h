@@ -1,5 +1,26 @@
 #pragma once
+
+// Disable STL exceptions
+#undef _HAS_EXCEPTIONS
+#define _HAS_EXCEPTIONS 0
+
+#define _STATIC_CPPLIB
+#define _DISABLE_DEPRECATE_STATIC_CPPLIB
+#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+
+#include <EAAssert/eaassert.h>
+#define RE_ASSERT(expression) EA_ASSERT(expression)
+
+// OpenGL Output Debug
 #include "Glew/include/glew.h"
+void GLAPIENTRY MessageCallback(
+	GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam);
 
 #define DEGTORAD 0.0174532925199432957f
 #define RADTODEG 57.295779513082320876f
@@ -15,74 +36,13 @@
 #define MEGABYTE 1048576.0
 #define GIGABYTE 1073741824.0
 
-// New useful types
+// Useful types
 typedef unsigned int uint;
 typedef unsigned short int ushortint;
 typedef unsigned char uchar;
 typedef unsigned long ulong;
 typedef unsigned long long UID;
 
-enum Dir
-{
-	FORWARD,
-	BACKWARD,
-	LEFT,
-	RIGHT,
-	UP,
-	DOWN
-};
-
-// Useful macros
-#define RE_CAP(n) ((n <= 0.0f) ? n=0.0f : (n >= 1.0f) ? n=1.0f : n=n)
-#define RE_CAPTO(n, t) ((n <= 0.0f) ? n=0.0f : (n >= t) ? n=t : n=n)
-#define RE_MIN(a,b) ((a)<(b)) ? (a) : (b)
-#define RE_MAX(a,b) ((a)>(b)) ? (a) : (b)
-
-/*/ Align 16, use if you have math elemtns in your class like float4x4 or AABB
-#define ALIGN_CLASS_TO_16 \
-	void* operator new(size_t i) { return _aligned_malloc(i,16); }\
-    void operator delete(void* p) { _aligned_free(p); }
-	*/
-
-
-// Deletes a buffer
-#define DEL( x )\
-    {\
-       if( x != nullptr )\
-       {\
-         delete x;\
-	     x = nullptr;\
-       }\
-    }
-
-// Deletes an array of buffers
-#define DEL_A( x )\
-	{\
-       if( x != nullptr )\
-       {\
-           delete[] x;\
-	       x = nullptr;\
-		 }\
-	 }
-
-
-// Warning disabled ---
-//#pragma warning( disable : 4577 ) // Warning that exceptions are disabled
-//#pragma warning( disable : 4530 ) // Warning that exceptions are disabled
-
-// Disable STL exceptions
-#undef _HAS_EXCEPTIONS
-#define _HAS_EXCEPTIONS 0
-
-#define _STATIC_CPPLIB
-#define _DISABLE_DEPRECATE_STATIC_CPPLIB
-
-//OpenGL Output Debug
-void GLAPIENTRY MessageCallback(
-	GLenum source,
-	GLenum type,
-	GLuint id,
-	GLenum severity,
-	GLsizei length,
-	const GLchar* message,
-	const void* userParam);
+// Delete Macros
+#define DEL(x) if (x != nullptr) { delete x; x = nullptr; }
+#define DEL_A(x) if (x != nullptr) { delete[] x; x = nullptr; }

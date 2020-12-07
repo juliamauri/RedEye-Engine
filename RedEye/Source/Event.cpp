@@ -1,8 +1,8 @@
 #include "Event.h"
 #include "EventListener.h"
 #include "SDL2\include\SDL_timer.h"
-
 #include <EASTL/queue.h>
+
 
 bool Event::paused = false;
 eastl::queue<Event> events_queue;

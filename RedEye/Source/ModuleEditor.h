@@ -2,9 +2,7 @@
 #define __MODULEEDITOR__
 
 #include "Module.h"
-
 #include "RE_CommandManager.h"
-
 #include "ImGui\imgui.h"
 #include <EASTL/list.h>
 

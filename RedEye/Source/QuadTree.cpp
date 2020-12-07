@@ -6,7 +6,6 @@
 #include "RE_GameObject.h"
 #include "Globals.h"
 #include "RE_ShaderImporter.h"
-#include "SDL2\include\SDL_assert.h"
 #include "Glew\include\glew.h"
 
 #include <EASTL/queue.h>
@@ -172,7 +171,7 @@ QTree::~QTree()
 
 void QTree::Build(RE_GameObject * root_g_obj)
 {
-	SDL_assert(root_g_obj != nullptr);
+	RE_ASSERT(root_g_obj != nullptr);
 
 	root.Clear();
 

@@ -293,7 +293,7 @@
       <Filter>Source\Application\Managers</Filter>
     </ClCompile>
     <ClCompile Include="RE_Hardware.cpp">
-      <Filter>Source\Application\Managers</Filter>
+      <Filter>Source\Application\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -479,9 +479,6 @@
     </ClInclude>
     <ClInclude Include="RE_CompCamera.h">
       <Filter>Source\Entity Component System\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="ModuleEditor.h">
-      <Filter>Source\Application\Modules\Editor</Filter>
     </ClInclude>
     <ClInclude Include="RE_CompTransform.h">
       <Filter>Source\Entity Component System\Components</Filter>
@@ -1240,7 +1237,10 @@
       <Filter>Source\Application\Managers</Filter>
     </ClInclude>
     <ClInclude Include="RE_Hardware.h">
-      <Filter>Source\Application\Managers</Filter>
+      <Filter>Source\Application\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleEditor.h">
+      <Filter>Source\Application\Modules\Editor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

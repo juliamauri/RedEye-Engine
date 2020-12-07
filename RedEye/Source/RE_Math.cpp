@@ -23,12 +23,26 @@ void RE_Math::Init()
 
 int RE_Math::Cap(const int val, const int min, const int max)
 {
-	return val > max ? max : (val < min ? min : val);
+	RE_ASSERT(min <= max);
+	int res[3] = { val, min, max };
+	return res[(2 * (val > max)) + (val < min)];
 }
 
 float RE_Math::Cap(const float val, const float min, const float max)
 {
 	return val > max ? max : (val < min ? min : val);
+}
+
+int RE_Math::Min(const int a, const int b)
+{
+	int res[2] = { a, b };
+	return res[b < a];
+}
+
+float RE_Math::Max(const float a, const float b)
+{
+	float res[2] = { a, b };
+	return res[b < a];
 }
 
 math::float4x4 RE_Math::Rotate(const math::float3 axis, const float radians)

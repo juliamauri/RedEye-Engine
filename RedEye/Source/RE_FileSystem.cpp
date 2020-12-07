@@ -18,7 +18,6 @@
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL.h"
-#include "SDL2\include\SDL_assert.h"
 #include "RapidJson\include\pointer.h"
 #include "RapidJson\include\stringbuffer.h"
 #include "RapidJson\include\writer.h"
@@ -34,7 +33,6 @@
 
 #ifdef _DEBUG
 #pragma comment( lib, "libzip/zip_d.lib" )
-
 #else
 #pragma comment( lib, "libzip/zip_r.lib" )
 #endif // _DEBUG
