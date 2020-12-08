@@ -320,3 +320,4 @@ __pycache__/
 !RedEye/Source/WWISESDK/binaries/libprofiler/*
 !RedEye/Source/WWISESDK/binaries/librelase/*
 !RedEye/Source/EA/EASTL/libx86/DebugLib/*
+!RedEye/Source/assimp/libx86/*
