@@ -27,8 +27,8 @@
 #include "RE_CompCamera.h"
 #include "RE_CompPrimitive.h"
 
-#include "RE_LogManager.h"
-#include "RE_TimeManager.h"
+#include "RE_ConsoleLog.h"
+#include "RE_Time.h"
 
 #include "md5.h"
 #include <EASTL/string.h>
@@ -45,6 +45,7 @@ ModuleScene::~ModuleScene() {}
 
 bool ModuleScene::Start()
 {
+	RE_LOG("Starting Module %s", name);
 	eastl::vector<ResourceContainer*> scenes = App::resources->GetResourcesByType(R_SCENE);
 	if (!scenes.empty()) LoadScene(scenes[0]->GetMD5());
 	else NewEmptyScene();
@@ -421,7 +422,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	scenePool.ClearPool();
 
 	RE_LOG("Loading scene from own format:");
-	if(!ignorehandle) RE_LogManager::ScopeProcedureLogging();
+	if(!ignorehandle) RE_ConsoleLog::ScopeProcedureLogging();
 	Timer timer;
 	currentScene = sceneMD5;
 	RE_Scene* scene = dynamic_cast<RE_Scene*>(App::resources->At(currentScene));
@@ -439,7 +440,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	App::editor->SetSelected(0);
 
 	RE_LOG("Time loading scene: %u ms", timer.Read());
-	if (!ignorehandle) RE_LogManager::EndScope();
+	if (!ignorehandle) RE_ConsoleLog::EndScope();
 	Event::ResumeEvents();
 }
 

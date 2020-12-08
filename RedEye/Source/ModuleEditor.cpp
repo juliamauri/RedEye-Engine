@@ -1,29 +1,20 @@
  #include "ModuleEditor.h"
 
+#include "RE_ConsoleLog.h"
+#include "RE_Time.h"
+
 #include "Application.h"
-#include "ModuleWindow.h"
 #include "ModuleInput.h"
+#include "ModuleWindow.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
+
 #include "EditorWindows.h"
-#include "RE_TimeManager.h"
-#include "RE_LogManager.h"
-#include "RE_ECS_Manager.h"
-#include "RE_CameraManager.h"
-#include "RE_PrimitiveManager.h"
-#include "QuadTree.h"
-#include "RE_GLCacheManager.h"
-#include "RE_ThumbnailManager.h"
-#include "RE_FileSystem.h"
-
 #include "RE_ResourceManager.h"
-#include "RE_Prefab.h"
 
-#include "MathGeoLib\include\MathGeoLib.h"
+#include "ImGui\imgui_internal.h"
 #include "ImGui\imgui_impl_opengl3.h"
 #include "ImGui\imgui_impl_sdl.h"
-#include "ImGuizmo\ImGuizmo.h"
-#include "ImGui/imgui_internal.h"
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
 
@@ -78,9 +69,10 @@ ModuleEditor::~ModuleEditor()
 	editorCommands.Clear();
 }
 
-bool ModuleEditor::Init(JSONNode* node)
+bool ModuleEditor::Init()
 {
-	bool ret = true;
+	bool ret = false;
+	RE_LOG("Initializing Module %s", name);
 
 	// ImGui
 	RE_LOG_SECONDARY("Init ImGui");
@@ -106,21 +98,23 @@ bool ModuleEditor::Init(JSONNode* node)
 	//style.Colors[ImGuiCol_HeaderHovered] = { 158.f, 62.f, 62.f, 1.f };
 	//style.Colors[ImGuiCol_HeaderActive] = { 158.f, 62.f, 62.f, 1.f };
 
-	if (ret = ImGui_ImplSDL2_InitForOpenGL(App::window->GetWindow(), App::renderer3d->GetWindowContext()))
+	if (ImGui_ImplSDL2_InitForOpenGL(App::window->GetWindow(), App::renderer3d->GetWindowContext()))
 	{
-		if (ret = ImGui_ImplOpenGL3_Init())
+		if (ImGui_ImplOpenGL3_Init())
+		{
 			RE_SOFT_NVS("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
-		else
-			RE_LOG_ERROR("ImGui could not OpenGL3_Init!");
+			ret = true;
+		}
+		else RE_LOG_ERROR("ImGui could not OpenGL3_Init!");
 	}
-	else
-		RE_LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
+	else RE_LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
 
 	return ret;
 }
 
 bool ModuleEditor::Start()
 {
+	RE_LOG("Starting Module %s", name);
 	windows.push_back(assets = new AssetsWindow());
 	windows.push_back(wwise = new WwiseWindow());
 
@@ -131,6 +125,8 @@ bool ModuleEditor::Start()
 	// FOCUS CAMERA
 	UID first = ModuleScene::GetRootCPtr()->GetFirstChildUID();
 	if (first) SetSelected(first);
+
+	App::resources->ThumbnailResources();
 
 	return true;
 }
@@ -675,19 +671,6 @@ void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
 	*height = sceneEditorWindow->GetSceneHeight();
 }
 
-void ModuleEditor::CreatePrefab(const UID go, const char* name, bool identityRoot)
-{
-	RE_Prefab* newPrefab = new RE_Prefab();
-	newPrefab->SetName(name);
-	newPrefab->SetType(Resource_Type::R_PREFAB);
-	Event::PauseEvents();
-
-	newPrefab->Save(App::scene->GetScenePool()->GetNewPoolFromID(go), identityRoot, true);
-	Event::ResumeEvents();
-	newPrefab->SaveMeta();
-	App::renderer3d->PushThumnailRend(App::resources->Reference(newPrefab));
-}
-
 void ModuleEditor::PushCommand(RE_Command* cmd) { editorCommands.PushCommand(cmd); }
 void ModuleEditor::ClearCommands() { editorCommands.Clear(); }
 
@@ -716,7 +699,7 @@ void ModuleEditor::UpdateCamera()
 			if (mouse.GetButton(3) == KEY_REPEAT)
 			{
 				// Camera Speed
-				float cameraSpeed = cam_speed * RE_TimeManager::GetDeltaTime();
+				float cameraSpeed = cam_speed * RE_Time::GetDeltaTime();
 				if (App::input->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT)) cameraSpeed *= 2.0f;
 
 				// Move

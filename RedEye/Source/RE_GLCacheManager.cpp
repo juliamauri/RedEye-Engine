@@ -1,7 +1,6 @@
 #include "RE_GLCacheManager.h"
 
 #include "RE_ShaderImporter.h"
-
 #include "Glew/include/glew.h"
 
 void RE_GLCacheManager::ChangeShader(unsigned int ID)

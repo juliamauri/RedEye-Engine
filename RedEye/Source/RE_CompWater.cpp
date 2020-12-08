@@ -3,8 +3,8 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "RE_ECS_Manager.h"
-#include "RE_FileSystem.h"
 #include "RE_GLCacheManager.h"
+#include "JSONNode.h"
 
 #include "RE_ResourceManager.h"
 #include "RE_InternalResources.h"
@@ -15,10 +15,6 @@
 #include "ImGui/imgui.h"
 
 RE_CompWater::RE_CompWater() : RE_Component(C_WATER) { box.SetFromCenterAndSize(math::vec::zero, math::vec::one); }
-
-RE_CompWater::~RE_CompWater()
-{
-}
 
 void RE_CompWater::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
 {

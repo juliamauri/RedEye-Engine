@@ -13,7 +13,7 @@ class RE_CompCamera;
 class RE_ThumbnailManager
 {
 public:
-	RE_ThumbnailManager();
+	RE_ThumbnailManager() {}
 	~RE_ThumbnailManager();
 
 	void Init();

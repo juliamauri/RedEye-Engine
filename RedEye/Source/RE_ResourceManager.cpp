@@ -1,13 +1,14 @@
 #include "RE_ResourceManager.h"
 
-#include "Application.h"
+#include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
+#include "Application.h"
 #include "ModuleScene.h"
+#include "ModuleRenderer3D.h"
 #include "RE_TextureImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_ThumbnailManager.h"
-#include "ModuleRenderer3D.h"
-
+#include "RE_ECS_Manager.h"
 #include "RE_Material.h"
 #include "RE_Shader.h"
 #include "RE_Prefab.h"
@@ -17,13 +18,8 @@
 #include "RE_Texture.h"
 #include "RE_Mesh.h"
 
-#include "RE_ECS_Manager.h"
-
-#include "Globals.h"
-#include "RE_LogManager.h"
-
-#include <EASTL/string.h>
 #include <EASTL/internal/char_traits.h>
+#include <EASTL/string.h>
 
 RE_InternalResources RE_ResourceManager::internalResources;
 
@@ -35,8 +31,6 @@ RE_ResourceManager::~RE_ResourceManager()
 		resources.erase(resources.begin());
 	}
 }
-
-void RE_ResourceManager::Init() { internalResources.Init(); }
 
 void RE_ResourceManager::RecieveEvent(const Event& e)
 {

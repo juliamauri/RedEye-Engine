@@ -1,16 +1,10 @@
 #include "Particle.h"
 
-#include "Application.h"
-#include "RE_TimeManager.h"
 #include "RE_CompParticleEmiter.h"
-#include "RE_GameObject.h"
-#include "RE_CompTransform.h"
-#include "RE_ShaderImporter.h"
-#include "RE_Mesh.h"
 
 void Particle::Update()
 {
-	lifetime += RE_TimeManager::GetDeltaTime();
+	//lifetime += RE_Time::GetDeltaTime();
 
 	if (lifetime > 0)
 	{
@@ -18,7 +12,6 @@ void Particle::Update()
 		position += speed * TimeManager::GetDeltaTime();
 		transform.SetPosition(position);
 		transform.Update();*/
-
 	}
 }
 
@@ -41,7 +34,7 @@ void Particle::Emit()
 
 void Particle::Draw(unsigned int shader)
 {
-	RE_Mesh* mesh = parent_emiter->GetMesh();
+	//RE_Mesh* mesh = parent_emiter->GetMesh();
 
 	/*if (mesh != nullptr)
 	{

@@ -1,28 +1,10 @@
 #include "RE_FBOManager.h"
 
-#include "RE_LogManager.h"
-
+#include "RE_ConsoleLog.h"
+#include "RE_GLCacheManager.h"
 #include "Glew/include/glew.h"
 
-#include "RE_GLCacheManager.h"
-
-eastl::map<unsigned int, RE_FBO> RE_FBOManager::fbos;
-
-RE_FBOManager::RE_FBOManager() { }
-
-RE_FBOManager::~RE_FBOManager()
-{
-	for (eastl::pair<unsigned int, RE_FBO> fbo : fbos)
-	{
-		const RE_FBO current = fbo.second;
-		if (current.stencilBuffer != 0) glDeleteRenderbuffers(1, &current.stencilBuffer);
-		if (current.depthBuffer != 0) glDeleteRenderbuffers(1, &current.depthBuffer);
-		if (current.depthstencilBuffer != 0) glDeleteRenderbuffers(1, &current.depthstencilBuffer);
-		for(auto c : current.texturesID) glDeleteTextures(1, &c);
-		glDeleteFramebuffers(1, &current.ID);
-	}
-	fbos.clear();
-}
+using namespace RE_FBOManager::Internal;
 
 int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize, bool depth, bool stencil)
 {
@@ -329,7 +311,21 @@ void RE_FBOManager::ChangeFBOBind(unsigned int fID, unsigned int width, unsigned
 	if(width != 0 && height != 0) glViewport(0, 0, width, height);
 }
 
-void RE_FBOManager::LoadDeferredTextures(RE_FBO& fbo)
+void RE_FBOManager::ClearAll()
+{
+	for (eastl::pair<unsigned int, RE_FBO> fbo : fbos)
+	{
+		const RE_FBO current = fbo.second;
+		if (current.stencilBuffer != 0) glDeleteRenderbuffers(1, &current.stencilBuffer);
+		if (current.depthBuffer != 0) glDeleteRenderbuffers(1, &current.depthBuffer);
+		if (current.depthstencilBuffer != 0) glDeleteRenderbuffers(1, &current.depthstencilBuffer);
+		for (auto c : current.texturesID) glDeleteTextures(1, &c);
+		glDeleteFramebuffers(1, &current.ID);
+	}
+	fbos.clear();
+}
+
+void RE_FBOManager::Internal::LoadDeferredTextures(RE_FBO& fbo)
 {
 	// position
 	unsigned int tex = 0;

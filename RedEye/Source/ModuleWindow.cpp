@@ -1,40 +1,29 @@
 #include "ModuleWindow.h"
 
+#include "RE_ConsoleLog.h"
+#include "RE_Config.h"
+#include "JSONNode.h"
 #include "Application.h"
-#include "RE_FileSystem.h"
 #include "ModuleRenderer3D.h"
-#include "Event.h"
-#include "RE_LogManager.h"
+
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL.h"
 #include "RapidJson\include\document.h"
 
-ModuleWindow::ModuleWindow(const char* name, bool start_enabled) : Module(name, start_enabled)
-{}
 
-ModuleWindow::~ModuleWindow()
-{}
+ModuleWindow::ModuleWindow(const char* name, bool start_enabled) : Module(name, start_enabled) {}
 
-bool ModuleWindow::Init(JSONNode* node)
+bool ModuleWindow::Init()
 {
+	bool ret = false;
+	RE_LOG("Initializing Module %s", name);
 	RE_LOG_SECONDARY("Init SDL video subsystem");
-	bool ret = true;
-
-	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
+	if (SDL_InitSubSystem(SDL_INIT_VIDEO) == 0)
 	{
-		RE_LOG_ERROR("SDL_VIDEO could not initialize! SDL_Error: %s", SDL_GetError());
-		ret = false;
+		Load();
+		ret = SetWindowProperties();
 	}
-	else
-	{
-		//Use OpenGL 2.1 ?? TODO check with teacher
-		/*SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);*/
-
-		pos_x = pos_y = SDL_WINDOWPOS_CENTERED;
-
-		Load(node);
-	}
+	else RE_LOG_ERROR("SDL_VIDEO could not initialize! SDL_Error: %s", SDL_GetError());
 
 	return ret;
 }
@@ -43,7 +32,6 @@ void ModuleWindow::DrawEditor()
 {
 	if (ImGui::CollapsingHeader("Window"))
 	{
-
 		int max_w = GetMaxWidth(), max_h = GetMaxHeight();
 		ImGui::Text("Screen Size: %u x %u", max_w, max_h);
 
@@ -64,30 +52,24 @@ void ModuleWindow::DrawEditor()
 		ImGui::Text("Position Y: %u", pos_y);
 
 		ImGui::Separator();
-
 		ImGui::Text("Window Flags");
 
 		bool flag = CheckFlag(SDL_WINDOW_RESIZABLE);
-		if (ImGui::Checkbox("Resizeable", &flag))
-			SetResizeable(flag);
+		if (ImGui::Checkbox("Resizeable", &flag)) SetResizeable(flag);
+
 		ImGui::SameLine();
 		flag = CheckFlag(SDL_WINDOW_FULLSCREEN);
-		if (ImGui::Checkbox("Fullscreen", &flag))
-			SetFullScreen(flag);
+		if (ImGui::Checkbox("Fullscreen", &flag)) SetFullScreen(flag);
 
 		flag = CheckFlag(SDL_WINDOW_BORDERLESS);
-		if (ImGui::Checkbox("View Border", &flag))
-			SetBorderless(flag);
+		if (ImGui::Checkbox("View Border", &flag)) SetBorderless(flag);
+
 		ImGui::SameLine();
 		flag = CheckFlag(SDL_WINDOW_FULLSCREEN_DESKTOP);
-		if (ImGui::Checkbox("Fullscreen Desktop", &flag))
-			SetFullDesktop(flag);
+		if (ImGui::Checkbox("Fullscreen Desktop", &flag)) SetFullDesktop(flag);
 		
 		ImGui::Separator();
-
-		float brightness = GetBrightness();
-		if (ImGui::SliderFloat("Brightness", &brightness, 0.f, 1.f, "%.2f"))
-			SetBrightness(brightness);
+		if (ImGui::SliderFloat("Brightness", &brightness, 0.f, 1.f, "%.2f")) SetBrightness(brightness);
 	}
 }
 
@@ -97,49 +79,34 @@ void ModuleWindow::CleanUp()
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
-bool ModuleWindow::Load(JSONNode * node)
+void ModuleWindow::Load()
 {
-	bool ret = true;
-
 	RE_LOG_SECONDARY("Loading Window propieties from config:");
+	JSONNode* node = App::config->GetRootNode(name);
+
+	/*/Use OpenGL 2.1 ?? TODO: check prefered GL Context version setting
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);*/
 
 	//OpenGL context 
 	flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
-	if (node->PullBool("fullscreen", false))
-		flags |= SDL_WINDOW_FULLSCREEN;
-	if (node->PullBool("resizable", true))
-		flags |= SDL_WINDOW_RESIZABLE;
-	if (node->PullBool("borderless", false))
-		flags |= SDL_WINDOW_BORDERLESS;
-	if (node->PullBool("fullscreen_desktop", false))
-		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+	if (node->PullBool("fullscreen", false)) flags |= SDL_WINDOW_FULLSCREEN;
+	if (node->PullBool("resizable", true)) flags |= SDL_WINDOW_RESIZABLE;
+	if (node->PullBool("borderless", false)) flags |= SDL_WINDOW_BORDERLESS;
+	if (node->PullBool("fullscreen_desktop", false)) flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
 	title = node->PullString("title", title.c_str());
-	pos_x = node->PullInt("pos_x", pos_x);
-	pos_y = node->PullInt("pos_y", pos_y);
+	pos_x = node->PullInt("pos_x", SDL_WINDOWPOS_CENTERED);
+	pos_y = node->PullInt("pos_y", SDL_WINDOWPOS_CENTERED);
 	width = node->PullInt("width", width);
 	height = node->PullInt("height", height);
 
-	SetWindowProperties();
-
-	if (!window)
-	{
-		RE_LOG("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-		ret = false;
-	}
-	else
-	{
-		brightness = SDL_GetWindowBrightness(window);
-		screen_surface = SDL_GetWindowSurface(window);
-	}
-
-	return ret;
+	DEL(node);
 }
 
-bool ModuleWindow::Save(JSONNode * node) const
+void ModuleWindow::Save() const
 {
-	bool ret = true;
-
+	JSONNode* node = App::config->GetRootNode(name);
 	if (flags == 0u)
 	{
 		node->PushBool("Fullscreen", false);
@@ -161,7 +128,7 @@ bool ModuleWindow::Save(JSONNode * node) const
 	node->PushInt("width", width);
 	node->PushInt("height", height);
 
-	return ret;
+	DEL(node);
 }
 
 void ModuleWindow::RecieveEvent(const Event& e)
@@ -344,22 +311,35 @@ void ModuleWindow::SwapFullDesktop()
 	SetFullDesktop(!(CheckFlag(SDL_WINDOW_FULLSCREEN_DESKTOP)));
 }
 
-void ModuleWindow::SetWindowProperties()
+bool ModuleWindow::SetWindowProperties()
 {
+	bool ret = false;
 	if (window == nullptr)
 	{
 		RE_LOG_SECONDARY("Creating new window: %s | Width: %i | Height: %i", title.c_str(), width, height);
 		window = SDL_CreateWindow(title.c_str(), pos_x, pos_y, width, height, flags);
 	}
-	else
+
+	if (window != nullptr)
 	{
 		SDL_SetWindowTitle(window, title.c_str());
-		SDL_SetWindowResizable(window, SDL_bool(flags & SDL_WINDOW_RESIZABLE));
-		SDL_SetWindowFullscreen(window, SDL_bool(flags & SDL_WINDOW_FULLSCREEN));
-		SDL_SetWindowBordered(window, SDL_bool(flags & SDL_WINDOW_BORDERLESS));
-		SDL_SetWindowFullscreen(window, SDL_bool(flags & SDL_WINDOW_FULLSCREEN_DESKTOP));
+		SDL_SetWindowResizable(window, static_cast<SDL_bool>(flags & SDL_WINDOW_RESIZABLE));
+		SDL_SetWindowBordered(window, static_cast<SDL_bool>(!(flags & SDL_WINDOW_BORDERLESS)));
 		SDL_SetWindowPosition(window, pos_x, pos_y);
-		SDL_SetWindowSize(window, width,height);
-		SDL_SetWindowBrightness(window, brightness);
+		SDL_SetWindowSize(window, width, height);
+
+		bool fullscreen = (flags & SDL_WINDOW_FULLSCREEN) || (flags & SDL_WINDOW_FULLSCREEN_DESKTOP);
+		if (SDL_SetWindowFullscreen(window, static_cast<SDL_bool>(fullscreen)) < 0)
+			RE_LOG_WARNING("SDL Window was not able to set fullscreen to %b", fullscreen);
+
+		if (SDL_SetWindowBrightness(window, brightness) < 0)
+			RE_LOG_WARNING("SDL Window was not able to set brightness to %f", brightness);
+
+		screen_surface = SDL_GetWindowSurface(window);
+		ret = (screen_surface != nullptr);
+
 	}
+	else RE_LOG_ERROR("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+
+	return ret;
 }

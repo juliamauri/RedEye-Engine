@@ -1,9 +1,9 @@
 #ifndef __PARTICLE_H__
 #define __PARTICLE_H__
 
-#include "RE_CompTransform.h"
+#include "MathGeoLib/include/Math/float3.h"
+
 class RE_CompParticleEmitter;
-class RE_Mesh;
 
 class Particle {
 public:

@@ -1,69 +1,49 @@
-#ifndef __SYSTEMINFO_H__
-#define __SYSTEMINFO_H__
+#ifndef __RE_HARDWARE_H__
+#define __RE_HARDWARE_H__
 
-#include <EASTL/vector.h>
 #include <EASTL/string.h>
 
-#define MEMORY_PLOT_ARRAY_SIZE 100
-
-class RE_Hardware
+namespace RE_Hardware
 {
-public:
-	RE_Hardware() {}
-	~RE_Hardware() {}
-
-	void Init();
 	void DrawEditor();
+	void Clear();
 
-private:
-
-	void BytesString(eastl::string& stat, const double val) const;
-	void KBytesString(eastl::string& stat, const double val) const;
-	void MBytesString(eastl::string& stat, const double val) const;
-
-private:
-
-	// CPU
-	eastl::string cpu_brand;
-	eastl::string cpu_vendor;
-	eastl::string core_count;
-	eastl::string caps1;
-	eastl::string caps2;
-
-	// Memory
-	bool pause_plotting = false;
-	enum MEMORY_TYPES : unsigned int
+	namespace Internal
 	{
-		Working_MEM = 0u, // amount of memory physically mapped to the process context at a given time
-		Pageable_MEM,	  // system memory that can be transferred to the paging file on disk (paged) when it is not being used
-		Nonpageable_MEM,  // system memory that cannot be paged to disk as long as the corresponding objects are allocated
-		Paged_MEM,		  // memory set aside for the process in the system paging file
-		MAX_MEM_TYPES
-	};
-	eastl::string ram_capacity;
-	eastl::string mem_peaks[MEMORY_PLOT_ARRAY_SIZE];
-	float mem[MAX_MEM_TYPES][MEMORY_PLOT_ARRAY_SIZE]{};
-																		  
-	// Display
-	eastl::string drivers;
+		// Memory
+		struct HardwareData
+		{
+			eastl::string
+				// CPU
+				cpu_brand, cpu_vendor, core_count, caps1, caps2,
+				// Display
+				display_drivers,
+				// GPU
+				vendor_id, device_id, gfx_brand, gt_generation, gpu_renderer, gpu_vendor,
+				//VRAM
+				vram_total, vram_used, vram_available, vram_reserved;
 
-	// GPU
-	eastl::string vendor_id;
-	eastl::string device_id;
-	eastl::string gfx_brand;
-	eastl::string gt_generation;
+			enum MEMORY_TYPES : unsigned int
+			{
+				Working_MEM = 0u, // amount of memory physically mapped to the process context at a given time
+				Pageable_MEM,	  // system memory that can be transferred to the paging file on disk (paged) when it is not being used
+				Nonpageable_MEM,  // system memory that cannot be paged to disk as long as the corresponding objects are allocated
+				Paged_MEM,		  // memory set aside for the process in the system paging file
+				MAX_MEM_TYPES
+			};
+			eastl::string ram_capacity, mem_peaks[100];
+			float mem[MAX_MEM_TYPES][100]{};
+			bool pause_plotting = false;
 
-	eastl::string gpu_renderer;
-	eastl::string gpu_vendor;
+			void QueryData();
+			void DrawEditor();
 
-	//eastl::string gpu_version;
-	//eastl::string gpu_shading;
+		} static *data = nullptr;
 
-	//VRAM
-	eastl::string vram_total;
-	eastl::string vram_used;
-	eastl::string vram_available;
-	eastl::string vram_reserved;
+		void BytesString(eastl::string& stat, const double val);
+		void KBytesString(eastl::string& stat, const double val);
+		void MBytesString(eastl::string& stat, const double val);
+	}
 };
 
-#endif // !__SYSTEMINFO_H__
+#endif // !__RE_HARDWARE_H__

@@ -43,7 +43,7 @@ public:
 	ModuleEditor(const char* name = "Editor", bool start_enabled = true);
 	~ModuleEditor();
 
-	bool Init(JSONNode* node) override;
+	bool Init() override;
 	bool Start() override;
 	void PreUpdate() override;
 	void Update() override;
@@ -58,7 +58,6 @@ public:
 
 	// UI
 	void DrawGameObjectItems(const UID parent = 0);
-	void CreatePrefab(const UID go, const char* name, bool identityRoot);
 
 	// Selection
 	UID GetSelected() const;

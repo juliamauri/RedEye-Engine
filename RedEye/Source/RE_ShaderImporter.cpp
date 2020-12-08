@@ -1,18 +1,16 @@
 #include "RE_ShaderImporter.h"
 
+#include "RE_ConsoleLog.h"
+#include "RE_FileBuffer.h"
 #include "Application.h"
 #include "ModuleEditor.h"
-#include "RE_FileSystem.h"
-#include "RE_LogManager.h"
+
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 
-RE_ShaderImporter::RE_ShaderImporter(const char * folder) : folderPath(folder) {}
-RE_ShaderImporter::~RE_ShaderImporter() {}
-
 bool RE_ShaderImporter::Init()
 {
-	bool ret;
+	bool ret = true;
 	RE_LOG("Initializing Shader Manager");
 	RE_SOFT_NVS("GLSLang", reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
 	
@@ -21,8 +19,11 @@ bool RE_ShaderImporter::Init()
 	binaryFormats = new int[formats];
 	glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, binaryFormats);
 
-	if (!(ret = (folderPath != nullptr)))
+	if (folderPath == nullptr)
+	{
 		RE_LOG_ERROR("Shader Importer could not read folder path");
+		ret = false;
+	}
 
 	return ret;
 }
@@ -47,7 +48,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 		vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
 		//load source
-		RE_FileIO file_vertexShader(vertexPath);
+		RE_FileBuffer file_vertexShader(vertexPath);
 		if (file_vertexShader.Load())
 		{
 			buffer = file_vertexShader.GetBuffer();
@@ -82,7 +83,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
 
-		RE_FileIO file_fragmentShader(fragmentPath);
+		RE_FileBuffer file_fragmentShader(fragmentPath);
 		if (file_fragmentShader.Load())
 		{
 			buffer = file_fragmentShader.GetBuffer();
@@ -116,7 +117,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 		//compiling geometry shader
 		geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
 
-		RE_FileIO file_geometryShader(geometryPath);
+		RE_FileBuffer file_geometryShader(geometryPath);
 		if (file_geometryShader.Load())
 		{
 			buffer = file_geometryShader.GetBuffer();

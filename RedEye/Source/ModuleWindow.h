@@ -13,14 +13,16 @@ class ModuleWindow : public Module
 public:
 
 	ModuleWindow(const char* name = "Window", bool start_enabled = true);
-	~ModuleWindow();
+	~ModuleWindow() {}
 
-	bool Init(JSONNode* node) override;
+	bool Init() override;
 	void DrawEditor() override;
 	void CleanUp() override;
-	bool Load(JSONNode* node) override;
-	bool Save(JSONNode* node) const override;
+
 	void RecieveEvent(const Event& e) override;
+
+	void Load() override;
+	void Save() const override;
 
 	SDL_Window* GetWindow() const;
 
@@ -30,8 +32,8 @@ public:
 	int GetMaxHeight() const;
 	float GetAspectRatio() const;
 
-	float	GetBrightness()const;
-	bool	CheckFlag(uint flag) const;
+	float GetBrightness()const;
+	bool CheckFlag(uint flag) const;
 
 	void SetBrightness(const float brightness);
 	void SetTitle(const char* new_title = nullptr);
@@ -50,7 +52,7 @@ public:
 
 private:
 
-	void SetWindowProperties();
+	bool SetWindowProperties();
 
 public:
 
@@ -59,13 +61,11 @@ public:
 
 private:
 
-	eastl::string title = "RedEye";
-	int pos_x = -1;
-	int pos_y = -1;
-	int width = 1280;
-	int height = 720;
 	unsigned int flags = 0u;
+	int pos_x = -1, pos_y = -1;
+	int width = 1280, height = 720;
 	float brightness = 0.9f;
+	eastl::string title = "RedEye";
 };
 
 #endif // __ModuleWindow_H__

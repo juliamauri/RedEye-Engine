@@ -1,29 +1,31 @@
 #include "RE_FileSystem.h"
 
+#include "RE_FileBuffer.h"
+#include "RE_Config.h"
+#include "JSONNode.h"
+
 #include "Application.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"
-#include "RE_LogManager.h"
+
+#include "RE_Time.h"
+#include "RE_ConsoleLog.h"
+
 #include "RE_ResourceManager.h"
-#include "RE_TimeManager.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_ModelImporter.h"
+
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_CompMesh.h"
 #include "RE_CompPrimitive.h"
 #include "RE_Mesh.h"
 #include "RE_Shader.h"
-#include "Globals.h"
 
 #include "ImGui\imgui.h"
-#include "SDL2\include\SDL.h"
-#include "RapidJson\include\pointer.h"
-#include "RapidJson\include\stringbuffer.h"
-#include "RapidJson\include\writer.h"
-#include "libzip/include/zip.h"
+#include "libzip\include\zip.h"
 #include "PhysFS\include\physfs.h"
-#include "md5.h"
+
 #include <EASTL/internal/char_traits.h>
 #include <EASTL/algorithm.h>
 #include <EASTL/iterator.h>
@@ -37,8 +39,6 @@
 #pragma comment( lib, "libzip/zip_r.lib" )
 #endif // _DEBUG
 
-RE_FileSystem::RE_FileSystem() : engine_config(nullptr) {}
-
 RE_FileSystem::~RE_FileSystem()
 {
 	for (auto dir : assetsDirectories)
@@ -48,16 +48,15 @@ RE_FileSystem::~RE_FileSystem()
 
 	for (auto dir : assetsDirectories) DEL(dir);
 
-	DEL(engine_config);
+	DEL(App::config);
 
 	PHYSFS_deinit();
 }
 
-
 bool RE_FileSystem::Init(int argc, char* argv[])
 {
 	bool ret = false;
-
+	RE_LOG("Initializing File System");
 	if (PHYSFS_init(argv[0]) != 0)
 	{
 		PHYSFS_Version physfs_version;
@@ -72,17 +71,15 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		library_path = "Library";
 		assets_path = "Assets";
 
-		zip_path = (GetExecutableDirectory());
-		zip_path += "data.zip";
-		PHYSFS_mount(zip_path.c_str(), NULL, 1);
+		zip_path = GetExecutableDirectory();
+		PHYSFS_mount((zip_path += "data.zip").c_str(), NULL, 1);
 
 		char **i;
 		for (i = PHYSFS_getSearchPath(); *i != NULL; i++) RE_LOG("[%s] is in the search path.\n", *i);
 		PHYSFS_freeList(*i);
 
-		const char* config_file = "Settings/config.json";
-		engine_config = new Config(config_file, zip_path.c_str());
-		if (ret = engine_config->Load())
+		App::config = new Config("Settings/config.json", zip_path.c_str());
+		if (ret = App::config->Load())
 		{
 			rootAssetDirectory = new RE_Directory();
 			rootAssetDirectory->SetPath("Assets/");
@@ -90,25 +87,16 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 			assetsDirectories.push_front(rootAssetDirectory);
 			dirIter = assetsDirectories.begin();
 		}
-		else
-			RE_LOG_ERROR("Error while loading Engine Configuration file: %s\nRed Eye Engine will initialize with default configuration parameters.", config_file);
+		else RE_LOG_WARNING("Can't load Settings/config.json - building module default configuration.");
 	}
-	else
-	{
-		RE_LOG_ERROR("PhysFS could not initialize! Error: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-	}
+	else RE_LOG_ERROR("PhysFS could not initialize! Error: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 
 	return ret;
 }
 
-Config* RE_FileSystem::GetConfig() const
-{
-	return engine_config;
-}
-
 unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 {
-	OPTICK_CATEGORY("Read Assets Changes", Optick::Category::IO);
+	OPTICK_CATEGORY("Read Asset Changes - File system", Optick::Category::IO);
 
 	Timer time;
 	bool run = true;
@@ -141,7 +129,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			RE_ProcessPath* process = assetsToProcess.top();
 			assetsToProcess.pop();
 
-			switch (process->whatToDo)
+			switch (process->procedure)
 			{
 			case P_ADDFILE:
 			{
@@ -294,7 +282,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 		if ((doAll || run) && !toImport.empty())
 		{
-			RE_LogManager::ScopeProcedureLogging();
+			RE_ConsoleLog::ScopeProcedureLogging();
 			eastl::vector<RE_File*> toRemoveF;
 
 			//Importing
@@ -341,7 +329,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					[&](auto x) {return eastl::find(begin(toRemoveF), end(toRemoveF), x) != end(toRemoveF); }), eastl::end(toImport));
 			}
 
-			RE_LogManager::EndScope();
+			RE_ConsoleLog::EndScope();
 		}
 
 		if ((doAll || run) && !toReImport.empty())
@@ -375,19 +363,16 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 void RE_FileSystem::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("File System"))
-	{
-		ImGui::Text("Executable Directory:");
-		ImGui::TextWrappedV(GetExecutableDirectory(), "");
+	ImGui::Text("Executable Directory:");
+	ImGui::TextWrappedV(GetExecutableDirectory(), "");
 
-		ImGui::Separator();
-		ImGui::Text("All assets directories:");
-		for (auto dir : assetsDirectories)ImGui::Text(dir->path.c_str());
-		ImGui::Separator();
+	ImGui::Separator();
+	ImGui::Text("All assets directories:");
+	for (auto dir : assetsDirectories)ImGui::Text(dir->path.c_str());
+	ImGui::Separator();
 
-		ImGui::Text("Write Directory");
-		ImGui::TextWrappedV(write_path.c_str(), "");
-	}
+	ImGui::Text("Write Directory");
+	ImGui::TextWrappedV(write_path.c_str(), "");
 }
 
 bool RE_FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
@@ -438,9 +423,9 @@ void RE_FileSystem::LogFolderItems(const char * folder)
 }
 
 // Quick Buffer From Platform-Dependent Path
-RE_FileIO* RE_FileSystem::QuickBufferFromPDPath(const char * full_path)// , char** buffer, unsigned int size)
+RE_FileBuffer* RE_FileSystem::QuickBufferFromPDPath(const char * full_path)// , char** buffer, unsigned int size)
 {
-	RE_FileIO* ret = nullptr;
+	RE_FileBuffer* ret = nullptr;
 	if (full_path)
 	{
 		eastl::string file_path = full_path;
@@ -450,7 +435,7 @@ RE_FileIO* RE_FileSystem::QuickBufferFromPDPath(const char * full_path)// , char
 
 		eastl::string tmp = "/Export/";
 		tmp += file_name;
-		ret = new RE_FileIO(tmp.c_str());
+		ret = new RE_FileBuffer(tmp.c_str());
 
 		if (App::fs->AddPath(file_path.c_str(), "/Export/"))
 		{
@@ -505,12 +490,12 @@ void RE_FileSystem::HandleDropedFile(const char * file)
 	bool newDir = (ext.compare("zip") == 0 || ext.compare("7z") == 0 || ext.compare("iso") == 0);
 	if (!newDir)
 	{
-		RE_FileIO* fileLoaded = QuickBufferFromPDPath(file);
+		RE_FileBuffer* fileLoaded = QuickBufferFromPDPath(file);
 		if (fileLoaded)
 		{
 			eastl::string destPath = App::editor->GetAssetsPanelPath();
 			destPath += fileNameExtension;
-			RE_FileIO toSave(destPath.c_str(), GetZipPath());
+			RE_FileBuffer toSave(destPath.c_str(), GetZipPath());
 			toSave.Save(fileLoaded->GetBuffer(), fileLoaded->GetSize());
 		}
 		else newDir = true;
@@ -548,7 +533,7 @@ void RE_FileSystem::DeleteUndefinedFile(const char* filePath)
 				iterPath++;
 			}
 
-			RE_FileIO fileToDelete(filePath, GetZipPath());
+			RE_FileBuffer fileToDelete(filePath, GetZipPath());
 			fileToDelete.Delete();
 			DEL(file);
 		}
@@ -566,7 +551,7 @@ void RE_FileSystem::DeleteResourceFiles(ResourceContainer* resContainer)
 
 	if (Exists(resContainer->GetLibraryPath()))
 	{
-		RE_FileIO fileToDelete(resContainer->GetLibraryPath(), GetZipPath());
+		RE_FileBuffer fileToDelete(resContainer->GetLibraryPath(), GetZipPath());
 		fileToDelete.Delete();
 	}
 }
@@ -665,10 +650,10 @@ void RE_FileSystem::CopyDirectory(const char * origin, const char * dest)
 				}
 				else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR)
 				{
-					RE_FileIO fileOrigin(inOrigin.c_str());
+					RE_FileBuffer fileOrigin(inOrigin.c_str());
 					if (fileOrigin.Load())
 					{
-						RE_FileIO fileDest(inDest.c_str(), GetZipPath());
+						RE_FileBuffer fileDest(inDest.c_str(), GetZipPath());
 						fileDest.Save(fileOrigin.GetBuffer(), fileOrigin.GetSize());
 					}
 				}
@@ -678,732 +663,10 @@ void RE_FileSystem::CopyDirectory(const char * origin, const char * dest)
 	}
 }
 
-
-////////////////////////////////////////////////////////////////////
-///////////////////RE_FileIO
-////////////////////////////////////////////////////////////////////
-
-RE_FileIO::RE_FileIO(const char* file_name, const char* from_zip) : buffer(nullptr), file_name(file_name), from_zip(from_zip) {}
-RE_FileIO::~RE_FileIO() { DEL_A(buffer); }
-
-bool RE_FileIO::Load()
-{
-	size = HardLoad();
-	return size > 0;
-}
-
-void RE_FileIO::Save() { HardSave(buffer); }
-void RE_FileIO::Save(char * buffer, unsigned int size) { WriteFile(from_zip, file_name, buffer, this->size = ((size == 0) ? strnlen_s(buffer, 0xffff) : size)); }
-
-void RE_FileIO::Delete()
-{
-	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
-		RE_LOG_ERROR("Ettot when unmount: %s", PHYSFS_getLastError());
-
-	struct zip* f_zip = NULL;
-	int error = 0;
-	f_zip = zip_open(from_zip, ZIP_CHECKCONS, &error); /* on ouvre l'archive zip */
-	if (error)	RE_LOG_ERROR("could not open or create archive: %s", from_zip);
-
-	zip_int64_t index = zip_name_locate(f_zip, file_name, NULL);
-	if(index == -1) RE_LOG_ERROR("file culdn't locate: %s", file_name);
-	else if (zip_delete(f_zip, index) == -1) RE_LOG_ERROR("file culdn't delete: %s", file_name);
-
-	zip_close(f_zip);
-	f_zip = NULL;
-
-	PHYSFS_mount(from_zip, NULL, 1);
-}
-
-void RE_FileIO::ClearBuffer()
-{
-	delete[] buffer;
-	buffer = nullptr;
-}
-
-char * RE_FileIO::GetBuffer() { return (buffer); }
-const char* RE_FileIO::GetBuffer() const { return (buffer); }
-inline bool RE_FileIO::operator!() const { return buffer == nullptr; }
-unsigned int RE_FileIO::GetSize() { return size; }
-eastl::string RE_FileIO::GetMd5() { return (!buffer && !Load()) ? "" : md5(eastl::string(buffer, size)); }
-
-unsigned int RE_FileIO::HardLoad()
-{
-	unsigned int ret = 0u;
-
-	if (PHYSFS_exists(file_name))
-	{
-		PHYSFS_File* fs_file = PHYSFS_openRead(file_name);
-
-		if (fs_file != NULL)
-		{
-			signed long long sll_size = PHYSFS_fileLength(fs_file);
-			if (sll_size > 0)
-			{
-				if (buffer) DEL_A(buffer);
-				buffer = new char[(unsigned int)sll_size + 1];
-				signed long long amountRead = PHYSFS_read(fs_file, buffer, 1, (signed int)sll_size);
-				
-				if (amountRead != sll_size)
-				{
-					RE_LOG_ERROR("File System error while reading from file %s: %s", file_name, PHYSFS_getLastError());
-					delete (buffer);
-				}
-				else
-				{
-					ret = (unsigned int)amountRead;
-					buffer[ret] = '\0';
-				}
-			}
-
-			if (PHYSFS_close(fs_file) == 0) RE_LOG_ERROR("File System error while closing file %s: %s", file_name, PHYSFS_getLastError());
-		}
-		else RE_LOG_ERROR("File System error while opening file %s: %s", file_name, PHYSFS_getLastError());
-	}
-	else RE_LOG_ERROR("File System error while checking file %s: %s", file_name, PHYSFS_getLastError());
-
-	return ret;
-}
-
-void RE_FileIO::HardSave(const char* buffer)
-{
-	PHYSFS_file* file = PHYSFS_openWrite(file_name);
-
-	if (file != NULL)
-	{
-		long long written = PHYSFS_write(file, (const void*)buffer, 1, size = (strnlen_s(buffer, 0xffff)));
-		if (written != size) RE_LOG_ERROR("Error while writing to file %s: %s", file, PHYSFS_getLastError());
-		if (PHYSFS_close(file) == 0) RE_LOG_ERROR("Error while closing save file %s: %s", file, PHYSFS_getLastError());
-	}
-	else RE_LOG_ERROR("Error while opening save file %s: %s", file, PHYSFS_getLastError());
-}
-
-void RE_FileIO::WriteFile(const char * zip_path, const char * filename, const char * buffer, unsigned int size)
-{
-	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
-		RE_LOG_ERROR("Ettot when unmount: %s", PHYSFS_getLastError());
-
-	struct zip *f_zip = NULL;
-	int error = 0;
-	f_zip = zip_open(zip_path, ZIP_CHECKCONS, &error); /* on ouvre l'archive zip */
-	if (error)	RE_LOG_ERROR("could not open or create archive: %s", zip_path);
-
-	zip_source_t* s = zip_source_buffer(f_zip, buffer, size, 0);
-	if (s == NULL || zip_file_add(f_zip, filename, s, ZIP_FL_OVERWRITE + ZIP_FL_ENC_UTF_8) < 0)
-	{
-		zip_source_free(s);
-		RE_LOG_ERROR("error adding file: %s\n", zip_strerror(f_zip));
-	}
-
-	zip_close(f_zip);
-	f_zip = NULL;
-	PHYSFS_mount(from_zip, NULL, 1);
-}
-
-
-////////////////////////////////////////////////////////////////////
-///////////////////Config
-////////////////////////////////////////////////////////////////////
-
-//Tutorial http://rapidjson.org/md_doc_tutorial.html
-
-Config::Config(const char* file_name, const char* _from_zip) : RE_FileIO(file_name)
-{
-	zip_path = _from_zip;
-	from_zip = zip_path.c_str();
-}
-
-bool Config::Load()
-{
-	// Open file
-	bool ret = false;
-	size = HardLoad();
-	if (ret = (size > 0))
-	{
-		rapidjson::StringStream s(buffer);
-		document.ParseStream(s);
-	}
-
-	return ret;
-}
-
-bool Config::LoadFromWindowsPath()
-{
-	// Open file
-	bool ret = false;
-	RE_FileIO* fileToLoad =  App::fs->QuickBufferFromPDPath(file_name);
-	if (fileToLoad != nullptr)
-	{
-		rapidjson::StringStream s(fileToLoad->GetBuffer());
-		document.ParseStream(s);
-		ret = true;
-		DEL(fileToLoad);
-	}
-	return ret;
-}
-
-void Config::Save()
-{
-	rapidjson::StringBuffer s_buffer;
-	rapidjson::Writer<rapidjson::StringBuffer> writer(s_buffer);
-	document.Accept(writer);
-	s_buffer.Put('\0');
-	size = s_buffer.GetSize();
-	eastl::string file(file_name);
-	WriteFile(from_zip, file.c_str(), s_buffer.GetString(), size);
-}
-
-JSONNode* Config::GetRootNode(const char* member)
-{
-	JSONNode* ret = nullptr;
-
-	if (member != nullptr)
-	{
-		eastl::string path("/");
-		path += member;
-		rapidjson::Value* value = rapidjson::Pointer(path.c_str()).Get(document);
-
-		if (value == nullptr)
-		{
-			value = &rapidjson::Pointer(path.c_str()).Create(document);
-			RE_LOG("Configuration node not found for %s, created new pointer", path.c_str());
-		}
-
-		ret = new JSONNode(path.c_str(), this);
-	}
-	else RE_LOG("Error Loading Configuration node: Empty Member Name");
-
-	return ret;
-}
-
-inline bool Config::operator!() const { return document.IsNull(); }
-
-eastl::string Config::GetMd5()
-{
-	rapidjson::StringBuffer s_buffer;
-	rapidjson::Writer<rapidjson::StringBuffer> writer(s_buffer);
-	document.Accept(writer);
-	s_buffer.Put('\0');
-	size = s_buffer.GetSize();
-	return md5(s_buffer.GetString());
-}
-
-
-////////////////////////////////////////////////////////////////////
-///////////////////JSONNode
-////////////////////////////////////////////////////////////////////
-
-JSONNode::JSONNode(const char* path, Config* config, bool isArray) : pointerPath(path), config(config)
-{
-	if (isArray) rapidjson::Pointer(path).Get(config->document)->SetArray();
-}
-
-JSONNode::JSONNode(JSONNode& node) : pointerPath(node.pointerPath), config(node.config) {}
-JSONNode::~JSONNode() { config = nullptr; }
-
-
-// Push ============================================================
-
-void JSONNode::PushBool(const char* name, const bool value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void JSONNode::PushBool(const char* name, const bool* value, unsigned int quantity)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		for (uint i = 0; i < quantity; i++) float_array.PushBack(value[i], config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
-	}
-}
-
-void JSONNode::PushInt(const char* name, const int value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void JSONNode::PushInt(const char* name, const int* value, unsigned int quantity)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		for (uint i = 0; i < quantity; i++) float_array.PushBack(value[i], config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
-	}
-}
-
-void JSONNode::PushUInt(const char* name, const unsigned int value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void JSONNode::PushUInt(const char* name, const unsigned int* value, unsigned int quantity)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		for (uint i = 0; i < quantity; i++) float_array.PushBack(value[i], config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
-	}
-}
-
-void JSONNode::PushFloat(const char* name, const float value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void JSONNode::PushFloat(const char* name, math::float2 value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		float_array.PushBack(value.x, config->document.GetAllocator()).PushBack(value.y, config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
-	}
-}
-
-void JSONNode::PushFloatVector(const char * name, math::vec vector)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		float_array.PushBack(vector.x, config->document.GetAllocator()).PushBack(vector.y, config->document.GetAllocator()).PushBack(vector.z, config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
-	}
-}
-
-void JSONNode::PushFloat4(const char * name, math::float4 vector)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		float_array.PushBack(vector.x, config->document.GetAllocator()).PushBack(vector.y, config->document.GetAllocator()).PushBack(vector.z, config->document.GetAllocator()).PushBack(vector.w, config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
-	}
-}
-
-void JSONNode::PushMat3(const char* name, math::float3x3 mat3)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		for (uint i = 0; i < 9; i++) float_array.PushBack(mat3.ptr()[i], config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
-	}
-}
-
-void JSONNode::PushMat4(const char* name, math::float4x4 mat4)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		for (uint i = 0; i < 16; i++) float_array.PushBack(mat4.ptr()[i], config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
-	}
-}
-
-void JSONNode::PushDouble(const char* name, const double value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void JSONNode::PushSignedLongLong(const char* name, const signed long long value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void JSONNode::PushUnsignedLongLong(const char* name, const unsigned long long value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void JSONNode::PushString(const char* name, const char* value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void JSONNode::PushValue(rapidjson::Value * val)
-{
-	rapidjson::Value* val_push = rapidjson::Pointer(pointerPath.c_str()).Get(config->document);
-	if (val_push->IsArray()) val_push->PushBack(*val, config->document.GetAllocator());
-}
-
-JSONNode* JSONNode::PushJObject(const char* name)
-{
-	JSONNode* ret = nullptr;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		ret = new JSONNode(path.c_str(), config);
-	}
-
-	return ret;
-}
-
-// Pull ============================================================
-
-bool JSONNode::PullBool(const char* name, bool deflt)
-{
-	bool ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret = val->GetBool();
-	}
-
-	return ret;
-}
-
-bool* JSONNode::PullBool(const char* name, unsigned int quantity, bool deflt)
-{
-	bool* ret = new bool[quantity];
-	bool* cursor = ret;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val)
-		{
-			for (uint i = 0; i < quantity; i++, cursor++)
-			{
-				bool f = val->GetArray()[i].GetBool();
-				memcpy(cursor, &f, sizeof(bool));
-			}
-		}
-		else
-		{
-			bool f = deflt;
-			for (uint i = 0; i < quantity; i++, cursor++) memcpy(cursor, &f, sizeof(bool));
-		}
-	}
-
-	return ret;
-}
-
-int JSONNode::PullInt(const char* name, int deflt)
-{
-	int ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret = val->GetInt();
-	}
-
-	return ret;
-}
-
-int* JSONNode::PullInt(const char* name, unsigned int quantity, int deflt)
-{
-	int* ret = new int[quantity];
-	int* cursor = ret;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-
-		if (val)
-		{
-			for (uint i = 0; i < quantity; i++, cursor++)
-			{
-				int f = val->GetArray()[i].GetInt();
-				memcpy(cursor, &f, sizeof(int));
-			}
-		}
-		else
-		{
-			int f = deflt;
-			for (uint i = 0; i < quantity; i++, cursor++) memcpy(cursor, &f, sizeof(int));
-		}
-	}
-
-	return ret;
-}
-
-unsigned int JSONNode::PullUInt(const char* name, const unsigned int deflt)
-{
-	unsigned int ret = 0u;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret = val->GetUint();
-	}
-
-	return ret;
-}
-
-unsigned int* JSONNode::PullUInt(const char* name, unsigned int quantity, unsigned int deflt)
-{
-	unsigned int* ret = new unsigned int[quantity];
-	unsigned int* cursor = ret;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-
-		if (val)
-		{
-			for (uint i = 0; i < quantity; i++, cursor++)
-			{
-				int f = val->GetArray()[i].GetUint();
-				memcpy(cursor, &f, sizeof(unsigned int));
-			}
-		}
-		else
-		{
-			int f = deflt;
-			for (uint i = 0; i < quantity; i++, cursor++) memcpy(cursor, &f, sizeof(unsigned int));
-		}
-	}
-
-	return ret;
-}
-
-
-float JSONNode::PullFloat(const char* name, float deflt)
-{
-	float ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret = val->GetFloat();
-	}
-
-	return ret;
-}
-
-math::float2 JSONNode::PullFloat(const char* name, math::float2 deflt)
-{
-	math::float2 ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret.Set(val->GetArray()[0].GetFloat(), val->GetArray()[1].GetFloat());
-	}
-
-	return ret;
-}
-
-math::vec JSONNode::PullFloatVector(const char * name, math::vec deflt)
-{
-	math::vec ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret.Set(val->GetArray()[0].GetFloat(), val->GetArray()[1].GetFloat(), val->GetArray()[2].GetFloat());
-	}
-
-	return ret;
-}
-
-math::float4 JSONNode::PullFloat4(const char * name, math::float4 deflt)
-{
-	math::float4 ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret.Set(val->GetArray()[0].GetFloat(), val->GetArray()[1].GetFloat(), val->GetArray()[2].GetFloat(), val->GetArray()[3].GetFloat());
-	}
-
-	return ret;
-}
-
-math::float3x3 JSONNode::PullMat3(const char* name, math::float3x3 deflt)
-{
-	math::float3x3 ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-
-		if (val)
-		{
-			float* fBuffer = new float[9];
-			float* cursor = fBuffer;
-
-			for (uint i = 0; i < 9; i++, cursor++)
-			{
-				int f = val->GetArray()[i].GetInt();
-				memcpy(cursor, &f, sizeof(int));
-			}
-
-			ret.Set(fBuffer);
-			DEL_A(fBuffer);
-		}
-	}
-
-	return ret;
-}
-
-math::float4x4 JSONNode::PullMat4(const char* name, math::float4x4 deflt)
-{
-	math::float4x4 ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-
-		if (val != nullptr)
-		{
-			float* fBuffer = new float[16];
-			float* cursor = fBuffer;
-
-			for (uint i = 0; i < 16; i++, cursor++)
-			{
-				int f = val->GetArray()[i].GetInt();
-				memcpy(cursor, &f, sizeof(int));
-			}
-
-			ret.Set(fBuffer);
-			DEL_A(fBuffer);
-		}
-	}
-
-	return ret;
-}
-
-double JSONNode::PullDouble(const char* name, double deflt)
-{
-	double ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret = val->GetDouble();
-	}
-
-	return ret;
-}
-
-signed long long JSONNode::PullSignedLongLong(const char* name, signed long long deflt)
-{
-	signed long long ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret = val->GetInt64();
-	}
-
-	return ret;
-}
-
-unsigned long long JSONNode::PullUnsignedLongLong(const char* name, unsigned long long deflt)
-{
-	unsigned long long ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret = val->GetUint64();
-	}
-
-	return ret;
-}
-
-const char*	JSONNode::PullString(const char* name, const char* deflt)
-{
-	const char* ret = deflt;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret = val->GetString();
-	}
-
-	return ret;
-}
-
-JSONNode* JSONNode::PullJObject(const char * name)
-{
-	JSONNode* ret = nullptr;
-
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		ret = new JSONNode(path.c_str(), config);
-	}
-
-	return ret;
-}
-
-rapidjson::Value::Array JSONNode::PullValueArray() { return config->document.FindMember(pointerPath.c_str())->value.GetArray(); }
-inline bool JSONNode::operator!() const { return config || pointerPath.empty(); }
-const char * JSONNode::GetDocumentPath() const { return pointerPath.c_str(); }
-rapidjson::Document * JSONNode::GetDocument() { return &config->document; }
-
-void JSONNode::SetArray()  { rapidjson::Pointer(pointerPath.c_str()).Get(config->document)->SetArray(); }
-void JSONNode::SetObject() { rapidjson::Pointer(pointerPath.c_str()).Get(config->document)->SetObject(); }
-
 RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const char* _path, const char*& _extension)
 {
 	static const char* extensionsSuported[12] = { "meta", "re","refab", "pupil", "sk",  "fbx", "jpg", "dds", "png", "tga", "tiff", "bmp" };
-	
+
 	RE_FileSystem::FileType ret = F_NOTSUPPORTED;
 	eastl::string modPath(_path);
 	eastl::string filename = modPath.substr(modPath.find_last_of("/") + 1);
@@ -1427,7 +690,8 @@ RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const cha
 			case 8:
 			case 9:
 			case 10:
-			case 11: ret = F_TEXTURE; break; }
+			case 11: ret = F_TEXTURE; break;
+			}
 		}
 	}
 	return ret;
@@ -1491,7 +755,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 		eastl::string iterPath(path);
 		eastl::vector<RE_Meta*> toRemoveM;
 		char** rc = PHYSFS_enumerateFiles(iterPath.c_str());
-		pathIterator iter = tree.begin();
+		auto iter = tree.begin();
 		for (char** i = rc; *i != NULL; i++)
 		{
 			PathType iterTreeType = (iter != tree.end()) ? (*iter)->pType : PathType::D_NULL;
@@ -1505,7 +769,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 					bool newFolder = (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FOLDER || (*iter)->path != (inPath += "/"));
 					if (newFolder && iter != tree.end())
 					{
-						pathIterator postPath = iter;
+						auto postPath = iter;
 						bool found = false;
 						while (postPath != tree.end())
 						{
@@ -1522,7 +786,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 					if (newFolder)
 					{
 						RE_Directory* newDirectory = new RE_Directory();
-						
+
 						if (inPath.back() != '/')inPath += "/";
 						newDirectory->SetPath(inPath.c_str());
 						newDirectory->parent = this;
@@ -1532,7 +796,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 						iter--;
 
 						RE_ProcessPath* newProcess = new RE_ProcessPath();
-						newProcess->whatToDo = P_ADDFOLDER;
+						newProcess->procedure = P_ADDFOLDER;
 						newProcess->toProcess = newDirectory->AsPath();
 						ret.push(newProcess);
 					}
@@ -1564,7 +828,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 
 					if (newFile && iter != tree.end())
 					{
-						pathIterator postPath = iter;
+						auto postPath = iter;
 						bool found = false;
 						while (postPath != tree.end())
 						{
@@ -1578,8 +842,8 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 						if (found) newFile = false;
 					}
 
-					 if(newFile)
-					 {
+					if (newFile)
+					{
 						RE_File* newFile = (fileType != FileType::F_META) ? new RE_File() : (RE_File*)new RE_Meta();
 						newFile->path = inPath;
 						newFile->filename = inPath.substr(inPath.find_last_of("/") + 1);
@@ -1589,27 +853,27 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 						newFile->extension = extension;
 
 						RE_ProcessPath* newProcess = new RE_ProcessPath();
-						newProcess->whatToDo = P_ADDFILE;
+						newProcess->procedure = P_ADDFILE;
 						newProcess->toProcess = newFile->AsPath();
 						ret.push(newProcess);
-						AddBeforeOf(newFile->AsPath(),iter);
+						AddBeforeOf(newFile->AsPath(), iter);
 						iter--;
 					}
 					else if ((*iter)->AsFile()->fType == FileType::F_META)
 					{
-						 bool reimport = false;
-						 ResourceContainer* res = App::resources->At((*iter)->AsFile()->AsMeta()->resource);
-						 if (res->GetType() == Resource_Type::R_SHADER)
-						 {
-							 RE_Shader* shadeRes = dynamic_cast<RE_Shader*>(res);
-							 if (shadeRes->isShaderFilesChanged())
-							 {
-								 RE_ProcessPath* newProcess = new RE_ProcessPath();
-								 newProcess->whatToDo = P_REIMPORT;
-								 newProcess->toProcess = (*iter);
-								 ret.push(newProcess);
-							 }
-						 }
+						bool reimport = false;
+						ResourceContainer* res = App::resources->At((*iter)->AsFile()->AsMeta()->resource);
+						if (res->GetType() == Resource_Type::R_SHADER)
+						{
+							RE_Shader* shadeRes = dynamic_cast<RE_Shader*>(res);
+							if (shadeRes->isShaderFilesChanged())
+							{
+								RE_ProcessPath* newProcess = new RE_ProcessPath();
+								newProcess->procedure = P_REIMPORT;
+								newProcess->toProcess = (*iter);
+								ret.push(newProcess);
+							}
+						}
 					}
 				}
 			}

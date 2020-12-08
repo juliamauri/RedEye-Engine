@@ -1,33 +1,16 @@
 #include "RE_ThumbnailManager.h"
 
-#include "Application.h"
 #include "RE_FileSystem.h"
-#include "ModuleWindow.h"
+#include "RE_FileBuffer.h"
+#include "Application.h"
 #include "RE_ResourceManager.h"
-#include "RE_ShaderImporter.h"
-#include "RE_InternalResources.h"
-#include "RE_TextureImporter.h"
-#include "ModuleScene.h"
 #include "RE_GLCacheManager.h"
-#include "RE_FBOManager.h"
-#include "Event.h"
-#include "RE_TimeManager.h"
-#include "RE_ECS_Manager.h"
-#include "RE_Shader.h"
 #include "RE_Texture.h"
-#include "RE_Model.h"
-
-#include "RE_Material.h"
-#include "RE_SkyBox.h"
-#include "Globals.h"
 
 #include "Glew/include/glew.h"
 #include "IL/include/il.h"
 #include "IL/include/ilu.h"
-#include "par_shapes.h"
 #include <EASTL/string.h>
-
-RE_ThumbnailManager::RE_ThumbnailManager() {}
 
 RE_ThumbnailManager::~RE_ThumbnailManager()
 {
@@ -66,23 +49,22 @@ void RE_ThumbnailManager::Delete(const char* ref)
 	eastl::string path(THUMBNAILPATH);
 	if (App::fs->Exists((path += ref).c_str()))
 	{
-		RE_FileIO fileToDelete(path.c_str(), App::fs->GetZipPath());
+		RE_FileBuffer fileToDelete(path.c_str(), App::fs->GetZipPath());
 		fileToDelete.Delete();
 	}
 }
 
-unsigned int RE_ThumbnailManager::At(const char* ref) { 
-
-	return (thumbnails.find(ref) != thumbnails.end()) ? thumbnails.at(ref) : 0;
-
+unsigned int RE_ThumbnailManager::At(const char* ref)
+{ 
+	return (thumbnails.find(ref) != thumbnails.end()) ? thumbnails.at(ref) : 0u;
 }
 
 unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
 {
-	uint ret = 0;
+	uint ret = 0u;
 	eastl::string path(DEFTHUMBNAILS);
 	path += filename;
-	RE_FileIO filderIcon(path.c_str());
+	RE_FileBuffer filderIcon(path.c_str());
 	if (filderIcon.Load())
 	{
 		RE_TextureSettings defTexSettings;
@@ -94,13 +76,13 @@ unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
 
 unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 {
-	uint ret = 0;
+	uint ret = 0u;
 	eastl::string path(THUMBNAILPATH);
 	if (!App::fs->Exists((path += ref).c_str()))
 	{
 		ResourceContainer* res = App::resources->At(ref);
 		RE_Texture* tex = dynamic_cast<RE_Texture*>(res);
-		RE_FileIO texFile(res->GetAssetPath());
+		RE_FileBuffer texFile(res->GetAssetPath());
 		if (texFile.Load())
 		{
 			unsigned int imageID = 0;
@@ -110,7 +92,7 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 			if (IL_FALSE != ilLoadL(tex->DetectExtension(), texFile.GetBuffer(), texFile.GetSize()))
 			{
 				iluScale(THUMBNAILSIZE, THUMBNAILSIZE, 1);
-				RE_FileIO saveThumb(path.c_str(), App::fs->GetZipPath());
+				RE_FileBuffer saveThumb(path.c_str(), App::fs->GetZipPath());
 				ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
 				ILubyte* data = new ILubyte[size];
 				ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
@@ -146,7 +128,7 @@ void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)
 		ILubyte* data = new ILubyte[size];
 
 		ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
-		RE_FileIO saveThumb(path, App::fs->GetZipPath());
+		RE_FileBuffer saveThumb(path, App::fs->GetZipPath());
 		saveThumb.Save(reinterpret_cast<char*>(data), size);
 		DEL_A(data);
 
@@ -161,9 +143,9 @@ void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)
 
 unsigned int RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 {
-	uint ret = 0;
+	uint ret = 0u;
 	eastl::string path(THUMBNAILPATH);
-	RE_FileIO thumbFile((path += ref).c_str());
+	RE_FileBuffer thumbFile((path += ref).c_str());
 	if (thumbFile.Load())
 	{
 		RE_TextureSettings defSettings;
@@ -187,7 +169,7 @@ unsigned int RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 			RE_GLCacheManager::ChangeTextureBind(0);
 			ilBindImage(0);
 			/* Delete used resources*/
-			ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
+			ilDeleteImages(1u, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
 		}
 	}
 	return ret;

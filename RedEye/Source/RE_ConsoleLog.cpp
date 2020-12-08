@@ -1,24 +1,13 @@
-#include "RE_LogManager.h"
+#include "RE_ConsoleLog.h"
 
 #include "Application.h"
 #include "ModuleEditor.h"
-#include "EditorWindows.h"
-
 #include <EAStdC/EASprintf.h>
-
 #include <windows.h> // TODO Julius: Destruir Windows. Reventarlo quitandote la camiseta. Que no lo reconozca ni Billy el Puertas.
 
 #define LOG_STATEMENT_MAX_LENGTH 512
 
-bool RE_LogManager::scoping_procedure = false;
-bool RE_LogManager::error_scoped = false;
-
-void RE_LogManager::_RequestBrowser(const char* link)
-{
-	ShellExecute(NULL, "open", link, NULL, NULL, SW_SHOWNORMAL);
-}
-
-void RE_LogManager::_Log(int category, const char file[], int line, const char* format, ...)
+void RE_ConsoleLog::_Log(int category, const char file[], int line, const char* format, ...)
 {
 	static char base[LOG_STATEMENT_MAX_LENGTH];
 	static va_list  ap;
@@ -52,7 +41,7 @@ void RE_LogManager::_Log(int category, const char file[], int line, const char* 
 	Event::PushForced(static_cast<RE_EventType>(CONSOLE_LOG_SEPARATOR + category), App::editor, edited, file_name);
 }
 
-void RE_LogManager::_ReportSoftware(const char file[], int line, const char* name, const char* version, const char* website)
+void RE_ConsoleLog::_ReportSoftware(const char file[], int line, const char* name, const char* version, const char* website)
 {
 	App::editor->ReportSoftawe(name, version, website);
 
@@ -65,12 +54,17 @@ void RE_LogManager::_ReportSoftware(const char file[], int line, const char* nam
 	else _Log(L_SOFTWARE, file, line, "3rd party software report: %s", name);
 }
 
-void RE_LogManager::ScopeProcedureLogging()
+void RE_ConsoleLog::_RequestBrowser(const char* link)
+{
+	ShellExecute(NULL, "open", link, NULL, NULL, SW_SHOWNORMAL);
+}
+
+void RE_ConsoleLog::ScopeProcedureLogging()
 {
 	scoping_procedure = true;
 	error_scoped = false;
 }
-void RE_LogManager::EndScope()
+void RE_ConsoleLog::EndScope()
 {
 	if (scoping_procedure)
 	{
@@ -79,4 +73,4 @@ void RE_LogManager::EndScope()
 	}
 }
 
-bool RE_LogManager::ScopedErrors() { return error_scoped; }
+bool RE_ConsoleLog::ScopedErrors() { return error_scoped; }

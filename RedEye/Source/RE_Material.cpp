@@ -1,21 +1,20 @@
 #include "RE_Material.h"
 
-#include "Application.h"
+#include "Globals.h"
+#include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
+#include "RE_FileBuffer.h"
+#include "RE_Config.h"
+#include "JSONNode.h"
+#include "Application.h"
 #include "ModuleRenderer3D.h"
-#include "RE_LogManager.h"
-#include "RE_ResourceManager.h"
-#include "RE_InternalResources.h"
+#include "ModuleEditor.h"
 #include "RE_ShaderImporter.h"
-#include "RE_Shader.h"
-#include "RE_Texture.h"
-
+#include "RE_ResourceManager.h"
 #include "RE_GLCacheManager.h"
 #include "RE_ThumbnailManager.h"
-
-#include "ModuleEditor.h"
-
-#include "Globals.h"
+#include "RE_Shader.h"
+#include "RE_Texture.h"
 
 #include "ImGui/imgui.h"
 #include "Glew/include/glew.h"
@@ -852,7 +851,7 @@ void RE_Material::PushTexturesJson(JSONNode * texturesNode, eastl::vector<const 
 
 void RE_Material::BinaryDeserialize()
 {
-	RE_FileIO libraryFile(GetLibraryPath());
+	RE_FileBuffer libraryFile(GetLibraryPath());
 	if (libraryFile.Load())
 	{
 		char* cursor = libraryFile.GetBuffer();
@@ -1084,7 +1083,7 @@ void RE_Material::BinaryDeserialize()
 
 void RE_Material::BinarySerialize()
 {
-	RE_FileIO libraryFile(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer libraryFile(GetLibraryPath(), App::fs->GetZipPath());
 
 	uint bufferSize = GetBinarySize() + 1;
 	char* buffer = new char[bufferSize];

@@ -4,17 +4,18 @@
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
-#include "RE_FileSystem.h"
+
 #include "RE_ShaderImporter.h"
 #include "RE_InternalResources.h"
 #include "RE_ResourceManager.h"
 #include "RE_CameraManager.h"
-
 #include "RE_SkyBox.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_ECS_Manager.h"
-#include "RE_LogManager.h"
+
+#include "RE_ConsoleLog.h"
+#include "JSONNode.h"
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
@@ -161,13 +162,9 @@ void RE_CompCamera::SetPlanesDistance(float n_plane, float f_plane)
 
 void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 {
-	RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f);
-
-	v_fov_rads = vertical_fov_degrees * DEGTORAD;
+	v_fov_rads = math::DegToRad(v_fov_degrees = RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f));
 	h_fov_rads = 2.0f * math::Atan(math::Tan(v_fov_rads / 2.0f) * (width / height));
-
-	h_fov_degrees = h_fov_rads * RADTODEG;
-	v_fov_degrees = vertical_fov_degrees;
+	h_fov_degrees = math::RadToDeg(h_fov_rads);
 
 	if (isPerspective)
 	{
@@ -178,12 +175,8 @@ void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 
 void RE_CompCamera::ForceFOV(float vertical_fov_degrees, float horizontal_fov_degrees)
 {
-	RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f);
-	RE_Math::Cap(horizontal_fov_degrees, 1.f, 180.f);
-	v_fov_rads = vertical_fov_degrees * DEGTORAD;
-	h_fov_rads = horizontal_fov_degrees * DEGTORAD;
-	h_fov_degrees = horizontal_fov_degrees;
-	v_fov_degrees = vertical_fov_degrees;
+	v_fov_rads = math::DegToRad(v_fov_degrees = RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f));
+	h_fov_rads = math::DegToRad(h_fov_degrees = RE_Math::Cap(horizontal_fov_degrees, 1.f, 180.f));
 
 	if (isPerspective)
 	{
@@ -250,7 +243,7 @@ void RE_CompCamera::SetBounds(float w, float h)
 	}
 	}
 
-	SetFOV(v_fov_rads * RADTODEG);
+	SetFOV(math::RadToDeg(v_fov_rads));
 	if (!isPerspective) frustum.SetOrthographic(width, height);
 	need_recalculation = true;
 }

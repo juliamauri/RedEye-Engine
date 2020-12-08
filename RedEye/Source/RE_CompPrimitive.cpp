@@ -1,23 +1,20 @@
 #include "RE_CompPrimitive.h"
 
-#include "SDL2/include/SDL.h"
-#include "Glew/include/glew.h"
-#include <gl/GL.h>
+#include "JSONNode.h"
 #include "Application.h"
-#include "ModuleRenderer3D.h"
+#include "ModuleScene.h"
 #include "ModuleEditor.h"
 #include "RE_ShaderImporter.h"
-#include "RE_PrimitiveManager.h"
-#include "RE_GameObject.h"
-#include "RE_CompTransform.h"
-#include "RE_CompCamera.h"
-#include "ModuleScene.h"
-#include "RE_FileSystem.h"
-#include "RE_InternalResources.h"
 #include "RE_ResourceManager.h"
 #include "RE_GLCacheManager.h"
 #include "RE_Mesh.h"
 #include "RE_Shader.h"
+#include "RE_GameObject.h"
+#include "RE_CompTransform.h"
+
+#include "SDL2/include/SDL.h"
+#include "Glew/include/glew.h"
+#include <gl/GL.h>
 
 #ifndef PAR_SHAPES_IMPLEMENTATION
 #define PAR_SHAPES_IMPLEMENTATION

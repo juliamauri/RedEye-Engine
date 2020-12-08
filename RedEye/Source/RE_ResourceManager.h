@@ -15,7 +15,6 @@ public:
 	RE_ResourceManager() {}
 	~RE_ResourceManager();
 
-	void Init();
 	void RecieveEvent(const Event& e) override;
 
 	ResourceContainer* At(const char* md5) const;

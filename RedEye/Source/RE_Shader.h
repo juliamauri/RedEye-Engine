@@ -18,13 +18,12 @@ struct RE_ShaderSettings {
 	signed long long glastModified = 0;
 };
 
-class RE_Shader :
-	public ResourceContainer
+class RE_Shader : public ResourceContainer
 {
 public:
-	RE_Shader();
-	RE_Shader(const char* metaPath);
-	~RE_Shader();
+	RE_Shader() {}
+	RE_Shader(const char* metaPath) : ResourceContainer(metaPath) {}
+	~RE_Shader() {}
 
 	void LoadInMemory() override;
 	void UnloadMemory() override;
@@ -50,6 +49,7 @@ public:
 	bool NeedUploadDepth()const;
 
 private:
+
 	void Draw() override;
 	void SaveResourceMeta(JSONNode* metaNode) override;
 	void LoadResourceMeta(JSONNode* metaNode) override;
@@ -68,6 +68,7 @@ private:
 	void GetLocations();
 
 private:
+
 	unsigned int ID = 0;
 
 	RE_ShaderSettings shaderSettings;

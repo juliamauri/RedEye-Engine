@@ -1,19 +1,13 @@
 #include "RE_PrimitiveManager.h"
 
-#include "Application.h"
-#include "RE_ShaderImporter.h"
-#include "RE_ResourceManager.h"
-#include "RE_InternalResources.h"
-#include "RE_LogManager.h"
-#include "RE_Math.h"
+#include "RE_ConsoleLog.h"
 #include "RE_CompPrimitive.h"
 #include "RE_GLCacheManager.h"
-#include "RE_Shader.h"
 
+#include "par_shapes.h"
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
-#include "par_shapes.h"
 
 RE_PrimitiveManager::RE_PrimitiveManager()
 {

@@ -9,10 +9,10 @@ class RE_ShaderImporter
 {
 public:
 	// constructor reads and builds the shader
-	RE_ShaderImporter(const char* folder = "Assets/Shaders/");
+	RE_ShaderImporter(const char* folder = "Assets/Shaders/") : folderPath(folder) {}
 
 	//delete all programs loaded
-	~RE_ShaderImporter();
+	~RE_ShaderImporter() {}
 
 	bool Init();
 

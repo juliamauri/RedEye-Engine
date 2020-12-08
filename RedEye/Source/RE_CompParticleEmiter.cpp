@@ -1,10 +1,8 @@
 #include "RE_CompParticleEmiter.h"
 
-#include "RE_TimeManager.h"
-#include "RE_LogManager.h"
-
+#include "Particle.h"
+#include "RE_Mesh.h"
 #include "ImGui\imgui.h"
-
 
 RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER) {}
 RE_CompParticleEmitter::~RE_CompParticleEmitter() {}
@@ -15,7 +13,7 @@ void RE_CompParticleEmitter::PreUpdate() {}
 void RE_CompParticleEmitter::Update()
 {
 	int spawns_needed = 0;
-	float dt = RE_TimeManager::GetDeltaTime();
+	float dt = 0.f;// RE_Time::GetDeltaTime();
 
 	if (emissor_life > 0.f)
 	{
@@ -47,7 +45,7 @@ void RE_CompParticleEmitter::PostUpdate() {}
 
 void RE_CompParticleEmitter::OnPlay()
 {
-	RE_LOG_SECONDARY("particle emitter play");
+	//RE_LOG_SECONDARY("particle emitter play");
 
 	if (particles)
 		DEL_A(particles);
@@ -65,7 +63,7 @@ void RE_CompParticleEmitter::OnPause() {}
 
 void RE_CompParticleEmitter::OnStop()
 {
-	RE_LOG_SECONDARY("particle emitter stop");
+	//RE_LOG_SECONDARY("particle emitter stop");
 }
 
 void RE_CompParticleEmitter::Draw() const
@@ -132,7 +130,6 @@ void RE_CompParticleEmitter::UpdateParticles(int spawns_needed)
 	Particle* p = nullptr;
 	for (int i = 0; i < max_particles; i++)
 	{
-		;
 		if (!((p = &particles[i])->Alive()))
 		{
 			if (spawns_needed > 0)
@@ -141,7 +138,6 @@ void RE_CompParticleEmitter::UpdateParticles(int spawns_needed)
 				spawns_needed--;
 			}
 		}
-		else
-			p->Update();
+		else p->Update();
 	}
 }

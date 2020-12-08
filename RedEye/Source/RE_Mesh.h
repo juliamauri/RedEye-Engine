@@ -8,7 +8,7 @@ class RE_Mesh : public ResourceContainer
 {
 public:
 	RE_Mesh();
-	~RE_Mesh();
+	~RE_Mesh() {}
 
 	void SetLibraryPath(const char* path)override;
 

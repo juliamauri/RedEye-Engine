@@ -10,7 +10,7 @@
 #include "EditorWindows.h"
 
 #include "Event.h"
-#include "RE_LogManager.h"
+#include "RE_ConsoleLog.h"
 
 #include "SDL2\include\SDL.h"
 
@@ -29,8 +29,9 @@ ModuleInput::~ModuleInput()
 }
 
 // Called before render is available
-bool ModuleInput::Init(JSONNode* config_module)
+bool ModuleInput::Init()
 {
+	RE_LOG("Initializing Module %s", name);
 	RE_LOG_SECONDARY("Init SDL input & event subsystems");
 	bool ret = true;
 

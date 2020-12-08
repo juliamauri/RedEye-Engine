@@ -31,7 +31,7 @@ public:
 	ModuleAudio(const char* name = "Audio", bool start_enabled = true);
 	~ModuleAudio();
 
-	bool Init(JSONNode* node) override;
+	bool Init() override;
 	bool Start() override;
 	void PostUpdate() override;
 	void CleanUp() override;
@@ -41,8 +41,8 @@ public:
 
 	void DrawWwiseElementsDetected();
 
-	bool Load(JSONNode* node) override;
-	bool Save(JSONNode* node) const override;
+	void Load() override;
+	void Save() const override;
 
 	unsigned int ReadBanksChanges(unsigned int extra_ms = 0u);
 

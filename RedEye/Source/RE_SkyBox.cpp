@@ -1,15 +1,17 @@
 #include "RE_SkyBox.h"
 
-#include "Application.h"
+#include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
+#include "RE_FileBuffer.h"
+#include "RE_Config.h"
+#include "JSONNode.h"
+#include "Application.h"
 #include "ModuleRenderer3D.h"
-#include "RE_ResourceManager.h"
-#include "RE_Texture.h"
-#include "Globals.h"
-#include "RE_LogManager.h"
 #include "RE_TextureImporter.h"
+#include "RE_ResourceManager.h"
 #include "RE_GLCacheManager.h"
 #include "RE_ThumbnailManager.h"
+#include "RE_Texture.h"
 
 #include "Glew/include/glew.h"
 #include "ImGui/imgui.h"
@@ -321,11 +323,11 @@ void RE_SkyBox::SaveResourceMeta(JSONNode* metaNode)
 
 void RE_SkyBox::LoadResourceMeta(JSONNode* metaNode)
 {
-	skyBoxSettings.min_filter = (RE_TextureFilters)metaNode->PullInt("minFilter", RE_LINEAR);
-	skyBoxSettings.mag_filter = (RE_TextureFilters)metaNode->PullInt("magFilter", RE_LINEAR);
-	skyBoxSettings.wrap_s = (RE_TextureWrap)metaNode->PullInt("wrapS", RE_CLAMP_TO_EDGE);
-	skyBoxSettings.wrap_t = (RE_TextureWrap)metaNode->PullInt("wrapT", RE_CLAMP_TO_EDGE);
-	skyBoxSettings.wrap_r = (RE_TextureWrap)metaNode->PullInt("wrapR", RE_CLAMP_TO_EDGE);
+	skyBoxSettings.min_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("minFilter", RE_LINEAR));
+	skyBoxSettings.mag_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("magFilter", RE_LINEAR));
+	skyBoxSettings.wrap_s =		static_cast<RE_TextureWrap>(metaNode->PullInt("wrapS", RE_CLAMP_TO_EDGE));
+	skyBoxSettings.wrap_t =		static_cast<RE_TextureWrap>(metaNode->PullInt("wrapT", RE_CLAMP_TO_EDGE));
+	skyBoxSettings.wrap_r =		static_cast<RE_TextureWrap>(metaNode->PullInt("wrapR", RE_CLAMP_TO_EDGE));
 
 	JSONNode* nodeTex = metaNode->PullJObject("textures");
 	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++)
@@ -404,7 +406,7 @@ void RE_SkyBox::DrawSkybox() const
 
 void RE_SkyBox::LibraryLoad()
 {
-	RE_FileIO fileLibray(GetLibraryPath());
+	RE_FileBuffer fileLibray(GetLibraryPath());
 
 	if (fileLibray.Load())
 	{
@@ -430,7 +432,7 @@ void RE_SkyBox::LibrarySave()
 	memcpy(cursor, &skyBoxSettings.skyBoxSize, size);
 	cursor += size;
 
-	RE_FileIO saveLibrary(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer saveLibrary(GetLibraryPath(), App::fs->GetZipPath());
 
 	saveLibrary.Save(libraryBuffer, totalSize + 1);
 	DEL_A(libraryBuffer);

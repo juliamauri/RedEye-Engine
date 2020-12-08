@@ -1,24 +1,22 @@
 #include "RE_Shader.h"
 
-#include "Application.h"
+#include "RE_ConsoleLog.h"
+#include "RE_Time.h"
 #include "RE_FileSystem.h"
+#include "RE_FileBuffer.h"
+#include "JSONNode.h"
+#include "Application.h"
 #include "RE_ResourceManager.h"
 #include "RE_ShaderImporter.h"
 #include "RE_CompCamera.h"
 #include "RE_CompTransform.h"
 #include "ModuleEditor.h"
 #include "RE_GLCacheManager.h"
-#include "RE_TimeManager.h"
 #include "Event.h"
-#include "RE_LogManager.h"
 
 #include "md5.h"
 #include "ImGui/imgui.h"
 #include "PhysFS\include\physfs.h"
-
-RE_Shader::RE_Shader() {}
-RE_Shader::RE_Shader(const char* metaPath) : ResourceContainer(metaPath) {}
-RE_Shader::~RE_Shader() {}
 
 void RE_Shader::LoadInMemory()
 {
@@ -97,7 +95,7 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	eastl::string buffer = "";
 	if (!shaderSettings.vertexShader.empty())
 	{
-		RE_FileIO vertexBuffer(shaderSettings.vertexShader.c_str());
+		RE_FileBuffer vertexBuffer(shaderSettings.vertexShader.c_str());
 		if (vertexBuffer.Load())
 		{
 			eastl::string vbuffer(vertexBuffer.GetBuffer(), vertexBuffer.GetSize());
@@ -106,7 +104,7 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	}
 	if (!shaderSettings.fragmentShader.empty())
 	{
-		RE_FileIO fragmentBuffer(shaderSettings.fragmentShader.c_str());
+		RE_FileBuffer fragmentBuffer(shaderSettings.fragmentShader.c_str());
 		if (fragmentBuffer.Load())
 		{
 			eastl::string fbuffer(fragmentBuffer.GetBuffer(), fragmentBuffer.GetSize());
@@ -115,7 +113,7 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	}
 	if (!shaderSettings.geometryShader.empty())
 	{
-		RE_FileIO geometryBuffer(shaderSettings.geometryShader.c_str());
+		RE_FileBuffer geometryBuffer(shaderSettings.geometryShader.c_str());
 		if (geometryBuffer.Load())
 		{
 			eastl::string gbuffer(geometryBuffer.GetBuffer(), geometryBuffer.GetSize());
@@ -141,8 +139,8 @@ void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float 
 	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
 	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera->GetProjectionPtr());
 
-	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, RE_TimeManager::GetDeltaTime());
-	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, (App::GetState() == GameState::GS_STOP) ? RE_TimeManager::GetEngineTimer() : RE_TimeManager::GetGameTimer());
+	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, RE_Time::GetDeltaTime());
+	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, RE_Time::GetCurrentTimer());
 
 	if (viewport_h != -1) RE_ShaderImporter::setFloat(uniforms[viewport_h].location, window_h);
 	if (viewport_w != -1) RE_ShaderImporter::setFloat(uniforms[viewport_w].location, window_w);
@@ -254,7 +252,7 @@ void RE_Shader::ParseAndGetUniforms()
 	eastl::vector<eastl::string> lines;
 	if (!shaderSettings.vertexShader.empty())
 	{
-		RE_FileIO sFile(shaderSettings.vertexShader.c_str());
+		RE_FileBuffer sFile(shaderSettings.vertexShader.c_str());
 		if (sFile.Load())
 		{
 			eastl::vector<eastl::string> slines = GetUniformLines(sFile.GetBuffer());
@@ -263,7 +261,7 @@ void RE_Shader::ParseAndGetUniforms()
 	}
 	if (!shaderSettings.fragmentShader.empty())
 	{
-		RE_FileIO sFile(shaderSettings.fragmentShader.c_str());
+		RE_FileBuffer sFile(shaderSettings.fragmentShader.c_str());
 		if (sFile.Load())
 		{
 			eastl::vector<eastl::string> slines = GetUniformLines(sFile.GetBuffer());
@@ -272,7 +270,7 @@ void RE_Shader::ParseAndGetUniforms()
 	}
 	if (!shaderSettings.geometryShader.empty())
 	{
-		RE_FileIO sFile(shaderSettings.geometryShader.c_str());
+		RE_FileBuffer sFile(shaderSettings.geometryShader.c_str());
 		if (sFile.Load())
 		{
 			eastl::vector<eastl::string> slines = GetUniformLines(sFile.GetBuffer());
@@ -522,7 +520,7 @@ void RE_Shader::AssetLoad()
 
 void RE_Shader::LibraryLoad()
 {
-	RE_FileIO libraryLoad(GetLibraryPath());
+	RE_FileBuffer libraryLoad(GetLibraryPath());
 	if (libraryLoad.Load())
 	{
 		if (!App::shaders.LoadFromBinary(libraryLoad.GetBuffer(), libraryLoad.GetSize(), &ID))
@@ -536,7 +534,7 @@ void RE_Shader::LibraryLoad()
 
 void RE_Shader::LibrarySave()
 {
-	RE_FileIO librarySave(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer librarySave(GetLibraryPath(), App::fs->GetZipPath());
 	char* buffer = nullptr;
 	int size = 0;
 	if (App::shaders.GetBinaryProgram(ID, &buffer, &size)) librarySave.Save(buffer, size);

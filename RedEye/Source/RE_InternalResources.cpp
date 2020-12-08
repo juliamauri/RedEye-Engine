@@ -1,22 +1,18 @@
 #include "RE_InternalResources.h"
 
 #include "Application.h"
-
-#include "RE_FileSystem.h"
-#include "RE_ResourceManager.h"
 #include "ModuleRenderer3D.h"
-
-#include "RE_DefaultShaders.h"
+#include "RE_ConsoleLog.h"
+#include "RE_FileBuffer.h"
+#include "RE_ResourceManager.h"
+#include "RE_GLCacheManager.h"
 #include "RE_ShaderImporter.h"
 #include "RE_TextureImporter.h"
 
-#include "RE_SkyBox.h"
+#include "RE_DefaultShaders.h"
 #include "RE_Shader.h"
 #include "RE_Material.h"
-
-#include "RE_LogManager.h"
-#include "Globals.h"
-#include "RE_GLCacheManager.h"
+#include "RE_SkyBox.h"
 
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
@@ -166,7 +162,7 @@ void RE_InternalResources::InitWaterResources()
 		}
 	}
 
-	RE_FileIO waterTexture(WATER_FOAM_TEX_PATH);
+	RE_FileBuffer waterTexture(WATER_FOAM_TEX_PATH);
 	if (waterTexture.Load())
 	{
 		RE_TextureSettings defTexSettings;

@@ -1,53 +1,41 @@
 #ifndef __REFBOMANAGER__
 #define __REFBOMANAGER__
 
-#include <EASTL/map.h>
 #include <EASTL/vector.h>
+#include <EASTL/map.h>
 
 struct RE_FBO
 {
-	unsigned int ID = 0;
-	unsigned int width = 0, height = 0;
+	enum FBO_Type : char { DEFAULT, DEFERRED } type = DEFAULT;
 	eastl::vector<unsigned int> texturesID;
-	unsigned int depthBuffer = 0;
-	unsigned int stencilBuffer = 0;
-	unsigned int depthstencilBuffer = 0;
-	unsigned int depthBufferTexture = 0;
-	enum FBO_Type : char
-	{
-		DEFAULT = 0,
-		DEFERRED
-	} type = DEFAULT;
+	unsigned int
+		ID = 0, width = 0, height = 0,
+		depthBuffer = 0, stencilBuffer = 0,
+		depthstencilBuffer = 0, depthBufferTexture = 0;
 };
 
-class RE_FBOManager
+namespace RE_FBOManager
 {
-public:
-	RE_FBOManager();
-	~RE_FBOManager();
+	int CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize = 1, bool depth = true, bool stencil = false);
+	int CreateDeferredFBO(unsigned int width, unsigned int height);
 
-	static int CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize = 1, bool depth = true, bool stencil = false);
-	static int CreateDeferredFBO(unsigned int width, unsigned int height);
+	unsigned int GetDepthTexture(unsigned int ID);
+	unsigned int GetTextureID(unsigned int ID, unsigned int texAttachment);
+	unsigned int GetWidth(unsigned int ID);
+	unsigned int GetHeight(unsigned int ID);
 
-	static void ChangeFBOSize(unsigned int ID, unsigned int width, unsigned int height);
+	void ChangeFBOSize(unsigned int ID, unsigned int width, unsigned int height);
+	void ChangeFBOBind(unsigned int tID, unsigned int width = 0, unsigned int height = 0);
 
-	static void ClearFBO(unsigned int ID);
+	void ClearFBOBuffers(unsigned int ID, const float color[4]);
+	void ClearFBO(unsigned int ID);
+	void ClearAll();
 
-	static unsigned int GetDepthTexture(unsigned int ID);
-	static unsigned int GetTextureID(unsigned int ID, unsigned int texAttachment);
-	static unsigned int GetWidth(unsigned int ID);
-	static unsigned int GetHeight(unsigned int ID);
-
-	static void ChangeFBOBind(unsigned int tID, unsigned int width = 0, unsigned int height = 0);
-	static void ClearFBOBuffers(unsigned int ID, const float color[4]);
-
-private:
-
-	static void LoadDeferredTextures(RE_FBO &fbo);
-
-private:
-
-	static eastl::map<unsigned int, RE_FBO> fbos;
+	namespace Internal
+	{
+		static eastl::map<unsigned int, RE_FBO> fbos;
+		void LoadDeferredTextures(RE_FBO& fbo);
+	}
 };
 
 #endif // !__REFBOMANAGER__

@@ -1,29 +1,26 @@
 #include "EditorWindows.h"
 
+#include "Globals.h"
 #include "Application.h"
-#include "RE_FileSystem.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
+#include "RE_FileBuffer.h"
+#include "RE_ConsoleLog.h"
+
+#include "RE_DefaultShaders.h"
 #include "RE_ShaderImporter.h"
 #include "RE_ResourceManager.h"
-
 #include "RE_InternalResources.h"
 #include "RE_Material.h"
 #include "RE_SkyBox.h"
 #include "RE_Shader.h"
 #include "RE_Prefab.h"
-
 #include "RE_GameObject.h"
-
-#include "RE_LogManager.h"
-#include "RE_DefaultShaders.h"
-#include "Globals.h"
 
 #include "ImGui/misc/cpp/imgui_stdlib.h"
 #include "ImGui/imgui_internal.h"
 #include "ImGuiColorTextEdit/TextEditor.h"
-
 #include "Glew/include/glew.h"
 
 MaterialEditorWindow::MaterialEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active)
@@ -363,13 +360,13 @@ void ShaderEditorWindow::Draw(bool secondary)
 
 		if (!compilePass && ImGui::Button("Compile Test"))
 		{
-			RE_LogManager::ScopeProcedureLogging();
+			RE_ConsoleLog::ScopeProcedureLogging();
 
 			uint sID = 0;
 			compilePass = App::shaders.LoadFromAssets(&sID, vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr, true);
 			if (!compilePass) RE_LOG_ERROR("Shader Compilation Error:\n%s", App::shaders.GetShaderError());
 
-			RE_LogManager::EndScope();
+			RE_ConsoleLog::EndScope();
 		}
 
 		if (secondary || pop || neededVertexAndFragment)
@@ -405,7 +402,7 @@ void TextEditorManagerWindow::PushEditor(const char* filePath, eastl::string* ne
 	editor* e = new editor();
 	if (filePath)
 	{
-		RE_FileIO* file = new RE_FileIO(filePath, App::fs->GetZipPath());
+		RE_FileBuffer* file = new RE_FileBuffer(filePath, App::fs->GetZipPath());
 		if (file->Load())
 		{
 			e->textEditor = new TextEditor();
@@ -480,7 +477,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 			names = "Compile as shader script #" + eastl::to_string(count);
 			if (ImGui::Button(names.c_str()))
 			{
-				RE_LogManager::ScopeProcedureLogging();
+				RE_ConsoleLog::ScopeProcedureLogging();
 
 				std::string tmp = e->textEditor->GetText();
 				eastl::string text(tmp.c_str(), tmp.size());
@@ -488,7 +485,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 				if (!e->works) RE_LOG_ERROR("%s", App::shaders.GetShaderError());
 				e->compiled = true;
 
-				RE_LogManager::EndScope();
+				RE_ConsoleLog::EndScope();
 			}
 
 			if (e->compiled) ImGui::Text((e->works) ? "Succeful compile" : "Error compile");
@@ -510,7 +507,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 					eastl::string text = e->textEditor->GetTextPtr();
 					if (!e->file)
 					{
-						e->file = new RE_FileIO(assetPath.c_str(), App::fs->GetZipPath());
+						e->file = new RE_FileBuffer(assetPath.c_str(), App::fs->GetZipPath());
 						*e->toModify = assetPath;
 					}
 
@@ -618,7 +615,7 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 				eastl::string shaderVertexFile("Assets/Shaders/");
 				shaderVertexFile += (deferred) ? "WaterDeferred.vert" : "Water.vert";
 				if (!App::fs->Exists(shaderVertexFile.c_str())) {
-					RE_FileIO vertexFile(shaderVertexFile.c_str(), App::fs->GetZipPath());
+					RE_FileBuffer vertexFile(shaderVertexFile.c_str(), App::fs->GetZipPath());
 					vertexFile.Save((deferred) ? WATERPASSVERTEXSHADER : WATERVERTEXSHADER, 
 						eastl::CharStrlen((deferred) ? WATERPASSVERTEXSHADER : WATERVERTEXSHADER));
 				}
@@ -626,7 +623,7 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 				eastl::string shaderFragmentFile("Assets/Shaders/");
 				shaderFragmentFile += (deferred) ? "WaterDeferred.frag" : "Water.frag";
 				if (!App::fs->Exists(shaderFragmentFile.c_str())) {
-					RE_FileIO fragmentFile(shaderFragmentFile.c_str(), App::fs->GetZipPath());
+					RE_FileBuffer fragmentFile(shaderFragmentFile.c_str(), App::fs->GetZipPath());
 					fragmentFile.Save((deferred) ? WATERPASSFRAGMENTSHADER : WATERFRAGMENTSHADER,
 						eastl::CharStrlen((deferred) ? WATERPASSFRAGMENTSHADER : WATERFRAGMENTSHADER));
 				}

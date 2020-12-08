@@ -1,14 +1,12 @@
 #include "RE_TextureImporter.h"
 
-#include "Application.h"
-#include "RE_ResourceManager.h"
+#include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
-#include "RE_SkyBox.h"
+#include "RE_FileBuffer.h"
+#include "Application.h"
 #include "ModuleEditor.h"
-#include "Globals.h"
-#include "RE_LogManager.h"
-#include "RE_TimeManager.h"
 #include "RE_GLCacheManager.h"
+#include "RE_ResourceManager.h"
 
 #include "md5.h"
 #include "ImGui\imgui.h"
@@ -21,11 +19,6 @@
 #pragma comment(lib, "IL/libx86/DevIL.lib")
 #pragma comment(lib, "IL/libx86/ILU.lib")
 #pragma comment(lib, "IL/libx86/ILUT.lib")
-
-
-
-RE_TextureImporter::RE_TextureImporter(const char* folderPath) : folderPath(folderPath) {}
-RE_TextureImporter::~RE_TextureImporter() {}
 
 bool RE_TextureImporter::Init()
 {
@@ -145,7 +138,7 @@ void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int s
 	}
 }
 
-void RE_TextureImporter::SaveOwnFormat(const char * assetBuffer, unsigned int assetSize, TextureType assetType, RE_FileIO * toSave)
+void RE_TextureImporter::SaveOwnFormat(const char* assetBuffer, unsigned int assetSize, TextureType assetType, RE_FileBuffer* toSave)
 {
 	uint imageID = 0;
 	ilGenImages(1, &imageID);
@@ -189,7 +182,7 @@ void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigne
 			texPath = settings.textures[i].path.c_str();
 		}
 
-		RE_FileIO librayTexture(texPath);
+		RE_FileBuffer librayTexture(texPath);
 
 		if (librayTexture.Load()) {
 			uint imageID = 0;

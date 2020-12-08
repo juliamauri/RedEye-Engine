@@ -1,12 +1,12 @@
 #ifndef __RE_COMPPARTICLEEMITER_H__
 #define __RE_COMPPARTICLEEMITER_H__
 
-#define MAX_PARTICLES 200
-
+#include "RE_Component.h"
+#include "MathGeoLib/include/Math/float3.h"
 #include <vector>
 
-#include "RE_Component.h"
-#include "Particle.h"
+class Particle;
+class RE_Mesh;
 
 enum Particle_Stat
 {
@@ -50,7 +50,6 @@ private:
 	void UpdateParticles(int spawns_needed);
 
 private:
-	Particle* particles = nullptr;
 
 	int max_particles = 0;
 	float time_counter = 0.0f;
@@ -77,6 +76,7 @@ private:
 	math::vec rgb_alpha = math::vec::zero;
 	unsigned int shader = 0;
 
+	Particle* particles = nullptr;
 	RE_Mesh* mParticle = nullptr;
 };
 

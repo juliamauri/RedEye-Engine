@@ -8,7 +8,7 @@
       <Filter>Source\Application\Modules</Filter>
     </ClCompile>
     <ClCompile Include="Event.cpp">
-      <Filter>Source\Events</Filter>
+      <Filter>Source\Events System</Filter>
     </ClCompile>
     <ClCompile Include="gpudetect\DeviceId.cpp">
       <Filter>3rd Party\gpudetect</Filter>
@@ -277,23 +277,32 @@
     <ClCompile Include="RE_GLCacheManager.cpp">
       <Filter>Source\Application\Managers</Filter>
     </ClCompile>
-    <ClCompile Include="RE_TimeManager.cpp">
-      <Filter>Source\Application\Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Math.cpp">
-      <Filter>Source\Application\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_FileSystem.cpp">
-      <Filter>Source\Application\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="Application.cpp">
       <Filter>Source\Application</Filter>
     </ClCompile>
-    <ClCompile Include="RE_LogManager.cpp">
-      <Filter>Source\Application\Managers</Filter>
+    <ClCompile Include="RE_Math.cpp">
+      <Filter>Source\Utility namespaces</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Time.cpp">
+      <Filter>Source\Utility namespaces</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ConsoleLog.cpp">
+      <Filter>Source\Utility namespaces</Filter>
     </ClCompile>
     <ClCompile Include="RE_Hardware.cpp">
-      <Filter>Source\Application\Utility</Filter>
+      <Filter>Source\Utility namespaces</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_FileSystem.cpp">
+      <Filter>Source\Application\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Config.cpp">
+      <Filter>Source\Application\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="JSONNode.cpp">
+      <Filter>Source\Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_FileBuffer.cpp">
+      <Filter>Source\Application\FileSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -307,10 +316,10 @@
       <Filter>Source\Application\Modules</Filter>
     </ClInclude>
     <ClInclude Include="Event.h">
-      <Filter>Source\Events</Filter>
+      <Filter>Source\Events System</Filter>
     </ClInclude>
     <ClInclude Include="EventListener.h">
-      <Filter>Source\Events</Filter>
+      <Filter>Source\Events System</Filter>
     </ClInclude>
     <ClInclude Include="PhysFS\include\physfs.h">
       <Filter>3rd Party\PhysFS</Filter>
@@ -1221,26 +1230,35 @@
     <ClInclude Include="RE_GLCacheManager.h">
       <Filter>Source\Application\Managers</Filter>
     </ClInclude>
-    <ClInclude Include="RE_TimeManager.h">
-      <Filter>Source\Application\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Math.h">
-      <Filter>Source\Application\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_FileSystem.h">
-      <Filter>Source\Application\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="Application.h">
       <Filter>Source\Application</Filter>
     </ClInclude>
-    <ClInclude Include="RE_LogManager.h">
-      <Filter>Source\Application\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Hardware.h">
-      <Filter>Source\Application\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleEditor.h">
       <Filter>Source\Application\Modules\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Math.h">
+      <Filter>Source\Utility namespaces</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Time.h">
+      <Filter>Source\Utility namespaces</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ConsoleLog.h">
+      <Filter>Source\Utility namespaces</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Hardware.h">
+      <Filter>Source\Utility namespaces</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_FileSystem.h">
+      <Filter>Source\Application\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Config.h">
+      <Filter>Source\Application\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="JSONNode.h">
+      <Filter>Source\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_FileBuffer.h">
+      <Filter>Source\Application\FileSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1346,14 +1364,8 @@
     <Filter Include="Class Diagrams">
       <UniqueIdentifier>{65836e87-fffd-4c0e-8be7-ad02ecfdd02b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Events">
-      <UniqueIdentifier>{b7a63cfc-233b-4186-96c0-37e2ed9b095d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Application">
       <UniqueIdentifier>{81e1c51b-a91f-4b42-af0d-467a3e443096}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Utility">
-      <UniqueIdentifier>{79e2c679-5e2b-47e5-95a0-240e5abe6473}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Application\Modules">
       <UniqueIdentifier>{dbb90943-cf3a-483e-b9a2-928baf328345}</UniqueIdentifier>
@@ -1382,6 +1394,15 @@
     <Filter Include="Source\Containers\Resources">
       <UniqueIdentifier>{138e3b14-77d4-440e-872a-1d54ebdae46f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility namespaces">
+      <UniqueIdentifier>{79e2c679-5e2b-47e5-95a0-240e5abe6473}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Events System">
+      <UniqueIdentifier>{b7a63cfc-233b-4186-96c0-37e2ed9b095d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\FileSystem">
+      <UniqueIdentifier>{639a6e47-8665-4a89-b1c1-06588da71634}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="EA\EAStdC\internal\EAMemory.inl">
@@ -1392,9 +1413,6 @@
     </None>
     <None Include="General Diagram.cd">
       <Filter>Class Diagrams</Filter>
-    </None>
-    <None Include="..\Build\Assets\Settings\config.json">
-      <Filter>Source\Application\Utility</Filter>
     </None>
   </ItemGroup>
 </Project>

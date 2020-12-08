@@ -85,7 +85,6 @@ private:
 
 	RE_Scene* unsavedScene = nullptr;
 	const char* currentScene = nullptr;
-
 };
 
 #endif // !__MODULESCENE_H__

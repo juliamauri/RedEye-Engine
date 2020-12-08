@@ -1,13 +1,9 @@
 #ifndef __EDITORWINDOWS__
 #define __EDITORWINDOWS__
 
-#include "Resource.h"
-
 #include "MathGeoLib/include/Math/float4.h"
-#include "MathGeoLib/include/Math/float2.h"
-
-#include "ImGuizmo/ImGuizmo.h"
 #include "ImGui\imgui.h"
+#include "ImGuizmo/ImGuizmo.h"
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
@@ -289,7 +285,7 @@ private:
 };
 
 class TextEditor;
-class RE_FileIO;
+class RE_FileBuffer;
 class TextEditorManagerWindow :public EditorWindow
 {
 public:
@@ -304,7 +300,7 @@ private:
 	struct editor {
 		eastl::string* toModify = nullptr;
 		TextEditor* textEditor = nullptr;
-		RE_FileIO* file = nullptr;
+		RE_FileBuffer* file = nullptr;
 		bool save = false;
 		bool* open = nullptr;
 		bool compiled = false;

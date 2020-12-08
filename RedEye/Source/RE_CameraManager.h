@@ -11,8 +11,8 @@ class RE_CameraManager
 {
 public:
 
-	RE_CameraManager();
-	~RE_CameraManager();
+	RE_CameraManager() {}
+	~RE_CameraManager() {}
 
 	void Init();
 	void Clear();

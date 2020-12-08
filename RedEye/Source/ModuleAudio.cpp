@@ -1,12 +1,15 @@
 #include "ModuleAudio.h"
 
+#include "RE_ConsoleLog.h"
+#include "RE_Time.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
-#include "RE_LogManager.h"
+#include "RE_FileBuffer.h"
+#include "RE_Config.h"
+#include "JSONNode.h"
 
 #include "ImGui/imgui.h"
 #include "ImGui/misc/cpp/imgui_stdlib.h"
-
 #include <EAStdC/EAString.h>
 
 #include <AK/SoundEngine/Platforms/Windows/AkTypes.h>
@@ -57,10 +60,11 @@
 ModuleAudio::ModuleAudio(const char* name, bool start_enabled) : Module(name, start_enabled) {}
 ModuleAudio::~ModuleAudio() {}
 
-bool ModuleAudio::Init(JSONNode * node)
+bool ModuleAudio::Init()
 {
 	bool ret = true;
 
+	RE_LOG("Initializing Module %s", name);
 	RE_SOFT_NVS("Wwise SDK", AK_WWISESDK_VERSIONNAME, "https://www.audiokinetic.com/products/wwise/");
 
 	AkMemSettings memSettings;
@@ -92,7 +96,6 @@ bool ModuleAudio::Init(JSONNode * node)
 	AkMusicSettings musicInit;
 	AK::MusicEngine::GetDefaultInitSettings(musicInit);
 	if (AK::MusicEngine::Init(&musicInit) != AK_Success)
-
 	{
 		RE_LOG_ERROR("Could not initialize the audio Music Engine.");
 		ret = false;
@@ -118,8 +121,7 @@ bool ModuleAudio::Init(JSONNode * node)
 
 #endif // AK_OPTIMIZED
 
-	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
-	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
+	Load();
 
 	return ret;
 }
@@ -128,6 +130,7 @@ static AkGameObjectID MY_DEFAULT_LISTENER = 0;
 
 bool ModuleAudio::Start()
 {
+	RE_LOG("Starting Module %s", name);
 	AK::StreamMgr::SetCurrentLanguage(AKTEXT("English(US)"));
 	
 	MY_DEFAULT_LISTENER = 0;
@@ -196,7 +199,7 @@ void ModuleAudio::DrawEditor()
 			ImGui::Text("The path will changed to:\n%s%s\\ \n", rootPath.c_str(), tempPath.c_str());
 			if (ImGui::Button("Check and Apply Path")) {
 
-				RE_LogManager::ScopeProcedureLogging();
+				RE_ConsoleLog::ScopeProcedureLogging();
 
 				if (tempPath[tempPath.size()] != '\\') tempPath += "\\";
 
@@ -210,7 +213,7 @@ void ModuleAudio::DrawEditor()
 					tempPath = audioBanksFolderPath;
 				}
 
-				RE_LogManager::EndScope();
+				RE_ConsoleLog::EndScope();
 				pathChanged = false;
 			}
 		}
@@ -279,17 +282,19 @@ void ModuleAudio::DrawWwiseElementsDetected()
 	}
 }
 
-bool ModuleAudio::Load(JSONNode* node)
+void ModuleAudio::Load()
 {
+	JSONNode* node = App::config->GetRootNode(name);
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
 	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
-	return true;
+	DEL(node);
 }
 
-bool ModuleAudio::Save(JSONNode* node) const
+void ModuleAudio::Save() const
 {
+	JSONNode* node = App::config->GetRootNode(name);
 	node->PushString("FolderBanks", audioBanksFolderPath.c_str());
-	return true;
+	DEL(node);
 }
 
 unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
@@ -387,7 +392,7 @@ SoundBank::~SoundBank()
 
 void SoundBank::LoadBank()
 {
-	RE_FileIO* bnkLoaded = App::fs->QuickBufferFromPDPath(path.c_str());
+	RE_FileBuffer* bnkLoaded = App::fs->QuickBufferFromPDPath(path.c_str());
 	if (bnkLoaded != nullptr)
 	{
 		AKRESULT result = AK::SoundEngine::LoadBankMemoryCopy(bnkLoaded->GetBuffer(), bnkLoaded->GetSize(), ID);

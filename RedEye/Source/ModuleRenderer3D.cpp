@@ -1,15 +1,28 @@
 #include "ModuleRenderer3D.h"
 
+#include "RE_ConsoleLog.h"
 #include "Application.h"
-#include "RE_FileSystem.h"
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
+
+#include "RE_FileBuffer.h"
+#include "RE_Config.h"
+#include "JSONNode.h"
+
+#include "RE_GLCacheManager.h"
+#include "RE_FBOManager.h"
 #include "RE_InternalResources.h"
 #include "RE_ResourceManager.h"
 #include "RE_ShaderImporter.h"
 #include "RE_ThumbnailManager.h"
+
+#include "RE_CompCamera.h"
+#include "RE_CompMesh.h"
+#include "RE_CompPrimitive.h"
+#include "RE_CameraManager.h"
+#include "RE_CompTransform.h"
 
 #include "RE_Shader.h"
 #include "RE_SkyBox.h"
@@ -18,32 +31,18 @@
 #include "RE_Model.h"
 #include "RE_Material.h"
 
-#include "RE_CompCamera.h"
-#include "RE_CompMesh.h"
-#include "RE_CompPrimitive.h"
-#include "RE_CameraManager.h"
-#include "RE_CompTransform.h"
-
-#include "RE_LogManager.h"
-#include "RE_TimeManager.h"
-#include "RE_GLCacheManager.h"
-#include "RE_FBOManager.h"
-
-#include <EASTL/list.h>
-#include <EASTL/stack.h>
-
-#include "SDL2/include/SDL.h"
-#include "Glew/include/glew.h"
-#include <gl/GL.h>
-
 #include "MathGeoLib/include/Math/float3.h"
 #include "MathGeoLib/include/Math/Quat.h"
 #include "ImGuizmo/ImGuizmo.h"
+#include "SDL2/include/SDL.h"
+#include "Glew/include/glew.h"
+#include <gl/GL.h>
+#include <EASTL/list.h>
+#include <EASTL/stack.h>
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
 
-RE_FBOManager ModuleRenderer3D::fbomanager;
 LightMode ModuleRenderer3D::current_lighting = LIGHT_GL;
 unsigned int ModuleRenderer3D::current_fbo = 0;
 
@@ -52,11 +51,13 @@ const char* RenderView::labels[12] = {
 						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clip Distance"};
 
 ModuleRenderer3D::ModuleRenderer3D(const char * name, bool start_enabled) : Module(name, start_enabled) {}
-ModuleRenderer3D::~ModuleRenderer3D() {}
 
-bool ModuleRenderer3D::Init(JSONNode * node)
+ModuleRenderer3D::~ModuleRenderer3D() { RE_FBOManager::ClearAll(); }
+
+bool ModuleRenderer3D::Init()
 {
 	bool ret = false;
+	RE_LOG("Initializing Module %s", name);
 	RE_LOG_SECONDARY("Seting SDL/GL Attributes.");
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) < 0)
 		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_PROFILE_MASK: SDL_GL_CONTEXT_PROFILE_CORE'");
@@ -87,10 +88,12 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 		GLenum error = glewInit();
 		if (ret = (error == GLEW_OK))
 		{
+			RE_SOFT_NVS("Glew", reinterpret_cast<const char*>(glewGetString(GLEW_VERSION)), "http://glew.sourceforge.net/");
+
 			render_views.push_back(RenderView("Scene", { 0, 0 },
 				FRUSTUM_CULLING | OVERRIDE_CULLING | OUTLINE_SELECTION /*| DEBUG_DRAW*/ | SKYBOX | BLENDED |
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
-				LIGHT_DEFERRED));
+				LIGHT_DISABLED));
 			
 			render_views.push_back(RenderView("Game", { 0, 0 },
 				FRUSTUM_CULLING | SKYBOX | BLENDED |
@@ -124,14 +127,9 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 			depthtest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 			lighting ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
 
-
-			Load(node);
-			RE_SOFT_NVS("Glew", reinterpret_cast<const char*>(glewGetString(GLEW_VERSION)), "http://glew.sourceforge.net/");
+			Load();
 		}
-		else
-		{
-			RE_LOG_ERROR("Glew could not initialize! Glew_Error: %s", glewGetErrorString(error));
-		}
+		else RE_LOG_ERROR("Glew could not initialize! Glew_Error: %s", glewGetErrorString(error));
 	}
 
 	return ret;
@@ -139,6 +137,7 @@ bool ModuleRenderer3D::Init(JSONNode * node)
 
 bool ModuleRenderer3D::Start()
 {
+	RE_LOG("Starting Module %s", name);
 	thumbnailView.fbos = { RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
 
 	render_views[VIEW_EDITOR].fbos = {
@@ -173,7 +172,7 @@ void ModuleRenderer3D::PostUpdate()
 		bool exist = App::fs->Exists(path.c_str());
 		if (rend.redo && exist)
 		{
-			RE_FileIO fileToDelete(path.c_str(), App::fs->GetZipPath());
+			RE_FileBuffer fileToDelete(path.c_str(), App::fs->GetZipPath());
 			fileToDelete.Delete();
 			exist = false;
 		}
@@ -360,50 +359,42 @@ void ModuleRenderer3D::DrawEditor()
 	}
 }
 
-bool ModuleRenderer3D::Load(JSONNode * node)
+void ModuleRenderer3D::Load()
 {
-	bool ret = (node != nullptr);
 	RE_LOG_SECONDARY("Loading Render3D config values:");
+	JSONNode* node = App::config->GetRootNode(name);
 
-	if (ret)
+	SetVSync(node->PullBool("vsync", vsync));
+	RE_LOG_TERCIARY((vsync) ? "VSync enabled." : "VSync disabled");
+
+	DEL(node);
+
+	//TODO RUB: Load render view loading
+	/*for (int i = 0; i < render_views.size(); ++i)
 	{
-		SetVSync(node->PullBool("vsync", vsync));
-		RE_LOG_TERCIARY((vsync)? "VSync enabled." : "VSync disabled");
+		render_views[i].name = node->PullString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
+		render_views[i].light = LightMode(node->PullInt(eastl::string(render_views[i].name + " - lightmode").c_str(), render_views[i].light));
 
-		//TODO RUB: Load render view loading
-		/*for (int i = 0; i < render_views.size(); ++i)
-		{
-			render_views[i].name = node->PullString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
-			render_views[i].light = LightMode(node->PullInt(eastl::string(render_views[i].name + " - lightmode").c_str(), render_views[i].light));
-
-			render_views[i].flags = 0;
-			for (int i2 = 0; i2 < 11; ++i2)
-				if (node->PullBool(eastl::string(render_views[i].name + " - " + RenderView::labels[i2]).c_str(), render_views[i].flags & (1 << i2)))
-					render_views[i].flags &= (1 << i2);
-		}*/
-	}
-
-	return ret;
+		render_views[i].flags = 0;
+		for (int i2 = 0; i2 < 11; ++i2)
+			if (node->PullBool(eastl::string(render_views[i].name + " - " + RenderView::labels[i2]).c_str(), render_views[i].flags & (1 << i2)))
+				render_views[i].flags &= (1 << i2);
+	}*/
 }
 
-bool ModuleRenderer3D::Save(JSONNode * node) const
+void ModuleRenderer3D::Save() const
 {
-	bool ret = (node != nullptr);
-
-	if (ret)
+	JSONNode* node = App::config->GetRootNode(name);
+	node->PushBool("vsync", vsync);
+	for (unsigned int i = 0; i < render_views.size(); ++i)
 	{
-		node->PushBool("vsync", vsync);
-		for (unsigned int i = 0; i < render_views.size(); ++i)
-		{
-			node->PushString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
-			node->PushInt(eastl::string(render_views[i].name + " - lightmode").c_str(), int(render_views[i].light));
+		node->PushString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
+		node->PushInt(eastl::string(render_views[i].name + " - lightmode").c_str(), int(render_views[i].light));
 
-			for (int i2 = 0; i2 < 11; ++i2)
-				node->PushBool(eastl::string(render_views[i].name + " - " + RenderView:: labels[i2]).c_str(), render_views[i].flags & (1 << i2));
-		}
+		for (int i2 = 0; i2 < 11; ++i2)
+			node->PushBool(eastl::string(render_views[i].name + " - " + RenderView::labels[i2]).c_str(), render_views[i].flags & (1 << i2));
 	}
-
-	return ret;
+	DEL(node);
 }
 
 void ModuleRenderer3D::SetVSync(bool enable)

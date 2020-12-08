@@ -1,21 +1,20 @@
 #include "RE_Model.h"
 
+#include "Globals.h"
+#include "RE_ConsoleLog.h"
+#include "RE_FileBuffer.h"
+#include "JSONNode.h"
 #include "Application.h"
-#include "RE_FileSystem.h"
-#include "RE_ResourceManager.h"
 #include "ModuleScene.h"
+#include "RE_ResourceManager.h"
+#include "RE_ECS_Manager.h"
 #include "RE_ECS_Importer.h"
 #include "RE_ModelImporter.h"
-#include "RE_ECS_Manager.h"
-#include "RE_LogManager.h"
-#include "Globals.h"
 
 #include "assimp\include\postprocess.h"
 #include "ImGui/imgui.h"
 
-RE_Model::RE_Model() {}
 RE_Model::RE_Model(const char* metaPath) : ResourceContainer(metaPath) {}
-RE_Model::~RE_Model() {}
 
 void RE_Model::LoadInMemory()
 {
@@ -132,7 +131,7 @@ void RE_Model::Draw()
 
 	if (!needReImport && ImGui::Button("Add to Scene"))
 	{
-		RE_LogManager::ScopeProcedureLogging();
+		RE_ConsoleLog::ScopeProcedureLogging();
 
 		if (CheckResourcesIsOnAssets())
 		{
@@ -146,7 +145,7 @@ void RE_Model::Draw()
 			needReImport = true;
 		}
 
-		RE_LogManager::EndScope();
+		RE_ConsoleLog::EndScope();
 	}
 	else if(needReImport && ImGui::Button("ReImport before add"))
 	{
@@ -211,7 +210,7 @@ void RE_Model::LoadResourceMeta(JSONNode* metaNode)
 
 void RE_Model::AssetLoad()
 {
-	RE_FileIO  assetload(GetAssetPath());
+	RE_FileBuffer assetload(GetAssetPath());
 	if (assetload.Load())
 	{
 		loaded = App::modelImporter.ProcessModel(assetload.GetBuffer(), assetload.GetSize(),GetAssetPath(), &modelSettings);
@@ -225,7 +224,7 @@ void RE_Model::AssetLoad()
 
 void RE_Model::LibraryLoad()
 {
-	RE_FileIO binaryLoad(GetLibraryPath());
+	RE_FileBuffer binaryLoad(GetLibraryPath());
 	if (binaryLoad.Load())
 	{
 		char* cursor = binaryLoad.GetBuffer();
@@ -241,7 +240,7 @@ void RE_Model::LibrarySave()
 		uint size = 0;
 		char* buffer = RE_ECS_Importer::BinarySerialize(loaded, &size);
 
-		RE_FileIO toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
+		RE_FileBuffer toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
 		toLibrarySave.Save(buffer, size);
 		DEL_A(buffer);
 	}
@@ -251,7 +250,7 @@ void RE_Model::LibrarySave()
 bool RE_Model::CheckResourcesIsOnAssets()
 {
 	bool ret = false;
-	RE_FileIO binaryLoad(GetLibraryPath());
+	RE_FileBuffer binaryLoad(GetLibraryPath());
 
 	if (binaryLoad.Load())
 	{

@@ -69,7 +69,7 @@ public:
 	ModuleRenderer3D(const char* name = "Renderer3D", bool start_enabled = true);
 	~ModuleRenderer3D();
 
-	bool Init(JSONNode* node) override;
+	bool Init() override;
 	bool Start() override;
 	void PostUpdate() override;
 	void CleanUp() override;
@@ -77,8 +77,8 @@ public:
 	void RecieveEvent(const Event& e) override;
 	void DrawEditor() override;
 
-	bool Load(JSONNode* node) override;
-	bool Save(JSONNode* node) const override;
+	void Load() override;
+	void Save() const override;
 
 	// Editor Values
 	void SetVSync(bool enable);
@@ -141,10 +141,6 @@ private:
 	// Direct Draws
 	void DrawQuad();
 	void DirectDrawCube(math::vec position, math::vec color);
-
-public:
-
-	static RE_FBOManager fbomanager;
 
 private:
 

@@ -2,17 +2,21 @@
 
 #include "Application.h"
 #include "RE_FileSystem.h"
-#include "ModuleInput.h"
-#include "ModuleRenderer3d.h"
-#include "ModuleEditor.h"
-#include "ModuleScene.h"
-#include "ModuleAudio.h"
-#include "RE_ThumbnailManager.h"
+#include "RE_ConsoleLog.h"
+#include "RE_Time.h"
 #include "RE_ResourceManager.h"
 #include "RE_CameraManager.h"
-#include "RE_TimeManager.h"
-#include "RE_LogManager.h"
+#include "RE_ThumbnailManager.h"
+#include "RE_Hardware.h"
+
+#include "ModuleInput.h"
+#include "ModuleScene.h"
+#include "ModuleEditor.h"
+#include "ModuleRenderer3d.h"
+#include "ModuleAudio.h"
+
 #include "RE_GameObject.h"
+#include "RE_Prefab.h"
 #include "RE_Command.h"
 
 #include "ImGui/misc/cpp/imgui_stdlib.h"
@@ -198,7 +202,21 @@ void ConfigWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		App::Ptr()->DrawEditor();
+		if (ImGui::BeginMenu("Options"))
+		{
+			if (ImGui::MenuItem("Load")) Event::Push(REQUEST_LOAD, App::Ptr());
+			if (ImGui::MenuItem("Save")) Event::Push(REQUEST_SAVE, App::Ptr());
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::CollapsingHeader("Time Profiling")) RE_Time::DrawEditorGraphs();
+
+		App::DrawModuleEditorConfig();
+
+		if (ImGui::CollapsingHeader("File System")) App::fs->DrawEditor();
+
+		if (ImGui::CollapsingHeader("Hardware")) RE_Hardware::DrawEditor();
+		else RE_Hardware::Clear();
 
 		if (secondary)
 		{
@@ -423,32 +441,16 @@ void PlayPauseWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		const GameState state = App::GetState();
-
-		// PLAY / RESTART
-		if (ImGui::Button(state == GS_PLAY ? "Restart" : " Play  "))
+		if (RE_CameraManager::HasMainCamera())
 		{
-			// check main camera
-			if (RE_CameraManager::HasMainCamera())
-				Event::Push(PLAY, App::Ptr());
-			// else { report problems }
+			switch (RE_Time::DrawEditorControls()) {
+			case GS_PLAY: Event::Push(PLAY, App::Ptr()); break;
+			case GS_PAUSE: Event::Push(PAUSE, App::Ptr()); break;
+			case GS_STOP: Event::Push(STOP, App::Ptr()); break;
+			case GS_TICK: Event::Push(TICK, App::Ptr()); break;
+			default: break; }
 		}
-
-		ImGui::SameLine();
-
-		// PAUSE / TICK
-		if (ImGui::Button(state != GS_PLAY ? "Tick " : "Pause"))
-			Event::Push(state != GS_PLAY ? TICK : PAUSE, App::Ptr());
-
-		ImGui::SameLine();
-
-		// STOP
-		if (ImGui::Button("Stop") && state != GS_STOP)
-			Event::Push(STOP, App::Ptr());
-
-		ImGui::SameLine();
-
-		ImGui::Text("%.2f", RE_TimeManager::GetGameTimer());
+		else ImGui::Text("Missing Main Camera");
 
 		ImGui::SameLine();
 		ImGui::Checkbox("Draw Gizmos", &App::editor->debug_drawing);
@@ -460,7 +462,6 @@ void PlayPauseWindow::Draw(bool secondary)
 		static bool changed = false;
 		static bool colored = false;
 		ImGui::SameLine();
-
 
 		if (App::input->GetKey(SDL_SCANCODE_Q) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::TRANSLATE; changed = true; }
 		if (App::input->GetKey(SDL_SCANCODE_W) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::ROTATE;    changed = true; }
@@ -521,16 +522,11 @@ void PlayPauseWindow::Draw(bool secondary)
 
 		ImGui::SameLine();
 		static ImGuizmo::MODE m = App::editor->GetSceneEditor()->GetMode();
-		if (ImGui::Button((m == ImGuizmo::MODE::LOCAL) ? "Local Transformation" : "Global Transformation")) {
-			switch (m)
-			{
-			case ImGuizmo::MODE::LOCAL:
-				m = ImGuizmo::MODE::WORLD;
-				break;
-			case ImGuizmo::MODE::WORLD:
-				m = ImGuizmo::MODE::LOCAL;
-				break;
-			}
+		if (ImGui::Button((m == ImGuizmo::MODE::LOCAL) ? "Local Transformation" : "Global Transformation"))
+		{
+			switch (m) {
+			case ImGuizmo::MODE::LOCAL: m = ImGuizmo::MODE::WORLD; break;
+			case ImGuizmo::MODE::WORLD: m = ImGuizmo::MODE::LOCAL; break; }
 			App::editor->GetSceneEditor()->SetMode(m);
 		}
 
@@ -731,22 +727,27 @@ void PopUpWindow::Draw(bool secondary)
 			static bool identityRoot = false;
 			ImGui::Checkbox("Make Root Identity", &identityRoot);
 
-			bool clicked = false;
-			if (ImGui::Button(btnText.c_str()))
-			{
-				clicked = true;
-				App::editor->CreatePrefab(goPrefab->GetUID(), nameStr.c_str(), identityRoot);
-			}
-
-			if (ImGui::Button("Cancel")) clicked = true;
-
+			bool clicked = ImGui::Button(btnText.c_str());
 			if (clicked)
 			{
-				active = false;
+				RE_Prefab* newPrefab = new RE_Prefab();
+				newPrefab->SetName(nameStr.c_str());
+				newPrefab->SetType(Resource_Type::R_PREFAB);
+
+				Event::PauseEvents();
+				newPrefab->Save(App::scene->GetScenePool()->GetNewPoolFromID(goPrefab->GetUID()), identityRoot, true);
+				Event::ResumeEvents();
+
+				newPrefab->SaveMeta();
+				App::renderer3d->PushThumnailRend(App::resources->Reference(newPrefab));
+			}
+
+			if (ImGui::Button("Cancel") || clicked)
+			{
 				state = PU_NONE;
-				inputName = false;
-				App::editor->PopUpFocus(false);
+				active = inputName = false;
 				goPrefab = nullptr;
+				App::editor->PopUpFocus(false);
 			}
 
 			break;
@@ -764,7 +765,7 @@ void PopUpWindow::Draw(bool secondary)
 			bool clicked = ImGui::Button(btnText.c_str());
 			if (clicked)
 			{
-				RE_LogManager::ScopeProcedureLogging();
+				RE_ConsoleLog::ScopeProcedureLogging();
 
 				// Delete at resource & filesystem
 				ResourceContainer* resAlone = App::resources->DeleteResource(resourceToDelete, resourcesUsing, resourceOnScene);
@@ -785,7 +786,7 @@ void PopUpWindow::Draw(bool secondary)
 				resourcesUsing.clear();
 				resourceOnScene = false;
 				App::resources->PopSelected(true);
-				RE_LogManager::EndScope();
+				RE_ConsoleLog::EndScope();
 			}
 
 			if (resourceOnScene) {
@@ -820,7 +821,7 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				clicked = true;
 
-				RE_LogManager::ScopeProcedureLogging();
+				RE_ConsoleLog::ScopeProcedureLogging();
 				if (!resourcesUsing.empty())
 				{
 					eastl::stack<ResourceContainer*> shadersDeleted;
@@ -838,7 +839,7 @@ void PopUpWindow::Draw(bool secondary)
 					}
 				}
 
-				if (!RE_LogManager::ScopedErrors()) App::fs->DeleteUndefinedFile(nameStr.c_str());
+				if (!RE_ConsoleLog::ScopedErrors()) App::fs->DeleteUndefinedFile(nameStr.c_str());
 				else RE_LOG_ERROR("File can't be erased; shaders can't be delete.");
 			}
 
@@ -851,7 +852,7 @@ void PopUpWindow::Draw(bool secondary)
 				App::editor->PopUpFocus(false);
 				resourcesUsing.clear();
 				App::resources->PopSelected(true);
-				RE_LogManager::EndScope();
+				RE_ConsoleLog::EndScope();
 			}
 
 			ImGui::Separator();
@@ -1282,7 +1283,7 @@ void SceneEditorWindow::Draw(bool secondary)
 
 			ImGuizmo::RecomposeMatrixFromComponents(pos.ptr(), rot.ToEulerXYZ().ptr(), scl.ptr(), matA);
 
-			math::float4x4 deltamatrix = math::float4x4::identity * RE_TimeManager::GetDeltaTime();
+			math::float4x4 deltamatrix = math::float4x4::identity * RE_Time::GetDeltaTime();
 
 			//SetRect of window at imgizmo
 			ImGuizmo::SetRect(vMin.x, vMin.y, vMax.x - vMin.x, vMax.y - vMin.y);

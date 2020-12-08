@@ -2,7 +2,7 @@
 
 #include "Application.h"
 #include "ModuleScene.h"
-#include "RE_FileSystem.h"
+#include "JSONNode.h"
 
 RE_ECS_Manager::RE_ECS_Manager() {}
 RE_ECS_Manager::~RE_ECS_Manager() {}

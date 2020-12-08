@@ -88,9 +88,9 @@ class RE_Model :
 public ResourceContainer
 {
 public:
-	RE_Model();
+	RE_Model() {}
 	RE_Model(const char* metaPath);
-	~RE_Model();
+	~RE_Model() {}
 
 	void LoadInMemory() override;
 	void UnloadMemory() override;

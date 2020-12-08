@@ -38,7 +38,7 @@ public:
 	ModuleInput(const char* name = "Input", bool start_enabled = true);
 	~ModuleInput();
 
-	bool Init(JSONNode* config_module) override;
+	bool Init() override;
 	void PreUpdate() override;
 	void DrawEditor() override;
 	void CleanUp() override;

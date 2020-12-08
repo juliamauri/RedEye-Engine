@@ -1,33 +1,33 @@
 #include "RE_ModelImporter.h"
 
+#include "Globals.h"
+#include "RE_ConsoleLog.h"
+#include "RE_FileBuffer.h"
+
 #include "Application.h"
-#include "RE_FileSystem.h"
+#include "ModuleRenderer3D.h"
+
 #include "RE_ResourceManager.h"
 #include "RE_TextureImporter.h"
 #include "RE_ShaderImporter.h"
-#include "ModuleRenderer3D.h"
 #include "RE_ECS_Manager.h"
+
 #include "RE_Model.h"
 #include "RE_Mesh.h"
 #include "RE_Material.h"
-#include "RE_LogManager.h"
-#include "Globals.h"
-#include "md5.h"
-#include "RE_TimeManager.h"
 
+#include "md5.h"
 #include "assimp\include\Importer.hpp"
 #include "assimp\include\scene.h"
 #include "assimp\include\postprocess.h"
-#include "assimp/include/material.h"
+#include "assimp\include\material.h"
 
 #ifdef _DEBUG
-#pragma comment(lib, "assimp/libx86/assimp-vc140-mt-debug.lib")
+	#pragma comment(lib, "assimp/libx86/assimp-vc142-mtd.lib")
 #else
-#pragma comment(lib, "assimp/libx86/assimp-vc140-mt-release.lib")
+	#pragma comment(lib, "assimp/libx86/assimp-vc142-mt.lib")
 #endif
 
-RE_ModelImporter::RE_ModelImporter(const char* folder) : folderPath(folder) {}
-RE_ModelImporter::~RE_ModelImporter() {}
 
 bool RE_ModelImporter::Init()
 {
@@ -38,7 +38,7 @@ bool RE_ModelImporter::Init()
 	return ret;
 }
 
-RE_ECS_Manager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
+RE_ECS_Manager* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
 {
 	aditionalData = new currentlyImporting();
 	aditionalData->settings = mSettings;
@@ -72,7 +72,7 @@ RE_ECS_Manager*  RE_ModelImporter::ProcessModel(const char * buffer, unsigned in
 	return ret;
 }
 
-void RE_ModelImporter::ProcessNodes(RE_ECS_Manager* goPool, aiNode * parentNode, const aiScene * scene, UID parentGO, math::float4x4 parentTransform)
+void RE_ModelImporter::ProcessNodes(RE_ECS_Manager* goPool, aiNode * parentNode, const aiScene * scene, unsigned long long parentGO, math::float4x4 parentTransform)
 {
 	aiVector3D nScale, nPosition;
 	aiQuaternion nRotationQuat;
@@ -255,11 +255,10 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 	}
 }
 
-
 eastl::vector<eastl::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(const char * path)
 {
 	eastl::vector<eastl::string> retPaths;
-	RE_FileIO* fbxloaded = App::fs->QuickBufferFromPDPath(path);
+	RE_FileBuffer* fbxloaded = App::fs->QuickBufferFromPDPath(path);
 
 	if (fbxloaded)
 	{

@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClCompile Include="AABBDynamicTree.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="JSONNode.cpp" />
+    <ClCompile Include="RE_Config.cpp" />
     <ClCompile Include="Cvar.cpp" />
     <ClCompile Include="EA\EAAssert\eaassert.cpp" />
     <ClCompile Include="EA\EAStdC\EACallback.cpp" />
@@ -67,6 +69,7 @@
     <ClCompile Include="RE_Component.cpp" />
     <ClCompile Include="RE_CompWater.cpp" />
     <ClCompile Include="RE_FBOManager.cpp" />
+    <ClCompile Include="RE_FileBuffer.cpp" />
     <ClCompile Include="RE_FileSystem.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="Globals.cpp" />
@@ -88,7 +91,7 @@
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="RE_CompParticleEmiter.cpp" />
     <ClCompile Include="RE_CompTransform.cpp" />
-    <ClCompile Include="RE_LogManager.cpp" />
+    <ClCompile Include="RE_ConsoleLog.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModuleEditor.cpp" />
     <ClCompile Include="ModuleInput.cpp" />
@@ -116,11 +119,13 @@
     <ClCompile Include="RE_ThumbnailManager.cpp" />
     <ClCompile Include="RE_Hardware.cpp" />
     <ClCompile Include="RE_TextureImporter.cpp" />
-    <ClCompile Include="RE_TimeManager.cpp" />
+    <ClCompile Include="RE_Time.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABBDynamicTree.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="JSONNode.h" />
+    <ClInclude Include="RE_Config.h" />
     <ClInclude Include="Cvar.h" />
     <ClInclude Include="EA\EAAssert\eaassert.h" />
     <ClInclude Include="EA\EAAssert\version.h" />
@@ -333,6 +338,7 @@
     <ClInclude Include="RE_CompWater.h" />
     <ClInclude Include="RE_DefaultShaders.h" />
     <ClInclude Include="RE_FBOManager.h" />
+    <ClInclude Include="RE_FileBuffer.h" />
     <ClInclude Include="RE_FileSystem.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="EventListener.h" />
@@ -364,7 +370,7 @@
     <ClInclude Include="Particle.h" />
     <ClInclude Include="RE_CompParticleEmiter.h" />
     <ClInclude Include="RE_CompTransform.h" />
-    <ClInclude Include="RE_LogManager.h" />
+    <ClInclude Include="RE_ConsoleLog.h" />
     <ClInclude Include="MathGeoLib\include\MathBuildConfig.h" />
     <ClInclude Include="MathGeoLib\include\MathGeoLib.h" />
     <ClInclude Include="MathGeoLib\include\MathGeoLibFwd.h" />
@@ -433,10 +439,9 @@
     <ClInclude Include="RE_ThumbnailManager.h" />
     <ClInclude Include="RE_Hardware.h" />
     <ClInclude Include="RE_TextureImporter.h" />
-    <ClInclude Include="RE_TimeManager.h" />
+    <ClInclude Include="RE_Time.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Build\Assets\Settings\config.json" />
     <None Include="General Diagram.cd" />
     <None Include="EA\EAStdC\internal\EAMemory.inl" />
     <None Include="EA\EAStdC\Win32\EAMathHelpWin32.inl" />

@@ -1,29 +1,25 @@
 #include "RE_Texture.h"
 
-#include "Application.h"
+#include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
+#include "RE_FileBuffer.h"
+#include "JSONNode.h"
+#include "Application.h"
 #include "RE_TextureImporter.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_GLCacheManager.h"
 
-#include "RE_LogManager.h"
-
 #include "Glew/include/glew.h"
-
 #include "ImGui/imgui.h"
 
 #define MINFCOMBO "Nearest\0Linear\0Nearest Mipmap Nearest\0Linear Mipmap Nearest\0Nearest Mipmap Linear\0Linear Mipmap Linear"
 #define MAGFOMBO "Nearest\0Linear"
 #define WRAPOMBO "Repeat\0Clamp to border\0Clamp to edge\0Mirrored Repeat"
 
-RE_Texture::RE_Texture() {}
-RE_Texture::RE_Texture(const char * metaPath) :ResourceContainer(metaPath) {}
-RE_Texture::~RE_Texture() {}
-
 const char* RE_Texture::GenerateMD5()
 {
 	const char* ret = nullptr;
-	RE_FileIO generateMD5(GetAssetPath());
+	RE_FileBuffer generateMD5(GetAssetPath());
 	eastl::string newMD5 = generateMD5.GetMd5();
 	if (!newMD5.empty())
 	{
@@ -215,18 +211,17 @@ void RE_Texture::SaveResourceMeta(JSONNode * metaNode)
 
 void RE_Texture::LoadResourceMeta(JSONNode * metaNode)
 {
-	texType = (TextureType)metaNode->PullInt("TextureType", RE_TEXTURE_UNKNOWN);
-	texSettings.min_filter = (RE_TextureFilters)metaNode->PullInt("minFilter", RE_NEAREST);
-	texSettings.mag_filter = (RE_TextureFilters)metaNode->PullInt("magFilter", RE_NEAREST);
-	texSettings.wrap_s = (RE_TextureWrap)metaNode->PullInt("wrapS", RE_REPEAT);
-	texSettings.wrap_t = (RE_TextureWrap)metaNode->PullInt("wrapT", RE_REPEAT);
+	texType = static_cast<TextureType>(metaNode->PullInt("TextureType", RE_TEXTURE_UNKNOWN));
+	texSettings.min_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("minFilter", RE_NEAREST));
+	texSettings.mag_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("magFilter", RE_NEAREST));
+	texSettings.wrap_s = static_cast<RE_TextureWrap>(metaNode->PullInt("wrapS", RE_REPEAT));
+	texSettings.wrap_t = static_cast<RE_TextureWrap>(metaNode->PullInt("wrapT", RE_REPEAT));
 	texSettings.borderColor = metaNode->PullFloat4("borderColor", math::float4::zero);
 	restoreSettings = texSettings;
 }
 
 int RE_Texture::GetComboFilter(RE_TextureFilters filter)
 {
-	int comboIndex = 0;
 	switch (filter) {
 	case RE_TextureFilters::RE_NEAREST: return 0;
 	case RE_TextureFilters::RE_LINEAR: return 1;
@@ -271,12 +266,8 @@ RE_TextureWrap RE_Texture::GetWrapCombo(int combo)
 
 void RE_Texture::ReImport()
 {
-	bool unload = false;
-	if (isInMemory())
-	{
-		unload = true;
-		UnloadMemory();
-	}
+	bool unload = isInMemory();
+	if (unload) UnloadMemory();
 	AssetLoad();
 	LibrarySave();
 	if (!unload) UnloadMemory();
@@ -308,7 +299,7 @@ void RE_Texture::TexParameterfv(unsigned int pname, float * param)
 
 void RE_Texture::AssetLoad()
 {
-	RE_FileIO assetFile(GetAssetPath());
+	RE_FileBuffer assetFile(GetAssetPath());
 	if (assetFile.Load())
 	{
 		App::textures.LoadTextureInMemory(assetFile.GetBuffer(), assetFile.GetSize(), texType, &ID, &width, &height, texSettings);
@@ -324,7 +315,7 @@ void RE_Texture::AssetLoad()
 
 void RE_Texture::LibraryLoad()
 {
-	RE_FileIO libraryFile(GetLibraryPath());
+	RE_FileBuffer libraryFile(GetLibraryPath());
 	if (libraryFile.Load())
 	{
 		App::textures.LoadTextureInMemory(libraryFile.GetBuffer(), libraryFile.GetSize(), TextureType::RE_DDS, &ID, &width, &height, texSettings);
@@ -334,7 +325,7 @@ void RE_Texture::LibraryLoad()
 
 void RE_Texture::LibrarySave()
 {
-	RE_FileIO assetFile(GetAssetPath());
-	RE_FileIO libraryFile(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer assetFile(GetAssetPath());
+	RE_FileBuffer libraryFile(GetLibraryPath(), App::fs->GetZipPath());
 	if (assetFile.Load()) App::textures.SaveOwnFormat(assetFile.GetBuffer(), assetFile.GetSize(), texType, &libraryFile);
 }

@@ -49,13 +49,12 @@ struct RE_TextureSettings {
 };
 
 
-class RE_Texture :
-	public ResourceContainer
+class RE_Texture : public ResourceContainer
 {
 public:
-	RE_Texture();
-	RE_Texture(const char* metaPath);
-	~RE_Texture();
+	RE_Texture() {}
+	RE_Texture(const char* metaPath) : ResourceContainer(metaPath) {}
+	~RE_Texture() {}
 
 	const char* GenerateMD5();
 	TextureType DetectExtension();

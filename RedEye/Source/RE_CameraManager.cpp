@@ -1,4 +1,6 @@
 #include "RE_CameraManager.h"
+
+#include "RE_Time.h"
 #include "RE_CompCamera.h"
 #include "Application.h"
 #include "ModuleScene.h"
@@ -8,9 +10,6 @@
 
 RE_CompCamera* RE_CameraManager::editor_camera = nullptr;
 UID RE_CameraManager::main_camera = 0ull;
-
-RE_CameraManager::RE_CameraManager() {}
-RE_CameraManager::~RE_CameraManager() {}
 
 void RE_CameraManager::Init()
 {
@@ -25,14 +24,14 @@ void RE_CameraManager::Clear()
 	DEL(editor_camera);
 }
 
-RE_CompCamera * RE_CameraManager::CurrentCamera()
+RE_CompCamera* RE_CameraManager::CurrentCamera()
 {
-	RE_CompCamera * ret = editor_camera;
-	if (App::GetState() != GS_STOP && main_camera) ret = dynamic_cast<RE_CompCamera*>(ModuleScene::GetScenePool()->GetComponentPtr(main_camera, C_CAMERA));
-	return ret;
+	return main_camera ?
+		dynamic_cast<RE_CompCamera*>(ModuleScene::GetScenePool()->GetComponentPtr(main_camera, C_CAMERA)) :
+		editor_camera;
 }
 
-RE_CompCamera * RE_CameraManager::EditorCamera() { return editor_camera; }
+RE_CompCamera* RE_CameraManager::EditorCamera() { return editor_camera; }
 RE_CompCamera* RE_CameraManager::MainCamera() { return dynamic_cast<RE_CompCamera*>(ModuleScene::GetScenePool()->GetComponentPtr(main_camera, C_CAMERA)); }
 bool RE_CameraManager::HasMainCamera() { return main_camera != 0ull; }
 

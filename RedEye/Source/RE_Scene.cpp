@@ -1,18 +1,17 @@
 #include "RE_Scene.h"
 
-#include "Application.h"
+#include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
+#include "RE_FileBuffer.h"
+#include "RE_Config.h"
+#include "JSONNode.h"
+#include "Application.h"
 #include "ModuleScene.h"
 #include "RE_ResourceManager.h"
 #include "RE_ECS_Manager.h"
 #include "RE_ECS_Importer.h"
-#include "RE_LogManager.h"
 
 #include "ImGui/imgui.h"
-
-RE_Scene::RE_Scene() {}
-RE_Scene::RE_Scene(const char* metaPath) : ResourceContainer(metaPath) {}
-RE_Scene::~RE_Scene() {}
 
 void RE_Scene::LoadInMemory()
 {
@@ -122,7 +121,7 @@ void RE_Scene::AssetLoad(bool generateLibraryPath)
 
 void RE_Scene::LibraryLoad()
 {
-	RE_FileIO binaryLoad(GetLibraryPath());
+	RE_FileBuffer binaryLoad(GetLibraryPath());
 	if (binaryLoad.Load())
 	{
 		char* cursor = binaryLoad.GetBuffer();
@@ -135,7 +134,7 @@ void RE_Scene::LibrarySave(bool fromLoaded)
 {
 	uint size = 0;
 	char* buffer = RE_ECS_Importer::BinarySerialize((fromLoaded) ? loaded : toSave, &size);
-	RE_FileIO toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
 	toLibrarySave.Save(buffer, size);
 	DEL_A(buffer);
 }

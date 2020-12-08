@@ -1,10 +1,10 @@
 #include "RE_ECS_Importer.h"
 
+#include "JSONNode.h"
 #include "Application.h"
-#include "RE_FileSystem.h"
+#include "RE_ECS_Manager.h"
 #include "RE_ResourceManager.h"
 #include "Resource.h"
-#include "RE_ECS_Manager.h"
 
 #include <EASTL/internal/char_traits.h>
 
@@ -193,7 +193,7 @@ bool RE_ECS_Importer::JsonCheckResources(JSONNode* node)
 		JSONNode* resN = resources->PullJObject(ref.c_str());
 
 		int index = resN->PullInt("index", -1);
-		Resource_Type type = (Resource_Type)resN->PullInt("type", Resource_Type::R_UNDEFINED);
+		Resource_Type type = static_cast<Resource_Type>(resN->PullInt("type", Resource_Type::R_UNDEFINED));
 		eastl::string mPath = resN->PullString("mPath", "");
 
 		const char* resMD5 = nullptr;

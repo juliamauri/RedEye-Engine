@@ -4,13 +4,12 @@
 #include "Resource.h"
 class RE_ECS_Manager;
 
-class RE_Scene :
-	public ResourceContainer
+class RE_Scene : public ResourceContainer
 {
 public:
-	RE_Scene();
-	RE_Scene(const char* metaPath);
-	~RE_Scene();
+	RE_Scene() {}
+	RE_Scene(const char* metaPath) : ResourceContainer(metaPath) {}
+	~RE_Scene() {}
 
 public:
 	void LoadInMemory() override;

@@ -1,22 +1,13 @@
 #include "RE_CompMesh.h"
 
-#include "Application.h"
-#include "ModuleScene.h"
-#include "ModuleRenderer3D.h"
-
 #include "RE_Math.h"
-#include "RE_FileSystem.h"
-
-#include "RE_InternalResources.h"
-#include "RE_PrimitiveManager.h"
+#include "RE_ConsoleLog.h"
+#include "JSONNode.h"
+#include "Application.h"
 #include "RE_ResourceManager.h"
-#include "RE_TextureImporter.h"
-#include "RE_ShaderImporter.h"
-
+#include "RE_ECS_Manager.h"
 #include "RE_Mesh.h"
 #include "RE_Material.h"
-#include "RE_Texture.h"
-
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 
@@ -36,8 +27,14 @@ void RE_CompMesh::Draw() const
 {
 	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_ResourceManager::internalResources.GetDefaulMaterial();
 	RE_Material* material = dynamic_cast<RE_Material*>(App::resources->At(materialToDraw));
-	material->UploadToShader(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr(), show_checkers);
-	(dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->DrawMesh(material->GetShaderID());
+	if (material != nullptr)
+	{
+		material->UploadToShader(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr(), show_checkers);
+		RE_Mesh* mesh = dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5));
+		if (mesh != nullptr) mesh->DrawMesh(material->GetShaderID());
+		else RE_LOG_WARNING("Component Mesh tried drawing invalid mesh");
+	}
+	else RE_LOG_WARNING("Component Mesh tried drawing invalid material");
 }
 
 void RE_CompMesh::DrawProperties()

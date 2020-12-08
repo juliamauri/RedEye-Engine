@@ -1,7 +1,7 @@
 #include "RE_Math.h"
 
 #include "Application.h"
-#include "RE_LogManager.h"
+#include "RE_ConsoleLog.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "MathGeoLib/lib/MathGeoLib_debug.lib")
@@ -9,28 +9,18 @@
 #pragma comment(lib, "MathGeoLib/lib/MathGeoLib_release.lib")
 #endif
 
-math::LCG RE_Math::lcg;
-
-RE_Math::RE_Math() {}
-RE_Math::~RE_Math() {}
-
-void RE_Math::Init()
-{
-	RE_LOG("Initializing Math");
-	RE_SOFT_NS("MathGeoLib", "https://github.com/juj/MathGeoLib");
-	lcg.Seed(math::Clock::TickU32());
-}
-
 int RE_Math::Cap(const int val, const int min, const int max)
 {
 	RE_ASSERT(min <= max);
 	int res[3] = { val, min, max };
-	return res[(2 * (val > max)) + (val < min)];
+	return res[(val < min) + (2 * (val > max))];
 }
 
 float RE_Math::Cap(const float val, const float min, const float max)
 {
-	return val > max ? max : (val < min ? min : val);
+	RE_ASSERT(min <= max);
+	float res[3] = { val, min, max };
+	return res[(val < min) + (2 * (val > max))];
 }
 
 int RE_Math::Min(const int a, const int b)

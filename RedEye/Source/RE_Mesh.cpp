@@ -1,21 +1,15 @@
 #include "RE_Mesh.h"
 
+#include "RE_ConsoleLog.h"
+#include "RE_FileBuffer.h"
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleScene.h"
-
-#include "RE_FileSystem.h"
-#include "RE_InternalResources.h"
-#include "RE_ResourceManager.h"
-
 #include "RE_ShaderImporter.h"
-
-#include "RE_GameObject.h"
-#include "RE_Component.h"
-#include "RE_CompTransform.h"
+#include "RE_ResourceManager.h"
 #include "RE_GLCacheManager.h"
-
-#include "RE_LogManager.h"
+#include "RE_GameObject.h"
+#include "RE_CompTransform.h"
 
 #include "ImGui\imgui.h"
 #include "Glew/include/glew.h"
@@ -33,8 +27,6 @@ RE_Mesh::RE_Mesh()
 {
 	bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 }
-
-RE_Mesh::~RE_Mesh() {}
 
 void RE_Mesh::SetLibraryPath(const char* path)
 {
@@ -174,7 +166,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 		libraryPath += existsMD5;
 		ResourceContainer::SetLibraryPath(libraryPath.c_str());
 
-		RE_FileIO toSave(GetLibraryPath(), App::fs->GetZipPath());
+		RE_FileBuffer toSave(GetLibraryPath(), App::fs->GetZipPath());
 		toSave.Save(buffer, size + 1);
 	}
 	else *exists = true;
@@ -564,7 +556,7 @@ void RE_Mesh::ClearVertex()
 
 void RE_Mesh::LibraryLoad()
 {
-	RE_FileIO toLoad(GetLibraryPath());
+	RE_FileBuffer toLoad(GetLibraryPath());
 
 	if (toLoad.Load())
 	{
