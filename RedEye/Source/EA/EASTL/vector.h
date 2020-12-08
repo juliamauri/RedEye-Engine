@@ -50,16 +50,16 @@ EA_DISABLE_ALL_VC_WARNINGS()
 #endif
 EA_RESTORE_ALL_VC_WARNINGS()
 
+// 4530 - C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+// 4480 - nonstandard extension used: specifying underlying type for enum
+// 4571 - catch(...) semantics changed since Visual C++ 7.1; structured exceptions (SEH) are no longer caught.
+EA_DISABLE_VC_WARNING(4530 4480 4571);
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4530)  // C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
-	#pragma warning(disable: 4345)  // Behavior change: an object of POD type constructed with an initializer of the form () will be default-initialized
-	#pragma warning(disable: 4244)  // Argument: conversion from 'int' to 'const eastl::vector<T>::value_type', possible loss of data
-	#pragma warning(disable: 4127)  // Conditional expression is constant
-	#pragma warning(disable: 4480)  // nonstandard extension used: specifying underlying type for enum
-	#pragma warning(disable: 4571)  // catch(...) semantics changed since Visual C++ 7.1; structured exceptions (SEH) are no longer caught.
-#endif
+// 4345 - Behavior change: an object of POD type constructed with an initializer of the form () will be default-initialized
+// 4244 - Argument: conversion from 'int' to 'const eastl::vector<T>::value_type', possible loss of data
+// 4127 - Conditional expression is constant
+EA_DISABLE_VC_WARNING(4345 4244 4127);
+
 
 #if defined(EA_PRAGMA_ONCE_SUPPORTED)
 	#pragma once // Some compilers (e.g. VC++) benefit significantly from using this. We've measured 3-4% build speed improvements in apps as a result.
@@ -894,11 +894,12 @@ namespace eastl
 	inline typename vector<T, Allocator>::reference
 	vector<T, Allocator>::operator[](size_type n)
 	{
-		#if EASTL_EMPTY_REFERENCE_ASSERT_ENABLED    // We allow the user to use a reference to v[0] of an empty container. But this was merely grandfathered in and ideally we shouldn't allow such access to [0].
-			if(EASTL_UNLIKELY((n != 0) && (n >= (static_cast<size_type>(mpEnd - mpBegin)))))
+	    #if EASTL_ASSERT_ENABLED && EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
+			if (EASTL_UNLIKELY(n >= (static_cast<size_type>(mpEnd - mpBegin))))
 				EASTL_FAIL_MSG("vector::operator[] -- out of range");
 		#elif EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(n >= (static_cast<size_type>(mpEnd - mpBegin))))
+			// We allow the user to use a reference to v[0] of an empty container. But this was merely grandfathered in and ideally we shouldn't allow such access to [0].
+			if (EASTL_UNLIKELY((n != 0) && (n >= (static_cast<size_type>(mpEnd - mpBegin)))))
 				EASTL_FAIL_MSG("vector::operator[] -- out of range");
 		#endif
 
@@ -910,11 +911,12 @@ namespace eastl
 	inline typename vector<T, Allocator>::const_reference
 	vector<T, Allocator>::operator[](size_type n) const
 	{
-		#if EASTL_EMPTY_REFERENCE_ASSERT_ENABLED    // We allow the user to use a reference to v[0] of an empty container. But this was merely grandfathered in and ideally we shouldn't allow such access to [0].
-			if(EASTL_UNLIKELY((n != 0) && (n >= (static_cast<size_type>(mpEnd - mpBegin)))))
+		#if EASTL_ASSERT_ENABLED && EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
+			if (EASTL_UNLIKELY(n >= (static_cast<size_type>(mpEnd - mpBegin))))
 				EASTL_FAIL_MSG("vector::operator[] -- out of range");
 		#elif EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(n >= (static_cast<size_type>(mpEnd - mpBegin))))
+			// We allow the user to use a reference to v[0] of an empty container. But this was merely grandfathered in and ideally we shouldn't allow such access to [0].
+			if (EASTL_UNLIKELY((n != 0) && (n >= (static_cast<size_type>(mpEnd - mpBegin)))))
 				EASTL_FAIL_MSG("vector::operator[] -- out of range");
 		#endif
 
@@ -926,8 +928,8 @@ namespace eastl
 	inline typename vector<T, Allocator>::reference
 	vector<T, Allocator>::at(size_type n)
 	{
-		// The difference between at() and operator[] is it signals 
-		// the requested position is out of range by throwing an 
+		// The difference between at() and operator[] is it signals
+		// the requested position is out of range by throwing an
 		// out_of_range exception.
 
 		#if EASTL_EXCEPTIONS_ENABLED
@@ -962,11 +964,11 @@ namespace eastl
 	inline typename vector<T, Allocator>::reference
 	vector<T, Allocator>::front()
 	{
-		#if EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
-			// We allow the user to reference an empty container.
-		#elif EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(mpEnd <= mpBegin)) // We don't allow the user to reference an empty container.
+		#if EASTL_ASSERT_ENABLED && EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
+			if (EASTL_UNLIKELY((mpBegin == nullptr) || (mpEnd <= mpBegin))) // We don't allow the user to reference an empty container.
 				EASTL_FAIL_MSG("vector::front -- empty vector");
+		#else
+			// We allow the user to reference an empty container.
 		#endif
 
 		return *mpBegin;
@@ -977,11 +979,11 @@ namespace eastl
 	inline typename vector<T, Allocator>::const_reference
 	vector<T, Allocator>::front() const
 	{
-		#if EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
-			// We allow the user to reference an empty container.
-		#elif EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(mpEnd <= mpBegin)) // We don't allow the user to reference an empty container.
+		#if EASTL_ASSERT_ENABLED && EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
+			if (EASTL_UNLIKELY((mpBegin == nullptr) || (mpEnd <= mpBegin))) // We don't allow the user to reference an empty container.
 				EASTL_FAIL_MSG("vector::front -- empty vector");
+		#else
+			// We allow the user to reference an empty container.
 		#endif
 
 		return *mpBegin;
@@ -992,11 +994,11 @@ namespace eastl
 	inline typename vector<T, Allocator>::reference
 	vector<T, Allocator>::back()
 	{
-		#if EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
-			// We allow the user to reference an empty container.
-		#elif EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(mpEnd <= mpBegin)) // We don't allow the user to reference an empty container.
+		#if EASTL_ASSERT_ENABLED && EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
+			if (EASTL_UNLIKELY((mpBegin == nullptr) || (mpEnd <= mpBegin))) // We don't allow the user to reference an empty container.
 				EASTL_FAIL_MSG("vector::back -- empty vector");
+		#else
+			// We allow the user to reference an empty container.
 		#endif
 
 		return *(mpEnd - 1);
@@ -1007,11 +1009,11 @@ namespace eastl
 	inline typename vector<T, Allocator>::const_reference
 	vector<T, Allocator>::back() const
 	{
-		#if EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
-			// We allow the user to reference an empty container.
-		#elif EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(mpEnd <= mpBegin)) // We don't allow the user to reference an empty container.
+		#if EASTL_ASSERT_ENABLED && EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
+			if (EASTL_UNLIKELY((mpBegin == nullptr) || (mpEnd <= mpBegin))) // We don't allow the user to reference an empty container.
 				EASTL_FAIL_MSG("vector::back -- empty vector");
+		#else
+			// We allow the user to reference an empty container.
 		#endif
 
 		return *(mpEnd - 1);
@@ -2046,19 +2048,8 @@ namespace eastl
 } // namespace eastl
 
 
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
+EA_RESTORE_VC_WARNING();
+EA_RESTORE_VC_WARNING();
 
 
 #endif // Header include guard
-
-
-
-
-
-
-
-
-
-

@@ -48,13 +48,12 @@ EA_DISABLE_ALL_VC_WARNINGS()
 #include <stddef.h>
 EA_RESTORE_ALL_VC_WARNINGS()
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4530)  // C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
-	#pragma warning(disable: 4345)  // Behavior change: an object of POD type constructed with an initializer of the form () will be default-initialized
-	#pragma warning(disable: 4571)  // catch(...) semantics changed since Visual C++ 7.1; structured exceptions (SEH) are no longer caught.
-	#pragma warning(disable: 4623)  // default constructor was implicitly defined as deleted
-#endif
+
+// 4530 - C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+// 4345 - Behavior change: an object of POD type constructed with an initializer of the form () will be default-initialized
+// 4571 - catch(...) semantics changed since Visual C++ 7.1; structured exceptions (SEH) are no longer caught.
+// 4623 - default constructor was implicitly defined as deleted
+EA_DISABLE_VC_WARNING(4530 4345 4571 4623);
 
 
 #if defined(EA_PRAGMA_ONCE_SUPPORTED)
@@ -995,11 +994,11 @@ namespace eastl
 	inline typename list<T, Allocator>::reference
 	list<T, Allocator>::front()
 	{
-		#if EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
-			// We allow the user to reference an empty container.
-		#elif EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(static_cast<node_type*>(internalNode().mpNext) == &internalNode()))
+		#if EASTL_ASSERT_ENABLED && EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
+			if (EASTL_UNLIKELY(static_cast<node_type*>(internalNode().mpNext) == &internalNode()))
 				EASTL_FAIL_MSG("list::front -- empty container");
+		#else
+			// We allow the user to reference an empty container.
 		#endif
 
 		return static_cast<node_type*>(internalNode().mpNext)->mValue;
@@ -1010,11 +1009,11 @@ namespace eastl
 	inline typename list<T, Allocator>::const_reference
 	list<T, Allocator>::front() const
 	{
-		#if EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
-			// We allow the user to reference an empty container.
-		#elif EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(static_cast<node_type*>(internalNode().mpNext) == &internalNode()))
+		#if EASTL_ASSERT_ENABLED && EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
+			if (EASTL_UNLIKELY(static_cast<node_type*>(internalNode().mpNext) == &internalNode()))
 				EASTL_FAIL_MSG("list::front -- empty container");
+		#else
+			// We allow the user to reference an empty container.
 		#endif
 
 		return static_cast<node_type*>(internalNode().mpNext)->mValue;
@@ -1025,11 +1024,11 @@ namespace eastl
 	inline typename list<T, Allocator>::reference
 	list<T, Allocator>::back()
 	{
-		#if EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
-			// We allow the user to reference an empty container.
-		#elif EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(static_cast<node_type*>(internalNode().mpNext) == &internalNode()))
+		#if EASTL_ASSERT_ENABLED && EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
+			if (EASTL_UNLIKELY(static_cast<node_type*>(internalNode().mpNext) == &internalNode()))
 				EASTL_FAIL_MSG("list::back -- empty container");
+		#else
+			// We allow the user to reference an empty container.
 		#endif
 
 		return static_cast<node_type*>(internalNode().mpPrev)->mValue;
@@ -1040,11 +1039,11 @@ namespace eastl
 	inline typename list<T, Allocator>::const_reference
 	list<T, Allocator>::back() const
 	{
-		#if EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
-			// We allow the user to reference an empty container.
-		#elif EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(static_cast<node_type*>(internalNode().mpNext) == &internalNode()))
+		#if EASTL_ASSERT_ENABLED && EASTL_EMPTY_REFERENCE_ASSERT_ENABLED
+			if (EASTL_UNLIKELY(static_cast<node_type*>(internalNode().mpNext) == &internalNode()))
 				EASTL_FAIL_MSG("list::back -- empty container");
+		#else
+			// We allow the user to reference an empty container.
 		#endif
 
 		return static_cast<node_type*>(internalNode().mpPrev)->mValue;
@@ -2163,34 +2162,7 @@ namespace eastl
 
 EA_RESTORE_SN_WARNING()
 
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
+EA_RESTORE_VC_WARNING();
 
 
 #endif // Header include guard
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

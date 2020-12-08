@@ -48,12 +48,10 @@ EA_DISABLE_ALL_VC_WARNINGS()
 	#include <stddef.h>
 EA_RESTORE_ALL_VC_WARNINGS()
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4512)  // 'class' : assignment operator could not be generated.
-	#pragma warning(disable: 4530)  // C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
-	#pragma warning(disable: 4571)  // catch(...) semantics changed since Visual C++ 7.1; structured exceptions (SEH) are no longer caught.
-#endif
+// 4512 - 'class' : assignment operator could not be generated.
+// 4530 - C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+// 4571 - catch(...) semantics changed since Visual C++ 7.1; structured exceptions (SEH) are no longer caught.
+EA_DISABLE_VC_WARNING(4512 4530 4571);
 
 
 namespace eastl
@@ -2814,7 +2812,7 @@ namespace eastl
 	{
 		// We ignore the first argument (hint iterator). It's not likely to be useful for hashtable containers.
 		insert_return_type result = DoInsertValue(has_unique_keys_type(), value);
-		return result.first; // Note by Paul Pedriana while perusing this code: This code will fail to compile when bU is false (i.e. for multiset, multimap).
+		return DoGetResultIterator(has_unique_keys_type(), result);
 	}
 
 
@@ -3218,18 +3216,7 @@ namespace eastl
 } // namespace eastl
 
 
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
+EA_RESTORE_VC_WARNING();
 
 
 #endif // Header include guard
-
-
-
-
-
-
-
-
-

@@ -89,8 +89,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef EASTL_VERSION
-	#define EASTL_VERSION   "3.16.05"
-	#define EASTL_VERSION_N  31605
+	#define EASTL_VERSION   "3.17.03"
+	#define EASTL_VERSION_N  31703
 #endif
 
 
@@ -143,18 +143,11 @@
 // http://en.wikipedia.org/wiki/C%2B%2B14#Relaxed_constexpr_restrictions
 //
 #if !defined(EA_CPP14_CONSTEXPR)
-
-	#if defined(EA_COMPILER_MSVC_2015)
-		#define EA_CPP14_CONSTEXPR  // not supported
-		#define EA_NO_CPP14_CONSTEXPR 
-	#elif defined(__GNUC__) && (EA_COMPILER_VERSION < 9000)   // Before GCC 9.0
-		#define EA_CPP14_CONSTEXPR  // not supported
-		#define EA_NO_CPP14_CONSTEXPR 
-	#elif defined(EA_COMPILER_CPP14_ENABLED)
+	#if defined(EA_COMPILER_CPP14_ENABLED)
 		#define EA_CPP14_CONSTEXPR constexpr
 	#else
 		#define EA_CPP14_CONSTEXPR  // not supported
-		#define EA_NO_CPP14_CONSTEXPR 
+		#define EA_NO_CPP14_CONSTEXPR
 	#endif
 #endif
 
@@ -252,11 +245,11 @@ namespace eastl
 ///////////////////////////////////////////////////////////////////////////////
 // EASTL_IF_NOT_DLL
 //
-// Utility to include expressions only for static builds. 
+// Utility to include expressions only for static builds.
 //
 #ifndef EASTL_IF_NOT_DLL
 	#if EASTL_DLL
-		#define EASTL_IF_NOT_DLL(x) 
+		#define EASTL_IF_NOT_DLL(x)
 	#else
 		#define EASTL_IF_NOT_DLL(x) x
 	#endif
@@ -448,6 +441,8 @@ namespace eastl
 // the front of the container, but not use it if the container is empty.
 // In practice it's often easier and more efficient to do this than to write
 // extra code to check if the container is empty.
+//
+// NOTE: If this is enabled, EASTL_ASSERT_ENABLED must also be enabled
 //
 // Example usage:
 //     template <typename T, typename Allocator>
@@ -830,7 +825,7 @@ namespace eastl
 // Defined as 0 or 1.
 //
 #ifndef EASTL_INT128_SUPPORTED
-	#if defined(EA_COMPILER_INTMAX_SIZE) && (EA_COMPILER_INTMAX_SIZE >= 16) // If the compiler supports int128_t (recent versions of GCC do)...
+	#if defined(__SIZEOF_INT128__) || (defined(EA_COMPILER_INTMAX_SIZE) && (EA_COMPILER_INTMAX_SIZE >= 16))
 		#define EASTL_INT128_SUPPORTED 1
 	#else
 		#define EASTL_INT128_SUPPORTED 0
@@ -869,7 +864,7 @@ namespace eastl
 	#if EASTL_INT128_SUPPORTED
 		#define EASTL_INT128_DEFINED 1
 
-		#if defined(__GNUC__)
+		#if defined(__SIZEOF_INT128__) || defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
 			typedef __int128_t   eastl_int128_t;
 			typedef __uint128_t eastl_uint128_t;
 		#else
@@ -1544,13 +1539,8 @@ namespace eastl
 //    size_t alignment = EASTL_ALIGN_OF(int);
 //
 ///////////////////////////////////////////////////////////////////////////////
-
 #ifndef EASTL_ALIGN_OF
-	#if !defined(__GNUC__) || (__GNUC__ >= 3) // GCC 2.x doesn't do __alignof correctly all the time.
-		#define EASTL_ALIGN_OF __alignof
-	#else
-		#define EASTL_ALIGN_OF(type) ((size_t)offsetof(struct{ char c; type m; }, m))
-	#endif
+	#define EASTL_ALIGN_OF alignof
 #endif
 
 
@@ -1768,20 +1758,13 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 	#endif
 #endif
 
+
 /// EASTL_TUPLE_ENABLED
 /// EASTL tuple implementation depends on variadic template support
 #if EASTL_VARIADIC_TEMPLATES_ENABLED && !defined(EA_COMPILER_NO_TEMPLATE_ALIASES)
 	#define EASTL_TUPLE_ENABLED 1
 #else
 	#define EASTL_TUPLE_ENABLED 0
-#endif
-
-/// EA_ONCE
-///
-/// This is a fix for the EA_ONCE define that's broken in EABase versions prior to 2.00.40
-///
-#ifndef EA_ONCE
-	#define EA_ONCE()
 #endif
 
 
@@ -1805,6 +1788,7 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 		#ifdef _MSC_VER
 			#pragma warning(disable: 4455) // disable warning C4455: literal suffix identifiers that do not start with an underscore are reserved
 		#endif
+
 	#else
 		#define EASTL_USER_LITERALS_ENABLED 0
 	#endif
@@ -1865,12 +1849,29 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 #endif
 
 
-
 /// EASTL_ENABLE_PAIR_FIRST_ELEMENT_CONSTRUCTOR
-/// This feature define allows users to toggle the problematic eastl::pair implicit 
+/// This feature define allows users to toggle the problematic eastl::pair implicit
 /// single element constructor.
 #ifndef EASTL_ENABLE_PAIR_FIRST_ELEMENT_CONSTRUCTOR
 	#define EASTL_ENABLE_PAIR_FIRST_ELEMENT_CONSTRUCTOR 0
 #endif
+
+/// EASTL_SYSTEM_BIG_ENDIAN_STATEMENT
+/// EASTL_SYSTEM_LITTLE_ENDIAN_STATEMENT
+/// These macros allow you to write endian specific macros as statements.
+/// This allows endian specific code to be macro expanded from within other macros
+///
+#if defined(EA_SYSTEM_BIG_ENDIAN)
+	#define EASTL_SYSTEM_BIG_ENDIAN_STATEMENT(...) __VA_ARGS__
+#else
+	#define EASTL_SYSTEM_BIG_ENDIAN_STATEMENT(...)
+#endif
+
+#if defined(EA_SYSTEM_LITTLE_ENDIAN)
+	#define EASTL_SYSTEM_LITTLE_ENDIAN_STATEMENT(...) __VA_ARGS__
+#else
+	#define EASTL_SYSTEM_LITTLE_ENDIAN_STATEMENT(...)
+#endif
+
 
 #endif // Header include guard
