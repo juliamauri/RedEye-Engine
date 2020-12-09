@@ -19,9 +19,6 @@
 #include "RE_ThumbnailManager.h"
 
 #include "SDL2\include\SDL.h"
-//#include "IL/include/il.h"
-#include "IL/include/ilu.h"
-#include "IL/include/ilut.h"
 #include "Optick/include/optick.h"
 #include <EAAssert/version.h>
 #include <EAStdC/internal/Config.h>
