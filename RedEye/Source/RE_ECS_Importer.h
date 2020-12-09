@@ -1,18 +1,18 @@
 #ifndef __RE_ECS_IMPORTER_H__
 #define __RE_ECS_IMPORTER_H__
 
-class RE_ECS_Manager;
-class JSONNode;
+class RE_ECS_Pool;
+class RE_Json;
 
 namespace RE_ECS_Importer
 {
-	void JsonSerialize(JSONNode* node, RE_ECS_Manager* pool);
-	char* BinarySerialize(RE_ECS_Manager* pool, unsigned int* bufferSize);
+	void JsonSerialize(RE_Json* node, RE_ECS_Pool* pool);
+	char* BinarySerialize(RE_ECS_Pool* pool, unsigned int* bufferSize);
 
-	RE_ECS_Manager* JsonDeserialize(JSONNode* node);
-	RE_ECS_Manager* BinaryDeserialize(char*& cursor);
+	RE_ECS_Pool* JsonDeserialize(RE_Json* node);
+	RE_ECS_Pool* BinaryDeserialize(char*& cursor);
 
-	bool JsonCheckResources(JSONNode* node);
+	bool JsonCheckResources(RE_Json* node);
 	bool BinaryCheckResources(char*& cursor);
 };
 

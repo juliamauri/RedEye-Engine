@@ -1223,7 +1223,7 @@ void SceneEditorWindow::Draw(bool secondary)
 		heigth = static_cast<int>(size.y) - 28;
 		if (recalc || lastWidht != width || lastHeight != heigth)
 		{
-			Event::Push(RE_EventType::EDITORWINDOWCHANGED, App::renderer3d, Cvar(lastWidht = width), Cvar(lastHeight = heigth));
+			Event::Push(RE_EventType::EDITORWINDOWCHANGED, App::renderer3d, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
 			Event::Push(RE_EventType::EDITORWINDOWCHANGED, App::editor);
 			recalc = false;
 		}
@@ -1387,7 +1387,7 @@ void SceneGameWindow::Draw(bool secondary)
 
 		if (recalc || lastWidht != width || lastHeight != heigth)
 		{
-			Event::Push(RE_EventType::GAMEWINDOWCHANGED, App::renderer3d, Cvar(lastWidht = width), Cvar(lastHeight = heigth));
+			Event::Push(RE_EventType::GAMEWINDOWCHANGED, App::renderer3d, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
 			Event::Push(RE_EventType::GAMEWINDOWCHANGED, App::editor);
 			recalc = false;
 		}

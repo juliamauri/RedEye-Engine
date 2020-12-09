@@ -31,6 +31,7 @@ enum GameState : char
 
 namespace RE_Time
 {
+
 	float FrameDeltaTime();
 	unsigned int FrameExtraMS();
 
@@ -63,8 +64,8 @@ namespace RE_Time
 	{
 		static GameState state = GS_STOP;
 		static Timer
-			ms_timer(false), // read every frame
-			fps_timer(false), // read every second
+			ms_timer, // read every frame
+			fps_timer, // read every second
 			game_timer(false); // read when playing scene
 
 		static float

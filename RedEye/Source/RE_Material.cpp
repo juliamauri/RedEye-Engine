@@ -5,7 +5,7 @@
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
@@ -107,75 +107,75 @@ void RE_Material::Draw()
 	ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
 }
 
-void RE_Material::SaveResourceMeta(JSONNode* metaNode)
+void RE_Material::SaveResourceMeta(RE_Json* metaNode)
 {
 	metaNode->PushString("shaderMeta", (shaderMD5) ? App::resources->At(shaderMD5)->GetMetaPath() : "NOMETAPATH");
 
-	JSONNode* diffuseNode = metaNode->PushJObject("DiffuseTextures");
+	RE_Json* diffuseNode = metaNode->PushJObject("DiffuseTextures");
 	PushTexturesJson(diffuseNode, &tDiffuse);
 	DEL(diffuseNode);
-	JSONNode* specularNode = metaNode->PushJObject("SpecularTextures");
+	RE_Json* specularNode = metaNode->PushJObject("SpecularTextures");
 	PushTexturesJson(specularNode, &tSpecular);
 	DEL(specularNode);
-	JSONNode* ambientNode = metaNode->PushJObject("AmbientTextures");
+	RE_Json* ambientNode = metaNode->PushJObject("AmbientTextures");
 	PushTexturesJson(ambientNode, &tAmbient);
 	DEL(ambientNode);
-	JSONNode* emissiveNode = metaNode->PushJObject("EmissiveTextures");
+	RE_Json* emissiveNode = metaNode->PushJObject("EmissiveTextures");
 	PushTexturesJson(emissiveNode, &tEmissive);
 	DEL(emissiveNode);
-	JSONNode* opacityNode = metaNode->PushJObject("OpacityTextures");
+	RE_Json* opacityNode = metaNode->PushJObject("OpacityTextures");
 	PushTexturesJson(opacityNode, &tOpacity);
 	DEL(opacityNode);
-	JSONNode* shininessNode = metaNode->PushJObject("ShininessTextures");
+	RE_Json* shininessNode = metaNode->PushJObject("ShininessTextures");
 	PushTexturesJson(shininessNode, &tShininess);
 	DEL(shininessNode);
-	JSONNode* heightNode = metaNode->PushJObject("HeightTextures");
+	RE_Json* heightNode = metaNode->PushJObject("HeightTextures");
 	PushTexturesJson(heightNode, &tHeight);
 	DEL(heightNode);
-	JSONNode* normalsNode = metaNode->PushJObject("NormalsTextures");
+	RE_Json* normalsNode = metaNode->PushJObject("NormalsTextures");
 	PushTexturesJson(normalsNode, &tNormals);
 	DEL(normalsNode);
-	JSONNode* reflectionNode = metaNode->PushJObject("ReflectionTextures");
+	RE_Json* reflectionNode = metaNode->PushJObject("ReflectionTextures");
 	PushTexturesJson(reflectionNode, &tReflection);
 	DEL(reflectionNode);
-	JSONNode* unknownNode = metaNode->PushJObject("UnknownTextures");
+	RE_Json* unknownNode = metaNode->PushJObject("UnknownTextures");
 	PushTexturesJson(unknownNode, &tUnknown);
 	DEL(unknownNode);
 }
 
-void RE_Material::LoadResourceMeta(JSONNode* metaNode)
+void RE_Material::LoadResourceMeta(RE_Json* metaNode)
 {
 	eastl::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
 	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = App::resources->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
 
-	JSONNode* diffuseNode = metaNode->PullJObject("DiffuseTextures");
+	RE_Json* diffuseNode = metaNode->PullJObject("DiffuseTextures");
 	PullTexturesJson(diffuseNode, &tDiffuse);
 	DEL(diffuseNode);
-	JSONNode* specularNode = metaNode->PullJObject("SpecularTextures");
+	RE_Json* specularNode = metaNode->PullJObject("SpecularTextures");
 	PullTexturesJson(specularNode, &tSpecular);
 	DEL(specularNode);
-	JSONNode* ambientNode = metaNode->PullJObject("AmbientTextures");
+	RE_Json* ambientNode = metaNode->PullJObject("AmbientTextures");
 	PullTexturesJson(ambientNode, &tAmbient);
 	DEL(ambientNode);
-	JSONNode* emissiveNode = metaNode->PullJObject("EmissiveTextures");
+	RE_Json* emissiveNode = metaNode->PullJObject("EmissiveTextures");
 	PullTexturesJson(emissiveNode, &tEmissive);
 	DEL(emissiveNode);
-	JSONNode* opacityNode = metaNode->PullJObject("OpacityTextures");
+	RE_Json* opacityNode = metaNode->PullJObject("OpacityTextures");
 	PullTexturesJson(opacityNode, &tOpacity);
 	DEL(opacityNode);
-	JSONNode* shininessNode = metaNode->PullJObject("ShininessTextures");
+	RE_Json* shininessNode = metaNode->PullJObject("ShininessTextures");
 	PullTexturesJson(shininessNode, &tShininess);
 	DEL(shininessNode);
-	JSONNode* heightNode = metaNode->PullJObject("HeightTextures");
+	RE_Json* heightNode = metaNode->PullJObject("HeightTextures");
 	PullTexturesJson(heightNode, &tHeight);
 	DEL(heightNode);
-	JSONNode* normalsNode = metaNode->PullJObject("NormalsTextures");
+	RE_Json* normalsNode = metaNode->PullJObject("NormalsTextures");
 	PullTexturesJson(normalsNode, &tNormals);
 	DEL(normalsNode);
-	JSONNode* reflectionNode = metaNode->PullJObject("ReflectionTextures");
+	RE_Json* reflectionNode = metaNode->PullJObject("ReflectionTextures");
 	PullTexturesJson(reflectionNode, &tReflection);
 	DEL(reflectionNode);
-	JSONNode* unknownNode = metaNode->PullJObject("UnknownTextures");
+	RE_Json* unknownNode = metaNode->PullJObject("UnknownTextures");
 	PullTexturesJson(unknownNode, &tUnknown);
 	DEL(unknownNode);
 }
@@ -492,7 +492,7 @@ void RE_Material::SomeResourceChanged(const char* resMD5)
 			LoadInMemory();
 			ResourceContainer::inMemory = false;
 		}
-		eastl::vector<ShaderCvar> beforeCustomUniforms = fromShaderCustomUniforms;
+		eastl::vector<RE_Shader_Cvar> beforeCustomUniforms = fromShaderCustomUniforms;
 		GetAndProcessUniformsFromShader();
 
 		for (uint b = 0; b < beforeCustomUniforms.size(); b++)
@@ -639,7 +639,7 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 {
 	Config material(GetAssetPath(), App::fs->GetZipPath());
 	if (material.Load()) {
-		JSONNode* nodeMat = material.GetRootNode("Material");
+		RE_Json* nodeMat = material.GetRootNode("Material");
 
 		shadingType = (RE_ShadingMode)nodeMat->PullInt("ShaderType", RE_ShadingMode::S_FLAT);
 
@@ -660,7 +660,7 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 		refraccti = nodeMat->PullFloat("Refraccti", 1.0f);
 
 		fromShaderCustomUniforms.clear();
-		JSONNode* nuniforms = nodeMat->PullJObject("uniforms");
+		RE_Json* nuniforms = nodeMat->PullJObject("uniforms");
 		uint size = nuniforms->PullUInt("size", 0);
 		if (size)
 		{
@@ -669,12 +669,12 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 			eastl::string id;
 			for (uint i = 0; i < size; i++)
 			{
-				ShaderCvar sVar;
+				RE_Shader_Cvar sVar;
 				id = "name" + eastl::to_string(i);
 				sVar.name = nuniforms->PullString(id.c_str(), "");
 
 				id = "type" + eastl::to_string(i);
-				Cvar::VAR_TYPE vT = (Cvar::VAR_TYPE)nuniforms->PullUInt(id.c_str(), ShaderCvar::UNDEFINED);
+				RE_Cvar::VAR_TYPE vT = (RE_Cvar::VAR_TYPE)nuniforms->PullUInt(id.c_str(), RE_Shader_Cvar::UNDEFINED);
 
 				id = "custom" + eastl::to_string(i);
 				sVar.custom = nuniforms->PullBool(id.c_str(), true);
@@ -682,58 +682,58 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 				id = "value" + eastl::to_string(i);
 				switch (vT)
 				{
-				case Cvar::BOOL: sVar.SetValue(nuniforms->PullBool(id.c_str(), true), true); break;
-				case Cvar::BOOL2:
+				case RE_Cvar::BOOL: sVar.SetValue(nuniforms->PullBool(id.c_str(), true), true); break;
+				case RE_Cvar::BOOL2:
 				{
 					b = nuniforms->PullBool(id.c_str(), 2, true);
 					sVar.SetValue(b, 2, true);
 					DEL_A(b);
 					break;
 				}
-				case Cvar::BOOL3:
+				case RE_Cvar::BOOL3:
 				{
 					b = nuniforms->PullBool(id.c_str(), 3, true);
 					sVar.SetValue(b, 3, true);
 					DEL_A(b);
 					break; 
 				}
-				case Cvar::BOOL4:
+				case RE_Cvar::BOOL4:
 				{
 					b = nuniforms->PullBool(id.c_str(), 4, true);
 					sVar.SetValue(b, 4, true);
 					DEL_A(b);
 					break; 
 				}
-				case Cvar::INT: sVar.SetValue(-1, true); break;
-				case Cvar::INT2:
+				case RE_Cvar::INT: sVar.SetValue(-1, true); break;
+				case RE_Cvar::INT2:
 				{
 					intPtr = nuniforms->PullInt(id.c_str(), 2, true);
 					sVar.SetValue(intPtr, 2, true);
 					DEL_A(b);
 					break;
 				}
-				case Cvar::INT3:
+				case RE_Cvar::INT3:
 				{
 					intPtr = nuniforms->PullInt(id.c_str(), 3, true);
 					sVar.SetValue(intPtr, 3, true);
 					DEL_A(b);
 					break; 
 				}
-				case Cvar::INT4:
+				case RE_Cvar::INT4:
 				{
 					intPtr = nuniforms->PullInt(id.c_str(), 4, true);
 					sVar.SetValue(intPtr, 4, true);
 					DEL_A(b);
 					break; 
 				}
-				case Cvar::FLOAT: sVar.SetValue(nuniforms->PullFloat(id.c_str(), 0), true); break;
-				case Cvar::FLOAT2: sVar.SetValue(nuniforms->PullFloat(id.c_str(), math::float2::zero), true); break;
-				case Cvar::FLOAT3: sVar.SetValue(nuniforms->PullFloatVector(id.c_str(), math::float3::zero), true); break;
-				case Cvar::FLOAT4:
-				case Cvar::MAT2: sVar.SetValue(nuniforms->PullFloat4(id.c_str(), math::float4::zero), true); break;
-				case Cvar::MAT3: sVar.SetValue(nuniforms->PullMat3(id.c_str(), math::float3x3::zero), true); break;
-				case Cvar::MAT4: sVar.SetValue(nuniforms->PullMat4(id.c_str(), math::float4x4::zero), true); break;
-				case Cvar::SAMPLER: sVar.SetSampler(App::resources->IsReference(nuniforms->PullString(id.c_str(),"")), true); break;
+				case RE_Cvar::FLOAT: sVar.SetValue(nuniforms->PullFloat(id.c_str(), 0), true); break;
+				case RE_Cvar::FLOAT2: sVar.SetValue(nuniforms->PullFloat(id.c_str(), math::float2::zero), true); break;
+				case RE_Cvar::FLOAT3: sVar.SetValue(nuniforms->PullFloatVector(id.c_str(), math::float3::zero), true); break;
+				case RE_Cvar::FLOAT4:
+				case RE_Cvar::MAT2: sVar.SetValue(nuniforms->PullFloat4(id.c_str(), math::float4::zero), true); break;
+				case RE_Cvar::MAT3: sVar.SetValue(nuniforms->PullMat3(id.c_str(), math::float3x3::zero), true); break;
+				case RE_Cvar::MAT4: sVar.SetValue(nuniforms->PullMat4(id.c_str(), math::float4x4::zero), true); break;
+				case RE_Cvar::SAMPLER: sVar.SetSampler(App::resources->IsReference(nuniforms->PullString(id.c_str(),"")), true); break;
 				}
 
 				fromShaderCustomUniforms.push_back(sVar);
@@ -755,7 +755,7 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 	}
 }
 
-void RE_Material::PullTexturesJson(JSONNode * texturesNode, eastl::vector<const char*>* textures)
+void RE_Material::PullTexturesJson(RE_Json * texturesNode, eastl::vector<const char*>* textures)
 {
 	uint texturesSize = texturesNode->PullInt("Size", 0);
 	for (uint i = 0; i < texturesSize; i++)
@@ -772,7 +772,7 @@ void RE_Material::PullTexturesJson(JSONNode * texturesNode, eastl::vector<const 
 void RE_Material::JsonSerialize(bool onlyMD5)
 {
 	Config materialSerialize(GetAssetPath(), App::fs->GetZipPath());
-	JSONNode* materialNode = materialSerialize.GetRootNode("Material");
+	RE_Json* materialNode = materialSerialize.GetRootNode("Material");
 	materialNode->PushString("name", GetName()); //for get different md5
 	materialNode->PushInt("ShaderType", (int)shadingType);
 	materialNode->PushUInt("usingOnMat", usingOnMat, 18);
@@ -788,7 +788,7 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 	materialNode->PushFloat("ShininessStrenght", shininessStrenght);
 	materialNode->PushFloat("Refraccti", refraccti);
 
-	JSONNode* nuniforms = materialNode->PushJObject("uniforms");
+	RE_Json* nuniforms = materialNode->PushJObject("uniforms");
 	nuniforms->PushUInt("size", fromShaderCustomUniforms.size());
 	if (!fromShaderCustomUniforms.empty()) {
 		eastl::string id;
@@ -806,22 +806,22 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 			id = "value" + eastl::to_string(i);
 			switch (fromShaderCustomUniforms[i].GetType())
 			{
-			case Cvar::BOOL: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool()); break;
-			case Cvar::BOOL2: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool2(), 2); break;
-			case Cvar::BOOL3: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool3(), 3); break;
-			case Cvar::BOOL4: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool4(), 4); break;
-			case Cvar::INT: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt()); break;
-			case Cvar::INT2: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt2(),2); break;
-			case Cvar::INT3: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt3(), 3); break;
-			case Cvar::INT4: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt4(), 4); break;
-			case Cvar::FLOAT: nuniforms->PushFloat(id.c_str(), fromShaderCustomUniforms[i].AsFloat()); break;
-			case Cvar::FLOAT2: nuniforms->PushFloat(id.c_str(), fromShaderCustomUniforms[i].AsFloat2()); break;
-			case Cvar::FLOAT3: nuniforms->PushFloatVector(id.c_str(), fromShaderCustomUniforms[i].AsFloat3()); break;
-			case Cvar::FLOAT4:
-			case Cvar::MAT2: nuniforms->PushFloat4(id.c_str(), fromShaderCustomUniforms[i].AsFloat4()); break;
-			case Cvar::MAT3: nuniforms->PushMat3(id.c_str(), fromShaderCustomUniforms[i].AsMat3()); break;
-			case Cvar::MAT4: nuniforms->PushMat4(id.c_str(), fromShaderCustomUniforms[i].AsMat4()); break;
-			case Cvar::SAMPLER: nuniforms->PushString(id.c_str(), (fromShaderCustomUniforms[i].AsCharP()) ? fromShaderCustomUniforms[i].AsCharP() : ""); break;
+			case RE_Cvar::BOOL: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool()); break;
+			case RE_Cvar::BOOL2: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool2(), 2); break;
+			case RE_Cvar::BOOL3: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool3(), 3); break;
+			case RE_Cvar::BOOL4: nuniforms->PushBool(id.c_str(), fromShaderCustomUniforms[i].AsBool4(), 4); break;
+			case RE_Cvar::INT: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt()); break;
+			case RE_Cvar::INT2: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt2(),2); break;
+			case RE_Cvar::INT3: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt3(), 3); break;
+			case RE_Cvar::INT4: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt4(), 4); break;
+			case RE_Cvar::FLOAT: nuniforms->PushFloat(id.c_str(), fromShaderCustomUniforms[i].AsFloat()); break;
+			case RE_Cvar::FLOAT2: nuniforms->PushFloat(id.c_str(), fromShaderCustomUniforms[i].AsFloat2()); break;
+			case RE_Cvar::FLOAT3: nuniforms->PushFloatVector(id.c_str(), fromShaderCustomUniforms[i].AsFloat3()); break;
+			case RE_Cvar::FLOAT4:
+			case RE_Cvar::MAT2: nuniforms->PushFloat4(id.c_str(), fromShaderCustomUniforms[i].AsFloat4()); break;
+			case RE_Cvar::MAT3: nuniforms->PushMat3(id.c_str(), fromShaderCustomUniforms[i].AsMat3()); break;
+			case RE_Cvar::MAT4: nuniforms->PushMat4(id.c_str(), fromShaderCustomUniforms[i].AsMat4()); break;
+			case RE_Cvar::SAMPLER: nuniforms->PushString(id.c_str(), (fromShaderCustomUniforms[i].AsCharP()) ? fromShaderCustomUniforms[i].AsCharP() : ""); break;
 			}
 		}
 	}
@@ -837,7 +837,7 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 	DEL(materialNode);
 }
 
-void RE_Material::PushTexturesJson(JSONNode * texturesNode, eastl::vector<const char*>* textures)
+void RE_Material::PushTexturesJson(RE_Json * texturesNode, eastl::vector<const char*>* textures)
 {
 	uint texturesSize = textures->size();
 	texturesNode->PushUInt("Size", texturesSize);
@@ -910,7 +910,7 @@ void RE_Material::BinaryDeserialize()
 		{
 			for (uint i = 0; i < uSize; i++)
 			{
-				ShaderCvar sVar;
+				RE_Shader_Cvar sVar;
 				uint nSize = 0;
 				size = sizeof(uint);
 				memcpy(&nSize, cursor, size);
@@ -935,9 +935,9 @@ void RE_Material::BinaryDeserialize()
 				int* intCursor;
 				float* floatCursor;
 				bool* boolCursor;
-				switch (Cvar::VAR_TYPE(uType))
+				switch (RE_Cvar::VAR_TYPE(uType))
 				{
-				case Cvar::BOOL:
+				case RE_Cvar::BOOL:
 				{
 					size = sizeof(bool);
 					memcpy(&b, cursor, size);
@@ -945,7 +945,7 @@ void RE_Material::BinaryDeserialize()
 					sVar.SetValue(b, true);
 					break; 
 				}
-				case Cvar::BOOL2:
+				case RE_Cvar::BOOL2:
 				{
 					size = sizeof(bool) * 2;
 					boolCursor = reinterpret_cast<bool*>(cursor);
@@ -953,7 +953,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::BOOL3:
+				case RE_Cvar::BOOL3:
 				{
 					size = sizeof(bool) * 3;
 					boolCursor = reinterpret_cast<bool*>(cursor);
@@ -961,7 +961,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::BOOL4:
+				case RE_Cvar::BOOL4:
 				{
 					size = sizeof(bool) * 4;
 					boolCursor = reinterpret_cast<bool*>(cursor);
@@ -969,7 +969,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::INT:
+				case RE_Cvar::INT:
 				{
 					size = sizeof(int);
 					memcpy(&int_v, cursor, size);
@@ -977,7 +977,7 @@ void RE_Material::BinaryDeserialize()
 					sVar.SetValue(int_v, true);
 					break; 
 				}
-				case Cvar::INT2:
+				case RE_Cvar::INT2:
 				{
 					size = sizeof(int) * 2;
 					intCursor = reinterpret_cast<int*>(cursor);
@@ -985,7 +985,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::INT3:
+				case RE_Cvar::INT3:
 				{
 					size = sizeof(int) * 3;
 					intCursor = reinterpret_cast<int*>(cursor);
@@ -993,7 +993,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::INT4:
+				case RE_Cvar::INT4:
 				{
 					size = sizeof(int) * 4;
 					intCursor = reinterpret_cast<int*>(cursor);
@@ -1001,7 +1001,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::FLOAT:
+				case RE_Cvar::FLOAT:
 				{
 					size = sizeof(float);
 					memcpy(&f, cursor, size);
@@ -1009,7 +1009,7 @@ void RE_Material::BinaryDeserialize()
 					sVar.SetValue(f, true);
 					break; 
 				}
-				case Cvar::FLOAT2:
+				case RE_Cvar::FLOAT2:
 				{
 					size = sizeof(float) * 2;
 					floatCursor = reinterpret_cast<float*>(cursor);
@@ -1017,7 +1017,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::FLOAT3:
+				case RE_Cvar::FLOAT3:
 				{
 					size = sizeof(float) * 3;
 					floatCursor = reinterpret_cast<float*>(cursor);
@@ -1025,8 +1025,8 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::FLOAT4:
-				case Cvar::MAT2:
+				case RE_Cvar::FLOAT4:
+				case RE_Cvar::MAT2:
 				{
 					size = sizeof(float) * 4;
 					floatCursor = reinterpret_cast<float*>(cursor);
@@ -1034,7 +1034,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::MAT3:
+				case RE_Cvar::MAT3:
 				{
 					size = sizeof(float) * 9;
 					floatCursor = reinterpret_cast<float*>(cursor);
@@ -1046,7 +1046,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::MAT4:
+				case RE_Cvar::MAT4:
 				{
 					size = sizeof(float) * 16;
 					floatCursor = reinterpret_cast<float*>(cursor);
@@ -1058,7 +1058,7 @@ void RE_Material::BinaryDeserialize()
 					cursor += size;
 					break; 
 				}
-				case Cvar::SAMPLER:
+				case RE_Cvar::SAMPLER:
 				{
 					nSize = 0;
 					size = sizeof(uint);
@@ -1164,7 +1164,7 @@ void RE_Material::BinarySerialize()
 			int int_v;
 			switch (fromShaderCustomUniforms[i].GetType())
 			{
-			case Cvar::BOOL:
+			case RE_Cvar::BOOL:
 			{
 				b = fromShaderCustomUniforms[i].AsBool();
 				size = sizeof(bool);
@@ -1172,28 +1172,28 @@ void RE_Material::BinarySerialize()
 				cursor += size;
 				break; 
 			}
-			case Cvar::BOOL2:
+			case RE_Cvar::BOOL2:
 			{
 				size = sizeof(bool) * 2;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsBool2(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::BOOL3:
+			case RE_Cvar::BOOL3:
 			{
 				size = sizeof(bool) * 3;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsBool3(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::BOOL4:
+			case RE_Cvar::BOOL4:
 			{
 				size = sizeof(bool) * 4;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsBool4(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::INT:
+			case RE_Cvar::INT:
 			{
 				int_v = fromShaderCustomUniforms[i].AsInt();
 				size = sizeof(int);
@@ -1201,71 +1201,71 @@ void RE_Material::BinarySerialize()
 				cursor += size;
 				break; 
 			}
-			case Cvar::INT2:
+			case RE_Cvar::INT2:
 			{
 				size = sizeof(int) * 2;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsInt2(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::INT3:
+			case RE_Cvar::INT3:
 			{
 				size = sizeof(int) * 3;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsInt3(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::INT4:
+			case RE_Cvar::INT4:
 			{
 				size = sizeof(int) * 4;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsInt4(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::FLOAT:
+			case RE_Cvar::FLOAT:
 			{
 				size = sizeof(float);
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::FLOAT2:
+			case RE_Cvar::FLOAT2:
 			{
 				size = sizeof(float) * 2;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::FLOAT3:
+			case RE_Cvar::FLOAT3:
 			{
 				size = sizeof(float) * 3;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::FLOAT4:
-			case Cvar::MAT2:
+			case RE_Cvar::FLOAT4:
+			case RE_Cvar::MAT2:
 			{
 				size = sizeof(float) * 4;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::MAT3:
+			case RE_Cvar::MAT3:
 			{
 				size = sizeof(float) * 9;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::MAT4:
+			case RE_Cvar::MAT4:
 			{
 				size = sizeof(float) * 16;
 				memcpy(cursor, fromShaderCustomUniforms[i].AsFloatPointer(), size);
 				cursor += size;
 				break; 
 			}
-			case Cvar::SAMPLER:
+			case RE_Cvar::SAMPLER:
 			{
 				nSize = (fromShaderCustomUniforms[i].AsCharP()) ? strlen(fromShaderCustomUniforms[i].AsCharP()) : 0;
 				size = sizeof(uint);
@@ -1457,77 +1457,77 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 		float* f_ptr;
 		switch (fromShaderCustomUniforms[i].GetType())
 		{
-		case Cvar::BOOL: RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsBool()); break;
-		case Cvar::BOOL2:
+		case RE_Cvar::BOOL: RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsBool()); break;
+		case RE_Cvar::BOOL2:
 		{
 			b = fromShaderCustomUniforms[i].AsBool2();
 			RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), b[0], b[1]);
 			break; 
 		}
-		case Cvar::BOOL3:
+		case RE_Cvar::BOOL3:
 		{
 			b = fromShaderCustomUniforms[i].AsBool3();
 			RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), b[0], b[1], b[2]);
 			break; 
 		}
-		case Cvar::BOOL4:
+		case RE_Cvar::BOOL4:
 		{
 			b = fromShaderCustomUniforms[i].AsBool4();
 			RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), b[0], b[1], b[2], b[3]);
 			break; 
 		}
-		case Cvar::INT: RE_ShaderImporter::setInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsInt()); break;
-		case Cvar::INT2:
+		case RE_Cvar::INT: RE_ShaderImporter::setInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsInt()); break;
+		case RE_Cvar::INT2:
 		{
 			int_pv = fromShaderCustomUniforms[i].AsInt2();
 			RE_ShaderImporter::setInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), int_pv[0], int_pv[1]);
 			break; 
 		}
-		case Cvar::INT3:
+		case RE_Cvar::INT3:
 		{
 			int_pv = fromShaderCustomUniforms[i].AsInt3();
 			RE_ShaderImporter::setInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), int_pv[0], int_pv[1], int_pv[2]);
 			break; 
 		}
-		case Cvar::INT4:
+		case RE_Cvar::INT4:
 		{
 			int_pv = fromShaderCustomUniforms[i].AsInt4();
 			RE_ShaderImporter::setInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), int_pv[0], int_pv[1], int_pv[2], int_pv[3]);
 			break; 
 		}
-		case Cvar::FLOAT: RE_ShaderImporter::setFloat(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsFloat()); break; 
-		case Cvar::FLOAT2:
+		case RE_Cvar::FLOAT: RE_ShaderImporter::setFloat(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsFloat()); break; 
+		case RE_Cvar::FLOAT2:
 		{
 			f_ptr = fromShaderCustomUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat(ShaderID, fromShaderCustomUniforms[i].name.c_str(), f_ptr[0], f_ptr[1]);
 			break; 
 		}
-		case Cvar::FLOAT3:
+		case RE_Cvar::FLOAT3:
 		{
 			f_ptr = fromShaderCustomUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat(ShaderID, fromShaderCustomUniforms[i].name.c_str(), f_ptr[0], f_ptr[1], f_ptr[2]);
 			break; 
 		}
-		case Cvar::FLOAT4:
-		case Cvar::MAT2:
+		case RE_Cvar::FLOAT4:
+		case RE_Cvar::MAT2:
 		{
 			f_ptr = fromShaderCustomUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat(ShaderID, fromShaderCustomUniforms[i].name.c_str(), f_ptr[0], f_ptr[1], f_ptr[2], f_ptr[3]);
 			break; 
 		}
-		case Cvar::MAT3:
+		case RE_Cvar::MAT3:
 		{
 			f_ptr = fromShaderCustomUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat3x3(ShaderID, fromShaderCustomUniforms[i].name.c_str(), f_ptr);
 			break; 
 		}
-		case Cvar::MAT4:
+		case RE_Cvar::MAT4:
 		{
 			f_ptr = fromShaderCustomUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat4x4(ShaderID, fromShaderCustomUniforms[i].name.c_str(), f_ptr);
 			break;
 		}
-		case Cvar::SAMPLER:
+		case RE_Cvar::SAMPLER:
 		{
 			if (fromShaderCustomUniforms[i].AsCharP())
 			{
@@ -1560,22 +1560,22 @@ unsigned int RE_Material::GetBinarySize()
 		{
 			charCount += sizeof(char) * fromShaderCustomUniforms[i].name.size();
 			switch (fromShaderCustomUniforms[i].GetType()) {
-			case Cvar::BOOL: charCount += sizeof(bool); break;
-			case Cvar::BOOL2: charCount += sizeof(bool) * 2; break;
-			case Cvar::BOOL3: charCount += sizeof(bool) * 3; break;
-			case Cvar::BOOL4: charCount += sizeof(bool) * 4; break;
-			case Cvar::INT: charCount += sizeof(int); break;
-			case Cvar::INT2: charCount += sizeof(int) * 2; break;
-			case Cvar::INT3: charCount += sizeof(int) * 3; break;
-			case Cvar::INT4: charCount += sizeof(int) * 4; break;
-			case Cvar::FLOAT: charCount += sizeof(float); break;
-			case Cvar::FLOAT2: charCount += sizeof(float) * 2; break;
-			case Cvar::FLOAT3: charCount += sizeof(float) * 3; break;
-			case Cvar::FLOAT4:
-			case Cvar::MAT2: charCount += sizeof(float) * 4; break;
-			case Cvar::MAT3: charCount += sizeof(float) * 9; break;
-			case Cvar::MAT4: charCount += sizeof(float) * 16; break;
-			case Cvar::SAMPLER:
+			case RE_Cvar::BOOL: charCount += sizeof(bool); break;
+			case RE_Cvar::BOOL2: charCount += sizeof(bool) * 2; break;
+			case RE_Cvar::BOOL3: charCount += sizeof(bool) * 3; break;
+			case RE_Cvar::BOOL4: charCount += sizeof(bool) * 4; break;
+			case RE_Cvar::INT: charCount += sizeof(int); break;
+			case RE_Cvar::INT2: charCount += sizeof(int) * 2; break;
+			case RE_Cvar::INT3: charCount += sizeof(int) * 3; break;
+			case RE_Cvar::INT4: charCount += sizeof(int) * 4; break;
+			case RE_Cvar::FLOAT: charCount += sizeof(float); break;
+			case RE_Cvar::FLOAT2: charCount += sizeof(float) * 2; break;
+			case RE_Cvar::FLOAT3: charCount += sizeof(float) * 3; break;
+			case RE_Cvar::FLOAT4:
+			case RE_Cvar::MAT2: charCount += sizeof(float) * 4; break;
+			case RE_Cvar::MAT3: charCount += sizeof(float) * 9; break;
+			case RE_Cvar::MAT4: charCount += sizeof(float) * 16; break;
+			case RE_Cvar::SAMPLER:
 			{
 				charCount += sizeof(uint);
 				if (fromShaderCustomUniforms[i].AsCharP()) charCount += sizeof(char) * strlen(fromShaderCustomUniforms[i].AsCharP());
@@ -1594,8 +1594,8 @@ void RE_Material::GetAndProcessUniformsFromShader()
 	static const char* materialNames[18] = {  "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient",  "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity",  "shininess", "shininessST", "tshininess", "refraccti", "theight",  "tnormals", "treflection" };
 	static const char* materialTextures[9] = {  "tdiffuse", "tspecular", "tambient", "temissive", "topacity", "tshininess", "theight", "tnormals", "treflection" };
 	
-	eastl::vector<ShaderCvar> fromShader = dynamic_cast<RE_Shader*>(App::resources->At(shaderMD5 ? shaderMD5 : RE_ResourceManager::internalResources.GetDefaultShader()))->GetUniformValues();
-	for (auto sVar : fromShader)
+	eastl::vector<RE_Shader_Cvar> fromShader = dynamic_cast<RE_Shader*>(App::resources->At(shaderMD5 ? shaderMD5 : RE_ResourceManager::internalResources.GetDefaultShader()))->GetUniformValues();
+	for (auto &sVar : fromShader)
 	{
 		if (sVar.custom)
 		{

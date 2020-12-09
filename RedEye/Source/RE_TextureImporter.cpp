@@ -4,17 +4,15 @@
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "Application.h"
-#include "ModuleEditor.h"
 #include "RE_GLCacheManager.h"
 #include "RE_ResourceManager.h"
+#include "RE_Texture.h"
 
-#include "md5.h"
-#include "ImGui\imgui.h"
-#include "Glew/include/glew.h"
-#include "IL/include/il.h"
-#include "IL/include/ilu.h"
-#include "IL/include/ilut.h"
-#include <EAStdC/EASprintf.h>
+#include "Glew\include\glew.h"
+#include "IL\include\il.h"
+#include "IL\include\ilu.h"
+#include "IL\include\ilut.h"
+#include <EAStdC\EASprintf.h>
 
 #pragma comment(lib, "IL/libx86/DevIL.lib")
 #pragma comment(lib, "IL/libx86/ILU.lib")
@@ -22,34 +20,26 @@
 
 bool RE_TextureImporter::Init()
 {
-	bool ret;
-	RE_LOG("Initializing Texture Manager");
-
+	RE_LOG("Initializing Texture Importer");
 	ilInit();
 	iluInit();
 	ilutInit();
 
 	ILenum error = ilGetError();
-	if (ret = (error == IL_NO_ERROR))
-	{
-		ilutRenderer(ILUT_OPENGL);
-		ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
-		ilEnable(IL_ORIGIN_SET);
+	if (error == IL_NO_ERROR) {
+		if (ilutRenderer(ILUT_OPENGL)) {
+			if (ilOriginFunc(IL_ORIGIN_LOWER_LEFT)) {
+				if (ilEnable(IL_ORIGIN_SET)) {
+					char tmp[8];
+					EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
+					RE_SOFT_NVS("DevIL", tmp, "http://openil.sourceforge.net/");
+					return true;
+				} else	RE_LOG_ERROR("DevIL Init Error when enabling origin IL_ORIGIN_SET");
+			} else		RE_LOG_ERROR("DevIL Init Error when setting origin to IL_ORIGIN_LOWER_LEFT");
+		} else			RE_LOG_ERROR("DevIL Init Error when setting renderer to ILUT_OPENGL");
+	} else				RE_LOG_ERROR("DevIL Init Error %d - %s", error, iluErrorString(error));
 
-		char tmp[8];
-		EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
-		RE_SOFT_NVS("DevIL", tmp, "http://openil.sourceforge.net/");
-	}
-	else
-		RE_LOG_ERROR("DevIL could not initialice! DevIL Error %d - %s", error, iluErrorString(error));
-
-	if (!folderPath)
-	{
-		RE_LOG_ERROR("Texure Manager could not read folder path");
-		ret = false;
-	}
-
-	return ret;
+	return false;
 }
 
 const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPath)
@@ -75,7 +65,7 @@ const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPat
 	return retMD5;
 }
 
-eastl::string RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsigned int assetSize, TextureType assetType, unsigned int* newSize)
+const char* RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsigned int assetSize, TextureType assetType, unsigned int* newSize)
 {
 	eastl::string ret;
 	uint imageID = 0;
@@ -99,7 +89,7 @@ eastl::string RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsign
 		RE_LOG_ERROR("Error when loading texture on DevIL");
 	}
 
-	return ret;
+	return ret.c_str();
 }
 
 void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int size, TextureType type, unsigned int * ID, int * width, int * height, RE_TextureSettings settings)
@@ -144,70 +134,19 @@ void RE_TextureImporter::SaveOwnFormat(const char* assetBuffer, unsigned int ass
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 
-	if (IL_FALSE != ilLoadL(assetType, assetBuffer, assetSize)) {
-		if (assetType == IL_TGA)
-			ilFlipSurfaceDxtcData();
+	if (IL_FALSE != ilLoadL(assetType, assetBuffer, assetSize))
+	{
+		if (assetType == IL_TGA) ilFlipSurfaceDxtcData();
 
 		//Save into dds
 		ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
 		ILubyte *data = new ILubyte[size];
-
 		ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
-
 		toSave->Save((char*)data, size);
 		DEL_A(data);
 		ilBindImage(0);
 		/* Delete used resources*/
 		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
-	} else{
-		RE_LOG_ERROR("Error when loading texture on DevIL");
 	}
-}
-
-void RE_TextureImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned int* ID, bool isDDS)
-{
-	RE_GLCacheManager::ChangeTextureBind(0);
-	glGenTextures(1, ID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, *ID);
-
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++) {
-
-		const char* texPath = nullptr;
-		if (!isDDS) {
-			texPath = App::resources->At(settings.textures[i].textureMD5)->GetLibraryPath();
-			if (!App::fs->Exists(texPath))
-				App::resources->At(settings.textures[i].textureMD5)->ReImport();
-		}
-		else {
-			texPath = settings.textures[i].path.c_str();
-		}
-
-		RE_FileBuffer librayTexture(texPath);
-
-		if (librayTexture.Load()) {
-			uint imageID = 0;
-			ilGenImages(1, &imageID);
-			ilBindImage(imageID);
-
-			if (IL_FALSE != ilLoadL(RE_DDS, librayTexture.GetBuffer(), librayTexture.GetSize())) {
-
-				iluFlipImage();
-
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-					0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()
-				);
-
-				ilBindImage(0);
-				ilDeleteImages(1, &imageID);
-			}
-		}
-	}
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, settings.min_filter);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, settings.mag_filter);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, settings.wrap_s);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, settings.wrap_t);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, settings.wrap_r);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	else RE_LOG_ERROR("Error when loading texture on DevIL");
 }

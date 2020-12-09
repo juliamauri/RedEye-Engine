@@ -2,7 +2,7 @@
 #define __RE_COMPWATER_H__
 
 #include "RE_Component.h"
-#include "Cvar.h"
+#include "RE_Cvar.h"
 
 #include "MathGeoLib/include/Geometry/AABB.h"
 #include "MathGeoLib/include/Geometry/Ray.h"
@@ -22,8 +22,8 @@ public:
 	void Draw() const override;
 	void DrawProperties() override;
 
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const override;
-	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) override;
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
+	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
 
 	unsigned int GetBinarySize() const override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
@@ -47,23 +47,23 @@ private:
 	unsigned int VAO = 0, VBO = 0, EBO = 0, triangle_count = 0;
 	int slices = 20, stacks = 20, target_slices = 0, target_stacks = 0;
 
-	eastl::pair<ShaderCvar*, unsigned int> waterFoam = {nullptr, 0};
-	eastl::vector<ShaderCvar> waterUniforms;
-	eastl::pair<ShaderCvar*, float> waveLenght = {nullptr, 1.5f};
-	eastl::pair<ShaderCvar*, float> amplitude = { nullptr, 0.75f };
-	eastl::pair<ShaderCvar*, float> speed = { nullptr, 1.0f };
-	eastl::pair<ShaderCvar*, bool> is_linear = { nullptr, true };
-	eastl::pair<ShaderCvar*, math::float2> direction = { nullptr, {1.0f, 1.0f } };
-	eastl::pair<ShaderCvar*, math::float2> center = { nullptr, {0.0f, 0.0f } };
-	eastl::pair<ShaderCvar*, float> steepness = { nullptr, 0.7f };
-	eastl::pair<ShaderCvar*, int> numWaves = { nullptr, 1 };
-	eastl::pair<ShaderCvar*, math::vec> cdiffuse = { nullptr, {0.0f, 0.0f, 1.0f} };
-	eastl::pair<ShaderCvar*, float> shininess = { nullptr, 1.f };
-	eastl::pair<ShaderCvar*, float> foamMin = { nullptr, 0.65f };
-	eastl::pair<ShaderCvar*, float> foamMax = { nullptr, 1.0f };
-	eastl::pair<ShaderCvar*, math::vec> foam_color = { nullptr, math::vec::one };
-	eastl::pair<ShaderCvar*, float> opacity = { nullptr, 1.f };
-	eastl::pair<ShaderCvar*, float> distanceFoam = { nullptr, 0.0002f };
+	eastl::pair<RE_Shader_Cvar*, unsigned int> waterFoam = {nullptr, 0};
+	eastl::vector<RE_Shader_Cvar> waterUniforms;
+	eastl::pair<RE_Shader_Cvar*, float> waveLenght = {nullptr, 1.5f};
+	eastl::pair<RE_Shader_Cvar*, float> amplitude = { nullptr, 0.75f };
+	eastl::pair<RE_Shader_Cvar*, float> speed = { nullptr, 1.0f };
+	eastl::pair<RE_Shader_Cvar*, bool> is_linear = { nullptr, true };
+	eastl::pair<RE_Shader_Cvar*, math::float2> direction = { nullptr, {1.0f, 1.0f } };
+	eastl::pair<RE_Shader_Cvar*, math::float2> center = { nullptr, {0.0f, 0.0f } };
+	eastl::pair<RE_Shader_Cvar*, float> steepness = { nullptr, 0.7f };
+	eastl::pair<RE_Shader_Cvar*, int> numWaves = { nullptr, 1 };
+	eastl::pair<RE_Shader_Cvar*, math::vec> cdiffuse = { nullptr, {0.0f, 0.0f, 1.0f} };
+	eastl::pair<RE_Shader_Cvar*, float> shininess = { nullptr, 1.f };
+	eastl::pair<RE_Shader_Cvar*, float> foamMin = { nullptr, 0.65f };
+	eastl::pair<RE_Shader_Cvar*, float> foamMax = { nullptr, 1.0f };
+	eastl::pair<RE_Shader_Cvar*, math::vec> foam_color = { nullptr, math::vec::one };
+	eastl::pair<RE_Shader_Cvar*, float> opacity = { nullptr, 1.f };
+	eastl::pair<RE_Shader_Cvar*, float> distanceFoam = { nullptr, 0.0002f };
 };
 
 #endif // !__RE_COMPWATER_H__

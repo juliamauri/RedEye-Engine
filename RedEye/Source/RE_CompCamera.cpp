@@ -12,10 +12,10 @@
 #include "RE_SkyBox.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 
 #include "RE_ConsoleLog.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
@@ -487,7 +487,7 @@ void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*
 	SetProperties(isPerspective, near_plane, far_plane, v_fov_rads, aspectRatioInt, draw_frustum, usingSkybox, (sbRes != -1) ? resources->at(sbRes) : nullptr);
 }
 
-void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>* resources) const
+void RE_CompCamera::SerializeJson(RE_Json * node, eastl::map<const char*, int>* resources) const
 {
 	node->PushBool("isPrespective", isPerspective);
 	node->PushFloat("near_plane", frustum.NearPlaneDistance());
@@ -499,7 +499,7 @@ void RE_CompCamera::SerializeJson(JSONNode * node, eastl::map<const char*, int>*
 	node->PushInt("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
 }
 
-void RE_CompCamera::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
+void RE_CompCamera::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	usingSkybox = node->PullBool("usingSkybox", true);
 	int sbRes = node->PullInt("skyboxResource", -1);

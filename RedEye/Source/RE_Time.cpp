@@ -1,7 +1,5 @@
 #include "RE_Time.h"
 
-#include "RE_ConsoleLog.h"
-#include "Event.h"
 #include "SDL2\include\SDL_timer.h"
 #include "ImGui\imgui.h"
 #include <EAStdC/EASprintf.h>
@@ -23,7 +21,7 @@ unsigned int RE_Time::FrameExtraMS()
 	if (fps_timer.Read() >= 1000)
 	{
 		last_fps_count = fps_counter;
-		fps_counter = 0;
+		fps_counter = 0u;
 		fps_timer.Start();
 	}
 

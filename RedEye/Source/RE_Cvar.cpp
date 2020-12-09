@@ -1,4 +1,4 @@
-#include "Cvar.h"
+#include "RE_Cvar.h"
 
 #include "Application.h"
 #include "RE_ResourceManager.h"
@@ -7,9 +7,9 @@
 #include "ImGui/imgui.h"
 #include <EASTL/vector.h>
 
-Cvar::Cvar() : type(UNDEFINED) { value.int_v = 0; }
+RE_Cvar::RE_Cvar() : type(UNDEFINED) { value.int_v = 0; }
 
-Cvar::Cvar(const Cvar & copy) : type(copy.type)
+RE_Cvar::RE_Cvar(const RE_Cvar & copy) : type(copy.type)
 {
 	switch (copy.type)
 	{
@@ -39,20 +39,20 @@ Cvar::Cvar(const Cvar & copy) : type(copy.type)
 	}
 }
 
-Cvar::Cvar(bool bool_v) : type(BOOL) { value.bool_v = bool_v; }
-Cvar::Cvar(int int_v) : type(INT) { value.int_v = int_v; }
-Cvar::Cvar(unsigned int uint_v) : type(UINT) { value.uint_v = uint_v; }
-Cvar::Cvar(long long int int64_v) : type(INT64) { value.int64_v = int64_v; }
-Cvar::Cvar(unsigned long long int uint64_v) : type(UINT64) { value.uint64_v = uint64_v; }
-Cvar::Cvar(double double_v) : type(DOUBLE) { value.double_v = double_v; }
-Cvar::Cvar(float float_v) : type(FLOAT) { value.float_v = float_v; }
-Cvar::Cvar(const char * char_p_v) : type(CHAR_P) { value.char_p_v = char_p_v; }
-Cvar::Cvar(eastl::string string_v) : type(STRING) { value.string_v = string_v; }
-Cvar::Cvar(RE_GameObject * go_v) : type(GAMEOBJECT) { value.go_v = go_v; }
+RE_Cvar::RE_Cvar(bool bool_v) : type(BOOL) { value.bool_v = bool_v; }
+RE_Cvar::RE_Cvar(int int_v) : type(INT) { value.int_v = int_v; }
+RE_Cvar::RE_Cvar(unsigned int uint_v) : type(UINT) { value.uint_v = uint_v; }
+RE_Cvar::RE_Cvar(long long int int64_v) : type(INT64) { value.int64_v = int64_v; }
+RE_Cvar::RE_Cvar(unsigned long long int uint64_v) : type(UINT64) { value.uint64_v = uint64_v; }
+RE_Cvar::RE_Cvar(double double_v) : type(DOUBLE) { value.double_v = double_v; }
+RE_Cvar::RE_Cvar(float float_v) : type(FLOAT) { value.float_v = float_v; }
+RE_Cvar::RE_Cvar(const char * char_p_v) : type(CHAR_P) { value.char_p_v = char_p_v; }
+RE_Cvar::RE_Cvar(eastl::string string_v) : type(STRING) { value.string_v = string_v; }
+RE_Cvar::RE_Cvar(RE_GameObject * go_v) : type(GAMEOBJECT) { value.go_v = go_v; }
 
-Cvar::Cvar(const math::float4x4 mat4_v) : type(MAT4) { value.mat4_v = mat4_v; }
+RE_Cvar::RE_Cvar(const math::float4x4 mat4_v) : type(MAT4) { value.mat4_v = mat4_v; }
 
-bool Cvar::SetValue(bool bool_v, bool force_type)
+bool RE_Cvar::SetValue(bool bool_v, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = BOOL;
@@ -60,7 +60,7 @@ bool Cvar::SetValue(bool bool_v, bool force_type)
 	return ret;
 }
 
-bool Cvar::SetValue(int int_v, bool force_type)
+bool RE_Cvar::SetValue(int int_v, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = INT;
@@ -68,7 +68,7 @@ bool Cvar::SetValue(int int_v, bool force_type)
 	return ret;
 }
 
-bool Cvar::SetValue(unsigned int uint_v, bool force_type)
+bool RE_Cvar::SetValue(unsigned int uint_v, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = UINT;
@@ -76,7 +76,7 @@ bool Cvar::SetValue(unsigned int uint_v, bool force_type)
 	return ret;
 }
 
-bool Cvar::SetValue(long long int int64_v, bool force_type)
+bool RE_Cvar::SetValue(long long int int64_v, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = INT64;
@@ -84,7 +84,7 @@ bool Cvar::SetValue(long long int int64_v, bool force_type)
 	return ret;
 }
 
-bool Cvar::SetValue(unsigned long long int uint64_v, bool force_type)
+bool RE_Cvar::SetValue(unsigned long long int uint64_v, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = UINT64;
@@ -92,7 +92,7 @@ bool Cvar::SetValue(unsigned long long int uint64_v, bool force_type)
 	return ret;
 }
 
-bool Cvar::SetValue(double double_v, bool force_type)
+bool RE_Cvar::SetValue(double double_v, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = DOUBLE;
@@ -100,7 +100,7 @@ bool Cvar::SetValue(double double_v, bool force_type)
 	return ret;
 }
 
-bool Cvar::SetValue(float float_v, bool force_type)
+bool RE_Cvar::SetValue(float float_v, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = FLOAT;
@@ -108,7 +108,7 @@ bool Cvar::SetValue(float float_v, bool force_type)
 	return ret;
 }
 
-bool Cvar::SetValue(const char * char_p_v, bool force_type)
+bool RE_Cvar::SetValue(const char * char_p_v, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = CHAR_P;
@@ -116,7 +116,7 @@ bool Cvar::SetValue(const char * char_p_v, bool force_type)
 	return ret;
 }
 
-bool Cvar::SetValue(eastl::string string_v, bool force_type)
+bool RE_Cvar::SetValue(eastl::string string_v, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = STRING;
@@ -124,7 +124,7 @@ bool Cvar::SetValue(eastl::string string_v, bool force_type)
 	return ret;
 }
 
-bool Cvar::SetValue(RE_GameObject * go_v, bool force_type)
+bool RE_Cvar::SetValue(RE_GameObject * go_v, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = GAMEOBJECT;
@@ -132,80 +132,80 @@ bool Cvar::SetValue(RE_GameObject * go_v, bool force_type)
 	return ret;
 }
 
-Cvar::VAR_TYPE Cvar::GetType() const { return type; }
-bool Cvar::AsBool() const { return value.bool_v; }
-bool* Cvar::AsBool2() { return value.bool2_v; }
-bool* Cvar::AsBool3() { return value.bool3_v; }
-bool* Cvar::AsBool4() { return value.bool4_v; }
-int Cvar::AsInt() const { return value.int_v; }
-int* Cvar::AsInt2() {return value.int2_v; }
-int* Cvar::AsInt3() { return value.int3_v; }
-int* Cvar::AsInt4() { return value.int4_v; }
-unsigned int Cvar::AsUInt() const { return value.uint_v; }
-long long int Cvar::AsInt64() const { return value.int64_v; }
-unsigned long long int Cvar::AsUInt64() const { return value.uint64_v; }
-double Cvar::AsDouble() const { return value.double_v; }
-float Cvar::AsFloat() const { return value.float_v; }
-math::float2 Cvar::AsFloat2() const { return value.float2_v; }
-math::float3 Cvar::AsFloat3() const { return value.float3_v; }
-math::float4 Cvar::AsFloat4() const { return value.float4_v; }
-math::float3x3 Cvar::AsMat3() const { return value.mat3_v; }
-math::float4x4 Cvar::AsMat4() const { return value.mat4_v; }
+RE_Cvar::VAR_TYPE RE_Cvar::GetType() const { return type; }
+bool RE_Cvar::AsBool() const { return value.bool_v; }
+bool* RE_Cvar::AsBool2() { return value.bool2_v; }
+bool* RE_Cvar::AsBool3() { return value.bool3_v; }
+bool* RE_Cvar::AsBool4() { return value.bool4_v; }
+int RE_Cvar::AsInt() const { return value.int_v; }
+int* RE_Cvar::AsInt2() {return value.int2_v; }
+int* RE_Cvar::AsInt3() { return value.int3_v; }
+int* RE_Cvar::AsInt4() { return value.int4_v; }
+unsigned int RE_Cvar::AsUInt() const { return value.uint_v; }
+long long int RE_Cvar::AsInt64() const { return value.int64_v; }
+unsigned long long int RE_Cvar::AsUInt64() const { return value.uint64_v; }
+double RE_Cvar::AsDouble() const { return value.double_v; }
+float RE_Cvar::AsFloat() const { return value.float_v; }
+math::float2 RE_Cvar::AsFloat2() const { return value.float2_v; }
+math::float3 RE_Cvar::AsFloat3() const { return value.float3_v; }
+math::float4 RE_Cvar::AsFloat4() const { return value.float4_v; }
+math::float3x3 RE_Cvar::AsMat3() const { return value.mat3_v; }
+math::float4x4 RE_Cvar::AsMat4() const { return value.mat4_v; }
 
-float* Cvar::AsFloatPointer()
+float* RE_Cvar::AsFloatPointer()
 { 
 	float* ret = nullptr;
 
 	switch (type) {
-	case Cvar::FLOAT: ret = &value.float_v; break;
-	case Cvar::FLOAT2: ret = value.float2_v.ptr(); break;
-	case Cvar::FLOAT3: ret = value.float3_v.ptr(); break;
-	case Cvar::FLOAT4:
-	case Cvar::MAT2: ret = value.float4_v.ptr(); break;
-	case Cvar::MAT3: ret = value.mat3_v.ptr(); break;
-	case Cvar::MAT4: ret = value.mat4_v.ptr(); break; }
+	case RE_Cvar::FLOAT: ret = &value.float_v; break;
+	case RE_Cvar::FLOAT2: ret = value.float2_v.ptr(); break;
+	case RE_Cvar::FLOAT3: ret = value.float3_v.ptr(); break;
+	case RE_Cvar::FLOAT4:
+	case RE_Cvar::MAT2: ret = value.float4_v.ptr(); break;
+	case RE_Cvar::MAT3: ret = value.mat3_v.ptr(); break;
+	case RE_Cvar::MAT4: ret = value.mat4_v.ptr(); break; }
 
 	return ret;
 }
 
-const float* Cvar::AsFloatPointer() const
+const float* RE_Cvar::AsFloatPointer() const
 {
 	const float* ret = nullptr;
 
 	switch (type) {
-	case Cvar::FLOAT: ret = &value.float_v; break;
-	case Cvar::FLOAT2: ret = value.float2_v.ptr(); break;
-	case Cvar::FLOAT3: ret = value.float3_v.ptr(); break;
-	case Cvar::FLOAT4:
-	case Cvar::MAT2: ret = value.float4_v.ptr(); break;
-	case Cvar::MAT3: ret = value.mat3_v.ptr(); break;
-	case Cvar::MAT4: ret = value.mat4_v.ptr(); break;
+	case RE_Cvar::FLOAT: ret = &value.float_v; break;
+	case RE_Cvar::FLOAT2: ret = value.float2_v.ptr(); break;
+	case RE_Cvar::FLOAT3: ret = value.float3_v.ptr(); break;
+	case RE_Cvar::FLOAT4:
+	case RE_Cvar::MAT2: ret = value.float4_v.ptr(); break;
+	case RE_Cvar::MAT3: ret = value.mat3_v.ptr(); break;
+	case RE_Cvar::MAT4: ret = value.mat4_v.ptr(); break;
 	}
 
 	return ret;
 }
 
-const char * Cvar::AsCharP() const
+const char * RE_Cvar::AsCharP() const
 {
 	switch (type) {
-	case Cvar::CHAR_P: return value.char_p_v;
-	case Cvar::STRING: return value.string_v.c_str();
+	case RE_Cvar::CHAR_P: return value.char_p_v;
+	case RE_Cvar::STRING: return value.string_v.c_str();
 	default: return nullptr; }
 }
 
-RE_GameObject * Cvar::AsGO() const { return value.go_v; }
+RE_GameObject * RE_Cvar::AsGO() const { return value.go_v; }
 
-// --- DoubleCvar ------------------------------------------------------------------------------
-/*DoubleCvar::DoubleCvar(bool bool_v) : Cvar(bool_v) { original_value.bool_v = bool_v; }
-DoubleCvar::DoubleCvar(int int_v) : Cvar(int_v) { original_value.int_v = int_v; }
-DoubleCvar::DoubleCvar(unsigned int uint_v) : Cvar(uint_v) { original_value.uint_v = uint_v; }
-DoubleCvar::DoubleCvar(long long int int64_v) : Cvar(int64_v) { original_value.int64_v = int64_v; }
-DoubleCvar::DoubleCvar(unsigned long long int uint64_v) : Cvar(uint64_v) { original_value.uint64_v = uint64_v; }
-DoubleCvar::DoubleCvar(double double_v) : Cvar(double_v) { original_value.double_v = double_v; }
-DoubleCvar::DoubleCvar(float float_v) : Cvar(float_v) { original_value.float_v = float_v; }
-DoubleCvar::DoubleCvar(const char * char_p_v) : Cvar(char_p_v) { original_value.char_p_v = char_p_v; }
+// --- RE_Double_Cvar ------------------------------------------------------------------------------
+/*RE_Double_Cvar::RE_Double_Cvar(bool bool_v) : RE_Cvar(bool_v) { original_value.bool_v = bool_v; }
+RE_Double_Cvar::RE_Double_Cvar(int int_v) : RE_Cvar(int_v) { original_value.int_v = int_v; }
+RE_Double_Cvar::RE_Double_Cvar(unsigned int uint_v) : RE_Cvar(uint_v) { original_value.uint_v = uint_v; }
+RE_Double_Cvar::RE_Double_Cvar(long long int int64_v) : RE_Cvar(int64_v) { original_value.int64_v = int64_v; }
+RE_Double_Cvar::RE_Double_Cvar(unsigned long long int uint64_v) : RE_Cvar(uint64_v) { original_value.uint64_v = uint64_v; }
+RE_Double_Cvar::RE_Double_Cvar(double double_v) : RE_Cvar(double_v) { original_value.double_v = double_v; }
+RE_Double_Cvar::RE_Double_Cvar(float float_v) : RE_Cvar(float_v) { original_value.float_v = float_v; }
+RE_Double_Cvar::RE_Double_Cvar(const char * char_p_v) : RE_Cvar(char_p_v) { original_value.char_p_v = char_p_v; }
 
-bool DoubleCvar::ValueHasChanged() const
+bool RE_Double_Cvar::ValueHasChanged() const
 {
 	bool ret = false;
 	switch (type) {
@@ -220,7 +220,7 @@ bool DoubleCvar::ValueHasChanged() const
 	return ret;
 }
 
-bool DoubleCvar::SetValue(bool bool_v, bool force_type)
+bool RE_Double_Cvar::SetValue(bool bool_v, bool force_type)
 {
 	bool ret;
 	if (force_type)
@@ -232,7 +232,7 @@ bool DoubleCvar::SetValue(bool bool_v, bool force_type)
 	return ret;
 }
 
-bool DoubleCvar::SetValue(int int_v, bool force_type)
+bool RE_Double_Cvar::SetValue(int int_v, bool force_type)
 {
 	bool ret;
 	if (force_type)
@@ -244,7 +244,7 @@ bool DoubleCvar::SetValue(int int_v, bool force_type)
 	return ret;
 }
 
-bool DoubleCvar::SetValue(unsigned int uint_v, bool force_type)
+bool RE_Double_Cvar::SetValue(unsigned int uint_v, bool force_type)
 {
 	bool ret;
 	if (force_type)
@@ -256,7 +256,7 @@ bool DoubleCvar::SetValue(unsigned int uint_v, bool force_type)
 	return ret;
 }
 
-bool DoubleCvar::SetValue(long long int int64_v, bool force_type)
+bool RE_Double_Cvar::SetValue(long long int int64_v, bool force_type)
 {
 	bool ret;
 	if (force_type)
@@ -268,7 +268,7 @@ bool DoubleCvar::SetValue(long long int int64_v, bool force_type)
 	return ret;
 }
 
-bool DoubleCvar::SetValue(unsigned long long int uint64_v, bool force_type)
+bool RE_Double_Cvar::SetValue(unsigned long long int uint64_v, bool force_type)
 {
 	bool ret;
 	if (force_type)
@@ -280,7 +280,7 @@ bool DoubleCvar::SetValue(unsigned long long int uint64_v, bool force_type)
 	return ret;
 }
 
-bool DoubleCvar::SetValue(double double_v, bool force_type)
+bool RE_Double_Cvar::SetValue(double double_v, bool force_type)
 {
 	bool ret;
 	if (force_type)
@@ -292,7 +292,7 @@ bool DoubleCvar::SetValue(double double_v, bool force_type)
 	return ret;
 }
 
-bool DoubleCvar::SetValue(float float_v, bool force_type)
+bool RE_Double_Cvar::SetValue(float float_v, bool force_type)
 {
 	bool ret;
 	if (force_type)
@@ -304,7 +304,7 @@ bool DoubleCvar::SetValue(float float_v, bool force_type)
 	return ret;
 }
 
-bool DoubleCvar::SetValue(const char * char_p_v, bool force_type)
+bool RE_Double_Cvar::SetValue(const char * char_p_v, bool force_type)
 {
 	bool ret;
 	if (force_type)
@@ -316,86 +316,86 @@ bool DoubleCvar::SetValue(const char * char_p_v, bool force_type)
 	return ret;
 }*/
 
-ShaderCvar::ShaderCvar() : Cvar() {}
-ShaderCvar::ShaderCvar(const ShaderCvar& copy) : Cvar(copy), name(copy.name), location(copy.location), locationDeferred(copy.locationDeferred), custom(copy.custom) { }
-ShaderCvar::ShaderCvar(const bool bool_v) : Cvar(bool_v) {}
-ShaderCvar::ShaderCvar(const int int_v, bool sampler)
+RE_Shader_Cvar::RE_Shader_Cvar() : RE_Cvar() {}
+RE_Shader_Cvar::RE_Shader_Cvar(const RE_Shader_Cvar& copy) : RE_Cvar(copy), name(copy.name), location(copy.location), locationDeferred(copy.locationDeferred), custom(copy.custom) { }
+RE_Shader_Cvar::RE_Shader_Cvar(const bool bool_v) : RE_Cvar(bool_v) {}
+RE_Shader_Cvar::RE_Shader_Cvar(const int int_v, bool sampler)
 {
-	Cvar::type = (sampler) ? Cvar::SAMPLER : Cvar::INT;
-	Cvar::value.int_v = int_v;
+	RE_Cvar::type = (sampler) ? RE_Cvar::SAMPLER : RE_Cvar::INT;
+	RE_Cvar::value.int_v = int_v;
 }
-ShaderCvar::ShaderCvar(float float_v) : Cvar(float_v) {}
-ShaderCvar::ShaderCvar(const bool boola_v[], unsigned int count)
-{
-	switch (count) {
-	case 2: Cvar::type = BOOL2; memcpy(value.bool2_v, boola_v, sizeof(bool) * 2); break;
-	case 3: Cvar::type = BOOL3; memcpy(value.bool3_v, boola_v, sizeof(bool) * 3); break;
-	case 4: Cvar::type = BOOL4; memcpy(value.bool4_v, boola_v, sizeof(bool) * 4); break;
-	default: Cvar::type = BOOL; value.bool_v = boola_v[0]; break; }
-}
-
-ShaderCvar::ShaderCvar(const int inta_v[], unsigned int count)
+RE_Shader_Cvar::RE_Shader_Cvar(float float_v) : RE_Cvar(float_v) {}
+RE_Shader_Cvar::RE_Shader_Cvar(const bool boola_v[], unsigned int count)
 {
 	switch (count) {
-	case 2: Cvar::type = INT2; memcpy(value.int2_v, inta_v, sizeof(int) * 2); break;
-	case 3: Cvar::type = INT3; memcpy(value.int3_v, inta_v, sizeof(int) * 3); break;
-	case 4: Cvar::type = INT4; memcpy(value.int4_v, inta_v, sizeof(int) * 4); break;
-	default: Cvar::type = INT; value.int_v = inta_v[0]; break; }
+	case 2: RE_Cvar::type = BOOL2; memcpy(value.bool2_v, boola_v, sizeof(bool) * 2); break;
+	case 3: RE_Cvar::type = BOOL3; memcpy(value.bool3_v, boola_v, sizeof(bool) * 3); break;
+	case 4: RE_Cvar::type = BOOL4; memcpy(value.bool4_v, boola_v, sizeof(bool) * 4); break;
+	default: RE_Cvar::type = BOOL; value.bool_v = boola_v[0]; break; }
 }
 
-ShaderCvar::ShaderCvar(const math::float2 float2_v) {
-	Cvar::type = Cvar::FLOAT2;
-	Cvar::value.float2_v = float2_v; }
-
-ShaderCvar::ShaderCvar(const math::float3 float3_v) {
-	Cvar::type = Cvar::FLOAT3;
-	Cvar::value.float3_v = float3_v; }
-
-ShaderCvar::ShaderCvar(const math::float4 float4_v, bool mat2) {
-	Cvar::type = (mat2) ? Cvar::MAT2 : Cvar::FLOAT4;
-	Cvar::value.float4_v = float4_v; }
-
-ShaderCvar::ShaderCvar(const math::float3x3 mat3_v) {
-	Cvar::type = Cvar::MAT3;
-	Cvar::value.mat3_v = mat3_v; }
-
-ShaderCvar::ShaderCvar(const math::float4x4 mat4_v) {
-	Cvar::type = Cvar::MAT4;
-	Cvar::value.mat4_v = mat4_v; }
-
-ShaderCvar ShaderCvar::operator=(const ShaderCvar& cpy)
+RE_Shader_Cvar::RE_Shader_Cvar(const int inta_v[], unsigned int count)
 {
-	return ShaderCvar(cpy);
+	switch (count) {
+	case 2: RE_Cvar::type = INT2; memcpy(value.int2_v, inta_v, sizeof(int) * 2); break;
+	case 3: RE_Cvar::type = INT3; memcpy(value.int3_v, inta_v, sizeof(int) * 3); break;
+	case 4: RE_Cvar::type = INT4; memcpy(value.int4_v, inta_v, sizeof(int) * 4); break;
+	default: RE_Cvar::type = INT; value.int_v = inta_v[0]; break; }
 }
 
-bool ShaderCvar::SetValue(const ShaderCvar& copyValue, bool force_type)
+RE_Shader_Cvar::RE_Shader_Cvar(const math::float2 float2_v) {
+	RE_Cvar::type = RE_Cvar::FLOAT2;
+	RE_Cvar::value.float2_v = float2_v; }
+
+RE_Shader_Cvar::RE_Shader_Cvar(const math::float3 float3_v) {
+	RE_Cvar::type = RE_Cvar::FLOAT3;
+	RE_Cvar::value.float3_v = float3_v; }
+
+RE_Shader_Cvar::RE_Shader_Cvar(const math::float4 float4_v, bool mat2) {
+	RE_Cvar::type = (mat2) ? RE_Cvar::MAT2 : RE_Cvar::FLOAT4;
+	RE_Cvar::value.float4_v = float4_v; }
+
+RE_Shader_Cvar::RE_Shader_Cvar(const math::float3x3 mat3_v) {
+	RE_Cvar::type = RE_Cvar::MAT3;
+	RE_Cvar::value.mat3_v = mat3_v; }
+
+RE_Shader_Cvar::RE_Shader_Cvar(const math::float4x4 mat4_v) {
+	RE_Cvar::type = RE_Cvar::MAT4;
+	RE_Cvar::value.mat4_v = mat4_v; }
+
+RE_Shader_Cvar RE_Shader_Cvar::operator=(const RE_Shader_Cvar& cpy)
+{
+	return RE_Shader_Cvar(cpy);
+}
+
+bool RE_Shader_Cvar::SetValue(const RE_Shader_Cvar& copyValue, bool force_type)
 {
 	bool ret = false;
 	if (force_type) type = copyValue.type;
 
 	if (ret = (type == copyValue.type)) {
 		switch (type) {
-		case Cvar::BOOL: SetValue(copyValue.value.bool_v); break;
-		case Cvar::BOOL2: SetValue(&copyValue.value.bool2_v[0], 2); break;
-		case Cvar::BOOL3: SetValue(copyValue.value.bool3_v, 3); break;
-		case Cvar::BOOL4: SetValue(copyValue.value.bool4_v, 4); break;
-		case Cvar::INT: SetValue(copyValue.value.int_v); break;
-		case Cvar::INT2: SetValue(copyValue.value.int2_v, 2); break;
-		case Cvar::INT3: SetValue(copyValue.value.int3_v, 3); break;
-		case Cvar::INT4: SetValue(copyValue.value.int4_v, 4); break;
-		case Cvar::FLOAT: SetValue(copyValue.value.float_v); break;
-		case Cvar::FLOAT2: SetValue(copyValue.value.float2_v); break;
-		case Cvar::FLOAT3: SetValue(copyValue.value.float3_v); break;
-		case Cvar::FLOAT4: SetValue(copyValue.value.float4_v); break;
-		case Cvar::MAT2: SetValue(copyValue.value.float4_v); break;
-		case Cvar::MAT3: SetValue(copyValue.value.mat3_v); break;
-		case Cvar::MAT4: SetValue(copyValue.value.mat4_v); break;
-		case Cvar::SAMPLER: SetSampler(copyValue.value.char_p_v); break; } }
+		case RE_Cvar::BOOL: SetValue(copyValue.value.bool_v); break;
+		case RE_Cvar::BOOL2: SetValue(&copyValue.value.bool2_v[0], 2); break;
+		case RE_Cvar::BOOL3: SetValue(copyValue.value.bool3_v, 3); break;
+		case RE_Cvar::BOOL4: SetValue(copyValue.value.bool4_v, 4); break;
+		case RE_Cvar::INT: SetValue(copyValue.value.int_v); break;
+		case RE_Cvar::INT2: SetValue(copyValue.value.int2_v, 2); break;
+		case RE_Cvar::INT3: SetValue(copyValue.value.int3_v, 3); break;
+		case RE_Cvar::INT4: SetValue(copyValue.value.int4_v, 4); break;
+		case RE_Cvar::FLOAT: SetValue(copyValue.value.float_v); break;
+		case RE_Cvar::FLOAT2: SetValue(copyValue.value.float2_v); break;
+		case RE_Cvar::FLOAT3: SetValue(copyValue.value.float3_v); break;
+		case RE_Cvar::FLOAT4: SetValue(copyValue.value.float4_v); break;
+		case RE_Cvar::MAT2: SetValue(copyValue.value.float4_v); break;
+		case RE_Cvar::MAT3: SetValue(copyValue.value.mat3_v); break;
+		case RE_Cvar::MAT4: SetValue(copyValue.value.mat4_v); break;
+		case RE_Cvar::SAMPLER: SetSampler(copyValue.value.char_p_v); break; } }
 
 	return ret;
 }
 
-bool ShaderCvar::SetValue(const bool bool_v, bool force_type)
+bool RE_Shader_Cvar::SetValue(const bool bool_v, bool force_type)
 {
 	bool ret;
 	if (force_type) type = BOOL;
@@ -403,11 +403,11 @@ bool ShaderCvar::SetValue(const bool bool_v, bool force_type)
 	return ret;
 }
 
-bool ShaderCvar::SetValue(const bool boola_v[], unsigned int count, bool force_type)
+bool RE_Shader_Cvar::SetValue(const bool boola_v[], unsigned int count, bool force_type)
 {
 	bool ret = false;
 
-	Cvar::VAR_TYPE toCheck;
+	RE_Cvar::VAR_TYPE toCheck;
 	switch (count) {
 	case 2: toCheck = BOOL2; break;
 	case 3: toCheck = BOOL3; break;
@@ -426,7 +426,7 @@ bool ShaderCvar::SetValue(const bool boola_v[], unsigned int count, bool force_t
 	return ret;
 }
 
-bool ShaderCvar::SetValue(const int int_v, bool force_type)
+bool RE_Shader_Cvar::SetValue(const int int_v, bool force_type)
 {
 	bool ret;
 	if (force_type) type = INT; 
@@ -434,10 +434,10 @@ bool ShaderCvar::SetValue(const int int_v, bool force_type)
 	return ret;
 }
 
-bool ShaderCvar::SetValue(const int inta_v[], unsigned int count, bool force_type)
+bool RE_Shader_Cvar::SetValue(const int inta_v[], unsigned int count, bool force_type)
 {
 	bool ret;
-	Cvar::VAR_TYPE toCheck;
+	RE_Cvar::VAR_TYPE toCheck;
 	switch (count) {
 	case 2: toCheck = INT2; break;
 	case 3: toCheck = INT3; break;
@@ -456,7 +456,7 @@ bool ShaderCvar::SetValue(const int inta_v[], unsigned int count, bool force_typ
 	return ret;
 }
 
-bool ShaderCvar::SetValue(const float float_v, bool force_type)
+bool RE_Shader_Cvar::SetValue(const float float_v, bool force_type)
 {
 	bool ret;
 	if (force_type) type = FLOAT; 
@@ -464,7 +464,7 @@ bool ShaderCvar::SetValue(const float float_v, bool force_type)
 	return ret;
 }
 
-bool ShaderCvar::SetValue(const math::float2 float2_v, bool force_type)
+bool RE_Shader_Cvar::SetValue(const math::float2 float2_v, bool force_type)
 {
 	bool ret;
 	if (force_type) type = FLOAT2;
@@ -472,7 +472,7 @@ bool ShaderCvar::SetValue(const math::float2 float2_v, bool force_type)
 	return ret;
 }
 
-bool ShaderCvar::SetValue(const math::float3 float3_v, bool force_type)
+bool RE_Shader_Cvar::SetValue(const math::float3 float3_v, bool force_type)
 {
 	bool ret;
 	if (force_type) type = FLOAT3;
@@ -480,7 +480,7 @@ bool ShaderCvar::SetValue(const math::float3 float3_v, bool force_type)
 	return ret;
 }
 
-bool ShaderCvar::SetValue(const math::float4 float4_v, bool mat2, bool force_type)
+bool RE_Shader_Cvar::SetValue(const math::float4 float4_v, bool mat2, bool force_type)
 {
 	bool ret;
 	if (force_type) type = (mat2) ? MAT2 : FLOAT4;
@@ -488,7 +488,7 @@ bool ShaderCvar::SetValue(const math::float4 float4_v, bool mat2, bool force_typ
 	return ret;
 }
 
-bool ShaderCvar::SetValue(const math::float3x3 mat3_v, bool force_type)
+bool RE_Shader_Cvar::SetValue(const math::float3x3 mat3_v, bool force_type)
 {
 	bool ret;
 	if (force_type) type = MAT3;
@@ -496,7 +496,7 @@ bool ShaderCvar::SetValue(const math::float3x3 mat3_v, bool force_type)
 	return ret;
 }
 
-bool ShaderCvar::SetValue(const math::float4x4 mat4_v, bool force_type)
+bool RE_Shader_Cvar::SetValue(const math::float4x4 mat4_v, bool force_type)
 {
 	bool ret;
 	if (force_type) type = MAT4;
@@ -504,7 +504,7 @@ bool ShaderCvar::SetValue(const math::float4x4 mat4_v, bool force_type)
 	return ret;
 }
 
-bool ShaderCvar::SetSampler(const char* res_ptr, bool force_type)
+bool RE_Shader_Cvar::SetSampler(const char* res_ptr, bool force_type)
 {
 	bool ret;
 	if (force_type) type = SAMPLER;
@@ -512,7 +512,7 @@ bool ShaderCvar::SetSampler(const char* res_ptr, bool force_type)
 	return ret;
 }
 
-bool ShaderCvar::DrawPropieties(bool isInMemory)
+bool RE_Shader_Cvar::DrawPropieties(bool isInMemory)
 {
 	bool ret = false;
 	eastl::string n = name;
@@ -520,11 +520,11 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 	float* fPtr = nullptr;
 	switch (type)
 	{
-	case Cvar::BOOL:
+	case RE_Cvar::BOOL:
 		if(ImGui::Checkbox(name.c_str(), &value.bool_v))
 			ret = true;
 		break;
-	case Cvar::BOOL2:
+	case RE_Cvar::BOOL2:
 		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool2_v[0]))
 			ret = true;
@@ -533,7 +533,7 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 		if (ImGui::Checkbox(n.c_str(), &value.bool2_v[1]))
 			ret = true;
 		break;
-	case Cvar::BOOL3:
+	case RE_Cvar::BOOL3:
 		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool3_v[0]))
 			ret = true;
@@ -546,7 +546,7 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 		if (ImGui::Checkbox(n.c_str(), &value.bool3_v[2]))
 			ret = true;
 		break;
-	case Cvar::BOOL4:
+	case RE_Cvar::BOOL4:
 		n += eastl::to_string(count++);
 		if (ImGui::Checkbox(n.c_str(), &value.bool4_v[0]))
 			ret = true;
@@ -563,31 +563,31 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 		if (ImGui::Checkbox(n.c_str(), &value.bool4_v[3]))
 			ret = true;
 		break;
-	case Cvar::INT:
+	case RE_Cvar::INT:
 		if (ImGui::DragInt(name.c_str(), &value.int_v))
 			ret = true;
 		break;
-	case Cvar::INT2:
+	case RE_Cvar::INT2:
 		if (ImGui::DragInt2(name.c_str(), value.int2_v))
 			ret = true;
 		break;
-	case Cvar::INT3:
+	case RE_Cvar::INT3:
 		if (ImGui::DragInt3(name.c_str(), value.int3_v))
 			ret = true;
 		break;
-	case Cvar::INT4:
+	case RE_Cvar::INT4:
 		if (ImGui::DragInt4(name.c_str(), value.int4_v))
 			ret = true;
 		break;
-	case Cvar::FLOAT:
+	case RE_Cvar::FLOAT:
 		if (ImGui::DragFloat(name.c_str(), &value.float_v, 0.1f))
 			ret = true;
 		break;
-	case Cvar::FLOAT2:
+	case RE_Cvar::FLOAT2:
 		if (ImGui::DragFloat2(name.c_str(), value.float2_v.ptr(), 0.1f))
 			ret = true;
 		break;
-	case Cvar::FLOAT3:
+	case RE_Cvar::FLOAT3:
 		n += " as vector";
 		if (ImGui::DragFloat3(n.c_str(), value.float3_v.ptr(), 0.1f))
 			ret = true;
@@ -596,7 +596,7 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 		if (ImGui::ColorEdit3(n.c_str(), value.float3_v.ptr()))
 			ret = true;
 		break;
-	case Cvar::FLOAT4:
+	case RE_Cvar::FLOAT4:
 		n += " as vector";
 		if (ImGui::DragFloat4(n.c_str(), value.float4_v.ptr(), 0.1f))
 			ret = true;
@@ -605,7 +605,7 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 		if (ImGui::ColorEdit4(n.c_str(), value.float4_v.ptr(), ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaPreview))
 			ret = true;
 		break;
-	case Cvar::MAT2:
+	case RE_Cvar::MAT2:
 		fPtr = value.float4_v.ptr();
 		n += eastl::to_string(count++);
 		if (ImGui::DragFloat2(n.c_str(), fPtr, 0.1f))
@@ -616,7 +616,7 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 		if (ImGui::DragFloat2(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		break;
-	case Cvar::MAT3:
+	case RE_Cvar::MAT3:
 		fPtr = value.mat3_v.ptr();
 		n += eastl::to_string(count++);
 		if (ImGui::DragFloat3(n.c_str(), fPtr, 0.1f))
@@ -632,7 +632,7 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 		if (ImGui::DragFloat3(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		break;
-	case Cvar::MAT4:
+	case RE_Cvar::MAT4:
 		fPtr = value.mat4_v.ptr();
 		n += eastl::to_string(count++);
 		if (ImGui::DragFloat4(n.c_str(), fPtr, 0.1f))
@@ -648,7 +648,7 @@ bool ShaderCvar::DrawPropieties(bool isInMemory)
 		if (ImGui::DragFloat4(n.c_str(), fPtr, 0.1f))
 			ret = true;
 		break;
-	case Cvar::SAMPLER:
+	case RE_Cvar::SAMPLER:
 		ImGui::Text("Sampler: %s", name.c_str());
 		if (!value.char_p_v)  ImGui::Text("No texture selected:");
 		else {

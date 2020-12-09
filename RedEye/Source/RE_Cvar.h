@@ -11,22 +11,22 @@
 
 class RE_GameObject;
 
-class Cvar // Global Value Container
+class RE_Cvar // Global Value Container
 {
 public:
-	Cvar();
-	Cvar(const Cvar& copy);
-	Cvar(bool bool_v);
-	Cvar(int int_v);
-	Cvar(unsigned int uint_v);
-	Cvar(long long int int64_v);
-	Cvar(unsigned long long int uint64_v);
-	Cvar(double double_v);
-	Cvar(float float_v);
-	Cvar(const char* char_p_v);
-	Cvar(eastl::string string_v);
-	Cvar(RE_GameObject* go_v);
-	Cvar(const math::float4x4 mat4_v);
+	RE_Cvar();
+	RE_Cvar(const RE_Cvar& copy);
+	RE_Cvar(bool bool_v);
+	RE_Cvar(int int_v);
+	RE_Cvar(unsigned int uint_v);
+	RE_Cvar(long long int int64_v);
+	RE_Cvar(unsigned long long int uint64_v);
+	RE_Cvar(double double_v);
+	RE_Cvar(float float_v);
+	RE_Cvar(const char* char_p_v);
+	RE_Cvar(eastl::string string_v);
+	RE_Cvar(RE_GameObject* go_v);
+	RE_Cvar(const math::float4x4 mat4_v);
 
 public:
 	enum VAR_TYPE : unsigned int
@@ -124,25 +124,25 @@ public:
 	RE_GameObject*			AsGO() const;
 };
 
-class ShaderCvar : public Cvar
+class RE_Shader_Cvar : public RE_Cvar
 {
 public: 
-	ShaderCvar();
-	ShaderCvar(const ShaderCvar& copy);
-	ShaderCvar(const bool bool_v);
-	ShaderCvar(const int int_v, bool sampler = false);
-	ShaderCvar(const float float_v);
-	ShaderCvar(const bool boola_v[], unsigned int count);
-	ShaderCvar(const int inta_v[], unsigned int count);
-	ShaderCvar(const math::float2 float2_v);
-	ShaderCvar(const math::float3 float3_v);
-	ShaderCvar(const math::float4 float4_v, bool mat2 = false);
-	ShaderCvar(const math::float3x3 mat3_v);
-	ShaderCvar(const math::float4x4 mat4_v);
+	RE_Shader_Cvar();
+	RE_Shader_Cvar(const RE_Shader_Cvar& copy);
+	RE_Shader_Cvar(const bool bool_v);
+	RE_Shader_Cvar(const int int_v, bool sampler = false);
+	RE_Shader_Cvar(const float float_v);
+	RE_Shader_Cvar(const bool boola_v[], unsigned int count);
+	RE_Shader_Cvar(const int inta_v[], unsigned int count);
+	RE_Shader_Cvar(const math::float2 float2_v);
+	RE_Shader_Cvar(const math::float3 float3_v);
+	RE_Shader_Cvar(const math::float4 float4_v, bool mat2 = false);
+	RE_Shader_Cvar(const math::float3x3 mat3_v);
+	RE_Shader_Cvar(const math::float4x4 mat4_v);
 
-	ShaderCvar operator=(const ShaderCvar& cpy);
+	RE_Shader_Cvar operator=(const RE_Shader_Cvar& cpy);
 
-	bool SetValue(const ShaderCvar& copyValue, bool force_type = false);
+	bool SetValue(const RE_Shader_Cvar& copyValue, bool force_type = false);
 	bool SetValue(const bool bool_v, bool force_type = false) override;
 	bool SetValue(const bool boola_v[], unsigned int count, bool force_type = false);
 	bool SetValue(const int int_v, bool force_type = false) override;
@@ -162,17 +162,17 @@ public:
 	bool custom = true;
 };
 
-/*class DoubleCvar : public Cvar
+/*class RE_Double_Cvar : public RE_Cvar
 {
 public:
-	DoubleCvar(bool bool_v);
-	DoubleCvar(int int_v);
-	DoubleCvar(unsigned int uint_v);
-	DoubleCvar(long long int int64_v);
-	DoubleCvar(unsigned long long int uint64_v);
-	DoubleCvar(double double_v);
-	DoubleCvar(float float_v);
-	DoubleCvar(const char* char_p_v);
+	RE_Double_Cvar(bool bool_v);
+	RE_Double_Cvar(int int_v);
+	RE_Double_Cvar(unsigned int uint_v);
+	RE_Double_Cvar(long long int int64_v);
+	RE_Double_Cvar(unsigned long long int uint64_v);
+	RE_Double_Cvar(double double_v);
+	RE_Double_Cvar(float float_v);
+	RE_Double_Cvar(const char* char_p_v);
 
 	bool ValueHasChanged() const;
 

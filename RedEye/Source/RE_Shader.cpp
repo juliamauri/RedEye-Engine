@@ -4,7 +4,7 @@
 #include "RE_Time.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "RE_ResourceManager.h"
 #include "RE_ShaderImporter.h"
@@ -59,7 +59,7 @@ void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuff
 	eastl::string libraryPath("Library/Shaders/");
 	libraryPath += GetMD5();
 	SetLibraryPath(libraryPath.c_str());
-	App::shaders.LoadFromBuffer(&ID, vertexBuffer, vertexLenght, fragmentBuffer, fragmentLenght, geometryBuffer, geometryLenght);
+	RE_ShaderImporter::LoadFromBuffer(&ID, vertexBuffer, vertexLenght, fragmentBuffer, fragmentLenght, geometryBuffer, geometryLenght);
 
 	uniforms.clear();
 	eastl::vector<eastl::string> lines;
@@ -79,7 +79,7 @@ void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuff
 		if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
 	}
 
-	MountShaderCvar(lines);
+	MountRE_Shader_Cvar(lines);
 	GetLocations();
 	LibrarySave();
 
@@ -131,7 +131,7 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	if (!isInternal()) SetMetaPath("Assets/Shaders/");
 }
 
-eastl::vector<ShaderCvar> RE_Shader::GetUniformValues() { return uniforms; }
+eastl::vector<RE_Shader_Cvar> RE_Shader::GetUniformValues() { return uniforms; }
 
 void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane)
 {
@@ -219,7 +219,7 @@ void RE_Shader::ReImport()
 	else GetLocations();
 
 	//Send Resource Event
-	Event::Push(RE_EventType::RESOURCE_CHANGED, App::resources, Cvar(GetMD5()));
+	Event::Push(RE_EventType::RESOURCE_CHANGED, App::resources, RE_Cvar(GetMD5()));
 }
 
 bool RE_Shader::IsPathOnShader(const char* assetPath)
@@ -277,7 +277,7 @@ void RE_Shader::ParseAndGetUniforms()
 			if (!slines.empty()) lines.insert(lines.end(), slines.begin(), slines.end());
 		}
 	}
-	MountShaderCvar(lines);
+	MountRE_Shader_Cvar(lines);
 }
 
 eastl::vector<eastl::string> RE_Shader::GetUniformLines(const char* buffer)
@@ -298,7 +298,7 @@ eastl::vector<eastl::string> RE_Shader::GetUniformLines(const char* buffer)
 	return lines;
 }
 
-void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
+void RE_Shader::MountRE_Shader_Cvar(eastl::vector<eastl::string> uniformLines)
 {
 	projection = view = model = time = dt = depth = viewport_w = viewport_h = near_plane = far_plane = view_pos = -1;
 	uniforms.clear();
@@ -309,7 +309,7 @@ void RE_Shader::MountShaderCvar(eastl::vector<eastl::string> uniformLines)
 		int pos = uniform.find_first_of(" ");
 		if (pos != eastl::string::npos)
 		{
-			ShaderCvar sVar;
+			RE_Shader_Cvar sVar;
 
 			pos++;
 			eastl::string typeAndName = uniform.substr(pos);
@@ -404,7 +404,7 @@ void RE_Shader::Draw()
 			App::editor->OpenTextEditor(shaderSettings.geometryShader.c_str(), &shaderSettings.geometryShader);
 }
 
-void RE_Shader::SaveResourceMeta(JSONNode* metaNode)
+void RE_Shader::SaveResourceMeta(RE_Json* metaNode)
 {
 	metaNode->PushString("vertexPath", shaderSettings.vertexShader.c_str());
 	metaNode->PushSignedLongLong("vLastModified", shaderSettings.vlastModified);
@@ -413,7 +413,7 @@ void RE_Shader::SaveResourceMeta(JSONNode* metaNode)
 	metaNode->PushString("geometryPath", shaderSettings.geometryShader.c_str());
 	metaNode->PushSignedLongLong("gLastModified", shaderSettings.glastModified);
 
-	JSONNode* nuniforms = metaNode->PushJObject("uniforms");
+	RE_Json* nuniforms = metaNode->PushJObject("uniforms");
 	nuniforms->PushUInt("size", uniforms.size());
 	if (!uniforms.empty())
 	{
@@ -427,7 +427,7 @@ void RE_Shader::SaveResourceMeta(JSONNode* metaNode)
 	DEL(nuniforms);
 }
 
-void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
+void RE_Shader::LoadResourceMeta(RE_Json* metaNode)
 {
 	shaderSettings.vertexShader = metaNode->PullString("vertexPath", "");
 	shaderSettings.vlastModified = metaNode->PullSignedLongLong("vLastModified", 0);
@@ -438,19 +438,19 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 
 	projection = view = model = time = dt = depth = viewport_w = viewport_h = near_plane = far_plane = view_pos = -1;
 	uniforms.clear();
-	JSONNode* nuniforms = metaNode->PullJObject("uniforms");
+	RE_Json* nuniforms = metaNode->PullJObject("uniforms");
 	uint size = nuniforms->PullUInt("size", 0);
 	if (size) {
 		eastl::string id;
 		for (uint i = 0; i < size; i++)
 		{
-			ShaderCvar sVar;
+			RE_Shader_Cvar sVar;
 			id = "name";
 			id += eastl::to_string(i);
 			sVar.name = nuniforms->PullString(id.c_str(), "");
 			id = "type";
 			id += eastl::to_string(i);
-			Cvar::VAR_TYPE vT = (Cvar::VAR_TYPE)nuniforms->PullUInt(id.c_str(), ShaderCvar::UNDEFINED);
+			RE_Cvar::VAR_TYPE vT = (RE_Cvar::VAR_TYPE)nuniforms->PullUInt(id.c_str(), RE_Shader_Cvar::UNDEFINED);
 			id = "custom";
 			id += eastl::to_string(i);
 			sVar.custom = nuniforms->PullBool(id.c_str(), true);
@@ -465,22 +465,22 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 			float f = 0.0;
 
 			switch (vT) {
-			case Cvar::BOOL: sVar.SetValue(true, true); break;
-			case Cvar::BOOL2: sVar.SetValue(b2, 2, true); break;
-			case Cvar::BOOL3: sVar.SetValue(b3, 3, true); break;
-			case Cvar::BOOL4: sVar.SetValue(b4, 4, true); break;
-			case Cvar::INT: sVar.SetValue(-1, true); break;
-			case Cvar::INT2: sVar.SetValue(i2, 2, true); break;
-			case Cvar::INT3: sVar.SetValue(i3, 3, true); break;
-			case Cvar::INT4: sVar.SetValue(i4, 4, true); break;
-			case Cvar::FLOAT: sVar.SetValue(f, true); break;
-			case Cvar::FLOAT2: sVar.SetValue(math::float2::zero, true); break;
-			case Cvar::FLOAT3: sVar.SetValue(math::float3::zero, true); break;
-			case Cvar::FLOAT4: sVar.SetValue(math::float4::zero, false, true); break;
-			case Cvar::MAT2: sVar.SetValue(math::float4::zero, true, true); break;
-			case Cvar::MAT3: sVar.SetValue(math::float3x3::zero, true); break;
-			case Cvar::MAT4: sVar.SetValue(math::float4x4::zero, true); break;
-			case Cvar::SAMPLER: sVar.SetSampler(nullptr, true); break; }
+			case RE_Cvar::BOOL: sVar.SetValue(true, true); break;
+			case RE_Cvar::BOOL2: sVar.SetValue(b2, 2, true); break;
+			case RE_Cvar::BOOL3: sVar.SetValue(b3, 3, true); break;
+			case RE_Cvar::BOOL4: sVar.SetValue(b4, 4, true); break;
+			case RE_Cvar::INT: sVar.SetValue(-1, true); break;
+			case RE_Cvar::INT2: sVar.SetValue(i2, 2, true); break;
+			case RE_Cvar::INT3: sVar.SetValue(i3, 3, true); break;
+			case RE_Cvar::INT4: sVar.SetValue(i4, 4, true); break;
+			case RE_Cvar::FLOAT: sVar.SetValue(f, true); break;
+			case RE_Cvar::FLOAT2: sVar.SetValue(math::float2::zero, true); break;
+			case RE_Cvar::FLOAT3: sVar.SetValue(math::float3::zero, true); break;
+			case RE_Cvar::FLOAT4: sVar.SetValue(math::float4::zero, false, true); break;
+			case RE_Cvar::MAT2: sVar.SetValue(math::float4::zero, true, true); break;
+			case RE_Cvar::MAT3: sVar.SetValue(math::float3x3::zero, true); break;
+			case RE_Cvar::MAT4: sVar.SetValue(math::float4x4::zero, true); break;
+			case RE_Cvar::SAMPLER: sVar.SetSampler(nullptr, true); break; }
 
 			uniforms.push_back(sVar);
 			if (!sVar.custom)
@@ -509,12 +509,12 @@ void RE_Shader::LoadResourceMeta(JSONNode* metaNode)
 void RE_Shader::AssetLoad()
 {
 	bool loaded = false;
-	loaded = App::shaders.LoadFromAssets(&ID,
+	loaded = RE_ShaderImporter::LoadFromAssets(&ID,
 		(!shaderSettings.vertexShader.empty()) ? shaderSettings.vertexShader.c_str() : nullptr,
 		(!shaderSettings.fragmentShader.empty()) ? shaderSettings.fragmentShader.c_str() : nullptr,
 		(!shaderSettings.geometryShader.empty()) ? shaderSettings.geometryShader.c_str() : nullptr);
 
-	if (!loaded) RE_LOG_ERROR("Error while loading shader %s on assets:\n%s\n", GetName(), App::shaders.GetShaderError());
+	if (!loaded) RE_LOG_ERROR("Error while loading shader %s on assets:\n%s\n", GetName(), RE_ShaderImporter::GetShaderError());
 	else ResourceContainer::inMemory = true;
 }
 
@@ -523,7 +523,7 @@ void RE_Shader::LibraryLoad()
 	RE_FileBuffer libraryLoad(GetLibraryPath());
 	if (libraryLoad.Load())
 	{
-		if (!App::shaders.LoadFromBinary(libraryLoad.GetBuffer(), libraryLoad.GetSize(), &ID))
+		if (!RE_ShaderImporter::LoadFromBinary(libraryLoad.GetBuffer(), libraryLoad.GetSize(), &ID))
 		{
 			AssetLoad();
 			LibrarySave();
@@ -537,6 +537,6 @@ void RE_Shader::LibrarySave()
 	RE_FileBuffer librarySave(GetLibraryPath(), App::fs->GetZipPath());
 	char* buffer = nullptr;
 	int size = 0;
-	if (App::shaders.GetBinaryProgram(ID, &buffer, &size)) librarySave.Save(buffer, size);
+	if (RE_ShaderImporter::GetBinaryProgram(ID, &buffer, &size)) librarySave.Save(buffer, size);
 	DEL_A(buffer);
 }

@@ -4,9 +4,6 @@
 #include "EventListener.h"
 #include "RE_CameraManager.h"
 #include "RE_PrimitiveManager.h"
-#include "RE_TextureImporter.h"
-#include "RE_ModelImporter.h"
-#include "RE_ShaderImporter.h"
 #include "Optick/include/optick.h"
 #include <EASTL/string.h>
 #include <EASTL/list.h>
@@ -73,17 +70,12 @@ public:
 	static RE_ThumbnailManager* thumbnail;
 	static RE_ResourceManager* resources;
 
-	// Importers
-	static RE_TextureImporter textures;
-	static RE_ModelImporter modelImporter;
-	static RE_ShaderImporter shaders;
-
 private:
 
-	bool want_to_load_config = false;
-	bool want_to_save_config = false;
-	bool want_to_quit = false;
-	bool save_config = true;
+	bool load_config = false;
+	bool save_config = false;
+	bool quit = false;
+	bool save_on_exit = true;
 
 	static Application* instance;
 	static eastl::string app_name;

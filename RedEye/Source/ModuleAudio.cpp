@@ -6,7 +6,7 @@
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 
 #include "ImGui/imgui.h"
 #include "ImGui/misc/cpp/imgui_stdlib.h"
@@ -284,7 +284,7 @@ void ModuleAudio::DrawWwiseElementsDetected()
 
 void ModuleAudio::Load()
 {
-	JSONNode* node = App::config->GetRootNode(name);
+	RE_Json* node = App::config->GetRootNode(name);
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
 	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
 	DEL(node);
@@ -292,13 +292,14 @@ void ModuleAudio::Load()
 
 void ModuleAudio::Save() const
 {
-	JSONNode* node = App::config->GetRootNode(name);
+	RE_Json* node = App::config->GetRootNode(name);
 	node->PushString("FolderBanks", audioBanksFolderPath.c_str());
 	DEL(node);
 }
 
 unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 {
+	OPTICK_CATEGORY("Read Audio Bank Changes - File system", Optick::Category::IO);
 	Timer time;
 	if (located_banksFolder)
 	{
@@ -326,7 +327,7 @@ unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 				Config soundbanksInfo(soundbankInfoPath.c_str(), "None");
 				if (soundbanksInfo.LoadFromWindowsPath())
 				{
-					JSONNode* rootNode = soundbanksInfo.GetRootNode("SoundBanksInfo");
+					RE_Json* rootNode = soundbanksInfo.GetRootNode("SoundBanksInfo");
 					rapidjson::Value* soundBanks = &rootNode->GetDocument()->FindMember("SoundBanksInfo")->value.FindMember("SoundBanks")->value;
 					for (auto& v : soundBanks->GetArray())
 					{

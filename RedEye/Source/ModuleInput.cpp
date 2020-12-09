@@ -161,14 +161,14 @@ void ModuleInput::HandleSDLEventQueue()
 			case SDL_WINDOWEVENT_HIDDEN:/**< Window has been hidden */ break;
 			case SDL_WINDOWEVENT_EXPOSED:/**< Window has been exposed and should be redrawn */ break;
 			case SDL_WINDOWEVENT_MOVED:/**< Window has been moved to data1, data2 */
-				Event::Push(WINDOW_MOVED, App::window, Cvar(e.window.data1), Cvar(e.window.data2));
+				Event::Push(WINDOW_MOVED, App::window, RE_Cvar(e.window.data1), RE_Cvar(e.window.data2));
 				break;
 			case SDL_WINDOWEVENT_RESIZED:/**< Window has been resized to data1xdata2 */
 				// this sneaky event is always preceded by SDL_WINDOWEVENT_SIZE_CHANGED
 				//App->renderer3d->MainContextChanged(width = e->window.data1, height = e->window.data2);
 				break;
 			case SDL_WINDOWEVENT_SIZE_CHANGED:/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
-				Event::Push(WINDOW_SIZE_CHANGED, App::window, Cvar(e.window.data1), Cvar(e.window.data2));
+				Event::Push(WINDOW_SIZE_CHANGED, App::window, RE_Cvar(e.window.data1), RE_Cvar(e.window.data2));
 				break;
 			case SDL_WINDOWEVENT_MINIMIZED:/**< Window has been minimized */ break;
 			case SDL_WINDOWEVENT_MAXIMIZED:/**< Window has been maximized */ break;

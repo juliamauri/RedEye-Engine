@@ -73,11 +73,11 @@
       <FileName>Event.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="RE_LogManager" Collapsed="true">
+  <Class Name="RE_ConsoleLog" Collapsed="true">
     <Position X="2.5" Y="12" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAIAAAAAACAABAAAAAAAAAAAAAAEAAAAAAAAAAAoAAE=</HashCode>
-      <FileName>RE_LogManager.h</FileName>
+      <FileName>RE_ConsoleLog.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="EditorWindow" Collapsed="true">
@@ -263,18 +263,18 @@
       <FileName>AABBDynamicTree.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Cvar" Collapsed="true">
+  <Class Name="RE_Cvar" Collapsed="true">
     <Position X="5.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AEAAAgAAACAAggABgAAIAAACYBABACEDABACAAAgAAg=</HashCode>
-      <FileName>Cvar.h</FileName>
+      <FileName>RE_Cvar.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="ShaderCvar" Collapsed="true">
+  <Class Name="RE_Shader_Cvar" Collapsed="true">
     <Position X="7.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAACAIgAAAAAAAAACAAAEAAAAAAAgAQACAAE=</HashCode>
-      <FileName>Cvar.h</FileName>
+      <FileName>RE_Cvar.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PoolMapped&lt;TYPEVALUE, TYPEKEY, size, increment&gt;" Collapsed="true">
@@ -497,7 +497,7 @@
       <FileName>RE_FileSystem.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="JSONNode" Collapsed="true">
+  <Class Name="RE_Json" Collapsed="true">
     <Position X="3.5" Y="3" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ABCDCQAAQAQkABAIAoBIAAAAEAAAAGAGQgigAEQACS4=</HashCode>
@@ -738,7 +738,7 @@
     <Position X="4.25" Y="12" Width="1.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAYAAAAAAQ=</HashCode>
-      <FileName>RE_LogManager.h</FileName>
+      <FileName>RE_ConsoleLog.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="RE_ModelSettings" Collapsed="true">
@@ -941,7 +941,7 @@
     <Position X="5.75" Y="12" Width="1.25" />
     <TypeIdentifier>
       <HashCode>AIIAAAAAAQAAAIAAAAAAAAAAAAAAAAAAMgAAAABAAIA=</HashCode>
-      <FileName>RE_LogManager.h</FileName>
+      <FileName>RE_ConsoleLog.h</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="GameState" Collapsed="true">

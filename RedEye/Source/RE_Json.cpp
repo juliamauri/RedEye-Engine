@@ -1,21 +1,21 @@
-#include "JSONNode.h"
+#include "RE_Json.h"
 
 #include "Globals.h"
 #include "RE_Config.h"
 #include "RapidJson\include\pointer.h"
 
-JSONNode::JSONNode(const char* path, Config* config, bool isArray) : pointerPath(path), config(config)
+RE_Json::RE_Json(const char* path, Config* config, bool isArray) : pointerPath(path), config(config)
 {
 	if (isArray) rapidjson::Pointer(path).Get(config->document)->SetArray();
 }
 
-JSONNode::JSONNode(JSONNode& node) : pointerPath(node.pointerPath), config(node.config) {}
-JSONNode::~JSONNode() { config = nullptr; }
+RE_Json::RE_Json(RE_Json& node) : pointerPath(node.pointerPath), config(node.config) {}
+RE_Json::~RE_Json() { config = nullptr; }
 
 
 // Push ============================================================
 
-void JSONNode::PushBool(const char* name, const bool value)
+void RE_Json::PushBool(const char* name, const bool value)
 {
 	if (name)
 	{
@@ -24,7 +24,7 @@ void JSONNode::PushBool(const char* name, const bool value)
 	}
 }
 
-void JSONNode::PushBool(const char* name, const bool* value, unsigned int quantity)
+void RE_Json::PushBool(const char* name, const bool* value, unsigned int quantity)
 {
 	if (name)
 	{
@@ -35,7 +35,7 @@ void JSONNode::PushBool(const char* name, const bool* value, unsigned int quanti
 	}
 }
 
-void JSONNode::PushInt(const char* name, const int value)
+void RE_Json::PushInt(const char* name, const int value)
 {
 	if (name)
 	{
@@ -44,7 +44,7 @@ void JSONNode::PushInt(const char* name, const int value)
 	}
 }
 
-void JSONNode::PushInt(const char* name, const int* value, unsigned int quantity)
+void RE_Json::PushInt(const char* name, const int* value, unsigned int quantity)
 {
 	if (name)
 	{
@@ -55,7 +55,7 @@ void JSONNode::PushInt(const char* name, const int* value, unsigned int quantity
 	}
 }
 
-void JSONNode::PushUInt(const char* name, const unsigned int value)
+void RE_Json::PushUInt(const char* name, const unsigned int value)
 {
 	if (name)
 	{
@@ -64,7 +64,7 @@ void JSONNode::PushUInt(const char* name, const unsigned int value)
 	}
 }
 
-void JSONNode::PushUInt(const char* name, const unsigned int* value, unsigned int quantity)
+void RE_Json::PushUInt(const char* name, const unsigned int* value, unsigned int quantity)
 {
 	if (name)
 	{
@@ -75,7 +75,7 @@ void JSONNode::PushUInt(const char* name, const unsigned int* value, unsigned in
 	}
 }
 
-void JSONNode::PushFloat(const char* name, const float value)
+void RE_Json::PushFloat(const char* name, const float value)
 {
 	if (name)
 	{
@@ -84,7 +84,7 @@ void JSONNode::PushFloat(const char* name, const float value)
 	}
 }
 
-void JSONNode::PushFloat(const char* name, math::float2 value)
+void RE_Json::PushFloat(const char* name, math::float2 value)
 {
 	if (name)
 	{
@@ -95,7 +95,7 @@ void JSONNode::PushFloat(const char* name, math::float2 value)
 	}
 }
 
-void JSONNode::PushFloatVector(const char* name, math::vec vector)
+void RE_Json::PushFloatVector(const char* name, math::vec vector)
 {
 	if (name)
 	{
@@ -106,7 +106,7 @@ void JSONNode::PushFloatVector(const char* name, math::vec vector)
 	}
 }
 
-void JSONNode::PushFloat4(const char* name, math::float4 vector)
+void RE_Json::PushFloat4(const char* name, math::float4 vector)
 {
 	if (name)
 	{
@@ -117,7 +117,7 @@ void JSONNode::PushFloat4(const char* name, math::float4 vector)
 	}
 }
 
-void JSONNode::PushMat3(const char* name, math::float3x3 mat3)
+void RE_Json::PushMat3(const char* name, math::float3x3 mat3)
 {
 	if (name)
 	{
@@ -128,7 +128,7 @@ void JSONNode::PushMat3(const char* name, math::float3x3 mat3)
 	}
 }
 
-void JSONNode::PushMat4(const char* name, math::float4x4 mat4)
+void RE_Json::PushMat4(const char* name, math::float4x4 mat4)
 {
 	if (name)
 	{
@@ -139,7 +139,7 @@ void JSONNode::PushMat4(const char* name, math::float4x4 mat4)
 	}
 }
 
-void JSONNode::PushDouble(const char* name, const double value)
+void RE_Json::PushDouble(const char* name, const double value)
 {
 	if (name)
 	{
@@ -148,7 +148,7 @@ void JSONNode::PushDouble(const char* name, const double value)
 	}
 }
 
-void JSONNode::PushSignedLongLong(const char* name, const signed long long value)
+void RE_Json::PushSignedLongLong(const char* name, const signed long long value)
 {
 	if (name)
 	{
@@ -157,7 +157,7 @@ void JSONNode::PushSignedLongLong(const char* name, const signed long long value
 	}
 }
 
-void JSONNode::PushUnsignedLongLong(const char* name, const unsigned long long value)
+void RE_Json::PushUnsignedLongLong(const char* name, const unsigned long long value)
 {
 	if (name)
 	{
@@ -166,7 +166,7 @@ void JSONNode::PushUnsignedLongLong(const char* name, const unsigned long long v
 	}
 }
 
-void JSONNode::PushString(const char* name, const char* value)
+void RE_Json::PushString(const char* name, const char* value)
 {
 	if (name)
 	{
@@ -175,20 +175,20 @@ void JSONNode::PushString(const char* name, const char* value)
 	}
 }
 
-void JSONNode::PushValue(rapidjson::Value* val)
+void RE_Json::PushValue(rapidjson::Value* val)
 {
 	rapidjson::Value* val_push = rapidjson::Pointer(pointerPath.c_str()).Get(config->document);
 	if (val_push->IsArray()) val_push->PushBack(*val, config->document.GetAllocator());
 }
 
-JSONNode* JSONNode::PushJObject(const char* name)
+RE_Json* RE_Json::PushJObject(const char* name)
 {
-	JSONNode* ret = nullptr;
+	RE_Json* ret = nullptr;
 
 	if (name)
 	{
 		eastl::string path = pointerPath + "/" + name;
-		ret = new JSONNode(path.c_str(), config);
+		ret = new RE_Json(path.c_str(), config);
 	}
 
 	return ret;
@@ -196,7 +196,7 @@ JSONNode* JSONNode::PushJObject(const char* name)
 
 // Pull ============================================================
 
-bool JSONNode::PullBool(const char* name, bool deflt)
+bool RE_Json::PullBool(const char* name, bool deflt)
 {
 	bool ret = deflt;
 
@@ -210,7 +210,7 @@ bool JSONNode::PullBool(const char* name, bool deflt)
 	return ret;
 }
 
-bool* JSONNode::PullBool(const char* name, unsigned int quantity, bool deflt)
+bool* RE_Json::PullBool(const char* name, unsigned int quantity, bool deflt)
 {
 	bool* ret = new bool[quantity];
 	bool* cursor = ret;
@@ -237,7 +237,7 @@ bool* JSONNode::PullBool(const char* name, unsigned int quantity, bool deflt)
 	return ret;
 }
 
-int JSONNode::PullInt(const char* name, int deflt)
+int RE_Json::PullInt(const char* name, int deflt)
 {
 	int ret = deflt;
 
@@ -251,7 +251,7 @@ int JSONNode::PullInt(const char* name, int deflt)
 	return ret;
 }
 
-int* JSONNode::PullInt(const char* name, unsigned int quantity, int deflt)
+int* RE_Json::PullInt(const char* name, unsigned int quantity, int deflt)
 {
 	int* ret = new int[quantity];
 	int* cursor = ret;
@@ -279,7 +279,7 @@ int* JSONNode::PullInt(const char* name, unsigned int quantity, int deflt)
 	return ret;
 }
 
-unsigned int JSONNode::PullUInt(const char* name, const unsigned int deflt)
+unsigned int RE_Json::PullUInt(const char* name, const unsigned int deflt)
 {
 	unsigned int ret = 0u;
 
@@ -293,7 +293,7 @@ unsigned int JSONNode::PullUInt(const char* name, const unsigned int deflt)
 	return ret;
 }
 
-unsigned int* JSONNode::PullUInt(const char* name, unsigned int quantity, unsigned int deflt)
+unsigned int* RE_Json::PullUInt(const char* name, unsigned int quantity, unsigned int deflt)
 {
 	unsigned int* ret = new unsigned int[quantity];
 	unsigned int* cursor = ret;
@@ -322,7 +322,7 @@ unsigned int* JSONNode::PullUInt(const char* name, unsigned int quantity, unsign
 }
 
 
-float JSONNode::PullFloat(const char* name, float deflt)
+float RE_Json::PullFloat(const char* name, float deflt)
 {
 	float ret = deflt;
 
@@ -336,7 +336,7 @@ float JSONNode::PullFloat(const char* name, float deflt)
 	return ret;
 }
 
-math::float2 JSONNode::PullFloat(const char* name, math::float2 deflt)
+math::float2 RE_Json::PullFloat(const char* name, math::float2 deflt)
 {
 	math::float2 ret = deflt;
 
@@ -350,7 +350,7 @@ math::float2 JSONNode::PullFloat(const char* name, math::float2 deflt)
 	return ret;
 }
 
-math::vec JSONNode::PullFloatVector(const char* name, math::vec deflt)
+math::vec RE_Json::PullFloatVector(const char* name, math::vec deflt)
 {
 	math::vec ret = deflt;
 
@@ -364,7 +364,7 @@ math::vec JSONNode::PullFloatVector(const char* name, math::vec deflt)
 	return ret;
 }
 
-math::float4 JSONNode::PullFloat4(const char* name, math::float4 deflt)
+math::float4 RE_Json::PullFloat4(const char* name, math::float4 deflt)
 {
 	math::float4 ret = deflt;
 
@@ -378,7 +378,7 @@ math::float4 JSONNode::PullFloat4(const char* name, math::float4 deflt)
 	return ret;
 }
 
-math::float3x3 JSONNode::PullMat3(const char* name, math::float3x3 deflt)
+math::float3x3 RE_Json::PullMat3(const char* name, math::float3x3 deflt)
 {
 	math::float3x3 ret = deflt;
 
@@ -406,7 +406,7 @@ math::float3x3 JSONNode::PullMat3(const char* name, math::float3x3 deflt)
 	return ret;
 }
 
-math::float4x4 JSONNode::PullMat4(const char* name, math::float4x4 deflt)
+math::float4x4 RE_Json::PullMat4(const char* name, math::float4x4 deflt)
 {
 	math::float4x4 ret = deflt;
 
@@ -434,7 +434,7 @@ math::float4x4 JSONNode::PullMat4(const char* name, math::float4x4 deflt)
 	return ret;
 }
 
-double JSONNode::PullDouble(const char* name, double deflt)
+double RE_Json::PullDouble(const char* name, double deflt)
 {
 	double ret = deflt;
 
@@ -448,7 +448,7 @@ double JSONNode::PullDouble(const char* name, double deflt)
 	return ret;
 }
 
-signed long long JSONNode::PullSignedLongLong(const char* name, signed long long deflt)
+signed long long RE_Json::PullSignedLongLong(const char* name, signed long long deflt)
 {
 	signed long long ret = deflt;
 
@@ -462,7 +462,7 @@ signed long long JSONNode::PullSignedLongLong(const char* name, signed long long
 	return ret;
 }
 
-unsigned long long JSONNode::PullUnsignedLongLong(const char* name, unsigned long long deflt)
+unsigned long long RE_Json::PullUnsignedLongLong(const char* name, unsigned long long deflt)
 {
 	unsigned long long ret = deflt;
 
@@ -476,7 +476,7 @@ unsigned long long JSONNode::PullUnsignedLongLong(const char* name, unsigned lon
 	return ret;
 }
 
-const char* JSONNode::PullString(const char* name, const char* deflt)
+const char* RE_Json::PullString(const char* name, const char* deflt)
 {
 	const char* ret = deflt;
 
@@ -490,23 +490,23 @@ const char* JSONNode::PullString(const char* name, const char* deflt)
 	return ret;
 }
 
-JSONNode* JSONNode::PullJObject(const char* name)
+RE_Json* RE_Json::PullJObject(const char* name)
 {
-	JSONNode* ret = nullptr;
+	RE_Json* ret = nullptr;
 
 	if (name)
 	{
 		eastl::string path = pointerPath + "/" + name;
-		ret = new JSONNode(path.c_str(), config);
+		ret = new RE_Json(path.c_str(), config);
 	}
 
 	return ret;
 }
 
-rapidjson::Value::Array JSONNode::PullValueArray() { return config->document.FindMember(pointerPath.c_str())->value.GetArray(); }
-inline bool JSONNode::operator!() const { return config || pointerPath.empty(); }
-const char* JSONNode::GetDocumentPath() const { return pointerPath.c_str(); }
-rapidjson::Document* JSONNode::GetDocument() { return &config->document; }
+rapidjson::Value::Array RE_Json::PullValueArray() { return config->document.FindMember(pointerPath.c_str())->value.GetArray(); }
+inline bool RE_Json::operator!() const { return config || pointerPath.empty(); }
+const char* RE_Json::GetDocumentPath() const { return pointerPath.c_str(); }
+rapidjson::Document* RE_Json::GetDocument() { return &config->document; }
 
-void JSONNode::SetArray() { rapidjson::Pointer(pointerPath.c_str()).Get(config->document)->SetArray(); }
-void JSONNode::SetObject() { rapidjson::Pointer(pointerPath.c_str()).Get(config->document)->SetObject(); }
+void RE_Json::SetArray() { rapidjson::Pointer(pointerPath.c_str()).Get(config->document)->SetArray(); }
+void RE_Json::SetObject() { rapidjson::Pointer(pointerPath.c_str()).Get(config->document)->SetObject(); }

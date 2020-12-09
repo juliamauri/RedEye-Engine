@@ -1,6 +1,7 @@
 #include "EditorWindows.h"
 
 #include "Globals.h"
+#include "RE_FileSystem.h"
 #include "Application.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
@@ -363,8 +364,8 @@ void ShaderEditorWindow::Draw(bool secondary)
 			RE_ConsoleLog::ScopeProcedureLogging();
 
 			uint sID = 0;
-			compilePass = App::shaders.LoadFromAssets(&sID, vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr, true);
-			if (!compilePass) RE_LOG_ERROR("Shader Compilation Error:\n%s", App::shaders.GetShaderError());
+			compilePass = RE_ShaderImporter::LoadFromAssets(&sID, vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr, true);
+			if (!compilePass) RE_LOG_ERROR("Shader Compilation Error:\n%s", RE_ShaderImporter::GetShaderError());
 
 			RE_ConsoleLog::EndScope();
 		}
@@ -481,8 +482,8 @@ void TextEditorManagerWindow::Draw(bool secondary)
 
 				std::string tmp = e->textEditor->GetText();
 				eastl::string text(tmp.c_str(), tmp.size());
-				e->works = App::shaders.Compile(text.c_str(), text.size());
-				if (!e->works) RE_LOG_ERROR("%s", App::shaders.GetShaderError());
+				e->works = RE_ShaderImporter::Compile(text.c_str(), text.size());
+				if (!e->works) RE_LOG_ERROR("%s", RE_ShaderImporter::GetShaderError());
 				e->compiled = true;
 
 				RE_ConsoleLog::EndScope();

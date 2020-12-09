@@ -1,6 +1,7 @@
 #include "RE_Mesh.h"
 
 #include "RE_ConsoleLog.h"
+#include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "Application.h"
 #include "ModuleRenderer3D.h"

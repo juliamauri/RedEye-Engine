@@ -2,10 +2,10 @@
 
 #include "RE_Math.h"
 #include "RE_ConsoleLog.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "RE_ResourceManager.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 #include "RE_Mesh.h"
 #include "RE_Material.h"
 #include "RE_GameObject.h"
@@ -136,13 +136,13 @@ eastl::vector<const char*> RE_CompMesh::GetAllResources()
 	return ret;
 }
 
-void RE_CompMesh::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
+void RE_CompMesh::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushInt("meshResource", (meshMD5) ? resources->at(meshMD5) : -1);
 	node->PushInt("materialResource", (materialMD5) ? resources->at(materialMD5) : -1);
 }
 
-void RE_CompMesh::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
+void RE_CompMesh::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	int id = node->PullInt("meshResource", -1);
 	meshMD5 = (id != -1) ? resources->at(id) : nullptr;

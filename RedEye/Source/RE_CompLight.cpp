@@ -3,8 +3,8 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_ShaderImporter.h"
-#include "JSONNode.h"
-#include "RE_ECS_Manager.h"
+#include "RE_Json.h"
+#include "RE_ECS_Pool.h"
 #include "ImGui\imgui.h"
 
 RE_CompLight::RE_CompLight() : RE_Component(C_LIGHT)
@@ -88,7 +88,7 @@ void RE_CompLight::DrawProperties()
 	}
 }
 
-void RE_CompLight::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
+void RE_CompLight::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushInt("type", type);
 	node->PushFloat("intensity", intensity);
@@ -101,7 +101,7 @@ void RE_CompLight::SerializeJson(JSONNode* node, eastl::map<const char*, int>* r
 	node->PushFloat("outerCutOff", outerCutOff[0]);
 }
 
-void RE_CompLight::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
+void RE_CompLight::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<LightType>(node->PullInt("type", L_POINT));
 

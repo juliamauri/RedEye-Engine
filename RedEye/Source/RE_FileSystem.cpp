@@ -2,7 +2,7 @@
 
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 
 #include "Application.h"
 #include "ModuleScene.h"
@@ -147,7 +147,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 						Config metaLoad(file->path.c_str(), App::fs->GetZipPath());
 						if (metaLoad.Load())
 						{
-							JSONNode* metaNode = metaLoad.GetRootNode("meta");
+							RE_Json* metaNode = metaLoad.GetRootNode("meta");
 							Resource_Type type = (Resource_Type)metaNode->PullInt("Type", Resource_Type::R_UNDEFINED);
 							DEL(metaNode);
 

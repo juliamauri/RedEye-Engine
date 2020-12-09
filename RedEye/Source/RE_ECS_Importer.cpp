@@ -1,14 +1,14 @@
 #include "RE_ECS_Importer.h"
 
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 #include "RE_ResourceManager.h"
 #include "Resource.h"
 
 #include <EASTL/internal/char_traits.h>
 
-void RE_ECS_Importer::JsonSerialize(JSONNode* node, RE_ECS_Manager* pool)
+void RE_ECS_Importer::JsonSerialize(RE_Json* node, RE_ECS_Pool* pool)
 {
 	//Get resources
 	eastl::vector<const char*>  resGo = pool->GetAllResources();
@@ -17,11 +17,11 @@ void RE_ECS_Importer::JsonSerialize(JSONNode* node, RE_ECS_Manager* pool)
 	for (const char* res : resGo) resourcesIndex.insert(eastl::pair<const char*, int>(res, count++));
 
 	//Resources Serialize
-	JSONNode* resources = node->PushJObject("resources");
+	RE_Json* resources = node->PushJObject("resources");
 	resources->PushUInt("resSize", resGo.size());
 	for (int r = 0; r < static_cast<int>(resGo.size()); r++)
 	{
-		JSONNode* resN = resources->PushJObject(("r" + eastl::to_string(r)).c_str());
+		RE_Json* resN = resources->PushJObject(("r" + eastl::to_string(r)).c_str());
 		ResourceContainer* res = App::resources->At(resGo.at(static_cast<unsigned int>(r)));
 		Resource_Type rtype = res->GetType();
 
@@ -37,7 +37,7 @@ void RE_ECS_Importer::JsonSerialize(JSONNode* node, RE_ECS_Manager* pool)
 	pool->SerializeJson(node, &resourcesIndex);
 }
 
-char* RE_ECS_Importer::BinarySerialize(RE_ECS_Manager* pool, unsigned int* bufferSize)
+char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, unsigned int* bufferSize)
 {
 	//Get resources
 	eastl::vector<const char*>  resGo = pool->GetAllResources();
@@ -99,16 +99,16 @@ char* RE_ECS_Importer::BinarySerialize(RE_ECS_Manager* pool, unsigned int* buffe
 	return buffer;
 }
 
-RE_ECS_Manager* RE_ECS_Importer::JsonDeserialize(JSONNode* node)
+RE_ECS_Pool* RE_ECS_Importer::JsonDeserialize(RE_Json* node)
 {
 	//Get resources
-	JSONNode* resources = node->PullJObject("resources");
+	RE_Json* resources = node->PullJObject("resources");
 	eastl::map< int, const char*> resourcesIndex;
 
 	uint resSize = resources->PullUInt("resSize", 0);
 	for (uint r = 0; r < resSize; r++)
 	{
-		JSONNode* resN = resources->PullJObject(("r" + eastl::to_string(r)).c_str());
+		RE_Json* resN = resources->PullJObject(("r" + eastl::to_string(r)).c_str());
 
 		int index = resN->PullInt("index", -1);
 		Resource_Type type = (Resource_Type)resN->PullInt("type", Resource_Type::R_UNDEFINED);
@@ -124,12 +124,12 @@ RE_ECS_Manager* RE_ECS_Importer::JsonDeserialize(JSONNode* node)
 	}
 
 	DEL(resources);
-	RE_ECS_Manager* ret = new RE_ECS_Manager();
+	RE_ECS_Pool* ret = new RE_ECS_Pool();
 	ret->DeserializeJson(node, &resourcesIndex);
 	return ret;
 }
 
-RE_ECS_Manager* RE_ECS_Importer::BinaryDeserialize(char*& cursor)
+RE_ECS_Pool* RE_ECS_Importer::BinaryDeserialize(char*& cursor)
 {
 	//Get resources
 	eastl::map< int, const char*> resourcesIndex;
@@ -174,15 +174,15 @@ RE_ECS_Manager* RE_ECS_Importer::BinaryDeserialize(char*& cursor)
 		DEL_A(str);
 	}
 
-	RE_ECS_Manager* ret = new RE_ECS_Manager();
+	RE_ECS_Pool* ret = new RE_ECS_Pool();
 	ret->DeserializeBinary(cursor, &resourcesIndex);
 	return ret;
 }
 
-bool RE_ECS_Importer::JsonCheckResources(JSONNode* node)
+bool RE_ECS_Importer::JsonCheckResources(RE_Json* node)
 {
 	bool ret = true;
-	JSONNode* resources = node->PullJObject("resources");
+	RE_Json* resources = node->PullJObject("resources");
 	uint resSize = resources->PullUInt("resSize", 0);
 	eastl::string ref;
 
@@ -190,7 +190,7 @@ bool RE_ECS_Importer::JsonCheckResources(JSONNode* node)
 	{
 		ref = "r";
 		ref += eastl::to_string(r);
-		JSONNode* resN = resources->PullJObject(ref.c_str());
+		RE_Json* resN = resources->PullJObject(ref.c_str());
 
 		int index = resN->PullInt("index", -1);
 		Resource_Type type = static_cast<Resource_Type>(resN->PullInt("type", Resource_Type::R_UNDEFINED));

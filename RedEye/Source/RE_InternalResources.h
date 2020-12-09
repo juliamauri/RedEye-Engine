@@ -1,7 +1,7 @@
 #ifndef __INTERNALRESOURCCES_H__
 #define __INTERNALRESOURCCES_H__
 
-#include "Cvar.h"
+#include "RE_Cvar.h"
 
 #include <EASTL/vector.h>
 class RE_SkyBox;
@@ -26,7 +26,7 @@ public:
 
 	unsigned int GetTextureChecker() const;
 	unsigned int GetTextureWaterFoam() const;
-	eastl::vector<ShaderCvar> GetWaterUniforms() const;
+	eastl::vector<RE_Shader_Cvar> GetWaterUniforms() const;
 
 private:
 
@@ -49,7 +49,7 @@ private:
 
 	const char* waterShader = nullptr;
 	const char* waterDefShader = nullptr;
-	eastl::vector<ShaderCvar> waterUniforms;
+	eastl::vector<RE_Shader_Cvar> waterUniforms;
 	unsigned int water_foam_texture = 0;
 
 	const char* defaultMaterial = nullptr;

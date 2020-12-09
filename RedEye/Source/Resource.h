@@ -4,7 +4,7 @@
 // disable warning for unsafe copy
 #pragma warning(disable : 4996)
 
-class JSONNode;
+class RE_Json;
 
 #include <EASTL/string.h>
 
@@ -63,8 +63,8 @@ public:
 private:
 
 	virtual void Draw() {}
-	virtual void SaveResourceMeta(JSONNode* metaNode) {}
-	virtual void LoadResourceMeta(JSONNode* metaNode) {}
+	virtual void SaveResourceMeta(RE_Json* metaNode) {}
+	virtual void LoadResourceMeta(RE_Json* metaNode) {}
 
 private:
 

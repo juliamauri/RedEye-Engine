@@ -2,16 +2,14 @@
 
 #include "Globals.h"
 #include "RE_ConsoleLog.h"
+#include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
-
 #include "Application.h"
 #include "ModuleRenderer3D.h"
-
 #include "RE_ResourceManager.h"
 #include "RE_TextureImporter.h"
 #include "RE_ShaderImporter.h"
-#include "RE_ECS_Manager.h"
-
+#include "RE_ECS_Pool.h"
 #include "RE_Model.h"
 #include "RE_Mesh.h"
 #include "RE_Material.h"
@@ -28,17 +26,15 @@
 	#pragma comment(lib, "assimp/libx86/assimp-vc142-mt.lib")
 #endif
 
+using namespace RE_ModelImporter::Internal;
 
-bool RE_ModelImporter::Init()
+void RE_ModelImporter::Init()
 {
-	bool ret;
 	RE_LOG("Initializing Model Importer");
-	RE_SOFT_NVS("Assimp", "4.0.1", "http://www.assimp.org/");
-	if (!(ret = (folderPath))) RE_LOG_ERROR("Model Importer could not read folder path");
-	return ret;
+	RE_SOFT_NVS("Assimp", "5.0.1", "http://www.assimp.org/");
 }
 
-RE_ECS_Manager* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
+RE_ECS_Pool* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
 {
 	aditionalData = new currentlyImporting();
 	aditionalData->settings = mSettings;
@@ -46,7 +42,7 @@ RE_ECS_Manager* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int
 	uint l = 0;
 	aditionalData->name = aditionalData->workingfilepath.substr(l = aditionalData->workingfilepath.find_last_of("/") + 1, aditionalData->workingfilepath.find_last_of(".") - l);
 
-	RE_ECS_Manager* ret = nullptr;
+	RE_ECS_Pool* ret = nullptr;
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFileFromMemory(buffer, size, mSettings->GetFlags()/*aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | /*aiProcess_PreTransformVertices | aiProcess_SortByPType | aiProcess_FlipUVs */);
@@ -64,7 +60,7 @@ RE_ECS_Manager* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int
 		if (scene->HasMeshes()) ProcessMeshes(scene);
 
 		RE_LOG_SECONDARY("Processing model hierarchy"); // Mount a go hiteracy with nodes from model
-		ProcessNodes(ret, scene->mRootNode, scene, (ret = new RE_ECS_Manager())->AddGO(aditionalData->name.c_str(), 0)->GetUID() , math::float4x4::identity);
+		ProcessNodes(ret, scene->mRootNode, scene, (ret = new RE_ECS_Pool())->AddGO(aditionalData->name.c_str(), 0)->GetUID() , math::float4x4::identity);
 
 	}
 
@@ -72,7 +68,7 @@ RE_ECS_Manager* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int
 	return ret;
 }
 
-void RE_ModelImporter::ProcessNodes(RE_ECS_Manager* goPool, aiNode * parentNode, const aiScene * scene, unsigned long long parentGO, math::float4x4 parentTransform)
+void RE_ModelImporter::Internal::ProcessNodes(RE_ECS_Pool* goPool, aiNode * parentNode, const aiScene * scene, unsigned long long parentGO, math::float4x4 parentTransform)
 {
 	aiVector3D nScale, nPosition;
 	aiQuaternion nRotationQuat;
@@ -169,7 +165,7 @@ void RE_ModelImporter::ProcessNodes(RE_ECS_Manager* goPool, aiNode * parentNode,
 	}
 }
 
-void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
+void RE_ModelImporter::Internal::ProcessMeshes(const aiScene* scene)
 {
 	for (uint i = 0; i < scene->mNumMeshes; i++)
 	{
@@ -289,10 +285,11 @@ eastl::vector<eastl::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(con
 
 		DEL(fbxloaded);
 	}
+
 	return retPaths;
 }
 
-void RE_ModelImporter::GetTexturePath(aiMaterial * material, eastl::vector<eastl::string> &retPaths, aiTextureType textureType)
+void RE_ModelImporter::Internal::GetTexturePath(aiMaterial * material, eastl::vector<eastl::string> &retPaths, aiTextureType textureType)
 {
 	if (uint textures = material->GetTextureCount(textureType) > 0)
 	{
@@ -308,7 +305,7 @@ void RE_ModelImporter::GetTexturePath(aiMaterial * material, eastl::vector<eastl
 	}
 }
 
-void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
+void RE_ModelImporter::Internal::ProcessMaterials(const aiScene* scene)
 {
 	eastl::string fileTexturePath = aditionalData->workingfilepath.substr(0, aditionalData->workingfilepath.find_last_of("/") + 1);
 
@@ -400,7 +397,7 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 	}
 }
 
-void RE_ModelImporter::GetTexturesMaterial(aiMaterial * material, eastl::string &fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString &name)
+void RE_ModelImporter::Internal::GetTexturesMaterial(aiMaterial * material, eastl::string &fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString &name)
 {
 	if (uint textures = material->GetTextureCount(textureType) > 0)
 	{

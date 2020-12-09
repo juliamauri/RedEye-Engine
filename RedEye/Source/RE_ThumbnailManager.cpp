@@ -3,6 +3,7 @@
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "Application.h"
+#include "RE_TextureImporter.h"
 #include "RE_ResourceManager.h"
 #include "RE_GLCacheManager.h"
 #include "RE_Texture.h"
@@ -69,7 +70,7 @@ unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
 	{
 		RE_TextureSettings defTexSettings;
 		int tmp1, tmp2;
-		App::textures.LoadTextureInMemory(filderIcon.GetBuffer(), filderIcon.GetSize(), TextureType::RE_DDS, &ret, &tmp1, &tmp2, defTexSettings);
+		RE_TextureImporter::LoadTextureInMemory(filderIcon.GetBuffer(), filderIcon.GetSize(), TextureType::RE_DDS, &ret, &tmp1, &tmp2, defTexSettings);
 	}
 	return ret;
 }

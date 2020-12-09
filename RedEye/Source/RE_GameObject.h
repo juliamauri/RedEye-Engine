@@ -17,7 +17,7 @@ class RE_CompWater;
 class RE_CompCamera;
 class RE_CompLight;
 class RE_CompPrimitive;
-class JSONNode;
+class RE_Json;
 class GameObjectsPool;
 class ComponentsPool;
 
@@ -157,8 +157,8 @@ public:
 
 	// Serialization
 	unsigned int GetBinarySize() const;
-	void SerializeJson(JSONNode* node);
-	void DeserializeJSON(JSONNode* node, GameObjectsPool* goPool, ComponentsPool* cmpsPool);
+	void SerializeJson(RE_Json* node);
+	void DeserializeJSON(RE_Json* node, GameObjectsPool* goPool, ComponentsPool* cmpsPool);
 	void SerializeBinary(char*& cursor);
 	void DeserializeBinary(char*& cursor, GameObjectsPool* goPool, ComponentsPool* compPool);
 
@@ -166,7 +166,7 @@ public:
 	UID GetUID() const;
 
 	friend class GameObjectsPool;
-	friend class RE_ECS_Manager;
+	friend class RE_ECS_Pool;
 	struct ComponentData
 	{
 		ComponentData(UID id = 0ull, ushortint type = 0u) : uid(id), type(type) {}

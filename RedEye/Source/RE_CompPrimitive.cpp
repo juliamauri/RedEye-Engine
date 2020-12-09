@@ -1,6 +1,6 @@
 #include "RE_CompPrimitive.h"
 
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"
@@ -171,13 +171,13 @@ unsigned int RE_CompGrid::GetBinarySize() const
 	return sizeof(float) * 3u + sizeof(int);
 }
 
-void RE_CompGrid::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
+void RE_CompGrid::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushFloatVector("color", color);
 	node->PushInt("divisions", divisions);
 }
 
-void RE_CompGrid::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
+void RE_CompGrid::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	color = node->PullFloatVector("color", color);
 	GridSetUp(node->PullInt("divisions", divisions));
@@ -284,14 +284,14 @@ unsigned int RE_CompRock::GetBinarySize() const
 	return sizeof(float) * 3 + sizeof(int) * 2;
 }
 
-void RE_CompRock::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
+void RE_CompRock::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushFloatVector("color", color);
 	node->PushInt("seed", seed);
 	node->PushInt("nsubdivisions", nsubdivisions);
 }
 
-void RE_CompRock::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
+void RE_CompRock::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
 	RockSetUp(node->PullInt("seed", seed), node->PullInt("nsubdivisions", nsubdivisions));
@@ -462,12 +462,12 @@ unsigned int RE_CompPlatonic::GetBinarySize() const
 	return sizeof(float) * 3;
 }
 
-void RE_CompPlatonic::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
+void RE_CompPlatonic::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushFloatVector("color", color);
 }
 
-void RE_CompPlatonic::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
+void RE_CompPlatonic::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	color = node->PullFloatVector("color", color);
 	App::primitives.SetUpComponentPrimitive(this);
@@ -571,7 +571,7 @@ unsigned int RE_CompParametric::GetBinarySize() const
 	return sizeof(float) * 4 + sizeof(int) * 2;
 }
 
-void RE_CompParametric::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
+void RE_CompParametric::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushFloatVector("color", color);
 	node->PushInt("slices", slices);
@@ -579,7 +579,7 @@ void RE_CompParametric::SerializeJson(JSONNode* node, eastl::map<const char*, in
 	node->PushFloat("radius", radius);
 }
 
-void RE_CompParametric::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
+void RE_CompParametric::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	color = node->PullFloatVector("color", color);
 	ParametricSetUp(node->PullInt("slices", slices), node->PullInt("stacks", stacks), node->PullFloat("radius", radius));

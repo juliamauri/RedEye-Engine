@@ -8,7 +8,7 @@
 #include "RE_TextureImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_ThumbnailManager.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 #include "RE_Material.h"
 #include "RE_Shader.h"
 #include "RE_Prefab.h"
@@ -201,7 +201,7 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 		Event::PauseEvents();
 		for (auto resource : temp_resources)
 		{
-			RE_ECS_Manager* poolGORes = nullptr;
+			RE_ECS_Pool* poolGORes = nullptr;
 			Use(resource->GetMD5());
 			switch (resource->GetType()) {
 			case R_SCENE: poolGORes = dynamic_cast<RE_Scene*>(resource)->GetPool(); break;
@@ -283,7 +283,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 			{
 				Event::PauseEvents();
 
-				RE_ECS_Manager* poolGORes = nullptr;
+				RE_ECS_Pool* poolGORes = nullptr;
 				Use(resToChange);
 
 				switch (goType) {

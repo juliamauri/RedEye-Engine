@@ -2,7 +2,7 @@
 #define __RE_PREFAB_H__
 
 #include "Resource.h"
-class RE_ECS_Manager;
+class RE_ECS_Pool;
 
 // .refab
 class RE_Prefab : public ResourceContainer
@@ -18,14 +18,14 @@ public:
 
 	void Import(bool keepInMemory = true) override;
 
-	void Save(RE_ECS_Manager* pool, bool rootidentity, bool keepInMemory = false);
+	void Save(RE_ECS_Pool* pool, bool rootidentity, bool keepInMemory = false);
 
 	//Override from container, when setting name sets the assets path to Assets/Prefabs/name.refab
 	//If you want in another path, set directly all path on SetAsetsPath
 	void SetName(const char* name) override;
 
 	//returns a new, needed destroy after use.
-	RE_ECS_Manager* GetPool();
+	RE_ECS_Pool* GetPool();
 
 private:
 	void AssetSave();
@@ -37,8 +37,8 @@ private:
 
 
 private:
-	RE_ECS_Manager* loaded = nullptr;
-	RE_ECS_Manager* toSave = nullptr;
+	RE_ECS_Pool* loaded = nullptr;
+	RE_ECS_Pool* toSave = nullptr;
 };
 
 #endif // !__RE_PREFAB_H__

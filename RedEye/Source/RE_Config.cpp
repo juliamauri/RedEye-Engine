@@ -1,13 +1,14 @@
 #include "RE_Config.h"
 
 #include "Globals.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
+
+#include "md5.h"
 #include "RapidJson\include\pointer.h"
 #include "RapidJson\include\stringbuffer.h"
 #include "RapidJson\include\writer.h"
-#include "md5.h"
 
 //Tutorial http://rapidjson.org/md_doc_tutorial.html
 
@@ -56,13 +57,13 @@ void Config::Save()
 	WriteFile(from_zip, file.c_str(), s_buffer.GetString(), size);
 }
 
-JSONNode* Config::GetRootNode(const char* member)
+RE_Json* Config::GetRootNode(const char* member)
 {
 	RE_ASSERT(member != nullptr);
 	eastl::string path("/"); path += member;
 	rapidjson::Pointer pointer(path.c_str());
 	if (pointer.Get(document) == nullptr) pointer.Create(document);
-	return new JSONNode(path.c_str(), this);
+	return new RE_Json(path.c_str(), this);
 }
 
 inline bool Config::operator!() const { return document.IsNull(); }

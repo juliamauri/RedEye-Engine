@@ -2,19 +2,18 @@
 
 #include "Globals.h"
 #include "RE_ConsoleLog.h"
+#include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "RE_ResourceManager.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 #include "RE_ECS_Importer.h"
 #include "RE_ModelImporter.h"
 
 #include "assimp\include\postprocess.h"
 #include "ImGui/imgui.h"
-
-RE_Model::RE_Model(const char* metaPath) : ResourceContainer(metaPath) {}
 
 void RE_Model::LoadInMemory()
 {
@@ -51,9 +50,9 @@ void RE_Model::Import(bool keepInMemory)
 	if(!keepInMemory) UnloadMemory();
 }
 
-RE_ECS_Manager* RE_Model::GetPool()
+RE_ECS_Pool* RE_Model::GetPool()
 {
-	RE_ECS_Manager* ret;
+	RE_ECS_Pool* ret;
 	bool unload = false;
 	if (unload = (loaded == nullptr)) LoadInMemory();
 	ret = loaded->GetNewPoolFromID(loaded->GetRootUID());
@@ -164,13 +163,13 @@ void RE_Model::Draw()
 	if (applySave && modelSettings == restoreSettings) applySave = false;
 }
 
-void RE_Model::SaveResourceMeta(JSONNode* metaNode)
+void RE_Model::SaveResourceMeta(RE_Json* metaNode)
 {
-	JSONNode* presets = metaNode->PushJObject("presets");
+	RE_Json* presets = metaNode->PushJObject("presets");
 	for (uint i = 0; i < 3; i++) presets->PushBool(eastl::to_string(i).c_str(), modelSettings.presets[i]);
 	DEL(presets);
 
-	JSONNode* flags = metaNode->PushJObject("flags");
+	RE_Json* flags = metaNode->PushJObject("flags");
 	for (uint i = 0; i < 25; i++) flags->PushBool(eastl::to_string(i).c_str(), modelSettings.flags[i]);
 	DEL(flags);
 
@@ -183,13 +182,13 @@ void RE_Model::SaveResourceMeta(JSONNode* metaNode)
 	}
 }
 
-void RE_Model::LoadResourceMeta(JSONNode* metaNode)
+void RE_Model::LoadResourceMeta(RE_Json* metaNode)
 {
-	JSONNode* presets = metaNode->PullJObject("presets");
+	RE_Json* presets = metaNode->PullJObject("presets");
 	for (uint i = 0; i < 3; i++) modelSettings.presets[i] = presets->PullBool(eastl::to_string(i).c_str(), false);
 	DEL(presets);
 
-	JSONNode* flags = metaNode->PullJObject("flags");
+	RE_Json* flags = metaNode->PullJObject("flags");
 	for (uint i = 0; i < 25; i++) modelSettings.flags[i] = flags->PullBool(eastl::to_string(i).c_str(), false);
 	DEL(flags);
 
@@ -213,7 +212,7 @@ void RE_Model::AssetLoad()
 	RE_FileBuffer assetload(GetAssetPath());
 	if (assetload.Load())
 	{
-		loaded = App::modelImporter.ProcessModel(assetload.GetBuffer(), assetload.GetSize(),GetAssetPath(), &modelSettings);
+		loaded = RE_ModelImporter::ProcessModel(assetload.GetBuffer(), assetload.GetSize(),GetAssetPath(), &modelSettings);
 		SetMD5(assetload.GetMd5().c_str());
 		eastl::string libraryPath("Library/Models/");
 		libraryPath += GetMD5();

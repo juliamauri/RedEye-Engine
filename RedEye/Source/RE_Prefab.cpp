@@ -1,14 +1,15 @@
 #include "RE_Prefab.h"
 
 #include "RE_ConsoleLog.h"
+#include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "RE_ResourceManager.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 #include "RE_ECS_Importer.h"
-#include "md5.h"
 
 #include "ImGui/imgui.h"
 #include <EASTL/map.h>
@@ -47,7 +48,7 @@ void RE_Prefab::Import(bool keepInMemory)
 	if (!keepInMemory) UnloadMemory();
 }
 
-void RE_Prefab::Save(RE_ECS_Manager* pool, bool rootidentity, bool keepInMemory)
+void RE_Prefab::Save(RE_ECS_Pool* pool, bool rootidentity, bool keepInMemory)
 {
 	if (pool)
 	{
@@ -76,9 +77,9 @@ void RE_Prefab::SetName(const char* _name)
 	SetAssetPath(assetPath.c_str());
 }
 
-RE_ECS_Manager* RE_Prefab::GetPool()
+RE_ECS_Pool* RE_Prefab::GetPool()
 {
-	RE_ECS_Manager* ret;
+	RE_ECS_Pool* ret;
 	bool unload = false;
 	if (unload = (loaded == nullptr)) LoadInMemory();
 	ret = loaded->GetNewPoolFromID(loaded->GetRootUID());
@@ -90,7 +91,7 @@ void RE_Prefab::AssetSave()
 {
 	//Serialize
 	Config prefab_SaveFile(GetAssetPath(), App::fs->GetZipPath());
-	JSONNode* prefabNode = prefab_SaveFile.GetRootNode("prefab");
+	RE_Json* prefabNode = prefab_SaveFile.GetRootNode("prefab");
 
 	RE_ECS_Importer::JsonSerialize(prefabNode, toSave);
 	DEL(prefabNode);
@@ -112,7 +113,7 @@ void RE_Prefab::AssetLoad(bool generateLibraryPath)
 
 	if (jsonLoad.Load())
 	{
-		JSONNode* prefabNode = jsonLoad.GetRootNode("prefab");
+		RE_Json* prefabNode = jsonLoad.GetRootNode("prefab");
 		loaded = RE_ECS_Importer::JsonDeserialize(prefabNode);
 		DEL(prefabNode);
 

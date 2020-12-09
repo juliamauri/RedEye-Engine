@@ -2,9 +2,9 @@
 #define __MODULESCENE_H__
 
 #include "Event.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 #include "Module.h"
-#include "AABBDynamicTree.h"
+#include "RE_AABBDynTree.h"
 
 class RE_GameObject;
 class RE_Scene;
@@ -31,7 +31,7 @@ public:
 	void RecieveEvent(const Event& e) override;
 
 	// Current Pool
-	static RE_ECS_Manager* GetScenePool();
+	static RE_ECS_Pool* GetScenePool();
 	static RE_GameObject* GetGOPtr(UID id);
 	static const RE_GameObject* GetGOCPtr(UID id);
 
@@ -47,7 +47,7 @@ public:
 	static void CreateMaxLights(const UID parent = 0);
 	static void CreateWater(const UID parent = 0);
 
-	void AddGOPool(RE_ECS_Manager* toAdd);
+	void AddGOPool(RE_ECS_Pool* toAdd);
 
 	// Scene Gameobject Filtering
 	UID RayCastGeometry(math::Ray& global_ray);
@@ -73,15 +73,15 @@ private:
 
 private:
 
-	static RE_ECS_Manager scenePool;
-	RE_ECS_Manager savedState;
+	static RE_ECS_Pool scenePool;
+	RE_ECS_Pool savedState;
 	bool haschanges = false;
 
 	eastl::stack<UID> to_delete;
 
 	// Trees
-	AABBDynamicTree static_tree;
-	AABBDynamicTree dynamic_tree;
+	RE_AABBDynTree static_tree;
+	RE_AABBDynTree dynamic_tree;
 
 	RE_Scene* unsavedScene = nullptr;
 	const char* currentScene = nullptr;

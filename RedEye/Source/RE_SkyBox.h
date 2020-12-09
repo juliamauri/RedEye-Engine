@@ -1,72 +1,15 @@
 #ifndef __RE_SKYBOX_H__
 #define __RE_SKYBOX_H__
 
-#include "RE_Texture.h"
+#include "Resource.h"
+#include "RE_SkyBoxSettings.h"
 
-#include <EASTL/string.h>
-
-#define MAXSKYBOXTEXTURES  6
-
-enum RE_TextureFace {
-	RE_NOFACE = -1,
-	RE_RIGHT,
-	RE_LEFT,
-	RE_TOP,
-	RE_BOTTOM,
-	RE_FRONT,
-	RE_BACK
-};
-
-struct TexSkyBox {
-	TexSkyBox(RE_TextureFace f) { face = f; }
-
-	const char* textureMD5 = nullptr;
-	RE_TextureFace face = RE_NOFACE;
-	std::string path;
-
-	inline bool operator==(const TexSkyBox& b) {
-		return (textureMD5 == b.textureMD5 && face == b.face);
-	}
-
-
-	inline bool operator!=(const TexSkyBox& b) {
-		return (textureMD5 != b.textureMD5 || face != b.face);
-	}
-};
-
-struct RE_SkyBoxSettings {
-	RE_TextureFilters min_filter = RE_LINEAR;
-	RE_TextureFilters mag_filter = RE_LINEAR;
-	RE_TextureWrap wrap_s = RE_CLAMP_TO_EDGE;
-	RE_TextureWrap wrap_t = RE_CLAMP_TO_EDGE;
-	RE_TextureWrap wrap_r = RE_CLAMP_TO_EDGE;
-
-	TexSkyBox textures[6] = { TexSkyBox(RE_RIGHT), TexSkyBox(RE_LEFT), TexSkyBox(RE_TOP), TexSkyBox(RE_BOTTOM), TexSkyBox(RE_FRONT), TexSkyBox(RE_BACK) };
-	float skyBoxSize = 2000.0f;
-
-	inline bool operator==(const RE_SkyBoxSettings& b) {
-		return (min_filter == b.min_filter && mag_filter == b.mag_filter && wrap_s == b.wrap_s && wrap_t == b.wrap_t && wrap_r == b.wrap_r && skyBoxSize == skyBoxSize
-			&& textures[0] == b.textures[0] && textures[1] == b.textures[1] && textures[2] == b.textures[2] && textures[3] == b.textures[3] && textures[4] == b.textures[4] && textures[5] == b.textures[5]);
-	}
-
-
-	inline bool operator!=(const RE_SkyBoxSettings& b) {
-		return (min_filter != b.min_filter || mag_filter != b.mag_filter || wrap_s != b.wrap_s || wrap_t != b.wrap_t || wrap_r != b.wrap_r  || skyBoxSize != skyBoxSize
-			|| textures[0] != b.textures[0] || textures[1] != b.textures[1] || textures[2] != b.textures[2] || textures[3] != b.textures[3] || textures[4] != b.textures[4] || textures[5] != b.textures[5]);
-	}
-
-	inline bool texturesChanged(RE_SkyBoxSettings& b) {
-		return (textures[0] == b.textures[0] && textures[1] == b.textures[1] && textures[2] == b.textures[2] && textures[3] == b.textures[3] && textures[4] == b.textures[4] && textures[5] == b.textures[5]);
-	}
-};
-
-class RE_SkyBox :
-	public ResourceContainer
+class RE_SkyBox : public ResourceContainer
 {
 public:
-	RE_SkyBox();
-	RE_SkyBox(const char* metaPath);
-	~RE_SkyBox();
+	RE_SkyBox() {}
+	RE_SkyBox(const char* metaPath) : ResourceContainer(metaPath) {}
+	~RE_SkyBox() {}
 
 	void LoadInMemory() override;
 	void UnloadMemory() override;
@@ -90,9 +33,10 @@ public:
 	bool isFacesFilled()const;
 
 private:
+
 	void Draw() override;
-	void SaveResourceMeta(JSONNode* metaNode) override;
-	void LoadResourceMeta(JSONNode* metaNode) override;
+	void SaveResourceMeta(RE_Json* metaNode) override;
+	void LoadResourceMeta(RE_Json* metaNode) override;
 
 	void AssetLoad(bool generateLibraryPath = false);
 	void LibraryLoad();
@@ -103,21 +47,12 @@ private:
 	void LoadSkyBoxSphere();
 
 private:
-	unsigned int ID = 0;
-	unsigned int VAO = 0;
-	unsigned int VBO = 0;
-	unsigned int EBO = 0;
-	unsigned int triangle_count = 0;
 
-	RE_SkyBoxSettings skyBoxSettings;
+	unsigned int ID = 0, VAO = 0, VBO = 0, EBO = 0, triangle_count = 0;
+	bool applySize = false, applyTextures = false, applySave = false;
+	RE_SkyBoxSettings skyBoxSettings, restoreSettings;
 
-	bool applySize = false;
-	bool applyTextures = false;
-
-	bool applySave = false;
-	RE_SkyBoxSettings restoreSettings;
-
-	const char* texturesname[6] = { "Right", "Left", "Top", "Bottom", "Front", "Back" };
+	static const char* texturesname[6];
 };
 
 #endif // !__RE_SKYBOX_H__

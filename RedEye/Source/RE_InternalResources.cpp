@@ -145,7 +145,7 @@ void RE_InternalResources::InitWaterResources()
 
 
 	static const char* internalNames[30] = { "useTexture", "useColor", "useClipPlane", "clip_plane", "time", "dt", "near_plane", "far_plane", "viewport_w", "viewport_h", "model", "view", "projection", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "topacity", "tshininess", "shininessST", "refraccti", "theight", "tnormals", "treflection", "currentDepth", "viewPos" };
-	eastl::vector<ShaderCvar> uniformsWaterShader = waterSr->GetUniformValues(), uniformsWaterDefShader = waterDefS->GetUniformValues();
+	eastl::vector<RE_Shader_Cvar> uniformsWaterShader = waterSr->GetUniformValues(), uniformsWaterDefShader = waterDefS->GetUniformValues();
 	for (unsigned int i = 0; i < uniformsWaterShader.size(); i++) {
 		bool skip = false;
 		for (int iN = 0; iN < 30 && !skip; iN++)
@@ -167,7 +167,7 @@ void RE_InternalResources::InitWaterResources()
 	{
 		RE_TextureSettings defTexSettings;
 		int tmp1, tmp2;
-		App::textures.LoadTextureInMemory(waterTexture.GetBuffer(), waterTexture.GetSize(), TextureType::RE_PNG, &water_foam_texture, &tmp1, &tmp2, defTexSettings);
+		RE_TextureImporter::LoadTextureInMemory(waterTexture.GetBuffer(), waterTexture.GetSize(), TextureType::RE_PNG, &water_foam_texture, &tmp1, &tmp2, defTexSettings);
 	}
 }
 
@@ -190,4 +190,4 @@ const char*	 RE_InternalResources::GetLightPassShader() const { return defLightS
 const char*	 RE_InternalResources::GetDefaultSkyBoxShader() const { return skyboxShader; }
 unsigned int RE_InternalResources::GetTextureChecker() const { return checkerTexture; }
 unsigned int RE_InternalResources::GetTextureWaterFoam() const { return water_foam_texture; }
-eastl::vector<ShaderCvar> RE_InternalResources::GetWaterUniforms() const { return waterUniforms; }
+eastl::vector<RE_Shader_Cvar> RE_InternalResources::GetWaterUniforms() const { return waterUniforms; }

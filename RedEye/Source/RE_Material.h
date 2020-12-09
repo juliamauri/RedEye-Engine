@@ -2,13 +2,13 @@
 #define __RE_MATERIAL_H__
 
 #include "Resource.h"
-#include "Cvar.h"
+#include "RE_Cvar.h"
 
 #include "MathGeoLib/include/Math/float3.h"
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 
-class JSONNode;
+class RE_Json;
 
 enum RE_ShadingMode : int { //from assimp documentation
 	S_FLAT = 0x1,
@@ -64,16 +64,16 @@ private:
 
 	void Draw() override;
 
-	void SaveResourceMeta(JSONNode* metaNode)override;
-	void LoadResourceMeta(JSONNode* metaNode)override;
+	void SaveResourceMeta(RE_Json* metaNode)override;
+	void LoadResourceMeta(RE_Json* metaNode)override;
 
 	void DrawTextures(const char* texturesName, eastl::vector<const char*>* textures);
 
 	void JsonDeserialize(bool generateLibraryPath = false);
 	void JsonSerialize(bool onlyMD5 = false);
 
-	void PullTexturesJson(JSONNode * texturesNode, eastl::vector<const char*>* textures);
-	void PushTexturesJson(JSONNode * texturesNode, eastl::vector<const char*>* textures);
+	void PullTexturesJson(RE_Json * texturesNode, eastl::vector<const char*>* textures);
+	void PushTexturesJson(RE_Json * texturesNode, eastl::vector<const char*>* textures);
 
 	void BinaryDeserialize();
 	void BinarySerialize();
@@ -120,7 +120,7 @@ private:
 	bool applySave = false;
 
 	const char* shaderMD5 = nullptr;
-	eastl::vector<ShaderCvar> fromShaderCustomUniforms;
+	eastl::vector<RE_Shader_Cvar> fromShaderCustomUniforms;
 
 	enum MaterialUINT {
 		UNDEFINED = -1, CDIFFUSE, TDIFFUSE, CSPECULAR, TSPECULAR, CAMBIENT, TAMBIENT, CEMISSIVE,

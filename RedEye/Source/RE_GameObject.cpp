@@ -1,13 +1,13 @@
 #include "RE_GameObject.h"
 
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
 #include "RE_CameraManager.h"
 #include "RE_GLCacheManager.h"
 #include "RE_ResourceManager.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_Component.h"
 
@@ -1047,7 +1047,7 @@ unsigned int RE_GameObject::GetBinarySize()const
 	return size;
 }
 
-void RE_GameObject::SerializeJson(JSONNode * node)
+void RE_GameObject::SerializeJson(RE_Json * node)
 {
 	node->PushString("name", name.c_str());
 	if (parent_uid) node->PushUnsignedLongLong("Parent Pool ID", parent_uid);
@@ -1058,7 +1058,7 @@ void RE_GameObject::SerializeJson(JSONNode * node)
 	node->PushFloatVector("scale", t->GetLocalScale());
 }
 
-void RE_GameObject::DeserializeJSON(JSONNode* node, GameObjectsPool* goPool, ComponentsPool* cmpsPool)
+void RE_GameObject::DeserializeJSON(RE_Json* node, GameObjectsPool* goPool, ComponentsPool* cmpsPool)
 {
 	SetUp(goPool, cmpsPool, node->PullString("name", "GameObject"), node->PullUnsignedLongLong("Parent Pool ID", 0));
 

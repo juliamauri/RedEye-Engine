@@ -1,277 +1,188 @@
 #include "QuadTree.h"
 
-#include "Application.h"
-#include "ModuleEditor.h"
-#include "RE_CompCamera.h"
-#include "RE_GameObject.h"
-#include "Globals.h"
-#include "RE_ShaderImporter.h"
-#include "Glew\include\glew.h"
-
-#include <EASTL/queue.h>
-
-QTree::QTreeNode::QTreeNode()
+template<class TYPE>
+QTree<TYPE>::QTree(math::AABB& max_size)
 {
-	box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
+	root.SetBox(max_size);
 }
 
-QTree::QTreeNode::QTreeNode(const AABB& box, QTreeNode* parent) : box(box), parent(parent) {}
+template<class TYPE>
+void QTree<TYPE>::Push(TYPE in, math::AABB& in_box)
+{
+	if (root.GetBox().Intersects(in_box))
+		root.RecursivePush(in, in_box);
+}
 
-QTree::QTreeNode::~QTreeNode() { Clear(); }
+template<class TYPE>
+void QTree<TYPE>::Pop(TYPE to_remove)
+{
+	root.RecursivePop(to_remove);
+}
 
-void QTree::QTreeNode::Push(RE_GameObject* g_obj)
+template<class TYPE>
+void QTree<TYPE>::Clear()
+{
+	root.Clear();
+}
+
+template<class TYPE>
+void QTree<TYPE>::BuildFromList(const eastl::vector<eastl::pair<TYPE, math::AABB>>& items, math::AABB& max_scope)
+{
+	for (auto item : items) root.RecursivePush(item.first, item.second);
+}
+
+template<class TYPE>
+void QTree<TYPE>::GetDrawVertices(eastl::vector<math::vec>& out) const
+{
+	root.GetDrawVertices(edges, count, out);
+}
+
+template<class TYPE>
+short QTree<TYPE>::GetDrawMode() const
+{
+	return draw_mode;
+}
+
+template<class TYPE>
+void QTree<TYPE>::SetDrawMode(short mode)
+{
+	switch (draw_mode = mode) {
+	case QTreeDrawMode::DISABLED: count = 0;
+	case QTreeDrawMode::TOP: count = 4; edges[0] = 5; edges[1] = 6; edges[2] = 7; edges[3] = 11; break;
+	case QTreeDrawMode::BOTTOM: count = 4; edges[0] = 0; edges[1] = 2; edges[2] = 4; edges[3] = 8; break;
+	case QTreeDrawMode::TOP_BOTTOM: count = 8; edges[0] = edges[4] = 0; edges[1] = edges[5] = 2; edges[2] = edges[6] = 4; edges[3] = edges[7] = 8; break;
+	case QTreeDrawMode::ALL: count = 12; for (int i = 0; i < 12; i++) { edges[i] = i; } break; }
+}
+
+template<class TYPE>
+QTreeNode<TYPE>::QTreeNode(const AABB& box, QTreeNode* parent) : box(box), parent(parent) {}
+
+template<class TYPE>
+QTreeNode<TYPE>::~QTreeNode() { FreeNodes(); }
+
+template<class TYPE>
+void QTreeNode<TYPE>::RecursivePush(TYPE item, math::AABB& _box)
 {
 	if (is_leaf)
 	{
-		g_objs.push_back(g_obj);
-
-		if (g_objs.size() >= 4)
-		{
-			AddNodes();
-			Distribute();
-		}
+		contained_items.push_back({ item, _box });
+		if (contained_items.size() >= 4) { AddNodes(); Distribute(); }
 	}
 	else
-	{
 		for (int i = 0; i < 4; i++)
-			if (nodes[i]->box.Intersects(g_obj->GetGlobalBoundingBox()))
-				nodes[i]->Push(g_obj);
-	}
+			if (nodes[i]->box.Intersects(_box))
+				nodes[i]->RecursivePush(item, _box);
 }
 
-void QTree::QTreeNode::Pop(const RE_GameObject* g_obj)
+template<class TYPE>
+void QTreeNode<TYPE>::RecursivePop(const TYPE to_remove)
 {
-	eastl::list<RE_GameObject*>::iterator it = eastl::find(g_objs.begin(), g_objs.end(), g_obj);
-	if (it != g_objs.end())
-		g_objs.erase(it);
+	item_storage::iterator it = contained_items.begin();
+	for (auto item : contained_items)
+	{
+		if (item.first == to_remove)
+		{
+			contained_items.erase(it);
+			break;
+		}
+		else it++;
+	}
 
 	if (!is_leaf)
 	{
-		for (int i = 0; i < 4; i++)
-			nodes[i]->Pop(g_obj);
+		for (int i = 0; i < 4; i++) nodes[i]->RecursivePop(to_remove);
 
-		// delete nodes if node can be leaf
-		int count = g_objs.size();
+		int count = contained_items.size();
 		if (count <= 4)
 		{
-			for (int i = 0; i < 4; i++)
-				count += nodes[i]->g_objs.size();
-
-			if (count <= 4)
+			for (int i = 0; i < 4; i++) count += nodes[i]->contained_items.size();
+			if (count <= 4) // check if node can be set to leaf with 4 or less items
 			{
-				for (int i = 0; i < 4; i++)
-					for (auto objs : nodes[i]->g_objs)
-						g_objs.push_back(objs);
-
-				for (int i = 0; i < 4; i++)
-					DEL(nodes[i]);
-
 				is_leaf = true;
+				for (int i = 0; i < 4; i++)
+				{
+					for (auto& item : nodes[i]->contained_items) contained_items.push_back(item);
+					delete nodes[i];
+				}
 			}
 		}
 	}
 }
 
-void QTree::QTreeNode::Clear()
+template<class TYPE>
+void QTreeNode<TYPE>::Clear()
 {
-	for (int i = 0; i < 4; i++)
-		DEL(nodes[i]);
-
-	g_objs.clear();
 	is_leaf = true;
+	contained_items.clear();
+	FreeNodes();
 }
 
-void QTree::QTreeNode::Draw(const int* edges, int count) const
+template<class TYPE>
+void QTreeNode<TYPE>::FreeNodes()
 {
-	for (int i = 0; i < count; i++)
-	{
-		glVertex3f(
-			box.Edge(edges[i]).a.x,
-			box.Edge(edges[i]).a.y,
-			box.Edge(edges[i]).a.z);
-		glVertex3f(
-			box.Edge(edges[i]).b.x,
-			box.Edge(edges[i]).b.y,
-			box.Edge(edges[i]).b.z);
-	}
-
-	if (!is_leaf)
-		for (int i = 0; i < 4; i++)
-			nodes[i]->Draw(edges, count);
+	for (int i = 0; i < 4; i++) if (nodes[i] != nullptr) delete nodes[i];
 }
 
-void QTree::QTreeNode::SetBox(const AABB & bounding_box)
-{
-	box = bounding_box;
-}
+template<class TYPE>
+void QTreeNode<TYPE>::SetBox(const math::AABB& new_box) { box = new_box; }
 
-const AABB& QTree::QTreeNode::GetBox() const
-{
-	return box;
-}
+template<class TYPE>
+const math::AABB& QTreeNode<TYPE>::GetBox() const { return box; }
 
-void QTree::QTreeNode::AddNodes()
+template<class TYPE>
+void QTreeNode<TYPE>::AddNodes()
 {
-	AABB target_box;
-	float3 center(box.CenterPoint());
-	float3 target_size(box.Size());
+	math::AABB target;
+	math::vec center(box.CenterPoint());
+	math::vec target_size(box.Size());
 	target_size.x *= 0.5f;
 	target_size.z *= 0.5f;
 
-	for (uint i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 	{
-		target_box.SetFromCenterAndSize( {
+		target.SetFromCenterAndSize({
 			i % 3 ? (center.x + target_size.x * 0.5f) : (center.x - target_size.x * 0.5f),
 			center.y,
 			i < 2 ? (center.z - target_size.z * 0.5f) : (center.z + target_size.z * 0.5f) },
 			target_size);
 
-		nodes[i] = new QTreeNode(target_box, this);
+		nodes[i] = new QTreeNode(target, this);
 	}
 
 	is_leaf = false;
 }
 
-void QTree::QTreeNode::Distribute()
+template<class TYPE>
+void QTreeNode<TYPE>::Distribute()
 {
-	eastl::list<RE_GameObject*>::iterator it = g_objs.begin();
-	while (it != g_objs.end())
+	item_storage::iterator it = contained_items.begin();
+	while (it != contained_items.end())
 	{
-		bool intersecting[4];
-		uint intersections_counter = 0;
+		bool intersecting[4] = {};
+		int intersections_counter = 0;
 
-		for (uint i = 0; i < 4; i++)
-		{
-			intersecting[i] = nodes[i]->box.Intersects((*it)->GetGlobalBoundingBox());
-
-			if (intersecting[i])
-				intersections_counter++; 
-		}
+		for (int i = 0; i < 4; i++)
+			intersections_counter += (intersecting[i] = nodes[i]->box.Intersects(it->second));
 
 		if (intersections_counter != 4)
 		{
-			for (uint i = 0; i < 4; i++)
-			{
-				if (intersecting[i]) nodes[i]->Push(*it);
-			}
-
-			it = g_objs.erase(it);
+			for (int i = 0; i < 4; i++) if (intersecting[i]) nodes[i]->RecursivePush(it->first, it->second);
+			it = contained_items.erase(it);
 		}
-		else
-		{
-			it++;
-		}
+		else it++;
 	}
 }
 
-QTree::QTree() { SetDrawMode(BOTTOM); }
-
-QTree::~QTree()
-{}
-
-void QTree::Build(RE_GameObject * root_g_obj)
+template<class TYPE>
+void QTreeNode<TYPE>::GetDrawVertices(const int* edges, int count, eastl::vector<math::vec>& out) const
 {
-	RE_ASSERT(root_g_obj != nullptr);
-
-	root.Clear();
-
-	PushWithChilds(root_g_obj);
-}
-
-void QTree::BuildFromList(const AABB& box, const eastl::list<RE_GameObject*>& gos)
-{
-	root.Clear();
-	root.SetBox(box);
-
-	for (auto go : gos)
-		root.Push(go);
-}
-
-void QTree::Draw() const
-{
-	root.Draw(edges, count);
-}
-
-void QTree::SetDrawMode(short mode)
-{
-	switch (draw_mode = DrawMode(mode))
+	for (int i = 0; i < count; i++)
 	{
-	case QTree::DISABLED:
-		count = 0;
-	case QTree::TOP:
-		count = 4;
-		edges[0] = 5;
-		edges[1] = 6;
-		edges[2] = 7;
-		edges[3] = 11;
-		break;
-	case QTree::BOTTOM:
-		count = 4;
-		edges[0] = 0;
-		edges[1] = 2;
-		edges[2] = 4;
-		edges[3] = 8;
-		break;
-	case QTree::TOP_BOTTOM:
-		count = 8;
-		edges[0] = 0;
-		edges[1] = 2;
-		edges[2] = 4;
-		edges[3] = 8;
-		edges[4] = 0;
-		edges[5] = 2;
-		edges[6] = 4;
-		edges[7] = 8;
-		break;
-	case QTree::ALL:
-		count = 12;
-		for (int i = 0; i < 12; i++)
-			edges[i] = i;
-		break;
+		out.push_back(box.Edge(edges[i]).a);
+		out.push_back(box.Edge(edges[i]).b);
 	}
-}
 
-short QTree::GetDrawMode() const
-{
-	return draw_mode;
-}
-
-void QTree::Pop(const RE_GameObject * g_obj)
-{
-	root.Pop(g_obj);
-}
-
-void QTree::Push(RE_GameObject * g_obj)
-{
-	if (g_obj->GetGlobalBoundingBox().Intersects(root.GetBox()))
-		root.Push(g_obj);
-}
-
-void QTree::Clear()
-{
-	root.Clear();
-}
-
-void QTree::PushWithChilds(RE_GameObject * g_obj)
-{
-	root.SetBox(g_obj->GetGlobalBoundingBox());
-
-	eastl::stack<RE_GameObject*> objects;
-
-	for (auto child : g_obj->GetChildsPtr())
-		objects.push(child);
-
-	while (!objects.empty())
-	{
-		RE_GameObject* obj = objects.top();
-		objects.pop();
-
-		if (obj->IsActiveStatic())
-		{
-			root.Push(obj);
-
-			for (auto child : obj->GetChildsPtr())
-				objects.push(child);
-		}
-	}
+	if (!is_leaf)
+		for (int i = 0; i < 4; i++)
+			nodes[i]->GetDrawVertices(edges, count, out);
 }

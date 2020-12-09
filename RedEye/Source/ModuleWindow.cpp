@@ -2,7 +2,7 @@
 
 #include "RE_ConsoleLog.h"
 #include "RE_Config.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 
@@ -82,7 +82,7 @@ void ModuleWindow::CleanUp()
 void ModuleWindow::Load()
 {
 	RE_LOG_SECONDARY("Loading Window propieties from config:");
-	JSONNode* node = App::config->GetRootNode(name);
+	RE_Json* node = App::config->GetRootNode(name);
 
 	/*/Use OpenGL 2.1 ?? TODO: check prefered GL Context version setting
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -106,7 +106,7 @@ void ModuleWindow::Load()
 
 void ModuleWindow::Save() const
 {
-	JSONNode* node = App::config->GetRootNode(name);
+	RE_Json* node = App::config->GetRootNode(name);
 	if (flags == 0u)
 	{
 		node->PushBool("Fullscreen", false);

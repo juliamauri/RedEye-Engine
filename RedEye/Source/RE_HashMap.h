@@ -1,15 +1,15 @@
-#ifndef __POOL_H__
-#define __POOL_H__
+#ifndef __HASH_MAP_H__
+#define __HASH_MAP_H__
 
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
 
 template<class TYPEVALUE, class TYPEKEY, unsigned int size, unsigned int increment>
-class PoolMapped
+class RE_HashMap
 {
 public:
-	PoolMapped() { pool_ = new TYPEVALUE[currentSize = size]; }
-	virtual ~PoolMapped() { delete[] pool_; }
+	RE_HashMap() { pool_ = new TYPEVALUE[currentSize = size]; }
+	virtual ~RE_HashMap() { delete[] pool_; }
 
 	virtual TYPEKEY Push(TYPEVALUE val) { return TYPEKEY(); };
 
@@ -71,4 +71,4 @@ protected:
 	unsigned int currentSize = 0;
 };
 
-#endif // !__POOL_H__
+#endif // !__HASH_MAP_H__

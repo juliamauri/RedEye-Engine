@@ -1,7 +1,7 @@
 #ifndef __EVENT_H__
 #define __EVENT_H__
 
-#include "Cvar.h"
+#include "RE_Cvar.h"
 
 class EventListener;
 
@@ -73,12 +73,12 @@ class Event
 {
 public:
 
-	Event(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
+	Event(RE_EventType t, EventListener* lis, RE_Cvar data = RE_Cvar(), RE_Cvar data2 = RE_Cvar());
 	Event(Event& e);
 	~Event() {}
 
-	static void Push(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
-	static void PushForced(RE_EventType t, EventListener* lis, Cvar data = Cvar(), Cvar data2 = Cvar());
+	static void Push(RE_EventType t, EventListener* lis, RE_Cvar data = RE_Cvar(), RE_Cvar data2 = RE_Cvar());
+	static void PushForced(RE_EventType t, EventListener* lis, RE_Cvar data = RE_Cvar(), RE_Cvar data2 = RE_Cvar());
 	static void PumpAll();
 	static void ClearQueue();
 	static void ResumeEvents();
@@ -94,8 +94,8 @@ public:
 
 	RE_EventType type;
 	EventListener* listener;
-	Cvar data1;
-	Cvar data2;
+	RE_Cvar data1;
+	RE_Cvar data2;
 	const unsigned int timestamp;
 
 private:

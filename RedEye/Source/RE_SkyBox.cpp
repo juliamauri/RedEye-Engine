@@ -4,10 +4,11 @@
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "RE_TextureImporter.h"
+#include "RE_SkyBoxImporter.h"
 #include "RE_ResourceManager.h"
 #include "RE_GLCacheManager.h"
 #include "RE_ThumbnailManager.h"
@@ -18,13 +19,7 @@
 #include "par_shapes.h"
 #include <EASTL/vector.h>
 
-#define MINFCOMBO "Nearest\0Linear\0Nearest Mipmap Nearest\0Linear Mipmap Nearest\0Nearest Mipmap Linear\0Linear Mipmap Linear"
-#define MAGFOMBO "Nearest\0Linear"
-#define WRAPOMBO "Repeat\0Clamp to border\0Clamp to edge\0Mirrored Repeat"
-
-RE_SkyBox::RE_SkyBox() {}
-RE_SkyBox::RE_SkyBox(const char* metaPath) :ResourceContainer(metaPath) {}
-RE_SkyBox::~RE_SkyBox() {}
+const char* RE_SkyBox::texturesname[6] = { "Right", "Left", "Top", "Bottom", "Front", "Back" };
 
 void RE_SkyBox::LoadInMemory()
 {
@@ -56,7 +51,7 @@ void RE_SkyBox::SetAsInternal()
 	SetInternal(true);
 
 	Config toMD5("", "");
-	JSONNode* node = toMD5.GetRootNode("skybox");
+	RE_Json* node = toMD5.GetRootNode("skybox");
 	//For differentMD5
 	node->PushString("SKname", GetName());
 	node->PushString("SKPath", GetAssetPath());
@@ -66,7 +61,7 @@ void RE_SkyBox::SetAsInternal()
 
 	SetMD5(toMD5.GetMd5().c_str());
 
-	App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID, true);
+	RE_SkyboxImporter::LoadSkyBoxInMemory(skyBoxSettings, &ID, true);
 	LoadSkyBoxSphere();
 
 	ResourceContainer::inMemory = true;
@@ -98,7 +93,7 @@ void RE_SkyBox::Draw()
 				if (applyTextures)
 				{
 					if (ID != 0) glDeleteTextures(1, &ID);
-					App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID);
+					RE_SkyboxImporter::LoadSkyBoxInMemory(skyBoxSettings, &ID);
 				}
 
 			}
@@ -128,7 +123,7 @@ void RE_SkyBox::Draw()
 		if (applyTextures && !isInternal())
 		{
 			if (ID != 0) glDeleteTextures(1, &ID);
-			App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID);
+			RE_SkyboxImporter::LoadSkyBoxInMemory(skyBoxSettings, &ID);
 		}
 
 		applySize = applyTextures = false;
@@ -223,8 +218,9 @@ void RE_SkyBox::DrawEditSkyBox()
 	ImGui::Separator();
 	ImGui::Text("OpenGL texture settings:");
 
+	static const char* minf_combo = "Nearest\0Linear\0Nearest Mipmap Nearest\0Linear Mipmap Nearest\0Nearest Mipmap Linear\0Linear Mipmap Linear";
 	int minIndex = RE_Texture::GetComboFilter(skyBoxSettings.min_filter);
-	if (ImGui::Combo("Minify filter", &minIndex, MINFCOMBO))
+	if (ImGui::Combo("Minify filter", &minIndex, minf_combo))
 	{
 		RE_TextureFilters newfilter = RE_Texture::GetFilterCombo(minIndex);
 		if (skyBoxSettings.min_filter != newfilter)
@@ -243,8 +239,9 @@ void RE_SkyBox::DrawEditSkyBox()
 		}
 	}
 
+	static const char* mag_combo = "Nearest\0Linear";
 	int magIndex = RE_Texture::GetComboFilter(skyBoxSettings.mag_filter);
-	if (ImGui::Combo("Magnify filter", &magIndex, MAGFOMBO))
+	if (ImGui::Combo("Magnify filter", &magIndex, mag_combo))
 	{
 		RE_TextureFilters newfilter = RE_Texture::GetFilterCombo(magIndex);
 		if (skyBoxSettings.mag_filter != newfilter)
@@ -254,8 +251,9 @@ void RE_SkyBox::DrawEditSkyBox()
 		}
 	}
 
+	static const char* wrap_combo = "Repeat\0Clamp to border\0Clamp to edge\0Mirrored Repeat";
 	int wrapSIndex = RE_Texture::GetComboWrap(skyBoxSettings.wrap_s);
-	if (ImGui::Combo("Wrap S", &wrapSIndex, WRAPOMBO))
+	if (ImGui::Combo("Wrap S", &wrapSIndex, wrap_combo))
 	{
 		RE_TextureWrap newwrap = RE_Texture::GetWrapCombo(wrapSIndex);
 		if (skyBoxSettings.wrap_s != newwrap)
@@ -266,7 +264,7 @@ void RE_SkyBox::DrawEditSkyBox()
 	}
 
 	int wrapTIndex = RE_Texture::GetComboWrap(skyBoxSettings.wrap_t);
-	if (ImGui::Combo("Wrap T", &wrapTIndex, WRAPOMBO))
+	if (ImGui::Combo("Wrap T", &wrapTIndex, wrap_combo))
 	{
 		RE_TextureWrap newwrap = RE_Texture::GetWrapCombo(wrapTIndex);
 		if (skyBoxSettings.wrap_t != newwrap)
@@ -277,7 +275,7 @@ void RE_SkyBox::DrawEditSkyBox()
 	}
 
 	int wrapRIndex = RE_Texture::GetComboWrap(skyBoxSettings.wrap_r);
-	if (ImGui::Combo("Wrap R", &wrapRIndex, WRAPOMBO))
+	if (ImGui::Combo("Wrap R", &wrapRIndex, wrap_combo))
 	{
 		RE_TextureWrap newwrap = RE_Texture::GetWrapCombo(wrapRIndex);
 		if (skyBoxSettings.wrap_r != newwrap)
@@ -291,7 +289,7 @@ void RE_SkyBox::DrawEditSkyBox()
 bool RE_SkyBox::isFacesFilled() const
 {
 	bool ret = true;
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++)
+	for (uint i = 0; i < 6; i++)
 	{
 		if (!skyBoxSettings.textures[i].textureMD5)
 		{
@@ -302,7 +300,7 @@ bool RE_SkyBox::isFacesFilled() const
 	return ret;
 }
 
-void RE_SkyBox::SaveResourceMeta(JSONNode* metaNode)
+void RE_SkyBox::SaveResourceMeta(RE_Json* metaNode)
 {
 	metaNode->PushInt("minFilter", skyBoxSettings.min_filter);
 	metaNode->PushInt("magFilter", skyBoxSettings.mag_filter);
@@ -310,8 +308,8 @@ void RE_SkyBox::SaveResourceMeta(JSONNode* metaNode)
 	metaNode->PushInt("wrapT", skyBoxSettings.wrap_t);
 	metaNode->PushInt("wrapR", skyBoxSettings.wrap_r);
 
-	JSONNode* nodeTex = metaNode->PushJObject("textures");
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++)
+	RE_Json* nodeTex = metaNode->PushJObject("textures");
+	for (uint i = 0; i < 6; i++)
 	{
 		if (texturesname[i] != nullptr && skyBoxSettings.textures[i].textureMD5 != nullptr)
 		{
@@ -321,7 +319,7 @@ void RE_SkyBox::SaveResourceMeta(JSONNode* metaNode)
 	}
 }
 
-void RE_SkyBox::LoadResourceMeta(JSONNode* metaNode)
+void RE_SkyBox::LoadResourceMeta(RE_Json* metaNode)
 {
 	skyBoxSettings.min_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("minFilter", RE_LINEAR));
 	skyBoxSettings.mag_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("magFilter", RE_LINEAR));
@@ -329,8 +327,8 @@ void RE_SkyBox::LoadResourceMeta(JSONNode* metaNode)
 	skyBoxSettings.wrap_t =		static_cast<RE_TextureWrap>(metaNode->PullInt("wrapT", RE_CLAMP_TO_EDGE));
 	skyBoxSettings.wrap_r =		static_cast<RE_TextureWrap>(metaNode->PullInt("wrapR", RE_CLAMP_TO_EDGE));
 
-	JSONNode* nodeTex = metaNode->PullJObject("textures");
-	for (uint i = 0; i < MAXSKYBOXTEXTURES; i++)
+	RE_Json* nodeTex = metaNode->PullJObject("textures");
+	for (uint i = 0; i < 6; i++)
 	{
 		eastl::string key(texturesname[i]);
 		eastl::string texMD5 = nodeTex->PullString(eastl::string(key + "textureMD5").c_str(), "");
@@ -352,7 +350,7 @@ void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 	Config toLoad(GetAssetPath(),App::fs->GetZipPath());
 	if (toLoad.Load())
 	{
-		JSONNode* node = toLoad.GetRootNode("skybox");
+		RE_Json* node = toLoad.GetRootNode("skybox");
 		skyBoxSettings.skyBoxSize = node->PullFloat("skyBoxSize", 5000);
 		DEL(node);
 		
@@ -365,7 +363,7 @@ void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 			SetLibraryPath(libraryPath.c_str());
 		}
 	}
-	App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID);
+	RE_SkyboxImporter::LoadSkyBoxInMemory(skyBoxSettings, &ID);
 	LoadSkyBoxSphere();
 	ResourceContainer::inMemory = true;
 }
@@ -376,7 +374,7 @@ void RE_SkyBox::AssetSave()
 	(assetPath += GetName()) += ".sk";
 	SetAssetPath(assetPath.c_str());
 	Config toSave(assetPath.c_str(), App::fs->GetZipPath());
-	JSONNode* node = toSave.GetRootNode("skybox");
+	RE_Json* node = toSave.GetRootNode("skybox");
 
 	//For differentMD5
 	node->PushString("SKname", GetName());
@@ -415,7 +413,7 @@ void RE_SkyBox::LibraryLoad()
 		memcpy( &skyBoxSettings.skyBoxSize, cursor, size);
 		cursor += size;
 
-		App::textures.LoadSkyBoxInMemory(skyBoxSettings, &ID);
+		RE_SkyboxImporter::LoadSkyBoxInMemory(skyBoxSettings, &ID);
 		LoadSkyBoxSphere();
 		ResourceContainer::inMemory = true;
 	}

@@ -7,7 +7,7 @@
 #include <EASTL/map.h>
 
 class RE_GameObject;
-class JSONNode;
+class RE_Json;
 class GameObjectsPool;
 
 enum ComponentType : ushortint
@@ -82,8 +82,8 @@ public:
 
 	virtual eastl::vector<const char*> GetAllResources() { return eastl::vector<const char*>(); }
 
-	virtual void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const {}
-	virtual void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) {}
+	virtual void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const {}
+	virtual void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) {}
 
 	virtual unsigned int GetBinarySize() const {  return 0; }
 	virtual void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const {}

@@ -1,29 +1,25 @@
 #include "ModuleRenderer3D.h"
 
 #include "RE_ConsoleLog.h"
+#include "RE_FileSystem.h"
+#include "RE_FileBuffer.h"
+#include "RE_Config.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
-
-#include "RE_FileBuffer.h"
-#include "RE_Config.h"
-#include "JSONNode.h"
-
 #include "RE_GLCacheManager.h"
 #include "RE_FBOManager.h"
-#include "RE_InternalResources.h"
 #include "RE_ResourceManager.h"
 #include "RE_ShaderImporter.h"
 #include "RE_ThumbnailManager.h"
-
+#include "RE_CameraManager.h"
+#include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
 #include "RE_CompMesh.h"
 #include "RE_CompPrimitive.h"
-#include "RE_CameraManager.h"
-#include "RE_CompTransform.h"
-
 #include "RE_Shader.h"
 #include "RE_SkyBox.h"
 #include "RE_Scene.h"
@@ -165,7 +161,7 @@ void ModuleRenderer3D::PostUpdate()
 		RenderQueue rend = rendQueue.top();
 		rendQueue.pop();
 
-		RE_ECS_Manager* poolGOThumbnail = nullptr;
+		RE_ECS_Pool* poolGOThumbnail = nullptr;
 		eastl::string path(THUMBNAILPATH);
 		path += rend.resMD5;
 
@@ -362,7 +358,7 @@ void ModuleRenderer3D::DrawEditor()
 void ModuleRenderer3D::Load()
 {
 	RE_LOG_SECONDARY("Loading Render3D config values:");
-	JSONNode* node = App::config->GetRootNode(name);
+	RE_Json* node = App::config->GetRootNode(name);
 
 	SetVSync(node->PullBool("vsync", vsync));
 	RE_LOG_TERCIARY((vsync) ? "VSync enabled." : "VSync disabled");
@@ -384,7 +380,7 @@ void ModuleRenderer3D::Load()
 
 void ModuleRenderer3D::Save() const
 {
-	JSONNode* node = App::config->GetRootNode(name);
+	RE_Json* node = App::config->GetRootNode(name);
 	node->PushBool("vsync", vsync);
 	for (unsigned int i = 0; i < render_views.size(); ++i)
 	{

@@ -4,11 +4,11 @@
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "RE_ResourceManager.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 #include "RE_ECS_Importer.h"
 
 #include "ImGui/imgui.h"
@@ -43,11 +43,11 @@ void RE_Scene::Import(bool keepInMemory)
 	if (!keepInMemory) UnloadMemory();
 }
 
-void RE_Scene::Save(RE_ECS_Manager* pool)
+void RE_Scene::Save(RE_ECS_Pool* pool)
 {
 	if (pool)
 	{
-		toSave = new RE_ECS_Manager();
+		toSave = new RE_ECS_Pool();
 		toSave->InsertPool(pool);
 		AssetSave();
 		LibrarySave();
@@ -64,8 +64,8 @@ void RE_Scene::SetName(const char* _name)
 	SetAssetPath(assetPath.c_str());
 }
 
-RE_ECS_Manager* RE_Scene::GetPool() { 
-	RE_ECS_Manager* ret;
+RE_ECS_Pool* RE_Scene::GetPool() { 
+	RE_ECS_Pool* ret;
 	bool unload = false;
 	if (unload = (loaded == nullptr)) LoadInMemory();
 	ret = loaded->GetNewPoolFromID(loaded->GetRootUID());
@@ -82,7 +82,7 @@ void RE_Scene::AssetSave()
 {
 	//Serialize
 	Config scene_SaveFile(GetAssetPath(), App::fs->GetZipPath());
-	JSONNode* scenebNode = scene_SaveFile.GetRootNode("scene");
+	RE_Json* scenebNode = scene_SaveFile.GetRootNode("scene");
 
 	if (toSave->TotalGameObjects() > 0) RE_ECS_Importer::JsonSerialize(scenebNode, toSave);
 	DEL(scenebNode);
@@ -104,7 +104,7 @@ void RE_Scene::AssetLoad(bool generateLibraryPath)
 
 	if (jsonLoad.Load())
 	{
-		JSONNode* scenebNode = jsonLoad.GetRootNode("scene");
+		RE_Json* scenebNode = jsonLoad.GetRootNode("scene");
 		loaded = RE_ECS_Importer::JsonDeserialize(scenebNode);
 		DEL(scenebNode);
 

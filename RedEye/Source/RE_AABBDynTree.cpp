@@ -1,13 +1,13 @@
-#include "AABBDynamicTree.h"
+#include "RE_AABBDynTree.h"
 
 #include "MathGeoLib/include/Geometry/Frustum.h"
 #include "MathGeoLib/include/Geometry/LineSegment.h"
 #include "SDL2/include/SDL_assert.h"
 
-AABBDynamicTree::AABBDynamicTree() {}
-AABBDynamicTree::~AABBDynamicTree() {}
+RE_AABBDynTree::RE_AABBDynTree() {}
+RE_AABBDynTree::~RE_AABBDynTree() {}
 
-void AABBDynamicTree::PushNode(UID go_index, AABB box)
+void RE_AABBDynTree::PushNode(UID go_index, AABB box)
 {
 	// Stage 0: Allocate Leaf Node
 	int leafIndex = AllocateLeafNode(box, go_index);
@@ -17,7 +17,7 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 		// Stage 1: find the best sibling for the new leaf
 		int best_sibling_index = root_index;
 		{
-			AABBDynamicTreeNode rootNode = At(root_index);
+			RE_AABBDynTreeNode rootNode = At(root_index);
 			float best_cost = Union(rootNode.box, box).SurfaceArea();
 			float box_sa = box.SurfaceArea();
 
@@ -32,7 +32,7 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 					int current_sibling = potential_siblings.front();
 					potential_siblings.pop();
 
-					AABBDynamicTreeNode& currentSNode = At(current_sibling);
+					RE_AABBDynTreeNode& currentSNode = At(current_sibling);
 
 					// C     = direct_cost                + inherited_cost
 					// C     = SA (box U current_sibling) + SUM (Dif_SA (current_sibling parents))
@@ -41,7 +41,7 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 					float direct_cost = Union(currentSNode.box, box).SurfaceArea();
 					float inherited_cost = 0.f;
 
-					AABBDynamicTreeNode* iNode;
+					RE_AABBDynTreeNode* iNode = nullptr;
 					for (int i = currentSNode.parent_index; i != -1; i = iNode->parent_index)
 					{
 						iNode = AtPtr(i);
@@ -68,13 +68,13 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 
 		// Stage 2: create a new parent
 		int new_parent_index = AllocateInternalNode();
-		AABBDynamicTreeNode& best_sibling = At(best_sibling_index);
+		RE_AABBDynTreeNode& best_sibling = At(best_sibling_index);
 		int old_parent = best_sibling.parent_index;
 
 		if (old_parent != -1)
 		{
 			// Connect old parent's child new parent
-			AABBDynamicTreeNode& oldParentNode = At(old_parent);
+			RE_AABBDynTreeNode& oldParentNode = At(old_parent);
 			if (oldParentNode.child1 == best_sibling_index) oldParentNode.child1 = new_parent_index;
 			else oldParentNode.child2 = new_parent_index;
 		}
@@ -85,7 +85,7 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 		}
 
 		// Connect new parent
-		AABBDynamicTreeNode& newParentNode = At(new_parent_index);
+		RE_AABBDynTreeNode& newParentNode = At(new_parent_index);
 		newParentNode.parent_index = old_parent;
 		newParentNode.child1 = best_sibling_index;
 		newParentNode.child2 = leafIndex;
@@ -97,7 +97,7 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 		// Stage 3: walk back up the tree refitting AABBs
 		while (new_parent_index != -1)
 		{
-			AABBDynamicTreeNode& iN = At(new_parent_index);
+			RE_AABBDynTreeNode& iN = At(new_parent_index);
 			iN.box = Union(AtPtr(iN.child1)->box, AtPtr(iN.child2)->box);
 			int next = iN.parent_index;
 			Rotate(iN, new_parent_index);
@@ -111,7 +111,7 @@ void AABBDynamicTree::PushNode(UID go_index, AABB box)
 	}
 }
 
-void AABBDynamicTree::PopNode(UID go_index)
+void RE_AABBDynTree::PopNode(UID go_index)
 {
 	SDL_assert(node_count > 0);
 	int index = objectToNode.at(go_index);
@@ -124,7 +124,7 @@ void AABBDynamicTree::PopNode(UID go_index)
 	else
 	{
 		int parent_index = At(index).parent_index;
-		AABBDynamicTreeNode& parent_node = At(parent_index);
+		RE_AABBDynTreeNode& parent_node = At(parent_index);
 
 		if (parent_index == root_index) // son of root
 		{
@@ -132,7 +132,7 @@ void AABBDynamicTree::PopNode(UID go_index)
 		}
 		else // has grand parent
 		{
-			AABBDynamicTreeNode& grand_parent_node = At(parent_node.parent_index);
+			RE_AABBDynTreeNode& grand_parent_node = At(parent_node.parent_index);
 			if (parent_node.child1 == index) // left child
 			{
 				if (grand_parent_node.child1 == parent_index) // left grand child
@@ -162,7 +162,7 @@ void AABBDynamicTree::PopNode(UID go_index)
 	objectToNode.erase(go_index);
 }
 
-void AABBDynamicTree::UpdateNode(UID go_index, AABB box)
+void RE_AABBDynTree::UpdateNode(UID go_index, AABB box)
 {
 	SDL_assert(node_count > 0);
 	int index = objectToNode.at(go_index);
@@ -174,10 +174,10 @@ void AABBDynamicTree::UpdateNode(UID go_index, AABB box)
 	}
 	else
 	{
-		AABBDynamicTreeNode& current_node = At(index);
+		RE_AABBDynTreeNode& current_node = At(index);
 		current_node.box = box;
 		int parent_index = current_node.parent_index;
-		AABBDynamicTreeNode& parent_node = At(parent_index);
+		RE_AABBDynTreeNode& parent_node = At(parent_index);
 		if (parent_index == root_index) // son of root
 		{
 			parent_node.box = Union(box, At((parent_node.child1 == index) ? parent_node.child2 : parent_node.child1).box);
@@ -186,7 +186,7 @@ void AABBDynamicTree::UpdateNode(UID go_index, AABB box)
 		{
 			// Stage 0: Remove parent from hierarchy
 			{
-				AABBDynamicTreeNode& grand_parent_node = At(parent_node.parent_index);
+				RE_AABBDynTreeNode& grand_parent_node = At(parent_node.parent_index);
 				if (parent_node.child1 == index) // left child
 				{
 					if (grand_parent_node.child1 == parent_index) grand_parent_node.child1 = parent_node.child2;
@@ -204,7 +204,7 @@ void AABBDynamicTree::UpdateNode(UID go_index, AABB box)
 			// Stage 1: find best sibling
 			int best_sibling_index = root_index;
 			{
-				AABBDynamicTreeNode& rootNode = At(root_index);
+				RE_AABBDynTreeNode& rootNode = At(root_index);
 				float best_cost = Union(rootNode.box, box).SurfaceArea();
 				float box_sa = box.SurfaceArea();
 				eastl::queue<int> potential_siblings;
@@ -215,7 +215,7 @@ void AABBDynamicTree::UpdateNode(UID go_index, AABB box)
 					int current_sibling = potential_siblings.front();
 					potential_siblings.pop();
 
-					AABBDynamicTreeNode currentSNode = At(current_sibling);
+					RE_AABBDynTreeNode currentSNode = At(current_sibling);
 
 					// C     = direct_cost                + inherited_cost
 					// C     = SA (box U current_sibling) + SUM (Dif_SA (current_sibling parents))
@@ -224,7 +224,7 @@ void AABBDynamicTree::UpdateNode(UID go_index, AABB box)
 					float direct_cost = Union(currentSNode.box, box).SurfaceArea();
 					float inherited_cost = 0.f;
 
-					AABBDynamicTreeNode* iNode;
+					RE_AABBDynTreeNode* iNode = nullptr;
 					for (int i = currentSNode.parent_index; i != -1; i = iNode->parent_index)
 					{
 						iNode = AtPtr(i);
@@ -250,7 +250,7 @@ void AABBDynamicTree::UpdateNode(UID go_index, AABB box)
 
 			// Stage 2: conect parent and best sibling
 			{
-				AABBDynamicTreeNode& best_sibling = At(best_sibling_index);
+				RE_AABBDynTreeNode& best_sibling = At(best_sibling_index);
 				int best_grand_parent = best_sibling.parent_index;
 				if (best_grand_parent == -1)
 				{
@@ -260,7 +260,7 @@ void AABBDynamicTree::UpdateNode(UID go_index, AABB box)
 				else
 				{
 					// Connect current parent to sibling's grand parent
-					AABBDynamicTreeNode& best_grand_parent_node = At(best_grand_parent);
+					RE_AABBDynTreeNode& best_grand_parent_node = At(best_grand_parent);
 					(best_grand_parent_node.child1 == best_sibling_index ? best_grand_parent_node.child1 : best_grand_parent_node.child2) = parent_index;
 				}
 
@@ -274,7 +274,7 @@ void AABBDynamicTree::UpdateNode(UID go_index, AABB box)
 			{
 				while (parent_index != -1)
 				{
-					AABBDynamicTreeNode& iN = At(parent_index);
+					RE_AABBDynTreeNode& iN = At(parent_index);
 					iN.box = Union(AtPtr(iN.child1)->box, AtPtr(iN.child2)->box);
 
 					int next = iN.parent_index;
@@ -286,29 +286,26 @@ void AABBDynamicTree::UpdateNode(UID go_index, AABB box)
 	}
 }
 
-eastl::vector<int> AABBDynamicTree::GetAllKeys() const
+eastl::vector<int> RE_AABBDynTree::GetAllKeys() const
 {
 	eastl::vector<int> ret;
 	for (auto go : poolmapped_) ret.push_back(go.first);
 	return ret;
 }
 
-void AABBDynamicTree::Clear()
+void RE_AABBDynTree::Clear()
 {
-	size = 0;
-	node_count = 0;
 	root_index = -1;
-	randomCount = 0;
-	lastAvaibleIndex = 0;
+	size = node_count = randomCount = lastAvaibleIndex = 0;
 	objectToNode.clear();
 	poolmapped_.clear();
 }
 
-void AABBDynamicTree::CollectIntersections(Ray ray, eastl::queue<UID>& indexes) const
+void RE_AABBDynTree::CollectIntersections(Ray ray, eastl::queue<UID>& indexes) const
 {
 	if (node_count > 0)
 	{
-		AABBDynamicTreeNode node;
+		RE_AABBDynTreeNode node;
 		eastl::queue<int> node_stack;
 		node_stack.push(root_index);
 
@@ -333,11 +330,11 @@ void AABBDynamicTree::CollectIntersections(Ray ray, eastl::queue<UID>& indexes) 
 	}
 }
 
-void AABBDynamicTree::CollectIntersections(const Frustum frustum, eastl::queue<UID>& indexes) const
+void RE_AABBDynTree::CollectIntersections(const Frustum frustum, eastl::queue<UID>& indexes) const
 {
 	if (node_count > 0)
 	{
-		AABBDynamicTreeNode node;
+		RE_AABBDynTreeNode node;
 		eastl::queue<int> node_stack;
 		node_stack.push(root_index);
 
@@ -362,10 +359,10 @@ void AABBDynamicTree::CollectIntersections(const Frustum frustum, eastl::queue<U
 	}
 }
 
-void AABBDynamicTree::Draw() const
+void RE_AABBDynTree::Draw() const
 {
 	for (auto pm_ : poolmapped_) {
-		AABBDynamicTreeNode node = At(pm_.first);
+		RE_AABBDynTreeNode node = At(pm_.first);
 		if (!node.is_leaf && (node.parent_index != -1 || pm_.first == root_index))
 		{
 			for (int a = 0; a < 12; a++)
@@ -383,32 +380,32 @@ void AABBDynamicTree::Draw() const
 	}
 }
 
-int AABBDynamicTree::GetCount() const
+int RE_AABBDynTree::GetCount() const
 {
 	return node_count;
 }
 
-AABB AABBDynamicTree::Union(AABB box1, AABB box2)
+AABB RE_AABBDynTree::Union(AABB box1, AABB box2)
 {
 	vec point_array[4] = { box1.minPoint, box1.maxPoint, box2.minPoint, box2.maxPoint };
 	return AABB::MinimalEnclosingAABB(&point_array[0], 4);
 }
 
-void AABBDynamicTree::Rotate(AABBDynamicTreeNode& node, int index)
+void RE_AABBDynTree::Rotate(RE_AABBDynTreeNode& node, int index)
 {
 	if (node.parent_index != -1)
 	{
-		AABBDynamicTreeNode& parent = At(node.parent_index);
+		RE_AABBDynTreeNode& parent = At(node.parent_index);
 
 		bool node_is_child1 = (parent.child1 == index);
-		AABBDynamicTreeNode& sibling = At(node_is_child1 ? parent.child2 : parent.child1);
+		RE_AABBDynTreeNode& sibling = At(node_is_child1 ? parent.child2 : parent.child1);
 
 		// rotation[0] = sibling <-> child1;
 		// rotation[1] = sibling <-> child2;
 		// rotation[2] = current <-> sibling child1;
 		// rotation[3] = current <-> sibling child2;
 
-		float rotation_sa[4];
+		float rotation_sa[4] = {};
 		int count = 2;
 
 		rotation_sa[0] = Union(sibling.box, At(node.child2).box).SurfaceArea();
@@ -521,9 +518,9 @@ void AABBDynamicTree::Rotate(AABBDynamicTreeNode& node, int index)
 	}
 }
 
-int AABBDynamicTree::AllocateLeafNode(AABB box, UID index)
+int RE_AABBDynTree::AllocateLeafNode(AABB box, UID index)
 {
-	AABBDynamicTreeNode newNode;
+	RE_AABBDynTreeNode newNode;
 	SetLeaf(newNode, box, index);
 
 	int node_index = randomCount++;
@@ -535,9 +532,9 @@ int AABBDynamicTree::AllocateLeafNode(AABB box, UID index)
 	return node_index;
 }
 
-int AABBDynamicTree::AllocateInternalNode()
+int RE_AABBDynTree::AllocateInternalNode()
 {
-	AABBDynamicTreeNode newNode;
+	RE_AABBDynTreeNode newNode;
 	SetInternal(newNode);
 
 	int node_index = randomCount++;
@@ -548,7 +545,7 @@ int AABBDynamicTree::AllocateInternalNode()
 	return node_index;
 }
 
-inline void AABBDynamicTree::SetLeaf(AABBDynamicTreeNode& node, AABB box, UID index)
+inline void RE_AABBDynTree::SetLeaf(RE_AABBDynTreeNode& node, AABB box, UID index)
 {
 	node.box = box;
 	node.object_index = index;
@@ -558,7 +555,7 @@ inline void AABBDynamicTree::SetLeaf(AABBDynamicTreeNode& node, AABB box, UID in
 	node.is_leaf = true;
 }
 
-inline void AABBDynamicTree::SetInternal(AABBDynamicTreeNode& node)
+inline void RE_AABBDynTree::SetInternal(RE_AABBDynTreeNode& node)
 {
 	node.box.SetNegativeInfinity();
 	node.object_index = -1;

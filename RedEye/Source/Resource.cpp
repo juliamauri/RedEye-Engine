@@ -4,7 +4,7 @@
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_Config.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "RE_ResourceManager.h"
 
 
@@ -68,7 +68,7 @@ void ResourceContainer::SaveMeta()
 {
 	Config metaSerialize(metaPath.c_str(), App::fs->GetZipPath());
 
-	JSONNode* metaNode = metaSerialize.GetRootNode("meta");
+	RE_Json* metaNode = metaSerialize.GetRootNode("meta");
 
 	metaNode->PushString("Name", name.c_str());
 	metaNode->PushString("AssetPath", assetPath.c_str());
@@ -86,7 +86,7 @@ void ResourceContainer::LoadMeta()
 {
 	Config metaDeserialize(metaPath.c_str(), App::fs->GetZipPath());
 	if (metaDeserialize.Load()) {
-		JSONNode* metaNode = metaDeserialize.GetRootNode("meta");
+		RE_Json* metaNode = metaDeserialize.GetRootNode("meta");
 
 		name = metaNode->PullString("Name", "unkown");
 		assetPath = metaNode->PullString("AssetPath", "Assets/");

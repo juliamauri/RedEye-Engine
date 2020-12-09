@@ -5,16 +5,9 @@
 
 #include <EASTL/string.h>
 
-class RE_ShaderImporter
+namespace RE_ShaderImporter
 {
-public:
-	// constructor reads and builds the shader
-	RE_ShaderImporter(const char* folder = "Assets/Shaders/") : folderPath(folder) {}
-
-	//delete all programs loaded
-	~RE_ShaderImporter() {}
-
-	bool Init();
+	void Init();
 
 	//Load shaders and put in vector
 	bool LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr, bool compileTest = false);
@@ -28,69 +21,66 @@ public:
 	const char* GetShaderError();
 
 	// use/activate the shader
-	static void use(unsigned int ID);
+	void use(unsigned int ID);
 	//Delete manually shader
-	static void Delete(unsigned int ID);
+	void Delete(unsigned int ID);
 	//Returns location
-	static int getLocation(unsigned int ID, const char* name);
+	int getLocation(unsigned int ID, const char* name);
 
 	// utility uniform functions
-	static void setBool(unsigned int ID, const char* name, bool value);
-	static void setBool(unsigned int ID, const char* name, bool value, bool value2);
-	static void setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3);
-	static void setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3, bool value4);
+	void setBool(unsigned int ID, const char* name, bool value);
+	void setBool(unsigned int ID, const char* name, bool value, bool value2);
+	void setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3);
+	void setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3, bool value4);
 
-	static void setBool(int loc, bool value);
-	static void setBool(int loc, bool value, bool value2);
-	static void setBool(int loc, bool value, bool value2, bool value3);
-	static void setBool(int loc, bool value, bool value2, bool value3, bool value4);
+	void setBool(int loc, bool value);
+	void setBool(int loc, bool value, bool value2);
+	void setBool(int loc, bool value, bool value2, bool value3);
+	void setBool(int loc, bool value, bool value2, bool value3, bool value4);
 
-	static void setInt(unsigned int ID, const char* name, int value);
-	static void setInt(unsigned int ID, const char* name, int value, int value2);
-	static void setInt(unsigned int ID, const char* name, int value, int value2, int value3);
-	static void setInt(unsigned int ID, const char* name, int value, int value2, int value3, int value4);
+	void setInt(unsigned int ID, const char* name, int value);
+	void setInt(unsigned int ID, const char* name, int value, int value2);
+	void setInt(unsigned int ID, const char* name, int value, int value2, int value3);
+	void setInt(unsigned int ID, const char* name, int value, int value2, int value3, int value4);
 
-	static void setInt(int loc, int value);
-	static void setInt(int loc, int value, int value2);
-	static void setInt(int loc, int value, int value2, int value3);
-	static void setInt(int loc, int value, int value2, int value3, int value4);
+	void setInt(int loc, int value);
+	void setInt(int loc, int value, int value2);
+	void setInt(int loc, int value, int value2, int value3);
+	void setInt(int loc, int value, int value2, int value3, int value4);
 
-	static void setFloat(unsigned int ID, const char* name, float value);
-	static void setFloat(unsigned int ID, const char* name, float value, float value2);
-	static void setFloat(unsigned int ID, const char* name, float value, float value2, float value3);
-	static void setFloat(unsigned int ID, const char* name, float value, float value2, float value3, float value4);
-	static void setFloat(unsigned int ID, const char* name, math::vec value);
+	void setFloat(unsigned int ID, const char* name, float value);
+	void setFloat(unsigned int ID, const char* name, float value, float value2);
+	void setFloat(unsigned int ID, const char* name, float value, float value2, float value3);
+	void setFloat(unsigned int ID, const char* name, float value, float value2, float value3, float value4);
+	void setFloat(unsigned int ID, const char* name, math::vec value);
 
-	static void setFloat(int loc, float value);
-	static void setFloat(int loc, float value, float value2);
-	static void setFloat(int loc, float value, float value2, float value3);
-	static void setFloat(int loc, float value, float value2, float value3, float value4);
-	static void setFloat(int loc, math::vec value);
+	void setFloat(int loc, float value);
+	void setFloat(int loc, float value, float value2);
+	void setFloat(int loc, float value, float value2, float value3);
+	void setFloat(int loc, float value, float value2, float value3, float value4);
+	void setFloat(int loc, math::vec value);
 	
-	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value);
-	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2);
-	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3);
-	static void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
+	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value);
+	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2);
+	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3);
+	void setUnsignedInt(unsigned int ID, const char* name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
 
-	static void setUnsignedInt(int loc, unsigned int value);
-	static void setUnsignedInt(int loc, unsigned int value, unsigned int value2);
-	static void setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3);
-	static void setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
+	void setUnsignedInt(int loc, unsigned int value);
+	void setUnsignedInt(int loc, unsigned int value, unsigned int value2);
+	void setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3);
+	void setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4);
 
-	static void setFloat3x3(unsigned int ID, const char* name, const float* trans);
-	static void setFloat4x4(unsigned int ID, const char* name, const float* trans);
+	void setFloat3x3(unsigned int ID, const char* name, const float* trans);
+	void setFloat4x4(unsigned int ID, const char* name, const float* trans);
 
-	static void setFloat3x3(int loc, const float* trans);
-	static void setFloat4x4(int loc, const float* trans);
+	void setFloat3x3(int loc, const float* trans);
+	void setFloat4x4(int loc, const float* trans);
 
-private:
-
-	const char* folderPath = nullptr;
-
-	//Last error
-	eastl::string last_error;
-
-	int* binaryFormats = nullptr;
+	namespace Internal
+	{
+		static eastl::string last_error;
+		static int* binaryFormats = nullptr;
+	}
 };
 
 #endif // __RE_SHADERIMPORTER_H__

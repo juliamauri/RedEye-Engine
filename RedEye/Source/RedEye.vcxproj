@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AABBDynamicTree.cpp" />
+    <ClCompile Include="RE_AABBDynTree.cpp" />
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="JSONNode.cpp" />
+    <ClCompile Include="RE_ComponentsPool.cpp" />
+    <ClCompile Include="RE_GameObjectPool.cpp" />
+    <ClCompile Include="RE_Json.cpp" />
     <ClCompile Include="RE_Config.cpp" />
-    <ClCompile Include="Cvar.cpp" />
+    <ClCompile Include="RE_Cvar.cpp" />
     <ClCompile Include="EA\EAAssert\eaassert.cpp" />
     <ClCompile Include="EA\EAStdC\EACallback.cpp" />
     <ClCompile Include="EA\EAStdC\EACType.cpp" />
@@ -84,7 +86,7 @@
     <ClCompile Include="md5.cpp" />
     <ClCompile Include="RE_CameraManager.cpp" />
     <ClCompile Include="RE_GLCacheManager.cpp" />
-    <ClCompile Include="RE_ECS_Manager.cpp" />
+    <ClCompile Include="RE_ECS_Pool.cpp" />
     <ClCompile Include="RE_InternalResources.cpp" />
     <ClCompile Include="RE_Model.cpp" />
     <ClCompile Include="RE_ModelImporter.cpp" />
@@ -114,6 +116,7 @@
     <ClCompile Include="RE_Scene.cpp" />
     <ClCompile Include="RE_Shader.cpp" />
     <ClCompile Include="RE_SkyBox.cpp" />
+    <ClCompile Include="RE_SkyboxImporter.cpp" />
     <ClCompile Include="RE_Texture.cpp" />
     <ClCompile Include="RE_ShaderImporter.cpp" />
     <ClCompile Include="RE_ThumbnailManager.cpp" />
@@ -122,11 +125,14 @@
     <ClCompile Include="RE_Time.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AABBDynamicTree.h" />
+    <ClInclude Include="RE_AABBDynTree.h" />
     <ClInclude Include="Application.h" />
-    <ClInclude Include="JSONNode.h" />
+    <ClInclude Include="RE_ComponentPool.h" />
+    <ClInclude Include="RE_ComponentsPool.h" />
+    <ClInclude Include="RE_GameObjectPool.h" />
+    <ClInclude Include="RE_Json.h" />
     <ClInclude Include="RE_Config.h" />
-    <ClInclude Include="Cvar.h" />
+    <ClInclude Include="RE_Cvar.h" />
     <ClInclude Include="EA\EAAssert\eaassert.h" />
     <ClInclude Include="EA\EAAssert\version.h" />
     <ClInclude Include="EA\EABase\config\eacompiler.h" />
@@ -331,7 +337,7 @@
     <ClInclude Include="ImGuiColorTextEdit\TextEditor.h" />
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="ModuleAudio.h" />
-    <ClInclude Include="PoolMapped.h" />
+    <ClInclude Include="RE_HashMap.h" />
     <ClInclude Include="RE_Command.h" />
     <ClInclude Include="RE_CommandManager.h" />
     <ClInclude Include="RE_CompLight.h" />
@@ -360,7 +366,7 @@
     <ClInclude Include="md5.h" />
     <ClInclude Include="RE_CameraManager.h" />
     <ClInclude Include="RE_GLCacheManager.h" />
-    <ClInclude Include="RE_ECS_Manager.h" />
+    <ClInclude Include="RE_ECS_Pool.h" />
     <ClInclude Include="Optick\include\optick.config.h" />
     <ClInclude Include="Optick\include\optick.h" />
     <ClInclude Include="par_shapes.h" />
@@ -419,6 +425,7 @@
     <ClInclude Include="RapidJson\include\stringbuffer.h" />
     <ClInclude Include="RapidJson\include\writer.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RE_ModelSettings.h" />
     <ClInclude Include="RE_ResourceManager.h" />
     <ClInclude Include="RE_CompCamera.h" />
     <ClInclude Include="RE_Component.h" />
@@ -434,8 +441,11 @@
     <ClInclude Include="RE_Scene.h" />
     <ClInclude Include="RE_Shader.h" />
     <ClInclude Include="RE_SkyBox.h" />
+    <ClInclude Include="RE_SkyboxImporter.h" />
+    <ClInclude Include="RE_SkyBoxSettings.h" />
     <ClInclude Include="RE_Texture.h" />
     <ClInclude Include="RE_ShaderImporter.h" />
+    <ClInclude Include="RE_TextureSettings.h" />
     <ClInclude Include="RE_ThumbnailManager.h" />
     <ClInclude Include="RE_Hardware.h" />
     <ClInclude Include="RE_TextureImporter.h" />

@@ -1,13 +1,12 @@
 #include "RE_CompWater.h"
 
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleRenderer3D.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 #include "RE_GLCacheManager.h"
-#include "JSONNode.h"
-
 #include "RE_ResourceManager.h"
-#include "RE_InternalResources.h"
+#include "RE_ShaderImporter.h"
 #include "RE_Shader.h"
 
 #include "MathGeoLib/include/Math/float4.h"
@@ -75,22 +74,22 @@ void RE_CompWater::Draw() const
 		{
 			switch (waterUniforms[i].GetType())
 			{
-			case Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].location, waterUniforms[i].AsBool()); break;
-			case Cvar::INT: RE_ShaderImporter::setInt(waterUniforms[i].location, waterUniforms[i].AsInt()); break;
-			case Cvar::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].location, waterUniforms[i].AsFloat()); break;
-			case Cvar::FLOAT2:
+			case RE_Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].location, waterUniforms[i].AsBool()); break;
+			case RE_Cvar::INT: RE_ShaderImporter::setInt(waterUniforms[i].location, waterUniforms[i].AsInt()); break;
+			case RE_Cvar::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].location, waterUniforms[i].AsFloat()); break;
+			case RE_Cvar::FLOAT2:
 			{
 				const float* f_ptr = waterUniforms[i].AsFloatPointer();
 				RE_ShaderImporter::setFloat(waterUniforms[i].location, f_ptr[0], f_ptr[1]);
 				break;
 			}
-			case Cvar::FLOAT3:
+			case RE_Cvar::FLOAT3:
 			{
 				const float* f_ptr = waterUniforms[i].AsFloatPointer();
 				RE_ShaderImporter::setFloat(waterUniforms[i].location, f_ptr[0], f_ptr[1], f_ptr[2]);
 				break;
 			}
-			case Cvar::SAMPLER: //Only one case
+			case RE_Cvar::SAMPLER: //Only one case
 				glActiveTexture(GL_TEXTURE0 + textureCounter);
 				RE_GLCacheManager::ChangeTextureBind(waterFoam.second);
 				RE_ShaderImporter::setUnsignedInt(waterUniforms[i].location, textureCounter++);
@@ -103,23 +102,23 @@ void RE_CompWater::Draw() const
 		{
 			switch (waterUniforms[i].GetType())
 			{
-			case Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].locationDeferred, waterUniforms[i].AsBool()); break;
-			case Cvar::INT: RE_ShaderImporter::setInt(waterUniforms[i].locationDeferred, waterUniforms[i].AsInt()); break;
-			case Cvar::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, waterUniforms[i].AsFloat()); break;
-			case Cvar::FLOAT2:
+			case RE_Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].locationDeferred, waterUniforms[i].AsBool()); break;
+			case RE_Cvar::INT: RE_ShaderImporter::setInt(waterUniforms[i].locationDeferred, waterUniforms[i].AsInt()); break;
+			case RE_Cvar::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, waterUniforms[i].AsFloat()); break;
+			case RE_Cvar::FLOAT2:
 			{
 				const float* f_ptr = waterUniforms[i].AsFloatPointer();
 				RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, f_ptr[0], f_ptr[1]);
 				break;
 			}
-			case Cvar::FLOAT3:
+			case RE_Cvar::FLOAT3:
 			{
 				const float* f_ptr = waterUniforms[i].AsFloatPointer();
 				RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, f_ptr[0], f_ptr[1], f_ptr[2]);
 				break;
 			}
 			{
-			case Cvar::SAMPLER: //Only one case
+			case RE_Cvar::SAMPLER: //Only one case
 				glActiveTexture(GL_TEXTURE0 + textureCounter);
 				RE_GLCacheManager::ChangeTextureBind(waterFoam.second);
 				RE_ShaderImporter::setUnsignedInt(waterUniforms[i].locationDeferred, textureCounter++);
@@ -210,7 +209,7 @@ void RE_CompWater::DrawProperties()
 	}
 }
 
-void RE_CompWater::SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const
+void RE_CompWater::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushInt("slices", slices);
 	node->PushInt("stacks", stacks);
@@ -230,7 +229,7 @@ void RE_CompWater::SerializeJson(JSONNode* node, eastl::map<const char*, int>* r
 	node->PushFloat("distanceFoam", distanceFoam.second);
 }
 
-void RE_CompWater::DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources)
+void RE_CompWater::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	target_slices = slices = node->PullInt("slices", slices);
 	target_stacks = stacks = node->PullInt("stacks", stacks);

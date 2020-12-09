@@ -7,7 +7,7 @@
 #include "RE_Command.h"
 
 #include "RE_GameObject.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 #include "ImGui\imgui.h"
 #include "RE_Math.h"
 

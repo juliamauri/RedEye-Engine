@@ -25,8 +25,8 @@ public:
 	void DrawProperties() override;
 
 	unsigned int GetBinarySize()const override;
-	void SerializeJson(JSONNode* node, eastl::map<const char*, int>* resources) const override;
-	void DeserializeJson(JSONNode* node, eastl::map<int, const char*>* resources) override;
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
+	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)override;
 

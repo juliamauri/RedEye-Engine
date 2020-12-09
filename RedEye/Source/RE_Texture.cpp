@@ -3,7 +3,7 @@
 #include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
-#include "JSONNode.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "RE_TextureImporter.h"
 #include "RE_ThumbnailManager.h"
@@ -11,10 +11,6 @@
 
 #include "Glew/include/glew.h"
 #include "ImGui/imgui.h"
-
-#define MINFCOMBO "Nearest\0Linear\0Nearest Mipmap Nearest\0Linear Mipmap Nearest\0Nearest Mipmap Linear\0Linear Mipmap Linear"
-#define MAGFOMBO "Nearest\0Linear"
-#define WRAPOMBO "Repeat\0Clamp to border\0Clamp to edge\0Mirrored Repeat"
 
 const char* RE_Texture::GenerateMD5()
 {
@@ -133,8 +129,9 @@ void RE_Texture::Draw()
 		}
 	}
 
+	static const char* minf_combo = "Repeat\0Clamp to border\0Clamp to edge\0Mirrored Repeat";
 	int minIndex = GetComboFilter(texSettings.min_filter);
-	if (ImGui::Combo("Minify filter", &minIndex, MINFCOMBO))
+	if (ImGui::Combo("Minify filter", &minIndex, minf_combo))
 	{
 		RE_TextureFilters newfilter = GetFilterCombo(minIndex);
 		if (texSettings.min_filter != newfilter)
@@ -153,8 +150,9 @@ void RE_Texture::Draw()
 		}
 	}
 
+	static const char* mag_combo = "Nearest\0Linear";
 	int magIndex = GetComboFilter(texSettings.mag_filter);
-	if(ImGui::Combo("Magnify filter",&magIndex,MAGFOMBO))
+	if(ImGui::Combo("Magnify filter",&magIndex, mag_combo))
 	{
 		RE_TextureFilters newfilter = GetFilterCombo(magIndex);
 		if (texSettings.mag_filter != newfilter)
@@ -164,8 +162,9 @@ void RE_Texture::Draw()
 		}
 	}
 
+	static const char* wrap_combo = "Repeat\0Clamp to border\0Clamp to edge\0Mirrored Repeat";
 	int wrapSIndex = GetComboWrap(texSettings.wrap_s);
-	if(ImGui::Combo("Wrap S", &wrapSIndex ,WRAPOMBO))
+	if(ImGui::Combo("Wrap S", &wrapSIndex , wrap_combo))
 	{
 		RE_TextureWrap newwrap = GetWrapCombo(wrapSIndex);
 		if (texSettings.wrap_s != newwrap)
@@ -176,7 +175,7 @@ void RE_Texture::Draw()
 	}
 
 	int wrapTIndex = GetComboWrap(texSettings.wrap_t);
-	if(ImGui::Combo("Wrap T", &wrapTIndex, WRAPOMBO))
+	if(ImGui::Combo("Wrap T", &wrapTIndex, wrap_combo))
 	{
 		RE_TextureWrap newwrap = GetWrapCombo(wrapTIndex);
 		if (texSettings.wrap_t != newwrap)
@@ -199,7 +198,7 @@ void RE_Texture::Draw()
 	if (applySave && texSettings == restoreSettings) applySave = false;
 }
 
-void RE_Texture::SaveResourceMeta(JSONNode * metaNode)
+void RE_Texture::SaveResourceMeta(RE_Json * metaNode)
 {
 	metaNode->PushInt("TextureType", texType);
 	metaNode->PushInt("minFilter", texSettings.min_filter);
@@ -209,7 +208,7 @@ void RE_Texture::SaveResourceMeta(JSONNode * metaNode)
 	metaNode->PushFloat4("borderColor", texSettings.borderColor);
 }
 
-void RE_Texture::LoadResourceMeta(JSONNode * metaNode)
+void RE_Texture::LoadResourceMeta(RE_Json * metaNode)
 {
 	texType = static_cast<TextureType>(metaNode->PullInt("TextureType", RE_TEXTURE_UNKNOWN));
 	texSettings.min_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("minFilter", RE_NEAREST));
@@ -302,7 +301,7 @@ void RE_Texture::AssetLoad()
 	RE_FileBuffer assetFile(GetAssetPath());
 	if (assetFile.Load())
 	{
-		App::textures.LoadTextureInMemory(assetFile.GetBuffer(), assetFile.GetSize(), texType, &ID, &width, &height, texSettings);
+		RE_TextureImporter::LoadTextureInMemory(assetFile.GetBuffer(), assetFile.GetSize(), texType, &ID, &width, &height, texSettings);
 		
 		SetMD5(assetFile.GetMd5().c_str());
 		eastl::string libraryPath("Library/Textures/");
@@ -318,7 +317,7 @@ void RE_Texture::LibraryLoad()
 	RE_FileBuffer libraryFile(GetLibraryPath());
 	if (libraryFile.Load())
 	{
-		App::textures.LoadTextureInMemory(libraryFile.GetBuffer(), libraryFile.GetSize(), TextureType::RE_DDS, &ID, &width, &height, texSettings);
+		RE_TextureImporter::LoadTextureInMemory(libraryFile.GetBuffer(), libraryFile.GetSize(), TextureType::RE_DDS, &ID, &width, &height, texSettings);
 		ResourceContainer::inMemory = true;
 	}
 }
@@ -327,5 +326,5 @@ void RE_Texture::LibrarySave()
 {
 	RE_FileBuffer assetFile(GetAssetPath());
 	RE_FileBuffer libraryFile(GetLibraryPath(), App::fs->GetZipPath());
-	if (assetFile.Load()) App::textures.SaveOwnFormat(assetFile.GetBuffer(), assetFile.GetSize(), texType, &libraryFile);
+	if (assetFile.Load()) RE_TextureImporter::SaveOwnFormat(assetFile.GetBuffer(), assetFile.GetSize(), texType, &libraryFile);
 }

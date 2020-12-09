@@ -14,7 +14,7 @@
 #include "RE_ShaderImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_TextureImporter.h"
-#include "RE_ECS_Manager.h"
+#include "RE_ECS_Pool.h"
 
 #include "RE_Material.h"
 #include "RE_Prefab.h"
@@ -30,7 +30,6 @@
 #include "RE_ConsoleLog.h"
 #include "RE_Time.h"
 
-#include "md5.h"
 #include <EASTL/string.h>
 #include <EASTL/queue.h>
 #include <EASTL/vector.h>
@@ -38,7 +37,7 @@
 
 #define DEFAULTMODEL "Assets/Meshes/BakerHouse/BakerHouse.fbx"
 
-RE_ECS_Manager ModuleScene::scenePool;
+RE_ECS_Pool ModuleScene::scenePool;
 
 ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled) {}
 ModuleScene::~ModuleScene() {}
@@ -229,7 +228,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 }
 
-RE_ECS_Manager* ModuleScene::GetScenePool() { return &scenePool; }
+RE_ECS_Pool* ModuleScene::GetScenePool() { return &scenePool; }
 RE_GameObject* ModuleScene::GetGOPtr(UID id) { return scenePool.GetGOPtr(id); }
 const RE_GameObject* ModuleScene::GetGOCPtr(UID id) { return scenePool.GetGOCPtr(id); }
 UID ModuleScene::GetRootUID() { return scenePool.GetRootUID(); }
@@ -281,7 +280,7 @@ void ModuleScene::CreateWater(const UID parent)
 	water_go->GetTransformPtr()->SetScale({ 10.0f, 10.0f, 1.0f });
 }
 
-void ModuleScene::AddGOPool(RE_ECS_Manager* toAdd)
+void ModuleScene::AddGOPool(RE_ECS_Pool* toAdd)
 {
 	toAdd->UseResources();
 	UID justAdded = scenePool.InsertPool(toAdd, true);
@@ -428,7 +427,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	RE_Scene* scene = dynamic_cast<RE_Scene*>(App::resources->At(currentScene));
 	App::resources->Use(sceneMD5);
 
-	RE_ECS_Manager* loadedDO = scene->GetPool();
+	RE_ECS_Pool* loadedDO = scene->GetPool();
 	if (loadedDO)scenePool.InsertPool(loadedDO);
 	else RE_LOG_ERROR("Can't Load Scene");
 

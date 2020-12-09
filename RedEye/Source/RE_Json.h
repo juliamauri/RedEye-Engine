@@ -11,12 +11,12 @@
 
 class Config;
 
-class JSONNode
+class RE_Json
 {
 public:
 
-	JSONNode(const char* path = nullptr, Config* config = nullptr, bool isArray = false);
-	~JSONNode();
+	RE_Json(const char* path = nullptr, Config* config = nullptr, bool isArray = false);
+	~RE_Json();
 
 	// Push
 	void		PushBool(const char* name, const bool value);
@@ -36,7 +36,7 @@ public:
 	void		PushUnsignedLongLong(const char* name, const unsigned long long value);
 	void		PushString(const char* name, const char* value);
 	void		PushValue(rapidjson::Value* val);
-	JSONNode*	PushJObject(const char* name);
+	RE_Json*	PushJObject(const char* name);
 
 	// Pull
 	bool					PullBool(const char* name, bool deflt);
@@ -55,7 +55,7 @@ public:
 	signed long long		PullSignedLongLong(const char* name, signed long long deflt);
 	unsigned long long		PullUnsignedLongLong(const char* name, unsigned long long deflt);
 	const char *			PullString(const char* name, const char* deflt);
-	JSONNode *				PullJObject(const char* name);
+	RE_Json *				PullJObject(const char* name);
 	rapidjson::Value::Array	PullValueArray();
 
 	// Utility
@@ -68,11 +68,11 @@ public:
 
 private:
 
-	JSONNode(JSONNode& node);
+	RE_Json(RE_Json& node);
 
 private:
 
-	Config* config;
+	Config* config = nullptr;
 	eastl::string pointerPath;
 };
 

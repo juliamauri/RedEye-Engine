@@ -1,104 +1,92 @@
 #ifndef __QUADTREE_H__
 #define __QUADTREE_H__
 
-#include "RE_GameObject.h"
-#include "MathGeoLib\include\Geometry\AABB.h"
+#include "MathGeoLib/include/Math/float3.h"
+#include "MathGeoLib/include/Geometry/AABB.h"
+#include "EASTL/vector.h"
 
-// Depricated class. GOs now use UIDs
+enum QTreeDrawMode : short { DISABLED, TOP, BOTTOM, TOP_BOTTOM, ALL };
 
-class QTree
+template <class TYPE> class QTreeNode;
+
+template <class TYPE> class QTree
 {
 public:
-	QTree();
-	~QTree();
 
-	void	Build(RE_GameObject* root_g_obj);
-	void	BuildFromList(const AABB& box, const eastl::list<RE_GameObject*>& gos);
-	void	Draw() const;
+	QTree(math::AABB& max_size);
+	~QTree() {}
 
-	void	SetDrawMode(short mode);
-	short	GetDrawMode() const;
-
-	void	Pop(const RE_GameObject* g_obj);
-
-	template<typename TYPE>
-	inline void CollectIntersections(eastl::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
-
-private:
-
-	void Push(RE_GameObject* g_obj);
+	void Push(TYPE in, math::AABB& in_box);
+	void Pop(TYPE to_remove);
 	void Clear();
-	void PushWithChilds(RE_GameObject* g_obj);
+
+	void BuildFromList(const eastl::vector<eastl::pair<TYPE, math::AABB>>& items, math::AABB& max_scope);
+
+	void GetDrawVertices(eastl::vector<math::vec>& out) const;
+	short GetDrawMode() const;
+	void SetDrawMode(short mode);
+
+	template<typename COLLISION_GEO>
+	inline void RecursiveIntersections(eastl::vector<TYPE>& out, const COLLISION_GEO& geometry) const
+	{
+		root.RecursiveIntersections(out, geometry);
+	}
 
 private:
 
-	class QTreeNode
-	{
-	public:
-		QTreeNode();
-		QTreeNode(const AABB& box, QTreeNode* parent = nullptr);
-		~QTreeNode();
-
-		void Push(RE_GameObject* g_obj);
-		void Pop(const RE_GameObject* g_obj);
-		void Clear();
-
-		void Draw(const int* edges, int count) const;
-
-		void SetBox(const AABB& bounding_box);
-		const AABB& GetBox() const;
-
-		template<typename TYPE>
-		inline void CollectIntersections(eastl::vector<RE_GameObject*>& objects, const TYPE & primitive) const;
-
-	private:
-
-		void AddNodes();
-		void Distribute();
-
-	private:
-
-		QTreeNode* nodes[4] = { nullptr, nullptr, nullptr, nullptr };
-		QTreeNode* parent = nullptr;
-
-		eastl::list<RE_GameObject*> g_objs;
-		bool is_leaf = true;
-		AABB box;
-	} root;
-
-	enum DrawMode : short
-	{
-		DISABLED,
-		TOP,
-		BOTTOM,
-		TOP_BOTTOM,
-		ALL
-	} draw_mode = DISABLED;
-
-	int edges[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	int count = 0;
+	QTreeNode<TYPE> root;
+	short draw_mode = DISABLED;
+	int edges[12] = {}, count = 0;
 };
 
-template<typename TYPE>
-inline void QTree::QTreeNode::CollectIntersections(eastl::vector<RE_GameObject*>& objects, const TYPE & primitive) const
+template <class TYPE> class QTreeNode
 {
-	if (primitive.Intersects(box))
+public:
+
+	QTreeNode() {}
+	QTreeNode(const AABB& box, QTreeNode* parent = nullptr);
+	~QTreeNode();
+
+	void RecursivePush(TYPE item, math::AABB& _box);
+	void RecursivePop(const TYPE to_remove);
+	void Clear();
+
+	void SetBox(const math::AABB& new_box);
+	const math::AABB& GetBox() const;
+
+	void GetDrawVertices(const int* edges, int count, eastl::vector<math::vec>& out) const;
+
+	template<typename COLLISION_GEO>
+	inline void RecursiveIntersections(eastl::vector<TYPE>& out, const COLLISION_GEO& geometry) const
 	{
-		for (auto go : g_objs)
-			if (primitive.Intersects(go->GetGlobalBoundingBox()))
-				objects.push_back(go);
+		if (box.Intersects(geometry))
+		{
+			for (auto item : contained_items)
+				if (item.first.Intersects(geometry))
+					out.push_back(item.second);
 
-		if (!is_leaf)
-			for (int i = 0; i < 4; ++i)
-				if (nodes[i] != nullptr) nodes[i]->CollectIntersections(objects, primitive);
+			if (!is_leaf)
+				for (int i = 0; i < 4; ++i)
+					if (nodes[i] != nullptr) nodes[i]->CollectIntersections(out, geometry);
+		}
 	}
-}
 
-template<typename TYPE>
-inline void QTree::CollectIntersections(eastl::vector<RE_GameObject*>& objects, const TYPE & primitive) const
-{
-	root.CollectIntersections(objects, primitive);
-}
+private:
 
+	void AddNodes();
+	void FreeNodes();
+	void Distribute();
+
+private:
+
+	math::AABB box;
+	bool is_leaf = true;
+
+	typedef eastl::vector<eastl::pair<TYPE, math::AABB>> item_storage;
+	item_storage contained_items;
+
+	QTreeNode* nodes[4] = {};
+	QTreeNode* parent = nullptr;
+};
 
 #endif // !__QUADTREE_H__

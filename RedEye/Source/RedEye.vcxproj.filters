@@ -28,9 +28,6 @@
     <ClCompile Include="ModuleRenderer3D.cpp">
       <Filter>Source\Application\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Cvar.cpp">
-      <Filter>Source\Containers</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleScene.cpp">
       <Filter>Source\Application\Modules</Filter>
     </ClCompile>
@@ -44,7 +41,7 @@
       <Filter>Source\Entity Component System\Components</Filter>
     </ClCompile>
     <ClCompile Include="QuadTree.cpp">
-      <Filter>Source\Containers</Filter>
+      <Filter>Source\Utility\Space Partition</Filter>
     </ClCompile>
     <ClCompile Include="ModuleEditor.cpp">
       <Filter>Source\Application\Modules\Editor</Filter>
@@ -67,32 +64,8 @@
     <ClCompile Include="RE_CompParticleEmiter.cpp">
       <Filter>Source\Entity Component System\Components\Particles</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Material.cpp">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Mesh.cpp">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Prefab.cpp">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="Resource.cpp">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Texture.cpp">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_SkyBox.cpp">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Scene.cpp">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Shader.cpp">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Model.cpp">
-      <Filter>Source\Containers\Resources</Filter>
+      <Filter>Source\Resources</Filter>
     </ClCompile>
     <ClCompile Include="RE_ResourceManager.cpp">
       <Filter>Source\Application\Managers\Resource Manager</Filter>
@@ -229,38 +202,14 @@
     <ClCompile Include="RE_Component.cpp">
       <Filter>Source\Entity Component System\Components</Filter>
     </ClCompile>
-    <ClCompile Include="AABBDynamicTree.cpp">
-      <Filter>Source\Containers</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompWater.cpp">
       <Filter>Source\Entity Component System\Components</Filter>
     </ClCompile>
     <ClCompile Include="md5.cpp">
       <Filter>3rd Party\MD5</Filter>
     </ClCompile>
-    <ClCompile Include="RE_ECS_Manager.cpp">
-      <Filter>Source\Entity Component System</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_GameObject.cpp">
-      <Filter>Source\Entity Component System\GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Globals.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_TextureImporter.cpp">
-      <Filter>Source\Application\Importers</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_ShaderImporter.cpp">
-      <Filter>Source\Application\Importers</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_ModelImporter.cpp">
-      <Filter>Source\Application\Importers</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_ECS_Importer.cpp">
-      <Filter>Source\Application\Importers</Filter>
     </ClCompile>
     <ClCompile Include="RE_ThumbnailManager.cpp">
       <Filter>Source\Application\Managers</Filter>
@@ -281,28 +230,88 @@
       <Filter>Source\Application</Filter>
     </ClCompile>
     <ClCompile Include="RE_Math.cpp">
-      <Filter>Source\Utility namespaces</Filter>
+      <Filter>Source\Utility</Filter>
     </ClCompile>
     <ClCompile Include="RE_Time.cpp">
-      <Filter>Source\Utility namespaces</Filter>
+      <Filter>Source\Utility</Filter>
     </ClCompile>
     <ClCompile Include="RE_ConsoleLog.cpp">
-      <Filter>Source\Utility namespaces</Filter>
+      <Filter>Source\Utility</Filter>
     </ClCompile>
     <ClCompile Include="RE_Hardware.cpp">
-      <Filter>Source\Utility namespaces</Filter>
+      <Filter>Source\Utility</Filter>
     </ClCompile>
     <ClCompile Include="RE_FileSystem.cpp">
-      <Filter>Source\Application\FileSystem</Filter>
+      <Filter>Source\FileSystem</Filter>
     </ClCompile>
     <ClCompile Include="RE_Config.cpp">
-      <Filter>Source\Application\FileSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="JSONNode.cpp">
-      <Filter>Source\Containers</Filter>
+      <Filter>Source\FileSystem</Filter>
     </ClCompile>
     <ClCompile Include="RE_FileBuffer.cpp">
-      <Filter>Source\Application\FileSystem</Filter>
+      <Filter>Source\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_AABBDynTree.cpp">
+      <Filter>Source\Utility\Space Partition</Filter>
+    </ClCompile>
+    <ClCompile Include="Globals.cpp">
+      <Filter>Source\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Json.cpp">
+      <Filter>Source\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Cvar.cpp">
+      <Filter>Source\Events System</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_TextureImporter.cpp">
+      <Filter>Source\Resources\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Texture.cpp">
+      <Filter>Source\Resources\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_SkyBox.cpp">
+      <Filter>Source\Resources\Skybox</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_SkyboxImporter.cpp">
+      <Filter>Source\Resources\Skybox</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ShaderImporter.cpp">
+      <Filter>Source\Resources\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Shader.cpp">
+      <Filter>Source\Resources\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ModelImporter.cpp">
+      <Filter>Source\Resources\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Model.cpp">
+      <Filter>Source\Resources\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ECS_Importer.cpp">
+      <Filter>Source\Entity Component System</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Material.cpp">
+      <Filter>Source\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Mesh.cpp">
+      <Filter>Source\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Prefab.cpp">
+      <Filter>Source\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Scene.cpp">
+      <Filter>Source\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ComponentsPool.cpp">
+      <Filter>Source\Entity Component System\Hash System</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_GameObjectPool.cpp">
+      <Filter>Source\Entity Component System\Hash System</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ECS_Pool.cpp">
+      <Filter>Source\Entity Component System\Hash System</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_GameObject.cpp">
+      <Filter>Source\Entity Component System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -471,9 +480,6 @@
     <ClInclude Include="MathGeoLib\include\MathGeoLibFwd.h">
       <Filter>3rd Party\MathGeoLib</Filter>
     </ClInclude>
-    <ClInclude Include="Cvar.h">
-      <Filter>Source\Containers</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleScene.h">
       <Filter>Source\Application\Modules</Filter>
     </ClInclude>
@@ -523,31 +529,7 @@
       <Filter>3rd Party\PAR Shapes</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Material.h">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Mesh.h">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Prefab.h">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Texture.h">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Scene.h">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Shader.h">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_SkyBox.h">
-      <Filter>Source\Containers\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Model.h">
-      <Filter>Source\Containers\Resources</Filter>
+      <Filter>Source\Resources</Filter>
     </ClInclude>
     <ClInclude Include="RE_ResourceManager.h">
       <Filter>Source\Application\Managers\Resource Manager</Filter>
@@ -568,10 +550,7 @@
       <Filter>Source\Application\Modules\Editor\Windows</Filter>
     </ClInclude>
     <ClInclude Include="QuadTree.h">
-      <Filter>Source\Containers</Filter>
-    </ClInclude>
-    <ClInclude Include="PoolMapped.h">
-      <Filter>Source\Containers</Filter>
+      <Filter>Source\Utility\Space Partition</Filter>
     </ClInclude>
     <ClInclude Include="EA\EABase\config\eacompiler.h">
       <Filter>3rd Party\EA\Base\config</Filter>
@@ -1185,35 +1164,11 @@
     <ClInclude Include="ModuleAudio.h">
       <Filter>Source\Application\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="AABBDynamicTree.h">
-      <Filter>Source\Containers</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompWater.h">
       <Filter>Source\Entity Component System\Components</Filter>
     </ClInclude>
     <ClInclude Include="md5.h">
       <Filter>3rd Party\MD5</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_ECS_Manager.h">
-      <Filter>Source\Entity Component System</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_GameObject.h">
-      <Filter>Source\Entity Component System\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Globals.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_TextureImporter.h">
-      <Filter>Source\Application\Importers</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_ShaderImporter.h">
-      <Filter>Source\Application\Importers</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_ModelImporter.h">
-      <Filter>Source\Application\Importers</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_ECS_Importer.h">
-      <Filter>Source\Application\Importers</Filter>
     </ClInclude>
     <ClInclude Include="RE_ThumbnailManager.h">
       <Filter>Source\Application\Managers</Filter>
@@ -1237,28 +1192,103 @@
       <Filter>Source\Application\Modules\Editor</Filter>
     </ClInclude>
     <ClInclude Include="RE_Math.h">
-      <Filter>Source\Utility namespaces</Filter>
+      <Filter>Source\Utility</Filter>
     </ClInclude>
     <ClInclude Include="RE_Time.h">
-      <Filter>Source\Utility namespaces</Filter>
+      <Filter>Source\Utility</Filter>
     </ClInclude>
     <ClInclude Include="RE_ConsoleLog.h">
-      <Filter>Source\Utility namespaces</Filter>
+      <Filter>Source\Utility</Filter>
     </ClInclude>
     <ClInclude Include="RE_Hardware.h">
-      <Filter>Source\Utility namespaces</Filter>
+      <Filter>Source\Utility</Filter>
     </ClInclude>
     <ClInclude Include="RE_FileSystem.h">
-      <Filter>Source\Application\FileSystem</Filter>
+      <Filter>Source\FileSystem</Filter>
     </ClInclude>
     <ClInclude Include="RE_Config.h">
-      <Filter>Source\Application\FileSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="JSONNode.h">
-      <Filter>Source\Containers</Filter>
+      <Filter>Source\FileSystem</Filter>
     </ClInclude>
     <ClInclude Include="RE_FileBuffer.h">
-      <Filter>Source\Application\FileSystem</Filter>
+      <Filter>Source\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_AABBDynTree.h">
+      <Filter>Source\Utility\Space Partition</Filter>
+    </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>Source\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Json.h">
+      <Filter>Source\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Cvar.h">
+      <Filter>Source\Events System</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_TextureImporter.h">
+      <Filter>Source\Resources\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Texture.h">
+      <Filter>Source\Resources\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_TextureSettings.h">
+      <Filter>Source\Resources\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_SkyBox.h">
+      <Filter>Source\Resources\Skybox</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_SkyBoxSettings.h">
+      <Filter>Source\Resources\Skybox</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_SkyboxImporter.h">
+      <Filter>Source\Resources\Skybox</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ShaderImporter.h">
+      <Filter>Source\Resources\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Shader.h">
+      <Filter>Source\Resources\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ModelImporter.h">
+      <Filter>Source\Resources\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Model.h">
+      <Filter>Source\Resources\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ECS_Importer.h">
+      <Filter>Source\Entity Component System</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ModelSettings.h">
+      <Filter>Source\Resources\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Mesh.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Material.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Scene.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Prefab.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_HashMap.h">
+      <Filter>Source\Entity Component System\Hash System</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_GameObjectPool.h">
+      <Filter>Source\Entity Component System\Hash System</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ComponentsPool.h">
+      <Filter>Source\Entity Component System\Hash System</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ComponentPool.h">
+      <Filter>Source\Entity Component System\Hash System</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ECS_Pool.h">
+      <Filter>Source\Entity Component System\Hash System</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_GameObject.h">
+      <Filter>Source\Entity Component System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1346,9 +1376,6 @@
     <Filter Include="Source">
       <UniqueIdentifier>{1e4434c3-6ced-459b-a620-3316f27a5c54}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Containers">
-      <UniqueIdentifier>{b68e0a5d-ad13-472e-be1a-55dccf9fc2ce}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Entity Component System">
       <UniqueIdentifier>{2ca41c23-353f-4ca0-8e9d-3a8797f417a8}</UniqueIdentifier>
     </Filter>
@@ -1357,9 +1384,6 @@
     </Filter>
     <Filter Include="Source\Entity Component System\Components\Particles">
       <UniqueIdentifier>{6be67668-60b0-48b8-9870-6f373919f170}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Entity Component System\GameObject">
-      <UniqueIdentifier>{e7540df0-e081-4ea9-a12e-d166f45541ad}</UniqueIdentifier>
     </Filter>
     <Filter Include="Class Diagrams">
       <UniqueIdentifier>{65836e87-fffd-4c0e-8be7-ad02ecfdd02b}</UniqueIdentifier>
@@ -1379,9 +1403,6 @@
     <Filter Include="Source\Application\Modules\Editor\Commands">
       <UniqueIdentifier>{619773c4-4576-417f-a33f-3d381f2a958a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Application\Importers">
-      <UniqueIdentifier>{f5cc3bec-cf4e-41d3-ad10-dea4b488cf92}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Application\Managers">
       <UniqueIdentifier>{ef86e356-e180-48c1-9ed2-ac227097742b}</UniqueIdentifier>
     </Filter>
@@ -1391,17 +1412,35 @@
     <Filter Include="Source\Application\Managers\Resource Manager\InternalResources">
       <UniqueIdentifier>{ba777deb-5c4f-4673-ab51-944abbdad942}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Containers\Resources">
-      <UniqueIdentifier>{138e3b14-77d4-440e-872a-1d54ebdae46f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Utility namespaces">
-      <UniqueIdentifier>{79e2c679-5e2b-47e5-95a0-240e5abe6473}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Events System">
       <UniqueIdentifier>{b7a63cfc-233b-4186-96c0-37e2ed9b095d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Application\FileSystem">
+    <Filter Include="Source\Utility">
+      <UniqueIdentifier>{79e2c679-5e2b-47e5-95a0-240e5abe6473}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\FileSystem">
       <UniqueIdentifier>{639a6e47-8665-4a89-b1c1-06588da71634}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Resources">
+      <UniqueIdentifier>{138e3b14-77d4-440e-872a-1d54ebdae46f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Space Partition">
+      <UniqueIdentifier>{b68e0a5d-ad13-472e-be1a-55dccf9fc2ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Resources\Textures">
+      <UniqueIdentifier>{8fa410d2-6d49-4616-9f70-cbe0637a8bb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Resources\Skybox">
+      <UniqueIdentifier>{05320b82-ffc7-4c59-acea-86ed4b28094a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Resources\Shaders">
+      <UniqueIdentifier>{8eb3bcc5-d4c7-4d66-ad27-9d479dee4938}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Resources\Model">
+      <UniqueIdentifier>{32b8e995-81be-404a-82fe-eec0fb9bf34a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Entity Component System\Hash System">
+      <UniqueIdentifier>{7d4a01e6-ec35-46e2-b62b-85e046c97aed}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

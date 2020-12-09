@@ -1,12 +1,12 @@
 #ifndef __AABB_DYNAMIC_TREE_H__
 #define __AABB_DYNAMIC_TREE_H__
 
-#include "PoolMapped.h"
+#include "RE_HashMap.h"
 #include "Globals.h"
 #include "MathGeoLib\include\Geometry\AABB.h"
 #include <EASTL/queue.h>
 
-struct AABBDynamicTreeNode
+struct RE_AABBDynTreeNode
 {
 	AABB box;
 	UID object_index = 0;
@@ -14,12 +14,12 @@ struct AABBDynamicTreeNode
 	bool is_leaf = true;
 };
 
-class AABBDynamicTree : public PoolMapped<AABBDynamicTreeNode, int, 1024, 512>
+class RE_AABBDynTree : public RE_HashMap<RE_AABBDynTreeNode, int, 1024, 512>
 {
 public:
 
-	AABBDynamicTree();
-	~AABBDynamicTree();
+	RE_AABBDynTree();
+	~RE_AABBDynTree();
 
 	void PushNode(UID goUID, AABB box);
 	void PopNode(UID index);
@@ -37,14 +37,14 @@ public:
 
 private:
 
-	void Rotate(AABBDynamicTreeNode& node, int index);
+	void Rotate(RE_AABBDynTreeNode& node, int index);
 
 	int AllocateLeafNode(AABB box, UID index);
 	int AllocateInternalNode();
 
 	static inline AABB Union(AABB box1, AABB box2);
-	static inline void SetLeaf(AABBDynamicTreeNode& node, AABB box, UID index);
-	static inline void SetInternal(AABBDynamicTreeNode& node);
+	static inline void SetLeaf(RE_AABBDynTreeNode& node, AABB box, UID index);
+	static inline void SetInternal(RE_AABBDynTreeNode& node);
 
 private:
 

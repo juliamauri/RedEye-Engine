@@ -8,7 +8,9 @@
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 
-bool RE_ShaderImporter::Init()
+using namespace RE_ShaderImporter::Internal;
+
+void RE_ShaderImporter::Init()
 {
 	bool ret = true;
 	RE_LOG("Initializing Shader Manager");
@@ -18,14 +20,6 @@ bool RE_ShaderImporter::Init()
 	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
 	binaryFormats = new int[formats];
 	glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, binaryFormats);
-
-	if (folderPath == nullptr)
-	{
-		RE_LOG_ERROR("Shader Importer could not read folder path");
-		ret = false;
-	}
-
-	return ret;
 }
 
 bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath, bool compileTest)
@@ -39,11 +33,10 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 	int  success;
 	char infoLog[512];
 
-	unsigned int vertexShader = 0;
-	unsigned int fragmentShader = 0;
-	unsigned int geometryShader = 0;
+	unsigned int vertexShader = 0, fragmentShader = 0, geometryShader = 0;
 
-	if (vertexPath) {
+	if (vertexPath)
+	{
 		//compiling vertex shader
 		vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
@@ -78,10 +71,10 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 		}
 	}
 	
-	if (fragmentPath) {
+	if (fragmentPath)
+	{
 		//compiling fragment shader
 		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
 
 		RE_FileBuffer file_fragmentShader(fragmentPath);
 		if (file_fragmentShader.Load())
@@ -113,7 +106,8 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 		}
 	}
 
-	if (geometryPath) {
+	if (geometryPath)
+	{
 		//compiling geometry shader
 		geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
 
@@ -149,7 +143,6 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 
 	//creating Shader program, link the once shaders types
 	*ID = glCreateProgram();
-
 	if(vertexShader != 0) glAttachShader(*ID, vertexShader);
 	if (fragmentShader != 0) glAttachShader(*ID, fragmentShader);
 	if (geometryShader != 0) glAttachShader(*ID, geometryShader);
@@ -289,18 +282,12 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 
 bool RE_ShaderImporter::LoadFromBinary(const char* buffer, unsigned int size, unsigned int* ID)
 {
-	bool ret = true;
+	int ret;
 
-	*ID = glCreateProgram();
-	glProgramBinary(*ID, binaryFormats[0], buffer, size);
-
-	int  success;
+	glProgramBinary((*ID = glCreateProgram()), binaryFormats[0], buffer, size);
 	glValidateProgram(*ID);
-	glGetProgramiv(*ID, GL_VALIDATE_STATUS, &success);
-	if (!success) {
-		glDeleteProgram(*ID);
-		ret = false;
-	}
+	glGetProgramiv(*ID, GL_VALIDATE_STATUS, &ret);
+	if (!ret) glDeleteProgram(*ID);
 
 	return ret;
 }
@@ -308,14 +295,13 @@ bool RE_ShaderImporter::LoadFromBinary(const char* buffer, unsigned int size, un
 bool RE_ShaderImporter::GetBinaryProgram(unsigned int ID, char** buffer, int* size)
 {
 	bool ret = false;
-
 	if (ID > 0)
 	{
 		glGetProgramiv(ID, GL_PROGRAM_BINARY_LENGTH, size);
 		if (*size > 0)
 		{
 			*buffer = new char[*size];
-			glGetProgramBinary(ID, *size, size, (GLenum*)binaryFormats, *buffer);
+			glGetProgramBinary(ID, *size, size, reinterpret_cast<GLenum*>(binaryFormats), *buffer);
 			ret = true;
 		}
 	}

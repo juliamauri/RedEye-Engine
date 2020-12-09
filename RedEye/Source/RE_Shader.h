@@ -2,7 +2,7 @@
 #define __RE_SHADER_H__
 
 #include "Resource.h"
-#include "Cvar.h"
+#include "RE_Cvar.h"
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 #include "MathGeoLib/include/Math/float4.h"
@@ -34,7 +34,7 @@ public:
 
 	void SetPaths(const char* vertex, const char* fragment, const char* geometry = nullptr);
 
-	eastl::vector<ShaderCvar> GetUniformValues();
+	eastl::vector<RE_Shader_Cvar> GetUniformValues();
 
 	void UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane);
 	void UploadModel(const float* model);
@@ -51,8 +51,8 @@ public:
 private:
 
 	void Draw() override;
-	void SaveResourceMeta(JSONNode* metaNode) override;
-	void LoadResourceMeta(JSONNode* metaNode) override;
+	void SaveResourceMeta(RE_Json* metaNode) override;
+	void LoadResourceMeta(RE_Json* metaNode) override;
 
 	void AssetLoad();
 	void LibraryLoad();
@@ -64,7 +64,7 @@ private:
 
 	void ParseAndGetUniforms();
 	eastl::vector<eastl::string> GetUniformLines(const char* buffer);
-	void MountShaderCvar(eastl::vector<eastl::string> uniformLines);
+	void MountRE_Shader_Cvar(eastl::vector<eastl::string> uniformLines);
 	void GetLocations();
 
 private:
@@ -89,7 +89,7 @@ private:
 	int clip_plane = -1;
 	int using_clip_plane = -1;
 	int view_pos = -1;
-	eastl::vector<ShaderCvar> uniforms;
+	eastl::vector<RE_Shader_Cvar> uniforms;
 };
 
 #endif // !__RE_SHADER_H__
