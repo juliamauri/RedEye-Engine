@@ -7,8 +7,8 @@
 #include "RE_CameraManager.h"
 #include "RE_GLCacheManager.h"
 #include "RE_ResourceManager.h"
-#include "RE_ECS_Pool.h"
 #include "RE_PrimitiveManager.h"
+#include "RE_ECS_Pool.h"
 #include "RE_Component.h"
 
 #include "Glew\include\glew.h"
@@ -18,9 +18,6 @@
 #include <EASTL/stack.h>
 #include <EASTL/internal/char_traits.h>
 #include <EAStdC/EASprintf.h>
-
-RE_GameObject::RE_GameObject() {}
-RE_GameObject::~RE_GameObject() {}
 
 void RE_GameObject::SetUp(GameObjectsPool* goPool, ComponentsPool* compPool, const char* _name, const UID parent, const bool start_active, const bool _isStatic)
 {
@@ -369,7 +366,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 		camera = (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid);
 		RE_CompCamera* new_cam = dynamic_cast<RE_CompCamera*>(ret);
 		new_cam->SetProperties();
-		if (!Event::isPaused()) App::cams.AddMainCamera(new_cam);
+		if (!Event::isPaused()) RE_CameraManager::AddMainCamera(new_cam);
 		break;
 	}
 	case C_LIGHT:
@@ -392,7 +389,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 			if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
 			ret = pool_comps->GetNewComponentPtr(_type);
 			render_geo = { ret->PoolSetUp(pool_gos, go_uid), type };
-			App::primitives.SetUpComponentPrimitive(dynamic_cast<RE_CompPrimitive*>(ret));
+			RE_PrimitiveManager::SetUpComponentPrimitive(dynamic_cast<RE_CompPrimitive*>(ret));
 		}
 		else
 		{

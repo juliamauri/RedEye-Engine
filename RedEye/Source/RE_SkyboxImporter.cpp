@@ -22,9 +22,9 @@ void RE_SkyboxImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned
 		const char* texPath = nullptr;
 		if (!isDDS)
 		{
-			texPath = App::resources->At(settings.textures[i].textureMD5)->GetLibraryPath();
-			if (!App::fs->Exists(texPath))
-				App::resources->At(settings.textures[i].textureMD5)->ReImport();
+			texPath = RE_ResourceManager::At(settings.textures[i].textureMD5)->GetLibraryPath();
+			if (!RE_FileSystem::Exists(texPath))
+				RE_ResourceManager::At(settings.textures[i].textureMD5)->ReImport();
 		}
 		else texPath = settings.textures[i].path.c_str();
 

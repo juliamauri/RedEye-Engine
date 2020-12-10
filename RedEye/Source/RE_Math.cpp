@@ -1,7 +1,7 @@
 #include "RE_Math.h"
 
-#include "Application.h"
 #include "RE_ConsoleLog.h"
+#include "Application.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "MathGeoLib/lib/MathGeoLib_debug.lib")
@@ -61,11 +61,11 @@ float RE_Math::RandomF(float min, float max) { return lcg.Float(min, max); }
 // @param b Upper bound, exclusive.
 int RE_Math::RandomInt(int min, int max) { return lcg.Int(min, max); }
 
-UID RE_Math::RandomUID()
+unsigned long long RE_Math::RandomUID()
 {
-	UID ret = static_cast<UID>(lcg.Int());
+	unsigned long long ret = static_cast<unsigned long long>(lcg.Int());
 	ret = ret << 32;
-	ret += static_cast<UID>(lcg.Int()) + 1ull;
+	ret += static_cast<unsigned long long>(lcg.Int() + 1);
 
 	return ret;
 }

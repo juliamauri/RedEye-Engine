@@ -3,7 +3,6 @@
 
 #include "EventListener.h"
 #include "RE_CameraManager.h"
-#include "RE_PrimitiveManager.h"
 #include "Optick/include/optick.h"
 #include <EASTL/string.h>
 #include <EASTL/list.h>
@@ -16,10 +15,6 @@ class ModuleScene;
 class ModuleEditor;
 class ModuleRenderer3D;
 class ModuleAudio;
-
-class RE_FileSystem;
-class RE_ResourceManager;
-class RE_ThumbnailManager;
 
 class Application : public EventListener
 {
@@ -52,9 +47,6 @@ private:
 
 public:
 
-	// Utility
-	static RE_FileSystem* fs;
-
 	// Modules
 	static ModuleInput* input;
 	static ModuleWindow* window;
@@ -62,13 +54,9 @@ public:
 	static ModuleEditor* editor;
 	static ModuleRenderer3D* renderer3d;
 	static ModuleAudio* audio;
-	static Config* config;
 
-	// Managers
-	static RE_CameraManager cams;
-	static RE_PrimitiveManager primitives;
-	static RE_ThumbnailManager* thumbnail;
-	static RE_ResourceManager* resources;
+	int argc;
+	char** argv;
 
 private:
 

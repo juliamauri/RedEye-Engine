@@ -1,15 +1,10 @@
 #include "RE_CameraManager.h"
 
-#include "RE_Time.h"
-#include "RE_CompCamera.h"
-#include "Application.h"
 #include "ModuleScene.h"
 #include "RE_GameObject.h"
-#include "RE_CompTransform.h"
-#include <EASTL/stack.h>
+#include "RE_CompCamera.h"
 
-RE_CompCamera* RE_CameraManager::editor_camera = nullptr;
-UID RE_CameraManager::main_camera = 0ull;
+using namespace RE_CameraManager::Internal;
 
 void RE_CameraManager::Init()
 {
@@ -63,7 +58,7 @@ void RE_CameraManager::RecallSceneCameras()
 	}
 }
 
-const math::Frustum RE_CameraManager::GetCullingFrustum() const
+const math::Frustum RE_CameraManager::GetCullingFrustum()
 {
 	for (auto cam : ModuleScene::GetScenePool()->GetAllCompCPtr(C_CAMERA)) {
 		const RE_CompCamera* camera = dynamic_cast<const RE_CompCamera*>(cam);

@@ -17,6 +17,7 @@
 #include "RE_TextureImporter.h"
 #include "RE_ResourceManager.h"
 #include "RE_ThumbnailManager.h"
+#include "RE_PrimitiveManager.h"
 
 #include "SDL2\include\SDL.h"
 #include "Optick/include/optick.h"
@@ -25,9 +26,6 @@
 #include <EAStdC/EASprintf.h>
 #include <eathread/internal/config.h>
 
-// Utility
-RE_FileSystem* App::fs = nullptr;
-
 // Modules
 ModuleInput* App::input = nullptr;
 ModuleWindow* App::window = nullptr;
@@ -35,13 +33,6 @@ ModuleScene* App::scene = nullptr;
 ModuleEditor* App::editor = nullptr;
 ModuleRenderer3D* App::renderer3d = nullptr;
 ModuleAudio* App::audio = nullptr;
-Config* Application::config = nullptr;
-
-// Managers
-RE_CameraManager App::cams;
-RE_PrimitiveManager App::primitives;
-RE_ResourceManager* App::resources = nullptr;
-RE_ThumbnailManager* App::thumbnail = nullptr;
 
 App* App::instance = nullptr;
 eastl::string App::app_name = "RedEye Engine";
@@ -57,22 +48,12 @@ Application::Application()
 	modules.push_back(renderer3d = new ModuleRenderer3D());
 	modules.push_back(audio = new ModuleAudio());
 
-	fs = new RE_FileSystem();
-	resources = new RE_ResourceManager();
-	thumbnail = new RE_ThumbnailManager();
-
 	instance = this;
 }
 
 Application::~Application()
 {
 	for (auto &mod : modules) delete mod;
-
-	DEL(thumbnail);
-	DEL(resources);
-	DEL(fs);
-
-	RE_Hardware::Clear();
 
 	instance = nullptr;
 }
@@ -122,7 +103,7 @@ void Application::MainLoop()
 		}
 
 		unsigned int extra_ms = RE_Time::FrameExtraMS();
-		if (extra_ms > 0) extra_ms = fs->ReadAssetChanges(extra_ms);
+		if (extra_ms > 0) extra_ms = RE_FileSystem::ReadAssetChanges(extra_ms);
 		if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
 		if (extra_ms > 0)
 		{
@@ -136,12 +117,16 @@ void Application::MainLoop()
 void Application::CleanUp()
 {
 	Event::ClearQueue();
-	if (config != nullptr && save_config) config->Save();
+	if (RE_FileSystem::config != nullptr && save_config) RE_FileSystem::config->Save();
 
 	for (auto it = modules.rbegin(); it != modules.rend(); ++it)
 		if ((*it)->IsActive()) (*it)->CleanUp();
 
 	RE_Hardware::Clear();
+	RE_CameraManager::Clear();
+	RE_PrimitiveManager::Clear();
+	RE_ThumbnailManager::Clear();
+	RE_ResourceManager::Clear();
 
 	SDL_Quit();
 }
@@ -190,6 +175,7 @@ void Application::RecieveEvent(const Event& e)
 	case REQUEST_LOAD: load_config = true; break;
 	case REQUEST_SAVE: save_config = true; break;
 	case REQUEST_QUIT: quit = true; break;
+	case RESOURCE_CHANGED: RE_ResourceManager::ResourceHasChanged(e.data1.AsCharP()); break;
 	}
 }
 
@@ -230,9 +216,9 @@ bool Application::InitSDL()
 bool Application::InitFileSystem(int argc, char* argv[])
 {
 	bool ret = false;
-	if (fs->Init(argc, argv))
+	if (RE_FileSystem::Init(argc, argv))
 	{
-		RE_Json* node = config->GetRootNode("App");
+		RE_Json* node = RE_FileSystem::config->GetRootNode("App");
 		app_name = node->PullString("Name", app_name.c_str());
 		organization = node->PullString("Organization", organization.c_str());
 		DEL(node);
@@ -249,13 +235,13 @@ void Application::InitInternalSystems()
 	if (!RE_TextureImporter::Init()) RE_LOG_WARNING("Won't be able to use/import textures");
 	
 	// Initialize Managers
-	cams.Init();
-	primitives.Init();
-	thumbnail->Init();
+	RE_CameraManager::Init();
+	RE_PrimitiveManager::Init();
+	RE_ThumbnailManager::Init();
+	RE_ResourceManager::Init();
 
 	// Fetch Assets
-	RE_ResourceManager::internalResources.Init();
-	fs->ReadAssetChanges(0, true);
+	RE_FileSystem::ReadAssetChanges(0, true);
 	audio->ReadBanksChanges();
 }
 
@@ -284,7 +270,7 @@ void Application::LoadConfig()
 	OPTICK_CATEGORY("Load module configuration - Application", Optick::Category::IO);
 	load_config = false;
 
-	RE_Json* node = config->GetRootNode("App");
+	RE_Json* node = RE_FileSystem::config->GetRootNode("App");
 	app_name = node->PullString("Name", app_name.c_str());
 	organization = node->PullString("Organization", organization.c_str());
 	DEL(node);
@@ -297,7 +283,7 @@ void Application::SaveConfig()
 	OPTICK_CATEGORY("Save module configuration - Application", Optick::Category::IO);
 	save_config = false;
 
-	RE_Json* node = config->GetRootNode("App");
+	RE_Json* node = RE_FileSystem::config->GetRootNode("App");
 	node->PushString("Name", app_name.c_str());
 	node->PushString("Organization", organization.c_str());
 	DEL(node);

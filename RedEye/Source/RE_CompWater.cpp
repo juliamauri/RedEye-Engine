@@ -53,7 +53,7 @@ void RE_CompWater::Draw() const
 {
 	unsigned int textureCounter = 0;
 
-	RE_Shader* shader = dynamic_cast<RE_Shader * >(App::resources->At(RE_ResourceManager::internalResources.GetDefaultWaterShader()));
+	RE_Shader* shader = dynamic_cast<RE_Shader * >(RE_ResourceManager::At(RE_InternalResources::GetDefaultWaterShader()));
 	unsigned int shaderID = shader->GetID();
 	RE_GLCacheManager::ChangeShader(shaderID);
 	shader->UploadModel(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
@@ -485,7 +485,7 @@ void RE_CompWater::GeneratePlane()
 
 void RE_CompWater::SetUpWaterUniforms()
 {
-	waterUniforms = RE_ResourceManager::internalResources.GetWaterUniforms();
+	waterUniforms = RE_InternalResources::GetWaterUniforms();
 
 	for (unsigned int i = 0; i < waterUniforms.size(); i++) {
 		if (waterUniforms[i].name == "waveLength") {
@@ -551,7 +551,7 @@ void RE_CompWater::SetUpWaterUniforms()
 		}
 		else if (waterUniforms[i].name == "water_foam") {
 			waterFoam.first = &waterUniforms[i];
-			waterFoam.second = RE_ResourceManager::internalResources.GetTextureWaterFoam();
+			waterFoam.second = RE_InternalResources::GetTextureWaterFoam();
 		}
 	}
 }

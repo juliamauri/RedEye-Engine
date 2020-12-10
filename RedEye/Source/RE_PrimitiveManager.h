@@ -1,35 +1,29 @@
-#ifndef __RE_PRIMITVEMANAGER_H__
-#define __RE_PRIMITVEMANAGER_H__
+#ifndef __RE_PRIMITVE_MANAGER_H__
+#define __RE_PRIMITVE_MANAGER_H__
 
-#include "MathGeoLib/include/Math/float3.h"
-
-#include <EASTL/utility.h>
-
-class RE_GameObject;
 class RE_CompPrimitive;
+struct par_shapes_mesh_s;
 
-class RE_PrimitiveManager
+namespace RE_PrimitiveManager
 {
-public:
-	RE_PrimitiveManager();
-	~RE_PrimitiveManager();
-
 	void Init();
+	void Clear();
 
 	void SetUpComponentPrimitive(RE_CompPrimitive* cmpP);
-	eastl::pair<unsigned int, unsigned int> GetPlatonicData(unsigned short type);
+	void GetPlatonicData(unsigned short type, unsigned int& vao, unsigned int& triangles);
 
-	struct PlatonicData { unsigned int vao = 0, vbo = 0, ebo = 0, triangles = 0; };
+	void CreateSphere(
+		unsigned int slices, unsigned int stacks,
+		unsigned int& vao , unsigned int& vbo, unsigned int& ebo, unsigned int& triangles);
 
-	PlatonicData CreateSphere(int slices, int stacks);
+	namespace Internal
+	{
+		struct PlatonicData { unsigned int vao = 0, vbo = 0, ebo = 0, triangles = 0; }
+		static platonics[5] = {};
 
-private:
-
-	void UploadPlatonic(struct par_shapes_mesh_s* param, unsigned int* vao, unsigned int* vbo, unsigned int * ebo, unsigned int* triangles);
-
-private:
-
-	PlatonicData platonics[5] = {};
+		void UploadPlatonic(par_shapes_mesh_s* plato,
+			unsigned int& vao, unsigned int& vbo, unsigned int& ebo, unsigned int& triangles);
+	};
 };
 
 #endif // !__RE_PRIMITVEMANAGER_H__#

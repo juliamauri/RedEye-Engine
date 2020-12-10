@@ -1,26 +1,24 @@
-#pragma once
+#ifndef __RE_COMMAND_MANAGER__
+#define __RE_COMMAND_MANAGER__
+
 #include <EASTL/stack.h>
 
 class RE_Command;
 
-class RE_CommandManager
+namespace RE_CommandManager
 {
-public:
-	RE_CommandManager();
-	~RE_CommandManager();
-
-	bool canRedo()const;
-	bool canUndo()const;
-	void redo();
-	void undo();
-
+	bool CanRedo();
+	bool CanUndo();
+	void Redo();
+	void Undo();
 	void PushCommand(RE_Command* newCommand);
-
 	void Clear();
-
-private:
-	eastl::stack<RE_Command*> undoCommands;
-	eastl::stack<RE_Command*> redoCommands;
-
+	
+	namespace Internal
+	{
+		static unsigned int max_commands = 100u;
+		static eastl::stack<RE_Command*> undoCommands, redoCommands;
+	};
 };
 
+#endif // !__RE_COMMAND_MANAGER__

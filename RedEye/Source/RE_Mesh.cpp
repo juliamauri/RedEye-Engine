@@ -39,7 +39,7 @@ void RE_Mesh::SetLibraryPath(const char* path)
 
 void RE_Mesh::LoadInMemory()
 {
-	if (App::fs->Exists(GetLibraryPath()))
+	if (RE_FileSystem::Exists(GetLibraryPath()))
 	{
 		LibraryLoad();
 		SetupAABB();
@@ -157,7 +157,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	memcpy(cursor, &nullchar, sizeof(char));
 
 	eastl::string md5Generated = MD5(eastl::string(buffer, size + 1)).hexdigest();
-	const char* existsMD5 = App::resources->IsReference(md5Generated.c_str());
+	const char* existsMD5 = RE_ResourceManager::IsReference(md5Generated.c_str());
 	if (!existsMD5)
 	{
 		SetMD5(md5Generated.c_str());
@@ -167,7 +167,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 		libraryPath += existsMD5;
 		ResourceContainer::SetLibraryPath(libraryPath.c_str());
 
-		RE_FileBuffer toSave(GetLibraryPath(), App::fs->GetZipPath());
+		RE_FileBuffer toSave(GetLibraryPath(), RE_FileSystem::GetZipPath());
 		toSave.Save(buffer, size + 1);
 	}
 	else *exists = true;

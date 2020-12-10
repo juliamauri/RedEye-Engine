@@ -17,6 +17,8 @@ enum RE_EventType : unsigned short int
 	REQUEST_SAVE,
 	REQUEST_QUIT,
 
+	RESOURCE_CHANGED,
+
 	// Window
 	WINDOW_MOVED,
 	WINDOW_SIZE_CHANGED,
@@ -62,9 +64,6 @@ enum RE_EventType : unsigned short int
 	CONSOLE_LOG_SAVE_WARNING,
 	CONSOLE_LOG_SAVE_SOLUTION,
 	CONSOLE_LOG_MAX,
-
-	// Resources
-	RESOURCE_CHANGED,
 
 	MAX_EVENT_TYPES
 };

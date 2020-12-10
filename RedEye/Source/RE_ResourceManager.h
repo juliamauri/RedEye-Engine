@@ -1,7 +1,6 @@
 #ifndef __RESOURCEMANAGER_H__
 #define __RESOURCEMANAGER_H__
 
-#include "EventListener.h"
 #include "Resource.h"
 #include "RE_InternalResources.h"
 
@@ -9,18 +8,16 @@
 #include <EASTL/vector.h>
 #include <EASTL/stack.h> 
 
-class RE_ResourceManager : public EventListener
+namespace RE_ResourceManager
 {
-public:
-	RE_ResourceManager() {}
-	~RE_ResourceManager();
+	void Init();
+	void Clear();
+	void ResourceHasChanged(const char* md5);
 
-	void RecieveEvent(const Event& e) override;
-
-	ResourceContainer* At(const char* md5) const;
+	ResourceContainer* At(const char* md5);
 	const char* ReferenceByMeta(const char* path, Resource_Type type);
 	const char* Reference(ResourceContainer* rc);
-	unsigned int TotalReferences() const;
+	unsigned int TotalReferences();
 
 	eastl::vector<const char*> GetAllResourcesActiveByType(Resource_Type resT);
 
@@ -35,12 +32,12 @@ public:
 	const char* ImportPrefab(const char* assetPath);
 	const char* ImportScene(const char* assetPath);
 
-	unsigned int TotalReferenceCount(const char* resMD5) const;
+	unsigned int TotalReferenceCount(const char* resMD5);
 	void Use(const char* resMD5);
 	void UnUse(const char* resMD5);
 
 	void PushSelected(const char* resS, bool popAll = false);
-	const char* GetSelected()const;
+	const char* GetSelected();
 	void PopSelected(bool all = false);
 
 	eastl::vector<ResourceContainer*> GetResourcesByType(Resource_Type type);
@@ -56,24 +53,18 @@ public:
 	typedef eastl::map<const char*, ResourceContainer*> ResourceMap;
 	typedef ResourceMap::iterator ResourceIter;
 	typedef ResourceMap::const_iterator ResourceConstIter;
-	
+
 	typedef eastl::pair<const char*, unsigned int> ResourceCounter;
 	typedef eastl::map<const char*, unsigned int> ResourceCounterMap;
 
-private:
+	namespace Internal
+	{
+		const char* GetNameFromType(const Resource_Type type);
 
-	const char* GetNameFromType(const Resource_Type type);
-
-public:
-
-	static RE_InternalResources internalResources;
-
-private:
-
-	ResourceMap resources;
-	ResourceCounterMap resourcesCounter;
-
-	eastl::stack< const char*> resourcesSelected;
-};
+		static ResourceMap resources;
+		static ResourceCounterMap resourcesCounter;
+		static eastl::stack< const char*> resourcesSelected;
+	}
+}
 
 #endif // !__RESOURCEMANAGER_H__

@@ -39,19 +39,7 @@
 #pragma comment( lib, "libzip/zip_r.lib" )
 #endif // _DEBUG
 
-RE_FileSystem::~RE_FileSystem()
-{
-	for (auto dir : assetsDirectories)
-		for (auto p : dir->tree)
-			if (p->pType != PathType::D_FOLDER)
-				DEL(p);
-
-	for (auto dir : assetsDirectories) DEL(dir);
-
-	DEL(App::config);
-
-	PHYSFS_deinit();
-}
+using namespace RE_FileSystem::Internal;
 
 bool RE_FileSystem::Init(int argc, char* argv[])
 {
@@ -78,8 +66,8 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		for (i = PHYSFS_getSearchPath(); *i != NULL; i++) RE_LOG("[%s] is in the search path.\n", *i);
 		PHYSFS_freeList(*i);
 
-		App::config = new Config("Settings/config.json", zip_path.c_str());
-		if (ret = App::config->Load())
+		config = new Config("Settings/config.json", zip_path.c_str());
+		if (ret = config->Load())
 		{
 			rootAssetDirectory = new RE_Directory();
 			rootAssetDirectory->SetPath("Assets/");
@@ -92,6 +80,20 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 	else RE_LOG_ERROR("PhysFS could not initialize! Error: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 
 	return ret;
+}
+
+void RE_FileSystem::Clear()
+{
+	for (auto dir : assetsDirectories)
+		for (auto p : dir->tree)
+			if (p->pType != PathType::D_FOLDER)
+				DEL(p);
+
+	for (auto dir : assetsDirectories) DEL(dir);
+
+	DEL(config);
+
+	PHYSFS_deinit();
 }
 
 unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
@@ -140,11 +142,11 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 				if (type == F_META)
 				{
-					const char* isReferenced = App::resources->FindMD5ByMETAPath(file->path.c_str());
+					const char* isReferenced = RE_ResourceManager::FindMD5ByMETAPath(file->path.c_str());
 
 					if (!isReferenced)
 					{
-						Config metaLoad(file->path.c_str(), App::fs->GetZipPath());
+						Config metaLoad(file->path.c_str(), GetZipPath());
 						if (metaLoad.Load())
 						{
 							RE_Json* metaNode = metaLoad.GetRootNode("meta");
@@ -152,7 +154,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 							DEL(metaNode);
 
 							if (type != Resource_Type::R_UNDEFINED)
-								metaFile->resource = App::resources->ReferenceByMeta(file->path.c_str(), type);
+								metaFile->resource = RE_ResourceManager::ReferenceByMeta(file->path.c_str(), type);
 						}
 					}
 					else
@@ -198,8 +200,8 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 			for (RE_Meta* meta : metaToFindFile)
 			{
-				ResourceContainer* res = App::resources->At(meta->resource);
-				const char* assetPath = App::resources->At(meta->resource)->GetAssetPath();
+				ResourceContainer* res = RE_ResourceManager::At(meta->resource);
+				const char* assetPath = RE_ResourceManager::At(meta->resource)->GetAssetPath();
 
 				if (!res->isInternal())
 				{
@@ -291,12 +293,12 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 				const char* newRes = nullptr;
 				switch (file->fType) {
-				case F_MODEL:	 newRes = App::resources->ImportModel(file->path.c_str()); break;
-				case F_TEXTURE:	 newRes = App::resources->ImportTexture(file->path.c_str()); break;
-				case F_MATERIAL: newRes = App::resources->ImportMaterial(file->path.c_str()); break;
-				case F_SKYBOX:	 newRes = App::resources->ImportSkyBox(file->path.c_str()); break;
-				case F_PREFAB:	 newRes = App::resources->ImportPrefab(file->path.c_str()); break;
-				case F_SCENE:	 newRes = App::resources->ImportScene(file->path.c_str()); break; }
+				case F_MODEL:	 newRes = RE_ResourceManager::ImportModel(file->path.c_str()); break;
+				case F_TEXTURE:	 newRes = RE_ResourceManager::ImportTexture(file->path.c_str()); break;
+				case F_MATERIAL: newRes = RE_ResourceManager::ImportMaterial(file->path.c_str()); break;
+				case F_SKYBOX:	 newRes = RE_ResourceManager::ImportSkyBox(file->path.c_str()); break;
+				case F_PREFAB:	 newRes = RE_ResourceManager::ImportPrefab(file->path.c_str()); break;
+				case F_SCENE:	 newRes = RE_ResourceManager::ImportScene(file->path.c_str()); break; }
 
 				if (newRes != nullptr)
 				{
@@ -306,7 +308,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					file->metaResource = newMetaFile;
 					RE_File* fromMetaF = newMetaFile->AsFile();
 					fromMetaF->fType = FileType::F_META;
-					fromMetaF->path = App::resources->At(newRes)->GetMetaPath();
+					fromMetaF->path = RE_ResourceManager::At(newRes)->GetMetaPath();
 					newMetaFile->AsPath()->pType = PathType::D_FILE;
 					metaRecentlyAdded.push_back(newMetaFile);
 				}
@@ -338,7 +340,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			for (RE_Meta* meta : toReImport)
 			{
 				RE_LOG("ReImporting %s", meta->path.c_str());
-				App::resources->At(meta->resource)->ReImport();
+				RE_ResourceManager::At(meta->resource)->ReImport();
 				toRemoveM.push_back(meta);
 
 				if (!doAll && extra_ms < time.Read())
@@ -413,7 +415,7 @@ bool RE_FileSystem::SetWritePath(const char * dir)
 	return ret;
 }
 
-const char * RE_FileSystem::GetWritePath() const { return write_path.c_str(); }
+const char * RE_FileSystem::GetWritePath() { return write_path.c_str(); }
 
 void RE_FileSystem::LogFolderItems(const char * folder)
 {
@@ -437,10 +439,10 @@ RE_FileBuffer* RE_FileSystem::QuickBufferFromPDPath(const char * full_path)// , 
 		tmp += file_name;
 		ret = new RE_FileBuffer(tmp.c_str());
 
-		if (App::fs->AddPath(file_path.c_str(), "/Export/"))
+		if (AddPath(file_path.c_str(), "/Export/"))
 		{
 			if (!ret->Load()) DEL(ret);
-			App::fs->RemovePath(file_path.c_str());
+			RemovePath(file_path.c_str());
 		}
 		else DEL(ret);
 	}
@@ -448,7 +450,7 @@ RE_FileBuffer* RE_FileSystem::QuickBufferFromPDPath(const char * full_path)// , 
 	return ret;
 }
 
-bool RE_FileSystem::ExistsOnOSFileSystem(const char* path, bool isFolder) const
+bool RE_FileSystem::ExistsOnOSFileSystem(const char* path, bool isFolder)
 {
 	eastl::string full_path(path);
 	eastl::string directory = full_path.substr(0, full_path.find_last_of('\\') + 1);
@@ -471,9 +473,9 @@ bool RE_FileSystem::ExistsOnOSFileSystem(const char* path, bool isFolder) const
 	return false;
 }
 
-bool RE_FileSystem::Exists(const char* file) const { return PHYSFS_exists(file) != 0; }
-bool RE_FileSystem::IsDirectory(const char* file) const { return PHYSFS_isDirectory(file) != 0; }
-const char* RE_FileSystem::GetExecutableDirectory() const { return PHYSFS_getBaseDir(); }
+bool RE_FileSystem::Exists(const char* file) { return PHYSFS_exists(file) != 0; }
+bool RE_FileSystem::IsDirectory(const char* file) { return PHYSFS_isDirectory(file) != 0; }
+const char* RE_FileSystem::GetExecutableDirectory() { return PHYSFS_getBaseDir(); }
 const char * RE_FileSystem::GetZipPath() { return zip_path.c_str(); }
 
 void RE_FileSystem::HandleDropedFile(const char * file)
@@ -504,13 +506,13 @@ void RE_FileSystem::HandleDropedFile(const char * file)
 	if (newDir)
 	{
 		finalPath += fileName + "/";
-		App::fs->AddPath(file, finalPath.c_str());
+		AddPath(file, finalPath.c_str());
 		CopyDirectory(exportPath.c_str(), App::editor->GetAssetsPanelPath());
-		App::fs->RemovePath(file);
+		RemovePath(file);
 	}
 }
 
-RE_FileSystem::RE_Directory* RE_FileSystem::GetRootDirectory() const { return rootAssetDirectory; }
+RE_FileSystem::RE_Directory* RE_FileSystem::GetRootDirectory() { return rootAssetDirectory; }
 
 void RE_FileSystem::DeleteUndefinedFile(const char* filePath)
 {
@@ -620,7 +622,7 @@ signed long long RE_FileSystem::GetLastTimeModified(const char* path)
 	return 0;
 }
 
-void RE_FileSystem::CopyDirectory(const char * origin, const char * dest)
+void RE_FileSystem::Internal::CopyDirectory(const char * origin, const char * dest)
 {
 	eastl::stack<eastl::pair< eastl::string, eastl::string>> copyDir;
 	copyDir.push({ origin , dest });
@@ -699,8 +701,8 @@ RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const cha
 
 bool RE_FileSystem::RE_Meta::IsModified() const
 {
-	return (App::resources->At(resource)->GetType() != Resource_Type::R_SHADER
-		&& fromFile->lastModified != App::resources->At(resource)->GetLastTimeModified());
+	return (RE_ResourceManager::At(resource)->GetType() != Resource_Type::R_SHADER
+		&& fromFile->lastModified != RE_ResourceManager::At(resource)->GetLastTimeModified());
 }
 
 void RE_FileSystem::RE_Directory::SetPath(const char* _path)
@@ -713,7 +715,7 @@ void RE_FileSystem::RE_Directory::SetPath(const char* _path)
 eastl::list< RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::MountTreeFolders()
 {
 	eastl::list< RE_Directory*> ret;
-	if (App::fs->Exists(path.c_str()))
+	if (Exists(path.c_str()))
 	{
 		eastl::string iterPath(path);
 		char** rc = PHYSFS_enumerateFiles(iterPath.c_str());
@@ -750,7 +752,7 @@ eastl::list< RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::MountTre
 eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAndApply(eastl::vector<RE_Meta*>* metaRecentlyAdded)
 {
 	eastl::stack<RE_ProcessPath*> ret;
-	if (App::fs->Exists(path.c_str()))
+	if (Exists(path.c_str()))
 	{
 		eastl::string iterPath(path);
 		eastl::vector<RE_Meta*> toRemoveM;
@@ -862,7 +864,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 					else if ((*iter)->AsFile()->fType == FileType::F_META)
 					{
 						bool reimport = false;
-						ResourceContainer* res = App::resources->At((*iter)->AsFile()->AsMeta()->resource);
+						ResourceContainer* res = RE_ResourceManager::At((*iter)->AsFile()->AsMeta()->resource);
 						if (res->GetType() == Resource_Type::R_SHADER)
 						{
 							RE_Shader* shadeRes = dynamic_cast<RE_Shader*>(res);
@@ -900,7 +902,7 @@ eastl::stack<RE_FileSystem::RE_Path*> RE_FileSystem::RE_Directory::GetDisplaying
 			{
 				if (path->AsMeta()->resource)
 				{
-					ResourceContainer* res = App::resources->At(path->AsMeta()->resource);
+					ResourceContainer* res = RE_ResourceManager::At(path->AsMeta()->resource);
 					if (res->GetType() == R_SHADER) ret.push(path);
 				}
 				break;

@@ -82,21 +82,21 @@ void RE_CompCamera::DrawProperties()
 
 			if (skyboxMD5)
 			{
-				skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(skyboxMD5));
-				if (ImGui::Button(skyRes->GetName())) App::resources->PushSelected(skyRes->GetMD5(), true);
+				skyRes = dynamic_cast<RE_SkyBox*>(RE_ResourceManager::At(skyboxMD5));
+				if (ImGui::Button(skyRes->GetName())) RE_ResourceManager::PushSelected(skyRes->GetMD5(), true);
 				ImGui::SameLine();
 				if (ImGui::Button("Back to Default Skybox")) skyboxMD5 = nullptr;
 			}
 			else
 			{
 				ImGui::Text("This component camera is using the default skybox.");
-				skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultSkyBox()));
-				if (ImGui::Button(skyRes->GetName())) App::resources->PushSelected(skyRes->GetMD5(), true);
+				skyRes = dynamic_cast<RE_SkyBox*>(RE_ResourceManager::At(RE_InternalResources::GetDefaultSkyBox()));
+				if (ImGui::Button(skyRes->GetName())) RE_ResourceManager::PushSelected(skyRes->GetMD5(), true);
 			}
 
 			if (ImGui::BeginMenu("Change skybox"))
 			{
-				eastl::vector<ResourceContainer*> materials = App::resources->GetResourcesByType(Resource_Type::R_SKYBOX);
+				eastl::vector<ResourceContainer*> materials = RE_ResourceManager::GetResourcesByType(Resource_Type::R_SKYBOX);
 				bool none = true;
 				for (auto material : materials)
 				{
@@ -105,9 +105,9 @@ void RE_CompCamera::DrawProperties()
 					none = false;
 					if (ImGui::MenuItem(material->GetName()))
 					{
-						if (skyboxMD5) App::resources->UnUse(skyboxMD5);
+						if (skyboxMD5) RE_ResourceManager::UnUse(skyboxMD5);
 						skyboxMD5 = material->GetMD5();
-						if (skyboxMD5) App::resources->Use(skyboxMD5);
+						if (skyboxMD5) RE_ResourceManager::Use(skyboxMD5);
 					}
 				}
 				if (none) ImGui::Text("No custom skyboxes on assets");
@@ -117,9 +117,9 @@ void RE_CompCamera::DrawProperties()
 			{
 				if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#SkyboxReference"))
 				{
-					if (skyboxMD5) App::resources->UnUse(skyboxMD5);
+					if (skyboxMD5) RE_ResourceManager::UnUse(skyboxMD5);
 					skyboxMD5 = *static_cast<const char**>(dropped->Data);
-					if (skyboxMD5) App::resources->Use(skyboxMD5);
+					if (skyboxMD5) RE_ResourceManager::Use(skyboxMD5);
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -150,7 +150,7 @@ void RE_CompCamera::DrawFrustum() const
 
 void RE_CompCamera::DrawSkybox() const
 {
-	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(skyboxMD5 ? skyboxMD5 : RE_ResourceManager::internalResources.GetDefaultSkyBox()));
+	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(RE_ResourceManager::At(skyboxMD5 ? skyboxMD5 : RE_InternalResources::GetDefaultSkyBox()));
 	if (skyRes) skyRes->DrawSkybox();
 }
 
@@ -396,8 +396,8 @@ bool RE_CompCamera::isUsingSkybox() const { return usingSkybox; }
 const char* RE_CompCamera::GetSkybox() const { return skyboxMD5; }
 void RE_CompCamera::DeleteSkybox() { usingSkybox = false; skyboxMD5 = nullptr; }
 void RE_CompCamera::SetSkyBox(const char* resS) { skyboxMD5 = resS; }
-void RE_CompCamera::UseResources() { if (skyboxMD5) App::resources->Use(skyboxMD5); }
-void RE_CompCamera::UnUseResources() { if (skyboxMD5) App::resources->UnUse(skyboxMD5); }
+void RE_CompCamera::UseResources() { if (skyboxMD5) RE_ResourceManager::Use(skyboxMD5); }
+void RE_CompCamera::UnUseResources() { if (skyboxMD5) RE_ResourceManager::UnUse(skyboxMD5); }
 
 eastl::vector<const char*> RE_CompCamera::GetAllResources()
 {

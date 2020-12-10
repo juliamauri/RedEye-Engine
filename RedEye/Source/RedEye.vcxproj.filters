@@ -25,26 +25,14 @@
     <ClCompile Include="ImGuizmo\ImGuizmo.cpp">
       <Filter>3rd Party\ImGuizmo</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleRenderer3D.cpp">
-      <Filter>Source\Application\Modules</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleScene.cpp">
       <Filter>Source\Application\Modules</Filter>
     </ClCompile>
     <ClCompile Include="RE_CompMesh.cpp">
       <Filter>Source\Entity Component System\Components</Filter>
     </ClCompile>
-    <ClCompile Include="RE_CompPrimitive.cpp">
-      <Filter>Source\Entity Component System\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_CompCamera.cpp">
-      <Filter>Source\Entity Component System\Components</Filter>
-    </ClCompile>
     <ClCompile Include="QuadTree.cpp">
       <Filter>Source\Utility\Space Partition</Filter>
-    </ClCompile>
-    <ClCompile Include="ModuleEditor.cpp">
-      <Filter>Source\Application\Modules\Editor</Filter>
     </ClCompile>
     <ClCompile Include="RE_CompTransform.cpp">
       <Filter>Source\Entity Component System\Components</Filter>
@@ -67,23 +55,17 @@
     <ClCompile Include="Resource.cpp">
       <Filter>Source\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="RE_ResourceManager.cpp">
-      <Filter>Source\Application\Managers\Resource Manager</Filter>
-    </ClCompile>
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="RE_InternalResources.cpp">
-      <Filter>Source\Application\Managers\Resource Manager\InternalResources</Filter>
-    </ClCompile>
     <ClCompile Include="EditorWindows.cpp">
-      <Filter>Source\Application\Modules\Editor\Windows</Filter>
+      <Filter>Source\Application\Modules\Editor\Editor Windows</Filter>
     </ClCompile>
     <ClCompile Include="ResourceEditorsWindows.cpp">
-      <Filter>Source\Application\Modules\Editor\Windows</Filter>
+      <Filter>Source\Application\Modules\Editor\Editor Windows</Filter>
     </ClCompile>
     <ClCompile Include="EA\EAStdC\EACallback.cpp">
       <Filter>3rd Party\EA\StdC</Filter>
@@ -199,9 +181,6 @@
     <ClCompile Include="ModuleAudio.cpp">
       <Filter>Source\Application\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Component.cpp">
-      <Filter>Source\Entity Component System\Components</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompWater.cpp">
       <Filter>Source\Entity Component System\Components</Filter>
     </ClCompile>
@@ -210,21 +189,6 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_ThumbnailManager.cpp">
-      <Filter>Source\Application\Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_PrimitiveManager.cpp">
-      <Filter>Source\Application\Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_CameraManager.cpp">
-      <Filter>Source\Application\Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_FBOManager.cpp">
-      <Filter>Source\Application\Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_GLCacheManager.cpp">
-      <Filter>Source\Application\Managers</Filter>
     </ClCompile>
     <ClCompile Include="Application.cpp">
       <Filter>Source\Application</Filter>
@@ -244,20 +208,11 @@
     <ClCompile Include="RE_FileSystem.cpp">
       <Filter>Source\FileSystem</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Config.cpp">
-      <Filter>Source\FileSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_FileBuffer.cpp">
-      <Filter>Source\FileSystem</Filter>
-    </ClCompile>
     <ClCompile Include="RE_AABBDynTree.cpp">
       <Filter>Source\Utility\Space Partition</Filter>
     </ClCompile>
     <ClCompile Include="Globals.cpp">
       <Filter>Source\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Json.cpp">
-      <Filter>Source\FileSystem</Filter>
     </ClCompile>
     <ClCompile Include="RE_Cvar.cpp">
       <Filter>Source\Events System</Filter>
@@ -289,18 +244,6 @@
     <ClCompile Include="RE_ECS_Importer.cpp">
       <Filter>Source\Entity Component System</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Material.cpp">
-      <Filter>Source\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Mesh.cpp">
-      <Filter>Source\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Prefab.cpp">
-      <Filter>Source\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_Scene.cpp">
-      <Filter>Source\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="RE_ComponentsPool.cpp">
       <Filter>Source\Entity Component System\Hash System</Filter>
     </ClCompile>
@@ -312,6 +255,63 @@
     </ClCompile>
     <ClCompile Include="RE_GameObject.cpp">
       <Filter>Source\Entity Component System</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CameraManager.cpp">
+      <Filter>Source\Entity Component System\Components\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CompCamera.cpp">
+      <Filter>Source\Entity Component System\Components\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_PrimitiveManager.cpp">
+      <Filter>Source\Entity Component System\Components\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CompPrimitive.cpp">
+      <Filter>Source\Entity Component System\Components\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Component.cpp">
+      <Filter>Source\Entity Component System\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ThumbnailManager.cpp">
+      <Filter>Source\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Config.cpp">
+      <Filter>Source\FileSystem\File Container</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_FileBuffer.cpp">
+      <Filter>Source\FileSystem\File Container</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Json.cpp">
+      <Filter>Source\FileSystem\File Container</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Mesh.cpp">
+      <Filter>Source\Resources\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Material.cpp">
+      <Filter>Source\Resources\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleEditor.cpp">
+      <Filter>Source\Application\Modules\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleRenderer3D.cpp">
+      <Filter>Source\Application\Modules\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_FBOManager.cpp">
+      <Filter>Source\Application\Modules\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_GLCacheManager.cpp">
+      <Filter>Source\Application\Modules\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ResourceManager.cpp">
+      <Filter>Source\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Prefab.cpp">
+      <Filter>Source\Resources\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Scene.cpp">
+      <Filter>Source\Resources\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_InternalResources.cpp">
+      <Filter>Source\Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -447,9 +447,6 @@
     <ClInclude Include="gpudetect\dxgi1_4.h">
       <Filter>3rd Party\gpudetect</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleRenderer3D.h">
-      <Filter>Source\Application\Modules</Filter>
-    </ClInclude>
     <ClInclude Include="ImGui\imconfig.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
@@ -483,16 +480,7 @@
     <ClInclude Include="ModuleScene.h">
       <Filter>Source\Application\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="RE_CompPrimitive.h">
-      <Filter>Source\Entity Component System\Components</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompMesh.h">
-      <Filter>Source\Entity Component System\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Component.h">
-      <Filter>Source\Entity Component System\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_CompCamera.h">
       <Filter>Source\Entity Component System\Components</Filter>
     </ClInclude>
     <ClInclude Include="RE_CompTransform.h">
@@ -531,23 +519,14 @@
     <ClInclude Include="Resource.h">
       <Filter>Source\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="RE_ResourceManager.h">
-      <Filter>Source\Application\Managers\Resource Manager</Filter>
-    </ClInclude>
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="ImGuiColorTextEdit\TextEditor.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="RE_InternalResources.h">
-      <Filter>Source\Application\Managers\Resource Manager\InternalResources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_DefaultShaders.h">
-      <Filter>Source\Application\Managers\Resource Manager\InternalResources</Filter>
-    </ClInclude>
     <ClInclude Include="EditorWindows.h">
-      <Filter>Source\Application\Modules\Editor\Windows</Filter>
+      <Filter>Source\Application\Modules\Editor\Editor Windows</Filter>
     </ClInclude>
     <ClInclude Include="QuadTree.h">
       <Filter>Source\Utility\Space Partition</Filter>
@@ -1170,26 +1149,8 @@
     <ClInclude Include="md5.h">
       <Filter>3rd Party\MD5</Filter>
     </ClInclude>
-    <ClInclude Include="RE_ThumbnailManager.h">
-      <Filter>Source\Application\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_PrimitiveManager.h">
-      <Filter>Source\Application\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_CameraManager.h">
-      <Filter>Source\Application\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_FBOManager.h">
-      <Filter>Source\Application\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_GLCacheManager.h">
-      <Filter>Source\Application\Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Application.h">
       <Filter>Source\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="ModuleEditor.h">
-      <Filter>Source\Application\Modules\Editor</Filter>
     </ClInclude>
     <ClInclude Include="RE_Math.h">
       <Filter>Source\Utility</Filter>
@@ -1206,20 +1167,11 @@
     <ClInclude Include="RE_FileSystem.h">
       <Filter>Source\FileSystem</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Config.h">
-      <Filter>Source\FileSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_FileBuffer.h">
-      <Filter>Source\FileSystem</Filter>
-    </ClInclude>
     <ClInclude Include="RE_AABBDynTree.h">
       <Filter>Source\Utility\Space Partition</Filter>
     </ClInclude>
     <ClInclude Include="Globals.h">
       <Filter>Source\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Json.h">
-      <Filter>Source\FileSystem</Filter>
     </ClInclude>
     <ClInclude Include="RE_Cvar.h">
       <Filter>Source\Events System</Filter>
@@ -1260,18 +1212,6 @@
     <ClInclude Include="RE_ModelSettings.h">
       <Filter>Source\Resources\Model</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Mesh.h">
-      <Filter>Source\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Material.h">
-      <Filter>Source\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Scene.h">
-      <Filter>Source\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_Prefab.h">
-      <Filter>Source\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="RE_HashMap.h">
       <Filter>Source\Entity Component System\Hash System</Filter>
     </ClInclude>
@@ -1289,6 +1229,66 @@
     </ClInclude>
     <ClInclude Include="RE_GameObject.h">
       <Filter>Source\Entity Component System</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CameraManager.h">
+      <Filter>Source\Entity Component System\Components\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompCamera.h">
+      <Filter>Source\Entity Component System\Components\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_PrimitiveManager.h">
+      <Filter>Source\Entity Component System\Components\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompPrimitive.h">
+      <Filter>Source\Entity Component System\Components\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Component.h">
+      <Filter>Source\Entity Component System\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ThumbnailManager.h">
+      <Filter>Source\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Config.h">
+      <Filter>Source\FileSystem\File Container</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_FileBuffer.h">
+      <Filter>Source\FileSystem\File Container</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Json.h">
+      <Filter>Source\FileSystem\File Container</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Mesh.h">
+      <Filter>Source\Resources\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Material.h">
+      <Filter>Source\Resources\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleEditor.h">
+      <Filter>Source\Application\Modules\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleRenderer3D.h">
+      <Filter>Source\Application\Modules\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_GLCacheManager.h">
+      <Filter>Source\Application\Modules\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_FBOManager.h">
+      <Filter>Source\Application\Modules\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ResourceManager.h">
+      <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Prefab.h">
+      <Filter>Source\Resources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Scene.h">
+      <Filter>Source\Resources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_DefaultShaders.h">
+      <Filter>Source\Resources\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_InternalResources.h">
+      <Filter>Source\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1394,24 +1394,6 @@
     <Filter Include="Source\Application\Modules">
       <UniqueIdentifier>{dbb90943-cf3a-483e-b9a2-928baf328345}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Application\Modules\Editor">
-      <UniqueIdentifier>{355a2309-34fd-415d-af8a-c2ca6f635028}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Modules\Editor\Windows">
-      <UniqueIdentifier>{a18935b7-c464-42a4-915b-e5d7df5fc839}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Modules\Editor\Commands">
-      <UniqueIdentifier>{619773c4-4576-417f-a33f-3d381f2a958a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Managers">
-      <UniqueIdentifier>{ef86e356-e180-48c1-9ed2-ac227097742b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Managers\Resource Manager">
-      <UniqueIdentifier>{c7fdb747-bf4e-4864-8336-d13e49a20d25}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Managers\Resource Manager\InternalResources">
-      <UniqueIdentifier>{ba777deb-5c4f-4673-ab51-944abbdad942}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Events System">
       <UniqueIdentifier>{b7a63cfc-233b-4186-96c0-37e2ed9b095d}</UniqueIdentifier>
     </Filter>
@@ -1441,6 +1423,30 @@
     </Filter>
     <Filter Include="Source\Entity Component System\Hash System">
       <UniqueIdentifier>{7d4a01e6-ec35-46e2-b62b-85e046c97aed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Entity Component System\Components\Camera">
+      <UniqueIdentifier>{d4743095-be7d-4996-921d-a6f282be6b07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Entity Component System\Components\Primitives">
+      <UniqueIdentifier>{5cbd9394-fc9d-44c6-ab07-36554b54cb52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\FileSystem\File Container">
+      <UniqueIdentifier>{4190a802-fb82-4dcf-9f91-4b4f2830c2e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor">
+      <UniqueIdentifier>{355a2309-34fd-415d-af8a-c2ca6f635028}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Editor Windows">
+      <UniqueIdentifier>{a18935b7-c464-42a4-915b-e5d7df5fc839}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Commands">
+      <UniqueIdentifier>{619773c4-4576-417f-a33f-3d381f2a958a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Renderer">
+      <UniqueIdentifier>{4a0cfd25-bda1-4dec-8a43-d29dc36bb337}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Resources\ECS">
+      <UniqueIdentifier>{0950dac9-e049-4f1f-ae0d-5d9db98ef642}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

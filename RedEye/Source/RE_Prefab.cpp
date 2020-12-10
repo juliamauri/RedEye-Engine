@@ -20,11 +20,11 @@ RE_Prefab::~RE_Prefab() {}
 
 void RE_Prefab::LoadInMemory()
 {
-	if (App::fs->Exists(GetLibraryPath()))
+	if (RE_FileSystem::Exists(GetLibraryPath()))
 	{
 		LibraryLoad();
 	}
-	else if (App::fs->Exists(GetAssetPath()))
+	else if (RE_FileSystem::Exists(GetAssetPath()))
 	{
 		AssetLoad();
 		LibrarySave();
@@ -90,7 +90,7 @@ RE_ECS_Pool* RE_Prefab::GetPool()
 void RE_Prefab::AssetSave()
 {
 	//Serialize
-	Config prefab_SaveFile(GetAssetPath(), App::fs->GetZipPath());
+	Config prefab_SaveFile(GetAssetPath(), RE_FileSystem::GetZipPath());
 	RE_Json* prefabNode = prefab_SaveFile.GetRootNode("prefab");
 
 	RE_ECS_Importer::JsonSerialize(prefabNode, toSave);
@@ -109,7 +109,7 @@ void RE_Prefab::AssetSave()
 
 void RE_Prefab::AssetLoad(bool generateLibraryPath)
 {
-	Config jsonLoad(GetAssetPath(), App::fs->GetZipPath());
+	Config jsonLoad(GetAssetPath(), RE_FileSystem::GetZipPath());
 
 	if (jsonLoad.Load())
 	{
@@ -145,7 +145,7 @@ void RE_Prefab::LibrarySave()
 {
 	uint size = 0;
 	char* buffer = RE_ECS_Importer::BinarySerialize(toSave, &size);
-	RE_FileBuffer toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer toLibrarySave(GetLibraryPath(), RE_FileSystem::GetZipPath());
 	toLibrarySave.Save(buffer, size);
 	DEL_A(buffer);
 }
@@ -153,7 +153,7 @@ void RE_Prefab::LibrarySave()
 void RE_Prefab::Draw()
 {
 	if (ImGui::Button("Add to Scene")) {
-		if (loaded == nullptr) App::resources->Use(GetMD5());
+		if (loaded == nullptr) RE_ResourceManager::Use(GetMD5());
 		App::scene->AddGOPool(loaded);
 	}
 }

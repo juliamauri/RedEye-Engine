@@ -5,8 +5,6 @@
 #include "Application.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
-#include "RE_TextureImporter.h"
-#include "RE_ModelImporter.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_ECS_Pool.h"
 #include "RE_Material.h"
@@ -19,11 +17,15 @@
 #include "RE_Mesh.h"
 
 #include <EASTL/internal/char_traits.h>
-#include <EASTL/string.h>
 
-RE_InternalResources RE_ResourceManager::internalResources;
+using namespace RE_ResourceManager::Internal;
 
-RE_ResourceManager::~RE_ResourceManager()
+void RE_ResourceManager::Init()
+{
+	RE_InternalResources::Init();
+}
+
+void RE_ResourceManager::Clear()
 {
 	while (!resources.empty())
 	{
@@ -32,16 +34,13 @@ RE_ResourceManager::~RE_ResourceManager()
 	}
 }
 
-void RE_ResourceManager::RecieveEvent(const Event& e)
+void RE_ResourceManager::ResourceHasChanged(const char* md5)
 {
-	if (e.type == RE_EventType::RESOURCE_CHANGED)
+	ResourceContainer* res = resources.at(md5);
+	if (res->GetType() == Resource_Type::R_SHADER)
 	{
-		ResourceContainer* res = resources.at(e.data1.AsCharP());
-		if (res->GetType() == Resource_Type::R_SHADER)
-		{
-			eastl::vector<ResourceContainer*> materials = GetResourcesByType(Resource_Type::R_MATERIAL);
-			for (auto material : materials) material->SomeResourceChanged(res->GetMD5());
-		}
+		eastl::vector<ResourceContainer*> materials = GetResourcesByType(Resource_Type::R_MATERIAL);
+		for (auto material : materials) material->SomeResourceChanged(res->GetMD5());
 	}
 }
 
@@ -81,7 +80,7 @@ void RE_ResourceManager::PushSelected(const char* resS, bool popAll)
 	resourcesSelected.push(resS);
 }
 
-const char* RE_ResourceManager::GetSelected() const
+const char* RE_ResourceManager::GetSelected()
 {
 	return (resourcesSelected.empty()) ? nullptr : resourcesSelected.top();
 }
@@ -95,7 +94,7 @@ void RE_ResourceManager::PopSelected(bool all)
 	} while (all && !resourcesSelected.empty());
 }
 
-ResourceContainer* RE_ResourceManager::At(const char* md5) const { return resources.at(md5); }
+ResourceContainer* RE_ResourceManager::At(const char* md5) { return resources.at(md5); }
 
 const char* RE_ResourceManager::ReferenceByMeta(const char* metaPath, Resource_Type type)
 {
@@ -119,7 +118,7 @@ const char* RE_ResourceManager::ReferenceByMeta(const char* metaPath, Resource_T
 	return retMD5;
 }
 
-unsigned int RE_ResourceManager::TotalReferences() const { return resources.size(); }
+unsigned int RE_ResourceManager::TotalReferences() { return resources.size(); }
 
 eastl::vector<const char*> RE_ResourceManager::GetAllResourcesActiveByType(Resource_Type resT)
 {
@@ -260,7 +259,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 		RE_Material* resChange = nullptr;
 		for (auto resToChange : resourcesWillChange)
 		{
-			(resChange = dynamic_cast<RE_Material*>(App::resources->At(resToChange)))->LoadInMemory();
+			(resChange = dynamic_cast<RE_Material*>(At(resToChange)))->LoadInMemory();
 			if(rType == R_SHADER) resChange->DeleteShader();
 			else resChange->DeleteTexture(res);
 			resChange->UnloadMemory();
@@ -273,7 +272,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	{
 		for (auto resToChange : resourcesWillChange)
 		{
-			ResourceContainer* resChange = App::resources->At(resToChange);
+			ResourceContainer* resChange = At(resToChange);
 			Resource_Type goType = resChange->GetType();
 
 			if (resourceOnScene && resToChange == App::scene->GetCurrentScene())
@@ -366,7 +365,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	resourcesCounter.erase(res);
 	resources.erase(res);
 
-	if (rType != R_SHADER) App::thumbnail->Delete(res);
+	if (rType != R_SHADER) RE_ThumbnailManager::Delete(res);
 
 	return resource;
 }
@@ -476,7 +475,7 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 
 	if (!meshMD5)
 	{
-		if (App::fs->Exists(librariPath))
+		if (RE_FileSystem::Exists(librariPath))
 		{
 			RE_Mesh* newMesh = new RE_Mesh();
 			newMesh->SetLibraryPath(librariPath);
@@ -497,21 +496,6 @@ void RE_ResourceManager::ThumbnailResources()
 		if(rT == R_SCENE || rT == R_PREFAB || rT == R_MODEL || rT == R_SKYBOX || rT == R_MATERIAL || rT == R_TEXTURE)
 			App::renderer3d->PushThumnailRend(res.first);
 	}
-}
-
-const char* RE_ResourceManager::GetNameFromType(const Resource_Type type)
-{
-	switch (type) {
-	case Resource_Type::R_TEXTURE: return "Texture";
-	case Resource_Type::R_SCENE: return "Scene";
-	case Resource_Type::R_MATERIAL: return "Material";
-	case Resource_Type::R_MESH: return "Mesh";
-	case Resource_Type::R_PREFAB: return "Prefab";
-	case Resource_Type::R_SHADER: return "Shader";
-	case Resource_Type::R_MODEL: return "Model";
-	case Resource_Type::R_SKYBOX: return "Skybox";
-	case Resource_Type::R_UNDEFINED: return "Undefined";
-	default: return "Invalid"; }
 }
 
 const char* RE_ResourceManager::ImportModel(const char* assetPath)
@@ -621,7 +605,23 @@ const char* RE_ResourceManager::ImportScene(const char* assetPath)
 	return Reference(newScene);
 }
 
-unsigned int RE_ResourceManager::TotalReferenceCount(const char* resMD5) const
+unsigned int RE_ResourceManager::TotalReferenceCount(const char* resMD5)
 {
 	return resourcesCounter.at(resMD5);
+}
+
+const char* RE_ResourceManager::Internal::GetNameFromType(const Resource_Type type)
+{
+	switch (type) {
+	case Resource_Type::R_TEXTURE: return "Texture";
+	case Resource_Type::R_SCENE: return "Scene";
+	case Resource_Type::R_MATERIAL: return "Material";
+	case Resource_Type::R_MESH: return "Mesh";
+	case Resource_Type::R_PREFAB: return "Prefab";
+	case Resource_Type::R_SHADER: return "Shader";
+	case Resource_Type::R_MODEL: return "Model";
+	case Resource_Type::R_SKYBOX: return "Skybox";
+	case Resource_Type::R_UNDEFINED: return "Undefined";
+	default: return "Invalid";
+	}
 }

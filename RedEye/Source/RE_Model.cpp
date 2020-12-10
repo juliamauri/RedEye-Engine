@@ -17,11 +17,11 @@
 
 void RE_Model::LoadInMemory()
 {
-	if (App::fs->Exists(GetLibraryPath()))
+	if (RE_FileSystem::Exists(GetLibraryPath()))
 	{
 		LibraryLoad();
 	}
-	else if (App::fs->Exists(GetAssetPath()))
+	else if (RE_FileSystem::Exists(GetAssetPath()))
 	{
 		AssetLoad();
 		LibrarySave();
@@ -134,7 +134,7 @@ void RE_Model::Draw()
 
 		if (CheckResourcesIsOnAssets())
 		{
-			if (loaded == nullptr) App::resources->Use(GetMD5());
+			if (loaded == nullptr) RE_ResourceManager::Use(GetMD5());
 			App::scene->AddGOPool(loaded);
 		}
 		else
@@ -177,7 +177,7 @@ void RE_Model::SaveResourceMeta(RE_Json* metaNode)
 	uint count = 0;
 	for (const char* mesh : modelSettings.libraryMeshes)
 	{
-		ResourceContainer* rM = App::resources->At(mesh);
+		ResourceContainer* rM = RE_ResourceManager::At(mesh);
 		metaNode->PushString(eastl::to_string(count++).c_str(), rM->GetLibraryPath());
 	}
 }
@@ -196,11 +196,11 @@ void RE_Model::LoadResourceMeta(RE_Json* metaNode)
 	for (uint i = 0; i < totalMeshes; i++)
 	{
 		eastl::string libraryMesh = metaNode->PullString(eastl::to_string(i).c_str(), "");
-		const char* md5 = App::resources->CheckOrFindMeshOnLibrary(libraryMesh.c_str());
+		const char* md5 = RE_ResourceManager::CheckOrFindMeshOnLibrary(libraryMesh.c_str());
 		if (md5)
 		{
-			App::resources->At(md5)->SetAssetPath(GetAssetPath());
-			App::resources->At(md5)->SetMetaPath(GetMetaPath());
+			RE_ResourceManager::At(md5)->SetAssetPath(GetAssetPath());
+			RE_ResourceManager::At(md5)->SetMetaPath(GetMetaPath());
 			modelSettings.libraryMeshes.push_back(md5);
 		}
 	}
@@ -239,7 +239,7 @@ void RE_Model::LibrarySave()
 		uint size = 0;
 		char* buffer = RE_ECS_Importer::BinarySerialize(loaded, &size);
 
-		RE_FileBuffer toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
+		RE_FileBuffer toLibrarySave(GetLibraryPath(), RE_FileSystem::GetZipPath());
 		toLibrarySave.Save(buffer, size);
 		DEL_A(buffer);
 	}

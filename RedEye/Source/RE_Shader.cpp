@@ -20,11 +20,11 @@
 
 void RE_Shader::LoadInMemory()
 {
-	if (App::fs->Exists(GetLibraryPath()))
+	if (RE_FileSystem::Exists(GetLibraryPath()))
 	{
 		LibraryLoad();
 	}
-	else if (App::fs->Exists(shaderSettings.vertexShader.c_str()) && App::fs->Exists(shaderSettings.fragmentShader.c_str()))
+	else if (RE_FileSystem::Exists(shaderSettings.vertexShader.c_str()) && RE_FileSystem::Exists(shaderSettings.fragmentShader.c_str()))
 	{
 		AssetLoad();
 		LibrarySave();
@@ -219,7 +219,7 @@ void RE_Shader::ReImport()
 	else GetLocations();
 
 	//Send Resource Event
-	Event::Push(RE_EventType::RESOURCE_CHANGED, App::resources, RE_Cvar(GetMD5()));
+	Event::Push(RE_EventType::RESOURCE_CHANGED, App::Ptr(), RE_Cvar(GetMD5()));
 }
 
 bool RE_Shader::IsPathOnShader(const char* assetPath)
@@ -534,7 +534,7 @@ void RE_Shader::LibraryLoad()
 
 void RE_Shader::LibrarySave()
 {
-	RE_FileBuffer librarySave(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer librarySave(GetLibraryPath(), RE_FileSystem::GetZipPath());
 	char* buffer = nullptr;
 	int size = 0;
 	if (RE_ShaderImporter::GetBinaryProgram(ID, &buffer, &size)) librarySave.Save(buffer, size);

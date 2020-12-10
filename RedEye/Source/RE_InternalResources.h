@@ -1,62 +1,59 @@
-#ifndef __INTERNALRESOURCCES_H__
-#define __INTERNALRESOURCCES_H__
+#ifndef __INTERNAL_RESOURCCES_H__
+#define __INTERNAL_RESOURCCES_H__
 
 #include "RE_Cvar.h"
 
 #include <EASTL/vector.h>
-class RE_SkyBox;
-class RE_Shader;
 
-class RE_InternalResources
+namespace RE_InternalResources
 {
-public:
-
-	RE_InternalResources() {}
-	~RE_InternalResources();
-
 	void Init();
+	void Clear();
 	
-	const char* GetDefaultShader()const;
-	const char* GetDefaultWaterShader()const;
-	const char* GetDefaultSkyBoxShader()const;
-	const char* GetDefaultScaleShader()const;
-	const char* GetDefaulMaterial()const;
-	const char* GetDefaultSkyBox()const;
-	const char* GetLightPassShader()const;
+	const char* GetDefaultShader();
+	const char* GetDefaultWaterShader();
+	const char* GetDefaultSkyBoxShader();
+	const char* GetDefaultScaleShader();
+	const char* GetDefaulMaterial();
+	const char* GetDefaultSkyBox();
+	const char* GetLightPassShader();
 
-	unsigned int GetTextureChecker() const;
-	unsigned int GetTextureWaterFoam() const;
-	eastl::vector<RE_Shader_Cvar> GetWaterUniforms() const;
+	unsigned int GetTextureChecker();
+	unsigned int GetTextureWaterFoam();
+	eastl::vector<RE_Shader_Cvar> GetWaterUniforms();
 
-private:
+	namespace Internal
+	{
+		void InitChecker();
+		bool InitShaders();
+		bool InitMaterial();
+		bool InitSkyBox();
 
-	void InitChecker();
-	bool InitShaders();
-	bool InitMaterial();
-	bool InitSkyBox();
+		void InitWaterResources();
 
-	void InitWaterResources();
+		static unsigned int checkerTexture = 0u;
+		static unsigned int water_foam_texture = 0;
 
-private:
+		static const char* defaultMaterial = nullptr;
+		static const char* defaultSkybox = nullptr;
 
-	const char* defaultShader = nullptr;
-	const char* defaultScaleShader = nullptr;
-	const char* skyboxShader = nullptr;
+		// Default shaders
+		static const char* defaultShader = nullptr;
+		static const char* defaultScaleShader = nullptr;
+		static const char* skyboxShader = nullptr;
 
-	const char* defGeoShader = nullptr;
-	const char* defLightShader = nullptr;
+		// Deferred shaders
+		static const char* defGeoShader = nullptr;
+		static const char* defLightShader = nullptr;
 
+		// Water
+		static eastl::vector<RE_Shader_Cvar> waterUniforms;
+		static const char* waterShader = nullptr;
+		static const char* waterDefShader = nullptr;
 
-	const char* waterShader = nullptr;
-	const char* waterDefShader = nullptr;
-	eastl::vector<RE_Shader_Cvar> waterUniforms;
-	unsigned int water_foam_texture = 0;
+		static const char* WATER_FOAM_TEX_PATH = "Settings/DefaultAssets/water_foam.png";
+	}
+}
 
-	const char* defaultMaterial = nullptr;
-	const char* defaultSkybox = nullptr;
-
-	unsigned int checkerTexture = 0u; 
-};
-
-#endif // !__INTERNALRESOURCCES_H__
+#endif // !__INTERNAL_RESOURCCES_H__
 

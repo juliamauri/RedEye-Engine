@@ -1,13 +1,8 @@
 #ifndef __CVAR__
 #define __CVAR__
 
+#include "RE_Math.h"
 #include <EASTL/string.h>
-
-#include "MathGeoLib/include/Math/float2.h"
-#include "MathGeoLib/include/Math/float3.h"
-#include "MathGeoLib/include/Math/float4.h"
-#include "MathGeoLib/include/Math/float3x3.h"
-#include "MathGeoLib/include/Math/float4x4.h"
 
 class RE_GameObject;
 

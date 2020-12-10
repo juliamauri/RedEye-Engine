@@ -45,7 +45,7 @@ ModuleScene::~ModuleScene() {}
 bool ModuleScene::Start()
 {
 	RE_LOG("Starting Module %s", name);
-	eastl::vector<ResourceContainer*> scenes = App::resources->GetResourcesByType(R_SCENE);
+	eastl::vector<ResourceContainer*> scenes = RE_ResourceManager::GetResourcesByType(R_SCENE);
 	if (!scenes.empty()) LoadScene(scenes[0]->GetMD5());
 	else NewEmptyScene();
 	return true;
@@ -339,7 +339,7 @@ void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container,
 
 void ModuleScene::SaveScene(const char* newName)
 {
-	RE_Scene* scene = (unsavedScene) ? unsavedScene : dynamic_cast<RE_Scene*>(App::resources->At(currentScene));
+	RE_Scene* scene = (unsavedScene) ? unsavedScene : dynamic_cast<RE_Scene*>(RE_ResourceManager::At(currentScene));
 
 	Event::PauseEvents();
 
@@ -349,7 +349,7 @@ void ModuleScene::SaveScene(const char* newName)
 
 	if (unsavedScene)
 	{
-		currentScene = App::resources->Reference(scene);
+		currentScene = RE_ResourceManager::Reference(scene);
 		App::renderer3d->PushThumnailRend(currentScene);
 		unsavedScene = nullptr;
 	}
@@ -424,8 +424,8 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	if(!ignorehandle) RE_ConsoleLog::ScopeProcedureLogging();
 	Timer timer;
 	currentScene = sceneMD5;
-	RE_Scene* scene = dynamic_cast<RE_Scene*>(App::resources->At(currentScene));
-	App::resources->Use(sceneMD5);
+	RE_Scene* scene = dynamic_cast<RE_Scene*>(RE_ResourceManager::At(currentScene));
+	RE_ResourceManager::Use(sceneMD5);
 
 	RE_ECS_Pool* loadedDO = scene->GetPool();
 	if (loadedDO)scenePool.InsertPool(loadedDO);
@@ -433,7 +433,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 
 	DEL(loadedDO);
 
-	App::resources->UnUse(sceneMD5);
+	RE_ResourceManager::UnUse(sceneMD5);
 	scenePool.UseResources();
 	SetupScene();
 	App::editor->SetSelected(0);

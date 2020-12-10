@@ -23,11 +23,11 @@ const char* RE_SkyBox::texturesname[6] = { "Right", "Left", "Top", "Bottom", "Fr
 
 void RE_SkyBox::LoadInMemory()
 {
-	if (App::fs->Exists(GetLibraryPath()))
+	if (RE_FileSystem::Exists(GetLibraryPath()))
 	{
 		LibraryLoad();
 	}
-	else if (App::fs->Exists(GetAssetPath()))
+	else if (RE_FileSystem::Exists(GetAssetPath()))
 	{
 		AssetLoad();
 		LibrarySave();
@@ -129,7 +129,7 @@ void RE_SkyBox::Draw()
 		applySize = applyTextures = false;
 	}
 
-	ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
+	ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
 
 	if (applySave && skyBoxSettings == restoreSettings) applySave = false;
 }
@@ -150,9 +150,9 @@ void RE_SkyBox::DrawEditSkyBox()
 		{
 			if (skyBoxSettings.textures[i].textureMD5)
 			{
-				ResourceContainer* resource = App::resources->At(skyBoxSettings.textures[i].textureMD5);
+				ResourceContainer* resource = RE_ResourceManager::At(skyBoxSettings.textures[i].textureMD5);
 				id = texture + resource->GetName();
-				if (ImGui::Button(id.c_str())) App::resources->PushSelected(resource->GetMD5());
+				if (ImGui::Button(id.c_str())) RE_ResourceManager::PushSelected(resource->GetMD5());
 
 				ImGui::SameLine();
 				id = "Delete";
@@ -165,7 +165,7 @@ void RE_SkyBox::DrawEditSkyBox()
 				id = "Change";
 				if (ImGui::BeginMenu(id.c_str()))
 				{
-					eastl::vector<ResourceContainer*> allTex = App::resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+					eastl::vector<ResourceContainer*> allTex = RE_ResourceManager::GetResourcesByType(Resource_Type::R_TEXTURE);
 					for (auto textRes : allTex)
 					{
 						if (ImGui::MenuItem(textRes->GetName()))
@@ -183,7 +183,7 @@ void RE_SkyBox::DrawEditSkyBox()
 				id = "Add";
 				if (ImGui::BeginMenu(id.c_str()))
 				{
-					eastl::vector<ResourceContainer*> allTex = App::resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+					eastl::vector<ResourceContainer*> allTex = RE_ResourceManager::GetResourcesByType(Resource_Type::R_TEXTURE);
 					for (auto textRes : allTex)
 					{
 						if (ImGui::MenuItem(textRes->GetName()))
@@ -332,7 +332,7 @@ void RE_SkyBox::LoadResourceMeta(RE_Json* metaNode)
 	{
 		eastl::string key(texturesname[i]);
 		eastl::string texMD5 = nodeTex->PullString(eastl::string(key + "textureMD5").c_str(), "");
-		skyBoxSettings.textures[i].textureMD5 = App::resources->IsReference(texMD5.c_str(), Resource_Type::R_TEXTURE);
+		skyBoxSettings.textures[i].textureMD5 = RE_ResourceManager::IsReference(texMD5.c_str(), Resource_Type::R_TEXTURE);
 	}
 
 	restoreSettings = skyBoxSettings;
@@ -347,7 +347,7 @@ void RE_SkyBox::Import(bool keepInMemory)
 
 void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 {
-	Config toLoad(GetAssetPath(),App::fs->GetZipPath());
+	Config toLoad(GetAssetPath(),RE_FileSystem::GetZipPath());
 	if (toLoad.Load())
 	{
 		RE_Json* node = toLoad.GetRootNode("skybox");
@@ -373,7 +373,7 @@ void RE_SkyBox::AssetSave()
 	eastl::string assetPath("Assets/Skyboxes/");
 	(assetPath += GetName()) += ".sk";
 	SetAssetPath(assetPath.c_str());
-	Config toSave(assetPath.c_str(), App::fs->GetZipPath());
+	Config toSave(assetPath.c_str(), RE_FileSystem::GetZipPath());
 	RE_Json* node = toSave.GetRootNode("skybox");
 
 	//For differentMD5
@@ -430,7 +430,7 @@ void RE_SkyBox::LibrarySave()
 	memcpy(cursor, &skyBoxSettings.skyBoxSize, size);
 	cursor += size;
 
-	RE_FileBuffer saveLibrary(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer saveLibrary(GetLibraryPath(), RE_FileSystem::GetZipPath());
 
 	saveLibrary.Save(libraryBuffer, totalSize + 1);
 	DEL_A(libraryBuffer);
