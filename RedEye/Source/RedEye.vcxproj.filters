@@ -313,6 +313,9 @@
     <ClCompile Include="RE_InternalResources.cpp">
       <Filter>Source\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="RE_PathTypes.cpp">
+      <Filter>Source\FileSystem\File Container</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Module.h">
@@ -1289,6 +1292,9 @@
     </ClInclude>
     <ClInclude Include="RE_InternalResources.h">
       <Filter>Source\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_PathTypes.h">
+      <Filter>Source\FileSystem\File Container</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

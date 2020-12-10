@@ -102,6 +102,7 @@
     <ClCompile Include="ModuleWindow.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="RE_PathTypes.cpp" />
     <ClCompile Include="RE_ResourceManager.cpp" />
     <ClCompile Include="RE_CompCamera.cpp" />
     <ClCompile Include="RE_CompMesh.cpp" />
@@ -426,6 +427,7 @@
     <ClInclude Include="RapidJson\include\writer.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RE_ModelSettings.h" />
+    <ClInclude Include="RE_PathTypes.h" />
     <ClInclude Include="RE_ResourceManager.h" />
     <ClInclude Include="RE_CompCamera.h" />
     <ClInclude Include="RE_Component.h" />

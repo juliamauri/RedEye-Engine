@@ -1,42 +1,29 @@
 #include "RE_FileSystem.h"
 
+#include "RE_Time.h"
+#include "RE_ConsoleLog.h"
+#include "RE_PathTypes.h"
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
 #include "RE_Json.h"
-
 #include "Application.h"
-#include "ModuleScene.h"
 #include "ModuleEditor.h"
-
-#include "RE_Time.h"
-#include "RE_ConsoleLog.h"
-
 #include "RE_ResourceManager.h"
-#include "RE_PrimitiveManager.h"
-#include "RE_ModelImporter.h"
-
-#include "RE_GameObject.h"
-#include "RE_CompTransform.h"
-#include "RE_CompMesh.h"
-#include "RE_CompPrimitive.h"
-#include "RE_Mesh.h"
-#include "RE_Shader.h"
 
 #include "ImGui\imgui.h"
 #include "libzip\include\zip.h"
 #include "PhysFS\include\physfs.h"
-
-#include <EASTL/internal/char_traits.h>
-#include <EASTL/algorithm.h>
-#include <EASTL/iterator.h>
-#include <EAStdC/EASprintf.h>
+#include <EASTL\internal\char_traits.h>
+#include <EASTL\algorithm.h>
+#include <EASTL\iterator.h>
+#include <EAStdC\EASprintf.h>
 
 #pragma comment( lib, "PhysFS/libx86/physfs.lib" )
 
 #ifdef _DEBUG
-#pragma comment( lib, "libzip/zip_d.lib" )
+	#pragma comment( lib, "libzip/zip_d.lib" )
 #else
-#pragma comment( lib, "libzip/zip_r.lib" )
+	#pragma comment( lib, "libzip/zip_r.lib" )
 #endif // _DEBUG
 
 using namespace RE_FileSystem::Internal;
@@ -54,28 +41,26 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		RE_SOFT_NVS("PhysFS", tmp, "https://icculus.org/physfs/");
 		RE_SOFT_NVS("Rapidjson", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
 		RE_SOFT_NVS("LibZip", "1.5.0", "https://libzip.org/");
-		
-		engine_path = "engine";
-		library_path = "Library";
-		assets_path = "Assets";
 
 		zip_path = GetExecutableDirectory();
-		PHYSFS_mount((zip_path += "data.zip").c_str(), NULL, 1);
-
-		char **i;
-		for (i = PHYSFS_getSearchPath(); *i != NULL; i++) RE_LOG("[%s] is in the search path.\n", *i);
-		PHYSFS_freeList(*i);
-
-		config = new Config("Settings/config.json", zip_path.c_str());
-		if (ret = config->Load())
+		if (PHYSFS_mount((zip_path += "data.zip").c_str(), NULL, 1) != 0)
 		{
-			rootAssetDirectory = new RE_Directory();
-			rootAssetDirectory->SetPath("Assets/");
-			assetsDirectories = rootAssetDirectory->MountTreeFolders();
-			assetsDirectories.push_front(rootAssetDirectory);
-			dirIter = assetsDirectories.begin();
+			char** i;
+			for (i = PHYSFS_getSearchPath(); *i != NULL; i++) RE_LOG("[%s] is in the search path.\n", *i);
+			PHYSFS_freeList(*i);
+
+			config = new Config("Settings/config.json", zip_path.c_str());
+			if (ret = config->Load())
+			{
+				rootAssetDirectory = new RE_Directory();
+				rootAssetDirectory->SetPath("Assets/");
+				assetsDirectories = rootAssetDirectory->MountTreeFolders();
+				assetsDirectories.push_front(rootAssetDirectory);
+				dirIter = assetsDirectories.begin();
+			}
+			else RE_LOG_WARNING("Can't load Settings/config.json - building module default configuration.");
 		}
-		else RE_LOG_WARNING("Can't load Settings/config.json - building module default configuration.");
+		else RE_LOG_ERROR("PhysFS failed to mount data.zip(%s) Error: %s", zip_path.c_str(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 	}
 	else RE_LOG_ERROR("PhysFS could not initialize! Error: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 
@@ -103,19 +88,15 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 	Timer time;
 	bool run = true;
 
-	if ((dirIter == assetsDirectories.begin()) && (!assetsToProcess.empty() || !filesToFindMeta.empty() || !toImport.empty() || !toReImport.empty()))
-		dirIter = assetsDirectories.end();
+	if ((dirIter == assetsDirectories.begin()) && (
+		!RE_Directory::assetsToProcess.empty() ||
+		!filesToFindMeta.empty() ||
+		!toImport.empty() ||
+		!meta_reimports.empty())) dirIter = assetsDirectories.end();
 
 	while ((doAll || run) && dirIter != assetsDirectories.end())
 	{
-		eastl::stack<RE_ProcessPath*> toProcess = (*dirIter)->CheckAndApply(&metaRecentlyAdded);
-		while (!toProcess.empty())
-		{
-			RE_ProcessPath* process = toProcess.top();
-			toProcess.pop();
-			assetsToProcess.push(process);
-		}
-
+		(*dirIter)->CheckAndApply();
 		dirIter++;
 
 		//timer
@@ -126,24 +107,23 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 	{
 		dirIter = assetsDirectories.begin();
 
-		while ((doAll || run) && !assetsToProcess.empty())
+		while ((doAll || run) && !RE_Directory::assetsToProcess.empty())
 		{
-			RE_ProcessPath* process = assetsToProcess.top();
-			assetsToProcess.pop();
-
-			switch (process->procedure)
+			PathProcess process = RE_Directory::assetsToProcess.back();
+			switch (static_cast<PathProcessType>(process.type))
 			{
 			case P_ADDFILE:
 			{
-				RE_File* file = process->toProcess->AsFile();
-				RE_Meta* metaFile = file->AsMeta();
-
-				FileType type = file->fType;
-
-				if (type == F_META)
+				RE_File* file = static_cast<RE_File*>(process.path);
+				switch (file->fType)
+				{
+				case F_NOTSUPPORTED: RE_LOG_ERROR("Unsupported file type"); break;
+				case F_NONE: RE_LOG_ERROR("Missing file type"); break;
+				case F_META:
 				{
 					const char* isReferenced = RE_ResourceManager::FindMD5ByMETAPath(file->path.c_str());
 
+					RE_Meta* metaFile = static_cast<RE_Meta*>(file);
 					if (!isReferenced)
 					{
 						Config metaLoad(file->path.c_str(), GetZipPath());
@@ -157,39 +137,30 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 								metaFile->resource = RE_ResourceManager::ReferenceByMeta(file->path.c_str(), type);
 						}
 					}
-					else
-						metaFile->resource = isReferenced;
+					else metaFile->resource = isReferenced;
 
 					metaToFindFile.push_back(metaFile);
+					break;
 				}
-				else if (type > F_NONE) filesToFindMeta.push_back(file);
-				else RE_LOG_ERROR("Unsupported file type");
+				default: filesToFindMeta.push_back(file); break;
+				}
 				break;
 			}
 			case P_ADDFOLDER:
 			{
-				RE_Directory* dir = (RE_Directory*)process->toProcess;
-				eastl::stack<RE_ProcessPath*> toProcess = dir->CheckAndApply(&metaRecentlyAdded);
-
-				while (!toProcess.empty())
-				{
-					RE_ProcessPath* process = toProcess.top();
-					toProcess.pop();
-					assetsToProcess.push(process);
-				}
-
+				RE_Directory* dir = static_cast<RE_Directory*>(process.path);
+				dir->CheckAndApply();
 				assetsDirectories.push_back(dir);
 				break;
 			}
 			case P_REIMPORT:
 			{
-				toReImport.push_back(process->toProcess->AsMeta());
+				meta_reimports.push_back(static_cast<RE_Meta*>(process.path));
 				break;
 			}
 			}
-			DEL(process);
 
-			//timer
+			RE_Directory::assetsToProcess.pop_back();
 			if (!doAll && extra_ms < time.Read()) run = false;
 		}
 
@@ -201,7 +172,6 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			for (RE_Meta* meta : metaToFindFile)
 			{
 				ResourceContainer* res = RE_ResourceManager::At(meta->resource);
-				const char* assetPath = RE_ResourceManager::At(meta->resource)->GetAssetPath();
 
 				if (!res->isInternal())
 				{
@@ -210,6 +180,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					{
 						for (RE_File* file : filesToFindMeta)
 						{
+							const char* assetPath = res->GetAssetPath();
 							sizefile = eastl::CharStrlen(assetPath);
 							if (sizefile > 0 && eastl::Compare(assetPath, file->path.c_str(), sizefile) == 0)
 							{
@@ -253,24 +224,22 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					break;
 				case F_SKYBOX:
 				{
-					eastl::list<RE_File*>::const_iterator iter = toImport.end();
+					eastl::list<RE_File*>::const_iterator it = toImport.end();
 					if (!toImport.empty())
 					{
-						iter--;
-						FileType type = (*iter)->fType;
+						it--;
+						FileType type = (*it)->fType;
 						int count = toImport.size();
 						while (count > 1)
 						{
-							if (type == F_PREFAB || type == F_SCENE || type == F_MODEL)
-								break;
+							if (type == F_PREFAB || type == F_SCENE || type == F_MODEL) break;
 
 							count--;
-							iter--;
-							type = (*iter)->fType;
+							type = (*(--it))->fType;
 						}
-						iter++;
+						it++;
 					}
-					toImport.insert(iter, file);
+					toImport.insert(it, file);
 					break;
 				}
 				case F_TEXTURE:
@@ -305,12 +274,10 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					RE_Meta* newMetaFile = new RE_Meta();
 					newMetaFile->resource = newRes;
 					newMetaFile->fromFile = file;
-					file->metaResource = newMetaFile;
-					RE_File* fromMetaF = newMetaFile->AsFile();
-					fromMetaF->fType = FileType::F_META;
-					fromMetaF->path = RE_ResourceManager::At(newRes)->GetMetaPath();
-					newMetaFile->AsPath()->pType = PathType::D_FILE;
-					metaRecentlyAdded.push_back(newMetaFile);
+					newMetaFile->fType = FileType::F_META;
+					newMetaFile->path = RE_ResourceManager::At(newRes)->GetMetaPath();
+					newMetaFile->pType = PathType::D_FILE;
+					RE_Directory::recent_metas.push_back(file->metaResource = newMetaFile);
 				}
 				else
 					file->fType = F_NOTSUPPORTED;
@@ -334,10 +301,10 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			RE_ConsoleLog::EndScope();
 		}
 
-		if ((doAll || run) && !toReImport.empty())
+		if ((doAll || run) && !meta_reimports.empty())
 		{
 			eastl::vector<RE_Meta*> toRemoveM;
-			for (RE_Meta* meta : toReImport)
+			for (RE_Meta* meta : meta_reimports)
 			{
 				RE_LOG("ReImporting %s", meta->path.c_str());
 				RE_ResourceManager::At(meta->resource)->ReImport();
@@ -353,8 +320,8 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			if (!toRemoveM.empty())
 			{
 				//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
-				toReImport.erase(eastl::remove_if(eastl::begin(toReImport), eastl::end(toReImport),
-					[&](auto x) {return eastl::find(begin(toRemoveM), end(toRemoveM), x) != end(toRemoveM); }), eastl::end(toReImport));
+				meta_reimports.erase(eastl::remove_if(eastl::begin(meta_reimports), eastl::end(meta_reimports),
+					[&](auto x) {return eastl::find(begin(toRemoveM), end(toRemoveM), x) != end(toRemoveM); }), eastl::end(meta_reimports));
 			}
 		}
 	}
@@ -512,15 +479,15 @@ void RE_FileSystem::HandleDropedFile(const char * file)
 	}
 }
 
-RE_FileSystem::RE_Directory* RE_FileSystem::GetRootDirectory() { return rootAssetDirectory; }
+RE_Directory* RE_FileSystem::GetRootDirectory() { return rootAssetDirectory; }
 
 void RE_FileSystem::DeleteUndefinedFile(const char* filePath)
 {
-	RE_FileSystem::RE_Directory* dir = FindDirectory(filePath);
+	RE_Directory* dir = FindDirectory(filePath);
 
 	if (dir != nullptr)
 	{
-		RE_FileSystem::RE_Path* file = FindPath(filePath, dir);
+		RE_Path* file = FindPath(filePath, dir);
 
 		if (file != nullptr)
 		{
@@ -558,9 +525,9 @@ void RE_FileSystem::DeleteResourceFiles(ResourceContainer* resContainer)
 	}
 }
 
-RE_FileSystem::RE_Directory* RE_FileSystem::FindDirectory(const char* pathToFind)
+RE_Directory* RE_FileSystem::FindDirectory(const char* pathToFind)
 {
-	RE_FileSystem::RE_Directory* ret = nullptr;
+	RE_Directory* ret = nullptr;
 
 	eastl::string fullpath(pathToFind);
 	eastl::string directoryStr = fullpath.substr(0, fullpath.find_last_of('/') + 1);
@@ -577,9 +544,9 @@ RE_FileSystem::RE_Directory* RE_FileSystem::FindDirectory(const char* pathToFind
 	return ret;
 }
 
-RE_FileSystem::RE_Path* RE_FileSystem::FindPath(const char* pathToFind, RE_Directory* dir)
+RE_Path* RE_FileSystem::FindPath(const char* pathToFind, RE_Directory* dir)
 {
-	RE_FileSystem::RE_Path* ret = nullptr;
+	RE_Path* ret = nullptr;
 
 	eastl::string fullpath(pathToFind);
 	eastl::string directoryStr = fullpath.substr(0, fullpath.find_last_of('/') + 1);
@@ -622,7 +589,17 @@ signed long long RE_FileSystem::GetLastTimeModified(const char* path)
 	return 0;
 }
 
-void RE_FileSystem::Internal::CopyDirectory(const char * origin, const char * dest)
+RE_Json* RE_FileSystem::GetConfigNode(const char* node)
+{
+	return config->GetRootNode(node);;
+}
+
+void RE_FileSystem::SaveConfig()
+{
+	config->Save();
+}
+
+void RE_FileSystem::Internal::CopyDirectory(const char* origin, const char* dest)
 {
 	eastl::stack<eastl::pair< eastl::string, eastl::string>> copyDir;
 	copyDir.push({ origin , dest });
@@ -663,270 +640,4 @@ void RE_FileSystem::Internal::CopyDirectory(const char * origin, const char * de
 		}
 		PHYSFS_freeList(rc);
 	}
-}
-
-RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const char* _path, const char*& _extension)
-{
-	static const char* extensionsSuported[12] = { "meta", "re","refab", "pupil", "sk",  "fbx", "jpg", "dds", "png", "tga", "tiff", "bmp" };
-
-	RE_FileSystem::FileType ret = F_NOTSUPPORTED;
-	eastl::string modPath(_path);
-	eastl::string filename = modPath.substr(modPath.find_last_of("/") + 1);
-	eastl::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
-	eastl::transform(extensionStr.begin(), extensionStr.end(), extensionStr.begin(), [](unsigned char c) { return eastl::CharToLower(c); });
-
-	for (uint i = 0; i < 12; i++)
-	{
-		if (extensionStr.compare(extensionsSuported[i]) == 0)
-		{
-			_extension = extensionsSuported[i];
-			switch (i) {
-			case 0: ret = F_META; break;
-			case 1: ret = F_SCENE; break;
-			case 2: ret = F_PREFAB; break;
-			case 3: ret = F_MATERIAL; break;
-			case 4: ret = F_SKYBOX; break;
-			case 5: ret = F_MODEL; break;
-			case 6:
-			case 7:
-			case 8:
-			case 9:
-			case 10:
-			case 11: ret = F_TEXTURE; break;
-			}
-		}
-	}
-	return ret;
-}
-
-bool RE_FileSystem::RE_Meta::IsModified() const
-{
-	return (RE_ResourceManager::At(resource)->GetType() != Resource_Type::R_SHADER
-		&& fromFile->lastModified != RE_ResourceManager::At(resource)->GetLastTimeModified());
-}
-
-void RE_FileSystem::RE_Directory::SetPath(const char* _path)
-{
-	path = _path;
-	name = eastl::string(path.c_str(), path.size() - 1);
-	name = name.substr(name.find_last_of("/") + 1);
-}
-
-eastl::list< RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::MountTreeFolders()
-{
-	eastl::list< RE_Directory*> ret;
-	if (Exists(path.c_str()))
-	{
-		eastl::string iterPath(path);
-		char** rc = PHYSFS_enumerateFiles(iterPath.c_str());
-		for (char** i = rc; *i != NULL; i++)
-		{
-			eastl::string inPath(iterPath);
-			inPath += *i;
-
-			PHYSFS_Stat fileStat;
-			if (PHYSFS_stat(inPath.c_str(), &fileStat) && fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY)
-			{
-				RE_Directory* newDirectory = new RE_Directory();
-				newDirectory->SetPath((inPath += "/").c_str());
-				newDirectory->parent = this;
-				newDirectory->pType = D_FOLDER;
-				tree.push_back(newDirectory->AsPath());
-				ret.push_back(newDirectory);
-			}
-		}
-		PHYSFS_freeList(rc);
-
-		if (!tree.empty())
-		{
-			for (RE_Path* path : tree)
-			{
-				eastl::list< RE_Directory*> fromChild = path->AsDirectory()->MountTreeFolders();
-				if (!fromChild.empty()) ret.insert(ret.end(), fromChild.begin(), fromChild.end());
-			}
-		}
-	}
-	return ret;
-}
-
-eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckAndApply(eastl::vector<RE_Meta*>* metaRecentlyAdded)
-{
-	eastl::stack<RE_ProcessPath*> ret;
-	if (Exists(path.c_str()))
-	{
-		eastl::string iterPath(path);
-		eastl::vector<RE_Meta*> toRemoveM;
-		char** rc = PHYSFS_enumerateFiles(iterPath.c_str());
-		auto iter = tree.begin();
-		for (char** i = rc; *i != NULL; i++)
-		{
-			PathType iterTreeType = (iter != tree.end()) ? (*iter)->pType : PathType::D_NULL;
-			eastl::string inPath(iterPath);
-			inPath += *i;
-			PHYSFS_Stat fileStat;
-			if (PHYSFS_stat(inPath.c_str(), &fileStat))
-			{
-				if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY)
-				{
-					bool newFolder = (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FOLDER || (*iter)->path != (inPath += "/"));
-					if (newFolder && iter != tree.end())
-					{
-						auto postPath = iter;
-						bool found = false;
-						while (postPath != tree.end())
-						{
-							if (inPath == (*postPath)->path)
-							{
-								found = true;
-								break;
-							}
-							postPath++;
-						}
-						if (found) newFolder = false;
-					}
-
-					if (newFolder)
-					{
-						RE_Directory* newDirectory = new RE_Directory();
-
-						if (inPath.back() != '/')inPath += "/";
-						newDirectory->SetPath(inPath.c_str());
-						newDirectory->parent = this;
-						newDirectory->pType = D_FOLDER;
-
-						AddBeforeOf(newDirectory->AsPath(), iter);
-						iter--;
-
-						RE_ProcessPath* newProcess = new RE_ProcessPath();
-						newProcess->procedure = P_ADDFOLDER;
-						newProcess->toProcess = newDirectory->AsPath();
-						ret.push(newProcess);
-					}
-				}
-				else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR)
-				{
-					const char* extension = nullptr;
-					FileType fileType = RE_File::DetectExtensionAndType(inPath.c_str(), extension);
-					bool newFile = (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FILE || (*iter)->path != inPath);
-					if (newFile && fileType == FileType::F_META && !metaRecentlyAdded->empty())
-					{
-						int sizemetap = 0;
-						for (RE_Meta* metaAdded : *metaRecentlyAdded)
-						{
-							sizemetap = eastl::CharStrlen(metaAdded->path.c_str());
-							if (sizemetap > 0 && eastl::Compare(metaAdded->path.c_str(), inPath.c_str(), sizemetap) == 0)
-							{
-								AddBeforeOf(metaAdded->AsPath(), iter);
-								iter--;
-								toRemoveM.push_back(metaAdded);
-								metaRecentlyAdded->erase(eastl::remove_if(eastl::begin(*metaRecentlyAdded), eastl::end(*metaRecentlyAdded),
-									[&](auto x) {return eastl::find(begin(toRemoveM), end(toRemoveM), x) != end(toRemoveM); }), eastl::end(*metaRecentlyAdded));
-								toRemoveM.clear();
-								newFile = false;
-								break;
-							}
-						}
-					}
-
-					if (newFile && iter != tree.end())
-					{
-						auto postPath = iter;
-						bool found = false;
-						while (postPath != tree.end())
-						{
-							if (inPath == (*postPath)->path)
-							{
-								found = true;
-								break;
-							}
-							postPath++;
-						}
-						if (found) newFile = false;
-					}
-
-					if (newFile)
-					{
-						RE_File* newFile = (fileType != FileType::F_META) ? new RE_File() : (RE_File*)new RE_Meta();
-						newFile->path = inPath;
-						newFile->filename = inPath.substr(inPath.find_last_of("/") + 1);
-						newFile->lastSize = fileStat.filesize;
-						newFile->pType = PathType::D_FILE;
-						newFile->fType = fileType;
-						newFile->extension = extension;
-
-						RE_ProcessPath* newProcess = new RE_ProcessPath();
-						newProcess->procedure = P_ADDFILE;
-						newProcess->toProcess = newFile->AsPath();
-						ret.push(newProcess);
-						AddBeforeOf(newFile->AsPath(), iter);
-						iter--;
-					}
-					else if ((*iter)->AsFile()->fType == FileType::F_META)
-					{
-						bool reimport = false;
-						ResourceContainer* res = RE_ResourceManager::At((*iter)->AsFile()->AsMeta()->resource);
-						if (res->GetType() == Resource_Type::R_SHADER)
-						{
-							RE_Shader* shadeRes = dynamic_cast<RE_Shader*>(res);
-							if (shadeRes->isShaderFilesChanged())
-							{
-								RE_ProcessPath* newProcess = new RE_ProcessPath();
-								newProcess->procedure = P_REIMPORT;
-								newProcess->toProcess = (*iter);
-								ret.push(newProcess);
-							}
-						}
-					}
-				}
-			}
-			if (iter != tree.end()) iter++;
-		}
-		PHYSFS_freeList(rc);
-	}
-	return ret;
-}
-
-eastl::stack<RE_FileSystem::RE_Path*> RE_FileSystem::RE_Directory::GetDisplayingFiles() const
-{
-	eastl::stack<RE_FileSystem::RE_Path*> ret;
-
-	for (auto path : tree)
-	{
-		switch (path->pType)
-		{
-		case RE_FileSystem::PathType::D_FILE:
-		{
-			switch (path->AsFile()->fType)
-			{
-			case RE_FileSystem::FileType::F_META:
-			{
-				if (path->AsMeta()->resource)
-				{
-					ResourceContainer* res = RE_ResourceManager::At(path->AsMeta()->resource);
-					if (res->GetType() == R_SHADER) ret.push(path);
-				}
-				break;
-			}
-			case RE_FileSystem::FileType::F_NONE: break;
-			default: ret.push(path); break;
-			}
-			break;
-		}
-		case RE_FileSystem::PathType::D_FOLDER: ret.push(path); break;
-		}
-	}
-
-	return ret;
-}
-
-eastl::list<RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::FromParentToThis()
-{
-	eastl::list<RE_Directory*> ret;
-	RE_Directory* iter = this;
-	while (iter != nullptr)
-	{
-		ret.push_front(iter);
-		iter = iter->parent;
-	}
-	return ret;
 }

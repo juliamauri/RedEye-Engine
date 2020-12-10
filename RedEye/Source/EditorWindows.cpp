@@ -1,21 +1,20 @@
 #include "EditorWindows.h"
 
-#include "Application.h"
-#include "RE_FileSystem.h"
-#include "RE_ConsoleLog.h"
 #include "RE_Time.h"
-#include "RE_ResourceManager.h"
-#include "RE_CameraManager.h"
-#include "RE_ThumbnailManager.h"
+#include "RE_ConsoleLog.h"
 #include "RE_Hardware.h"
-
+#include "RE_FileSystem.h"
+#include "RE_PathTypes.h"
+#include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"
 #include "ModuleRenderer3d.h"
 #include "ModuleAudio.h"
+#include "RE_ResourceManager.h"
+#include "RE_CameraManager.h"
+#include "RE_ThumbnailManager.h"
 
-#include "RE_GameObject.h"
 #include "RE_Prefab.h"
 #include "RE_Command.h"
 
@@ -909,8 +908,8 @@ void AssetsWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		static RE_FileSystem::RE_Directory* currentDir = RE_FileSystem::GetRootDirectory();
-		RE_FileSystem::RE_Directory* toChange = nullptr;
+		static RE_Directory* currentDir = RE_FileSystem::GetRootDirectory();
+		RE_Directory* toChange = nullptr;
 		static float iconsSize = 100;
 
 		if (ImGui::BeginMenuBar())
@@ -922,7 +921,7 @@ void AssetsWindow::Draw(bool secondary)
 			}
 			else
 			{
-				eastl::list<RE_FileSystem::RE_Directory*> folders = currentDir->FromParentToThis();
+				eastl::list<RE_Directory*> folders = currentDir->FromParentToThis();
 				for (auto dir : folders)
 				{
 					if (dir == currentDir) ImGui::Text(currentDir->name.c_str());
@@ -947,40 +946,48 @@ void AssetsWindow::Draw(bool secondary)
 		float width = ImGui::GetWindowWidth();
 		int itemsColum = static_cast<int>(width / iconsSize);
 		if (itemsColum == 0) itemsColum = 1;
-		eastl::stack<RE_FileSystem::RE_Path*> filesToDisplay = currentDir->GetDisplayingFiles();
+		eastl::stack<RE_Path*> filesToDisplay = currentDir->GetDisplayingFiles();
 
 		ImGui::Columns(itemsColum, NULL, false);
 		eastl::string idName = "#AssetImage";
 		uint idCount = 0;
 		while (!filesToDisplay.empty())
 		{
-			RE_FileSystem::RE_Path* p = filesToDisplay.top();
+			RE_Path* p = filesToDisplay.top();
 			filesToDisplay.pop();
 			eastl::string id = idName + eastl::to_string(idCount++);
 			ImGui::PushID(id.c_str());
 			switch (p->pType)
 			{
-			case RE_FileSystem::PathType::D_FOLDER:
+			case PathType::D_FOLDER:
 			{
-				if (ImGui::ImageButton(reinterpret_cast<void*>(RE_ThumbnailManager::GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
-					toChange = p->AsDirectory();
+				RE_Directory* directory = static_cast<RE_Directory*>(p);
+				if (ImGui::ImageButton(
+					reinterpret_cast<void*>(RE_ThumbnailManager::GetFolderID()),
+					{ iconsSize, iconsSize },
+					{ 0.0f, 0.0f }, { 1.0f, 1.0f },
+					0))
+					toChange = directory;
+
 				ImGui::PopID();
-				ImGui::Text(p->AsDirectory()->name.c_str());
+				ImGui::Text(directory->name.c_str());
 				break;
 			}
-			case RE_FileSystem::PathType::D_FILE:
+			case PathType::D_FILE:
 			{
-				switch (p->AsFile()->fType)
+				RE_File* file = static_cast<RE_File*>(p);
+				switch (file->fType)
 				{
-				case RE_FileSystem::FileType::F_META:
+				case FileType::F_META:
 				{
-					ResourceContainer* res = RE_ResourceManager::At(p->AsMeta()->resource);
+					RE_Meta* meta = static_cast<RE_Meta*>(p);
+					ResourceContainer* res = RE_ResourceManager::At(meta->resource);
 					if (ImGui::ImageButton(reinterpret_cast<void*>(RE_ThumbnailManager::GetShaderFileID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
 						RE_ResourceManager::PushSelected(res->GetMD5(), true);
 
 					if (ImGui::BeginDragDropSource())
 					{
-						ImGui::SetDragDropPayload("#ShadereReference", &p->AsMeta()->resource, sizeof(const char**));
+						ImGui::SetDragDropPayload("#ShadereReference", &meta->resource, sizeof(const char**));
 						ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::GetShaderFileID()), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 						ImGui::EndDragDropSource();
 					}
@@ -998,7 +1005,7 @@ void AssetsWindow::Draw(bool secondary)
 					ImGui::Text(res->GetName());
 					break;
 				}
-				case RE_FileSystem::FileType::F_NOTSUPPORTED:
+				case FileType::F_NOTSUPPORTED:
 				{
 					bool pop = (!selectingUndefFile && !secondary);
 					if (pop)
@@ -1040,7 +1047,7 @@ void AssetsWindow::Draw(bool secondary)
 						ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 					}
 
-					ImGui::Text(p->AsFile()->filename.c_str());
+					ImGui::Text(file->filename.c_str());
 
 					if (pop)
 					{
@@ -1052,11 +1059,16 @@ void AssetsWindow::Draw(bool secondary)
 				}
 				default:
 				{
-					if (p->AsFile()->metaResource != nullptr)
+					if (file->metaResource != nullptr)
 					{
-						ResourceContainer* res = RE_ResourceManager::At(p->AsFile()->metaResource->resource);
-						if (ImGui::ImageButton(reinterpret_cast<void*>(RE_ThumbnailManager::At(res->GetMD5())), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+						ResourceContainer* res = RE_ResourceManager::At(file->metaResource->resource);
+						if (ImGui::ImageButton(
+							reinterpret_cast<void*>(RE_ThumbnailManager::At(res->GetMD5())),
+							{ iconsSize, iconsSize },
+							{ 0.0f, 0.0f }, { 1.0f, 1.0f },
+							0))
 							RE_ResourceManager::PushSelected(res->GetMD5(), true);
+
 						ImGui::PopID();
 
 						id = idName + eastl::to_string(idCount) + "Delete";
@@ -1074,12 +1086,12 @@ void AssetsWindow::Draw(bool secondary)
 
 						if (ImGui::BeginDragDropSource())
 						{
-							ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
-							ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::At(p->AsFile()->metaResource->resource)), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+							ImGui::SetDragDropPayload(dragID.c_str(), &file->metaResource->resource, sizeof(const char**));
+							ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::At(file->metaResource->resource)), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 							ImGui::EndDragDropSource();
 						}
 
-						ImGui::Text(p->AsFile()->filename.c_str());
+						ImGui::Text(file->filename.c_str());
 					}
 					else
 						ImGui::PopID();

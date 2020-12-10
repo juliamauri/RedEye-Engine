@@ -4,7 +4,6 @@
 #include "RE_ConsoleLog.h"
 #include "RE_Hardware.h"
 #include "RE_FileSystem.h"
-#include "RE_Config.h"
 #include "RE_Json.h"
 #include "ModuleScene.h"
 #include "ModuleInput.h"
@@ -55,6 +54,7 @@ Application::~Application()
 {
 	for (auto &mod : modules) delete mod;
 
+	modules.clear();
 	instance = nullptr;
 }
 
@@ -117,7 +117,7 @@ void Application::MainLoop()
 void Application::CleanUp()
 {
 	Event::ClearQueue();
-	if (RE_FileSystem::config != nullptr && save_config) RE_FileSystem::config->Save();
+	if (save_on_exit) SaveConfig();
 
 	for (auto it = modules.rbegin(); it != modules.rend(); ++it)
 		if ((*it)->IsActive()) (*it)->CleanUp();
@@ -127,6 +127,7 @@ void Application::CleanUp()
 	RE_PrimitiveManager::Clear();
 	RE_ThumbnailManager::Clear();
 	RE_ResourceManager::Clear();
+	RE_FileSystem::Clear();
 
 	SDL_Quit();
 }
@@ -218,7 +219,7 @@ bool Application::InitFileSystem(int argc, char* argv[])
 	bool ret = false;
 	if (RE_FileSystem::Init(argc, argv))
 	{
-		RE_Json* node = RE_FileSystem::config->GetRootNode("App");
+		RE_Json* node = RE_FileSystem::GetConfigNode("App");
 		app_name = node->PullString("Name", app_name.c_str());
 		organization = node->PullString("Organization", organization.c_str());
 		DEL(node);
@@ -232,7 +233,7 @@ void Application::InitInternalSystems()
 	// Initialize Importers
 	RE_ModelImporter::Init();
 	RE_ShaderImporter::Init();
-	if (!RE_TextureImporter::Init()) RE_LOG_WARNING("Won't be able to use/import textures");
+	RE_TextureImporter::Init();
 	
 	// Initialize Managers
 	RE_CameraManager::Init();
@@ -270,7 +271,7 @@ void Application::LoadConfig()
 	OPTICK_CATEGORY("Load module configuration - Application", Optick::Category::IO);
 	load_config = false;
 
-	RE_Json* node = RE_FileSystem::config->GetRootNode("App");
+	RE_Json* node = RE_FileSystem::GetConfigNode("App");
 	app_name = node->PullString("Name", app_name.c_str());
 	organization = node->PullString("Organization", organization.c_str());
 	DEL(node);
@@ -283,10 +284,12 @@ void Application::SaveConfig()
 	OPTICK_CATEGORY("Save module configuration - Application", Optick::Category::IO);
 	save_config = false;
 
-	RE_Json* node = RE_FileSystem::config->GetRootNode("App");
+	RE_Json* node = RE_FileSystem::GetConfigNode("App");
 	node->PushString("Name", app_name.c_str());
 	node->PushString("Organization", organization.c_str());
 	DEL(node);
 
 	for (auto mod : modules) if (mod->IsActive()) mod->Save();
+
+	RE_FileSystem::SaveConfig();
 }

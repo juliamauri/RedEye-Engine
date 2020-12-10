@@ -1,86 +1,22 @@
 #ifndef __FILESYSTEM_H__
 #define __FILESYSTEM_H__
 
+#include <EASTL\stack.h>
 #include <EASTL\list.h>
 #include <EASTL\vector.h>
-#include <EASTL\stack.h>
 #include <EASTL\string.h>
 
+struct RE_Directory;
+struct RE_Path;
+struct RE_File;
+struct RE_Meta;
 class Config;
+class RE_Json;
 class RE_FileBuffer;
 class ResourceContainer;
 
 namespace RE_FileSystem
 {
-	enum PathType { D_NULL = -1, D_FOLDER, D_FILE };
-	enum FileType { F_NOTSUPPORTED = -1, F_NONE, F_MODEL, F_TEXTURE, F_MATERIAL, F_SKYBOX, F_PREFAB, F_SCENE, F_META };
-	enum PathProcessType { P_ADDFILE, P_DELETE, P_REIMPORT, P_ADDFOLDER, };
-
-	struct RE_ProcessPath;
-	struct RE_File;
-	struct RE_Meta;
-	struct RE_Directory;
-	struct RE_Path
-	{
-		eastl::string path;
-		PathType pType = D_NULL;
-
-		RE_File* AsFile()const { return (RE_File*)this; }
-		RE_Meta* AsMeta()const { return (RE_Meta*)this; }
-		RE_Directory* AsDirectory()const { return (RE_Directory*)this; }
-	};
-
-	struct RE_File : public RE_Path
-	{
-		eastl::string filename;
-		FileType fType = F_NONE;
-		const char* extension = nullptr;
-		signed long long lastModified = 0;
-		signed long long lastSize = 0;
-
-		RE_Meta* metaResource = nullptr;
-
-		static FileType DetectExtensionAndType(const char* _path, const char*& _extension);
-
-		RE_Path* AsPath()const { return (RE_Path*)this; }
-		RE_Meta* AsMeta()const { return (RE_Meta*)this; }
-	};
-
-	struct RE_Meta : public RE_File
-	{
-		RE_File* fromFile = nullptr;
-		const char* resource = nullptr;
-
-		bool IsModified()const;
-
-		RE_Path* AsPath()const { return (RE_Path*)this; }
-		RE_File* AsFile()const { return (RE_File*)this; }
-	};
-
-	struct RE_ProcessPath { PathProcessType procedure; RE_Path* toProcess; };
-
-	struct RE_Directory : public RE_Path
-	{
-		eastl::string name;
-		RE_Directory* parent = nullptr;
-		eastl::list<RE_Path*> tree;
-
-		void AddBeforeOf(RE_Path* toAdd, eastl::list<RE_Path*>::iterator to) { tree.insert(to, toAdd); }
-		void Delete(eastl::list<RE_Path*>::iterator del) { tree.erase(del); }
-
-		void SetPath(const char* path);
-		eastl::list<RE_Directory*> MountTreeFolders();
-		eastl::stack<RE_ProcessPath*> CheckAndApply(eastl::vector<RE_Meta*>* metaRecentlyAdded);
-
-		eastl::stack<RE_Path*> GetDisplayingFiles()const;
-
-		eastl::list<RE_Directory*> FromParentToThis();
-
-		RE_Path* AsPath()const { return (RE_Path*)this; }
-	};
-
-	static Config* config = nullptr;
-
 	bool Init(int argc, char* argv[]);
 	void Clear();
 
@@ -114,27 +50,36 @@ namespace RE_FileSystem
 
 	signed long long GetLastTimeModified(const char* path);
 
+	// Config
+	RE_Json* GetConfigNode(const char* node);
+	void SaveConfig();
+
 	namespace Internal
 	{
 		void CopyDirectory(const char* origin, const char* dest);
 
-		static eastl::string engine_path;
-		static eastl::string library_path;
-		static eastl::string assets_path;
+		static Config* config = nullptr;
+		static RE_Directory* rootAssetDirectory = nullptr;
+
+		typedef eastl::list<RE_Directory*> DirectoryPool;
+		static DirectoryPool assetsDirectories;
+		static DirectoryPool::iterator dirIter;
+
+		typedef eastl::vector<RE_Meta*> MetaPool;
+		static MetaPool metaToFindFile;
+		static MetaPool metaRecentlyAdded;
+
+		static eastl::vector<RE_File*> filesToFindMeta;
+		static eastl::list<RE_File*> toImport;
+
+		static eastl::list<RE_Meta*> meta_reimports;
+
+		static const char* engine_path = "engine";
+		static const char* library_path = "Library";
+		static const char* assets_path = "Assets";
+
 		static eastl::string zip_path;
 		static eastl::string write_path;
-
-		static RE_Directory* rootAssetDirectory = nullptr;
-		static eastl::list<RE_Directory*> assetsDirectories;
-		static eastl::list<RE_Directory*>::iterator dirIter;
-		static eastl::stack<RE_ProcessPath*> assetsToProcess;
-
-		static eastl::vector<RE_Meta*> metaToFindFile;
-		static eastl::vector<RE_File*> filesToFindMeta;
-		static eastl::vector<RE_Meta*> metaRecentlyAdded;
-
-		static eastl::list<RE_File*> toImport;
-		static eastl::list<RE_Meta*> toReImport;
 	}
 };
 

@@ -3,7 +3,6 @@
 #include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
-#include "RE_Config.h"
 #include "RE_Json.h"
 #include "Application.h"
 #include "ModuleWindow.h"
@@ -103,7 +102,8 @@ bool ModuleRenderer3D::Init()
 			thumbnailView.camera = new RE_CompCamera();
 			thumbnailView.camera->SetParent(0ull);
 			thumbnailView.camera->SetProperties();
-			thumbnailView.camera->SetBounds(RE_ThumbnailManager::Internal::thumbnail_size, RE_ThumbnailManager::Internal::thumbnail_size);
+			float thumbnail_size = static_cast<float>(RE_ThumbnailManager::Internal::thumbnail_size);
+			thumbnailView.camera->SetBounds(thumbnail_size, thumbnail_size);
 			thumbnailView.camera->Update();
 			Event::ResumeEvents();
 
@@ -205,7 +205,7 @@ void ModuleRenderer3D::PostUpdate()
 			{
 				ResourceContainer* res = RE_ResourceManager::At(rend.resMD5);
 				RE_ResourceManager::Use(rend.resMD5);
-				ThumbnailMaterial(dynamic_cast<RE_Material*>(res));
+				ThumbnailMaterial(static_cast<RE_Material*>(res));
 				RE_ResourceManager::UnUse(rend.resMD5);
 				RE_ThumbnailManager::SaveTextureFromFBO(path.c_str());
 			}
@@ -355,7 +355,7 @@ void ModuleRenderer3D::DrawEditor()
 void ModuleRenderer3D::Load()
 {
 	RE_LOG_SECONDARY("Loading Render3D config values:");
-	RE_Json* node = RE_FileSystem::config->GetRootNode(name);
+	RE_Json* node = RE_FileSystem::GetConfigNode(name);
 
 	SetVSync(node->PullBool("vsync", vsync));
 	RE_LOG_TERCIARY((vsync) ? "VSync enabled." : "VSync disabled");
@@ -377,7 +377,7 @@ void ModuleRenderer3D::Load()
 
 void ModuleRenderer3D::Save() const
 {
-	RE_Json* node = RE_FileSystem::config->GetRootNode(name);
+	RE_Json* node = RE_FileSystem::GetConfigNode(name);
 	node->PushBool("vsync", vsync);
 	for (unsigned int i = 0; i < render_views.size(); ++i)
 	{
@@ -793,7 +793,9 @@ void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
 	internalCamera->Focus(go->GetGlobalBoundingBox().CenterPoint());
 	internalCamera->Update();
 
-	for (auto sMD5 : activeShaders) (dynamic_cast<RE_Shader*>(RE_ResourceManager::At(sMD5)))->UploadMainUniforms(internalCamera, RE_ThumbnailManager::Internal::thumbnail_size, RE_ThumbnailManager::Internal::thumbnail_size, false, {});
+	float thumbnail_size = static_cast<float>(RE_ThumbnailManager::Internal::thumbnail_size);
+	for (auto sMD5 : activeShaders)
+		static_cast<RE_Shader*>(RE_ResourceManager::At(sMD5))->UploadMainUniforms(internalCamera, thumbnail_size, thumbnail_size, false, {});
 
 	go->DrawChilds();
 }
