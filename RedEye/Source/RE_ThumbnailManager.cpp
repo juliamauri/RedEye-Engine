@@ -13,24 +13,7 @@
 #include "IL/include/ilu.h"
 #include <EASTL/string.h>
 
-using namespace RE_ThumbnailManager::Internal;
-
-void RE_ThumbnailManager::Init()
-{
-	folder = LoadDefIcon("folder.dds");
-	file = LoadDefIcon("file.dds");
-	selectfile = LoadDefIcon("selectfile.dds");
-	shaderFile = LoadDefIcon("shaderFile.dds");
-
-	thumbnail_data_size = thumbnail_size * thumbnail_size * 4;
-
-	glGenBuffersARB(1, &pboRender);
-	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboRender);
-	glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, thumbnail_data_size, 0, GL_STREAM_READ_ARB);
-	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
-}
-
-void RE_ThumbnailManager::Clear()
+RE_ThumbnailManager::~RE_ThumbnailManager()
 {
 	glDeleteTextures(1, &folder);
 	glDeleteTextures(1, &file);
@@ -39,6 +22,19 @@ void RE_ThumbnailManager::Clear()
 	for (auto thumb : thumbnails) glDeleteTextures(1, &thumb.second);
 
 	glDeleteBuffersARB(1, &pboRender);
+}
+
+void RE_ThumbnailManager::Init()
+{
+	folder = LoadDefIcon("folder.dds");
+	file = LoadDefIcon("file.dds");
+	selectfile = LoadDefIcon("selectfile.dds");
+	shaderFile = LoadDefIcon("shaderFile.dds");
+	
+	glGenBuffersARB(1, &pboRender);
+	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboRender);
+	glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, THUMBNAILDATASIZE, 0, GL_STREAM_READ_ARB);
+	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
 }
 
 void RE_ThumbnailManager::Change(const char* ref, unsigned int id)
@@ -51,10 +47,10 @@ void RE_ThumbnailManager::Change(const char* ref, unsigned int id)
 void RE_ThumbnailManager::Delete(const char* ref)
 {
 	thumbnails.erase(ref);
-	eastl::string path(library_path);
-	if (RE_FileSystem::Exists((path += ref).c_str()))
+	eastl::string path(THUMBNAILPATH);
+	if (App::fs->Exists((path += ref).c_str()))
 	{
-		RE_FileBuffer fileToDelete(path.c_str(), RE_FileSystem::GetZipPath());
+		RE_FileBuffer fileToDelete(path.c_str(), App::fs->GetZipPath());
 		fileToDelete.Delete();
 	}
 }
@@ -64,18 +60,28 @@ unsigned int RE_ThumbnailManager::At(const char* ref)
 	return (thumbnails.find(ref) != thumbnails.end()) ? thumbnails.at(ref) : 0u;
 }
 
-unsigned int RE_ThumbnailManager::GetFolderID() { return folder; }
-unsigned int RE_ThumbnailManager::GetFileID() { return file; }
-unsigned int RE_ThumbnailManager::GetSelectFileID() { return selectfile; }
-unsigned int RE_ThumbnailManager::GetShaderFileID() { return shaderFile; }
+unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
+{
+	uint ret = 0u;
+	eastl::string path(DEFTHUMBNAILS);
+	path += filename;
+	RE_FileBuffer filderIcon(path.c_str());
+	if (filderIcon.Load())
+	{
+		RE_TextureSettings defTexSettings;
+		int tmp1, tmp2;
+		RE_TextureImporter::LoadTextureInMemory(filderIcon.GetBuffer(), filderIcon.GetSize(), TextureType::RE_DDS, &ret, &tmp1, &tmp2, defTexSettings);
+	}
+	return ret;
+}
 
 unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 {
 	uint ret = 0u;
-	eastl::string path(library_path);
-	if (!RE_FileSystem::Exists((path += ref).c_str()))
+	eastl::string path(THUMBNAILPATH);
+	if (!App::fs->Exists((path += ref).c_str()))
 	{
-		ResourceContainer* res = RE_ResourceManager::At(ref);
+		ResourceContainer* res = App::resources->At(ref);
 		RE_Texture* tex = dynamic_cast<RE_Texture*>(res);
 		RE_FileBuffer texFile(res->GetAssetPath());
 		if (texFile.Load())
@@ -86,8 +92,8 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 
 			if (IL_FALSE != ilLoadL(tex->DetectExtension(), texFile.GetBuffer(), texFile.GetSize()))
 			{
-				iluScale(thumbnail_size, thumbnail_size, 1);
-				RE_FileBuffer saveThumb(path.c_str(), RE_FileSystem::GetZipPath());
+				iluScale(THUMBNAILSIZE, THUMBNAILSIZE, 1);
+				RE_FileBuffer saveThumb(path.c_str(), App::fs->GetZipPath());
 				ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
 				ILubyte* data = new ILubyte[size];
 				ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
@@ -110,20 +116,20 @@ void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)
 {
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboRender);
-	glReadPixels(0, 0, thumbnail_size, thumbnail_size, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glReadPixels(0, 0, THUMBNAILSIZE, THUMBNAILSIZE, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	GLubyte* ptr = static_cast<GLubyte*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
 	if (ptr)
 	{
 		uint imageID = 0;
 		ilGenImages(1, &imageID);
 		ilBindImage(imageID);
-		ilTexImage(thumbnail_size, thumbnail_size, 1, 4, IL_RGBA, GL_UNSIGNED_BYTE, ptr);
+		ilTexImage(THUMBNAILSIZE, THUMBNAILSIZE, 1, 4, IL_RGBA, GL_UNSIGNED_BYTE, ptr);
 
 		ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
 		ILubyte* data = new ILubyte[size];
 
 		ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
-		RE_FileBuffer saveThumb(path, RE_FileSystem::GetZipPath());
+		RE_FileBuffer saveThumb(path, App::fs->GetZipPath());
 		saveThumb.Save(reinterpret_cast<char*>(data), size);
 		DEL_A(data);
 
@@ -139,7 +145,7 @@ void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)
 unsigned int RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 {
 	uint ret = 0u;
-	eastl::string path(library_path);
+	eastl::string path(THUMBNAILPATH);
 	RE_FileBuffer thumbFile((path += ref).c_str());
 	if (thumbFile.Load())
 	{
@@ -159,28 +165,13 @@ unsigned int RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, defSettings.wrap_s); /* We will use linear interpolation for minifying filter */
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, defSettings.wrap_t); /* We will use linear interpolation for minifying filter */
 
-			glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), thumbnail_size, thumbnail_size, 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
+			glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), THUMBNAILSIZE, THUMBNAILSIZE, 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
 
 			RE_GLCacheManager::ChangeTextureBind(0);
 			ilBindImage(0);
 			/* Delete used resources*/
 			ilDeleteImages(1u, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
 		}
-	}
-	return ret;
-}
-
-unsigned int RE_ThumbnailManager::Internal::LoadDefIcon(const char* filename)
-{
-	uint ret = 0u;
-	eastl::string path(defaults);
-	path += filename;
-	RE_FileBuffer filderIcon(path.c_str());
-	if (filderIcon.Load())
-	{
-		RE_TextureSettings defTexSettings;
-		int tmp1, tmp2;
-		RE_TextureImporter::LoadTextureInMemory(filderIcon.GetBuffer(), filderIcon.GetSize(), TextureType::RE_DDS, &ret, &tmp1, &tmp2, defTexSettings);
 	}
 	return ret;
 }

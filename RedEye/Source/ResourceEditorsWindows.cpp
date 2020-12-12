@@ -54,7 +54,7 @@ void MaterialEditorWindow::Draw(bool secondary)
 		assetPath += ".pupil";
 		ImGui::Text("Save path: %s", assetPath.c_str());
 
-		bool exits = RE_FileSystem::Exists(assetPath.c_str());
+		bool exits = App::fs->Exists(assetPath.c_str());
 		if (exits) ImGui::Text("This material exits, change the name.");
 
 		if (exits && !secondary)
@@ -71,7 +71,7 @@ void MaterialEditorWindow::Draw(bool secondary)
 			editingMaerial->SetType(Resource_Type::R_MATERIAL);
 			editingMaerial->Save();
 
-			App::renderer3d->PushThumnailRend(RE_ResourceManager::Reference((ResourceContainer*)editingMaerial));
+			App::renderer3d->PushThumnailRend(App::resources->Reference((ResourceContainer*)editingMaerial));
 
 			editingMaerial = new RE_Material();
 			matName = "New Material";
@@ -128,7 +128,7 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 		ImGui::Text("Save path: %s", assetPath.c_str());
 
 		bool isTexturesFilled = editingSkybox->isFacesFilled();
-		bool exits = RE_FileSystem::Exists(assetPath.c_str());
+		bool exits = App::fs->Exists(assetPath.c_str());
 		if (exits) ImGui::Text("This skybox exits, change the name.");
 
 		if (isTexturesFilled) ImGui::Text("Needed set all textures before save.");
@@ -148,7 +148,7 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 			editingSkybox->AssetSave();
 			editingSkybox->SaveMeta();
 
-			App::renderer3d->PushThumnailRend(RE_ResourceManager::Reference((ResourceContainer*)editingSkybox));
+			App::renderer3d->PushThumnailRend(App::resources->Reference((ResourceContainer*)editingSkybox));
 
 			editingSkybox = new RE_SkyBox();
 			sbName = "New Skybox";
@@ -211,7 +211,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 		static bool fragmentModify = false;
 		static bool geometryModify = false;
 
-		bool exists = RE_FileSystem::Exists(assetPath.c_str());
+		bool exists = App::fs->Exists(assetPath.c_str());
 		if (exists) ImGui::Text("This shader exits, change the name.");
 
 		bool neededVertexAndFragment = (vertexPath.empty() || fragmentPath.empty());
@@ -237,7 +237,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 				editingShader->SetPaths(vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr);
 				editingShader->isShaderFilesChanged();
 				editingShader->SaveMeta();
-				RE_ResourceManager::Reference((ResourceContainer*)editingShader);
+				App::resources->Reference((ResourceContainer*)editingShader);
 
 				editingShader = new RE_Shader();
 				shaderName = "New Shader";
@@ -403,7 +403,7 @@ void TextEditorManagerWindow::PushEditor(const char* filePath, eastl::string* ne
 	editor* e = new editor();
 	if (filePath)
 	{
-		RE_FileBuffer* file = new RE_FileBuffer(filePath, RE_FileSystem::GetZipPath());
+		RE_FileBuffer* file = new RE_FileBuffer(filePath, App::fs->GetZipPath());
 		if (file->Load())
 		{
 			e->textEditor = new TextEditor();
@@ -465,7 +465,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 				ImGui::InputText("##newshadername", e->toModify);
 				(assetPath = "Assets/Shaders/") += *e->toModify;
 				ImGui::Text("Save path: %s", assetPath.c_str());
-				if (pop = RE_FileSystem::Exists(assetPath.c_str())) ImGui::Text("This shader exits, change the name.");
+				if (pop = App::fs->Exists(assetPath.c_str())) ImGui::Text("This shader exits, change the name.");
 
 				if (*e->toModify == "Water.vert" || *e->toModify == "Water.frag" || *e->toModify == "WaterDeferred.vert" || *e->toModify == "WaterDeferred.frag") {
 					nameReserved = true;
@@ -508,7 +508,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 					eastl::string text = e->textEditor->GetTextPtr();
 					if (!e->file)
 					{
-						e->file = new RE_FileBuffer(assetPath.c_str(), RE_FileSystem::GetZipPath());
+						e->file = new RE_FileBuffer(assetPath.c_str(), App::fs->GetZipPath());
 						*e->toModify = assetPath;
 					}
 
@@ -589,7 +589,7 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 		shaderPath += (deferred) ? "WaterDeferredShader" : "WaterShader";
 		shaderPath += ".meta";
 
-		const char* waterShader = RE_ResourceManager::FindMD5ByMETAPath(shaderPath.c_str(), R_SHADER);
+		const char* waterShader = App::resources->FindMD5ByMETAPath(shaderPath.c_str(), R_SHADER);
 		if (!waterShader) {
 			ImGui::Text((deferred) ? "Water Deferred Shader doesn't exists." : "Water Shader doesn't exists.");
 			ImGui::Text("Shader will generate when create.");
@@ -601,7 +601,7 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 		materialPath += waterResouceName;
 		materialPath += ".pupil";
 
-		bool exists = RE_FileSystem::Exists(materialPath.c_str());
+		bool exists = App::fs->Exists(materialPath.c_str());
 		if (exists) ImGui::Text("That Material exists!");
 
 		if (exists && !secondary)
@@ -615,16 +615,16 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 			if (!waterShader) {
 				eastl::string shaderVertexFile("Assets/Shaders/");
 				shaderVertexFile += (deferred) ? "WaterDeferred.vert" : "Water.vert";
-				if (!RE_FileSystem::Exists(shaderVertexFile.c_str())) {
-					RE_FileBuffer vertexFile(shaderVertexFile.c_str(), RE_FileSystem::GetZipPath());
+				if (!App::fs->Exists(shaderVertexFile.c_str())) {
+					RE_FileBuffer vertexFile(shaderVertexFile.c_str(), App::fs->GetZipPath());
 					vertexFile.Save((deferred) ? WATERPASSVERTEXSHADER : WATERVERTEXSHADER, 
 						eastl::CharStrlen((deferred) ? WATERPASSVERTEXSHADER : WATERVERTEXSHADER));
 				}
 
 				eastl::string shaderFragmentFile("Assets/Shaders/");
 				shaderFragmentFile += (deferred) ? "WaterDeferred.frag" : "Water.frag";
-				if (!RE_FileSystem::Exists(shaderFragmentFile.c_str())) {
-					RE_FileBuffer fragmentFile(shaderFragmentFile.c_str(), RE_FileSystem::GetZipPath());
+				if (!App::fs->Exists(shaderFragmentFile.c_str())) {
+					RE_FileBuffer fragmentFile(shaderFragmentFile.c_str(), App::fs->GetZipPath());
 					fragmentFile.Save((deferred) ? WATERPASSFRAGMENTSHADER : WATERFRAGMENTSHADER,
 						eastl::CharStrlen((deferred) ? WATERPASSFRAGMENTSHADER : WATERFRAGMENTSHADER));
 				}
@@ -635,7 +635,7 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 				waterShaderRes->SetPaths(shaderVertexFile.c_str(), shaderFragmentFile.c_str(), nullptr);
 				waterShaderRes->isShaderFilesChanged();
 				waterShaderRes->SaveMeta();
-				waterShader = RE_ResourceManager::Reference(static_cast<ResourceContainer*>(waterShaderRes));
+				waterShader = App::resources->Reference(static_cast<ResourceContainer*>(waterShaderRes));
 			}
 
 			RE_Material* editingMaterialRes = new RE_Material();
@@ -645,7 +645,7 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 			editingMaterialRes->SetType(Resource_Type::R_MATERIAL);
 			editingMaterialRes->SetShader(waterShader); //save meta after add to shader
 
-			App::renderer3d->PushThumnailRend(RE_ResourceManager::Reference((ResourceContainer*)editingMaterialRes));
+			App::renderer3d->PushThumnailRend(App::resources->Reference((ResourceContainer*)editingMaterialRes));
 
 			waterResouceName = "WaterMaterial";
 		}

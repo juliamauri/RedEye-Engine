@@ -2,11 +2,13 @@
 
 #include "RE_ConsoleLog.h"
 #include "RE_Time.h"
+
 #include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
+
 #include "EditorWindows.h"
 #include "RE_ResourceManager.h"
 
@@ -15,6 +17,7 @@
 #include "ImGui\imgui_impl_sdl.h"
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
+
 #include <EASTL/stack.h>
 #include <EASTL/queue.h>
 
@@ -63,7 +66,7 @@ ModuleEditor::~ModuleEditor()
 {
 	windows.clear();
 	tools.clear();
-	RE_CommandManager::Clear();
+	editorCommands.Clear();
 }
 
 bool ModuleEditor::Init()
@@ -123,7 +126,7 @@ bool ModuleEditor::Start()
 	UID first = ModuleScene::GetRootCPtr()->GetFirstChildUID();
 	if (first) SetSelected(first);
 
-	RE_ResourceManager::ThumbnailResources();
+	App::resources->ThumbnailResources();
 
 	return true;
 }
@@ -170,11 +173,11 @@ void ModuleEditor::Update()
 			//Edit
 			if (ImGui::BeginMenu("Edit"))
 			{
-				if (ImGui::MenuItem("Undo", "LCTRL + Z", false, RE_CommandManager::CanUndo()))
-					RE_CommandManager::Undo();
+				if (ImGui::MenuItem("Undo", "LCTRL + Z", false, editorCommands.canUndo()))
+					editorCommands.undo();
 
-				if (ImGui::MenuItem("Redo", "LCTRL + Y", false, RE_CommandManager::CanRedo()))
-					RE_CommandManager::Redo();
+				if (ImGui::MenuItem("Redo", "LCTRL + Y", false, editorCommands.canRedo()))
+					editorCommands.redo();
 
 				ImGui::EndMenu();
 			}
@@ -317,10 +320,10 @@ void ModuleEditor::Update()
 	if (App::input->GetKey(SDL_SCANCODE_LCTRL) == KEY_STATE::KEY_REPEAT)
 	{
 		if (App::input->GetKey(SDL_SCANCODE_Z) == KEY_STATE::KEY_DOWN)
-			RE_CommandManager::Undo();
+			editorCommands.undo();
 
 		if (App::input->GetKey(SDL_SCANCODE_Y) == KEY_STATE::KEY_DOWN)
-			RE_CommandManager::Redo();
+			editorCommands.redo();
 	}
 
 	ImGui::End();
@@ -357,8 +360,6 @@ void ModuleEditor::CleanUp()
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
-
-	RE_CommandManager::Clear();
 }
 
 void ModuleEditor::RecieveEvent(const Event& e)
@@ -632,7 +633,7 @@ UID ModuleEditor::GetSelected() const { return selected; }
 void ModuleEditor::SetSelected(const UID go, bool force_focus)
 {
 	selected = go;
-	RE_ResourceManager::PopSelected(true);
+	App::resources->PopSelected(true);
 	if (force_focus || (focus_on_select && selected))
 	{
 		math::AABB box = ModuleScene::GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds();
@@ -670,8 +671,8 @@ void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
 	*height = sceneEditorWindow->GetSceneHeight();
 }
 
-void ModuleEditor::PushCommand(RE_Command* cmd) { RE_CommandManager::PushCommand(cmd); }
-void ModuleEditor::ClearCommands() { RE_CommandManager::Clear(); }
+void ModuleEditor::PushCommand(RE_Command* cmd) { editorCommands.PushCommand(cmd); }
+void ModuleEditor::ClearCommands() { editorCommands.Clear(); }
 
 void ModuleEditor::UpdateCamera()
 {

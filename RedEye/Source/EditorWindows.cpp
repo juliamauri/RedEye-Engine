@@ -213,7 +213,7 @@ void ConfigWindow::Draw(bool secondary)
 
 		App::DrawModuleEditorConfig();
 
-		if (ImGui::CollapsingHeader("File System")) RE_FileSystem::DrawEditor();
+		if (ImGui::CollapsingHeader("File System")) App::fs->DrawEditor();
 
 		if (ImGui::CollapsingHeader("Hardware")) RE_Hardware::DrawEditor();
 		else RE_Hardware::Clear();
@@ -269,7 +269,7 @@ void PropertiesWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (RE_ResourceManager::GetSelected() != nullptr) RE_ResourceManager::At(RE_ResourceManager::GetSelected())->DrawPropieties();
+		if (App::resources->GetSelected() != nullptr) App::resources->At(App::resources->GetSelected())->DrawPropieties();
 		else if (App::editor->GetSelected()) ModuleScene::GetGOPtr(App::editor->GetSelected())->DrawProperties();
 
 		if (secondary)
@@ -578,9 +578,9 @@ void PopUpWindow::PopUpDelRes(const char* res)
 {
 	state = PU_DELETERESOURCE;
 	resourceToDelete = res;
-	resourcesUsing = RE_ResourceManager::WhereIsUsed(res);
+	resourcesUsing = App::resources->WhereIsUsed(res);
 
-	Resource_Type rType = RE_ResourceManager::At(res)->GetType();
+	Resource_Type rType = App::resources->At(res)->GetType();
 	eastl::stack<RE_Component*> comps = App::scene->GetScenePool()->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 	bool skip = false;
 	while (!comps.empty() && !skip)
@@ -613,7 +613,7 @@ void PopUpWindow::PopUpDelUndeFile(const char* assetPath)
 {
 	state = PU_DELETEUNDEFINEDFILE;
 	nameStr = assetPath;
-	resourcesUsing = RE_ResourceManager::WhereUndefinedFileIsUsed(assetPath);
+	resourcesUsing = App::resources->WhereUndefinedFileIsUsed(assetPath);
 	PopUp("Delete", "Do you want to delete that file?", false);
 }
 
@@ -739,7 +739,7 @@ void PopUpWindow::Draw(bool secondary)
 				Event::ResumeEvents();
 
 				newPrefab->SaveMeta();
-				App::renderer3d->PushThumnailRend(RE_ResourceManager::Reference(newPrefab));
+				App::renderer3d->PushThumnailRend(App::resources->Reference(newPrefab));
 			}
 
 			if (ImGui::Button("Cancel") || clicked)
@@ -754,7 +754,7 @@ void PopUpWindow::Draw(bool secondary)
 		}
 		case PopUpWindow::PU_DELETERESOURCE:
 		{
-			ResourceContainer* res = RE_ResourceManager::At(resourceToDelete);
+			ResourceContainer* res = App::resources->At(resourceToDelete);
 			ImGui::Text("Name: %s", res->GetName());
 
 			static const char* names[MAX_R_TYPES] = { "undefined.", "shader.", "texture.", "mesh.", "prefab.", "skyBox.", "material.", "model.", "scene." };
@@ -768,8 +768,8 @@ void PopUpWindow::Draw(bool secondary)
 				RE_ConsoleLog::ScopeProcedureLogging();
 
 				// Delete at resource & filesystem
-				ResourceContainer* resAlone = RE_ResourceManager::DeleteResource(resourceToDelete, resourcesUsing, resourceOnScene);
-				RE_FileSystem::DeleteResourceFiles(resAlone);
+				ResourceContainer* resAlone = App::resources->DeleteResource(resourceToDelete, resourcesUsing, resourceOnScene);
+				App::fs->DeleteResourceFiles(resAlone);
 
 				DEL(resAlone);
 			}
@@ -785,7 +785,7 @@ void PopUpWindow::Draw(bool secondary)
 				resourceToDelete = nullptr;
 				resourcesUsing.clear();
 				resourceOnScene = false;
-				RE_ResourceManager::PopSelected(true);
+				App::resources->PopSelected(true);
 				RE_ConsoleLog::EndScope();
 			}
 
@@ -801,12 +801,12 @@ void PopUpWindow::Draw(bool secondary)
 			for (auto resource : resourcesUsing)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
-				ResourceContainer* resConflict = RE_ResourceManager::At(resource);
+				ResourceContainer* resConflict = App::resources->At(resource);
 				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | " };
 				btnname += (resource == App::scene->GetCurrentScene()) ? "Scene (current scene) | " : names[resConflict->GetType()];
 				btnname += resConflict->GetName();
 
-				if (ImGui::Button(btnname.c_str())) RE_ResourceManager::PushSelected(resource, true);
+				if (ImGui::Button(btnname.c_str())) App::resources->PushSelected(resource, true);
 			}
 
 			break;
@@ -826,20 +826,20 @@ void PopUpWindow::Draw(bool secondary)
 				{
 					eastl::stack<ResourceContainer*> shadersDeleted;
 					for (auto resource : resourcesUsing)
-						if (RE_ResourceManager::At(resource)->GetType() == R_SHADER)
-							shadersDeleted.push(RE_ResourceManager::DeleteResource(resource, RE_ResourceManager::WhereIsUsed(resource), false));
+						if (App::resources->At(resource)->GetType() == R_SHADER)
+							shadersDeleted.push(App::resources->DeleteResource(resource, App::resources->WhereIsUsed(resource), false));
 
 					// Delete shader files
 					while (shadersDeleted.empty())
 					{
 						ResourceContainer* resS = shadersDeleted.top();
-						RE_FileSystem::DeleteResourceFiles(resS);
+						App::fs->DeleteResourceFiles(resS);
 						shadersDeleted.pop();
 						DEL(resS);
 					}
 				}
 
-				if (!RE_ConsoleLog::ScopedErrors()) RE_FileSystem::DeleteUndefinedFile(nameStr.c_str());
+				if (!RE_ConsoleLog::ScopedErrors()) App::fs->DeleteUndefinedFile(nameStr.c_str());
 				else RE_LOG_ERROR("File can't be erased; shaders can't be delete.");
 			}
 
@@ -851,7 +851,7 @@ void PopUpWindow::Draw(bool secondary)
 				state = PU_NONE;
 				App::editor->PopUpFocus(false);
 				resourcesUsing.clear();
-				RE_ResourceManager::PopSelected(true);
+				App::resources->PopSelected(true);
 				RE_ConsoleLog::EndScope();
 			}
 
@@ -862,7 +862,7 @@ void PopUpWindow::Draw(bool secondary)
 			for (auto resource : resourcesUsing)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
-				ResourceContainer* resConflict = RE_ResourceManager::At(resource);
+				ResourceContainer* resConflict = App::resources->At(resource);
 				Resource_Type type = resConflict->GetType();
 
 				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | " };
@@ -870,7 +870,7 @@ void PopUpWindow::Draw(bool secondary)
 				btnname += resConflict->GetName();
 
 				if (type == R_SHADER) ImGui::Separator();
-				if (ImGui::Button(btnname.c_str())) RE_ResourceManager::PushSelected(resource, true);
+				if (ImGui::Button(btnname.c_str())) App::resources->PushSelected(resource, true);
 				if (type == R_SHADER) ImGui::Text("%s will be deleted and the next resources will be affected:", resConflict->GetName());
 			}
 
@@ -909,7 +909,7 @@ void AssetsWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		static RE_FileSystem::RE_Directory* currentDir = RE_FileSystem::GetRootDirectory();
+		static RE_FileSystem::RE_Directory* currentDir = App::fs->GetRootDirectory();
 		RE_FileSystem::RE_Directory* toChange = nullptr;
 		static float iconsSize = 100;
 
@@ -962,7 +962,7 @@ void AssetsWindow::Draw(bool secondary)
 			{
 			case RE_FileSystem::PathType::D_FOLDER:
 			{
-				if (ImGui::ImageButton(reinterpret_cast<void*>(RE_ThumbnailManager::GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+				if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
 					toChange = p->AsDirectory();
 				ImGui::PopID();
 				ImGui::Text(p->AsDirectory()->name.c_str());
@@ -974,14 +974,14 @@ void AssetsWindow::Draw(bool secondary)
 				{
 				case RE_FileSystem::FileType::F_META:
 				{
-					ResourceContainer* res = RE_ResourceManager::At(p->AsMeta()->resource);
-					if (ImGui::ImageButton(reinterpret_cast<void*>(RE_ThumbnailManager::GetShaderFileID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
-						RE_ResourceManager::PushSelected(res->GetMD5(), true);
+					ResourceContainer* res = App::resources->At(p->AsMeta()->resource);
+					if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->GetShaderFileID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+						App::resources->PushSelected(res->GetMD5(), true);
 
 					if (ImGui::BeginDragDropSource())
 					{
 						ImGui::SetDragDropPayload("#ShadereReference", &p->AsMeta()->resource, sizeof(const char**));
-						ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::GetShaderFileID()), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+						ImGui::Image(reinterpret_cast<void*>(App::thumbnail->GetShaderFileID()), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 						ImGui::EndDragDropSource();
 					}
 					ImGui::PopID();
@@ -1008,7 +1008,7 @@ void AssetsWindow::Draw(bool secondary)
 					}
 
 					if (ImGui::ImageButton(
-						reinterpret_cast<void*>(selectingUndefFile ? RE_ThumbnailManager::GetSelectFileID() : RE_ThumbnailManager::GetFileID()),
+						reinterpret_cast<void*>(selectingUndefFile ? App::thumbnail->GetSelectFileID() : App::thumbnail->GetFileID()),
 						{ iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, (selectingUndefFile) ? -1 : 0))
 					{
 						if (selectingUndefFile)
@@ -1054,9 +1054,9 @@ void AssetsWindow::Draw(bool secondary)
 				{
 					if (p->AsFile()->metaResource != nullptr)
 					{
-						ResourceContainer* res = RE_ResourceManager::At(p->AsFile()->metaResource->resource);
-						if (ImGui::ImageButton(reinterpret_cast<void*>(RE_ThumbnailManager::At(res->GetMD5())), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
-							RE_ResourceManager::PushSelected(res->GetMD5(), true);
+						ResourceContainer* res = App::resources->At(p->AsFile()->metaResource->resource);
+						if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->At(res->GetMD5())), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+							App::resources->PushSelected(res->GetMD5(), true);
 						ImGui::PopID();
 
 						id = idName + eastl::to_string(idCount) + "Delete";
@@ -1075,7 +1075,7 @@ void AssetsWindow::Draw(bool secondary)
 						if (ImGui::BeginDragDropSource())
 						{
 							ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
-							ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::At(p->AsFile()->metaResource->resource)), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+							ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(p->AsFile()->metaResource->resource)), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 							ImGui::EndDragDropSource();
 						}
 

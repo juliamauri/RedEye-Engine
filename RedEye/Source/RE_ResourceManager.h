@@ -1,6 +1,7 @@
 #ifndef __RESOURCEMANAGER_H__
 #define __RESOURCEMANAGER_H__
 
+#include "EventListener.h"
 #include "Resource.h"
 #include "RE_InternalResources.h"
 
@@ -8,16 +9,18 @@
 #include <EASTL/vector.h>
 #include <EASTL/stack.h> 
 
-namespace RE_ResourceManager
+class RE_ResourceManager : public EventListener
 {
-	void Init();
-	void Clear();
-	void ResourceHasChanged(const char* md5);
+public:
+	RE_ResourceManager() {}
+	~RE_ResourceManager();
 
-	ResourceContainer* At(const char* md5);
+	void RecieveEvent(const Event& e) override;
+
+	ResourceContainer* At(const char* md5) const;
 	const char* ReferenceByMeta(const char* path, Resource_Type type);
 	const char* Reference(ResourceContainer* rc);
-	unsigned int TotalReferences();
+	unsigned int TotalReferences() const;
 
 	eastl::vector<const char*> GetAllResourcesActiveByType(Resource_Type resT);
 
@@ -32,12 +35,12 @@ namespace RE_ResourceManager
 	const char* ImportPrefab(const char* assetPath);
 	const char* ImportScene(const char* assetPath);
 
-	unsigned int TotalReferenceCount(const char* resMD5);
+	unsigned int TotalReferenceCount(const char* resMD5) const;
 	void Use(const char* resMD5);
 	void UnUse(const char* resMD5);
 
 	void PushSelected(const char* resS, bool popAll = false);
-	const char* GetSelected();
+	const char* GetSelected()const;
 	void PopSelected(bool all = false);
 
 	eastl::vector<ResourceContainer*> GetResourcesByType(Resource_Type type);
@@ -53,18 +56,24 @@ namespace RE_ResourceManager
 	typedef eastl::map<const char*, ResourceContainer*> ResourceMap;
 	typedef ResourceMap::iterator ResourceIter;
 	typedef ResourceMap::const_iterator ResourceConstIter;
-
+	
 	typedef eastl::pair<const char*, unsigned int> ResourceCounter;
 	typedef eastl::map<const char*, unsigned int> ResourceCounterMap;
 
-	namespace Internal
-	{
-		const char* GetNameFromType(const Resource_Type type);
+private:
 
-		static ResourceMap resources;
-		static ResourceCounterMap resourcesCounter;
-		static eastl::stack< const char*> resourcesSelected;
-	}
-}
+	const char* GetNameFromType(const Resource_Type type);
+
+public:
+
+	static RE_InternalResources internalResources;
+
+private:
+
+	ResourceMap resources;
+	ResourceCounterMap resourcesCounter;
+
+	eastl::stack< const char*> resourcesSelected;
+};
 
 #endif // !__RESOURCEMANAGER_H__

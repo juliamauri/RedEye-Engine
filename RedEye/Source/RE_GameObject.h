@@ -37,8 +37,8 @@ class RE_GameObject : public EventListener
 {
 public:
 
-	RE_GameObject() {}
-	~RE_GameObject() {}
+	RE_GameObject();
+	~RE_GameObject();
 	void SetUp(GameObjectsPool* goPool, ComponentsPool* compPool, const char* name,
 		const UID parent = 0, const bool start_active = true, const bool isStatic = true);
 

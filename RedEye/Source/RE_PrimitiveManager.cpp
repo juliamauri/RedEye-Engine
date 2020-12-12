@@ -9,15 +9,12 @@
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 
-using namespace RE_PrimitiveManager::Internal;
-
-void RE_PrimitiveManager::Init()
+RE_PrimitiveManager::RE_PrimitiveManager()
 {
-	RE_SOFT_NS("par_shapes.h", "https://github.com/prideout/par");
 	for (auto platonic : platonics) platonic = { 0, 0, 0, 0 };
 }
 
-void RE_PrimitiveManager::Clear()
+RE_PrimitiveManager::~RE_PrimitiveManager()
 {
 	for (auto platonic : platonics)
 	{
@@ -28,6 +25,11 @@ void RE_PrimitiveManager::Clear()
 			glDeleteBuffers(1, &platonic.ebo);
 		}
 	}
+}
+
+void RE_PrimitiveManager::Init()
+{
+	RE_SOFT_NS("par_shapes.h", "https://github.com/prideout/par");
 }
 
 void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP)
@@ -54,7 +56,7 @@ void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP)
 	case C_ROCK: dynamic_cast<RE_CompRock*>(cmpP)->RockSetUp(5, 20); break; }
 }
 
-void RE_PrimitiveManager::GetPlatonicData(unsigned short type, unsigned int& vao, unsigned int& triangles)
+eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPlatonicData(unsigned short type)
 {
 	unsigned short index = type - C_CUBE;
 
@@ -66,22 +68,21 @@ void RE_PrimitiveManager::GetPlatonicData(unsigned short type, unsigned int& vao
 		case C_DODECAHEDRON: mesh = par_shapes_create_dodecahedron(); break;
 		case C_TETRAHEDRON: mesh = par_shapes_create_tetrahedron(); break;
 		case C_OCTOHEDRON: mesh = par_shapes_create_octahedron(); break;
-		case C_ICOSAHEDRON: mesh = par_shapes_create_icosahedron(); break;
-		}
+		case C_ICOSAHEDRON: mesh = par_shapes_create_icosahedron(); break; }
 
-		UploadPlatonic(mesh, platonics[index].vao, platonics[index].vbo, platonics[index].ebo, platonics[index].triangles);
+		UploadPlatonic(mesh, &platonics[index].vao, &platonics[index].vbo, &platonics[index].ebo, &platonics[index].triangles);
 		par_shapes_free_mesh(mesh);
 	}
-
-	vao = platonics[index].vao;
-	triangles = platonics[index].triangles;
+	
+	return { platonics[index].vao, platonics[index].triangles };
 }
 
-void RE_PrimitiveManager::CreateSphere(unsigned int slices, unsigned int stacks,
-	unsigned int& vao, unsigned int& vbo, unsigned int& ebo, unsigned int& triangles)
+RE_PrimitiveManager::PlatonicData RE_PrimitiveManager::CreateSphere(int slices, int stacks)
 {
 	if (slices < 3) slices = 3;
 	if (stacks < 3) stacks = 3;
+
+	PlatonicData ret;
 
 	par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(slices, stacks);
 
@@ -126,11 +127,11 @@ void RE_PrimitiveManager::CreateSphere(unsigned int slices, unsigned int stacks,
 		cursor += cursorSize;
 	}
 
-	glGenVertexArrays(1, &vao);
-	RE_GLCacheManager::ChangeVAO(vao);
+	glGenVertexArrays(1, &ret.vao);
+	RE_GLCacheManager::ChangeVAO(ret.vao);
 
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glGenBuffers(1, &ret.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, ret.vbo);
 	glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
@@ -142,24 +143,26 @@ void RE_PrimitiveManager::CreateSphere(unsigned int slices, unsigned int stacks,
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 6u));
 
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glGenBuffers(1, &ret.ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ret.ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, sphere->triangles, GL_STATIC_DRAW);
 
 	RE_GLCacheManager::ChangeVAO(0);
 
-	triangles = sphere->ntriangles;
+	ret.triangles = sphere->ntriangles;
 
 	par_shapes_free_mesh(sphere);
 	DEL_A(points);
 	DEL_A(normals);
 	DEL_A(texCoords);
 	DEL_A(meshBuffer);
+
+	return ret;
 }
 
-void RE_PrimitiveManager::Internal::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int& vao, unsigned int& vbo, unsigned int& ebo, unsigned int& triangles)
+void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int* vao, unsigned int* vbo, unsigned int* ebo, unsigned int* triangles)
 {
-	triangles = static_cast<unsigned int>(plato->ntriangles);
+	*triangles = static_cast<unsigned int>(plato->ntriangles);
 
 	par_shapes_unweld(plato, true);
 	par_shapes_compute_normals(plato);
@@ -168,8 +171,8 @@ void RE_PrimitiveManager::Internal::UploadPlatonic(par_shapes_mesh_s* plato, uns
 	float* normals = new float[plato->npoints * 3];
 
 	uint meshSize = 0;
-	uint stride = 0;
 	size_t size = plato->npoints * 3 * sizeof(float);
+	uint stride = 0;
 
 	memcpy(points, plato->points, size);
 	meshSize += 3 * plato->npoints;
@@ -194,11 +197,11 @@ void RE_PrimitiveManager::Internal::UploadPlatonic(par_shapes_mesh_s* plato, uns
 		cursor += cursorSize;
 	}
 
-	glGenVertexArrays(1, &vao);
-	RE_GLCacheManager::ChangeVAO(vao);
+	glGenVertexArrays(1, vao);
+	RE_GLCacheManager::ChangeVAO(*vao);
 
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glGenBuffers(1, vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, *vbo);
 	glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
@@ -207,9 +210,9 @@ void RE_PrimitiveManager::Internal::UploadPlatonic(par_shapes_mesh_s* plato, uns
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 3));
 
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangles * sizeof(unsigned short) * 3u, plato->triangles, GL_STATIC_DRAW);
+	glGenBuffers(1, ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, *triangles * sizeof(unsigned short) * 3u, plato->triangles, GL_STATIC_DRAW);
 
 	RE_GLCacheManager::ChangeVAO(0);
 	

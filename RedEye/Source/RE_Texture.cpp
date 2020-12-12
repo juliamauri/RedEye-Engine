@@ -55,11 +55,11 @@ TextureType RE_Texture::GetTextureType() const { return texType; }
 
 void RE_Texture::LoadInMemory()
 {
-	if (RE_FileSystem::Exists(GetLibraryPath()))
+	if (App::fs->Exists(GetLibraryPath()))
 	{
 		LibraryLoad();
 	}
-	else if (RE_FileSystem::Exists(GetAssetPath()))
+	else if (App::fs->Exists(GetAssetPath()))
 	{
 		AssetLoad();
 		LibrarySave();
@@ -91,7 +91,7 @@ void RE_Texture::GetWithHeight(int * w, int * h)
 
 void RE_Texture::DrawTextureImGui()
 {
-	ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::At(GetMD5())), ImVec2(256, 256), { 0.0, 1.0 }, {1.0, 0.0});
+	ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(GetMD5())), ImVec2(256, 256), { 0.0, 1.0 }, {1.0, 0.0});
 }
 
 void RE_Texture::Draw()
@@ -325,6 +325,6 @@ void RE_Texture::LibraryLoad()
 void RE_Texture::LibrarySave()
 {
 	RE_FileBuffer assetFile(GetAssetPath());
-	RE_FileBuffer libraryFile(GetLibraryPath(), RE_FileSystem::GetZipPath());
+	RE_FileBuffer libraryFile(GetLibraryPath(), App::fs->GetZipPath());
 	if (assetFile.Load()) RE_TextureImporter::SaveOwnFormat(assetFile.GetBuffer(), assetFile.GetSize(), texType, &libraryFile);
 }

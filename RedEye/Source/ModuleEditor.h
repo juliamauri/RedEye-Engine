@@ -96,6 +96,9 @@ private:
 	bool show_demo = false;
 	bool popUpFocus = false;
 
+	// Command Tracker
+	RE_CommandManager editorCommands;
+
 	// Windows & Tools
 	eastl::list<EditorWindow*> windows, tools;
 

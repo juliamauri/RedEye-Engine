@@ -66,7 +66,7 @@ void ResourceContainer::SetInternal(bool is_internal) { isinternal = is_internal
 
 void ResourceContainer::SaveMeta()
 {
-	Config metaSerialize(metaPath.c_str(), RE_FileSystem::GetZipPath());
+	Config metaSerialize(metaPath.c_str(), App::fs->GetZipPath());
 
 	RE_Json* metaNode = metaSerialize.GetRootNode("meta");
 
@@ -84,7 +84,7 @@ void ResourceContainer::SaveMeta()
 
 void ResourceContainer::LoadMeta()
 {
-	Config metaDeserialize(metaPath.c_str(), RE_FileSystem::GetZipPath());
+	Config metaDeserialize(metaPath.c_str(), App::fs->GetZipPath());
 	if (metaDeserialize.Load()) {
 		RE_Json* metaNode = metaDeserialize.GetRootNode("meta");
 
@@ -103,14 +103,14 @@ void ResourceContainer::LoadMeta()
 void ResourceContainer::DrawPropieties()
 {
 	if (ImGui::CollapsingHeader(eastl::string(propietiesName + name).c_str(), ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen)) {
-		if (ImGui::Button("Return")) RE_ResourceManager::PopSelected();
+		if (ImGui::Button("Return")) App::resources->PopSelected();
 		ImGui::Separator();
 		ImGui::Text("Name: %s", name.c_str());
 		ImGui::Text("Asset path: %s", assetPath.c_str());
 		ImGui::Text("Library path: %s", libraryPath.c_str());
 		ImGui::Text("Meta path: %s", metaPath.c_str());
 		ImGui::Text("MD5: %s", md5);
-		ImGui::Text("Times Counted: %u", RE_ResourceManager::TotalReferenceCount(md5));
+		ImGui::Text("Times Counted: %u", App::resources->TotalReferenceCount(md5));
 
 		ImGui::Separator();
 		Draw();

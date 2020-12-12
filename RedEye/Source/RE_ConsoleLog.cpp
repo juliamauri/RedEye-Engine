@@ -5,32 +5,16 @@
 #include <EAStdC/EASprintf.h>
 #include <windows.h> // TODO Julius: Destruir Windows. Reventarlo quitandote la camiseta. Que no lo reconozca ni Billy el Puertas.
 
-using namespace RE_ConsoleLog::Internal;
+#define LOG_STATEMENT_MAX_LENGTH 512
 
-void RE_ConsoleLog::ScopeProcedureLogging()
+void RE_ConsoleLog::_Log(int category, const char file[], int line, const char* format, ...)
 {
-	scoping_procedure = true;
-	error_scoped = false;
-}
-void RE_ConsoleLog::EndScope()
-{
-	if (scoping_procedure)
-	{
-		scoping_procedure = false;
-		Event::PushForced(SCOPE_PROCEDURE_END, App::editor, error_scoped);
-	}
-}
-
-bool RE_ConsoleLog::ScopedErrors() { return error_scoped; }
-
-void RE_ConsoleLog::Internal::_Log(int category, const char file[], int line, const char* format, ...)
-{
-	static char base[max_log_size];
+	static char base[LOG_STATEMENT_MAX_LENGTH];
 	static va_list  ap;
 
 	// Construct the string from variable arguments
 	va_start(ap, format);
-	EA::StdC::Vsnprintf(base, max_log_size, format, ap);
+	EA::StdC::Vsnprintf(base, LOG_STATEMENT_MAX_LENGTH, format, ap);
 	va_end(ap);
 
 	// Extract file's name only
@@ -57,7 +41,7 @@ void RE_ConsoleLog::Internal::_Log(int category, const char file[], int line, co
 	Event::PushForced(static_cast<RE_EventType>(CONSOLE_LOG_SEPARATOR + category), App::editor, edited, file_name);
 }
 
-void RE_ConsoleLog::Internal::_ReportSoftware(const char file[], int line, const char* name, const char* version, const char* website)
+void RE_ConsoleLog::_ReportSoftware(const char file[], int line, const char* name, const char* version, const char* website)
 {
 	App::editor->ReportSoftawe(name, version, website);
 
@@ -70,7 +54,23 @@ void RE_ConsoleLog::Internal::_ReportSoftware(const char file[], int line, const
 	else _Log(L_SOFTWARE, file, line, "3rd party software report: %s", name);
 }
 
-void RE_ConsoleLog::Internal::_RequestBrowser(const char* link)
+void RE_ConsoleLog::_RequestBrowser(const char* link)
 {
 	ShellExecute(NULL, "open", link, NULL, NULL, SW_SHOWNORMAL);
 }
+
+void RE_ConsoleLog::ScopeProcedureLogging()
+{
+	scoping_procedure = true;
+	error_scoped = false;
+}
+void RE_ConsoleLog::EndScope()
+{
+	if (scoping_procedure)
+	{
+		scoping_procedure = false;
+		Event::PushForced(SCOPE_PROCEDURE_END, App::editor, error_scoped);
+	}
+}
+
+bool RE_ConsoleLog::ScopedErrors() { return error_scoped; }

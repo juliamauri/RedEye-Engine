@@ -1,22 +1,25 @@
 #ifndef __FILESYSTEM_H__
 #define __FILESYSTEM_H__
 
-#include <EASTL\list.h>
-#include <EASTL\vector.h>
-#include <EASTL\stack.h>
+#include <EASTL/list.h>
+#include <EASTL/vector.h>
+#include <EASTL/stack.h>
 #include <EASTL\string.h>
 
 class Config;
 class RE_FileBuffer;
+class RE_GameObject;
 class ResourceContainer;
+struct Vertex;
 
-namespace RE_FileSystem
+class RE_FileSystem
 {
+public:
+
 	enum PathType { D_NULL = -1, D_FOLDER, D_FILE };
 	enum FileType { F_NOTSUPPORTED = -1, F_NONE, F_MODEL, F_TEXTURE, F_MATERIAL, F_SKYBOX, F_PREFAB, F_SCENE, F_META };
 	enum PathProcessType { P_ADDFILE, P_DELETE, P_REIMPORT, P_ADDFOLDER, };
 
-	struct RE_ProcessPath;
 	struct RE_File;
 	struct RE_Meta;
 	struct RE_Directory;
@@ -50,7 +53,7 @@ namespace RE_FileSystem
 	{
 		RE_File* fromFile = nullptr;
 		const char* resource = nullptr;
-
+		
 		bool IsModified()const;
 
 		RE_Path* AsPath()const { return (RE_Path*)this; }
@@ -79,10 +82,12 @@ namespace RE_FileSystem
 		RE_Path* AsPath()const { return (RE_Path*)this; }
 	};
 
-	static Config* config = nullptr;
+public:
+
+	RE_FileSystem() {}
+	~RE_FileSystem();
 
 	bool Init(int argc, char* argv[]);
-	void Clear();
 
 	unsigned int ReadAssetChanges(unsigned int extra_ms, bool doAll = false);
 
@@ -90,21 +95,21 @@ namespace RE_FileSystem
 	bool AddPath(const char* path_or_zip, const char* mount_point = nullptr);
 	bool RemovePath(const char* path_or_zip);
 	bool SetWritePath(const char* dir);
-	const char* GetWritePath();
+	const char* GetWritePath() const;
 	void LogFolderItems(const char* folder);
 
 	RE_FileBuffer* QuickBufferFromPDPath(const char* full_path); // , char** buffer, unsigned int size);
 
-	bool ExistsOnOSFileSystem(const char* file, bool isFolder = true);
-	bool Exists(const char* file);
-	bool IsDirectory(const char* file);
-	const char* GetExecutableDirectory();
+	bool ExistsOnOSFileSystem(const char* file, bool isFolder = true) const;
+	bool Exists(const char* file) const;
+	bool IsDirectory(const char* file) const;
+	const char* GetExecutableDirectory() const;
 
 	const char* GetZipPath();
 
 	void HandleDropedFile(const char* file);
 
-	RE_Directory* GetRootDirectory();
+	RE_Directory* GetRootDirectory()const;
 
 	void DeleteUndefinedFile(const char* filePath);
 	void DeleteResourceFiles(ResourceContainer* resContainer);
@@ -114,28 +119,25 @@ namespace RE_FileSystem
 
 	signed long long GetLastTimeModified(const char* path);
 
-	namespace Internal
-	{
-		void CopyDirectory(const char* origin, const char* dest);
+private:
 
-		static eastl::string engine_path;
-		static eastl::string library_path;
-		static eastl::string assets_path;
-		static eastl::string zip_path;
-		static eastl::string write_path;
+	void CopyDirectory(const char* origin, const char* dest);
 
-		static RE_Directory* rootAssetDirectory = nullptr;
-		static eastl::list<RE_Directory*> assetsDirectories;
-		static eastl::list<RE_Directory*>::iterator dirIter;
-		static eastl::stack<RE_ProcessPath*> assetsToProcess;
+private:
 
-		static eastl::vector<RE_Meta*> metaToFindFile;
-		static eastl::vector<RE_File*> filesToFindMeta;
-		static eastl::vector<RE_Meta*> metaRecentlyAdded;
+	eastl::string engine_path, library_path, assets_path, zip_path, write_path;
 
-		static eastl::list<RE_File*> toImport;
-		static eastl::list<RE_Meta*> toReImport;
-	}
+	RE_Directory* rootAssetDirectory = nullptr;
+	eastl::list<RE_Directory*> assetsDirectories;
+	eastl::list<RE_Directory*>::iterator dirIter;
+	eastl::stack<RE_ProcessPath*> assetsToProcess;
+
+	eastl::vector<RE_Meta*> metaToFindFile;
+	eastl::vector<RE_File*> filesToFindMeta;
+	eastl::vector<RE_Meta*> metaRecentlyAdded;
+
+	eastl::list<RE_File*> toImport;
+	eastl::list<RE_Meta*> toReImport;
 };
 
 #endif // !__FILESYSTEM_H__

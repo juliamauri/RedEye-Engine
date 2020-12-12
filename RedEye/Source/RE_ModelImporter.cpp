@@ -241,7 +241,7 @@ void RE_ModelImporter::Internal::ProcessMeshes(const aiScene* scene)
 				newMesh->SetName(mesh->mName.C_Str());
 				newMesh->SetType(Resource_Type::R_MESH);
 				newMesh->SetAssetPath(aditionalData->workingfilepath.c_str());
-				RE_ResourceManager::Reference(newMesh);
+				App::resources->Reference(newMesh);
 			}
 			else DEL(newMesh);
 
@@ -254,7 +254,7 @@ void RE_ModelImporter::Internal::ProcessMeshes(const aiScene* scene)
 eastl::vector<eastl::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(const char * path)
 {
 	eastl::vector<eastl::string> retPaths;
-	RE_FileBuffer* fbxloaded = RE_FileSystem::QuickBufferFromPDPath(path);
+	RE_FileBuffer* fbxloaded = App::fs->QuickBufferFromPDPath(path);
 
 	if (fbxloaded)
 	{
@@ -318,7 +318,7 @@ void RE_ModelImporter::Internal::ProcessMaterials(const aiScene* scene)
 		RE_LOG_TERCIARY("Loadinig %s material.", name.C_Str());
 
 		eastl::string filePath = "Assets/Materials/" + aditionalData->name + "/" + name.C_Str() + ".pupil";
-		materialMD5 = RE_ResourceManager::FindMD5ByAssetsPath(filePath.c_str(), Resource_Type::R_MATERIAL);
+		materialMD5 = App::resources->FindMD5ByAssetsPath(filePath.c_str(), Resource_Type::R_MATERIAL);
 		if (!materialMD5)
 		{
 			RE_Material* newMaterial = new RE_Material();
@@ -390,7 +390,7 @@ void RE_ModelImporter::Internal::ProcessMaterials(const aiScene* scene)
 			container->SetType(Resource_Type::R_MATERIAL);
 
 			newMaterial->Save();
-			materialMD5 = RE_ResourceManager::Reference(container);
+			materialMD5 = App::resources->Reference(container);
 			App::renderer3d->PushThumnailRend(materialMD5);
 		}
 		aditionalData->materialsLoaded.insert(eastl::pair<aiMaterial*,const char*>(material, materialMD5));
@@ -410,9 +410,9 @@ void RE_ModelImporter::Internal::GetTexturesMaterial(aiMaterial * material, east
 				eastl::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 				eastl::string realAssetsPath = fileTexturePath + filename;
 
-				if (RE_FileSystem::Exists(realAssetsPath.c_str()))
+				if (App::fs->Exists(realAssetsPath.c_str()))
 				{
-					const char* texture = RE_ResourceManager::FindMD5ByAssetsPath(realAssetsPath.c_str(), Resource_Type::R_TEXTURE);
+					const char* texture = App::resources->FindMD5ByAssetsPath(realAssetsPath.c_str(), Resource_Type::R_TEXTURE);
 					if (texture) vectorToFill->push_back(texture);
 					else RE_LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
 				}

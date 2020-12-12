@@ -47,7 +47,7 @@ public:
 		type(type), go(go), active(start_active) {}
 	virtual ~RE_Component() {}
 
-	UID PoolSetUp(GameObjectsPool* pool, const UID parent, bool report_parent = false);
+	virtual UID PoolSetUp(GameObjectsPool* pool, const UID parent, bool report_parent = false);
 	virtual void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) {}
 
 	virtual void Init() {}
@@ -76,7 +76,6 @@ public:
 	void SetType(ComponentType t) { type = t; }
 	ComponentType GetType() const { return type; }
 	UID GetGOUID() const { return go; }
-
 	RE_GameObject* GetGOPtr() const;
 	const RE_GameObject* GetGOCPtr() const;
 	void SetParent(const UID parent) { useParent = (go = parent); };
@@ -86,12 +85,12 @@ public:
 	virtual void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const {}
 	virtual void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) {}
 
-	virtual unsigned int GetBinarySize() const { return 0; }
+	virtual unsigned int GetBinarySize() const {  return 0; }
 	virtual void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const {}
 	virtual void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) {}
 
-	virtual void UseResources() {}
-	virtual void UnUseResources() {}
+	virtual void UseResources() {  }
+	virtual void UnUseResources() {  }
 
 	//POOL
 	UID GetPoolID()const { return id; }

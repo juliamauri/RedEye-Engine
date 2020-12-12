@@ -1,23 +1,33 @@
 #include "RE_CommandManager.h"
 
-#include "Globals.h"
 #include "RE_Command.h"
 
-using namespace RE_CommandManager::Internal;
+#include "Globals.h"
 
-bool RE_CommandManager::CanRedo()
+#define MAX_COMMANDS 100
+
+RE_CommandManager::RE_CommandManager()
+{
+}
+
+RE_CommandManager::~RE_CommandManager()
+{
+	Clear();
+}
+
+bool RE_CommandManager::canRedo() const
 {
 	return !redoCommands.empty();
 }
 
-bool RE_CommandManager::CanUndo()
+bool RE_CommandManager::canUndo() const
 {
 	return !undoCommands.empty();
 }
 
-void RE_CommandManager::Redo()
+void RE_CommandManager::redo()
 {
-	if (!redoCommands.empty()) {
+	if (canRedo()) {
 		RE_Command* cmd = redoCommands.top();
 		cmd->execute();
 		undoCommands.push(cmd);
@@ -25,11 +35,11 @@ void RE_CommandManager::Redo()
 	}
 }
 
-void RE_CommandManager::Undo()
+void RE_CommandManager::undo()
 {
-	if (!undoCommands.empty()) {
+	if (canUndo()) {
 		RE_Command* cmd = undoCommands.top();
-		cmd->Undo();
+		cmd->undo();
 		redoCommands.push(cmd);
 		undoCommands.pop();
 	}
@@ -42,7 +52,7 @@ void RE_CommandManager::PushCommand(RE_Command* newCommand)
 		redoCommands.pop();
 	}
 
-	if (undoCommands.size() == max_commands) {
+	if (undoCommands.size() == MAX_COMMANDS) {
 		DEL(*undoCommands.c.begin());
 		undoCommands.c.erase(undoCommands.c.begin());
 	}

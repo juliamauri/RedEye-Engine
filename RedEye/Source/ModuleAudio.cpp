@@ -170,7 +170,7 @@ void ModuleAudio::DrawEditor()
 {
 	if (ImGui::CollapsingHeader("Wwise Audio Engine"))
 	{
-		static eastl::string rootPath = RE_FileSystem::GetExecutableDirectory();
+		static eastl::string rootPath = App::fs->GetExecutableDirectory();
 		static eastl::string tempPath = audioBanksFolderPath;
 		static bool pathChanged = false;
 
@@ -203,7 +203,7 @@ void ModuleAudio::DrawEditor()
 
 				if (tempPath[tempPath.size()] != '\\') tempPath += "\\";
 
-				if (RE_FileSystem::ExistsOnOSFileSystem((rootPath + tempPath).c_str()))
+				if (App::fs->ExistsOnOSFileSystem((rootPath + tempPath).c_str()))
 				{
 					audioBanksFolderPath = tempPath;
 				}
@@ -284,7 +284,7 @@ void ModuleAudio::DrawWwiseElementsDetected()
 
 void ModuleAudio::Load()
 {
-	RE_Json* node = RE_FileSystem::config->GetRootNode(name);
+	RE_Json* node = App::config->GetRootNode(name);
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
 	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
 	DEL(node);
@@ -292,7 +292,7 @@ void ModuleAudio::Load()
 
 void ModuleAudio::Save() const
 {
-	RE_Json* node = RE_FileSystem::config->GetRootNode(name);
+	RE_Json* node = App::config->GetRootNode(name);
 	node->PushString("FolderBanks", audioBanksFolderPath.c_str());
 	DEL(node);
 }
@@ -304,7 +304,7 @@ unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 	if (located_banksFolder)
 	{
 		static const char* platformPath = "Windows\\";
-		eastl::string soundbankInfoPath(RE_FileSystem::GetExecutableDirectory());
+		eastl::string soundbankInfoPath(App::fs->GetExecutableDirectory());
 
 		eastl_size_t posOfBack = soundbankInfoPath.find_last_of((char)'\\..');
 		if (posOfBack != eastl::string::npos)
@@ -317,9 +317,9 @@ unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 		soundbankInfoPath += platformPath;
 		soundbankInfoPath += "SoundbanksInfo.json";
 
-		if (RE_FileSystem::ExistsOnOSFileSystem(soundbankInfoPath.c_str(), false))
+		if (App::fs->ExistsOnOSFileSystem(soundbankInfoPath.c_str(), false))
 		{
-			signed long long lastMod = RE_FileSystem::GetLastTimeModified(soundbankInfoPath.c_str());
+			signed long long lastMod = App::fs->GetLastTimeModified(soundbankInfoPath.c_str());
 			if (lastMod != 0 && lastSoundBanksInfoModified != lastMod)
 			{
 				soundbanks.clear();
@@ -332,7 +332,7 @@ unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 					for (auto& v : soundBanks->GetArray())
 					{
 						SoundBank newSB(v.FindMember("Path")->value.GetString(), static_cast<unsigned long>(EA::StdC::AtoU64(v.FindMember("Id")->value.GetString())));
-						newSB.path = RE_FileSystem::GetExecutableDirectory();
+						newSB.path = App::fs->GetExecutableDirectory();
 						newSB.path += audioBanksFolderPath;
 						newSB.path += platformPath;
 						newSB.path += newSB.name;
@@ -393,7 +393,7 @@ SoundBank::~SoundBank()
 
 void SoundBank::LoadBank()
 {
-	RE_FileBuffer* bnkLoaded = RE_FileSystem::QuickBufferFromPDPath(path.c_str());
+	RE_FileBuffer* bnkLoaded = App::fs->QuickBufferFromPDPath(path.c_str());
 	if (bnkLoaded != nullptr)
 	{
 		AKRESULT result = AK::SoundEngine::LoadBankMemoryCopy(bnkLoaded->GetBuffer(), bnkLoaded->GetSize(), ID);

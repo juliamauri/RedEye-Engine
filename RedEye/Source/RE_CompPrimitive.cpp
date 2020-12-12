@@ -7,7 +7,6 @@
 #include "RE_ShaderImporter.h"
 #include "RE_ResourceManager.h"
 #include "RE_GLCacheManager.h"
-#include "RE_PrimitiveManager.h"
 #include "RE_Mesh.h"
 #include "RE_Shader.h"
 #include "RE_GameObject.h"
@@ -36,17 +35,27 @@ bool RE_CompPrimitive::CheckFaceCollision(const math::Ray& ray, float& distance)
 
 void RE_CompPrimitive::DeleteBuffers()
 {
-	if (VAO) { glDeleteVertexArrays(1, static_cast<GLuint*>(&VAO)); VAO = 0; }
-	if (VBO) {		glDeleteBuffers(1, static_cast<GLuint*>(&VBO)); VBO = 0; }
-	if (EBO) {		glDeleteBuffers(1, static_cast<GLuint*>(&EBO)); EBO = 0; }
+	if (VAO)
+	{
+		glDeleteVertexArrays(1, static_cast<GLuint*>(&VAO));
+		VAO = 0;
+	}
+	if (VBO)
+	{
+		glDeleteBuffers(1, static_cast<GLuint*>(&VBO));
+		VBO = 0;
+	}
+	if (EBO)
+	{
+		glDeleteBuffers(1, static_cast<GLuint*>(&EBO));
+		EBO = 0;
+	}
 }
 
 void RE_CompPrimitive::SetColor(float r, float g, float b) { color.Set(r, g, b); }
 void RE_CompPrimitive::SetColor(math::vec nColor) { color = nColor; }
-
 unsigned int RE_CompPrimitive::GetVAO() const { return VAO; }
 void RE_CompPrimitive::SetVAO(unsigned int vao) { VAO = vao; }
-
 unsigned int RE_CompPrimitive::GetTriangleCount() const { return triangle_count; }
 
 ///////   Grid   ////////////////////////////////////////////
@@ -125,7 +134,7 @@ void RE_CompGrid::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UI
 
 void RE_CompGrid::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_ResourceManager::At(RE_InternalResources::GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<RE_Shader*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultShader()))->GetID();
 	RE_GLCacheManager::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetTransformPtr()->GetGlobalMatrixPtr());
 	RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
@@ -223,7 +232,7 @@ void RE_CompRock::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UI
 
 void RE_CompRock::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_ResourceManager::At(RE_InternalResources::GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<RE_Shader*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultShader()))->GetID();
 	RE_GLCacheManager::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
@@ -398,8 +407,17 @@ RE_CompPlatonic::~RE_CompPlatonic() { DeleteBuffers(); }
 
 void RE_CompPlatonic::PlatonicSetUp(unsigned int vao, unsigned int t_count)
 {
-	if (vao) { VAO = vao; triangle_count = t_count; }
-	else RE_PrimitiveManager::GetPlatonicData(type, VAO, triangle_count);
+	if (vao)
+	{
+		VAO = vao;
+		triangle_count = t_count;
+	}
+	else
+	{
+		eastl::pair<unsigned int, unsigned int> data = App::primitives.GetPlatonicData(type);
+		VAO = data.first;
+		triangle_count = data.second;
+	}
 }
 
 void RE_CompPlatonic::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UID parent)
@@ -415,7 +433,7 @@ void RE_CompPlatonic::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, cons
 
 void RE_CompPlatonic::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_ResourceManager::At(RE_InternalResources::GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<RE_Shader*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultShader()))->GetID();
 	RE_GLCacheManager::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
@@ -452,7 +470,7 @@ void RE_CompPlatonic::SerializeJson(RE_Json* node, eastl::map<const char*, int>*
 void RE_CompPlatonic::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	color = node->PullFloatVector("color", color);
-	RE_PrimitiveManager::SetUpComponentPrimitive(this);
+	App::primitives.SetUpComponentPrimitive(this);
 }
 
 void RE_CompPlatonic::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
@@ -468,7 +486,7 @@ void RE_CompPlatonic::DeserializeBinary(char*& cursor, eastl::map<int, const cha
 	memcpy(&color[0], cursor, size);
 	cursor += size;
 
-	RE_PrimitiveManager::SetUpComponentPrimitive(this);
+	App::primitives.SetUpComponentPrimitive(this);
 }
 
 ///////   Parametric   ////////////////////////////////////////////
@@ -499,7 +517,7 @@ void RE_CompParametric::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, co
 
 void RE_CompParametric::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_ResourceManager::At(RE_InternalResources::GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<RE_Shader*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultShader()))->GetID();
 	RE_GLCacheManager::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
@@ -515,7 +533,7 @@ void RE_CompParametric::Draw() const
 		RE_ShaderImporter::setFloat(shader, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(shader, "useTexture", 1.0f);
 		RE_ShaderImporter::setUnsignedInt(shader, "tdiffuse", 0);
-		RE_GLCacheManager::ChangeTextureBind(RE_InternalResources::GetTextureChecker());
+		RE_GLCacheManager::ChangeTextureBind(RE_ResourceManager::internalResources.GetTextureChecker());
 	}
 
 	RE_GLCacheManager::ChangeVAO(VAO);
@@ -717,7 +735,7 @@ const char* RE_CompPlane::TransformAsMeshResource()
 	{
 		newMesh->SetName(eastl::string("Plane " + eastl::to_string(plane->ntriangles) + " triangles").c_str());
 		newMesh->SetType(Resource_Type::R_MESH);
-		RE_ResourceManager::Reference(newMesh);
+		App::resources->Reference(newMesh);
 	}
 	else DEL(newMesh);
 

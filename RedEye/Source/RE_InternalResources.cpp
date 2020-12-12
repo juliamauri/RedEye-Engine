@@ -17,7 +17,13 @@
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 
-using namespace RE_InternalResources::Internal;
+#define WATER_FOAM_TEX_PATH "Settings/DefaultAssets/water_foam.png"
+
+RE_InternalResources::~RE_InternalResources()
+{
+	if(checkerTexture != 0) glDeleteTextures(1, &checkerTexture);
+	if(water_foam_texture != 0) glDeleteTextures(1, &water_foam_texture);
+}
 
 void RE_InternalResources::Init()
 {
@@ -28,34 +34,7 @@ void RE_InternalResources::Init()
 	if (!InitSkyBox()) RE_LOG_WARNING("Could not initialize default skybox");
 }
 
-void RE_InternalResources::Clear()
-{
-	if (checkerTexture != 0) glDeleteTextures(1, &checkerTexture);
-	if (water_foam_texture != 0) glDeleteTextures(1, &water_foam_texture);
-}
-
-const char* RE_InternalResources::GetDefaultShader()
-{
-	static const char* shaders[4] = { defaultShader, defaultShader, defaultShader /* TODO RUB: add shader with light input*/, defGeoShader };
-	return shaders[ModuleRenderer3D::GetLightMode()];
-}
-
-const char* RE_InternalResources::GetDefaultWaterShader()
-{
-	static const char* waterShaders[4] = { waterShader, waterShader, waterShader /* TODO RUB: add shader with light input*/, waterDefShader };
-	return waterShaders[ModuleRenderer3D::GetLightMode()];
-}
-
-const char* RE_InternalResources::GetDefaultScaleShader() { return defaultScaleShader; }
-const char* RE_InternalResources::GetDefaulMaterial() { return defaultMaterial; }
-const char* RE_InternalResources::GetDefaultSkyBox() { return defaultSkybox; }
-const char* RE_InternalResources::GetLightPassShader() { return defLightShader; }
-const char* RE_InternalResources::GetDefaultSkyBoxShader() { return skyboxShader; }
-unsigned int RE_InternalResources::GetTextureChecker() { return checkerTexture; }
-unsigned int RE_InternalResources::GetTextureWaterFoam() { return water_foam_texture; }
-eastl::vector<RE_Shader_Cvar> RE_InternalResources::GetWaterUniforms() { return waterUniforms; }
-
-void RE_InternalResources::Internal::InitChecker()
+void RE_InternalResources::InitChecker()
 {
 	// Checkers
 	unsigned char imageData[264][264][3];
@@ -80,7 +59,7 @@ void RE_InternalResources::Internal::InitChecker()
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 }
 
-bool RE_InternalResources::Internal::InitShaders()
+bool RE_InternalResources::InitShaders()
 {
 	//Loading Shaders
 	// Default
@@ -88,40 +67,40 @@ bool RE_InternalResources::Internal::InitShaders()
 	defSRes->SetName("Default Shader");
 	defSRes->SetType(Resource_Type::R_SHADER);
 	defSRes->SetAsInternal(DEFVERTEXSHADER, DEFFRAGMENTSHADER);
-	defaultShader = RE_ResourceManager::Reference(defSRes);
+	defaultShader = App::resources->Reference(defSRes);
 
 	// Scaled (for outline)
 	RE_Shader* defScaleRes = new RE_Shader();
 	defScaleRes->SetName("Default Scale Shader");
 	defScaleRes->SetType(Resource_Type::R_SHADER);
 	defScaleRes->SetAsInternal(DEFVERTEXSCALESHADER, DEFFRAGMENTSHADER);
-	defaultScaleShader = RE_ResourceManager::Reference(defScaleRes);
+	defaultScaleShader = App::resources->Reference(defScaleRes);
 
 	// Skybox
 	RE_Shader* defSKRes = new RE_Shader();
 	defSKRes->SetName("Default SkyBox Shader");
 	defSKRes->SetType(Resource_Type::R_SHADER);
 	defSKRes->SetAsInternal(SKYBOXVERTEXSHADER, SKYBOXFRAGMENTSHADER);
-	skyboxShader = RE_ResourceManager::Reference(defSKRes);
+	skyboxShader = App::resources->Reference(defSKRes);
 
 	// Deferred
 	RE_Shader* deferred = new RE_Shader();
 	deferred->SetName("Deferred Shader");
 	deferred->SetType(Resource_Type::R_SHADER);
 	deferred->SetAsInternal(GEOPASSVERTEXSHADER, GEOPASSFRAGMENTSHADER);
-	defGeoShader = RE_ResourceManager::Reference(deferred);
+	defGeoShader = App::resources->Reference(deferred);
 
 	// Light Pass
 	RE_Shader* lightPass = new RE_Shader();
 	lightPass->SetName("Light Pass Shader");
 	lightPass->SetType(Resource_Type::R_SHADER);
 	lightPass->SetAsInternal(LIGHTPASSVERTEXSHADER, LIGHTPASSFRAGMENTSHADER);
-	defLightShader = RE_ResourceManager::Reference(lightPass);
+	defLightShader = App::resources->Reference(lightPass);
 
 	return defaultShader && defaultScaleShader && skyboxShader && defGeoShader && defLightShader;
 }
 
-bool RE_InternalResources::Internal::InitMaterial()
+bool RE_InternalResources::InitMaterial()
 {
 	RE_Material* defMaterial = new RE_Material();
 	defMaterial->SetName("Default Material");
@@ -129,10 +108,10 @@ bool RE_InternalResources::Internal::InitMaterial()
 	defMaterial->ProcessMD5();
 	defMaterial->SetInternal(true);
 	defMaterial->LoadInMemory();
-	return defaultMaterial = RE_ResourceManager::Reference(defMaterial);
+	return defaultMaterial = App::resources->Reference(defMaterial);
 }
 
-bool RE_InternalResources::Internal::InitSkyBox()
+bool RE_InternalResources::InitSkyBox()
 {
 	RE_SkyBox* rdefaultSkybox = new RE_SkyBox();
 	rdefaultSkybox->SetName("defaultSkyBox");
@@ -145,24 +124,24 @@ bool RE_InternalResources::Internal::InitSkyBox()
 	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_BACK, "Settings/DefaultAssets/Skybox/6back.dds");
 	rdefaultSkybox->SetAsInternal();
 
-	return defaultSkybox = RE_ResourceManager::Reference(rdefaultSkybox);
+	return defaultSkybox = App::resources->Reference(rdefaultSkybox);
 }
 
-void RE_InternalResources::Internal::InitWaterResources()
+void RE_InternalResources::InitWaterResources()
 {
 	// Deferred
 	RE_Shader* waterSr = new RE_Shader();
 	waterSr->SetName("Water Shader");
 	waterSr->SetType(Resource_Type::R_SHADER);
 	waterSr->SetAsInternal(WATERVERTEXSHADER, WATERFRAGMENTSHADER);
-	waterShader = RE_ResourceManager::Reference(waterSr);
+	waterShader = App::resources->Reference(waterSr);
 
 	// Light Pass
 	RE_Shader* waterDefS = new RE_Shader();
 	waterDefS->SetName("Water Deferred Shader");
 	waterDefS->SetType(Resource_Type::R_SHADER);
 	waterDefS->SetAsInternal(WATERPASSVERTEXSHADER, WATERPASSFRAGMENTSHADER);
-	waterDefShader = RE_ResourceManager::Reference(waterDefS);
+	waterDefShader = App::resources->Reference(waterDefS);
 
 
 	static const char* internalNames[30] = { "useTexture", "useColor", "useClipPlane", "clip_plane", "time", "dt", "near_plane", "far_plane", "viewport_w", "viewport_h", "model", "view", "projection", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "topacity", "tshininess", "shininessST", "refraccti", "theight", "tnormals", "treflection", "currentDepth", "viewPos" };
@@ -191,3 +170,24 @@ void RE_InternalResources::Internal::InitWaterResources()
 		RE_TextureImporter::LoadTextureInMemory(waterTexture.GetBuffer(), waterTexture.GetSize(), TextureType::RE_PNG, &water_foam_texture, &tmp1, &tmp2, defTexSettings);
 	}
 }
+
+const char* RE_InternalResources::GetDefaultShader() const
+{
+	static const char* shaders[4] = { defaultShader, defaultShader, defaultShader /* TODO RUB: add shader with light input*/, defGeoShader };
+	return shaders[ModuleRenderer3D::GetLightMode()];
+}
+
+const char* RE_InternalResources::GetDefaultWaterShader() const
+{
+	static const char* waterShaders[4] = { waterShader, waterShader, waterShader /* TODO RUB: add shader with light input*/, waterDefShader };
+	return waterShaders[ModuleRenderer3D::GetLightMode()];
+}
+
+const char*	 RE_InternalResources::GetDefaultScaleShader() const { return defaultScaleShader; }
+const char*	 RE_InternalResources::GetDefaulMaterial() const { return defaultMaterial; }
+const char*	 RE_InternalResources::GetDefaultSkyBox() const { return defaultSkybox; }
+const char*	 RE_InternalResources::GetLightPassShader() const { return defLightShader; }
+const char*	 RE_InternalResources::GetDefaultSkyBoxShader() const { return skyboxShader; }
+unsigned int RE_InternalResources::GetTextureChecker() const { return checkerTexture; }
+unsigned int RE_InternalResources::GetTextureWaterFoam() const { return water_foam_texture; }
+eastl::vector<RE_Shader_Cvar> RE_InternalResources::GetWaterUniforms() const { return waterUniforms; }

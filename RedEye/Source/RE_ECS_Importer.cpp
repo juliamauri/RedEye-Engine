@@ -22,7 +22,7 @@ void RE_ECS_Importer::JsonSerialize(RE_Json* node, RE_ECS_Pool* pool)
 	for (int r = 0; r < static_cast<int>(resGo.size()); r++)
 	{
 		RE_Json* resN = resources->PushJObject(("r" + eastl::to_string(r)).c_str());
-		ResourceContainer* res = RE_ResourceManager::At(resGo.at(static_cast<unsigned int>(r)));
+		ResourceContainer* res = App::resources->At(resGo.at(static_cast<unsigned int>(r)));
 		Resource_Type rtype = res->GetType();
 
 		resN->PushInt("index", r);
@@ -47,7 +47,7 @@ char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, unsigned int* bufferSi
 	for (const char* res : resGo)
 	{
 		resourcesIndex.insert(eastl::pair<const char*, int>(res, count++));
-		resC.push_back(RE_ResourceManager::At(res));
+		resC.push_back(App::resources->At(res));
 	}
 
 	*bufferSize = sizeof(uint) + ((sizeof(int) + sizeof(unsigned int) + sizeof(uint)) * resGo.size());
@@ -116,8 +116,8 @@ RE_ECS_Pool* RE_ECS_Importer::JsonDeserialize(RE_Json* node)
 
 		const char* resMD5 = nullptr;
 		resMD5 = (type == Resource_Type::R_MESH) ?
-			RE_ResourceManager::CheckOrFindMeshOnLibrary(mPath.c_str()) :
-			RE_ResourceManager::FindMD5ByMETAPath(mPath.c_str(), type);
+			App::resources->CheckOrFindMeshOnLibrary(mPath.c_str()) :
+			App::resources->FindMD5ByMETAPath(mPath.c_str(), type);
 
 		resourcesIndex.insert(eastl::pair< int, const char*>(r, resMD5));
 		DEL(resN);
@@ -167,8 +167,8 @@ RE_ECS_Pool* RE_ECS_Importer::BinaryDeserialize(char*& cursor)
 
 		const char* resMD5 = nullptr;
 		(rType == Resource_Type::R_MESH) ?
-			resMD5 = RE_ResourceManager::CheckOrFindMeshOnLibrary(str) :
-			resMD5= RE_ResourceManager::FindMD5ByMETAPath(str, rType);
+			resMD5 = App::resources->CheckOrFindMeshOnLibrary(str) :
+			resMD5= App::resources->FindMD5ByMETAPath(str, rType);
 
 		resourcesIndex.insert(eastl::pair< int, const char*>(index, resMD5));
 		DEL_A(str);
@@ -198,8 +198,8 @@ bool RE_ECS_Importer::JsonCheckResources(RE_Json* node)
 
 		const char* resMD5 = nullptr;
 		resMD5 = (type == Resource_Type::R_MESH) ?
-			RE_ResourceManager::CheckOrFindMeshOnLibrary(mPath.c_str()) :
-			RE_ResourceManager::FindMD5ByMETAPath(mPath.c_str(), type);
+			App::resources->CheckOrFindMeshOnLibrary(mPath.c_str()) :
+			App::resources->FindMD5ByMETAPath(mPath.c_str(), type);
 
 		if (!resMD5) ret = false;
 		DEL(resN);
@@ -247,8 +247,8 @@ bool RE_ECS_Importer::BinaryCheckResources(char*& cursor)
 
 		const char* resMD5 = nullptr;
 		resMD5 = (rType == Resource_Type::R_MESH) ?
-			RE_ResourceManager::CheckOrFindMeshOnLibrary(str) :
-			RE_ResourceManager::FindMD5ByMETAPath(str, rType);
+			App::resources->CheckOrFindMeshOnLibrary(str) :
+			App::resources->FindMD5ByMETAPath(str, rType);
 
 		if (!resMD5) ret = false;
 		DEL_A(str);
