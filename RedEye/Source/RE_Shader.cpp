@@ -136,8 +136,8 @@ eastl::vector<RE_Shader_Cvar> RE_Shader::GetUniformValues() { return uniforms; }
 void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane)
 {
 	RE_GLCacheManager::ChangeShader(ID);
-	if (view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
-	if (projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera->GetProjectionPtr());
+	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
+	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera->GetProjectionPtr());
 
 	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, RE_Time::GetDeltaTime());
 	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, RE_Time::GetCurrentTimer());
@@ -356,23 +356,23 @@ void RE_Shader::MountRE_Shader_Cvar(eastl::vector<eastl::string> uniformLines)
 					break;
 				}
 			}
-			if (!sVar.custom) {
-				if (projection == -1 && sVar.name.compare("projection") == 0) projection = uniforms.size();
-				else if (view == -1 && sVar.name.compare("view") == 0) view = uniforms.size();
-				else if (model == -1 && sVar.name.compare("model") == 0) model = uniforms.size();
-				else if (dt == -1 && sVar.name.compare("dt") == 0) dt = uniforms.size();
-				else if (time == -1 && sVar.name.compare("time") == 0) time = uniforms.size();
-				else if (depth == -1 && sVar.name.compare("currentDepth") == 0) depth = uniforms.size();
-				else if (viewport_w == -1 && sVar.name.compare("viewport_w") == 0) viewport_w = uniforms.size();
-				else if (viewport_h == -1 && sVar.name.compare("viewport_h") == 0) viewport_h = uniforms.size();
-				else if (near_plane == -1 && sVar.name.compare("near_plane") == 0) near_plane = uniforms.size();
-				else if (far_plane == -1 && sVar.name.compare("far_plane") == 0) far_plane = uniforms.size();
-				else if (using_clip_plane == -1 && sVar.name.compare("useClipPlane") == 0) using_clip_plane = uniforms.size();
-				else if (clip_plane == -1 && sVar.name.compare("clip_plane") == 0) clip_plane = uniforms.size();
-				else if (view_pos == -1 && sVar.name.compare("viewPos") == 0) view_pos = uniforms.size();
-			}
 
 			uniforms.push_back(sVar);
+			if (!sVar.custom) {
+				if (projection == -1 && sVar.name.compare("projection") == 0) projection = uniforms.size() - 1;
+				else if (view == -1 && sVar.name.compare("view") == 0) view = uniforms.size() - 1;
+				else if (model == -1 && sVar.name.compare("model") == 0) model = uniforms.size() - 1;
+				else if (dt == -1 && sVar.name.compare("dt") == 0) dt = uniforms.size() - 1;
+				else if (time == -1 && sVar.name.compare("time") == 0) time = uniforms.size() - 1;
+				else if (depth == -1 && sVar.name.compare("currentDepth") == 0) depth = uniforms.size() - 1;
+				else if (viewport_w == -1 && sVar.name.compare("viewport_w") == 0) viewport_w = uniforms.size() - 1;
+				else if (viewport_h == -1 && sVar.name.compare("viewport_h") == 0) viewport_h = uniforms.size() - 1;
+				else if (near_plane == -1 && sVar.name.compare("near_plane") == 0) near_plane = uniforms.size() - 1;
+				else if (far_plane == -1 && sVar.name.compare("far_plane") == 0) far_plane = uniforms.size() - 1;
+				else if (using_clip_plane == -1 && sVar.name.compare("useClipPlane") == 0) using_clip_plane = uniforms.size() - 1;
+				else if (clip_plane == -1 && sVar.name.compare("clip_plane") == 0) clip_plane = uniforms.size() - 1;
+				else if (view_pos == -1 && sVar.name.compare("viewPos") == 0) view_pos = uniforms.size() - 1;
+			}
 		}
 	}
 }

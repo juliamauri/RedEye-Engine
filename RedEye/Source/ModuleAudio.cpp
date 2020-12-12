@@ -2,11 +2,11 @@
 
 #include "RE_ConsoleLog.h"
 #include "RE_Time.h"
+#include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
 #include "RE_Json.h"
-#include "Application.h"
 
 #include "ImGui/imgui.h"
 #include "ImGui/misc/cpp/imgui_stdlib.h"
@@ -284,7 +284,7 @@ void ModuleAudio::DrawWwiseElementsDetected()
 
 void ModuleAudio::Load()
 {
-	RE_Json* node = RE_FileSystem::GetConfigNode(name);
+	RE_Json* node = RE_FileSystem::config->GetRootNode(name);
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
 	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
 	DEL(node);
@@ -292,7 +292,7 @@ void ModuleAudio::Load()
 
 void ModuleAudio::Save() const
 {
-	RE_Json* node = RE_FileSystem::GetConfigNode(name);
+	RE_Json* node = RE_FileSystem::config->GetRootNode(name);
 	node->PushString("FolderBanks", audioBanksFolderPath.c_str());
 	DEL(node);
 }

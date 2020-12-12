@@ -1,8 +1,9 @@
 #include "RE_TextureImporter.h"
 
-#include "Globals.h"
 #include "RE_ConsoleLog.h"
+#include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
+#include "Application.h"
 #include "RE_GLCacheManager.h"
 #include "RE_ResourceManager.h"
 #include "RE_Texture.h"
@@ -17,12 +18,12 @@
 #pragma comment(lib, "IL/libx86/ILU.lib")
 #pragma comment(lib, "IL/libx86/ILUT.lib")
 
-void RE_TextureImporter::Init()
+bool RE_TextureImporter::Init()
 {
 	RE_LOG("Initializing Texture Importer");
-	ilInit(); // DevIL
-	iluInit(); // DevIL Utility
-	ilutInit(); // DevIL Utility Tools
+	ilInit();
+	iluInit();
+	ilutInit();
 
 	ILenum error = ilGetError();
 	if (error == IL_NO_ERROR) {
@@ -32,13 +33,13 @@ void RE_TextureImporter::Init()
 					char tmp[8];
 					EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
 					RE_SOFT_NVS("DevIL", tmp, "http://openil.sourceforge.net/");
-					return;
+					return true;
 				} else	RE_LOG_ERROR("DevIL Init Error when enabling origin IL_ORIGIN_SET");
 			} else		RE_LOG_ERROR("DevIL Init Error when setting origin to IL_ORIGIN_LOWER_LEFT");
 		} else			RE_LOG_ERROR("DevIL Init Error when setting renderer to ILUT_OPENGL");
 	} else				RE_LOG_ERROR("DevIL Init Error %d - %s", error, iluErrorString(error));
 
-	RE_LOG_WARNING("Won't be able to use/import textures");
+	return false;
 }
 
 const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPath)

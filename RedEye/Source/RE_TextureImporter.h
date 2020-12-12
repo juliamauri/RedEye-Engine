@@ -7,7 +7,7 @@ class RE_FileBuffer;
 
 namespace RE_TextureImporter
 {
-	void Init();
+	bool Init();
 
 	const char* AddNewTextureOnResources(const char* assetsPath);
 	const char* TransformToDDS(const char* assetBuffer, unsigned int assetSize, TextureType assetType, unsigned int* newSize);
