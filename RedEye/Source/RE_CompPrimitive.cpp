@@ -1,12 +1,15 @@
 #include "RE_CompPrimitive.h"
 
-#include "RE_Json.h"
 #include "Application.h"
+#include "ModuleInput.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"
+#include "RE_Json.h"
 #include "RE_ShaderImporter.h"
+#include "RE_InternalResources.h"
 #include "RE_ResourceManager.h"
-#include "RE_GLCacheManager.h"
+#include "RE_PrimitiveManager.h"
+#include "RE_GLCache.h"
 #include "RE_Mesh.h"
 #include "RE_Shader.h"
 #include "RE_GameObject.h"
@@ -110,7 +113,7 @@ void RE_CompGrid::GridSetUp(int newD)
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 
-	RE_GLCacheManager::ChangeVAO(VAO);
+	RE_GLCache::ChangeVAO(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
@@ -118,7 +121,7 @@ void RE_CompGrid::GridSetUp(int newD)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
 
-	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCache::ChangeVAO(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
@@ -134,16 +137,16 @@ void RE_CompGrid::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UI
 
 void RE_CompGrid::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultShader()))->GetID();
-	RE_GLCacheManager::ChangeShader(shader);
+	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetTransformPtr()->GetGlobalMatrixPtr());
 	RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
 	RE_ShaderImporter::setFloat(shader, "cdiffuse", color);
 
-	RE_GLCacheManager::ChangeVAO(VAO);
+	RE_GLCache::ChangeVAO(VAO);
 	glDrawArrays(GL_LINES, 0, (divisions * 8) + 4);
-	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCache::ChangeVAO(0);
 }
 
 void RE_CompGrid::DrawProperties()
@@ -232,8 +235,8 @@ void RE_CompRock::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UI
 
 void RE_CompRock::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultShader()))->GetID();
-	RE_GLCacheManager::ChangeShader(shader);
+	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
 	// Apply Diffuse Color
@@ -242,9 +245,9 @@ void RE_CompRock::Draw() const
 	RE_ShaderImporter::setFloat(shader, "cdiffuse", color);
 
 	// Draw
-	RE_GLCacheManager::ChangeVAO(VAO);
+	RE_GLCache::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
-	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCache::ChangeVAO(0);
 }
 
 void RE_CompRock::DrawProperties()
@@ -373,7 +376,7 @@ void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
 		}
 
 		glGenVertexArrays(1, &VAO);
-		RE_GLCacheManager::ChangeVAO(VAO);
+		RE_GLCache::ChangeVAO(VAO);
 
 		glGenBuffers(1, &VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -389,7 +392,7 @@ void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, rock->ntriangles * sizeof(unsigned short) * 3, rock->triangles, GL_STATIC_DRAW);
 
-		RE_GLCacheManager::ChangeVAO(0);
+		RE_GLCache::ChangeVAO(0);
 
 		triangle_count = rock->ntriangles;
 
@@ -414,7 +417,7 @@ void RE_CompPlatonic::PlatonicSetUp(unsigned int vao, unsigned int t_count)
 	}
 	else
 	{
-		eastl::pair<unsigned int, unsigned int> data = App::primitives.GetPlatonicData(type);
+		eastl::pair<unsigned int, unsigned int> data = RE_SCENE->primitives->GetPlatonicData(type);
 		VAO = data.first;
 		triangle_count = data.second;
 	}
@@ -433,8 +436,8 @@ void RE_CompPlatonic::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, cons
 
 void RE_CompPlatonic::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultShader()))->GetID();
-	RE_GLCacheManager::ChangeShader(shader);
+	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
 	// Apply Diffuse Color
@@ -443,9 +446,9 @@ void RE_CompPlatonic::Draw() const
 	RE_ShaderImporter::setFloat(shader, "cdiffuse", color);
 
 	// Draw
-	RE_GLCacheManager::ChangeVAO(VAO);
+	RE_GLCache::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
-	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCache::ChangeVAO(0);
 }
 
 void RE_CompPlatonic::DrawProperties()
@@ -470,7 +473,7 @@ void RE_CompPlatonic::SerializeJson(RE_Json* node, eastl::map<const char*, int>*
 void RE_CompPlatonic::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	color = node->PullFloatVector("color", color);
-	App::primitives.SetUpComponentPrimitive(this);
+	RE_SCENE->primitives->SetUpComponentPrimitive(this);
 }
 
 void RE_CompPlatonic::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
@@ -486,7 +489,7 @@ void RE_CompPlatonic::DeserializeBinary(char*& cursor, eastl::map<int, const cha
 	memcpy(&color[0], cursor, size);
 	cursor += size;
 
-	App::primitives.SetUpComponentPrimitive(this);
+	RE_SCENE->primitives->SetUpComponentPrimitive(this);
 }
 
 ///////   Parametric   ////////////////////////////////////////////
@@ -517,8 +520,8 @@ void RE_CompParametric::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, co
 
 void RE_CompParametric::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultShader()))->GetID();
-	RE_GLCacheManager::ChangeShader(shader);
+	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
 	if (!show_checkers) // Apply Diffuse Color
@@ -533,12 +536,12 @@ void RE_CompParametric::Draw() const
 		RE_ShaderImporter::setFloat(shader, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(shader, "useTexture", 1.0f);
 		RE_ShaderImporter::setUnsignedInt(shader, "tdiffuse", 0);
-		RE_GLCacheManager::ChangeTextureBind(RE_ResourceManager::internalResources.GetTextureChecker());
+		RE_GLCache::ChangeTextureBind(RE_RES->internalResources->GetTextureChecker());
 	}
 
-	RE_GLCacheManager::ChangeVAO(VAO);
+	RE_GLCache::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
-	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCache::ChangeVAO(0);
 }
 
 void RE_CompParametric::DrawProperties()
@@ -562,7 +565,7 @@ void RE_CompParametric::DrawProperties()
 		}
 
 		if (type == C_PLANE && ImGui::Button("Convert To Mesh")) 
-			Event::Push(RE_EventType::PLANE_CHANGE_TO_MESH, App::scene, go);
+			RE_INPUT->Push(RE_EventType::PLANE_CHANGE_TO_MESH, RE_SCENE, go);
 	}
 }
 
@@ -672,7 +675,7 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 	}
 
 	glGenVertexArrays(1, &VAO);
-	RE_GLCacheManager::ChangeVAO(VAO);
+	RE_GLCache::ChangeVAO(VAO);
 
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -691,7 +694,7 @@ void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, param->ntriangles * sizeof(unsigned short) * 3u, param->triangles, GL_STATIC_DRAW);
 
-	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCache::ChangeVAO(0);
 
 	triangle_count = param->ntriangles;
 
@@ -735,7 +738,7 @@ const char* RE_CompPlane::TransformAsMeshResource()
 	{
 		newMesh->SetName(eastl::string("Plane " + eastl::to_string(plane->ntriangles) + " triangles").c_str());
 		newMesh->SetType(Resource_Type::R_MESH);
-		App::resources->Reference(newMesh);
+		RE_RES->Reference(newMesh);
 	}
 	else DEL(newMesh);
 

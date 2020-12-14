@@ -2,13 +2,12 @@
 #define __APP_H__
 
 #include "EventListener.h"
-#include "RE_CameraManager.h"
-#include "RE_PrimitiveManager.h"
-#include "Optick/include/optick.h"
-#include <EASTL/string.h>
-#include <EASTL/list.h>
+#include "RE_ConsoleLog.h"
 
-class Config;
+class RE_Time;
+class RE_Math;
+class RE_Hardware;
+
 class Module;
 class ModuleInput;
 class ModuleWindow;
@@ -19,7 +18,6 @@ class ModuleAudio;
 
 class RE_FileSystem;
 class RE_ResourceManager;
-class RE_ThumbnailManager;
 
 class Application : public EventListener
 {
@@ -34,55 +32,82 @@ public:
 
 	void RecieveEvent(const Event& e) override;
 
-	static Application* Ptr();
-	static const char* GetName();
-	static const char* GetOrganization();
-	static void DrawModuleEditorConfig();
+	const char* GetName() { return "RedEye Engine"; }
+	const char* GetOrganization() { return "RedEye"; }
 
 private:
-
-	bool InitSDL();
-	bool InitFileSystem(int argc, char* argv[]);
-	bool InitModules();
-	void InitInternalSystems();
-	bool StartModules();
 
 	void LoadConfig();
 	void SaveConfig();
 
 public:
 
+	int argc = 0;
+	char** argv = nullptr;
+
 	// Utility
-	static RE_FileSystem* fs;
+	RE_ConsoleLog log;
+	RE_Time* time = nullptr;
+	RE_Math* math = nullptr;
+	RE_Hardware* hardware = nullptr;
 
 	// Modules
-	static ModuleInput* input;
-	static ModuleWindow* window;
-	static ModuleScene* scene;
-	static ModuleEditor* editor;
-	static ModuleRenderer3D* renderer3d;
-	static ModuleAudio* audio;
-	static Config* config;
+	ModuleInput* input = nullptr;
+	ModuleWindow* window = nullptr;
+	ModuleScene* scene = nullptr;
+	ModuleEditor* editor = nullptr;
+	ModuleRenderer3D* renderer = nullptr;
+	ModuleAudio* audio = nullptr;
 
-	// Managers
-	static RE_CameraManager cams;
-	static RE_PrimitiveManager primitives;
-	static RE_ThumbnailManager* thumbnail;
-	static RE_ResourceManager* resources;
+	// Files & Resources
+	RE_FileSystem* fs = nullptr;
+	RE_ResourceManager* res = nullptr;
 
 private:
 
-	bool load_config = false;
-	bool save_config = false;
-	bool quit = false;
-	bool save_on_exit = true;
+	enum AppFlags : char
+	{
+		EMPLY_FLAGS = 0,
+		LOAD_CONFIG = 0x1,	// 0001
+		SAVE_CONFIG = 0x2,	// 0010
+		WANT_TO_QUIT = 0x4,	// 0100
+		SAVE_ON_EXIT = 0x8,	// 1000
+	};
 
-	static Application* instance;
-	static eastl::string app_name;
-	static eastl::string organization;
-	static eastl::list<Module*> modules;
+	char flags = EMPLY_FLAGS;
 };
 
-typedef Application App;
+extern Application* App;
+
+#define RE_LOGGER App->log
+#define RE_TIME App->time
+#define RE_MATH App->math
+#define RE_HARDWARE App->hardware
+#define RE_FS App->fs
+#define RE_RES App->res
+
+#define RE_INPUT App->input
+#define RE_WINDOW App->window
+#define RE_SCENE App->scene
+#define RE_EDITOR App->editor
+#define RE_RENDER App->renderer
+#define RE_AUDIO App->audio
+/*
+#include "Optick\include\optick.h"
+RE_INPUT->
+RE_WINDOW->
+RE_SCENE->
+RE_EDITOR->
+RE_RENDER->
+RE_AUDIO->
+
+RE_LOGGER.
+RE_TIME->
+RE_RNG->
+RE_HARDWARE->
+RE_FS->
+RE_RES->
+
+*/
 
 #endif // !__APP_H__

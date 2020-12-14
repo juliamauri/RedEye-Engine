@@ -3,7 +3,6 @@
 
 #include "RE_Component.h"
 #include "RE_Math.h"
-#include "MathGeoLib\include\MathGeoLib.h"
 
 class RE_CompTransform: public RE_Component
 {

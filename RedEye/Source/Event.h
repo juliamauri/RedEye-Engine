@@ -69,38 +69,17 @@ enum RE_EventType : unsigned short int
 	MAX_EVENT_TYPES
 };
 
-class Event
+struct Event
 {
-public:
-
 	Event(RE_EventType t, EventListener* lis, RE_Cvar data = RE_Cvar(), RE_Cvar data2 = RE_Cvar());
 	Event(Event& e);
 	~Event() {}
-
-	static void Push(RE_EventType t, EventListener* lis, RE_Cvar data = RE_Cvar(), RE_Cvar data2 = RE_Cvar());
-	static void PushForced(RE_EventType t, EventListener* lis, RE_Cvar data = RE_Cvar(), RE_Cvar data2 = RE_Cvar());
-	static void PumpAll();
-	static void ClearQueue();
-	static void ResumeEvents();
-	static void PauseEvents();
-	static bool isPaused();
-
-private:
-
-	void CallListener() const;
-	bool IsValid() const;
-
-public:
 
 	RE_EventType type;
 	EventListener* listener;
 	RE_Cvar data1;
 	RE_Cvar data2;
 	const unsigned int timestamp;
-
-private:
-
-	static bool paused;
 };
 
-#endif
+#endif // !__EVENT_H__

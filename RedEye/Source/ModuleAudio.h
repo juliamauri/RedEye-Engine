@@ -28,22 +28,21 @@ struct SoundBank {
 class ModuleAudio : public Module
 {
 public:
-	ModuleAudio(const char* name = "Audio", bool start_enabled = true);
-	~ModuleAudio();
+	ModuleAudio() : Module("Audio") {}
+	~ModuleAudio() {}
 
 	bool Init() override;
 	bool Start() override;
 	void PostUpdate() override;
 	void CleanUp() override;
 
-	void RecieveEvent(const Event& e) override;
 	void DrawEditor() override;
-
-	void DrawWwiseElementsDetected();
+	void RecieveEvent(const Event& e) override;
 
 	void Load() override;
 	void Save() const override;
 
+	void DrawWwiseElementsDetected();
 	unsigned int ReadBanksChanges(unsigned int extra_ms = 0u);
 
 	static void SendRTPC(const char* name, float value);
@@ -51,6 +50,7 @@ public:
 	static void SendSwitch(const char* switchName, const char* switchStateName);
 
 private:
+
 	eastl::string audioBanksFolderPath;
 	bool located_banksFolder = false;
 

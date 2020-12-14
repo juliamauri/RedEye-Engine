@@ -1,6 +1,6 @@
 #include "RE_FileBuffer.h"
 
-#include "RE_ConsoleLog.h"
+#include "Application.h"
 #include "md5.h"
 #include "Optick\include\optick.h"
 #include "PhysFS\include\physfs.h"

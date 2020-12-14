@@ -1,18 +1,17 @@
 #include "RE_Shader.h"
 
-#include "RE_ConsoleLog.h"
+#include "Application.h"
 #include "RE_Time.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Json.h"
-#include "Application.h"
+#include "ModuleInput.h"
+#include "ModuleEditor.h"
 #include "RE_ResourceManager.h"
 #include "RE_ShaderImporter.h"
+#include "RE_GLCache.h"
 #include "RE_CompCamera.h"
 #include "RE_CompTransform.h"
-#include "ModuleEditor.h"
-#include "RE_GLCacheManager.h"
-#include "Event.h"
 
 #include "md5.h"
 #include "ImGui/imgui.h"
@@ -20,11 +19,11 @@
 
 void RE_Shader::LoadInMemory()
 {
-	if (App::fs->Exists(GetLibraryPath()))
+	if (RE_FS->Exists(GetLibraryPath()))
 	{
 		LibraryLoad();
 	}
-	else if (App::fs->Exists(shaderSettings.vertexShader.c_str()) && App::fs->Exists(shaderSettings.fragmentShader.c_str()))
+	else if (RE_FS->Exists(shaderSettings.vertexShader.c_str()) && RE_FS->Exists(shaderSettings.fragmentShader.c_str()))
 	{
 		AssetLoad();
 		LibrarySave();
@@ -135,12 +134,12 @@ eastl::vector<RE_Shader_Cvar> RE_Shader::GetUniformValues() { return uniforms; }
 
 void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane)
 {
-	RE_GLCacheManager::ChangeShader(ID);
+	RE_GLCache::ChangeShader(ID);
 	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
 	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera->GetProjectionPtr());
 
-	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, RE_Time::GetDeltaTime());
-	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, RE_Time::GetCurrentTimer());
+	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, RE_TIME->GetDeltaTime());
+	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, RE_TIME->GetCurrentTimer());
 
 	if (viewport_h != -1) RE_ShaderImporter::setFloat(uniforms[viewport_h].location, window_h);
 	if (viewport_w != -1) RE_ShaderImporter::setFloat(uniforms[viewport_w].location, window_w);
@@ -149,18 +148,18 @@ void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float 
 	if (using_clip_plane != -1) RE_ShaderImporter::setFloat(uniforms[using_clip_plane].location, (clipDistance) ? 1.0f : -1.0f);
 	if (clip_plane != -1) RE_ShaderImporter::setFloat(uniforms[clip_plane].location, clipPlane.x, clipPlane.y, clipPlane.z, clipPlane.w);
 	if (view_pos != -1) RE_ShaderImporter::setFloat(uniforms[view_pos].location, camera->GetTransform()->GetGlobalPosition());
-	RE_GLCacheManager::ChangeShader(0);
+	RE_GLCache::ChangeShader(0);
 }
 
 void RE_Shader::UploadModel(const float* _model)
 {
-	RE_GLCacheManager::ChangeShader(ID);
+	RE_GLCache::ChangeShader(ID);
 	if(model != -1) RE_ShaderImporter::setFloat4x4(uniforms[model].location, _model);
 }
 
 void RE_Shader::UploadDepth(int texture)
 {
-	RE_GLCacheManager::ChangeShader(ID);
+	RE_GLCache::ChangeShader(ID);
 	if (depth != -1) RE_ShaderImporter::setInt(uniforms[depth].location, texture);
 }
 
@@ -219,7 +218,7 @@ void RE_Shader::ReImport()
 	else GetLocations();
 
 	//Send Resource Event
-	Event::Push(RE_EventType::RESOURCE_CHANGED, App::resources, RE_Cvar(GetMD5()));
+	RE_INPUT->Push(RE_EventType::RESOURCE_CHANGED, RE_RES, RE_Cvar(GetMD5()));
 }
 
 bool RE_Shader::IsPathOnShader(const char* assetPath)
@@ -379,10 +378,10 @@ void RE_Shader::MountRE_Shader_Cvar(eastl::vector<eastl::string> uniformLines)
 
 void RE_Shader::GetLocations()
 {
-	RE_GLCacheManager::ChangeShader(ID);
+	RE_GLCache::ChangeShader(ID);
 	for (unsigned int i = 0; i < uniforms.size(); i++)
 		uniforms[i].location = RE_ShaderImporter::getLocation(ID, uniforms[i].name.c_str());
-	RE_GLCacheManager::ChangeShader(0);
+	RE_GLCache::ChangeShader(0);
 }
 
 bool RE_Shader::NeedUploadDepth() const { return (depth != -1); }
@@ -393,15 +392,15 @@ void RE_Shader::Draw()
 	ImGui::Text("Vertex Shader path: %s", shaderSettings.vertexShader.c_str());
 	if (!shaderSettings.vertexShader.empty())
 		if (ImGui::Button("Edit vertex"))
-			App::editor->OpenTextEditor(shaderSettings.vertexShader.c_str(), &shaderSettings.vertexShader);
+			RE_EDITOR->OpenTextEditor(shaderSettings.vertexShader.c_str(), &shaderSettings.vertexShader);
 	ImGui::Text("Fragment Shader path: %s", shaderSettings.fragmentShader.c_str());
 	if (!shaderSettings.fragmentShader.empty())
 		if (ImGui::Button("Edit fragment"))
-			App::editor->OpenTextEditor(shaderSettings.fragmentShader.c_str(), &shaderSettings.fragmentShader);
+			RE_EDITOR->OpenTextEditor(shaderSettings.fragmentShader.c_str(), &shaderSettings.fragmentShader);
 	ImGui::Text("Geometry Shader path: %s", shaderSettings.geometryShader.c_str());
 	if (!shaderSettings.geometryShader.empty())
 		if (ImGui::Button("Edit geometry"))
-			App::editor->OpenTextEditor(shaderSettings.geometryShader.c_str(), &shaderSettings.geometryShader);
+			RE_EDITOR->OpenTextEditor(shaderSettings.geometryShader.c_str(), &shaderSettings.geometryShader);
 }
 
 void RE_Shader::SaveResourceMeta(RE_Json* metaNode)
@@ -534,7 +533,7 @@ void RE_Shader::LibraryLoad()
 
 void RE_Shader::LibrarySave()
 {
-	RE_FileBuffer librarySave(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer librarySave(GetLibraryPath(), RE_FS->GetZipPath());
 	char* buffer = nullptr;
 	int size = 0;
 	if (RE_ShaderImporter::GetBinaryProgram(ID, &buffer, &size)) librarySave.Save(buffer, size);

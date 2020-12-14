@@ -9,7 +9,6 @@
 #include "RE_GameObject.h"
 #include "RE_ECS_Pool.h"
 #include "ImGui\imgui.h"
-#include "RE_Math.h"
 
 #define MIN_SCALE 0.001f
 
@@ -330,11 +329,11 @@ void RE_CompTransform::DrawProperties()
 			}
 		}
 
-		if (watchingChange && (App::input->GetMouse().GetButton(1) == KEY_STATE::KEY_UP || !frameWatched))
+		if (watchingChange && (RE_INPUT->GetMouse().GetButton(1) == KEY_STATE::KEY_UP || !frameWatched))
 		{
-			if		(pFrom) App::editor->PushCommand(new RE_CMDTransformPosition(go, before, last));
-			else if (rFrom) App::editor->PushCommand(new RE_CMDTransformRotation(go, before, last));
-			else if (sFrom) App::editor->PushCommand(new RE_CMDTransformScale(go, before, last));
+			if		(pFrom) RE_EDITOR->PushCommand(new RE_CMDTransformPosition(go, before, last));
+			else if (rFrom) RE_EDITOR->PushCommand(new RE_CMDTransformRotation(go, before, last));
+			else if (sFrom) RE_EDITOR->PushCommand(new RE_CMDTransformScale(go, before, last));
 			
 			watchingChange = pFrom = rFrom = sFrom = false;
 			before = last = math::vec::zero;
@@ -364,7 +363,7 @@ void RE_CompTransform::CalcGlobalTransform()
 		{
 			math::float4x4 next_global = model_local * parent->GetTransformPtr()->GetGlobalMatrix();
 			if (!next_global.Equals(model_global))
-				Event::Push(TRANSFORM_MODIFIED, App::scene, go, model_global = next_global);
+				RE_INPUT->Push(TRANSFORM_MODIFIED, RE_SCENE, go, model_global = next_global);
 		}
 	}
 	else model_global = model_local;

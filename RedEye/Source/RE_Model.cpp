@@ -1,27 +1,27 @@
 #include "RE_Model.h"
 
 #include "Globals.h"
-#include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Json.h"
 #include "Application.h"
+#include "ModuleInput.h"
 #include "ModuleScene.h"
 #include "RE_ResourceManager.h"
-#include "RE_ECS_Pool.h"
-#include "RE_ECS_Importer.h"
 #include "RE_ModelImporter.h"
+#include "RE_ECS_Importer.h"
+#include "RE_ECS_Pool.h"
 
 #include "assimp\include\postprocess.h"
-#include "ImGui/imgui.h"
+#include "ImGui\imgui.h"
 
 void RE_Model::LoadInMemory()
 {
-	if (App::fs->Exists(GetLibraryPath()))
+	if (RE_FS->Exists(GetLibraryPath()))
 	{
 		LibraryLoad();
 	}
-	else if (App::fs->Exists(GetAssetPath()))
+	else if (RE_FS->Exists(GetAssetPath()))
 	{
 		AssetLoad();
 		LibrarySave();
@@ -73,13 +73,13 @@ void RE_Model::Draw()
 			restoreSettings = modelSettings;
 			bool neededReLoad = false;
 			if (ResourceContainer::inMemory) neededReLoad = true;
-			Event::PauseEvents();
+			RE_INPUT->PauseEvents();
 			if (neededReLoad) UnloadMemory();
 			AssetLoad();
 			LibrarySave();
 			SaveMeta();
 			if(!neededReLoad) UnloadMemory();
-			Event::ResumeEvents();
+			RE_INPUT->ResumeEvents();
 			applySave = false;
 		}
 		if (ImGui::Button("Restore"))
@@ -130,12 +130,12 @@ void RE_Model::Draw()
 
 	if (!needReImport && ImGui::Button("Add to Scene"))
 	{
-		RE_ConsoleLog::ScopeProcedureLogging();
+		RE_LOGGER.ScopeProcedureLogging();
 
 		if (CheckResourcesIsOnAssets())
 		{
-			if (loaded == nullptr) App::resources->Use(GetMD5());
-			App::scene->AddGOPool(loaded);
+			if (loaded == nullptr) RE_RES->Use(GetMD5());
+			RE_SCENE->AddGOPool(loaded);
 		}
 		else
 		{
@@ -144,19 +144,19 @@ void RE_Model::Draw()
 			needReImport = true;
 		}
 
-		RE_ConsoleLog::EndScope();
+		RE_LOGGER.EndScope();
 	}
 	else if(needReImport && ImGui::Button("ReImport before add"))
 	{
 		bool neededReLoad = false;
 		if (ResourceContainer::inMemory) neededReLoad = true;
-		Event::PauseEvents();
+		RE_INPUT->PauseEvents();
 		if (neededReLoad) UnloadMemory();
 		AssetLoad();
 		LibrarySave();
 		SaveMeta();
 		if (!neededReLoad) UnloadMemory();
-		Event::ResumeEvents();
+		RE_INPUT->ResumeEvents();
 		needReImport = false;
 	}
 
@@ -177,7 +177,7 @@ void RE_Model::SaveResourceMeta(RE_Json* metaNode)
 	uint count = 0;
 	for (const char* mesh : modelSettings.libraryMeshes)
 	{
-		ResourceContainer* rM = App::resources->At(mesh);
+		ResourceContainer* rM = RE_RES->At(mesh);
 		metaNode->PushString(eastl::to_string(count++).c_str(), rM->GetLibraryPath());
 	}
 }
@@ -196,11 +196,11 @@ void RE_Model::LoadResourceMeta(RE_Json* metaNode)
 	for (uint i = 0; i < totalMeshes; i++)
 	{
 		eastl::string libraryMesh = metaNode->PullString(eastl::to_string(i).c_str(), "");
-		const char* md5 = App::resources->CheckOrFindMeshOnLibrary(libraryMesh.c_str());
+		const char* md5 = RE_RES->CheckOrFindMeshOnLibrary(libraryMesh.c_str());
 		if (md5)
 		{
-			App::resources->At(md5)->SetAssetPath(GetAssetPath());
-			App::resources->At(md5)->SetMetaPath(GetMetaPath());
+			RE_RES->At(md5)->SetAssetPath(GetAssetPath());
+			RE_RES->At(md5)->SetMetaPath(GetMetaPath());
 			modelSettings.libraryMeshes.push_back(md5);
 		}
 	}
@@ -212,7 +212,7 @@ void RE_Model::AssetLoad()
 	RE_FileBuffer assetload(GetAssetPath());
 	if (assetload.Load())
 	{
-		loaded = RE_ModelImporter::ProcessModel(assetload.GetBuffer(), assetload.GetSize(),GetAssetPath(), &modelSettings);
+		loaded = RE_RES->model_importer->ProcessModel(assetload.GetBuffer(), assetload.GetSize(),GetAssetPath(), &modelSettings);
 		SetMD5(assetload.GetMd5().c_str());
 		eastl::string libraryPath("Library/Models/");
 		libraryPath += GetMD5();
@@ -239,7 +239,7 @@ void RE_Model::LibrarySave()
 		uint size = 0;
 		char* buffer = RE_ECS_Importer::BinarySerialize(loaded, &size);
 
-		RE_FileBuffer toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
+		RE_FileBuffer toLibrarySave(GetLibraryPath(), RE_FS->GetZipPath());
 		toLibrarySave.Save(buffer, size);
 		DEL_A(buffer);
 	}

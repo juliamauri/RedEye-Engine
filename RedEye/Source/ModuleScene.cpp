@@ -1,51 +1,54 @@
 #include "ModuleScene.h"
 
+#include "RE_Timer.h"
+#include "RE_Math.h"
 #include "Application.h"
-#include "ModuleRenderer3D.h"
-#include "ModuleEditor.h"
 #include "ModuleInput.h"
-#include "RE_ThumbnailManager.h"
-
+#include "ModuleEditor.h"
+#include "ModuleRenderer3D.h"
 #include "RE_FileSystem.h"
-#include "RE_PrimitiveManager.h"
 #include "RE_ResourceManager.h"
-#include "RE_InternalResources.h"
 #include "RE_CameraManager.h"
+#include "RE_PrimitiveManager.h"
 #include "RE_ShaderImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_TextureImporter.h"
 #include "RE_ECS_Pool.h"
-
-#include "RE_Material.h"
-#include "RE_Prefab.h"
-#include "RE_Scene.h"
-#include "RE_Model.h"
-
 #include "RE_GameObject.h"
 #include "RE_CompMesh.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
 #include "RE_CompPrimitive.h"
+#include "RE_Material.h"
+#include "RE_Prefab.h"
+#include "RE_Scene.h"
+#include "RE_Model.h"
 
-#include "RE_ConsoleLog.h"
-#include "RE_Time.h"
-
+#include "SDL2\include\SDL.h"
+#include "Optick\include\optick.h"
 #include <EASTL/string.h>
 #include <EASTL/queue.h>
 #include <EASTL/vector.h>
-#include "SDL2\include\SDL.h"
 
-#define DEFAULTMODEL "Assets/Meshes/BakerHouse/BakerHouse.fbx"
+ModuleScene::ModuleScene() :
+	Module("Scene"),
+	cams(new RE_CameraManager()),
+	primitives(new RE_PrimitiveManager()) {}
 
-RE_ECS_Pool ModuleScene::scenePool;
+ModuleScene::~ModuleScene() { DEL(cams); DEL(primitives); }
 
-ModuleScene::ModuleScene(const char* name, bool start_enabled) : Module(name, start_enabled) {}
-ModuleScene::~ModuleScene() {}
+bool ModuleScene::Init()
+{
+	RE_LOG("Initializing Module %s", name);
+	cams->Init();
+	primitives->Init();
+	return true;
+}
 
 bool ModuleScene::Start()
 {
 	RE_LOG("Starting Module %s", name);
-	eastl::vector<ResourceContainer*> scenes = App::resources->GetResourcesByType(R_SCENE);
+	eastl::vector<ResourceContainer*> scenes = RE_RES->GetResourcesByType(R_SCENE);
 	if (!scenes.empty()) LoadScene(scenes[0]->GetMD5());
 	else NewEmptyScene();
 	return true;
@@ -69,6 +72,8 @@ void ModuleScene::PostUpdate()
 
 void ModuleScene::CleanUp()
 {
+	cams->Clear();
+	primitives->Clear();
 	if (unsavedScene) DEL(unsavedScene);
 }
 
@@ -97,10 +102,10 @@ void ModuleScene::DebugDraw() const
 
 void ModuleScene::OnPlay()
 {
-	Event::PauseEvents();
+	RE_INPUT->PauseEvents();
 	savedState.ClearPool();
 	savedState.InsertPool(&scenePool);
-	Event::ResumeEvents();
+	RE_INPUT->ResumeEvents();
 
 	scenePool.GetRootPtr()->OnPlay();
 }
@@ -114,13 +119,13 @@ void ModuleScene::OnStop()
 {
 	scenePool.GetRootPtr()->OnStop();
 
-	Event::PauseEvents();
+	RE_INPUT->PauseEvents();
 	scenePool.ClearPool();
 	scenePool.InsertPool(&savedState);
 	savedState.ClearPool();
-	App::editor->SetSelected(0);
+	RE_EDITOR->SetSelected(0);
 	SetupScene();
-	Event::ResumeEvents();
+	RE_INPUT->ResumeEvents();
 }
 
 void ModuleScene::RecieveEvent(const Event& e)
@@ -228,13 +233,6 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 }
 
-RE_ECS_Pool* ModuleScene::GetScenePool() { return &scenePool; }
-RE_GameObject* ModuleScene::GetGOPtr(UID id) { return scenePool.GetGOPtr(id); }
-const RE_GameObject* ModuleScene::GetGOCPtr(UID id) { return scenePool.GetGOCPtr(id); }
-UID ModuleScene::GetRootUID() { return scenePool.GetRootUID(); }
-RE_GameObject * ModuleScene::GetRootPtr() { return scenePool.GetRootPtr(); }
-const RE_GameObject * ModuleScene::GetRootCPtr() { return scenePool.GetRootCPtr(); }
-
 void ModuleScene::CreatePrimitive(ComponentType type, const UID parent)
 {
 	scenePool.AddGO("Primitive", Validate(parent), true)->AddNewComponent(type);
@@ -267,7 +265,7 @@ void ModuleScene::CreateMaxLights(const UID parent)
 
 			static math::vec colors[5] = { math::vec(1.f,0.f,0.f), math::vec(0.f,1.f,0.f), math::vec(0.f,0.f,1.f), math::vec(1.f,1.f,0.f), math::vec(0.f,1.f,1.f) };
 			dynamic_cast<RE_CompPrimitive*>(light_go->AddNewComponent(C_SPHERE))->SetColor(
-				dynamic_cast<RE_CompLight*>(light_go->AddNewComponent(C_LIGHT))->diffuse = colors[RE_Math::RandomInt() % 5]);
+				dynamic_cast<RE_CompLight*>(light_go->AddNewComponent(C_LIGHT))->diffuse = colors[RE_MATH->RandomInt() % 5]);
 		}
 	}
 }
@@ -284,11 +282,11 @@ void ModuleScene::AddGOPool(RE_ECS_Pool* toAdd)
 {
 	toAdd->UseResources();
 	UID justAdded = scenePool.InsertPool(toAdd, true);
-	App::editor->SetSelected(justAdded);
+	RE_EDITOR->SetSelected(justAdded);
 	haschanges = true;
 }
 
-UID ModuleScene::RayCastGeometry(math::Ray & global_ray)
+UID ModuleScene::RayCastGeometry(math::Ray & global_ray) const
 {
 	UID ret = 0;
 
@@ -324,7 +322,7 @@ UID ModuleScene::RayCastGeometry(math::Ray & global_ray)
 	return ret;
 }
 
-void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum & frustum)
+void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum & frustum) const
 {
 	eastl::queue<UID> goIndex;
 	static_tree.CollectIntersections(frustum, goIndex);
@@ -339,9 +337,9 @@ void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container,
 
 void ModuleScene::SaveScene(const char* newName)
 {
-	RE_Scene* scene = (unsavedScene) ? unsavedScene : dynamic_cast<RE_Scene*>(App::resources->At(currentScene));
+	RE_Scene* scene = (unsavedScene) ? unsavedScene : dynamic_cast<RE_Scene*>(RE_RES->At(currentScene));
 
-	Event::PauseEvents();
+	RE_INPUT->PauseEvents();
 
 	scene->SetName((unsavedScene) ? (newName) ? newName : GetRootCPtr()->name.c_str() : scene->GetName());
 	scene->Save(&scenePool);
@@ -349,22 +347,22 @@ void ModuleScene::SaveScene(const char* newName)
 
 	if (unsavedScene)
 	{
-		currentScene = App::resources->Reference(scene);
-		App::renderer3d->PushThumnailRend(currentScene);
+		currentScene = RE_RES->Reference(scene);
+		RE_RENDER->PushThumnailRend(currentScene);
 		unsavedScene = nullptr;
 	}
 	else
-		App::renderer3d->PushThumnailRend(scene->GetMD5(), true);
+		RE_RENDER->PushThumnailRend(scene->GetMD5(), true);
 
 	haschanges = false;
-	Event::ResumeEvents();
+	RE_INPUT->ResumeEvents();
 }
 
 const char* ModuleScene::GetCurrentScene() const { return currentScene; }
 
 void ModuleScene::ClearScene()
 {
-	Event::PauseEvents();
+	RE_INPUT->PauseEvents();
 
 	if (GetRootUID()) scenePool.UnUseResources();
 	savedState.ClearPool();
@@ -378,17 +376,17 @@ void ModuleScene::ClearScene()
 
 	UID root_uid = scenePool.GetRootUID();
 	scenePool.AddGO("Camera", root_uid)->AddNewComponent(C_CAMERA);
-	App::editor->SetSelected(root_uid);
+	RE_EDITOR->SetSelected(root_uid);
 
 	RE_CameraManager::RecallSceneCameras();
 
-	Event::ResumeEvents();
+	RE_INPUT->ResumeEvents();
 }
 
 void ModuleScene::NewEmptyScene(const char* name)
 {
-	Event::PauseEvents();
-	App::editor->ClearCommands();
+	RE_INPUT->PauseEvents();
+	RE_EDITOR->ClearCommands();
 
 	if (unsavedScene) { DEL(unsavedScene); }
 	else currentScene = nullptr;
@@ -404,16 +402,16 @@ void ModuleScene::NewEmptyScene(const char* name)
 	scenePool.AddGO("root", 0)->SetStatic(false);
 
 	SetupScene();
-	App::editor->SetSelected(0);
-	Event::ResumeEvents();
+	RE_EDITOR->SetSelected(0);
+	RE_INPUT->ResumeEvents();
 
 	haschanges = false;
 }
 
 void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 {
-	Event::PauseEvents();
-	App::editor->ClearCommands();
+	RE_INPUT->PauseEvents();
+	RE_EDITOR->ClearCommands();
 	if (unsavedScene) DEL(unsavedScene);
 	
 	scenePool.UnUseResources();
@@ -421,11 +419,11 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	scenePool.ClearPool();
 
 	RE_LOG("Loading scene from own format:");
-	if(!ignorehandle) RE_ConsoleLog::ScopeProcedureLogging();
-	Timer timer;
+	if(!ignorehandle) RE_LOGGER.ScopeProcedureLogging();
+	RE_Timer timer;
 	currentScene = sceneMD5;
-	RE_Scene* scene = dynamic_cast<RE_Scene*>(App::resources->At(currentScene));
-	App::resources->Use(sceneMD5);
+	RE_Scene* scene = dynamic_cast<RE_Scene*>(RE_RES->At(currentScene));
+	RE_RES->Use(sceneMD5);
 
 	RE_ECS_Pool* loadedDO = scene->GetPool();
 	if (loadedDO)scenePool.InsertPool(loadedDO);
@@ -433,27 +431,27 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 
 	DEL(loadedDO);
 
-	App::resources->UnUse(sceneMD5);
+	RE_RES->UnUse(sceneMD5);
 	scenePool.UseResources();
 	SetupScene();
-	App::editor->SetSelected(0);
+	RE_EDITOR->SetSelected(0);
 
 	RE_LOG("Time loading scene: %u ms", timer.Read());
-	if (!ignorehandle) RE_ConsoleLog::EndScope();
-	Event::ResumeEvents();
+	if (!ignorehandle) RE_LOGGER.EndScope();
+	RE_INPUT->ResumeEvents();
 }
 
 void ModuleScene::SetupScene()
 {
-	Event::PauseEvents();
+	RE_INPUT->PauseEvents();
 
 	// Render Camera Management
 	RE_CameraManager::RecallSceneCameras();
 	if (!RE_CameraManager::HasMainCamera())
 	{
-		Event::ResumeEvents();
+		RE_INPUT->ResumeEvents();
 		CreateCamera(scenePool.GetRootUID());
-		Event::PauseEvents();
+		RE_INPUT->PauseEvents();
 	}
 
 	savedState.ClearPool();
@@ -471,13 +469,6 @@ void ModuleScene::SetupScene()
 			(gos[i].second->IsStatic() ? static_tree : dynamic_tree).PushNode(gos[i].first, gos[i].second->GetGlobalBoundingBox());
 	}
 
-	Event::ResumeEvents();
+	RE_INPUT->ResumeEvents();
 }
 
-inline UID ModuleScene::Validate(const UID id)
-{
-	return id ? id : GetRootUID();
-}
-
-bool ModuleScene::HasChanges() const { return haschanges; }
-bool ModuleScene::isNewScene() const { return (unsavedScene); }

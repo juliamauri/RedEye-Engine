@@ -6,30 +6,30 @@
 
 void RE_CMDTransformPosition::execute()
 {
-	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetPosition(p_);
+	RE_SCENE->GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetPosition(p_);
 }
 
-void RE_CMDTransformPosition::undo()
+void RE_CMDTransformPosition::Undo()
 {
-	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetPosition(pBefore_);
+	RE_SCENE->GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetPosition(pBefore_);
 }
 
 void RE_CMDTransformRotation::execute()
 {
-	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetRotation(r_);
+	RE_SCENE->GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetRotation(r_);
 }
 
-void RE_CMDTransformRotation::undo()
+void RE_CMDTransformRotation::Undo()
 {
-	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetRotation(rBefore_);
+	RE_SCENE->GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetRotation(rBefore_);
 }
 
 void RE_CMDTransformScale::execute()
 {
-	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetScale(s_);
+	RE_SCENE->GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetScale(s_);
 }
 
-void RE_CMDTransformScale::undo()
+void RE_CMDTransformScale::Undo()
 {
-	ModuleScene::GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetScale(sBefore_);
+	RE_SCENE->GetScenePool()->GetGOPtr(go_)->GetTransformPtr()->SetScale(sBefore_);
 }

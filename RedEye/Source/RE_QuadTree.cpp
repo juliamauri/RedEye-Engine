@@ -1,50 +1,50 @@
-#include "QuadTree.h"
+#include "RE_QuadTree.h"
 
 template<class TYPE>
-QTree<TYPE>::QTree(math::AABB& max_size)
+RE_QuadTree<TYPE>::RE_QuadTree(math::AABB& max_size)
 {
 	root.SetBox(max_size);
 }
 
 template<class TYPE>
-void QTree<TYPE>::Push(TYPE in, math::AABB& in_box)
+void RE_QuadTree<TYPE>::Push(TYPE in, math::AABB& in_box)
 {
 	if (root.GetBox().Intersects(in_box))
 		root.RecursivePush(in, in_box);
 }
 
 template<class TYPE>
-void QTree<TYPE>::Pop(TYPE to_remove)
+void RE_QuadTree<TYPE>::Pop(TYPE to_remove)
 {
 	root.RecursivePop(to_remove);
 }
 
 template<class TYPE>
-void QTree<TYPE>::Clear()
+void RE_QuadTree<TYPE>::Clear()
 {
 	root.Clear();
 }
 
 template<class TYPE>
-void QTree<TYPE>::BuildFromList(const eastl::vector<eastl::pair<TYPE, math::AABB>>& items, math::AABB& max_scope)
+void RE_QuadTree<TYPE>::BuildFromList(const eastl::vector<eastl::pair<TYPE, math::AABB>>& items, math::AABB& max_scope)
 {
 	for (auto item : items) root.RecursivePush(item.first, item.second);
 }
 
 template<class TYPE>
-void QTree<TYPE>::GetDrawVertices(eastl::vector<math::vec>& out) const
+void RE_QuadTree<TYPE>::GetDrawVertices(eastl::vector<math::vec>& out) const
 {
 	root.GetDrawVertices(edges, count, out);
 }
 
 template<class TYPE>
-short QTree<TYPE>::GetDrawMode() const
+short RE_QuadTree<TYPE>::GetDrawMode() const
 {
 	return draw_mode;
 }
 
 template<class TYPE>
-void QTree<TYPE>::SetDrawMode(short mode)
+void RE_QuadTree<TYPE>::SetDrawMode(short mode)
 {
 	switch (draw_mode = mode) {
 	case QTreeDrawMode::DISABLED: count = 0;

@@ -6,28 +6,9 @@
 
 #define MAX_COMMANDS 100
 
-RE_CommandManager::RE_CommandManager()
+void RE_CommandManager::Redo()
 {
-}
-
-RE_CommandManager::~RE_CommandManager()
-{
-	Clear();
-}
-
-bool RE_CommandManager::canRedo() const
-{
-	return !redoCommands.empty();
-}
-
-bool RE_CommandManager::canUndo() const
-{
-	return !undoCommands.empty();
-}
-
-void RE_CommandManager::redo()
-{
-	if (canRedo()) {
+	if (!redoCommands.empty()) {
 		RE_Command* cmd = redoCommands.top();
 		cmd->execute();
 		undoCommands.push(cmd);
@@ -35,11 +16,11 @@ void RE_CommandManager::redo()
 	}
 }
 
-void RE_CommandManager::undo()
+void RE_CommandManager::Undo()
 {
-	if (canUndo()) {
+	if (!undoCommands.empty()) {
 		RE_Command* cmd = undoCommands.top();
-		cmd->undo();
+		cmd->Undo();
 		redoCommands.push(cmd);
 		undoCommands.pop();
 	}

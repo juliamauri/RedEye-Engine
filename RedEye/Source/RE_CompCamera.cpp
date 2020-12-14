@@ -1,21 +1,16 @@
 #include "RE_CompCamera.h"
 
 #include "Application.h"
+#include "RE_Json.h"
+#include "ModuleInput.h"
 #include "ModuleWindow.h"
-#include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
-
-#include "RE_ShaderImporter.h"
-#include "RE_InternalResources.h"
 #include "RE_ResourceManager.h"
-#include "RE_CameraManager.h"
-#include "RE_SkyBox.h"
-#include "RE_GameObject.h"
+#include "RE_InternalResources.h"
+#include "RE_ShaderImporter.h"
 #include "RE_CompTransform.h"
 #include "RE_ECS_Pool.h"
-
-#include "RE_ConsoleLog.h"
-#include "RE_Json.h"
+#include "RE_SkyBox.h"
 
 #include "ImGui\imgui.h"
 #include "SDL2\include\SDL_opengl.h"
@@ -82,21 +77,21 @@ void RE_CompCamera::DrawProperties()
 
 			if (skyboxMD5)
 			{
-				skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(skyboxMD5));
-				if (ImGui::Button(skyRes->GetName())) App::resources->PushSelected(skyRes->GetMD5(), true);
+				skyRes = dynamic_cast<RE_SkyBox*>(RE_RES->At(skyboxMD5));
+				if (ImGui::Button(skyRes->GetName())) RE_RES->PushSelected(skyRes->GetMD5(), true);
 				ImGui::SameLine();
 				if (ImGui::Button("Back to Default Skybox")) skyboxMD5 = nullptr;
 			}
 			else
 			{
 				ImGui::Text("This component camera is using the default skybox.");
-				skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaultSkyBox()));
-				if (ImGui::Button(skyRes->GetName())) App::resources->PushSelected(skyRes->GetMD5(), true);
+				skyRes = dynamic_cast<RE_SkyBox*>(RE_RES->At(RE_RES->internalResources->GetDefaultSkyBox()));
+				if (ImGui::Button(skyRes->GetName())) RE_RES->PushSelected(skyRes->GetMD5(), true);
 			}
 
 			if (ImGui::BeginMenu("Change skybox"))
 			{
-				eastl::vector<ResourceContainer*> materials = App::resources->GetResourcesByType(Resource_Type::R_SKYBOX);
+				eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(Resource_Type::R_SKYBOX);
 				bool none = true;
 				for (auto material : materials)
 				{
@@ -105,9 +100,9 @@ void RE_CompCamera::DrawProperties()
 					none = false;
 					if (ImGui::MenuItem(material->GetName()))
 					{
-						if (skyboxMD5) App::resources->UnUse(skyboxMD5);
+						if (skyboxMD5) RE_RES->UnUse(skyboxMD5);
 						skyboxMD5 = material->GetMD5();
-						if (skyboxMD5) App::resources->Use(skyboxMD5);
+						if (skyboxMD5) RE_RES->Use(skyboxMD5);
 					}
 				}
 				if (none) ImGui::Text("No custom skyboxes on assets");
@@ -117,9 +112,9 @@ void RE_CompCamera::DrawProperties()
 			{
 				if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#SkyboxReference"))
 				{
-					if (skyboxMD5) App::resources->UnUse(skyboxMD5);
+					if (skyboxMD5) RE_RES->UnUse(skyboxMD5);
 					skyboxMD5 = *static_cast<const char**>(dropped->Data);
-					if (skyboxMD5) App::resources->Use(skyboxMD5);
+					if (skyboxMD5) RE_RES->Use(skyboxMD5);
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -150,7 +145,7 @@ void RE_CompCamera::DrawFrustum() const
 
 void RE_CompCamera::DrawSkybox() const
 {
-	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(App::resources->At(skyboxMD5 ? skyboxMD5 : RE_ResourceManager::internalResources.GetDefaultSkyBox()));
+	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(RE_RES->At(skyboxMD5 ? skyboxMD5 : RE_RES->internalResources->GetDefaultSkyBox()));
 	if (skyRes) skyRes->DrawSkybox();
 }
 
@@ -188,7 +183,7 @@ void RE_CompCamera::ForceFOV(float vertical_fov_degrees, float horizontal_fov_de
 void RE_CompCamera::SetAspectRatio(AspectRatioTYPE aspect_ratio)
 {
 	target_ar = aspect_ratio;
-	SetBounds(static_cast<float>(App::window->GetWidth()), static_cast<float>(App::window->GetHeight()));
+	SetBounds(static_cast<float>(RE_WINDOW->GetWidth()), static_cast<float>(RE_WINDOW->GetHeight()));
 }
 
 void RE_CompCamera::SetBounds(float w, float h)
@@ -284,8 +279,8 @@ void RE_CompCamera::GetTargetViewPort(math::float4& viewPort) const
 	viewPort.z = width;
 	viewPort.w = height;
 
-	float wH = static_cast<float>(App::window->GetHeight());
-	float wW = static_cast<float>(App::window->GetWidth());
+	float wH = static_cast<float>(RE_WINDOW->GetHeight());
+	float wW = static_cast<float>(RE_WINDOW->GetWidth());
 
 	switch (target_ar)
 	{
@@ -396,8 +391,8 @@ bool RE_CompCamera::isUsingSkybox() const { return usingSkybox; }
 const char* RE_CompCamera::GetSkybox() const { return skyboxMD5; }
 void RE_CompCamera::DeleteSkybox() { usingSkybox = false; skyboxMD5 = nullptr; }
 void RE_CompCamera::SetSkyBox(const char* resS) { skyboxMD5 = resS; }
-void RE_CompCamera::UseResources() { if (skyboxMD5) App::resources->Use(skyboxMD5); }
-void RE_CompCamera::UnUseResources() { if (skyboxMD5) App::resources->UnUse(skyboxMD5); }
+void RE_CompCamera::UseResources() { if (skyboxMD5) RE_RES->Use(skyboxMD5); }
+void RE_CompCamera::UnUseResources() { if (skyboxMD5) RE_RES->UnUse(skyboxMD5); }
 
 eastl::vector<const char*> RE_CompCamera::GetAllResources()
 {
@@ -535,7 +530,7 @@ void RE_CompCamera::DrawItsProperties()
 	if (ImGui::Combo("Aspect Ratio", &aspect_ratio, "Fit Window\0Square 1x1\0TraditionalTV 4x3\0Movietone 16x9\0Personalized\0"))
 	{
 		target_ar = AspectRatioTYPE(aspect_ratio);
-		Event::Push(RE_EventType::UPDATE_SCENE_WINDOWS, App::editor, go);
+		RE_INPUT->Push(RE_EventType::UPDATE_SCENE_WINDOWS, RE_EDITOR, go);
 	}
 
 	// TODO Rub: Personalied Aspect Ratio

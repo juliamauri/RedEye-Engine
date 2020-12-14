@@ -2,10 +2,11 @@
 #define __MODULERENDER3D_H__
 
 #include "Module.h"
-#include "RE_FBOManager.h"
-#include <EASTL/stack.h>
 #include "MathGeoLib/include/Math/float4.h"
+#include <EASTL/stack.h>
 
+class RE_FBOManager;
+class RE_CompCamera;
 class RE_Material;
 class RE_SkyBox;
 
@@ -34,8 +35,6 @@ enum RenderViewFlags : short
 	DEPTH_TEST = 0x400,		 // 0100 0000 0000
 	CLIP_DISTANCE = 0x800	 // 1000 0000 0000
 };
-
-class RE_CompCamera;
 
 struct RenderView
 {
@@ -66,17 +65,15 @@ enum RENDER_VIEWS : short
 class ModuleRenderer3D : public Module 
 {
 public:
-	ModuleRenderer3D(const char* name = "Renderer3D", bool start_enabled = true);
+	ModuleRenderer3D();
 	~ModuleRenderer3D();
 
 	bool Init() override;
 	bool Start() override;
 	void PostUpdate() override;
 	void CleanUp() override;
-
-	void RecieveEvent(const Event& e) override;
 	void DrawEditor() override;
-
+	void RecieveEvent(const Event& e) override;
 	void Load() override;
 	void Save() const override;
 
@@ -104,7 +101,6 @@ public:
 	void PushSceneRend(RenderView& rV);
 	void PushThumnailRend(const char* md5, bool redo = false);
 
-public:
 	enum RenderType {
 		R_R_SCENE,
 		T_R_GO,
@@ -112,6 +108,7 @@ public:
 		T_R_TEX,
 		T_R_SKYBOX
 	};
+	
 	struct RenderQueue {
 		RenderQueue(RenderType t, RenderView& rv, const char* r, bool re = false) : type(t), renderview(rv), resMD5(r), redo(re) {}
 		RenderType type;
@@ -142,12 +139,13 @@ private:
 	void DrawQuad();
 	void DirectDrawCube(math::vec position, math::vec color);
 
+public:
+
+	RE_FBOManager* fbos = nullptr;
+
 private:
 
 	eastl::stack<RenderQueue> rendQueue;
-
-	// Scene Drawing
-	//float time, dt;
 	eastl::vector<const char*> activeShaders;
 
 	// Context

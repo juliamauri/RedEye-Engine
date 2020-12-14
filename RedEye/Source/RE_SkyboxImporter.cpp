@@ -3,7 +3,7 @@
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "Application.h"
-#include "RE_GLCacheManager.h"
+#include "RE_GLCache.h"
 #include "RE_ResourceManager.h"
 #include "RE_Texture.h"
 
@@ -13,7 +13,7 @@
 
 void RE_SkyboxImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned int* ID, bool isDDS)
 {
-	RE_GLCacheManager::ChangeTextureBind(0);
+	RE_GLCache::ChangeTextureBind(0);
 	glGenTextures(1, ID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, *ID);
 
@@ -22,16 +22,16 @@ void RE_SkyboxImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned
 		const char* texPath = nullptr;
 		if (!isDDS)
 		{
-			texPath = App::resources->At(settings.textures[i].textureMD5)->GetLibraryPath();
-			if (!App::fs->Exists(texPath))
-				App::resources->At(settings.textures[i].textureMD5)->ReImport();
+			texPath = RE_RES->At(settings.textures[i].textureMD5)->GetLibraryPath();
+			if (!RE_FS->Exists(texPath))
+				RE_RES->At(settings.textures[i].textureMD5)->ReImport();
 		}
 		else texPath = settings.textures[i].path.c_str();
 
 		RE_FileBuffer librayTexture(texPath);
 		if (librayTexture.Load())
 		{
-			uint imageID = 0;
+			unsigned int imageID = 0u;
 			ilGenImages(1, &imageID);
 			ilBindImage(imageID);
 

@@ -21,18 +21,21 @@ void* operator new[](size_t size, const char* pName, int flags, unsigned     deb
 void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* pName, int flags, unsigned debugFlags, const char* file, int line)
 { return new uint8_t[size]; }
 
+// Declare and define unique global variable
+Application* App = nullptr;
+
 int main(int argc, char* argv[])
 {
 	bool exit_with_error = true;
-	Application* app = new Application();
+	App = new Application();
 
-	if (app->Init(argc, argv))
+	if (App->Init(argc, argv))
 	{
-		app->MainLoop();
-		app->CleanUp();
+		App->MainLoop();
+		App->CleanUp();
 		exit_with_error = false;
 	}
 
-	delete app;
+	delete App;
 	return exit_with_error;
 }

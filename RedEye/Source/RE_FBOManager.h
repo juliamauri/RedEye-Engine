@@ -14,8 +14,12 @@ struct RE_FBO
 		depthstencilBuffer = 0, depthBufferTexture = 0;
 };
 
-namespace RE_FBOManager
+class RE_FBOManager
 {
+public:
+	RE_FBOManager() {}
+	~RE_FBOManager() {}
+
 	int CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize = 1, bool depth = true, bool stencil = false);
 	int CreateDeferredFBO(unsigned int width, unsigned int height);
 
@@ -31,11 +35,13 @@ namespace RE_FBOManager
 	void ClearFBO(unsigned int ID);
 	void ClearAll();
 
-	namespace Internal
-	{
-		static eastl::map<unsigned int, RE_FBO> fbos;
-		void LoadDeferredTextures(RE_FBO& fbo);
-	}
+private:
+
+	void LoadDeferredTextures(RE_FBO& fbo);
+
+private:
+
+	eastl::map<unsigned int, RE_FBO> fbos;
 };
 
 #endif // !__REFBOMANAGER__

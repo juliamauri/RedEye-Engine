@@ -1,14 +1,12 @@
 #include "RE_ShaderImporter.h"
 
-#include "RE_ConsoleLog.h"
-#include "RE_FileBuffer.h"
 #include "Application.h"
+#include "RE_FileBuffer.h"
 #include "ModuleEditor.h"
+#include "RE_ResourceManager.h"
 
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
-
-using namespace RE_ShaderImporter::Internal;
 
 void RE_ShaderImporter::Init()
 {
@@ -22,12 +20,17 @@ void RE_ShaderImporter::Init()
 	glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, binaryFormats);
 }
 
+void RE_ShaderImporter::Clear()
+{
+	DEL_A(binaryFormats);
+}
+
 bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath, bool compileTest)
 {
 	RE_LOG("%s %s\n%s\n%s shaders.",(!compileTest) ? "Loading" : "Compile Test", vertexPath, fragmentPath, (geometryPath) ? geometryPath : "No geometry shader");
 
 	bool ret = true;
-	last_error.clear();
+	eastl::string last_error;
 
 	const char* buffer = nullptr;
 	int  success;
@@ -166,13 +169,15 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 	if (geometryShader != 0) glDeleteShader(geometryShader);
 	if(compileTest) glDeleteProgram(*ID);
 
+	if (!ret) RE_RES->shader_importer->last_error = last_error;
+
 	return ret;
 }
 
 bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffer, unsigned int vSize, const char* fragmentBuffer, unsigned int fSize, const char* geometryBuffer, unsigned int gSize)
 {
 	bool ret = true;
-	last_error.clear();
+	eastl::string last_error;
 
 	const char* buffer = nullptr;
 	int  success;
@@ -277,6 +282,8 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 	if (fragmentShader != 0) glDeleteShader(fragmentShader);
 	if (geometryShader != 0) glDeleteShader(geometryShader);
 
+	if (!ret) RE_RES->shader_importer->last_error = last_error;
+
 	return ret;
 }
 
@@ -284,7 +291,7 @@ bool RE_ShaderImporter::LoadFromBinary(const char* buffer, unsigned int size, un
 {
 	int ret;
 
-	glProgramBinary((*ID = glCreateProgram()), binaryFormats[0], buffer, size);
+	glProgramBinary((*ID = glCreateProgram()), RE_RES->shader_importer->binaryFormats[0], buffer, size);
 	glValidateProgram(*ID);
 	glGetProgramiv(*ID, GL_VALIDATE_STATUS, &ret);
 	if (!ret) glDeleteProgram(*ID);
@@ -301,7 +308,7 @@ bool RE_ShaderImporter::GetBinaryProgram(unsigned int ID, char** buffer, int* si
 		if (*size > 0)
 		{
 			*buffer = new char[*size];
-			glGetProgramBinary(ID, *size, size, reinterpret_cast<GLenum*>(binaryFormats), *buffer);
+			glGetProgramBinary(ID, *size, size, reinterpret_cast<GLenum*>(RE_RES->shader_importer->binaryFormats), *buffer);
 			ret = true;
 		}
 	}
@@ -312,7 +319,7 @@ bool RE_ShaderImporter::GetBinaryProgram(unsigned int ID, char** buffer, int* si
 bool RE_ShaderImporter::Compile(const char* buffer, unsigned int size, unsigned int GLCompile)
 {
 	bool ret = true;
-	last_error.clear();
+	eastl::string last_error;
 
 	uint shaderScript = glCreateShader(GLCompile);
 
@@ -334,12 +341,14 @@ bool RE_ShaderImporter::Compile(const char* buffer, unsigned int size, unsigned 
 	}
 	glDeleteShader(shaderScript);
 
+	if (!ret) RE_RES->shader_importer->last_error = last_error;
+
 	return ret;
 }
 
 const char * RE_ShaderImporter::GetShaderError()
 {
-	return last_error.c_str();
+	return RE_RES->shader_importer->last_error.c_str();
 }
 
 void RE_ShaderImporter::use(unsigned int ID)

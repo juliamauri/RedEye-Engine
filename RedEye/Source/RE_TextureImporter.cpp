@@ -1,11 +1,11 @@
 #include "RE_TextureImporter.h"
 
-#include "RE_ConsoleLog.h"
+#include "Globals.h"
+#include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
-#include "Application.h"
-#include "RE_GLCacheManager.h"
 #include "RE_ResourceManager.h"
+#include "RE_GLCache.h"
 #include "RE_Texture.h"
 
 #include "Glew\include\glew.h"
@@ -52,23 +52,23 @@ const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPat
 
 	RE_Texture* newTexture = new RE_Texture();
 	newTexture->SetAssetPath(path.c_str());
-	if (newTexture->DetectExtension() != RE_TEXTURE_UNKNOWN) {
+	if (newTexture->DetectExtension() != RE_TEXTURE_UNKNOWN)
+	{
 		newTexture->SetName(name.c_str());
 		newTexture->SetType(Resource_Type::R_TEXTURE);
 		retMD5 = newTexture->GenerateMD5();
 		newTexture->SaveMeta();
 	}
 	else
-	{
 		RE_LOG_ERROR("Error detecting texture extension. Don't suported %s", extension.c_str());
-	}
+
 	return retMD5;
 }
 
 const char* RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsigned int assetSize, TextureType assetType, unsigned int* newSize)
 {
 	eastl::string ret;
-	uint imageID = 0;
+	unsigned int imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 
@@ -94,7 +94,7 @@ const char* RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsigned
 
 void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int size, TextureType type, unsigned int * ID, int * width, int * height, RE_TextureSettings settings)
 {
-	uint imageID = 0;
+	unsigned int imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 
@@ -105,7 +105,7 @@ void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int s
 
 		/* OpenGL texture binding of the image loaded by DevIL  */
 		glGenTextures(1, ID); /* Texture name generation */
-		RE_GLCacheManager::ChangeTextureBind(*ID); /* Binding of texture name */
+		RE_GLCache::ChangeTextureBind(*ID); /* Binding of texture name */
 		
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.mag_filter); /* We will use linear interpolation for magnification filter */
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.min_filter); /* We will use linear interpolation for minifying filter */
@@ -130,7 +130,7 @@ void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int s
 
 void RE_TextureImporter::SaveOwnFormat(const char* assetBuffer, unsigned int assetSize, TextureType assetType, RE_FileBuffer* toSave)
 {
-	uint imageID = 0;
+	unsigned int imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 

@@ -1,10 +1,14 @@
 #include "RE_ResourceManager.h"
 
-#include "RE_ConsoleLog.h"
-#include "RE_FileSystem.h"
 #include "Application.h"
+#include "RE_FileSystem.h"
+#include "ModuleInput.h"
 #include "ModuleScene.h"
+#include "ModuleEditor.h"
 #include "ModuleRenderer3D.h"
+#include "ModuleAudio.h"
+#include "RE_InternalResources.h"
+#include "RE_ShaderImporter.h"
 #include "RE_TextureImporter.h"
 #include "RE_ModelImporter.h"
 #include "RE_ThumbnailManager.h"
@@ -21,10 +25,38 @@
 #include <EASTL/internal/char_traits.h>
 #include <EASTL/string.h>
 
-RE_InternalResources RE_ResourceManager::internalResources;
+RE_ResourceManager::RE_ResourceManager()
+{
+	model_importer = new RE_ModelImporter();
+	shader_importer = new RE_ShaderImporter();
+	internalResources = new RE_InternalResources();
+}
 
 RE_ResourceManager::~RE_ResourceManager()
 {
+	DEL(internalResources);
+	DEL(shader_importer);
+	DEL(model_importer);
+}
+
+void RE_ResourceManager::Init()
+{
+	RE_LOG_SEPARATOR("Initializing Resources");
+
+	RE_TextureImporter::Init();
+	shader_importer->Init();
+	internalResources->Init();
+
+	// Fetch Assets
+	RE_FS->ReadAssetChanges(0, true);
+	RE_AUDIO->ReadBanksChanges();
+}
+
+void RE_ResourceManager::Clear()
+{
+	internalResources->Clear();
+	shader_importer->Clear();
+
 	while (!resources.empty())
 	{
 		DEL(resources.begin()->second);
@@ -198,7 +230,7 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 			temp_resources.insert(temp_resources.end(), temp.begin(), temp.end());
 		}
 
-		Event::PauseEvents();
+		RE_INPUT->PauseEvents();
 		for (auto resource : temp_resources)
 		{
 			RE_ECS_Pool* poolGORes = nullptr;
@@ -237,7 +269,7 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 			}
 			UnUse(resource->GetMD5());
 		}
-		Event::ResumeEvents();
+		RE_INPUT->ResumeEvents();
 		break;
 	}
 	}
@@ -260,11 +292,11 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 		RE_Material* resChange = nullptr;
 		for (auto resToChange : resourcesWillChange)
 		{
-			(resChange = dynamic_cast<RE_Material*>(App::resources->At(resToChange)))->LoadInMemory();
+			(resChange = dynamic_cast<RE_Material*>(RE_RES->At(resToChange)))->LoadInMemory();
 			if(rType == R_SHADER) resChange->DeleteShader();
 			else resChange->DeleteTexture(res);
 			resChange->UnloadMemory();
-			App::renderer3d->PushThumnailRend(resToChange, true);
+			RE_RENDER->PushThumnailRend(resToChange, true);
 		}
 		break;
 	}
@@ -273,15 +305,15 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	{
 		for (auto resToChange : resourcesWillChange)
 		{
-			ResourceContainer* resChange = App::resources->At(resToChange);
+			ResourceContainer* resChange = RE_RES->At(resToChange);
 			Resource_Type goType = resChange->GetType();
 
-			if (resourceOnScene && resToChange == App::scene->GetCurrentScene())
+			if (resourceOnScene && resToChange == RE_SCENE->GetCurrentScene())
 				continue;
 
 			if (goType != R_MODEL)
 			{
-				Event::PauseEvents();
+				RE_INPUT->PauseEvents();
 
 				RE_ECS_Pool* poolGORes = nullptr;
 				Use(resToChange);
@@ -330,10 +362,10 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 						break;
 					}
 					}
-					App::renderer3d->PushThumnailRend(resToChange, true);
+					RE_RENDER->PushThumnailRend(resToChange, true);
 					UnUse(resToChange);
 					DEL(poolGORes);
-					Event::ResumeEvents();
+					RE_INPUT->ResumeEvents();
 				}
 			}
 		}
@@ -343,7 +375,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	}
 
 	if (resourceOnScene) {
-		eastl::stack<RE_Component*> comps = App::scene->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+		eastl::stack<RE_Component*> comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 		while (!comps.empty())
 		{
 			RE_Component* go = comps.top();
@@ -360,13 +392,13 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 				if (cam && cam->GetSkybox() == res) cam->SetSkyBox(nullptr);
 			}
 		}
-		App::scene->HasChanges();
+		RE_SCENE->HasChanges();
 	}
 
 	resourcesCounter.erase(res);
 	resources.erase(res);
 
-	if (rType != R_SHADER) App::thumbnail->Delete(res);
+	if (rType != R_SHADER) RE_EDITOR->thumbnails->Delete(res);
 
 	return resource;
 }
@@ -476,7 +508,7 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 
 	if (!meshMD5)
 	{
-		if (App::fs->Exists(librariPath))
+		if (RE_FS->Exists(librariPath))
 		{
 			RE_Mesh* newMesh = new RE_Mesh();
 			newMesh->SetLibraryPath(librariPath);
@@ -495,7 +527,7 @@ void RE_ResourceManager::ThumbnailResources()
 	for (auto res : resources) {
 		Resource_Type rT = res.second->GetType();
 		if(rT == R_SCENE || rT == R_PREFAB || rT == R_MODEL || rT == R_SKYBOX || rT == R_MATERIAL || rT == R_TEXTURE)
-			App::renderer3d->PushThumnailRend(res.first);
+			RE_RENDER->PushThumnailRend(res.first);
 	}
 }
 
@@ -516,7 +548,7 @@ const char* RE_ResourceManager::GetNameFromType(const Resource_Type type)
 
 const char* RE_ResourceManager::ImportModel(const char* assetPath)
 {
-	Event::PauseEvents();
+	RE_INPUT->PauseEvents();
 	eastl::string path(assetPath);
 	eastl::string filename = path.substr(path.find_last_of("/") + 1);
 	eastl::string name = filename.substr(0, filename.find_last_of("."));
@@ -528,7 +560,7 @@ const char* RE_ResourceManager::ImportModel(const char* assetPath)
 	newModel->SetType(Resource_Type::R_MODEL);
 	newModel->Import(false);
 	newModel->SaveMeta();
-	Event::ResumeEvents();
+	RE_INPUT->ResumeEvents();
 
 	return Reference(newModel);
 }
@@ -585,7 +617,7 @@ const char* RE_ResourceManager::ImportSkyBox(const char* assetPath)
 
 const char* RE_ResourceManager::ImportPrefab(const char* assetPath)
 {
-	Event::PauseEvents();
+	RE_INPUT->PauseEvents();
 	eastl::string path(assetPath);
 	eastl::string filename = path.substr(path.find_last_of("/") + 1);
 	eastl::string name = filename.substr(0, filename.find_last_of("."));
@@ -597,14 +629,14 @@ const char* RE_ResourceManager::ImportPrefab(const char* assetPath)
 	newPrefab->SetType(Resource_Type::R_PREFAB);
 	newPrefab->Import(false);
 	newPrefab->SaveMeta();
-	Event::ResumeEvents();
+	RE_INPUT->ResumeEvents();
 
 	return Reference(newPrefab);
 }
 
 const char* RE_ResourceManager::ImportScene(const char* assetPath)
 {
-	Event::PauseEvents();
+	RE_INPUT->PauseEvents();
 	eastl::string path(assetPath);
 	eastl::string filename = path.substr(path.find_last_of("/") + 1);
 	eastl::string name = filename.substr(0, filename.find_last_of("."));
@@ -616,7 +648,7 @@ const char* RE_ResourceManager::ImportScene(const char* assetPath)
 	newScene->SetType(Resource_Type::R_SCENE);
 	newScene->Import(false);
 	newScene->SaveMeta();
-	Event::ResumeEvents();
+	RE_INPUT->ResumeEvents();
 
 	return Reference(newScene);
 }

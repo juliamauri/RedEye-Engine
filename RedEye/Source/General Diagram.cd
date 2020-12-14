@@ -419,11 +419,11 @@
       <FileName>RE_HandleErrors.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="RE_GLCacheManager" Collapsed="true">
+  <Class Name="RE_GLCache" Collapsed="true">
     <Position X="2.5" Y="22.5" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAAAAAAAAAAAEAAAAIAAAAAAAAAAAA=</HashCode>
-      <FileName>RE_GLCacheManager.h</FileName>
+      <FileName>RE_GLCache.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_FBOManager" Collapsed="true">

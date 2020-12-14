@@ -15,13 +15,12 @@ public:
 	~RE_PrimitiveManager();
 
 	void Init();
+	void Clear();
 
 	void SetUpComponentPrimitive(RE_CompPrimitive* cmpP);
 	eastl::pair<unsigned int, unsigned int> GetPlatonicData(unsigned short type);
 
-	struct PlatonicData { unsigned int vao = 0, vbo = 0, ebo = 0, triangles = 0; };
-
-	PlatonicData CreateSphere(int slices, int stacks);
+	void CreateSphere(int slices, int stacks, unsigned int& vao, unsigned int& vbo, unsigned int& ebo, unsigned int& triangles);
 
 private:
 
@@ -29,7 +28,8 @@ private:
 
 private:
 
-	PlatonicData platonics[5] = {};
+	struct PlatonicData { unsigned int vao = 0, vbo = 0, ebo = 0, triangles = 0; }
+	*platonics = nullptr;
 };
 
 #endif // !__RE_PRIMITVEMANAGER_H__#

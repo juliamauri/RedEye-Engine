@@ -12,7 +12,7 @@ class ModuleWindow : public Module
 {
 public:
 
-	ModuleWindow(const char* name = "Window", bool start_enabled = true);
+	ModuleWindow() : Module("Window") {}
 	~ModuleWindow() {}
 
 	bool Init() override;

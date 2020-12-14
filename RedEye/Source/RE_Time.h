@@ -1,24 +1,7 @@
-#ifndef __TIMEMANAGER_H__
-#define __TIMEMANAGER_H__
+#ifndef _RE_TIME_H__
+#define _RE_TIME_H__
 
-class Timer
-{
-public:
-	Timer(const bool start_active = true);
-	Timer(const Timer& timer);
-
-	void Start();
-	void Pause();
-	void Stop();
-
-	float ReadF() const;
-	unsigned int Read() const;
-
-private:
-
-	bool paused = false;
-	unsigned int started_at = 0, paused_at = 0;
-};
+#include "RE_Timer.h"
 
 enum GameState : char
 {
@@ -29,59 +12,88 @@ enum GameState : char
 	GS_EMPTY
 };
 
-namespace RE_Time
+class RE_Time
 {
+public:
+	RE_Time();
+	~RE_Time() {}
 
-	float FrameDeltaTime();
-	unsigned int FrameExtraMS();
+	float FrameDeltaTime()
+	{
+		dt = ms_timer.ReadF() / 1000.f;
+		ms_timer.Start();
+		return dt;
+	}
+
+	unsigned int FrameExtraMS()
+	{
+		++global_frame_counter;
+		++fps_counter;
+
+		if (fps_timer.Read() >= 1000)
+		{
+			last_fps_count = fps_counter;
+			fps_counter = 0u;
+			fps_timer.Start();
+		}
+
+		last_ms_count = ms_timer.Read();
+
+		unsigned int ret = 1u;
+		if (capped_ms > 0 && capped_ms > last_ms_count) ret = capped_ms - last_ms_count;
+
+		return ret;
+	}
 
 	GameState DrawEditorControls(); // Draws graphs on time stats
 	void DrawEditorGraphs(); // Draws graphs on time stats
+
+	void Delay(unsigned int ms) const;
 	
-	void SetMaxFPS(float max_fps); // Set to 0 uncap fps
-	void Delay(unsigned int ms);
-
-	void TickGameTimer();
-	void StartGameTimer();
-	void PauseGameTimer();
-	void StopGameTimer();
-
-	float GetDeltaTime();
-	float GetMaxFPS();
-
-	float GetEngineTimer();
-	float GetGameTimer();
-	float GetCurrentTimer();
-
-	GameState GetState();
-
-	unsigned int GetCappedMS();
-	unsigned int GetFpsCounter();
-	unsigned int GetLastMs();
-	unsigned int GetLastFPS();
-
-	namespace Internal
+	void SetMaxFPS(float max_fps) // Set 0 to uncap fps
 	{
-		static GameState state = GS_STOP;
-		static Timer
-			ms_timer, // read every frame
-			fps_timer, // read every second
-			game_timer(false); // read when playing scene
-
-		static float
-			dt = 0,
-			capped_fps = 60.f;
-
-		static unsigned int
-			capped_ms = 16u,
-			last_fps_count = 0u, last_ms_count = 0u,
-			fps_counter = 0u;
-
-		static unsigned long global_frame_counter = 0u;
-
-		static bool	pause_plotting = false;
-		static float fps[100] = {}, ms[100] = {};
+		capped_fps = max_fps;
+		if (capped_fps < 1.f) capped_ms = 0u;
+		else capped_ms = static_cast<unsigned int>(1000.f / capped_fps);
 	}
+
+	float GetMaxFPS() const { return capped_fps; }
+	float GetDeltaTime() const { return dt; }
+
+	unsigned int GetCappedMS() const { return capped_ms; }
+	unsigned int GetFpsCounter() const { return fps_counter; }
+	unsigned int GetLastMs() const { return last_ms_count; }
+	unsigned int GetLastFPS() const { return last_fps_count; }
+
+	GameState GetState() const { return state; }
+
+	unsigned int GetTicks() const;
+	float GetEngineTimer() const;
+	float GetGameTimer() const { return game_timer.ReadF() / 1000.f; }
+	float GetCurrentTimer() const { return (state == GS_STOP) ? GetEngineTimer() : game_timer.ReadF() / 1000.f; }
+
+	void TickGameTimer() { game_timer.Start(); state = GS_TICK; }
+	void StartGameTimer() { game_timer.Start(); state = GS_PLAY; }
+	void PauseGameTimer() { game_timer.Pause(); state = GS_PAUSE; }
+	void StopGameTimer() { game_timer.Stop(); state = GS_STOP; }
+
+private:
+
+	// Frame time data
+	float dt = 0, capped_fps = 60.f;
+	unsigned int capped_ms = 16u, last_fps_count = 0u, last_ms_count = 0u, fps_counter = 0u;
+	unsigned long global_frame_counter = 0u;
+
+	// Timers
+	GameState state = GS_STOP;
+	RE_Timer
+		ms_timer, // read every frame
+		fps_timer, // read every second
+		game_timer; // read when playing scene
+
+	// Profiling
+	bool pause_plotting = false;
+	float fps[100] = {}, ms[100] = {};
 };
 
-#endif // !__TIMEMANAGER_H__
+#endif // !_RE_TIME_H__

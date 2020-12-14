@@ -2,10 +2,11 @@
 
 #include "RE_Json.h"
 #include "Application.h"
+#include "ModuleInput.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
 #include "RE_CameraManager.h"
-#include "RE_GLCacheManager.h"
+#include "RE_GLCache.h"
 #include "RE_ResourceManager.h"
 #include "RE_ECS_Pool.h"
 #include "RE_PrimitiveManager.h"
@@ -369,7 +370,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 		camera = (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid);
 		RE_CompCamera* new_cam = dynamic_cast<RE_CompCamera*>(ret);
 		new_cam->SetProperties();
-		if (!Event::isPaused()) App::cams.AddMainCamera(new_cam);
+		if (!RE_INPUT->Paused()) RE_SCENE->cams->AddMainCamera(new_cam);
 		break;
 	}
 	case C_LIGHT:
@@ -392,7 +393,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 			if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
 			ret = pool_comps->GetNewComponentPtr(_type);
 			render_geo = { ret->PoolSetUp(pool_gos, go_uid), type };
-			App::primitives.SetUpComponentPrimitive(dynamic_cast<RE_CompPrimitive*>(ret));
+			RE_SCENE->primitives->SetUpComponentPrimitive(dynamic_cast<RE_CompPrimitive*>(ret));
 		}
 		else
 		{
@@ -763,7 +764,7 @@ void RE_GameObject::SetActive(const bool value, const bool broadcast)
 	if (active != value)
 	{
 		active = value;
-		if (broadcast) Event::Push(active ? GO_CHANGED_TO_ACTIVE : GO_CHANGED_TO_INACTIVE, App::scene, go_uid);
+		if (broadcast) RE_INPUT->Push(active ? GO_CHANGED_TO_ACTIVE : GO_CHANGED_TO_INACTIVE, RE_SCENE, go_uid);
 	}
 }
 
@@ -789,7 +790,7 @@ void RE_GameObject::SetStatic(const bool value, bool broadcast)
 	if (isStatic != value)
 	{
 		isStatic = value;
-		if (active && broadcast) Event::Push(isStatic ? GO_CHANGED_TO_STATIC : GO_CHANGED_TO_NON_STATIC, App::scene, go_uid);
+		if (active && broadcast) RE_INPUT->Push(isStatic ? GO_CHANGED_TO_STATIC : GO_CHANGED_TO_NON_STATIC, RE_SCENE, go_uid);
 	}
 }
 
@@ -1012,7 +1013,7 @@ void RE_GameObject::ResetGOandChildsAABB()
 
 void RE_GameObject::DrawAABB(math::vec color) const
 {
-	RE_GLCacheManager::ChangeShader(0);
+	RE_GLCache::ChangeShader(0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf((dynamic_cast<RE_CompTransform*>(CompPtr(transform, C_TRANSFORM))->GetGlobalMatrix() * RE_CameraManager::CurrentCamera()->GetView()).ptr());

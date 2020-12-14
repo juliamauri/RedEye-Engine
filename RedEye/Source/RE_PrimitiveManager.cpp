@@ -1,8 +1,8 @@
 #include "RE_PrimitiveManager.h"
 
-#include "RE_ConsoleLog.h"
+#include "Application.h"
 #include "RE_CompPrimitive.h"
-#include "RE_GLCacheManager.h"
+#include "RE_GLCache.h"
 
 #include "par_shapes.h"
 #include "SDL2/include/SDL.h"
@@ -11,25 +11,30 @@
 
 RE_PrimitiveManager::RE_PrimitiveManager()
 {
-	for (auto platonic : platonics) platonic = { 0, 0, 0, 0 };
+	platonics = new PlatonicData[5];
 }
 
 RE_PrimitiveManager::~RE_PrimitiveManager()
 {
-	for (auto platonic : platonics)
-	{
-		if (platonic.triangles)
-		{
-			glDeleteVertexArrays(1, &platonic.vao);
-			glDeleteBuffers(1, &platonic.vbo);
-			glDeleteBuffers(1, &platonic.ebo);
-		}
-	}
+	DEL(platonics);
 }
 
 void RE_PrimitiveManager::Init()
 {
 	RE_SOFT_NS("par_shapes.h", "https://github.com/prideout/par");
+}
+
+void RE_PrimitiveManager::Clear()
+{
+	for (int i = 0; i < 5; ++i)
+	{
+		if (platonics[i].triangles)
+		{
+			glDeleteVertexArrays(1, &platonics[i].vao);
+			glDeleteBuffers(1, &platonics[i].vbo);
+			glDeleteBuffers(1, &platonics[i].ebo);
+		}
+	}
 }
 
 void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP)
@@ -77,12 +82,10 @@ eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPlatonicData(uns
 	return { platonics[index].vao, platonics[index].triangles };
 }
 
-RE_PrimitiveManager::PlatonicData RE_PrimitiveManager::CreateSphere(int slices, int stacks)
+void RE_PrimitiveManager::CreateSphere(int slices, int stacks, unsigned int& vao, unsigned int& vbo, unsigned int& ebo, unsigned int& triangles)
 {
 	if (slices < 3) slices = 3;
 	if (stacks < 3) stacks = 3;
-
-	PlatonicData ret;
 
 	par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(slices, stacks);
 
@@ -127,11 +130,11 @@ RE_PrimitiveManager::PlatonicData RE_PrimitiveManager::CreateSphere(int slices, 
 		cursor += cursorSize;
 	}
 
-	glGenVertexArrays(1, &ret.vao);
-	RE_GLCacheManager::ChangeVAO(ret.vao);
+	glGenVertexArrays(1, &vao);
+	RE_GLCache::ChangeVAO(vao);
 
-	glGenBuffers(1, &ret.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, ret.vbo);
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
@@ -143,21 +146,19 @@ RE_PrimitiveManager::PlatonicData RE_PrimitiveManager::CreateSphere(int slices, 
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 6u));
 
-	glGenBuffers(1, &ret.ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ret.ebo);
+	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere->ntriangles * sizeof(unsigned short) * 3, sphere->triangles, GL_STATIC_DRAW);
 
-	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCache::ChangeVAO(0);
 
-	ret.triangles = sphere->ntriangles;
+	triangles = sphere->ntriangles;
 
 	par_shapes_free_mesh(sphere);
 	DEL_A(points);
 	DEL_A(normals);
 	DEL_A(texCoords);
 	DEL_A(meshBuffer);
-
-	return ret;
 }
 
 void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int* vao, unsigned int* vbo, unsigned int* ebo, unsigned int* triangles)
@@ -198,7 +199,7 @@ void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int*
 	}
 
 	glGenVertexArrays(1, vao);
-	RE_GLCacheManager::ChangeVAO(*vao);
+	RE_GLCache::ChangeVAO(*vao);
 
 	glGenBuffers(1, vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, *vbo);
@@ -214,7 +215,7 @@ void RE_PrimitiveManager::UploadPlatonic(par_shapes_mesh_s* plato, unsigned int*
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, *triangles * sizeof(unsigned short) * 3u, plato->triangles, GL_STATIC_DRAW);
 
-	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCache::ChangeVAO(0);
 	
 	DEL_A(points);
 	DEL_A(normals);

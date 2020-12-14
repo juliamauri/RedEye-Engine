@@ -2,9 +2,15 @@
 #define __MODULEEDITOR__
 
 #include "Module.h"
-#include "RE_CommandManager.h"
 #include "ImGui\imgui.h"
 #include <EASTL/list.h>
+
+union SDL_Event;
+class RE_Command;
+class RE_CommandManager;
+class RE_ThumbnailManager;
+class RE_CompCamera;
+class RE_CompGrid;
 
 class EditorWindow;
 class ConsoleWindow;
@@ -25,34 +31,25 @@ class TextEditorManagerWindow;
 class WaterPlaneResourceWindow;
 class SceneEditorWindow;
 class SceneGameWindow;
-
 class TransformDebugWindow;
-
-struct SoftwareInfo;
-class RE_GameObject;
-class RE_Component;
-class RE_CompCamera;
-class RE_CompGrid;
-class ComponentsPool;
-
-union SDL_Event;
 
 class ModuleEditor : public Module
 {
 public:
-	ModuleEditor(const char* name = "Editor", bool start_enabled = true);
+	ModuleEditor();
 	~ModuleEditor();
 
+	// Module
 	bool Init() override;
 	bool Start() override;
 	void PreUpdate() override;
 	void Update() override;
 	void CleanUp() override;
 	void RecieveEvent(const Event& e) override;
+	void DrawEditor() override;
 
 	// Draws
 	void Draw() const;
-	void DrawEditor() override;
 	void DrawDebug(RE_CompCamera* current_camera) const;
 	void DrawHeriarchy();
 
@@ -68,8 +65,8 @@ public:
 	void ReportSoftawe(const char* name, const char* version, const char* website) const;
 	void HandleSDLEvent(SDL_Event* e);
 	void PopUpFocus(bool focus);
-	const char* GetAssetsPanelPath()const;
-	void SelectUndefinedFile(eastl::string* toSelect)const;
+	const char* GetAssetsPanelPath() const;
+	void SelectUndefinedFile(eastl::string* toSelect) const;
 	void OpenTextEditor(const char* filePath, eastl::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
 	void GetSceneWindowSize(unsigned int* widht, unsigned int* height);
 
@@ -85,6 +82,9 @@ private:
 
 public:
 
+	RE_CommandManager* commands = nullptr;
+	RE_ThumbnailManager* thumbnails = nullptr;
+
 	bool debug_drawing = true;
 
 	PopUpWindow* popupWindow = nullptr;
@@ -95,9 +95,6 @@ private:
 	bool show_all = true;
 	bool show_demo = false;
 	bool popUpFocus = false;
-
-	// Command Tracker
-	RE_CommandManager editorCommands;
 
 	// Windows & Tools
 	eastl::list<EditorWindow*> windows, tools;

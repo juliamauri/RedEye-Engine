@@ -16,7 +16,7 @@ class RE_CompLight : public RE_Component
 public:
 
 	RE_CompLight();
-	~RE_CompLight();
+	~RE_CompLight() {}
 
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 

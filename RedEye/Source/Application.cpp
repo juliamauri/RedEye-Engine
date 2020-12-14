@@ -1,101 +1,98 @@
 #include "Application.h"
 
 #include "RE_Time.h"
-#include "RE_ConsoleLog.h"
+#include "RE_Math.h"
 #include "RE_Hardware.h"
 #include "RE_FileSystem.h"
-#include "RE_Config.h"
-#include "RE_Json.h"
-#include "ModuleScene.h"
+#include "RE_ResourceManager.h"
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
+#include "ModuleScene.h"
 #include "ModuleEditor.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleAudio.h"
-#include "RE_ModelImporter.h"
-#include "RE_ShaderImporter.h"
-#include "RE_TextureImporter.h"
-#include "RE_ResourceManager.h"
-#include "RE_ThumbnailManager.h"
 
 #include "SDL2\include\SDL.h"
-#include "Optick/include/optick.h"
-#include <EAAssert/version.h>
-#include <EAStdC/internal/Config.h>
-#include <EAStdC/EASprintf.h>
-#include <eathread/internal/config.h>
-
-// Utility
-RE_FileSystem* App::fs = nullptr;
-
-// Modules
-ModuleInput* App::input = nullptr;
-ModuleWindow* App::window = nullptr;
-ModuleScene* App::scene = nullptr;
-ModuleEditor* App::editor = nullptr;
-ModuleRenderer3D* App::renderer3d = nullptr;
-ModuleAudio* App::audio = nullptr;
-Config* Application::config = nullptr;
-
-// Managers
-RE_CameraManager App::cams;
-RE_PrimitiveManager App::primitives;
-RE_ResourceManager* App::resources = nullptr;
-RE_ThumbnailManager* App::thumbnail = nullptr;
-
-App* App::instance = nullptr;
-eastl::string App::app_name = "RedEye Engine";
-eastl::string App::organization = "RedEye";
-eastl::list<Module*> App::modules;
+#include "Optick\include\optick.h"
+#include <EAAssert\version.h>
+#include <EAStdC\internal\Config.h>
+#include <EAStdC\EASprintf.h>
+#include <eathread\internal\config.h>
 
 Application::Application()
 {
-	modules.push_back(input = new ModuleInput());
-	modules.push_back(window = new ModuleWindow());
-	modules.push_back(scene = new ModuleScene());
-	modules.push_back(editor = new ModuleEditor());
-	modules.push_back(renderer3d = new ModuleRenderer3D());
-	modules.push_back(audio = new ModuleAudio());
+	time = new RE_Time();
+	math = new RE_Math();
+	hardware = new RE_Hardware();
 
 	fs = new RE_FileSystem();
-	resources = new RE_ResourceManager();
-	thumbnail = new RE_ThumbnailManager();
+	res = new RE_ResourceManager();
 
-	instance = this;
+	input = new ModuleInput();
+	window = new ModuleWindow();
+	scene = new ModuleScene();
+	editor = new ModuleEditor();
+	renderer = new ModuleRenderer3D();
+	audio = new ModuleAudio();
 }
 
 Application::~Application()
 {
-	for (auto &mod : modules) delete mod;
+	DEL(audio);
+	DEL(renderer);
+	DEL(editor);
+	DEL(scene);
+	DEL(window);
+	DEL(input);
 
-	DEL(thumbnail);
-	DEL(resources);
+	DEL(res);
 	DEL(fs);
 
-	RE_Hardware::Clear();
-
-	instance = nullptr;
+	DEL(hardware);
+	DEL(math);
+	DEL(time);
 }
 
-bool Application::Init(int argc, char* argv[])
+bool Application::Init(int _argc, char* _argv[])
 {
 	bool ret = false;
 	RE_LOG_SEPARATOR("Initializing Application");
-	if (InitSDL())
+
+	char tmp[8];
+	EA::StdC::Snprintf(tmp, 8, "%i.%i.%i", EAASSERT_VERSION_MAJOR, EAASSERT_VERSION_MINOR, EAASSERT_VERSION_PATCH);
+	RE_SOFT_NVS("EABase", EABASE_VERSION, "https://github.com/electronicarts/EABase");
+	RE_SOFT_NVS("EASTL", EASTL_VERSION, "https://github.com/electronicarts/EASTL");
+	RE_SOFT_NVS("EAStdC", EASTDC_VERSION, "https://github.com/electronicarts/EAStdC");
+	RE_SOFT_NVS("EAAssert", tmp, "https://github.com/electronicarts/EAAssert");
+	RE_SOFT_NVS("EAThread", EATHREAD_VERSION, "https://github.com/electronicarts/EAThread");
+	RE_SOFT_NVS("Optick", "1.2.9", "https://optick.dev/");
+	RE_SOFT_NS("MathGeoLib", "https://github.com/juj/MathGeoLib");
+	RE_SOFT_NVS("Assimp", "5.0.1", "http://www.assimp.org/");
+	RE_SOFT_N("gpudetect");
+
+	RE_LOG_SECONDARY("Initializing SDL file I/O and threading subsystems");
+	if (SDL_Init(0) == 0)
 	{
-		if (InitFileSystem(argc, argv))
+		SDL_version sdl_version;
+		SDL_GetVersion(&sdl_version);
+		EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", sdl_version.major, sdl_version.minor, sdl_version.patch);
+		RE_SOFT_NVS("SDL", tmp, "https://www.libsdl.org/");
+
+		if (fs->Init(argc = _argc, argv = _argv))
 		{
-			if (InitModules())
+			if (input->Init() && window->Init() && scene->Init() && editor->Init() && renderer->Init() && audio->Init())
 			{
-				InitInternalSystems();
-				if (!StartModules()) RE_LOG_ERROR("Application Init exits with ERROR");
-				else ret = true;
-			}
-			else RE_LOG_ERROR("Application Init exits with ERROR");
-		}
-		else RE_LOG_ERROR("Application Init exits with ERROR");
-	}
-	else RE_LOG_ERROR("Application Init exits with ERROR");
+				hardware->Init();
+				res->Init();
+
+				if (scene->Start() && editor->Start() && renderer->Start() && audio->Start())
+				{
+					res->ThumbnailResources();
+					ret = true;
+				} else RE_LOG_ERROR("Application Init failed to start modules");
+			} else RE_LOG_ERROR("Application Init failed to initialize");
+		} else RE_LOG_ERROR("Application Init failed to initialize file system");
+	} else RE_LOG_ERROR("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 
 	return ret;
 }
@@ -103,52 +100,58 @@ bool Application::Init(int argc, char* argv[])
 void Application::MainLoop()
 {
 	OPTICK_FRAME("MainThread RedEye");
-	RE_LOG_SEPARATOR("Entering Application's Main Loop - %.3f", RE_Time::FrameDeltaTime());
+	RE_LOG_SEPARATOR("Entering Application's Main Loop - %.3f", time->FrameDeltaTime());
 
 	do {
 		OPTICK_CATEGORY("Application Update", Optick::Category::GameLogic);
-		RE_Time::FrameDeltaTime();
-		for (auto mod : modules) if (mod->IsActive()) mod->PreUpdate();
-		for (auto mod : modules) if (mod->IsActive()) mod->Update();
-		for (auto mod : modules) if (mod->IsActive()) mod->PostUpdate();
 
-		if (load_config) LoadConfig();
-		if (save_config) SaveConfig();
-		if (RE_Time::GetState() == GS_TICK)
+		time->FrameDeltaTime();
+		input->PreUpdate();
+		editor->PreUpdate();
+
+		scene->Update();
+		editor->Update();
+
+		scene->PostUpdate();
+		renderer->PostUpdate();
+		audio->PostUpdate();
+
+		if (flags & LOAD_CONFIG) LoadConfig();
+		if (flags & SAVE_CONFIG) SaveConfig();
+		if (time->GetState() == GS_TICK)
 		{
-			RE_Time::PauseGameTimer();
-			for (auto it = modules.rbegin(); it != modules.rend(); ++it)
-				if ((*it)->IsActive()) (*it)->OnPause();
+			time->PauseGameTimer();
+			scene->OnPause();
 		}
 
-		unsigned int extra_ms = RE_Time::FrameExtraMS();
+		unsigned int extra_ms = time->FrameExtraMS();
 		if (extra_ms > 0) extra_ms = fs->ReadAssetChanges(extra_ms);
 		if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
 		if (extra_ms > 0)
 		{
 			OPTICK_CATEGORY("Application Delay extra ms", Optick::Category::WaitEmpty);
-			RE_Time::Delay(extra_ms);
+			time->Delay(extra_ms);
 		}
 
-	} while (!quit);
+	} while (!(flags & WANT_TO_QUIT));
 }
 
 void Application::CleanUp()
 {
-	Event::ClearQueue();
-	if (config != nullptr && save_config) config->Save();
+	if (flags & SAVE_ON_EXIT) fs->SaveConfig();
 
-	for (auto it = modules.rbegin(); it != modules.rend(); ++it)
-		if ((*it)->IsActive()) (*it)->CleanUp();
+	audio->CleanUp();
+	renderer->CleanUp();
+	editor->CleanUp();
+	scene->CleanUp();
+	window->CleanUp();
+	input->CleanUp();
 
-	RE_Hardware::Clear();
+	res->Clear();
+	fs->Clear();
 
-	SDL_Quit();
-}
-
-void Application::DrawModuleEditorConfig()
-{
-	for (auto mod : modules) if (mod->IsActive()) mod->DrawEditor();
+	if (SDL_WasInit(0) != 0)
+		SDL_Quit();
 }
 
 void Application::RecieveEvent(const Event& e)
@@ -157,150 +160,51 @@ void Application::RecieveEvent(const Event& e)
 	{
 	case PLAY: 
 	{
-		RE_Time::StartGameTimer();
-		for (auto it = modules.rbegin(); it != modules.rend(); ++it)
-			if ((*it)->IsActive()) (*it)->OnPlay();
-
+		time->StartGameTimer();
+		scene->OnPlay();
 		break;
 	}
 	case PAUSE:
 	{
-		RE_Time::PauseGameTimer();
-		for (auto it = modules.rbegin(); it != modules.rend(); ++it)
-			if ((*it)->IsActive()) (*it)->OnPause();
-
+		time->PauseGameTimer();
+		scene->OnPause();
 		break;
 	}
 	case TICK:
 	{
-		RE_Time::TickGameTimer();
-		for (auto it = modules.rbegin(); it != modules.rend(); ++it)
-			if ((*it)->IsActive()) (*it)->OnPlay();
-
+		time->TickGameTimer();
+		scene->OnPlay();
 		break;
 	}
 	case STOP:
 	{
-		RE_Time::StopGameTimer();
-		for (auto it = modules.rbegin(); it != modules.rend(); ++it)
-			if ((*it)->IsActive()) (*it)->OnStop();
-
+		time->StopGameTimer();
+		scene->OnStop();
 		break;
 	}
-	case REQUEST_LOAD: load_config = true; break;
-	case REQUEST_SAVE: save_config = true; break;
-	case REQUEST_QUIT: quit = true; break;
-	}
-}
-
-Application* Application::Ptr() { return instance; }
-const char* Application::GetName() { return app_name.c_str(); }
-const char* Application::GetOrganization() { return organization.c_str(); }
-
-bool Application::InitSDL()
-{
-	bool ret = false;
-	RE_LOG_SECONDARY("Initializing SDL without any subsystems");
-	if (SDL_Init(0) == 0)
-	{
-		char tmp[8];
-		SDL_version sdl_version;
-		SDL_GetVersion(&sdl_version);
-		EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", sdl_version.major, sdl_version.minor, sdl_version.patch);
-		RE_SOFT_NVS("SDL", tmp, "https://www.libsdl.org/");
-
-		// exploit tmp to report un-initialized software
-		EA::StdC::Snprintf(tmp, 8, "%i.%i.%i", EAASSERT_VERSION_MAJOR, EAASSERT_VERSION_MINOR, EAASSERT_VERSION_PATCH);
-		RE_SOFT_NVS("EABase", EABASE_VERSION, "https://github.com/electronicarts/EABase");
-		RE_SOFT_NVS("EASTL", EASTL_VERSION, "https://github.com/electronicarts/EASTL");
-		RE_SOFT_NVS("EAStdC", EASTDC_VERSION, "https://github.com/electronicarts/EAStdC");
-		RE_SOFT_NVS("EAAssert", tmp, "https://github.com/electronicarts/EAAssert");
-		RE_SOFT_NVS("EAThread", EATHREAD_VERSION, "https://github.com/electronicarts/EAThread");
-		RE_SOFT_NVS("Optick", "1.2.9", "https://optick.dev/");
-		RE_SOFT_NS("MathGeoLib", "https://github.com/juj/MathGeoLib");
-		RE_SOFT_N("gpudetect");
-
-		ret = true;
-	}
-	else RE_LOG_ERROR("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-
-	return ret;
-}
-
-bool Application::InitFileSystem(int argc, char* argv[])
-{
-	bool ret = false;
-	if (fs->Init(argc, argv))
-	{
-		RE_Json* node = config->GetRootNode("App");
-		app_name = node->PullString("Name", app_name.c_str());
-		organization = node->PullString("Organization", organization.c_str());
-		DEL(node);
-		ret = true;
-	}
-	return ret;
-}
-
-void Application::InitInternalSystems()
-{
-	// Initialize Importers
-	RE_ModelImporter::Init();
-	RE_ShaderImporter::Init();
-	if (!RE_TextureImporter::Init()) RE_LOG_WARNING("Won't be able to use/import textures");
-	
-	// Initialize Managers
-	cams.Init();
-	primitives.Init();
-	thumbnail->Init();
-
-	// Fetch Assets
-	RE_ResourceManager::internalResources.Init();
-	fs->ReadAssetChanges(0, true);
-	audio->ReadBanksChanges();
-}
-
-bool Application::InitModules()
-{
-	RE_LOG_SEPARATOR("Initializing Modules");
-	for (auto mod : modules)
-		if (mod->IsActive())
-			if (!mod->Init()) return false;
-
-	return true;
-}
-
-bool Application::StartModules()
-{
-	RE_LOG_SEPARATOR("Starting Modules");
-	for (auto mod : modules)
-		if (mod->IsActive())
-			if (!mod->Start()) return false;
-
-	return true;
+	case REQUEST_LOAD: flags |= LOAD_CONFIG; break;
+	case REQUEST_SAVE: flags |= SAVE_CONFIG; break;
+	case REQUEST_QUIT: flags |= WANT_TO_QUIT; break; }
 }
 
 void Application::LoadConfig()
 {
+	if (flags & LOAD_CONFIG) flags -= LOAD_CONFIG;
+
 	OPTICK_CATEGORY("Load module configuration - Application", Optick::Category::IO);
-	load_config = false;
-
-	RE_Json* node = config->GetRootNode("App");
-	app_name = node->PullString("Name", app_name.c_str());
-	organization = node->PullString("Organization", organization.c_str());
-	DEL(node);
-
-	for (auto mod : modules) if (mod->IsActive()) mod->Load();
+	window->Load();
+	renderer->Load();
+	audio->Load();
 }
 
 void Application::SaveConfig()
 {
+	if (flags & SAVE_CONFIG) flags -= SAVE_CONFIG;
+
 	OPTICK_CATEGORY("Save module configuration - Application", Optick::Category::IO);
-	save_config = false;
+	window->Save();
+	renderer->Save();
+	audio->Save();
 
-	RE_Json* node = config->GetRootNode("App");
-	node->PushString("Name", app_name.c_str());
-	node->PushString("Organization", organization.c_str());
-	DEL(node);
-
-	for (auto mod : modules) if (mod->IsActive()) mod->Save();
+	fs->SaveConfig();
 }

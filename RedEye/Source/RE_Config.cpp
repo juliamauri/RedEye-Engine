@@ -35,7 +35,7 @@ bool Config::LoadFromWindowsPath()
 {
 	// Open file
 	bool ret = false;
-	RE_FileBuffer* fileToLoad = App::fs->QuickBufferFromPDPath(file_name);
+	RE_FileBuffer* fileToLoad = RE_FS->QuickBufferFromPDPath(file_name);
 	if (fileToLoad != nullptr)
 	{
 		rapidjson::StringStream s(fileToLoad->GetBuffer());

@@ -1,10 +1,8 @@
 #include "RE_FBOManager.h"
 
-#include "RE_ConsoleLog.h"
-#include "RE_GLCacheManager.h"
+#include "Application.h"
+#include "RE_GLCache.h"
 #include "Glew/include/glew.h"
-
-using namespace RE_FBOManager::Internal;
 
 int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize, bool depth, bool stencil)
 {
@@ -293,9 +291,9 @@ unsigned int RE_FBOManager::GetHeight(unsigned int ID)
 unsigned int RE_FBOManager::GetDepthTexture(unsigned int ID)
 {
 	RE_FBO fbo = fbos.at(ID);
-	RE_GLCacheManager::ChangeTextureBind(fbo.depthBufferTexture);
+	RE_GLCache::ChangeTextureBind(fbo.depthBufferTexture);
 	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 0, 0, fbo.width, fbo.height, 0);
-	RE_GLCacheManager::ChangeTextureBind(0);
+	RE_GLCache::ChangeTextureBind(0);
 	return fbo.depthBufferTexture;
 }
 
@@ -325,7 +323,7 @@ void RE_FBOManager::ClearAll()
 	fbos.clear();
 }
 
-void RE_FBOManager::Internal::LoadDeferredTextures(RE_FBO& fbo)
+void RE_FBOManager::LoadDeferredTextures(RE_FBO& fbo)
 {
 	// position
 	unsigned int tex = 0;

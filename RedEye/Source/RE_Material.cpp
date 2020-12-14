@@ -1,17 +1,17 @@
 #include "RE_Material.h"
 
 #include "Globals.h"
-#include "RE_ConsoleLog.h"
+#include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
 #include "RE_Json.h"
-#include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleEditor.h"
-#include "RE_ShaderImporter.h"
 #include "RE_ResourceManager.h"
-#include "RE_GLCacheManager.h"
+#include "RE_InternalResources.h"
+#include "RE_ShaderImporter.h"
+#include "RE_GLCache.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_Shader.h"
 #include "RE_Texture.h"
@@ -26,11 +26,11 @@ RE_Material::~RE_Material() {}
 
 void RE_Material::LoadInMemory()
 {
-	if (App::fs->Exists(GetLibraryPath()))
+	if (RE_FS->Exists(GetLibraryPath()))
 	{
 		BinaryDeserialize();
 	}
-	else if (App::fs->Exists(GetAssetPath()))
+	else if (RE_FS->Exists(GetAssetPath()))
 	{
 		JsonDeserialize();
 		BinarySerialize();
@@ -87,11 +87,11 @@ void RE_Material::Draw()
 	if (!isInternal() && applySave && ImGui::Button("Save Changes"))
 	{
 		Save();
-		App::renderer3d->PushThumnailRend(GetMD5(), true);
+		RE_RENDER->PushThumnailRend(GetMD5(), true);
 		applySave = false;
 	}
 
-	if (App::resources->TotalReferenceCount(GetMD5()) == 0)
+	if (RE_RES->TotalReferenceCount(GetMD5()) == 0)
 	{
 		ImGui::Text("Material is unloaded, load for watch and modify values.");
 		if (ImGui::Button("Load"))
@@ -104,12 +104,12 @@ void RE_Material::Draw()
 	}
 
 	DrawMaterialEdit();
-	ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
+	ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
 }
 
 void RE_Material::SaveResourceMeta(RE_Json* metaNode)
 {
-	metaNode->PushString("shaderMeta", (shaderMD5) ? App::resources->At(shaderMD5)->GetMetaPath() : "NOMETAPATH");
+	metaNode->PushString("shaderMeta", (shaderMD5) ? RE_RES->At(shaderMD5)->GetMetaPath() : "NOMETAPATH");
 
 	RE_Json* diffuseNode = metaNode->PushJObject("DiffuseTextures");
 	PushTexturesJson(diffuseNode, &tDiffuse);
@@ -146,7 +146,7 @@ void RE_Material::SaveResourceMeta(RE_Json* metaNode)
 void RE_Material::LoadResourceMeta(RE_Json* metaNode)
 {
 	eastl::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
-	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = App::resources->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
+	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = RE_RES->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
 
 	RE_Json* diffuseNode = metaNode->PullJObject("DiffuseTextures");
 	PullTexturesJson(diffuseNode, &tDiffuse);
@@ -182,7 +182,7 @@ void RE_Material::LoadResourceMeta(RE_Json* metaNode)
 
 void RE_Material::DrawMaterialEdit()
 {
-	RE_Shader* matShader = dynamic_cast<RE_Shader*>(App::resources->At(shaderMD5 ? shaderMD5 : RE_ResourceManager::internalResources.GetDefaultShader()));
+	RE_Shader* matShader = dynamic_cast<RE_Shader*>(RE_RES->At(shaderMD5 ? shaderMD5 : RE_RES->internalResources->GetDefaultShader()));
 
 	ImGui::Text("Shader selected: %s", matShader->GetMD5());
 	
@@ -191,13 +191,13 @@ void RE_Material::DrawMaterialEdit()
 	if (ImGui::Button(matShader->GetName()))
 	{
 		bool popAll = false;
-		const char* selected = App::resources->GetSelected();
+		const char* selected = RE_RES->GetSelected();
 		if (selected)
 		{
-			Resource_Type t = App::resources->At(selected)->GetType();
+			Resource_Type t = RE_RES->At(selected)->GetType();
 			popAll = (t == Resource_Type::R_SHADER || t == Resource_Type::R_TEXTURE);
 		}
-		App::resources->PushSelected(matShader->GetMD5(), popAll);
+		RE_RES->PushSelected(matShader->GetMD5(), popAll);
 	}
 
 	if (shaderMD5)
@@ -213,7 +213,7 @@ void RE_Material::DrawMaterialEdit()
 
 	if (ImGui::BeginMenu("Change shader"))
 	{
-		eastl::vector<ResourceContainer*> shaders = App::resources->GetResourcesByType(Resource_Type::R_SHADER);
+		eastl::vector<ResourceContainer*> shaders = RE_RES->GetResourcesByType(Resource_Type::R_SHADER);
 		bool none = true;
 		for (auto  shader :  shaders)
 		{
@@ -221,9 +221,9 @@ void RE_Material::DrawMaterialEdit()
 			none = false;
 			if (ImGui::MenuItem(shader->GetName()))
 			{
-				if (ResourceContainer::inMemory && shaderMD5) App::resources->UnUse(shaderMD5);
+				if (ResourceContainer::inMemory && shaderMD5) RE_RES->UnUse(shaderMD5);
 				shaderMD5 = shader->GetMD5();
-				if (ResourceContainer::inMemory && shaderMD5) App::resources->Use(shaderMD5);
+				if (ResourceContainer::inMemory && shaderMD5) RE_RES->Use(shaderMD5);
 				GetAndProcessUniformsFromShader();
 				applySave = true;
 			}
@@ -276,7 +276,7 @@ void RE_Material::DrawMaterialEdit()
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 			{
 				tDiffuse.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App::resources->Use(tDiffuse.back());
+				if (ResourceContainer::inMemory) RE_RES->Use(tDiffuse.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -297,7 +297,7 @@ void RE_Material::DrawMaterialEdit()
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 			{
 				tSpecular.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App::resources->Use(tSpecular.back());
+				if (ResourceContainer::inMemory) RE_RES->Use(tSpecular.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -318,7 +318,7 @@ void RE_Material::DrawMaterialEdit()
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 			{
 				tAmbient.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App::resources->Use(tAmbient.back());
+				if (ResourceContainer::inMemory) RE_RES->Use(tAmbient.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -339,7 +339,7 @@ void RE_Material::DrawMaterialEdit()
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 			{
 				tAmbient.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App::resources->Use(tEmissive.back());
+				if (ResourceContainer::inMemory) RE_RES->Use(tEmissive.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -360,7 +360,7 @@ void RE_Material::DrawMaterialEdit()
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 			{
 				tOpacity.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App::resources->Use(tOpacity.back());
+				if (ResourceContainer::inMemory) RE_RES->Use(tOpacity.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -382,7 +382,7 @@ void RE_Material::DrawMaterialEdit()
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 			{
 				tShininess.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App::resources->Use(tShininess.back());
+				if (ResourceContainer::inMemory) RE_RES->Use(tShininess.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -402,7 +402,7 @@ void RE_Material::DrawMaterialEdit()
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 			{
 				tHeight.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App::resources->Use(tHeight.back());
+				if (ResourceContainer::inMemory) RE_RES->Use(tHeight.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -421,7 +421,7 @@ void RE_Material::DrawMaterialEdit()
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 			{
 				tNormals.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App::resources->Use(tNormals.back());
+				if (ResourceContainer::inMemory) RE_RES->Use(tNormals.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -440,7 +440,7 @@ void RE_Material::DrawMaterialEdit()
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 			{
 				tReflection.push_back(*static_cast<const char**>(dropped->Data));
-				if (ResourceContainer::inMemory) App::resources->Use(tReflection.back());
+				if (ResourceContainer::inMemory) RE_RES->Use(tReflection.back());
 				applySave = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -476,7 +476,7 @@ void RE_Material::DrawMaterialEdit()
 		if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
 		{
 			tUnknown.push_back(*static_cast<const char**>(dropped->Data));
-			if (ResourceContainer::inMemory) App::resources->Use(tUnknown.back());
+			if (ResourceContainer::inMemory) RE_RES->Use(tUnknown.back());
 			applySave = true;
 		}
 		ImGui::EndDragDropTarget();
@@ -567,18 +567,18 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 		uint count = 1;
 		for (eastl::vector<const char*>::iterator md5 = textures->begin(); md5 != textures->end(); ++md5)
 		{
-			ResourceContainer* resource = App::resources->At(*md5);
+			ResourceContainer* resource = RE_RES->At(*md5);
 			if (ImGui::Button(eastl::string("Texture #" + eastl::to_string(count) + " " + eastl::string(resource->GetName())).c_str()))
 			{
 
 				bool popAll = false;
-				const char* selected = App::resources->GetSelected();
+				const char* selected = RE_RES->GetSelected();
 				if (selected)
 				{
-					Resource_Type t = App::resources->At(selected)->GetType();
+					Resource_Type t = RE_RES->At(selected)->GetType();
 					popAll = (t == Resource_Type::R_SHADER || t == Resource_Type::R_TEXTURE);
 				}
-				App::resources->PushSelected(*md5, popAll);
+				RE_RES->PushSelected(*md5, popAll);
 			}
 
 			ImGui::SameLine();
@@ -586,7 +586,7 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 			deletetexture += eastl::to_string(count);
 			if (ImGui::Button(deletetexture.c_str()))
 			{
-				if (ResourceContainer::inMemory) App::resources->UnUse(*md5);
+				if (ResourceContainer::inMemory) RE_RES->UnUse(*md5);
 				toDelete = md5;
 				applySave = true;
 			}
@@ -595,14 +595,14 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 			changetexture += eastl::to_string(count++);
 			if (ImGui::BeginMenu(changetexture.c_str()))
 			{
-				eastl::vector<ResourceContainer*> allTex = App::resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+				eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(Resource_Type::R_TEXTURE);
 				for (auto textRes : allTex)
 				{
 					if (ImGui::MenuItem(textRes->GetName()))
 					{
-						if (ResourceContainer::inMemory) App::resources->UnUse(*md5);
+						if (ResourceContainer::inMemory) RE_RES->UnUse(*md5);
 						*md5 = textRes->GetMD5();
-						if (ResourceContainer::inMemory) App::resources->Use(*md5);
+						if (ResourceContainer::inMemory) RE_RES->Use(*md5);
 						applySave = true;
 					}
 				}
@@ -621,13 +621,13 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 	eastl::string addtexture = "Add #";
 	if (ImGui::BeginMenu(((addtexture += texturesName) += " texture").c_str()))
 	{
-		eastl::vector<ResourceContainer*> allTex = App::resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+		eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(Resource_Type::R_TEXTURE);
 		for (auto textRes : allTex)
 		{
 			if (ImGui::MenuItem(textRes->GetName()))
 			{
 				textures->push_back(textRes->GetMD5());
-				if (ResourceContainer::inMemory) App::resources->Use(textures->back());
+				if (ResourceContainer::inMemory) RE_RES->Use(textures->back());
 				applySave = true;
 			}
 		}
@@ -637,7 +637,7 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 
 void RE_Material::JsonDeserialize(bool generateLibraryPath)
 {
-	Config material(GetAssetPath(), App::fs->GetZipPath());
+	Config material(GetAssetPath(), RE_FS->GetZipPath());
 	if (material.Load()) {
 		RE_Json* nodeMat = material.GetRootNode("Material");
 
@@ -733,7 +733,7 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 				case RE_Cvar::MAT2: sVar.SetValue(nuniforms->PullFloat4(id.c_str(), math::float4::zero), true); break;
 				case RE_Cvar::MAT3: sVar.SetValue(nuniforms->PullMat3(id.c_str(), math::float3x3::zero), true); break;
 				case RE_Cvar::MAT4: sVar.SetValue(nuniforms->PullMat4(id.c_str(), math::float4x4::zero), true); break;
-				case RE_Cvar::SAMPLER: sVar.SetSampler(App::resources->IsReference(nuniforms->PullString(id.c_str(),"")), true); break;
+				case RE_Cvar::SAMPLER: sVar.SetSampler(RE_RES->IsReference(nuniforms->PullString(id.c_str(),"")), true); break;
 				}
 
 				fromShaderCustomUniforms.push_back(sVar);
@@ -763,7 +763,7 @@ void RE_Material::PullTexturesJson(RE_Json * texturesNode, eastl::vector<const c
 		eastl::string idref = "MetaPath";
 		idref += eastl::to_string(i).c_str();
 		eastl::string textureMaT = texturesNode->PullString(idref.c_str(), "");
-		const char* textureMD5 = App::resources->FindMD5ByMETAPath(textureMaT.c_str());
+		const char* textureMD5 = RE_RES->FindMD5ByMETAPath(textureMaT.c_str());
 		if (textureMD5) textures->push_back(textureMD5);
 		else RE_LOG_ERROR("No texture found.\nPath: %s", textureMaT.c_str());
 	}
@@ -771,7 +771,7 @@ void RE_Material::PullTexturesJson(RE_Json * texturesNode, eastl::vector<const c
 
 void RE_Material::JsonSerialize(bool onlyMD5)
 {
-	Config materialSerialize(GetAssetPath(), App::fs->GetZipPath());
+	Config materialSerialize(GetAssetPath(), RE_FS->GetZipPath());
 	RE_Json* materialNode = materialSerialize.GetRootNode("Material");
 	materialNode->PushString("name", GetName()); //for get different md5
 	materialNode->PushInt("ShaderType", (int)shadingType);
@@ -845,7 +845,7 @@ void RE_Material::PushTexturesJson(RE_Json * texturesNode, eastl::vector<const c
 	{
 		eastl::string idref = "MetaPath";
 		idref += eastl::to_string(i).c_str();
-		texturesNode->PushString(idref.c_str(), App::resources->At(textures->operator[](i))->GetMetaPath());
+		texturesNode->PushString(idref.c_str(), RE_RES->At(textures->operator[](i))->GetMetaPath());
 	}
 }
 
@@ -1067,7 +1067,7 @@ void RE_Material::BinaryDeserialize()
 					if (nSize > 0)
 					{
 						size = sizeof(char) * nSize;
-						sVar.SetSampler(App::resources->IsReference(eastl::string(cursor, nSize).c_str()), true);
+						sVar.SetSampler(RE_RES->IsReference(eastl::string(cursor, nSize).c_str()), true);
 						cursor += size;
 					}
 					else sVar.SetSampler(nullptr, true);
@@ -1083,7 +1083,7 @@ void RE_Material::BinaryDeserialize()
 
 void RE_Material::BinarySerialize()
 {
-	RE_FileBuffer libraryFile(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer libraryFile(GetLibraryPath(), RE_FS->GetZipPath());
 
 	uint bufferSize = GetBinarySize() + 1;
 	char* buffer = new char[bufferSize];
@@ -1292,39 +1292,39 @@ void RE_Material::BinarySerialize()
 
 void RE_Material::UseResources()
 {
-	if(shaderMD5) App::resources->Use(shaderMD5);
-	for (auto t : tDiffuse) App::resources->Use(t);
-	for (auto t : tSpecular) App::resources->Use(t);
-	for (auto t : tAmbient) App::resources->Use(t);
-	for (auto t : tEmissive) App::resources->Use(t);
-	for (auto t : tOpacity) App::resources->Use(t);
-	for (auto t : tShininess) App::resources->Use(t);
-	for (auto t : tHeight) App::resources->Use(t);
-	for (auto t : tNormals) App::resources->Use(t);
-	for (auto t : tReflection) App::resources->Use(t);
-	for (auto t : tUnknown) App::resources->Use(t);
+	if(shaderMD5) RE_RES->Use(shaderMD5);
+	for (auto t : tDiffuse) RE_RES->Use(t);
+	for (auto t : tSpecular) RE_RES->Use(t);
+	for (auto t : tAmbient) RE_RES->Use(t);
+	for (auto t : tEmissive) RE_RES->Use(t);
+	for (auto t : tOpacity) RE_RES->Use(t);
+	for (auto t : tShininess) RE_RES->Use(t);
+	for (auto t : tHeight) RE_RES->Use(t);
+	for (auto t : tNormals) RE_RES->Use(t);
+	for (auto t : tReflection) RE_RES->Use(t);
+	for (auto t : tUnknown) RE_RES->Use(t);
 }
 
 void RE_Material::UnUseResources()
 {
-	if (shaderMD5) App::resources->UnUse(shaderMD5);
-	for (auto t : tDiffuse) App::resources->UnUse(t);
-	for (auto t : tSpecular) App::resources->UnUse(t);
-	for (auto t : tAmbient) App::resources->UnUse(t);
-	for (auto t : tEmissive) App::resources->UnUse(t);
-	for (auto t : tOpacity) App::resources->UnUse(t);
-	for (auto t : tShininess) App::resources->UnUse(t);
-	for (auto t : tHeight) App::resources->UnUse(t);
-	for (auto t : tNormals) App::resources->UnUse(t);
-	for (auto t : tReflection) App::resources->UnUse(t);
-	for (auto t : tUnknown) App::resources->UnUse(t);
+	if (shaderMD5) RE_RES->UnUse(shaderMD5);
+	for (auto t : tDiffuse) RE_RES->UnUse(t);
+	for (auto t : tSpecular) RE_RES->UnUse(t);
+	for (auto t : tAmbient) RE_RES->UnUse(t);
+	for (auto t : tEmissive) RE_RES->UnUse(t);
+	for (auto t : tOpacity) RE_RES->UnUse(t);
+	for (auto t : tShininess) RE_RES->UnUse(t);
+	for (auto t : tHeight) RE_RES->UnUse(t);
+	for (auto t : tNormals) RE_RES->UnUse(t);
+	for (auto t : tReflection) RE_RES->UnUse(t);
+	for (auto t : tUnknown) RE_RES->UnUse(t);
 }
 
 void RE_Material::UploadToShader(const float* model, bool usingChekers, bool defaultShader)
 {
-	const char* usingShader = (shaderMD5 && !defaultShader) ? shaderMD5 : RE_ResourceManager::internalResources.GetDefaultShader();
-	RE_Shader* shaderRes = dynamic_cast<RE_Shader*>(App::resources->At(usingShader));
-	RE_GLCacheManager::ChangeShader(shaderRes->GetID());
+	const char* usingShader = (shaderMD5 && !defaultShader) ? shaderMD5 : RE_RES->internalResources->GetDefaultShader();
+	RE_Shader* shaderRes = dynamic_cast<RE_Shader*>(RE_RES->At(usingShader));
+	RE_GLCache::ChangeShader(shaderRes->GetID());
 	shaderRes->UploadModel(model);
 
 	unsigned int ShaderID = shaderRes->GetID();
@@ -1359,7 +1359,7 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 	if (shaderRes->NeedUploadDepth())
 	{
 		glActiveTexture(GL_TEXTURE0 + textureCounter);
-		RE_GLCacheManager::ChangeTextureBind(App::renderer3d->GetDepthTexture());
+		RE_GLCache::ChangeTextureBind(RE_RENDER->GetDepthTexture());
 		shaderRes->UploadDepth(textureCounter++);
 	}
 
@@ -1380,7 +1380,7 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 	{
 		glActiveTexture(GL_TEXTURE0 + textureCounter);
 		RE_ShaderImporter::setInt(ShaderID, "tdiffuse0", textureCounter++);
-		RE_GLCacheManager::ChangeTextureBind(RE_ResourceManager::internalResources.GetTextureChecker());
+		RE_GLCache::ChangeTextureBind(RE_RES->internalResources->GetTextureChecker());
 	}
 	else
 	{
@@ -1398,55 +1398,55 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tdiffuse" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(App::resources->At(tDiffuse[i]))->use();
+			dynamic_cast<RE_Texture*>(RE_RES->At(tDiffuse[i]))->use();
 		}
 		for (unsigned int i = 0; i < tSpecular.size() || i < usingOnMat[TSPECULAR]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tspecular" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(App::resources->At(tSpecular[i]))->use();
+			dynamic_cast<RE_Texture*>(RE_RES->At(tSpecular[i]))->use();
 		}
 		for (unsigned int i = 0; i < tAmbient.size() || i < usingOnMat[TAMBIENT]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tambient" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(App::resources->At(tAmbient[i]))->use();
+			dynamic_cast<RE_Texture*>(RE_RES->At(tAmbient[i]))->use();
 		}
 		for (unsigned int i = 0; i < tEmissive.size() || i < usingOnMat[TEMISSIVE]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("temissive" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(App::resources->At(tEmissive[i]))->use();
+			dynamic_cast<RE_Texture*>(RE_RES->At(tEmissive[i]))->use();
 		}
 		for (unsigned int i = 0; i < tOpacity.size() || i < usingOnMat[TOPACITY]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("topacity" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(App::resources->At(tOpacity[i]))->use();
+			dynamic_cast<RE_Texture*>(RE_RES->At(tOpacity[i]))->use();
 		}
 		for (unsigned int i = 0; i < tShininess.size() || i < usingOnMat[TSHININESS]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tshininess" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(App::resources->At(tShininess[i]))->use();
+			dynamic_cast<RE_Texture*>(RE_RES->At(tShininess[i]))->use();
 		}
 		for (unsigned int i = 0; i < tHeight.size() || i < usingOnMat[THEIGHT]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("theight" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(App::resources->At(tHeight[i]))->use();
+			dynamic_cast<RE_Texture*>(RE_RES->At(tHeight[i]))->use();
 		}
 		for (unsigned int i = 0; i < tNormals.size() || i < usingOnMat[TNORMALS]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tnormals" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(App::resources->At(tNormals[i]))->use();
+			dynamic_cast<RE_Texture*>(RE_RES->At(tNormals[i]))->use();
 		}
 		for (unsigned int i = 0; i < tReflection.size() || i < usingOnMat[TREFLECTION]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("treflection" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(App::resources->At(tReflection[i]))->use();
+			dynamic_cast<RE_Texture*>(RE_RES->At(tReflection[i]))->use();
 		}
 	}
 
@@ -1533,7 +1533,7 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 			{
 				glActiveTexture(GL_TEXTURE0 + textureCounter);
 				RE_ShaderImporter::setUnsignedInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), textureCounter++);
-				dynamic_cast<RE_Texture*>(App::resources->At(fromShaderCustomUniforms[i].AsCharP()))->use();
+				dynamic_cast<RE_Texture*>(RE_RES->At(fromShaderCustomUniforms[i].AsCharP()))->use();
 			}
 			break;
 		}
@@ -1543,8 +1543,8 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 
 unsigned int RE_Material::GetShaderID() const
 {
-	const char* usingShader = (shaderMD5) ? shaderMD5 : RE_ResourceManager::internalResources.GetDefaultShader();
-	return dynamic_cast<RE_Shader*>(App::resources->At(usingShader))->GetID();
+	const char* usingShader = (shaderMD5) ? shaderMD5 : RE_RES->internalResources->GetDefaultShader();
+	return dynamic_cast<RE_Shader*>(RE_RES->At(usingShader))->GetID();
 }
 
 unsigned int RE_Material::GetBinarySize()
@@ -1594,7 +1594,7 @@ void RE_Material::GetAndProcessUniformsFromShader()
 	static const char* materialNames[18] = {  "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient",  "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity",  "shininess", "shininessST", "tshininess", "refraccti", "theight",  "tnormals", "treflection" };
 	static const char* materialTextures[9] = {  "tdiffuse", "tspecular", "tambient", "temissive", "topacity", "tshininess", "theight", "tnormals", "treflection" };
 	
-	eastl::vector<RE_Shader_Cvar> fromShader = dynamic_cast<RE_Shader*>(App::resources->At(shaderMD5 ? shaderMD5 : RE_ResourceManager::internalResources.GetDefaultShader()))->GetUniformValues();
+	eastl::vector<RE_Shader_Cvar> fromShader = dynamic_cast<RE_Shader*>(RE_RES->At(shaderMD5 ? shaderMD5 : RE_RES->internalResources->GetDefaultShader()))->GetUniformValues();
 	for (auto &sVar : fromShader)
 	{
 		if (sVar.custom)

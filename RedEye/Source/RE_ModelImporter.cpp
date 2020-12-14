@@ -1,10 +1,10 @@
 #include "RE_ModelImporter.h"
 
 #include "Globals.h"
-#include "RE_ConsoleLog.h"
+#include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
-#include "Application.h"
+#include "ModuleInput.h"
 #include "ModuleRenderer3D.h"
 #include "RE_ResourceManager.h"
 #include "RE_TextureImporter.h"
@@ -26,17 +26,9 @@
 	#pragma comment(lib, "assimp/libx86/assimp-vc142-mt.lib")
 #endif
 
-using namespace RE_ModelImporter::Internal;
-
-void RE_ModelImporter::Init()
-{
-	RE_LOG("Initializing Model Importer");
-	RE_SOFT_NVS("Assimp", "5.0.1", "http://www.assimp.org/");
-}
-
 RE_ECS_Pool* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
 {
-	aditionalData = new currentlyImporting();
+	aditionalData = new CurrentlyImporting();
 	aditionalData->settings = mSettings;
 	aditionalData->workingfilepath = assetPath;
 	uint l = 0;
@@ -68,7 +60,7 @@ RE_ECS_Pool* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int si
 	return ret;
 }
 
-void RE_ModelImporter::Internal::ProcessNodes(RE_ECS_Pool* goPool, aiNode * parentNode, const aiScene * scene, unsigned long long parentGO, math::float4x4 parentTransform)
+void RE_ModelImporter::ProcessNodes(RE_ECS_Pool* goPool, aiNode * parentNode, const aiScene * scene, unsigned long long parentGO, math::float4x4 parentTransform)
 {
 	aiVector3D nScale, nPosition;
 	aiQuaternion nRotationQuat;
@@ -110,15 +102,15 @@ void RE_ModelImporter::Internal::ProcessNodes(RE_ECS_Pool* goPool, aiNode * pare
 				math::Quat rotation;
 				transform.Decompose(position, rotation, scale);
 
-				bool paused = Event::isPaused();
-				if (!paused) Event::PauseEvents();
+				bool paused = RE_INPUT->Paused();
+				if (!paused) RE_INPUT->PauseEvents();
 
 				RE_CompTransform* t = goPool->GetGOPtr(go_haschildren)->GetTransformPtr();
 				t->SetRotation(rotation);
 				t->SetPosition(position);
 				t->SetScale(scale);
 				t->Update();
-				if (!paused) Event::ResumeEvents();
+				if (!paused) RE_INPUT->ResumeEvents();
 
 				transform = math::float4x4::identity;
 			}
@@ -137,8 +129,8 @@ void RE_ModelImporter::Internal::ProcessNodes(RE_ECS_Pool* goPool, aiNode * pare
 					math::Quat rotation;
 					transform.Decompose(position, rotation, scale);
 
-					bool paused = Event::isPaused();
-					if (!paused) Event::PauseEvents();
+					bool paused = RE_INPUT->Paused();
+					if (!paused) RE_INPUT->PauseEvents();
 
 					RE_CompTransform* t = goMesh->GetTransformPtr();
 					t->SetRotation(rotation);
@@ -146,7 +138,7 @@ void RE_ModelImporter::Internal::ProcessNodes(RE_ECS_Pool* goPool, aiNode * pare
 					t->SetScale(scale);
 					t->Update();
 
-					if (!paused) Event::ResumeEvents();
+					if (!paused) RE_INPUT->ResumeEvents();
 
 					transform = math::float4x4::identity;
 				}
@@ -165,7 +157,7 @@ void RE_ModelImporter::Internal::ProcessNodes(RE_ECS_Pool* goPool, aiNode * pare
 	}
 }
 
-void RE_ModelImporter::Internal::ProcessMeshes(const aiScene* scene)
+void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 {
 	for (uint i = 0; i < scene->mNumMeshes; i++)
 	{
@@ -241,7 +233,7 @@ void RE_ModelImporter::Internal::ProcessMeshes(const aiScene* scene)
 				newMesh->SetName(mesh->mName.C_Str());
 				newMesh->SetType(Resource_Type::R_MESH);
 				newMesh->SetAssetPath(aditionalData->workingfilepath.c_str());
-				App::resources->Reference(newMesh);
+				RE_RES->Reference(newMesh);
 			}
 			else DEL(newMesh);
 
@@ -254,7 +246,7 @@ void RE_ModelImporter::Internal::ProcessMeshes(const aiScene* scene)
 eastl::vector<eastl::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(const char * path)
 {
 	eastl::vector<eastl::string> retPaths;
-	RE_FileBuffer* fbxloaded = App::fs->QuickBufferFromPDPath(path);
+	RE_FileBuffer* fbxloaded = RE_FS->QuickBufferFromPDPath(path);
 
 	if (fbxloaded)
 	{
@@ -289,7 +281,7 @@ eastl::vector<eastl::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(con
 	return retPaths;
 }
 
-void RE_ModelImporter::Internal::GetTexturePath(aiMaterial * material, eastl::vector<eastl::string> &retPaths, aiTextureType textureType)
+void RE_ModelImporter::GetTexturePath(aiMaterial * material, eastl::vector<eastl::string> &retPaths, aiTextureType textureType)
 {
 	if (uint textures = material->GetTextureCount(textureType) > 0)
 	{
@@ -305,7 +297,7 @@ void RE_ModelImporter::Internal::GetTexturePath(aiMaterial * material, eastl::ve
 	}
 }
 
-void RE_ModelImporter::Internal::ProcessMaterials(const aiScene* scene)
+void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 {
 	eastl::string fileTexturePath = aditionalData->workingfilepath.substr(0, aditionalData->workingfilepath.find_last_of("/") + 1);
 
@@ -318,7 +310,7 @@ void RE_ModelImporter::Internal::ProcessMaterials(const aiScene* scene)
 		RE_LOG_TERCIARY("Loadinig %s material.", name.C_Str());
 
 		eastl::string filePath = "Assets/Materials/" + aditionalData->name + "/" + name.C_Str() + ".pupil";
-		materialMD5 = App::resources->FindMD5ByAssetsPath(filePath.c_str(), Resource_Type::R_MATERIAL);
+		materialMD5 = RE_RES->FindMD5ByAssetsPath(filePath.c_str(), Resource_Type::R_MATERIAL);
 		if (!materialMD5)
 		{
 			RE_Material* newMaterial = new RE_Material();
@@ -390,14 +382,14 @@ void RE_ModelImporter::Internal::ProcessMaterials(const aiScene* scene)
 			container->SetType(Resource_Type::R_MATERIAL);
 
 			newMaterial->Save();
-			materialMD5 = App::resources->Reference(container);
-			App::renderer3d->PushThumnailRend(materialMD5);
+			materialMD5 = RE_RES->Reference(container);
+			RE_RENDER->PushThumnailRend(materialMD5);
 		}
 		aditionalData->materialsLoaded.insert(eastl::pair<aiMaterial*,const char*>(material, materialMD5));
 	}
 }
 
-void RE_ModelImporter::Internal::GetTexturesMaterial(aiMaterial * material, eastl::string &fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString &name)
+void RE_ModelImporter::GetTexturesMaterial(aiMaterial * material, eastl::string &fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString &name)
 {
 	if (uint textures = material->GetTextureCount(textureType) > 0)
 	{
@@ -410,9 +402,9 @@ void RE_ModelImporter::Internal::GetTexturesMaterial(aiMaterial * material, east
 				eastl::string filename = file_path.substr(file_path.find_last_of("\\") + 1);
 				eastl::string realAssetsPath = fileTexturePath + filename;
 
-				if (App::fs->Exists(realAssetsPath.c_str()))
+				if (RE_FS->Exists(realAssetsPath.c_str()))
 				{
-					const char* texture = App::resources->FindMD5ByAssetsPath(realAssetsPath.c_str(), Resource_Type::R_TEXTURE);
+					const char* texture = RE_RES->FindMD5ByAssetsPath(realAssetsPath.c_str(), Resource_Type::R_TEXTURE);
 					if (texture) vectorToFill->push_back(texture);
 					else RE_LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
 				}

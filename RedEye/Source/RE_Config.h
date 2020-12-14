@@ -21,6 +21,7 @@ public:
 	eastl::string GetMd5() override;
 
 public:
+
 	eastl::string zip_path;
 	rapidjson::Document document;
 };

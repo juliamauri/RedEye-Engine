@@ -4,19 +4,16 @@
 #include "ModuleScene.h"
 #include "ModuleWindow.h"
 #include "ModuleRenderer3D.h"
-#include "RE_FileSystem.h"
-
 #include "ModuleEditor.h"
+#include "RE_FileSystem.h"
 #include "EditorWindows.h"
 
-#include "Event.h"
-#include "RE_ConsoleLog.h"
-
 #include "SDL2\include\SDL.h"
+#include "Optick\include\optick.h"
 
 #define MAX_KEYS 300
 
-ModuleInput::ModuleInput(const char* name, bool start_enabled) : Module(name, start_enabled)
+ModuleInput::ModuleInput() : Module("Input")
 {
 	keyboard = new KEY_STATE[MAX_KEYS];
 	memset(keyboard, KEY_IDLE, sizeof(KEY_STATE) * MAX_KEYS);
@@ -56,13 +53,32 @@ void ModuleInput::PreUpdate()
 	mouse.ResetMotion();
 
 	// Keyboard
-	UpdateKeyboard();
+	const Uint8* keys = SDL_GetKeyboardState(NULL);
+	for (int i = 0; i < MAX_KEYS; ++i)
+	{
+		if (keys[i] == 1)
+		{
+			if (keyboard[i] == KEY_IDLE) keyboard[i] = KEY_DOWN;
+			else keyboard[i] = KEY_REPEAT;
+		}
+		else
+		{
+			if (keyboard[i] == KEY_REPEAT || keyboard[i] == KEY_DOWN) keyboard[i] = KEY_UP;
+			else keyboard[i] = KEY_IDLE;
+		}
+	}
 
 	// Events SDL (and send to Editor's ImGui)
 	HandleSDLEventQueue();
 
 	// Call all own events' listeners
-	Event::PumpAll();
+	while (!events_queue.empty())
+	{
+		const Event e = events_queue.front();
+		if (e.type < MAX_EVENT_TYPES && e.listener != nullptr)
+			e.listener->RecieveEvent(e);
+		events_queue.pop();
+	}
 }
 
 void ModuleInput::DrawEditor()
@@ -80,6 +96,8 @@ void ModuleInput::DrawEditor()
 void ModuleInput::CleanUp()
 {
 	SDL_QuitSubSystem(SDL_INIT_EVENTS);
+
+	while (!events_queue.empty()) events_queue.pop();
 }
 
 KEY_STATE ModuleInput::GetKey(const unsigned int id) const
@@ -99,26 +117,17 @@ const MouseData& ModuleInput::GetMouse() const { return mouse; }
 void ModuleInput::SetMouseAtCenter()
 {
 	// TODO Rub: Differenciate between whole window and views
-	SDL_WarpMouseInWindow(App::window->GetWindow(), App::window->GetWidth() / 2, App::window->GetHeight() / 2);
+	SDL_WarpMouseInWindow(RE_WINDOW->GetWindow(), RE_WINDOW->GetWidth() / 2, RE_WINDOW->GetHeight() / 2);
 }
 
-void ModuleInput::UpdateKeyboard()
+void ModuleInput::Push(RE_EventType t, EventListener* lis, RE_Cvar d1, RE_Cvar d2)
 {
-	const Uint8* keys = SDL_GetKeyboardState(NULL);
+	if (!events_paused) events_queue.push(Event(t, lis, d1, d2));
+}
 
-	for (int i = 0; i < MAX_KEYS; ++i)
-	{
-		if (keys[i] == 1)
-		{
-			if (keyboard[i] == KEY_IDLE) keyboard[i] = KEY_DOWN;
-			else keyboard[i] = KEY_REPEAT;
-		}
-		else
-		{
-			if (keyboard[i] == KEY_REPEAT || keyboard[i] == KEY_DOWN) keyboard[i] = KEY_UP;
-			else keyboard[i] = KEY_IDLE;
-		}
-	}
+void ModuleInput::PushForced(RE_EventType t, EventListener* lis, RE_Cvar d1, RE_Cvar d2)
+{
+	events_queue.push(Event(t, lis, d1, d2));
 }
 
 void ModuleInput::HandleSDLEventQueue()
@@ -131,8 +140,8 @@ void ModuleInput::HandleSDLEventQueue()
 		{
 		/* Application events */
 		case SDL_QUIT:/**< User-requested quit */
-			if (App::scene->HasChanges()) App::editor->popupWindow->PopUpSave(true);
-			else Event::Push(REQUEST_QUIT, App::Ptr());
+			if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSave(true);
+			else Push(REQUEST_QUIT, App);
 			break;
 		case SDL_APP_TERMINATING:/**< The application is being terminated by the OS
 								Called on iOS in applicationWillTerminate()
@@ -161,14 +170,14 @@ void ModuleInput::HandleSDLEventQueue()
 			case SDL_WINDOWEVENT_HIDDEN:/**< Window has been hidden */ break;
 			case SDL_WINDOWEVENT_EXPOSED:/**< Window has been exposed and should be redrawn */ break;
 			case SDL_WINDOWEVENT_MOVED:/**< Window has been moved to data1, data2 */
-				Event::Push(WINDOW_MOVED, App::window, RE_Cvar(e.window.data1), RE_Cvar(e.window.data2));
+				Push(WINDOW_MOVED, RE_WINDOW, RE_Cvar(e.window.data1), RE_Cvar(e.window.data2));
 				break;
 			case SDL_WINDOWEVENT_RESIZED:/**< Window has been resized to data1xdata2 */
 				// this sneaky event is always preceded by SDL_WINDOWEVENT_SIZE_CHANGED
 				//App->renderer3d->MainContextChanged(width = e->window.data1, height = e->window.data2);
 				break;
 			case SDL_WINDOWEVENT_SIZE_CHANGED:/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
-				Event::Push(WINDOW_SIZE_CHANGED, App::window, RE_Cvar(e.window.data1), RE_Cvar(e.window.data2));
+				Push(WINDOW_SIZE_CHANGED, RE_WINDOW, RE_Cvar(e.window.data1), RE_Cvar(e.window.data2));
 				break;
 			case SDL_WINDOWEVENT_MINIMIZED:/**< Window has been minimized */ break;
 			case SDL_WINDOWEVENT_MAXIMIZED:/**< Window has been maximized */ break;
@@ -179,8 +188,8 @@ void ModuleInput::HandleSDLEventQueue()
 			case SDL_WINDOWEVENT_FOCUS_LOST:/**< Window has lost keyboard focus */ break;
 			case SDL_WINDOWEVENT_CLOSE:/**< The window manager requests that the window be closed */
 			{
-				if (App::scene->HasChanges()) App::editor->popupWindow->PopUpSave(true);
-				else Event::Push(REQUEST_QUIT, App::Ptr());
+				if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSave(true);
+				else Push(REQUEST_QUIT, App);
 				break;
 			}
 			}
@@ -239,7 +248,7 @@ void ModuleInput::HandleSDLEventQueue()
 		/* Drag and drop events */
 		case SDL_DROPFILE:/**< The system requests a file open */
 			RE_LOG("File Dropped: %s", e.drop.file);
-			App::fs->HandleDropedFile(e.drop.file);
+			RE_FS->HandleDropedFile(e.drop.file);
 			break;
 
 		/* Render events */
@@ -248,7 +257,7 @@ void ModuleInput::HandleSDLEventQueue()
 		}
 	}
 
-	App::editor->HandleSDLEvent(&e);
+	RE_EDITOR->HandleSDLEvent(&e);
 }
 
 // --------------------- SDL Event Types ---------------------

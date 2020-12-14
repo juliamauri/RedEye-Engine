@@ -3,17 +3,23 @@
 
 #include "EventListener.h"
 #include "Resource.h"
-#include "RE_InternalResources.h"
 
 #include <EASTL/map.h>
 #include <EASTL/vector.h>
 #include <EASTL/stack.h> 
 
+class RE_InternalResources;
+class RE_ModelImporter;
+class RE_ShaderImporter;
+
 class RE_ResourceManager : public EventListener
 {
 public:
-	RE_ResourceManager() {}
+	RE_ResourceManager();
 	~RE_ResourceManager();
+
+	void Init();
+	void Clear();
 
 	void RecieveEvent(const Event& e) override;
 
@@ -66,7 +72,14 @@ private:
 
 public:
 
-	static RE_InternalResources internalResources;
+	RE_ModelImporter* model_importer = nullptr;
+	RE_ShaderImporter* shader_importer = nullptr;
+	RE_InternalResources* internalResources = nullptr;
+
+	/* Other importers are purely static therefore namespaces
+	namespace RE_ECS_Importer
+	namespace RE_TextureImporter
+	namespace RE_SkyboxImporter*/
 
 private:
 

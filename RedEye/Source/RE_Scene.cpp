@@ -15,11 +15,11 @@
 
 void RE_Scene::LoadInMemory()
 {
-	if (App::fs->Exists(GetLibraryPath()))
+	if (RE_FS->Exists(GetLibraryPath()))
 	{
 		LibraryLoad();
 	}
-	else if (App::fs->Exists(GetAssetPath()))
+	else if (RE_FS->Exists(GetAssetPath()))
 	{
 		AssetLoad();
 		LibrarySave(true);
@@ -75,13 +75,13 @@ RE_ECS_Pool* RE_Scene::GetPool() {
 
 void RE_Scene::Draw()
 {
-	if (ImGui::Button("Load Scene")) App::scene->LoadScene(GetMD5());
+	if (ImGui::Button("Load Scene")) RE_SCENE->LoadScene(GetMD5());
 }
 
 void RE_Scene::AssetSave()
 {
 	//Serialize
-	Config scene_SaveFile(GetAssetPath(), App::fs->GetZipPath());
+	Config scene_SaveFile(GetAssetPath(), RE_FS->GetZipPath());
 	RE_Json* scenebNode = scene_SaveFile.GetRootNode("scene");
 
 	if (toSave->TotalGameObjects() > 0) RE_ECS_Importer::JsonSerialize(scenebNode, toSave);
@@ -100,7 +100,7 @@ void RE_Scene::AssetSave()
 
 void RE_Scene::AssetLoad(bool generateLibraryPath)
 {
-	Config jsonLoad(GetAssetPath(), App::fs->GetZipPath());
+	Config jsonLoad(GetAssetPath(), RE_FS->GetZipPath());
 
 	if (jsonLoad.Load())
 	{
@@ -134,7 +134,7 @@ void RE_Scene::LibrarySave(bool fromLoaded)
 {
 	uint size = 0;
 	char* buffer = RE_ECS_Importer::BinarySerialize((fromLoaded) ? loaded : toSave, &size);
-	RE_FileBuffer toLibrarySave(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer toLibrarySave(GetLibraryPath(), RE_FS->GetZipPath());
 	toLibrarySave.Save(buffer, size);
 	DEL_A(buffer);
 }

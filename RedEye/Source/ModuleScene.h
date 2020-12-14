@@ -1,87 +1,92 @@
 #ifndef __MODULESCENE_H__
 #define __MODULESCENE_H__
 
-#include "Event.h"
-#include "RE_ECS_Pool.h"
 #include "Module.h"
+#include "RE_ECS_Pool.h"
 #include "RE_AABBDynTree.h"
+#include <EASTL/stack.h>
 
-class RE_GameObject;
 class RE_Scene;
+class RE_CameraManager;
+class RE_PrimitiveManager;
 
 class ModuleScene : public Module
 {
 public:
-	ModuleScene(const char* name = "Scene", bool start_enabled = true);
+	ModuleScene();
 	~ModuleScene();
 
+	bool Init() override;
 	bool Start() override;
 	void Update() override;
 	void PostUpdate() override;
 	void CleanUp() override;
-
-	// Draws
 	void DrawEditor() override;
+	void RecieveEvent(const Event& e) override;
+
+	// Draw space Partitioning
 	void DebugDraw() const;
 	
 	// Events
-	void OnPlay() override;
-	void OnPause() override;
-	void OnStop() override;
-	void RecieveEvent(const Event& e) override;
+	void OnPlay();
+	void OnPause();
+	void OnStop();
 
 	// Current Pool
-	static RE_ECS_Pool* GetScenePool();
-	static RE_GameObject* GetGOPtr(UID id);
-	static const RE_GameObject* GetGOCPtr(UID id);
+	RE_ECS_Pool* GetScenePool() { return &scenePool; }
+	RE_GameObject* GetGOPtr(UID id) const { return scenePool.GetGOPtr(id); }
+	const RE_GameObject* GetGOCPtr(UID id) const { return scenePool.GetGOCPtr(id); }
 
 	// Root
-	static UID GetRootUID();
-	static RE_GameObject* GetRootPtr();
-	static const RE_GameObject* GetRootCPtr();
+	UID GetRootUID() const { return scenePool.GetRootUID(); }
+	RE_GameObject* GetRootPtr() const { return scenePool.GetRootPtr(); }
+	const RE_GameObject* GetRootCPtr() const { return scenePool.GetRootCPtr(); }
 
 	// Adding to scene
-	static void CreatePrimitive(ComponentType type, const UID parent = 0);
-	static void CreateCamera(const UID parent = 0);
-	static void CreateLight(const UID parent = 0);
-	static void CreateMaxLights(const UID parent = 0);
-	static void CreateWater(const UID parent = 0);
-
+	void CreatePrimitive(ComponentType type, const UID parent = 0);
+	void CreateCamera(const UID parent = 0);
+	void CreateLight(const UID parent = 0);
+	void CreateMaxLights(const UID parent = 0);
+	void CreateWater(const UID parent = 0);
 	void AddGOPool(RE_ECS_Pool* toAdd);
 
 	// Scene Gameobject Filtering
-	UID RayCastGeometry(math::Ray& global_ray);
-	void FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum& frustum);
+	UID RayCastGeometry(math::Ray& global_ray) const;
+	void FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum& frustum) const;
 
 	// Scene Management
-	const char* GetCurrentScene()const;
+	const char* GetCurrentScene() const;
 	void ClearScene();
 	void NewEmptyScene(const char* name = "New Scene");
+	bool HasChanges() const { return haschanges; }
+	bool isNewScene() const { return (unsavedScene); }
 
 	// Serialization
 	void LoadScene(const char* sceneMD5, bool ignorehandle = false);
 	void SaveScene(const char* newName = nullptr);
-
-	bool HasChanges()const;
-	bool isNewScene() const;
 	
 private:
 
 	void SetupScene();
 
-	static inline UID Validate(const UID id);
+	UID Validate(const UID id) const { return id ? id : GetRootUID(); }
+
+public:
+
+	RE_CameraManager* cams = nullptr;
+	RE_PrimitiveManager* primitives = nullptr;
 
 private:
 
-	static RE_ECS_Pool scenePool;
+	RE_ECS_Pool scenePool;
 	RE_ECS_Pool savedState;
 	bool haschanges = false;
-
-	eastl::stack<UID> to_delete;
 
 	// Trees
 	RE_AABBDynTree static_tree;
 	RE_AABBDynTree dynamic_tree;
+
+	eastl::stack<UID> to_delete;
 
 	RE_Scene* unsavedScene = nullptr;
 	const char* currentScene = nullptr;

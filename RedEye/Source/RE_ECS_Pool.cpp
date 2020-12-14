@@ -1,7 +1,8 @@
 #include "RE_ECS_Pool.h"
 
-#include "RE_Json.h"
 #include "Application.h"
+#include "RE_Json.h"
+#include "ModuleInput.h"
 #include "ModuleScene.h"
 
 void RE_ECS_Pool::Update()
@@ -18,7 +19,7 @@ RE_GameObject* RE_ECS_Pool::AddGO(const char* name, UID parent, bool broadcast)
 	RE_GameObject* ret = gameObjectsPool.AtPtr(new_go_uid);
 	ret->SetUp(&gameObjectsPool, &componentsPool, name, parent);
 
-	if (broadcast) Event::Push(GO_HAS_NEW_CHILD, App::scene, parent, new_go_uid);
+	if (broadcast) RE_INPUT->Push(GO_HAS_NEW_CHILD, RE_SCENE, parent, new_go_uid);
 
 	return ret;
 }

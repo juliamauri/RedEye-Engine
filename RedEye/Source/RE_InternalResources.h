@@ -12,17 +12,18 @@ class RE_InternalResources
 public:
 
 	RE_InternalResources() {}
-	~RE_InternalResources();
+	~RE_InternalResources() {}
 
 	void Init();
+	void Clear();
 	
-	const char* GetDefaultShader()const;
-	const char* GetDefaultWaterShader()const;
-	const char* GetDefaultSkyBoxShader()const;
-	const char* GetDefaultScaleShader()const;
-	const char* GetDefaulMaterial()const;
-	const char* GetDefaultSkyBox()const;
-	const char* GetLightPassShader()const;
+	const char* GetDefaultShader() const;
+	const char* GetDefaultWaterShader() const;
+	const char* GetDefaultSkyBoxShader() const;
+	const char* GetDefaultScaleShader() const;
+	const char* GetDefaulMaterial() const;
+	const char* GetDefaultSkyBox() const;
+	const char* GetLightPassShader() const;
 
 	unsigned int GetTextureChecker() const;
 	unsigned int GetTextureWaterFoam() const;

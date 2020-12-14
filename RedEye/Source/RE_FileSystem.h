@@ -1,12 +1,13 @@
 #ifndef __FILESYSTEM_H__
 #define __FILESYSTEM_H__
 
-#include <EASTL/list.h>
-#include <EASTL/vector.h>
-#include <EASTL/stack.h>
+#include <EASTL\list.h>
+#include <EASTL\vector.h>
+#include <EASTL\stack.h>
 #include <EASTL\string.h>
 
 class Config;
+class RE_Json;
 class RE_FileBuffer;
 class RE_GameObject;
 class ResourceContainer;
@@ -75,7 +76,7 @@ public:
 		eastl::list<RE_Directory*> MountTreeFolders();
 		eastl::stack<RE_ProcessPath*> CheckAndApply(eastl::vector<RE_Meta*>* metaRecentlyAdded);
 
-		eastl::stack<RE_Path*> GetDisplayingFiles()const;
+		eastl::stack<RE_Path*> GetDisplayingFiles() const;
 
 		eastl::list<RE_Directory*> FromParentToThis();
 
@@ -85,9 +86,10 @@ public:
 public:
 
 	RE_FileSystem() {}
-	~RE_FileSystem();
+	~RE_FileSystem() {}
 
 	bool Init(int argc, char* argv[]);
+	void Clear();
 
 	unsigned int ReadAssetChanges(unsigned int extra_ms, bool doAll = false);
 
@@ -119,6 +121,9 @@ public:
 
 	signed long long GetLastTimeModified(const char* path);
 
+	RE_Json* ConfigNode(const char* node) const;
+	void SaveConfig() const;
+
 private:
 
 	void CopyDirectory(const char* origin, const char* dest);
@@ -138,6 +143,8 @@ private:
 
 	eastl::list<RE_File*> toImport;
 	eastl::list<RE_Meta*> toReImport;
+
+	Config* config = nullptr;
 };
 
 #endif // !__FILESYSTEM_H__

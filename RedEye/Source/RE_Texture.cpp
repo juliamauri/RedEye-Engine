@@ -1,13 +1,13 @@
 #include "RE_Texture.h"
 
-#include "RE_ConsoleLog.h"
+#include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Json.h"
-#include "Application.h"
-#include "RE_TextureImporter.h"
+#include "ModuleEditor.h"
 #include "RE_ThumbnailManager.h"
-#include "RE_GLCacheManager.h"
+#include "RE_TextureImporter.h"
+#include "RE_GLCache.h"
 
 #include "Glew/include/glew.h"
 #include "ImGui/imgui.h"
@@ -55,11 +55,11 @@ TextureType RE_Texture::GetTextureType() const { return texType; }
 
 void RE_Texture::LoadInMemory()
 {
-	if (App::fs->Exists(GetLibraryPath()))
+	if (RE_FS->Exists(GetLibraryPath()))
 	{
 		LibraryLoad();
 	}
-	else if (App::fs->Exists(GetAssetPath()))
+	else if (RE_FS->Exists(GetAssetPath()))
 	{
 		AssetLoad();
 		LibrarySave();
@@ -81,7 +81,7 @@ void RE_Texture::Import(bool keepInMemory)
 	if (!keepInMemory) UnloadMemory();
 }
 
-void RE_Texture::use() { RE_GLCacheManager::ChangeTextureBind(ID); }
+void RE_Texture::use() { RE_GLCache::ChangeTextureBind(ID); }
 
 void RE_Texture::GetWithHeight(int * w, int * h)
 {
@@ -91,7 +91,7 @@ void RE_Texture::GetWithHeight(int * w, int * h)
 
 void RE_Texture::DrawTextureImGui()
 {
-	ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(GetMD5())), ImVec2(256, 256), { 0.0, 1.0 }, {1.0, 0.0});
+	ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(GetMD5())), ImVec2(256, 256), { 0.0, 1.0 }, {1.0, 0.0});
 }
 
 void RE_Texture::Draw()
@@ -325,6 +325,6 @@ void RE_Texture::LibraryLoad()
 void RE_Texture::LibrarySave()
 {
 	RE_FileBuffer assetFile(GetAssetPath());
-	RE_FileBuffer libraryFile(GetLibraryPath(), App::fs->GetZipPath());
+	RE_FileBuffer libraryFile(GetLibraryPath(), RE_FS->GetZipPath());
 	if (assetFile.Load()) RE_TextureImporter::SaveOwnFormat(assetFile.GetBuffer(), assetFile.GetSize(), texType, &libraryFile);
 }

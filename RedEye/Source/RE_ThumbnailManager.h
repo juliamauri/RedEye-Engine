@@ -14,9 +14,10 @@ class RE_ThumbnailManager
 {
 public:
 	RE_ThumbnailManager() {}
-	~RE_ThumbnailManager();
+	~RE_ThumbnailManager() {}
 
 	void Init();
+	void Clear();
 
 	void Change(const char* ref, unsigned int id);
 	void Delete(const char* ref);
@@ -34,10 +35,11 @@ public:
 	unsigned int LoadLibraryThumbnail(const char* ref);
 
 private:
+
 	unsigned int LoadDefIcon(const char* filename);
 
-
 private:
+
 	eastl::map<const char*, unsigned int> thumbnails;
 
 	unsigned int singleRenderFBO = 0;

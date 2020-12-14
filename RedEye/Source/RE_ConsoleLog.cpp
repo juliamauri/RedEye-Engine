@@ -1,13 +1,14 @@
 #include "RE_ConsoleLog.h"
 
 #include "Application.h"
+#include "ModuleInput.h"
 #include "ModuleEditor.h"
 #include <EAStdC/EASprintf.h>
 #include <windows.h> // TODO Julius: Destruir Windows. Reventarlo quitandote la camiseta. Que no lo reconozca ni Billy el Puertas.
 
 #define LOG_STATEMENT_MAX_LENGTH 512
 
-void RE_ConsoleLog::_Log(int category, const char file[], int line, const char* format, ...)
+void RE_ConsoleLog::Log(int category, const char file[], int line, const char* format, ...)
 {
 	static char base[LOG_STATEMENT_MAX_LENGTH];
 	static va_list  ap;
@@ -38,23 +39,23 @@ void RE_ConsoleLog::_Log(int category, const char file[], int line, const char* 
 	default: return; }
 
 	if (scoping_procedure && category >= L_ERROR) category += 3;
-	Event::PushForced(static_cast<RE_EventType>(CONSOLE_LOG_SEPARATOR + category), App::editor, edited, file_name);
+	RE_INPUT->PushForced(static_cast<RE_EventType>(CONSOLE_LOG_SEPARATOR + category), RE_EDITOR, edited, file_name);
 }
 
-void RE_ConsoleLog::_ReportSoftware(const char file[], int line, const char* name, const char* version, const char* website)
+void RE_ConsoleLog::ReportSoftware(const char file[], int line, const char* name, const char* version, const char* website)
 {
-	App::editor->ReportSoftawe(name, version, website);
+	RE_EDITOR->ReportSoftawe(name, version, website);
 
 	if (version != nullptr)
 	{
-		if (website != nullptr) _Log(L_SOFTWARE, file, line, "3rd party software report: %s v%s (%s)", name, version, website);
-		else _Log(L_SOFTWARE, file, line, "3rd party software report: %s v%s", name, version);
+		if (website != nullptr) Log(L_SOFTWARE, file, line, "3rd party software report: %s v%s (%s)", name, version, website);
+		else Log(L_SOFTWARE, file, line, "3rd party software report: %s v%s", name, version);
 	}
-	else if (website != nullptr) _Log(L_SOFTWARE, file, line, "3rd party software report: %s (%s)", name, website);
-	else _Log(L_SOFTWARE, file, line, "3rd party software report: %s", name);
+	else if (website != nullptr) Log(L_SOFTWARE, file, line, "3rd party software report: %s (%s)", name, website);
+	else Log(L_SOFTWARE, file, line, "3rd party software report: %s", name);
 }
 
-void RE_ConsoleLog::_RequestBrowser(const char* link)
+void RE_ConsoleLog::RequestBrowser(const char* link) const
 {
 	ShellExecute(NULL, "open", link, NULL, NULL, SW_SHOWNORMAL);
 }
@@ -69,7 +70,7 @@ void RE_ConsoleLog::EndScope()
 	if (scoping_procedure)
 	{
 		scoping_procedure = false;
-		Event::PushForced(SCOPE_PROCEDURE_END, App::editor, error_scoped);
+		RE_INPUT->PushForced(SCOPE_PROCEDURE_END, RE_EDITOR, error_scoped);
 	}
 }
 

@@ -9,7 +9,7 @@ class RE_Command
 public:
 	virtual ~RE_Command() {};
 	virtual void execute() = 0;
-	virtual void undo() = 0;
+	virtual void Undo() = 0;
 };
 
 class RE_CMDTransformPosition : public RE_Command{
@@ -19,7 +19,7 @@ public:
 
 	void execute() override;
 
-	void undo() override;
+	void Undo() override;
 
 private:
 	UID go_;
@@ -35,7 +35,7 @@ public:
 
 	void execute() override;
 
-	void undo() override;
+	void Undo() override;
 
 private:
 	UID go_;
@@ -49,7 +49,7 @@ public:
 
 	void execute() override;
 
-	void undo() override;
+	void Undo() override;
 
 private:
 	UID go_;

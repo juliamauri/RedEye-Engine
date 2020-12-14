@@ -4,8 +4,9 @@
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "RE_ECS_Pool.h"
-#include "RE_GLCacheManager.h"
+#include "RE_GLCache.h"
 #include "RE_ResourceManager.h"
+#include "RE_InternalResources.h"
 #include "RE_ShaderImporter.h"
 #include "RE_Shader.h"
 
@@ -53,18 +54,18 @@ void RE_CompWater::Draw() const
 {
 	unsigned int textureCounter = 0;
 
-	RE_Shader* shader = dynamic_cast<RE_Shader * >(App::resources->At(RE_ResourceManager::internalResources.GetDefaultWaterShader()));
+	RE_Shader* shader = dynamic_cast<RE_Shader * >(RE_RES->At(RE_RES->internalResources->GetDefaultWaterShader()));
 	unsigned int shaderID = shader->GetID();
-	RE_GLCacheManager::ChangeShader(shaderID);
+	RE_GLCache::ChangeShader(shaderID);
 	shader->UploadModel(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 	
 	LightMode lMode = ModuleRenderer3D::GetLightMode();
 	
 	glActiveTexture(GL_TEXTURE0 + textureCounter);
-	RE_GLCacheManager::ChangeTextureBind(App::renderer3d->GetDepthTexture());
+	RE_GLCache::ChangeTextureBind(RE_RENDER->GetDepthTexture());
 	shader->UploadDepth(textureCounter++);
 
-	RE_GLCacheManager::ChangeShader(shaderID);
+	RE_GLCache::ChangeShader(shaderID);
 	switch (lMode)
 	{
 	case LIGHT_DISABLED:
@@ -91,7 +92,7 @@ void RE_CompWater::Draw() const
 			}
 			case RE_Cvar::SAMPLER: //Only one case
 				glActiveTexture(GL_TEXTURE0 + textureCounter);
-				RE_GLCacheManager::ChangeTextureBind(waterFoam.second);
+				RE_GLCache::ChangeTextureBind(waterFoam.second);
 				RE_ShaderImporter::setUnsignedInt(waterUniforms[i].location, textureCounter++);
 				break;
 			}
@@ -120,7 +121,7 @@ void RE_CompWater::Draw() const
 			{
 			case RE_Cvar::SAMPLER: //Only one case
 				glActiveTexture(GL_TEXTURE0 + textureCounter);
-				RE_GLCacheManager::ChangeTextureBind(waterFoam.second);
+				RE_GLCache::ChangeTextureBind(waterFoam.second);
 				RE_ShaderImporter::setUnsignedInt(waterUniforms[i].locationDeferred, textureCounter++);
 				break;
 			}
@@ -130,10 +131,10 @@ void RE_CompWater::Draw() const
 		break;
 	}
 
-	RE_GLCacheManager::ChangeVAO(VAO);
+	RE_GLCache::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, nullptr);
-	RE_GLCacheManager::ChangeVAO(0);
-	RE_GLCacheManager::ChangeShader(0);
+	RE_GLCache::ChangeVAO(0);
+	RE_GLCache::ChangeShader(0);
 }
 
 void RE_CompWater::DrawProperties()
@@ -434,7 +435,7 @@ void RE_CompWater::GeneratePlane()
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
-	RE_GLCacheManager::ChangeVAO(VAO);
+	RE_GLCache::ChangeVAO(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	stride *= sizeof(float);
@@ -474,7 +475,7 @@ void RE_CompWater::GeneratePlane()
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(accumulativeOffset));
 
-	RE_GLCacheManager::ChangeVAO(0);
+	RE_GLCache::ChangeVAO(0);
 
 	DEL_A(points);
 	DEL_A(normals);
@@ -485,7 +486,7 @@ void RE_CompWater::GeneratePlane()
 
 void RE_CompWater::SetUpWaterUniforms()
 {
-	waterUniforms = RE_ResourceManager::internalResources.GetWaterUniforms();
+	waterUniforms = RE_RES->internalResources->GetWaterUniforms();
 
 	for (unsigned int i = 0; i < waterUniforms.size(); i++) {
 		if (waterUniforms[i].name == "waveLength") {
@@ -551,7 +552,7 @@ void RE_CompWater::SetUpWaterUniforms()
 		}
 		else if (waterUniforms[i].name == "water_foam") {
 			waterFoam.first = &waterUniforms[i];
-			waterFoam.second = RE_ResourceManager::internalResources.GetTextureWaterFoam();
+			waterFoam.second = RE_RES->internalResources->GetTextureWaterFoam();
 		}
 	}
 }

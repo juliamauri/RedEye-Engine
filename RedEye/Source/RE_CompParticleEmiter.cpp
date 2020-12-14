@@ -13,7 +13,7 @@ void RE_CompParticleEmitter::PreUpdate() {}
 void RE_CompParticleEmitter::Update()
 {
 	int spawns_needed = 0;
-	float dt = 0.f;// RE_Time::GetDeltaTime();
+	float dt = 0.f;// RE_TIME->GetDeltaTime();
 
 	if (emissor_life > 0.f)
 	{

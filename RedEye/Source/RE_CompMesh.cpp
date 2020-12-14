@@ -5,6 +5,7 @@
 #include "RE_Json.h"
 #include "Application.h"
 #include "RE_ResourceManager.h"
+#include "RE_InternalResources.h"
 #include "RE_ECS_Pool.h"
 #include "RE_Mesh.h"
 #include "RE_Material.h"
@@ -25,12 +26,12 @@ void RE_CompMesh::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID
 
 void RE_CompMesh::Draw() const
 {
-	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_ResourceManager::internalResources.GetDefaulMaterial();
-	RE_Material* material = dynamic_cast<RE_Material*>(App::resources->At(materialToDraw));
+	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_RES->internalResources->GetDefaulMaterial();
+	RE_Material* material = dynamic_cast<RE_Material*>(RE_RES->At(materialToDraw));
 	if (material != nullptr)
 	{
 		material->UploadToShader(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr(), show_checkers);
-		RE_Mesh* mesh = dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5));
+		RE_Mesh* mesh = dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5));
 		if (mesh != nullptr) mesh->DrawMesh(material->GetShaderID());
 		else RE_LOG_WARNING("Component Mesh tried drawing invalid mesh");
 	}
@@ -44,7 +45,7 @@ void RE_CompMesh::DrawProperties()
 		if (meshMD5)
 		{
 			if (ImGui::Button(eastl::string("Resource Mesh").c_str()))
-				App::resources->PushSelected(meshMD5, true);
+				RE_RES->PushSelected(meshMD5, true);
 		}
 		else ImGui::TextWrapped("Empty Mesh Component");
 
@@ -52,11 +53,11 @@ void RE_CompMesh::DrawProperties()
 		ImGui::Checkbox("Use checkers texture", &show_checkers);
 		ImGui::Separator();
 		RE_Material* matRes = (materialMD5) ?
-			dynamic_cast<RE_Material*>(App::resources->At(materialMD5)) :
-			dynamic_cast<RE_Material*>(App::resources->At(RE_ResourceManager::internalResources.GetDefaulMaterial()));
+			dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)) :
+			dynamic_cast<RE_Material*>(RE_RES->At(RE_RES->internalResources->GetDefaulMaterial()));
 
 		if (!materialMD5) ImGui::Text("This component mesh is using the default material.");
-		if (ImGui::Button(matRes->GetName())) App::resources->PushSelected(matRes->GetMD5(), true);
+		if (ImGui::Button(matRes->GetName())) RE_RES->PushSelected(matRes->GetMD5(), true);
 		if (materialMD5)
 		{
 			ImGui::SameLine();
@@ -65,7 +66,7 @@ void RE_CompMesh::DrawProperties()
 
 		if (ImGui::BeginMenu("Change material"))
 		{
-			eastl::vector<ResourceContainer*> materials = App::resources->GetResourcesByType(Resource_Type::R_MATERIAL);
+			eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(Resource_Type::R_MATERIAL);
 			bool none = true;
 			for (auto material : materials)
 			{
@@ -76,14 +77,14 @@ void RE_CompMesh::DrawProperties()
 				{
 					if (materialMD5)
 					{
-						App::resources->UnUse(materialMD5);
-						(dynamic_cast<RE_Material*>(App::resources->At(materialMD5)))->UnUseResources();
+						RE_RES->UnUse(materialMD5);
+						(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UnUseResources();
 					}
 					materialMD5 = material->GetMD5();
 					if (materialMD5)
 					{
-						App::resources->Use(materialMD5);
-						(dynamic_cast<RE_Material*>(App::resources->At(materialMD5)))->UseResources();
+						RE_RES->Use(materialMD5);
+						(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UseResources();
 					}
 				}
 			}
@@ -95,9 +96,9 @@ void RE_CompMesh::DrawProperties()
 		{
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#MaterialReference"))
 			{
-				if (materialMD5) App::resources->UnUse(materialMD5);
+				if (materialMD5) RE_RES->UnUse(materialMD5);
 				materialMD5 = *static_cast<const char**>(dropped->Data);
-				if (materialMD5) App::resources->Use(materialMD5);
+				if (materialMD5) RE_RES->Use(materialMD5);
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -117,12 +118,12 @@ const char* RE_CompMesh::GetMesh() const
 
 unsigned int RE_CompMesh::GetVAOMesh() const
 {
-	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->GetVAO() : 0u;
+	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->GetVAO() : 0u;
 }
 
 unsigned int RE_CompMesh::GetTriangleMesh() const
 {
-	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->GetTriangleCount() : 0u;
+	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->GetTriangleCount() : 0u;
 }
 
 void RE_CompMesh::SetMaterial(const char * md5) { materialMD5 = md5; }
@@ -186,40 +187,40 @@ math::AABB RE_CompMesh::GetAABB() const
 {
 	math::AABB ret;
 	RE_Mesh* mesh;
-	if (meshMD5 && (mesh = dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))) ret = mesh->GetAABB();
+	if (meshMD5 && (mesh = dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))) ret = mesh->GetAABB();
 	else ret.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	return ret;
 }
 
 bool RE_CompMesh::CheckFaceCollision(const math::Ray & local_ray, float & distance) const
 {
-	return meshMD5 && (dynamic_cast<RE_Mesh*>(App::resources->At(meshMD5)))->CheckFaceCollision(local_ray, distance);
+	return meshMD5 && (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->CheckFaceCollision(local_ray, distance);
 }
 
 void RE_CompMesh::UseResources()
 {
-	if (meshMD5) App::resources->Use(meshMD5);
+	if (meshMD5) RE_RES->Use(meshMD5);
 	if (materialMD5)
 	{
-		App::resources->Use(materialMD5);
-		(dynamic_cast<RE_Material*>(App::resources->At(materialMD5)))->UseResources();
+		RE_RES->Use(materialMD5);
+		(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UseResources();
 	}
 }
 
 void RE_CompMesh::UnUseResources()
 {
-	if (meshMD5) App::resources->UnUse(meshMD5);
+	if (meshMD5) RE_RES->UnUse(meshMD5);
 	if (materialMD5)
 	{
-		App::resources->UnUse(materialMD5);
-		(dynamic_cast<RE_Material*>(App::resources->At(materialMD5)))->UnUseResources();
+		RE_RES->UnUse(materialMD5);
+		(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UnUseResources();
 	}
 }
 
 bool RE_CompMesh::isBlend() const
 {
-	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_ResourceManager::internalResources.GetDefaulMaterial();
-	RE_Material* material = dynamic_cast<RE_Material*>(App::resources->At(materialToDraw));
+	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_RES->internalResources->GetDefaulMaterial();
+	RE_Material* material = dynamic_cast<RE_Material*>(RE_RES->At(materialToDraw));
 	return material->blendMode;
 }
 

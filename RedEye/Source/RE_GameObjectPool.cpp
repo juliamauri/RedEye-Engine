@@ -1,5 +1,6 @@
 #include "RE_GameObjectPool.h"
 
+#include "Application.h"
 #include "RE_Math.h"
 #include "RE_Json.h"
 
@@ -12,7 +13,7 @@ void GameObjectsPool::Clear()
 UID GameObjectsPool::Push(RE_GameObject val)
 {
 	UID ret = 0;
-	if (RE_HashMap::Push(val, val.go_uid = RE_Math::RandomUID())) ret = val.go_uid;
+	if (RE_HashMap::Push(val, val.go_uid = RE_MATH->RandomUID())) ret = val.go_uid;
 	return ret;
 }
 

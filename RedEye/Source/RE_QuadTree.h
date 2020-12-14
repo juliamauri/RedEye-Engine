@@ -9,12 +9,12 @@ enum QTreeDrawMode : short { DISABLED, TOP, BOTTOM, TOP_BOTTOM, ALL };
 
 template <class TYPE> class QTreeNode;
 
-template <class TYPE> class QTree
+template <class TYPE> class RE_QuadTree
 {
 public:
 
-	QTree(math::AABB& max_size);
-	~QTree() {}
+	RE_QuadTree(math::AABB& max_size);
+	~RE_QuadTree() {}
 
 	void Push(TYPE in, math::AABB& in_box);
 	void Pop(TYPE to_remove);

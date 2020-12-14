@@ -1,6 +1,8 @@
 #ifndef __RE_COMPONENT_POOL_H__
 #define __RE_COMPONENT_POOL_H__
 
+#include "Application.h"
+#include "RE_Math.h"
 #include "RE_HashMap.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
@@ -32,7 +34,7 @@ public:
 
 	UID Push(COMPCLASS val)override
 	{
-		UID ret = RE_Math::RandomUID();
+		UID ret = RE_MATH->RandomUID();
 		RE_HashMap::Push(val, ret);
 		RE_HashMap::pool_[RE_HashMap::poolmapped_.at(ret)].SetPoolID(ret);
 		return ret;

@@ -1,20 +1,19 @@
 #include "EditorWindows.h"
 
 #include "Application.h"
-#include "RE_FileSystem.h"
-#include "RE_ConsoleLog.h"
 #include "RE_Time.h"
-#include "RE_ResourceManager.h"
-#include "RE_CameraManager.h"
-#include "RE_ThumbnailManager.h"
+#include "RE_Math.h"
 #include "RE_Hardware.h"
-
+#include "RE_FileSystem.h"
 #include "ModuleInput.h"
+#include "ModuleWindow.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"
 #include "ModuleRenderer3d.h"
 #include "ModuleAudio.h"
-
+#include "RE_ResourceManager.h"
+#include "RE_CameraManager.h"
+#include "RE_ThumbnailManager.h"
 #include "RE_GameObject.h"
 #include "RE_Prefab.h"
 #include "RE_Command.h"
@@ -204,19 +203,22 @@ void ConfigWindow::Draw(bool secondary)
 
 		if (ImGui::BeginMenu("Options"))
 		{
-			if (ImGui::MenuItem("Load")) Event::Push(REQUEST_LOAD, App::Ptr());
-			if (ImGui::MenuItem("Save")) Event::Push(REQUEST_SAVE, App::Ptr());
+			if (ImGui::MenuItem("Load")) RE_INPUT->Push(REQUEST_LOAD, App);
+			if (ImGui::MenuItem("Save")) RE_INPUT->Push(REQUEST_SAVE, App);
 			ImGui::EndMenu();
 		}
 
-		if (ImGui::CollapsingHeader("Time Profiling")) RE_Time::DrawEditorGraphs();
+		if (ImGui::CollapsingHeader("Time Profiling")) RE_TIME->DrawEditorGraphs();
+		
+		RE_INPUT->DrawEditor();
+		RE_WINDOW->DrawEditor();
+		RE_SCENE->DrawEditor();
+		RE_EDITOR->DrawEditor();
+		RE_RENDER->DrawEditor();
+		RE_AUDIO->DrawEditor();
 
-		App::DrawModuleEditorConfig();
-
-		if (ImGui::CollapsingHeader("File System")) App::fs->DrawEditor();
-
-		if (ImGui::CollapsingHeader("Hardware")) RE_Hardware::DrawEditor();
-		else RE_Hardware::Clear();
+		if (ImGui::CollapsingHeader("File System")) RE_FS->DrawEditor();
+		if (ImGui::CollapsingHeader("Hardware")) RE_HARDWARE->DrawEditor();
 
 		if (secondary)
 		{
@@ -242,7 +244,7 @@ void HeriarchyWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if(App::scene) App::editor->DrawHeriarchy();
+		if(RE_SCENE) RE_EDITOR->DrawHeriarchy();
 
 		if (secondary)
 		{
@@ -269,8 +271,8 @@ void PropertiesWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (App::resources->GetSelected() != nullptr) App::resources->At(App::resources->GetSelected())->DrawPropieties();
-		else if (App::editor->GetSelected()) ModuleScene::GetGOPtr(App::editor->GetSelected())->DrawProperties();
+		if (RE_RES->GetSelected() != nullptr) RE_RES->At(RE_RES->GetSelected())->DrawPropieties();
+		else if (RE_EDITOR->GetSelected()) RE_SCENE->GetGOPtr(RE_EDITOR->GetSelected())->DrawProperties();
 
 		if (secondary)
 		{
@@ -295,12 +297,12 @@ void AboutWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		ImGui::Text("Engine name: %s", App::GetName());
-		ImGui::Text("Organization: %s", App::GetOrganization());
+		ImGui::Text("Engine name: %s", App->GetName());
+		ImGui::Text("Organization: %s", App->GetOrganization());
 		ImGui::Text("License: GNU General Public License v3.0");
 
 		ImGui::Separator();
-		ImGui::Text("%s is a 3D Game Engine Sofware for academic purposes.", App::GetName());
+		ImGui::Text("%s is a 3D Game Engine Sofware for academic purposes.", App->GetName());
 
 		ImGui::Separator();
 		ImGui::Text("Authors:");
@@ -358,7 +360,7 @@ void RandomTest::Draw(bool secondary)
 		ImGui::SliderInt("Max Integer", &maxInt, minInt, 100);
 
 		if (ImGui::Button("Generate Int"))
-			resultInt = RE_Math::RandomInt(minInt, maxInt);
+			resultInt = RE_MATH->RandomInt(minInt, maxInt);
 
 		ImGui::SameLine();
 		ImGui::Text("Random Integer: %u", resultInt);
@@ -370,7 +372,7 @@ void RandomTest::Draw(bool secondary)
 		ImGui::SliderFloat("Max Float", &maxF, minF, 100.f, "%.1f");
 
 		if (ImGui::Button("Generate Float"))
-			resultF = RE_Math::RandomF(minF, maxF);
+			resultF = RE_MATH->RandomF(minF, maxF);
 
 		ImGui::SameLine();
 		ImGui::Text("Random Float: %.2f", resultF);
@@ -388,13 +390,13 @@ void RandomTest::Draw(bool secondary)
 		ImGui::Text("Count: %s", eastl::to_string(count).c_str());
 		if (generating)
 		{
-			Timer timer;
+			RE_Timer timer;
 
 			for (int i = 0; i < loops[0]; ++i)
 			{
 				for (int i = 0; i < loops[1]; ++i)
 				{
-					UID r = RE_Math::RandomUID();
+					UID r = RE_MATH->RandomUID();
 					if (r == first)
 					{
 						generating = false;
@@ -413,7 +415,7 @@ void RandomTest::Draw(bool secondary)
 		else if (ImGui::Button("Generate UID"))
 		{
 			generating = true;
-			first = RE_Math::RandomUID();
+			first = RE_MATH->RandomUID();
 			max = count = 0;
 			min = 0xffffffffffffffff;
 		}
@@ -443,29 +445,29 @@ void PlayPauseWindow::Draw(bool secondary)
 
 		if (RE_CameraManager::HasMainCamera())
 		{
-			switch (RE_Time::DrawEditorControls()) {
-			case GS_PLAY: Event::Push(PLAY, App::Ptr()); break;
-			case GS_PAUSE: Event::Push(PAUSE, App::Ptr()); break;
-			case GS_STOP: Event::Push(STOP, App::Ptr()); break;
-			case GS_TICK: Event::Push(TICK, App::Ptr()); break;
+			switch (RE_TIME->DrawEditorControls()) {
+			case GS_PLAY:  RE_INPUT->Push(PLAY,  App); break;
+			case GS_PAUSE: RE_INPUT->Push(PAUSE, App); break;
+			case GS_STOP:  RE_INPUT->Push(STOP,  App); break;
+			case GS_TICK:  RE_INPUT->Push(TICK,  App); break;
 			default: break; }
 		}
 		else ImGui::Text("Missing Main Camera");
 
 		ImGui::SameLine();
-		ImGui::Checkbox("Draw Gizmos", &App::editor->debug_drawing);
+		ImGui::Checkbox("Draw Gizmos", &RE_EDITOR->debug_drawing);
 
 		ImGui::SameLine();
 		ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
 
-		static ImGuizmo::OPERATION o = App::editor->GetSceneEditor()->GetOperation();
+		static ImGuizmo::OPERATION o = RE_EDITOR->GetSceneEditor()->GetOperation();
 		static bool changed = false;
 		static bool colored = false;
 		ImGui::SameLine();
 
-		if (App::input->GetKey(SDL_SCANCODE_Q) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::TRANSLATE; changed = true; }
-		if (App::input->GetKey(SDL_SCANCODE_W) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::ROTATE;    changed = true; }
-		if (App::input->GetKey(SDL_SCANCODE_E) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::SCALE;	    changed = true; }
+		if (RE_INPUT->GetKey(SDL_SCANCODE_Q) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::TRANSLATE; changed = true; }
+		if (RE_INPUT->GetKey(SDL_SCANCODE_W) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::ROTATE;    changed = true; }
+		if (RE_INPUT->GetKey(SDL_SCANCODE_E) == KEY_STATE::KEY_DOWN){ o = ImGuizmo::OPERATION::SCALE;	    changed = true; }
 
 		if (!colored && o == ImGuizmo::OPERATION::TRANSLATE) {
 			ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, { 0.0f, 1.0f, 0.0f, 1.0f });
@@ -515,19 +517,19 @@ void PlayPauseWindow::Draw(bool secondary)
 		}
 
 		if (changed) {
-			App::editor->GetSceneEditor()->SetOperation(o);
+			RE_EDITOR->GetSceneEditor()->SetOperation(o);
 			changed = false;
 		}
 
 
 		ImGui::SameLine();
-		static ImGuizmo::MODE m = App::editor->GetSceneEditor()->GetMode();
+		static ImGuizmo::MODE m = RE_EDITOR->GetSceneEditor()->GetMode();
 		if (ImGui::Button((m == ImGuizmo::MODE::LOCAL) ? "Local Transformation" : "Global Transformation"))
 		{
 			switch (m) {
 			case ImGuizmo::MODE::LOCAL: m = ImGuizmo::MODE::WORLD; break;
 			case ImGuizmo::MODE::WORLD: m = ImGuizmo::MODE::LOCAL; break; }
-			App::editor->GetSceneEditor()->SetMode(m);
+			RE_EDITOR->GetSceneEditor()->SetMode(m);
 		}
 
 		if (secondary) {
@@ -546,7 +548,7 @@ void PopUpWindow::PopUp(const char * _btnText, const char* title, bool _disableA
 {
 	btnText = _btnText;
 	titleText = title;
-	App::editor->PopUpFocus(_disableAllWindows);
+	RE_EDITOR->PopUpFocus(_disableAllWindows);
 	active = true;
 }
 
@@ -561,7 +563,7 @@ void PopUpWindow::PopUpSave(bool fromExit, bool newScene)
 	state = PU_SAVE;
 	exitAfter = fromExit;
 	spawnNewScene = newScene;
-	if (inputName = App::scene->isNewScene()) nameStr = "New Scene";
+	if (inputName = RE_SCENE->isNewScene()) nameStr = "New Scene";
 	PopUp("Save", "Scene have changes", true);
 }
 
@@ -578,10 +580,10 @@ void PopUpWindow::PopUpDelRes(const char* res)
 {
 	state = PU_DELETERESOURCE;
 	resourceToDelete = res;
-	resourcesUsing = App::resources->WhereIsUsed(res);
+	resourcesUsing = RE_RES->WhereIsUsed(res);
 
-	Resource_Type rType = App::resources->At(res)->GetType();
-	eastl::stack<RE_Component*> comps = App::scene->GetScenePool()->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+	Resource_Type rType = RE_RES->At(res)->GetType();
+	eastl::stack<RE_Component*> comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
 	bool skip = false;
 	while (!comps.empty() && !skip)
 	{
@@ -613,7 +615,7 @@ void PopUpWindow::PopUpDelUndeFile(const char* assetPath)
 {
 	state = PU_DELETEUNDEFINEDFILE;
 	nameStr = assetPath;
-	resourcesUsing = App::resources->WhereUndefinedFileIsUsed(assetPath);
+	resourcesUsing = RE_RES->WhereUndefinedFileIsUsed(assetPath);
 	PopUp("Delete", "Do you want to delete that file?", false);
 }
 
@@ -662,7 +664,7 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				active = false;
 				state = PU_NONE;
-				App::editor->PopUpFocus(false);
+				RE_EDITOR->PopUpFocus(false);
 				ClearScope();
 			}
 
@@ -696,7 +698,7 @@ void PopUpWindow::Draw(bool secondary)
 
 			if (ImGui::Button(btnText.c_str()))
 			{
-				App::scene->SaveScene((inputName) ? nameStr.c_str() : nullptr);
+				RE_SCENE->SaveScene((inputName) ? nameStr.c_str() : nullptr);
 				clicked = true;
 			}
 
@@ -707,9 +709,9 @@ void PopUpWindow::Draw(bool secondary)
 				active = false;
 				state = PU_NONE;
 				inputName = false;
-				App::editor->PopUpFocus(false);
-				if (exitAfter) Event::Push(RE_EventType::REQUEST_QUIT, App::Ptr());
-				else if (spawnNewScene) App::scene->NewEmptyScene();
+				RE_EDITOR->PopUpFocus(false);
+				if (exitAfter) RE_INPUT->Push(RE_EventType::REQUEST_QUIT, App);
+				else if (spawnNewScene) RE_SCENE->NewEmptyScene();
 				spawnNewScene = false;
 			}
 
@@ -734,12 +736,12 @@ void PopUpWindow::Draw(bool secondary)
 				newPrefab->SetName(nameStr.c_str());
 				newPrefab->SetType(Resource_Type::R_PREFAB);
 
-				Event::PauseEvents();
-				newPrefab->Save(App::scene->GetScenePool()->GetNewPoolFromID(goPrefab->GetUID()), identityRoot, true);
-				Event::ResumeEvents();
+				RE_INPUT->PauseEvents();
+				newPrefab->Save(RE_SCENE->GetScenePool()->GetNewPoolFromID(goPrefab->GetUID()), identityRoot, true);
+				RE_INPUT->ResumeEvents();
 
 				newPrefab->SaveMeta();
-				App::renderer3d->PushThumnailRend(App::resources->Reference(newPrefab));
+				RE_RENDER->PushThumnailRend(RE_RES->Reference(newPrefab));
 			}
 
 			if (ImGui::Button("Cancel") || clicked)
@@ -747,14 +749,14 @@ void PopUpWindow::Draw(bool secondary)
 				state = PU_NONE;
 				active = inputName = false;
 				goPrefab = nullptr;
-				App::editor->PopUpFocus(false);
+				RE_EDITOR->PopUpFocus(false);
 			}
 
 			break;
 		}
 		case PopUpWindow::PU_DELETERESOURCE:
 		{
-			ResourceContainer* res = App::resources->At(resourceToDelete);
+			ResourceContainer* res = RE_RES->At(resourceToDelete);
 			ImGui::Text("Name: %s", res->GetName());
 
 			static const char* names[MAX_R_TYPES] = { "undefined.", "shader.", "texture.", "mesh.", "prefab.", "skyBox.", "material.", "model.", "scene." };
@@ -765,11 +767,11 @@ void PopUpWindow::Draw(bool secondary)
 			bool clicked = ImGui::Button(btnText.c_str());
 			if (clicked)
 			{
-				RE_ConsoleLog::ScopeProcedureLogging();
+				RE_LOGGER.ScopeProcedureLogging();
 
 				// Delete at resource & filesystem
-				ResourceContainer* resAlone = App::resources->DeleteResource(resourceToDelete, resourcesUsing, resourceOnScene);
-				App::fs->DeleteResourceFiles(resAlone);
+				ResourceContainer* resAlone = RE_RES->DeleteResource(resourceToDelete, resourcesUsing, resourceOnScene);
+				RE_FS->DeleteResourceFiles(resAlone);
 
 				DEL(resAlone);
 			}
@@ -780,13 +782,13 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				active = false;
 				state = PU_NONE;
-				App::editor->PopUpFocus(false);
+				RE_EDITOR->PopUpFocus(false);
 				goPrefab = nullptr;
 				resourceToDelete = nullptr;
 				resourcesUsing.clear();
 				resourceOnScene = false;
-				App::resources->PopSelected(true);
-				RE_ConsoleLog::EndScope();
+				RE_RES->PopSelected(true);
+				RE_LOGGER.EndScope();
 			}
 
 			if (resourceOnScene) {
@@ -801,12 +803,12 @@ void PopUpWindow::Draw(bool secondary)
 			for (auto resource : resourcesUsing)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
-				ResourceContainer* resConflict = App::resources->At(resource);
+				ResourceContainer* resConflict = RE_RES->At(resource);
 				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | " };
-				btnname += (resource == App::scene->GetCurrentScene()) ? "Scene (current scene) | " : names[resConflict->GetType()];
+				btnname += (resource == RE_SCENE->GetCurrentScene()) ? "Scene (current scene) | " : names[resConflict->GetType()];
 				btnname += resConflict->GetName();
 
-				if (ImGui::Button(btnname.c_str())) App::resources->PushSelected(resource, true);
+				if (ImGui::Button(btnname.c_str())) RE_RES->PushSelected(resource, true);
 			}
 
 			break;
@@ -821,25 +823,25 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				clicked = true;
 
-				RE_ConsoleLog::ScopeProcedureLogging();
+				RE_LOGGER.ScopeProcedureLogging();
 				if (!resourcesUsing.empty())
 				{
 					eastl::stack<ResourceContainer*> shadersDeleted;
 					for (auto resource : resourcesUsing)
-						if (App::resources->At(resource)->GetType() == R_SHADER)
-							shadersDeleted.push(App::resources->DeleteResource(resource, App::resources->WhereIsUsed(resource), false));
+						if (RE_RES->At(resource)->GetType() == R_SHADER)
+							shadersDeleted.push(RE_RES->DeleteResource(resource, RE_RES->WhereIsUsed(resource), false));
 
 					// Delete shader files
 					while (shadersDeleted.empty())
 					{
 						ResourceContainer* resS = shadersDeleted.top();
-						App::fs->DeleteResourceFiles(resS);
+						RE_FS->DeleteResourceFiles(resS);
 						shadersDeleted.pop();
 						DEL(resS);
 					}
 				}
 
-				if (!RE_ConsoleLog::ScopedErrors()) App::fs->DeleteUndefinedFile(nameStr.c_str());
+				if (!RE_LOGGER.ScopedErrors()) RE_FS->DeleteUndefinedFile(nameStr.c_str());
 				else RE_LOG_ERROR("File can't be erased; shaders can't be delete.");
 			}
 
@@ -849,10 +851,10 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				active = false;
 				state = PU_NONE;
-				App::editor->PopUpFocus(false);
+				RE_EDITOR->PopUpFocus(false);
 				resourcesUsing.clear();
-				App::resources->PopSelected(true);
-				RE_ConsoleLog::EndScope();
+				RE_RES->PopSelected(true);
+				RE_LOGGER.EndScope();
 			}
 
 			ImGui::Separator();
@@ -862,7 +864,7 @@ void PopUpWindow::Draw(bool secondary)
 			for (auto resource : resourcesUsing)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
-				ResourceContainer* resConflict = App::resources->At(resource);
+				ResourceContainer* resConflict = RE_RES->At(resource);
 				Resource_Type type = resConflict->GetType();
 
 				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | " };
@@ -870,7 +872,7 @@ void PopUpWindow::Draw(bool secondary)
 				btnname += resConflict->GetName();
 
 				if (type == R_SHADER) ImGui::Separator();
-				if (ImGui::Button(btnname.c_str())) App::resources->PushSelected(resource, true);
+				if (ImGui::Button(btnname.c_str())) RE_RES->PushSelected(resource, true);
 				if (type == R_SHADER) ImGui::Text("%s will be deleted and the next resources will be affected:", resConflict->GetName());
 			}
 
@@ -882,7 +884,7 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				active = false;
 				state = PU_NONE;
-				App::editor->PopUpFocus(false);
+				RE_EDITOR->PopUpFocus(false);
 			}
 			break;
 		}
@@ -909,7 +911,7 @@ void AssetsWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		static RE_FileSystem::RE_Directory* currentDir = App::fs->GetRootDirectory();
+		static RE_FileSystem::RE_Directory* currentDir = RE_FS->GetRootDirectory();
 		RE_FileSystem::RE_Directory* toChange = nullptr;
 		static float iconsSize = 100;
 
@@ -962,7 +964,7 @@ void AssetsWindow::Draw(bool secondary)
 			{
 			case RE_FileSystem::PathType::D_FOLDER:
 			{
-				if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+				if (ImGui::ImageButton(reinterpret_cast<void*>(RE_EDITOR->thumbnails->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
 					toChange = p->AsDirectory();
 				ImGui::PopID();
 				ImGui::Text(p->AsDirectory()->name.c_str());
@@ -974,14 +976,14 @@ void AssetsWindow::Draw(bool secondary)
 				{
 				case RE_FileSystem::FileType::F_META:
 				{
-					ResourceContainer* res = App::resources->At(p->AsMeta()->resource);
-					if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->GetShaderFileID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
-						App::resources->PushSelected(res->GetMD5(), true);
+					ResourceContainer* res = RE_RES->At(p->AsMeta()->resource);
+					if (ImGui::ImageButton(reinterpret_cast<void*>(RE_EDITOR->thumbnails->GetShaderFileID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+						RE_RES->PushSelected(res->GetMD5(), true);
 
 					if (ImGui::BeginDragDropSource())
 					{
 						ImGui::SetDragDropPayload("#ShadereReference", &p->AsMeta()->resource, sizeof(const char**));
-						ImGui::Image(reinterpret_cast<void*>(App::thumbnail->GetShaderFileID()), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+						ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->GetShaderFileID()), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 						ImGui::EndDragDropSource();
 					}
 					ImGui::PopID();
@@ -990,7 +992,7 @@ void AssetsWindow::Draw(bool secondary)
 					ImGui::PushID(id.c_str());
 					if (ImGui::BeginPopupContextItem())
 					{
-						if (ImGui::Button("Delete")) App::editor->popupWindow->PopUpDelRes(res->GetMD5());
+						if (ImGui::Button("Delete")) RE_EDITOR->popupWindow->PopUpDelRes(res->GetMD5());
 						ImGui::EndPopup();
 					}
 					ImGui::PopID();
@@ -1008,7 +1010,7 @@ void AssetsWindow::Draw(bool secondary)
 					}
 
 					if (ImGui::ImageButton(
-						reinterpret_cast<void*>(selectingUndefFile ? App::thumbnail->GetSelectFileID() : App::thumbnail->GetFileID()),
+						reinterpret_cast<void*>(selectingUndefFile ? RE_EDITOR->thumbnails->GetSelectFileID() : RE_EDITOR->thumbnails->GetFileID()),
 						{ iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, (selectingUndefFile) ? -1 : 0))
 					{
 						if (selectingUndefFile)
@@ -1029,7 +1031,7 @@ void AssetsWindow::Draw(bool secondary)
 					ImGui::PushID(id.c_str());
 					if (ImGui::BeginPopupContextItem())
 					{
-						if (ImGui::Button("Delete")) App::editor->popupWindow->PopUpDelUndeFile(p->path.c_str());
+						if (ImGui::Button("Delete")) RE_EDITOR->popupWindow->PopUpDelUndeFile(p->path.c_str());
 						ImGui::EndPopup();
 					}
 					ImGui::PopID();
@@ -1054,16 +1056,16 @@ void AssetsWindow::Draw(bool secondary)
 				{
 					if (p->AsFile()->metaResource != nullptr)
 					{
-						ResourceContainer* res = App::resources->At(p->AsFile()->metaResource->resource);
-						if (ImGui::ImageButton(reinterpret_cast<void*>(App::thumbnail->At(res->GetMD5())), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
-							App::resources->PushSelected(res->GetMD5(), true);
+						ResourceContainer* res = RE_RES->At(p->AsFile()->metaResource->resource);
+						if (ImGui::ImageButton(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(res->GetMD5())), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+							RE_RES->PushSelected(res->GetMD5(), true);
 						ImGui::PopID();
 
 						id = idName + eastl::to_string(idCount) + "Delete";
 						ImGui::PushID(id.c_str());
 						if (ImGui::BeginPopupContextItem())
 						{
-							if (ImGui::Button("Delete")) App::editor->popupWindow->PopUpDelRes(res->GetMD5());
+							if (ImGui::Button("Delete")) RE_EDITOR->popupWindow->PopUpDelRes(res->GetMD5());
 							ImGui::EndPopup();
 						}
 						ImGui::PopID();
@@ -1075,7 +1077,7 @@ void AssetsWindow::Draw(bool secondary)
 						if (ImGui::BeginDragDropSource())
 						{
 							ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
-							ImGui::Image(reinterpret_cast<void*>(App::thumbnail->At(p->AsFile()->metaResource->resource)), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+							ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(p->AsFile()->metaResource->resource)), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 							ImGui::EndDragDropSource();
 						}
 
@@ -1180,7 +1182,7 @@ void WwiseWindow::Draw(bool secondary)
 			ImGui::Separator();
 		}
 
-		App::audio->DrawWwiseElementsDetected();
+		RE_AUDIO->DrawWwiseElementsDetected();
 
 		if (secondary)
 		{
@@ -1223,14 +1225,14 @@ void SceneEditorWindow::Draw(bool secondary)
 		heigth = static_cast<int>(size.y) - 28;
 		if (recalc || lastWidht != width || lastHeight != heigth)
 		{
-			Event::Push(RE_EventType::EDITORWINDOWCHANGED, App::renderer3d, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
-			Event::Push(RE_EventType::EDITORWINDOWCHANGED, App::editor);
+			RE_INPUT->Push(RE_EventType::EDITORWINDOWCHANGED, RE_RENDER, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
+			RE_INPUT->Push(RE_EventType::EDITORWINDOWCHANGED, RE_EDITOR);
 			recalc = false;
 		}
 
 		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 		ImGui::SetCursorPos({ viewport.x, viewport.y });
-		ImGui::Image((void*)App::renderer3d->GetRenderedEditorSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
+		ImGui::Image((void*)RE_RENDER->GetRenderedEditorSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 
 		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 		ImVec2 vMax = ImGui::GetWindowContentRegionMax();
@@ -1239,16 +1241,16 @@ void SceneEditorWindow::Draw(bool secondary)
 		vMax.x += ImGui::GetWindowPos().x;
 		vMax.y += ImGui::GetWindowPos().y;
 
-		if(!ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && isWindowSelected && App::input->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && App::input->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN)
+		if(!ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && isWindowSelected && RE_INPUT->GetKey(SDL_SCANCODE_LALT) == KEY_IDLE && RE_INPUT->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN)
 		{
 			ImVec2 mousePosOnThis = ImGui::GetMousePos();
 			if ((mousePosOnThis.x -= vMin.x - ImGui::GetStyle().WindowPadding.x) > 0.f && (mousePosOnThis.y -= vMin.y - ImGui::GetStyle().WindowPadding.y) > 0.f)
-				Event::Push(EDITOR_SCENE_RAYCAST, App::editor, mousePosOnThis.x, mousePosOnThis.y);
+				RE_INPUT->Push(EDITOR_SCENE_RAYCAST, RE_EDITOR, mousePosOnThis.x, mousePosOnThis.y);
 		}
 
 		UID selected_uid;
-		if (selected_uid = App::editor->GetSelected()) {
-			RE_GameObject* selected = ModuleScene::GetGOPtr(selected_uid);
+		if (selected_uid = RE_EDITOR->GetSelected()) {
+			RE_GameObject* selected = RE_SCENE->GetGOPtr(selected_uid);
 			RE_GameObject* parent = selected->GetParentPtr();
 			RE_CompTransform* sTransform = selected->GetTransformPtr();
 
@@ -1283,7 +1285,7 @@ void SceneEditorWindow::Draw(bool secondary)
 
 			ImGuizmo::RecomposeMatrixFromComponents(pos.ptr(), rot.ToEulerXYZ().ptr(), scl.ptr(), matA);
 
-			math::float4x4 deltamatrix = math::float4x4::identity * RE_Time::GetDeltaTime();
+			math::float4x4 deltamatrix = math::float4x4::identity * RE_TIME->GetDeltaTime();
 
 			//SetRect of window at imgizmo
 			ImGuizmo::SetRect(vMin.x, vMin.y, vMax.x - vMin.x, vMax.y - vMin.y);
@@ -1327,18 +1329,18 @@ void SceneEditorWindow::Draw(bool secondary)
 			}
 
 
-			if (watchingChange && (App::input->GetMouse().GetButton(1) == KEY_STATE::KEY_UP))
+			if (watchingChange && (RE_INPUT->GetMouse().GetButton(1) == KEY_STATE::KEY_UP))
 			{
 				switch (operation)
 				{
 				case ImGuizmo::TRANSLATE:
-					App::editor->PushCommand(new RE_CMDTransformPosition(selected_uid, before, last));
+					RE_EDITOR->PushCommand(new RE_CMDTransformPosition(selected_uid, before, last));
 					break;
 				case ImGuizmo::ROTATE:
-					App::editor->PushCommand(new RE_CMDTransformRotation(selected_uid, before, last));
+					RE_EDITOR->PushCommand(new RE_CMDTransformRotation(selected_uid, before, last));
 					break;
 				case ImGuizmo::SCALE:
-					App::editor->PushCommand(new RE_CMDTransformScale(selected_uid, before, last));
+					RE_EDITOR->PushCommand(new RE_CMDTransformScale(selected_uid, before, last));
 					break;
 				}
 
@@ -1387,14 +1389,14 @@ void SceneGameWindow::Draw(bool secondary)
 
 		if (recalc || lastWidht != width || lastHeight != heigth)
 		{
-			Event::Push(RE_EventType::GAMEWINDOWCHANGED, App::renderer3d, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
-			Event::Push(RE_EventType::GAMEWINDOWCHANGED, App::editor);
+			RE_INPUT->Push(RE_EventType::GAMEWINDOWCHANGED, RE_RENDER, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
+			RE_INPUT->Push(RE_EventType::GAMEWINDOWCHANGED, RE_EDITOR);
 			recalc = false;
 		}
 
 		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 		ImGui::SetCursorPos({ viewport.x, viewport.y });
-		ImGui::Image(reinterpret_cast<void*>(App::renderer3d->GetRenderedGameSceneTexture()), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
+		ImGui::Image(reinterpret_cast<void*>(RE_RENDER->GetRenderedGameSceneTexture()), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 
 		if (secondary)
 		{
@@ -1414,7 +1416,7 @@ void TransformDebugWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
-		eastl::vector<UID> allTransforms = App::scene->GetScenePool()->GetAllGOUIDs();
+		eastl::vector<UID> allTransforms = RE_SCENE->GetScenePool()->GetAllGOUIDs();
 		
 		int transformCount = allTransforms.size();
 		ImGui::Text("Total %i transforms.", transformCount);
@@ -1431,7 +1433,7 @@ void TransformDebugWindow::Draw(bool secondary)
 		ImGui::DragInt("List Size", &totalShowing, 1.f, 0);
 
 		for (int i = range; i < totalShowing + range && i < transformCount; i++) {
-			RE_CompTransform* transform = ModuleScene::GetGOPtr(allTransforms[i])->GetTransformPtr();
+			RE_CompTransform* transform = RE_SCENE->GetGOPtr(allTransforms[i])->GetTransformPtr();
 
 			ImGui::PushID(("#TransformDebug" + eastl::to_string(i)).c_str());
 

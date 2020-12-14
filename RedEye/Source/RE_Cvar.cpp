@@ -652,12 +652,12 @@ bool RE_Shader_Cvar::DrawPropieties(bool isInMemory)
 		ImGui::Text("Sampler: %s", name.c_str());
 		if (!value.char_p_v)  ImGui::Text("No texture selected:");
 		else {
-			ResourceContainer* res = App::resources->At((value.char_p_v));
-			if (ImGui::Button(res->GetName())) App::resources->PushSelected(res->GetMD5());
+			ResourceContainer* res = RE_RES->At((value.char_p_v));
+			if (ImGui::Button(res->GetName())) RE_RES->PushSelected(res->GetMD5());
 
 			ImGui::SameLine();
 			if (ImGui::Button(eastl::string("Delete Sampler Texture #" + name).c_str())) {
-				if (isInMemory) App::resources->UnUse(value.char_p_v);
+				if (isInMemory) RE_RES->UnUse(value.char_p_v);
 				value.char_p_v = nullptr;
 				ret = true;
 			}
@@ -665,12 +665,12 @@ bool RE_Shader_Cvar::DrawPropieties(bool isInMemory)
 
 		if (ImGui::BeginMenu(eastl::string("Change Sampler Texture #" + name).c_str()))
 		{
-			eastl::vector<ResourceContainer*> allTex = App::resources->GetResourcesByType(Resource_Type::R_TEXTURE);
+			eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(Resource_Type::R_TEXTURE);
 			for (auto textRes : allTex) {
 				if (ImGui::MenuItem(textRes->GetName())) {
-					if (isInMemory) App::resources->UnUse(value.char_p_v);
+					if (isInMemory) RE_RES->UnUse(value.char_p_v);
 					value.char_p_v = textRes->GetMD5();
-					if (isInMemory) App::resources->Use(value.char_p_v);
+					if (isInMemory) RE_RES->Use(value.char_p_v);
 					ret = true;
 				}
 			}
@@ -680,9 +680,9 @@ bool RE_Shader_Cvar::DrawPropieties(bool isInMemory)
 		if (ImGui::BeginDragDropTarget()) {
 
 			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference")) {
-				if (isInMemory) App::resources->UnUse(value.char_p_v);
+				if (isInMemory) RE_RES->UnUse(value.char_p_v);
 				value.char_p_v = *static_cast<const char**>(dropped->Data);
-				if (isInMemory) App::resources->Use(value.char_p_v);
+				if (isInMemory) RE_RES->Use(value.char_p_v);
 				ret = true;
 			}
 			ImGui::EndDragDropTarget();
