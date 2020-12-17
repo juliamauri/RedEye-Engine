@@ -12,6 +12,7 @@
 bool ModuleWindow::Init()
 {
 	bool ret = false;
+	RE_PROFILE(PROF_Init, PROF_ModuleWindow);
 	RE_LOG("Initializing Module %s", name);
 	RE_LOG_SECONDARY("Init SDL video subsystem");
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) == 0)
@@ -71,12 +72,14 @@ void ModuleWindow::DrawEditor()
 
 void ModuleWindow::CleanUp()
 {
+	RE_PROFILE(PROF_CleanUp, PROF_ModuleWindow);
 	if (window) SDL_DestroyWindow(window);
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 void ModuleWindow::Load()
 {
+	RE_PROFILE(PROF_Load, PROF_ModuleWindow);
 	RE_LOG_SECONDARY("Loading Window propieties from config:");
 	RE_Json* node = RE_FS->ConfigNode(name);
 
@@ -102,6 +105,7 @@ void ModuleWindow::Load()
 
 void ModuleWindow::Save() const
 {
+	RE_PROFILE(PROF_Save, PROF_ModuleWindow);
 	RE_Json* node = RE_FS->ConfigNode(name);
 	if (flags == 0u)
 	{
@@ -309,9 +313,11 @@ void ModuleWindow::SwapFullDesktop()
 
 bool ModuleWindow::SetWindowProperties()
 {
+	RE_PROFILE(PROF_SetWindowProperties, PROF_ModuleWindow);
 	bool ret = false;
 	if (window == nullptr)
 	{
+		RE_PROFILE(PROF_CreateWindow, PROF_ModuleWindow);
 		RE_LOG_SECONDARY("Creating new window: %s | Width: %i | Height: %i", title.c_str(), width, height);
 		window = SDL_CreateWindow(title.c_str(), pos_x, pos_y, width, height, flags);
 	}

@@ -18,7 +18,6 @@
 #include "ImGui\imgui_impl_sdl.h"
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
-#include "Optick/include/optick.h"
 
 #include <EASTL/stack.h>
 #include <EASTL/queue.h>
@@ -62,6 +61,7 @@ ModuleEditor::~ModuleEditor()
 bool ModuleEditor::Init()
 {
 	bool ret = false;
+	RE_PROFILE(PROF_Init, PROF_ModuleEditor);
 	RE_LOG("Initializing Module %s", name);
 
 	// ImGui
@@ -124,7 +124,7 @@ bool ModuleEditor::Init()
 
 bool ModuleEditor::Start()
 {
-	RE_LOG("Starting Module %s", name);
+	RE_PROFILE(PROF_Start, PROF_ModuleEditor);
 	windows.push_back(assets = new AssetsWindow());
 	windows.push_back(wwise = new WwiseWindow());
 
@@ -137,14 +137,13 @@ bool ModuleEditor::Start()
 	if (first) SetSelected(first);
 
 	thumbnails->Init();
-	RE_RES->ThumbnailResources();
 
 	return true;
 }
 
 void ModuleEditor::PreUpdate()
 {
-	OPTICK_CATEGORY("PreUpdate ModuleEditor", Optick::Category::GameLogic);
+	RE_PROFILE(PROF_PreUpdate, PROF_ModuleEditor);
 	ImGuizmo::SetOrthographic(!RE_SCENE->cams->EditorCamera()->isPrespective());
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame(RE_WINDOW->GetWindow());
@@ -154,7 +153,7 @@ void ModuleEditor::PreUpdate()
 
 void ModuleEditor::Update()
 {
-	OPTICK_CATEGORY("Update ModuleEditor", Optick::Category::UI);
+	RE_PROFILE(PROF_Update, PROF_ModuleEditor);
 	if (show_all)
 	{
 		// Main Menu Bar
@@ -342,6 +341,7 @@ void ModuleEditor::Update()
 
 void ModuleEditor::CleanUp()
 {
+	RE_PROFILE(PROF_CleanUp, PROF_ModuleEditor);
 	commands->Clear();
 	thumbnails->Clear();
 
@@ -384,7 +384,7 @@ void ModuleEditor::RecieveEvent(const Event& e)
 		float width, height;
 		camera->GetTargetWidthHeight(width, height);
 
-		OPTICK_CATEGORY("Update ModuleEditor Camera RayCast", Optick::Category::Camera);
+		RE_PROFILE(PROF_CameraRaycast, PROF_ModuleEditor);
 		UID hit = RE_SCENE->RayCastGeometry(
 			math::Ray(camera->GetFrustum().UnProjectLineSegment(
 			(e.data1.AsFloat() -(width / 2.0f)) / (width / 2.0f),
@@ -420,8 +420,7 @@ void ModuleEditor::RecieveEvent(const Event& e)
 
 void ModuleEditor::Draw() const
 {
-	OPTICK_CATEGORY("ImGui Rend", Optick::Category::Rendering);
-
+	RE_PROFILE(PROF_DrawEditor, PROF_ModuleEditor);
 	sceneEditorWindow->DrawWindow();
 	sceneGameWindow->DrawWindow();
 
@@ -484,7 +483,7 @@ void ModuleEditor::DrawEditor()
 
 void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 {
-	OPTICK_CATEGORY("Debug Draw", Optick::Category::Debug);
+	RE_PROFILE(PROF_DrawDebug, PROF_ModuleEditor);
 	AABBDebugDrawing adapted_AABBdraw = (selected ? aabb_drawing : AABBDebugDrawing(aabb_drawing - 1));
 
 	if (debug_drawing && ((adapted_AABBdraw != AABBDebugDrawing::NONE) || draw_quad_tree || draw_cameras))
@@ -679,7 +678,7 @@ void ModuleEditor::ClearCommands() { commands->Clear(); }
 
 void ModuleEditor::UpdateCamera()
 {
-	OPTICK_CATEGORY("Update ModuleEditor Camera", Optick::Category::Camera);
+	RE_PROFILE(PROF_EditorCamera, PROF_ModuleEditor);
 	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
 	if (sceneEditorWindow->isSelected())
 	{

@@ -41,6 +41,7 @@ RE_ResourceManager::~RE_ResourceManager()
 
 void RE_ResourceManager::Init()
 {
+	RE_PROFILE(PROF_Init, PROF_ResourcesManager);
 	RE_LOG_SEPARATOR("Initializing Resources");
 
 	RE_TextureImporter::Init();
@@ -54,6 +55,7 @@ void RE_ResourceManager::Init()
 
 void RE_ResourceManager::Clear()
 {
+	RE_PROFILE(PROF_Clear, PROF_ResourcesManager);
 	internalResources->Clear();
 	shader_importer->Clear();
 
@@ -161,7 +163,8 @@ eastl::vector<const char*> RE_ResourceManager::GetAllResourcesActiveByType(Resou
 	while (!resourcesByType.empty())
 	{
 		const char* resMD5 = resourcesByType.back()->GetMD5();
-		if (resourcesCounter.at(resMD5) > 0) ret.push_back(resMD5);
+		if (resourcesCounter.at(resMD5) > 0)
+			ret.push_back(resMD5);
 		resourcesByType.pop_back();
 	}
 	return ret;
@@ -524,6 +527,7 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 
 void RE_ResourceManager::ThumbnailResources()
 {
+	RE_PROFILE(PROF_ThumbnailResources, PROF_ResourcesManager);
 	for (auto res : resources) {
 		Resource_Type rT = res.second->GetType();
 		if(rT == R_SCENE || rT == R_PREFAB || rT == R_MODEL || rT == R_SKYBOX || rT == R_MATERIAL || rT == R_TEXTURE)

@@ -25,7 +25,6 @@
 #include "ImGui\imgui.h"
 #include "libzip\include\zip.h"
 #include "PhysFS\include\physfs.h"
-#include "Optick\include\optick.h"
 
 #include <EASTL\internal\char_traits.h>
 #include <EASTL\algorithm.h>
@@ -42,6 +41,7 @@
 
 bool RE_FileSystem::Init(int argc, char* argv[])
 {
+	RE_PROFILE(PROF_Init, PROF_FileSystem);
 	bool ret = false;
 	RE_LOG("Initializing File System");
 	if (PHYSFS_init(argv[0]) != 0)
@@ -59,7 +59,8 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		assets_path = "Assets";
 
 		zip_path = GetExecutableDirectory();
-		PHYSFS_mount((zip_path += "data.zip").c_str(), NULL, 1);
+		PHYSFS_mount(zip_path.c_str(), NULL, 0);
+		PHYSFS_mount((zip_path += "data.zip").c_str(), NULL, 0);
 
 		char **i;
 		for (i = PHYSFS_getSearchPath(); *i != NULL; i++) RE_LOG("[%s] is in the search path.\n", *i);
@@ -97,8 +98,7 @@ void RE_FileSystem::Clear()
 
 unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 {
-	OPTICK_CATEGORY("Read Asset Changes - File system", Optick::Category::IO);
-
+	RE_PROFILE(PROF_ReadAssetChanges, PROF_FileSystem);
 	RE_Timer time;
 	bool run = true;
 
@@ -479,7 +479,7 @@ const char * RE_FileSystem::GetZipPath() { return zip_path.c_str(); }
 
 void RE_FileSystem::HandleDropedFile(const char * file)
 {
-	OPTICK_CATEGORY("Dropped File", Optick::Category::IO);
+	RE_PROFILE(PROF_DroppedFile, PROF_FileSystem);
 	eastl::string full_path(file);
 	eastl::string directory = full_path.substr(0, full_path.find_last_of('\\') + 1);
 	eastl::string fileNameExtension = full_path.substr(full_path.find_last_of("\\") + 1);

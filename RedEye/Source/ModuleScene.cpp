@@ -25,7 +25,6 @@
 #include "RE_Model.h"
 
 #include "SDL2\include\SDL.h"
-#include "Optick\include\optick.h"
 #include <EASTL/string.h>
 #include <EASTL/queue.h>
 #include <EASTL/vector.h>
@@ -39,6 +38,7 @@ ModuleScene::~ModuleScene() { DEL(cams); DEL(primitives); }
 
 bool ModuleScene::Init()
 {
+	RE_PROFILE(PROF_Init, PROF_ModuleScene);
 	RE_LOG("Initializing Module %s", name);
 	cams->Init();
 	primitives->Init();
@@ -47,6 +47,7 @@ bool ModuleScene::Init()
 
 bool ModuleScene::Start()
 {
+	RE_PROFILE(PROF_Start, PROF_ModuleScene);
 	RE_LOG("Starting Module %s", name);
 	eastl::vector<ResourceContainer*> scenes = RE_RES->GetResourcesByType(R_SCENE);
 	if (!scenes.empty()) LoadScene(scenes[0]->GetMD5());
@@ -56,12 +57,13 @@ bool ModuleScene::Start()
 
 void ModuleScene::Update()
 {
-	OPTICK_CATEGORY("Update Scene", Optick::Category::GameLogic);
+	RE_PROFILE(PROF_Update, PROF_ModuleScene);
 	scenePool.Update();
 }
 
 void ModuleScene::PostUpdate()
 {
+	RE_PROFILE(PROF_PostUpdate, PROF_ModuleScene);
 	bool someDelete = !to_delete.empty();
 	while (!to_delete.empty())
 	{
@@ -72,6 +74,7 @@ void ModuleScene::PostUpdate()
 
 void ModuleScene::CleanUp()
 {
+	RE_PROFILE(PROF_CleanUp, PROF_ModuleScene);
 	cams->Clear();
 	primitives->Clear();
 	if (unsavedScene) DEL(unsavedScene);

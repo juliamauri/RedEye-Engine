@@ -316,6 +316,7 @@
     <ClCompile Include="RE_Math.cpp">
       <Filter>Source\Application\Math</Filter>
     </ClCompile>
+    <ClCompile Include="RE_Profiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Module.h">
@@ -1296,6 +1297,7 @@
     <ClInclude Include="RE_GLCache.h">
       <Filter>Source\Application\Modules\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="RE_Profiler.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">

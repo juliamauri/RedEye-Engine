@@ -2,7 +2,6 @@
 
 #include "Application.h"
 #include "md5.h"
-#include "Optick\include\optick.h"
 #include "PhysFS\include\physfs.h"
 #include "libzip\include\zip.h"
 

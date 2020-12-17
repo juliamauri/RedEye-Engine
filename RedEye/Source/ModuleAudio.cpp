@@ -9,7 +9,6 @@
 
 #include "ImGui/imgui.h"
 #include "ImGui/misc/cpp/imgui_stdlib.h"
-#include "Optick/include/optick.h"
 #include <EAStdC/EAString.h>
 
 #include <AK/SoundEngine/Platforms/Windows/AkTypes.h>
@@ -61,6 +60,7 @@ bool ModuleAudio::Init()
 {
 	bool ret = true;
 
+	RE_PROFILE(PROF_Init, PROF_ModuleAudio);
 	RE_LOG("Initializing Module %s", name);
 	RE_SOFT_NVS("Wwise SDK", AK_WWISESDK_VERSIONNAME, "https://www.audiokinetic.com/products/wwise/");
 
@@ -127,6 +127,7 @@ static AkGameObjectID MY_DEFAULT_LISTENER = 0;
 
 bool ModuleAudio::Start()
 {
+	RE_PROFILE(PROF_Start, PROF_ModuleAudio);
 	RE_LOG("Starting Module %s", name);
 	AK::StreamMgr::SetCurrentLanguage(AKTEXT("English(US)"));
 	
@@ -143,12 +144,13 @@ bool ModuleAudio::Start()
 
 void ModuleAudio::PostUpdate()
 {
-	OPTICK_CATEGORY("Render Audio", Optick::Category::Audio);
+	RE_PROFILE(PROF_PostUpdate, PROF_ModuleAudio);
 	AK::SoundEngine::RenderAudio();
 }
 
 void ModuleAudio::CleanUp()
 {
+	RE_PROFILE(PROF_CleanUp, PROF_ModuleAudio);
 	soundbanks.clear();
 	AK::SoundEngine::ClearBanks();
 #ifndef AK_OPTIMIZED
@@ -281,6 +283,7 @@ void ModuleAudio::DrawWwiseElementsDetected()
 
 void ModuleAudio::Load()
 {
+	RE_PROFILE(PROF_Load, PROF_ModuleAudio);
 	RE_Json* node = RE_FS->ConfigNode(name);
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
 	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
@@ -289,6 +292,7 @@ void ModuleAudio::Load()
 
 void ModuleAudio::Save() const
 {
+	RE_PROFILE(PROF_Save, PROF_ModuleAudio);
 	RE_Json* node = RE_FS->ConfigNode(name);
 	node->PushString("FolderBanks", audioBanksFolderPath.c_str());
 	DEL(node);
@@ -296,7 +300,7 @@ void ModuleAudio::Save() const
 
 unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 {
-	OPTICK_CATEGORY("Read Audio Bank Changes - File system", Optick::Category::IO);
+	RE_PROFILE(PROF_ReadAssetChanges, PROF_ModuleAudio);
 	RE_Timer time;
 	if (located_banksFolder)
 	{

@@ -13,7 +13,6 @@
 #include "ModuleAudio.h"
 
 #include "SDL2\include\SDL.h"
-#include "Optick\include\optick.h"
 #include <EAAssert\version.h>
 #include <EAStdC\internal\Config.h>
 #include <EAStdC\EASprintf.h>
@@ -21,6 +20,7 @@
 
 Application::Application()
 {
+	profiler = new RE_Profiler();
 	time = new RE_Time();
 	math = new RE_Math();
 	hardware = new RE_Hardware();
@@ -51,11 +51,13 @@ Application::~Application()
 	DEL(hardware);
 	DEL(math);
 	DEL(time);
+	DEL(profiler);
 }
 
 bool Application::Init(int _argc, char* _argv[])
 {
 	bool ret = false;
+	RE_PROFILE(PROF_Init, PROF_Application);
 	RE_LOG_SEPARATOR("Initializing Application");
 
 	char tmp[8];
@@ -99,38 +101,35 @@ bool Application::Init(int _argc, char* _argv[])
 
 void Application::MainLoop()
 {
-	OPTICK_FRAME("MainThread RedEye");
 	RE_LOG_SEPARATOR("Entering Application's Main Loop - %.3f", time->FrameDeltaTime());
-
 	do {
-		OPTICK_CATEGORY("Application Update", Optick::Category::GameLogic);
-
-		time->FrameDeltaTime();
-		input->PreUpdate();
-		editor->PreUpdate();
-
-		scene->Update();
-		editor->Update();
-
-		scene->PostUpdate();
-		renderer->PostUpdate();
-		audio->PostUpdate();
-
-		if (flags & LOAD_CONFIG) LoadConfig();
-		if (flags & SAVE_CONFIG) SaveConfig();
-		if (time->GetState() == GS_TICK)
+		RE_PROFILE_FRAME();
 		{
-			time->PauseGameTimer();
-			scene->OnPause();
-		}
+			RE_PROFILE(PROF_Update, PROF_Application);
+			time->FrameDeltaTime();
 
-		unsigned int extra_ms = time->FrameExtraMS();
-		if (extra_ms > 0) extra_ms = fs->ReadAssetChanges(extra_ms);
-		if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
-		if (extra_ms > 0)
-		{
-			OPTICK_CATEGORY("Application Delay extra ms", Optick::Category::WaitEmpty);
-			time->Delay(extra_ms);
+			input->PreUpdate();
+			editor->PreUpdate();
+
+			scene->Update();
+			editor->Update();
+
+			scene->PostUpdate();
+			renderer->PostUpdate();
+			audio->PostUpdate();
+
+			if (flags & LOAD_CONFIG) LoadConfig();
+			if (flags & SAVE_CONFIG) SaveConfig();
+			if (time->GetState() == GS_TICK)
+			{
+				time->PauseGameTimer();
+				scene->OnPause();
+			}
+
+			unsigned int extra_ms = time->FrameExtraMS();
+			if (extra_ms > 0) extra_ms = fs->ReadAssetChanges(extra_ms);
+			if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
+			if (extra_ms > 0) time->Delay(extra_ms); 
 		}
 
 	} while (!(flags & WANT_TO_QUIT));
@@ -191,7 +190,7 @@ void Application::LoadConfig()
 {
 	if (flags & LOAD_CONFIG) flags -= LOAD_CONFIG;
 
-	OPTICK_CATEGORY("Load module configuration - Application", Optick::Category::IO);
+	RE_PROFILE(PROF_Load, PROF_Application);
 	window->Load();
 	renderer->Load();
 	audio->Load();
@@ -201,7 +200,7 @@ void Application::SaveConfig()
 {
 	if (flags & SAVE_CONFIG) flags -= SAVE_CONFIG;
 
-	OPTICK_CATEGORY("Save module configuration - Application", Optick::Category::IO);
+	RE_PROFILE(PROF_Save, PROF_Application);
 	window->Save();
 	renderer->Save();
 	audio->Save();

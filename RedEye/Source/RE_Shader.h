@@ -67,7 +67,7 @@ private:
 	void MountRE_Shader_Cvar(eastl::vector<eastl::string> uniformLines);
 	void GetLocations();
 
-private:
+public:
 
 	unsigned int ID = 0;
 

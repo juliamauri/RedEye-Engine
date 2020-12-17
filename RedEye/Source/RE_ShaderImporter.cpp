@@ -10,6 +10,7 @@
 
 void RE_ShaderImporter::Init()
 {
+	RE_PROFILE(PROF_Init, PROF_ShaderImporter);
 	bool ret = true;
 	RE_LOG("Initializing Shader Manager");
 	RE_SOFT_NVS("GLSLang", reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)), "https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/glsl_overview.php");
@@ -22,6 +23,7 @@ void RE_ShaderImporter::Init()
 
 void RE_ShaderImporter::Clear()
 {
+	RE_PROFILE(PROF_Clear, PROF_ShaderImporter);
 	DEL_A(binaryFormats);
 }
 

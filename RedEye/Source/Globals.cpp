@@ -21,8 +21,7 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 	case GL_DEBUG_TYPE_PORTABILITY: typeStr += "GL PORTABILITY"; break;
 	case GL_DEBUG_TYPE_PERFORMANCE: typeStr += "GL PERFORMANCE"; break;
 	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: typeStr += "GL DEPRECATED"; break;
-	default: typeStr += "GL UNDEFINED"; break;
-	}
+	default: typeStr += "GL UNDEFINED"; break; }
 
 	if (type == GL_DEBUG_TYPE_ERROR) RE_LOG_ERROR("%s, %s, message = %s\n",
 		(typeStr.c_str()), severityStr.c_str(), message);

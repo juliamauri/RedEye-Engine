@@ -2,6 +2,7 @@
 #define __APP_H__
 
 #include "EventListener.h"
+#include "RE_Profiler.h"
 #include "RE_ConsoleLog.h"
 
 class RE_Time;
@@ -46,6 +47,7 @@ public:
 	char** argv = nullptr;
 
 	// Utility
+	RE_Profiler* profiler = nullptr;
 	RE_ConsoleLog log;
 	RE_Time* time = nullptr;
 	RE_Math* math = nullptr;
@@ -92,8 +94,8 @@ extern Application* App;
 #define RE_EDITOR App->editor
 #define RE_RENDER App->renderer
 #define RE_AUDIO App->audio
+
 /*
-#include "Optick\include\optick.h"
 RE_INPUT->
 RE_WINDOW->
 RE_SCENE->
@@ -107,7 +109,6 @@ RE_RNG->
 RE_HARDWARE->
 RE_FS->
 RE_RES->
-
 */
 
 #endif // !__APP_H__

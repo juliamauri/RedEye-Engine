@@ -101,6 +101,7 @@
     <ClCompile Include="ModuleRenderer3D.cpp" />
     <ClCompile Include="ModuleScene.cpp" />
     <ClCompile Include="ModuleWindow.cpp" />
+    <ClCompile Include="RE_Profiler.cpp" />
     <ClCompile Include="RE_QuadTree.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="RE_ResourceManager.cpp" />
@@ -389,6 +390,7 @@
     <ClInclude Include="ModuleWindow.h" />
     <ClInclude Include="PhysFS\include\physfs.h" />
     <ClInclude Include="PhysFS\include\physfs_internal.h" />
+    <ClInclude Include="RE_Profiler.h" />
     <ClInclude Include="RE_QuadTree.h" />
     <ClInclude Include="RapidJson\include\allocators.h" />
     <ClInclude Include="RapidJson\include\document.h" />

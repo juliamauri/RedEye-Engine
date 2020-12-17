@@ -16,6 +16,7 @@
 
 void RE_Hardware::Init()
 {
+	RE_PROFILE(PROF_Init, PROF_Hardware);
 	// CPU
 	std::string brand, vendor;
 	getCPUInfo(&brand, &vendor);

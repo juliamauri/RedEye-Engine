@@ -9,7 +9,6 @@
 #include "EditorWindows.h"
 
 #include "SDL2\include\SDL.h"
-#include "Optick\include\optick.h"
 
 #define MAX_KEYS 300
 
@@ -28,6 +27,7 @@ ModuleInput::~ModuleInput()
 // Called before render is available
 bool ModuleInput::Init()
 {
+	RE_PROFILE(PROF_Init, PROF_ModuleInput);
 	RE_LOG("Initializing Module %s", name);
 	RE_LOG_SECONDARY("Init SDL input & event subsystems");
 	bool ret = true;
@@ -44,7 +44,7 @@ bool ModuleInput::Init()
 // Called every draw update
 void ModuleInput::PreUpdate()
 {
-	OPTICK_CATEGORY("UpdateInput", Optick::Category::Input);
+	RE_PROFILE(PROF_PreUpdate, PROF_ModuleInput);
 
 	SDL_PumpEvents();
 
@@ -95,8 +95,8 @@ void ModuleInput::DrawEditor()
 // Called before quitting
 void ModuleInput::CleanUp()
 {
+	RE_PROFILE(PROF_CleanUp, PROF_ModuleInput);
 	SDL_QuitSubSystem(SDL_INIT_EVENTS);
-
 	while (!events_queue.empty()) events_queue.pop();
 }
 

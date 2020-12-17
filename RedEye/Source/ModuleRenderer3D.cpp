@@ -33,7 +33,6 @@
 #include "MathGeoLib/include/Math/Quat.h"
 #include "ImGuizmo/ImGuizmo.h"
 #include "SDL2/include/SDL.h"
-#include "Optick\include\optick.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 #include <EASTL/list.h>
@@ -54,6 +53,7 @@ ModuleRenderer3D::~ModuleRenderer3D() { DEL(fbos); }
 
 bool ModuleRenderer3D::Init()
 {
+	RE_PROFILE(PROF_Init, PROF_ModuleRender);
 	bool ret = false;
 	RE_LOG("Initializing Module %s", name);
 	RE_LOG_SECONDARY("Seting SDL/GL Attributes.");
@@ -131,6 +131,7 @@ bool ModuleRenderer3D::Init()
 
 bool ModuleRenderer3D::Start()
 {
+	RE_PROFILE(PROF_Start, PROF_ModuleRender);
 	RE_LOG("Starting Module %s", name);
 	thumbnailView.fbos = { fbos->CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
 
@@ -147,90 +148,119 @@ bool ModuleRenderer3D::Start()
 
 void ModuleRenderer3D::PostUpdate()
 {
-	OPTICK_CATEGORY("PostUpdate Renderer3D", Optick::Category::GameLogic);
-
-	// Setup Draws
-	activeShaders = RE_RES->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
-
-	current_lighting = LightMode::LIGHT_DISABLED;
-
-	while (!rendQueue.empty())
+	RE_PROFILE(PROF_PostUpdate, PROF_ModuleRender);
 	{
-		RenderQueue rend = rendQueue.top();
-		rendQueue.pop();
-
-		RE_ECS_Pool* poolGOThumbnail = nullptr;
-		eastl::string path(THUMBNAILPATH);
-		path += rend.resMD5;
-
-		bool exist = RE_FS->Exists(path.c_str());
-		if (rend.redo && exist)
+		RE_PROFILE(PROF_GetActiveShaders, PROF_ModuleRender);
+		// Setup Draws
+		activeShaders = RE_RES->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+		/*
+		Debug shaders for thumbnails
+		for (auto shader : activeShaders)
 		{
-			RE_FileBuffer fileToDelete(path.c_str(), RE_FS->GetZipPath());
-			fileToDelete.Delete();
-			exist = false;
-		}
+			RE_Shader* s = static_cast<RE_Shader*>(RE_RES->At(shader));
 
-		switch (rend.type)
+			eastl::string text = "Shader ";
+			text += s->GetName();
+			text += " has " + eastl::to_string(s->uniforms.size()) + " uniforms: ";
+
+			if (s->projection != -1) text += "projection " + eastl::to_string(s->projection) + ", ";
+			if (s->view != -1) text += "view " + eastl::to_string(s->view) + ", ";
+			if (s->model != -1) text += "model " + eastl::to_string(s->model) + ", ";
+			if (s->time != -1) text += "time " + eastl::to_string(s->time) + ", ";
+			if (s->dt != -1) text += "dt " + eastl::to_string(s->dt) + ", ";
+			if (s->depth != -1) text += "depth " + eastl::to_string(s->depth) + ", ";
+			if (s->viewport_w != -1) text += "viewport_w " + eastl::to_string(s->viewport_w) + ", ";
+			if (s->viewport_h != -1) text += "viewport_h " + eastl::to_string(s->viewport_h) + ", ";
+			if (s->near_plane != -1) text += "near_plane " + eastl::to_string(s->near_plane) + ", ";
+			if (s->far_plane != -1) text += "far_plane " + eastl::to_string(s->far_plane) + ", ";
+			if (s->clip_plane != -1) text += "clip_plane " + eastl::to_string(s->clip_plane) + ", ";
+			if (s->using_clip_plane != -1) text += "using_clip_plane " + eastl::to_string(s->using_clip_plane) + ", ";
+			if (s->view_pos != -1) text += "view_pos " + eastl::to_string(s->view_pos) + ", ";
+
+			RE_LOG(text.c_str());
+		}*/
+	}
+
+	{
+		RE_PROFILE(PROF_DrawThumbnails, PROF_ModuleRender);
+		current_lighting = LightMode::LIGHT_DISABLED;
+		while (!rendQueue.empty())
 		{
-		case RenderType::T_R_GO:
-		{
-			RE_INPUT->PauseEvents();
-			if (!exist) {
-				ResourceContainer* res = RE_RES->At(rend.resMD5);
-				RE_RES->Use(rend.resMD5);
-				switch (res->GetType()) {
-				case Resource_Type::R_MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
-				case Resource_Type::R_PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
-				case Resource_Type::R_SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break;
+			RenderQueue rend = rendQueue.top();
+			rendQueue.pop();
+
+			RE_ECS_Pool* poolGOThumbnail = nullptr;
+			eastl::string path(THUMBNAILPATH);
+			path += rend.resMD5;
+
+			bool exist = RE_FS->Exists(path.c_str());
+			if (rend.redo && exist)
+			{
+				RE_FileBuffer fileToDelete(path.c_str(), RE_FS->GetZipPath());
+				fileToDelete.Delete();
+				exist = false;
+			}
+
+			switch (rend.type)
+			{
+			case RenderType::T_R_GO:
+			{
+				RE_INPUT->PauseEvents();
+				if (!exist) {
+					ResourceContainer* res = RE_RES->At(rend.resMD5);
+					RE_RES->Use(rend.resMD5);
+					switch (res->GetType()) {
+					case Resource_Type::R_MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
+					case Resource_Type::R_PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
+					case Resource_Type::R_SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break;
+					}
+					if (poolGOThumbnail != nullptr)
+					{
+						poolGOThumbnail->UseResources();
+						ThumbnailGameObject(poolGOThumbnail->GetRootPtr());
+						poolGOThumbnail->UnUseResources();
+						RE_RES->UnUse(rend.resMD5);
+						RE_EDITOR->thumbnails->SaveTextureFromFBO(path.c_str());
+						DEL(poolGOThumbnail);
+					}
 				}
-				if (poolGOThumbnail != nullptr)
+
+				RE_EDITOR->thumbnails->Change(rend.resMD5, RE_EDITOR->thumbnails->LoadLibraryThumbnail(rend.resMD5));
+				RE_INPUT->ResumeEvents();
+
+				break;
+			}
+			case RenderType::T_R_MAT:
+			{
+				if (!exist)
 				{
-					poolGOThumbnail->UseResources();
-					ThumbnailGameObject(poolGOThumbnail->GetRootPtr());
-					poolGOThumbnail->UnUseResources();
+					ResourceContainer* res = RE_RES->At(rend.resMD5);
+					RE_RES->Use(rend.resMD5);
+					ThumbnailMaterial(dynamic_cast<RE_Material*>(res));
 					RE_RES->UnUse(rend.resMD5);
 					RE_EDITOR->thumbnails->SaveTextureFromFBO(path.c_str());
-					DEL(poolGOThumbnail);
 				}
+
+				RE_EDITOR->thumbnails->Change(rend.resMD5, RE_EDITOR->thumbnails->LoadLibraryThumbnail(rend.resMD5));
+				break;
+			}
+			case RenderType::T_R_TEX:
+				RE_EDITOR->thumbnails->Change(rend.resMD5, RE_EDITOR->thumbnails->ThumbnailTexture(rend.resMD5));
+				break;
+			case RenderType::T_R_SKYBOX:
+				if (!exist)
+				{
+					ResourceContainer* res = RE_RES->At(rend.resMD5);
+					RE_RES->Use(rend.resMD5);
+					ThumbnailSkyBox(dynamic_cast<RE_SkyBox*>(res));
+					RE_RES->UnUse(rend.resMD5);
+					RE_EDITOR->thumbnails->SaveTextureFromFBO(path.c_str());
+				}
+				RE_EDITOR->thumbnails->Change(rend.resMD5, RE_EDITOR->thumbnails->LoadLibraryThumbnail(rend.resMD5));
+				break;
 			}
 
-			RE_EDITOR->thumbnails->Change(rend.resMD5, RE_EDITOR->thumbnails->LoadLibraryThumbnail(rend.resMD5));
-			RE_INPUT->ResumeEvents();
-
-			break;
-		}
-		case RenderType::T_R_MAT:
-		{
-			if (!exist)
-			{
-				ResourceContainer* res = RE_RES->At(rend.resMD5);
-				RE_RES->Use(rend.resMD5);
-				ThumbnailMaterial(dynamic_cast<RE_Material*>(res));
-				RE_RES->UnUse(rend.resMD5);
-				RE_EDITOR->thumbnails->SaveTextureFromFBO(path.c_str());
-			}
-
-			RE_EDITOR->thumbnails->Change(rend.resMD5, RE_EDITOR->thumbnails->LoadLibraryThumbnail(rend.resMD5));
-			break;
-		}
-		case RenderType::T_R_TEX:
-			RE_EDITOR->thumbnails->Change(rend.resMD5,RE_EDITOR->thumbnails->ThumbnailTexture(rend.resMD5));
-			break;
-		case RenderType::T_R_SKYBOX:
-			if (!exist)
-			{
-				ResourceContainer* res = RE_RES->At(rend.resMD5);
-				RE_RES->Use(rend.resMD5);
-				ThumbnailSkyBox(dynamic_cast<RE_SkyBox*>(res));
-				RE_RES->UnUse(rend.resMD5);
-				RE_EDITOR->thumbnails->SaveTextureFromFBO(path.c_str());
-			}
-			RE_EDITOR->thumbnails->Change(rend.resMD5, RE_EDITOR->thumbnails->LoadLibraryThumbnail(rend.resMD5));
-			break;
-		}
-
-	}
+		}}
 
 	render_views[0].camera = RE_CameraManager::EditorCamera();
 	render_views[1].camera = RE_CameraManager::MainCamera();
@@ -262,6 +292,7 @@ void ModuleRenderer3D::PostUpdate()
 
 void ModuleRenderer3D::CleanUp()
 {
+	RE_PROFILE(PROF_CleanUp, PROF_ModuleRender);
 	fbos->ClearAll();
 	SDL_GL_DeleteContext(mainContext);
 }
@@ -356,6 +387,7 @@ void ModuleRenderer3D::DrawEditor()
 
 void ModuleRenderer3D::Load()
 {
+	RE_PROFILE(PROF_Load, PROF_ModuleRender);
 	RE_LOG_SECONDARY("Loading Render3D config values:");
 	RE_Json* node = RE_FS->ConfigNode(name);
 
@@ -379,6 +411,7 @@ void ModuleRenderer3D::Load()
 
 void ModuleRenderer3D::Save() const
 {
+	RE_PROFILE(PROF_Save, PROF_ModuleRender);
 	RE_Json* node = RE_FS->ConfigNode(name);
 	node->PushBool("vsync", vsync);
 	for (unsigned int i = 0; i < render_views.size(); ++i)
@@ -479,7 +512,7 @@ void ModuleRenderer3D::PushThumnailRend(const char* md5, bool redo)
 
 void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 {
-	OPTICK_CATEGORY(render_view.name.c_str(), Optick::Category::Rendering);
+	RE_PROFILE(PROF_DrawScene, PROF_ModuleRender);
 
 	// Setup Frame Buffer
 	current_lighting = render_view.light;
@@ -574,8 +607,6 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		if (!blend && dT != C_WATER) drawing->Draw();
 		else drawAsLast.push(drawing);
 	}
-
-
 
 	// Deferred Light Pass
 	if (render_view.light == LIGHT_DEFERRED)
@@ -675,7 +706,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			RE_Component* rendComponent = stencilPtr->GetRenderGeo();
 			if (rendComponent)
 			{
-				OPTICK_CATEGORY("Stencil Draw", Optick::Category::Rendering);
+				RE_PROFILE(PROF_DrawStencil, PROF_ModuleRender);
 				unsigned int vaoToStencil = 0, triangleToStencil = 0;
 
 				ComponentType cT = rendComponent->GetType();
@@ -766,8 +797,7 @@ void ModuleRenderer3D::DrawDebug(const RenderView& render_view)
 
 void ModuleRenderer3D::DrawSkyBox()
 {
-	OPTICK_CATEGORY("SkyBox Draw", Optick::Category::Rendering);
-
+	RE_PROFILE(PROF_DrawSkybox, PROF_ModuleRender);
 	RE_GLCache::ChangeTextureBind(0);
 
 	uint skysphereshader = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultSkyBoxShader()))->GetID();
