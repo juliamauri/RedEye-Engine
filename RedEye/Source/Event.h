@@ -17,6 +17,9 @@ enum RE_EventType : unsigned short int
 	REQUEST_SAVE,
 	REQUEST_QUIT,
 
+	START_PROFILING,
+	STOP_PROFILING,
+
 	// Window
 	WINDOW_MOVED,
 	WINDOW_SIZE_CHANGED,

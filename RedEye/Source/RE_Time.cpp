@@ -1,5 +1,9 @@
 #include "RE_Time.h"
 
+#include "Application.h"
+#include "ModuleInput.h"
+#include "RE_Profiler.h"
+
 #include "SDL2\include\SDL_timer.h"
 #include "ImGui\imgui.h"
 #include <EAStdC/EASprintf.h>
@@ -60,6 +64,21 @@ void RE_Time::DrawEditorGraphs()
 	if (ImGui::Checkbox(pause_plotting ? "Restart Plotting" : "Pause Plotting", &pause_plotting) && !pause_plotting)
 		for (int i = 0; i <= 99; i++)
 			fps[i] = ms[i] = 0.f;
+
+	bool isProfiling = RE_Profiler::enabled;
+
+	if (isProfiling) {
+		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, { 0.75, 0.0,0.0,1.0 });
+		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ButtonActive, { 1.0, 0.0,0.0,1.0 });
+		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ButtonHovered, { 0.5, 0.0,0.0,1.0 });
+	}
+
+	if (ImGui::Button(isProfiling ? "Stop profiling" : "Start profiling")) {
+
+		if (!isProfiling) RE_INPUT->Push(START_PROFILING, App);
+		else RE_INPUT->Push(STOP_PROFILING, App);
+	}
+	if (isProfiling) ImGui::PopStyleColor(3);
 }
 
 void RE_Time::Delay(unsigned int ms) const { SDL_Delay(ms); }

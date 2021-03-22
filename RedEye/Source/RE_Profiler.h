@@ -107,12 +107,17 @@ struct RE_Profiler
 	~RE_Profiler();
 	eastl::vector<ProfilingOperation> operations;
 
+	static bool enabled;
+
+	void start();
+	void dispatch();
+
 #ifdef PROFILE_CAP
 	void Frame();
 #endif // PROFILE_CAP
 };
 
-#define RE_PROFILE(func, context) ProfilingTimer profiling_timer(func, context)
+#define RE_PROFILE(func, context) if (RE_Profiler::enabled) ProfilingTimer profiling_timer(func, context)
 
 #ifdef PROFILE_CAP
 #define RE_PROFILE_FRAME() ++ProfilingTimer::frame; profiler->Frame()

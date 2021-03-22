@@ -183,7 +183,9 @@ void Application::RecieveEvent(const Event& e)
 	}
 	case REQUEST_LOAD: flags |= LOAD_CONFIG; break;
 	case REQUEST_SAVE: flags |= SAVE_CONFIG; break;
-	case REQUEST_QUIT: flags |= WANT_TO_QUIT; break; }
+	case REQUEST_QUIT: flags |= WANT_TO_QUIT; break; 
+	case START_PROFILING: profiler->start(); break;
+	case STOP_PROFILING: profiler->dispatch(); break; }
 }
 
 void Application::LoadConfig()
