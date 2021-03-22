@@ -2,7 +2,7 @@
 
 #define PROFILE_ACTIVE
 #define INTERNAL_PROFILING
-#define PROFILE_CAP 9400
+//#define PROFILE_CAP 9400
 
 enum RE_ProfiledFunc : unsigned short
 {

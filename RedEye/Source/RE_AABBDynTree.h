@@ -18,8 +18,8 @@ class RE_AABBDynTree : public RE_HashMap<RE_AABBDynTreeNode, int, 1024, 512>
 {
 public:
 
-	RE_AABBDynTree();
-	~RE_AABBDynTree();
+	RE_AABBDynTree() {}
+	~RE_AABBDynTree() {}
 
 	void PushNode(UID goUID, AABB box);
 	void PopNode(UID index);
@@ -42,9 +42,9 @@ private:
 	int AllocateLeafNode(AABB box, UID index);
 	int AllocateInternalNode();
 
-	static inline AABB Union(AABB box1, AABB box2);
-	static inline void SetLeaf(RE_AABBDynTreeNode& node, AABB box, UID index);
-	static inline void SetInternal(RE_AABBDynTreeNode& node);
+	inline AABB Union(AABB box1, AABB box2);
+	inline void SetLeaf(RE_AABBDynTreeNode& node, AABB box, UID index);
+	inline void SetInternal(RE_AABBDynTreeNode& node);
 
 private:
 

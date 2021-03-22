@@ -4,9 +4,6 @@
 #include "MathGeoLib/include/Geometry/LineSegment.h"
 #include "SDL2/include/SDL_assert.h"
 
-RE_AABBDynTree::RE_AABBDynTree() {}
-RE_AABBDynTree::~RE_AABBDynTree() {}
-
 void RE_AABBDynTree::PushNode(UID go_index, AABB box)
 {
 	// Stage 0: Allocate Leaf Node
