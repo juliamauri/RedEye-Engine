@@ -11,6 +11,7 @@ public:
 		meshPool.SetName("Meshes Pool");
 		lightPool.SetName("Lights Pool");
 		waterPool.SetName("Water Pool");
+		particleSPool.SetName("Particle System Pool");
 		pGridPool.SetName("Grid Pool");
 		pRockPool.SetName("Rock Pool");
 		pDodecahedronPool.SetName("Dodecahedron Pool");
@@ -66,6 +67,7 @@ private:
 	MeshesPool meshPool;
 	LightPool lightPool;
 	WaterPool waterPool;
+	ParticleSystemPool particleSPool;
 	//Primitives
 	GridPool pGridPool;
 	RockPool pRockPool;

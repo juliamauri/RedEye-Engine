@@ -11,11 +11,11 @@ public:
 	~ModulePhysics();
 
 	// Module
-	bool Init() override;
-	bool Start() override;
+	bool Init();
+	bool Start();
 	//void PreUpdate() override;
-	void Update() override;
-	void CleanUp() override;
+	void Update();
+	void CleanUp();
 	//void RecieveEvent(const Event& e) override;
 	//void DrawEditor() override;
 

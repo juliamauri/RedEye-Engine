@@ -282,6 +282,11 @@ void ModuleScene::CreateWater(const UID parent)
 	water_go->GetTransformPtr()->SetScale({ 10.0f, 10.0f, 1.0f });
 }
 
+void ModuleScene::CreateParticleSyste(const UID parent)
+{
+	scenePool.AddGO("Particle System", Validate(parent), true)->AddNewComponent(C_PARTICLEEMITER);
+}
+
 void ModuleScene::AddGOPool(RE_ECS_Pool* toAdd)
 {
 	toAdd->UseResources();

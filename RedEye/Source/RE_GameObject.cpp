@@ -216,6 +216,11 @@ RE_CompWater* RE_GameObject::GetWater() const
 	return (render_geo.type == ComponentType::C_WATER) ? dynamic_cast<RE_CompWater*>(CompPtr(render_geo)) : nullptr;
 }
 
+RE_CompParticleEmitter* RE_GameObject::GetParticleSystem() const
+{
+	return (render_geo.type == ComponentType::C_PARTICLEEMITER) ? dynamic_cast<RE_CompParticleEmitter*>(CompPtr(render_geo)) : nullptr;
+}
+
 RE_CompCamera* RE_GameObject::GetCamera() const
 {
 	return camera ? dynamic_cast<RE_CompCamera*>(CompPtr(camera, ComponentType::C_CAMERA)) : nullptr;
@@ -359,6 +364,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	}
 	case C_MESH:
 	case C_WATER:
+	case C_PARTICLEEMITER:
 	{
 		if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
 		render_geo = { (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type };
@@ -377,13 +383,6 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	{
 		if (light) pool_comps->DestroyComponent(_type, light);
 		light = (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid);
-		break;
-	}
-	case C_PARTICLEEMITER:
-	{
-		// TODO Julius: particle emitter
-		// if (p_emitter) pool_comps->DestroyComponent(_type, p_emitter);
-		// p_emitter = pool_comps->GetNewComponentPtr(_type)->PoolSetUp(pool_gos, go_uid);
 		break;
 	}
 	default:
@@ -464,13 +463,6 @@ void RE_GameObject::DestroyComponent(const UID id, const ushortint type)
 	{
 		if (light) pool_comps->DestroyComponent(_type, light);
 		light = 0;
-		break;
-	}
-	case C_PARTICLEEMITER:
-	{
-		// TODO: particle emitter
-		// if (p_emitter) pool_comps->DestroyComponent(type, p_emitter);
-		// p_emitter = 0;
 		break;
 	}
 	default:
@@ -1180,5 +1172,5 @@ inline const RE_GameObject* RE_GameObject::ChildCPtr(const UID child) const
 
 inline bool RE_GameObject::IsRenderGeo(ushortint type) const
 {
-	return (type == ComponentType::C_MESH || type == ComponentType::C_WATER || (type > ComponentType::C_PRIMIVE_MIN && type < ComponentType::C_PRIMIVE_MAX));
+	return (type == ComponentType::C_MESH || type == ComponentType::C_WATER || type == ComponentType::C_PARTICLEEMITER || (type > ComponentType::C_PRIMIVE_MIN && type < ComponentType::C_PRIMIVE_MAX));
 }

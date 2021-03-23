@@ -21,33 +21,17 @@ public:
 	RE_CompParticleEmitter();
 	~RE_CompParticleEmitter();
 
-	void Init() override;
-	void CleanUp() override;
-
-	void PreUpdate() override;
-	void Update() override;
-	void PostUpdate() override;
-
-	void OnPlay() override;
-	void OnPause() override;
-	void OnStop() override;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
 	void Draw() const override;
 	void DrawProperties() override;
 
-	bool LocalEmission() const;
-	bool EmmissionFinished() const;
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
+	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
 
-	RE_Mesh* GetMesh() const;
-
-	//void Serialize(RE_Json* node, rapidjson::Value* val) override;
-
-	void SetUp(RE_Mesh* paticle, unsigned int shader);
-
-private:
-
-	void ResetParticle(Particle* p);
-	void UpdateParticles(int spawns_needed);
+	unsigned int GetBinarySize() const override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
 private:
 
@@ -75,9 +59,6 @@ private:
 	// Particle Drawing
 	math::vec rgb_alpha = math::vec::zero;
 	unsigned int shader = 0;
-
-	Particle* particles = nullptr;
-	RE_Mesh* mParticle = nullptr;
 };
 
 #endif // !__RE_COMPPARTICLEEMITER_H__

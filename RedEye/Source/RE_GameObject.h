@@ -14,6 +14,7 @@ class RE_Component;
 class RE_CompTransform;
 class RE_CompMesh;
 class RE_CompWater;
+class RE_CompParticleEmitter;
 class RE_CompCamera;
 class RE_CompLight;
 class RE_CompPrimitive;
@@ -58,6 +59,7 @@ public:
 	RE_Component* GetRenderGeo() const;
 	RE_CompMesh* GetMesh() const;
 	RE_CompWater* GetWater() const;
+	RE_CompParticleEmitter* GetParticleSystem() const;
 	RE_CompCamera* GetCamera() const;
 	RE_CompLight* GetLight() const;
 	RE_CompPrimitive* GetPrimitive() const;

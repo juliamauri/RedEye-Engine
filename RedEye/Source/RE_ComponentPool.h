@@ -10,6 +10,7 @@
 #include "RE_CompLight.h"
 #include "RE_CompWater.h"
 #include "RE_CompPrimitive.h"
+#include "RE_CompParticleEmiter.h"
 
 template<class COMPCLASS, unsigned int size, unsigned int increment>
 class ComponentPool : public RE_HashMap<COMPCLASS, UID, size, increment>
@@ -158,6 +159,7 @@ typedef ComponentPool<RE_CompCamera, 128, 64> CamerasPool;
 typedef ComponentPool<RE_CompMesh, 128, 64> MeshesPool;
 typedef ComponentPool<RE_CompLight, 128, 64> LightPool;
 typedef ComponentPool<RE_CompWater, 8, 8> WaterPool;
+typedef ComponentPool<RE_CompParticleEmitter, 32, 16> ParticleSystemPool;
 //Primitives
 typedef ComponentPool<RE_CompGrid, 128, 64> GridPool;
 typedef ComponentPool<RE_CompRock, 128, 64> RockPool;

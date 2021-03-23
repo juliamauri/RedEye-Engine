@@ -19,5 +19,5 @@ void ModulePhysics::Update()
 
 void ModulePhysics::CleanUp()
 {
-	particles.Clear();
+	//particles.Clear();
 }

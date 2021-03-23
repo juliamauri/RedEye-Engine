@@ -19,15 +19,42 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ModulePhysics.cpp" />
-    <ClCompile Include="ParticleManager.cpp" />
-    <ClCompile Include="RE_AABBDynTree.cpp" />
-    <ClCompile Include="Application.cpp" />
-    <ClCompile Include="RE_ComponentsPool.cpp" />
-    <ClCompile Include="RE_GameObjectPool.cpp" />
-    <ClCompile Include="RE_Json.cpp" />
-    <ClCompile Include="RE_Config.cpp" />
-    <ClCompile Include="RE_Cvar.cpp" />
+    <ClCompile Include="ModulePhysics.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="ParticleManager.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_AABBDynTree.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_ComponentsPool.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_GameObjectPool.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Json.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Config.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Cvar.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
     <ClCompile Include="EA\EAAssert\eaassert.cpp" />
     <ClCompile Include="EA\EAStdC\EACallback.cpp" />
     <ClCompile Include="EA\EAStdC\EACType.cpp" />
@@ -62,21 +89,60 @@
     <ClCompile Include="EA\eathread\eathread_storage.cpp" />
     <ClCompile Include="EA\eathread\eathread_thread.cpp" />
     <ClCompile Include="EA\eathread\version.cpp" />
-    <ClCompile Include="EditorWindows.cpp" />
+    <ClCompile Include="EditorWindows.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
     <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp" />
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp" />
-    <ClCompile Include="ModuleAudio.cpp" />
-    <ClCompile Include="ResourceEditorsWindows.cpp" />
-    <ClCompile Include="RE_Command.cpp" />
-    <ClCompile Include="RE_CommandManager.cpp" />
-    <ClCompile Include="RE_CompLight.cpp" />
-    <ClCompile Include="RE_Component.cpp" />
-    <ClCompile Include="RE_CompWater.cpp" />
-    <ClCompile Include="RE_FBOManager.cpp" />
-    <ClCompile Include="RE_FileBuffer.cpp" />
-    <ClCompile Include="RE_FileSystem.cpp" />
-    <ClCompile Include="Event.cpp" />
-    <ClCompile Include="Globals.cpp" />
+    <ClCompile Include="ModuleAudio.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="ResourceEditorsWindows.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Command.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_CommandManager.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_CompLight.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Component.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_CompWater.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_FBOManager.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_FileBuffer.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_FileSystem.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="Event.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="Globals.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
     <ClCompile Include="gpudetect\DeviceId.cpp" />
     <ClCompile Include="ImGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -86,48 +152,169 @@
     <ClCompile Include="ImGui\imgui_impl_sdl.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="md5.cpp" />
-    <ClCompile Include="RE_CameraManager.cpp" />
-    <ClCompile Include="RE_GLCache.cpp" />
-    <ClCompile Include="RE_ECS_Pool.cpp" />
-    <ClCompile Include="RE_InternalResources.cpp" />
-    <ClCompile Include="RE_Math.cpp" />
-    <ClCompile Include="RE_Model.cpp" />
-    <ClCompile Include="RE_ModelImporter.cpp" />
-    <ClCompile Include="RE_CompParticleEmiter.cpp" />
-    <ClCompile Include="RE_CompTransform.cpp" />
-    <ClCompile Include="RE_ConsoleLog.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="ModuleEditor.cpp" />
-    <ClCompile Include="ModuleInput.cpp" />
-    <ClCompile Include="ModuleRenderer3D.cpp" />
-    <ClCompile Include="ModuleScene.cpp" />
-    <ClCompile Include="ModuleWindow.cpp" />
-    <ClCompile Include="RE_Profiler.cpp" />
-    <ClCompile Include="RE_QuadTree.cpp" />
-    <ClCompile Include="Resource.cpp" />
-    <ClCompile Include="RE_ResourceManager.cpp" />
-    <ClCompile Include="RE_CompCamera.cpp" />
-    <ClCompile Include="RE_CompMesh.cpp" />
-    <ClCompile Include="RE_GameObject.cpp" />
-    <ClCompile Include="RE_Material.cpp" />
-    <ClCompile Include="RE_Mesh.cpp" />
-    <ClCompile Include="RE_CompPrimitive.cpp" />
-    <ClCompile Include="RE_Prefab.cpp" />
-    <ClCompile Include="RE_PrimitiveManager.cpp" />
-    <ClCompile Include="RE_ECS_Importer.cpp" />
-    <ClCompile Include="RE_Scene.cpp" />
-    <ClCompile Include="RE_Shader.cpp" />
-    <ClCompile Include="RE_SkyBox.cpp" />
-    <ClCompile Include="RE_SkyboxImporter.cpp" />
-    <ClCompile Include="RE_Texture.cpp" />
-    <ClCompile Include="RE_ShaderImporter.cpp" />
-    <ClCompile Include="RE_ThumbnailManager.cpp" />
-    <ClCompile Include="RE_Hardware.cpp" />
-    <ClCompile Include="RE_TextureImporter.cpp" />
-    <ClCompile Include="RE_Time.cpp" />
-    <ClCompile Include="RE_Timer.cpp" />
+    <ClCompile Include="RE_CameraManager.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_GLCache.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_ECS_Pool.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_InternalResources.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Math.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Model.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_ModelImporter.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_CompParticleEmiter.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_CompTransform.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_ConsoleLog.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="ModuleEditor.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="ModuleInput.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="ModuleRenderer3D.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="ModuleScene.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="ModuleWindow.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Profiler.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_QuadTree.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_ResourceManager.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_CompCamera.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_CompMesh.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_GameObject.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Material.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Mesh.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_CompPrimitive.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Prefab.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_PrimitiveManager.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_ECS_Importer.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Scene.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Shader.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_SkyBox.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_SkyboxImporter.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Texture.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_ShaderImporter.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_ThumbnailManager.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Hardware.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_TextureImporter.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Time.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="RE_Timer.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Module.h" />
     <ClInclude Include="ModulePhysics.h" />
     <ClInclude Include="ParticleManager.h" />
     <ClInclude Include="RE_AABBDynTree.h" />
@@ -384,7 +571,6 @@
     <ClInclude Include="MathGeoLib\include\MathBuildConfig.h" />
     <ClInclude Include="MathGeoLib\include\MathGeoLib.h" />
     <ClInclude Include="MathGeoLib\include\MathGeoLibFwd.h" />
-    <ClInclude Include="Module.h" />
     <ClInclude Include="ModuleEditor.h" />
     <ClInclude Include="ModuleInput.h" />
     <ClInclude Include="ModuleRenderer3D.h" />
@@ -534,6 +720,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EntryPointSymbol>
@@ -560,6 +747,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\EA\;$(MSBuildProjectDirectory)\WWISESDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

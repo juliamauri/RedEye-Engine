@@ -311,20 +311,17 @@
       <Filter>Source\Application\Math</Filter>
     </ClCompile>
     <ClCompile Include="RE_Profiler.cpp" />
-    <ClCompile Include="ModulePhysics.cpp">
-      <Filter>Source\Application\Modules\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="ParticleManager.cpp">
       <Filter>Source\Application\Modules\Physics</Filter>
     </ClCompile>
     <ClCompile Include="RE_CompParticleEmiter.cpp">
       <Filter>Source\Application\Modules\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="ModulePhysics.cpp">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Module.h">
-      <Filter>Source\Application\Modules</Filter>
-    </ClInclude>
     <ClInclude Include="Event.h">
       <Filter>Source\Application\Modules\Input\Events System</Filter>
     </ClInclude>
@@ -1295,14 +1292,17 @@
       <Filter>Source\Application\Modules\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="RE_Profiler.h" />
-    <ClInclude Include="ModulePhysics.h">
-      <Filter>Source\Application\Modules\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="ParticleManager.h">
       <Filter>Source\Application\Modules\Physics</Filter>
     </ClInclude>
     <ClInclude Include="RE_CompParticleEmiter.h">
       <Filter>Source\Application\Modules\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="ModulePhysics.h">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Module.h">
+      <Filter>Source\Application\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
