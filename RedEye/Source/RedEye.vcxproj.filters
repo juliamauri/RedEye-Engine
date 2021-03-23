@@ -43,12 +43,6 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="Particle.cpp">
-      <Filter>Source\Application\Modules\Scene\Entity Component System\Components\Particles</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_CompParticleEmiter.cpp">
-      <Filter>Source\Application\Modules\Scene\Entity Component System\Components\Particles</Filter>
-    </ClCompile>
     <ClCompile Include="Resource.cpp">
       <Filter>Source\Application\Resources</Filter>
     </ClCompile>
@@ -317,6 +311,18 @@
       <Filter>Source\Application\Math</Filter>
     </ClCompile>
     <ClCompile Include="RE_Profiler.cpp" />
+    <ClCompile Include="ModulePhysics.cpp">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleManager.cpp">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CompParticleEmiter.cpp">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Module.h">
@@ -510,12 +516,6 @@
     </ClInclude>
     <ClInclude Include="Optick\include\optick.h">
       <Filter>3rd Party\Optick</Filter>
-    </ClInclude>
-    <ClInclude Include="Particle.h">
-      <Filter>Source\Application\Modules\Scene\Entity Component System\Components\Particles</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_CompParticleEmiter.h">
-      <Filter>Source\Application\Modules\Scene\Entity Component System\Components\Particles</Filter>
     </ClInclude>
     <ClInclude Include="par_shapes.h">
       <Filter>3rd Party\PAR Shapes</Filter>
@@ -1298,6 +1298,18 @@
       <Filter>Source\Application\Modules\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="RE_Profiler.h" />
+    <ClInclude Include="ModulePhysics.h">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleManager.h">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompParticleEmiter.h">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -1417,9 +1429,6 @@
     <Filter Include="Source\Application\Modules\Scene\Entity Component System\Components">
       <UniqueIdentifier>{a1265e59-2843-4b5a-abaf-37c926bb38a7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Application\Modules\Scene\Entity Component System\Components\Particles">
-      <UniqueIdentifier>{6be67668-60b0-48b8-9870-6f373919f170}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Application\Modules\Scene\Entity Component System\Hash System">
       <UniqueIdentifier>{7d4a01e6-ec35-46e2-b62b-85e046c97aed}</UniqueIdentifier>
     </Filter>
@@ -1482,6 +1491,9 @@
     </Filter>
     <Filter Include="Source\Application\Modules\Window">
       <UniqueIdentifier>{88c9c9e4-53cf-483c-9a9d-ac3bcc6ff579}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Physics">
+      <UniqueIdentifier>{c9a1c74d-c576-4531-944c-9463c6e3e6cc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
