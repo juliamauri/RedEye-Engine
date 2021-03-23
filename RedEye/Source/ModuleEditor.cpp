@@ -1,5 +1,6 @@
  #include "ModuleEditor.h"
 
+#include "RE_Profiler.h"
 #include "RE_ConsoleLog.h"
 #include "RE_Time.h"
 #include "Application.h"

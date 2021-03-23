@@ -1,5 +1,6 @@
 #include "ModuleRenderer3D.h"
 
+#include "RE_Profiler.h"
 #include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"

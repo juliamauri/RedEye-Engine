@@ -1,5 +1,6 @@
 #include "Application.h"
 
+#include "RE_Profiler.h"
 #include "RE_Time.h"
 #include "RE_Math.h"
 #include "RE_Hardware.h"
@@ -20,7 +21,6 @@
 
 Application::Application()
 {
-	profiler = new RE_Profiler();
 	time = new RE_Time();
 	math = new RE_Math();
 	hardware = new RE_Hardware();
@@ -51,7 +51,13 @@ Application::~Application()
 	DEL(hardware);
 	DEL(math);
 	DEL(time);
-	DEL(profiler);
+
+#ifdef PROFILING_ENABLED
+#ifdef INTERNAL_PROFILING
+	if (ProfilingTimer::recording) RE_Profiler::Deploy();
+	RE_Profiler::Clear();
+#endif // INTERNAL_PROFILING
+#endif // PROFILING_ENABLED
 }
 
 bool Application::Init(int _argc, char* _argv[])
@@ -183,9 +189,8 @@ void Application::RecieveEvent(const Event& e)
 	}
 	case REQUEST_LOAD: flags |= LOAD_CONFIG; break;
 	case REQUEST_SAVE: flags |= SAVE_CONFIG; break;
-	case REQUEST_QUIT: flags |= WANT_TO_QUIT; break; 
-	case START_PROFILING: profiler->start(); break;
-	case STOP_PROFILING: profiler->dispatch(); break; }
+	case REQUEST_QUIT: flags |= WANT_TO_QUIT; break;
+	}
 }
 
 void Application::LoadConfig()

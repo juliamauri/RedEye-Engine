@@ -1,5 +1,6 @@
 #include "ModuleAudio.h"
 
+#include "RE_Profiler.h"
 #include "RE_Time.h"
 #include "Application.h"
 #include "RE_FileSystem.h"

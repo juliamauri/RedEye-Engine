@@ -1,11 +1,10 @@
 #include "RE_Hardware.h"
 
-#include "Globals.h"
-#include "Application.h"
-
+#include "RE_Profiler.h"
 #include "SDL2\include\SDL.h"
 #include "imgui\imgui.h"
 #include "gpudetect\DeviceId.h"
+#include "Glew/include/glew.h"
 #include <EAStdC/EAString.h>
 
 #include <Psapi.h> // WINDOWS memory calls

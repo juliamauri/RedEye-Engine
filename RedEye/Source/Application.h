@@ -2,7 +2,6 @@
 #define __APP_H__
 
 #include "EventListener.h"
-#include "RE_Profiler.h"
 #include "RE_ConsoleLog.h"
 
 class RE_Time;
@@ -47,7 +46,6 @@ public:
 	char** argv = nullptr;
 
 	// Utility
-	RE_Profiler* profiler = nullptr;
 	RE_ConsoleLog log;
 	RE_Time* time = nullptr;
 	RE_Math* math = nullptr;

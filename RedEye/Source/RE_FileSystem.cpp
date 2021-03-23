@@ -4,6 +4,7 @@
 #include "RE_Config.h"
 #include "RE_Json.h"
 
+#include "RE_Profiler.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"

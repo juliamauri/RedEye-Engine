@@ -1,5 +1,6 @@
 #include "RE_InternalResources.h"
 
+#include "RE_Profiler.h"
 #include "Application.h"
 #include "ModuleRenderer3D.h"
 #include "RE_ConsoleLog.h"

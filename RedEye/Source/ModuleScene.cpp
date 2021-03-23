@@ -1,5 +1,6 @@
 #include "ModuleScene.h"
 
+#include "RE_Profiler.h"
 #include "RE_Timer.h"
 #include "RE_Math.h"
 #include "Application.h"

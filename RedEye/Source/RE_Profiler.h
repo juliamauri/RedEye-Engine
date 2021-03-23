@@ -1,8 +1,7 @@
 #pragma once
 
-#define PROFILE_ACTIVE
-#define INTERNAL_PROFILING
-//#define PROFILE_CAP 9400
+#define PROFILING_ENABLED // undefine to disable any profiling methods
+#define INTERNAL_PROFILING // undefine to use Optick Profiling
 
 enum RE_ProfiledFunc : unsigned short
 {
@@ -79,18 +78,10 @@ enum RE_ProfiledClass : unsigned short
 	PROF_CLASS_MAX
 };
 
-#ifdef PROFILE_ACTIVE
+#ifdef PROFILING_ENABLED
 #ifdef INTERNAL_PROFILING
 
 #include <EASTL\vector.h>
-
-struct ProfilingTimer
-{
-	ProfilingTimer(RE_ProfiledFunc function, RE_ProfiledClass context);
-	~ProfilingTimer();
-	unsigned int operation_id;
-	static unsigned int frame;
-};
 
 struct ProfilingOperation
 {
@@ -98,38 +89,35 @@ struct ProfilingOperation
 	RE_ProfiledClass context;
 	unsigned long long start; // ticks
 	unsigned long long duration; // ticks
-	unsigned int frame;
+	unsigned long frame;
 };
 
-struct RE_Profiler
+struct ProfilingTimer
 {
-	RE_Profiler();
-	~RE_Profiler();
-	eastl::vector<ProfilingOperation> operations;
+	ProfilingTimer(RE_ProfiledFunc function, RE_ProfiledClass context);
+	~ProfilingTimer();
 
-	static bool enabled;
+	bool pushed;
+	unsigned int operation_id;
 
-	void start();
-	void dispatch();
-
-#ifdef PROFILE_CAP
-	void Frame();
-#endif // PROFILE_CAP
+	static bool recording;
+	static unsigned long frame;
+	static eastl::vector<ProfilingOperation> operations;
 };
 
-#define RE_PROFILE(func, context) if (RE_Profiler::enabled) ProfilingTimer profiling_timer(func, context)
+namespace RE_Profiler
+{
+	void Start();
+	void Pause();
+	void Clear();
+	void Deploy();
+};
 
-#ifdef PROFILE_CAP
-#define RE_PROFILE_FRAME() ++ProfilingTimer::frame; profiler->Frame()
+#define RE_PROFILE(func, context) ProfilingTimer profiling_timer(func, context)
+#define RE_PROFILE_FRAME() ProfilingTimer::frame++;
+
 #else
-#define RE_PROFILE_FRAME() ++ProfilingTimer::frame
-#endif // PROFILE_CAP
-
-
-#else
-struct RE_Profiler {};
 #include "Optick\include\optick.h"
-
 #define RE_OPTICK_NAME(function)\
 	function == PROF_Init ? "Init" : \
 	function == PROF_Start ? "Start" : \
@@ -156,14 +144,13 @@ struct RE_Profiler {};
 	(category < PROF_ModuleEditor ?	Optick::Category::Scene :		\
 	(category < PROF_ModuleRender ?	Optick::Category::UI :			\
 	(category < PROF_ModuleAudio ?	Optick::Category::Rendering :	\
-	(category < PROF_FileSystem ?	Optick::Category::Audio :		\
-									Optick::Category::IO))))))
+	(category < PROF_FileSystem ?	Optick::Category::Audio : Optick::Category::IO))))))
 
 #define RE_PROFILE(func, context) OPTICK_CATEGORY(RE_OPTICK_NAME(func),	RE_OPTICK_CATEGORY(context))
 #define RE_PROFILE_FRAME() OPTICK_FRAME("MainThread RedEye")
 #endif // INTERNAL_PROFILING
+
 #else
-struct RE_Profiler {};
 #define RE_PROFILE(func, context)
 #define RE_PROFILE_FRAME()
-#endif // PROFILE_ACTIVE
+#endif // PROFILING_ENABLED

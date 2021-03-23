@@ -1,7 +1,5 @@
 #include "RE_Time.h"
 
-#include "Application.h"
-#include "ModuleInput.h"
 #include "RE_Profiler.h"
 
 #include "SDL2\include\SDL_timer.h"
@@ -65,20 +63,30 @@ void RE_Time::DrawEditorGraphs()
 		for (int i = 0; i <= 99; i++)
 			fps[i] = ms[i] = 0.f;
 
-	bool isProfiling = RE_Profiler::enabled;
-
-	if (isProfiling) {
+#ifdef PROFILING_ENABLED
+#ifdef INTERNAL_PROFILING
+	if (!ProfilingTimer::recording)
+	{
+		if (ImGui::Button("Start profiling")) RE_Profiler::Start();
+	}
+	else
+	{
 		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, { 0.75, 0.0,0.0,1.0 });
 		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ButtonActive, { 1.0, 0.0,0.0,1.0 });
 		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ButtonHovered, { 0.5, 0.0,0.0,1.0 });
+		if (ImGui::Button("Pause profiling")) RE_Profiler::Pause();
+		ImGui::PopStyleColor(3);
 	}
 
-	if (ImGui::Button(isProfiling ? "Stop profiling" : "Start profiling")) {
-
-		if (!isProfiling) RE_INPUT->Push(START_PROFILING, App);
-		else RE_INPUT->Push(STOP_PROFILING, App);
+	unsigned int logged_operations = ProfilingTimer::operations.size();
+	if (logged_operations > 0u)
+	{
+		EA::StdC::Snprintf(title, 25, "Deploy %u", logged_operations);
+		if (ImGui::Button(title)) RE_Profiler::Deploy();
+		if (ImGui::Button("Clear Logs")) RE_Profiler::Clear();
 	}
-	if (isProfiling) ImGui::PopStyleColor(3);
+#endif // INTERNAL_PROFILING
+#endif // PROFILING_ENABLED
 }
 
 void RE_Time::Delay(unsigned int ms) const { SDL_Delay(ms); }

@@ -1,6 +1,7 @@
 #include "RE_TextureImporter.h"
 
 #include "Globals.h"
+#include "RE_Profiler.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"

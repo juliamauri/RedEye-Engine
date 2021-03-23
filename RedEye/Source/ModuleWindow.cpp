@@ -1,5 +1,6 @@
 #include "ModuleWindow.h"
 
+#include "RE_Profiler.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_Json.h"

@@ -1,5 +1,6 @@
 #include "RE_ResourceManager.h"
 
+#include "RE_Profiler.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "ModuleInput.h"
