@@ -317,9 +317,6 @@
     <ClCompile Include="ParticleManager.cpp">
       <Filter>Source\Application\Modules\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Particle.cpp">
-      <Filter>Source\Application\Modules\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompParticleEmiter.cpp">
       <Filter>Source\Application\Modules\Physics</Filter>
     </ClCompile>
@@ -1302,9 +1299,6 @@
       <Filter>Source\Application\Modules\Physics</Filter>
     </ClInclude>
     <ClInclude Include="ParticleManager.h">
-      <Filter>Source\Application\Modules\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Particle.h">
       <Filter>Source\Application\Modules\Physics</Filter>
     </ClInclude>
     <ClInclude Include="RE_CompParticleEmiter.h">

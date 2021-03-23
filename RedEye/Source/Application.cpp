@@ -9,6 +9,7 @@
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
 #include "ModuleScene.h"
+#include "ModulePhysics.h"
 #include "ModuleEditor.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleAudio.h"
@@ -31,6 +32,7 @@ Application::Application()
 	input = new ModuleInput();
 	window = new ModuleWindow();
 	scene = new ModuleScene();
+	physics = new ModulePhysics();
 	editor = new ModuleEditor();
 	renderer = new ModuleRenderer3D();
 	audio = new ModuleAudio();
@@ -42,6 +44,7 @@ Application::~Application()
 	DEL(renderer);
 	DEL(editor);
 	DEL(scene);
+	DEL(physics);
 	DEL(window);
 	DEL(input);
 
@@ -88,12 +91,12 @@ bool Application::Init(int _argc, char* _argv[])
 
 		if (fs->Init(argc = _argc, argv = _argv))
 		{
-			if (input->Init() && window->Init() && scene->Init() && editor->Init() && renderer->Init() && audio->Init())
+			if (input->Init() && window->Init() && scene->Init() && physics->Init() && editor->Init() && renderer->Init() && audio->Init())
 			{
 				hardware->Init();
 				res->Init();
 
-				if (scene->Start() && editor->Start() && renderer->Start() && audio->Start())
+				if (scene->Start() && physics->Start() && editor->Start() && renderer->Start() && audio->Start())
 				{
 					res->ThumbnailResources();
 					ret = true;
@@ -118,6 +121,7 @@ void Application::MainLoop()
 			editor->PreUpdate();
 
 			scene->Update();
+			physics->Update();
 			editor->Update();
 
 			scene->PostUpdate();
@@ -149,6 +153,7 @@ void Application::CleanUp()
 	renderer->CleanUp();
 	editor->CleanUp();
 	scene->CleanUp();
+	physics->CleanUp();
 	window->CleanUp();
 	input->CleanUp();
 

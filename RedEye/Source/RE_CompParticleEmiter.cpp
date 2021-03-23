@@ -1,6 +1,5 @@
 #include "RE_CompParticleEmiter.h"
 
-#include "Particle.h"
 #include "RE_Mesh.h"
 #include "ImGui\imgui.h"
 

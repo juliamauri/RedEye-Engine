@@ -1,10 +1,23 @@
 #include "ModulePhysics.h"
 
-ModulePhysics::ModulePhysics() : Module("Physics")
-{
+ModulePhysics::ModulePhysics() : Module("Physics") {}
+ModulePhysics::~ModulePhysics() {}
 
+bool ModulePhysics::Init()
+{
+	return true;
 }
 
-ModulePhysics::~ModulePhysics()
+bool ModulePhysics::Start()
 {
+	return true;
+}
+
+void ModulePhysics::Update()
+{
+}
+
+void ModulePhysics::CleanUp()
+{
+	particles.Clear();
 }

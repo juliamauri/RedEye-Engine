@@ -12,6 +12,7 @@ class Module;
 class ModuleInput;
 class ModuleWindow;
 class ModuleScene;
+class ModulePhysics;
 class ModuleEditor;
 class ModuleRenderer3D;
 class ModuleAudio;
@@ -55,6 +56,7 @@ public:
 	ModuleInput* input = nullptr;
 	ModuleWindow* window = nullptr;
 	ModuleScene* scene = nullptr;
+	ModulePhysics* physics = nullptr;
 	ModuleEditor* editor = nullptr;
 	ModuleRenderer3D* renderer = nullptr;
 	ModuleAudio* audio = nullptr;
