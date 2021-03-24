@@ -65,14 +65,14 @@ void RE_CompParticleEmitter::Draw() const
 			front.Normalize();
 
 			math::float3 right = front.Cross(cT->GetUp().Normalized()).Normalized();
+			if (right.x < 0.0f) right *= -1.0f;
+
 			math::float3 up = right.Cross(front).Normalized();
 
-			math::float3x3 rotmat = math::float3x3(right, up, front);
 			math::float4x4 rotm;
-			rotm.SetRotatePart(rotmat);
-			math::float3 rote = rotm.ToEulerXYZ();
-			math::Quat rot = math::Quat::identity * math::Quat::FromEulerXYZ(rote.x, rote.y, rote.z);
-			math::float4x4 pMatrix = math::float4x4::FromTRS(partcleGlobalpos, rot, scale).Transposed();
+			rotm.SetRotatePart(math::float3x3(right, up, front));
+			math::float3 roteuler = rotm.ToEulerXYZ();
+			math::float4x4 pMatrix = math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), scale).Transposed();
 			pS->UploadModel(pMatrix.ptr());
 
 			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
