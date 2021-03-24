@@ -1,28 +1,33 @@
 #ifndef __RE_PARTICLEMANAGER_H__
 #define __RE_PARTICLEMANAGER_H__
 
-#include "EASTL/list.h"
 #include "MathGeoLib/include/Math/float3.h"
+#include "EA/EASTL/utility.h"
+#include "EA/EASTL/list.h"
 
-struct Particle
+struct RE_Particle
 {
+	bool Update(float dt);
+
 	math::vec position = math::vec::zero;
-	float lifetime = -1.0f;
+	float lifetime = 0.0f;
+	float max_lifetime = 15.0f;
 };
 
-struct ParticleEmitter
+struct RE_ParticleEmitter
 {
-	unsigned int id;
+	int GetNewSpawns(float dt);
+
+	unsigned int id = 0u;
 
 	// Simulation parameters
 	enum PlaybackState { STOP = 0, PLAY, PAUSE } state = STOP;
 	bool loop = true;
-	float spaw_frequency = 20.0f;
+	float spaw_frequency = 3.f;
 	float lifetime = 1.5f;
 
-	// Particles managed
-	unsigned int index_min;
-	unsigned int index_max;
+	// Control values
+	float spawn_offset = 0.f;
 };
 
 class ParticleManager
@@ -31,14 +36,15 @@ public:
 	ParticleManager();
 	~ParticleManager();
 
-	unsigned int Allocate(ParticleEmitter emitter);
+	unsigned int Allocate(RE_ParticleEmitter* emitter);
 	bool Deallocate(unsigned int index);
 
-	bool SetEmitterState(unsigned int index, ParticleEmitter::PlaybackState state);
+
+	bool SetEmitterState(unsigned int index, RE_ParticleEmitter::PlaybackState state);
 
 public:
 
-	eastl::list<eastl::pair<ParticleEmitter, eastl::list<Particle>>> particles;
+	eastl::list<eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>*> simulations;
 
 private:
 

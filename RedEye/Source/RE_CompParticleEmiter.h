@@ -7,6 +7,7 @@
 
 class Particle;
 class RE_Mesh;
+struct RE_ParticleEmitter;
 
 enum Particle_Stat
 {
@@ -23,6 +24,8 @@ public:
 
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
+	void Update() override;
+
 	void Draw() const override;
 	void DrawProperties() override;
 
@@ -34,6 +37,8 @@ public:
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
 private:
+
+	RE_ParticleEmitter* simulation = nullptr;
 
 	int max_particles = 0;
 	float time_counter = 0.0f;

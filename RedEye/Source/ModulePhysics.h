@@ -19,6 +19,11 @@ public:
 	//void RecieveEvent(const Event& e) override;
 	//void DrawEditor() override;
 
+	RE_ParticleEmitter* AddEmitter();
+	void RemoveEmitter(RE_ParticleEmitter* emitter);
+
+	unsigned int GetParticleCount(unsigned int emitter_id) const;
+
 private:
 
 	ParticleManager particles;

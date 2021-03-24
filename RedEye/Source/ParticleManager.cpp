@@ -1,6 +1,32 @@
 #include "ParticleManager.h"
 
+#include "Application.h"
+#include "RE_Math.h"
+
 unsigned int ParticleManager::emitter_count = 0u;
+
+bool RE_Particle::Update(float dt)
+{
+	bool ret = false;
+	lifetime += dt;
+
+	if (lifetime < max_lifetime)
+	{
+		for (int i = 0; i < 3; ++i)
+			position[i] += dt * RE_MATH->RandomF();
+
+		ret = true;
+	}
+
+	return ret;
+}
+
+int RE_ParticleEmitter::GetNewSpawns(float dt)
+{
+	int units = static_cast<int>((spawn_offset += dt) * spaw_frequency);
+	spawn_offset -= static_cast<float>(units) / spaw_frequency;
+	return units;
+}
 
 ParticleManager::ParticleManager()
 {
@@ -8,24 +34,23 @@ ParticleManager::ParticleManager()
 
 ParticleManager::~ParticleManager()
 {
-	particles.clear();
+	simulations.clear();
 }
 
-unsigned int ParticleManager::Allocate(ParticleEmitter emitter)
+unsigned int ParticleManager::Allocate(RE_ParticleEmitter* emitter)
 {
-	unsigned int ret = emitter.id = emitter_count++;
-	particles.push_back({ emitter, {} });
-	return ret;
+	simulations.push_back(new eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>(emitter, new eastl::list<RE_Particle*>()));
+	return (emitter->id = ++emitter_count);
 }
 
 bool ParticleManager::Deallocate(unsigned int index)
 {
-	eastl::list<eastl::pair<ParticleEmitter, eastl::list<Particle>>>::iterator it;
-	for (it = particles.begin(); it != particles.end(); ++it)
+	eastl::list<eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>*>::iterator it;
+	for (it = simulations.begin(); it != simulations.end(); ++it)
 	{
-		if (it->first.id == index)
+		if ((*it)->first->id == index)
 		{
-			particles.erase(it);
+			simulations.erase(it);
 			return true;
 		}
 	}
@@ -33,14 +58,14 @@ bool ParticleManager::Deallocate(unsigned int index)
 	return false;
 }
 
-bool ParticleManager::SetEmitterState(unsigned int index, ParticleEmitter::PlaybackState state)
+bool ParticleManager::SetEmitterState(unsigned int index, RE_ParticleEmitter::PlaybackState state)
 {
-	eastl::list<eastl::pair<ParticleEmitter, eastl::list<Particle>>>::iterator it;
-	for (it = particles.begin(); it != particles.end(); ++it)
+	eastl::list<eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>*>::iterator it;
+	for (it = simulations.begin(); it != simulations.end(); ++it)
 	{
-		if (it->first.id == index)
+		if ((*it)->first->id == index)
 		{
-			it->first.state = state;
+			(*it)->first->state = state;
 			return true;
 		}
 	}

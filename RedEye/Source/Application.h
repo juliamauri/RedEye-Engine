@@ -91,6 +91,7 @@ extern Application* App;
 #define RE_INPUT App->input
 #define RE_WINDOW App->window
 #define RE_SCENE App->scene
+#define RE_PHYSICS App->physics
 #define RE_EDITOR App->editor
 #define RE_RENDER App->renderer
 #define RE_AUDIO App->audio

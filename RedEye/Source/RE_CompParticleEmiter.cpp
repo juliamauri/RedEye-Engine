@@ -1,12 +1,22 @@
 #include "RE_CompParticleEmiter.h"
 
+#include "Application.h"
+#include "ModulePhysics.h"
 #include "RE_Mesh.h"
 #include "ImGui\imgui.h"
 
 RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER) {}
-RE_CompParticleEmitter::~RE_CompParticleEmitter() {}
+
+RE_CompParticleEmitter::~RE_CompParticleEmitter()
+{
+	if (simulation != nullptr)
+		RE_PHYSICS->RemoveEmitter(simulation);
+}
 
 void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
+{}
+
+void RE_CompParticleEmitter::Update()
 {
 }
 
@@ -19,8 +29,43 @@ void RE_CompParticleEmitter::Draw() const
 
 void RE_CompParticleEmitter::DrawProperties()
 {
+	if (simulation == nullptr)
+		simulation = RE_PHYSICS->AddEmitter();
+
 	if (ImGui::CollapsingHeader("Particle Emitter"))
 	{
+		if (simulation != nullptr)
+		{
+			switch (simulation->state)
+			{
+			case RE_ParticleEmitter::STOP:
+			{
+				if (ImGui::Button("Play")) simulation->state = RE_ParticleEmitter::PLAY;
+				break;
+			}
+			case RE_ParticleEmitter::PLAY:
+			{
+				if (ImGui::Button("Pause")) simulation->state = RE_ParticleEmitter::PAUSE;
+				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOP;
+				break;
+			}
+			case RE_ParticleEmitter::PAUSE:
+			{
+				if (ImGui::Button("Resume")) simulation->state = RE_ParticleEmitter::PLAY;
+				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOP;
+				break;
+			}
+			}
+
+			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
+		}
+		else
+		{
+			ImGui::Text("Unregistered simulation");
+		}
+
+		ImGui::Separator();
+
 		ImGui::SliderFloat("Emissor Life", &emissor_life, -1.0f, 10.0f, "%.2f");
 		ImGui::Separator();
 
