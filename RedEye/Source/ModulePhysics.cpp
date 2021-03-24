@@ -20,7 +20,15 @@ void ModulePhysics::Update()
 {
 	for (auto sim : particles.simulations)
 	{
-		if (sim->first->state == RE_ParticleEmitter::PLAY)
+		switch (sim->first->state)
+		{
+		case RE_ParticleEmitter::STOP:
+		{
+			if (!sim->second->empty())
+				sim->second->clear();
+			break;
+		}
+		case RE_ParticleEmitter::PLAY:
 		{
 			// Spawn new particles
 			float dt = RE_TIME->GetDeltaTime();
@@ -41,6 +49,10 @@ void ModulePhysics::Update()
 					++it;
 				}
 			}
+
+			break;
+		}
+		default: break;
 		}
 	}
 }
