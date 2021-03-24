@@ -637,4 +637,41 @@
 
 #pragma endregion WaterShader
 
+#pragma region ParticleShader
+
+
+#define PARTICLEVERTEXSHADER										\
+"#version 330 core\n"												\
+"layout(location = 0) in vec3 aPos;\n"								\
+"layout(location = 1) in vec3 aNormal;\n"							\
+"layout(location = 2) in vec3 aTangent;\n"							\
+"layout(location = 3) in vec3 aBitangent;\n"						\
+"layout(location = 4) in vec2 aTexCoord;\n"							\
+"\n"																\
+"out vec2 TexCoord;\n"												\
+"\n"																\
+"uniform mat4 model;\n"												\
+"uniform mat4 view;\n"												\
+"uniform mat4 projection;\n"										\
+"\n"																\
+"void main()\n"														\
+"{\n"																\
+"	gl_Position = projection * view * model * vec4(aPos, 1.0);\n"	\
+"	TexCoord = aTexCoord;\n"										\
+"}\0"																  
+
+#define PARTICLEFRAGMENTSHADER													\
+"#version 330 core\n"															\
+"#extension GL_ARB_separate_shader_objects : enable\n"						   	\
+"layout(location = 0) out vec4 color;\n"										\
+"\n"																			\
+"in vec2 TexCoord;\n"															\
+"\n"																			\
+"void main()\n"																	\
+"{\n"																			\
+"	color = vec4(1.0,0.0,0.0,1.0);"												\
+"}\0"
+
+#pragma endregion ParticleShader
+
 #endif // !__DEFAULTSHADERS_H__

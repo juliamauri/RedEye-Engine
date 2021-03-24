@@ -92,6 +92,8 @@ public:
 
 	// Sets shader for unassigned geometry
 	static const LightMode GetLightMode();
+	
+	static RE_CompCamera* GetCamera();
 
 	void ChangeFBOSize(int width, int height, bool editor = false);
 	unsigned int GetRenderedEditorSceneTexture()const;
@@ -163,6 +165,7 @@ private:
 	bool clip_distance = false;
 
 	static LightMode current_lighting;
+	static RE_CompCamera* current_camera;
 	static unsigned int current_fbo;
 
 	// Rendering Views

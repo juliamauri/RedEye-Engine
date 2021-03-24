@@ -43,6 +43,7 @@
 #pragma comment(lib, "opengl32.lib")
 
 LightMode ModuleRenderer3D::current_lighting = LIGHT_GL;
+RE_CompCamera* ModuleRenderer3D::current_camera = nullptr;
 unsigned int ModuleRenderer3D::current_fbo = 0;
 
 const char* RenderView::labels[12] = {
@@ -458,6 +459,11 @@ const LightMode ModuleRenderer3D::GetLightMode()
 	return current_lighting;
 }
 
+RE_CompCamera* ModuleRenderer3D::GetCamera()
+{
+	return current_camera;
+}
+
 void ModuleRenderer3D::ChangeFBOSize(int width, int height, bool isEditor)
 {
 	fbos->ChangeFBOSize(render_views[!isEditor].GetFBO(), width, height);
@@ -518,6 +524,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	// Setup Frame Buffer
 	current_lighting = render_view.light;
 	current_fbo = render_view.GetFBO();
+	current_camera = render_view.camera;
 
 	fbos->ChangeFBOBind(current_fbo, fbos->GetWidth(current_fbo), fbos->GetHeight(current_fbo));
 	fbos->ClearFBOBuffers(current_fbo, render_view.clear_color.ptr());

@@ -63,7 +63,9 @@ private:
 
 	// Particle Drawing
 	math::vec rgb_alpha = math::vec::zero;
-	unsigned int shader = 0;
+
+	unsigned int VAO, VBO, EBO;
+	bool draw = false;
 };
 
 #endif // !__RE_COMPPARTICLEEMITER_H__

@@ -24,6 +24,7 @@ public:
 	const char* GetDefaulMaterial() const;
 	const char* GetDefaultSkyBox() const;
 	const char* GetLightPassShader() const;
+	const char* GetParticleShader() const;
 
 	unsigned int GetTextureChecker() const;
 	unsigned int GetTextureWaterFoam() const;
@@ -47,6 +48,7 @@ private:
 	const char* defGeoShader = nullptr;
 	const char* defLightShader = nullptr;
 
+	const char* particleShader = nullptr;
 
 	const char* waterShader = nullptr;
 	const char* waterDefShader = nullptr;

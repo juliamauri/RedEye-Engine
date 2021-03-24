@@ -2,10 +2,23 @@
 
 #include "Application.h"
 #include "ModulePhysics.h"
+#include "ModuleRenderer3D.h"
+#include "RE_CameraManager.h"
+#include "RE_ResourceManager.h"
+#include "RE_InternalResources.h"
 #include "RE_Mesh.h"
+#include "RE_Shader.h"
+#include "RE_GLCache.h"
+
+#include "ModuleScene.h"
+#include "RE_GameObject.h"
+#include "RE_CompTransform.h"
+#include "RE_CompCamera.h"
+
 #include "ImGui\imgui.h"
 
-RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER) {}
+RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER) {
+}
 
 RE_CompParticleEmitter::~RE_CompParticleEmitter()
 {
@@ -22,9 +35,49 @@ void RE_CompParticleEmitter::Update()
 
 void RE_CompParticleEmitter::Draw() const
 {
-	//for (int i = 0; i < max_particles; i++)
-	//	if (particles[i].Alive())
-	//		particles[i].Draw(shader);
+	if (draw) {
+		RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
+
+		eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+		unsigned int shader = pS->GetID();
+		RE_GLCache::ChangeShader(shader);
+		RE_GLCache::ChangeVAO(VAO);
+
+		
+		RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
+		math::float3 goPosition = transform->GetGlobalPosition();
+		RE_CompCamera* c = ModuleRenderer3D::GetCamera();
+		
+		RE_CompTransform* cT = c->GetTransform();
+
+
+		math::float3 scale = {0.1f,0.1f,0.1f};
+
+		if (!scale.IsFinite())
+		{
+			scale = math::float3::one;
+		}
+
+		for (auto p : *particles) {
+			math::float3 partcleGlobalpos = goPosition + p->position;
+
+			math::float3 front = cT->GetGlobalPosition() - partcleGlobalpos;
+			front.Normalize();
+
+			math::float3 right = front.Cross(cT->GetUp().Normalized()).Normalized();
+			math::float3 up = right.Cross(front).Normalized();
+
+			math::float3x3 rotmat = math::float3x3(right, up, front);
+			math::float4x4 rotm;
+			rotm.SetRotatePart(rotmat);
+			math::float3 rote = rotm.ToEulerXYZ();
+			math::Quat rot = math::Quat::identity * math::Quat::FromEulerXYZ(rote.x, rote.y, rote.z);
+			math::float4x4 pMatrix = math::float4x4::FromTRS(partcleGlobalpos, rot, scale).Transposed();
+			pS->UploadModel(pMatrix.ptr());
+
+			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+		}
+	}
 }
 
 void RE_CompParticleEmitter::DrawProperties()
@@ -36,6 +89,38 @@ void RE_CompParticleEmitter::DrawProperties()
 	{
 		if (simulation != nullptr)
 		{
+			if (!draw && ImGui::Button("Start Draw")) {
+				glGenVertexArrays(1, &VAO);
+				glGenBuffers(1, &VBO);
+				glGenBuffers(1, &EBO);
+
+				RE_GLCache::ChangeVAO(VAO);
+				glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+				float triangle[9]{
+					-0.5f, -0.5f, 0.0f,
+					0.5f, -0.5f, 0.0f,
+					0.0f,  0.5f, 0.0f
+				};
+
+				unsigned int index[3] = { 0, 1, 2 };
+
+				glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), &triangle[0], GL_STATIC_DRAW);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(unsigned int), &index[0], GL_STATIC_DRAW);
+
+				// vertex positions
+				int accumulativeOffset = 0;
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
+				accumulativeOffset += sizeof(float) * 3;
+
+				RE_GLCache::ChangeVAO(0);
+
+				draw = true;
+			}
+
+
 			switch (simulation->state)
 			{
 			case RE_ParticleEmitter::STOP:

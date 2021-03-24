@@ -23,6 +23,7 @@ public:
 	void RemoveEmitter(RE_ParticleEmitter* emitter);
 
 	unsigned int GetParticleCount(unsigned int emitter_id) const;
+	eastl::list<RE_Particle*>* GetParticles(unsigned int emitter_id) const;
 
 private:
 

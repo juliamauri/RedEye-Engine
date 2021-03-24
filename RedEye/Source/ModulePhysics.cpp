@@ -85,3 +85,15 @@ unsigned int ModulePhysics::GetParticleCount(unsigned int emitter_id) const
 	}
 	return 0u;
 }
+
+eastl::list<RE_Particle*>* ModulePhysics::GetParticles(unsigned int emitter_id) const
+{
+	for (auto sim : particles.simulations)
+	{
+		if (sim->first->id == emitter_id)
+		{
+			return sim->second;
+		}
+	}
+	return nullptr;
+}

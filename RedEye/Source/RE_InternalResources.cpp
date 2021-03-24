@@ -102,7 +102,14 @@ bool RE_InternalResources::InitShaders()
 	lightPass->SetAsInternal(LIGHTPASSVERTEXSHADER, LIGHTPASSFRAGMENTSHADER);
 	defLightShader = RE_RES->Reference(lightPass);
 
-	return defaultShader && defaultScaleShader && skyboxShader && defGeoShader && defLightShader;
+	// Particle
+	RE_Shader* particleS = new RE_Shader();
+	particleS->SetName("Particle Shader");
+	particleS->SetType(Resource_Type::R_SHADER);
+	particleS->SetAsInternal(PARTICLEVERTEXSHADER, PARTICLEFRAGMENTSHADER);
+	particleShader = RE_RES->Reference(particleS);
+
+	return defaultShader && defaultScaleShader && skyboxShader && defGeoShader && defLightShader && particleShader;
 }
 
 bool RE_InternalResources::InitMaterial()
@@ -195,6 +202,7 @@ const char*	 RE_InternalResources::GetDefaultScaleShader() const { return defaul
 const char*	 RE_InternalResources::GetDefaulMaterial() const { return defaultMaterial; }
 const char*	 RE_InternalResources::GetDefaultSkyBox() const { return defaultSkybox; }
 const char*	 RE_InternalResources::GetLightPassShader() const { return defLightShader; }
+const char* RE_InternalResources::GetParticleShader() const { return particleShader; }
 const char*	 RE_InternalResources::GetDefaultSkyBoxShader() const { return skyboxShader; }
 unsigned int RE_InternalResources::GetTextureChecker() const { return checkerTexture; }
 unsigned int RE_InternalResources::GetTextureWaterFoam() const { return water_foam_texture; }
