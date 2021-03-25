@@ -36,9 +36,15 @@ public:
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
+	bool isLighting() const;
+	void CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights) const;
+
 private:
 
 	RE_ParticleEmitter* simulation = nullptr;
+
+	bool emitlight = false;
+	math::vec lightColor = math::vec::one;
 
 	int max_particles = 0;
 	float time_counter = 0.0f;

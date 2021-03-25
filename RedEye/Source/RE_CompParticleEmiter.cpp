@@ -151,6 +151,8 @@ void RE_CompParticleEmitter::DrawProperties()
 			}
 
 			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
+			ImGui::Checkbox(emitlight ? "Disable lighting" : "Enable lighting", &emitlight);
+			ImGui::ColorEdit3("Light Color", &lightColor[0]);
 		}
 		else
 		{
@@ -214,6 +216,49 @@ void RE_CompParticleEmitter::SerializeBinary(char*& cursor, eastl::map<const cha
 
 void RE_CompParticleEmitter::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
 {
+}
+
+bool RE_CompParticleEmitter::isLighting() const { return emitlight; }
+
+void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights) const
+{
+	//float cutOff[2]; // cos(radians(12.5f))
+	//float outerCutOff[2]; // cos(radians(17.5f))
+	//cutOff[0] = 12.5f;
+	//outerCutOff[0] = 17.5f;
+	//cutOff[1] = math::Cos(math::DegToRad(cutOff[0]));
+	//outerCutOff[1] = math::Cos(math::DegToRad(outerCutOff[0]));
+
+	eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+
+	eastl::string array_name(array_unif_name);
+	array_name += "[";
+
+	eastl::string unif_name;
+	for (auto p : *particles) {
+		if (count == maxLights) return;
+		
+		unif_name += array_name + eastl::to_string(count++) + "].";
+
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "type").c_str()), float(L_POINT));
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "intensity").c_str()), 1.0f);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuse").c_str()), lightColor);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "specular").c_str()), 0.2f);
+
+		RE_CompTransform* transform = GetGOPtr()->GetTransformPtr();
+		math::float3 partcleGlobalpos = transform->GetGlobalPosition() + p->position;
+		math::float3 front = ModuleRenderer3D::GetCamera()->GetTransform()->GetGlobalPosition() - partcleGlobalpos;
+		front.Normalize();
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "direction").c_str()), front);
+
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "position").c_str()), partcleGlobalpos);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "constant").c_str()), 1.0f);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "linear").c_str()), 0.091f);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "quadratic").c_str()), 0.011f);
+
+		//RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "cutOff").c_str()), cutOff[1]);
+		//RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "outerCutOff").c_str()), outerCutOff[1]);
+	}
 }
 
 

@@ -601,6 +601,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 	// Draw Scene
 	eastl::stack<RE_Component*> drawAsLast;
+	eastl::stack<RE_Component*> particleSystems;
 	RE_Component* drawing = nullptr;
 	while (!comptsToDraw.empty())
 	{
@@ -612,13 +613,30 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		if (dT == C_MESH)
 			 blend = dynamic_cast<RE_CompMesh*>(drawing)->isBlend();
 
-		if (!blend && dT != C_WATER) drawing->Draw();
+		if (dT == C_PARTICLEEMITER) particleSystems.push(drawing);
+		else if (!blend && dT != C_WATER) drawing->Draw();
 		else drawAsLast.push(drawing);
 	}
+
+
 
 	// Deferred Light Pass
 	if (render_view.light == LIGHT_DEFERRED)
 	{
+		eastl::vector<RE_Component*> particleS_lights;
+		// Particle System Draws
+		if (!particleSystems.empty())
+		{
+			while (!particleSystems.empty())
+			{
+				RE_Component* drawPS = particleSystems.top();
+				if (dynamic_cast<RE_CompParticleEmitter*>(drawPS)->isLighting())
+					particleS_lights.push_back(drawPS);
+				drawPS->Draw();
+				particleSystems.pop();
+			}
+		}
+
 		// Draw Blended elements
 		if (!drawAsLast.empty())
 		{
@@ -656,6 +674,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			count++;
 		}
 
+		for (auto pS : particleS_lights) {
+			dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(light_pass, "lights", count, 64);
+		}
+
 		for (count; count < 64; count++) {
 			unif_name = "lights[" + eastl::to_string(count) + "].";
 			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "type").c_str()), -1.0f);
@@ -676,6 +698,16 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			DrawSkyBox();
 	}
 	else {
+
+		// Particle System Draws
+		if (!particleSystems.empty())
+		{
+			while (!particleSystems.empty())
+			{
+				particleSystems.top()->Draw();
+				particleSystems.pop();
+			}
+		}
 
 		// Draw Debug Geometry
 		if (render_view.flags & DEBUG_DRAW)
