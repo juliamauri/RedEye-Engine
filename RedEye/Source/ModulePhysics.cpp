@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "RE_Time.h"
+#include "RE_Math.h"
 
 ModulePhysics::ModulePhysics() : Module("Physics") {}
 ModulePhysics::~ModulePhysics() {}
@@ -35,7 +36,14 @@ void ModulePhysics::Update()
 			int to_add = sim->first->GetNewSpawns(dt);
 
 			for (int i = 0; i < to_add; ++i)
-				sim->second->push_back(new RE_Particle());
+			{
+				RE_Particle* particle = new RE_Particle();
+
+				for (int i = 0; i < 3; ++i)
+					particle->speed[i] = RE_MATH->RandomF() * sim->first->speed_muliplier;
+
+				sim->second->push_back(particle);
+			}
 
 			for (eastl::list<RE_Particle*>::iterator it = sim->second->begin(); it != sim->second->end();)
 			{

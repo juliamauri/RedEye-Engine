@@ -10,6 +10,8 @@ struct RE_Particle
 	bool Update(float dt);
 
 	math::vec position = math::vec::zero;
+	math::vec speed = math::vec::zero;
+
 	float lifetime = 0.0f;
 	float max_lifetime = 15.0f;
 };
@@ -28,6 +30,7 @@ struct RE_ParticleEmitter
 
 	// Control values
 	float spawn_offset = 0.f;
+	float speed_muliplier = 2.f;
 };
 
 class ParticleManager

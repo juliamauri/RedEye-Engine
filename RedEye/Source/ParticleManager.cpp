@@ -1,24 +1,17 @@
 #include "ParticleManager.h"
 
-#include "Application.h"
-#include "RE_Math.h"
-
 unsigned int ParticleManager::emitter_count = 0u;
 
 bool RE_Particle::Update(float dt)
 {
-	bool ret = false;
-	lifetime += dt;
+	bool is_alive = ((lifetime += dt) < max_lifetime);
 
-	if (lifetime < max_lifetime)
+	if (is_alive)
 	{
-		for (int i = 0; i < 3; ++i)
-			position[i] += dt * RE_MATH->RandomF();
-
-		ret = true;
+		position += speed * dt;
 	}
 
-	return ret;
+	return is_alive;
 }
 
 int RE_ParticleEmitter::GetNewSpawns(float dt)
