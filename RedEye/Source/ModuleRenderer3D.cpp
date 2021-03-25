@@ -675,10 +675,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		}
 
 		for (auto pS : particleS_lights) {
-			dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(light_pass, "lights", count, 64);
+			dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(light_pass, "lights", count, 92);
 		}
 
-		for (count; count < 64; count++) {
+		for (count; count < 92; count++) {
 			unif_name = "lights[" + eastl::to_string(count) + "].";
 			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "type").c_str()), -1.0f);
 		}

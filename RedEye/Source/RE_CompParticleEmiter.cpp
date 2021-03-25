@@ -238,7 +238,7 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 	for (auto p : *particles) {
 		if (count == maxLights) return;
 		
-		unif_name += array_name + eastl::to_string(count++) + "].";
+		unif_name = array_name + eastl::to_string(count++) + "].";
 
 		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "type").c_str()), float(L_POINT));
 		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "intensity").c_str()), 1.0f);

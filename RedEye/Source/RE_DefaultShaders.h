@@ -238,7 +238,7 @@
 "    float linear;\n"																																\
 "    float quadratic;\n"																															\
 "};\n"																																				\
-"const int NR_LIGHTS = 64;\n"																														\
+"const int NR_LIGHTS = 92;\n"																														\
 "uniform Light lights[NR_LIGHTS];\n"																												\
 "uniform vec3 viewPos;\n"																															\
 "\n"																																				\
