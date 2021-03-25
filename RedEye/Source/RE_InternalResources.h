@@ -49,6 +49,7 @@ private:
 	const char* defLightShader = nullptr;
 
 	const char* particleShader = nullptr;
+	const char* defParticleShader = nullptr;
 
 	const char* waterShader = nullptr;
 	const char* waterDefShader = nullptr;

@@ -639,6 +639,7 @@
 
 #pragma region ParticleShader
 
+#pragma region pNormalShading
 
 #define PARTICLEVERTEXSHADER										\
 "#version 330 core\n"												\
@@ -669,8 +670,62 @@
 "\n"																			\
 "void main()\n"																	\
 "{\n"																			\
-"	color = vec4(1.0,0.0,0.0,1.0);"												\
+"	color = vec4(1.0,1.0,1.0,1.0);"												\
 "}\0"
+
+#pragma endregion pNormalShading
+
+#pragma region pDeffShading
+// Deferred Geo Pass
+#define PARTICLEGEOPASSVERTEXSHADER							\
+"#version 330 core\n"										\
+"layout(location = 0) in vec3 aPos;\n"						\
+"layout(location = 1) in vec3 aNormal;\n"					\
+"layout(location = 4) in vec2 aTexCoord;\n"					\
+"\n"														\
+"out vec3 FragPos;\n"										\
+"out vec2 TexCoord;\n"										\
+"out vec3 Normal;\n"										\
+"\n"														\
+"uniform vec3 normal;\n"									\
+"uniform mat4 model;\n"										\
+"uniform mat4 view;\n"										\
+"uniform mat4 projection;\n"								\
+"\n"														\
+"void main()\n"												\
+"{\n"														\
+"	vec4 worldPos = model * vec4(aPos, 1.0);\n"				\
+"	FragPos = worldPos.xyz;\n"								\
+"	TexCoord = aTexCoord;\n"								\
+"	mat3 normalMatrix = transpose(inverse(mat3(model)));\n"	\
+"	Normal = normalMatrix * aNormal;\n"						\
+"	gl_Position = projection * view * worldPos;\n"			\
+"}\0"
+
+#define PARTICLEGEOPASSFRAGMENTSHADER								\
+"#version 330 core\n"												\
+"layout (location = 0) out vec3 gPosition;\n"						\
+"layout (location = 1) out vec3 gNormal;\n"							\
+"layout (location = 2) out vec3 gAlbedo;\n"							\
+"layout (location = 3) out vec3 gSpec;\n"							\
+"\n"																\
+"in vec3 FragPos;\n"												\
+"in vec2 TexCoord;\n"												\
+"in vec3 Normal;\n"													\
+"\n"																\
+"uniform vec3 cdiffuse;\n"											\
+"uniform float specular;\n"											\
+"uniform float shininess;\n"										\
+"\n"																\
+"void main()\n"														\
+"{\n"																\
+"	gPosition = FragPos;\n"											\
+"	gNormal = normalize(Normal);\n"									\
+"\n"																\
+"	gAlbedo = cdiffuse;\n"										    \
+"	gSpec = vec3(specular, shininess, 1.0);\n"						\
+"}\0"
+#pragma endregion pDeffShading
 
 #pragma endregion ParticleShader
 

@@ -4,6 +4,7 @@
 #include "ModulePhysics.h"
 #include "ModuleRenderer3D.h"
 #include "RE_CameraManager.h"
+#include "RE_ShaderImporter.h"
 #include "RE_ResourceManager.h"
 #include "RE_InternalResources.h"
 #include "RE_Mesh.h"
@@ -74,6 +75,13 @@ void RE_CompParticleEmitter::Draw() const
 			math::float3 roteuler = rotm.ToEulerXYZ();
 			math::float4x4 pMatrix = math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), scale).Transposed();
 			pS->UploadModel(pMatrix.ptr());
+
+			if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED) {
+				RE_ShaderImporter::setFloat(shader, "normal", front);
+				RE_ShaderImporter::setFloat(shader, "cdiffuse", { 1.0f,1.0f,1.0f });
+				RE_ShaderImporter::setFloat(shader, "specular", 2.5f);
+				RE_ShaderImporter::setFloat(shader, "shininess", 16.0f);
+			}
 
 			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 		}

@@ -109,7 +109,14 @@ bool RE_InternalResources::InitShaders()
 	particleS->SetAsInternal(PARTICLEVERTEXSHADER, PARTICLEFRAGMENTSHADER);
 	particleShader = RE_RES->Reference(particleS);
 
-	return defaultShader && defaultScaleShader && skyboxShader && defGeoShader && defLightShader && particleShader;
+	// Deferred Particle
+	RE_Shader* defParticleS = new RE_Shader();
+	defParticleS->SetName("Geo Pass Particle Shader");
+	defParticleS->SetType(Resource_Type::R_SHADER);
+	defParticleS->SetAsInternal(PARTICLEGEOPASSVERTEXSHADER, PARTICLEGEOPASSFRAGMENTSHADER);
+	defParticleShader = RE_RES->Reference(defParticleS);
+
+	return defaultShader && defaultScaleShader && skyboxShader && defGeoShader && defLightShader && particleShader && defParticleShader;
 }
 
 bool RE_InternalResources::InitMaterial()
@@ -202,7 +209,13 @@ const char*	 RE_InternalResources::GetDefaultScaleShader() const { return defaul
 const char*	 RE_InternalResources::GetDefaulMaterial() const { return defaultMaterial; }
 const char*	 RE_InternalResources::GetDefaultSkyBox() const { return defaultSkybox; }
 const char*	 RE_InternalResources::GetLightPassShader() const { return defLightShader; }
-const char* RE_InternalResources::GetParticleShader() const { return particleShader; }
+
+const char* RE_InternalResources::GetParticleShader() const
+{
+	static const char* particleshaders[4] = { particleShader, particleShader, particleShader /* TODO RUB: add shader with light input*/, defParticleShader };
+	return particleshaders[ModuleRenderer3D::GetLightMode()];
+}
+
 const char*	 RE_InternalResources::GetDefaultSkyBoxShader() const { return skyboxShader; }
 unsigned int RE_InternalResources::GetTextureChecker() const { return checkerTexture; }
 unsigned int RE_InternalResources::GetTextureWaterFoam() const { return water_foam_texture; }
