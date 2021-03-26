@@ -222,23 +222,13 @@
 "in vec2 TexCoord;\n"																																\
 "\n"																																				\
 "struct Light {\n"																																	\
-"    float type;\n"																																	\
-"    float intensity;\n"																															\
-"\n"																																				\
-"    vec3 position;\n"																																\
-"    vec3 direction;\n"																																\
-"\n"																																				\
-"    float cutOff;\n"																																\
-"    float outerCutOff;\n"																															\
-"\n"																																				\
-"    vec3 diffuse;\n"																																\
-"    float specular;\n"																																\
-"\n"																																				\
-"    float constant;\n"																																\
-"    float linear;\n"																																\
-"    float quadratic;\n"																															\
+"    vec4 positionType;\n"																															\
+"    vec4 directionIntensity;\n"																													\
+"    vec4 diffuseSpecular;\n"																														\
+"    vec4 clq; //constant linear quadratic\n"																										\
+"    vec4 co; //cutoff outercutoff\n"																												\
 "};\n"																																				\
-"const int NR_LIGHTS = 92;\n"																														\
+"const int NR_LIGHTS = 203;\n"																														\
 "uniform Light lights[NR_LIGHTS];\n"																												\
 "uniform vec3 viewPos;\n"																															\
 "\n"																																				\
@@ -261,56 +251,56 @@
 "	\n"																																				\
 "	for (int i = 0; i < NR_LIGHTS; ++i)\n"				        																					\
 "   {\n"																																			\
-"       if (lights[i].type >= 0)\n"																													\
+"       if (lights[i].positionType.w >= 0)\n"																													\
 "		{\n"																																		\
-"			vec3 lightDir = normalize(lights[i].position - Position);\n"																			\
+"			vec3 lightDir = normalize(lights[i].positionType.xyz - Position);\n"																			\
 "			vec3 specular = vec3(0.0, 0.0, 0.0);\n"																									\
 "			vec3 res_light = vec3(0.0, 0.0, 0.0);\n"																								\
 "			\n"																																		\
-"			if (lights[i].type == 0.0) // DIRECTIONAL_LIGHT\n"																						\
+"			if (lights[i].positionType.w == 0.0) // DIRECTIONAL_LIGHT\n"																						\
 "			{\n"																																	\
-"				vec3 diffuse = lights[i].diffuse * max(dot(Normal, lightDir), 0.0) * Diffuse;\n"													\
+"				vec3 diffuse = lights[i].diffuseSpecular.xyz * max(dot(Normal, lightDir), 0.0) * Diffuse;\n"													\
 "				\n"																																	\
 "				if (dot(Normal, lightDir) > 0.0)\n"																									\
-"					specular = vec3(pow(max(dot(viewDir, reflect(-lightDir, Normal)), 0.0), shininess) * lights[i].specular * Specular);\n"			\
+"					specular = vec3(pow(max(dot(viewDir, reflect(-lightDir, Normal)), 0.0), shininess) * lights[i].diffuseSpecular.w * Specular);\n"			\
 "				\n"																																	\
 "				res_light = diffuse + specular;\n"																									\
 "			}\n"																																	\
-"			else if (lights[i].type == 1.0) // POINT_LIGHT\n"																						\
+"			else if (lights[i].positionType.w == 1.0) // POINT_LIGHT\n"																						\
 "			{\n"																																	\
-"				vec3 diffuse = lights[i].diffuse * max(dot(Normal, lightDir), 0.0) * Diffuse;\n"													\
+"				vec3 diffuse = lights[i].diffuseSpecular.xyz * max(dot(Normal, lightDir), 0.0) * Diffuse;\n"													\
 "				\n"																																	\
 "				if (dot(Normal, lightDir) > 0.0)\n"																									\
-"					specular = vec3(pow(max(dot(viewDir, reflect(-lightDir, Normal)), 0.0), shininess) * lights[i].specular * Specular);\n"			\
+"					specular = vec3(pow(max(dot(viewDir, reflect(-lightDir, Normal)), 0.0), shininess) * lights[i].diffuseSpecular.w * Specular);\n"			\
 "				\n"																																	\
-"				float distance = length(lights[i].position - Position);\n"																			\
-"				float attenuation = 1.0 / (lights[i].constant + lights[i].linear * distance + lights[i].quadratic * (distance * distance));\n"		\
+"				float distance = length(lights[i].positionType.xyz - Position);\n"																			\
+"				float attenuation = 1.0 / (lights[i].clq.x + lights[i].clq.y * distance + lights[i].clq.z * (distance * distance));\n"		\
 "				\n"																																	\
 "				diffuse *= attenuation;\n"																											\
 "				specular *= attenuation;\n"																											\
 "				res_light = diffuse + specular;\n"																									\
 "			}\n"																																	\
-"			else if (lights[i].type == 2.0) // SPOT_LIGHT\n"																						\
+"			else if (lights[i].positionType.w == 2.0) // SPOT_LIGHT\n"																						\
 "			{\n"																																	\
-"				float theta = dot(lightDir, normalize(-lights[i].direction));\n"																	\
-"				if(theta > lights[i].outerCutOff)\n"																								\
+"				float theta = dot(lightDir, normalize(-lights[i].directionIntensity.xyz));\n"																	\
+"				if(theta > lights[i].co.y)\n"																								\
 "				{\n"																																\
-"					vec3 diffuse = lights[i].diffuse * max(dot(Normal, lightDir), 0.0) * Diffuse;\n"												\
+"					vec3 diffuse = lights[i].diffuseSpecular.xyz * max(dot(Normal, lightDir), 0.0) * Diffuse;\n"												\
 "					\n"																																\
 "					if (dot(Normal, lightDir) > 0.0)\n"																								\
-"						specular = vec3(pow(max(dot(viewDir, reflect(-lightDir, Normal)), 0.0), shininess) * lights[i].specular * Specular);\n"		\
+"						specular = vec3(pow(max(dot(viewDir, reflect(-lightDir, Normal)), 0.0), shininess) * lights[i].diffuseSpecular.w * Specular);\n"\
 "					\n"																																\
-"					float smoothness = clamp((theta - lights[i].outerCutOff) / (lights[i].cutOff - lights[i].outerCutOff), 0.0, 1.0);\n"			\
+"					float smoothness = clamp((theta - lights[i].co.y) / (lights[i].co.z - lights[i].co.y), 0.0, 1.0);\n"			\
 "					\n"																																\
-"					float distance = length(lights[i].position - Position);\n"																		\
-"					float attenuation = 1.0 / (lights[i].constant + lights[i].linear * distance + lights[i].quadratic * (distance * distance));\n"	\
+"					float distance = length(lights[i].positionType.xyz - Position);\n"																		\
+"					float attenuation = 1.0 / (lights[i].clq.x + lights[i].clq.y * distance + lights[i].clq.z * (distance * distance));\n"	\
 "					\n"																																\
 "					diffuse *= attenuation * smoothness;\n"																							\
 "					specular *= attenuation * smoothness;\n"																						\
 "					res_light = diffuse + specular;\n"																								\
 "				}\n"																																\
 "			}\n"																																	\
-"			lighting += res_light * lights[i].intensity;\n"																							\
+"			lighting += res_light * lights[i].directionIntensity.w;\n"																							\
 "		}\n"																																		\
 "   }\n"																																			\
 "	aRes = vec4(lighting,opacity);\n"																												\

@@ -240,24 +240,20 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 		
 		unif_name = array_name + eastl::to_string(count++) + "].";
 
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "type").c_str()), float(L_POINT));
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "intensity").c_str()), 1.0f);
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuse").c_str()), lightColor);
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "specular").c_str()), 0.2f);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, 0.2f);
+
 
 		RE_CompTransform* transform = GetGOPtr()->GetTransformPtr();
 		math::float3 partcleGlobalpos = transform->GetGlobalPosition() + p->position;
 		math::float3 front = ModuleRenderer3D::GetCamera()->GetTransform()->GetGlobalPosition() - partcleGlobalpos;
 		front.Normalize();
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "direction").c_str()), front);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "directionIntensity").c_str()), front.x, front.y, front.z, 1.0f);
 
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "position").c_str()), partcleGlobalpos);
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "constant").c_str()), 1.0f);
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "linear").c_str()), 0.091f);
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "quadratic").c_str()), 0.011f);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, float(L_POINT));
 
-		//RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "cutOff").c_str()), cutOff[1]);
-		//RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "outerCutOff").c_str()), outerCutOff[1]);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "clq").c_str()), 1.0f, 0.091f, 0.011f, 0.0f);
+
+		//RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "co").c_str()), cutOff[1], outerCutOff[1], 0.0, 0.0);
 	}
 }
 

@@ -36,29 +36,26 @@ void RE_CompLight::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UI
 
 void RE_CompLight::CallShaderUniforms(unsigned int shader, const char* name) const
 {
+	RE_CompTransform* transform = GetGOPtr()->GetTransformPtr();
 	eastl::string unif_name = name;
 
-	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "type").c_str()), float(type));
-	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "intensity").c_str()), intensity);
-	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuse").c_str()), diffuse);
-	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "specular").c_str()), specular);
+	math::vec f = transform->GetFront();
+	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "directionIntensity").c_str()), f.x, f.y, f.z, intensity);
+	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), diffuse.x, diffuse.y, diffuse.z, specular);
 
-	RE_CompTransform* transform = GetGOPtr()->GetTransformPtr();
-	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "direction").c_str()), transform->GetFront());
 
 	if (type != L_DIRECTIONAL)
 	{
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "position").c_str()), transform->GetGlobalPosition());
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "constant").c_str()), constant);
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "linear").c_str()), linear);
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "quadratic").c_str()), quadratic);
+		math::vec p = transform->GetGlobalPosition();
+
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), p.x, p.y, p.z, float(type));
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "clq").c_str()), constant, linear, quadratic, 0.0f);
 
 		if (type == L_SPOTLIGHT)
-		{
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "cutOff").c_str()), cutOff[1]);
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "outerCutOff").c_str()), outerCutOff[1]);
-		}
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "co").c_str()), cutOff[1], outerCutOff[1], 0.0f, 0.0f);
 	}
+	else
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), 0.0f,0.0f,0.0f, float(type));
 }
 
 void RE_CompLight::DrawProperties()
