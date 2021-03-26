@@ -680,7 +680,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 		for (count; count < 92; count++) {
 			unif_name = "lights[" + eastl::to_string(count) + "].";
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "type").c_str()), -1.0f);
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "positionType").c_str()), 0.0, 0.0, 0.0, -1.0f);
 		}
 
 		// Render Lights
