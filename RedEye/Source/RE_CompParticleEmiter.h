@@ -42,9 +42,10 @@ public:
 private:
 
 	RE_ParticleEmitter* simulation = nullptr;
-
+	
 	bool emitlight = false;
 	math::vec lightColor = math::vec::one;
+	bool particleLColor = false;
 
 	int max_particles = 0;
 	float time_counter = 0.0f;

@@ -153,6 +153,11 @@ void RE_CompParticleEmitter::DrawProperties()
 			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
 			ImGui::Checkbox(emitlight ? "Disable lighting" : "Enable lighting", &emitlight);
 			ImGui::ColorEdit3("Light Color", &lightColor[0]);
+			ImGui::Checkbox(particleLColor ? "Disable single particle lighting" : "Enable single particle lighting", &particleLColor);
+			if (ImGui::Button("Randomize light color")) {
+				eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+				for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
+			}
 		}
 		else
 		{
@@ -220,7 +225,7 @@ void RE_CompParticleEmitter::DeserializeBinary(char*& cursor, eastl::map<int, co
 
 bool RE_CompParticleEmitter::isLighting() const { return emitlight; }
 
-void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights) const
+void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* u_name, unsigned int& count, unsigned int maxLights) const
 {
 	//float cutOff[2]; // cos(radians(12.5f))
 	//float outerCutOff[2]; // cos(radians(17.5f))
@@ -229,9 +234,16 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 	//cutOff[1] = math::Cos(math::DegToRad(cutOff[0]));
 	//outerCutOff[1] = math::Cos(math::DegToRad(outerCutOff[0]));
 
-	eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
 
-	eastl::string array_name(array_unif_name);
+	eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+	RE_CompTransform* transform = GetGOPtr()->GetTransformPtr();
+	math::vec objectPos = transform->GetGlobalPosition();
+
+
+	eastl::string uniform_name("pInfo.tclq");
+	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (uniform_name).c_str()), float(L_POINT), 1.0f, 0.091f, 0.011f);
+
+	eastl::string array_name(u_name);
 	array_name += "[";
 
 	eastl::string unif_name;
@@ -240,20 +252,14 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 		
 		unif_name = array_name + eastl::to_string(count++) + "].";
 
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, 0.2f);
+		if(particleLColor)
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), p->lightColor.x, p->lightColor.y, p->lightColor.z, 0.2f);
+		else
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, 0.2f);
 
+		math::float3 partcleGlobalpos = objectPos + p->position;
 
-		RE_CompTransform* transform = GetGOPtr()->GetTransformPtr();
-		math::float3 partcleGlobalpos = transform->GetGlobalPosition() + p->position;
-		math::float3 front = ModuleRenderer3D::GetCamera()->GetTransform()->GetGlobalPosition() - partcleGlobalpos;
-		front.Normalize();
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "directionIntensity").c_str()), front.x, front.y, front.z, 1.0f);
-
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, float(L_POINT));
-
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "clq").c_str()), 1.0f, 0.091f, 0.011f, 0.0f);
-
-		//RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "co").c_str()), cutOff[1], outerCutOff[1], 0.0, 0.0);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionIntensity").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, 1.0f);
 	}
 }
 

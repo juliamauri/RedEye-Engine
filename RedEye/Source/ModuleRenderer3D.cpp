@@ -674,14 +674,38 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			count++;
 		}
 
-		for (auto pS : particleS_lights) {
-			dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(light_pass, "lights", count, 92);
-		}
-
 		for (count; count < 92; count++) {
 			unif_name = "lights[" + eastl::to_string(count) + "].";
 			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "positionType").c_str()), 0.0, 0.0, 0.0, -1.0f);
 		}
+
+		// Render Lights
+		DrawQuad();
+
+		// Render Particle Lights
+
+				// Setup Shader
+		unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
+		RE_GLCache::ChangeShader(particlelight_pass);
+
+
+		glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
+
+		// Bind Textures
+		static const eastl::string pdeferred_textures[5] = {  "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
+		for (unsigned int count = 0; count < 5; ++count)
+		{
+			glActiveTexture(GL_TEXTURE0 + count);
+			RE_ShaderImporter::setInt(particlelight_pass, pdeferred_textures[count].c_str(), count);
+			RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+		}
+
+		unsigned int pCount = 0;
+		for (auto pS : particleS_lights) {
+			dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(particlelight_pass, "plights", pCount, 510);
+		}
+		unif_name = "pInfo.pCount";
+		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, unif_name.c_str()), pCount);
 
 		// Render Lights
 		DrawQuad();

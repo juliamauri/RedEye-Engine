@@ -102,6 +102,13 @@ bool RE_InternalResources::InitShaders()
 	lightPass->SetAsInternal(LIGHTPASSVERTEXSHADER, LIGHTPASSFRAGMENTSHADER);
 	defLightShader = RE_RES->Reference(lightPass);
 
+	// Particle Light Pass
+	RE_Shader* lightParticlePass = new RE_Shader();
+	lightParticlePass->SetName("Particle Light Pass Shader");
+	lightParticlePass->SetType(Resource_Type::R_SHADER);
+	lightParticlePass->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
+	defParticleLightShader = RE_RES->Reference(lightParticlePass);
+
 	// Particle
 	RE_Shader* particleS = new RE_Shader();
 	particleS->SetName("Particle Shader");
@@ -209,6 +216,8 @@ const char*	 RE_InternalResources::GetDefaultScaleShader() const { return defaul
 const char*	 RE_InternalResources::GetDefaulMaterial() const { return defaultMaterial; }
 const char*	 RE_InternalResources::GetDefaultSkyBox() const { return defaultSkybox; }
 const char*	 RE_InternalResources::GetLightPassShader() const { return defLightShader; }
+
+const char* RE_InternalResources::GetParticleLightPassShader() const { return defParticleLightShader; }
 
 const char* RE_InternalResources::GetParticleShader() const
 {
