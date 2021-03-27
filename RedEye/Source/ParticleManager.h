@@ -11,6 +11,9 @@ struct RE_Particle
 
 	math::vec position = math::vec::zero;
 	math::vec speed = math::vec::zero;
+	math::vec lightColor = math::vec::one;
+	float intensity = 1.0f;
+	float specular = .2f;
 
 	float lifetime = 0.0f;
 	float max_lifetime = 15.0f;

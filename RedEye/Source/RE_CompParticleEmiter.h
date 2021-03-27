@@ -45,7 +45,14 @@ private:
 	
 	bool emitlight = false;
 	math::vec lightColor = math::vec::one;
+	float specular = 0.2f;
 	bool particleLColor = false;
+
+	// Attenuattion
+	float intensity = 1.0f;
+	float constant = 1.0f;
+	float linear = 0.091f;
+	float quadratic = 0.011f;
 
 	int max_particles = 0;
 	float time_counter = 0.0f;

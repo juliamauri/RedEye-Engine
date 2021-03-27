@@ -153,10 +153,48 @@ void RE_CompParticleEmitter::DrawProperties()
 			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
 			ImGui::Checkbox(emitlight ? "Disable lighting" : "Enable lighting", &emitlight);
 			ImGui::ColorEdit3("Light Color", &lightColor[0]);
+			if (particleLColor) {
+				if (ImGui::Button("Set particles light color")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->lightColor = lightColor;
+				}
+			}
+			ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f");
+			if (particleLColor) {
+				if (ImGui::Button("Set particles specular")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->specular = specular;
+				}
+			}
+			ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f");
+			if (particleLColor) {
+				if (ImGui::Button("Set particles intensity")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->intensity = intensity;
+				}
+			}
+			ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f");
+			ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f");
+			ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
+			ImGui::Separator();
 			ImGui::Checkbox(particleLColor ? "Disable single particle lighting" : "Enable single particle lighting", &particleLColor);
-			if (ImGui::Button("Randomize light color")) {
-				eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-				for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
+			if (particleLColor) {
+				if (ImGui::Button("Randomize light color")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
+				}
+				static float sClamp[2] = { 0.f, 1.f };
+				ImGui::DragFloat2("Specular min-max", sClamp, 0.005f, 0.0f, 1.0f);
+				if (ImGui::Button("Randomize Specular")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->specular = RE_MATH->RandomF(sClamp[0], sClamp[1]);
+				}
+				static float iClamp[2] = { 0.0f, 50.0f };
+				ImGui::DragFloat2("Intensity min-max", iClamp, 0.1f, 0.0f, 50.0f);
+				if (ImGui::Button("Randomize intensity")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->intensity = RE_MATH->RandomF(iClamp[0], iClamp[1]);
+				}
 			}
 		}
 		else
@@ -166,33 +204,33 @@ void RE_CompParticleEmitter::DrawProperties()
 
 		ImGui::Separator();
 
-		ImGui::SliderFloat("Emissor Life", &emissor_life, -1.0f, 10.0f, "%.2f");
-		ImGui::Separator();
-
-		ImGui::SliderFloat("Emission Rate", &emissionRate, 0.0f, 20.f, "%.2f");
-		float ps[3] = { spawn_position_offset.x, spawn_position_offset.y, spawn_position_offset.z };
-		if (ImGui::DragFloat3("Spawn Position Offset", ps, 0.1f, -10000.f, 10000.f, "%.2f"))
-			spawn_position_offset.Set(ps[0], ps[1], ps[2]);
-		float gp[3] = { gravity.x, gravity.y, gravity.z };
-		if (ImGui::DragFloat3("Gravity", gp, 0.1f, -10000.f, 10000.f, "%.2f"))
-			gravity.Set(gp[0], gp[1], gp[2]);
-		ImGui::Checkbox("Local Emission", &local_emission);
-		ImGui::Separator();
-
-		ImGui::SliderFloat("Lifetime", &lifetime, 0.0f, 10.0f, "%.2f");
-		ImGui::SliderFloat("Initial Speed", &initial_speed, 0.0f, 10.0f, "%.2f");
-		ImGui::Separator();
-
-		float am[3] = { math::RadToDeg(direction_margin.x), math::RadToDeg(direction_margin.y), math::RadToDeg(direction_margin.z) };
-		if (ImGui::DragFloat3("Direction Margin", am, 0.1f, 0.f, 180.f, "%.2f"))
-			direction_margin.Set(math::DegToRad(am[0]), math::DegToRad(am[1]), math::DegToRad(am[2]));
-		ImGui::SliderFloat("Speed Margin", &speed_margin, 0.0f, 10.0f, "%.2f");
-		ImGui::SliderFloat("Lifetime Margin", &lifetime_margin, 0.0f, 10.0f, "%.2f");
-		ImGui::Separator();
-
-		float rgba[3] = { rgb_alpha.x, rgb_alpha.y, rgb_alpha.z };
-		if (ImGui::DragFloat3("RGB Alpha", rgba, 0.1f, 0.0f, 255.0f, "%.2f"))
-			rgb_alpha.Set(rgba[0], rgba[1], rgba[2]);
+		//ImGui::SliderFloat("Emissor Life", &emissor_life, -1.0f, 10.0f, "%.2f");
+		//ImGui::Separator();
+		//
+		//ImGui::SliderFloat("Emission Rate", &emissionRate, 0.0f, 20.f, "%.2f");
+		//float ps[3] = { spawn_position_offset.x, spawn_position_offset.y, spawn_position_offset.z };
+		//if (ImGui::DragFloat3("Spawn Position Offset", ps, 0.1f, -10000.f, 10000.f, "%.2f"))
+		//	spawn_position_offset.Set(ps[0], ps[1], ps[2]);
+		//float gp[3] = { gravity.x, gravity.y, gravity.z };
+		//if (ImGui::DragFloat3("Gravity", gp, 0.1f, -10000.f, 10000.f, "%.2f"))
+		//	gravity.Set(gp[0], gp[1], gp[2]);
+		//ImGui::Checkbox("Local Emission", &local_emission);
+		//ImGui::Separator();
+		//
+		//ImGui::SliderFloat("Lifetime", &lifetime, 0.0f, 10.0f, "%.2f");
+		//ImGui::SliderFloat("Initial Speed", &initial_speed, 0.0f, 10.0f, "%.2f");
+		//ImGui::Separator();
+		//
+		//float am[3] = { math::RadToDeg(direction_margin.x), math::RadToDeg(direction_margin.y), math::RadToDeg(direction_margin.z) };
+		//if (ImGui::DragFloat3("Direction Margin", am, 0.1f, 0.f, 180.f, "%.2f"))
+		//	direction_margin.Set(math::DegToRad(am[0]), math::DegToRad(am[1]), math::DegToRad(am[2]));
+		//ImGui::SliderFloat("Speed Margin", &speed_margin, 0.0f, 10.0f, "%.2f");
+		//ImGui::SliderFloat("Lifetime Margin", &lifetime_margin, 0.0f, 10.0f, "%.2f");
+		//ImGui::Separator();
+		//
+		//float rgba[3] = { rgb_alpha.x, rgb_alpha.y, rgb_alpha.z };
+		//if (ImGui::DragFloat3("RGB Alpha", rgba, 0.1f, 0.0f, 255.0f, "%.2f"))
+		//	rgb_alpha.Set(rgba[0], rgba[1], rgba[2]);
 
 		//if (mParticle)
 		//{
@@ -245,7 +283,7 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 
 	if (!sharedLight) {
 		eastl::string uniform_name("pInfo.tclq");
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (uniform_name).c_str()), float(L_POINT), 1.0f, 0.091f, 0.011f);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (uniform_name).c_str()), float(L_POINT), constant, linear, quadratic);
 
 
 		for (auto p : *particles) {
@@ -254,14 +292,12 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 			unif_name = array_name + eastl::to_string(count++) + "].";
 			
 			if (particleLColor)
-				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), p->lightColor.x, p->lightColor.y, p->lightColor.z, 0.2f);
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), p->lightColor.x, p->lightColor.y, p->lightColor.z, p->specular);
 			else
-				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, 0.2f);
-
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, specular);
 
 			math::float3 partcleGlobalpos = objectPos + p->position;
-
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionIntensity").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, 1.0f);
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionIntensity").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, particleLColor ? p->intensity : intensity);
 		}
 	}
 	else
@@ -272,13 +308,13 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 			unif_name = array_name + eastl::to_string(count++) + "].";
 
 			//math::vec f = transform->GetFront();
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "directionIntensity").c_str()),0.0,0.0,0.0, 1.0);
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "directionIntensity").c_str()),0.0,0.0,0.0, particleLColor ? p->intensity : intensity);
 
 
 			if (particleLColor)
-				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), p->lightColor.x, p->lightColor.y, p->lightColor.z, 0.2f);
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), p->lightColor.x, p->lightColor.y, p->lightColor.z, p->specular);
 			else
-				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, 0.2f);
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, specular);
 
 
 			//if (L_POINT != L_DIRECTIONAL)
@@ -286,7 +322,7 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 				math::float3 partcleGlobalpos = objectPos + p->position;
 
 				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, float(L_POINT));
-				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "clq").c_str()), 1.0f, 0.091f, 0.011f, 0.0f);
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "clq").c_str()), constant, linear, quadratic, 0.0f);
 
 				//if (type == L_SPOTLIGHT)
 				//	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "co").c_str()), cutOff[1], outerCutOff[1], 0.0f, 0.0f);
