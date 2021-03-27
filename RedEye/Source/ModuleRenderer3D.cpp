@@ -30,6 +30,8 @@
 #include "RE_Model.h"
 #include "RE_Material.h"
 
+#include "RE_DefaultShaders.h"
+
 #include "MathGeoLib/include/Math/float3.h"
 #include "MathGeoLib/include/Math/Quat.h"
 #include "ImGuizmo/ImGuizmo.h"
@@ -89,6 +91,17 @@ bool ModuleRenderer3D::Init()
 		if (ret = (error == GLEW_OK))
 		{
 			RE_SOFT_NVS("Glew", reinterpret_cast<const char*>(glewGetString(GLEW_VERSION)), "http://glew.sourceforge.net/");
+
+			int test;
+			glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &test);
+			glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_BLOCKS, &test);
+			glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &test);
+			glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &test);
+			glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &test);
+			glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &test);
+			glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &test);
+			glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS, &test);
+
 
 			render_views.push_back(RenderView("Scene", { 0, 0 },
 				FRUSTUM_CULLING | OVERRIDE_CULLING | OUTLINE_SELECTION /*| DEBUG_DRAW*/ | SKYBOX | BLENDED |
@@ -361,6 +374,12 @@ void ModuleRenderer3D::DrawEditor()
 	{
 		if (ImGui::Checkbox((vsync) ? "VSync Enabled" : "VSync Disabled", &vsync))
 			SetVSync(vsync);
+		if (ImGui::Checkbox(shareLightPass ? "Not share light pass" : "Share Light pass", &shareLightPass)) {
+			if (shareLightPass)
+				RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader())->UnloadMemory();
+			else
+				dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
+		}
 
 		for (unsigned int i = 0; i < render_views.size(); ++i)
 		{
@@ -663,60 +682,101 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 		glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
 
-		// Bind Textures
-		static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
-		for (unsigned int count = 0; count < 4; ++count)
+		if (!shareLightPass) 
 		{
-			glActiveTexture(GL_TEXTURE0 + count);
-			RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
-			RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+
+			// Bind Textures
+			static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
+			for (unsigned int count = 0; count < 4; ++count)
+			{
+				glActiveTexture(GL_TEXTURE0 + count);
+				RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
+				RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+			}
+
+			// Setup Light Uniforms
+			unsigned int count = 0;
+
+			eastl::string unif_name;
+			for (auto l : scene_lights) {
+				unif_name = "lights[" + eastl::to_string(count) + "].";
+				dynamic_cast<RE_CompLight*>(l)->CallShaderUniforms(light_pass, unif_name.c_str());
+				count++;
+				if (count == 203) break;
+			}
+			lightsCount = count;
+
+			unif_name = "count";
+			RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, unif_name.c_str()), count);
+
+
+			// Render Lights
+			DrawQuad();
+
+			// Render Particle Lights
+
+			// Setup Shader
+			unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
+			RE_GLCache::ChangeShader(particlelight_pass);
+
+			// Bind Textures
+			static const eastl::string pdeferred_textures[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
+			for (unsigned int count = 0; count < 5; ++count)
+			{
+				glActiveTexture(GL_TEXTURE0 + count);
+				RE_ShaderImporter::setInt(particlelight_pass, pdeferred_textures[count].c_str(), count);
+				RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+			}
+
+			unsigned int pCount = 0;
+			for (auto pS : particleS_lights) {
+				dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(particlelight_pass, "plights", pCount, 508, shareLightPass);
+			}
+			particlelightsCount = pCount;
+
+			unif_name = "pInfo.pCount";
+			RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, unif_name.c_str()), pCount);
+
+			// Render Lights
+			DrawQuad();
 		}
-
-		// Setup Light Uniforms
-		unsigned int count = 0;
-
-		eastl::string unif_name;
-		for (auto l : scene_lights) {
-			unif_name = "lights[" + eastl::to_string(count) + "].";
-			dynamic_cast<RE_CompLight*>(l)->CallShaderUniforms(light_pass, unif_name.c_str());
-			count++;
-			if (count == 203) break;
-		}
-		lightsCount = count;
-
-		unif_name = "count";
-		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, unif_name.c_str()), count);
-
-
-		// Render Lights
-		DrawQuad();
-
-		// Render Particle Lights
-
-		// Setup Shader
-		unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
-		RE_GLCache::ChangeShader(particlelight_pass);
-
-		// Bind Textures
-		static const eastl::string pdeferred_textures[5] = {  "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
-		for (unsigned int count = 0; count < 5; ++count)
+		else
 		{
-			glActiveTexture(GL_TEXTURE0 + count);
-			RE_ShaderImporter::setInt(particlelight_pass, pdeferred_textures[count].c_str(), count);
-			RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+			// Bind Textures
+			static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
+			for (unsigned int count = 0; count < 4; ++count)
+			{
+				glActiveTexture(GL_TEXTURE0 + count);
+				RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
+				RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+			}
+
+			// Setup Light Uniforms
+			unsigned int count = 0;
+
+			eastl::string unif_name;
+			for (auto l : scene_lights) {
+				unif_name = "lights[" + eastl::to_string(count) + "].";
+				dynamic_cast<RE_CompLight*>(l)->CallShaderUniforms(light_pass, unif_name.c_str());
+				count++;
+				if (count == 203) break;
+			}
+			lightsCount = count;
+
+			unif_name = "lights";
+			for (auto pS : particleS_lights) {
+				dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(light_pass, unif_name.c_str(), count, 203, shareLightPass);
+			}
+
+			particlelightsCount = static_cast<unsigned int>(math::Clamp(static_cast<int>(count) - static_cast<int>(lightsCount), 0, 203));
+
+			unif_name = "count";
+			RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, unif_name.c_str()), count);
+
+			// Render Lights
+			DrawQuad();
 		}
 
-		unsigned int pCount = 0;
-		for (auto pS : particleS_lights) {
-			dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(particlelight_pass, "plights", pCount, 510);
-		}
-		particlelightsCount = pCount;
-
-		unif_name = "pInfo.pCount";
-		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, unif_name.c_str()), pCount);
-
-		// Render Lights
-		DrawQuad();
 
 		if (render_view.flags & DEPTH_TEST)
 			SetDepthTest(true);
@@ -1085,10 +1145,11 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	glEnd();
 }
 
-void ModuleRenderer3D::GetCurrentLightsCount(unsigned int& lightC, unsigned int& pLightC)
+void ModuleRenderer3D::GetCurrentLightsCount(unsigned int& lightC, unsigned int& pLightC, bool& sharedLP)
 {
 	lightC = lightsCount;
 	pLightC = particlelightsCount;
+	sharedLP = shareLightPass;
 }
 
 RenderView::RenderView(eastl::string name, eastl::pair<unsigned int, unsigned int> fbos, short flags, LightMode light, math::float4 clipDistance) :

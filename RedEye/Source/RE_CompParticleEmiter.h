@@ -37,7 +37,7 @@ public:
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
 	bool isLighting() const;
-	void CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights) const;
+	void CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
 
 private:
 

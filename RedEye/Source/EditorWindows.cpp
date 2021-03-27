@@ -1484,9 +1484,19 @@ void RendererDebugWindow::Draw(bool secondary)
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
 		unsigned int lightC, pLightC;
-		RE_RENDER->GetCurrentLightsCount(lightC, pLightC);
-		ImGui::Text("Lights: %u:203", lightC);
-		ImGui::Text("Particle Lights: %u:508", pLightC);
+		bool sharedL;
+		RE_RENDER->GetCurrentLightsCount(lightC, pLightC, sharedL);
+		if (sharedL) {
+			ImGui::Text("Total Lights: %u:203", lightC + pLightC);
+			ImGui::Text("From lights components: %u", lightC);
+			ImGui::Text("From particles: %u", pLightC);
+
+		}
+		else
+		{
+			ImGui::Text("Lights components: %u:203", lightC);
+			ImGui::Text("Particle Lights: %u:508", pLightC);
+		}
 	}
 	ImGui::End();
 }

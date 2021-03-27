@@ -225,7 +225,7 @@ void RE_CompParticleEmitter::DeserializeBinary(char*& cursor, eastl::map<int, co
 
 bool RE_CompParticleEmitter::isLighting() const { return emitlight; }
 
-void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* u_name, unsigned int& count, unsigned int maxLights) const
+void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* u_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
 {
 	//float cutOff[2]; // cos(radians(12.5f))
 	//float outerCutOff[2]; // cos(radians(17.5f))
@@ -239,27 +239,62 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 	RE_CompTransform* transform = GetGOPtr()->GetTransformPtr();
 	math::vec objectPos = transform->GetGlobalPosition();
 
-
-	eastl::string uniform_name("pInfo.tclq");
-	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (uniform_name).c_str()), float(L_POINT), 1.0f, 0.091f, 0.011f);
-
 	eastl::string array_name(u_name);
 	array_name += "[";
-
 	eastl::string unif_name;
-	for (auto p : *particles) {
-		if (count == maxLights) return;
-		
-		unif_name = array_name + eastl::to_string(count++) + "].";
 
-		if(particleLColor)
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), p->lightColor.x, p->lightColor.y, p->lightColor.z, 0.2f);
-		else
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, 0.2f);
+	if (!sharedLight) {
+		eastl::string uniform_name("pInfo.tclq");
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (uniform_name).c_str()), float(L_POINT), 1.0f, 0.091f, 0.011f);
 
-		math::float3 partcleGlobalpos = objectPos + p->position;
 
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionIntensity").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, 1.0f);
+		for (auto p : *particles) {
+			if (count == maxLights) return;
+
+			unif_name = array_name + eastl::to_string(count++) + "].";
+			
+			if (particleLColor)
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), p->lightColor.x, p->lightColor.y, p->lightColor.z, 0.2f);
+			else
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, 0.2f);
+
+
+			math::float3 partcleGlobalpos = objectPos + p->position;
+
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionIntensity").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, 1.0f);
+		}
+	}
+	else
+	{
+		for (auto p : *particles) {
+			if (count == maxLights) return;
+
+			unif_name = array_name + eastl::to_string(count++) + "].";
+
+			//math::vec f = transform->GetFront();
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "directionIntensity").c_str()),0.0,0.0,0.0, 1.0);
+
+
+			if (particleLColor)
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), p->lightColor.x, p->lightColor.y, p->lightColor.z, 0.2f);
+			else
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, 0.2f);
+
+
+			//if (L_POINT != L_DIRECTIONAL)
+			//{
+				math::float3 partcleGlobalpos = objectPos + p->position;
+
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, float(L_POINT));
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "clq").c_str()), 1.0f, 0.091f, 0.011f, 0.0f);
+
+				//if (type == L_SPOTLIGHT)
+				//	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "co").c_str()), cutOff[1], outerCutOff[1], 0.0f, 0.0f);
+			//}
+			//else
+			//	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), 0.0f, 0.0f, 0.0f, float(type));
+		}
+
 	}
 }
 

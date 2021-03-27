@@ -104,7 +104,7 @@ public:
 	void PushThumnailRend(const char* md5, bool redo = false);
 
 	//Get Render Debug
-	void GetCurrentLightsCount(unsigned int& lightC, unsigned int& pLightC);
+	void GetCurrentLightsCount(unsigned int& lightC, unsigned int& pLightC, bool& sharedLP);
 
 
 	enum RenderType {
@@ -183,6 +183,9 @@ private:
 	//Debug info
 	unsigned int lightsCount = 0;
 	unsigned int particlelightsCount = 0;
+
+	// Light pass render
+	bool shareLightPass = false;
 
 };
 
