@@ -103,6 +103,10 @@ public:
 	void PushSceneRend(RenderView& rV);
 	void PushThumnailRend(const char* md5, bool redo = false);
 
+	//Get Render Debug
+	void GetCurrentLightsCount(unsigned int& lightC, unsigned int& pLightC);
+
+
 	enum RenderType {
 		R_R_SCENE,
 		T_R_GO,
@@ -141,6 +145,7 @@ private:
 	void DrawQuad();
 	void DirectDrawCube(math::vec position, math::vec color);
 
+
 public:
 
 	RE_FBOManager* fbos = nullptr;
@@ -174,6 +179,11 @@ private:
 	//Thumbnail values
 	RenderView thumbnailView;
 	unsigned int mat_vao = 0, mat_vbo = 0, mat_ebo = 0, mat_triangles = 0;
+
+	//Debug info
+	unsigned int lightsCount = 0;
+	unsigned int particlelightsCount = 0;
+
 };
 
 #endif // !__MODULERENDER3D_H__

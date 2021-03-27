@@ -566,6 +566,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 	// Setup Lights
 	eastl::vector<RE_Component*> scene_lights;
+	eastl::vector<RE_Component*> particleS_lights;
+
 	switch (render_view.light)
 	{
 	case LIGHT_DISABLED:
@@ -577,7 +579,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	{
 		SetLighting(true);
 		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(C_LIGHT);
-
+		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(C_PARTICLEEMITER);
+		for(auto ps: tmp)
+			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->isLighting())
+				particleS_lights.push_back(ps);
 		// TODO RUB: Bind GL Lights
 
 		break;
@@ -586,7 +591,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	{
 		SetLighting(false);
 		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(C_LIGHT);
-
+		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(C_PARTICLEEMITER);
+		for (auto ps : tmp)
+			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->isLighting())
+				particleS_lights.push_back(ps);
 		// TODO RUB: Upload Light uniforms
 
 		break;
@@ -595,6 +603,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	{
 		SetLighting(false);
 		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(C_LIGHT);
+		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(C_PARTICLEEMITER);
+		for (auto ps : tmp)
+			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->isLighting())
+				particleS_lights.push_back(ps);
 		break;
 	}
 	}
@@ -623,16 +635,12 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	// Deferred Light Pass
 	if (render_view.light == LIGHT_DEFERRED)
 	{
-		eastl::vector<RE_Component*> particleS_lights;
 		// Particle System Draws
 		if (!particleSystems.empty())
 		{
 			while (!particleSystems.empty())
 			{
-				RE_Component* drawPS = particleSystems.top();
-				if (dynamic_cast<RE_CompParticleEmitter*>(drawPS)->isLighting())
-					particleS_lights.push_back(drawPS);
-				drawPS->Draw();
+				particleSystems.top()->Draw();
 				particleSystems.pop();
 			}
 		}
@@ -672,24 +680,22 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			unif_name = "lights[" + eastl::to_string(count) + "].";
 			dynamic_cast<RE_CompLight*>(l)->CallShaderUniforms(light_pass, unif_name.c_str());
 			count++;
+			if (count == 203) break;
 		}
+		lightsCount = count;
 
-		for (count; count < 92; count++) {
-			unif_name = "lights[" + eastl::to_string(count) + "].";
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(light_pass, (unif_name + "positionType").c_str()), 0.0, 0.0, 0.0, -1.0f);
-		}
+		unif_name = "count";
+		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, unif_name.c_str()), count);
+
 
 		// Render Lights
 		DrawQuad();
 
 		// Render Particle Lights
 
-				// Setup Shader
+		// Setup Shader
 		unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
 		RE_GLCache::ChangeShader(particlelight_pass);
-
-
-		glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
 
 		// Bind Textures
 		static const eastl::string pdeferred_textures[5] = {  "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
@@ -704,6 +710,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		for (auto pS : particleS_lights) {
 			dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(particlelight_pass, "plights", pCount, 510);
 		}
+		particlelightsCount = pCount;
+
 		unif_name = "pInfo.pCount";
 		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, unif_name.c_str()), pCount);
 
@@ -1075,6 +1083,12 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	glVertex3f(-1.0f, 1.0f, 1.0f);
 	glVertex3f(- 1.0f, 1.0f, -1.0f);
 	glEnd();
+}
+
+void ModuleRenderer3D::GetCurrentLightsCount(unsigned int& lightC, unsigned int& pLightC)
+{
+	lightC = lightsCount;
+	pLightC = particlelightsCount;
 }
 
 RenderView::RenderView(eastl::string name, eastl::pair<unsigned int, unsigned int> fbos, short flags, LightMode light, math::float4 clipDistance) :

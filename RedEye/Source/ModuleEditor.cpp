@@ -113,6 +113,7 @@ bool ModuleEditor::Init()
 
 			tools.push_back(rng = new RandomTest());
 			tools.push_back(transDebInfo = new TransformDebugWindow());
+			tools.push_back(rendDebInfo = new RendererDebugWindow());
 			
 			ret = true;
 		}

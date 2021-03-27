@@ -1475,3 +1475,18 @@ void TransformDebugWindow::Draw(bool secondary)
 	}
 	ImGui::End();
 }
+
+RendererDebugWindow::RendererDebugWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
+RendererDebugWindow::~RendererDebugWindow() { }
+
+void RendererDebugWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		unsigned int lightC, pLightC;
+		RE_RENDER->GetCurrentLightsCount(lightC, pLightC);
+		ImGui::Text("Lights: %u:203", lightC);
+		ImGui::Text("Particle Lights: %u:508", pLightC);
+	}
+	ImGui::End();
+}

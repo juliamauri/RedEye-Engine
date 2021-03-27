@@ -230,6 +230,7 @@
 "};\n"																																				\
 "const int NR_LIGHTS = 203;\n"																														\
 "uniform Light lights[NR_LIGHTS];\n"																												\
+"uniform int count;\n"																															\
 "uniform vec3 viewPos;\n"																															\
 "\n"																																				\
 "uniform sampler2D gPosition;\n"																													\
@@ -300,12 +301,9 @@
 "   vec3 lighting = vec3(0.0, 0.0, 0.0);\n"				    																						\
 "	vec3 viewDir = normalize(viewPos - Position);\n"																								\
 "	\n"																																				\
-"	for (int i = 0; i < NR_LIGHTS; ++i)\n"				        																					\
+"	for (int i = 0; i < count; ++i)\n"				        																					\
 "   {\n"																																			\
-"       if (lights[i].positionType.w >= 0)\n"																													\
-"		{\n"																																		\
-"			lighting += calculateLight(lights[i].positionType.w, viewDir, Position, lights[i].positionType.xyz, Normal, Diffuse, lights[i].diffuseSpecular.xyz, shininess, Specular, lights[i].diffuseSpecular.w, lights[i].directionIntensity.w, lights[i].clq.x, lights[i].clq.y, lights[i].clq.z, lights[i].directionIntensity.xyz, lights[i].co.x, lights[i].co.y);\n"																							\
-"		}\n"																																		\
+"		lighting += calculateLight(lights[i].positionType.w, viewDir, Position, lights[i].positionType.xyz, Normal, Diffuse, lights[i].diffuseSpecular.xyz, shininess, Specular, lights[i].diffuseSpecular.w, lights[i].directionIntensity.w, lights[i].clq.x, lights[i].clq.y, lights[i].clq.z, lights[i].directionIntensity.xyz, lights[i].co.x, lights[i].co.y);\n"																							\
 "   }\n"																																			\
 "	aRes = vec4(lighting,opacity);\n"																												\
 "}\0"
@@ -400,10 +398,7 @@
 "	\n"																																				\
 "	for (int i = 0; i < pInfo.pCount; ++i)\n"				        																					\
 "   {\n"																																			\
-"       if (pInfo.tclq.x >= 0)\n"																													\
-"		{\n"																																		\
-"			lighting += calculateLight(pInfo.tclq.x, viewDir, Position, plights[i].positionIntensity.xyz, Normal, Diffuse, plights[i].diffuseSpecular.xyz, shininess, Specular, plights[i].diffuseSpecular.w, plights[i].positionIntensity.w, pInfo.tclq.y, pInfo.tclq.z, pInfo.tclq.w, lighting, 0.0, 0.0);\n"																							\
-"		}\n"																																		\
+"		lighting += calculateLight(pInfo.tclq.x, viewDir, Position, plights[i].positionIntensity.xyz, Normal, Diffuse, plights[i].diffuseSpecular.xyz, shininess, Specular, plights[i].diffuseSpecular.w, plights[i].positionIntensity.w, pInfo.tclq.y, pInfo.tclq.z, pInfo.tclq.w, lighting, 0.0, 0.0);\n"																							\
 "   }\n"																																			\
 "	aRes = vec4(lighting,opacity);\n"																												\
 "}\0"

@@ -32,6 +32,7 @@ class WaterPlaneResourceWindow;
 class SceneEditorWindow;
 class SceneGameWindow;
 class TransformDebugWindow;
+class RendererDebugWindow;
 
 class ModuleEditor : public Module
 {
@@ -123,6 +124,7 @@ private:
 
 	//Debug info
 	TransformDebugWindow* transDebInfo = nullptr;
+	RendererDebugWindow* rendDebInfo = nullptr;
 
 	// Camera Controls
 	bool select_on_mc = true;

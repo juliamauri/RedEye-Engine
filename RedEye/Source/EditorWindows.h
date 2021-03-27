@@ -379,4 +379,14 @@ private:
 	void Draw(bool secondary = false) override;
 };
 
+class RendererDebugWindow : public EditorWindow
+{
+public:
+	RendererDebugWindow(const char* name = "Renderer Debug Info", bool start_active = true);
+	~RendererDebugWindow();
+
+private:
+	void Draw(bool secondary = false) override;
+};
+
 #endif // !__EDITORWINDOWS__
