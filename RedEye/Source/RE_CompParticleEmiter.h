@@ -54,6 +54,8 @@ private:
 	float linear = 0.091f;
 	float quadratic = 0.011f;
 
+	const char* meshMD5 = nullptr;
+
 	int max_particles = 0;
 	float time_counter = 0.0f;
 	float spawn_counter = 0.0f;

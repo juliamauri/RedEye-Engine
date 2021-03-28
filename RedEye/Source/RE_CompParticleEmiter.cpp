@@ -42,8 +42,6 @@ void RE_CompParticleEmitter::Draw() const
 		eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
 		unsigned int shader = pS->GetID();
 		RE_GLCache::ChangeShader(shader);
-		RE_GLCache::ChangeVAO(VAO);
-
 		
 		RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
 		math::float3 goPosition = transform->GetGlobalPosition();
@@ -83,7 +81,12 @@ void RE_CompParticleEmitter::Draw() const
 				RE_ShaderImporter::setFloat(shader, "shininess", 16.0f);
 			}
 
-			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+			if (meshMD5)
+				dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5))->DrawMesh(shader);
+			else {
+				RE_GLCache::ChangeVAO(VAO);
+				glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+			}
 		}
 	}
 }
@@ -196,6 +199,49 @@ void RE_CompParticleEmitter::DrawProperties()
 					for (auto p : *particles) p->intensity = RE_MATH->RandomF(iClamp[0], iClamp[1]);
 				}
 			}
+
+			ImGui::Separator();
+
+			if (meshMD5)
+			{
+				if (ImGui::Button(eastl::string("Resource Mesh").c_str()))
+					RE_RES->PushSelected(meshMD5, true);
+			}
+			else ImGui::TextWrapped("Empty Mesh Component");
+
+			if (ImGui::BeginMenu("Change mesh"))
+			{
+				eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(Resource_Type::R_MESH);
+				bool none = true;
+				unsigned int count = 0;
+				for (auto m : meshes)
+				{
+					if (m->isInternal()) continue;
+
+					none = false;
+					eastl::string name = eastl::to_string(count++) + m->GetName();
+					if (ImGui::MenuItem(name.c_str()))
+					{
+						if (meshMD5) RE_RES->UnUse(meshMD5);
+						meshMD5 = m->GetMD5();
+						if (meshMD5) RE_RES->Use(meshMD5);
+					}
+				}
+				if (none) ImGui::Text("No custom materials on assets");
+
+				ImGui::EndMenu();
+			}
+
+			//if (ImGui::BeginDragDropTarget())
+			//{
+			//	if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#ModelReference"))
+			//	{
+			//		if (meshMD5) RE_RES->UnUse(meshMD5);
+			//		meshMD5 = *static_cast<const char**>(dropped->Data);
+			//		if (meshMD5) RE_RES->Use(meshMD5);
+			//	}
+			//	ImGui::EndDragDropTarget();
+			//}
 		}
 		else
 		{
