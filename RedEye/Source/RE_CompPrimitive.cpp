@@ -36,33 +36,15 @@ bool RE_CompPrimitive::CheckFaceCollision(const math::Ray& ray, float& distance)
 	return false;
 }
 
-void RE_CompPrimitive::DeleteBuffers()
-{
-	if (VAO)
-	{
-		glDeleteVertexArrays(1, static_cast<GLuint*>(&VAO));
-		VAO = 0;
-	}
-	if (VBO)
-	{
-		glDeleteBuffers(1, static_cast<GLuint*>(&VBO));
-		VBO = 0;
-	}
-	if (EBO)
-	{
-		glDeleteBuffers(1, static_cast<GLuint*>(&EBO));
-		EBO = 0;
-	}
-}
-
 void RE_CompPrimitive::SetColor(float r, float g, float b) { color.Set(r, g, b); }
 void RE_CompPrimitive::SetColor(math::vec nColor) { color = nColor; }
 unsigned int RE_CompPrimitive::GetVAO() const { return VAO; }
-void RE_CompPrimitive::SetVAO(unsigned int vao) { VAO = vao; }
 unsigned int RE_CompPrimitive::GetTriangleCount() const { return triangle_count; }
 
+void RE_CompPrimitive::UnUseResources() { RE_SCENE->primitives->UnUsePrimitive(type, primID); }
+
 ///////   Grid   ////////////////////////////////////////////
-RE_CompGrid::~RE_CompGrid() { DeleteBuffers(); }
+RE_CompGrid::~RE_CompGrid() { }
 
 void RE_CompGrid::GridSetUp(int newD)
 {
@@ -73,56 +55,11 @@ void RE_CompGrid::GridSetUp(int newD)
 
 	if (newD < 0) newD = 10;
 	
-	if (VAO) DeleteBuffers();
-
 	tmpSb = divisions = newD;
 
-	eastl::vector<float> vertices;
-	float d = static_cast<float>(divisions);
-	float distance = d * 2.5f;
-	float f = 0.f;
-	for (; f < d; f += 0.5f)
-	{
-		vertices.push_back((f * 5.f) - distance);
-		vertices.push_back(0.f);
-		vertices.push_back(distance);
-		vertices.push_back((f * 5.f) - distance);
-		vertices.push_back(0.f);
-		vertices.push_back(-distance);
-		vertices.push_back(distance);
-		vertices.push_back(0.f);
-		vertices.push_back((f * 5.f) - distance);
-		vertices.push_back(-distance);
-		vertices.push_back(0.f);
-		vertices.push_back((f * 5.f) - distance);
-	}
-
-	vertices.push_back((f * 5.f) - distance);
-	vertices.push_back(0.f);
-	vertices.push_back(distance);
-	vertices.push_back((f * 5.f) - distance);
-	vertices.push_back(0.f);
-	vertices.push_back(-distance);
-	vertices.push_back(distance);
-	vertices.push_back(0.f);
-	vertices.push_back((f * 5.f) - distance);
-	vertices.push_back(-distance);
-	vertices.push_back(0.f);
-	vertices.push_back((f * 5.f) - distance);
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	RE_GLCache::ChangeVAO(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(0);
-
-	RE_GLCache::ChangeVAO(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	primID = static_cast<int>(type) + divisions;
+	auto mD = RE_SCENE->primitives->GetPrimitiveMeshData(this, primID);
+	VAO = mD.first;
 }
 
 void RE_CompGrid::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UID parent)
@@ -216,7 +153,7 @@ float RE_CompGrid::GetDistance() const
 }
 
 ///////   Rock   ////////////////////////////////////////////
-RE_CompRock::~RE_CompRock() { DeleteBuffers(); }
+RE_CompRock::~RE_CompRock() { }
 
 void RE_CompRock::RockSetUp(int _seed, int _subdivions)
 {
@@ -332,95 +269,30 @@ void RE_CompRock::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 	RockSetUp(seed, nsubdivisions);
 }
 
-void RE_CompRock::GenerateNewRock(int seed, int subdivisions)
+void RE_CompRock::GenerateNewRock(int s, int subdivisions)
 {
 	if (canChange)
 	{
-		if (VAO != 0)
-		{
-			glDeleteVertexArrays(1, &(GLuint)VAO);
-			glDeleteBuffers(1, &(GLuint)VBO);
-			glDeleteBuffers(1, &(GLuint)EBO);
-		}
+		seed = s;
+		nsubdivisions = subdivisions;
 
-		par_shapes_mesh* rock = par_shapes_create_rock(seed, subdivisions);
+		auto mD = RE_SCENE->primitives->GetPrimitiveMeshData(this, seed * nsubdivisions * C_ROCK);
 
-		float* points = new float[rock->npoints * 3];
-		float* normals = new float[rock->npoints * 3];
-
-		uint meshSize = 0;
-		size_t size = rock->npoints * 3 * sizeof(float);
-		uint stride = 0;
-
-		memcpy(points, rock->points, size);
-		meshSize += 3 * rock->npoints;
-		stride += 3;
-
-		memcpy(normals, rock->normals, size);
-		meshSize += 3 * rock->npoints;
-		stride += 3;
-
-		stride *= sizeof(float);
-		float* meshBuffer = new float[meshSize];
-		float* cursor = meshBuffer;
-		for (int i = 0; i < rock->npoints; i++)
-		{
-			uint cursorSize = 3;
-			size_t size = sizeof(float) * 3;
-
-			memcpy(cursor, &points[i * 3], size);
-			cursor += cursorSize;
-
-			memcpy(cursor, &normals[i * 3], size);
-			cursor += cursorSize;
-		}
-
-		glGenVertexArrays(1, &VAO);
-		RE_GLCache::ChangeVAO(VAO);
-
-		glGenBuffers(1, &VBO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
-
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
-
-		glGenBuffers(1, &EBO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, rock->ntriangles * sizeof(unsigned short) * 3, rock->triangles, GL_STATIC_DRAW);
-
-		RE_GLCache::ChangeVAO(0);
-
-		triangle_count = rock->ntriangles;
-
-		par_shapes_free_mesh(rock);
-		DEL_A(points);
-		DEL_A(normals);
-		DEL_A(meshBuffer);
+		VAO = mD.first;
+		triangle_count = mD.second;
 
 		canChange = false;
 	}
 }
 
 ///////   Platonic   ////////////////////////////////////////////
-RE_CompPlatonic::~RE_CompPlatonic() { DeleteBuffers(); }
+RE_CompPlatonic::~RE_CompPlatonic() { }
 
-void RE_CompPlatonic::PlatonicSetUp(unsigned int vao, unsigned int t_count)
+void RE_CompPlatonic::PlatonicSetUp()
 {
-	if (vao)
-	{
-		VAO = vao;
-		triangle_count = t_count;
-	}
-	else
-	{
-		eastl::pair<unsigned int, unsigned int> data = RE_SCENE->primitives->GetPlatonicData(type);
-		VAO = data.first;
-		triangle_count = data.second;
-	}
+	auto mD = RE_SCENE->primitives->GetPrimitiveMeshData(this);
+	VAO = mD.first;
+	triangle_count = mD.second;
 }
 
 void RE_CompPlatonic::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UID parent)
@@ -431,7 +303,7 @@ void RE_CompPlatonic::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, cons
 	RE_CompPlatonic* copy = dynamic_cast<RE_CompPlatonic*>(_copy);
 	color = copy->color;
 
-	PlatonicSetUp(copy->VAO, copy->triangle_count);
+	PlatonicSetUp();
 }
 
 void RE_CompPlatonic::Draw() const
@@ -473,7 +345,7 @@ void RE_CompPlatonic::SerializeJson(RE_Json* node, eastl::map<const char*, int>*
 void RE_CompPlatonic::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	color = node->PullFloatVector("color", color);
-	RE_SCENE->primitives->SetUpComponentPrimitive(this);
+	PlatonicSetUp();
 }
 
 void RE_CompPlatonic::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
@@ -489,20 +361,23 @@ void RE_CompPlatonic::DeserializeBinary(char*& cursor, eastl::map<int, const cha
 	memcpy(&color[0], cursor, size);
 	cursor += size;
 
-	RE_SCENE->primitives->SetUpComponentPrimitive(this);
+	PlatonicSetUp();
 }
 
 ///////   Parametric   ////////////////////////////////////////////
 RE_CompParametric::RE_CompParametric(ComponentType t, const char* _name) : RE_CompPrimitive(t), name(_name) {}
-RE_CompParametric::~RE_CompParametric() { DeleteBuffers(); }
+RE_CompParametric::~RE_CompParametric() { }
 
 void RE_CompParametric::ParametricSetUp(int _slices, int _stacks, float _radius)
 {
-	target_slices = slices = RE_Math::Cap(_slices, 1, 3);
-	target_stacks = stacks = RE_Math::Cap(_stacks, 1, 3);
+	target_slices = slices = RE_Math::Cap(_slices, 3, INT_MAX);
+	target_stacks = stacks = RE_Math::Cap(_stacks, 3, INT_MAX);
 	target_radius = radius = _radius;
 	canChange = false;
-	GenerateParametric();
+
+	auto md = RE_SCENE->primitives->GetPrimitiveMeshData(this);
+	VAO = md.first;
+	triangle_count = md.second;
 }
 
 void RE_CompParametric::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UID parent)
@@ -553,16 +428,11 @@ void RE_CompParametric::DrawProperties()
 		ImGui::PushItemWidth(75.0f);
 		if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) canChange = true;
 		if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) canChange = true;
-		if (radius > 0.f && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) canChange = true;
+		if ((type == C_TORUS || type == C_TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) canChange = true;
 
 		ImGui::PopItemWidth();
 		if (canChange && ImGui::Button("Apply"))
-		{
-			slices = target_slices;
-			stacks = target_stacks;
-			GenerateParametric();
-			canChange = false;
-		}
+			ParametricSetUp(target_slices, target_stacks, target_radius);
 
 		if (type == C_PLANE && ImGui::Button("Convert To Mesh")) 
 			RE_INPUT->Push(RE_EventType::PLANE_CHANGE_TO_MESH, RE_SCENE, go);
@@ -628,82 +498,6 @@ void RE_CompParametric::DeserializeBinary(char*& cursor, eastl::map<int, const c
 	ParametricSetUp(slices, stacks, radius);
 }
 
-void RE_CompParametric::UploadParametric(par_shapes_mesh_s* param)
-{
-	if (VAO != 0) DeleteBuffers();
-
-	float* points = new float[param->npoints * 3];
-	float* normals = new float[param->npoints * 3];
-	float* texCoords = new float[param->npoints * 2];
-
-	uint meshSize = 0;
-	size_t size = param->npoints * 3 * sizeof(float);
-	uint stride = 0;
-
-	memcpy(points, param->points, size);
-	meshSize += 3 * param->npoints;
-	stride += 3;
-
-	memcpy(normals, param->normals, size);
-	meshSize += 3 * param->npoints;
-	stride += 3;
-
-	size = param->npoints * 2 * sizeof(float);
-	memcpy(texCoords, param->tcoords, size);
-	meshSize += 2 * param->npoints;
-	stride += 2;
-
-	stride *= sizeof(float);
-	float* meshBuffer = new float[meshSize];
-	float* cursor = meshBuffer;
-
-	for (int i = 0; i < param->npoints; i++)
-	{
-		uint cursorSize = 3;
-		size_t size = sizeof(float) * 3;
-
-		memcpy(cursor, &points[i * 3], size);
-		cursor += cursorSize;
-
-		memcpy(cursor, &normals[i * 3], size);
-		cursor += cursorSize;
-
-		cursorSize = 2;
-		size = sizeof(float) * 2;
-		memcpy(cursor, &texCoords[i * 2], size);
-		cursor += cursorSize;
-	}
-
-	glGenVertexArrays(1, &VAO);
-	RE_GLCache::ChangeVAO(VAO);
-
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), meshBuffer, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 3u));
-
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 6u));
-
-	glGenBuffers(1, &(GLuint)EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, param->ntriangles * sizeof(unsigned short) * 3u, param->triangles, GL_STATIC_DRAW);
-
-	RE_GLCache::ChangeVAO(0);
-
-	triangle_count = param->ntriangles;
-
-	DEL_A(points);
-	DEL_A(normals);
-	DEL_A(texCoords);
-	DEL_A(meshBuffer);
-}
-
 ///////   Plane   ////////////////////////////////////////////
 RE_CompPlane::RE_CompPlane() : RE_CompParametric(C_PLANE, "Plane") {}
 RE_CompPlane::~RE_CompPlane() {}
@@ -746,45 +540,17 @@ const char* RE_CompPlane::TransformAsMeshResource()
 	return meshMD5;
 }
 
-void RE_CompPlane::GenerateParametric()
-{
-	par_shapes_mesh* plane = par_shapes_create_plane(slices, stacks);
-	UploadParametric(plane);
-	par_shapes_free_mesh(plane);
-}
-
 ///////   Sphere   ////////////////////////////////////////////
 RE_CompSphere::RE_CompSphere() : RE_CompParametric(C_SPHERE, "Sphere") {}
 RE_CompSphere::~RE_CompSphere() {}
-
-void RE_CompSphere::GenerateParametric()
-{
-	par_shapes_mesh* sphere = par_shapes_create_parametric_sphere(slices, stacks);
-	UploadParametric(sphere);
-	par_shapes_free_mesh(sphere);
-}
 
 ///////   Cylinder   ////////////////////////////////////////////
 RE_CompCylinder::RE_CompCylinder() : RE_CompParametric(C_CYLINDER, "Cylinder") {}
 RE_CompCylinder::~RE_CompCylinder() {}
 
-void RE_CompCylinder::GenerateParametric()
-{
-	par_shapes_mesh* cylinder = par_shapes_create_cylinder(slices, stacks);
-	UploadParametric(cylinder);
-	par_shapes_free_mesh(cylinder);
-}
-
 ///////   HemiSphere   ////////////////////////////////////////////
 RE_CompHemiSphere::RE_CompHemiSphere() : RE_CompParametric(C_HEMISHPERE, "HemiSphere") {}
 RE_CompHemiSphere::~RE_CompHemiSphere() {}
-
-void RE_CompHemiSphere::GenerateParametric()
-{
-	par_shapes_mesh* hemishpere = par_shapes_create_hemisphere(slices, stacks);
-	UploadParametric(hemishpere);
-	par_shapes_free_mesh(hemishpere);
-}
 
 ///////   Torus   ////////////////////////////////////////////
 RE_CompTorus::RE_CompTorus() : RE_CompParametric(C_TORUS, "Torus")
@@ -794,13 +560,6 @@ RE_CompTorus::RE_CompTorus() : RE_CompParametric(C_TORUS, "Torus")
 }
 RE_CompTorus::~RE_CompTorus() {}
 
-void RE_CompTorus::GenerateParametric()
-{
-	par_shapes_mesh* torus = par_shapes_create_torus(slices, stacks, radius);
-	UploadParametric(torus);
-	par_shapes_free_mesh(torus);
-}
-
 ///////   TrefoiKnot   ////////////////////////////////////////////
 RE_CompTrefoiKnot::RE_CompTrefoiKnot() : RE_CompParametric(C_TREFOILKNOT,"Trefoil Knot")
 {
@@ -808,10 +567,3 @@ RE_CompTrefoiKnot::RE_CompTrefoiKnot() : RE_CompParametric(C_TREFOILKNOT,"Trefoi
 	max_r = 3.0f;
 }
 RE_CompTrefoiKnot::~RE_CompTrefoiKnot() {}
-
-void RE_CompTrefoiKnot::GenerateParametric()
-{
-	par_shapes_mesh* trefoilknot = par_shapes_create_trefoil_knot(slices, stacks, radius);
-	UploadParametric(trefoilknot);
-	par_shapes_free_mesh(trefoilknot);
-}

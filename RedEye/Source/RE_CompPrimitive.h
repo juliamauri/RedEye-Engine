@@ -22,21 +22,18 @@ public:
 
 	virtual bool CheckFaceCollision(const math::Ray& ray, float& distance) const;
 
-	void DeleteBuffers();
-
 	void SetColor(float r, float g, float b);
 	void SetColor(math::vec nColor);
 
 	unsigned int GetVAO() const;
-	virtual void SetVAO(unsigned int vao);
-
 	virtual unsigned int GetTriangleCount() const;
+
+	void UnUseResources();
 
 protected:
 
+	int primID = -1;
 	unsigned int VAO = 0;
-	unsigned int VBO = 0;
-	unsigned int EBO = 0;
 	unsigned int triangle_count = 0;
 	math::vec color = math::vec::one;
 };
@@ -51,6 +48,7 @@ public:
 
 	RE_CompGrid() : RE_CompPrimitive(C_GRID) {}
 	~RE_CompGrid();
+	friend class RE_PrimitiveManager;
 
 	void GridSetUp(int divisions = 10);
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
@@ -85,6 +83,7 @@ public:
 
 	RE_CompRock() : RE_CompPrimitive(C_ROCK) {}
 	~RE_CompRock();
+	friend class RE_PrimitiveManager;
 
 	void RockSetUp(int _seed = 251654, int _subdivions = 5);
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
@@ -118,8 +117,9 @@ public:
 
 	RE_CompPlatonic(ComponentType t) : RE_CompPrimitive(t) {}
 	~RE_CompPlatonic();
+	friend class RE_PrimitiveManager;
 
-	void PlatonicSetUp(unsigned int vao = 0, unsigned int t_count = 0);
+	void PlatonicSetUp();
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
 	void Draw() const override;
@@ -145,6 +145,7 @@ class RE_CompParametric : public RE_CompPrimitive
 public:
 	RE_CompParametric(ComponentType t, const char* name);
 	virtual ~RE_CompParametric();
+	friend class RE_PrimitiveManager;
 
 	void ParametricSetUp(int _slices, int _stacks, float _radius = 0.0f);
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
@@ -157,11 +158,6 @@ public:
 	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
-
-protected:
-
-	virtual void GenerateParametric() = 0;
-	void UploadParametric(struct par_shapes_mesh_s* param);
 
 protected:
 
@@ -209,9 +205,6 @@ public:
 	~RE_CompPlane();
 
 	const char* TransformAsMeshResource();
-
-private:
-	void GenerateParametric()override;
 };
 
 /**************************************************
@@ -223,10 +216,6 @@ class RE_CompSphere : public RE_CompParametric
 public:
 	RE_CompSphere();
 	~RE_CompSphere();
-
-private:
-	void GenerateParametric()override;
-
 };
 
 /**************************************************
@@ -238,9 +227,6 @@ class RE_CompCylinder : public RE_CompParametric
 public:
 	RE_CompCylinder();
 	~RE_CompCylinder();
-
-private:
-	void GenerateParametric()override;
 };
 
 /**************************************************
@@ -252,9 +238,6 @@ class RE_CompHemiSphere : public RE_CompParametric
 public:
 	RE_CompHemiSphere();
 	~RE_CompHemiSphere();
-
-private:
-	void GenerateParametric()override;
 };
 
 /**************************************************
@@ -266,10 +249,6 @@ class RE_CompTorus : public RE_CompParametric
 public:
 	RE_CompTorus();
 	~RE_CompTorus();
-
-private:
-	void GenerateParametric()override;
-
 };
 
 /**************************************************
@@ -281,9 +260,6 @@ class RE_CompTrefoiKnot : public RE_CompParametric
 public:
 	RE_CompTrefoiKnot();
 	~RE_CompTrefoiKnot();
-
-private:
-	void GenerateParametric()override;
 };
 
 #endif // !__RE_COMPPRIMITIVE_H__
