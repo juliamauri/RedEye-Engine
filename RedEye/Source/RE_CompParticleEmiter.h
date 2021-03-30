@@ -8,13 +8,7 @@
 class Particle;
 class RE_Mesh;
 struct RE_ParticleEmitter;
-
-enum Particle_Stat
-{
-	PS_CameraPosition, //Watch to camera
-	PS_CameraDiretion, //Watch to direction from camera
-	PS_Free
-};
+class RE_CompPrimitive;
 
 class RE_CompParticleEmitter : public RE_Component
 {
@@ -36,13 +30,18 @@ public:
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
+	void UseResources();
+	void UnUseResources();
+
 	bool isLighting() const;
 	void CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
 
 private:
 
 	RE_ParticleEmitter* simulation = nullptr;
-	
+
+	bool draw = false;
+
 	bool emitlight = false;
 	math::vec lightColor = math::vec::one;
 	float specular = 0.2f;
@@ -55,6 +54,18 @@ private:
 	float quadratic = 0.011f;
 
 	const char* meshMD5 = nullptr;
+	RE_CompPrimitive* primCmp = nullptr;
+
+	math::float3 scale = { 0.1f,0.1f,0.1f };
+
+	enum Particle_Dir : int
+	{
+		PS_FromPS,
+		PS_Billboard,
+		PS_Custom
+	};
+	Particle_Dir particleDir = PS_Billboard;
+	math::float3 direction = { -1.0f,1.0f,0.5f };
 
 	int max_particles = 0;
 	float time_counter = 0.0f;
@@ -80,8 +91,8 @@ private:
 	// Particle Drawing
 	math::vec rgb_alpha = math::vec::zero;
 
+	// Triangle "Point"
 	unsigned int VAO, VBO, EBO;
-	bool draw = false;
 };
 
 #endif // !__RE_COMPPARTICLEEMITER_H__

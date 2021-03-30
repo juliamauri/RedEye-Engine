@@ -102,7 +102,6 @@ bool ModuleRenderer3D::Init()
 			glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &test);
 			glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS, &test);
 
-
 			render_views.push_back(RenderView("Scene", { 0, 0 },
 				FRUSTUM_CULLING | OVERRIDE_CULLING | OUTLINE_SELECTION /*| DEBUG_DRAW*/ | SKYBOX | BLENDED |
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
@@ -387,7 +386,7 @@ void ModuleRenderer3D::DrawEditor()
 			{
 				int light = render_views[i].light;
 				ImGui::PushID(eastl::string("light" + eastl::to_string(i)).c_str());
-				if (ImGui::Combo("Light Mode", &light, "LIGHT_DISABLED\0LIGHT_GL\0LIGHT_DIRECT\0LIGHT_DEFERRED"))
+				if (ImGui::Combo("Light Mode", &light, "LIGHT_DISABLED\0LIGHT_GL\0LIGHT_DIRECT\0LIGHT_DEFERRED\0"))
 					render_views[i].light = LightMode(light);
 				ImGui::PopID();
 

@@ -26,7 +26,7 @@ public:
 	void SetColor(math::vec nColor);
 
 	unsigned int GetVAO() const;
-	virtual unsigned int GetTriangleCount() const;
+	unsigned int GetTriangleCount() const;
 
 	void UnUseResources();
 

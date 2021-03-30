@@ -2,6 +2,8 @@
 
 #include "Application.h"
 #include "ModulePhysics.h"
+#include "ModuleScene.h"
+#include "RE_PrimitiveManager.h"
 #include "ModuleRenderer3D.h"
 #include "RE_CameraManager.h"
 #include "RE_ShaderImporter.h"
@@ -15,6 +17,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
+#include "RE_CompPrimitive.h"
 
 #include "ImGui\imgui.h"
 
@@ -45,33 +48,71 @@ void RE_CompParticleEmitter::Draw() const
 		
 		RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
 		math::float3 goPosition = transform->GetGlobalPosition();
+		math::float3 goUp = transform->GetUp().Normalized();
+		math::float3 goRight = transform->GetRight().Normalized();
 		RE_CompCamera* c = ModuleRenderer3D::GetCamera();
 		
 		RE_CompTransform* cT = c->GetTransform();
+		math::float3 cUp = cT->GetUp().Normalized();
 
+		math::float3 pFront = direction.Normalized();
 
-		math::float3 scale = {0.1f,0.1f,0.1f};
-
-		if (!scale.IsFinite())
+		unsigned int triangleCount = 1;
+		
+		if (primCmp)
 		{
-			scale = math::float3::one;
+			RE_GLCache::ChangeVAO(primCmp->GetVAO());
+			triangleCount = primCmp->GetTriangleCount();
 		}
+		else
+			RE_GLCache::ChangeVAO(VAO);
 
 		for (auto p : *particles) {
 			math::float3 partcleGlobalpos = goPosition + p->position;
 
-			math::float3 front = cT->GetGlobalPosition() - partcleGlobalpos;
-			front.Normalize();
+			math::float3 front, right, up;
+			math::float4x4 rotm, pMatrix;
+			math::float3 roteuler;
+			switch (particleDir)
+			{
+			case RE_CompParticleEmitter::PS_FromPS:
+				
+				front = (goPosition - partcleGlobalpos).Normalized();
 
-			math::float3 right = front.Cross(cT->GetUp().Normalized()).Normalized();
-			if (right.x < 0.0f) right *= -1.0f;
+				right = front.Cross(goUp).Normalized();
+				if (right.x < 0.0f) right *= -1.0f;
 
-			math::float3 up = right.Cross(front).Normalized();
+				up = right.Cross(front).Normalized();
 
-			math::float4x4 rotm;
+				break;
+			case RE_CompParticleEmitter::PS_Billboard:
+
+				front = cT->GetGlobalPosition() - partcleGlobalpos;
+				front.Normalize();
+
+				right = front.Cross(cUp).Normalized();
+				if (right.x < 0.0f) right *= -1.0f;
+
+				up = right.Cross(front).Normalized();
+
+				break;
+			case RE_CompParticleEmitter::PS_Custom:
+
+				front = pFront;
+
+				right = front.Cross(cUp).Normalized();
+				if (right.x < 0.0f) right *= -1.0f;
+
+				up = right.Cross(front).Normalized();
+
+				break;
+			}
+
 			rotm.SetRotatePart(math::float3x3(right, up, front));
-			math::float3 roteuler = rotm.ToEulerXYZ();
-			math::float4x4 pMatrix = math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), scale).Transposed();
+			roteuler = rotm.ToEulerXYZ();
+
+			pMatrix = math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), scale).Transposed();
+
 			pS->UploadModel(pMatrix.ptr());
 
 			if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED) {
@@ -83,10 +124,8 @@ void RE_CompParticleEmitter::Draw() const
 
 			if (meshMD5)
 				dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5))->DrawMesh(shader);
-			else {
-				RE_GLCache::ChangeVAO(VAO);
-				glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
-			}
+			else
+				glDrawElements(GL_TRIANGLES, triangleCount * 3, primCmp ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, nullptr);
 		}
 	}
 }
@@ -154,6 +193,18 @@ void RE_CompParticleEmitter::DrawProperties()
 			}
 
 			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
+
+			if (ImGui::DragFloat3("Scale", scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
+				if (!scale.IsFinite())scale.Set(0.5f, 0.5f, 0.5f);
+			}
+
+			int pDir = particleDir;
+			if (ImGui::Combo("Particle Direction", &pDir, "Normal\0Billboard\0Custom\0")) 
+				particleDir = static_cast<Particle_Dir>(pDir);
+
+			if(particleDir == RE_CompParticleEmitter::PS_Custom)
+				ImGui::DragFloat3("Custom Direction", direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
+
 			ImGui::Checkbox(emitlight ? "Disable lighting" : "Enable lighting", &emitlight);
 			ImGui::ColorEdit3("Light Color", &lightColor[0]);
 			if (particleLColor) {
@@ -207,7 +258,138 @@ void RE_CompParticleEmitter::DrawProperties()
 				if (ImGui::Button(eastl::string("Resource Mesh").c_str()))
 					RE_RES->PushSelected(meshMD5, true);
 			}
-			else ImGui::TextWrapped("Empty Mesh Component");
+			else if (primCmp) 
+			{
+				primCmp->DrawProperties();
+			}
+			else ImGui::TextWrapped("Select mesh resource or select primitive");
+
+			static bool clearMesh = false, setUpPrimitive = false;
+			if (ImGui::BeginMenu("Primitive"))
+			{
+				if (ImGui::MenuItem("Point")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					clearMesh = true;
+				}
+				if (ImGui::MenuItem("Cube")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompCube();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Dodecahedron")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompDodecahedron();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Tetrahedron")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompTetrahedron();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Octohedron")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompOctohedron();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Icosahedron")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompIcosahedron();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Plane")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompPlane();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Sphere")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompSphere();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Cylinder")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompCylinder();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("HemiSphere")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompHemiSphere();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Torus")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompTorus();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Trefoil Knot")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompTrefoiKnot();
+					setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Rock")) {
+					if (primCmp) {
+						primCmp->UnUseResources();
+						DEL(primCmp);
+					}
+					primCmp = new RE_CompRock();
+					setUpPrimitive = clearMesh = true;
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (clearMesh)
+			{
+				if (meshMD5) {
+					RE_RES->UnUse(meshMD5);
+					meshMD5 = nullptr;
+				}
+
+				if (setUpPrimitive) {
+					RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
+					setUpPrimitive = false;
+				}
+
+				clearMesh = false;
+			}
+
+
 
 			if (ImGui::BeginMenu("Change mesh"))
 			{
@@ -305,6 +487,16 @@ void RE_CompParticleEmitter::SerializeBinary(char*& cursor, eastl::map<const cha
 
 void RE_CompParticleEmitter::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
 {
+}
+
+void RE_CompParticleEmitter::UseResources()
+{
+	if (meshMD5)RE_RES->Use(meshMD5);
+}
+
+void RE_CompParticleEmitter::UnUseResources()
+{
+	if (meshMD5)RE_RES->UnUse(meshMD5);
 }
 
 bool RE_CompParticleEmitter::isLighting() const { return emitlight; }
