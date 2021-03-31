@@ -260,9 +260,11 @@ void RE_CompParticleEmitter::DrawProperties()
 			}
 			else if (primCmp) 
 			{
-				primCmp->DrawProperties();
+				primCmp->DrawPrimPropierties();
 			}
 			else ImGui::TextWrapped("Select mesh resource or select primitive");
+
+			ImGui::Separator();
 
 			static bool clearMesh = false, setUpPrimitive = false;
 			if (ImGui::BeginMenu("Primitive"))

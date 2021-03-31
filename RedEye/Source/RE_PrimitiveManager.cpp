@@ -87,9 +87,10 @@ eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPrimitiveMeshDat
 	auto pIter = primReference.find(pType);
 	if (pIter != primReference.end()) {
 		auto iIter = pIter->second.find(id);
-		if (iIter != pIter->second.end())
+		if (iIter != pIter->second.end()) {
 			iIter->second.refCount += 1;
 			return { iIter->second.vao, iIter->second.triangles };
+		}
 	}
 
 	if (pIter == primReference.end())primReference.insert({ pType, {} });

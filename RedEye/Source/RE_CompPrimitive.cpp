@@ -193,7 +193,7 @@ void RE_CompRock::DrawProperties()
 	{
 		int tmpSe = seed, tmpSb = nsubdivisions;
 
-		ImGui::Text("Can't checker because don't support Texture Coords");
+		ImGui::Text("Can't checker because doesn't support Texture Coords");
 		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
 		ImGui::PushItemWidth(75.0f);
 
@@ -205,18 +205,41 @@ void RE_CompRock::DrawProperties()
 
 		if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
 		{
-			if (tmpSb >= 3 && nsubdivisions != tmpSb)
+			tmpSb = RE_Math::Cap(tmpSb, 1, 5);
+			if (nsubdivisions != tmpSb)
 			{
 				nsubdivisions = tmpSb;
 				canChange = true;
 			}
-			else if (tmpSb < 1) tmpSb = 1;
-			else if (tmpSb > 5) tmpSb = 5;
 		}
 
 		ImGui::PopItemWidth();
-		if (ImGui::Button("Apply")) GenerateNewRock(seed, nsubdivisions);
+		if (canChange && ImGui::Button("Apply")) GenerateNewRock(seed, nsubdivisions);
 	}
+}
+
+void RE_CompRock::DrawPrimPropierties()
+{
+	int tmpSe = seed, tmpSb = nsubdivisions;
+
+	ImGui::Text("Can't use texture because doesn't support Texture Coords");
+	if (ImGui::DragInt("Seed", &tmpSe, 1.0f) && seed != tmpSe)
+	{
+		seed = tmpSe;
+		canChange = true;
+	}
+
+	if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
+	{
+		tmpSb = RE_Math::Cap(tmpSb, 1, 5);
+		if ( nsubdivisions != tmpSb)
+		{
+			nsubdivisions = tmpSb;
+			canChange = true;
+		}
+	}
+
+	if (canChange && ImGui::Button("Apply")) GenerateNewRock(seed, nsubdivisions);
 }
 
 unsigned int RE_CompRock::GetBinarySize() const
@@ -271,18 +294,17 @@ void RE_CompRock::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 
 void RE_CompRock::GenerateNewRock(int s, int subdivisions)
 {
-	if (canChange)
-	{
-		seed = s;
-		nsubdivisions = subdivisions;
+	seed = s;
+	nsubdivisions = subdivisions;
 
-		auto mD = RE_SCENE->primitives->GetPrimitiveMeshData(this, seed * nsubdivisions * C_ROCK);
+	if (primID = !- 1) RE_SCENE->primitives->UnUsePrimitive(type, primID);
+	primID = seed * nsubdivisions * C_ROCK;
+	auto mD = RE_SCENE->primitives->GetPrimitiveMeshData(this, primID);
 
-		VAO = mD.first;
-		triangle_count = mD.second;
+	VAO = mD.first;
+	triangle_count = mD.second;
 
-		canChange = false;
-	}
+	canChange = false;
 }
 
 ///////   Platonic   ////////////////////////////////////////////
@@ -332,6 +354,11 @@ void RE_CompPlatonic::DrawProperties()
 	}
 }
 
+void RE_CompPlatonic::DrawPrimPropierties()
+{
+	ImGui::Text("Can't use texture because doesn't support Texture Coords");
+}
+
 unsigned int RE_CompPlatonic::GetBinarySize() const
 {
 	return sizeof(float) * 3;
@@ -372,10 +399,13 @@ void RE_CompParametric::ParametricSetUp(int _slices, int _stacks, float _radius)
 {
 	target_slices = slices = RE_Math::Cap(_slices, 3, INT_MAX);
 	target_stacks = stacks = RE_Math::Cap(_stacks, 3, INT_MAX);
-	target_radius = radius = _radius;
+	target_radius = radius = RE_Math::Cap(_radius, min_r, max_r);
 	canChange = false;
 
-	auto md = RE_SCENE->primitives->GetPrimitiveMeshData(this);
+	if(primID =! -1) RE_SCENE->primitives->UnUsePrimitive(type, primID);
+	primID = (type == C_TORUS || type == C_TREFOILKNOT) ? slices * stacks * static_cast<int>(radius * 100.f) : slices * stacks;
+
+	auto md = RE_SCENE->primitives->GetPrimitiveMeshData(this, primID);
 	VAO = md.first;
 	triangle_count = md.second;
 }
@@ -437,6 +467,16 @@ void RE_CompParametric::DrawProperties()
 		if (type == C_PLANE && ImGui::Button("Convert To Mesh")) 
 			RE_INPUT->Push(RE_EventType::PLANE_CHANGE_TO_MESH, RE_SCENE, go);
 	}
+}
+
+void RE_CompParametric::DrawPrimPropierties()
+{
+	if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) canChange = true;
+	if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) canChange = true;
+	if ((type == C_TORUS || type == C_TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) canChange = true;
+
+	if (canChange && ImGui::Button("Apply"))
+		ParametricSetUp(target_slices, target_stacks, target_radius);
 }
 
 unsigned int RE_CompParametric::GetBinarySize() const
