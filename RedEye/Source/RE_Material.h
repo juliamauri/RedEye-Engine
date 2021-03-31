@@ -44,10 +44,12 @@ public:
 	void UnUseResources();
 
 	void UploadToShader(const float* model, bool usingChekers, bool defaultShader = false);
+	void UploadAsParticleDataToShader(unsigned int shaderID, bool useTextures, bool lighting);
 
 	unsigned int GetShaderID()const;
 
 	void DrawMaterialEdit();
+	void DrawMaterialParticleEdit(bool tex);
 
 	void SomeResourceChanged(const char* resMD5)override;
 

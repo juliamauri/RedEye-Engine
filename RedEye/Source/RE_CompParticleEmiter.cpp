@@ -10,6 +10,7 @@
 #include "RE_ResourceManager.h"
 #include "RE_InternalResources.h"
 #include "RE_Mesh.h"
+#include "RE_Material.h"
 #include "RE_Shader.h"
 #include "RE_GLCache.h"
 
@@ -45,6 +46,14 @@ void RE_CompParticleEmitter::Draw() const
 		eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
 		unsigned int shader = pS->GetID();
 		RE_GLCache::ChangeShader(shader);
+		if (materialMD5) dynamic_cast<RE_Material*>(RE_RES->At(materialMD5))->UploadAsParticleDataToShader(shader, useTextures, emitlight);
+		else {
+			RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
+			RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", { 1.0f,1.0f,1.0f });
+			RE_ShaderImporter::setFloat(shader, "opacity", 1.0f);
+		}
+
 		
 		RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
 		math::float3 goPosition = transform->GetGlobalPosition();
@@ -115,9 +124,11 @@ void RE_CompParticleEmitter::Draw() const
 
 			pS->UploadModel(pMatrix.ptr());
 
-			if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED) {
-				RE_ShaderImporter::setFloat(shader, "normal", front);
-				RE_ShaderImporter::setFloat(shader, "cdiffuse", { 1.0f,1.0f,1.0f });
+
+			if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED && !materialMD5) {
+				bool cNormal = !meshMD5 && !primCmp;
+				RE_ShaderImporter::setFloat(shader, "customNormal", static_cast<float>(cNormal));
+				if(cNormal) RE_ShaderImporter::setFloat(shader, "normal", front);
 				RE_ShaderImporter::setFloat(shader, "specular", 2.5f);
 				RE_ShaderImporter::setFloat(shader, "shininess", 16.0f);
 			}
@@ -275,6 +286,7 @@ void RE_CompParticleEmitter::DrawProperties()
 						DEL(primCmp);
 					}
 					clearMesh = true;
+					useTextures = false;
 				}
 				if (ImGui::MenuItem("Cube")) {
 					if (primCmp) {
@@ -283,6 +295,7 @@ void RE_CompParticleEmitter::DrawProperties()
 					}
 					primCmp = new RE_CompCube();
 					setUpPrimitive = clearMesh = true;
+					useTextures = false;
 				}
 				if (ImGui::MenuItem("Dodecahedron")) {
 					if (primCmp) {
@@ -291,6 +304,7 @@ void RE_CompParticleEmitter::DrawProperties()
 					}
 					primCmp = new RE_CompDodecahedron();
 					setUpPrimitive = clearMesh = true;
+					useTextures = false;
 				}
 				if (ImGui::MenuItem("Tetrahedron")) {
 					if (primCmp) {
@@ -299,6 +313,7 @@ void RE_CompParticleEmitter::DrawProperties()
 					}
 					primCmp = new RE_CompTetrahedron();
 					setUpPrimitive = clearMesh = true;
+					useTextures = false;
 				}
 				if (ImGui::MenuItem("Octohedron")) {
 					if (primCmp) {
@@ -307,6 +322,7 @@ void RE_CompParticleEmitter::DrawProperties()
 					}
 					primCmp = new RE_CompOctohedron();
 					setUpPrimitive = clearMesh = true;
+					useTextures = false;
 				}
 				if (ImGui::MenuItem("Icosahedron")) {
 					if (primCmp) {
@@ -315,6 +331,7 @@ void RE_CompParticleEmitter::DrawProperties()
 					}
 					primCmp = new RE_CompIcosahedron();
 					setUpPrimitive = clearMesh = true;
+					useTextures = false;
 				}
 				if (ImGui::MenuItem("Plane")) {
 					if (primCmp) {
@@ -322,7 +339,7 @@ void RE_CompParticleEmitter::DrawProperties()
 						DEL(primCmp);
 					}
 					primCmp = new RE_CompPlane();
-					setUpPrimitive = clearMesh = true;
+					useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Sphere")) {
 					if (primCmp) {
@@ -330,7 +347,7 @@ void RE_CompParticleEmitter::DrawProperties()
 						DEL(primCmp);
 					}
 					primCmp = new RE_CompSphere();
-					setUpPrimitive = clearMesh = true;
+					useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Cylinder")) {
 					if (primCmp) {
@@ -338,7 +355,7 @@ void RE_CompParticleEmitter::DrawProperties()
 						DEL(primCmp);
 					}
 					primCmp = new RE_CompCylinder();
-					setUpPrimitive = clearMesh = true;
+					useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("HemiSphere")) {
 					if (primCmp) {
@@ -346,7 +363,7 @@ void RE_CompParticleEmitter::DrawProperties()
 						DEL(primCmp);
 					}
 					primCmp = new RE_CompHemiSphere();
-					setUpPrimitive = clearMesh = true;
+					useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Torus")) {
 					if (primCmp) {
@@ -354,7 +371,7 @@ void RE_CompParticleEmitter::DrawProperties()
 						DEL(primCmp);
 					}
 					primCmp = new RE_CompTorus();
-					setUpPrimitive = clearMesh = true;
+					useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Trefoil Knot")) {
 					if (primCmp) {
@@ -362,7 +379,7 @@ void RE_CompParticleEmitter::DrawProperties()
 						DEL(primCmp);
 					}
 					primCmp = new RE_CompTrefoiKnot();
-					setUpPrimitive = clearMesh = true;
+					useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Rock")) {
 					if (primCmp) {
@@ -371,6 +388,7 @@ void RE_CompParticleEmitter::DrawProperties()
 					}
 					primCmp = new RE_CompRock();
 					setUpPrimitive = clearMesh = true;
+					useTextures = false;
 				}
 
 				ImGui::EndMenu();
@@ -408,7 +426,9 @@ void RE_CompParticleEmitter::DrawProperties()
 					{
 						if (meshMD5) RE_RES->UnUse(meshMD5);
 						meshMD5 = m->GetMD5();
-						if (meshMD5) RE_RES->Use(meshMD5);
+						if (meshMD5) RE_RES->Use(meshMD5);\
+
+						useTextures = true;
 					}
 				}
 				if (none) ImGui::Text("No custom materials on assets");
@@ -426,6 +446,58 @@ void RE_CompParticleEmitter::DrawProperties()
 			//	}
 			//	ImGui::EndDragDropTarget();
 			//}
+
+
+
+			if (!materialMD5) ImGui::Text("NMaterial not selected.");
+			else
+			{
+				ImGui::Separator();
+				RE_Material* matRes = dynamic_cast<RE_Material*>(RE_RES->At(materialMD5));
+				if (ImGui::Button(matRes->GetName())) RE_RES->PushSelected(matRes->GetMD5(), true);
+				
+				matRes->DrawMaterialParticleEdit(useTextures);
+			}
+
+
+			if (ImGui::BeginMenu("Change material"))
+			{
+				eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(Resource_Type::R_MATERIAL);
+				bool none = true;
+				for (auto material : materials)
+				{
+					if (material->isInternal()) continue;
+
+					none = false;
+					if (ImGui::MenuItem(material->GetName()))
+					{
+						if (materialMD5)
+						{
+							(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UnUseResources();
+							RE_RES->UnUse(materialMD5);
+						}
+						materialMD5 = material->GetMD5();
+						if (materialMD5)
+						{
+							RE_RES->Use(materialMD5);
+							(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UseResources();
+						}
+					}
+				}
+				if (none) ImGui::Text("No custom materials on assets");
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#MaterialReference"))
+				{
+					if (materialMD5) RE_RES->UnUse(materialMD5);
+					materialMD5 = *static_cast<const char**>(dropped->Data);
+					if (materialMD5) RE_RES->Use(materialMD5);
+				}
+				ImGui::EndDragDropTarget();
+			}
 		}
 		else
 		{
@@ -494,11 +566,19 @@ void RE_CompParticleEmitter::DeserializeBinary(char*& cursor, eastl::map<int, co
 void RE_CompParticleEmitter::UseResources()
 {
 	if (meshMD5)RE_RES->Use(meshMD5);
+	if (materialMD5) {
+		RE_RES->Use(materialMD5);
+		dynamic_cast<RE_Material*>(RE_RES->At(materialMD5))->UseResources();
+	}
 }
 
 void RE_CompParticleEmitter::UnUseResources()
 {
 	if (meshMD5)RE_RES->UnUse(meshMD5);
+	if (materialMD5) {
+		dynamic_cast<RE_Material*>(RE_RES->At(materialMD5))->UnUseResources();
+		RE_RES->UnUse(materialMD5);
+	}
 }
 
 bool RE_CompParticleEmitter::isLighting() const { return emitlight; }
@@ -511,7 +591,6 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 	//outerCutOff[0] = 17.5f;
 	//cutOff[1] = math::Cos(math::DegToRad(cutOff[0]));
 	//outerCutOff[1] = math::Cos(math::DegToRad(outerCutOff[0]));
-
 
 	eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
 	RE_CompTransform* transform = GetGOPtr()->GetTransformPtr();

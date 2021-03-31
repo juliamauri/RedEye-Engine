@@ -483,6 +483,67 @@ void RE_Material::DrawMaterialEdit()
 	}
 }
 
+void RE_Material::DrawMaterialParticleEdit(bool tex)
+{
+	if (!isInternal() && applySave && ImGui::Button("Save Changes"))
+	{
+		Save();
+		RE_RENDER->PushThumnailRend(GetMD5(), true);
+		applySave = false;
+	}
+
+	ImGui::Separator();
+	if (ImGui::BeginMenu("Diffuse values"))
+	{
+		if (ImGui::ColorEdit3("Diffuse Color", &cDiffuse[0])) applySave = true;
+		if(tex) DrawTextures("Diffuse", &tDiffuse);
+
+		ImGui::EndMenu();
+	}
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+		{
+			tDiffuse.push_back(*static_cast<const char**>(dropped->Data));
+			if (ResourceContainer::inMemory) RE_RES->Use(tDiffuse.back());
+			applySave = true;
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	ImGui::Separator();
+	if (ImGui::BeginMenu("Specular values"))
+	{
+		if (ImGui::ColorEdit3("Specular Color", &cSpecular[0])) applySave = true;
+		if (tex) DrawTextures("Specular", &tSpecular);
+		ImGui::EndMenu();
+	}
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#TextureReference"))
+		{
+			tSpecular.push_back(*static_cast<const char**>(dropped->Data));
+			if (ResourceContainer::inMemory) RE_RES->Use(tSpecular.back());
+			applySave = true;
+		}
+		ImGui::EndDragDropTarget();
+	}
+	ImGui::Separator();
+
+	if (ImGui::BeginMenu("Shininess values"))
+	{
+		if (ImGui::DragFloat("Shininess", &shininess, 0.1f, 1.0f, 32.0f)) applySave = true;
+		ImGui::EndMenu();
+	}
+	if (ImGui::BeginMenu("Opacity values"))
+	{
+		if (ImGui::InputFloat("Opacity", &opacity)) applySave = true;
+		ImGui::EndMenu();
+	}
+	ImGui::Separator();
+
+}
+
 void RE_Material::SomeResourceChanged(const char* resMD5)
 {
 	if (shaderMD5 == resMD5)
@@ -1400,49 +1461,49 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 			RE_ShaderImporter::setInt(ShaderID, ("tdiffuse" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tDiffuse[i]))->use();
 		}
-		for (unsigned int i = 0; i < tSpecular.size() || i < usingOnMat[TSPECULAR]; i++)
+		for (unsigned int i = 0; i < tSpecular.size() && i < usingOnMat[TSPECULAR]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tspecular" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tSpecular[i]))->use();
 		}
-		for (unsigned int i = 0; i < tAmbient.size() || i < usingOnMat[TAMBIENT]; i++)
+		for (unsigned int i = 0; i < tAmbient.size() && i < usingOnMat[TAMBIENT]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tambient" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tAmbient[i]))->use();
 		}
-		for (unsigned int i = 0; i < tEmissive.size() || i < usingOnMat[TEMISSIVE]; i++)
+		for (unsigned int i = 0; i < tEmissive.size() && i < usingOnMat[TEMISSIVE]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("temissive" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tEmissive[i]))->use();
 		}
-		for (unsigned int i = 0; i < tOpacity.size() || i < usingOnMat[TOPACITY]; i++)
+		for (unsigned int i = 0; i < tOpacity.size() && i < usingOnMat[TOPACITY]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("topacity" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tOpacity[i]))->use();
 		}
-		for (unsigned int i = 0; i < tShininess.size() || i < usingOnMat[TSHININESS]; i++)
+		for (unsigned int i = 0; i < tShininess.size() && i < usingOnMat[TSHININESS]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tshininess" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tShininess[i]))->use();
 		}
-		for (unsigned int i = 0; i < tHeight.size() || i < usingOnMat[THEIGHT]; i++)
+		for (unsigned int i = 0; i < tHeight.size() && i < usingOnMat[THEIGHT]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("theight" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tHeight[i]))->use();
 		}
-		for (unsigned int i = 0; i < tNormals.size() || i < usingOnMat[TNORMALS]; i++)
+		for (unsigned int i = 0; i < tNormals.size() && i < usingOnMat[TNORMALS]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tnormals" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tNormals[i]))->use();
 		}
-		for (unsigned int i = 0; i < tReflection.size() || i < usingOnMat[TREFLECTION]; i++)
+		for (unsigned int i = 0; i < tReflection.size() && i < usingOnMat[TREFLECTION]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("treflection" + eastl::to_string(i)).c_str(), textureCounter++);
@@ -1537,6 +1598,39 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 			}
 			break;
 		}
+		}
+	}
+}
+
+void RE_Material::UploadAsParticleDataToShader(unsigned int shaderID, bool useTextures, bool lighting)
+{
+	RE_ShaderImporter::setFloat(shaderID, "useColor", 1.0f);
+
+	RE_ShaderImporter::setFloat(shaderID, "cdiffuse", cDiffuse);
+	RE_ShaderImporter::setFloat(shaderID, "opacity", opacity);
+	if (lighting) {
+		RE_ShaderImporter::setFloat(shaderID, "cspecular", cSpecular);
+		RE_ShaderImporter::setFloat(shaderID, "shininess", shininess);
+	}else
+		RE_ShaderImporter::setFloat(shaderID, "opacity", 1.0f);
+
+	if (useTextures) {
+		RE_ShaderImporter::setFloat(shaderID, "useTexture", static_cast<float>(tDiffuse.size() > 0 && tSpecular.size() > 0));
+
+		unsigned int textureCounter = 0;
+		for (unsigned int i = 0; i < tDiffuse.size() && i < usingOnMat[TDIFFUSE]; i++)
+		{
+			glActiveTexture(GL_TEXTURE0 + textureCounter);
+			RE_ShaderImporter::setInt(shaderID, ("tdiffuse" + eastl::to_string(i)).c_str(), textureCounter++);
+			dynamic_cast<RE_Texture*>(RE_RES->At(tDiffuse[i]))->use();
+		}
+		if (lighting) {
+			for (unsigned int i = 0; i < tSpecular.size() && i < usingOnMat[TSPECULAR]; i++)
+			{
+				glActiveTexture(GL_TEXTURE0 + textureCounter);
+				RE_ShaderImporter::setInt(shaderID, ("tspecular" + eastl::to_string(i)).c_str(), textureCounter++);
+				dynamic_cast<RE_Texture*>(RE_RES->At(tSpecular[i]))->use();
+			}
 		}
 	}
 }

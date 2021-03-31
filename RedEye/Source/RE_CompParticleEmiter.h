@@ -53,6 +53,8 @@ private:
 	float linear = 0.091f;
 	float quadratic = 0.011f;
 
+	const char* materialMD5 = nullptr;
+	bool useTextures = false;
 	const char* meshMD5 = nullptr;
 	RE_CompPrimitive* primCmp = nullptr;
 

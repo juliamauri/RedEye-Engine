@@ -83,8 +83,8 @@ void RE_CompMesh::DrawProperties()
 					materialMD5 = material->GetMD5();
 					if (materialMD5)
 					{
-						RE_RES->Use(materialMD5);
 						(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UseResources();
+						RE_RES->Use(materialMD5);
 					}
 				}
 			}
@@ -212,8 +212,8 @@ void RE_CompMesh::UnUseResources()
 	if (meshMD5) RE_RES->UnUse(meshMD5);
 	if (materialMD5)
 	{
-		RE_RES->UnUse(materialMD5);
 		(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UnUseResources();
+		RE_RES->UnUse(materialMD5);
 	}
 }
 

@@ -755,9 +755,21 @@
 "\n"																			\
 "in vec2 TexCoord;\n"															\
 "\n"																			\
+"uniform float useTexture;\n"													\
+"uniform sampler2D tdiffuse0;\n"											   	\
+"\n"																			\
+"uniform float useColor;\n"														\
+"uniform vec3 cdiffuse;\n"													   	\
+"uniform float opacity;\n"													   	\
+"\n"																			\
 "void main()\n"																	\
 "{\n"																			\
-"	color = vec4(1.0,1.0,1.0,1.0);"												\
+"	if (useTexture > 0.0f && useColor > 0.0f)\n"								\
+"		color = vec4(texture(tdiffuse0, TexCoord) * vec4(cdiffuse, opacity));\n"\
+"	else if (useTexture > 0.0f)\n"												\
+"		color = texture(tdiffuse0, TexCoord);\n"						       	\
+"	else if (useColor > 0.0f)\n"												\
+"		color = vec4(cdiffuse, opacity);\n"									    \
 "}\0"
 
 #pragma endregion pNormalShading
@@ -774,6 +786,7 @@
 "out vec2 TexCoord;\n"										\
 "out vec3 Normal;\n"										\
 "\n"														\
+"uniform float customNormal;\n"								\
 "uniform vec3 normal;\n"									\
 "uniform mat4 model;\n"										\
 "uniform mat4 view;\n"										\
@@ -785,7 +798,10 @@
 "	FragPos = worldPos.xyz;\n"								\
 "	TexCoord = aTexCoord;\n"								\
 "	mat3 normalMatrix = transpose(inverse(mat3(model)));\n"	\
-"	Normal = normalMatrix * aNormal;\n"						\
+"	if(customNormal > 0.0)"									\
+"		Normal = normalMatrix * customNormal;\n"			\
+"	else\n"													\
+"		Normal = normalMatrix * aNormal;\n"					\
 "	gl_Position = projection * view * worldPos;\n"			\
 "}\0"
 
@@ -800,17 +816,36 @@
 "in vec2 TexCoord;\n"												\
 "in vec3 Normal;\n"													\
 "\n"																\
-"uniform vec3 cdiffuse;\n"											\
-"uniform float specular;\n"											\
+"uniform float useTexture;\n"										\
+"uniform sampler2D tdiffuse0;\n"									\
+"uniform sampler2D tspecular0;\n"									\
 "uniform float shininess;\n"										\
+"\n"																\
+"uniform float useColor;\n"											\
+"uniform vec3 cdiffuse;\n"											\
+"uniform vec3 cspecular;\n"											\
+"uniform float opacity;\n"											\
 "\n"																\
 "void main()\n"														\
 "{\n"																\
 "	gPosition = FragPos;\n"											\
 "	gNormal = normalize(Normal);\n"									\
 "\n"																\
-"	gAlbedo = cdiffuse;\n"										    \
-"	gSpec = vec3(specular, shininess, 1.0);\n"						\
+"	if (useTexture > 0.0f && useColor > 0.0f)\n"					\
+"	{\n"															\
+"		gAlbedo = texture(tdiffuse0, TexCoord).rgb * cdiffuse;\n"	\
+"		gSpec = vec3(texture(tspecular0, TexCoord).r, shininess,opacity);\n"\
+"	}\n"															\
+"	else if (useTexture > 0.0f)\n"									\
+"	{\n"															\
+"		gAlbedo = texture(tdiffuse0, TexCoord).rgb;\n"				\
+"		gSpec = vec3(texture(tspecular0, TexCoord).r, shininess,opacity);\n"\
+"	}\n"															\
+"	else if (useColor > 0.0f)\n"									\
+"	{\n"															\
+"		gAlbedo = cdiffuse;\n"									    \
+"		gSpec = vec3(cspecular.x, shininess, opacity);\n"			\
+"	}\n"															\
 "}\0"
 #pragma endregion pDeffShading
 
