@@ -1,5 +1,8 @@
 #include "ParticleManager.h"
 
+#include "Application.h"
+#include "RE_Math.h"
+
 unsigned int ParticleManager::emitter_count = 0u;
 
 bool RE_Particle::Update(float dt)
@@ -19,6 +22,16 @@ int RE_ParticleEmitter::GetNewSpawns(float dt)
 	int units = static_cast<int>((spawn_offset += dt) * spaw_frequency);
 	spawn_offset -= static_cast<float>(units) / spaw_frequency;
 	return units;
+}
+
+void RE_ParticleEmitter::SetUpParticle(RE_Particle* particle)
+{
+	if(randomLightColor)
+		particle->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
+	else
+		particle->lightColor = lightColor;
+	particle->intensity = (randomIntensity) ? RE_MATH->RandomF(iClamp[0], iClamp[1]) : intensity;
+	particle->specular = (randomSpecular) ? RE_MATH->RandomF(sClamp[0], sClamp[1]) : specular;
 }
 
 ParticleManager::ParticleManager()

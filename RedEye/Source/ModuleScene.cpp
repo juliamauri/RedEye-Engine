@@ -20,6 +20,7 @@
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
 #include "RE_CompPrimitive.h"
+#include "RE_CompParticleEmiter.h"
 #include "RE_Material.h"
 #include "RE_Prefab.h"
 #include "RE_Scene.h"
@@ -284,7 +285,7 @@ void ModuleScene::CreateWater(const UID parent)
 
 void ModuleScene::CreateParticleSyste(const UID parent)
 {
-	scenePool.AddGO("Particle System", Validate(parent), true)->AddNewComponent(C_PARTICLEEMITER);
+	dynamic_cast<RE_CompParticleEmitter*>(scenePool.AddGO("Particle System", Validate(parent), true)->AddNewComponent(C_PARTICLEEMITER))->AddSimulation();
 }
 
 void ModuleScene::AddGOPool(RE_ECS_Pool* toAdd)

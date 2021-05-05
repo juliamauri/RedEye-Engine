@@ -16,6 +16,8 @@ public:
 	RE_CompParticleEmitter();
 	~RE_CompParticleEmitter();
 
+	void AddSimulation();
+
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
 	void Update() override;
@@ -41,57 +43,6 @@ private:
 	RE_ParticleEmitter* simulation = nullptr;
 
 	bool draw = false;
-
-	bool emitlight = false;
-	math::vec lightColor = math::vec::one;
-	float specular = 0.2f;
-	bool particleLColor = false;
-
-	// Attenuattion
-	float intensity = 1.0f;
-	float constant = 1.0f;
-	float linear = 0.091f;
-	float quadratic = 0.011f;
-
-	const char* materialMD5 = nullptr;
-	bool useTextures = false;
-	const char* meshMD5 = nullptr;
-	RE_CompPrimitive* primCmp = nullptr;
-
-	math::float3 scale = { 0.1f,0.1f,0.1f };
-
-	enum Particle_Dir : int
-	{
-		PS_FromPS,
-		PS_Billboard,
-		PS_Custom
-	};
-	Particle_Dir particleDir = PS_Billboard;
-	math::float3 direction = { -1.0f,1.0f,0.5f };
-
-	int max_particles = 0;
-	float time_counter = 0.0f;
-	float spawn_counter = 0.0f;
-
-	float emissor_life = -1.0f;
-
-	// Emissor Values
-	float emissionRate = 3.0f;
-	math::vec spawn_position_offset = math::vec::zero;
-	math::vec gravity = math::vec::zero;
-	bool local_emission = true;
-
-	// Particle Spawned Info
-	float lifetime = 1.0f;
-	float initial_speed = 0.f;
-
-	// Margins
-	math::vec direction_margin = math::vec::zero;
-	float speed_margin = 0.f;
-	float lifetime_margin = 0.f;
-
-	// Particle Drawing
-	math::vec rgb_alpha = math::vec::zero;
 
 	// Triangle "Point"
 	unsigned int VAO, VBO, EBO;

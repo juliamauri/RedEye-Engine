@@ -713,7 +713,6 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			DrawQuad();
 
 			// Render Particle Lights
-
 			// Setup Shader
 			unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
 			RE_GLCache::ChangeShader(particlelight_pass);

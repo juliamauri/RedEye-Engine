@@ -31,6 +31,12 @@ RE_CompParticleEmitter::~RE_CompParticleEmitter()
 		RE_PHYSICS->RemoveEmitter(simulation);
 }
 
+void RE_CompParticleEmitter::AddSimulation()
+{
+	if (simulation == nullptr)
+		simulation = RE_PHYSICS->AddEmitter();
+}
+
 void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
 {}
 
@@ -46,7 +52,7 @@ void RE_CompParticleEmitter::Draw() const
 		eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
 		unsigned int shader = pS->GetID();
 		RE_GLCache::ChangeShader(shader);
-		if (materialMD5) dynamic_cast<RE_Material*>(RE_RES->At(materialMD5))->UploadAsParticleDataToShader(shader, useTextures, emitlight);
+		if (simulation->materialMD5) dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UploadAsParticleDataToShader(shader, simulation->useTextures, simulation->emitlight);
 		else {
 			RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 			RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
@@ -64,14 +70,14 @@ void RE_CompParticleEmitter::Draw() const
 		RE_CompTransform* cT = c->GetTransform();
 		math::float3 cUp = cT->GetUp().Normalized();
 
-		math::float3 pFront = direction.Normalized();
+		math::float3 pFront = simulation->direction.Normalized();
 
 		unsigned int triangleCount = 1;
 		
-		if (primCmp)
+		if (simulation->primCmp)
 		{
-			RE_GLCache::ChangeVAO(primCmp->GetVAO());
-			triangleCount = primCmp->GetTriangleCount();
+			RE_GLCache::ChangeVAO(simulation->primCmp->GetVAO());
+			triangleCount = simulation->primCmp->GetTriangleCount();
 		}
 		else
 			RE_GLCache::ChangeVAO(VAO);
@@ -82,9 +88,9 @@ void RE_CompParticleEmitter::Draw() const
 			math::float3 front, right, up;
 			math::float4x4 rotm, pMatrix;
 			math::float3 roteuler;
-			switch (particleDir)
+			switch (simulation->particleDir)
 			{
-			case RE_CompParticleEmitter::PS_FromPS:
+			case RE_ParticleEmitter::PS_FromPS:
 				
 				front = (goPosition - partcleGlobalpos).Normalized();
 
@@ -94,7 +100,7 @@ void RE_CompParticleEmitter::Draw() const
 				up = right.Cross(front).Normalized();
 
 				break;
-			case RE_CompParticleEmitter::PS_Billboard:
+			case RE_ParticleEmitter::PS_Billboard:
 
 				front = cT->GetGlobalPosition() - partcleGlobalpos;
 				front.Normalize();
@@ -105,7 +111,7 @@ void RE_CompParticleEmitter::Draw() const
 				up = right.Cross(front).Normalized();
 
 				break;
-			case RE_CompParticleEmitter::PS_Custom:
+			case RE_ParticleEmitter::PS_Custom:
 
 				front = pFront;
 
@@ -120,32 +126,29 @@ void RE_CompParticleEmitter::Draw() const
 			rotm.SetRotatePart(math::float3x3(right, up, front));
 			roteuler = rotm.ToEulerXYZ();
 
-			pMatrix = math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), scale).Transposed();
+			pMatrix = math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), simulation->scale).Transposed();
 
 			pS->UploadModel(pMatrix.ptr());
 
 
-			if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED && !materialMD5) {
-				bool cNormal = !meshMD5 && !primCmp;
+			if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED && !simulation->materialMD5) {
+				bool cNormal = !simulation->meshMD5 && !simulation->primCmp;
 				RE_ShaderImporter::setFloat(shader, "customNormal", static_cast<float>(cNormal));
 				if(cNormal) RE_ShaderImporter::setFloat(shader, "normal", front);
 				RE_ShaderImporter::setFloat(shader, "specular", 2.5f);
 				RE_ShaderImporter::setFloat(shader, "shininess", 16.0f);
 			}
 
-			if (meshMD5)
-				dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5))->DrawMesh(shader);
+			if (simulation->meshMD5)
+				dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
 			else
-				glDrawElements(GL_TRIANGLES, triangleCount * 3, primCmp ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, nullptr);
+				glDrawElements(GL_TRIANGLES, triangleCount * 3, simulation->primCmp ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, nullptr);
 		}
 	}
 }
 
 void RE_CompParticleEmitter::DrawProperties()
 {
-	if (simulation == nullptr)
-		simulation = RE_PHYSICS->AddEmitter();
-
 	if (ImGui::CollapsingHeader("Particle Emitter"))
 	{
 		if (simulation != nullptr)
@@ -181,7 +184,6 @@ void RE_CompParticleEmitter::DrawProperties()
 				draw = true;
 			}
 
-
 			switch (simulation->state)
 			{
 			case RE_ParticleEmitter::STOP:
@@ -205,73 +207,86 @@ void RE_CompParticleEmitter::DrawProperties()
 
 			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
 
-			if (ImGui::DragFloat3("Scale", scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
-				if (!scale.IsFinite())scale.Set(0.5f, 0.5f, 0.5f);
+			if (ImGui::DragFloat3("Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
+				if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
 			}
 
-			int pDir = particleDir;
+			int pDir = simulation->particleDir;
 			if (ImGui::Combo("Particle Direction", &pDir, "Normal\0Billboard\0Custom\0")) 
-				particleDir = static_cast<Particle_Dir>(pDir);
+				simulation->particleDir = static_cast<RE_ParticleEmitter::Particle_Dir>(pDir);
 
-			if(particleDir == RE_CompParticleEmitter::PS_Custom)
-				ImGui::DragFloat3("Custom Direction", direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
+			if(simulation->particleDir == RE_ParticleEmitter::PS_Custom)
+				ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
 
-			ImGui::Checkbox(emitlight ? "Disable lighting" : "Enable lighting", &emitlight);
-			ImGui::ColorEdit3("Light Color", &lightColor[0]);
-			if (particleLColor) {
+			ImGui::Checkbox(simulation->emitlight ? "Disable lighting" : "Enable lighting", &simulation->emitlight);
+			ImGui::ColorEdit3("Light Color", &simulation->lightColor[0]);
+			if (simulation->particleLColor) {
 				if (ImGui::Button("Set particles light color")) {
 					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->lightColor = lightColor;
+					for (auto p : *particles) p->lightColor = simulation->lightColor;
 				}
 			}
-			ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f");
-			if (particleLColor) {
+			ImGui::DragFloat("Specular", &simulation->specular, 0.01f, 0.f, 1.f, "%.2f");
+			if (simulation->particleLColor) {
 				if (ImGui::Button("Set particles specular")) {
 					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->specular = specular;
+					for (auto p : *particles) p->specular = simulation->specular;
 				}
 			}
-			ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f");
-			if (particleLColor) {
+			ImGui::DragFloat("Intensity", &simulation->intensity, 0.01f, 0.0f, 50.0f, "%.2f");
+			if (simulation->particleLColor) {
 				if (ImGui::Button("Set particles intensity")) {
 					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->intensity = intensity;
+					for (auto p : *particles) p->intensity = simulation->intensity;
 				}
 			}
-			ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f");
-			ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f");
-			ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
+			ImGui::DragFloat("Constant", &simulation->constant, 0.01f, 0.001f, 5.0f, "%.2f");
+			ImGui::DragFloat("Linear", &simulation->linear, 0.001f, 0.001f, 5.0f, "%.3f");
+			ImGui::DragFloat("Quadratic", &simulation->quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
 			ImGui::Separator();
-			ImGui::Checkbox(particleLColor ? "Disable single particle lighting" : "Enable single particle lighting", &particleLColor);
-			if (particleLColor) {
-				if (ImGui::Button("Randomize light color")) {
+			ImGui::Checkbox(simulation->particleLColor ? "Disable single particle lighting" : "Enable single particle lighting", &simulation->particleLColor);
+			if (simulation->particleLColor) {
+				if (ImGui::Checkbox(simulation->randomLightColor ? "Disable random particle color" : "Enable random particle color", &simulation->randomLightColor)) {
+
 					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
+					if (simulation->randomLightColor)
+						for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
+					else
+						for (auto p : *particles) p->lightColor = simulation->lightColor;
 				}
-				static float sClamp[2] = { 0.f, 1.f };
-				ImGui::DragFloat2("Specular min-max", sClamp, 0.005f, 0.0f, 1.0f);
-				if (ImGui::Button("Randomize Specular")) {
+
+				ImGui::DragFloat2("Specular min-max", simulation->sClamp, 0.005f, 0.0f, 1.0f);
+				if (ImGui::Checkbox(simulation->randomSpecular ? "Disable random particle specular" : "Enable random particle specular", &simulation->randomSpecular)) {
+
 					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->specular = RE_MATH->RandomF(sClamp[0], sClamp[1]);
+
+					if (simulation->randomSpecular)
+						for (auto p : *particles) p->specular = RE_MATH->RandomF(simulation->sClamp[0], simulation->sClamp[1]);
+					else
+						for (auto p : *particles) p->specular = simulation->specular;
 				}
-				static float iClamp[2] = { 0.0f, 50.0f };
-				ImGui::DragFloat2("Intensity min-max", iClamp, 0.1f, 0.0f, 50.0f);
-				if (ImGui::Button("Randomize intensity")) {
+				
+				ImGui::DragFloat2("Intensity min-max", simulation->iClamp, 0.1f, 0.0f, 50.0f);
+				if (ImGui::Checkbox(simulation->randomIntensity ? "Disable random particle intensity" : "Enable random particle intensity", &simulation->randomIntensity)) {
 					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->intensity = RE_MATH->RandomF(iClamp[0], iClamp[1]);
+
+					if (simulation->randomIntensity)
+						for (auto p : *particles) p->intensity = RE_MATH->RandomF(simulation->iClamp[0], simulation->iClamp[1]);
+					else
+						for (auto p : *particles) p->intensity = simulation->intensity;
 				}
 			}
 
 			ImGui::Separator();
 
-			if (meshMD5)
+			if (simulation->meshMD5)
 			{
 				if (ImGui::Button(eastl::string("Resource Mesh").c_str()))
-					RE_RES->PushSelected(meshMD5, true);
+					RE_RES->PushSelected(simulation->meshMD5, true);
 			}
-			else if (primCmp) 
+			else if (simulation->primCmp)
 			{
-				primCmp->DrawPrimPropierties();
+				simulation->primCmp->DrawPrimPropierties();
 			}
 			else ImGui::TextWrapped("Select mesh resource or select primitive");
 
@@ -281,114 +296,114 @@ void RE_CompParticleEmitter::DrawProperties()
 			if (ImGui::BeginMenu("Primitive"))
 			{
 				if (ImGui::MenuItem("Point")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
 					clearMesh = true;
-					useTextures = false;
+					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Cube")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompCube();
+					simulation->primCmp = new RE_CompCube();
 					setUpPrimitive = clearMesh = true;
-					useTextures = false;
+					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Dodecahedron")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompDodecahedron();
+					simulation->primCmp = new RE_CompDodecahedron();
 					setUpPrimitive = clearMesh = true;
-					useTextures = false;
+					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Tetrahedron")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompTetrahedron();
+					simulation->primCmp = new RE_CompTetrahedron();
 					setUpPrimitive = clearMesh = true;
-					useTextures = false;
+					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Octohedron")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompOctohedron();
+					simulation->primCmp = new RE_CompOctohedron();
 					setUpPrimitive = clearMesh = true;
-					useTextures = false;
+					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Icosahedron")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompIcosahedron();
+					simulation->primCmp = new RE_CompIcosahedron();
 					setUpPrimitive = clearMesh = true;
-					useTextures = false;
+					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Plane")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompPlane();
-					useTextures = setUpPrimitive = clearMesh = true;
+					simulation->primCmp = new RE_CompPlane();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Sphere")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompSphere();
-					useTextures = setUpPrimitive = clearMesh = true;
+					simulation->primCmp = new RE_CompSphere();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Cylinder")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompCylinder();
-					useTextures = setUpPrimitive = clearMesh = true;
+					simulation->primCmp = new RE_CompCylinder();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("HemiSphere")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompHemiSphere();
-					useTextures = setUpPrimitive = clearMesh = true;
+					simulation->primCmp = new RE_CompHemiSphere();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Torus")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompTorus();
-					useTextures = setUpPrimitive = clearMesh = true;
+					simulation->primCmp = new RE_CompTorus();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Trefoil Knot")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompTrefoiKnot();
-					useTextures = setUpPrimitive = clearMesh = true;
+					simulation->primCmp = new RE_CompTrefoiKnot();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Rock")) {
-					if (primCmp) {
-						primCmp->UnUseResources();
-						DEL(primCmp);
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
 					}
-					primCmp = new RE_CompRock();
+					simulation->primCmp = new RE_CompRock();
 					setUpPrimitive = clearMesh = true;
-					useTextures = false;
+					simulation->useTextures = false;
 				}
 
 				ImGui::EndMenu();
@@ -396,13 +411,13 @@ void RE_CompParticleEmitter::DrawProperties()
 
 			if (clearMesh)
 			{
-				if (meshMD5) {
-					RE_RES->UnUse(meshMD5);
-					meshMD5 = nullptr;
+				if (simulation->meshMD5) {
+					RE_RES->UnUse(simulation->meshMD5);
+					simulation->meshMD5 = nullptr;
 				}
 
 				if (setUpPrimitive) {
-					RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
+					RE_SCENE->primitives->SetUpComponentPrimitive(simulation->primCmp);
 					setUpPrimitive = false;
 				}
 
@@ -424,11 +439,11 @@ void RE_CompParticleEmitter::DrawProperties()
 					eastl::string name = eastl::to_string(count++) + m->GetName();
 					if (ImGui::MenuItem(name.c_str()))
 					{
-						if (meshMD5) RE_RES->UnUse(meshMD5);
-						meshMD5 = m->GetMD5();
-						if (meshMD5) RE_RES->Use(meshMD5);\
+						if (simulation->meshMD5) RE_RES->UnUse(simulation->meshMD5);
+						simulation->meshMD5 = m->GetMD5();
+						if (simulation->meshMD5) RE_RES->Use(simulation->meshMD5);
 
-						useTextures = true;
+						simulation->useTextures = true;
 					}
 				}
 				if (none) ImGui::Text("No custom materials on assets");
@@ -449,14 +464,14 @@ void RE_CompParticleEmitter::DrawProperties()
 
 
 
-			if (!materialMD5) ImGui::Text("NMaterial not selected.");
+			if (!simulation->materialMD5) ImGui::Text("NMaterial not selected.");
 			else
 			{
 				ImGui::Separator();
-				RE_Material* matRes = dynamic_cast<RE_Material*>(RE_RES->At(materialMD5));
+				RE_Material* matRes = dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5));
 				if (ImGui::Button(matRes->GetName())) RE_RES->PushSelected(matRes->GetMD5(), true);
 				
-				matRes->DrawMaterialParticleEdit(useTextures);
+				matRes->DrawMaterialParticleEdit(simulation->useTextures);
 			}
 
 
@@ -471,16 +486,16 @@ void RE_CompParticleEmitter::DrawProperties()
 					none = false;
 					if (ImGui::MenuItem(material->GetName()))
 					{
-						if (materialMD5)
+						if (simulation->materialMD5)
 						{
-							(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UnUseResources();
-							RE_RES->UnUse(materialMD5);
+							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UnUseResources();
+							RE_RES->UnUse(simulation->materialMD5);
 						}
-						materialMD5 = material->GetMD5();
-						if (materialMD5)
+						simulation->materialMD5 = material->GetMD5();
+						if (simulation->materialMD5)
 						{
-							RE_RES->Use(materialMD5);
-							(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UseResources();
+							RE_RES->Use(simulation->materialMD5);
+							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UseResources();
 						}
 					}
 				}
@@ -492,9 +507,9 @@ void RE_CompParticleEmitter::DrawProperties()
 			{
 				if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#MaterialReference"))
 				{
-					if (materialMD5) RE_RES->UnUse(materialMD5);
-					materialMD5 = *static_cast<const char**>(dropped->Data);
-					if (materialMD5) RE_RES->Use(materialMD5);
+					if (simulation->materialMD5) RE_RES->UnUse(simulation->materialMD5);
+					simulation->materialMD5 = *static_cast<const char**>(dropped->Data);
+					if (simulation->materialMD5) RE_RES->Use(simulation->materialMD5);
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -565,23 +580,23 @@ void RE_CompParticleEmitter::DeserializeBinary(char*& cursor, eastl::map<int, co
 
 void RE_CompParticleEmitter::UseResources()
 {
-	if (meshMD5)RE_RES->Use(meshMD5);
-	if (materialMD5) {
-		RE_RES->Use(materialMD5);
-		dynamic_cast<RE_Material*>(RE_RES->At(materialMD5))->UseResources();
+	if (simulation->meshMD5)RE_RES->Use(simulation->meshMD5);
+	if (simulation->materialMD5) {
+		RE_RES->Use(simulation->materialMD5);
+		dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UseResources();
 	}
 }
 
 void RE_CompParticleEmitter::UnUseResources()
 {
-	if (meshMD5)RE_RES->UnUse(meshMD5);
-	if (materialMD5) {
-		dynamic_cast<RE_Material*>(RE_RES->At(materialMD5))->UnUseResources();
-		RE_RES->UnUse(materialMD5);
+	if (simulation->meshMD5)RE_RES->UnUse(simulation->meshMD5);
+	if (simulation->materialMD5) {
+		dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UnUseResources();
+		RE_RES->UnUse(simulation->materialMD5);
 	}
 }
 
-bool RE_CompParticleEmitter::isLighting() const { return emitlight; }
+bool RE_CompParticleEmitter::isLighting() const { return simulation->emitlight; }
 
 void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* u_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
 {
@@ -602,7 +617,7 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 
 	if (!sharedLight) {
 		eastl::string uniform_name("pInfo.tclq");
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (uniform_name).c_str()), float(L_POINT), constant, linear, quadratic);
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (uniform_name).c_str()), float(L_POINT), simulation->constant, simulation->linear, simulation->quadratic);
 
 
 		for (auto p : *particles) {
@@ -610,13 +625,13 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 
 			unif_name = array_name + eastl::to_string(count++) + "].";
 			
-			if (particleLColor)
+			if (simulation->particleLColor)
 				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), p->lightColor.x, p->lightColor.y, p->lightColor.z, p->specular);
 			else
-				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, specular);
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), simulation->lightColor.x, simulation->lightColor.y, simulation->lightColor.z, simulation->specular);
 
 			math::float3 partcleGlobalpos = objectPos + p->position;
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionIntensity").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, particleLColor ? p->intensity : intensity);
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionIntensity").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, simulation->particleLColor ? p->intensity : simulation->intensity);
 		}
 	}
 	else
@@ -627,13 +642,13 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 			unif_name = array_name + eastl::to_string(count++) + "].";
 
 			//math::vec f = transform->GetFront();
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "directionIntensity").c_str()),0.0,0.0,0.0, particleLColor ? p->intensity : intensity);
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "directionIntensity").c_str()),0.0,0.0,0.0, simulation->particleLColor ? p->intensity : simulation->intensity);
 
 
-			if (particleLColor)
+			if (simulation->particleLColor)
 				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), p->lightColor.x, p->lightColor.y, p->lightColor.z, p->specular);
 			else
-				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), lightColor.x, lightColor.y, lightColor.z, specular);
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), simulation->lightColor.x, simulation->lightColor.y, simulation->lightColor.z, simulation->specular);
 
 
 			//if (L_POINT != L_DIRECTIONAL)
@@ -641,7 +656,7 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 				math::float3 partcleGlobalpos = objectPos + p->position;
 
 				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, float(L_POINT));
-				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "clq").c_str()), constant, linear, quadratic, 0.0f);
+				RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "clq").c_str()), simulation->constant, simulation->linear, simulation->quadratic, 0.0f);
 
 				//if (type == L_SPOTLIGHT)
 				//	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "co").c_str()), cutOff[1], outerCutOff[1], 0.0f, 0.0f);
@@ -652,89 +667,3 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 
 	}
 }
-
-
-/*
-void RE_CompParticleEmitter::Update()
-{
-	int spawns_needed = 0;
-	float dt = 0.f;// RE_TIME->GetDeltaTime();
-
-	if (emissor_life > 0.f)
-	{
-		time_counter += dt;
-		if (time_counter <= emissor_life)
-		{
-			spawn_counter += dt;
-			while (spawn_counter > 1000.f / emissionRate)
-			{
-				spawn_counter -= (1000.f / emissionRate);
-				spawns_needed++;
-			}
-		}
-	}
-	else
-	{
-		spawn_counter += dt;
-		while (spawn_counter > 1.f / emissionRate)
-		{
-			spawn_counter -= (1.f / emissionRate);
-			spawns_needed++;
-		}
-	}
-
-	UpdateParticles(spawns_needed);
-}
-
-void RE_CompParticleEmitter::PostUpdate() {}
-
-void RE_CompParticleEmitter::OnPlay()
-{
-	//RE_LOG_SECONDARY("particle emitter play");
-
-	if (particles)
-		DEL_A(particles);
-
-	particles = new Particle[max_particles = (unsigned int)(emissionRate * (lifetime + lifetime_margin))];
-
-	time_counter = 0.0f;
-	spawn_counter = 0.0f;
-
-	for (int i = 0; i < max_particles; i++)
-		particles[i].SetUp(this);
-}
-
-void RE_CompParticleEmitter::OnPause() {}
-
-void RE_CompParticleEmitter::OnStop()
-{
-	//RE_LOG_SECONDARY("particle emitter stop");
-}
-*/
-
-
-/*
-bool RE_CompParticleEmitter::LocalEmission() const { return local_emission; }
-bool RE_CompParticleEmitter::EmmissionFinished() const { return emissor_life < 0.f ? false : time_counter <= emissor_life; }
-RE_Mesh * RE_CompParticleEmitter::GetMesh() const { return mParticle; }
-
-
-void RE_CompParticleEmitter::ResetParticle(Particle * p) { p->Emit(); }
-
-void RE_CompParticleEmitter::UpdateParticles(int spawns_needed)
-{
-	Particle* p = nullptr;
-	for (int i = 0; i < max_particles; i++)
-	{
-		if (!((p = &particles[i])->Alive()))
-		{
-			if (spawns_needed > 0)
-			{
-				ResetParticle(p);
-				spawns_needed--;
-			}
-		}
-		else p->Update();
-	}
-}
-*/

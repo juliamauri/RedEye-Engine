@@ -42,6 +42,7 @@ void ModulePhysics::Update()
 				for (int i = 0; i < 3; ++i)
 					particle->speed[i] = RE_MATH->RandomF() * sim->first->speed_muliplier;
 
+				sim->first->SetUpParticle(particle);
 				sim->second->push_back(particle);
 			}
 
