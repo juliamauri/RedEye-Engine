@@ -718,6 +718,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
 			RE_GLCache::ChangeShader(particlelight_pass);
 
+			glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
+
 			// Bind Textures
 			static const eastl::string pdeferred_textures[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
 			for (unsigned int count = 0; count < 5; ++count)
