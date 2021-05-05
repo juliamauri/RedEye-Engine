@@ -799,7 +799,7 @@
 "	TexCoord = aTexCoord;\n"								\
 "	mat3 normalMatrix = transpose(inverse(mat3(model)));\n"	\
 "	if(customNormal > 0.0)"									\
-"		Normal = normalMatrix * customNormal;\n"			\
+"		Normal = normalMatrix * normal;\n"					\
 "	else\n"													\
 "		Normal = normalMatrix * aNormal;\n"					\
 "	gl_Position = projection * view * worldPos;\n"			\
