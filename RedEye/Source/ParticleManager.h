@@ -38,8 +38,17 @@ struct RE_ParticleEmitter
 	// Control values
 	float spawn_offset = 0.f;
 	float speed_muliplier = 2.f;
+	
+	float maxLifeTime = 1.5f;
+	float maxSpeed = 2.f;
+	float maxDistance = 2.f * 1.5f; //lifetime * speed
 
 	// Render values
+	enum ColorState { SINGLE = 0, OVERLIFETIME, OVERDISTANCE, OVERSPEED };
+	ColorState cState = SINGLE;
+	math::vec particleColor = math::vec::one;
+	math::vec gradient[2] = { math::vec::zero, math::vec::one };
+
 	bool emitlight = false;
 	math::vec lightColor = math::vec::one;
 	bool randomLightColor = false;

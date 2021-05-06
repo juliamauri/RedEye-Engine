@@ -56,7 +56,6 @@ void RE_CompParticleEmitter::Draw() const
 		else {
 			RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 			RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", { 1.0f,1.0f,1.0f });
 			RE_ShaderImporter::setFloat(shader, "opacity", 1.0f);
 		}
 
@@ -139,6 +138,51 @@ void RE_CompParticleEmitter::Draw() const
 				RE_ShaderImporter::setFloat(shader, "shininess", 16.0f);
 			}
 
+			static float weight = 0.0f;
+			static float weight2 = 0.0f;
+			static math::vec wColor = math::vec::zero;
+			switch (simulation->cState)
+			{
+			case RE_ParticleEmitter::ColorState::SINGLE:
+				RE_ShaderImporter::setFloat(shader, "cdiffuse", simulation->particleColor);
+				break;
+			case RE_ParticleEmitter::ColorState::OVERLIFETIME:
+				weight = simulation->maxLifeTime / p->lifetime;
+				weight2 = 1 - weight;
+
+				wColor.Set(
+					simulation->gradient[0].x* weight + simulation->gradient[1].x * weight2,
+					simulation->gradient[0].y* weight + simulation->gradient[1].y * weight2,
+					simulation->gradient[0].z* weight + simulation->gradient[1].z * weight2
+				);
+				RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
+				break;
+			case RE_ParticleEmitter::ColorState::OVERDISTANCE:
+				weight = simulation->maxDistance / (p->position - goPosition).Length();
+				weight2 = 1 - weight;
+
+				wColor.Set(
+					simulation->gradient[0].x * weight + simulation->gradient[1].x * weight2,
+					simulation->gradient[0].y * weight + simulation->gradient[1].y * weight2,
+					simulation->gradient[0].z * weight + simulation->gradient[1].z * weight2
+				);
+				RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
+				break;
+			case RE_ParticleEmitter::ColorState::OVERSPEED:
+				
+				
+				weight = p->speed.Abs().AverageOfElements() / simulation->maxSpeed /* * 1.732f math::Sqrt(3.f) */;
+				weight2 = 1 - weight;
+
+				wColor.Set(
+					simulation->gradient[1].x * weight + simulation->gradient[0].x * weight2,
+					simulation->gradient[1].y * weight + simulation->gradient[0].y * weight2,
+					simulation->gradient[1].z * weight + simulation->gradient[0].z * weight2
+				);
+				RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
+				break;
+			}
+
 			if (simulation->meshMD5)
 				dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
 			else
@@ -217,6 +261,22 @@ void RE_CompParticleEmitter::DrawProperties()
 
 			if(simulation->particleDir == RE_ParticleEmitter::PS_Custom)
 				ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
+
+
+			int cState = simulation->cState;
+			if (ImGui::Combo("Color Type", &cState, "Single\0Over Lifetime\0Over Distance\0Over Speed\0"))
+				simulation->cState = static_cast<RE_ParticleEmitter::ColorState>(cState);
+
+			switch (simulation->cState)
+			{
+			case RE_ParticleEmitter::ColorState::SINGLE:
+				ImGui::ColorEdit3("Particle Color", &simulation->particleColor[0]);
+				break;
+			default:
+				ImGui::ColorEdit3("Particle Gradient 1", &simulation->gradient[0][0]);
+				ImGui::ColorEdit3("Particle Gradient 2", &simulation->gradient[1][0]);
+				break;
+			}
 
 			ImGui::Checkbox(simulation->emitlight ? "Disable lighting" : "Enable lighting", &simulation->emitlight);
 			ImGui::ColorEdit3("Light Color", &simulation->lightColor[0]);
