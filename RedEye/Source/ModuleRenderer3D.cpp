@@ -34,7 +34,7 @@
 
 #include "MathGeoLib/include/Math/float3.h"
 #include "MathGeoLib/include/Math/Quat.h"
-#include "ImGuizmo/ImGuizmo.h"
+#include "ImGuiWidgets/ImGuizmo/ImGuizmo.h"
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>

@@ -3,7 +3,7 @@
 
 #include "MathGeoLib/include/Math/float4.h"
 #include "ImGui\imgui.h"
-#include "ImGuizmo/ImGuizmo.h"
+#include "ImGuiWidgets/ImGuizmo/ImGuizmo.h"
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 #include <EASTL/map.h>

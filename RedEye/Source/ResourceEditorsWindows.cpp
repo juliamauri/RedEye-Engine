@@ -21,7 +21,7 @@
 
 #include "ImGui/misc/cpp/imgui_stdlib.h"
 #include "ImGui/imgui_internal.h"
-#include "ImGuiColorTextEdit/TextEditor.h"
+#include "ImGuiWidgets/ImGuiColorTextEdit/TextEditor.h"
 #include "Glew/include/glew.h"
 
 MaterialEditorWindow::MaterialEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active)

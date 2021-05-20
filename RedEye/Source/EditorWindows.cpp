@@ -20,7 +20,7 @@
 
 #include "ImGui/misc/cpp/imgui_stdlib.h"
 #include "ImGui/imgui_internal.h"
-#include "ImGuiColorTextEdit/TextEditor.h"
+#include "ImGuiWidgets/ImGuiColorTextEdit/TextEditor.h"
 #include "SDL2/include/SDL_scancode.h"
 #include <EAStdC/EASprintf.h>
 

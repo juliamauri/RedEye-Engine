@@ -16,9 +16,6 @@
     <ClCompile Include="ImGui\imgui_draw.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuizmo\ImGuizmo.cpp">
-      <Filter>3rd Party\ImGuizmo</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompMesh.cpp">
       <Filter>Source\Application\Modules\Scene\Entity Component System\Components</Filter>
     </ClCompile>
@@ -47,9 +44,6 @@
       <Filter>Source\Application\Resources</Filter>
     </ClCompile>
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp">
-      <Filter>3rd Party\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp">
       <Filter>3rd Party\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="RE_InternalResources.cpp">
@@ -320,6 +314,12 @@
     <ClCompile Include="ModulePhysics.cpp">
       <Filter>Source\Application\Modules\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="ImGuiWidgets\ImGuizmo\ImGuizmo.cpp">
+      <Filter>3rd Party\ImGuiWidgets\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiWidgets\ImGuiColorTextEdit\TextEditor.cpp">
+      <Filter>3rd Party\ImGuiWidgets\ImGuiTextEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event.h">
@@ -463,9 +463,6 @@
     <ClInclude Include="ImGui\stb_truetype.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuizmo\ImGuizmo.h">
-      <Filter>3rd Party\ImGuizmo</Filter>
-    </ClInclude>
     <ClInclude Include="MathGeoLib\include\MathBuildConfig.h">
       <Filter>3rd Party\MathGeoLib</Filter>
     </ClInclude>
@@ -518,9 +515,6 @@
       <Filter>Source\Application\Resources</Filter>
     </ClInclude>
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h">
-      <Filter>3rd Party\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGuiColorTextEdit\TextEditor.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="RE_InternalResources.h">
@@ -1304,6 +1298,15 @@
     <ClInclude Include="Module.h">
       <Filter>Source\Application\Modules</Filter>
     </ClInclude>
+    <ClInclude Include="ImGuiWidgets\ImGuizmo\ImGuizmo.h">
+      <Filter>3rd Party\ImGuiWidgets\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiWidgets\ImGuiColorTextEdit\TextEditor.h">
+      <Filter>3rd Party\ImGuiWidgets\ImGuiTextEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiWidgets\ImGuiCurverEditor\ImGuiCurveEditor.hpp">
+      <Filter>3rd Party\ImGuiWidgets\ImGuiCurveEditor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -1332,9 +1335,6 @@
     </Filter>
     <Filter Include="3rd Party\ImGui">
       <UniqueIdentifier>{a919df7d-26c5-4f48-bc4d-d94d785fcd11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="3rd Party\ImGuizmo">
-      <UniqueIdentifier>{a8753026-9d83-44bd-8441-d736761a142d}</UniqueIdentifier>
     </Filter>
     <Filter Include="3rd Party\Optick">
       <UniqueIdentifier>{96f88492-7884-4afc-8db2-b5f3566d4b9c}</UniqueIdentifier>
@@ -1488,6 +1488,18 @@
     </Filter>
     <Filter Include="Source\Application\Modules\Physics">
       <UniqueIdentifier>{c9a1c74d-c576-4531-944c-9463c6e3e6cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\ImGuiWidgets">
+      <UniqueIdentifier>{0aed895f-199d-49a6-ac2e-b99e4b818ea3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\ImGuiWidgets\ImGuizmo">
+      <UniqueIdentifier>{a8753026-9d83-44bd-8441-d736761a142d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\ImGuiWidgets\ImGuiTextEditor">
+      <UniqueIdentifier>{6f65617c-1001-4545-bc50-399bd5a073c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\ImGuiWidgets\ImGuiCurveEditor">
+      <UniqueIdentifier>{3289b0cd-b1cf-46c4-b44d-63506dab86ab}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
