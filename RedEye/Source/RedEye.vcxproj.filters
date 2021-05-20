@@ -1307,6 +1307,12 @@
     <ClInclude Include="ImGuiWidgets\ImGuiCurverEditor\ImGuiCurveEditor.hpp">
       <Filter>3rd Party\ImGuiWidgets\ImGuiCurveEditor</Filter>
     </ClInclude>
+    <ClInclude Include="RE_Particle.h">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ParticleEmitter.h">
+      <Filter>Source\Application\Modules\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">

@@ -34,4 +34,6 @@ unsigned long long RE_Math::RandomUID()
 	return ret;
 }
 
+math::LCG& RE_Math::GetRNGSeed() { return lcg; }
+
 void RE_Math::SetRNGSeed(unsigned int seed) { lcg.Seed(seed); }

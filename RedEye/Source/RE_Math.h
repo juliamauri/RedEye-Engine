@@ -27,6 +27,7 @@ public:
 	int					RandomInt(int min, int max);
 	unsigned long long	RandomUID();
 
+	math::LCG& GetRNGSeed();
 	void SetRNGSeed(unsigned int seed);
 
 	// Number valuations

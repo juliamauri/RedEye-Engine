@@ -13,6 +13,7 @@
 #include "RE_Material.h"
 #include "RE_Shader.h"
 #include "RE_GLCache.h"
+#include "RE_Particle.h"
 
 #include "ModuleScene.h"
 #include "RE_GameObject.h"
@@ -171,7 +172,7 @@ void RE_CompParticleEmitter::Draw() const
 			case RE_ParticleEmitter::ColorState::OVERSPEED:
 				
 				
-				weight = p->speed.Abs().AverageOfElements() / simulation->maxSpeed /* * 1.732f math::Sqrt(3.f) */;
+				weight = p->velocity.Abs().AverageOfElements() / simulation->maxSpeed /* * 1.732f math::Sqrt(3.f) */;
 				weight2 = 1 - weight;
 
 				wColor.Set(

@@ -214,8 +214,8 @@ const UID ComponentsPool::GetNewComponentUID(ComponentType cType)
 	case C_HEMISHPERE: return pHemiSpherePool.GetNewCompUID();
 	case C_TORUS:  return pTorusPool.GetNewCompUID();
 	case C_TREFOILKNOT: return pTrefoiKnotPool.GetNewCompUID();
-	default: return 0;
 	}
+	return 0;
 }
 
 RE_Component* ComponentsPool::GetNewComponentPtr(ComponentType cType)

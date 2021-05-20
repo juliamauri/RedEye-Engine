@@ -579,6 +579,8 @@
     <ClInclude Include="ModuleWindow.h" />
     <ClInclude Include="PhysFS\include\physfs.h" />
     <ClInclude Include="PhysFS\include\physfs_internal.h" />
+    <ClInclude Include="RE_Particle.h" />
+    <ClInclude Include="RE_ParticleEmitter.h" />
     <ClInclude Include="RE_Profiler.h" />
     <ClInclude Include="RE_QuadTree.h" />
     <ClInclude Include="RapidJson\include\allocators.h" />

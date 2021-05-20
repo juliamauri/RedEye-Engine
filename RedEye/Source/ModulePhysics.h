@@ -10,14 +10,10 @@ public:
 	ModulePhysics();
 	~ModulePhysics();
 
-	// Module
-	bool Init();
-	bool Start();
-	//void PreUpdate() override;
-	void Update();
-	void CleanUp();
-	//void RecieveEvent(const Event& e) override;
-	//void DrawEditor() override;
+	bool Init() override;
+	bool Start() override;
+	void Update() override;
+	void CleanUp() override;
 
 	RE_ParticleEmitter* AddEmitter();
 	void RemoveEmitter(RE_ParticleEmitter* emitter);

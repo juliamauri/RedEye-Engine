@@ -45,7 +45,7 @@ private:
 	bool draw = false;
 
 	// Triangle "Point"
-	unsigned int VAO, VBO, EBO;
+	unsigned int VAO = 0u, VBO = 0u, EBO = 0u;
 };
 
 #endif // !__RE_COMPPARTICLEEMITER_H__

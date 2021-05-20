@@ -96,20 +96,4 @@ extern Application* App;
 #define RE_RENDER App->renderer
 #define RE_AUDIO App->audio
 
-/*
-RE_INPUT->
-RE_WINDOW->
-RE_SCENE->
-RE_EDITOR->
-RE_RENDER->
-RE_AUDIO->
-
-RE_LOGGER.
-RE_TIME->
-RE_RNG->
-RE_HARDWARE->
-RE_FS->
-RE_RES->
-*/
-
 #endif // !__APP_H__
