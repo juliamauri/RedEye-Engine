@@ -3,6 +3,9 @@
 
 #include "MathGeoLib/include/Math/float3.h"
 #include "MathGeoLib/include/Geometry/AABB.h"
+#include <EASTL/vector.h>
+
+#include "ImGui/imgui.h"
 
 class RE_CompPrimitive;
 
@@ -94,6 +97,12 @@ struct RE_ParticleEmitter
 		PS_Custom
 	} particleDir = PS_Billboard;
 	math::float3 direction = { -1.0f,1.0f,0.5f };
+
+	//Curves
+	bool useCurve = false;
+	bool smoothCurve = false;
+	eastl::vector< ImVec2> curve;
+	int total_points = 10;
 };
 
 #endif //!__RE_PARTICLEEMITTER_H__

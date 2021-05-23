@@ -22,6 +22,7 @@
 #include "RE_CompPrimitive.h"
 
 #include "ImGui\imgui.h"
+#include "ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp"
 
 RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER) {
 }
@@ -149,6 +150,12 @@ void RE_CompParticleEmitter::Draw() const
 				break;
 			case RE_ParticleEmitter::ColorState::OVERLIFETIME:
 				weight = simulation->maxLifeTime / p->lifetime;
+
+				if (simulation->useCurve) {
+					weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
+						ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
+				}
+
 				weight2 = 1 - weight;
 
 				wColor.Set(
@@ -160,6 +167,12 @@ void RE_CompParticleEmitter::Draw() const
 				break;
 			case RE_ParticleEmitter::ColorState::OVERDISTANCE:
 				weight = simulation->maxDistance / (p->position - goPosition).Length();
+
+				if (simulation->useCurve) {
+					weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
+						ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
+				}
+
 				weight2 = 1 - weight;
 
 				wColor.Set(
@@ -170,9 +183,13 @@ void RE_CompParticleEmitter::Draw() const
 				RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
 				break;
 			case RE_ParticleEmitter::ColorState::OVERSPEED:
-				
-				
 				weight = p->velocity.Abs().AverageOfElements() / simulation->maxSpeed /* * 1.732f math::Sqrt(3.f) */;
+
+				if (simulation->useCurve) {
+					weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
+						ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
+				}
+
 				weight2 = 1 - weight;
 
 				wColor.Set(
@@ -574,13 +591,48 @@ void RE_CompParticleEmitter::DrawProperties()
 				}
 				ImGui::EndDragDropTarget();
 			}
+
+			ImGui::Separator();
+
+			ImGui::Checkbox("Use curve", &simulation->useCurve);
+
+			if (simulation->useCurve) {
+
+				ImGui::PushItemWidth(75.f);
+
+				static int minPoitns = 3;
+
+				if (ImGui::DragInt("Num Points", &simulation->total_points, 1.0f)) {
+
+					if (simulation->total_points < minPoitns) simulation->total_points = minPoitns;
+
+					simulation->curve.clear();
+					simulation->curve.push_back({ -1.0f, 0.0f });
+					for (int i = 1; i < simulation->total_points; i++)
+						simulation->curve.push_back({ 0.0f, 0.0f });
+				}
+
+				ImGui::SameLine();
+
+				ImGui::Checkbox("Smooth curve", &simulation->smoothCurve);
+
+				ImGui::SameLine();
+
+				ImGui::PushItemWidth(150.f);
+
+				static float cSize[2] = { 600.f, 200.f };
+				ImGui::DragFloat2("Curve size", cSize, 1.0f, 0.0f, 0.0f, "%.0f");
+
+				ImGui::PopItemWidth();
+
+
+				ImGui::Curve("Particle curve editor", { cSize[0], cSize[1] }, simulation->total_points, simulation->curve.data());
+			}
 		}
 		else
 		{
 			ImGui::Text("Unregistered simulation");
 		}
-
-		ImGui::Separator();
 
 		//ImGui::SliderFloat("Emissor Life", &emissor_life, -1.0f, 10.0f, "%.2f");
 		//ImGui::Separator();
