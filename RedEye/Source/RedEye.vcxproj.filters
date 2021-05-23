@@ -304,13 +304,6 @@
     <ClCompile Include="RE_Math.cpp">
       <Filter>Source\Application\Math</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Profiler.cpp" />
-    <ClCompile Include="ParticleManager.cpp">
-      <Filter>Source\Application\Modules\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_CompParticleEmiter.cpp">
-      <Filter>Source\Application\Modules\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="ModulePhysics.cpp">
       <Filter>Source\Application\Modules\Physics</Filter>
     </ClCompile>
@@ -319,6 +312,15 @@
     </ClCompile>
     <ClCompile Include="ImGuiWidgets\ImGuiColorTextEdit\TextEditor.cpp">
       <Filter>3rd Party\ImGuiWidgets\ImGuiTextEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleManager.cpp">
+      <Filter>Source\Application\Modules\Physics\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CompParticleEmiter.cpp">
+      <Filter>Source\Application\Modules\Physics\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Profiler.cpp">
+      <Filter>Source\Utility\Profiling</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1285,13 +1287,6 @@
     <ClInclude Include="RE_GLCache.h">
       <Filter>Source\Application\Modules\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Profiler.h" />
-    <ClInclude Include="ParticleManager.h">
-      <Filter>Source\Application\Modules\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_CompParticleEmiter.h">
-      <Filter>Source\Application\Modules\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="ModulePhysics.h">
       <Filter>Source\Application\Modules\Physics</Filter>
     </ClInclude>
@@ -1307,11 +1302,20 @@
     <ClInclude Include="ImGuiWidgets\ImGuiCurverEditor\ImGuiCurveEditor.hpp">
       <Filter>3rd Party\ImGuiWidgets\ImGuiCurveEditor</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleManager.h">
+      <Filter>Source\Application\Modules\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CompParticleEmiter.h">
+      <Filter>Source\Application\Modules\Physics\Particles</Filter>
+    </ClInclude>
     <ClInclude Include="RE_Particle.h">
-      <Filter>Source\Application\Modules\Physics</Filter>
+      <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClInclude>
     <ClInclude Include="RE_ParticleEmitter.h">
-      <Filter>Source\Application\Modules\Physics</Filter>
+      <Filter>Source\Application\Modules\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Profiler.h">
+      <Filter>Source\Utility\Profiling</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1506,6 +1510,12 @@
     </Filter>
     <Filter Include="3rd Party\ImGuiWidgets\ImGuiCurveEditor">
       <UniqueIdentifier>{3289b0cd-b1cf-46c4-b44d-63506dab86ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Physics\Particles">
+      <UniqueIdentifier>{282671b5-8dfc-40c2-8ec6-a054dc233ced}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Profiling">
+      <UniqueIdentifier>{ccea0756-2382-409c-8b41-df5beea8f53d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

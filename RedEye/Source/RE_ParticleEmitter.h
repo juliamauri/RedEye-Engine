@@ -16,7 +16,7 @@ struct RE_ParticleEmitter
 
 	// Instantiation parameters
 	float lifetime = 4.f;
-	float speed_muliplier = 0.1f;
+	float speed_muliplier = 1.f;
 	float spawn_frequency = 50.f;
 	float spawn_offset = 0.f;
 

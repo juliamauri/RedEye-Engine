@@ -4,6 +4,8 @@
 #include "Module.h"
 #include "ParticleManager.h"
 
+class RE_CompCamera;
+
 class ModulePhysics : public Module
 {
 public:
@@ -15,6 +17,9 @@ public:
 	void Update() override;
 	void CleanUp() override;
 
+	void DrawDebug(RE_CompCamera* current_camera) const;
+	void DrawEditor() override;
+
 	RE_ParticleEmitter* AddEmitter();
 	void RemoveEmitter(RE_ParticleEmitter* emitter);
 
@@ -24,6 +29,10 @@ public:
 private:
 
 	ParticleManager particles;
+
+	// Debug drawing
+	float debug_color[4] = { 0.1f, 0.8f, 0.1f, 1.f };
+	float circle_steps = 12.f;
 };
 
 #endif // !__MODULEPHYSICS__

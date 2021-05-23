@@ -16,6 +16,7 @@ public:
 	unsigned int Allocate(RE_ParticleEmitter* emitter);
 	bool Deallocate(unsigned int index);
 
+	void DrawDebug(float circle_steps) const;
 
 	bool SetEmitterState(unsigned int index, RE_ParticleEmitter::PlaybackState state);
 

@@ -11,6 +11,7 @@
 #include "ModuleInput.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
+#include "ModulePhysics.h"
 #include "RE_GLCache.h"
 #include "RE_FBOManager.h"
 #include "RE_ResourceManager.h"
@@ -921,6 +922,7 @@ void ModuleRenderer3D::DrawDebug(const RenderView& render_view)
 	SetLighting(false);
 	SetTexture2D(false);
 
+	RE_PHYSICS->DrawDebug(render_view.camera);
 	RE_EDITOR->DrawDebug(render_view.camera);
 
 	if (reset_light) SetLighting(true);

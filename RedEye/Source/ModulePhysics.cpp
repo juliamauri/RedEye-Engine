@@ -4,6 +4,7 @@
 #include "RE_Time.h"
 #include "RE_Math.h"
 #include "RE_Particle.h"
+#include "RE_CompCamera.h"
 
 ModulePhysics::ModulePhysics() : Module("Physics") {}
 ModulePhysics::~ModulePhysics() {}
@@ -39,6 +40,7 @@ void ModulePhysics::Update()
 			const float spawn_period = 1.f / sim->first->spawn_frequency;
 			int to_add = sim->first->GetNewSpawns(local_dt);
 
+			// Spawn new particles
 			for (int i = 0; i < to_add; ++i)
 			{
 				RE_Particle* particle = new RE_Particle();
@@ -191,6 +193,25 @@ void ModulePhysics::Update()
 void ModulePhysics::CleanUp()
 {
 	particles.simulations.clear();
+}
+
+void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const
+{
+	if (!particles.simulations.empty())
+	{
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixf(current_camera->GetProjectionPtr());
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf((current_camera->GetView()).ptr());
+		glBegin(GL_LINES);
+		glColor4f(debug_color[0], debug_color[1], debug_color[2], debug_color[3]);
+		particles.DrawDebug(circle_steps);
+		glEnd();
+	}
+}
+
+void ModulePhysics::DrawEditor()
+{
 }
 
 RE_ParticleEmitter* ModulePhysics::AddEmitter()
