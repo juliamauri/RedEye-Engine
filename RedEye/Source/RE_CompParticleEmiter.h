@@ -38,6 +38,8 @@ public:
 	bool isLighting() const;
 	void CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
 
+	bool isBlend() const;
+
 private:
 
 	RE_ParticleEmitter* simulation = nullptr;

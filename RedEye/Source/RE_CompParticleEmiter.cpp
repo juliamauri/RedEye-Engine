@@ -58,7 +58,7 @@ void RE_CompParticleEmitter::Draw() const
 		else {
 			RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 			RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
-			RE_ShaderImporter::setFloat(shader, "opacity", 1.0f);
+			RE_ShaderImporter::setFloat(shader, "opacity", simulation->useOpacity ? simulation->opacity : 1.0f);
 		}
 
 		
@@ -295,6 +295,12 @@ void RE_CompParticleEmitter::DrawProperties()
 				ImGui::ColorEdit3("Particle Gradient 2", &simulation->gradient[1][0]);
 				break;
 			}
+
+			ImGui::Checkbox("Use Opacity", &simulation->useOpacity);
+			ImGui::SameLine();
+			ImGui::PushItemWidth(200.f);
+			ImGui::SliderFloat("Opecity", &simulation->opacity, 0.0f, 1.0f);
+			ImGui::PopItemWidth();
 
 			ImGui::Checkbox(simulation->emitlight ? "Disable lighting" : "Enable lighting", &simulation->emitlight);
 			ImGui::ColorEdit3("Light Color", &simulation->lightColor[0]);
@@ -780,3 +786,5 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 
 	}
 }
+
+bool RE_CompParticleEmitter::isBlend() const { return simulation->useOpacity; }

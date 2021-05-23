@@ -792,12 +792,17 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	}
 	else {
 
+		eastl::stack<RE_Component*> drawParticleSystemAsLast;
 		// Particle System Draws
 		if (!particleSystems.empty())
 		{
 			while (!particleSystems.empty())
 			{
-				particleSystems.top()->Draw();
+				RE_Component* toDraw = particleSystems.top();
+				if (dynamic_cast<RE_CompParticleEmitter*>(toDraw)->isBlend())
+					drawParticleSystemAsLast.push(toDraw);
+				else
+					toDraw->Draw();
 				particleSystems.pop();
 			}
 		}
@@ -811,7 +816,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			DrawSkyBox();
 
 		// Draw Blended elements
-		if (!drawAsLast.empty())
+		if (!drawAsLast.empty() || !drawParticleSystemAsLast.empty())
 		{
 			if (render_view.flags & BLENDED) {
 				glEnable(GL_BLEND);
@@ -822,6 +827,12 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			{
 				drawAsLast.top()->Draw();
 				drawAsLast.pop();
+			}
+
+			while (!drawParticleSystemAsLast.empty())
+			{
+				drawParticleSystemAsLast.top()->Draw();
+				drawParticleSystemAsLast.pop();
 			}
 
 			if (render_view.flags & BLENDED) glDisable(GL_BLEND);
