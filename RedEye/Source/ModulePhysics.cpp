@@ -47,12 +47,12 @@ void ModulePhysics::Update()
 
 				// Set base properties
 				particle->dt_offset = local_dt - sim->first->spawn_offset - (spawn_period * (i + 1));
-				particle->position = { 0.f, 0.f, 0.f };
+				particle->position = { 0.f, 5.f, 0.f };
 
 				// Set physic properties
 				particle->mass = 1.f;
-				particle->velocity = { (RE_MATH->RandomF() * 3.f), 5.f, (RE_MATH->RandomF() * 3.f) };
-				particle->col_radius = 0.2f;
+				particle->velocity = { (RE_MATH->RandomF() * 1.f), -1.f, (RE_MATH->RandomF() * 1.f) };
+				particle->col_radius = 0.5f;
 
 				// Set light properties
 				particle->intensity = (sim->first->randomIntensity) ? RE_MATH->RandomF(sim->first->iClamp[0], sim->first->iClamp[1]) : sim->first->intensity;
@@ -159,14 +159,50 @@ void ModulePhysics::Update()
 						}
 					}
 
-					// TODO: Check boundary collisions
+					// Check boundary collisions
+
+					switch (sim->first->bound_type)
+					{
+					case RE_ParticleEmitter::BoundaryType::NONE: break;
+					case RE_ParticleEmitter::BoundaryType::GROUND:
+					{
+						sim->first->boundary.plane.Set(math::vec::zero, { 0.f, 1.f, 0.f });
+
+						// Check if particle intersects or has passed plane
+						float dist_to_plane = sim->first->boundary.plane.SignedDistance((*p1)->position);
+						if (dist_to_plane <= (*p1)->col_radius)
+						{
+							// Resolve intersection
+							float dist_to_col = 0.f;
+							if (math::Plane::IntersectLinePlane(
+								sim->first->boundary.plane.normal,
+								sim->first->boundary.plane.d,
+								(*p1)->position,
+								(*p1)->velocity.Normalized(),
+								dist_to_col))
+							{
+								(*p1)->position += (*p1)->velocity.Normalized() * (dist_to_col - (*p1)->col_radius);
+
+								// Check if particle is already moving away from plane
+								float dot = (*p1)->velocity.Dot(sim->first->boundary.plane.normal);
+								if (dot < 0.f)
+								{
+									// Resolve collision impulse
+									(*p1)->velocity -= (2.f * (dot)*sim->first->boundary.plane.normal);
+								}
+							}
+						}
+
+						break;
+					}
+					}
 
 					// Acceleration
 					const float final_dt = local_dt - (*p1)->dt_offset;
 					(*p1)->velocity += sim->first->wind * final_dt;
 					(*p1)->velocity.y += sim->first->gravity * final_dt;
 
-					// TODO: Cap speed
+					// Cap speed
 					if ((*p1)->velocity.Length() > sim->first->maxSpeed)
 						(*p1)->velocity = (*p1)->velocity.Normalized() * sim->first->maxSpeed;
 

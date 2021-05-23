@@ -49,7 +49,7 @@ void ParticleManager::DrawDebug(float circle_steps) const
 		for (auto p = (*it)->second->cbegin(); p != (*it)->second->cend(); ++p)
 		{
 			eastl::vector<math::float2> trigonometry;
-			trigonometry.reserve(circle_steps);
+			trigonometry.reserve(static_cast<unsigned int>(circle_steps));
 			const float radius = (*p)->col_radius;
 			const math::vec p_pos = go_pos + (*p)->position;
 			for (float i = 0.f; i < cap; i += interval) trigonometry.push_back({ radius * sin(i), -radius * cos(i) });
