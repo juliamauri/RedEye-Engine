@@ -66,7 +66,7 @@ struct RE_ParticleEmitter
 	ColorState cState = SINGLE;
 	math::vec particleColor = math::vec::one;
 	math::vec gradient[2] = { math::vec::zero, math::vec::one };
-	bool useOpacity = false;  float opacity = 1.0f;
+	bool useOpacity = false, opacityWithCurve = false;  float opacity = 1.0f;
 
 	bool emitlight = false;
 	math::vec lightColor = math::vec::one;

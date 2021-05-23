@@ -154,6 +154,9 @@ void RE_CompParticleEmitter::Draw() const
 				if (simulation->useCurve) {
 					weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
 						ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
+
+					if(simulation->useOpacity && simulation->opacityWithCurve)
+						RE_ShaderImporter::setFloat(shader, "opacity", weight);
 				}
 
 				weight2 = 1 - weight;
@@ -171,6 +174,9 @@ void RE_CompParticleEmitter::Draw() const
 				if (simulation->useCurve) {
 					weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
 						ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
+
+					if (simulation->useOpacity && simulation->opacityWithCurve)
+						RE_ShaderImporter::setFloat(shader, "opacity", weight);
 				}
 
 				weight2 = 1 - weight;
@@ -188,6 +194,9 @@ void RE_CompParticleEmitter::Draw() const
 				if (simulation->useCurve) {
 					weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
 						ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
+
+					if (simulation->useOpacity && simulation->opacityWithCurve)
+						RE_ShaderImporter::setFloat(shader, "opacity", weight);
 				}
 
 				weight2 = 1 - weight;
@@ -297,10 +306,14 @@ void RE_CompParticleEmitter::DrawProperties()
 			}
 
 			ImGui::Checkbox("Use Opacity", &simulation->useOpacity);
-			ImGui::SameLine();
-			ImGui::PushItemWidth(200.f);
-			ImGui::SliderFloat("Opecity", &simulation->opacity, 0.0f, 1.0f);
-			ImGui::PopItemWidth();
+			if (!simulation->opacityWithCurve) {
+				ImGui::SameLine();
+				ImGui::PushItemWidth(200.f);
+				ImGui::SliderFloat("Opacity", &simulation->opacity, 0.0f, 1.0f);
+				ImGui::PopItemWidth();
+			}
+			else
+				ImGui::Text("Opacity is with curve");
 
 			ImGui::Checkbox(simulation->emitlight ? "Disable lighting" : "Enable lighting", &simulation->emitlight);
 			ImGui::ColorEdit3("Light Color", &simulation->lightColor[0]);
@@ -603,6 +616,8 @@ void RE_CompParticleEmitter::DrawProperties()
 			ImGui::Checkbox("Use curve", &simulation->useCurve);
 
 			if (simulation->useCurve) {
+
+				ImGui::Checkbox("Opacity with curve", &simulation->opacityWithCurve);
 
 				ImGui::PushItemWidth(75.f);
 
