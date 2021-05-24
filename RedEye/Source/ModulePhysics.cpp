@@ -79,6 +79,40 @@ void ModulePhysics::Update()
 					// Iterate for collisions (other particles could be dead, but dt should always be too small to notice)
 					for (eastl::list<RE_Particle*>::iterator p2 = p1.next(); p2 != sim->second->end(); ++p2)
 					{
+#ifndef Impulse_Thomas_Smid
+						// Check particle collision
+						const math::vec collision_dir = (*p1)->position - (*p2)->position;
+						const float dist2 = collision_dir.Dot(collision_dir);
+						const float combined_radius = (*p1)->col_radius + (*p2)->col_radius;
+						if (dist2 <= combined_radius * combined_radius)
+						{
+							// Get mtd: Minimum Translation Distance
+							const float dist = sqrt(dist2);
+							const math::vec mtd = collision_dir * (combined_radius - dist) / dist;
+
+							// Resolve Intersection
+							const float p1_inv_mass = 1.f / (*p1)->mass;
+							const float p2_inv_mass = 1.f / (*p2)->mass;
+							(*p1)->position += mtd * (p1_inv_mass / (p1_inv_mass + p2_inv_mass));
+							(*p2)->position -= mtd * (p2_inv_mass / (p1_inv_mass + p2_inv_mass));
+
+							// Resolve Collision
+							const math::vec col_normal = collision_dir.Normalized();
+							const math::vec col_speed = ((*p1)->velocity - (*p2)->velocity);
+							const float dot = col_speed.Dot(col_normal);
+
+							// Check if particles not already moving away
+							if (dot < 0.0f)
+							{
+								// Resolve applying impulse
+								const math::vec impulse = col_normal * (-(1.0f + sim->first->restitution) * dot) / (p1_inv_mass + p2_inv_mass);
+								(*p1)->velocity += impulse * p1_inv_mass;
+								(*p2)->velocity -= impulse * p2_inv_mass;
+							}
+						}
+#else
+						// Adaptation to Thomas Smid's sphere collision detection and resolution
+						// Shifts coordinate system to preview impending collisions
 						// Get relative distance & speed
 						float rel_distance = ((*p2)->position - (*p1)->position).Length();
 						float rel_speed = ((*p2)->velocity - (*p1)->velocity).Length();
@@ -157,6 +191,8 @@ void ModulePhysics::Update()
 								}
 							}
 						}
+
+#endif // !Impulse_Thomas_Smid
 					}
 
 					// Acceleration
@@ -210,6 +246,9 @@ void ModulePhysics::Update()
 
 						break;
 					}
+					case RE_ParticleEmitter::BoundaryType::CEILING: break;
+					case RE_ParticleEmitter::BoundaryType::BOX: break;
+					case RE_ParticleEmitter::BoundaryType::SPHERE: break;
 					}
 
 					++p1;

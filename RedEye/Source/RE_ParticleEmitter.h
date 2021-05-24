@@ -7,6 +7,8 @@
 
 #include "ImGui/imgui.h"
 
+//#define Impulse_Thomas_Smid
+
 class RE_CompPrimitive;
 
 struct RE_ParticleEmitter
@@ -115,75 +117,5 @@ struct RE_ParticleEmitter
 	eastl::vector< ImVec2> curve;
 	int total_points = 10;
 };
-/*
-struct Sphere
-{
-	Vector m_position;  
-	Vector m_velocity;  
-	float  m_radius;
-	float  m_mass; 
-	bool collide(Sphere& sphere);  
-	bool resolveIntersection(Sphere& sphere, const Vector& mtd); 
-	bool resolveCollision(Sphere& sphere, const Vector& Normal); 
-	bool colliding(const Sphere& sphere) const;
-}; 
-
-bool Sphere::colliding(const Sphere& sphere, Vector& mtd) const 
-{    // delta vector  
-	Vector delta = (m_position - sphere.m_position);
-	float r = m_radius + sphere.m_radius;
-	// square distance
-	vector dist2 = delta.dotProduct(delta);
-	// square distance > radius squared. no collision
-	if(dist2 > r*r) return false;
-	// find the mtd (or the amount of intersection along the delta vector).
-	float dist = sqrt(dist2);
-	mtd = delta * (r - dist) / dist;
-	return true;
-}
-
-bool Sphere::resolveIntersection(Sphere& sphere, const Vector& mtd)
-{    // inverse mass quantities
-	float im1 = 1 / m_mass;
-	float im2 = 1 / sphere.m_mass;
-	// resolve intersection
-	m_position += mtd * (im1 / (im1 + im2));
-	sphere.m_position -= mtd * (im2 / (im1 + im2));
-	return true;
-}
-
-bool Sphere::resolveCollision(Sphere& sphere, const Vector& n){
-	const float cor = 0.7f;
-	// inverse mass quantities 
-	float im1 = 1 / m_mass;
-	float im2 = 1 / sphere.m_mass;
-	// impact speed
-	Vector v = (m_velocity - sphere.m_velocity);
-	float vn = v.dotProduct(n);
-	// sphere intersecting but moving away from each other already
-	if(vn > 0.0f) return false;
-	// collision impulse 
-	float i = (-(1.0f + cor) * vn) / (im1 + im2);
-	Vector impulse = n * i;
-	// change in momentum
-	m_velocity += impulse * im1;
-	sphere.m_velocity -= impulse * im2;
-	return true;
-}
-
-bool Sphere::collide(Sphere& sphere)
-{    
-	Vector mtd;
-	Vector normal;
-	if(!colliding(sphere, mtd))
-		return false;
-
-	normal = (m_position - sphere.m_position);
-	normal.normalise();
-	resolveIntersection(sphere, mtd);
-	resolveCollision(sphere, normal);
-	return true;
-}*/
-
 
 #endif //!__RE_PARTICLEEMITTER_H__
