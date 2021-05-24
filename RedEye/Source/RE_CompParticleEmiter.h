@@ -43,11 +43,6 @@ public:
 private:
 
 	RE_ParticleEmitter* simulation = nullptr;
-
-	bool draw = false;
-
-	// Triangle "Point"
-	unsigned int VAO = 0u, VBO = 0u, EBO = 0u;
 };
 
 #endif // !__RE_COMPPARTICLEEMITER_H__

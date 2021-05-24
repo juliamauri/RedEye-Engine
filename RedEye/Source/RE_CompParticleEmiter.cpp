@@ -24,6 +24,7 @@
 #include "ImGui\imgui.h"
 #include "ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp"
 
+
 RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER) {
 }
 
@@ -48,173 +49,169 @@ void RE_CompParticleEmitter::Update()
 
 void RE_CompParticleEmitter::Draw() const
 {
-	if (draw) {
-		RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
+	RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
 
-		eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-		unsigned int shader = pS->GetID();
-		RE_GLCache::ChangeShader(shader);
-		if (simulation->materialMD5) dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UploadAsParticleDataToShader(shader, simulation->useTextures, simulation->emitlight);
-		else {
-			RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
-			RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
-			RE_ShaderImporter::setFloat(shader, "opacity", simulation->useOpacity ? simulation->opacity : 1.0f);
-		}
+	eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+	unsigned int shader = pS->GetID();
+	RE_GLCache::ChangeShader(shader);
+	if (simulation->materialMD5) dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UploadAsParticleDataToShader(shader, simulation->useTextures, simulation->emitlight);
+	else {
+		RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
+		RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
+		RE_ShaderImporter::setFloat(shader, "opacity", simulation->useOpacity ? simulation->opacity : 1.0f);
+	}
 
-		
-		RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
-		math::float3 goPosition = transform->GetGlobalPosition();
-		math::float3 goUp = transform->GetUp().Normalized();
-		math::float3 goRight = transform->GetRight().Normalized();
-		RE_CompCamera* c = ModuleRenderer3D::GetCamera();
-		
-		RE_CompTransform* cT = c->GetTransform();
-		math::float3 cUp = cT->GetUp().Normalized();
+	
+	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
+	math::float3 goPosition = transform->GetGlobalPosition();
+	math::float3 goUp = transform->GetUp().Normalized();
+	math::float3 goRight = transform->GetRight().Normalized();
+	RE_CompCamera* c = ModuleRenderer3D::GetCamera();
+	
+	RE_CompTransform* cT = c->GetTransform();
+	math::float3 cUp = cT->GetUp().Normalized();
 
-		math::float3 pFront = simulation->direction.Normalized();
+	math::float3 pFront = simulation->direction.Normalized();
 
-		unsigned int triangleCount = 1;
-		
-		if (simulation->primCmp)
+	unsigned int triangleCount = 1;
+	
+	if (simulation->primCmp)
+	{
+		RE_GLCache::ChangeVAO(simulation->primCmp->GetVAO());
+		triangleCount = simulation->primCmp->GetTriangleCount();
+	}
+
+	for (auto p : *particles) {
+		math::float3 partcleGlobalpos = goPosition + p->position;
+
+		math::float3 front, right, up;
+		math::float4x4 rotm, pMatrix;
+		math::float3 roteuler;
+		switch (simulation->particleDir)
 		{
-			RE_GLCache::ChangeVAO(simulation->primCmp->GetVAO());
-			triangleCount = simulation->primCmp->GetTriangleCount();
+		case RE_ParticleEmitter::PS_FromPS:
+			
+			front = (goPosition - partcleGlobalpos).Normalized();
+
+			right = front.Cross(goUp).Normalized();
+			if (right.x < 0.0f) right *= -1.0f;
+
+			up = right.Cross(front).Normalized();
+
+			break;
+		case RE_ParticleEmitter::PS_Billboard:
+
+			front = cT->GetGlobalPosition() - partcleGlobalpos;
+			front.Normalize();
+
+			right = front.Cross(cUp).Normalized();
+			if (right.x < 0.0f) right *= -1.0f;
+
+			up = right.Cross(front).Normalized();
+
+			break;
+		case RE_ParticleEmitter::PS_Custom:
+
+			front = pFront;
+
+			right = front.Cross(cUp).Normalized();
+			if (right.x < 0.0f) right *= -1.0f;
+
+			up = right.Cross(front).Normalized();
+
+			break;
 		}
+
+		rotm.SetRotatePart(math::float3x3(right, up, front));
+		roteuler = rotm.ToEulerXYZ();
+
+		pMatrix = math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), simulation->scale).Transposed();
+
+		pS->UploadModel(pMatrix.ptr());
+
+
+		if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED && !simulation->materialMD5) {
+			bool cNormal = !simulation->meshMD5 && !simulation->primCmp;
+			RE_ShaderImporter::setFloat(shader, "customNormal", static_cast<float>(cNormal));
+			if(cNormal) RE_ShaderImporter::setFloat(shader, "normal", front);
+			RE_ShaderImporter::setFloat(shader, "specular", 2.5f);
+			RE_ShaderImporter::setFloat(shader, "shininess", 16.0f);
+		}
+
+		static float weight = 0.0f;
+		static float weight2 = 0.0f;
+		static math::vec wColor = math::vec::zero;
+		switch (simulation->cState)
+		{
+		case RE_ParticleEmitter::ColorState::SINGLE:
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", simulation->particleColor);
+			break;
+		case RE_ParticleEmitter::ColorState::OVERLIFETIME:
+			weight = simulation->maxLifeTime / p->lifetime;
+
+			if (simulation->useCurve) {
+				weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
+					ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
+
+				if(simulation->useOpacity && simulation->opacityWithCurve)
+					RE_ShaderImporter::setFloat(shader, "opacity", weight);
+			}
+
+			weight2 = 1 - weight;
+
+			wColor.Set(
+				simulation->gradient[0].x* weight + simulation->gradient[1].x * weight2,
+				simulation->gradient[0].y* weight + simulation->gradient[1].y * weight2,
+				simulation->gradient[0].z* weight + simulation->gradient[1].z * weight2
+			);
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
+			break;
+		case RE_ParticleEmitter::ColorState::OVERDISTANCE:
+			weight = simulation->maxDistance / (p->position - goPosition).Length();
+
+			if (simulation->useCurve) {
+				weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
+					ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
+
+				if (simulation->useOpacity && simulation->opacityWithCurve)
+					RE_ShaderImporter::setFloat(shader, "opacity", weight);
+			}
+
+			weight2 = 1 - weight;
+
+			wColor.Set(
+				simulation->gradient[0].x * weight + simulation->gradient[1].x * weight2,
+				simulation->gradient[0].y * weight + simulation->gradient[1].y * weight2,
+				simulation->gradient[0].z * weight + simulation->gradient[1].z * weight2
+			);
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
+			break;
+		case RE_ParticleEmitter::ColorState::OVERSPEED:
+			weight = p->velocity.Abs().AverageOfElements() / simulation->maxSpeed /* * 1.732f math::Sqrt(3.f) */;
+
+			if (simulation->useCurve) {
+				weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
+					ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
+
+				if (simulation->useOpacity && simulation->opacityWithCurve)
+					RE_ShaderImporter::setFloat(shader, "opacity", weight);
+			}
+
+			weight2 = 1 - weight;
+
+			wColor.Set(
+				simulation->gradient[1].x * weight + simulation->gradient[0].x * weight2,
+				simulation->gradient[1].y * weight + simulation->gradient[0].y * weight2,
+				simulation->gradient[1].z * weight + simulation->gradient[0].z * weight2
+			);
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
+			break;
+		}
+
+		if (simulation->meshMD5)
+			dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
 		else
-			RE_GLCache::ChangeVAO(VAO);
-
-		for (auto p : *particles) {
-			math::float3 partcleGlobalpos = goPosition + p->position;
-
-			math::float3 front, right, up;
-			math::float4x4 rotm, pMatrix;
-			math::float3 roteuler;
-			switch (simulation->particleDir)
-			{
-			case RE_ParticleEmitter::PS_FromPS:
-				
-				front = (goPosition - partcleGlobalpos).Normalized();
-
-				right = front.Cross(goUp).Normalized();
-				if (right.x < 0.0f) right *= -1.0f;
-
-				up = right.Cross(front).Normalized();
-
-				break;
-			case RE_ParticleEmitter::PS_Billboard:
-
-				front = cT->GetGlobalPosition() - partcleGlobalpos;
-				front.Normalize();
-
-				right = front.Cross(cUp).Normalized();
-				if (right.x < 0.0f) right *= -1.0f;
-
-				up = right.Cross(front).Normalized();
-
-				break;
-			case RE_ParticleEmitter::PS_Custom:
-
-				front = pFront;
-
-				right = front.Cross(cUp).Normalized();
-				if (right.x < 0.0f) right *= -1.0f;
-
-				up = right.Cross(front).Normalized();
-
-				break;
-			}
-
-			rotm.SetRotatePart(math::float3x3(right, up, front));
-			roteuler = rotm.ToEulerXYZ();
-
-			pMatrix = math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), simulation->scale).Transposed();
-
-			pS->UploadModel(pMatrix.ptr());
-
-
-			if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED && !simulation->materialMD5) {
-				bool cNormal = !simulation->meshMD5 && !simulation->primCmp;
-				RE_ShaderImporter::setFloat(shader, "customNormal", static_cast<float>(cNormal));
-				if(cNormal) RE_ShaderImporter::setFloat(shader, "normal", front);
-				RE_ShaderImporter::setFloat(shader, "specular", 2.5f);
-				RE_ShaderImporter::setFloat(shader, "shininess", 16.0f);
-			}
-
-			static float weight = 0.0f;
-			static float weight2 = 0.0f;
-			static math::vec wColor = math::vec::zero;
-			switch (simulation->cState)
-			{
-			case RE_ParticleEmitter::ColorState::SINGLE:
-				RE_ShaderImporter::setFloat(shader, "cdiffuse", simulation->particleColor);
-				break;
-			case RE_ParticleEmitter::ColorState::OVERLIFETIME:
-				weight = simulation->maxLifeTime / p->lifetime;
-
-				if (simulation->useCurve) {
-					weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
-						ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
-
-					if(simulation->useOpacity && simulation->opacityWithCurve)
-						RE_ShaderImporter::setFloat(shader, "opacity", weight);
-				}
-
-				weight2 = 1 - weight;
-
-				wColor.Set(
-					simulation->gradient[0].x* weight + simulation->gradient[1].x * weight2,
-					simulation->gradient[0].y* weight + simulation->gradient[1].y * weight2,
-					simulation->gradient[0].z* weight + simulation->gradient[1].z * weight2
-				);
-				RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
-				break;
-			case RE_ParticleEmitter::ColorState::OVERDISTANCE:
-				weight = simulation->maxDistance / (p->position - goPosition).Length();
-
-				if (simulation->useCurve) {
-					weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
-						ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
-
-					if (simulation->useOpacity && simulation->opacityWithCurve)
-						RE_ShaderImporter::setFloat(shader, "opacity", weight);
-				}
-
-				weight2 = 1 - weight;
-
-				wColor.Set(
-					simulation->gradient[0].x * weight + simulation->gradient[1].x * weight2,
-					simulation->gradient[0].y * weight + simulation->gradient[1].y * weight2,
-					simulation->gradient[0].z * weight + simulation->gradient[1].z * weight2
-				);
-				RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
-				break;
-			case RE_ParticleEmitter::ColorState::OVERSPEED:
-				weight = p->velocity.Abs().AverageOfElements() / simulation->maxSpeed /* * 1.732f math::Sqrt(3.f) */;
-
-				if (simulation->useCurve) {
-					weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
-						ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
-
-					if (simulation->useOpacity && simulation->opacityWithCurve)
-						RE_ShaderImporter::setFloat(shader, "opacity", weight);
-				}
-
-				weight2 = 1 - weight;
-
-				wColor.Set(
-					simulation->gradient[1].x * weight + simulation->gradient[0].x * weight2,
-					simulation->gradient[1].y * weight + simulation->gradient[0].y * weight2,
-					simulation->gradient[1].z * weight + simulation->gradient[0].z * weight2
-				);
-				RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
-				break;
-			}
-
-			if (simulation->meshMD5)
-				dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
-			else
-				glDrawElements(GL_TRIANGLES, triangleCount * 3, simulation->primCmp ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, nullptr);
-		}
+			glDrawElements(GL_TRIANGLES, triangleCount * 3, GL_UNSIGNED_SHORT, nullptr);
 	}
 }
 
@@ -224,36 +221,6 @@ void RE_CompParticleEmitter::DrawProperties()
 	{
 		if (simulation != nullptr)
 		{
-			if (!draw && ImGui::Button("Start Draw")) {
-				glGenVertexArrays(1, &VAO);
-				glGenBuffers(1, &VBO);
-				glGenBuffers(1, &EBO);
-
-				RE_GLCache::ChangeVAO(VAO);
-				glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-				float triangle[9]{
-					-0.5f, -0.5f, 0.0f,
-					0.5f, -0.5f, 0.0f,
-					0.0f,  0.5f, 0.0f
-				};
-
-				unsigned int index[3] = { 0, 1, 2 };
-
-				glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), &triangle[0], GL_STATIC_DRAW);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(unsigned int), &index[0], GL_STATIC_DRAW);
-
-				// vertex positions
-				int accumulativeOffset = 0;
-				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
-				accumulativeOffset += sizeof(float) * 3;
-
-				RE_GLCache::ChangeVAO(0);
-
-				draw = true;
-			}
 
 			switch (simulation->state)
 			{
@@ -397,7 +364,8 @@ void RE_CompParticleEmitter::DrawProperties()
 						simulation->primCmp->UnUseResources();
 						DEL(simulation->primCmp);
 					}
-					clearMesh = true;
+					simulation->primCmp = new RE_CompPoint();
+					setUpPrimitive = clearMesh = true;
 					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Cube")) {
@@ -520,8 +488,6 @@ void RE_CompParticleEmitter::DrawProperties()
 
 				clearMesh = false;
 			}
-
-
 
 			if (ImGui::BeginMenu("Change mesh"))
 			{

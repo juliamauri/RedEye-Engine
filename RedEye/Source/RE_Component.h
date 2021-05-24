@@ -23,6 +23,7 @@ enum ComponentType : ushortint
 	C_PRIMIVE_MIN = 20,
 	C_GRID,
 	C_CUBE,
+	C_POINT,
 	C_DODECAHEDRON,
 	C_TETRAHEDRON,
 	C_OCTOHEDRON,

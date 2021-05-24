@@ -737,6 +737,7 @@ void ModuleEditor::DrawGameObjectItems(const UID parent)
 		if (ImGui::MenuItem("Tetrahedron")) RE_SCENE->CreatePrimitive(C_TETRAHEDRON, parent);
 		if (ImGui::MenuItem("Octohedron")) RE_SCENE->CreatePrimitive(C_OCTOHEDRON, parent);
 		if (ImGui::MenuItem("Icosahedron")) RE_SCENE->CreatePrimitive(C_ICOSAHEDRON, parent);
+		if (ImGui::MenuItem("Point")) RE_SCENE->CreatePrimitive(C_POINT, parent);
 		if (ImGui::MenuItem("Plane")) RE_SCENE->CreatePrimitive(C_PLANE, parent);
 		// if (ImGui::MenuItem("Frustum")) RE_SCENE->CreatePrimitive(C_FUSTRUM, parent);
 		if (ImGui::MenuItem("Sphere")) RE_SCENE->CreatePrimitive(C_SPHERE, parent);

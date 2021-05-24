@@ -18,6 +18,7 @@ public:
 		pTetrahedronPool.SetName("Tetrahedron Pool");
 		pOctohedronPool.SetName("Octohedron Pool");
 		pIcosahedronPool.SetName("Icosahedron Pool");
+		pPointPool.SetName("Point Pool");
 		pPlanePool.SetName("Plane Pool");
 		pSpherePool.SetName("Sphere Pool");
 		pCylinderPool.SetName("Cylinder Pool");
@@ -76,6 +77,7 @@ private:
 	TetrahedronPool pTetrahedronPool;
 	OctohedronPool pOctohedronPool;
 	IcosahedronPool pIcosahedronPool;
+	PointPool pPointPool;
 	PlanePool pPlanePool;
 	SpherePool pSpherePool;
 	CylinderPool pCylinderPool;

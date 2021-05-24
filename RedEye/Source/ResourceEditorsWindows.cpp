@@ -5,9 +5,12 @@
 #include "Application.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
+#include "ModulePhysics.h"
 #include "ModuleRenderer3D.h"
+#include "RE_PrimitiveManager.h"
 #include "RE_FileBuffer.h"
 #include "RE_ConsoleLog.h"
+#include "RE_GLCache.h"
 
 #include "RE_DefaultShaders.h"
 #include "RE_ShaderImporter.h"
@@ -18,10 +21,17 @@
 #include "RE_Shader.h"
 #include "RE_Prefab.h"
 #include "RE_GameObject.h"
+#include "RE_Particle.h"
+
+//#include "RE_ParticleEmitter.h"
 
 #include "ImGui/misc/cpp/imgui_stdlib.h"
-#include "ImGui/imgui_internal.h"
 #include "ImGuiWidgets/ImGuiColorTextEdit/TextEditor.h"
+
+#define IMGUICURVEIMPLEMENTATION
+#include "ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp"
+
+
 #include "Glew/include/glew.h"
 
 MaterialEditorWindow::MaterialEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active)
@@ -654,6 +664,451 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 		{
 			ImGui::PopItemFlag();
 			ImGui::PopStyleVar();
+		}
+	}
+	ImGui::End();
+}
+
+
+ParticleEmiiterEditorWindow::ParticleEmiiterEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
+
+ParticleEmiiterEditorWindow::~ParticleEmiiterEditorWindow() {}
+
+void ParticleEmiiterEditorWindow::Draw(bool secondary)
+{
+	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	{
+		if (simulation != nullptr)
+		{
+			//if (!draw && ImGui::Button("Start Draw")) {
+			//	glGenVertexArrays(1, &VAO);
+			//	glGenBuffers(1, &VBO);
+			//	glGenBuffers(1, &EBO);
+			//
+			//	RE_GLCache::ChangeVAO(VAO);
+			//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			//
+			//	float triangle[9]{
+			//		-0.5f, -0.5f, 0.0f,
+			//		0.5f, -0.5f, 0.0f,
+			//		0.0f,  0.5f, 0.0f
+			//	};
+			//
+			//	unsigned int index[3] = { 0, 1, 2 };
+			//
+			//	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), &triangle[0], GL_STATIC_DRAW);
+			//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+			//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(unsigned int), &index[0], GL_STATIC_DRAW);
+			//
+			//	// vertex positions
+			//	int accumulativeOffset = 0;
+			//	glEnableVertexAttribArray(0);
+			//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
+			//	accumulativeOffset += sizeof(float) * 3;
+			//
+			//	RE_GLCache::ChangeVAO(0);
+			//
+			//	draw = true;
+			//}
+
+			switch (simulation->state)
+			{
+			case RE_ParticleEmitter::STOP:
+			{
+				if (ImGui::Button("Play")) simulation->state = RE_ParticleEmitter::PLAY;
+				break;
+			}
+			case RE_ParticleEmitter::PLAY:
+			{
+				if (ImGui::Button("Pause")) simulation->state = RE_ParticleEmitter::PAUSE;
+				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOP;
+				break;
+			}
+			case RE_ParticleEmitter::PAUSE:
+			{
+				if (ImGui::Button("Resume")) simulation->state = RE_ParticleEmitter::PLAY;
+				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOP;
+				break;
+			}
+			}
+
+			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
+
+			if (ImGui::DragFloat3("Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
+				if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
+			}
+
+			int pDir = simulation->particleDir;
+			if (ImGui::Combo("Particle Direction", &pDir, "Normal\0Billboard\0Custom\0"))
+				simulation->particleDir = static_cast<RE_ParticleEmitter::Particle_Dir>(pDir);
+
+			if (simulation->particleDir == RE_ParticleEmitter::PS_Custom)
+				ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
+
+
+			int cState = simulation->cState;
+			if (ImGui::Combo("Color Type", &cState, "Single\0Over Lifetime\0Over Distance\0Over Speed\0"))
+				simulation->cState = static_cast<RE_ParticleEmitter::ColorState>(cState);
+
+			switch (simulation->cState)
+			{
+			case RE_ParticleEmitter::ColorState::SINGLE:
+				ImGui::ColorEdit3("Particle Color", &simulation->particleColor[0]);
+				break;
+			default:
+				ImGui::ColorEdit3("Particle Gradient 1", &simulation->gradient[0][0]);
+				ImGui::ColorEdit3("Particle Gradient 2", &simulation->gradient[1][0]);
+				break;
+			}
+
+			ImGui::Checkbox("Use Opacity", &simulation->useOpacity);
+			if (!simulation->opacityWithCurve) {
+				ImGui::SameLine();
+				ImGui::PushItemWidth(200.f);
+				ImGui::SliderFloat("Opacity", &simulation->opacity, 0.0f, 1.0f);
+				ImGui::PopItemWidth();
+			}
+			else
+				ImGui::Text("Opacity is with curve");
+
+			ImGui::Checkbox(simulation->emitlight ? "Disable lighting" : "Enable lighting", &simulation->emitlight);
+			ImGui::ColorEdit3("Light Color", &simulation->lightColor[0]);
+			if (simulation->particleLColor) {
+				if (ImGui::Button("Set particles light color")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->lightColor = simulation->lightColor;
+				}
+			}
+			ImGui::DragFloat("Specular", &simulation->specular, 0.01f, 0.f, 1.f, "%.2f");
+			if (simulation->particleLColor) {
+				if (ImGui::Button("Set particles specular")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->specular = simulation->specular;
+				}
+			}
+			ImGui::DragFloat("Intensity", &simulation->intensity, 0.01f, 0.0f, 50.0f, "%.2f");
+			if (simulation->particleLColor) {
+				if (ImGui::Button("Set particles intensity")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->intensity = simulation->intensity;
+				}
+			}
+			ImGui::DragFloat("Constant", &simulation->constant, 0.01f, 0.001f, 5.0f, "%.2f");
+			ImGui::DragFloat("Linear", &simulation->linear, 0.001f, 0.001f, 5.0f, "%.3f");
+			ImGui::DragFloat("Quadratic", &simulation->quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
+			ImGui::Separator();
+			ImGui::Checkbox(simulation->particleLColor ? "Disable single particle lighting" : "Enable single particle lighting", &simulation->particleLColor);
+			if (simulation->particleLColor) {
+				if (ImGui::Checkbox(simulation->randomLightColor ? "Disable random particle color" : "Enable random particle color", &simulation->randomLightColor)) {
+
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					if (simulation->randomLightColor)
+						for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
+					else
+						for (auto p : *particles) p->lightColor = simulation->lightColor;
+				}
+
+				ImGui::DragFloat2("Specular min-max", simulation->sClamp, 0.005f, 0.0f, 1.0f);
+				if (ImGui::Checkbox(simulation->randomSpecular ? "Disable random particle specular" : "Enable random particle specular", &simulation->randomSpecular)) {
+
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+
+					if (simulation->randomSpecular)
+						for (auto p : *particles) p->specular = RE_MATH->RandomF(simulation->sClamp[0], simulation->sClamp[1]);
+					else
+						for (auto p : *particles) p->specular = simulation->specular;
+				}
+
+				ImGui::DragFloat2("Intensity min-max", simulation->iClamp, 0.1f, 0.0f, 50.0f);
+				if (ImGui::Checkbox(simulation->randomIntensity ? "Disable random particle intensity" : "Enable random particle intensity", &simulation->randomIntensity)) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+
+					if (simulation->randomIntensity)
+						for (auto p : *particles) p->intensity = RE_MATH->RandomF(simulation->iClamp[0], simulation->iClamp[1]);
+					else
+						for (auto p : *particles) p->intensity = simulation->intensity;
+				}
+			}
+
+			ImGui::Separator();
+
+			if (simulation->meshMD5)
+			{
+				if (ImGui::Button(eastl::string("Resource Mesh").c_str()))
+					RE_RES->PushSelected(simulation->meshMD5, true);
+			}
+			else if (simulation->primCmp)
+			{
+				simulation->primCmp->DrawPrimPropierties();
+			}
+			else ImGui::TextWrapped("Select mesh resource or select primitive");
+
+			ImGui::Separator();
+
+			static bool clearMesh = false, setUpPrimitive = false;
+			if (ImGui::BeginMenu("Primitive"))
+			{
+				if (ImGui::MenuItem("Point")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					clearMesh = true;
+					simulation->useTextures = false;
+				}
+				if (ImGui::MenuItem("Cube")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompCube();
+					setUpPrimitive = clearMesh = true;
+					simulation->useTextures = false;
+				}
+				if (ImGui::MenuItem("Dodecahedron")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompDodecahedron();
+					setUpPrimitive = clearMesh = true;
+					simulation->useTextures = false;
+				}
+				if (ImGui::MenuItem("Tetrahedron")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompTetrahedron();
+					setUpPrimitive = clearMesh = true;
+					simulation->useTextures = false;
+				}
+				if (ImGui::MenuItem("Octohedron")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompOctohedron();
+					setUpPrimitive = clearMesh = true;
+					simulation->useTextures = false;
+				}
+				if (ImGui::MenuItem("Icosahedron")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompIcosahedron();
+					setUpPrimitive = clearMesh = true;
+					simulation->useTextures = false;
+				}
+				if (ImGui::MenuItem("Plane")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompPlane();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Sphere")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompSphere();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Cylinder")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompCylinder();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("HemiSphere")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompHemiSphere();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Torus")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompTorus();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Trefoil Knot")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompTrefoiKnot();
+					simulation->useTextures = setUpPrimitive = clearMesh = true;
+				}
+				if (ImGui::MenuItem("Rock")) {
+					if (simulation->primCmp) {
+						simulation->primCmp->UnUseResources();
+						DEL(simulation->primCmp);
+					}
+					simulation->primCmp = new RE_CompRock();
+					setUpPrimitive = clearMesh = true;
+					simulation->useTextures = false;
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (clearMesh)
+			{
+				if (simulation->meshMD5) {
+					RE_RES->UnUse(simulation->meshMD5);
+					simulation->meshMD5 = nullptr;
+				}
+
+				if (setUpPrimitive) {
+					RE_SCENE->primitives->SetUpComponentPrimitive(simulation->primCmp);
+					setUpPrimitive = false;
+				}
+
+				clearMesh = false;
+			}
+
+
+
+			if (ImGui::BeginMenu("Change mesh"))
+			{
+				eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(Resource_Type::R_MESH);
+				bool none = true;
+				unsigned int count = 0;
+				for (auto m : meshes)
+				{
+					if (m->isInternal()) continue;
+
+					none = false;
+					eastl::string name = eastl::to_string(count++) + m->GetName();
+					if (ImGui::MenuItem(name.c_str()))
+					{
+						if (simulation->meshMD5) RE_RES->UnUse(simulation->meshMD5);
+						simulation->meshMD5 = m->GetMD5();
+						if (simulation->meshMD5) RE_RES->Use(simulation->meshMD5);
+
+						simulation->useTextures = true;
+					}
+				}
+				if (none) ImGui::Text("No custom materials on assets");
+
+				ImGui::EndMenu();
+			}
+
+			//if (ImGui::BeginDragDropTarget())
+			//{
+			//	if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#ModelReference"))
+			//	{
+			//		if (meshMD5) RE_RES->UnUse(meshMD5);
+			//		meshMD5 = *static_cast<const char**>(dropped->Data);
+			//		if (meshMD5) RE_RES->Use(meshMD5);
+			//	}
+			//	ImGui::EndDragDropTarget();
+			//}
+
+
+
+			if (!simulation->materialMD5) ImGui::Text("NMaterial not selected.");
+			else
+			{
+				ImGui::Separator();
+				RE_Material* matRes = dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5));
+				if (ImGui::Button(matRes->GetName())) RE_RES->PushSelected(matRes->GetMD5(), true);
+
+				matRes->DrawMaterialParticleEdit(simulation->useTextures);
+			}
+
+
+			if (ImGui::BeginMenu("Change material"))
+			{
+				eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(Resource_Type::R_MATERIAL);
+				bool none = true;
+				for (auto material : materials)
+				{
+					if (material->isInternal()) continue;
+
+					none = false;
+					if (ImGui::MenuItem(material->GetName()))
+					{
+						if (simulation->materialMD5)
+						{
+							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UnUseResources();
+							RE_RES->UnUse(simulation->materialMD5);
+						}
+						simulation->materialMD5 = material->GetMD5();
+						if (simulation->materialMD5)
+						{
+							RE_RES->Use(simulation->materialMD5);
+							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UseResources();
+						}
+					}
+				}
+				if (none) ImGui::Text("No custom materials on assets");
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#MaterialReference"))
+				{
+					if (simulation->materialMD5) RE_RES->UnUse(simulation->materialMD5);
+					simulation->materialMD5 = *static_cast<const char**>(dropped->Data);
+					if (simulation->materialMD5) RE_RES->Use(simulation->materialMD5);
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			ImGui::Separator();
+
+			ImGui::Checkbox("Use curve", &simulation->useCurve);
+
+			if (simulation->useCurve) {
+
+				ImGui::Checkbox("Opacity with curve", &simulation->opacityWithCurve);
+
+				ImGui::PushItemWidth(75.f);
+
+				static int minPoitns = 3;
+
+				if (ImGui::DragInt("Num Points", &simulation->total_points, 1.0f)) {
+
+					if (simulation->total_points < minPoitns) simulation->total_points = minPoitns;
+
+					simulation->curve.clear();
+					simulation->curve.push_back({ -1.0f, 0.0f });
+					for (int i = 1; i < simulation->total_points; i++)
+						simulation->curve.push_back({ 0.0f, 0.0f });
+				}
+
+				ImGui::SameLine();
+
+				ImGui::Checkbox("Smooth curve", &simulation->smoothCurve);
+
+				ImGui::SameLine();
+
+				ImGui::PushItemWidth(150.f);
+
+				static float cSize[2] = { 600.f, 200.f };
+				ImGui::DragFloat2("Curve size", cSize, 1.0f, 0.0f, 0.0f, "%.0f");
+
+				ImGui::PopItemWidth();
+
+
+				ImGui::Curve("Particle curve editor", { cSize[0], cSize[1] }, simulation->total_points, simulation->curve.data());
+			}
+		}
+		else
+		{
+			ImGui::Text("Unregistered simulation");
 		}
 	}
 	ImGui::End();

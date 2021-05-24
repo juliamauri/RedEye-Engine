@@ -411,6 +411,8 @@ static inline double ease(int easetype, double t)
 }
 } // namespace tween
 
+#ifdef IMGUICURVEIMPLEMENTATION
+
 namespace ImGui
 {
 // [src] http://iquilezles.org/www/articles/minispline/minispline.htm
@@ -736,3 +738,4 @@ int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* po
 }
 
 }; // namespace ImGui
+#endif // IMGUICURVEIMPLEMENTATION

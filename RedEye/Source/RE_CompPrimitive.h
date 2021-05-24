@@ -184,6 +184,9 @@ private:
 ******	Platonic
 **************************************************/
 
+class RE_CompPoint : public RE_CompPlatonic
+{ public: RE_CompPoint() : RE_CompPlatonic(C_POINT) {} };
+
 class RE_CompCube : public RE_CompPlatonic
 { public: RE_CompCube() : RE_CompPlatonic(C_CUBE) {} };
 

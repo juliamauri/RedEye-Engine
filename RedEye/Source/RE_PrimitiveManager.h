@@ -33,6 +33,7 @@ public:
 
 private:
 
+	void GeneratePoint(PrimData& prim);
 	void GenerateGrid(PrimData& prim, RE_CompGrid* gridC);
 	void GenerateRock(PrimData& prim, RE_CompRock* rockC);
 

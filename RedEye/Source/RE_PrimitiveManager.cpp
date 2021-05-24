@@ -11,7 +11,7 @@
 
 RE_PrimitiveManager::RE_PrimitiveManager()
 {
-	platonics = new PrimData[5];
+	platonics = new PrimData[6];
 }
 
 RE_PrimitiveManager::~RE_PrimitiveManager()
@@ -33,6 +33,7 @@ void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP)
 		// Grid
 	case C_GRID: dynamic_cast<RE_CompGrid*>(cmpP)->GridSetUp(50); break;
 		// Platonics
+	case C_POINT: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
 	case C_CUBE: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
 	case C_DODECAHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
 	case C_TETRAHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
@@ -57,6 +58,7 @@ eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPrimitiveMeshDat
 	switch (pType)
 	{
 	case C_CUBE:
+	case C_POINT:
 	case C_DODECAHEDRON:
 	case C_TETRAHEDRON:
 	case C_OCTOHEDRON:
@@ -66,19 +68,22 @@ eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPrimitiveMeshDat
 
 		if (!platonics[index].refCount)
 		{
-			par_shapes_mesh* mesh = nullptr;
-			switch (pType) {
-			case C_CUBE: mesh = par_shapes_create_cube(); break;
-			case C_DODECAHEDRON: mesh = par_shapes_create_dodecahedron(); break;
-			case C_TETRAHEDRON: mesh = par_shapes_create_tetrahedron(); break;
-			case C_OCTOHEDRON: mesh = par_shapes_create_octahedron(); break;
-			case C_ICOSAHEDRON: mesh = par_shapes_create_icosahedron(); break;
+			if (pType == C_POINT) GeneratePoint(platonics[index]);
+			else
+			{
+				par_shapes_mesh* mesh = nullptr;
+				switch (pType) {
+				case C_CUBE: mesh = par_shapes_create_cube(); break;
+				case C_DODECAHEDRON: mesh = par_shapes_create_dodecahedron(); break;
+				case C_TETRAHEDRON: mesh = par_shapes_create_tetrahedron(); break;
+				case C_OCTOHEDRON: mesh = par_shapes_create_octahedron(); break;
+				case C_ICOSAHEDRON: mesh = par_shapes_create_icosahedron(); break;
+				}
+
+				UploadPlatonic(platonics[index], mesh);
+				par_shapes_free_mesh(mesh);
 			}
-
-			UploadPlatonic(platonics[index], mesh);
-			par_shapes_free_mesh(mesh);
 		}
-
 		platonics[index].refCount += 1;
 		return { platonics[index].vao, platonics[index].triangles };
 	}
@@ -146,6 +151,7 @@ void RE_PrimitiveManager::UnUsePrimitive(unsigned short pType, int id)
 	switch (pType)
 	{
 	case C_CUBE:
+	case C_POINT:
 	case C_DODECAHEDRON:
 	case C_TETRAHEDRON:
 	case C_OCTOHEDRON:
@@ -251,6 +257,36 @@ void RE_PrimitiveManager::CreateSphere(int slices, int stacks, unsigned int& vao
 	DEL_A(normals);
 	DEL_A(texCoords);
 	DEL_A(meshBuffer);
+}
+
+void RE_PrimitiveManager::GeneratePoint(PrimData& prim)
+{
+	glGenVertexArrays(1, &prim.vao);
+	glGenBuffers(1, &prim.vbo);
+	glGenBuffers(1, &prim.ebo);
+
+	RE_GLCache::ChangeVAO(prim.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, prim.vbo);
+
+	float triangle[9]{
+		-0.5f, -0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+		0.0f,  0.5f, 0.0f
+	};
+
+	unsigned short index[3] = { 0, 1, 2 };
+
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), &triangle[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prim.ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(unsigned short), &index[0], GL_STATIC_DRAW);
+
+	// vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, NULL);
+
+	prim.triangles = 1;
+
+	RE_GLCache::ChangeVAO(0);
 }
 
 void RE_PrimitiveManager::GenerateGrid(PrimData& prim, RE_CompGrid* gridC)

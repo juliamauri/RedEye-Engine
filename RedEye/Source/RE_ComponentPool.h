@@ -168,6 +168,7 @@ typedef ComponentPool<RE_CompDodecahedron, 128, 64> DodecahedronPool;
 typedef ComponentPool<RE_CompTetrahedron, 128, 64> TetrahedronPool;
 typedef ComponentPool<RE_CompOctohedron, 128, 64> OctohedronPool;
 typedef ComponentPool<RE_CompIcosahedron, 128, 64> IcosahedronPool;
+typedef ComponentPool<RE_CompPoint, 128, 64> PointPool;
 typedef ComponentPool<RE_CompPlane, 128, 64> PlanePool;
 typedef ComponentPool<RE_CompSphere, 128, 64> SpherePool;
 typedef ComponentPool<RE_CompCylinder, 128, 64> CylinderPool;

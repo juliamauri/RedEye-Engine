@@ -1,6 +1,8 @@
 #include "ModulePhysics.h"
 
 #include "Application.h"
+#include "ModuleScene.h"
+#include "RE_PrimitiveManager.h"
 #include "RE_Time.h"
 #include "RE_Math.h"
 #include "RE_Particle.h"
@@ -297,6 +299,10 @@ RE_ParticleEmitter* ModulePhysics::AddEmitter()
 	ret->curve.push_back({ -1.0f, 0.0f });// init data so editor knows to take it from here
 	for (int i = 1; i < ret->total_points; i++)
 		ret->curve.push_back({ 0.0f, 0.0f });
+
+	// Prim SetUp
+	ret->primCmp = new RE_CompPoint();
+	RE_SCENE->primitives->SetUpComponentPrimitive(ret->primCmp);
 
 	// Boundary setup
 	ret->boundary.plane.Set(math::vec::zero, { 0.f, 1.f, 0.f });
