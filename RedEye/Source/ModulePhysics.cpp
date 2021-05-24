@@ -217,8 +217,6 @@ void ModulePhysics::Update()
 					case RE_ParticleEmitter::BoundaryType::NONE: break;
 					case RE_ParticleEmitter::BoundaryType::GROUND:
 					{
-						sim->first->boundary.plane.Set(math::vec::zero, { 0.f, 1.f, 0.f });
-
 						// Check if particle intersects or has passed plane
 						float dist_to_plane = sim->first->boundary.plane.SignedDistance((*p1)->position);
 						if (dist_to_plane < (*p1)->col_radius)
@@ -295,10 +293,13 @@ RE_ParticleEmitter* ModulePhysics::AddEmitter()
 {
 	RE_ParticleEmitter* ret = new RE_ParticleEmitter();
 
-	//Curve SetUp
+	// Curve SetUp
 	ret->curve.push_back({ -1.0f, 0.0f });// init data so editor knows to take it from here
 	for (int i = 1; i < ret->total_points; i++)
 		ret->curve.push_back({ 0.0f, 0.0f });
+
+	// Boundary setup
+	ret->boundary.plane.Set(math::vec::zero, { 0.f, 1.f, 0.f });
 
 	particles.Allocate(ret);
 	return ret;
