@@ -47,11 +47,11 @@ void ModulePhysics::Update()
 
 				// Set base properties
 				particle->dt_offset = local_dt - sim->first->spawn_offset - (spawn_period * (i + 1));
-				particle->position = { 0.f, 5.f, 0.f };
+				particle->position = { (RE_MATH->RandomF() * 6.f), 15.f, (RE_MATH->RandomF() * 6.f) };
 
 				// Set physic properties
 				particle->mass = 1.f;
-				particle->velocity = { (RE_MATH->RandomF() * 1.f), -1.f, (RE_MATH->RandomF() * 1.f) };
+				particle->velocity = { (RE_MATH->RandomF() * 5.f), 0.f, (RE_MATH->RandomF() * 5.f) };
 				particle->col_radius = 0.5f;
 
 				// Set light properties
@@ -159,8 +159,23 @@ void ModulePhysics::Update()
 						}
 					}
 
-					// Check boundary collisions
+					// Acceleration
+					const float final_dt = local_dt - (*p1)->dt_offset;
+					(*p1)->velocity += sim->first->wind * final_dt;
+					(*p1)->velocity.y += sim->first->gravity * final_dt;
 
+					// Cap speed
+					const math::vec norm_speed = (*p1)->velocity.Normalized();
+					const math::vec cap_speeds[2] = {
+						(*p1)->velocity,
+						norm_speed * sim->first->maxSpeed };
+					(*p1)->velocity = cap_speeds[(*p1)->velocity.Length() > sim->first->maxSpeed];
+
+					// Update position
+					(*p1)->position += (*p1)->velocity * final_dt;
+					(*p1)->dt_offset = 0.f;
+
+					// Check boundary collisions
 					switch (sim->first->bound_type)
 					{
 					case RE_ParticleEmitter::BoundaryType::NONE: break;
@@ -170,45 +185,32 @@ void ModulePhysics::Update()
 
 						// Check if particle intersects or has passed plane
 						float dist_to_plane = sim->first->boundary.plane.SignedDistance((*p1)->position);
-						if (dist_to_plane <= (*p1)->col_radius)
+						if (dist_to_plane < (*p1)->col_radius)
 						{
 							// Resolve intersection
 							float dist_to_col = 0.f;
 							if (math::Plane::IntersectLinePlane(
 								sim->first->boundary.plane.normal,
-								sim->first->boundary.plane.d,
+								sim->first->boundary.plane.d + (*p1)->col_radius,
 								(*p1)->position,
-								(*p1)->velocity.Normalized(),
+								norm_speed,
 								dist_to_col))
 							{
-								(*p1)->position += (*p1)->velocity.Normalized() * (dist_to_col - (*p1)->col_radius);
+								(*p1)->position += norm_speed * dist_to_col;
 
-								// Check if particle is already moving away from plane
+								// Resolve impulse if particle not already moving away from plane
 								float dot = (*p1)->velocity.Dot(sim->first->boundary.plane.normal);
-								if (dot < 0.f)
-								{
-									// Resolve collision impulse
-									(*p1)->velocity -= (2.f * (dot)*sim->first->boundary.plane.normal);
-								}
+								const math::vec speeds[2] = {
+									(*p1)->velocity,
+									(*p1)->velocity - (sim->first->restitution + sim->first->boundary_restitution) * dot * sim->first->boundary.plane.normal };
+
+								(*p1)->velocity = speeds[dot < 0.f];
 							}
 						}
 
 						break;
 					}
 					}
-
-					// Acceleration
-					const float final_dt = local_dt - (*p1)->dt_offset;
-					(*p1)->velocity += sim->first->wind * final_dt;
-					(*p1)->velocity.y += sim->first->gravity * final_dt;
-
-					// Cap speed
-					if ((*p1)->velocity.Length() > sim->first->maxSpeed)
-						(*p1)->velocity = (*p1)->velocity.Normalized() * sim->first->maxSpeed;
-
-					// Update position
-					(*p1)->position += (*p1)->velocity * final_dt;
-					(*p1)->dt_offset = 0.f;
 
 					++p1;
 				}

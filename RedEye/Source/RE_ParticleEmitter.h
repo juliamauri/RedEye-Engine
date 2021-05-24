@@ -20,7 +20,7 @@ struct RE_ParticleEmitter
 	// Instantiation parameters
 	float lifetime = 14.f;
 	float speed_muliplier = 1.f;
-	float spawn_frequency = 51.f;
+	float spawn_frequency = 10.f;
 	float spawn_offset = 0.f;
 
 	inline int GetNewSpawns(float dt)
@@ -38,7 +38,7 @@ struct RE_ParticleEmitter
 	// Physic properties ---------------------------------------------------------
 
 	// Collider
-	float restitution = 0.2f; // elastic vs inelastic
+	float restitution = 0.85f; // elastic vs inelastic
 
 	// External Forces
 	float gravity = -9.81f;
@@ -67,6 +67,8 @@ struct RE_ParticleEmitter
 		float radius = 0.f; // height
 		math::Plane plane;
 	} boundary;
+
+	float boundary_restitution = 0.95f;
 
 	// Render properties ---------------------------------------------------------
 
