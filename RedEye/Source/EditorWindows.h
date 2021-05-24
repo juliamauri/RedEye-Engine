@@ -284,18 +284,22 @@ private:
 	bool deferred = false;
 };
 
+struct RE_ParticleEmitter;
+
 class ParticleEmiiterEditorWindow : public EditorWindow
 {
 public:
 	ParticleEmiiterEditorWindow(const char* name = "Particle Emitter Workspace", bool start_active = false);
 	~ParticleEmiiterEditorWindow();
 
+	void StartEditing(RE_ParticleEmitter* sim);
+
 private:
 	void Draw(bool secondary = false) override;
 
 
 private:
-	struct RE_ParticleEmitter* simulation = nullptr;
+	RE_ParticleEmitter* simulation = nullptr;
 };
 
 class TextEditor;

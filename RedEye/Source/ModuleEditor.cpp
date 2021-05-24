@@ -110,6 +110,7 @@ bool ModuleEditor::Init()
 
 			sceneEditorWindow = new SceneEditorWindow();
 			sceneGameWindow = new SceneGameWindow();
+			particleEmitterWindow = new ParticleEmiiterEditorWindow();
 
 			tools.push_back(rng = new RandomTest());
 			tools.push_back(transDebInfo = new TransformDebugWindow());
@@ -318,6 +319,7 @@ void ModuleEditor::Update()
 		if (shadereditor->IsActive()) shadereditor->DrawWindow(popUpFocus);
 		if (skyboxeditor->IsActive()) skyboxeditor->DrawWindow(popUpFocus);
 		if (waterplaneResourceWindow->IsActive()) waterplaneResourceWindow->DrawWindow(popUpFocus);
+		if (particleEmitterWindow->IsActive()) particleEmitterWindow->DrawWindow(popUpFocus);
 
 		texteditormanager->DrawWindow(popUpFocus);
 	}
@@ -673,6 +675,11 @@ void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
 {
 	*widht = sceneEditorWindow->GetSceneWidht();
 	*height = sceneEditorWindow->GetSceneHeight();
+}
+
+void ModuleEditor::StartEditingParticleEmiter(RE_ParticleEmitter* sim)
+{
+	particleEmitterWindow->StartEditing(sim);
 }
 
 void ModuleEditor::PushCommand(RE_Command* cmd) { commands->PushCommand(cmd); }

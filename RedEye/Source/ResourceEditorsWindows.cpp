@@ -674,42 +674,30 @@ ParticleEmiiterEditorWindow::ParticleEmiiterEditorWindow(const char* name, bool 
 
 ParticleEmiiterEditorWindow::~ParticleEmiiterEditorWindow() {}
 
+void ParticleEmiiterEditorWindow::StartEditing(RE_ParticleEmitter* sim)
+{
+	active = true;
+	simulation = sim;
+}
+
 void ParticleEmiiterEditorWindow::Draw(bool secondary)
 {
-	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	if (simulation != nullptr)
 	{
-		if (simulation != nullptr)
+		if (ImGui::Begin(name, &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 		{
-			//if (!draw && ImGui::Button("Start Draw")) {
-			//	glGenVertexArrays(1, &VAO);
-			//	glGenBuffers(1, &VBO);
-			//	glGenBuffers(1, &EBO);
-			//
-			//	RE_GLCache::ChangeVAO(VAO);
-			//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-			//
-			//	float triangle[9]{
-			//		-0.5f, -0.5f, 0.0f,
-			//		0.5f, -0.5f, 0.0f,
-			//		0.0f,  0.5f, 0.0f
-			//	};
-			//
-			//	unsigned int index[3] = { 0, 1, 2 };
-			//
-			//	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), &triangle[0], GL_STATIC_DRAW);
-			//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-			//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(unsigned int), &index[0], GL_STATIC_DRAW);
-			//
-			//	// vertex positions
-			//	int accumulativeOffset = 0;
-			//	glEnableVertexAttribArray(0);
-			//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
-			//	accumulativeOffset += sizeof(float) * 3;
-			//
-			//	RE_GLCache::ChangeVAO(0);
-			//
-			//	draw = true;
-			//}
+			ImGui::Image((void*)RE_RENDER->GetRenderedEditorSceneTexture(), { 100.f, 100.f }, { 0.0, 1.0 }, { 1.0, 0.0 });
+
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Particle Controller", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
 
 			switch (simulation->state)
 			{
@@ -721,18 +709,52 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 			case RE_ParticleEmitter::PLAY:
 			{
 				if (ImGui::Button("Pause")) simulation->state = RE_ParticleEmitter::PAUSE;
+				ImGui::SameLine();
 				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOP;
 				break;
 			}
 			case RE_ParticleEmitter::PAUSE:
 			{
 				if (ImGui::Button("Resume")) simulation->state = RE_ParticleEmitter::PLAY;
+				ImGui::SameLine();
 				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOP;
 				break;
 			}
 			}
 
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Particle Settings", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
 			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Particle Renderer Settings", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
 
 			if (ImGui::DragFloat3("Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
 				if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
@@ -771,66 +793,73 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 			else
 				ImGui::Text("Opacity is with curve");
 
-			ImGui::Checkbox(simulation->emitlight ? "Disable lighting" : "Enable lighting", &simulation->emitlight);
-			ImGui::ColorEdit3("Light Color", &simulation->lightColor[0]);
-			if (simulation->particleLColor) {
-				if (ImGui::Button("Set particles light color")) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->lightColor = simulation->lightColor;
-				}
-			}
-			ImGui::DragFloat("Specular", &simulation->specular, 0.01f, 0.f, 1.f, "%.2f");
-			if (simulation->particleLColor) {
-				if (ImGui::Button("Set particles specular")) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->specular = simulation->specular;
-				}
-			}
-			ImGui::DragFloat("Intensity", &simulation->intensity, 0.01f, 0.0f, 50.0f, "%.2f");
-			if (simulation->particleLColor) {
-				if (ImGui::Button("Set particles intensity")) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->intensity = simulation->intensity;
-				}
-			}
-			ImGui::DragFloat("Constant", &simulation->constant, 0.01f, 0.001f, 5.0f, "%.2f");
-			ImGui::DragFloat("Linear", &simulation->linear, 0.001f, 0.001f, 5.0f, "%.3f");
-			ImGui::DragFloat("Quadratic", &simulation->quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
-			ImGui::Separator();
-			ImGui::Checkbox(simulation->particleLColor ? "Disable single particle lighting" : "Enable single particle lighting", &simulation->particleLColor);
-			if (simulation->particleLColor) {
-				if (ImGui::Checkbox(simulation->randomLightColor ? "Disable random particle color" : "Enable random particle color", &simulation->randomLightColor)) {
+			if (!simulation->materialMD5) ImGui::Text("NMaterial not selected.");
+			else
+			{
+				ImGui::Separator();
+				RE_Material* matRes = dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5));
+				if (ImGui::Button(matRes->GetName())) RE_RES->PushSelected(matRes->GetMD5(), true);
 
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					if (simulation->randomLightColor)
-						for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
-					else
-						for (auto p : *particles) p->lightColor = simulation->lightColor;
-				}
-
-				ImGui::DragFloat2("Specular min-max", simulation->sClamp, 0.005f, 0.0f, 1.0f);
-				if (ImGui::Checkbox(simulation->randomSpecular ? "Disable random particle specular" : "Enable random particle specular", &simulation->randomSpecular)) {
-
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-
-					if (simulation->randomSpecular)
-						for (auto p : *particles) p->specular = RE_MATH->RandomF(simulation->sClamp[0], simulation->sClamp[1]);
-					else
-						for (auto p : *particles) p->specular = simulation->specular;
-				}
-
-				ImGui::DragFloat2("Intensity min-max", simulation->iClamp, 0.1f, 0.0f, 50.0f);
-				if (ImGui::Checkbox(simulation->randomIntensity ? "Disable random particle intensity" : "Enable random particle intensity", &simulation->randomIntensity)) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-
-					if (simulation->randomIntensity)
-						for (auto p : *particles) p->intensity = RE_MATH->RandomF(simulation->iClamp[0], simulation->iClamp[1]);
-					else
-						for (auto p : *particles) p->intensity = simulation->intensity;
-				}
+				matRes->DrawMaterialParticleEdit(simulation->useTextures);
 			}
 
 			ImGui::Separator();
+
+			if (ImGui::BeginMenu("Change material"))
+			{
+				eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(Resource_Type::R_MATERIAL);
+				bool none = true;
+				for (auto material : materials)
+				{
+					if (material->isInternal()) continue;
+
+					none = false;
+					if (ImGui::MenuItem(material->GetName()))
+					{
+						if (simulation->materialMD5)
+						{
+							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UnUseResources();
+							RE_RES->UnUse(simulation->materialMD5);
+						}
+						simulation->materialMD5 = material->GetMD5();
+						if (simulation->materialMD5)
+						{
+							RE_RES->Use(simulation->materialMD5);
+							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UseResources();
+						}
+					}
+				}
+				if (none) ImGui::Text("No custom materials on assets");
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#MaterialReference"))
+				{
+					if (simulation->materialMD5) RE_RES->UnUse(simulation->materialMD5);
+					simulation->materialMD5 = *static_cast<const char**>(dropped->Data);
+					if (simulation->materialMD5) RE_RES->Use(simulation->materialMD5);
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Particle Form", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
 
 			if (simulation->meshMD5)
 			{
@@ -853,7 +882,8 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 						simulation->primCmp->UnUseResources();
 						DEL(simulation->primCmp);
 					}
-					clearMesh = true;
+					simulation->primCmp = new RE_CompPoint();
+					setUpPrimitive = clearMesh = true;
 					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Cube")) {
@@ -977,8 +1007,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				clearMesh = false;
 			}
 
-
-
 			if (ImGui::BeginMenu("Change mesh"))
 			{
 				eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(Resource_Type::R_MESH);
@@ -1003,79 +1031,119 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 
 				ImGui::EndMenu();
 			}
-
-			//if (ImGui::BeginDragDropTarget())
-			//{
-			//	if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#ModelReference"))
-			//	{
-			//		if (meshMD5) RE_RES->UnUse(meshMD5);
-			//		meshMD5 = *static_cast<const char**>(dropped->Data);
-			//		if (meshMD5) RE_RES->Use(meshMD5);
-			//	}
-			//	ImGui::EndDragDropTarget();
-			//}
-
-
-
-			if (!simulation->materialMD5) ImGui::Text("NMaterial not selected.");
-			else
+			if (secondary)
 			{
-				ImGui::Separator();
-				RE_Material* matRes = dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5));
-				if (ImGui::Button(matRes->GetName())) RE_RES->PushSelected(matRes->GetMD5(), true);
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
 
-				matRes->DrawMaterialParticleEdit(simulation->useTextures);
+		if (ImGui::Begin("Particle Lighting", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
 
-			if (ImGui::BeginMenu("Change material"))
-			{
-				eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(Resource_Type::R_MATERIAL);
-				bool none = true;
-				for (auto material : materials)
-				{
-					if (material->isInternal()) continue;
-
-					none = false;
-					if (ImGui::MenuItem(material->GetName()))
-					{
-						if (simulation->materialMD5)
-						{
-							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UnUseResources();
-							RE_RES->UnUse(simulation->materialMD5);
-						}
-						simulation->materialMD5 = material->GetMD5();
-						if (simulation->materialMD5)
-						{
-							RE_RES->Use(simulation->materialMD5);
-							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UseResources();
-						}
-					}
+			ImGui::Checkbox(simulation->emitlight ? "Disable lighting" : "Enable lighting", & simulation->emitlight);
+			ImGui::ColorEdit3("Light Color", &simulation->lightColor[0]);
+			if (simulation->particleLColor) {
+				if (ImGui::Button("Set particles light color")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->lightColor = simulation->lightColor;
 				}
-				if (none) ImGui::Text("No custom materials on assets");
-				ImGui::EndMenu();
 			}
-
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#MaterialReference"))
-				{
-					if (simulation->materialMD5) RE_RES->UnUse(simulation->materialMD5);
-					simulation->materialMD5 = *static_cast<const char**>(dropped->Data);
-					if (simulation->materialMD5) RE_RES->Use(simulation->materialMD5);
+			ImGui::DragFloat("Specular", &simulation->specular, 0.01f, 0.f, 1.f, "%.2f");
+			if (simulation->particleLColor) {
+				if (ImGui::Button("Set particles specular")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->specular = simulation->specular;
 				}
-				ImGui::EndDragDropTarget();
 			}
-
+			ImGui::DragFloat("Intensity", &simulation->intensity, 0.01f, 0.0f, 50.0f, "%.2f");
+			if (simulation->particleLColor) {
+				if (ImGui::Button("Set particles intensity")) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					for (auto p : *particles) p->intensity = simulation->intensity;
+				}
+			}
+			ImGui::DragFloat("Constant", &simulation->constant, 0.01f, 0.001f, 5.0f, "%.2f");
+			ImGui::DragFloat("Linear", &simulation->linear, 0.001f, 0.001f, 5.0f, "%.3f");
+			ImGui::DragFloat("Quadratic", &simulation->quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
 			ImGui::Separator();
+			ImGui::Checkbox(simulation->particleLColor ? "Disable single particle lighting" : "Enable single particle lighting", &simulation->particleLColor);
+			if (simulation->particleLColor) {
+				if (ImGui::Checkbox(simulation->randomLightColor ? "Disable random particle color" : "Enable random particle color", &simulation->randomLightColor)) {
+
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+					if (simulation->randomLightColor)
+						for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
+					else
+						for (auto p : *particles) p->lightColor = simulation->lightColor;
+				}
+
+				ImGui::DragFloat2("Specular min-max", simulation->sClamp, 0.005f, 0.0f, 1.0f);
+				if (ImGui::Checkbox(simulation->randomSpecular ? "Disable random particle specular" : "Enable random particle specular", &simulation->randomSpecular)) {
+
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+
+					if (simulation->randomSpecular)
+						for (auto p : *particles) p->specular = RE_MATH->RandomF(simulation->sClamp[0], simulation->sClamp[1]);
+					else
+						for (auto p : *particles) p->specular = simulation->specular;
+				}
+
+				ImGui::DragFloat2("Intensity min-max", simulation->iClamp, 0.1f, 0.0f, 50.0f);
+				if (ImGui::Checkbox(simulation->randomIntensity ? "Disable random particle intensity" : "Enable random particle intensity", &simulation->randomIntensity)) {
+					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+
+					if (simulation->randomIntensity)
+						for (auto p : *particles) p->intensity = RE_MATH->RandomF(simulation->iClamp[0], simulation->iClamp[1]);
+					else
+						for (auto p : *particles) p->intensity = simulation->intensity;
+				}
+			}
+
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Particle Curve", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
 
 			ImGui::Checkbox("Use curve", &simulation->useCurve);
 
 			if (simulation->useCurve) {
 
-				ImGui::Checkbox("Opacity with curve", &simulation->opacityWithCurve);
+				static float cSize[2] = { 600.f, 200.f };
 
-				ImGui::PushItemWidth(75.f);
+
+				ImGui::SameLine();
+
+				ImGui::PushItemWidth(150.f);
+
+				ImGui::DragFloat2("Curve size", cSize, 1.0f, 0.0f, 0.0f, "%.0f");
+
+				ImGui::PopItemWidth();
+
+				ImGui::Curve("Particle curve editor", { cSize[0], cSize[1] }, simulation->total_points, simulation->curve.data());
+
+				ImGui::SameLine();
+
+				ImGui::PushItemWidth(50.f);
 
 				static int minPoitns = 3;
 
@@ -1091,25 +1159,21 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 
 				ImGui::SameLine();
 
+
 				ImGui::Checkbox("Smooth curve", &simulation->smoothCurve);
 
 				ImGui::SameLine();
 
-				ImGui::PushItemWidth(150.f);
+				ImGui::Checkbox("Opacity with curve", &simulation->opacityWithCurve);
 
-				static float cSize[2] = { 600.f, 200.f };
-				ImGui::DragFloat2("Curve size", cSize, 1.0f, 0.0f, 0.0f, "%.0f");
-
-				ImGui::PopItemWidth();
-
-
-				ImGui::Curve("Particle curve editor", { cSize[0], cSize[1] }, simulation->total_points, simulation->curve.data());
+			}
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
 			}
 		}
-		else
-		{
-			ImGui::Text("Unregistered simulation");
-		}
+		ImGui::End();
+
 	}
-	ImGui::End();
 }

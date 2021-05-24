@@ -707,6 +707,9 @@ int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* po
     {
         item = 0;
     }
+
+    ImGui::PushItemWidth(100.f);
+
     if (ImGui::Combo("Ease type", &item, items, IM_ARRAYSIZE(items)))
     {
         max = maxpoints;
@@ -719,6 +722,8 @@ int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* po
             }
         }
     }
+
+    ImGui::PopItemWidth();
 
     char buf[128];
     const char* str = label;

@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "ModulePhysics.h"
 #include "ModuleScene.h"
+#include "ModuleEditor.h"
 #include "RE_PrimitiveManager.h"
 #include "ModuleRenderer3D.h"
 #include "RE_CameraManager.h"
@@ -15,7 +16,6 @@
 #include "RE_GLCache.h"
 #include "RE_Particle.h"
 
-#include "ModuleScene.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
@@ -221,6 +221,8 @@ void RE_CompParticleEmitter::DrawProperties()
 	{
 		if (simulation != nullptr)
 		{
+			if (ImGui::Button("Edit simulation on workspace"))
+				RE_EDITOR->StartEditingParticleEmiter(simulation);
 
 			switch (simulation->state)
 			{

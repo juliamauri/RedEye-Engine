@@ -33,6 +33,7 @@ class SceneEditorWindow;
 class SceneGameWindow;
 class TransformDebugWindow;
 class RendererDebugWindow;
+class ParticleEmiiterEditorWindow;
 
 class ModuleEditor : public Module
 {
@@ -70,6 +71,7 @@ public:
 	void SelectUndefinedFile(eastl::string* toSelect) const;
 	void OpenTextEditor(const char* filePath, eastl::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
 	void GetSceneWindowSize(unsigned int* widht, unsigned int* height);
+	void StartEditingParticleEmiter(struct RE_ParticleEmitter* sim);
 
 	// Commands
 	void PushCommand(RE_Command* cmd);
@@ -114,6 +116,7 @@ private:
 	SkyBoxEditorWindow* skyboxeditor = nullptr;
 	TextEditorManagerWindow* texteditormanager = nullptr;
 	WaterPlaneResourceWindow* waterplaneResourceWindow = nullptr;
+	ParticleEmiiterEditorWindow* particleEmitterWindow = nullptr;
 
 	// Scene views
 	SceneEditorWindow* sceneEditorWindow = nullptr;
