@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="RE_EmissionData.cpp" />
     <ClCompile Include="ImGuiWidgets\ImGuiColorTextEdit\TextEditor.cpp" />
     <ClCompile Include="ImGuiWidgets\ImGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="ModulePhysics.cpp">
@@ -314,6 +315,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="RE_EmissionData.h" />
     <ClInclude Include="ImGuiWidgets\ImGuiColorTextEdit\TextEditor.h" />
     <ClInclude Include="ImGuiWidgets\ImGuiCurverEditor\ImGuiCurveEditor.hpp" />
     <ClInclude Include="ImGuiWidgets\ImGuizmo\ImGuizmo.h" />

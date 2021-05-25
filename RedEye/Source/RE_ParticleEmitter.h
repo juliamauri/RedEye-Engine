@@ -1,13 +1,11 @@
 #ifndef __RE_PARTICLEEMITTER_H__
 #define __RE_PARTICLEEMITTER_H__
 
+#include "RE_EmissionData.h"
+
 #include "MathGeoLib/include/Math/float3.h"
-#include "MathGeoLib/include/Geometry/Plane.h"
-#include <EASTL/vector.h>
-
 #include "ImGui/imgui.h"
-
-//#define Impulse_Thomas_Smid
+#include <EASTL/vector.h>
 
 class RE_CompPrimitive;
 
@@ -18,59 +16,29 @@ struct RE_ParticleEmitter
 	// Playback parameters
 	enum PlaybackState { STOP = 0, PLAY, PAUSE } state = STOP;
 	bool loop = true; // float start_delay = 0.0f;
-
-	// Instantiation parameters
-	float lifetime = 14.f;
 	float speed_muliplier = 1.f;
-	float spawn_frequency = 10.f;
-	float spawn_offset = 0.f;
-
-	inline int GetNewSpawns(float dt)
-	{
-		int units = static_cast<int>((spawn_offset += dt) * spawn_frequency);
-		spawn_offset -= static_cast<float>(units) / spawn_frequency;
-		return units;
-	}
 
 	// Control values
+	unsigned int max_particles = 1000u;
 	float maxLifeTime = 15.5f;
 	float maxSpeed = 20.f;
 	float maxDistance = 2.f * 1.5f; //lifetime * speed
 
+	float spawn_frequency = 10.f;
+	float spawn_offset = 0.f;
+
+	// Instantiation parameters
+	RE_EmissionLifetime lifetime = {};
+	RE_EmissionShape init_pos = {};
+	RE_EmissionSpeed init_speed = {};
+
 	// Physic properties ---------------------------------------------------------
-
-	// Collider
-	float restitution = 0.85f; // elastic vs inelastic
-
-	// External Forces
-	float gravity = -9.81f;
-	math::vec wind = math::vec::zero;
-
-	// Boundaries
-	enum BoundaryType
-	{
-		NONE,
-		GROUND,
-		CEILING,
-		BOX,
-		SPHERE
-	} bound_type = GROUND;
-
-	enum BoundaryEffect
-	{
-		CONTAIN,
-		KILL,
-		CLAMP
-	} effect;
-
-	union Boundary
-	{
-		Boundary() {}
-		float radius = 0.f; // height
-		math::Plane plane;
-	} boundary;
-
-	float boundary_restitution = 0.95f;
+	
+	RE_EmissionMass init_mass = {};
+	RE_EmissionColRadius init_col_r = {};
+	RE_EmissionColRest col_restitution = {};
+	RE_EmissionBoundary boundary = {};
+	RE_EmissionExternalForces external_acc = {};
 
 	// Render properties ---------------------------------------------------------
 

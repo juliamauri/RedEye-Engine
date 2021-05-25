@@ -322,6 +322,9 @@
     <ClCompile Include="RE_Profiler.cpp">
       <Filter>Source\Utility\Profiling</Filter>
     </ClCompile>
+    <ClCompile Include="RE_EmissionData.cpp">
+      <Filter>Source\Application\Modules\Physics\Particles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event.h">
@@ -1316,6 +1319,9 @@
     </ClInclude>
     <ClInclude Include="RE_Profiler.h">
       <Filter>Source\Utility\Profiling</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_EmissionData.h">
+      <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

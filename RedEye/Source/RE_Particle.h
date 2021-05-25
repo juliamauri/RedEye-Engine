@@ -7,14 +7,16 @@ struct RE_Particle
 {
 	// Base attributes
 	float lifetime = 0.0f;
+	float max_lifetime = 0.0f;
 	float dt_offset = 0.f;
 
 	math::vec position = math::vec::zero;
 	math::vec velocity = math::vec::zero;
 
 	// Physic properties
-	float mass = 0.1f;
-	float col_radius = 0.2f;
+	float mass = 1.f;
+	float col_radius = 1.f;
+	float col_restitution = 0.9f;
 
 	// Lighting parameters
 	math::vec lightColor = math::vec::one;

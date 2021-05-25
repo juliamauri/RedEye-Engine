@@ -27,6 +27,8 @@ public:
 	int					RandomInt(int min, int max);
 	unsigned long long	RandomUID();
 
+	math::vec RandomNDir();
+
 	math::LCG& GetRNGSeed();
 	void SetRNGSeed(unsigned int seed);
 

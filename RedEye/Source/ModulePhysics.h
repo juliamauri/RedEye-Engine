@@ -28,7 +28,18 @@ public:
 
 private:
 
+	void ImpulseCollision(RE_ParticleEmitter* emitter, RE_Particle& p1, RE_Particle& p2) const;
+	void ImpulseCollisionTS(RE_ParticleEmitter* emitter, RE_Particle& p1, RE_Particle& p2, const float dt) const;
+	
+private:
+
 	ParticleManager particles;
+
+	enum CollisionResolution
+	{
+		SIMPLE,
+		Thomas_Smid
+	} method = SIMPLE;
 
 	// Debug drawing
 	float debug_color[4] = { 0.1f, 0.8f, 0.1f, 1.f };
