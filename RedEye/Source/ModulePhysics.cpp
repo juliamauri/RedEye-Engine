@@ -42,20 +42,19 @@ void ModulePhysics::Update()
 			const float spawn_period = 1.f / sim->first->spawn_frequency;
 			int to_add = static_cast<int>((sim->first->spawn_offset += local_dt) * sim->first->spawn_frequency);
 			sim->first->spawn_offset -= static_cast<float>(to_add) / sim->first->spawn_frequency;
-
-			// Spawn new particles
 			for (int i = 0; i < to_add; ++i)
 			{
 				RE_Particle* particle = new RE_Particle();
 
 				// Set base properties
 				particle->dt_offset = local_dt - sim->first->spawn_offset - (spawn_period * (i + 1));
-				particle->position = sim->first->init_pos.GetPosition();
-				particle->velocity = sim->first->init_speed.GetSpeed();
+				particle->position = sim->first->v_pos.GetPosition();
+				particle->velocity = sim->first->v_speed.GetSpeed();
 
 				// Set physic properties
-				particle->mass = 1.f;
-				particle->col_radius = 0.5f;
+				particle->mass = sim->first->v_mass.GetValue();
+				particle->col_radius = sim->first->v_col_radius.GetValue();
+				particle->col_restitution = sim->first->v_col_restitution.GetValue();
 
 				// Set light properties
 				particle->intensity = (sim->first->randomIntensity) ? RE_MATH->RandomF(sim->first->iClamp[0], sim->first->iClamp[1]) : sim->first->intensity;
@@ -75,8 +74,8 @@ void ModulePhysics::Update()
 			{
 				// Check if particle is still alive
 				bool is_alive = true;
-				switch (sim->first->lifetime.type) {
-				case RE_EmissionSingleValue::Type::VALUE: is_alive = ((*p1)->lifetime += local_dt) < sim->first->lifetime.GetValue(); break;
+				switch (sim->first->v_lifetime.type) {
+				case RE_EmissionSingleValue::Type::VALUE: is_alive = ((*p1)->lifetime += local_dt) < sim->first->v_lifetime.GetValue(); break;
 				case RE_EmissionSingleValue::Type::RANGE: is_alive = ((*p1)->lifetime += local_dt) < (*p1)->max_lifetime; break;
 				default: break; }
 
@@ -148,6 +147,12 @@ RE_ParticleEmitter* ModulePhysics::AddEmitter()
 {
 	RE_ParticleEmitter* ret = new RE_ParticleEmitter();
 
+	ret->v_lifetime.min = 10.f;
+	ret->v_pos.geo.point = { 0.f, 5.f, 0.f };
+	ret->v_mass.min = 1.f;
+	ret->v_col_radius.min = 1.f;
+	ret->v_col_restitution.min = 0.9f;
+
 	// Curve SetUp
 	ret->curve.push_back({ -1.0f, 0.0f });// init data so editor knows to take it from here
 	for (int i = 1; i < ret->total_points; i++)
@@ -156,9 +161,6 @@ RE_ParticleEmitter* ModulePhysics::AddEmitter()
 	// Prim SetUp
 	ret->primCmp = new RE_CompPoint();
 	RE_SCENE->primitives->SetUpComponentPrimitive(ret->primCmp);
-
-	// Boundary setup
-	ret->boundary.data.plane.Set(math::vec::zero, { 0.f, 1.f, 0.f });
 
 	particles.Allocate(ret);
 	return ret;

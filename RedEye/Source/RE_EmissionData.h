@@ -42,9 +42,9 @@ struct RE_EmissionVector
 		RANGEXZ,
 		RANGEYZ,
 		RANGEXYZ
-	} type = NONE;
+	} type = RANGEXYZ;
 
-	math::vec min = math::vec::zero;
+	math::vec min = -math::vec::one;
 	math::vec max = math::vec::one;
 
 	math::vec GetSpeed() const;
@@ -61,7 +61,7 @@ struct RE_EmissionSingleValue
 		RANGE
 	} type = VALUE;
 
-	float min = 0.f;
+	float min = 1.f;
 	float max = 1.f;
 
 	float GetValue() const;
@@ -80,7 +80,7 @@ struct RE_EmissionExternalForces
 		GRAVITY,
 		WIND,
 		WIND_GRAVITY
-	} type = NONE;
+	} type = GRAVITY;
 
 	float gravity = -9.81f;
 	math::vec wind = math::vec::zero;
@@ -99,7 +99,7 @@ struct RE_EmissionBoundary
 		CEILING,
 		BOX,
 		SPHERE
-	} type = GROUND;
+	} type = NONE;
 
 	enum Effect
 	{

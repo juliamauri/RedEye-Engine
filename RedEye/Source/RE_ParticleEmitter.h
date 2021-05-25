@@ -28,15 +28,16 @@ struct RE_ParticleEmitter
 	float spawn_offset = 0.f;
 
 	// Instantiation parameters
-	RE_EmissionLifetime lifetime = {};
-	RE_EmissionShape init_pos = {};
-	RE_EmissionSpeed init_speed = {};
+	RE_EmissionLifetime v_lifetime = {};
+	RE_EmissionShape v_pos = {};
+	RE_EmissionSpeed v_speed = {};
 
 	// Physic properties ---------------------------------------------------------
 	
-	RE_EmissionMass init_mass = {};
-	RE_EmissionColRadius init_col_r = {};
-	RE_EmissionColRest col_restitution = {};
+	RE_EmissionMass v_mass = {};
+	RE_EmissionColRadius v_col_radius = {};
+	RE_EmissionColRest v_col_restitution = {};
+
 	RE_EmissionBoundary boundary = {};
 	RE_EmissionExternalForces external_acc = {};
 
