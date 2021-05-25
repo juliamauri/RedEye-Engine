@@ -14,6 +14,9 @@ RE_Math::RE_Math()
 // range [ 0, 1 )
 float RE_Math::RandomF() { return lcg.Float(); }
 
+// range ( -1, 1 )
+float RE_Math::RandomFN() { return (lcg.Float() * 2.f) - 1.f; }
+
 // range [ 0, 2147483647 ]
 int RE_Math::RandomInt() { return lcg.Int(); }
 

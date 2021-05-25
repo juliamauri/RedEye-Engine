@@ -47,7 +47,10 @@ void ModulePhysics::Update()
 				RE_Particle* particle = new RE_Particle();
 
 				// Set base properties
+				particle->lifetime = 0.f;
+				particle->max_lifetime = sim->first->v_lifetime.GetValue();
 				particle->dt_offset = local_dt - sim->first->spawn_offset - (spawn_period * (i + 1));
+				
 				particle->position = sim->first->v_pos.GetPosition();
 				particle->velocity = sim->first->v_speed.GetSpeed();
 
@@ -93,17 +96,25 @@ void ModulePhysics::Update()
 					(*p1)->velocity += sim->first->external_acc.GetAcceleration() * (local_dt -= (*p1)->dt_offset);
 					(*p1)->dt_offset = 0.f;
 
-					// Cap speed
-					if ((*p1)->velocity.LengthSq() > sim->first->maxSpeed * sim->first->maxSpeed)
-						(*p1)->velocity = (*p1)->velocity.Normalized() * sim->first->maxSpeed;
-
 					// Check boundary collision
-					sim->first->boundary.ParticleCollision(**p1);
+					if (sim->first->boundary.ParticleCollision(**p1))
+					{
+						// Cap speed
+						if ((*p1)->velocity.LengthSq() > sim->first->maxSpeed * sim->first->maxSpeed)
+							(*p1)->velocity = (*p1)->velocity.Normalized() * sim->first->maxSpeed;
 
-					// Update position
-					(*p1)->position += (*p1)->velocity * local_dt;
+						// Update position
+						(*p1)->position += (*p1)->velocity * local_dt;
 
-					++p1;
+						++p1;
+					}
+					else
+					{
+						// Remove dead particles
+						DEL(*p1);
+						p1 = sim->second->erase(p1);
+					}
+
 				}
 				else
 				{
@@ -147,11 +158,11 @@ RE_ParticleEmitter* ModulePhysics::AddEmitter()
 {
 	RE_ParticleEmitter* ret = new RE_ParticleEmitter();
 
-	ret->v_lifetime.min = 10.f;
+	ret->v_lifetime.val = 10.f;
 	ret->v_pos.geo.point = { 0.f, 5.f, 0.f };
-	ret->v_mass.min = 1.f;
-	ret->v_col_radius.min = 1.f;
-	ret->v_col_restitution.min = 0.9f;
+	ret->v_mass.val = 1.f;
+	ret->v_col_radius.val = 1.f;
+	ret->v_col_restitution.val = 0.9f;
 
 	// Curve SetUp
 	ret->curve.push_back({ -1.0f, 0.0f });// init data so editor knows to take it from here
@@ -204,7 +215,7 @@ void ModulePhysics::ImpulseCollision(RE_ParticleEmitter* emitter, RE_Particle& p
 	if (dist2 <= combined_radius * combined_radius)
 	{
 		// Get mtd: Minimum Translation Distance
-		const float dist = sqrt(dist2);
+		const float dist = math::Sqrt(dist2);
 		const math::vec mtd = collision_dir * (combined_radius - dist) / dist;
 
 		// Resolve Intersection
@@ -246,12 +257,12 @@ void ModulePhysics::ImpulseCollisionTS(RE_ParticleEmitter* emitter, RE_Particle&
 		math::vec p2_rel_pos = p2.position - p1.position;
 
 		// Get polar coordinates
-		const float theta2 = acos(p2_rel_pos.z / rel_distance);
-		const float st = sin(theta2);
-		const float ct = cos(theta2);
-		const float phi2 = (p2_rel_pos.x == 0 && p2_rel_pos.y == 0) ? 0.f : atan2(p2_rel_pos.y, p2_rel_pos.x);
-		const float sp = sin(phi2);
-		const float cp = cos(phi2);
+		const float theta2 = math::Acos(p2_rel_pos.z / rel_distance);
+		const float st = math::Sin(theta2);
+		const float ct = math::Cos(theta2);
+		const float phi2 = (p2_rel_pos.x == 0 && p2_rel_pos.y == 0) ? 0.f : math::Atan2(p2_rel_pos.y, p2_rel_pos.x);
+		const float sp = math::Sin(phi2);
+		const float cp = math::Cos(phi2);
 
 		// Set p2 velocity as resting
 		const math::vec p1_rel_vel = p1.velocity - p2.velocity;
@@ -263,14 +274,14 @@ void ModulePhysics::ImpulseCollisionTS(RE_ParticleEmitter* emitter, RE_Particle&
 			st * cp * p1_rel_vel.x + st * sp * p1_rel_vel.y + ct * p1_rel_vel.z };
 
 		// Get angles and normalized impact parameter
-		const float thetav = acos(RE_Math::Cap(p1_rot_vel.z / rel_speed, -1.f, 1.f));
-		const float phiv = (p1_rot_vel.x == 0 && p1_rot_vel.y == 0) ? 0.f : atan2(p1_rot_vel.y, p1_rot_vel.x);
-		const float dr = rel_distance * sin(thetav) / (p1.col_radius + p2.col_radius);
+		const float thetav = math::Acos(RE_Math::Cap(p1_rot_vel.z / rel_speed, -1.f, 1.f));
+		const float phiv = (p1_rot_vel.x == 0 && p1_rot_vel.y == 0) ? 0.f : math::Atan2(p1_rot_vel.y, p1_rot_vel.x);
+		const float dr = rel_distance * math::Sin(thetav) / (p1.col_radius + p2.col_radius);
 
-		if (!(thetav > 1.57079632f || fabs(dr) > 1))
+		if (!(thetav > 1.57079632f || math::Abs(dr) > 1))
 		{
 			// Get time to collision
-			const float t = (rel_distance * cos(thetav) - (p1.col_radius + p2.col_radius) * sqrt(1 - dr * dr)) / rel_speed;
+			const float t = (rel_distance * math::Cos(thetav) - (p1.col_radius + p2.col_radius) * math::Sqrt(1 - dr * dr)) / rel_speed;
 			if (t < dt - p1.dt_offset)
 			{
 				// Move to collision position
@@ -280,9 +291,9 @@ void ModulePhysics::ImpulseCollisionTS(RE_ParticleEmitter* emitter, RE_Particle&
 				p2.dt_offset += t;
 
 				// Get impact angles
-				const float a = tan(thetav + asin(-dr));
-				const float sbeta = sin(phiv);
-				const float cbeta = cos(phiv);
+				const float a = math::Tan(thetav + math::Asin(-dr));
+				const float sbeta = math::Sin(phiv);
+				const float cbeta = math::Cos(phiv);
 
 				const float mass_ratio = p2.mass / p1.mass;
 

@@ -22,6 +22,7 @@ public:
 
 	// Random number generation
 	float				RandomF();
+	float				RandomFN();
 	int					RandomInt();
 	float				RandomF(float min, float max);
 	int					RandomInt(int min, int max);

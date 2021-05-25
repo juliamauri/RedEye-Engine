@@ -247,6 +247,17 @@ void RE_CompParticleEmitter::DrawProperties()
 
 			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
 
+			simulation->v_lifetime.DrawEditor("max life time");
+			simulation->v_pos.DrawEditor();
+			simulation->v_speed.DrawEditor("speed");
+
+			simulation->v_mass.DrawEditor("mass");
+			simulation->v_col_radius.DrawEditor("collider radius");
+			simulation->v_col_restitution.DrawEditor("restitution");
+
+			simulation->boundary.DrawEditor();
+			simulation->external_acc.DrawEditor();
+
 			if (ImGui::DragFloat3("Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
 				if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
 			}

@@ -8,7 +8,7 @@
 
 struct RE_EmissionShape
 {
-	enum Type
+	enum Type : int
 	{
 		POINT,
 		BOX,
@@ -24,14 +24,15 @@ struct RE_EmissionShape
 		math::vec box[2];
 		math::Sphere sphere;
 		eastl::pair<math::Sphere, float> hollow_sphere;
-	} geo;
+	} geo = {};
 
 	math::vec GetPosition() const;
+	void DrawEditor();
 };
 
 struct RE_EmissionVector
 {
-	enum Type
+	enum Type : int
 	{
 		NONE,
 		VALUE,
@@ -44,27 +45,29 @@ struct RE_EmissionVector
 		RANGEXYZ
 	} type = RANGEXYZ;
 
-	math::vec min = -math::vec::one;
-	math::vec max = math::vec::one;
+	math::vec val = -math::vec::one;
+	math::vec dt = math::vec::one;
 
 	math::vec GetSpeed() const;
+	void DrawEditor(const char* name);
 };
 
 typedef RE_EmissionVector RE_EmissionSpeed;
 
 struct RE_EmissionSingleValue
 {
-	enum Type
+	enum Type : int
 	{
 		NONE,
 		VALUE,
 		RANGE
 	} type = VALUE;
 
-	float min = 1.f;
-	float max = 1.f;
+	float val = 1.f;
+	float dt = 1.f;
 
 	float GetValue() const;
+	void DrawEditor(const char* name);
 };
 
 typedef RE_EmissionSingleValue RE_EmissionLifetime;
@@ -74,7 +77,7 @@ typedef RE_EmissionSingleValue RE_EmissionColRest;
 
 struct RE_EmissionExternalForces
 {
-	enum Type
+	enum Type : int
 	{
 		NONE,
 		GRAVITY,
@@ -86,22 +89,22 @@ struct RE_EmissionExternalForces
 	math::vec wind = math::vec::zero;
 
 	math::vec GetAcceleration() const;
+	void DrawEditor();
 };
 
 struct RE_Particle;
 
 struct RE_EmissionBoundary
 {
-	enum Type
+	enum Type : int
 	{
 		NONE,
-		GROUND,
-		CEILING,
-		BOX,
-		SPHERE
+		PLANE,
+		SPHERE,
+		BOX
 	} type = NONE;
 
-	enum Effect
+	enum Effect : int
 	{
 		CONTAIN,
 		KILL,
@@ -110,13 +113,15 @@ struct RE_EmissionBoundary
 
 	union Data
 	{
-		float radius = 0.f; // height
 		math::Plane plane;
+		math::Sphere sphere;
+		math::vec box[2];
 	} data;
 
 	float restitution = 0.95f;
 
-	void ParticleCollision(RE_Particle& p) const;
+	bool ParticleCollision(RE_Particle& p) const;
+	void DrawEditor();
 };
 
 #endif //!__RE_EMISSION_SHAPE_H__
