@@ -373,6 +373,7 @@ void ModuleEditor::RecieveEvent(const Event& e)
 {
 	switch (e.type)
 	{
+	case PARTRICLEEDITORWINDOWCHANGED: particleEmitterWindow->UpdateViewPort(); break;
 	case EDITORWINDOWCHANGED: sceneEditorWindow->UpdateViewPort(); break;
 	case GAMEWINDOWCHANGED: sceneGameWindow->UpdateViewPort(); break;
 	case UPDATE_SCENE_WINDOWS:
@@ -677,9 +678,16 @@ void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
 	*height = sceneEditorWindow->GetSceneHeight();
 }
 
-void ModuleEditor::StartEditingParticleEmiter(RE_ParticleEmitter* sim)
+void ModuleEditor::StartEditingParticleEmiter(RE_ParticleEmitter* sim, UID fromComponent)
 {
-	particleEmitterWindow->StartEditing(sim);
+	particleEmitterWindow->StartEditing(sim, fromComponent);
+}
+
+bool ModuleEditor::IsParticleEditorActive() const { return particleEmitterWindow->IsActive(); }
+
+UID ModuleEditor::GetEditingParticleEmittorComponent() const
+{
+	return particleEmitterWindow->GetComponent();
 }
 
 void ModuleEditor::PushCommand(RE_Command* cmd) { commands->PushCommand(cmd); }
@@ -732,6 +740,50 @@ void ModuleEditor::UpdateCamera()
 	}
 
 	camera->Update();
+
+	if (particleEmitterWindow->IsActive()) {
+		camera = RE_CameraManager::ParticleEditorCamera();
+
+		if (particleEmitterWindow->isSelected()) {
+			const MouseData mouse = RE_INPUT->GetMouse();
+
+			if (RE_INPUT->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse.GetButton(1) == KEY_REPEAT)
+			{
+				// Orbit
+				if (mouse.mouse_x_motion || mouse.mouse_y_motion)
+					camera->Orbit(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion, { 0.0f, 0.0f, 0.0f });
+			}
+			else if ((RE_INPUT->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && selected)
+				// Focus
+				camera->Focus({0.0f, 0.0f, 0.0f});
+			else
+			{
+				if (mouse.GetButton(3) == KEY_REPEAT)
+				{
+					// Camera Speed
+					float cameraSpeed = cam_speed * RE_TIME->GetDeltaTime();
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT)) cameraSpeed *= 2.0f;
+
+					// Move
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_W, KEY_REPEAT))	  camera->LocalMove(Dir::FORWARD, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_S, KEY_REPEAT))	  camera->LocalMove(Dir::BACKWARD, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_A, KEY_REPEAT))	  camera->LocalMove(Dir::LEFT, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))	  camera->LocalMove(Dir::RIGHT, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_SPACE, KEY_REPEAT)) camera->LocalMove(Dir::UP, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_C, KEY_REPEAT))	  camera->LocalMove(Dir::DOWN, cameraSpeed);
+
+					// Rotate
+					if (mouse.mouse_x_motion != 0 || mouse.mouse_y_motion != 0)
+						camera->LocalPan(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion);
+				}
+
+				// Zoom
+				if (mouse.mouse_wheel_motion != 0) camera->SetFOV(camera->GetVFOVDegrees() - mouse.mouse_wheel_motion);
+			}
+		}
+
+		camera->Update();
+	}
 }
 
 void ModuleEditor::DrawGameObjectItems(const UID parent)

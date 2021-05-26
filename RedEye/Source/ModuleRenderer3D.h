@@ -59,6 +59,7 @@ enum RENDER_VIEWS : short
 {
 	VIEW_EDITOR,
 	VIEW_GAME,
+	VIEW_PARTICLE,
 	VIEW_OTHER
 };
 
@@ -95,8 +96,9 @@ public:
 	
 	static RE_CompCamera* GetCamera();
 
-	void ChangeFBOSize(int width, int height, bool editor = false);
+	void ChangeFBOSize(int width, int height, RENDER_VIEWS view);
 	unsigned int GetRenderedEditorSceneTexture()const;
+	unsigned int GetRenderedParticleEditorTexture()const;
 	unsigned int GetDepthTexture()const;
 	unsigned int GetRenderedGameSceneTexture()const;
 
@@ -127,6 +129,7 @@ private:
 
 	void DrawScene(const RenderView& render_view);
 	void DrawDebug(const RenderView& render_view);
+	void DrawParticleEditor(RenderView& render_view);
 	void DrawSkyBox();
 	void ThumbnailGameObject(RE_GameObject* go);
 	void ThumbnailMaterial(RE_Material* mat);

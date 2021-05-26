@@ -9,6 +9,7 @@
 #include <EASTL/stack.h>
 
 RE_CompCamera* RE_CameraManager::editor_camera = nullptr;
+RE_CompCamera* RE_CameraManager::particleEditor_camera = nullptr;
 UID RE_CameraManager::main_camera = 0ull;
 
 void RE_CameraManager::Init()
@@ -17,11 +18,17 @@ void RE_CameraManager::Init()
 	editor_camera->SetParent(0ull);
 	editor_camera->SetProperties();
 	editor_camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
+
+	particleEditor_camera = new RE_CompCamera();
+	particleEditor_camera->SetParent(0ull);
+	particleEditor_camera->SetProperties();
+	particleEditor_camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
 }
 
 void RE_CameraManager::Clear()
 {
 	DEL(editor_camera);
+	DEL(particleEditor_camera);
 }
 
 RE_CompCamera* RE_CameraManager::CurrentCamera()
@@ -32,6 +39,7 @@ RE_CompCamera* RE_CameraManager::CurrentCamera()
 }
 
 RE_CompCamera* RE_CameraManager::EditorCamera() { return editor_camera; }
+RE_CompCamera* RE_CameraManager::ParticleEditorCamera() { return particleEditor_camera; }
 RE_CompCamera* RE_CameraManager::MainCamera() { return dynamic_cast<RE_CompCamera*>(RE_SCENE->GetScenePool()->GetComponentPtr(main_camera, C_CAMERA)); }
 bool RE_CameraManager::HasMainCamera() { return main_camera != 0ull; }
 

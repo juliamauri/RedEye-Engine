@@ -7,6 +7,7 @@
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
+#include "Globals.h"
 
 class RE_GameObject;
 
@@ -292,14 +293,31 @@ public:
 	ParticleEmiiterEditorWindow(const char* name = "Particle Emitter Workspace", bool start_active = false);
 	~ParticleEmiiterEditorWindow();
 
-	void StartEditing(RE_ParticleEmitter* sim);
+	void StartEditing(RE_ParticleEmitter* sim, UID cmp);
+	UID GetComponent() const;
+
+	unsigned int GetSceneWidht()const { return (width == 0) ? 500 : width; }
+	unsigned int GetSceneHeight()const { return (heigth == 0) ? 500 : heigth; }
+
+	bool isSelected()const { return isWindowSelected; }
+
+	void UpdateViewPort();
+	void Recalc();
 
 private:
 	void Draw(bool secondary = false) override;
 
 
 private:
+	UID fromComponent = 0ull;
 	RE_ParticleEmitter* simulation = nullptr;
+
+	math::float4 viewport = math::float4::zero;
+	int width = 0;
+	int heigth = 0;
+
+	bool isWindowSelected = false;
+	bool recalc = false;
 };
 
 class TextEditor;

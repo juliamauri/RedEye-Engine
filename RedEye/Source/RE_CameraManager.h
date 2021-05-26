@@ -19,6 +19,7 @@ public:
 
 	static RE_CompCamera * CurrentCamera();
 	static RE_CompCamera * EditorCamera();
+	static RE_CompCamera * ParticleEditorCamera();
 	static RE_CompCamera * MainCamera();
 	static bool HasMainCamera();
 
@@ -31,6 +32,7 @@ public:
 private:
 
 	static RE_CompCamera* editor_camera;
+	static RE_CompCamera* particleEditor_camera;
 	static UID main_camera;
 
 	bool cull_scene = true;

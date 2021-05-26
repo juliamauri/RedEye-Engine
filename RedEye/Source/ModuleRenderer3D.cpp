@@ -113,6 +113,11 @@ bool ModuleRenderer3D::Init()
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
 				LIGHT_DEFERRED));
 
+			render_views.push_back(RenderView("Particle Editor", { 0, 0 },
+				FACE_CULLING | BLENDED | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
+				LIGHT_DISABLED));
+			//render_views.back().clear_color = { 0.0f, 0.0f,0.0f,1.0f };
+
 			//Thumbnail Configuration
 			thumbnailView.clear_color = {0.f, 0.f, 0.f, 1.f};
 			RE_INPUT->PauseEvents();
@@ -156,6 +161,10 @@ bool ModuleRenderer3D::Start()
 
 	render_views[VIEW_GAME].fbos = {
 		fbos->CreateFBO(1024, 768, true, true),
+		fbos->CreateDeferredFBO(1024, 768) };
+
+	render_views[VIEW_PARTICLE].fbos = {
+		fbos->CreateFBO(1024, 768, true),
 		fbos->CreateDeferredFBO(1024, 768) };
 
 	return true;
@@ -279,6 +288,7 @@ void ModuleRenderer3D::PostUpdate()
 
 	render_views[0].camera = RE_CameraManager::EditorCamera();
 	render_views[1].camera = RE_CameraManager::MainCamera();
+	render_views[2].camera = RE_CameraManager::ParticleEditorCamera();
 	PushSceneRend(render_views[1]);
 	PushSceneRend(render_views[0]);
 
@@ -293,6 +303,9 @@ void ModuleRenderer3D::PostUpdate()
 			break;
 		}
 	}
+
+	if (RE_EDITOR->IsParticleEditorActive())
+		DrawParticleEditor(render_views[2]);
 
 	// Set Render to Window
 	fbos->ChangeFBOBind(0, RE_WINDOW->GetWidth(), RE_WINDOW->GetHeight());
@@ -355,14 +368,21 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 	{
 		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
 		RE_CameraManager::EditorCamera()->SetBounds(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
-		ChangeFBOSize(window_size[0], window_size[1], true);
+		ChangeFBOSize(window_size[0], window_size[1], RENDER_VIEWS::VIEW_EDITOR);
 		break;
 	}
 	case GAMEWINDOWCHANGED:
 	{
 		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
 		RE_SCENE->cams->OnWindowChangeSize(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
-		ChangeFBOSize(window_size[0], window_size[1]);
+		ChangeFBOSize(window_size[0], window_size[1], RENDER_VIEWS::VIEW_GAME);
+		break;
+	}
+	case PARTRICLEEDITORWINDOWCHANGED:
+	{
+		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
+		RE_CameraManager::ParticleEditorCamera()->SetBounds(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
+		ChangeFBOSize(window_size[0], window_size[1], RENDER_VIEWS::VIEW_PARTICLE);
 		break;
 	}
 	}
@@ -483,14 +503,19 @@ RE_CompCamera* ModuleRenderer3D::GetCamera()
 	return current_camera;
 }
 
-void ModuleRenderer3D::ChangeFBOSize(int width, int height, bool isEditor)
+void ModuleRenderer3D::ChangeFBOSize(int width, int height, RENDER_VIEWS view)
 {
-	fbos->ChangeFBOSize(render_views[!isEditor].GetFBO(), width, height);
+	fbos->ChangeFBOSize(render_views[view].GetFBO(), width, height);
 }
 
 unsigned int ModuleRenderer3D::GetRenderedEditorSceneTexture() const
 {
 	return fbos->GetTextureID(render_views[0].GetFBO(), 4 * (render_views[0].light == LIGHT_DEFERRED));
+}
+
+unsigned int ModuleRenderer3D::GetRenderedParticleEditorTexture() const
+{
+	return fbos->GetTextureID(render_views[2].GetFBO(), 4 * (render_views[2].light == LIGHT_DEFERRED));;
 }
 
 unsigned int ModuleRenderer3D::GetDepthTexture() const
@@ -938,6 +963,143 @@ void ModuleRenderer3D::DrawDebug(const RenderView& render_view)
 
 	if (reset_light) SetLighting(true);
 	SetTexture2D(render_view.flags & TEXTURE_2D);
+}
+
+void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
+{
+	// Setup Frame Buffer
+	current_lighting = render_view.light;
+	current_fbo = render_view.GetFBO();
+	current_camera = render_view.camera;
+
+	fbos->ChangeFBOBind(current_fbo, fbos->GetWidth(current_fbo), fbos->GetHeight(current_fbo));
+	fbos->ClearFBOBuffers(current_fbo, render_view.clear_color.ptr());
+
+	// Setup Render Flags
+	SetWireframe(render_view.flags & WIREFRAME);
+	SetFaceCulling(render_view.flags & FACE_CULLING);
+	SetTexture2D(false);
+	SetColorMaterial(render_view.flags & COLOR_MATERIAL);
+	SetDepthTest(render_view.flags & DEPTH_TEST);
+	bool usingClipDistance;
+	SetClipDistance(usingClipDistance = render_view.flags & CLIP_DISTANCE);
+
+	// Upload Shader Uniforms
+	for (auto sMD5 : activeShaders)
+		static_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
+			render_view.camera,
+			static_cast<float>(fbos->GetHeight(current_fbo)),
+			static_cast<float>(fbos->GetWidth(current_fbo)),
+			usingClipDistance,
+			render_view.clip_distance);
+
+	RE_Component* comptToDraw = RE_SCENE->GetScenePool()->GetComponentPtr(RE_EDITOR->GetEditingParticleEmittorComponent(), ComponentType::C_PARTICLEEMITER);
+
+	RE_CompParticleEmitter* particleEmitterToDraw = dynamic_cast<RE_CompParticleEmitter*>(comptToDraw);
+
+	if (particleEmitterToDraw != nullptr) {
+
+		// Deferred Light Pass
+		if (render_view.light == LIGHT_DEFERRED)
+		{
+			// Particle System Draws
+			particleEmitterToDraw->Draw();
+
+
+			if (!shareLightPass)
+			{
+				// Render Particle Lights
+				// Setup Shader
+				unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
+				RE_GLCache::ChangeShader(particlelight_pass);
+
+				glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
+
+				// Bind Textures
+				static const eastl::string pdeferred_textures[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
+				for (unsigned int count = 0; count < 5; ++count)
+				{
+					glActiveTexture(GL_TEXTURE0 + count);
+					RE_ShaderImporter::setInt(particlelight_pass, pdeferred_textures[count].c_str(), count);
+					RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+				}
+
+				unsigned int pCount = 0;
+				if(particleEmitterToDraw->isLighting())
+					particleEmitterToDraw->CallLightShaderUniforms(particlelight_pass, "plights", pCount, 508, shareLightPass);
+
+
+				eastl::string unif_name = "pInfo.pCount";
+				RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, unif_name.c_str()), pCount);
+
+				// Render Lights
+				DrawQuad();
+			}
+			else
+			{
+				// Setup Shader
+				unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetLightPassShader()))->GetID();
+				RE_GLCache::ChangeShader(light_pass);
+
+				SetDepthTest(false);
+
+				glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
+
+				// Bind Textures
+				static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
+				for (unsigned int count = 0; count < 4; ++count)
+				{
+					glActiveTexture(GL_TEXTURE0 + count);
+					RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
+					RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+				}
+
+				// Setup Light Uniforms
+				unsigned int count = 0;
+				if (particleEmitterToDraw->isLighting())
+					particleEmitterToDraw->CallLightShaderUniforms(light_pass, "lights", count, 203, shareLightPass);
+
+				RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, "count"), count);
+
+				// Render Lights
+				DrawQuad();
+			}
+
+
+			if (render_view.flags & DEPTH_TEST)
+				SetDepthTest(true);
+
+			// Draw Debug Geometry
+			if (render_view.flags & DEBUG_DRAW)
+				DrawDebug(render_view);
+		}
+		else {
+
+			bool drawParticleSystemAsLast = false;
+			// Particle System Draws
+			if (particleEmitterToDraw->isBlend())
+				drawParticleSystemAsLast = true;
+			else
+				particleEmitterToDraw->Draw();
+
+			// Draw Debug Geometry
+			if (render_view.flags & DEBUG_DRAW)
+				DrawDebug(render_view);
+
+			// Draw Blended elements
+			if (drawParticleSystemAsLast)
+			{
+				if (render_view.flags & BLENDED) {
+					glEnable(GL_BLEND);
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				}
+
+				particleEmitterToDraw->Draw();
+
+				if (render_view.flags & BLENDED) glDisable(GL_BLEND);
+			}
+		}
+	}
 }
 
 void ModuleRenderer3D::DrawSkyBox()

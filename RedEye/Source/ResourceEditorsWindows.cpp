@@ -7,10 +7,12 @@
 #include "ModuleScene.h"
 #include "ModulePhysics.h"
 #include "ModuleRenderer3D.h"
+#include "ModuleInput.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_FileBuffer.h"
 #include "RE_ConsoleLog.h"
 #include "RE_GLCache.h"
+#include "RE_CameraManager.h"
 
 #include "RE_DefaultShaders.h"
 #include "RE_ShaderImporter.h"
@@ -674,11 +676,26 @@ ParticleEmiiterEditorWindow::ParticleEmiiterEditorWindow(const char* name, bool 
 
 ParticleEmiiterEditorWindow::~ParticleEmiiterEditorWindow() {}
 
-void ParticleEmiiterEditorWindow::StartEditing(RE_ParticleEmitter* sim)
+void ParticleEmiiterEditorWindow::StartEditing(RE_ParticleEmitter* sim, UID cmp)
 {
 	active = true;
 	simulation = sim;
+	fromComponent = cmp;
 }
+
+UID ParticleEmiiterEditorWindow::GetComponent() const
+{
+	return fromComponent;
+}
+
+void ParticleEmiiterEditorWindow::UpdateViewPort()
+{
+	RE_CameraManager::ParticleEditorCamera()->GetTargetViewPort(viewport);
+	viewport.x = (width - viewport.z) * 0.5f;
+	viewport.y = (heigth - viewport.w) * 0.5f + 20;
+}
+
+void ParticleEmiiterEditorWindow::Recalc() { recalc = true; }
 
 void ParticleEmiiterEditorWindow::Draw(bool secondary)
 {
@@ -686,8 +703,33 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 	{
 		if (ImGui::Begin(name, &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 		{
-			ImGui::Image((void*)RE_RENDER->GetRenderedEditorSceneTexture(), { 100.f, 100.f }, { 0.0, 1.0 }, { 1.0, 0.0 });
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
 
+			static int lastWidht = 0;
+			static int lastHeight = 0;
+			ImVec2 size = ImGui::GetWindowSize();
+			width = static_cast<int>(size.x);
+			heigth = static_cast<int>(size.y) - 28;
+			if (recalc || lastWidht != width || lastHeight != heigth)
+			{
+				RE_INPUT->Push(RE_EventType::PARTRICLEEDITORWINDOWCHANGED, RE_RENDER, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
+				RE_INPUT->Push(RE_EventType::PARTRICLEEDITORWINDOWCHANGED, RE_EDITOR);
+				recalc = false;
+			}
+
+			isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
+			ImGui::SetCursorPos({ viewport.x, viewport.y });
+			ImGui::Image((void*)RE_RENDER->GetRenderedParticleEditorTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
 		}
 		ImGui::End();
 

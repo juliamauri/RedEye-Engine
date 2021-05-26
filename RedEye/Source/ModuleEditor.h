@@ -71,7 +71,9 @@ public:
 	void SelectUndefinedFile(eastl::string* toSelect) const;
 	void OpenTextEditor(const char* filePath, eastl::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
 	void GetSceneWindowSize(unsigned int* widht, unsigned int* height);
-	void StartEditingParticleEmiter(struct RE_ParticleEmitter* sim);
+	void StartEditingParticleEmiter(struct RE_ParticleEmitter* sim, UID fromComponent);
+	bool IsParticleEditorActive() const;
+	UID GetEditingParticleEmittorComponent() const;
 
 	// Commands
 	void PushCommand(RE_Command* cmd);

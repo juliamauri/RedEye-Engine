@@ -44,8 +44,7 @@ void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy
 {}
 
 void RE_CompParticleEmitter::Update()
-{
-}
+{}
 
 void RE_CompParticleEmitter::Draw() const
 {
@@ -222,7 +221,7 @@ void RE_CompParticleEmitter::DrawProperties()
 		if (simulation != nullptr)
 		{
 			if (ImGui::Button("Edit simulation on workspace"))
-				RE_EDITOR->StartEditingParticleEmiter(simulation);
+				RE_EDITOR->StartEditingParticleEmiter(simulation, id);
 
 			switch (simulation->state)
 			{
