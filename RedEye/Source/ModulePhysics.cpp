@@ -8,7 +8,9 @@
 #include "RE_Particle.h"
 #include "RE_CompCamera.h"
 
-ModulePhysics::ModulePhysics() : Module("Physics") {}
+ModulePhysics::ModulePhysics() : Module("Physics") {
+
+}
 ModulePhysics::~ModulePhysics() {}
 
 bool ModulePhysics::Init()
@@ -145,13 +147,25 @@ void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const
 		glLoadMatrixf((current_camera->GetView()).ptr());
 		glBegin(GL_LINES);
 		glColor4f(debug_color[0], debug_color[1], debug_color[2], debug_color[3]);
-		particles.DrawDebug(circle_steps);
+		particles.DrawDebug();
 		glEnd();
 	}
 }
 
 void ModulePhysics::DrawEditor()
 {
+	if (ImGui::CollapsingHeader(name))
+	{
+		int tmp = static_cast<int>(method);
+		if (ImGui::Combo("Collision Resolution Method", &tmp, "Simple\0Thomas Smid\0"))
+			method = static_cast<CollisionResolution>(tmp);
+
+		tmp = particles.GetCircleSteps();
+		if (ImGui::DragInt("Steps", &tmp, 1.f, 0, 64))
+			particles.SetCircleSteps(tmp);
+
+		ImGui::ColorEdit4("Debug Color", debug_color);
+	}
 }
 
 RE_ParticleEmitter* ModulePhysics::AddEmitter()
@@ -243,7 +257,7 @@ void ModulePhysics::ImpulseCollision(RE_ParticleEmitter* emitter, RE_Particle& p
 void ModulePhysics::ImpulseCollisionTS(RE_ParticleEmitter* emitter, RE_Particle& p1, RE_Particle& p2, const float dt) const
 {
 	// Adaptation to Thomas Smid's sphere collision detection and resolution
-	// // Shifts coordinate system to preview impending collisions
+	//		Shifts coordinate system to check impending collisions
 	
 	// Get relative distance & speed
 	float rel_distance = (p2.position - p1.position).Length();
@@ -278,7 +292,7 @@ void ModulePhysics::ImpulseCollisionTS(RE_ParticleEmitter* emitter, RE_Particle&
 		const float phiv = (p1_rot_vel.x == 0 && p1_rot_vel.y == 0) ? 0.f : math::Atan2(p1_rot_vel.y, p1_rot_vel.x);
 		const float dr = rel_distance * math::Sin(thetav) / (p1.col_radius + p2.col_radius);
 
-		if (!(thetav > 1.57079632f || math::Abs(dr) > 1))
+		if (!(thetav > RE_Math::pi_div2 || math::Abs(dr) > 1))
 		{
 			// Get time to collision
 			const float t = (rel_distance * math::Cos(thetav) - (p1.col_radius + p2.col_radius) * math::Sqrt(1 - dr * dr)) / rel_speed;

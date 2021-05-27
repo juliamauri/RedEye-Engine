@@ -35,7 +35,7 @@ private:
 
 	ParticleManager particles;
 
-	enum CollisionResolution
+	enum CollisionResolution : int
 	{
 		SIMPLE,
 		Thomas_Smid
@@ -43,7 +43,6 @@ private:
 
 	// Debug drawing
 	float debug_color[4] = { 0.1f, 0.8f, 0.1f, 1.f };
-	float circle_steps = 12.f;
 };
 
 #endif // !__MODULEPHYSICS__

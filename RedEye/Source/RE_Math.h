@@ -30,6 +30,7 @@ public:
 
 	math::vec RandomNDir();
 
+	// Random Seed LCG
 	math::LCG& GetRNGSeed();
 	void SetRNGSeed(unsigned int seed);
 
@@ -56,6 +57,13 @@ public:
 		float res[2] = { a, b };
 		return res[b < a];
 	}
+
+	// Significant Values
+	static const float pi;
+	static const float pi_x2;
+	static const float pi_div2;
+	static const float deg_to_rad;
+	static const float rad_to_deg;
 
 	// Geometry
 	static math::float4x4 Rotate(const math::float3 axis, const float radians)

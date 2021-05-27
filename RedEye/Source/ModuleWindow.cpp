@@ -28,7 +28,7 @@ bool ModuleWindow::Init()
 
 void ModuleWindow::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("Window"))
+	if (ImGui::CollapsingHeader(name))
 	{
 		int max_w = GetMaxWidth(), max_h = GetMaxHeight();
 		ImGui::Text("Screen Size: %u x %u", max_w, max_h);

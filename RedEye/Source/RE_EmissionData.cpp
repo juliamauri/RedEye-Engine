@@ -10,11 +10,12 @@ math::vec RE_EmissionShape::GetPosition() const
 	switch (shape)
 	{
 	case POINT: return geo.point;
-	case CIRCLE: return geo.circle.GetPoint(RE_MATH->RandomF() * 6.283185307f);
+	case CIRCLE: return geo.circle.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2);
+	case RING: return geo.ring.first.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2) + (RE_MATH->RandomNDir() * geo.ring.second);
 	case BOX:
-		return { geo.box[0].x + (RE_MATH->RandomF() * (geo.box[1].x - geo.box[0].x)),
-			geo.box[0].y + (RE_MATH->RandomF() * (geo.box[1].y - geo.box[0].y)),
-			geo.box[0].z + (RE_MATH->RandomF() * (geo.box[1].z - geo.box[0].z)) };
+		return { geo.box[0].x + (RE_MATH->RandomFN() * geo.box[1].x),
+			geo.box[0].y + (RE_MATH->RandomFN() * geo.box[1].y),
+			geo.box[0].z + (RE_MATH->RandomFN() * geo.box[1].z) };
 	case SPHERE: return geo.sphere.pos + ((RE_MATH->RandomF() * geo.sphere.r) * RE_MATH->RandomNDir());
 	case HOLLOW_SPHERE:
 		float rand_radius = geo.hollow_sphere.first.r + (geo.hollow_sphere.second + RE_MATH->RandomFN());
@@ -25,11 +26,12 @@ math::vec RE_EmissionShape::GetPosition() const
 void RE_EmissionShape::DrawEditor()
 {
 	int next_shape = static_cast<int>(shape);
-	if (ImGui::Combo("Emissor Shape", &next_shape, "Point\0Box\0Cirle\0Sphere\Hollow Sphere\0"))
+	if (ImGui::Combo("Emissor Shape", &next_shape, "Point\0Box\0Cirle\0Ring\0Sphere\0Hollow Sphere\0"))
 	{
 		switch (shape = static_cast<Type>(next_shape)) {
 		case RE_EmissionShape::POINT: geo.point = math::vec::zero; break;
-		case RE_EmissionShape::CIRCLE: geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f); break;
+		case RE_EmissionShape::CIRCLE: geo.ring = { math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f), 0.1f }; break;
+		case RE_EmissionShape::RING: geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f); break;
 		case RE_EmissionShape::BOX: geo.box[0] = math::vec::one * -0.5f; geo.box[1] = math::vec::one * 0.5f; break;
 		case RE_EmissionShape::SPHERE: geo.sphere = math::Sphere(math::vec::zero, 1.f); break;
 		case RE_EmissionShape::HOLLOW_SPHERE: geo.hollow_sphere = { math::Sphere(math::vec::zero, 1.f), 0.8f }; break; }
@@ -39,40 +41,54 @@ void RE_EmissionShape::DrawEditor()
 	{
 	case RE_EmissionShape::POINT:
 	{
-		ImGui::DragFloat3("Position", geo.point.ptr());
+		ImGui::DragFloat3("Starting Pos", geo.point.ptr());
 		break;
 	}
 	case RE_EmissionShape::CIRCLE:
 	{
-		ImGui::DragFloat3("Position", geo.circle.pos.ptr());
+		ImGui::DragFloat3("Starting Pos", geo.circle.pos.ptr());
 		ImGui::DragFloat("Radius", &geo.circle.r, 1.f, 0.f);
 
-		float yaw = math::Atan(-geo.circle.normal.x / (geo.circle.normal.y));
-		float pitch = math::Atan(math::Sqrt((geo.circle.normal.x * geo.circle.normal.x) + (geo.circle.normal.y * geo.circle.normal.y)) / geo.circle.normal.z);
-		if (ImGui::DragFloat("Yaw", &yaw) || ImGui::DragFloat("Pitch", &pitch))
+		
+		math::float2 angles = geo.circle.normal.ToSphericalCoordinatesNormalized() * RE_Math::rad_to_deg;
+		if (ImGui::DragFloat2("Yaw - Pitch", angles.ptr(), 0.1f, -180.f, 180.f))
 		{
-			const float cos_pitch = math::Cos(pitch);
-			geo.circle.normal = math::vec(cos_pitch * math::Cos(yaw), math::Sin(pitch), cos_pitch * math::Sin(-yaw)).Normalized();
+			angles *= RE_Math::deg_to_rad;
+			geo.circle.normal = math::vec::FromSphericalCoordinates(angles.x, angles.y);
+		}
+		break;
+	}
+	case RE_EmissionShape::RING:
+	{
+		ImGui::DragFloat3("Starting Pos", geo.ring.first.pos.ptr());
+		ImGui::DragFloat("Radius", &geo.ring.first.r, 1.f, 0.f);
+		ImGui::DragFloat("Inner Radius", &geo.ring.second, 1.f, 0.f, geo.ring.first.r);
+
+		math::float2 angles = geo.ring.first.normal.ToSphericalCoordinatesNormalized() * RE_Math::rad_to_deg;
+		if (ImGui::DragFloat2("Yaw - Pitch", angles.ptr(), 0.1f, -180.f, 180.f))
+		{
+			angles *= RE_Math::deg_to_rad;
+			geo.ring.first.normal = math::vec::FromSphericalCoordinates(angles.x, angles.y);
 		}
 		break;
 	}
 	case RE_EmissionShape::BOX:
 	{
-		ImGui::DragFloat3("Min Point", geo.box[0].ptr());
-		ImGui::DragFloat3("Max Point", geo.box[1].ptr());
+		ImGui::DragFloat3("Center", geo.box[0].ptr());
+		ImGui::DragFloat3("Margin", geo.box[1].ptr());
 		break;
 	}
 	case RE_EmissionShape::SPHERE:
 	{
-		ImGui::DragFloat3("Position", geo.sphere.pos.ptr());
+		ImGui::DragFloat3("Starting Pos", geo.sphere.pos.ptr());
 		ImGui::DragFloat("Radius", &geo.sphere.r, 1.f, 0.f);
 		break;
 	}
 	case RE_EmissionShape::HOLLOW_SPHERE:
 	{
-		ImGui::DragFloat3("Position", geo.hollow_sphere.first.pos.ptr());
+		ImGui::DragFloat3("Starting Pos", geo.hollow_sphere.first.pos.ptr());
 		ImGui::DragFloat("Radius", &geo.hollow_sphere.first.r, 1.f, 0.f);
-		ImGui::DragFloat("Ring Radius", &geo.hollow_sphere.second, 1.f, 0.f);
+		ImGui::DragFloat("Inner Radius", &geo.hollow_sphere.second, 1.f, 0.f, geo.hollow_sphere.first.r);
 		break;
 	}
 	}
@@ -83,13 +99,13 @@ math::vec RE_EmissionVector::GetSpeed() const
 	switch (type) {
 	case NONE: return math::vec::zero;
 	case VALUE: return val;
-	case RANGEX: return { val.x + (RE_MATH->RandomFN() * dt.x), val.y, val.z};
-	case RANGEY: return { val.x, val.y + (RE_MATH->RandomFN() * dt.y), val.z };
-	case RANGEZ: return { val.x, val.y, val.z + (RE_MATH->RandomFN() * dt.z) };
-	case RANGEXY: return { val.x + (RE_MATH->RandomFN() * dt.x), val.y + (RE_MATH->RandomFN() * dt.y), val.z };
-	case RANGEXZ: return { val.x + (RE_MATH->RandomFN() * dt.x), val.y, val.z + (RE_MATH->RandomFN() * dt.z) };
-	case RANGEYZ: return { val.x, val.y + (RE_MATH->RandomFN() * dt.y), val.z + (RE_MATH->RandomFN() * dt.z) };
-	case RANGEXYZ: return { val.x + (RE_MATH->RandomFN() * dt.x), val.y + (RE_MATH->RandomFN() * dt.y), val.z + (RE_MATH->RandomFN() * dt.z) }; }
+	case RANGEX: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y, val.z};
+	case RANGEY: return { val.x, val.y + (RE_MATH->RandomFN() * margin.y), val.z };
+	case RANGEZ: return { val.x, val.y, val.z + (RE_MATH->RandomFN() * margin.z) };
+	case RANGEXY: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y + (RE_MATH->RandomFN() * margin.y), val.z };
+	case RANGEXZ: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y, val.z + (RE_MATH->RandomFN() * margin.z) };
+	case RANGEYZ: return { val.x, val.y + (RE_MATH->RandomFN() * margin.y), val.z + (RE_MATH->RandomFN() * margin.z) };
+	case RANGEXYZ: return val.Mul(margin); }
 }
 
 void RE_EmissionVector::DrawEditor(const char* name)
@@ -103,48 +119,46 @@ void RE_EmissionVector::DrawEditor(const char* name)
 	case RE_EmissionVector::RANGEX:
 	{
 		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat("X variance", &dt.x);
+		ImGui::DragFloat("X Margin", &margin.x);
 		break; 
 	}
 	case RE_EmissionVector::RANGEY:
 	{
 		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat("Y variance", &dt.y);
+		ImGui::DragFloat("Y Margin", &margin.y);
 		break; 
 	}
 	case RE_EmissionVector::RANGEZ:
 	{
 		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat("Z variance", &dt.z);
+		ImGui::DragFloat("Z Margin", &margin.z);
 		break; 
 	}
 	case RE_EmissionVector::RANGEXY:
 	{
 		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat("X variance", &dt.x);
-		ImGui::DragFloat("Y variance", &dt.y);
+		ImGui::DragFloat("X Margin", &margin.x);
+		ImGui::DragFloat("Y Margin", &margin.y);
 		break; 
 	}
 	case RE_EmissionVector::RANGEXZ:
 	{
 		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat("X variance", &dt.x);
-		ImGui::DragFloat("Z variance", &dt.z);
+		ImGui::DragFloat("X Margin", &margin.x);
+		ImGui::DragFloat("Z Margin", &margin.z);
 		break; 
 	}
 	case RE_EmissionVector::RANGEYZ:
 	{
 		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat("Y variance", &dt.y);
-		ImGui::DragFloat("Z variance", &dt.z);
+		ImGui::DragFloat("Y Margin", &margin.y);
+		ImGui::DragFloat("Z Margin", &margin.z);
 		break; 
 	}
 	case RE_EmissionVector::RANGEXYZ:
 	{
 		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat("X variance", &dt.x);
-		ImGui::DragFloat("Y variance", &dt.y);
-		ImGui::DragFloat("Z variance", &dt.z);
+		ImGui::DragFloat3("Margin", margin.ptr());
 		break;
 	}
 	default: break; }
@@ -191,9 +205,7 @@ void RE_EmissionExternalForces::DrawEditor()
 	case RE_EmissionExternalForces::NONE: break;
 	case RE_EmissionExternalForces::GRAVITY: ImGui::DragFloat("Gravity", &gravity); break;
 	case RE_EmissionExternalForces::WIND: ImGui::DragFloat3("Wind", wind.ptr()); break;
-	case RE_EmissionExternalForces::WIND_GRAVITY: ImGui::DragFloat("Gravity", &gravity); ImGui::DragFloat3("Wind", wind.ptr()); break;
-	default: break;
-	}
+	case RE_EmissionExternalForces::WIND_GRAVITY: ImGui::DragFloat("Gravity", &gravity); ImGui::DragFloat3("Wind", wind.ptr()); break; }
 }
 
 bool RE_EmissionBoundary::ParticleCollision(RE_Particle& p) const
@@ -204,7 +216,7 @@ bool RE_EmissionBoundary::ParticleCollision(RE_Particle& p) const
 	case Type::PLANE:
 	{
 		// Check if particle intersects or has passed plane
-		float dist_to_plane = data.plane.SignedDistance(p.position);
+		float dist_to_plane = geo.plane.SignedDistance(p.position);
 		if (dist_to_plane < p.col_radius)
 		{
 			switch (effect)
@@ -215,23 +227,22 @@ bool RE_EmissionBoundary::ParticleCollision(RE_Particle& p) const
 				const math::vec norm_speed = p.velocity.Normalized();
 				float dist_to_col = 0.f;
 				if (math::Plane::IntersectLinePlane(
-					data.plane.normal,
-					data.plane.d + p.col_radius,
+					geo.plane.normal,
+					geo.plane.d + p.col_radius,
 					p.position,
 					norm_speed,
 					dist_to_col))
 				{
 					p.position += norm_speed * dist_to_col;
 
-					// Resolve impulse if particle not already moving away from plane
-					float dot = p.velocity.Dot(data.plane.normal);
+					// Resolve impulse only if particle not already moving away from plane
+					float dot = p.velocity.Dot(geo.plane.normal);
 					if (dot < 0.f)
-						p.velocity -= (p.col_restitution + restitution) * dot * data.plane.normal;
+						p.velocity -= (p.col_restitution + restitution) * dot * geo.plane.normal;
 				}
 				break;
 			}
 			case RE_EmissionBoundary::KILL: return false;
-			case RE_EmissionBoundary::CLAMP: break;
 			}
 		}
 
@@ -239,15 +250,25 @@ bool RE_EmissionBoundary::ParticleCollision(RE_Particle& p) const
 	}
 	case Type::SPHERE:
 	{
-
-		if (data.sphere.Distance(math::Sphere(p.position, p.col_radius)) > 0.f)
+		float overlap_distance = p.position.Distance(geo.sphere.pos) + p.col_radius - geo.sphere.r;
+		if (overlap_distance > 0.f)
 		{
 			switch (effect)
 			{
 			case RE_EmissionBoundary::CONTAIN:
+			{
+				// Resolve intersection
+				p.position -= p.velocity.Normalized() * overlap_distance;
+
+				// Resolve impulse only if particle not already moving away from sphere
+				const math::vec impact_normal = (geo.sphere.pos - p.position).Normalized();
+				float dot = p.velocity.Dot(impact_normal);
+				if (dot < 0.f)
+					p.velocity -= (p.col_restitution + restitution) * dot * impact_normal;
+
 				break;
+			}
 			case RE_EmissionBoundary::KILL: return false;
-			case RE_EmissionBoundary::CLAMP: break;
 			}
 		}
 		
@@ -262,45 +283,44 @@ bool RE_EmissionBoundary::ParticleCollision(RE_Particle& p) const
 void RE_EmissionBoundary::DrawEditor()
 {
 	int tmp = static_cast<int>(type);
-	if (ImGui::Combo("Boundary Type", &tmp, "None\0Plane\0Box - WIP\0Sphere - WIP\0"))
+	if (ImGui::Combo("Boundary Type", &tmp, "None\0Plane\0Sphere - WIP\0Box - WIP\0"))
 	{
 		switch (type = static_cast<Type>(tmp)) {
 		case RE_EmissionBoundary::NONE: break;
-		case RE_EmissionBoundary::PLANE: data.plane = math::Plane({ 0.f, 1.f, 0.f }, 0.f); break;
-		case RE_EmissionBoundary::SPHERE: data.sphere = math::Sphere({ 0.f, 0.f, 0.f }, 1.f); break;
-		case RE_EmissionBoundary::BOX: data.box[0] = -math::vec::one; data.box[0] = math::vec::one; break; }
+		case RE_EmissionBoundary::PLANE: geo.plane = math::Plane({ 0.f, 1.f, 0.f }, 0.f); break;
+		case RE_EmissionBoundary::SPHERE: geo.sphere = math::Sphere({ 0.f, 0.f, 0.f }, 1.f); break;
+		case RE_EmissionBoundary::BOX: geo.box[0] = -math::vec::one; geo.box[1] = math::vec::one; break; }
 	}
 
 	tmp = static_cast<int>(effect);
-	if (ImGui::Combo("Boundary Effect", &tmp, "Contain\0Kill\0Clamp - WIP\0"))
+	if (ImGui::Combo("Boundary Effect", &tmp, "Contain\0Kill\0"))
 		effect = static_cast<Effect>(tmp);
 
 	switch (type) {
 	case RE_EmissionBoundary::NONE: break;
 	case RE_EmissionBoundary::PLANE:
 	{
-		ImGui::DragFloat("Distance", &data.plane.d, 1.f, 0.f);
+		ImGui::DragFloat("Distance", &geo.plane.d, 1.f, 0.f);
 
-		float yaw = math::Atan(-data.plane.normal.x / (data.plane.normal.y));
-		float pitch = math::Atan(math::Sqrt((data.plane.normal.x * data.plane.normal.x) + (data.plane.normal.y * data.plane.normal.y)) / data.plane.normal.z);
-		if (ImGui::DragFloat("Yaw", &yaw) || ImGui::DragFloat("Pitch", &pitch))
+		math::float2 angles = geo.plane.normal.ToSphericalCoordinatesNormalized() * RE_Math::rad_to_deg;
+		if (ImGui::DragFloat2("Yaw - Pitch", angles.ptr(), 0.1f, -180.f, 180.f))
 		{
-			const float cos_pitch = math::Cos(pitch);
-			data.plane.normal = math::vec(cos_pitch * math::Cos(yaw), math::Sin(pitch), cos_pitch * math::Sin(-yaw)).Normalized();
+			angles *= RE_Math::deg_to_rad;
+			geo.plane.normal = math::vec::FromSphericalCoordinates(angles.x, angles.y);
 		}
 
 		break;
 	}
 	case RE_EmissionBoundary::SPHERE:
 	{
-		ImGui::DragFloat3("Position", data.sphere.pos.ptr());
-		ImGui::DragFloat("Radius", &data.sphere.r, 1.f, 0.f);
+		ImGui::DragFloat3("Position", geo.sphere.pos.ptr());
+		ImGui::DragFloat("Radius", &geo.sphere.r, 1.f, 0.f);
 		break; 
 	}
 	case RE_EmissionBoundary::BOX:
 	{
-		ImGui::DragFloat3("Min Point", data.box[0].ptr());
-		ImGui::DragFloat3("Max Point", data.box[1].ptr());
+		ImGui::DragFloat3("Min Point", geo.box[0].ptr());
+		ImGui::DragFloat3("Max Point", geo.box[1].ptr());
 		break; 
 	}
 	}

@@ -16,7 +16,11 @@ public:
 	unsigned int Allocate(RE_ParticleEmitter* emitter);
 	bool Deallocate(unsigned int index);
 
-	void DrawDebug(float circle_steps) const;
+	int GetCircleSteps() const;
+	void SetCircleSteps(int steps);
+
+	void DrawDebug() const;
+	void DrawAASphere(const math::vec p_pos, const float radius) const;
 
 	bool SetEmitterState(unsigned int index, RE_ParticleEmitter::PlaybackState state);
 
@@ -27,6 +31,9 @@ public:
 private:
 
 	static unsigned int emitter_count;
+
+	float circle_steps = 12.f;
+	eastl::vector<math::float2> circle_precompute;
 };
 
 #endif //!__RE_PARTICLEMANAGER_H__

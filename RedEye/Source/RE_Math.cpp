@@ -45,3 +45,9 @@ math::vec RE_Math::RandomNDir()
 math::LCG& RE_Math::GetRNGSeed() { return lcg; }
 
 void RE_Math::SetRNGSeed(unsigned int seed) { lcg.Seed(seed); }
+
+const float RE_Math::pi = 3.1415926f;
+const float RE_Math::pi_x2 = 6.2831853f;
+const float RE_Math::pi_div2 = 1.5707963f;
+const float RE_Math::deg_to_rad = 0.01745329f;
+const float RE_Math::rad_to_deg = 57.2957795f;

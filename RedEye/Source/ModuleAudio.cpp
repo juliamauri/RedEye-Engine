@@ -168,7 +168,7 @@ void ModuleAudio::RecieveEvent(const Event& e) {}
 
 void ModuleAudio::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("Wwise Audio Engine"))
+	if (ImGui::CollapsingHeader(name))
 	{
 		static eastl::string rootPath = RE_FS->GetExecutableDirectory();
 		static eastl::string tempPath = audioBanksFolderPath;

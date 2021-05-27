@@ -84,7 +84,7 @@ void ModuleInput::PreUpdate()
 
 void ModuleInput::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("Input"))
+	if (ImGui::CollapsingHeader(name))
 	{
 		ImGui::Text("Mouse");
 		ImGui::Text("X: %u\tY: %u", mouse.mouse_x, mouse.mouse_y);

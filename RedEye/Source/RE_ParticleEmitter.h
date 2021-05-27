@@ -34,6 +34,7 @@ struct RE_ParticleEmitter
 
 	// Physic properties ---------------------------------------------------------
 	
+	bool active_physics = true;
 	RE_EmissionMass v_mass = {};
 	RE_EmissionColRadius v_col_radius = {};
 	RE_EmissionColRest v_col_restitution = {};

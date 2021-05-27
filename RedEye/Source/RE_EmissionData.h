@@ -13,6 +13,7 @@ struct RE_EmissionShape
 		POINT,
 		BOX,
 		CIRCLE,
+		RING,
 		SPHERE,
 		HOLLOW_SPHERE
 	} shape = POINT;
@@ -21,7 +22,8 @@ struct RE_EmissionShape
 	{
 		math::vec point = math::vec::zero;
 		math::Circle circle;
-		math::vec box[2];
+		eastl::pair<math::Circle, float> ring;
+		math::vec box[2]; // center, margin
 		math::Sphere sphere;
 		eastl::pair<math::Sphere, float> hollow_sphere;
 	} geo = {};
@@ -46,7 +48,7 @@ struct RE_EmissionVector
 	} type = RANGEXYZ;
 
 	math::vec val = -math::vec::one;
-	math::vec dt = math::vec::one;
+	math::vec margin = math::vec::one;
 
 	math::vec GetSpeed() const;
 	void DrawEditor(const char* name);
@@ -107,8 +109,7 @@ struct RE_EmissionBoundary
 	enum Effect : int
 	{
 		CONTAIN,
-		KILL,
-		CLAMP
+		KILL
 	} effect = CONTAIN;
 
 	union Data
@@ -116,7 +117,7 @@ struct RE_EmissionBoundary
 		math::Plane plane;
 		math::Sphere sphere;
 		math::vec box[2];
-	} data;
+	} geo;
 
 	float restitution = 0.95f;
 

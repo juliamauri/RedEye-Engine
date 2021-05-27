@@ -84,7 +84,7 @@ void ModuleScene::CleanUp()
 
 void ModuleScene::DrawEditor()
 {
-	if (ImGui::CollapsingHeader(GetName()))
+	if (ImGui::CollapsingHeader(name))
 	{
 		int total_count = scenePool.TotalGameObjects();
 		int static_count = static_tree.GetCount();

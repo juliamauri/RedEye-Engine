@@ -390,7 +390,7 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 
 void ModuleRenderer3D::DrawEditor()
 {
-	if(ImGui::CollapsingHeader("Renderer 3D"))
+	if(ImGui::CollapsingHeader(name))
 	{
 		if (ImGui::Checkbox((vsync) ? "VSync Enabled" : "VSync Disabled", &vsync))
 			SetVSync(vsync);

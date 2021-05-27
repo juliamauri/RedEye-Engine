@@ -444,7 +444,7 @@ void ModuleEditor::Draw() const
 
 void ModuleEditor::DrawEditor()
 {
-	if (ImGui::CollapsingHeader(GetName()))
+	if (ImGui::CollapsingHeader(name))
 	{
 		ImGui::DragFloat("Camera speed", &cam_speed, 0.1f, 0.1f, 100.0f, "%.1f");
 		ImGui::DragFloat("Camera sensitivity", &cam_sensitivity, 0.01f, 0.01f, 1.0f, "%.2f");
