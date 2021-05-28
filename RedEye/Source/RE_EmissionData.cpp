@@ -197,7 +197,7 @@ void RE_EmissionSingleValue::DrawEditor(const char* name)
 	switch (type) {
 	case RE_EmissionSingleValue::NONE: break;
 	case RE_EmissionSingleValue::VALUE: ImGui::DragFloat(name, &val); break;
-	case RE_EmissionSingleValue::RANGE: ImGui::DragFloat(name, &val); ImGui::DragFloat((tmp + " Margin").c_str(), &margin); break; }
+	case RE_EmissionSingleValue::RANGE: ImGui::DragFloat(name, &val); ImGui::DragFloat((tmp + " Margin").c_str(), &margin, 0.01f, 0.f); break; }
 }
 
 math::vec RE_EmissionExternalForces::GetAcceleration() const

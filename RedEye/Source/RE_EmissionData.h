@@ -46,7 +46,7 @@ struct RE_EmissionVector
 		RANGEXZ,
 		RANGEYZ,
 		RANGEXYZ
-	} type = RANGEXYZ;
+	} type = NONE;
 
 	math::vec val = -math::vec::one;
 	math::vec margin = math::vec::one;
@@ -88,7 +88,7 @@ struct RE_EmissionExternalForces
 		GRAVITY,
 		WIND,
 		WIND_GRAVITY
-	} type = GRAVITY;
+	} type = NONE;
 
 	float gravity = -9.81f;
 	math::vec wind = math::vec::zero;

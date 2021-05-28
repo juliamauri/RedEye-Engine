@@ -62,22 +62,86 @@ void ParticleManager::DrawDebug() const
 	eastl::list<eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>*>::const_iterator it;
 	for (it = simulations.cbegin(); it != simulations.cend(); ++it)
 	{
+		const math::vec go_pos = math::vec::zero;
+
+		// Render initial pos shape
+		glColor4f(1.0f, 0.27f, 0.f, 1.f); // orange
+		switch ((*it)->first->initial_pos.shape) {
+		case RE_EmissionShape::Type::CIRCLE:
+		{
+			math::Circle c = (*it)->first->initial_pos.geo.circle;
+			c.pos += go_pos;
+			math::vec previous = c.GetPoint(0.f);
+			for (float i = interval; i < RE_Math::pi_x2; i += interval)
+			{
+				glVertex3f(previous.x, previous.y, previous.z);
+				previous = c.GetPoint(i);
+				glVertex3f(previous.x, previous.y, previous.z);
+			}
+			break;
+		}
+		case RE_EmissionShape::Type::RING:
+		{
+			math::Circle c = (*it)->first->initial_pos.geo.ring.first;
+			c.pos += go_pos;
+			c.r += (*it)->first->initial_pos.geo.ring.second;
+			math::vec previous = c.GetPoint(0.f);
+			for (float i = interval; i < RE_Math::pi_x2; i += interval)
+			{
+				glVertex3f(previous.x, previous.y, previous.z);
+				previous = c.GetPoint(i);
+				glVertex3f(previous.x, previous.y, previous.z);
+			}
+
+			c.r -= 2.f * (*it)->first->initial_pos.geo.ring.second;
+			previous = c.GetPoint(0.f);
+			for (float i = interval; i < RE_Math::pi_x2; i += interval)
+			{
+				glVertex3f(previous.x, previous.y, previous.z);
+				previous = c.GetPoint(i);
+				glVertex3f(previous.x, previous.y, previous.z);
+			}
+			break;
+		}
+		case RE_EmissionShape::Type::AABB:
+		{
+			for (int i = 0; i < 12; i++)
+			{
+				glVertex3fv((*it)->first->initial_pos.geo.box.Edge(i).a.ptr());
+				glVertex3fv((*it)->first->initial_pos.geo.box.Edge(i).b.ptr());
+			}
+
+			break;
+		}
+		case RE_EmissionShape::Type::SPHERE:
+		{
+			DrawAASphere(go_pos + (*it)->first->initial_pos.geo.sphere.pos, (*it)->first->initial_pos.geo.sphere.r);
+			break;
+		}
+		case RE_EmissionShape::Type::HOLLOW_SPHERE:
+		{
+			DrawAASphere(go_pos + (*it)->first->initial_pos.geo.hollow_sphere.first.pos, (*it)->first->initial_pos.geo.hollow_sphere.first.r - (*it)->first->initial_pos.geo.hollow_sphere.second);
+			DrawAASphere(go_pos + (*it)->first->initial_pos.geo.hollow_sphere.first.pos, (*it)->first->initial_pos.geo.hollow_sphere.first.r + (*it)->first->initial_pos.geo.hollow_sphere.second);
+			break;
+		}
+		default: break; }
+
 		if ((*it)->first->active_physics)
 		{
-			const math::vec go_pos = math::vec::zero;
-
 			// Render Particles
+			glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
 			for (auto p = (*it)->second->cbegin(); p != (*it)->second->cend(); ++p)
 				DrawAASphere(go_pos + (*p)->position, (*p)->col_radius);
 
 			// Render Boundary
+			glColor4f(1.f, 0.84f, 0.0f, 1.f); // gold
 			switch ((*it)->first->boundary.type)
 			{
 			case RE_EmissionBoundary::NONE: break;
 			case RE_EmissionBoundary::PLANE:
 			{
 				const float interval = RE_Math::pi_x2 / circle_steps;
-				for (float j = 1.f; j * j < (*it)->first->dist_range_sq[1]; ++j)
+				for (float j = 1.f; j < 6.f; ++j)
 				{
 					const math::Circle c = (*it)->first->boundary.geo.plane.GenerateCircle(go_pos, j * j);
 					math::vec previous = c.GetPoint(0.f);

@@ -25,8 +25,7 @@ void ModulePhysics::Update()
 			{
 				sim->second->clear();
 				sim->first->particle_count = 0u;
-				sim->first->dist_range_sq = math::float2::zero;
-				sim->first->speed_range_sq = math::float2::zero;
+				sim->first->max_dist_sq = sim->first->max_speed_sq = 0.f;
 			}
 			break;
 		}
@@ -37,7 +36,7 @@ void ModulePhysics::Update()
 			SpawnParticles(sim->first, sim->second, local_dt);
 
 			// Reset control values
-			sim->first->dist_range_sq = sim->first->speed_range_sq = math::float2::zero;
+			sim->first->max_dist_sq = sim->first->max_speed_sq = 0.f;
 
 			// Update particles
 			for (eastl::list<RE_Particle*>::iterator p1 = sim->second->begin(); p1 != sim->second->end();)
@@ -100,7 +99,6 @@ void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf((current_camera->GetView()).ptr());
 		glBegin(GL_LINES);
-		glColor4f(debug_color[0], debug_color[1], debug_color[2], debug_color[3]);
 		particles.DrawDebug();
 		glEnd();
 	}
@@ -117,8 +115,6 @@ void ModulePhysics::DrawEditor()
 		tmp = particles.GetCircleSteps();
 		if (ImGui::DragInt("Steps", &tmp, 1.f, 0, 64))
 			particles.SetCircleSteps(tmp);
-
-		ImGui::ColorEdit4("Debug Color", debug_color);
 	}
 }
 
@@ -126,8 +122,9 @@ RE_ParticleEmitter* ModulePhysics::AddEmitter()
 {
 	RE_ParticleEmitter* ret = new RE_ParticleEmitter();
 
-	ret->initial_lifetime.val = 10.f;
-	ret->initial_pos.geo.point = { 0.f, 5.f, 0.f };
+	ret->initial_lifetime.val = 2.f;
+	ret->initial_pos.shape = RE_EmissionShape::Type::SPHERE;
+	ret->initial_pos.geo.sphere = math::Sphere(math::vec::zero, 1.f);
 	ret->initial_mass.val = 1.f;
 	ret->initial_col_radius.val = 1.f;
 	ret->initial_col_restitution.val = 0.9f;
@@ -342,14 +339,7 @@ void ModulePhysics::ApplyParticleSpeed(RE_ParticleEmitter* emitter, RE_Particle&
 	p.position += p.velocity * dt;
 
 	// Update Control values
-	const float dist_sq = p.position.LengthSq();
-	emitter->dist_range_sq = {
-		RE_Math::MinF(emitter->dist_range_sq.x, dist_sq),
-		RE_Math::MaxF(emitter->dist_range_sq.y, dist_sq) };
-
-	const float speed_sq = p.velocity.LengthSq();
-	emitter->speed_range_sq = {
-		RE_Math::MinF(emitter->speed_range_sq.x, speed_sq),
-		RE_Math::MaxF(emitter->speed_range_sq.y, speed_sq) };
+	emitter->max_dist_sq = RE_Math::MaxF(emitter->max_dist_sq, p.position.LengthSq());
+	emitter->max_speed_sq = RE_Math::MaxF(emitter->max_speed_sq, p.velocity.LengthSq());
 }
 

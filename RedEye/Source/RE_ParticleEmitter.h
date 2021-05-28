@@ -3,7 +3,6 @@
 
 #include "RE_EmissionData.h"
 
-#include "MathGeoLib/include/Math/float2.h"
 #include "MathGeoLib/include/Math/float3.h"
 #include "ImGui/imgui.h"
 #include <EASTL/vector.h>
@@ -22,8 +21,8 @@ struct RE_ParticleEmitter
 	// Control values
 	unsigned int particle_count = 0u;
 	unsigned int max_particles = 1000u;
-	math::float2 dist_range_sq = math::float2::zero;
-	math::float2 speed_range_sq = math::float2::zero;
+	float max_dist_sq = 0.f;
+	float max_speed_sq = 0.f;
 
 	// Instantiation parameters
 	float spawn_frequency = 10.f;
@@ -48,6 +47,8 @@ struct RE_ParticleEmitter
 
 	// Render properties ---------------------------------------------------------
 
+	bool active_rendering = true;
+
 	enum ColorState { SINGLE = 0, OVERLIFETIME, OVERDISTANCE, OVERSPEED };
 	ColorState cState = SINGLE;
 	math::vec particleColor = math::vec::one;
@@ -55,6 +56,7 @@ struct RE_ParticleEmitter
 	bool useOpacity = false, opacityWithCurve = false;  float opacity = 1.0f;
 
 	bool emitlight = false;
+
 	math::vec lightColor = math::vec::one;
 	bool randomLightColor = false;
 	float specular = 0.2f;

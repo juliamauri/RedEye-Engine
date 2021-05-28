@@ -55,7 +55,7 @@ public:
 	static int MaxI(const int a, const int b)
 	{
 		int res[2] = { a, b };
-		return res[b < a];
+		return res[b > a];
 	}
 	static float MinF(const float a, const float b)
 	{
@@ -65,7 +65,7 @@ public:
 	static float MaxF(const float a, const float b)
 	{
 		float res[2] = { a, b };
-		return res[b < a];
+		return res[b > a];
 	}
 
 	// Significant Values

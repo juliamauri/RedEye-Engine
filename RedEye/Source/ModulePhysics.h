@@ -40,9 +40,6 @@ private:
 		SIMPLE,
 		Thomas_Smid
 	} method = SIMPLE;
-
-	// Debug drawing
-	float debug_color[4] = { 0.1f, 0.8f, 0.1f, 1.f };
 };
 
 #endif // !__MODULEPHYSICS__

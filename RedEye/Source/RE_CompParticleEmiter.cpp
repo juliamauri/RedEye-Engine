@@ -48,6 +48,8 @@ void RE_CompParticleEmitter::Update()
 
 void RE_CompParticleEmitter::Draw() const
 {
+	if (!simulation->active_rendering) return;
+
 	// Get Shader and uniforms
 	RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
 	unsigned int shader = pS->GetID();
@@ -154,7 +156,7 @@ void RE_CompParticleEmitter::Draw() const
 		}
 		case RE_ParticleEmitter::ColorState::OVERDISTANCE:
 		{
-			float weight = math::SqrtFast(p->position.LengthSq()) / math::SqrtFast(simulation->dist_range_sq[1]);
+			float weight = math::SqrtFast(p->position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq);
 
 			if (simulation->useCurve)
 			{
@@ -172,7 +174,7 @@ void RE_CompParticleEmitter::Draw() const
 		}
 		case RE_ParticleEmitter::ColorState::OVERSPEED:
 		{
-			float weight = math::SqrtFast(p->velocity.LengthSq()) / math::SqrtFast(simulation->speed_range_sq[1]);
+			float weight = math::SqrtFast(p->velocity.LengthSq()) / math::SqrtFast(simulation->max_speed_sq);
 
 			if (simulation->useCurve)
 			{
@@ -229,10 +231,14 @@ void RE_CompParticleEmitter::DrawProperties()
 
 			// Simulation Measurements
 			ImGui::Text("Current particles: %i", simulation->particle_count);
+			ImGui::Text("Max Distance: %.1f units", math::SqrtFast(simulation->max_dist_sq));
+			ImGui::Text("Max Speed: %.1f units/s", math::SqrtFast(simulation->max_speed_sq));
+			ImGui::DragFloat("Time Multiplier", &simulation->speed_muliplier, 0.01f, 0.01f, 10.f);
+			ImGui::DragFloat("Spawn Frequency", &simulation->spawn_frequency, 1.f, 0.1f, 1000.f);
 
 			// Instantiation Procedure
 			ImGui::Separator();
-			simulation->initial_lifetime.DrawEditor("max life time");
+			simulation->initial_lifetime.DrawEditor("Lifetime");
 
 			// Initial Values
 			ImGui::Separator();
@@ -256,104 +262,113 @@ void RE_CompParticleEmitter::DrawProperties()
 			}
 
 			ImGui::Separator();
-			if (ImGui::DragFloat3("Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
-				if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
-			}
+			if (ImGui::Button(simulation->active_rendering ? "Disable Rendering" : "Enable Rendering"))
+				simulation->active_rendering = !simulation->active_rendering;
 
-			int pDir = simulation->particleDir;
-			if (ImGui::Combo("Particle Direction", &pDir, "Normal\0Billboard\0Custom\0")) 
-				simulation->particleDir = static_cast<RE_ParticleEmitter::Particle_Dir>(pDir);
-
-			if(simulation->particleDir == RE_ParticleEmitter::PS_Custom)
-				ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
-
-
-			int cState = simulation->cState;
-			if (ImGui::Combo("Color Type", &cState, "Single\0Over Lifetime\0Over Distance\0Over Speed\0"))
-				simulation->cState = static_cast<RE_ParticleEmitter::ColorState>(cState);
-
-			switch (simulation->cState)
+			if (simulation->active_rendering)
 			{
-			case RE_ParticleEmitter::ColorState::SINGLE:
-				ImGui::ColorEdit3("Particle Color", &simulation->particleColor[0]);
-				break;
-			default:
-				ImGui::ColorEdit3("Particle Gradient 1", &simulation->gradient[0][0]);
-				ImGui::ColorEdit3("Particle Gradient 2", &simulation->gradient[1][0]);
-				break;
+				if (ImGui::DragFloat3("Rendering Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f"))
+					if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
+
+				int pDir = simulation->particleDir;
+				if (ImGui::Combo("Particle Direction", &pDir, "Normal\0Billboard\0Custom\0"))
+					simulation->particleDir = static_cast<RE_ParticleEmitter::Particle_Dir>(pDir);
+
+				if (simulation->particleDir == RE_ParticleEmitter::PS_Custom)
+					ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
+
+				int cState = simulation->cState;
+				if (ImGui::Combo("Color Type", &cState, "Single\0Over Lifetime\0Over Distance\0Over Speed\0"))
+					simulation->cState = static_cast<RE_ParticleEmitter::ColorState>(cState);
+
+				switch (simulation->cState) {
+				case RE_ParticleEmitter::ColorState::SINGLE:
+					ImGui::ColorEdit3("Particle Color", &simulation->particleColor[0]);
+					break;
+				default:
+					ImGui::ColorEdit3("Particle Gradient 1", &simulation->gradient[0][0]);
+					ImGui::ColorEdit3("Particle Gradient 2", &simulation->gradient[1][0]);
+					break; }
+
+				ImGui::Checkbox("Use Opacity", &simulation->useOpacity);
+				if (!simulation->opacityWithCurve)
+				{
+					ImGui::SameLine();
+					ImGui::PushItemWidth(200.f);
+					ImGui::SliderFloat("Opacity", &simulation->opacity, 0.0f, 1.0f);
+					ImGui::PopItemWidth();
+				}
+				else ImGui::Text("Opacity is with curve");
 			}
 
-			ImGui::Checkbox("Use Opacity", &simulation->useOpacity);
-			if (!simulation->opacityWithCurve) {
-				ImGui::SameLine();
-				ImGui::PushItemWidth(200.f);
-				ImGui::SliderFloat("Opacity", &simulation->opacity, 0.0f, 1.0f);
-				ImGui::PopItemWidth();
-			}
-			else
-				ImGui::Text("Opacity is with curve");
-
-			ImGui::Checkbox(simulation->emitlight ? "Disable lighting" : "Enable lighting", &simulation->emitlight);
-			ImGui::ColorEdit3("Light Color", &simulation->lightColor[0]);
-			if (simulation->particleLColor) {
-				if (ImGui::Button("Set particles light color")) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->lightColor = simulation->lightColor;
-				}
-			}
-			ImGui::DragFloat("Specular", &simulation->specular, 0.01f, 0.f, 1.f, "%.2f");
-			if (simulation->particleLColor) {
-				if (ImGui::Button("Set particles specular")) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->specular = simulation->specular;
-				}
-			}
-			ImGui::DragFloat("Intensity", &simulation->intensity, 0.01f, 0.0f, 50.0f, "%.2f");
-			if (simulation->particleLColor) {
-				if (ImGui::Button("Set particles intensity")) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->intensity = simulation->intensity;
-				}
-			}
-			ImGui::DragFloat("Constant", &simulation->constant, 0.01f, 0.001f, 5.0f, "%.2f");
-			ImGui::DragFloat("Linear", &simulation->linear, 0.001f, 0.001f, 5.0f, "%.3f");
-			ImGui::DragFloat("Quadratic", &simulation->quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
 			ImGui::Separator();
-			ImGui::Checkbox(simulation->particleLColor ? "Disable single particle lighting" : "Enable single particle lighting", &simulation->particleLColor);
-			if (simulation->particleLColor) {
-				if (ImGui::Checkbox(simulation->randomLightColor ? "Disable random particle color" : "Enable random particle color", &simulation->randomLightColor)) {
+			if (ImGui::Button(simulation->emitlight ? "Disable Lighting" : "Enable Lighting"))
+				simulation->emitlight = !simulation->emitlight;
 
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					if (simulation->randomLightColor)
-						for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
-					else
+			if (simulation->emitlight)
+			{
+				ImGui::ColorEdit3("Light Color", &simulation->lightColor[0]);
+				if (simulation->particleLColor) {
+					if (ImGui::Button("Set particles light color")) {
+						eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
 						for (auto p : *particles) p->lightColor = simulation->lightColor;
+					}
 				}
-
-				ImGui::DragFloat2("Specular min-max", simulation->sClamp, 0.005f, 0.0f, 1.0f);
-				if (ImGui::Checkbox(simulation->randomSpecular ? "Disable random particle specular" : "Enable random particle specular", &simulation->randomSpecular)) {
-
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-
-					if (simulation->randomSpecular)
-						for (auto p : *particles) p->specular = RE_MATH->RandomF(simulation->sClamp[0], simulation->sClamp[1]);
-					else
+				ImGui::DragFloat("Specular", &simulation->specular, 0.01f, 0.f, 1.f, "%.2f");
+				if (simulation->particleLColor) {
+					if (ImGui::Button("Set particles specular")) {
+						eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
 						for (auto p : *particles) p->specular = simulation->specular;
+					}
 				}
-				
-				ImGui::DragFloat2("Intensity min-max", simulation->iClamp, 0.1f, 0.0f, 50.0f);
-				if (ImGui::Checkbox(simulation->randomIntensity ? "Disable random particle intensity" : "Enable random particle intensity", &simulation->randomIntensity)) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-
-					if (simulation->randomIntensity)
-						for (auto p : *particles) p->intensity = RE_MATH->RandomF(simulation->iClamp[0], simulation->iClamp[1]);
-					else
+				ImGui::DragFloat("Intensity", &simulation->intensity, 0.01f, 0.0f, 50.0f, "%.2f");
+				if (simulation->particleLColor) {
+					if (ImGui::Button("Set particles intensity")) {
+						eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
 						for (auto p : *particles) p->intensity = simulation->intensity;
+					}
 				}
+
+				ImGui::DragFloat("Constant", &simulation->constant, 0.01f, 0.001f, 5.0f, "%.2f");
+				ImGui::DragFloat("Linear", &simulation->linear, 0.001f, 0.001f, 5.0f, "%.3f");
+				ImGui::DragFloat("Quadratic", &simulation->quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
+				ImGui::Separator();
+				ImGui::Checkbox(simulation->particleLColor ? "Disable single particle lighting" : "Enable single particle lighting", & simulation->particleLColor);
+				if (simulation->particleLColor) {
+					if (ImGui::Checkbox(simulation->randomLightColor ? "Disable random particle color" : "Enable random particle color", &simulation->randomLightColor)) {
+
+						eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+						if (simulation->randomLightColor)
+							for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
+						else
+							for (auto p : *particles) p->lightColor = simulation->lightColor;
+					}
+
+					ImGui::DragFloat2("Specular min-max", simulation->sClamp, 0.005f, 0.0f, 1.0f);
+					if (ImGui::Checkbox(simulation->randomSpecular ? "Disable random particle specular" : "Enable random particle specular", &simulation->randomSpecular)) {
+
+						eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+
+						if (simulation->randomSpecular)
+							for (auto p : *particles) p->specular = RE_MATH->RandomF(simulation->sClamp[0], simulation->sClamp[1]);
+						else
+							for (auto p : *particles) p->specular = simulation->specular;
+					}
+
+					ImGui::DragFloat2("Intensity min-max", simulation->iClamp, 0.1f, 0.0f, 50.0f);
+					if (ImGui::Checkbox(simulation->randomIntensity ? "Disable random particle intensity" : "Enable random particle intensity", &simulation->randomIntensity)) {
+						eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+
+						if (simulation->randomIntensity)
+							for (auto p : *particles) p->intensity = RE_MATH->RandomF(simulation->iClamp[0], simulation->iClamp[1]);
+						else
+							for (auto p : *particles) p->intensity = simulation->intensity;
+					}
+				}
+
 			}
 
 			ImGui::Separator();
-
 			if (simulation->meshMD5)
 			{
 				if (ImGui::Button(eastl::string("Resource Mesh").c_str()))
@@ -536,8 +551,6 @@ void RE_CompParticleEmitter::DrawProperties()
 			//	ImGui::EndDragDropTarget();
 			//}
 
-
-
 			if (!simulation->materialMD5) ImGui::Text("NMaterial not selected.");
 			else
 			{
@@ -547,7 +560,6 @@ void RE_CompParticleEmitter::DrawProperties()
 				
 				matRes->DrawMaterialParticleEdit(simulation->useTextures);
 			}
-
 
 			if (ImGui::BeginMenu("Change material"))
 			{
@@ -589,9 +601,7 @@ void RE_CompParticleEmitter::DrawProperties()
 			}
 
 			ImGui::Separator();
-
 			ImGui::Checkbox("Use curve", &simulation->useCurve);
-
 			if (simulation->useCurve) {
 
 				ImGui::Checkbox("Opacity with curve", &simulation->opacityWithCurve);
