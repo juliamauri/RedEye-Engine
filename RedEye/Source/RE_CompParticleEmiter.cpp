@@ -48,87 +48,76 @@ void RE_CompParticleEmitter::Update()
 
 void RE_CompParticleEmitter::Draw() const
 {
+	// Get Shader and uniforms
 	RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
-
-	eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
 	unsigned int shader = pS->GetID();
 	RE_GLCache::ChangeShader(shader);
-	if (simulation->materialMD5) dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UploadAsParticleDataToShader(shader, simulation->useTextures, simulation->emitlight);
-	else {
+	if (!simulation->materialMD5) 
+	{
 		RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 		RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
 		RE_ShaderImporter::setFloat(shader, "opacity", simulation->useOpacity ? simulation->opacity : 1.0f);
 	}
-
-	
-	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
-	math::float3 goPosition = transform->GetGlobalPosition();
-	math::float3 goUp = transform->GetUp().Normalized();
-	math::float3 goRight = transform->GetRight().Normalized();
-	RE_CompCamera* c = ModuleRenderer3D::GetCamera();
-	
-	RE_CompTransform* cT = c->GetTransform();
-	math::float3 cUp = cT->GetUp().Normalized();
-
-	math::float3 pFront = simulation->direction.Normalized();
+	else dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UploadAsParticleDataToShader(shader, simulation->useTextures, simulation->emitlight);
 
 	unsigned int triangleCount = 1;
-	
 	if (simulation->primCmp)
 	{
 		RE_GLCache::ChangeVAO(simulation->primCmp->GetVAO());
 		triangleCount = simulation->primCmp->GetTriangleCount();
 	}
 
-	for (auto p : *particles) {
-		math::float3 partcleGlobalpos = goPosition + p->position;
+	// Get GO Transform
+	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
+	math::float3 goPosition = transform->GetGlobalPosition();
+	math::float3 goUp = transform->GetUp().Normalized();
 
+	// Get Camera Transform
+	RE_CompTransform* cT = ModuleRenderer3D::GetCamera()->GetTransform();
+	math::float3 cUp = cT->GetUp().Normalized();
+
+	const eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
+	for (auto p : *particles)
+	{
+		// Calculate Particle Transform
+		math::float3 partcleGlobalpos = goPosition + p->position;
 		math::float3 front, right, up;
-		math::float4x4 rotm, pMatrix;
-		math::float3 roteuler;
 		switch (simulation->particleDir)
 		{
 		case RE_ParticleEmitter::PS_FromPS:
-			
+		{
 			front = (goPosition - partcleGlobalpos).Normalized();
-
 			right = front.Cross(goUp).Normalized();
 			if (right.x < 0.0f) right *= -1.0f;
-
 			up = right.Cross(front).Normalized();
-
-			break;
+			break; 
+		}
 		case RE_ParticleEmitter::PS_Billboard:
-
+		{
 			front = cT->GetGlobalPosition() - partcleGlobalpos;
 			front.Normalize();
-
 			right = front.Cross(cUp).Normalized();
 			if (right.x < 0.0f) right *= -1.0f;
-
 			up = right.Cross(front).Normalized();
-
-			break;
+			break; 
+		}
 		case RE_ParticleEmitter::PS_Custom:
-
-			front = pFront;
-
+		{
+			front = simulation->direction.Normalized();
 			right = front.Cross(cUp).Normalized();
 			if (right.x < 0.0f) right *= -1.0f;
-
 			up = right.Cross(front).Normalized();
-
-			break;
+			break; 
+		}
 		}
 
+		// Rotate and upload Transform
+		math::float4x4 rotm;
 		rotm.SetRotatePart(math::float3x3(right, up, front));
-		roteuler = rotm.ToEulerXYZ();
+		math::vec roteuler = rotm.ToEulerXYZ();
+		pS->UploadModel(math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), simulation->scale).Transposed().ptr());
 
-		pMatrix = math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), simulation->scale).Transposed();
-
-		pS->UploadModel(pMatrix.ptr());
-
-
+		// Lightmode
 		if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED && !simulation->materialMD5) {
 			bool cNormal = !simulation->meshMD5 && !simulation->primCmp;
 			RE_ShaderImporter::setFloat(shader, "customNormal", static_cast<float>(cNormal));
@@ -137,80 +126,73 @@ void RE_CompParticleEmitter::Draw() const
 			RE_ShaderImporter::setFloat(shader, "shininess", 16.0f);
 		}
 
-		static float weight = 0.0f;
-		static float weight2 = 0.0f;
-		static math::vec wColor = math::vec::zero;
+		// Color + Opacity
 		switch (simulation->cState)
 		{
 		case RE_ParticleEmitter::ColorState::SINGLE:
+		{
 			RE_ShaderImporter::setFloat(shader, "cdiffuse", simulation->particleColor);
-			break;
+			break; 
+		}
 		case RE_ParticleEmitter::ColorState::OVERLIFETIME:
-			weight = simulation->maxLifeTime / p->lifetime;
+		{
+			float weight = simulation->initial_lifetime.GetMax() / p->lifetime;
 
-			if (simulation->useCurve) {
-				weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
+			if (simulation->useCurve)
+			{
+				weight = simulation->smoothCurve ?
+					ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
 					ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
 
-				if(simulation->useOpacity && simulation->opacityWithCurve)
+				if (simulation->useOpacity && simulation->opacityWithCurve)
 					RE_ShaderImporter::setFloat(shader, "opacity", weight);
 			}
 
-			weight2 = 1 - weight;
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1 - weight)));
 
-			wColor.Set(
-				simulation->gradient[0].x* weight + simulation->gradient[1].x * weight2,
-				simulation->gradient[0].y* weight + simulation->gradient[1].y * weight2,
-				simulation->gradient[0].z* weight + simulation->gradient[1].z * weight2
-			);
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
-			break;
+			break; 
+		}
 		case RE_ParticleEmitter::ColorState::OVERDISTANCE:
-			weight = simulation->maxDistance / (p->position - goPosition).Length();
+		{
+			float weight = math::SqrtFast(p->position.LengthSq()) / math::SqrtFast(simulation->dist_range_sq[1]);
 
-			if (simulation->useCurve) {
-				weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
+			if (simulation->useCurve)
+			{
+				weight = simulation->smoothCurve ? 
+					ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
 					ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
 
 				if (simulation->useOpacity && simulation->opacityWithCurve)
 					RE_ShaderImporter::setFloat(shader, "opacity", weight);
 			}
 
-			weight2 = 1 - weight;
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1 - weight)));
 
-			wColor.Set(
-				simulation->gradient[0].x * weight + simulation->gradient[1].x * weight2,
-				simulation->gradient[0].y * weight + simulation->gradient[1].y * weight2,
-				simulation->gradient[0].z * weight + simulation->gradient[1].z * weight2
-			);
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
-			break;
+			break; 
+		}
 		case RE_ParticleEmitter::ColorState::OVERSPEED:
-			weight = p->velocity.Abs().AverageOfElements() / simulation->maxSpeed /* * 1.732f math::Sqrt(3.f) */;
+		{
+			float weight = math::SqrtFast(p->velocity.LengthSq()) / math::SqrtFast(simulation->speed_range_sq[1]);
 
-			if (simulation->useCurve) {
-				weight = simulation->smoothCurve ? ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
+			if (simulation->useCurve)
+			{
+				weight = simulation->smoothCurve ? 
+					ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
 					ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
 
 				if (simulation->useOpacity && simulation->opacityWithCurve)
 					RE_ShaderImporter::setFloat(shader, "opacity", weight);
 			}
 
-			weight2 = 1 - weight;
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1 - weight)));
 
-			wColor.Set(
-				simulation->gradient[1].x * weight + simulation->gradient[0].x * weight2,
-				simulation->gradient[1].y * weight + simulation->gradient[0].y * weight2,
-				simulation->gradient[1].z * weight + simulation->gradient[0].z * weight2
-			);
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", wColor);
-			break;
+			break; 
+		}
 		}
 
-		if (simulation->meshMD5)
-			dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
-		else
-			glDrawElements(GL_TRIANGLES, triangleCount * 3, GL_UNSIGNED_SHORT, nullptr);
+		// Draw Call
+		if (simulation->meshMD5) dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
+		else glDrawElements(GL_TRIANGLES, triangleCount * 3, GL_UNSIGNED_SHORT, nullptr);
 	}
 }
 
@@ -223,6 +205,7 @@ void RE_CompParticleEmitter::DrawProperties()
 			if (ImGui::Button("Edit simulation on workspace"))
 				RE_EDITOR->StartEditingParticleEmiter(simulation, id);
 
+			// Playback Controls
 			switch (simulation->state)
 			{
 			case RE_ParticleEmitter::STOP:
@@ -244,19 +227,35 @@ void RE_CompParticleEmitter::DrawProperties()
 			}
 			}
 
-			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
+			// Simulation Measurements
+			ImGui::Text("Current particles: %i", simulation->particle_count);
 
-			simulation->v_lifetime.DrawEditor("max life time");
-			simulation->v_pos.DrawEditor();
-			simulation->v_speed.DrawEditor("speed");
+			// Instantiation Procedure
+			ImGui::Separator();
+			simulation->initial_lifetime.DrawEditor("max life time");
 
-			simulation->v_mass.DrawEditor("mass");
-			simulation->v_col_radius.DrawEditor("collider radius");
-			simulation->v_col_restitution.DrawEditor("restitution");
+			// Initial Values
+			ImGui::Separator();
+			simulation->initial_pos.DrawEditor();
+			simulation->initial_speed.DrawEditor("Starting Speed");
 
-			simulation->boundary.DrawEditor();
-			simulation->external_acc.DrawEditor();
+			// Physics Initial Values
+			ImGui::Separator();
+			if (ImGui::Button(simulation->active_physics ? "Disable Physics" : "Enable Physics"))
+				simulation->active_physics = !simulation->active_physics;
 
+			if (simulation->active_physics)
+			{
+				simulation->active_physics = true;
+				simulation->initial_mass.DrawEditor("Mass");
+				simulation->initial_col_radius.DrawEditor("Col Radius");
+				simulation->initial_col_restitution.DrawEditor("Col Restitution");
+
+				simulation->boundary.DrawEditor();
+				simulation->external_acc.DrawEditor();
+			}
+
+			ImGui::Separator();
 			if (ImGui::DragFloat3("Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
 				if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
 			}
@@ -632,40 +631,6 @@ void RE_CompParticleEmitter::DrawProperties()
 		{
 			ImGui::Text("Unregistered simulation");
 		}
-
-		//ImGui::SliderFloat("Emissor Life", &emissor_life, -1.0f, 10.0f, "%.2f");
-		//ImGui::Separator();
-		//
-		//ImGui::SliderFloat("Emission Rate", &emissionRate, 0.0f, 20.f, "%.2f");
-		//float ps[3] = { spawn_position_offset.x, spawn_position_offset.y, spawn_position_offset.z };
-		//if (ImGui::DragFloat3("Spawn Position Offset", ps, 0.1f, -10000.f, 10000.f, "%.2f"))
-		//	spawn_position_offset.Set(ps[0], ps[1], ps[2]);
-		//float gp[3] = { gravity.x, gravity.y, gravity.z };
-		//if (ImGui::DragFloat3("Gravity", gp, 0.1f, -10000.f, 10000.f, "%.2f"))
-		//	gravity.Set(gp[0], gp[1], gp[2]);
-		//ImGui::Checkbox("Local Emission", &local_emission);
-		//ImGui::Separator();
-		//
-		//ImGui::SliderFloat("Lifetime", &lifetime, 0.0f, 10.0f, "%.2f");
-		//ImGui::SliderFloat("Initial Speed", &initial_speed, 0.0f, 10.0f, "%.2f");
-		//ImGui::Separator();
-		//
-		//float am[3] = { math::RadToDeg(direction_margin.x), math::RadToDeg(direction_margin.y), math::RadToDeg(direction_margin.z) };
-		//if (ImGui::DragFloat3("Direction Margin", am, 0.1f, 0.f, 180.f, "%.2f"))
-		//	direction_margin.Set(math::DegToRad(am[0]), math::DegToRad(am[1]), math::DegToRad(am[2]));
-		//ImGui::SliderFloat("Speed Margin", &speed_margin, 0.0f, 10.0f, "%.2f");
-		//ImGui::SliderFloat("Lifetime Margin", &lifetime_margin, 0.0f, 10.0f, "%.2f");
-		//ImGui::Separator();
-		//
-		//float rgba[3] = { rgb_alpha.x, rgb_alpha.y, rgb_alpha.z };
-		//if (ImGui::DragFloat3("RGB Alpha", rgba, 0.1f, 0.0f, 255.0f, "%.2f"))
-		//	rgb_alpha.Set(rgba[0], rgba[1], rgba[2]);
-
-		//if (mParticle)
-		//{
-		//	ImGui::Text("Particle Texture");
-		//	//((RE_Texture*)App->resources->At(mParticle->ma))->DrawTextureImGui();
-		//}
 	}
 }
 

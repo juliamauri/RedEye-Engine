@@ -1026,8 +1026,8 @@ void RE_GameObject::DrawGlobalAABB() const
 {
 	for (uint i = 0; i < 12; i++)
 	{
-		glVertex3f(global_bounding_box.Edge(i).a.x, global_bounding_box.Edge(i).a.y, global_bounding_box.Edge(i).a.z);
-		glVertex3f(global_bounding_box.Edge(i).b.x, global_bounding_box.Edge(i).b.y, global_bounding_box.Edge(i).b.z);
+		glVertex3fv(global_bounding_box.Edge(i).a.ptr());
+		glVertex3fv(global_bounding_box.Edge(i).b.ptr());
 	}
 }
 

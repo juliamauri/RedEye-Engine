@@ -4,6 +4,7 @@
 #include "MathGeoLib/include/Geometry/Circle.h"
 #include "MathGeoLib/include/Geometry/Sphere.h"
 #include "MathGeoLib/include/Geometry/Plane.h"
+#include "MathGeoLib/include/Geometry/AABB.h"
 #include <EASTL/utility.h>
 
 struct RE_EmissionShape
@@ -11,9 +12,9 @@ struct RE_EmissionShape
 	enum Type : int
 	{
 		POINT,
-		BOX,
 		CIRCLE,
 		RING,
+		AABB,
 		SPHERE,
 		HOLLOW_SPHERE
 	} shape = POINT;
@@ -23,7 +24,7 @@ struct RE_EmissionShape
 		math::vec point = math::vec::zero;
 		math::Circle circle;
 		eastl::pair<math::Circle, float> ring;
-		math::vec box[2]; // center, margin
+		math::AABB box;
 		math::Sphere sphere;
 		eastl::pair<math::Sphere, float> hollow_sphere;
 	} geo = {};
@@ -66,9 +67,11 @@ struct RE_EmissionSingleValue
 	} type = VALUE;
 
 	float val = 1.f;
-	float dt = 1.f;
+	float margin = 1.f;
 
 	float GetValue() const;
+	float GetMin() const;
+	float GetMax() const;
 	void DrawEditor(const char* name);
 };
 
@@ -103,7 +106,7 @@ struct RE_EmissionBoundary
 		NONE,
 		PLANE,
 		SPHERE,
-		BOX
+		AABB
 	} type = NONE;
 
 	enum Effect : int
@@ -116,7 +119,7 @@ struct RE_EmissionBoundary
 	{
 		math::Plane plane;
 		math::Sphere sphere;
-		math::vec box[2];
+		math::AABB box;
 	} geo;
 
 	float restitution = 0.95f;

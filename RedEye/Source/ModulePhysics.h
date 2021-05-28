@@ -12,8 +12,6 @@ public:
 	ModulePhysics();
 	~ModulePhysics();
 
-	bool Init() override;
-	bool Start() override;
 	void Update() override;
 	void CleanUp() override;
 
@@ -28,8 +26,10 @@ public:
 
 private:
 
+	void SpawnParticles(RE_ParticleEmitter* emitter, eastl::list<RE_Particle*>* container, const float dt) const;
 	void ImpulseCollision(RE_ParticleEmitter* emitter, RE_Particle& p1, RE_Particle& p2) const;
 	void ImpulseCollisionTS(RE_ParticleEmitter* emitter, RE_Particle& p1, RE_Particle& p2, const float dt) const;
+	void ApplyParticleSpeed(RE_ParticleEmitter* emitter, RE_Particle& p1, const float dt) const;
 	
 private:
 

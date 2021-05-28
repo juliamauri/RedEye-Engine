@@ -780,7 +780,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			ImGui::Text("Current particles: %i", RE_PHYSICS->GetParticleCount(simulation->id));
+			ImGui::Text("Current particles: %i", simulation->particle_count);
 
 			if (secondary)
 			{

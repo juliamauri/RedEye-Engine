@@ -157,7 +157,7 @@ RE_CompRock::~RE_CompRock() { }
 
 void RE_CompRock::RockSetUp(int _seed, int _subdivions)
 {
-	GenerateNewRock(_seed, RE_Math::Cap(_subdivions, 1, 5));
+	GenerateNewRock(_seed, RE_Math::CapI(_subdivions, 1, 5));
 }
 
 void RE_CompRock::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UID parent)
@@ -205,7 +205,7 @@ void RE_CompRock::DrawProperties()
 
 		if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
 		{
-			tmpSb = RE_Math::Cap(tmpSb, 1, 5);
+			tmpSb = RE_Math::CapI(tmpSb, 1, 5);
 			if (nsubdivisions != tmpSb)
 			{
 				nsubdivisions = tmpSb;
@@ -231,7 +231,7 @@ void RE_CompRock::DrawPrimPropierties()
 
 	if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
 	{
-		tmpSb = RE_Math::Cap(tmpSb, 1, 5);
+		tmpSb = RE_Math::CapI(tmpSb, 1, 5);
 		if ( nsubdivisions != tmpSb)
 		{
 			nsubdivisions = tmpSb;
@@ -397,9 +397,9 @@ RE_CompParametric::~RE_CompParametric() { }
 
 void RE_CompParametric::ParametricSetUp(int _slices, int _stacks, float _radius)
 {
-	target_slices = slices = RE_Math::Cap(_slices, 3, INT_MAX);
-	target_stacks = stacks = RE_Math::Cap(_stacks, 3, INT_MAX);
-	target_radius = radius = RE_Math::Cap(_radius, min_r, max_r);
+	target_slices = slices = RE_Math::CapI(_slices, 3, INT_MAX);
+	target_stacks = stacks = RE_Math::CapI(_stacks, 3, INT_MAX);
+	target_radius = radius = RE_Math::CapF(_radius, min_r, max_r);
 	canChange = false;
 
 	if(primID =! -1) RE_SCENE->primitives->UnUsePrimitive(type, primID);

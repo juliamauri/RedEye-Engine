@@ -77,10 +77,9 @@ void ParticleManager::DrawDebug() const
 			case RE_EmissionBoundary::PLANE:
 			{
 				const float interval = RE_Math::pi_x2 / circle_steps;
-				math::Circle c;
-				for (int j = 1; j < 5; ++j)
+				for (float j = 1.f; j * j < (*it)->first->dist_range_sq[1]; ++j)
 				{
-					c = (*it)->first->boundary.geo.plane.GenerateCircle(go_pos, j * j);
+					const math::Circle c = (*it)->first->boundary.geo.plane.GenerateCircle(go_pos, j * j);
 					math::vec previous = c.GetPoint(0.f);
 					for (float i = interval; i < RE_Math::pi_x2; i += interval)
 					{
@@ -97,7 +96,17 @@ void ParticleManager::DrawDebug() const
 				DrawAASphere(go_pos + (*it)->first->boundary.geo.sphere.pos, (*it)->first->boundary.geo.sphere.r);
 				break; 
 			}
-			case RE_EmissionBoundary::BOX: break; }
+			case RE_EmissionBoundary::AABB:
+			{
+				for (int i = 0; i < 12; i++)
+				{
+					glVertex3fv((*it)->first->boundary.geo.box.Edge(i).a.ptr());
+					glVertex3fv((*it)->first->boundary.geo.box.Edge(i).b.ptr());
+				}
+
+				break;
+			}
+			}
 		}
 	}
 }
@@ -108,23 +117,23 @@ void ParticleManager::DrawAASphere(const math::vec p_pos, const float radius) co
 	math::vec previous = { p_pos.x + (circle_precompute.cbegin()->x * radius), p_pos.y + (circle_precompute.cbegin()->y * radius), p_pos.z };
 	for (; i != circle_precompute.cend(); ++i) // Z
 	{
-		glVertex3f(previous.x, previous.y, previous.z);
+		glVertex3fv(previous.ptr());
 		previous = { p_pos.x + (i->x * radius), p_pos.y + (i->y * radius), p_pos.z };
-		glVertex3f(previous.x, previous.y, previous.z);
+		glVertex3fv(previous.ptr());
 	}
 	previous = { p_pos.x + (circle_precompute.cbegin()->x * radius), p_pos.y, p_pos.z + (circle_precompute.cbegin()->y * radius) };
 	for (i = circle_precompute.cbegin() + 1; i != circle_precompute.cend(); ++i) // Y
 	{
-		glVertex3f(previous.x, previous.y, previous.z);
+		glVertex3fv(previous.ptr());
 		previous = { p_pos.x + (i->x * radius), p_pos.y, p_pos.z + (i->y * radius) };
-		glVertex3f(previous.x, previous.y, previous.z);
+		glVertex3fv(previous.ptr());
 	}
 	previous = { p_pos.x, p_pos.y + (circle_precompute.cbegin()->y * radius), p_pos.z + (circle_precompute.cbegin()->x * radius) };
 	for (i = circle_precompute.cbegin() + 1; i != circle_precompute.cend(); ++i) // X
 	{
-		glVertex3f(previous.x, previous.y, previous.z);
+		glVertex3fv(previous.ptr());
 		previous = { p_pos.x, p_pos.y + (i->y * radius), p_pos.z + (i->x * radius) };
-		glVertex3f(previous.x, previous.y, previous.z);
+		glVertex3fv(previous.ptr());
 	}
 }
 

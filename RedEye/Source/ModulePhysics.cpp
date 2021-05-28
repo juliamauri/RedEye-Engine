@@ -8,20 +8,8 @@
 #include "RE_Particle.h"
 #include "RE_CompCamera.h"
 
-ModulePhysics::ModulePhysics() : Module("Physics") {
-
-}
+ModulePhysics::ModulePhysics() : Module("Physics") {}
 ModulePhysics::~ModulePhysics() {}
-
-bool ModulePhysics::Init()
-{
-	return true;
-}
-
-bool ModulePhysics::Start()
-{
-	return true;
-}
 
 void ModulePhysics::Update()
 {
@@ -34,97 +22,63 @@ void ModulePhysics::Update()
 		case RE_ParticleEmitter::STOP:
 		{
 			if (!sim->second->empty())
+			{
 				sim->second->clear();
+				sim->first->particle_count = 0u;
+				sim->first->dist_range_sq = math::float2::zero;
+				sim->first->speed_range_sq = math::float2::zero;
+			}
 			break;
 		}
 		case RE_ParticleEmitter::PLAY:
 		{
 			// Spawn new particles
-			float local_dt = global_dt * sim->first->speed_muliplier;
-			const float spawn_period = 1.f / sim->first->spawn_frequency;
-			int to_add = static_cast<int>((sim->first->spawn_offset += local_dt) * sim->first->spawn_frequency);
-			sim->first->spawn_offset -= static_cast<float>(to_add) / sim->first->spawn_frequency;
-			for (int i = 0; i < to_add; ++i)
-			{
-				RE_Particle* particle = new RE_Particle();
+			const float local_dt = global_dt * sim->first->speed_muliplier;
+			SpawnParticles(sim->first, sim->second, local_dt);
 
-				// Set base properties
-				particle->lifetime = 0.f;
-				particle->max_lifetime = sim->first->v_lifetime.GetValue();
-				particle->dt_offset = local_dt - sim->first->spawn_offset - (spawn_period * (i + 1));
-				
-				particle->position = sim->first->v_pos.GetPosition();
-				particle->velocity = sim->first->v_speed.GetSpeed();
-
-				// Set physic properties
-				particle->mass = sim->first->v_mass.GetValue();
-				particle->col_radius = sim->first->v_col_radius.GetValue();
-				particle->col_restitution = sim->first->v_col_restitution.GetValue();
-
-				// Set light properties
-				particle->intensity = (sim->first->randomIntensity) ? RE_MATH->RandomF(sim->first->iClamp[0], sim->first->iClamp[1]) : sim->first->intensity;
-				particle->specular = (sim->first->randomSpecular) ? RE_MATH->RandomF(sim->first->sClamp[0], sim->first->sClamp[1]) : sim->first->specular;
-				
-				if (sim->first->randomLightColor)
-					particle->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
-				else
-					particle->lightColor = sim->first->lightColor;
-
-				// Append particle
-				sim->second->push_back(particle);
-			}
+			// Reset control values
+			sim->first->dist_range_sq = sim->first->speed_range_sq = math::float2::zero;
 
 			// Update particles
 			for (eastl::list<RE_Particle*>::iterator p1 = sim->second->begin(); p1 != sim->second->end();)
 			{
 				// Check if particle is still alive
 				bool is_alive = true;
-				switch (sim->first->v_lifetime.type) {
-				case RE_EmissionSingleValue::Type::VALUE: is_alive = ((*p1)->lifetime += local_dt) < sim->first->v_lifetime.GetValue(); break;
+				switch (sim->first->initial_lifetime.type) {
+				case RE_EmissionSingleValue::Type::VALUE: is_alive = ((*p1)->lifetime += local_dt) < sim->first->initial_lifetime.GetValue(); break;
 				case RE_EmissionSingleValue::Type::RANGE: is_alive = ((*p1)->lifetime += local_dt) < (*p1)->max_lifetime; break;
 				default: break; }
 
 				if (is_alive)
 				{
 					// Iterate for collisions (other particles could be dead, but dt should always be too small to notice)
-					for (eastl::list<RE_Particle*>::iterator p2 = p1.next(); p2 != sim->second->end(); ++p2)
+					if (sim->first->active_physics)
 					{
-						switch (method) {
-						case ModulePhysics::SIMPLE: ImpulseCollision(sim->first, **p1, **p2); break;
-						case ModulePhysics::Thomas_Smid: ImpulseCollisionTS(sim->first, **p1, **p2, local_dt); break; }
-					}
+						for (eastl::list<RE_Particle*>::iterator p2 = p1.next(); p2 != sim->second->end(); ++p2)
+						{
+							switch (method) {
+							case ModulePhysics::SIMPLE: ImpulseCollision(sim->first, **p1, **p2); break;
+							case ModulePhysics::Thomas_Smid: ImpulseCollisionTS(sim->first, **p1, **p2, local_dt); break; }
+						}
 
-					// Acceleration
-					(*p1)->velocity += sim->first->external_acc.GetAcceleration() * (local_dt -= (*p1)->dt_offset);
-					(*p1)->dt_offset = 0.f;
-
-					// Check boundary collision
-					if (sim->first->boundary.ParticleCollision(**p1))
-					{
-						// Cap speed
-						if ((*p1)->velocity.LengthSq() > sim->first->maxSpeed * sim->first->maxSpeed)
-							(*p1)->velocity = (*p1)->velocity.Normalized() * sim->first->maxSpeed;
-
-						// Update position
-						(*p1)->position += (*p1)->velocity * local_dt;
-
-						++p1;
+						// Check boundary collision
+						if (sim->first->boundary.ParticleCollision(**p1))
+						{
+							ApplyParticleSpeed(sim->first, **p1, local_dt - (*p1)->dt_offset);
+							++p1;
+						}
+						else { DEL(*p1); p1 = sim->second->erase(p1); } // Remove dead particles from boundary collision
 					}
 					else
 					{
-						// Remove dead particles
-						DEL(*p1);
-						p1 = sim->second->erase(p1);
+						ApplyParticleSpeed(sim->first, **p1, local_dt - (*p1)->dt_offset);
+						++p1;
 					}
-
 				}
-				else
-				{
-					// Remove dead particles
-					DEL(*p1);
-					p1 = sim->second->erase(p1);
-				}
+				else { DEL(*p1); p1 = sim->second->erase(p1); } // Remove dead particles
 			}
+
+			sim->first->particle_count = sim->second->size();
 
 			break;
 		}
@@ -172,11 +126,11 @@ RE_ParticleEmitter* ModulePhysics::AddEmitter()
 {
 	RE_ParticleEmitter* ret = new RE_ParticleEmitter();
 
-	ret->v_lifetime.val = 10.f;
-	ret->v_pos.geo.point = { 0.f, 5.f, 0.f };
-	ret->v_mass.val = 1.f;
-	ret->v_col_radius.val = 1.f;
-	ret->v_col_restitution.val = 0.9f;
+	ret->initial_lifetime.val = 10.f;
+	ret->initial_pos.geo.point = { 0.f, 5.f, 0.f };
+	ret->initial_mass.val = 1.f;
+	ret->initial_col_radius.val = 1.f;
+	ret->initial_col_restitution.val = 0.9f;
 
 	// Curve SetUp
 	ret->curve.push_back({ -1.0f, 0.0f });// init data so editor knows to take it from here
@@ -202,7 +156,7 @@ unsigned int ModulePhysics::GetParticleCount(unsigned int emitter_id) const
 	{
 		if (sim->first->id == emitter_id)
 		{
-			return sim->second->size();
+			return sim->first->particle_count;
 		}
 	}
 	return 0u;
@@ -218,6 +172,42 @@ eastl::list<RE_Particle*>* ModulePhysics::GetParticles(unsigned int emitter_id) 
 		}
 	}
 	return nullptr;
+}
+
+void ModulePhysics::SpawnParticles(RE_ParticleEmitter* emitter, eastl::list<RE_Particle*>* container, const float dt) const
+{
+	const float spawn_period = 1.f / emitter->spawn_frequency;
+	int to_add = static_cast<int>((emitter->spawn_offset += dt) * emitter->spawn_frequency);
+	emitter->spawn_offset -= static_cast<float>(to_add) / emitter->spawn_frequency;
+	for (int i = 0; i < to_add; ++i)
+	{
+		RE_Particle* particle = new RE_Particle();
+
+		// Set base properties
+		particle->lifetime = 0.f;
+		particle->max_lifetime = emitter->initial_lifetime.GetValue();
+		particle->dt_offset = dt - emitter->spawn_offset - (spawn_period * (i + 1));
+
+		particle->position = emitter->initial_pos.GetPosition();
+		particle->velocity = emitter->initial_speed.GetSpeed();
+
+		// Set physic properties
+		particle->mass = emitter->initial_mass.GetValue();
+		particle->col_radius = emitter->initial_col_radius.GetValue();
+		particle->col_restitution = emitter->initial_col_restitution.GetValue();
+
+		// Set light properties
+		particle->intensity = (emitter->randomIntensity) ? RE_MATH->RandomF(emitter->iClamp[0], emitter->iClamp[1]) : emitter->intensity;
+		particle->specular  = (emitter->randomSpecular)  ? RE_MATH->RandomF(emitter->sClamp[0], emitter->sClamp[1]) : emitter->specular;
+
+		if (emitter->randomLightColor)
+			particle->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
+		else
+			particle->lightColor = emitter->lightColor;
+
+		// Append particle
+		container->push_back(particle);
+	}
 }
 
 void ModulePhysics::ImpulseCollision(RE_ParticleEmitter* emitter, RE_Particle& p1, RE_Particle& p2) const
@@ -288,7 +278,7 @@ void ModulePhysics::ImpulseCollisionTS(RE_ParticleEmitter* emitter, RE_Particle&
 			st * cp * p1_rel_vel.x + st * sp * p1_rel_vel.y + ct * p1_rel_vel.z };
 
 		// Get angles and normalized impact parameter
-		const float thetav = math::Acos(RE_Math::Cap(p1_rot_vel.z / rel_speed, -1.f, 1.f));
+		const float thetav = math::Acos(RE_Math::CapF(p1_rot_vel.z / rel_speed, -1.f, 1.f));
 		const float phiv = (p1_rot_vel.x == 0 && p1_rot_vel.y == 0) ? 0.f : math::Atan2(p1_rot_vel.y, p1_rot_vel.x);
 		const float dr = rel_distance * math::Sin(thetav) / (p1.col_radius + p2.col_radius);
 
@@ -336,5 +326,30 @@ void ModulePhysics::ImpulseCollisionTS(RE_ParticleEmitter* emitter, RE_Particle&
 			}
 		}
 	}
+}
+
+void ModulePhysics::ApplyParticleSpeed(RE_ParticleEmitter* emitter, RE_Particle& p, const float dt) const
+{
+	// Acceleration
+	p.velocity += emitter->external_acc.GetAcceleration() * dt;
+	p.dt_offset = 0.f;
+
+	/*/ Cap speed
+	if (p.velocity.LengthSq() > emitter->maxSpeed * emitter->maxSpeed)
+		p.velocity = p.velocity.Normalized() * emitter->maxSpeed;*/
+	
+	// Update position
+	p.position += p.velocity * dt;
+
+	// Update Control values
+	const float dist_sq = p.position.LengthSq();
+	emitter->dist_range_sq = {
+		RE_Math::MinF(emitter->dist_range_sq.x, dist_sq),
+		RE_Math::MaxF(emitter->dist_range_sq.y, dist_sq) };
+
+	const float speed_sq = p.velocity.LengthSq();
+	emitter->speed_range_sq = {
+		RE_Math::MinF(emitter->speed_range_sq.x, speed_sq),
+		RE_Math::MaxF(emitter->speed_range_sq.y, speed_sq) };
 }
 

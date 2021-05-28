@@ -35,24 +35,34 @@ public:
 	void SetRNGSeed(unsigned int seed);
 
 	// Number valuations
-	static int Cap(const int val, const int min, const int max)
+	static int CapI(const int val, const int min, const int max)
 	{
 		RE_ASSERT(min <= max);
 		int res[3] = { val, min, max };
 		return res[(val < min) + (2 * (val > max))];
 	}
-	static float Cap(const float val, const float min, const float max)
+	static float CapF(const float val, const float min, const float max)
 	{
 		RE_ASSERT(min <= max);
 		float res[3] = { val, min, max };
 		return res[(val < min) + (2 * (val > max))];
 	}
-	static int Min(const int a, const int b)
+	static int MinI(const int a, const int b)
 	{
 		int res[2] = { a, b };
 		return res[b < a];
 	}
-	static float Max(const float a, const float b)
+	static int MaxI(const int a, const int b)
+	{
+		int res[2] = { a, b };
+		return res[b < a];
+	}
+	static float MinF(const float a, const float b)
+	{
+		float res[2] = { a, b };
+		return res[b < a];
+	}
+	static float MaxF(const float a, const float b)
 	{
 		float res[2] = { a, b };
 		return res[b < a];

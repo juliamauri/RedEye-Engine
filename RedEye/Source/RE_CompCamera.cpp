@@ -157,7 +157,7 @@ void RE_CompCamera::SetPlanesDistance(float n_plane, float f_plane)
 
 void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 {
-	v_fov_rads = math::DegToRad(v_fov_degrees = RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f));
+	v_fov_rads = math::DegToRad(v_fov_degrees = RE_Math::CapF(vertical_fov_degrees, 1.f, 180.f));
 	h_fov_rads = 2.0f * math::Atan(math::Tan(v_fov_rads / 2.0f) * (width / height));
 	h_fov_degrees = math::RadToDeg(h_fov_rads);
 
@@ -170,8 +170,8 @@ void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 
 void RE_CompCamera::ForceFOV(float vertical_fov_degrees, float horizontal_fov_degrees)
 {
-	v_fov_rads = math::DegToRad(v_fov_degrees = RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f));
-	h_fov_rads = math::DegToRad(h_fov_degrees = RE_Math::Cap(horizontal_fov_degrees, 1.f, 180.f));
+	v_fov_rads = math::DegToRad(v_fov_degrees = RE_Math::CapF(vertical_fov_degrees, 1.f, 180.f));
+	h_fov_rads = math::DegToRad(h_fov_degrees = RE_Math::CapF(horizontal_fov_degrees, 1.f, 180.f));
 
 	if (isPerspective)
 	{

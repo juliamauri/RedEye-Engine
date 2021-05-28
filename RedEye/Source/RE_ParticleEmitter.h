@@ -3,6 +3,7 @@
 
 #include "RE_EmissionData.h"
 
+#include "MathGeoLib/include/Math/float2.h"
 #include "MathGeoLib/include/Math/float3.h"
 #include "ImGui/imgui.h"
 #include <EASTL/vector.h>
@@ -19,28 +20,31 @@ struct RE_ParticleEmitter
 	float speed_muliplier = 1.f;
 
 	// Control values
+	unsigned int particle_count = 0u;
 	unsigned int max_particles = 1000u;
-	float maxLifeTime = 15.5f;
-	float maxSpeed = 20.f;
-	float maxDistance = 2.f * 1.5f; //lifetime * speed
+	math::float2 dist_range_sq = math::float2::zero;
+	math::float2 speed_range_sq = math::float2::zero;
 
+	// Instantiation parameters
 	float spawn_frequency = 10.f;
 	float spawn_offset = 0.f;
 
-	// Instantiation parameters
-	RE_EmissionLifetime v_lifetime = {};
-	RE_EmissionShape v_pos = {};
-	RE_EmissionSpeed v_speed = {};
+	RE_EmissionLifetime initial_lifetime = {};
+	RE_EmissionShape initial_pos = {};
+	RE_EmissionSpeed initial_speed = {};
+
+	// Acceleration
+	RE_EmissionExternalForces external_acc = {};
 
 	// Physic properties ---------------------------------------------------------
 	
-	bool active_physics = true;
-	RE_EmissionMass v_mass = {};
-	RE_EmissionColRadius v_col_radius = {};
-	RE_EmissionColRest v_col_restitution = {};
+	bool active_physics = false;
+
+	RE_EmissionMass initial_mass = {};
+	RE_EmissionColRadius initial_col_radius = {};
+	RE_EmissionColRest initial_col_restitution = {};
 
 	RE_EmissionBoundary boundary = {};
-	RE_EmissionExternalForces external_acc = {};
 
 	// Render properties ---------------------------------------------------------
 
