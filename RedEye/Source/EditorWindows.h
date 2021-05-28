@@ -318,6 +318,8 @@ private:
 
 	bool isWindowSelected = false;
 	bool recalc = false;
+
+	bool docking = false;
 };
 
 class TextEditor;

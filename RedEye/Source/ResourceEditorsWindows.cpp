@@ -701,7 +701,12 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 {
 	if (simulation != nullptr)
 	{
-		if (ImGui::Begin(name, &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		if(!docking) ImGui::GetIO().ConfigFlags -= ImGuiConfigFlags_DockingEnable;
+
+		ImGuiWindowFlags wFlags = ImGuiWindowFlags_::ImGuiWindowFlags_None;
+		wFlags |= ImGuiWindowFlags_NoCollapse;// | ImGuiWindowFlags_NoTitleBar;
+
+		if (ImGui::Begin("Particle Controller", &active, wFlags | ImGuiWindowFlags_MenuBar))
 		{
 			if (secondary)
 			{
@@ -709,37 +714,9 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			static int lastWidht = 0;
-			static int lastHeight = 0;
-			ImVec2 size = ImGui::GetWindowSize();
-			width = static_cast<int>(size.x);
-			heigth = static_cast<int>(size.y) - 28;
-			if (recalc || lastWidht != width || lastHeight != heigth)
-			{
-				RE_INPUT->Push(RE_EventType::PARTRICLEEDITORWINDOWCHANGED, RE_RENDER, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
-				RE_INPUT->Push(RE_EventType::PARTRICLEEDITORWINDOWCHANGED, RE_EDITOR);
-				recalc = false;
-			}
-
-			isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
-			ImGui::SetCursorPos({ viewport.x, viewport.y });
-			ImGui::Image((void*)RE_RENDER->GetRenderedParticleEditorTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
-
-			if (secondary)
-			{
-				ImGui::PopItemFlag();
-				ImGui::PopStyleVar();
-			}
-		}
-		ImGui::End();
-
-		if (ImGui::Begin("Particle Controller", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
-		{
-			if (secondary)
-			{
-				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-			}
+			if (ImGui::BeginMenuBar())
+				ImGui::Checkbox(!docking ? "Enable Docking" : "Disable Docking", &docking);
+			ImGui::EndMenuBar();
 
 			switch (simulation->state)
 			{
@@ -772,7 +749,39 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Settings", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		if (ImGui::Begin(name, &active, wFlags))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			static int lastWidht = 0;
+			static int lastHeight = 0;
+			ImVec2 size = ImGui::GetWindowSize();
+			width = static_cast<int>(size.x);
+			heigth = static_cast<int>(size.y) - 28;
+			if (recalc || lastWidht != width || lastHeight != heigth)
+			{
+				RE_INPUT->Push(RE_EventType::PARTRICLEEDITORWINDOWCHANGED, RE_RENDER, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
+				RE_INPUT->Push(RE_EventType::PARTRICLEEDITORWINDOWCHANGED, RE_EDITOR);
+				recalc = false;
+			}
+
+			isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
+			ImGui::SetCursorPos({ viewport.x, viewport.y });
+			ImGui::Image((void*)RE_RENDER->GetRenderedParticleEditorTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Particle Settings", &active, wFlags))
 		{
 			if (secondary)
 			{
@@ -790,7 +799,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Renderer Settings", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		if (ImGui::Begin("Particle Renderer Settings", &active, wFlags))
 		{
 			if (secondary)
 			{
@@ -895,7 +904,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Form", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		if (ImGui::Begin("Particle Form", &active, wFlags))
 		{
 			if (secondary)
 			{
@@ -1081,7 +1090,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Lighting", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		if (ImGui::Begin("Particle Lighting", &active, wFlags))
 		{
 			if (secondary)
 			{
@@ -1158,7 +1167,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Curve", &active, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+		if (ImGui::Begin("Particle Curve", &active, wFlags))
 		{
 			if (secondary)
 			{
@@ -1217,5 +1226,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
+		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	}
 }
