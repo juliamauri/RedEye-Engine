@@ -26,20 +26,7 @@ public:
 
 private:
 
-	void SpawnParticles(RE_ParticleEmitter* emitter, eastl::list<RE_Particle*>* container, const float dt) const;
-	void ImpulseCollision(RE_ParticleEmitter* emitter, RE_Particle& p1, RE_Particle& p2) const;
-	void ImpulseCollisionTS(RE_ParticleEmitter* emitter, RE_Particle& p1, RE_Particle& p2, const float dt) const;
-	void ApplyParticleSpeed(RE_ParticleEmitter* emitter, RE_Particle& p1, const float dt) const;
-	
-private:
-
 	ParticleManager particles;
-
-	enum CollisionResolution : int
-	{
-		SIMPLE,
-		Thomas_Smid
-	} method = SIMPLE;
 };
 
 #endif // !__MODULEPHYSICS__

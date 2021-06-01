@@ -21,16 +21,16 @@ ParticleManager::~ParticleManager()
 
 unsigned int ParticleManager::Allocate(RE_ParticleEmitter* emitter)
 {
-	simulations.push_back(new eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>(emitter, new eastl::list<RE_Particle*>()));
-	return (emitter->id = ++emitter_count);
+	simulations.push_back(emitter);
+	return (emitter->id = (++emitter_count));
 }
 
 bool ParticleManager::Deallocate(unsigned int index)
 {
-	eastl::list<eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>*>::iterator it;
+	eastl::list<RE_ParticleEmitter*>::iterator it;
 	for (it = simulations.begin(); it != simulations.end(); ++it)
 	{
-		if ((*it)->first->id == index)
+		if ((*it)->id == index)
 		{
 			simulations.erase(it);
 			return true;
@@ -59,17 +59,16 @@ void ParticleManager::SetCircleSteps(int steps)
 void ParticleManager::DrawDebug() const
 {
 	const float interval = RE_Math::pi_x2 / circle_steps;
-	eastl::list<eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>*>::const_iterator it;
-	for (it = simulations.cbegin(); it != simulations.cend(); ++it)
+	for (auto sim : simulations)
 	{
 		const math::vec go_pos = math::vec::zero;
 
 		// Render initial pos shape
 		glColor4f(1.0f, 0.27f, 0.f, 1.f); // orange
-		switch ((*it)->first->initial_pos.shape) {
+		switch (sim->initial_pos.shape) {
 		case RE_EmissionShape::Type::CIRCLE:
 		{
-			math::Circle c = (*it)->first->initial_pos.geo.circle;
+			math::Circle c = sim->initial_pos.geo.circle;
 			c.pos += go_pos;
 			math::vec previous = c.GetPoint(0.f);
 			for (float i = interval; i < RE_Math::pi_x2; i += interval)
@@ -82,9 +81,9 @@ void ParticleManager::DrawDebug() const
 		}
 		case RE_EmissionShape::Type::RING:
 		{
-			math::Circle c = (*it)->first->initial_pos.geo.ring.first;
+			math::Circle c = sim->initial_pos.geo.ring.first;
 			c.pos += go_pos;
-			c.r += (*it)->first->initial_pos.geo.ring.second;
+			c.r += sim->initial_pos.geo.ring.second;
 			math::vec previous = c.GetPoint(0.f);
 			for (float i = interval; i < RE_Math::pi_x2; i += interval)
 			{
@@ -93,7 +92,7 @@ void ParticleManager::DrawDebug() const
 				glVertex3f(previous.x, previous.y, previous.z);
 			}
 
-			c.r -= 2.f * (*it)->first->initial_pos.geo.ring.second;
+			c.r -= 2.f * sim->initial_pos.geo.ring.second;
 			previous = c.GetPoint(0.f);
 			for (float i = interval; i < RE_Math::pi_x2; i += interval)
 			{
@@ -107,35 +106,35 @@ void ParticleManager::DrawDebug() const
 		{
 			for (int i = 0; i < 12; i++)
 			{
-				glVertex3fv((*it)->first->initial_pos.geo.box.Edge(i).a.ptr());
-				glVertex3fv((*it)->first->initial_pos.geo.box.Edge(i).b.ptr());
+				glVertex3fv(sim->initial_pos.geo.box.Edge(i).a.ptr());
+				glVertex3fv(sim->initial_pos.geo.box.Edge(i).b.ptr());
 			}
 
 			break;
 		}
 		case RE_EmissionShape::Type::SPHERE:
 		{
-			DrawAASphere(go_pos + (*it)->first->initial_pos.geo.sphere.pos, (*it)->first->initial_pos.geo.sphere.r);
+			DrawAASphere(go_pos + sim->initial_pos.geo.sphere.pos, sim->initial_pos.geo.sphere.r);
 			break;
 		}
 		case RE_EmissionShape::Type::HOLLOW_SPHERE:
 		{
-			DrawAASphere(go_pos + (*it)->first->initial_pos.geo.hollow_sphere.first.pos, (*it)->first->initial_pos.geo.hollow_sphere.first.r - (*it)->first->initial_pos.geo.hollow_sphere.second);
-			DrawAASphere(go_pos + (*it)->first->initial_pos.geo.hollow_sphere.first.pos, (*it)->first->initial_pos.geo.hollow_sphere.first.r + (*it)->first->initial_pos.geo.hollow_sphere.second);
+			DrawAASphere(go_pos + sim->initial_pos.geo.hollow_sphere.first.pos, sim->initial_pos.geo.hollow_sphere.first.r - sim->initial_pos.geo.hollow_sphere.second);
+			DrawAASphere(go_pos + sim->initial_pos.geo.hollow_sphere.first.pos, sim->initial_pos.geo.hollow_sphere.first.r + sim->initial_pos.geo.hollow_sphere.second);
 			break;
 		}
 		default: break; }
 
-		if ((*it)->first->active_physics)
+		if (sim->active_collider)
 		{
 			// Render Particles
 			glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
-			for (auto p = (*it)->second->cbegin(); p != (*it)->second->cend(); ++p)
-				DrawAASphere(go_pos + (*p)->position, (*p)->col_radius);
+			for (auto p : sim->particle_pool)
+				DrawAASphere(go_pos + p->position, p->col_radius);
 
 			// Render Boundary
 			glColor4f(1.f, 0.84f, 0.0f, 1.f); // gold
-			switch ((*it)->first->boundary.type)
+			switch (sim->boundary.type)
 			{
 			case RE_EmissionBoundary::NONE: break;
 			case RE_EmissionBoundary::PLANE:
@@ -143,7 +142,7 @@ void ParticleManager::DrawDebug() const
 				const float interval = RE_Math::pi_x2 / circle_steps;
 				for (float j = 1.f; j < 6.f; ++j)
 				{
-					const math::Circle c = (*it)->first->boundary.geo.plane.GenerateCircle(go_pos, j * j);
+					const math::Circle c = sim->boundary.geo.plane.GenerateCircle(go_pos, j * j);
 					math::vec previous = c.GetPoint(0.f);
 					for (float i = interval; i < RE_Math::pi_x2; i += interval)
 					{
@@ -157,15 +156,15 @@ void ParticleManager::DrawDebug() const
 			}
 			case RE_EmissionBoundary::SPHERE:
 			{
-				DrawAASphere(go_pos + (*it)->first->boundary.geo.sphere.pos, (*it)->first->boundary.geo.sphere.r);
+				DrawAASphere(go_pos + sim->boundary.geo.sphere.pos, sim->boundary.geo.sphere.r);
 				break; 
 			}
 			case RE_EmissionBoundary::AABB:
 			{
 				for (int i = 0; i < 12; i++)
 				{
-					glVertex3fv((*it)->first->boundary.geo.box.Edge(i).a.ptr());
-					glVertex3fv((*it)->first->boundary.geo.box.Edge(i).b.ptr());
+					glVertex3fv(sim->boundary.geo.box.Edge(i).a.ptr());
+					glVertex3fv(sim->boundary.geo.box.Edge(i).b.ptr());
 				}
 
 				break;
@@ -204,11 +203,11 @@ void ParticleManager::DrawAASphere(const math::vec p_pos, const float radius) co
 bool ParticleManager::SetEmitterState(unsigned int index, RE_ParticleEmitter::PlaybackState state)
 {
 	eastl::list<eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>*>::iterator it;
-	for (it = simulations.begin(); it != simulations.end(); ++it)
+	for (auto sim : simulations)
 	{
-		if ((*it)->first->id == index)
+		if (sim->id == index)
 		{
-			(*it)->first->state = state;
+			sim->state = state;
 			return true;
 		}
 	}

@@ -1,49 +1,63 @@
 #ifndef __RE_PARTICLEEMITTER_H__
 #define __RE_PARTICLEEMITTER_H__
 
+#include "RE_Particle.h"
 #include "RE_EmissionData.h"
 
 #include "MathGeoLib/include/Math/float3.h"
 #include "ImGui/imgui.h"
+#include "EA/EASTL/list.h"
 #include <EASTL/vector.h>
 
 class RE_CompPrimitive;
 
 struct RE_ParticleEmitter
 {
+	eastl::list<RE_Particle*> particle_pool;
+
 	unsigned int id = 0u;
 
-	// Playback parameters
-	enum PlaybackState { STOP = 0, PLAY, PAUSE } state = STOP;
-	bool loop = true; // float start_delay = 0.0f;
-	float speed_muliplier = 1.f;
-
-	// Control values
-	unsigned int particle_count = 0u;
 	unsigned int max_particles = 1000u;
+
+	// Playback
+	enum PlaybackState { STOPING, RESTART, PLAY, STOP, PAUSE } state = STOP;
+	bool loop = true;
+	float max_time = 5.f;
+	float start_delay = 0.0f;
+	float time_muliplier = 1.f;
+
+	// Control (read-only)
+	unsigned int particle_count = 0u;
+	float total_time = 0.f;
 	float max_dist_sq = 0.f;
 	float max_speed_sq = 0.f;
 
-	// Instantiation parameters
-	float spawn_frequency = 10.f;
-	float spawn_offset = 0.f;
+	// Spawning
+	RE_EmissionInterval spawn_interval = {};
+	RE_EmissionSpawn spawn_mode = {};
 
+	// Instantiation
 	RE_EmissionLifetime initial_lifetime = {};
 	RE_EmissionShape initial_pos = {};
 	RE_EmissionSpeed initial_speed = {};
 
-	// Acceleration
+	// External Forces
 	RE_EmissionExternalForces external_acc = {};
 
-	// Physic properties ---------------------------------------------------------
-	
-	bool active_physics = false;
+	// Boundary
+	RE_EmissionBoundary boundary = {};
 
+	// Collider
+	bool active_collider = false;
 	RE_EmissionMass initial_mass = {};
 	RE_EmissionColRadius initial_col_radius = {};
 	RE_EmissionColRest initial_col_restitution = {};
 
-	RE_EmissionBoundary boundary = {};
+	enum CollisionResolution : int
+	{
+		SIMPLE,
+		Thomas_Smid
+	} method = SIMPLE;
 
 	// Render properties ---------------------------------------------------------
 
@@ -92,6 +106,17 @@ struct RE_ParticleEmitter
 	bool smoothCurve = false;
 	eastl::vector< ImVec2> curve;
 	int total_points = 10;
+
+	void Update(const float global_dt);
+
+	void Reset();
+
+	unsigned int CountNewParticles(const float dt);
+	RE_Particle* SpawnParticle();
+
+	void ImpulseCollision(RE_Particle& p1, RE_Particle& p2) const;
+	void ImpulseCollisionTS(RE_Particle& p1, RE_Particle& p2, const float dt) const;
+
 };
 
 #endif //!__RE_PARTICLEEMITTER_H__

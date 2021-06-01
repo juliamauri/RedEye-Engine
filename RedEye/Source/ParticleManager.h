@@ -2,8 +2,6 @@
 #define __RE_PARTICLEMANAGER_H__
 
 #include "RE_ParticleEmitter.h"
-#include "EA/EASTL/utility.h"
-#include "EA/EASTL/list.h"
 
 struct RE_Particle;
 
@@ -26,7 +24,7 @@ public:
 
 public:
 
-	eastl::list<eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>*> simulations;
+	eastl::list<RE_ParticleEmitter*> simulations;
 
 private:
 

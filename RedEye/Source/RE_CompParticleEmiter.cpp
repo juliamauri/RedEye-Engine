@@ -207,7 +207,8 @@ void RE_CompParticleEmitter::DrawProperties()
 			if (ImGui::Button("Edit simulation on workspace"))
 				RE_EDITOR->StartEditingParticleEmiter(simulation, id);
 
-			// Playback Controls
+			// Playback
+			ImGui::Separator();
 			switch (simulation->state)
 			{
 			case RE_ParticleEmitter::STOP:
@@ -229,36 +230,49 @@ void RE_CompParticleEmitter::DrawProperties()
 			}
 			}
 
-			// Simulation Measurements
+			ImGui::Separator();
+			ImGui::Checkbox("Loop", &simulation->loop);
+			ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f);
+			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, simulation->max_time);
+			ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f);
+
+			// Control (read-only)
+			ImGui::Separator();
 			ImGui::Text("Current particles: %i", simulation->particle_count);
+			ImGui::Text("Total time: %.1f s", simulation->total_time);
 			ImGui::Text("Max Distance: %.1f units", math::SqrtFast(simulation->max_dist_sq));
 			ImGui::Text("Max Speed: %.1f units/s", math::SqrtFast(simulation->max_speed_sq));
-			ImGui::DragFloat("Time Multiplier", &simulation->speed_muliplier, 0.01f, 0.01f, 10.f);
-			ImGui::DragFloat("Spawn Frequency", &simulation->spawn_frequency, 1.f, 0.1f, 1000.f);
 
-			// Instantiation Procedure
+			// Spawning
+			ImGui::Separator();
+			if (simulation->spawn_interval.DrawEditor() + simulation->spawn_mode.DrawEditor())
+				if (simulation->state != RE_ParticleEmitter::PlaybackState::STOP)
+					simulation->state = RE_ParticleEmitter::PlaybackState::RESTART;
+
+			// Instantiation
 			ImGui::Separator();
 			simulation->initial_lifetime.DrawEditor("Lifetime");
-
-			// Initial Values
-			ImGui::Separator();
 			simulation->initial_pos.DrawEditor();
 			simulation->initial_speed.DrawEditor("Starting Speed");
 
-			// Physics Initial Values
+			// External Forces
 			ImGui::Separator();
-			if (ImGui::Button(simulation->active_physics ? "Disable Physics" : "Enable Physics"))
-				simulation->active_physics = !simulation->active_physics;
+			simulation->external_acc.DrawEditor();
 
-			if (simulation->active_physics)
+			// Boundary
+			ImGui::Separator();
+			simulation->boundary.DrawEditor();
+
+			// Collider
+			ImGui::Separator();
+			if (ImGui::Button(simulation->active_collider ? "Disable Collider" : "Enable Collider"))
+				simulation->active_collider = !simulation->active_collider;
+
+			if (simulation->active_collider)
 			{
-				simulation->active_physics = true;
 				simulation->initial_mass.DrawEditor("Mass");
 				simulation->initial_col_radius.DrawEditor("Col Radius");
 				simulation->initial_col_restitution.DrawEditor("Col Restitution");
-
-				simulation->boundary.DrawEditor();
-				simulation->external_acc.DrawEditor();
 			}
 
 			ImGui::Separator();

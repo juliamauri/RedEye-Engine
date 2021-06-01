@@ -7,6 +7,40 @@
 #include "MathGeoLib/include/Geometry/AABB.h"
 #include <EASTL/utility.h>
 
+struct RE_EmissionInterval
+{
+	enum Type : int
+	{
+		NONE,
+		INTERMITENT,
+		CUSTOM
+	} type = NONE;
+
+	bool is_open = true;
+	float time_offset = 0.f;
+	float duration[2] = { 1.f, 1.f };
+
+	bool IsActive(float &dt);
+	bool DrawEditor();
+};
+
+struct RE_EmissionSpawn
+{
+	enum Type : int
+	{
+		SINGLE,
+		BURST,
+		FLOW
+	} type = SINGLE;
+
+	bool has_started = false;
+	int particles_spawned = 10;
+	float frequency = 10.f;
+	float time_offset = 0.f;
+
+	bool DrawEditor();
+};
+
 struct RE_EmissionShape
 {
 	enum Type : int
@@ -124,7 +158,9 @@ struct RE_EmissionBoundary
 
 	float restitution = 0.95f;
 
-	bool ParticleCollision(RE_Particle& p) const;
+	bool PointCollision(RE_Particle& p) const;
+	bool SphereCollision(RE_Particle& p) const;
+
 	void DrawEditor();
 };
 

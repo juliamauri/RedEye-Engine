@@ -41,6 +41,12 @@ public:
 		int res[3] = { val, min, max };
 		return res[(val < min) + (2 * (val > max))];
 	}
+	static unsigned int CapUI(const unsigned int val, const unsigned int min, const unsigned int max)
+	{
+		RE_ASSERT(min <= max);
+		unsigned int res[3] = { val, min, max };
+		return res[(val < min) + (2 * (val > max))];
+	}
 	static float CapF(const float val, const float min, const float max)
 	{
 		RE_ASSERT(min <= max);
@@ -52,15 +58,25 @@ public:
 		int res[2] = { a, b };
 		return res[b < a];
 	}
-	static int MaxI(const int a, const int b)
+	static unsigned int MinUI(const unsigned int a, const unsigned int b)
 	{
-		int res[2] = { a, b };
-		return res[b > a];
+		unsigned int res[2] = { a, b };
+		return res[b < a];
 	}
 	static float MinF(const float a, const float b)
 	{
 		float res[2] = { a, b };
 		return res[b < a];
+	}
+	static int MaxI(const int a, const int b)
+	{
+		int res[2] = { a, b };
+		return res[b > a];
+	}
+	static unsigned int MaxUI(const unsigned int a, const unsigned int b)
+	{
+		unsigned int res[2] = { a, b };
+		return res[b > a];
 	}
 	static float MaxF(const float a, const float b)
 	{

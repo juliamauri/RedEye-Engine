@@ -5,6 +5,106 @@
 #include "RE_Particle.h"
 #include "ImGui\imgui.h"
 
+bool RE_EmissionInterval::IsActive(float &dt)
+{
+	switch (type)
+	{
+	case NONE:
+	{
+		is_open = true;
+		break;
+	}
+	case INTERMITENT:
+	{
+		if ((time_offset += dt) >= duration[1])
+		{
+			dt -= (time_offset -= duration[1]);
+			is_open = !is_open;
+		}
+
+		break;
+	}
+	case CUSTOM:
+	{
+		if ((time_offset += dt) >= duration[is_open])
+		{
+			dt -= (time_offset -= duration[is_open]);
+			is_open = !is_open;
+		}
+
+		break;
+	}
+	}
+
+	return is_open;
+}
+
+bool RE_EmissionInterval::DrawEditor()
+{
+	bool ret = false;
+	int tmp = static_cast<int>(type);
+	if (ImGui::Combo("Interval", &tmp, "None\0Intermitent\0Custom\0"))
+	{
+		type = static_cast<RE_EmissionInterval::Type>(tmp);
+		is_open = true;
+		time_offset = 0.f;
+		duration[0] = duration[1] = 1.f;
+		ret = true;
+	}
+
+	switch (type) {
+	case RE_EmissionInterval::INTERMITENT:
+	{
+		ImGui::DragFloat("Interval On", &duration[1], 1.f, 0.f, 10000.f);
+		break; 
+	}
+	case RE_EmissionInterval::CUSTOM:
+	{
+		ImGui::DragFloat("Interval On", &duration[1], 1.f, 0.f, 10000.f);
+		ImGui::DragFloat("Interval Off", &duration[0], 1.f, 0.f, 10000.f);
+		break;
+	}
+	default: break; }
+
+	return ret;
+}
+
+bool RE_EmissionSpawn::DrawEditor()
+{
+	bool ret = false;
+	int tmp = static_cast<int>(type);
+	if (ImGui::Combo("Spawn type", &tmp, "Single\0Burst\0Flow\0"))
+	{
+		type = static_cast<RE_EmissionSpawn::Type>(tmp);
+		has_started = false;
+		time_offset = 0.f;
+		ret = true;
+	}
+
+	switch (type) {
+	case RE_EmissionSpawn::Type::SINGLE:
+	{
+		ImGui::DragInt("Particle amount", &particles_spawned, 1.f, 0, 10000);
+		break;
+	}
+	case RE_EmissionSpawn::Type::BURST:
+	{
+		ImGui::DragInt("Particles/burst", &particles_spawned, 1.f, 0, 10000);
+		ImGui::DragFloat("Period", &frequency, 1.f, 0.0001f, 10000.f);
+
+		break;
+	}
+	case RE_EmissionSpawn::Type::FLOW:
+	{
+		ImGui::DragFloat("Frecuency", &frequency, 1.f, 0.0001f, 1000.f);
+		break;
+	}
+	}
+
+	return ret;
+}
+
+
 math::vec RE_EmissionShape::GetPosition() const
 {
 	switch (shape) {
@@ -222,7 +322,126 @@ void RE_EmissionExternalForces::DrawEditor()
 	case RE_EmissionExternalForces::WIND_GRAVITY: ImGui::DragFloat("Gravity", &gravity); ImGui::DragFloat3("Wind", wind.ptr()); break; }
 }
 
-bool RE_EmissionBoundary::ParticleCollision(RE_Particle& p) const
+bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
+{
+	switch (type)
+	{
+	case Type::PLANE:
+	{
+		// Check if particle intersects or has passed plane
+		float dist_to_plane = geo.plane.SignedDistance(p.position);
+		if (dist_to_plane <= 0.f)
+		{
+			if (effect == RE_EmissionBoundary::KILL) return false;
+
+			// Resolve intersection
+			const math::vec norm_speed = p.velocity.Normalized();
+			float dist_to_col = 0.f;
+			if (math::Plane::IntersectLinePlane(geo.plane.normal, geo.plane.d, p.position, norm_speed, dist_to_col))
+			{
+				p.position += norm_speed * dist_to_col;
+
+				// Resolve impulse only if particle not already moving away from plane
+				float dot = p.velocity.Dot(geo.plane.normal);
+				if (dot < 0.f)
+					p.velocity -= (p.col_restitution + restitution) * dot * geo.plane.normal;
+			}
+			else // Direction is parallel to plane
+			{
+				p.position += geo.plane.normal * dist_to_plane;
+				p.velocity *= 0.9999f;
+			}
+		}
+
+		break;
+	}
+	case Type::SPHERE:
+	{
+		float overlap_distance = p.position.DistanceSq(geo.sphere.pos) - (geo.sphere.r * geo.sphere.r);
+		if (overlap_distance > 0.f)
+		{
+			if (effect == RE_EmissionBoundary::KILL) return false;
+
+			// Resolve intersection
+			p.position -= p.velocity.Normalized() * math::Sqrt(overlap_distance);
+
+			// Resolve impulse only if particle not already moving away from sphere
+			const math::vec impact_normal = (geo.sphere.pos - p.position).Normalized();
+			float dot = p.velocity.Dot(impact_normal);
+			if (dot < 0.f)
+				p.velocity -= (p.col_restitution + restitution) * dot * impact_normal;
+		}
+
+		break;
+	}
+	case Type::AABB:
+	{
+		const bool collision[6] = {
+			p.position.x < geo.box.minPoint.x, // x min
+			p.position.x > geo.box.maxPoint.x, // x max
+			p.position.y < geo.box.minPoint.y, // y min
+			p.position.y > geo.box.maxPoint.y, // y max
+			p.position.z < geo.box.minPoint.z, // z min
+			p.position.z > geo.box.maxPoint.z }; // z max
+
+		if (collision[0] + collision[1] + collision[2] + collision[3] + collision[4] + collision[5] > 0)
+		{
+			if (effect == RE_EmissionBoundary::KILL) return false;
+
+			math::vec impact_normal;
+			if (collision[0]) // x min
+			{
+				p.position.x = geo.box.minPoint.x;
+				float dot = p.velocity.Dot({ 1.f, 0.f, 0.f });
+				if (dot < 0.f)
+					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(1.f, 0.f, 0.f);
+			}
+			if (collision[2]) // y min
+			{
+				p.position.y = geo.box.minPoint.y;
+				float dot = p.velocity.Dot({ 0.f, 1.f, 0.f });
+				if (dot < 0.f)
+					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, 1.f, 0.f);
+			}
+			if (collision[4]) // z min
+			{
+				p.position.z = geo.box.minPoint.z;
+				float dot = p.velocity.Dot({ 0.f, 0.f, 1.f });
+				if (dot < 0.f)
+					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, 0.f, 1.f);
+			}
+
+			if (collision[1]) // x max
+			{
+				p.position.x = geo.box.maxPoint.x;
+				float dot = p.velocity.Dot({ -1.f, 0.f, 0.f });
+				if (dot < 0.f)
+					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(-1.f, 0.f, 0.f);
+			}
+			if (collision[3]) // y max
+			{
+				p.position.y = geo.box.maxPoint.y;
+				float dot = p.velocity.Dot({ -1.f, 0.f, 0.f });
+				if (dot < 0.f)
+					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, -1.f, 0.f);
+			}
+			if (collision[5]) // z max
+			{
+				p.position.z = geo.box.maxPoint.z;
+				float dot = p.velocity.Dot({ -1.f, 0.f, 0.f });
+				if (dot < 0.f)
+					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, -1.f, 0.f);
+			}
+		}
+		break;
+	}
+	default: break;
+	}
+
+	return true;
+}
+
+bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 {
 	switch (type)
 	{
@@ -251,6 +470,11 @@ bool RE_EmissionBoundary::ParticleCollision(RE_Particle& p) const
 				float dot = p.velocity.Dot(geo.plane.normal);
 				if (dot < 0.f)
 					p.velocity -= (p.col_restitution + restitution) * dot * geo.plane.normal;
+			}
+			else // Direction is parallel to plane
+			{
+				p.position += geo.plane.normal * dist_to_plane;
+				p.velocity *= 0.9999f;
 			}
 		}
 
