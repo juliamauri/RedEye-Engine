@@ -22,13 +22,11 @@ void RE_ParticleEmitter::Update(const float global_dt)
 	case RE_ParticleEmitter::PLAY:
 	{
 		// Check time limitations
-		bool is_starting = false;
 		float local_dt = global_dt * time_muliplier;
 		if (total_time < start_delay)
 		{
 			if (total_time + local_dt >= start_delay)
 			{
-				is_starting = true;
 				total_time += local_dt;
 				local_dt -= start_delay - total_time;
 			}
@@ -131,6 +129,7 @@ void RE_ParticleEmitter::Reset()
 	particle_count = 0u;
 	max_dist_sq = max_speed_sq = total_time = 
 	spawn_interval.time_offset = spawn_mode.time_offset = 0.f;
+	spawn_mode.has_started = false;
 }
 
 unsigned int RE_ParticleEmitter::CountNewParticles(const float dt)

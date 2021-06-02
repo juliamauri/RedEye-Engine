@@ -36,11 +36,7 @@ void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const
 void ModulePhysics::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(name))
-	{
-		int tmp = particles.GetCircleSteps();
-		if (ImGui::DragInt("Steps", &tmp, 1.f, 0, 64))
-			particles.SetCircleSteps(tmp);
-	}
+		particles.DrawEditor();
 }
 
 RE_ParticleEmitter* ModulePhysics::AddEmitter()

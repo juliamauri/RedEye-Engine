@@ -5,12 +5,15 @@
 #include "RE_Math.h"
 #include "RE_Hardware.h"
 #include "RE_FileSystem.h"
+
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
 #include "ModuleScene.h"
+#include "ModulePhysics.h"
 #include "ModuleEditor.h"
 #include "ModuleRenderer3d.h"
 #include "ModuleAudio.h"
+
 #include "RE_ResourceManager.h"
 #include "RE_CameraManager.h"
 #include "RE_ThumbnailManager.h"
@@ -213,6 +216,7 @@ void ConfigWindow::Draw(bool secondary)
 		RE_INPUT->DrawEditor();
 		RE_WINDOW->DrawEditor();
 		RE_SCENE->DrawEditor();
+		RE_PHYSICS->DrawEditor();
 		RE_EDITOR->DrawEditor();
 		RE_RENDER->DrawEditor();
 		RE_AUDIO->DrawEditor();

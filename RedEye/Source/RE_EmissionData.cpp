@@ -349,7 +349,7 @@ bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 			else // Direction is parallel to plane
 			{
 				p.position += geo.plane.normal * dist_to_plane;
-				p.velocity *= 0.9999f;
+				p.velocity *= (1.f - (p.col_restitution + restitution)) * 0.005f;
 			}
 		}
 
@@ -376,63 +376,36 @@ bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 	}
 	case Type::AABB:
 	{
-		const bool collision[6] = {
-			p.position.x < geo.box.minPoint.x, // x min
-			p.position.x > geo.box.maxPoint.x, // x max
-			p.position.y < geo.box.minPoint.y, // y min
-			p.position.y > geo.box.maxPoint.y, // y max
-			p.position.z < geo.box.minPoint.z, // z min
-			p.position.z > geo.box.maxPoint.z }; // z max
+		int collision = 0;
+		for (int i = 5; i >= 0; --i)
+		{
+			collision = collision << 1;
+			const int axis = i % 3;
+			collision += (i < 3) ?
+				(p.position[axis] <= geo.box.minPoint[axis]) :
+				(p.position[axis] >= geo.box.maxPoint[axis]);
+		}
 
-		if (collision[0] + collision[1] + collision[2] + collision[3] + collision[4] + collision[5] > 0)
+		if (collision)
 		{
 			if (effect == RE_EmissionBoundary::KILL) return false;
 
-			math::vec impact_normal;
-			if (collision[0]) // x min
+			for (int i = 0; i < 6; ++i)
 			{
-				p.position.x = geo.box.minPoint.x;
-				float dot = p.velocity.Dot({ 1.f, 0.f, 0.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(1.f, 0.f, 0.f);
-			}
-			if (collision[2]) // y min
-			{
-				p.position.y = geo.box.minPoint.y;
-				float dot = p.velocity.Dot({ 0.f, 1.f, 0.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, 1.f, 0.f);
-			}
-			if (collision[4]) // z min
-			{
-				p.position.z = geo.box.minPoint.z;
-				float dot = p.velocity.Dot({ 0.f, 0.f, 1.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, 0.f, 1.f);
-			}
+				if (collision & (1 << i))
+				{
+					const int axis = i % 3;
+					p.position[axis] = i < 3 ? geo.box.minPoint[axis] : geo.box.maxPoint[axis];
 
-			if (collision[1]) // x max
-			{
-				p.position.x = geo.box.maxPoint.x;
-				float dot = p.velocity.Dot({ -1.f, 0.f, 0.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(-1.f, 0.f, 0.f);
-			}
-			if (collision[3]) // y max
-			{
-				p.position.y = geo.box.maxPoint.y;
-				float dot = p.velocity.Dot({ -1.f, 0.f, 0.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, -1.f, 0.f);
-			}
-			if (collision[5]) // z max
-			{
-				p.position.z = geo.box.maxPoint.z;
-				float dot = p.velocity.Dot({ -1.f, 0.f, 0.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, -1.f, 0.f);
+					math::vec normal = math::vec::zero;
+					normal[axis] = i < 3 ? 1.f : -1.f;
+					float dot = p.velocity.Dot(normal);
+					if (dot < 0.f) p.velocity -= (p.col_restitution + restitution) * dot * normal;
+				}
 			}
 		}
+
+
 		break;
 	}
 	default: break;
@@ -474,7 +447,7 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 			else // Direction is parallel to plane
 			{
 				p.position += geo.plane.normal * dist_to_plane;
-				p.velocity *= 0.9999f;
+				p.velocity *= (1.f - (p.col_restitution + restitution)) * 0.005f;
 			}
 		}
 
@@ -501,61 +474,32 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 	}
 	case Type::AABB:
 	{
-		const bool collision[6] = {
-			(p.position.x - p.col_radius) < geo.box.minPoint.x, // x min
-			(p.position.x + p.col_radius) > geo.box.maxPoint.x, // x max
-			(p.position.y - p.col_radius) < geo.box.minPoint.y, // y min
-			(p.position.y + p.col_radius) > geo.box.maxPoint.y, // y max
-			(p.position.z - p.col_radius) < geo.box.minPoint.z, // z min
-			(p.position.z + p.col_radius) > geo.box.maxPoint.z }; // z max
+		int collision = 0;
+		for (int i = 5; i >= 0; --i)
+		{
+			collision = collision << 1;
+			const int axis = i % 3;
+			collision += (i < 3) ? 
+				(p.position[axis] <= geo.box.minPoint[axis] + p.col_radius) :
+				(p.position[axis] >= geo.box.maxPoint[axis] - p.col_radius) ;
+		}
 
-		if (collision[0] + collision[1] + collision[2] + collision[3] + collision[4] + collision[5])
+		if (collision)
 		{
 			if (effect == RE_EmissionBoundary::KILL) return false;
 
-			math::vec impact_normal;
-			if (collision[0]) // x min
+			for (int i = 0; i < 6; ++i)
 			{
-				p.position.x = geo.box.minPoint.x + p.col_radius;
-				float dot = p.velocity.Dot({ 1.f, 0.f, 0.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(1.f, 0.f, 0.f);
-			}
-			if (collision[2]) // y min
-			{
-				p.position.y = geo.box.minPoint.y + p.col_radius;
-				float dot = p.velocity.Dot({ 0.f, 1.f, 0.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, 1.f, 0.f);
-			}
-			if (collision[4]) // z min
-			{
-				p.position.z = geo.box.minPoint.z + p.col_radius;
-				float dot = p.velocity.Dot({ 0.f, 0.f, 1.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, 0.f, 1.f);
-			}
+				if (collision & (1 << i))
+				{
+					const int axis = i % 3;
+					p.position[axis] = i < 3 ? geo.box.minPoint[axis] + p.col_radius : geo.box.maxPoint[axis] - p.col_radius;
 
-			if (collision[1]) // x max
-			{
-				p.position.x = geo.box.maxPoint.x - p.col_radius;
-				float dot = p.velocity.Dot({ -1.f, 0.f, 0.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(-1.f, 0.f, 0.f);
-			}
-			if (collision[3]) // y max
-			{
-				p.position.y = geo.box.maxPoint.y - p.col_radius;
-				float dot = p.velocity.Dot({ -1.f, 0.f, 0.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, -1.f, 0.f);
-			}
-			if (collision[5]) // z max
-			{
-				p.position.z = geo.box.maxPoint.z - p.col_radius;
-				float dot = p.velocity.Dot({ -1.f, 0.f, 0.f });
-				if (dot < 0.f)
-					p.velocity -= (p.col_restitution + restitution) * dot * math::vec(0.f, -1.f, 0.f);
+					math::vec normal = math::vec::zero;
+					normal[axis] = i < 3 ? 1.f : -1.f;
+					float dot = p.velocity.Dot(normal);
+					if (dot < 0.f) p.velocity -= (p.col_restitution + restitution) * dot * normal;
+				}
 			}
 		}
 		break;
@@ -582,6 +526,9 @@ void RE_EmissionBoundary::DrawEditor()
 		tmp = static_cast<int>(effect);
 		if (ImGui::Combo("Boundary Effect", &tmp, "Contain\0Kill\0"))
 			effect = static_cast<Effect>(tmp);
+
+		if (effect == Effect::CONTAIN)
+			ImGui::DragFloat("Boundary Restitution", &restitution, 1.f, 0.f, 100.f);
 
 		switch (type) {
 		case RE_EmissionBoundary::NONE: break;
