@@ -105,9 +105,7 @@ struct RE_ParticleEmitter
 	unsigned int CountNewParticles(const float dt);
 	RE_Particle* SpawnParticle();
 
-	void ImpulseCollision(RE_Particle& p1, RE_Particle& p2) const;
-	void ImpulseCollisionTS(RE_Particle& p1, RE_Particle& p2, const float dt) const;
-
+	void ImpulseCollision(RE_Particle& p1, RE_Particle& p2, const float combined_radius = 0.001f) const;
 };
 
 #endif //!__RE_PARTICLEEMITTER_H__

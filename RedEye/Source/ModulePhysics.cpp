@@ -12,8 +12,39 @@ ModulePhysics::~ModulePhysics() {}
 void ModulePhysics::Update()
 {
 	const float global_dt = RE_TIME->GetDeltaTime();
-	for (auto sim : particles.simulations)
-		sim->Update(global_dt);
+
+	if (use_fixed_dt)
+	{
+		dt_offset += global_dt;
+
+		float final_dt = 0.f;
+		while (dt_offset >= fixed_dt)
+		{
+			dt_offset -= fixed_dt;
+			final_dt += fixed_dt;
+		}
+
+		if (final_dt > 0.f)
+		{
+			update_count++;
+			for (auto sim : particles.simulations)
+				sim->Update(final_dt);
+		}
+	}
+	else
+	{
+		update_count++;
+		for (auto sim : particles.simulations)
+			sim->Update(global_dt);
+	}
+
+	time_counter += global_dt;
+	if (time_counter >= 1.f)
+	{
+		time_counter--;
+		updates_per_s = update_count;
+		update_count = 0.f;
+	}
 }
 
 void ModulePhysics::CleanUp()
@@ -36,7 +67,19 @@ void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const
 void ModulePhysics::DrawEditor()
 {
 	if (ImGui::CollapsingHeader(name))
+	{
+		ImGui::Text("Updates/s: %.1f", updates_per_s);
+
+		ImGui::Checkbox("Used Fixed Update", &use_fixed_dt);
+		if (use_fixed_dt)
+		{
+			float tmp = 1.f / fixed_dt;
+			if (ImGui::DragFloat("Dt", &tmp, 1.f, 1.f, 480.f, "%.0f"))
+				fixed_dt = 1.f / tmp;
+		}
+
 		particles.DrawEditor();
+	}
 }
 
 RE_ParticleEmitter* ModulePhysics::AddEmitter()
@@ -44,11 +87,11 @@ RE_ParticleEmitter* ModulePhysics::AddEmitter()
 	RE_ParticleEmitter* ret = new RE_ParticleEmitter();
 
 	// Default setup
-	ret->initial_lifetime.val = 2.f;
-	ret->initial_pos.shape = RE_EmissionShape::Type::SPHERE;
-	ret->initial_pos.geo.sphere = math::Sphere(math::vec::zero, 1.f);
+	ret->initial_lifetime.val = 12.f;
+	ret->initial_pos.shape = RE_EmissionShape::Type::CIRCLE;
+	ret->initial_pos.geo.circle = math::Circle(math::vec::zero, math::vec(0.f, 1.f, 0.f), 1.f);
 	ret->collider.mass.val = 1.f;
-	ret->collider.radius.val = 1.f;
+	ret->collider.radius.val = 0.5f;
 	ret->collider.restitution.val = 0.9f;
 
 	// Curve setup

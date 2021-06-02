@@ -347,10 +347,7 @@ bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 					p.velocity -= (p.col_restitution + restitution) * dot * geo.plane.normal;
 			}
 			else // Direction is parallel to plane
-			{
 				p.position += geo.plane.normal * dist_to_plane;
-				p.velocity *= (1.f - (p.col_restitution + restitution)) * 0.005f;
-			}
 		}
 
 		break;
@@ -405,7 +402,6 @@ bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 			}
 		}
 
-
 		break;
 	}
 	default: break;
@@ -418,7 +414,6 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 {
 	switch (type)
 	{
-	case Type::NONE: break;
 	case Type::PLANE:
 	{
 		// Check if particle intersects or has passed plane
@@ -445,10 +440,7 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 					p.velocity -= (p.col_restitution + restitution) * dot * geo.plane.normal;
 			}
 			else // Direction is parallel to plane
-			{
 				p.position += geo.plane.normal * dist_to_plane;
-				p.velocity *= (1.f - (p.col_restitution + restitution)) * 0.005f;
-			}
 		}
 
 		break;
@@ -504,6 +496,7 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 		}
 		break;
 	}
+	default: break;
 	}
 
 	return true;
@@ -517,8 +510,8 @@ void RE_EmissionBoundary::DrawEditor()
 		switch (type = static_cast<Type>(tmp)) {
 		case RE_EmissionBoundary::NONE: break;
 		case RE_EmissionBoundary::PLANE: geo.plane = math::Plane({ 0.f, 1.f, 0.f }, 0.f); break;
-		case RE_EmissionBoundary::SPHERE: geo.sphere = math::Sphere({ 0.f, 0.f, 0.f }, 1.f); break;
-		case RE_EmissionBoundary::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one); break; }
+		case RE_EmissionBoundary::SPHERE: geo.sphere = math::Sphere({ 0.f, 0.f, 0.f }, 10.f); break;
+		case RE_EmissionBoundary::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one * 5.f); break; }
 	}
 
 	if (type)
@@ -568,9 +561,7 @@ void RE_EmissionCollider::DrawEditor()
 
 	if (shape)
 	{
-		tmp = static_cast<int>(method);
-		if (ImGui::Combo("Resolution", &tmp, "None\0Simple\0Thomas Smid\0"))
-			method = static_cast<CollisionResolution>(tmp);
+		ImGui::Checkbox("Inter collisions", &inter_collisions);
 
 		mass.DrawEditor("Mass");
 		restitution.DrawEditor("Restitution");

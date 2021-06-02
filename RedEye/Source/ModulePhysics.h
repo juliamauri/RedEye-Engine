@@ -27,6 +27,14 @@ public:
 private:
 
 	ParticleManager particles;
+
+	bool use_fixed_dt = true;
+	float fixed_dt = 1.f / 60.f;
+	float dt_offset = 0.f;
+
+	float update_count = 0.f;
+	float time_counter = 0.f;
+	float updates_per_s = 0.f;
 };
 
 #endif // !__MODULEPHYSICS__

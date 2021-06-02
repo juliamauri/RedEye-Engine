@@ -138,7 +138,7 @@ void RE_CompParticleEmitter::Draw() const
 		}
 		case RE_ParticleEmitter::ColorState::OVERLIFETIME:
 		{
-			float weight = simulation->initial_lifetime.GetMax() / p->lifetime;
+			float weight = p->lifetime / simulation->initial_lifetime.GetMax();
 
 			if (simulation->useCurve)
 			{
@@ -150,7 +150,7 @@ void RE_CompParticleEmitter::Draw() const
 					RE_ShaderImporter::setFloat(shader, "opacity", weight);
 			}
 
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1 - weight)));
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1.f - weight)));
 
 			break; 
 		}
@@ -168,7 +168,7 @@ void RE_CompParticleEmitter::Draw() const
 					RE_ShaderImporter::setFloat(shader, "opacity", weight);
 			}
 
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1 - weight)));
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1.f - weight)));
 
 			break; 
 		}
@@ -186,7 +186,7 @@ void RE_CompParticleEmitter::Draw() const
 					RE_ShaderImporter::setFloat(shader, "opacity", weight);
 			}
 
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1 - weight)));
+			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1.f - weight)));
 
 			break; 
 		}
@@ -245,6 +245,10 @@ void RE_CompParticleEmitter::DrawProperties()
 
 			// Spawning
 			ImGui::Separator();
+			int tmp = static_cast<int>(simulation->max_particles);
+			if (ImGui::DragInt("Max particles", &tmp, 1.f, 0, 65000))
+				simulation->max_particles = static_cast<unsigned int>(tmp);
+
 			if (simulation->spawn_interval.DrawEditor() + simulation->spawn_mode.DrawEditor())
 				if (simulation->state != RE_ParticleEmitter::PlaybackState::STOP)
 					simulation->state = RE_ParticleEmitter::PlaybackState::RESTART;

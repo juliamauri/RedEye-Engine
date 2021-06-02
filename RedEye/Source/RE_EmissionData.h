@@ -166,12 +166,7 @@ struct RE_EmissionCollider
 		SPHERE
 	} shape = Type::NONE;
 
-	enum CollisionResolution : int
-	{
-		NO_RESOLUTION = 0,
-		SIMPLE,
-		Thomas_Smid
-	} method = NO_RESOLUTION;
+	bool inter_collisions = false;
 
 	RE_EmissionSingleValue mass = {};
 	RE_EmissionSingleValue radius = {};

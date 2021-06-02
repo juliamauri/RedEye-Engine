@@ -8,7 +8,6 @@ struct RE_Particle
 	// Base attributes
 	float lifetime = 0.0f;
 	float max_lifetime = 0.0f;
-	float dt_offset = 0.f;
 
 	math::vec position = math::vec::zero;
 	math::vec velocity = math::vec::zero;
