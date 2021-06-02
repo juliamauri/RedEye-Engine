@@ -509,7 +509,7 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 			(p.position.z - p.col_radius) < geo.box.minPoint.z, // z min
 			(p.position.z + p.col_radius) > geo.box.maxPoint.z }; // z max
 
-		if (collision[0] + collision[1] + collision[2] + collision[3] + collision[4] + collision[5] > 0)
+		if (collision[0] + collision[1] + collision[2] + collision[3] + collision[4] + collision[5])
 		{
 			if (effect == RE_EmissionBoundary::KILL) return false;
 
@@ -610,5 +610,25 @@ void RE_EmissionBoundary::DrawEditor()
 			break;
 		}
 		}
+	}
+}
+
+void RE_EmissionCollider::DrawEditor()
+{
+	int tmp = static_cast<int>(shape);
+	if (ImGui::Combo("Collider Type", &tmp, "None\0Point\0Sphere\0"))
+		shape = static_cast<Type>(tmp);
+
+	if (shape)
+	{
+		tmp = static_cast<int>(method);
+		if (ImGui::Combo("Resolution", &tmp, "None\0Simple\0Thomas Smid\0"))
+			method = static_cast<CollisionResolution>(tmp);
+
+		mass.DrawEditor("Mass");
+		restitution.DrawEditor("Restitution");
+
+		if (shape == RE_EmissionCollider::SPHERE)
+			radius.DrawEditor("Collider Radius");
 	}
 }

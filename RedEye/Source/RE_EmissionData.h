@@ -89,8 +89,6 @@ struct RE_EmissionVector
 	void DrawEditor(const char* name);
 };
 
-typedef RE_EmissionVector RE_EmissionSpeed;
-
 struct RE_EmissionSingleValue
 {
 	enum Type : int
@@ -108,11 +106,6 @@ struct RE_EmissionSingleValue
 	float GetMax() const;
 	void DrawEditor(const char* name);
 };
-
-typedef RE_EmissionSingleValue RE_EmissionLifetime;
-typedef RE_EmissionSingleValue RE_EmissionMass;
-typedef RE_EmissionSingleValue RE_EmissionColRadius;
-typedef RE_EmissionSingleValue RE_EmissionColRest;
 
 struct RE_EmissionExternalForces
 {
@@ -160,6 +153,29 @@ struct RE_EmissionBoundary
 
 	bool PointCollision(RE_Particle& p) const;
 	bool SphereCollision(RE_Particle& p) const;
+
+	void DrawEditor();
+};
+
+struct RE_EmissionCollider
+{
+	enum Type : int
+	{
+		NONE = 0,
+		POINT,
+		SPHERE
+	} shape = Type::NONE;
+
+	enum CollisionResolution : int
+	{
+		NO_RESOLUTION = 0,
+		SIMPLE,
+		Thomas_Smid
+	} method = NO_RESOLUTION;
+
+	RE_EmissionSingleValue mass = {};
+	RE_EmissionSingleValue radius = {};
+	RE_EmissionSingleValue restitution = {};
 
 	void DrawEditor();
 };

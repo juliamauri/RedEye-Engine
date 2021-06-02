@@ -13,11 +13,11 @@ class RE_CompPrimitive;
 
 struct RE_ParticleEmitter
 {
-	eastl::list<RE_Particle*> particle_pool;
-
 	unsigned int id = 0u;
 
+	// Particle storage
 	unsigned int max_particles = 1000u;
+	eastl::list<RE_Particle*> particle_pool;
 
 	// Playback
 	enum PlaybackState { STOPING, RESTART, PLAY, STOP, PAUSE } state = STOP;
@@ -37,9 +37,9 @@ struct RE_ParticleEmitter
 	RE_EmissionSpawn spawn_mode = {};
 
 	// Instantiation
-	RE_EmissionLifetime initial_lifetime = {};
+	RE_EmissionSingleValue initial_lifetime = {};
 	RE_EmissionShape initial_pos = {};
-	RE_EmissionSpeed initial_speed = {};
+	RE_EmissionVector initial_speed = {};
 
 	// External Forces
 	RE_EmissionExternalForces external_acc = {};
@@ -48,16 +48,7 @@ struct RE_ParticleEmitter
 	RE_EmissionBoundary boundary = {};
 
 	// Collider
-	bool active_collider = false;
-	RE_EmissionMass initial_mass = {};
-	RE_EmissionColRadius initial_col_radius = {};
-	RE_EmissionColRest initial_col_restitution = {};
-
-	enum CollisionResolution : int
-	{
-		SIMPLE,
-		Thomas_Smid
-	} method = SIMPLE;
+	RE_EmissionCollider collider = {};
 
 	// Render properties ---------------------------------------------------------
 

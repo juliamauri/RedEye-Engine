@@ -219,22 +219,22 @@ void RE_CompParticleEmitter::DrawProperties()
 			case RE_ParticleEmitter::PLAY:
 			{
 				if (ImGui::Button("Pause")) simulation->state = RE_ParticleEmitter::PAUSE;
-				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOP;
+				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOPING;
 				break;
 			}
 			case RE_ParticleEmitter::PAUSE:
 			{
 				if (ImGui::Button("Resume")) simulation->state = RE_ParticleEmitter::PLAY;
-				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOP;
+				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOPING;
 				break;
 			}
 			}
 
 			ImGui::Separator();
-			ImGui::Checkbox("Loop", &simulation->loop);
-			ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f);
-			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, simulation->max_time);
 			ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f);
+			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, simulation->max_time);
+			ImGui::Checkbox("Loop", &simulation->loop);
+			if (!simulation->loop) ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f);
 
 			// Control (read-only)
 			ImGui::Separator();
@@ -255,26 +255,14 @@ void RE_CompParticleEmitter::DrawProperties()
 			simulation->initial_pos.DrawEditor();
 			simulation->initial_speed.DrawEditor("Starting Speed");
 
-			// External Forces
-			ImGui::Separator();
+			ImGui::Separator(); // External Forces
 			simulation->external_acc.DrawEditor();
-
-			// Boundary
-			ImGui::Separator();
+			ImGui::Separator(); // Boundary
 			simulation->boundary.DrawEditor();
+			ImGui::Separator(); // Collider
+			simulation->collider.DrawEditor();
 
-			// Collider
-			ImGui::Separator();
-			if (ImGui::Button(simulation->active_collider ? "Disable Collider" : "Enable Collider"))
-				simulation->active_collider = !simulation->active_collider;
-
-			if (simulation->active_collider)
-			{
-				simulation->initial_mass.DrawEditor("Mass");
-				simulation->initial_col_radius.DrawEditor("Col Radius");
-				simulation->initial_col_restitution.DrawEditor("Col Restitution");
-			}
-
+			// Rendering
 			ImGui::Separator();
 			if (ImGui::Button(simulation->active_rendering ? "Disable Rendering" : "Enable Rendering"))
 				simulation->active_rendering = !simulation->active_rendering;

@@ -63,7 +63,9 @@ void ParticleManager::DrawDebug() const
 	{
 		const math::vec go_pos = math::vec::zero;
 
-		// Render initial pos shape
+		glBegin(GL_LINES);
+
+		// Render Spawn Shape
 		glColor4f(1.0f, 0.27f, 0.f, 1.f); // orange
 		switch (sim->initial_pos.shape) {
 		case RE_EmissionShape::Type::CIRCLE:
@@ -125,52 +127,75 @@ void ParticleManager::DrawDebug() const
 		}
 		default: break; }
 
-		if (sim->active_collider)
+		// Render Boundary
+		glColor4f(1.f, 0.84f, 0.0f, 1.f); // gold
+		switch (sim->boundary.type) {
+		case RE_EmissionBoundary::PLANE:
 		{
-			// Render Particles
+			const float interval = RE_Math::pi_x2 / circle_steps;
+			for (float j = 1.f; j < 6.f; ++j)
+			{
+				const math::Circle c = sim->boundary.geo.plane.GenerateCircle(go_pos, j * j);
+				math::vec previous = c.GetPoint(0.f);
+				for (float i = interval; i < RE_Math::pi_x2; i += interval)
+				{
+					glVertex3f(previous.x, previous.y, previous.z);
+					previous = c.GetPoint(i);
+					glVertex3f(previous.x, previous.y, previous.z);
+				}
+			}
+
+			break;
+		}
+		case RE_EmissionBoundary::SPHERE:
+		{
+			DrawAASphere(go_pos + sim->boundary.geo.sphere.pos, sim->boundary.geo.sphere.r);
+			break;
+		}
+		case RE_EmissionBoundary::AABB:
+		{
+			for (int i = 0; i < 12; i++)
+			{
+				glVertex3fv(sim->boundary.geo.box.Edge(i).a.ptr());
+				glVertex3fv(sim->boundary.geo.box.Edge(i).b.ptr());
+			}
+
+			break;
+		}
+		default: break;
+		}
+
+		glEnd();
+
+		// Render Collider
+		switch (sim->collider.shape) {
+		case RE_EmissionCollider::Type::POINT:
+		{
+			glBegin(GL_POINTS);
+			glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
+			for (auto p : sim->particle_pool)
+			{
+				const math::vec pos = go_pos + p->position;
+				glVertex3fv(pos.ptr());
+			}
+			glEnd();
+
+			break;
+		}
+		case RE_EmissionCollider::Type::SPHERE:
+		{
+			glBegin(GL_POINTS);
 			glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
 			for (auto p : sim->particle_pool)
 				DrawAASphere(go_pos + p->position, p->col_radius);
 
-			// Render Boundary
-			glColor4f(1.f, 0.84f, 0.0f, 1.f); // gold
-			switch (sim->boundary.type)
-			{
-			case RE_EmissionBoundary::NONE: break;
-			case RE_EmissionBoundary::PLANE:
-			{
-				const float interval = RE_Math::pi_x2 / circle_steps;
-				for (float j = 1.f; j < 6.f; ++j)
-				{
-					const math::Circle c = sim->boundary.geo.plane.GenerateCircle(go_pos, j * j);
-					math::vec previous = c.GetPoint(0.f);
-					for (float i = interval; i < RE_Math::pi_x2; i += interval)
-					{
-						glVertex3f(previous.x, previous.y, previous.z);
-						previous = c.GetPoint(i);
-						glVertex3f(previous.x, previous.y, previous.z);
-					}
-				}
+			glEnd();
 
-				break; 
-			}
-			case RE_EmissionBoundary::SPHERE:
-			{
-				DrawAASphere(go_pos + sim->boundary.geo.sphere.pos, sim->boundary.geo.sphere.r);
-				break; 
-			}
-			case RE_EmissionBoundary::AABB:
-			{
-				for (int i = 0; i < 12; i++)
-				{
-					glVertex3fv(sim->boundary.geo.box.Edge(i).a.ptr());
-					glVertex3fv(sim->boundary.geo.box.Edge(i).b.ptr());
-				}
-
-				break;
-			}
-			}
+			break;
 		}
+		default: break; }
+
+		glEnd();
 	}
 }
 

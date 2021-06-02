@@ -38,7 +38,7 @@ void RE_ParticleEmitter::Update(const float global_dt)
 
 		if (!loop && total_time >= max_time)
 		{
-			state = RE_ParticleEmitter::STOP;
+			state = RE_ParticleEmitter::STOPING;
 			break;
 		}
 
@@ -56,21 +56,31 @@ void RE_ParticleEmitter::Update(const float global_dt)
 			default: break;
 			}
 
-			if (is_alive)
+			// Iterate collisions
+			if (is_alive && collider.shape)
 			{
-				// Iterate for collisions (other particles could be dead, but dt should always be too small to notice)
-				if (active_collider)
+				switch (collider.method)
+				{
+				case RE_EmissionCollider::CollisionResolution::SIMPLE:
 				{
 					for (eastl::list<RE_Particle*>::iterator p2 = p1.next(); p2 != particle_pool.end(); ++p2)
-					{
-						switch (method) {
-						case CollisionResolution::SIMPLE: ImpulseCollision(**p1, **p2); break;
-						case CollisionResolution::Thomas_Smid: ImpulseCollisionTS(**p1, **p2, local_dt); break; }
-					}
+						ImpulseCollision(**p1, **p2);
 
-					is_alive = boundary.SphereCollision(**p1);
+					break;
 				}
-				else is_alive = boundary.PointCollision(**p1);
+				case RE_EmissionCollider::CollisionResolution::Thomas_Smid:
+				{
+					for (eastl::list<RE_Particle*>::iterator p2 = p1.next(); p2 != particle_pool.end(); ++p2)
+						ImpulseCollisionTS(**p1, **p2, local_dt);
+
+					break;
+				}
+				default: break; }
+
+				switch (collider.shape) {
+				case RE_EmissionCollider::Type::POINT: is_alive = boundary.PointCollision(**p1); break;
+				case RE_EmissionCollider::Type::SPHERE: is_alive = boundary.SphereCollision(**p1); break;
+				default: break; }
 			}
 
 			if (is_alive)
@@ -105,8 +115,7 @@ void RE_ParticleEmitter::Update(const float global_dt)
 		{
 			unsigned int to_add = RE_Math::MinUI(CountNewParticles(local_dt), max_particles - particle_count);
 			particle_count += to_add;
-			for (unsigned int i = 0u; i < to_add; ++i)
-				particle_pool.push_back(SpawnParticle());
+			for (unsigned int i = 0u; i < to_add; ++i) particle_pool.push_back(SpawnParticle());
 		}
 
 		break;
@@ -178,9 +187,9 @@ RE_Particle* RE_ParticleEmitter::SpawnParticle()
 	ret->velocity = initial_speed.GetSpeed();
 
 	// Set physic properties
-	ret->mass = initial_mass.GetValue();
-	ret->col_radius = initial_col_radius.GetValue();
-	ret->col_restitution = initial_col_restitution.GetValue();
+	ret->mass = collider.mass.GetValue();
+	ret->col_radius = collider.radius.GetValue();
+	ret->col_restitution = collider.restitution.GetValue();
 
 	// Set light properties
 	ret->intensity = (randomIntensity) ? RE_MATH->RandomF(iClamp[0], iClamp[1]) : intensity;
