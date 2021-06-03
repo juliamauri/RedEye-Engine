@@ -835,7 +835,7 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 	Config materialSerialize(GetAssetPath(), RE_FS->GetZipPath());
 	RE_Json* materialNode = materialSerialize.GetRootNode("Material");
 	materialNode->PushString("name", GetName()); //for get different md5
-	materialNode->PushInt("ShaderType", (int)shadingType);
+	materialNode->PushInt("ShaderType", static_cast<int>(shadingType));
 	materialNode->PushUInt("usingOnMat", usingOnMat, 18);
 	materialNode->PushFloatVector("DiffuseColor", cDiffuse);
 	materialNode->PushFloatVector("SpecularColor", cSpecular);

@@ -1,7 +1,10 @@
-#pragma once
+#ifndef __RE_PARTICLEEMISSION_H__
+#define __RE_PARTICLEEMISSION_H__
+
 #include "Resource.h"
-class RE_ParticleEmission :
-    public ResourceContainer
+#include "RE_EmissionData.h"
+
+class RE_ParticleEmission : public ResourceContainer
 {
 public:
 	RE_ParticleEmission() {}
@@ -26,13 +29,35 @@ private:
 	void JsonSerialize(bool onlyMD5 = false); //We need to call ProcessMD5() before SaveMeta
 
 	void BinaryDeserialize();
-	void BinarySerialize();
+	void BinarySerialize() const;
 	unsigned int GetBinarySize() const;
 
 private:
-	//Data
 
+	// Playback
+	bool loop = true;
+	float max_time = 5.f;
+	float start_delay = 0.0f;
+	float time_muliplier = 1.f;
 
+	// Spawning
+	unsigned int max_particles = 1000u;
+	RE_EmissionInterval spawn_interval = {};
+	RE_EmissionSpawn spawn_mode = {};
 
+	// Instantiation
+	RE_EmissionSingleValue initial_lifetime = {};
+	RE_EmissionShape initial_pos = {};
+	RE_EmissionVector initial_speed = {};
+
+	// External Forces
+	RE_EmissionExternalForces external_acc = {};
+
+	// Boundary
+	RE_EmissionBoundary boundary = {};
+
+	// Collider
+	RE_EmissionCollider collider = {};
 };
 
+#endif //!__RE_PARTICLEEMISSION_H__

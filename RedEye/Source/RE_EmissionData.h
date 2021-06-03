@@ -7,6 +7,8 @@
 #include "MathGeoLib/include/Geometry/AABB.h"
 #include <EASTL/utility.h>
 
+class RE_Json;
+
 struct RE_EmissionInterval
 {
 	enum Type : int
@@ -16,12 +18,21 @@ struct RE_EmissionInterval
 		CUSTOM
 	} type = NONE;
 
-	bool is_open = true;
+	bool is_open = false;
 	float time_offset = 0.f;
+
 	float duration[2] = { 1.f, 1.f };
 
 	bool IsActive(float &dt);
+
 	bool DrawEditor();
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
 };
 
 struct RE_EmissionSpawn
@@ -34,18 +45,26 @@ struct RE_EmissionSpawn
 	} type = SINGLE;
 
 	bool has_started = false;
-	int particles_spawned = 10;
-	float frequency = 10.f;
 	float time_offset = 0.f;
 
+	int particles_spawned = 10;
+	float frequency = 10.f;
+
 	bool DrawEditor();
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
 };
 
 struct RE_EmissionShape
 {
 	enum Type : int
 	{
-		POINT,
+		POINT = 0,
 		CIRCLE,
 		RING,
 		AABB,
@@ -64,14 +83,22 @@ struct RE_EmissionShape
 	} geo = {};
 
 	math::vec GetPosition() const;
+
 	void DrawEditor();
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
 };
 
 struct RE_EmissionVector
 {
 	enum Type : int
 	{
-		NONE,
+		NONE = 0,
 		VALUE,
 		RANGEX,
 		RANGEY,
@@ -86,7 +113,15 @@ struct RE_EmissionVector
 	math::vec margin = math::vec::one;
 
 	math::vec GetSpeed() const;
+
 	void DrawEditor(const char* name);
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
 };
 
 struct RE_EmissionSingleValue
@@ -104,7 +139,15 @@ struct RE_EmissionSingleValue
 	float GetValue() const;
 	float GetMin() const;
 	float GetMax() const;
+
 	void DrawEditor(const char* name);
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
 };
 
 struct RE_EmissionExternalForces
@@ -121,7 +164,15 @@ struct RE_EmissionExternalForces
 	math::vec wind = math::vec::zero;
 
 	math::vec GetAcceleration() const;
+
 	void DrawEditor();
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
 };
 
 struct RE_Particle;
@@ -155,6 +206,13 @@ struct RE_EmissionBoundary
 	bool SphereCollision(RE_Particle& p) const;
 
 	void DrawEditor();
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
 };
 
 struct RE_EmissionCollider
@@ -173,6 +231,13 @@ struct RE_EmissionCollider
 	RE_EmissionSingleValue restitution = {};
 
 	void DrawEditor();
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
 };
 
 #endif //!__RE_EMISSION_SHAPE_H__

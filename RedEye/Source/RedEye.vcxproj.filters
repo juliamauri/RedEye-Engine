@@ -325,9 +325,6 @@
     <ClCompile Include="RE_EmissionData.cpp">
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClCompile>
-    <ClCompile Include="RE_ParticleEmitter.cpp">
-      <Filter>Source\Application\Resources\Particle Emitter</Filter>
-    </ClCompile>
     <ClCompile Include="RE_ParticleEmission.cpp">
       <Filter>Source\Application\Resources\Particle Emitter</Filter>
     </ClCompile>
@@ -336,6 +333,9 @@
     </ClCompile>
     <ClCompile Include="RE_ParticleEmitterBase.cpp">
       <Filter>Source\Application\Resources\Particle Emitter</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ParticleEmitter.cpp">
+      <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1332,9 +1332,6 @@
     <ClInclude Include="RE_EmissionData.h">
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClInclude>
-    <ClInclude Include="RE_ParticleEmitter.h">
-      <Filter>Source\Application\Resources\Particle Emitter</Filter>
-    </ClInclude>
     <ClInclude Include="RE_ParticleEmission.h">
       <Filter>Source\Application\Resources\Particle Emitter</Filter>
     </ClInclude>
@@ -1343,6 +1340,9 @@
     </ClInclude>
     <ClInclude Include="RE_ParticleEmitterBase.h">
       <Filter>Source\Application\Resources\Particle Emitter</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ParticleEmitter.h">
+      <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

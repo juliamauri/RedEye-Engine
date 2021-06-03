@@ -11,26 +11,40 @@
 
 class RE_CompPrimitive;
 
-
-struct RE_ParticleEmitter
+class RE_ParticleEmitter
 {
+public:
+
+	void Update(const float global_dt);
+
+private:
+
+	void Reset();
+	unsigned int CountNewParticles(const float dt);
+	RE_Particle* SpawnParticle();
+	void ImpulseCollision(RE_Particle& p1, RE_Particle& p2, const float combined_radius = 0.001f) const;
+
+public:
+
 	unsigned int id = 0u;
-
-	// Particle storage
-	eastl::list<RE_Particle*> particle_pool;
-
-	// Playback
 	enum PlaybackState { STOPING, RESTART, PLAY, STOP, PAUSE } state = STOP;
-	bool loop = true;
-	float max_time = 5.f;
-	float start_delay = 0.0f;
-	float time_muliplier = 1.f;
 
 	// Control (read-only)
 	unsigned int particle_count = 0u;
 	float total_time = 0.f;
 	float max_dist_sq = 0.f;
 	float max_speed_sq = 0.f;
+
+	// Particle storage
+	eastl::list<RE_Particle*> particle_pool;
+
+	// Emission properties ---------------------------------------------------------
+	
+	// Playback
+	bool loop = true;
+	float max_time = 5.f;
+	float start_delay = 0.0f;
+	float time_muliplier = 1.f;
 
 	// Spawning
 	unsigned int max_particles = 1000u;
@@ -98,15 +112,6 @@ struct RE_ParticleEmitter
 	bool smoothCurve = false;
 	eastl::vector< ImVec2> curve;
 	int total_points = 10;
-
-	void Update(const float global_dt);
-
-	void Reset();
-
-	unsigned int CountNewParticles(const float dt);
-	RE_Particle* SpawnParticle();
-
-	void ImpulseCollision(RE_Particle& p1, RE_Particle& p2, const float combined_radius = 0.001f) const;
 };
 
 #endif //!__RE_PARTICLEEMITTER_H__

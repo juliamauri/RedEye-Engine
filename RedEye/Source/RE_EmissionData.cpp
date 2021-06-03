@@ -3,17 +3,13 @@
 #include "Application.h"
 #include "RE_Math.h"
 #include "RE_Particle.h"
+#include "RE_Json.h"
 #include "ImGui\imgui.h"
 
 bool RE_EmissionInterval::IsActive(float &dt)
 {
 	switch (type)
 	{
-	case NONE:
-	{
-		is_open = true;
-		break;
-	}
 	case INTERMITENT:
 	{
 		if ((time_offset += dt) >= duration[1])
@@ -32,6 +28,11 @@ bool RE_EmissionInterval::IsActive(float &dt)
 			is_open = !is_open;
 		}
 
+		break;
+	}
+	default:
+	{
+		is_open = true;
 		break;
 	}
 	}
@@ -66,6 +67,63 @@ bool RE_EmissionInterval::DrawEditor()
 	}
 	default: break; }
 
+	return ret;
+}
+
+void RE_EmissionInterval::JsonDeserialize(RE_Json* node)
+{
+	type = static_cast<RE_EmissionInterval::Type>(node->PullInt("Type", static_cast<int>(type)));
+	if (type)
+	{
+		duration[0] = node->PullFloat("Duration 1", duration[0]);
+		duration[1] = node->PullFloat("Duration 2", duration[1]);
+	}
+
+	DEL(node);
+}
+
+void RE_EmissionInterval::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(type));
+	if (type)
+	{
+		node->PushFloat("Duration 1", duration[0]);
+		node->PushFloat("Duration 2", duration[1]);
+	}
+
+	DEL(node);
+}
+
+void RE_EmissionInterval::BinaryDeserialize(char*& cursor)
+{
+	unsigned int size = sizeof(int);
+	memcpy(&type, cursor, size);
+	cursor += size;
+	if (type)
+	{
+		size = sizeof(float) * 2u;
+		memcpy(duration, cursor, size);
+		cursor += size;
+	}
+}
+
+void RE_EmissionInterval::BinarySerialize(char*& cursor) const
+{
+	unsigned int size = sizeof(int);
+	memcpy(cursor, &type, size);
+	cursor += size;
+	if (type)
+	{
+		size = sizeof(float) * 2u;
+		memcpy(cursor, duration, size);
+		cursor += size;
+	}
+}
+
+unsigned int RE_EmissionInterval::GetBinarySize() const
+{
+	unsigned int ret = sizeof(int);
+	if (type) ret += sizeof(float) * 2u;
 	return ret;
 }
 
@@ -104,6 +162,127 @@ bool RE_EmissionSpawn::DrawEditor()
 	return ret;
 }
 
+void RE_EmissionSpawn::JsonDeserialize(RE_Json* node)
+{
+	type = static_cast<RE_EmissionSpawn::Type>(node->PullInt("Type", static_cast<int>(type)));
+	switch (type) {
+	case RE_EmissionSpawn::Type::SINGLE:
+	{
+		particles_spawned = node->PullInt("Particles spawned", particles_spawned);
+		break;
+	}
+	case RE_EmissionSpawn::Type::BURST:
+	{
+		particles_spawned = node->PullInt("Particles spawned", particles_spawned);
+		frequency = node->PullFloat("Period", frequency);
+		break;
+	}
+	case RE_EmissionSpawn::Type::FLOW:
+	{
+		frequency = node->PullFloat("Frequency", frequency);
+		break;
+	}
+	}
+
+	DEL(node);
+}
+
+void RE_EmissionSpawn::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(type));
+	switch (type) {
+	case RE_EmissionSpawn::Type::SINGLE:
+	{
+		node->PushInt("Particles spawned", particles_spawned);
+		break;
+	}
+	case RE_EmissionSpawn::Type::BURST:
+	{
+		node->PushInt("Particles spawned", particles_spawned);
+		node->PushFloat("Period", frequency);
+		break;
+	}
+	case RE_EmissionSpawn::Type::FLOW:
+	{
+		node->PushFloat("Frequency", frequency);
+		break;
+	}
+	}
+
+	DEL(node);
+}
+
+void RE_EmissionSpawn::BinaryDeserialize(char*& cursor)
+{
+	unsigned int size = sizeof(int);
+	memcpy(&type, cursor, size);
+	cursor += size;
+	switch (type) {
+	case RE_EmissionSpawn::Type::SINGLE:
+	{
+		memcpy(&particles_spawned, cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionSpawn::Type::BURST:
+	{
+		memcpy(&particles_spawned, cursor, size);
+		cursor += size;
+		size = sizeof(float);
+		memcpy(&frequency, cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionSpawn::Type::FLOW:
+	{
+		size = sizeof(float);
+		memcpy(&frequency, cursor, size);
+		cursor += size;
+		break;
+	}
+	}
+}
+
+void RE_EmissionSpawn::BinarySerialize(char*& cursor) const
+{
+	unsigned int size = sizeof(int);
+	memcpy(cursor, &type, size);
+	cursor += size;
+	switch (type) {
+	case RE_EmissionSpawn::Type::SINGLE:
+	{
+		memcpy(cursor, &particles_spawned, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionSpawn::Type::BURST:
+	{
+		memcpy(cursor, &particles_spawned, size);
+		cursor += size;
+		size = sizeof(float);
+		memcpy(cursor, &frequency, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionSpawn::Type::FLOW:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &frequency, size);
+		cursor += size;
+		break;
+	}
+	}
+}
+
+unsigned int RE_EmissionSpawn::GetBinarySize() const
+{
+	unsigned int ret = sizeof(int);
+	switch (type) {
+	case RE_EmissionSpawn::Type::SINGLE: ret *= 2u; break;
+	case RE_EmissionSpawn::Type::BURST: ret *= 2u; ret += sizeof(float); break;
+	case RE_EmissionSpawn::Type::FLOW: ret += sizeof(float); break; }
+	return ret;
+}
 
 math::vec RE_EmissionShape::GetPosition() const
 {
@@ -126,8 +305,8 @@ void RE_EmissionShape::DrawEditor()
 	{
 		switch (shape = static_cast<Type>(next_shape)) {
 		case RE_EmissionShape::POINT: geo.point = math::vec::zero; break;
-		case RE_EmissionShape::CIRCLE: geo.ring = { math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f), 0.1f }; break;
-		case RE_EmissionShape::RING: geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f); break;
+		case RE_EmissionShape::CIRCLE: geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f); break;
+		case RE_EmissionShape::RING: geo.ring = { math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f), 0.1f }; break;
 		case RE_EmissionShape::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one); break;
 		case RE_EmissionShape::SPHERE: geo.sphere = math::Sphere(math::vec::zero, 1.f); break;
 		case RE_EmissionShape::HOLLOW_SPHERE: geo.hollow_sphere = { math::Sphere(math::vec::zero, 1.f), 0.8f }; break; }
@@ -187,6 +366,267 @@ void RE_EmissionShape::DrawEditor()
 		break;
 	}
 	}
+}
+
+void RE_EmissionShape::JsonDeserialize(RE_Json* node)
+{
+	shape = static_cast<RE_EmissionShape::Type>(node->PullInt("Type", static_cast<int>(shape)));
+	switch (shape) {
+	case RE_EmissionShape::Type::CIRCLE:
+	{
+		geo.circle.r = node->PullFloat("Radius", geo.circle.r);
+		geo.circle.pos = node->PullFloatVector("Position", geo.circle.pos);
+		geo.circle.normal = node->PullFloatVector("Normal", geo.circle.normal);
+		break;
+	}
+	case RE_EmissionShape::Type::RING:
+	{
+		geo.ring.second = node->PullFloat("Inner radius", geo.ring.second);
+		geo.ring.first.r = node->PullFloat("Radius", geo.ring.first.r);
+		geo.ring.first.pos = node->PullFloatVector("Position", geo.ring.first.pos);
+		geo.ring.first.normal = node->PullFloatVector("Normal", geo.ring.first.normal);
+		break;
+	}
+	case RE_EmissionShape::Type::AABB:
+	{
+		geo.box.minPoint = node->PullFloatVector("Min point", geo.box.minPoint);
+		geo.box.maxPoint = node->PullFloatVector("Max point", geo.box.maxPoint);
+		break;
+	}
+	case RE_EmissionShape::Type::SPHERE:
+	{
+		geo.sphere.r = node->PullFloat("Radius", geo.sphere.r);
+		geo.sphere.pos = node->PullFloatVector("Position", geo.sphere.pos);
+		break;
+	}
+	case RE_EmissionShape::Type::HOLLOW_SPHERE:
+	{
+		geo.hollow_sphere.second = node->PullFloat("Inner radius", geo.hollow_sphere.second);
+		geo.hollow_sphere.first.r = node->PullFloat("Radius", geo.hollow_sphere.first.r);
+		geo.hollow_sphere.first.pos = node->PullFloatVector("Position", geo.hollow_sphere.first.pos);
+		break;
+	}
+	default:
+	{
+		geo.point = node->PullFloatVector("Position", geo.point);
+		break;
+	}
+	}
+
+	DEL(node);
+}
+
+void RE_EmissionShape::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(shape));
+	switch (shape) {
+	case RE_EmissionShape::Type::CIRCLE:
+	{
+		node->PushFloat("Radius", geo.circle.r);
+		node->PushFloatVector("Position", geo.circle.pos);
+		node->PushFloatVector("Normal", geo.circle.normal);
+		break;
+	}
+	case RE_EmissionShape::Type::RING:
+	{
+		node->PushFloat("Inner radius", geo.ring.second);
+		node->PushFloat("Radius", geo.ring.first.r);
+		node->PushFloatVector("Position", geo.ring.first.pos);
+		node->PushFloatVector("Normal", geo.ring.first.normal);
+		break;
+	}
+	case RE_EmissionShape::Type::AABB:
+	{
+		node->PushFloatVector("Min point", geo.box.minPoint);
+		node->PushFloatVector("Max point", geo.box.maxPoint);
+		break;
+	}
+	case RE_EmissionShape::Type::SPHERE:
+	{
+		node->PushFloat("Radius", geo.sphere.r);
+		node->PushFloatVector("Position", geo.sphere.pos);
+		break;
+	}
+	case RE_EmissionShape::Type::HOLLOW_SPHERE:
+	{
+		node->PushFloat("Inner radius", geo.hollow_sphere.second);
+		node->PushFloat("Radius", geo.hollow_sphere.first.r);
+		node->PushFloatVector("Position", geo.hollow_sphere.first.pos);
+		break;
+	}
+	default:
+	{
+		node->PushFloatVector("Position", geo.point);
+		break;
+	}
+	}
+
+	DEL(node);
+}
+
+void RE_EmissionShape::BinaryDeserialize(char*& cursor)
+{
+	unsigned int size = sizeof(int);
+	memcpy(&shape, cursor, size);
+	cursor += size;
+	switch (shape) {
+	case RE_EmissionShape::Type::CIRCLE:
+	{
+		size = sizeof(float);
+		memcpy(&geo.circle.r, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(geo.circle.pos.ptr(), cursor, size);
+		cursor += size;
+		memcpy(geo.circle.normal.ptr(), cursor, size);
+		cursor += size;
+
+		break;
+	}
+	case RE_EmissionShape::Type::RING:
+	{
+		size = sizeof(float);
+		memcpy(&geo.ring.second, cursor, size);
+		cursor += size;
+		memcpy(&geo.ring.first.r, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(geo.ring.first.pos.ptr(), cursor, size);
+		cursor += size;
+		memcpy(geo.ring.first.normal.ptr(), cursor, size);
+		cursor += size;
+
+		break;
+	}
+	case RE_EmissionShape::Type::AABB:
+	{
+		size = sizeof(float) * 3u;
+		memcpy(geo.box.minPoint.ptr(), cursor, size);
+		cursor += size;
+		memcpy(geo.box.maxPoint.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionShape::Type::SPHERE:
+	{
+		size = sizeof(float);
+		memcpy(&geo.sphere.r, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(geo.sphere.pos.ptr(), cursor, size);
+		cursor += size;
+
+		break;
+	}
+	case RE_EmissionShape::Type::HOLLOW_SPHERE:
+	{
+		size = sizeof(float);
+		memcpy(&geo.hollow_sphere.second, cursor, size);
+		cursor += size;
+		memcpy(&geo.hollow_sphere.first.r, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(geo.hollow_sphere.first.pos.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	default:
+	{
+		size = sizeof(float) * 3u;
+		memcpy(geo.point.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	}
+}
+
+void RE_EmissionShape::BinarySerialize(char*& cursor) const
+{
+	unsigned int size = sizeof(int);
+	memcpy(cursor, &shape, size);
+	cursor += size;
+	switch (shape) {
+	case RE_EmissionShape::Type::CIRCLE:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &geo.circle.r, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, geo.circle.pos.ptr(), size);
+		cursor += size;
+		memcpy(cursor, geo.circle.normal.ptr(), size);
+		cursor += size;
+
+		break;
+	}
+	case RE_EmissionShape::Type::RING:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &geo.ring.second, size);
+		cursor += size;
+		memcpy(cursor, &geo.ring.first.r, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, geo.ring.first.pos.ptr(), size);
+		cursor += size;
+		memcpy(cursor, geo.ring.first.normal.ptr(), size);
+		cursor += size;
+
+		break;
+	}
+	case RE_EmissionShape::Type::AABB:
+	{
+		size = sizeof(float) * 3u;
+		memcpy(cursor, geo.box.minPoint.ptr(), size);
+		cursor += size;
+		memcpy(cursor, geo.box.maxPoint.ptr(), size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionShape::Type::SPHERE:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &geo.sphere.r, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, geo.sphere.pos.ptr(), size);
+		cursor += size;
+
+		break;
+	}
+	case RE_EmissionShape::Type::HOLLOW_SPHERE:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &geo.hollow_sphere.second, size);
+		cursor += size;
+		memcpy(cursor, &geo.hollow_sphere.first.r, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, geo.hollow_sphere.first.pos.ptr(), size);
+		cursor += size;
+		break;
+	}
+	default:
+	{
+		size = sizeof(float) * 3u;
+		memcpy(cursor, geo.point.ptr(), size);
+		cursor += size;
+		break;
+	}
+	}
+}
+
+unsigned int RE_EmissionShape::GetBinarySize() const
+{
+	unsigned int ret = sizeof(int);
+	switch (shape) {
+	case RE_EmissionShape::Type::CIRCLE: ret += sizeof(float) * 7u; break;
+	case RE_EmissionShape::Type::RING: ret += sizeof(float) * 8u; break;
+	case RE_EmissionShape::Type::AABB: ret += sizeof(float) * 6u; break;
+	case RE_EmissionShape::Type::SPHERE: ret += sizeof(float) * 4u; break;
+	case RE_EmissionShape::Type::HOLLOW_SPHERE: ret += sizeof(float) * 5u; break;
+	default: ret += sizeof(float) * 3u; break; }
+	return ret;
 }
 
 math::vec RE_EmissionVector::GetSpeed() const
@@ -263,6 +703,325 @@ void RE_EmissionVector::DrawEditor(const char* name)
 	default: break; }
 }
 
+void RE_EmissionVector::JsonDeserialize(RE_Json* node)
+{
+	type = static_cast<RE_EmissionVector::Type>(node->PullInt("Type", static_cast<int>(type)));
+	switch (type) {
+	case RE_EmissionVector::Type::VALUE:
+	{
+		val = node->PullFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEX:
+	{
+		margin.x = node->PullFloat("Margin X", margin.x);
+		val = node->PullFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEY:
+	{
+		margin.y = node->PullFloat("Margin Y", margin.y);
+		val = node->PullFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEZ:
+	{
+		margin.z = node->PullFloat("Margin Z", margin.z);
+		val = node->PullFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXY:
+	{
+		margin.x = node->PullFloat("Margin X", margin.x);
+		margin.y = node->PullFloat("Margin Y", margin.y);
+		val = node->PullFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXZ:
+	{
+		margin.x = node->PullFloat("Margin X", margin.x);
+		margin.z = node->PullFloat("Margin Z", margin.z);
+		val = node->PullFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEYZ:
+	{
+		margin.y = node->PullFloat("Margin Y", margin.y);
+		margin.z = node->PullFloat("Margin Z", margin.z);
+		val = node->PullFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXYZ:
+	{
+		margin = node->PullFloatVector("Margin", margin);
+		val = node->PullFloatVector("Value", val);
+		break;
+	}
+	default: break; }
+
+	DEL(node);
+}
+
+void RE_EmissionVector::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(type));
+	switch (type) {
+	case RE_EmissionVector::Type::VALUE:
+	{
+		node->PushFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEX:
+	{
+		node->PushFloat("Margin X", margin.x);
+		node->PushFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEY:
+	{
+		node->PushFloat("Margin Y", margin.y);
+		node->PushFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEZ:
+	{
+		node->PushFloat("Margin Z", margin.z);
+		node->PushFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXY:
+	{
+		node->PushFloat("Margin X", margin.x);
+		node->PushFloat("Margin Y", margin.y);
+		node->PushFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXZ:
+	{
+		node->PushFloat("Margin X", margin.x);
+		node->PushFloat("Margin Z", margin.z);
+		node->PushFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEYZ:
+	{
+		node->PushFloat("Margin Y", margin.y);
+		node->PushFloat("Margin Z", margin.z);
+		node->PushFloatVector("Value", val);
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXYZ:
+	{
+		node->PushFloatVector("Margin", margin);
+		node->PushFloatVector("Value", val);
+		break;
+	}
+	default: break; }
+
+	DEL(node);
+}
+
+void RE_EmissionVector::BinaryDeserialize(char*& cursor)
+{
+	unsigned int size = sizeof(int);
+	memcpy(&type, cursor, size);
+	cursor += size;
+	switch (type) {
+	case RE_EmissionVector::Type::VALUE:
+	{
+		size = sizeof(float) * 3u;
+		memcpy(val.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEX:
+	{
+		size = sizeof(float);
+		memcpy(&margin.x, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(val.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEY:
+	{
+		size = sizeof(float);
+		memcpy(&margin.y, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(val.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEZ:
+	{
+		size = sizeof(float);
+		memcpy(&margin.z, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(val.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXY:
+	{
+		size = sizeof(float);
+		memcpy(&margin.x, cursor, size);
+		cursor += size;
+		memcpy(&margin.y, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(val.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXZ:
+	{
+		size = sizeof(float);
+		memcpy(&margin.x, cursor, size);
+		cursor += size;
+		memcpy(&margin.z, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(val.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEYZ:
+	{
+		size = sizeof(float);
+		memcpy(&margin.y, cursor, size);
+		cursor += size;
+		memcpy(&margin.z, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(val.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXYZ:
+	{
+		size = sizeof(float) * 3u;
+		memcpy(margin.ptr(), cursor, size);
+		cursor += size;
+		memcpy(val.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	default: break;
+	}
+}
+
+void RE_EmissionVector::BinarySerialize(char*& cursor) const
+{
+	unsigned int size = sizeof(int);
+	memcpy(cursor, &type, size);
+	cursor += size;
+	switch (type) {
+	case RE_EmissionVector::Type::VALUE:
+	{
+		size = sizeof(float) * 3u;
+		memcpy(cursor, val.ptr(), size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEX:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &margin.x, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, val.ptr(), size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEY:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &margin.y, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, val.ptr(), size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEZ:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &margin.z, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, val.ptr(), size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXY:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &margin.x, size);
+		cursor += size;
+		memcpy(cursor, &margin.y, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, val.ptr(), size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXZ:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &margin.x, size);
+		cursor += size;
+		memcpy(cursor, &margin.z, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, val.ptr(), size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEYZ:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &margin.y, size);
+		cursor += size;
+		memcpy(cursor, &margin.z, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, val.ptr(), size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionVector::Type::RANGEXYZ:
+	{
+		size = sizeof(float) * 3u;
+		memcpy(cursor, margin.ptr(), size);
+		cursor += size;
+		memcpy(cursor, val.ptr(), size);
+		cursor += size;
+		break;
+	}
+	default: break;
+	}
+}
+
+unsigned int RE_EmissionVector::GetBinarySize() const
+{
+	unsigned int ret = sizeof(float);
+	switch (type) {
+	case RE_EmissionVector::Type::VALUE: ret *= 3u; break;
+	case RE_EmissionVector::Type::RANGEX: ret *= 4u; break;
+	case RE_EmissionVector::Type::RANGEY: ret *= 4u; break;
+	case RE_EmissionVector::Type::RANGEZ: ret *= 4u; break;
+	case RE_EmissionVector::Type::RANGEXY: ret *= 5u; break;
+	case RE_EmissionVector::Type::RANGEXZ: ret *= 5u; break;
+	case RE_EmissionVector::Type::RANGEYZ: ret *= 5u; break;
+	case RE_EmissionVector::Type::RANGEXYZ: ret *= 6u; break;
+	default: break; }
+	ret += sizeof(int);
+	return ret;
+}
+
 float RE_EmissionSingleValue::GetValue() const
 {
 	switch (type) {
@@ -300,6 +1059,107 @@ void RE_EmissionSingleValue::DrawEditor(const char* name)
 	case RE_EmissionSingleValue::RANGE: ImGui::DragFloat(name, &val); ImGui::DragFloat((tmp + " Margin").c_str(), &margin, 0.01f, 0.f); break; }
 }
 
+void RE_EmissionSingleValue::JsonDeserialize(RE_Json* node)
+{
+	type = static_cast<RE_EmissionSingleValue::Type>(node->PullInt("Type", static_cast<int>(type)));
+	switch (type) {
+	case RE_EmissionSingleValue::Type::VALUE:
+	{
+		val = node->PullFloat("Value", val);
+		break;
+	}
+	case RE_EmissionSingleValue::Type::RANGE:
+	{
+		val = node->PullFloat("Value", val);
+		margin = node->PullFloat("Margin", margin);
+		break;
+	}
+	default: break; }
+
+	DEL(node);
+}
+
+void RE_EmissionSingleValue::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(type));
+	switch (type) {
+	case RE_EmissionSingleValue::Type::VALUE:
+	{
+		node->PushFloat("Value", val);
+		break;
+	}
+	case RE_EmissionSingleValue::Type::RANGE:
+	{
+		node->PushFloat("Value", val);
+		node->PushFloat("Margin", margin);
+		break;
+	}
+	default: break; }
+
+	DEL(node);
+}
+
+void RE_EmissionSingleValue::BinaryDeserialize(char*& cursor)
+{
+	unsigned int size = sizeof(int);
+	memcpy(&type, cursor, size);
+	cursor += size;
+	switch (type) {
+	case RE_EmissionSingleValue::Type::VALUE:
+	{
+		size = sizeof(float);
+		memcpy(&val, cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionSingleValue::Type::RANGE:
+	{
+		size = sizeof(float);
+		memcpy(&val, cursor, size);
+		cursor += size;
+		memcpy(&margin, cursor, size);
+		cursor += size;
+		break;
+	}
+	default: break;
+	}
+}
+
+void RE_EmissionSingleValue::BinarySerialize(char*& cursor) const
+{
+	unsigned int size = sizeof(int);
+	memcpy(cursor, &type, size);
+	cursor += size;
+	switch (type) {
+	case RE_EmissionSingleValue::Type::VALUE:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &val, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionSingleValue::Type::RANGE:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &val, size);
+		cursor += size;
+		memcpy(cursor, &margin, size);
+		cursor += size;
+		break;
+	}
+	default: break; }
+}
+
+unsigned int RE_EmissionSingleValue::GetBinarySize() const
+{
+	unsigned int ret = sizeof(int);
+	switch (type) {
+	case RE_EmissionSingleValue::Type::VALUE: ret += sizeof(float); break;
+	case RE_EmissionSingleValue::Type::RANGE: ret += sizeof(float) * 2u; break;
+	default: break; }
+	return ret;
+}
+
 math::vec RE_EmissionExternalForces::GetAcceleration() const
 {
 	switch (type) {
@@ -320,6 +1180,134 @@ void RE_EmissionExternalForces::DrawEditor()
 	case RE_EmissionExternalForces::GRAVITY: ImGui::DragFloat("Gravity", &gravity); break;
 	case RE_EmissionExternalForces::WIND: ImGui::DragFloat3("Wind", wind.ptr()); break;
 	case RE_EmissionExternalForces::WIND_GRAVITY: ImGui::DragFloat("Gravity", &gravity); ImGui::DragFloat3("Wind", wind.ptr()); break; }
+}
+
+void RE_EmissionExternalForces::JsonDeserialize(RE_Json* node)
+{
+	type = static_cast<RE_EmissionExternalForces::Type>(node->PullInt("Type", static_cast<int>(type)));
+	switch (type) {
+	case RE_EmissionExternalForces::GRAVITY:
+	{
+		gravity = node->PullFloat("Gravity", gravity);
+		break;
+	}
+	case RE_EmissionExternalForces::WIND:
+	{
+		wind = node->PullFloatVector("Wind", wind);
+		break;
+	}
+	case RE_EmissionExternalForces::WIND_GRAVITY:
+	{
+		gravity = node->PullFloat("Gravity", gravity);
+		wind = node->PullFloatVector("Wind", wind);
+		break;
+	}
+	default: break; }
+
+	DEL(node);
+}
+
+void RE_EmissionExternalForces::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(type));
+	switch (type) {
+	case RE_EmissionExternalForces::GRAVITY:
+	{
+		node->PushFloat("Gravity", gravity);
+		break;
+	}
+	case RE_EmissionExternalForces::WIND:
+	{
+		node->PushFloatVector("Wind", wind);
+		break;
+	}
+	case RE_EmissionExternalForces::WIND_GRAVITY:
+	{
+		node->PushFloat("Gravity", gravity);
+		node->PushFloatVector("Wind", wind);
+		break;
+	}
+	default: break; }
+
+	DEL(node);
+}
+
+void RE_EmissionExternalForces::BinaryDeserialize(char*& cursor)
+{
+	unsigned int size = sizeof(int);
+	memcpy(&type, cursor, size);
+	cursor += size;
+	switch (type) {
+	case RE_EmissionExternalForces::GRAVITY:
+	{
+		size = sizeof(float);
+		memcpy(&gravity, cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionExternalForces::WIND:
+	{
+		size = sizeof(float) * 3u;
+		memcpy(wind.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionExternalForces::WIND_GRAVITY:
+	{
+		size = sizeof(float);
+		memcpy(&gravity, cursor, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(wind.ptr(), cursor, size);
+		cursor += size;
+		break;
+	}
+	default: break;
+	}
+}
+
+void RE_EmissionExternalForces::BinarySerialize(char*& cursor) const
+{
+	unsigned int size = sizeof(int);
+	memcpy(cursor, &type, size);
+	cursor += size;
+	switch (type) {
+	case RE_EmissionExternalForces::GRAVITY:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &gravity, size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionExternalForces::WIND:
+	{
+		size = sizeof(float) * 3u;
+		memcpy(cursor, wind.ptr(), size);
+		cursor += size;
+		break;
+	}
+	case RE_EmissionExternalForces::WIND_GRAVITY:
+	{
+		size = sizeof(float);
+		memcpy(cursor, &gravity, size);
+		cursor += size;
+		size *= 3u;
+		memcpy(cursor, wind.ptr(), size);
+		cursor += size;
+		break;
+	}
+	default: break; }
+}
+
+unsigned int RE_EmissionExternalForces::GetBinarySize() const
+{
+	unsigned int ret = sizeof(int);
+	switch (type) {
+	case RE_EmissionExternalForces::Type::GRAVITY: ret += sizeof(float); break;
+	case RE_EmissionExternalForces::Type::WIND: ret += sizeof(float) * 3u; break;
+	case RE_EmissionExternalForces::Type::WIND_GRAVITY: ret += sizeof(float) * 4u; break;
+	default: break; }
+	return ret;
 }
 
 bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
@@ -553,6 +1541,176 @@ void RE_EmissionBoundary::DrawEditor()
 	}
 }
 
+void RE_EmissionBoundary::JsonDeserialize(RE_Json* node)
+{
+	type = static_cast<RE_EmissionBoundary::Type>(node->PullInt("Type", static_cast<int>(type)));
+	if (type)
+	{
+		effect = static_cast<RE_EmissionBoundary::Effect>(node->PullInt("Effect", static_cast<int>(effect)));
+
+		switch (type) {
+		case RE_EmissionBoundary::PLANE:
+		{
+			geo.plane.d = node->PullFloat("Distance", geo.plane.d);
+			geo.plane.normal = node->PullFloatVector("Normal", geo.plane.normal);
+			break;
+		}
+		case RE_EmissionBoundary::SPHERE:
+		{
+			geo.sphere.r = node->PullFloat("Radius", geo.sphere.r);
+			geo.sphere.pos = node->PullFloatVector("Position", geo.sphere.pos);
+			break;
+		}
+		case RE_EmissionBoundary::AABB:
+		{
+			geo.box.minPoint = node->PullFloatVector("Min point", geo.box.minPoint);
+			geo.box.maxPoint = node->PullFloatVector("Max point", geo.box.maxPoint);
+			break;
+		}
+		default: break; }
+	}
+
+	DEL(node);
+}
+
+void RE_EmissionBoundary::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(type));
+	if (type)
+	{
+		node->PushInt("Effect", static_cast<int>(effect));
+
+		switch (type) {
+		case RE_EmissionBoundary::PLANE:
+		{
+			node->PushFloat("Distance", geo.plane.d);
+			node->PushFloatVector("Normal", geo.plane.normal);
+			break;
+		}
+		case RE_EmissionBoundary::SPHERE:
+		{
+			node->PushFloat("Radius", geo.sphere.r);
+			node->PushFloatVector("Position", geo.sphere.pos);
+			break;
+		}
+		case RE_EmissionBoundary::AABB:
+		{
+			node->PushFloatVector("Min point", geo.box.minPoint);
+			node->PushFloatVector("Max point", geo.box.maxPoint);
+			break;
+		}
+		default: break; }
+	}
+
+	DEL(node);
+}
+
+void RE_EmissionBoundary::BinaryDeserialize(char*& cursor)
+{
+	unsigned int size = sizeof(int);
+	memcpy(&type, cursor, size);
+	cursor += size;
+	if (type)
+	{
+		memcpy(&effect, cursor, size);
+		cursor += size;
+
+		switch (type) {
+		case RE_EmissionBoundary::PLANE:
+		{
+			size = sizeof(float);
+			memcpy(&geo.plane.d, cursor, size);
+			cursor += size;
+			size *= 3u;
+			memcpy(geo.plane.normal.ptr(), cursor, size);
+			cursor += size;
+			break;
+		}
+		case RE_EmissionBoundary::SPHERE:
+		{
+			size = sizeof(float);
+			memcpy(&geo.sphere.r, cursor, size);
+			cursor += size;
+			size *= 3u;
+			memcpy(geo.sphere.pos.ptr(), cursor, size);
+			cursor += size;
+			break;
+		}
+		case RE_EmissionBoundary::AABB:
+		{
+			size = sizeof(float) * 3u;
+			memcpy(geo.box.minPoint.ptr(), cursor, size);
+			cursor += size;
+			memcpy(geo.box.maxPoint.ptr(), cursor, size);
+			cursor += size;
+			break;
+		}
+		default: break;
+		}
+	}
+}
+
+void RE_EmissionBoundary::BinarySerialize(char*& cursor) const
+{
+	unsigned int size = sizeof(int);
+	memcpy(cursor, &type, size);
+	cursor += size;
+	if (type)
+	{
+		memcpy(cursor, &effect, size);
+		cursor += size;
+
+		switch (type) {
+		case RE_EmissionBoundary::PLANE:
+		{
+			size = sizeof(float);
+			memcpy(cursor, &geo.plane.d, size);
+			cursor += size;
+			size *= 3u;
+			memcpy(cursor, geo.plane.normal.ptr(), size);
+			cursor += size;
+			break;
+		}
+		case RE_EmissionBoundary::SPHERE:
+		{
+			size = sizeof(float);
+			memcpy(cursor, &geo.sphere.r, size);
+			cursor += size;
+			size *= 3u;
+			memcpy(cursor, geo.sphere.pos.ptr(), size);
+			cursor += size;
+			break;
+		}
+		case RE_EmissionBoundary::AABB:
+		{
+			size = sizeof(float) * 3u;
+			memcpy(cursor, geo.box.minPoint.ptr(), size);
+			cursor += size;
+			memcpy(cursor, geo.box.maxPoint.ptr(), size);
+			cursor += size;
+			break;
+		}
+		default: break;
+		}
+	}
+}
+
+unsigned int RE_EmissionBoundary::GetBinarySize() const
+{
+	unsigned int ret = sizeof(int);
+	if (type)
+	{
+		ret *= 2u;
+		switch (type) {
+		case RE_EmissionBoundary::Type::PLANE: ret += sizeof(float) * 4u; break;
+		case RE_EmissionBoundary::Type::SPHERE: ret += sizeof(float) * 4u; break;
+		case RE_EmissionBoundary::Type::AABB: ret += sizeof(float) * 6u; break;
+		default: break; }
+	}
+
+	return ret;
+}
+
 void RE_EmissionCollider::DrawEditor()
 {
 	int tmp = static_cast<int>(shape);
@@ -569,4 +1727,144 @@ void RE_EmissionCollider::DrawEditor()
 		if (shape == RE_EmissionCollider::SPHERE)
 			radius.DrawEditor("Collider Radius");
 	}
+}
+
+void RE_EmissionCollider::JsonDeserialize(RE_Json* node)
+{
+	shape = static_cast<RE_EmissionCollider::Type>(node->PullInt("Type", static_cast<int>(shape)));
+	if (shape)
+	{
+		inter_collisions = node->PullBool("Inter collisions", inter_collisions);
+		switch (shape) {
+		case RE_EmissionCollider::Type::POINT:
+		{
+			mass.JsonDeserialize(node->PullJObject("Mass"));
+			restitution.JsonDeserialize(node->PullJObject("Restitution"));
+			break;
+		}
+		case RE_EmissionCollider::Type::SPHERE:
+		{
+			mass.JsonDeserialize(node->PullJObject("Mass"));
+			radius.JsonDeserialize(node->PullJObject("Radius"));
+			restitution.JsonDeserialize(node->PullJObject("Restitution"));
+			break;
+		}
+		default: break; }
+	}
+
+	DEL(node);
+}
+
+void RE_EmissionCollider::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(shape));
+	if (shape)
+	{
+		node->PushBool("Inter collisions", inter_collisions);
+		switch (shape) {
+		case RE_EmissionCollider::Type::POINT:
+		{
+			mass.JsonSerialize(node->PushJObject("Mass"));
+			restitution.JsonSerialize(node->PushJObject("Restitution"));
+			break;
+		}
+		case RE_EmissionCollider::Type::SPHERE:
+		{
+			mass.JsonSerialize(node->PushJObject("Mass"));
+			radius.JsonSerialize(node->PushJObject("Radius"));
+			restitution.JsonSerialize(node->PushJObject("Restitution"));
+			break;
+		}
+		default: break; }
+	}
+
+	DEL(node);
+}
+
+void RE_EmissionCollider::BinaryDeserialize(char*& cursor)
+{
+	unsigned size = sizeof(int);
+	memcpy(&shape, cursor, size);
+	cursor += size;
+
+	if (shape)
+	{
+		size = sizeof(bool);
+		memcpy(&inter_collisions, cursor, size);
+		cursor += size;
+
+		switch (shape) {
+		case RE_EmissionCollider::Type::POINT:
+		{
+			mass.BinaryDeserialize(cursor);
+			restitution.BinaryDeserialize(cursor);
+			break;
+		}
+		case RE_EmissionCollider::Type::SPHERE:
+		{
+			mass.BinaryDeserialize(cursor);
+			radius.BinaryDeserialize(cursor);
+			restitution.BinaryDeserialize(cursor);
+			break;
+		}
+		default: break;
+		}
+	}
+}
+
+void RE_EmissionCollider::BinarySerialize(char*& cursor) const
+{
+	unsigned size = sizeof(int);
+	memcpy(cursor, &shape, size);
+	cursor += size;
+
+	if (shape)
+	{
+		size = sizeof(bool);
+		memcpy(cursor, &inter_collisions, size);
+		cursor += size;
+
+		switch (shape) {
+		case RE_EmissionCollider::Type::POINT:
+		{
+			mass.BinarySerialize(cursor);
+			restitution.BinarySerialize(cursor);
+			break;
+		}
+		case RE_EmissionCollider::Type::SPHERE:
+		{
+			mass.BinarySerialize(cursor);
+			radius.BinarySerialize(cursor);
+			restitution.BinarySerialize(cursor);
+			break;
+		}
+		default: break; }
+	}
+}
+
+unsigned int RE_EmissionCollider::GetBinarySize() const
+{
+	unsigned int ret = sizeof(int);
+	if (shape)
+	{
+		ret += sizeof(bool);
+		switch (shape) {
+		case RE_EmissionCollider::Type::POINT:
+		{
+			ret += mass.GetBinarySize();
+			ret += restitution.GetBinarySize();
+			break;
+		}
+		case RE_EmissionCollider::Type::SPHERE:
+		{
+			ret += mass.GetBinarySize();
+			ret += radius.GetBinarySize();
+			ret += restitution.GetBinarySize();
+			break;
+		}
+		default: break;
+		}
+	}
+
+	return ret;
 }
