@@ -6,13 +6,14 @@
 struct RE_Particle
 {
 	// Base attributes
-	float lifetime = 0.0f;
-	float max_lifetime = 0.0f;
-
 	math::vec position = math::vec::zero;
 	math::vec velocity = math::vec::zero;
 
-	// Physic properties
+	// Lifetime
+	float lifetime = 0.0f;
+	float max_lifetime = 0.0f;
+
+	// Collider properties
 	float mass = 1.f;
 	float col_radius = 1.f;
 	float col_restitution = 0.9f;

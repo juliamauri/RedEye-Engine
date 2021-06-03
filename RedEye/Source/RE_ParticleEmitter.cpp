@@ -3,6 +3,214 @@
 #include "Application.h"
 #include "RE_Math.h"
 
+void RE_ParticleEmission::LoadInMemory()
+{
+	if (RE_FS->Exists(GetLibraryPath()))
+	{
+		LibraryLoad();
+	}
+	else if (RE_FS->Exists(GetAssetPath()))
+	{
+		AssetLoad();
+		LibrarySave();
+	}
+	else RE_LOG_ERROR("SkyBox %s not found in project", GetName());
+}
+
+void RE_ParticleEmission::UnloadMemory()
+{
+	cDiffuse = cSpecular = cAmbient = cEmissive = cTransparent = math::float3::zero;
+	backFaceCulling = true;
+	blendMode = false;
+	opacity = shininess = shininessStrenght = refraccti = 1.0f;
+	ResourceContainer::inMemory = false;
+}
+
+void RE_ParticleEmission::Import(bool keepInMemory)
+{
+	AssetLoad(true);
+	LibrarySave();
+	if (!keepInMemory) UnloadMemory();
+}
+
+void RE_ParticleEmission::SomeResourceChanged(const char* resMD5)
+{
+	if (shaderMD5 == resMD5)
+	{
+		if (!isInMemory())
+		{
+			LoadInMemory();
+			ResourceContainer::inMemory = false;
+		}
+		eastl::vector<RE_Shader_Cvar> beforeCustomUniforms = fromShaderCustomUniforms;
+		GetAndProcessUniformsFromShader();
+
+		for (uint b = 0; b < beforeCustomUniforms.size(); b++)
+		{
+			for (uint i = 0; i < fromShaderCustomUniforms.size(); i++)
+			{
+				if (beforeCustomUniforms[b].name == fromShaderCustomUniforms[i].name && beforeCustomUniforms[b].GetType() == fromShaderCustomUniforms[i].GetType())
+				{
+					fromShaderCustomUniforms[i].SetValue(beforeCustomUniforms[b]);
+					break;
+				}
+			}
+		}
+
+		Save();
+	}
+}
+
+void RE_ParticleEmission::Save()
+{
+	if (!shaderMD5)
+	{
+		//Default Shader
+		usingOnMat[CDIFFUSE] = 1;
+		usingOnMat[TDIFFUSE] = 1;
+		usingOnMat[OPACITY] = 1;
+		usingOnMat[SHININESS] = 1;
+	}
+	JsonSerialize();
+	BinarySerialize();
+	SaveMeta();
+	applySave = false;
+}
+
+
+
+
+
+
+void RE_ParticleEmission::Draw()
+{
+	if (!isInternal() && applySave && ImGui::Button("Save Changes"))
+	{
+		Save();
+		RE_RENDER->PushThumnailRend(GetMD5(), true);
+		applySave = false;
+	}
+
+	if (RE_RES->TotalReferenceCount(GetMD5()) == 0)
+	{
+		ImGui::Text("Material is unloaded, load for watch and modify values.");
+		if (ImGui::Button("Load"))
+		{
+			LoadInMemory();
+			applySave = false;
+			ResourceContainer::inMemory = false;
+		}
+		ImGui::Separator();
+	}
+
+	ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
+}
+
+void RE_ParticleEmission::SaveResourceMeta(RE_Json* metaNode)
+{
+	metaNode->PushString("shaderMeta", (shaderMD5) ? RE_RES->At(shaderMD5)->GetMetaPath() : "NOMETAPATH");
+
+	RE_Json* diffuseNode = metaNode->PushJObject("DiffuseTextures");
+	PushTexturesJson(diffuseNode, &tDiffuse);
+	DEL(diffuseNode);
+	RE_Json* specularNode = metaNode->PushJObject("SpecularTextures");
+	PushTexturesJson(specularNode, &tSpecular);
+	DEL(specularNode);
+}
+
+void RE_ParticleEmission::LoadResourceMeta(RE_Json* metaNode)
+{
+	eastl::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
+	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = RE_RES->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
+
+	RE_Json* diffuseNode = metaNode->PullJObject("DiffuseTextures");
+	PullTexturesJson(diffuseNode, &tDiffuse);
+	DEL(diffuseNode);
+	RE_Json* specularNode = metaNode->PullJObject("SpecularTextures");
+	PullTexturesJson(specularNode, &tSpecular);
+	DEL(specularNode);
+}
+
+
+
+
+void RE_ParticleEmission::AssetLoad(bool generateLibraryPath)
+{
+	Config jsonLoad(GetAssetPath(), RE_FS->GetZipPath());
+
+	if (jsonLoad.Load())
+	{
+		RE_Json* prefabNode = jsonLoad.GetRootNode("prefab");
+		loaded = RE_ECS_Importer::JsonDeserialize(prefabNode);
+		DEL(prefabNode);
+
+		if (generateLibraryPath)
+		{
+			eastl::string md5 = jsonLoad.GetMd5();
+			SetMD5(md5.c_str());
+			eastl::string libraryPath("Library/Prefabs/");
+			libraryPath += md5;
+			SetLibraryPath(libraryPath.c_str());
+		}
+	}
+
+	ResourceContainer::inMemory = true;
+}
+
+void RE_ParticleEmission::LibraryLoad()
+{
+	RE_FileBuffer binaryLoad(GetLibraryPath());
+	if (binaryLoad.Load())
+	{
+		char* cursor = binaryLoad.GetBuffer();
+		loaded = RE_ECS_Importer::BinaryDeserialize(cursor);
+	}
+	ResourceContainer::inMemory = true;
+}
+
+void RE_ParticleEmission::LibrarySave()
+{
+	RE_FileBuffer assetFile(GetAssetPath());
+	RE_FileBuffer libraryFile(GetLibraryPath(), RE_FS->GetZipPath());
+	if (assetFile.Load()) RE_TextureImporter::SaveOwnFormat(assetFile.GetBuffer(), assetFile.GetSize(), texType, &libraryFile);
+}
+
+void RE_ParticleEmission::BinaryDeserialize()
+{
+}
+
+void RE_ParticleEmission::BinarySerialize()
+{
+}
+
+unsigned int RE_ParticleEmission::GetBinarySize() const
+{
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void RE_ParticleEmitter::Update(const float global_dt)
 {
 	switch (state)
@@ -236,3 +444,4 @@ void RE_ParticleEmitter::ImpulseCollision(RE_Particle& p1, RE_Particle& p2, cons
 		}
 	}
 }
+

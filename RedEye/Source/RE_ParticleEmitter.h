@@ -1,6 +1,7 @@
 #ifndef __RE_PARTICLEEMITTER_H__
 #define __RE_PARTICLEEMITTER_H__
 
+#include "Resource.h"
 #include "RE_Particle.h"
 #include "RE_EmissionData.h"
 
@@ -11,12 +12,50 @@
 
 class RE_CompPrimitive;
 
+class RE_ParticleEmission : public ResourceContainer
+{
+public:
+
+	RE_ParticleEmission() {}
+	RE_ParticleEmission(const char* metapath) : ResourceContainer(metapath) {}
+	~RE_ParticleEmission() {}
+
+	void LoadInMemory() override;
+	void UnloadMemory() override;
+	void Import(bool keepInMemory = true) override;
+	void SomeResourceChanged(const char* resMD5) override;
+
+	void Save();
+
+
+private:
+
+	void Draw() override;
+
+	void SaveResourceMeta(RE_Json* metaNode) override;
+	void LoadResourceMeta(RE_Json* metaNode) override;
+
+	void AssetLoad(bool generateLibraryPath = false);
+	void LibraryLoad();
+	void LibrarySave();
+
+
+	void BinaryDeserialize();
+	void BinarySerialize();
+	unsigned int GetBinarySize() const;
+};
+
+
+
+
+
+
+
 struct RE_ParticleEmitter
 {
 	unsigned int id = 0u;
 
 	// Particle storage
-	unsigned int max_particles = 1000u;
 	eastl::list<RE_Particle*> particle_pool;
 
 	// Playback
@@ -33,6 +72,7 @@ struct RE_ParticleEmitter
 	float max_speed_sq = 0.f;
 
 	// Spawning
+	unsigned int max_particles = 1000u;
 	RE_EmissionInterval spawn_interval = {};
 	RE_EmissionSpawn spawn_mode = {};
 
