@@ -658,6 +658,21 @@ const char* RE_ResourceManager::ImportScene(const char* assetPath)
 	return Reference(newScene);
 }
 
+const char* RE_ResourceManager::ImportParticleEmissor(const char* assetPath)
+{
+	return nullptr;
+}
+
+const char* RE_ResourceManager::ImportParticleRender(const char* assetPath)
+{
+	return nullptr;
+}
+
+const char* RE_ResourceManager::ImportParticleEmitter(const char* assetPath)
+{
+	return nullptr;
+}
+
 unsigned int RE_ResourceManager::TotalReferenceCount(const char* resMD5) const
 {
 	return resourcesCounter.at(resMD5);

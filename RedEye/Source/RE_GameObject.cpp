@@ -414,7 +414,6 @@ void RE_GameObject::ReleaseComponent(const UID id, const ushortint type)
 	case C_TRANSFORM: transform = 0; break;
 	case C_CAMERA: camera = 0; break;
 	case C_LIGHT: light = 0; break;
-	// TODO: particle emitter case C_PARTICLEEMITER: break;
 	default:
 	{
 		if (IsRenderGeo(static_cast<ushortint>(type)))

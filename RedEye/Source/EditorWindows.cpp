@@ -582,6 +582,7 @@ void PopUpWindow::PopUpPrefab(RE_GameObject* go)
 
 void PopUpWindow::PopUpDelRes(const char* res)
 {
+	//TODO PARTICLE RESOUCES
 	state = PU_DELETERESOURCE;
 	resourceToDelete = res;
 	resourcesUsing = RE_RES->WhereIsUsed(res);

@@ -19,6 +19,7 @@ enum Resource_Type : short unsigned int
 	R_MATERIAL,
 	R_MODEL,
 	R_SCENE,
+	R_PARTICLE_EMITTER,
 	R_PARTICLE_EMISSION,
 	R_PARTICLE_RENDER,
 

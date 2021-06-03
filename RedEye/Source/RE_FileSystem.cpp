@@ -252,6 +252,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					toImport.push_back(file);
 					break;
 				case F_SKYBOX:
+				case F_PARTICLEEMITTER:
 				{
 					eastl::list<RE_File*>::const_iterator iter = toImport.end();
 					if (!toImport.empty())
@@ -273,6 +274,8 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					toImport.insert(iter, file);
 					break;
 				}
+				case F_PARTICLEEMISSOR:
+				case F_PARTICLERENDER:
 				case F_TEXTURE:
 				case F_MATERIAL:
 					toImport.push_front(file);
@@ -298,7 +301,10 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				case F_MATERIAL: newRes = RE_RES->ImportMaterial(file->path.c_str()); break;
 				case F_SKYBOX:	 newRes = RE_RES->ImportSkyBox(file->path.c_str()); break;
 				case F_PREFAB:	 newRes = RE_RES->ImportPrefab(file->path.c_str()); break;
-				case F_SCENE:	 newRes = RE_RES->ImportScene(file->path.c_str()); break; }
+				case F_SCENE:	 newRes = RE_RES->ImportScene(file->path.c_str()); break; 
+				case F_PARTICLEEMISSOR:	 newRes = RE_RES->ImportParticleEmissor(file->path.c_str()); break; 
+				case F_PARTICLERENDER:	 newRes = RE_RES->ImportParticleRender(file->path.c_str()); break; 
+				case F_PARTICLEEMITTER:	 newRes = RE_RES->ImportParticleEmitter(file->path.c_str()); break; }
 
 				if (newRes != nullptr)
 				{
@@ -677,7 +683,7 @@ void RE_FileSystem::CopyDirectory(const char * origin, const char * dest)
 
 RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const char* _path, const char*& _extension)
 {
-	static const char* extensionsSuported[12] = { "meta", "re","refab", "pupil", "sk",  "fbx", "jpg", "dds", "png", "tga", "tiff", "bmp" };
+	static const char* extensionsSuported[15] = { "meta", "re","refab", "pupil", "sk",  "fbx", "jpg", "dds", "png", "tga", "tiff", "bmp", "lasselopfe", "lasse", "lopfe" };
 
 	RE_FileSystem::FileType ret = F_NOTSUPPORTED;
 	eastl::string modPath(_path);
@@ -685,7 +691,7 @@ RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const cha
 	eastl::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
 	eastl::transform(extensionStr.begin(), extensionStr.end(), extensionStr.begin(), [](unsigned char c) { return eastl::CharToLower(c); });
 
-	for (uint i = 0; i < 12; i++)
+	for (uint i = 0; i < 15; i++)
 	{
 		if (extensionStr.compare(extensionsSuported[i]) == 0)
 		{
@@ -703,6 +709,9 @@ RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const cha
 			case 9:
 			case 10:
 			case 11: ret = F_TEXTURE; break;
+			case 12: ret = F_PARTICLEEMITTER; break;
+			case 13: ret = F_PARTICLEEMISSOR; break;
+			case 14: ret = F_PARTICLERENDER; break;
 			}
 		}
 	}

@@ -40,6 +40,10 @@ public:
 	const char* ImportSkyBox(const char* assetPath);
 	const char* ImportPrefab(const char* assetPath);
 	const char* ImportScene(const char* assetPath);
+	//TODO IMPORT PARTICLE RESOURCES
+	const char* ImportParticleEmissor(const char* assetPath);
+	const char* ImportParticleRender(const char* assetPath);
+	const char* ImportParticleEmitter(const char* assetPath);
 
 	unsigned int TotalReferenceCount(const char* resMD5) const;
 	void Use(const char* resMD5);

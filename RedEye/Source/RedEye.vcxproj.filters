@@ -326,7 +326,16 @@
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClCompile>
     <ClCompile Include="RE_ParticleEmitter.cpp">
-      <Filter>Source\Application\Modules\Physics\Particles</Filter>
+      <Filter>Source\Application\Resources\Particle Emitter</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ParticleEmission.cpp">
+      <Filter>Source\Application\Resources\Particle Emitter</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ParticleRender.cpp">
+      <Filter>Source\Application\Resources\Particle Emitter</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_ParticleEmitterBase.cpp">
+      <Filter>Source\Application\Resources\Particle Emitter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1317,14 +1326,23 @@
     <ClInclude Include="RE_Particle.h">
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClInclude>
-    <ClInclude Include="RE_ParticleEmitter.h">
-      <Filter>Source\Application\Modules\Physics\Particles</Filter>
-    </ClInclude>
     <ClInclude Include="RE_Profiler.h">
       <Filter>Source\Utility\Profiling</Filter>
     </ClInclude>
     <ClInclude Include="RE_EmissionData.h">
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ParticleEmitter.h">
+      <Filter>Source\Application\Resources\Particle Emitter</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ParticleEmission.h">
+      <Filter>Source\Application\Resources\Particle Emitter</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ParticleRender.h">
+      <Filter>Source\Application\Resources\Particle Emitter</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ParticleEmitterBase.h">
+      <Filter>Source\Application\Resources\Particle Emitter</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1525,6 +1543,9 @@
     </Filter>
     <Filter Include="Source\Utility\Profiling">
       <UniqueIdentifier>{ccea0756-2382-409c-8b41-df5beea8f53d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Resources\Particle Emitter">
+      <UniqueIdentifier>{d69b7f37-6b2b-4825-a7dd-632a056cb6b6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

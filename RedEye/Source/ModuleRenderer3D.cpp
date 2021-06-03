@@ -558,7 +558,15 @@ void ModuleRenderer3D::PushThumnailRend(const char* md5, bool redo)
 		t = RenderType::T_R_SKYBOX;
 		rendQueue.push({ t, thumbnailView, md5, redo });
 		break;
+
+	//TODO FIND ICON TEXTURE FOR PARTICLE EMISSOR & PARTICLE RENDER
+	//TODO RENDER THUMBAIL PARTICLE EMITTER
+	case R_PARTICLE_EMISSION:
+	case R_PARTICLE_RENDER:
+	case R_PARTICLE_EMITTER:
+		RE_EDITOR->thumbnails->Change(md5, 0);
 	}
+
 }
 
 void ModuleRenderer3D::DrawScene(const RenderView& render_view)

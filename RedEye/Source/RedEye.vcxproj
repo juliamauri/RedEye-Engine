@@ -217,7 +217,10 @@
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
+    <ClCompile Include="RE_ParticleEmission.cpp" />
     <ClCompile Include="RE_ParticleEmitter.cpp" />
+    <ClCompile Include="RE_ParticleEmitterBase.cpp" />
+    <ClCompile Include="RE_ParticleRender.cpp" />
     <ClCompile Include="RE_Profiler.cpp">
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
@@ -583,7 +586,10 @@
     <ClInclude Include="PhysFS\include\physfs.h" />
     <ClInclude Include="PhysFS\include\physfs_internal.h" />
     <ClInclude Include="RE_Particle.h" />
+    <ClInclude Include="RE_ParticleEmission.h" />
     <ClInclude Include="RE_ParticleEmitter.h" />
+    <ClInclude Include="RE_ParticleEmitterBase.h" />
+    <ClInclude Include="RE_ParticleRender.h" />
     <ClInclude Include="RE_Profiler.h" />
     <ClInclude Include="RE_QuadTree.h" />
     <ClInclude Include="RapidJson\include\allocators.h" />
