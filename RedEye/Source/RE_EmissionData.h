@@ -42,7 +42,7 @@ struct RE_EmissionSpawn
 		SINGLE,
 		BURST,
 		FLOW
-	} type = SINGLE;
+	} type = FLOW;
 
 	bool has_started = false;
 	float time_offset = 0.f;
@@ -70,12 +70,12 @@ struct RE_EmissionShape
 		AABB,
 		SPHERE,
 		HOLLOW_SPHERE
-	} shape = POINT;
+	} type = CIRCLE;
 
 	union Geo
 	{
-		math::vec point = math::vec::zero;
-		math::Circle circle;
+		math::vec point;
+		math::Circle circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f);
 		eastl::pair<math::Circle, float> ring;
 		math::AABB box;
 		math::Sphere sphere;
@@ -158,7 +158,7 @@ struct RE_EmissionExternalForces
 		GRAVITY,
 		WIND,
 		WIND_GRAVITY
-	} type = NONE;
+	} type = GRAVITY;
 
 	float gravity = -9.81f;
 	math::vec wind = math::vec::zero;
@@ -222,7 +222,7 @@ struct RE_EmissionCollider
 		NONE = 0,
 		POINT,
 		SPHERE
-	} shape = Type::NONE;
+	} type = Type::NONE;
 
 	bool inter_collisions = false;
 

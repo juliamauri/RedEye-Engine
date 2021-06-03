@@ -286,7 +286,7 @@ unsigned int RE_EmissionSpawn::GetBinarySize() const
 
 math::vec RE_EmissionShape::GetPosition() const
 {
-	switch (shape) {
+	switch (type) {
 	case CIRCLE: return geo.circle.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2);
 	case RING: return geo.ring.first.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2) + (RE_MATH->RandomNDir() * geo.ring.second);
 	case AABB: return { 
@@ -300,10 +300,10 @@ math::vec RE_EmissionShape::GetPosition() const
 
 void RE_EmissionShape::DrawEditor()
 {
-	int next_shape = static_cast<int>(shape);
+	int next_shape = static_cast<int>(type);
 	if (ImGui::Combo("Emissor Shape", &next_shape, "Point\0Cirle\0Ring\0AABB\0Sphere\0Hollow Sphere\0"))
 	{
-		switch (shape = static_cast<Type>(next_shape)) {
+		switch (type = static_cast<Type>(next_shape)) {
 		case RE_EmissionShape::POINT: geo.point = math::vec::zero; break;
 		case RE_EmissionShape::CIRCLE: geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f); break;
 		case RE_EmissionShape::RING: geo.ring = { math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f), 0.1f }; break;
@@ -312,7 +312,7 @@ void RE_EmissionShape::DrawEditor()
 		case RE_EmissionShape::HOLLOW_SPHERE: geo.hollow_sphere = { math::Sphere(math::vec::zero, 1.f), 0.8f }; break; }
 	}
 
-	switch (shape)
+	switch (type)
 	{
 	case RE_EmissionShape::POINT:
 	{
@@ -370,8 +370,8 @@ void RE_EmissionShape::DrawEditor()
 
 void RE_EmissionShape::JsonDeserialize(RE_Json* node)
 {
-	shape = static_cast<RE_EmissionShape::Type>(node->PullInt("Type", static_cast<int>(shape)));
-	switch (shape) {
+	type = static_cast<RE_EmissionShape::Type>(node->PullInt("Type", static_cast<int>(type)));
+	switch (type) {
 	case RE_EmissionShape::Type::CIRCLE:
 	{
 		geo.circle.r = node->PullFloat("Radius", geo.circle.r);
@@ -418,8 +418,8 @@ void RE_EmissionShape::JsonDeserialize(RE_Json* node)
 
 void RE_EmissionShape::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(shape));
-	switch (shape) {
+	node->PushInt("Type", static_cast<int>(type));
+	switch (type) {
 	case RE_EmissionShape::Type::CIRCLE:
 	{
 		node->PushFloat("Radius", geo.circle.r);
@@ -467,9 +467,9 @@ void RE_EmissionShape::JsonSerialize(RE_Json* node) const
 void RE_EmissionShape::BinaryDeserialize(char*& cursor)
 {
 	unsigned int size = sizeof(int);
-	memcpy(&shape, cursor, size);
+	memcpy(&type, cursor, size);
 	cursor += size;
-	switch (shape) {
+	switch (type) {
 	case RE_EmissionShape::Type::CIRCLE:
 	{
 		size = sizeof(float);
@@ -543,9 +543,9 @@ void RE_EmissionShape::BinaryDeserialize(char*& cursor)
 void RE_EmissionShape::BinarySerialize(char*& cursor) const
 {
 	unsigned int size = sizeof(int);
-	memcpy(cursor, &shape, size);
+	memcpy(cursor, &type, size);
 	cursor += size;
-	switch (shape) {
+	switch (type) {
 	case RE_EmissionShape::Type::CIRCLE:
 	{
 		size = sizeof(float);
@@ -619,7 +619,7 @@ void RE_EmissionShape::BinarySerialize(char*& cursor) const
 unsigned int RE_EmissionShape::GetBinarySize() const
 {
 	unsigned int ret = sizeof(int);
-	switch (shape) {
+	switch (type) {
 	case RE_EmissionShape::Type::CIRCLE: ret += sizeof(float) * 7u; break;
 	case RE_EmissionShape::Type::RING: ret += sizeof(float) * 8u; break;
 	case RE_EmissionShape::Type::AABB: ret += sizeof(float) * 6u; break;
@@ -1713,29 +1713,29 @@ unsigned int RE_EmissionBoundary::GetBinarySize() const
 
 void RE_EmissionCollider::DrawEditor()
 {
-	int tmp = static_cast<int>(shape);
+	int tmp = static_cast<int>(type);
 	if (ImGui::Combo("Collider Type", &tmp, "None\0Point\0Sphere\0"))
-		shape = static_cast<Type>(tmp);
+		type = static_cast<Type>(tmp);
 
-	if (shape)
+	if (type)
 	{
 		ImGui::Checkbox("Inter collisions", &inter_collisions);
 
 		mass.DrawEditor("Mass");
 		restitution.DrawEditor("Restitution");
 
-		if (shape == RE_EmissionCollider::SPHERE)
+		if (type == RE_EmissionCollider::SPHERE)
 			radius.DrawEditor("Collider Radius");
 	}
 }
 
 void RE_EmissionCollider::JsonDeserialize(RE_Json* node)
 {
-	shape = static_cast<RE_EmissionCollider::Type>(node->PullInt("Type", static_cast<int>(shape)));
-	if (shape)
+	type = static_cast<RE_EmissionCollider::Type>(node->PullInt("Type", static_cast<int>(type)));
+	if (type)
 	{
 		inter_collisions = node->PullBool("Inter collisions", inter_collisions);
-		switch (shape) {
+		switch (type) {
 		case RE_EmissionCollider::Type::POINT:
 		{
 			mass.JsonDeserialize(node->PullJObject("Mass"));
@@ -1757,11 +1757,11 @@ void RE_EmissionCollider::JsonDeserialize(RE_Json* node)
 
 void RE_EmissionCollider::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(shape));
-	if (shape)
+	node->PushInt("Type", static_cast<int>(type));
+	if (type)
 	{
 		node->PushBool("Inter collisions", inter_collisions);
-		switch (shape) {
+		switch (type) {
 		case RE_EmissionCollider::Type::POINT:
 		{
 			mass.JsonSerialize(node->PushJObject("Mass"));
@@ -1784,16 +1784,16 @@ void RE_EmissionCollider::JsonSerialize(RE_Json* node) const
 void RE_EmissionCollider::BinaryDeserialize(char*& cursor)
 {
 	unsigned size = sizeof(int);
-	memcpy(&shape, cursor, size);
+	memcpy(&type, cursor, size);
 	cursor += size;
 
-	if (shape)
+	if (type)
 	{
 		size = sizeof(bool);
 		memcpy(&inter_collisions, cursor, size);
 		cursor += size;
 
-		switch (shape) {
+		switch (type) {
 		case RE_EmissionCollider::Type::POINT:
 		{
 			mass.BinaryDeserialize(cursor);
@@ -1815,16 +1815,16 @@ void RE_EmissionCollider::BinaryDeserialize(char*& cursor)
 void RE_EmissionCollider::BinarySerialize(char*& cursor) const
 {
 	unsigned size = sizeof(int);
-	memcpy(cursor, &shape, size);
+	memcpy(cursor, &type, size);
 	cursor += size;
 
-	if (shape)
+	if (type)
 	{
 		size = sizeof(bool);
 		memcpy(cursor, &inter_collisions, size);
 		cursor += size;
 
-		switch (shape) {
+		switch (type) {
 		case RE_EmissionCollider::Type::POINT:
 		{
 			mass.BinarySerialize(cursor);
@@ -1845,10 +1845,10 @@ void RE_EmissionCollider::BinarySerialize(char*& cursor) const
 unsigned int RE_EmissionCollider::GetBinarySize() const
 {
 	unsigned int ret = sizeof(int);
-	if (shape)
+	if (type)
 	{
 		ret += sizeof(bool);
-		switch (shape) {
+		switch (type) {
 		case RE_EmissionCollider::Type::POINT:
 		{
 			ret += mass.GetBinarySize();

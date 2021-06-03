@@ -9,30 +9,86 @@
 
 void RE_ParticleEmission::LoadInMemory()
 {
+	if (RE_FS->Exists(GetLibraryPath())) BinaryDeserialize();
+	else if (RE_FS->Exists(GetAssetPath())) { JsonDeserialize(); BinarySerialize(); }
+	else if (isInternal()) ResourceContainer::inMemory = true;
+	else RE_LOG_ERROR("Particle Emission %s not found on project", GetName());
 }
 
 void RE_ParticleEmission::UnloadMemory()
 {
+	loop = true;
+	max_time = 5.f;
+	start_delay = 0.0f;
+	time_muliplier = 1.f;
+	max_particles = 1000u;
+	spawn_interval.type = RE_EmissionInterval::Type::NONE;
+	spawn_mode.type = RE_EmissionSpawn::Type::FLOW;
+	spawn_mode.particles_spawned = 10;
+	spawn_mode.frequency = 10.f;
+	initial_lifetime.type = RE_EmissionSingleValue::Type::NONE;
+	initial_pos.type = RE_EmissionShape::Type::CIRCLE;
+	initial_pos.geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f);
+	initial_speed.type = RE_EmissionVector::Type::NONE;
+	external_acc.type = RE_EmissionExternalForces::Type::NONE;
+	external_acc.gravity = -9.81f;
+	boundary.type = RE_EmissionBoundary::Type::NONE;
+	collider.type = RE_EmissionCollider::Type::NONE;
+
+	ResourceContainer::inMemory = false;
 }
 
 void RE_ParticleEmission::Import(bool keepInMemory)
 {
+	JsonDeserialize(true);
+	BinarySerialize();
+	if (!keepInMemory) UnloadMemory();
 }
 
 void RE_ParticleEmission::Save()
 {
+	JsonSerialize();
+	BinarySerialize();
+	SaveMeta();
 }
 
 void RE_ParticleEmission::ProcessMD5()
 {
+	JsonSerialize(true);
 }
 
 void RE_ParticleEmission::SaveResourceMeta(RE_Json* metaNode)
 {
+	metaNode->PushBool("Loop", loop);
+	metaNode->PushFloat("Max time", max_time);
+	metaNode->PushFloat("Start Delay", start_delay);
+	metaNode->PushFloat("Time Multiplier", time_muliplier);
+
+	spawn_interval.JsonSerialize(metaNode->PushJObject("Interval"));
+	spawn_mode.JsonSerialize(metaNode->PushJObject("Spawn Mode"));
+	initial_lifetime.JsonSerialize(metaNode->PushJObject("Lifetime"));
+	initial_pos.JsonSerialize(metaNode->PushJObject("Position"));
+	initial_speed.JsonSerialize(metaNode->PushJObject("Speed"));
+	external_acc.JsonSerialize(metaNode->PushJObject("Acceleration"));
+	boundary.JsonSerialize(metaNode->PushJObject("Boundary"));
+	collider.JsonSerialize(metaNode->PushJObject("Collider"));
 }
 
 void RE_ParticleEmission::LoadResourceMeta(RE_Json* metaNode)
 {
+	metaNode->PushBool("Loop", loop);
+	metaNode->PushFloat("Max time", max_time);
+	metaNode->PushFloat("Start Delay", start_delay);
+	metaNode->PushFloat("Time Multiplier", time_muliplier);
+
+	spawn_interval.JsonSerialize(metaNode->PushJObject("Interval"));
+	spawn_mode.JsonSerialize(metaNode->PushJObject("Spawn Mode"));
+	initial_lifetime.JsonSerialize(metaNode->PushJObject("Lifetime"));
+	initial_pos.JsonSerialize(metaNode->PushJObject("Position"));
+	initial_speed.JsonSerialize(metaNode->PushJObject("Speed"));
+	external_acc.JsonSerialize(metaNode->PushJObject("Acceleration"));
+	boundary.JsonSerialize(metaNode->PushJObject("Boundary"));
+	collider.JsonSerialize(metaNode->PushJObject("Collider"));
 }
 
 void RE_ParticleEmission::JsonDeserialize(bool generateLibraryPath)

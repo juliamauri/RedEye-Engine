@@ -56,7 +56,7 @@ void RE_ParticleEmitter::Update(const float global_dt)
 			// Iterate collisions
 			if (is_alive)
 			{
-				switch (collider.shape) {
+				switch (collider.type) {
 				case RE_EmissionCollider::Type::POINT:
 				{
 					if (collider.inter_collisions)

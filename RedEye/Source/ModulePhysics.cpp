@@ -86,14 +86,6 @@ RE_ParticleEmitter* ModulePhysics::AddEmitter()
 {
 	RE_ParticleEmitter* ret = new RE_ParticleEmitter();
 
-	// Default setup
-	ret->initial_lifetime.val = 12.f;
-	ret->initial_pos.shape = RE_EmissionShape::Type::CIRCLE;
-	ret->initial_pos.geo.circle = math::Circle(math::vec::zero, math::vec(0.f, 1.f, 0.f), 1.f);
-	ret->collider.mass.val = 1.f;
-	ret->collider.radius.val = 0.5f;
-	ret->collider.restitution.val = 0.9f;
-
 	// Curve setup
 	ret->curve.push_back({ -1.0f, 0.0f });// init data so editor knows to take it from here
 	for (int i = 1; i < ret->total_points; i++)

@@ -64,13 +64,13 @@ void ParticleManager::DrawDebug() const
 	{
 		const math::vec go_pos = math::vec::zero;
 
-		if (sim->initial_pos.shape || sim->boundary.type)
+		if (sim->initial_pos.type || sim->boundary.type)
 		{
 			glBegin(GL_LINES);
 
 			// Render Spawn Shape
 			glColor4f(1.0f, 0.27f, 0.f, 1.f); // orange
-			switch (sim->initial_pos.shape) {
+			switch (sim->initial_pos.type) {
 			case RE_EmissionShape::Type::CIRCLE:
 			{
 				math::Circle c = sim->initial_pos.geo.circle;
@@ -170,7 +170,7 @@ void ParticleManager::DrawDebug() const
 			}
 
 			// Render Shape Collider
-			if (sim->collider.shape == RE_EmissionCollider::Type::SPHERE)
+			if (sim->collider.type == RE_EmissionCollider::Type::SPHERE)
 			{
 				glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
 				for (auto p : sim->particle_pool)
@@ -181,7 +181,7 @@ void ParticleManager::DrawDebug() const
 		}
 
 		// Render Point Collider
-		if (sim->collider.shape == RE_EmissionCollider::Type::POINT)
+		if (sim->collider.type == RE_EmissionCollider::Type::POINT)
 		{
 			glPointSize(point_size);
 			glBegin(GL_POINTS);
