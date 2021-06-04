@@ -1,5 +1,13 @@
 #include "RE_ParticleEmitterBase.h"
 
+#include "Globals.h"
+#include "Application.h"
+#include "RE_FileSystem.h"
+#include "RE_FileBuffer.h"
+#include "RE_Config.h"
+#include "RE_Json.h"
+#include "RE_ResourceManager.h"
+
 void RE_ParticleEmitterBase::LoadInMemory()
 {
 	if (RE_FS->Exists(GetLibraryPath()))
@@ -11,15 +19,14 @@ void RE_ParticleEmitterBase::LoadInMemory()
 		AssetLoad();
 		LibrarySave();
 	}
-	else RE_LOG_ERROR("SkyBox %s not found in project", GetName());
+	else RE_LOG_ERROR("Emitter Base %s not found in project", GetName());
 }
 
 void RE_ParticleEmitterBase::UnloadMemory()
 {
-	cDiffuse = cSpecular = cAmbient = cEmissive = cTransparent = math::float3::zero;
-	backFaceCulling = true;
-	blendMode = false;
-	opacity = shininess = shininessStrenght = refraccti = 1.0f;
+	resource_emission = nullptr;
+	resource_renderer = nullptr;
+
 	ResourceContainer::inMemory = false;
 }
 
@@ -32,26 +39,22 @@ void RE_ParticleEmitterBase::Import(bool keepInMemory)
 
 void RE_ParticleEmitterBase::SomeResourceChanged(const char* resMD5)
 {
-	if (shaderMD5 == resMD5)
+	if (resource_emission == resMD5)
 	{
 		if (!isInMemory())
 		{
 			LoadInMemory();
 			ResourceContainer::inMemory = false;
 		}
-		eastl::vector<RE_Shader_Cvar> beforeCustomUniforms = fromShaderCustomUniforms;
-		GetAndProcessUniformsFromShader();
 
-		for (uint b = 0; b < beforeCustomUniforms.size(); b++)
+		Save();
+	}
+	else if (resource_renderer == resMD5)
+	{
+		if (!isInMemory())
 		{
-			for (uint i = 0; i < fromShaderCustomUniforms.size(); i++)
-			{
-				if (beforeCustomUniforms[b].name == fromShaderCustomUniforms[i].name && beforeCustomUniforms[b].GetType() == fromShaderCustomUniforms[i].GetType())
-				{
-					fromShaderCustomUniforms[i].SetValue(beforeCustomUniforms[b]);
-					break;
-				}
-			}
+			LoadInMemory();
+			ResourceContainer::inMemory = false;
 		}
 
 		Save();
@@ -68,6 +71,7 @@ void RE_ParticleEmitterBase::Save()
 void RE_ParticleEmitterBase::ProcessMD5()
 {
 	//md5 from emissor md5 + render md5
+	SetMD5((eastl::string(resource_emission) + resource_renderer).c_str());
 }
 
 
@@ -90,31 +94,58 @@ void RE_ParticleEmitterBase::Draw()
 
 void RE_ParticleEmitterBase::SaveResourceMeta(RE_Json* metaNode)
 {
-	metaNode->PushString("shaderMeta", (shaderMD5) ? RE_RES->At(shaderMD5)->GetMetaPath() : "NOMETAPATH");
-
-	RE_Json* diffuseNode = metaNode->PushJObject("DiffuseTextures");
-	PushTexturesJson(diffuseNode, &tDiffuse);
-	DEL(diffuseNode);
-	RE_Json* specularNode = metaNode->PushJObject("SpecularTextures");
-	PushTexturesJson(specularNode, &tSpecular);
-	DEL(specularNode);
+	metaNode->PushString("Emission Meta", (resource_emission) ? RE_RES->At(resource_emission)->GetMetaPath() : "NOMETAPATH");
+	metaNode->PushString("Rendering Meta", (resource_renderer) ? RE_RES->At(resource_renderer)->GetMetaPath() : "NOMETAPATH");
 }
 
 void RE_ParticleEmitterBase::LoadResourceMeta(RE_Json* metaNode)
 {
-	eastl::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
-	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = RE_RES->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
+	eastl::string tmp = metaNode->PullString("Emission Meta", "NOMETAPATH");
+	if (tmp.compare("NOMETAPATH") != 0) resource_emission = RE_RES->FindMD5ByMETAPath(tmp.c_str(), Resource_Type::R_PARTICLE_EMISSION);
 
-	RE_Json* diffuseNode = metaNode->PullJObject("DiffuseTextures");
-	PullTexturesJson(diffuseNode, &tDiffuse);
-	DEL(diffuseNode);
-	RE_Json* specularNode = metaNode->PullJObject("SpecularTextures");
-	PullTexturesJson(specularNode, &tSpecular);
-	DEL(specularNode);
+	tmp = metaNode->PullString("Rendering Meta", "NOMETAPATH");
+	if (tmp.compare("NOMETAPATH") != 0) resource_renderer = RE_RES->FindMD5ByMETAPath(tmp.c_str(), Resource_Type::R_PARTICLE_RENDER);
 }
 
 void RE_ParticleEmitterBase::JsonDeserialize(bool generateLibraryPath)
 {
+	Config particles(GetAssetPath(), RE_FS->GetZipPath());
+	if (particles.Load())
+	{
+		RE_Json* node = particles.GetRootNode("Particles");
+
+
+		if (generateLibraryPath)
+		{
+			SetMD5(particles.GetMd5().c_str());
+			eastl::string libraryPath("Library/Particles/");
+			libraryPath += GetMD5();
+			SetLibraryPath(libraryPath.c_str());
+		}
+
+		ResourceContainer::inMemory = true;
+	}
+}
+
+void RE_ParticleEmitterBase::JsonSerialize(bool onlyMD5)
+{
+	Config emission(GetAssetPath(), RE_FS->GetZipPath());
+	RE_Json* node = emission.GetRootNode("Particles");
+
+
+
+	//We need to call ProcessMD5() before SaveMeta
+
+
+
+	if (!onlyMD5) emission.Save();
+	SetMD5(emission.GetMd5().c_str());
+
+	eastl::string libraryPath("Library/Particles/");
+	libraryPath += GetMD5();
+	SetLibraryPath(libraryPath.c_str());
+
+	DEL(node);
 }
 
 
@@ -126,15 +157,15 @@ void RE_ParticleEmitterBase::AssetLoad(bool generateLibraryPath)
 
 	if (jsonLoad.Load())
 	{
-		RE_Json* prefabNode = jsonLoad.GetRootNode("prefab");
-		loaded = RE_ECS_Importer::JsonDeserialize(prefabNode);
-		DEL(prefabNode);
+		RE_Json* node = jsonLoad.GetRootNode("Particles");
+		JsonDeserialize(prefabNode);
+		DEL(node);
 
 		if (generateLibraryPath)
 		{
 			eastl::string md5 = jsonLoad.GetMd5();
 			SetMD5(md5.c_str());
-			eastl::string libraryPath("Library/Prefabs/");
+			eastl::string libraryPath("Library/Particles/");
 			libraryPath += md5;
 			SetLibraryPath(libraryPath.c_str());
 		}

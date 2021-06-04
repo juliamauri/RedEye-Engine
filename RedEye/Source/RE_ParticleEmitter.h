@@ -4,10 +4,7 @@
 #include "RE_Particle.h"
 #include "RE_EmissionData.h"
 
-#include "MathGeoLib/include/Math/float3.h"
-#include "ImGui/imgui.h"
 #include "EA/EASTL/list.h"
-#include <EASTL/vector.h>
 
 class RE_CompPrimitive;
 
@@ -29,14 +26,14 @@ public:
 	unsigned int id = 0u;
 	enum PlaybackState { STOPING, RESTART, PLAY, STOP, PAUSE } state = STOP;
 
+	// Particle storage
+	eastl::list<RE_Particle*> particle_pool;
+
 	// Control (read-only)
 	unsigned int particle_count = 0u;
 	float total_time = 0.f;
 	float max_dist_sq = 0.f;
 	float max_speed_sq = 0.f;
-
-	// Particle storage
-	eastl::list<RE_Particle*> particle_pool;
 
 	// Emission properties ---------------------------------------------------------
 	
@@ -56,24 +53,17 @@ public:
 	RE_EmissionShape initial_pos = {};
 	RE_EmissionVector initial_speed = {};
 
-	// External Forces
+	// Physics
 	RE_EmissionExternalForces external_acc = {};
-
-	// Boundary
 	RE_EmissionBoundary boundary = {};
-
-	// Collider
 	RE_EmissionCollider collider = {};
 
 	// Render properties ---------------------------------------------------------
 
 	bool active_rendering = true;
 
-	enum ColorState { SINGLE = 0, OVERLIFETIME, OVERDISTANCE, OVERSPEED };
-	ColorState cState = SINGLE;
-	math::vec particleColor = math::vec::one;
-	math::vec gradient[2] = { math::vec::zero, math::vec::one };
-	bool useOpacity = false, opacityWithCurve = false;  float opacity = 1.0f;
+	RE_PR_Color color = {};
+	RE_PR_Opacity opacity = {};
 
 	bool emitlight = false;
 
@@ -106,12 +96,6 @@ public:
 		PS_Custom
 	} particleDir = PS_Billboard;
 	math::float3 direction = { -1.0f,1.0f,0.5f };
-
-	//Curves
-	bool useCurve = false;
-	bool smoothCurve = false;
-	eastl::vector< ImVec2> curve;
-	int total_points = 10;
 };
 
 #endif //!__RE_PARTICLEEMITTER_H__

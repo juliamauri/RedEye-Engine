@@ -4,7 +4,9 @@
 #include "RE_Math.h"
 #include "RE_Particle.h"
 #include "RE_Json.h"
+
 #include "ImGui\imgui.h"
+#include "ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp"
 
 bool RE_EmissionInterval::IsActive(float &dt)
 {
@@ -1867,4 +1869,86 @@ unsigned int RE_EmissionCollider::GetBinarySize() const
 	}
 
 	return ret;
+}
+
+math::vec RE_PR_Color::GetValue(const float weight) const
+{
+	if (type == Type::SINGLE) return base;
+	else return (base * weight) + (gradient * (1.f - weight));
+}
+
+void RE_PR_Color::DrawEditor()
+{
+	int tmp = static_cast<int>(type);
+	if (ImGui::Combo("Color Type", &tmp, "Single\0Over Lifetime\0Over Distance\0Over Speed\0"))
+		type = static_cast<Type>(tmp);
+
+	if (type != RE_PR_Color::SINGLE)
+	{
+		ImGui::ColorEdit3("Particle Gradient 1", base.ptr());
+		ImGui::ColorEdit3("Particle Gradient 2", gradient.ptr());
+	}
+	else ImGui::ColorEdit3("Particle Color", base.ptr());
+}
+
+CurveData::CurveData()
+{
+	points.push_back({ -1.0f, 0.0f });
+	for (int i = 1; i < total_points; i++)
+		points.push_back({ 0.0f, 0.0f });
+}
+
+CurveData::~CurveData() { points.clear(); }
+
+float CurveData::GetValue(const float weight) const
+{
+	return smooth ?
+		ImGui::CurveValueSmooth(weight, total_points, points.data()) :
+		ImGui::CurveValue(weight, total_points, points.data());
+}
+
+void CurveData::DrawEditor(const char* name)
+{
+	eastl::string tmp(name);
+	if (ImGui::DragInt((tmp + "Num Points").c_str(), &total_points, 1.0f, 3, 200))
+	{
+		points.clear();
+		points.push_back({ -1.0f, 0.0f });
+		total_points = RE_Math::CapI(total_points, 3, 200);
+		for (int i = 1; i < total_points; i++) points.push_back({ 0.0f, 0.0f });
+	}
+
+	ImGui::SameLine();
+	ImGui::Checkbox((tmp + "smooth curve").c_str(), &smooth);
+	ImGui::SameLine();
+	ImGui::PushItemWidth(150.f);
+	static float cSize[2] = { 600.f, 200.f };
+	ImGui::DragFloat2((tmp + "curve size").c_str(), cSize, 1.0f, 0.0f, 0.0f, "%.0f");
+	ImGui::PopItemWidth();
+	ImGui::Curve((tmp + "curve").c_str(), { cSize[0], cSize[1] }, total_points, points.data());
+}
+
+float RE_PR_Opacity::GetValue(const float weight) const
+{
+	switch (type) {
+	case RE_PR_Opacity::VALUE: return data.opacity;
+	case RE_PR_Opacity::CURVE: return data.curve.GetValue(weight);
+	default: return 1.f; }
+}
+
+void RE_PR_Opacity::DrawEditor()
+{
+	int tmp = static_cast<int>(type);
+	if (ImGui::Combo("Opacity Type", &tmp, "None\0Value\0Use Curve\0"))
+	{
+		switch (type = static_cast<Type>(tmp)) {
+		case RE_PR_Opacity::VALUE: data.opacity = 1.0f; break;
+		case RE_PR_Opacity::CURVE: data.curve = CurveData(); break;
+		default: break; }
+	}
+
+	switch (type) {
+	case RE_PR_Opacity::VALUE: ImGui::SliderFloat("Opacity", &data.opacity, 0.0f, 1.0f); break;
+	case RE_PR_Opacity::CURVE: data.curve.DrawEditor("Opacity"); break;
+	default: break; }
 }

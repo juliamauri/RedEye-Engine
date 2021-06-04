@@ -86,11 +86,6 @@ RE_ParticleEmitter* ModulePhysics::AddEmitter()
 {
 	RE_ParticleEmitter* ret = new RE_ParticleEmitter();
 
-	// Curve setup
-	ret->curve.push_back({ -1.0f, 0.0f });// init data so editor knows to take it from here
-	for (int i = 1; i < ret->total_points; i++)
-		ret->curve.push_back({ 0.0f, 0.0f });
-
 	// Prim setup
 	ret->primCmp = new RE_CompPoint();
 	RE_SCENE->primitives->SetUpComponentPrimitive(ret->primCmp);

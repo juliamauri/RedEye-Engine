@@ -22,7 +22,6 @@
 #include "RE_CompPrimitive.h"
 
 #include "ImGui\imgui.h"
-#include "ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp"
 
 
 RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER) {
@@ -58,7 +57,9 @@ void RE_CompParticleEmitter::Draw() const
 	{
 		RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 		RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
-		RE_ShaderImporter::setFloat(shader, "opacity", simulation->useOpacity ? simulation->opacity : 1.0f);
+
+		// JULIUS CHECK TODO: NO SE LA OPACIDAD QUE SE DEBE PASAR
+		RE_ShaderImporter::setFloat(shader, "opacity", simulation->opacity.type == RE_PR_Opacity::Type::VALUE ? simulation->opacity.data.opacity : 1.0f);
 	}
 	else dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UploadAsParticleDataToShader(shader, simulation->useTextures, simulation->emitlight);
 
@@ -129,68 +130,15 @@ void RE_CompParticleEmitter::Draw() const
 		}
 
 		// Color + Opacity
-		switch (simulation->cState)
-		{
-		case RE_ParticleEmitter::ColorState::SINGLE:
-		{
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", simulation->particleColor);
-			break; 
-		}
-		case RE_ParticleEmitter::ColorState::OVERLIFETIME:
-		{
-			float weight = p->lifetime / simulation->initial_lifetime.GetMax();
+		float weight = 1.f;
+		switch (simulation->color.type) {
+		case RE_PR_Color::Type::OVERLIFETIME: weight = p->lifetime / simulation->initial_lifetime.GetMax(); break;
+		case RE_PR_Color::Type::OVERDISTANCE: weight = math::SqrtFast(p->position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq);break;
+		case RE_PR_Color::Type::OVERSPEED: weight = math::SqrtFast(p->velocity.LengthSq()) / math::SqrtFast(simulation->max_speed_sq); break;
+		default: break; }
 
-			if (simulation->useCurve)
-			{
-				weight = simulation->smoothCurve ?
-					ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
-					ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
-
-				if (simulation->useOpacity && simulation->opacityWithCurve)
-					RE_ShaderImporter::setFloat(shader, "opacity", weight);
-			}
-
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1.f - weight)));
-
-			break; 
-		}
-		case RE_ParticleEmitter::ColorState::OVERDISTANCE:
-		{
-			float weight = math::SqrtFast(p->position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq);
-
-			if (simulation->useCurve)
-			{
-				weight = simulation->smoothCurve ? 
-					ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
-					ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
-
-				if (simulation->useOpacity && simulation->opacityWithCurve)
-					RE_ShaderImporter::setFloat(shader, "opacity", weight);
-			}
-
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1.f - weight)));
-
-			break; 
-		}
-		case RE_ParticleEmitter::ColorState::OVERSPEED:
-		{
-			float weight = math::SqrtFast(p->velocity.LengthSq()) / math::SqrtFast(simulation->max_speed_sq);
-
-			if (simulation->useCurve)
-			{
-				weight = simulation->smoothCurve ? 
-					ImGui::CurveValueSmooth(weight, simulation->total_points, simulation->curve.data()) :
-					ImGui::CurveValue(weight, simulation->total_points, simulation->curve.data());
-
-				if (simulation->useOpacity && simulation->opacityWithCurve)
-					RE_ShaderImporter::setFloat(shader, "opacity", weight);
-			}
-
-			RE_ShaderImporter::setFloat(shader, "cdiffuse", (simulation->gradient[0] * weight) + (simulation->gradient[1] * (1.f - weight)));
-
-			break; 
-		}
-		}
+		RE_ShaderImporter::setFloat(shader, "cdiffuse", simulation->color.GetValue(weight));
+		if (isBlend()) RE_ShaderImporter::setFloat(shader, "opacity", simulation->opacity.GetValue(weight));
 
 		// Draw Call
 		if (simulation->meshMD5) dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
@@ -206,6 +154,13 @@ void RE_CompParticleEmitter::DrawProperties()
 		{
 			if (ImGui::Button("Edit simulation on workspace"))
 				RE_EDITOR->StartEditingParticleEmiter(simulation, id);
+
+			// Control (read-only)
+			ImGui::Separator();
+			ImGui::Text("Current particles: %i", simulation->particle_count);
+			ImGui::Text("Total time: %.1f s", simulation->total_time);
+			ImGui::Text("Max Distance: %.1f units", math::SqrtFast(simulation->max_dist_sq));
+			ImGui::Text("Max Speed: %.1f units/s", math::SqrtFast(simulation->max_speed_sq));
 
 			// Playback
 			ImGui::Separator();
@@ -229,19 +184,11 @@ void RE_CompParticleEmitter::DrawProperties()
 				break;
 			}
 			}
-
 			ImGui::Separator();
 			ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f);
-			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, simulation->max_time);
+			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, simulation->loop ? 10000.f : simulation->max_time);
 			ImGui::Checkbox("Loop", &simulation->loop);
 			if (!simulation->loop) ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f);
-
-			// Control (read-only)
-			ImGui::Separator();
-			ImGui::Text("Current particles: %i", simulation->particle_count);
-			ImGui::Text("Total time: %.1f s", simulation->total_time);
-			ImGui::Text("Max Distance: %.1f units", math::SqrtFast(simulation->max_dist_sq));
-			ImGui::Text("Max Speed: %.1f units/s", math::SqrtFast(simulation->max_speed_sq));
 
 			// Spawning
 			ImGui::Separator();
@@ -259,11 +206,12 @@ void RE_CompParticleEmitter::DrawProperties()
 			simulation->initial_pos.DrawEditor();
 			simulation->initial_speed.DrawEditor("Starting Speed");
 
-			ImGui::Separator(); // External Forces
+			// Physics
+			ImGui::Separator();
 			simulation->external_acc.DrawEditor();
-			ImGui::Separator(); // Boundary
+			ImGui::Separator();
 			simulation->boundary.DrawEditor();
-			ImGui::Separator(); // Collider
+			ImGui::Separator();
 			simulation->collider.DrawEditor();
 
 			// Rendering
@@ -283,28 +231,8 @@ void RE_CompParticleEmitter::DrawProperties()
 				if (simulation->particleDir == RE_ParticleEmitter::PS_Custom)
 					ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
 
-				int cState = simulation->cState;
-				if (ImGui::Combo("Color Type", &cState, "Single\0Over Lifetime\0Over Distance\0Over Speed\0"))
-					simulation->cState = static_cast<RE_ParticleEmitter::ColorState>(cState);
-
-				switch (simulation->cState) {
-				case RE_ParticleEmitter::ColorState::SINGLE:
-					ImGui::ColorEdit3("Particle Color", &simulation->particleColor[0]);
-					break;
-				default:
-					ImGui::ColorEdit3("Particle Gradient 1", &simulation->gradient[0][0]);
-					ImGui::ColorEdit3("Particle Gradient 2", &simulation->gradient[1][0]);
-					break; }
-
-				ImGui::Checkbox("Use Opacity", &simulation->useOpacity);
-				if (!simulation->opacityWithCurve)
-				{
-					ImGui::SameLine();
-					ImGui::PushItemWidth(200.f);
-					ImGui::SliderFloat("Opacity", &simulation->opacity, 0.0f, 1.0f);
-					ImGui::PopItemWidth();
-				}
-				else ImGui::Text("Opacity is with curve");
+				simulation->color.DrawEditor();
+				simulation->opacity.DrawEditor();
 			}
 
 			ImGui::Separator();
@@ -605,43 +533,6 @@ void RE_CompParticleEmitter::DrawProperties()
 				}
 				ImGui::EndDragDropTarget();
 			}
-
-			ImGui::Separator();
-			ImGui::Checkbox("Use curve", &simulation->useCurve);
-			if (simulation->useCurve) {
-
-				ImGui::Checkbox("Opacity with curve", &simulation->opacityWithCurve);
-
-				ImGui::PushItemWidth(75.f);
-
-				static int minPoitns = 3;
-
-				if (ImGui::DragInt("Num Points", &simulation->total_points, 1.0f)) {
-
-					if (simulation->total_points < minPoitns) simulation->total_points = minPoitns;
-
-					simulation->curve.clear();
-					simulation->curve.push_back({ -1.0f, 0.0f });
-					for (int i = 1; i < simulation->total_points; i++)
-						simulation->curve.push_back({ 0.0f, 0.0f });
-				}
-
-				ImGui::SameLine();
-
-				ImGui::Checkbox("Smooth curve", &simulation->smoothCurve);
-
-				ImGui::SameLine();
-
-				ImGui::PushItemWidth(150.f);
-
-				static float cSize[2] = { 600.f, 200.f };
-				ImGui::DragFloat2("Curve size", cSize, 1.0f, 0.0f, 0.0f, "%.0f");
-
-				ImGui::PopItemWidth();
-
-
-				ImGui::Curve("Particle curve editor", { cSize[0], cSize[1] }, simulation->total_points, simulation->curve.data());
-			}
 		}
 		else
 		{
@@ -761,4 +652,4 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 	}
 }
 
-bool RE_CompParticleEmitter::isBlend() const { return simulation->useOpacity; }
+bool RE_CompParticleEmitter::isBlend() const { return static_cast<bool>(simulation->opacity.type); }

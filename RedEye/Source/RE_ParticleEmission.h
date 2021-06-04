@@ -50,13 +50,9 @@ private:
 	RE_EmissionShape initial_pos = {};
 	RE_EmissionVector initial_speed = {};
 
-	// External Forces
+	// Physics
 	RE_EmissionExternalForces external_acc = {};
-
-	// Boundary
 	RE_EmissionBoundary boundary = {};
-
-	// Collider
 	RE_EmissionCollider collider = {};
 };
 

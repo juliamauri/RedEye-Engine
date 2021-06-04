@@ -3,8 +3,6 @@
 
 #include "Resource.h"
 
-
-
 class RE_ParticleEmitterBase : public ResourceContainer
 {
 public:
@@ -15,6 +13,8 @@ public:
 	void LoadInMemory() override;
 	void UnloadMemory() override;
 	void Import(bool keepInMemory = true) override;
+
+	void SomeResourceChanged(const char* resMD5);
 
 	void Save();
 	void ProcessMD5();
@@ -30,6 +30,10 @@ private:
 
 	void JsonDeserialize(bool generateLibraryPath = false);
 	void JsonSerialize(bool onlyMD5 = false); //We need to call ProcessMD5() before SaveMeta
+
+	void AssetLoad(bool generateLibraryPath);
+	void LibraryLoad();
+	void LibrarySave();
 
 	void BinaryDeserialize();
 	void BinarySerialize();

@@ -706,7 +706,8 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		ImGuiWindowFlags wFlags = ImGuiWindowFlags_::ImGuiWindowFlags_None;
 		wFlags |= ImGuiWindowFlags_NoCollapse;// | ImGuiWindowFlags_NoTitleBar;
 
-		if (ImGui::Begin("Particle Controller", &active, wFlags | ImGuiWindowFlags_MenuBar))
+		// Playback Controls
+		if (ImGui::Begin("Playback Controls", &active, wFlags | ImGuiWindowFlags_MenuBar))
 		{
 			if (secondary)
 			{
@@ -718,6 +719,14 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				ImGui::Checkbox(!docking ? "Enable Docking" : "Disable Docking", &docking);
 			ImGui::EndMenuBar();
 
+			// Control (read-only)
+			ImGui::Text("Current particles: %i", simulation->particle_count);
+			ImGui::Text("Total time: %.1f s", simulation->total_time);
+			ImGui::Text("Max Distance: %.1f units", math::SqrtFast(simulation->max_dist_sq));
+			ImGui::Text("Max Speed: %.1f units/s", math::SqrtFast(simulation->max_speed_sq));
+
+			// Playback
+			ImGui::Separator();
 			switch (simulation->state)
 			{
 			case RE_ParticleEmitter::STOP:
@@ -729,17 +738,23 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 			{
 				if (ImGui::Button("Pause")) simulation->state = RE_ParticleEmitter::PAUSE;
 				ImGui::SameLine();
-				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOP;
+				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOPING;
 				break;
 			}
 			case RE_ParticleEmitter::PAUSE:
 			{
 				if (ImGui::Button("Resume")) simulation->state = RE_ParticleEmitter::PLAY;
 				ImGui::SameLine();
-				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOP;
+				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOPING;
 				break;
 			}
 			}
+			ImGui::Separator();
+			ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f);
+			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, 10000.f);
+			ImGui::Checkbox("Loop", &simulation->loop);
+
+			if (!simulation->loop) ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f);
 
 			if (secondary)
 			{
@@ -749,6 +764,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
+		// Viewport
 		if (ImGui::Begin(name, &active, wFlags))
 		{
 			if (secondary)
@@ -781,7 +797,8 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Settings", &active, wFlags))
+		// Spawning
+		if (ImGui::Begin("Spawning", &active, wFlags))
 		{
 			if (secondary)
 			{
@@ -789,7 +806,64 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			ImGui::Text("Current particles: %i", simulation->particle_count);
+			int tmp = static_cast<int>(simulation->max_particles);
+			if (ImGui::DragInt("Max particles", &tmp, 1.f, 0, 65000))
+				simulation->max_particles = static_cast<unsigned int>(tmp);
+
+			if (simulation->spawn_interval.DrawEditor() + simulation->spawn_mode.DrawEditor())
+				if (simulation->state != RE_ParticleEmitter::PlaybackState::STOP)
+					simulation->state = RE_ParticleEmitter::PlaybackState::RESTART;
+
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		// Instantiation
+		if (ImGui::Begin("Instantiation", &active, wFlags))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			simulation->initial_lifetime.DrawEditor("Lifetime");
+
+			ImGui::Separator();
+			simulation->initial_pos.DrawEditor();
+
+			ImGui::Separator();
+			simulation->initial_speed.DrawEditor("Starting Speed");
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		// Physics
+		if (ImGui::Begin("Particle Physics", &active, wFlags))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			simulation->external_acc.DrawEditor();
+
+			ImGui::Separator();
+			simulation->boundary.DrawEditor();
+
+			ImGui::Separator();
+			simulation->collider.DrawEditor();
 
 			if (secondary)
 			{
@@ -818,31 +892,8 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 			if (simulation->particleDir == RE_ParticleEmitter::PS_Custom)
 				ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
 
-
-			int cState = simulation->cState;
-			if (ImGui::Combo("Color Type", &cState, "Single\0Over Lifetime\0Over Distance\0Over Speed\0"))
-				simulation->cState = static_cast<RE_ParticleEmitter::ColorState>(cState);
-
-			switch (simulation->cState)
-			{
-			case RE_ParticleEmitter::ColorState::SINGLE:
-				ImGui::ColorEdit3("Particle Color", &simulation->particleColor[0]);
-				break;
-			default:
-				ImGui::ColorEdit3("Particle Gradient 1", &simulation->gradient[0][0]);
-				ImGui::ColorEdit3("Particle Gradient 2", &simulation->gradient[1][0]);
-				break;
-			}
-
-			ImGui::Checkbox("Use Opacity", &simulation->useOpacity);
-			if (!simulation->opacityWithCurve) {
-				ImGui::SameLine();
-				ImGui::PushItemWidth(200.f);
-				ImGui::SliderFloat("Opacity", &simulation->opacity, 0.0f, 1.0f);
-				ImGui::PopItemWidth();
-			}
-			else
-				ImGui::Text("Opacity is with curve");
+			simulation->color.DrawEditor();
+			simulation->opacity.DrawEditor();
 
 			if (!simulation->materialMD5) ImGui::Text("NMaterial not selected.");
 			else
@@ -1159,65 +1210,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 			}
 
 
-			if (secondary)
-			{
-				ImGui::PopItemFlag();
-				ImGui::PopStyleVar();
-			}
-		}
-		ImGui::End();
-
-		if (ImGui::Begin("Particle Curve", &active, wFlags))
-		{
-			if (secondary)
-			{
-				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-			}
-
-			ImGui::Checkbox("Use curve", &simulation->useCurve);
-
-			if (simulation->useCurve) {
-
-				static float cSize[2] = { 600.f, 200.f };
-
-
-				ImGui::SameLine();
-
-				ImGui::PushItemWidth(150.f);
-
-				ImGui::DragFloat2("Curve size", cSize, 1.0f, 0.0f, 0.0f, "%.0f");
-
-				ImGui::PopItemWidth();
-
-				ImGui::Curve("Particle curve editor", { cSize[0], cSize[1] }, simulation->total_points, simulation->curve.data());
-
-				ImGui::SameLine();
-
-				ImGui::PushItemWidth(50.f);
-
-				static int minPoitns = 3;
-
-				if (ImGui::DragInt("Num Points", &simulation->total_points, 1.0f)) {
-
-					if (simulation->total_points < minPoitns) simulation->total_points = minPoitns;
-
-					simulation->curve.clear();
-					simulation->curve.push_back({ -1.0f, 0.0f });
-					for (int i = 1; i < simulation->total_points; i++)
-						simulation->curve.push_back({ 0.0f, 0.0f });
-				}
-
-				ImGui::SameLine();
-
-
-				ImGui::Checkbox("Smooth curve", &simulation->smoothCurve);
-
-				ImGui::SameLine();
-
-				ImGui::Checkbox("Opacity with curve", &simulation->opacityWithCurve);
-
-			}
 			if (secondary)
 			{
 				ImGui::PopItemFlag();

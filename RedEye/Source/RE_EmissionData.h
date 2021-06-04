@@ -5,7 +5,10 @@
 #include "MathGeoLib/include/Geometry/Sphere.h"
 #include "MathGeoLib/include/Geometry/Plane.h"
 #include "MathGeoLib/include/Geometry/AABB.h"
+#include "MathGeoLib/include/Math/float3.h"
+#include "ImGui/imgui.h"
 #include <EASTL/utility.h>
+#include <EASTL/vector.h>
 
 class RE_Json;
 
@@ -13,7 +16,7 @@ struct RE_EmissionInterval
 {
 	enum Type : int
 	{
-		NONE,
+		NONE = 0,
 		INTERMITENT,
 		CUSTOM
 	} type = NONE;
@@ -39,7 +42,7 @@ struct RE_EmissionSpawn
 {
 	enum Type : int
 	{
-		SINGLE,
+		SINGLE = 0,
 		BURST,
 		FLOW
 	} type = FLOW;
@@ -128,7 +131,7 @@ struct RE_EmissionSingleValue
 {
 	enum Type : int
 	{
-		NONE,
+		NONE = 0,
 		VALUE,
 		RANGE
 	} type = VALUE;
@@ -154,7 +157,7 @@ struct RE_EmissionExternalForces
 {
 	enum Type : int
 	{
-		NONE,
+		NONE = 0,
 		GRAVITY,
 		WIND,
 		WIND_GRAVITY
@@ -181,7 +184,7 @@ struct RE_EmissionBoundary
 {
 	enum Type : int
 	{
-		NONE,
+		NONE = 0,
 		PLANE,
 		SPHERE,
 		AABB
@@ -189,7 +192,7 @@ struct RE_EmissionBoundary
 
 	enum Effect : int
 	{
-		CONTAIN,
+		CONTAIN = 0,
 		KILL
 	} effect = CONTAIN;
 
@@ -229,6 +232,71 @@ struct RE_EmissionCollider
 	RE_EmissionSingleValue mass = {};
 	RE_EmissionSingleValue radius = {};
 	RE_EmissionSingleValue restitution = {};
+
+	void DrawEditor();
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
+};
+
+struct RE_PR_Color
+{
+	enum Type : int
+	{
+		SINGLE = 0,
+		OVERLIFETIME,
+		OVERDISTANCE,
+		OVERSPEED
+	} type = SINGLE;
+
+	math::vec base = math::vec::one;
+	math::vec gradient = math::vec::one;
+
+	math::vec GetValue(const float weight = 1.f) const;
+
+	void DrawEditor();
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
+};
+
+struct CurveData
+{
+	CurveData();
+	~CurveData();
+	bool smooth = false;
+	int total_points = 10;
+	eastl::vector<ImVec2> points = {};
+
+	float GetValue(const float weight) const;
+	void DrawEditor(const char* name);
+};
+
+struct RE_PR_Opacity
+{
+	enum Type : int
+	{
+		NONE = 0,
+		VALUE,
+		CURVE
+	} type = NONE;
+
+	union Data
+	{
+		~Data() {};
+		float opacity = 1.0f;
+		CurveData curve;
+	} data = {};
+
+	float GetValue(const float weight) const;
 
 	void DrawEditor();
 

@@ -115,7 +115,7 @@ void RE_ParticleEmission::JsonDeserialize(bool generateLibraryPath)
 		if (generateLibraryPath)
 		{
 			SetMD5(emission.GetMd5().c_str());
-			eastl::string libraryPath("Library/Materials/");
+			eastl::string libraryPath("Library/Particles/");
 			libraryPath += GetMD5();
 			SetLibraryPath(libraryPath.c_str());
 		}
