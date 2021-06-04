@@ -109,6 +109,11 @@ void RE_ParticleEmitter::Update(const float global_dt)
 			}
 		}
 
+		// Update GO dependecies
+		const math::vec go_pos = GetGOPos();
+		parent_speed = (go_pos - parent_pos) / local_dt;
+		parent_pos = go_pos;
+
 		// Spawn new particles
 		if (spawn_interval.IsActive(local_dt))
 		{
@@ -182,10 +187,12 @@ RE_Particle* RE_ParticleEmitter::SpawnParticle()
 	// Set base properties
 	ret->lifetime = 0.f;
 	ret->max_lifetime = initial_lifetime.GetValue();
-	//particle->dt_offset = dt - emitter->spawn_mode.time_offset - ((1.f / emitter->spawn_mode.frequency) * (i + 1));
 
 	ret->position = initial_pos.GetPosition();
 	ret->velocity = initial_speed.GetSpeed();
+
+	if (!local_space) ret->position += parent_pos;
+	if (inherit_speed) ret->velocity += parent_speed;
 
 	// Set physic properties
 	ret->mass = collider.mass.GetValue();

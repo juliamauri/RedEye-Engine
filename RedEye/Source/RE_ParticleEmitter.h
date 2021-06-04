@@ -53,6 +53,12 @@ public:
 	RE_EmissionShape initial_pos = {};
 	RE_EmissionVector initial_speed = {};
 
+	// GO & Space
+	bool local_space = true;
+	bool inherit_speed = false;
+	math::vec parent_pos = math::vec::zero;
+	math::vec parent_speed = math::vec::zero;
+
 	// Physics
 	RE_EmissionExternalForces external_acc = {};
 	RE_EmissionBoundary boundary = {};
