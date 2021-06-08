@@ -34,6 +34,8 @@ public:
 	float total_time = 0.f;
 	float max_dist_sq = 0.f;
 	float max_speed_sq = 0.f;
+	math::vec parent_pos = math::vec::zero;
+	math::vec parent_speed = math::vec::zero;
 
 	// Emission properties ---------------------------------------------------------
 	
@@ -56,8 +58,6 @@ public:
 	// GO & Space
 	bool local_space = true;
 	bool inherit_speed = false;
-	math::vec parent_pos = math::vec::zero;
-	math::vec parent_speed = math::vec::zero;
 
 	// Physics
 	RE_EmissionExternalForces external_acc = {};

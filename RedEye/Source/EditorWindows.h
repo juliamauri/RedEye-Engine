@@ -285,7 +285,7 @@ private:
 	bool deferred = false;
 };
 
-struct RE_ParticleEmitter;
+class RE_ParticleEmitter;
 
 class ParticleEmiiterEditorWindow : public EditorWindow
 {

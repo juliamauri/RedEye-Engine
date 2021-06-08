@@ -716,45 +716,35 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 			}
 
 			if (ImGui::BeginMenuBar())
+			{
+				// Playback
+				switch (simulation->state)
+				{
+				case RE_ParticleEmitter::STOP:
+				{
+					if (ImGui::Button("Play")) simulation->state = RE_ParticleEmitter::PLAY;
+					break;
+				}
+				case RE_ParticleEmitter::PLAY:
+				{
+					if (ImGui::Button("Pause")) simulation->state = RE_ParticleEmitter::PAUSE;
+					ImGui::SameLine();
+					if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOPING;
+					break;
+				}
+				case RE_ParticleEmitter::PAUSE:
+				{
+					if (ImGui::Button("Resume")) simulation->state = RE_ParticleEmitter::PLAY;
+					ImGui::SameLine();
+					if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOPING;
+					break;
+				}
+				}
+
+				ImGui::SameLine();
 				ImGui::Checkbox(!docking ? "Enable Docking" : "Disable Docking", &docking);
+			}
 			ImGui::EndMenuBar();
-
-			// Control (read-only)
-			ImGui::Text("Current particles: %i", simulation->particle_count);
-			ImGui::Text("Total time: %.1f s", simulation->total_time);
-			ImGui::Text("Max Distance: %.1f units", math::SqrtFast(simulation->max_dist_sq));
-			ImGui::Text("Max Speed: %.1f units/s", math::SqrtFast(simulation->max_speed_sq));
-
-			// Playback
-			ImGui::Separator();
-			switch (simulation->state)
-			{
-			case RE_ParticleEmitter::STOP:
-			{
-				if (ImGui::Button("Play")) simulation->state = RE_ParticleEmitter::PLAY;
-				break;
-			}
-			case RE_ParticleEmitter::PLAY:
-			{
-				if (ImGui::Button("Pause")) simulation->state = RE_ParticleEmitter::PAUSE;
-				ImGui::SameLine();
-				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOPING;
-				break;
-			}
-			case RE_ParticleEmitter::PAUSE:
-			{
-				if (ImGui::Button("Resume")) simulation->state = RE_ParticleEmitter::PLAY;
-				ImGui::SameLine();
-				if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOPING;
-				break;
-			}
-			}
-			ImGui::Separator();
-			ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f);
-			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, 10000.f);
-			ImGui::Checkbox("Loop", &simulation->loop);
-
-			if (!simulation->loop) ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f);
 
 			if (secondary)
 			{
@@ -797,6 +787,43 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
+		// Timing
+		if (ImGui::Begin("Timing", &active, wFlags))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			// Control (read-only)
+			ImGui::Text("Current particles: %i", simulation->particle_count);
+			ImGui::Text("Total time: %.1f s", simulation->total_time);
+			ImGui::Text("Max Distance: %.1f units", math::SqrtFast(simulation->max_dist_sq));
+			ImGui::Text("Max Speed: %.1f units/s", math::SqrtFast(simulation->max_speed_sq));
+			ImGui::Text("Parent Position: %.1f, %.1f, %.1f", simulation->parent_pos.x, simulation->parent_pos.y, simulation->parent_pos.z);
+			ImGui::Text("Parent Speed: %.1f, %.1f, %.1f", simulation->parent_speed.x, simulation->parent_speed.y, simulation->parent_speed.z);
+			
+			// Timing
+			ImGui::Separator();
+			ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f);
+			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, 10000.f);
+			ImGui::Checkbox("Loop", &simulation->loop);
+
+			if (!simulation->loop)
+			{
+				ImGui::SameLine();
+				ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f);
+			}
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
 		// Instantiation
 		if (ImGui::Begin("Instantiation", &active, wFlags))
 		{
@@ -806,12 +833,21 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
+			ImGui::Separator();
+			ImGui::Checkbox("Local Space", &simulation->local_space);
+			ImGui::Checkbox("Inherit Speed", &simulation->inherit_speed);
+
 			simulation->initial_lifetime.DrawEditor("Lifetime");
 
 			ImGui::Separator();
 			simulation->initial_pos.DrawEditor();
 
 			ImGui::Separator();
+			simulation->initial_speed.DrawEditor("Starting Speed");
+
+			if (!simulation->local_space)
+
+
 			simulation->initial_speed.DrawEditor("Starting Speed");
 
 			if (secondary)
@@ -823,7 +859,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		ImGui::End();
 
 		// Physics
-		if (ImGui::Begin("Particle Physics", &active, wFlags))
+		if (ImGui::Begin("Physics", &active, wFlags))
 		{
 			if (secondary)
 			{

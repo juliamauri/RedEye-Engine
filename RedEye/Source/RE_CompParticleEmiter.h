@@ -7,7 +7,7 @@
 
 class Particle;
 class RE_Mesh;
-struct RE_ParticleEmitter;
+class RE_ParticleEmitter;
 class RE_CompPrimitive;
 
 class RE_CompParticleEmitter : public RE_Component
