@@ -1175,7 +1175,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 			}
 
 			if (simulation->opacity.type != RE_PR_Opacity::Type::VALUE && simulation->opacity.type != RE_PR_Opacity::Type::NONE && simulation->opacity.useCurve)
-				simulation->opacity.curve.DrawEditor("Opacity", false);
+				simulation->opacity.curve.DrawEditor("Opacity");
 			else
 				ImGui::Text("Select a opacity over type and enable curve at opacity propierties.");
 

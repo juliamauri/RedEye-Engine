@@ -1874,7 +1874,7 @@ unsigned int RE_EmissionCollider::GetBinarySize() const
 math::vec RE_PR_Color::GetValue(const float weight) const
 {
 	if (type == Type::SINGLE) return base;
-	else return (base * weight) + (gradient * (1.f - weight));
+	else return (gradient * weight) + (base * (1.f - weight));
 }
 
 void RE_PR_Color::DrawEditor()
@@ -1910,7 +1910,7 @@ float CurveData::GetValue(const float weight) const
 		ImGui::CurveValue(weight, total_points, points.data());
 }
 
-void CurveData::DrawEditor(const char* name, bool one)
+void CurveData::DrawEditor(const char* name)
 {
 	eastl::string tmp(name);
 	static float cSize[2] = { 600.f, 200.f };
@@ -1923,7 +1923,8 @@ void CurveData::DrawEditor(const char* name, bool one)
 
 	ImGui::PopItemWidth();
 
-	ImGui::Curve((tmp + " curve").c_str(), { cSize[0], cSize[1] }, total_points, points.data(), one);
+	
+	ImGui::Curve((tmp + " curve").c_str(), { cSize[0], cSize[1] }, total_points, points.data(), &comboCurve);
 
 	ImGui::SameLine();
 
@@ -1954,7 +1955,7 @@ float RE_PR_Opacity::GetValue(const float weight) const
 	case RE_PR_Opacity::OVERLIFETIME:
 	case RE_PR_Opacity::OVERDISTANCE:
 	case RE_PR_Opacity::OVERSPEED:
-		return (useCurve) ? curve.GetValue(weight) : weight;
+		return (useCurve) ? curve.GetValue(weight) : (inverted) ? 1.f - weight : weight;
 	default: return 1.f; }
 }
 
@@ -1973,6 +1974,10 @@ void RE_PR_Opacity::DrawEditor()
 	case RE_PR_Opacity::OVERDISTANCE:
 	case RE_PR_Opacity::OVERSPEED:
 		ImGui::Checkbox(useCurve ? "Disable Opacity Curve" : "Enable Opacity Curve", &useCurve);
+		if (!useCurve) {
+			ImGui::SameLine();
+			ImGui::Checkbox("Invert Opacity", &inverted);
+		}
 		break;
 	default:
 		break;

@@ -250,9 +250,10 @@ struct CurveData
 	bool smooth = false;
 	int total_points = 10;
 	eastl::vector<ImVec2> points = {};
+	int comboCurve = 0;
 
 	float GetValue(const float weight) const;
-	void DrawEditor(const char* name, bool one = true);
+	void DrawEditor(const char* name);
 };
 
 struct RE_PR_Color
@@ -266,7 +267,7 @@ struct RE_PR_Color
 	} type = SINGLE;
 
 	math::vec base = math::vec::one;
-	math::vec gradient = math::vec::one;
+	math::vec gradient = math::vec::zero;
 
 	bool useCurve = false;
 	CurveData curve = {};
@@ -295,6 +296,7 @@ struct RE_PR_Opacity
 	} type = NONE;
 
 	float opacity = 1.0f;
+	bool inverted = false;
 
 	bool useCurve = false;
 	CurveData curve = {};

@@ -44,7 +44,7 @@ namespace ImGui
 
 namespace ImGui
 {
-int Curve(const char* label, const ImVec2& size, int maxpoints, ImVec2* points, bool one = true);
+int Curve(const char* label, const ImVec2& size, int maxpoints, ImVec2* points, int* item);
 float CurveValue(float p, int maxpoints, const ImVec2* points);
 float CurveValueSmooth(float p, int maxpoints, const ImVec2* points);
 }; // namespace ImGui
@@ -499,7 +499,7 @@ float CurveValue(float p, int maxpoints, const ImVec2* points)
     return points[left].y + (points[left + 1].y - points[left].y) * d;
 }
 
-int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* points, bool one)
+int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* points, int* item)
 {
     int modified = 0;
     int i;
@@ -706,12 +706,8 @@ int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* po
                            "Schubring1",      "Schubring2",  "Schubring3",
 
                            "SinPi2",          "Swing"};
-    static int item1 = 0, item2 = 0;
-
 
     ImGui::PushItemWidth(100.f);
-
-    int* item = one ? &item1 : &item2;
 
     if (modified)
     {
