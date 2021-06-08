@@ -2,6 +2,7 @@
 #include "Resource.h"
 
 #include "RE_ParticleEmitter.h"
+#include "RE_Component.h"
 
 class RE_ParticleRender :
     public ResourceContainer
@@ -33,11 +34,8 @@ private:
 	unsigned int GetBinarySize() const;
 
 private:
-
-	//RE_ParticleEmitter::ColorState cState = RE_ParticleEmitter::ColorState::SINGLE;
-	math::vec particleColor = math::vec::one;
-	math::vec gradient[2] = { math::vec::zero, math::vec::one };
-	bool useOpacity = false, opacityWithCurve = false;  float opacity = 1.0f;
+	RE_PR_Color color = {};
+	RE_PR_Opacity opacity = {};
 
 	bool emitlight = false;
 
@@ -56,20 +54,11 @@ private:
 	float linear = 0.091f;
 	float quadratic = 0.011f;
 
-	const char* materialMD5 = nullptr;
-	bool useTextures = false;
 	const char* meshMD5 = nullptr;
-	RE_CompPrimitive* primCmp = nullptr;
+	ComponentType primCmp = C_POINT;
 
 	math::float3 scale = { 0.5f,0.5f,0.1f };
 
 	RE_ParticleEmitter::Particle_Dir particleDir = RE_ParticleEmitter::Particle_Dir::PS_Billboard;
 	math::float3 direction = { -1.0f,1.0f,0.5f };
-
-	//Curves
-	bool useCurve = false;
-	bool smoothCurve = false;
-	eastl::vector< ImVec2> curve;
-	int total_points = 10;
 };
-

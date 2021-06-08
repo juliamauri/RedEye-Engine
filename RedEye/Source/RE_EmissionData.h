@@ -254,6 +254,13 @@ struct CurveData
 
 	float GetValue(const float weight) const;
 	void DrawEditor(const char* name);
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
 };
 
 struct RE_PR_Color

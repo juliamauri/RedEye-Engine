@@ -57,40 +57,6 @@ void RE_ParticleEmission::ProcessMD5()
 	JsonSerialize(true);
 }
 
-void RE_ParticleEmission::SaveResourceMeta(RE_Json* metaNode)
-{
-	metaNode->PushBool("Loop", loop);
-	metaNode->PushFloat("Max time", max_time);
-	metaNode->PushFloat("Start Delay", start_delay);
-	metaNode->PushFloat("Time Multiplier", time_muliplier);
-
-	spawn_interval.JsonSerialize(metaNode->PushJObject("Interval"));
-	spawn_mode.JsonSerialize(metaNode->PushJObject("Spawn Mode"));
-	initial_lifetime.JsonSerialize(metaNode->PushJObject("Lifetime"));
-	initial_pos.JsonSerialize(metaNode->PushJObject("Position"));
-	initial_speed.JsonSerialize(metaNode->PushJObject("Speed"));
-	external_acc.JsonSerialize(metaNode->PushJObject("Acceleration"));
-	boundary.JsonSerialize(metaNode->PushJObject("Boundary"));
-	collider.JsonSerialize(metaNode->PushJObject("Collider"));
-}
-
-void RE_ParticleEmission::LoadResourceMeta(RE_Json* metaNode)
-{
-	metaNode->PushBool("Loop", loop);
-	metaNode->PushFloat("Max time", max_time);
-	metaNode->PushFloat("Start Delay", start_delay);
-	metaNode->PushFloat("Time Multiplier", time_muliplier);
-
-	spawn_interval.JsonSerialize(metaNode->PushJObject("Interval"));
-	spawn_mode.JsonSerialize(metaNode->PushJObject("Spawn Mode"));
-	initial_lifetime.JsonSerialize(metaNode->PushJObject("Lifetime"));
-	initial_pos.JsonSerialize(metaNode->PushJObject("Position"));
-	initial_speed.JsonSerialize(metaNode->PushJObject("Speed"));
-	external_acc.JsonSerialize(metaNode->PushJObject("Acceleration"));
-	boundary.JsonSerialize(metaNode->PushJObject("Boundary"));
-	collider.JsonSerialize(metaNode->PushJObject("Collider"));
-}
-
 void RE_ParticleEmission::JsonDeserialize(bool generateLibraryPath)
 {
 	Config emission(GetAssetPath(), RE_FS->GetZipPath());

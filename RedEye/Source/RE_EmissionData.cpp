@@ -1894,6 +1894,77 @@ void RE_PR_Color::DrawEditor()
 	else ImGui::ColorEdit3("Particle Color", base.ptr());
 }
 
+void RE_PR_Color::JsonDeserialize(RE_Json* node)
+{
+	type = static_cast<Type>(node->PullInt("Type", 0));
+
+	base = node->PullFloatVector("Base", math::vec::one);
+	gradient = node->PullFloatVector("Gradient", math::vec::zero);
+	useCurve = node->PullBool("useCurve", false);
+
+	curve.JsonDeserialize(node->PullJObject("curve"));
+
+	DEL(node);
+}
+
+void RE_PR_Color::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(type));
+
+	node->PushFloatVector("Base", base);
+	node->PushFloatVector("Gradient", gradient);
+	node->PushBool("useCurve", useCurve);
+
+	curve.JsonSerialize(node->PushJObject("curve"));
+
+	DEL(node);
+}
+
+void RE_PR_Color::BinaryDeserialize(char*& cursor)
+{
+	size_t size = sizeof(Type);
+	memcpy(&type, cursor, size);
+	cursor += size;
+
+	size = sizeof(float) * 3;
+	memcpy(base.ptr(), cursor, size);
+	cursor += size;
+
+	memcpy(gradient.ptr(), cursor, size);
+	cursor += size;
+
+	size = sizeof(bool);
+	memcpy(&useCurve, cursor, size);
+	cursor += size;
+
+	curve.BinaryDeserialize(cursor);
+}
+
+void RE_PR_Color::BinarySerialize(char*& cursor) const
+{
+	size_t size = sizeof(Type);
+	memcpy(cursor, &type, size);
+	cursor += size;
+
+	size = sizeof(float) * 3;
+	memcpy(cursor, base.ptr(), size);
+	cursor += size;
+
+	memcpy(cursor, gradient.ptr(), size);
+	cursor += size;
+
+	size = sizeof(bool);
+	memcpy(cursor, &useCurve, size);
+	cursor += size;
+
+	curve.BinarySerialize(cursor);
+}
+
+unsigned int RE_PR_Color::GetBinarySize() const
+{
+	return sizeof(float) * 6 + sizeof(bool) + curve.GetBinarySize();
+}
+
 CurveData::CurveData()
 {
 	points.push_back({ -1.0f, 0.0f });
@@ -1948,6 +2019,79 @@ void CurveData::DrawEditor(const char* name)
 	ImGui::Checkbox((tmp + " smooth curve").c_str(), &smooth);
 }
 
+void CurveData::JsonDeserialize(RE_Json* node)
+{
+	smooth = node->PullBool("Smooth", false);
+	total_points = node->PullInt("TotalPoints", 10);
+	comboCurve = node->PullInt("comboCurve", 0);
+	for (int i = 0; i < total_points; i++) {
+		math::float2 toImVec2 = node->PullFloat((eastl::to_string(i) + "p").c_str(), { -1.0f, 0.0f });
+		points.push_back({ toImVec2.x,toImVec2.y });
+	}
+	DEL(node);
+}
+
+void CurveData::JsonSerialize(RE_Json* node) const
+{
+	node->PushBool("Smooth", smooth);
+	node->PushInt("TotalPoints", total_points);
+	node->PushInt("comboCurve", comboCurve);
+	for (int i = 0; i < total_points; i++)
+		node->PushFloat((eastl::to_string(i) + "p").c_str(), { points[i].x, points[i].y });
+
+	DEL(node);
+}
+
+void CurveData::BinaryDeserialize(char*& cursor)
+{
+	size_t size = sizeof(bool);
+	memcpy(&smooth, cursor, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(&total_points, cursor, size);
+	cursor += size;
+
+	memcpy(&comboCurve, cursor, size);
+	cursor += size;
+
+	points.clear();
+	size = sizeof(float);
+	float x = -1.0f, y = 0.0f;
+	for (int i = 0; i < total_points; i++)
+	{
+		memcpy(&x, cursor, size);
+		cursor += size;
+		memcpy(&y, cursor, size);
+		cursor += size;
+
+		points.push_back({ x, y });
+	}
+}
+
+void CurveData::BinarySerialize(char*& cursor) const
+{
+	size_t size = sizeof(bool);
+	memcpy(cursor, &smooth, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(cursor, &total_points, size);
+	cursor += size;
+
+	memcpy(cursor, &comboCurve, size);
+	cursor += size;
+
+	size = sizeof(float) * 2 * total_points;
+	memcpy(cursor, points.data(), size);
+	cursor += size;
+}
+
+unsigned int CurveData::GetBinarySize() const
+{
+	return sizeof(bool) + sizeof(int) * 2 + sizeof(float) * 2 * points.size();
+}
+
 float RE_PR_Opacity::GetValue(const float weight) const
 {
 	switch (type) {
@@ -1982,4 +2126,74 @@ void RE_PR_Opacity::DrawEditor()
 	default:
 		break;
 	}
+}
+
+void RE_PR_Opacity::JsonDeserialize(RE_Json* node)
+{
+	type = static_cast<Type>(node->PullInt("Type", 0));
+
+	opacity = node->PullFloat("Opacity", 1.0f);
+	inverted = node->PullBool("Inverted", false);
+	useCurve = node->PullBool("useCurve", false);
+
+	curve.JsonDeserialize(node->PullJObject("curve"));
+	DEL(node);
+}
+
+void RE_PR_Opacity::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(type));
+
+	node->PushFloat("Opacity", opacity);
+	node->PushBool("Inverted", inverted);
+	node->PushBool("useCurve", useCurve);
+
+	curve.JsonSerialize(node->PushJObject("curve"));
+
+	DEL(node);
+}
+
+void RE_PR_Opacity::BinaryDeserialize(char*& cursor)
+{
+	size_t size = sizeof(Type);
+	memcpy(&type, cursor, size);
+	cursor += size;
+
+	size = sizeof(float);
+	memcpy(&opacity, cursor, size);
+	cursor += size;
+
+	size = sizeof(bool);
+	memcpy(&inverted, cursor, size);
+	cursor += size;
+
+	memcpy(&useCurve, cursor, size);
+	cursor += size;
+
+	curve.BinaryDeserialize(cursor);
+}
+
+void RE_PR_Opacity::BinarySerialize(char*& cursor) const
+{
+	size_t size = sizeof(Type);
+	memcpy(cursor, &type, size);
+	cursor += size;
+
+	size = sizeof(float);
+	memcpy(cursor, &opacity, size);
+	cursor += size;
+
+	size = sizeof(bool);
+	memcpy(cursor, &inverted, size);
+	cursor += size;
+
+	memcpy(cursor, &useCurve, size);
+	cursor += size;
+
+	curve.BinarySerialize(cursor);
+}
+
+unsigned int RE_PR_Opacity::GetBinarySize() const
+{
+	return sizeof(float) + sizeof(bool) * 2 + curve.GetBinarySize();
 }

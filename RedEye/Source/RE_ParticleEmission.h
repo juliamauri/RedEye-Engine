@@ -22,9 +22,6 @@ private:
 
 	//void Draw() override;
 
-	void SaveResourceMeta(RE_Json* metaNode) override;
-	void LoadResourceMeta(RE_Json* metaNode) override;
-
 	void JsonDeserialize(bool generateLibraryPath = false);
 	void JsonSerialize(bool onlyMD5 = false); //We need to call ProcessMD5() before SaveMeta
 

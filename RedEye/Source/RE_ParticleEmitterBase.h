@@ -12,12 +12,8 @@ public:
 
 	void LoadInMemory() override;
 	void UnloadMemory() override;
-	void Import(bool keepInMemory = true) override;
 
 	void SomeResourceChanged(const char* resMD5);
-
-	void Save();
-	void ProcessMD5();
 
 	class RE_ParticleEmitter* GetNewEmitter();
 
@@ -28,20 +24,9 @@ private:
 	void SaveResourceMeta(RE_Json* metaNode) override;
 	void LoadResourceMeta(RE_Json* metaNode) override;
 
-	void JsonDeserialize(bool generateLibraryPath = false);
-	void JsonSerialize(bool onlyMD5 = false); //We need to call ProcessMD5() before SaveMeta
-
-	void AssetLoad(bool generateLibraryPath);
-	void LibraryLoad();
-	void LibrarySave();
-
-	void BinaryDeserialize();
-	void BinarySerialize();
-	unsigned int GetBinarySize() const;
-
 private:
-	const char* resource_emission;
-	const char* resource_renderer;
+	const char* resource_emission = nullptr;
+	const char* resource_renderer = nullptr;
 };
 
 
