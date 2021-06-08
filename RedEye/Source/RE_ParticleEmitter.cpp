@@ -110,7 +110,7 @@ void RE_ParticleEmitter::Update(const float global_dt)
 		}
 
 		// Update GO dependecies
-		const math::vec go_pos = GetGOPos();
+		const math::vec go_pos = math::vec::zero;// GetGOPos();
 		parent_speed = (go_pos - parent_pos) / local_dt;
 		parent_pos = go_pos;
 

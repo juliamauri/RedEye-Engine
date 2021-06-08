@@ -14,6 +14,9 @@
 #include "RE_CameraManager.h"
 #include "EditorWindows.h"
 
+#include "RE_ParticleEmitter.h"
+
+
 #include "ImGui\imgui_internal.h"
 #include "ImGui\imgui_impl_opengl3.h"
 #include "ImGui\imgui_impl_sdl.h"

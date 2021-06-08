@@ -1883,10 +1883,13 @@ void RE_PR_Color::DrawEditor()
 	if (ImGui::Combo("Color Type", &tmp, "Single\0Over Lifetime\0Over Distance\0Over Speed\0"))
 		type = static_cast<Type>(tmp);
 
+
 	if (type != RE_PR_Color::SINGLE)
 	{
 		ImGui::ColorEdit3("Particle Gradient 1", base.ptr());
 		ImGui::ColorEdit3("Particle Gradient 2", gradient.ptr());
+		 
+		ImGui::Checkbox(useCurve ? "Disable Color Curve" : "Enable Color Curve", &useCurve);
 	}
 	else ImGui::ColorEdit3("Particle Color", base.ptr());
 }
@@ -1907,48 +1910,71 @@ float CurveData::GetValue(const float weight) const
 		ImGui::CurveValue(weight, total_points, points.data());
 }
 
-void CurveData::DrawEditor(const char* name)
+void CurveData::DrawEditor(const char* name, bool one)
 {
 	eastl::string tmp(name);
-	if (ImGui::DragInt((tmp + "Num Points").c_str(), &total_points, 1.0f, 3, 200))
-	{
+	static float cSize[2] = { 600.f, 200.f };
+
+	ImGui::SameLine();
+
+	ImGui::PushItemWidth(150.f);
+
+	ImGui::DragFloat2((tmp + " curve size").c_str(), cSize, 1.0f, 0.0f, 0.0f, "%.0f");
+
+	ImGui::PopItemWidth();
+
+	ImGui::Curve((tmp + " curve").c_str(), { cSize[0], cSize[1] }, total_points, points.data(), one);
+
+	ImGui::SameLine();
+
+	ImGui::PushItemWidth(50.f);
+
+	static int minPoitns = 3;
+
+	if (ImGui::DragInt((tmp + " num Points").c_str(), &total_points, 1.0f)) {
+
+		if (total_points < minPoitns) total_points = minPoitns;
+
 		points.clear();
 		points.push_back({ -1.0f, 0.0f });
-		total_points = RE_Math::CapI(total_points, 3, 200);
-		for (int i = 1; i < total_points; i++) points.push_back({ 0.0f, 0.0f });
+		for (int i = 1; i < total_points; i++)
+			points.push_back({ 0.0f, 0.0f });
 	}
 
 	ImGui::SameLine();
-	ImGui::Checkbox((tmp + "smooth curve").c_str(), &smooth);
-	ImGui::SameLine();
-	ImGui::PushItemWidth(150.f);
-	static float cSize[2] = { 600.f, 200.f };
-	ImGui::DragFloat2((tmp + "curve size").c_str(), cSize, 1.0f, 0.0f, 0.0f, "%.0f");
-	ImGui::PopItemWidth();
-	ImGui::Curve((tmp + "curve").c_str(), { cSize[0], cSize[1] }, total_points, points.data());
+
+
+	ImGui::Checkbox((tmp + " smooth curve").c_str(), &smooth);
 }
 
 float RE_PR_Opacity::GetValue(const float weight) const
 {
 	switch (type) {
-	case RE_PR_Opacity::VALUE: return data.opacity;
-	case RE_PR_Opacity::CURVE: return data.curve.GetValue(weight);
+	case RE_PR_Opacity::VALUE: return opacity;
+	case RE_PR_Opacity::OVERLIFETIME:
+	case RE_PR_Opacity::OVERDISTANCE:
+	case RE_PR_Opacity::OVERSPEED:
+		return (useCurve) ? curve.GetValue(weight) : weight;
 	default: return 1.f; }
 }
 
 void RE_PR_Opacity::DrawEditor()
 {
 	int tmp = static_cast<int>(type);
-	if (ImGui::Combo("Opacity Type", &tmp, "None\0Value\0Use Curve\0"))
-	{
-		switch (type = static_cast<Type>(tmp)) {
-		case RE_PR_Opacity::VALUE: data.opacity = 1.0f; break;
-		case RE_PR_Opacity::CURVE: data.curve = CurveData(); break;
-		default: break; }
-	}
+	if (ImGui::Combo("Opacity Type", &tmp, "None\0Value\0Over Lifetime\0Over Distance\0Over Speed\0"))
+		type = static_cast<Type>(tmp);
 
-	switch (type) {
-	case RE_PR_Opacity::VALUE: ImGui::SliderFloat("Opacity", &data.opacity, 0.0f, 1.0f); break;
-	case RE_PR_Opacity::CURVE: data.curve.DrawEditor("Opacity"); break;
-	default: break; }
+	switch (type)
+	{
+	case RE_PR_Opacity::VALUE:
+		ImGui::SliderFloat("Opacity", &opacity, 0.0f, 1.0f);
+		break;
+	case RE_PR_Opacity::OVERLIFETIME:
+	case RE_PR_Opacity::OVERDISTANCE:
+	case RE_PR_Opacity::OVERSPEED:
+		ImGui::Checkbox(useCurve ? "Disable Opacity Curve" : "Enable Opacity Curve", &useCurve);
+		break;
+	default:
+		break;
+	}
 }

@@ -797,32 +797,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		// Spawning
-		if (ImGui::Begin("Spawning", &active, wFlags))
-		{
-			if (secondary)
-			{
-				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-			}
-
-			int tmp = static_cast<int>(simulation->max_particles);
-			if (ImGui::DragInt("Max particles", &tmp, 1.f, 0, 65000))
-				simulation->max_particles = static_cast<unsigned int>(tmp);
-
-			if (simulation->spawn_interval.DrawEditor() + simulation->spawn_mode.DrawEditor())
-				if (simulation->state != RE_ParticleEmitter::PlaybackState::STOP)
-					simulation->state = RE_ParticleEmitter::PlaybackState::RESTART;
-
-
-			if (secondary)
-			{
-				ImGui::PopItemFlag();
-				ImGui::PopStyleVar();
-			}
-		}
-		ImGui::End();
-
 		// Instantiation
 		if (ImGui::Begin("Instantiation", &active, wFlags))
 		{
@@ -873,7 +847,8 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Renderer Settings", &active, wFlags))
+		// Spawning
+		if (ImGui::Begin("Spawning", &active, wFlags))
 		{
 			if (secondary)
 			{
@@ -881,70 +856,13 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-			if (ImGui::DragFloat3("Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
-				if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
-			}
+			int tmp = static_cast<int>(simulation->max_particles);
+			if (ImGui::DragInt("Max particles", &tmp, 1.f, 0, 65000))
+				simulation->max_particles = static_cast<unsigned int>(tmp);
 
-			int pDir = simulation->particleDir;
-			if (ImGui::Combo("Particle Direction", &pDir, "Normal\0Billboard\0Custom\0"))
-				simulation->particleDir = static_cast<RE_ParticleEmitter::Particle_Dir>(pDir);
-
-			if (simulation->particleDir == RE_ParticleEmitter::PS_Custom)
-				ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
-
-			simulation->color.DrawEditor();
-			simulation->opacity.DrawEditor();
-
-			if (!simulation->materialMD5) ImGui::Text("NMaterial not selected.");
-			else
-			{
-				ImGui::Separator();
-				RE_Material* matRes = dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5));
-				if (ImGui::Button(matRes->GetName())) RE_RES->PushSelected(matRes->GetMD5(), true);
-
-				matRes->DrawMaterialParticleEdit(simulation->useTextures);
-			}
-
-			ImGui::Separator();
-
-			if (ImGui::BeginMenu("Change material"))
-			{
-				eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(Resource_Type::R_MATERIAL);
-				bool none = true;
-				for (auto material : materials)
-				{
-					if (material->isInternal()) continue;
-
-					none = false;
-					if (ImGui::MenuItem(material->GetName()))
-					{
-						if (simulation->materialMD5)
-						{
-							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UnUseResources();
-							RE_RES->UnUse(simulation->materialMD5);
-						}
-						simulation->materialMD5 = material->GetMD5();
-						if (simulation->materialMD5)
-						{
-							RE_RES->Use(simulation->materialMD5);
-							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UseResources();
-						}
-					}
-				}
-				if (none) ImGui::Text("No custom materials on assets");
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#MaterialReference"))
-				{
-					if (simulation->materialMD5) RE_RES->UnUse(simulation->materialMD5);
-					simulation->materialMD5 = *static_cast<const char**>(dropped->Data);
-					if (simulation->materialMD5) RE_RES->Use(simulation->materialMD5);
-				}
-				ImGui::EndDragDropTarget();
-			}
+			if (simulation->spawn_interval.DrawEditor() + simulation->spawn_mode.DrawEditor())
+				if (simulation->state != RE_ParticleEmitter::PlaybackState::STOP)
+					simulation->state = RE_ParticleEmitter::PlaybackState::RESTART;
 
 
 			if (secondary)
@@ -955,7 +873,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Form", &active, wFlags))
+		if (ImGui::Begin("Particle Shape", &active, wFlags))
 		{
 			if (secondary)
 			{
@@ -1209,6 +1127,78 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				}
 			}
 
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Particle Renderer Settings", &active, wFlags))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			if (ImGui::DragFloat3("Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
+				if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
+			}
+
+			int pDir = simulation->particleDir;
+			if (ImGui::Combo("Particle Direction", &pDir, "Normal\0Billboard\0Custom\0"))
+				simulation->particleDir = static_cast<RE_ParticleEmitter::Particle_Dir>(pDir);
+
+			if (simulation->particleDir == RE_ParticleEmitter::PS_Custom)
+				ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
+
+			simulation->color.DrawEditor();
+			simulation->opacity.DrawEditor();
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Opacity Curve", &active, wFlags))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			if (simulation->opacity.type != RE_PR_Opacity::Type::VALUE && simulation->opacity.type != RE_PR_Opacity::Type::NONE && simulation->opacity.useCurve)
+				simulation->opacity.curve.DrawEditor("Opacity", false);
+			else
+				ImGui::Text("Select a opacity over type and enable curve at opacity propierties.");
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Color Curve", &active, wFlags))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			if (simulation->color.type != RE_PR_Color::Type::SINGLE && simulation->color.useCurve)
+				simulation->color.curve.DrawEditor("Color");
+			else
+				ImGui::Text("Select a color over type and enable curve at color propierties.");
 
 			if (secondary)
 			{

@@ -53,15 +53,9 @@ void RE_CompParticleEmitter::Draw() const
 	RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
 	unsigned int shader = pS->GetID();
 	RE_GLCache::ChangeShader(shader);
-	if (!simulation->materialMD5) 
-	{
-		RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
-		RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
 
-		// JULIUS CHECK TODO: NO SE LA OPACIDAD QUE SE DEBE PASAR
-		RE_ShaderImporter::setFloat(shader, "opacity", simulation->opacity.type == RE_PR_Opacity::Type::VALUE ? simulation->opacity.data.opacity : 1.0f);
-	}
-	else dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UploadAsParticleDataToShader(shader, simulation->useTextures, simulation->emitlight);
+	RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
+	RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
 
 	unsigned int triangleCount = 1;
 	if (simulation->primCmp)
@@ -120,17 +114,31 @@ void RE_CompParticleEmitter::Draw() const
 		math::vec roteuler = rotm.ToEulerXYZ();
 		pS->UploadModel(math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), simulation->scale).Transposed().ptr());
 
+		float weight = 1.f;
+
 		// Lightmode
-		if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED && !simulation->materialMD5) {
+		if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED) {
 			bool cNormal = !simulation->meshMD5 && !simulation->primCmp;
 			RE_ShaderImporter::setFloat(shader, "customNormal", static_cast<float>(cNormal));
 			if(cNormal) RE_ShaderImporter::setFloat(shader, "normal", front);
 			RE_ShaderImporter::setFloat(shader, "specular", 2.5f);
 			RE_ShaderImporter::setFloat(shader, "shininess", 16.0f);
+			RE_ShaderImporter::setFloat(shader, "opacity", 1.0f);
+		}
+		else
+		{
+			//Opacity
+			switch (simulation->opacity.type) {
+			case RE_PR_Opacity::Type::OVERLIFETIME: weight = p->lifetime / simulation->initial_lifetime.GetMax(); break;
+			case RE_PR_Opacity::Type::OVERDISTANCE: weight = math::SqrtFast(p->position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq); break;
+			case RE_PR_Opacity::Type::OVERSPEED: weight = math::SqrtFast(p->velocity.LengthSq()) / math::SqrtFast(simulation->max_speed_sq); break;
+			default: break;
+			}
+
+			RE_ShaderImporter::setFloat(shader, "opacity", simulation->opacity.GetValue(weight));
 		}
 
-		// Color + Opacity
-		float weight = 1.f;
+		// Color
 		switch (simulation->color.type) {
 		case RE_PR_Color::Type::OVERLIFETIME: weight = p->lifetime / simulation->initial_lifetime.GetMax(); break;
 		case RE_PR_Color::Type::OVERDISTANCE: weight = math::SqrtFast(p->position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq);break;
@@ -138,7 +146,6 @@ void RE_CompParticleEmitter::Draw() const
 		default: break; }
 
 		RE_ShaderImporter::setFloat(shader, "cdiffuse", simulation->color.GetValue(weight));
-		if (isBlend()) RE_ShaderImporter::setFloat(shader, "opacity", simulation->opacity.GetValue(weight));
 
 		// Draw Call
 		if (simulation->meshMD5) dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
@@ -474,65 +481,6 @@ void RE_CompParticleEmitter::DrawProperties()
 				ImGui::EndMenu();
 			}
 
-			//if (ImGui::BeginDragDropTarget())
-			//{
-			//	if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#ModelReference"))
-			//	{
-			//		if (meshMD5) RE_RES->UnUse(meshMD5);
-			//		meshMD5 = *static_cast<const char**>(dropped->Data);
-			//		if (meshMD5) RE_RES->Use(meshMD5);
-			//	}
-			//	ImGui::EndDragDropTarget();
-			//}
-
-			if (!simulation->materialMD5) ImGui::Text("NMaterial not selected.");
-			else
-			{
-				ImGui::Separator();
-				RE_Material* matRes = dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5));
-				if (ImGui::Button(matRes->GetName())) RE_RES->PushSelected(matRes->GetMD5(), true);
-				
-				matRes->DrawMaterialParticleEdit(simulation->useTextures);
-			}
-
-			if (ImGui::BeginMenu("Change material"))
-			{
-				eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(Resource_Type::R_MATERIAL);
-				bool none = true;
-				for (auto material : materials)
-				{
-					if (material->isInternal()) continue;
-
-					none = false;
-					if (ImGui::MenuItem(material->GetName()))
-					{
-						if (simulation->materialMD5)
-						{
-							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UnUseResources();
-							RE_RES->UnUse(simulation->materialMD5);
-						}
-						simulation->materialMD5 = material->GetMD5();
-						if (simulation->materialMD5)
-						{
-							RE_RES->Use(simulation->materialMD5);
-							(dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5)))->UseResources();
-						}
-					}
-				}
-				if (none) ImGui::Text("No custom materials on assets");
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#MaterialReference"))
-				{
-					if (simulation->materialMD5) RE_RES->UnUse(simulation->materialMD5);
-					simulation->materialMD5 = *static_cast<const char**>(dropped->Data);
-					if (simulation->materialMD5) RE_RES->Use(simulation->materialMD5);
-				}
-				ImGui::EndDragDropTarget();
-			}
 		}
 		else
 		{
@@ -565,19 +513,11 @@ void RE_CompParticleEmitter::DeserializeBinary(char*& cursor, eastl::map<int, co
 void RE_CompParticleEmitter::UseResources()
 {
 	if (simulation->meshMD5)RE_RES->Use(simulation->meshMD5);
-	if (simulation->materialMD5) {
-		RE_RES->Use(simulation->materialMD5);
-		dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UseResources();
-	}
 }
 
 void RE_CompParticleEmitter::UnUseResources()
 {
 	if (simulation->meshMD5)RE_RES->UnUse(simulation->meshMD5);
-	if (simulation->materialMD5) {
-		dynamic_cast<RE_Material*>(RE_RES->At(simulation->materialMD5))->UnUseResources();
-		RE_RES->UnUse(simulation->materialMD5);
-	}
 }
 
 bool RE_CompParticleEmitter::isLighting() const { return simulation->emitlight; }

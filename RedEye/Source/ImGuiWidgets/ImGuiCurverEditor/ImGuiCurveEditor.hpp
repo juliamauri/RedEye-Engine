@@ -15,6 +15,7 @@
 #include "../ImGui/imgui_internal.h"
 
 #include <cmath>
+#include <EASTL/string.h>
 
 /* To use, add this prototype somewhere..
 
@@ -43,7 +44,7 @@ namespace ImGui
 
 namespace ImGui
 {
-int Curve(const char* label, const ImVec2& size, int maxpoints, ImVec2* points);
+int Curve(const char* label, const ImVec2& size, int maxpoints, ImVec2* points, bool one = true);
 float CurveValue(float p, int maxpoints, const ImVec2* points);
 float CurveValueSmooth(float p, int maxpoints, const ImVec2* points);
 }; // namespace ImGui
@@ -498,7 +499,7 @@ float CurveValue(float p, int maxpoints, const ImVec2* points)
     return points[left].y + (points[left + 1].y - points[left].y) * d;
 }
 
-int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* points)
+int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* points, bool one)
 {
     int modified = 0;
     int i;
@@ -678,6 +679,8 @@ int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* po
     }
 
     // buttons; @todo: mirror, smooth, tessellate
+    eastl::string idstring(label);
+    ImGui::PushID((idstring + "flip").c_str());
     if (ImGui::Button("Flip"))
     {
         for (i = 0; i < max; ++i)
@@ -685,6 +688,7 @@ int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* po
             points[i].y = 1 - points[i].y;
         }
     }
+    ImGui::PopID();
     ImGui::SameLine();
 
     // curve selector
@@ -702,27 +706,32 @@ int Curve(const char* label, const ImVec2& size, const int maxpoints, ImVec2* po
                            "Schubring1",      "Schubring2",  "Schubring3",
 
                            "SinPi2",          "Swing"};
-    static int item = 0;
-    if (modified)
-    {
-        item = 0;
-    }
+    static int item1 = 0, item2 = 0;
+
 
     ImGui::PushItemWidth(100.f);
 
-    if (ImGui::Combo("Ease type", &item, items, IM_ARRAYSIZE(items)))
+    int* item = one ? &item1 : &item2;
+
+    if (modified)
+    {
+        *item = 0;
+    }
+
+    ImGui::PushID((idstring + "easetype").c_str());
+    if (ImGui::Combo("Ease type", item, items, IM_ARRAYSIZE(items)))
     {
         max = maxpoints;
-        if (item > 0)
+        if (*item > 0)
         {
             for (i = 0; i < max; ++i)
             {
                 points[i].x = i / float(max - 1);
-                points[i].y = float(tween::ease(item - 1, points[i].x));
+                points[i].y = float(tween::ease(*item - 1, points[i].x));
             }
         }
     }
-
+    ImGui::PopID();
     ImGui::PopItemWidth();
 
     char buf[128];

@@ -243,6 +243,18 @@ struct RE_EmissionCollider
 	unsigned int GetBinarySize() const;
 };
 
+struct CurveData
+{
+	CurveData();
+	~CurveData();
+	bool smooth = false;
+	int total_points = 10;
+	eastl::vector<ImVec2> points = {};
+
+	float GetValue(const float weight) const;
+	void DrawEditor(const char* name, bool one = true);
+};
+
 struct RE_PR_Color
 {
 	enum Type : int
@@ -256,6 +268,9 @@ struct RE_PR_Color
 	math::vec base = math::vec::one;
 	math::vec gradient = math::vec::one;
 
+	bool useCurve = false;
+	CurveData curve = {};
+
 	math::vec GetValue(const float weight = 1.f) const;
 
 	void DrawEditor();
@@ -268,33 +283,21 @@ struct RE_PR_Color
 	unsigned int GetBinarySize() const;
 };
 
-struct CurveData
-{
-	CurveData();
-	~CurveData();
-	bool smooth = false;
-	int total_points = 10;
-	eastl::vector<ImVec2> points = {};
-
-	float GetValue(const float weight) const;
-	void DrawEditor(const char* name);
-};
-
 struct RE_PR_Opacity
 {
 	enum Type : int
 	{
 		NONE = 0,
 		VALUE,
-		CURVE
+		OVERLIFETIME,
+		OVERDISTANCE,
+		OVERSPEED
 	} type = NONE;
 
-	union Data
-	{
-		~Data() {};
-		float opacity = 1.0f;
-		CurveData curve;
-	} data = {};
+	float opacity = 1.0f;
+
+	bool useCurve = false;
+	CurveData curve = {};
 
 	float GetValue(const float weight) const;
 
