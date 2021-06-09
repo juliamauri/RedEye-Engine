@@ -86,12 +86,12 @@ public:
 	virtual void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const {}
 	virtual void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) {}
 
-	virtual unsigned int GetBinarySize() const {  return 0; }
+	virtual unsigned int GetBinarySize() const { return 0; }
 	virtual void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const {}
 	virtual void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) {}
 
-	virtual void UseResources() {  }
-	virtual void UnUseResources() {  }
+	virtual void UseResources() {}
+	virtual void UnUseResources() {}
 
 	//POOL
 	UID GetPoolID()const { return id; }

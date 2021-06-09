@@ -17,8 +17,12 @@ public:
 private:
 
 	void Reset();
-	unsigned int CountNewParticles(const float dt);
-	RE_Particle* SpawnParticle();
+
+	bool IsTimeValid(const float global_dt);
+	void UpdateParticles();
+	void UpdateSpawn();
+
+
 	void ImpulseCollision(RE_Particle& p1, RE_Particle& p2, const float combined_radius = 0.001f) const;
 
 public:
@@ -34,6 +38,7 @@ public:
 	float total_time = 0.f;
 	float max_dist_sq = 0.f;
 	float max_speed_sq = 0.f;
+	float local_dt = 0.f;
 	math::vec parent_pos = math::vec::zero;
 	math::vec parent_speed = math::vec::zero;
 
@@ -68,31 +73,14 @@ public:
 
 	bool active_rendering = true;
 
+	math::float3 scale = { 0.5f,0.5f,0.1f };
+
 	RE_PR_Color color = {};
 	RE_PR_Opacity opacity = {};
+	RE_PR_Light light = {};
 
-	bool emitlight = false;
-
-	math::vec lightColor = math::vec::one;
-	bool randomLightColor = false;
-	float specular = 0.2f;
-	float sClamp[2] = { 0.f, 1.f };
-	bool randomSpecular = false;
-	bool particleLColor = false;
-
-	// Attenuattion
-	float iClamp[2] = { 0.0f, 50.0f };
-	float intensity = 1.0f;
-	bool randomIntensity = false;
-	float constant = 1.0f;
-	float linear = 0.091f;
-	float quadratic = 0.011f;
-
-	bool useTextures = false;
 	const char* meshMD5 = nullptr;
 	RE_CompPrimitive* primCmp = nullptr;
-
-	math::float3 scale = { 0.5f,0.5f,0.1f };
 
 	enum Particle_Dir : int
 	{
@@ -100,6 +88,7 @@ public:
 		PS_Billboard,
 		PS_Custom
 	} particleDir = PS_Billboard;
+
 	math::float3 direction = { -1.0f,1.0f,0.5f };
 };
 

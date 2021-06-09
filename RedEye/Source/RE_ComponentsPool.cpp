@@ -7,6 +7,7 @@ void ComponentsPool::Update()
 {
 	transPool.Update();
 	camPool.Update();
+	particleSPool.Update();
 }
 
 void ComponentsPool::ClearComponents()

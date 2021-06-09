@@ -28,7 +28,8 @@ public:
 	int					RandomInt(int min, int max);
 	unsigned long long	RandomUID();
 
-	math::vec RandomNDir();
+	math::vec RandomVec();
+	math::vec RandomNVec();
 
 	// Random Seed LCG
 	math::LCG& GetRNGSeed();

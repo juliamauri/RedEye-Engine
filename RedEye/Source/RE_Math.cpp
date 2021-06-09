@@ -37,7 +37,12 @@ unsigned long long RE_Math::RandomUID()
 	return ret;
 }
 
-math::vec RE_Math::RandomNDir()
+math::vec RE_Math::RandomVec()
+{
+	return math::vec(lcg.Float(), lcg.Float(), lcg.Float());
+}
+
+math::vec RE_Math::RandomNVec()
 {
 	return math::vec(lcg.Float() - 0.5f, lcg.Float() - 0.5f, lcg.Float() - 0.5f).Normalized();
 }

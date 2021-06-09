@@ -763,9 +763,9 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			}
 
 			unsigned int pCount = 0;
-			for (auto pS : particleS_lights) {
+			for (auto pS : particleS_lights)
 				dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(particlelight_pass, "plights", pCount, 508, shareLightPass);
-			}
+
 			particlelightsCount = pCount;
 
 			unif_name = "pInfo.pCount";
@@ -871,7 +871,6 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			if (render_view.flags & BLENDED) glDisable(GL_BLEND);
 		}
 	}
-
 
 	// Draw Stencil
 	if (render_view.flags & OUTLINE_SELECTION)

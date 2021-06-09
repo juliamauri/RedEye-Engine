@@ -1,6 +1,7 @@
 #include "RE_EmissionData.h"
 
 #include "Application.h"
+#include "ModulePhysics.h"
 #include "RE_Math.h"
 #include "RE_Particle.h"
 #include "RE_Json.h"
@@ -126,6 +127,47 @@ unsigned int RE_EmissionInterval::GetBinarySize() const
 {
 	unsigned int ret = sizeof(int);
 	if (type) ret += sizeof(float) * 2u;
+	return ret;
+}
+
+unsigned int RE_EmissionSpawn::CountNewParticles(const float dt)
+{
+	unsigned int ret = 0u;
+
+	time_offset += dt;
+
+	switch (type)
+	{
+	case RE_EmissionSpawn::Type::SINGLE:
+	{
+		if (!has_started)
+			ret = static_cast<unsigned int>(particles_spawned);
+
+		break;
+	}
+	case RE_EmissionSpawn::Type::BURST:
+	{
+		int mult = static_cast<int>(!has_started);
+		while (time_offset >= frequency)
+		{
+			time_offset -= frequency;
+			mult++;
+		}
+
+		ret += static_cast<unsigned int>(particles_spawned * mult);
+
+		break;
+	}
+	case RE_EmissionSpawn::Type::FLOW:
+	{
+		ret = static_cast<unsigned int>(time_offset * frequency);
+		time_offset -= static_cast<float>(ret) / frequency;
+		break;
+	}
+	}
+
+	has_started = true;
+
 	return ret;
 }
 
@@ -290,13 +332,13 @@ math::vec RE_EmissionShape::GetPosition() const
 {
 	switch (type) {
 	case CIRCLE: return geo.circle.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2);
-	case RING: return geo.ring.first.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2) + (RE_MATH->RandomNDir() * geo.ring.second);
+	case RING: return geo.ring.first.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2) + (RE_MATH->RandomNVec() * geo.ring.second);
 	case AABB: return { 
 			geo.box.minPoint.x + (RE_MATH->RandomF() * (geo.box.maxPoint.x - geo.box.minPoint.x)),
 			geo.box.minPoint.y + (RE_MATH->RandomF() * (geo.box.maxPoint.y - geo.box.minPoint.y)),
 			geo.box.minPoint.z + (RE_MATH->RandomF() * (geo.box.maxPoint.z - geo.box.minPoint.z)) };
-	case SPHERE: return geo.sphere.pos + ((RE_MATH->RandomF() * geo.sphere.r) * RE_MATH->RandomNDir());
-	case HOLLOW_SPHERE: return geo.hollow_sphere.first.pos + ((geo.hollow_sphere.first.r + (geo.hollow_sphere.second + RE_MATH->RandomFN())) * RE_MATH->RandomNDir());
+	case SPHERE: return geo.sphere.pos + ((RE_MATH->RandomF() * geo.sphere.r) * RE_MATH->RandomNVec());
+	case HOLLOW_SPHERE: return geo.hollow_sphere.first.pos + ((geo.hollow_sphere.first.r + (geo.hollow_sphere.second + RE_MATH->RandomFN())) * RE_MATH->RandomNVec());
 	default: return geo.point; }
 }
 
@@ -631,7 +673,7 @@ unsigned int RE_EmissionShape::GetBinarySize() const
 	return ret;
 }
 
-math::vec RE_EmissionVector::GetSpeed() const
+math::vec RE_EmissionVector::GetValue() const
 {
 	switch (type) {
 	case VALUE: return val;
@@ -1962,7 +2004,10 @@ void RE_PR_Color::BinarySerialize(char*& cursor) const
 
 unsigned int RE_PR_Color::GetBinarySize() const
 {
-	return sizeof(float) * 6 + sizeof(bool) + curve.GetBinarySize();
+	return sizeof(int)
+		+ (sizeof(float) * 6u)
+		+ sizeof(bool)
+		+ curve.GetBinarySize();
 }
 
 CurveData::CurveData()
@@ -1987,22 +2032,14 @@ void CurveData::DrawEditor(const char* name)
 	static float cSize[2] = { 600.f, 200.f };
 
 	ImGui::SameLine();
-
 	ImGui::PushItemWidth(150.f);
-
 	ImGui::DragFloat2((tmp + " curve size").c_str(), cSize, 1.0f, 0.0f, 0.0f, "%.0f");
-
 	ImGui::PopItemWidth();
-
-	
 	ImGui::Curve((tmp + " curve").c_str(), { cSize[0], cSize[1] }, total_points, points.data(), &comboCurve);
-
 	ImGui::SameLine();
-
 	ImGui::PushItemWidth(50.f);
 
 	static int minPoitns = 3;
-
 	if (ImGui::DragInt((tmp + " num Points").c_str(), &total_points, 1.0f)) {
 
 		if (total_points < minPoitns) total_points = minPoitns;
@@ -2014,8 +2051,6 @@ void CurveData::DrawEditor(const char* name)
 	}
 
 	ImGui::SameLine();
-
-
 	ImGui::Checkbox((tmp + " smooth curve").c_str(), &smooth);
 }
 
@@ -2082,14 +2117,14 @@ void CurveData::BinarySerialize(char*& cursor) const
 	memcpy(cursor, &comboCurve, size);
 	cursor += size;
 
-	size = sizeof(float) * 2 * total_points;
+	size = sizeof(float) * 2u * total_points;
 	memcpy(cursor, points.data(), size);
 	cursor += size;
 }
 
 unsigned int CurveData::GetBinarySize() const
 {
-	return sizeof(bool) + sizeof(int) * 2 + sizeof(float) * 2 * points.size();
+	return sizeof(bool) + (sizeof(int) * 2u) + (sizeof(float) * 2u * points.size());
 }
 
 float RE_PR_Opacity::GetValue(const float weight) const
@@ -2195,5 +2230,364 @@ void RE_PR_Opacity::BinarySerialize(char*& cursor) const
 
 unsigned int RE_PR_Opacity::GetBinarySize() const
 {
-	return sizeof(float) + sizeof(bool) * 2 + curve.GetBinarySize();
+	return sizeof(int)
+		+ sizeof(float)
+		+ (sizeof(bool) * 2)
+		+ curve.GetBinarySize();
+}
+
+math::vec RE_PR_Light::GetColor() const { return random_color ? RE_MATH->RandomVec() : color; }
+float RE_PR_Light::GetIntensity() const { return random_i ? intensity + (RE_MATH->RandomF() * (intensity_max - intensity)) : intensity; }
+float RE_PR_Light::GetSpecular() const { return random_s ? specular + (RE_MATH->RandomF() * (specular_max - specular)) : specular; }
+math::vec RE_PR_Light::GetQuadraticValues() const { return { constant, linear, quadratic }; }
+
+void RE_PR_Light::DrawEditor(const unsigned int id)
+{
+	int tmp = static_cast<int>(type);
+	if (ImGui::Combo("Light Mode", &tmp, "None\0Unique\0Per Particle\0"))
+	{
+		switch (type = static_cast<Type>(tmp)) {
+		case RE_PR_Light::UNIQUE:
+		{
+			auto particles = RE_PHYSICS->GetParticles(id);
+			color = GetColor();
+			intensity = GetIntensity();
+			specular = GetSpecular();
+
+			for (auto p : *particles)
+			{
+				p->lightColor = color;
+				p->intensity = intensity;
+				p->specular = specular;
+			}
+
+			break;
+		}
+		case RE_PR_Light::PER_PARTICLE:
+		{
+			auto particles = RE_PHYSICS->GetParticles(id);
+			for (auto p : *particles)
+			{
+				p->lightColor = GetColor();
+				p->intensity = GetIntensity();
+				p->specular = GetSpecular();
+			}
+
+			break;
+		}
+		default: break; }
+	}
+
+	switch (type) {
+	case RE_PR_Light::UNIQUE:
+	{
+		auto particles = RE_PHYSICS->GetParticles(id);
+
+		ImGui::ColorEdit3("Light Color", color.ptr());
+		ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f");
+		ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f");
+
+		ImGui::Separator();
+		ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f");
+		ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f");
+		ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
+
+		break;
+	}
+	case RE_PR_Light::PER_PARTICLE:
+	{
+		auto particles = RE_PHYSICS->GetParticles(id);
+
+		if (ImGui::Checkbox("Random Color", &random_color))
+			for (auto p : *particles) p->lightColor = GetColor();
+
+		if (!random_color && ImGui::ColorEdit3("Light Color", color.ptr()))
+			for (auto p : *particles) p->lightColor = color;
+
+		if (ImGui::Checkbox("Random Intensity", &random_i))
+			for (auto p : *particles) p->intensity = GetIntensity();
+
+		if (random_i)
+		{
+			bool update_sim = false;
+			update_sim |= ImGui::DragFloat("Intensity Min", &intensity, 0.01f, 0.0f, intensity_max, "%.2f");
+			update_sim |= ImGui::DragFloat("Intensity Max", &intensity_max, 0.01f, intensity, 50.f, "%.2f");
+			if (update_sim) for (auto p : *particles) p->intensity = GetIntensity();
+		}
+		else if (ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f"))
+			for (auto p : *particles) p->intensity = intensity;
+
+		if (ImGui::Checkbox("Random Specular", &random_s))
+			for (auto p : *particles) p->specular = GetSpecular();
+
+		if (random_s)
+		{
+			bool update_sim = false;
+			update_sim |= ImGui::DragFloat("Specular Min", &specular, 0.01f, 0.0f, specular_max, "%.2f");
+			update_sim |= ImGui::DragFloat("Specular Max", &specular_max, 0.01f, specular, 10.f, "%.2f");
+			if (update_sim) for (auto p : *particles) p->specular = GetSpecular();
+		}
+		else if (ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f"))
+			for (auto p : *particles) p->specular = specular;
+
+		ImGui::Separator();
+		ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f");
+		ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f");
+		ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
+
+		break;
+	}
+	default: break; }
+}
+
+void RE_PR_Light::JsonDeserialize(RE_Json* node)
+{
+	type = static_cast<RE_PR_Light::Type>(node->PullInt("Type", static_cast<int>(type)));
+
+	switch (type) {
+	case RE_PR_Light::UNIQUE:
+	{
+		color = node->PullFloatVector("Color", color);
+		intensity = node->PullFloat("Intensity", intensity);
+		specular = node->PullFloat("Specular", specular);
+
+		constant = node->PullFloat("Constant", constant);
+		linear = node->PullFloat("Linear", linear);
+		quadratic = node->PullFloat("Quadratic", quadratic);
+
+		break;
+	}
+	case RE_PR_Light::PER_PARTICLE:
+	{
+		random_color = node->PullBool("Random Color", random_color);
+		if (!random_color) color = node->PullFloatVector("Color", color);
+
+		random_i = node->PullBool("Random Intensity", random_i);
+		intensity = node->PullFloat("Intensity", intensity);
+		if (random_i) intensity_max = node->PullFloat("Intensity Max", intensity_max);
+
+		random_s = node->PullBool("Random Specular", random_s);
+		specular = node->PullFloat("Specular", specular);
+		if (random_s) specular_max = node->PullFloat("Specular Max", specular_max);
+
+		constant = node->PullFloat("Constant", constant);
+		linear = node->PullFloat("Linear", linear);
+		quadratic = node->PullFloat("Quadratic", quadratic);
+
+		break;
+	}
+	default: break; }
+
+	DEL(node);
+}
+
+void RE_PR_Light::JsonSerialize(RE_Json* node) const
+{
+	node->PushInt("Type", static_cast<int>(type));
+	switch (type) {
+	case RE_PR_Light::UNIQUE:
+	{
+		node->PushFloatVector("Color", color);
+		node->PushFloat("Intensity", intensity);
+		node->PushFloat("Specular", specular);
+
+		node->PushFloat("Constant", constant);
+		node->PushFloat("Linear", linear);
+		node->PushFloat("Quadratic", quadratic);
+
+		break;
+	}
+	case RE_PR_Light::PER_PARTICLE:
+	{
+		node->PushBool("Random Color", random_color);
+		if (!random_color) node->PushFloatVector("Color", color);
+
+		node->PushBool("Random Intensity", random_i);
+		node->PushFloat("Intensity", intensity);
+		if (random_i) node->PushFloat("Intensity Max", intensity_max);
+
+		node->PushBool("Random Specular", random_s);
+		node->PushFloat("Specular", specular);
+		if (random_s) node->PushFloat("Specular Max", specular_max);
+
+		node->PushFloat("Constant", constant);
+		node->PushFloat("Linear", linear);
+		node->PushFloat("Quadratic", quadratic);
+
+		break;
+	}
+	default: break; }
+
+	DEL(node);
+}
+
+void RE_PR_Light::BinaryDeserialize(char*& cursor)
+{
+	unsigned int size = sizeof(int);
+	memcpy(&type, cursor, size);
+	cursor += size;
+
+	switch (type) {
+	case RE_PR_Light::UNIQUE:
+	{
+		size = sizeof(float);
+		memcpy(color.ptr(), cursor, size * 3u);
+		cursor += size * 3u;
+		memcpy(&intensity, cursor, size);
+		cursor += size;
+		memcpy(&specular, cursor, size);
+		cursor += size;
+
+		memcpy(&constant, cursor, size);
+		cursor += size;
+		memcpy(&linear, cursor, size);
+		cursor += size;
+		memcpy(&quadratic, cursor, size);
+		cursor += size;
+
+		break;
+	}
+	case RE_PR_Light::PER_PARTICLE:
+	{
+		size = sizeof(bool);
+		memcpy(&random_color, cursor, size);
+		cursor += size;
+		if (!random_color)
+		{
+			size = sizeof(float) * 3u;
+			memcpy(color.ptr(), cursor, size);
+			cursor += size;
+		}
+
+		size = sizeof(bool);
+		memcpy(&random_i, cursor, size);
+		cursor += size;
+		size = sizeof(float);
+		memcpy(&intensity, cursor, size);
+		if (!random_i)
+		{
+			memcpy(&intensity_max, cursor, size);
+			cursor += size;
+		}
+
+		size = sizeof(bool);
+		memcpy(&random_s, cursor, size);
+		cursor += size;
+		size = sizeof(float);
+		memcpy(&specular, cursor, size);
+		if (!random_s)
+		{
+			memcpy(&specular_max, cursor, size);
+			cursor += size;
+		}
+
+		memcpy(&constant, cursor, size);
+		cursor += size;
+		memcpy(&linear, cursor, size);
+		cursor += size;
+		memcpy(&quadratic, cursor, size);
+		cursor += size;
+
+		break;
+	}
+	default: break; }
+}
+
+void RE_PR_Light::BinarySerialize(char*& cursor) const
+{
+	unsigned int size = sizeof(int);
+	memcpy(cursor, &type, size);
+	cursor += size;
+
+	switch (type) {
+	case RE_PR_Light::UNIQUE:
+	{
+		size = sizeof(float);
+		memcpy(cursor, color.ptr(), size * 3u);
+		cursor += size * 3u;
+		memcpy(cursor, &intensity, size);
+		cursor += size;
+		memcpy(cursor, &specular, size);
+		cursor += size;
+
+		memcpy(cursor, &constant, size);
+		cursor += size;
+		memcpy(cursor, &linear, size);
+		cursor += size;
+		memcpy(cursor, &quadratic, size);
+		cursor += size;
+
+		break;
+	}
+	case RE_PR_Light::PER_PARTICLE:
+	{
+		size = sizeof(bool);
+		memcpy(cursor, &random_color, size);
+		cursor += size;
+		if (!random_color)
+		{
+			size = sizeof(float) * 3u;
+			memcpy(cursor, color.ptr(), size);
+			cursor += size;
+		}
+
+		size = sizeof(bool);
+		memcpy(cursor, &random_i, size);
+		cursor += size;
+		size = sizeof(float);
+		memcpy(cursor, &intensity, size);
+		if (!random_i)
+		{
+			memcpy(cursor, &intensity_max, size);
+			cursor += size;
+		}
+
+		size = sizeof(bool);
+		memcpy(cursor, &random_s, size);
+		cursor += size;
+		size = sizeof(float);
+		memcpy(cursor, &specular, size);
+		if (!random_s)
+		{
+			memcpy(cursor, &specular_max, size);
+			cursor += size;
+		}
+
+		memcpy(cursor, &constant, size);
+		cursor += size;
+		memcpy(cursor, &linear, size);
+		cursor += size;
+		memcpy(cursor, &quadratic, size);
+		cursor += size;
+
+		break;
+	}
+	default: break;
+	}
+}
+
+unsigned int RE_PR_Light::GetBinarySize() const
+{
+	unsigned int ret = sizeof(int);
+
+	switch (type) {
+	case RE_PR_Light::UNIQUE:
+	{
+		ret += sizeof(float) * 8u;
+		break;
+	}
+	case RE_PR_Light::PER_PARTICLE:
+	{
+		ret += sizeof(bool) * 3u;
+		ret += sizeof(float) * 5u;
+
+		if (!random_color) ret += sizeof(float) * 3u;
+		if (!random_i) ret += sizeof(float);
+		if (!random_s) ret += sizeof(float);
+
+		break;
+	}
+	default: break; }
+
+	return ret;
 }

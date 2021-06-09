@@ -5,9 +5,7 @@
 #include "MathGeoLib/include/Geometry/Sphere.h"
 #include "MathGeoLib/include/Geometry/Plane.h"
 #include "MathGeoLib/include/Geometry/AABB.h"
-#include "MathGeoLib/include/Math/float3.h"
 #include "ImGui/imgui.h"
-#include <EASTL/utility.h>
 #include <EASTL/vector.h>
 
 class RE_Json;
@@ -52,6 +50,8 @@ struct RE_EmissionSpawn
 
 	int particles_spawned = 10;
 	float frequency = 10.f;
+
+	unsigned int CountNewParticles(const float dt);
 
 	bool DrawEditor();
 
@@ -112,10 +112,10 @@ struct RE_EmissionVector
 		RANGEXYZ
 	} type = NONE;
 
-	math::vec val = -math::vec::one;
-	math::vec margin = math::vec::one;
+	math::vec val = math::vec::zero;
+	math::vec margin = math::vec::zero;
 
-	math::vec GetSpeed() const;
+	math::vec GetValue() const;
 
 	void DrawEditor(const char* name);
 
@@ -311,6 +311,36 @@ struct RE_PR_Opacity
 	float GetValue(const float weight) const;
 
 	void DrawEditor();
+
+	void JsonDeserialize(RE_Json* node);
+	void JsonSerialize(RE_Json* node) const;
+
+	void BinaryDeserialize(char*& cursor);
+	void BinarySerialize(char*& cursor) const;
+	unsigned int GetBinarySize() const;
+};
+
+struct RE_PR_Light
+{
+	enum Type : int
+	{
+		NONE = 0,
+		UNIQUE,
+		PER_PARTICLE
+	} type = NONE;
+
+	bool random_color = false, random_i = false, random_s = false;
+	math::vec color = math::vec::one;
+	float intensity = 1.f, specular = 0.2f;
+	float intensity_max = 50.f, specular_max = 1.f;
+	float constant = 1.0f, linear = 0.091f, quadratic = 0.011f;
+
+	math::vec GetColor() const;
+	float GetIntensity() const;
+	float GetSpecular() const;
+	math::vec GetQuadraticValues() const;
+
+	void DrawEditor(const unsigned int id);
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;

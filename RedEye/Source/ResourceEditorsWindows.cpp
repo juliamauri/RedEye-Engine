@@ -787,8 +787,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		// Timing
-		if (ImGui::Begin("Timing", &active, wFlags))
+		if (ImGui::Begin("Status", &active, wFlags))
 		{
 			if (secondary)
 			{
@@ -804,18 +803,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 			ImGui::Text("Parent Position: %.1f, %.1f, %.1f", simulation->parent_pos.x, simulation->parent_pos.y, simulation->parent_pos.z);
 			ImGui::Text("Parent Speed: %.1f, %.1f, %.1f", simulation->parent_speed.x, simulation->parent_speed.y, simulation->parent_speed.z);
 			
-			// Timing
-			ImGui::Separator();
-			ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f);
-			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, 10000.f);
-			ImGui::Checkbox("Loop", &simulation->loop);
-
-			if (!simulation->loop)
-			{
-				ImGui::SameLine();
-				ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f);
-			}
-
 			if (secondary)
 			{
 				ImGui::PopItemFlag();
@@ -824,66 +811,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		// Instantiation
-		if (ImGui::Begin("Instantiation", &active, wFlags))
-		{
-			if (secondary)
-			{
-				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-			}
-
-			ImGui::Separator();
-			ImGui::Checkbox("Local Space", &simulation->local_space);
-			ImGui::Checkbox("Inherit Speed", &simulation->inherit_speed);
-
-			simulation->initial_lifetime.DrawEditor("Lifetime");
-
-			ImGui::Separator();
-			simulation->initial_pos.DrawEditor();
-
-			ImGui::Separator();
-			simulation->initial_speed.DrawEditor("Starting Speed");
-
-			if (!simulation->local_space)
-
-
-			simulation->initial_speed.DrawEditor("Starting Speed");
-
-			if (secondary)
-			{
-				ImGui::PopItemFlag();
-				ImGui::PopStyleVar();
-			}
-		}
-		ImGui::End();
-
-		// Physics
-		if (ImGui::Begin("Physics", &active, wFlags))
-		{
-			if (secondary)
-			{
-				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-			}
-
-			simulation->external_acc.DrawEditor();
-
-			ImGui::Separator();
-			simulation->boundary.DrawEditor();
-
-			ImGui::Separator();
-			simulation->collider.DrawEditor();
-
-			if (secondary)
-			{
-				ImGui::PopItemFlag();
-				ImGui::PopStyleVar();
-			}
-		}
-		ImGui::End();
-
-		// Spawning
 		if (ImGui::Begin("Spawning", &active, wFlags))
 		{
 			if (secondary)
@@ -900,6 +827,52 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				if (simulation->state != RE_ParticleEmitter::PlaybackState::STOP)
 					simulation->state = RE_ParticleEmitter::PlaybackState::RESTART;
 
+			ImGui::Separator();
+			ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f);
+			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, 10000.f);
+			ImGui::Checkbox("Loop", &simulation->loop);
+			if (!simulation->loop)
+			{
+				ImGui::SameLine();
+				ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f);
+			}
+
+			ImGui::Separator();
+			ImGui::Checkbox("Local Space", &simulation->local_space);
+			ImGui::Checkbox("Inherit Speed", &simulation->inherit_speed);
+
+			ImGui::Separator();
+			simulation->initial_lifetime.DrawEditor("Lifetime");
+
+			ImGui::Separator();
+			simulation->initial_pos.DrawEditor();
+
+			ImGui::Separator();
+			simulation->initial_speed.DrawEditor("Starting Speed");
+
+			if (secondary)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Physics", &active, wFlags))
+		{
+			if (secondary)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			simulation->external_acc.DrawEditor();
+
+			ImGui::Separator();
+			simulation->boundary.DrawEditor();
+
+			ImGui::Separator();
+			simulation->collider.DrawEditor();
 
 			if (secondary)
 			{
@@ -940,7 +913,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 					}
 					simulation->primCmp = new RE_CompPoint();
 					setUpPrimitive = clearMesh = true;
-					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Cube")) {
 					if (simulation->primCmp) {
@@ -949,7 +921,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 					}
 					simulation->primCmp = new RE_CompCube();
 					setUpPrimitive = clearMesh = true;
-					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Dodecahedron")) {
 					if (simulation->primCmp) {
@@ -958,7 +929,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 					}
 					simulation->primCmp = new RE_CompDodecahedron();
 					setUpPrimitive = clearMesh = true;
-					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Tetrahedron")) {
 					if (simulation->primCmp) {
@@ -967,7 +937,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 					}
 					simulation->primCmp = new RE_CompTetrahedron();
 					setUpPrimitive = clearMesh = true;
-					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Octohedron")) {
 					if (simulation->primCmp) {
@@ -976,7 +945,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 					}
 					simulation->primCmp = new RE_CompOctohedron();
 					setUpPrimitive = clearMesh = true;
-					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Icosahedron")) {
 					if (simulation->primCmp) {
@@ -985,7 +953,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 					}
 					simulation->primCmp = new RE_CompIcosahedron();
 					setUpPrimitive = clearMesh = true;
-					simulation->useTextures = false;
 				}
 				if (ImGui::MenuItem("Plane")) {
 					if (simulation->primCmp) {
@@ -993,7 +960,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 						DEL(simulation->primCmp);
 					}
 					simulation->primCmp = new RE_CompPlane();
-					simulation->useTextures = setUpPrimitive = clearMesh = true;
+					setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Sphere")) {
 					if (simulation->primCmp) {
@@ -1001,7 +968,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 						DEL(simulation->primCmp);
 					}
 					simulation->primCmp = new RE_CompSphere();
-					simulation->useTextures = setUpPrimitive = clearMesh = true;
+					setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Cylinder")) {
 					if (simulation->primCmp) {
@@ -1009,7 +976,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 						DEL(simulation->primCmp);
 					}
 					simulation->primCmp = new RE_CompCylinder();
-					simulation->useTextures = setUpPrimitive = clearMesh = true;
+					setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("HemiSphere")) {
 					if (simulation->primCmp) {
@@ -1017,7 +984,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 						DEL(simulation->primCmp);
 					}
 					simulation->primCmp = new RE_CompHemiSphere();
-					simulation->useTextures = setUpPrimitive = clearMesh = true;
+					setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Torus")) {
 					if (simulation->primCmp) {
@@ -1025,7 +992,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 						DEL(simulation->primCmp);
 					}
 					simulation->primCmp = new RE_CompTorus();
-					simulation->useTextures = setUpPrimitive = clearMesh = true;
+					setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Trefoil Knot")) {
 					if (simulation->primCmp) {
@@ -1033,7 +1000,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 						DEL(simulation->primCmp);
 					}
 					simulation->primCmp = new RE_CompTrefoiKnot();
-					simulation->useTextures = setUpPrimitive = clearMesh = true;
+					setUpPrimitive = clearMesh = true;
 				}
 				if (ImGui::MenuItem("Rock")) {
 					if (simulation->primCmp) {
@@ -1042,7 +1009,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 					}
 					simulation->primCmp = new RE_CompRock();
 					setUpPrimitive = clearMesh = true;
-					simulation->useTextures = false;
 				}
 
 				ImGui::EndMenu();
@@ -1079,8 +1045,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 						if (simulation->meshMD5) RE_RES->UnUse(simulation->meshMD5);
 						simulation->meshMD5 = m->GetMD5();
 						if (simulation->meshMD5) RE_RES->Use(simulation->meshMD5);
-
-						simulation->useTextures = true;
 					}
 				}
 				if (none) ImGui::Text("No custom materials on assets");
@@ -1103,66 +1067,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 
-
-			ImGui::Checkbox(simulation->emitlight ? "Disable lighting" : "Enable lighting", & simulation->emitlight);
-			ImGui::ColorEdit3("Light Color", &simulation->lightColor[0]);
-			if (simulation->particleLColor) {
-				if (ImGui::Button("Set particles light color")) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->lightColor = simulation->lightColor;
-				}
-			}
-			ImGui::DragFloat("Specular", &simulation->specular, 0.01f, 0.f, 1.f, "%.2f");
-			if (simulation->particleLColor) {
-				if (ImGui::Button("Set particles specular")) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->specular = simulation->specular;
-				}
-			}
-			ImGui::DragFloat("Intensity", &simulation->intensity, 0.01f, 0.0f, 50.0f, "%.2f");
-			if (simulation->particleLColor) {
-				if (ImGui::Button("Set particles intensity")) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					for (auto p : *particles) p->intensity = simulation->intensity;
-				}
-			}
-			ImGui::DragFloat("Constant", &simulation->constant, 0.01f, 0.001f, 5.0f, "%.2f");
-			ImGui::DragFloat("Linear", &simulation->linear, 0.001f, 0.001f, 5.0f, "%.3f");
-			ImGui::DragFloat("Quadratic", &simulation->quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
-			ImGui::Separator();
-			ImGui::Checkbox(simulation->particleLColor ? "Disable single particle lighting" : "Enable single particle lighting", &simulation->particleLColor);
-			if (simulation->particleLColor) {
-				if (ImGui::Checkbox(simulation->randomLightColor ? "Disable random particle color" : "Enable random particle color", &simulation->randomLightColor)) {
-
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-					if (simulation->randomLightColor)
-						for (auto p : *particles) p->lightColor.Set(RE_MATH->RandomF(), RE_MATH->RandomF(), RE_MATH->RandomF());
-					else
-						for (auto p : *particles) p->lightColor = simulation->lightColor;
-				}
-
-				ImGui::DragFloat2("Specular min-max", simulation->sClamp, 0.005f, 0.0f, 1.0f);
-				if (ImGui::Checkbox(simulation->randomSpecular ? "Disable random particle specular" : "Enable random particle specular", &simulation->randomSpecular)) {
-
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-
-					if (simulation->randomSpecular)
-						for (auto p : *particles) p->specular = RE_MATH->RandomF(simulation->sClamp[0], simulation->sClamp[1]);
-					else
-						for (auto p : *particles) p->specular = simulation->specular;
-				}
-
-				ImGui::DragFloat2("Intensity min-max", simulation->iClamp, 0.1f, 0.0f, 50.0f);
-				if (ImGui::Checkbox(simulation->randomIntensity ? "Disable random particle intensity" : "Enable random particle intensity", &simulation->randomIntensity)) {
-					eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-
-					if (simulation->randomIntensity)
-						for (auto p : *particles) p->intensity = RE_MATH->RandomF(simulation->iClamp[0], simulation->iClamp[1]);
-					else
-						for (auto p : *particles) p->intensity = simulation->intensity;
-				}
-			}
-
+			simulation->light.DrawEditor(simulation->id);
 
 			if (secondary)
 			{

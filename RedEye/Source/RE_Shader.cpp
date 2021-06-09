@@ -151,13 +151,13 @@ void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float 
 	RE_GLCache::ChangeShader(0);
 }
 
-void RE_Shader::UploadModel(const float* _model)
+void RE_Shader::UploadModel(const float* _model) const
 {
 	RE_GLCache::ChangeShader(ID);
 	if(model != -1) RE_ShaderImporter::setFloat4x4(uniforms[model].location, _model);
 }
 
-void RE_Shader::UploadDepth(int texture)
+void RE_Shader::UploadDepth(int texture) const
 {
 	RE_GLCache::ChangeShader(ID);
 	if (depth != -1) RE_ShaderImporter::setInt(uniforms[depth].location, texture);

@@ -34,25 +34,10 @@ private:
 	unsigned int GetBinarySize() const;
 
 private:
+
 	RE_PR_Color color = {};
 	RE_PR_Opacity opacity = {};
-
-	bool emitlight = false;
-
-	math::vec lightColor = math::vec::one;
-	bool randomLightColor = false;
-	float specular = 0.2f;
-	float sClamp[2] = { 0.f, 1.f };
-	bool randomSpecular = false;
-	bool particleLColor = false;
-
-	// Attenuattion
-	float iClamp[2] = { 0.0f, 50.0f };
-	float intensity = 1.0f;
-	bool randomIntensity = false;
-	float constant = 1.0f;
-	float linear = 0.091f;
-	float quadratic = 0.011f;
+	RE_PR_Light light = {};
 
 	const char* meshMD5 = nullptr;
 	ComponentType primCmp = C_POINT;
