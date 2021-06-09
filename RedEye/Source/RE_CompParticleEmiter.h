@@ -32,6 +32,7 @@ public:
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
+	eastl::vector<const char*> GetAllResources() override;
 	void UseResources();
 	void UnUseResources();
 
@@ -43,6 +44,7 @@ public:
 private:
 
 	RE_ParticleEmitter* simulation = nullptr;
+	const char* emitter_md5 = nullptr;
 };
 
 #endif // !__RE_COMPPARTICLEEMITER_H__

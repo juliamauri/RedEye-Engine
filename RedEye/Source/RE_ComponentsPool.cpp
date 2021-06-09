@@ -323,6 +323,8 @@ eastl::vector<const char*> ComponentsPool::GetAllResources()
 	if (!resources.empty()) allResources.insert(allResources.end(), resources.begin(), resources.end());
 	resources = meshPool.GetAllResources();
 	if (!resources.empty()) allResources.insert(allResources.end(), resources.begin(), resources.end());
+	resources = particleSPool.GetAllResources();
+	if (!resources.empty()) allResources.insert(allResources.end(), resources.begin(), resources.end());
 
 	eastl::vector<const char*> ret;
 	int resSize = 0;

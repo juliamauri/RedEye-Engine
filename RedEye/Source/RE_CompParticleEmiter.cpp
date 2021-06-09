@@ -16,6 +16,7 @@
 #include "RE_Shader.h"
 #include "RE_GLCache.h"
 #include "RE_Particle.h"
+#include "RE_Json.h"
 
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
@@ -179,33 +180,50 @@ void RE_CompParticleEmitter::DrawProperties()
 
 void RE_CompParticleEmitter::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
+	node->PushInt("emitterResource", (emitter_md5) ? resources->at(emitter_md5) : -1);
 }
 
 void RE_CompParticleEmitter::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
+	int id = node->PullInt("emitterResource", -1);
+	emitter_md5 = (id != -1) ? resources->at(id) : nullptr;
 }
 
-unsigned int RE_CompParticleEmitter::GetBinarySize() const
-{
-	return 0;
-}
+unsigned int RE_CompParticleEmitter::GetBinarySize() const { return sizeof(int); }
 
 void RE_CompParticleEmitter::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
 {
+	size_t size = sizeof(int);
+	int md5 = (emitter_md5) ? resources->at(emitter_md5) : -1;
+	memcpy(cursor, &md5, size);
+	cursor += size;
 }
 
 void RE_CompParticleEmitter::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
 {
+	size_t size = sizeof(int);
+	int md5 = -1;
+	memcpy(&md5, cursor, size);
+	cursor += size;
+
+	emitter_md5 = (md5 != -1) ? resources->at(md5) : nullptr;
+}
+
+eastl::vector<const char*> RE_CompParticleEmitter::GetAllResources()
+{
+	eastl::vector<const char*> ret;
+	if (emitter_md5) ret.push_back(emitter_md5);
+	return ret;
 }
 
 void RE_CompParticleEmitter::UseResources()
 {
-	if (simulation->meshMD5)RE_RES->Use(simulation->meshMD5);
+	if (emitter_md5) RE_RES->Use(emitter_md5);
 }
 
 void RE_CompParticleEmitter::UnUseResources()
 {
-	if (simulation->meshMD5)RE_RES->UnUse(simulation->meshMD5);
+	if (emitter_md5) RE_RES->UnUse(emitter_md5);
 }
 
 bool RE_CompParticleEmitter::isLighting() const { return simulation->light.type; }
