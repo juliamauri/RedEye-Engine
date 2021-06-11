@@ -1,5 +1,6 @@
 #include "ParticleManager.h"
 
+#include "RE_Profiler.h"
 #include "RE_Math.h"
 #include "RE_Particle.h"
 #include <EASTL/vector.h>
@@ -15,6 +16,18 @@ ParticleManager::ParticleManager()
 }
 
 ParticleManager::~ParticleManager()
+{
+	simulations.clear();
+}
+
+void ParticleManager::Update(const float dt)
+{
+	RE_PROFILE(PROF_Update, PROF_ParticleManager);
+	particle_count = 0u;
+	for (auto sim : simulations) particle_count += sim->Update(dt);
+}
+
+void ParticleManager::Clear()
 {
 	simulations.clear();
 }
@@ -42,15 +55,18 @@ bool ParticleManager::Deallocate(unsigned int index)
 
 void ParticleManager::DrawEditor()
 {
+	ImGui::Text("Total Emitters: %i", simulations.size());
+	ImGui::Text("Total Particles: %i", particle_count);
+
 	ImGui::DragFloat("Point size", &point_size, 1.f, 0.f, 100.f);
 
-	int tmp = static_cast<int>(circle_steps);;
-	if (ImGui::DragInt("Steps", &tmp, 1.f, 0, 64))
+	int in_steps = static_cast<int>(circle_steps);
+	if (ImGui::DragInt("Steps", &in_steps, 1.f, 0, 64))
 	{
 		circle_precompute.clear();
-		circle_precompute.set_capacity(static_cast<unsigned int>(tmp));
+		circle_precompute.set_capacity(static_cast<unsigned int>(in_steps));
 
-		circle_steps = static_cast<float>(tmp);
+		circle_steps = static_cast<float>(in_steps);
 		const float interval = RE_Math::pi_x2 / circle_steps;
 		for (float i = 0.f; i < RE_Math::pi_x2; i += interval)
 			circle_precompute.push_back({ math::Sin(i), -math::Cos(i) });
@@ -59,11 +75,11 @@ void ParticleManager::DrawEditor()
 
 void ParticleManager::DrawDebug() const
 {
+	RE_PROFILE(PROF_Update, PROF_ModulePhysics);
+
 	const float interval = RE_Math::pi_x2 / circle_steps;
 	for (auto sim : simulations)
 	{
-		const math::vec go_pos = math::vec::zero;
-
 		if (sim->initial_pos.type || sim->boundary.type)
 		{
 			glBegin(GL_LINES);
@@ -74,7 +90,7 @@ void ParticleManager::DrawDebug() const
 			case RE_EmissionShape::Type::CIRCLE:
 			{
 				math::Circle c = sim->initial_pos.geo.circle;
-				c.pos += go_pos;
+				c.pos += sim->parent_pos;
 				math::vec previous = c.GetPoint(0.f);
 				for (float i = interval; i < RE_Math::pi_x2; i += interval)
 				{
@@ -87,7 +103,7 @@ void ParticleManager::DrawDebug() const
 			case RE_EmissionShape::Type::RING:
 			{
 				math::Circle c = sim->initial_pos.geo.ring.first;
-				c.pos += go_pos;
+				c.pos += sim->parent_pos;
 				c.r += sim->initial_pos.geo.ring.second;
 				math::vec previous = c.GetPoint(0.f);
 				for (float i = interval; i < RE_Math::pi_x2; i += interval)
@@ -111,21 +127,21 @@ void ParticleManager::DrawDebug() const
 			{
 				for (int i = 0; i < 12; i++)
 				{
-					glVertex3fv(sim->initial_pos.geo.box.Edge(i).a.ptr());
-					glVertex3fv(sim->initial_pos.geo.box.Edge(i).b.ptr());
+					glVertex3fv((sim->initial_pos.geo.box.Edge(i).a + sim->parent_pos).ptr());
+					glVertex3fv((sim->initial_pos.geo.box.Edge(i).b + sim->parent_pos).ptr());
 				}
 
 				break;
 			}
 			case RE_EmissionShape::Type::SPHERE:
 			{
-				DrawAASphere(go_pos + sim->initial_pos.geo.sphere.pos, sim->initial_pos.geo.sphere.r);
+				DrawAASphere(sim->parent_pos + sim->initial_pos.geo.sphere.pos, sim->initial_pos.geo.sphere.r);
 				break;
 			}
 			case RE_EmissionShape::Type::HOLLOW_SPHERE:
 			{
-				DrawAASphere(go_pos + sim->initial_pos.geo.hollow_sphere.first.pos, sim->initial_pos.geo.hollow_sphere.first.r - sim->initial_pos.geo.hollow_sphere.second);
-				DrawAASphere(go_pos + sim->initial_pos.geo.hollow_sphere.first.pos, sim->initial_pos.geo.hollow_sphere.first.r + sim->initial_pos.geo.hollow_sphere.second);
+				DrawAASphere(sim->parent_pos + sim->initial_pos.geo.hollow_sphere.first.pos, sim->initial_pos.geo.hollow_sphere.first.r - sim->initial_pos.geo.hollow_sphere.second);
+				DrawAASphere(sim->parent_pos + sim->initial_pos.geo.hollow_sphere.first.pos, sim->initial_pos.geo.hollow_sphere.first.r + sim->initial_pos.geo.hollow_sphere.second);
 				break;
 			}
 			default: break;
@@ -139,7 +155,7 @@ void ParticleManager::DrawDebug() const
 				const float interval = RE_Math::pi_x2 / circle_steps;
 				for (float j = 1.f; j < 6.f; ++j)
 				{
-					const math::Circle c = sim->boundary.geo.plane.GenerateCircle(go_pos, j * j);
+					const math::Circle c = sim->boundary.geo.plane.GenerateCircle(sim->parent_pos, j * j);
 					math::vec previous = c.GetPoint(0.f);
 					for (float i = interval; i < RE_Math::pi_x2; i += interval)
 					{
@@ -153,29 +169,28 @@ void ParticleManager::DrawDebug() const
 			}
 			case RE_EmissionBoundary::SPHERE:
 			{
-				DrawAASphere(go_pos + sim->boundary.geo.sphere.pos, sim->boundary.geo.sphere.r);
+				DrawAASphere(sim->parent_pos + sim->boundary.geo.sphere.pos, sim->boundary.geo.sphere.r);
 				break;
 			}
 			case RE_EmissionBoundary::AABB:
 			{
 				for (int i = 0; i < 12; i++)
 				{
-					glVertex3fv(sim->boundary.geo.box.Edge(i).a.ptr());
-					glVertex3fv(sim->boundary.geo.box.Edge(i).b.ptr());
+					glVertex3fv((sim->parent_pos + sim->boundary.geo.box.Edge(i).a).ptr());
+					glVertex3fv((sim->parent_pos + sim->boundary.geo.box.Edge(i).b).ptr());
 				}
 
 				break;
 			}
-			default: break;
-			}
+			default: break; }
 
-			// Render Shape Collider
+			/*/ Render Shape Collider
 			if (sim->collider.type == RE_EmissionCollider::Type::SPHERE)
 			{
 				glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
 				for (auto p : sim->particle_pool)
-					DrawAASphere(go_pos + p->position, p->col_radius);
-			}
+					DrawAASphere(sim->local_space ? sim->parent_pos + p->position : p->position, p->col_radius);
+			}*/
 
 			glEnd();
 		}
@@ -187,11 +202,12 @@ void ParticleManager::DrawDebug() const
 			glBegin(GL_POINTS);
 			glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
 
-			for (auto p : sim->particle_pool)
-			{
-				const math::vec pos = go_pos + p->position;
-				glVertex3fv(pos.ptr());
-			}
+			if (sim->local_space)
+				for (auto p : sim->particle_pool)
+					glVertex3fv((sim->parent_pos + p->position).ptr());
+			else
+				for (auto p : sim->particle_pool)
+					glVertex3fv(p->position.ptr());
 
 			glPointSize(1.f);
 			glEnd();

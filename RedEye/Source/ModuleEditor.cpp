@@ -816,5 +816,5 @@ void ModuleEditor::DrawGameObjectItems(const UID parent)
 	if (ImGui::MenuItem("Light")) RE_SCENE->CreateLight(parent);
 	if (ImGui::MenuItem("Max Lights")) RE_SCENE->CreateMaxLights(parent);
 	if (ImGui::MenuItem("Water")) RE_SCENE->CreateWater(parent);
-	if (ImGui::MenuItem("Particle System")) RE_SCENE->CreateParticleSyste(parent);
+	if (ImGui::MenuItem("Particle System")) RE_SCENE->CreateParticleSystem(parent);
 }

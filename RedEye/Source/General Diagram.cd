@@ -684,7 +684,7 @@
     <Position X="7.75" Y="18.25" Width="2" />
     <TypeIdentifier>
       <HashCode>CIwAgIiQUAAAIgAAAAIAAEECAcAEGAIFQTQMQGVERGA=</HashCode>
-      <FileName>RE_CompParticleEmiter.h</FileName>
+      <FileName>RE_CompParticleEmitter.h</FileName>
     </TypeIdentifier>
   </Class>
   <Struct Name="WwiseEvent" Collapsed="true">

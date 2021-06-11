@@ -11,6 +11,9 @@ public:
 	ParticleManager();
 	~ParticleManager();
 
+	void Update(const float dt);
+	void Clear();
+
 	unsigned int Allocate(RE_ParticleEmitter* emitter);
 	bool Deallocate(unsigned int index);
 
@@ -29,10 +32,11 @@ private:
 
 private:
 
+	unsigned int particle_count = 0u;
 	static unsigned int emitter_count;
 
 	float point_size = 2.f;
-	float circle_steps = 12.f;
+	float circle_steps = 4.f;
 	eastl::vector<math::float2> circle_precompute;
 };
 

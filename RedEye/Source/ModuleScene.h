@@ -48,7 +48,7 @@ public:
 	void CreateLight(const UID parent = 0);
 	void CreateMaxLights(const UID parent = 0);
 	void CreateWater(const UID parent = 0);
-	void CreateParticleSyste(const UID parent = 0);
+	void CreateParticleSystem(const UID parent = 0);
 	void AddGOPool(RE_ECS_Pool* toAdd);
 
 	// Scene Gameobject Filtering

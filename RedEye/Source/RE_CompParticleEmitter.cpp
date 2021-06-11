@@ -1,4 +1,4 @@
-#include "RE_CompParticleEmiter.h"
+#include "RE_CompParticleEmitter.h"
 
 #include "Application.h"
 #include "RE_Time.h"
@@ -35,10 +35,12 @@ RE_CompParticleEmitter::~RE_CompParticleEmitter()
 		RE_PHYSICS->RemoveEmitter(simulation);
 }
 
-void RE_CompParticleEmitter::AddSimulation()
+RE_ParticleEmitter* RE_CompParticleEmitter::AddSimulation()
 {
 	if (simulation == nullptr)
 		simulation = RE_PHYSICS->AddEmitter();
+
+	return simulation;
 }
 
 void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
@@ -46,6 +48,8 @@ void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy
 
 void RE_CompParticleEmitter::Update()
 {
+
+
 	if (simulation)
 	{
 		const math::vec global_pos = GetGOCPtr()->GetTransformPtr()->GetGlobalPosition();
@@ -82,8 +86,7 @@ void RE_CompParticleEmitter::Draw() const
 	RE_CompTransform* cT = ModuleRenderer3D::GetCamera()->GetTransform();
 	const math::float3 cUp = cT->GetUp().Normalized();
 
-	const eastl::list<RE_Particle*>* particles = RE_PHYSICS->GetParticles(simulation->id);
-	for (auto p : *particles)
+	for (auto p : simulation->particle_pool)
 	{
 		// Calculate Particle Transform
 		const math::float3 partcleGlobalpos = simulation->local_space ? goPosition + p->position : p->position;

@@ -10,7 +10,7 @@
 #include "RE_CompLight.h"
 #include "RE_CompWater.h"
 #include "RE_CompPrimitive.h"
-#include "RE_CompParticleEmiter.h"
+#include "RE_CompParticleEmitter.h"
 
 template<class COMPCLASS, unsigned int size, unsigned int increment>
 class ComponentPool : public RE_HashMap<COMPCLASS, UID, size, increment>

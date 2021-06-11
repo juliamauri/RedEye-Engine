@@ -1,5 +1,5 @@
-#ifndef __RE_COMPPARTICLEEMITER_H__
-#define __RE_COMPPARTICLEEMITER_H__
+#ifndef __RE_COMPPARTICLEEMITTER_H__
+#define __RE_COMPPARTICLEEMITTER_H__
 
 #include "RE_Component.h"
 #include "MathGeoLib/include/Math/float3.h"
@@ -16,7 +16,7 @@ public:
 	RE_CompParticleEmitter();
 	~RE_CompParticleEmitter();
 
-	void AddSimulation();
+	RE_ParticleEmitter* AddSimulation();
 
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
@@ -47,4 +47,4 @@ private:
 	const char* emitter_md5 = nullptr;
 };
 
-#endif // !__RE_COMPPARTICLEEMITER_H__
+#endif // !__RE_COMPPARTICLEEMITTER_H__

@@ -1,9 +1,10 @@
 #include "RE_ParticleEmitter.h"
 
+#include "RE_Profiler.h"
 #include "Application.h"
 #include "RE_Math.h"
 
-void RE_ParticleEmitter::Update(const float global_dt)
+unsigned int RE_ParticleEmitter::Update(const float global_dt)
 {
 	switch (state)
 	{
@@ -28,8 +29,9 @@ void RE_ParticleEmitter::Update(const float global_dt)
 		}
 		break;
 	}
-	default: break;
-	}
+	default: break; }
+
+	return particle_count;
 }
 
 void RE_ParticleEmitter::Reset()
@@ -44,6 +46,7 @@ void RE_ParticleEmitter::Reset()
 
 bool RE_ParticleEmitter::IsTimeValid(const float global_dt)
 {
+	RE_PROFILE(PROF_ParticleTiming, PROF_ParticleEmitter);
 	// Check time limitations
 	local_dt = global_dt * time_muliplier;
 	if (total_time < start_delay)
@@ -68,6 +71,7 @@ bool RE_ParticleEmitter::IsTimeValid(const float global_dt)
 
 void RE_ParticleEmitter::UpdateParticles()
 {
+	RE_PROFILE(PROF_ParticleUpdate, PROF_ParticleEmitter);
 	max_dist_sq = max_speed_sq = 0.f;
 	for (eastl::list<RE_Particle*>::iterator p1 = particle_pool.begin(); p1 != particle_pool.end();)
 	{
@@ -131,6 +135,7 @@ void RE_ParticleEmitter::UpdateParticles()
 
 void RE_ParticleEmitter::UpdateSpawn()
 {
+	RE_PROFILE(PROF_ParticleSpawn, PROF_ParticleEmitter);
 	if (spawn_interval.IsActive(local_dt))
 	{
 		const unsigned int to_add = RE_Math::MinUI(
@@ -150,6 +155,7 @@ void RE_ParticleEmitter::UpdateSpawn()
 
 void RE_ParticleEmitter::ImpulseCollision(RE_Particle& p1, RE_Particle& p2, const float combined_radius) const
 {
+	RE_PROFILE(PROF_ParticleCollision, PROF_ParticleEmitter);
 	// Check particle collision
 	const math::vec collision_dir = p1.position - p2.position;
 	const float dist2 = collision_dir.Dot(collision_dir);

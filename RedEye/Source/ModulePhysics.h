@@ -29,7 +29,7 @@ private:
 	ParticleManager particles;
 
 	bool use_fixed_dt = true;
-	float fixed_dt = 1.f / 60.f;
+	float fixed_dt = 1.f / 30.f;
 	float dt_offset = 0.f;
 
 	float update_count = 0.f;

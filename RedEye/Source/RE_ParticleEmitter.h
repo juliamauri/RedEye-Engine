@@ -12,7 +12,7 @@ class RE_ParticleEmitter
 {
 public:
 
-	void Update(const float global_dt);
+	unsigned int Update(const float global_dt);
 
 private:
 
@@ -51,7 +51,7 @@ public:
 	float time_muliplier = 1.f;
 
 	// Spawning
-	unsigned int max_particles = 1000u;
+	unsigned int max_particles = 5000u;
 	RE_EmissionInterval spawn_interval = {};
 	RE_EmissionSpawn spawn_mode = {};
 

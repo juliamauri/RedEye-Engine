@@ -2,10 +2,12 @@
 
 #define PROFILING_ENABLED // undefine to disable any profiling methods
 #define INTERNAL_PROFILING // undefine to use Optick Profiling
+#define RECORD_FROM_START false
+#define PARTICLE_PHYSICS_TEST
 
 enum RE_ProfiledFunc : unsigned short
 {
-	PROF_Init,
+	PROF_Init, // Modules
 	PROF_Start,
 	PROF_PreUpdate,
 	PROF_Update,
@@ -15,10 +17,10 @@ enum RE_ProfiledFunc : unsigned short
 	PROF_Save,
 	PROF_Clear,
 
-	PROF_ReadAssetChanges,
+	PROF_ReadAssetChanges, // File System
 	PROF_DroppedFile,
 
-	PROF_GetActiveShaders,
+	PROF_GetActiveShaders, // Rendering
 	PROF_DrawScene,
 	PROF_DrawSkybox,
 	PROF_DrawStencil,
@@ -26,18 +28,25 @@ enum RE_ProfiledFunc : unsigned short
 	PROF_DrawDebug,
 	PROF_DrawThumbnails,
 
-	PROF_CameraRaycast,
+	PROF_CameraRaycast, // Cameras
 	PROF_EditorCamera,
 
-	PROF_ThumbnailResources,
+	PROF_ThumbnailResources, // Resources
 	PROF_InitChecker,
 	PROF_InitShaders,
 	PROF_InitWater,
 	PROF_InitMaterial,
 	PROF_InitSkyBox,
 
-	PROF_SetWindowProperties,
+	PROF_SetWindowProperties, // Window
 	PROF_CreateWindow,
+
+	PROF_ParticleTiming, // Particles
+	PROF_ParticleUpdate,
+	PROF_ParticleSpawn,
+	PROF_ParticleCollision,
+	PROF_ParticleBoundPCol,
+	PROF_ParticleBoundSCol,
 
 	PROF_FUNC_MAX
 };
@@ -56,6 +65,11 @@ enum RE_ProfiledClass : unsigned short
 	PROF_ModuleScene, // Scene
 	PROF_CameraManager,
 	PROF_PrimitiveManager,
+
+	PROF_ModulePhysics, // Physics
+	PROF_ParticleManager,
+	PROF_ParticleEmitter,
+	PROF_ParticleBoundary,
 
 	PROF_ModuleEditor, // UI
 	PROF_ThumbnailManager,
@@ -80,6 +94,12 @@ enum RE_ProfiledClass : unsigned short
 
 #ifdef PROFILING_ENABLED
 #ifdef INTERNAL_PROFILING
+
+#ifdef PARTICLE_PHYSICS_TEST
+#define FILE_OUT_NAME "Particles Red Eye Profiling.json"
+#else
+#define FILE_OUT_NAME "General Red Eye Profiling.json"
+#endif // PARTICLE_PHYSICS_TEST
 
 #include <EASTL\vector.h>
 
@@ -117,8 +137,9 @@ namespace RE_Profiler
 #define RE_PROFILE_FRAME() ProfilingTimer::frame++;
 
 #else
+
 #include "Optick\include\optick.h"
-#define RE_OPTICK_NAME(function)\
+#define RE_OPTICK_NAME(function)\ // missing some definitions & could be improved
 	function == PROF_Init ? "Init" : \
 	function == PROF_Start ? "Start" : \
 	function == PROF_PreUpdate ? "PreUpdate" : \
@@ -139,18 +160,28 @@ namespace RE_Profiler
 	function == PROF_EditorCamera ? "Editor Camera" : "Undefined"
 
 #define RE_OPTICK_CATEGORY(category)\
-	(category < PROF_ModuleInput ?	Optick::Category::GameLogic :	\
-	(category < PROF_ModuleScene ?	Optick::Category::Input :		\
-	(category < PROF_ModuleEditor ?	Optick::Category::Scene :		\
-	(category < PROF_ModuleRender ?	Optick::Category::UI :			\
-	(category < PROF_ModuleAudio ?	Optick::Category::Rendering :	\
-	(category < PROF_FileSystem ?	Optick::Category::Audio : Optick::Category::IO))))))
+	(category < PROF_ModuleInput	?	Optick::Category::GameLogic :	\
+	(category < PROF_ModuleScene	?	Optick::Category::Input :		\
+	(category < PROF_ModulePhysics	?	Optick::Category::Scene :		\
+	(category < PROF_ModuleEditor	?	Optick::Category::Physics :		\
+	(category < PROF_ModuleRender	?	Optick::Category::UI :			\
+	(category < PROF_ModuleAudio	?	Optick::Category::Rendering :	\
+	(category < PROF_FileSystem 	?	Optick::Category::Audio : Optick::Category::IO)))))))
 
 #define RE_PROFILE(func, context) OPTICK_CATEGORY(RE_OPTICK_NAME(func),	RE_OPTICK_CATEGORY(context))
 #define RE_PROFILE_FRAME() OPTICK_FRAME("MainThread RedEye")
+
+#undef PARTICLE_PHYSICS_TEST
+
 #endif // INTERNAL_PROFILING
 
 #else
+
 #define RE_PROFILE(func, context)
 #define RE_PROFILE_FRAME()
+
+#undef INTERNAL_PROFILING
+#undef PARTICLE_PHYSICS_TEST
+
 #endif // PROFILING_ENABLED
+

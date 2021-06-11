@@ -10,7 +10,7 @@
 #include <iostream>
 #include <fstream>
 
-bool ProfilingTimer::recording = true;
+bool ProfilingTimer::recording = RECORD_FROM_START;
 unsigned long ProfilingTimer::frame = 0u;
 eastl::vector<ProfilingOperation> ProfilingTimer::operations;
 
@@ -85,8 +85,24 @@ void RE_Profiler::Deploy()
 	writer.Key("Operations");
 	writer.StartArray();
 
-	const char* function_name[PROF_FUNC_MAX] = { "Init", "Start", "PreUpdate", "Update", "PostUpdate", "CleanUp", "Load", "Save", "Clear", "Read Asset Changes", "Dropped File", "Get Active Shaders", "Draw Scene", "Draw Skybox", "Draw Stencil", "Draw Editor", "Draw Debug", "Draw Thumbnails", "Camera Raycast", "Editor Camera", "Thumbnail Resources", "Init Checker", "Init Shaders", "Init Water", "Init Material", "Init SkyBox", "Set Window Properties", "Create Window" };
-	const char* class_name[PROF_CLASS_MAX] = { "Application", "Log", "Time", "Math", "Hardware", "Module Input", "Module Window", "Module Scene", "Camera Manager", "Primitive Manager", "Module Editor", "Thumbnail Manager", "Module Render", "FBO Manager", "GL Cache", "Module Audio", "File System", "Resources Manager", "Model Importer", "Shader Importer", "ECS Importer", "Texture Importer", "Skybox Importer", "Internal Resources" };
+	const char* function_name[PROF_FUNC_MAX] = {
+		"Init", "Start", "PreUpdate", "Update", "PostUpdate", "CleanUp", "Load", "Save", "Clear",
+		"Read Asset Changes", "Dropped File",
+		"Get Active Shaders", "Draw Scene", "Draw Skybox", "Draw Stencil", "Draw Editor", "Draw Debug", "Draw Thumbnails",
+		"Camera Raycast", "Editor Camera",
+		"Thumbnail Resources", "Init Checker", "Init Shaders", "Init Water", "Init Material", "Init SkyBox",
+		"Set Window Properties", "Create Window",
+		"Particle Timing", "Particle Update", "Particle Spawn", "Particle Collision", "Particle BoundPCol", "Particle BoundSCol" };
+
+	const char* class_name[PROF_CLASS_MAX] = {
+		"Application", "Log", "Time", "Math", "Hardware",
+		"Module Input", "Module Window",
+		"Module Scene", "Camera Manager", "Primitive Manager",
+		"Module Physics", "Particle Manager",  "Particle Emitter", "Particle Boundary",
+		"Module Editor", "Thumbnail Manager",
+		"Module Render", "FBO Manager", "GL Cache",
+		"Module Audio",
+		"File System", "Resources Manager", "Model Importer", "Shader Importer", "ECS Importer", "Texture Importer", "Skybox Importer", "Internal Resources" };
 
 	for (auto op : ProfilingTimer::operations)
 	{
@@ -107,7 +123,7 @@ void RE_Profiler::Deploy()
 	writer.EndObject();
 
 	std::ofstream file;
-	file.open("Red Eye Profiling.json", std::ios::trunc);
+	file.open(FILE_OUT_NAME, std::ios::trunc);
 	file << s.GetString();
 	file.close();
 }

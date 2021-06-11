@@ -1,5 +1,6 @@
 #include "ModulePhysics.h"
 
+#include "RE_Profiler.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "RE_PrimitiveManager.h"
@@ -11,6 +12,7 @@ ModulePhysics::~ModulePhysics() {}
 
 void ModulePhysics::Update()
 {
+	RE_PROFILE(PROF_Update, PROF_ModulePhysics);
 	const float global_dt = RE_TIME->GetDeltaTime();
 
 	if (use_fixed_dt)
@@ -27,15 +29,13 @@ void ModulePhysics::Update()
 		if (final_dt > 0.f)
 		{
 			update_count++;
-			for (auto sim : particles.simulations)
-				sim->Update(final_dt);
+			particles.Update(final_dt);
 		}
 	}
 	else
 	{
 		update_count++;
-		for (auto sim : particles.simulations)
-			sim->Update(global_dt);
+		particles.Update(global_dt);
 	}
 
 	time_counter += global_dt;
@@ -49,7 +49,7 @@ void ModulePhysics::Update()
 
 void ModulePhysics::CleanUp()
 {
-	particles.simulations.clear();
+	particles.Clear();
 }
 
 void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const

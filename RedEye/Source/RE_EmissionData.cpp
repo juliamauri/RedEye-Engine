@@ -1,5 +1,7 @@
 #include "RE_EmissionData.h"
 
+
+#include "RE_Profiler.h"
 #include "Application.h"
 #include "ModulePhysics.h"
 #include "RE_Math.h"
@@ -331,7 +333,7 @@ unsigned int RE_EmissionSpawn::GetBinarySize() const
 math::vec RE_EmissionShape::GetPosition() const
 {
 	switch (type) {
-	case CIRCLE: return geo.circle.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2);
+	case CIRCLE: return ((geo.circle.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2) - geo.circle.pos) * RE_MATH->RandomF()) + geo.circle.pos;
 	case RING: return geo.ring.first.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2) + (RE_MATH->RandomNVec() * geo.ring.second);
 	case AABB: return { 
 			geo.box.minPoint.x + (RE_MATH->RandomF() * (geo.box.maxPoint.x - geo.box.minPoint.x)),
@@ -1356,6 +1358,7 @@ unsigned int RE_EmissionExternalForces::GetBinarySize() const
 
 bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 {
+	RE_PROFILE(PROF_ParticleBoundPCol, PROF_ParticleBoundary);
 	switch (type)
 	{
 	case Type::PLANE:
@@ -1444,6 +1447,7 @@ bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 
 bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 {
+	RE_PROFILE(PROF_ParticleBoundSCol, PROF_ParticleBoundary);
 	switch (type)
 	{
 	case Type::PLANE:
@@ -1540,10 +1544,10 @@ void RE_EmissionBoundary::DrawEditor()
 	if (ImGui::Combo("Boundary Type", &tmp, "None\0Plane\0Sphere\0AABB\0"))
 	{
 		switch (type = static_cast<Type>(tmp)) {
-		case RE_EmissionBoundary::NONE: break;
 		case RE_EmissionBoundary::PLANE: geo.plane = math::Plane({ 0.f, 1.f, 0.f }, 0.f); break;
 		case RE_EmissionBoundary::SPHERE: geo.sphere = math::Sphere({ 0.f, 0.f, 0.f }, 10.f); break;
-		case RE_EmissionBoundary::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one * 5.f); break; }
+		case RE_EmissionBoundary::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one * 5.f); break; 
+		default: break; }
 	}
 
 	if (type)

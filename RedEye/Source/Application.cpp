@@ -55,12 +55,10 @@ Application::~Application()
 	DEL(math);
 	DEL(time);
 
-#ifdef PROFILING_ENABLED
 #ifdef INTERNAL_PROFILING
 	if (ProfilingTimer::recording) RE_Profiler::Deploy();
 	RE_Profiler::Clear();
 #endif // INTERNAL_PROFILING
-#endif // PROFILING_ENABLED
 }
 
 bool Application::Init(int _argc, char* _argv[])
@@ -113,34 +111,33 @@ void Application::MainLoop()
 	RE_LOG_SEPARATOR("Entering Application's Main Loop - %.3f", time->FrameDeltaTime());
 	do {
 		RE_PROFILE_FRAME();
+		RE_PROFILE(PROF_Update, PROF_Application);
+
+		time->FrameDeltaTime();
+
+		input->PreUpdate();
+		editor->PreUpdate();
+
+		scene->Update();
+		physics->Update();
+		editor->Update();
+
+		scene->PostUpdate();
+		renderer->PostUpdate();
+		audio->PostUpdate();
+
+		if (flags & LOAD_CONFIG) LoadConfig();
+		if (flags & SAVE_CONFIG) SaveConfig();
+		if (time->GetState() == GS_TICK)
 		{
-			RE_PROFILE(PROF_Update, PROF_Application);
-			time->FrameDeltaTime();
-
-			input->PreUpdate();
-			editor->PreUpdate();
-
-			scene->Update();
-			physics->Update();
-			editor->Update();
-
-			scene->PostUpdate();
-			renderer->PostUpdate();
-			audio->PostUpdate();
-
-			if (flags & LOAD_CONFIG) LoadConfig();
-			if (flags & SAVE_CONFIG) SaveConfig();
-			if (time->GetState() == GS_TICK)
-			{
-				time->PauseGameTimer();
-				scene->OnPause();
-			}
-
-			unsigned int extra_ms = time->FrameExtraMS();
-			if (extra_ms > 0) extra_ms = fs->ReadAssetChanges(extra_ms);
-			if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
-			if (extra_ms > 0) time->Delay(extra_ms); 
+			time->PauseGameTimer();
+			scene->OnPause();
 		}
+
+		unsigned int extra_ms = time->FrameExtraMS();
+		if (extra_ms > 0) extra_ms = fs->ReadAssetChanges(extra_ms);
+		if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
+		if (extra_ms > 0) time->Delay(extra_ms);
 
 	} while (!(flags & WANT_TO_QUIT));
 }
@@ -168,7 +165,7 @@ void Application::RecieveEvent(const Event& e)
 {
 	switch (e.type)
 	{
-	case PLAY: 
+	case PLAY:
 	{
 		time->StartGameTimer();
 		scene->OnPlay();
@@ -195,7 +192,7 @@ void Application::RecieveEvent(const Event& e)
 	case REQUEST_LOAD: flags |= LOAD_CONFIG; break;
 	case REQUEST_SAVE: flags |= SAVE_CONFIG; break;
 	case REQUEST_QUIT: flags |= WANT_TO_QUIT; break;
-	}
+	default: break;	}
 }
 
 void Application::LoadConfig()
