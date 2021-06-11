@@ -262,8 +262,8 @@ void RE_FBOManager::ClearFBOBuffers(unsigned int ID, const float color[4])
 		mask |= GL_STENCIL_BUFFER_BIT;
 	}
 
-	glClear(mask);
 	glClearColor(color[0], color[1], color[2], color[3]);
+	glClear(mask);
 }
 
 void RE_FBOManager::ClearFBO(unsigned int ID)
