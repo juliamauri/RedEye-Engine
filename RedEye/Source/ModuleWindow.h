@@ -5,8 +5,6 @@
 #include <EASTL/string.h>
 
 struct SDL_Window;
-struct SDL_Surface;
-union SDL_Event;
 
 class ModuleWindow : public Module
 {
@@ -33,7 +31,7 @@ public:
 	float GetAspectRatio() const;
 
 	float GetBrightness()const;
-	bool CheckFlag(uint flag) const;
+	bool CheckFlag(const unsigned int flag) const;
 
 	void SetBrightness(const float brightness);
 	void SetTitle(const char* new_title = nullptr);
@@ -57,7 +55,7 @@ private:
 public:
 
 	SDL_Window* window = nullptr;
-	SDL_Surface* screen_surface = nullptr;
+	struct SDL_Surface* screen_surface = nullptr;
 
 private:
 

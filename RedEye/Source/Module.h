@@ -1,7 +1,6 @@
 #ifndef __MODULE_H__
 #define __MODULE_H__
 
-#include "Globals.h"
 #include "EventListener.h"
 
 class Module : public EventListener

@@ -16,7 +16,7 @@ enum KEY_STATE : char
 
 struct MouseData
 {
-	KEY_STATE mouse_buttons[MAX_MOUSE_BUTTONS];
+	KEY_STATE mouse_buttons[MAX_MOUSE_BUTTONS] = {};
 
 	int mouse_x = -1;
 	int mouse_y = -1;

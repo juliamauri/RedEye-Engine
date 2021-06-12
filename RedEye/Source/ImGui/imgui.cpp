@@ -20,6 +20,8 @@
 // come with any guarantee of forward compatibility. Discussing your changes on the GitHub Issue Tracker may lead you
 // to a better solution or official support for them.
 
+#pragma warning disable warning-list
+
 /*
 
 Index of this file:

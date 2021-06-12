@@ -15,6 +15,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 
+#include "ImGui/imgui.h"
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>

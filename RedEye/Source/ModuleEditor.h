@@ -1,39 +1,11 @@
 #ifndef __MODULEEDITOR__
 #define __MODULEEDITOR__
 
+#include "Globals.h"
 #include "Module.h"
-#include "ImGui\imgui.h"
 #include <EASTL/list.h>
 
-union SDL_Event;
-class RE_Command;
-class RE_CommandManager;
-class RE_ThumbnailManager;
-class RE_CompCamera;
-class RE_CompGrid;
-
-class EditorWindow;
-class ConsoleWindow;
-class AssetsWindow;
-class WwiseWindow;
-class DemoWindow;
-class ConfigWindow;
-class HeriarchyWindow;
-class PropertiesWindow;
-class AboutWindow;
-class RandomTest;
-class PlayPauseWindow;
-class PopUpWindow;
-class MaterialEditorWindow;
-class ShaderEditorWindow;
-class SkyBoxEditorWindow;
-class TextEditorManagerWindow;
-class WaterPlaneResourceWindow;
 class SceneEditorWindow;
-class SceneGameWindow;
-class TransformDebugWindow;
-class RendererDebugWindow;
-class ParticleEmiiterEditorWindow;
 
 class ModuleEditor : public Module
 {
@@ -52,7 +24,7 @@ public:
 
 	// Draws
 	void Draw() const;
-	void DrawDebug(RE_CompCamera* current_camera) const;
+	void DrawDebug(class RE_CompCamera* current_camera) const;
 	void DrawHeriarchy();
 
 	// UI
@@ -65,7 +37,7 @@ public:
 
 	// Editor Windows
 	void ReportSoftawe(const char* name, const char* version, const char* website) const;
-	void HandleSDLEvent(SDL_Event* e);
+	void HandleSDLEvent(union SDL_Event* e);
 	void PopUpFocus(bool focus);
 	const char* GetAssetsPanelPath() const;
 	void SelectUndefinedFile(eastl::string* toSelect) const;
@@ -76,7 +48,7 @@ public:
 	UID GetEditingParticleEmittorComponent() const;
 
 	// Commands
-	void PushCommand(RE_Command* cmd);
+	void PushCommand(class RE_Command* cmd);
 	void ClearCommands();
 
 	SceneEditorWindow* GetSceneEditor() { return sceneEditorWindow; }
@@ -87,12 +59,12 @@ private:
 
 public:
 
-	RE_CommandManager* commands = nullptr;
-	RE_ThumbnailManager* thumbnails = nullptr;
+	class RE_CommandManager* commands = nullptr;
+	class RE_ThumbnailManager* thumbnails = nullptr;
 
 	bool debug_drawing = true;
 
-	PopUpWindow* popupWindow = nullptr;
+	class PopUpWindow* popupWindow = nullptr;
 
 private:
 
@@ -102,34 +74,34 @@ private:
 	bool popUpFocus = false;
 
 	// Windows & Tools
-	eastl::list<EditorWindow*> windows, tools;
+	eastl::list<class EditorWindow*> windows, tools;
 
 	// General Windows
-	ConsoleWindow* console = nullptr;
-	AssetsWindow* assets = nullptr;
-	WwiseWindow* wwise = nullptr;
-	ConfigWindow* config = nullptr;
-	HeriarchyWindow* heriarchy = nullptr;
-	PropertiesWindow* properties = nullptr;
-	PlayPauseWindow* play_pause = nullptr;
-	AboutWindow* about = nullptr;
-	MaterialEditorWindow* materialeditor = nullptr;
-	ShaderEditorWindow* shadereditor = nullptr;
-	SkyBoxEditorWindow* skyboxeditor = nullptr;
-	TextEditorManagerWindow* texteditormanager = nullptr;
-	WaterPlaneResourceWindow* waterplaneResourceWindow = nullptr;
-	ParticleEmiiterEditorWindow* particleEmitterWindow = nullptr;
+	class ConsoleWindow* console = nullptr;
+	class AssetsWindow* assets = nullptr;
+	class WwiseWindow* wwise = nullptr;
+	class ConfigWindow* config = nullptr;
+	class HeriarchyWindow* heriarchy = nullptr;
+	class PropertiesWindow* properties = nullptr;
+	class PlayPauseWindow* play_pause = nullptr;
+	class AboutWindow* about = nullptr;
+	class MaterialEditorWindow* materialeditor = nullptr;
+	class ShaderEditorWindow* shadereditor = nullptr;
+	class SkyBoxEditorWindow* skyboxeditor = nullptr;
+	class TextEditorManagerWindow* texteditormanager = nullptr;
+	class WaterPlaneResourceWindow* waterplaneResourceWindow = nullptr;
+	class ParticleEmiiterEditorWindow* particleEmitterWindow = nullptr;
 
 	// Scene views
 	SceneEditorWindow* sceneEditorWindow = nullptr;
-	SceneGameWindow* sceneGameWindow = nullptr;
+	class SceneGameWindow* sceneGameWindow = nullptr;
 
 	// Tools
-	RandomTest* rng = nullptr;
+	class RandomTest* rng = nullptr;
 
 	//Debug info
-	TransformDebugWindow* transDebInfo = nullptr;
-	RendererDebugWindow* rendDebInfo = nullptr;
+	class TransformDebugWindow* transDebInfo = nullptr;
+	class RendererDebugWindow* rendDebInfo = nullptr;
 
 	// Camera Controls
 	bool select_on_mc = true;
@@ -141,7 +113,7 @@ private:
 	UID selected = 0;
 
 	// Grid
-	RE_CompGrid* grid = nullptr;
+	class RE_CompGrid* grid = nullptr;
 	float grid_size[2];
 
 	// Debug Drawing

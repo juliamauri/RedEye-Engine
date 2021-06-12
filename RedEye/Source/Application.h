@@ -4,22 +4,6 @@
 #include "EventListener.h"
 #include "RE_ConsoleLog.h"
 
-class RE_Time;
-class RE_Math;
-class RE_Hardware;
-
-class Module;
-class ModuleInput;
-class ModuleWindow;
-class ModuleScene;
-class ModulePhysics;
-class ModuleEditor;
-class ModuleRenderer3D;
-class ModuleAudio;
-
-class RE_FileSystem;
-class RE_ResourceManager;
-
 class Application : public EventListener
 {
 public:
@@ -48,22 +32,23 @@ public:
 
 	// Utility
 	RE_ConsoleLog log;
-	RE_Time* time = nullptr;
-	RE_Math* math = nullptr;
-	RE_Hardware* hardware = nullptr;
+
+	class RE_Time* time = nullptr;
+	class RE_Math* math = nullptr;
+	class RE_Hardware* hardware = nullptr;
 
 	// Modules
-	ModuleInput* input = nullptr;
-	ModuleWindow* window = nullptr;
-	ModuleScene* scene = nullptr;
-	ModulePhysics* physics = nullptr;
-	ModuleEditor* editor = nullptr;
-	ModuleRenderer3D* renderer = nullptr;
-	ModuleAudio* audio = nullptr;
+	class ModuleInput* input = nullptr;
+	class ModuleWindow* window = nullptr;
+	class ModuleScene* scene = nullptr;
+	class ModulePhysics* physics = nullptr;
+	class ModuleEditor* editor = nullptr;
+	class ModuleRenderer3D* renderer = nullptr;
+	class ModuleAudio* audio = nullptr;
 
 	// Files & Resources
-	RE_FileSystem* fs = nullptr;
-	RE_ResourceManager* res = nullptr;
+	class RE_FileSystem* fs = nullptr;
+	class RE_ResourceManager* res = nullptr;
 
 private:
 

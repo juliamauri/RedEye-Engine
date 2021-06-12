@@ -1,5 +1,6 @@
 #include "ModuleWindow.h"
 
+#include "Globals.h"
 #include "RE_Profiler.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
@@ -204,7 +205,7 @@ float ModuleWindow::GetBrightness()const
 	return brightness;
 }
 
-bool ModuleWindow::CheckFlag(uint flag) const
+bool ModuleWindow::CheckFlag(const unsigned int flag) const
 {
 	return flags & flag;
 }
