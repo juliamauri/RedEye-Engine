@@ -18,6 +18,7 @@ public:
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override {}
 
 	void Draw() const override {}
+	void SimpleDraw()const;
 	void DrawProperties() override {}
 	virtual void DrawPrimPropierties() { }
 

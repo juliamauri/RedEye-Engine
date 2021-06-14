@@ -70,13 +70,6 @@ void RE_CompParticleEmitter::Draw() const
 	RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
 
-	unsigned int triangleCount = 1;
-	if (simulation->primCmp)
-	{
-		RE_GLCache::ChangeVAO(simulation->primCmp->GetVAO());
-		triangleCount = simulation->primCmp->GetTriangleCount();
-	}
-
 	// Get GO Transform
 	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
 	const math::float3 goPosition = transform->GetGlobalPosition();
@@ -161,7 +154,7 @@ void RE_CompParticleEmitter::Draw() const
 
 		// Draw Call
 		if (simulation->meshMD5) dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
-		else glDrawElements(GL_TRIANGLES, triangleCount * 3, GL_UNSIGNED_SHORT, nullptr);
+		else dynamic_cast<RE_CompPrimitive*>(simulation->primCmp)->SimpleDraw();
 	}
 }
 

@@ -31,6 +31,13 @@ RE_CompPrimitive::RE_CompPrimitive(ComponentType t) : RE_Component(t)
 	color = math::vec(1.0f, 0.15f, 0.15f);
 }
 
+void RE_CompPrimitive::SimpleDraw() const
+{
+	RE_GLCache::ChangeVAO(VAO);
+	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	RE_GLCache::ChangeVAO(0);
+}
+
 bool RE_CompPrimitive::CheckFaceCollision(const math::Ray& ray, float& distance) const
 {
 	// TODO Rub: Primitive raycast checking
