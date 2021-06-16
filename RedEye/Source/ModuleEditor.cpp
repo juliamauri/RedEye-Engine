@@ -691,6 +691,16 @@ UID ModuleEditor::GetEditingParticleEmittorComponent() const
 	return particleEmitterWindow->GetComponent();
 }
 
+bool ModuleEditor::EditorSceneNeedsRender() const
+{
+	return sceneEditorWindow->NeedRender();
+}
+
+bool ModuleEditor::GameSceneNeedsRender() const
+{
+	return sceneGameWindow->NeedRender();
+}
+
 void ModuleEditor::PushCommand(RE_Command* cmd) { commands->PushCommand(cmd); }
 void ModuleEditor::ClearCommands() { commands->Clear(); }
 

@@ -291,8 +291,8 @@ void ModuleRenderer3D::PostUpdate()
 	render_views[0].camera = RE_CameraManager::EditorCamera();
 	render_views[1].camera = RE_CameraManager::MainCamera();
 	render_views[2].camera = RE_CameraManager::ParticleEditorCamera();
-	PushSceneRend(render_views[1]);
-	PushSceneRend(render_views[0]);
+	if (RE_EDITOR->EditorSceneNeedsRender()) PushSceneRend(render_views[0]);
+	if (RE_EDITOR->GameSceneNeedsRender()) PushSceneRend(render_views[1]);
 
 	while (!rendQueue.empty()) {
 		RenderQueue rend = rendQueue.top();

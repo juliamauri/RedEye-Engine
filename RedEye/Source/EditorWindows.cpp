@@ -1215,7 +1215,7 @@ void SceneEditorWindow::Recalc() { recalc = true; }
 
 void SceneEditorWindow::Draw(bool secondary)
 {
-	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	if (need_render = ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
 		if (secondary)
 		{
@@ -1378,7 +1378,7 @@ void SceneGameWindow::Recalc() { recalc = true; }
 
 void SceneGameWindow::Draw(bool secondary)
 {
-	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	if (need_render = ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
 		if (secondary)
 		{

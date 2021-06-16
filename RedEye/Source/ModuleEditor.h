@@ -46,6 +46,8 @@ public:
 	void StartEditingParticleEmiter(class RE_ParticleEmitter* sim, UID fromComponent);
 	bool IsParticleEditorActive() const;
 	UID GetEditingParticleEmittorComponent() const;
+	bool EditorSceneNeedsRender() const;
+	bool GameSceneNeedsRender() const;
 
 	// Commands
 	void PushCommand(class RE_Command* cmd);

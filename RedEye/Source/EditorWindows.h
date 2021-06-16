@@ -358,6 +358,7 @@ public:
 	unsigned int GetSceneHeight()const { return (heigth == 0) ? 500 : heigth; }
 
 	bool isSelected()const { return isWindowSelected; }
+	bool NeedRender()const { return need_render; };
 
 	void UpdateViewPort();
 	void Recalc();
@@ -380,6 +381,7 @@ private:
 
 	bool isWindowSelected = false;
 	bool recalc = false;
+	bool need_render = true;
 };
 
 class SceneGameWindow :public EditorWindow
@@ -392,6 +394,7 @@ public:
 	unsigned int GetSceneHeight()const { return (heigth == 0) ? 500 : heigth; }
 
 	bool isSelected()const { return isWindowSelected; }
+	bool NeedRender()const { return need_render; };
 
 	void UpdateViewPort();
 	void Recalc();
@@ -405,6 +408,7 @@ private:
 
 	bool isWindowSelected = false;
 	bool recalc = false;
+	bool need_render = true;
 };
 
 class TransformDebugWindow : public EditorWindow
