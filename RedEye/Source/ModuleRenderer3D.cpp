@@ -225,6 +225,8 @@ void ModuleRenderer3D::PostUpdate()
 				exist = false;
 			}
 
+			RE_GLCache::ChangeVAO(0);
+
 			switch (rend.type)
 			{
 			case RenderType::T_R_GO:
@@ -1139,7 +1141,16 @@ void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
 	internalCamera->Focus(go->GetGlobalBoundingBox().CenterPoint());
 	internalCamera->Update();
 
-	for (auto sMD5 : activeShaders) (dynamic_cast<RE_Shader*>(RE_RES->At(sMD5)))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+	for (auto sMD5 : activeShaders)
+	{
+		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));
+		if (!shader->uniforms.empty())
+			shader->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+		else
+		{
+			int julius = 0;
+		}
+	}
 
 	go->DrawChilds();
 }
@@ -1160,7 +1171,15 @@ void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
 	RE_INPUT->ResumeEvents();
 
 	for (auto sMD5 : activeShaders)
-		dynamic_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+	{
+		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));
+		if (!shader->uniforms.empty())
+			shader->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+		else
+		{
+			int julius = 0;
+		}
+	}
 
 	mat->UploadToShader(math::float4x4::identity.ptr(), false, true);
 
@@ -1186,7 +1205,15 @@ void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
 	RE_INPUT->ResumeEvents();
 
 	for (auto sMD5 : activeShaders)
-		dynamic_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+	{
+		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));
+		if (!shader->uniforms.empty())
+			shader->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+		else
+		{
+			int julius = 0;
+		}
+	}
 
 	RE_GLCache::ChangeTextureBind(0);
 
