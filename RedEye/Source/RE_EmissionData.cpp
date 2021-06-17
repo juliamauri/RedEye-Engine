@@ -1,7 +1,10 @@
 #include "RE_EmissionData.h"
 
 
+#ifdef PARTICLE_PHYSICS_TEST
 #include "RE_Profiler.h"
+#endif
+
 #include "Application.h"
 #include "ModulePhysics.h"
 #include "RE_Math.h"
@@ -1367,6 +1370,10 @@ bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 		float dist_to_plane = geo.plane.SignedDistance(p.position);
 		if (dist_to_plane <= 0.f)
 		{
+#ifdef PARTICLE_PHYSICS_TEST
+			ProfilingTimer::p_col_boundary++;
+#endif // PARTICLE_PHYSICS_TEST
+
 			if (effect == RE_EmissionBoundary::KILL) return false;
 
 			// Resolve intersection
@@ -1392,6 +1399,10 @@ bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 		float overlap_distance = p.position.DistanceSq(geo.sphere.pos) - (geo.sphere.r * geo.sphere.r);
 		if (overlap_distance > 0.f)
 		{
+#ifdef PARTICLE_PHYSICS_TEST
+			ProfilingTimer::p_col_boundary++;
+#endif // PARTICLE_PHYSICS_TEST
+
 			if (effect == RE_EmissionBoundary::KILL) return false;
 
 			// Resolve intersection
@@ -1420,6 +1431,10 @@ bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 
 		if (collision)
 		{
+#ifdef PARTICLE_PHYSICS_TEST
+			ProfilingTimer::p_col_boundary++;
+#endif // PARTICLE_PHYSICS_TEST
+
 			if (effect == RE_EmissionBoundary::KILL) return false;
 
 			for (int i = 0; i < 6; ++i)
@@ -1456,6 +1471,10 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 		float dist_to_plane = geo.plane.SignedDistance(p.position);
 		if (dist_to_plane < p.col_radius)
 		{
+#ifdef PARTICLE_PHYSICS_TEST
+			ProfilingTimer::p_col_boundary++;
+#endif // PARTICLE_PHYSICS_TEST
+
 			if (effect == RE_EmissionBoundary::KILL) return false;
 
 			// Resolve intersection
@@ -1486,6 +1505,10 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 		float overlap_distance = p.position.Distance(geo.sphere.pos) + p.col_radius - geo.sphere.r;
 		if (overlap_distance > 0.f)
 		{
+#ifdef PARTICLE_PHYSICS_TEST
+			ProfilingTimer::p_col_boundary++;
+#endif // PARTICLE_PHYSICS_TEST
+
 			if (effect == RE_EmissionBoundary::KILL) return false;
 
 			// Resolve intersection
@@ -1514,6 +1537,10 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 
 		if (collision)
 		{
+#ifdef PARTICLE_PHYSICS_TEST
+			ProfilingTimer::p_col_boundary++;
+#endif // PARTICLE_PHYSICS_TEST
+
 			if (effect == RE_EmissionBoundary::KILL) return false;
 
 			for (int i = 0; i < 6; ++i)

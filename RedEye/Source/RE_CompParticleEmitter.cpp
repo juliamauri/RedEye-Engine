@@ -1,5 +1,6 @@
 #include "RE_CompParticleEmitter.h"
 
+#include "RE_Profiler.h"
 #include "Application.h"
 #include "RE_Time.h"
 #include "ModulePhysics.h"
@@ -48,8 +49,6 @@ void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy
 
 void RE_CompParticleEmitter::Update()
 {
-
-
 	if (simulation)
 	{
 		const math::vec global_pos = GetGOCPtr()->GetTransformPtr()->GetGlobalPosition();
@@ -60,7 +59,15 @@ void RE_CompParticleEmitter::Update()
 
 void RE_CompParticleEmitter::Draw() const
 {
+	RE_PROFILE(PROF_DrawParticles, PROF_CompParticleEmitter);
+
 	if (!simulation->active_rendering) return;
+
+#ifdef PARTICLE_RENDER_TEST
+
+	RE_Timer timer_simple;
+
+#endif // PARTICLE_RENDER_TEST
 
 	// Get Shader and uniforms
 	const RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
@@ -156,6 +163,27 @@ void RE_CompParticleEmitter::Draw() const
 		if (simulation->meshMD5) dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
 		else dynamic_cast<RE_CompPrimitive*>(simulation->primCmp)->SimpleDraw();
 	}
+
+#ifdef PARTICLE_RENDER_TEST
+
+	ProfilingTimer::update_time = RE_Math::MaxUI(timer_simple.Read(), ProfilingTimer::update_time);
+	if (ProfilingTimer::update_time > 33u)
+	{
+		RE_PHYSICS->mode = ModulePhysics::UpdateMode::ENGINE_PAR;
+
+		eastl::string file_name = "Particle_Rendering ";
+		file_name += eastl::to_string(ProfilingTimer::current_sim / 10);
+		file_name += eastl::to_string(ProfilingTimer::current_sim % 10);
+
+		// TODO JULIUS: setup filename from emitter properties for rendering profiling
+
+		file_name += ".json";
+
+		RE_Profiler::Deploy(file_name.c_str());
+		ProfilingTimer::current_sim < 11 // MAX SIMULATIONS INDEX
+			? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->QuickQuit();
+	}
+#endif // PARTICLE_RENDER_TEST
 }
 
 void RE_CompParticleEmitter::DrawProperties()

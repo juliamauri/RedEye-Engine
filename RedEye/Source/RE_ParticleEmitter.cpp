@@ -1,11 +1,11 @@
 #include "RE_ParticleEmitter.h"
 
-#include "RE_Profiler.h"
 #include "Application.h"
 #include "RE_Math.h"
 
 unsigned int RE_ParticleEmitter::Update(const float global_dt)
 {
+	RE_PROFILE(PROF_Update, PROF_ParticleEmitter);
 	switch (state)
 	{
 	case RE_ParticleEmitter::STOPING:
@@ -161,6 +161,11 @@ void RE_ParticleEmitter::ImpulseCollision(RE_Particle& p1, RE_Particle& p2, cons
 	const float dist2 = collision_dir.Dot(collision_dir);
 	if (dist2 <= combined_radius * combined_radius)
 	{
+
+#ifdef PARTICLE_PHYSICS_TEST
+		ProfilingTimer::p_col_internal++;
+#endif // PARTICLE_PHYSICS_TEST
+
 		// Get mtd: Minimum Translation Distance
 		const float dist = math::Sqrt(dist2);
 		const math::vec mtd = collision_dir * (combined_radius - dist) / dist;
@@ -187,3 +192,60 @@ void RE_ParticleEmitter::ImpulseCollision(RE_Particle& p1, RE_Particle& p2, cons
 	}
 }
 
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
+
+RE_ParticleEmitter* RE_ParticleEmitter::demo_emitter = nullptr;
+
+void RE_ParticleEmitter::DemoSetup()
+{
+	Reset();
+
+	int i = ++ProfilingTimer::current_sim;
+	ProfilingTimer::p_count = 0u;
+
+	state = PlaybackState::STOP;
+	initial_lifetime.type = RE_EmissionSingleValue::Type::NONE;
+
+#ifdef PARTICLE_PHYSICS_TEST
+
+	active_rendering = false;
+	ProfilingTimer::p_col_internal = ProfilingTimer::p_col_boundary = 0u;
+	initial_pos.type = RE_EmissionShape::Type::CIRCLE;
+	collider.type = static_cast<RE_EmissionCollider::Type>(1 + (i % 6 < 3));
+	collider.inter_collisions = (i < 6);
+
+#ifdef DEBUG
+
+	spawn_mode.frequency = i < 6 ? 10.f : 980.f;
+	initial_pos.geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, i < 6 ? 12.f : 60.f);
+
+	switch (boundary.type = static_cast<RE_EmissionBoundary::Type>(1 + (i % 3))) {
+	case RE_EmissionBoundary::PLANE: boundary.geo.plane = math::Plane({ 0.f, 1.f, 0.f }, i < 6 ? -10.f : -40.f); break;
+	case RE_EmissionBoundary::SPHERE: boundary.geo.sphere = math::Sphere(math::vec::zero, i < 6 ? 20.f : 70.f); break;
+	case RE_EmissionBoundary::AABB: boundary.geo.box.SetFromCenterAndSize(math::vec::zero, math::vec(i < 6 ? 30.f : 140.f)); break;
+	default: break; }
+
+#else // RELEASE
+
+	spawn_mode.frequency = i < 6 ? 120.f : 2000.f;
+	initial_pos.geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, i < 6 ? 40.f : 260.f);
+
+	switch (boundary.type = static_cast<RE_EmissionBoundary::Type>(1 + (i % 3))) {
+	case RE_EmissionBoundary::PLANE: boundary.geo.plane = math::Plane({ 0.f, 1.f, 0.f }, i < 6 ? -20.f : -70.f); break;
+	case RE_EmissionBoundary::SPHERE: boundary.geo.sphere = math::Sphere(math::vec::zero, i < 6 ? 80.f : 400.f); break;
+	case RE_EmissionBoundary::AABB: boundary.geo.box.SetFromCenterAndSize(math::vec::zero, math::vec(i < 6 ? 120.f : 550.f)); break;
+	default: break; }
+
+#endif
+
+#else // PARTICLE_RENDER_TEST
+
+	// TODO JULIUS: setup emitter properties for rendering profiling
+	
+
+
+
+#endif
+}
+
+#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST

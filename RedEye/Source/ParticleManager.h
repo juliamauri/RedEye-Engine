@@ -32,11 +32,11 @@ private:
 
 private:
 
+	unsigned int emitter_count = 0u;
 	unsigned int particle_count = 0u;
-	static unsigned int emitter_count;
 
 	float point_size = 2.f;
-	float circle_steps = 4.f;
+	float circle_steps = 12.f;
 	eastl::vector<math::float2> circle_precompute;
 };
 

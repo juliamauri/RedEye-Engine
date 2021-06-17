@@ -59,12 +59,28 @@ void RE_Time::DrawEditorGraphs()
 	EA::StdC::Snprintf(title, 25, "Milliseconds %.1f", ms[99]);
 	ImGui::PlotHistogram("##milliseconds", ms, ((int)(sizeof(ms) / sizeof(*ms))), 0, title, 0.0f, 40.0f, ImVec2(310, 100));
 
+#ifdef INTERNAL_PROFILING
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
+
+	ImGui::Text("Current Sim %i", ProfilingTimer::current_sim);
+	ImGui::Text("Particle Count %u", ProfilingTimer::p_count);
+	ImGui::Text("Registers %u", ProfilingTimer::operations.size());
+	ImGui::Text("Dt %u / 33 ms", ProfilingTimer::update_time);
+	ImGui::Text("Ticks till reset %i", ProfilingTimer::wait4frame);
+
+#ifdef PARTICLE_PHYSICS_TEST
+
+	ImGui::Text("Collisions internal %u", ProfilingTimer::p_col_internal);
+	ImGui::Text("Collisions boundary %u", ProfilingTimer::p_col_boundary);
+
+#endif // PARTICLE_PHYSICS_TEST
+
+#else
+
 	if (ImGui::Checkbox(pause_plotting ? "Restart Plotting" : "Pause Plotting", &pause_plotting) && !pause_plotting)
 		for (int i = 0; i <= 99; i++)
 			fps[i] = ms[i] = 0.f;
 
-#ifdef PROFILING_ENABLED
-#ifdef INTERNAL_PROFILING
 	if (!ProfilingTimer::recording)
 	{
 		if (ImGui::Button("Start profiling")) RE_Profiler::Start();
@@ -85,8 +101,9 @@ void RE_Time::DrawEditorGraphs()
 		if (ImGui::Button(title)) RE_Profiler::Deploy();
 		if (ImGui::Button("Clear Logs")) RE_Profiler::Clear();
 	}
+
+#endif // PARTICLE_PHYSICS_TEST
 #endif // INTERNAL_PROFILING
-#endif // PROFILING_ENABLED
 }
 
 void RE_Time::Delay(unsigned int ms) const { SDL_Delay(ms); }

@@ -57,7 +57,6 @@ Application::~Application()
 
 #ifdef INTERNAL_PROFILING
 	if (ProfilingTimer::recording) RE_Profiler::Deploy();
-	RE_Profiler::Clear();
 #endif // INTERNAL_PROFILING
 }
 
@@ -157,6 +156,10 @@ void Application::CleanUp()
 	res->Clear();
 	fs->Clear();
 
+#ifdef INTERNAL_PROFILING
+	RE_Profiler::Exit();
+#endif // INTERNAL_PROFILING
+
 	if (SDL_WasInit(0) != 0)
 		SDL_Quit();
 }
@@ -193,6 +196,11 @@ void Application::RecieveEvent(const Event& e)
 	case REQUEST_SAVE: flags |= SAVE_CONFIG; break;
 	case REQUEST_QUIT: flags |= WANT_TO_QUIT; break;
 	default: break;	}
+}
+
+void Application::QuickQuit()
+{
+	flags |= WANT_TO_QUIT;
 }
 
 void Application::LoadConfig()

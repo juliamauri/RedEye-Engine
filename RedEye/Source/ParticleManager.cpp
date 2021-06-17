@@ -1,11 +1,15 @@
 #include "ParticleManager.h"
 
 #include "RE_Profiler.h"
+#include "RE_Timer.h"
+#include "Application.h"
 #include "RE_Math.h"
 #include "RE_Particle.h"
 #include <EASTL/vector.h>
 
-unsigned int ParticleManager::emitter_count = 0u;
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
+#include "ModulePhysics.h"
+#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 
 ParticleManager::ParticleManager()
 {
@@ -23,8 +27,69 @@ ParticleManager::~ParticleManager()
 void ParticleManager::Update(const float dt)
 {
 	RE_PROFILE(PROF_Update, PROF_ParticleManager);
+
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
+
+	ProfilingTimer::p_count = particle_count;
+
+#ifdef PARTICLE_PHYSICS_TEST
+
+	RE_Timer timer_simple;
+
+#endif // PARTICLE_PHYSICS_TEST
+#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
+
 	particle_count = 0u;
 	for (auto sim : simulations) particle_count += sim->Update(dt);
+
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
+
+	if (ProfilingTimer::wait4frame > 0)
+	{
+		ProfilingTimer::wait4frame--;
+	}
+	else if (ProfilingTimer::wait4frame == 0)
+	{
+		ProfilingTimer::update_time = 0u;
+		ProfilingTimer::wait4frame--;
+		RE_Profiler::Reset();
+		RE_Profiler::Start();
+		RE_ParticleEmitter::demo_emitter->state = RE_ParticleEmitter::PlaybackState::PLAY;
+		RE_PHYSICS->mode = ModulePhysics::UpdateMode::FIXED_TIME_STEP;
+	}
+
+#ifdef PARTICLE_PHYSICS_TEST
+
+	else
+	{
+		ProfilingTimer::update_time = RE_Math::MaxUI(timer_simple.Read(), ProfilingTimer::update_time);
+		if (ProfilingTimer::update_time > 33u)
+		{
+			RE_PHYSICS->mode = ModulePhysics::UpdateMode::ENGINE_PAR;
+
+			eastl::string file_name = "Particle_Sim ";
+
+			file_name += eastl::to_string(ProfilingTimer::current_sim / 10);
+			file_name += eastl::to_string(ProfilingTimer::current_sim % 10);
+
+			if (RE_ParticleEmitter::demo_emitter->collider.inter_collisions) file_name += "Inter ";
+			file_name += RE_ParticleEmitter::demo_emitter->collider.type == RE_EmissionCollider::Type::POINT ? "Point " : "Ball ";
+
+			switch (RE_ParticleEmitter::demo_emitter->boundary.type) {
+			case RE_EmissionBoundary::Type::PLANE: file_name += "Plane"; break;
+			case RE_EmissionBoundary::Type::SPHERE: file_name += "Sphere"; break;
+			case RE_EmissionBoundary::Type::AABB: file_name += "AABB"; break;
+			default: break;
+			}
+			file_name += ".json";
+
+			RE_Profiler::Deploy(file_name.c_str());
+			ProfilingTimer::current_sim < 11 ? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->QuickQuit();
+		}
+	
+
+#endif // PARTICLE_PHYSICS_TEST
+#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 }
 
 void ParticleManager::Clear()
@@ -184,13 +249,13 @@ void ParticleManager::DrawDebug() const
 			}
 			default: break; }
 
-			/*/ Render Shape Collider
+			// Render Shape Collider
 			if (sim->collider.type == RE_EmissionCollider::Type::SPHERE)
 			{
 				glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
 				for (auto p : sim->particle_pool)
 					DrawAASphere(sim->local_space ? sim->parent_pos + p->position : p->position, p->col_radius);
-			}*/
+			}
 
 			glEnd();
 		}

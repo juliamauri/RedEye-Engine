@@ -109,7 +109,7 @@ bool ModuleRenderer3D::Init()
 				LIGHT_DISABLED));
 			
 			render_views.push_back(RenderView("Game", { 0, 0 },
-				FRUSTUM_CULLING | SKYBOX | BLENDED |
+				FRUSTUM_CULLING | SKYBOX | BLENDED | /*DEBUG_DRAW |*/
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
 				LIGHT_DEFERRED));
 

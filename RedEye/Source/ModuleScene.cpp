@@ -52,45 +52,23 @@ bool ModuleScene::Start()
 {
 	RE_PROFILE(PROF_Start, PROF_ModuleScene);
 	RE_LOG("Starting Module %s", name);
-	eastl::vector<ResourceContainer*> scenes = RE_RES->GetResourcesByType(R_SCENE);
 
-#ifdef PARTICLE_PHYSICS_TEST
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 
 	NewEmptyScene();
 
-	cams->MainCamera()->GetTransform()->SetPosition({ -163.f, 51.f, 29.f });
-	cams->EditorCamera()->GetTransform()->SetPosition({ -163.f, 51.f, 29.f });
+	const math::vec best_pos = { 0.f, -10.f, 0.f };
+	cams->MainCamera()->Focus(best_pos, 70.f);
+	cams->EditorCamera()->Focus(best_pos, 70.f);
 
-	// Spawn 35 different particle configurations
-	for (int i = 0; i < 32; ++i)
-	{
-		RE_GameObject* go = scenePool.AddGO("Particle System", GetRootUID(), true);
-		go->GetTransformPtr()->SetPosition(math::vec(static_cast<float>(i % 5) * 30.f, 0.f, static_cast<float>(i / 5) * 30.f));
-
-		RE_ParticleEmitter* emitter = dynamic_cast<RE_CompParticleEmitter*>(go->AddNewComponent(C_PARTICLEEMITER))->AddSimulation();
-		emitter->state = RE_ParticleEmitter::PlaybackState::PLAY;
-		emitter->spawn_mode.frequency = 25.f;
-		//emitter->initial_lifetime.type = RE_EmissionSingleValue::Type::NONE;
-		emitter->initial_lifetime.val = /*static_cast<float>(i) */ 25.f;
-		emitter->initial_pos.type = RE_EmissionShape::Type::CIRCLE;
-		emitter->initial_pos.geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 5.f);
-
-		/*if (i >= 5u) emitter->boundary.type = static_cast<RE_EmissionBoundary::Type>(1 + ((i - 5) / 10));
-		emitter->boundary.effect = static_cast<RE_EmissionBoundary::Effect>(i % 10 >= 5);
-		switch (emitter->boundary.type) {
-		case RE_EmissionBoundary::PLANE: emitter->boundary.geo.plane = math::Plane({ 0.f, 1.f, 0.f }, -15.f); break;
-		case RE_EmissionBoundary::SPHERE: emitter->boundary.geo.sphere = math::Sphere(math::vec::zero, 15.f); break;
-		case RE_EmissionBoundary::AABB: emitter->boundary.geo.box.SetFromCenterAndSize(math::vec::zero, math::vec(15.f)); break;
-		default: break; }*/
-
-		if (i % 5 == 0) emitter->collider.type = RE_EmissionCollider::Type::NONE;
-		else if (i % 5 <= 2) emitter->collider.type = RE_EmissionCollider::Type::POINT;
-		else emitter->collider.type = RE_EmissionCollider::Type::SPHERE;
-		emitter->collider.inter_collisions = static_cast<bool>((i % 5) % 2);
-	}
+	RE_GameObject* go = scenePool.AddGO("Particle System", GetRootUID(), true);
+	RE_ParticleEmitter::demo_emitter = dynamic_cast<RE_CompParticleEmitter*>(go->AddNewComponent(C_PARTICLEEMITER))->AddSimulation();
+	RE_ParticleEmitter::demo_emitter->DemoSetup();
+	ProfilingTimer::operations.reserve(50000u);
 
 #else
 
+	eastl::vector<ResourceContainer*> scenes = RE_RES->GetResourcesByType(R_SCENE);
 	if (!scenes.empty()) LoadScene(scenes[0]->GetMD5());
 	else NewEmptyScene();
 

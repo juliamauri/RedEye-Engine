@@ -3,7 +3,10 @@
 #define PROFILING_ENABLED // undefine to disable any profiling methods
 #define INTERNAL_PROFILING // undefine to use Optick Profiling
 #define RECORD_FROM_START false
-#define PARTICLE_PHYSICS_TEST
+
+// define to set engine to run particle physics or rendering demo test
+//#define PARTICLE_PHYSICS_TEST
+//#define PARTICLE_RENDER_TEST
 
 enum RE_ProfiledFunc : unsigned short
 {
@@ -27,6 +30,7 @@ enum RE_ProfiledFunc : unsigned short
 	PROF_DrawEditor,
 	PROF_DrawDebug,
 	PROF_DrawThumbnails,
+	PROF_DrawParticles,
 
 	PROF_CameraRaycast, // Cameras
 	PROF_EditorCamera,
@@ -70,6 +74,7 @@ enum RE_ProfiledClass : unsigned short
 	PROF_ParticleManager,
 	PROF_ParticleEmitter,
 	PROF_ParticleBoundary,
+	PROF_CompParticleEmitter,
 
 	PROF_ModuleEditor, // UI
 	PROF_ThumbnailManager,
@@ -92,13 +97,14 @@ enum RE_ProfiledClass : unsigned short
 	PROF_CLASS_MAX
 };
 
+
 #ifdef PROFILING_ENABLED
 #ifdef INTERNAL_PROFILING
 
 #ifdef PARTICLE_PHYSICS_TEST
-#define FILE_OUT_NAME "Particles Red Eye Profiling.json"
-#else
-#define FILE_OUT_NAME "General Red Eye Profiling.json"
+#undef PARTICLE_RENDER_TEST
+#elif defined(PARTICLE_RENDER_TEST)
+#undef PARTICLE_PHYSICS_TEST
 #endif // PARTICLE_PHYSICS_TEST
 
 #include <EASTL\vector.h>
@@ -110,6 +116,21 @@ struct ProfilingOperation
 	unsigned long long start; // ticks
 	unsigned long long duration; // ticks
 	unsigned long frame;
+
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
+
+	unsigned int p_count = 0u;
+
+#ifdef PARTICLE_PHYSICS_TEST
+
+	unsigned int p_col_internal = 0u;
+	unsigned int p_col_boundary = 0u;
+
+#elif defined(PARTICLE_RENDER_TEST)
+
+
+#endif // PARTICLE_RENDER_TEST
+#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 };
 
 struct ProfilingTimer
@@ -117,12 +138,31 @@ struct ProfilingTimer
 	ProfilingTimer(RE_ProfiledFunc function, RE_ProfiledClass context);
 	~ProfilingTimer();
 
+	unsigned long long Read() const;
+	float ReadMs() const;
+
 	bool pushed;
 	unsigned int operation_id;
 
+	static unsigned long long start;
 	static bool recording;
 	static unsigned long frame;
 	static eastl::vector<ProfilingOperation> operations;
+
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
+
+	static int wait4frame;
+	static int current_sim;
+	static unsigned int update_time;
+	static unsigned int p_count;
+
+#ifdef PARTICLE_PHYSICS_TEST
+
+	static unsigned int p_col_internal;
+	static unsigned int p_col_boundary;
+
+#endif // PARTICLE_PHYSICS_TEST
+#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 };
 
 namespace RE_Profiler
@@ -130,7 +170,9 @@ namespace RE_Profiler
 	void Start();
 	void Pause();
 	void Clear();
-	void Deploy();
+	void Reset();
+	void Deploy(const char* file_name = "General Red Eye Profiling.json");
+	void Exit();
 };
 
 #define RE_PROFILE(func, context) ProfilingTimer profiling_timer(func, context)
@@ -139,7 +181,7 @@ namespace RE_Profiler
 #else
 
 #include "Optick\include\optick.h"
-#define RE_OPTICK_NAME(function)\ // missing some definitions & could be improved
+#define RE_OPTICK_NAME(function)\ // TODO RUB: missing some definitions & should be improved
 	function == PROF_Init ? "Init" : \
 	function == PROF_Start ? "Start" : \
 	function == PROF_PreUpdate ? "PreUpdate" : \
@@ -172,6 +214,7 @@ namespace RE_Profiler
 #define RE_PROFILE_FRAME() OPTICK_FRAME("MainThread RedEye")
 
 #undef PARTICLE_PHYSICS_TEST
+#undef PARTICLE_RENDER_TEST
 
 #endif // INTERNAL_PROFILING
 
@@ -182,6 +225,7 @@ namespace RE_Profiler
 
 #undef INTERNAL_PROFILING
 #undef PARTICLE_PHYSICS_TEST
+#undef PARTICLE_RENDER_TEST
 
 #endif // PROFILING_ENABLED
 

@@ -367,7 +367,7 @@ protected:
             const Ch c = is.Peek();
             if (!TargetEncoding::supportUnicode && static_cast<unsigned>(c) >= 0x80) {
                 // Unicode escaping
-                unsigned codepoint;
+                unsigned codepoint = 0u;
                 if (RAPIDJSON_UNLIKELY(!SourceEncoding::Decode(is, &codepoint)))
                     return false;
                 PutUnsafe(*os_, '\\');

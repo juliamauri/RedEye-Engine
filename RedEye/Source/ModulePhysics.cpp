@@ -15,7 +15,8 @@ void ModulePhysics::Update()
 	RE_PROFILE(PROF_Update, PROF_ModulePhysics);
 	const float global_dt = RE_TIME->GetDeltaTime();
 
-	if (use_fixed_dt)
+	switch (mode) {
+	case ModulePhysics::FIXED_UPDATE:
 	{
 		dt_offset += global_dt;
 
@@ -31,11 +32,28 @@ void ModulePhysics::Update()
 			update_count++;
 			particles.Update(final_dt);
 		}
+
+		break;
 	}
-	else
+	case ModulePhysics::FIXED_TIME_STEP:
+	{
+		dt_offset += global_dt;
+
+		while (dt_offset >= fixed_dt)
+		{
+			dt_offset -= fixed_dt;
+			update_count++;
+			particles.Update(fixed_dt);
+		}
+
+		break;
+	}
+	default:
 	{
 		update_count++;
 		particles.Update(global_dt);
+		break;
+	}
 	}
 
 	time_counter += global_dt;
@@ -70,12 +88,15 @@ void ModulePhysics::DrawEditor()
 	{
 		ImGui::Text("Updates/s: %.1f", updates_per_s);
 
-		ImGui::Checkbox("Used Fixed Update", &use_fixed_dt);
-		if (use_fixed_dt)
+		int type = static_cast<int>(mode);
+		if (ImGui::Combo("Update Mode", &type, "Engine Par\0Fixed Update\0Fixed Time Step\0"))
+			mode = static_cast<UpdateMode>(type);
+
+		if (mode)
 		{
-			float tmp = 1.f / fixed_dt;
-			if (ImGui::DragFloat("Dt", &tmp, 1.f, 1.f, 480.f, "%.0f"))
-				fixed_dt = 1.f / tmp;
+			float period = 1.f / fixed_dt;
+			if (ImGui::DragFloat("Dt", &period, 1.f, 1.f, 480.f, "%.0f"))
+				fixed_dt = 1.f / period;
 		}
 
 		particles.DrawEditor();

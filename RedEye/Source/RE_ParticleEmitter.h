@@ -1,6 +1,7 @@
 #ifndef __RE_PARTICLEEMITTER_H__
 #define __RE_PARTICLEEMITTER_H__
 
+#include "RE_Profiler.h"
 #include "RE_Particle.h"
 #include "RE_EmissionData.h"
 
@@ -13,15 +14,13 @@ class RE_ParticleEmitter
 public:
 
 	unsigned int Update(const float global_dt);
+	void Reset();
 
 private:
-
-	void Reset();
 
 	bool IsTimeValid(const float global_dt);
 	void UpdateParticles();
 	void UpdateSpawn();
-
 
 	void ImpulseCollision(RE_Particle& p1, RE_Particle& p2, const float combined_radius = 0.001f) const;
 
@@ -51,7 +50,7 @@ public:
 	float time_muliplier = 1.f;
 
 	// Spawning
-	unsigned int max_particles = 5000u;
+	unsigned int max_particles = 5000000u;
 	RE_EmissionInterval spawn_interval = {};
 	RE_EmissionSpawn spawn_mode = {};
 
@@ -90,6 +89,16 @@ public:
 	} particleDir = PS_Billboard;
 
 	math::float3 direction = { -1.0f,1.0f,0.5f };
+
+
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
+
+public:
+	void DemoSetup();
+
+	static RE_ParticleEmitter* demo_emitter;
+
+#endif // PARTICLE_PHYSICS_TEST
 };
 
 #endif //!__RE_PARTICLEEMITTER_H__

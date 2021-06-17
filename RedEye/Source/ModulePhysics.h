@@ -24,11 +24,19 @@ public:
 	unsigned int GetParticleCount(unsigned int emitter_id) const;
 	eastl::list<RE_Particle*>* GetParticles(unsigned int emitter_id) const;
 
+public:
+
+	enum UpdateMode : int
+	{
+		ENGINE_PAR,
+		FIXED_UPDATE,
+		FIXED_TIME_STEP
+	} mode = FIXED_UPDATE;
+
 private:
 
 	ParticleManager particles;
 
-	bool use_fixed_dt = true;
 	float fixed_dt = 1.f / 30.f;
 	float dt_offset = 0.f;
 
