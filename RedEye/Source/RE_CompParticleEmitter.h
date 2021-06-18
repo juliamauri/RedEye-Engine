@@ -5,10 +5,7 @@
 #include "MathGeoLib/include/Math/float3.h"
 #include <vector>
 
-class Particle;
-class RE_Mesh;
 class RE_ParticleEmitter;
-class RE_CompPrimitive;
 
 class RE_CompParticleEmitter : public RE_Component
 {
@@ -40,6 +37,8 @@ public:
 	void CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
 
 	bool isBlend() const;
+
+	RE_ParticleEmitter* GetSimulation() const;
 
 private:
 

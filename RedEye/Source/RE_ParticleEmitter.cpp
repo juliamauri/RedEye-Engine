@@ -42,6 +42,7 @@ void RE_ParticleEmitter::Reset()
 	max_dist_sq = max_speed_sq = total_time = 
 	spawn_interval.time_offset = spawn_mode.time_offset = 0.f;
 	spawn_mode.has_started = false;
+	bounding_box.minPoint = bounding_box.maxPoint = math::vec::zero;
 }
 
 bool RE_ParticleEmitter::IsTimeValid(const float global_dt)
@@ -72,6 +73,7 @@ bool RE_ParticleEmitter::IsTimeValid(const float global_dt)
 void RE_ParticleEmitter::UpdateParticles()
 {
 	RE_PROFILE(PROF_ParticleUpdate, PROF_ParticleEmitter);
+
 	max_dist_sq = max_speed_sq = 0.f;
 	for (eastl::list<RE_Particle*>::iterator p1 = particle_pool.begin(); p1 != particle_pool.end();)
 	{
@@ -131,6 +133,12 @@ void RE_ParticleEmitter::UpdateParticles()
 			particle_count--;
 		}
 	}
+
+	// Broadphase AABB Boundary
+	switch (boundary.type) {
+	case RE_EmissionBoundary::Type::SPHERE: bounding_box.SetFrom(boundary.geo.sphere); break;
+	case RE_EmissionBoundary::Type::AABB: bounding_box = boundary.geo.box; break;
+	default: bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec(max_dist_sq)); break; }
 }
 
 void RE_ParticleEmitter::UpdateSpawn()

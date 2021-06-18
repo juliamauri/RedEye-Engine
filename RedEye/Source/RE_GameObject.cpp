@@ -11,6 +11,7 @@
 #include "RE_ECS_Pool.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_Component.h"
+#include "RE_ParticleEmitter.h"
 
 #include "Glew\include\glew.h"
 #include "ImGui\imgui.h"
@@ -945,9 +946,16 @@ void RE_GameObject::ResetLocalBoundingBox()
 	if (render_geo.uid)
 	{
 		switch (render_geo.type) {
-		case C_MESH:		 local_bounding_box = dynamic_cast<RE_CompMesh*>(CompPtr(render_geo))->GetAABB(); break;
-		case C_WATER:		 local_bounding_box = dynamic_cast<RE_CompWater*>(CompPtr(render_geo))->GetAABB(); break;
-		case C_GRID: {
+		case C_MESH:		 local_bounding_box = dynamic_cast<const RE_CompMesh*>(CompCPtr(render_geo))->GetAABB(); break;
+		case C_WATER:		 local_bounding_box = dynamic_cast<const RE_CompWater*>(CompCPtr(render_geo))->GetAABB(); break;
+		case C_PARTICLEEMITER:
+		{
+			const RE_ParticleEmitter* sim = dynamic_cast<const RE_CompParticleEmitter*>(CompCPtr(render_geo))->GetSimulation();
+			if (sim != nullptr) local_bounding_box = sim->bounding_box;
+			break;
+		}
+		case C_GRID:
+		{
 			float dist = dynamic_cast<RE_CompGrid*>(CompPtr(render_geo))->GetDistance();
 			local_bounding_box.FromCenterAndSize(math::vec::zero, { dist , 1.0f, dist }); 
 			break;

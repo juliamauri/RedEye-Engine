@@ -40,6 +40,7 @@ public:
 	float local_dt = 0.f;
 	math::vec parent_pos = math::vec::zero;
 	math::vec parent_speed = math::vec::zero;
+	math::AABB bounding_box;
 
 	// Emission properties ---------------------------------------------------------
 	
@@ -48,6 +49,7 @@ public:
 	float max_time = 5.f;
 	float start_delay = 0.0f;
 	float time_muliplier = 1.f;
+	bool start_on_play = true;
 
 	// Spawning
 	unsigned int max_particles = 5000000u;
@@ -90,10 +92,8 @@ public:
 
 	math::float3 direction = { -1.0f,1.0f,0.5f };
 
-
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 
-public:
 	void DemoSetup();
 
 	static RE_ParticleEmitter* demo_emitter;

@@ -305,7 +305,9 @@ void ModuleScene::CreateWater(const UID parent)
 
 void ModuleScene::CreateParticleSystem(const UID parent)
 {
-	dynamic_cast<RE_CompParticleEmitter*>(scenePool.AddGO("Particle System", Validate(parent), true)->AddNewComponent(C_PARTICLEEMITER))->AddSimulation();
+	RE_GameObject* go = scenePool.AddGO("Particle System", Validate(parent), true);
+	dynamic_cast<RE_CompParticleEmitter*>(go->AddNewComponent(C_PARTICLEEMITER))->AddSimulation();
+	go->SetStatic(false);
 }
 
 void ModuleScene::AddGOPool(RE_ECS_Pool* toAdd)

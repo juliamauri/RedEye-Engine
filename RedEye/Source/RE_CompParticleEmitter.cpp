@@ -51,9 +51,13 @@ void RE_CompParticleEmitter::Update()
 {
 	if (simulation)
 	{
-		const math::vec global_pos = GetGOCPtr()->GetTransformPtr()->GetGlobalPosition();
+		RE_GameObject* g_obj = GetGOPtr();
+		const math::vec global_pos = g_obj->GetTransformPtr()->GetGlobalPosition();
 		simulation->parent_speed = (global_pos - simulation->parent_pos) / RE_TIME->GetDeltaTime();
 		simulation->parent_pos = global_pos;
+
+		if (simulation->state <= RE_ParticleEmitter::PlaybackState::PLAY)
+			g_obj->ResetBoundingBoxes();
 	}
 }
 
@@ -352,3 +356,8 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 }
 
 bool RE_CompParticleEmitter::isBlend() const { return static_cast<bool>(simulation->opacity.type); }
+
+RE_ParticleEmitter* RE_CompParticleEmitter::GetSimulation() const
+{
+	return simulation;
+}
