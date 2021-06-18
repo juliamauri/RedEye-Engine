@@ -70,6 +70,37 @@ void ModulePhysics::CleanUp()
 	particles.Clear();
 }
 
+void ModulePhysics::OnPlay(const bool was_paused)
+{
+	for (auto sim : particles.simulations)
+	{
+		if (was_paused)
+		{
+			if (sim->state == RE_ParticleEmitter::PlaybackState::PAUSE)
+				sim->state = RE_ParticleEmitter::PlaybackState::RESTART;
+			else
+				sim->state = RE_ParticleEmitter::PlaybackState::STOPING;
+		}
+		else if (sim->start_on_play)
+			sim->state = RE_ParticleEmitter::PlaybackState::RESTART;
+		else 
+			sim->state = RE_ParticleEmitter::PlaybackState::STOPING;
+	}
+}
+
+void ModulePhysics::OnPause()
+{
+	for (auto sim : particles.simulations)
+		if (sim->state == RE_ParticleEmitter::PlaybackState::PLAY)
+			sim->state = RE_ParticleEmitter::PlaybackState::PAUSE;
+}
+
+void ModulePhysics::OnStop()
+{
+	for (auto sim : particles.simulations)
+		sim->state = RE_ParticleEmitter::PlaybackState::STOPING;
+}
+
 void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const
 {
 	if (!particles.simulations.empty())

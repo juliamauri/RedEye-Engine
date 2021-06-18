@@ -828,14 +828,15 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 					simulation->state = RE_ParticleEmitter::PlaybackState::RESTART;
 
 			ImGui::Separator();
-			ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f);
-			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, 10000.f);
+			ImGui::Checkbox("Start on Play", &simulation->start_on_play);
 			ImGui::Checkbox("Loop", &simulation->loop);
 			if (!simulation->loop)
 			{
 				ImGui::SameLine();
 				ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f);
 			}
+			ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f);
+			ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, 10000.f);
 
 			ImGui::Separator();
 			ImGui::Checkbox("Local Space", &simulation->local_space);

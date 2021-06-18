@@ -170,26 +170,34 @@ void Application::RecieveEvent(const Event& e)
 	{
 	case PLAY:
 	{
-		time->StartGameTimer();
 		scene->OnPlay();
+		physics->OnPlay(time->GetState() == GS_PAUSE);
+
+		time->StartGameTimer();
 		break;
 	}
 	case PAUSE:
 	{
-		time->PauseGameTimer();
 		scene->OnPause();
+		physics->OnPause();
+
+		time->PauseGameTimer();
 		break;
 	}
 	case TICK:
 	{
-		time->TickGameTimer();
 		scene->OnPlay();
+		physics->OnPlay(time->GetState() == GS_PAUSE);
+
+		time->TickGameTimer();
 		break;
 	}
 	case STOP:
 	{
-		time->StopGameTimer();
 		scene->OnStop();
+		physics->OnStop();
+
+		time->StopGameTimer();
 		break;
 	}
 	case REQUEST_LOAD: flags |= LOAD_CONFIG; break;

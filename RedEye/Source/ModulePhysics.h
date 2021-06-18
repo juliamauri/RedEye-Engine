@@ -15,6 +15,10 @@ public:
 	void Update() override;
 	void CleanUp() override;
 
+	void OnPlay(const bool was_paused);
+	void OnPause();
+	void OnStop();
+
 	void DrawDebug(RE_CompCamera* current_camera) const;
 	void DrawEditor() override;
 
