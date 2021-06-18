@@ -3,6 +3,8 @@
 #include "Application.h"
 #include "RE_Math.h"
 
+RE_ParticleEmitter::BoundingMode RE_ParticleEmitter::mode = PER_PARTICLE;
+
 unsigned int RE_ParticleEmitter::Update(const float global_dt)
 {
 	RE_PROFILE(PROF_Update, PROF_ParticleEmitter);
@@ -75,6 +77,8 @@ void RE_ParticleEmitter::UpdateParticles()
 	RE_PROFILE(PROF_ParticleUpdate, PROF_ParticleEmitter);
 
 	max_dist_sq = max_speed_sq = 0.f;
+	bounding_box.minPoint = bounding_box.maxPoint = parent_pos * !local_space;
+
 	for (eastl::list<RE_Particle*>::iterator p1 = particle_pool.begin(); p1 != particle_pool.end();)
 	{
 		// Check if particle is still alive
@@ -121,8 +125,15 @@ void RE_ParticleEmitter::UpdateParticles()
 			(*p1)->position += (*p1)->velocity * local_dt;
 
 			// Update Control values
-			max_dist_sq = RE_Math::MaxF(max_dist_sq, (*p1)->position.LengthSq());
+			max_dist_sq = RE_Math::MaxF(max_dist_sq, ((*p1)->position - (parent_pos * !local_space)).LengthSq());
 			max_speed_sq = RE_Math::MaxF(max_speed_sq, (*p1)->velocity.LengthSq());
+
+			// Broadphase AABB Boundary
+			if (RE_ParticleEmitter::mode == PER_PARTICLE)
+			{
+				bounding_box.maxPoint = RE_Math::MaxVecValues((*p1)->position, bounding_box.maxPoint);
+				bounding_box.minPoint = RE_Math::MinVecValues((*p1)->position, bounding_box.minPoint);
+			}
 
 			++p1;
 		}
@@ -134,11 +145,13 @@ void RE_ParticleEmitter::UpdateParticles()
 		}
 	}
 
-	// Broadphase AABB Boundary
-	switch (boundary.type) {
-	case RE_EmissionBoundary::Type::SPHERE: bounding_box.SetFrom(boundary.geo.sphere); break;
-	case RE_EmissionBoundary::Type::AABB: bounding_box = boundary.geo.box; break;
-	default: bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec(max_dist_sq)); break; }
+	if (RE_ParticleEmitter::mode == GENERAL)
+	{
+		switch (boundary.type) {
+		case RE_EmissionBoundary::Type::SPHERE: bounding_box.SetFrom(boundary.geo.sphere); break;
+		case RE_EmissionBoundary::Type::AABB: bounding_box = boundary.geo.box; break;
+		default: bounding_box.SetFromCenterAndSize(parent_pos * !local_space, math::vec(math::SqrtFast(max_dist_sq))); break; }
+	}
 }
 
 void RE_ParticleEmitter::UpdateSpawn()

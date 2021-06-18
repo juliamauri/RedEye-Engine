@@ -3,6 +3,7 @@
 #include "RE_Profiler.h"
 #include "Application.h"
 #include "RE_Time.h"
+#include "ModuleInput.h"
 #include "ModulePhysics.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"
@@ -57,7 +58,7 @@ void RE_CompParticleEmitter::Update()
 		simulation->parent_pos = global_pos;
 
 		if (simulation->state <= RE_ParticleEmitter::PlaybackState::PLAY)
-			g_obj->ResetBoundingBoxes();
+			RE_INPUT->Push(TRANSFORM_MODIFIED, RE_SCENE, go);
 	}
 }
 

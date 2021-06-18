@@ -893,6 +893,9 @@ bool RE_GameObject::CheckRayCollision(const math::Ray& global_ray, float& distan
 			break;
 		case C_WATER:
 			ret = dynamic_cast<RE_CompWater*>(CompPtr(render_geo))->CheckFaceCollision(local_ray, distance);
+			break;	
+		case C_PARTICLEEMITER:
+			ret = true;
 			break;		
 		default:
 			ret = dynamic_cast<RE_CompPrimitive*>(CompPtr(render_geo))->CheckFaceCollision(local_ray, distance);
@@ -951,7 +954,13 @@ void RE_GameObject::ResetLocalBoundingBox()
 		case C_PARTICLEEMITER:
 		{
 			const RE_ParticleEmitter* sim = dynamic_cast<const RE_CompParticleEmitter*>(CompCPtr(render_geo))->GetSimulation();
-			if (sim != nullptr) local_bounding_box = sim->bounding_box;
+			if (sim != nullptr)
+			{
+				local_bounding_box = sim->bounding_box;
+
+				if (!sim->local_space)
+					local_bounding_box.TransformAsAABB(GetTransformPtr()->GetGlobalMatrix().InverseTransposed());
+			}
 			break;
 		}
 		case C_GRID:

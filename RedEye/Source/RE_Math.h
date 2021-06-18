@@ -69,6 +69,12 @@ public:
 		float res[2] = { a, b };
 		return res[b < a];
 	}
+	static math::vec MinVecValues(const math::vec a, const math::vec b)
+	{
+		float res[6] = { a.x, b.x, a.y, b.y, a.z, b.z };
+		return math::vec(res[b.x < a.x], res[2 + (b.y < a.y)], res[4 + (b.z < a.z)]);
+	}
+
 	static int MaxI(const int a, const int b)
 	{
 		int res[2] = { a, b };
@@ -83,6 +89,11 @@ public:
 	{
 		float res[2] = { a, b };
 		return res[b > a];
+	}
+	static math::vec MaxVecValues(const math::vec a, const math::vec b)
+	{
+		float res[6] = { a.x, b.x, a.y, b.y, a.z, b.z };
+		return math::vec(res[b.x > a.x], res[2 + (b.y > a.y)], res[4 + (b.z > a.z)]);
 	}
 
 	// Significant Values

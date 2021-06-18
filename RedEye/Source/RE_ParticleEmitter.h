@@ -40,7 +40,9 @@ public:
 	float local_dt = 0.f;
 	math::vec parent_pos = math::vec::zero;
 	math::vec parent_speed = math::vec::zero;
+
 	math::AABB bounding_box;
+	static enum BoundingMode : int { GENERAL, PER_PARTICLE } mode;
 
 	// Emission properties ---------------------------------------------------------
 	

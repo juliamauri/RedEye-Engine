@@ -87,7 +87,6 @@ void ParticleManager::Update(const float dt)
 			ProfilingTimer::current_sim < 11 ? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->QuickQuit();
 		}
 	
-
 #endif // PARTICLE_PHYSICS_TEST
 #endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 }
@@ -123,15 +122,19 @@ void ParticleManager::DrawEditor()
 	ImGui::Text("Total Emitters: %i", simulations.size());
 	ImGui::Text("Total Particles: %i", particle_count);
 
+	int tmp = static_cast<int>(RE_ParticleEmitter::mode);
+	if (ImGui::Combo("Spawn type", &tmp, "General\0Per Particle\0"))
+		RE_ParticleEmitter::mode = static_cast<RE_ParticleEmitter::BoundingMode>(tmp);
+
 	ImGui::DragFloat("Point size", &point_size, 1.f, 0.f, 100.f);
 
-	int in_steps = static_cast<int>(circle_steps);
-	if (ImGui::DragInt("Steps", &in_steps, 1.f, 0, 64))
+	tmp = static_cast<int>(circle_steps);
+	if (ImGui::DragInt("Steps", &tmp, 1.f, 0, 64))
 	{
 		circle_precompute.clear();
-		circle_precompute.set_capacity(static_cast<unsigned int>(in_steps));
+		circle_precompute.set_capacity(static_cast<unsigned int>(tmp));
 
-		circle_steps = static_cast<float>(in_steps);
+		circle_steps = static_cast<float>(tmp);
 		const float interval = RE_Math::pi_x2 / circle_steps;
 		for (float i = 0.f; i < RE_Math::pi_x2; i += interval)
 			circle_precompute.push_back({ math::Sin(i), -math::Cos(i) });

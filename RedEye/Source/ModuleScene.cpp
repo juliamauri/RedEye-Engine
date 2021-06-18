@@ -299,15 +299,16 @@ void ModuleScene::CreateWater(const UID parent)
 {
 	RE_GameObject* water_go = scenePool.AddGO("Water", Validate(parent), true);
 	water_go->AddNewComponent(C_WATER)->UseResources();
-	water_go->GetTransformPtr()->SetRotation({ -(math::pi / 2.f), 0.0f, 0.0f });
-	water_go->GetTransformPtr()->SetScale({ 10.0f, 10.0f, 1.0f });
+	RE_CompTransform* transform = water_go->GetTransformPtr();
+	transform->SetRotation({ -(math::pi / 2.f), 0.0f, 0.0f });
+	transform->SetScale({ 10.0f, 10.0f, 1.0f });
 }
 
 void ModuleScene::CreateParticleSystem(const UID parent)
 {
 	RE_GameObject* go = scenePool.AddGO("Particle System", Validate(parent), true);
+	go->SetStatic(false, false);
 	dynamic_cast<RE_CompParticleEmitter*>(go->AddNewComponent(C_PARTICLEEMITER))->AddSimulation();
-	go->SetStatic(false);
 }
 
 void ModuleScene::AddGOPool(RE_ECS_Pool* toAdd)
