@@ -26,7 +26,7 @@ struct RE_EmissionInterval
 
 	bool IsActive(float &dt);
 
-	bool DrawEditor();
+	bool DrawEditor(bool& changes);
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -53,7 +53,7 @@ struct RE_EmissionSpawn
 
 	unsigned int CountNewParticles(const float dt);
 
-	bool DrawEditor();
+	bool DrawEditor(bool& changes);
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -87,7 +87,7 @@ struct RE_EmissionShape
 
 	math::vec GetPosition() const;
 
-	void DrawEditor();
+	bool DrawEditor();
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -117,7 +117,7 @@ struct RE_EmissionVector
 
 	math::vec GetValue() const;
 
-	void DrawEditor(const char* name);
+	bool DrawEditor(const char* name);
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -143,7 +143,7 @@ struct RE_EmissionSingleValue
 	float GetMin() const;
 	float GetMax() const;
 
-	void DrawEditor(const char* name);
+	bool DrawEditor(const char* name);
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -168,7 +168,7 @@ struct RE_EmissionExternalForces
 
 	math::vec GetAcceleration() const;
 
-	void DrawEditor();
+	bool DrawEditor();
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -208,7 +208,7 @@ struct RE_EmissionBoundary
 	bool PointCollision(RE_Particle& p) const;
 	bool SphereCollision(RE_Particle& p) const;
 
-	void DrawEditor();
+	bool DrawEditor();
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -233,7 +233,7 @@ struct RE_EmissionCollider
 	RE_EmissionSingleValue radius = {};
 	RE_EmissionSingleValue restitution = {};
 
-	void DrawEditor();
+	bool DrawEditor();
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -253,7 +253,7 @@ struct CurveData
 	int comboCurve = 0;
 
 	float GetValue(const float weight) const;
-	void DrawEditor(const char* name);
+	bool DrawEditor(const char* name);
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -281,7 +281,7 @@ struct RE_PR_Color
 
 	math::vec GetValue(const float weight = 1.f) const;
 
-	void DrawEditor();
+	bool DrawEditor();
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -310,7 +310,7 @@ struct RE_PR_Opacity
 
 	float GetValue(const float weight) const;
 
-	void DrawEditor();
+	bool DrawEditor();
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;
@@ -340,7 +340,7 @@ struct RE_PR_Light
 	float GetSpecular() const;
 	math::vec GetQuadraticValues() const;
 
-	void DrawEditor(const unsigned int id);
+	bool DrawEditor(const unsigned int id);
 
 	void JsonDeserialize(RE_Json* node);
 	void JsonSerialize(RE_Json* node) const;

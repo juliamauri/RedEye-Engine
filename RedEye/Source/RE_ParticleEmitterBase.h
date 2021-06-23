@@ -3,6 +3,8 @@
 
 #include "Resource.h"
 
+class RE_ParticleEmitter;
+
 class RE_ParticleEmitterBase : public ResourceContainer
 {
 public:
@@ -15,7 +17,18 @@ public:
 
 	void SomeResourceChanged(const char* resMD5);
 
-	class RE_ParticleEmitter* GetNewEmitter();
+	RE_ParticleEmitter* GetNewEmitter();
+	void FillEmitter(RE_ParticleEmitter* emitter_to_fill);
+	void FillAndSave(RE_ParticleEmitter* for_fill);
+	void GenerateSubResourcesAndReference(const char* emission_name, const char* renderer_name);
+
+	void ChangeEmissor(RE_ParticleEmitter* sim, const char* emissor);
+	void ChangeRenderer(RE_ParticleEmitter* sim, const char* renderer);
+
+	bool HasEmissor()const;
+	bool HasRenderer()const;
+
+	bool Contains(const char* res)const;
 
 private:
 

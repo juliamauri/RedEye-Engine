@@ -20,6 +20,9 @@ void RE_ThumbnailManager::Init()
 	file = LoadDefIcon("file.dds");
 	selectfile = LoadDefIcon("selectfile.dds");
 	shaderFile = LoadDefIcon("shaderFile.dds");
+	p_emitter = LoadDefIcon("pemitter.dds");
+	p_emission = LoadDefIcon("pemissor.dds");
+	p_render = LoadDefIcon("prender.dds");
 	
 	glGenBuffersARB(1, &pboRender);
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboRender);

@@ -13,6 +13,8 @@ class RE_ParticleEmitter
 {
 public:
 
+	~RE_ParticleEmitter();
+
 	unsigned int Update(const float global_dt);
 	void Reset();
 

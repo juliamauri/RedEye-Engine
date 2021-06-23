@@ -19,6 +19,9 @@ public:
 	void Save();
 	void ProcessMD5();
 
+	void FillEmitter(class RE_ParticleEmitter* to_fill);
+	void FillResouce(class RE_ParticleEmitter* from);
+
 private:
 
 	//void Draw() override;
@@ -40,7 +43,8 @@ private:
 	RE_PR_Light light = {};
 
 	const char* meshMD5 = nullptr;
-	ComponentType primCmp = C_POINT;
+	ComponentType primType = C_EMPTY;
+	RE_CompPrimitive* primCmp = nullptr;
 
 	math::float3 scale = { 0.5f,0.5f,0.1f };
 

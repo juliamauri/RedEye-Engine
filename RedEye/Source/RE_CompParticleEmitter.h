@@ -13,8 +13,6 @@ public:
 	RE_CompParticleEmitter();
 	~RE_CompParticleEmitter();
 
-	RE_ParticleEmitter* AddSimulation();
-
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
 
 	void Update() override;
@@ -39,6 +37,10 @@ public:
 	bool isBlend() const;
 
 	RE_ParticleEmitter* GetSimulation() const;
+	const char* GetEmitterResource()const;
+	void UpdateEmitter(const char* emitter);
+
+	void SetEmitter(const char* md5);
 
 private:
 

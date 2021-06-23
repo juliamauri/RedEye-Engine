@@ -168,17 +168,17 @@ void ModuleEditor::Update()
 			{
 				if (ImGui::MenuItem(" New Scene"))
 				{
-					if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSave(false, true);
+					if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSaveScene(false, true);
 					else RE_SCENE->NewEmptyScene();
 				}
 				if (ImGui::MenuItem(" Save Scene") && RE_SCENE->HasChanges())
 				{
-					if (RE_SCENE->isNewScene()) RE_EDITOR->popupWindow->PopUpSave();
+					if (RE_SCENE->isNewScene()) RE_EDITOR->popupWindow->PopUpSaveScene();
 					else RE_SCENE->SaveScene();
 				}
 				if (ImGui::MenuItem(" Exit", "	Esc"))
 				{
-					if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSave(true);
+					if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSaveScene(true);
 					else RE_INPUT->Push(REQUEST_QUIT, App);
 				}
 				ImGui::EndMenu();
@@ -679,17 +679,27 @@ void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
 	*height = sceneEditorWindow->GetSceneHeight();
 }
 
-void ModuleEditor::StartEditingParticleEmiter(RE_ParticleEmitter* sim, UID fromComponent)
+void ModuleEditor::StartEditingParticleEmitter(RE_ParticleEmitter* sim, const char* md5)
 {
-	particleEmitterWindow->StartEditing(sim, fromComponent);
+	particleEmitterWindow->StartEditing(sim, md5);
+}
+
+const RE_ParticleEmitter* ModuleEditor::GetCurrentEditingParticleEmitter() const
+{
+	return particleEmitterWindow->GetEdittingParticleEmitter();
+}
+
+void ModuleEditor::SaveEmitter(bool close, const char* emitter_name, const char* emissor_base, const char* renderer_base)
+{
+	particleEmitterWindow->SaveEmitter(close, emitter_name, emissor_base, renderer_base);
+}
+
+void ModuleEditor::CloseParticleEditor()
+{
+	particleEmitterWindow->NextOrClose();
 }
 
 bool ModuleEditor::IsParticleEditorActive() const { return particleEmitterWindow->IsActive(); }
-
-UID ModuleEditor::GetEditingParticleEmittorComponent() const
-{
-	return particleEmitterWindow->GetComponent();
-}
 
 bool ModuleEditor::EditorSceneNeedsRender() const
 {

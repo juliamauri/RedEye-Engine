@@ -18,6 +18,9 @@ public:
 	void Save();
 	void ProcessMD5();
 
+	void FillEmitter(class RE_ParticleEmitter* to_fill);
+	void FillResouce(class RE_ParticleEmitter* from);
+
 private:
 
 	//void Draw() override;

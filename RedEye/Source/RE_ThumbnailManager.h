@@ -28,6 +28,9 @@ public:
 	unsigned int GetFileID()const { return file; }
 	unsigned int GetSelectFileID()const { return selectfile; }
 	unsigned int GetShaderFileID()const { return shaderFile; }
+	unsigned int GetPEmitterFileID()const { return p_emitter; }
+	unsigned int GetPEmissionFileID()const { return p_emission; }
+	unsigned int GetPRenderFileID()const { return p_render; }
 
 	unsigned int ThumbnailTexture(const char* ref);
 
@@ -49,6 +52,7 @@ private:
 	unsigned int file = 0;
 	unsigned int selectfile = 0;
 	unsigned int shaderFile = 0;
+	unsigned int p_emitter = 0, p_emission = 0, p_render = 0;
 };
 
 #endif // !__RETHUMBNAILMANAGER_H__

@@ -38,7 +38,7 @@ signed long long ResourceContainer::GetLastTimeModified() const { return lastMod
 
 void ResourceContainer::SetType(Resource_Type _type)
 {
-	static const char* names[MAX_R_TYPES] = { "Undefined ", "Shader ", "Texture ", "Mesh ", "Prefab ", "SkyBox ", "Material ", "Model ", "Scene " };
+	static const char* names[MAX_R_TYPES] = { "Undefined ", "Shader ", "Texture ", "Mesh ", "Prefab ", "SkyBox ", "Material ", "Model ", "Scene ", "Particle emitter", "Particle emission", "Particle render" };
 	(propietiesName = names[type = _type]) += "resource ";
 }
 

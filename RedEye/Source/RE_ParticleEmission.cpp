@@ -7,6 +7,8 @@
 #include "RE_Config.h"
 #include "RE_Json.h"
 
+#include "RE_ParticleEmitter.h"
+
 void RE_ParticleEmission::LoadInMemory()
 {
 	if (RE_FS->Exists(GetLibraryPath())) BinaryDeserialize();
@@ -55,6 +57,40 @@ void RE_ParticleEmission::Save()
 void RE_ParticleEmission::ProcessMD5()
 {
 	JsonSerialize(true);
+}
+
+void RE_ParticleEmission::FillEmitter(RE_ParticleEmitter* to_fill)
+{
+	to_fill->loop = loop;
+	to_fill->max_time = max_time;
+	to_fill->start_delay = start_delay;
+	to_fill->time_muliplier = time_muliplier;
+	to_fill->max_particles = max_particles;
+	to_fill->spawn_interval = spawn_interval;
+	to_fill->spawn_mode = spawn_mode;
+	to_fill->initial_lifetime = initial_lifetime;
+	memcpy(&to_fill->initial_pos, &initial_pos, sizeof(RE_EmissionShape));
+	to_fill->initial_speed = initial_speed;
+	to_fill->external_acc = external_acc;
+	memcpy(&to_fill->boundary, &boundary, sizeof(RE_EmissionBoundary));
+	to_fill->collider = collider;
+}
+
+void RE_ParticleEmission::FillResouce(RE_ParticleEmitter* from)
+{
+	loop = from->loop;
+	max_time = from->max_time;
+	start_delay = from->start_delay;
+	time_muliplier = from->time_muliplier;
+	max_particles = from->max_particles;
+	spawn_interval = from->spawn_interval;
+	spawn_mode = from->spawn_mode;
+	initial_lifetime = from->initial_lifetime;
+	memcpy(&initial_pos, &from->initial_pos, sizeof(RE_EmissionShape));
+	initial_speed = from->initial_speed;
+	external_acc = from->external_acc;
+	memcpy(&boundary, &from->boundary, sizeof(RE_EmissionBoundary));
+	collider = from->collider;
 }
 
 void RE_ParticleEmission::JsonDeserialize(bool generateLibraryPath)

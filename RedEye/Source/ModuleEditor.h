@@ -6,6 +6,7 @@
 #include <EASTL/list.h>
 
 class SceneEditorWindow;
+class RE_ParticleEmitter;
 
 class ModuleEditor : public Module
 {
@@ -43,9 +44,11 @@ public:
 	void SelectUndefinedFile(eastl::string* toSelect) const;
 	void OpenTextEditor(const char* filePath, eastl::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
 	void GetSceneWindowSize(unsigned int* widht, unsigned int* height);
-	void StartEditingParticleEmiter(class RE_ParticleEmitter* sim, UID fromComponent);
+	void StartEditingParticleEmitter(class RE_ParticleEmitter* sim, const char* md5);
+	const RE_ParticleEmitter* GetCurrentEditingParticleEmitter()const;
+	void SaveEmitter(bool close = false, const char* emitter_name = nullptr, const char* emissor_base = nullptr, const char* renderer_base = nullptr);
+	void CloseParticleEditor();
 	bool IsParticleEditorActive() const;
-	UID GetEditingParticleEmittorComponent() const;
 	bool EditorSceneNeedsRender() const;
 	bool GameSceneNeedsRender() const;
 

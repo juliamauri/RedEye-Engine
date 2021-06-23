@@ -14,6 +14,9 @@ public:
 	void Update(const float dt);
 	void Clear();
 
+	void DrawSimulation(unsigned int index, math::float3  go_positon, math::float3  go_up) const;
+	void CallLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
+
 	unsigned int Allocate(RE_ParticleEmitter* emitter);
 	bool Deallocate(unsigned int index);
 

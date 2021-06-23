@@ -19,10 +19,13 @@ public:
 	void OnPause();
 	void OnStop();
 
+	void DrawParticleEmitterSimulation(unsigned int index, math::float3  go_positon, math::float3 go_up) const;
+	void CallParticleEmitterLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
+
 	void DrawDebug(RE_CompCamera* current_camera) const;
 	void DrawEditor() override;
 
-	RE_ParticleEmitter* AddEmitter();
+	RE_ParticleEmitter* AddEmitter(RE_ParticleEmitter* to_add);
 	void RemoveEmitter(RE_ParticleEmitter* emitter);
 
 	unsigned int GetParticleCount(unsigned int emitter_id) const;

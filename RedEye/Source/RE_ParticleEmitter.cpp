@@ -5,6 +5,11 @@
 
 RE_ParticleEmitter::BoundingMode RE_ParticleEmitter::mode = PER_PARTICLE;
 
+RE_ParticleEmitter::~RE_ParticleEmitter()
+{
+	if (primCmp) DEL(primCmp);
+}
+
 unsigned int RE_ParticleEmitter::Update(const float global_dt)
 {
 	RE_PROFILE(PROF_Update, PROF_ParticleEmitter);

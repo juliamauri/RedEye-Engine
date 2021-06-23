@@ -15,6 +15,7 @@
 #include "ModuleAudio.h"
 
 #include "RE_ResourceManager.h"
+#include "RE_ParticleEmitterBase.h"
 #include "RE_CameraManager.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_GameObject.h"
@@ -550,8 +551,8 @@ PopUpWindow::~PopUpWindow() {}
 
 void PopUpWindow::PopUp(const char * _btnText, const char* title, bool _disableAllWindows)
 {
-	btnText = _btnText;
-	titleText = title;
+	btn_text = _btnText;
+	title_text = title;
 	RE_EDITOR->PopUpFocus(_disableAllWindows);
 	active = true;
 }
@@ -562,21 +563,36 @@ void PopUpWindow::PopUpError()
 	PopUp("Accept", "Error", true);
 }
 
-void PopUpWindow::PopUpSave(bool fromExit, bool newScene)
+void PopUpWindow::PopUpSaveScene(bool fromExit, bool newScene)
 {
-	state = PU_SAVE;
-	exitAfter = fromExit;
-	spawnNewScene = newScene;
-	if (inputName = RE_SCENE->isNewScene()) nameStr = "New Scene";
+	state = PU_SAVE_SCENE;
+	exit_after = fromExit;
+	spawn_new_scene = newScene;
+	if (input_name = RE_SCENE->isNewScene()) name_str = "New Scene";
 	PopUp("Save", "Scene have changes", true);
+}
+
+void PopUpWindow::PopUpSaveParticles(bool need_particle_names, bool not_emissor, bool not_renderer, bool close_after)
+{
+	state = PU_SAVE_PARTICLEEMITTER;
+	exit_after = close_after;
+	particle_names = need_particle_names;
+	if (particle_names) {
+		name_str = "emitter_name";
+		emission_name = "emission_name";
+		need_emission = !not_emissor;
+		renderer_name = "renderer_name";
+		need_renderer = !not_renderer;
+	}
+	PopUp("Save", "Save particle emittter", true);
 }
 
 void PopUpWindow::PopUpPrefab(RE_GameObject* go)
 {
 	state = PU_PREFAB;
-	inputName = true;
-	nameStr = "New Prefab";
-	goPrefab = go;
+	input_name = true;
+	name_str = "New Prefab";
+	go_prefab = go;
 	PopUp("Save", "Create prefab", false);
 }
 
@@ -584,32 +600,86 @@ void PopUpWindow::PopUpDelRes(const char* res)
 {
 	//TODO PARTICLE RESOUCES
 	state = PU_DELETERESOURCE;
-	resourceToDelete = res;
-	resourcesUsing = RE_RES->WhereIsUsed(res);
+	resource_to_delete = res;
+	using_resources = RE_RES->WhereIsUsed(res);
 
 	Resource_Type rType = RE_RES->At(res)->GetType();
-	eastl::stack<RE_Component*> comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents((rType == R_MATERIAL) ? C_MESH : C_CAMERA);
+	
+	eastl::stack<RE_Component*> comps;
+
+	switch (rType)
+	{
+	case R_SKYBOX:
+	{
+		comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_CAMERA);
+		break;
+	}
+	case R_MATERIAL:
+	{
+		comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_MESH);
+		break;
+	}
+	case R_PARTICLE_EMITTER:
+		comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_PARTICLEEMITER);
+		break;
+	}
+	
 	bool skip = false;
 	while (!comps.empty() && !skip)
 	{
-		if (rType == R_MATERIAL)
+		switch (rType)
 		{
-			RE_CompMesh* mesh = dynamic_cast<RE_CompMesh*>(comps.top());
-			if (mesh && mesh->GetMaterial() == res)
-			{
-				resourceOnScene = true;
-				skip = true;
-			}
-		}
-		else
+		case R_SKYBOX:
 		{
 			RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(comps.top());
 			if (cam && cam->GetSkybox() == res)
 			{
-				resourceOnScene = true;
+				resource_on_scene = true;
 				skip = true;
 			}
+			break;
 		}
+		case R_MATERIAL:
+		{
+			RE_CompMesh* mesh = dynamic_cast<RE_CompMesh*>(comps.top());
+			if (mesh && mesh->GetMaterial() == res)
+			{
+				resource_on_scene = true;
+				skip = true;
+			}
+			break;
+		}
+		case R_PARTICLE_EMITTER:
+		{
+			RE_CompParticleEmitter* emitter = dynamic_cast<RE_CompParticleEmitter*>(comps.top());
+			if (emitter && emitter->GetEmitterResource() == res)
+			{
+				resource_on_scene = true;
+				skip = true;
+			}
+			break;
+		}
+		case R_PARTICLE_EMISSION:
+		case R_PARTICLE_RENDER:
+		{
+			RE_CompParticleEmitter* emitter = dynamic_cast<RE_CompParticleEmitter*>(comps.top());
+
+			if (emitter)
+			{
+				const char* emitter_res = emitter->GetEmitterResource();
+				if (emitter_res)
+				{
+					if (dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_res))->Contains(res))
+					{
+						resource_on_scene = true;
+						skip = true;
+					}
+				}
+			}
+			break;
+		}
+		}
+
 		comps.pop();
 	}
 
@@ -619,8 +689,8 @@ void PopUpWindow::PopUpDelRes(const char* res)
 void PopUpWindow::PopUpDelUndeFile(const char* assetPath)
 {
 	state = PU_DELETEUNDEFINEDFILE;
-	nameStr = assetPath;
-	resourcesUsing = RE_RES->WhereUndefinedFileIsUsed(assetPath);
+	name_str = assetPath;
+	using_resources = RE_RES->WhereUndefinedFileIsUsed(assetPath);
 	PopUp("Delete", "Do you want to delete that file?", false);
 }
 
@@ -647,7 +717,7 @@ void PopUpWindow::ClearScope()
 
 void PopUpWindow::Draw(bool secondary)
 {
-	if(ImGui::Begin(titleText.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	if(ImGui::Begin(title_text.c_str(), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
 		switch (state)
 		{
@@ -665,7 +735,7 @@ void PopUpWindow::Draw(bool secondary)
 			ImGui::Separator();
 
 			// Accept Button
-			if (ImGui::Button(btnText.c_str()))
+			if (ImGui::Button(btn_text.c_str()))
 			{
 				active = false;
 				state = PU_NONE;
@@ -690,20 +760,20 @@ void PopUpWindow::Draw(bool secondary)
 
 			break;
 		}
-		case PopUpWindow::PU_SAVE:
+		case PopUpWindow::PU_SAVE_SCENE:
 		{
-			if (inputName)
+			if (input_name)
 			{
 				char name_holder[64];
-				EA::StdC::Snprintf(name_holder, 64, "%s", nameStr.c_str());
-				if (ImGui::InputText("Name", name_holder, 64)) nameStr = name_holder;
+				EA::StdC::Snprintf(name_holder, 64, "%s", name_str.c_str());
+				if (ImGui::InputText("Name", name_holder, 64)) name_str = name_holder;
 			}
 
 			bool clicked = false;
 
-			if (ImGui::Button(btnText.c_str()))
+			if (ImGui::Button(btn_text.c_str()))
 			{
-				RE_SCENE->SaveScene((inputName) ? nameStr.c_str() : nullptr);
+				RE_SCENE->SaveScene((input_name) ? name_str.c_str() : nullptr);
 				clicked = true;
 			}
 
@@ -713,36 +783,115 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				active = false;
 				state = PU_NONE;
-				inputName = false;
+				input_name = false;
 				RE_EDITOR->PopUpFocus(false);
-				if (exitAfter) RE_INPUT->Push(RE_EventType::REQUEST_QUIT, App);
-				else if (spawnNewScene) RE_SCENE->NewEmptyScene();
-				spawnNewScene = false;
+				if (exit_after) RE_INPUT->Push(RE_EventType::REQUEST_QUIT, App);
+				else if (spawn_new_scene) RE_SCENE->NewEmptyScene();
+				spawn_new_scene = false;
+			}
+
+			break;
+		}
+		case PopUpWindow::PU_SAVE_PARTICLEEMITTER:
+		{
+			bool exists_emitter = false, exists_emissor = false, exists_renderer = false;
+			if (particle_names)
+			{
+				char names_holder[64];
+				EA::StdC::Snprintf(names_holder, 64, "%s", name_str.c_str());
+				if (ImGui::InputText("Emitter Name", names_holder, 64)) name_str = names_holder;
+
+				eastl::string resource_path("Assets/Particles/");
+				resource_path += name_str;
+				resource_path += ".meta";
+
+				exists_emitter = RE_FS->Exists(resource_path.c_str());
+				if (exists_emitter) ImGui::Text("That Emitter exists!");
+
+				if (need_emission) {
+					EA::StdC::Snprintf(names_holder, 64, "%s", emission_name.c_str());
+					if (ImGui::InputText("Emission Name", names_holder, 64)) emission_name = names_holder;
+				
+					resource_path ="Assets/Particles/";
+					resource_path += emission_name;
+					resource_path += ".lasse";
+
+					exists_emissor = RE_FS->Exists(resource_path.c_str());
+					if (exists_emissor) ImGui::Text("That Emissor exists!");
+				}
+
+				if (need_renderer) {
+					EA::StdC::Snprintf(names_holder, 64, "%s", renderer_name.c_str());
+					if (ImGui::InputText("Renderer Name", names_holder, 64)) renderer_name = names_holder;
+				
+					resource_path = "Assets/Particles/";
+					resource_path += renderer_name;
+					resource_path += ".lopfe";
+
+					exists_renderer = RE_FS->Exists(resource_path.c_str());
+					if (exists_renderer) ImGui::Text("That Renderer exists!");
+				}
+			}
+
+			bool clicked = false, canceled = false;
+
+			if (exists_emitter || exists_emissor || exists_renderer)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+			}
+
+			if (ImGui::Button(btn_text.c_str())) clicked = true;
+
+			if (exists_emitter || exists_emissor || exists_renderer) {
+				ImGui::SameLine();
+				ImGui::Text("Check names!");
+			}
+
+			if (exists_emitter || exists_emissor || exists_renderer)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+
+			if (ImGui::Button("Cancel")) canceled = clicked = true;
+
+			if (clicked)
+			{
+				active = false;
+				state = PU_NONE;
+				input_name = false;
+				particle_names = false;
+				need_emission = false;
+				need_renderer = false;
+				RE_EDITOR->PopUpFocus(false);
+				if (!canceled) RE_EDITOR->SaveEmitter(exit_after, name_str.c_str(), emission_name.c_str(), renderer_name.c_str());
+				else RE_EDITOR->CloseParticleEditor();
 			}
 
 			break;
 		}
 		case PopUpWindow::PU_PREFAB:
 		{
-			if (inputName)
+			if (input_name)
 			{
 				char name_holder[64];
-				EA::StdC::Snprintf(name_holder, 64, "%s", nameStr.c_str());
-				if (ImGui::InputText("Name", name_holder, 64)) nameStr = name_holder;
+				EA::StdC::Snprintf(name_holder, 64, "%s", name_str.c_str());
+				if (ImGui::InputText("Name", name_holder, 64)) name_str = name_holder;
 			}
 
 			static bool identityRoot = false;
 			ImGui::Checkbox("Make Root Identity", &identityRoot);
 
-			bool clicked = ImGui::Button(btnText.c_str());
+			bool clicked = ImGui::Button(btn_text.c_str());
 			if (clicked)
 			{
 				RE_Prefab* newPrefab = new RE_Prefab();
-				newPrefab->SetName(nameStr.c_str());
+				newPrefab->SetName(name_str.c_str());
 				newPrefab->SetType(Resource_Type::R_PREFAB);
 
 				RE_INPUT->PauseEvents();
-				newPrefab->Save(RE_SCENE->GetScenePool()->GetNewPoolFromID(goPrefab->GetUID()), identityRoot, true);
+				newPrefab->Save(RE_SCENE->GetScenePool()->GetNewPoolFromID(go_prefab->GetUID()), identityRoot, true);
 				RE_INPUT->ResumeEvents();
 
 				newPrefab->SaveMeta();
@@ -752,8 +901,8 @@ void PopUpWindow::Draw(bool secondary)
 			if (ImGui::Button("Cancel") || clicked)
 			{
 				state = PU_NONE;
-				active = inputName = false;
-				goPrefab = nullptr;
+				active = input_name = false;
+				go_prefab = nullptr;
 				RE_EDITOR->PopUpFocus(false);
 			}
 
@@ -761,21 +910,21 @@ void PopUpWindow::Draw(bool secondary)
 		}
 		case PopUpWindow::PU_DELETERESOURCE:
 		{
-			ResourceContainer* res = RE_RES->At(resourceToDelete);
+			ResourceContainer* res = RE_RES->At(resource_to_delete);
 			ImGui::Text("Name: %s", res->GetName());
 
-			static const char* names[MAX_R_TYPES] = { "undefined.", "shader.", "texture.", "mesh.", "prefab.", "skyBox.", "material.", "model.", "scene." };
+			static const char* names[MAX_R_TYPES] = { "undefined.", "shader.", "texture.", "mesh.", "prefab.", "skyBox.", "material.", "model.", "scene.", "particle emitter.", "particle emission.", "particle render." };
 			ImGui::Text("Type: %s", names[res->GetType()]);
 
 			ImGui::Separator();
 
-			bool clicked = ImGui::Button(btnText.c_str());
+			bool clicked = ImGui::Button(btn_text.c_str());
 			if (clicked)
 			{
 				RE_LOGGER.ScopeProcedureLogging();
 
 				// Delete at resource & filesystem
-				ResourceContainer* resAlone = RE_RES->DeleteResource(resourceToDelete, resourcesUsing, resourceOnScene);
+				ResourceContainer* resAlone = RE_RES->DeleteResource(resource_to_delete, using_resources, resource_on_scene);
 				RE_FS->DeleteResourceFiles(resAlone);
 
 				DEL(resAlone);
@@ -788,28 +937,28 @@ void PopUpWindow::Draw(bool secondary)
 				active = false;
 				state = PU_NONE;
 				RE_EDITOR->PopUpFocus(false);
-				goPrefab = nullptr;
-				resourceToDelete = nullptr;
-				resourcesUsing.clear();
-				resourceOnScene = false;
+				go_prefab = nullptr;
+				resource_to_delete = nullptr;
+				using_resources.clear();
+				resource_on_scene = false;
 				RE_RES->PopSelected(true);
 				RE_LOGGER.EndScope();
 			}
 
-			if (resourceOnScene) {
+			if (resource_on_scene) {
 				ImGui::Separator();
 				ImGui::Text("Your current scene will be affected.");
 			}
 
 			ImGui::Separator();
-			ImGui::Text((resourcesUsing.empty()) ? "No resources will be afected." : "The next resources will be afected and changed to default:");
+			ImGui::Text((using_resources.empty()) ? "No resources will be afected." : "The next resources will be afected and changed to default:");
 
 			uint count = 0;
-			for (auto resource : resourcesUsing)
+			for (auto resource : using_resources)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
 				ResourceContainer* resConflict = RE_RES->At(resource);
-				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | " };
+				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | ", "Particle emitter | ", "Particle emission | ", "Particle render | " };
 				btnname += (resource == RE_SCENE->GetCurrentScene()) ? "Scene (current scene) | " : names[resConflict->GetType()];
 				btnname += resConflict->GetName();
 
@@ -820,19 +969,19 @@ void PopUpWindow::Draw(bool secondary)
 		}
 		case PopUpWindow::PU_DELETEUNDEFINEDFILE:
 		{
-			ImGui::Text("File: %s", nameStr.c_str());
+			ImGui::Text("File: %s", name_str.c_str());
 			ImGui::Separator();
 
 			bool clicked = false;
-			if (ImGui::Button(btnText.c_str()))
+			if (ImGui::Button(btn_text.c_str()))
 			{
 				clicked = true;
 
 				RE_LOGGER.ScopeProcedureLogging();
-				if (!resourcesUsing.empty())
+				if (!using_resources.empty())
 				{
 					eastl::stack<ResourceContainer*> shadersDeleted;
-					for (auto resource : resourcesUsing)
+					for (auto resource : using_resources)
 						if (RE_RES->At(resource)->GetType() == R_SHADER)
 							shadersDeleted.push(RE_RES->DeleteResource(resource, RE_RES->WhereIsUsed(resource), false));
 
@@ -846,7 +995,7 @@ void PopUpWindow::Draw(bool secondary)
 					}
 				}
 
-				if (!RE_LOGGER.ScopedErrors()) RE_FS->DeleteUndefinedFile(nameStr.c_str());
+				if (!RE_LOGGER.ScopedErrors()) RE_FS->DeleteUndefinedFile(name_str.c_str());
 				else RE_LOG_ERROR("File can't be erased; shaders can't be delete.");
 			}
 
@@ -857,22 +1006,22 @@ void PopUpWindow::Draw(bool secondary)
 				active = false;
 				state = PU_NONE;
 				RE_EDITOR->PopUpFocus(false);
-				resourcesUsing.clear();
+				using_resources.clear();
 				RE_RES->PopSelected(true);
 				RE_LOGGER.EndScope();
 			}
 
 			ImGui::Separator();
-			ImGui::Text((resourcesUsing.empty()) ? "No resources will be afected." : "The next resources will be afected:");
+			ImGui::Text((using_resources.empty()) ? "No resources will be afected." : "The next resources will be afected:");
 
 			uint count = 0;
-			for (auto resource : resourcesUsing)
+			for (auto resource : using_resources)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
 				ResourceContainer* resConflict = RE_RES->At(resource);
 				Resource_Type type = resConflict->GetType();
 
-				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | " };
+				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | ", "Particle emitter | ", "Particle emission | ", "Particle render | " };
 				btnname += names[type];
 				btnname += resConflict->GetName();
 
@@ -885,7 +1034,7 @@ void PopUpWindow::Draw(bool secondary)
 		}
 		default:
 		{
-			if (ImGui::Button(btnText.c_str()))
+			if (ImGui::Button(btn_text.c_str()))
 			{
 				active = false;
 				state = PU_NONE;
@@ -982,13 +1131,16 @@ void AssetsWindow::Draw(bool secondary)
 				case RE_FileSystem::FileType::F_META:
 				{
 					ResourceContainer* res = RE_RES->At(p->AsMeta()->resource);
-					if (ImGui::ImageButton(reinterpret_cast<void*>(RE_EDITOR->thumbnails->GetShaderFileID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+
+					unsigned int icon_meta = (res->GetType() == R_SHADER) ? RE_EDITOR->thumbnails->GetShaderFileID() : RE_EDITOR->thumbnails->GetPEmitterFileID();
+
+					if (ImGui::ImageButton(reinterpret_cast<void*>(icon_meta), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
 						RE_RES->PushSelected(res->GetMD5(), true);
 
 					if (ImGui::BeginDragDropSource())
 					{
-						ImGui::SetDragDropPayload("#ShadereReference", &p->AsMeta()->resource, sizeof(const char**));
-						ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->GetShaderFileID()), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+						ImGui::SetDragDropPayload((res->GetType() == R_SHADER) ? "#ShadereReference" : "#EmitterReference", &p->AsMeta()->resource, sizeof(const char**));
+						ImGui::Image(reinterpret_cast<void*>(icon_meta), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 						ImGui::EndDragDropSource();
 					}
 					ImGui::PopID();
@@ -1062,7 +1214,17 @@ void AssetsWindow::Draw(bool secondary)
 					if (p->AsFile()->metaResource != nullptr)
 					{
 						ResourceContainer* res = RE_RES->At(p->AsFile()->metaResource->resource);
-						if (ImGui::ImageButton(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(res->GetMD5())), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+
+						unsigned int file_icon = 0;
+
+						switch (res->GetType())
+						{
+						case R_PARTICLE_EMISSION: file_icon = RE_EDITOR->thumbnails->GetPEmissionFileID(); break;
+						case R_PARTICLE_RENDER: file_icon = RE_EDITOR->thumbnails->GetPRenderFileID(); break;
+						default: file_icon = RE_EDITOR->thumbnails->At(res->GetMD5()); break;
+						}
+
+						if (ImGui::ImageButton(reinterpret_cast<void*>(file_icon), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
 							RE_RES->PushSelected(res->GetMD5(), true);
 						ImGui::PopID();
 
@@ -1075,14 +1237,14 @@ void AssetsWindow::Draw(bool secondary)
 						}
 						ImGui::PopID();
 
-						static const char* names[MAX_R_TYPES] = { "Undefined", "Shader", "Texture", "Mesh", "Prefab", "SkyBox", "Material", "Model", "Scene" };
+						static const char* names[MAX_R_TYPES] = { "Undefined", "Shader", "Texture", "Mesh", "Prefab", "SkyBox", "Material", "Model", "Scene", "Particle emitter", "Particle emission", "Particle render" };
 						eastl::string dragID("#");
 						(dragID += names[res->GetType()]) += "Reference";
 
 						if (ImGui::BeginDragDropSource())
 						{
 							ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
-							ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(p->AsFile()->metaResource->resource)), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+							ImGui::Image(reinterpret_cast<void*>(file_icon), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 							ImGui::EndDragDropSource();
 						}
 

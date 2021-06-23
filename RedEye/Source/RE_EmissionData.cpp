@@ -48,7 +48,7 @@ bool RE_EmissionInterval::IsActive(float &dt)
 	return is_open;
 }
 
-bool RE_EmissionInterval::DrawEditor()
+bool RE_EmissionInterval::DrawEditor(bool& changes)
 {
 	bool ret = false;
 	int tmp = static_cast<int>(type);
@@ -58,19 +58,19 @@ bool RE_EmissionInterval::DrawEditor()
 		is_open = true;
 		time_offset = 0.f;
 		duration[0] = duration[1] = 1.f;
-		ret = true;
+		changes = ret = true;
 	}
 
 	switch (type) {
 	case RE_EmissionInterval::INTERMITENT:
 	{
-		ImGui::DragFloat("Interval On", &duration[1], 1.f, 0.f, 10000.f);
+		if(ImGui::DragFloat("Interval On", &duration[1], 1.f, 0.f, 10000.f)) changes = true;
 		break; 
 	}
 	case RE_EmissionInterval::CUSTOM:
 	{
-		ImGui::DragFloat("Interval On", &duration[1], 1.f, 0.f, 10000.f);
-		ImGui::DragFloat("Interval Off", &duration[0], 1.f, 0.f, 10000.f);
+		if(ImGui::DragFloat("Interval On", &duration[1], 1.f, 0.f, 10000.f)) changes = true;
+		if(ImGui::DragFloat("Interval Off", &duration[0], 1.f, 0.f, 10000.f)) changes = true;
 		break;
 	}
 	default: break; }
@@ -176,7 +176,7 @@ unsigned int RE_EmissionSpawn::CountNewParticles(const float dt)
 	return ret;
 }
 
-bool RE_EmissionSpawn::DrawEditor()
+bool RE_EmissionSpawn::DrawEditor(bool& changes)
 {
 	bool ret = false;
 	int tmp = static_cast<int>(type);
@@ -185,25 +185,25 @@ bool RE_EmissionSpawn::DrawEditor()
 		type = static_cast<RE_EmissionSpawn::Type>(tmp);
 		has_started = false;
 		time_offset = 0.f;
-		ret = true;
+		changes = ret = true;
 	}
 
 	switch (type) {
 	case RE_EmissionSpawn::Type::SINGLE:
 	{
-		ImGui::DragInt("Particle amount", &particles_spawned, 1.f, 0, 10000);
+		if (ImGui::DragInt("Particle amount", &particles_spawned, 1.f, 0, 10000)) changes = true;
 		break;
 	}
 	case RE_EmissionSpawn::Type::BURST:
 	{
-		ImGui::DragInt("Particles/burst", &particles_spawned, 1.f, 0, 10000);
-		ImGui::DragFloat("Period", &frequency, 1.f, 0.0001f, 10000.f);
+		if(ImGui::DragInt("Particles/burst", &particles_spawned, 1.f, 0, 10000)) changes = true;
+		if(ImGui::DragFloat("Period", &frequency, 1.f, 0.0001f, 10000.f)) changes = true;
 
 		break;
 	}
 	case RE_EmissionSpawn::Type::FLOW:
 	{
-		ImGui::DragFloat("Frecuency", &frequency, 1.f, 0.0001f, 1000.f);
+		if(ImGui::DragFloat("Frecuency", &frequency, 1.f, 0.0001f, 1000.f)) changes = true;
 		break;
 	}
 	}
@@ -347,8 +347,9 @@ math::vec RE_EmissionShape::GetPosition() const
 	default: return geo.point; }
 }
 
-void RE_EmissionShape::DrawEditor()
+bool RE_EmissionShape::DrawEditor()
 {
+	bool ret = false;
 	int next_shape = static_cast<int>(type);
 	if (ImGui::Combo("Emissor Shape", &next_shape, "Point\0Cirle\0Ring\0AABB\0Sphere\0Hollow Sphere\0"))
 	{
@@ -359,62 +360,67 @@ void RE_EmissionShape::DrawEditor()
 		case RE_EmissionShape::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one); break;
 		case RE_EmissionShape::SPHERE: geo.sphere = math::Sphere(math::vec::zero, 1.f); break;
 		case RE_EmissionShape::HOLLOW_SPHERE: geo.hollow_sphere = { math::Sphere(math::vec::zero, 1.f), 0.8f }; break; }
+		ret = true;
 	}
 
 	switch (type)
 	{
 	case RE_EmissionShape::POINT:
 	{
-		ImGui::DragFloat3("Starting Pos", geo.point.ptr());
+		if(ImGui::DragFloat3("Starting Pos", geo.point.ptr())) ret = true;
 		break;
 	}
 	case RE_EmissionShape::CIRCLE:
 	{
-		ImGui::DragFloat3("Circle Origin", geo.circle.pos.ptr());
-		ImGui::DragFloat("Circle Radius", &geo.circle.r, 1.f, 0.f);
+		if(ImGui::DragFloat3("Circle Origin", geo.circle.pos.ptr())) ret = true;
+		if(ImGui::DragFloat("Circle Radius", &geo.circle.r, 1.f, 0.f)) ret = true;
 
 		math::float2 angles = geo.circle.normal.ToSphericalCoordinatesNormalized() * RE_Math::rad_to_deg;
 		if (ImGui::DragFloat2("Circle Yaw - Pitch", angles.ptr(), 0.1f, -180.f, 180.f))
 		{
 			angles *= RE_Math::deg_to_rad;
 			geo.circle.normal = math::vec::FromSphericalCoordinates(angles.x, angles.y);
+			ret = true;
 		}
 		break;
 	}
 	case RE_EmissionShape::RING:
 	{
-		ImGui::DragFloat3("Ring Origin", geo.ring.first.pos.ptr());
-		ImGui::DragFloat("Ring Radius", &geo.ring.first.r, 1.f, 0.f);
-		ImGui::DragFloat("Ring Inner Radius", &geo.ring.second, 1.f, 0.f, geo.ring.first.r);
+		if(ImGui::DragFloat3("Ring Origin", geo.ring.first.pos.ptr())) ret = true;
+		if(ImGui::DragFloat("Ring Radius", &geo.ring.first.r, 1.f, 0.f)) ret = true;
+		if(ImGui::DragFloat("Ring Inner Radius", &geo.ring.second, 1.f, 0.f, geo.ring.first.r)) ret = true;
 
 		math::float2 angles = geo.ring.first.normal.ToSphericalCoordinatesNormalized() * RE_Math::rad_to_deg;
 		if (ImGui::DragFloat2("Ring Yaw - Pitch", angles.ptr(), 0.1f, -180.f, 180.f))
 		{
 			angles *= RE_Math::deg_to_rad;
 			geo.ring.first.normal = math::vec::FromSphericalCoordinates(angles.x, angles.y);
+			ret = true;
 		}
 		break;
 	}
 	case RE_EmissionShape::AABB:
 	{
-		ImGui::DragFloat3("Box Min ", geo.box.minPoint.ptr());
-		ImGui::DragFloat3("Box Max ", geo.box.maxPoint.ptr());
+		if(ImGui::DragFloat3("Box Min ", geo.box.minPoint.ptr())) ret = true;
+		if(ImGui::DragFloat3("Box Max ", geo.box.maxPoint.ptr())) ret = true;
 		break;
 	}
 	case RE_EmissionShape::SPHERE:
 	{
-		ImGui::DragFloat3("Sphere Origin", geo.sphere.pos.ptr());
-		ImGui::DragFloat("Sphere Radius", &geo.sphere.r, 1.f, 0.f);
+		if(ImGui::DragFloat3("Sphere Origin", geo.sphere.pos.ptr())) ret = true;
+		if(ImGui::DragFloat("Sphere Radius", &geo.sphere.r, 1.f, 0.f)) ret = true;
 		break;
 	}
 	case RE_EmissionShape::HOLLOW_SPHERE:
 	{
-		ImGui::DragFloat3("Hollow Sphere Origin", geo.hollow_sphere.first.pos.ptr());
-		ImGui::DragFloat("Hollow Sphere Radius", &geo.hollow_sphere.first.r, 1.f, 0.f);
-		ImGui::DragFloat("Hollow Sphere Inner Radius", &geo.hollow_sphere.second, 1.f, 0.f, geo.hollow_sphere.first.r);
+		if(ImGui::DragFloat3("Hollow Sphere Origin", geo.hollow_sphere.first.pos.ptr())) ret = true;
+		if(ImGui::DragFloat("Hollow Sphere Radius", &geo.hollow_sphere.first.r, 1.f, 0.f)) ret = true;
+		if(ImGui::DragFloat("Hollow Sphere Inner Radius", &geo.hollow_sphere.second, 1.f, 0.f, geo.hollow_sphere.first.r)) ret = true;
 		break;
 	}
 	}
+
+	return ret;
 }
 
 void RE_EmissionShape::JsonDeserialize(RE_Json* node)
@@ -692,64 +698,69 @@ math::vec RE_EmissionVector::GetValue() const
 	default: return math::vec::zero; }
 }
 
-void RE_EmissionVector::DrawEditor(const char* name)
+bool RE_EmissionVector::DrawEditor(const char* name)
 {
+	bool ret = false;
 	const eastl::string tmp(name);
 	int next_type = static_cast<int>(type);
-	if (ImGui::Combo((tmp + " type").c_str(), &next_type, "None\0Value\0Range X\0Range Y\0Range Z\0Range XY\0Range XZ\0Range YZ\0Range XYZ\0"))
+	if (ImGui::Combo((tmp + " type").c_str(), &next_type, "None\0Value\0Range X\0Range Y\0Range Z\0Range XY\0Range XZ\0Range YZ\0Range XYZ\0")) {
 		type = static_cast<Type>(next_type);
+		ret = true;
+	}
 
 	switch (type) {
 	case RE_EmissionVector::VALUE: ImGui::DragFloat3(name, val.ptr()); break;
 	case RE_EmissionVector::RANGEX:
 	{
-		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat((tmp + " X Margin").c_str(), &margin.x);
+		if(ImGui::DragFloat3(name, val.ptr())) ret = true;
+		if(ImGui::DragFloat((tmp + " X Margin").c_str(), &margin.x)) ret = true;
 		break; 
 	}
 	case RE_EmissionVector::RANGEY:
 	{
-		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat((tmp + " Y Margin").c_str(), &margin.y);
+		if(ImGui::DragFloat3(name, val.ptr())) ret = true;
+		if(ImGui::DragFloat((tmp + " Y Margin").c_str(), &margin.y)) ret = true;
 		break; 
 	}
 	case RE_EmissionVector::RANGEZ:
 	{
-		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat((tmp + " Z Margin").c_str(), &margin.z);
+		if(ImGui::DragFloat3(name, val.ptr())) ret = true;
+		if(ImGui::DragFloat((tmp + " Z Margin").c_str(), &margin.z)) ret = true;
 		break; 
 	}
 	case RE_EmissionVector::RANGEXY:
 	{
-		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat2((tmp + " XY Margin").c_str(), &margin.x);
-		ImGui::DragFloat((tmp + " Y Margin").c_str(), &margin.y);
+		if(ImGui::DragFloat3(name, val.ptr())) ret = true;
+		if(ImGui::DragFloat2((tmp + " XY Margin").c_str(), &margin.x)) ret = true;
+		if(ImGui::DragFloat((tmp + " Y Margin").c_str(), &margin.y)) ret = true;
 		break; 
 	}
 	case RE_EmissionVector::RANGEXZ:
 	{
-		ImGui::DragFloat3(name, val.ptr());
+		if(ImGui::DragFloat3(name, val.ptr())) ret = true;
 		float xz[2] = { margin.x, margin.z };
 		if (ImGui::DragFloat2((tmp + " XZ Margin").c_str(), xz))
 		{
 			margin.x = xz[0];
 			margin.z = xz[1];
+			ret = true;
 		}
 		break; 
 	}
 	case RE_EmissionVector::RANGEYZ:
 	{
-		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat2((tmp + " YZ Margin").c_str(), margin.ptr() + 1);
+		if(ImGui::DragFloat3(name, val.ptr())) ret = true;
+		if(ImGui::DragFloat2((tmp + " YZ Margin").c_str(), margin.ptr() + 1)) ret = true;
 		break; 
 	}
 	case RE_EmissionVector::RANGEXYZ:
 	{
-		ImGui::DragFloat3(name, val.ptr());
-		ImGui::DragFloat3((tmp + " Margin").c_str(), margin.ptr());
+		if(ImGui::DragFloat3(name, val.ptr())) ret = true;
+		if(ImGui::DragFloat3((tmp + " Margin").c_str(), margin.ptr())) ret = true;
 		break;
 	}
 	default: break; }
+	return ret;
 }
 
 void RE_EmissionVector::JsonDeserialize(RE_Json* node)
@@ -1095,17 +1106,26 @@ float RE_EmissionSingleValue::GetMax() const
 	default: return 0.f; }
 }
 
-void RE_EmissionSingleValue::DrawEditor(const char* name)
+bool RE_EmissionSingleValue::DrawEditor(const char* name)
 {
+	bool ret = false;
 	const eastl::string tmp(name);
 	int next_type = static_cast<int>(type);
-	if (ImGui::Combo((tmp + " type").c_str(), &next_type, "None\0Value\0Range\0"))
+	if (ImGui::Combo((tmp + " type").c_str(), &next_type, "None\0Value\0Range\0")) {
 		type = static_cast<Type>(next_type);
+		ret = true;
+	}
 
 	switch (type) {
 	case RE_EmissionSingleValue::NONE: break;
-	case RE_EmissionSingleValue::VALUE: ImGui::DragFloat(name, &val); break;
-	case RE_EmissionSingleValue::RANGE: ImGui::DragFloat(name, &val); ImGui::DragFloat((tmp + " Margin").c_str(), &margin, 0.01f, 0.f); break; }
+	case RE_EmissionSingleValue::VALUE: if (ImGui::DragFloat(name, &val)) ret = true; break;
+	case RE_EmissionSingleValue::RANGE: {
+		if(ImGui::DragFloat(name, &val)) ret = true;
+		if(ImGui::DragFloat((tmp + " Margin").c_str(), &margin, 0.01f, 0.f)) ret = true;
+		break;
+	}
+	}
+	return ret;
 }
 
 void RE_EmissionSingleValue::JsonDeserialize(RE_Json* node)
@@ -1218,17 +1238,28 @@ math::vec RE_EmissionExternalForces::GetAcceleration() const
 	default: return math::vec::zero; }
 }
 
-void RE_EmissionExternalForces::DrawEditor()
+bool RE_EmissionExternalForces::DrawEditor()
 {
+	bool ret = false;
+
 	int next_type = static_cast<int>(type);
-	if (ImGui::Combo("External Forces", &next_type, "None\0Gravity\0Wind\0Gravity + Wind\0"))
+	if (ImGui::Combo("External Forces", &next_type, "None\0Gravity\0Wind\0Gravity + Wind\0")) {
 		type = static_cast<Type>(next_type);
+		ret = true;
+	}
 
 	switch (type) {
 	case RE_EmissionExternalForces::NONE: break;
-	case RE_EmissionExternalForces::GRAVITY: ImGui::DragFloat("Gravity", &gravity); break;
-	case RE_EmissionExternalForces::WIND: ImGui::DragFloat3("Wind", wind.ptr()); break;
-	case RE_EmissionExternalForces::WIND_GRAVITY: ImGui::DragFloat("Gravity", &gravity); ImGui::DragFloat3("Wind", wind.ptr()); break; }
+	case RE_EmissionExternalForces::GRAVITY: if (ImGui::DragFloat("Gravity", &gravity)) ret = true; break;
+	case RE_EmissionExternalForces::WIND: if (ImGui::DragFloat3("Wind", wind.ptr())) ret = true; break;
+	case RE_EmissionExternalForces::WIND_GRAVITY: {
+		if(ImGui::DragFloat("Gravity", &gravity)) ret = true;
+		if(ImGui::DragFloat3("Wind", wind.ptr())) ret = true;
+		break; 
+	}
+	}
+
+	return ret;
 }
 
 void RE_EmissionExternalForces::JsonDeserialize(RE_Json* node)
@@ -1565,8 +1596,9 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 	return true;
 }
 
-void RE_EmissionBoundary::DrawEditor()
+bool RE_EmissionBoundary::DrawEditor()
 {
+	bool ret = false;
 	int tmp = static_cast<int>(type);
 	if (ImGui::Combo("Boundary Type", &tmp, "None\0Plane\0Sphere\0AABB\0"))
 	{
@@ -1575,45 +1607,50 @@ void RE_EmissionBoundary::DrawEditor()
 		case RE_EmissionBoundary::SPHERE: geo.sphere = math::Sphere({ 0.f, 0.f, 0.f }, 10.f); break;
 		case RE_EmissionBoundary::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one * 5.f); break; 
 		default: break; }
+		ret = true;
 	}
 
 	if (type)
 	{
 		tmp = static_cast<int>(effect);
-		if (ImGui::Combo("Boundary Effect", &tmp, "Contain\0Kill\0"))
+		if (ImGui::Combo("Boundary Effect", &tmp, "Contain\0Kill\0")) {
 			effect = static_cast<Effect>(tmp);
+			ret = true;
+		}
 
 		if (effect == Effect::CONTAIN)
-			ImGui::DragFloat("Boundary Restitution", &restitution, 1.f, 0.f, 100.f);
+			if (ImGui::DragFloat("Boundary Restitution", &restitution, 1.f, 0.f, 100.f)) ret = true;
 
 		switch (type) {
 		case RE_EmissionBoundary::NONE: break;
 		case RE_EmissionBoundary::PLANE:
 		{
-			ImGui::DragFloat("Distance to origin", &geo.plane.d, 1.f, 0.f);
+			if (ImGui::DragFloat("Distance to origin", &geo.plane.d, 1.f, 0.f)) ret = true;
 			math::float2 angles = geo.plane.normal.ToSphericalCoordinatesNormalized() * RE_Math::rad_to_deg;
 			if (ImGui::DragFloat2("Boundary Yaw - Pitch", angles.ptr(), 0.1f, -180.f, 180.f))
 			{
 				angles *= RE_Math::deg_to_rad;
 				geo.plane.normal = math::vec::FromSphericalCoordinates(angles.x, angles.y);
+				ret = true;
 			}
 
 			break;
 		}
 		case RE_EmissionBoundary::SPHERE:
 		{
-			ImGui::DragFloat3("Boundary Position", geo.sphere.pos.ptr());
-			ImGui::DragFloat("Boundary Radius", &geo.sphere.r, 1.f, 0.f);
+			if (ImGui::DragFloat3("Boundary Position", geo.sphere.pos.ptr())) ret = true;
+			if (ImGui::DragFloat("Boundary Radius", &geo.sphere.r, 1.f, 0.f)) ret = true;
 			break;
 		}
 		case RE_EmissionBoundary::AABB:
 		{
-			ImGui::DragFloat3("Boundary Min", geo.box.minPoint.ptr());
-			ImGui::DragFloat3("Boundary Max", geo.box.maxPoint.ptr());
+			if(ImGui::DragFloat3("Boundary Min", geo.box.minPoint.ptr())) ret = true;
+			if(ImGui::DragFloat3("Boundary Max", geo.box.maxPoint.ptr())) ret = true;
 			break;
 		}
 		}
 	}
+	return ret;
 }
 
 void RE_EmissionBoundary::JsonDeserialize(RE_Json* node)
@@ -1786,22 +1823,26 @@ unsigned int RE_EmissionBoundary::GetBinarySize() const
 	return ret;
 }
 
-void RE_EmissionCollider::DrawEditor()
+bool RE_EmissionCollider::DrawEditor()
 {
+	bool ret = false;
 	int tmp = static_cast<int>(type);
-	if (ImGui::Combo("Collider Type", &tmp, "None\0Point\0Sphere\0"))
+	if (ImGui::Combo("Collider Type", &tmp, "None\0Point\0Sphere\0")) {
 		type = static_cast<Type>(tmp);
+		ret = true;
+	}
 
 	if (type)
 	{
-		ImGui::Checkbox("Inter collisions", &inter_collisions);
+		if(ImGui::Checkbox("Inter collisions", &inter_collisions)) ret = true;
 
-		mass.DrawEditor("Mass");
-		restitution.DrawEditor("Restitution");
+		if (mass.DrawEditor("Mass")) ret = true;
+		if (restitution.DrawEditor("Restitution")) ret = true;
 
 		if (type == RE_EmissionCollider::SPHERE)
-			radius.DrawEditor("Collider Radius");
+			if (radius.DrawEditor("Collider Radius")) ret = true;
 	}
+	return ret;
 }
 
 void RE_EmissionCollider::JsonDeserialize(RE_Json* node)
@@ -1950,21 +1991,26 @@ math::vec RE_PR_Color::GetValue(const float weight) const
 	else return (gradient * weight) + (base * (1.f - weight));
 }
 
-void RE_PR_Color::DrawEditor()
+bool RE_PR_Color::DrawEditor()
 {
+	bool ret = false;
 	int tmp = static_cast<int>(type);
-	if (ImGui::Combo("Color Type", &tmp, "Single\0Over Lifetime\0Over Distance\0Over Speed\0"))
+	if (ImGui::Combo("Color Type", &tmp, "Single\0Over Lifetime\0Over Distance\0Over Speed\0")) {
 		type = static_cast<Type>(tmp);
-
+		ret = true;
+	}
 
 	if (type != RE_PR_Color::SINGLE)
 	{
-		ImGui::ColorEdit3("Particle Gradient 1", base.ptr());
-		ImGui::ColorEdit3("Particle Gradient 2", gradient.ptr());
-		 
-		ImGui::Checkbox(useCurve ? "Disable Color Curve" : "Enable Color Curve", &useCurve);
+		if (ImGui::ColorEdit3("Particle Gradient 1", base.ptr())) ret = true;
+		if (ImGui::ColorEdit3("Particle Gradient 2", gradient.ptr())) ret = true;
+
+		if (ImGui::Checkbox(useCurve ? "Disable Color Curve" : "Enable Color Curve", &useCurve)) ret = true;
 	}
-	else ImGui::ColorEdit3("Particle Color", base.ptr());
+	else
+		if (ImGui::ColorEdit3("Particle Color", base.ptr())) ret = true;
+
+	return ret;
 }
 
 void RE_PR_Color::JsonDeserialize(RE_Json* node)
@@ -2057,8 +2103,9 @@ float CurveData::GetValue(const float weight) const
 		ImGui::CurveValue(weight, total_points, points.data());
 }
 
-void CurveData::DrawEditor(const char* name)
+bool CurveData::DrawEditor(const char* name)
 {
+	bool ret = false;
 	eastl::string tmp(name);
 	static float cSize[2] = { 600.f, 200.f };
 
@@ -2066,7 +2113,7 @@ void CurveData::DrawEditor(const char* name)
 	ImGui::PushItemWidth(150.f);
 	ImGui::DragFloat2((tmp + " curve size").c_str(), cSize, 1.0f, 0.0f, 0.0f, "%.0f");
 	ImGui::PopItemWidth();
-	ImGui::Curve((tmp + " curve").c_str(), { cSize[0], cSize[1] }, total_points, points.data(), &comboCurve);
+	if (ImGui::Curve((tmp + " curve").c_str(), { cSize[0], cSize[1] }, total_points, points.data(), &comboCurve)) ret = true;
 	ImGui::SameLine();
 	ImGui::PushItemWidth(50.f);
 
@@ -2079,10 +2126,14 @@ void CurveData::DrawEditor(const char* name)
 		points.push_back({ -1.0f, 0.0f });
 		for (int i = 1; i < total_points; i++)
 			points.push_back({ 0.0f, 0.0f });
+
+		ret = true;
 	}
 
 	ImGui::SameLine();
-	ImGui::Checkbox((tmp + " smooth curve").c_str(), &smooth);
+	if (ImGui::Checkbox((tmp + " smooth curve").c_str(), &smooth)) ret = true;
+
+	return ret;
 }
 
 void CurveData::JsonDeserialize(RE_Json* node)
@@ -2169,29 +2220,33 @@ float RE_PR_Opacity::GetValue(const float weight) const
 	default: return 1.f; }
 }
 
-void RE_PR_Opacity::DrawEditor()
+bool RE_PR_Opacity::DrawEditor()
 {
+	bool ret = false;
 	int tmp = static_cast<int>(type);
-	if (ImGui::Combo("Opacity Type", &tmp, "None\0Value\0Over Lifetime\0Over Distance\0Over Speed\0"))
+	if (ImGui::Combo("Opacity Type", &tmp, "None\0Value\0Over Lifetime\0Over Distance\0Over Speed\0")) {
 		type = static_cast<Type>(tmp);
+		ret = true;
+	}
 
 	switch (type)
 	{
 	case RE_PR_Opacity::VALUE:
-		ImGui::SliderFloat("Opacity", &opacity, 0.0f, 1.0f);
+		if (ImGui::SliderFloat("Opacity", &opacity, 0.0f, 1.0f)) ret = true;
 		break;
 	case RE_PR_Opacity::OVERLIFETIME:
 	case RE_PR_Opacity::OVERDISTANCE:
 	case RE_PR_Opacity::OVERSPEED:
-		ImGui::Checkbox(useCurve ? "Disable Opacity Curve" : "Enable Opacity Curve", &useCurve);
+		if (ImGui::Checkbox(useCurve ? "Disable Opacity Curve" : "Enable Opacity Curve", &useCurve)) ret = true;
 		if (!useCurve) {
 			ImGui::SameLine();
-			ImGui::Checkbox("Invert Opacity", &inverted);
+			if (ImGui::Checkbox("Invert Opacity", &inverted)) ret = true;
 		}
 		break;
 	default:
 		break;
 	}
+	return ret;
 }
 
 void RE_PR_Opacity::JsonDeserialize(RE_Json* node)
@@ -2272,8 +2327,9 @@ float RE_PR_Light::GetIntensity() const { return random_i ? intensity + (RE_MATH
 float RE_PR_Light::GetSpecular() const { return random_s ? specular + (RE_MATH->RandomF() * (specular_max - specular)) : specular; }
 math::vec RE_PR_Light::GetQuadraticValues() const { return { constant, linear, quadratic }; }
 
-void RE_PR_Light::DrawEditor(const unsigned int id)
+bool RE_PR_Light::DrawEditor(const unsigned int id)
 {
+	bool ret = false;
 	int tmp = static_cast<int>(type);
 	if (ImGui::Combo("Light Mode", &tmp, "None\0Unique\0Per Particle\0"))
 	{
@@ -2307,6 +2363,8 @@ void RE_PR_Light::DrawEditor(const unsigned int id)
 			break;
 		}
 		default: break; }
+
+		ret = true;
 	}
 
 	switch (type) {
@@ -2314,14 +2372,14 @@ void RE_PR_Light::DrawEditor(const unsigned int id)
 	{
 		auto particles = RE_PHYSICS->GetParticles(id);
 
-		ImGui::ColorEdit3("Light Color", color.ptr());
-		ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f");
-		ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f");
+		if (ImGui::ColorEdit3("Light Color", color.ptr())) ret = true;
+		if(ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f")) ret = true;
+		if(ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f")) ret = true;
 
 		ImGui::Separator();
-		ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f");
-		ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f");
-		ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
+		if(ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f")) ret = true;
+		if(ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
+		if(ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
 
 		break;
 	}
@@ -2329,46 +2387,66 @@ void RE_PR_Light::DrawEditor(const unsigned int id)
 	{
 		auto particles = RE_PHYSICS->GetParticles(id);
 
-		if (ImGui::Checkbox("Random Color", &random_color))
+		if (ImGui::Checkbox("Random Color", &random_color)) {
 			for (auto p : *particles) p->lightColor = GetColor();
+			ret = true;
+		}
 
-		if (!random_color && ImGui::ColorEdit3("Light Color", color.ptr()))
+		if (!random_color && ImGui::ColorEdit3("Light Color", color.ptr())) {
 			for (auto p : *particles) p->lightColor = color;
+			ret = true;
+		}
 
-		if (ImGui::Checkbox("Random Intensity", &random_i))
+		if (ImGui::Checkbox("Random Intensity", &random_i)) {
 			for (auto p : *particles) p->intensity = GetIntensity();
+			ret = true;
+		}
 
 		if (random_i)
 		{
 			bool update_sim = false;
 			update_sim |= ImGui::DragFloat("Intensity Min", &intensity, 0.01f, 0.0f, intensity_max, "%.2f");
 			update_sim |= ImGui::DragFloat("Intensity Max", &intensity_max, 0.01f, intensity, 50.f, "%.2f");
-			if (update_sim) for (auto p : *particles) p->intensity = GetIntensity();
+			if (update_sim) {
+				for (auto p : *particles) p->intensity = GetIntensity();
+				ret = true;
+			}
 		}
-		else if (ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f"))
+		else if (ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f")) {
 			for (auto p : *particles) p->intensity = intensity;
+			ret = true;
+		}
 
-		if (ImGui::Checkbox("Random Specular", &random_s))
+		if (ImGui::Checkbox("Random Specular", &random_s)) {
 			for (auto p : *particles) p->specular = GetSpecular();
+			ret = true;
+		}
 
 		if (random_s)
 		{
 			bool update_sim = false;
 			update_sim |= ImGui::DragFloat("Specular Min", &specular, 0.01f, 0.0f, specular_max, "%.2f");
 			update_sim |= ImGui::DragFloat("Specular Max", &specular_max, 0.01f, specular, 10.f, "%.2f");
-			if (update_sim) for (auto p : *particles) p->specular = GetSpecular();
+			if (update_sim) {
+				for (auto p : *particles) p->specular = GetSpecular();
+				ret = true;
+			}
 		}
-		else if (ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f"))
+		else if (ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f")) {
 			for (auto p : *particles) p->specular = specular;
+			ret = true;
+		}
 
 		ImGui::Separator();
-		ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f");
-		ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f");
-		ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f");
+		if(ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f")) ret = true;
+		if(ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
+		if(ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
 
 		break;
 	}
 	default: break; }
+
+	return ret;
 }
 
 void RE_PR_Light::JsonDeserialize(RE_Json* node)

@@ -220,7 +220,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 							}
 						}
 					}
-					if (res->GetType() == R_SHADER)  toRemoveM.push_back(meta);
+					if (res->GetType() == R_SHADER || res->GetType() == R_PARTICLE_EMITTER)  toRemoveM.push_back(meta);
 				}
 				else toRemoveM.push_back(meta);
 
@@ -252,7 +252,6 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					toImport.push_back(file);
 					break;
 				case F_SKYBOX:
-				case F_PARTICLEEMITTER:
 				{
 					eastl::list<RE_File*>::const_iterator iter = toImport.end();
 					if (!toImport.empty())
@@ -303,8 +302,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				case F_PREFAB:	 newRes = RE_RES->ImportPrefab(file->path.c_str()); break;
 				case F_SCENE:	 newRes = RE_RES->ImportScene(file->path.c_str()); break; 
 				case F_PARTICLEEMISSOR:	 newRes = RE_RES->ImportParticleEmissor(file->path.c_str()); break; 
-				case F_PARTICLERENDER:	 newRes = RE_RES->ImportParticleRender(file->path.c_str()); break; 
-				case F_PARTICLEEMITTER:	 newRes = RE_RES->ImportParticleEmitter(file->path.c_str()); break; }
+				case F_PARTICLERENDER:	 newRes = RE_RES->ImportParticleRender(file->path.c_str()); break; }
 
 				if (newRes != nullptr)
 				{
@@ -343,10 +341,23 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 		if ((doAll || run) && !toReImport.empty())
 		{
 			eastl::vector<RE_Meta*> toRemoveM;
+			static bool particle_reimport = false;
 			for (RE_Meta* meta : toReImport)
 			{
 				RE_LOG("ReImporting %s", meta->path.c_str());
-				RE_RES->At(meta->resource)->ReImport();
+
+				switch (RE_RES->At(meta->resource)->GetType())
+				{
+				case R_SHADER:
+					RE_RES->At(meta->resource)->ReImport();
+					break;
+				case R_PARTICLE_RENDER:
+				case R_PARTICLE_EMISSION:
+					RE_RES->PushParticleResource(meta->resource);
+					particle_reimport = true;
+					break;
+				}
+
 				toRemoveM.push_back(meta);
 
 				if (!doAll && extra_ms < time.Read())
@@ -354,6 +365,11 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					run = false;
 					break;
 				}
+			}
+
+			if (particle_reimport) {
+				RE_RES->ProcessParticlesReimport();
+				particle_reimport = false;
 			}
 
 			if (!toRemoveM.empty())
@@ -554,7 +570,7 @@ void RE_FileSystem::DeleteUndefinedFile(const char* filePath)
 
 void RE_FileSystem::DeleteResourceFiles(ResourceContainer* resContainer)
 {
-	if (resContainer->GetType() != R_SHADER) DeleteUndefinedFile(resContainer->GetAssetPath());
+	if (resContainer->GetType() != R_SHADER && resContainer->GetType() != R_PARTICLE_EMITTER) DeleteUndefinedFile(resContainer->GetAssetPath());
 	DeleteUndefinedFile(resContainer->GetMetaPath());
 
 	if (Exists(resContainer->GetLibraryPath()))
@@ -683,7 +699,7 @@ void RE_FileSystem::CopyDirectory(const char * origin, const char * dest)
 
 RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const char* _path, const char*& _extension)
 {
-	static const char* extensionsSuported[15] = { "meta", "re","refab", "pupil", "sk",  "fbx", "jpg", "dds", "png", "tga", "tiff", "bmp", "lasselopfe", "lasse", "lopfe" };
+	static const char* extensionsSuported[14] = { "meta", "re","refab", "pupil", "sk",  "fbx", "jpg", "dds", "png", "tga", "tiff", "bmp", "lasse", "lopfe" };
 
 	RE_FileSystem::FileType ret = F_NOTSUPPORTED;
 	eastl::string modPath(_path);
@@ -709,9 +725,8 @@ RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const cha
 			case 9:
 			case 10:
 			case 11: ret = F_TEXTURE; break;
-			case 12: ret = F_PARTICLEEMITTER; break;
-			case 13: ret = F_PARTICLEEMISSOR; break;
-			case 14: ret = F_PARTICLERENDER; break;
+			case 12: ret = F_PARTICLEEMISSOR; break;
+			case 13: ret = F_PARTICLERENDER; break;
 			}
 		}
 	}
@@ -872,6 +887,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 						newFile->pType = PathType::D_FILE;
 						newFile->fType = fileType;
 						newFile->extension = extension;
+						newFile->lastModified = fileStat.modtime;
 
 						RE_ProcessPath* newProcess = new RE_ProcessPath();
 						newProcess->procedure = P_ADDFILE;
@@ -884,8 +900,9 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 					{
 						bool reimport = false;
 						ResourceContainer* res = RE_RES->At((*iter)->AsFile()->AsMeta()->resource);
-						if (res->GetType() == Resource_Type::R_SHADER)
+						switch (res->GetType())
 						{
+						case R_SHADER: {
 							RE_Shader* shadeRes = dynamic_cast<RE_Shader*>(res);
 							if (shadeRes->isShaderFilesChanged())
 							{
@@ -894,6 +911,20 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 								newProcess->toProcess = (*iter);
 								ret.push(newProcess);
 							}
+							break; }
+						case R_PARTICLE_RENDER:
+						case R_PARTICLE_EMISSION: {
+
+							if ((*iter)->AsFile()->lastModified != fileStat.modtime) {
+								(*iter)->AsFile()->lastModified = fileStat.modtime;
+
+								RE_ProcessPath* newProcess = new RE_ProcessPath();
+								newProcess->procedure = P_REIMPORT;
+								newProcess->toProcess = (*iter);
+								ret.push(newProcess);
+							}
+							break;
+						}
 						}
 					}
 				}
@@ -922,7 +953,7 @@ eastl::stack<RE_FileSystem::RE_Path*> RE_FileSystem::RE_Directory::GetDisplaying
 				if (path->AsMeta()->resource)
 				{
 					ResourceContainer* res = RE_RES->At(path->AsMeta()->resource);
-					if (res->GetType() == R_SHADER) ret.push(path);
+					if (res->GetType() == R_SHADER || res->GetType() == R_PARTICLE_EMITTER) ret.push(path);
 				}
 				break;
 			}

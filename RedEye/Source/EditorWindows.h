@@ -163,7 +163,8 @@ public:
 	void PopUp(const char* btnText = "Accept", const char* title = "PopUp", bool disableAllWindows = false);
 
 	void PopUpError();
-	void PopUpSave(bool fromExit = false, bool newScene = false);
+	void PopUpSaveScene(bool fromExit = false, bool newScene = false);
+	void PopUpSaveParticles(bool need_particle_names = false, bool not_emissor = false, bool not_renderer = false, bool close_after = false);
 	void PopUpPrefab(RE_GameObject* go);
 	void PopUpDelRes(const char* res);
 	void PopUpDelUndeFile(const char* assetPath);
@@ -184,21 +185,22 @@ private:
 	enum PU_STATE {
 		PU_NONE = -1,
 		PU_ERROR,
-		PU_SAVE,
+		PU_SAVE_SCENE,
+		PU_SAVE_PARTICLEEMITTER,
 		PU_PREFAB,
 		PU_DELETERESOURCE,
 		PU_DELETEUNDEFINEDFILE
 	} state = PU_NONE;
-	bool exitAfter = false;
-	bool inputName = false;
-	bool spawnNewScene = false;
-	eastl::string btnText;
-	eastl::string titleText;
-	eastl::string nameStr;
-	RE_GameObject* goPrefab = nullptr;
-	const char* resourceToDelete = nullptr;
-	eastl::vector<const char*> resourcesUsing;
-	bool resourceOnScene = false;
+	bool exit_after = false, input_name = false,
+		spawn_new_scene = false, particle_names = false,
+		need_emission = false, need_renderer = false;
+	eastl::string btn_text;
+	eastl::string title_text;
+	eastl::string name_str, emission_name, renderer_name;
+	RE_GameObject* go_prefab = nullptr;
+	const char* resource_to_delete = nullptr;
+	eastl::vector<const char*> using_resources;
+	bool resource_on_scene = false;
 };
 
 class AssetsWindow : public EditorWindow
@@ -293,8 +295,13 @@ public:
 	ParticleEmiiterEditorWindow(const char* name = "Particle Emitter Workspace", bool start_active = false);
 	~ParticleEmiiterEditorWindow();
 
-	void StartEditing(RE_ParticleEmitter* sim, UID cmp);
-	UID GetComponent() const;
+	void StartEditing(RE_ParticleEmitter* sim, const char* md5);
+	const RE_ParticleEmitter* GetEdittingParticleEmitter()const { return simulation; }
+
+	void SaveEmitter(bool close = false, const char* emitter_name = nullptr, const char* emissor_base = nullptr, const char* renderer_base = nullptr);
+	void NextOrClose();
+	void CloseEditor();
+	void LoadNextEmitter();
 
 	unsigned int GetSceneWidht()const { return (width == 0) ? 500 : width; }
 	unsigned int GetSceneHeight()const { return (heigth == 0) ? 500 : heigth; }
@@ -309,8 +316,13 @@ private:
 
 
 private:
-	UID fromComponent = 0ull;
+	const char* emiter_md5 = nullptr;
 	RE_ParticleEmitter* simulation = nullptr;
+	class RE_ParticleEmitterBase* new_emitter = nullptr;
+
+	bool load_next = false;
+	const char* next_emiter_md5 = nullptr;
+	RE_ParticleEmitter* next_simulation = nullptr;
 
 	math::float4 viewport = math::float4::zero;
 	int width = 0;
@@ -320,6 +332,7 @@ private:
 	bool recalc = false;
 
 	bool docking = false;
+	bool need_save = false;
 };
 
 class TextEditor;

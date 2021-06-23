@@ -348,6 +348,7 @@ void ComponentsPool::UseResources()
 	camPool.UseResources();
 	meshPool.UseResources();
 	waterPool.UseResources();
+	particleSPool.UseResources();
 }
 
 void ComponentsPool::UnUseResources()
@@ -355,6 +356,7 @@ void ComponentsPool::UnUseResources()
 	camPool.UnUseResources();
 	meshPool.UnUseResources();
 	waterPool.UnUseResources();
+	particleSPool.UnUseResources();
 }
 
 eastl::vector<UID> ComponentsPool::GetAllCompUID(ushortint type) const

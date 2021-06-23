@@ -560,13 +560,6 @@ void ModuleRenderer3D::PushThumnailRend(const char* md5, bool redo)
 		t = RenderType::T_R_SKYBOX;
 		rendQueue.push({ t, thumbnailView, md5, redo });
 		break;
-
-	//TODO FIND ICON TEXTURE FOR PARTICLE EMISSOR & PARTICLE RENDER
-	//TODO RENDER THUMBAIL PARTICLE EMITTER
-	case R_PARTICLE_EMISSION:
-	case R_PARTICLE_RENDER:
-	case R_PARTICLE_EMITTER:
-		RE_EDITOR->thumbnails->Change(md5, 0);
 	}
 
 }
@@ -1002,78 +995,74 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 			usingClipDistance,
 			render_view.clip_distance);
 
-	RE_Component* comptToDraw = RE_SCENE->GetScenePool()->GetComponentPtr(RE_EDITOR->GetEditingParticleEmittorComponent(), ComponentType::C_PARTICLEEMITER);
+	const RE_ParticleEmitter* editting_simulation = RE_EDITOR->GetCurrentEditingParticleEmitter();
 
-	RE_CompParticleEmitter* particleEmitterToDraw = dynamic_cast<RE_CompParticleEmitter*>(comptToDraw);
-
-	if (particleEmitterToDraw != nullptr) {
+	if (editting_simulation != nullptr) {
 
 		// Deferred Light Pass
 		if (render_view.light == LIGHT_DEFERRED)
 		{
 			// Particle System Draws
-			particleEmitterToDraw->Draw();
+			RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0 }, { 0.0,1.0,0.0 });
 
-
-			if (!shareLightPass)
+			if (editting_simulation->light.type != RE_PR_Light::Type::NONE)
 			{
-				// Render Particle Lights
-				// Setup Shader
-				unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
-				RE_GLCache::ChangeShader(particlelight_pass);
-
-				glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
-
-				// Bind Textures
-				static const eastl::string pdeferred_textures[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
-				for (unsigned int count = 0; count < 5; ++count)
+				if (!shareLightPass)
 				{
-					glActiveTexture(GL_TEXTURE0 + count);
-					RE_ShaderImporter::setInt(particlelight_pass, pdeferred_textures[count].c_str(), count);
-					RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+					// Render Particle Lights
+					// Setup Shader
+					unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
+					RE_GLCache::ChangeShader(particlelight_pass);
+
+					glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
+
+					// Bind Textures
+					static const eastl::string pdeferred_textures[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
+					for (unsigned int count = 0; count < 5; ++count)
+					{
+						glActiveTexture(GL_TEXTURE0 + count);
+						RE_ShaderImporter::setInt(particlelight_pass, pdeferred_textures[count].c_str(), count);
+						RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+					}
+
+					unsigned int pCount = 0;
+					RE_PHYSICS->CallParticleEmitterLightShaderUniforms(editting_simulation->id, { 0.0,0.0,0.0 }, particlelight_pass, "plights", pCount, 508, shareLightPass);
+
+					eastl::string unif_name = "pInfo.pCount";
+					RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, unif_name.c_str()), pCount);
+
+					// Render Lights
+					DrawQuad();
 				}
-
-				unsigned int pCount = 0;
-				if(particleEmitterToDraw->isLighting())
-					particleEmitterToDraw->CallLightShaderUniforms(particlelight_pass, "plights", pCount, 508, shareLightPass);
-
-
-				eastl::string unif_name = "pInfo.pCount";
-				RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, unif_name.c_str()), pCount);
-
-				// Render Lights
-				DrawQuad();
-			}
-			else
-			{
-				// Setup Shader
-				unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetLightPassShader()))->GetID();
-				RE_GLCache::ChangeShader(light_pass);
-
-				SetDepthTest(false);
-
-				glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
-
-				// Bind Textures
-				static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
-				for (unsigned int count = 0; count < 4; ++count)
+				else
 				{
-					glActiveTexture(GL_TEXTURE0 + count);
-					RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
-					RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+					// Setup Shader
+					unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetLightPassShader()))->GetID();
+					RE_GLCache::ChangeShader(light_pass);
+
+					SetDepthTest(false);
+
+					glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
+
+					// Bind Textures
+					static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
+					for (unsigned int count = 0; count < 4; ++count)
+					{
+						glActiveTexture(GL_TEXTURE0 + count);
+						RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
+						RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+					}
+
+					// Setup Light Uniforms
+					unsigned int count = 0;
+					RE_PHYSICS->CallParticleEmitterLightShaderUniforms(editting_simulation->id, { 0.0,0.0,0.0 }, light_pass, "lights", count, 203, shareLightPass);
+
+					RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, "count"), count);
+
+					// Render Lights
+					DrawQuad();
 				}
-
-				// Setup Light Uniforms
-				unsigned int count = 0;
-				if (particleEmitterToDraw->isLighting())
-					particleEmitterToDraw->CallLightShaderUniforms(light_pass, "lights", count, 203, shareLightPass);
-
-				RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, "count"), count);
-
-				// Render Lights
-				DrawQuad();
 			}
-
 
 			if (render_view.flags & DEPTH_TEST)
 				SetDepthTest(true);
@@ -1086,10 +1075,10 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 
 			bool drawParticleSystemAsLast = false;
 			// Particle System Draws
-			if (particleEmitterToDraw->isBlend())
+			if(editting_simulation->opacity.type != RE_PR_Opacity::Type::NONE)
 				drawParticleSystemAsLast = true;
 			else
-				particleEmitterToDraw->Draw();
+				RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0 }, { 0.0,1.0,0.0 });
 
 			// Draw Debug Geometry
 			if (render_view.flags & DEBUG_DRAW)
@@ -1103,7 +1092,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				}
 
-				particleEmitterToDraw->Draw();
+				RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0 }, { 0.0,1.0,0.0 });
 
 				if (render_view.flags & BLENDED) glDisable(GL_BLEND);
 			}

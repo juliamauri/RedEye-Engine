@@ -101,6 +101,16 @@ void ModulePhysics::OnStop()
 		sim->state = RE_ParticleEmitter::PlaybackState::STOPING;
 }
 
+void ModulePhysics::DrawParticleEmitterSimulation(unsigned int index, math::float3 go_positon, math::float3 go_up) const
+{
+	particles.DrawSimulation(index, go_positon, go_up);
+}
+
+void ModulePhysics::CallParticleEmitterLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
+{
+	particles.CallLightShaderUniforms(index, go_position, shader, array_unif_name, count, maxLights, sharedLight);
+}
+
 void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const
 {
 	if (!particles.simulations.empty())
@@ -134,16 +144,10 @@ void ModulePhysics::DrawEditor()
 	}
 }
 
-RE_ParticleEmitter* ModulePhysics::AddEmitter()
+RE_ParticleEmitter* ModulePhysics::AddEmitter(RE_ParticleEmitter* to_add)
 {
-	RE_ParticleEmitter* ret = new RE_ParticleEmitter();
-
-	// Prim setup
-	ret->primCmp = new RE_CompPoint();
-	RE_SCENE->primitives->SetUpComponentPrimitive(ret->primCmp);
-
-	particles.Allocate(ret);
-	return ret;
+	particles.Allocate(to_add);
+	return to_add;
 }
 
 void ModulePhysics::RemoveEmitter(RE_ParticleEmitter* emitter)

@@ -226,15 +226,17 @@ void RE_CompRock::DrawProperties()
 	}
 }
 
-void RE_CompRock::DrawPrimPropierties()
+bool RE_CompRock::DrawPrimPropierties()
 {
+	bool ret = false;
 	int tmpSe = seed, tmpSb = nsubdivisions;
 
-	ImGui::Text("Can't use texture because doesn't support Texture Coords");
+	//ImGui::Text("Can't use texture because doesn't support Texture Coords");
 	if (ImGui::DragInt("Seed", &tmpSe, 1.0f) && seed != tmpSe)
 	{
 		seed = tmpSe;
 		canChange = true;
+		ret = true;
 	}
 
 	if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
@@ -244,10 +246,12 @@ void RE_CompRock::DrawPrimPropierties()
 		{
 			nsubdivisions = tmpSb;
 			canChange = true;
+			ret = true;
 		}
 	}
 
 	if (canChange && ImGui::Button("Apply")) GenerateNewRock(seed, nsubdivisions);
+	return ret;
 }
 
 unsigned int RE_CompRock::GetBinarySize() const
@@ -290,6 +294,48 @@ void RE_CompRock::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 	cursor += size;
 
 	size = sizeof(int);
+	memcpy(&seed, cursor, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(&nsubdivisions, cursor, size);
+	cursor += size;
+
+	RockSetUp(seed, nsubdivisions);
+}
+
+unsigned int RE_CompRock::GetParticleBinarySize() const
+{
+	return sizeof(int) * 2;
+}
+
+void RE_CompRock::SerializeParticleJson(RE_Json* node) const
+{
+	node->PushInt("seed", seed);
+	node->PushInt("nsubdivisions", nsubdivisions);
+	DEL(node);
+}
+
+void RE_CompRock::DeserializeParticleJson(RE_Json* node)
+{
+	RockSetUp(node->PullInt("seed", seed), node->PullInt("nsubdivisions", nsubdivisions));
+	DEL(node);
+}
+
+void RE_CompRock::SerializeParticleBinary(char*& cursor) const
+{
+	size_t size = sizeof(int);
+	memcpy(cursor, &seed, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(cursor, &nsubdivisions, size);
+	cursor += size;
+}
+
+void RE_CompRock::DeserializeParticleBinary(char*& cursor)
+{
+	size_t size = sizeof(int);
 	memcpy(&seed, cursor, size);
 	cursor += size;
 
@@ -362,9 +408,9 @@ void RE_CompPlatonic::DrawProperties()
 	}
 }
 
-void RE_CompPlatonic::DrawPrimPropierties()
+bool RE_CompPlatonic::DrawPrimPropierties()
 {
-	ImGui::Text("Can't use texture because doesn't support Texture Coords");
+	return false;
 }
 
 unsigned int RE_CompPlatonic::GetBinarySize() const
@@ -477,14 +523,17 @@ void RE_CompParametric::DrawProperties()
 	}
 }
 
-void RE_CompParametric::DrawPrimPropierties()
+bool RE_CompParametric::DrawPrimPropierties()
 {
-	if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) canChange = true;
-	if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) canChange = true;
-	if ((type == C_TORUS || type == C_TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) canChange = true;
+	bool ret = false;
+	if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) ret = canChange = true;
+	if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) ret = canChange = true;
+	if ((type == C_TORUS || type == C_TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) ret = canChange = true;
 
 	if (canChange && ImGui::Button("Apply"))
 		ParametricSetUp(target_slices, target_stacks, target_radius);
+
+	return ret;
 }
 
 unsigned int RE_CompParametric::GetBinarySize() const
@@ -532,6 +581,57 @@ void RE_CompParametric::DeserializeBinary(char*& cursor, eastl::map<int, const c
 	cursor += size;
 
 	size = sizeof(int);
+	memcpy(&slices, cursor, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(&stacks, cursor, size);
+	cursor += size;
+
+	size = sizeof(float);
+	memcpy(&radius, cursor, size);
+	cursor += size;
+
+	ParametricSetUp(slices, stacks, radius);
+}
+
+unsigned int RE_CompParametric::GetParticleBinarySize() const
+{
+	return sizeof(int) * 2 + sizeof(float);
+}
+
+void RE_CompParametric::SerializeParticleJson(RE_Json* node) const
+{
+	node->PushInt("slices", slices);
+	node->PushInt("stacks", stacks);
+	node->PushFloat("radius", radius);
+	DEL(node);
+}
+
+void RE_CompParametric::DeserializeParticleJson(RE_Json* node)
+{
+	ParametricSetUp(node->PullInt("slices", slices), node->PullInt("stacks", stacks), node->PullFloat("radius", radius));
+	DEL(node);
+}
+
+void RE_CompParametric::SerializeParticleBinary(char*& cursor) const
+{
+	size_t size = sizeof(int);
+	memcpy(cursor, &slices, size);
+	cursor += size;
+
+	size = sizeof(int);
+	memcpy(cursor, &stacks, size);
+	cursor += size;
+
+	size = sizeof(float);
+	memcpy(cursor, &radius, size);
+	cursor += size;
+}
+
+void RE_CompParametric::DeserializeParticleBinary(char*& cursor)
+{
+	size_t size = sizeof(int);
 	memcpy(&slices, cursor, size);
 	cursor += size;
 

@@ -20,7 +20,7 @@ public:
 	void Draw() const override {}
 	void SimpleDraw()const;
 	void DrawProperties() override {}
-	virtual void DrawPrimPropierties() { }
+	virtual bool DrawPrimPropierties() { return false; }
 
 	virtual bool CheckFaceCollision(const math::Ray& ray, float& distance) const;
 
@@ -31,6 +31,13 @@ public:
 	unsigned int GetTriangleCount() const;
 
 	void UnUseResources();
+
+	virtual unsigned int GetParticleBinarySize() const { return 0; }
+	virtual void SerializeParticleJson(RE_Json* node) const { DEL(node); }
+	virtual void DeserializeParticleJson(RE_Json* node) { DEL(node); }
+	virtual void SerializeParticleBinary(char*& cursor) const {}
+	virtual void DeserializeParticleBinary(char*& cursor) {}
+
 
 protected:
 
@@ -92,7 +99,7 @@ public:
 
 	void Draw() const override;
 	void DrawProperties() override;
-	void DrawPrimPropierties() override;
+	bool DrawPrimPropierties() override;
 
 	unsigned int GetBinarySize() const override;
 	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
@@ -100,6 +107,11 @@ public:
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
+	unsigned int GetParticleBinarySize() const override;
+	void SerializeParticleJson(RE_Json* node) const override;
+	void DeserializeParticleJson(RE_Json* node) override;
+	void SerializeParticleBinary(char*& cursor) const override;
+	void DeserializeParticleBinary(char*& cursor) override;
 
 private:
 
@@ -128,7 +140,7 @@ public:
 
 	void Draw() const override;
 	void DrawProperties() override;
-	void DrawPrimPropierties() override;
+	bool DrawPrimPropierties() override;
 
 	unsigned int GetBinarySize() const override;
 	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
@@ -157,13 +169,19 @@ public:
 
 	void Draw() const override;
 	void DrawProperties() override;
-	void DrawPrimPropierties() override;
+	bool DrawPrimPropierties() override;
 
 	unsigned int GetBinarySize() const override;
 	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
 	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
+
+	unsigned int GetParticleBinarySize() const override;
+	void SerializeParticleJson(RE_Json* node) const override;
+	void DeserializeParticleJson(RE_Json* node) override;
+	void SerializeParticleBinary(char*& cursor) const override;
+	void DeserializeParticleBinary(char*& cursor) override;
 
 protected:
 

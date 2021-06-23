@@ -141,7 +141,7 @@ void ModuleInput::HandleSDLEventQueue()
 		{
 		/* Application events */
 		case SDL_QUIT:/**< User-requested quit */
-			if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSave(true);
+			if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSaveScene(true);
 			else Push(REQUEST_QUIT, App);
 			break;
 		case SDL_APP_TERMINATING:/**< The application is being terminated by the OS
@@ -189,7 +189,7 @@ void ModuleInput::HandleSDLEventQueue()
 			case SDL_WINDOWEVENT_FOCUS_LOST:/**< Window has lost keyboard focus */ break;
 			case SDL_WINDOWEVENT_CLOSE:/**< The window manager requests that the window be closed */
 			{
-				if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSave(true);
+				if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSaveScene(true);
 				else Push(REQUEST_QUIT, App);
 				break;
 			}
