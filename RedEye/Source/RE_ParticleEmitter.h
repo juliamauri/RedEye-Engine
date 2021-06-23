@@ -7,6 +7,10 @@
 
 #include "EA/EASTL/list.h"
 
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
+#include "EASTL/string.h"
+#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
+
 class RE_CompPrimitive;
 
 class RE_ParticleEmitter
@@ -20,9 +24,9 @@ public:
 
 private:
 
-	bool IsTimeValid(const float global_dt);
-	void UpdateParticles();
-	void UpdateSpawn();
+	inline bool IsTimeValid(const float global_dt);
+	inline void UpdateParticles();
+	inline void UpdateSpawn();
 
 	void ImpulseCollision(RE_Particle& p1, RE_Particle& p2, const float combined_radius = 0.001f) const;
 
@@ -101,8 +105,9 @@ public:
 	void DemoSetup();
 
 	static RE_ParticleEmitter* demo_emitter;
+	static eastl::string filename;
 
-#endif // PARTICLE_PHYSICS_TEST
+#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 };
 
 #endif //!__RE_PARTICLEEMITTER_H__

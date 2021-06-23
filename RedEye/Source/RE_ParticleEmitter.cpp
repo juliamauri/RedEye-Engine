@@ -5,6 +5,10 @@
 
 RE_ParticleEmitter::BoundingMode RE_ParticleEmitter::mode = PER_PARTICLE;
 
+#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
+eastl::string RE_ParticleEmitter::filename;
+#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
+
 RE_ParticleEmitter::~RE_ParticleEmitter()
 {
 	if (primCmp) DEL(primCmp);
@@ -228,11 +232,28 @@ void RE_ParticleEmitter::DemoSetup()
 
 	int i = ++ProfilingTimer::current_sim;
 	ProfilingTimer::p_count = 0u;
+	ProfilingTimer::wait4frame = 160;
 
 	state = PlaybackState::STOP;
 	initial_lifetime.type = RE_EmissionSingleValue::Type::NONE;
 
 #ifdef PARTICLE_PHYSICS_TEST
+
+	filename = "Particle_Sim "
+	//filename = "Z Particle_Sim "
+		+ eastl::to_string(ProfilingTimer::current_sim / 10)
+		+ eastl::to_string(ProfilingTimer::current_sim % 10);
+
+	if (RE_ParticleEmitter::demo_emitter->collider.inter_collisions) filename += "Inter ";
+	filename += RE_ParticleEmitter::demo_emitter->collider.type == RE_EmissionCollider::Type::POINT ? "Point " : "Ball ";
+
+	switch (RE_ParticleEmitter::demo_emitter->boundary.type) {
+	case RE_EmissionBoundary::Type::PLANE: filename += "Plane"; break;
+	case RE_EmissionBoundary::Type::SPHERE: filename += "Sphere"; break;
+	case RE_EmissionBoundary::Type::AABB: filename += "AABB"; break;
+	default: break; }
+
+	filename += ".json";
 
 	active_rendering = false;
 	ProfilingTimer::p_col_internal = ProfilingTimer::p_col_boundary = 0u;
@@ -240,7 +261,7 @@ void RE_ParticleEmitter::DemoSetup()
 	collider.type = static_cast<RE_EmissionCollider::Type>(1 + (i % 6 < 3));
 	collider.inter_collisions = (i < 6);
 
-#ifdef DEBUG
+#ifdef _DEBUG
 
 	spawn_mode.frequency = i < 6 ? 10.f : 980.f;
 	initial_pos.geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, i < 6 ? 12.f : 60.f);
@@ -261,6 +282,8 @@ void RE_ParticleEmitter::DemoSetup()
 	case RE_EmissionBoundary::SPHERE: boundary.geo.sphere = math::Sphere(math::vec::zero, i < 6 ? 80.f : 400.f); break;
 	case RE_EmissionBoundary::AABB: boundary.geo.box.SetFromCenterAndSize(math::vec::zero, math::vec(i < 6 ? 120.f : 550.f)); break;
 	default: break; }
+
+	filename = "R " + filename;
 
 #endif
 

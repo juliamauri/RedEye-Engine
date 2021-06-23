@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "RE_ResourceManager.h"
 #include "ModuleRenderer3D.h"
+
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 #include "ModulePhysics.h"
 #endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
@@ -80,24 +81,7 @@ void ParticleManager::Update(const float dt)
 		if (ProfilingTimer::update_time > 33u)
 		{
 			RE_PHYSICS->mode = ModulePhysics::UpdateMode::ENGINE_PAR;
-
-			eastl::string file_name = "Particle_Sim ";
-
-			file_name += eastl::to_string(ProfilingTimer::current_sim / 10);
-			file_name += eastl::to_string(ProfilingTimer::current_sim % 10);
-
-			if (RE_ParticleEmitter::demo_emitter->collider.inter_collisions) file_name += "Inter ";
-			file_name += RE_ParticleEmitter::demo_emitter->collider.type == RE_EmissionCollider::Type::POINT ? "Point " : "Ball ";
-
-			switch (RE_ParticleEmitter::demo_emitter->boundary.type) {
-			case RE_EmissionBoundary::Type::PLANE: file_name += "Plane"; break;
-			case RE_EmissionBoundary::Type::SPHERE: file_name += "Sphere"; break;
-			case RE_EmissionBoundary::Type::AABB: file_name += "AABB"; break;
-			default: break;
-			}
-			file_name += ".json";
-
-			RE_Profiler::Deploy(file_name.c_str());
+			RE_Profiler::Deploy(RE_ParticleEmitter::filename.c_str());
 			ProfilingTimer::current_sim < 11 ? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->QuickQuit();
 		}
 	}
@@ -382,7 +366,7 @@ void ParticleManager::DrawEditor()
 	ImGui::Text("Total Particles: %i", particle_count);
 
 	int tmp = static_cast<int>(RE_ParticleEmitter::mode);
-	if (ImGui::Combo("Spawn type", &tmp, "General\0Per Particle\0"))
+	if (ImGui::Combo("AABB Enclosing", &tmp, "General\0Per Particle\0"))
 		RE_ParticleEmitter::mode = static_cast<RE_ParticleEmitter::BoundingMode>(tmp);
 
 	ImGui::DragFloat("Point size", &point_size, 1.f, 0.f, 100.f);

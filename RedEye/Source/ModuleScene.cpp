@@ -62,7 +62,10 @@ bool ModuleScene::Start()
 	cams->EditorCamera()->Focus(best_pos, 70.f);
 
 	RE_GameObject* go = scenePool.AddGO("Particle System", GetRootUID(), true);
-	RE_ParticleEmitter::demo_emitter = dynamic_cast<RE_CompParticleEmitter*>(go->AddNewComponent(C_PARTICLEEMITER))->UseResources();
+	RE_CompParticleEmitter* comp = dynamic_cast<RE_CompParticleEmitter*>(go->AddNewComponent(C_PARTICLEEMITER));
+	comp->UseResources();
+
+	RE_ParticleEmitter::demo_emitter = comp->GetSimulation();
 	RE_ParticleEmitter::demo_emitter->DemoSetup();
 	ProfilingTimer::operations.reserve(50000u);
 

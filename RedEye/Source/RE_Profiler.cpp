@@ -17,7 +17,7 @@ eastl::vector<ProfilingOperation> ProfilingTimer::operations;
 
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 
-int ProfilingTimer::current_sim = 10;
+int ProfilingTimer::current_sim = 0;
 int ProfilingTimer::wait4frame = 0;
 unsigned int ProfilingTimer::update_time = 0u;
 unsigned int ProfilingTimer::p_count = 0u;

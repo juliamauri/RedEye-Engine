@@ -707,7 +707,7 @@ RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const cha
 	eastl::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
 	eastl::transform(extensionStr.begin(), extensionStr.end(), extensionStr.begin(), [](unsigned char c) { return eastl::CharToLower(c); });
 
-	for (uint i = 0; i < 15; i++)
+	for (uint i = 0; i < 14; i++)
 	{
 		if (extensionStr.compare(extensionsSuported[i]) == 0)
 		{
