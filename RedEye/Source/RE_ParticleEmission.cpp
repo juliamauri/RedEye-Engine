@@ -186,6 +186,8 @@ void RE_ParticleEmission::BinaryDeserialize()
 		external_acc.BinaryDeserialize(cursor);
 		boundary.BinaryDeserialize(cursor);
 		collider.BinaryDeserialize(cursor);
+
+		ResourceContainer::inMemory = true;
 	}
 }
 

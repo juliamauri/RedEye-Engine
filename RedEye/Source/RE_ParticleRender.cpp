@@ -271,6 +271,8 @@ void RE_ParticleRender::BinaryDeserialize()
 			if(primType >= C_CUBE && primType <= C_ICOSAHEDRON)
 				RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
 		}
+
+		ResourceContainer::inMemory = true;
 	}
 }
 
