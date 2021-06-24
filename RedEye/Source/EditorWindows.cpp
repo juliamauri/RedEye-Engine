@@ -572,13 +572,14 @@ void PopUpWindow::PopUpSaveScene(bool fromExit, bool newScene)
 	PopUp("Save", "Scene have changes", true);
 }
 
-void PopUpWindow::PopUpSaveParticles(bool need_particle_names, bool not_emissor, bool not_renderer, bool close_after)
+void PopUpWindow::PopUpSaveParticles(bool need_particle_names, bool not_name, bool not_emissor, bool not_renderer, bool close_after)
 {
 	state = PU_SAVE_PARTICLEEMITTER;
 	exit_after = close_after;
 	particle_names = need_particle_names;
 	if (particle_names) {
 		name_str = "emitter_name";
+		need_name = !not_name;
 		emission_name = "emission_name";
 		need_emission = !not_emissor;
 		renderer_name = "renderer_name";
@@ -619,6 +620,8 @@ void PopUpWindow::PopUpDelRes(const char* res)
 		comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_MESH);
 		break;
 	}
+	case R_PARTICLE_EMISSION:
+	case R_PARTICLE_RENDER:
 	case R_PARTICLE_EMITTER:
 		comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_PARTICLEEMITER);
 		break;
@@ -795,40 +798,39 @@ void PopUpWindow::Draw(bool secondary)
 		case PopUpWindow::PU_SAVE_PARTICLEEMITTER:
 		{
 			bool exists_emitter = false, exists_emissor = false, exists_renderer = false;
+			static eastl::string emitter_path, emission_path, render_path;
 			if (particle_names)
 			{
-				char names_holder[64];
-				EA::StdC::Snprintf(names_holder, 64, "%s", name_str.c_str());
-				if (ImGui::InputText("Emitter Name", names_holder, 64)) name_str = names_holder;
+				if (need_name) {
+					ImGui::InputText("Emitter Name", &name_str);
 
-				eastl::string resource_path("Assets/Particles/");
-				resource_path += name_str;
-				resource_path += ".meta";
+					emitter_path = "Assets/Particles/";
+					emitter_path += name_str;
+					emitter_path += ".meta";
 
-				exists_emitter = RE_FS->Exists(resource_path.c_str());
-				if (exists_emitter) ImGui::Text("That Emitter exists!");
+					exists_emitter = RE_FS->Exists(emitter_path.c_str());
+					if (exists_emitter) ImGui::Text("That Emitter exists!");
+				}
 
 				if (need_emission) {
-					EA::StdC::Snprintf(names_holder, 64, "%s", emission_name.c_str());
-					if (ImGui::InputText("Emission Name", names_holder, 64)) emission_name = names_holder;
+					ImGui::InputText("Emission Name", &emission_name);
 				
-					resource_path ="Assets/Particles/";
-					resource_path += emission_name;
-					resource_path += ".lasse";
+					emission_path ="Assets/Particles/";
+					emission_path += emission_name;
+					emission_path += ".lasse";
 
-					exists_emissor = RE_FS->Exists(resource_path.c_str());
+					exists_emissor = RE_FS->Exists(emission_path.c_str());
 					if (exists_emissor) ImGui::Text("That Emissor exists!");
 				}
 
 				if (need_renderer) {
-					EA::StdC::Snprintf(names_holder, 64, "%s", renderer_name.c_str());
-					if (ImGui::InputText("Renderer Name", names_holder, 64)) renderer_name = names_holder;
+					ImGui::InputText("Render Name", &renderer_name);
 				
-					resource_path = "Assets/Particles/";
-					resource_path += renderer_name;
-					resource_path += ".lopfe";
+					render_path = "Assets/Particles/";
+					render_path += renderer_name;
+					render_path += ".lopfe";
 
-					exists_renderer = RE_FS->Exists(resource_path.c_str());
+					exists_renderer = RE_FS->Exists(render_path.c_str());
 					if (exists_renderer) ImGui::Text("That Renderer exists!");
 				}
 			}
@@ -918,7 +920,23 @@ void PopUpWindow::Draw(bool secondary)
 
 			ImGui::Separator();
 
+			bool pushed = resource_on_scene && RE_SCENE->isPlaying();
+			if (pushed)
+			{
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+
+				ImGui::TextColored(ImVec4(255.f, 0.f, 0.f, 1.f), "Stop Scene for delete resource", nullptr, ImGuiTextFlags_NoWidthForLargeClippedText);
+			}
+
 			bool clicked = ImGui::Button(btn_text.c_str());
+
+			if (pushed)
+			{
+				ImGui::PopItemFlag();
+				ImGui::PopStyleVar();
+			}
+
 			if (clicked)
 			{
 				RE_LOGGER.ScopeProcedureLogging();

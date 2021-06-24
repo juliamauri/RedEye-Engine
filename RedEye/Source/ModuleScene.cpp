@@ -136,11 +136,15 @@ void ModuleScene::OnPlay()
 	RE_INPUT->ResumeEvents();
 
 	scenePool.GetRootPtr()->OnPlay();
+
+	is_playing = true;
 }
 
 void ModuleScene::OnPause()
 {
 	scenePool.GetRootPtr()->OnPause();
+
+	is_playing = true;
 }
 
 void ModuleScene::OnStop()
@@ -154,6 +158,8 @@ void ModuleScene::OnStop()
 	RE_EDITOR->SetSelected(0);
 	SetupScene();
 	RE_INPUT->ResumeEvents();
+
+	is_playing = false;
 }
 
 void ModuleScene::RecieveEvent(const Event& e)

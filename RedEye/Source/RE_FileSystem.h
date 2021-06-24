@@ -135,7 +135,8 @@ private:
 	RE_Directory* rootAssetDirectory = nullptr;
 	eastl::list<RE_Directory*> assetsDirectories;
 	eastl::list<RE_Directory*>::iterator dirIter;
-	eastl::stack<RE_ProcessPath*> assetsToProcess;
+	eastl::stack<RE_ProcessPath*> assets_to_process;
+	eastl::stack<RE_ProcessPath*> meta_to_process_last;
 
 	eastl::vector<RE_Meta*> metaToFindFile;
 	eastl::vector<RE_File*> filesToFindMeta;

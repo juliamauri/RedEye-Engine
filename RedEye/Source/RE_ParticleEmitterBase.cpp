@@ -4,6 +4,7 @@
 #include "Application.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
+#include "RE_PrimitiveManager.h"
 #include "RE_Json.h"
 #include "RE_ResourceManager.h"
 
@@ -64,7 +65,7 @@ void RE_ParticleEmitterBase::SomeResourceChanged(const char* resMD5)
 
 RE_ParticleEmitter* RE_ParticleEmitterBase::GetNewEmitter()
 {
-	RE_ParticleEmitter* ret = new RE_ParticleEmitter();
+	RE_ParticleEmitter* ret = new RE_ParticleEmitter((!resource_renderer));
 
 	if (resource_emission)
 		dynamic_cast<RE_ParticleEmission*>(RE_RES->At(resource_emission))->FillEmitter(ret);
@@ -82,6 +83,17 @@ void RE_ParticleEmitterBase::FillEmitter(RE_ParticleEmitter* emitter_to_fill)
 
 	if (resource_renderer)
 		dynamic_cast<RE_ParticleRender*>(RE_RES->At(resource_renderer))->FillEmitter(emitter_to_fill);
+	else
+	{
+		if (emitter_to_fill->primCmp)
+		{
+			emitter_to_fill->primCmp->UnUseResources();
+			DEL(emitter_to_fill->primCmp);
+			emitter_to_fill->primCmp = new RE_CompPoint();
+			RE_SCENE->primitives->SetUpComponentPrimitive(emitter_to_fill->primCmp);
+
+		}
+	}
 }
 
 void RE_ParticleEmitterBase::FillAndSave(RE_ParticleEmitter* for_fill)
@@ -101,7 +113,7 @@ void RE_ParticleEmitterBase::FillAndSave(RE_ParticleEmitter* for_fill)
 		new_md5 += renderer->GetMD5();
 	}
 	SetMD5(MD5(new_md5).hexdigest().c_str());
-	SetMetaPath(eastl::string("Assets/Particles/" + eastl::string(GetName()) + eastl::string(".meta")).c_str());
+	SetMetaPath("Assets/Particles/");
 	SaveMeta();
 }
 

@@ -178,7 +178,8 @@ void RE_Model::SaveResourceMeta(RE_Json* metaNode)
 	for (const char* mesh : modelSettings.libraryMeshes)
 	{
 		ResourceContainer* rM = RE_RES->At(mesh);
-		metaNode->PushString(eastl::to_string(count++).c_str(), rM->GetLibraryPath());
+		metaNode->PushString((eastl::string("Name") + eastl::to_string(count)).c_str(), rM->GetName());
+		metaNode->PushString((eastl::string("LibraryPath") + eastl::to_string(count++)).c_str(), rM->GetLibraryPath());
 	}
 }
 
@@ -195,10 +196,12 @@ void RE_Model::LoadResourceMeta(RE_Json* metaNode)
 	uint totalMeshes = metaNode->PullUInt("MeshesSize", 0);
 	for (uint i = 0; i < totalMeshes; i++)
 	{
-		eastl::string libraryMesh = metaNode->PullString(eastl::to_string(i).c_str(), "");
-		const char* md5 = RE_RES->CheckOrFindMeshOnLibrary(libraryMesh.c_str());
+		eastl::string name_mesh = metaNode->PullString((eastl::string("Name") + eastl::to_string(i)).c_str(), "");
+		eastl::string library_mesh = metaNode->PullString((eastl::string("LibraryPath") + eastl::to_string(i)).c_str(), "");
+		const char* md5 = RE_RES->CheckOrFindMeshOnLibrary(library_mesh.c_str());
 		if (md5)
 		{
+			RE_RES->At(md5)->SetName(name_mesh.c_str());
 			RE_RES->At(md5)->SetAssetPath(GetAssetPath());
 			RE_RES->At(md5)->SetMetaPath(GetMetaPath());
 			modelSettings.libraryMeshes.push_back(md5);

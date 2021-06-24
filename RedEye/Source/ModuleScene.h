@@ -32,6 +32,8 @@ public:
 	void OnPause();
 	void OnStop();
 
+	bool isPlaying()const { return is_playing; }
+
 	// Current Pool
 	RE_ECS_Pool* GetScenePool() { return &scenePool; }
 	RE_GameObject* GetGOPtr(UID id) const { return scenePool.GetGOPtr(id); }
@@ -91,6 +93,8 @@ private:
 
 	RE_Scene* unsavedScene = nullptr;
 	const char* currentScene = nullptr;
+
+	bool is_playing = false;
 };
 
 #endif // !__MODULESCENE_H__

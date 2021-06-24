@@ -43,7 +43,7 @@ private:
 	RE_PR_Light light = {};
 
 	const char* meshMD5 = nullptr;
-	ComponentType primType = C_EMPTY;
+	ComponentType primType = C_POINT;
 	RE_CompPrimitive* primCmp = nullptr;
 
 	math::float3 scale = { 0.5f,0.5f,0.1f };

@@ -1,7 +1,11 @@
 #include "RE_ParticleEmitter.h"
 
 #include "Application.h"
+#include "ModuleScene.h"
+#include "RE_PrimitiveManager.h"
 #include "RE_Math.h"
+
+#include "RE_CompPrimitive.h"
 
 RE_ParticleEmitter::BoundingMode RE_ParticleEmitter::mode = PER_PARTICLE;
 
@@ -9,9 +13,20 @@ RE_ParticleEmitter::BoundingMode RE_ParticleEmitter::mode = PER_PARTICLE;
 eastl::string RE_ParticleEmitter::filename;
 #endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 
+RE_ParticleEmitter::RE_ParticleEmitter(bool instance_primitive)
+{
+	if (instance_primitive) {
+		primCmp = new RE_CompPoint();
+		RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
+	}
+}
+
 RE_ParticleEmitter::~RE_ParticleEmitter()
 {
-	if (primCmp) DEL(primCmp);
+	if (primCmp) {
+		primCmp->UnUseResources();
+		DEL(primCmp);
+	}
 }
 
 unsigned int RE_ParticleEmitter::Update(const float global_dt)

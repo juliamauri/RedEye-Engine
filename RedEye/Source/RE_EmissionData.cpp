@@ -1987,8 +1987,17 @@ unsigned int RE_EmissionCollider::GetBinarySize() const
 
 math::vec RE_PR_Color::GetValue(const float weight) const
 {
-	if (type == Type::SINGLE) return base;
-	else return (gradient * weight) + (base * (1.f - weight));
+	switch (type)
+	{
+	case RE_PR_Color::SINGLE: return base;
+	case RE_PR_Color::OVERLIFETIME:
+	case RE_PR_Color::OVERDISTANCE:
+	case RE_PR_Color::OVERSPEED:
+	{
+		 float w = (useCurve) ? curve.GetValue(weight) : weight;
+		 return (gradient * w) + (base * (1.f - w));
+	}
+	}
 }
 
 bool RE_PR_Color::DrawEditor()

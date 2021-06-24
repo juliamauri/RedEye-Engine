@@ -16,7 +16,7 @@ class RE_CompPrimitive;
 class RE_ParticleEmitter
 {
 public:
-
+	RE_ParticleEmitter(bool instance_primitive = false);
 	~RE_ParticleEmitter();
 
 	unsigned int Update(const float global_dt);

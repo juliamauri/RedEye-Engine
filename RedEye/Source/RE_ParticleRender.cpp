@@ -94,6 +94,7 @@ void RE_ParticleRender::FillEmitter(RE_ParticleEmitter* to_fill)
 			char* prim_buffer = new char[p_size];
 			char* cursor = prim_buffer;
 			primCmp->SerializeParticleBinary(cursor);
+			cursor = prim_buffer;
 			to_fill->primCmp->DeserializeParticleBinary(cursor);
 
 			DEL_A(prim_buffer);

@@ -1130,6 +1130,8 @@ void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
 	internalCamera->Focus(go->GetGlobalBoundingBox().CenterPoint());
 	internalCamera->Update();
 
+	current_camera = internalCamera;
+
 	for (auto sMD5 : activeShaders)
 	{
 		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));

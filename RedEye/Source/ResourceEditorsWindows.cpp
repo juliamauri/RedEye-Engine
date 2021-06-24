@@ -679,15 +679,19 @@ ParticleEmiiterEditorWindow::~ParticleEmiiterEditorWindow() {}
 
 void ParticleEmiiterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const char* md5)
 {
-	if (emiter_md5 != md5) {
+	if (emiter_md5 != md5 || md5 == nullptr) {
 		if (active || simulation || emiter_md5) {
 			if (need_save) {
 				next_emiter_md5 = md5;
 				next_simulation = sim;
 				load_next = true;
 
-				if (emiter_md5)RE_EDITOR->popupWindow->PopUpSaveParticles();
-				else RE_EDITOR->popupWindow->PopUpSaveParticles(true, new_emitter->HasEmissor(), new_emitter->HasRenderer());
+				if (emiter_md5) {
+					RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+					bool has_emissor = emitter->HasEmissor(), has_render = emitter->HasRenderer();
+					RE_EDITOR->popupWindow->PopUpSaveParticles((!has_emissor || !has_render), true, has_emissor, has_render);
+				}
+				else RE_EDITOR->popupWindow->PopUpSaveParticles(true, false, new_emitter->HasEmissor(), new_emitter->HasRenderer());
 
 				return;
 			}
@@ -704,11 +708,16 @@ void ParticleEmiiterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const ch
 void ParticleEmiiterEditorWindow::SaveEmitter(bool close, const char* emitter_name, const char* emissor_base, const char* renderer_base)
 {
 	if (emiter_md5)
-		dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->FillAndSave(simulation);
+	{
+		RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+		if(!emitter->HasEmissor() || !emitter->HasRenderer())
+			emitter->GenerateSubResourcesAndReference(emissor_base, renderer_base);
+		emitter->FillAndSave(simulation);
+	}
 	else {
 		new_emitter->SetName(emitter_name);
 		new_emitter->SetType(R_PARTICLE_EMITTER);
-		new_emitter->GenerateSubResourcesAndReference(emitter_name, emissor_base);
+		new_emitter->GenerateSubResourcesAndReference(emissor_base, renderer_base);
 		new_emitter->FillAndSave(simulation);
 
 		emiter_md5 = RE_RES->Reference(dynamic_cast<ResourceContainer*>(new_emitter));
@@ -765,13 +774,15 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 {
 	if (simulation != nullptr)
 	{
+		bool close = false;
+
 		if(!docking) ImGui::GetIO().ConfigFlags -= ImGuiConfigFlags_DockingEnable;
 
 		ImGuiWindowFlags wFlags = ImGuiWindowFlags_::ImGuiWindowFlags_None;
 		wFlags |= ImGuiWindowFlags_NoCollapse;// | ImGuiWindowFlags_NoTitleBar;
 
 		// Playback Controls
-		if (ImGui::Begin("Playback Controls", &active, wFlags | ImGuiWindowFlags_MenuBar))
+		if (ImGui::Begin("Playback Controls", NULL, wFlags | ImGuiWindowFlags_MenuBar))
 		{
 			if (secondary)
 			{
@@ -808,12 +819,6 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				ImGui::SameLine();
 				ImGui::Checkbox(!docking ? "Enable Docking" : "Disable Docking", &docking);
 
-				bool disabled = false;
-				if (!need_save && !secondary) {
-					ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-					ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-					disabled = true;
-				}
 
 				ImGui::SameLine();
 				if (ImGui::BeginMenu("Change emissor"))
@@ -835,8 +840,9 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 							need_save = true;
 						}
 					}
-					if (none) ImGui::Text("No meshes on assets");
+					if (none) ImGui::Text("No particle emissors on assets");
 
+					ImGui::EndMenu();
 				}
 
 				ImGui::SameLine();
@@ -860,22 +866,34 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 							need_save = true;
 						}
 					}
-					if (none) ImGui::Text("No meshes on assets");
+					if (none) ImGui::Text("No particle renders on assets");
+
+					ImGui::EndMenu();
 				}
-				
+
+				bool disabled = false;
+				if (!need_save && !secondary) {
+					ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+					ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+					disabled = true;
+				}
 
 				ImGui::SameLine();
 				if (ImGui::Button("Save"))
 				{
-					if (emiter_md5)RE_EDITOR->popupWindow->PopUpSaveParticles();
-					else RE_EDITOR->popupWindow->PopUpSaveParticles(true, new_emitter->HasEmissor(), new_emitter->HasRenderer());
+					if (emiter_md5) {
+						RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+						bool has_emissor = emitter->HasEmissor(), has_render = emitter->HasRenderer();
+						RE_EDITOR->popupWindow->PopUpSaveParticles((!has_emissor || !has_render), true, has_emissor, has_render);
+					}
+					else RE_EDITOR->popupWindow->PopUpSaveParticles(true, false, new_emitter->HasEmissor(), new_emitter->HasRenderer());
 				}
 				ImGui::SameLine();
 				if (ImGui::Button("Discard changes"))
 				{
 					DEL(simulation);
 					simulation = (emiter_md5) ? dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->GetNewEmitter() 
-						: new RE_ParticleEmitter();
+						: new RE_ParticleEmitter(true);
 
 					if (!emiter_md5) {
 						DEL(new_emitter);
@@ -893,16 +911,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 
 				ImGui::SameLine();
 
-				if (ImGui::Button("Close"))
-				{
-					if (need_save)
-					{
-						if (emiter_md5)RE_EDITOR->popupWindow->PopUpSaveParticles(false, true, true, true);
-						else RE_EDITOR->popupWindow->PopUpSaveParticles(true, new_emitter->HasEmissor(), new_emitter->HasRenderer(), true);
-					}
-					else CloseEditor();
-				}
-
+				if (ImGui::Button("Close")) close = true; 
 			}
 			ImGui::EndMenuBar();
 
@@ -915,7 +924,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		ImGui::End();
 
 		// Viewport
-		if (ImGui::Begin(name, &active, wFlags))
+		if (ImGui::Begin(name, NULL, wFlags))
 		{
 			if (secondary)
 			{
@@ -947,7 +956,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Status", &active, wFlags))
+		if (ImGui::Begin("Status", NULL, wFlags))
 		{
 			if (secondary)
 			{
@@ -971,7 +980,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Spawning", &active, wFlags))
+		if (ImGui::Begin("Spawning", NULL, wFlags))
 		{
 			if (secondary)
 			{
@@ -1023,7 +1032,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Physics", &active, wFlags))
+		if (ImGui::Begin("Physics", NULL, wFlags))
 		{
 			if (secondary)
 			{
@@ -1047,7 +1056,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Shape", &active, wFlags))
+		if (ImGui::Begin("Particle Shape", NULL, wFlags))
 		{
 			if (secondary)
 			{
@@ -1228,7 +1237,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Lighting", &active, wFlags))
+		if (ImGui::Begin("Particle Lighting", NULL, wFlags))
 		{
 			if (secondary)
 			{
@@ -1246,7 +1255,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Particle Renderer Settings", &active, wFlags))
+		if (ImGui::Begin("Particle Renderer Settings", NULL, wFlags))
 		{
 			if (secondary)
 			{
@@ -1281,7 +1290,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Opacity Curve", &active, wFlags))
+		if (ImGui::Begin("Opacity Curve", NULL, wFlags))
 		{
 			if (secondary)
 			{
@@ -1290,7 +1299,9 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 			}
 
 			if (simulation->opacity.type != RE_PR_Opacity::Type::VALUE && simulation->opacity.type != RE_PR_Opacity::Type::NONE && simulation->opacity.useCurve)
+			{
 				if(simulation->opacity.curve.DrawEditor("Opacity")) need_save = true;
+			}
 			else
 				ImGui::Text("Select a opacity over type and enable curve at opacity propierties.");
 
@@ -1302,7 +1313,7 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Color Curve", &active, wFlags))
+		if (ImGui::Begin("Color Curve", NULL, wFlags))
 		{
 			if (secondary)
 			{
@@ -1311,7 +1322,9 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 			}
 
 			if (simulation->color.type != RE_PR_Color::Type::SINGLE && simulation->color.useCurve)
+			{
 				if(simulation->color.curve.DrawEditor("Color")) need_save = true;
+			}
 			else
 				ImGui::Text("Select a color over type and enable curve at color propierties.");
 
@@ -1324,5 +1337,18 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		ImGui::End();
 
 		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+		if (close) {
+			if (need_save)
+			{
+				if (emiter_md5) {
+					RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+					bool has_emissor = emitter->HasEmissor(), has_render = emitter->HasRenderer();
+					RE_EDITOR->popupWindow->PopUpSaveParticles((!has_emissor || !has_render), true, has_emissor, has_render, true);
+				}
+				else RE_EDITOR->popupWindow->PopUpSaveParticles(true, false, new_emitter->HasEmissor(), new_emitter->HasRenderer(), true);
+			}
+			else CloseEditor();
+		}
 	}
 }

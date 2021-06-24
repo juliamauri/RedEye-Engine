@@ -164,7 +164,7 @@ public:
 
 	void PopUpError();
 	void PopUpSaveScene(bool fromExit = false, bool newScene = false);
-	void PopUpSaveParticles(bool need_particle_names = false, bool not_emissor = false, bool not_renderer = false, bool close_after = false);
+	void PopUpSaveParticles(bool need_particle_names = false, bool not_name = false, bool not_emissor = false, bool not_renderer = false, bool close_after = false);
 	void PopUpPrefab(RE_GameObject* go);
 	void PopUpDelRes(const char* res);
 	void PopUpDelUndeFile(const char* assetPath);
@@ -193,7 +193,7 @@ private:
 	} state = PU_NONE;
 	bool exit_after = false, input_name = false,
 		spawn_new_scene = false, particle_names = false,
-		need_emission = false, need_renderer = false;
+		need_name = false, need_emission = false, need_renderer = false;
 	eastl::string btn_text;
 	eastl::string title_text;
 	eastl::string name_str, emission_name, renderer_name;

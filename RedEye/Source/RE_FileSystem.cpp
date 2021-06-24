@@ -103,7 +103,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 	RE_Timer time;
 	bool run = true;
 
-	if ((dirIter == assetsDirectories.begin()) && (!assetsToProcess.empty() || !filesToFindMeta.empty() || !toImport.empty() || !toReImport.empty()))
+	if ((dirIter == assetsDirectories.begin()) && (!assets_to_process.empty() || !filesToFindMeta.empty() || !toImport.empty() || !toReImport.empty()))
 		dirIter = assetsDirectories.end();
 
 	while ((doAll || run) && dirIter != assetsDirectories.end())
@@ -113,7 +113,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 		{
 			RE_ProcessPath* process = toProcess.top();
 			toProcess.pop();
-			assetsToProcess.push(process);
+			assets_to_process.push(process);
 		}
 
 		dirIter++;
@@ -126,10 +126,10 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 	{
 		dirIter = assetsDirectories.begin();
 
-		while ((doAll || run) && !assetsToProcess.empty())
+		while ((doAll || run) && !assets_to_process.empty())
 		{
-			RE_ProcessPath* process = assetsToProcess.top();
-			assetsToProcess.pop();
+			RE_ProcessPath* process = assets_to_process.top();
+			assets_to_process.pop();
 
 			switch (process->procedure)
 			{
@@ -153,6 +153,11 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 							Resource_Type type = (Resource_Type)metaNode->PullInt("Type", Resource_Type::R_UNDEFINED);
 							DEL(metaNode);
 
+							if (type == Resource_Type::R_PARTICLE_EMITTER) {
+								meta_to_process_last.push(process);
+								continue;
+							}
+
 							if (type != Resource_Type::R_UNDEFINED)
 								metaFile->resource = RE_RES->ReferenceByMeta(file->path.c_str(), type);
 						}
@@ -175,7 +180,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				{
 					RE_ProcessPath* process = toProcess.top();
 					toProcess.pop();
-					assetsToProcess.push(process);
+					assets_to_process.push(process);
 				}
 
 				assetsDirectories.push_back(dir);
@@ -188,6 +193,20 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			}
 			}
 			DEL(process);
+
+			//timer
+			if (!doAll && extra_ms < time.Read()) run = false;
+		}
+
+		while ((doAll || run) && !meta_to_process_last.empty())
+		{
+			RE_ProcessPath* process = meta_to_process_last.top();
+			meta_to_process_last.pop();
+
+			RE_File* file = process->toProcess->AsFile();
+			RE_Meta* metaFile = file->AsMeta();
+
+			metaFile->resource = RE_RES->ReferenceByMeta(file->path.c_str(), Resource_Type::R_PARTICLE_EMITTER);
 
 			//timer
 			if (!doAll && extra_ms < time.Read()) run = false;
@@ -220,7 +239,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 							}
 						}
 					}
-					if (res->GetType() == R_SHADER || res->GetType() == R_PARTICLE_EMITTER)  toRemoveM.push_back(meta);
+					if (res->GetType() == R_SHADER)  toRemoveM.push_back(meta);
 				}
 				else toRemoveM.push_back(meta);
 

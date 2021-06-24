@@ -23,7 +23,15 @@ RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER
 RE_CompParticleEmitter::~RE_CompParticleEmitter() {}
 
 
-void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) {}
+void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) 
+{
+	pool_gos = pool;
+	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_PARTICLEEMITER);
+
+	RE_CompParticleEmitter* cmp_emitter = dynamic_cast<RE_CompParticleEmitter*>(copy);
+	simulation = cmp_emitter->simulation;
+	emitter_md5 = cmp_emitter->emitter_md5;
+}
 
 void RE_CompParticleEmitter::Update()
 {
@@ -61,14 +69,15 @@ void RE_CompParticleEmitter::DrawProperties()
 		{
 			eastl::vector<ResourceContainer*> r_emitters = RE_RES->GetResourcesByType(Resource_Type::R_PARTICLE_EMITTER);
 			bool none = true;
-			for (auto emitters : r_emitters)
+			for (auto emitter : r_emitters)
 			{
-				if (emitters->isInternal()) continue;
+				if (emitter->isInternal()) continue;
 
 				none = false;
-				if (ImGui::MenuItem(emitters->GetName()))
+				if (ImGui::MenuItem(emitter->GetName()))
 				{
 					UnUseResources();
+					emitter_md5 = emitter->GetMD5();
 					UseResources();
 				}
 			}
@@ -123,7 +132,7 @@ void RE_CompParticleEmitter::UseResources()
 		simulation = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_md5))->GetNewEmitter();
 	}
 	else
-		simulation = new RE_ParticleEmitter();
+		simulation = new RE_ParticleEmitter(true);
 
 	RE_PHYSICS->AddEmitter(simulation);
 }

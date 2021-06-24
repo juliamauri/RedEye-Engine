@@ -30,6 +30,7 @@ public:
 
 	bool Contains(const char* res)const;
 
+
 private:
 
 	void Draw() override;

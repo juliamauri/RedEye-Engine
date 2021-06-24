@@ -212,6 +212,9 @@ void ModuleEditor::Update()
 					if (ImGui::MenuItem("Water Resources", waterplaneResourceWindow->IsActive() ? "Hide" : "Open"))
 						waterplaneResourceWindow->SwitchActive();
 
+					if (ImGui::MenuItem("Particle Resources"))
+						particleEmitterWindow->StartEditing(new RE_ParticleEmitter(true), nullptr);
+
 					ImGui::EndMenu();
 				}
 				ImGui::EndMenu();
