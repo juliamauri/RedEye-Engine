@@ -797,31 +797,21 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 				{
 				case RE_ParticleEmitter::STOP:
 				{
-					ImGui::PushID("PlayPEditor");
-					if (ImGui::Button("Play")) simulation->state = RE_ParticleEmitter::PLAY;
-					ImGui::PopID();
+					if (ImGui::Button("Play simulation")) simulation->state = RE_ParticleEmitter::PLAY;
 					break;
 				}
 				case RE_ParticleEmitter::PLAY:
 				{
-					ImGui::PushID("PausePEditor");
-					if (ImGui::Button("Pause")) simulation->state = RE_ParticleEmitter::PAUSE;
-					ImGui::PopID();
+					if (ImGui::Button("Pause simulation")) simulation->state = RE_ParticleEmitter::PAUSE;
 					ImGui::SameLine();
-					ImGui::PushID("StopPEditor");
-					if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOPING;
-					ImGui::PopID();
+					if (ImGui::Button("Stop simulation")) simulation->state = RE_ParticleEmitter::STOPING;
 					break;
 				}
 				case RE_ParticleEmitter::PAUSE:
 				{
-					ImGui::PushID("ResumePEditor");
-					if (ImGui::Button("Resume")) simulation->state = RE_ParticleEmitter::PLAY;
-					ImGui::PopID();
+					if (ImGui::Button("Resume simulation")) simulation->state = RE_ParticleEmitter::PLAY;
 					ImGui::SameLine();
-					ImGui::PushID("StopPEditor");
-					if (ImGui::Button("Stop")) simulation->state = RE_ParticleEmitter::STOPING;
-					ImGui::PopID();
+					if (ImGui::Button("Stop simulation")) simulation->state = RE_ParticleEmitter::STOPING;
 					break;
 				}
 				}
