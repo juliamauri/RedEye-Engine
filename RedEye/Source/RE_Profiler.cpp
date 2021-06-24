@@ -17,7 +17,7 @@ eastl::vector<ProfilingOperation> ProfilingTimer::operations;
 
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 
-int ProfilingTimer::current_sim = 0;
+int ProfilingTimer::current_sim = -1;
 int ProfilingTimer::wait4frame = 0;
 unsigned int ProfilingTimer::update_time = 0u;
 unsigned int ProfilingTimer::p_count = 0u;
@@ -171,6 +171,7 @@ void DumpToFile(eastl::string file_name/*, eastl::vector<ProfilingOperation> ope
 		writer.Uint(op.p_col_internal);
 		writer.Key("cB");
 		writer.Uint(op.p_col_boundary);
+
 #elif defined(PARTICLE_RENDER_TEST)
 
 

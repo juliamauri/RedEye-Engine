@@ -5,10 +5,10 @@
 #include "RE_Particle.h"
 #include "RE_EmissionData.h"
 
-#include "EA/EASTL/list.h"
+#include <EASTL/vector.h>
 
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-#include "EASTL/string.h"
+#include <EASTL/string.h>
 #endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 
 class RE_CompPrimitive;
@@ -36,7 +36,7 @@ public:
 	enum PlaybackState { STOPING, RESTART, PLAY, STOP, PAUSE } state = STOP;
 
 	// Particle storage
-	eastl::list<RE_Particle*> particle_pool;
+	eastl::vector<RE_Particle> particle_pool;
 
 	// Control (read-only)
 	unsigned int particle_count = 0u;
@@ -102,7 +102,7 @@ public:
 
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 
-	void DemoSetup();
+	void DemoSetup(bool first_call = false);
 
 	static RE_ParticleEmitter* demo_emitter;
 	static eastl::string filename;

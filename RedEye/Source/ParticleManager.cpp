@@ -128,10 +128,10 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positon
 	RE_CompTransform* cT = ModuleRenderer3D::GetCamera()->GetTransform();
 	const math::float3 cUp = cT->GetUp().Normalized();
 
-	for (auto p : simulation->particle_pool)
+	for (const auto p : simulation->particle_pool)
 	{
 		// Calculate Particle Transform
-		const math::float3 partcleGlobalpos = simulation->local_space ? go_positon + p->position : p->position;
+		const math::float3 partcleGlobalpos = simulation->local_space ? go_positon + p.position : p.position;
 		math::float3 front, right, up;
 		switch (simulation->particleDir)
 		{
@@ -184,9 +184,9 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positon
 		{
 			//Opacity
 			switch (simulation->opacity.type) {
-			case RE_PR_Opacity::Type::OVERLIFETIME: weight = p->lifetime / simulation->initial_lifetime.GetMax(); break;
-			case RE_PR_Opacity::Type::OVERDISTANCE: weight = math::SqrtFast(p->position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq); break;
-			case RE_PR_Opacity::Type::OVERSPEED: weight = math::SqrtFast(p->velocity.LengthSq()) / math::SqrtFast(simulation->max_speed_sq); break;
+			case RE_PR_Opacity::Type::OVERLIFETIME: weight = p.lifetime / simulation->initial_lifetime.GetMax(); break;
+			case RE_PR_Opacity::Type::OVERDISTANCE: weight = math::SqrtFast(p.position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq); break;
+			case RE_PR_Opacity::Type::OVERSPEED: weight = math::SqrtFast(p.velocity.LengthSq()) / math::SqrtFast(simulation->max_speed_sq); break;
 			default: break;
 			}
 
@@ -195,9 +195,9 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positon
 
 		// Color
 		switch (simulation->color.type) {
-		case RE_PR_Color::Type::OVERLIFETIME: weight = p->lifetime / simulation->initial_lifetime.GetMax(); break;
-		case RE_PR_Color::Type::OVERDISTANCE: weight = math::SqrtFast(p->position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq); break;
-		case RE_PR_Color::Type::OVERSPEED: weight = math::SqrtFast(p->velocity.LengthSq()) / math::SqrtFast(simulation->max_speed_sq); break;
+		case RE_PR_Color::Type::OVERLIFETIME: weight = p.lifetime / simulation->initial_lifetime.GetMax(); break;
+		case RE_PR_Color::Type::OVERDISTANCE: weight = math::SqrtFast(p.position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq); break;
+		case RE_PR_Color::Type::OVERSPEED: weight = math::SqrtFast(p.velocity.LengthSq()) / math::SqrtFast(simulation->max_speed_sq); break;
 		default: break;
 		}
 
@@ -258,11 +258,11 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 			simulation->light.linear,
 			simulation->light.quadratic);
 
-		for (auto p : simulation->particle_pool)
+		for (const auto p : simulation->particle_pool)
 		{
 			if (count == maxLights) return;
 			unif_name = array_name + eastl::to_string(count++) + "].";
-			const math::float3 p_global_pos = go_position + p->position;
+			const math::float3 p_global_pos = go_position + p.position;
 
 			switch (simulation->light.type) {
 			case RE_PR_Light::Type::UNIQUE:
@@ -281,11 +281,11 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 			{
 				RE_ShaderImporter::setFloat(
 					RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()),
-					p->lightColor.x, p->lightColor.y, p->lightColor.z, p->specular);
+					p.lightColor.x, p.lightColor.y, p.lightColor.z, p.specular);
 
 				RE_ShaderImporter::setFloat(
 					RE_ShaderImporter::getLocation(shader, (unif_name + "positionIntensity").c_str()),
-					p_global_pos.x, p_global_pos.y, p_global_pos.z, p->intensity);
+					p_global_pos.x, p_global_pos.y, p_global_pos.z, p.intensity);
 
 				break;
 			}
@@ -298,7 +298,7 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 		const math::vec color = simulation->light.GetColor();
 		const float intensity = simulation->light.GetIntensity();
 
-		for (auto p : simulation->particle_pool)
+		for (const auto p : simulation->particle_pool)
 		{
 			if (count == maxLights) return;
 
@@ -320,17 +320,17 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 			{
 				RE_ShaderImporter::setFloat(
 					RE_ShaderImporter::getLocation(shader, (unif_name + "directionIntensity").c_str()),
-					0.f, 0.f, 0.f, p->intensity);
+					0.f, 0.f, 0.f, p.intensity);
 
 				RE_ShaderImporter::setFloat(
 					RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()),
-					p->lightColor.x, p->lightColor.y, p->lightColor.z, p->specular);
+					p.lightColor.x, p.lightColor.y, p.lightColor.z, p.specular);
 				break;
 			}
 			default: break;
 			}
 
-			const math::float3 partcleGlobalpos = go_position + p->position;
+			const math::float3 partcleGlobalpos = go_position + p.position;
 			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, static_cast<float>(L_POINT));
 
 			const math::vec quadratic = simulation->light.GetQuadraticValues();
@@ -389,7 +389,7 @@ void ParticleManager::DrawDebug() const
 	RE_PROFILE(PROF_Update, PROF_ModulePhysics);
 
 	const float interval = RE_Math::pi_x2 / circle_steps;
-	for (auto sim : simulations)
+	for (const auto sim : simulations)
 	{
 		if (sim->initial_pos.type || sim->boundary.type)
 		{
@@ -499,8 +499,8 @@ void ParticleManager::DrawDebug() const
 			if (sim->collider.type == RE_EmissionCollider::Type::SPHERE)
 			{
 				glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
-				for (auto p : sim->particle_pool)
-					DrawAASphere(sim->local_space ? sim->parent_pos + p->position : p->position, p->col_radius);
+				for (const auto p : sim->particle_pool)
+					DrawAASphere(sim->local_space ? sim->parent_pos + p.position : p.position, p.col_radius);
 			}
 
 			glEnd();
@@ -514,11 +514,11 @@ void ParticleManager::DrawDebug() const
 			glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
 
 			if (sim->local_space)
-				for (auto p : sim->particle_pool)
-					glVertex3fv((sim->parent_pos + p->position).ptr());
+				for (const auto p : sim->particle_pool)
+					glVertex3fv((sim->parent_pos + p.position).ptr());
 			else
-				for (auto p : sim->particle_pool)
-					glVertex3fv(p->position.ptr());
+				for (const auto p : sim->particle_pool)
+					glVertex3fv(p.position.ptr());
 
 			glPointSize(1.f);
 			glEnd();
@@ -529,7 +529,7 @@ void ParticleManager::DrawDebug() const
 bool ParticleManager::SetEmitterState(unsigned int index, RE_ParticleEmitter::PlaybackState state)
 {
 	eastl::list<eastl::pair<RE_ParticleEmitter*, eastl::list<RE_Particle*>*>*>::iterator it;
-	for (auto sim : simulations)
+	for (const auto sim : simulations)
 	{
 		if (sim->id == index)
 		{

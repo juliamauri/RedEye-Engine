@@ -3,6 +3,8 @@
 
 #include "RE_ParticleEmitter.h"
 
+#include <EASTL/list.h>
+
 struct RE_Particle;
 
 class ParticleManager

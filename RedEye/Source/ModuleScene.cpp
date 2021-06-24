@@ -66,8 +66,8 @@ bool ModuleScene::Start()
 	comp->UseResources();
 
 	RE_ParticleEmitter::demo_emitter = comp->GetSimulation();
-	RE_ParticleEmitter::demo_emitter->DemoSetup();
-	ProfilingTimer::operations.reserve(50000u);
+	RE_ParticleEmitter::demo_emitter->DemoSetup(true);
+	ProfilingTimer::operations.reserve(20000u);
 
 #else
 

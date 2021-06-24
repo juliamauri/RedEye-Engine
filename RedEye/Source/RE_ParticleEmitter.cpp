@@ -103,13 +103,13 @@ void RE_ParticleEmitter::UpdateParticles()
 	max_dist_sq = max_speed_sq = 0.f;
 	bounding_box.minPoint = bounding_box.maxPoint = parent_pos * !local_space;
 
-	for (eastl::list<RE_Particle*>::iterator p1 = particle_pool.begin(); p1 != particle_pool.end();)
+	for (unsigned int index = 0u; index < particle_count; ++index)
 	{
 		// Check if particle is still alive
 		bool is_alive = true;
 		switch (initial_lifetime.type) {
-		case RE_EmissionSingleValue::Type::VALUE: is_alive = ((*p1)->lifetime += local_dt) < initial_lifetime.GetValue(); break;
-		case RE_EmissionSingleValue::Type::RANGE: is_alive = ((*p1)->lifetime += local_dt) < (*p1)->max_lifetime; break;
+		case RE_EmissionSingleValue::Type::VALUE: is_alive = (particle_pool[index].lifetime += local_dt) < initial_lifetime.GetValue(); break;
+		case RE_EmissionSingleValue::Type::RANGE: is_alive = (particle_pool[index].lifetime += local_dt) < particle_pool[index].max_lifetime; break;
 		default: break; }
 
 		// Iterate collisions
@@ -119,24 +119,24 @@ void RE_ParticleEmitter::UpdateParticles()
 			case RE_EmissionCollider::Type::POINT:
 			{
 				if (collider.inter_collisions)
-					for (eastl::list<RE_Particle*>::iterator p2 = p1.next(); p2 != particle_pool.end(); ++p2)
-						ImpulseCollision(**p1, **p2);
+					for (unsigned int next = index + 1u; next < particle_count; ++next)
+						ImpulseCollision(particle_pool[index], particle_pool[next]);
 
-				is_alive = boundary.PointCollision(**p1);
+				is_alive = boundary.PointCollision(particle_pool[index]);
 				break;
 			}
 			case RE_EmissionCollider::Type::SPHERE:
 			{
 				if (collider.inter_collisions)
-					for (eastl::list<RE_Particle*>::iterator p2 = p1.next(); p2 != particle_pool.end(); ++p2)
-						ImpulseCollision(**p1, **p2, (*p1)->col_radius + (*p2)->col_radius);
+					for (unsigned int next = index + 1u; next < particle_count; ++next)
+						ImpulseCollision(particle_pool[index], particle_pool[next], particle_pool[index].col_radius + particle_pool[next].col_radius);
 
-				is_alive = boundary.SphereCollision(**p1);
+				is_alive = boundary.SphereCollision(particle_pool[index]);
 				break;
 			}
 			default:
 			{
-				is_alive = boundary.PointCollision(**p1);
+				is_alive = boundary.PointCollision(particle_pool[index]);
 				break;
 			}
 			}
@@ -145,26 +145,23 @@ void RE_ParticleEmitter::UpdateParticles()
 		if (is_alive)
 		{
 			// Update Speed & Position
-			(*p1)->velocity += external_acc.GetAcceleration() * local_dt;
-			(*p1)->position += (*p1)->velocity * local_dt;
+			particle_pool[index].position += (particle_pool[index].velocity += external_acc.GetAcceleration() * local_dt) * local_dt;
 
 			// Update Control values
-			max_dist_sq = RE_Math::MaxF(max_dist_sq, ((*p1)->position - (parent_pos * !local_space)).LengthSq());
-			max_speed_sq = RE_Math::MaxF(max_speed_sq, (*p1)->velocity.LengthSq());
+			max_dist_sq = RE_Math::MaxF(max_dist_sq, (particle_pool[index].position - (parent_pos * !local_space)).LengthSq());
+			max_speed_sq = RE_Math::MaxF(max_speed_sq, particle_pool[index].velocity.LengthSq());
 
 			// Broadphase AABB Boundary
 			if (RE_ParticleEmitter::mode == PER_PARTICLE)
 			{
-				bounding_box.maxPoint = RE_Math::MaxVecValues((*p1)->position, bounding_box.maxPoint);
-				bounding_box.minPoint = RE_Math::MinVecValues((*p1)->position, bounding_box.minPoint);
+				bounding_box.maxPoint = RE_Math::MaxVecValues(particle_pool[index].position, bounding_box.maxPoint);
+				bounding_box.minPoint = RE_Math::MinVecValues(particle_pool[index].position, bounding_box.minPoint);
 			}
-
-			++p1;
 		}
 		else // Remove dead particles
 		{
-			DEL(*p1);
-			p1 = particle_pool.erase(p1);
+			particle_pool.erase(particle_pool.begin() + index);
+			index--;
 			particle_count--;
 		}
 	}
@@ -189,7 +186,7 @@ void RE_ParticleEmitter::UpdateSpawn()
 
 		particle_count += to_add;
 		for (unsigned int i = 0u; i < to_add; ++i)
-			particle_pool.push_back(new RE_Particle(
+			particle_pool.push_back(RE_Particle(
 				initial_lifetime.GetValue(),
 				local_space ? initial_pos.GetPosition() : initial_pos.GetPosition() + parent_pos,
 				!inherit_speed ? initial_speed.GetValue() : initial_speed.GetValue() + parent_speed,
@@ -241,9 +238,11 @@ void RE_ParticleEmitter::ImpulseCollision(RE_Particle& p1, RE_Particle& p2, cons
 
 RE_ParticleEmitter* RE_ParticleEmitter::demo_emitter = nullptr;
 
-void RE_ParticleEmitter::DemoSetup()
+void RE_ParticleEmitter::DemoSetup(bool first_call)
 {
 	Reset();
+
+	if (first_call) particle_pool.reserve(800000u);
 
 	int i = ++ProfilingTimer::current_sim;
 	ProfilingTimer::p_count = 0u;

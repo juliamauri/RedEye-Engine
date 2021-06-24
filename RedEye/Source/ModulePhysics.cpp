@@ -157,18 +157,18 @@ void ModulePhysics::RemoveEmitter(RE_ParticleEmitter* emitter)
 
 unsigned int ModulePhysics::GetParticleCount(unsigned int emitter_id) const
 {
-	for (auto sim : particles.simulations)
+	for (const auto sim : particles.simulations)
 		if (sim->id == emitter_id)
 			return sim->particle_count;
 
 	return 0u;
 }
 
-eastl::list<RE_Particle*>* ModulePhysics::GetParticles(unsigned int emitter_id) const
+const eastl::vector<RE_Particle>& ModulePhysics::GetParticles(unsigned int emitter_id) const
 {
-	for (auto sim : particles.simulations)
+	for (const auto &sim : particles.simulations)
 		if (sim->id == emitter_id)
-			return &sim->particle_pool;
+			return sim->particle_pool;
 
-	return nullptr;
+	return eastl::vector<RE_Particle>();
 }
