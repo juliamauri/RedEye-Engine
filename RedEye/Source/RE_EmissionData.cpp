@@ -1990,9 +1990,7 @@ math::vec RE_PR_Color::GetValue(const float weight) const
 	switch (type)
 	{
 	case RE_PR_Color::SINGLE: return base;
-	case RE_PR_Color::OVERLIFETIME:
-	case RE_PR_Color::OVERDISTANCE:
-	case RE_PR_Color::OVERSPEED:
+	default:
 	{
 		 float w = (useCurve) ? curve.GetValue(weight) : weight;
 		 return (gradient * w) + (base * (1.f - w));

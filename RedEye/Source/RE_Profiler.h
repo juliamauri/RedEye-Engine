@@ -5,7 +5,7 @@
 #define RECORD_FROM_START false
 
 // define to set engine to run particle physics or rendering demo test
-//#define PARTICLE_PHYSICS_TEST
+#define PARTICLE_PHYSICS_TEST
 //#define PARTICLE_RENDER_TEST
 
 enum RE_ProfiledFunc : unsigned short
