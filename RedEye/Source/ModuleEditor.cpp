@@ -771,15 +771,12 @@ void ModuleEditor::UpdateCamera()
 		if (particleEmitterWindow->isSelected()) {
 			const MouseData mouse = RE_INPUT->GetMouse();
 
-			if (RE_INPUT->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse.GetButton(1) == KEY_REPEAT)
+			if ((RE_INPUT->GetKey(SDL_SCANCODE_F) == KEY_DOWN))
 			{
-				// Orbit
-				if (mouse.mouse_x_motion || mouse.mouse_y_motion)
-					camera->Orbit(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion, { 0.0f, 0.0f, 0.0f });
-			}
-			else if ((RE_INPUT->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && selected)
 				// Focus
-				camera->Focus({0.0f, 0.0f, 0.0f});
+				math::AABB box = particleEmitterWindow->GetEdittingParticleEmitter()->bounding_box;
+				camera->Focus(box.CenterPoint(), box.HalfSize().Length());
+			}
 			else
 			{
 				if (mouse.GetButton(3) == KEY_REPEAT)

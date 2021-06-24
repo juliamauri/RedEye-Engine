@@ -116,7 +116,7 @@ bool ModuleRenderer3D::Init()
 			render_views.push_back(RenderView("Particle Editor", { 0, 0 },
 				FACE_CULLING | BLENDED | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
 				LIGHT_DISABLED));
-			//render_views.back().clear_color = { 0.0f, 0.0f,0.0f,1.0f };
+			render_views.back().clear_color = { 0.0f, 0.0f,0.0f,1.0f };
 
 			//Thumbnail Configuration
 			thumbnailView.clear_color = {0.f, 0.f, 0.f, 1.f};
@@ -1350,6 +1350,26 @@ void ModuleRenderer3D::GetCurrentLightsCount(unsigned int& lightC, unsigned int&
 	lightC = lightsCount;
 	pLightC = particlelightsCount;
 	sharedLP = shareLightPass;
+}
+
+math::float4 ModuleRenderer3D::GetRenderViewClearColor(RENDER_VIEWS r_view) const
+{
+	return (r_view < VIEW_OTHER) ? render_views[r_view].clear_color : math::float4(0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+LightMode ModuleRenderer3D::GetRenderViewLightMode(RENDER_VIEWS r_view) const
+{
+	return (r_view < VIEW_OTHER) ? render_views[r_view].light : LightMode::LIGHT_DISABLED;
+}
+
+void ModuleRenderer3D::SetRenderViewDeferred(RENDER_VIEWS r_view, bool using_deferred)
+{
+	if (r_view < VIEW_OTHER) render_views[r_view].light = (using_deferred) ? LightMode::LIGHT_DEFERRED : LightMode::LIGHT_DISABLED;
+}
+
+void ModuleRenderer3D::SetRenderViewClearColor(RENDER_VIEWS r_view, math::float4 clear_color)
+{
+	if (r_view < VIEW_OTHER) render_views[r_view].clear_color = clear_color;
 }
 
 RenderView::RenderView(eastl::string name, eastl::pair<unsigned int, unsigned int> fbos, short flags, LightMode light, math::float4 clipDistance) :

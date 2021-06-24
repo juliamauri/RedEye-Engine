@@ -22,7 +22,7 @@ void RE_CameraManager::Init()
 	particleEditor_camera = new RE_CompCamera();
 	particleEditor_camera->SetParent(0ull);
 	particleEditor_camera->SetProperties();
-	particleEditor_camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
+	particleEditor_camera->GetTransform()->SetPosition(math::vec(0.f, 0.f, 10.f));
 }
 
 void RE_CameraManager::Clear()

@@ -924,13 +924,37 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 		ImGui::End();
 
 		// Viewport
-		if (ImGui::Begin(name, NULL, wFlags))
+		if (ImGui::Begin(name, NULL, wFlags | ImGuiWindowFlags_MenuBar))
 		{
 			if (secondary)
 			{
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
+
+			if (ImGui::BeginMenuBar())
+			{
+				static math::float4 clear_color = RE_RENDER->GetRenderViewClearColor(RENDER_VIEWS::VIEW_PARTICLE);
+				static bool deferred = (RE_RENDER->GetRenderViewLightMode(RENDER_VIEWS::VIEW_PARTICLE) == LightMode::LIGHT_DEFERRED);
+				if (ImGui::Checkbox("Deferred lighting", &deferred)) {
+					RE_RENDER->SetRenderViewDeferred(RENDER_VIEWS::VIEW_PARTICLE, deferred);
+					if (deferred) {
+						clear_color = { 0.0f,0.0f,0.0f,1.0 };
+						RE_RENDER->SetRenderViewClearColor(RENDER_VIEWS::VIEW_PARTICLE, clear_color);
+					}
+				}
+
+				if (!deferred) {
+					ImGui::PushItemWidth(150.0f);
+
+					if (ImGui::ColorEdit3("Background color", clear_color.ptr()))
+						RE_RENDER->SetRenderViewClearColor(RENDER_VIEWS::VIEW_PARTICLE, clear_color);
+
+					ImGui::PopItemWidth();
+				}
+
+			}
+			ImGui::EndMenuBar();
 
 			static int lastWidht = 0;
 			static int lastHeight = 0;

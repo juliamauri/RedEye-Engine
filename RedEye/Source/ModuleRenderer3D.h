@@ -108,6 +108,10 @@ public:
 	//Get Render Debug
 	void GetCurrentLightsCount(unsigned int& lightC, unsigned int& pLightC, bool& sharedLP);
 
+	math::float4 GetRenderViewClearColor(RENDER_VIEWS r_view)const;
+	LightMode GetRenderViewLightMode(RENDER_VIEWS r_view)const;
+	void SetRenderViewDeferred(RENDER_VIEWS r_view, bool using_deferred);
+	void SetRenderViewClearColor(RENDER_VIEWS r_view, math::float4 clear_color);
 
 	enum RenderType {
 		R_R_SCENE,
