@@ -242,7 +242,7 @@ void RE_ParticleEmitter::DemoSetup(bool first_call)
 {
 	Reset();
 
-	if (first_call) particle_pool.reserve(800000u);
+	if (first_call) particle_pool.reserve(400000u);
 
 	int i = ++ProfilingTimer::current_sim;
 	ProfilingTimer::p_count = 0u;
@@ -252,22 +252,6 @@ void RE_ParticleEmitter::DemoSetup(bool first_call)
 	initial_lifetime.type = RE_EmissionSingleValue::Type::NONE;
 
 #ifdef PARTICLE_PHYSICS_TEST
-
-	filename = "Particle_Sim "
-	//filename = "Z Particle_Sim "
-		+ eastl::to_string(ProfilingTimer::current_sim / 10)
-		+ eastl::to_string(ProfilingTimer::current_sim % 10);
-
-	if (RE_ParticleEmitter::demo_emitter->collider.inter_collisions) filename += "Inter ";
-	filename += RE_ParticleEmitter::demo_emitter->collider.type == RE_EmissionCollider::Type::POINT ? "Point " : "Ball ";
-
-	switch (RE_ParticleEmitter::demo_emitter->boundary.type) {
-	case RE_EmissionBoundary::Type::PLANE: filename += "Plane"; break;
-	case RE_EmissionBoundary::Type::SPHERE: filename += "Sphere"; break;
-	case RE_EmissionBoundary::Type::AABB: filename += "AABB"; break;
-	default: break; }
-
-	filename += ".json";
 
 	active_rendering = false;
 	ProfilingTimer::p_col_internal = ProfilingTimer::p_col_boundary = 0u;
@@ -286,6 +270,7 @@ void RE_ParticleEmitter::DemoSetup(bool first_call)
 	case RE_EmissionBoundary::AABB: boundary.geo.box.SetFromCenterAndSize(math::vec::zero, math::vec(i < 6 ? 30.f : 140.f)); break;
 	default: break; }
 
+
 #else // RELEASE
 
 	spawn_mode.frequency = i < 6 ? 120.f : 2000.f;
@@ -293,13 +278,26 @@ void RE_ParticleEmitter::DemoSetup(bool first_call)
 
 	switch (boundary.type = static_cast<RE_EmissionBoundary::Type>(1 + (i % 3))) {
 	case RE_EmissionBoundary::PLANE: boundary.geo.plane = math::Plane({ 0.f, 1.f, 0.f }, i < 6 ? -20.f : -70.f); break;
-	case RE_EmissionBoundary::SPHERE: boundary.geo.sphere = math::Sphere(math::vec::zero, i < 6 ? 80.f : 400.f); break;
+	case RE_EmissionBoundary::SPHERE: boundary.geo.sphere = math::Sphere(math::vec::zero, i < 6 ? 80.f : 650.f); break;
 	case RE_EmissionBoundary::AABB: boundary.geo.box.SetFromCenterAndSize(math::vec::zero, math::vec(i < 6 ? 120.f : 550.f)); break;
 	default: break; }
 
-	filename = "R " + filename;
-
 #endif
+
+	filename = "Particle_Sim "
+		+ eastl::to_string(ProfilingTimer::current_sim / 10)
+		+ eastl::to_string(ProfilingTimer::current_sim % 10);
+
+	if (RE_ParticleEmitter::demo_emitter->collider.inter_collisions) filename += "Inter ";
+	filename += RE_ParticleEmitter::demo_emitter->collider.type == RE_EmissionCollider::Type::POINT ? "Point " : "Ball ";
+
+	switch (RE_ParticleEmitter::demo_emitter->boundary.type) {
+	case RE_EmissionBoundary::Type::PLANE: filename += "Plane"; break;
+	case RE_EmissionBoundary::Type::SPHERE: filename += "Sphere"; break;
+	case RE_EmissionBoundary::Type::AABB: filename += "AABB"; break;
+	default: break; }
+
+	filename += ".json";
 
 #else // PARTICLE_RENDER_TEST
 
