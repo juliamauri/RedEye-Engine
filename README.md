@@ -6,6 +6,7 @@ What’s special about it? The code was written from scratch using a total of 15
 * Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly.
 * Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses.
 * Added Unity-like resource management with binary save/load for all the engines resources.
+* Added particle pipeline with physics and graphics customization.
 
 Future plans: improve the engine by adding a 3d physics particle simulation and rendering pipeline.
 
@@ -23,8 +24,17 @@ Future plans: improve the engine by adding a 3d physics particle simulation and 
 
 ### Release v5.0 Particle Pipeline
 
-
-
+ * Added module phyisics: updates particle manager using fixed, timed-steps or engine par delta time.
+ * Added particle emitter: stores simulation data and handles particle iteration
+ * Added particle emitter gameobject component: places referenced particle emitter resource in the scene.
+ * Added new particle resources:
+    * Emission: stores spawning and phyical properties
+    * Rendering: stores orientation, graphics and lighting properties
+    * Emitter: stores an emission resource and rendering resource
+ * Added emitter workspace: editor window that comfortably allows modifying all the different properties of a simulation. Includes a viewport with its own camera and controls.
+ * Improved GPU memory usage. Increased maximum supported rendering lights from 64 to 203 for light components and up to 508 for particle point lights.
+ * Added primitive resource manager: reference counts loaded primitives
+ * Added physics and rendering profiling methods to measure each system's performance.
 
 ## User Actions
 ### Shortcuts
@@ -145,7 +155,8 @@ When droping and .fbx file, its path will vary depending on which platform de en
 Importing .fbx files may trigger errors while checking the materials' texture paths. These paths vary depending on which platform de engine is running and there must be a conversion if needed. When importing a .zip file containing all resources allows for LibZip and PhysFS to create a virtual directory through which access is already handled. This system allows cross-platform imports through .zip files.
 ### Profiling
 Started using Optick to profile engine's methods. Adapted calls to support custom profiling pipeline. Internal profiling registers function calls and tick intervals and can deploy registers to a .json file. We can feed the output to Tableau and graphically analize performance metrics.
-
+### Particle Pipeline
+Physics module supports running particle simulations inside a Particle Manager. Particle physics, spawning, rendering behaviours can be edited through the emitter workspace window.
 ## Libraries Used
 * EABase v2.09.05
 * EASTL v3.16.05
