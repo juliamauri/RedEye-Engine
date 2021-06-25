@@ -13,58 +13,18 @@ Future plans: improve the engine by adding a 3d physics particle simulation and 
 * Repository [Github](https://github.com/juliamauri/RedEye-Engine)
 * Webpage: https://redeye-engine.es/
 * Authors: [Julià Mauri Costa](https://github.com/juliamauri) & [Rubén Sardón](https://github.com/cumus)
-* Tutor: [Marc Garrigó](https://github.com/markitus18)
+* Tutor 1: [Ricard Pillosu](https://github.com/d0n3val) (9/2018-2/2019)
+* Tutor 2: [Marc Garrigó](https://github.com/markitus18) (9/2019-2/2020)
+* Tutor 3: [Lasse Löpfe](https://www.linkedin.com/in/lasse-loepfe) (2/2021-6/2021)
 * University: [CITM UPC](https://www.citm.upc.edu/)
 * License: [GNU General Public License v3.0](https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE)
 
 ## Latest Version Notes
 
-### Release v4.0 ***Big Chunky Update***
-* Graphics:
-    * Added and implemented **Deferred Light Shading**!
-        * New render pipeline can toggle lighting modes.
-        * **Added Component Light**!
-        * Support for material Shininess value.
-    * Added **Commponent Water**!
-        * Implemented **dynamic foam** on water!
-          * New shader's internal values are parsed and uploaded to the shader. You may now request the depth texture generated each frame.
-        * Because of new render pipeline, we configured a water component that works automatically with and without deferring.
-        * Implemented procedure automatically generate your own water resource. You may select if you want deferred or not (**engine scene**, everything we use on the engine you can implemented it step by step with our editor tools!).
-* **Performance**:
-    * Implemented Gameobject's and components' Hash Table (RE_GOManager class). 
-        * **Hash Table removes using new's, delete's and UUID** (windows). Now using UID (unsigned long long) generated with our random generator (playing with **bitwise operators**) to reference any gamepbject or component.
-        * Upgraded Hash Table array's to **dynamic arrays**, increasing array size when full.
-        * Implemented RE_GOManager on scene and gameobjects resources (Model, Scene and Prefab).
-        * **New serialization** based on Hash Table direct memory copying.
-        * Using Hash Tables allows **x3 faster iteration** in scene elements. All data is neatly stored together and removes using pointers to access all elements.
-    * Code CleanUp:
-        * **Removing warning**s.
-        * Implementing **C++ casts** (dynamic, static, const and reinterpret).
-        * **Zero recursivity** methods.
-        * **Removing App pointer**, welcome static values.
-    * Fixed some OpenGL errors and warnings. We found them thanks to adding new debug log polling from opengl.
-* Resources:
-    * Implemented **erase resources**. It updates other resources with dependencies.
-    * Visual upgrade on panel assets.
-    * Fixed thumbnails; although an issue remains where some gameobjects and material thumbnails don't render properly.
-* Usability
-    * Implemented **destroy GameObject**!
-    * Added create prefab from any gameobject of hierarchy.
-    * Added **Gizmo** (ImGuizmo).
-    * Added and implemented **Commands!** You can do and redo all transformation changes!
-    * New window monitoring all scene transforms (debug pruposes).
-    * Added **OpenGL Debug Output**. Now automatcally send logs to console!
-    * "New Scene" and "Save Scene" Buttons. PopUp window opens before closing if current scene changes haven't been save.
-* Implemented all primitives from **par_shapes.h**
-* Added functional Grid Component!
-* Added and implemented new AudioModule with **Wwise**!
-    * You can configure the folder of output from wwise editor inside of engine folder for **hot reloading** new changes inmediatly!
-    * Added new audio module panel which to send calls to Wwise.
-* Added internal custom profiling. Key method calls are recorded when starting profiling session. Session may be paused and resumed later on. Having recorded at least a method displays a button to save session to file and another to clear them.
-* Current WIP issues:
-    * [Thumbnail camera not positioning correctly for rendered icons](https://github.com/juliamauri/RedEye-Engine/issues/3)
-    * [Primitive's AABBs do not enclose geometry](https://github.com/juliamauri/RedEye-Engine/issues/2)
-    * [Thumbnail not rendering models and crashing](https://github.com/juliamauri/RedEye-Engine/issues/1)
+### Release v5.0 Particle Pipeline
+
+
+
 
 ## User Actions
 ### Shortcuts
@@ -208,6 +168,53 @@ Started using Optick to profile engine's methods. Adapted calls to support custo
 * gpudetect
 
 ## Previous Version Notes
+
+### Release v4.0 ***Big Chunky Update***
+* Graphics:
+    * Added and implemented **Deferred Light Shading**!
+        * New render pipeline can toggle lighting modes.
+        * **Added Component Light**!
+        * Support for material Shininess value.
+    * Added **Commponent Water**!
+        * Implemented **dynamic foam** on water!
+          * New shader's internal values are parsed and uploaded to the shader. You may now request the depth texture generated each frame.
+        * Because of new render pipeline, we configured a water component that works automatically with and without deferring.
+        * Implemented procedure automatically generate your own water resource. You may select if you want deferred or not (**engine scene**, everything we use on the engine you can implemented it step by step with our editor tools!).
+* **Performance**:
+    * Implemented Gameobject's and components' Hash Table (RE_GOManager class). 
+        * **Hash Table removes using new's, delete's and UUID** (windows). Now using UID (unsigned long long) generated with our random generator (playing with **bitwise operators**) to reference any gamepbject or component.
+        * Upgraded Hash Table array's to **dynamic arrays**, increasing array size when full.
+        * Implemented RE_GOManager on scene and gameobjects resources (Model, Scene and Prefab).
+        * **New serialization** based on Hash Table direct memory copying.
+        * Using Hash Tables allows **x3 faster iteration** in scene elements. All data is neatly stored together and removes using pointers to access all elements.
+    * Code CleanUp:
+        * **Removing warning**s.
+        * Implementing **C++ casts** (dynamic, static, const and reinterpret).
+        * **Zero recursivity** methods.
+        * **Removing App pointer**, welcome static values.
+    * Fixed some OpenGL errors and warnings. We found them thanks to adding new debug log polling from opengl.
+* Resources:
+    * Implemented **erase resources**. It updates other resources with dependencies.
+    * Visual upgrade on panel assets.
+    * Fixed thumbnails; although an issue remains where some gameobjects and material thumbnails don't render properly.
+* Usability
+    * Implemented **destroy GameObject**!
+    * Added create prefab from any gameobject of hierarchy.
+    * Added **Gizmo** (ImGuizmo).
+    * Added and implemented **Commands!** You can do and redo all transformation changes!
+    * New window monitoring all scene transforms (debug pruposes).
+    * Added **OpenGL Debug Output**. Now automatcally send logs to console!
+    * "New Scene" and "Save Scene" Buttons. PopUp window opens before closing if current scene changes haven't been save.
+* Implemented all primitives from **par_shapes.h**
+* Added functional Grid Component!
+* Added and implemented new AudioModule with **Wwise**!
+    * You can configure the folder of output from wwise editor inside of engine folder for **hot reloading** new changes inmediatly!
+    * Added new audio module panel which to send calls to Wwise.
+* Added internal custom profiling. Key method calls are recorded when starting profiling session. Session may be paused and resumed later on. Having recorded at least a method displays a button to save session to file and another to clear them.
+* Current WIP issues:
+    * [Thumbnail camera not positioning correctly for rendered icons](https://github.com/juliamauri/RedEye-Engine/issues/3)
+    * [Primitive's AABBs do not enclose geometry](https://github.com/juliamauri/RedEye-Engine/issues/2)
+    * [Thumbnail not rendering models and crashing](https://github.com/juliamauri/RedEye-Engine/issues/1)
 
 ### Release v3.2
 * Added and implemented **EASTL** and EA libraries' dependencies. Good bye STD.
