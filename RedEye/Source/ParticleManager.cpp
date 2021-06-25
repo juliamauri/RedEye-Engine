@@ -6,11 +6,17 @@
 
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 #include "ModulePhysics.h"
+
+#ifdef PARTICLE_RENDER_TEST
+
+RE_Timer ParticleManager::timer_simple(false);
+
+#endif // PARTICLE_RENDER_TEST
+
 #endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 
 #include "RE_Math.h"
 #include "RE_Profiler.h"
-#include "RE_Timer.h"
 #include "RE_GLCache.h"
 
 #include "RE_InternalResources.h"
@@ -96,7 +102,7 @@ void ParticleManager::Clear()
 
 void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_position, math::float3 go_up) const
 {
-	RE_PROFILE(PROF_DrawParticles, PROF_CompParticleEmitter);
+	RE_PROFILE(PROF_DrawParticles, PROF_ParticleManager);
 
 	RE_ParticleEmitter* simulation = nullptr;
 	eastl::list<RE_ParticleEmitter*>::const_iterator it;
@@ -112,7 +118,21 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 
 #ifdef PARTICLE_RENDER_TEST
 
-	RE_Timer timer_simple;
+	if (ProfilingTimer::wait4frame < 0) {
+		ProfilingTimer::update_time = RE_Math::MaxUI(timer_simple.Read(), ProfilingTimer::update_time);
+		if (ProfilingTimer::update_time > 33u)
+		{
+			RE_PHYSICS->mode = ModulePhysics::UpdateMode::ENGINE_PAR;
+
+			RE_Profiler::Deploy(RE_ParticleEmitter::filename.c_str());
+			ProfilingTimer::current_sim < 3 // MAX SIMULATIONS INDEX
+				? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->QuickQuit();
+		}
+
+		timer_simple.Stop();
+		timer_simple.Start();
+	}
+
 
 #endif // PARTICLE_RENDER_TEST
 
@@ -210,28 +230,15 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 
 #ifdef PARTICLE_RENDER_TEST
 
-	ProfilingTimer::update_time = RE_Math::MaxUI(timer_simple.Read(), ProfilingTimer::update_time);
-	if (ProfilingTimer::update_time > 33u)
-	{
-		RE_PHYSICS->mode = ModulePhysics::UpdateMode::ENGINE_PAR;
+	timer_simple.Pause();
 
-		eastl::string file_name = "Particle_Rendering ";
-		file_name += eastl::to_string(ProfilingTimer::current_sim / 10);
-		file_name += eastl::to_string(ProfilingTimer::current_sim % 10);
-
-		// TODO JULIUS: setup filename from emitter properties for rendering profiling
-
-		file_name += ".json";
-
-		RE_Profiler::Deploy(file_name.c_str());
-		ProfilingTimer::current_sim < 11 // MAX SIMULATIONS INDEX
-			? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->QuickQuit();
-	}
 #endif // PARTICLE_RENDER_TEST
 }
 
 void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
 {
+	RE_PROFILE(PROF_DrawParticlesLight, PROF_ParticleManager);
+
 	RE_ParticleEmitter* simulation = nullptr;
 	eastl::list<RE_ParticleEmitter*>::const_iterator it;
 	for (it = simulations.begin(); it != simulations.end(); ++it)

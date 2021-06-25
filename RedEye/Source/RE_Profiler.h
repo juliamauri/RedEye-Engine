@@ -1,12 +1,12 @@
 #pragma once
 
-#define PROFILING_ENABLED // undefine to disable any profiling methods
+//#define PROFILING_ENABLED // undefine to disable any profiling methods
 #define INTERNAL_PROFILING // undefine to use Optick Profiling
 #define RECORD_FROM_START false
 
 // define to set engine to run particle physics or rendering demo test
 #define PARTICLE_PHYSICS_TEST
-//#define PARTICLE_RENDER_TEST
+#define PARTICLE_RENDER_TEST
 
 enum RE_ProfiledFunc : unsigned short
 {
@@ -31,6 +31,7 @@ enum RE_ProfiledFunc : unsigned short
 	PROF_DrawDebug,
 	PROF_DrawThumbnails,
 	PROF_DrawParticles,
+	PROF_DrawParticlesLight,
 
 	PROF_CameraRaycast, // Cameras
 	PROF_EditorCamera,
@@ -128,6 +129,7 @@ struct ProfilingOperation
 
 #elif defined(PARTICLE_RENDER_TEST)
 
+	unsigned int p_lights = 0u;
 
 #endif // PARTICLE_RENDER_TEST
 #endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
@@ -160,6 +162,10 @@ struct ProfilingTimer
 
 	static unsigned int p_col_internal;
 	static unsigned int p_col_boundary;
+
+#else
+
+	static unsigned int p_lights;
 
 #endif // PARTICLE_PHYSICS_TEST
 #endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST

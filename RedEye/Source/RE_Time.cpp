@@ -73,6 +73,8 @@ void RE_Time::DrawEditorGraphs()
 	ImGui::Text("Collisions internal %u", ProfilingTimer::p_col_internal);
 	ImGui::Text("Collisions boundary %u", ProfilingTimer::p_col_boundary);
 
+#else
+	ImGui::Text("Particle light count: %u", ProfilingTimer::p_lights);
 #endif // PARTICLE_PHYSICS_TEST
 
 #else

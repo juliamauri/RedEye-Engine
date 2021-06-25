@@ -4,6 +4,7 @@
 #include "RE_ParticleEmitter.h"
 
 #include <EASTL/list.h>
+#include "RE_Timer.h"
 
 struct RE_Particle;
 
@@ -33,6 +34,12 @@ public:
 public:
 
 	eastl::list<RE_ParticleEmitter*> simulations;
+
+#ifdef PARTICLE_RENDER_TEST
+
+	static RE_Timer timer_simple;
+
+#endif // PARTICLE_RENDER_TEST
 
 private:
 

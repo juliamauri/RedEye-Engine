@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "ModuleScene.h"
+#include "ModuleRenderer3D.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_Math.h"
 
@@ -300,11 +301,39 @@ void RE_ParticleEmitter::DemoSetup(bool first_call)
 	filename += ".json";
 
 #else // PARTICLE_RENDER_TEST
-
-	// TODO JULIUS: setup emitter properties for rendering profiling
 	
+	spawn_mode.frequency = 100.f; // Constant frequency
 
+	//Contains particles on screen -----------
+	initial_pos.type = RE_EmissionShape::Type::CIRCLE;
+	initial_pos.geo.circle = math::Circle({ 0.0f,30.0f, 0.0f }, { 0.f, 1.f, 0.f }, 80.f);
 
+	boundary.type = RE_EmissionBoundary::SPHERE;
+	boundary.geo.sphere = boundary.geo.sphere = math::Sphere({ 0.0f,30.0f, 0.0f }, 120.f);
+
+	collider.type = RE_EmissionCollider::Type::POINT;
+	collider.inter_collisions = false;
+	// ---------------------------------------
+
+	switch (i) {
+	case 0: RE_RENDER->SetRenderViewDeferred(RENDER_VIEWS::VIEW_GAME, false); break; 
+	case 1: {
+		opacity.type = RE_PR_Opacity::Type::VALUE;
+		opacity.opacity = 0.3;
+		break; }
+	case 2: {
+		RE_RENDER->SetRenderViewDeferred(RENDER_VIEWS::VIEW_GAME, true);
+		opacity.type = RE_PR_Opacity::Type::NONE;
+		break; }
+	case 3: light.type = RE_PR_Light::Type::UNIQUE; break;
+	}
+
+	ProfilingTimer::p_lights = 0u;
+
+	filename = "Particle_Rendering ";
+	filename += eastl::to_string(ProfilingTimer::current_sim / 10);
+	filename += eastl::to_string(ProfilingTimer::current_sim % 10);
+	filename += ".json";
 
 #endif
 }

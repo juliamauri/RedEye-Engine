@@ -27,6 +27,11 @@ unsigned int ProfilingTimer::p_count = 0u;
 unsigned int ProfilingTimer::p_col_internal = 0u;
 unsigned int ProfilingTimer::p_col_boundary = 0u;
 
+#else
+
+unsigned int ProfilingTimer::p_lights = 0u;
+
+
 #endif // PARTICLE_RENDER_TEST
 #endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 
@@ -42,10 +47,10 @@ ProfilingTimer::ProfilingTimer(RE_ProfiledFunc f, RE_ProfiledClass c) : operatio
 
 #elif defined(PARTICLE_RENDER_TEST)
 
-	if (pushed = (recording && c == PROF_CompParticleEmitter))
+	if (pushed = (recording && (f == PROF_DrawParticles || f == PROF_DrawParticlesLight)))
 	{
 		operation_id = operations.size();
-		operations.push_back({ f, c, math::Clock::Tick() - ProfilingTimer::start, 0ull, frame, p_count });
+		operations.push_back({ f, c, math::Clock::Tick() - ProfilingTimer::start, 0ull, frame, p_count, p_lights });
 	}
 
 #else
@@ -130,7 +135,7 @@ void DumpToFile(eastl::string file_name/*, eastl::vector<ProfilingOperation> ope
 	const char* function_name[PROF_FUNC_MAX] = {
 		"Init", "Start", "PreUpdate", "Update", "PostUpdate", "CleanUp", "Load", "Save", "Clear",
 		"Read Asset Changes", "Dropped File",
-		"Get Active Shaders", "Draw Scene", "Draw Skybox", "Draw Stencil", "Draw Editor", "Draw Debug", "Draw Thumbnails", "Draw Particles",
+		"Get Active Shaders", "Draw Scene", "Draw Skybox", "Draw Stencil", "Draw Editor", "Draw Debug", "Draw Thumbnails", "Draw Particles", "Draw Particles Light",
 		"Camera Raycast", "Editor Camera",
 		"Thumbnail Resources", "Init Checker", "Init Shaders", "Init Water", "Init Material", "Init SkyBox",
 		"Set Window Properties", "Create Window",
@@ -172,8 +177,9 @@ void DumpToFile(eastl::string file_name/*, eastl::vector<ProfilingOperation> ope
 		writer.Key("cB");
 		writer.Uint(op.p_col_boundary);
 
-#elif defined(PARTICLE_RENDER_TEST)
-
+#else
+		writer.Key("lC");
+		writer.Uint(op.p_lights);
 
 
 #endif // PARTICLE_RENDER_TEST
