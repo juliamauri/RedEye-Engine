@@ -8,7 +8,7 @@ What’s special about it? The code was written from scratch using a total of 15
 * Added Unity-like resource management with binary save/load for all the engines resources.
 * Added particle pipeline with physics and graphics customization.
 
-Future plans: improve the engine by adding a 3d physics particle simulation and rendering pipeline.
+Future plans: add multi-threading and different rendering APIs such as DirectX and/or Vulkan.
 
 ## Links:
 * Repository [Github](https://github.com/juliamauri/RedEye-Engine)
