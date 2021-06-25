@@ -94,7 +94,7 @@ void ParticleManager::Clear()
 	simulations.clear();
 }
 
-void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positon, math::float3 go_up) const
+void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_position, math::float3 go_up) const
 {
 	RE_PROFILE(PROF_DrawParticles, PROF_CompParticleEmitter);
 
@@ -131,13 +131,13 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positon
 	for (const auto p : simulation->particle_pool)
 	{
 		// Calculate Particle Transform
-		const math::float3 partcleGlobalpos = simulation->local_space ? go_positon + p.position : p.position;
+		const math::float3 partcleGlobalpos = simulation->local_space ? go_position + p.position : p.position;
 		math::float3 front, right, up;
 		switch (simulation->particleDir)
 		{
 		case RE_ParticleEmitter::PS_FromPS:
 		{
-			front = (go_positon - partcleGlobalpos).Normalized();
+			front = (go_position - partcleGlobalpos).Normalized();
 			right = front.Cross(go_up).Normalized();
 			if (right.x < 0.0f) right *= -1.0f;
 			up = right.Cross(front).Normalized();
@@ -262,8 +262,8 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 		{
 			if (count == maxLights) return;
 			unif_name = array_name + eastl::to_string(count++) + "].";
-			const math::float3 p_global_pos = go_position + p.position;
 
+			const math::float3 p_global_pos = simulation->local_space ? go_position + p.position : p.position;
 			switch (simulation->light.type) {
 			case RE_PR_Light::Type::UNIQUE:
 			{
