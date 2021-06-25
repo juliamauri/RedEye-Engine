@@ -391,139 +391,150 @@ void ParticleManager::DrawDebug() const
 	const float interval = RE_Math::pi_x2 / circle_steps;
 	for (const auto sim : simulations)
 	{
-		if (sim->initial_pos.type || sim->boundary.type)
-		{
-			glBegin(GL_LINES);
-
-			// Render Spawn Shape
-			glColor4f(1.0f, 0.27f, 0.f, 1.f); // orange
-			switch (sim->initial_pos.type) {
-			case RE_EmissionShape::Type::CIRCLE:
-			{
-				math::Circle c = sim->initial_pos.geo.circle;
-				c.pos += sim->parent_pos;
-				math::vec previous = c.GetPoint(0.f);
-				for (float i = interval; i < RE_Math::pi_x2; i += interval)
-				{
-					glVertex3f(previous.x, previous.y, previous.z);
-					previous = c.GetPoint(i);
-					glVertex3f(previous.x, previous.y, previous.z);
-				}
-				break;
-			}
-			case RE_EmissionShape::Type::RING:
-			{
-				math::Circle c = sim->initial_pos.geo.ring.first;
-				c.pos += sim->parent_pos;
-				c.r += sim->initial_pos.geo.ring.second;
-				math::vec previous = c.GetPoint(0.f);
-				for (float i = interval; i < RE_Math::pi_x2; i += interval)
-				{
-					glVertex3f(previous.x, previous.y, previous.z);
-					previous = c.GetPoint(i);
-					glVertex3f(previous.x, previous.y, previous.z);
-				}
-
-				c.r -= 2.f * sim->initial_pos.geo.ring.second;
-				previous = c.GetPoint(0.f);
-				for (float i = interval; i < RE_Math::pi_x2; i += interval)
-				{
-					glVertex3f(previous.x, previous.y, previous.z);
-					previous = c.GetPoint(i);
-					glVertex3f(previous.x, previous.y, previous.z);
-				}
-				break;
-			}
-			case RE_EmissionShape::Type::AABB:
-			{
-				for (int i = 0; i < 12; i++)
-				{
-					glVertex3fv((sim->initial_pos.geo.box.Edge(i).a + sim->parent_pos).ptr());
-					glVertex3fv((sim->initial_pos.geo.box.Edge(i).b + sim->parent_pos).ptr());
-				}
-
-				break;
-			}
-			case RE_EmissionShape::Type::SPHERE:
-			{
-				DrawAASphere(sim->parent_pos + sim->initial_pos.geo.sphere.pos, sim->initial_pos.geo.sphere.r);
-				break;
-			}
-			case RE_EmissionShape::Type::HOLLOW_SPHERE:
-			{
-				DrawAASphere(sim->parent_pos + sim->initial_pos.geo.hollow_sphere.first.pos, sim->initial_pos.geo.hollow_sphere.first.r - sim->initial_pos.geo.hollow_sphere.second);
-				DrawAASphere(sim->parent_pos + sim->initial_pos.geo.hollow_sphere.first.pos, sim->initial_pos.geo.hollow_sphere.first.r + sim->initial_pos.geo.hollow_sphere.second);
-				break;
-			}
-			default: break;
-			}
-
-			// Render Boundary
-			glColor4f(1.f, 0.84f, 0.0f, 1.f); // gold
-			switch (sim->boundary.type) {
-			case RE_EmissionBoundary::PLANE:
-			{
-				const float interval = RE_Math::pi_x2 / circle_steps;
-				for (float j = 1.f; j < 6.f; ++j)
-				{
-					const math::Circle c = sim->boundary.geo.plane.GenerateCircle(sim->parent_pos, j * j);
-					math::vec previous = c.GetPoint(0.f);
-					for (float i = interval; i < RE_Math::pi_x2; i += interval)
-					{
-						glVertex3f(previous.x, previous.y, previous.z);
-						previous = c.GetPoint(i);
-						glVertex3f(previous.x, previous.y, previous.z);
-					}
-				}
-
-				break;
-			}
-			case RE_EmissionBoundary::SPHERE:
-			{
-				DrawAASphere(sim->parent_pos + sim->boundary.geo.sphere.pos, sim->boundary.geo.sphere.r);
-				break;
-			}
-			case RE_EmissionBoundary::AABB:
-			{
-				for (int i = 0; i < 12; i++)
-				{
-					glVertex3fv((sim->parent_pos + sim->boundary.geo.box.Edge(i).a).ptr());
-					glVertex3fv((sim->parent_pos + sim->boundary.geo.box.Edge(i).b).ptr());
-				}
-
-				break;
-			}
-			default: break; }
-
-			// Render Shape Collider
-			if (sim->collider.type == RE_EmissionCollider::Type::SPHERE)
-			{
-				glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
-				for (const auto p : sim->particle_pool)
-					DrawAASphere(sim->local_space ? sim->parent_pos + p.position : p.position, p.col_radius);
-			}
-
-			glEnd();
-		}
-
-		// Render Point Collider
-		if (sim->collider.type == RE_EmissionCollider::Type::POINT)
-		{
-			glPointSize(point_size);
-			glBegin(GL_POINTS);
-			glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
-
-			if (sim->local_space)
-				for (const auto p : sim->particle_pool)
-					glVertex3fv((sim->parent_pos + p.position).ptr());
-			else
-				for (const auto p : sim->particle_pool)
-					glVertex3fv(p.position.ptr());
-
-			glPointSize(1.f);
-			glEnd();
-		}
+		DebugDrawSimulation(sim, interval);
 	}
+}
+
+void ParticleManager::DebugDrawSimulation(const RE_ParticleEmitter* const sim, const float interval) const
+{
+	if (sim->initial_pos.type || sim->boundary.type)
+	{
+		glBegin(GL_LINES);
+
+		// Render Spawn Shape
+		glColor4f(1.0f, 0.27f, 0.f, 1.f); // orange
+		switch (sim->initial_pos.type) {
+		case RE_EmissionShape::Type::CIRCLE:
+		{
+			math::Circle c = sim->initial_pos.geo.circle;
+			c.pos += sim->parent_pos;
+			math::vec previous = c.GetPoint(0.f);
+			for (float i = interval; i < RE_Math::pi_x2; i += interval)
+			{
+				glVertex3f(previous.x, previous.y, previous.z);
+				previous = c.GetPoint(i);
+				glVertex3f(previous.x, previous.y, previous.z);
+			}
+			break;
+		}
+		case RE_EmissionShape::Type::RING:
+		{
+			math::Circle c = sim->initial_pos.geo.ring.first;
+			c.pos += sim->parent_pos;
+			c.r += sim->initial_pos.geo.ring.second;
+			math::vec previous = c.GetPoint(0.f);
+			for (float i = interval; i < RE_Math::pi_x2; i += interval)
+			{
+				glVertex3f(previous.x, previous.y, previous.z);
+				previous = c.GetPoint(i);
+				glVertex3f(previous.x, previous.y, previous.z);
+			}
+
+			c.r -= 2.f * sim->initial_pos.geo.ring.second;
+			previous = c.GetPoint(0.f);
+			for (float i = interval; i < RE_Math::pi_x2; i += interval)
+			{
+				glVertex3f(previous.x, previous.y, previous.z);
+				previous = c.GetPoint(i);
+				glVertex3f(previous.x, previous.y, previous.z);
+			}
+			break;
+		}
+		case RE_EmissionShape::Type::AABB:
+		{
+			for (int i = 0; i < 12; i++)
+			{
+				glVertex3fv((sim->initial_pos.geo.box.Edge(i).a + sim->parent_pos).ptr());
+				glVertex3fv((sim->initial_pos.geo.box.Edge(i).b + sim->parent_pos).ptr());
+			}
+
+			break;
+		}
+		case RE_EmissionShape::Type::SPHERE:
+		{
+			DrawAASphere(sim->parent_pos + sim->initial_pos.geo.sphere.pos, sim->initial_pos.geo.sphere.r);
+			break;
+		}
+		case RE_EmissionShape::Type::HOLLOW_SPHERE:
+		{
+			DrawAASphere(sim->parent_pos + sim->initial_pos.geo.hollow_sphere.first.pos, sim->initial_pos.geo.hollow_sphere.first.r - sim->initial_pos.geo.hollow_sphere.second);
+			DrawAASphere(sim->parent_pos + sim->initial_pos.geo.hollow_sphere.first.pos, sim->initial_pos.geo.hollow_sphere.first.r + sim->initial_pos.geo.hollow_sphere.second);
+			break;
+		}
+		default: break;
+		}
+
+		// Render Boundary
+		glColor4f(1.f, 0.84f, 0.0f, 1.f); // gold
+		switch (sim->boundary.type) {
+		case RE_EmissionBoundary::PLANE:
+		{
+			const float interval = RE_Math::pi_x2 / circle_steps;
+			for (float j = 1.f; j < 6.f; ++j)
+			{
+				const math::Circle c = sim->boundary.geo.plane.GenerateCircle(sim->parent_pos, j * j);
+				math::vec previous = c.GetPoint(0.f);
+				for (float i = interval; i < RE_Math::pi_x2; i += interval)
+				{
+					glVertex3f(previous.x, previous.y, previous.z);
+					previous = c.GetPoint(i);
+					glVertex3f(previous.x, previous.y, previous.z);
+				}
+			}
+
+			break;
+		}
+		case RE_EmissionBoundary::SPHERE:
+		{
+			DrawAASphere(sim->parent_pos + sim->boundary.geo.sphere.pos, sim->boundary.geo.sphere.r);
+			break;
+		}
+		case RE_EmissionBoundary::AABB:
+		{
+			for (int i = 0; i < 12; i++)
+			{
+				glVertex3fv((sim->parent_pos + sim->boundary.geo.box.Edge(i).a).ptr());
+				glVertex3fv((sim->parent_pos + sim->boundary.geo.box.Edge(i).b).ptr());
+			}
+
+			break;
+		}
+		default: break;
+		}
+
+		// Render Shape Collider
+		if (sim->collider.type == RE_EmissionCollider::Type::SPHERE)
+		{
+			glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
+			for (const auto p : sim->particle_pool)
+				DrawAASphere(sim->local_space ? sim->parent_pos + p.position : p.position, p.col_radius);
+		}
+
+		glEnd();
+	}
+
+	// Render Point Collider
+	if (sim->collider.type == RE_EmissionCollider::Type::POINT)
+	{
+		glPointSize(point_size);
+		glBegin(GL_POINTS);
+		glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
+
+		if (sim->local_space)
+			for (const auto p : sim->particle_pool)
+				glVertex3fv((sim->parent_pos + p.position).ptr());
+		else
+			for (const auto p : sim->particle_pool)
+				glVertex3fv(p.position.ptr());
+
+		glPointSize(1.f);
+		glEnd();
+	}
+}
+
+float ParticleManager::GetInterval() const
+{
+	return RE_Math::pi_x2 / circle_steps;
 }
 
 bool ParticleManager::SetEmitterState(unsigned int index, RE_ParticleEmitter::PlaybackState state)

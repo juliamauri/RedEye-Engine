@@ -110,8 +110,10 @@ public:
 
 	math::float4 GetRenderViewClearColor(RENDER_VIEWS r_view)const;
 	LightMode GetRenderViewLightMode(RENDER_VIEWS r_view)const;
+	bool GetRenderViewDebugDraw(RENDER_VIEWS r_view)const;
 	void SetRenderViewDeferred(RENDER_VIEWS r_view, bool using_deferred);
 	void SetRenderViewClearColor(RENDER_VIEWS r_view, math::float4 clear_color);
+	void SetRenderViewDebugDraw(RENDER_VIEWS r_view, bool debug_draw);
 
 	enum RenderType {
 		R_R_SCENE,

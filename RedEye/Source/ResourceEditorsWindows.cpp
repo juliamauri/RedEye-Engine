@@ -934,8 +934,13 @@ void ParticleEmiiterEditorWindow::Draw(bool secondary)
 
 			if (ImGui::BeginMenuBar())
 			{
-				static math::float4 clear_color = RE_RENDER->GetRenderViewClearColor(RENDER_VIEWS::VIEW_PARTICLE);
+				static bool debug_draw = RE_RENDER->GetRenderViewDebugDraw(RENDER_VIEWS::VIEW_PARTICLE);
 				static bool deferred = (RE_RENDER->GetRenderViewLightMode(RENDER_VIEWS::VIEW_PARTICLE) == LightMode::LIGHT_DEFERRED);
+				static math::float4 clear_color = RE_RENDER->GetRenderViewClearColor(RENDER_VIEWS::VIEW_PARTICLE);
+
+				if (ImGui::Checkbox("Particle debug draw", &debug_draw))
+					RE_RENDER->SetRenderViewDebugDraw(RENDER_VIEWS::VIEW_PARTICLE, debug_draw);
+
 				if (ImGui::Checkbox("Deferred lighting", &deferred)) {
 					RE_RENDER->SetRenderViewDeferred(RENDER_VIEWS::VIEW_PARTICLE, deferred);
 					if (deferred) {

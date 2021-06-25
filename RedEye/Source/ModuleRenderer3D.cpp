@@ -1069,7 +1069,24 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 
 			// Draw Debug Geometry
 			if (render_view.flags & DEBUG_DRAW)
-				DrawDebug(render_view);
+			{
+				RE_GLCache::ChangeShader(0);
+				RE_GLCache::ChangeTextureBind(0);
+
+				bool reset_light = lighting;
+				SetLighting(false);
+				SetTexture2D(false);
+
+				glMatrixMode(GL_PROJECTION);
+				glLoadMatrixf(render_view.camera->GetProjectionPtr());
+				glMatrixMode(GL_MODELVIEW);
+				glLoadMatrixf((render_view.camera->GetView()).ptr());
+
+				RE_PHYSICS->DebugDrawParticleEmitterSimulation(editting_simulation);
+
+				if (reset_light) SetLighting(true);
+				SetTexture2D(render_view.flags & TEXTURE_2D);
+			}
 		}
 		else {
 
@@ -1082,7 +1099,24 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 
 			// Draw Debug Geometry
 			if (render_view.flags & DEBUG_DRAW)
-				DrawDebug(render_view);
+			{
+				RE_GLCache::ChangeShader(0);
+				RE_GLCache::ChangeTextureBind(0);
+
+				bool reset_light = lighting;
+				SetLighting(false);
+				SetTexture2D(false);
+
+				glMatrixMode(GL_PROJECTION);
+				glLoadMatrixf(render_view.camera->GetProjectionPtr());
+				glMatrixMode(GL_MODELVIEW);
+				glLoadMatrixf((render_view.camera->GetView()).ptr());
+
+				RE_PHYSICS->DebugDrawParticleEmitterSimulation(editting_simulation);
+
+				if (reset_light) SetLighting(true);
+				SetTexture2D(render_view.flags & TEXTURE_2D);
+			}
 
 			// Draw Blended elements
 			if (drawParticleSystemAsLast)
@@ -1362,6 +1396,11 @@ LightMode ModuleRenderer3D::GetRenderViewLightMode(RENDER_VIEWS r_view) const
 	return (r_view < VIEW_OTHER) ? render_views[r_view].light : LightMode::LIGHT_DISABLED;
 }
 
+bool ModuleRenderer3D::GetRenderViewDebugDraw(RENDER_VIEWS r_view) const
+{
+	return (r_view < VIEW_OTHER) ? render_views[r_view].flags & DEBUG_DRAW : false;
+}
+
 void ModuleRenderer3D::SetRenderViewDeferred(RENDER_VIEWS r_view, bool using_deferred)
 {
 	if (r_view < VIEW_OTHER) render_views[r_view].light = (using_deferred) ? LightMode::LIGHT_DEFERRED : LightMode::LIGHT_DISABLED;
@@ -1370,6 +1409,14 @@ void ModuleRenderer3D::SetRenderViewDeferred(RENDER_VIEWS r_view, bool using_def
 void ModuleRenderer3D::SetRenderViewClearColor(RENDER_VIEWS r_view, math::float4 clear_color)
 {
 	if (r_view < VIEW_OTHER) render_views[r_view].clear_color = clear_color;
+}
+
+void ModuleRenderer3D::SetRenderViewDebugDraw(RENDER_VIEWS r_view, bool debug_draw)
+{
+	if (r_view < VIEW_OTHER) {
+		if (debug_draw) render_views[r_view].flags |=  DEBUG_DRAW;
+		else render_views[r_view].flags -= DEBUG_DRAW;	
+	}
 }
 
 RenderView::RenderView(eastl::string name, eastl::pair<unsigned int, unsigned int> fbos, short flags, LightMode light, math::float4 clipDistance) :

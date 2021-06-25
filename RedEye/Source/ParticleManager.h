@@ -25,6 +25,9 @@ public:
 	void DrawEditor();
 	void DrawDebug() const;
 
+	void DebugDrawSimulation(const RE_ParticleEmitter* const sim, const float interval) const;
+
+	float GetInterval()const;
 	bool SetEmitterState(unsigned int index, RE_ParticleEmitter::PlaybackState state);
 
 public:

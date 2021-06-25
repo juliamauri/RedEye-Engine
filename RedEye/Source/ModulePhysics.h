@@ -20,6 +20,7 @@ public:
 	void OnStop();
 
 	void DrawParticleEmitterSimulation(unsigned int index, math::float3  go_positon, math::float3 go_up) const;
+	void DebugDrawParticleEmitterSimulation(const RE_ParticleEmitter* const sim)const;
 	void CallParticleEmitterLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
 
 	void DrawDebug(RE_CompCamera* current_camera) const;
