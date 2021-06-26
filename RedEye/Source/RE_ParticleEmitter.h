@@ -60,7 +60,7 @@ public:
 	bool start_on_play = true;
 
 	// Spawning
-	unsigned int max_particles = 5000000u;
+	unsigned int max_particles = 500000u;
 	RE_EmissionInterval spawn_interval = {};
 	RE_EmissionSpawn spawn_mode = {};
 
@@ -102,7 +102,7 @@ public:
 
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 
-	void DemoSetup(bool first_call = false);
+	void DemoSetup();
 
 	static RE_ParticleEmitter* demo_emitter;
 	static eastl::string filename;

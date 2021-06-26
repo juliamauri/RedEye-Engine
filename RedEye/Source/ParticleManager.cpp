@@ -148,7 +148,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 	RE_CompTransform* cT = ModuleRenderer3D::GetCamera()->GetTransform();
 	const math::float3 cUp = cT->GetUp().Normalized();
 
-	for (const auto p : simulation->particle_pool)
+	for (const auto &p : simulation->particle_pool)
 	{
 		// Calculate Particle Transform
 		const math::float3 partcleGlobalpos = simulation->local_space ? go_position + p.position : p.position;

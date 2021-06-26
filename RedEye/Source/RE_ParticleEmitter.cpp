@@ -64,6 +64,7 @@ unsigned int RE_ParticleEmitter::Update(const float global_dt)
 void RE_ParticleEmitter::Reset()
 {
 	if (!particle_pool.empty()) particle_pool.clear();
+	particle_pool.shrink_to_fit();
 
 	particle_count = 0u;
 	max_dist_sq = max_speed_sq = total_time = 
@@ -185,6 +186,17 @@ void RE_ParticleEmitter::UpdateSpawn()
 			spawn_mode.CountNewParticles(local_dt),
 			max_particles - particle_count);
 
+		if (particle_pool.capacity() < particle_count + to_add)
+		{
+			const unsigned int allocation_step = max_particles / 10u;
+			unsigned int desired_capacity = allocation_step;
+
+			while (particle_count + to_add < desired_capacity)
+				desired_capacity += allocation_step;
+
+			particle_pool.reserve(desired_capacity);
+		}
+
 		particle_count += to_add;
 		for (unsigned int i = 0u; i < to_add; ++i)
 			particle_pool.push_back(RE_Particle(
@@ -239,11 +251,9 @@ void RE_ParticleEmitter::ImpulseCollision(RE_Particle& p1, RE_Particle& p2, cons
 
 RE_ParticleEmitter* RE_ParticleEmitter::demo_emitter = nullptr;
 
-void RE_ParticleEmitter::DemoSetup(bool first_call)
+void RE_ParticleEmitter::DemoSetup()
 {
 	Reset();
-
-	if (first_call) particle_pool.reserve(400000u);
 
 	int i = ++ProfilingTimer::current_sim;
 	ProfilingTimer::p_count = 0u;
