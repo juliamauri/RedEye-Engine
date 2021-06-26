@@ -118,15 +118,6 @@ void RE_ParticleEmitter::UpdateParticles()
 		if (is_alive)
 		{
 			switch (collider.type) {
-			case RE_EmissionCollider::Type::POINT:
-			{
-				if (collider.inter_collisions)
-					for (unsigned int next = index + 1u; next < particle_count; ++next)
-						ImpulseCollision(particle_pool[index], particle_pool[next]);
-
-				is_alive = boundary.PointCollision(particle_pool[index]);
-				break;
-			}
 			case RE_EmissionCollider::Type::SPHERE:
 			{
 				if (collider.inter_collisions)
@@ -186,18 +177,18 @@ void RE_ParticleEmitter::UpdateSpawn()
 			spawn_mode.CountNewParticles(local_dt),
 			max_particles - particle_count);
 
-		if (particle_pool.capacity() < particle_count + to_add)
+		particle_count += to_add;
+		if (particle_pool.capacity() < particle_count)
 		{
 			const unsigned int allocation_step = max_particles / 10u;
 			unsigned int desired_capacity = allocation_step;
 
-			while (particle_count + to_add < desired_capacity)
+			while (particle_count < desired_capacity)
 				desired_capacity += allocation_step;
 
 			particle_pool.reserve(desired_capacity);
 		}
 
-		particle_count += to_add;
 		for (unsigned int i = 0u; i < to_add; ++i)
 			particle_pool.push_back(RE_Particle(
 				initial_lifetime.GetValue(),
