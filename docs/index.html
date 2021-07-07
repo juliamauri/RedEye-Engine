@@ -96,11 +96,12 @@
                         <a class="nav-link" href="https://www.redeye-engine.es/" style="color: #4ECBD9">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="https://www.redeye-engine.es/The-Brains/" style="color: #4ECBD9">The Brains</a>
+                        <a class="nav-link" href="https://www.redeye-engine.es/The-Brains/" style="color: #4ECBD9">The
+                            Brains</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="https://www.redeye-engine.es/The-Entrails/"
-                            style="color: #4ECBD9">The Entrails</a>
+                        <a class="nav-link" href="https://www.redeye-engine.es/The-Entrails/" style="color: #4ECBD9">The
+                            Entrails</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="https://www.redeye-engine.es/Whats-Next/"
@@ -120,16 +121,36 @@
     </nav>
 
     <div style="background-color: #0D0D0D;">
-        <div class="jumbotron jumbotron-fluid mb-0">
-            <div class="container-left ml-3">
-                <h1 class="display-4">Welcome to RedEye Engine!</h1>
-                <p class="lead" style="color: #ffffff">RedEye is a 3D Game Engine written in C++ by Julià Mauri and
-                    Rubén Sardón.</p>
+        <header>
+            <div class="overlay"></div>
+            <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop">
+                <source src="Exampletitlevideo.mp4" type="video/mp4">
+            </video>
+            <div class="container h-100">
+                <div class="d-flex h-100 text-center align-items-center">
+                    <div class="w-100 text-white">
+                        <h1 class="display-3">Welcome to RedEye Engine!</h1>
+                        <p class="lead mb-0">RedEye is an open source C++ 3D Game Engine. We are working on adding new
+                            interesting features before setting the game deployment pipeline. Feel free to try out our
+                            latest released version or dig into our source code repository and explore the engine’s
+                            structure.</p>
+                        <form class="m-4 d-flex justify-content-center">
+                            <div class="pe-2 ">
+                                <a href="https://github.com/juliamauri/RedEye-Engine/releases/download/v5.0/RedEye.Engine.v5.0.zip"
+                                    class="btn btn-primary btn-lg" role="button">Download for PC</a>
+                            </div>
+                            <a href="https://github.com/juliamauri/RedEye-Engine" class="btn btn-secondary btn-lg"
+                                role="button">Explore Source Code</a>
+                        </form>
+                        <p class="mb-0">
+                            Code authored by <a href="https://github.com/juliamauri">Julià Mauri</a> and <a
+                                href="https://github.com/cumus">Rubén Sardón</a>.
+                        </p>
+                    </div>
+                </div>
             </div>
-        </div>
+        </header>
 
-        <img src="https://i.gyazo.com/340473d1ddace10fb78c592ee0232359.gif" class="img-fluid mx-auto d-block"
-            alt="Frustum Culling">
 
         <div class="container p-5" style="color: #ffffff">
             <p class="text-justify">What’s special about it? The code was written from scratch using a total of 15 C++
