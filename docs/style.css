@@ -110,8 +110,13 @@ header {
     transform: scale(1.2);
   }
 
-  
-  /* font size default 16 and h5 default 20 */
+
+  /* font size default 16 | h5 default 20 | h1 default 36 */
+
+  p.lead{
+    font-size: x-large;
+
+  }
 
   @media screen and (max-width: 1290px) {
     div.card-img-wrap {
@@ -165,6 +170,7 @@ header {
     h5.card-title {
       font-size: 12px;
     }
+
   }
 
   @media screen and (max-width: 280px) {
@@ -173,5 +179,15 @@ header {
     }
     h5.card-title {
       font-size: 10px;
+    }
+
+    h1.display-3{
+      font-size: 26px;
+
+    }
+
+    p.lead{
+      font-size: 16px;
+
     }
   }
