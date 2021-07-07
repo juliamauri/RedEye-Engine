@@ -126,16 +126,16 @@
             <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop">
                 <source src="Exampletitlevideo.mp4" type="video/mp4">
             </video>
-            <div class="container h-100">
-                <div class="d-flex h-100 text-center align-items-center">
-                    <div class="w-100 text-white">
-                        <h1 class="display-3">Welcome to RedEye Engine!</h1>
-                        <p class="lead mb-0">RedEye is an open source C++ 3D Game Engine. We are working on adding new
+            <div class="container h-100" >
+                <div class="d-flex h-100 text-center align-items-center" >
+                    <div class="w-100 text-white" style="background-color: #0d0d0dbe;">
+                        <h1 class="display-3" style="font-weight:600;">Welcome to RedEye Engine!</h1>
+                        <p class="lead mb-0" style="font-size: x-large;">RedEye is an open source C++ 3D Game Engine. We are working on adding new
                             interesting features before setting the game deployment pipeline. Feel free to try out our
                             latest released version or dig into our source code repository and explore the engine’s
                             structure.</p>
                         <form class="m-4 d-flex justify-content-center">
-                            <div class="pe-2 ">
+                            <div class="me-2 ">
                                 <a href="https://github.com/juliamauri/RedEye-Engine/releases/download/v5.0/RedEye.Engine.v5.0.zip"
                                     class="btn btn-primary btn-lg" role="button">Download for PC</a>
                             </div>
@@ -152,30 +152,13 @@
         </header>
 
 
-        <div class="container p-5" style="color: #ffffff">
-            <p class="text-justify">What’s special about it? The code was written from scratch using a total of 15 C++
-                libraries. We started by building a geometry loader that could render the scene with simple controls for
-                the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and
-                quadtrees) and resource management. For the finishing touches we:</p>
-            <ul>
-                <li>Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated
-                    instantly.</li>
-                <li>Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same
-                    Overwatch uses.</li>
-                <li>Added Unity-like resource management with binary save/load for all the engines resources.</li>
-            </ul>
-        </div>
 
-        <img src="https://i.gyazo.com/7aecf65fdd396ddcc73ab2c1be5183b7.gif" class="img-fluid mx-auto d-block"
-            alt="Frustum Culling" />
-
-        <hr>
-
-        <div class="container w-70">
+        <div class="container w-70 mt-4">
 
             <div class="embed-responsive embed-responsive-16by9">
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/kDCOSGXkqL4?controls=0"
-                    frameborder="0" allow="picture-in-picture" allowfullscreen></iframe>
+
+                <div class="iframe-16-9"><iframe src="https://www.youtube.com/embed/kDCOSGXkqL4?controls=0" allow="picture-in-picture" allowfullscreen frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe></div>
+
             </div>
 
             <ul class="list-unstyled py-5" style="color: white">
