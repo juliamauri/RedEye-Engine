@@ -2,6 +2,11 @@ h1 {
     color: #d30012;
 }
 
+a.custom-card,
+a.custom-card:hover {
+  color: inherit;
+}
+
 .card {
     background-color: #0D0D0D;
 }
@@ -183,11 +188,9 @@ header {
 
     h1.display-3{
       font-size: 26px;
-
     }
 
     p.lead{
       font-size: 16px;
-
     }
   }
