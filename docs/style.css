@@ -159,6 +159,17 @@ header {
     }
   }
 
+  @media screen and (max-width: 667px) {
+
+    h1.display-3{
+      font-size: 30px;
+    }
+  
+    p.lead{
+      font-size: 20px;
+    }
+  }
+
   @media screen and (max-width: 400px) {
     div.card-img-wrap {
       font-size: 10px;
@@ -170,13 +181,13 @@ header {
 
   @media screen and (max-width: 375px) {
 
-  h1.display-3{
-    font-size: 26px;
-  }
+    h1.display-3{
+      font-size: 26px;
+    }
 
-  p.lead{
-    font-size: 16px;
-  }
+    p.lead{
+      font-size: 16px;
+    }
   }
 
   @media screen and (max-width: 310px) {
