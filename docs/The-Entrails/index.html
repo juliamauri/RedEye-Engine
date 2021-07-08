@@ -18,19 +18,24 @@
     <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
     <link rel="manifest" href="../site.webmanifest" />
 
-    <meta name="keywords" content="C++, Game Engine, RedEye Game Development, Graphics Programming, Video Game Engines, Game Programming, Unity Like, Shader, OpenGL, SDL, RedEye Engine" />
+    <meta name="keywords"
+        content="C++, Game Engine, RedEye Game Development, Graphics Programming, Video Game Engines, Game Programming, Unity Like, Shader, OpenGL, SDL, RedEye Engine" />
 
     <meta property="og:title" content="RedEye Engine, a Video Game Development C++ Engine" />
     <meta property="og:type" content="website" />
-    <meta property="og:description" content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we: Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly. Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses. Added Unity-like resource management with binary save/load for all the engines resources." />
-    <meta property="og:image" content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png" />
+    <meta property="og:description"
+        content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we: Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly. Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses. Added Unity-like resource management with binary save/load for all the engines resources." />
+    <meta property="og:image"
+        content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png" />
     <meta property="og:site_name" content="RedEye Engine" />
 
     <meta name="Twitter:card" content="summary with large image" />
     <meta name="Twitter:url" content="https://www.redeye-engine.es/" />
     <meta name="Twitter:title" content="RedEye Engine, a Video Game Development C++ Engine" />
-    <meta name="Twitter:description" content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries." />
-    <meta name="Twitter:image" content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png" />
+    <meta name="Twitter:description"
+        content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries." />
+    <meta name="Twitter:image"
+        content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png" />
 
     <script type="application/ld+json">
         {
@@ -90,11 +95,12 @@
                         <a class="nav-link" href="https://www.redeye-engine.es/" style="color: #4ECBD9">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="https://www.redeye-engine.es/The-Brains/" style="color: #4ECBD9">The Brains</a>
+                        <a class="nav-link" href="https://www.redeye-engine.es/The-Brains/" style="color: #4ECBD9">The
+                            Brains</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="https://www.redeye-engine.es/The-Entrails/"
-                            style="color: #4ECBD9">The Entrails</a>
+                        <a class="nav-link" href="https://www.redeye-engine.es/The-Entrails/" style="color: #4ECBD9">The
+                            Entrails</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="https://www.redeye-engine.es/Whats-Next/"
@@ -113,8 +119,6 @@
         </div>
     </nav>
 
-
-
     <div class="jumbotron jumbotron-fluid mb-0">
         <div class="container-left ml-3">
             <h1 class="display-4">The Engine Guts!</h1>
@@ -124,10 +128,12 @@
 
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         <li class="nav-item">
-            <a class="nav-link active" id="application-tab" data-toggle="tab" href="#application" role="tab" aria-controls="application" aria-selected="true">Application Systems</a>
+            <a class="nav-link active" id="application-tab" data-toggle="tab" href="#application" role="tab"
+                aria-controls="application" aria-selected="true">Application Systems</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="shader-tab" data-toggle="tab" href="#shader" role="tab" aria-controls="shader" aria-selected="false">Shader Pipeline</a>
+            <a class="nav-link" id="shader-tab" data-toggle="tab" href="#shader" role="tab" aria-controls="shader"
+                aria-selected="false">Shader Pipeline</a>
         </li>
     </ul>
 
@@ -135,7 +141,8 @@
 
         <div class="tab-content text-justify" id="myTabContent" style="color: #1F248C">
             <div class="tab-pane fade show active" id="application" role="tabpanel" aria-labelledby="application-tab">
-                <div class="tab-pane fade show active" id="list-appsystem" role="tabpanel" aria-labelledby="list-appsystem-list">
+                <div class="tab-pane fade show active" id="list-appsystem" role="tabpanel"
+                    aria-labelledby="list-appsystem-list">
                     <div>Our application has 5 main modules that are updated each frame:
                         <ul>
                             <li>Input</li>
@@ -146,12 +153,15 @@
                         </ul>
                     </div>
 
-                    Then there are a bunch of independent modules that require no update and are used all over the place:
+                    Then there are a bunch of independent modules that require no update and are used all over the
+                    place:
                     <ul>
                         <li>File system</li>
-                        <li>Managers for: timers, cameras, primitives, frame buffer objects, resources and thumbnails.</li>
+                        <li>Managers for: timers, cameras, primitives, frame buffer objects, resources and thumbnails.
+                        </li>
                         <li>Importers for: models, textures and shaders.</li>
-                        <li>Other: system specs, math, internal resources, error handler, glcache (optimizes repeated opengl calls).</li>
+                        <li>Other: system specs, math, internal resources, error handler, glcache (optimizes repeated
+                            opengl calls).</li>
                     </ul>
 
 
@@ -160,31 +170,42 @@
             <div class="tab-pane fade" id="shader" role="tabpanel" aria-labelledby="shader-tab">
 
 
-                The sub-system we focused on is quite simple. It’s a shader manager that uses static functions to ease their handling and to make it more fun we:
+                The sub-system we focused on is quite simple. It’s a shader manager that uses static functions to ease
+                their handling and to make it more fun we:
                 <ul>
 
                     <li>Added a frame buffer object manager to allow for multiple rendering targets.</li>
                     <li>Made selected gameobjects render with a thin border using the stencil buffer.</li>
-                    <li>Made a sample <a href="https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models"> Gerstner Wave</a> shader.</li>
-                    <li>Added Dynamic AABB Trees to further optimize the renderer as it was starting to get laggy. These trees calculate the bounding boxes the enclose the scene using always the combination with least surface area.</li>
+                    <li>Made a sample <a
+                            href="https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models">
+                            Gerstner Wave</a> shader.</li>
+                    <li>Added Dynamic AABB Trees to further optimize the renderer as it was starting to get laggy. These
+                        trees calculate the bounding boxes the enclose the scene using always the combination with least
+                        surface area.</li>
                 </ul>
-                <img src="https://i.gyazo.com/fd1f8c59aa2b05a0e1ccb38f164ddc28.gif" class="img-fluid w-100" alt="Waves" />
+                <img src="https://i.gyazo.com/fd1f8c59aa2b05a0e1ccb38f164ddc28.gif" class="img-fluid w-100"
+                    alt="Waves" />
                 <p>
 
-                    File system uses frame’s extra milliseconds to iterate the virtual directory looking for any changes in file last modification date. Thanks to this little detail we are able to detect any changes in our assets and update the shaders as soon as they are modified in-editor or outside.
+                    File system uses frame’s extra milliseconds to iterate the virtual directory looking for any changes
+                    in file last modification date. Thanks to this little detail we are able to detect any changes in
+                    our assets and update the shaders as soon as they are modified in-editor or outside.
                 </p>
                 <p>
-                    Mesh components store geometry and its associated material. The material contains the shader it's going to be rendered with and the shader contains the actual program and its uniforms. Everything except debug drawing and editor UI renders using the shader pipeline.
+                    Mesh components store geometry and its associated material. The material contains the shader it's
+                    going to be rendered with and the shader contains the actual program and its uniforms. Everything
+                    except debug drawing and editor UI renders using the shader pipeline.
                 </p>
             </div>
         </div>
 
     </div>
 
-
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha384-vk5WoKIaW/vJyUAd9n/wmopsmNhiy+L2Z+SBxGYnUkunIxVxAv/UtMOhba/xskxh" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha384-vk5WoKIaW/vJyUAd9n/wmopsmNhiy+L2Z+SBxGYnUkunIxVxAv/UtMOhba/xskxh"
+        crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
         integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
         crossorigin="anonymous"></script>
@@ -197,7 +218,6 @@
     <!-- TODO: Add SDKs for Firebase products that you want to use
      https://firebase.google.com/docs/web/setup#available-libraries -->
     <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-analytics.js"></script>
-
 
     <script crossorigin="anonymous">
         // Your web app's Firebase configuration
@@ -216,4 +236,6 @@
         firebase.analytics();
     </script>
 
-</body></html>
+</body>
+
+</html>
