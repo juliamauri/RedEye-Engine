@@ -72,8 +72,8 @@
   z-index: 3;
   border-color: #ff0019;
   outline: 0;
-  -webkit-box-shadow: #ff0019;
-          box-shadow: #ff0019;
+  -webkit-box-shadow: 0 0 0 0.25rem rgba(255, 0, 0, 0.575);
+          box-shadow: 0 0 0 0.25rem rgba(255, 0, 0, 0.575);
 }
 
 .accordion-header {
