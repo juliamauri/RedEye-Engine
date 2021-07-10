@@ -15,29 +15,6 @@ a.custom-card:hover {
     background-color: #0D0D0D;
 }
 
-
-.nav-item .nav-link.active{
-    color: #0D0D0D;
-    font-weight: bold;
-    background-color:  #8C0F1A;
-    border-color: #4ECBD9;
-}
-
-.nav-item:hover .nav-link {
-    color: #0D0D0D;
-    font-weight: bold;
-    background-color:  #8C0F1A;
-    border-color: #4ECBD9;
-}
-
-.nav-item .nav-link {
-    color: #4ECBD9;
-}
-
-.nav{
-    border-color: #4ECBD9;
-}
-
 header {
     position: relative;
     background-color: black;
