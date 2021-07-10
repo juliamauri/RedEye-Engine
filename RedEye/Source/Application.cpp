@@ -36,6 +36,10 @@ Application::Application()
 	editor = new ModuleEditor();
 	renderer = new ModuleRenderer3D();
 	audio = new ModuleAudio();
+
+#ifdef INTERNAL_PROFILING
+	ProfilingTimer::operations.reserve(20000u);
+#endif // INTERNAL_PROFILING
 }
 
 Application::~Application()

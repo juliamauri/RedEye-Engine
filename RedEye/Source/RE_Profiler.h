@@ -2,11 +2,11 @@
 
 //#define PROFILING_ENABLED // undefine to disable any profiling methods
 #define INTERNAL_PROFILING // undefine to use Optick Profiling
-#define RECORD_FROM_START false
+#define RECORD_FROM_START true
 
 // define to set engine to run particle physics or rendering demo test
-#define PARTICLE_PHYSICS_TEST
-#define PARTICLE_RENDER_TEST
+//#define PARTICLE_PHYSICS_TEST
+//#define PARTICLE_RENDER_TEST
 
 enum RE_ProfiledFunc : unsigned short
 {
@@ -98,14 +98,31 @@ enum RE_ProfiledClass : unsigned short
 	PROF_CLASS_MAX
 };
 
-
 #ifdef PROFILING_ENABLED
 #ifdef INTERNAL_PROFILING
 
 #ifdef PARTICLE_PHYSICS_TEST
 #undef PARTICLE_RENDER_TEST
+#ifdef _DEBUG
+#define PROFILING_OUTPUT_FILE_NAME "Debug Physics Red Eye Profiling.json"
+#else
+#define PROFILING_OUTPUT_FILE_NAME "Release Physics Red Eye Profiling.json"
+#endif // _DEBUG
+
 #elif defined(PARTICLE_RENDER_TEST)
 #undef PARTICLE_PHYSICS_TEST
+#ifdef _DEBUG
+#define PROFILING_OUTPUT_FILE_NAME "Debug Rendering Red Eye Profiling.json"
+#else
+#define PROFILING_OUTPUT_FILE_NAME "Release Rendering Red Eye Profiling.json"
+#endif // _DEBUG
+
+#else
+#ifdef _DEBUG
+#define PROFILING_OUTPUT_FILE_NAME "Debug General Red Eye Profiling.json"
+#else
+#define PROFILING_OUTPUT_FILE_NAME "Release General Red Eye Profiling.json"
+#endif // _DEBUG
 #endif // PARTICLE_PHYSICS_TEST
 
 #include <EASTL\vector.h>
@@ -177,7 +194,7 @@ namespace RE_Profiler
 	void Pause();
 	void Clear();
 	void Reset();
-	void Deploy(const char* file_name = "General Red Eye Profiling.json");
+	void Deploy(const char* file_name = PROFILING_OUTPUT_FILE_NAME);
 	void Exit();
 };
 

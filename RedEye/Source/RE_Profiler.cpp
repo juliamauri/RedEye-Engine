@@ -145,13 +145,13 @@ void DumpToFile(eastl::string file_name/*, eastl::vector<ProfilingOperation> ope
 		"Application", "Log", "Time", "Math", "Hardware",
 		"Module Input", "Module Window",
 		"Module Scene", "Camera Manager", "Primitive Manager",
-		"Module Physics", "Particle Manager",  "Particle Emitter", "Particle Boundary", "Comp Particle Emitter"
+		"Module Physics", "Particle Manager",  "Particle Emitter", "Particle Boundary", "Comp Particle Emitter",
 		"Module Editor", "Thumbnail Manager",
 		"Module Render", "FBO Manager", "GL Cache",
 		"Module Audio",
 		"File System", "Resources Manager", "Model Importer", "Shader Importer", "ECS Importer", "Texture Importer", "Skybox Importer", "Internal Resources" };
 
-	for (auto op : ProfilingTimer::operations)
+	for (auto &op : ProfilingTimer::operations)
 	{
 		writer.StartObject();
 		writer.Key("fr");

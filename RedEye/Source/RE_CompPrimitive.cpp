@@ -51,6 +51,9 @@ unsigned int RE_CompPrimitive::GetTriangleCount() const { return triangle_count;
 
 void RE_CompPrimitive::UnUseResources() { RE_SCENE->primitives->UnUsePrimitive(type, primID); }
 
+void RE_CompPrimitive::SerializeParticleJson(RE_Json* node) const { DEL(node); }
+void RE_CompPrimitive::DeserializeParticleJson(RE_Json* node) { DEL(node); }
+
 ///////   Grid   ////////////////////////////////////////////
 RE_CompGrid::~RE_CompGrid() { }
 

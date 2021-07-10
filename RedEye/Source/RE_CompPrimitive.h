@@ -33,8 +33,8 @@ public:
 	void UnUseResources();
 
 	virtual unsigned int GetParticleBinarySize() const { return 0; }
-	virtual void SerializeParticleJson(RE_Json* node) const { DEL(node); }
-	virtual void DeserializeParticleJson(RE_Json* node) { DEL(node); }
+	virtual void SerializeParticleJson(RE_Json* node) const;
+	virtual void DeserializeParticleJson(RE_Json* node);
 	virtual void SerializeParticleBinary(char*& cursor) const {}
 	virtual void DeserializeParticleBinary(char*& cursor) {}
 
