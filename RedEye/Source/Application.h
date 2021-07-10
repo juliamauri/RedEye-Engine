@@ -16,10 +16,7 @@ public:
 	void CleanUp();
 
 	void RecieveEvent(const Event& e) override;
-	void QuickQuit();
-
-	const char* GetName() { return "RedEye Engine"; }
-	const char* GetOrganization() { return "RedEye"; }
+	void Quit();
 
 private:
 

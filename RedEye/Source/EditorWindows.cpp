@@ -302,21 +302,22 @@ void AboutWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		ImGui::Text("Engine name: %s", App->GetName());
-		ImGui::Text("Organization: %s", App->GetOrganization());
-		ImGui::Text("License: GNU General Public License v3.0");
+		ImGui::Text("Engine name: %s", ENGINE_NAME);
+		ImGui::Text("Version: %s", ENGINE_VERSION);
+		ImGui::Text("Organization: %s", ENGINE_ORGANIZATION);
+		ImGui::Text("License: %s", ENGINE_LICENSE);
 
 		ImGui::Separator();
-		ImGui::Text("%s is a 3D Game Engine Sofware for academic purposes.", App->GetName());
+		ImGui::Text(ENGINE_DESCRIPTION);
 
 		ImGui::Separator();
 		ImGui::Text("Authors:");
-		ImGui::Text("Juli Mauri Costa");
+		ImGui::Text(ENGINE_AUTHOR_1);
 		ImGui::SameLine();
-		if (ImGui::Button("Visit Juli's Github Profile")) BROWSER("https://github.com/juliamauri");
-		ImGui::Text("Ruben Sardon Roldan");
+		if (ImGui::Button("Visit Github Profile")) BROWSER("https://github.com/juliamauri");
+		ImGui::Text(ENGINE_AUTHOR_2);
 		ImGui::SameLine();
-		if (ImGui::Button("Visit Ruben's Github Profile")) BROWSER("https://github.com/cumus");
+		if (ImGui::Button("Visit Github Profile")) BROWSER("https://github.com/cumus");
 
 		ImGui::Separator();
 		if (ImGui::CollapsingHeader("3rd Party Software:"))

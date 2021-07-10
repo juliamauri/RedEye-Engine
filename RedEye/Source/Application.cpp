@@ -148,8 +148,8 @@ void Application::CleanUp()
 	audio->CleanUp();
 	renderer->CleanUp();
 	editor->CleanUp();
-	scene->CleanUp();
 	physics->CleanUp();
+	scene->CleanUp();
 	window->CleanUp();
 	input->CleanUp();
 
@@ -206,7 +206,7 @@ void Application::RecieveEvent(const Event& e)
 	default: break;	}
 }
 
-void Application::QuickQuit()
+void Application::Quit()
 {
 	flags |= WANT_TO_QUIT;
 }

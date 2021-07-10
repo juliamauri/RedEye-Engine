@@ -118,6 +118,15 @@ void RE_ParticleEmitter::UpdateParticles()
 		if (is_alive)
 		{
 			switch (collider.type) {
+			case RE_EmissionCollider::Type::POINT:
+			{
+				if (collider.inter_collisions)
+					for (unsigned int next = index + 1u; next < particle_count; ++next)
+						ImpulseCollision(particle_pool[index], particle_pool[next]);
+
+				is_alive = boundary.PointCollision(particle_pool[index]);
+				break;
+			}
 			case RE_EmissionCollider::Type::SPHERE:
 			{
 				if (collider.inter_collisions)

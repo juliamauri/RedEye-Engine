@@ -88,7 +88,7 @@ void ParticleManager::Update(const float dt)
 		{
 			RE_PHYSICS->mode = ModulePhysics::UpdateMode::ENGINE_PAR;
 			RE_Profiler::Deploy(RE_ParticleEmitter::filename.c_str());
-			ProfilingTimer::current_sim < 11 ? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->QuickQuit();
+			ProfilingTimer::current_sim < 11 ? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->Quit();
 		}
 	}
 #endif // PARTICLE_PHYSICS_TEST
@@ -126,7 +126,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 
 			RE_Profiler::Deploy(RE_ParticleEmitter::filename.c_str());
 			ProfilingTimer::current_sim < 3 // MAX SIMULATIONS INDEX
-				? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->QuickQuit();
+				? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->Quit();
 		}
 
 		timer_simple.Stop();
