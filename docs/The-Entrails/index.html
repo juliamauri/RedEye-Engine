@@ -136,8 +136,8 @@
   <div class="accordion m-5 text-white" id="entrails_content">
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
-        <button class="accordion-button text-white" type="button" data-bs-toggle="collapse" data-bs-target="#EngineSkeleton"
-          aria-expanded="true" aria-controls="EngineSkeleton">
+        <button class="accordion-button text-white" type="button" data-bs-toggle="collapse"
+          data-bs-target="#EngineSkeleton" aria-expanded="true" aria-controls="EngineSkeleton">
           <h4>Engine Skeleton</h4>
         </button>
       </h2>
@@ -278,8 +278,8 @@
             rendering capabilities. Shaders were now part of the resource system and could be dropped and applied to
             mesh components. To take advantage of the new feature, we also added skybox support and outlines for
             selected geometries.</p>
-            <img src="Multimedia/Exampletitlevideo.gif" class="img-fluid mx-auto d-block">
-            <p>Editing the shaders outside the engine’s scope bothered us enough to decide to improve shader use for v3.0
+          <img src="Multimedia/Exampletitlevideo.gif" class="img-fluid mx-auto d-block">
+          <p>Editing the shaders outside the engine’s scope bothered us enough to decide to improve shader use for v3.0
             and we added a shader editor tool to allow us to modify our shaders in-engine. Changes in shader code are
             parsed searching for defined uniform variables that are able to be set through the material’s resource
             properties for any material referencing the shader. The previous water shaders made are now defined as
@@ -290,7 +290,7 @@
             has 2 passes. First, it outputs framebuffers with pixel data: position, diffuse, and normal. Then, it uses
             these buffers and sends light uniforms for lights to be iterated per pixel. This 2-step pipeline can be
             complemented by adding other rendering procedures like blurs, blooms, ambient occlusion.</p>
-            <img src="Multimedia/deferred_light.gif" class="img-fluid mx-auto d-block">
+          <img src="Multimedia/deferred_light.gif" class="img-fluid mx-auto d-block">
         </div>
       </div>
     </div>
@@ -309,7 +309,7 @@
             containing the actual raw files and a Library directory where we store files to a binary format. Library
             files are named by feeding the generated json format string to an MD5 generator that outputs a small unique
             string. This way, different files with the same content are not stored duplicated.</p>
-            <img src="Multimedia/file_system_2.PNG" class="img-fluid mx-auto d-block">
+          <img src="Multimedia/file_system_2.PNG" class="img-fluid mx-auto d-block">
           <p>Procedures for loading resources are scoped for errors and reported as logs for the console to show. File
             changes in the directories are scoped using the extra milliseconds between frames. Our intention is to set
             up multi-threading so as to set calls at a parallel thread freeing the main one. Once resources (scenes,
@@ -332,7 +332,7 @@
           <p>The scene module holds the Entity-Component System. Game objects are organized in a hierarchy and child
             global transforms are calculated based on their local transforms and their parents’ matrix. To improve scene
             performance we built different systems around the scene’s procedures.</p>
-            <img src="Multimedia/hierarchy.PNG" class="img-fluid mx-auto d-block">
+          <img src="Multimedia/hierarchy.PNG" class="img-fluid mx-auto d-block">
           <h4>Camera Manager</h4>
           <p>Scenes must have at least one main camera for the renderer to position the point of view. This manager
             flags which cameras must be used to render builds a default one when missing to ensure having a scene
@@ -346,7 +346,7 @@
             Entertainment’s Overwatch approach to scene space partitioning using a dynamic axis-aligned bounding box
             tree. The tree contains boxes paired through their minimum enclosing AABB surface area. Check out his
             detailed explanation <a href="https://box2d.org/files/ErinCatto_DynamicBVH_GDC2019.pdf">here</a>.</p>
-            <img src="Multimedia/Dyn_AABB.PNG" class="img-fluid mx-auto d-block">
+          <img src="Multimedia/Dyn_AABB.PNG" class="img-fluid mx-auto d-block">
           <h4>Hash mapped ECS</h4>
           <p>Cameras mentioned previously are positioned inside the scene as Camera Components. Compared to mesh
             components, cameras and transforms must update each frame if they or their parent’s transforms have been
@@ -371,11 +371,23 @@
       <div id="UserInterface" class="accordion-collapse collapse" aria-labelledby="headingSix"
         data-bs-parent="#entrails_content">
         <div class="accordion-body">
-          <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin
-          adds the appropriate classes that we use to style each element. These classes control the overall appearance,
-          as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or
-          overriding our default variables. It's also worth noting that just about any HTML can go within the
-          <code>.accordion-body</code>, though the transition does limit overflow.
+          <p>All GUI elements are powered with the use of <a href="https://github.com/ocornut/imgui">ImGui</a>. This
+            open-sourced
+            library contains C++ renderer agnostic and self-contained methods for easy editor interface production. The
+            editor module handles ImGui setup, holds interface windows and registers user activity. If we were to choose
+            the most interesting editor windows, we must mention the shader editor that allows shader code files to be
+            edited and reloaded into the pipeline and the particle workspace window where simulations can be edited
+            thoroughly. The editor also contains debug drawing calls such as a default grid positioned at origin. Grid,
+            game object AABBs and scene space partitioning geometry drawing can be configured in the editor’s settings
+            together with the rest of modules.</p>
+          <p>On opening the engine, the editor runs ImGui, shows numerous windows and has 2 viewports on display: Game
+            Scene from the scene’s main camera and the Editor Scene with the editor’s camera viewpoint. The editor
+            counts with its own camera component and controls such as: selecting game object (mouse click), focus camera
+            on selection (F), orbiting selection (Alt + Mouse move) and free movement (WASD). When selecting a game
+            object, the hierarchy expands and the properties tab show’s selection’s components and game object values.
+            Translation, rotation and scaling gizmos will also appear. Transform procedures get queued and can be undone
+            (Ctrl+Z) or redone (Ctrl+Y).</p>
+            <img src="Multimedia/general_view.png" class="img-fluid mx-auto d-block">
         </div>
       </div>
     </div>
@@ -426,9 +438,11 @@
             showcase the engine, but now we expanded it to include the engine’s own website.</p>
           <p>Because we still wanted everything in RedEye to be open-sourced, we used Github’s domain linking to set it
             up directly from the repository. To build the site’s elements, we used
-            <a href="https://getbootstrap.com/">Bootstrap</a>’s front-end open source toolkit. Find out how the code ended at the
-            <a href="https://github.com/juliamauri/RedEye-Engine/tree/master/docs">docs folder</a>.</p>
-            <p>Image</p>
+            <a href="https://getbootstrap.com/">Bootstrap</a>’s front-end open source toolkit. Find out how the code
+            ended at the
+            <a href="https://github.com/juliamauri/RedEye-Engine/tree/master/docs">docs folder</a>.
+          </p>
+          <p>Image</p>
         </div>
       </div>
     </div>
