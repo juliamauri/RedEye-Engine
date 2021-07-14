@@ -127,27 +127,68 @@
       <p class="lead" style="color: #ffffff">The engine’s earliest state was a simple application class back in early
         2018 that held basic modules for starting and closing a blank window. After developing features continuously, we
         now even have our own particle pipeline system implemented. For further documentation on how the engine was
-        built and works, feel free to check the repository’s <a href="https://github.com/juliamauri/RedEye-Engine/wiki/Release-Version-Notes">wiki</a>
-         section.</p>
+        built and works, feel free to check the repository’s <a
+          href="https://github.com/juliamauri/RedEye-Engine/wiki/Release-Version-Notes">wiki</a>
+        section.</p>
     </div>
   </div>
 
   <div class="accordion m-5 text-white" id="entrails_content">
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
-        <button class="accordion-button text-white" type="button" data-bs-toggle="collapse"
-          data-bs-target="#EngineCore" aria-expanded="true" aria-controls="EngineCore">
-          <h4>Engine Core</h4>
+        <button class="accordion-button text-white" type="button" data-bs-toggle="collapse" data-bs-target="#EngineSkeleton"
+          aria-expanded="true" aria-controls="EngineSkeleton">
+          <h4>Engine Skeleton</h4>
         </button>
       </h2>
-      <div id="EngineCore" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+      <div id="EngineSkeleton" class="accordion-collapse collapse show" aria-labelledby="headingOne"
         data-bs-parent="#entrails_content">
         <div class="accordion-body">
-          <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin
-          adds the appropriate classes that we use to style each element. These classes control the overall appearance,
-          as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or
-          overriding our default variables. It's also worth noting that just about any HTML can go within the
-          <code>.accordion-body</code>, though the transition does limit overflow.
+          <p>
+            The application class is the engine’s skeleton. It holds all modules and it is the only class used in our
+            C++’s main function call. Constructor and Initialization calls setup all systems and check for any errors
+            during these procedures. Mainloop updates the modules each frame and controls timing to use extra
+            milliseconds
+            on secondary procedures. Application contains these modules:
+          </p>
+          <p>&#9642; <strong>Input</strong>: Uses SDL Input subsystem to record I/O events from mouse and keyboard and
+            also window’s events. The module counts with another queue reserved for Redeye’s systems’ internal events
+            such as gameobjects changing transform or an editor window changing size. </p>
+          <p>&#9642; <strong>Window</strong>: Uses SDL Window subsystem to request a single window. We intend to expand
+            its use to several windows at a later stage to allow for easier editor tabs organization.</p>
+          <p>&#9642; <strong>Scene</strong>: Holds the ECS (Entity-Component System) and complementary systems to manage
+            it more efficiently. The <a href="https://www.redeye-engine.es/The-Entrails/#SceneOptimization">Scene
+              Optimization</a> section digs deeper into how they operate.</p>
+          <p>&#9642; <strong>Physics</strong>: Latest module addition for building the new pipeline. It was envisioned
+            to hold other physical entities apart from particles. The other planned features can be found listed at the
+            <a href="https://www.redeye-engine.es/Whats-Next/">What's Next?</a> page.
+          </p>
+          <p>&#9642; <strong>Editor</strong>: Powered by ImGUI, the editor module handles the user interface and lets us
+            navigate, use and customize all the engine’s systems. It holds all the available menus and allows resizing,
+            repositioning and docking them for a custom setup. Modules and some other classes have a DrawEditor function
+            to portray data structures to the user interface. Check the <a
+              href="https://www.redeye-engine.es/The-Entrails/#UserInterface">User Interface</a> section for an overview
+            of the different editor windows.</p>
+          <p>&#9642; <strong>Renderer</strong>: Uses OpenGL to communicate with the GPU and draw scenes. It has numerous
+            ways to customize how the scenes are displayed for each different viewport used: game, editor and particles.
+            Toggle debug drawing options, light modes and other rendering flags. For a more detailed overview on how the
+            different elements are drawn, check the <a
+              href="https://www.redeye-engine.es/The-Entrails/#ShaderPipeline">Shader Pipeline</a> section.</p>
+          <p>&#9642; <strong>Audio</strong>: Using Wwise, the engine can load and playback audio files. This powerful
+            library is implemented scarcely as we wish to expand its use when setting up the scripting system and allow
+            users to fully apply the audio engine’s features.</p>
+          <p>
+            The previous modules are systems that require being updated each frame. Time controls and module settings
+            are customizable through the Configuration panel. This panel should end up becoming an individual window,
+            but because we have to test all the different configurations, we left it visible at the right-bottom corner.
+            Project configuration is stored in a config.json file that saves your presets for later use.
+          </p>
+          <p>
+            Update-less systems contained within App include code for hardware detection, the console and file system.
+            The console counts with options to filter logs based on their type or file source. Scene and resource
+            loading are described in the <a
+              href="https://www.redeye-engine.es/The-Entrails/#ResourceManagement">Resource Managemen</a> section.
+          </p>
         </div>
       </div>
     </div>
@@ -161,11 +202,64 @@
       <div id="Particles" class="accordion-collapse collapse" aria-labelledby="headingTwo"
         data-bs-parent="#entrails_content">
         <div class="accordion-body">
-          <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin
-          adds the appropriate classes that we use to style each element. These classes control the overall appearance,
-          as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or
-          overriding our default variables. It's also worth noting that just about any HTML can go within the
-          <code>.accordion-body</code>, though the transition does limit overflow.
+          <p>
+            Particle pipeline is the latest feature in v5.0. Through the physics module, particle simulations run and
+            can be customized in numerous ways at the workspace window. It even counts with its own camera to display
+            simulations without having to hit play on the scene. The editable fields can be split into emission, physics
+            and rendering attributes.
+          </p>
+          <h4>Emission</h4>
+          <p>&#9642; <strong>Max Particles</strong>: caps particle spawning to a given limit.</p>
+          <p>&#9642; <strong>Intervals</strong>: emission can be set to enable spawning at intermittent intervals or
+            operate at different on and off intervals.</p>
+          <p>&#9642; <strong>Spawning Method</strong>: the default emitter is set to spawn a constant stream of
+            particles and now can be changed to bursts. It requires defining the number of particles per burst and the
+            time between bursts. Particularly useful for explosion effects where particles start flying in different
+            directions at the same time.</p>
+          <p>&#9642; <strong>Timing</strong>: digging into the engine’s complementary systems, particles now react to
+            the scene’s playback controls and have the option to start on par with the scene.</p>
+          <p>&#9642; <strong>Time multiplier</strong>: scales the speed of simulation playback</p>
+          <p>&#9642; <strong>Spawn frequency</strong>: defines number of new particles per second</p>
+          <p>&#9642; <strong>Lifetime</strong>: defines the amount of time particles will live. It can be set to a
+            random value between a given interval.</p>
+          <p>&#9642; <strong>Speed</strong>: sets the initial speed a particle will hold when spawned. It can be set to
+            a random value between a given interval.</p>
+          <p>&#9642; <strong>Emitter Shape</strong>: defines the area over which new particles will appear. This gets
+            complicated to handle; because, if many particles are spawned with physics within a reduced amount of space,
+            they will overlap, and some spawned particles will have an unnatural instantaneous resolution. So be warned
+            of its mishaps when limiting particle space. Bounding the space to an even smaller margin for particles will
+            saturate processing time with constant collisions. To face this issue, we set up 6 different types of
+            emitter shapes: Point, Circle, Ring, Sphere, Hollow sphere and AABB.</p>
+          <p>&#9642; <strong>Parent Dependencies</strong>: parent position and speed are shown in the status tab and
+            used when changing the emission from local to global space instantiation or if particles inherit the
+            gameobjects speed. Because of the dynamically handled hash mapped ECS, we cannot store the gameobjects
+            pointer for easy access and so the component handles the bridge between by sending the data to the emitter.
+          </p>
+
+          <h4>Physics</h4>
+          <p>&#9642; <strong>External Forces</strong>: adds constant force acceleration to each particle to simulate
+            gravity and/or wind.</p>
+          <p>&#9642; <strong>Boundary</strong>: boundaries have 3 different shapes available and editable through the
+            ImGui editor fields. The need to resolve collisions can now be removed if we kill the particles when
+            reaching the boundaries.</p>
+          <p>&#9642; <strong>Collider</strong>: Boundaries have no effect on collier-less particles. To check
+            collisions, they must contain mass and restitution properties; and a radius, given they are set to spheres.
+          </p>
+
+          <h4>Rendering</h4>
+          <p>&#9642; <strong>Orientation</strong>: for simple sprites, 3d effect is achieved by billboarding: aligning
+            the sprite with the camera used. Choose between orientation configurations or set your own value.</p>
+          <p>&#9642; <strong>Geometry</strong>: choose between using imported meshes or primitive shapes to display
+            using the simulations. We improved the particle system for optimized VAO management as we integrated them
+            into the resource system.</p>
+          <p>&#9642; <strong>Color & Opacity</strong>: Change the color component of the geometry and modify its
+            transparency. You can base these values on the simulation’s state such as over particle lifetime, distance
+            or speed. Furthermore, the pipeline counts with curve input support.</p>
+          <p>&#9642; <strong>Lights</strong>: particles can be set to emit all the same light, or have independent light
+            components. These properties include color, intensity and specular values. With the improved graphics memory
+            allocation we increased maximum supported lights from 64 to 203. Further light configuration is available
+            through the render module.</p>
+
         </div>
       </div>
     </div>
@@ -179,11 +273,24 @@
       <div id="ShaderPipeline" class="accordion-collapse collapse" aria-labelledby="headingThree"
         data-bs-parent="#entrails_content">
         <div class="accordion-body">
-          <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin
-          adds the appropriate classes that we use to style each element. These classes control the overall appearance,
-          as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or
-          overriding our default variables. It's also worth noting that just about any HTML can go within the
-          <code>.accordion-body</code>, though the transition does limit overflow.
+          <p>The engine at first used OpenGL calls to render geometry and it wasn’t until v2.0 shaders were added to the
+            pipeline. Being able to draw simple grids with different water effects got us excited about the progress in
+            rendering capabilities. Shaders were now part of the resource system and could be dropped and applied to
+            mesh components. To take advantage of the new feature, we also added skybox support and outlines for
+            selected geometries.</p>
+            <img src="Multimedia/Exampletitlevideo.gif" class="img-fluid mx-auto d-block">
+            <p>Editing the shaders outside the engine’s scope bothered us enough to decide to improve shader use for v3.0
+            and we added a shader editor tool to allow us to modify our shaders in-engine. Changes in shader code are
+            parsed searching for defined uniform variables that are able to be set through the material’s resource
+            properties for any material referencing the shader. The previous water shaders made are now defined as
+            internal resources and there is a button that sets up a gameobject with their own water component with
+            customizable uniform fields.</p>
+          <p>After playing with shaders, we were comfortable setting up more advanced rendering techniques and
+            implementing lights through deferred shading. Instead of iterating light sources per vertex, the renderer
+            has 2 passes. First, it outputs framebuffers with pixel data: position, diffuse, and normal. Then, it uses
+            these buffers and sends light uniforms for lights to be iterated per pixel. This 2-step pipeline can be
+            complemented by adding other rendering procedures like blurs, blooms, ambient occlusion.</p>
+            <img src="Multimedia/deferred_light.gif" class="img-fluid mx-auto d-block">
         </div>
       </div>
     </div>
@@ -197,11 +304,18 @@
       <div id="ResourceManagement" class="accordion-collapse collapse" aria-labelledby="headingFour"
         data-bs-parent="#entrails_content">
         <div class="accordion-body">
-          <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin
-          adds the appropriate classes that we use to style each element. These classes control the overall appearance,
-          as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or
-          overriding our default variables. It's also worth noting that just about any HTML can go within the
-          <code>.accordion-body</code>, though the transition does limit overflow.
+          <p>The engine’s file system is powered using PhysFS open-sourced cross-platform library. We mount our data.zip
+            file to a virtual directory and store all the files used. Inside data.zip we can find the Assets directory
+            containing the actual raw files and a Library directory where we store files to a binary format. Library
+            files are named by feeding the generated json format string to an MD5 generator that outputs a small unique
+            string. This way, different files with the same content are not stored duplicated.</p>
+            <img src="Multimedia/file_system_2.PNG" class="img-fluid mx-auto d-block">
+          <p>Procedures for loading resources are scoped for errors and reported as logs for the console to show. File
+            changes in the directories are scoped using the extra milliseconds between frames. Our intention is to set
+            up multi-threading so as to set calls at a parallel thread freeing the main one. Once resources (scenes,
+            meshes, materials, skyboxes, etc.) are saved to the Library the renderer gets queued with thumbnails for the
+            asset panel. Images files have the image itself for thumbnail in the Assets Panel, but other elements such
+            as scenes require setting up a temporal scene and camera to output the asset thumbnail.</p>
         </div>
       </div>
     </div>
@@ -215,11 +329,35 @@
       <div id="SceneOptimization" class="accordion-collapse collapse" aria-labelledby="headingFive"
         data-bs-parent="#entrails_content">
         <div class="accordion-body">
-          <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin
-          adds the appropriate classes that we use to style each element. These classes control the overall appearance,
-          as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or
-          overriding our default variables. It's also worth noting that just about any HTML can go within the
-          <code>.accordion-body</code>, though the transition does limit overflow.
+          <p>The scene module holds the Entity-Component System. Game objects are organized in a hierarchy and child
+            global transforms are calculated based on their local transforms and their parents’ matrix. To improve scene
+            performance we built different systems around the scene’s procedures.</p>
+            <img src="Multimedia/hierarchy.PNG" class="img-fluid mx-auto d-block">
+          <h4>Camera Manager</h4>
+          <p>Scenes must have at least one main camera for the renderer to position the point of view. This manager
+            flags which cameras must be used to render builds a default one when missing to ensure having a scene
+            visual. Cameras store and update their frustum geometry to cull scene elements that are not contained within
+            the viewport.</p>
+          <h4>Dynamic AABB Tree</h4>
+          <p>Camera culling iterated each triangle in the scene to check if the geometry was contained within the
+            viewport. To improve this process we added a broad phasing procedure to reduce the amount of geometry
+            checked by ordering the scene using a quadtree. This improved performance but we felt it could be improved.
+            We thought about upgrading to an octree until we found Erin Catto’s documentation for Blizzard
+            Entertainment’s Overwatch approach to scene space partitioning using a dynamic axis-aligned bounding box
+            tree. The tree contains boxes paired through their minimum enclosing AABB surface area. Check out his
+            detailed explanation <a href="https://box2d.org/files/ErinCatto_DynamicBVH_GDC2019.pdf">here</a>.</p>
+            <img src="Multimedia/Dyn_AABB.PNG" class="img-fluid mx-auto d-block">
+          <h4>Hash mapped ECS</h4>
+          <p>Cameras mentioned previously are positioned inside the scene as Camera Components. Compared to mesh
+            components, cameras and transforms must update each frame if they or their parent’s transforms have been
+            modified. The first implementation had to travel from game object to game object iterating the hierarchy in
+            orden to find components who needed updated values.</p>
+          <p>As of v4.0, game objects and components are stored using a hash map. This way data is allocated in a
+            contiguous manner for faster iteration. We used to allocate data without order with C++’s new calls and now
+            each component type has their own array. This improved the update cycles but meant that pointers were now
+            useless, as data is moved around inside the containers. To reference game objects or their components, we
+            now use 64-bit unique number identifiers. Through the UIDs, we can map where in the hash the target
+            structure is located.</p>
         </div>
       </div>
     </div>
@@ -251,11 +389,24 @@
       <div id="Profiling" class="accordion-collapse collapse" aria-labelledby="headingSeven"
         data-bs-parent="#entrails_content">
         <div class="accordion-body">
-          <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin
-          adds the appropriate classes that we use to style each element. These classes control the overall appearance,
-          as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or
-          overriding our default variables. It's also worth noting that just about any HTML can go within the
-          <code>.accordion-body</code>, though the transition does limit overflow.
+          <p>Profiling refers to measuring our systems’ performance. At first we decided to implement
+            <a href="https://www.optickprofiler.com/">Brofiler</a> and output function calls to the listener app. It is
+            a powerful
+            tool full of features, but our interest lies in being able to analyze data visually through the use of
+            <a href="https://www.tableau.com/">Tableau</a>. We can feed Tableau procedure data to create graphs from raw
+            fields or
+            calculated ones to represent the engine’s performance to our liking. Using C++ macros, we set up different
+            code configurations for testing environments so as to not pollute code with unnecessary profiling in release
+            versions. The macros re-define the already present Brofiler calls and store procedure timings. The next
+            table shows a Gantt distribution of RedEye’s startup procedures. Shader setup occupies around 60% of
+            Application’s initialization.
+          </p>
+          <img src="Multimedia/profiling_init.PNG" class="img-fluid mx-auto d-block">
+          <p>To test the latest particle system, we expanded RedEye’s internal profiling so as to procure different
+            executable files that run subsequent simulations. Once a simulation reaches a duration threshold, it is
+            cleared and edited for the next one. The simulations reached up to 400K particles updated in under a
+            thirtieth of a second (33ms). Programming data-oriented design paradigms into the particle pipeline improved
+            particle cap and results were able to be evaluated comparing test performances.</p>
         </div>
       </div>
     </div>
@@ -269,15 +420,18 @@
       <div id="Website" class="accordion-collapse collapse" aria-labelledby="headingEight"
         data-bs-parent="#entrails_content">
         <div class="accordion-body">
-          <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin
-          adds the appropriate classes that we use to style each element. These classes control the overall appearance,
-          as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or
-          overriding our default variables. It's also worth noting that just about any HTML can go within the
-          <code>.accordion-body</code>, though the transition does limit overflow.
+          <p>This website forms part of the engine’s development. Not only do we want users to explore our engine, but
+            we also aim for supporting them through complementary published resources. The read.me file is displayed at
+            the repository’s main page and we had a simple wiki filled out. We only used Github’s repository page to
+            showcase the engine, but now we expanded it to include the engine’s own website.</p>
+          <p>Because we still wanted everything in RedEye to be open-sourced, we used Github’s domain linking to set it
+            up directly from the repository. To build the site’s elements, we used
+            <a href="https://getbootstrap.com/">Bootstrap</a>’s front-end open source toolkit. Find out how the code ended at the
+            <a href="https://github.com/juliamauri/RedEye-Engine/tree/master/docs">docs folder</a>.</p>
+            <p>Image</p>
         </div>
       </div>
     </div>
-
   </div>
 
   <!-- Optional JavaScript -->
