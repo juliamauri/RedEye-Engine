@@ -1,7 +1,8 @@
 #include "EditorWindows.h"
 
-#include "Globals.h"
+#include "RE_Memory.h"
 #include "RE_FileSystem.h"
+#include "RE_FileBuffer.h"
 #include "Application.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
@@ -9,11 +10,8 @@
 #include "ModuleRenderer3D.h"
 #include "ModuleInput.h"
 #include "RE_PrimitiveManager.h"
-#include "RE_FileBuffer.h"
-#include "RE_ConsoleLog.h"
 #include "RE_GLCache.h"
 #include "RE_CameraManager.h"
-
 #include "RE_DefaultShaders.h"
 #include "RE_ShaderImporter.h"
 #include "RE_ResourceManager.h"
@@ -26,14 +24,11 @@
 #include "RE_GameObject.h"
 #include "RE_Particle.h"
 
-//#include "RE_ParticleEmitter.h"
-
 #include "ImGui/misc/cpp/imgui_stdlib.h"
 #include "ImGuiWidgets/ImGuiColorTextEdit/TextEditor.h"
 
 #define IMGUICURVEIMPLEMENTATION
 #include "ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp"
-
 
 #include "Glew/include/glew.h"
 

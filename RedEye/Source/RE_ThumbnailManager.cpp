@@ -1,9 +1,10 @@
 #include "RE_ThumbnailManager.h"
 
-#include "Globals.h"
+#include "RE_Memory.h"
+#include "RE_DataTypes.h"
+#include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
-#include "Application.h"
 #include "RE_TextureImporter.h"
 #include "RE_ResourceManager.h"
 #include "RE_GLCache.h"

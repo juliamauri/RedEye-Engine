@@ -1,8 +1,7 @@
 #include "RE_CommandManager.h"
 
+#include "RE_Memory.h"
 #include "RE_Command.h"
-
-#include "Globals.h"
 
 #define MAX_COMMANDS 100
 

@@ -19,7 +19,7 @@ RE_CompTransform::RE_CompTransform() : RE_Component(C_TRANSFORM)
 
 RE_CompTransform::~RE_CompTransform() {}
 
-void RE_CompTransform::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
+void RE_CompTransform::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);

@@ -1,5 +1,6 @@
 #include "RE_CompWater.h"
 
+#include "RE_Memory.h"
 #include "RE_Json.h"
 #include "Application.h"
 #include "ModuleRenderer3D.h"
@@ -10,13 +11,14 @@
 #include "RE_ShaderImporter.h"
 #include "RE_Shader.h"
 
+#include "Glew/include/glew.h"
 #include "MathGeoLib/include/Math/float4.h"
 #include "par_shapes.h"
 #include "ImGui/imgui.h"
 
 RE_CompWater::RE_CompWater() : RE_Component(C_WATER) { box.SetFromCenterAndSize(math::vec::zero, math::vec::one); }
 
-void RE_CompWater::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
+void RE_CompWater::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_WATER);

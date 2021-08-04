@@ -10,12 +10,12 @@ void RE_ECS_Pool::Update()
 	componentsPool.Update();
 }
 
-RE_GameObject* RE_ECS_Pool::AddGO(const char* name, UID parent, bool broadcast)
+RE_GameObject* RE_ECS_Pool::AddGO(const char* name, GO_UID parent, bool broadcast)
 {
 	if (gameObjectsPool.GetCount() > 0 && !parent)
 		parent = gameObjectsPool.GetRootUID();
 
-	UID new_go_uid = gameObjectsPool.GetNewGOUID();
+	GO_UID new_go_uid = gameObjectsPool.GetNewGOUID();
 	RE_GameObject* ret = gameObjectsPool.AtPtr(new_go_uid);
 	ret->SetUp(&gameObjectsPool, &componentsPool, name, parent);
 
@@ -24,9 +24,9 @@ RE_GameObject* RE_ECS_Pool::AddGO(const char* name, UID parent, bool broadcast)
 	return ret;
 }
 
-UID RE_ECS_Pool::CopyGO(const RE_GameObject* copy, UID parent, bool broadcast)
+GO_UID RE_ECS_Pool::CopyGO(const RE_GameObject* copy, GO_UID parent, bool broadcast)
 {
-	UID new_go = AddGO(copy->name.c_str(), parent, broadcast)->GetUID();
+	GO_UID new_go = AddGO(copy->name.c_str(), parent, broadcast)->GetUID();
 
 	for (auto copy_comp : copy->AllCompData())
 		componentsPool.CopyComponent(&gameObjectsPool, copy->pool_comps->GetComponentPtr(copy_comp.uid, static_cast<ComponentType>(copy_comp.type)), new_go);
@@ -34,20 +34,20 @@ UID RE_ECS_Pool::CopyGO(const RE_GameObject* copy, UID parent, bool broadcast)
 	return new_go;
 }
 
-UID RE_ECS_Pool::CopyGOandChilds(const RE_GameObject* copy, UID parent, bool broadcast)
+GO_UID RE_ECS_Pool::CopyGOandChilds(const RE_GameObject* copy, GO_UID parent, bool broadcast)
 {
-	UID ret_uid = CopyGO(copy, parent, broadcast);
+	GO_UID ret_uid = CopyGO(copy, parent, broadcast);
 
-	eastl::stack<eastl::pair<const RE_GameObject*, UID>> copy_gos;
+	eastl::stack<eastl::pair<const RE_GameObject*, GO_UID>> copy_gos;
 	for (auto copy_child : copy->GetChildsCPtr())
 		copy_gos.push({ copy_child, ret_uid });
 
 	while (!copy_gos.empty())
 	{
-		eastl::pair<const RE_GameObject*, UID> copy_go = copy_gos.top();
+		eastl::pair<const RE_GameObject*, GO_UID> copy_go = copy_gos.top();
 		copy_gos.pop();
 
-		UID new_go_uid = CopyGO(copy_go.first, copy_go.second);
+		GO_UID new_go_uid = CopyGO(copy_go.first, copy_go.second);
 
 		for (auto copy_child : copy_go.first->GetChildsCPtr())
 			copy_gos.push({ copy_child, new_go_uid });
@@ -56,17 +56,17 @@ UID RE_ECS_Pool::CopyGOandChilds(const RE_GameObject* copy, UID parent, bool bro
 	return ret_uid;
 }
 
-RE_GameObject* RE_ECS_Pool::GetGOPtr(UID id) const
+RE_GameObject* RE_ECS_Pool::GetGOPtr(GO_UID id) const
 {
 	return gameObjectsPool.AtPtr(id);
 }
 
-const RE_GameObject* RE_ECS_Pool::GetGOCPtr(UID id) const
+const RE_GameObject* RE_ECS_Pool::GetGOCPtr(GO_UID id) const
 {
 	return gameObjectsPool.AtCPtr(id);
 }
 
-UID RE_ECS_Pool::GetRootUID() const
+GO_UID RE_ECS_Pool::GetRootUID() const
 {
 	return gameObjectsPool.GetRootUID();
 }
@@ -81,7 +81,7 @@ const RE_GameObject* RE_ECS_Pool::GetRootCPtr() const
 	return gameObjectsPool.GetRootCPtr();
 }
 
-eastl::vector<UID> RE_ECS_Pool::GetAllGOUIDs() const
+eastl::vector<GO_UID> RE_ECS_Pool::GetAllGOUIDs() const
 {
 	return gameObjectsPool.GetAllKeys();
 }
@@ -91,23 +91,23 @@ eastl::vector<RE_GameObject*> RE_ECS_Pool::GetAllGOPtrs() const
 	return gameObjectsPool.GetAllPtrs();
 }
 
-eastl::vector<eastl::pair<const UID, RE_GameObject*>> RE_ECS_Pool::GetAllGOData() const
+eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> RE_ECS_Pool::GetAllGOData() const
 {
 	return gameObjectsPool.GetAllData();
 }
 
-void RE_ECS_Pool::DestroyGO(UID toDestroy)
+void RE_ECS_Pool::DestroyGO(GO_UID toDestroy)
 {
 	RE_GameObject* go = gameObjectsPool.AtPtr(toDestroy);
 	go->UnlinkParent();
 
-	eastl::stack<UID> gos;
+	eastl::stack<GO_UID> gos;
 	for (auto child : go->childs) gos.push(child);
 	for (auto comp : go->AllCompData()) componentsPool.DestroyComponent(static_cast<ComponentType>(comp.type), comp.uid);
 
 	while (!gos.empty()) {
 
-		UID toD = gos.top();
+		GO_UID toD = gos.top();
 		gos.pop();
 
 		RE_GameObject* cGO = gameObjectsPool.AtPtr(toD);
@@ -121,12 +121,12 @@ void RE_ECS_Pool::DestroyGO(UID toDestroy)
 	gameObjectsPool.DeleteGO(toDestroy);
 }
 
-UID RE_ECS_Pool::InsertPool(RE_ECS_Pool* pool, bool broadcast)
+GO_UID RE_ECS_Pool::InsertPool(RE_ECS_Pool* pool, bool broadcast)
 {
 	return CopyGOandChilds(pool->GetRootPtr(), (TotalGameObjects() > 0) ? GetRootUID() : 0, broadcast);
 }
 
-RE_ECS_Pool* RE_ECS_Pool::GetNewPoolFromID(UID id)
+RE_ECS_Pool* RE_ECS_Pool::GetNewPoolFromID(GO_UID id)
 {
 	RE_ECS_Pool* ret = new RE_ECS_Pool();
 
@@ -135,7 +135,7 @@ RE_ECS_Pool* RE_ECS_Pool::GetNewPoolFromID(UID id)
 	return ret;
 }
 
-eastl::vector<UID> RE_ECS_Pool::GetAllCompUID(ushortint type) const
+eastl::vector<COMP_UID> RE_ECS_Pool::GetAllCompUID(ushortint type) const
 {
 	return componentsPool.GetAllCompUID(type);
 }
@@ -150,17 +150,17 @@ eastl::vector<const RE_Component*> RE_ECS_Pool::GetAllCompCPtr(ushortint type) c
 	return componentsPool.GetAllCompCPtr(type);
 }
 
-eastl::vector<eastl::pair<const UID, RE_Component*>> RE_ECS_Pool::GetAllCompData(ushortint type) const
+eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> RE_ECS_Pool::GetAllCompData(ushortint type) const
 {
 	return componentsPool.GetAllCompData(type);
 }
 
-RE_Component* RE_ECS_Pool::GetComponentPtr(UID poolid, ComponentType cType)
+RE_Component* RE_ECS_Pool::GetComponentPtr(COMP_UID poolid, ComponentType cType)
 {
 	return componentsPool.GetComponentPtr(poolid, cType);
 }
 
-const RE_Component* RE_ECS_Pool::GetComponentCPtr(UID poolid, ComponentType cType) const
+const RE_Component* RE_ECS_Pool::GetComponentCPtr(COMP_UID poolid, ComponentType cType) const
 {
 	return componentsPool.GetComponentCPtr(poolid, cType);
 }

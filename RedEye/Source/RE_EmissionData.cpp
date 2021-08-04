@@ -1,10 +1,8 @@
 #include "RE_EmissionData.h"
 
-
-#ifdef PARTICLE_PHYSICS_TEST
 #include "RE_Profiler.h"
-#endif
 
+#include "RE_Memory.h"
 #include "Application.h"
 #include "ModulePhysics.h"
 #include "RE_Math.h"

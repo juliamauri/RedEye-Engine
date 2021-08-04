@@ -23,7 +23,7 @@ RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER
 RE_CompParticleEmitter::~RE_CompParticleEmitter() {}
 
 
-void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) 
+void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_PARTICLEEMITER);

@@ -18,7 +18,7 @@ public:
 	RE_CompLight();
 	~RE_CompLight() {}
 
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
 
 	void CallShaderUniforms(unsigned int shader, const char* unif_name) const;
 

@@ -1,5 +1,6 @@
 #include "RE_CameraManager.h"
 
+#include "RE_Memory.h"
 #include "RE_Time.h"
 #include "RE_CompCamera.h"
 #include "Application.h"
@@ -10,7 +11,7 @@
 
 RE_CompCamera* RE_CameraManager::editor_camera = nullptr;
 RE_CompCamera* RE_CameraManager::particleEditor_camera = nullptr;
-UID RE_CameraManager::main_camera = 0ull;
+COMP_UID RE_CameraManager::main_camera = 0ull;
 
 void RE_CameraManager::Init()
 {

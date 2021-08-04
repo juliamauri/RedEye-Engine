@@ -31,7 +31,7 @@ private:
 
 	static RE_CompCamera* editor_camera;
 	static RE_CompCamera* particleEditor_camera;
-	static UID main_camera;
+	static COMP_UID main_camera;
 
 	bool cull_scene = true;
 };

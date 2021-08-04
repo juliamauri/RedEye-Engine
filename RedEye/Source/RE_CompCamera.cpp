@@ -1,5 +1,6 @@
 #include "RE_CompCamera.h"
 
+#include "RE_Memory.h"
 #include "Application.h"
 #include "RE_Json.h"
 #include "ModuleInput.h"
@@ -46,7 +47,7 @@ void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_pla
 	RecalculateMatrixes();
 }
 
-void RE_CompCamera::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
+void RE_CompCamera::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);

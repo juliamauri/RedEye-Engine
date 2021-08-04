@@ -1,25 +1,24 @@
 #ifndef __RE_COMPONENT_POOL_H__
 #define __RE_COMPONENT_POOL_H__
 
+#include "RE_Memory.h"
+#include "RE_DataTypes.h"
 #include "Application.h"
+#include "RE_Json.h"
 #include "RE_Math.h"
 #include "RE_HashMap.h"
-#include "RE_CompTransform.h"
-#include "RE_CompCamera.h"
-#include "RE_CompMesh.h"
-#include "RE_CompLight.h"
-#include "RE_CompWater.h"
-#include "RE_CompPrimitive.h"
-#include "RE_CompParticleEmitter.h"
+
+class GameObjectsPool;
 
 template<class COMPCLASS, unsigned int size, unsigned int increment>
-class ComponentPool : public RE_HashMap<COMPCLASS, UID, size, increment>
+class ComponentPool : public RE_HashMap<COMPCLASS, COMP_UID, size, increment>
 {
 public:
 	ComponentPool() { }
 	~ComponentPool() { }
 
-	void SetName(const char* name) {
+	void SetName(const char* name)
+	{
 		cName = name;
 	}
 
@@ -28,24 +27,27 @@ public:
 		for (int i = 0; i < lastAvaibleIndex; ++i) pool_[i].Update();
 	}
 
-	void Clear() {
+	void Clear()
+	{
 		poolmapped_.clear();
 		lastAvaibleIndex = 0;
 	}
 
-	UID Push(COMPCLASS val)override
+	COMP_UID Push(COMPCLASS val) override
 	{
-		UID ret = RE_MATH->RandomUID();
+		COMP_UID ret = RE_MATH->RandomUID();
 		RE_HashMap::Push(val, ret);
 		RE_HashMap::pool_[RE_HashMap::poolmapped_.at(ret)].SetPoolID(ret);
 		return ret;
 	}
 
-	UID GetNewCompUID() {
+	COMP_UID GetNewCompUID()
+	{
 		return Push({});
 	}
 
-	eastl::vector<const char*> GetAllResources() {
+	eastl::vector<const char*> GetAllResources()
+	{
 		eastl::vector<const char*> ret;
 		for (int i = 0; i < lastAvaibleIndex; i++) {
 			eastl::vector<const char*> cmpres = pool_[i].GetAllResources();
@@ -54,24 +56,27 @@ public:
 		return ret;
 	}
 
-	void UseResources() {
+	void UseResources()
+	{
 		for (int i = 0; i < lastAvaibleIndex; i++)
 			pool_[i].UseResources();
 	}
 
-	void UnUseResources() {
+	void UnUseResources()
+	{
 		for (int i = 0; i < lastAvaibleIndex; i++)
 			pool_[i].UnUseResources();
 	}
 
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) {
-
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources)
+	{
 		RE_Json* compPool = node->PushJObject(cName.c_str());
 
 		unsigned int cmpSize = GetCount();
 		compPool->PushUInt("poolSize", cmpSize);
 
-		for (uint i = 0; i < cmpSize; i++) {
+		for (uint i = 0; i < cmpSize; i++)
+		{
 			RE_Json* comp = compPool->PushJObject(eastl::to_string(i).c_str());
 			comp->PushUnsignedLongLong("parentPoolID", pool_[i].GetGOUID());
 			pool_[i].SerializeJson(comp, resources);
@@ -96,10 +101,11 @@ public:
 		DEL(comp_objs);
 	}
 
-	unsigned int GetBinarySize()const {
+	unsigned int GetBinarySize()const
+	{
 		unsigned int size = sizeof(unsigned int);
 		unsigned int cmpSize = GetCount();
-		size += sizeof(UID) * cmpSize;
+		size += sizeof(COMP_UID) * cmpSize;
 		for (unsigned int i = 0; i < cmpSize; i++) size += pool_[i].GetBinarySize();
 		return size;
 	}
@@ -111,10 +117,10 @@ public:
 		memcpy(cursor, &cmpSize, size);
 		cursor += size;
 
-		size = sizeof(UID);
+		size = sizeof(GO_UID);
 		for (unsigned int i = 0; i < cmpSize; i++)
 		{
-			UID goID = pool_[i].GetGOUID();
+			GO_UID goID = pool_[i].GetGOUID();
 			memcpy(cursor, &goID, size);
 			cursor += size;
 
@@ -130,10 +136,10 @@ public:
 		memcpy(&totalComps, cursor, size);
 		cursor += size;
 
-		size = sizeof(UID);
+		size = sizeof(GO_UID);
 		for (uint i = 0; i < totalComps; i++)
 		{
-			UID goID;
+			GO_UID goID;
 			memcpy(&goID, cursor, size);
 			cursor += size;
 
@@ -143,24 +149,34 @@ public:
 		}
 	}
 
-	eastl::vector<UID> GetAllKeys() const override {
-		eastl::vector<UID> ret;
+	eastl::vector<COMP_UID> GetAllKeys() const override
+	{
+		eastl::vector<COMP_UID> ret;
 		for (auto cmp : poolmapped_) ret.push_back(cmp.first);
 		return ret;
 	}
 
 private:
+
 	eastl::string cName;
 };
 
 //Components Pools
+#include "RE_CompTransform.h"
+#include "RE_CompCamera.h"
+#include "RE_CompMesh.h"
+#include "RE_CompLight.h"
+#include "RE_CompWater.h"
+#include "RE_CompParticleEmitter.h"
 typedef ComponentPool<RE_CompTransform, 1024, 512> TransformsPool;
 typedef ComponentPool<RE_CompCamera, 128, 64> CamerasPool;
 typedef ComponentPool<RE_CompMesh, 128, 64> MeshesPool;
 typedef ComponentPool<RE_CompLight, 128, 64> LightPool;
 typedef ComponentPool<RE_CompWater, 8, 8> WaterPool;
 typedef ComponentPool<RE_CompParticleEmitter, 32, 16> ParticleSystemPool;
+
 //Primitives
+#include "RE_CompPrimitive.h"
 typedef ComponentPool<RE_CompGrid, 128, 64> GridPool;
 typedef ComponentPool<RE_CompRock, 128, 64> RockPool;
 typedef ComponentPool<RE_CompCube, 128, 64> CubePool;

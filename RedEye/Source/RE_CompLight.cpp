@@ -15,7 +15,7 @@ RE_CompLight::RE_CompLight() : RE_Component(C_LIGHT)
 	UpdateCutOff();
 }
 
-void RE_CompLight::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
+void RE_CompLight::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_LIGHT);

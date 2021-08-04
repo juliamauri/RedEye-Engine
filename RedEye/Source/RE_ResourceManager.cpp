@@ -1,5 +1,6 @@
 #include "RE_ResourceManager.h"
 
+#include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
@@ -539,7 +540,11 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	resourcesCounter.erase(res);
 	resources.erase(res);
 
-	if (rType != R_SHADER && rType != R_PARTICLE_EMITTER) RE_EDITOR->thumbnails->Delete(res);
+	if (rType != R_SHADER &&
+		rType != R_PARTICLE_EMITTER &&
+		rType != R_PARTICLE_EMISSION &&
+		rType != R_PARTICLE_RENDER)
+		RE_EDITOR->thumbnails->Delete(res);
 
 	return resource;
 }

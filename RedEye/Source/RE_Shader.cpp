@@ -1,5 +1,6 @@
 #include "RE_Shader.h"
 
+#include "RE_Memory.h"
 #include "Application.h"
 #include "RE_Time.h"
 #include "RE_FileSystem.h"

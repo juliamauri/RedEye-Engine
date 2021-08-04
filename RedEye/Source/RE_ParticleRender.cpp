@@ -1,5 +1,6 @@
 #include "RE_ParticleRender.h"
 
+#include "RE_Memory.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "RE_ResourceManager.h"

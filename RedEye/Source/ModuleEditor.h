@@ -1,8 +1,8 @@
 #ifndef __MODULEEDITOR__
 #define __MODULEEDITOR__
 
-#include "Globals.h"
 #include "Event.h"
+#include "RE_DataTypes.h"
 #include <EASTL/list.h>
 
 class SceneEditorWindow;
@@ -29,11 +29,11 @@ public:
 	void DrawHeriarchy();
 
 	// UI
-	void DrawGameObjectItems(const UID parent = 0);
+	void DrawGameObjectItems(const GO_UID parent = 0);
 
 	// Selection
-	UID GetSelected() const;
-	void SetSelected(const UID go, bool force_focus = false);
+	GO_UID GetSelected() const;
+	void SetSelected(const GO_UID go, bool force_focus = false);
 	void DuplicateSelectedObject();
 
 	// Editor Windows
@@ -115,7 +115,7 @@ private:
 	float cam_sensitivity = 0.01f;
 
 	// Selected GO
-	UID selected = 0;
+	GO_UID selected = 0;
 
 	// Grid
 	class RE_CompGrid* grid = nullptr;

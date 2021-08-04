@@ -4,7 +4,7 @@
 #include "RE_HashMap.h"
 #include "RE_GameObject.h"
 
-class GameObjectsPool : public RE_HashMap<RE_GameObject, UID, 1024, 512>
+class GameObjectsPool : public RE_HashMap<RE_GameObject, GO_UID, 1024, 512>
 {
 public:
 	GameObjectsPool() {}
@@ -14,16 +14,16 @@ public:
 	void Clear();
 
 	// Pool handling
-	UID GetNewGOUID();
+	GO_UID GetNewGOUID();
 	RE_GameObject* GetNewGOPtr();
-	void DeleteGO(UID toDelete);
+	void DeleteGO(GO_UID toDelete);
 
 	// Getters
 	eastl::vector<RE_GameObject*> GetAllPtrs() const;
-	eastl::vector<eastl::pair<const UID, RE_GameObject*>> GetAllData() const;
+	eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> GetAllData() const;
 
 	// Root
-	UID GetRootUID() const;
+	GO_UID GetRootUID() const;
 	RE_GameObject* GetRootPtr() const;
 	const RE_GameObject* GetRootCPtr() const;
 
@@ -35,11 +35,11 @@ public:
 	void SerializeJson(RE_Json* node);
 	void DeserializeJson(RE_Json* node, ComponentsPool* cmpsPool);
 
-	eastl::vector<UID> GetAllKeys() const override;
+	eastl::vector<GO_UID> GetAllKeys() const override;
 
 private:
 
-	UID Push(RE_GameObject val) override;
+	GO_UID Push(RE_GameObject val) override;
 };
 
 #endif // !__RE_GAMEOBJECT_POOL_H__

@@ -1,5 +1,8 @@
 #include "EditorWindows.h"
 
+#include "RE_Memory.h"
+#include "RE_DataTypes.h"
+#include "RE_EngineInfo.h"
 #include "Application.h"
 #include "RE_Time.h"
 #include "RE_Math.h"
@@ -402,7 +405,7 @@ void RandomTest::Draw(bool secondary)
 			{
 				for (int i = 0; i < loops[1]; ++i)
 				{
-					UID r = RE_MATH->RandomUID();
+					unsigned long long r = RE_MATH->RandomUID();
 					if (r == first)
 					{
 						generating = false;
@@ -1434,7 +1437,7 @@ void SceneEditorWindow::Draw(bool secondary)
 				RE_INPUT->Push(EDITOR_SCENE_RAYCAST, RE_EDITOR, mousePosOnThis.x, mousePosOnThis.y);
 		}
 
-		UID selected_uid;
+		GO_UID selected_uid;
 		if (selected_uid = RE_EDITOR->GetSelected()) {
 			RE_GameObject* selected = RE_SCENE->GetGOPtr(selected_uid);
 			RE_GameObject* parent = selected->GetParentPtr();
@@ -1602,7 +1605,7 @@ void TransformDebugWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
 	{
-		eastl::vector<UID> allTransforms = RE_SCENE->GetScenePool()->GetAllGOUIDs();
+		eastl::vector<GO_UID> allTransforms = RE_SCENE->GetScenePool()->GetAllGOUIDs();
 		
 		int transformCount = allTransforms.size();
 		ImGui::Text("Total %i transforms.", transformCount);

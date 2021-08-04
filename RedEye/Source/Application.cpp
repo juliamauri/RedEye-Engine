@@ -1,5 +1,6 @@
 #include "Application.h"
 
+#include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "RE_Time.h"
 #include "RE_Math.h"

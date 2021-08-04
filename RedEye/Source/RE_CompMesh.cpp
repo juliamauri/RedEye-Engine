@@ -14,7 +14,7 @@
 
 #include "ImGui\imgui.h"
 
-void RE_CompMesh::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent)
+void RE_CompMesh::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_MESH);

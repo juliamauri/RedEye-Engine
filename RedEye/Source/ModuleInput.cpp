@@ -1,5 +1,6 @@
 #include "ModuleInput.h"
 
+#include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "Application.h"
 #include "ModuleScene.h"

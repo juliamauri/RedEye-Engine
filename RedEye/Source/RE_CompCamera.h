@@ -4,8 +4,6 @@
 #include "RE_Component.h"
 #include "RE_Math.h"
 
-class RE_CompTransform;
-
 class RE_CompCamera : public RE_Component
 {
 public:
@@ -25,7 +23,7 @@ public:
 	~RE_CompCamera();
 
 	void SetProperties(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 0.523599f, short aspect_ratio_t = 0, bool draw_frustum = true, bool usingSkybox = true, const char* skyboxMD5 = nullptr);
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
 	
 	void Update() override;
 	void OnTransformModified() override;
@@ -60,7 +58,7 @@ public:
 	float GetVFOVDegrees() const;
 	float GetHFOVDegrees() const;
 
-	RE_CompTransform* GetTransform() const;
+	class RE_CompTransform* GetTransform() const;
 	math::float4x4 GetView();
 	const float* GetViewPtr();
 	math::float4x4 GetProjection();

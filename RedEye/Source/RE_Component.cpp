@@ -2,7 +2,7 @@
 
 #include "RE_ECS_Pool.h"
 
-UID RE_Component::PoolSetUp(GameObjectsPool* pool, const UID parent, bool report_parent)
+COMP_UID RE_Component::PoolSetUp(GameObjectsPool* pool, const GO_UID parent, bool report_parent)
 {
 	pool_gos = pool;
 	useParent = (go = parent);

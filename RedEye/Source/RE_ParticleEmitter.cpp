@@ -1,5 +1,6 @@
 #include "RE_ParticleEmitter.h"
 
+#include "RE_Memory.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
@@ -24,7 +25,8 @@ RE_ParticleEmitter::RE_ParticleEmitter(bool instance_primitive)
 
 RE_ParticleEmitter::~RE_ParticleEmitter()
 {
-	if (primCmp) {
+	if (primCmp)
+	{
 		primCmp->UnUseResources();
 		DEL(primCmp);
 	}

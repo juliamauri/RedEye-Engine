@@ -1,5 +1,6 @@
 #include "RE_Scene.h"
 
+#include "RE_Memory.h"
 #include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"

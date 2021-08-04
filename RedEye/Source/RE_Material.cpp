@@ -1,6 +1,6 @@
 #include "RE_Material.h"
 
-#include "Globals.h"
+#include "RE_Memory.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"

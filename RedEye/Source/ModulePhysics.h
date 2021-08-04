@@ -1,7 +1,7 @@
 #ifndef __MODULEPHYSICS__
 #define __MODULEPHYSICS__
 
-#include "ParticleManager.h"
+#include "RE_ParticleManager.h"
 
 class RE_CompCamera;
 

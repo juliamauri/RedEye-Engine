@@ -1,8 +1,6 @@
 #ifndef __EDITORWINDOWS__
 #define __EDITORWINDOWS__
 
-#include "Globals.h"
-
 #include "MathGeoLib/include/Math/float4.h"
 #include "ImGui\imgui.h"
 #include "ImGuiWidgets/ImGuizmo/ImGuizmo.h"

@@ -1,18 +1,15 @@
 #include "RE_ParticleEmitterBase.h"
 
-#include "Globals.h"
+#include "RE_Memory.h"
 #include "Application.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
-#include "RE_PrimitiveManager.h"
 #include "RE_Json.h"
+#include "RE_PrimitiveManager.h"
 #include "RE_ResourceManager.h"
-
 #include "RE_ParticleEmission.h"
 #include "RE_ParticleRender.h"
-
 #include "RE_ParticleEmitter.h"
-
 #include "RE_CompParticleEmitter.h"
 
 #include"md5.h"

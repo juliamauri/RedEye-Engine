@@ -14,6 +14,7 @@
 #include "RE_CameraManager.h"
 #include "EditorWindows.h"
 #include "RE_ParticleEmitter.h"
+#include "RE_Memory.h"
 
 #include "ImGui\imgui_internal.h"
 #include "ImGui\imgui_impl_opengl3.h"
@@ -136,7 +137,7 @@ bool ModuleEditor::Start()
 	grid->GridSetUp(50);
 
 	// FOCUS CAMERA
-	UID first = RE_SCENE->GetRootCPtr()->GetFirstChildUID();
+	GO_UID first = RE_SCENE->GetRootCPtr()->GetFirstChildUID();
 	if (first) SetSelected(first);
 
 	thumbnails->Init();
@@ -393,7 +394,7 @@ void ModuleEditor::RecieveEvent(const Event& e)
 		camera->GetTargetWidthHeight(width, height);
 
 		RE_PROFILE(PROF_CameraRaycast, PROF_ModuleEditor);
-		UID hit = RE_SCENE->RayCastGeometry(
+		GO_UID hit = RE_SCENE->RayCastGeometry(
 			math::Ray(camera->GetFrustum().UnProjectLineSegment(
 			(e.data1.AsFloat() -(width / 2.0f)) / (width / 2.0f),
 				((height - e.data2.AsFloat()) - (height / 2.0f)) / (height / 2.0f))));
@@ -586,9 +587,11 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 
 void ModuleEditor::DrawHeriarchy()
 {
-	UID to_select = 0ull, goToDelete_uid = 0ull;
+	GO_UID to_select = 0ull, goToDelete_uid = 0ull;
+
 	const RE_GameObject* root = RE_SCENE->GetRootCPtr();
-	UID root_uid = root->GetUID();
+	GO_UID root_uid = root->GetUID();
+
 	if (root->ChildCount() > 0)
 	{
 		eastl::stack<RE_GameObject*> gos;
@@ -600,7 +603,7 @@ void ModuleEditor::DrawHeriarchy()
 			RE_GameObject* go = gos.top();
 			gos.pop();
 
-			UID go_uid = go->GetUID();
+			GO_UID go_uid = go->GetUID();
 			bool is_leaf = (go->ChildCount() == 0);
 
 			ImGui::PushID(eastl::string("#HierarchyGOID" + eastl::to_string(count++)).c_str());
@@ -638,9 +641,9 @@ void ModuleEditor::DrawHeriarchy()
 	}
 }
 
-UID ModuleEditor::GetSelected() const { return selected; }
+GO_UID ModuleEditor::GetSelected() const { return selected; }
 
-void ModuleEditor::SetSelected(const UID go, bool force_focus)
+void ModuleEditor::SetSelected(const GO_UID go, bool force_focus)
 {
 	selected = go;
 	RE_RES->PopSelected(true);
@@ -806,7 +809,7 @@ void ModuleEditor::UpdateCamera()
 	}
 }
 
-void ModuleEditor::DrawGameObjectItems(const UID parent)
+void ModuleEditor::DrawGameObjectItems(const GO_UID parent)
 {
 	if (ImGui::BeginMenu("Primitive"))
 	{

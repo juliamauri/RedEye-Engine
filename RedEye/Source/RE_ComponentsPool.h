@@ -3,9 +3,11 @@
 
 #include "RE_ComponentPool.h"
 
-class ComponentsPool {
+class ComponentsPool
+{
 public:
-	ComponentsPool() {
+	ComponentsPool()
+	{
 		transPool.SetName("Transforms Pool");
 		camPool.SetName("Cameras Pool");
 		meshPool.SetName("Meshes Pool");
@@ -26,7 +28,8 @@ public:
 		pTorusPool.SetName("orus Pool");
 		pTrefoiKnotPool.SetName("TrefoiKnot Pool");
 	}
-	~ComponentsPool() { }
+
+	~ComponentsPool() {}
 
 	// Content iteration
 	void Update();
@@ -38,21 +41,21 @@ public:
 	void UnUseResources();
 
 	// Component Handling
-	eastl::pair<const UID, RE_Component*> GetNewComponent(ComponentType cType);
-	const UID GetNewComponentUID(ComponentType cType);
+	eastl::pair<const COMP_UID, RE_Component*> GetNewComponent(ComponentType cType);
+	const COMP_UID GetNewComponentUID(ComponentType cType);
 	RE_Component* GetNewComponentPtr(ComponentType cType);
 
-	RE_Component* CopyComponent(GameObjectsPool* pool, RE_Component* copy, const UID parent);
-	void DestroyComponent(ComponentType cType, UID toDelete);
+	RE_Component* CopyComponent(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent);
+	void DestroyComponent(ComponentType cType, COMP_UID toDelete);
 
 	// Component Getters
-	RE_Component* GetComponentPtr(UID poolid, ComponentType cType);
-	const RE_Component* GetComponentCPtr(UID poolid, ComponentType cType) const;
+	RE_Component* GetComponentPtr(COMP_UID poolid, ComponentType cType);
+	const RE_Component* GetComponentCPtr(COMP_UID poolid, ComponentType cType) const;
 
-	eastl::vector<UID> GetAllCompUID(ushortint type = 0) const;
+	eastl::vector<COMP_UID> GetAllCompUID(ushortint type = 0) const;
 	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
 	eastl::vector<const RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
-	eastl::vector<eastl::pair<const UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
+	eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
 
 	// Serialization
 	unsigned int GetBinarySize()const;
@@ -63,12 +66,14 @@ public:
 	void DeserializeJson(GameObjectsPool* goPool, RE_Json* node, eastl::map<int, const char*>* resources);
 
 private:
+
 	TransformsPool transPool;
 	CamerasPool camPool;
 	MeshesPool meshPool;
 	LightPool lightPool;
 	WaterPool waterPool;
 	ParticleSystemPool particleSPool;
+
 	//Primitives
 	GridPool pGridPool;
 	RockPool pRockPool;

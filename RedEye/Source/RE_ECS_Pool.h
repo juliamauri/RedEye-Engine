@@ -15,39 +15,39 @@ public:
 	void ClearPool();
 
 	// Pool handling
-	RE_GameObject* AddGO(const char* name, UID parent, bool broadcast = false);
-	UID CopyGO(const RE_GameObject* copy, UID parent, bool broadcast = false);
-	UID CopyGOandChilds(const RE_GameObject* copy, UID parent, bool broadcast = false);
-	UID InsertPool(RE_ECS_Pool* pool, bool broadcast = false);
+	RE_GameObject* AddGO(const char* name, GO_UID parent, bool broadcast = false);
+	GO_UID CopyGO(const RE_GameObject* copy, GO_UID parent, bool broadcast = false);
+	GO_UID CopyGOandChilds(const RE_GameObject* copy, GO_UID parent, bool broadcast = false);
+	GO_UID InsertPool(RE_ECS_Pool* pool, bool broadcast = false);
 
-	void DestroyGO(UID toDestroy);
+	void DestroyGO(GO_UID toDestroy);
 
 	// Root
-	UID GetRootUID() const;
+	GO_UID GetRootUID() const;
 	RE_GameObject* GetRootPtr() const;
 	const RE_GameObject* GetRootCPtr() const;
 
 	// GO Getters
-	RE_GameObject* GetGOPtr(UID id) const;
-	const RE_GameObject* GetGOCPtr(UID id) const;
+	RE_GameObject* GetGOPtr(GO_UID id) const;
+	const RE_GameObject* GetGOCPtr(GO_UID id) const;
 
-	eastl::vector<UID> GetAllGOUIDs() const;
+	eastl::vector<GO_UID> GetAllGOUIDs() const;
 	eastl::vector<RE_GameObject*> GetAllGOPtrs() const;
-	eastl::vector<eastl::pair<const UID, RE_GameObject*>> GetAllGOData() const;
+	eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> GetAllGOData() const;
 
 	unsigned int TotalGameObjects() const { return gameObjectsPool.GetCount(); };
 
-	RE_ECS_Pool* GetNewPoolFromID(UID id);
+	RE_ECS_Pool* GetNewPoolFromID(GO_UID id);
 
 	#pragma region Component Getters
 
-	RE_Component* GetComponentPtr(const UID poolid, ComponentType cType);
-	const RE_Component* GetComponentCPtr(const UID poolid, ComponentType cType) const;
+	RE_Component* GetComponentPtr(const COMP_UID poolid, ComponentType cType);
+	const RE_Component* GetComponentCPtr(const COMP_UID poolid, ComponentType cType) const;
 
-	eastl::vector<UID> GetAllCompUID(ushortint type = 0) const;
+	eastl::vector<COMP_UID> GetAllCompUID(ushortint type = 0) const;
 	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
 	eastl::vector<const RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
-	eastl::vector<eastl::pair<const UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
+	eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
 
 	#pragma endregion
 

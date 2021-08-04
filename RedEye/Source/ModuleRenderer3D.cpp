@@ -1,5 +1,6 @@
 #include "ModuleRenderer3D.h"
 
+#include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
@@ -44,6 +45,37 @@
 
 #pragma comment(lib, "Glew/lib/glew32.lib")
 #pragma comment(lib, "opengl32.lib")
+
+// OpenGL Output Debug
+void GLAPIENTRY MessageCallback(
+	GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam)
+{
+	if (severity == GL_DEBUG_SEVERITY_NOTIFICATION || type == GL_DEBUG_TYPE_OTHER) return;
+
+	eastl::string severityStr = "Severiry ";
+	switch (severity) {
+	case GL_DEBUG_SEVERITY_LOW: severityStr += "low"; break;
+	case GL_DEBUG_SEVERITY_MEDIUM: severityStr += "medium"; break;
+	case GL_DEBUG_SEVERITY_HIGH: severityStr += "high"; break;
+	default: severityStr += "not specified."; break; }
+
+	eastl::string typeStr = "Type ";
+	switch (type) {
+	case GL_DEBUG_TYPE_ERROR: typeStr += "GL ERROR"; break;
+	case GL_DEBUG_TYPE_PORTABILITY: typeStr += "GL PORTABILITY"; break;
+	case GL_DEBUG_TYPE_PERFORMANCE: typeStr += "GL PERFORMANCE"; break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: typeStr += "GL DEPRECATED"; break;
+	default: typeStr += "GL UNDEFINED"; break; }
+
+	if (type == GL_DEBUG_TYPE_ERROR) RE_LOG_ERROR("%s, %s, message = %s\n", (typeStr.c_str()), severityStr.c_str(), message);
+	else RE_LOG_WARNING("%s, %s, message = %s\n", (typeStr.c_str()), severityStr.c_str(), message);
+}
 
 LightMode ModuleRenderer3D::current_lighting = LIGHT_GL;
 RE_CompCamera* ModuleRenderer3D::current_camera = nullptr;
@@ -116,7 +148,6 @@ bool ModuleRenderer3D::Init()
 			render_views.push_back(RenderView("Particle Editor", { 0, 0 },
 				FACE_CULLING | BLENDED | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
 				LIGHT_DISABLED));
-			render_views.back().clear_color = { 0.0f, 0.0f,0.0f,1.0f };
 
 			//Thumbnail Configuration
 			thumbnailView.clear_color = {0.f, 0.f, 0.f, 1.f};
@@ -901,7 +932,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	// Draw Stencil
 	if (render_view.flags & OUTLINE_SELECTION)
 	{
-		UID stencilGO = RE_EDITOR->GetSelected();
+		GO_UID stencilGO = RE_EDITOR->GetSelected();
 		if (stencilGO)
 		{
 			RE_GameObject* stencilPtr = RE_SCENE->GetGOPtr(stencilGO);
@@ -1453,7 +1484,7 @@ void ModuleRenderer3D::SetRenderViewDebugDraw(RENDER_VIEWS r_view, bool debug_dr
 RenderView::RenderView(eastl::string name, eastl::pair<unsigned int, unsigned int> fbos, short flags, LightMode light, math::float4 clipDistance) :
 	name(name), fbos(fbos), flags(flags), light(light)
 {
-	clear_color = math::float4::one;
+	clear_color = { 0.0f, 0.0f, 0.0f, 1.0f };
 	clip_distance = clipDistance;
 }
 

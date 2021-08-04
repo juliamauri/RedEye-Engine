@@ -1,5 +1,6 @@
 #include "RE_PrimitiveManager.h"
 
+#include "RE_Memory.h"
 #include "Application.h"
 #include "RE_CompPrimitive.h"
 #include "RE_GLCache.h"

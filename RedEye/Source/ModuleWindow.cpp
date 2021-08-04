@@ -1,6 +1,6 @@
 #include "ModuleWindow.h"
 
-#include "Globals.h"
+#include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
@@ -197,7 +197,7 @@ int ModuleWindow::GetMaxHeight() const
 
 float ModuleWindow::GetAspectRatio() const
 {
-	return (float)width / (float)height;
+	return static_cast<float>(width) / static_cast<float>(height);
 }
 
 float ModuleWindow::GetBrightness()const

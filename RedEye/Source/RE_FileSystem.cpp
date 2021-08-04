@@ -1,5 +1,6 @@
 #include "RE_FileSystem.h"
 
+#include "RE_Memory.h"
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
 #include "RE_Json.h"

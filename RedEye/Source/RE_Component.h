@@ -1,7 +1,8 @@
 #ifndef __RE_COMPONENT_H__
 #define __RE_COMPONENT_H__
 
-#include "Globals.h"
+#include "RE_DataTypes.h"
+
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
 
@@ -39,12 +40,12 @@ enum ComponentType : unsigned short int
 class RE_Component
 {
 public:
-	RE_Component(const ComponentType type = C_EMPTY, const UID go = 0, const bool start_active = true) :
+	RE_Component(const ComponentType type = C_EMPTY, const GO_UID go = 0, const bool start_active = true) :
 		type(type), go(go), active(start_active) {}
 	virtual ~RE_Component() {}
 
-	virtual UID PoolSetUp(class GameObjectsPool* pool, const UID parent, bool report_parent = false);
-	virtual void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) {}
+	virtual COMP_UID PoolSetUp(class GameObjectsPool* pool, const GO_UID parent, bool report_parent = false);
+	virtual void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) {}
 
 	virtual void Init() {}
 	virtual void CleanUp() {}
@@ -71,10 +72,10 @@ public:
 
 	void SetType(ComponentType t) { type = t; }
 	ComponentType GetType() const { return type; }
-	UID GetGOUID() const { return go; }
+	GO_UID GetGOUID() const { return go; }
 	class RE_GameObject* GetGOPtr() const;
 	const RE_GameObject* GetGOCPtr() const;
-	void SetParent(const UID parent) { useParent = (go = parent); };
+	void SetParent(const GO_UID parent) { useParent = (go = parent); };
 
 	virtual eastl::vector<const char*> GetAllResources() { return eastl::vector<const char*>(); }
 
@@ -89,16 +90,16 @@ public:
 	virtual void UnUseResources() {}
 
 	//POOL
-	UID GetPoolID()const { return id; }
-	void SetPoolID(UID uid) { id = uid; }
+	COMP_UID GetPoolID()const { return id; }
+	void SetPoolID(COMP_UID uid) { id = uid; }
 
 protected:
 
 	bool active = true;
 	ComponentType type = C_EMPTY;
 
-	UID id = 0;
-	UID go = 0;
+	COMP_UID id = 0;
+	GO_UID go = 0;
 
 	GameObjectsPool* pool_gos = nullptr;
 	bool useParent = true;

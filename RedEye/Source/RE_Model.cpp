@@ -1,6 +1,6 @@
 #include "RE_Model.h"
 
-#include "Globals.h"
+#include "RE_Memory.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Json.h"

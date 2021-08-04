@@ -1,5 +1,6 @@
 #include "RE_Mesh.h"
 
+#include "RE_Memory.h"
 #include "RE_ConsoleLog.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
@@ -18,7 +19,6 @@
 #include "MathGeoLib\include\MathGeoLib.h"
 #include "MathGeoLib\include\Math\Quat.h"
 #include "md5.h"
-
 #include "assimp/include/Importer.hpp"
 #include "assimp/include/scene.h"
 #include "assimp/include/postprocess.h"

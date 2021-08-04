@@ -15,7 +15,7 @@ public:
 	RE_CompPrimitive(ComponentType t);
 	virtual ~RE_CompPrimitive() {}
 
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override {}
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override {}
 
 	void Draw() const override {}
 	void SimpleDraw()const;
@@ -60,7 +60,7 @@ public:
 	friend class RE_PrimitiveManager;
 
 	void GridSetUp(int divisions = 10);
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
 
 	void Draw() const override;
 	void DrawProperties() override;
@@ -95,7 +95,7 @@ public:
 	friend class RE_PrimitiveManager;
 
 	void RockSetUp(int _seed = 251654, int _subdivions = 5);
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
 
 	void Draw() const override;
 	void DrawProperties() override;
@@ -136,7 +136,7 @@ public:
 	friend class RE_PrimitiveManager;
 
 	void PlatonicSetUp();
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
 
 	void Draw() const override;
 	void DrawProperties() override;
@@ -165,7 +165,7 @@ public:
 	friend class RE_PrimitiveManager;
 
 	void ParametricSetUp(int _slices, int _stacks, float _radius = 0.0f);
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
 
 	void Draw() const override;
 	void DrawProperties() override;

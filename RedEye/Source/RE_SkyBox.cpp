@@ -1,5 +1,6 @@
 #include "RE_SkyBox.h"
 
+#include "RE_Memory.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
@@ -52,10 +53,10 @@ void RE_SkyBox::SetAsInternal()
 
 	Config toMD5("", "");
 	RE_Json* node = toMD5.GetRootNode("skybox");
+
 	//For differentMD5
 	node->PushString("SKname", GetName());
 	node->PushString("SKPath", GetAssetPath());
-
 	node->PushFloat("skyBoxSize", skyBoxSettings.skyBoxSize);
 	DEL(node);
 

@@ -13,7 +13,7 @@ public:
 	RE_CompParticleEmitter();
 	~RE_CompParticleEmitter();
 
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) override;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
 
 	void Update() override;
 

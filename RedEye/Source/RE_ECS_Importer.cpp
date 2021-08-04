@@ -1,5 +1,6 @@
 #include "RE_ECS_Importer.h"
 
+#include "RE_Memory.h"
 #include "RE_Json.h"
 #include "Application.h"
 #include "RE_ECS_Pool.h"

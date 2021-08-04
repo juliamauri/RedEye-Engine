@@ -1,8 +1,9 @@
-#include "ParticleManager.h"
+#include "RE_ParticleManager.h"
 
 #include "Application.h"
 #include "RE_ResourceManager.h"
 #include "ModuleRenderer3D.h"
+#include "Glew/include/glew.h"
 
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 #include "ModulePhysics.h"

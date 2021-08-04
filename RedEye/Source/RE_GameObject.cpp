@@ -12,6 +12,7 @@
 #include "RE_PrimitiveManager.h"
 #include "RE_Component.h"
 #include "RE_ParticleEmitter.h"
+#include "RE_Memory.h"
 
 #include "Glew\include\glew.h"
 #include "ImGui\imgui.h"
@@ -24,7 +25,7 @@
 RE_GameObject::RE_GameObject() {}
 RE_GameObject::~RE_GameObject() {}
 
-void RE_GameObject::SetUp(GameObjectsPool* goPool, ComponentsPool* compPool, const char* _name, const UID parent, const bool start_active, const bool _isStatic)
+void RE_GameObject::SetUp(GameObjectsPool* goPool, ComponentsPool* compPool, const char* _name, const GO_UID parent, const bool start_active, const bool _isStatic)
 {
 	active = start_active;
 	isStatic = _isStatic;
@@ -92,7 +93,7 @@ void RE_GameObject::DrawWithChilds() const
 
 void RE_GameObject::DrawChilds() const
 {
-	eastl::stack<UID> gos;
+	eastl::stack<GO_UID> gos;
 	for (auto child : childs) gos.push(child);
 	while (!gos.empty())
 	{
@@ -110,40 +111,20 @@ void RE_GameObject::DrawChilds() const
 RE_Component* RE_GameObject::GetCompPtr(const ushortint type) const
 {
 	RE_Component* ret = nullptr;
-	switch (static_cast<ComponentType>(type))
-	{
-	case ComponentType::C_TRANSFORM:
-	{
-		ret = CompPtr(transform, ComponentType::C_TRANSFORM);
-		break;
-	}
-	case ComponentType::C_CAMERA:
-	{
-		if (camera) ret = CompPtr(camera, ComponentType::C_CAMERA);
-		break;
-	}
-	case ComponentType::C_LIGHT:
-	{
-		if (light) ret = CompPtr(light, ComponentType::C_LIGHT);
-		break;
-	}
+	switch (static_cast<ComponentType>(type)) {
+	case ComponentType::C_TRANSFORM: ret = CompPtr(transform, ComponentType::C_TRANSFORM); break;
+	case ComponentType::C_CAMERA: ret = camera ? CompPtr(camera, ComponentType::C_CAMERA) : nullptr; break;
+	case ComponentType::C_LIGHT: ret = light ? CompPtr(light, ComponentType::C_LIGHT) : nullptr; break;
 	default:
 	{
-		if (render_geo.type == type && render_geo.uid)
-		{
-			ret = CompPtr(render_geo);
-		}
+		if (render_geo.type == type && render_geo.uid) ret = CompPtr(render_geo);
 		else
-		{
 			for (auto comp : components)
-			{
 				if (comp.type == type)
 				{
 					ret = CompPtr(comp.uid, comp.type);
 					break;
 				}
-			}
-		}
 
 		break;
 	}
@@ -152,33 +133,24 @@ RE_Component* RE_GameObject::GetCompPtr(const ushortint type) const
 	return ret;
 }
 
-UID RE_GameObject::GetCompUID(const ushortint type) const
+COMP_UID RE_GameObject::GetCompUID(const ushortint type) const
 {
-	UID ret = 0;
+	COMP_UID ret = 0;
 
-
-	switch (type)
-	{
+	switch (type) {
 	case C_TRANSFORM: ret = transform; break;
 	case ComponentType::C_CAMERA: ret = camera; break;
 	case ComponentType::C_LIGHT: ret = light; break;
 	default:
 	{
-		if (render_geo.uid && render_geo.type == type)
-		{
-			ret = render_geo.uid;
-		}
+		if (render_geo.uid && render_geo.type == type) ret = render_geo.uid;
 		else
-		{
 			for (auto comp : components)
-			{
 				if (comp.type == type)
 				{
 					ret = comp.uid;
 					break;
 				}
-			}
-		}
 
 		break;
 	}
@@ -262,7 +234,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsComponents(const unsigned
 {
 	eastl::stack<RE_Component*> ret;
 
-	eastl::stack<UID> gos;
+	eastl::stack<GO_UID> gos;
 	for (auto child : childs)
 		gos.push(child);
 
@@ -307,7 +279,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos() const
 	return ret;
 }
 
-eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const UID stencil_mask) const
+eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const GO_UID stencil_mask) const
 {
 	eastl::stack<RE_Component*> ret;
 
@@ -332,11 +304,10 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const UI
 	return ret;
 }
 
-void RE_GameObject::ReportComponent(const UID id, const ushortint type)
+void RE_GameObject::ReportComponent(const COMP_UID id, const ushortint type)
 {
 	RE_ASSERT(id > 0);
-	switch (static_cast<ComponentType>(type))
-	{
+	switch (static_cast<ComponentType>(type)) {
 	case ComponentType::C_TRANSFORM: transform = id; break;
 	case ComponentType::C_CAMERA: camera = id; break;
 	case ComponentType::C_LIGHT: light = id; break;
@@ -355,8 +326,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	ComponentType _type = static_cast<ComponentType>(type);
 	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
 
-	switch (_type)
-	{
+	switch (_type) {
 	case C_TRANSFORM:
 	{
 		if (transform) pool_comps->DestroyComponent(_type, transform);
@@ -395,10 +365,8 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 			render_geo = { ret->PoolSetUp(pool_gos, go_uid), type };
 			RE_SCENE->primitives->SetUpComponentPrimitive(dynamic_cast<RE_CompPrimitive*>(ret));
 		}
-		else
-		{
-			components.push_back({ (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type });
-		}
+		else components.push_back({ (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type });
+
 		break;
 	}
 	}
@@ -406,25 +374,22 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	return ret;
 }
 
-void RE_GameObject::ReleaseComponent(const UID id, const ushortint type)
+void RE_GameObject::ReleaseComponent(const COMP_UID id, const ushortint type)
 {
 	ComponentType _type = static_cast<ComponentType>(type);
 	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
-	switch (_type)
-	{
+
+	switch (_type){
 	case C_TRANSFORM: transform = 0; break;
 	case C_CAMERA: camera = 0; break;
 	case C_LIGHT: light = 0; break;
 	default:
 	{
-		if (IsRenderGeo(static_cast<ushortint>(type)))
-		{
-			render_geo = { 0, 0 };
-		}
+		if (IsRenderGeo(static_cast<ushortint>(type))) render_geo = { 0, 0 };
 		else
 		{
-			unsigned int count = 0u;
-			for (auto comp : components)
+			uint count = 0u;
+			for (auto & comp : components)
 			{
 				if (comp.uid == id)
 				{
@@ -441,12 +406,12 @@ void RE_GameObject::ReleaseComponent(const UID id, const ushortint type)
 	}
 }
 
-void RE_GameObject::DestroyComponent(const UID id, const ushortint type)
+void RE_GameObject::DestroyComponent(const COMP_UID id, const ushortint type)
 {
 	ComponentType _type = static_cast<ComponentType>(type);
 	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
-	switch (_type)
-	{
+
+	switch (_type){
 	case C_TRANSFORM:
 	{
 		if (transform) pool_comps->DestroyComponent(_type, transform);
@@ -469,7 +434,9 @@ void RE_GameObject::DestroyComponent(const UID id, const ushortint type)
 	{
 		if (IsRenderGeo(static_cast<ushortint>(type)))
 		{
-			if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
+			if (render_geo.uid)
+				pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
+
 			render_geo = { 0, 0 };
 		}
 		else
@@ -493,7 +460,7 @@ void RE_GameObject::DestroyComponent(const UID id, const ushortint type)
 	}
 }
 
-const eastl::vector<UID>& RE_GameObject::GetChilds() const { return childs; }
+const eastl::vector<GO_UID>& RE_GameObject::GetChilds() const { return childs; }
 
 eastl::list<RE_GameObject*> RE_GameObject::GetChildsPtr() const
 {
@@ -501,12 +468,14 @@ eastl::list<RE_GameObject*> RE_GameObject::GetChildsPtr() const
 	for (auto child : childs) ret.push_back(pool_gos->AtPtr(child));
 	return ret;
 }
+
 eastl::list<RE_GameObject*> RE_GameObject::GetChildsPtrReversed() const
 {
 	eastl::list<RE_GameObject*> ret;
 	for (auto child : childs) ret.push_front(pool_gos->AtPtr(child));
 	return ret;
 }
+
 eastl::list<const RE_GameObject*> RE_GameObject::GetChildsCPtr() const
 {
 	eastl::list<const RE_GameObject*> ret;
@@ -514,15 +483,16 @@ eastl::list<const RE_GameObject*> RE_GameObject::GetChildsCPtr() const
 	return ret;
 }
 
-eastl::vector<UID> RE_GameObject::GetGOandChilds() const
+eastl::vector<GO_UID> RE_GameObject::GetGOandChilds() const
 {
-	eastl::vector<UID> ret;
+	eastl::vector<GO_UID> ret;
 	ret.push_back(go_uid);
-	eastl::stack<UID> gos;
+	eastl::stack<GO_UID> gos;
 	for (auto child : childs) gos.push(child);
 
-	while (!gos.empty()) {
-		UID go = gos.top();
+	while (!gos.empty())
+	{
+		GO_UID go = gos.top();
 		gos.pop();
 
 		ret.push_back(go);
@@ -538,11 +508,12 @@ eastl::vector<RE_GameObject*> RE_GameObject::GetGOandChildsPtr()
 {
 	eastl::vector<RE_GameObject*> ret;
 	ret.push_back(this);
-	eastl::stack<UID> gos;
+	eastl::stack<GO_UID> gos;
 	for (auto child : childs) gos.push(child);
 
-	while (!gos.empty()) {
-		UID go = gos.top();
+	while (!gos.empty())
+	{
+		GO_UID go = gos.top();
 		gos.pop();
 
 		RE_GameObject* goPtr = pool_gos->AtPtr(go);
@@ -558,11 +529,13 @@ eastl::vector<const RE_GameObject*> RE_GameObject::GetGOandChildsCPtr() const
 {
 	eastl::vector<const RE_GameObject*> ret;
 	ret.push_back(this);
-	eastl::stack<UID> gos;
+
+	eastl::stack<GO_UID> gos;
 	for (auto child : childs) gos.push(child);
 
-	while (!gos.empty()) {
-		UID go = gos.top();
+	while (!gos.empty())
+	{
+		GO_UID go = gos.top();
 		gos.pop();
 
 		const RE_GameObject* goPtr = pool_gos->AtCPtr(go);
@@ -638,7 +611,7 @@ eastl::vector<const RE_GameObject*> RE_GameObject::GetActiveDrawableGOandChildsC
 	return ret;
 }
 
-const UID RE_GameObject::GetFirstChildUID() const
+const GO_UID RE_GameObject::GetFirstChildUID() const
 {
 	return childs.empty() ? 0 : childs.front();
 }
@@ -653,7 +626,7 @@ const RE_GameObject* RE_GameObject::GetFirstChildCPtr() const
 	return childs.empty() ? nullptr : pool_gos->AtCPtr(childs.front());
 }
 
-const UID RE_GameObject::GetLastChildUID() const
+const GO_UID RE_GameObject::GetLastChildUID() const
 {
 	return childs.empty() ? 0 : childs.back();
 }
@@ -672,7 +645,7 @@ RE_GameObject* RE_GameObject::AddNewChild(const char* _name, const bool start_ac
 {
 	RE_GameObject* ret = nullptr;
 
-	UID child = pool_gos->GetNewGOUID();
+	GO_UID child = pool_gos->GetNewGOUID();
 	if (child)
 	{
 		childs.push_back(child);
@@ -684,7 +657,7 @@ RE_GameObject* RE_GameObject::AddNewChild(const char* _name, const bool start_ac
 	return ret;
 }
 
-void RE_GameObject::ReleaseChild(const UID id)
+void RE_GameObject::ReleaseChild(const GO_UID id)
 {
 	unsigned int count = 0u;
 	for (auto child : childs)
@@ -698,7 +671,7 @@ void RE_GameObject::ReleaseChild(const UID id)
 	}
 }
 
-void RE_GameObject::DestroyChild(const UID id)
+void RE_GameObject::DestroyChild(const GO_UID id)
 {
 	unsigned int count = 0u;
 	for (auto child : childs)
@@ -716,7 +689,7 @@ void RE_GameObject::DestroyChild(const UID id)
 
 unsigned int RE_GameObject::ChildCount() const { return childs.size(); }
 bool RE_GameObject::IsLastChild() const { return parent_uid && (GetParentCPtr()->GetLastChildUID() == go_uid); }
-bool RE_GameObject::isParent(UID parent) const
+bool RE_GameObject::isParent(GO_UID parent) const
 {
 	bool ret = false;
 	if (parent_uid){
@@ -725,11 +698,11 @@ bool RE_GameObject::isParent(UID parent) const
 	}
 	return ret;
 }
-UID RE_GameObject::GetParentUID() const { return parent_uid; }
+GO_UID RE_GameObject::GetParentUID() const { return parent_uid; }
 RE_GameObject* RE_GameObject::GetParentPtr() const { return pool_gos->AtPtr(parent_uid); }
 const RE_GameObject* RE_GameObject::GetParentCPtr() const { return pool_gos->AtCPtr(parent_uid); }
 
-void RE_GameObject::SetParent(const UID id, bool unlink_previous, bool link_new)
+void RE_GameObject::SetParent(const GO_UID id, bool unlink_previous, bool link_new)
 {
 	if (unlink_previous && parent_uid) GetParentPtr()->ReleaseChild(go_uid);
 	parent_uid = id;
@@ -742,7 +715,7 @@ void RE_GameObject::UnlinkParent()
 	parent_uid = 0;
 }
 
-UID RE_GameObject::GetRootUID() const { return pool_gos->GetRootUID(); }
+GO_UID RE_GameObject::GetRootUID() const { return pool_gos->GetRootUID(); }
 RE_GameObject* RE_GameObject::GetRootPtr() const { return pool_gos->GetRootPtr(); }
 const RE_GameObject* RE_GameObject::GetRootCPtr() const { return pool_gos->GetRootCPtr(); }
 
@@ -1052,7 +1025,7 @@ math::AABB RE_GameObject::GetGlobalBoundingBox() const { return global_bounding_
 
 unsigned int RE_GameObject::GetBinarySize()const
 {
-	uint size = (sizeof(float) * 9) + sizeof(uint) + name.length() + sizeof(UID);
+	uint size = (sizeof(float) * 9) + sizeof(uint) + name.length() + sizeof(GO_UID);
 	return size;
 }
 
@@ -1087,7 +1060,7 @@ void RE_GameObject::SerializeBinary(char*& cursor)
 	memcpy(cursor, name.c_str(), size);
 	cursor += size;
 
-	size = sizeof(UID);
+	size = sizeof(GO_UID);
 	memcpy(cursor, &parent_uid, size);
 	cursor += size;
 
@@ -1117,8 +1090,8 @@ void RE_GameObject::DeserializeBinary(char*& cursor, GameObjectsPool* goPool, Co
 	char nullchar = '\0';
 	memcpy(strNameCursor, &nullchar, sizeof(char));
 
-	size = sizeof(UID);
-	UID goParentID;
+	size = sizeof(GO_UID);
+	GO_UID goParentID;
 	memcpy(&goParentID, cursor, size);
 	cursor += size;
 	SetUp(goPool, compPool, strName, goParentID);
@@ -1138,7 +1111,7 @@ void RE_GameObject::DeserializeBinary(char*& cursor, GameObjectsPool* goPool, Co
 	t->SetScale(math::vec(vec));
 }
 
-UID RE_GameObject::GetUID() const
+GO_UID RE_GameObject::GetUID() const
 {
 	return go_uid;
 }
@@ -1148,7 +1121,7 @@ inline RE_Component* RE_GameObject::CompPtr(ComponentData comp) const
 	return pool_comps->GetComponentPtr(comp.uid, static_cast<ComponentType>(comp.type));
 }
 
-inline RE_Component* RE_GameObject::CompPtr(UID id, ushortint type) const
+inline RE_Component* RE_GameObject::CompPtr(COMP_UID id, ushortint type) const
 {
 	return pool_comps->GetComponentPtr(id, static_cast<ComponentType>(type));
 }
@@ -1158,7 +1131,7 @@ inline const RE_Component* RE_GameObject::CompCPtr(ComponentData comp) const
 	return pool_comps->GetComponentCPtr(comp.uid, static_cast<ComponentType>(comp.type));
 }
 
-inline const RE_Component* RE_GameObject::CompCPtr(UID id, ushortint type) const
+inline const RE_Component* RE_GameObject::CompCPtr(COMP_UID id, ushortint type) const
 {
 	return pool_comps->GetComponentCPtr(id, static_cast<ComponentType>(type));
 }
@@ -1176,12 +1149,12 @@ eastl::list<RE_GameObject::ComponentData> RE_GameObject::AllCompData() const
 	return ret;
 }
 
-inline RE_GameObject* RE_GameObject::ChildPtr(const UID child) const
+inline RE_GameObject* RE_GameObject::ChildPtr(const GO_UID child) const
 {
 	return pool_gos->AtPtr(child);
 }
 
-inline const RE_GameObject* RE_GameObject::ChildCPtr(const UID child) const
+inline const RE_GameObject* RE_GameObject::ChildCPtr(const GO_UID child) const
 {
 	return pool_gos->AtCPtr(child);
 }

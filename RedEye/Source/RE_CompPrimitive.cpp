@@ -1,5 +1,6 @@
 #include "RE_CompPrimitive.h"
 
+#include "RE_Memory.h"
 #include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
@@ -73,7 +74,7 @@ void RE_CompGrid::GridSetUp(int newD)
 	VAO = mD.first;
 }
 
-void RE_CompGrid::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UID parent)
+void RE_CompGrid::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);
@@ -171,7 +172,7 @@ void RE_CompRock::RockSetUp(int _seed, int _subdivions)
 	GenerateNewRock(_seed, RE_Math::CapI(_subdivions, 1, 5));
 }
 
-void RE_CompRock::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UID parent)
+void RE_CompRock::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);
@@ -374,7 +375,7 @@ void RE_CompPlatonic::PlatonicSetUp()
 	triangle_count = mD.second;
 }
 
-void RE_CompPlatonic::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UID parent)
+void RE_CompPlatonic::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);
@@ -468,7 +469,7 @@ void RE_CompParametric::ParametricSetUp(int _slices, int _stacks, float _radius)
 	triangle_count = md.second;
 }
 
-void RE_CompParametric::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const UID parent)
+void RE_CompParametric::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);

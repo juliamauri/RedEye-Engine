@@ -1,5 +1,6 @@
 #include "ModuleScene.h"
 
+#include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "RE_Timer.h"
 #include "RE_Math.h"
@@ -185,7 +186,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 	case GO_CHANGED_TO_STATIC:
 	{
-		UID go_uid = e.data1.AsUInt64();
+		GO_UID go_uid = e.data1.AsUInt64();
 		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
 		if (go->IsActive())
 		{
@@ -198,7 +199,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 	case GO_CHANGED_TO_NON_STATIC:
 	{
-		UID go_uid = e.data1.AsUInt64();
+		GO_UID go_uid = e.data1.AsUInt64();
 		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
 		if (go->IsActive())
 		{
@@ -224,7 +225,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 	case DESTROY_GO:
 	{
-		UID go_uid = e.data1.AsUInt64();
+		GO_UID go_uid = e.data1.AsUInt64();
 		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
 
 		if (go->IsActive())
@@ -265,17 +266,17 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 }
 
-void ModuleScene::CreatePrimitive(ComponentType type, const UID parent)
+void ModuleScene::CreatePrimitive(ComponentType type, const GO_UID parent)
 {
 	scenePool.AddGO("Primitive", Validate(parent), true)->AddNewComponent(type);
 }
 
-void ModuleScene::CreateCamera(const UID parent)
+void ModuleScene::CreateCamera(const GO_UID parent)
 {
 	scenePool.AddGO("Camera", Validate(parent), true)->AddNewComponent(C_CAMERA);
 }
 
-void ModuleScene::CreateLight(const UID parent)
+void ModuleScene::CreateLight(const GO_UID parent)
 {
 	RE_GameObject* light_go = scenePool.AddGO("Light", Validate(parent), true);
 
@@ -283,9 +284,9 @@ void ModuleScene::CreateLight(const UID parent)
 		dynamic_cast<RE_CompLight*>(light_go->AddNewComponent(C_LIGHT))->diffuse);
 }
 
-void ModuleScene::CreateMaxLights(const UID parent)
+void ModuleScene::CreateMaxLights(const GO_UID parent)
 {
-	UID container_go = scenePool.AddGO("Bunch of Lights", (parent) ? parent : GetRootUID(), true)->GetUID();
+	GO_UID container_go = scenePool.AddGO("Bunch of Lights", (parent) ? parent : GetRootUID(), true)->GetUID();
 
 	eastl::string name = "light ";
 	for (int x = 0; x < 8; ++x)
@@ -302,7 +303,7 @@ void ModuleScene::CreateMaxLights(const UID parent)
 	}
 }
 
-void ModuleScene::CreateWater(const UID parent)
+void ModuleScene::CreateWater(const GO_UID parent)
 {
 	RE_GameObject* water_go = scenePool.AddGO("Water", Validate(parent), true);
 	water_go->AddNewComponent(C_WATER)->UseResources();
@@ -311,7 +312,7 @@ void ModuleScene::CreateWater(const UID parent)
 	transform->SetScale({ 10.0f, 10.0f, 1.0f });
 }
 
-void ModuleScene::CreateParticleSystem(const UID parent)
+void ModuleScene::CreateParticleSystem(const GO_UID parent)
 {
 	RE_GameObject* go = scenePool.AddGO("Particle System", Validate(parent), true);
 	go->SetStatic(false, false);
@@ -321,23 +322,23 @@ void ModuleScene::CreateParticleSystem(const UID parent)
 void ModuleScene::AddGOPool(RE_ECS_Pool* toAdd)
 {
 	toAdd->UseResources();
-	UID justAdded = scenePool.InsertPool(toAdd, true);
+	GO_UID justAdded = scenePool.InsertPool(toAdd, true);
 	RE_EDITOR->SetSelected(justAdded);
 	haschanges = true;
 }
 
-UID ModuleScene::RayCastGeometry(math::Ray & global_ray) const
+GO_UID ModuleScene::RayCastGeometry(math::Ray & global_ray) const
 {
-	UID ret = 0;
+	GO_UID ret = 0;
 
-	eastl::queue<UID> aabb_collisions;
+	eastl::queue<GO_UID> aabb_collisions;
 	static_tree.CollectIntersections(global_ray, aabb_collisions);
 	dynamic_tree.CollectIntersections(global_ray, aabb_collisions);
 
-	eastl::vector<eastl::pair<UID,const RE_GameObject*>> gos;
+	eastl::vector<eastl::pair<GO_UID,const RE_GameObject*>> gos;
 	while (!aabb_collisions.empty())
 	{
-		UID id = aabb_collisions.front();
+		GO_UID id = aabb_collisions.front();
 		aabb_collisions.pop();
 		gos.push_back({ id, scenePool.GetGOCPtr(id) });
 	}
@@ -364,7 +365,7 @@ UID ModuleScene::RayCastGeometry(math::Ray & global_ray) const
 
 void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum & frustum) const
 {
-	eastl::queue<UID> goIndex;
+	eastl::queue<GO_UID> goIndex;
 	static_tree.CollectIntersections(frustum, goIndex);
 	dynamic_tree.CollectIntersections(frustum, goIndex);
 
@@ -414,7 +415,7 @@ void ModuleScene::ClearScene()
 	RE_GameObject* root = scenePool.AddGO("root", 0);
 	root->SetStatic(false);
 
-	UID root_uid = scenePool.GetRootUID();
+	GO_UID root_uid = scenePool.GetRootUID();
 	scenePool.AddGO("Camera", root_uid)->AddNewComponent(C_CAMERA);
 	RE_EDITOR->SetSelected(root_uid);
 
@@ -502,7 +503,7 @@ void ModuleScene::SetupScene()
 	dynamic_tree.Clear();
 	GetRootPtr()->ResetGOandChildsAABB();
 
-	eastl::vector<eastl::pair<const UID, RE_GameObject*>> gos = scenePool.GetAllGOData();
+	eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> gos = scenePool.GetAllGOData();
 	for (unsigned int i = 0; i < gos.size(); i++)
 	{
 		if (gos[i].second->HasActiveRenderGeo())

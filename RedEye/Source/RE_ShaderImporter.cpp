@@ -1,5 +1,6 @@
 #include "RE_ShaderImporter.h"
 
+#include "RE_Memory.h"
 #include "Application.h"
 #include "RE_Profiler.h"
 #include "RE_FileBuffer.h"

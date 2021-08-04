@@ -15,14 +15,14 @@ public:
 class RE_CMDTransformPosition : public RE_Command{
 public:
 
-	RE_CMDTransformPosition(UID go, math::vec pBefore, math::vec p) : go_(go), pBefore_(pBefore), p_(p) { }
+	RE_CMDTransformPosition(GO_UID go, math::vec pBefore, math::vec p) : go_(go), pBefore_(pBefore), p_(p) { }
 
 	void execute() override;
 
 	void Undo() override;
 
 private:
-	UID go_;
+	GO_UID go_;
 	math::vec pBefore_;
 	math::vec p_;
 
@@ -31,28 +31,28 @@ private:
 class RE_CMDTransformRotation : public RE_Command {
 public:
 
-	RE_CMDTransformRotation(UID go, math::vec rBefore, math::vec r) : go_(go), rBefore_(rBefore), r_(r) { }
+	RE_CMDTransformRotation(GO_UID go, math::vec rBefore, math::vec r) : go_(go), rBefore_(rBefore), r_(r) { }
 
 	void execute() override;
 
 	void Undo() override;
 
 private:
-	UID go_;
+	GO_UID go_;
 	math::vec rBefore_;
 	math::vec r_;
 };
 
 class RE_CMDTransformScale : public RE_Command {
 public:
-	RE_CMDTransformScale(UID go, math::vec sBefore, math::vec s) : go_(go), sBefore_(sBefore), s_(s) { }
+	RE_CMDTransformScale(GO_UID go, math::vec sBefore, math::vec s) : go_(go), sBefore_(sBefore), s_(s) { }
 
 	void execute() override;
 
 	void Undo() override;
 
 private:
-	UID go_;
+	GO_UID go_;
 	math::vec sBefore_;
 	math::vec s_;
 };

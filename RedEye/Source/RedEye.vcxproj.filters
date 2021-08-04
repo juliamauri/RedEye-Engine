@@ -289,9 +289,6 @@
     <ClCompile Include="RE_ConsoleLog.cpp">
       <Filter>Source\Application\Console</Filter>
     </ClCompile>
-    <ClCompile Include="Globals.cpp">
-      <Filter>Source\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleWindow.cpp">
       <Filter>Source\Application\Modules\Window</Filter>
     </ClCompile>
@@ -313,7 +310,7 @@
     <ClCompile Include="ImGuiWidgets\ImGuiColorTextEdit\TextEditor.cpp">
       <Filter>3rd Party\ImGuiWidgets\ImGuiTextEditor</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleManager.cpp">
+    <ClCompile Include="RE_ParticleManager.cpp">
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClCompile>
     <ClCompile Include="RE_Profiler.cpp">
@@ -1287,9 +1284,6 @@
     <ClInclude Include="RE_ConsoleLog.h">
       <Filter>Source\Application\Console</Filter>
     </ClInclude>
-    <ClInclude Include="Globals.h">
-      <Filter>Source\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleWindow.h">
       <Filter>Source\Application\Modules\Window</Filter>
     </ClInclude>
@@ -1311,7 +1305,7 @@
     <ClInclude Include="ImGuiWidgets\ImGuiCurverEditor\ImGuiCurveEditor.hpp">
       <Filter>3rd Party\ImGuiWidgets\ImGuiCurveEditor</Filter>
     </ClInclude>
-    <ClInclude Include="ParticleManager.h">
+    <ClInclude Include="RE_ParticleManager.h">
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClInclude>
     <ClInclude Include="RE_Particle.h">
@@ -1337,6 +1331,18 @@
     </ClInclude>
     <ClInclude Include="RE_CompParticleEmitter.h">
       <Filter>Source\Application\Modules\Scene\Entity Component System\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_EngineInfo.h">
+      <Filter>Source\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_DataTypes.h">
+      <Filter>Source\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Memory.h">
+      <Filter>Source\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Assert.h">
+      <Filter>Source\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

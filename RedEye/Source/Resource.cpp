@@ -1,12 +1,11 @@
 #include "Resource.h"
 
-#include "Globals.h"
+#include "RE_Memory.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_Config.h"
 #include "RE_Json.h"
 #include "RE_ResourceManager.h"
-
 
 #include "ImGui/imgui.h"
 

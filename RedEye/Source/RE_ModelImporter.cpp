@@ -1,6 +1,7 @@
 #include "RE_ModelImporter.h"
 
-#include "Globals.h"
+#include "RE_DataTypes.h"
+#include "RE_Memory.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
@@ -66,16 +67,16 @@ void RE_ModelImporter::ProcessNodes(RE_ECS_Pool* goPool, aiNode * parentNode, co
 	aiQuaternion nRotationQuat;
 
 	// Warning Rub: better options than that aberration?
-	eastl::stack<eastl::pair< aiNode*, eastl::pair<UID, math::float4x4>>> nodes;
+	eastl::stack<eastl::pair< aiNode*, eastl::pair<GO_UID, math::float4x4>>> nodes;
 	nodes.push({ parentNode , {parentGO, parentTransform} });
 	bool isRoot = true;
 
 	while (!nodes.empty()) {
 
-		eastl::pair< aiNode*, eastl::pair<UID, math::float4x4>> nodeToProcess = nodes.top();
+		eastl::pair< aiNode*, eastl::pair<GO_UID, math::float4x4>> nodeToProcess = nodes.top();
 		nodes.pop();
 		aiNode* node = nodeToProcess.first;
-		UID pGO = nodeToProcess.second.first;
+		GO_UID pGO = nodeToProcess.second.first;
 		math::float4x4 transform = nodeToProcess.second.second;
 
 		RE_LOG_TERCIARY("%s Node: %s (%u meshes | %u children)",
@@ -91,7 +92,7 @@ void RE_ModelImporter::ProcessNodes(RE_ECS_Pool* goPool, aiNode * parentNode, co
 			{ nScale.x, nScale.y, nScale.z });
 
 
-		UID go_haschildren = 0ull;
+		GO_UID go_haschildren = 0ull;
 		if (node->mNumChildren > 0 || (node->mNumChildren == 0 && node->mNumMeshes == 0))
 		{
 			if (isRoot || eastl::string(node->mName.C_Str()).find("_$Assimp") == eastl::string::npos)

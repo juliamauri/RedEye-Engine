@@ -1,7 +1,9 @@
 #include "RE_Json.h"
 
-#include "Globals.h"
+#include "RE_DataTypes.h"
+#include "RE_Memory.h"
 #include "RE_Config.h"
+
 #include "RapidJson\include\pointer.h"
 
 RE_Json::RE_Json(const char* path, Config* config, bool isArray) : pointerPath(path), config(config)

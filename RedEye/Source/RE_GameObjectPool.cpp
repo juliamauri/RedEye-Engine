@@ -1,5 +1,6 @@
 #include "RE_GameObjectPool.h"
 
+#include "RE_Memory.h"
 #include "Application.h"
 #include "RE_Math.h"
 #include "RE_Json.h"
@@ -10,12 +11,12 @@ void GameObjectsPool::Clear()
 	lastAvaibleIndex = 0;
 }
 
-UID GameObjectsPool::Push(RE_GameObject val)
+GO_UID GameObjectsPool::Push(RE_GameObject val)
 {
 	return RE_HashMap::Push(val, val.go_uid = RANDOM_UID) ? val.go_uid : 0ull;
 }
 
-UID GameObjectsPool::GetNewGOUID()
+GO_UID GameObjectsPool::GetNewGOUID()
 {
 	return Push({});
 }
@@ -25,7 +26,7 @@ RE_GameObject* GameObjectsPool::GetNewGOPtr()
 	return AtPtr(Push({}));
 }
 
-UID GameObjectsPool::GetRootUID() const
+GO_UID GameObjectsPool::GetRootUID() const
 {
 	return (lastAvaibleIndex > 0) ? pool_[0].go_uid : 0;
 }
@@ -40,7 +41,7 @@ const RE_GameObject* GameObjectsPool::GetRootCPtr() const
 	return (lastAvaibleIndex > 0) ? &pool_[0] : nullptr;
 }
 
-void GameObjectsPool::DeleteGO(UID toDelete)
+void GameObjectsPool::DeleteGO(GO_UID toDelete)
 {
 	Pop(toDelete);
 }
@@ -48,15 +49,15 @@ void GameObjectsPool::DeleteGO(UID toDelete)
 eastl::vector<RE_GameObject*> GameObjectsPool::GetAllPtrs() const
 {
 	eastl::vector<RE_GameObject*> ret;
-	eastl::vector<UID> uids = GetAllKeys();
+	eastl::vector<GO_UID> uids = GetAllKeys();
 	for (auto uid : uids) ret.push_back(AtPtr(uid));
 	return ret;
 }
 
-eastl::vector<eastl::pair<const UID, RE_GameObject*>> GameObjectsPool::GetAllData() const
+eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> GameObjectsPool::GetAllData() const
 {
-	eastl::vector<eastl::pair<const UID, RE_GameObject*>> ret;
-	eastl::vector<UID> uids = GetAllKeys();
+	eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> ret;
+	eastl::vector<GO_UID> uids = GetAllKeys();
 	for (auto uid : uids) ret.push_back({ uid, AtPtr(uid) });
 	return ret;
 }
@@ -64,7 +65,7 @@ eastl::vector<eastl::pair<const UID, RE_GameObject*>> GameObjectsPool::GetAllDat
 unsigned int GameObjectsPool::GetBinarySize() const
 {
 	uint size = sizeof(unsigned int);
-	size += lastAvaibleIndex * sizeof(UID);
+	size += lastAvaibleIndex * sizeof(GO_UID);
 	for (int i = 0; i < lastAvaibleIndex; i++)
 		size += pool_[i].GetBinarySize();
 	return size;
@@ -77,7 +78,7 @@ void GameObjectsPool::SerializeBinary(char*& cursor)
 	memcpy(cursor, &goSize, size);
 	cursor += size;
 
-	size = sizeof(UID);
+	size = sizeof(GO_UID);
 	for (uint i = 0; i < goSize; i++)
 	{
 		memcpy(cursor, &pool_[i].go_uid, size);
@@ -88,17 +89,17 @@ void GameObjectsPool::SerializeBinary(char*& cursor)
 
 void GameObjectsPool::DeserializeBinary(char*& cursor, ComponentsPool* cmpsPool)
 {
-	eastl::map<UID, RE_GameObject*> idGO;
+	eastl::map<GO_UID, RE_GameObject*> idGO;
 
 	uint size = sizeof(unsigned int);
 	uint goSize;
 	memcpy(&goSize, cursor, size);
 	cursor += size;
 
-	size = sizeof(UID);
+	size = sizeof(GO_UID);
 	for (uint i = 0; i < goSize; i++)
 	{
-		RE_GameObject newGO; UID goUID;
+		RE_GameObject newGO; GO_UID goUID;
 		memcpy(&goUID, cursor, size);
 		cursor += size;
 		newGO.go_uid = goUID;
@@ -124,13 +125,13 @@ void GameObjectsPool::SerializeJson(RE_Json* node)
 
 void GameObjectsPool::DeserializeJson(RE_Json* node, ComponentsPool* cmpsPool)
 {
-	eastl::map<UID, RE_GameObject*> idGO;
+	eastl::map<GO_UID, RE_GameObject*> idGO;
 	RE_Json* goPool = node->PullJObject("gameobjects Pool");
 	unsigned int goSize = goPool->PullUInt("gameobjectsSize", 0);
 
 	for (uint i = 0; i < goSize; i++) {
 		RE_Json* goNode = goPool->PullJObject(eastl::to_string(i).c_str());
-		UID goUID = goNode->PullUnsignedLongLong("GOUID", 0);
+		GO_UID goUID = goNode->PullUnsignedLongLong("GOUID", 0);
 		RE_GameObject newGO;
 		newGO.go_uid = goUID;
 		RE_HashMap::Push(newGO, goUID);
@@ -140,9 +141,9 @@ void GameObjectsPool::DeserializeJson(RE_Json* node, ComponentsPool* cmpsPool)
 	DEL(goPool);
 }
 
-eastl::vector<UID> GameObjectsPool::GetAllKeys() const
+eastl::vector<GO_UID> GameObjectsPool::GetAllKeys() const
 {
-	eastl::vector<UID> ret;
+	eastl::vector<GO_UID> ret;
 	for (auto &go : poolmapped_) ret.push_back(go.first);
 	return ret;
 }

@@ -1,7 +1,7 @@
 #ifndef __RE_MATH_H__
 #define __RE_MATH_H__
 
-#include "Globals.h"
+#include "RE_Assert.h"
 #include "MathGeoLib/include/MathGeoLib.h"
 
 enum Dir
