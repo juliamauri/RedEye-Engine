@@ -10,15 +10,15 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
-  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="../Styles/custom_main.css" />
 
-  <link rel="stylesheet" href="../scss/custom_accordion.css" />
+  <link rel="stylesheet" href="../Styles/custom_accordion.css" />
 
 
-  <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+  <link rel="shortcut icon" type="image/x-icon" href="../Multimedia/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../Multimedia/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../Multimedia/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../Multimedia/favicon-16x16.png" />
   <link rel="manifest" href="../site.webmanifest" />
 
   <meta name="keywords"
@@ -29,7 +29,7 @@
   <meta property="og:description"
     content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries. We started by building a geometry loader that could render the scene with simple controls for the camera. Once the base was solid we moved on to optimize the rendering process (frustum culling and quadtrees) and resource management. For the finishing touches we: Added shader pipeline with integrated editor so that shaders can be modified, compiled and updated instantly. Changed quadtree for a better space partitioning algorithm: Dynamic Bound Box Tree; the same Overwatch uses. Added Unity-like resource management with binary save/load for all the engines resources." />
   <meta property="og:image"
-    content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png" />
+    content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/Multimedia/thumbnail.png" />
   <meta property="og:site_name" content="RedEye Engine" />
 
   <meta name="Twitter:card" content="summary with large image" />
@@ -38,7 +38,7 @@
   <meta name="Twitter:description"
     content="What’s special about RedEye Engine? The code was written from scratch using a total of 15 C++ libraries." />
   <meta name="Twitter:image"
-    content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png" />
+    content="https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/Multimedia/thumbnail.png" />
 
   <script type="application/ld+json">
         {
@@ -62,7 +62,7 @@
             "accessModeSufficient": ["textual", "visual"],
             "acquireLicensePage": "https://github.com/juliamauri/RedEye-Engine/blob/master/LICENSE",
             "video": "https://www.youtube.com/watch?v=kDCOSGXkqL4",
-            "image": "https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/thumbnail.png",
+            "image": "https://raw.githubusercontent.com/juliamauri/RedEye-Engine/master/docs/Multimedia/thumbnail.png",
             "author": [{
                 "@type": "Person",
                 "familyName": "Mauri Costa",
@@ -86,7 +86,7 @@
   <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: #203F59;">
     <div class="container-fluid">
       <a class="navbar-brand" href="https://www.redeye-engine.es/" style="color: #4ECBD9">
-        <img src="../favicon-32x32.png" width="30" height="30" class="d-inline-block align-top" alt="">
+        <img src="../Multimedia/favicon-32x32.png" width="30" height="30" class="d-inline-block align-top" alt="">
         RedEye Engine</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
         aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -278,7 +278,7 @@
             rendering capabilities. Shaders were now part of the resource system and could be dropped and applied to
             mesh components. To take advantage of the new feature, we also added skybox support and outlines for
             selected geometries.</p>
-          <img src="Multimedia/Exampletitlevideo.gif" class="img-fluid mx-auto d-block">
+          <img src="../Multimedia/Exampletitlevideo.gif" class="img-fluid mx-auto d-block">
           <p>Editing the shaders outside the engine’s scope bothered us enough to decide to improve shader use for v3.0
             and we added a shader editor tool to allow us to modify our shaders in-engine. Changes in shader code are
             parsed searching for defined uniform variables that are able to be set through the material’s resource
@@ -290,7 +290,7 @@
             has 2 passes. First, it outputs framebuffers with pixel data: position, diffuse, and normal. Then, it uses
             these buffers and sends light uniforms for lights to be iterated per pixel. This 2-step pipeline can be
             complemented by adding other rendering procedures like blurs, blooms, ambient occlusion.</p>
-          <img src="Multimedia/deferred_light.gif" class="img-fluid mx-auto d-block">
+          <img src="../Multimedia/deferred_light.gif" class="img-fluid mx-auto d-block">
         </div>
       </div>
     </div>
@@ -309,7 +309,7 @@
             containing the actual raw files and a Library directory where we store files to a binary format. Library
             files are named by feeding the generated json format string to an MD5 generator that outputs a small unique
             string. This way, different files with the same content are not stored duplicated.</p>
-          <img src="Multimedia/file_system_2.PNG" class="img-fluid mx-auto d-block">
+          <img src="../Multimedia/file_system_2.PNG" class="img-fluid mx-auto d-block">
           <p>Procedures for loading resources are scoped for errors and reported as logs for the console to show. File
             changes in the directories are scoped using the extra milliseconds between frames. Our intention is to set
             up multi-threading so as to set calls at a parallel thread freeing the main one. Once resources (scenes,
@@ -332,7 +332,7 @@
           <p>The scene module holds the Entity-Component System. Game objects are organized in a hierarchy and child
             global transforms are calculated based on their local transforms and their parents’ matrix. To improve scene
             performance we built different systems around the scene’s procedures.</p>
-          <img src="Multimedia/hierarchy.PNG" class="img-fluid mx-auto d-block">
+          <img src="../Multimedia/hierarchy.PNG" class="img-fluid mx-auto d-block">
           <h4>Camera Manager</h4>
           <p>Scenes must have at least one main camera for the renderer to position the point of view. This manager
             flags which cameras must be used to render builds a default one when missing to ensure having a scene
@@ -346,7 +346,7 @@
             Entertainment’s Overwatch approach to scene space partitioning using a dynamic axis-aligned bounding box
             tree. The tree contains boxes paired through their minimum enclosing AABB surface area. Check out his
             detailed explanation <a href="https://box2d.org/files/ErinCatto_DynamicBVH_GDC2019.pdf">here</a>.</p>
-          <img src="Multimedia/Dyn_AABB.PNG" class="img-fluid mx-auto d-block">
+          <img src="../Multimedia/Dyn_AABB.PNG" class="img-fluid mx-auto d-block">
           <h4>Hash mapped ECS</h4>
           <p>Cameras mentioned previously are positioned inside the scene as Camera Components. Compared to mesh
             components, cameras and transforms must update each frame if they or their parent’s transforms have been
@@ -387,7 +387,7 @@
             object, the hierarchy expands and the properties tab show’s selection’s components and game object values.
             Translation, rotation and scaling gizmos will also appear. Transform procedures get queued and can be undone
             (Ctrl+Z) or redone (Ctrl+Y).</p>
-            <img src="Multimedia/general_view.png" class="img-fluid mx-auto d-block">
+            <img src="../Multimedia/general_view.png" class="img-fluid mx-auto d-block">
         </div>
       </div>
     </div>
@@ -413,7 +413,7 @@
             table shows a Gantt distribution of RedEye’s startup procedures. Shader setup occupies around 60% of
             Application’s initialization.
           </p>
-          <img src="Multimedia/profiling_init.PNG" class="img-fluid mx-auto d-block">
+          <img src="../Multimedia/profiling_init.PNG" class="img-fluid mx-auto d-block">
           <p>To test the latest particle system, we expanded RedEye’s internal profiling so as to procure different
             executable files that run subsequent simulations. Once a simulation reaches a duration threshold, it is
             cleared and edited for the next one. The simulations reached up to 400K particles updated in under a
