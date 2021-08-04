@@ -61,23 +61,24 @@ RE_ECS_Pool* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int si
 	return ret;
 }
 
+
+
 void RE_ModelImporter::ProcessNodes(RE_ECS_Pool* goPool, aiNode * parentNode, const aiScene * scene, unsigned long long parentGO, math::float4x4 parentTransform)
 {
 	aiVector3D nScale, nPosition;
 	aiQuaternion nRotationQuat;
 
-	// Warning Rub: better options than that aberration?
-	eastl::stack<eastl::pair< aiNode*, eastl::pair<GO_UID, math::float4x4>>> nodes;
-	nodes.push({ parentNode , {parentGO, parentTransform} });
+	eastl::stack<eastl::tuple<aiNode*, GO_UID, math::float4x4>> nodes;
+	nodes.push({ parentNode , parentGO, parentTransform });
 	bool isRoot = true;
 
-	while (!nodes.empty()) {
-
-		eastl::pair< aiNode*, eastl::pair<GO_UID, math::float4x4>> nodeToProcess = nodes.top();
+	while (!nodes.empty())
+	{
+		aiNode* node;
+		GO_UID pGO;
+		math::float4x4 transform;
+		eastl::tie(node, pGO, transform) = nodes.top();
 		nodes.pop();
-		aiNode* node = nodeToProcess.first;
-		GO_UID pGO = nodeToProcess.second.first;
-		math::float4x4 transform = nodeToProcess.second.second;
 
 		RE_LOG_TERCIARY("%s Node: %s (%u meshes | %u children)",
 			node->mParent ? "SON" : "PARENT",
@@ -152,7 +153,7 @@ void RE_ModelImporter::ProcessNodes(RE_ECS_Pool* goPool, aiNode * parentNode, co
 			}
 		}
 
-		for (i = 0; i < node->mNumChildren; i++) nodes.push({ node->mChildren[i] ,{ go_haschildren, transform } });
+		for (i = 0; i < node->mNumChildren; i++) nodes.push({ node->mChildren[i], go_haschildren, transform });
 
 		isRoot = false;
 	}
