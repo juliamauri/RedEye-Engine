@@ -39,9 +39,7 @@ void RE_Hardware::Init()
 
 	// Memory
 	MBytesString(ram_capacity = "Total space: ", static_cast<double>(SDL_GetSystemRAM()));
-	for (unsigned int i = 0; i < MAX_MEM_TYPES; ++i)
-		for (int j = 0; j < 101; ++j)
-			mem[i][j] = 0.f;
+	memset(mem, 0, sizeof(mem));
 
 	// Display Drivers
 	display_drivers = "2D display drivers: ";
@@ -104,7 +102,7 @@ void RE_Hardware::DrawEditor()
 			for (unsigned short i = 0; i < MAX_MEM_TYPES; ++i)
 			{
 				float peak = values[i][0];
-				for (int i2 = 0; i2 < 100 - 1; i2++)
+				for (int i2 = 0; i2 < 99; i2++)
 				{
 					float tmp[2] = { peak, mem[i][i2] };
 					peak = tmp[mem[i][i2] > peak];
@@ -120,15 +118,13 @@ void RE_Hardware::DrawEditor()
 
 				// Max Peak
 				title = "Highest peak: ";
-				MBytesString(title, values[i][100]);
+				MBytesString(title, peak);
 				ImGui::Text(title.c_str());
 			}
 		}
 
 		if (ImGui::Checkbox(pause_plotting ? "Restart Plotting" : "Pause Plotting", &pause_plotting) && !pause_plotting)
-			for (unsigned short i = 0; i < MAX_MEM_TYPES; ++i)
-				for (int i2 = 0; i2 < 101; ++i2)
-					mem[i][i2] = 0.f;
+			memset(mem, 0, sizeof(mem));
 
 		ImGui::TreePop();
 	}
@@ -196,9 +192,7 @@ void RE_Hardware::QueryData()
 
 	// Memory
 	MBytesString(ram_capacity = "Total space: ", static_cast<double>(SDL_GetSystemRAM()));
-	for (unsigned int i = 0; i < MAX_MEM_TYPES; ++i)
-		for (int j = 0; j < 100; ++j)
-			mem[i][j] = 0.f;
+	memset(mem, 0, sizeof(mem));
 
 	// Display Drivers
 	display_drivers = "2D display drivers: ";

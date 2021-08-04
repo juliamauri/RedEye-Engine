@@ -39,19 +39,19 @@ public:
 	static inline int CapI(const int val, const int min, const int max)
 	{
 		RE_ASSERT(min <= max);
-		int res[3] = { val, min, max };
+		int res[4] = { val, min, max, 0 };
 		return res[(val < min) + (2 * (val > max))];
 	}
 	static inline unsigned int CapUI(const unsigned int val, const unsigned int min, const unsigned int max)
 	{
 		RE_ASSERT(min <= max);
-		unsigned int res[3] = { val, min, max };
+		unsigned int res[4] = { val, min, max, 0u };
 		return res[(val < min) + (2 * (val > max))];
 	}
 	static inline float CapF(const float val, const float min, const float max)
 	{
 		RE_ASSERT(min <= max);
-		float res[3] = { val, min, max };
+		float res[4] = { val, min, max, 0.f };
 		return res[(val < min) + (2 * (val > max))];
 	}
 	inline const int MinI(const int a, const int b)

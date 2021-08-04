@@ -46,7 +46,7 @@ private:
 		Paged_MEM,		  // memory set aside for the process in the system paging file
 		MAX_MEM_TYPES
 	};
-	float mem[MAX_MEM_TYPES][101]{};
+	float mem[MAX_MEM_TYPES][100]{};
 };
 
 #endif // !__RE_HARDWARE_H__
