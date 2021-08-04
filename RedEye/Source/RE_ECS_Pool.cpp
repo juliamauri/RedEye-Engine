@@ -126,6 +126,15 @@ UID RE_ECS_Pool::InsertPool(RE_ECS_Pool* pool, bool broadcast)
 	return CopyGOandChilds(pool->GetRootPtr(), (TotalGameObjects() > 0) ? GetRootUID() : 0, broadcast);
 }
 
+RE_ECS_Pool* RE_ECS_Pool::GetNewPoolFromID(UID id)
+{
+	RE_ECS_Pool* ret = new RE_ECS_Pool();
+
+	ret->CopyGOandChilds(gameObjectsPool.AtPtr(id), 0);
+
+	return ret;
+}
+
 eastl::vector<UID> RE_ECS_Pool::GetAllCompUID(ushortint type) const
 {
 	return componentsPool.GetAllCompUID(type);
@@ -156,15 +165,6 @@ const RE_Component* RE_ECS_Pool::GetComponentCPtr(UID poolid, ComponentType cTyp
 	return componentsPool.GetComponentCPtr(poolid, cType);
 }
 
-RE_ECS_Pool* RE_ECS_Pool::GetNewPoolFromID(UID id)
-{
-	RE_ECS_Pool* ret = new RE_ECS_Pool();
-
-	ret->CopyGOandChilds(gameObjectsPool.AtPtr(id), 0);
-
-	return ret;
-}
-
 eastl::vector<const char*> RE_ECS_Pool::GetAllResources()
 {
 	return componentsPool.GetAllResources();
@@ -185,6 +185,21 @@ void RE_ECS_Pool::ClearPool()
 	gameObjectsPool.Clear();
 	componentsPool.ClearComponents();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Serialization
 
 unsigned int RE_ECS_Pool::GetBinarySize() const
 {

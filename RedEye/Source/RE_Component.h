@@ -2,15 +2,10 @@
 #define __RE_COMPONENT_H__
 
 #include "Globals.h"
-
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
 
-class RE_GameObject;
-class RE_Json;
-class GameObjectsPool;
-
-enum ComponentType : ushortint
+enum ComponentType : unsigned short int
 {
 	C_EMPTY = 0x00,
 	C_TRANSFORM,
@@ -48,7 +43,7 @@ public:
 		type(type), go(go), active(start_active) {}
 	virtual ~RE_Component() {}
 
-	virtual UID PoolSetUp(GameObjectsPool* pool, const UID parent, bool report_parent = false);
+	virtual UID PoolSetUp(class GameObjectsPool* pool, const UID parent, bool report_parent = false);
 	virtual void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const UID parent) {}
 
 	virtual void Init() {}
@@ -77,13 +72,13 @@ public:
 	void SetType(ComponentType t) { type = t; }
 	ComponentType GetType() const { return type; }
 	UID GetGOUID() const { return go; }
-	RE_GameObject* GetGOPtr() const;
+	class RE_GameObject* GetGOPtr() const;
 	const RE_GameObject* GetGOCPtr() const;
 	void SetParent(const UID parent) { useParent = (go = parent); };
 
 	virtual eastl::vector<const char*> GetAllResources() { return eastl::vector<const char*>(); }
 
-	virtual void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const {}
+	virtual void SerializeJson(class RE_Json* node, eastl::map<const char*, int>* resources) const {}
 	virtual void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) {}
 
 	virtual unsigned int GetBinarySize() const { return 0; }
@@ -101,8 +96,10 @@ protected:
 
 	bool active = true;
 	ComponentType type = C_EMPTY;
+
 	UID id = 0;
 	UID go = 0;
+
 	GameObjectsPool* pool_gos = nullptr;
 	bool useParent = true;
 };

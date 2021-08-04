@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __RE_PROFILER__
+#define __RE_PROFILER__
 
 //#define PROFILING_ENABLED // undefine to disable any profiling methods
 #define INTERNAL_PROFILING // undefine to use Optick Profiling
@@ -252,3 +253,4 @@ namespace RE_Profiler
 
 #endif // PROFILING_ENABLED
 
+#endif // !__RE_PROFILER__

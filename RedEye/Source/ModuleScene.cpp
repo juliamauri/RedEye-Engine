@@ -33,7 +33,6 @@
 #include <EASTL/vector.h>
 
 ModuleScene::ModuleScene() :
-	Module("Scene"),
 	cams(new RE_CameraManager()),
 	primitives(new RE_PrimitiveManager()) {}
 
@@ -42,7 +41,7 @@ ModuleScene::~ModuleScene() { DEL(cams); DEL(primitives); }
 bool ModuleScene::Init()
 {
 	RE_PROFILE(PROF_Init, PROF_ModuleScene);
-	RE_LOG("Initializing Module %s", name);
+	RE_LOG("Initializing Module Scene");
 	cams->Init();
 	primitives->Init();
 	return true;
@@ -51,7 +50,7 @@ bool ModuleScene::Init()
 bool ModuleScene::Start()
 {
 	RE_PROFILE(PROF_Start, PROF_ModuleScene);
-	RE_LOG("Starting Module %s", name);
+	RE_LOG("Starting Module Scene");
 
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 
@@ -106,7 +105,7 @@ void ModuleScene::CleanUp()
 
 void ModuleScene::DrawEditor()
 {
-	if (ImGui::CollapsingHeader(name))
+	if (ImGui::CollapsingHeader("Scene"))
 	{
 		int total_count = scenePool.TotalGameObjects();
 		int static_count = static_tree.GetCount();
@@ -121,7 +120,7 @@ void ModuleScene::DrawEditor()
 	}
 }
 
-void ModuleScene::DebugDraw() const
+void ModuleScene::DrawSpacePartitioning() const
 {
 	static_tree.Draw();
 	dynamic_tree.Draw();

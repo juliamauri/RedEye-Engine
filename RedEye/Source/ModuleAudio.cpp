@@ -63,7 +63,7 @@ bool ModuleAudio::Init()
 	bool ret = true;
 
 	RE_PROFILE(PROF_Init, PROF_ModuleAudio);
-	RE_LOG("Initializing Module %s", name);
+	RE_LOG("Initializing Module Audio");
 	RE_SOFT_NVS("Wwise SDK", AK_WWISESDK_VERSIONNAME, "https://www.audiokinetic.com/products/wwise/");
 
 	AkMemSettings memSettings;
@@ -130,7 +130,7 @@ static AkGameObjectID MY_DEFAULT_LISTENER = 0;
 bool ModuleAudio::Start()
 {
 	RE_PROFILE(PROF_Start, PROF_ModuleAudio);
-	RE_LOG("Starting Module %s", name);
+	RE_LOG("Starting Module Audio");
 	AK::StreamMgr::SetCurrentLanguage(AKTEXT("English(US)"));
 	
 	MY_DEFAULT_LISTENER = 0;
@@ -165,11 +165,9 @@ void ModuleAudio::CleanUp()
 	AK::MemoryMgr::Term();
 }
 
-void ModuleAudio::RecieveEvent(const Event& e) {}
-
 void ModuleAudio::DrawEditor()
 {
-	if (ImGui::CollapsingHeader(name))
+	if (ImGui::CollapsingHeader("Audio"))
 	{
 		static eastl::string rootPath = RE_FS->GetExecutableDirectory();
 		static eastl::string tempPath = audioBanksFolderPath;
@@ -286,7 +284,7 @@ void ModuleAudio::DrawWwiseElementsDetected()
 void ModuleAudio::Load()
 {
 	RE_PROFILE(PROF_Load, PROF_ModuleAudio);
-	RE_Json* node = RE_FS->ConfigNode(name);
+	RE_Json* node = RE_FS->ConfigNode("Audio");
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
 	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
 	DEL(node);
@@ -295,7 +293,7 @@ void ModuleAudio::Load()
 void ModuleAudio::Save() const
 {
 	RE_PROFILE(PROF_Save, PROF_ModuleAudio);
-	RE_Json* node = RE_FS->ConfigNode(name);
+	RE_Json* node = RE_FS->ConfigNode("Audio");
 	node->PushString("FolderBanks", audioBanksFolderPath.c_str());
 	DEL(node);
 }

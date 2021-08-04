@@ -118,4 +118,6 @@ private:
 	math::LCG lcg;
 };
 
+#define RANDOM_UID RE_MATH->RandomUID()
+
 #endif // !__RE_MATH_H__

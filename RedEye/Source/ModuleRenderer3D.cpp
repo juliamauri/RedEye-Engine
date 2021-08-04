@@ -53,14 +53,14 @@ const char* RenderView::labels[12] = {
 						"Fustrum Culling", "Override Culling", "Outline Selection", "Debug Draw", "Skybox", "Blending",
 						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clip Distance"};
 
-ModuleRenderer3D::ModuleRenderer3D() : Module("Renderer3D"), fbos(new RE_FBOManager()) {}
+ModuleRenderer3D::ModuleRenderer3D() : fbos(new RE_FBOManager()) {}
 ModuleRenderer3D::~ModuleRenderer3D() { DEL(fbos); }
 
 bool ModuleRenderer3D::Init()
 {
 	RE_PROFILE(PROF_Init, PROF_ModuleRender);
 	bool ret = false;
-	RE_LOG("Initializing Module %s", name);
+	RE_LOG("Initializing Module Renderer3D");
 	RE_LOG_SECONDARY("Seting SDL/GL Attributes.");
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) < 0)
 		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_PROFILE_MASK: SDL_GL_CONTEXT_PROFILE_CORE'");
@@ -152,7 +152,7 @@ bool ModuleRenderer3D::Init()
 bool ModuleRenderer3D::Start()
 {
 	RE_PROFILE(PROF_Start, PROF_ModuleRender);
-	RE_LOG("Starting Module %s", name);
+	RE_LOG("Starting Module Renderer3D");
 	thumbnailView.fbos = { fbos->CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
 
 	render_views[VIEW_EDITOR].fbos = {
@@ -392,7 +392,7 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 
 void ModuleRenderer3D::DrawEditor()
 {
-	if(ImGui::CollapsingHeader(name))
+	if(ImGui::CollapsingHeader("Renderer3D"))
 	{
 		if (ImGui::Checkbox((vsync) ? "VSync Enabled" : "VSync Disabled", &vsync))
 			SetVSync(vsync);
@@ -432,7 +432,7 @@ void ModuleRenderer3D::Load()
 {
 	RE_PROFILE(PROF_Load, PROF_ModuleRender);
 	RE_LOG_SECONDARY("Loading Render3D config values:");
-	RE_Json* node = RE_FS->ConfigNode(name);
+	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
 
 	SetVSync(node->PullBool("vsync", vsync));
 	RE_LOG_TERCIARY((vsync) ? "VSync enabled." : "VSync disabled");
@@ -455,7 +455,7 @@ void ModuleRenderer3D::Load()
 void ModuleRenderer3D::Save() const
 {
 	RE_PROFILE(PROF_Save, PROF_ModuleRender);
-	RE_Json* node = RE_FS->ConfigNode(name);
+	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
 	node->PushBool("vsync", vsync);
 	for (unsigned int i = 0; i < render_views.size(); ++i)
 	{

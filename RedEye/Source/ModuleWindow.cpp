@@ -15,7 +15,7 @@ bool ModuleWindow::Init()
 {
 	bool ret = false;
 	RE_PROFILE(PROF_Init, PROF_ModuleWindow);
-	RE_LOG("Initializing Module %s", name);
+	RE_LOG("Initializing Module Window");
 	RE_LOG_SECONDARY("Init SDL video subsystem");
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) == 0)
 	{
@@ -29,7 +29,7 @@ bool ModuleWindow::Init()
 
 void ModuleWindow::DrawEditor()
 {
-	if (ImGui::CollapsingHeader(name))
+	if (ImGui::CollapsingHeader("Window"))
 	{
 		int max_w = GetMaxWidth(), max_h = GetMaxHeight();
 		ImGui::Text("Screen Size: %u x %u", max_w, max_h);
@@ -83,7 +83,7 @@ void ModuleWindow::Load()
 {
 	RE_PROFILE(PROF_Load, PROF_ModuleWindow);
 	RE_LOG_SECONDARY("Loading Window propieties from config:");
-	RE_Json* node = RE_FS->ConfigNode(name);
+	RE_Json* node = RE_FS->ConfigNode("Window");
 
 	/*/Use OpenGL 2.1 ?? TODO: check prefered GL Context version setting
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -108,7 +108,7 @@ void ModuleWindow::Load()
 void ModuleWindow::Save() const
 {
 	RE_PROFILE(PROF_Save, PROF_ModuleWindow);
-	RE_Json* node = RE_FS->ConfigNode(name);
+	RE_Json* node = RE_FS->ConfigNode("Window");
 	if (flags == 0u)
 	{
 		node->PushBool("Fullscreen", false);

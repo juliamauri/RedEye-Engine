@@ -1,7 +1,7 @@
 #ifndef __RESOURCEMANAGER_H__
 #define __RESOURCEMANAGER_H__
 
-#include "EventListener.h"
+#include "Event.h"
 #include "Resource.h"
 
 #include <EASTL/map.h>

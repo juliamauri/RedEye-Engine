@@ -459,8 +459,9 @@ void RE_CompParametric::ParametricSetUp(int _slices, int _stacks, float _radius)
 	target_radius = radius = RE_Math::CapF(_radius, min_r, max_r);
 	canChange = false;
 
-	if(primID =! -1) RE_SCENE->primitives->UnUsePrimitive(type, primID);
-	primID = (type == C_TORUS || type == C_TREFOILKNOT) ? slices * stacks * static_cast<int>(radius * 100.f) : slices * stacks;
+	if(primID != -1) RE_SCENE->primitives->UnUsePrimitive(type, primID);
+	int curves[2] = { 1, static_cast<int>(radius * 100.f) };
+	primID = slices * stacks * curves[type == C_TORUS || type == C_TREFOILKNOT];
 
 	auto md = RE_SCENE->primitives->GetPrimitiveMeshData(this, primID);
 	VAO = md.first;

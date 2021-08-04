@@ -25,7 +25,6 @@
 #include <EASTL/queue.h>
 
 ModuleEditor::ModuleEditor() :
-	Module("Editor"),
 	commands(new RE_CommandManager()),
 	thumbnails(new RE_ThumbnailManager())
 {
@@ -64,7 +63,7 @@ bool ModuleEditor::Init()
 {
 	bool ret = false;
 	RE_PROFILE(PROF_Init, PROF_ModuleEditor);
-	RE_LOG("Initializing Module %s", name);
+	RE_LOG("Initializing Module Editor");
 
 	// ImGui
 	RE_LOG_SECONDARY("Init ImGui");
@@ -448,7 +447,7 @@ void ModuleEditor::Draw() const
 
 void ModuleEditor::DrawEditor()
 {
-	if (ImGui::CollapsingHeader(name))
+	if (ImGui::CollapsingHeader("Editor"))
 	{
 		ImGui::DragFloat("Camera speed", &cam_speed, 0.1f, 0.1f, 100.0f, "%.1f");
 		ImGui::DragFloat("Camera sensitivity", &cam_sensitivity, 0.01f, 0.01f, 1.0f, "%.2f");
@@ -569,7 +568,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 		if (draw_quad_tree)
 		{
 			glColor4f(quad_tree_color[0], quad_tree_color[1], quad_tree_color[2], 1.0f);
-			RE_SCENE->DebugDraw();
+			RE_SCENE->DrawSpacePartitioning();
 		}
 
 		if (draw_cameras)

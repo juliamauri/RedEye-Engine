@@ -1,9 +1,8 @@
-#pragma once
+#ifndef __RE_ECS_POOL__
+#define __RE_ECS_POOL__
 
 #include "RE_ComponentsPool.h"
 #include "RE_GameObjectPool.h"
-
-class RE_Json;
 
 class RE_ECS_Pool
 {
@@ -38,32 +37,42 @@ public:
 
 	unsigned int TotalGameObjects() const { return gameObjectsPool.GetCount(); };
 
-	// Component Getters
+	RE_ECS_Pool* GetNewPoolFromID(UID id);
+
+	#pragma region Component Getters
+
+	RE_Component* GetComponentPtr(const UID poolid, ComponentType cType);
+	const RE_Component* GetComponentCPtr(const UID poolid, ComponentType cType) const;
+
 	eastl::vector<UID> GetAllCompUID(ushortint type = 0) const;
 	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
 	eastl::vector<const RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
 	eastl::vector<eastl::pair<const UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
 
-	RE_Component* GetComponentPtr(const UID poolid, ComponentType cType);
-	const RE_Component* GetComponentCPtr(const UID poolid, ComponentType cType) const;
+	#pragma endregion
 
-	RE_ECS_Pool* GetNewPoolFromID(UID id);
+	#pragma region Resources
 
-	// Resources
 	eastl::vector<const char*> GetAllResources();
 	void UseResources();
 	void UnUseResources();
 
-	// Serialization
+	#pragma endregion
+
+	#pragma region Serialization
+
 	unsigned int GetBinarySize() const;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources);
-
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources);
+	void SerializeJson(class RE_Json* node, eastl::map<const char*, int>* resources);
 	void DeserializeJson(RE_Json* node, eastl::map<int, const char* >* resources);
+
+	#pragma endregion
 
 private:
 
 	GameObjectsPool gameObjectsPool;
 	ComponentsPool componentsPool;
 };
+
+#endif // !__RE_ECS_POOL__

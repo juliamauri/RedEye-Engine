@@ -4,8 +4,6 @@
 #include "RE_CompCamera.h"
 #include "MathGeoLib/include/Geometry/Frustum.h"
 #include <EASTL/list.h>
-
-class RE_GameObject;
 	
 class RE_CameraManager
 {

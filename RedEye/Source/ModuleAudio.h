@@ -1,46 +1,49 @@
-#pragma once
-#include "Module.h"
+#ifndef __MODULEAUDIO__
+#define __MODULEAUDIO__
 
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 
-struct WwiseEvent {
+struct WwiseEvent
+{
+	WwiseEvent(const char* _name, unsigned long _ID) : name(_name), ID(_ID) {}
+
 	eastl::string name;
 	unsigned long ID;
-	WwiseEvent(const char* _name, unsigned long _ID) : name(_name), ID(_ID) {}
 };
 
-struct SoundBank {
+struct SoundBank
+{
+	SoundBank(const char* _name, unsigned long _ID) : name(_name), ID(_ID) {}
+	~SoundBank();
+
+	void AddEvent(const char* _name, unsigned long _ID) { events.push_back(WwiseEvent(_name, _ID)); }
+
+	void LoadBank();
+	void Unload();
+
 	eastl::string name;
 	eastl::string path;
 	unsigned long ID;
 	bool loaded = false;
 	eastl::vector<WwiseEvent> events;
-
-	SoundBank(const char* _name, unsigned long _ID) : name(_name), ID(_ID) {}
-	~SoundBank();
-	void AddEvent(const char* _name, unsigned long _ID) { events.push_back(WwiseEvent(_name, _ID)); }
-
-	void LoadBank();
-	void Unload();
 };
 
-class ModuleAudio : public Module
+class ModuleAudio
 {
 public:
-	ModuleAudio() : Module("Audio") {}
+	ModuleAudio() {}
 	~ModuleAudio() {}
 
-	bool Init() override;
-	bool Start() override;
-	void PostUpdate() override;
-	void CleanUp() override;
+	bool Init();
+	bool Start();
+	void PostUpdate();
+	void CleanUp();
 
-	void DrawEditor() override;
-	void RecieveEvent(const Event& e) override;
+	void DrawEditor();
 
-	void Load() override;
-	void Save() const override;
+	void Load();
+	void Save() const;
 
 	void DrawWwiseElementsDetected();
 	unsigned int ReadBanksChanges(unsigned int extra_ms = 0u);
@@ -60,3 +63,5 @@ private:
 	eastl::vector<SoundBank> soundbanks;
 	bool initBnkLoaded = false;
 };
+
+#endif // !__MODULEAUDIO__

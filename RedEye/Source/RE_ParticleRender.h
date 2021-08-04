@@ -1,13 +1,14 @@
-#pragma once
-#include "Resource.h"
+#ifndef __RE_PARTICLE_RENDER__
+#define __RE_PARTICLE_RENDER__
 
+#include "Resource.h"
 #include "RE_ParticleEmitter.h"
 #include "RE_Component.h"
 
-class RE_ParticleRender :
-    public ResourceContainer
+class RE_ParticleRender : public ResourceContainer
 {
 public:
+
 	RE_ParticleRender() {}
 	RE_ParticleRender(const char* metapath) : ResourceContainer(metapath) {}
 	~RE_ParticleRender() {}
@@ -51,3 +52,5 @@ private:
 	RE_ParticleEmitter::Particle_Dir particleDir = RE_ParticleEmitter::Particle_Dir::PS_Billboard;
 	math::float3 direction = { -1.0f,1.0f,0.5f };
 };
+
+#endif // !__RE_PARTICLE_RENDER__

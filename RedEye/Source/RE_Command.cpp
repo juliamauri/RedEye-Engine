@@ -1,7 +1,6 @@
 #include "RE_Command.h"
 
 #include "ModuleScene.h"
-#include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 
 void RE_CMDTransformPosition::execute()

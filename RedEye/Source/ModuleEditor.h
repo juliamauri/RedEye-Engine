@@ -2,26 +2,26 @@
 #define __MODULEEDITOR__
 
 #include "Globals.h"
-#include "Module.h"
+#include "Event.h"
 #include <EASTL/list.h>
 
 class SceneEditorWindow;
 class RE_ParticleEmitter;
 
-class ModuleEditor : public Module
+class ModuleEditor : public EventListener
 {
 public:
 	ModuleEditor();
 	~ModuleEditor();
 
 	// Module
-	bool Init() override;
-	bool Start() override;
-	void PreUpdate() override;
-	void Update() override;
-	void CleanUp() override;
+	bool Init();
+	bool Start();
+	void PreUpdate();
+	void Update();
+	void CleanUp();
 	void RecieveEvent(const Event& e) override;
-	void DrawEditor() override;
+	void DrawEditor();
 
 	// Draws
 	void Draw() const;

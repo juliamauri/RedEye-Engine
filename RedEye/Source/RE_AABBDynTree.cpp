@@ -3,8 +3,9 @@
 #include "MathGeoLib/include/Geometry/Frustum.h"
 #include "MathGeoLib/include/Geometry/LineSegment.h"
 #include "SDL2/include/SDL_assert.h"
+#include "Glew/include/glew.h"
 
-void RE_AABBDynTree::PushNode(UID go_index, AABB box)
+void RE_AABBDynTree::PushNode(Object_UID go_index, AABB box)
 {
 	// Stage 0: Allocate Leaf Node
 	int leafIndex = AllocateLeafNode(box, go_index);
@@ -108,7 +109,7 @@ void RE_AABBDynTree::PushNode(UID go_index, AABB box)
 	}
 }
 
-void RE_AABBDynTree::PopNode(UID go_index)
+void RE_AABBDynTree::PopNode(Object_UID go_index)
 {
 	SDL_assert(node_count > 0);
 	int index = objectToNode.at(go_index);
@@ -159,7 +160,7 @@ void RE_AABBDynTree::PopNode(UID go_index)
 	objectToNode.erase(go_index);
 }
 
-void RE_AABBDynTree::UpdateNode(UID go_index, AABB box)
+void RE_AABBDynTree::UpdateNode(Object_UID go_index, AABB box)
 {
 	SDL_assert(node_count > 0);
 	int index = objectToNode.at(go_index);
@@ -298,7 +299,7 @@ void RE_AABBDynTree::Clear()
 	poolmapped_.clear();
 }
 
-void RE_AABBDynTree::CollectIntersections(Ray ray, eastl::queue<UID>& indexes) const
+void RE_AABBDynTree::CollectIntersections(Ray ray, eastl::queue<Object_UID>& indexes) const
 {
 	if (node_count > 0)
 	{
@@ -327,7 +328,7 @@ void RE_AABBDynTree::CollectIntersections(Ray ray, eastl::queue<UID>& indexes) c
 	}
 }
 
-void RE_AABBDynTree::CollectIntersections(const Frustum frustum, eastl::queue<UID>& indexes) const
+void RE_AABBDynTree::CollectIntersections(const Frustum frustum, eastl::queue<Object_UID>& indexes) const
 {
 	if (node_count > 0)
 	{
@@ -515,7 +516,7 @@ void RE_AABBDynTree::Rotate(RE_AABBDynTreeNode& node, int index)
 	}
 }
 
-int RE_AABBDynTree::AllocateLeafNode(AABB box, UID index)
+int RE_AABBDynTree::AllocateLeafNode(AABB box, Object_UID index)
 {
 	RE_AABBDynTreeNode newNode;
 	SetLeaf(newNode, box, index);
@@ -542,7 +543,7 @@ int RE_AABBDynTree::AllocateInternalNode()
 	return node_index;
 }
 
-inline void RE_AABBDynTree::SetLeaf(RE_AABBDynTreeNode& node, AABB box, UID index)
+inline void RE_AABBDynTree::SetLeaf(RE_AABBDynTreeNode& node, AABB box, Object_UID index)
 {
 	node.box = box;
 	node.object_index = index;

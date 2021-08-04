@@ -1,15 +1,15 @@
 #ifndef __EDITORWINDOWS__
 #define __EDITORWINDOWS__
 
+#include "Globals.h"
+
 #include "MathGeoLib/include/Math/float4.h"
 #include "ImGui\imgui.h"
 #include "ImGuiWidgets/ImGuizmo/ImGuizmo.h"
+
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
-#include "Globals.h"
-
-class RE_GameObject;
 
 class EditorWindow
 {
@@ -165,7 +165,7 @@ public:
 	void PopUpError();
 	void PopUpSaveScene(bool fromExit = false, bool newScene = false);
 	void PopUpSaveParticles(bool need_particle_names = false, bool not_name = false, bool not_emissor = false, bool not_renderer = false, bool close_after = false);
-	void PopUpPrefab(RE_GameObject* go);
+	void PopUpPrefab(class RE_GameObject* go);
 	void PopUpDelRes(const char* res);
 	void PopUpDelUndeFile(const char* assetPath);
 

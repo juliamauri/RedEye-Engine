@@ -83,4 +83,12 @@ struct Event
 	const unsigned int timestamp;
 };
 
+class EventListener
+{
+public:
+
+	virtual ~EventListener() {}
+	virtual void RecieveEvent(const Event& e) = 0;
+};
+
 #endif // !__EVENT_H__

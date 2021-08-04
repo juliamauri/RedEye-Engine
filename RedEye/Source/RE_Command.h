@@ -1,8 +1,8 @@
-#pragma once
-#include "Globals.h"
-#include "MathGeoLib\include\MathGeoLib.h"
+#ifndef __RE_COMMAND__
+#define __RE_COMMAND__
 
-class RE_GameObject;
+#include "RE_GameObject.h"
+#include "MathGeoLib\include\MathGeoLib.h"
 
 class RE_Command
 {
@@ -56,3 +56,5 @@ private:
 	math::vec sBefore_;
 	math::vec s_;
 };
+
+#endif // !__RE_COMMAND__

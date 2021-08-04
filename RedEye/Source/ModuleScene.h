@@ -1,31 +1,28 @@
 #ifndef __MODULESCENE_H__
 #define __MODULESCENE_H__
 
-#include "Module.h"
+#include "Event.h"
 #include "RE_ECS_Pool.h"
 #include "RE_AABBDynTree.h"
 #include <EASTL/stack.h>
 
-class RE_Scene;
-class RE_CameraManager;
-class RE_PrimitiveManager;
-
-class ModuleScene : public Module
+class ModuleScene : public EventListener
 {
 public:
 	ModuleScene();
 	~ModuleScene();
 
-	bool Init() override;
-	bool Start() override;
-	void Update() override;
-	void PostUpdate() override;
-	void CleanUp() override;
-	void DrawEditor() override;
+	bool Init();
+	bool Start();
+	void Update();
+	void PostUpdate();
+	void CleanUp();
+	void DrawEditor();
+
 	void RecieveEvent(const Event& e) override;
 
 	// Draw space Partitioning
-	void DebugDraw() const;
+	void DrawSpacePartitioning() const;
 	
 	// Events
 	void OnPlay();
@@ -76,7 +73,7 @@ private:
 
 public:
 
-	RE_CameraManager* cams = nullptr;
+	class RE_CameraManager* cams = nullptr;
 	RE_PrimitiveManager* primitives = nullptr;
 
 private:
@@ -91,7 +88,7 @@ private:
 
 	eastl::stack<UID> to_delete;
 
-	RE_Scene* unsavedScene = nullptr;
+	class RE_Scene* unsavedScene = nullptr;
 	const char* currentScene = nullptr;
 
 	bool is_playing = false;

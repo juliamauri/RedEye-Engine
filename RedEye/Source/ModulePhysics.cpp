@@ -7,7 +7,7 @@
 #include "RE_Time.h"
 #include "RE_CompCamera.h"
 
-ModulePhysics::ModulePhysics() : Module("Physics") {}
+ModulePhysics::ModulePhysics() {}
 ModulePhysics::~ModulePhysics() {}
 
 void ModulePhysics::Update()
@@ -130,7 +130,7 @@ void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const
 
 void ModulePhysics::DrawEditor()
 {
-	if (ImGui::CollapsingHeader(name))
+	if (ImGui::CollapsingHeader("Physics"))
 	{
 		ImGui::Text("Updates/s: %.1f", updates_per_s);
 

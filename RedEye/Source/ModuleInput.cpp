@@ -13,7 +13,7 @@
 
 #define MAX_KEYS 300
 
-ModuleInput::ModuleInput() : Module("Input")
+ModuleInput::ModuleInput()
 {
 	keyboard = new KEY_STATE[MAX_KEYS];
 	memset(keyboard, KEY_IDLE, sizeof(KEY_STATE) * MAX_KEYS);
@@ -29,7 +29,7 @@ ModuleInput::~ModuleInput()
 bool ModuleInput::Init()
 {
 	RE_PROFILE(PROF_Init, PROF_ModuleInput);
-	RE_LOG("Initializing Module %s", name);
+	RE_LOG("Initializing Module Input");
 	RE_LOG_SECONDARY("Init SDL input & event subsystems");
 	bool ret = true;
 
@@ -84,7 +84,7 @@ void ModuleInput::PreUpdate()
 
 void ModuleInput::DrawEditor()
 {
-	if (ImGui::CollapsingHeader(name))
+	if (ImGui::CollapsingHeader("Input"))
 	{
 		ImGui::Text("Mouse");
 		ImGui::Text("X: %u\tY: %u", mouse.mouse_x, mouse.mouse_y);

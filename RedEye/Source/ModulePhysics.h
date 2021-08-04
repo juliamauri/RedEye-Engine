@@ -1,19 +1,18 @@
 #ifndef __MODULEPHYSICS__
 #define __MODULEPHYSICS__
 
-#include "Module.h"
 #include "ParticleManager.h"
 
 class RE_CompCamera;
 
-class ModulePhysics : public Module
+class ModulePhysics
 {
 public:
 	ModulePhysics();
 	~ModulePhysics();
 
-	void Update() override;
-	void CleanUp() override;
+	void Update();
+	void CleanUp();
 
 	void OnPlay(const bool was_paused);
 	void OnPause();
@@ -24,7 +23,7 @@ public:
 	void CallParticleEmitterLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
 
 	void DrawDebug(RE_CompCamera* current_camera) const;
-	void DrawEditor() override;
+	void DrawEditor();
 
 	RE_ParticleEmitter* AddEmitter(RE_ParticleEmitter* to_add);
 	void RemoveEmitter(RE_ParticleEmitter* emitter);

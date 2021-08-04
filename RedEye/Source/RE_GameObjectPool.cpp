@@ -12,9 +12,7 @@ void GameObjectsPool::Clear()
 
 UID GameObjectsPool::Push(RE_GameObject val)
 {
-	UID ret = 0;
-	if (RE_HashMap::Push(val, val.go_uid = RE_MATH->RandomUID())) ret = val.go_uid;
-	return ret;
+	return RE_HashMap::Push(val, val.go_uid = RANDOM_UID) ? val.go_uid : 0ull;
 }
 
 UID GameObjectsPool::GetNewGOUID()
@@ -145,6 +143,6 @@ void GameObjectsPool::DeserializeJson(RE_Json* node, ComponentsPool* cmpsPool)
 eastl::vector<UID> GameObjectsPool::GetAllKeys() const
 {
 	eastl::vector<UID> ret;
-	for (auto go : poolmapped_) ret.push_back(go.first);
+	for (auto &go : poolmapped_) ret.push_back(go.first);
 	return ret;
 }

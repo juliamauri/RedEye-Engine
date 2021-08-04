@@ -1,28 +1,25 @@
 #ifndef __ModuleWindow_H__
 #define __ModuleWindow_H__
 
-#include "Module.h"
-#include <EASTL/string.h>
+#include "Event.h"
 
-struct SDL_Window;
-
-class ModuleWindow : public Module
+class ModuleWindow : public EventListener
 {
 public:
 
-	ModuleWindow() : Module("Window") {}
+	ModuleWindow() {}
 	~ModuleWindow() {}
 
-	bool Init() override;
-	void DrawEditor() override;
-	void CleanUp() override;
+	bool Init();
+	void CleanUp();
 
+	void DrawEditor();
 	void RecieveEvent(const Event& e) override;
 
-	void Load() override;
-	void Save() const override;
+	void Load();
+	void Save() const;
 
-	SDL_Window* GetWindow() const;
+	struct SDL_Window* GetWindow() const;
 
 	int GetWidth() const;
 	int GetHeight() const;

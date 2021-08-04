@@ -1,14 +1,11 @@
 #ifndef __MODULERENDER3D_H__
 #define __MODULERENDER3D_H__
 
-#include "Module.h"
+#include "Event.h"
+
 #include "MathGeoLib/include/Math/float4.h"
 #include <EASTL/stack.h>
-
-class RE_FBOManager;
-class RE_CompCamera;
-class RE_Material;
-class RE_SkyBox;
+#include <EASTL/string.h>
 
 enum LightMode : int
 {
@@ -48,7 +45,7 @@ struct RenderView
 	LightMode light;
 	math::float4 clear_color;
 	math::float4 clip_distance;
-	RE_CompCamera* camera = nullptr;
+	class RE_CompCamera* camera = nullptr;
 
 	const unsigned int GetFBO() const;
 
@@ -63,20 +60,22 @@ enum RENDER_VIEWS : short
 	VIEW_OTHER
 };
 
-class ModuleRenderer3D : public Module 
+class ModuleRenderer3D : public EventListener 
 {
 public:
 	ModuleRenderer3D();
 	~ModuleRenderer3D();
 
-	bool Init() override;
-	bool Start() override;
-	void PostUpdate() override;
-	void CleanUp() override;
-	void DrawEditor() override;
+	bool Init();
+	bool Start();
+	void PostUpdate();
+	void CleanUp();
+
+	void DrawEditor();
 	void RecieveEvent(const Event& e) override;
-	void Load() override;
-	void Save() const override;
+
+	void Load();
+	void Save() const;
 
 	// Editor Values
 	void SetVSync(bool enable);
@@ -123,12 +122,13 @@ public:
 		T_R_SKYBOX
 	};
 	
-	struct RenderQueue {
-		RenderQueue(RenderType t, RenderView& rv, const char* r, bool re = false) : type(t), renderview(rv), resMD5(r), redo(re) {}
+	struct RenderQueue
+	{
 		RenderType type;
 		RenderView& renderview;
 		const char* resMD5;
 		bool redo = false;
+		RenderQueue(RenderType t, RenderView& rv, const char* r, bool re = false) : type(t), renderview(rv), resMD5(r), redo(re) {}
 	};
 
 private:
@@ -137,9 +137,9 @@ private:
 	void DrawDebug(const RenderView& render_view);
 	void DrawParticleEditor(RenderView& render_view);
 	void DrawSkyBox();
-	void ThumbnailGameObject(RE_GameObject* go);
-	void ThumbnailMaterial(RE_Material* mat);
-	void ThumbnailSkyBox(RE_SkyBox* skybox);
+	void ThumbnailGameObject(class RE_GameObject* go);
+	void ThumbnailMaterial(class RE_Material* mat);
+	void ThumbnailSkyBox(class RE_SkyBox* skybox);
 
 	// Render Flags
 	void inline SetWireframe(bool enable);
@@ -157,7 +157,7 @@ private:
 
 public:
 
-	RE_FBOManager* fbos = nullptr;
+	class RE_FBOManager* fbos = nullptr;
 
 private:
 
@@ -195,7 +195,6 @@ private:
 
 	// Light pass render
 	bool shareLightPass = false;
-
 };
 
 #endif // !__MODULERENDER3D_H__

@@ -342,9 +342,6 @@
     <ClInclude Include="Event.h">
       <Filter>Source\Application\Modules\Input\Events System</Filter>
     </ClInclude>
-    <ClInclude Include="EventListener.h">
-      <Filter>Source\Application\Modules\Input\Events System</Filter>
-    </ClInclude>
     <ClInclude Include="PhysFS\include\physfs.h">
       <Filter>3rd Party\PhysFS</Filter>
     </ClInclude>
@@ -1304,9 +1301,6 @@
     </ClInclude>
     <ClInclude Include="ModulePhysics.h">
       <Filter>Source\Application\Modules\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Module.h">
-      <Filter>Source\Application\Modules</Filter>
     </ClInclude>
     <ClInclude Include="ImGuiWidgets\ImGuizmo\ImGuizmo.h">
       <Filter>3rd Party\ImGuiWidgets\ImGuizmo</Filter>

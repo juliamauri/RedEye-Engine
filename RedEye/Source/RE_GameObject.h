@@ -1,46 +1,28 @@
 #ifndef __RE_GAMEOBJECT_H__
 #define __RE_GAMEOBJECT_H__
 
-#include "EventListener.h"
 #include "Globals.h"
 
 #include "MathGeoLib\include\MathGeoLib.h"
 #include <EASTL/list.h>
 #include <EASTL/vector.h>
 #include <EASTL/stack.h>
-#include <EASTL/map.h>
-
-class RE_Component;
-class RE_CompTransform;
-class RE_CompMesh;
-class RE_CompWater;
-class RE_CompParticleEmitter;
-class RE_CompCamera;
-class RE_CompLight;
-class RE_CompPrimitive;
-class RE_Json;
-class GameObjectsPool;
-class ComponentsPool;
+#include <EASTL/string.h>
 
 /* Todo Rub: bitmask go flags with properties
-enum GO_Flags : char
-{
-	ACTIVE,
-	PARENT_ACTIVE,
-	STATIC,
-	DYNAMIC,
-	KINEMATIC,
-	HAS_CHILDS,
-	IS_ROOT
-};*/
+enum GO_Flags : char { ACTIVE, PARENT_ACTIVE, STATIC, DYNAMIC, KINEMATIC, HAS_CHILDS, IS_ROOT };*/
 
-class RE_GameObject : public EventListener
+class RE_GameObject
 {
 public:
 
 	RE_GameObject();
 	~RE_GameObject();
-	void SetUp(GameObjectsPool* goPool, ComponentsPool* compPool, const char* name,
+
+	friend class GameObjectsPool;
+	friend class RE_ECS_Pool;
+
+	void SetUp(GameObjectsPool* goPool, class ComponentsPool* compPool, const char* name,
 		const UID parent = 0, const bool start_active = true, const bool isStatic = true);
 
 	// Draws
@@ -50,19 +32,19 @@ public:
 	void DrawChilds() const;
 
 	// Component Getters
+	class RE_CompTransform* GetTransformPtr() const;
+	class RE_Component* GetRenderGeo() const;
+	class RE_CompMesh* GetMesh() const;
+	class RE_CompWater* GetWater() const;
+	class RE_CompParticleEmitter* GetParticleSystem() const;
+	class RE_CompCamera* GetCamera() const;
+	class RE_CompLight* GetLight() const;
+	class RE_CompPrimitive* GetPrimitive() const;
+
 	RE_Component* GetCompPtr(const ushortint type) const;
 	UID GetCompUID(const ushortint type) const;
 	bool HasRenderGeo() const;
 	bool HasActiveRenderGeo() const;
-
-	RE_CompTransform* GetTransformPtr() const;
-	RE_Component* GetRenderGeo() const;
-	RE_CompMesh* GetMesh() const;
-	RE_CompWater* GetWater() const;
-	RE_CompParticleEmitter* GetParticleSystem() const;
-	RE_CompCamera* GetCamera() const;
-	RE_CompLight* GetLight() const;
-	RE_CompPrimitive* GetPrimitive() const;
 
 	eastl::list<RE_Component*> GetComponentsPtr() const;
 	eastl::list<RE_Component*> GetStackableComponentsPtr() const;
@@ -153,28 +135,20 @@ public:
 	// Raycast
 	bool CheckRayCollision(const math::Ray& global_ray, float& distance) const;
 
+	//POOL
+	UID GetUID() const;
+	struct ComponentData { UID uid = 0ull; ushortint type = 0u; };
+
 	// Resources
 	void UseResources();
 	void UnUseResources();
 
 	// Serialization
 	unsigned int GetBinarySize() const;
-	void SerializeJson(RE_Json* node);
+	void SerializeJson(class RE_Json* node);
 	void DeserializeJSON(RE_Json* node, GameObjectsPool* goPool, ComponentsPool* cmpsPool);
 	void SerializeBinary(char*& cursor);
 	void DeserializeBinary(char*& cursor, GameObjectsPool* goPool, ComponentsPool* compPool);
-
-	//POOL
-	UID GetUID() const;
-
-	friend class GameObjectsPool;
-	friend class RE_ECS_Pool;
-	struct ComponentData
-	{
-		ComponentData(UID id = 0ull, ushortint type = 0u) : uid(id), type(type) {}
-		UID uid;
-		ushortint type;
-	};
 
 private:
 
@@ -190,8 +164,8 @@ private:
 	inline const RE_GameObject* ChildCPtr(const UID child) const;
 
 public:
-
-		eastl::string name;
+	
+	eastl::string name;
 
 private:
 

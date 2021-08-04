@@ -1,7 +1,7 @@
 #ifndef __APP_H__
 #define __APP_H__
 
-#include "EventListener.h"
+#include "Event.h"
 #include "RE_ConsoleLog.h"
 
 class Application : public EventListener
@@ -14,9 +14,8 @@ public:
 	bool Init(int argc, char* argv[]);
 	void MainLoop();
 	void CleanUp();
-
-	void RecieveEvent(const Event& e) override;
 	void Quit();
+	void RecieveEvent(const Event& e) override;
 
 private:
 
@@ -24,9 +23,6 @@ private:
 	void SaveConfig();
 
 public:
-
-	int argc = 0;
-	char** argv = nullptr;
 
 	// Utility
 	RE_ConsoleLog log;
@@ -49,6 +45,9 @@ public:
 	class RE_ResourceManager* res = nullptr;
 
 private:
+
+	int argc = 0;
+	char** argv = nullptr;
 
 	enum AppFlags : char
 	{

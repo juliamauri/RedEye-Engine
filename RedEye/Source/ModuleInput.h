@@ -1,7 +1,7 @@
 #ifndef __MODULEINPUT_H__
 #define __MODULEINPUT_H__
 
-#include "Module.h"
+#include "Event.h"
 #include <EASTL/queue.h>
 
 #define MAX_MOUSE_BUTTONS 5
@@ -31,16 +31,16 @@ struct MouseData
 	bool Moved() const;
 };
 
-class ModuleInput : public Module
+class ModuleInput
 {
 public:
 	ModuleInput();
 	~ModuleInput();
 
-	bool Init() override;
-	void PreUpdate() override;
-	void DrawEditor() override;
-	void CleanUp() override;
+	bool Init();
+	void PreUpdate();
+	void DrawEditor();
+	void CleanUp();
 
 	// Keyboard
 	KEY_STATE GetKey(const unsigned int id) const;
@@ -65,7 +65,7 @@ private:
 
 	// Input devices
 	KEY_STATE* keyboard = nullptr;
-	MouseData mouse;
+	MouseData mouse = {};
 
 	// Events
 	friend Event;

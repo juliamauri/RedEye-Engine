@@ -92,12 +92,20 @@ bool Application::Init(int _argc, char* _argv[])
 
 		if (fs->Init(argc = _argc, argv = _argv))
 		{
-			if (input->Init() && window->Init() && scene->Init() && physics->Init() && editor->Init() && renderer->Init() && audio->Init())
+			if (input->Init() &&
+				window->Init() &&
+				scene->Init() &&
+				editor->Init() &&
+				renderer->Init() &&
+				audio->Init())
 			{
 				hardware->Init();
 				res->Init();
 
-				if (scene->Start() && physics->Start() && editor->Start() && renderer->Start() && audio->Start())
+				if (scene->Start() &&
+					editor->Start() &&
+					renderer->Start() &&
+					audio->Start())
 				{
 					res->ThumbnailResources();
 					ret = true;
@@ -168,6 +176,11 @@ void Application::CleanUp()
 		SDL_Quit();
 }
 
+void Application::Quit()
+{
+	flags |= WANT_TO_QUIT;
+}
+
 void Application::RecieveEvent(const Event& e)
 {
 	switch (e.type)
@@ -208,11 +221,6 @@ void Application::RecieveEvent(const Event& e)
 	case REQUEST_SAVE: flags |= SAVE_CONFIG; break;
 	case REQUEST_QUIT: flags |= WANT_TO_QUIT; break;
 	default: break;	}
-}
-
-void Application::Quit()
-{
-	flags |= WANT_TO_QUIT;
 }
 
 void Application::LoadConfig()

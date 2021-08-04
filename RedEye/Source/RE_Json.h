@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __RE_JSON__
+#define __RE_JSON__
 
 #include "RapidJson\include\rapidjson.h"
 #include "RapidJson\include\document.h"
@@ -76,3 +77,4 @@ private:
 	eastl::string pointerPath;
 };
 
+#endif // !__RE_JSON__

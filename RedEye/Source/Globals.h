@@ -1,13 +1,14 @@
-#pragma once
+#ifndef __GLOBALS__
+#define __GLOBALS__
 
 // Engine data
-#define ENGINE_NAME "RedEye Engine"
-#define ENGINE_VERSION "5.0"
-#define ENGINE_ORGANIZATION "RedEye"
-#define ENGINE_AUTHOR_1 "Juli Mauri Costa"
-#define ENGINE_AUTHOR_2 "Ruben Sardon Roldan"
-#define ENGINE_DESCRIPTION "RedEye Engine is a 3D Game Engine Sofware."
-#define ENGINE_LICENSE "GNU General Public License v3.0"
+constexpr auto ENGINE_NAME = "RedEye Engine";
+constexpr auto ENGINE_VERSION = "5.0";
+constexpr auto ENGINE_ORGANIZATION = "RedEye";
+constexpr auto ENGINE_AUTHOR_1 = "Juli Mauri Costa";
+constexpr auto ENGINE_AUTHOR_2 = "Ruben Sardon Roldan";
+constexpr auto ENGINE_DESCRIPTION = "RedEye Engine is a 3D Game Engine Sofware.";
+constexpr auto ENGINE_LICENSE = "GNU General Public License v3.0";
 
 // Useful types
 typedef unsigned int uint;
@@ -45,3 +46,5 @@ void GLAPIENTRY MessageCallback(
 	GLsizei length,
 	const GLchar* message,
 	const void* userParam);
+
+#endif // !__GLOBALS__
