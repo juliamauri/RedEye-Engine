@@ -65,6 +65,11 @@
 	#endif
 
 	#if defined(EA_PROCESSOR_X86)
+		extern "C" int64_t _InterlockedExchange64_INLINE(int64_t volatile* Target, int64_t Value);
+		extern "C" int64_t _InterlockedExchangeAdd64_INLINE(int64_t volatile* Addend, int64_t Value);
+		extern "C" int64_t _InterlockedAnd64_INLINE(int64_t volatile* Target, int64_t Value);
+		extern "C" int64_t _InterlockedOr64_INLINE(int64_t volatile* Target, int64_t Value);
+		extern "C" int64_t _InterlockedXor64_INLINE(int64_t volatile* Target, int64_t Value);
 		#define _InterlockedExchange64		_InterlockedExchange64_INLINE
 		#define _InterlockedExchangeAdd64	_InterlockedExchangeAdd64_INLINE
 		#define _InterlockedAnd64			_InterlockedAnd64_INLINE
