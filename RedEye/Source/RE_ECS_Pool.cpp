@@ -19,7 +19,7 @@ RE_GameObject* RE_ECS_Pool::AddGO(const char* name, GO_UID parent, bool broadcas
 	RE_GameObject* ret = gameObjectsPool.AtPtr(new_go_uid);
 	ret->SetUp(&gameObjectsPool, &componentsPool, name, parent);
 
-	if (broadcast) RE_INPUT->Push(GO_HAS_NEW_CHILD, RE_SCENE, parent, new_go_uid);
+	if (broadcast) RE_INPUT->Push(RE_EventType::GO_HAS_NEW_CHILD, RE_SCENE, parent, new_go_uid);
 
 	return ret;
 }

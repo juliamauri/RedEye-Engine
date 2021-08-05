@@ -104,9 +104,6 @@ public:
 	void PushSceneRend(RenderView& rV);
 	void PushThumnailRend(const char* md5, bool redo = false);
 
-	//Get Render Debug
-	void GetCurrentLightsCount(unsigned int& lightC, unsigned int& pLightC, bool& sharedLP);
-
 	math::float4 GetRenderViewClearColor(RENDER_VIEWS r_view)const;
 	LightMode GetRenderViewLightMode(RENDER_VIEWS r_view)const;
 	bool GetRenderViewDebugDraw(RENDER_VIEWS r_view)const;

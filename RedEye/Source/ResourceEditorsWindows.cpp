@@ -1,4 +1,4 @@
-#include "EditorWindows.h"
+#include "ResourceEditorsWindows.h"
 
 #include "RE_Memory.h"
 #include "RE_FileSystem.h"
@@ -20,9 +20,12 @@
 #include "RE_SkyBox.h"
 #include "RE_Shader.h"
 #include "RE_Prefab.h"
+#include "RE_ParticleEmitter.h"
 #include "RE_ParticleEmitterBase.h"
 #include "RE_GameObject.h"
 #include "RE_Particle.h"
+
+#include "PopUpWindow.h"
 
 #include "ImGui/misc/cpp/imgui_stdlib.h"
 #include "ImGuiWidgets/ImGuiColorTextEdit/TextEditor.h"
@@ -668,11 +671,11 @@ void WaterPlaneResourceWindow::Draw(bool secondary)
 }
 
 
-ParticleEmiiterEditorWindow::ParticleEmiiterEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
+ParticleEmitterEditorWindow::ParticleEmitterEditorWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
 
-ParticleEmiiterEditorWindow::~ParticleEmiiterEditorWindow() {}
+ParticleEmitterEditorWindow::~ParticleEmitterEditorWindow() {}
 
-void ParticleEmiiterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const char* md5)
+void ParticleEmitterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const char* md5)
 {
 	if (emiter_md5 != md5 || md5 == nullptr) {
 		if (active || simulation || emiter_md5) {
@@ -700,7 +703,7 @@ void ParticleEmiiterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const ch
 	}
 }
 
-void ParticleEmiiterEditorWindow::SaveEmitter(bool close, const char* emitter_name, const char* emissor_base, const char* renderer_base)
+void ParticleEmitterEditorWindow::SaveEmitter(bool close, const char* emitter_name, const char* emissor_base, const char* renderer_base)
 {
 	if (emiter_md5)
 	{
@@ -724,13 +727,13 @@ void ParticleEmiiterEditorWindow::SaveEmitter(bool close, const char* emitter_na
 	else if (close) CloseEditor();
 }
 
-void ParticleEmiiterEditorWindow::NextOrClose()
+void ParticleEmitterEditorWindow::NextOrClose()
 {
 	if (load_next)LoadNextEmitter();
 	else CloseEditor();
 }
 
-void ParticleEmiiterEditorWindow::CloseEditor()
+void ParticleEmitterEditorWindow::CloseEditor()
 {
 	if (simulation) RE_PHYSICS->RemoveEmitter(simulation);
 	simulation = nullptr;
@@ -741,7 +744,7 @@ void ParticleEmiiterEditorWindow::CloseEditor()
 	active = false;
 }
 
-void ParticleEmiiterEditorWindow::LoadNextEmitter()
+void ParticleEmitterEditorWindow::LoadNextEmitter()
 {
 	CloseEditor();
 
@@ -756,16 +759,16 @@ void ParticleEmiiterEditorWindow::LoadNextEmitter()
 	simulation = nullptr;
 }
 
-void ParticleEmiiterEditorWindow::UpdateViewPort()
+void ParticleEmitterEditorWindow::UpdateViewPort()
 {
 	RE_CameraManager::ParticleEditorCamera()->GetTargetViewPort(viewport);
 	viewport.x = (width - viewport.z) * 0.5f;
 	viewport.y = (heigth - viewport.w) * 0.5f + 20;
 }
 
-void ParticleEmiiterEditorWindow::Recalc() { recalc = true; }
+void ParticleEmitterEditorWindow::Recalc() { recalc = true; }
 
-void ParticleEmiiterEditorWindow::Draw(bool secondary)
+void ParticleEmitterEditorWindow::Draw(bool secondary)
 {
 	if (simulation != nullptr)
 	{

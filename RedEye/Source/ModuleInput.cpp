@@ -3,14 +3,15 @@
 #include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "Application.h"
-#include "ModuleScene.h"
 #include "ModuleWindow.h"
-#include "ModuleRenderer3D.h"
+#include "ModuleScene.h"
 #include "ModuleEditor.h"
+#include "ModuleRenderer3D.h"
 #include "RE_FileSystem.h"
-#include "EditorWindows.h"
+#include "PopUpWindow.h"
 
 #include "SDL2\include\SDL.h"
+//#include "ImGui/imgui.h"
 
 #define MAX_KEYS 300
 
@@ -77,7 +78,7 @@ void ModuleInput::PreUpdate()
 	while (!events_queue.empty())
 	{
 		const Event e = events_queue.front();
-		if (e.type < MAX_EVENT_TYPES && e.listener != nullptr)
+		if (e.type < RE_EventType::MAX_EVENT_TYPES && e.listener != nullptr)
 			e.listener->RecieveEvent(e);
 		events_queue.pop();
 	}
@@ -143,7 +144,7 @@ void ModuleInput::HandleSDLEventQueue()
 		/* Application events */
 		case SDL_QUIT:/**< User-requested quit */
 			if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSaveScene(true);
-			else Push(REQUEST_QUIT, App);
+			else Push(RE_EventType::REQUEST_QUIT, App);
 			break;
 		case SDL_APP_TERMINATING:/**< The application is being terminated by the OS
 								Called on iOS in applicationWillTerminate()
@@ -172,14 +173,14 @@ void ModuleInput::HandleSDLEventQueue()
 			case SDL_WINDOWEVENT_HIDDEN:/**< Window has been hidden */ break;
 			case SDL_WINDOWEVENT_EXPOSED:/**< Window has been exposed and should be redrawn */ break;
 			case SDL_WINDOWEVENT_MOVED:/**< Window has been moved to data1, data2 */
-				Push(WINDOW_MOVED, RE_WINDOW, RE_Cvar(e.window.data1), RE_Cvar(e.window.data2));
+				Push(RE_EventType::WINDOW_MOVED, RE_WINDOW, RE_Cvar(e.window.data1), RE_Cvar(e.window.data2));
 				break;
 			case SDL_WINDOWEVENT_RESIZED:/**< Window has been resized to data1xdata2 */
 				// this sneaky event is always preceded by SDL_WINDOWEVENT_SIZE_CHANGED
 				//App->renderer3d->MainContextChanged(width = e->window.data1, height = e->window.data2);
 				break;
 			case SDL_WINDOWEVENT_SIZE_CHANGED:/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
-				Push(WINDOW_SIZE_CHANGED, RE_WINDOW, RE_Cvar(e.window.data1), RE_Cvar(e.window.data2));
+				Push(RE_EventType::WINDOW_SIZE_CHANGED, RE_WINDOW, RE_Cvar(e.window.data1), RE_Cvar(e.window.data2));
 				break;
 			case SDL_WINDOWEVENT_MINIMIZED:/**< Window has been minimized */ break;
 			case SDL_WINDOWEVENT_MAXIMIZED:/**< Window has been maximized */ break;
@@ -191,7 +192,7 @@ void ModuleInput::HandleSDLEventQueue()
 			case SDL_WINDOWEVENT_CLOSE:/**< The window manager requests that the window be closed */
 			{
 				if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSaveScene(true);
-				else Push(REQUEST_QUIT, App);
+				else Push(RE_EventType::REQUEST_QUIT, App);
 				break;
 			}
 			}

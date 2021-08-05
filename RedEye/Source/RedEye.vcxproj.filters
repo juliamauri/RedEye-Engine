@@ -49,12 +49,6 @@
     <ClCompile Include="RE_InternalResources.cpp">
       <Filter>Source\Application\Resources\Internal</Filter>
     </ClCompile>
-    <ClCompile Include="EditorWindows.cpp">
-      <Filter>Source\Application\Modules\Editor\Editor Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="ResourceEditorsWindows.cpp">
-      <Filter>Source\Application\Modules\Editor\Editor Windows</Filter>
-    </ClCompile>
     <ClCompile Include="EA\EAStdC\EACallback.cpp">
       <Filter>3rd Party\EA\StdC</Filter>
     </ClCompile>
@@ -182,10 +176,10 @@
       <Filter>Source\Application</Filter>
     </ClCompile>
     <ClCompile Include="RE_FileSystem.cpp">
-      <Filter>Source\Application\FileSystem</Filter>
+      <Filter>Source\Application\Utility\FileSystem</Filter>
     </ClCompile>
     <ClCompile Include="RE_AABBDynTree.cpp">
-      <Filter>Source\Utility\Space Partition</Filter>
+      <Filter>Source\Application\Utility\Space Partition</Filter>
     </ClCompile>
     <ClCompile Include="RE_Cvar.cpp">
       <Filter>Source\Application\Modules\Input\Events System</Filter>
@@ -245,25 +239,25 @@
       <Filter>Source\Application\Resources\ECS</Filter>
     </ClCompile>
     <ClCompile Include="RE_Config.cpp">
-      <Filter>Source\Application\FileSystem\File Containers</Filter>
+      <Filter>Source\Application\Utility\FileSystem\File Containers</Filter>
     </ClCompile>
     <ClCompile Include="RE_FileBuffer.cpp">
-      <Filter>Source\Application\FileSystem\File Containers</Filter>
+      <Filter>Source\Application\Utility\FileSystem\File Containers</Filter>
     </ClCompile>
     <ClCompile Include="RE_Json.cpp">
-      <Filter>Source\Application\FileSystem\File Containers</Filter>
+      <Filter>Source\Application\Utility\FileSystem\File Containers</Filter>
     </ClCompile>
     <ClCompile Include="RE_ECS_Importer.cpp">
       <Filter>Source\Application\Resources\ECS</Filter>
     </ClCompile>
     <ClCompile Include="RE_Time.cpp">
-      <Filter>Source\Application\Time</Filter>
+      <Filter>Source\Application\Utility\Time</Filter>
     </ClCompile>
     <ClCompile Include="RE_Timer.cpp">
-      <Filter>Source\Application\Time</Filter>
+      <Filter>Source\Application\Utility\Time</Filter>
     </ClCompile>
     <ClCompile Include="RE_QuadTree.cpp">
-      <Filter>Source\Utility\Space Partition</Filter>
+      <Filter>Source\Application\Utility\Space Partition</Filter>
     </ClCompile>
     <ClCompile Include="ModuleScene.cpp">
       <Filter>Source\Application\Modules\Scene</Filter>
@@ -284,10 +278,10 @@
       <Filter>Source\Application\Modules\Scene\Component Managers</Filter>
     </ClCompile>
     <ClCompile Include="RE_Hardware.cpp">
-      <Filter>Source\Application\Hardware</Filter>
+      <Filter>Source\Application\Utility\Hardware</Filter>
     </ClCompile>
     <ClCompile Include="RE_ConsoleLog.cpp">
-      <Filter>Source\Application\Console</Filter>
+      <Filter>Source\Application\Utility\Console</Filter>
     </ClCompile>
     <ClCompile Include="ModuleWindow.cpp">
       <Filter>Source\Application\Modules\Window</Filter>
@@ -299,7 +293,7 @@
       <Filter>Source\Application\Modules\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="RE_Math.cpp">
-      <Filter>Source\Application\Math</Filter>
+      <Filter>Source\Application\Utility\Math</Filter>
     </ClCompile>
     <ClCompile Include="ModulePhysics.cpp">
       <Filter>Source\Application\Modules\Physics</Filter>
@@ -314,7 +308,7 @@
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClCompile>
     <ClCompile Include="RE_Profiler.cpp">
-      <Filter>Source\Utility\Profiling</Filter>
+      <Filter>Source\Application\Utility\Profiling</Filter>
     </ClCompile>
     <ClCompile Include="RE_EmissionData.cpp">
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
@@ -333,6 +327,42 @@
     </ClCompile>
     <ClCompile Include="RE_CompParticleEmitter.cpp">
       <Filter>Source\Application\Modules\Scene\Entity Component System\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="PopUpWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\PopUp</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Console</Filter>
+    </ClCompile>
+    <ClCompile Include="HierarchyWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayPauseWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\PlayPause</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertiesWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Properties</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetsWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="WwiseWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Wwise</Filter>
+    </ClCompile>
+    <ClCompile Include="GameWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneEditorWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceEditorsWindows.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Resource Editor Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="AboutWindow.cpp">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\About</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -533,9 +563,6 @@
     </ClInclude>
     <ClInclude Include="RE_DefaultShaders.h">
       <Filter>Source\Application\Resources\Internal</Filter>
-    </ClInclude>
-    <ClInclude Include="EditorWindows.h">
-      <Filter>Source\Application\Modules\Editor\Editor Windows</Filter>
     </ClInclude>
     <ClInclude Include="EA\EABase\config\eacompiler.h">
       <Filter>3rd Party\EA\Base\config</Filter>
@@ -1159,10 +1186,10 @@
       <Filter>Source\Application\Modules\Editor</Filter>
     </ClInclude>
     <ClInclude Include="RE_FileSystem.h">
-      <Filter>Source\Application\FileSystem</Filter>
+      <Filter>Source\Application\Utility\FileSystem</Filter>
     </ClInclude>
     <ClInclude Include="RE_AABBDynTree.h">
-      <Filter>Source\Utility\Space Partition</Filter>
+      <Filter>Source\Application\Utility\Space Partition</Filter>
     </ClInclude>
     <ClInclude Include="RE_Cvar.h">
       <Filter>Source\Application\Modules\Input\Events System</Filter>
@@ -1237,25 +1264,25 @@
       <Filter>Source\Application\Resources\ECS</Filter>
     </ClInclude>
     <ClInclude Include="RE_Json.h">
-      <Filter>Source\Application\FileSystem\File Containers</Filter>
+      <Filter>Source\Application\Utility\FileSystem\File Containers</Filter>
     </ClInclude>
     <ClInclude Include="RE_Config.h">
-      <Filter>Source\Application\FileSystem\File Containers</Filter>
+      <Filter>Source\Application\Utility\FileSystem\File Containers</Filter>
     </ClInclude>
     <ClInclude Include="RE_FileBuffer.h">
-      <Filter>Source\Application\FileSystem\File Containers</Filter>
+      <Filter>Source\Application\Utility\FileSystem\File Containers</Filter>
     </ClInclude>
     <ClInclude Include="RE_ECS_Importer.h">
       <Filter>Source\Application\Resources\ECS</Filter>
     </ClInclude>
     <ClInclude Include="RE_Time.h">
-      <Filter>Source\Application\Time</Filter>
+      <Filter>Source\Application\Utility\Time</Filter>
     </ClInclude>
     <ClInclude Include="RE_Timer.h">
-      <Filter>Source\Application\Time</Filter>
+      <Filter>Source\Application\Utility\Time</Filter>
     </ClInclude>
     <ClInclude Include="RE_QuadTree.h">
-      <Filter>Source\Utility\Space Partition</Filter>
+      <Filter>Source\Application\Utility\Space Partition</Filter>
     </ClInclude>
     <ClInclude Include="ModuleScene.h">
       <Filter>Source\Application\Modules\Scene</Filter>
@@ -1264,7 +1291,7 @@
       <Filter>Source\Application\Resources</Filter>
     </ClInclude>
     <ClInclude Include="RE_Math.h">
-      <Filter>Source\Application\Math</Filter>
+      <Filter>Source\Application\Utility\Math</Filter>
     </ClInclude>
     <ClInclude Include="ModuleInput.h">
       <Filter>Source\Application\Modules\Input</Filter>
@@ -1279,10 +1306,10 @@
       <Filter>Source\Application\Modules\Scene\Component Managers</Filter>
     </ClInclude>
     <ClInclude Include="RE_Hardware.h">
-      <Filter>Source\Application\Hardware</Filter>
+      <Filter>Source\Application\Utility\Hardware</Filter>
     </ClInclude>
     <ClInclude Include="RE_ConsoleLog.h">
-      <Filter>Source\Application\Console</Filter>
+      <Filter>Source\Application\Utility\Console</Filter>
     </ClInclude>
     <ClInclude Include="ModuleWindow.h">
       <Filter>Source\Application\Modules\Window</Filter>
@@ -1312,7 +1339,7 @@
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
     </ClInclude>
     <ClInclude Include="RE_Profiler.h">
-      <Filter>Source\Utility\Profiling</Filter>
+      <Filter>Source\Application\Utility\Profiling</Filter>
     </ClInclude>
     <ClInclude Include="RE_EmissionData.h">
       <Filter>Source\Application\Modules\Physics\Particles</Filter>
@@ -1333,16 +1360,55 @@
       <Filter>Source\Application\Modules\Scene\Entity Component System\Components</Filter>
     </ClInclude>
     <ClInclude Include="RE_EngineInfo.h">
-      <Filter>Source\Utility</Filter>
+      <Filter>Source\Application\Utility</Filter>
     </ClInclude>
     <ClInclude Include="RE_DataTypes.h">
-      <Filter>Source\Utility</Filter>
+      <Filter>Source\Application\Utility</Filter>
     </ClInclude>
     <ClInclude Include="RE_Memory.h">
-      <Filter>Source\Utility</Filter>
+      <Filter>Source\Application\Utility</Filter>
     </ClInclude>
     <ClInclude Include="RE_Assert.h">
-      <Filter>Source\Utility</Filter>
+      <Filter>Source\Application\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="PopUpWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\PopUp</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Console</Filter>
+    </ClInclude>
+    <ClInclude Include="AboutWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\About</Filter>
+    </ClInclude>
+    <ClInclude Include="HierarchyWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayPauseWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\PlayPause</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertiesWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Properties</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetsWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="WwiseWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Wwise</Filter>
+    </ClInclude>
+    <ClInclude Include="GameWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneEditorWindow.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceEditorsWindows.h">
+      <Filter>Source\Application\Modules\Editor\Interface Windows\Resource Editor Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1448,12 +1514,6 @@
     <Filter Include="Source\Application\Modules\Scene">
       <UniqueIdentifier>{a420133e-c6ac-4389-9eff-eead5a3acc8a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Application\Modules\Input">
-      <UniqueIdentifier>{b0a9a8be-e33d-4665-be5a-846aeacd79f1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Modules\Input\Events System">
-      <UniqueIdentifier>{b7a63cfc-233b-4186-96c0-37e2ed9b095d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Application\Modules\Scene\Entity Component System">
       <UniqueIdentifier>{2ca41c23-353f-4ca0-8e9d-3a8797f417a8}</UniqueIdentifier>
     </Filter>
@@ -1463,32 +1523,8 @@
     <Filter Include="Source\Application\Modules\Scene\Entity Component System\Hash System">
       <UniqueIdentifier>{7d4a01e6-ec35-46e2-b62b-85e046c97aed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Application\Modules\Editor\Editor Windows">
-      <UniqueIdentifier>{a18935b7-c464-42a4-915b-e5d7df5fc839}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Modules\Editor\Thumbnails">
-      <UniqueIdentifier>{ae9a93ff-6fc9-4767-854d-7d9e43779e88}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Application\Modules\Scene\Component Managers">
       <UniqueIdentifier>{e85a9611-0b62-4c79-a43d-5cf26ef3f36c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Time">
-      <UniqueIdentifier>{94ccdf27-8db2-406e-ac1d-bc6ea6e760ae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\FileSystem">
-      <UniqueIdentifier>{639a6e47-8665-4a89-b1c1-06588da71634}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\FileSystem\File Containers">
-      <UniqueIdentifier>{d155eb7d-8878-4717-9d08-0637c1460191}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Math">
-      <UniqueIdentifier>{b5055d16-151c-48cb-a75d-cb9dd6b71e56}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Console">
-      <UniqueIdentifier>{b630a2a9-5501-4d67-9326-585cd766aacb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Application\Hardware">
-      <UniqueIdentifier>{b07af6a2-f836-4776-a784-f59bf6d5d1b8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Application\Resources">
       <UniqueIdentifier>{138e3b14-77d4-440e-872a-1d54ebdae46f}</UniqueIdentifier>
@@ -1510,12 +1546,6 @@
     </Filter>
     <Filter Include="Source\Application\Resources\ECS">
       <UniqueIdentifier>{54cbb0b4-229b-4cd9-8776-91d113938160}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Utility">
-      <UniqueIdentifier>{79e2c679-5e2b-47e5-95a0-240e5abe6473}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Utility\Space Partition">
-      <UniqueIdentifier>{b68e0a5d-ad13-472e-be1a-55dccf9fc2ce}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Application\Modules\Audio">
       <UniqueIdentifier>{ff15938a-adc4-4b1e-837c-c8586a4f736c}</UniqueIdentifier>
@@ -1541,11 +1571,83 @@
     <Filter Include="Source\Application\Modules\Physics\Particles">
       <UniqueIdentifier>{282671b5-8dfc-40c2-8ec6-a054dc233ced}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\Profiling">
-      <UniqueIdentifier>{ccea0756-2382-409c-8b41-df5beea8f53d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Application\Resources\Particle Emitter">
       <UniqueIdentifier>{d69b7f37-6b2b-4825-a7dd-632a056cb6b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Input">
+      <UniqueIdentifier>{b0a9a8be-e33d-4665-be5a-846aeacd79f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Input\Events System">
+      <UniqueIdentifier>{b7a63cfc-233b-4186-96c0-37e2ed9b095d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Utility">
+      <UniqueIdentifier>{79e2c679-5e2b-47e5-95a0-240e5abe6473}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Utility\Space Partition">
+      <UniqueIdentifier>{b68e0a5d-ad13-472e-be1a-55dccf9fc2ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Utility\Profiling">
+      <UniqueIdentifier>{ccea0756-2382-409c-8b41-df5beea8f53d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Utility\Console">
+      <UniqueIdentifier>{b630a2a9-5501-4d67-9326-585cd766aacb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Utility\FileSystem">
+      <UniqueIdentifier>{639a6e47-8665-4a89-b1c1-06588da71634}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Utility\FileSystem\File Containers">
+      <UniqueIdentifier>{d155eb7d-8878-4717-9d08-0637c1460191}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Utility\Hardware">
+      <UniqueIdentifier>{b07af6a2-f836-4776-a784-f59bf6d5d1b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Utility\Math">
+      <UniqueIdentifier>{b5055d16-151c-48cb-a75d-cb9dd6b71e56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Utility\Time">
+      <UniqueIdentifier>{94ccdf27-8db2-406e-ac1d-bc6ea6e760ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Thumbnails">
+      <UniqueIdentifier>{ae9a93ff-6fc9-4767-854d-7d9e43779e88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows">
+      <UniqueIdentifier>{a18935b7-c464-42a4-915b-e5d7df5fc839}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\PopUp">
+      <UniqueIdentifier>{4bff0e54-3d2e-448a-a7db-88cc029f117c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\Wwise">
+      <UniqueIdentifier>{8ebeb94a-6bb7-4244-92c8-867651647d82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\About">
+      <UniqueIdentifier>{814386d6-61fc-40c3-a980-781e8b2ab49a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\Assets">
+      <UniqueIdentifier>{90cf6012-4345-4f17-aa10-1499f225a711}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\Config">
+      <UniqueIdentifier>{942d7962-e36b-4310-a448-ad817032562c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\Console">
+      <UniqueIdentifier>{4b2b9ce5-a270-4a72-b90f-e7c9c7392c15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\Hierarchy">
+      <UniqueIdentifier>{e923f986-34cc-4a0a-9760-8a71a536d3fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\PlayPause">
+      <UniqueIdentifier>{0449aa3b-c3b0-4e3e-897c-01403a18102f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\Properties">
+      <UniqueIdentifier>{edfbe3a6-4a49-4958-a0f0-41ec35b189ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\Game">
+      <UniqueIdentifier>{ea464fc3-cac0-4fb6-81cc-4c3f089ffb77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\Scene">
+      <UniqueIdentifier>{125bb508-86a2-4cc6-b875-cc1ca97da142}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Interface Windows\Resource Editor Windows">
+      <UniqueIdentifier>{a6ec9e6e-cc3b-4409-8af7-91bdc5645fdf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

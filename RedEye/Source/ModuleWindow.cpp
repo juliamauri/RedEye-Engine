@@ -137,13 +137,13 @@ void ModuleWindow::RecieveEvent(const Event& e)
 {
 	switch (e.type)
 	{
-	case WINDOW_MOVED:
+	case RE_EventType::WINDOW_MOVED:
 	{
 		pos_x = e.data1.AsInt();
 		pos_y = e.data2.AsInt();
 		break;
 	}
-	case WINDOW_SIZE_CHANGED:
+	case RE_EventType::WINDOW_SIZE_CHANGED:
 	{
 		width = e.data1.AsInt();
 		height = e.data2.AsInt();

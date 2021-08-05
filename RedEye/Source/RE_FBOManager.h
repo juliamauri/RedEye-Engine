@@ -6,7 +6,7 @@
 
 struct RE_FBO
 {
-	enum FBO_Type : char { DEFAULT, DEFERRED } type = DEFAULT;
+	enum class FBO_Type : char { DEFAULT, DEFERRED } type = FBO_Type::DEFAULT;
 	eastl::vector<unsigned int> texturesID;
 	unsigned int
 		ID = 0, width = 0, height = 0,

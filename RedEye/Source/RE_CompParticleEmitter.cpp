@@ -43,7 +43,7 @@ void RE_CompParticleEmitter::Update()
 		simulation->parent_pos = global_pos;
 
 		if (simulation->state <= RE_ParticleEmitter::PlaybackState::PLAY)
-			RE_INPUT->Push(TRANSFORM_MODIFIED, RE_SCENE, go);
+			RE_INPUT->Push(RE_EventType::TRANSFORM_MODIFIED, RE_SCENE, go);
 	}
 }
 

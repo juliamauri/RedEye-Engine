@@ -12,16 +12,29 @@
 #include "RE_CommandManager.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_CameraManager.h"
-#include "EditorWindows.h"
 #include "RE_ParticleEmitter.h"
 #include "RE_Memory.h"
+
+#include "ResourceEditorsWindows.h"
+
+#include "AboutWindow.h"
+#include "AssetsWindow.h"
+#include "ConfigWindow.h"
+#include "ConsoleWindow.h"
+#include "HierarchyWindow.h"
+#include "PlayPauseWindow.h"
+#include "PropertiesWindow.h"
+#include "PopUpWindow.h"
+#include "WwiseWindow.h"
+
+#include "SceneEditorWindow.h"
+#include "GameWindow.h"
 
 #include "ImGui\imgui_internal.h"
 #include "ImGui\imgui_impl_opengl3.h"
 #include "ImGui\imgui_impl_sdl.h"
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
-
 #include <EASTL/stack.h>
 #include <EASTL/queue.h>
 
@@ -105,17 +118,13 @@ bool ModuleEditor::Init()
 
 			windows.push_back(console = new ConsoleWindow());
 			windows.push_back(config = new ConfigWindow());
-			windows.push_back(heriarchy = new HeriarchyWindow());
+			windows.push_back(hierarchy = new HierarchyWindow());
 			windows.push_back(properties = new PropertiesWindow());
 			windows.push_back(play_pause = new PlayPauseWindow());
 
 			sceneEditorWindow = new SceneEditorWindow();
-			sceneGameWindow = new SceneGameWindow();
-			particleEmitterWindow = new ParticleEmiiterEditorWindow();
-
-			tools.push_back(rng = new RandomTest());
-			tools.push_back(transDebInfo = new TransformDebugWindow());
-			tools.push_back(rendDebInfo = new RendererDebugWindow());
+			sceneGameWindow = new GameWindow();
+			particleEmitterWindow = new ParticleEmitterEditorWindow();
 			
 			ret = true;
 		}
@@ -179,7 +188,7 @@ void ModuleEditor::Update()
 				if (ImGui::MenuItem(" Exit", "	Esc"))
 				{
 					if (RE_SCENE->HasChanges()) RE_EDITOR->popupWindow->PopUpSaveScene(true);
-					else RE_INPUT->Push(REQUEST_QUIT, App);
+					else RE_INPUT->Push(RE_EventType::REQUEST_QUIT, App);
 				}
 				ImGui::EndMenu();
 			}
@@ -201,16 +210,16 @@ void ModuleEditor::Update()
 				if (ImGui::BeginMenu("Create")) {
 
 					if (ImGui::MenuItem("Material", materialeditor->IsActive() ? "Hide" : "Open"))
-						materialeditor->SwitchActive();
+						materialeditor->ToggleActive();
 
 					if (ImGui::MenuItem("Shader", shadereditor->IsActive() ? "Hide" : "Open"))
-						shadereditor->SwitchActive();
+						shadereditor->ToggleActive();
 
 					if (ImGui::MenuItem("Skybox", skyboxeditor->IsActive() ? "Hide" : "Open"))
-						skyboxeditor->SwitchActive();
+						skyboxeditor->ToggleActive();
 
 					if (ImGui::MenuItem("Water Resources", waterplaneResourceWindow->IsActive() ? "Hide" : "Open"))
-						waterplaneResourceWindow->SwitchActive();
+						waterplaneResourceWindow->ToggleActive();
 
 					if (ImGui::MenuItem("Particle Resources"))
 						particleEmitterWindow->StartEditing(new RE_ParticleEmitter(true), nullptr);
@@ -231,17 +240,7 @@ void ModuleEditor::Update()
 			{
 				for (auto window : windows)
 					if (ImGui::MenuItem(window->Name(), window->IsActive() ? "Hide" : "Open"))
-						window->SwitchActive();
-
-				// Tools submenu
-				if (ImGui::BeginMenu("Tools"))
-				{
-					for (auto tool : tools)
-						if (ImGui::MenuItem(tool->Name(), tool->IsActive() ? "Hide" : "Open"))
-							tool->SwitchActive();
-
-					ImGui::EndMenu();
-				}
+						window->ToggleActive();
 
 				ImGui::EndMenu();
 			}
@@ -258,7 +257,7 @@ void ModuleEditor::Update()
 				if (ImGui::MenuItem("Report a Bug"))
 					BROWSER("https://github.com/juliamauri/RedEye-Engine/issues");
 				if (ImGui::MenuItem("About", about->IsActive() ? "Hide" : "Open"))
-					about->SwitchActive();
+					about->ToggleActive();
 
 				ImGui::EndMenu();
 			}
@@ -315,10 +314,6 @@ void ModuleEditor::Update()
 		if (about && about->IsActive())
 			about->DrawWindow(popUpFocus); // (not in windows' list)
 
-		for (auto tool : tools)
-			if (tool->IsActive())
-				tool->DrawWindow(popUpFocus);
-
 		if (materialeditor->IsActive()) materialeditor->DrawWindow(popUpFocus);
 		if (shadereditor->IsActive()) shadereditor->DrawWindow(popUpFocus);
 		if (skyboxeditor->IsActive()) skyboxeditor->DrawWindow(popUpFocus);
@@ -354,7 +349,6 @@ void ModuleEditor::CleanUp()
 	thumbnails->Clear();
 
 	windows.clear();
-	tools.clear();
 
 	DEL(materialeditor);
 	DEL(skyboxeditor);
@@ -377,16 +371,16 @@ void ModuleEditor::RecieveEvent(const Event& e)
 {
 	switch (e.type)
 	{
-	case PARTRICLEEDITORWINDOWCHANGED: particleEmitterWindow->UpdateViewPort(); break;
-	case EDITORWINDOWCHANGED: sceneEditorWindow->UpdateViewPort(); break;
-	case GAMEWINDOWCHANGED: sceneGameWindow->UpdateViewPort(); break;
-	case UPDATE_SCENE_WINDOWS:
+	case RE_EventType::PARTRICLEEDITORWINDOWCHANGED: particleEmitterWindow->UpdateViewPort(); break;
+	case RE_EventType::EDITORWINDOWCHANGED: sceneEditorWindow->UpdateViewPort(); break;
+	case RE_EventType::GAMEWINDOWCHANGED: sceneGameWindow->UpdateViewPort(); break;
+	case RE_EventType::UPDATE_SCENE_WINDOWS:
 	{
 		if(e.data1.AsGO()) sceneGameWindow->Recalc();
 		else sceneEditorWindow->Recalc();
 		break;
 	}
-	case EDITOR_SCENE_RAYCAST:
+	case RE_EventType::EDITOR_SCENE_RAYCAST:
 	{
 		// Mouse Pick
 		RE_CompCamera* camera = RE_CameraManager::EditorCamera();
@@ -403,19 +397,19 @@ void ModuleEditor::RecieveEvent(const Event& e)
 
 		break;
 	}
-	case SCOPE_PROCEDURE_END:
+	case RE_EventType::SCOPE_PROCEDURE_END:
 	{
 		if (e.data1.AsBool()) popupWindow->PopUpError();
 		break;
 	}
 	default:
 	{
-		if (e.type > CONSOLE_LOG_MIN && e.type < CONSOLE_LOG_MAX)
+		if (e.type > RE_EventType::CONSOLE_LOG_MIN && e.type < RE_EventType::CONSOLE_LOG_MAX)
 		{
-			unsigned int category = static_cast<unsigned int>(e.type - CONSOLE_LOG_SEPARATOR);
+			unsigned int category = static_cast<unsigned int>(e.type) - static_cast<unsigned int>(RE_EventType::CONSOLE_LOG_SEPARATOR);
 			const char* text = e.data1.AsCharP();
 
-			if (e.type >= CONSOLE_LOG_SAVE_ERROR)
+			if (e.type >= RE_EventType::CONSOLE_LOG_SAVE_ERROR)
 			{
 				category -= 3u;
 				popupWindow->AppendScopedLog(text, e.type);
@@ -636,7 +630,7 @@ void ModuleEditor::DrawHeriarchy()
 
 	if (to_select) SetSelected(to_select);
 	if (goToDelete_uid != 0ull) {
-		RE_INPUT->Push(DESTROY_GO, RE_SCENE, goToDelete_uid);
+		RE_INPUT->Push(RE_EventType::DESTROY_GO, RE_SCENE, goToDelete_uid);
 		if (selected == goToDelete_uid || RE_SCENE->GetGOPtr(goToDelete_uid)->isParent(selected)) selected = 0ull;
 	}
 }

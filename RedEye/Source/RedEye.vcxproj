@@ -19,6 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AboutWindow.cpp" />
+    <ClCompile Include="ConfigWindow.cpp" />
+    <ClCompile Include="ConsoleWindow.cpp" />
+    <ClCompile Include="HierarchyWindow.cpp" />
+    <ClCompile Include="GameWindow.cpp" />
+    <ClCompile Include="SceneEditorWindow.cpp" />
+    <ClCompile Include="WwiseWindow.cpp" />
+    <ClCompile Include="PlayPauseWindow.cpp" />
+    <ClCompile Include="PopUpWindow.cpp" />
     <ClCompile Include="RE_EmissionData.cpp" />
     <ClCompile Include="ImGuiWidgets\ImGuiColorTextEdit\TextEditor.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
@@ -163,10 +172,6 @@
     </ClCompile>
     <ClCompile Include="EA\eathread\version.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EditorWindows.cpp">
-      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
-      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
@@ -403,8 +408,22 @@
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiThreaded</RuntimeLibrary>
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
+    <ClCompile Include="PropertiesWindow.cpp" />
+    <ClCompile Include="AssetsWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssetsWindow.h" />
+    <ClInclude Include="ConfigWindow.h" />
+    <ClInclude Include="ConsoleWindow.h" />
+    <ClInclude Include="EditorWindow.h" />
+    <ClInclude Include="AboutWindow.h" />
+    <ClInclude Include="GameWindow.h" />
+    <ClInclude Include="SceneEditorWindow.h" />
+    <ClInclude Include="PlayPauseWindow.h" />
+    <ClInclude Include="HierarchyWindow.h" />
+    <ClInclude Include="WwiseWindow.h" />
+    <ClInclude Include="PopUpWindow.h" />
+    <ClInclude Include="PropertiesWindow.h" />
     <ClInclude Include="RE_Assert.h" />
     <ClInclude Include="RE_EngineInfo.h" />
     <ClInclude Include="RE_DataTypes.h" />
@@ -622,7 +641,7 @@
     <ClInclude Include="EA\eathread\version.h" />
     <ClInclude Include="EA\eathread\x86-64\eathread_atomic_x86-64.h" />
     <ClInclude Include="EA\eathread\x86-64\eathread_sync_x86-64.h" />
-    <ClInclude Include="EditorWindows.h" />
+    <ClInclude Include="ResourceEditorsWindows.h" />
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="ModuleAudio.h" />
     <ClInclude Include="RE_HashMap.h" />

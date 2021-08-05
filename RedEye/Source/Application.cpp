@@ -21,6 +21,15 @@
 #include <EAStdC\EASprintf.h>
 #include <eathread\internal\config.h>
 
+namespace AppFlags {
+	constexpr unsigned char
+		EMPLY_FLAGS = 0,
+		LOAD_CONFIG = 1 << 0,
+		SAVE_CONFIG = 1 << 1,
+		WANT_TO_QUIT = 1 << 2,
+		SAVE_ON_EXIT = 1 << 3;
+}
+
 Application::Application()
 {
 	time = new RE_Time();
@@ -138,8 +147,8 @@ void Application::MainLoop()
 		renderer->PostUpdate();
 		audio->PostUpdate();
 
-		if (flags & LOAD_CONFIG) LoadConfig();
-		if (flags & SAVE_CONFIG) SaveConfig();
+		if (flags & AppFlags::LOAD_CONFIG) LoadConfig();
+		if (flags & AppFlags::SAVE_CONFIG) SaveConfig();
 		if (time->GetState() == GS_TICK)
 		{
 			time->PauseGameTimer();
@@ -151,12 +160,12 @@ void Application::MainLoop()
 		if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
 		if (extra_ms > 0) time->Delay(extra_ms);
 
-	} while (!(flags & WANT_TO_QUIT));
+	} while (!(flags & AppFlags::WANT_TO_QUIT));
 }
 
 void Application::CleanUp()
 {
-	if (flags & SAVE_ON_EXIT) fs->SaveConfig();
+	if (flags & AppFlags::SAVE_ON_EXIT) fs->SaveConfig();
 
 	audio->CleanUp();
 	renderer->CleanUp();
@@ -179,14 +188,14 @@ void Application::CleanUp()
 
 void Application::Quit()
 {
-	flags |= WANT_TO_QUIT;
+	flags |= AppFlags::WANT_TO_QUIT;
 }
 
 void Application::RecieveEvent(const Event& e)
 {
 	switch (e.type)
 	{
-	case PLAY:
+	case RE_EventType::PLAY:
 	{
 		scene->OnPlay();
 		physics->OnPlay(time->GetState() == GS_PAUSE);
@@ -194,7 +203,7 @@ void Application::RecieveEvent(const Event& e)
 		time->StartGameTimer();
 		break;
 	}
-	case PAUSE:
+	case RE_EventType::PAUSE:
 	{
 		scene->OnPause();
 		physics->OnPause();
@@ -202,7 +211,7 @@ void Application::RecieveEvent(const Event& e)
 		time->PauseGameTimer();
 		break;
 	}
-	case TICK:
+	case RE_EventType::TICK:
 	{
 		scene->OnPlay();
 		physics->OnPlay(time->GetState() == GS_PAUSE);
@@ -210,7 +219,7 @@ void Application::RecieveEvent(const Event& e)
 		time->TickGameTimer();
 		break;
 	}
-	case STOP:
+	case RE_EventType::STOP:
 	{
 		scene->OnStop();
 		physics->OnStop();
@@ -218,15 +227,15 @@ void Application::RecieveEvent(const Event& e)
 		time->StopGameTimer();
 		break;
 	}
-	case REQUEST_LOAD: flags |= LOAD_CONFIG; break;
-	case REQUEST_SAVE: flags |= SAVE_CONFIG; break;
-	case REQUEST_QUIT: flags |= WANT_TO_QUIT; break;
+	case RE_EventType::REQUEST_LOAD: flags |= AppFlags::LOAD_CONFIG; break;
+	case RE_EventType::REQUEST_SAVE: flags |= AppFlags::SAVE_CONFIG; break;
+	case RE_EventType::REQUEST_QUIT: flags |= AppFlags::WANT_TO_QUIT; break;
 	default: break;	}
 }
 
 void Application::LoadConfig()
 {
-	if (flags & LOAD_CONFIG) flags -= LOAD_CONFIG;
+	if (flags & AppFlags::LOAD_CONFIG) flags -= AppFlags::LOAD_CONFIG;
 
 	RE_PROFILE(PROF_Load, PROF_Application);
 	window->Load();
@@ -236,7 +245,7 @@ void Application::LoadConfig()
 
 void Application::SaveConfig()
 {
-	if (flags & SAVE_CONFIG) flags -= SAVE_CONFIG;
+	if (flags & AppFlags::SAVE_CONFIG) flags -= AppFlags::SAVE_CONFIG;
 
 	RE_PROFILE(PROF_Save, PROF_Application);
 	window->Save();

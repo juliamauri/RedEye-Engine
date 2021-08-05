@@ -1,11 +1,9 @@
-#ifndef __EVENT_H__
-#define __EVENT_H__
+#ifndef __EVENT__
+#define __EVENT__
 
 #include "RE_Cvar.h"
 
-class EventListener;
-
-enum RE_EventType : unsigned short int
+enum class RE_EventType : unsigned short int
 {
 	// APP
 	PLAY,
@@ -72,15 +70,15 @@ enum RE_EventType : unsigned short int
 
 struct Event
 {
-	Event(RE_EventType t, EventListener* lis, RE_Cvar data = RE_Cvar(), RE_Cvar data2 = RE_Cvar());
-	Event(Event& e);
-	~Event() {}
-
 	RE_EventType type;
-	EventListener* listener;
+	class EventListener* listener;
 	RE_Cvar data1;
 	RE_Cvar data2;
 	const unsigned int timestamp;
+
+	Event(RE_EventType t, EventListener* lis, RE_Cvar data = RE_Cvar(), RE_Cvar data2 = RE_Cvar());
+	Event(Event& e);
+	~Event() {}
 };
 
 class EventListener
@@ -91,4 +89,4 @@ public:
 	virtual void RecieveEvent(const Event& e) = 0;
 };
 
-#endif // !__EVENT_H__
+#endif // !__EVENT__

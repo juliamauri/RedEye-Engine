@@ -29,6 +29,7 @@
 #include "RE_Model.h"
 
 #include "SDL2\include\SDL.h"
+#include "ImGui/imgui_internal.h"
 #include <EASTL/string.h>
 #include <EASTL/queue.h>
 #include <EASTL/vector.h>
@@ -118,6 +119,70 @@ void ModuleScene::DrawEditor()
 		ImGui::Text(" - Static: %i", static_count);
 		ImGui::Text(" - Non Static: %i", dynamic_count);
 		ImGui::Text("Total Inacive: %i", total_count - (static_count + dynamic_count));
+
+		if (ImGui::TreeNodeEx("Transforms", ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
+		{
+			eastl::vector<GO_UID> allTransforms = GetScenePool()->GetAllGOUIDs();
+
+			int transformCount = allTransforms.size();
+			ImGui::Text("Total %i transforms.", transformCount);
+			ImGui::SameLine();
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
+			static int range = 0, totalShowing = 8;
+			ImGui::SameLine();
+
+			ImGui::Text("Actual Range: %i - %i", range, (range + totalShowing < transformCount) ? range + totalShowing : transformCount);
+
+			ImGui::PushItemWidth(50.f);
+			ImGui::DragInt("Position", &range, 1.f, 0, transformCount - totalShowing);
+			ImGui::SameLine();
+			ImGui::DragInt("List Size", &totalShowing, 1.f, 0);
+
+			for (int i = range; i < totalShowing + range && i < transformCount; i++) {
+				RE_CompTransform* transform = GetGOPtr(allTransforms[i])->GetTransformPtr();
+
+				ImGui::PushID(("#TransformDebug" + eastl::to_string(i)).c_str());
+
+				if (ImGui::CollapsingHeader(("GO: " + transform->GetGOPtr()->name).c_str())) {
+					ImGui::Columns(2);
+					static math::vec pos, rotE, scl;
+					static math::float3x3 rot;
+
+					static math::float4x4 localM;
+					localM = transform->GetLocalMatrix().Transposed();
+					localM.Decompose(pos, rot, scl);
+					rotE = rot.ToEulerXYZ();
+					ImGui::Text("Local Transform:");
+					ImGui::Text("Position:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
+					ImGui::Text("Rotation:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
+					ImGui::Text("Scale:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+
+					ImGui::NextColumn();
+
+					static math::float4x4 globalM;
+					globalM = transform->GetGlobalMatrix().Transposed();
+					globalM.Decompose(pos, rot, scl);
+					rotE = rot.ToEulerXYZ();
+					ImGui::Text("Global Transform:");
+					ImGui::Text("Position:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
+					ImGui::Text("Rotation:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
+					ImGui::Text("Scale:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+
+					ImGui::Columns(1);
+				}
+				ImGui::PopID();
+			}
+
+
+
+			ImGui::TreePop();
+		}
 	}
 }
 
@@ -165,7 +230,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 {
 	switch (e.type)
 	{
-	case GO_CHANGED_TO_ACTIVE:
+	case RE_EventType::GO_CHANGED_TO_ACTIVE:
 	{
 		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
 		go->ResetGOandChildsAABB();
@@ -176,7 +241,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		haschanges = true;
 		break;
 	}
-	case GO_CHANGED_TO_INACTIVE:
+	case RE_EventType::GO_CHANGED_TO_INACTIVE:
 	{
 		for (auto draw_go : scenePool.GetGOPtr(e.data1.AsUInt64())->GetActiveDrawableGOandChildsPtr())
 			(draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
@@ -184,7 +249,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		haschanges = true;
 		break;
 	}
-	case GO_CHANGED_TO_STATIC:
+	case RE_EventType::GO_CHANGED_TO_STATIC:
 	{
 		GO_UID go_uid = e.data1.AsUInt64();
 		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
@@ -197,7 +262,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		haschanges = true;
 		break;
 	}
-	case GO_CHANGED_TO_NON_STATIC:
+	case RE_EventType::GO_CHANGED_TO_NON_STATIC:
 	{
 		GO_UID go_uid = e.data1.AsUInt64();
 		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
@@ -210,7 +275,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		haschanges = true;
 		break;
 	}
-	case GO_HAS_NEW_CHILD:
+	case RE_EventType::GO_HAS_NEW_CHILD:
 	{
 		RE_GameObject* child_go = scenePool.GetGOPtr(e.data2.AsUInt64());
 		child_go->ResetGOandChildsAABB();
@@ -223,7 +288,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		haschanges = true;
 		break;
 	}
-	case DESTROY_GO:
+	case RE_EventType::DESTROY_GO:
 	{
 		GO_UID go_uid = e.data1.AsUInt64();
 		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
@@ -236,7 +301,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		haschanges = true;
 		break;
 	}
-	case TRANSFORM_MODIFIED:
+	case RE_EventType::TRANSFORM_MODIFIED:
 	{
 		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
 		if (go->IsActive())
@@ -251,7 +316,7 @@ void ModuleScene::RecieveEvent(const Event& e)
 		haschanges = true;
 		break;
 	}
-	case PLANE_CHANGE_TO_MESH:
+	case RE_EventType::PLANE_CHANGE_TO_MESH:
 	{
 		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
 		RE_CompPlane* plane = dynamic_cast<RE_CompPlane*>(go->GetCompPtr(C_PLANE));

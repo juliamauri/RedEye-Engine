@@ -729,7 +729,7 @@ void RE_GameObject::SetActive(const bool value, const bool broadcast)
 	if (active != value)
 	{
 		active = value;
-		if (broadcast) RE_INPUT->Push(active ? GO_CHANGED_TO_ACTIVE : GO_CHANGED_TO_INACTIVE, RE_SCENE, go_uid);
+		if (broadcast) RE_INPUT->Push(active ? RE_EventType::GO_CHANGED_TO_ACTIVE : RE_EventType::GO_CHANGED_TO_INACTIVE, RE_SCENE, go_uid);
 	}
 }
 
@@ -755,7 +755,7 @@ void RE_GameObject::SetStatic(const bool value, bool broadcast)
 	if (isStatic != value)
 	{
 		isStatic = value;
-		if (active && broadcast) RE_INPUT->Push(isStatic ? GO_CHANGED_TO_STATIC : GO_CHANGED_TO_NON_STATIC, RE_SCENE, go_uid);
+		if (active && broadcast) RE_INPUT->Push(isStatic ? RE_EventType::GO_CHANGED_TO_STATIC : RE_EventType::GO_CHANGED_TO_NON_STATIC, RE_SCENE, go_uid);
 	}
 }
 

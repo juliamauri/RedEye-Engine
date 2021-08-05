@@ -5,9 +5,6 @@
 #include "RE_DataTypes.h"
 #include <EASTL/list.h>
 
-class SceneEditorWindow;
-class RE_ParticleEmitter;
-
 class ModuleEditor : public EventListener
 {
 public:
@@ -56,7 +53,7 @@ public:
 	void PushCommand(class RE_Command* cmd);
 	void ClearCommands();
 
-	SceneEditorWindow* GetSceneEditor() { return sceneEditorWindow; }
+	class SceneEditorWindow* GetSceneEditor() { return sceneEditorWindow; }
 
 private:
 
@@ -79,14 +76,14 @@ private:
 	bool popUpFocus = false;
 
 	// Windows & Tools
-	eastl::list<class EditorWindow*> windows, tools;
+	eastl::list<class EditorWindow*> windows;
 
 	// General Windows
 	class ConsoleWindow* console = nullptr;
 	class AssetsWindow* assets = nullptr;
 	class WwiseWindow* wwise = nullptr;
 	class ConfigWindow* config = nullptr;
-	class HeriarchyWindow* heriarchy = nullptr;
+	class HierarchyWindow* hierarchy = nullptr;
 	class PropertiesWindow* properties = nullptr;
 	class PlayPauseWindow* play_pause = nullptr;
 	class AboutWindow* about = nullptr;
@@ -95,11 +92,11 @@ private:
 	class SkyBoxEditorWindow* skyboxeditor = nullptr;
 	class TextEditorManagerWindow* texteditormanager = nullptr;
 	class WaterPlaneResourceWindow* waterplaneResourceWindow = nullptr;
-	class ParticleEmiiterEditorWindow* particleEmitterWindow = nullptr;
+	class ParticleEmitterEditorWindow* particleEmitterWindow = nullptr;
 
 	// Scene views
 	SceneEditorWindow* sceneEditorWindow = nullptr;
-	class SceneGameWindow* sceneGameWindow = nullptr;
+	class GameWindow* sceneGameWindow = nullptr;
 
 	// Tools
 	class RandomTest* rng = nullptr;

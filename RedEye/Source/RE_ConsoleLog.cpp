@@ -39,7 +39,7 @@ void RE_ConsoleLog::Log(int category, const char file[], int line, const char* f
 	default: return; }
 
 	if (scoping_procedure && category >= L_ERROR) category += 3;
-	RE_INPUT->PushForced(static_cast<RE_EventType>(CONSOLE_LOG_SEPARATOR + category), RE_EDITOR, edited, file_name);
+	RE_INPUT->PushForced(static_cast<RE_EventType>(category + static_cast<int>(RE_EventType::CONSOLE_LOG_SEPARATOR)), RE_EDITOR, edited, file_name);
 }
 
 void RE_ConsoleLog::ReportSoftware(const char file[], int line, const char* name, const char* version, const char* website)
@@ -70,7 +70,7 @@ void RE_ConsoleLog::EndScope()
 	if (scoping_procedure)
 	{
 		scoping_procedure = false;
-		RE_INPUT->PushForced(SCOPE_PROCEDURE_END, RE_EDITOR, error_scoped);
+		RE_INPUT->PushForced(RE_EventType::SCOPE_PROCEDURE_END, RE_EDITOR, error_scoped);
 	}
 }
 

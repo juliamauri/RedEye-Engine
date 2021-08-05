@@ -362,56 +362,56 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 {
 	switch (e.type)
 	{
-	case SET_VSYNC:
+	case RE_EventType::SET_VSYNC:
 	{
 		SetVSync(e.data1.AsBool());
 		break;
 	}
-	case SET_DEPTH_TEST:
+	case RE_EventType::SET_DEPTH_TEST:
 	{
 		SetDepthTest(e.data1.AsBool());
 		break;
 	}
-	case SET_FACE_CULLING:
+	case RE_EventType::SET_FACE_CULLING:
 	{
 		SetFaceCulling(e.data1.AsBool());
 		break;
 	}
-	case SET_LIGHTNING:
+	case RE_EventType::SET_LIGHTNING:
 	{
 		SetLighting(e.data1.AsBool());
 		break;
 	}
-	case SET_TEXTURE_TWO_D:
+	case RE_EventType::SET_TEXTURE_TWO_D:
 	{
 		SetTexture2D(e.data1.AsBool());
 		break;
 	}
-	case SET_COLOR_MATERIAL:
+	case RE_EventType::SET_COLOR_MATERIAL:
 	{
 		SetColorMaterial(e.data1.AsBool());
 		break;
 	}
-	case SET_WIRE_FRAME:
+	case RE_EventType::SET_WIRE_FRAME:
 	{
 		SetWireframe(e.data1.AsBool());
 		break;
 	}
-	case EDITORWINDOWCHANGED:
+	case RE_EventType::EDITORWINDOWCHANGED:
 	{
 		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
 		RE_CameraManager::EditorCamera()->SetBounds(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
 		ChangeFBOSize(window_size[0], window_size[1], RENDER_VIEWS::VIEW_EDITOR);
 		break;
 	}
-	case GAMEWINDOWCHANGED:
+	case RE_EventType::GAMEWINDOWCHANGED:
 	{
 		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
 		RE_SCENE->cams->OnWindowChangeSize(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
 		ChangeFBOSize(window_size[0], window_size[1], RENDER_VIEWS::VIEW_GAME);
 		break;
 	}
-	case PARTRICLEEDITORWINDOWCHANGED:
+	case RE_EventType::PARTRICLEEDITORWINDOWCHANGED:
 	{
 		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
 		RE_CameraManager::ParticleEditorCamera()->SetBounds(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
@@ -427,12 +427,29 @@ void ModuleRenderer3D::DrawEditor()
 	{
 		if (ImGui::Checkbox((vsync) ? "VSync Enabled" : "VSync Disabled", &vsync))
 			SetVSync(vsync);
+
 		if (ImGui::Checkbox(shareLightPass ? "Not share light pass" : "Share Light pass", &shareLightPass)) {
 			if (shareLightPass)
 				RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader())->UnloadMemory();
 			else
 				dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
 		}
+
+		ImGui::Separator();
+
+		if (shareLightPass)
+		{
+			ImGui::Text("Total Lights: %u:203", lightsCount + particlelightsCount);
+			ImGui::Text("From lights components: %u", lightsCount);
+			ImGui::Text("From particles: %u", particlelightsCount);
+		}
+		else
+		{
+			ImGui::Text("Lights components: %u:203", lightsCount);
+			ImGui::Text("Particle Lights: %u:508", particlelightsCount);
+		}
+
+		ImGui::Separator();
 
 		for (unsigned int i = 0; i < render_views.size(); ++i)
 		{
@@ -1439,13 +1456,6 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	glVertex3f(-1.0f, 1.0f, 1.0f);
 	glVertex3f(- 1.0f, 1.0f, -1.0f);
 	glEnd();
-}
-
-void ModuleRenderer3D::GetCurrentLightsCount(unsigned int& lightC, unsigned int& pLightC, bool& sharedLP)
-{
-	lightC = lightsCount;
-	pLightC = particlelightsCount;
-	sharedLP = shareLightPass;
 }
 
 math::float4 ModuleRenderer3D::GetRenderViewClearColor(RENDER_VIEWS r_view) const

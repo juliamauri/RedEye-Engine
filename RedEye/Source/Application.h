@@ -46,19 +46,8 @@ public:
 
 private:
 
-	int argc = 0;
-	char** argv = nullptr;
-
-	enum AppFlags : char
-	{
-		EMPLY_FLAGS = 0,
-		LOAD_CONFIG = 0x1,	// 0001
-		SAVE_CONFIG = 0x2,	// 0010
-		WANT_TO_QUIT = 0x4,	// 0100
-		SAVE_ON_EXIT = 0x8,	// 1000
-	};
-
-	char flags = EMPLY_FLAGS;
+	unsigned char flags = 0;
+	int argc = 0; char** argv = nullptr;
 };
 
 extern Application* App;

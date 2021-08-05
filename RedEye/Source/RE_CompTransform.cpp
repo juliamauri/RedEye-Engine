@@ -363,7 +363,7 @@ void RE_CompTransform::CalcGlobalTransform()
 		{
 			math::float4x4 next_global = model_local * parent->GetTransformPtr()->GetGlobalMatrix();
 			if (!next_global.Equals(model_global))
-				RE_INPUT->Push(TRANSFORM_MODIFIED, RE_SCENE, go, model_global = next_global);
+				RE_INPUT->Push(RE_EventType::TRANSFORM_MODIFIED, RE_SCENE, go, model_global = next_global);
 		}
 	}
 	else model_global = model_local;
