@@ -3,7 +3,7 @@
 
 #include "EditorWindow.h"
 
-#include "MathGeoLib/include/Math/float4.h"
+#include <MGL/Math/float4.h>
 #include "ImGuiWidgets/ImGuizmo/ImGuizmo.h"
 
 class SceneEditorWindow :public EditorWindow

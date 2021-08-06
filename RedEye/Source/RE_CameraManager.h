@@ -2,7 +2,7 @@
 #define __CAMERAMANAGER_H__
 
 #include "RE_CompCamera.h"
-#include "MathGeoLib/include/Geometry/Frustum.h"
+#include <MGL/Geometry/Frustum.h>
 #include <EASTL/list.h>
 	
 class RE_CameraManager

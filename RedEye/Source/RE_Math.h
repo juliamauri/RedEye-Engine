@@ -2,7 +2,7 @@
 #define __RE_MATH_H__
 
 #include "RE_Assert.h"
-#include "MathGeoLib/include/MathGeoLib.h"
+#include <MGL/MathGeoLib.h>
 
 enum Dir
 {

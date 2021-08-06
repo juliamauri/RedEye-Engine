@@ -1,0 +1,409 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|win32">
+      <Configuration>Debug</Configuration>
+      <Platform>win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|win32">
+      <Configuration>Release</Configuration>
+      <Platform>win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|win32">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{981FE726-8519-38E2-B3B5-35ECC8814BBD}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>win32</Platform>
+    <ProjectName>MathGeoLib</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">MathGeoLib.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">MathGeoLib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|win32'">C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|win32'">MathGeoLib.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|win32'">MathGeoLib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">MathGeoLib.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">MathGeoLib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">MathGeoLib.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">MathGeoLib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86 /ignore:4221</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|win32'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OmitFramePointers>true</OmitFramePointers>
+      <Optimization>Full</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <StringPooling>true</StringPooling>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86 /ignore:4221</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86 /ignore:4221</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Full</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <StringPooling>true</StringPooling>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86 /ignore:4221</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeLists.txt">
+      <StdOutEncoding>UTF-8</StdOutEncoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">Building Custom Rule C:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib" "-BC:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib" --check-stamp-file "C:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCCompilerABI.c;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXCompilerABI.cpp;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCompilerIdDetection.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompileFeatures.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompilerABI.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompilerId.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeFindBinUtils.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeParseImplicitIncludeInfo.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeParseImplicitLinkInfo.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCompilerCommon.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ADSP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ARMCC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ARMClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\AppleClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Borland-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Bruce-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Clang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Comeau-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Compaq-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Cray-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GHS-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GNU-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\HP-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IAR-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IBMCPP-C-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Intel-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IntelClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IntelDPCPP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\PGI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\PathScale-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SCO-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SDCC-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SunPro-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\TI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\TinyCC-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\VisualAge-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Watcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XL-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XLClang-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\zOS-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CompilerId\VS-10.vcxproj.in;C:\Program Files\CMake\share\cmake-3.19\Modules\Internal\FeatureTesting.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-Determine-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeCCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeCXXCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeRCCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeSystem.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CommonOptions.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\MathGeoLibConfig.cmake.in;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\MathGeoLibConfigVersion.cmake.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|win32'">Building Custom Rule C:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib" "-BC:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib" --check-stamp-file "C:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|win32'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCCompilerABI.c;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXCompilerABI.cpp;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCompilerIdDetection.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompileFeatures.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompilerABI.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompilerId.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeFindBinUtils.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeParseImplicitIncludeInfo.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeParseImplicitLinkInfo.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCompilerCommon.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ADSP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ARMCC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ARMClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\AppleClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Borland-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Bruce-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Clang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Comeau-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Compaq-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Cray-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GHS-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GNU-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\HP-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IAR-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IBMCPP-C-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Intel-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IntelClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IntelDPCPP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\PGI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\PathScale-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SCO-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SDCC-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SunPro-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\TI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\TinyCC-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\VisualAge-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Watcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XL-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XLClang-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\zOS-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CompilerId\VS-10.vcxproj.in;C:\Program Files\CMake\share\cmake-3.19\Modules\Internal\FeatureTesting.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-Determine-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeCCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeCXXCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeRCCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeSystem.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CommonOptions.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\MathGeoLibConfig.cmake.in;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\MathGeoLibConfigVersion.cmake.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|win32'">C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">Building Custom Rule C:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib" "-BC:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib" --check-stamp-file "C:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCCompilerABI.c;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXCompilerABI.cpp;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCompilerIdDetection.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompileFeatures.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompilerABI.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompilerId.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeFindBinUtils.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeParseImplicitIncludeInfo.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeParseImplicitLinkInfo.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCompilerCommon.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ADSP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ARMCC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ARMClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\AppleClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Borland-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Bruce-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Clang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Comeau-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Compaq-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Cray-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GHS-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GNU-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\HP-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IAR-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IBMCPP-C-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Intel-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IntelClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IntelDPCPP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\PGI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\PathScale-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SCO-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SDCC-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SunPro-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\TI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\TinyCC-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\VisualAge-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Watcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XL-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XLClang-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\zOS-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CompilerId\VS-10.vcxproj.in;C:\Program Files\CMake\share\cmake-3.19\Modules\Internal\FeatureTesting.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-Determine-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeCCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeCXXCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeRCCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeSystem.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CommonOptions.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\MathGeoLibConfig.cmake.in;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\MathGeoLibConfigVersion.cmake.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">Building Custom Rule C:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib" "-BC:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib" --check-stamp-file "C:/Users/JuliG/Documentos/GitHub/RedEye-Engine/RedEye/3rd Parties/MathGeoLib/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCCompilerABI.c;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXCompilerABI.cpp;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCompilerIdDetection.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompileFeatures.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompilerABI.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineCompilerId.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeFindBinUtils.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeParseImplicitIncludeInfo.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeParseImplicitLinkInfo.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestCompilerCommon.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeTestRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ADSP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ARMCC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\ARMClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\AppleClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Borland-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Bruce-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Clang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Comeau-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Compaq-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Cray-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GHS-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GNU-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\HP-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IAR-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IBMCPP-C-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Intel-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IntelClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\IntelDPCPP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\PGI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\PathScale-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SCO-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SDCC-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SunPro-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\TI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\TinyCC-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\VisualAge-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\Watcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XL-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XLClang-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\zOS-C-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CompilerId\VS-10.vcxproj.in;C:\Program Files\CMake\share\cmake-3.19\Modules\Internal\FeatureTesting.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-Determine-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeCCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeCXXCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeRCCompiler.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\3.19.0\CMakeSystem.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CommonOptions.cmake;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\MathGeoLibConfig.cmake.in;C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\MathGeoLibConfigVersion.cmake.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\GJK.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\GJK2D.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\Random\LCG.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\SAT.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\AABB.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Capsule.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Circle.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Circle2D.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Frustum.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Line.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\LineSegment.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\LineSegment2D.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\OBB.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\PBVolume.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Plane.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Polygon.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Polyhedron.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Ray.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Sphere.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Triangle.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Triangle2D.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\TriangleMesh.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\BitOps.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Callstack.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathFunc.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathLog.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathOps.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MiniFloat.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Polynomial.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Quat.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\SSEMath.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\TransformOps.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float2.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3x3.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3x4.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4d.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4x4.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\grisu3.c" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\grisu3_cpp.cpp" />
+    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Time\Clock.cpp" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\GJK.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\GJK2D.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\Random\LCG.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\SAT.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\AABB.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\AABB2D.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Capsule.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Circle.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Circle2D.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Frustum.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\GeomType.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\GeometryAll.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\HitInfo.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\KDTree.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Line.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\LineSegment.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\LineSegment2D.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\OBB.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\OBB2D.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\PBVolume.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Plane.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Polygon.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Polygon2DRef.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Polyhedron.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\QuadTree.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Ray.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Sphere.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Triangle.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Triangle2D.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\TriangleMesh.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\BitFuncs.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\BitOps.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Callstack.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\FixedPoint.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\FloatCmp.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\InclWindows.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Interpolate.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathAll.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathConstants.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathFunc.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathLog.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathNamespace.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathTypes.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MatrixProxy.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MiniFloat.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MultiLineMacro.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Polynomial.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Quat.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Rect.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Reinterpret.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\SSEMath.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Swap.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\TransformOps.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\assume.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float2.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3x3.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3x4.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4_neon.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4_sse.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4d.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4x4.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4x4_neon.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4x4_sse.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\grisu3.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\myassert.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\quat_simd.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\simd.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\sse_mathfun.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\vec2d.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\MathBuildConfig.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\MathGeoLib.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\MathGeoLibFwd.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Time\Clock.h" />
+    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\emscripten\library_system.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\ZERO_CHECK.vcxproj">
+      <Project>{91BA98E3-9699-3FA5-ABB2-38F18E69C799}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

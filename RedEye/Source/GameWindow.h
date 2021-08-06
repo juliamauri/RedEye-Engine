@@ -3,7 +3,7 @@
 
 #include "EditorWindow.h"
 
-#include "MathGeoLib/include/Math/float4.h"
+#include <MGL/Math/float4.h>
 
 class GameWindow :public EditorWindow
 {

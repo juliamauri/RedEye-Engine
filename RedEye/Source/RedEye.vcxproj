@@ -681,9 +681,6 @@
     <ClInclude Include="RE_CompParticleEmitter.h" />
     <ClInclude Include="RE_CompTransform.h" />
     <ClInclude Include="RE_ConsoleLog.h" />
-    <ClInclude Include="MathGeoLib\include\MathBuildConfig.h" />
-    <ClInclude Include="MathGeoLib\include\MathGeoLib.h" />
-    <ClInclude Include="MathGeoLib\include\MathGeoLibFwd.h" />
     <ClInclude Include="ModuleEditor.h" />
     <ClInclude Include="ModuleInput.h" />
     <ClInclude Include="ModuleRenderer3D.h" />
@@ -766,6 +763,11 @@
     <None Include="EA\EAStdC\internal\EAMemory.inl" />
     <None Include="EA\EAStdC\Win32\EAMathHelpWin32.inl" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\3rd Parties\MathGeoLib\MathGeoLib.vcxproj">
+      <Project>{981fe726-8519-38e2-b3b5-35ecc8814bbd}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{13DC399F-3A96-48E0-82B4-94FD73051599}</ProjectGuid>
@@ -834,7 +836,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StructMemberAlignment>Default</StructMemberAlignment>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\EA\;$(MSBuildProjectDirectory)\WWISESDK\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(MSBuildProjectDirectory)\EA\;$(MSBuildProjectDirectory)\WWISESDK\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
@@ -853,6 +855,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>;$(SolutionDir)\3rd Parties\MathGeoLib\src</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -863,7 +866,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\EA\;$(MSBuildProjectDirectory)\WWISESDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(MSBuildProjectDirectory)\EA\;$(MSBuildProjectDirectory)\WWISESDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -885,6 +888,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>;$(SolutionDir)\3rd Parties\MathGeoLib\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

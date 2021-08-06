@@ -12,7 +12,7 @@
 #include "RE_Shader.h"
 
 #include "Glew/include/glew.h"
-#include "MathGeoLib/include/Math/float4.h"
+#include <MGL/Math/float4.h>
 #include "par_shapes.h"
 #include "ImGui/imgui.h"
 

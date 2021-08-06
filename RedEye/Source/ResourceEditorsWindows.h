@@ -4,7 +4,7 @@
 #include "Event.h"
 #include "EditorWindow.h"
 
-#include "MathGeoLib/include/Math/float4.h"
+#include <MGL/Math/float4.h>
 #include "ImGui\imgui.h"
 #include "ImGuiWidgets/ImGuizmo/ImGuizmo.h"
 

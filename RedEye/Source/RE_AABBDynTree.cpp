@@ -1,7 +1,7 @@
 #include "RE_AABBDynTree.h"
 
-#include "MathGeoLib/include/Geometry/Frustum.h"
-#include "MathGeoLib/include/Geometry/LineSegment.h"
+#include <MGL/Geometry/Frustum.h>
+#include <MGL/Geometry/LineSegment.h>
 #include "SDL2/include/SDL_assert.h"
 #include "Glew/include/glew.h"
 

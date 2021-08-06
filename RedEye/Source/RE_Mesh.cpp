@@ -16,8 +16,8 @@
 #include "ImGui\imgui.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
-#include "MathGeoLib\include\MathGeoLib.h"
-#include "MathGeoLib\include\Math\Quat.h"
+#include <MGL/MathGeoLib.h>
+#include <MGL/Math\Quat.h>
 #include "md5.h"
 #include "assimp/include/Importer.hpp"
 #include "assimp/include/scene.h"

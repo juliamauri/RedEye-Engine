@@ -4,7 +4,7 @@
 #include "Resource.h"
 #include "RE_Cvar.h"
 
-#include "MathGeoLib/include/Math/float3.h"
+#include <MGL/Math/float3.h>
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 

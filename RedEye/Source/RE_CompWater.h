@@ -4,10 +4,10 @@
 #include "RE_Component.h"
 #include "RE_Cvar.h"
 
-#include "MathGeoLib/include/Geometry/AABB.h"
-#include "MathGeoLib/include/Geometry/Ray.h"
-#include "MathGeoLib/include/Math/float2.h"
-#include "MathGeoLib/include/Math/float3.h"
+#include <MGL/Geometry/AABB.h>
+#include <MGL/Geometry/Ray.h>
+#include <MGL/Math/float2.h>
+#include <MGL/Math/float3.h>
 
 #include <EASTL/vector.h>
 

@@ -1,8 +1,8 @@
 #ifndef __QUADTREE_H__
 #define __QUADTREE_H__
 
-#include "MathGeoLib/include/Math/float3.h"
-#include "MathGeoLib/include/Geometry/AABB.h"
+#include <MGL/Math/float3.h>
+#include <MGL/Geometry/AABB.h>
 #include "EASTL/vector.h"
 
 enum QTreeDrawMode : short { DISABLED, TOP, BOTTOM, TOP_BOTTOM, ALL };

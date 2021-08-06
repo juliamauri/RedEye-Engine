@@ -3,7 +3,7 @@
 
 #include "RE_DataTypes.h"
 
-#include "MathGeoLib\include\MathGeoLib.h"
+#include <MGL/MathGeoLib.h>
 #include <EASTL/list.h>
 #include <EASTL/vector.h>
 #include <EASTL/stack.h>

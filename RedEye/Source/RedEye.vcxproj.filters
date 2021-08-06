@@ -504,15 +504,6 @@
     <ClInclude Include="ImGui\stb_truetype.h">
       <Filter>3rd Party\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="MathGeoLib\include\MathBuildConfig.h">
-      <Filter>3rd Party\MathGeoLib</Filter>
-    </ClInclude>
-    <ClInclude Include="MathGeoLib\include\MathGeoLib.h">
-      <Filter>3rd Party\MathGeoLib</Filter>
-    </ClInclude>
-    <ClInclude Include="MathGeoLib\include\MathGeoLibFwd.h">
-      <Filter>3rd Party\MathGeoLib</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CompPrimitive.h">
       <Filter>Source\Application\Modules\Scene\Entity Component System\Components</Filter>
     </ClInclude>
@@ -1432,9 +1423,6 @@
     </Filter>
     <Filter Include="3rd Party\gpudetect">
       <UniqueIdentifier>{fec4a5bb-9630-4fec-ac82-f68facecd32b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="3rd Party\MathGeoLib">
-      <UniqueIdentifier>{431bcedd-ace7-494b-97d5-9917c675a2a2}</UniqueIdentifier>
     </Filter>
     <Filter Include="3rd Party\ImGui">
       <UniqueIdentifier>{a919df7d-26c5-4f48-bc4d-d94d785fcd11}</UniqueIdentifier>

@@ -2,7 +2,7 @@
 #define __RE_COMPMESH_H__
 
 #include "RE_Component.h"
-#include "MathGeoLib/include/Geometry/AABB.h"
+#include <MGL/Geometry/AABB.h>
 
 class RE_CompMesh : public RE_Component
 {

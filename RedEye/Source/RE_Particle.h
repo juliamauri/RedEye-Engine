@@ -1,7 +1,7 @@
 #ifndef __RE_PARTICLE_H__
 #define __RE_PARTICLE_H__
 
-#include "MathGeoLib/include/Math/float3.h"
+#include <MGL/Math/float3.h>
 
 struct RE_Particle
 {

@@ -2,7 +2,7 @@
 #define __AABB_DYNAMIC_TREE_H__
 
 #include "RE_HashMap.h"
-#include "MathGeoLib\include\Geometry\AABB.h"
+#include <MGL/Geometry/AABB.h>
 #include <EASTL/queue.h>
 
 typedef unsigned long long Object_UID;

@@ -11,7 +11,7 @@ enum aiTextureType;
 class RE_ECS_Pool;
 class RE_GameObject;
 
-#include "MathGeoLib/include/Math/float4x4.h"
+#include <MGL/Math/float4x4.h>
 
 #include <EASTL/vector.h>
 #include <EASTL/string.h>

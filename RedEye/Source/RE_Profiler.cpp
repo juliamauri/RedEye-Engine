@@ -4,7 +4,7 @@
 #ifdef INTERNAL_PROFILING
 
 #include "Application.h"
-#include "MathGeoLib\include\Time\Clock.h"
+#include <MGL/Time\Clock.h>
 #include "RapidJson\include\writer.h"
 #include "RapidJson\include\stringbuffer.h"
 #include <iostream>

@@ -1,0 +1,9 @@
+MathGeoLibConfig.cmake
+MathGeoLibConfigVersion.cmake
+MathGeoLibTargets.cmake
+cmake_install.cmake
+ALL_BUILD.*
+CMakeCache.txt
+INSTALL.*
+ZERO_CHECK.*
+MathGeoLib.sln

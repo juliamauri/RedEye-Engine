@@ -1,7 +1,7 @@
 #ifndef __RE_TEXTURE_SETTINGS_H__
 #define __RE_TEXTURE_SETTINGS_H__
 
-#include "MathGeoLib/include/Math/float4.h"
+#include <MGL/Math/float4.h>
 
 enum TextureType { //Same as image types defines on  il.h DevIL
 	RE_TEXTURE_UNKNOWN = 0x0000,

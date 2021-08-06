@@ -1,10 +1,10 @@
 #ifndef __RE_EMISSION_SHAPE_H__
 #define __RE_EMISSION_SHAPE_H__
 
-#include "MathGeoLib/include/Geometry/Circle.h"
-#include "MathGeoLib/include/Geometry/Sphere.h"
-#include "MathGeoLib/include/Geometry/Plane.h"
-#include "MathGeoLib/include/Geometry/AABB.h"
+#include <MGL/Geometry/Circle.h>
+#include <MGL/Geometry/Sphere.h>
+#include <MGL/Geometry/Plane.h>
+#include <MGL/Geometry/AABB.h>
 #include "ImGui/imgui.h"
 #include <EASTL/vector.h>
 

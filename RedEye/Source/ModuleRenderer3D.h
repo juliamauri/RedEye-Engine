@@ -3,7 +3,7 @@
 
 #include "Event.h"
 
-#include "MathGeoLib/include/Math/float4.h"
+#include <MGL/Math/float4.h>
 #include <EASTL/stack.h>
 #include <EASTL/string.h>
 

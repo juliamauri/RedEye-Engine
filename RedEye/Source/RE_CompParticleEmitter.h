@@ -2,7 +2,7 @@
 #define __RE_COMPPARTICLEEMITTER_H__
 
 #include "RE_Component.h"
-#include "MathGeoLib/include/Math/float3.h"
+#include <MGL/Math/float3.h>
 #include <vector>
 
 class RE_ParticleEmitter;

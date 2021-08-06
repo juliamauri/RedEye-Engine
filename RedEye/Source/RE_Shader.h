@@ -5,7 +5,7 @@
 #include "RE_Cvar.h"
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
-#include "MathGeoLib/include/Math/float4.h"
+#include <MGL/Math/float4.h>
 
 class RE_CompCamera;
 

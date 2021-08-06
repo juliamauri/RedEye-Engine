@@ -1,7 +1,7 @@
 #ifndef __RE_PRIMITVEMANAGER_H__
 #define __RE_PRIMITVEMANAGER_H__
 
-#include "MathGeoLib/include/Math/float3.h"
+#include <MGL/Math/float3.h>
 
 #include <EASTL/map.h>
 #include <EASTL/utility.h>
