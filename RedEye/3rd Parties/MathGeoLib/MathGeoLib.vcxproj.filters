@@ -1,365 +1,362 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\GJK.cpp">
+    <ClCompile Include="src\MGL\Algorithm\GJK.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\GJK2D.cpp">
+    <ClCompile Include="src\MGL\Algorithm\GJK2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\Random\LCG.cpp">
+    <ClCompile Include="src\MGL\Algorithm\Random\LCG.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\SAT.cpp">
+    <ClCompile Include="src\MGL\Algorithm\SAT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\AABB.cpp">
+    <ClCompile Include="src\MGL\Geometry\AABB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Capsule.cpp">
+    <ClCompile Include="src\MGL\Geometry\Capsule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Circle.cpp">
+    <ClCompile Include="src\MGL\Geometry\Circle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Circle2D.cpp">
+    <ClCompile Include="src\MGL\Geometry\Circle2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Frustum.cpp">
+    <ClCompile Include="src\MGL\Geometry\Frustum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Line.cpp">
+    <ClCompile Include="src\MGL\Geometry\Line.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\LineSegment.cpp">
+    <ClCompile Include="src\MGL\Geometry\LineSegment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\LineSegment2D.cpp">
+    <ClCompile Include="src\MGL\Geometry\LineSegment2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\OBB.cpp">
+    <ClCompile Include="src\MGL\Geometry\OBB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\PBVolume.cpp">
+    <ClCompile Include="src\MGL\Geometry\PBVolume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Plane.cpp">
+    <ClCompile Include="src\MGL\Geometry\Plane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Polygon.cpp">
+    <ClCompile Include="src\MGL\Geometry\Polygon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Polyhedron.cpp">
+    <ClCompile Include="src\MGL\Geometry\Polyhedron.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Ray.cpp">
+    <ClCompile Include="src\MGL\Geometry\Ray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Sphere.cpp">
+    <ClCompile Include="src\MGL\Geometry\Sphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Triangle.cpp">
+    <ClCompile Include="src\MGL\Geometry\Triangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Triangle2D.cpp">
+    <ClCompile Include="src\MGL\Geometry\Triangle2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\TriangleMesh.cpp">
+    <ClCompile Include="src\MGL\Geometry\TriangleMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\BitOps.cpp">
+    <ClCompile Include="src\MGL\Math\BitOps.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Callstack.cpp">
+    <ClCompile Include="src\MGL\Math\Callstack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathFunc.cpp">
+    <ClCompile Include="src\MGL\Math\MathFunc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathLog.cpp">
+    <ClCompile Include="src\MGL\Math\MathLog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathOps.cpp">
+    <ClCompile Include="src\MGL\Math\MathOps.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MiniFloat.cpp">
+    <ClCompile Include="src\MGL\Math\MiniFloat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Polynomial.cpp">
+    <ClCompile Include="src\MGL\Math\Polynomial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Quat.cpp">
+    <ClCompile Include="src\MGL\Math\Quat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\SSEMath.cpp">
+    <ClCompile Include="src\MGL\Math\SSEMath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\TransformOps.cpp">
+    <ClCompile Include="src\MGL\Math\TransformOps.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float2.cpp">
+    <ClCompile Include="src\MGL\Math\float2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3.cpp">
+    <ClCompile Include="src\MGL\Math\float3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3x3.cpp">
+    <ClCompile Include="src\MGL\Math\float3x3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3x4.cpp">
+    <ClCompile Include="src\MGL\Math\float3x4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4.cpp">
+    <ClCompile Include="src\MGL\Math\float4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4d.cpp">
+    <ClCompile Include="src\MGL\Math\float4d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4x4.cpp">
+    <ClCompile Include="src\MGL\Math\float4x4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\grisu3.c">
+    <ClCompile Include="src\MGL\Math\grisu3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\grisu3_cpp.cpp">
+    <ClCompile Include="src\MGL\Math\grisu3_cpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Time\Clock.cpp">
+    <ClCompile Include="src\MGL\Time\Clock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\GJK.h">
+    <ClInclude Include="src\MGL\Algorithm\GJK.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\GJK2D.h">
+    <ClInclude Include="src\MGL\Algorithm\GJK2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\Random\LCG.h">
+    <ClInclude Include="src\MGL\Algorithm\Random\LCG.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Algorithm\SAT.h">
+    <ClInclude Include="src\MGL\Algorithm\SAT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\AABB.h">
+    <ClInclude Include="src\MGL\Geometry\AABB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\AABB2D.h">
+    <ClInclude Include="src\MGL\Geometry\AABB2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Capsule.h">
+    <ClInclude Include="src\MGL\Geometry\Capsule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Circle.h">
+    <ClInclude Include="src\MGL\Geometry\Circle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Circle2D.h">
+    <ClInclude Include="src\MGL\Geometry\Circle2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Frustum.h">
+    <ClInclude Include="src\MGL\Geometry\Frustum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\GeomType.h">
+    <ClInclude Include="src\MGL\Geometry\GeomType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\GeometryAll.h">
+    <ClInclude Include="src\MGL\Geometry\GeometryAll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\HitInfo.h">
+    <ClInclude Include="src\MGL\Geometry\HitInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\KDTree.h">
+    <ClInclude Include="src\MGL\Geometry\KDTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Line.h">
+    <ClInclude Include="src\MGL\Geometry\Line.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\LineSegment.h">
+    <ClInclude Include="src\MGL\Geometry\LineSegment.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\LineSegment2D.h">
+    <ClInclude Include="src\MGL\Geometry\LineSegment2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\OBB.h">
+    <ClInclude Include="src\MGL\Geometry\OBB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\OBB2D.h">
+    <ClInclude Include="src\MGL\Geometry\OBB2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\PBVolume.h">
+    <ClInclude Include="src\MGL\Geometry\PBVolume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Plane.h">
+    <ClInclude Include="src\MGL\Geometry\Plane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Polygon.h">
+    <ClInclude Include="src\MGL\Geometry\Polygon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Polygon2DRef.h">
+    <ClInclude Include="src\MGL\Geometry\Polygon2DRef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Polyhedron.h">
+    <ClInclude Include="src\MGL\Geometry\Polyhedron.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\QuadTree.h">
+    <ClInclude Include="src\MGL\Geometry\QuadTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Ray.h">
+    <ClInclude Include="src\MGL\Geometry\Ray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Sphere.h">
+    <ClInclude Include="src\MGL\Geometry\Sphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Triangle.h">
+    <ClInclude Include="src\MGL\Geometry\Triangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\Triangle2D.h">
+    <ClInclude Include="src\MGL\Geometry\Triangle2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Geometry\TriangleMesh.h">
+    <ClInclude Include="src\MGL\Geometry\TriangleMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\BitFuncs.h">
+    <ClInclude Include="src\MGL\Math\BitFuncs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\BitOps.h">
+    <ClInclude Include="src\MGL\Math\BitOps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Callstack.h">
+    <ClInclude Include="src\MGL\Math\Callstack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\FixedPoint.h">
+    <ClInclude Include="src\MGL\Math\FixedPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\FloatCmp.h">
+    <ClInclude Include="src\MGL\Math\FloatCmp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\InclWindows.h">
+    <ClInclude Include="src\MGL\Math\InclWindows.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Interpolate.h">
+    <ClInclude Include="src\MGL\Math\Interpolate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathAll.h">
+    <ClInclude Include="src\MGL\Math\MathAll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathConstants.h">
+    <ClInclude Include="src\MGL\Math\MathConstants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathFunc.h">
+    <ClInclude Include="src\MGL\Math\MathFunc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathLog.h">
+    <ClInclude Include="src\MGL\Math\MathLog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathNamespace.h">
+    <ClInclude Include="src\MGL\Math\MathNamespace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MathTypes.h">
+    <ClInclude Include="src\MGL\Math\MathTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MatrixProxy.h">
+    <ClInclude Include="src\MGL\Math\MatrixProxy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MiniFloat.h">
+    <ClInclude Include="src\MGL\Math\MiniFloat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\MultiLineMacro.h">
+    <ClInclude Include="src\MGL\Math\MultiLineMacro.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Polynomial.h">
+    <ClInclude Include="src\MGL\Math\Polynomial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Quat.h">
+    <ClInclude Include="src\MGL\Math\Quat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Rect.h">
+    <ClInclude Include="src\MGL\Math\Rect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Reinterpret.h">
+    <ClInclude Include="src\MGL\Math\Reinterpret.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\SSEMath.h">
+    <ClInclude Include="src\MGL\Math\SSEMath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\Swap.h">
+    <ClInclude Include="src\MGL\Math\Swap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\TransformOps.h">
+    <ClInclude Include="src\MGL\Math\TransformOps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\assume.h">
+    <ClInclude Include="src\MGL\Math\assume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float2.h">
+    <ClInclude Include="src\MGL\Math\float2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3.h">
+    <ClInclude Include="src\MGL\Math\float3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3x3.h">
+    <ClInclude Include="src\MGL\Math\float3x3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float3x4.h">
+    <ClInclude Include="src\MGL\Math\float3x4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4.h">
+    <ClInclude Include="src\MGL\Math\float4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4_neon.h">
+    <ClInclude Include="src\MGL\Math\float4_neon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4_sse.h">
+    <ClInclude Include="src\MGL\Math\float4_sse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4d.h">
+    <ClInclude Include="src\MGL\Math\float4d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4x4.h">
+    <ClInclude Include="src\MGL\Math\float4x4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4x4_neon.h">
+    <ClInclude Include="src\MGL\Math\float4x4_neon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\float4x4_sse.h">
+    <ClInclude Include="src\MGL\Math\float4x4_sse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\grisu3.h">
+    <ClInclude Include="src\MGL\Math\grisu3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\myassert.h">
+    <ClInclude Include="src\MGL\Math\myassert.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\quat_simd.h">
+    <ClInclude Include="src\MGL\Math\quat_simd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\simd.h">
+    <ClInclude Include="src\MGL\Math\simd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\sse_mathfun.h">
+    <ClInclude Include="src\MGL\Math\sse_mathfun.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Math\vec2d.h">
+    <ClInclude Include="src\MGL\Math\vec2d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\MathBuildConfig.h">
+    <ClInclude Include="src\MGL\MathBuildConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\MathGeoLib.h">
+    <ClInclude Include="src\MGL\MathGeoLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\MathGeoLibFwd.h">
+    <ClInclude Include="src\MGL\MathGeoLibFwd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\Time\Clock.h">
+    <ClInclude Include="src\MGL\Time\Clock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\src\MGL\emscripten\library_system.h">
+    <ClInclude Include="src\MGL\emscripten\library_system.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="C:\Users\JuliG\Documentos\GitHub\RedEye-Engine\RedEye\3rd Parties\MathGeoLib\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

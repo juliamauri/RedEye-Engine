@@ -36,11 +36,6 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-doc/build/
-doc/xml/
-Makefile
-CMakeFiles/
-CMakeCache.txt
 
 !RedEye/Source/EA/eathread/*
 
@@ -90,18 +85,12 @@ artifacts/
 *.tmp
 *.tmp_proj
 *.log
-*.tlog
 *.vspscc
 *.vssscc
 .builds
 *.pidb
 *.svclog
 *.scc
-*.smproj
-*.gcov
-*.idb
-*.ipch
-*.o
 
 # Chutzpah Test files
 _Chutzpah*
