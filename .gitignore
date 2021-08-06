@@ -30,6 +30,8 @@ RedEye.pdb
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+MinSizeRel/
+RelWithDebInfo/
 x64/
 x86/
 bld/

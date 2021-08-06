@@ -15,10 +15,8 @@
 
 #ifdef _DEBUG
 #pragma comment( lib, "Optick/libx86/OptickCore_debug.lib" )
-#pragma comment( lib, "EA/EASTL/libx86/DebugLib/EASTL.lib" )
 #else
 #pragma comment( lib, "Optick/libx86/OptickCore_release.lib" )
-#pragma comment( lib, "EA/EASTL/libx86/ReleaseLib/EASTL.lib" )
 #endif
 
 /*  HELLO EASTL! -> How to track the memory:

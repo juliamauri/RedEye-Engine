@@ -1,0 +1,629 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|Win32">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|Win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4D97B454-7F2F-3B41-A692-4916D5785F1A}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>Win32</Platform>
+    <ProjectName>EASTL</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EASTL.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EASTL</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">EASTL.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">EASTL</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">EASTL.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">EASTL</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">EASTL.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">EASTL</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <ConformanceMode>true</ConformanceMode>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;EA_PLATFORM_MICROSOFT;EA_PROCESSOR_X86;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ConformanceMode>true</ConformanceMode>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;EA_PLATFORM_MICROSOFT;EA_PROCESSOR_X86;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ConformanceMode>true</ConformanceMode>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;EA_PLATFORM_MICROSOFT;EA_PROCESSOR_X86;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ConformanceMode>true</ConformanceMode>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;EA_PLATFORM_MICROSOFT;EA_PROCESSOR_X86;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)test\packages\EAAssert\include;$(ProjectDir)test\packages\EABase\include\Common;$(ProjectDir)test\packages\EAMain\include;$(ProjectDir)test\packages\EAStdC\include;$(ProjectDir)test\packages\EAThread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="source\allocator_eastl.cpp" />
+    <ClCompile Include="source\assert.cpp" />
+    <ClCompile Include="source\atomic.cpp" />
+    <ClCompile Include="source\fixed_pool.cpp" />
+    <ClCompile Include="source\hashtable.cpp" />
+    <ClCompile Include="source\intrusive_list.cpp" />
+    <ClCompile Include="source\numeric_limits.cpp" />
+    <ClCompile Include="source\red_black_tree.cpp" />
+    <ClCompile Include="source\string.cpp" />
+    <ClCompile Include="source\thread_support.cpp" />
+    <ClCompile Include="test\packages\EAAssert\source\eaassert.cpp" />
+    <ClCompile Include="test\packages\EAMain\source\EAEntryPointMain.cpp" />
+    <ClCompile Include="test\packages\EAMain\source\EAMain.cpp" />
+    <ClCompile Include="test\packages\EAMain\source\EAMainExit.cpp" />
+    <ClCompile Include="test\packages\EAMain\source\EAMainPrint.cpp" />
+    <ClCompile Include="test\packages\EAMain\source\internal\EAMainChannels.cpp" />
+    <ClCompile Include="test\packages\EAMain\source\internal\EAMainPrintManager.cpp" />
+    <ClCompile Include="test\packages\EAMain\source\internal\EAMainStartupShutdown.cpp" />
+    <ClCompile Include="test\packages\EAMain\source\internal\NetworkChannel.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EACallback.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EACType.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EADateTime.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAFixedPoint.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAGlobal.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAHashCRC.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAHashString.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAMemory.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAProcess.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EARandom.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAScanf.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAScanfCore.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EASprintf.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EASprintfCore.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EASprintfOrdered.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAStdC.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAStopwatch.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EAString.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\EATextUtil.cpp" />
+    <ClCompile Include="test\packages\EAStdC\source\Int128_t.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_barrier.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_callstack.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_condition.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_futex.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_mutex.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_pool.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_rwmutex.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_rwmutex_ip.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_semaphore.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_storage.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\eathread_thread.cpp" />
+    <ClCompile Include="test\packages\EAThread\source\version.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_add_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_and_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_cmpxchg_strong.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_cmpxchg_weak.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_compiler_barrier.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_cpu_pause.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_exchange.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_fetch_add.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_fetch_and.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_fetch_or.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_fetch_sub.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_fetch_xor.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_load.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_memory_barrier.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_or_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_signal_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_store.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_sub_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_thread_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arch_xor_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arm\arch_arm.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arm\arch_arm_load.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arm\arch_arm_memory_barrier.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arm\arch_arm_store.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\arm\arch_arm_thread_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_add_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_and_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_cmpxchg_strong.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_cmpxchg_weak.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_exchange.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_fetch_add.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_fetch_and.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_fetch_or.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_fetch_sub.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_fetch_xor.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_load.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_memory_barrier.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_or_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_store.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_sub_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_thread_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\arch\x86\arch_x86_xor_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_asserts.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_base_width.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_casts.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_flag.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_flag_standalone.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_integral.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_add_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_and_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_base.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_cmpxchg_strong.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_cmpxchg_weak.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_compiler_barrier.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_cpu_pause.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_exchange.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_fetch_add.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_fetch_and.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_fetch_or.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_fetch_sub.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_fetch_xor.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_load.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_memory_barrier.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_or_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_signal_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_store.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_sub_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_thread_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_macros\atomic_macros_xor_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_memory_order.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_pointer.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_pop_compiler_options.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_push_compiler_options.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_size_aligned.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\atomic_standalone.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_add_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_and_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_barrier.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_cmpxchg_strong.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_cmpxchg_weak.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_cpu_pause.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_exchange.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_fetch_add.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_fetch_and.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_fetch_or.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_fetch_sub.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_fetch_xor.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_load.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_memory_barrier.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_or_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_signal_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_store.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_sub_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_thread_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\compiler_xor_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_add_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_and_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_barrier.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_cmpxchg_strong.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_cmpxchg_weak.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_cpu_pause.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_exchange.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_fetch_add.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_fetch_and.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_fetch_or.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_fetch_sub.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_fetch_xor.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_load.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_or_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_signal_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_store.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_sub_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_thread_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\gcc\compiler_gcc_xor_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_add_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_and_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_barrier.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_cmpxchg_strong.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_cmpxchg_weak.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_cpu_pause.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_exchange.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_fetch_add.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_fetch_and.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_fetch_or.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_fetch_sub.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_fetch_xor.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_or_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_signal_fence.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_sub_fetch.h" />
+    <ClInclude Include="include\EASTL\internal\atomic\compiler\msvc\compiler_msvc_xor_fetch.h" />
+    <ClInclude Include="test\packages\EAAssert\include\EAAssert\eaassert.h" />
+    <ClInclude Include="test\packages\EAAssert\include\EAAssert\version.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\config\eacompiler.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\config\eacompilertraits.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\config\eaplatform.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\eabase.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\eahave.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\earesult.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\eastdarg.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\eaunits.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\int128.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\nullptr.h" />
+    <ClInclude Include="test\packages\EABase\include\Common\EABase\version.h" />
+    <ClInclude Include="test\packages\EAMain\include\EAMain\EAMain.h" />
+    <ClInclude Include="test\packages\EAMain\include\EAMain\EAMainExit.h" />
+    <ClInclude Include="test\packages\EAMain\include\EAMain\internal\EAMainChannels.h" />
+    <ClInclude Include="test\packages\EAMain\include\EAMain\internal\EAMainPrintManager.h" />
+    <ClInclude Include="test\packages\EAMain\include\EAMain\internal\EAMainStartupShutdown.h" />
+    <ClInclude Include="test\packages\EAMain\include\EAMain\internal\Version.h" />
+    <ClInclude Include="test\packages\EAMain\include\EAMain\IPhoneEntry.h" />
+    <ClInclude Include="test\packages\EAMain\include\EAMain\version.h" />
+    <ClInclude Include="test\packages\EAMain\source\EAMainPrintf.h" />
+    <ClInclude Include="test\packages\EAMain\source\internal\NetworkChannel.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAAlignment.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EABitTricks.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAByteCrackers.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EACallback.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EACType.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EADateTime.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAEndian.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAFixedPoint.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAGlobal.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAHashCRC.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAHashString.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAMathHelp.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAMemory.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAProcess.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EARandom.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EARandomDistribution.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAScanf.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EASingleton.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EASprintf.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EASprintfOrdered.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAStdC.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAStopwatch.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EAString.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\EATextUtil.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\Int128_t.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\internal\Config.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\internal\IntrusiveList.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\internal\ScanfCore.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\internal\SprintfCore.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\internal\stdioEA.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\internal\Thread.h" />
+    <ClInclude Include="test\packages\EAStdC\include\EAStdC\version.h" />
+    <ClInclude Include="include\EASTL\algorithm.h" />
+    <ClInclude Include="include\EASTL\allocator.h" />
+    <ClInclude Include="include\EASTL\allocator_malloc.h" />
+    <ClInclude Include="include\EASTL\any.h" />
+    <ClInclude Include="include\EASTL\array.h" />
+    <ClInclude Include="include\EASTL\bitset.h" />
+    <ClInclude Include="include\EASTL\bitvector.h" />
+    <ClInclude Include="include\EASTL\bonus\adaptors.h" />
+    <ClInclude Include="include\EASTL\bonus\call_traits.h" />
+    <ClInclude Include="include\EASTL\bonus\compressed_pair.h" />
+    <ClInclude Include="include\EASTL\bonus\fixed_ring_buffer.h" />
+    <ClInclude Include="include\EASTL\bonus\fixed_tuple_vector.h" />
+    <ClInclude Include="include\EASTL\bonus\intrusive_sdlist.h" />
+    <ClInclude Include="include\EASTL\bonus\intrusive_slist.h" />
+    <ClInclude Include="include\EASTL\bonus\list_map.h" />
+    <ClInclude Include="include\EASTL\bonus\lru_cache.h" />
+    <ClInclude Include="include\EASTL\bonus\ring_buffer.h" />
+    <ClInclude Include="include\EASTL\bonus\sort_extra.h" />
+    <ClInclude Include="include\EASTL\bonus\tuple_vector.h" />
+    <ClInclude Include="include\EASTL\chrono.h" />
+    <ClInclude Include="include\EASTL\core_allocator.h" />
+    <ClInclude Include="include\EASTL\core_allocator_adapter.h" />
+    <ClInclude Include="include\EASTL\deque.h" />
+    <ClInclude Include="include\EASTL\finally.h" />
+    <ClInclude Include="include\EASTL\fixed_allocator.h" />
+    <ClInclude Include="include\EASTL\fixed_function.h" />
+    <ClInclude Include="include\EASTL\fixed_hash_map.h" />
+    <ClInclude Include="include\EASTL\fixed_hash_set.h" />
+    <ClInclude Include="include\EASTL\fixed_list.h" />
+    <ClInclude Include="include\EASTL\fixed_map.h" />
+    <ClInclude Include="include\EASTL\fixed_set.h" />
+    <ClInclude Include="include\EASTL\fixed_slist.h" />
+    <ClInclude Include="include\EASTL\fixed_string.h" />
+    <ClInclude Include="include\EASTL\fixed_substring.h" />
+    <ClInclude Include="include\EASTL\fixed_vector.h" />
+    <ClInclude Include="include\EASTL\functional.h" />
+    <ClInclude Include="include\EASTL\hash_map.h" />
+    <ClInclude Include="include\EASTL\hash_set.h" />
+    <ClInclude Include="include\EASTL\heap.h" />
+    <ClInclude Include="include\EASTL\initializer_list.h" />
+    <ClInclude Include="include\EASTL\internal\char_traits.h" />
+    <ClInclude Include="include\EASTL\internal\config.h" />
+    <ClInclude Include="include\EASTL\internal\copy_help.h" />
+    <ClInclude Include="include\EASTL\internal\enable_shared.h" />
+    <ClInclude Include="include\EASTL\internal\fill_help.h" />
+    <ClInclude Include="include\EASTL\internal\fixed_pool.h" />
+    <ClInclude Include="include\EASTL\internal\function.h" />
+    <ClInclude Include="include\EASTL\internal\functional_base.h" />
+    <ClInclude Include="include\EASTL\internal\function_detail.h" />
+    <ClInclude Include="include\EASTL\internal\function_help.h" />
+    <ClInclude Include="include\EASTL\internal\generic_iterator.h" />
+    <ClInclude Include="include\EASTL\internal\hashtable.h" />
+    <ClInclude Include="include\EASTL\internal\integer_sequence.h" />
+    <ClInclude Include="include\EASTL\internal\intrusive_hashtable.h" />
+    <ClInclude Include="include\EASTL\internal\in_place_t.h" />
+    <ClInclude Include="include\EASTL\internal\memory_base.h" />
+    <ClInclude Include="include\EASTL\internal\mem_fn.h" />
+    <ClInclude Include="include\EASTL\internal\move_help.h" />
+    <ClInclude Include="include\EASTL\internal\pair_fwd_decls.h" />
+    <ClInclude Include="include\EASTL\internal\piecewise_construct_t.h" />
+    <ClInclude Include="include\EASTL\internal\red_black_tree.h" />
+    <ClInclude Include="include\EASTL\internal\smart_ptr.h" />
+    <ClInclude Include="include\EASTL\internal\thread_support.h" />
+    <ClInclude Include="include\EASTL\internal\tuple_fwd_decls.h" />
+    <ClInclude Include="include\EASTL\internal\type_compound.h" />
+    <ClInclude Include="include\EASTL\internal\type_fundamental.h" />
+    <ClInclude Include="include\EASTL\internal\type_pod.h" />
+    <ClInclude Include="include\EASTL\internal\type_properties.h" />
+    <ClInclude Include="include\EASTL\internal\type_transformations.h" />
+    <ClInclude Include="include\EASTL\intrusive_hash_map.h" />
+    <ClInclude Include="include\EASTL\intrusive_hash_set.h" />
+    <ClInclude Include="include\EASTL\intrusive_list.h" />
+    <ClInclude Include="include\EASTL\intrusive_ptr.h" />
+    <ClInclude Include="include\EASTL\iterator.h" />
+    <ClInclude Include="include\EASTL\linked_array.h" />
+    <ClInclude Include="include\EASTL\linked_ptr.h" />
+    <ClInclude Include="include\EASTL\list.h" />
+    <ClInclude Include="include\EASTL\map.h" />
+    <ClInclude Include="include\EASTL\memory.h" />
+    <ClInclude Include="include\EASTL\meta.h" />
+    <ClInclude Include="include\EASTL\numeric.h" />
+    <ClInclude Include="include\EASTL\numeric_limits.h" />
+    <ClInclude Include="include\EASTL\optional.h" />
+    <ClInclude Include="include\EASTL\priority_queue.h" />
+    <ClInclude Include="include\EASTL\queue.h" />
+    <ClInclude Include="include\EASTL\random.h" />
+    <ClInclude Include="include\EASTL\ratio.h" />
+    <ClInclude Include="include\EASTL\safe_ptr.h" />
+    <ClInclude Include="include\EASTL\scoped_array.h" />
+    <ClInclude Include="include\EASTL\scoped_ptr.h" />
+    <ClInclude Include="include\EASTL\segmented_vector.h" />
+    <ClInclude Include="include\EASTL\set.h" />
+    <ClInclude Include="include\EASTL\shared_array.h" />
+    <ClInclude Include="include\EASTL\shared_ptr.h" />
+    <ClInclude Include="include\EASTL\slist.h" />
+    <ClInclude Include="include\EASTL\sort.h" />
+    <ClInclude Include="include\EASTL\span.h" />
+    <ClInclude Include="include\EASTL\stack.h" />
+    <ClInclude Include="include\EASTL\string.h" />
+    <ClInclude Include="include\EASTL\string_hash_map.h" />
+    <ClInclude Include="include\EASTL\string_map.h" />
+    <ClInclude Include="include\EASTL\string_view.h" />
+    <ClInclude Include="include\EASTL\tuple.h" />
+    <ClInclude Include="include\EASTL\type_traits.h" />
+    <ClInclude Include="include\EASTL\unique_ptr.h" />
+    <ClInclude Include="include\EASTL\unordered_map.h" />
+    <ClInclude Include="include\EASTL\unordered_set.h" />
+    <ClInclude Include="include\EASTL\utility.h" />
+    <ClInclude Include="include\EASTL\variant.h" />
+    <ClInclude Include="include\EASTL\vector.h" />
+    <ClInclude Include="include\EASTL\vector_map.h" />
+    <ClInclude Include="include\EASTL\vector_multimap.h" />
+    <ClInclude Include="include\EASTL\vector_multiset.h" />
+    <ClInclude Include="include\EASTL\vector_set.h" />
+    <ClInclude Include="include\EASTL\version.h" />
+    <ClInclude Include="include\EASTL\weak_ptr.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_atomic.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_barrier.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_callstack.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_callstack_context.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_condition.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_futex.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_list.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_mutex.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_pool.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_rwmutex.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_rwmutex_ip.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_rwsemalock.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_rwspinlock.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_rwspinlockw.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_semaphore.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_spinlock.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_storage.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_sync.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\eathread_thread.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\gcc\eathread_atomic_gcc.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\gcc\eathread_sync_gcc.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\internal\atomic.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\internal\config.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\internal\dllinfo.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\internal\eathread_atomic.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\internal\eathread_atomic_standalone.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\internal\eathread_atomic_standalone_gcc.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\internal\eathread_atomic_standalone_msvc.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\internal\eathread_global.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\internal\timings.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\shared_array_mt.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\shared_ptr_mt.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\version.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\x86-64\eathread_atomic_x86-64.h" />
+    <ClInclude Include="test\packages\EAThread\include\eathread\x86-64\eathread_sync_x86-64.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test\packages\EAMain\include\EAMain\EAEntryPointMain.inl" />
+    <None Include="test\packages\EAMain\include\EAMain\EAMainInitFini.inl" />
+    <None Include="test\packages\EAMain\include\EAMain\internal\EAMainStartupShutdown.inl" />
+    <None Include="test\packages\EAStdC\include\EAStdC\internal\EAMemory.inl" />
+    <None Include="test\packages\EAStdC\include\EAStdC\Win32\EAMathHelpWin32.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

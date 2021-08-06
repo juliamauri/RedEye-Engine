@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "../ImGui/imgui.h"
+#include "../../ImGui/imgui.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "../ImGui/imgui_internal.h"
+#include "../../ImGui/imgui_internal.h"
 
 #include <cmath>
 #include <EASTL/string.h>

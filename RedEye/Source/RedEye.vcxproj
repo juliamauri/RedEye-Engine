@@ -36,108 +36,6 @@
     <ClCompile Include="RE_Json.cpp" />
     <ClCompile Include="RE_Config.cpp" />
     <ClCompile Include="RE_Cvar.cpp" />
-    <ClCompile Include="EA\EAAssert\eaassert.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EACallback.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EACType.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EADateTime.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAFixedPoint.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAGlobal.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAHashCRC.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAHashString.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAMemory.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAProcess.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EARandom.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAScanf.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAScanfCore.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EASprintf.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EASprintfCore.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EASprintfOrdered.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAStdC.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAStopwatch.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EAString.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\EATextUtil.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\EAStdC\Int128_t.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_barrier.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_callstack.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_condition.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_futex.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_mutex.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_pool.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_rwmutex.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_rwmutex_ip.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_semaphore.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_storage.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\eathread_thread.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="EA\eathread\version.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
     <ClCompile Include="ImGui\misc\cpp\imgui_stdlib.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
@@ -184,14 +82,14 @@
     <ClCompile Include="RE_Model.cpp" />
     <ClCompile Include="RE_ModelImporter.cpp" />
     <ClCompile Include="RE_CompParticleEmitter.cpp" />
-    <ClCompile Include="RE_CompTransform.cpp"  />
+    <ClCompile Include="RE_CompTransform.cpp" />
     <ClCompile Include="RE_ConsoleLog.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ModuleEditor.cpp"  />
+    <ClCompile Include="ModuleEditor.cpp" />
     <ClCompile Include="ModuleInput.cpp" />
     <ClCompile Include="ModuleRenderer3D.cpp" />
     <ClCompile Include="ModuleScene.cpp" />
-    <ClCompile Include="ModuleWindow.cpp"/>
+    <ClCompile Include="ModuleWindow.cpp" />
     <ClCompile Include="RE_ParticleEmission.cpp" />
     <ClCompile Include="RE_ParticleEmitter.cpp" />
     <ClCompile Include="RE_ParticleEmitterBase.cpp" />
@@ -201,7 +99,7 @@
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="RE_ResourceManager.cpp" />
     <ClCompile Include="RE_CompCamera.cpp" />
-    <ClCompile Include="RE_CompMesh.cpp"/>
+    <ClCompile Include="RE_CompMesh.cpp" />
     <ClCompile Include="RE_GameObject.cpp" />
     <ClCompile Include="RE_Material.cpp" />
     <ClCompile Include="RE_Mesh.cpp" />
@@ -209,15 +107,15 @@
     <ClCompile Include="RE_Prefab.cpp" />
     <ClCompile Include="RE_PrimitiveManager.cpp" />
     <ClCompile Include="RE_ECS_Importer.cpp" />
-    <ClCompile Include="RE_Scene.cpp"  />
+    <ClCompile Include="RE_Scene.cpp" />
     <ClCompile Include="RE_Shader.cpp" />
     <ClCompile Include="RE_SkyBox.cpp" />
     <ClCompile Include="RE_SkyboxImporter.cpp" />
     <ClCompile Include="RE_Texture.cpp" />
     <ClCompile Include="RE_ShaderImporter.cpp" />
-    <ClCompile Include="RE_ThumbnailManager.cpp"  />
+    <ClCompile Include="RE_ThumbnailManager.cpp" />
     <ClCompile Include="RE_Hardware.cpp" />
-    <ClCompile Include="RE_TextureImporter.cpp"/>
+    <ClCompile Include="RE_TextureImporter.cpp" />
     <ClCompile Include="RE_Time.cpp" />
     <ClCompile Include="RE_Timer.cpp" />
     <ClCompile Include="PropertiesWindow.cpp" />
@@ -253,206 +151,6 @@
     <ClInclude Include="RE_Json.h" />
     <ClInclude Include="RE_Config.h" />
     <ClInclude Include="RE_Cvar.h" />
-    <ClInclude Include="EA\EAAssert\eaassert.h" />
-    <ClInclude Include="EA\EAAssert\version.h" />
-    <ClInclude Include="EA\EABase\config\eacompiler.h" />
-    <ClInclude Include="EA\EABase\config\eacompilertraits.h" />
-    <ClInclude Include="EA\EABase\config\eaplatform.h" />
-    <ClInclude Include="EA\EABase\eabase.h" />
-    <ClInclude Include="EA\EABase\eahave.h" />
-    <ClInclude Include="EA\EABase\earesult.h" />
-    <ClInclude Include="EA\EABase\eastdarg.h" />
-    <ClInclude Include="EA\EABase\eaunits.h" />
-    <ClInclude Include="EA\EABase\int128.h" />
-    <ClInclude Include="EA\EABase\nullptr.h" />
-    <ClInclude Include="EA\EABase\version.h" />
-    <ClInclude Include="EA\EAStdC\EAAlignment.h" />
-    <ClInclude Include="EA\EAStdC\EABitTricks.h" />
-    <ClInclude Include="EA\EAStdC\EAByteCrackers.h" />
-    <ClInclude Include="EA\EAStdC\EACallback.h" />
-    <ClInclude Include="EA\EAStdC\EACType.h" />
-    <ClInclude Include="EA\EAStdC\EADateTime.h" />
-    <ClInclude Include="EA\EAStdC\EAEndian.h" />
-    <ClInclude Include="EA\EAStdC\EAFixedPoint.h" />
-    <ClInclude Include="EA\EAStdC\EAGlobal.h" />
-    <ClInclude Include="EA\EAStdC\EAHashCRC.h" />
-    <ClInclude Include="EA\EAStdC\EAHashString.h" />
-    <ClInclude Include="EA\EAStdC\EAMathHelp.h" />
-    <ClInclude Include="EA\EAStdC\EAMemory.h" />
-    <ClInclude Include="EA\EAStdC\EAProcess.h" />
-    <ClInclude Include="EA\EAStdC\EARandom.h" />
-    <ClInclude Include="EA\EAStdC\EARandomDistribution.h" />
-    <ClInclude Include="EA\EAStdC\EAScanf.h" />
-    <ClInclude Include="EA\EAStdC\EASingleton.h" />
-    <ClInclude Include="EA\EAStdC\EASprintf.h" />
-    <ClInclude Include="EA\EAStdC\EASprintfOrdered.h" />
-    <ClInclude Include="EA\EAStdC\EAStdC.h" />
-    <ClInclude Include="EA\EAStdC\EAStopwatch.h" />
-    <ClInclude Include="EA\EAStdC\EAString.h" />
-    <ClInclude Include="EA\EAStdC\EATextUtil.h" />
-    <ClInclude Include="EA\EAStdC\Int128_t.h" />
-    <ClInclude Include="EA\EAStdC\internal\Config.h" />
-    <ClInclude Include="EA\EAStdC\internal\IntrusiveList.h" />
-    <ClInclude Include="EA\EAStdC\internal\ScanfCore.h" />
-    <ClInclude Include="EA\EAStdC\internal\SprintfCore.h" />
-    <ClInclude Include="EA\EAStdC\internal\stdioEA.h" />
-    <ClInclude Include="EA\EAStdC\internal\Thread.h" />
-    <ClInclude Include="EA\EAStdC\version.h" />
-    <ClInclude Include="EA\EASTL\algorithm.h" />
-    <ClInclude Include="EA\EASTL\allocator.h" />
-    <ClInclude Include="EA\EASTL\allocator_malloc.h" />
-    <ClInclude Include="EA\EASTL\any.h" />
-    <ClInclude Include="EA\EASTL\array.h" />
-    <ClInclude Include="EA\EASTL\bitset.h" />
-    <ClInclude Include="EA\EASTL\bitvector.h" />
-    <ClInclude Include="EA\EASTL\bonus\adaptors.h" />
-    <ClInclude Include="EA\EASTL\bonus\call_traits.h" />
-    <ClInclude Include="EA\EASTL\bonus\compressed_pair.h" />
-    <ClInclude Include="EA\EASTL\bonus\fixed_ring_buffer.h" />
-    <ClInclude Include="EA\EASTL\bonus\fixed_tuple_vector.h" />
-    <ClInclude Include="EA\EASTL\bonus\intrusive_sdlist.h" />
-    <ClInclude Include="EA\EASTL\bonus\intrusive_slist.h" />
-    <ClInclude Include="EA\EASTL\bonus\list_map.h" />
-    <ClInclude Include="EA\EASTL\bonus\lru_cache.h" />
-    <ClInclude Include="EA\EASTL\bonus\ring_buffer.h" />
-    <ClInclude Include="EA\EASTL\bonus\sort_extra.h" />
-    <ClInclude Include="EA\EASTL\bonus\sparse_matrix.h" />
-    <ClInclude Include="EA\EASTL\bonus\tuple_vector.h" />
-    <ClInclude Include="EA\EASTL\chrono.h" />
-    <ClInclude Include="EA\EASTL\core_allocator.h" />
-    <ClInclude Include="EA\EASTL\core_allocator_adapter.h" />
-    <ClInclude Include="EA\EASTL\deque.h" />
-    <ClInclude Include="EA\EASTL\finally.h" />
-    <ClInclude Include="EA\EASTL\fixed_allocator.h" />
-    <ClInclude Include="EA\EASTL\fixed_function.h" />
-    <ClInclude Include="EA\EASTL\fixed_hash_map.h" />
-    <ClInclude Include="EA\EASTL\fixed_hash_set.h" />
-    <ClInclude Include="EA\EASTL\fixed_list.h" />
-    <ClInclude Include="EA\EASTL\fixed_map.h" />
-    <ClInclude Include="EA\EASTL\fixed_set.h" />
-    <ClInclude Include="EA\EASTL\fixed_slist.h" />
-    <ClInclude Include="EA\EASTL\fixed_string.h" />
-    <ClInclude Include="EA\EASTL\fixed_substring.h" />
-    <ClInclude Include="EA\EASTL\fixed_vector.h" />
-    <ClInclude Include="EA\EASTL\functional.h" />
-    <ClInclude Include="EA\EASTL\hash_map.h" />
-    <ClInclude Include="EA\EASTL\hash_set.h" />
-    <ClInclude Include="EA\EASTL\heap.h" />
-    <ClInclude Include="EA\EASTL\initializer_list.h" />
-    <ClInclude Include="EA\EASTL\internal\allocator_traits.h" />
-    <ClInclude Include="EA\EASTL\internal\allocator_traits_fwd_decls.h" />
-    <ClInclude Include="EA\EASTL\internal\char_traits.h" />
-    <ClInclude Include="EA\EASTL\internal\config.h" />
-    <ClInclude Include="EA\EASTL\internal\copy_help.h" />
-    <ClInclude Include="EA\EASTL\internal\enable_shared.h" />
-    <ClInclude Include="EA\EASTL\internal\fill_help.h" />
-    <ClInclude Include="EA\EASTL\internal\fixed_pool.h" />
-    <ClInclude Include="EA\EASTL\internal\function.h" />
-    <ClInclude Include="EA\EASTL\internal\functional_base.h" />
-    <ClInclude Include="EA\EASTL\internal\function_detail.h" />
-    <ClInclude Include="EA\EASTL\internal\function_help.h" />
-    <ClInclude Include="EA\EASTL\internal\generic_iterator.h" />
-    <ClInclude Include="EA\EASTL\internal\hashtable.h" />
-    <ClInclude Include="EA\EASTL\internal\integer_sequence.h" />
-    <ClInclude Include="EA\EASTL\internal\intrusive_hashtable.h" />
-    <ClInclude Include="EA\EASTL\internal\in_place_t.h" />
-    <ClInclude Include="EA\EASTL\internal\memory_base.h" />
-    <ClInclude Include="EA\EASTL\internal\mem_fn.h" />
-    <ClInclude Include="EA\EASTL\internal\move_help.h" />
-    <ClInclude Include="EA\EASTL\internal\pair_fwd_decls.h" />
-    <ClInclude Include="EA\EASTL\internal\piecewise_construct_t.h" />
-    <ClInclude Include="EA\EASTL\internal\red_black_tree.h" />
-    <ClInclude Include="EA\EASTL\internal\smart_ptr.h" />
-    <ClInclude Include="EA\EASTL\internal\thread_support.h" />
-    <ClInclude Include="EA\EASTL\internal\tuple_fwd_decls.h" />
-    <ClInclude Include="EA\EASTL\internal\type_compound.h" />
-    <ClInclude Include="EA\EASTL\internal\type_fundamental.h" />
-    <ClInclude Include="EA\EASTL\internal\type_pod.h" />
-    <ClInclude Include="EA\EASTL\internal\type_properties.h" />
-    <ClInclude Include="EA\EASTL\internal\type_transformations.h" />
-    <ClInclude Include="EA\EASTL\intrusive_hash_map.h" />
-    <ClInclude Include="EA\EASTL\intrusive_hash_set.h" />
-    <ClInclude Include="EA\EASTL\intrusive_list.h" />
-    <ClInclude Include="EA\EASTL\intrusive_ptr.h" />
-    <ClInclude Include="EA\EASTL\iterator.h" />
-    <ClInclude Include="EA\EASTL\linked_array.h" />
-    <ClInclude Include="EA\EASTL\linked_ptr.h" />
-    <ClInclude Include="EA\EASTL\list.h" />
-    <ClInclude Include="EA\EASTL\map.h" />
-    <ClInclude Include="EA\EASTL\memory.h" />
-    <ClInclude Include="EA\EASTL\meta.h" />
-    <ClInclude Include="EA\EASTL\numeric.h" />
-    <ClInclude Include="EA\EASTL\numeric_limits.h" />
-    <ClInclude Include="EA\EASTL\optional.h" />
-    <ClInclude Include="EA\EASTL\priority_queue.h" />
-    <ClInclude Include="EA\EASTL\queue.h" />
-    <ClInclude Include="EA\EASTL\random.h" />
-    <ClInclude Include="EA\EASTL\ratio.h" />
-    <ClInclude Include="EA\EASTL\safe_ptr.h" />
-    <ClInclude Include="EA\EASTL\scoped_array.h" />
-    <ClInclude Include="EA\EASTL\scoped_ptr.h" />
-    <ClInclude Include="EA\EASTL\segmented_vector.h" />
-    <ClInclude Include="EA\EASTL\set.h" />
-    <ClInclude Include="EA\EASTL\shared_array.h" />
-    <ClInclude Include="EA\EASTL\shared_ptr.h" />
-    <ClInclude Include="EA\EASTL\slist.h" />
-    <ClInclude Include="EA\EASTL\sort.h" />
-    <ClInclude Include="EA\EASTL\span.h" />
-    <ClInclude Include="EA\EASTL\stack.h" />
-    <ClInclude Include="EA\EASTL\string.h" />
-    <ClInclude Include="EA\EASTL\string_hash_map.h" />
-    <ClInclude Include="EA\EASTL\string_map.h" />
-    <ClInclude Include="EA\EASTL\string_view.h" />
-    <ClInclude Include="EA\EASTL\tuple.h" />
-    <ClInclude Include="EA\EASTL\type_traits.h" />
-    <ClInclude Include="EA\EASTL\unique_ptr.h" />
-    <ClInclude Include="EA\EASTL\unordered_map.h" />
-    <ClInclude Include="EA\EASTL\unordered_set.h" />
-    <ClInclude Include="EA\EASTL\utility.h" />
-    <ClInclude Include="EA\EASTL\variant.h" />
-    <ClInclude Include="EA\EASTL\vector.h" />
-    <ClInclude Include="EA\EASTL\vector_map.h" />
-    <ClInclude Include="EA\EASTL\vector_multimap.h" />
-    <ClInclude Include="EA\EASTL\vector_multiset.h" />
-    <ClInclude Include="EA\EASTL\vector_set.h" />
-    <ClInclude Include="EA\EASTL\version.h" />
-    <ClInclude Include="EA\EASTL\weak_ptr.h" />
-    <ClInclude Include="EA\eathread\eathread.h" />
-    <ClInclude Include="EA\eathread\eathread_atomic.h" />
-    <ClInclude Include="EA\eathread\eathread_barrier.h" />
-    <ClInclude Include="EA\eathread\eathread_callstack.h" />
-    <ClInclude Include="EA\eathread\eathread_callstack_context.h" />
-    <ClInclude Include="EA\eathread\eathread_condition.h" />
-    <ClInclude Include="EA\eathread\eathread_futex.h" />
-    <ClInclude Include="EA\eathread\eathread_list.h" />
-    <ClInclude Include="EA\eathread\eathread_mutex.h" />
-    <ClInclude Include="EA\eathread\eathread_pool.h" />
-    <ClInclude Include="EA\eathread\eathread_rwmutex.h" />
-    <ClInclude Include="EA\eathread\eathread_rwmutex_ip.h" />
-    <ClInclude Include="EA\eathread\eathread_rwsemalock.h" />
-    <ClInclude Include="EA\eathread\eathread_rwspinlock.h" />
-    <ClInclude Include="EA\eathread\eathread_rwspinlockw.h" />
-    <ClInclude Include="EA\eathread\eathread_semaphore.h" />
-    <ClInclude Include="EA\eathread\eathread_spinlock.h" />
-    <ClInclude Include="EA\eathread\eathread_storage.h" />
-    <ClInclude Include="EA\eathread\eathread_sync.h" />
-    <ClInclude Include="EA\eathread\eathread_thread.h" />
-    <ClInclude Include="EA\eathread\gcc\eathread_atomic_gcc.h" />
-    <ClInclude Include="EA\eathread\gcc\eathread_sync_gcc.h" />
-    <ClInclude Include="EA\eathread\internal\atomic.h" />
-    <ClInclude Include="EA\eathread\internal\config.h" />
-    <ClInclude Include="EA\eathread\internal\dllinfo.h" />
-    <ClInclude Include="EA\eathread\internal\eathread_atomic.h" />
-    <ClInclude Include="EA\eathread\internal\eathread_atomic_standalone.h" />
-    <ClInclude Include="EA\eathread\internal\eathread_atomic_standalone_gcc.h" />
-    <ClInclude Include="EA\eathread\internal\eathread_atomic_standalone_msvc.h" />
-    <ClInclude Include="EA\eathread\internal\eathread_global.h" />
-    <ClInclude Include="EA\eathread\internal\timings.h" />
-    <ClInclude Include="EA\eathread\shared_array_mt.h" />
-    <ClInclude Include="EA\eathread\shared_ptr_mt.h" />
-    <ClInclude Include="EA\eathread\version.h" />
-    <ClInclude Include="EA\eathread\x86-64\eathread_atomic_x86-64.h" />
-    <ClInclude Include="EA\eathread\x86-64\eathread_sync_x86-64.h" />
     <ClInclude Include="ResourceEditorsWindows.h" />
     <ClInclude Include="ImGui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="ModuleAudio.h" />
@@ -572,10 +270,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="General Diagram.cd" />
-    <None Include="EA\EAStdC\internal\EAMemory.inl" />
-    <None Include="EA\EAStdC\Win32\EAMathHelpWin32.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\3rd Parties\EASTL\EASTL.vcxproj">
+      <Project>{4d97b454-7f2f-3b41-a692-4916d5785f1a}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\3rd Parties\MathGeoLib\MathGeoLib.vcxproj">
       <Project>{981fe726-8519-38e2-b3b5-35ecc8814bbd}</Project>
     </ProjectReference>
@@ -629,7 +328,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StructMemberAlignment>Default</StructMemberAlignment>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(MSBuildProjectDirectory)\EA\;$(MSBuildProjectDirectory)\WWISESDK\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(MSBuildProjectDirectory)\WWISESDK\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
@@ -651,7 +350,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(MSBuildProjectDirectory)\EA\;$(MSBuildProjectDirectory)\WWISESDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(MSBuildProjectDirectory)\WWISESDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
