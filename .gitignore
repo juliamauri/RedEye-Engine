@@ -7,6 +7,7 @@
 !RedEye/DebugData/*
 !RedEye/ReleaseData/*
 !RedEye/Source/libzip/*
+!RedEye/3rd Parties/EASTL/test/packages/**/*
 
 # User-specific files
 *.suo
@@ -33,13 +34,11 @@ RedEye.pdb
 MinSizeRel/
 RelWithDebInfo/
 x64/
-x86/
+**/x86/*
 bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-
-!RedEye/Source/EA/eathread/*
 
 
 # Visual Studio 2015 cache/options directory
@@ -317,10 +316,11 @@ __pycache__/
 *.xsd.cs
 
 #not ignore some pdb
-!RedEye/Source/MathGeoLib/lib/MathGeoLib.pdb
 !RedEye/Source/WWISESDK/binaries/libdebug/*
 !RedEye/Source/WWISESDK/binaries/libprofiler/*
 !RedEye/Source/WWISESDK/binaries/librelase/*
-!RedEye/Source/EA/EASTL/libx86/DebugLib/*
 !RedEye/Source/assimp/libx86/*
-!RedEye/3rd Parties/EASTL/test/packages/*
+
+!RedEye/3rd Parties/EASTL/include/EASTL/internal/atomic/arch/x86/*
+!RedEye/3rd Parties/EASTL/test/packages/EAThread/include/eathread/x86/*
+!RedEye/3rd Parties/EASTL/test/packages/EAThread/source/x86/*
