@@ -13,7 +13,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 
-#include "ImGui\imgui.h"
+#include <ImGui/imgui.h>
 #include "Glew/include/glew.h"
 #include <gl/GL.h>
 #include <MGL/MathGeoLib.h>

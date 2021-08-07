@@ -42,7 +42,7 @@
 
 #define WINDOWS_IGNORE_PACKING_MISMATCH
 
-#include "imgui.h"
+#include <ImGui/imgui.h>
 #include "imgui_impl_sdl.h"
 
 // SDL

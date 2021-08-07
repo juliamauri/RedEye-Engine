@@ -7,7 +7,7 @@
 #include "RE_CameraManager.h"
 #include "SceneEditorWindow.h"
 
-#include "ImGuiWidgets/ImGuizmo/ImGuizmo.h"
+#include <ImGuiWidgets/ImGuizmo/ImGuizmo.h>
 
 
 #include "SDL2/include/SDL_scancode.h"

@@ -36,7 +36,7 @@
 
 #include <MGL/Math/float3.h>
 #include <MGL/Math/Quat.h>
-#include "ImGuiWidgets/ImGuizmo/ImGuizmo.h"
+#include <ImGuiWidgets/ImGuizmo/ImGuizmo.h>
 #include "SDL2/include/SDL.h"
 #include "Glew/include/glew.h"
 #include <gl/GL.h>

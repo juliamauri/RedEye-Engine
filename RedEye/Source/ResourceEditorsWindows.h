@@ -5,8 +5,8 @@
 #include "EditorWindow.h"
 
 #include <MGL/Math/float4.h>
-#include "ImGui\imgui.h"
-#include "ImGuiWidgets/ImGuizmo/ImGuizmo.h"
+#include <ImGui/imgui.h>
+#include <ImGuiWidgets/ImGuizmo/ImGuizmo.h>
 
 #include <EASTL/string.h>
 #include <EASTL/vector.h>

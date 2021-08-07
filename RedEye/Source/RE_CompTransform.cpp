@@ -8,7 +8,7 @@
 
 #include "RE_GameObject.h"
 #include "RE_ECS_Pool.h"
-#include "ImGui\imgui.h"
+#include <ImGui/imgui.h>
 
 #define MIN_SCALE 0.001f
 

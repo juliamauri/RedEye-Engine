@@ -12,7 +12,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 
-#include "ImGui\imgui.h"
+#include <ImGui/imgui.h>
 
 void RE_CompMesh::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {

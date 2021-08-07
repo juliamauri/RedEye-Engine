@@ -9,8 +9,8 @@
 #include "RE_Particle.h"
 #include "RE_Json.h"
 
-#include "ImGui\imgui.h"
-#include "ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp"
+#include <ImGui/imgui.h>
+#include <ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp>
 
 bool RE_EmissionInterval::IsActive(float &dt)
 {

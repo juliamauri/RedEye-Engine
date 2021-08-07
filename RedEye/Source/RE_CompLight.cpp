@@ -5,7 +5,7 @@
 #include "RE_ShaderImporter.h"
 #include "RE_Json.h"
 #include "RE_ECS_Pool.h"
-#include "ImGui\imgui.h"
+#include <ImGui/imgui.h>
 
 RE_CompLight::RE_CompLight() : RE_Component(C_LIGHT)
 {

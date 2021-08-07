@@ -4,7 +4,7 @@
 #include "ModuleAudio.h"
 
 #include "ImGui/imgui_internal.h"
-#include "ImGui/misc/cpp/imgui_stdlib.h" // TODO Julius: check this is ok with EAstl
+#include "ImGuiImplementations/imgui_stdlib.h"
 #include <EASTL/string.h>
 
 void WwiseWindow::Draw(bool secondary)

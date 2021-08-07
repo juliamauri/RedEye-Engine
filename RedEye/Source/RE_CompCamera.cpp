@@ -13,7 +13,7 @@
 #include "RE_ECS_Pool.h"
 #include "RE_SkyBox.h"
 
-#include "ImGui\imgui.h"
+#include <ImGui/imgui.h>
 #include "SDL2\include\SDL_opengl.h"
 
 RE_CompCamera::RE_CompCamera() : RE_Component(C_CAMERA) {}

@@ -27,11 +27,11 @@
 
 #include "PopUpWindow.h"
 
-#include "ImGui/misc/cpp/imgui_stdlib.h"
-#include "ImGuiWidgets/ImGuiColorTextEdit/TextEditor.h"
+#include "ImGuiImplementations/imgui_stdlib.h"
+#include <ImGuiWidgets/ImGuiColorTextEdit/TextEditor.h>
 
 #define IMGUICURVEIMPLEMENTATION
-#include "ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp"
+#include <ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp>
 
 #include "Glew/include/glew.h"
 

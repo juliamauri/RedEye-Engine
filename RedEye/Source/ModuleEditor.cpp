@@ -30,9 +30,9 @@
 #include "SceneEditorWindow.h"
 #include "GameWindow.h"
 
-#include "ImGui\imgui_internal.h"
-#include "ImGui\imgui_impl_opengl3.h"
-#include "ImGui\imgui_impl_sdl.h"
+#include <ImGui/imgui_internal.h>
+#include "ImGuiImplementations/imgui_impl_opengl3.h"
+#include "ImGuiImplementations/imgui_impl_sdl.h"
 #include "glew\include\glew.h"
 #include "SDL2\include\SDL.h"
 #include <EASTL/stack.h>
@@ -262,7 +262,7 @@ void ModuleEditor::Update()
 				ImGui::EndMenu();
 			}
 
-			if (show_demo) ImGui::ShowTestWindow();
+			if (show_demo) ImGui::ShowDemoWindow();
 
 			ImGui::EndMainMenuBar();
 		}

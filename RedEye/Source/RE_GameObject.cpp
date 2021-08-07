@@ -15,7 +15,7 @@
 #include "RE_Memory.h"
 
 #include "Glew\include\glew.h"
-#include "ImGui\imgui.h"
+#include <ImGui/imgui.h>
 #include <EASTL/unordered_set.h>
 #include <EASTL/queue.h>
 #include <EASTL/stack.h>

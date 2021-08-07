@@ -10,7 +10,7 @@
 #include "RE_Json.h"
 
 #include "ImGui/imgui.h"
-#include "ImGui/misc/cpp/imgui_stdlib.h"
+#include "ImGuiImplementations/imgui_stdlib.h"
 #include <EAStdC/EAString.h>
 
 #include <AK/SoundEngine/Platforms/Windows/AkTypes.h>

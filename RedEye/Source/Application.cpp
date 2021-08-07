@@ -105,8 +105,8 @@ bool Application::Init(int _argc, char* _argv[])
 			if (input->Init() &&
 				window->Init() &&
 				scene->Init() &&
-				editor->Init() &&
 				renderer->Init() &&
+				editor->Init() &&
 				audio->Init())
 			{
 				hardware->Init();

@@ -16,7 +16,7 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 
-#include "ImGui\imgui.h"
+#include <ImGui/imgui.h>
 
 RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER) {}
 

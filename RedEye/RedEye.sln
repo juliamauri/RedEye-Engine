@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MathGeoLib", "3rd Parties\M
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EASTL", "3rd Parties\EASTL\EASTL.vcxproj", "{4D97B454-7F2F-3B41-A692-4916D5785F1A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImGui", "3rd Parties\ImGui\ImGui.vcxproj", "{5A0CA256-F06B-410F-B9A1-398483CACA11}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -45,6 +47,14 @@ Global
 		{4D97B454-7F2F-3B41-A692-4916D5785F1A}.Release|Win32.Build.0 = Release|Win32
 		{4D97B454-7F2F-3B41-A692-4916D5785F1A}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
 		{4D97B454-7F2F-3B41-A692-4916D5785F1A}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
+		{5A0CA256-F06B-410F-B9A1-398483CACA11}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5A0CA256-F06B-410F-B9A1-398483CACA11}.Debug|Win32.Build.0 = Debug|Win32
+		{5A0CA256-F06B-410F-B9A1-398483CACA11}.MinSizeRel|Win32.ActiveCfg = Debug|Win32
+		{5A0CA256-F06B-410F-B9A1-398483CACA11}.MinSizeRel|Win32.Build.0 = Debug|Win32
+		{5A0CA256-F06B-410F-B9A1-398483CACA11}.Release|Win32.ActiveCfg = Release|Win32
+		{5A0CA256-F06B-410F-B9A1-398483CACA11}.Release|Win32.Build.0 = Release|Win32
+		{5A0CA256-F06B-410F-B9A1-398483CACA11}.RelWithDebInfo|Win32.ActiveCfg = Release|Win32
+		{5A0CA256-F06B-410F-B9A1-398483CACA11}.RelWithDebInfo|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

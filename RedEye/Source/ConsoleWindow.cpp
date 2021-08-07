@@ -53,7 +53,7 @@ void ConsoleWindow::Draw(bool secondary)
 
 		if (scroll_to_bot)
 		{
-			ImGui::SetScrollHere(1.f);
+			ImGui::SetScrollHereY(1.f);
 			scroll_to_bot = false;
 		}
 		if (secondary)

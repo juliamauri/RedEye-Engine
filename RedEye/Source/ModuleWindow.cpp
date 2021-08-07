@@ -7,7 +7,7 @@
 #include "RE_Json.h"
 #include "ModuleRenderer3D.h"
 
-#include "ImGui\imgui.h"
+#include <ImGui/imgui.h>
 #include "SDL2\include\SDL.h"
 #include "RapidJson\include\document.h"
 

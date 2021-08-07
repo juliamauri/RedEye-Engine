@@ -3,7 +3,7 @@
 #include "RE_Profiler.h"
 
 #include "SDL2\include\SDL_timer.h"
-#include "ImGui\imgui.h"
+#include <ImGui/imgui.h>
 #include <EAStdC/EASprintf.h>
 
 RE_Time::RE_Time()
