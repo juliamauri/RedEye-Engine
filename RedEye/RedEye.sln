@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RedEye", "Source\RedEye.vcxproj", "{13DC399F-3A96-48E0-82B4-94FD73051599}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RedEye", "Engine\RedEye.vcxproj", "{13DC399F-3A96-48E0-82B4-94FD73051599}"
 	ProjectSection(ProjectDependencies) = postProject
 		{981FE726-8519-38E2-B3B5-35ECC8814BBD} = {981FE726-8519-38E2-B3B5-35ECC8814BBD}
 		{4D97B454-7F2F-3B41-A692-4916D5785F1A} = {4D97B454-7F2F-3B41-A692-4916D5785F1A}
