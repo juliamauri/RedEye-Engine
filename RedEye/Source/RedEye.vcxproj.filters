@@ -235,13 +235,13 @@
     <ClCompile Include="AboutWindow.cpp">
       <Filter>Source\Application\Modules\Editor\Interface Windows\About</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiImplementations\imgui_impl_opengl3.cpp">
+    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_impl_opengl3.cpp">
       <Filter>3rd Party\ImGuiImplementations</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiImplementations\imgui_impl_sdl.cpp">
+    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_impl_sdl.cpp">
       <Filter>3rd Party\ImGuiImplementations</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiImplementations\imgui_stdlib.cpp">
+    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_stdlib.cpp">
       <Filter>3rd Party\ImGuiImplementations</Filter>
     </ClCompile>
   </ItemGroup>
@@ -633,16 +633,13 @@
     <ClInclude Include="SceneEditorWindow.h">
       <Filter>Source\Application\Modules\Editor\Interface Windows\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceEditorsWindows.h">
-      <Filter>Source\Application\Modules\Editor\Interface Windows\Resource Editor Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGuiImplementations\imgui_impl_opengl3.h">
+    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_impl_opengl3.h">
       <Filter>3rd Party\ImGuiImplementations</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiImplementations\imgui_impl_sdl.h">
+    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_impl_sdl.h">
       <Filter>3rd Party\ImGuiImplementations</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiImplementations\imgui_stdlib.h">
+    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_stdlib.h">
       <Filter>3rd Party\ImGuiImplementations</Filter>
     </ClInclude>
   </ItemGroup>
@@ -679,9 +676,6 @@
     </Filter>
     <Filter Include="Source">
       <UniqueIdentifier>{1e4434c3-6ced-459b-a620-3316f27a5c54}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Class Diagrams">
-      <UniqueIdentifier>{65836e87-fffd-4c0e-8be7-ad02ecfdd02b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Application">
       <UniqueIdentifier>{81e1c51b-a91f-4b42-af0d-467a3e443096}</UniqueIdentifier>
@@ -786,6 +780,10 @@
       <UniqueIdentifier>{ae9a93ff-6fc9-4767-854d-7d9e43779e88}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Application\Modules\Editor\Interface Windows">
+    <Filter Include="3rd Party\ImGuiImplementations">
+      <UniqueIdentifier>{ad5d9ea1-006f-4d2d-a94c-62673cae903b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Base Windows">
       <UniqueIdentifier>{a18935b7-c464-42a4-915b-e5d7df5fc839}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Application\Modules\Editor\Interface Windows\PopUp">
@@ -824,13 +822,32 @@
     <Filter Include="Source\Application\Modules\Editor\Interface Windows\Resource Editor Windows">
       <UniqueIdentifier>{a6ec9e6e-cc3b-4409-8af7-91bdc5645fdf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="3rd Party\ImGuiImplementations">
-      <UniqueIdentifier>{ad5d9ea1-006f-4d2d-a94c-62673cae903b}</UniqueIdentifier>
+    <Filter Include="Source\Application\Modules\Editor\Resource Editors">
+      <UniqueIdentifier>{a3c8abdb-529e-49a7-8144-029d9fb227e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Resource Editors\Material Editor">
+      <UniqueIdentifier>{5f7c9fe0-4dcf-4fb5-a4dc-0a1ed74108cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Resource Editors\Skybox Editor">
+      <UniqueIdentifier>{c93d304c-951c-4bc9-8a36-fb86ac0571e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Resource Editors\Shader Editor">
+      <UniqueIdentifier>{33ef5b50-a825-49f2-aa7e-c2974fb29511}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Resource Editors\Particle Emitter Editor">
+      <UniqueIdentifier>{d44a74ad-6a08-4a9b-94ca-0ced9627667b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Text Editor Manager">
+      <UniqueIdentifier>{0cadaf2b-4832-4167-bd67-4abea9b1d96c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\Glew">
+      <UniqueIdentifier>{e9e354eb-e5af-4983-940c-ff00dfd5bb7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application\Modules\Editor\Resource Editors\Water Plane">
+      <UniqueIdentifier>{04d2bda9-33bf-4e1f-aaef-ef5176cc306f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="General Diagram.cd">
-      <Filter>Class Diagrams</Filter>
-    </None>
+    <None Include="General Diagram.cd" />
   </ItemGroup>
 </Project>
