@@ -2,7 +2,7 @@
 
 #include "Application.h"
 #include "RE_GLCache.h"
-#include "Glew/include/glew.h"
+#include <Glew/glew.h>
 
 int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize, bool depth, bool stencil)
 {

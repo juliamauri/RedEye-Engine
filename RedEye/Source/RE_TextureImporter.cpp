@@ -9,7 +9,7 @@
 #include "RE_GLCache.h"
 #include "RE_Texture.h"
 
-#include "Glew\include\glew.h"
+#include <Glew\glew.h>
 #include "IL\include\il.h"
 #include "IL\include\ilu.h"
 #include "IL\include\ilut.h"

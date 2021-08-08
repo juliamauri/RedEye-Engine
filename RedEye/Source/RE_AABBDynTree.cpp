@@ -3,7 +3,7 @@
 #include <MGL/Geometry/Frustum.h>
 #include <MGL/Geometry/LineSegment.h>
 #include "SDL2/include/SDL_assert.h"
-#include "Glew/include/glew.h"
+#include <Glew/glew.h>
 
 void RE_AABBDynTree::PushNode(Object_UID go_index, AABB box)
 {

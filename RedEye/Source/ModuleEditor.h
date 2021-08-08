@@ -91,7 +91,7 @@ private:
 	class ShaderEditorWindow* shadereditor = nullptr;
 	class SkyBoxEditorWindow* skyboxeditor = nullptr;
 	class TextEditorManagerWindow* texteditormanager = nullptr;
-	class WaterPlaneResourceWindow* waterplaneResourceWindow = nullptr;
+	class WaterPlaneWindow* waterplaneWindow = nullptr;
 	class ParticleEmitterEditorWindow* particleEmitterWindow = nullptr;
 
 	// Scene views

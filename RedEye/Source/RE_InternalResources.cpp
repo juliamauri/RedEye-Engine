@@ -15,7 +15,7 @@
 #include "RE_Material.h"
 #include "RE_SkyBox.h"
 
-#include "Glew/include/glew.h"
+#include <Glew/glew.h>
 #include <gl/GL.h>
 
 #define WATER_FOAM_TEX_PATH "Settings/DefaultAssets/water_foam.png"

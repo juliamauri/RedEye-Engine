@@ -16,10 +16,15 @@
     <ClCompile Include="ConsoleWindow.cpp" />
     <ClCompile Include="HierarchyWindow.cpp" />
     <ClCompile Include="GameWindow.cpp" />
-    <ClCompile Include="ImGuiImplementations\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="ImGuiImplementations\imgui_impl_sdl.cpp" />
-    <ClCompile Include="ImGuiImplementations\imgui_stdlib.cpp" />
+    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_impl_sdl.cpp" />
+    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_stdlib.cpp" />
+    <ClCompile Include="ParticleEmitterEditorWindow.cpp" />
     <ClCompile Include="SceneEditorWindow.cpp" />
+    <ClCompile Include="MaterialEditorWindow.cpp" />
+    <ClCompile Include="ShaderEditorWindow.cpp" />
+    <ClCompile Include="SkyBoxEditorWindow.cpp" />
+    <ClCompile Include="TextEditorManagerWindow.cpp" />
     <ClCompile Include="WwiseWindow.cpp" />
     <ClCompile Include="PlayPauseWindow.cpp" />
     <ClCompile Include="PopUpWindow.cpp" />
@@ -34,7 +39,6 @@
     <ClCompile Include="RE_Config.cpp" />
     <ClCompile Include="RE_Cvar.cpp" />
     <ClCompile Include="ModuleAudio.cpp" />
-    <ClCompile Include="ResourceEditorsWindows.cpp" />
     <ClCompile Include="RE_Command.cpp" />
     <ClCompile Include="RE_CommandManager.cpp" />
     <ClCompile Include="RE_CompLight.cpp" />
@@ -47,7 +51,7 @@
     <ClCompile Include="gpudetect\DeviceId.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
-    <ClCompile Include="md5.cpp">
+    <ClCompile Include="MD5\md5.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="RE_CameraManager.cpp" />
@@ -104,12 +108,23 @@
     <ClInclude Include="EditorWindow.h" />
     <ClInclude Include="AboutWindow.h" />
     <ClInclude Include="GameWindow.h" />
-    <ClInclude Include="ImGuiImplementations\imgui_impl_opengl3.h" />
-    <ClInclude Include="ImGuiImplementations\imgui_impl_sdl.h" />
-    <ClInclude Include="ImGuiImplementations\imgui_stdlib.h" />
+    <ClInclude Include="Glew\include\Glew\eglew.h" />
+    <ClInclude Include="Glew\include\Glew\glew.h" />
+    <ClInclude Include="Glew\include\Glew\glxew.h" />
+    <ClInclude Include="Glew\include\Glew\wglew.h" />
+    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_impl_opengl3.h" />
+    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_impl_sdl.h" />
+    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_stdlib.h" />
+    <ClInclude Include="MaterialEditorWindow.h" />
+    <ClInclude Include="ParticleEmitterEditorWindow.h" />
     <ClInclude Include="SceneEditorWindow.h" />
     <ClInclude Include="PlayPauseWindow.h" />
     <ClInclude Include="HierarchyWindow.h" />
+    <ClInclude Include="ShaderEditorWindow.h" />
+    <ClInclude Include="SkyBoxEditorWindow.h" />
+    <ClInclude Include="TextEditorManagerWindow.h" />
+    <ClCompile Include="WaterPlaneWindow.cpp" />
+    <ClInclude Include="WaterPlaneWindow.h" />
     <ClInclude Include="WwiseWindow.h" />
     <ClInclude Include="PopUpWindow.h" />
     <ClInclude Include="PropertiesWindow.h" />
@@ -127,7 +142,6 @@
     <ClInclude Include="RE_Json.h" />
     <ClInclude Include="RE_Config.h" />
     <ClInclude Include="RE_Cvar.h" />
-    <ClInclude Include="ResourceEditorsWindows.h" />
     <ClInclude Include="ModuleAudio.h" />
     <ClInclude Include="RE_HashMap.h" />
     <ClInclude Include="RE_Command.h" />
@@ -141,7 +155,7 @@
     <ClInclude Include="Event.h" />
     <ClInclude Include="gpudetect\DeviceId.h" />
     <ClInclude Include="gpudetect\dxgi1_4.h" />
-    <ClInclude Include="md5.h" />
+    <ClInclude Include="MD5\md5.h" />
     <ClInclude Include="RE_CameraManager.h" />
     <ClInclude Include="RE_GLCache.h" />
     <ClInclude Include="RE_ECS_Pool.h" />
@@ -295,7 +309,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StructMemberAlignment>Default</StructMemberAlignment>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\ImGui\misc;$(SolutionDir)Source\Glew\include;$(SolutionDir)Source\ImGuiImplementations;$(MSBuildProjectDirectory)\WWISESDK\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\ImGui\misc;$(SolutionDir)Source\Glew\include;$(SolutionDir)Source\ImGuiImplementations;$(SolutionDir)Source\MD5;$(MSBuildProjectDirectory)\WWISESDK\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
@@ -317,7 +331,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\ImGui\misc;$(SolutionDir)Source\Glew\include;$(SolutionDir)Source\ImGuiImplementations;$(MSBuildProjectDirectory)\WWISESDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\ImGui\misc;$(SolutionDir)Source\Glew\include;$(SolutionDir)Source\ImGuiImplementations;$(SolutionDir)Source\MD5;$(MSBuildProjectDirectory)\WWISESDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>

@@ -17,7 +17,7 @@
 #include "RE_Texture.h"
 
 #include "ImGui/imgui.h"
-#include "Glew/include/glew.h"
+#include <Glew/glew.h>
 #include <EAStdC/EAString.h>
 
 RE_Material::RE_Material() {}

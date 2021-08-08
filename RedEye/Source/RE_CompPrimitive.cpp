@@ -18,7 +18,7 @@
 
 #include "ImGui/imgui.h"
 #include "SDL2/include/SDL.h"
-#include "Glew/include/glew.h"
+#include <Glew/glew.h>
 #include <gl/GL.h>
 
 #ifndef PAR_SHAPES_IMPLEMENTATION

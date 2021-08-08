@@ -12,7 +12,7 @@
 
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_internal.h"
-#include "ImGuiImplementations/imgui_stdlib.h"
+#include <ImGuiImpl/imgui_stdlib.h>
 #include <EAStdC/EASprintf.h>
 
 namespace PopUpFlags {

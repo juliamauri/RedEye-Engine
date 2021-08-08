@@ -6,10 +6,8 @@
 #include "RE_PrimitiveManager.h"
 #include "RE_Time.h"
 #include "RE_CompCamera.h"
-#include "Glew/include/glew.h"
 
-ModulePhysics::ModulePhysics() {}
-ModulePhysics::~ModulePhysics() {}
+#include <Glew/glew.h>
 
 void ModulePhysics::Update()
 {

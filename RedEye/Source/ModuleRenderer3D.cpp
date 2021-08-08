@@ -1,18 +1,18 @@
 #include "ModuleRenderer3D.h"
 
 #include "RE_Memory.h"
-#include "RE_Profiler.h"
-#include "RE_ConsoleLog.h"
-#include "RE_FileSystem.h"
-#include "RE_FileBuffer.h"
-#include "RE_Config.h"
-#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
 #include "ModulePhysics.h"
+#include "RE_Profiler.h"
+#include "RE_ConsoleLog.h"
+#include "RE_FileSystem.h"
+#include "RE_FileBuffer.h"
+#include "RE_Config.h"
+#include "RE_Json.h"
 #include "RE_GLCache.h"
 #include "RE_FBOManager.h"
 #include "RE_ResourceManager.h"
@@ -31,14 +31,13 @@
 #include "RE_Prefab.h"
 #include "RE_Model.h"
 #include "RE_Material.h"
-
 #include "RE_DefaultShaders.h"
 
 #include <MGL/Math/float3.h>
 #include <MGL/Math/Quat.h>
 #include <ImGuiWidgets/ImGuizmo/ImGuizmo.h>
 #include "SDL2/include/SDL.h"
-#include "Glew/include/glew.h"
+#include <Glew/glew.h>
 #include <gl/GL.h>
 #include <EASTL/list.h>
 #include <EASTL/stack.h>

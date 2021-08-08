@@ -8,8 +8,8 @@ class RE_CompCamera;
 class ModulePhysics
 {
 public:
-	ModulePhysics();
-	~ModulePhysics();
+	ModulePhysics() {}
+	~ModulePhysics() {}
 
 	void Update();
 	void CleanUp();

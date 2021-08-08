@@ -4,7 +4,7 @@
 #include "ModuleAudio.h"
 
 #include "ImGui/imgui_internal.h"
-#include "ImGuiImplementations/imgui_stdlib.h"
+#include <ImGuiImpl/imgui_stdlib.h>
 #include <EASTL/string.h>
 
 void WwiseWindow::Draw(bool secondary)

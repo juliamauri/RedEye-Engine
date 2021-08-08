@@ -11,8 +11,8 @@
 #include "RE_ShaderImporter.h"
 #include "RE_Shader.h"
 
-#include "Glew/include/glew.h"
 #include <MGL/Math/float4.h>
+#include <Glew/glew.h>
 #include "par_shapes.h"
 #include "ImGui/imgui.h"
 

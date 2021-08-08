@@ -15,8 +15,6 @@
 #include "RE_ParticleEmitter.h"
 #include "RE_Memory.h"
 
-#include "ResourceEditorsWindows.h"
-
 #include "AboutWindow.h"
 #include "AssetsWindow.h"
 #include "ConfigWindow.h"
@@ -30,21 +28,28 @@
 #include "SceneEditorWindow.h"
 #include "GameWindow.h"
 
+#include "MaterialEditorWindow.h"
+#include "SkyBoxEditorWindow.h"
+#include "ShaderEditorWindow.h"
+#include "TextEditorManagerWindow.h"
+#include "WaterPlaneWindow.h"
+#include "ParticleEmitterEditorWindow.h"
+
+#include <ImGuiImpl/imgui_impl_sdl.h>
+#include <ImGuiImpl/imgui_stdlib.h>
+#include <ImGuiImpl/imgui_impl_opengl3.h>
 #include <ImGui/imgui_internal.h>
-#include "ImGuiImplementations/imgui_impl_opengl3.h"
-#include "ImGuiImplementations/imgui_impl_sdl.h"
-#include "glew\include\glew.h"
+#include <Glew/glew.h>
 #include "SDL2\include\SDL.h"
 #include <EASTL/stack.h>
 #include <EASTL/queue.h>
 
 ModuleEditor::ModuleEditor() :
-	commands(new RE_CommandManager()),
-	thumbnails(new RE_ThumbnailManager())
+	commands(new RE_CommandManager),
+	thumbnails(new RE_ThumbnailManager),
+	popupWindow(new PopUpWindow),
+	about(new AboutWindow)
 {
-	popupWindow = new PopUpWindow();
-	about = new AboutWindow();
-
 	grid_size[0] = grid_size[1] = 1.f;
 
 	all_aabb_color[0] = 0.f;
@@ -114,7 +119,7 @@ bool ModuleEditor::Init()
 			skyboxeditor = new SkyBoxEditorWindow();
 			shadereditor = new ShaderEditorWindow();
 			texteditormanager = new TextEditorManagerWindow();
-			waterplaneResourceWindow = new WaterPlaneResourceWindow();
+			waterplaneWindow = new WaterPlaneWindow();
 
 			windows.push_back(console = new ConsoleWindow());
 			windows.push_back(config = new ConfigWindow());
@@ -218,8 +223,8 @@ void ModuleEditor::Update()
 					if (ImGui::MenuItem("Skybox", skyboxeditor->IsActive() ? "Hide" : "Open"))
 						skyboxeditor->ToggleActive();
 
-					if (ImGui::MenuItem("Water Resources", waterplaneResourceWindow->IsActive() ? "Hide" : "Open"))
-						waterplaneResourceWindow->ToggleActive();
+					if (ImGui::MenuItem("Water Resources", waterplaneWindow->IsActive() ? "Hide" : "Open"))
+						waterplaneWindow->ToggleActive();
 
 					if (ImGui::MenuItem("Particle Resources"))
 						particleEmitterWindow->StartEditing(new RE_ParticleEmitter(true), nullptr);
@@ -317,7 +322,7 @@ void ModuleEditor::Update()
 		if (materialeditor->IsActive()) materialeditor->DrawWindow(popUpFocus);
 		if (shadereditor->IsActive()) shadereditor->DrawWindow(popUpFocus);
 		if (skyboxeditor->IsActive()) skyboxeditor->DrawWindow(popUpFocus);
-		if (waterplaneResourceWindow->IsActive()) waterplaneResourceWindow->DrawWindow(popUpFocus);
+		if (waterplaneWindow->IsActive()) waterplaneWindow->DrawWindow(popUpFocus);
 		if (particleEmitterWindow->IsActive()) particleEmitterWindow->DrawWindow(popUpFocus);
 
 		texteditormanager->DrawWindow(popUpFocus);
@@ -355,7 +360,7 @@ void ModuleEditor::CleanUp()
 	DEL(shadereditor);
 
 	DEL(texteditormanager);
-	DEL(waterplaneResourceWindow);
+	DEL(waterplaneWindow);
 
 	DEL(sceneEditorWindow);
 	DEL(sceneGameWindow);
