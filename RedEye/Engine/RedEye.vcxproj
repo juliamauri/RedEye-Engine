@@ -11,14 +11,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\3rd Parties\Others\Include\gpudetect\DeviceId.cpp" />
+    <ClCompile Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_sdl.cpp" />
+    <ClCompile Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_stdlib.cpp" />
+    <ClCompile Include="..\3rd Parties\Others\Include\MD5\md5.cpp" />
     <ClCompile Include="AboutWindow.cpp" />
     <ClCompile Include="ConfigWindow.cpp" />
     <ClCompile Include="ConsoleWindow.cpp" />
     <ClCompile Include="HierarchyWindow.cpp" />
     <ClCompile Include="GameWindow.cpp" />
-    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_impl_sdl.cpp" />
-    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_stdlib.cpp" />
     <ClCompile Include="ParticleEmitterEditorWindow.cpp" />
     <ClCompile Include="SceneEditorWindow.cpp" />
     <ClCompile Include="MaterialEditorWindow.cpp" />
@@ -48,12 +50,6 @@
     <ClCompile Include="RE_FileBuffer.cpp" />
     <ClCompile Include="RE_FileSystem.cpp" />
     <ClCompile Include="Event.cpp" />
-    <ClCompile Include="gpudetect\DeviceId.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
-    <ClCompile Include="MD5\md5.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-    </ClCompile>
     <ClCompile Include="RE_CameraManager.cpp" />
     <ClCompile Include="RE_GLCache.cpp" />
     <ClCompile Include="RE_ECS_Pool.cpp" />
@@ -106,6 +102,14 @@
     <ClInclude Include="..\3rd Parties\Others\Include\GL\Glew\glew.h" />
     <ClInclude Include="..\3rd Parties\Others\Include\GL\Glew\glxew.h" />
     <ClInclude Include="..\3rd Parties\Others\Include\GL\Glew\wglew.h" />
+    <ClInclude Include="..\3rd Parties\Others\Include\gpudetect\DeviceId.h" />
+    <ClInclude Include="..\3rd Parties\Others\Include\gpudetect\dxgi1_4.h" />
+    <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_sdl.h" />
+    <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_stdlib.h" />
+    <ClInclude Include="..\3rd Parties\Others\Include\MD5\md5.h" />
+    <ClInclude Include="..\3rd Parties\Others\Include\Optick\optick.config.h" />
+    <ClInclude Include="..\3rd Parties\Others\Include\Optick\optick.h" />
     <ClInclude Include="..\3rd Parties\Others\Include\par_shapes.h" />
     <ClInclude Include="..\3rd Parties\Others\Include\RapidJson\allocators.h" />
     <ClInclude Include="..\3rd Parties\Others\Include\RapidJson\document.h" />
@@ -148,9 +152,6 @@
     <ClInclude Include="EditorWindow.h" />
     <ClInclude Include="AboutWindow.h" />
     <ClInclude Include="GameWindow.h" />
-    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_impl_opengl3.h" />
-    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_impl_sdl.h" />
-    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_stdlib.h" />
     <ClInclude Include="MaterialEditorWindow.h" />
     <ClInclude Include="ParticleEmitterEditorWindow.h" />
     <ClInclude Include="SceneEditorWindow.h" />
@@ -189,14 +190,9 @@
     <ClInclude Include="RE_FileBuffer.h" />
     <ClInclude Include="RE_FileSystem.h" />
     <ClInclude Include="Event.h" />
-    <ClInclude Include="gpudetect\DeviceId.h" />
-    <ClInclude Include="gpudetect\dxgi1_4.h" />
-    <ClInclude Include="MD5\md5.h" />
     <ClInclude Include="RE_CameraManager.h" />
     <ClInclude Include="RE_GLCache.h" />
     <ClInclude Include="RE_ECS_Pool.h" />
-    <ClInclude Include="Optick\include\optick.config.h" />
-    <ClInclude Include="Optick\include\optick.h" />
     <ClInclude Include="RE_InternalResources.h" />
     <ClInclude Include="RE_Memory.h" />
     <ClInclude Include="RE_Model.h" />
@@ -307,19 +303,19 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StructMemberAlignment>Default</StructMemberAlignment>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\ImGui\misc;$(SolutionDir)3rd Parties\Others\Include;$(MSBuildProjectDirectory)\Glew\include;$(MSBuildProjectDirectory)\ImGuiImplementations;$(MSBuildProjectDirectory)\MD5;$(MSBuildProjectDirectory)\WWISESDK\include\;$(SolutionDir)3rd Parties\Others\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\ImGui\misc;$(SolutionDir)3rd Parties\Others\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>ws2_32.lib;physfs.lib;SDL2.lib;SDL2main.lib;glew32.lib;opengl32.lib;zip_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)3rd Parties\Others\Binaries\PhysFS;$(SolutionDir)3rd Parties\Others\Binaries\libzip;$(SolutionDir)3rd Parties\Others\Binaries\SDL2;$(SolutionDir)3rd Parties\Others\Binaries\Glew;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;physfs.lib;SDL2.lib;SDL2main.lib;glew32.lib;opengl32.lib;AkMemoryMgr.lib;AkMusicEngine.lib;AkSoundEngine.lib;AkSpatialAudio.lib;AkStreamMgr.lib;DevIL.lib;ILU.lib;ILUT.lib;CommunicationCentral.lib;zip_d.lib;assimp-vc142-mtd.lib;OptickCore_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)3rd Parties\Others\Binaries\PhysFS;$(SolutionDir)3rd Parties\Others\Binaries\libzip;$(SolutionDir)3rd Parties\Others\Binaries\SDL2;$(SolutionDir)3rd Parties\Others\Binaries\Glew;$(SolutionDir)3rd Parties\Others\Binaries\assimp;$(SolutionDir)3rd Parties\Others\Binaries\IL;$(SolutionDir)3rd Parties\Others\Binaries\Optick;$(SolutionDir)3rd Parties\Others\Binaries\AK\libdebug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -330,7 +326,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\ImGui\misc;$(SolutionDir)3rd Parties\Others\Include;$(SolutionDir)Source\Glew\include;$(SolutionDir)Source\ImGuiImplementations;$(SolutionDir)Source\MD5;$(MSBuildProjectDirectory)\WWISESDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\MathGeoLib\src;$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\ImGui\misc;$(SolutionDir)3rd Parties\Others\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -338,12 +334,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>ws2_32.lib;physfs.lib;SDL2.lib;SDL2main.lib;glew32.lib;opengl32.lib;zip_r.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;physfs.lib;SDL2.lib;SDL2main.lib;glew32.lib;opengl32.lib;AkMemoryMgr.lib;AkMusicEngine.lib;AkSoundEngine.lib;AkSpatialAudio.lib;AkStreamMgr.lib;DevIL.lib;ILU.lib;ILUT.lib;assimp-vc142-mt.lib;zip_r.lib;OptickCore_release.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(SolutionDir)3rd Parties\Others\Binaries\PhysFS;$(SolutionDir)3rd Parties\Others\Binaries\libzip;$(SolutionDir)3rd Parties\Others\Binaries\SDL2;$(SolutionDir)3rd Parties\Others\Binaries\Glew;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)3rd Parties\Others\Binaries\PhysFS;$(SolutionDir)3rd Parties\Others\Binaries\libzip;$(SolutionDir)3rd Parties\Others\Binaries\SDL2;$(SolutionDir)3rd Parties\Others\Binaries\Glew;$(SolutionDir)3rd Parties\Others\Binaries\assimp;$(SolutionDir)3rd Parties\Others\Binaries\IL;$(SolutionDir)3rd Parties\Others\Binaries\Optick;$(SolutionDir)3rd Parties\Others\Binaries\AK\librelase;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

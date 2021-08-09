@@ -12,7 +12,7 @@
 #include "RE_ECS_Importer.h"
 #include "RE_ECS_Pool.h"
 
-#include "assimp\include\postprocess.h"
+#include <assimp/postprocess.h>
 #include <ImGui/imgui.h>
 
 void RE_Model::LoadInMemory()

@@ -11,12 +11,6 @@
 
 #include <SDL2/SDL.h>
 
-#ifdef _DEBUG
-#pragma comment( lib, "Optick/libx86/OptickCore_debug.lib" )
-#else
-#pragma comment( lib, "Optick/libx86/OptickCore_release.lib" )
-#endif
-
 /*  HELLO EASTL! -> How to track the memory:
 https://stackoverflow.com/questions/42565582/how-to-track-memory-usage-using-eastlç
 https://www.swardle.com/sweb/img/Memory%20and%20C++%20debuging%20at%20EA%20-%20Scott%20Wardle%20-%20CppCon%202015.pdf*/

@@ -8,8 +8,8 @@
 #include "RE_Texture.h"
 
 #include <GL/Glew/glew.h>
-#include "IL\include\il.h"
-#include "IL\include\ilu.h"
+#include <IL/il.h>
+#include <IL/ilu.h>
 
 void RE_SkyboxImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned int* ID, bool isDDS)
 {

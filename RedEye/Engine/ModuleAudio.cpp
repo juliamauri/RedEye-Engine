@@ -23,33 +23,8 @@
 #include <AK/MusicEngine/Common/AkMusicEngine.h>                // Music Engine
 #include <AK/SpatialAudio/Common/AkSpatialAudio.h>              // Spatial Audio
 
-#ifdef _DEBUG
-#pragma comment( lib, "WWISESDK/binaries/libdebug/AkMemoryMgr.lib" )
-#pragma comment( lib, "WWISESDK/binaries/libdebug/AkStreamMgr.lib" )
-#pragma comment( lib, "WWISESDK/binaries/libdebug/AkSoundEngine.lib" )
-#pragma comment( lib, "WWISESDK/binaries/libdebug/AkMusicEngine.lib" )
-#pragma comment( lib, "WWISESDK/binaries/libdebug/AkSpatialAudio.lib" )
-#pragma comment( lib, "WWISESDK/binaries/libdebug/CommunicationCentral.lib" )
-
-#elif GAMEMODE //retail releaase
-
+#ifndef _DEBUG
 #define AK_OPTIMIZED
-#pragma comment( lib, "WWISESDK/binaries/librelase/AkMemoryMgr.lib" )
-#pragma comment( lib, "WWISESDK/binaries/librelase/AkStreamMgr.lib" )
-#pragma comment( lib, "WWISESDK/binaries/librelase/AkSoundEngine.lib" )
-#pragma comment( lib, "WWISESDK/binaries/librelase/AkMusicEngine.lib" )
-#pragma comment( lib, "WWISESDK/binaries/librelase/AkSpatialAudio.lib" )
-#pragma comment( lib, "WWISESDK/binaries/librelase/CommunicationCentral.lib" )
-
-#else //profiling
-
-#pragma comment( lib, "WWISESDK/binaries/libprofiler/AkMemoryMgr.lib" )
-#pragma comment( lib, "WWISESDK/binaries/libprofiler/AkStreamMgr.lib" )
-#pragma comment( lib, "WWISESDK/binaries/libprofiler/AkSoundEngine.lib" )
-#pragma comment( lib, "WWISESDK/binaries/libprofiler/AkMusicEngine.lib" )
-#pragma comment( lib, "WWISESDK/binaries/libprofiler/AkSpatialAudio.lib" )
-#pragma comment( lib, "WWISESDK/binaries/libprofiler/CommunicationCentral.lib" )
-
 #endif // DEBUG
 
 #ifndef AK_OPTIMIZED

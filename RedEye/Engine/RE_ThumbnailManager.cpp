@@ -11,8 +11,8 @@
 #include "RE_Texture.h"
 
 #include <GL/Glew/glew.h>
-#include "IL/include/il.h"
-#include "IL/include/ilu.h"
+#include <IL/il.h>
+#include <IL/ilu.h>
 #include <EASTL/string.h>
 
 void RE_ThumbnailManager::Init()

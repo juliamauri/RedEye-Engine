@@ -1,7 +1,7 @@
 #include "RE_FileBuffer.h"
 
 #include "Application.h"
-#include "md5.h"
+#include <MD5/md5.h>
 #include <PhysFS/physfs.h>
 #include <libzip/zip.h>
 

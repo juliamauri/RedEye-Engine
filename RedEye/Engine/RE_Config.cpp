@@ -6,7 +6,7 @@
 #include "RE_FileSystem.h"
 #include "RE_Json.h"
 
-#include "md5.h"
+#include <MD5/md5.h>
 #include <RapidJson/pointer.h>
 #include <RapidJson/stringbuffer.h>
 #include <RapidJson/writer.h>

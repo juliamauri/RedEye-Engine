@@ -4,9 +4,6 @@
     <ClCompile Include="Event.cpp">
       <Filter>Engine\Application\Modules\Input\Events System</Filter>
     </ClCompile>
-    <ClCompile Include="gpudetect\DeviceId.cpp">
-      <Filter>3rd Party\gpudetect</Filter>
-    </ClCompile>
     <ClCompile Include="RE_CompMesh.cpp">
       <Filter>Engine\Application\Modules\Scene\Entity Component System\Components</Filter>
     </ClCompile>
@@ -42,9 +39,6 @@
     </ClCompile>
     <ClCompile Include="RE_CompWater.cpp">
       <Filter>Engine\Application\Modules\Scene\Entity Component System\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="MD5\md5.cpp">
-      <Filter>3rd Party\MD5</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Engine</Filter>
@@ -232,15 +226,6 @@
     <ClCompile Include="AboutWindow.cpp">
       <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\About</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_impl_opengl3.cpp">
-      <Filter>3rd Party\ImGuiImplementations</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_impl_sdl.cpp">
-      <Filter>3rd Party\ImGuiImplementations</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGuiImplementations\ImGuiImpl\imgui_stdlib.cpp">
-      <Filter>3rd Party\ImGuiImplementations</Filter>
-    </ClCompile>
     <ClCompile Include="MaterialEditorWindow.cpp">
       <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Material Editor</Filter>
     </ClCompile>
@@ -259,16 +244,25 @@
     <ClCompile Include="WaterPlaneWindow.cpp">
       <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Water Plane</Filter>
     </ClCompile>
+    <ClCompile Include="..\3rd Parties\Others\Include\MD5\md5.cpp">
+      <Filter>3rd Party\MD5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd Parties\Others\Include\gpudetect\DeviceId.cpp">
+      <Filter>3rd Party\gpudetect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_opengl3.cpp">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_sdl.cpp">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_stdlib.cpp">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event.h">
       <Filter>Engine\Application\Modules\Input\Events System</Filter>
-    </ClInclude>
-    <ClInclude Include="gpudetect\DeviceId.h">
-      <Filter>3rd Party\gpudetect</Filter>
-    </ClInclude>
-    <ClInclude Include="gpudetect\dxgi1_4.h">
-      <Filter>3rd Party\gpudetect</Filter>
     </ClInclude>
     <ClInclude Include="RE_CompPrimitive.h">
       <Filter>Engine\Application\Modules\Scene\Entity Component System\Components</Filter>
@@ -284,12 +278,6 @@
     </ClInclude>
     <ClInclude Include="RE_CompTransform.h">
       <Filter>Engine\Application\Modules\Scene\Entity Component System\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\include\optick.config.h">
-      <Filter>3rd Party\Optick</Filter>
-    </ClInclude>
-    <ClInclude Include="Optick\include\optick.h">
-      <Filter>3rd Party\Optick</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Engine\Application\Resources</Filter>
@@ -311,9 +299,6 @@
     </ClInclude>
     <ClInclude Include="RE_CompWater.h">
       <Filter>Engine\Application\Modules\Scene\Entity Component System\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="MD5\md5.h">
-      <Filter>3rd Party\MD5</Filter>
     </ClInclude>
     <ClInclude Include="Application.h">
       <Filter>Engine\Application</Filter>
@@ -531,15 +516,6 @@
     <ClInclude Include="SceneEditorWindow.h">
       <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_impl_opengl3.h">
-      <Filter>3rd Party\ImGuiImplementations</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_impl_sdl.h">
-      <Filter>3rd Party\ImGuiImplementations</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGuiImplementations\ImGuiImpl\imgui_stdlib.h">
-      <Filter>3rd Party\ImGuiImplementations</Filter>
-    </ClInclude>
     <ClInclude Include="MaterialEditorWindow.h">
       <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Material Editor</Filter>
     </ClInclude>
@@ -681,6 +657,30 @@
     <ClInclude Include="..\3rd Parties\Others\Include\GL\Glew\wglew.h">
       <Filter>3rd Party\Glew</Filter>
     </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\Include\MD5\md5.h">
+      <Filter>3rd Party\MD5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\Include\gpudetect\DeviceId.h">
+      <Filter>3rd Party\gpudetect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\Include\gpudetect\dxgi1_4.h">
+      <Filter>3rd Party\gpudetect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\Include\Optick\optick.config.h">
+      <Filter>3rd Party\Optick</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\Include\Optick\optick.h">
+      <Filter>3rd Party\Optick</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_opengl3.h">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_sdl.h">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_stdlib.h">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -709,9 +709,6 @@
     </Filter>
     <Filter Include="3rd Party\MD5">
       <UniqueIdentifier>{dde4a8a1-2d44-48f2-bfc3-be7364f13339}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="3rd Party\ImGuiImplementations">
-      <UniqueIdentifier>{ad5d9ea1-006f-4d2d-a94c-62673cae903b}</UniqueIdentifier>
     </Filter>
     <Filter Include="3rd Party\Glew">
       <UniqueIdentifier>{e9e354eb-e5af-4983-940c-ff00dfd5bb7d}</UniqueIdentifier>
@@ -877,6 +874,9 @@
     </Filter>
     <Filter Include="Engine\Application\Utility\Time">
       <UniqueIdentifier>{94ccdf27-8db2-406e-ac1d-bc6ea6e760ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\ImGuiImpl">
+      <UniqueIdentifier>{ad5d9ea1-006f-4d2d-a94c-62673cae903b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

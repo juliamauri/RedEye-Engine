@@ -14,7 +14,7 @@
 #include "RE_CompCamera.h"
 #include "RE_CompTransform.h"
 
-#include <md5.h>
+#include <MD5/md5.h>
 #include <ImGui/imgui.h>
 #include <PhysFS/physfs.h>
 

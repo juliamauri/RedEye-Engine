@@ -12,7 +12,7 @@
 #include "RE_ParticleEmitter.h"
 #include "RE_CompParticleEmitter.h"
 
-#include"md5.h"
+#include <MD5/md5.h>
 
 void RE_ParticleEmitterBase::LoadInMemory()
 {

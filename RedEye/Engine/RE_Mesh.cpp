@@ -18,10 +18,10 @@
 #include <gl/GL.h>
 #include <MGL/MathGeoLib.h>
 #include <MGL/Math\Quat.h>
-#include <md5.h>
-#include "assimp/include/Importer.hpp"
-#include "assimp/include/scene.h"
-#include "assimp/include/postprocess.h"
+#include <MD5/md5.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 
 RE_Mesh::RE_Mesh()

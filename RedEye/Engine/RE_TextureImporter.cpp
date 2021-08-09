@@ -10,14 +10,10 @@
 #include "RE_Texture.h"
 
 #include <GL/Glew/glew.h>
-#include "IL\include\il.h"
-#include "IL\include\ilu.h"
-#include "IL\include\ilut.h"
+#include <IL/il.h>
+#include <IL/ilu.h>
+#include <IL/ilut.h>
 #include <EAStdC\EASprintf.h>
-
-#pragma comment(lib, "IL/libx86/DevIL.lib")
-#pragma comment(lib, "IL/libx86/ILU.lib")
-#pragma comment(lib, "IL/libx86/ILUT.lib")
 
 bool RE_TextureImporter::Init()
 {

@@ -15,17 +15,11 @@
 #include "RE_Mesh.h"
 #include "RE_Material.h"
 
-#include "md5.h"
-#include "assimp\include\Importer.hpp"
-#include "assimp\include\scene.h"
-#include "assimp\include\postprocess.h"
-#include "assimp\include\material.h"
-
-#ifdef _DEBUG
-	#pragma comment(lib, "assimp/libx86/assimp-vc142-mtd.lib")
-#else
-	#pragma comment(lib, "assimp/libx86/assimp-vc142-mt.lib")
-#endif
+#include <MD5/md5.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/material.h>
 
 RE_ECS_Pool* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
 {

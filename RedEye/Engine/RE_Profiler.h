@@ -204,7 +204,7 @@ namespace RE_Profiler
 
 #else
 
-#include "Optick\include\optick.h"
+#include <Optick/optick.h>
 #define RE_OPTICK_NAME(function)\ // TODO RUB: missing some definitions & should be improved
 	function == PROF_Init ? "Init" : \
 	function == PROF_Start ? "Start" : \
