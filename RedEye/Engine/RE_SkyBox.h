@@ -1,7 +1,6 @@
 #ifndef __RE_SKYBOX_H__
 #define __RE_SKYBOX_H__
 
-#include "Resource.h"
 #include "RE_SkyBoxSettings.h"
 
 class RE_SkyBox : public ResourceContainer

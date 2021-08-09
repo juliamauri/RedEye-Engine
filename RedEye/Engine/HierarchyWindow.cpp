@@ -1,3 +1,5 @@
+#include "EditorWindow.h"
+
 #include "HierarchyWindow.h"
 
 #include "Application.h"

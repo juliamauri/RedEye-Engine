@@ -1,3 +1,6 @@
+#include "RE_Component.h"
+#include <MGL/Geometry/AABB.h>
+
 #include "RE_CompMesh.h"
 
 #include "RE_Math.h"

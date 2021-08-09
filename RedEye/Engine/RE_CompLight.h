@@ -1,9 +1,6 @@
 #ifndef __RE_COMPLIGHT_H__
 #define __RE_COMPLIGHT_H__
 
-#include "RE_Component.h"
-#include <MGL/Math/float3.h>
-
 enum LightType : int
 {
 	L_DIRECTIONAL = 0,

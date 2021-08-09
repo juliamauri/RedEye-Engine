@@ -1,9 +1,6 @@
 #ifndef __RE_COMPMESH_H__
 #define __RE_COMPMESH_H__
 
-#include "RE_Component.h"
-#include <MGL/Geometry/AABB.h>
-
 class RE_CompMesh : public RE_Component
 {
 public:

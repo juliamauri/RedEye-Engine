@@ -1,9 +1,6 @@
 #ifndef __RE_MESH_H__
 #define __RE_MESH_H__
 
-#include "RE_Math.h"
-#include "Resource.h"
-
 class RE_Mesh : public ResourceContainer
 {
 public:

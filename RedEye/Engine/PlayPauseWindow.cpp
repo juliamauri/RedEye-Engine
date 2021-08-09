@@ -1,3 +1,5 @@
+#include "EditorWindow.h"
+
 #include "PlayPauseWindow.h"
 
 #include "Application.h"

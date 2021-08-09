@@ -2,10 +2,6 @@
 #define __POP_UP_WINDOW__
 
 #include "EditorWindow.h"
-#include "Event.h"
-
-#include <EASTL/string.h>
-#include <EASTL/vector.h>
 
 class PopUpWindow :public EditorWindow
 {

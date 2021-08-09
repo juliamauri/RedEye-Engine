@@ -1,3 +1,9 @@
+#include "Resource.h"
+#include "RE_Cvar.h"
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
+#include <MGL/Math/float4.h>
+
 #include "RE_Shader.h"
 
 #include "RE_Memory.h"

@@ -1,10 +1,6 @@
 #ifndef __RE_COMPPARTICLEEMITTER_H__
 #define __RE_COMPPARTICLEEMITTER_H__
 
-#include "RE_Component.h"
-#include <MGL/Math/float3.h>
-#include <vector>
-
 class RE_ParticleEmitter;
 
 class RE_CompParticleEmitter : public RE_Component

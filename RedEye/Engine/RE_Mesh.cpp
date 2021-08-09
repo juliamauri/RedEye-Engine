@@ -1,3 +1,7 @@
+#include <MGL/Geometry/AABB.h>
+#include <MGL/Geometry/Ray.h>
+#include "Resource.h"
+
 #include "RE_Mesh.h"
 
 #include "RE_Memory.h"

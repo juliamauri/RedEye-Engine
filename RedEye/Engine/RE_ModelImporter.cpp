@@ -1,3 +1,8 @@
+#include <MGL/Math/float4x4.h>
+#include <EASTL/vector.h>
+#include <EASTL/string.h>
+#include <EASTL/map.h>
+
 #include "RE_ModelImporter.h"
 
 #include "RE_DataTypes.h"

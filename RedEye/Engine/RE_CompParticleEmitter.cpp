@@ -1,3 +1,7 @@
+#include "RE_Component.h"
+#include <MGL/Math/float3.h>
+#include <EASTL/vector.h>
+
 #include "RE_CompParticleEmitter.h"
 
 #include "RE_Profiler.h"

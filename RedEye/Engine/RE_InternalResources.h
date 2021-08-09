@@ -1,9 +1,6 @@
 #ifndef __INTERNALRESOURCCES_H__
 #define __INTERNALRESOURCCES_H__
 
-#include "RE_Cvar.h"
-
-#include <EASTL/vector.h>
 class RE_SkyBox;
 class RE_Shader;
 

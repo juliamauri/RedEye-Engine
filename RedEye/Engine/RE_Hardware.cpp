@@ -1,3 +1,5 @@
+#include <EASTL/string.h>
+
 #include "RE_Hardware.h"
 
 #include "RE_Profiler.h"

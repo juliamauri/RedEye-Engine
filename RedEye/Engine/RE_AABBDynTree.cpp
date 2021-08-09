@@ -1,3 +1,5 @@
+#include <MGL/Geometry/AABB.h>
+
 #include "RE_AABBDynTree.h"
 
 #include <MGL/Geometry/Frustum.h>

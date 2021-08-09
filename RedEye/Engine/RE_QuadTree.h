@@ -1,10 +1,6 @@
 #ifndef __QUADTREE_H__
 #define __QUADTREE_H__
 
-#include <MGL/Math/float3.h>
-#include <MGL/Geometry/AABB.h>
-#include "EASTL/vector.h"
-
 enum QTreeDrawMode : short { DISABLED, TOP, BOTTOM, TOP_BOTTOM, ALL };
 
 template <class TYPE> class QTreeNode;

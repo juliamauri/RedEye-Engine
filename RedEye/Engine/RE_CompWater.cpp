@@ -1,3 +1,11 @@
+#include "RE_Component.h"
+#include "RE_Cvar.h"
+#include <MGL/Geometry/AABB.h>
+#include <MGL/Geometry/Ray.h>
+#include <MGL/Math/float2.h>
+#include <MGL/Math/float3.h>
+#include <EASTL/vector.h>
+
 #include "RE_CompWater.h"
 
 #include "RE_Memory.h"

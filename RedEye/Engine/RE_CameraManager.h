@@ -1,10 +1,8 @@
 #ifndef __CAMERAMANAGER_H__
 #define __CAMERAMANAGER_H__
-
-#include "RE_CompCamera.h"
-#include <MGL/Geometry/Frustum.h>
-#include <EASTL/list.h>
 	
+#include "RE_CompCamera.h"
+
 class RE_CameraManager
 {
 public:

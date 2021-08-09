@@ -1,7 +1,6 @@
 #ifndef __MODULEEDITOR__
 #define __MODULEEDITOR__
 
-#include "Event.h"
 #include "RE_DataTypes.h"
 #include <EASTL/list.h>
 

@@ -1,7 +1,6 @@
 #ifndef __RE_SCENE_H__
 #define __RE_SCENE_H__
 
-#include "Resource.h"
 class RE_ECS_Pool;
 
 class RE_Scene : public ResourceContainer

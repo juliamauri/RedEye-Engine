@@ -1,7 +1,6 @@
 #ifndef __RE_MODEL_H__
 #define __RE_MODEL_H__
 
-#include "Resource.h"
 #include "RE_ModelSettings.h"
 
 class RE_ECS_Pool;

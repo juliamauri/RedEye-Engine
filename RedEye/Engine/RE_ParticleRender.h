@@ -1,9 +1,7 @@
 #ifndef __RE_PARTICLE_RENDER__
 #define __RE_PARTICLE_RENDER__
 
-#include "Resource.h"
 #include "RE_ParticleEmitter.h"
-#include "RE_Component.h"
 
 class RE_ParticleRender : public ResourceContainer
 {

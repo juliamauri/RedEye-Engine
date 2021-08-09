@@ -1,8 +1,6 @@
 #ifndef __WWISE_WINDOW__
 #define __WWISE_WINDOW__
 
-#include "EditorWindow.h"
-
 class WwiseWindow : public EditorWindow
 {
 public:

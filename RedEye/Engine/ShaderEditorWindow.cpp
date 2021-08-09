@@ -1,3 +1,6 @@
+#include "EditorWindow.h"
+#include <EASTL/string.h>
+
 #include "ShaderEditorWindow.h"
 
 #include "RE_Memory.h"

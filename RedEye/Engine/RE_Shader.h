@@ -1,12 +1,6 @@
 #ifndef __RE_SHADER_H__
 #define __RE_SHADER_H__
 
-#include "Resource.h"
-#include "RE_Cvar.h"
-#include <EASTL/string.h>
-#include <EASTL/vector.h>
-#include <MGL/Math/float4.h>
-
 class RE_CompCamera;
 
 struct RE_ShaderSettings {

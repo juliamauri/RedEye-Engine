@@ -1,3 +1,7 @@
+#include "Event.h"
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
+
 #include "PopUpWindow.h"
 
 #include "Application.h"

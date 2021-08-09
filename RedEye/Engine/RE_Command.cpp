@@ -1,3 +1,5 @@
+#include <MGL/Math/float3.h>
+
 #include "RE_Command.h"
 
 #include "ModuleScene.h"

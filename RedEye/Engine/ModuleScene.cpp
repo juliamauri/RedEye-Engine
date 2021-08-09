@@ -1,3 +1,6 @@
+#include "Event.h"
+#include <EASTL/stack.h>
+
 #include "ModuleScene.h"
 
 #include "RE_Memory.h"

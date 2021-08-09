@@ -1,8 +1,6 @@
 #ifndef __PROPERTIES_WINDOW__
 #define __PROPERTIES_WINDOW__
 
-#include "EditorWindow.h"
-
 class PropertiesWindow : public EditorWindow
 {
 public:

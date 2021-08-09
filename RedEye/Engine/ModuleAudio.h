@@ -1,7 +1,6 @@
 #ifndef __MODULEAUDIO__
 #define __MODULEAUDIO__
 
-#include <EASTL/string.h>
 #include <EASTL/vector.h>
 
 struct WwiseEvent

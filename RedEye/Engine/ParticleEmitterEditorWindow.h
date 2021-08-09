@@ -1,10 +1,6 @@
 #ifndef __PARTICLE_EMITTER_EDITOR_WINDOW__
 #define __PARTICLE_EMITTER_EDITOR_WINDOW__
 
-#include "EditorWindow.h"
-#include <EASTL/string.h>
-#include <MGL/Math/float4.h>
-
 class RE_ParticleEmitter;
 class RE_ParticleEmitterBase;
 

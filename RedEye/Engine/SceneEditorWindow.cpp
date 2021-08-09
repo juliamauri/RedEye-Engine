@@ -1,3 +1,6 @@
+#include "EditorWindow.h"
+#include <MGL/Math/float4.h>
+
 #include "SceneEditorWindow.h"
 
 #include "Application.h"

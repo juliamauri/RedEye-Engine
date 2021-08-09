@@ -1,3 +1,6 @@
+#include "Resource.h"
+#include "RE_Component.h"
+
 #include "RE_ParticleRender.h"
 
 #include "RE_Memory.h"

@@ -1,11 +1,7 @@
 #ifndef __MODULERENDER3D_H__
 #define __MODULERENDER3D_H__
 
-#include "Event.h"
-
-#include <MGL/Math/float4.h>
 #include <EASTL/stack.h>
-#include <EASTL/string.h>
 
 enum LightMode : int
 {

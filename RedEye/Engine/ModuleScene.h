@@ -1,10 +1,8 @@
 #ifndef __MODULESCENE_H__
 #define __MODULESCENE_H__
 
-#include "Event.h"
 #include "RE_ECS_Pool.h"
 #include "RE_AABBDynTree.h"
-#include <EASTL/stack.h>
 
 class ModuleScene : public EventListener
 {

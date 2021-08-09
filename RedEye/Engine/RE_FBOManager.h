@@ -1,9 +1,6 @@
 #ifndef __REFBOMANAGER__
 #define __REFBOMANAGER__
 
-#include <EASTL/vector.h>
-#include <EASTL/map.h>
-
 struct RE_FBO
 {
 	enum class FBO_Type : char { DEFAULT, DEFERRED } type = FBO_Type::DEFAULT;

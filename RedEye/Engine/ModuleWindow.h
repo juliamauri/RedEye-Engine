@@ -1,8 +1,6 @@
 #ifndef __ModuleWindow_H__
 #define __ModuleWindow_H__
 
-#include "Event.h"
-
 class ModuleWindow : public EventListener
 {
 public:

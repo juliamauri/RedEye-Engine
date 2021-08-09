@@ -1,3 +1,6 @@
+#include "RE_Cvar.h"
+#include <EASTL/vector.h>
+
 #include "RE_InternalResources.h"
 
 #include "RE_Profiler.h"

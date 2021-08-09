@@ -1,9 +1,6 @@
 #ifndef __SCENE_EDITOR_WINDOW__
 #define __SCENE_EDITOR_WINDOW__
 
-#include "EditorWindow.h"
-
-#include <MGL/Math/float4.h>
 #include <ImGuiWidgets/ImGuizmo/ImGuizmo.h>
 
 class SceneEditorWindow :public EditorWindow

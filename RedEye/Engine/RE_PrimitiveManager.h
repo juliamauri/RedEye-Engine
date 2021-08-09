@@ -1,11 +1,6 @@
 #ifndef __RE_PRIMITVEMANAGER_H__
 #define __RE_PRIMITVEMANAGER_H__
 
-#include <MGL/Math/float3.h>
-
-#include <EASTL/map.h>
-#include <EASTL/utility.h>
-
 class RE_GameObject;
 class RE_Component;
 class RE_CompPrimitive;

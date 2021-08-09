@@ -1,7 +1,6 @@
 #ifndef __RE_PARTICLEEMISSION_H__
 #define __RE_PARTICLEEMISSION_H__
 
-#include "Resource.h"
 #include "RE_EmissionData.h"
 
 class RE_ParticleEmission : public ResourceContainer

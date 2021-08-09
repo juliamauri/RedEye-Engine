@@ -3,9 +3,8 @@
 
 #include "RE_DataTypes.h"
 
-#include <MGL/MathGeoLib.h>
+#include <MGL/Geometry/AABB.h>
 #include <EASTL/list.h>
-#include <EASTL/vector.h>
 #include <EASTL/stack.h>
 #include <EASTL/string.h>
 

@@ -1,3 +1,6 @@
+#include "EditorWindow.h"
+#include <EASTL/string.h>
+
 #include "AssetsWindow.h"
 
 #include "Application.h"

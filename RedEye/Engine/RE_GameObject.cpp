@@ -1,3 +1,5 @@
+#include <EASTL/vector.h>
+
 #include "RE_GameObject.h"
 
 #include "RE_Json.h"

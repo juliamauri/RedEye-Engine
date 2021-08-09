@@ -1,3 +1,5 @@
+#include "EditorWindow.h"
+
 #include "ConfigWindow.h"
 
 #include "Application.h"

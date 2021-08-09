@@ -2,7 +2,6 @@
 #define __RE_COMMAND__
 
 #include "RE_GameObject.h"
-#include <MGL/MathGeoLib.h>
 
 class RE_Command
 {

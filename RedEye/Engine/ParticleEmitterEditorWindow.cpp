@@ -1,3 +1,7 @@
+#include "EditorWindow.h"
+#include <EASTL/string.h>
+#include <MGL/Math/float4.h>
+
 #include "ParticleEmitterEditorWindow.h"
 
 #include "RE_Memory.h"

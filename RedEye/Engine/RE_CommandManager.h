@@ -1,8 +1,6 @@
 #ifndef __RE_COMMAND_MANAGER_H__
 #define __RE_COMMAND_MANAGER_H__
 
-#include <EASTL/stack.h>
-
 class RE_Command;
 
 class RE_CommandManager

@@ -11,12 +11,6 @@ enum aiTextureType;
 class RE_ECS_Pool;
 class RE_GameObject;
 
-#include <MGL/Math/float4x4.h>
-
-#include <EASTL/vector.h>
-#include <EASTL/string.h>
-#include <EASTL/map.h>
-
 class RE_ModelImporter
 {
 public:

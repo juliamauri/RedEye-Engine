@@ -1,8 +1,6 @@
 #ifndef __RE_PARTICLEEMITTERBASE_H__
 #define __RE_PARTICLEEMITTERBASE_H__
 
-#include "Resource.h"
-
 class RE_ParticleEmitter;
 
 class RE_ParticleEmitterBase : public ResourceContainer

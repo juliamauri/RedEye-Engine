@@ -1,3 +1,5 @@
+#include "Event.h"
+
 #include "RE_ResourceManager.h"
 
 #include "RE_Memory.h"

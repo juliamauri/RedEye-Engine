@@ -1,8 +1,6 @@
 #ifndef __HIERARCHY_WINDOW__
 #define __HIERARCHY_WINDOW__
 
-#include "EditorWindow.h"
-
 class HierarchyWindow : public EditorWindow
 {
 public:

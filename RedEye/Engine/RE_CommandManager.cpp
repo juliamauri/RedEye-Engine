@@ -1,3 +1,5 @@
+#include <EASTL/stack.h>
+
 #include "RE_CommandManager.h"
 
 #include "RE_Memory.h"

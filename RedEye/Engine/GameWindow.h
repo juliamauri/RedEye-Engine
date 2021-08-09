@@ -1,10 +1,6 @@
 #ifndef __GAME_WINDOW__
 #define __GAME_WINDOW__
 
-#include "EditorWindow.h"
-
-#include <MGL/Math/float4.h>
-
 class GameWindow :public EditorWindow
 {
 public:

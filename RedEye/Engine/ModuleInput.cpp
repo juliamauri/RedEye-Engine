@@ -1,3 +1,5 @@
+#include "Event.h"
+
 #include "ModuleInput.h"
 
 #include "RE_Memory.h"

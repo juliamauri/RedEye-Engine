@@ -1,3 +1,6 @@
+#include "RE_Component.h"
+#include <MGL/Math/float3.h>
+
 #include "RE_CompLight.h"
 
 #include "RE_GameObject.h"

@@ -1,3 +1,6 @@
+#include <MGL/Geometry/Frustum.h>
+#include <EASTL/list.h>
+
 #include "RE_CameraManager.h"
 
 #include "RE_Memory.h"

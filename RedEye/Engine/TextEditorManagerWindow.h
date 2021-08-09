@@ -1,10 +1,6 @@
 #ifndef __TEXT_EDITOR_MANAGER_WINDOW__
 #define __TEXT_EDITOR_MANAGER_WINDOW__
 
-#include "EditorWindow.h"
-#include <EASTL/string.h>
-#include <EASTL/vector.h>
-
 class TextEditorManagerWindow :public EditorWindow
 {
 public:

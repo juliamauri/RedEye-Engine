@@ -1,8 +1,7 @@
 #ifndef __RE_SHADERIMPORTER_H__
 #define __RE_SHADERIMPORTER_H__
 
-#include "RE_Math.h"
-
+#include <MGL/Math/float3.h>
 #include <EASTL/string.h>
 
 class RE_ShaderImporter

@@ -1,8 +1,6 @@
 #ifndef __RE_HARDWARE_H__
 #define __RE_HARDWARE_H__
 
-#include <EASTL/string.h>
-
 class RE_Hardware
 {
 public:

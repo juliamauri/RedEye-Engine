@@ -1,8 +1,6 @@
 #ifndef __CONFIG_WINDOW__
 #define __CONFIG_WINDOW__
 
-#include "EditorWindow.h"
-
 class ConfigWindow : public EditorWindow
 {
 public:

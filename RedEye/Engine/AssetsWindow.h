@@ -1,9 +1,6 @@
 #ifndef __ASSETS_WINDOW__
 #define __ASSETS_WINDOW__
 
-#include "EditorWindow.h"
-#include <EASTL/string.h>
-
 class AssetsWindow : public EditorWindow
 {
 public:

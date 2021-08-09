@@ -1,3 +1,5 @@
+#include <EASTL/string.h>
+
 #include "ModuleAudio.h"
 
 #include "RE_Memory.h"

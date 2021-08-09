@@ -1,16 +1,6 @@
 #ifndef __RE_COMPWATER_H__
 #define __RE_COMPWATER_H__
 
-#include "RE_Component.h"
-#include "RE_Cvar.h"
-
-#include <MGL/Geometry/AABB.h>
-#include <MGL/Geometry/Ray.h>
-#include <MGL/Math/float2.h>
-#include <MGL/Math/float3.h>
-
-#include <EASTL/vector.h>
-
 class RE_CompWater : public RE_Component
 {
 public:

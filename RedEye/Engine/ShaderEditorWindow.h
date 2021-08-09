@@ -1,9 +1,6 @@
 #ifndef __SHADER_EDITOR_WINDOW__
 #define __SHADER_EDITOR_WINDOW__
 
-#include "EditorWindow.h"
-#include <EASTL/string.h>
-
 class ShaderEditorWindow :public EditorWindow
 {
 public:

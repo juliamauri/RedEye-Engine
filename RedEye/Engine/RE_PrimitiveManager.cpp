@@ -1,3 +1,7 @@
+#include <MGL/Math/float3.h>
+#include <EASTL/map.h>
+#include <EASTL/utility.h>
+
 #include "RE_PrimitiveManager.h"
 
 #include "RE_Memory.h"

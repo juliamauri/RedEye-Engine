@@ -1,12 +1,6 @@
 #ifndef __CONSOLE_WINDOW__
 #define __CONSOLE_WINDOW__
 
-#include "EditorWindow.h"
-
-#include <EASTL/string.h>
-#include <EASTL/vector.h>
-#include <EASTL/map.h>
-
 class ConsoleWindow : public EditorWindow
 {
 public:

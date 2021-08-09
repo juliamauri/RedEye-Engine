@@ -1,3 +1,6 @@
+#include <EASTL/vector.h>
+#include <EASTL/map.h>
+
 #include "RE_FBOManager.h"
 
 #include "Application.h"

@@ -1,8 +1,6 @@
 #ifndef __PLAY_PAUSE_WINDOW__
 #define __PLAY_PAUSE_WINDOW__
 
-#include "EditorWindow.h"
-
 class PlayPauseWindow : public EditorWindow
 {
 public:

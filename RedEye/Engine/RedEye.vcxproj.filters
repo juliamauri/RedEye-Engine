@@ -773,9 +773,6 @@
     <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Game">
       <UniqueIdentifier>{ea464fc3-cac0-4fb6-81cc-4c3f089ffb77}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Hierarchy">
-      <UniqueIdentifier>{e923f986-34cc-4a0a-9760-8a71a536d3fd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\PlayPause">
       <UniqueIdentifier>{0449aa3b-c3b0-4e3e-897c-01403a18102f}</UniqueIdentifier>
     </Filter>
@@ -877,6 +874,9 @@
     </Filter>
     <Filter Include="3rd Party\ImGuiImpl">
       <UniqueIdentifier>{ad5d9ea1-006f-4d2d-a94c-62673cae903b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Hierarchy">
+      <UniqueIdentifier>{e923f986-34cc-4a0a-9760-8a71a536d3fd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

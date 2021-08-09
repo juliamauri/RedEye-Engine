@@ -1,3 +1,6 @@
+#include <MGL/Math/float3.h>
+#include <EASTL/string.h>
+
 #include "RE_CompPrimitive.h"
 
 #include "RE_Memory.h"

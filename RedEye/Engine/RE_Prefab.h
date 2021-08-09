@@ -1,7 +1,6 @@
 #ifndef __RE_PREFAB_H__
 #define __RE_PREFAB_H__
 
-#include "Resource.h"
 class RE_ECS_Pool;
 
 // .refab

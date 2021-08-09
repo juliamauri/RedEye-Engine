@@ -1,3 +1,7 @@
+#include "Event.h"
+#include <MGL/Math/float4.h>
+#include <EASTL/string.h>
+
 #include "ModuleRenderer3D.h"
 
 #include "RE_Memory.h"

@@ -1,9 +1,6 @@
 #ifndef __SKYBOX_EDITOR_WINDOW__
 #define __SKYBOX_EDITOR_WINDOW__
 
-#include "EditorWindow.h"
-#include <EASTL/string.h>
-
 class SkyBoxEditorWindow :public EditorWindow
 {
 public:

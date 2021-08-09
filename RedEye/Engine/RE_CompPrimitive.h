@@ -1,10 +1,7 @@
 #ifndef __RE_COMPPRIMITIVE_H__
 #define __RE_COMPPRIMITIVE_H__
 
-#include "RE_Math.h"
 #include "RE_Component.h"
-
-#include <EASTL/string.h>
 
 class RE_CompTransform;
 

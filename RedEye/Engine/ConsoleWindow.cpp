@@ -1,3 +1,8 @@
+#include "EditorWindow.h"
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
+#include <EASTL/map.h>
+
 #include "ConsoleWindow.h"
 
 #include "RE_ConsoleLog.h"

@@ -1,3 +1,5 @@
+#include "Resource.h"
+
 #include "RE_ParticleEmission.h"
 
 #include "RE_Memory.h"

@@ -1,4 +1,6 @@
- #include "ModuleEditor.h"
+#include "Event.h"
+
+#include "ModuleEditor.h"
 
 #include "RE_Profiler.h"
 #include "RE_ConsoleLog.h"

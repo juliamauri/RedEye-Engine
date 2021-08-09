@@ -1,7 +1,6 @@
 #ifndef __MODULEINPUT_H__
 #define __MODULEINPUT_H__
 
-#include "Event.h"
 #include <EASTL/queue.h>
 
 #define MAX_MOUSE_BUTTONS 5

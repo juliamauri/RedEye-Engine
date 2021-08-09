@@ -2,7 +2,6 @@
 #define __ABOUT_WINDOW__
 
 #include "EditorWindow.h"
-
 #include <EASTL/vector.h>
 
 class AboutWindow : public EditorWindow

@@ -1,3 +1,5 @@
+#include "Event.h"
+
 #include "ModuleWindow.h"
 
 #include "RE_Memory.h"
