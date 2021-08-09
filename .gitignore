@@ -324,3 +324,10 @@ __pycache__/
 !RedEye/3rd Parties/EASTL/include/EASTL/internal/atomic/arch/x86/*
 !RedEye/3rd Parties/EASTL/test/packages/EAThread/include/eathread/x86/*
 !RedEye/3rd Parties/EASTL/test/packages/EAThread/source/x86/*
+RedEye/Build/RedEye_debug.exe.lastcodeanalysissucceeded
+RedEye/Build/RedEye_debug.exe
+RedEye/Build/RedEye_debug.exp
+RedEye/Build/RedEye_debug.lib
+RedEye/Build/RedEye_release.exe
+RedEye/Build/RedEye_release.exp
+RedEye/Build/RedEye_release.lib
