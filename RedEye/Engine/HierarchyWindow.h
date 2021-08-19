@@ -4,7 +4,7 @@
 class HierarchyWindow : public EditorWindow
 {
 public:
-	HierarchyWindow(const char* name = "Heriarchy", bool start_active = true) : EditorWindow(name, start_active) {}
+	HierarchyWindow() : EditorWindow("Heriarchy", true) {}
 	~HierarchyWindow() {}
 
 private:

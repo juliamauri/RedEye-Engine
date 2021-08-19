@@ -6,14 +6,23 @@
 class SceneEditorWindow :public EditorWindow
 {
 public:
-	SceneEditorWindow(const char* name = "Editor Scene", bool start_active = true) : EditorWindow(name, start_active) {}
+	SceneEditorWindow() : EditorWindow("Editor Scene", true) {}
 	~SceneEditorWindow() {}
 
-	unsigned int GetSceneWidht()const { return (width == 0) ? 500 : width; }
-	unsigned int GetSceneHeight()const { return (heigth == 0) ? 500 : heigth; }
+	unsigned int GetSceneWidth() const
+	{
+		int no_branch[2] = { 500, width };
+		return static_cast<unsigned int>(no_branch[width > 0]);
+	}
 
-	bool isSelected()const { return isWindowSelected; }
-	bool NeedRender()const { return need_render; };
+	unsigned int GetSceneHeight() const
+	{
+		int no_branch[2] = { 500, heigth };
+		return static_cast<unsigned int>(no_branch[heigth > 0]);
+	}
+
+	bool isSelected() const { return isWindowSelected; }
+	bool NeedRender() const { return need_render; };
 
 	void Recalc() { recalc = true; }
 

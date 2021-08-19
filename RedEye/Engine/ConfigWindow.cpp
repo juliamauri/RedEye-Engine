@@ -16,14 +16,10 @@
 
 #include <ImGui/imgui_internal.h>
 
-ConfigWindow::ConfigWindow(const char* name, bool start_active) : EditorWindow(name, start_active)
+ConfigWindow::ConfigWindow() : EditorWindow("Configuration", true)
 {
-	changed_config = false;
-	pos.x = 2000.f;
-	pos.y = 400.f;
+	pos = { 2000.f, 400.f };
 }
-
-ConfigWindow::~ConfigWindow() {}
 
 void ConfigWindow::Draw(bool secondary)
 {

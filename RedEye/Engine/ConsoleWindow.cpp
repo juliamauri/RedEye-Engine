@@ -9,8 +9,7 @@
 
 #include <ImGui/imgui_internal.h>
 
-ConsoleWindow::ConsoleWindow(const char* name, bool start_active) :
-	EditorWindow(name, start_active)
+ConsoleWindow::ConsoleWindow() : EditorWindow("Console", true)
 {
 	pos.y = 500.f;
 	for (auto& c : categories) c = true;

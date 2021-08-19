@@ -4,7 +4,7 @@
 class PlayPauseWindow : public EditorWindow
 {
 public:
-	PlayPauseWindow(const char* name = "Play Controls", bool start_active = true) : EditorWindow(name, start_active) {}
+	PlayPauseWindow() : EditorWindow("Play Controls", true) {}
 	~PlayPauseWindow() {}
 
 private:

@@ -15,9 +15,6 @@
 #include <ImGui/imgui_internal.h>
 #include <ImGuiImpl/imgui_stdlib.h>
 
-WaterPlaneWindow::WaterPlaneWindow() : EditorWindow("Water As Resource", false)
-{}
-
 void WaterPlaneWindow::Draw(bool secondary)
 {
 	if (ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))

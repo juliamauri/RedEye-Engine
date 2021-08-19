@@ -230,7 +230,7 @@ void Application::RecieveEvent(const Event& e)
 	case RE_EventType::REQUEST_LOAD: flags |= AppFlags::LOAD_CONFIG; break;
 	case RE_EventType::REQUEST_SAVE: flags |= AppFlags::SAVE_CONFIG; break;
 	case RE_EventType::REQUEST_QUIT: flags |= AppFlags::WANT_TO_QUIT; break;
-	default: break;	}
+	default: RE_ASSERT(false); break; }
 }
 
 void Application::LoadConfig()

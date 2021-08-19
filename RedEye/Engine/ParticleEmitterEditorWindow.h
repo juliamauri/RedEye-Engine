@@ -12,20 +12,29 @@ public:
 	~ParticleEmitterEditorWindow() {}
 
 	void StartEditing(RE_ParticleEmitter* sim, const char* md5);
-	const RE_ParticleEmitter* GetEdittingParticleEmitter()const { return simulation; }
+	const RE_ParticleEmitter* GetEdittingParticleEmitter() const { return simulation; }
 
 	void SaveEmitter(bool close = false, const char* emitter_name = nullptr, const char* emissor_base = nullptr, const char* renderer_base = nullptr);
 	void NextOrClose();
 	void CloseEditor();
 	void LoadNextEmitter();
 
-	unsigned int GetSceneWidht()const { return (width == 0) ? 500 : width; }
-	unsigned int GetSceneHeight()const { return (heigth == 0) ? 500 : heigth; }
+	unsigned int GetSceneWidth() const
+	{
+		int no_branch[2] = { 500, width };
+		return static_cast<unsigned int>(no_branch[width > 0]);
+	}
 
-	bool isSelected()const { return isWindowSelected; }
+	unsigned int GetSceneHeight() const
+	{
+		int no_branch[2] = { 500, heigth };
+		return static_cast<unsigned int>(no_branch[heigth > 0]);
+	}
+
+	void Recalc() { recalc = true; }
+	bool isSelected() const { return isWindowSelected; }
 
 	void UpdateViewPort();
-	void Recalc() { recalc = true; }
 
 private:
 

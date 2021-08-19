@@ -5,7 +5,7 @@ class WaterPlaneWindow : public EditorWindow
 {
 public:
 
-	WaterPlaneWindow();
+	WaterPlaneWindow() : EditorWindow("Water As Resource", false) {}
 	~WaterPlaneWindow() {}
 
 private:

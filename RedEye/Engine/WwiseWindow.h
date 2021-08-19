@@ -4,7 +4,7 @@
 class WwiseWindow : public EditorWindow
 {
 public:
-	WwiseWindow(const char* name = "Wwise", bool start_active = true) : EditorWindow(name, start_active) {}
+	WwiseWindow() : EditorWindow("Wwise", true) {}
 	~WwiseWindow() {}
 
 private:

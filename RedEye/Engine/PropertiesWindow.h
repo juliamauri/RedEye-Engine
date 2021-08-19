@@ -4,7 +4,7 @@
 class PropertiesWindow : public EditorWindow
 {
 public:
-	PropertiesWindow(const char* name = "Properties", bool start_active = true) : EditorWindow(name, start_active) {}
+	PropertiesWindow() : EditorWindow("Properties", true) {}
 	~PropertiesWindow() {}
 
 private:

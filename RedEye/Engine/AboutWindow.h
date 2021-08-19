@@ -7,7 +7,7 @@
 class AboutWindow : public EditorWindow
 {
 public:
-	AboutWindow(const char* name = "About", bool start_active = false) : EditorWindow(name, start_active) {}
+	AboutWindow() : EditorWindow("About", false) {}
 	~AboutWindow() {}
 
 private:

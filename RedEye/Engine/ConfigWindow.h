@@ -4,8 +4,8 @@
 class ConfigWindow : public EditorWindow
 {
 public:
-	ConfigWindow(const char* name = "Configuration", bool start_active = true);
-	~ConfigWindow();
+	ConfigWindow();
+	~ConfigWindow() {}
 
 private:
 
@@ -13,7 +13,7 @@ private:
 
 public:
 
-	bool changed_config;
+	bool changed_config = false;
 };
 
 #endif // !__CONFIG_WINDOW__

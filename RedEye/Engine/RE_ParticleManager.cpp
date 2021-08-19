@@ -226,7 +226,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 
 		// Draw Call
 		if (simulation->meshMD5) dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
-		else dynamic_cast<RE_CompPrimitive*>(simulation->primCmp)->SimpleDraw();
+		else simulation->primCmp->SimpleDraw();
 	}
 
 #ifdef PARTICLE_RENDER_TEST

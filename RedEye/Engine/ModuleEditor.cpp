@@ -681,7 +681,7 @@ void ModuleEditor::OpenTextEditor(const char* filePath, eastl::string* filePathS
 
 void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
 {
-	*widht = sceneEditorWindow->GetSceneWidht();
+	*widht = sceneEditorWindow->GetSceneWidth();
 	*height = sceneEditorWindow->GetSceneHeight();
 }
 

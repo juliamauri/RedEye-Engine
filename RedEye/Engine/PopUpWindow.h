@@ -6,7 +6,7 @@
 class PopUpWindow :public EditorWindow
 {
 public:
-	PopUpWindow(const char* name = "PopUp", bool start_active = false) : EditorWindow(name, start_active) {}
+	PopUpWindow() : EditorWindow("PopUp", false) {}
 	~PopUpWindow() {}
 
 	void PopUp(const char* btnText = "Accept", const char* title = "PopUp", bool disableAllWindows = false);

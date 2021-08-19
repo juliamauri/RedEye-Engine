@@ -4,7 +4,7 @@
 class ConsoleWindow : public EditorWindow
 {
 public:
-	ConsoleWindow(const char* name = "Console", bool start_active = true);
+	ConsoleWindow();
 	~ConsoleWindow() {}
 
 	void ChangeFilter(const int new_filter);

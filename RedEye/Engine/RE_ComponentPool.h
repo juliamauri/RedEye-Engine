@@ -152,7 +152,7 @@ public:
 	eastl::vector<COMP_UID> GetAllKeys() const override
 	{
 		eastl::vector<COMP_UID> ret;
-		for (auto cmp : poolmapped_) ret.push_back(cmp.first);
+		for (auto &cmp : poolmapped_) ret.push_back(cmp.first);
 		return ret;
 	}
 
