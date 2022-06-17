@@ -85,7 +85,7 @@ void ParticleManager::Update(const float dt)
 	else
 	{
 		ProfilingTimer::update_time = RE_Math::MaxUI(timer_simple.Read(), ProfilingTimer::update_time);
-		if (ProfilingTimer::update_time > 33u)
+		if (ProfilingTimer::update_time > 33u || RE_ParticleEmitter::demo_emitter->particle_count == RE_ParticleEmitter::demo_emitter->max_particles)
 		{
 			RE_PHYSICS->mode = ModulePhysics::UpdateMode::ENGINE_PAR;
 			RE_Profiler::Deploy(RE_ParticleEmitter::filename.c_str());
@@ -121,7 +121,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 
 	if (ProfilingTimer::wait4frame < 0) {
 		ProfilingTimer::update_time = RE_Math::MaxUI(timer_simple.Read(), ProfilingTimer::update_time);
-		if (ProfilingTimer::update_time > 33u)
+		if (ProfilingTimer::update_time > 33u || RE_ParticleEmitter::demo_emitter->particle_count == RE_ParticleEmitter::demo_emitter->max_particles)
 		{
 			RE_PHYSICS->mode = ModulePhysics::UpdateMode::ENGINE_PAR;
 
