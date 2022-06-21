@@ -28,8 +28,8 @@ pipeline {
                     xcopy "RedEye\\Build\\Optick.exe" "Final Build\\"
 
                     cd FinalBuild
-                    mkdir -p GeneratedSoundBanks
-                    xcopy /i /e "RedEye\\Build\\GeneratedSoundBanks" "Final Build\\"
+                    mkdir GeneratedSoundBanks
+                    xcopy /i /e "RedEye\\Build\\GeneratedSoundBanks" "FinalBuild\\"
                 """
             }
         }
