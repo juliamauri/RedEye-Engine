@@ -6,8 +6,7 @@ pipeline {
         stage('Prepare Build Folder') {
             steps {
                 bat 'if not exist "Final Build\\" mkdir "Final Build"'
-
-                bat 'xcopy "RedEye\\ReleaseData\\*.*" "Final Build\\"'
+                bat 'rm -rfv Final Build\\*'
             }
         }
         
@@ -20,9 +19,11 @@ pipeline {
         stage('Copying final files') {
             steps {
                 bat """
+                    bat 'xcopy "RedEye\\ReleaseData\\*.*" "Final Build\\"'
                     xcopy "RedEye\\Build\\RedEye_release.exe" "Final Build\\"
                     xcopy "RedEye\\Build\\data.zip" "Final Build\\"
                     xcopy "RedEye\\Build\\Optick.exe" "Final Build\\"
+                    mkdir -p FinalBuild\\GeneratedSoundBanks
                     xcopy /i /e "RedEye\\Build\\GeneratedSoundBanks" "Final Build\\"
                 """
             }
