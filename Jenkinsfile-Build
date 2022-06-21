@@ -27,9 +27,9 @@ pipeline {
                     xcopy "RedEye\\Build\\data.zip" "Final Build\\"
                     xcopy "RedEye\\Build\\Optick.exe" "Final Build\\"
 
-                    cd FinalBuild
+                    cd Final Build
                     mkdir GeneratedSoundBanks
-                    xcopy /i /e "RedEye\\Build\\GeneratedSoundBanks" "FinalBuild\\"
+                    xcopy /i /e "RedEye\\Build\\GeneratedSoundBanks" "Final Build\\GeneratedSoundBanks"
                 """
             }
         }
