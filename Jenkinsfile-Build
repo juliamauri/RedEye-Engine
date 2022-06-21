@@ -6,7 +6,7 @@ pipeline {
         stage('Prepare Build Folder') {
             steps {
                 bat 'if not exist "Final Build\\" mkdir "Final Build"'
-                bat 'rm -rfv Final Build\\*'
+                bat 'del Final Build\\*.*'
             }
         }
         
