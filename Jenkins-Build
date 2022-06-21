@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+    
+    stages {
+        
+        stage('Prepare Build Folder') {
+            steps {
+                bat 'if not exist "Final Build\\" mkdir "Final Build"'
+
+                bat 'xcopy "RedEye\\ReleaseData\\*.*" "Final Build\\"'
+            }
+        }
+        
+        stage('Normal Build') {
+            steps {
+                bat '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Msbuild\\Current\\Bin\\MSBuild.exe" RedEye/RedEye.sln /p:Configuration="Release"'
+            }
+        }
+
+        stage('Copying final files') {
+            steps {
+                bat """
+                    xcopy "RedEye\\Build\\RedEye_release.exe" "Final Build\\"
+                    xcopy "RedEye\\Build\\data.zip" "Final Build\\"
+                    xcopy "RedEye\\Build\\Optick.exe" "Final Build\\"
+                    xcopy /i /e "RedEye\\Build\\GeneratedSoundBanks" "Final Build\\"
+                """
+            }
+        }
+    }
+}

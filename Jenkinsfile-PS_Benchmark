@@ -20,12 +20,6 @@ pipeline {
             }
         }
         
-        //stage('Normal Build') {
-        //    steps {
-        //        bat '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Msbuild\\Current\\Bin\\MSBuild.exe" RedEye/RedEye.sln /p:Configuration="Release"'
-        //    }
-        //}
-        
         stage('P_Physics Benchmark Build') {
             steps {
                 bat """
