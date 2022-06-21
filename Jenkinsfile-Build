@@ -29,7 +29,7 @@ pipeline {
 
                     cd Final Build
                     mkdir GeneratedSoundBanks
-                    xcopy /i /e "RedEye\\Build\\GeneratedSoundBanks" "Final Build\\GeneratedSoundBanks"
+                    xcopy /i /e "RedEye\\Build\\GeneratedSoundBanks" "Final Build\\GeneratedSoundBanks\\"
                 """
             }
         }
