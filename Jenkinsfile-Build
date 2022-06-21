@@ -22,11 +22,13 @@ pipeline {
         stage('Copying final files') {
             steps {
                 bat """
-                    bat 'xcopy "RedEye\\ReleaseData\\*.*" "Final Build\\"'
+                    xcopy "RedEye\\ReleaseData\\*.*" "Final Build\\"
                     xcopy "RedEye\\Build\\RedEye_release.exe" "Final Build\\"
                     xcopy "RedEye\\Build\\data.zip" "Final Build\\"
                     xcopy "RedEye\\Build\\Optick.exe" "Final Build\\"
-                    mkdir -p FinalBuild\\GeneratedSoundBanks
+
+                    cd FinalBuild
+                    mkdir -p GeneratedSoundBanks
                     xcopy /i /e "RedEye\\Build\\GeneratedSoundBanks" "Final Build\\"
                 """
             }
