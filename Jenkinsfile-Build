@@ -6,7 +6,10 @@ pipeline {
         stage('Prepare Build Folder') {
             steps {
                 bat 'if not exist "Final Build\\" mkdir "Final Build"'
-                bat 'del Final Build\\*.*'
+                bat """
+                    cd "Final Build"
+                    del * /S /Q
+                """
             }
         }
         
