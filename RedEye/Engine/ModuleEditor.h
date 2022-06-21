@@ -118,7 +118,7 @@ private:
 	float grid_size[2];
 
 	// Debug Drawing
-	enum class AABBDebugDrawing : unsigned char
+	enum class AABBDebugDrawing : int
 	{
 		NONE = 0,
 		SELECTED_ONLY,

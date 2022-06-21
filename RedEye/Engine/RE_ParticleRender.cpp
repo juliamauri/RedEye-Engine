@@ -38,7 +38,7 @@ void RE_ParticleRender::UnloadMemory()
 	}
 	if (meshMD5) RE_RES->UnUse(meshMD5);
 	scale = { 0.5f,0.5f,0.1f };
-	particleDir = RE_ParticleEmitter::Particle_Dir::PS_Billboard;
+	particleDir = RE_ParticleEmitter::ParticleDir::Billboard;
 	direction = { -1.0f,1.0f,0.5f };
 
 	ResourceContainer::inMemory = false;
@@ -107,7 +107,7 @@ void RE_ParticleRender::FillEmitter(RE_ParticleEmitter* to_fill)
 	else to_fill->primCmp = nullptr;
 
 	to_fill->scale = scale;
-	to_fill->particleDir = particleDir;
+	to_fill->orientation = particleDir;
 	to_fill->direction = direction;
 }
 
@@ -129,7 +129,7 @@ void RE_ParticleRender::FillResouce(RE_ParticleEmitter* from)
 		primCmp = nullptr;
 	}
 	scale = from->scale;
-	particleDir = from->particleDir;
+	particleDir = from->orientation;
 	direction = from->direction;
 }
 
@@ -162,7 +162,7 @@ void RE_ParticleRender::JsonDeserialize(bool generateLibraryPath)
 		light.JsonDeserialize(node->PullJObject("Light"));
 
 		scale = node->PullFloatVector("Scale", { 0.5f,0.5f,0.1f });
-		particleDir = static_cast<RE_ParticleEmitter::Particle_Dir>(node->PullInt("particleDir", 0));
+		particleDir = static_cast<RE_ParticleEmitter::ParticleDir>(node->PullInt("particleDir", 0));
 		direction = node->PullFloatVector("Direction", { -1.0f,1.0f,0.5f });
 
 		primType = static_cast<ComponentType>(node->PullInt("primitiveType", static_cast<int>(C_EMPTY)));
@@ -240,7 +240,7 @@ void RE_ParticleRender::BinaryDeserialize()
 		memcpy(scale.ptr(), cursor, size);
 		cursor += size;
 
-		size = sizeof(RE_ParticleEmitter::Particle_Dir);
+		size = sizeof(RE_ParticleEmitter::ParticleDir);
 		memcpy(&particleDir, cursor, size);
 		cursor += size;
 
@@ -297,7 +297,7 @@ void RE_ParticleRender::BinarySerialize()
 	memcpy(cursor, scale.ptr(), size);
 	cursor += size;
 
-	size = sizeof(RE_ParticleEmitter::Particle_Dir);
+	size = sizeof(RE_ParticleEmitter::ParticleDir);
 	memcpy(cursor, &particleDir, size);
 	cursor += size;
 
@@ -320,7 +320,7 @@ void RE_ParticleRender::BinarySerialize()
 
 unsigned int RE_ParticleRender::GetBinarySize() const
 {
-	return sizeof(RE_ParticleEmitter::Particle_Dir)
+	return sizeof(RE_ParticleEmitter::ParticleDir)
 		+ (sizeof(float) * 6u)
 		+ sizeof(ComponentType)
 		+ ((primType != C_EMPTY) ? primCmp->GetParticleBinarySize() : 0)

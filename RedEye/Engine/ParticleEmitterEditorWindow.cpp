@@ -646,13 +646,13 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				need_save = true;
 			}
 
-			int pDir = simulation->particleDir;
+			int pDir = static_cast<int>(simulation->orientation);
 			if (ImGui::Combo("Particle Direction", &pDir, "Normal\0Billboard\0Custom\0")) {
-				simulation->particleDir = static_cast<RE_ParticleEmitter::Particle_Dir>(pDir);
+				simulation->orientation = static_cast<RE_ParticleEmitter::ParticleDir>(pDir);
 				need_save = true;
 			}
 
-			if (simulation->particleDir == RE_ParticleEmitter::PS_Custom) {
+			if (simulation->orientation == RE_ParticleEmitter::ParticleDir::Custom) {
 				ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
 				need_save = true;
 			}

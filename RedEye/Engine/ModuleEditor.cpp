@@ -497,9 +497,9 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 
 	AABBDebugDrawing adapted_AABBdraw = aabb_drawing;
 
-	if (!selected) adapted_AABBdraw--;
+	if (!selected) adapted_AABBdraw = static_cast<AABBDebugDrawing>(static_cast<int>(adapted_AABBdraw) - 1);
 	
-	adapted_AABBdraw = (selected ? aabb_drawing : aabb_drawing - 1);
+	adapted_AABBdraw = (selected ? aabb_drawing : static_cast<AABBDebugDrawing>(static_cast<int>(aabb_drawing) - 1));
 
 	if (debug_drawing && ((adapted_AABBdraw != AABBDebugDrawing::NONE) || draw_quad_tree || draw_cameras))
 	{

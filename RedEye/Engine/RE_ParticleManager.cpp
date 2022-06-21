@@ -154,9 +154,9 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 		// Calculate Particle Transform
 		const math::float3 partcleGlobalpos = simulation->local_space ? go_position + p.position : p.position;
 		math::float3 front, right, up;
-		switch (simulation->particleDir)
+		switch (simulation->orientation)
 		{
-		case RE_ParticleEmitter::PS_FromPS:
+		case RE_ParticleEmitter::ParticleDir::FromPS:
 		{
 			front = (go_position - partcleGlobalpos).Normalized();
 			right = front.Cross(go_up).Normalized();
@@ -164,7 +164,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 			up = right.Cross(front).Normalized();
 			break;
 		}
-		case RE_ParticleEmitter::PS_Billboard:
+		case RE_ParticleEmitter::ParticleDir::Billboard:
 		{
 			front = cT->GetGlobalPosition() - partcleGlobalpos;
 			front.Normalize();
@@ -173,7 +173,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 			up = right.Cross(front).Normalized();
 			break;
 		}
-		case RE_ParticleEmitter::PS_Custom:
+		case RE_ParticleEmitter::ParticleDir::Custom:
 		{
 			front = simulation->direction.Normalized();
 			right = front.Cross(cUp).Normalized();

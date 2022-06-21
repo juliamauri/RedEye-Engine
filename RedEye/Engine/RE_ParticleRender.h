@@ -47,7 +47,7 @@ private:
 
 	math::float3 scale = { 0.5f,0.5f,0.1f };
 
-	RE_ParticleEmitter::Particle_Dir particleDir = RE_ParticleEmitter::Particle_Dir::PS_Billboard;
+	RE_ParticleEmitter::ParticleDir particleDir = RE_ParticleEmitter::ParticleDir::Billboard;
 	math::float3 direction = { -1.0f,1.0f,0.5f };
 };
 
