@@ -11,8 +11,6 @@
 #include <EASTL/string.h>
 #endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 
-class RE_CompPrimitive;
-
 class RE_ParticleEmitter
 {
 public:
@@ -33,7 +31,7 @@ private:
 public:
 
 	unsigned int id = 0u;
-	enum PlaybackState { STOPING, RESTART, PLAY, STOP, PAUSE } state = STOP;
+	enum class PlaybackState { STOPING, RESTART, PLAY, STOP, PAUSE } state = PlaybackState::STOP;
 
 	// Particle storage
 	eastl::vector<RE_Particle> particle_pool;
@@ -48,7 +46,7 @@ public:
 	math::vec parent_speed = math::vec::zero;
 
 	math::AABB bounding_box;
-	static enum BoundingMode : int { GENERAL, PER_PARTICLE } mode;
+	static enum class BoundingMode : int { GENERAL, PER_PARTICLE } mode;
 
 	// Emission properties ---------------------------------------------------------
 	
@@ -89,14 +87,14 @@ public:
 	RE_PR_Light light = {};
 
 	const char* meshMD5 = nullptr;
-	RE_CompPrimitive* primCmp = nullptr;
+	class RE_CompPrimitive* primCmp = nullptr;
 
-	enum Particle_Dir : int
+	enum class ParticleDir : unsigned char
 	{
-		PS_FromPS,
-		PS_Billboard,
-		PS_Custom
-	} particleDir = PS_Billboard;
+		FromPS,
+		Billboard,
+		Custom
+	} orientation = ParticleDir::Billboard;
 
 	math::float3 direction = { -1.0f,1.0f,0.5f };
 

@@ -9,7 +9,7 @@
 
 #include "RE_CompPrimitive.h"
 
-RE_ParticleEmitter::BoundingMode RE_ParticleEmitter::mode = PER_PARTICLE;
+RE_ParticleEmitter::BoundingMode RE_ParticleEmitter::mode = BoundingMode::PER_PARTICLE;
 
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 eastl::string RE_ParticleEmitter::filename;
@@ -37,19 +37,19 @@ unsigned int RE_ParticleEmitter::Update(const float global_dt)
 	RE_PROFILE(PROF_Update, PROF_ParticleEmitter);
 	switch (state)
 	{
-	case RE_ParticleEmitter::STOPING:
+	case RE_ParticleEmitter::PlaybackState::STOPING:
 	{
 		Reset();
-		state = RE_ParticleEmitter::STOP;
+		state = RE_ParticleEmitter::PlaybackState::STOP;
 		break;
 	}
-	case RE_ParticleEmitter::RESTART:
+	case RE_ParticleEmitter::PlaybackState::RESTART:
 	{
 		Reset();
-		state = RE_ParticleEmitter::PLAY;
+		state = RE_ParticleEmitter::PlaybackState::PLAY;
 		break;
 	}
-	case RE_ParticleEmitter::PLAY:
+	case RE_ParticleEmitter::PlaybackState::PLAY:
 	{
 		if (IsTimeValid(global_dt))
 		{
@@ -93,7 +93,7 @@ bool RE_ParticleEmitter::IsTimeValid(const float global_dt)
 
 	if (!loop && total_time >= max_time)
 	{
-		state = RE_ParticleEmitter::STOPING;
+		state = RE_ParticleEmitter::PlaybackState::STOPING;
 		return false;
 	}
 
@@ -156,7 +156,7 @@ void RE_ParticleEmitter::UpdateParticles()
 			max_speed_sq = RE_Math::MaxF(max_speed_sq, particle_pool[index].velocity.LengthSq());
 
 			// Broadphase AABB Boundary
-			if (RE_ParticleEmitter::mode == PER_PARTICLE)
+			if (RE_ParticleEmitter::mode == BoundingMode::PER_PARTICLE)
 			{
 				bounding_box.maxPoint = RE_Math::MaxVecValues(particle_pool[index].position, bounding_box.maxPoint);
 				bounding_box.minPoint = RE_Math::MinVecValues(particle_pool[index].position, bounding_box.minPoint);
@@ -170,7 +170,7 @@ void RE_ParticleEmitter::UpdateParticles()
 		}
 	}
 
-	if (RE_ParticleEmitter::mode == GENERAL)
+	if (RE_ParticleEmitter::mode == BoundingMode::GENERAL)
 	{
 		switch (boundary.type) {
 		case RE_EmissionBoundary::Type::SPHERE: bounding_box.SetFrom(boundary.geo.sphere); break;

@@ -118,13 +118,14 @@ private:
 	float grid_size[2];
 
 	// Debug Drawing
-	enum AABBDebugDrawing : int
+	enum class AABBDebugDrawing : unsigned char
 	{
 		NONE = 0,
 		SELECTED_ONLY,
 		ALL,
 		ALL_AND_SELECTED,
 	} aabb_drawing = AABBDebugDrawing::ALL_AND_SELECTED;
+
 	bool draw_quad_tree = true;
 	bool draw_cameras = true;
 

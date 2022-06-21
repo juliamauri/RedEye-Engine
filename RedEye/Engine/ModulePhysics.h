@@ -29,16 +29,16 @@ public:
 	void RemoveEmitter(RE_ParticleEmitter* emitter);
 
 	unsigned int GetParticleCount(unsigned int emitter_id) const;
-	const eastl::vector<RE_Particle>& GetParticles(unsigned int emitter_id) const;
+	bool GetParticles(unsigned int emitter_id, eastl::vector<RE_Particle> &out) const;
 
 public:
 
-	enum UpdateMode : int
+	enum class UpdateMode : int
 	{
 		ENGINE_PAR,
 		FIXED_UPDATE,
 		FIXED_TIME_STEP
-	} mode = FIXED_UPDATE;
+	} mode = UpdateMode::FIXED_UPDATE;
 
 private:
 

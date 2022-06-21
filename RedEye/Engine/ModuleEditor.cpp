@@ -337,12 +337,12 @@ void ModuleEditor::Update()
 	// CAMERA CONTROLS
 	UpdateCamera();
 
-	if (RE_INPUT->GetKey(SDL_SCANCODE_LCTRL) == KEY_STATE::KEY_REPEAT)
+	if (RE_INPUT->GetKey(SDL_Scancode::SDL_SCANCODE_LCTRL) == KEY_STATE::KEY_REPEAT)
 	{
-		if (RE_INPUT->GetKey(SDL_SCANCODE_Z) == KEY_STATE::KEY_DOWN)
+		if (RE_INPUT->GetKey(SDL_Scancode::SDL_SCANCODE_Z) == KEY_STATE::KEY_DOWN)
 			commands->Undo();
 
-		if (RE_INPUT->GetKey(SDL_SCANCODE_Y) == KEY_STATE::KEY_DOWN)
+		if (RE_INPUT->GetKey(SDL_Scancode::SDL_SCANCODE_Y) == KEY_STATE::KEY_DOWN)
 			commands->Redo();
 	}
 
@@ -475,12 +475,12 @@ void ModuleEditor::DrawEditor()
 				grid->GetTransformPtr()->Update();
 			}
 
-			int aabb_d = aabb_drawing;
+			int aabb_d = static_cast<int>(aabb_drawing);
 			if (ImGui::Combo("Draw AABB", &aabb_d, "None\0Selected only\0All\0All w/ different selected\0"))
-				aabb_drawing = AABBDebugDrawing(aabb_d);
+				aabb_drawing = static_cast<AABBDebugDrawing>(aabb_d);
 
-			if (aabb_drawing > SELECTED_ONLY) ImGui::ColorEdit3("Color AABB", all_aabb_color);
-			if (aabb_drawing % 2 == 1) ImGui::ColorEdit3("Color Selected", sel_aabb_color);
+			if (aabb_drawing > AABBDebugDrawing::SELECTED_ONLY) ImGui::ColorEdit3("Color AABB", all_aabb_color);
+			if (static_cast<int>(aabb_drawing) % 2 == 1) ImGui::ColorEdit3("Color Selected", sel_aabb_color);
 
 			ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
 			if (draw_quad_tree) ImGui::ColorEdit3("Color Quadtree", quad_tree_color);
@@ -494,7 +494,12 @@ void ModuleEditor::DrawEditor()
 void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 {
 	RE_PROFILE(PROF_DrawDebug, PROF_ModuleEditor);
-	AABBDebugDrawing adapted_AABBdraw = (selected ? aabb_drawing : AABBDebugDrawing(aabb_drawing - 1));
+
+	AABBDebugDrawing adapted_AABBdraw = aabb_drawing;
+
+	if (!selected) adapted_AABBdraw--;
+	
+	adapted_AABBdraw = (selected ? aabb_drawing : aabb_drawing - 1);
 
 	if (debug_drawing && ((adapted_AABBdraw != AABBDebugDrawing::NONE) || draw_quad_tree || draw_cameras))
 	{
@@ -507,13 +512,13 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 		// Draw Bounding Boxes
 		switch (adapted_AABBdraw)
 		{
-		case SELECTED_ONLY:
+		case AABBDebugDrawing::SELECTED_ONLY:
 		{
 			glColor4f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2], 1.0f);
 			RE_SCENE->GetGOCPtr(selected)->DrawGlobalAABB();
 			break;
 		}
-		case ALL:
+		case AABBDebugDrawing::ALL:
 		{
 			eastl::queue<const RE_GameObject*> objects;
 			for (auto child : RE_SCENE->GetRootCPtr()->GetChildsPtr())
@@ -537,7 +542,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 
 			break;
 		}
-		case ALL_AND_SELECTED:
+		case AABBDebugDrawing::ALL_AND_SELECTED:
 		{
 			glColor4f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2], 1.0f);
 			RE_SCENE->GetGOCPtr(selected)->DrawGlobalAABB();
@@ -728,13 +733,13 @@ void ModuleEditor::UpdateCamera()
 	{
 		const MouseData mouse = RE_INPUT->GetMouse();
 
-		if (RE_INPUT->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT && mouse.GetButton(1) == KEY_REPEAT)
+		if (RE_INPUT->GetKey(SDL_SCANCODE_LALT) == KEY_STATE::KEY_REPEAT && mouse.GetButton(1) == KEY_STATE::KEY_REPEAT)
 		{
 			// Orbit
 			if (selected && (mouse.mouse_x_motion || mouse.mouse_y_motion))
 				camera->Orbit(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion, RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds().CenterPoint());
 		}
-		else if ((RE_INPUT->GetKey(SDL_SCANCODE_F) == KEY_DOWN) && selected)
+		else if ((RE_INPUT->GetKey(SDL_SCANCODE_F) == KEY_STATE::KEY_DOWN) && selected)
 		{
 			// Focus
 			math::AABB box = RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds();
@@ -742,19 +747,19 @@ void ModuleEditor::UpdateCamera()
 		}
 		else
 		{
-			if (mouse.GetButton(3) == KEY_REPEAT)
+			if (mouse.GetButton(3) == KEY_STATE::KEY_REPEAT)
 			{
 				// Camera Speed
 				float cameraSpeed = cam_speed * RE_TIME->GetDeltaTime();
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT)) cameraSpeed *= 2.0f;
+				if (RE_INPUT->CheckKey(SDL_SCANCODE_LSHIFT, KEY_STATE::KEY_REPEAT)) cameraSpeed *= 2.0f;
 
 				// Move
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_W, KEY_REPEAT))	  camera->LocalMove(Dir::FORWARD, cameraSpeed);
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_S, KEY_REPEAT))	  camera->LocalMove(Dir::BACKWARD, cameraSpeed);
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_A, KEY_REPEAT))	  camera->LocalMove(Dir::LEFT, cameraSpeed);
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))	  camera->LocalMove(Dir::RIGHT, cameraSpeed);
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_SPACE, KEY_REPEAT)) camera->LocalMove(Dir::UP, cameraSpeed);
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_C, KEY_REPEAT))	  camera->LocalMove(Dir::DOWN, cameraSpeed);
+				if (RE_INPUT->CheckKey(SDL_SCANCODE_W, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::FORWARD, cameraSpeed);
+				if (RE_INPUT->CheckKey(SDL_SCANCODE_S, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::BACKWARD, cameraSpeed);
+				if (RE_INPUT->CheckKey(SDL_SCANCODE_A, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::LEFT, cameraSpeed);
+				if (RE_INPUT->CheckKey(SDL_SCANCODE_D, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::RIGHT, cameraSpeed);
+				if (RE_INPUT->CheckKey(SDL_SCANCODE_SPACE, KEY_STATE::KEY_REPEAT)) camera->LocalMove(Dir::UP, cameraSpeed);
+				if (RE_INPUT->CheckKey(SDL_SCANCODE_C, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::DOWN, cameraSpeed);
 
 				// Rotate
 				if (mouse.mouse_x_motion != 0 || mouse.mouse_y_motion != 0)
@@ -774,7 +779,7 @@ void ModuleEditor::UpdateCamera()
 		if (particleEmitterWindow->isSelected()) {
 			const MouseData mouse = RE_INPUT->GetMouse();
 
-			if ((RE_INPUT->GetKey(SDL_SCANCODE_F) == KEY_DOWN))
+			if ((RE_INPUT->GetKey(SDL_SCANCODE_F) == KEY_STATE::KEY_DOWN))
 			{
 				// Focus
 				math::AABB box = particleEmitterWindow->GetEdittingParticleEmitter()->bounding_box;
@@ -782,19 +787,19 @@ void ModuleEditor::UpdateCamera()
 			}
 			else
 			{
-				if (mouse.GetButton(3) == KEY_REPEAT)
+				if (mouse.GetButton(3) == KEY_STATE::KEY_REPEAT)
 				{
 					// Camera Speed
 					float cameraSpeed = cam_speed * RE_TIME->GetDeltaTime();
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_LSHIFT, KEY_REPEAT)) cameraSpeed *= 2.0f;
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_LSHIFT, KEY_STATE::KEY_REPEAT)) cameraSpeed *= 2.0f;
 
 					// Move
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_W, KEY_REPEAT))	  camera->LocalMove(Dir::FORWARD, cameraSpeed);
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_S, KEY_REPEAT))	  camera->LocalMove(Dir::BACKWARD, cameraSpeed);
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_A, KEY_REPEAT))	  camera->LocalMove(Dir::LEFT, cameraSpeed);
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_D, KEY_REPEAT))	  camera->LocalMove(Dir::RIGHT, cameraSpeed);
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_SPACE, KEY_REPEAT)) camera->LocalMove(Dir::UP, cameraSpeed);
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_C, KEY_REPEAT))	  camera->LocalMove(Dir::DOWN, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_W, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::FORWARD, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_S, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::BACKWARD, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_A, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::LEFT, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_D, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::RIGHT, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_SPACE, KEY_STATE::KEY_REPEAT)) camera->LocalMove(Dir::UP, cameraSpeed);
+					if (RE_INPUT->CheckKey(SDL_SCANCODE_C, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::DOWN, cameraSpeed);
 
 					// Rotate
 					if (mouse.mouse_x_motion != 0 || mouse.mouse_y_motion != 0)

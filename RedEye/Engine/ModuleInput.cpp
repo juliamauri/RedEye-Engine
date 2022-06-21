@@ -13,21 +13,6 @@
 #include "PopUpWindow.h"
 
 #include <SDL2/SDL.h>
-//#include <ImGui/imgui.h>
-
-#define MAX_KEYS 300
-
-ModuleInput::ModuleInput()
-{
-	keyboard = new KEY_STATE[MAX_KEYS];
-	memset(keyboard, KEY_IDLE, sizeof(KEY_STATE) * MAX_KEYS);
-}
-
-// Destructor
-ModuleInput::~ModuleInput()
-{
-	DEL_A(keyboard);
-}
 
 // Called before render is available
 bool ModuleInput::Init()
@@ -63,13 +48,13 @@ void ModuleInput::PreUpdate()
 	{
 		if (keys[i] == 1)
 		{
-			if (keyboard[i] == KEY_IDLE) keyboard[i] = KEY_DOWN;
-			else keyboard[i] = KEY_REPEAT;
+			if (keyboard[i] == KEY_STATE::KEY_IDLE) keyboard[i] = KEY_STATE::KEY_DOWN;
+			else keyboard[i] = KEY_STATE::KEY_REPEAT;
 		}
 		else
 		{
-			if (keyboard[i] == KEY_REPEAT || keyboard[i] == KEY_DOWN) keyboard[i] = KEY_UP;
-			else keyboard[i] = KEY_IDLE;
+			if (keyboard[i] == KEY_STATE::KEY_REPEAT || keyboard[i] == KEY_STATE::KEY_DOWN) keyboard[i] = KEY_STATE::KEY_UP;
+			else keyboard[i] = KEY_STATE::KEY_IDLE;
 		}
 	}
 
@@ -301,13 +286,13 @@ void MouseData::UpdateButtons()
 	{
 		if (buttons & SDL_BUTTON(i))
 		{
-			if (mouse_buttons[i] == KEY_IDLE) mouse_buttons[i] = KEY_DOWN;
-			else mouse_buttons[i] = KEY_REPEAT;
+			if (mouse_buttons[i] == KEY_STATE::KEY_IDLE) mouse_buttons[i] = KEY_STATE::KEY_DOWN;
+			else mouse_buttons[i] = KEY_STATE::KEY_REPEAT;
 		}
 		else
 		{
-			if (mouse_buttons[i] == KEY_REPEAT || mouse_buttons[i] == KEY_DOWN) mouse_buttons[i] = KEY_UP;
-			else mouse_buttons[i] = KEY_IDLE;
+			if (mouse_buttons[i] == KEY_STATE::KEY_REPEAT || mouse_buttons[i] == KEY_STATE::KEY_DOWN) mouse_buttons[i] = KEY_STATE::KEY_UP;
+			else mouse_buttons[i] = KEY_STATE::KEY_IDLE;
 		}
 	}
 }

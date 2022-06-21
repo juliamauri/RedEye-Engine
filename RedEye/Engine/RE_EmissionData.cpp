@@ -2341,28 +2341,34 @@ bool RE_PR_Light::DrawEditor(const unsigned int id)
 		switch (type = static_cast<Type>(tmp)) {
 		case RE_PR_Light::UNIQUE:
 		{
-			auto particles = RE_PHYSICS->GetParticles(id);
-			color = GetColor();
-			intensity = GetIntensity();
-			specular = GetSpecular();
-
-			for (auto &p : particles)
+			eastl::vector<RE_Particle> particles;
+			if (RE_PHYSICS->GetParticles(id, particles))
 			{
-				p.lightColor = color;
-				p.intensity = intensity;
-				p.specular = specular;
+				color = GetColor();
+				intensity = GetIntensity();
+				specular = GetSpecular();
+
+				for (auto& p : particles)
+				{
+					p.lightColor = color;
+					p.intensity = intensity;
+					p.specular = specular;
+				}
 			}
 
 			break;
 		}
 		case RE_PR_Light::PER_PARTICLE:
 		{
-			auto particles = RE_PHYSICS->GetParticles(id);
-			for (auto &p : particles)
+			eastl::vector<RE_Particle> particles;
+			if (RE_PHYSICS->GetParticles(id, particles))
 			{
-				p.lightColor = GetColor();
-				p.intensity = GetIntensity();
-				p.specular = GetSpecular();
+				for (auto& p : particles)
+				{
+					p.lightColor = GetColor();
+					p.intensity = GetIntensity();
+					p.specular = GetSpecular();
+				}
 			}
 
 			break;
@@ -2375,77 +2381,90 @@ bool RE_PR_Light::DrawEditor(const unsigned int id)
 	switch (type) {
 	case RE_PR_Light::UNIQUE:
 	{
-		auto particles = RE_PHYSICS->GetParticles(id);
+		eastl::vector<RE_Particle> particles;
+		if (RE_PHYSICS->GetParticles(id, particles))
+		{
+			if (ImGui::ColorEdit3("Light Color", color.ptr())) ret = true;
+			if (ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f")) ret = true;
+			if (ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f")) ret = true;
 
-		if (ImGui::ColorEdit3("Light Color", color.ptr())) ret = true;
-		if(ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f")) ret = true;
-		if(ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f")) ret = true;
-
-		ImGui::Separator();
-		if(ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f")) ret = true;
-		if(ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
-		if(ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
+			ImGui::Separator();
+			if (ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f")) ret = true;
+			if (ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
+			if (ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
+		}
 
 		break;
 	}
 	case RE_PR_Light::PER_PARTICLE:
 	{
-		auto particles = RE_PHYSICS->GetParticles(id);
-
-		if (ImGui::Checkbox("Random Color", &random_color)) {
-			for (auto &p : particles) p.lightColor = GetColor();
-			ret = true;
-		}
-
-		if (!random_color && ImGui::ColorEdit3("Light Color", color.ptr())) {
-			for (auto &p : particles) p.lightColor = color;
-			ret = true;
-		}
-
-		if (ImGui::Checkbox("Random Intensity", &random_i)) {
-			for (auto &p : particles) p.intensity = GetIntensity();
-			ret = true;
-		}
-
-		if (random_i)
+		eastl::vector<RE_Particle> particles;
+		if (RE_PHYSICS->GetParticles(id, particles))
 		{
-			bool update_sim = false;
-			update_sim |= ImGui::DragFloat("Intensity Min", &intensity, 0.01f, 0.0f, intensity_max, "%.2f");
-			update_sim |= ImGui::DragFloat("Intensity Max", &intensity_max, 0.01f, intensity, 50.f, "%.2f");
-			if (update_sim) {
-				for (auto &p : particles) p.intensity = GetIntensity();
+			if (ImGui::Checkbox("Random Color", &random_color))
+			{
+				for (auto& p : particles) p.lightColor = GetColor();
 				ret = true;
 			}
-		}
-		else if (ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f")) {
-			for (auto &p : particles) p.intensity = intensity;
-			ret = true;
-		}
 
-		if (ImGui::Checkbox("Random Specular", &random_s)) {
-			for (auto &p : particles) p.specular = GetSpecular();
-			ret = true;
-		}
-
-		if (random_s)
-		{
-			bool update_sim = false;
-			update_sim |= ImGui::DragFloat("Specular Min", &specular, 0.01f, 0.0f, specular_max, "%.2f");
-			update_sim |= ImGui::DragFloat("Specular Max", &specular_max, 0.01f, specular, 10.f, "%.2f");
-			if (update_sim) {
-				for (auto &p : particles) p.specular = GetSpecular();
+			if (!random_color && ImGui::ColorEdit3("Light Color", color.ptr()))
+			{
+				for (auto& p : particles) p.lightColor = color;
 				ret = true;
 			}
-		}
-		else if (ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f")) {
-			for (auto &p : particles) p.specular = specular;
-			ret = true;
-		}
 
-		ImGui::Separator();
-		if(ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f")) ret = true;
-		if(ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
-		if(ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
+			if (ImGui::Checkbox("Random Intensity", &random_i))
+			{
+				for (auto& p : particles) p.intensity = GetIntensity();
+				ret = true;
+			}
+
+			if (random_i)
+			{
+				bool update_sim = false;
+				update_sim |= ImGui::DragFloat("Intensity Min", &intensity, 0.01f, 0.0f, intensity_max, "%.2f");
+				update_sim |= ImGui::DragFloat("Intensity Max", &intensity_max, 0.01f, intensity, 50.f, "%.2f");
+				if (update_sim) {
+					for (auto& p : particles) p.intensity = GetIntensity();
+					ret = true;
+				}
+			}
+			else if (ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f, "%.2f"))
+			{
+				for (auto& p : particles) p.intensity = intensity;
+				ret = true;
+			}
+
+			if (ImGui::Checkbox("Random Specular", &random_s))
+			{
+				for (auto& p : particles) p.specular = GetSpecular();
+				ret = true;
+			}
+
+			if (random_s)
+			{
+				bool update_sim = false;
+				update_sim |= ImGui::DragFloat("Specular Min", &specular, 0.01f, 0.0f, specular_max, "%.2f");
+				update_sim |= ImGui::DragFloat("Specular Max", &specular_max, 0.01f, specular, 10.f, "%.2f");
+				
+				if (update_sim)
+				{
+					for (auto& p : particles) p.specular = GetSpecular();
+					ret = true;
+				}
+			}
+			else if (ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f"))
+			{
+				for (auto& p : particles) p.specular = specular;
+				ret = true;
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f")) ret = true;
+			if (ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
+			if (ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f")) ret = true;
+		}
 
 		break;
 	}

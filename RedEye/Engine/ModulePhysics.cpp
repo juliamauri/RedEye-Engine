@@ -15,7 +15,7 @@ void ModulePhysics::Update()
 	const float global_dt = RE_TIME->GetDeltaTime();
 
 	switch (mode) {
-	case ModulePhysics::FIXED_UPDATE:
+	case ModulePhysics::UpdateMode::FIXED_UPDATE:
 	{
 		dt_offset += global_dt;
 
@@ -34,7 +34,7 @@ void ModulePhysics::Update()
 
 		break;
 	}
-	case ModulePhysics::FIXED_TIME_STEP:
+	case ModulePhysics::UpdateMode::FIXED_TIME_STEP:
 	{
 		dt_offset += global_dt;
 
@@ -137,7 +137,7 @@ void ModulePhysics::DrawEditor()
 		if (ImGui::Combo("Update Mode", &type, "Engine Par\0Fixed Update\0Fixed Time Step\0"))
 			mode = static_cast<UpdateMode>(type);
 
-		if (mode)
+		if (type)
 		{
 			float period = 1.f / fixed_dt;
 			if (ImGui::DragFloat("Dt", &period, 1.f, 1.f, 480.f, "%.0f"))
@@ -168,11 +168,16 @@ unsigned int ModulePhysics::GetParticleCount(unsigned int emitter_id) const
 	return 0u;
 }
 
-const eastl::vector<RE_Particle>& ModulePhysics::GetParticles(unsigned int emitter_id) const
+bool ModulePhysics::GetParticles(unsigned int emitter_id, eastl::vector<RE_Particle>& out) const
 {
-	for (const auto &sim : particles.simulations)
+	for (const auto& sim : particles.simulations)
+	{
 		if (sim->id == emitter_id)
-			return sim->particle_pool;
+		{
+			out = sim->particle_pool;
+			return true;
+		}
+	}
 
-	return eastl::vector<RE_Particle>();
+	return false;
 }
