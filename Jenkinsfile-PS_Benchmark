@@ -1,0 +1,66 @@
+pipeline {
+    agent any
+    
+    options {
+        // This is required if you want to clean before build
+        skipDefaultCheckout(true)
+    }
+    stages {
+        stage('Clean Up') {
+            steps {
+               cleanWs()
+            }
+        }
+        
+        stage('Git Download') {
+            steps {
+                git branch: "Empty-data", url: 'https://github.com/juliamauri/RedEye-Engine.git'
+                
+                bat 'xcopy "RedEye\\ReleaseData\\*.*" "RedEye\\Build\\"'
+            }
+        }
+        
+        //stage('Normal Build') {
+        //    steps {
+        //        bat '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Msbuild\\Current\\Bin\\MSBuild.exe" RedEye/RedEye.sln /p:Configuration="Release"'
+        //    }
+        //}
+        
+        stage('P_Physics Benchmark Build') {
+            steps {
+                bat """
+                    set ExternalCompilerOptions=/DPROFILING_ENABLED /DPARTICLE_PHYSICS_TEST
+                    "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Msbuild\\Current\\Bin\\MSBuild.exe" RedEye/RedEye.sln /p:Configuration="Release" /t:Rebuild
+                """
+            }
+        }
+        
+        stage('Run Particle Physics Benchmark') {
+            steps {
+                bat"""
+                cd RedEye\\Build\\
+                start /WAIT RedEye_release.exe
+                """
+            }
+        }
+        
+        stage('P_Render Benchmark Build') {
+            steps {
+                bat """
+                    set ExternalCompilerOptions=/DPROFILING_ENABLED /DPARTICLE_RENDER_TEST
+                    "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Msbuild\\Current\\Bin\\MSBuild.exe" RedEye/RedEye.sln /p:Configuration="Release" /t:Rebuild
+                """
+            }
+        }
+        
+         stage('Run Particle Render Benchmark') {
+            steps {
+                 bat"""
+                cd RedEye\\Build\\
+                start /WAIT RedEye_release.exe
+                """
+            }
+        }
+
+    }
+}
