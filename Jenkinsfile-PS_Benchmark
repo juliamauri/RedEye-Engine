@@ -6,19 +6,19 @@ pipeline {
         skipDefaultCheckout(true)
     }
     stages {
-        //stage('Clean Up') {
-        //    steps {
-        //       cleanWs()
-        //    }
-        //}
-        //
-        //stage('Git Download') {
-        //    steps {
-        //        git branch: "Empty-data", url: 'https://github.com/juliamauri/RedEye-Engine.git'
-        //        
-        //        bat 'xcopy "RedEye\\ReleaseData\\*.*" "RedEye\\Build\\"'
-        //    }
-        //}
+        stage('Clean Up') {
+            steps {
+               cleanWs()
+            }
+        }
+        
+        stage('Git Download') {
+            steps {
+                git branch: "Cleanup-II", url: 'https://github.com/juliamauri/RedEye-Engine.git'
+                
+                bat 'xcopy "RedEye\\ReleaseData\\*.*" "RedEye\\Build\\"'
+            }
+        }
         
         //stage('Normal Build') {
         //    steps {
