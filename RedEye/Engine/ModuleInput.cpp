@@ -43,18 +43,21 @@ void ModuleInput::PreUpdate()
 	mouse.ResetMotion();
 
 	// Keyboard
-	const Uint8* keys = SDL_GetKeyboardState(NULL);
-	for (int i = 0; i < MAX_KEYS; ++i)
+	if (!ImGui::GetIO().WantCaptureKeyboard)
 	{
-		if (keys[i] == 1)
+		const Uint8* keys = SDL_GetKeyboardState(NULL);
+		for (int i = 0; i < MAX_KEYS; ++i)
 		{
-			if (keyboard[i] == KEY_STATE::KEY_IDLE) keyboard[i] = KEY_STATE::KEY_DOWN;
-			else keyboard[i] = KEY_STATE::KEY_REPEAT;
-		}
-		else
-		{
-			if (keyboard[i] == KEY_STATE::KEY_REPEAT || keyboard[i] == KEY_STATE::KEY_DOWN) keyboard[i] = KEY_STATE::KEY_UP;
-			else keyboard[i] = KEY_STATE::KEY_IDLE;
+			if (keys[i] == 1)
+			{
+				if (keyboard[i] == KEY_STATE::KEY_IDLE) keyboard[i] = KEY_STATE::KEY_DOWN;
+				else keyboard[i] = KEY_STATE::KEY_REPEAT;
+			}
+			else
+			{
+				if (keyboard[i] == KEY_STATE::KEY_REPEAT || keyboard[i] == KEY_STATE::KEY_DOWN) keyboard[i] = KEY_STATE::KEY_UP;
+				else keyboard[i] = KEY_STATE::KEY_IDLE;
+			}
 		}
 	}
 
@@ -126,6 +129,8 @@ void ModuleInput::HandleSDLEventQueue()
 	SDL_Event e;
 	while (SDL_PollEvent(&e))
 	{
+		RE_EDITOR->HandleSDLEvent(&e);
+
 		switch (e.type)
 		{
 		/* Application events */
@@ -194,15 +199,21 @@ void ModuleInput::HandleSDLEventQueue()
 
 		/* Mouse events */
 		case SDL_MOUSEMOTION:/**< Mouse moved */
-			mouse.mouse_x = e.motion.x;
-			mouse.mouse_y = e.motion.y;
-			mouse.mouse_x_motion = e.motion.xrel;
-			mouse.mouse_y_motion = e.motion.yrel;
+			if (!ImGui::GetIO().WantCaptureMouse)
+			{
+				mouse.mouse_x = e.motion.x;
+				mouse.mouse_y = e.motion.y;
+				mouse.mouse_x_motion = e.motion.xrel;
+				mouse.mouse_y_motion = e.motion.yrel;
+			}
 			break;
 		case SDL_MOUSEBUTTONDOWN: /**< Mouse button pressed */ break;
 		case SDL_MOUSEBUTTONUP: /**< Mouse button released */ break;
 		case SDL_MOUSEWHEEL: /**< Mouse wheel motion */
-			mouse.mouse_wheel_motion = e.wheel.y;
+			if (!ImGui::GetIO().WantCaptureMouse)
+			{
+				mouse.mouse_wheel_motion = e.wheel.y;
+			}
 			break;
 
 		/* Joystick events */
@@ -246,8 +257,6 @@ void ModuleInput::HandleSDLEventQueue()
 		case SDL_RENDER_DEVICE_RESET:/**< The device has been reset and all textures need to be recreated */ break;
 		}
 	}
-
-	RE_EDITOR->HandleSDLEvent(&e);
 }
 
 // --------------------- SDL Event Types ---------------------

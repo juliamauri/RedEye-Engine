@@ -105,6 +105,7 @@
     <ClInclude Include="..\3rd Parties\Others\Include\gpudetect\DeviceId.h" />
     <ClInclude Include="..\3rd Parties\Others\Include\gpudetect\dxgi1_4.h" />
     <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_sdl.h" />
     <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_stdlib.h" />
     <ClInclude Include="..\3rd Parties\Others\Include\MD5\md5.h" />

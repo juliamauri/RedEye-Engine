@@ -56,7 +56,7 @@ void SceneEditorWindow::Draw(bool secondary)
 		vMax.x += ImGui::GetWindowPos().x;
 		vMax.y += ImGui::GetWindowPos().y;
 
-		if(!ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && isWindowSelected && RE_INPUT->GetKey(SDL_SCANCODE_LALT) == KEY_STATE::KEY_IDLE && RE_INPUT->GetMouse().GetButton(1) == KEY_STATE::KEY_DOWN)
+		if (!ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && isWindowSelected && !ImGui::GetKeyData(ImGuiKey_::ImGuiKey_LeftAlt)->Down && ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
 		{
 			ImVec2 mousePosOnThis = ImGui::GetMousePos();
 			if ((mousePosOnThis.x -= vMin.x - ImGui::GetStyle().WindowPadding.x) > 0.f && (mousePosOnThis.y -= vMin.y - ImGui::GetStyle().WindowPadding.y) > 0.f)
@@ -109,8 +109,6 @@ void SceneEditorWindow::Draw(bool secondary)
 			ImGuizmo::SetDrawlist();
 			ImGuizmo::Manipulate(cameraView.ptr(), eCamera->GetProjectionPtr(), operation, mode, matA, deltamatrix.ptr());
 
-
-
 			if (ImGuizmo::IsUsing()) {
 				watchingChange = true;
 				static float matrixTranslation[3], matrixRotation[3], matrixScale[3];
@@ -144,7 +142,7 @@ void SceneEditorWindow::Draw(bool secondary)
 			}
 
 
-			if (watchingChange && (RE_INPUT->GetMouse().GetButton(1) == KEY_STATE::KEY_UP))
+			if (watchingChange && ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
 			{
 				switch (operation)
 				{

@@ -27,6 +27,7 @@
     <ClCompile Include="source\imgui.cpp" />
     <ClCompile Include="source\imgui_demo.cpp" />
     <ClCompile Include="source\imgui_draw.cpp" />
+    <ClCompile Include="source\imgui_tables.cpp" />
     <ClCompile Include="source\imgui_widgets.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

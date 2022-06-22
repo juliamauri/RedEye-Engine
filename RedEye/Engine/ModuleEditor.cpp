@@ -166,7 +166,7 @@ void ModuleEditor::PreUpdate()
 	RE_PROFILE(PROF_PreUpdate, PROF_ModuleEditor);
 	ImGuizmo::SetOrthographic(!RE_SCENE->cams->EditorCamera()->isPrespective());
 	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame(RE_WINDOW->GetWindow());
+	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
 }
@@ -330,19 +330,21 @@ void ModuleEditor::Update()
 		texteditormanager->DrawWindow(popUpFocus);
 	}
 	
+	
+
 	// Toggle show editor on F1
-	if(RE_INPUT->CheckKey(SDL_SCANCODE_F1))
+	if(ImGui::GetKeyData(ImGuiKey_::ImGuiKey_F1)->Down)
 		show_all = !show_all;
 
 	// CAMERA CONTROLS
 	UpdateCamera();
 
-	if (RE_INPUT->GetKey(SDL_Scancode::SDL_SCANCODE_LCTRL) == KEY_STATE::KEY_REPEAT)
+	if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_LeftCtrl)->Down)
 	{
-		if (RE_INPUT->GetKey(SDL_Scancode::SDL_SCANCODE_Z) == KEY_STATE::KEY_DOWN)
+		if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_Z)->Down)
 			commands->Undo();
 
-		if (RE_INPUT->GetKey(SDL_Scancode::SDL_SCANCODE_Y) == KEY_STATE::KEY_DOWN)
+		if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_Y)->Down)
 			commands->Redo();
 	}
 
@@ -440,10 +442,11 @@ void ModuleEditor::Draw() const
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
-		//GLFWwindow* backup_current_context = glfwGetCurrentContext();
+		SDL_Window* backup_current_window = RE_WINDOW->GetWindow();
+		SDL_GLContext backup_current_context = RE_RENDER->GetWindowContext();
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
-		//glfwMakeContextCurrent(backup_current_context);
+		SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
 	}
 }
 
@@ -731,15 +734,15 @@ void ModuleEditor::UpdateCamera()
 	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
 	if (sceneEditorWindow->isSelected())
 	{
-		const MouseData mouse = RE_INPUT->GetMouse();
+		ImVec2 mouseData = ImGui::GetIO().MouseDelta;
 
-		if (RE_INPUT->GetKey(SDL_SCANCODE_LALT) == KEY_STATE::KEY_REPEAT && mouse.GetButton(1) == KEY_STATE::KEY_REPEAT)
+		if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_LeftAlt)->Down && ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
 		{
 			// Orbit
-			if (selected && (mouse.mouse_x_motion || mouse.mouse_y_motion))
-				camera->Orbit(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion, RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds().CenterPoint());
+			if (selected && (mouseData.x || mouseData.y))
+				camera->Orbit(cam_sensitivity * -mouseData.x, cam_sensitivity * mouseData.y, RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds().CenterPoint());
 		}
-		else if ((RE_INPUT->GetKey(SDL_SCANCODE_F) == KEY_STATE::KEY_DOWN) && selected)
+		else if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_F)->Down && selected)
 		{
 			// Focus
 			math::AABB box = RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds();
@@ -747,27 +750,29 @@ void ModuleEditor::UpdateCamera()
 		}
 		else
 		{
-			if (mouse.GetButton(3) == KEY_STATE::KEY_REPEAT)
+			if (ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Right))
 			{
 				// Camera Speed
 				float cameraSpeed = cam_speed * RE_TIME->GetDeltaTime();
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_LSHIFT, KEY_STATE::KEY_REPEAT)) cameraSpeed *= 2.0f;
-
+				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
+				
 				// Move
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_W, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::FORWARD, cameraSpeed);
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_S, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::BACKWARD, cameraSpeed);
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_A, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::LEFT, cameraSpeed);
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_D, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::RIGHT, cameraSpeed);
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_SPACE, KEY_STATE::KEY_REPEAT)) camera->LocalMove(Dir::UP, cameraSpeed);
-				if (RE_INPUT->CheckKey(SDL_SCANCODE_C, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::DOWN, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_W)->Down)			camera->LocalMove(Dir::FORWARD, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_S)->Down)			camera->LocalMove(Dir::BACKWARD, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_A)->Down)			camera->LocalMove(Dir::LEFT, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_D)->Down)			camera->LocalMove(Dir::RIGHT, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_Space)->Down)		camera->LocalMove(Dir::UP, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_C)->Down)			camera->LocalMove(Dir::DOWN, cameraSpeed);
 
 				// Rotate
-				if (mouse.mouse_x_motion != 0 || mouse.mouse_y_motion != 0)
-					camera->LocalPan(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion);
+				if (mouseData.x != 0 || mouseData.y != 0)
+					camera->LocalPan(cam_sensitivity * -mouseData.x, cam_sensitivity * mouseData.y);
 			}
 
+			float mouseWheelData = ImGui::GetIO().MouseWheel;
+
 			// Zoom
-			if (mouse.mouse_wheel_motion != 0) camera->SetFOV(camera->GetVFOVDegrees() - mouse.mouse_wheel_motion);
+			if (mouseWheelData != 0) camera->SetFOV(camera->GetVFOVDegrees() - mouseWheelData);
 		}
 	}
 
@@ -777,9 +782,9 @@ void ModuleEditor::UpdateCamera()
 		camera = RE_CameraManager::ParticleEditorCamera();
 
 		if (particleEmitterWindow->isSelected()) {
-			const MouseData mouse = RE_INPUT->GetMouse();
+			ImVec2 mouseData = ImGui::GetIO().MouseDelta;
 
-			if ((RE_INPUT->GetKey(SDL_SCANCODE_F) == KEY_STATE::KEY_DOWN))
+			if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_F)->Down)
 			{
 				// Focus
 				math::AABB box = particleEmitterWindow->GetEdittingParticleEmitter()->bounding_box;
@@ -787,27 +792,28 @@ void ModuleEditor::UpdateCamera()
 			}
 			else
 			{
-				if (mouse.GetButton(3) == KEY_STATE::KEY_REPEAT)
+				if (ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Right))
 				{
 					// Camera Speed
 					float cameraSpeed = cam_speed * RE_TIME->GetDeltaTime();
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_LSHIFT, KEY_STATE::KEY_REPEAT)) cameraSpeed *= 2.0f;
+					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
 
 					// Move
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_W, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::FORWARD, cameraSpeed);
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_S, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::BACKWARD, cameraSpeed);
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_A, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::LEFT, cameraSpeed);
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_D, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::RIGHT, cameraSpeed);
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_SPACE, KEY_STATE::KEY_REPEAT)) camera->LocalMove(Dir::UP, cameraSpeed);
-					if (RE_INPUT->CheckKey(SDL_SCANCODE_C, KEY_STATE::KEY_REPEAT))	  camera->LocalMove(Dir::DOWN, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_W)->Down)			camera->LocalMove(Dir::FORWARD, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_S)->Down)			camera->LocalMove(Dir::BACKWARD, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_A)->Down)			camera->LocalMove(Dir::LEFT, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_D)->Down)			camera->LocalMove(Dir::RIGHT, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_Space)->Down)		camera->LocalMove(Dir::UP, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_C)->Down)			camera->LocalMove(Dir::DOWN, cameraSpeed);
 
 					// Rotate
-					if (mouse.mouse_x_motion != 0 || mouse.mouse_y_motion != 0)
-						camera->LocalPan(cam_sensitivity * -mouse.mouse_x_motion, cam_sensitivity * mouse.mouse_y_motion);
+					if (mouseData.x != 0 || mouseData.y != 0)
+						camera->LocalPan(cam_sensitivity * -mouseData.x, cam_sensitivity * mouseData.y);
 				}
 
+				float mouseWheelData = ImGui::GetIO().MouseWheel;
 				// Zoom
-				if (mouse.mouse_wheel_motion != 0) camera->SetFOV(camera->GetVFOVDegrees() - mouse.mouse_wheel_motion);
+				if (mouseWheelData != 0) camera->SetFOV(camera->GetVFOVDegrees() - mouseWheelData);
 			}
 		}
 

@@ -328,8 +328,8 @@ void RE_CompTransform::DrawProperties()
 				last = scale.scale;
 			}
 		}
-
-		if (watchingChange && (RE_INPUT->GetMouse().GetButton(1) == KEY_STATE::KEY_UP || !frameWatched))
+		
+		if (watchingChange && !ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left) || !frameWatched)
 		{
 			if		(pFrom) RE_EDITOR->PushCommand(new RE_CMDTransformPosition(go, before, last));
 			else if (rFrom) RE_EDITOR->PushCommand(new RE_CMDTransformRotation(go, before, last));

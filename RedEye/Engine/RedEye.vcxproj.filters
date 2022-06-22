@@ -681,6 +681,9 @@
     <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_stdlib.h">
       <Filter>3rd Party\ImGuiImpl</Filter>
     </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\Include\ImGuiImpl\imgui_impl_opengl3_loader.h">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
