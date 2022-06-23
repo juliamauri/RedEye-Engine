@@ -69,6 +69,9 @@ void AssetsWindow::Draw(bool secondary)
 
 			while (!filesToDisplay.empty())
 			{
+
+				ImGui::TableNextColumn();
+
 				RE_FileSystem::RE_Path* p = filesToDisplay.top();
 				filesToDisplay.pop();
 				eastl::string id = idName + eastl::to_string(idCount++);
@@ -218,8 +221,6 @@ void AssetsWindow::Draw(bool secondary)
 					break;
 				}
 				}
-
-				ImGui::TableNextColumn();
 			}
 			ImGui::EndTable();
 		}
