@@ -62,127 +62,46 @@ void AssetsWindow::Draw(bool secondary)
 		if (itemsColum == 0) itemsColum = 1;
 		eastl::stack<RE_FileSystem::RE_Path*> filesToDisplay = currentDir->GetDisplayingFiles();
 
-		ImGui::Columns(itemsColum, NULL, false);
-		eastl::string idName = "#AssetImage";
-		uint idCount = 0;
-		while (!filesToDisplay.empty())
-		{
-			RE_FileSystem::RE_Path* p = filesToDisplay.top();
-			filesToDisplay.pop();
-			eastl::string id = idName + eastl::to_string(idCount++);
-			ImGui::PushID(id.c_str());
-			switch (p->pType)
+		if (ImGui::BeginTable("AssetsFiles", itemsColum, ImGuiTableFlags_::ImGuiTableFlags_NoBordersInBody)) {
+			eastl::string idName = "#AssetImage";
+			uint idCount = 0;
+
+
+			while (!filesToDisplay.empty())
 			{
-			case RE_FileSystem::PathType::D_FOLDER:
-			{
-				if (ImGui::ImageButton(reinterpret_cast<void*>(RE_EDITOR->thumbnails->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
-					toChange = p->AsDirectory();
-				ImGui::PopID();
-				ImGui::Text(p->AsDirectory()->name.c_str());
-				break;
-			}
-			case RE_FileSystem::PathType::D_FILE:
-			{
-				switch (p->AsFile()->fType)
+				RE_FileSystem::RE_Path* p = filesToDisplay.top();
+				filesToDisplay.pop();
+				eastl::string id = idName + eastl::to_string(idCount++);
+				ImGui::PushID(id.c_str());
+				switch (p->pType)
 				{
-				case RE_FileSystem::FileType::F_META:
+				case RE_FileSystem::PathType::D_FOLDER:
 				{
-					ResourceContainer* res = RE_RES->At(p->AsMeta()->resource);
-
-					unsigned int icon_meta = (res->GetType() == R_SHADER) ? RE_EDITOR->thumbnails->GetShaderFileID() : RE_EDITOR->thumbnails->GetPEmitterFileID();
-
-					if (ImGui::ImageButton(reinterpret_cast<void*>(icon_meta), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
-						RE_RES->PushSelected(res->GetMD5(), true);
-
-					if (ImGui::BeginDragDropSource())
-					{
-						ImGui::SetDragDropPayload((res->GetType() == R_SHADER) ? "#ShadereReference" : "#EmitterReference", &p->AsMeta()->resource, sizeof(const char**));
-						ImGui::Image(reinterpret_cast<void*>(icon_meta), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
-						ImGui::EndDragDropSource();
-					}
+					if (ImGui::ImageButton(reinterpret_cast<void*>(RE_EDITOR->thumbnails->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+						toChange = p->AsDirectory();
 					ImGui::PopID();
-
-					id = idName + eastl::to_string(idCount) + "Delete";
-					ImGui::PushID(id.c_str());
-					if (ImGui::BeginPopupContextItem())
-					{
-						if (ImGui::Button("Delete")) RE_EDITOR->popupWindow->PopUpDelRes(res->GetMD5());
-						ImGui::EndPopup();
-					}
-					ImGui::PopID();
-
-					ImGui::Text(res->GetName());
+					ImGui::Text(p->AsDirectory()->name.c_str());
 					break;
 				}
-				case RE_FileSystem::FileType::F_NOTSUPPORTED:
+				case RE_FileSystem::PathType::D_FILE:
 				{
-					bool pop = (!selectingUndefFile && !secondary);
-					if (pop)
+					switch (p->AsFile()->fType)
 					{
-						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-						ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-					}
-
-					if (ImGui::ImageButton(
-						reinterpret_cast<void*>(selectingUndefFile ? RE_EDITOR->thumbnails->GetSelectFileID() : RE_EDITOR->thumbnails->GetFileID()),
-						{ iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, (selectingUndefFile) ? -1 : 0))
+					case RE_FileSystem::FileType::F_META:
 					{
-						if (selectingUndefFile)
-						{
-							*selectingUndefFile = p->path;
-							selectingUndefFile = nullptr;
-						}
-					}
-					ImGui::PopID();
+						ResourceContainer* res = RE_RES->At(p->AsMeta()->resource);
 
-					if (pop)
-					{
-						ImGui::PopItemFlag();
-						ImGui::PopStyleVar();
-					}
+						unsigned int icon_meta = (res->GetType() == R_SHADER) ? RE_EDITOR->thumbnails->GetShaderFileID() : RE_EDITOR->thumbnails->GetPEmitterFileID();
 
-					id = idName + eastl::to_string(idCount) + "Delete";
-					ImGui::PushID(id.c_str());
-					if (ImGui::BeginPopupContextItem())
-					{
-						if (ImGui::Button("Delete")) RE_EDITOR->popupWindow->PopUpDelUndeFile(p->path.c_str());
-						ImGui::EndPopup();
-					}
-					ImGui::PopID();
-
-					if (pop = (!selectingUndefFile && !secondary))
-					{
-						ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-						ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-					}
-
-					ImGui::Text(p->AsFile()->filename.c_str());
-
-					if (pop)
-					{
-						ImGui::PopItemFlag();
-						ImGui::PopStyleVar();
-					}
-
-					break;
-				}
-				default:
-				{
-					if (p->AsFile()->metaResource != nullptr)
-					{
-						ResourceContainer* res = RE_RES->At(p->AsFile()->metaResource->resource);
-
-						unsigned int file_icon = 0;
-
-						switch (res->GetType())
-						{
-						case R_PARTICLE_EMISSION: file_icon = RE_EDITOR->thumbnails->GetPEmissionFileID(); break;
-						case R_PARTICLE_RENDER: file_icon = RE_EDITOR->thumbnails->GetPRenderFileID(); break;
-						default: file_icon = RE_EDITOR->thumbnails->At(res->GetMD5()); break;
-						}
-
-						if (ImGui::ImageButton(reinterpret_cast<void*>(file_icon), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+						if (ImGui::ImageButton(reinterpret_cast<void*>(icon_meta), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
 							RE_RES->PushSelected(res->GetMD5(), true);
+
+						if (ImGui::BeginDragDropSource())
+						{
+							ImGui::SetDragDropPayload((res->GetType() == R_SHADER) ? "#ShadereReference" : "#EmitterReference", &p->AsMeta()->resource, sizeof(const char**));
+							ImGui::Image(reinterpret_cast<void*>(icon_meta), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+							ImGui::EndDragDropSource();
+						}
 						ImGui::PopID();
 
 						id = idName + eastl::to_string(idCount) + "Delete";
@@ -194,33 +113,116 @@ void AssetsWindow::Draw(bool secondary)
 						}
 						ImGui::PopID();
 
-						static const char* names[MAX_R_TYPES] = { "Undefined", "Shader", "Texture", "Mesh", "Prefab", "SkyBox", "Material", "Model", "Scene", "Particle emitter", "Particle emission", "Particle render" };
-						eastl::string dragID("#");
-						(dragID += names[res->GetType()]) += "Reference";
-
-						if (ImGui::BeginDragDropSource())
+						ImGui::Text(res->GetName());
+						break;
+					}
+					case RE_FileSystem::FileType::F_NOTSUPPORTED:
+					{
+						bool pop = (!selectingUndefFile && !secondary);
+						if (pop)
 						{
-							ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
-							ImGui::Image(reinterpret_cast<void*>(file_icon), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
-							ImGui::EndDragDropSource();
+							ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+							ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+						}
+
+						if (ImGui::ImageButton(
+							reinterpret_cast<void*>(selectingUndefFile ? RE_EDITOR->thumbnails->GetSelectFileID() : RE_EDITOR->thumbnails->GetFileID()),
+							{ iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, (selectingUndefFile) ? -1 : 0))
+						{
+							if (selectingUndefFile)
+							{
+								*selectingUndefFile = p->path;
+								selectingUndefFile = nullptr;
+							}
+						}
+						ImGui::PopID();
+
+						if (pop)
+						{
+							ImGui::PopItemFlag();
+							ImGui::PopStyleVar();
+						}
+
+						id = idName + eastl::to_string(idCount) + "Delete";
+						ImGui::PushID(id.c_str());
+						if (ImGui::BeginPopupContextItem())
+						{
+							if (ImGui::Button("Delete")) RE_EDITOR->popupWindow->PopUpDelUndeFile(p->path.c_str());
+							ImGui::EndPopup();
+						}
+						ImGui::PopID();
+
+						if (pop = (!selectingUndefFile && !secondary))
+						{
+							ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+							ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 						}
 
 						ImGui::Text(p->AsFile()->filename.c_str());
-					}
-					else
-						ImGui::PopID();
 
+						if (pop)
+						{
+							ImGui::PopItemFlag();
+							ImGui::PopStyleVar();
+						}
+
+						break;
+					}
+					default:
+					{
+						if (p->AsFile()->metaResource != nullptr)
+						{
+							ResourceContainer* res = RE_RES->At(p->AsFile()->metaResource->resource);
+
+							unsigned int file_icon = 0;
+
+							switch (res->GetType())
+							{
+							case R_PARTICLE_EMISSION: file_icon = RE_EDITOR->thumbnails->GetPEmissionFileID(); break;
+							case R_PARTICLE_RENDER: file_icon = RE_EDITOR->thumbnails->GetPRenderFileID(); break;
+							default: file_icon = RE_EDITOR->thumbnails->At(res->GetMD5()); break;
+							}
+
+							if (ImGui::ImageButton(reinterpret_cast<void*>(file_icon), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+								RE_RES->PushSelected(res->GetMD5(), true);
+							ImGui::PopID();
+
+							id = idName + eastl::to_string(idCount) + "Delete";
+							ImGui::PushID(id.c_str());
+							if (ImGui::BeginPopupContextItem())
+							{
+								if (ImGui::Button("Delete")) RE_EDITOR->popupWindow->PopUpDelRes(res->GetMD5());
+								ImGui::EndPopup();
+							}
+							ImGui::PopID();
+
+							static const char* names[MAX_R_TYPES] = { "Undefined", "Shader", "Texture", "Mesh", "Prefab", "SkyBox", "Material", "Model", "Scene", "Particle emitter", "Particle emission", "Particle render" };
+							eastl::string dragID("#");
+							(dragID += names[res->GetType()]) += "Reference";
+
+							if (ImGui::BeginDragDropSource())
+							{
+								ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
+								ImGui::Image(reinterpret_cast<void*>(file_icon), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+								ImGui::EndDragDropSource();
+							}
+
+							ImGui::Text(p->AsFile()->filename.c_str());
+						}
+						else
+							ImGui::PopID();
+
+						break;
+					}
+					}
 					break;
 				}
 				}
-				break;
-			}
-			}
 
-			ImGui::NextColumn();
+				ImGui::TableNextColumn();
+			}
+			ImGui::EndTable();
 		}
-
-		ImGui::Columns(1);
 
 		if (secondary)
 		{

@@ -141,45 +141,54 @@ void ModuleScene::DrawEditor()
 			ImGui::SameLine();
 			ImGui::DragInt("List Size", &totalShowing, 1.f, 0);
 
-			for (int i = range; i < totalShowing + range && i < transformCount; i++) {
-				RE_CompTransform* transform = GetGOPtr(allTransforms[i])->GetTransformPtr();
+			if (ImGui::BeginTable("transformTable", 1, ImGuiTableFlags_::ImGuiTableFlags_BordersH | ImGuiTableFlags_Hideable)) {
+				ImGui::TableNextColumn();
+				for (int i = range; i < totalShowing + range && i < transformCount; i++) {
+					RE_CompTransform* transform = GetGOPtr(allTransforms[i])->GetTransformPtr();
 
-				ImGui::PushID(("#TransformDebug" + eastl::to_string(i)).c_str());
+					ImGui::Text(("Name: " + transform->GetGOPtr()->name).c_str());
 
-				if (ImGui::CollapsingHeader(("GO: " + transform->GetGOPtr()->name).c_str())) {
-					ImGui::Columns(2);
-					static math::vec pos, rotE, scl;
-					static math::float3x3 rot;
+					if (ImGui::BeginTable("transformsTableNested", 2, ImGuiTableFlags_Hideable))
+					{
+						ImGui::TableSetupColumn("Local Transform:");
+						ImGui::TableSetupColumn("Global Transform:");
+						ImGui::TableHeadersRow();
+						ImGui::TableNextRow(ImGuiTableRowFlags_None);
 
-					static math::float4x4 localM;
-					localM = transform->GetLocalMatrix().Transposed();
-					localM.Decompose(pos, rot, scl);
-					rotE = rot.ToEulerXYZ();
-					ImGui::Text("Local Transform:");
-					ImGui::Text("Position:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
-					ImGui::Text("Rotation:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
-					ImGui::Text("Scale:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+						ImGui::TableNextColumn();
 
-					ImGui::NextColumn();
+						static math::vec pos, rotE, scl;
+						static math::float3x3 rot;
 
-					static math::float4x4 globalM;
-					globalM = transform->GetGlobalMatrix().Transposed();
-					globalM.Decompose(pos, rot, scl);
-					rotE = rot.ToEulerXYZ();
-					ImGui::Text("Global Transform:");
-					ImGui::Text("Position:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
-					ImGui::Text("Rotation:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
-					ImGui::Text("Scale:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+						static math::float4x4 localM;
+						localM = transform->GetLocalMatrix().Transposed();
+						localM.Decompose(pos, rot, scl);
+						rotE = rot.ToEulerXYZ();
+						ImGui::Text("Position:");
+						ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
+						ImGui::Text("Rotation:");
+						ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
+						ImGui::Text("Scale:");
+						ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
 
-					ImGui::Columns(1);
+						ImGui::TableNextColumn();
+
+						static math::float4x4 globalM;
+						globalM = transform->GetGlobalMatrix().Transposed();
+						globalM.Decompose(pos, rot, scl);
+						rotE = rot.ToEulerXYZ();
+						ImGui::Text("Position:");
+						ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
+						ImGui::Text("Rotation:");
+						ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
+						ImGui::Text("Scale:");
+						ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+
+						ImGui::EndTable();
+					}
+					ImGui::TableNextColumn();
 				}
-				ImGui::PopID();
+				ImGui::EndTable();
 			}
 
 
