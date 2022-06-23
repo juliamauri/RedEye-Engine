@@ -504,45 +504,42 @@ void ModuleEditor::Draw() const
 
 void ModuleEditor::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("Editor"))
+	ImGui::DragFloat("Camera speed", &cam_speed, 0.1f, 0.1f, 100.0f, "%.1f");
+	ImGui::DragFloat("Camera sensitivity", &cam_sensitivity, 0.01f, 0.01f, 1.0f, "%.2f");
+
+	RE_CameraManager::EditorCamera()->DrawAsEditorProperties();
+
+	ImGui::Separator();
+	ImGui::Checkbox("Select on mouse click", &select_on_mc);
+	ImGui::Checkbox("Focus on Select", &focus_on_select);
+	ImGui::Separator();
+
+	// Debug Drawing
+	ImGui::Checkbox("Debug Draw", &debug_drawing);
+	if (debug_drawing)
 	{
-		ImGui::DragFloat("Camera speed", &cam_speed, 0.1f, 0.1f, 100.0f, "%.1f");
-		ImGui::DragFloat("Camera sensitivity", &cam_sensitivity, 0.01f, 0.01f, 1.0f, "%.2f");
+		bool active_grid = grid->IsActive();
+		if (ImGui::Checkbox("Draw Grid", &active_grid))
+			grid->SetActive(active_grid);
 
-		RE_CameraManager::EditorCamera()->DrawAsEditorProperties();
-
-		ImGui::Separator();
-		ImGui::Checkbox("Select on mouse click", &select_on_mc);
-		ImGui::Checkbox("Focus on Select", &focus_on_select);
-		ImGui::Separator();
-
-		// Debug Drawing
-		ImGui::Checkbox("Debug Draw", &debug_drawing);
-		if (debug_drawing)
+		if (active_grid && ImGui::DragFloat2("Grid Size", grid_size, 0.2f, 0.01f, 100.0f, "%.1f"))
 		{
-			bool active_grid = grid->IsActive();
-			if (ImGui::Checkbox("Draw Grid", &active_grid))
-				grid->SetActive(active_grid);
-
-			if (active_grid && ImGui::DragFloat2("Grid Size", grid_size, 0.2f, 0.01f, 100.0f, "%.1f"))
-			{
-				grid->GetTransformPtr()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
-				grid->GetTransformPtr()->Update();
-			}
-
-			int aabb_d = static_cast<int>(aabb_drawing);
-			if (ImGui::Combo("Draw AABB", &aabb_d, "None\0Selected only\0All\0All w/ different selected\0"))
-				aabb_drawing = static_cast<AABBDebugDrawing>(aabb_d);
-
-			if (aabb_drawing > AABBDebugDrawing::SELECTED_ONLY) ImGui::ColorEdit3("Color AABB", all_aabb_color);
-			if (static_cast<int>(aabb_drawing) % 2 == 1) ImGui::ColorEdit3("Color Selected", sel_aabb_color);
-
-			ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
-			if (draw_quad_tree) ImGui::ColorEdit3("Color Quadtree", quad_tree_color);
-
-			ImGui::Checkbox("Draw Camera Fustrums", &draw_cameras);
-			if (draw_cameras) ImGui::ColorEdit3("Color Fustrum", frustum_color);
+			grid->GetTransformPtr()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
+			grid->GetTransformPtr()->Update();
 		}
+
+		int aabb_d = static_cast<int>(aabb_drawing);
+		if (ImGui::Combo("Draw AABB", &aabb_d, "None\0Selected only\0All\0All w/ different selected\0"))
+			aabb_drawing = static_cast<AABBDebugDrawing>(aabb_d);
+
+		if (aabb_drawing > AABBDebugDrawing::SELECTED_ONLY) ImGui::ColorEdit3("Color AABB", all_aabb_color);
+		if (static_cast<int>(aabb_drawing) % 2 == 1) ImGui::ColorEdit3("Color Selected", sel_aabb_color);
+
+		ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
+		if (draw_quad_tree) ImGui::ColorEdit3("Color Quadtree", quad_tree_color);
+
+		ImGui::Checkbox("Draw Camera Fustrums", &draw_cameras);
+		if (draw_cameras) ImGui::ColorEdit3("Color Fustrum", frustum_color);
 	}
 }
 

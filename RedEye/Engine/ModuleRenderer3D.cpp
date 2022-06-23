@@ -423,55 +423,52 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 
 void ModuleRenderer3D::DrawEditor()
 {
-	if(ImGui::CollapsingHeader("Renderer3D"))
-	{
-		if (ImGui::Checkbox((vsync) ? "VSync Enabled" : "VSync Disabled", &vsync))
-			SetVSync(vsync);
+	if (ImGui::Checkbox((vsync) ? "VSync Enabled" : "VSync Disabled", &vsync))
+		SetVSync(vsync);
 
-		if (ImGui::Checkbox(shareLightPass ? "Not share light pass" : "Share Light pass", &shareLightPass)) {
-			if (shareLightPass)
-				RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader())->UnloadMemory();
-			else
-				dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
-		}
-
-		ImGui::Separator();
-
+	if (ImGui::Checkbox(shareLightPass ? "Not share light pass" : "Share Light pass", &shareLightPass)) {
 		if (shareLightPass)
-		{
-			ImGui::Text("Total Lights: %u:203", lightsCount + particlelightsCount);
-			ImGui::Text("From lights components: %u", lightsCount);
-			ImGui::Text("From particles: %u", particlelightsCount);
-		}
+			RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader())->UnloadMemory();
 		else
-		{
-			ImGui::Text("Lights components: %u:203", lightsCount);
-			ImGui::Text("Particle Lights: %u:508", particlelightsCount);
-		}
+			dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
+	}
 
-		ImGui::Separator();
+	ImGui::Separator();
 
-		for (unsigned int i = 0; i < render_views.size(); ++i)
+	if (shareLightPass)
+	{
+		ImGui::Text("Total Lights: %u:203", lightsCount + particlelightsCount);
+		ImGui::Text("From lights components: %u", lightsCount);
+		ImGui::Text("From particles: %u", particlelightsCount);
+	}
+	else
+	{
+		ImGui::Text("Lights components: %u:203", lightsCount);
+		ImGui::Text("Particle Lights: %u:508", particlelightsCount);
+	}
+
+	ImGui::Separator();
+
+	for (unsigned int i = 0; i < render_views.size(); ++i)
+	{
+		if (ImGui::TreeNodeEx((render_views[i].name + " View").c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
 		{
-			if (ImGui::TreeNodeEx((render_views[i].name + " View").c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
+			int light = render_views[i].light;
+			ImGui::PushID(eastl::string("light" + eastl::to_string(i)).c_str());
+			if (ImGui::Combo("Light Mode", &light, "LIGHT_DISABLED\0LIGHT_GL\0LIGHT_DIRECT\0LIGHT_DEFERRED\0"))
+				render_views[i].light = LightMode(light);
+			ImGui::PopID();
+
+			for (short count = 0; count < 12; ++count)
 			{
-				int light = render_views[i].light;
-				ImGui::PushID(eastl::string("light" + eastl::to_string(i)).c_str());
-				if (ImGui::Combo("Light Mode", &light, "LIGHT_DISABLED\0LIGHT_GL\0LIGHT_DIRECT\0LIGHT_DEFERRED\0"))
-					render_views[i].light = LightMode(light);
+				bool temp = (render_views[i].flags & (1 << count));
+				ImGui::PushID(eastl::string(RenderView::labels[count] + eastl::to_string(i)).c_str());
+				if (ImGui::Checkbox(RenderView::labels[count], &temp))
+					temp ? render_views[i].flags |= (1 << count) : render_views[i].flags -= (1 << count);
 				ImGui::PopID();
-
-				for (short count = 0; count < 12; ++count)
-				{
-					bool temp = (render_views[i].flags & (1 << count));
-					ImGui::PushID(eastl::string(RenderView::labels[count] + eastl::to_string(i)).c_str());
-					if (ImGui::Checkbox(RenderView::labels[count], &temp))
-						temp ? render_views[i].flags |= (1 << count) : render_views[i].flags -= (1 << count);
-					ImGui::PopID();
-				}
-
-				ImGui::TreePop();
 			}
+
+			ImGui::TreePop();
 		}
 	}
 }

@@ -76,13 +76,10 @@ void ModuleInput::PreUpdate()
 
 void ModuleInput::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("Input"))
-	{
-		ImGui::Text("Mouse");
-		ImGui::Text("X: %u\tY: %u", mouse.mouse_x, mouse.mouse_y);
-		ImGui::Text("MotionX: %i\tMotionY: %i", mouse.mouse_x_motion, mouse.mouse_y_motion);
-		ImGui::Text("Wheel Motion: %i", mouse.mouse_wheel_motion);
-	}
+	ImGui::Text("Mouse");
+	ImGui::Text("X: %u\tY: %u", mouse.mouse_x, mouse.mouse_y);
+	ImGui::Text("MotionX: %i\tMotionY: %i", mouse.mouse_x_motion, mouse.mouse_y_motion);
+	ImGui::Text("Wheel Motion: %i", mouse.mouse_wheel_motion);
 }
 
 // Called before quitting

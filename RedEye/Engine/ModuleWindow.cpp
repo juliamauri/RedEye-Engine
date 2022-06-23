@@ -31,47 +31,44 @@ bool ModuleWindow::Init()
 
 void ModuleWindow::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("Window"))
+	int max_w = GetMaxWidth(), max_h = GetMaxHeight();
+	ImGui::Text("Screen Size: %u x %u", max_w, max_h);
+
+	if (CheckFlag(SDL_WINDOW_RESIZABLE))
 	{
-		int max_w = GetMaxWidth(), max_h = GetMaxHeight();
-		ImGui::Text("Screen Size: %u x %u", max_w, max_h);
-
-		if (CheckFlag(SDL_WINDOW_RESIZABLE))
-		{
-			if (ImGui::SliderInt("Width", &width, 0, max_w, "%.0f"))
-				SetWindowSize(width, height);
-			if (ImGui::SliderInt("Height", &height, 0, max_h, "%.0f"))
-				SetWindowSize(width, height);
-		}
-		else
-		{
-			ImGui::Text("Width: %u", width);
-			ImGui::Text("Height: %u", height);
-		}
-
-		ImGui::Text("Position X: %u", pos_x);
-		ImGui::Text("Position Y: %u", pos_y);
-
-		ImGui::Separator();
-		ImGui::Text("Window Flags");
-
-		bool flag = CheckFlag(SDL_WINDOW_RESIZABLE);
-		if (ImGui::Checkbox("Resizeable", &flag)) SetResizeable(flag);
-
-		ImGui::SameLine();
-		flag = CheckFlag(SDL_WINDOW_FULLSCREEN);
-		if (ImGui::Checkbox("Fullscreen", &flag)) SetFullScreen(flag);
-
-		flag = CheckFlag(SDL_WINDOW_BORDERLESS);
-		if (ImGui::Checkbox("View Border", &flag)) SetBorderless(flag);
-
-		ImGui::SameLine();
-		flag = CheckFlag(SDL_WINDOW_FULLSCREEN_DESKTOP);
-		if (ImGui::Checkbox("Fullscreen Desktop", &flag)) SetFullDesktop(flag);
-		
-		ImGui::Separator();
-		if (ImGui::SliderFloat("Brightness", &brightness, 0.f, 1.f, "%.2f")) SetBrightness(brightness);
+		if (ImGui::SliderInt("Width", &width, 0, max_w, "%.0f"))
+			SetWindowSize(width, height);
+		if (ImGui::SliderInt("Height", &height, 0, max_h, "%.0f"))
+			SetWindowSize(width, height);
 	}
+	else
+	{
+		ImGui::Text("Width: %u", width);
+		ImGui::Text("Height: %u", height);
+	}
+
+	ImGui::Text("Position X: %u", pos_x);
+	ImGui::Text("Position Y: %u", pos_y);
+
+	ImGui::Separator();
+	ImGui::Text("Window Flags");
+
+	bool flag = CheckFlag(SDL_WINDOW_RESIZABLE);
+	if (ImGui::Checkbox("Resizeable", &flag)) SetResizeable(flag);
+
+	ImGui::SameLine();
+	flag = CheckFlag(SDL_WINDOW_FULLSCREEN);
+	if (ImGui::Checkbox("Fullscreen", &flag)) SetFullScreen(flag);
+
+	flag = CheckFlag(SDL_WINDOW_BORDERLESS);
+	if (ImGui::Checkbox("View Border", &flag)) SetBorderless(flag);
+
+	ImGui::SameLine();
+	flag = CheckFlag(SDL_WINDOW_FULLSCREEN_DESKTOP);
+	if (ImGui::Checkbox("Fullscreen Desktop", &flag)) SetFullDesktop(flag);
+
+	ImGui::Separator();
+	if (ImGui::SliderFloat("Brightness", &brightness, 0.f, 1.f, "%.2f")) SetBrightness(brightness);
 }
 
 void ModuleWindow::CleanUp()

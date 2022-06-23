@@ -40,10 +40,12 @@ void RE_Time::DrawEditorGraphs()
 {
 	if (!pause_plotting)
 	{
+		max_fps = fps[0];
 		for (int i = 0; i < 99; i++)
 		{
 			ms[i] = ms[i + 1];
 			fps[i] = fps[i + 1];
+			if (max_fps < fps[i]) max_fps = fps[i];
 		}
 
 		ms[99] = static_cast<float>(last_ms_count);
@@ -55,7 +57,7 @@ void RE_Time::DrawEditorGraphs()
 
 	char title[25];
 	EA::StdC::Snprintf(title, 25, "Framerate %.1f", fps[99]);
-	ImGui::PlotHistogram("##framerate", fps, ((int)(sizeof(fps) / sizeof(*fps))), 0, title, 0.0f, capped_fps < 1.f ? 500.f : capped_fps, ImVec2(310, 100));
+	ImGui::PlotHistogram("##framerate", fps, ((int)(sizeof(fps) / sizeof(*fps))), 0, title, 0.0f, (capped_fps < 1.f ? max_fps : capped_fps) * 1.2f, ImVec2(310, 100));
 	EA::StdC::Snprintf(title, 25, "Milliseconds %.1f", ms[99]);
 	ImGui::PlotHistogram("##milliseconds", ms, ((int)(sizeof(ms) / sizeof(*ms))), 0, title, 0.0f, 40.0f, ImVec2(310, 100));
 

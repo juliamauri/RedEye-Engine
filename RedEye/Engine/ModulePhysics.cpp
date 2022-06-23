@@ -129,23 +129,20 @@ void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const
 
 void ModulePhysics::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("Physics"))
+	ImGui::Text("Updates/s: %.1f", updates_per_s);
+
+	int type = static_cast<int>(mode);
+	if (ImGui::Combo("Update Mode", &type, "Engine Par\0Fixed Update\0Fixed Time Step\0"))
+		mode = static_cast<UpdateMode>(type);
+
+	if (type)
 	{
-		ImGui::Text("Updates/s: %.1f", updates_per_s);
-
-		int type = static_cast<int>(mode);
-		if (ImGui::Combo("Update Mode", &type, "Engine Par\0Fixed Update\0Fixed Time Step\0"))
-			mode = static_cast<UpdateMode>(type);
-
-		if (type)
-		{
-			float period = 1.f / fixed_dt;
-			if (ImGui::DragFloat("Dt", &period, 1.f, 1.f, 480.f, "%.0f"))
-				fixed_dt = 1.f / period;
-		}
-
-		particles.DrawEditor();
+		float period = 1.f / fixed_dt;
+		if (ImGui::DragFloat("Dt", &period, 1.f, 1.f, 480.f, "%.0f"))
+			fixed_dt = 1.f / period;
 	}
+
+	particles.DrawEditor();
 }
 
 RE_ParticleEmitter* ModulePhysics::AddEmitter(RE_ParticleEmitter* to_add)

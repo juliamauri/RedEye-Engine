@@ -93,7 +93,7 @@ private:
 
 	// Profiling
 	bool pause_plotting = false;
-	float fps[100] = {}, ms[100] = {};
+	float fps[100] = {}, max_fps = 0.f, ms[100] = {};
 };
 
 #endif // !_RE_TIME_H__

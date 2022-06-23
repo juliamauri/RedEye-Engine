@@ -144,54 +144,51 @@ void ModuleAudio::CleanUp()
 
 void ModuleAudio::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("Audio"))
+	static eastl::string rootPath = RE_FS->GetExecutableDirectory();
+	static eastl::string tempPath = audioBanksFolderPath;
+	static bool pathChanged = false;
+
+	if (audioBanksFolderPath == "NONE SELECTED") {
+		ImGui::Text("PATH NONE SELECTED");
+		located_banksFolder = false;
+	}
+	else {
+		ImGui::Text("The actual audio bank Path is: \n%s%s \n", rootPath.c_str(), audioBanksFolderPath.c_str());
+		ImGui::Text((located_SoundBanksInfo) ? "SoundBanksInfo.json located at:\n%s\\Windows\\SoundBanksInfo.json" : "Don't located SoundBanksInfo.json.", audioBanksFolderPath.c_str());
+		ImGui::Text((initBnkLoaded) ? "Init.bnk is loaded." : "Init.bnk culdn't be loaded.");
+		located_banksFolder = true;
+	}
+
+	ImGui::Separator();
+
+	if (ImGui::InputText("Audio Bank Folder Name (path root is project folder)", &tempPath))
 	{
-		static eastl::string rootPath = RE_FS->GetExecutableDirectory();
-		static eastl::string tempPath = audioBanksFolderPath;
-		static bool pathChanged = false;
+		if (tempPath != audioBanksFolderPath)
+			pathChanged = true;
+		else if (tempPath == audioBanksFolderPath)
+			pathChanged = false;
+	}
 
-		if (audioBanksFolderPath == "NONE SELECTED") {
-			ImGui::Text("PATH NONE SELECTED");
-			located_banksFolder = false;
-		}
-		else {
-			ImGui::Text("The actual audio bank Path is: \n%s%s \n", rootPath.c_str(), audioBanksFolderPath.c_str());
-			ImGui::Text((located_SoundBanksInfo) ? "SoundBanksInfo.json located at:\n%s\\Windows\\SoundBanksInfo.json" : "Don't located SoundBanksInfo.json.", audioBanksFolderPath.c_str());
-			ImGui::Text((initBnkLoaded) ? "Init.bnk is loaded." : "Init.bnk culdn't be loaded.");
-			located_banksFolder = true;
-		}
+	if (pathChanged) {
+		ImGui::Text("The path will changed to:\n%s%s\\ \n", rootPath.c_str(), tempPath.c_str());
+		if (ImGui::Button("Check and Apply Path")) {
 
-		ImGui::Separator();
+			App->log.ScopeProcedureLogging();
 
-		if (ImGui::InputText("Audio Bank Folder Name (path root is project folder)", &tempPath))
-		{
-			if (tempPath != audioBanksFolderPath)
-				pathChanged = true;
-			else if(tempPath == audioBanksFolderPath)
-				pathChanged = false;
-		}
+			if (tempPath[tempPath.size()] != '\\') tempPath += "\\";
 
-		if (pathChanged) {
-			ImGui::Text("The path will changed to:\n%s%s\\ \n", rootPath.c_str(), tempPath.c_str());
-			if (ImGui::Button("Check and Apply Path")) {
-
-				App->log.ScopeProcedureLogging();
-
-				if (tempPath[tempPath.size()] != '\\') tempPath += "\\";
-
-				if (RE_FS->ExistsOnOSFileSystem((rootPath + tempPath).c_str()))
-				{
-					audioBanksFolderPath = tempPath;
-				}
-				else
-				{
-					RE_LOG_ERROR("This Folder don't exist: \n%s%s", rootPath.c_str(), tempPath.c_str());
-					tempPath = audioBanksFolderPath;
-				}
-
-				App->log.EndScope();
-				pathChanged = false;
+			if (RE_FS->ExistsOnOSFileSystem((rootPath + tempPath).c_str()))
+			{
+				audioBanksFolderPath = tempPath;
 			}
+			else
+			{
+				RE_LOG_ERROR("This Folder don't exist: \n%s%s", rootPath.c_str(), tempPath.c_str());
+				tempPath = audioBanksFolderPath;
+			}
+
+			App->log.EndScope();
+			pathChanged = false;
 		}
 	}
 }

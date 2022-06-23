@@ -39,15 +39,13 @@ void ConfigWindow::Draw(bool secondary)
 		}
 
 		if (ImGui::CollapsingHeader("Time Profiling")) RE_TIME->DrawEditorGraphs();
-
-		RE_INPUT->DrawEditor();
-		RE_WINDOW->DrawEditor();
-		RE_SCENE->DrawEditor();
-		RE_PHYSICS->DrawEditor();
-		RE_EDITOR->DrawEditor();
-		RE_RENDER->DrawEditor();
-		RE_AUDIO->DrawEditor();
-
+		if (ImGui::CollapsingHeader("Input")) RE_INPUT->DrawEditor();
+		if (ImGui::CollapsingHeader("Window")) RE_WINDOW->DrawEditor();
+		if (ImGui::CollapsingHeader("Scene")) RE_SCENE->DrawEditor();
+		if (ImGui::CollapsingHeader("Physics")) RE_PHYSICS->DrawEditor();
+		if (ImGui::CollapsingHeader("Editor")) RE_EDITOR->DrawEditor();
+		if (ImGui::CollapsingHeader("Renderer3D")) RE_RENDER->DrawEditor();
+		if (ImGui::CollapsingHeader("Audio")) RE_AUDIO->DrawEditor();
 		if (ImGui::CollapsingHeader("File System")) RE_FS->DrawEditor();
 		if (ImGui::CollapsingHeader("Hardware")) RE_HARDWARE->DrawEditor();
 

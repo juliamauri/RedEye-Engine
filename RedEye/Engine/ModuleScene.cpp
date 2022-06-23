@@ -110,91 +110,85 @@ void ModuleScene::CleanUp()
 
 void ModuleScene::DrawEditor()
 {
-	if (ImGui::CollapsingHeader("Scene"))
+	int total_count = scenePool.TotalGameObjects();
+	int static_count = static_tree.GetCount();
+	int dynamic_count = dynamic_tree.GetCount();
+	static_count = static_count <= 1 ? static_count : (static_count - 1) / 2;
+	dynamic_count = dynamic_count <= 1 ? dynamic_count : (dynamic_count - 1) / 2;
+	ImGui::Text("Total Scene GOs: %i", total_count);
+	ImGui::Text("Total Active: %i", static_count + dynamic_count);
+	ImGui::Text(" - Static: %i", static_count);
+	ImGui::Text(" - Non Static: %i", dynamic_count);
+	ImGui::Text("Total Inacive: %i", total_count - (static_count + dynamic_count));
+
+	if (ImGui::TreeNodeEx("Transforms", ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
 	{
-		int total_count = scenePool.TotalGameObjects();
-		int static_count = static_tree.GetCount();
-		int dynamic_count = dynamic_tree.GetCount();
-		static_count = static_count <= 1 ? static_count : (static_count - 1) / 2;
-		dynamic_count = dynamic_count <= 1 ? dynamic_count : (dynamic_count - 1) / 2;
-		ImGui::Text("Total Scene GOs: %i", total_count);
-		ImGui::Text("Total Active: %i", static_count + dynamic_count);
-		ImGui::Text(" - Static: %i", static_count);
-		ImGui::Text(" - Non Static: %i", dynamic_count);
-		ImGui::Text("Total Inacive: %i", total_count - (static_count + dynamic_count));
+		eastl::vector<GO_UID> allTransforms = GetScenePool()->GetAllGOUIDs();
 
-		if (ImGui::TreeNodeEx("Transforms", ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
-		{
-			eastl::vector<GO_UID> allTransforms = GetScenePool()->GetAllGOUIDs();
+		int transformCount = allTransforms.size();
+		ImGui::Text("Total %i transforms.", transformCount);
+		ImGui::SameLine();
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
+		static int range = 0, totalShowing = 8;
+		ImGui::SameLine();
 
-			int transformCount = allTransforms.size();
-			ImGui::Text("Total %i transforms.", transformCount);
-			ImGui::SameLine();
-			ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
-			static int range = 0, totalShowing = 8;
-			ImGui::SameLine();
+		ImGui::Text("Actual Range: %i - %i", range, (range + totalShowing < transformCount) ? range + totalShowing : transformCount);
 
-			ImGui::Text("Actual Range: %i - %i", range, (range + totalShowing < transformCount) ? range + totalShowing : transformCount);
+		ImGui::PushItemWidth(50.f);
+		ImGui::DragInt("Position", &range, 1.f, 0, transformCount - totalShowing);
+		ImGui::SameLine();
+		ImGui::DragInt("List Size", &totalShowing, 1.f, 0);
 
-			ImGui::PushItemWidth(50.f);
-			ImGui::DragInt("Position", &range, 1.f, 0, transformCount - totalShowing);
-			ImGui::SameLine();
-			ImGui::DragInt("List Size", &totalShowing, 1.f, 0);
+		if (ImGui::BeginTable("transformTable", 1, ImGuiTableFlags_::ImGuiTableFlags_BordersH | ImGuiTableFlags_Hideable)) {
+			ImGui::TableNextColumn();
+			for (int i = range; i < totalShowing + range && i < transformCount; i++) {
+				RE_CompTransform* transform = GetGOPtr(allTransforms[i])->GetTransformPtr();
 
-			if (ImGui::BeginTable("transformTable", 1, ImGuiTableFlags_::ImGuiTableFlags_BordersH | ImGuiTableFlags_Hideable)) {
-				ImGui::TableNextColumn();
-				for (int i = range; i < totalShowing + range && i < transformCount; i++) {
-					RE_CompTransform* transform = GetGOPtr(allTransforms[i])->GetTransformPtr();
+				ImGui::Text(("Name: " + transform->GetGOPtr()->name).c_str());
 
-					ImGui::Text(("Name: " + transform->GetGOPtr()->name).c_str());
+				if (ImGui::BeginTable("transformsTableNested", 2, ImGuiTableFlags_Hideable))
+				{
+					ImGui::TableSetupColumn("Local Transform:");
+					ImGui::TableSetupColumn("Global Transform:");
+					ImGui::TableHeadersRow();
+					ImGui::TableNextRow(ImGuiTableRowFlags_None);
 
-					if (ImGui::BeginTable("transformsTableNested", 2, ImGuiTableFlags_Hideable))
-					{
-						ImGui::TableSetupColumn("Local Transform:");
-						ImGui::TableSetupColumn("Global Transform:");
-						ImGui::TableHeadersRow();
-						ImGui::TableNextRow(ImGuiTableRowFlags_None);
-
-						ImGui::TableNextColumn();
-
-						static math::vec pos, rotE, scl;
-						static math::float3x3 rot;
-
-						static math::float4x4 localM;
-						localM = transform->GetLocalMatrix().Transposed();
-						localM.Decompose(pos, rot, scl);
-						rotE = rot.ToEulerXYZ();
-						ImGui::Text("Position:");
-						ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
-						ImGui::Text("Rotation:");
-						ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
-						ImGui::Text("Scale:");
-						ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
-
-						ImGui::TableNextColumn();
-
-						static math::float4x4 globalM;
-						globalM = transform->GetGlobalMatrix().Transposed();
-						globalM.Decompose(pos, rot, scl);
-						rotE = rot.ToEulerXYZ();
-						ImGui::Text("Position:");
-						ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
-						ImGui::Text("Rotation:");
-						ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
-						ImGui::Text("Scale:");
-						ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
-
-						ImGui::EndTable();
-					}
 					ImGui::TableNextColumn();
+
+					static math::vec pos, rotE, scl;
+					static math::float3x3 rot;
+
+					static math::float4x4 localM;
+					localM = transform->GetLocalMatrix().Transposed();
+					localM.Decompose(pos, rot, scl);
+					rotE = rot.ToEulerXYZ();
+					ImGui::Text("Position:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
+					ImGui::Text("Rotation:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
+					ImGui::Text("Scale:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+
+					ImGui::TableNextColumn();
+
+					static math::float4x4 globalM;
+					globalM = transform->GetGlobalMatrix().Transposed();
+					globalM.Decompose(pos, rot, scl);
+					rotE = rot.ToEulerXYZ();
+					ImGui::Text("Position:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
+					ImGui::Text("Rotation:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
+					ImGui::Text("Scale:");
+					ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+
+					ImGui::EndTable();
 				}
-				ImGui::EndTable();
+				ImGui::TableNextColumn();
 			}
-
-
-
-			ImGui::TreePop();
+			ImGui::EndTable();
 		}
+		ImGui::TreePop();
 	}
 }
 
