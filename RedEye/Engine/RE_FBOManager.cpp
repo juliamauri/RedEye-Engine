@@ -377,4 +377,6 @@ void RE_FBOManager::LoadDeferredTextures(RE_FBO& fbo)
 	// Bind Attachments
 	unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
 	glDrawBuffers(5, attachments);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

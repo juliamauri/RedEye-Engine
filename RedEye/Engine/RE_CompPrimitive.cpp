@@ -509,6 +509,7 @@ void RE_CompParametric::Draw() const
 	RE_GLCache::ChangeVAO(VAO);
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
 	RE_GLCache::ChangeVAO(0);
+	RE_GLCache::ChangeTextureBind(0);
 }
 
 void RE_CompParametric::DrawProperties()

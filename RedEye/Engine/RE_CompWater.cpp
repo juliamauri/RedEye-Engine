@@ -145,6 +145,7 @@ void RE_CompWater::Draw() const
 	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, nullptr);
 	RE_GLCache::ChangeVAO(0);
 	RE_GLCache::ChangeShader(0);
+	RE_GLCache::ChangeTextureBind(0);
 }
 
 void RE_CompWater::DrawProperties()

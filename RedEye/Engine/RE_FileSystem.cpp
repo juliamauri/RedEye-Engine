@@ -320,9 +320,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				case F_MODEL:	 newRes = RE_RES->ImportModel(file->path.c_str()); break;
 				case F_TEXTURE:	 newRes = RE_RES->ImportTexture(file->path.c_str()); break;
 				case F_MATERIAL: newRes = RE_RES->ImportMaterial(file->path.c_str()); break;
-
 				case F_SKYBOX:	 newRes = RE_RES->ImportSkyBox(file->path.c_str()); break;
-
 				case F_PREFAB:	 newRes = RE_RES->ImportPrefab(file->path.c_str()); break;
 				case F_SCENE:	 newRes = RE_RES->ImportScene(file->path.c_str()); break; 
 				case F_PARTICLEEMISSOR:	 newRes = RE_RES->ImportParticleEmissor(file->path.c_str()); break; 

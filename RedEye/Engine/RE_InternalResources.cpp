@@ -64,6 +64,7 @@ void RE_InternalResources::InitChecker()
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	RE_GLCache::ChangeTextureBind(0);
 }
 
 bool RE_InternalResources::InitShaders()

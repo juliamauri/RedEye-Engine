@@ -247,6 +247,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 	}
 
 	RE_GLCache::ChangeShader(0);
+	RE_GLCache::ChangeTextureBind(0);
 }
 
 void RE_Mesh::Draw()

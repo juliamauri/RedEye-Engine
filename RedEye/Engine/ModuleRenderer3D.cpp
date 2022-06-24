@@ -1240,6 +1240,8 @@ void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
 
 	internalCamera->SetFOV(math::RadToDeg(0.523599f));
 	internalCamera->Update();
+	internalCamera->GetTransform()->SetPosition({ 0.0f,1.0f,5.0f });
+	internalCamera->Update();
 	internalCamera->GetTransform()->SetRotation({ math::DegToRad(45.0f),0.0f,0.0f});
 	internalCamera->Update();
 	math::AABB box = go->GetGlobalBoundingBoxWithChilds();
@@ -1294,11 +1296,11 @@ void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
 
 	mat->UploadToShader(math::float4x4::identity.ptr(), false, true);
 
-	//RE_GLCache::ChangeShader(dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID());
 	RE_GLCache::ChangeVAO(mat_vao);
 	glDrawElements(GL_TRIANGLES, mat_triangles * 3, GL_UNSIGNED_SHORT, 0);
 	RE_GLCache::ChangeVAO(0);
 	RE_GLCache::ChangeShader(0);
+	RE_GLCache::ChangeTextureBind(0);
 }
 
 void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)

@@ -117,6 +117,7 @@ void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int s
 		if(settings.min_filter >= RE_TextureFilters::RE_NEAREST_MIPMAP_NEAREST)
 			glGenerateMipmap(GL_TEXTURE_2D);
 
+		RE_GLCache::ChangeTextureBind(0);
 		ilBindImage(0);
 		/* Delete used resources*/
 		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
