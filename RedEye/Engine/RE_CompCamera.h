@@ -22,6 +22,8 @@ public:
 	RE_CompCamera();
 	~RE_CompCamera();
 
+	friend class ModuleEditor;
+
 	void SetProperties(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 0.523599f, short aspect_ratio_t = 0, bool draw_frustum = true, bool usingSkybox = true, const char* skyboxMD5 = nullptr);
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
 	

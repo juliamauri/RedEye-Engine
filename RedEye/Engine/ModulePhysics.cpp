@@ -3,6 +3,7 @@
 #include "RE_Profiler.h"
 #include "Application.h"
 #include "ModuleScene.h"
+#include "RE_FileSystem.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_Time.h"
 #include "RE_CompCamera.h"
@@ -143,6 +144,27 @@ void ModulePhysics::DrawEditor()
 	}
 
 	particles.DrawEditor();
+}
+
+void ModulePhysics::Load()
+{
+	RE_PROFILE(PROF_Load, PROF_ModuleWindow);
+	RE_LOG_SECONDARY("Loading Physics propieties from config:");
+	RE_Json* node = RE_FS->ConfigNode("Physics");
+
+	mode = static_cast<UpdateMode>(node->PullInt("UpdateMode", static_cast<int>(UpdateMode::FIXED_UPDATE)));
+
+	DEL(node);
+}
+
+void ModulePhysics::Save() const
+{
+	RE_PROFILE(PROF_Save, PROF_ModulePhysics);
+	RE_Json* node = RE_FS->ConfigNode("Physics");
+
+	node->PushInt("UpdateMode", static_cast<int>(mode));
+
+	DEL(node);
 }
 
 RE_ParticleEmitter* ModulePhysics::AddEmitter(RE_ParticleEmitter* to_add)

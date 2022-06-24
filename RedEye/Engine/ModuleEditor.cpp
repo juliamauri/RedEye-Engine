@@ -10,6 +10,7 @@
 #include "ModuleWindow.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
+#include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
 #include "RE_CommandManager.h"
 #include "RE_ThumbnailManager.h"
@@ -541,6 +542,102 @@ void ModuleEditor::DrawEditor()
 		ImGui::Checkbox("Draw Camera Fustrums", &draw_cameras);
 		if (draw_cameras) ImGui::ColorEdit3("Color Fustrum", frustum_color);
 	}
+}
+
+void ModuleEditor::Load()
+{
+	RE_PROFILE(PROF_Load, PROF_ModuleWindow);
+	RE_LOG_SECONDARY("Loading Editor propieties from config:");
+	RE_Json* node = RE_FS->ConfigNode("Editor");
+
+	cam_speed = node->PullFloat("C_Speed", 25.0f);
+	cam_sensitivity = node->PullFloat("C_Sensitivity", 0.01f);
+
+	//Editor Camera
+	RE_CompCamera* editor_camera = RE_CameraManager::EditorCamera();
+
+	editor_camera->draw_frustum = node->PullBool("C_DrawFrustum", true);
+	editor_camera->override_cull = node->PullBool("C_OverrideCull", false);
+
+	math::float2 planes = node->PullFloat("C_Planes", { 1.0f, 5000.0f });
+	editor_camera->SetPlanesDistance(planes.x, planes.y);
+
+	editor_camera->target_ar = static_cast<RE_CompCamera::AspectRatioTYPE>(node->PullInt("C_AspectRatio", static_cast<int>(RE_CompCamera::AspectRatioTYPE::Fit_Window)));
+	editor_camera->isPerspective = node->PullBool("C_Prespective", true);
+	editor_camera->SetFOV(math::RadToDeg(node->PullFloat("C_VerticalFOV", math::DegToRad(30.0f))));
+	//------------------
+
+	select_on_mc = node->PullBool("SelectMouseClick", true);
+	focus_on_select = node->PullBool("FocusOnSelect", false);
+
+	debug_drawing = node->PullBool("DebugDraw", true);
+
+	grid->SetActive(node->PullBool("Grid_Draw", true));
+
+	math::float2 grid_size_vec = node->PullFloat("Grid_Size", { 1.0f, 1.0f });
+	memcpy_s(grid_size, sizeof(float) * 2, grid_size_vec.ptr(), sizeof(float) * 2);
+	grid->GetTransformPtr()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
+	grid->GetTransformPtr()->Update();
+
+	aabb_drawing = static_cast<AABBDebugDrawing>(node->PullInt("AABB_Drawing", static_cast<int>(AABBDebugDrawing::ALL_AND_SELECTED)));
+
+	math::vec temp_color = node->PullFloatVector("AABB_Selected_Color", { 0.0f, 1.0f, 0.0f });
+	memcpy_s(all_aabb_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
+
+	temp_color = node->PullFloatVector("AABB_Color", { 1.0f, 0.5f, 0.0f });
+	memcpy_s(sel_aabb_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
+
+	draw_quad_tree = node->PullBool("QuadTree_Draw", true);
+
+	temp_color = node->PullFloatVector("Quadtree_Color", { 1.0f, 1.0f, 0.0f });
+	memcpy_s(quad_tree_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
+
+	draw_cameras = node->PullBool("Frustum_Draw", true);
+
+	temp_color = node->PullFloatVector("Frustum_Color", { 0.0f, 1.0f, 1.0f });
+	memcpy_s(frustum_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
+
+	DEL(node);
+}
+
+void ModuleEditor::Save() const
+{
+	RE_PROFILE(PROF_Save, PROF_ModuleWindow);
+	RE_Json* node = RE_FS->ConfigNode("Editor");
+
+	node->PushFloat("C_Speed", cam_speed);
+	node->PushFloat("C_Sensitivity", cam_sensitivity);
+
+	//Editor Camera
+	RE_CompCamera* editor_camera = RE_CameraManager::EditorCamera();
+	node->PushBool("C_DrawFrustum", editor_camera->draw_frustum);
+	node->PushBool("C_OverrideCull", editor_camera->override_cull);
+	node->PushFloat("C_Planes", { editor_camera->GetNearPlane(), editor_camera->GetFarPlane() });
+	node->PushInt("C_AspectRatio", static_cast<int>(editor_camera->target_ar));
+	node->PushBool("C_Prespective", editor_camera->isPerspective);
+	node->PushFloat("C_VerticalFOV", editor_camera->v_fov_rads);
+	//------------------
+
+	node->PushBool("SelectMouseClick", select_on_mc);
+	node->PushBool("FocusOnSelect", focus_on_select);
+
+	node->PushBool("DebugDraw", debug_drawing);
+
+	node->PushBool("Grid_Draw", grid->IsActive());
+	node->PushFloat("Grid_Size", { grid_size[0], grid_size[0]});
+
+	node->PushInt("AABB_Drawing", static_cast<int>(aabb_drawing));
+
+	node->PushFloatVector("AABB_Selected_Color", { all_aabb_color[0], all_aabb_color[1], all_aabb_color[2] });
+	node->PushFloatVector("AABB_Color", { sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2] });
+
+	node->PushBool("QuadTree_Draw", draw_quad_tree);
+	node->PushFloatVector("Quadtree_Color", { quad_tree_color[0], quad_tree_color[1], quad_tree_color[2] });
+
+	node->PushBool("Frustum_Draw", draw_cameras);
+	node->PushFloatVector("Frustum_Color", { frustum_color[0], frustum_color[1], frustum_color[2] });
+
+	DEL(node);
 }
 
 void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const

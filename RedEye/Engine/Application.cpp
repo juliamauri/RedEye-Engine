@@ -239,7 +239,9 @@ void Application::LoadConfig()
 
 	RE_PROFILE(PROF_Load, PROF_Application);
 	window->Load();
+	editor->Load();
 	renderer->Load();
+	physics->Load();
 	audio->Load();
 }
 
@@ -249,7 +251,9 @@ void Application::SaveConfig()
 
 	RE_PROFILE(PROF_Save, PROF_Application);
 	window->Save();
+	editor->Save();
 	renderer->Save();
+	physics->Save();
 	audio->Save();
 
 	fs->SaveConfig();

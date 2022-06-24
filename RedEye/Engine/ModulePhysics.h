@@ -25,6 +25,9 @@ public:
 	void DrawDebug(RE_CompCamera* current_camera) const;
 	void DrawEditor();
 
+	void Load();
+	void Save() const;
+
 	RE_ParticleEmitter* AddEmitter(RE_ParticleEmitter* to_add);
 	void RemoveEmitter(RE_ParticleEmitter* emitter);
 

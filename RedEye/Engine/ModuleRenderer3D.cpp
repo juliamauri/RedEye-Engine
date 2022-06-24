@@ -462,12 +462,22 @@ void ModuleRenderer3D::DrawEditor()
 				render_views[i].light = LightMode(light);
 			ImGui::PopID();
 
+			ImGui::PushID(eastl::string("clearcolor" + eastl::to_string(i)).c_str());
+			ImGui::ColorEdit4("Clear Color", render_views[i].clear_color.ptr(), ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
+			ImGui::PopID();
+
 			for (short count = 0; count < 12; ++count)
 			{
 				bool temp = (render_views[i].flags & (1 << count));
 				ImGui::PushID(eastl::string(RenderView::labels[count] + eastl::to_string(i)).c_str());
 				if (ImGui::Checkbox(RenderView::labels[count], &temp))
 					temp ? render_views[i].flags |= (1 << count) : render_views[i].flags -= (1 << count);
+				ImGui::PopID();
+			}
+
+			if (render_views[i].flags & (1 << 11)) {
+				ImGui::PushID(eastl::string("clipdistance" + eastl::to_string(i)).c_str());
+				ImGui::DragFloat4("Clip Distance", render_views[i].clip_distance.ptr(), 0.1f);
 				ImGui::PopID();
 			}
 
@@ -482,22 +492,64 @@ void ModuleRenderer3D::Load()
 	RE_LOG_SECONDARY("Loading Render3D config values:");
 	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
 
-	SetVSync(node->PullBool("vsync", vsync));
+	SetVSync(node->PullBool("vsync", true));
 	RE_LOG_TERCIARY((vsync) ? "VSync enabled." : "VSync disabled");
+
+	if(shareLightPass = node->PullBool("share_light_pass", false))
+		RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader())->UnloadMemory();
+
+	for (unsigned int i = 0; i < render_views.size(); ++i)
+	{
+		eastl::string view_id("RV_");
+		view_id += render_views[i].name.c_str();
+
+		static bool DEFAULT_SV_flags[12] = { true, true, true, false, true, true, false, true, true, true, true, false },
+					DEFAULT_GV_flags[12] = { true, false, false, false, true, true, false, true, true, true, true, false },
+					DEFAULT_PV_flags[12] = { false, false, false, false, false, true, false, true, true, true, true, false };
+		bool flag_temp = false, pull_flag_temp = false;
+		int i2 = 0;
+		switch (i)
+		{
+		case 1: //Game view
+			render_views[i].light = static_cast<LightMode>(node->PullInt(eastl::string(view_id + "-LightMode").c_str(), static_cast<int>(LightMode::LIGHT_DEFERRED)));
+
+			for (i2 = 0; i2 < 12; ++i2) {
+				flag_temp = (render_views[i].flags & (1 << i2));
+				if((pull_flag_temp = node->PullBool(eastl::string(view_id + "-" + RenderView::labels[i2]).c_str(), DEFAULT_GV_flags[i2]) != flag_temp))
+					pull_flag_temp ? render_views[i].flags |= (1 << i2) : render_views[i].flags -= (1 << i2);
+			}
+
+			break;
+
+		case 2: // Particle Editor view
+			render_views[i].light = static_cast<LightMode>(node->PullInt(eastl::string(view_id + "-LightMode").c_str(), static_cast<int>(LightMode::LIGHT_DISABLED)));
+
+			for (i2 = 0; i2 < 12; ++i2) {
+				flag_temp = (render_views[i].flags & (1 << i2));
+				if ((pull_flag_temp = node->PullBool(eastl::string(view_id + "-" + RenderView::labels[i2]).c_str(), DEFAULT_PV_flags[i2]) != flag_temp))
+					pull_flag_temp ? render_views[i].flags |= (1 << i2) : render_views[i].flags -= (1 << i2);
+			}
+
+			break;
+
+		default: // Scene & undefined views
+			render_views[i].light = static_cast<LightMode>(node->PullInt(eastl::string(view_id + "-LightMode").c_str(), static_cast<int>(LightMode::LIGHT_DISABLED)));
+
+			for (i2 = 0; i2 < 12; ++i2) {
+				flag_temp = (render_views[i].flags & (1 << i2));
+				if ((pull_flag_temp = node->PullBool(eastl::string(view_id + "-" + RenderView::labels[i2]).c_str(), DEFAULT_SV_flags[i2]) != flag_temp))
+					pull_flag_temp ? render_views[i].flags |= (1 << i2) : render_views[i].flags -= (1 << i2);
+			}
+
+			break;
+		}
+
+		render_views[i].clear_color = node->PullFloat4(eastl::string(view_id + "-ClearColor").c_str(), { 0.0f, 0.0f, 0.0f, 1.0f });
+		render_views[i].clip_distance = node->PullFloat4(eastl::string(view_id + "-ClipDistance").c_str(), math::float4::zero);
+	}
 
 	DEL(node);
 
-	//TODO RUB: Load render view loading
-	/*for (int i = 0; i < render_views.size(); ++i)
-	{
-		render_views[i].name = node->PullString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
-		render_views[i].light = LightMode(node->PullInt(eastl::string(render_views[i].name + " - lightmode").c_str(), render_views[i].light));
-
-		render_views[i].flags = 0;
-		for (int i2 = 0; i2 < 11; ++i2)
-			if (node->PullBool(eastl::string(render_views[i].name + " - " + RenderView::labels[i2]).c_str(), render_views[i].flags & (1 << i2)))
-				render_views[i].flags &= (1 << i2);
-	}*/
 }
 
 void ModuleRenderer3D::Save() const
@@ -505,13 +557,21 @@ void ModuleRenderer3D::Save() const
 	RE_PROFILE(PROF_Save, PROF_ModuleRender);
 	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
 	node->PushBool("vsync", vsync);
+
+	node->PullBool("share_light_pass", shareLightPass);
+
 	for (unsigned int i = 0; i < render_views.size(); ++i)
 	{
-		node->PushString((eastl::string("Render view ") + eastl::to_string(i)).c_str(), render_views[i].name.c_str());
-		node->PushInt(eastl::string(render_views[i].name + " - lightmode").c_str(), int(render_views[i].light));
+		eastl::string view_id("RV_");
+		view_id += render_views[i].name.c_str();
 
-		for (int i2 = 0; i2 < 11; ++i2)
-			node->PushBool(eastl::string(render_views[i].name + " - " + RenderView::labels[i2]).c_str(), render_views[i].flags & (1 << i2));
+		node->PushInt(eastl::string(view_id + "-LightMode").c_str(), static_cast<int>(render_views[i].light));
+
+		for (int i2 = 0; i2 < 12; ++i2)
+			node->PushBool(eastl::string(view_id + "-" + RenderView::labels[i2]).c_str(), render_views[i].flags & (1 << i2));
+
+		node->PushFloat4(eastl::string(view_id + "-ClearColor").c_str(), render_views[i].clear_color);
+		node->PushFloat4(eastl::string(view_id + "-ClipDistance").c_str(), render_views[i].clip_distance);
 	}
 	DEL(node);
 }

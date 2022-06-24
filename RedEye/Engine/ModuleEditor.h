@@ -19,6 +19,9 @@ public:
 	void RecieveEvent(const Event& e) override;
 	void DrawEditor();
 
+	void Load();
+	void Save() const;
+
 	// Draws
 	void Draw() const;
 	void DrawDebug(class RE_CompCamera* current_camera) const;
