@@ -139,6 +139,7 @@ private:
 	eastl::stack<RE_ProcessPath*> meta_to_process_last;
 
 	eastl::vector<RE_Meta*> metaToFindFile;
+	eastl::stack<RE_Meta*> reloadResourceMeta;
 	eastl::vector<RE_File*> filesToFindMeta;
 	eastl::vector<RE_Meta*> metaRecentlyAdded;
 

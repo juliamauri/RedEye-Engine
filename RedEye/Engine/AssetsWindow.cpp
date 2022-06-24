@@ -80,7 +80,7 @@ void AssetsWindow::Draw(bool secondary)
 				{
 				case RE_FileSystem::PathType::D_FOLDER:
 				{
-					if (ImGui::ImageButton(reinterpret_cast<void*>(RE_EDITOR->thumbnails->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+					if (ImGui::ImageButton(reinterpret_cast<void*>(RE_EDITOR->thumbnails->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 						toChange = p->AsDirectory();
 					ImGui::PopID();
 					ImGui::Text(p->AsDirectory()->name.c_str());
@@ -96,13 +96,13 @@ void AssetsWindow::Draw(bool secondary)
 
 						unsigned int icon_meta = (res->GetType() == R_SHADER) ? RE_EDITOR->thumbnails->GetShaderFileID() : RE_EDITOR->thumbnails->GetPEmitterFileID();
 
-						if (ImGui::ImageButton(reinterpret_cast<void*>(icon_meta), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+						if (ImGui::ImageButton(reinterpret_cast<void*>(icon_meta), { iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 							RE_RES->PushSelected(res->GetMD5(), true);
 
 						if (ImGui::BeginDragDropSource())
 						{
 							ImGui::SetDragDropPayload((res->GetType() == R_SHADER) ? "#ShadereReference" : "#EmitterReference", &p->AsMeta()->resource, sizeof(const char**));
-							ImGui::Image(reinterpret_cast<void*>(icon_meta), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+							ImGui::Image(reinterpret_cast<void*>(icon_meta), { 50,50 }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 							ImGui::EndDragDropSource();
 						}
 						ImGui::PopID();
@@ -130,7 +130,7 @@ void AssetsWindow::Draw(bool secondary)
 
 						if (ImGui::ImageButton(
 							reinterpret_cast<void*>(selectingUndefFile ? RE_EDITOR->thumbnails->GetSelectFileID() : RE_EDITOR->thumbnails->GetFileID()),
-							{ iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, (selectingUndefFile) ? -1 : 0))
+							{ iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, (selectingUndefFile) ? -1 : 0))
 						{
 							if (selectingUndefFile)
 							{
@@ -186,7 +186,7 @@ void AssetsWindow::Draw(bool secondary)
 							default: file_icon = RE_EDITOR->thumbnails->At(res->GetMD5()); break;
 							}
 
-							if (ImGui::ImageButton(reinterpret_cast<void*>(file_icon), { iconsSize, iconsSize }, { 0.0f, 0.0f }, { 1.0f, 1.0f }, 0))
+							if (ImGui::ImageButton(reinterpret_cast<void*>(file_icon), { iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 								RE_RES->PushSelected(res->GetMD5(), true);
 							ImGui::PopID();
 
@@ -206,7 +206,7 @@ void AssetsWindow::Draw(bool secondary)
 							if (ImGui::BeginDragDropSource())
 							{
 								ImGui::SetDragDropPayload(dragID.c_str(), &p->AsFile()->metaResource->resource, sizeof(const char**));
-								ImGui::Image(reinterpret_cast<void*>(file_icon), { 50,50 }, { 0.0f, 0.0f }, { 1.0f, 1.0f });
+								ImGui::Image(reinterpret_cast<void*>(file_icon), { 50,50 }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 								ImGui::EndDragDropSource();
 							}
 

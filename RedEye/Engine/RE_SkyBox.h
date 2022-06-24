@@ -37,6 +37,8 @@ private:
 	void SaveResourceMeta(RE_Json* metaNode) override;
 	void LoadResourceMeta(RE_Json* metaNode) override;
 
+	bool isNeededResourcesReferenced(RE_Json* metaNode) override;
+
 	void AssetLoad(bool generateLibraryPath = false);
 	void LibraryLoad();
 	void LibrarySave();

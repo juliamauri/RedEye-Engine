@@ -99,6 +99,18 @@ void ResourceContainer::LoadMeta()
 	}
 }
 
+bool ResourceContainer::isNeededResourcesReferenced()
+{
+	bool ret = false;
+	Config metaDeserialize(metaPath.c_str(), RE_FS->GetZipPath());
+	if (metaDeserialize.Load()) {
+		RE_Json* metaNode = metaDeserialize.GetRootNode("meta");
+		ret = isNeededResourcesReferenced(metaNode);
+		DEL(metaNode);
+	}
+	return ret;
+}
+
 void ResourceContainer::DrawPropieties()
 {
 	if (ImGui::CollapsingHeader(eastl::string(propietiesName + name).c_str(), ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen)) {

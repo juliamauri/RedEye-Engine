@@ -186,6 +186,50 @@ void RE_Material::LoadResourceMeta(RE_Json* metaNode)
 	DEL(unknownNode);
 }
 
+bool RE_Material::isNeededResourcesReferenced(RE_Json* metaNode)
+{
+	bool ret = false;
+	eastl::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
+	if (shaderMeta.compare("NOMETAPATH") != 0) {
+		shaderMD5 = RE_RES->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
+
+		if (!shaderMD5) ret = true;
+	}
+
+	RE_Json* diffuseNode = metaNode->PullJObject("DiffuseTextures");
+	if(isNeededResourcesReferencedTexturePull(diffuseNode)) ret = true;
+	DEL(diffuseNode);
+	RE_Json* specularNode = metaNode->PullJObject("SpecularTextures");
+	if (isNeededResourcesReferencedTexturePull(specularNode)) ret = true;
+	DEL(specularNode);
+	RE_Json* ambientNode = metaNode->PullJObject("AmbientTextures");
+	if (isNeededResourcesReferencedTexturePull(ambientNode)) ret = true;
+	DEL(ambientNode);
+	RE_Json* emissiveNode = metaNode->PullJObject("EmissiveTextures");
+	if (isNeededResourcesReferencedTexturePull(emissiveNode)) ret = true;
+	DEL(emissiveNode);
+	RE_Json* opacityNode = metaNode->PullJObject("OpacityTextures");
+	if (isNeededResourcesReferencedTexturePull(opacityNode)) ret = true;
+	DEL(opacityNode);
+	RE_Json* shininessNode = metaNode->PullJObject("ShininessTextures");
+	if (isNeededResourcesReferencedTexturePull(shininessNode)) ret = true;
+	DEL(shininessNode);
+	RE_Json* heightNode = metaNode->PullJObject("HeightTextures");
+	if (isNeededResourcesReferencedTexturePull(heightNode)) ret = true;
+	DEL(heightNode);
+	RE_Json* normalsNode = metaNode->PullJObject("NormalsTextures");
+	if (isNeededResourcesReferencedTexturePull(normalsNode)) ret = true;
+	DEL(normalsNode);
+	RE_Json* reflectionNode = metaNode->PullJObject("ReflectionTextures");
+	if (isNeededResourcesReferencedTexturePull(reflectionNode)) ret = true;
+	DEL(reflectionNode);
+	RE_Json* unknownNode = metaNode->PullJObject("UnknownTextures");
+	if (isNeededResourcesReferencedTexturePull(unknownNode)) ret = true;
+	DEL(unknownNode);
+
+	return ret;
+}
+
 void RE_Material::DrawMaterialEdit()
 {
 	RE_Shader* matShader = dynamic_cast<RE_Shader*>(RE_RES->At(shaderMD5 ? shaderMD5 : RE_RES->internalResources->GetDefaultShader()));
@@ -914,6 +958,20 @@ void RE_Material::PushTexturesJson(RE_Json * texturesNode, eastl::vector<const c
 		idref += eastl::to_string(i).c_str();
 		texturesNode->PushString(idref.c_str(), RE_RES->At(textures->operator[](i))->GetMetaPath());
 	}
+}
+
+bool RE_Material::isNeededResourcesReferencedTexturePull(RE_Json* texturesNode)
+{
+	uint texturesSize = texturesNode->PullInt("Size", 0);
+	for (uint i = 0; i < texturesSize; i++)
+	{
+		eastl::string idref = "MetaPath";
+		idref += eastl::to_string(i).c_str();
+		eastl::string textureMaT = texturesNode->PullString(idref.c_str(), "");
+		const char* textureMD5 = RE_RES->FindMD5ByMETAPath(textureMaT.c_str());
+		if (!textureMD5) return true;
+	}
+	return false;
 }
 
 void RE_Material::BinaryDeserialize()

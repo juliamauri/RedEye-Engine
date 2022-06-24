@@ -58,6 +58,8 @@ public:
 	const char* FindMD5ByAssetsPath(const char* assetsPath, Resource_Type type = Resource_Type::R_UNDEFINED);
 	const char* CheckOrFindMeshOnLibrary(const char* librariPath);
 
+	bool isNeededResoursesLoaded(const char* metaPath, Resource_Type type)const;
+
 	void ThumbnailResources();
 
 	void PushParticleResource(const char* md5);

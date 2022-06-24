@@ -151,6 +151,9 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 								continue;
 							}
 
+							if (RE_RES->isNeededResoursesLoaded(file->path.c_str(), type))
+								reloadResourceMeta.push(metaFile);
+
 							if (type != Resource_Type::R_UNDEFINED)
 								metaFile->resource = RE_RES->ReferenceByMeta(file->path.c_str(), type);
 						}
@@ -270,7 +273,14 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					{
 						iter--;
 						FileType type = (*iter)->fType;
+
+						if (type == R_TEXTURE)
+						{
+							toImport.push_back(file);
+						}
+
 						int count = toImport.size();
+
 						while (count > 1)
 						{
 							if (type == F_PREFAB || type == F_SCENE || type == F_MODEL)
@@ -310,7 +320,9 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				case F_MODEL:	 newRes = RE_RES->ImportModel(file->path.c_str()); break;
 				case F_TEXTURE:	 newRes = RE_RES->ImportTexture(file->path.c_str()); break;
 				case F_MATERIAL: newRes = RE_RES->ImportMaterial(file->path.c_str()); break;
+
 				case F_SKYBOX:	 newRes = RE_RES->ImportSkyBox(file->path.c_str()); break;
+
 				case F_PREFAB:	 newRes = RE_RES->ImportPrefab(file->path.c_str()); break;
 				case F_SCENE:	 newRes = RE_RES->ImportScene(file->path.c_str()); break; 
 				case F_PARTICLEEMISSOR:	 newRes = RE_RES->ImportParticleEmissor(file->path.c_str()); break; 
@@ -348,6 +360,17 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			}
 
 			RE_LOGGER.EndScope();
+		}
+
+		while ((doAll || run) && !reloadResourceMeta.empty())
+		{
+			RE_Meta* metaFile = reloadResourceMeta.top();
+			reloadResourceMeta.pop();
+		
+			RE_RES->At(metaFile->resource)->LoadMeta();
+		
+			//timer
+			if (!doAll && extra_ms < time.Read()) run = false;
 		}
 
 		if ((doAll || run) && !toReImport.empty())

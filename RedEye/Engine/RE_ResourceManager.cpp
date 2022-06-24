@@ -670,6 +670,33 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 	return meshMD5;
 }
 
+bool RE_ResourceManager::isNeededResoursesLoaded(const char* metaPath, Resource_Type type) const
+{
+	bool ret = false;
+
+	ResourceContainer* newContainer = nullptr;
+	switch (type) {
+	case R_SHADER:				newContainer = static_cast<ResourceContainer*>(new RE_Shader(metaPath));				break;
+	case R_TEXTURE:				newContainer = static_cast<ResourceContainer*>(new RE_Texture(metaPath));				break;
+	case R_PREFAB:				newContainer = static_cast<ResourceContainer*>(new RE_Prefab(metaPath));				break;
+	case R_SKYBOX:				newContainer = static_cast<ResourceContainer*>(new RE_SkyBox(metaPath));				break;
+	case R_MATERIAL:			newContainer = static_cast<ResourceContainer*>(new RE_Material(metaPath));				break;
+	case R_MODEL:				newContainer = static_cast<ResourceContainer*>(new RE_Model(metaPath));					break;
+	case R_SCENE:				newContainer = static_cast<ResourceContainer*>(new RE_Scene(metaPath));					break;
+	case R_PARTICLE_EMITTER:	newContainer = static_cast<ResourceContainer*>(new RE_ParticleEmitterBase(metaPath));	break;
+	case R_PARTICLE_EMISSION:	newContainer = static_cast<ResourceContainer*>(new RE_ParticleEmission(metaPath));		break;
+	case R_PARTICLE_RENDER:		newContainer = static_cast<ResourceContainer*>(new RE_ParticleRender(metaPath));		break;
+	}
+
+	if(newContainer)
+	{
+		ret = newContainer->isNeededResourcesReferenced();
+		DEL(newContainer);
+	}
+
+	return ret;
+}
+
 void RE_ResourceManager::ThumbnailResources()
 {
 	RE_PROFILE(PROF_ThumbnailResources, PROF_ResourcesManager);

@@ -61,6 +61,8 @@ public:
 	void SaveMeta();
 	void LoadMeta();
 
+	bool isNeededResourcesReferenced();
+
 	void DrawPropieties();
 
 private:
@@ -68,6 +70,8 @@ private:
 	virtual void Draw() {}
 	virtual void SaveResourceMeta(RE_Json* metaNode) {}
 	virtual void LoadResourceMeta(RE_Json* metaNode) {}
+
+	virtual bool isNeededResourcesReferenced(RE_Json* metaNode) { return false; }
 
 private:
 

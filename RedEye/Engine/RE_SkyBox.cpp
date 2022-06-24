@@ -341,6 +341,22 @@ void RE_SkyBox::LoadResourceMeta(RE_Json* metaNode)
 	restoreSettings = skyBoxSettings;
 }
 
+bool RE_SkyBox::isNeededResourcesReferenced(RE_Json* metaNode)
+{
+
+	RE_Json* nodeTex = metaNode->PullJObject("textures");
+	for (uint i = 0; i < 6; i++)
+	{
+		eastl::string key(texturesname[i]);
+		eastl::string texMD5 = nodeTex->PullString(eastl::string(key + "textureMD5").c_str(), "");
+		skyBoxSettings.textures[i].textureMD5 = RE_RES->IsReference(texMD5.c_str(), Resource_Type::R_TEXTURE);
+
+		if (!skyBoxSettings.textures[i].textureMD5) return true;
+	}
+
+	return false;
+}
+
 void RE_SkyBox::Import(bool keepInMemory)
 {
 	AssetLoad(true);
