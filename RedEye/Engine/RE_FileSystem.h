@@ -5,6 +5,7 @@
 #include <EASTL\vector.h>
 #include <EASTL\stack.h>
 #include <EASTL\string.h>
+#include <EASTL\priority_queue.h>
 
 class Config;
 class RE_Json;
@@ -18,7 +19,7 @@ class RE_FileSystem
 public:
 
 	enum PathType { D_NULL = -1, D_FOLDER, D_FILE };
-	enum FileType { F_NOTSUPPORTED = -1, F_NONE, F_MODEL, F_TEXTURE, F_MATERIAL, F_SKYBOX, F_PREFAB, F_SCENE, F_PARTICLEEMISSOR, F_PARTICLERENDER, F_META };
+	enum FileType { F_NOTSUPPORTED = -1, F_NONE, F_MESH, F_TEXTURE, F_MATERIAL, F_SKYBOX, F_PARTICLEEMISSOR, F_PARTICLERENDER, F_PREFAB, F_MODEL,  F_SCENE, F_META };
 	enum PathProcessType { P_ADDFILE, P_DELETE, P_REIMPORT, P_ADDFOLDER, };
 
 	struct RE_File;
@@ -143,8 +144,15 @@ private:
 	eastl::vector<RE_File*> filesToFindMeta;
 	eastl::vector<RE_Meta*> metaRecentlyAdded;
 
-	eastl::list<RE_File*> toImport;
-	eastl::list<RE_Meta*> toReImport;
+	struct AssetsPrioroty {
+		bool operator()(const RE_File* lhs, const RE_File* rhs) const
+		{
+			return lhs->fType > rhs->fType;
+		}
+	};
+
+	eastl::priority_queue<RE_File*, eastl::vector<RE_File*>, AssetsPrioroty> toImport;
+	eastl::priority_queue<RE_File*, eastl::vector<RE_File*>, AssetsPrioroty> toReImport;
 
 	Config* config = nullptr;
 };

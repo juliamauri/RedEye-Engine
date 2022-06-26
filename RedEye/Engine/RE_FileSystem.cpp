@@ -184,7 +184,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			}
 			case P_REIMPORT:
 			{
-				toReImport.push_back(process->toProcess->AsMeta());
+				toReImport.push(process->toProcess->AsFile());
 				break;
 			}
 			}
@@ -255,64 +255,24 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			}
 		}
 
-		if ((doAll || run) && !filesToFindMeta.empty())
+		if (!filesToFindMeta.empty())
 		{
 			for (RE_File* file : filesToFindMeta)
 			{
-				switch (file->fType)
-				{
-				case F_MODEL:
-				case F_PREFAB:
-				case F_SCENE:
-					toImport.push_back(file);
-					break;
-				case F_SKYBOX:
-				{
-					eastl::list<RE_File*>::const_iterator iter = toImport.end();
-					if (!toImport.empty())
-					{
-						iter--;
-						FileType type = (*iter)->fType;
-
-						if (type == R_TEXTURE)
-						{
-							toImport.push_back(file);
-						}
-
-						int count = toImport.size();
-
-						while (count > 1)
-						{
-							if (type == F_PREFAB || type == F_SCENE || type == F_MODEL)
-								break;
-
-							count--;
-							iter--;
-							type = (*iter)->fType;
-						}
-						iter++;
-					}
-					toImport.insert(iter, file);
-					break;
-				}
-				case F_PARTICLEEMISSOR:
-				case F_PARTICLERENDER:
-				case F_TEXTURE:
-				case F_MATERIAL:
-					toImport.push_front(file);
-					break;
-				}
+				toImport.push(file);
 			}
 			filesToFindMeta.clear();
 		}
 
-		if ((doAll || run) && !toImport.empty())
-		{
+		if (!toImport.empty()) {
 			RE_LOGGER.ScopeProcedureLogging();
-			eastl::vector<RE_File*> toRemoveF;
+			while ((doAll || run) && !toImport.empty())
+			{
 
-			//Importing
-			for (RE_File* file : toImport) {
+				RE_File* file = toImport.top();
+				toImport.pop();
+
+				//Importing
 				RE_LOG("Importing %s", file->path.c_str());
 
 				const char* newRes = nullptr;
@@ -322,9 +282,10 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				case F_MATERIAL: newRes = RE_RES->ImportMaterial(file->path.c_str()); break;
 				case F_SKYBOX:	 newRes = RE_RES->ImportSkyBox(file->path.c_str()); break;
 				case F_PREFAB:	 newRes = RE_RES->ImportPrefab(file->path.c_str()); break;
-				case F_SCENE:	 newRes = RE_RES->ImportScene(file->path.c_str()); break; 
-				case F_PARTICLEEMISSOR:	 newRes = RE_RES->ImportParticleEmissor(file->path.c_str()); break; 
-				case F_PARTICLERENDER:	 newRes = RE_RES->ImportParticleRender(file->path.c_str()); break; }
+				case F_SCENE:	 newRes = RE_RES->ImportScene(file->path.c_str()); break;
+				case F_PARTICLEEMISSOR:	 newRes = RE_RES->ImportParticleEmissor(file->path.c_str()); break;
+				case F_PARTICLERENDER:	 newRes = RE_RES->ImportParticleRender(file->path.c_str()); break;
+				}
 
 				if (newRes != nullptr)
 				{
@@ -341,22 +302,12 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				else
 					file->fType = F_NOTSUPPORTED;
 
-				toRemoveF.push_back(file);
-
 				if (!doAll && extra_ms < time.Read())
 				{
 					run = false;
 					break;
 				}
 			}
-
-			if (!toRemoveF.empty())
-			{
-				//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
-				toImport.erase(eastl::remove_if(eastl::begin(toImport), eastl::end(toImport),
-					[&](auto x) {return eastl::find(begin(toRemoveF), end(toRemoveF), x) != end(toRemoveF); }), eastl::end(toImport));
-			}
-
 			RE_LOGGER.EndScope();
 		}
 
@@ -371,12 +322,14 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			if (!doAll && extra_ms < time.Read()) run = false;
 		}
 
-		if ((doAll || run) && !toReImport.empty())
+		if (!toReImport.empty())
 		{
-			eastl::vector<RE_Meta*> toRemoveM;
 			static bool particle_reimport = false;
-			for (RE_Meta* meta : toReImport)
+			while ((doAll || run) && !toReImport.empty())
 			{
+				RE_Meta* meta = toReImport.top()->AsMeta();
+				toReImport.pop();
+
 				RE_LOG("ReImporting %s", meta->path.c_str());
 
 				switch (RE_RES->At(meta->resource)->GetType())
@@ -391,25 +344,15 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					break;
 				}
 
-				toRemoveM.push_back(meta);
-
 				if (!doAll && extra_ms < time.Read())
 				{
 					run = false;
 					break;
 				}
 			}
-
 			if (particle_reimport) {
 				RE_RES->ProcessParticlesReimport();
 				particle_reimport = false;
-			}
-
-			if (!toRemoveM.empty())
-			{
-				//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
-				toReImport.erase(eastl::remove_if(eastl::begin(toReImport), eastl::end(toReImport),
-					[&](auto x) {return eastl::find(begin(toRemoveM), end(toRemoveM), x) != end(toRemoveM); }), eastl::end(toReImport));
 			}
 		}
 	}
