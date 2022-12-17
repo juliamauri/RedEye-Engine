@@ -1,5 +1,7 @@
+    GNU General Public License v3.0 (gpl-3.0)
+    
     RedEye Engine is an open source C++ 3D Game Engine
-    Copyright (C) 2018-2022  Julià Mauri Costa & Rubén Sardón
+    Copyright (C) 2018-2022  Julià Mauri Costa <julimacowork@gmail.com> & Rubén Sardón <me@rubensardon.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
