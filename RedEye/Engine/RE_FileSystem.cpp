@@ -47,7 +47,7 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		RE_SOFT_NVS("PhysFS", tmp, "https://icculus.org/physfs/");
 		RE_SOFT_NVS("Rapidjson", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
 		RE_SOFT_NVS("LibZip", "1.5.0", "https://libzip.org/");
-		
+
 		engine_path = "engine";
 		library_path = "Library";
 		assets_path = "Assets";
@@ -66,20 +66,20 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		//PHYSFS_mount(zip_path.c_str(), NULL, 0);
 		//PHYSFS_mount((zip_path += "data.zip").c_str(), NULL, 0);
 
-		char **i;
+		char** i;
 		for (i = PHYSFS_getSearchPath(); *i != NULL; i++) RE_LOG("[%s] is in the search path.\n", *i);
 		PHYSFS_freeList(*i);
 
 		config = new Config("Settings/config.json");
-		if (ret = config->Load())
-		{
-			rootAssetDirectory = new RE_Directory();
-			rootAssetDirectory->SetPath("Assets/");
-			assetsDirectories = rootAssetDirectory->MountTreeFolders();
-			assetsDirectories.push_front(rootAssetDirectory);
-			dirIter = assetsDirectories.begin();
-		}
-		else RE_LOG_WARNING("Can't load Settings/config.json - building module default configuration.");
+		if (!config->Load()) RE_LOG_WARNING("Can't load Settings/config.json - building module default configuration.");
+
+		rootAssetDirectory = new RE_Directory();
+		rootAssetDirectory->SetPath("Assets/");
+		assetsDirectories = rootAssetDirectory->MountTreeFolders();
+		assetsDirectories.push_front(rootAssetDirectory);
+		dirIter = assetsDirectories.begin();
+
+		ret = true;
 	}
 	else RE_LOG_ERROR("PhysFS could not initialize! Error: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
 
@@ -325,9 +325,9 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 		{
 			RE_Meta* metaFile = reloadResourceMeta.top();
 			reloadResourceMeta.pop();
-		
+
 			RE_RES->At(metaFile->resource)->LoadMeta();
-		
+
 			//timer
 			if (!doAll && extra_ms < time.Read()) run = false;
 		}
@@ -373,8 +373,8 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 void RE_FileSystem::DrawEditor()
 {
-	//ImGui::Text("Executable Directory:");
-	//ImGui::TextWrappedV(GetExecutableDirectory(), "");
+	ImGui::Text("Executable Directory:");
+	ImGui::TextWrappedV(GetExecutableDirectory(), "");
 
 	ImGui::Separator();
 	ImGui::Text("All assets directories:");
@@ -385,7 +385,7 @@ void RE_FileSystem::DrawEditor()
 	ImGui::TextWrappedV(write_path.c_str(), "");
 }
 
-bool RE_FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
+bool RE_FileSystem::AddPath(const char* path_or_zip, const char* mount_point)
 {
 	bool ret = true;
 
@@ -397,7 +397,7 @@ bool RE_FileSystem::AddPath(const char * path_or_zip, const char * mount_point)
 	return ret;
 }
 
-bool RE_FileSystem::RemovePath(const char * path_or_zip)
+bool RE_FileSystem::RemovePath(const char* path_or_zip)
 {
 	bool ret = true;
 
@@ -409,7 +409,7 @@ bool RE_FileSystem::RemovePath(const char * path_or_zip)
 	return ret;
 }
 
-bool RE_FileSystem::SetWritePath(const char * dir)
+bool RE_FileSystem::SetWritePath(const char* dir)
 {
 	bool ret = true;
 
@@ -423,17 +423,17 @@ bool RE_FileSystem::SetWritePath(const char * dir)
 	return ret;
 }
 
-const char * RE_FileSystem::GetWritePath() const { return write_path.c_str(); }
+const char* RE_FileSystem::GetWritePath() const { return write_path.c_str(); }
 
-void RE_FileSystem::LogFolderItems(const char * folder)
+void RE_FileSystem::LogFolderItems(const char* folder)
 {
-	char **rc = PHYSFS_enumerateFiles(folder), **i;
+	char** rc = PHYSFS_enumerateFiles(folder), ** i;
 	for (i = rc; *i != NULL; i++) RE_LOG(" * We've got [%s].\n", *i);
 	PHYSFS_freeList(rc);
 }
 
 // Quick Buffer From Platform-Dependent Path
-RE_FileBuffer* RE_FileSystem::QuickBufferFromPDPath(const char * full_path)// , char** buffer, unsigned int size)
+RE_FileBuffer* RE_FileSystem::QuickBufferFromPDPath(const char* full_path)// , char** buffer, unsigned int size)
 {
 	RE_FileBuffer* ret = nullptr;
 	if (full_path)
@@ -485,7 +485,7 @@ bool RE_FileSystem::Exists(const char* file) const { return PHYSFS_exists(file) 
 bool RE_FileSystem::IsDirectory(const char* file) const { return PHYSFS_isDirectory(file) != 0; }
 const char* RE_FileSystem::GetExecutableDirectory() const { return PHYSFS_getBaseDir(); }
 
-void RE_FileSystem::HandleDropedFile(const char * file)
+void RE_FileSystem::HandleDropedFile(const char* file)
 {
 	RE_PROFILE(PROF_DroppedFile, PROF_FileSystem);
 	eastl::string full_path(file);
@@ -639,7 +639,7 @@ void RE_FileSystem::SaveConfig() const
 	config->Save();
 }
 
-void RE_FileSystem::CopyDirectory(const char * origin, const char * dest)
+void RE_FileSystem::CopyDirectory(const char* origin, const char* dest)
 {
 	eastl::stack<eastl::pair< eastl::string, eastl::string>> copyDir;
 	copyDir.push({ origin , dest });
