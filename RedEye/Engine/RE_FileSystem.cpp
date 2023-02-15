@@ -52,15 +52,25 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		library_path = "Library";
 		assets_path = "Assets";
 
-		zip_path = GetExecutableDirectory();
-		PHYSFS_mount(zip_path.c_str(), NULL, 0);
-		PHYSFS_mount((zip_path += "data.zip").c_str(), NULL, 0);
+		if (PHYSFS_mount(".", 0, 0) == 0) {
+
+			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
+			return false;
+		}
+		if (PHYSFS_setWriteDir(".") == 0) {
+
+			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
+			return false;
+		}
+
+		//PHYSFS_mount(zip_path.c_str(), NULL, 0);
+		//PHYSFS_mount((zip_path += "data.zip").c_str(), NULL, 0);
 
 		char **i;
 		for (i = PHYSFS_getSearchPath(); *i != NULL; i++) RE_LOG("[%s] is in the search path.\n", *i);
 		PHYSFS_freeList(*i);
 
-		config = new Config("Settings/config.json", zip_path.c_str());
+		config = new Config("Settings/config.json");
 		if (ret = config->Load())
 		{
 			rootAssetDirectory = new RE_Directory();
@@ -139,7 +149,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 					if (!isReferenced)
 					{
-						Config metaLoad(file->path.c_str(), RE_FS->GetZipPath());
+						Config metaLoad(file->path.c_str());
 						if (metaLoad.Load())
 						{
 							RE_Json* metaNode = metaLoad.GetRootNode("meta");
@@ -363,8 +373,8 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 void RE_FileSystem::DrawEditor()
 {
-	ImGui::Text("Executable Directory:");
-	ImGui::TextWrappedV(GetExecutableDirectory(), "");
+	//ImGui::Text("Executable Directory:");
+	//ImGui::TextWrappedV(GetExecutableDirectory(), "");
 
 	ImGui::Separator();
 	ImGui::Text("All assets directories:");
@@ -474,7 +484,6 @@ bool RE_FileSystem::ExistsOnOSFileSystem(const char* path, bool isFolder) const
 bool RE_FileSystem::Exists(const char* file) const { return PHYSFS_exists(file) != 0; }
 bool RE_FileSystem::IsDirectory(const char* file) const { return PHYSFS_isDirectory(file) != 0; }
 const char* RE_FileSystem::GetExecutableDirectory() const { return PHYSFS_getBaseDir(); }
-const char * RE_FileSystem::GetZipPath() { return zip_path.c_str(); }
 
 void RE_FileSystem::HandleDropedFile(const char * file)
 {
@@ -495,7 +504,7 @@ void RE_FileSystem::HandleDropedFile(const char * file)
 		{
 			eastl::string destPath = RE_EDITOR->GetAssetsPanelPath();
 			destPath += fileNameExtension;
-			RE_FileBuffer toSave(destPath.c_str(), GetZipPath());
+			RE_FileBuffer toSave(destPath.c_str());
 			toSave.Save(fileLoaded->GetBuffer(), fileLoaded->GetSize());
 		}
 		else newDir = true;
@@ -533,7 +542,7 @@ void RE_FileSystem::DeleteUndefinedFile(const char* filePath)
 				iterPath++;
 			}
 
-			RE_FileBuffer fileToDelete(filePath, GetZipPath());
+			RE_FileBuffer fileToDelete(filePath);
 			fileToDelete.Delete();
 			DEL(file);
 		}
@@ -551,7 +560,7 @@ void RE_FileSystem::DeleteResourceFiles(ResourceContainer* resContainer)
 
 	if (Exists(resContainer->GetLibraryPath()))
 	{
-		RE_FileBuffer fileToDelete(resContainer->GetLibraryPath(), GetZipPath());
+		RE_FileBuffer fileToDelete(resContainer->GetLibraryPath());
 		fileToDelete.Delete();
 	}
 }
@@ -663,7 +672,7 @@ void RE_FileSystem::CopyDirectory(const char * origin, const char * dest)
 					RE_FileBuffer fileOrigin(inOrigin.c_str());
 					if (fileOrigin.Load())
 					{
-						RE_FileBuffer fileDest(inDest.c_str(), GetZipPath());
+						RE_FileBuffer fileDest(inDest.c_str());
 						fileDest.Save(fileOrigin.GetBuffer(), fileOrigin.GetSize());
 					}
 				}

@@ -748,7 +748,7 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 
 void RE_Material::JsonDeserialize(bool generateLibraryPath)
 {
-	Config material(GetAssetPath(), RE_FS->GetZipPath());
+	Config material(GetAssetPath());
 	if (material.Load()) {
 		RE_Json* nodeMat = material.GetRootNode("Material");
 
@@ -882,7 +882,7 @@ void RE_Material::PullTexturesJson(RE_Json * texturesNode, eastl::vector<const c
 
 void RE_Material::JsonSerialize(bool onlyMD5)
 {
-	Config materialSerialize(GetAssetPath(), RE_FS->GetZipPath());
+	Config materialSerialize(GetAssetPath());
 	RE_Json* materialNode = materialSerialize.GetRootNode("Material");
 	materialNode->PushString("name", GetName()); //for get different md5
 	materialNode->PushInt("ShaderType", static_cast<int>(shadingType));
@@ -1208,7 +1208,7 @@ void RE_Material::BinaryDeserialize()
 
 void RE_Material::BinarySerialize()
 {
-	RE_FileBuffer libraryFile(GetLibraryPath(), RE_FS->GetZipPath());
+	RE_FileBuffer libraryFile(GetLibraryPath());
 
 	uint bufferSize = GetBinarySize() + 1;
 	char* buffer = new char[bufferSize];

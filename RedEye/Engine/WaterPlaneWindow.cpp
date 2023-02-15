@@ -61,7 +61,7 @@ void WaterPlaneWindow::Draw(bool secondary)
 				eastl::string shaderVertexFile("Assets/Shaders/");
 				shaderVertexFile += (deferred) ? "WaterDeferred.vert" : "Water.vert";
 				if (!RE_FS->Exists(shaderVertexFile.c_str())) {
-					RE_FileBuffer vertexFile(shaderVertexFile.c_str(), RE_FS->GetZipPath());
+					RE_FileBuffer vertexFile(shaderVertexFile.c_str());
 					vertexFile.Save((deferred) ? WATERPASSVERTEXSHADER : WATERVERTEXSHADER,
 						eastl::CharStrlen((deferred) ? WATERPASSVERTEXSHADER : WATERVERTEXSHADER));
 				}
@@ -69,7 +69,7 @@ void WaterPlaneWindow::Draw(bool secondary)
 				eastl::string shaderFragmentFile("Assets/Shaders/");
 				shaderFragmentFile += (deferred) ? "WaterDeferred.frag" : "Water.frag";
 				if (!RE_FS->Exists(shaderFragmentFile.c_str())) {
-					RE_FileBuffer fragmentFile(shaderFragmentFile.c_str(), RE_FS->GetZipPath());
+					RE_FileBuffer fragmentFile(shaderFragmentFile.c_str());
 					fragmentFile.Save((deferred) ? WATERPASSFRAGMENTSHADER : WATERFRAGMENTSHADER,
 						eastl::CharStrlen((deferred) ? WATERPASSFRAGMENTSHADER : WATERFRAGMENTSHADER));
 				}

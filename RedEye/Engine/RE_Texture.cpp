@@ -325,6 +325,6 @@ void RE_Texture::LibraryLoad()
 void RE_Texture::LibrarySave()
 {
 	RE_FileBuffer assetFile(GetAssetPath());
-	RE_FileBuffer libraryFile(GetLibraryPath(), RE_FS->GetZipPath());
+	RE_FileBuffer libraryFile(GetLibraryPath());
 	if (assetFile.Load()) RE_TextureImporter::SaveOwnFormat(assetFile.GetBuffer(), assetFile.GetSize(), texType, &libraryFile);
 }

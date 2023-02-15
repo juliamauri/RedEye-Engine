@@ -248,7 +248,7 @@ void RE_Model::LibrarySave()
 		uint size = 0;
 		char* buffer = RE_ECS_Importer::BinarySerialize(loaded, &size);
 
-		RE_FileBuffer toLibrarySave(GetLibraryPath(), RE_FS->GetZipPath());
+		RE_FileBuffer toLibrarySave(GetLibraryPath());
 		toLibrarySave.Save(buffer, size);
 		DEL_A(buffer);
 	}

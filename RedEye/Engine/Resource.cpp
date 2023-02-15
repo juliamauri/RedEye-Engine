@@ -65,7 +65,7 @@ void ResourceContainer::SetInternal(bool is_internal) { isinternal = is_internal
 
 void ResourceContainer::SaveMeta()
 {
-	Config metaSerialize(metaPath.c_str(), RE_FS->GetZipPath());
+	Config metaSerialize(metaPath.c_str());
 
 	RE_Json* metaNode = metaSerialize.GetRootNode("meta");
 
@@ -83,7 +83,7 @@ void ResourceContainer::SaveMeta()
 
 void ResourceContainer::LoadMeta()
 {
-	Config metaDeserialize(metaPath.c_str(), RE_FS->GetZipPath());
+	Config metaDeserialize(metaPath.c_str());
 	if (metaDeserialize.Load()) {
 		RE_Json* metaNode = metaDeserialize.GetRootNode("meta");
 
@@ -102,7 +102,7 @@ void ResourceContainer::LoadMeta()
 bool ResourceContainer::isNeededResourcesReferenced()
 {
 	bool ret = false;
-	Config metaDeserialize(metaPath.c_str(), RE_FS->GetZipPath());
+	Config metaDeserialize(metaPath.c_str());
 	if (metaDeserialize.Load()) {
 		RE_Json* metaNode = metaDeserialize.GetRootNode("meta");
 		ret = isNeededResourcesReferenced(metaNode);

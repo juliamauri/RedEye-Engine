@@ -108,8 +108,6 @@ public:
 	bool IsDirectory(const char* file) const;
 	const char* GetExecutableDirectory() const;
 
-	const char* GetZipPath();
-
 	void HandleDropedFile(const char* file);
 
 	RE_Directory* GetRootDirectory()const;
@@ -131,7 +129,7 @@ private:
 
 private:
 
-	eastl::string engine_path, library_path, assets_path, zip_path, write_path;
+	eastl::string engine_path, library_path, assets_path, write_path;
 
 	RE_Directory* rootAssetDirectory = nullptr;
 	eastl::list<RE_Directory*> assetsDirectories;

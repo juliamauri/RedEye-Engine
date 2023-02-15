@@ -144,7 +144,6 @@ void ModuleAudio::CleanUp()
 
 void ModuleAudio::DrawEditor()
 {
-	static eastl::string rootPath = RE_FS->GetExecutableDirectory();
 	static eastl::string tempPath = audioBanksFolderPath;
 	static bool pathChanged = false;
 
@@ -153,7 +152,7 @@ void ModuleAudio::DrawEditor()
 		located_banksFolder = false;
 	}
 	else {
-		ImGui::Text("The actual audio bank Path is: \n%s%s \n", rootPath.c_str(), audioBanksFolderPath.c_str());
+		ImGui::Text("The actual audio bank Path is: \n%s \n", audioBanksFolderPath.c_str());
 		ImGui::Text((located_SoundBanksInfo) ? "SoundBanksInfo.json located at:\n%s\\Windows\\SoundBanksInfo.json" : "Don't located SoundBanksInfo.json.", audioBanksFolderPath.c_str());
 		ImGui::Text((initBnkLoaded) ? "Init.bnk is loaded." : "Init.bnk culdn't be loaded.");
 		located_banksFolder = true;
@@ -170,20 +169,20 @@ void ModuleAudio::DrawEditor()
 	}
 
 	if (pathChanged) {
-		ImGui::Text("The path will changed to:\n%s%s\\ \n", rootPath.c_str(), tempPath.c_str());
+		ImGui::Text("The path will changed to:\n%s\\ \n", tempPath.c_str());
 		if (ImGui::Button("Check and Apply Path")) {
 
 			App->log.ScopeProcedureLogging();
 
 			if (tempPath[tempPath.size()] != '\\') tempPath += "\\";
 
-			if (RE_FS->ExistsOnOSFileSystem((rootPath + tempPath).c_str()))
+			if (RE_FS->ExistsOnOSFileSystem(tempPath.c_str()))
 			{
 				audioBanksFolderPath = tempPath;
 			}
 			else
 			{
-				RE_LOG_ERROR("This Folder don't exist: \n%s%s", rootPath.c_str(), tempPath.c_str());
+				RE_LOG_ERROR("This Folder don't exist: \n%s", tempPath.c_str());
 				tempPath = audioBanksFolderPath;
 			}
 
@@ -279,16 +278,8 @@ unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 	if (located_banksFolder)
 	{
 		static const char* platformPath = "Windows\\";
-		eastl::string soundbankInfoPath(RE_FS->GetExecutableDirectory());
 
-		eastl_size_t posOfBack = soundbankInfoPath.find_last_of((char)'\\..');
-		if (posOfBack != eastl::string::npos)
-		{
-			eastl_size_t toBack = soundbankInfoPath.find_last_of('\\', posOfBack - 3);
-			soundbankInfoPath.erase(toBack + 1, posOfBack - toBack + 1);	
-		}
-
-		soundbankInfoPath += audioBanksFolderPath;
+		eastl::string soundbankInfoPath(audioBanksFolderPath);
 		soundbankInfoPath += platformPath;
 		soundbankInfoPath += "SoundbanksInfo.json";
 
@@ -299,7 +290,7 @@ unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 			{
 				soundbanks.clear();
 				initBnkLoaded = false;
-				Config soundbanksInfo(soundbankInfoPath.c_str(), "None");
+				Config soundbanksInfo(soundbankInfoPath.c_str());
 				if (soundbanksInfo.LoadFromWindowsPath())
 				{
 					RE_Json* rootNode = soundbanksInfo.GetRootNode("SoundBanksInfo");
@@ -307,8 +298,7 @@ unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 					for (auto& v : soundBanks->GetArray())
 					{
 						SoundBank newSB(v.FindMember("Path")->value.GetString(), static_cast<unsigned long>(EA::StdC::AtoU64(v.FindMember("Id")->value.GetString())));
-						newSB.path = RE_FS->GetExecutableDirectory();
-						newSB.path += audioBanksFolderPath;
+						newSB.path = audioBanksFolderPath;
 						newSB.path += platformPath;
 						newSB.path += newSB.name;
 

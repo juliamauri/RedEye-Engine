@@ -93,7 +93,7 @@ RE_ECS_Pool* RE_Prefab::GetPool()
 void RE_Prefab::AssetSave()
 {
 	//Serialize
-	Config prefab_SaveFile(GetAssetPath(), RE_FS->GetZipPath());
+	Config prefab_SaveFile(GetAssetPath());
 	RE_Json* prefabNode = prefab_SaveFile.GetRootNode("prefab");
 
 	RE_ECS_Importer::JsonSerialize(prefabNode, toSave);
@@ -112,7 +112,7 @@ void RE_Prefab::AssetSave()
 
 void RE_Prefab::AssetLoad(bool generateLibraryPath)
 {
-	Config jsonLoad(GetAssetPath(), RE_FS->GetZipPath());
+	Config jsonLoad(GetAssetPath());
 
 	if (jsonLoad.Load())
 	{
@@ -148,7 +148,7 @@ void RE_Prefab::LibrarySave()
 {
 	uint size = 0;
 	char* buffer = RE_ECS_Importer::BinarySerialize(toSave, &size);
-	RE_FileBuffer toLibrarySave(GetLibraryPath(), RE_FS->GetZipPath());
+	RE_FileBuffer toLibrarySave(GetLibraryPath());
 	toLibrarySave.Save(buffer, size);
 	DEL_A(buffer);
 }

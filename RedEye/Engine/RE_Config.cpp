@@ -13,11 +13,7 @@
 
 //Tutorial http://rapidjson.org/md_doc_tutorial.html
 
-Config::Config(const char* file_name, const char* _from_zip) : RE_FileBuffer(file_name)
-{
-	zip_path = _from_zip;
-	from_zip = zip_path.c_str();
-}
+Config::Config(const char* file_name) : RE_FileBuffer(file_name) { }
 
 // Open file
 bool Config::Load()
@@ -55,7 +51,7 @@ void Config::Save()
 	s_buffer.Put('\0');
 	size = s_buffer.GetSize();
 	eastl::string file(file_name);
-	WriteFile(from_zip, file.c_str(), s_buffer.GetString(), size);
+	HardSave(s_buffer.GetString());
 }
 
 RE_Json* Config::GetRootNode(const char* member)

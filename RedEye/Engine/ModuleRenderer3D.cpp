@@ -251,7 +251,7 @@ void ModuleRenderer3D::PostUpdate()
 			bool exist = RE_FS->Exists(path.c_str());
 			if (rend.redo && exist)
 			{
-				RE_FileBuffer fileToDelete(path.c_str(), RE_FS->GetZipPath());
+				RE_FileBuffer fileToDelete(path.c_str());
 				fileToDelete.Delete();
 				exist = false;
 			}

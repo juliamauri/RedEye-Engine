@@ -84,7 +84,7 @@ void RE_Scene::Draw()
 void RE_Scene::AssetSave()
 {
 	//Serialize
-	Config scene_SaveFile(GetAssetPath(), RE_FS->GetZipPath());
+	Config scene_SaveFile(GetAssetPath());
 	RE_Json* scenebNode = scene_SaveFile.GetRootNode("scene");
 
 	if (toSave->TotalGameObjects() > 0) RE_ECS_Importer::JsonSerialize(scenebNode, toSave);
@@ -103,7 +103,7 @@ void RE_Scene::AssetSave()
 
 void RE_Scene::AssetLoad(bool generateLibraryPath)
 {
-	Config jsonLoad(GetAssetPath(), RE_FS->GetZipPath());
+	Config jsonLoad(GetAssetPath());
 
 	if (jsonLoad.Load())
 	{
@@ -137,7 +137,7 @@ void RE_Scene::LibrarySave(bool fromLoaded)
 {
 	uint size = 0;
 	char* buffer = RE_ECS_Importer::BinarySerialize((fromLoaded) ? loaded : toSave, &size);
-	RE_FileBuffer toLibrarySave(GetLibraryPath(), RE_FS->GetZipPath());
+	RE_FileBuffer toLibrarySave(GetLibraryPath());
 	toLibrarySave.Save(buffer, size);
 	DEL_A(buffer);
 }

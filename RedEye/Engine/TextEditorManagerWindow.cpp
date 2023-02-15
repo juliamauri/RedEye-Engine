@@ -34,7 +34,7 @@ void TextEditorManagerWindow::PushEditor(const char* filePath, eastl::string* ne
 	EditorData* e = new EditorData();
 	if (filePath)
 	{
-		RE_FileBuffer* file = new RE_FileBuffer(filePath, RE_FS->GetZipPath());
+		RE_FileBuffer* file = new RE_FileBuffer(filePath);
 		if (file->Load())
 		{
 			e->textEditor = new TextEditor();
@@ -139,7 +139,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 					eastl::string text = e->textEditor->GetTextPtr();
 					if (!e->file)
 					{
-						e->file = new RE_FileBuffer(assetPath.c_str(), RE_FS->GetZipPath());
+						e->file = new RE_FileBuffer(assetPath.c_str());
 						*e->toModify = assetPath;
 					}
 

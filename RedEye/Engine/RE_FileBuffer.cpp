@@ -5,7 +5,7 @@
 #include <PhysFS/physfs.h>
 #include <libzip/zip.h>
 
-RE_FileBuffer::RE_FileBuffer(const char* file_name, const char* from_zip) : buffer(nullptr), file_name(file_name), from_zip(from_zip) {}
+RE_FileBuffer::RE_FileBuffer(const char* file_name) : buffer(nullptr), file_name(file_name) {}
 RE_FileBuffer::~RE_FileBuffer() { if (buffer != nullptr) delete[] buffer; }
 
 bool RE_FileBuffer::Load()
@@ -15,26 +15,12 @@ bool RE_FileBuffer::Load()
 }
 
 void RE_FileBuffer::Save() { HardSave(buffer); }
-void RE_FileBuffer::Save(char* buffer, unsigned int size) { WriteFile(from_zip, file_name, buffer, this->size = ((size == 0) ? strnlen_s(buffer, 0xffff) : size)); }
+void RE_FileBuffer::Save(char* buffer, unsigned int size) { HardSave(buffer, size); }
 
 void RE_FileBuffer::Delete()
 {
-	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
-		RE_LOG_ERROR("Ettot when unmount: %s", PHYSFS_getLastError());
-
-	struct zip* f_zip = NULL;
-	int error = 0;
-	f_zip = zip_open(from_zip, ZIP_CHECKCONS, &error); /* on ouvre l'archive zip */
-	if (error)	RE_LOG_ERROR("could not open or create archive: %s", from_zip);
-
-	zip_int64_t index = zip_name_locate(f_zip, file_name, NULL);
-	if (index == -1) RE_LOG_ERROR("file culdn't locate: %s", file_name);
-	else if (zip_delete(f_zip, index) == -1) RE_LOG_ERROR("file culdn't delete: %s", file_name);
-
-	zip_close(f_zip);
-	f_zip = NULL;
-
-	PHYSFS_mount(from_zip, NULL, 1);
+	if(PHYSFS_delete(file_name) == 0)
+		RE_LOG_ERROR("File System error while deleting file %s: %s", file_name, PHYSFS_getLastError());
 }
 
 void RE_FileBuffer::ClearBuffer()
@@ -87,19 +73,28 @@ unsigned int RE_FileBuffer::HardLoad()
 	return ret;
 }
 
-void RE_FileBuffer::HardSave(const char* buffer)
+void RE_FileBuffer::HardSave(const char* buffer, unsigned int size)
 {
+	std::string path(file_name);
+	std::size_t botDirPos = path.find_last_of("/");
+	// get directory
+	std::string dir = path.substr(0, botDirPos);
+
+	if (PHYSFS_exists(dir.c_str()) == 0)
+		PHYSFS_mkdir(dir.c_str());
+
 	PHYSFS_file* file = PHYSFS_openWrite(file_name);
 
 	if (file != NULL)
 	{
-		long long written = PHYSFS_write(file, (const void*)buffer, 1, size = (strnlen_s(buffer, 0xffff)));
+		long long written = PHYSFS_write(file, (const void*)buffer, 1, (size == 0) ? size = (strnlen_s(buffer, 0xffff)) : size);
 		if (written != size) RE_LOG_ERROR("Error while writing to file %s: %s", file, PHYSFS_getLastError());
 		if (PHYSFS_close(file) == 0) RE_LOG_ERROR("Error while closing save file %s: %s", file, PHYSFS_getLastError());
 	}
 	else RE_LOG_ERROR("Error while opening save file %s: %s", file, PHYSFS_getLastError());
 }
 
+/* Write
 void RE_FileBuffer::WriteFile(const char* zip_path, const char* filename, const char* buffer, unsigned int size)
 {
 	if (PHYSFS_removeFromSearchPath(from_zip) == 0)
@@ -107,7 +102,7 @@ void RE_FileBuffer::WriteFile(const char* zip_path, const char* filename, const 
 
 	struct zip* f_zip = NULL;
 	int error = 0;
-	f_zip = zip_open(zip_path, ZIP_CHECKCONS, &error); /* on ouvre l'archive zip */
+	f_zip = zip_open(zip_path, ZIP_CHECKCONS, &error); // on ouvre l'archive zip 
 	if (error)	RE_LOG_ERROR("could not open or create archive: %s", zip_path);
 
 	zip_source_t* s = zip_source_buffer(f_zip, buffer, size, 0);
@@ -121,3 +116,23 @@ void RE_FileBuffer::WriteFile(const char* zip_path, const char* filename, const 
 	f_zip = NULL;
 	PHYSFS_mount(from_zip, NULL, 1);
 }
+*/
+
+/* Delete
+if (PHYSFS_removeFromSearchPath(from_zip) == 0)
+	RE_LOG_ERROR("Ettot when unmount: %s", PHYSFS_getLastError());
+
+struct zip* f_zip = NULL;
+int error = 0;
+f_zip = zip_open(from_zip, ZIP_CHECKCONS, &error); //on ouvre l'archive zip
+if (error)	RE_LOG_ERROR("could not open or create archive: %s", from_zip);
+
+zip_int64_t index = zip_name_locate(f_zip, file_name, NULL);
+if (index == -1) RE_LOG_ERROR("file culdn't locate: %s", file_name);
+else if (zip_delete(f_zip, index) == -1) RE_LOG_ERROR("file culdn't delete: %s", file_name);
+
+zip_close(f_zip);
+f_zip = NULL;
+
+PHYSFS_mount(from_zip, NULL, 1);
+*/

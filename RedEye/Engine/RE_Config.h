@@ -9,7 +9,7 @@ class RE_Json;
 class Config : public RE_FileBuffer
 {
 public:
-	Config(const char* file_name, const char* from_zip);
+	Config(const char* file_name);
 
 	bool Load() override;
 	bool LoadFromWindowsPath();
@@ -22,7 +22,6 @@ public:
 
 public:
 
-	eastl::string zip_path;
 	rapidjson::Document document;
 };
 

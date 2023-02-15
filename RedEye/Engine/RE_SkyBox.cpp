@@ -53,7 +53,7 @@ void RE_SkyBox::SetAsInternal()
 {
 	SetInternal(true);
 
-	Config toMD5("", "");
+	Config toMD5("");
 	RE_Json* node = toMD5.GetRootNode("skybox");
 
 	//For differentMD5
@@ -366,7 +366,7 @@ void RE_SkyBox::Import(bool keepInMemory)
 
 void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 {
-	Config toLoad(GetAssetPath(),RE_FS->GetZipPath());
+	Config toLoad(GetAssetPath());
 	if (toLoad.Load())
 	{
 		RE_Json* node = toLoad.GetRootNode("skybox");
@@ -392,7 +392,7 @@ void RE_SkyBox::AssetSave()
 	eastl::string assetPath("Assets/Skyboxes/");
 	(assetPath += GetName()) += ".sk";
 	SetAssetPath(assetPath.c_str());
-	Config toSave(assetPath.c_str(), RE_FS->GetZipPath());
+	Config toSave(assetPath.c_str());
 	RE_Json* node = toSave.GetRootNode("skybox");
 
 	//For differentMD5
@@ -449,7 +449,7 @@ void RE_SkyBox::LibrarySave()
 	memcpy(cursor, &skyBoxSettings.skyBoxSize, size);
 	cursor += size;
 
-	RE_FileBuffer saveLibrary(GetLibraryPath(), RE_FS->GetZipPath());
+	RE_FileBuffer saveLibrary(GetLibraryPath());
 
 	saveLibrary.Save(libraryBuffer, totalSize + 1);
 	DEL_A(libraryBuffer);

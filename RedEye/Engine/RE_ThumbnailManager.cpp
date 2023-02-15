@@ -55,7 +55,7 @@ void RE_ThumbnailManager::Delete(const char* ref)
 	eastl::string path(THUMBNAILPATH);
 	if (RE_FS->Exists((path += ref).c_str()))
 	{
-		RE_FileBuffer fileToDelete(path.c_str(), RE_FS->GetZipPath());
+		RE_FileBuffer fileToDelete(path.c_str());
 		fileToDelete.Delete();
 	}
 }
@@ -98,7 +98,7 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 			if (IL_FALSE != ilLoadL(tex->DetectExtension(), texFile.GetBuffer(), texFile.GetSize()))
 			{
 				iluScale(THUMBNAILSIZE, THUMBNAILSIZE, 1);
-				RE_FileBuffer saveThumb(path.c_str(), RE_FS->GetZipPath());
+				RE_FileBuffer saveThumb(path.c_str());
 				ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
 				ILubyte* data = new ILubyte[size];
 				ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
@@ -134,7 +134,7 @@ void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)
 		ILubyte* data = new ILubyte[size];
 
 		ilSaveL(IL_DDS, data, size); // Save with the ilSaveIL function
-		RE_FileBuffer saveThumb(path, RE_FS->GetZipPath());
+		RE_FileBuffer saveThumb(path);
 		saveThumb.Save(reinterpret_cast<char*>(data), size);
 		DEL_A(data);
 

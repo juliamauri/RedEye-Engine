@@ -98,7 +98,7 @@ void RE_ParticleEmission::FillResouce(RE_ParticleEmitter* from)
 
 void RE_ParticleEmission::JsonDeserialize(bool generateLibraryPath)
 {
-	Config emission(GetAssetPath(), RE_FS->GetZipPath());
+	Config emission(GetAssetPath());
 	if (emission.Load())
 	{
 		RE_Json* node = emission.GetRootNode("Emission");
@@ -131,7 +131,7 @@ void RE_ParticleEmission::JsonDeserialize(bool generateLibraryPath)
 
 void RE_ParticleEmission::JsonSerialize(bool onlyMD5)
 {
-	Config emission(GetAssetPath(), RE_FS->GetZipPath());
+	Config emission(GetAssetPath());
 	RE_Json* node = emission.GetRootNode("Emission");
 
 	node->PushBool("Loop", loop);
@@ -196,7 +196,7 @@ void RE_ParticleEmission::BinaryDeserialize()
 
 void RE_ParticleEmission::BinarySerialize() const
 {
-	RE_FileBuffer libraryFile(GetLibraryPath(), RE_FS->GetZipPath());
+	RE_FileBuffer libraryFile(GetLibraryPath());
 
 	uint bufferSize = GetBinarySize() + 1;
 	char* buffer = new char[bufferSize];

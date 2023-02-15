@@ -171,7 +171,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 		libraryPath += existsMD5;
 		ResourceContainer::SetLibraryPath(libraryPath.c_str());
 
-		RE_FileBuffer toSave(GetLibraryPath(), RE_FS->GetZipPath());
+		RE_FileBuffer toSave(GetLibraryPath());
 		toSave.Save(buffer, size + 1);
 	}
 	else *exists = true;

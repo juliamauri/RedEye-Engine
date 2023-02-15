@@ -151,7 +151,7 @@ void RE_ParticleRender::LoadResourceMeta(RE_Json* metaNode)
 
 void RE_ParticleRender::JsonDeserialize(bool generateLibraryPath)
 {
-	Config render(GetAssetPath(), RE_FS->GetZipPath());
+	Config render(GetAssetPath());
 	if (render.Load())
 	{
 		math::float2 tmp;
@@ -203,7 +203,7 @@ void RE_ParticleRender::JsonDeserialize(bool generateLibraryPath)
 
 void RE_ParticleRender::JsonSerialize(bool onlyMD5)
 {
-	Config render(GetAssetPath(), RE_FS->GetZipPath());
+	Config render(GetAssetPath());
 	RE_Json* node = render.GetRootNode("Render");
 	
 	color.JsonSerialize(node->PushJObject("Color"));
@@ -282,7 +282,7 @@ void RE_ParticleRender::BinaryDeserialize()
 
 void RE_ParticleRender::BinarySerialize()
 {
-	RE_FileBuffer libraryFile(GetLibraryPath(), RE_FS->GetZipPath());
+	RE_FileBuffer libraryFile(GetLibraryPath());
 
 	uint bufferSize = GetBinarySize() + 1;
 

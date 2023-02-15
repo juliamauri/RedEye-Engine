@@ -540,7 +540,7 @@ void RE_Shader::LibraryLoad()
 
 void RE_Shader::LibrarySave()
 {
-	RE_FileBuffer librarySave(GetLibraryPath(), RE_FS->GetZipPath());
+	RE_FileBuffer librarySave(GetLibraryPath());
 	char* buffer = nullptr;
 	int size = 0;
 	if (RE_ShaderImporter::GetBinaryProgram(ID, &buffer, &size)) librarySave.Save(buffer, size);
