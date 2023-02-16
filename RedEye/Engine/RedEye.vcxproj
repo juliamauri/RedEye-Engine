@@ -258,7 +258,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{13DC399F-3A96-48E0-82B4-94FD73051599}</ProjectGuid>
-    <RootNamespace>Source</RootNamespace>
+    <RootNamespace>Engine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.20348.0</WindowsTargetPlatformVersion>
     <ProjectName>RedEye</ProjectName>
   </PropertyGroup>
@@ -290,12 +290,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(Configuration)\</IntDir>
-    <OutDir>..\Build\</OutDir>
+    <OutDir>$(SolutionDIr)Build\</OutDir>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TargetName>$(ProjectName)_debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\Build\</OutDir>
+    <OutDir>$(SolutionDIr)Build\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_release</TargetName>
   </PropertyGroup>
