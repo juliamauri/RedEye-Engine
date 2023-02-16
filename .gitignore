@@ -331,3 +331,7 @@ RedEye/Build/RedEye_debug.lib
 RedEye/Build/RedEye_release.exe
 RedEye/Build/RedEye_release.exp
 RedEye/Build/RedEye_release.lib
+
+
+!RedEye Projects Explorer/BuildData/**
+!RedEye Projects Explorer/Binaries/**
