@@ -16,7 +16,7 @@
 #include "RE_ParticleEmitter.h"
 #include "RE_Memory.h"
 
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <ImGui/imgui.h>
 #include <EASTL/unordered_set.h>
 #include <EASTL/queue.h>

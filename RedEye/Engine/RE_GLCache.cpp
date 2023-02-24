@@ -1,7 +1,7 @@
 #include "RE_GLCache.h"
 
 #include "RE_ShaderImporter.h"
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 
 void RE_GLCache::ChangeShader(unsigned int ID)
 {

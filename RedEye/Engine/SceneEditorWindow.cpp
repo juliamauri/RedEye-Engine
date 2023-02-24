@@ -56,7 +56,7 @@ void SceneEditorWindow::Draw(bool secondary)
 		vMax.x += ImGui::GetWindowPos().x;
 		vMax.y += ImGui::GetWindowPos().y;
 
-		if (!ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && isWindowSelected && !ImGui::GetKeyData(ImGuiKey_::ImGuiKey_LeftAlt)->Down && ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
+		if (!ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && isWindowSelected && !ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftAlt)->Down && ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
 		{
 			ImVec2 mousePosOnThis = ImGui::GetMousePos();
 			if ((mousePosOnThis.x -= vMin.x - ImGui::GetStyle().WindowPadding.x) > 0.f && (mousePosOnThis.y -= vMin.y - ImGui::GetStyle().WindowPadding.y) > 0.f)

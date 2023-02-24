@@ -11,7 +11,7 @@
 
 #include <par_shapes.h>
 #include <SDL2/SDL.h>
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <gl/GL.h>
 
 RE_PrimitiveManager::RE_PrimitiveManager()

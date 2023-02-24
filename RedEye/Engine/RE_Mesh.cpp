@@ -18,7 +18,7 @@
 #include "RE_CompTransform.h"
 
 #include <ImGui/imgui.h>
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <gl/GL.h>
 #include <MGL/MathGeoLib.h>
 #include <MGL/Math\Quat.h>

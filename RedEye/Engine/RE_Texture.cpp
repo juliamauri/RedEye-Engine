@@ -9,7 +9,7 @@
 #include "RE_TextureImporter.h"
 #include "RE_GLCache.h"
 
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <ImGui/imgui.h>
 
 const char* RE_Texture::GenerateMD5()

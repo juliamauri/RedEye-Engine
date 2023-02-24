@@ -17,7 +17,7 @@
 #include "RE_ThumbnailManager.h"
 #include "RE_Texture.h"
 
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <ImGui/imgui.h>
 #include <par_shapes.h>
 #include <EASTL/vector.h>

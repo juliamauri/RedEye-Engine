@@ -38,11 +38,11 @@
 #include "WaterPlaneWindow.h"
 #include "ParticleEmitterEditorWindow.h"
 
-#include <ImGuiImpl/imgui_impl_sdl.h>
+#include <ImGuiImpl/imgui_impl_sdl2.h>
 #include <ImGuiImpl/imgui_stdlib.h>
 #include <ImGuiImpl/imgui_impl_opengl3.h>
 #include <ImGui/imgui_internal.h>
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <EASTL/stack.h>
 #include <EASTL/queue.h>
@@ -386,18 +386,18 @@ void ModuleEditor::Update()
 	
 
 	// Toggle show editor on F1
-	if(ImGui::GetKeyData(ImGuiKey_::ImGuiKey_F1)->Down)
+	if(ImGui::GetKeyData(ImGuiKey::ImGuiKey_F1)->Down)
 		show_all = !show_all;
 
 	// CAMERA CONTROLS
 	UpdateCamera();
 
-	if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_LeftCtrl)->Down)
+	if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftCtrl)->Down)
 	{
-		if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_Z)->Down)
+		if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Z)->Down)
 			commands->Undo();
 
-		if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_Y)->Down)
+		if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Y)->Down)
 			commands->Redo();
 	}
 
@@ -882,13 +882,13 @@ void ModuleEditor::UpdateCamera()
 	{
 		ImVec2 mouseData = ImGui::GetIO().MouseDelta;
 
-		if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_LeftAlt)->Down && ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
+		if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftAlt)->Down && ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
 		{
 			// Orbit
 			if (selected && (mouseData.x || mouseData.y))
 				camera->Orbit(cam_sensitivity * -mouseData.x, cam_sensitivity * mouseData.y, RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds().CenterPoint());
 		}
-		else if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_F)->Down && selected)
+		else if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_F)->Down && selected)
 		{
 			// Focus
 			math::AABB box = RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds();
@@ -900,15 +900,15 @@ void ModuleEditor::UpdateCamera()
 			{
 				// Camera Speed
 				float cameraSpeed = cam_speed * RE_TIME->GetDeltaTime();
-				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
 				
 				// Move
-				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_W)->Down)			camera->LocalMove(Dir::FORWARD, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_S)->Down)			camera->LocalMove(Dir::BACKWARD, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_A)->Down)			camera->LocalMove(Dir::LEFT, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_D)->Down)			camera->LocalMove(Dir::RIGHT, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_Space)->Down)		camera->LocalMove(Dir::UP, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_C)->Down)			camera->LocalMove(Dir::DOWN, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_W)->Down)			camera->LocalMove(Dir::FORWARD, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_S)->Down)			camera->LocalMove(Dir::BACKWARD, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_A)->Down)			camera->LocalMove(Dir::LEFT, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_D)->Down)			camera->LocalMove(Dir::RIGHT, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Space)->Down)		camera->LocalMove(Dir::UP, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_C)->Down)			camera->LocalMove(Dir::DOWN, cameraSpeed);
 
 				// Rotate
 				if (mouseData.x != 0 || mouseData.y != 0)
@@ -930,7 +930,7 @@ void ModuleEditor::UpdateCamera()
 		if (particleEmitterWindow->isSelected()) {
 			ImVec2 mouseData = ImGui::GetIO().MouseDelta;
 
-			if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_F)->Down)
+			if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_F)->Down)
 			{
 				// Focus
 				math::AABB box = particleEmitterWindow->GetEdittingParticleEmitter()->bounding_box;
@@ -942,15 +942,15 @@ void ModuleEditor::UpdateCamera()
 				{
 					// Camera Speed
 					float cameraSpeed = cam_speed * RE_TIME->GetDeltaTime();
-					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
 
 					// Move
-					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_W)->Down)			camera->LocalMove(Dir::FORWARD, cameraSpeed);
-					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_S)->Down)			camera->LocalMove(Dir::BACKWARD, cameraSpeed);
-					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_A)->Down)			camera->LocalMove(Dir::LEFT, cameraSpeed);
-					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_D)->Down)			camera->LocalMove(Dir::RIGHT, cameraSpeed);
-					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_Space)->Down)		camera->LocalMove(Dir::UP, cameraSpeed);
-					if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_C)->Down)			camera->LocalMove(Dir::DOWN, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_W)->Down)			camera->LocalMove(Dir::FORWARD, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_S)->Down)			camera->LocalMove(Dir::BACKWARD, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_A)->Down)			camera->LocalMove(Dir::LEFT, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_D)->Down)			camera->LocalMove(Dir::RIGHT, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Space)->Down)		camera->LocalMove(Dir::UP, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_C)->Down)			camera->LocalMove(Dir::DOWN, cameraSpeed);
 
 					// Rotate
 					if (mouseData.x != 0 || mouseData.y != 0)

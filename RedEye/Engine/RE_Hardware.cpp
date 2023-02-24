@@ -6,7 +6,7 @@
 #include <SDL2/SDL.h>
 #include "imgui\imgui.h"
 #include "gpudetect\DeviceId.h"
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <EAStdC/EAString.h>
 
 #include <Psapi.h> // WINDOWS memory calls

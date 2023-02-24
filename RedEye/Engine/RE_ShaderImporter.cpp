@@ -8,7 +8,7 @@
 #include "RE_ResourceManager.h"
 
 #include <SDL2/SDL.h>
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 
 void RE_ShaderImporter::Init()
 {

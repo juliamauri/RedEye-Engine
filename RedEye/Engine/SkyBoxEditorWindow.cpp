@@ -12,7 +12,7 @@
 
 #include <ImGuiImpl/imgui_stdlib.h>
 #include <ImGui/imgui_internal.h>
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 
 SkyBoxEditorWindow::SkyBoxEditorWindow() :
 	EditorWindow("Skybox Editor", false),

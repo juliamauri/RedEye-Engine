@@ -8,7 +8,7 @@
 #include "RE_Time.h"
 #include "RE_CompCamera.h"
 
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 
 void ModulePhysics::Update()
 {

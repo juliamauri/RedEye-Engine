@@ -3,25 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-#keep some folders, not ignore
-!RedEye/DebugData/*
-!RedEye/ReleaseData/*
-!RedEye/Source/libzip/*
-!RedEye/3rd Parties/EASTL/test/packages/**/*
 
 # User-specific files
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
-
-#Build files
-RedEye.exe
-RedEye.iobj
-RedEye.exp
-RedEye.ipdb
-RedEye.lib
-RedEye.pdb
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -39,7 +26,6 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -315,23 +301,5 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-#not ignore some pdb
-!RedEye/Source/WWISESDK/binaries/libdebug/*
-!RedEye/Source/WWISESDK/binaries/libprofiler/*
-!RedEye/Source/WWISESDK/binaries/librelase/*
-!RedEye/Source/assimp/libx86/*
-
-!RedEye/3rd Parties/EASTL/include/EASTL/internal/atomic/arch/x86/*
-!RedEye/3rd Parties/EASTL/test/packages/EAThread/include/eathread/x86/*
-!RedEye/3rd Parties/EASTL/test/packages/EAThread/source/x86/*
-RedEye/Build/RedEye_debug.exe.lastcodeanalysissucceeded
-RedEye/Build/RedEye_debug.exe
-RedEye/Build/RedEye_debug.exp
-RedEye/Build/RedEye_debug.lib
-RedEye/Build/RedEye_release.exe
-RedEye/Build/RedEye_release.exp
-RedEye/Build/RedEye_release.lib
-
-
-!RedEye Projects Explorer/BuildData/**
-!RedEye Projects Explorer/Binaries/**
+!RedEye/BuildData/**/*
+!RedEye/BuildLib/**/*

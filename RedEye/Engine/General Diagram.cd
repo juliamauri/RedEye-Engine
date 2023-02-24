@@ -3,7 +3,7 @@
   <Class Name="ModuleAudio" Collapsed="true">
     <Position X="2.25" Y="23.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AEAAgIIAACIABAAAAgDAEAIQAAAAAAQAAEACCEAIQAA=</HashCode>
+      <HashCode>AEAAgIIAACIABAAAAgDAAAIQAAAAAAQAAEACCEAIQAA=</HashCode>
       <FileName>ModuleAudio.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -17,14 +17,14 @@
   <Class Name="ModuleRenderer3D" Collapsed="true">
     <Position X="2.25" Y="21.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>IAQApIFAACSo5wZQgIBAMgkgAAiQDAAJBIEKZGpMAA4=</HashCode>
+      <HashCode>IAQApIFAACTs5wZQgIBAMgkkQAiQDAAJBIEKVGpMAA4=</HashCode>
       <FileName>ModuleRenderer3D.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ModuleScene" Collapsed="true">
     <Position X="2.25" Y="16" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>gKRAAABCAWCgAkohAAbAOAgBEASAgAoQA0ACAFQIABg=</HashCode>
+      <HashCode>gKRAAIBCAWCgAkohAAbAOAgBEASAgAoEA0ACIFQIABg=</HashCode>
       <FileName>ModuleScene.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -35,35 +35,25 @@
       <FileName>ModuleWindow.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Module" Collapsed="true">
+  <Class Name="Module&lt;OutOfProc, ModuleT&gt;" Collapsed="true">
     <Position X="1" Y="12.75" Width="1.5" />
-    <InheritanceLine Type="EventListener" ManuallyRouted="true">
-      <Path>
-        <Point X="1.25" Y="1.062" />
-        <Point X="1.25" Y="1.635" />
-        <Point X="0.75" Y="1.635" />
-        <Point X="0.75" Y="15.125" />
-        <Point X="1.75" Y="15.125" />
-        <Point X="1.75" Y="12.75" />
-      </Path>
-    </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAQAgIAAACAACAAAAABAEAAAAAAEAAAAAAACCEEIBAA=</HashCode>
-      <FileName>Module.h</FileName>
+      <HashCode>AIAAAAAAIAAAAAAABAAAQAAAAAQAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\winrt\wrl\module.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MD5" Collapsed="true">
     <Position X="7.25" Y="4" Width="1.25" />
     <TypeIdentifier>
       <HashCode>ABAAAEAAAAAAIAgABEAEAAAAAAAGQAJEAIBAGGAEAAE=</HashCode>
-      <FileName>md5.h</FileName>
+      <FileName>C:\Users\JuliG\Documents\GitHub\RedEye-Engine\RedEye\3rd Parties\Others\Include\MD5\md5.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="EventListener" Collapsed="true">
     <Position X="0.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>EventListener.h</FileName>
+      <HashCode>AAAAAAAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Event.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_ConsoleLog" Collapsed="true">
@@ -76,36 +66,29 @@
   <Class Name="EditorWindow" Collapsed="true">
     <Position X="9.25" Y="20" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AQAAAAAAAgAAAgAAEIAgAIQAAEAEAAAwAAAAIAAAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <HashCode>AQAAAAAAAgAAAgAAEIAgAIQAAAAEAAAwCAAAIAAAAAA=</HashCode>
+      <FileName>EditorWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ConsoleWindow" Collapsed="true">
     <Position X="10.25" Y="22" Width="1.5" />
     <TypeIdentifier>
       <HashCode>oAEAAAAAAAQAAoAAAAAQAAAQAEAEgAAAAAgAACAAAAE=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>ConsoleWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ConfigWindow" Collapsed="true">
     <Position X="10.25" Y="22.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAgAAAAAQAAAAAAAAAAAAAAQAAAAAQAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="HeriarchyWindow" Collapsed="true">
-    <Position X="10.25" Y="24.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAgAAAAAAgAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>ConfigWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PropertiesWindow" Collapsed="true">
-    <Position X="10.25" Y="25" Width="1.5" />
+    <Position X="10.25" Y="25.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAIAgAAAAAAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>PropertiesWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="AboutWindow" Collapsed="true">
@@ -115,98 +98,70 @@
     </Compartments>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAoAAAAAAAAAAABAAAAAAQAAAAAAAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="RandomTest" Collapsed="true">
-    <Position X="15" Y="23.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAQAEAAAAAAQAiAABAEAAAAAAAAABAAAgAAAACUoAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>AboutWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PlayPauseWindow" Collapsed="true">
     <Position X="10.25" Y="23.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAgAAAAAAAEAAAAAAAAAAAAAAAIAAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>PlayPauseWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PopUpWindow" Collapsed="true">
-    <Position X="15" Y="24.25" Width="1.5" />
+    <Position X="15" Y="24.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAACAAgAABAQkggAAIEiCgAIRAEAAAAFAEAEAAyAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <HashCode>gAAAAAAAABAQkiAAAIEUCiAIQAEAQAAFAAAQAASAAAQ=</HashCode>
+      <FileName>PopUpWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="AssetsWindow" Collapsed="true">
     <Position X="10.25" Y="21.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAiAgAAAIAAAAAABAAAAAEAAAAAAAAQA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>AssetsWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="WwiseWindow" Collapsed="true">
     <Position X="15" Y="22.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAgAQAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>WwiseWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MaterialEditorWindow" Collapsed="true">
     <Position X="17.25" Y="21.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AEAAAAAAAAAAAgAAAAAAAIAAAAAAAIAQAAAAAAQAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>MaterialEditorWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="SkyBoxEditorWindow" Collapsed="true">
     <Position X="17.25" Y="23.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AEAAAAAAAAAAAgAAAAACAAAAAAAAAgQAAAAAAEAAAAg=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>SkyBoxEditorWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ShaderEditorWindow" Collapsed="true">
     <Position X="17.25" Y="22" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QGAAACAAAAAAAgAQAAAIAAAAAAAAAAAAAACABAAAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="WaterPlaneResourceWindow" Collapsed="true">
-    <Position X="15" Y="21.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>gAAAAAAAAAAAAgAAAAACAAAAAAAAAAIAAAAAAAAAgAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>ShaderEditorWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TextEditorManagerWindow" Collapsed="true">
     <Position X="17.25" Y="22.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAgAAAAAAAAiAAAAAAAAAAABAAAAgAAAAAAAAAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <FileName>TextEditorManagerWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="SceneEditorWindow" Collapsed="true">
     <Position X="12.5" Y="21.25" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>IAEAAAAQIAgAQgDAREAQAIAAAAAAAAAAAAAAAEABFAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="SceneGameWindow" Collapsed="true">
-    <Position X="12.5" Y="22" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>IAAAAAASAAAAQgBAREAAAIAAAAAAQAAAAAAAAAAAFAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="TransformDebugWindow" Collapsed="true">
-    <Position X="15" Y="25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAgAAAAAAAQAAAAAAAAAAAAAAAAgAAAA=</HashCode>
-      <FileName>EditorWindows.h</FileName>
+      <HashCode>IAEAAAAQIAgAQgDAREAQAIAAAAAAAAAAAgAAAUABBAA=</HashCode>
+      <FileName>SceneEditorWindow.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ModuleEditor" Collapsed="true">
@@ -215,7 +170,7 @@
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>gMaWAChCgCIIig0JghSJEAEBACBBEDARyICCAkGYAKA=</HashCode>
+      <HashCode>gMaWgKhCgKKMig0JggSJGAEBAiIBEDARyIBCgkGYAKg=</HashCode>
       <FileName>ModuleEditor.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -231,7 +186,7 @@
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>IAABAAAAABBAAgAAAAIAmICBgAACABAIgIACAEAAlAQ=</HashCode>
+      <HashCode>IAABAAAAABBAAgAAAAIAmICBgAACABAIAIACAEAAkQQ=</HashCode>
       <FileName>Application.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -266,7 +221,7 @@
   <Class Name="RE_ThumbnailManager" Collapsed="true">
     <Position X="1.5" Y="9.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>QgQkAACCgABBAAAAAAACQAAAIAGAABAABABCAABgAAQ=</HashCode>
+      <HashCode>QiQkAADCgABBAAAAAAACQAAAIAGAABAABABCBABgAgQ=</HashCode>
       <FileName>RE_ThumbnailManager.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -280,7 +235,7 @@
   <Class Name="RE_PrimitiveManager" Collapsed="true">
     <Position X="1.5" Y="10" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAECAAQAABAAAAAAgAAAAA0AAAAAARAAACAAJBAAA=</HashCode>
+      <HashCode>AAAAECAAQAABAAAAAAgAAAAA0AAAAAARAAACAAJBAEA=</HashCode>
       <FileName>RE_PrimitiveManager.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -296,7 +251,7 @@
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAEAyACAEAwJAigIhQEAUAEAAAGEIQAAIABCChBABAA=</HashCode>
+      <HashCode>AAEAyACAEAwJEigIhQEAUAEAEAGEIQAAICRCChBgBAA=</HashCode>
       <FileName>RE_ResourceManager.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -317,7 +272,7 @@
   <Class Name="RE_Material" Collapsed="true">
     <Position X="4.75" Y="9.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>DQgBCICAABIASgACIOAqCgEMSCQUZYEARFgAEAJ4wDA=</HashCode>
+      <HashCode>DQgBGICAAhIASgACIOAqCgEMSCQUZYEARFgAEAJ4wDA=</HashCode>
       <FileName>RE_Material.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -359,7 +314,7 @@
   <Class Name="RE_SkyBox" Collapsed="true">
     <Position X="4.75" Y="7.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>gAgAQiAAAEIAggAGMAAYgAAAUAAARKIgFAQAAAgMACE=</HashCode>
+      <HashCode>gAgAUiAAAEIAggAGMAAYgAAAUAAARKIgFAQAAAgMACE=</HashCode>
       <FileName>RE_SkyBox.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -373,7 +328,7 @@
   <Class Name="ResourceContainer" Collapsed="true">
     <Position X="3.5" Y="4" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>BMgAAEAIIIIAAgAAIAAICAgBKAAFxiUUAgIAUAAiBIA=</HashCode>
+      <HashCode>BMgAEEAIIIIAAgAAIAAICAgBKAAFxiUUAgIAUAAiBIA=</HashCode>
       <FileName>Resource.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -387,7 +342,7 @@
   <Class Name="RE_CameraManager" Collapsed="true">
     <Position X="1.5" Y="10.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>BEAAAAAIAAAAAAAhAAIAAAAAAAAABAIEABECQABAAAA=</HashCode>
+      <HashCode>BUAAAAAIAAAAAAAhAAIAAAAAAAAABAMEABECQABAAAA=</HashCode>
       <FileName>RE_CameraManager.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -401,63 +356,21 @@
   <Class Name="RE_Math" Collapsed="true">
     <Position X="6.5" Y="2" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAgAAQBQAEAAAEAIAAAAAUAAAAAgAAAABAAAAAAA=</HashCode>
+      <HashCode>BEAQIgQMUiAIFAIAAAYAAAAAUBAAAAhACAABQAAQIAA=</HashCode>
       <FileName>RE_Math.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_FileSystem" Collapsed="true">
     <Position X="1.75" Y="3" Width="1.5" />
-    <NestedTypes>
-      <Enum Name="RE_FileSystem::PathType" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>RE_FileSystem.h</NewMemberFileName>
-        </TypeIdentifier>
-      </Enum>
-      <Enum Name="RE_FileSystem::FileType" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>RE_FileSystem.h</NewMemberFileName>
-        </TypeIdentifier>
-      </Enum>
-      <Enum Name="RE_FileSystem::PathProcessType" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>RE_FileSystem.h</NewMemberFileName>
-        </TypeIdentifier>
-      </Enum>
-      <Struct Name="RE_FileSystem::RE_File" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>RE_FileSystem.h</NewMemberFileName>
-        </TypeIdentifier>
-      </Struct>
-      <Struct Name="RE_FileSystem::RE_Meta" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>RE_FileSystem.h</NewMemberFileName>
-        </TypeIdentifier>
-      </Struct>
-      <Struct Name="RE_FileSystem::RE_Directory" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>RE_FileSystem.h</NewMemberFileName>
-        </TypeIdentifier>
-      </Struct>
-      <Struct Name="RE_FileSystem::RE_Path" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>RE_FileSystem.h</NewMemberFileName>
-        </TypeIdentifier>
-      </Struct>
-      <Struct Name="RE_FileSystem::RE_ProcessPath" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>RE_FileSystem.h</NewMemberFileName>
-        </TypeIdentifier>
-      </Struct>
-    </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAIiAAI4gAABEABwCBAQgABBiIAQAIAEAAEDoAFIFgI=</HashCode>
+      <HashCode>AAIiIAI4gAABEABwCBAQgABACIAQAIAEAAAjoAFIFgI=</HashCode>
       <FileName>RE_FileSystem.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Config" Collapsed="true">
     <Position X="5.25" Y="3" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAgIAAAgAAAAAAAAAAAAAAAAIAAAAAAAEgIAAAEAA=</HashCode>
+      <HashCode>AAAAgIAAAgAAAAAAAAAAAAAAAAIAAAAAAAAgIAAAEAA=</HashCode>
       <FileName>RE_Config.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -478,7 +391,7 @@
   <Class Name="ComponentsPool" Collapsed="true">
     <Position X="4" Y="16" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>DAwAQDLAAEAgEBACABgCgGEhAYAFAAAAZAAQADQABgY=</HashCode>
+      <HashCode>DAwAQDLAAEAgEBASABgCgGEhAYAFAAAAZAAQADQABgY=</HashCode>
       <FileName>RE_ComponentsPool.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -506,7 +419,7 @@
   <Class Name="RE_CompPrimitive" Collapsed="true">
     <Position X="16.75" Y="7.25" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>BAAAAoAAABAAAgACAAAQIAAAAAAEAASAAAgBAAAAAUA=</HashCode>
+      <HashCode>BAAAAoAEAhEAAgACAABQIAAAAAAEAASAAAgBIAAABUA=</HashCode>
       <FileName>RE_CompPrimitive.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -520,7 +433,7 @@
   <Class Name="RE_CompRock" Collapsed="true">
     <Position X="13.75" Y="7.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAkAAICAAAAAQgAAAAAAAAEAAQAQCAAAQAIBQAAAgEA=</HashCode>
+      <HashCode>AAkAAICEAAEAQgAAAABAAAEAAQAQCAAAQAIBYAAAhEA=</HashCode>
       <FileName>RE_CompPrimitive.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -543,7 +456,7 @@
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>ACgAAICACAAAAgABAAAAAAEAAQAEAIAAQYABQqAJAUA=</HashCode>
+      <HashCode>ACgAAICECAEAAgABAABAAAEAAQAEAIAAQYABYqAJBUA=</HashCode>
       <FileName>RE_CompPrimitive.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -627,7 +540,7 @@
   <Class Name="RE_Component" Collapsed="true">
     <Position X="15.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>CAwAwICAAAAIBgAAEABQAAEBAwAFAAERQEIDINEBAlA=</HashCode>
+      <HashCode>CAwAwICAAAAIBgAAEABQAAEBAQAFAAERQFICINUBAlA=</HashCode>
       <FileName>RE_Component.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -662,28 +575,28 @@
   <Class Name="RE_FileBuffer" Collapsed="true">
     <Position X="7" Y="3" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAgIAAAIAAAACAAIAAAAAAAAEEAAAACABgKIAAABE=</HashCode>
+      <HashCode>AAQAgIAAAIAAAACAAIAAAAAAAAEEAAAACABgIIAAABE=</HashCode>
       <FileName>RE_FileBuffer.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ModulePhysics" Collapsed="true">
     <Position X="2.25" Y="18.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AgYAAAAAACAAAAAAQAgAAAIAAAAAAAAAAAgCAEAAAQA=</HashCode>
+      <HashCode>AgYAgIAAAAAEAISAQAgAAAIBAAAAQgAAAEoAAFAIAUA=</HashCode>
       <FileName>ModulePhysics.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ParticleManager" Collapsed="true">
     <Position X="4" Y="18.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAABAAEIAAAABAAAAAAAAAAAAAAAAAIAAAAAAAEIAA=</HashCode>
-      <FileName>ParticleManager.h</FileName>
+      <HashCode>EAQAhAQEIAADABSAAEAAAAAQAAAQABAIAAAAAABMIAA=</HashCode>
+      <FileName>RE_ParticleManager.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_CompParticleEmitter" Collapsed="true">
     <Position X="7.75" Y="18.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>CIwAgIiQUAAAIgAAAAIAAEECAcAEGAIFQTQMQGVERGA=</HashCode>
+      <HashCode>CAwAgICQQAAAAgAAAAABAAEAAQAEAAAEQAAAJAgAREA=</HashCode>
       <FileName>RE_CompParticleEmitter.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -753,15 +666,8 @@
   <Struct Name="RE_Particle" Collapsed="true">
     <Position X="6" Y="19" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAAAAAAAIAAAAAAACQAAAAAAAQFAAAA=</HashCode>
-      <FileName>ParticleManager.h</FileName>
-    </TypeIdentifier>
-  </Struct>
-  <Struct Name="RE_ParticleEmitter" Collapsed="true">
-    <Position X="6" Y="18.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAIAAAAAAAACAIAAAgAAAAAAAAQAAAEAAAAAABAAgA=</HashCode>
-      <FileName>ParticleManager.h</FileName>
+      <HashCode>CIAAAAAAAAAAAAAIAAAAIAAAAAABCAAAAAQAAQFAAAA=</HashCode>
+      <FileName>RE_Particle.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Typedef Name="TransformsPool" Collapsed="true">
@@ -963,14 +869,14 @@
   <Enum Name="Resource_Type" Collapsed="true">
     <Position X="5.5" Y="4" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAIhAAAAAAAABBABAAAIAAAAAACAAAAAIAAAIA=</HashCode>
+      <HashCode>AAAAAAAIhAAAQAAAABBABAAAIAgAAAACAAAAAIAAAMA=</HashCode>
       <FileName>Resource.h</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="ComponentType" Collapsed="true">
     <Position X="17.5" Y="1.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQQECgAgAAAEAEAAAAAECAAUEDEIiAgAGAAAAAAAAg=</HashCode>
+      <HashCode>AAQQECgAgAAQEAEAAAAAECAAUEDEIiAgAGAAAAAAAAg=</HashCode>
       <FileName>RE_Component.h</FileName>
     </TypeIdentifier>
   </Enum>

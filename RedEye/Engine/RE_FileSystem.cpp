@@ -25,7 +25,6 @@
 #include "RE_Shader.h"
 
 #include <ImGui/imgui.h>
-#include <libzip/zip.h>
 #include <PhysFS/physfs.h>
 
 #include <EASTL\internal\char_traits.h>
@@ -52,12 +51,13 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		library_path = "Library";
 		assets_path = "Assets";
 
-		if (PHYSFS_mount(".", 0, 0) == 0) {
+		//Loads from argument (RedLens)
+		if (PHYSFS_mount((argv[1]) ? argv[1] : ".", 0, 0) == 0) {
 
 			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
 			return false;
 		}
-		if (PHYSFS_setWriteDir(".") == 0) {
+		if (PHYSFS_setWriteDir((argv[1]) ? argv[1] : ".") == 0) {
 
 			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
 			return false;

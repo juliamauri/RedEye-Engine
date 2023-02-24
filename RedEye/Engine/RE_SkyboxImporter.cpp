@@ -7,7 +7,7 @@
 #include "RE_ResourceManager.h"
 #include "RE_Texture.h"
 
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <IL/il.h>
 #include <IL/ilu.h>
 

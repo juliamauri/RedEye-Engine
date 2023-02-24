@@ -10,7 +10,7 @@
 #include "RE_GLCache.h"
 #include "RE_Texture.h"
 
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <IL/il.h>
 #include <IL/ilu.h>
 #include <EASTL/string.h>

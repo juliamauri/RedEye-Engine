@@ -41,7 +41,7 @@
 #include <MGL/Math/Quat.h>
 #include <ImGuiWidgets/ImGuizmo/ImGuizmo.h>
 #include <SDL2/SDL.h>
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <gl/GL.h>
 #include <EASTL/list.h>
 #include <EASTL/stack.h>

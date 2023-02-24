@@ -23,7 +23,7 @@
 #include "RE_Texture.h"
 
 #include <ImGui/imgui.h>
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <EAStdC/EAString.h>
 
 RE_Material::RE_Material() {}

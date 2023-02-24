@@ -21,12 +21,8 @@
 
 #include <ImGui/imgui.h>
 #include <SDL2/SDL.h>
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <gl/GL.h>
-
-#ifndef PAR_SHAPES_IMPLEMENTATION
-#define PAR_SHAPES_IMPLEMENTATION
-#endif
 
 #include <par_shapes.h>
 

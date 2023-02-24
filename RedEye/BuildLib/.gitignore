@@ -1,0 +1,13 @@
+*.*
+!.gitignore
+!AkMemoryMgr.*
+!AkMusicEngine.*
+!AkSoundEngine.*
+!AkSpatialAudio.*
+!AkStreamMgr.*
+!CommunicationCentral.*
+!DevIL.*
+!ILU.*
+!ILUT.*
+!OptickCored.*
+!OptickCore.*

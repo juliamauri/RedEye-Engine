@@ -47,9 +47,9 @@ void PlayPauseWindow::Draw(bool secondary)
 		static bool colored = false;
 		ImGui::SameLine();
 		
-		if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_Q)->Down) { o = ImGuizmo::OPERATION::TRANSLATE; changed = true; }
-		if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_W)->Down) { o = ImGuizmo::OPERATION::ROTATE;    changed = true; }
-		if (ImGui::GetKeyData(ImGuiKey_::ImGuiKey_E)->Down) { o = ImGuizmo::OPERATION::SCALE;	    changed = true; }
+		if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Q)->Down) { o = ImGuizmo::OPERATION::TRANSLATE; changed = true; }
+		if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_W)->Down) { o = ImGuizmo::OPERATION::ROTATE;    changed = true; }
+		if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_E)->Down) { o = ImGuizmo::OPERATION::SCALE;	    changed = true; }
 
 		if (!colored && o == ImGuizmo::OPERATION::TRANSLATE) {
 			ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, { 0.0f, 1.0f, 0.0f, 1.0f });

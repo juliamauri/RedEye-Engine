@@ -3,7 +3,6 @@
 #include "Application.h"
 #include <MD5/md5.h>
 #include <PhysFS/physfs.h>
-#include <libzip/zip.h>
 
 RE_FileBuffer::RE_FileBuffer(const char* file_name) : buffer(nullptr), file_name(file_name) {}
 RE_FileBuffer::~RE_FileBuffer() { if (buffer != nullptr) delete[] buffer; }

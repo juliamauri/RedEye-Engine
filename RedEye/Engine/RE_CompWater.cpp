@@ -20,7 +20,7 @@
 #include "RE_Shader.h"
 
 #include <MGL/Math/float4.h>
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <par_shapes.h>
 #include <ImGui/imgui.h>
 

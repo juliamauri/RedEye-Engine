@@ -25,7 +25,7 @@
 
 #include <ImGuiImpl/imgui_stdlib.h>
 #include <ImGui/imgui_internal.h>
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 
 void ParticleEmitterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const char* md5)
 {

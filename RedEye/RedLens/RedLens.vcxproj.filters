@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="3rd Party">
+      <UniqueIdentifier>{246a6cf6-a175-4b1a-a75e-f60669789f6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ImGuiWindows">
+      <UniqueIdentifier>{fb4ff610-e08a-4e3f-bcb3-ccbb3f22aede}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImGuiWindows">
+      <UniqueIdentifier>{77b7cffb-a41e-4111-a495-dbf8207b6c8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ImGuiWindows\Windows">
+      <UniqueIdentifier>{2cdef023-67c8-4833-9d6f-f819fe02c847}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImGuiWindows\Windows">
+      <UniqueIdentifier>{1511347f-6a83-46cd-8cf0-27ebc8c9bc8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd Party\ImGuiImpl">
+      <UniqueIdentifier>{88add625-f16a-454c-944c-24e8ee750c86}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JR_Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JR_Input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JR_WindowAndRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JR_WindowsManager.cpp">
+      <Filter>Source Files\ImGuiWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="JR_Window.cpp">
+      <Filter>Source Files\ImGuiWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3.cpp">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_sdl2.cpp">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="JR_Application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JR_Input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JR_WindowAndRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JR_WindowsManager.h">
+      <Filter>Header Files\ImGuiWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="JR_Window.h">
+      <Filter>Header Files\ImGuiWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3.h">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3_loader.h">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_sdl2.h">
+      <Filter>3rd Party\ImGuiImpl</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

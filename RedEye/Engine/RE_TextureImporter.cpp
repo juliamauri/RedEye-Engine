@@ -9,7 +9,7 @@
 #include "RE_GLCache.h"
 #include "RE_Texture.h"
 
-#include <GL/Glew/glew.h>
+#include <GL/glew.h>
 #include <IL/il.h>
 #include <IL/ilu.h>
 #include <IL/ilut.h>
@@ -30,7 +30,7 @@ bool RE_TextureImporter::Init()
 				if (ilEnable(IL_ORIGIN_SET)) {
 					char tmp[8];
 					EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", IL_VERSION / 100, (IL_VERSION % 100) / 10, IL_VERSION % 10);
-					RE_SOFT_NVS("DevIL", tmp, "http://openil.sourceforge.net/");
+					RE_SOFT_NVS("DevIL", tmp, "https://github.com/DentonW/DevIL");
 					return true;
 				} else	RE_LOG_ERROR("DevIL Init Error when enabling origin IL_ORIGIN_SET");
 			} else		RE_LOG_ERROR("DevIL Init Error when setting origin to IL_ORIGIN_LOWER_LEFT");
