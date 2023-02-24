@@ -303,3 +303,4 @@ __pycache__/
 
 !RedEye/BuildData/**/*
 !RedEye/BuildLib/**/*
+!RedEye/3rd Parties/assimp/code/AssetLib/**/*
