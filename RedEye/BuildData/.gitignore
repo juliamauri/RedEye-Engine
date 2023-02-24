@@ -1,3 +1,7 @@
+/Release/x86/**
+/Release/x64/**
+/Debug/x86/**
+/Debug/x64/**
 *.*
 !.gitignore
 !DevIL.dll
