@@ -189,7 +189,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>$(SolutionDir)BuildLib\Debug\x86\assimp-vc143-mtd.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/JuliG/Desktop/3rd Party Projects/assimp/B 86/bin/Debug/assimp-vc143-mtd.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>$(SolutionDir)BuildData\Debug\x86\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -237,7 +237,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>$(SolutionDir)BuildLib\Debug\x86\assimp-vc143-mtd.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/JuliG/Desktop/3rd Party Projects/assimp/B 86/bin/Debug/assimp-vc143-mtd.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>$(SolutionDir)BuildData\Debug\x64\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -286,7 +286,7 @@
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\assimp-vc143-mt.lib</ImportLibrary>
       <OptimizeReferences>true</OptimizeReferences>
-      <ProgramDataBaseFile>C:/Users/JuliG/Desktop/3rd Party Projects/assimp/B 86/bin/Release/assimp-vc143-mt.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>$(SolutionDir)BuildData\Release\x86\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -335,7 +335,7 @@
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\assimp-vc143-mt.lib</ImportLibrary>
       <OptimizeReferences>true</OptimizeReferences>
-      <ProgramDataBaseFile>C:/Users/JuliG/Desktop/3rd Party Projects/assimp/B 86/bin/Release/assimp-vc143-mt.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>$(SolutionDir)BuildData\Release\x64\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -383,7 +383,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\assimp-vc143-mt.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/JuliG/Desktop/3rd Party Projects/assimp/B 86/bin/MinSizeRel/assimp-vc143-mt.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>$(SolutionDir)BuildData\Release\x86\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -431,7 +431,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\assimp-vc143-mt.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/JuliG/Desktop/3rd Party Projects/assimp/B 86/bin/MinSizeRel/assimp-vc143-mt.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>$(SolutionDir)BuildData\Release\x64\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -478,7 +478,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\assimp-vc143-mt.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/JuliG/Desktop/3rd Party Projects/assimp/B 86/bin/RelWithDebInfo/assimp-vc143-mt.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>$(SolutionDir)BuildData\Release\x86\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -525,7 +525,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\assimp-vc143-mt.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/JuliG/Desktop/3rd Party Projects/assimp/B 86/bin/RelWithDebInfo/assimp-vc143-mt.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>$(SolutionDir)BuildData\Release\x64\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
