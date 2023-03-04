@@ -52,12 +52,24 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		assets_path = "Assets";
 
 		//Loads from argument (RedLens)
-		if (PHYSFS_mount((argv[1]) ? argv[1] : ".", 0, 0) == 0) {
+		if (argv[1])
+		{
+			project_path = argv[1];
+			project_path = project_path.substr(0, project_path.find_last_of('\\') + 1);
+		}
+
+		if (PHYSFS_mount("EngineAssets/", "Internal/", 0) == 0)
+		{
+			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
+			return false;
+		}
+
+		if (PHYSFS_mount((argv[1]) ? project_path.c_str() : ".", 0, 0) == 0) {
 
 			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
 			return false;
 		}
-		if (PHYSFS_setWriteDir((argv[1]) ? argv[1] : ".") == 0) {
+		if (PHYSFS_setWriteDir((argv[1]) ? project_path.c_str() : ".") == 0) {
 
 			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
 			return false;
@@ -70,8 +82,19 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		for (i = PHYSFS_getSearchPath(); *i != NULL; i++) RE_LOG("[%s] is in the search path.\n", *i);
 		PHYSFS_freeList(*i);
 
-		config = new Config("Settings/config.json");
-		if (!config->Load()) RE_LOG_WARNING("Can't load Settings/config.json - building module default configuration.");
+		if (argv[1])
+		{
+			eastl::string config_file = argv[1];
+			config_file = config_file.substr(config_file.find_last_of('\\') + 1);
+			config = new Config(config_file.c_str());
+			if (!config->Load()) RE_LOG_WARNING("Can't load %s - building module default configuration.", config_file.c_str());
+		}
+		else
+		{
+			project_path = GetExecutableDirectory();
+			config = new Config("Settings/config.json");
+			if (!config->Load()) RE_LOG_WARNING("Can't load Settings/config.json - building module default configuration.");
+		}
 
 		rootAssetDirectory = new RE_Directory();
 		rootAssetDirectory->SetPath("Assets/");
@@ -375,6 +398,10 @@ void RE_FileSystem::DrawEditor()
 {
 	ImGui::Text("Executable Directory:");
 	ImGui::TextWrappedV(GetExecutableDirectory(), "");
+
+	ImGui::Separator();
+	ImGui::Text("Project Directory:");
+	ImGui::TextWrappedV(project_path.c_str(), "");
 
 	ImGui::Separator();
 	ImGui::Text("All assets directories:");

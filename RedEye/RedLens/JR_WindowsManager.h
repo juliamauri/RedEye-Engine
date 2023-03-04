@@ -1,7 +1,7 @@
 #ifndef JR_WINDOWSMANAGER_CLASS
 #define JR_WINDOWSMANAGER_CLASS
 
-#include <vector>
+#include <EASTL/vector.h>
 
 class JR_WindowsManager
 {
@@ -15,7 +15,7 @@ public:
 private:
 	void SetStyleColor();
 
-	std::vector<class JR_Window*> windows;
+	eastl::vector<class JR_Window*> windows;
 };
 
 #endif // !JR_MAINWINDOWS_CLASS

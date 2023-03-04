@@ -375,6 +375,9 @@
       <AdditionalLibraryDirectories>$(SolutionDir)BuildLib\Debug\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ImportLibrary>$(SolutionDir)BuildLib\Debug\x86\$(TargetName).lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /i /e /s /y /f "$(ProjectDir)OutputFiles\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -397,8 +400,11 @@
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>ws2_32.lib;opengl32.lib;AkMemoryMgr.lib;AkMusicEngine.lib;AkSoundEngine.lib;AkSpatialAudio.lib;AkStreamMgr.lib;DevIL.lib;ILU.lib;ILUT.lib;CommunicationCentral.lib;OptickCored.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)BuildLib\Debug\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ImportLibrary>$(SolutionDir)BuildLib\Debug\x86\$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)BuildLib\Debug\x64\$(TargetName).lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /i /e /s /y /f "$(ProjectDir)OutputFiles\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -425,6 +431,9 @@
       <AdditionalLibraryDirectories>$(SolutionDir)BuildLib\Release\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\$(TargetName).lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /i /e /s /y /f "$(ProjectDir)OutputFiles\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -449,8 +458,11 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>$(SolutionDir)BuildLib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)BuildLib\Release\x64\$(TargetName).lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /i /e /s /y /f "$(ProjectDir)OutputFiles\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

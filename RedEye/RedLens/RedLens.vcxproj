@@ -30,26 +30,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -99,7 +99,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WINDOWS_IGNORE_PACKING_MISMATCH;IMGUI_DISABLE_OBSOLETE_FUNCTIONS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\SDL2\include;$(SolutionDir)3rd Parties\nativefiledialog\src\include;$(SolutionDir)3rd Parties\Others;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\SDL2\include;$(SolutionDir)3rd Parties\nativefiledialog\src\include;$(SolutionDir)3rd Parties\physfs\src\include;$(SolutionDir)3rd Parties\Others;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -109,6 +109,9 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(SolutionDir)BuildLib\Debug\x86\$(TargetName).lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /i /e /s /y /f "$(ProjectDir)OutputFiles\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -118,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WINDOWS_IGNORE_PACKING_MISMATCH;IMGUI_DISABLE_OBSOLETE_FUNCTIONS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\SDL2\include;$(SolutionDir)3rd Parties\nativefiledialog\src\include;$(SolutionDir)3rd Parties\Others;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\SDL2\include;$(SolutionDir)3rd Parties\nativefiledialog\src\include;$(SolutionDir)3rd Parties\physfs\src\include;$(SolutionDir)3rd Parties\Others;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -130,6 +133,9 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\$(TargetName).lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /i /e /s /y /f "$(ProjectDir)OutputFiles\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -137,7 +143,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>IMGUI_DISABLE_OBSOLETE_FUNCTIONS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\SDL2\include;$(SolutionDir)3rd Parties\nativefiledialog\src\include;$(SolutionDir)3rd Parties\Others;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\SDL2\include;$(SolutionDir)3rd Parties\nativefiledialog\src\include;$(SolutionDir)3rd Parties\physfs\src\include;$(SolutionDir)3rd Parties\Others;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -147,6 +153,9 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(SolutionDir)BuildLib\Debug\x64\$(TargetName).lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /i /e /s /y /f "$(ProjectDir)OutputFiles\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -156,7 +165,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>IMGUI_DISABLE_OBSOLETE_FUNCTIONS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\SDL2\include;$(SolutionDir)3rd Parties\nativefiledialog\src\include;$(SolutionDir)3rd Parties\Others;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rd Parties\EASTL\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAAssert\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EABase\include\Common;$(SolutionDir)3rd Parties\EASTL\test\packages\EAMain\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAStdC\include;$(SolutionDir)3rd Parties\EASTL\test\packages\EAThread\include;$(SolutionDir)3rd Parties\ImGui\include;$(SolutionDir)3rd Parties\SDL2\include;$(SolutionDir)3rd Parties\nativefiledialog\src\include;$(SolutionDir)3rd Parties\physfs\src\include;$(SolutionDir)3rd Parties\Others;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -168,33 +177,83 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(SolutionDir)BuildLib\Release\x64\$(TargetName).lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /i /e /s /y /f "$(ProjectDir)OutputFiles\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_sdl2.cpp" />
+    <ClCompile Include="..\3rd Parties\Others\ImGuiImpl\imgui_stdlib.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="JR_Application.cpp" />
     <ClCompile Include="JR_Input.cpp" />
     <ClCompile Include="JR_Window.cpp" />
     <ClCompile Include="JR_WindowsManager.cpp" />
     <ClCompile Include="JR_WindowAndRenderer.cpp" />
+    <ClCompile Include="RL_FileSystem.cpp" />
+    <ClCompile Include="RL_Projects.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3.h" />
     <ClInclude Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_sdl2.h" />
+    <ClInclude Include="..\3rd Parties\Others\ImGuiImpl\imgui_stdlib.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\allocators.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\document.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\encodedstream.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\encodings.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\error\en.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\error\error.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\filereadstream.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\filewritestream.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\fwd.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\biginteger.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\diyfp.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\dtoa.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\ieee754.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\itoa.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\meta.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\pow10.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\regex.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\stack.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\strfunc.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\strtod.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\internal\swap.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\istreamwrapper.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\memorybuffer.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\memorystream.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\msinttypes\inttypes.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\msinttypes\stdint.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\ostreamwrapper.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\pointer.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\prettywriter.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\rapidjson.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\reader.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\schema.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\stream.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\stringbuffer.h" />
+    <ClInclude Include="..\3rd Parties\Others\RapidJson\writer.h" />
     <ClInclude Include="JR_Application.h" />
     <ClInclude Include="JR_Input.h" />
     <ClInclude Include="JR_Window.h" />
     <ClInclude Include="JR_WindowsManager.h" />
     <ClInclude Include="JR_WindowAndRenderer.h" />
+    <ClInclude Include="RL_FileSystem.h" />
+    <ClInclude Include="RL_Projects.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\3rd Parties\EASTL\EASTL.vcxproj">
+      <Project>{4d97b454-7f2f-3b41-a692-4916d5785f1a}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\3rd Parties\ImGui\ImGui.vcxproj">
       <Project>{5a0ca256-f06b-410f-b9a1-398483caca11}</Project>
     </ProjectReference>
     <ProjectReference Include="..\3rd Parties\nativefiledialog\build\vs2010\nfd.vcxproj">
       <Project>{5d94880b-c99d-887c-5219-9f7cbe21947c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\3rd Parties\physfs\physfs.vcxproj">
+      <Project>{99cf2137-57ce-3092-9964-4e273221e1d6}</Project>
     </ProjectReference>
     <ProjectReference Include="..\3rd Parties\SDL2\VisualC\SDLmain\SDLmain.vcxproj">
       <Project>{da956fd3-e142-46f2-9dd5-c78bebb56b7a}</Project>

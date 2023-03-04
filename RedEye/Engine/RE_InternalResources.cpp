@@ -21,7 +21,7 @@
 #include <GL/glew.h>
 #include <gl/GL.h>
 
-#define WATER_FOAM_TEX_PATH "Settings/DefaultAssets/water_foam.png"
+#define WATER_FOAM_TEX_PATH "Internal/DefaultAssets/water_foam.png"
 
 void RE_InternalResources::Init()
 {
@@ -148,12 +148,12 @@ bool RE_InternalResources::InitSkyBox()
 	RE_SkyBox* rdefaultSkybox = new RE_SkyBox();
 	rdefaultSkybox->SetName("defaultSkyBox");
 	rdefaultSkybox->SetType(Resource_Type::R_SKYBOX);
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_RIGHT, "Settings/DefaultAssets/Skybox/1right.dds");
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_LEFT, "Settings/DefaultAssets/Skybox/2left.dds");
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_TOP, "Settings/DefaultAssets/Skybox/3top.dds");
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_BOTTOM, "Settings/DefaultAssets/Skybox/4bottom.dds");
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_FRONT, "Settings/DefaultAssets/Skybox/5front.dds");
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_BACK, "Settings/DefaultAssets/Skybox/6back.dds");
+	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_RIGHT, "Internal/DefaultAssets/Skybox/1right.dds");
+	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_LEFT, "Internal/DefaultAssets/Skybox/2left.dds");
+	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_TOP, "Internal/DefaultAssets/Skybox/3top.dds");
+	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_BOTTOM, "Internal/DefaultAssets/Skybox/4bottom.dds");
+	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_FRONT, "Internal/DefaultAssets/Skybox/5front.dds");
+	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_BACK, "Internal/DefaultAssets/Skybox/6back.dds");
 	rdefaultSkybox->SetAsInternal();
 
 	return defaultSkybox = RE_RES->Reference(rdefaultSkybox);

@@ -1,7 +1,7 @@
 #ifndef JR_WINDOW_CLASS
 #define JR_WINDOW_CLASS
 
-#include <string>
+#include <EASTL/string.h>
 
 #include <ImGui/imgui.h>
 
@@ -23,7 +23,7 @@ private:
 	virtual void DrawContent() = 0;
 
 private:
-	std::string name;
+	eastl::string name;
 	ImGuiWindowFlags w_flags = ImGuiWindowFlags_None;
 
 	bool apply_styles = false;

@@ -129,7 +129,7 @@ private:
 
 private:
 
-	eastl::string engine_path, library_path, assets_path, write_path;
+	eastl::string engine_path, project_path, library_path, assets_path, write_path;
 
 	RE_Directory* rootAssetDirectory = nullptr;
 	eastl::list<RE_Directory*> assetsDirectories;

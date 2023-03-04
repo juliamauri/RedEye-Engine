@@ -4,7 +4,7 @@
 #include <EASTL/map.h>
 
 #define THUMBNAILPATH "Library/Thumbnails/"
-#define DEFTHUMBNAILS "Settings/Icons/"
+#define DEFTHUMBNAILS "Internal/Icons/"
 #define THUMBNAILSIZE 256
 #define THUMBNAILDATASIZE THUMBNAILSIZE * THUMBNAILSIZE * 4
 

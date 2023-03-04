@@ -3,7 +3,7 @@
 "VSVersion" = "3:800"
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
-"ProjectName" = "8:RedEye Installer"
+"ProjectName" = "8:RedEye Installer x64"
 "LanguageId" = "3:1033"
 "CodePage" = "3:1252"
 "UILanguageId" = "3:1033"
@@ -21,19 +21,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_08536346EEFE4814A4143A9037D825C3"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_107D4FC8C5214293BD96154D65A837CC"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_14280F885E154D55AC7AF3DC8CE37DAA"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -45,7 +33,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_270D059620ED40758A45815CB883C3FA"
+        "MsmKey" = "8:_247DB7C11E6741959459BDB7197B6B63"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_26BF508E55764894B8A1CE9558A5E7B8"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -57,7 +51,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_41016CCA73A742D1B76CD6DA536B8191"
+        "MsmKey" = "8:_4519CF31153D42FC8410C3D4AC66EE68"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -69,37 +63,19 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_4C68B8B69F674E9E8A58CD5E25948691"
+        "MsmKey" = "8:_4F9B233F7D174209AE203D685104018E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_584912AB365C74B2F41B5AE696598D09"
-        "OwnerKey" = "8:_9228025B91424156A68FB6560DEDA7BA"
+        "MsmKey" = "8:_5983E164C0F5481388F49AD4672FB3BA"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_5EDE927AAF9547C8AB0DD3038AAACC5B"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_62616D37E4634E3DA54A1D2275A704AC"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_65D849772BC3F57051775C522F4C15CB"
-        "OwnerKey" = "8:_9228025B91424156A68FB6560DEDA7BA"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_73B0671795C84D718F9150386E60E1D9"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -111,25 +87,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_7EDAC7B242BB47BF97751C39DF256D10"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_821D61EA1DF347119D51532AB1493E4E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_9228025B91424156A68FB6560DEDA7BA"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_93331280F6F5461994D2ABCB984E1518"
+        "MsmKey" = "8:_840C70F2523A4080A8221A69EF9CFF62"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -147,13 +111,19 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_B15922D5A2B348EFAFD5C750423EB0E6"
+        "MsmKey" = "8:_CDA5C3FFF67A4DC49B4840E6C0A2605B"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_D2B809E953134B0D80441ABE00E2FE1F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D2D7C27DD4D445D982A9E25E32E7D355"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -171,18 +141,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_E3DAEF55663B15AADE749202F5133318"
-        "OwnerKey" = "8:_9228025B91424156A68FB6560DEDA7BA"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_E5D750B283664D85872C695EF521D603"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_E6FD6BE24D1744D4A2E9B9F0EE143438"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -195,20 +153,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_F02C0EE72A7B4CB9BE132473CF9082C2"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_F72DA006BB41473586AA60E585AC352E"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_08536346EEFE4814A4143A9037D825C3"
+        "OwnerKey" = "8:_4F9B233F7D174209AE203D685104018E"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -219,7 +165,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\x86\\RedEye Installer.msi"
+        "OutputFilename" = "8:Release\\x64\\RedEye Installer x64.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -294,37 +240,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_08536346EEFE4814A4143A9037D825C3"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Optick, Version=1.4.0.0, Culture=neutral, processorArchitecture=x86"
-                "ScatterAssemblies"
-                {
-                    "_08536346EEFE4814A4143A9037D825C3"
-                    {
-                    "Name" = "8:Optick.exe"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\Optick.exe"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_107D4FC8C5214293BD96154D65A837CC"
             {
             "SourcePath" = "8:..\\Engine\\OutputFiles\\EngineAssets\\Icons\\file.dds"
@@ -365,10 +280,30 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_270D059620ED40758A45815CB883C3FA"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_247DB7C11E6741959459BDB7197B6B63"
             {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\OptickCore.dll"
-            "TargetName" = "8:OptickCore.dll"
+            "SourcePath" = "8:..\\..\\README.md"
+            "TargetName" = "8:README.md"
+            "Tag" = "8:"
+            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_26BF508E55764894B8A1CE9558A5E7B8"
+            {
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\ILU.dll"
+            "TargetName" = "8:ILU.dll"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             "Condition" = "8:"
@@ -405,10 +340,10 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_41016CCA73A742D1B76CD6DA536B8191"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4519CF31153D42FC8410C3D4AC66EE68"
             {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\ILUT.dll"
-            "TargetName" = "8:ILUT.dll"
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\imgui.ini"
+            "TargetName" = "8:imgui.ini"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             "Condition" = "8:"
@@ -445,10 +380,21 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4C68B8B69F674E9E8A58CD5E25948691"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_4F9B233F7D174209AE203D685104018E"
             {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\imgui.ini"
-            "TargetName" = "8:imgui.ini"
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Optick, Version=1.4.0.0, Culture=neutral, processorArchitecture=AMD64"
+                "ScatterAssemblies"
+                {
+                    "_4F9B233F7D174209AE203D685104018E"
+                    {
+                    "Name" = "8:Optick.exe"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\Optick.exe"
+            "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             "Condition" = "8:"
@@ -465,10 +411,10 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_584912AB365C74B2F41B5AE696598D09"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5983E164C0F5481388F49AD4672FB3BA"
             {
-            "SourcePath" = "8:physfs.dll"
-            "TargetName" = "8:physfs.dll"
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\OptickCore.dll"
+            "TargetName" = "8:OptickCore.dll"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             "Condition" = "8:"
@@ -482,7 +428,7 @@
             "PackageAs" = "3:1"
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5EDE927AAF9547C8AB0DD3038AAACC5B"
@@ -505,72 +451,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_62616D37E4634E3DA54A1D2275A704AC"
-            {
-            "SourcePath" = "8:..\\..\\README.md"
-            "TargetName" = "8:README.md"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_65D849772BC3F57051775C522F4C15CB"
-            {
-            "SourcePath" = "8:IMM32.dll"
-            "TargetName" = "8:IMM32.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_767C941648884C06B60BF36AA8C0D624"
             {
             "SourcePath" = "8:..\\Engine\\OutputFiles\\EngineAssets\\DefaultAssets\\Skybox\\6back.dds"
             "TargetName" = "8:6back.dds"
             "Tag" = "8:"
             "Folder" = "8:_D39474154282409AA240CCFC6C3029AB"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7EDAC7B242BB47BF97751C39DF256D10"
-            {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\ILU.dll"
-            "TargetName" = "8:ILU.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -605,9 +491,9 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_93331280F6F5461994D2ABCB984E1518"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_840C70F2523A4080A8221A69EF9CFF62"
             {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\DevIL.dll"
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\DevIL.dll"
             "TargetName" = "8:DevIL.dll"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
@@ -665,12 +551,52 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CDA5C3FFF67A4DC49B4840E6C0A2605B"
+            {
+            "SourcePath" = "8:..\\..\\LICENSE"
+            "TargetName" = "8:LICENSE"
+            "Tag" = "8:"
+            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D2B809E953134B0D80441ABE00E2FE1F"
             {
             "SourcePath" = "8:..\\Engine\\OutputFiles\\EngineAssets\\DefaultAssets\\Skybox\\3top.dds"
             "TargetName" = "8:3top.dds"
             "Tag" = "8:"
             "Folder" = "8:_D39474154282409AA240CCFC6C3029AB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D2D7C27DD4D445D982A9E25E32E7D355"
+            {
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\ILUT.dll"
+            "TargetName" = "8:ILUT.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -711,46 +637,6 @@
             "TargetName" = "8:folder.dds"
             "Tag" = "8:"
             "Folder" = "8:_F95005C1C60048368134D3AD2DC5DCCE"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E3DAEF55663B15AADE749202F5133318"
-            {
-            "SourcePath" = "8:SDL2.dll"
-            "TargetName" = "8:SDL2.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E5D750B283664D85872C695EF521D603"
-            {
-            "SourcePath" = "8:..\\..\\LICENSE"
-            "TargetName" = "8:LICENSE"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -824,7 +710,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             {
-            "DefaultLocation" = "8:[ProgramFilesFolder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFiles64Folder][Manufacturer]\\[ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -832,7 +718,7 @@
             "Property" = "8:TARGETDIR"
                 "Folders"
                 {
-                    "{9EF0B969-E518-4E46-987F-47570745A589}:_90010FDF79A74C99A65EFDF93B1E1A87"
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_7BADD0D3D4EF4AB785F188735960C88E"
                     {
                     "Name" = "8:EngineAssets"
                     "AlwaysCreate" = "11:FALSE"
@@ -904,10 +790,10 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:RedEye Engine"
-        "ProductCode" = "8:{732E171A-2882-4E96-A436-9451F09D5BB1}"
-        "PackageCode" = "8:{EBEC2EEC-2E9C-4BEA-9646-61A18C5D5A19}"
-        "UpgradeCode" = "8:{E71F4BDC-6038-4FD2-ABDE-FFFAC87CDCCB}"
+        "ProductName" = "8:RedEye Engine x64"
+        "ProductCode" = "8:{E12F4AA5-8A03-4B5F-AC1B-891D1CA81344}"
+        "PackageCode" = "8:{0E0F41D9-F39E-42AA-9381-6E9AEFF366FD}"
+        "UpgradeCode" = "8:{A6DB7709-2E2A-4239-91CF-1AB61768F8FE}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
@@ -917,7 +803,7 @@
         "Manufacturer" = "8:RedEye"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://redeye-engine.es/"
-        "Title" = "8:RedEye Engine"
+        "Title" = "8:RedEye Engine x64"
         "Subject" = "8:"
         "ARPCONTACT" = "8:"
         "Keywords" = "8:"
@@ -927,7 +813,7 @@
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
-        "TargetPlatform" = "3:0"
+        "TargetPlatform" = "3:1"
         "PreBuildEvent" = "8:"
         "PostBuildEvent" = "8:"
         "RunPostBuildEvent" = "3:0"
@@ -1026,29 +912,29 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_1E2B12A7B324458594CDD86285361686"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_E8814613C2114595820A650C6BDA5F5D"
             {
-            "Name" = "8:RedEye Engine"
+            "Name" = "8:RedEye Engine x64"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_9228025B91424156A68FB6560DEDA7BA"
+            "Target" = "8:_2BFAB659CC2744D7A8F84D261E740A68"
             "Folder" = "8:_11AD19A1BB2B40249B1C814BE40C5A5D"
             "WorkingFolder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             "Icon" = "8:"
             "Feature" = "8:"
             }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_C7F77660B3EE4C919B1D6F213A5A9401"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_FA62936D2BCD4C1D9E3FB4AA2D4875FE"
             {
-            "Name" = "8:RedEye Engine"
+            "Name" = "8:RedEye Engine x64"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_9228025B91424156A68FB6560DEDA7BA"
+            "Target" = "8:_2BFAB659CC2744D7A8F84D261E740A68"
             "Folder" = "8:_C238C6E281104CDDA94E9CFF54309732"
             "WorkingFolder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             "Icon" = "8:"
@@ -1453,9 +1339,9 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_14280F885E154D55AC7AF3DC8CE37DAA"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_127A7B5AD7E64856B9CC0DD96F0B72CB"
             {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\glew32.dll"
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\glew32.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
@@ -1463,7 +1349,7 @@
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:TRUE"
+            "Hidden" = "11:FALSE"
             "System" = "11:FALSE"
             "Permanent" = "11:FALSE"
             "SharedLegacy" = "11:FALSE"
@@ -1473,7 +1359,7 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|Win32"
+            "OutputConfiguration" = "8:Release|x64"
             "OutputGroupCanonicalName" = "8:Built"
             "OutputProjectGuid" = "8:{55AE3D72-7DE6-F19F-AEF2-9AE8CA26CF3D}"
             "ShowKeyOutput" = "11:TRUE"
@@ -1481,9 +1367,9 @@
                 {
                 }
             }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_73B0671795C84D718F9150386E60E1D9"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_2BFAB659CC2744D7A8F84D261E740A68"
             {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\SDL2.dll"
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\RedLens.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
@@ -1501,35 +1387,7 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|Win32"
-            "OutputGroupCanonicalName" = "8:Built"
-            "OutputProjectGuid" = "8:{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}"
-            "ShowKeyOutput" = "11:TRUE"
-                "ExcludeFilters"
-                {
-                }
-            }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_9228025B91424156A68FB6560DEDA7BA"
-            {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\RedLens.exe"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|Win32"
+            "OutputConfiguration" = "8:Release|x64"
             "OutputGroupCanonicalName" = "8:Built"
             "OutputProjectGuid" = "8:{2A92806F-95C0-43B0-B5F8-4268E224C39B}"
             "ShowKeyOutput" = "11:TRUE"
@@ -1537,9 +1395,9 @@
                 {
                 }
             }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B15922D5A2B348EFAFD5C750423EB0E6"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_35DF741DE6DB4317A6440D1BDA6606CF"
             {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\Engine.exe"
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\assimp-vc143-mt.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
@@ -1557,35 +1415,7 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|Win32"
-            "OutputGroupCanonicalName" = "8:Built"
-            "OutputProjectGuid" = "8:{13DC399F-3A96-48E0-82B4-94FD73051599}"
-            "ShowKeyOutput" = "11:TRUE"
-                "ExcludeFilters"
-                {
-                }
-            }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_F02C0EE72A7B4CB9BE132473CF9082C2"
-            {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\assimp-vc143-mt.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|Win32"
+            "OutputConfiguration" = "8:Release|x64"
             "OutputGroupCanonicalName" = "8:Built"
             "OutputProjectGuid" = "8:{6D635564-319B-3542-925D-3A5AB974DBCF}"
             "ShowKeyOutput" = "11:TRUE"
@@ -1593,9 +1423,9 @@
                 {
                 }
             }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_F72DA006BB41473586AA60E585AC352E"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_600B8DD38B574108AF25AE3A6BABCEB1"
             {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\physfs.dll"
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\physfs.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
@@ -1613,9 +1443,65 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|Win32"
+            "OutputConfiguration" = "8:Release|x64"
             "OutputGroupCanonicalName" = "8:Built"
             "OutputProjectGuid" = "8:{99CF2137-57CE-3092-9964-4E273221E1D6}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_96705E0F5D80445688D5E3EA82711BCF"
+            {
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\SDL2.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:Release|x64"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B34382AA39FC4AD19D3597A7AFCE1A32"
+            {
+            "SourcePath" = "8:..\\BuildData\\Release\\x64\\Engine.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:Release|x64"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{13DC399F-3A96-48E0-82B4-94FD73051599}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {

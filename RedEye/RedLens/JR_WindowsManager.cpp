@@ -3,6 +3,7 @@
 #include "JR_Application.h"
 #include "JR_WindowAndRenderer.h"
 #include "JR_Input.h"
+#include "RL_Projects.h"
 
 #include "JR_Window.h"
 
@@ -12,10 +13,6 @@
 #include <ImGuiImpl/imgui_impl_sdl2.h>
 #include <ImGuiImpl/imgui_impl_opengl3_loader.h>
 #include <ImGuiImpl/imgui_impl_opengl3.h>
-#include <nfd/nfd.h>
-
-#include <vector>
-#include <string>
 
 bool JR_WindowsManager::Init()
 {
@@ -94,35 +91,7 @@ void JR_WindowsManager::Draw()
 		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 	}
 
-	if (ImGui::Begin("Projects")) {
-
-
-		bool _open = false;
-		if (ImGui::Button("New Project")) _open = false;
-
-		if (ImGui::Button("Load Project")) _open = true;
-
-		if (_open) {
-
-			nfdchar_t* outPath = NULL;
-			nfdresult_t result = NFD_PickFolder(NULL, &outPath);
-
-
-			if (result == NFD_OKAY) {
-
-				std::string l("start C:\\Users\\JuliG\\Documents\\GitHub\\RedEye-Engine\\RedEye\\Build\\RedEye_debug.exe ");
-				l += '"';
-				l += outPath;
-				l += '"';
-
-				system(l.c_str());
-			}
-			else {
-				//printf("Error: %s\n", NFD_GetError());
-			}
-		}
-	}
-	ImGui::End();
+	RL_PROJECTS->DrawGUI();
 
 	for (auto w : windows) w->Draw();
 

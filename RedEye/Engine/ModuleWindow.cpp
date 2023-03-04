@@ -325,7 +325,12 @@ bool ModuleWindow::SetWindowProperties()
 
 	if (window != nullptr)
 	{
-		SDL_SetWindowTitle(window, title.c_str());
+		eastl::string w_title = title;
+#ifdef _WIN64
+		w_title += " (Engine x64)";
+#endif // _DEBUG
+
+		SDL_SetWindowTitle(window, w_title.c_str());
 		SDL_SetWindowResizable(window, static_cast<SDL_bool>(flags & SDL_WINDOW_RESIZABLE));
 		SDL_SetWindowBordered(window, static_cast<SDL_bool>(!(flags & SDL_WINDOW_BORDERLESS)));
 		SDL_SetWindowPosition(window, pos_x, pos_y);

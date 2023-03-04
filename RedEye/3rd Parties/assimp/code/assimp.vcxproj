@@ -236,7 +236,7 @@
       <AdditionalOptions>%(AdditionalOptions) </AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>$(SolutionDir)BuildLib\Debug\x86\assimp-vc143-mtd.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)BuildLib\Debug\x64\assimp-vc143-mtd.lib</ImportLibrary>
       <ProgramDataBaseFile>$(SolutionDir)BuildData\Debug\x64\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -333,7 +333,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\assimp-vc143-mt.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)BuildLib\Release\x64\assimp-vc143-mt.lib</ImportLibrary>
       <OptimizeReferences>true</OptimizeReferences>
       <ProgramDataBaseFile>$(SolutionDir)BuildData\Release\x64\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
@@ -430,7 +430,7 @@
       <AdditionalOptions>%(AdditionalOptions) </AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\assimp-vc143-mt.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)BuildLib\Release\x64\assimp-vc143-mt.lib</ImportLibrary>
       <ProgramDataBaseFile>$(SolutionDir)BuildData\Release\x64\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -524,7 +524,7 @@
       <AdditionalOptions>%(AdditionalOptions) </AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>$(SolutionDir)BuildLib\Release\x86\assimp-vc143-mt.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)BuildLib\Release\x64\assimp-vc143-mt.lib</ImportLibrary>
       <ProgramDataBaseFile>$(SolutionDir)BuildData\Release\x64\$(TargetName).pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
