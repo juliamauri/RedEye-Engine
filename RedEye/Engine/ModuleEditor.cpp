@@ -550,8 +550,6 @@ void ModuleEditor::Load()
 	RE_PROFILE(PROF_Load, PROF_ModuleWindow);
 	RE_LOG_SECONDARY("Loading Editor propieties from config:");
 
-	size_t _size = 0;
-	const char* buff = ImGui::SaveIniSettingsToMemory(&_size);
 	RE_FileBuffer _load("imgui.ini");
 	if (_load.Load())
 		ImGui::LoadIniSettingsFromMemory(_load.GetBuffer(), _load.GetSize());
