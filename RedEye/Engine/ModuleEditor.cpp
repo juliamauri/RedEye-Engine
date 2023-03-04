@@ -11,6 +11,7 @@
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
 #include "RE_FileSystem.h"
+#include "RE_FileBuffer.h"
 #include "RE_ResourceManager.h"
 #include "RE_CommandManager.h"
 #include "RE_ThumbnailManager.h"
@@ -548,6 +549,13 @@ void ModuleEditor::Load()
 {
 	RE_PROFILE(PROF_Load, PROF_ModuleWindow);
 	RE_LOG_SECONDARY("Loading Editor propieties from config:");
+
+	size_t _size = 0;
+	const char* buff = ImGui::SaveIniSettingsToMemory(&_size);
+	RE_FileBuffer _load("imgui.ini");
+	if (_load.Load())
+		ImGui::LoadIniSettingsFromMemory(_load.GetBuffer(), _load.GetSize());
+
 	RE_Json* node = RE_FS->ConfigNode("Editor");
 
 	cam_speed = node->PullFloat("C_Speed", 25.0f);
@@ -603,6 +611,12 @@ void ModuleEditor::Load()
 void ModuleEditor::Save() const
 {
 	RE_PROFILE(PROF_Save, PROF_ModuleWindow);
+	
+	size_t _size = 0;
+	const char* buff = ImGui::SaveIniSettingsToMemory(&_size);
+	RE_FileBuffer _save("imgui.ini");
+	_save.Save(const_cast<char*>(buff), _size);
+
 	RE_Json* node = RE_FS->ConfigNode("Editor");
 
 	node->PushFloat("C_Speed", cam_speed);
