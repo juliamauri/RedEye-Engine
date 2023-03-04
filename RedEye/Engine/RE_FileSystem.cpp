@@ -50,6 +50,7 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 		engine_path = "engine";
 		library_path = "Library";
 		assets_path = "Assets";
+		pref_directory = PHYSFS_getPrefDir("RedEye", "RedEye Engine");
 
 		//Loads from argument (RedLens)
 		if (argv[1])
@@ -57,8 +58,13 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 			project_path = argv[1];
 			project_path = project_path.substr(0, project_path.find_last_of('\\') + 1);
 		}
-
 		if (PHYSFS_mount("EngineAssets/", "Internal/", 0) == 0)
+		{
+			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
+			return false;
+		}
+
+		if (PHYSFS_mount(pref_directory.c_str(), "Pref/", 0) == 0)
 		{
 			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
 			return false;
@@ -70,6 +76,12 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 			return false;
 		}
 		if (PHYSFS_setWriteDir((argv[1]) ? project_path.c_str() : ".") == 0) {
+
+			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
+			return false;
+		}
+
+		if (PHYSFS_setWriteDir(pref_directory.c_str()) == 0) {
 
 			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
 			return false;

@@ -105,6 +105,10 @@ void RL_Projects::DrawGUI()
 					project_selected += '\\';
 					RL_FS->WriteOutside(project_selected.c_str(), _name.c_str(), s_buffer.GetString(), s_buffer.GetSize());
 
+					eastl::string _imgui = RL_FS->Read(IMGUI_CONFIG_TEMPLATE);
+					if (!_imgui.empty())
+						RL_FS->WriteOutside(project_selected.c_str(), IMGUI_CONFIG_TEMPLATE, _imgui.c_str(), _imgui.size());
+
 					_p.path = project_selected + _name;
 					_projects.push_back(_p);
 					Save();

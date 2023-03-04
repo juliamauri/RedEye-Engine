@@ -69,14 +69,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_4C68B8B69F674E9E8A58CD5E25948691"
+        "MsmKey" = "8:_4F3A05C235754079942618B23AD4578E"
         "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_584912AB365C74B2F41B5AE696598D09"
-        "OwnerKey" = "8:_9228025B91424156A68FB6560DEDA7BA"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -89,12 +83,6 @@
         {
         "MsmKey" = "8:_62616D37E4634E3DA54A1D2275A704AC"
         "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_65D849772BC3F57051775C522F4C15CB"
-        "OwnerKey" = "8:_9228025B91424156A68FB6560DEDA7BA"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -167,12 +155,6 @@
         {
         "MsmKey" = "8:_DC9D7AEF78E34ED4B797BC8A28B53A34"
         "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_E3DAEF55663B15AADE749202F5133318"
-        "OwnerKey" = "8:_9228025B91424156A68FB6560DEDA7BA"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -445,9 +427,9 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4C68B8B69F674E9E8A58CD5E25948691"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4F3A05C235754079942618B23AD4578E"
             {
-            "SourcePath" = "8:..\\BuildData\\Release\\x86\\imgui.ini"
+            "SourcePath" = "8:..\\RedLens\\OutputFiles\\imgui.ini"
             "TargetName" = "8:imgui.ini"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
@@ -463,26 +445,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_584912AB365C74B2F41B5AE696598D09"
-            {
-            "SourcePath" = "8:physfs.dll"
-            "TargetName" = "8:physfs.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5EDE927AAF9547C8AB0DD3038AAACC5B"
@@ -523,26 +485,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_65D849772BC3F57051775C522F4C15CB"
-            {
-            "SourcePath" = "8:IMM32.dll"
-            "TargetName" = "8:IMM32.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_767C941648884C06B60BF36AA8C0D624"
@@ -725,26 +667,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E3DAEF55663B15AADE749202F5133318"
-            {
-            "SourcePath" = "8:SDL2.dll"
-            "TargetName" = "8:SDL2.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E5D750B283664D85872C695EF521D603"
             {
             "SourcePath" = "8:..\\..\\LICENSE"
@@ -906,7 +828,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:RedEye Engine"
         "ProductCode" = "8:{732E171A-2882-4E96-A436-9451F09D5BB1}"
-        "PackageCode" = "8:{EBEC2EEC-2E9C-4BEA-9646-61A18C5D5A19}"
+        "PackageCode" = "8:{14A205EF-1053-4C71-A975-B1E1BA3A5D3C}"
         "UpgradeCode" = "8:{E71F4BDC-6038-4FD2-ABDE-FFFAC87CDCCB}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"

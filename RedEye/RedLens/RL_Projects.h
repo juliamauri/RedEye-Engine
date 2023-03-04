@@ -33,6 +33,7 @@ private:
 private:
 	static constexpr const char* PROJECTS_FILE = "WriteDir/Projects.json";
 	static constexpr const char* PROJECT_CONFIG_TEMPLATE = "template";
+	static constexpr const char* IMGUI_CONFIG_TEMPLATE = "imgui.ini";
 #ifdef _DEBUG
 	static constexpr const char* ENGINE_EXECUTABLE = "Engine-d.exe";
 #else

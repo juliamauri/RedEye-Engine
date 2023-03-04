@@ -51,12 +51,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_4519CF31153D42FC8410C3D4AC66EE68"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_4A8582FA667C405FBC7D7404B643F99E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -106,6 +100,12 @@
         "Entry"
         {
         "MsmKey" = "8:_A436EB2633AF4880916FC9434AC1E231"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C4E67BFB107242E2A06C25437B5647D1"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -340,26 +340,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4519CF31153D42FC8410C3D4AC66EE68"
-            {
-            "SourcePath" = "8:..\\BuildData\\Release\\x64\\imgui.ini"
-            "TargetName" = "8:imgui.ini"
-            "Tag" = "8:"
-            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4A8582FA667C405FBC7D7404B643F99E"
             {
             "SourcePath" = "8:..\\Engine\\OutputFiles\\EngineAssets\\Icons\\shaderFile.dds"
@@ -535,6 +515,26 @@
             {
             "SourcePath" = "8:..\\RedLens\\OutputFiles\\template"
             "TargetName" = "8:template"
+            "Tag" = "8:"
+            "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C4E67BFB107242E2A06C25437B5647D1"
+            {
+            "SourcePath" = "8:..\\RedLens\\OutputFiles\\imgui.ini"
+            "TargetName" = "8:imgui.ini"
             "Tag" = "8:"
             "Folder" = "8:_4A28C9A9FD794EEFBB5F2153F39B8F52"
             "Condition" = "8:"
@@ -792,7 +792,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:RedEye Engine x64"
         "ProductCode" = "8:{E12F4AA5-8A03-4B5F-AC1B-891D1CA81344}"
-        "PackageCode" = "8:{0E0F41D9-F39E-42AA-9381-6E9AEFF366FD}"
+        "PackageCode" = "8:{56A28BAB-178D-46F7-B8F0-61CE44B40B61}"
         "UpgradeCode" = "8:{A6DB7709-2E2A-4239-91CF-1AB61768F8FE}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"

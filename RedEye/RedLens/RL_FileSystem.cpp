@@ -6,7 +6,7 @@ bool RL_FileSystem::Init(char* argv[])
 {
 	if (PHYSFS_init(argv[0]) != 0) {
 
-		_pref_directory = PHYSFS_getPrefDir("RedEye", "RedLens");
+		_pref_directory = PHYSFS_getPrefDir("RedEye", "RedEye Engine");
 		_exec_directory = argv[0];
 		_exec_directory = _exec_directory.substr(0, _exec_directory.find_last_of('\\') + 1);
 
