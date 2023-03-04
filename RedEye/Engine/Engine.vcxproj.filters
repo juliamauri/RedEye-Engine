@@ -669,6 +669,9 @@
     <ClInclude Include="..\3rd Parties\Others\RapidJson\error\error.h">
       <Filter>3rd Party\RapidJson\error</Filter>
     </ClInclude>
+    <ClInclude Include="resource1.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -860,8 +863,23 @@
     <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Hierarchy">
       <UniqueIdentifier>{e923f986-34cc-4a0a-9760-8a71a536d3fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{f67675b7-cb18-4f10-a715-37a957201e92}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="General Diagram.cd" />
+    <ResourceCompile Include="Engine.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="General Diagram.cd">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\docs\Multimedia\icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
