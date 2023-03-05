@@ -75,13 +75,8 @@ bool RE_FileSystem::Init(int argc, char* argv[])
 			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
 			return false;
 		}
+
 		if (PHYSFS_setWriteDir((argv[1]) ? project_path.c_str() : ".") == 0) {
-
-			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
-			return false;
-		}
-
-		if (PHYSFS_setWriteDir(pref_directory.c_str()) == 0) {
 
 			PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
 			return false;
