@@ -82,16 +82,34 @@ SIMDCapability DetectSIMDCapability()
 #endif
 //	bool    bMOVOptimization = false;
 
-	CpuId(CPUInfo, 0);
+	//CpuId(CPUInfo, 0);
+#ifdef _WIN32
+	__cpuid(CPUInfo, 0);
+
+#else
+	asm volatile
+		("cpuid" : "=a" (CPUInfo[0]), "=b" (CPUInfo[1]), "=c" (CPUInfo[2]), "=d" (CPUInfo[3])
+			: "a" (i), "c" (0));
+	// ECX is set to zero for CPUID function 4
+#endif
 	nIds = CPUInfo[0];
 
 	// Get the information associated with each valid Id
 //	for (i=0; i<=nIds; ++i)
 	if (nIds >= 1)
 	{
-	//	__cpuid(CPUInfo, i);
 
-		CpuId(CPUInfo, 1);
+	//	__cpuid(CPUInfo, i);
+#ifdef _WIN32
+		__cpuid(CPUInfo, 1);
+
+#else
+		asm volatile
+			("cpuid" : "=a" (CPUInfo[0]), "=b" (CPUInfo[1]), "=c" (CPUInfo[2]), "=d" (CPUInfo[3])
+				: "a" (i), "c" (0));
+		// ECX is set to zero for CPUID function 4
+#endif
+
 		// Interpret CPU feature information.
 //		if  (i == 1)
 		{
