@@ -78,7 +78,7 @@ struct RE_EmissionShape
 	union Geo
 	{
 		math::vec point;
-		math::Circle circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f);
+		math::Circle circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f, 0.f }, 1.f);
 		eastl::pair<math::Circle, float> ring;
 		math::AABB box;
 		math::Sphere sphere;

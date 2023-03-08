@@ -12,7 +12,7 @@
 
 RE_CompLight::RE_CompLight() : RE_Component(C_LIGHT)
 {
-	diffuse = math::vec(0.8f);
+	diffuse = math::vec({ 0.8f,0.8f,0.8f,1.f });
 	cutOff[0] = 12.5f;
 	outerCutOff[0] = 17.5f;
 	UpdateCutOff();
@@ -58,7 +58,7 @@ void RE_CompLight::CallShaderUniforms(unsigned int shader, const char* name) con
 			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "co").c_str()), cutOff[1], outerCutOff[1], 0.0f, 0.0f);
 	}
 	else
-		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), 0.0f,0.0f,0.0f, float(type));
+		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), 0.0f, 0.0f, 0.0f, float(type));
 }
 
 void RE_CompLight::DrawProperties()

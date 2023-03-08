@@ -53,7 +53,7 @@ void RE_Material::LoadInMemory()
 
 void RE_Material::UnloadMemory()
 {
-	cDiffuse = cSpecular = cAmbient = cEmissive = cTransparent = math::float3::zero;
+	cDiffuse = cSpecular = cAmbient = cEmissive = cTransparent = math::vec::zero;
 	backFaceCulling = true;
 	blendMode = false;
 	opacity = shininess = shininessStrenght = refraccti = 1.0f;
@@ -839,7 +839,7 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 				}
 				case RE_Cvar::FLOAT: sVar.SetValue(nuniforms->PullFloat(id.c_str(), 0), true); break;
 				case RE_Cvar::FLOAT2: sVar.SetValue(nuniforms->PullFloat(id.c_str(), math::float2::zero), true); break;
-				case RE_Cvar::FLOAT3: sVar.SetValue(nuniforms->PullFloatVector(id.c_str(), math::float3::zero), true); break;
+				case RE_Cvar::FLOAT3: sVar.SetValue(nuniforms->PullFloatVector(id.c_str(), math::vec::zero), true); break;
 				case RE_Cvar::FLOAT4:
 				case RE_Cvar::MAT2: sVar.SetValue(nuniforms->PullFloat4(id.c_str(), math::float4::zero), true); break;
 				case RE_Cvar::MAT3: sVar.SetValue(nuniforms->PullMat3(id.c_str(), math::float3x3::zero), true); break;
@@ -927,7 +927,7 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 			case RE_Cvar::INT4: nuniforms->PushInt(id.c_str(), fromShaderCustomUniforms[i].AsInt4(), 4); break;
 			case RE_Cvar::FLOAT: nuniforms->PushFloat(id.c_str(), fromShaderCustomUniforms[i].AsFloat()); break;
 			case RE_Cvar::FLOAT2: nuniforms->PushFloat(id.c_str(), fromShaderCustomUniforms[i].AsFloat2()); break;
-			case RE_Cvar::FLOAT3: nuniforms->PushFloatVector(id.c_str(), fromShaderCustomUniforms[i].AsFloat3()); break;
+			case RE_Cvar::FLOAT3: nuniforms->PushFloatVector(id.c_str(), math::vec(fromShaderCustomUniforms[i].AsFloat3(), 0.f)); break;
 			case RE_Cvar::FLOAT4:
 			case RE_Cvar::MAT2: nuniforms->PushFloat4(id.c_str(), fromShaderCustomUniforms[i].AsFloat4()); break;
 			case RE_Cvar::MAT3: nuniforms->PushMat3(id.c_str(), fromShaderCustomUniforms[i].AsMat3()); break;
@@ -1146,7 +1146,7 @@ void RE_Material::BinaryDeserialize()
 				{
 					size = sizeof(float) * 3;
 					floatCursor = reinterpret_cast<float*>(cursor);
-					sVar.SetValue(math::float3(floatCursor), true);
+					sVar.SetValue(math::vec(floatCursor), true);
 					cursor += size;
 					break; 
 				}

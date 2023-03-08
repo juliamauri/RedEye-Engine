@@ -33,7 +33,7 @@ void RE_ParticleEmission::UnloadMemory()
 	spawn_mode.frequency = 10.f;
 	initial_lifetime.type = RE_EmissionSingleValue::Type::NONE;
 	initial_pos.type = RE_EmissionShape::Type::CIRCLE;
-	initial_pos.geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f);
+	initial_pos.geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f, 0.f }, 1.f);
 	initial_speed.type = RE_EmissionVector::Type::NONE;
 	external_acc.type = RE_EmissionExternalForces::Type::NONE;
 	external_acc.gravity = -9.81f;

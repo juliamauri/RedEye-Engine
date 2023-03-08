@@ -526,7 +526,7 @@ void ModuleEditor::DrawEditor()
 
 		if (active_grid && ImGui::DragFloat2("Grid Size", grid_size, 0.2f, 0.01f, 100.0f, "%.1f"))
 		{
-			grid->GetTransformPtr()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
+			grid->GetTransformPtr()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1], 0.f));
 			grid->GetTransformPtr()->Update();
 		}
 
@@ -582,25 +582,25 @@ void ModuleEditor::Load()
 
 	math::float2 grid_size_vec = node->PullFloat("Grid_Size", { 1.0f, 1.0f });
 	memcpy_s(grid_size, sizeof(float) * 2, grid_size_vec.ptr(), sizeof(float) * 2);
-	grid->GetTransformPtr()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
+	grid->GetTransformPtr()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1], 0.f));
 	grid->GetTransformPtr()->Update();
 
 	aabb_drawing = static_cast<AABBDebugDrawing>(node->PullInt("AABB_Drawing", static_cast<int>(AABBDebugDrawing::ALL_AND_SELECTED)));
 
-	math::vec temp_color = node->PullFloatVector("AABB_Selected_Color", { 0.0f, 1.0f, 0.0f });
+	math::vec temp_color = node->PullFloatVector("AABB_Selected_Color", { 0.0f, 1.0f, 0.0, 0.f });
 	memcpy_s(all_aabb_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
 
-	temp_color = node->PullFloatVector("AABB_Color", { 1.0f, 0.5f, 0.0f });
+	temp_color = node->PullFloatVector("AABB_Color", { 1.0f, 0.5f, 0.0f, 0.f });
 	memcpy_s(sel_aabb_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
 
 	draw_quad_tree = node->PullBool("QuadTree_Draw", true);
 
-	temp_color = node->PullFloatVector("Quadtree_Color", { 1.0f, 1.0f, 0.0f });
+	temp_color = node->PullFloatVector("Quadtree_Color", { 1.0f, 1.0f, 0.0f, 0.f });
 	memcpy_s(quad_tree_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
 
 	draw_cameras = node->PullBool("Frustum_Draw", true);
 
-	temp_color = node->PullFloatVector("Frustum_Color", { 0.0f, 1.0f, 1.0f });
+	temp_color = node->PullFloatVector("Frustum_Color", { 0.0f, 1.0f, 1.0f, 0.f });
 	memcpy_s(frustum_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
 
 	DEL(node);
@@ -640,14 +640,14 @@ void ModuleEditor::Save() const
 
 	node->PushInt("AABB_Drawing", static_cast<int>(aabb_drawing));
 
-	node->PushFloatVector("AABB_Selected_Color", { all_aabb_color[0], all_aabb_color[1], all_aabb_color[2] });
-	node->PushFloatVector("AABB_Color", { sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2] });
+	node->PushFloatVector("AABB_Selected_Color", { all_aabb_color[0], all_aabb_color[1], all_aabb_color[2], 0.f });
+	node->PushFloatVector("AABB_Color", { sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2], 0.f });
 
 	node->PushBool("QuadTree_Draw", draw_quad_tree);
-	node->PushFloatVector("Quadtree_Color", { quad_tree_color[0], quad_tree_color[1], quad_tree_color[2] });
+	node->PushFloatVector("Quadtree_Color", { quad_tree_color[0], quad_tree_color[1], quad_tree_color[2], 0.f });
 
 	node->PushBool("Frustum_Draw", draw_cameras);
-	node->PushFloatVector("Frustum_Color", { frustum_color[0], frustum_color[1], frustum_color[2] });
+	node->PushFloatVector("Frustum_Color", { frustum_color[0], frustum_color[1], frustum_color[2], 0.f });
 
 	DEL(node);
 }

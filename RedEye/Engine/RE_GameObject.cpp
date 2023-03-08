@@ -833,8 +833,8 @@ math::AABB RE_GameObject::GetGlobalBoundingBoxWithChilds() const
 		points.resize(2 + (childs.size() * 2));
 
 		// Store local mesh AABB max and min points
-		points[cursor++].Set(ret.minPoint.x, ret.minPoint.y, ret.minPoint.z);
-		points[cursor++].Set(ret.maxPoint.x, ret.maxPoint.y, ret.maxPoint.z);
+		points[cursor++].Set(ret.minPoint.x, ret.minPoint.y, ret.minPoint.z, 0.f);
+		points[cursor++].Set(ret.maxPoint.x, ret.maxPoint.y, ret.maxPoint.z, 0.f);
 
 		// Store child AABBs max and min points
 		for (auto child : childs)
@@ -842,8 +842,8 @@ math::AABB RE_GameObject::GetGlobalBoundingBoxWithChilds() const
 			// Update child AABB
 			math::AABB child_aabb = ChildCPtr(child)->GetGlobalBoundingBoxWithChilds();
 
-			points[cursor++].Set(child_aabb.minPoint.x, child_aabb.minPoint.y, child_aabb.minPoint.z);
-			points[cursor++].Set(child_aabb.maxPoint.x, child_aabb.maxPoint.y, child_aabb.maxPoint.z);
+			points[cursor++].Set(child_aabb.minPoint.x, child_aabb.minPoint.y, child_aabb.minPoint.z, 0.f);
+			points[cursor++].Set(child_aabb.maxPoint.x, child_aabb.maxPoint.y, child_aabb.maxPoint.z, 0.f);
 		}
 
 		// Enclose stored points
@@ -941,7 +941,7 @@ void RE_GameObject::ResetLocalBoundingBox()
 		case C_GRID:
 		{
 			float dist = dynamic_cast<RE_CompGrid*>(CompPtr(render_geo))->GetDistance();
-			local_bounding_box.FromCenterAndSize(math::vec::zero, { dist , 1.0f, dist }); 
+			local_bounding_box.FromCenterAndSize(math::vec::zero, { dist , 1.0f, dist,0.f });
 			break;
 		}
 		case C_CUBE:		 local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;

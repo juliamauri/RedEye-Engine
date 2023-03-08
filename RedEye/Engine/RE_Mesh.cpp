@@ -202,14 +202,14 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 		if (lFaceNormals)
 		{
 			// Draw lines
-			math::vec color(0.f, 0.f, 1.f);
+			math::vec color(0.f, 0.f, 1.f, 0.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 			RE_GLCache::ChangeVAO(VAO_FaceNormals);
 			glDrawArrays(GL_LINES, 0, triangle_count * 2);
 			RE_GLCache::ChangeVAO(0);
 
 			// Draw points
-			color.Set(1.f, 1.f, 1.f);
+			color.Set(1.f, 1.f, 1.f, 1.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
@@ -225,14 +225,14 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 		if (lVertexNormals)
 		{
 			// Draw lines
-			math::vec color(0.f, 1.f, 0.f);
+			math::vec color(0.f, 1.f, 0.f, 1.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 			RE_GLCache::ChangeVAO(VAO_VertexNormals);
 			glDrawArrays(GL_LINES, 0, triangle_count * 3 * 2);
 			RE_GLCache::ChangeVAO(0);
 
 			// Draw points
-			color.Set(1.f, 1.f, 1.f);
+			color.Set(1.f, 1.f, 1.f, 1.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
@@ -448,7 +448,7 @@ void RE_Mesh::loadFaceNormals()
 		memcpy(fNCursor, &pos, size * sizeof(float));
 		fNCursor += size;
 
-		memcpy(fNCursor, &math::vec(pos.x + normal.x, pos.y + normal.y, pos.z + normal.z), size * sizeof(float));
+		memcpy(fNCursor, &math::vec(pos.x + normal.x, pos.y + normal.y, pos.z + normal.z, 0.f), size * sizeof(float));
 		fNCursor += size;
 
 		memcpy(fCcursor, &pos, size * sizeof(float));

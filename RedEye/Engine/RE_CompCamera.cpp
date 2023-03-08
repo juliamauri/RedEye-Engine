@@ -510,7 +510,7 @@ void RE_CompCamera::DeserializeJson(RE_Json* node, eastl::map<int, const char*>*
 void RE_CompCamera::RecalculateMatrixes()
 {
 	math::float4x4 trs = GetTransform()->GetGlobalMatrix();
-	frustum.SetFrame(trs.Row3(3), -trs.WorldZ(), trs.WorldY());
+	frustum.SetFrame(math::vec(trs.Row3(3),0.f), math::vec(-trs.WorldZ(), 0.f), math::vec(trs.WorldY(), 0.f));
 	(global_view = frustum.ViewMatrix()).Transpose();
 	global_projection = frustum.ProjectionMatrix().Transposed();
 

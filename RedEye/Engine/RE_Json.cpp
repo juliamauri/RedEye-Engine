@@ -360,7 +360,7 @@ math::vec RE_Json::PullFloatVector(const char* name, math::vec deflt)
 	{
 		eastl::string path = pointerPath + "/" + name;
 		rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
-		if (val) ret.Set(val->GetArray()[0].GetFloat(), val->GetArray()[1].GetFloat(), val->GetArray()[2].GetFloat());
+		if (val) ret.Set(val->GetArray()[0].GetFloat(), val->GetArray()[1].GetFloat(), val->GetArray()[2].GetFloat(), 0.f);
 	}
 
 	return ret;

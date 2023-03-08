@@ -293,7 +293,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::Checkbox("Deferred lighting", &deferred)) {
 					RE_RENDER->SetRenderViewDeferred(RENDER_VIEWS::VIEW_PARTICLE, deferred);
 					if (deferred) {
-						clear_color = { 0.0f,0.0f,0.0f,1.0 };
+						clear_color.Set({0.0f,0.0f,0.0f, 1.0});
 						RE_RENDER->SetRenderViewClearColor(RENDER_VIEWS::VIEW_PARTICLE, clear_color);
 					}
 				}
@@ -642,7 +642,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			}
 
 			if (ImGui::DragFloat3("Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f")) {
-				if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
+				if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f, 0.f);
 				need_save = true;
 			}
 

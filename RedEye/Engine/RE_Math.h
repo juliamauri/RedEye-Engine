@@ -72,7 +72,7 @@ public:
 	static inline math::vec MinVecValues(const math::vec a, const math::vec b)
 	{
 		float res[6] = { a.x, b.x, a.y, b.y, a.z, b.z };
-		return math::vec(res[b.x < a.x], res[2 + (b.y < a.y)], res[4 + (b.z < a.z)]);
+		return math::vec(res[b.x < a.x], res[2 + (b.y < a.y)], res[4 + (b.z < a.z)], 0.f);
 	}
 
 	static inline int MaxI(const int a, const int b)
@@ -93,7 +93,7 @@ public:
 	static inline math::vec MaxVecValues(const math::vec a, const math::vec b)
 	{
 		float res[6] = { a.x, b.x, a.y, b.y, a.z, b.z };
-		return math::vec(res[b.x > a.x], res[2 + (b.y > a.y)], res[4 + (b.z > a.z)]);
+		return math::vec(res[b.x > a.x], res[2 + (b.y > a.y)], res[4 + (b.z > a.z)], 0.f);
 	}
 
 	// Significant Values
@@ -104,9 +104,9 @@ public:
 	static const float rad_to_deg;
 
 	// Geometry
-	static math::float4x4 Rotate(const math::float3 axis, const float radians)
+	static math::float4x4 Rotate(const math::vec axis, const float radians)
 	{
-		return math::float4x4(math::Quat::identity * math::Quat::RotateAxisAngle(axis.Normalized(), radians));
+		return math::float4x4(math::Quat::identity * math::Quat::RotateAxisAngle(axis.xyz().Normalized(), radians));
 	}
 	static math::float4x4 Rotate(const math::Quat quat)
 	{

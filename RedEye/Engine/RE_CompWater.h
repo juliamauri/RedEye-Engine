@@ -47,7 +47,7 @@ private:
 	eastl::pair<RE_Shader_Cvar*, math::float2> center = { nullptr, {0.0f, 0.0f } };
 	eastl::pair<RE_Shader_Cvar*, float> steepness = { nullptr, 0.7f };
 	eastl::pair<RE_Shader_Cvar*, int> numWaves = { nullptr, 1 };
-	eastl::pair<RE_Shader_Cvar*, math::vec> cdiffuse = { nullptr, {0.0f, 0.0f, 1.0f} };
+	eastl::pair<RE_Shader_Cvar*, math::vec> cdiffuse = { nullptr, {0.0f, 0.0f, 1.0f, 0.f} };
 	eastl::pair<RE_Shader_Cvar*, float> shininess = { nullptr, 1.f };
 	eastl::pair<RE_Shader_Cvar*, float> foamMin = { nullptr, 0.65f };
 	eastl::pair<RE_Shader_Cvar*, float> foamMax = { nullptr, 1.0f };

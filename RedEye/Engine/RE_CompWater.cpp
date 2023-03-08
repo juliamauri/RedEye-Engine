@@ -507,7 +507,7 @@ void RE_CompWater::SetUpWaterUniforms()
 		else if (waterUniforms[i].name == "amplitude") {
 			amplitude.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(amplitude.second);
-			box.SetFromCenterAndSize(math::vec::one * 0.5f, { 1.0f, amplitude.second, 1.0f });
+			box.SetFromCenterAndSize(math::vec::one * 0.5f, { 1.0f, amplitude.second, 1.0f, 0.f });
 		}
 		else if (waterUniforms[i].name == "speed") {
 			speed.first = &waterUniforms[i];

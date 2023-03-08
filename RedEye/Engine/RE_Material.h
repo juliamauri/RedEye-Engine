@@ -88,14 +88,14 @@ public:
 	RE_ShadingMode shadingType = S_FLAT;
 
 	eastl::vector<const char*> tDiffuse;
-	math::float3 cDiffuse = math::float3::zero;
+	math::vec cDiffuse = math::vec::zero;
 	eastl::vector<const char*> tSpecular;
-	math::float3 cSpecular = math::float3::zero;
+	math::vec cSpecular = math::vec::zero;
 	eastl::vector<const char*> tAmbient;
-	math::float3 cAmbient = math::float3::zero;
+	math::vec cAmbient = math::vec::zero;
 	eastl::vector<const char*> tEmissive;
-	math::float3 cEmissive = math::float3::zero;
-	math::float3 cTransparent = math::float3::zero;
+	math::vec cEmissive = math::vec::zero;
+	math::vec cTransparent = math::vec::zero;
 
 	bool backFaceCulling = true;
 	bool blendMode = false;

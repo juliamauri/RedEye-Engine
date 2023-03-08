@@ -108,8 +108,8 @@ void RE_ModelImporter::ProcessNodes(RE_ECS_Pool* goPool, aiNode * parentNode, co
 
 				RE_CompTransform* t = goPool->GetGOPtr(go_haschildren)->GetTransformPtr();
 				t->SetRotation(rotation);
-				t->SetPosition(position);
-				t->SetScale(scale);
+				t->SetPosition(math::vec(position, 0.f));
+				t->SetScale(math::vec(scale, 0.f));
 				t->Update();
 				if (!paused) RE_INPUT->ResumeEvents();
 
@@ -135,8 +135,8 @@ void RE_ModelImporter::ProcessNodes(RE_ECS_Pool* goPool, aiNode * parentNode, co
 
 					RE_CompTransform* t = goMesh->GetTransformPtr();
 					t->SetRotation(rotation);
-					t->SetPosition(position);
-					t->SetScale(scale);
+					t->SetPosition(math::vec(position,0.f));
+					t->SetScale(math::vec(scale, 0.f));
 					t->Update();
 
 					if (!paused) RE_INPUT->ResumeEvents();
@@ -324,27 +324,27 @@ void RE_ModelImporter::ProcessMaterials(const aiScene* scene)
 			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, colorDiffuse))
 			{
 				if (shadingType == aiShadingMode::aiShadingMode_Flat && !colorDiffuse.IsBlack()) shadingType = aiShadingMode::aiShadingMode_Gouraud;
-				newMaterial->cDiffuse.Set(colorDiffuse.r, colorDiffuse.g, colorDiffuse.g);
+				newMaterial->cDiffuse.Set(colorDiffuse.r, colorDiffuse.g, colorDiffuse.g, 0.f);
 			}
 
 			GetTexturesMaterial(material, fileTexturePath, aiTextureType_SPECULAR, &newMaterial->tSpecular, name);
 			aiColor3D colorSpecular(0, 0, 0);
 			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_SPECULAR, colorSpecular))
-				newMaterial->cSpecular.Set(colorSpecular.r, colorSpecular.g, colorSpecular.g);
+				newMaterial->cSpecular.Set(colorSpecular.r, colorSpecular.g, colorSpecular.g, 0.f);
 
 			GetTexturesMaterial(material, fileTexturePath, aiTextureType_AMBIENT, &newMaterial->tAmbient, name);
 			aiColor3D colorAmbient(0, 0, 0);
 			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_AMBIENT, colorAmbient))
-				newMaterial->cAmbient.Set(colorAmbient.r, colorAmbient.g, colorAmbient.g);
+				newMaterial->cAmbient.Set(colorAmbient.r, colorAmbient.g, colorAmbient.g, 0.f);
 
 			GetTexturesMaterial(material, fileTexturePath, aiTextureType_EMISSIVE, &newMaterial->tEmissive, name);
 			aiColor3D colorEmissive(0, 0, 0);
 			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_EMISSIVE, colorEmissive))
-				newMaterial->cEmissive.Set(colorEmissive.r, colorEmissive.g, colorEmissive.g);
+				newMaterial->cEmissive.Set(colorEmissive.r, colorEmissive.g, colorEmissive.g, 0.f);
 
 			aiColor3D colorTransparent(0, 0, 0);
 			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_TRANSPARENT, colorTransparent))
-				newMaterial->cTransparent.Set(colorTransparent.r, colorTransparent.g, colorTransparent.g);
+				newMaterial->cTransparent.Set(colorTransparent.r, colorTransparent.g, colorTransparent.g, 0.f);
 
 			bool twosided = false;
 			if (AI_SUCCESS == material->Get(AI_MATKEY_TWOSIDED, twosided))

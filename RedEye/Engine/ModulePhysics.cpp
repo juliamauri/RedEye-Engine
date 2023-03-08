@@ -101,7 +101,7 @@ void ModulePhysics::OnStop()
 		sim->state = RE_ParticleEmitter::PlaybackState::STOPING;
 }
 
-void ModulePhysics::DrawParticleEmitterSimulation(unsigned int index, math::float3 go_positon, math::float3 go_up) const
+void ModulePhysics::DrawParticleEmitterSimulation(unsigned int index, math::vec go_positon, math::vec go_up) const
 {
 	particles.DrawSimulation(index, go_positon, go_up);
 }
@@ -111,7 +111,7 @@ void ModulePhysics::DebugDrawParticleEmitterSimulation(const RE_ParticleEmitter*
 	particles.DebugDrawSimulation(sim, particles.GetInterval());
 }
 
-void ModulePhysics::CallParticleEmitterLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
+void ModulePhysics::CallParticleEmitterLightShaderUniforms(unsigned int index, math::vec go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
 {
 	particles.CallLightShaderUniforms(index, go_position, shader, array_unif_name, count, maxLights, sharedLight);
 }

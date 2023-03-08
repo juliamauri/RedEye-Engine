@@ -21,12 +21,12 @@ void RE_CameraManager::Init()
 	editor_camera = new RE_CompCamera();
 	editor_camera->SetParent(0ull);
 	editor_camera->SetProperties();
-	editor_camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f));
+	editor_camera->GetTransform()->SetPosition(math::vec(0.f, 5.f, -5.f, 0.f));
 
 	particleEditor_camera = new RE_CompCamera();
 	particleEditor_camera->SetParent(0ull);
 	particleEditor_camera->SetProperties();
-	particleEditor_camera->GetTransform()->SetPosition(math::vec(0.f, 0.f, 10.f));
+	particleEditor_camera->GetTransform()->SetPosition(math::vec(0.f, 0.f, 10.f, 0.f));
 }
 
 void RE_CameraManager::Clear()

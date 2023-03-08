@@ -74,7 +74,8 @@ void SceneEditorWindow::Draw(bool secondary)
 			static math::Quat rot, lastRot;
 			static math::vec scl;
 
-			static math::vec before = math::vec::zero, last = math::vec::zero;
+			static math::vec before = math::vec::zero;
+			static math::vec last = math::vec::zero;
 
 			RE_CompCamera* eCamera = RE_CameraManager::EditorCamera();
 			math::float4x4 cameraView = eCamera->GetView();
@@ -82,7 +83,7 @@ void SceneEditorWindow::Draw(bool secondary)
 			bool isGlobal = false;
 
 			//filling matA
-			sTransform->GetGlobalMatrix().Transposed().Decompose(pos, rot, scl);
+			sTransform->GetGlobalMatrix().Transposed().Decompose(pos.xyz(), rot, scl.xyz());
 
 			static bool watchingChange = false;
 
@@ -118,11 +119,11 @@ void SceneEditorWindow::Draw(bool secondary)
 				math::float4x4 localMat = parent->GetTransformPtr()->GetGlobalMatrix().InverseTransposed();
 
 		
-				math::float4x4 globalMat = math::float4x4::FromTRS(math::vec(matrixTranslation), math::Quat::FromEulerXYZ(matrixRotation[0], matrixRotation[1], matrixRotation[2]), math::vec(matrixScale));
+				math::float4x4 globalMat = math::float4x4::FromTRS(math::float3(matrixTranslation), math::Quat::FromEulerXYZ(matrixRotation[0], matrixRotation[1], matrixRotation[2]), math::float3(matrixScale));
 				
 				localMat = localMat * globalMat;
 
-				localMat.Decompose(pos, rot, scl);
+				localMat.Decompose(pos.xyz(), rot, scl.xyz());
 
 				switch (operation) {
 				case ImGuizmo::TRANSLATE: 
@@ -130,7 +131,7 @@ void SceneEditorWindow::Draw(bool secondary)
 					last = pos;
 					break;
 				case ImGuizmo::ROTATE: 
-					last = isGlobal ? (rot * lastRot).ToEulerXYZ() : rot.ToEulerXYZ();
+					last = isGlobal ? math::vec((rot * lastRot).ToEulerXYZ(), 0.f) : math::vec(rot.ToEulerXYZ(), 0.f);
 					sTransform->SetRotation(last);
 
 					break;

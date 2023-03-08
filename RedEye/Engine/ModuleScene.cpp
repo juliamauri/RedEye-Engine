@@ -155,7 +155,7 @@ void ModuleScene::DrawEditor()
 
 					ImGui::TableNextColumn();
 
-					static math::vec pos, rotE, scl;
+					static math::float3 pos, rotE, scl;
 					static math::float3x3 rot;
 
 					static math::float4x4 localM;
@@ -365,9 +365,9 @@ void ModuleScene::CreateMaxLights(const GO_UID parent)
 		for (int y = 0; y < 8; ++y)
 		{
 			RE_GameObject* light_go = scenePool.AddGO((name + eastl::to_string(x) + "x" + eastl::to_string(y)).c_str(), container_go);
-			light_go->GetTransformPtr()->SetPosition(math::vec((static_cast<float>(x) * 12.5f) - 50.f, 0.f, (static_cast<float>(y) * 12.5f) - 50.f));
+			light_go->GetTransformPtr()->SetPosition(math::vec((static_cast<float>(x) * 12.5f) - 50.f, 0.f, (static_cast<float>(y) * 12.5f) - 50.f, 0.f));
 
-			static math::vec colors[5] = { math::vec(1.f,0.f,0.f), math::vec(0.f,1.f,0.f), math::vec(0.f,0.f,1.f), math::vec(1.f,1.f,0.f), math::vec(0.f,1.f,1.f) };
+			static math::vec colors[5] = { math::vec(1.f,0.f,0.f,1.f), math::vec(0.f,1.f,0.f,1.f), math::vec(0.f,0.f,1.f,1.f), math::vec(1.f,1.f,0.f,1.f), math::vec(0.f,1.f,1.f,1.f) };
 			dynamic_cast<RE_CompPrimitive*>(light_go->AddNewComponent(C_SPHERE))->SetColor(
 				dynamic_cast<RE_CompLight*>(light_go->AddNewComponent(C_LIGHT))->diffuse = colors[RE_MATH->RandomInt() % 5]);
 		}
@@ -379,8 +379,8 @@ void ModuleScene::CreateWater(const GO_UID parent)
 	RE_GameObject* water_go = scenePool.AddGO("Water", Validate(parent), true);
 	water_go->AddNewComponent(C_WATER)->UseResources();
 	RE_CompTransform* transform = water_go->GetTransformPtr();
-	transform->SetRotation({ -(math::pi / 2.f), 0.0f, 0.0f });
-	transform->SetScale({ 10.0f, 10.0f, 1.0f });
+	transform->SetRotation(math::vec( - (math::pi / 2.f), 0.0f, 0.0f, 0.f));
+	transform->SetScale(math::vec(10.0f, 10.0f, 1.0f,0.f));
 }
 
 void ModuleScene::CreateParticleSystem(const GO_UID parent)

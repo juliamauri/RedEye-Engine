@@ -175,7 +175,13 @@ void RE_ParticleEmitter::UpdateParticles()
 		switch (boundary.type) {
 		case RE_EmissionBoundary::Type::SPHERE: bounding_box.SetFrom(boundary.geo.sphere); break;
 		case RE_EmissionBoundary::Type::AABB: bounding_box = boundary.geo.box; break;
-		default: bounding_box.SetFromCenterAndSize(parent_pos * !local_space, math::vec(math::SqrtFast(max_dist_sq))); break; }
+		default:
+		{
+			float _sqrt = math::SqrtFast(max_dist_sq);
+			bounding_box.SetFromCenterAndSize(parent_pos * !local_space, math::vec(_sqrt, _sqrt, _sqrt, 0.f));
+		}
+		break;
+		}
 	}
 }
 

@@ -101,7 +101,7 @@ void ParticleManager::Clear()
 	simulations.clear();
 }
 
-void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_position, math::float3 go_up) const
+void ParticleManager::DrawSimulation(unsigned int index, math::vec go_position, math::vec go_up) const
 {
 	RE_PROFILE(PROF_DrawParticles, PROF_ParticleManager);
 
@@ -147,13 +147,13 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 
 	// Get Camera Transform
 	RE_CompTransform* cT = ModuleRenderer3D::GetCamera()->GetTransform();
-	const math::float3 cUp = cT->GetUp().Normalized();
+	const math::vec cUp = cT->GetUp().Normalized();
 
 	for (const auto &p : simulation->particle_pool)
 	{
 		// Calculate Particle Transform
-		const math::float3 partcleGlobalpos = simulation->local_space ? go_position + p.position : p.position;
-		math::float3 front, right, up;
+		const math::vec partcleGlobalpos = simulation->local_space ? go_position + p.position : p.position;
+		math::vec front, right, up;
 		switch (simulation->orientation)
 		{
 		case RE_ParticleEmitter::ParticleDir::FromPS:
@@ -185,9 +185,9 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 
 		// Rotate and upload Transform
 		math::float4x4 rotm;
-		rotm.SetRotatePart(math::float3x3(right, up, front));
-		math::vec roteuler = rotm.ToEulerXYZ();
-		pS->UploadModel(math::float4x4::FromTRS(partcleGlobalpos, math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), simulation->scale).Transposed().ptr());
+		rotm.SetRotatePart(math::float3x3(right.xyz(), up.xyz(), front.xyz()));
+		math::vec roteuler = math::vec(rotm.ToEulerXYZ(),0.f);
+		pS->UploadModel(math::float4x4::FromTRS(partcleGlobalpos.xyz(), math::Quat::identity * math::Quat::FromEulerXYZ(roteuler.x, roteuler.y, roteuler.z), simulation->scale.xyz()).Transposed().ptr());
 
 		float weight = 1.f;
 
@@ -236,7 +236,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 #endif // PARTICLE_RENDER_TEST
 }
 
-void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
+void ParticleManager::CallLightShaderUniforms(unsigned int index, math::vec go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
 {
 	RE_PROFILE(PROF_DrawParticlesLight, PROF_ParticleManager);
 
@@ -271,7 +271,7 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 			if (count == maxLights) return;
 			unif_name = array_name + eastl::to_string(count++) + "].";
 
-			const math::float3 p_global_pos = simulation->local_space ? go_position + p.position : p.position;
+			const math::vec p_global_pos = simulation->local_space ? go_position + p.position : p.position;
 			switch (simulation->light.type) {
 			case RE_PR_Light::Type::UNIQUE:
 			{
@@ -338,7 +338,7 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 			default: break;
 			}
 
-			const math::float3 partcleGlobalpos = go_position + p.position;
+			const math::vec partcleGlobalpos = go_position + p.position;
 			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, static_cast<float>(L_POINT));
 
 			const math::vec quadratic = simulation->light.GetQuadraticValues();
@@ -563,7 +563,7 @@ bool ParticleManager::SetEmitterState(unsigned int index, RE_ParticleEmitter::Pl
 void ParticleManager::DrawAASphere(const math::vec p_pos, const float radius) const
 {
 	eastl::vector<math::float2>::const_iterator i = circle_precompute.cbegin() + 1;
-	math::vec previous = { p_pos.x + (circle_precompute.cbegin()->x * radius), p_pos.y + (circle_precompute.cbegin()->y * radius), p_pos.z };
+	math::vec previous = { p_pos.x + (circle_precompute.cbegin()->x * radius), p_pos.y + (circle_precompute.cbegin()->y * radius), p_pos.z, 0.f };
 	for (; i != circle_precompute.cend(); ++i) // Z
 	{
 		glVertex3fv(previous.ptr());

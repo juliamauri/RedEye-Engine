@@ -336,7 +336,7 @@ void RE_Shader::MountRE_Shader_Cvar(eastl::vector<eastl::string> uniformLines)
 			else if (varType.compare("int") == 0) sVar.SetValue(-1, true);
 			else if (varType.compare("float") == 0) sVar.SetValue(f, true);
 			else if (varType.compare("vec2") == 0) sVar.SetValue(math::float2::zero, true);
-			else if (varType.compare("vec3") == 0) sVar.SetValue(math::float3::zero, true);
+			else if (varType.compare("vec3") == 0) sVar.SetValue(math::vec::zero, true);
 			else if (varType.compare("vec4") == 0) sVar.SetValue(math::float4::zero, false, true);
 			else if (varType.compare("bvec2") == 0) sVar.SetValue(b2, 2, true);
 			else if (varType.compare("bvec3") == 0) sVar.SetValue(b3, 3, true);
@@ -481,7 +481,7 @@ void RE_Shader::LoadResourceMeta(RE_Json* metaNode)
 			case RE_Cvar::INT4: sVar.SetValue(i4, 4, true); break;
 			case RE_Cvar::FLOAT: sVar.SetValue(f, true); break;
 			case RE_Cvar::FLOAT2: sVar.SetValue(math::float2::zero, true); break;
-			case RE_Cvar::FLOAT3: sVar.SetValue(math::float3::zero, true); break;
+			case RE_Cvar::FLOAT3: sVar.SetValue(math::vec::zero, true); break;
 			case RE_Cvar::FLOAT4: sVar.SetValue(math::float4::zero, false, true); break;
 			case RE_Cvar::MAT2: sVar.SetValue(math::float4::zero, true, true); break;
 			case RE_Cvar::MAT3: sVar.SetValue(math::float3x3::zero, true); break;

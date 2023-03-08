@@ -33,12 +33,12 @@ unsigned long long RE_Math::RandomUID()
 
 math::vec RE_Math::RandomVec()
 {
-	return math::vec(lcg.Float(), lcg.Float(), lcg.Float());
+	return math::vec(lcg.Float(), lcg.Float(), lcg.Float(), 0.f);
 }
 
 math::vec RE_Math::RandomNVec()
 {
-	return math::vec(lcg.Float() - 0.5f, lcg.Float() - 0.5f, lcg.Float() - 0.5f).Normalized();
+	return math::vec(math::float3(lcg.Float() - 0.5f, lcg.Float() - 0.5f, lcg.Float() - 0.5f).Normalized(), 0.f );
 }
 
 math::LCG& RE_Math::GetRNGSeed() { return lcg; }

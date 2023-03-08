@@ -80,7 +80,7 @@ public:
 
 	bool active_rendering = true;
 
-	math::float3 scale = { 0.5f,0.5f,0.1f };
+	math::vec scale = { 0.5f,0.5f,0.1f,0.f };
 
 	RE_PR_Color color = {};
 	RE_PR_Opacity opacity = {};
@@ -96,7 +96,7 @@ public:
 		Custom
 	} orientation = ParticleDir::Billboard;
 
-	math::float3 direction = { -1.0f,1.0f,0.5f };
+	math::vec direction = { -1.0f,1.0f,0.5f,0.f };
 
 #if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
 

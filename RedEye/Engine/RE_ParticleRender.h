@@ -45,10 +45,10 @@ private:
 	ComponentType primType = C_POINT;
 	RE_CompPrimitive* primCmp = nullptr;
 
-	math::float3 scale = { 0.5f,0.5f,0.1f };
+	math::vec scale = { 0.5f,0.5f,0.1f,0.f };
 
 	RE_ParticleEmitter::ParticleDir particleDir = RE_ParticleEmitter::ParticleDir::Billboard;
-	math::float3 direction = { -1.0f,1.0f,0.5f };
+	math::vec direction = { -1.0f,1.0f,0.5f,0.f };
 };
 
 #endif // !__RE_PARTICLE_RENDER__

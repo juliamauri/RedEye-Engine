@@ -44,7 +44,7 @@ bool RE_CompTransform::CheckUpdate()
 
 math::float4x4 RE_CompTransform::GetLocalMatrix()
 {
-	if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale);
+	if (needed_update_transform) model_local = math::float4x4::FromTRS(pos.xyz(), rot_quat, scale.scale.xyz());
 	return model_local;
 }
 
@@ -63,7 +63,7 @@ const float* RE_CompTransform::GetGlobalMatrixPtr()
 void RE_CompTransform::SetRotation(math::Quat rotation)
 {
 	rot_quat = rotation;
-	rot_eul = rotation.ToEulerXYZ();
+	rot_eul = math::vec(rotation.ToEulerXYZ(), 0.f);
 	rot_mat = rotation.ToFloat3x3();
 	needed_update_transform = true;
 }
@@ -79,7 +79,7 @@ void RE_CompTransform::SetRotation(math::vec rotation)
 void RE_CompTransform::SetRotation(math::float3x3 rotation)
 {
 	rot_mat = rotation;
-	rot_eul = rotation.ToEulerXYZ();
+	rot_eul = math::vec(rotation.ToEulerXYZ(), 0.f);
 	rot_quat = rotation.ToQuat();
 	needed_update_transform = true;
 }
@@ -121,12 +121,12 @@ math::vec RE_CompTransform::GetLocalPosition() const { return pos; }
 math::vec RE_CompTransform::GetGlobalPosition()
 {
 	if (needed_update_transform) CalcGlobalTransform();
-	return model_global.Row3(3);
+	return model_global.Row(3);
 }
 
 void RE_CompTransform::LocalPan(float rad_dx, float rad_dy, float rad_dz)
 {
-	rot_eul -= math::vec(rad_dy * -1, rad_dx, rad_dz);
+	rot_eul -= math::vec(rad_dy * -1, rad_dx, rad_dz, 0.f);
 	rot_quat = math::Quat::FromEulerXYZ(rot_eul.x, rot_eul.y, rot_eul.z);
 	rot_mat = rot_quat.ToFloat3x3();
 	needed_update_transform = true;
@@ -137,12 +137,13 @@ void RE_CompTransform::LocalMove(Dir dir, float speed)
 	if (speed != 0.f)
 	{
 		switch (dir) {
-		case FORWARD:	pos -= model_global.WorldZ() * speed; break;
-		case BACKWARD:	pos += model_global.WorldZ() * speed; break;
-		case LEFT:		pos -= model_global.WorldX() * speed; break;
-		case RIGHT:		pos += model_global.WorldX() * speed; break;
-		case UP:		pos += model_global.WorldY() * speed; break;
-		case DOWN:		pos -= model_global.WorldY() * speed; break; }
+		case FORWARD:	pos -= math::vec(model_global.WorldZ() * speed, 0.f); break;
+		case BACKWARD:	pos += math::vec(model_global.WorldZ() * speed, 0.f); break;
+		case LEFT:		pos -= math::vec(model_global.WorldX() * speed, 0.f); break;
+		case RIGHT:		pos += math::vec(model_global.WorldX() * speed, 0.f); break;
+		case UP:		pos += math::vec(model_global.WorldY() * speed, 0.f); break;
+		case DOWN:		pos -= math::vec(model_global.WorldY() * speed, 0.f); break;
+		}
 
 		needed_update_transform = true;
 	}
@@ -160,21 +161,22 @@ void RE_CompTransform::Orbit(float rad_dx, float rad_dy, const math::vec center)
 			if (has_parent = go_ptr->GetParentUID())
 			{
 				math::float4x4 parent_global = go_ptr->GetParentCPtr()->GetTransformPtr()->GetGlobalMatrix();
+				if (needed_update_transform)
+					model_local = math::float4x4::FromTRS(pos.xyz(), rot_quat, scale.scale.xyz()).Transposed();
 
-				if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
 				model_global = model_local * parent_global;
 
-				float distance = model_global.Row3(3).Distance(center);
+				float distance = model_global.Row(3).Distance(center);
 
 				LocalPan(rad_dx, rad_dy);
-				pos = center - parent_global.Row3(3) + ((math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed() * parent_global).Row3(2).Normalized() * distance);
+				pos = center - math::vec(parent_global.Row3(3), 0.f) + math::vec((math::float4x4::FromTRS(pos.xyz(), rot_quat, scale.scale.xyz()).Transposed() * parent_global).Row3(2).Normalized() * distance, 0.f);
 			}
 		}
 
 		if (!has_parent)
 		{
 			LocalPan(rad_dx, rad_dy);
-			pos = center + (math::float4x4::FromTRS(pos, rot_quat, scale.scale).Row3(2).Normalized() * pos.Distance(center));
+			pos = center + math::vec((math::float4x4::FromTRS(pos.xyz(), rot_quat, scale.scale.xyz()).Row3(2).Normalized() * pos.Distance(center)),0.f);
 		}
 	}
 }
@@ -202,17 +204,17 @@ void RE_CompTransform::Focus(const math::vec center, float v_fov_rads, float h_f
 			{
 				math::float4x4 parent_global = go_ptr->GetParentCPtr()->GetTransformPtr()->GetGlobalMatrix();
 
-				if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
+				if (needed_update_transform) model_local = math::float4x4::FromTRS(pos.xyz(), rot_quat, scale.scale.xyz()).Transposed();
 				model_global = model_local * parent_global;
 
-				pos = (center + (model_global.Col3(2).Normalized() * camDistance)) - parent_global.Row3(3);
+				pos = (center + math::vec(model_global.Col3(2).Normalized() * camDistance, 0.f)) - math::vec(parent_global.Row3(3), 0.f);
 			}
 		}
 
 		if (!has_parent)
 		{
-			if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
-			pos = center + (model_local.Col3(2).Normalized() * camDistance);
+			if (needed_update_transform) model_local = math::float4x4::FromTRS(pos.xyz(), rot_quat, scale.scale.xyz()).Transposed();
+			pos = center + math::vec(model_local.Col3(2).Normalized() * camDistance, 0.f);
 		}
 
 		needed_update_transform = true;
@@ -223,37 +225,37 @@ void RE_CompTransform::Focus(const math::vec center, float v_fov_rads, float h_f
 math::vec RE_CompTransform::GetRight()
 {
 	if (needed_update_transform) CalcGlobalTransform();
-	return model_global.Row3(0);
+	return math::vec(model_global.Row3(0), 0.f);
 }
 
 math::vec RE_CompTransform::GetLeft()
 {
 	if (needed_update_transform) CalcGlobalTransform();
-	return -model_global.Row3(0);
+	return -math::vec(model_global.Row3(0), 0.f);
 }
 
 math::vec RE_CompTransform::GetUp()
 {
 	if (needed_update_transform) CalcGlobalTransform();
-	return model_global.Row3(1);
+	return math::vec(model_global.Row3(1), 0.f);
 }
 
 math::vec RE_CompTransform::GetDown()
 {
 	if (needed_update_transform) CalcGlobalTransform();
-	return -model_global.Row3(1);
+	return -math::vec(model_global.Row3(1), 0.f);
 }
 
 math::vec RE_CompTransform::GetFront()
 {
 	if (needed_update_transform) CalcGlobalTransform();
-	return -model_global.Row3(2);
+	return -math::vec(model_global.Row3(2), 0.f);
 }
 
 math::vec RE_CompTransform::GetBack()
 {
 	if (needed_update_transform) CalcGlobalTransform();
-	return model_global.Row3(2);
+	return math::vec(model_global.Row3(2), 0.f);
 }
 
 void RE_CompTransform::DrawProperties()
@@ -280,7 +282,7 @@ void RE_CompTransform::DrawProperties()
 				pFrom = true;
 			}
 
-			SetPosition({ p[0], p[1], p[2] });
+			SetPosition({ p[0], p[1], p[2], 0.f });
 
 			if (watchingChange)
 			{
@@ -300,7 +302,7 @@ void RE_CompTransform::DrawProperties()
 				rFrom = true;
 			}
 
-			SetRotation({ math::DegToRad(r[0]), math::DegToRad(r[1]), math::DegToRad(r[2]) });
+			SetRotation(math::vec({ math::DegToRad(r[0]), math::DegToRad(r[1]), math::DegToRad(r[2]), 0.f }));
 
 			if (watchingChange)
 			{
@@ -320,7 +322,7 @@ void RE_CompTransform::DrawProperties()
 				sFrom = true;
 			}
 
-			SetScale({ s[0], s[1], s[2] });
+			SetScale({ s[0], s[1], s[2], 0.f });
 
 			if (watchingChange)
 			{
@@ -328,13 +330,13 @@ void RE_CompTransform::DrawProperties()
 				last = scale.scale;
 			}
 		}
-		
+
 		if (watchingChange && !ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left) || !frameWatched)
 		{
-			if		(pFrom) RE_EDITOR->PushCommand(new RE_CMDTransformPosition(go, before, last));
+			if (pFrom) RE_EDITOR->PushCommand(new RE_CMDTransformPosition(go, before, last));
 			else if (rFrom) RE_EDITOR->PushCommand(new RE_CMDTransformRotation(go, before, last));
 			else if (sFrom) RE_EDITOR->PushCommand(new RE_CMDTransformScale(go, before, last));
-			
+
 			watchingChange = pFrom = rFrom = sFrom = false;
 			before = last = math::vec::zero;
 		}
@@ -346,14 +348,14 @@ void RE_CompTransform::OnTransformModified() { needed_update_transform = true; }
 math::float4x4 RE_CompTransform::UpdateGlobalMatrixFromParent(math::float4x4 parent)
 {
 	needed_update_transform = false;
-	model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
+	model_local = math::float4x4::FromTRS(pos.xyz(), rot_quat, scale.scale.xyz()).Transposed();
 	return model_global = model_local * parent;
 }
 
 void RE_CompTransform::CalcGlobalTransform()
 {
 	needed_update_transform = false;
-	model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
+	model_local = math::float4x4::FromTRS(pos.xyz(), rot_quat, scale.scale.xyz()).Transposed();
 
 	if (useParent)
 	{

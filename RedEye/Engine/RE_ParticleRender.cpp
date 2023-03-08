@@ -161,9 +161,9 @@ void RE_ParticleRender::JsonDeserialize(bool generateLibraryPath)
 		opacity.JsonDeserialize(node->PullJObject("Opacity"));
 		light.JsonDeserialize(node->PullJObject("Light"));
 
-		scale = node->PullFloatVector("Scale", { 0.5f,0.5f,0.1f });
+		scale = node->PullFloatVector("Scale", { 0.5f,0.5f,0.1f, 0.f });
 		particleDir = static_cast<RE_ParticleEmitter::ParticleDir>(node->PullInt("particleDir", 0));
-		direction = node->PullFloatVector("Direction", { -1.0f,1.0f,0.5f });
+		direction = node->PullFloatVector("Direction", { -1.0f,1.0f,0.5f, 0.f });
 
 		primType = static_cast<ComponentType>(node->PullInt("primitiveType", static_cast<int>(C_EMPTY)));
 		if (primType != C_EMPTY) {

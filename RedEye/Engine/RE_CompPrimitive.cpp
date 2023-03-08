@@ -28,7 +28,7 @@
 
 RE_CompPrimitive::RE_CompPrimitive(ComponentType t) : RE_Component(t)
 {
-	color = math::vec(1.0f, 0.15f, 0.15f);
+	color = math::vec(1.0f, 0.15f, 0.15f, 0.f);
 }
 
 void RE_CompPrimitive::SimpleDraw() const
@@ -44,7 +44,7 @@ bool RE_CompPrimitive::CheckFaceCollision(const math::Ray& ray, float& distance)
 	return false;
 }
 
-void RE_CompPrimitive::SetColor(float r, float g, float b) { color.Set(r, g, b); }
+void RE_CompPrimitive::SetColor(float r, float g, float b) { color.Set(r, g, b, 0.f); }
 void RE_CompPrimitive::SetColor(math::vec nColor) { color = nColor; }
 unsigned int RE_CompPrimitive::GetVAO() const { return VAO; }
 unsigned int RE_CompPrimitive::GetTriangleCount() const { return triangle_count; }
@@ -271,7 +271,7 @@ void RE_CompRock::SerializeJson(RE_Json* node, eastl::map<const char*, int>* res
 
 void RE_CompRock::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
-	color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
+	color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f,0.f });
 	RockSetUp(node->PullInt("seed", seed), node->PullInt("nsubdivisions", nsubdivisions));
 }
 

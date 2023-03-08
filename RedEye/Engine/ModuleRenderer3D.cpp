@@ -150,7 +150,7 @@ bool ModuleRenderer3D::Init()
 				LIGHT_DISABLED));
 
 			//Thumbnail Configuration
-			thumbnailView.clear_color = {0.f, 0.f, 0.f, 1.f};
+			thumbnailView.clear_color = math::float4({ 0.f, 0.f, 0.f, 1.f });
 			RE_INPUT->PauseEvents();
 			thumbnailView.camera = new RE_CompCamera();
 			thumbnailView.camera->SetParent(0ull);
@@ -1050,7 +1050,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 				sShader->UploadModel(stencilPtr->GetTransformPtr()->GetGlobalMatrixPtr());
 				RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
 				RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
-				RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
+				RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0, 0.f });
 				RE_ShaderImporter::setFloat(shaderiD, "opacity", 1.0f);
 				RE_ShaderImporter::setFloat(shaderiD, "center", stencilPtr->GetLocalBoundingBox().CenterPoint());
 
@@ -1142,7 +1142,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 		if (render_view.light == LIGHT_DEFERRED)
 		{
 			// Particle System Draws
-			RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0 }, { 0.0,1.0,0.0 });
+			RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0,0.f }, { 0.0,1.0,0.0,0.f });
 
 			if (editting_simulation->light.type != RE_PR_Light::Type::NONE)
 			{
@@ -1165,7 +1165,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 					}
 
 					unsigned int pCount = 0;
-					RE_PHYSICS->CallParticleEmitterLightShaderUniforms(editting_simulation->id, { 0.0,0.0,0.0 }, particlelight_pass, "plights", pCount, 508, shareLightPass);
+					RE_PHYSICS->CallParticleEmitterLightShaderUniforms(editting_simulation->id, { 0.0,0.0,0.0,0.f }, particlelight_pass, "plights", pCount, 508, shareLightPass);
 
 					eastl::string unif_name = "pInfo.pCount";
 					RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, unif_name.c_str()), pCount);
@@ -1194,7 +1194,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 
 					// Setup Light Uniforms
 					unsigned int count = 0;
-					RE_PHYSICS->CallParticleEmitterLightShaderUniforms(editting_simulation->id, { 0.0,0.0,0.0 }, light_pass, "lights", count, 203, shareLightPass);
+					RE_PHYSICS->CallParticleEmitterLightShaderUniforms(editting_simulation->id, { 0.0,0.0,0.0,0.f }, light_pass, "lights", count, 203, shareLightPass);
 
 					RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, "count"), count);
 
@@ -1234,7 +1234,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 			if(editting_simulation->opacity.type != RE_PR_Opacity::Type::NONE)
 				drawParticleSystemAsLast = true;
 			else
-				RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0 }, { 0.0,1.0,0.0 });
+				RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0,0.f }, { 0.0,1.0,0.0,0.f });
 
 			// Draw Debug Geometry
 			if (render_view.flags & DEBUG_DRAW)
@@ -1265,7 +1265,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				}
 
-				RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0 }, { 0.0,1.0,0.0 });
+				RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0,0.f }, { 0.0,1.0,0.0,0.f });
 
 				if (render_view.flags & BLENDED) glDisable(GL_BLEND);
 			}
@@ -1300,9 +1300,9 @@ void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
 
 	internalCamera->SetFOV(math::RadToDeg(0.523599f));
 	internalCamera->Update();
-	internalCamera->GetTransform()->SetPosition({ 0.0f,1.0f,5.0f });
+	internalCamera->GetTransform()->SetPosition({ 0.0f,1.0f,5.0f,0.f });
 	internalCamera->Update();
-	internalCamera->GetTransform()->SetRotation({ math::DegToRad(45.0f),0.0f,0.0f});
+	internalCamera->GetTransform()->SetRotation({ math::vec(math::DegToRad(45.0f),0.0f,0.0f,0.f)});
 	internalCamera->Update();
 	math::AABB box = go->GetGlobalBoundingBoxWithChilds();
 	internalCamera->Focus(box.CenterPoint(), box.HalfSize().Length());
@@ -1335,11 +1335,11 @@ void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
 	RE_INPUT->PauseEvents();
 	internalCamera->SetFOV(math::RadToDeg(0.523599f));
 	internalCamera->Update();
-	internalCamera->GetTransform()->SetRotation({ 0.0f,0.0f, 0.0f });
+	internalCamera->GetTransform()->SetRotation(math::vec(0.0f,0.0f, 0.0f,0.f));
 	internalCamera->Update();
 	//internalCamera->GetTransform()->SetPosition({ 0.0f, 0.0f, 0.0f});
 	//internalCamera->Update();
-	internalCamera->GetTransform()->SetPosition({ 0.0f ,0.0f, 5.0f });
+	internalCamera->GetTransform()->SetPosition(math::vec(0.0f ,0.0f, 5.0f,0.f));
 	internalCamera->Update();
 	RE_INPUT->ResumeEvents();
 
@@ -1373,8 +1373,8 @@ void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
 
 	RE_INPUT->PauseEvents();
 	internalCamera->ForceFOV(125, 140);
-	internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
-	internalCamera->GetTransform()->SetPosition(math::vec(0.f, 0.f, 0.f));
+	internalCamera->GetTransform()->SetRotation(math::vec(0.0,0.0,0.0,0.f));
+	internalCamera->GetTransform()->SetPosition(math::vec(0.f, 0.f, 0.f, 0.f));
 	internalCamera->Update();
 	RE_INPUT->ResumeEvents();
 
@@ -1477,7 +1477,7 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 {
 	glColor3f(color.x, color.y, color.z);
 
-	math::float4x4 model = math::float4x4::Translate(position.Neg());
+	math::float4x4 model = math::float4x4::Translate(position.xyz().Neg());
 	model.InverseTranspose();
 
 	glMatrixMode(GL_MODELVIEW);
@@ -1564,7 +1564,7 @@ void ModuleRenderer3D::SetRenderViewDebugDraw(RENDER_VIEWS r_view, bool debug_dr
 RenderView::RenderView(eastl::string name, eastl::pair<unsigned int, unsigned int> fbos, short flags, LightMode light, math::float4 clipDistance) :
 	name(name), fbos(fbos), flags(flags), light(light)
 {
-	clear_color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	clear_color = math::vec(0.0f, 0.0f, 0.0f, 1.0f);
 	clip_distance = clipDistance;
 }
 

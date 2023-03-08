@@ -339,7 +339,7 @@ math::vec RE_EmissionShape::GetPosition() const
 	case AABB: return { 
 			geo.box.minPoint.x + (RE_MATH->RandomF() * (geo.box.maxPoint.x - geo.box.minPoint.x)),
 			geo.box.minPoint.y + (RE_MATH->RandomF() * (geo.box.maxPoint.y - geo.box.minPoint.y)),
-			geo.box.minPoint.z + (RE_MATH->RandomF() * (geo.box.maxPoint.z - geo.box.minPoint.z)) };
+			geo.box.minPoint.z + (RE_MATH->RandomF() * (geo.box.maxPoint.z - geo.box.minPoint.z)), 0.f };
 	case SPHERE: return geo.sphere.pos + ((RE_MATH->RandomF() * geo.sphere.r) * RE_MATH->RandomNVec());
 	case HOLLOW_SPHERE: return geo.hollow_sphere.first.pos + ((geo.hollow_sphere.first.r + (geo.hollow_sphere.second + RE_MATH->RandomFN())) * RE_MATH->RandomNVec());
 	default: return geo.point; }
@@ -353,8 +353,8 @@ bool RE_EmissionShape::DrawEditor()
 	{
 		switch (type = static_cast<Type>(next_shape)) {
 		case RE_EmissionShape::POINT: geo.point = math::vec::zero; break;
-		case RE_EmissionShape::CIRCLE: geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f); break;
-		case RE_EmissionShape::RING: geo.ring = { math::Circle(math::vec::zero, { 0.f, 1.f, 0.f }, 1.f), 0.1f }; break;
+		case RE_EmissionShape::CIRCLE: geo.circle = math::Circle(math::vec::zero, { 0.f, 1.f, 0.f, 0.f }, 1.f); break;
+		case RE_EmissionShape::RING: geo.ring = { math::Circle(math::vec::zero, { 0.f, 1.f, 0.f, 0.f }, 1.f), 0.1f }; break;
 		case RE_EmissionShape::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one); break;
 		case RE_EmissionShape::SPHERE: geo.sphere = math::Sphere(math::vec::zero, 1.f); break;
 		case RE_EmissionShape::HOLLOW_SPHERE: geo.hollow_sphere = { math::Sphere(math::vec::zero, 1.f), 0.8f }; break; }
@@ -686,13 +686,13 @@ math::vec RE_EmissionVector::GetValue() const
 {
 	switch (type) {
 	case VALUE: return val;
-	case RANGEX: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y, val.z};
-	case RANGEY: return { val.x, val.y + (RE_MATH->RandomFN() * margin.y), val.z };
-	case RANGEZ: return { val.x, val.y, val.z + (RE_MATH->RandomFN() * margin.z) };
-	case RANGEXY: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y + (RE_MATH->RandomFN() * margin.y), val.z };
-	case RANGEXZ: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y, val.z + (RE_MATH->RandomFN() * margin.z) };
-	case RANGEYZ: return { val.x, val.y + (RE_MATH->RandomFN() * margin.y), val.z + (RE_MATH->RandomFN() * margin.z) };
-	case RANGEXYZ: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y + (RE_MATH->RandomFN() * margin.y), val.z + (RE_MATH->RandomFN() * margin.z) };
+	case RANGEX: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y, val.z, 0.f };
+	case RANGEY: return { val.x, val.y + (RE_MATH->RandomFN() * margin.y), val.z, 0.f };
+	case RANGEZ: return { val.x, val.y, val.z + (RE_MATH->RandomFN() * margin.z), 0.f };
+	case RANGEXY: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y + (RE_MATH->RandomFN() * margin.y), val.z, 0.f };
+	case RANGEXZ: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y, val.z + (RE_MATH->RandomFN() * margin.z), 0.f };
+	case RANGEYZ: return { val.x, val.y + (RE_MATH->RandomFN() * margin.y), val.z + (RE_MATH->RandomFN() * margin.z), 0.f };
+	case RANGEXYZ: return { val.x + (RE_MATH->RandomFN() * margin.x), val.y + (RE_MATH->RandomFN() * margin.y), val.z + (RE_MATH->RandomFN() * margin.z), 0.f };
 	default: return math::vec::zero; }
 }
 
@@ -1230,9 +1230,9 @@ unsigned int RE_EmissionSingleValue::GetBinarySize() const
 math::vec RE_EmissionExternalForces::GetAcceleration() const
 {
 	switch (type) {
-	case RE_EmissionExternalForces::GRAVITY: return math::vec(0.f, gravity, 0.f);
+	case RE_EmissionExternalForces::GRAVITY: return math::vec(0.f, gravity, 0.f, 0.f);
 	case RE_EmissionExternalForces::WIND: return wind;
-	case RE_EmissionExternalForces::WIND_GRAVITY: return math::vec(wind.x, wind.y + gravity, wind.z);
+	case RE_EmissionExternalForces::WIND_GRAVITY: return math::vec(wind.x, wind.y + gravity, wind.z, 0.f);
 	default: return math::vec::zero; }
 }
 
@@ -1601,8 +1601,8 @@ bool RE_EmissionBoundary::DrawEditor()
 	if (ImGui::Combo("Boundary Type", &tmp, "None\0Plane\0Sphere\0AABB\0"))
 	{
 		switch (type = static_cast<Type>(tmp)) {
-		case RE_EmissionBoundary::PLANE: geo.plane = math::Plane({ 0.f, 1.f, 0.f }, 0.f); break;
-		case RE_EmissionBoundary::SPHERE: geo.sphere = math::Sphere({ 0.f, 0.f, 0.f }, 10.f); break;
+		case RE_EmissionBoundary::PLANE: geo.plane = math::Plane({ 0.f, 1.f, 0.f, 0.f }, 0.f); break;
+		case RE_EmissionBoundary::SPHERE: geo.sphere = math::Sphere({ 0.f, 0.f, 0.f, 0.f }, 10.f); break;
 		case RE_EmissionBoundary::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one * 5.f); break; 
 		default: break; }
 		ret = true;
@@ -2330,7 +2330,7 @@ unsigned int RE_PR_Opacity::GetBinarySize() const
 math::vec RE_PR_Light::GetColor() const { return random_color ? RE_MATH->RandomVec() : color; }
 float RE_PR_Light::GetIntensity() const { return random_i ? intensity + (RE_MATH->RandomF() * (intensity_max - intensity)) : intensity; }
 float RE_PR_Light::GetSpecular() const { return random_s ? specular + (RE_MATH->RandomF() * (specular_max - specular)) : specular; }
-math::vec RE_PR_Light::GetQuadraticValues() const { return { constant, linear, quadratic }; }
+math::vec RE_PR_Light::GetQuadraticValues() const { return { constant, linear, quadratic, 0.f }; }
 
 bool RE_PR_Light::DrawEditor(const unsigned int id)
 {
