@@ -259,6 +259,12 @@
     <ClCompile Include="..\3rd Parties\Others\MD5\md5.cpp">
       <Filter>3rd Party\MD5</Filter>
     </ClCompile>
+    <ClCompile Include="RE_ThreadPool.cpp">
+      <Filter>Engine\Application\Utility\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Directory.cpp">
+      <Filter>Engine\Application\Utility\FileSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event.h">
@@ -672,6 +678,18 @@
     <ClInclude Include="resource1.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="RE_Thread.h">
+      <Filter>Engine\Application\Utility\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ThreadPool.hpp">
+      <Filter>Engine\Application\Utility\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Directory.hpp">
+      <Filter>Engine\Application\Utility\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_ThreadDefines.h">
+      <Filter>Engine\Application\Utility\Threading</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -865,6 +883,9 @@
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{f67675b7-cb18-4f10-a715-37a957201e92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Utility\Threading">
+      <UniqueIdentifier>{43833fb3-a002-415f-8b06-cfad952da756}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -912,7 +912,7 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_E8814613C2114595820A650C6BDA5F5D"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_1EF974DCE38A470B8837485E15BF03CB"
             {
             "Name" = "8:RedEye Engine x64"
             "Arguments" = "8:"
@@ -926,7 +926,7 @@
             "Icon" = "8:"
             "Feature" = "8:"
             }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_FA62936D2BCD4C1D9E3FB4AA2D4875FE"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_84366E763D674C1285CDAED47C0648B6"
             {
             "Name" = "8:RedEye Engine x64"
             "Arguments" = "8:"

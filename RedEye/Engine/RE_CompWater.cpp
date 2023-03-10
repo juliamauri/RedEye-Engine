@@ -64,7 +64,7 @@ void RE_CompWater::Draw() const
 {
 	unsigned int textureCounter = 0;
 
-	RE_Shader* shader = dynamic_cast<RE_Shader * >(RE_RES->At(RE_RES->internalResources->GetDefaultWaterShader()));
+	const RE_Shader* shader = dynamic_cast<const RE_Shader * >(RE_RES->At(RE_RES->internalResources->GetDefaultWaterShader()));
 	unsigned int shaderID = shader->GetID();
 	RE_GLCache::ChangeShader(shaderID);
 	shader->UploadModel(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());

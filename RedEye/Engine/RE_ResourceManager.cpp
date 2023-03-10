@@ -29,6 +29,8 @@
 #include "RE_ParticleEmission.h"
 #include "RE_ParticleRender.h"
 
+#include  "RE_Directory.hpp"
+
 #include <EASTL/internal/char_traits.h>
 #include <EASTL/string.h>
 
@@ -56,13 +58,14 @@ void RE_ResourceManager::Init()
 	internalResources->Init();
 
 	// Fetch Assets
-	RE_FS->ReadAssetChanges(0, true);
 	RE_AUDIO->ReadBanksChanges();
+	RE_Directory::Assets::Init();
 }
 
 void RE_ResourceManager::Clear()
 {
 	RE_PROFILE(PROF_Clear, PROF_ResourcesManager);
+
 	internalResources->Clear();
 	shader_importer->Clear();
 
@@ -91,6 +94,7 @@ const char* RE_ResourceManager::Reference(ResourceContainer* rc)
 	const char* retMD5 = nullptr;
 	if (rc)
 	{
+		EA::Thread::AutoMutex am(_resources_mutex);
 		resources.insert(Resource(retMD5 = rc->GetMD5(), rc));
 		resourcesCounter.insert(ResourceCounter(retMD5, (rc->isInMemory()) ? 1 : 0));
 		RE_LOG("%s referenced: %s\n\tAsset path: %s\n\tLibrary path: %s\n\tGenerated MD5: %s",
@@ -101,12 +105,14 @@ const char* RE_ResourceManager::Reference(ResourceContainer* rc)
 
 void RE_ResourceManager::Use(const char* resMD5)
 {
+	EA::Thread::AutoMutex am(_resources_mutex);
 	if (resourcesCounter.at(resMD5) == 0) resources.at(resMD5)->LoadInMemory();
 	resourcesCounter.at(resMD5)++;
 }
 
 void RE_ResourceManager::UnUse(const char* resMD5)
 {
+	EA::Thread::AutoMutex am(_resources_mutex);
 	if (--resourcesCounter.at(resMD5) == 0) resources.at(resMD5)->UnloadMemory();
 	else if (resourcesCounter.at(resMD5) < 0)
 	{
@@ -136,7 +142,7 @@ void RE_ResourceManager::PopSelected(bool all)
 	} while (all && !resourcesSelected.empty());
 }
 
-ResourceContainer* RE_ResourceManager::At(const char* md5) const { return resources.at(md5); }
+const ResourceContainer* RE_ResourceManager::At(const char* md5) const { return resources.at(md5); }
 
 const char* RE_ResourceManager::ReferenceByMeta(const char* metaPath, Resource_Type type)
 {
@@ -164,6 +170,26 @@ const char* RE_ResourceManager::ReferenceByMeta(const char* metaPath, Resource_T
 }
 
 unsigned int RE_ResourceManager::TotalReferences() const { return resources.size(); }
+
+void RE_ResourceManager::SetResourceMeta(const char* md5, const char* name, const char* asset_path, const char* library_path)
+{
+	EA::Thread::AutoMutex am(_resources_mutex);
+	resources.at(md5)->SetName(name);
+	resources.at(md5)->SetAssetPath(asset_path);
+	resources.at(md5)->SetLibraryPath(library_path);
+}
+
+void RE_ResourceManager::LoadResourceMeta(const char* md5)
+{
+	EA::Thread::AutoMutex am(_resources_mutex);
+	resources.at(md5)->LoadMeta();
+}
+
+void RE_ResourceManager::ReImportResource(const char* md5)
+{
+	EA::Thread::AutoMutex am(_resources_mutex);
+	resources.at(md5)->ReImport();
+}
 
 eastl::vector<const char*> RE_ResourceManager::GetAllResourcesActiveByType(Resource_Type resT)
 {
@@ -346,9 +372,10 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	case R_TEXTURE: //search on materials. No will afect on scene because the textures are saved on meta
 	{
 		RE_Material* resChange = nullptr;
+		EA::Thread::AutoMutex am(_resources_mutex);
 		for (auto resToChange : resourcesWillChange)
 		{
-			(resChange = dynamic_cast<RE_Material*>(RE_RES->At(resToChange)))->LoadInMemory();
+			(resChange = dynamic_cast<RE_Material*>(resources.at(resToChange)))->LoadInMemory();
 			if(rType == R_SHADER) resChange->DeleteShader();
 			else resChange->DeleteTexture(res);
 			resChange->UnloadMemory();
@@ -360,9 +387,10 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	case R_MATERIAL: //search on scenes, prefabs and models(models advise you need to reimport)
 	case R_PARTICLE_EMITTER://search on particle emitters from scenes or prefabs
 	{
+		EA::Thread::AutoMutex am(_resources_mutex);
 		for (auto resToChange : resourcesWillChange)
 		{
-			ResourceContainer* resChange = RE_RES->At(resToChange);
+			ResourceContainer* resChange = resources.at(resToChange);
 			Resource_Type goType = resChange->GetType();
 
 			if (resourceOnScene && resToChange == RE_SCENE->GetCurrentScene())
@@ -444,12 +472,13 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	case R_PARTICLE_EMISSION:
 	case R_PARTICLE_RENDER:
 	{
+		EA::Thread::AutoMutex am(_resources_mutex);
 		RE_ParticleEmitterBase* resChange = nullptr;
 		for (auto resToChange : resourcesWillChange)
 		{
 			bool need_update_scene = false;
 
-			resChange = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(resToChange));
+			resChange = dynamic_cast<RE_ParticleEmitterBase*>(resources.at(resToChange));
 
 			if (TotalReferenceCount(resToChange) > 0) need_update_scene = true;
 
@@ -727,6 +756,11 @@ void RE_ResourceManager::ProcessParticlesReimport()
 		}
 
 	}
+}
+
+EA::Thread::Mutex& RE_ResourceManager::GetResourcesMutex()
+{
+	return _resources_mutex;
 }
 
 const char* RE_ResourceManager::GetNameFromType(const Resource_Type type)

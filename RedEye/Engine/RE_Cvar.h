@@ -101,13 +101,13 @@ public:
 
 	VAR_TYPE				GetType() const;
 	bool					AsBool() const;
-	bool*					AsBool2();
-	bool*					AsBool3();
-	bool*					AsBool4();
+	bool*					AsBool2() const;
+	bool*					AsBool3() const;
+	bool*					AsBool4() const;
 	int						AsInt() const;
-	int*					AsInt2();
-	int*					AsInt3();
-	int*					AsInt4();
+	int*					AsInt2() const;
+	int*					AsInt3() const;
+	int*					AsInt4() const;
 	unsigned int			AsUInt() const;
 	long long int			AsInt64() const;
 	unsigned long long int	AsUInt64() const;

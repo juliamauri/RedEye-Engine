@@ -150,7 +150,7 @@ void PopUpWindow::PopUpDelRes(const char* res)
 				const char* emitter_res = emitter->GetEmitterResource();
 				if (emitter_res)
 				{
-					if (dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_res))->Contains(res))
+					if (dynamic_cast<const RE_ParticleEmitterBase*>(RE_RES->At(emitter_res))->Contains(res))
 					{
 						flags |= PopUpFlags::resource_on_scene;
 						skip = true;
@@ -391,7 +391,7 @@ void PopUpWindow::Draw(bool secondary)
 		}
 		case PopUpState::DELETE_RESOURCE:
 		{
-			ResourceContainer* res = RE_RES->At(resource_to_delete);
+			const ResourceContainer* res = RE_RES->At(resource_to_delete);
 			ImGui::Text("Name: %s", res->GetName());
 
 			static const char* names[MAX_R_TYPES] = { "undefined.", "shader.", "texture.", "mesh.", "prefab.", "skyBox.", "material.", "model.", "scene.", "particle emitter.", "particle emission.", "particle render." };
@@ -455,7 +455,7 @@ void PopUpWindow::Draw(bool secondary)
 			for (auto resource : using_resources)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
-				ResourceContainer* resConflict = RE_RES->At(resource);
+				const ResourceContainer* resConflict = RE_RES->At(resource);
 				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | ", "Particle emitter | ", "Particle emission | ", "Particle render | " };
 				btnname += (resource == RE_SCENE->GetCurrentScene()) ? "Scene (current scene) | " : names[resConflict->GetType()];
 				btnname += resConflict->GetName();
@@ -516,7 +516,7 @@ void PopUpWindow::Draw(bool secondary)
 			for (auto resource : using_resources)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
-				ResourceContainer* resConflict = RE_RES->At(resource);
+				const ResourceContainer* resConflict = RE_RES->At(resource);
 				Resource_Type type = resConflict->GetType();
 
 				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | ", "Particle emitter | ", "Particle emission | ", "Particle render | " };

@@ -37,7 +37,7 @@ void ParticleEmitterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const ch
 				load_next = true;
 
 				if (emiter_md5) {
-					RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+					const RE_ParticleEmitterBase* emitter = dynamic_cast<const RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
 					bool has_emissor = emitter->HasEmissor(), has_render = emitter->HasRenderer();
 					RE_EDITOR->popupWindow->PopUpSaveParticles((!has_emissor || !has_render), true, has_emissor, has_render);
 				}
@@ -59,7 +59,10 @@ void ParticleEmitterEditorWindow::SaveEmitter(bool close, const char* emitter_na
 {
 	if (emiter_md5)
 	{
-		RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+		EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+		EA::Thread::AutoMutex am(_r_mutex);
+
+		RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(const_cast<ResourceContainer*>(RE_RES->At(emiter_md5)));
 		if (!emitter->HasEmissor() || !emitter->HasRenderer())
 			emitter->GenerateSubResourcesAndReference(emissor_base, renderer_base);
 
@@ -183,7 +186,12 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 						eastl::string name = eastl::to_string(count++) + m->GetName();
 						if (ImGui::MenuItem(name.c_str()))
 						{
-							if (emiter_md5) dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->ChangeEmissor(simulation, m->GetMD5());
+							if (emiter_md5) 
+							{
+								EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+								EA::Thread::AutoMutex am(_r_mutex);
+								dynamic_cast<RE_ParticleEmitterBase*>(const_cast<ResourceContainer*>(RE_RES->At(emiter_md5)))->ChangeEmissor(simulation, m->GetMD5());
+							}
 							else new_emitter->ChangeEmissor(simulation, m->GetMD5());
 
 							need_save = true;
@@ -209,7 +217,12 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 						eastl::string name = eastl::to_string(count++) + m->GetName();
 						if (ImGui::MenuItem(name.c_str()))
 						{
-							if (emiter_md5) dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->ChangeRenderer(simulation, m->GetMD5());
+							if (emiter_md5)
+							{
+								EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+								EA::Thread::AutoMutex am(_r_mutex);
+								dynamic_cast<RE_ParticleEmitterBase*>(const_cast<ResourceContainer*>(RE_RES->At(emiter_md5)))->ChangeRenderer(simulation, m->GetMD5());
+							}
 							else new_emitter->ChangeRenderer(simulation, m->GetMD5());
 
 							need_save = true;
@@ -231,7 +244,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::Button("Save"))
 				{
 					if (emiter_md5) {
-						RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+						const RE_ParticleEmitterBase* emitter = dynamic_cast<const RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
 						bool has_emissor = emitter->HasEmissor(), has_render = emitter->HasRenderer();
 						RE_EDITOR->popupWindow->PopUpSaveParticles((!has_emissor || !has_render), true, has_emissor, has_render);
 					}
@@ -241,8 +254,14 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::Button("Discard changes"))
 				{
 					DEL(simulation);
-					simulation = (emiter_md5) ? dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->GetNewEmitter()
-						: new RE_ParticleEmitter(true);
+					if (emiter_md5)
+					{
+						EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+						EA::Thread::AutoMutex am(_r_mutex);
+						simulation = dynamic_cast<RE_ParticleEmitterBase*>(const_cast<ResourceContainer*>(RE_RES->At(emiter_md5)))->GetNewEmitter();
+					}
+					else
+						new RE_ParticleEmitter(true);
 
 					if (!emiter_md5) {
 						DEL(new_emitter);
@@ -720,7 +739,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			if (need_save)
 			{
 				if (emiter_md5) {
-					RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+					const RE_ParticleEmitterBase* emitter = dynamic_cast<const RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
 					bool has_emissor = emitter->HasEmissor(), has_render = emitter->HasRenderer();
 					RE_EDITOR->popupWindow->PopUpSaveParticles((!has_emissor || !has_render), true, has_emissor, has_render, true);
 				}

@@ -20,7 +20,7 @@ public:
 
 	void Import(bool keepInMemory = true) override;
 
-	void use();
+	void use() const;
 	void GetWithHeight(int* w, int* h);
 	void DrawTextureImGui();
 	unsigned int GetID()const { return ID; }

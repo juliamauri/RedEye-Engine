@@ -137,9 +137,9 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	if (!isInternal()) SetMetaPath("Assets/Shaders/");
 }
 
-eastl::vector<RE_Shader_Cvar> RE_Shader::GetUniformValues() { return uniforms; }
+eastl::vector<RE_Shader_Cvar> RE_Shader::GetUniformValues()const { return uniforms; }
 
-void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane)
+void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane) const
 {
 	RE_GLCache::ChangeShader(ID);
 	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
@@ -170,7 +170,7 @@ void RE_Shader::UploadDepth(int texture) const
 	if (depth != -1) RE_ShaderImporter::setInt(uniforms[depth].location, texture);
 }
 
-bool RE_Shader::isShaderFilesChanged()
+bool RE_Shader::isShaderFilesChanged() const
 {
 	bool ret = false;
 

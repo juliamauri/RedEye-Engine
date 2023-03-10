@@ -10,6 +10,8 @@
 #include "RE_ThumbnailManager.h"
 #include "PopUpWindow.h"
 
+#include "RE_Directory.hpp"
+
 #include <ImGui/imgui_internal.h>
 
 void AssetsWindow::Draw(bool secondary)
@@ -22,8 +24,8 @@ void AssetsWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		static RE_FileSystem::RE_Directory* currentDir = RE_FS->GetRootDirectory();
-		RE_FileSystem::RE_Directory* toChange = nullptr;
+		static const RE_Directory::RE_Directory* currentDir = RE_Directory::Assets::GetRoot();
+		const RE_Directory::RE_Directory* toChange = nullptr;
 		static float iconsSize = 100;
 
 		if (ImGui::BeginMenuBar())
@@ -35,7 +37,7 @@ void AssetsWindow::Draw(bool secondary)
 			}
 			else
 			{
-				eastl::list<RE_FileSystem::RE_Directory*> folders = currentDir->FromParentToThis();
+				eastl::list<const RE_Directory::RE_Directory*> folders = currentDir->FromParentToThis();
 				for (auto dir : folders)
 				{
 					if (dir == currentDir) ImGui::Text(currentDir->name.c_str());
@@ -60,7 +62,7 @@ void AssetsWindow::Draw(bool secondary)
 		float width = ImGui::GetWindowWidth();
 		int itemsColum = static_cast<int>(width / iconsSize);
 		if (itemsColum == 0) itemsColum = 1;
-		eastl::stack<RE_FileSystem::RE_Path*> filesToDisplay = currentDir->GetDisplayingFiles();
+		eastl::stack<RE_Directory::RE_Path*> filesToDisplay = currentDir->GetDisplayingFiles();
 
 		if (ImGui::BeginTable("AssetsFiles", itemsColum, ImGuiTableFlags_::ImGuiTableFlags_NoBordersInBody)) {
 			eastl::string idName = "#AssetImage";
@@ -72,13 +74,13 @@ void AssetsWindow::Draw(bool secondary)
 
 				ImGui::TableNextColumn();
 
-				RE_FileSystem::RE_Path* p = filesToDisplay.top();
+				RE_Directory::RE_Path* p = filesToDisplay.top();
 				filesToDisplay.pop();
 				eastl::string id = idName + eastl::to_string(idCount++);
 				ImGui::PushID(id.c_str());
 				switch (p->pType)
 				{
-				case RE_FileSystem::PathType::D_FOLDER:
+				case RE_Directory::PathType::D_FOLDER:
 				{
 					if (ImGui::ImageButton(reinterpret_cast<void*>(RE_EDITOR->thumbnails->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 						toChange = p->AsDirectory();
@@ -86,13 +88,13 @@ void AssetsWindow::Draw(bool secondary)
 					ImGui::Text(p->AsDirectory()->name.c_str());
 					break;
 				}
-				case RE_FileSystem::PathType::D_FILE:
+				case RE_Directory::PathType::D_FILE:
 				{
 					switch (p->AsFile()->fType)
 					{
-					case RE_FileSystem::FileType::F_META:
+					case RE_Directory::FileType::F_META:
 					{
-						ResourceContainer* res = RE_RES->At(p->AsMeta()->resource);
+						const ResourceContainer* res = RE_RES->At(p->AsMeta()->resource);
 
 						unsigned int icon_meta = (res->GetType() == R_SHADER) ? RE_EDITOR->thumbnails->GetShaderFileID() : RE_EDITOR->thumbnails->GetPEmitterFileID();
 
@@ -119,7 +121,7 @@ void AssetsWindow::Draw(bool secondary)
 						ImGui::Text(res->GetName());
 						break;
 					}
-					case RE_FileSystem::FileType::F_NOTSUPPORTED:
+					case RE_Directory::FileType::F_NOTSUPPORTED:
 					{
 						bool pop = (!selectingUndefFile && !secondary);
 						if (pop)
@@ -175,7 +177,7 @@ void AssetsWindow::Draw(bool secondary)
 					{
 						if (p->AsFile()->metaResource != nullptr)
 						{
-							ResourceContainer* res = RE_RES->At(p->AsFile()->metaResource->resource);
+							const ResourceContainer* res = RE_RES->At(p->AsFile()->metaResource->resource);
 
 							unsigned int file_icon = 0;
 

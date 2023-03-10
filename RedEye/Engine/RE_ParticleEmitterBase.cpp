@@ -18,15 +18,15 @@
 
 void RE_ParticleEmitterBase::LoadInMemory()
 {
-	if(resource_emission) RE_RES->At(resource_emission)->LoadInMemory();
-	if (resource_renderer) RE_RES->At(resource_renderer)->LoadInMemory();
+	if(resource_emission) const_cast<ResourceContainer*>(RE_RES->At(resource_emission))->LoadInMemory();
+	if (resource_renderer) const_cast<ResourceContainer*>(RE_RES->At(resource_renderer))->LoadInMemory();
 	ResourceContainer::inMemory = true;
 }
 
 void RE_ParticleEmitterBase::UnloadMemory()
 {
-	if (resource_emission) RE_RES->At(resource_emission)->UnloadMemory();
-	if (resource_renderer) RE_RES->At(resource_renderer)->UnloadMemory();
+	if (resource_emission) const_cast<ResourceContainer*>(RE_RES->At(resource_emission))->UnloadMemory();
+	if (resource_renderer) const_cast<ResourceContainer*>(RE_RES->At(resource_renderer))->UnloadMemory();
 	ResourceContainer::inMemory = false;
 }
 
@@ -64,24 +64,28 @@ void RE_ParticleEmitterBase::SomeResourceChanged(const char* resMD5)
 
 RE_ParticleEmitter* RE_ParticleEmitterBase::GetNewEmitter()
 {
+	EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+	EA::Thread::AutoMutex am(_r_mutex);
 	RE_ParticleEmitter* ret = new RE_ParticleEmitter((!resource_renderer));
 
 	if (resource_emission)
-		dynamic_cast<RE_ParticleEmission*>(RE_RES->At(resource_emission))->FillEmitter(ret);
+		dynamic_cast<RE_ParticleEmission*>(const_cast<ResourceContainer*>(RE_RES->At(resource_emission)))->FillEmitter(ret);
 
 	if (resource_renderer)
-		dynamic_cast<RE_ParticleRender*>(RE_RES->At(resource_renderer))->FillEmitter(ret);
+		dynamic_cast<RE_ParticleRender*>(const_cast<ResourceContainer*>(RE_RES->At(resource_renderer)))->FillEmitter(ret);
 
 	return ret;
 }
 
 void RE_ParticleEmitterBase::FillEmitter(RE_ParticleEmitter* emitter_to_fill)
 {
+	EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+	EA::Thread::AutoMutex am(_r_mutex);
 	if (resource_emission)
-		dynamic_cast<RE_ParticleEmission*>(RE_RES->At(resource_emission))->FillEmitter(emitter_to_fill);
+		dynamic_cast<RE_ParticleEmission*>(const_cast<ResourceContainer*>(RE_RES->At(resource_emission)))->FillEmitter(emitter_to_fill);
 
 	if (resource_renderer)
-		dynamic_cast<RE_ParticleRender*>(RE_RES->At(resource_renderer))->FillEmitter(emitter_to_fill);
+		dynamic_cast<RE_ParticleRender*>(const_cast<ResourceContainer*>(RE_RES->At(resource_renderer)))->FillEmitter(emitter_to_fill);
 	else
 	{
 		if (emitter_to_fill->primCmp)
@@ -97,16 +101,19 @@ void RE_ParticleEmitterBase::FillEmitter(RE_ParticleEmitter* emitter_to_fill)
 
 void RE_ParticleEmitterBase::FillAndSave(RE_ParticleEmitter* for_fill)
 {
+	EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
 	eastl::string new_md5 = "";
 	if (resource_emission) {
-		RE_ParticleEmission* emission = dynamic_cast<RE_ParticleEmission*>(RE_RES->At(resource_emission));
+		EA::Thread::AutoMutex am(_r_mutex);
+		RE_ParticleEmission* emission = dynamic_cast<RE_ParticleEmission*>(const_cast<ResourceContainer*>(RE_RES->At(resource_emission)));
 		emission->FillResouce(for_fill);
 		emission->Save();
 		new_md5 = emission->GetMD5();
 	}
 
 	if (resource_renderer) {
-		RE_ParticleRender* renderer = dynamic_cast<RE_ParticleRender*>(RE_RES->At(resource_renderer));
+		EA::Thread::AutoMutex am(_r_mutex);
+		RE_ParticleRender* renderer = dynamic_cast<RE_ParticleRender*>(const_cast<ResourceContainer*>(RE_RES->At(resource_renderer)));
 		renderer->FillResouce(for_fill);
 		renderer->Save();
 		new_md5 += renderer->GetMD5();
@@ -143,7 +150,9 @@ void RE_ParticleEmitterBase::ChangeEmissor(RE_ParticleEmitter* sim, const char* 
 	resource_emission = emissor;
 	if (resource_emission) {
 		RE_RES->Use(resource_emission);
-		if(sim) dynamic_cast<RE_ParticleEmission*>(RE_RES->At(resource_emission))->FillEmitter(sim);
+		EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+		EA::Thread::AutoMutex am(_r_mutex);
+		if(sim) dynamic_cast<RE_ParticleEmission*>(const_cast<ResourceContainer*>(RE_RES->At(resource_emission)))->FillEmitter(sim);
 	}
 	else
 	{
@@ -158,7 +167,9 @@ void RE_ParticleEmitterBase::ChangeRenderer(RE_ParticleEmitter* sim, const char*
 	resource_renderer = renderer;
 	if (resource_renderer) {
 		RE_RES->Use(resource_renderer);
-		if (sim) dynamic_cast<RE_ParticleRender*>(RE_RES->At(resource_renderer))->FillEmitter(sim);
+		EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+		EA::Thread::AutoMutex am(_r_mutex);
+		if (sim) dynamic_cast<RE_ParticleRender*>(const_cast<ResourceContainer*>(RE_RES->At(resource_renderer)))->FillEmitter(sim);
 	}
 	else
 	{

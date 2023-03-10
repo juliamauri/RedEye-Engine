@@ -30,11 +30,11 @@ void RE_CompMesh::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_
 void RE_CompMesh::Draw() const
 {
 	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_RES->internalResources->GetDefaulMaterial();
-	RE_Material* material = dynamic_cast<RE_Material*>(RE_RES->At(materialToDraw));
+	const RE_Material* material = dynamic_cast<const RE_Material*>(RE_RES->At(materialToDraw));
 	if (material != nullptr)
 	{
 		material->UploadToShader(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr(), show_checkers);
-		RE_Mesh* mesh = dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5));
+		const RE_Mesh* mesh = dynamic_cast<const RE_Mesh*>(RE_RES->At(meshMD5));
 		if (mesh != nullptr) mesh->DrawMesh(material->GetShaderID());
 		else RE_LOG_WARNING("Component Mesh tried drawing invalid mesh");
 	}
@@ -55,9 +55,9 @@ void RE_CompMesh::DrawProperties()
 		ImGui::Separator();
 		ImGui::Checkbox("Use checkers texture", &show_checkers);
 		ImGui::Separator();
-		RE_Material* matRes = (materialMD5) ?
-			dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)) :
-			dynamic_cast<RE_Material*>(RE_RES->At(RE_RES->internalResources->GetDefaulMaterial()));
+		const RE_Material* matRes = (materialMD5) ?
+			dynamic_cast<const RE_Material*>(RE_RES->At(materialMD5)) :
+			dynamic_cast<const RE_Material*>(RE_RES->At(RE_RES->internalResources->GetDefaulMaterial()));
 
 		if (!materialMD5) ImGui::Text("This component mesh is using the default material.");
 		if (ImGui::Button(matRes->GetName())) RE_RES->PushSelected(matRes->GetMD5(), true);
@@ -81,12 +81,12 @@ void RE_CompMesh::DrawProperties()
 					if (materialMD5)
 					{
 						RE_RES->UnUse(materialMD5);
-						(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UnUseResources();
+						(dynamic_cast<RE_Material*>(const_cast<ResourceContainer*>(RE_RES->At(materialMD5))))->UnUseResources();
 					}
 					materialMD5 = material->GetMD5();
 					if (materialMD5)
 					{
-						(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UseResources();
+						(dynamic_cast<RE_Material*>(const_cast<ResourceContainer*>(RE_RES->At(materialMD5))))->UseResources();
 						RE_RES->Use(materialMD5);
 					}
 				}
@@ -121,12 +121,12 @@ const char* RE_CompMesh::GetMesh() const
 
 unsigned int RE_CompMesh::GetVAOMesh() const
 {
-	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->GetVAO() : 0u;
+	return (meshMD5) ? (dynamic_cast<const RE_Mesh*>(RE_RES->At(meshMD5)))->GetVAO() : 0u;
 }
 
 unsigned int RE_CompMesh::GetTriangleMesh() const
 {
-	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->GetTriangleCount() : 0u;
+	return (meshMD5) ? (dynamic_cast<const RE_Mesh*>(RE_RES->At(meshMD5)))->GetTriangleCount() : 0u;
 }
 
 void RE_CompMesh::SetMaterial(const char * md5) { materialMD5 = md5; }
@@ -189,15 +189,15 @@ void RE_CompMesh::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 math::AABB RE_CompMesh::GetAABB() const
 {
 	math::AABB ret;
-	RE_Mesh* mesh;
-	if (meshMD5 && (mesh = dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))) ret = mesh->GetAABB();
+	const RE_Mesh* mesh;
+	if (meshMD5 && (mesh = dynamic_cast<const RE_Mesh*>(RE_RES->At(meshMD5)))) ret = mesh->GetAABB();
 	else ret.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	return ret;
 }
 
 bool RE_CompMesh::CheckFaceCollision(const math::Ray & local_ray, float & distance) const
 {
-	return meshMD5 && (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->CheckFaceCollision(local_ray, distance);
+	return meshMD5 && (dynamic_cast<const RE_Mesh*>(RE_RES->At(meshMD5)))->CheckFaceCollision(local_ray, distance);
 }
 
 void RE_CompMesh::UseResources()
@@ -206,7 +206,7 @@ void RE_CompMesh::UseResources()
 	if (materialMD5)
 	{
 		RE_RES->Use(materialMD5);
-		(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UseResources();
+		(dynamic_cast<RE_Material*>(const_cast<ResourceContainer*>(RE_RES->At(materialMD5))))->UseResources();
 	}
 }
 
@@ -215,7 +215,7 @@ void RE_CompMesh::UnUseResources()
 	if (meshMD5) RE_RES->UnUse(meshMD5);
 	if (materialMD5)
 	{
-		(dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)))->UnUseResources();
+		(dynamic_cast<RE_Material*>(const_cast<ResourceContainer*>(RE_RES->At(materialMD5))))->UnUseResources();
 		RE_RES->UnUse(materialMD5);
 	}
 }
@@ -223,7 +223,7 @@ void RE_CompMesh::UnUseResources()
 bool RE_CompMesh::isBlend() const
 {
 	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_RES->internalResources->GetDefaulMaterial();
-	RE_Material* material = dynamic_cast<RE_Material*>(RE_RES->At(materialToDraw));
+	const RE_Material* material = dynamic_cast<const RE_Material*>(RE_RES->At(materialToDraw));
 	return material->blendMode;
 }
 

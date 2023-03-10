@@ -134,13 +134,13 @@ bool RE_Cvar::SetValue(RE_GameObject * go_v, bool force_type)
 
 RE_Cvar::VAR_TYPE RE_Cvar::GetType() const { return type; }
 bool RE_Cvar::AsBool() const { return value.bool_v; }
-bool* RE_Cvar::AsBool2() { return value.bool2_v; }
-bool* RE_Cvar::AsBool3() { return value.bool3_v; }
-bool* RE_Cvar::AsBool4() { return value.bool4_v; }
+bool* RE_Cvar::AsBool2() const { return const_cast<bool*>(value.bool2_v); }
+bool* RE_Cvar::AsBool3() const { return const_cast<bool*>(value.bool3_v); }
+bool* RE_Cvar::AsBool4() const { return const_cast<bool*>(value.bool4_v); }
 int RE_Cvar::AsInt() const { return value.int_v; }
-int* RE_Cvar::AsInt2() {return value.int2_v; }
-int* RE_Cvar::AsInt3() { return value.int3_v; }
-int* RE_Cvar::AsInt4() { return value.int4_v; }
+int* RE_Cvar::AsInt2() const {return const_cast<int*>(value.int2_v); }
+int* RE_Cvar::AsInt3() const { return const_cast<int*>(value.int3_v); }
+int* RE_Cvar::AsInt4() const { return const_cast<int*>(value.int4_v); }
 unsigned int RE_Cvar::AsUInt() const { return value.uint_v; }
 long long int RE_Cvar::AsInt64() const { return value.int64_v; }
 unsigned long long int RE_Cvar::AsUInt64() const { return value.uint64_v; }
@@ -652,7 +652,7 @@ bool RE_Shader_Cvar::DrawPropieties(bool isInMemory)
 		ImGui::Text("Sampler: %s", name.c_str());
 		if (!value.char_p_v)  ImGui::Text("No texture selected:");
 		else {
-			ResourceContainer* res = RE_RES->At((value.char_p_v));
+			const ResourceContainer* res = RE_RES->At((value.char_p_v));
 			if (ImGui::Button(res->GetName())) RE_RES->PushSelected(res->GetMD5());
 
 			ImGui::SameLine();

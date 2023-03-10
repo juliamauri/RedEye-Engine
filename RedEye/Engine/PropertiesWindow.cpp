@@ -20,7 +20,12 @@ void PropertiesWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (RE_RES->GetSelected() != nullptr) RE_RES->At(RE_RES->GetSelected())->DrawPropieties();
+		if (RE_RES->GetSelected() != nullptr)
+		{
+			EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+			EA::Thread::AutoMutex am(_r_mutex);
+			const_cast<ResourceContainer*>(RE_RES->At(RE_RES->GetSelected()))->DrawPropieties();
+		}
 		else if (RE_EDITOR->GetSelected()) RE_SCENE->GetGOPtr(RE_EDITOR->GetSelected())->DrawProperties();
 
 		if (secondary)

@@ -85,7 +85,7 @@ void RE_CompGrid::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO
 
 void RE_CompGrid::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<const RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
 	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetTransformPtr()->GetGlobalMatrixPtr());
 	RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
@@ -183,7 +183,7 @@ void RE_CompRock::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO
 
 void RE_CompRock::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<const RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
 	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
@@ -387,7 +387,7 @@ void RE_CompPlatonic::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, cons
 
 void RE_CompPlatonic::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<const RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
 	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
@@ -483,7 +483,7 @@ void RE_CompParametric::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, co
 
 void RE_CompParametric::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<const RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
 	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 

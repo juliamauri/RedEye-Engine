@@ -232,7 +232,7 @@ bool RE_Material::isNeededResourcesReferenced(RE_Json* metaNode)
 
 void RE_Material::DrawMaterialEdit()
 {
-	RE_Shader* matShader = dynamic_cast<RE_Shader*>(RE_RES->At(shaderMD5 ? shaderMD5 : RE_RES->internalResources->GetDefaultShader()));
+	const RE_Shader* matShader = dynamic_cast<const RE_Shader*>(RE_RES->At(shaderMD5 ? shaderMD5 : RE_RES->internalResources->GetDefaultShader()));
 
 	ImGui::Text("Shader selected: %s", matShader->GetMD5());
 	
@@ -678,7 +678,7 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 		uint count = 1;
 		for (eastl::vector<const char*>::iterator md5 = textures->begin(); md5 != textures->end(); ++md5)
 		{
-			ResourceContainer* resource = RE_RES->At(*md5);
+			const ResourceContainer* resource = RE_RES->At(*md5);
 			if (ImGui::Button(eastl::string("Texture #" + eastl::to_string(count) + " " + eastl::string(resource->GetName())).c_str()))
 			{
 
@@ -1445,10 +1445,10 @@ void RE_Material::UnUseResources()
 	for (auto t : tUnknown) RE_RES->UnUse(t);
 }
 
-void RE_Material::UploadToShader(const float* model, bool usingChekers, bool defaultShader)
+void RE_Material::UploadToShader(const float* model, bool usingChekers, bool defaultShader) const
 {
 	const char* usingShader = (shaderMD5 && !defaultShader) ? shaderMD5 : RE_RES->internalResources->GetDefaultShader();
-	RE_Shader* shaderRes = dynamic_cast<RE_Shader*>(RE_RES->At(usingShader));
+	const RE_Shader* shaderRes = dynamic_cast<const RE_Shader*>(RE_RES->At(usingShader));
 	RE_GLCache::ChangeShader(shaderRes->GetID());
 	shaderRes->UploadModel(model);
 
@@ -1523,63 +1523,63 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tdiffuse" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(RE_RES->At(tDiffuse[i]))->use();
+			dynamic_cast<const RE_Texture*>(RE_RES->At(tDiffuse[i]))->use();
 		}
 		for (unsigned int i = 0; i < tSpecular.size() && i < usingOnMat[TSPECULAR]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tspecular" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(RE_RES->At(tSpecular[i]))->use();
+			dynamic_cast<const RE_Texture*>(RE_RES->At(tSpecular[i]))->use();
 		}
 		for (unsigned int i = 0; i < tAmbient.size() && i < usingOnMat[TAMBIENT]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tambient" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(RE_RES->At(tAmbient[i]))->use();
+			dynamic_cast<const RE_Texture*>(RE_RES->At(tAmbient[i]))->use();
 		}
 		for (unsigned int i = 0; i < tEmissive.size() && i < usingOnMat[TEMISSIVE]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("temissive" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(RE_RES->At(tEmissive[i]))->use();
+			dynamic_cast<const RE_Texture*>(RE_RES->At(tEmissive[i]))->use();
 		}
 		for (unsigned int i = 0; i < tOpacity.size() && i < usingOnMat[TOPACITY]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("topacity" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(RE_RES->At(tOpacity[i]))->use();
+			dynamic_cast<const RE_Texture*>(RE_RES->At(tOpacity[i]))->use();
 		}
 		for (unsigned int i = 0; i < tShininess.size() && i < usingOnMat[TSHININESS]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tshininess" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(RE_RES->At(tShininess[i]))->use();
+			dynamic_cast<const RE_Texture*>(RE_RES->At(tShininess[i]))->use();
 		}
 		for (unsigned int i = 0; i < tHeight.size() && i < usingOnMat[THEIGHT]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("theight" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(RE_RES->At(tHeight[i]))->use();
+			dynamic_cast<const RE_Texture*>(RE_RES->At(tHeight[i]))->use();
 		}
 		for (unsigned int i = 0; i < tNormals.size() && i < usingOnMat[TNORMALS]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tnormals" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(RE_RES->At(tNormals[i]))->use();
+			dynamic_cast<const RE_Texture*>(RE_RES->At(tNormals[i]))->use();
 		}
 		for (unsigned int i = 0; i < tReflection.size() && i < usingOnMat[TREFLECTION]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("treflection" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(RE_RES->At(tReflection[i]))->use();
+			dynamic_cast<const RE_Texture*>(RE_RES->At(tReflection[i]))->use();
 		}
 	}
 
 	for (uint i = 0; i < fromShaderCustomUniforms.size(); i++)
 	{
-		bool* b;
-		int* int_pv;
-		float* f_ptr;
+		const bool* b;
+		const int* int_pv;
+		const float* f_ptr;
 		switch (fromShaderCustomUniforms[i].GetType())
 		{
 		case RE_Cvar::BOOL: RE_ShaderImporter::setBool(ShaderID, fromShaderCustomUniforms[i].name.c_str(), fromShaderCustomUniforms[i].AsBool()); break;
@@ -1658,7 +1658,7 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 			{
 				glActiveTexture(GL_TEXTURE0 + textureCounter);
 				RE_ShaderImporter::setUnsignedInt(ShaderID, fromShaderCustomUniforms[i].name.c_str(), textureCounter++);
-				dynamic_cast<RE_Texture*>(RE_RES->At(fromShaderCustomUniforms[i].AsCharP()))->use();
+				dynamic_cast<const RE_Texture*>(RE_RES->At(fromShaderCustomUniforms[i].AsCharP()))->use();
 			}
 			break;
 		}
@@ -1686,14 +1686,14 @@ void RE_Material::UploadAsParticleDataToShader(unsigned int shaderID, bool useTe
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(shaderID, ("tdiffuse" + eastl::to_string(i)).c_str(), textureCounter++);
-			dynamic_cast<RE_Texture*>(RE_RES->At(tDiffuse[i]))->use();
+			dynamic_cast<const RE_Texture*>(RE_RES->At(tDiffuse[i]))->use();
 		}
 		if (lighting) {
 			for (unsigned int i = 0; i < tSpecular.size() && i < usingOnMat[TSPECULAR]; i++)
 			{
 				glActiveTexture(GL_TEXTURE0 + textureCounter);
 				RE_ShaderImporter::setInt(shaderID, ("tspecular" + eastl::to_string(i)).c_str(), textureCounter++);
-				dynamic_cast<RE_Texture*>(RE_RES->At(tSpecular[i]))->use();
+				dynamic_cast<const RE_Texture*>(RE_RES->At(tSpecular[i]))->use();
 			}
 		}
 	}
@@ -1702,7 +1702,7 @@ void RE_Material::UploadAsParticleDataToShader(unsigned int shaderID, bool useTe
 unsigned int RE_Material::GetShaderID() const
 {
 	const char* usingShader = (shaderMD5) ? shaderMD5 : RE_RES->internalResources->GetDefaultShader();
-	return dynamic_cast<RE_Shader*>(RE_RES->At(usingShader))->GetID();
+	return dynamic_cast<const RE_Shader*>(RE_RES->At(usingShader))->GetID();
 }
 
 unsigned int RE_Material::GetBinarySize()
@@ -1752,7 +1752,7 @@ void RE_Material::GetAndProcessUniformsFromShader()
 	static const char* materialNames[18] = {  "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient",  "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity",  "shininess", "shininessST", "tshininess", "refraccti", "theight",  "tnormals", "treflection" };
 	static const char* materialTextures[9] = {  "tdiffuse", "tspecular", "tambient", "temissive", "topacity", "tshininess", "theight", "tnormals", "treflection" };
 	
-	eastl::vector<RE_Shader_Cvar> fromShader = dynamic_cast<RE_Shader*>(RE_RES->At(shaderMD5 ? shaderMD5 : RE_RES->internalResources->GetDefaultShader()))->GetUniformValues();
+	eastl::vector<RE_Shader_Cvar> fromShader = dynamic_cast<const RE_Shader*>(RE_RES->At(shaderMD5 ? shaderMD5 : RE_RES->internalResources->GetDefaultShader()))->GetUniformValues();
 	for (auto &sVar : fromShader)
 	{
 		if (sVar.custom)

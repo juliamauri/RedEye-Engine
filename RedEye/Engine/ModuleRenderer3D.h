@@ -131,8 +131,8 @@ private:
 	void DrawParticleEditor(RenderView& render_view);
 	void DrawSkyBox();
 	void ThumbnailGameObject(class RE_GameObject* go);
-	void ThumbnailMaterial(class RE_Material* mat);
-	void ThumbnailSkyBox(class RE_SkyBox* skybox);
+	void ThumbnailMaterial(const class RE_Material* mat);
+	void ThumbnailSkyBox(const class RE_SkyBox* skybox);
 
 	// Render Flags
 	void inline SetWireframe(bool enable);

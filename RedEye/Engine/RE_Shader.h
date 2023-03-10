@@ -3,13 +3,16 @@
 
 class RE_CompCamera;
 
+/// <summary>
+/// lastModifieds are mutable, make sure it's modified by one thread at time
+/// </summary>
 struct RE_ShaderSettings {
 	eastl::string vertexShader;
-	signed long long vlastModified = 0;
+	mutable signed long long vlastModified = 0;
 	eastl::string fragmentShader;
-	signed long long flastModified = 0;
+	mutable signed long long flastModified = 0;
 	eastl::string geometryShader;
-	signed long long glastModified = 0;
+	mutable signed long long glastModified = 0;
 };
 
 class RE_Shader : public ResourceContainer
@@ -28,13 +31,13 @@ public:
 
 	void SetPaths(const char* vertex, const char* fragment, const char* geometry = nullptr);
 
-	eastl::vector<RE_Shader_Cvar> GetUniformValues();
+	eastl::vector<RE_Shader_Cvar> GetUniformValues() const;
 
-	void UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane);
+	void UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane) const;
 	void UploadModel(const float* model) const;
 	void UploadDepth(int texture) const;
 
-	bool isShaderFilesChanged();
+	bool isShaderFilesChanged() const;
 
 	void ReImport()override;
 

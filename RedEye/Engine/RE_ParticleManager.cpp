@@ -138,7 +138,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 #endif // PARTICLE_RENDER_TEST
 
 	// Get Shader and uniforms
-	const RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
+	const RE_Shader* pS = static_cast<const RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
 	const unsigned int shader = pS->GetID();
 	RE_GLCache::ChangeShader(shader);
 
@@ -225,7 +225,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 		RE_ShaderImporter::setFloat(shader, "cdiffuse", simulation->color.GetValue(weight));
 
 		// Draw Call
-		if (simulation->meshMD5) dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
+		if (simulation->meshMD5) dynamic_cast<const RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
 		else simulation->primCmp->SimpleDraw();
 	}
 

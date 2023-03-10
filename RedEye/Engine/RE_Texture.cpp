@@ -81,7 +81,7 @@ void RE_Texture::Import(bool keepInMemory)
 	if (!keepInMemory) UnloadMemory();
 }
 
-void RE_Texture::use() { RE_GLCache::ChangeTextureBind(ID); }
+void RE_Texture::use() const { RE_GLCache::ChangeTextureBind(ID); }
 
 void RE_Texture::GetWithHeight(int * w, int * h)
 {

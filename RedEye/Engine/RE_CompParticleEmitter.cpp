@@ -132,8 +132,11 @@ eastl::vector<const char*> RE_CompParticleEmitter::GetAllResources()
 void RE_CompParticleEmitter::UseResources()
 {
 	if (emitter_md5) {
+
 		RE_RES->Use(emitter_md5);
-		simulation = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_md5))->GetNewEmitter();
+		EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+		EA::Thread::AutoMutex am(_r_mutex);
+		simulation = dynamic_cast<RE_ParticleEmitterBase*>(const_cast<ResourceContainer*>(RE_RES->At(emitter_md5)))->GetNewEmitter();
 	}
 	else
 		simulation = new RE_ParticleEmitter(true);
@@ -170,7 +173,11 @@ const char* RE_CompParticleEmitter::GetEmitterResource() const
 void RE_CompParticleEmitter::UpdateEmitter(const char* emitter)
 {
 	if (emitter == emitter_md5)
-		dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_md5))->FillEmitter(simulation);
+	{
+		EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+		EA::Thread::AutoMutex am(_r_mutex);
+		dynamic_cast<RE_ParticleEmitterBase*>(const_cast<ResourceContainer*>(RE_RES->At(emitter_md5)))->FillEmitter(simulation);
+	}
 }
 
 void RE_CompParticleEmitter::SetEmitter(const char* md5)

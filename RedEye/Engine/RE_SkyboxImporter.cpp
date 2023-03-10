@@ -24,7 +24,7 @@ void RE_SkyboxImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned
 		{
 			texPath = RE_RES->At(settings.textures[i].textureMD5)->GetLibraryPath();
 			if (!RE_FS->Exists(texPath))
-				RE_RES->At(settings.textures[i].textureMD5)->ReImport();
+				RE_RES->ReImportResource(settings.textures[i].textureMD5);
 		}
 		else texPath = settings.textures[i].path.c_str();
 

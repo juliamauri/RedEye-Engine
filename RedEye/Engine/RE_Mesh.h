@@ -14,7 +14,7 @@ public:
 
 	const char* CheckAndSave(bool* exists);
 
-	void DrawMesh(unsigned int shader);
+	void DrawMesh(unsigned int shader) const;
 
 	math::AABB GetAABB() const;
 

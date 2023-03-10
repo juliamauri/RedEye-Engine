@@ -186,7 +186,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	return existsMD5;
 }
 
-void RE_Mesh::DrawMesh(unsigned int shader)
+void RE_Mesh::DrawMesh(unsigned int shader) const
 {
 	// Draw mesh
 	RE_GLCache::ChangeVAO(VAO);

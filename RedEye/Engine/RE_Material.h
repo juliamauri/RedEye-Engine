@@ -36,7 +36,7 @@ public:
 	void UseResources();
 	void UnUseResources();
 
-	void UploadToShader(const float* model, bool usingChekers, bool defaultShader = false);
+	void UploadToShader(const float* model, bool usingChekers, bool defaultShader = false) const;
 	void UploadAsParticleDataToShader(unsigned int shaderID, bool useTextures, bool lighting);
 
 	unsigned int GetShaderID()const;

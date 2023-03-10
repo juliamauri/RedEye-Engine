@@ -5,7 +5,9 @@
 
 #include <EASTL/map.h>
 #include <EASTL/vector.h>
-#include <EASTL/stack.h> 
+#include <EASTL/stack.h>
+
+#include <eathread/eathread_mutex.h>
 
 class RE_InternalResources;
 class RE_ModelImporter;
@@ -22,10 +24,20 @@ public:
 
 	void RecieveEvent(const Event& e) override;
 
-	ResourceContainer* At(const char* md5) const;
+	/// <summary>
+	/// NOT THREAD SAFE
+	/// </summary>
+	/// <param name="md5"></param>
+	/// <returns></returns>
+	const ResourceContainer* At(const char* md5) const;
 	const char* ReferenceByMeta(const char* path, Resource_Type type);
 	const char* Reference(ResourceContainer* rc);
 	unsigned int TotalReferences() const;
+
+	void SetResourceMeta(const char* md5, const char* name, const char* asset_path, const char* library_path);
+
+	void LoadResourceMeta(const char* md5);
+	void ReImportResource(const char* md5);
 
 	eastl::vector<const char*> GetAllResourcesActiveByType(Resource_Type resT);
 
@@ -65,6 +77,8 @@ public:
 	void PushParticleResource(const char* md5);
 	void ProcessParticlesReimport();
 
+	EA::Thread::Mutex& GetResourcesMutex();
+
 	typedef eastl::pair<const char*, ResourceContainer*> Resource;
 	typedef eastl::map<const char*, ResourceContainer*> ResourceMap;
 	typedef ResourceMap::iterator ResourceIter;
@@ -90,6 +104,7 @@ public:
 
 private:
 
+	EA::Thread::Mutex _resources_mutex;
 	ResourceMap resources;
 	ResourceCounterMap resourcesCounter;
 

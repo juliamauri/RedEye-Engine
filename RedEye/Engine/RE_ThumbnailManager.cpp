@@ -86,8 +86,8 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 	eastl::string path(THUMBNAILPATH);
 	if (!RE_FS->Exists((path += ref).c_str()))
 	{
-		ResourceContainer* res = RE_RES->At(ref);
-		RE_Texture* tex = dynamic_cast<RE_Texture*>(res);
+		const ResourceContainer* res = RE_RES->At(ref);
+		const RE_Texture* tex = dynamic_cast<const RE_Texture*>(res);
 		RE_FileBuffer texFile(res->GetAssetPath());
 		if (texFile.Load())
 		{
@@ -95,7 +95,7 @@ unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 			ilGenImages(1, &imageID);
 			ilBindImage(imageID);
 
-			if (IL_FALSE != ilLoadL(tex->DetectExtension(), texFile.GetBuffer(), texFile.GetSize()))
+			if (IL_FALSE != ilLoadL(tex->GetTextureType(), texFile.GetBuffer(), texFile.GetSize()))
 			{
 				iluScale(THUMBNAILSIZE, THUMBNAILSIZE, 1);
 				RE_FileBuffer saveThumb(path.c_str());

@@ -398,7 +398,7 @@ void ModuleScene::AddGOPool(RE_ECS_Pool* toAdd)
 	haschanges = true;
 }
 
-GO_UID ModuleScene::RayCastGeometry(math::Ray & global_ray) const
+GO_UID ModuleScene::RayCastGeometry(math::Ray& global_ray) const
 {
 	GO_UID ret = 0;
 
@@ -406,7 +406,7 @@ GO_UID ModuleScene::RayCastGeometry(math::Ray & global_ray) const
 	static_tree.CollectIntersections(global_ray, aabb_collisions);
 	dynamic_tree.CollectIntersections(global_ray, aabb_collisions);
 
-	eastl::vector<eastl::pair<GO_UID,const RE_GameObject*>> gos;
+	eastl::vector<eastl::pair<GO_UID, const RE_GameObject*>> gos;
 	while (!aabb_collisions.empty())
 	{
 		GO_UID id = aabb_collisions.front();
@@ -434,7 +434,7 @@ GO_UID ModuleScene::RayCastGeometry(math::Ray & global_ray) const
 	return ret;
 }
 
-void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum & frustum) const
+void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum& frustum) const
 {
 	eastl::queue<GO_UID> goIndex;
 	static_tree.CollectIntersections(frustum, goIndex);
@@ -449,13 +449,18 @@ void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container,
 
 void ModuleScene::SaveScene(const char* newName)
 {
-	RE_Scene* scene = (unsavedScene) ? unsavedScene : dynamic_cast<RE_Scene*>(RE_RES->At(currentScene));
+	RE_Scene* scene = nullptr;
+	{
+		EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+		EA::Thread::AutoMutex am(_r_mutex);
+		scene = (unsavedScene) ? unsavedScene : dynamic_cast<RE_Scene*>(const_cast<ResourceContainer*>(RE_RES->At(currentScene)));
 
-	RE_INPUT->PauseEvents();
+		RE_INPUT->PauseEvents();
 
-	scene->SetName((unsavedScene) ? (newName) ? newName : GetRootCPtr()->name.c_str() : scene->GetName());
-	scene->Save(&scenePool);
-	scene->SaveMeta();
+		scene->SetName((unsavedScene) ? (newName) ? newName : GetRootCPtr()->name.c_str() : scene->GetName());
+		scene->Save(&scenePool);
+		scene->SaveMeta();
+	}
 
 	if (unsavedScene)
 	{
@@ -525,17 +530,23 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	RE_INPUT->PauseEvents();
 	RE_EDITOR->ClearCommands();
 	if (unsavedScene) DEL(unsavedScene);
-	
+
 	scenePool.UnUseResources();
 	savedState.ClearPool();
 	scenePool.ClearPool();
 
 	RE_LOG("Loading scene from own format:");
-	if(!ignorehandle) RE_LOGGER.ScopeProcedureLogging();
+	if (!ignorehandle) RE_LOGGER.ScopeProcedureLogging();
 	RE_Timer timer;
 	currentScene = sceneMD5;
-	RE_Scene* scene = dynamic_cast<RE_Scene*>(RE_RES->At(currentScene));
-	RE_RES->Use(sceneMD5);
+
+	RE_Scene* scene = nullptr;
+	EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+	{
+		EA::Thread::AutoMutex am(_r_mutex);
+		scene = dynamic_cast<RE_Scene*>(const_cast<ResourceContainer*>(RE_RES->At(currentScene)));
+		RE_RES->Use(sceneMD5);
+	}
 
 	RE_ECS_Pool* loadedDO = scene->GetPool();
 	if (loadedDO)scenePool.InsertPool(loadedDO);
@@ -543,7 +554,10 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 
 	DEL(loadedDO);
 
-	RE_RES->UnUse(sceneMD5);
+	{
+		RE_RES->Use(sceneMD5);
+		RE_RES->UnUse(sceneMD5);
+	}
 	scenePool.UseResources();
 	SetupScene();
 	RE_EDITOR->SetSelected(0);

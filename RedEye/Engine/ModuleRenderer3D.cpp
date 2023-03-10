@@ -63,7 +63,8 @@ void GLAPIENTRY MessageCallback(
 	case GL_DEBUG_SEVERITY_LOW: severityStr += "low"; break;
 	case GL_DEBUG_SEVERITY_MEDIUM: severityStr += "medium"; break;
 	case GL_DEBUG_SEVERITY_HIGH: severityStr += "high"; break;
-	default: severityStr += "not specified."; break; }
+	default: severityStr += "not specified."; break;
+	}
 
 	eastl::string typeStr = "Type ";
 	switch (type) {
@@ -71,7 +72,8 @@ void GLAPIENTRY MessageCallback(
 	case GL_DEBUG_TYPE_PORTABILITY: typeStr += "GL PORTABILITY"; break;
 	case GL_DEBUG_TYPE_PERFORMANCE: typeStr += "GL PERFORMANCE"; break;
 	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: typeStr += "GL DEPRECATED"; break;
-	default: typeStr += "GL UNDEFINED"; break; }
+	default: typeStr += "GL UNDEFINED"; break;
+	}
 
 	if (type == GL_DEBUG_TYPE_ERROR) RE_LOG_ERROR("%s, %s, message = %s\n", (typeStr.c_str()), severityStr.c_str(), message);
 	else RE_LOG_WARNING("%s, %s, message = %s\n", (typeStr.c_str()), severityStr.c_str(), message);
@@ -83,7 +85,7 @@ unsigned int ModuleRenderer3D::current_fbo = 0;
 
 const char* RenderView::labels[12] = {
 						"Fustrum Culling", "Override Culling", "Outline Selection", "Debug Draw", "Skybox", "Blending",
-						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clip Distance"};
+						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clip Distance" };
 
 ModuleRenderer3D::ModuleRenderer3D() : fbos(new RE_FBOManager()) {}
 ModuleRenderer3D::~ModuleRenderer3D() { DEL(fbos); }
@@ -106,7 +108,7 @@ bool ModuleRenderer3D::Init()
 		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MAJOR_VERSION: 3'");
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1) < 0)
 		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MINOR_VERSION: 1'");
-	
+
 	if (RE_WINDOW)
 	{
 		RE_LOG_SECONDARY("Creating SDL GL Context");
@@ -139,7 +141,7 @@ bool ModuleRenderer3D::Init()
 				FRUSTUM_CULLING | OVERRIDE_CULLING | OUTLINE_SELECTION /*| DEBUG_DRAW*/ | SKYBOX | BLENDED |
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
 				LIGHT_DISABLED));
-			
+
 			render_views.push_back(RenderView("Game", { 0, 0 },
 				FRUSTUM_CULLING | SKYBOX | BLENDED | /*DEBUG_DRAW |*/
 				FACE_CULLING | TEXTURE_2D | COLOR_MATERIAL | DEPTH_TEST,
@@ -150,7 +152,7 @@ bool ModuleRenderer3D::Init()
 				LIGHT_DISABLED));
 
 			//Thumbnail Configuration
-			thumbnailView.clear_color = {0.f, 0.f, 0.f, 1.f};
+			thumbnailView.clear_color = { 0.f, 0.f, 0.f, 1.f };
 			RE_INPUT->PauseEvents();
 			thumbnailView.camera = new RE_CompCamera();
 			thumbnailView.camera->SetParent(0ull);
@@ -158,7 +160,7 @@ bool ModuleRenderer3D::Init()
 			thumbnailView.camera->SetBounds(THUMBNAILSIZE, THUMBNAILSIZE);
 			thumbnailView.camera->Update();
 			RE_INPUT->ResumeEvents();
-			
+
 			RE_SCENE->primitives->CreateSphere(24, 24, mat_vao, mat_vbo, mat_ebo, mat_triangles);
 
 			//OpenGL Debug Output
@@ -264,12 +266,16 @@ void ModuleRenderer3D::PostUpdate()
 			{
 				RE_INPUT->PauseEvents();
 				if (!exist) {
-					ResourceContainer* res = RE_RES->At(rend.resMD5);
 					RE_RES->Use(rend.resMD5);
-					switch (res->GetType()) {
-					case Resource_Type::R_MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
-					case Resource_Type::R_PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
-					case Resource_Type::R_SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break;
+					{
+						EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+						EA::Thread::AutoMutex am(_r_mutex);
+						ResourceContainer* res = const_cast<ResourceContainer*>(RE_RES->At(rend.resMD5));
+						switch (res->GetType()) {
+						case Resource_Type::R_MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
+						case Resource_Type::R_PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
+						case Resource_Type::R_SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break;
+						}
 					}
 					if (poolGOThumbnail != nullptr)
 					{
@@ -291,11 +297,19 @@ void ModuleRenderer3D::PostUpdate()
 			{
 				if (!exist)
 				{
-					ResourceContainer* res = RE_RES->At(rend.resMD5);
 					RE_RES->Use(rend.resMD5);
-					dynamic_cast<RE_Material*>(res)->UseResources();
-					ThumbnailMaterial(dynamic_cast<RE_Material*>(res));
-					dynamic_cast<RE_Material*>(res)->UnUseResources();
+
+					EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+					ResourceContainer* res = const_cast<ResourceContainer*>(RE_RES->At(rend.resMD5));
+					{
+						EA::Thread::AutoMutex am(_r_mutex);
+						dynamic_cast<RE_Material*>(res)->UseResources();
+					}
+					ThumbnailMaterial(dynamic_cast<const RE_Material*>(res));
+					{
+						EA::Thread::AutoMutex am(_r_mutex);
+						dynamic_cast<RE_Material*>(res)->UnUseResources();
+					}
 					RE_RES->UnUse(rend.resMD5);
 					RE_EDITOR->thumbnails->SaveTextureFromFBO(path.c_str());
 				}
@@ -309,10 +323,10 @@ void ModuleRenderer3D::PostUpdate()
 			case RenderType::T_R_SKYBOX:
 				if (!exist)
 				{
-					ResourceContainer* res = RE_RES->At(rend.resMD5);
+					const ResourceContainer* res = RE_RES->At(rend.resMD5);
 
 					RE_RES->Use(rend.resMD5);
-					ThumbnailSkyBox(dynamic_cast<RE_SkyBox*>(res));
+					ThumbnailSkyBox(dynamic_cast<const RE_SkyBox*>(res));
 					RE_RES->UnUse(rend.resMD5);
 					RE_EDITOR->thumbnails->SaveTextureFromFBO(path.c_str());
 				}
@@ -361,7 +375,7 @@ void ModuleRenderer3D::CleanUp()
 	SDL_GL_DeleteContext(mainContext);
 }
 
-void ModuleRenderer3D::RecieveEvent(const Event & e)
+void ModuleRenderer3D::RecieveEvent(const Event& e)
 {
 	switch (e.type)
 	{
@@ -430,10 +444,12 @@ void ModuleRenderer3D::DrawEditor()
 		SetVSync(vsync);
 
 	if (ImGui::Checkbox(shareLightPass ? "Not share light pass" : "Share Light pass", &shareLightPass)) {
+		EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+		EA::Thread::AutoMutex am(_r_mutex);
 		if (shareLightPass)
-			RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader())->UnloadMemory();
+			const_cast<ResourceContainer*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->UnloadMemory();
 		else
-			dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
+			dynamic_cast<RE_Shader*>(const_cast<ResourceContainer*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader())))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
 	}
 
 	ImGui::Separator();
@@ -495,17 +511,20 @@ void ModuleRenderer3D::Load()
 	SetVSync(node->PullBool("vsync", true));
 	RE_LOG_TERCIARY((vsync) ? "VSync enabled." : "VSync disabled");
 
-	if(shareLightPass = node->PullBool("share_light_pass", false))
-		RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader())->UnloadMemory();
-
+	if (shareLightPass = node->PullBool("share_light_pass", false))
+	{
+		EA::Thread::Mutex& _r_mutex = RE_RES->GetResourcesMutex();
+		EA::Thread::AutoMutex am(_r_mutex);
+		const_cast<ResourceContainer*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->UnloadMemory();
+	}
 	for (unsigned int i = 0; i < render_views.size(); ++i)
 	{
 		eastl::string view_id("RV_");
 		view_id += render_views[i].name.c_str();
 
 		static bool DEFAULT_SV_flags[12] = { true, true, true, false, true, true, false, true, true, true, true, false },
-					DEFAULT_GV_flags[12] = { true, false, false, false, true, true, false, true, true, true, true, false },
-					DEFAULT_PV_flags[12] = { false, false, false, false, false, true, false, true, true, true, true, false };
+			DEFAULT_GV_flags[12] = { true, false, false, false, true, true, false, true, true, true, true, false },
+			DEFAULT_PV_flags[12] = { false, false, false, false, false, true, false, true, true, true, true, false };
 		bool flag_temp = false, pull_flag_temp = false;
 		int i2 = 0;
 		switch (i)
@@ -515,7 +534,7 @@ void ModuleRenderer3D::Load()
 
 			for (i2 = 0; i2 < 12; ++i2) {
 				flag_temp = (render_views[i].flags & (1 << i2));
-				if((pull_flag_temp = node->PullBool(eastl::string(view_id + "-" + RenderView::labels[i2]).c_str(), DEFAULT_GV_flags[i2]) != flag_temp))
+				if ((pull_flag_temp = node->PullBool(eastl::string(view_id + "-" + RenderView::labels[i2]).c_str(), DEFAULT_GV_flags[i2]) != flag_temp))
 					pull_flag_temp ? render_views[i].flags |= (1 << i2) : render_views[i].flags -= (1 << i2);
 			}
 
@@ -641,7 +660,7 @@ unsigned int ModuleRenderer3D::GetRenderedGameSceneTexture() const
 
 void ModuleRenderer3D::PushSceneRend(RenderView& rV)
 {
-	rendQueue.push({ RenderType::R_R_SCENE, rV, nullptr});
+	rendQueue.push({ RenderType::R_R_SCENE, rV, nullptr });
 }
 
 void ModuleRenderer3D::PushThumnailRend(const char* md5, bool redo)
@@ -695,7 +714,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
-		static_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
+		static_cast<const RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
 			render_view.camera,
 			static_cast<float>(fbos->GetHeight(current_fbo)),
 			static_cast<float>(fbos->GetWidth(current_fbo)),
@@ -713,7 +732,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		for (const RE_GameObject* object : objects)
 			if (object->IsActive()) {
 				RE_Component* goRend = object->GetRenderGeo();
-				if(goRend) comptsToDraw.push(goRend);
+				if (goRend) comptsToDraw.push(goRend);
 			}
 	}
 	else
@@ -735,7 +754,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		SetLighting(true);
 		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(C_LIGHT);
 		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(C_PARTICLEEMITER);
-		for(auto ps: tmp)
+		for (auto ps : tmp)
 			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->isLighting())
 				particleS_lights.push_back(ps);
 		// TODO RUB: Bind GL Lights
@@ -778,7 +797,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		bool blend = false;
 		ComponentType dT = drawing->GetType();
 		if (dT == C_MESH)
-			 blend = dynamic_cast<RE_CompMesh*>(drawing)->isBlend();
+			blend = dynamic_cast<RE_CompMesh*>(drawing)->isBlend();
 
 		if (dT == C_PARTICLEEMITER) particleSystems.push(drawing);
 		else if (!blend && dT != C_WATER) drawing->Draw();
@@ -811,14 +830,14 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		}
 
 		// Setup Shader
-		unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetLightPassShader()))->GetID();
+		unsigned int light_pass = dynamic_cast<const RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetLightPassShader()))->GetID();
 		RE_GLCache::ChangeShader(light_pass);
 
 		SetDepthTest(false);
 
 		glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
 
-		if (!shareLightPass) 
+		if (!shareLightPass)
 		{
 
 			// Bind Textures
@@ -860,7 +879,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 			// Render Particle Lights
 			// Setup Shader
-			unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
+			unsigned int particlelight_pass = dynamic_cast<const RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
 			RE_GLCache::ChangeShader(particlelight_pass);
 
 			glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
@@ -943,7 +962,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			ParticleManager::timer_simple.Pause();
 
 #endif // PARTICLE_RENDER_TEST
-		}
+	}
 
 
 		if (render_view.flags & DEPTH_TEST)
@@ -956,7 +975,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		// Draw Skybox
 		if (render_view.flags & SKYBOX && render_view.camera->isUsingSkybox())
 			DrawSkyBox();
-	}
+}
 	else {
 
 		eastl::stack<RE_Component*> drawParticleSystemAsLast;
@@ -1043,7 +1062,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 				//Getting the scale shader and setting some values
 				const char* scaleShader = RE_RES->internalResources->GetDefaultScaleShader();
-				RE_Shader* sShader = dynamic_cast<RE_Shader*>(RE_RES->At(scaleShader));
+				const RE_Shader* sShader = dynamic_cast<const RE_Shader*>(RE_RES->At(scaleShader));
 				unsigned int shaderiD = sShader->GetID();
 				RE_GLCache::ChangeShader(shaderiD);
 				RE_GLCache::ChangeVAO(vaoToStencil);
@@ -1074,7 +1093,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 				glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Make sure we draw on the backbuffer again.
 				glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Make sure you will no longer (over)write stencil values, even if any test succeeds
 				glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
-				
+
 				//Draw scaled mesh 
 				RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / stencilPtr->GetTransformPtr()->GetLocalScale().Length());
 				glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
@@ -1127,7 +1146,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
-		static_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
+		static_cast<const RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
 			render_view.camera,
 			static_cast<float>(fbos->GetHeight(current_fbo)),
 			static_cast<float>(fbos->GetWidth(current_fbo)),
@@ -1150,7 +1169,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 				{
 					// Render Particle Lights
 					// Setup Shader
-					unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
+					unsigned int particlelight_pass = dynamic_cast<const RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
 					RE_GLCache::ChangeShader(particlelight_pass);
 
 					glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
@@ -1176,7 +1195,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 				else
 				{
 					// Setup Shader
-					unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetLightPassShader()))->GetID();
+					unsigned int light_pass = dynamic_cast<const RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetLightPassShader()))->GetID();
 					RE_GLCache::ChangeShader(light_pass);
 
 					SetDepthTest(false);
@@ -1231,7 +1250,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 
 			bool drawParticleSystemAsLast = false;
 			// Particle System Draws
-			if(editting_simulation->opacity.type != RE_PR_Opacity::Type::NONE)
+			if (editting_simulation->opacity.type != RE_PR_Opacity::Type::NONE)
 				drawParticleSystemAsLast = true;
 			else
 				RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0 }, { 0.0,1.0,0.0 });
@@ -1278,7 +1297,7 @@ void ModuleRenderer3D::DrawSkyBox()
 	RE_PROFILE(PROF_DrawSkybox, PROF_ModuleRender);
 	RE_GLCache::ChangeTextureBind(0);
 
-	uint skysphereshader = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultSkyBoxShader()))->GetID();
+	uint skysphereshader = static_cast<const RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultSkyBoxShader()))->GetID();
 	RE_GLCache::ChangeShader(skysphereshader);
 	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
 	RE_ShaderImporter::setBool(skysphereshader, "deferred", (current_lighting == LightMode::LIGHT_DEFERRED));
@@ -1302,17 +1321,17 @@ void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
 	internalCamera->Update();
 	internalCamera->GetTransform()->SetPosition({ 0.0f,1.0f,5.0f });
 	internalCamera->Update();
-	internalCamera->GetTransform()->SetRotation({ math::DegToRad(45.0f),0.0f,0.0f});
+	internalCamera->GetTransform()->SetRotation({ math::DegToRad(45.0f),0.0f,0.0f });
 	internalCamera->Update();
 	math::AABB box = go->GetGlobalBoundingBoxWithChilds();
 	internalCamera->Focus(box.CenterPoint(), box.HalfSize().Length());
 	internalCamera->Update();
-	
+
 	current_camera = internalCamera;
 
 	for (auto sMD5 : activeShaders)
 	{
-		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));
+		const RE_Shader* shader = dynamic_cast<const RE_Shader*>(RE_RES->At(sMD5));
 		if (!shader->uniforms.empty())
 			shader->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 		else
@@ -1324,7 +1343,7 @@ void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
 	go->DrawChilds();
 }
 
-void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
+void ModuleRenderer3D::ThumbnailMaterial(const RE_Material* mat)
 {
 	unsigned int c_fbo = thumbnailView.fbos.first;
 	fbos->ChangeFBOBind(c_fbo, fbos->GetWidth(c_fbo), fbos->GetHeight(c_fbo));
@@ -1345,7 +1364,7 @@ void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
 
 	for (auto sMD5 : activeShaders)
 	{
-		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));
+		const RE_Shader* shader = dynamic_cast<const RE_Shader*>(RE_RES->At(sMD5));
 		if (!shader->uniforms.empty())
 			shader->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 		else
@@ -1363,7 +1382,7 @@ void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
 	RE_GLCache::ChangeTextureBind(0);
 }
 
-void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
+void ModuleRenderer3D::ThumbnailSkyBox(const RE_SkyBox* skybox)
 {
 	unsigned int c_fbo = thumbnailView.fbos.first;
 	fbos->ChangeFBOBind(c_fbo, fbos->GetWidth(c_fbo), fbos->GetHeight(c_fbo));
@@ -1380,7 +1399,7 @@ void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
 
 	for (auto sMD5 : activeShaders)
 	{
-		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));
+		const RE_Shader* shader = dynamic_cast<const RE_Shader*>(RE_RES->At(sMD5));
 		if (!shader->uniforms.empty())
 			shader->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
 		else
@@ -1488,22 +1507,22 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	glVertex3f(1.0f, -1.0f, -1.0f);
 	glVertex3f(1.0f, 1.0f, -1.0f);
 	glVertex3f(1.0f, 1.0f, -1.0f);
-	glVertex3f(- 1.0f, 1.0f, -1.0f);
-	glVertex3f(- 1.0f, -1.0f, -1.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f);
+	glVertex3f(-1.0f, -1.0f, -1.0f);
 
-	glVertex3f(- 1.0f, -1.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, 1.0f);
 	glVertex3f(1.0f, -1.0f, 1.0f);
 	glVertex3f(1.0f, 1.0f, 1.0f);
 	glVertex3f(1.0f, 1.0f, 1.0f);
-	glVertex3f(- 1.0f, 1.0f, 1.0f);
-	glVertex3f(- 1.0f, -1.0f, 1.0f);
+	glVertex3f(-1.0f, 1.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, 1.0f);
 
 	glVertex3f(-1.0f, 1.0f, 1.0f);
 	glVertex3f(-1.0f, 1.0f, -1.0f);
 	glVertex3f(-1.0f, -1.0f, -1.0f);
 	glVertex3f(-1.0f, -1.0f, -1.0f);
 	glVertex3f(-1.0f, -1.0f, 1.0f);
-	glVertex3f(- 1.0f, 1.0f, 1.0f);
+	glVertex3f(-1.0f, 1.0f, 1.0f);
 
 	glVertex3f(1.0f, 1.0f, 1.0f);
 	glVertex3f(1.0f, 1.0f, -1.0f);
@@ -1517,14 +1536,14 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	glVertex3f(1.0f, -1.0f, 1.0f);
 	glVertex3f(1.0f, -1.0f, 1.0f);
 	glVertex3f(-1.0f, -1.0f, 1.0f);
-	glVertex3f(- 1.0f, -1.0f, -1.0f);
+	glVertex3f(-1.0f, -1.0f, -1.0f);
 
 	glVertex3f(-1.0f, 1.0f, -1.0f);
 	glVertex3f(1.0f, 1.0f, -1.0f);
 	glVertex3f(1.0f, 1.0f, 1.0f);
 	glVertex3f(1.0f, 1.0f, 1.0f);
 	glVertex3f(-1.0f, 1.0f, 1.0f);
-	glVertex3f(- 1.0f, 1.0f, -1.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f);
 	glEnd();
 }
 
@@ -1556,8 +1575,8 @@ void ModuleRenderer3D::SetRenderViewClearColor(RENDER_VIEWS r_view, math::float4
 void ModuleRenderer3D::SetRenderViewDebugDraw(RENDER_VIEWS r_view, bool debug_draw)
 {
 	if (r_view < VIEW_OTHER) {
-		if (debug_draw) render_views[r_view].flags |=  DEBUG_DRAW;
-		else render_views[r_view].flags -= DEBUG_DRAW;	
+		if (debug_draw) render_views[r_view].flags |= DEBUG_DRAW;
+		else render_views[r_view].flags -= DEBUG_DRAW;
 	}
 }
 

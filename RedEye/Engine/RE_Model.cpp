@@ -183,7 +183,7 @@ void RE_Model::SaveResourceMeta(RE_Json* metaNode)
 	uint count = 0;
 	for (const char* mesh : modelSettings.libraryMeshes)
 	{
-		ResourceContainer* rM = RE_RES->At(mesh);
+		const ResourceContainer* rM = RE_RES->At(mesh);
 		metaNode->PushString((eastl::string("Name") + eastl::to_string(count)).c_str(), rM->GetName());
 		metaNode->PushString((eastl::string("LibraryPath") + eastl::to_string(count++)).c_str(), rM->GetLibraryPath());
 	}
@@ -207,9 +207,7 @@ void RE_Model::LoadResourceMeta(RE_Json* metaNode)
 		const char* md5 = RE_RES->CheckOrFindMeshOnLibrary(library_mesh.c_str());
 		if (md5)
 		{
-			RE_RES->At(md5)->SetName(name_mesh.c_str());
-			RE_RES->At(md5)->SetAssetPath(GetAssetPath());
-			RE_RES->At(md5)->SetMetaPath(GetMetaPath());
+			RE_RES->SetResourceMeta(md5, name_mesh.c_str(), GetAssetPath(), GetMetaPath());
 			modelSettings.libraryMeshes.push_back(md5);
 		}
 	}

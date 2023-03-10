@@ -23,7 +23,7 @@ void RE_ECS_Importer::JsonSerialize(RE_Json* node, RE_ECS_Pool* pool)
 	for (int r = 0; r < static_cast<int>(resGo.size()); r++)
 	{
 		RE_Json* resN = resources->PushJObject(("r" + eastl::to_string(r)).c_str());
-		ResourceContainer* res = RE_RES->At(resGo.at(static_cast<unsigned int>(r)));
+		const ResourceContainer* res = RE_RES->At(resGo.at(static_cast<unsigned int>(r)));
 		Resource_Type rtype = res->GetType();
 
 		resN->PushInt("index", r);
@@ -42,7 +42,7 @@ char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, unsigned int* bufferSi
 {
 	//Get resources
 	eastl::vector<const char*>  resGo = pool->GetAllResources();
-	eastl::vector<ResourceContainer*>  resC;
+	eastl::vector<const ResourceContainer*>  resC;
 	eastl::map<const char*, int> resourcesIndex;
 	int count = 0;
 	for (const char* res : resGo)
@@ -52,7 +52,7 @@ char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, unsigned int* bufferSi
 	}
 
 	*bufferSize = sizeof(uint) + ((sizeof(int) + sizeof(unsigned int) + sizeof(uint)) * resGo.size());
-	for (ResourceContainer* res : resC)
+	for (const ResourceContainer* res : resC)
 		*bufferSize += eastl::CharStrlen((res->GetType() == Resource_Type::R_MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
 	*bufferSize += pool->GetBinarySize();
 	*bufferSize += 1;
@@ -66,7 +66,7 @@ char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, unsigned int* bufferSi
 
 	for (int r = 0; r < static_cast<int>(resGo.size()); r++)
 	{
-		ResourceContainer* res = resC.at(static_cast<unsigned int>(r));
+		const ResourceContainer* res = resC.at(static_cast<unsigned int>(r));
 		Resource_Type rtype = res->GetType();
 
 		size = sizeof(int);

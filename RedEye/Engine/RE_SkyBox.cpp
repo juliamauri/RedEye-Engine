@@ -153,7 +153,7 @@ void RE_SkyBox::DrawEditSkyBox()
 		{
 			if (skyBoxSettings.textures[i].textureMD5)
 			{
-				ResourceContainer* resource = RE_RES->At(skyBoxSettings.textures[i].textureMD5);
+				const ResourceContainer* resource = RE_RES->At(skyBoxSettings.textures[i].textureMD5);
 				id = texture + resource->GetName();
 				if (ImGui::Button(id.c_str())) RE_RES->PushSelected(resource->GetMD5());
 

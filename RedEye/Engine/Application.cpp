@@ -21,6 +21,8 @@
 #include <EAStdC\EASprintf.h>
 #include <eathread\internal\config.h>
 
+#include "RE_ThreadPool.hpp"
+
 namespace AppFlags {
 	constexpr unsigned char
 		EMPLY_FLAGS = 0,
@@ -32,6 +34,8 @@ namespace AppFlags {
 
 Application::Application()
 {
+	RE_ThreadPool::Init();
+
 	time = new RE_Time();
 	math = new RE_Math();
 	hardware = new RE_Hardware();
@@ -156,7 +160,6 @@ void Application::MainLoop()
 		}
 
 		unsigned int extra_ms = time->FrameExtraMS();
-		if (extra_ms > 0) extra_ms = fs->ReadAssetChanges(extra_ms);
 		if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
 		if (extra_ms > 0) time->Delay(extra_ms);
 
@@ -166,6 +169,8 @@ void Application::MainLoop()
 void Application::CleanUp()
 {
 	if (flags & AppFlags::SAVE_ON_EXIT) fs->SaveConfig();
+
+	RE_ThreadPool::CleanUp();
 
 	audio->CleanUp();
 	renderer->CleanUp();
@@ -181,6 +186,7 @@ void Application::CleanUp()
 #ifdef INTERNAL_PROFILING
 	RE_Profiler::Exit();
 #endif // INTERNAL_PROFILING
+
 
 	if (SDL_WasInit(0) != 0)
 		SDL_Quit();
