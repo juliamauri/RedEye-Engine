@@ -643,6 +643,11 @@
   <ItemGroup>
     <ResourceCompile Include="..\..\src\main\windows\version.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.exclusions">
+      <Value>/**</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -171,6 +171,11 @@
     <ClCompile Include="..\..\src\nfd_common.c" />
     <ClCompile Include="..\..\src\nfd_win.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.exclusions">
+      <Value>/**</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
