@@ -151,6 +151,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26495;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -182,6 +183,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26495;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -217,12 +219,13 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <StringPooling>true</StringPooling>
       <UseFullPaths>false</UseFullPaths>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26495;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -264,6 +267,7 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26495;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -295,6 +299,7 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26495;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -326,6 +331,7 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26495;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -365,6 +371,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26495;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -404,6 +411,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26495;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;MATH_SILENT_ASSUME;RELEASE;OPTIMIZED_RELEASE%(PreprocessorDefinitions)</PreprocessorDefinitions>

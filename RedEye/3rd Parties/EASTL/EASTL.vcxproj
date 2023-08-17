@@ -154,6 +154,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>WIN32;_WINDOWS;EA_PLATFORM_MICROSOFT;EA_PROCESSOR_X86;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -189,6 +190,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>WIN32;_WINDOWS;EA_PLATFORM_MICROSOFT;EA_PROCESSOR_X64;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -219,11 +221,12 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <PreprocessorDefinitions>WIN32;_WINDOWS;EA_PLATFORM_MICROSOFT;EA_PROCESSOR_X86;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -259,6 +262,7 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -294,6 +298,7 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -329,6 +334,7 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -363,6 +369,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>WIN32;_WINDOWS;EA_PLATFORM_MICROSOFT;EA_PROCESSOR_X86;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -397,6 +404,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>WIN32;_WINDOWS;EA_PLATFORM_MICROSOFT;EA_PROCESSOR_X64;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4996;4100;4267;4244;26439</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CHAR16T;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;EASTL_OPENSOURCE=1;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>

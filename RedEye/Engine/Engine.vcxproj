@@ -20,10 +20,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\3rd Parties\Others\gpudetect\DeviceId.cpp" />
-    <ClCompile Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3.cpp">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6031</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">6031</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6031</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6031</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_sdl2.cpp" />
     <ClCompile Include="..\3rd Parties\Others\ImGuiImpl\imgui_stdlib.cpp" />
-    <ClCompile Include="..\3rd Parties\Others\MD5\md5.cpp" />
+    <ClCompile Include="..\3rd Parties\Others\MD5\md5.cpp">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4505;4267;26451</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4505;4267;26451</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4505;4267;26451</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4505;4267;26451</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="AboutWindow.cpp" />
     <ClCompile Include="ConfigWindow.cpp" />
     <ClCompile Include="ConsoleWindow.cpp" />
