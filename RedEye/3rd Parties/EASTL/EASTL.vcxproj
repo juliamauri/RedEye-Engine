@@ -830,13 +830,11 @@
     <None Include="test\packages\EAStdC\include\EAStdC\internal\EAMemory.inl" />
     <None Include="test\packages\EAStdC\include\EAStdC\Win32\EAMathHelpWin32.inl" />
   </ItemGroup>
-  <Target Name="BeforeBuild">
-    <ItemGroup>
-      <SonarQubeSetting Include="sonar.exclusions">
-        <Value>/**</Value>
-      </SonarQubeSetting>
-    </ItemGroup>
-  </Target>
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.exclusions">
+      <Value>/**</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

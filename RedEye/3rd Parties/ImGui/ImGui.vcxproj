@@ -38,13 +38,11 @@
     <ClCompile Include="source\imgui_tables.cpp" />
     <ClCompile Include="source\imgui_widgets.cpp" />
   </ItemGroup>
-  <Target Name="BeforeBuild">
-    <ItemGroup>
-      <SonarQubeSetting Include="sonar.exclusions">
-        <Value>/**</Value>
-      </SonarQubeSetting>
-    </ItemGroup>
-  </Target>
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.exclusions">
+      <Value>/**</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

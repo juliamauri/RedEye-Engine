@@ -293,16 +293,14 @@
   <ItemGroup>
     <Image Include="..\..\docs\Multimedia\icon.ico" />
   </ItemGroup>
-  <Target Name="BeforeBuild">
-    <ItemGroup>
-      <SonarQubeSetting Include="sonar.sources">
-        <Value>/**</Value>
-      </SonarQubeSetting>
-      <SonarQubeSetting Include="sonar.exclusions">
-        <Value>../3rd Parties/**</Value>
-      </SonarQubeSetting>
-    </ItemGroup>
-  </Target>
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.sources">
+      <Value>/**</Value>
+    </SonarQubeSetting>
+    <SonarQubeSetting Include="sonar.exclusions">
+      <Value>../3rd Parties/**</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{13DC399F-3A96-48E0-82B4-94FD73051599}</ProjectGuid>
