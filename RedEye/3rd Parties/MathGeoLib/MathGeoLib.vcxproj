@@ -548,11 +548,6 @@
     <ClInclude Include="src\MGL\Time\Clock.h" />
     <ClInclude Include="src\MGL\emscripten\library_system.h" />
   </ItemGroup>
-  <ItemGroup>
-    <SonarQubeSetting Include="sonar.exclusions">
-      <Value>/**</Value>
-    </SonarQubeSetting>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
