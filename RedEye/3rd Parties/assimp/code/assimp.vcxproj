@@ -1124,11 +1124,13 @@
       <Project>{b0615dce-bb25-3b22-a432-af1a4f14a01a}</Project>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <SonarQubeSetting Include="sonar.exclusions">
-      <Value>/**</Value>
-    </SonarQubeSetting>
-  </ItemGroup>
+  <Target Name="BeforeBuild">
+    <ItemGroup>
+      <SonarQubeSetting Include="sonar.exclusions">
+        <Value>/**</Value>
+      </SonarQubeSetting>
+    </ItemGroup>
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

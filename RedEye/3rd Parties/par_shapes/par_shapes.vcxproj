@@ -21,11 +21,13 @@
   <ItemGroup>
     <ClCompile Include="include\par_shapes.h" />
   </ItemGroup>
-  <ItemGroup>
-    <SonarQubeSetting Include="sonar.exclusions">
-      <Value>/**</Value>
-    </SonarQubeSetting>
-  </ItemGroup>
+  <Target Name="BeforeBuild">
+    <ItemGroup>
+      <SonarQubeSetting Include="sonar.exclusions">
+        <Value>/**</Value>
+      </SonarQubeSetting>
+    </ItemGroup>
+  </Target>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

@@ -269,14 +269,16 @@
   <ItemGroup>
     <Image Include="..\..\docs\Multimedia\icon.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <SonarQubeSetting Include="sonar.sources">
-      <Value>/**</Value>
-    </SonarQubeSetting>
-    <SonarQubeSetting Include="sonar.exclusions">
-      <Value>../3rd Parties/**</Value>
-    </SonarQubeSetting>
-  </ItemGroup>
+  <Target Name="BeforeBuild">
+    <ItemGroup>
+      <SonarQubeSetting Include="sonar.sources">
+        <Value>/**</Value>
+      </SonarQubeSetting>
+      <SonarQubeSetting Include="sonar.exclusions">
+        <Value>../3rd Parties/**</Value>
+      </SonarQubeSetting>
+    </ItemGroup>
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

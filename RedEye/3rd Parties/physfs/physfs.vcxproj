@@ -63,11 +63,13 @@
     <ClCompile Include="src\physfs_platform_windows.c" />
     <ClCompile Include="src\physfs_unicode.c" />
   </ItemGroup>
-  <ItemGroup>
-    <SonarQubeSetting Include="sonar.exclusions">
-      <Value>/**</Value>
-    </SonarQubeSetting>
-  </ItemGroup>
+  <Target Name="BeforeBuild">
+    <ItemGroup>
+      <SonarQubeSetting Include="sonar.exclusions">
+        <Value>/**</Value>
+      </SonarQubeSetting>
+    </ItemGroup>
+  </Target>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{99CF2137-57CE-3092-9964-4E273221E1D6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
