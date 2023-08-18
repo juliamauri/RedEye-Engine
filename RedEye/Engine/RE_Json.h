@@ -3,12 +3,12 @@
 
 #include <RapidJson/rapidjson.h>
 #include <RapidJson/document.h>
-#include <MGL/Math\float2.h>
-#include <MGL/Math\float3.h>
-#include <MGL/Math\float4.h>
-#include <MGL/Math\float3x3.h>
-#include <MGL/Math\float4x4.h>
-#include <EASTL\string.h>
+#include <MGL/Math/float2.h>
+#include <MGL/Math/float3.h>
+#include <MGL/Math/float4.h>
+#include <MGL/Math/float3x3.h>
+#include <MGL/Math/float4x4.h>
+#include <EASTL/string.h>
 
 class Config;
 
