@@ -16,10 +16,10 @@
 #include "ModuleAudio.h"
 
 #include <SDL2/SDL.h>
-#include <EAAssert\version.h>
-#include <EAStdC\internal\Config.h>
-#include <EAStdC\EASprintf.h>
-#include <eathread\internal\config.h>
+#include <EAAssert/version.h>
+#include <EAStdC/internal/Config.h>
+#include <EAStdC/EASprintf.h>
+#include <eathread/internal/config.h>
 
 namespace AppFlags {
 	constexpr unsigned char
