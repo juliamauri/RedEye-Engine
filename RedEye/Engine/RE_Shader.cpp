@@ -1,8 +1,8 @@
 #include "Resource.h"
 #include "RE_Cvar.h"
-#include <EASTL/string.h>
-#include <EASTL/vector.h>
-#include <MGL/Math/float4.h>
+#include <EASTL\string.h>
+#include <EASTL\vector.h>
+#include <MGL\Math\float4.h>
 
 #include "RE_Shader.h"
 
@@ -20,9 +20,9 @@
 #include "RE_CompCamera.h"
 #include "RE_CompTransform.h"
 
-#include <MD5/md5.h>
-#include <ImGui/imgui.h>
-#include <PhysFS/physfs.h>
+#include <MD5\md5.h>
+#include <ImGui\imgui.h>
+#include <PhysFS\physfs.h>
 
 void RE_Shader::LoadInMemory()
 {

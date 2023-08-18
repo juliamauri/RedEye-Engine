@@ -1,7 +1,7 @@
-#include <MGL/Math/float4x4.h>
-#include <EASTL/vector.h>
-#include <EASTL/string.h>
-#include <EASTL/map.h>
+#include <MGL\Math\float4x4.h>
+#include <EASTL\vector.h>
+#include <EASTL\string.h>
+#include <EASTL\map.h>
 
 #include "RE_ModelImporter.h"
 
@@ -20,11 +20,11 @@
 #include "RE_Mesh.h"
 #include "RE_Material.h"
 
-#include <MD5/md5.h>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/material.h>
+#include <MD5\md5.h>
+#include <assimp\Importer.hpp>
+#include <assimp\scene.h>
+#include <assimp\postprocess.h>
+#include <assimp\material.h>
 
 RE_ECS_Pool* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
 {

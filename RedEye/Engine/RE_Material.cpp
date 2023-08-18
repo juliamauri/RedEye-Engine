@@ -1,8 +1,8 @@
 #include "Resource.h"
 #include "RE_Cvar.h"
-#include <MGL/Math/float3.h>
-#include <EASTL/string.h>
-#include <EASTL/vector.h>
+#include <MGL\Math\float3.h>
+#include <EASTL\string.h>
+#include <EASTL\vector.h>
 
 #include "RE_Material.h"
 
@@ -22,9 +22,9 @@
 #include "RE_Shader.h"
 #include "RE_Texture.h"
 
-#include <ImGui/imgui.h>
-#include <GL/glew.h>
-#include <EAStdC/EAString.h>
+#include <ImGui\imgui.h>
+#include <GL\glew.h>
+#include <EAStdC\EAString.h>
 
 RE_Material::RE_Material() {}
 RE_Material::RE_Material(const char* metapath) : ResourceContainer(metapath) {}
