@@ -9,6 +9,8 @@
 
 #include <EASTL/internal/config.h>
 #include <EASTL/internal/move_help.h>
+#include <EASTL/internal/type_detected.h>
+#include <EASTL/internal/type_void_t.h>
 #include <EASTL/initializer_list.h>
 
 EA_DISABLE_ALL_VC_WARNINGS();
@@ -93,16 +95,35 @@ namespace eastl
 
 
 	// struct iterator_traits
-	template <typename Iterator>
-	struct iterator_traits
+	namespace internal
 	{
-		typedef typename Iterator::iterator_category iterator_category;
-		typedef typename Iterator::value_type        value_type;
-		typedef typename Iterator::difference_type   difference_type;
-		typedef typename Iterator::pointer           pointer;
-		typedef typename Iterator::reference         reference;
-	};
+		// Helper to make iterator_traits SFINAE friendly as N3844 requires.
+		template <typename Iterator, class = void>
+		struct default_iterator_traits {};
 
+		template <typename Iterator>
+		struct default_iterator_traits<
+			Iterator,
+			void_t<
+				typename Iterator::iterator_category,
+				typename Iterator::value_type,
+				typename Iterator::difference_type,
+				typename Iterator::pointer,
+				typename Iterator::reference
+			>
+		>
+		{
+			typedef typename Iterator::iterator_category iterator_category;
+			typedef typename Iterator::value_type        value_type;
+			typedef typename Iterator::difference_type   difference_type;
+			typedef typename Iterator::pointer           pointer;
+			typedef typename Iterator::reference         reference;
+		};
+	}
+	
+	template <typename Iterator>
+	struct iterator_traits : internal::default_iterator_traits<Iterator> {};
+	
 	template <typename T>
 	struct iterator_traits<T*>
 	{
@@ -129,37 +150,46 @@ namespace eastl
 	/// is_iterator_wrapper
 	///
 	/// Tells if an Iterator type is a wrapper type as opposed to a regular type.
-	/// Relies on the class declaring a typedef called wrapped_iterator_type.
+	/// Relies on the class declaring a member function called unwrap.
 	///
 	/// Examples of wrapping iterators:
-	///     reverse_iterator
 	///     generic_iterator
 	///     move_iterator
+	///     reverse_iterator<T> (if T is a wrapped iterator)
 	/// Examples of non-wrapping iterators:
 	///     iterator
 	///     list::iterator
 	///     char*
 	///
 	/// Example behavior:
-	///     is_iterator_wrapper(int*)::value                                              => false
-	///     is_iterator_wrapper(eastl::array<char>*)::value                               => false
-	///     is_iterator_wrapper(eastl::vector<int>::iterator)::value                      => false
-	///     is_iterator_wrapper(eastl::generic_iterator<int*>)::value                     => true
-	///     is_iterator_wrapper(eastl::move_iterator<eastl::array<int>::iterator>)::value => true
+	///     is_iterator_wrapper(int*)::value												=> false
+	///     is_iterator_wrapper(eastl::array<char>*)::value									=> false
+	///     is_iterator_wrapper(eastl::vector<int>::iterator)::value						=> false
+	///     is_iterator_wrapper(eastl::generic_iterator<int*>)::value						=> true
+	///     is_iterator_wrapper(eastl::move_iterator<eastl::array<int>::iterator>)::value	=> true
+	///     is_iterator_wrapper(eastl::reverse_iterator<int*>)::value						=> false
+	///     is_iterator_wrapper(eastl::reverse_iterator<eastl::move_iterator<int*>>)::value	=> true
 	///
 	template<typename Iterator>
 	class is_iterator_wrapper
 	{
-		template<typename>
-		static eastl::no_type test(...);
-
-		template<typename U>
-		static eastl::yes_type test(typename U::wrapped_iterator_type*, typename eastl::enable_if<eastl::is_class<U>::value>::type* = 0);
-
+#if defined(EA_COMPILER_CLANG) || defined(EA_COMPILER_CLANG_CL)
+		// Using a default template type parameter trick here because
+		// of a bug in clang that makes the other implementation not
+		// work when unwrap() is private and this is class is a
+		// friend.
+		// See: https://bugs.llvm.org/show_bug.cgi?id=25334
+		template<typename T, typename U = decltype(eastl::declval<T>().unwrap())>
+		using detect_has_unwrap = U;
+#else
+		// Note: the above implementation does not work on GCC when
+		// unwrap() is private and this class is a friend. So we're
+		// forced to diverge here to support both GCC and clang.
+		template<typename T>
+		using detect_has_unwrap = decltype(eastl::declval<T>().unwrap());
+#endif
 	public:
-		EA_DISABLE_VC_WARNING(6334)
-		static const bool value = (sizeof(test<Iterator>(NULL)) == sizeof(eastl::yes_type));
-		EA_RESTORE_VC_WARNING()
+		static const bool value = eastl::is_detected<detect_has_unwrap, Iterator>::value;
 	};
 
 
@@ -180,25 +210,28 @@ namespace eastl
 	template <typename Iterator, bool isWrapper>
 	struct is_iterator_wrapper_helper
 	{
-		typedef Iterator iterator_type;
+		using iterator_type = Iterator;
 
-		static iterator_type get_base(Iterator it)
-			{ return it; }
+		static iterator_type get_unwrapped(Iterator it) { return it; }
 	};
 
 
 	template <typename Iterator>
 	struct is_iterator_wrapper_helper<Iterator, true>
 	{
-		typedef typename Iterator::iterator_type iterator_type;
+		// get_unwrapped must return by value since we're returning
+		// it.unwrap(), and `it` will be out of scope as soon as
+		// get_unwrapped returns.
+		using iterator_type =
+		    typename eastl::remove_cvref<decltype(eastl::declval<Iterator>().unwrap())>::type;
 
-		static iterator_type get_base(Iterator it)
-			{ return it.base(); }
+		static iterator_type get_unwrapped(Iterator it) { return it.unwrap(); }
 	};
+
 
 	template <typename Iterator>
 	inline typename is_iterator_wrapper_helper<Iterator, eastl::is_iterator_wrapper<Iterator>::value>::iterator_type unwrap_iterator(Iterator it)
-		{ return eastl::is_iterator_wrapper_helper<Iterator, eastl::is_iterator_wrapper<Iterator>::value>::get_base(it); }
+		{ return eastl::is_iterator_wrapper_helper<Iterator, eastl::is_iterator_wrapper<Iterator>::value>::get_unwrapped(it); }
 
 
 
@@ -222,9 +255,13 @@ namespace eastl
 											 typename eastl::iterator_traits<Iterator>::pointer,
 											 typename eastl::iterator_traits<Iterator>::reference>
 	{
+	private:
+		using base_wrapped_iterator_type =
+		    typename eastl::is_iterator_wrapper_helper<Iterator,
+		                                               eastl::is_iterator_wrapper<Iterator>::value>::iterator_type;
+
 	public:
 		typedef Iterator                                                   iterator_type;
-		typedef iterator_type                                              wrapped_iterator_type;   // This is not in the C++ Standard; it's used by use to identify it as a wrapping iterator type.
 		typedef typename eastl::iterator_traits<Iterator>::pointer         pointer;
 		typedef typename eastl::iterator_traits<Iterator>::reference       reference;
 		typedef typename eastl::iterator_traits<Iterator>::difference_type difference_type;
@@ -304,6 +341,18 @@ namespace eastl
 		// operator[] may return something other than reference.
 		EA_CPP14_CONSTEXPR reference operator[](difference_type n) const
 			{ return mIterator[-n - 1]; }
+
+
+	private:
+		// Unwrapping interface, not part of the public API.
+		template <typename U = iterator_type>
+		EA_CPP14_CONSTEXPR typename eastl::enable_if<eastl::is_iterator_wrapper<U>::value, reverse_iterator<base_wrapped_iterator_type>>::type unwrap() const
+		{ return reverse_iterator<base_wrapped_iterator_type>(unwrap_iterator(mIterator)); }
+
+		// The unwrapper helpers need access to unwrap() (when it exists).
+		using this_type = reverse_iterator<Iterator>;
+		friend is_iterator_wrapper_helper<this_type, is_iterator_wrapper<iterator_type>::value>;
+		friend is_iterator_wrapper<this_type>;
 	};
 
 
@@ -380,21 +429,15 @@ namespace eastl
 	struct is_reverse_iterator< eastl::reverse_iterator<Iterator> >
 		: public eastl::true_type {};
 
-
-
-	/// unwrap_reverse_iterator
-	///
-	/// Returns Iterator::get_base() if it's a reverse_iterator, else returns Iterator as-is.
-	///
-	/// Example usage:
-	///      vector<int> intVector;
-	///      eastl::reverse_iterator<vector<int>::iterator> reverseIterator(intVector.begin());
-	///      vector<int>::iterator it = unwrap_reverse_iterator(reverseIterator);
-	///
-	/// Disabled until there is considered a good use for it.
-	/// template <typename Iterator>
-	/// inline typename eastl::is_iterator_wrapper_helper<Iterator, eastl::is_reverse_iterator<Iterator>::value>::iterator_type unwrap_reverse_iterator(Iterator it)
-	///     { return eastl::is_iterator_wrapper_helper<Iterator, eastl::is_reverse_iterator<Iterator>::value>::get_base(it); }
+	/// unwrap_reverse_iterator is not implemented since there's no
+	/// good use case and there's some abiguitiy. Note that
+	/// unwrap_iterator(reverse_iterator<T>) returns
+	/// reverse_iterator<unwrap(T)>. However, given what
+	/// unwrap_generic_iterator and unwrap_move_iterator do, one might
+	/// expect unwrap_reverse_iterator(reverse_iterator<T>) to return
+	/// T, which is not the same. To avoid that confusion, and because
+	/// there's no current use case for this, we don't provide
+	/// unwrap_reverse_iterator.
 
 
 
@@ -409,15 +452,19 @@ namespace eastl
 	template<typename Iterator>
 	class move_iterator // Don't inherit from iterator.
 	{
+	private:
+		using WrappedIteratorReference = typename iterator_traits<Iterator>::reference;
+
 	public:
 		typedef Iterator                                iterator_type;
-		typedef iterator_type                           wrapped_iterator_type;   // This is not in the C++ Standard; it's used by use to identify it as a wrapping iterator type.
 		typedef iterator_traits<Iterator>               traits_type;
 		typedef typename traits_type::iterator_category iterator_category;
 		typedef typename traits_type::value_type        value_type;
 		typedef typename traits_type::difference_type   difference_type;
 		typedef Iterator                                pointer;
-		typedef value_type&&                            reference;
+		using reference = conditional_t<is_reference<WrappedIteratorReference>::value,
+										remove_reference_t<WrappedIteratorReference>&&,
+										WrappedIteratorReference>;
 
 	protected:
 		iterator_type mIterator;
@@ -440,8 +487,7 @@ namespace eastl
 		iterator_type base() const
 			{ return mIterator; }
 
-		reference operator*() const
-			{ return eastl::move(*mIterator); }
+		reference operator*() const { return static_cast<reference>(*mIterator); }
 
 		pointer operator->() const
 			{ return mIterator; }
@@ -492,6 +538,16 @@ namespace eastl
 
 		reference operator[](difference_type n) const
 			{ return eastl::move(mIterator[n]); }
+
+	private:
+		// Unwrapping interface, not part of the public API.
+		iterator_type unwrap() const
+			{ return mIterator; }
+
+		// The unwrapper helpers need access to unwrap().
+		using this_type = move_iterator<Iterator>;
+		friend is_iterator_wrapper_helper<this_type, true>;
+		friend is_iterator_wrapper<this_type>;
 	};
 
 	template<typename Iterator1, typename Iterator2>
@@ -585,7 +641,7 @@ namespace eastl
 
 	/// unwrap_move_iterator
 	///
-	/// Returns Iterator::get_base() if it's a move_iterator, else returns Iterator as-is.
+	/// Returns `it.base()` if it's a move_iterator, else returns `it` as-is.
 	///
 	/// Example usage:
 	///      vector<int> intVector;
@@ -594,9 +650,10 @@ namespace eastl
 	///
 	template <typename Iterator>
 	inline typename eastl::is_iterator_wrapper_helper<Iterator, eastl::is_move_iterator<Iterator>::value>::iterator_type unwrap_move_iterator(Iterator it)
-		{ return eastl::is_iterator_wrapper_helper<Iterator, eastl::is_move_iterator<Iterator>::value>::get_base(it); }
-
-
+	{
+		// get_unwrapped(it) -> it.unwrap() which is equivalent to `it.base()` for move_iterator and to `it` otherwise.
+		return eastl::is_iterator_wrapper_helper<Iterator, eastl::is_move_iterator<Iterator>::value>::get_unwrapped(it);
+	}
 
 
 	/// back_insert_iterator
@@ -1070,10 +1127,16 @@ namespace eastl
 			return container.begin();
 		}
 
-		template <typename Container>
-		EA_CPP14_CONSTEXPR inline auto cbegin(const Container& container) -> decltype(container.begin())
+		template<typename T, size_t arraySize>
+		EA_CPP14_CONSTEXPR inline T* begin(T (&arrayObject)[arraySize]) EA_NOEXCEPT
 		{
-			return container.begin();
+			return arrayObject;
+		}
+
+		template <typename Container>
+		EA_CPP14_CONSTEXPR inline auto cbegin(const Container& container) -> decltype(eastl::begin(container))
+		{
+			return eastl::begin(container);
 		}
 
 		template <typename Container>
@@ -1088,10 +1151,16 @@ namespace eastl
 			return container.end();
 		}
 
-		template <typename Container>
-		EA_CPP14_CONSTEXPR inline auto cend(const Container& container) -> decltype(container.end())
+		template<typename T, size_t arraySize>
+		EA_CPP14_CONSTEXPR inline T* end(T (&arrayObject)[arraySize]) EA_NOEXCEPT
 		{
-			return container.end();
+			return (arrayObject + arraySize);
+		}
+
+		template <typename Container>
+		EA_CPP14_CONSTEXPR inline auto cend(const Container& container) -> decltype(eastl::end(container))
+		{
+			return eastl::end(container);
 		}
 
 		template <typename Container>
@@ -1130,17 +1199,6 @@ namespace eastl
 			return container.rend();
 		}
 
-		template<typename T, size_t arraySize>
-		EA_CPP14_CONSTEXPR inline T* begin(T (&arrayObject)[arraySize])
-		{
-			return arrayObject;
-		}
-
-		template<typename T, size_t arraySize>
-		EA_CPP14_CONSTEXPR inline T* end(T (&arrayObject)[arraySize])
-		{
-			return (arrayObject + arraySize);
-		}
 
 		template <typename T, size_t arraySize>
 		EA_CPP14_CONSTEXPR inline reverse_iterator<T*> rbegin(T (&arrayObject)[arraySize])
@@ -1179,7 +1237,7 @@ namespace eastl
 // Some compilers (e.g. GCC 4.6) support range-based for loops, but have a bug with
 // respect to argument-dependent lookup which results on them unilaterally using std::begin/end
 // with range-based for loops. To work around this we #include <iterator> for this case in
-// order to make std::begin/end visible to users of <eastl/iterator.h>, for portability.
+// order to make std::begin/end visible to users of <EASTL/iterator.h>, for portability.
 #if !EASTL_BEGIN_END_ENABLED && !defined(EA_COMPILER_NO_RANGE_BASED_FOR_LOOP)
 	#include <iterator>
 #endif

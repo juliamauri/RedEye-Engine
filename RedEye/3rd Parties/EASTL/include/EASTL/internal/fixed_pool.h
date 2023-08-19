@@ -1362,12 +1362,10 @@ namespace eastl
 		{
 		}
 
-		// Disabled because the default is sufficient.
-		//fixed_vector_allocator(const fixed_vector_allocator& x)
-		//{
-		//    mpPoolBegin        = x.mpPoolBegin;
-		//    mOverflowAllocator = x.mOverflowAllocator;
-		//}
+		fixed_vector_allocator(const fixed_vector_allocator& x)
+			: mOverflowAllocator(x.mOverflowAllocator), mpPoolBegin(x.mpPoolBegin)
+		{
+		}
 
 		fixed_vector_allocator& operator=(const fixed_vector_allocator& x)
 		{
@@ -1481,12 +1479,14 @@ namespace eastl
 		void* allocate(size_t /*n*/, int /*flags*/ = 0)
 		{
 			EASTL_ASSERT(false); // A fixed_vector should not reallocate, else the user has exhausted its space.
+			EASTL_CRASH();		 // We choose to crash here since the owning vector can't handle an allocator returning null. Better to crash earlier.
 			return NULL;
 		}
 
 		void* allocate(size_t /*n*/, size_t /*alignment*/, size_t /*offset*/, int /*flags*/ = 0)
 		{
-			EASTL_ASSERT(false);
+			EASTL_ASSERT(false); // A fixed_vector should not reallocate, else the user has exhausted its space.
+			EASTL_CRASH();		 // We choose to crash here since the owning vector can't handle an allocator returning null. Better to crash earlier.
 			return NULL;
 		}
 

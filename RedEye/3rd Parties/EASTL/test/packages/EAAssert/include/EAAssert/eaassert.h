@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #if defined(EA_PRAGMA_ONCE_SUPPORTED)
-	#pragma once // Some compilers (e.g. VC++) benefit significantly from using this. We've measured 3-4% build speed improvements in apps as a result.
+#pragma once // Some compilers (e.g. VC++) benefit significantly from using this. We've measured 3-4% build speed improvements in apps as a result.
 #endif
 
 #ifndef EAASSERT_EAASSERT_H
@@ -34,7 +34,7 @@
 //              a formatted string (char*) and the rest is printf style parameters
 //
 #ifdef EA_ASSERT_HAVE_OWN_HEADER
-	#include EA_ASSERT_HAVE_OWN_HEADER
+#include EA_ASSERT_HAVE_OWN_HEADER
 
 #else // The user did not supply their own assert definition, so we'll use ours instead
 
@@ -59,27 +59,29 @@
 //
 
 #if defined(EA_DLL) && defined(_MSC_VER)
-	#ifndef EA_ASSERT_API
-		#define EA_ASSERT_API __declspec(dllimport)
-	#endif
+#ifndef EA_ASSERT_API
+#define EA_ASSERT_API __declspec(dllimport)
+#endif
 #else
-	#define EA_ASSERT_API
+#define EA_ASSERT_API
 #endif
 
 #ifdef __cplusplus
-namespace EA { 
-namespace Assert {
+namespace EA {
+	namespace Assert {
 
-	typedef bool (*FailureCallback)(const char*, const char*, int, const char*, const char*, va_list);
+		typedef bool (*FailureCallback)(const char*, const char*, int, const char*, const char*, va_list);
 
-	EA_ASSERT_API   FailureCallback GetFailureCallback();
-	EA_ASSERT_API   void            SetFailureCallback(FailureCallback failureCallback);
+		EA_ASSERT_API   FailureCallback GetFailureCallback();
+		EA_ASSERT_API   void            SetFailureCallback(FailureCallback failureCallback);
 
-namespace Detail {
-	EA_ASSERT_API   bool            VCall(const char *expr, const char *filename, int line, const char *function, const char *msg, ...);
-	EA_ASSERT_API   bool            Call(const char *expr, const char *filename, int line, const char *function, const char *msg);
-	EA_ASSERT_API   bool            Call(const char *expr, const char *filename, int line, const char *function);
-}}}
+		namespace Detail {
+			EA_ASSERT_API   bool            VCall(const char* expr, const char* filename, int line, const char* function, const char* msg, ...);
+			EA_ASSERT_API   bool            Call(const char* expr, const char* filename, int line, const char* function, const char* msg);
+			EA_ASSERT_API   bool            Call(const char* expr, const char* filename, int line, const char* function);
+		}
+	}
+}
 #endif
 
 
@@ -112,30 +114,30 @@ namespace Detail {
 /// not in another function.
 ///
 #if ! defined EA_DEBUG_BREAK && ! defined EA_DEBUG_BREAK_DEFINED
-	#if   defined(EA_PLATFORM_SONY) && defined(EA_PROCESSOR_X86_64)
-		#define EA_DEBUG_BREAK() do { { __asm volatile ("int $0x41"); } } while(0)
-	#elif defined _MSC_VER
-		#define EA_DEBUG_BREAK() __debugbreak()
-	#elif EA_COMPILER_HAS_BUILTIN(__builtin_debugtrap)
-		#define EA_DEBUG_BREAK() __builtin_debugtrap()
-	#elif (defined(EA_PROCESSOR_X86) || defined(EA_PROCESSOR_X86_64)) && defined(__GNUC__)
-		// Using __asm__ here instead of asm is more compatible with clang when compiling in c99 mode.
-		#define EA_DEBUG_BREAK() __asm__("int3")
-	#elif defined(EA_PROCESSOR_ARM64) && defined(__GNUC__)
-		#define EA_DEBUG_BREAK() asm("brk 10")
-	#elif defined(EA_PROCESSOR_ARM) && defined(__APPLE__)
-		#include <signal.h>
-		#include <unistd.h>
-		#define EA_DEBUG_BREAK() kill( getpid(), SIGINT )
-	#elif defined(EA_PROCESSOR_ARM) && defined(__GNUC__)
-		#define EA_DEBUG_BREAK() asm("BKPT 10")     // The 10 is arbitrary. It's just a unique id.
-	#elif defined(EA_PROCESSOR_ARM) && defined(__ARMCC_VERSION)
-		#define EA_DEBUG_BREAK() __breakpoint(10)
-	#else
-		#define EA_DEBUG_BREAK() *(int*)(0) = 0
-	#endif
+#if   defined(EA_PLATFORM_SONY) && defined(EA_PROCESSOR_X86_64)
+#define EA_DEBUG_BREAK() do { { __asm volatile ("int $0x41"); } } while(0)
+#elif defined _MSC_VER
+#define EA_DEBUG_BREAK() __debugbreak()
+#elif EA_COMPILER_HAS_BUILTIN(__builtin_debugtrap)
+#define EA_DEBUG_BREAK() __builtin_debugtrap()
+#elif (defined(EA_PROCESSOR_X86) || defined(EA_PROCESSOR_X86_64)) && defined(__GNUC__)
+	// Using __asm__ here instead of asm is more compatible with clang when compiling in c99 mode.
+#define EA_DEBUG_BREAK() __asm__("int3")
+#elif defined(EA_PROCESSOR_ARM64) && defined(__GNUC__)
+#define EA_DEBUG_BREAK() asm("brk 10")
+#elif defined(EA_PROCESSOR_ARM) && defined(__APPLE__)
+#include <signal.h>
+#include <unistd.h>
+#define EA_DEBUG_BREAK() kill( getpid(), SIGINT )
+#elif defined(EA_PROCESSOR_ARM) && defined(__GNUC__)
+#define EA_DEBUG_BREAK() asm("BKPT 10")     // The 10 is arbitrary. It's just a unique id.
+#elif defined(EA_PROCESSOR_ARM) && defined(__ARMCC_VERSION)
+#define EA_DEBUG_BREAK() __breakpoint(10)
+#else
+#define EA_DEBUG_BREAK() *(int*)(0) = 0
+#endif
 
-	#define EA_DEBUG_BREAK_DEFINED
+#define EA_DEBUG_BREAK_DEFINED
 #endif
 
 
@@ -147,9 +149,9 @@ namespace Detail {
 /// on most platforms.
 ///
 #if !defined(EA_CRASH) && !defined(EA_CRASH_DEFINED)
-	#define EA_CRASH() *(volatile int*)(0) = 0
+#define EA_CRASH() *(volatile int*)(0) = 0
 
-	#define EA_CRASH_DEFINED
+#define EA_CRASH_DEFINED
 #endif
 
 
@@ -170,19 +172,19 @@ namespace Detail {
 /// compilers.
 ///
 #ifndef EA_CURRENT_FUNCTION
-	#if defined __GNUC__ || (defined __ICC && __ICC >= 600)
-		#define EA_CURRENT_FUNCTION __PRETTY_FUNCTION__
-	#elif defined(__FUNCSIG__)
-		#define EA_CURRENT_FUNCTION __FUNCSIG__
-	#elif (defined __INTEL_COMPILER && __INTEL_COMPILER >= 600) || (defined __IBMCPP__ && __IBMCPP__ >= 500) || (defined CS_UNDEFINED_STRING && CS_UNDEFINED_STRING >= 0x4200)
-		#define EA_CURRENT_FUNCTION __FUNCTION__
-	#elif defined __BORLANDC__ && __BORLANDC__ >= 0x550
-		#define EA_CURRENT_FUNCTION __FUNC__
-	#elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901
-		#define EA_CURRENT_FUNCTION __func__
-	#else
-		#define EA_CURRENT_FUNCTION "(unknown function)"
-	#endif
+#if defined __GNUC__ || (defined __ICC && __ICC >= 600)
+#define EA_CURRENT_FUNCTION __PRETTY_FUNCTION__
+#elif defined(__FUNCSIG__)
+#define EA_CURRENT_FUNCTION __FUNCSIG__
+#elif (defined __INTEL_COMPILER && __INTEL_COMPILER >= 600) || (defined __IBMCPP__ && __IBMCPP__ >= 500) || (defined CS_UNDEFINED_STRING && CS_UNDEFINED_STRING >= 0x4200)
+#define EA_CURRENT_FUNCTION __FUNCTION__
+#elif defined __BORLANDC__ && __BORLANDC__ >= 0x550
+#define EA_CURRENT_FUNCTION __FUNC__
+#elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901
+#define EA_CURRENT_FUNCTION __func__
+#else
+#define EA_CURRENT_FUNCTION "(unknown function)"
+#endif
 #endif
 
 
@@ -190,46 +192,48 @@ namespace Detail {
 
 
 #ifdef __cplusplus
-namespace EA { 
-namespace Assert { 
-namespace Detail 
-{
-	// The Forwarder class is deprecated on compilers that support variadic macros. Avoiding
-	// the temporary instances created by this code can result in significant code size savings.
-	// Code outside of the EAAssert library shouldn't be referencing API in the Detail namespace.
-	#ifdef EA_COMPILER_NO_VARIADIC_MACROS
-		#define EA_ASSERT_PREFIX_DEPRECATED
-		#define EA_ASSERT_POSTFIX_DEPRECATED
-	#else
-		#define EA_ASSERT_PREFIX_DEPRECATED EA_PREFIX_DEPRECATED
-		#define EA_ASSERT_POSTFIX_DEPRECATED EA_POSTFIX_DEPRECATED
-	#endif
-
-	struct Forwarder
-	{ 
-		const char* mExpr;
-		const char* mFunction;
-		const char* mFilename;
-		int mLine;
-		Forwarder(const char* expr, const char* filename, int line,  const char* function) : mExpr(expr), mFunction(function), mFilename(filename), mLine(line) {}
-		EA_ASSERT_PREFIX_DEPRECATED bool Call(const char* msg, ...) const EA_ASSERT_POSTFIX_DEPRECATED
+namespace EA {
+	namespace Assert {
+		namespace Detail
 		{
-			va_list args;
-			va_start(args, msg);
-			bool ret = (*GetFailureCallback())(mExpr, mFilename, mLine, mFunction, msg, args);
-			va_end(args);
-			return ret;
+			// The Forwarder class is deprecated on compilers that support variadic macros. Avoiding
+			// the temporary instances created by this code can result in significant code size savings.
+			// Code outside of the EAAssert library shouldn't be referencing API in the Detail namespace.
+#ifdef EA_COMPILER_NO_VARIADIC_MACROS
+#define EA_ASSERT_PREFIX_DEPRECATED
+#define EA_ASSERT_POSTFIX_DEPRECATED
+#else
+#define EA_ASSERT_PREFIX_DEPRECATED EA_PREFIX_DEPRECATED
+#define EA_ASSERT_POSTFIX_DEPRECATED EA_POSTFIX_DEPRECATED
+#endif
+
+			struct Forwarder
+			{
+				const char* mExpr;
+				const char* mFunction;
+				const char* mFilename;
+				int mLine;
+				Forwarder(const char* expr, const char* filename, int line, const char* function) : mExpr(expr), mFunction(function), mFilename(filename), mLine(line) {}
+				EA_ASSERT_PREFIX_DEPRECATED bool Call(const char* msg, ...) const EA_ASSERT_POSTFIX_DEPRECATED
+				{
+					va_list args;
+					va_start(args, msg);
+					bool ret = (*GetFailureCallback())(mExpr, mFilename, mLine, mFunction, msg, args);
+					va_end(args);
+					return ret;
+				}
+			};
+
+#ifdef EA_COMPILER_NO_VARIADIC_MACROS
+#define EA_ASSERT_FORMATTED_HANDLER_CALL(EXPR, FILE, LINE, FUNCTION, FMT) EA::Assert::Detail::Forwarder(EXPR, FILE, LINE, FUNCTION).Call FMT
+#else
+#define EA_ASSERT_FORMATTED_HANDLER_CALL(EXPR, FILE, LINE, FUNCTION, FMT) EA::Assert::Detail::VCall(EXPR, FILE, LINE, FUNCTION, EA_ASSERT_EXPAND_VA_ARGS FMT)
+#define EA_ASSERT_EXPAND_VA_ARGS(...) __VA_ARGS__
+#endif
+
 		}
-	};
-
-	#ifdef EA_COMPILER_NO_VARIADIC_MACROS
-		#define EA_ASSERT_FORMATTED_HANDLER_CALL(EXPR, FILE, LINE, FUNCTION, FMT) EA::Assert::Detail::Forwarder(EXPR, FILE, LINE, FUNCTION).Call FMT
-	#else
-		#define EA_ASSERT_FORMATTED_HANDLER_CALL(EXPR, FILE, LINE, FUNCTION, FMT) EA::Assert::Detail::VCall(EXPR, FILE, LINE, FUNCTION, EA_ASSERT_EXPAND_VA_ARGS FMT)
-		#define EA_ASSERT_EXPAND_VA_ARGS(...) __VA_ARGS__
-	#endif
-
-}}}
+	}
+}
 #endif
 
 
@@ -249,42 +253,42 @@ namespace Detail
 ///    EA_COMPILETIME_ASSERT(sizeof(int) == 4);
 ///
 #ifndef EA_COMPILETIME_ASSERT
-	#if defined(EA_COMPILER_EDG) || defined(EA_COMPILER_CLANG)
-		// Ideally static_assert would be used wherever possible because it allows for improved error reporting.
-		// However, using static_assert with Clang currently breaks code using EAOffsetOf.  We need to fix this
-		// macro on clang before enabling the use of static_assert.
-		#define EAASSERT_TOKEN_PASTE(a,b) a ## b
-		#define EAASSERT_CONCATENATE_HELPER(a,b) EAASSERT_TOKEN_PASTE(a,b)
-		#define EA_COMPILETIME_ASSERT(expr) \
+#if defined(EA_COMPILER_EDG) || defined(EA_COMPILER_CLANG)
+	// Ideally static_assert would be used wherever possible because it allows for improved error reporting.
+	// However, using static_assert with Clang currently breaks code using EAOffsetOf.  We need to fix this
+	// macro on clang before enabling the use of static_assert.
+#define EAASSERT_TOKEN_PASTE(a,b) a ## b
+#define EAASSERT_CONCATENATE_HELPER(a,b) EAASSERT_TOKEN_PASTE(a,b)
+#define EA_COMPILETIME_ASSERT(expr) \
 			EA_DISABLE_CLANG_WARNING(-Wunknown-pragmas); /* Disable warnings about unknown pragmas in case -Wunused-local-typedefs is not supported*/ \
 			EA_DISABLE_CLANG_WARNING(-Wunused-local-typedef); \
 			typedef char EAASSERT_CONCATENATE_HELPER(compileTimeAssert,__LINE__)  [((expr) != 0) ? 1 : -1]; \
 			EA_RESTORE_CLANG_WARNING() \
 			EA_RESTORE_CLANG_WARNING()
-	#else
-		#define EA_COMPILETIME_ASSERT(expr) static_assert(expr, EA_STRINGIFY(expr))
-	#endif
+#else
+#define EA_COMPILETIME_ASSERT(expr) static_assert(expr, EA_STRINGIFY(expr))
+#endif
 #endif
 
 #ifndef EA_CT_ASSERT
-	#define EA_CT_ASSERT EA_COMPILETIME_ASSERT
+#define EA_CT_ASSERT EA_COMPILETIME_ASSERT
 #endif
 
 
 
 #ifdef EA_DEBUG
-	#ifndef EA_ASSERT_ENABLED
-		#define EA_ASSERT_ENABLED 1
-	#endif
-	#ifndef EA_PANIC_ENABLED
-		#define EA_PANIC_ENABLED 1
-	#endif
+#ifndef EA_ASSERT_ENABLED
+#define EA_ASSERT_ENABLED 1
+#endif
+#ifndef EA_PANIC_ENABLED
+#define EA_PANIC_ENABLED 1
+#endif
 #endif
 
 #ifdef EA_ASSERT_ENABLED    
-	#ifdef __cplusplus
-		#ifndef EA_ASSERT
-			#define EA_ASSERT(expr) \
+#ifdef __cplusplus
+#ifndef EA_ASSERT
+#define EA_ASSERT(expr) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do { \
 					EA_ANALYSIS_ASSUME(expr); \
@@ -294,9 +298,9 @@ namespace Detail
 						((void)0);\
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_ASSERT_MSG
-			#define EA_ASSERT_MSG(expr, msg) \
+#endif
+#ifndef EA_ASSERT_MSG
+#define EA_ASSERT_MSG(expr, msg) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do { \
 					EA_ANALYSIS_ASSUME(expr); \
@@ -306,22 +310,22 @@ namespace Detail
 						((void)0);\
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_ASSERT_FORMATTED
-			#define EA_ASSERT_FORMATTED(expr, fmt) if (!(expr) && EA_ASSERT_FORMATTED_HANDLER_CALL(#expr, __FILE__, __LINE__, EA_CURRENT_FUNCTION, fmt))       EA_DEBUG_BREAK(); else ((void)0)
-		#endif
-		#ifndef EA_FAIL
-			#define EA_FAIL() if ( EA::Assert::Detail::Call("EA_FAIL", __FILE__, __LINE__, EA_CURRENT_FUNCTION)) EA_DEBUG_BREAK(); else ((void)0)
-		#endif
-		#ifndef EA_FAIL_MSG
-			#define EA_FAIL_MSG(msg) if ( EA::Assert::Detail::Call("EA_FAIL", __FILE__, __LINE__, EA_CURRENT_FUNCTION, msg)) EA_DEBUG_BREAK(); else ((void)0)
-		#endif
-		#ifndef EA_FAIL_FORMATTED
-			#define EA_FAIL_FORMATTED(fmt)         if (EA_ASSERT_FORMATTED_HANDLER_CALL("EA_FAIL", __FILE__, __LINE__, EA_CURRENT_FUNCTION, fmt))       EA_DEBUG_BREAK(); else ((void)0)
-		#endif
-	#else
-		#ifndef EA_ASSERT
-			#define EA_ASSERT(expr) \
+#endif
+#ifndef EA_ASSERT_FORMATTED
+#define EA_ASSERT_FORMATTED(expr, fmt) if (!(expr) && EA_ASSERT_FORMATTED_HANDLER_CALL(#expr, __FILE__, __LINE__, EA_CURRENT_FUNCTION, fmt))       EA_DEBUG_BREAK(); else ((void)0)
+#endif
+#ifndef EA_FAIL
+#define EA_FAIL() if ( EA::Assert::Detail::Call("EA_FAIL", __FILE__, __LINE__, EA_CURRENT_FUNCTION)) EA_DEBUG_BREAK(); else ((void)0)
+#endif
+#ifndef EA_FAIL_MSG
+#define EA_FAIL_MSG(msg) if ( EA::Assert::Detail::Call("EA_FAIL", __FILE__, __LINE__, EA_CURRENT_FUNCTION, msg)) EA_DEBUG_BREAK(); else ((void)0)
+#endif
+#ifndef EA_FAIL_FORMATTED
+#define EA_FAIL_FORMATTED(fmt)         if (EA_ASSERT_FORMATTED_HANDLER_CALL("EA_FAIL", __FILE__, __LINE__, EA_CURRENT_FUNCTION, fmt))       EA_DEBUG_BREAK(); else ((void)0)
+#endif
+#else
+#ifndef EA_ASSERT
+#define EA_ASSERT(expr) \
 				EA_DISABLE_VC_WARNING(4127)\
 				do {\
 					EA_ANALYSIS_ASSUME(expr);\
@@ -335,9 +339,9 @@ namespace Detail
 					}\
 				} while(0)\
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_ASSERT_MSG
-			#define EA_ASSERT_MSG(expr, msg) \
+#endif
+#ifndef EA_ASSERT_MSG
+#define EA_ASSERT_MSG(expr, msg) \
 				EA_DISABLE_VC_WARNING(4127)\
 				do\
 				{ \
@@ -352,9 +356,9 @@ namespace Detail
 					} \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_ASSERT_FORMATTED
-			#define EA_ASSERT_FORMATTED(expr, fmt) \
+#endif
+#ifndef EA_ASSERT_FORMATTED
+#define EA_ASSERT_FORMATTED(expr, fmt) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do {\
 					EA_ANALYSIS_ASSUME(expr); \
@@ -368,51 +372,51 @@ namespace Detail
 					} \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_FAIL
-			#define EA_FAIL() \
+#endif
+#ifndef EA_FAIL
+#define EA_FAIL() \
 				EA_DISABLE_VC_WARNING(4127) \
 				do {\
 					printf("\nEA_FAIL: %s(%d)\n", __FILE__, __LINE__); EA_DEBUG_BREAK(); \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_FAIL_MSG
-			#define EA_FAIL_MSG(msg) \
+#endif
+#ifndef EA_FAIL_MSG
+#define EA_FAIL_MSG(msg) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do {\
 					printf("\nEA_FAIL: %s(%d): %s\n", __FILE__, __LINE__, msg); EA_DEBUG_BREAK(); \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_FAIL_FORMATTED
-			#define EA_FAIL_FORMATTED(fmt) \
+#endif
+#ifndef EA_FAIL_FORMATTED
+#define EA_FAIL_FORMATTED(fmt) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do {\
 					printf fmt; EA_DEBUG_BREAK(); \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-	#endif
+#endif
+#endif
 #else
-	#ifndef EA_ASSERT
-		#define EA_ASSERT(expr)                        ((void)0)
-	#endif
-	#ifndef EA_ASSERT_MSG
-		#define EA_ASSERT_MSG(expr, msg)               ((void)0)
-	#endif
-	#ifndef EA_ASSERT_FORMATTED
-		#define EA_ASSERT_FORMATTED(expr, fmt)         ((void)0)
-	#endif
-	#ifndef EA_FAIL
-		#define EA_FAIL()                              ((void)0)
-	#endif
-	#ifndef EA_FAIL_MSG
-		#define EA_FAIL_MSG(msg)                       ((void)0)
-	#endif
-	#ifndef EA_FAIL_FORMATTED
-		#define EA_FAIL_FORMATTED(fmt)                 ((void)0)
-	#endif
+#ifndef EA_ASSERT
+#define EA_ASSERT(expr)                        ((void)0)
+#endif
+#ifndef EA_ASSERT_MSG
+#define EA_ASSERT_MSG(expr, msg)               ((void)0)
+#endif
+#ifndef EA_ASSERT_FORMATTED
+#define EA_ASSERT_FORMATTED(expr, fmt)         ((void)0)
+#endif
+#ifndef EA_FAIL
+#define EA_FAIL()                              ((void)0)
+#endif
+#ifndef EA_FAIL_MSG
+#define EA_FAIL_MSG(msg)                       ((void)0)
+#endif
+#ifndef EA_FAIL_FORMATTED
+#define EA_FAIL_FORMATTED(fmt)                 ((void)0)
+#endif
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -430,9 +434,9 @@ namespace Detail
 ///    EA_PANIC(myVar == theirVar);
 ///
 #ifdef EA_PANIC_ENABLED
-	#ifdef __cplusplus
-		#ifndef EA_PANIC
-			#define EA_PANIC(expr) \
+#ifdef __cplusplus
+#ifndef EA_PANIC
+#define EA_PANIC(expr) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do { \
 					EA_ANALYSIS_ASSUME(expr); \
@@ -441,9 +445,9 @@ namespace Detail
 					} else ((void)0); \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_PANIC_MSG
-			#define EA_PANIC_MSG(expr, msg) \
+#endif
+#ifndef EA_PANIC_MSG
+#define EA_PANIC_MSG(expr, msg) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do { \
 					EA_ANALYSIS_ASSUME(expr); \
@@ -452,9 +456,9 @@ namespace Detail
 					} else ((void)0); \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_PANIC_FORMATTED
-			#define EA_PANIC_FORMATTED(expr, fmt) \
+#endif
+#ifndef EA_PANIC_FORMATTED
+#define EA_PANIC_FORMATTED(expr, fmt) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do { \
 					EA_ANALYSIS_ASSUME(expr); \
@@ -463,10 +467,10 @@ namespace Detail
 					} else ((void)0); \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-	#else
-		#ifndef EA_PANIC
-			#define EA_PANIC(expr) \
+#endif
+#else
+#ifndef EA_PANIC
+#define EA_PANIC(expr) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do { \
 					EA_ANALYSIS_ASSUME(expr); \
@@ -475,9 +479,9 @@ namespace Detail
 					} else ((void)0); \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_PANIC_MSG
-			#define EA_PANIC_MSG(expr, msg) \
+#endif
+#ifndef EA_PANIC_MSG
+#define EA_PANIC_MSG(expr, msg) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do { \
 					EA_ANALYSIS_ASSUME(expr); \
@@ -486,9 +490,9 @@ namespace Detail
 					} else ((void)0); \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-		#ifndef EA_PANIC_FORMATTED
-			#define EA_PANIC_FORMATTED(expr, fmt) \
+#endif
+#ifndef EA_PANIC_FORMATTED
+#define EA_PANIC_FORMATTED(expr, fmt) \
 				EA_DISABLE_VC_WARNING(4127) \
 				do { \
 					EA_ANALYSIS_ASSUME(expr); \
@@ -497,18 +501,18 @@ namespace Detail
 					} else ((void)0); \
 				} while(0) \
 				EA_RESTORE_VC_WARNING()
-		#endif
-	#endif
+#endif
+#endif
 #else
-	#ifndef EA_PANIC
-		#define EA_PANIC(expr)                ((void)0)
-	#endif
-	#ifndef EA_PANIC_MSG
-		#define EA_PANIC_MSG(expr, msg)       ((void)0)
-	#endif
-	#ifndef EA_PANIC_FORMATTED
-		#define EA_PANIC_FORMATTED(expr, fmt) ((void)0)
-	#endif
+#ifndef EA_PANIC
+#define EA_PANIC(expr)                ((void)0)
+#endif
+#ifndef EA_PANIC_MSG
+#define EA_PANIC_MSG(expr, msg)       ((void)0)
+#endif
+#ifndef EA_PANIC_FORMATTED
+#define EA_PANIC_FORMATTED(expr, fmt) ((void)0)
+#endif
 #endif
 
 #endif // EA_ASSERT_HAVE_OWN_HEADER
@@ -516,22 +520,22 @@ namespace Detail
 // We provide some synonyms for the message style macros, because we couldn't reach common ground
 // and there was too much existing code using different versions. It's not pretty, but relatively harmless
 #ifndef EA_ASSERT_M
-	#define EA_ASSERT_M EA_ASSERT_MSG
+#define EA_ASSERT_M EA_ASSERT_MSG
 #endif
 #ifndef EA_ASSERT_MESSAGE 
-	#define EA_ASSERT_MESSAGE EA_ASSERT_MSG
+#define EA_ASSERT_MESSAGE EA_ASSERT_MSG
 #endif
 #ifndef EA_FAIL_M
-	#define EA_FAIL_M EA_FAIL_MSG
+#define EA_FAIL_M EA_FAIL_MSG
 #endif
 #ifndef EA_FAIL_MESSAGE
-	#define EA_FAIL_MESSAGE EA_FAIL_MSG
+#define EA_FAIL_MESSAGE EA_FAIL_MSG
 #endif
 #ifndef EA_PANIC_M
-	#define EA_PANIC_M EA_PANIC_MSG
+#define EA_PANIC_M EA_PANIC_MSG
 #endif
 #ifndef EA_PANIC_MESSAGE
-	#define EA_PANIC_MESSAGE EA_PANIC_MSG
+#define EA_PANIC_MESSAGE EA_PANIC_MSG
 #endif
 
 

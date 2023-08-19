@@ -32,22 +32,13 @@
 
 /////////////////////////////////////////////////////////////////////////////////
 
-
-#if defined(EA_COMPILER_MSVC)
-
+#if (defined(__clang__) || defined(EA_COMPILER_GNUC)) && defined(EA_PROCESSOR_X86_64)
+	#define EASTL_ARCH_ATOMIC_HAS_128BIT
+#elif defined(EA_COMPILER_MSVC)
 	#if EA_PLATFORM_PTR_SIZE == 8
 		#define EASTL_ARCH_ATOMIC_HAS_128BIT
 	#endif
-
 #endif
-
-
-#if ((defined(EA_COMPILER_CLANG) || defined(EA_COMPILER_GNUC)) && defined(EA_PROCESSOR_X86_64))
-
-	#define EASTL_ARCH_ATOMIC_HAS_128BIT
-
-#endif
-
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -77,7 +68,7 @@
 
 	#define EASTL_ARCH_ATOMIC_X86_OP_64_IMPL(type, ret, ptr, val, MemoryOrder, PRE_COMPUTE_DESIRED, POST_COMPUTE_RET) \
 		{																	\
-			bool cmpxchgRet;												\
+			EASTL_ATOMIC_DEFAULT_INIT(bool, cmpxchgRet);					\
 			EASTL_ATOMIC_LOAD_RELAXED_64(type, ret, ptr);					\
 			do																\
 			{																\
@@ -104,7 +95,7 @@
  * SSE 128-bit loads are not guaranteed to be atomic even though some CPUs
  * make them atomic such as AMD Ryzen or Intel SandyBridge.
  */
-#if ((defined(EA_COMPILER_CLANG) || defined(EA_COMPILER_GNUC)) && defined(EA_PROCESSOR_X86_64))
+#if ((defined(__clang__) || defined(EA_COMPILER_GNUC)) && defined(EA_PROCESSOR_X86_64))
 
 
 	#define EASTL_ARCH_ATOMIC_X86_NOP_PRE_COMPUTE_DESIRED(ret, observed, val) \
@@ -115,7 +106,7 @@
 
 	#define EASTL_ARCH_ATOMIC_X86_OP_128_IMPL(type, ret, ptr, val, MemoryOrder, PRE_COMPUTE_DESIRED, POST_COMPUTE_RET) \
 		{																	\
-			bool cmpxchgRet;												\
+			EASTL_ATOMIC_DEFAULT_INIT(bool, cmpxchgRet);					\
 			/* This is intentionally a non-atomic 128-bit load which may observe shearing. */ \
 			/* Either we do not observe *(ptr) but then the cmpxchg will fail and the observed */ \
 			/* atomic load will be returned. Or the non-atomic load got lucky and the cmpxchg succeeds */ \

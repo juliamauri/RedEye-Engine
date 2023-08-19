@@ -51,12 +51,12 @@
 #endif
 
 
-#if ((defined(EA_COMPILER_CLANG) || defined(EA_COMPILER_GNUC)) && defined(EA_PROCESSOR_X86_64))
+#if ((defined(__clang__) || defined(EA_COMPILER_GNUC)) && defined(EA_PROCESSOR_X86_64))
 
 
 	#define EASTL_ARCH_ATOMIC_X86_EXCHANGE_128(type, ret, ptr, val, MemoryOrder) \
 		{																	\
-			bool cmpxchgRet;												\
+			EASTL_ATOMIC_DEFAULT_INIT(bool, cmpxchgRet);					\
 			/* This is intentionally a non-atomic 128-bit load which may observe shearing. */ \
 			/* Either we do not observe *(ptr) but then the cmpxchg will fail and the observed */ \
 			/* atomic load will be returned. Or the non-atomic load got lucky and the cmpxchg succeeds */ \

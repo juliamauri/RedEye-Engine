@@ -22,7 +22,9 @@ RE_CompTransform::~RE_CompTransform() {}
 void RE_CompTransform::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
-	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);
+	RE_GameObject* go_ptr = nullptr;
+	if (go = parent) (go_ptr = pool_gos->AtPtr(go))->ReportComponent(id, type);
+	useParent = go_ptr->GetParentUID();
 
 	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(copy);
 	SetPosition(t->pos);

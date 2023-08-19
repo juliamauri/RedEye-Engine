@@ -8,7 +8,7 @@
 
 void AboutWindow::Draw(bool secondary)
 {
-	if (ImGui::Begin(name, 0, ImGuiWindowFlags_NoFocusOnAppearing))
+	if (ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
 	{
 		if (secondary)
 		{
@@ -33,23 +33,7 @@ void AboutWindow::Draw(bool secondary)
 		ImGui::SameLine();
 		if (ImGui::Button("Visit Github Profile")) BROWSER("https://github.com/cumus");
 
-		ImGui::Separator();
-		if (ImGui::CollapsingHeader("3rd Party Software:"))
-		{
-			for (auto software : sw_info)
-			{
-				if (software.version != nullptr) ImGui::BulletText("%s: v%s ", software.name, software.version);
-				else ImGui::BulletText("%s ", software.name);
-
-				if (software.website != nullptr)
-				{
-					ImGui::SameLine();
-					char tmp[128];
-					EA::StdC::Snprintf(tmp, 128, "Open %s Website", software.name);
-					if (ImGui::Button(tmp)) BROWSER(software.website);
-				}
-			}
-		}
+		DrawThirdParties();
 
 		if (secondary)
 		{
@@ -58,4 +42,28 @@ void AboutWindow::Draw(bool secondary)
 		}
 	}
 	ImGui::End();
+}
+
+void AboutWindow::DrawThirdParties() const
+{
+	ImGui::Separator();
+	if (ImGui::CollapsingHeader("3rd Party Software:"))
+	{
+		for (auto& software : sw_info)
+		{
+			if (software.version != nullptr) ImGui::BulletText("%s: v%s ", software.name, software.version);
+			else ImGui::BulletText("%s ", software.name);
+
+			if (software.website != nullptr)
+			{
+				ImGui::SameLine();
+				static eastl::string tmp;
+				tmp.clear();
+				tmp.reserve(124);
+
+				EA::StdC::Snprintf(tmp.data(), 128, "Open %s Website", software.name);
+				if (ImGui::Button(tmp.c_str())) BROWSER(software.website);
+			}
+		}
+	}
 }
