@@ -187,7 +187,7 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 			simulation->light.linear,
 			simulation->light.quadratic);
 
-		for (const auto p : simulation->particle_pool)
+		for (const auto& p : simulation->particle_pool)
 		{
 			if (count == maxLights) return;
 			unif_name = array_name + eastl::to_string(count++) + "].";
@@ -227,7 +227,7 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 		const math::vec color = simulation->light.GetColor();
 		const float intensity = simulation->light.GetIntensity();
 
-		for (const auto p : simulation->particle_pool)
+		for (const auto& p : simulation->particle_pool)
 		{
 			if (count == maxLights) return;
 
@@ -435,7 +435,7 @@ void ParticleManager::DebugDrawSimulation(const RE_ParticleEmitter* const sim, c
 		if (sim->collider.type == RE_EmissionCollider::Type::SPHERE)
 		{
 			glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
-			for (const auto p : sim->particle_pool)
+			for (const auto& p : sim->particle_pool)
 				DrawAASphere(sim->local_space ? sim->parent_pos + p.position : p.position, p.col_radius);
 		}
 
@@ -450,10 +450,10 @@ void ParticleManager::DebugDrawSimulation(const RE_ParticleEmitter* const sim, c
 		glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
 
 		if (sim->local_space)
-			for (const auto p : sim->particle_pool)
+			for (const auto& p : sim->particle_pool)
 				glVertex3fv((sim->parent_pos + p.position).ptr());
 		else
-			for (const auto p : sim->particle_pool)
+			for (const auto& p : sim->particle_pool)
 				glVertex3fv(p.position.ptr());
 
 		glPointSize(1.f);
