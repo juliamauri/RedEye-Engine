@@ -1,6 +1,6 @@
-#include <MGL\Math\float3.h>
-#include <MGL\Geometry\AABB.h>
-#include <EASTL\vector.h>
+#include <MGL/Math/float3.h>
+#include <MGL/Geometry/AABB.h>
+#include <EASTL/vector.h>
 
 #include "RE_QuadTree.h"
 

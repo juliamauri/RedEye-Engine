@@ -17,15 +17,15 @@
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
 
-#include <ImGui\imgui.h>
-#include <GL\glew.h>
-#include <gl\GL.h>
-#include <MGL\MathGeoLib.h>
-#include <MGL\Math\Quat.h>
-#include <MD5\md5.h>
-#include <assimp\Importer.hpp>
-#include <assimp\scene.h>
-#include <assimp\postprocess.h>
+#include <ImGui/imgui.h>
+#include <GL/glew.h>
+#include <gl/GL.h>
+#include <MGL/MathGeoLib.h>
+#include <MGL/Math\Quat.h>
+#include <MD5/md5.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 
 RE_Mesh::RE_Mesh()
