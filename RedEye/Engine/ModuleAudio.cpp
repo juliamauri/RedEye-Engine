@@ -41,7 +41,12 @@ bool ModuleAudio::Init()
 
 	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleAudio);
 	RE_LOG("Initializing Module Audio");
-	RE_SOFT_NVS("Wwise SDK", AK_WWISESDK_VERSIONNAME, "https://www.audiokinetic.com/products/wwise/");
+
+	RE_SOFT_NVS("Wwise SDK", eastl::string(
+				eastl::to_string(AK_WWISESDK_VERSION_MAJOR) + "." + 
+				eastl::to_string(AK_WWISESDK_VERSION_MINOR) + "." + 
+				eastl::to_string(AK_WWISESDK_VERSION_SUBMINOR)).c_str(),
+				"https://www.audiokinetic.com/products/wwise/");
 
 	AkMemSettings memSettings;
 	AK::MemoryMgr::GetDefaultSettings(memSettings);

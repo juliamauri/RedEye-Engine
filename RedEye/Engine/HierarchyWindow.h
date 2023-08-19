@@ -5,7 +5,7 @@ class HierarchyWindow : public EditorWindow
 {
 public:
 	HierarchyWindow() : EditorWindow("Heriarchy", true) {}
-	~HierarchyWindow() {}
+	~HierarchyWindow() final = default;
 
 private:
 

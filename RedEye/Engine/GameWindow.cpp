@@ -10,17 +10,18 @@
 #include "RE_CameraManager.h"
 
 #include <ImGui/imgui_internal.h>
+#include <EASTL/bit.h>
 
 void GameWindow::UpdateViewPort()
 {
 	RE_CameraManager::MainCamera()->GetTargetViewPort(viewport);
-	viewport.x = (width - viewport.z) * 0.5f;
-	viewport.y = (heigth - viewport.w) * 0.5f + 20;
+	viewport.x = (static_cast<float>(width) - viewport.z) * 0.5f;
+	viewport.y = (static_cast<float>(heigth) - viewport.w) * 0.5f + 20;
 }
 
 void GameWindow::Draw(bool secondary)
 {
-	if (need_render = ImGui::Begin(name, 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse))
+	if ((need_render = ImGui::Begin(name, nullptr, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse)))
 	{
 		if (secondary)
 		{
@@ -43,8 +44,8 @@ void GameWindow::Draw(bool secondary)
 
 		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 		ImGui::SetCursorPos({ viewport.x, viewport.y });
-		ImGui::Image(reinterpret_cast<void*>(RE_RENDER->GetRenderedGameSceneTexture()), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
-
+		ImGui::Image(eastl::bit_cast<void*>(RE_RENDER->GetRenderedGameSceneTexture()), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
+		
 		if (secondary)
 		{
 			ImGui::PopItemFlag();

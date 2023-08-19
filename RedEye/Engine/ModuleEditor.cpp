@@ -832,7 +832,7 @@ void ModuleEditor::DuplicateSelectedObject()
 
 void ModuleEditor::ReportSoftawe(const char* name, const char* version, const char* website) const
 {
-	about->sw_info.push_back({ name, version, website });
+	about->sw_info.push_back({ name, version ? version : "", website ? website : "" });
 }
 
 void ModuleEditor::HandleSDLEvent(SDL_Event* e) { ImGui_ImplSDL2_ProcessEvent(e); }

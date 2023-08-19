@@ -132,9 +132,9 @@ void RE_CompLight::SerializeBinary(char*& cursor, eastl::map<const char*, int>* 
 	memcpy(cursor, &linear, size);
 	cursor += size;
 	memcpy(cursor, &quadratic, size);
-	cursor += size;
-	memcpy(cursor, diffuse.ptr(), size * 3);
-	cursor += size * 3;
+	cursor += size; 
+	memcpy(cursor, diffuse.ptr(), size * diffuse.Size);
+	cursor += size * diffuse.Size;
 	memcpy(cursor, &specular, size);
 	cursor += size;
 	memcpy(cursor, &cutOff[0], size);
@@ -158,8 +158,8 @@ void RE_CompLight::DeserializeBinary(char*& cursor, eastl::map<int, const char*>
 	cursor += size;
 	memcpy(&quadratic, cursor, size);
 	cursor += size;
-	memcpy(&diffuse[0], cursor, size * 3);
-	cursor += size * 3;
+	memcpy(&diffuse[0], cursor, size * diffuse.Size);
+	cursor += size * diffuse.Size;
 	memcpy(&specular, cursor, size);
 	cursor += size;
 	memcpy(&cutOff[0], cursor, size);

@@ -26,6 +26,7 @@
 #include <ImGuiImpl/imgui_stdlib.h>
 #include <ImGui/imgui_internal.h>
 #include <GL/glew.h>
+#include <EASTL/bit.h>
 
 void ParticleEmitterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const char* md5)
 {
@@ -324,8 +325,8 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 
 			isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 			ImGui::SetCursorPos({ viewport.x, viewport.y });
-			ImGui::Image((void*)RE_RENDER->GetRenderedParticleEditorTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
-
+			ImGui::Image(eastl::bit_cast<void*>(RE_RENDER->GetRenderedParticleEditorTexture()), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
+			
 			if (secondary)
 			{
 				ImGui::PopItemFlag();

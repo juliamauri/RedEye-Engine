@@ -9,7 +9,7 @@
 
 void HierarchyWindow::Draw(bool secondary)
 {
-	if (ImGui::Begin(name, 0, ImGuiWindowFlags_HorizontalScrollbar))
+	if (ImGui::Begin(name, nullptr, ImGuiWindowFlags_HorizontalScrollbar))
 	{
 		if (secondary)
 		{

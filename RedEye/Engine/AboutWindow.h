@@ -2,28 +2,32 @@
 #define __ABOUT_WINDOW__
 
 #include "EditorWindow.h"
+#include <EASTL/string.h>
 #include <EASTL/vector.h>
 
 class AboutWindow : public EditorWindow
 {
 public:
-	AboutWindow() : EditorWindow("About", false) {}
-	~AboutWindow() final {}
-
-private:
-
-	void Draw(bool secondary = false) override;
-
-	void DrawThirdParties() const;
+	struct SoftwareInfo
+	{
+		eastl::string name;
+		eastl::string version;
+		eastl::string website;
+	};
 
 public:
 
-	struct SoftwareInfo
-	{
-		const char* name = nullptr;
-		const char* version = nullptr;
-		const char* website = nullptr;
-	};
+	AboutWindow() : EditorWindow("About", false) {}
+	~AboutWindow() final = default;
+
+private:
+	void Draw(bool secondary = false) override;
+
+	void DrawThirdParties() const;
+	void DisplayThirdParty(const SoftwareInfo& software) const;
+
+public:
+
 	eastl::vector<SoftwareInfo> sw_info;
 };
 

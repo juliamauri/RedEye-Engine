@@ -5,11 +5,14 @@ class ConfigWindow : public EditorWindow
 {
 public:
 	ConfigWindow();
-	~ConfigWindow() {}
+	~ConfigWindow() final = default;
 
 private:
 
 	void Draw(bool secondary = false) override;
+
+	void DrawOptions() const;
+	void DrawModules() const;
 
 public:
 
