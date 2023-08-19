@@ -90,7 +90,7 @@ ModuleRenderer3D::~ModuleRenderer3D() { DEL(fbos); }
 
 bool ModuleRenderer3D::Init()
 {
-	RE_PROFILE(PROF_Init, PROF_ModuleRender);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleRender);
 	bool ret = false;
 	RE_LOG("Initializing Module Renderer3D");
 	RE_LOG_SECONDARY("Seting SDL/GL Attributes.");
@@ -176,13 +176,13 @@ bool ModuleRenderer3D::Init()
 		}
 		else RE_LOG_ERROR("Glew could not initialize! Glew_Error: %s", glewGetErrorString(error));
 	}
-
+	 
 	return ret;
 }
 
 bool ModuleRenderer3D::Start()
 {
-	RE_PROFILE(PROF_Start, PROF_ModuleRender);
+	RE_PROFILE(RE_ProfiledFunc::Start, RE_ProfiledClass::ModuleRender);
 	RE_LOG("Starting Module Renderer3D");
 	thumbnailView.fbos = { fbos->CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
 
@@ -203,9 +203,9 @@ bool ModuleRenderer3D::Start()
 
 void ModuleRenderer3D::PostUpdate()
 {
-	RE_PROFILE(PROF_PostUpdate, PROF_ModuleRender);
+	RE_PROFILE(RE_ProfiledFunc::PostUpdate, RE_ProfiledClass::ModuleRender);
 	{
-		RE_PROFILE(PROF_GetActiveShaders, PROF_ModuleRender);
+		RE_PROFILE(RE_ProfiledFunc::GetActiveShaders, RE_ProfiledClass::ModuleRender);
 		// Setup Draws
 		activeShaders = RE_RES->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
 		/*
@@ -237,7 +237,7 @@ void ModuleRenderer3D::PostUpdate()
 	}
 
 	{
-		RE_PROFILE(PROF_DrawThumbnails, PROF_ModuleRender);
+		RE_PROFILE(RE_ProfiledFunc::DrawThumbnails, RE_ProfiledClass::ModuleRender);
 		current_lighting = LightMode::LIGHT_DISABLED;
 		while (!rendQueue.empty())
 		{
@@ -356,7 +356,7 @@ void ModuleRenderer3D::PostUpdate()
 
 void ModuleRenderer3D::CleanUp()
 {
-	RE_PROFILE(PROF_CleanUp, PROF_ModuleRender);
+	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleRender);
 	fbos->ClearAll();
 	SDL_GL_DeleteContext(mainContext);
 }
@@ -488,7 +488,7 @@ void ModuleRenderer3D::DrawEditor()
 
 void ModuleRenderer3D::Load()
 {
-	RE_PROFILE(PROF_Load, PROF_ModuleRender);
+	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleRender);
 	RE_LOG_SECONDARY("Loading Render3D config values:");
 	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
 
@@ -554,7 +554,7 @@ void ModuleRenderer3D::Load()
 
 void ModuleRenderer3D::Save() const
 {
-	RE_PROFILE(PROF_Save, PROF_ModuleRender);
+	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModuleRender);
 	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
 	node->PushBool("vsync", vsync);
 
@@ -674,7 +674,7 @@ void ModuleRenderer3D::PushThumnailRend(const char* md5, bool redo)
 
 void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 {
-	RE_PROFILE(PROF_DrawScene, PROF_ModuleRender);
+	RE_PROFILE(RE_ProfiledFunc::DrawScene, RE_ProfiledClass::ModuleRender);
 
 	// Setup Frame Buffer
 	current_lighting = render_view.light;
@@ -849,7 +849,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			DrawQuad();
 
 			// Render Particle Lights
-			RE_PROFILE(PROF_DrawParticlesLight, PROF_ModuleRender);
+			RE_PROFILE(RE_ProfiledFunc::DrawParticlesLight, RE_ProfiledClass::ModuleRender);
 
 			// Setup Shader
 			unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
@@ -880,7 +880,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		}
 		else
 		{
-			RE_PROFILE(PROF_DrawParticlesLight, PROF_ModuleRender);
+			RE_PROFILE(RE_ProfiledFunc::DrawParticlesLight, RE_ProfiledClass::ModuleRender);
 
 			// Bind Textures
 			static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
@@ -988,7 +988,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			RE_Component* rendComponent = stencilPtr->GetRenderGeo();
 			if (rendComponent)
 			{
-				RE_PROFILE(PROF_DrawStencil, PROF_ModuleRender);
+				RE_PROFILE(RE_ProfiledFunc::DrawStencil, RE_ProfiledClass::ModuleRender);
 				unsigned int vaoToStencil = 0, triangleToStencil = 0;
 
 				ComponentType cT = rendComponent->GetType();
@@ -1247,7 +1247,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 
 void ModuleRenderer3D::DrawSkyBox()
 {
-	RE_PROFILE(PROF_DrawSkybox, PROF_ModuleRender);
+	RE_PROFILE(RE_ProfiledFunc::DrawSkybox, RE_ProfiledClass::ModuleRender);
 	RE_GLCache::ChangeTextureBind(0);
 
 	uint skysphereshader = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultSkyBoxShader()))->GetID();

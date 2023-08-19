@@ -85,7 +85,7 @@ ModuleEditor::~ModuleEditor()
 bool ModuleEditor::Init()
 {
 	bool ret = false;
-	RE_PROFILE(PROF_Init, PROF_ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleEditor);
 	RE_LOG("Initializing Module Editor");
 
 	// ImGui
@@ -198,7 +198,7 @@ bool ModuleEditor::Init()
 
 bool ModuleEditor::Start()
 {
-	RE_PROFILE(PROF_Start, PROF_ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::Start, RE_ProfiledClass::ModuleEditor);
 	windows.push_back(assets = new AssetsWindow());
 	windows.push_back(wwise = new WwiseWindow());
 
@@ -217,7 +217,7 @@ bool ModuleEditor::Start()
 
 void ModuleEditor::PreUpdate()
 {
-	RE_PROFILE(PROF_PreUpdate, PROF_ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::PreUpdate, RE_ProfiledClass::ModuleEditor);
 	ImGuizmo::SetOrthographic(!RE_SCENE->cams->EditorCamera()->isPrespective());
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
@@ -227,7 +227,7 @@ void ModuleEditor::PreUpdate()
 
 void ModuleEditor::Update()
 {
-	RE_PROFILE(PROF_Update, PROF_ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModuleEditor);
 	if (show_all)
 	{
 		// Main Menu Bar
@@ -407,7 +407,7 @@ void ModuleEditor::Update()
 
 void ModuleEditor::CleanUp()
 {
-	RE_PROFILE(PROF_CleanUp, PROF_ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleEditor);
 	commands->Clear();
 	thumbnails->Clear();
 
@@ -450,7 +450,7 @@ void ModuleEditor::RecieveEvent(const Event& e)
 		float width, height;
 		camera->GetTargetWidthHeight(width, height);
 
-		RE_PROFILE(PROF_CameraRaycast, PROF_ModuleEditor);
+		RE_PROFILE(RE_ProfiledFunc::CameraRaycast, RE_ProfiledClass::ModuleEditor);
 		GO_UID hit = RE_SCENE->RayCastGeometry(
 			math::Ray(camera->GetFrustum().UnProjectLineSegment(
 			(e.data1.AsFloat() -(width / 2.0f)) / (width / 2.0f),
@@ -486,7 +486,7 @@ void ModuleEditor::RecieveEvent(const Event& e)
 
 void ModuleEditor::Draw() const
 {
-	RE_PROFILE(PROF_DrawEditor, PROF_ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::DrawEditor, RE_ProfiledClass::ModuleEditor);
 	sceneEditorWindow->DrawWindow();
 	sceneGameWindow->DrawWindow();
 
@@ -547,7 +547,7 @@ void ModuleEditor::DrawEditor()
 
 void ModuleEditor::Load()
 {
-	RE_PROFILE(PROF_Load, PROF_ModuleWindow);
+	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleWindow);
 	RE_LOG_SECONDARY("Loading Editor propieties from config:");
 
 	RE_FileBuffer _load("imgui.ini");
@@ -608,7 +608,7 @@ void ModuleEditor::Load()
 
 void ModuleEditor::Save() const
 {
-	RE_PROFILE(PROF_Save, PROF_ModuleWindow);
+	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModuleWindow);
 	
 	size_t _size = 0;
 	const char* buff = ImGui::SaveIniSettingsToMemory(&_size);
@@ -654,7 +654,7 @@ void ModuleEditor::Save() const
 
 void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 {
-	RE_PROFILE(PROF_DrawDebug, PROF_ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::DrawDebug, RE_ProfiledClass::ModuleEditor);
 
 	AABBDebugDrawing adapted_AABBdraw = aabb_drawing;
 
@@ -888,7 +888,7 @@ void ModuleEditor::ClearCommands() { commands->Clear(); }
 
 void ModuleEditor::UpdateCamera()
 {
-	RE_PROFILE(PROF_EditorCamera, PROF_ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::EditorCamera, RE_ProfiledClass::ModuleEditor);
 	RE_CompCamera* camera = RE_CameraManager::EditorCamera();
 	if (sceneEditorWindow->isSelected())
 	{

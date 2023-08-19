@@ -37,7 +37,7 @@ ParticleManager::~ParticleManager()
 
 void ParticleManager::Update(const float dt)
 {
-	RE_PROFILE(PROF_Update, PROF_ParticleManager);
+	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ParticleManager);
 
 	particle_count = 0u;
 	for (auto sim : simulations) particle_count += sim->Update(dt);
@@ -50,7 +50,7 @@ void ParticleManager::Clear()
 
 void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_position, math::float3 go_up) const
 {
-	RE_PROFILE(PROF_DrawParticles, PROF_ParticleManager);
+	RE_PROFILE(RE_ProfiledFunc::DrawParticles, RE_ProfiledClass::ParticleManager);
 
 	RE_ParticleEmitter* simulation = nullptr;
 	eastl::list<RE_ParticleEmitter*>::const_iterator it;
@@ -159,7 +159,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 
 void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
 {
-	RE_PROFILE(PROF_DrawParticlesLight, PROF_ParticleManager);
+	RE_PROFILE(RE_ProfiledFunc::DrawParticlesLight, RE_ProfiledClass::ParticleManager);
 
 	RE_ParticleEmitter* simulation = nullptr;
 	eastl::list<RE_ParticleEmitter*>::const_iterator it;
@@ -315,7 +315,7 @@ void ParticleManager::DrawEditor()
 
 void ParticleManager::DrawDebug() const
 {
-	RE_PROFILE(PROF_Update, PROF_ModulePhysics);
+	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModulePhysics);
 
 	const float interval = RE_Math::pi_x2 / circle_steps;
 	for (const auto sim : simulations)

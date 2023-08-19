@@ -1390,7 +1390,7 @@ unsigned int RE_EmissionExternalForces::GetBinarySize() const
 
 bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 {
-	RE_PROFILE(PROF_ParticleBoundPCol, PROF_ParticleBoundary);
+	RE_PROFILE(RE_ProfiledFunc::ParticleBoundPCol, RE_ProfiledClass::ParticleBoundary);
 	switch (type)
 	{
 	case Type::PLANE:
@@ -1479,7 +1479,7 @@ bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 
 bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 {
-	RE_PROFILE(PROF_ParticleBoundSCol, PROF_ParticleBoundary);
+	RE_PROFILE(RE_ProfiledFunc::ParticleBoundSCol, RE_ProfiledClass::ParticleBoundary);
 	switch (type)
 	{
 	case Type::PLANE:

@@ -48,7 +48,7 @@ RE_ResourceManager::~RE_ResourceManager()
 
 void RE_ResourceManager::Init()
 {
-	RE_PROFILE(PROF_Init, PROF_ResourcesManager);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ResourcesManager);
 	RE_LOG_SEPARATOR("Initializing Resources");
 
 	RE_TextureImporter::Init();
@@ -62,7 +62,7 @@ void RE_ResourceManager::Init()
 
 void RE_ResourceManager::Clear()
 {
-	RE_PROFILE(PROF_Clear, PROF_ResourcesManager);
+	RE_PROFILE(RE_ProfiledFunc::Clear, RE_ProfiledClass::ResourcesManager);
 	internalResources->Clear();
 	shader_importer->Clear();
 
@@ -699,7 +699,7 @@ bool RE_ResourceManager::isNeededResoursesLoaded(const char* metaPath, Resource_
 
 void RE_ResourceManager::ThumbnailResources()
 {
-	RE_PROFILE(PROF_ThumbnailResources, PROF_ResourcesManager);
+	RE_PROFILE(RE_ProfiledFunc::ThumbnailResources, RE_ProfiledClass::ResourcesManager);
 	for (auto res : resources) {
 		Resource_Type rT = res.second->GetType();
 		if(rT == R_SCENE || rT == R_PREFAB || rT == R_MODEL || rT == R_SKYBOX || rT == R_MATERIAL || rT == R_TEXTURE)

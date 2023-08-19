@@ -45,7 +45,7 @@ ModuleScene::~ModuleScene() { DEL(cams); DEL(primitives); }
 
 bool ModuleScene::Init()
 {
-	RE_PROFILE(PROF_Init, PROF_ModuleScene);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleScene);
 	RE_LOG("Initializing Module Scene");
 	cams->Init();
 	primitives->Init();
@@ -54,7 +54,7 @@ bool ModuleScene::Init()
 
 bool ModuleScene::Start()
 {
-	RE_PROFILE(PROF_Start, PROF_ModuleScene);
+	RE_PROFILE(RE_ProfiledFunc::Start, RE_ProfiledClass::ModuleScene);
 	RE_LOG("Starting Module Scene");
 
 	eastl::vector<ResourceContainer*> scenes = RE_RES->GetResourcesByType(R_SCENE);
@@ -66,13 +66,13 @@ bool ModuleScene::Start()
 
 void ModuleScene::Update()
 {
-	RE_PROFILE(PROF_Update, PROF_ModuleScene);
+	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModuleScene);
 	scenePool.Update();
 }
 
 void ModuleScene::PostUpdate()
 {
-	RE_PROFILE(PROF_PostUpdate, PROF_ModuleScene);
+	RE_PROFILE(RE_ProfiledFunc::PostUpdate, RE_ProfiledClass::ModuleScene);
 	bool someDelete = !to_delete.empty();
 	while (!to_delete.empty())
 	{
@@ -83,7 +83,7 @@ void ModuleScene::PostUpdate()
 
 void ModuleScene::CleanUp()
 {
-	RE_PROFILE(PROF_CleanUp, PROF_ModuleScene);
+	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleScene);
 	cams->Clear();
 	primitives->Clear();
 	if (unsavedScene) DEL(unsavedScene);

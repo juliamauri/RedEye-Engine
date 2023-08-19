@@ -39,7 +39,7 @@ bool ModuleAudio::Init()
 {
 	bool ret = true;
 
-	RE_PROFILE(PROF_Init, PROF_ModuleAudio);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleAudio);
 	RE_LOG("Initializing Module Audio");
 	RE_SOFT_NVS("Wwise SDK", AK_WWISESDK_VERSIONNAME, "https://www.audiokinetic.com/products/wwise/");
 
@@ -106,7 +106,7 @@ static AkGameObjectID MY_DEFAULT_LISTENER = 0;
 
 bool ModuleAudio::Start()
 {
-	RE_PROFILE(PROF_Start, PROF_ModuleAudio);
+	RE_PROFILE(RE_ProfiledFunc::Start, RE_ProfiledClass::ModuleAudio);
 	RE_LOG("Starting Module Audio");
 	AK::StreamMgr::SetCurrentLanguage(AKTEXT("English(US)"));
 	
@@ -123,13 +123,13 @@ bool ModuleAudio::Start()
 
 void ModuleAudio::PostUpdate()
 {
-	RE_PROFILE(PROF_PostUpdate, PROF_ModuleAudio);
+	RE_PROFILE(RE_ProfiledFunc::PostUpdate, RE_ProfiledClass::ModuleAudio);
 	AK::SoundEngine::RenderAudio();
 }
 
 void ModuleAudio::CleanUp()
 {
-	RE_PROFILE(PROF_CleanUp, PROF_ModuleAudio);
+	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleAudio);
 	soundbanks.clear();
 	AK::SoundEngine::ClearBanks();
 #ifndef AK_OPTIMIZED
@@ -256,7 +256,7 @@ void ModuleAudio::DrawWwiseElementsDetected()
 
 void ModuleAudio::Load()
 {
-	RE_PROFILE(PROF_Load, PROF_ModuleAudio);
+	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleAudio);
 	RE_Json* node = RE_FS->ConfigNode("Audio");
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
 	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
@@ -265,7 +265,7 @@ void ModuleAudio::Load()
 
 void ModuleAudio::Save() const
 {
-	RE_PROFILE(PROF_Save, PROF_ModuleAudio);
+	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModuleAudio);
 	RE_Json* node = RE_FS->ConfigNode("Audio");
 	node->PushString("FolderBanks", audioBanksFolderPath.c_str());
 	DEL(node);
@@ -273,7 +273,7 @@ void ModuleAudio::Save() const
 
 unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 {
-	RE_PROFILE(PROF_ReadAssetChanges, PROF_ModuleAudio);
+	RE_PROFILE(RE_ProfiledFunc::ReadAssetChanges, RE_ProfiledClass::ModuleAudio);
 	RE_Timer time;
 	if (located_banksFolder)
 	{

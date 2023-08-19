@@ -12,7 +12,7 @@
 
 void ModulePhysics::Update()
 {
-	RE_PROFILE(PROF_Update, PROF_ModulePhysics);
+	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModulePhysics);
 	const float global_dt = RE_TIME->GetDeltaTime();
 
 	switch (mode) {
@@ -148,7 +148,7 @@ void ModulePhysics::DrawEditor()
 
 void ModulePhysics::Load()
 {
-	RE_PROFILE(PROF_Load, PROF_ModuleWindow);
+	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleWindow);
 	RE_LOG_SECONDARY("Loading Physics propieties from config:");
 	RE_Json* node = RE_FS->ConfigNode("Physics");
 
@@ -159,7 +159,7 @@ void ModulePhysics::Load()
 
 void ModulePhysics::Save() const
 {
-	RE_PROFILE(PROF_Save, PROF_ModulePhysics);
+	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModulePhysics);
 	RE_Json* node = RE_FS->ConfigNode("Physics");
 
 	node->PushInt("UpdateMode", static_cast<int>(mode));

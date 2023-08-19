@@ -4,98 +4,106 @@
 #define PROFILING_ENABLED // undefine to disable any profiling methods
 #define INTERNAL_PROFILING // undefine to use Optick Profiling
 #define RECORD_FROM_START true
+#define OUTPUT_CLASSES_AND_FUNCTIONS_TABLE
 
-enum RE_ProfiledFunc : unsigned short
+enum class RE_ProfiledFunc : unsigned short
 {
-	PROF_Init, // Modules
-	PROF_Start,
-	PROF_PreUpdate,
-	PROF_Update,
-	PROF_PostUpdate,
-	PROF_CleanUp,
-	PROF_Load,
-	PROF_Save,
-	PROF_Clear,
+	Init, // Modules
+	Start,
+	PreUpdate,
+	Update,
+	PostUpdate,
+	CleanUp,
+	Load,
+	Save,
+	Clear,
 
-	PROF_ReadAssetChanges, // File System
-	PROF_DroppedFile,
+	ReadAssetChanges, // File System
+	DroppedFile,
 
-	PROF_GetActiveShaders, // Rendering
-	PROF_DrawScene,
-	PROF_DrawSkybox,
-	PROF_DrawStencil,
-	PROF_DrawEditor,
-	PROF_DrawDebug,
-	PROF_DrawThumbnails,
-	PROF_DrawParticles,
-	PROF_DrawParticlesLight,
+	GetActiveShaders, // Rendering
+	DrawScene,
+	DrawSkybox,
+	DrawStencil,
+	DrawEditor,
+	DrawDebug,
+	DrawThumbnails,
+	DrawParticles,
+	DrawParticlesLight,
 
-	PROF_CameraRaycast, // Cameras
-	PROF_EditorCamera,
+	CameraRaycast, // Cameras
+	EditorCamera,
 
-	PROF_ThumbnailResources, // Resources
-	PROF_InitChecker,
-	PROF_InitShaders,
-	PROF_InitWater,
-	PROF_InitMaterial,
-	PROF_InitSkyBox,
+	ThumbnailResources, // Resources
+	InitChecker,
+	InitShaders,
+	InitWater,
+	InitMaterial,
+	InitSkyBox,
 
-	PROF_SetWindowProperties, // Window
-	PROF_CreateWindow,
+	SetWindowProperties, // Window
+	CreateWindow,
 
-	PROF_ParticleTiming, // Particles
-	PROF_ParticleUpdate,
-	PROF_ParticleSpawn,
-	PROF_ParticleCollision,
-	PROF_ParticleBoundPCol,
-	PROF_ParticleBoundSCol,
+	ParticleTiming, // Particles
+	ParticleUpdate,
+	ParticleSpawn,
+	ParticleCollision,
+	ParticleBoundPCol,
+	ParticleBoundSCol,
 
-	PROF_FUNC_MAX
+	END
 };
 
-enum RE_ProfiledClass : unsigned short
+enum class RE_ProfiledClass : unsigned short
 {
-	PROF_Application, // GameLogic
-	PROF_Log,
-	PROF_Time,
-	PROF_Math,
-	PROF_Hardware,
+	Application, // GameLogic
+	Log,
+	Time,
+	Math,
+	Hardware,
 
-	PROF_ModuleInput, // Input
-	PROF_ModuleWindow,
+	ModuleInput, // Input
+	ModuleWindow,
 
-	PROF_ModuleScene, // Scene
-	PROF_CameraManager,
-	PROF_PrimitiveManager,
+	ModuleScene, // Scene
+	CameraManager,
+	PrimitiveManager,
 
-	PROF_ModulePhysics, // Physics
-	PROF_ParticleManager,
-	PROF_ParticleEmitter,
-	PROF_ParticleBoundary,
-	PROF_CompParticleEmitter,
+	ModulePhysics, // Physics
+	ParticleManager,
+	ParticleEmitter,
+	ParticleBoundary,
+	CompParticleEmitter,
 
-	PROF_ModuleEditor, // UI
-	PROF_ThumbnailManager,
+	ModuleEditor, // UI
+	ThumbnailManager,
 
-	PROF_ModuleRender, // Rendering
-	PROF_FBOManager,
-	PROF_GLCache,
+	ModuleRender, // Rendering
+	FBOManager,
+	GLCache,
 
-	PROF_ModuleAudio, //Audio
+	ModuleAudio, //Audio
 
-	PROF_FileSystem, // IO
-	PROF_ResourcesManager,
-	PROF_ModelImporter,
-	PROF_ShaderImporter,
-	PROF_ECSImporter,
-	PROF_TextureImporter,
-	PROF_SkyboxImporter,
-	PROF_InternalResources,
+	FileSystem, // IO
+	ResourcesManager,
+	ModelImporter,
+	ShaderImporter,
+	ECSImporter,
+	TextureImporter,
+	SkyboxImporter,
+	InternalResources,
 
-	PROF_CLASS_MAX
+	END
 };
 
 #ifdef PROFILING_ENABLED
+
+namespace RE_Profiler
+{
+	const char* GetFunctionStr(const RE_ProfiledFunc function);
+	const char* GetClassStr(const RE_ProfiledClass function);
+}
+
 #ifdef INTERNAL_PROFILING
 #ifdef _DEBUG
 #define PROFILING_OUTPUT_FILE_NAME "Debug Red Eye Profiling.json"
@@ -112,6 +120,7 @@ namespace RE_Profiler
 	void Clear();
 	void Reset();
 	void Deploy(const char* file_name = PROFILING_OUTPUT_FILE_NAME);
+	void DeployIntermediates();
 	void Exit();
 };
 
@@ -146,70 +155,16 @@ struct ProfilingTimer
 
 #else
 
-namespace RE_Profiler
-{
-	char* GetFunctionStr(RE_ProfiledFunc function)
-	{
-		switch (function)
-		{
-		case PROF_Init: return "Init";
-		case PROF_Start: return "Start";
-		case PROF_PreUpdate: return "PreUpdate";
-		case PROF_Update: return "Update";
-		case PROF_PostUpdate: return "PostUpdate";
-		case PROF_CleanUp: return "CleanUp";
-		case PROF_Load: return "Load";
-		case PROF_Save: return "Save";
-		case PROF_Clear: return "Clear";
-
-		case PROF_ReadAssetChanges: return "Read Asset Changes";
-		case PROF_DroppedFile: return "Dropped File";
-
-		case PROF_GetActiveShaders: return "Get Active Shaders";
-		case PROF_DrawScene: return "DrawS cene";
-		case PROF_DrawSkybox: return "Draw Skybox";
-		case PROF_DrawStencil: return "Draw Stencil";
-		case PROF_DrawEditor: return "Draw Editor";
-		case PROF_DrawDebug: return "Draw Debug";
-		case PROF_DrawThumbnails: return "Draw Thumbnails";
-		case PROF_DrawParticles: return "Draw Particles";
-		case PROF_DrawParticlesLight: return "Camera Particles' Light";
-
-		case PROF_CameraRaycast: return "Camera Raycast";
-		case PROF_EditorCamera: return "Editor Camera";
-
-		case PROF_ThumbnailResources: return "Thumbnail Resources";
-		case PROF_InitChecker: return "Init Checker";
-		case PROF_InitShaders: return "Init Shaders";
-		case PROF_InitWater: return "Init Water";
-		case PROF_InitMaterial: return "Init Material";
-		case PROF_InitSkyBox: return "Init SkyBox";
-
-		case PROF_SetWindowProperties: return "Set Window Properties";
-		case PROF_CreateWindow: return "Create Window";
-
-		case PROF_ParticleTiming: return "Particle Timing";
-		case PROF_ParticleUpdate: return "Particle Update";
-		case PROF_ParticleSpawn: return "Particle Spawn";
-		case PROF_ParticleCollision: return "Particle Collision";
-		case PROF_ParticleBoundPCol: return "Particle Plane Boundary Collision";
-		case PROF_ParticleBoundSCol: return "Particle Sphere Boundary Collision";
-
-		default: return "Undefined";
-		}
-	}
-}
-
 #include <Optick/optick.h>
 
 #define RE_OPTICK_CATEGORY(category)\
-	(category < PROF_ModuleInput	?	Optick::Category::GameLogic :	\
-	(category < PROF_ModuleScene	?	Optick::Category::Input :		\
-	(category < PROF_ModulePhysics	?	Optick::Category::Scene :		\
-	(category < PROF_ModuleEditor	?	Optick::Category::Physics :		\
-	(category < PROF_ModuleRender	?	Optick::Category::UI :			\
-	(category < PROF_ModuleAudio	?	Optick::Category::Rendering :	\
-	(category < PROF_FileSystem 	?	Optick::Category::Audio : Optick::Category::IO)))))))
+	(category < RE_ProfiledClass::ModuleInput	?	Optick::Category::GameLogic :	\
+	(category < RE_ProfiledClass::ModuleScene	?	Optick::Category::Input :		\
+	(category < RE_ProfiledClass::ModulePhysics	?	Optick::Category::Scene :		\
+	(category < RE_ProfiledClass::ModuleEditor	?	Optick::Category::Physics :		\
+	(category < RE_ProfiledClass::ModuleRender	?	Optick::Category::UI :			\
+	(category < RE_ProfiledClass::ModuleAudio	?	Optick::Category::Rendering :	\
+	(category < RE_ProfiledClass::FileSystem 	?	Optick::Category::Audio : Optick::Category::IO)))))))
 
 #define RE_PROFILE(func, context) OPTICK_CATEGORY(RE_Profiler::GetFunctionStr(func), RE_OPTICK_CATEGORY(context))
 #define RE_PROFILE_FRAME() OPTICK_FRAME("MainThread RedEye")

@@ -77,7 +77,7 @@ Application::~Application()
 bool Application::Init(int _argc, char* _argv[])
 {
 	bool ret = false;
-	RE_PROFILE(PROF_Init, PROF_Application);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::Application);
 	RE_LOG_SEPARATOR("Initializing Application");
 
 	char tmp[8];
@@ -132,7 +132,7 @@ void Application::MainLoop()
 	RE_LOG_SEPARATOR("Entering Application's Main Loop - %.3f", time->FrameDeltaTime());
 	do {
 		RE_PROFILE_FRAME();
-		RE_PROFILE(PROF_Update, PROF_Application);
+		RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::Application);
 
 		time->FrameDeltaTime();
 
@@ -237,7 +237,7 @@ void Application::LoadConfig()
 {
 	if (flags & AppFlags::LOAD_CONFIG) flags -= AppFlags::LOAD_CONFIG;
 
-	RE_PROFILE(PROF_Load, PROF_Application);
+	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::Application);
 	window->Load();
 	editor->Load();
 	renderer->Load();
@@ -249,7 +249,7 @@ void Application::SaveConfig()
 {
 	if (flags & AppFlags::SAVE_CONFIG) flags -= AppFlags::SAVE_CONFIG;
 
-	RE_PROFILE(PROF_Save, PROF_Application);
+	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::Application);
 	window->Save();
 	editor->Save();
 	renderer->Save();

@@ -17,7 +17,7 @@
 
 bool RE_TextureImporter::Init()
 {
-	RE_PROFILE(PROF_Init, PROF_TextureImporter);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::TextureImporter);
 	RE_LOG("Initializing Texture Importer");
 	ilInit();
 	iluInit();
