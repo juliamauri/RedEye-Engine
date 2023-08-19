@@ -89,8 +89,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef EASTL_VERSION
-	#define EASTL_VERSION   "3.17.06"
-	#define EASTL_VERSION_N  31706
+	#define EASTL_VERSION   "3.20.02"
+	#define EASTL_VERSION_N  32002
 #endif
 
 
@@ -670,6 +670,17 @@ namespace eastl
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// EASTL_CRASH
+//
+// Executes an invalid memory write, which should result in an exception 
+// on most platforms.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+#define EASTL_CRASH() *((volatile int*)0) = 0xDEADC0DE;
+
+
+///////////////////////////////////////////////////////////////////////////////
 // EASTL_ALLOCATOR_COPY_ENABLED
 //
 // Defined as 0 or 1. Default is 0 (disabled) until some future date.
@@ -825,11 +836,26 @@ namespace eastl
 // Defined as 0 or 1.
 //
 #ifndef EASTL_INT128_SUPPORTED
-	#if defined(__SIZEOF_INT128__) || (defined(EA_COMPILER_INTMAX_SIZE) && (EA_COMPILER_INTMAX_SIZE >= 16))
+	#if defined(EA_COMPILER_INTMAX_SIZE) && (EA_COMPILER_INTMAX_SIZE >= 16)
 		#define EASTL_INT128_SUPPORTED 1
 	#else
 		#define EASTL_INT128_SUPPORTED 0
 	#endif
+#endif
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EASTL_GCC_STYLE_INT128_SUPPORTED
+//
+// Defined as 0 or 1.
+// Specifies whether __int128_t/__uint128_t are defined.
+//
+#ifndef EASTL_GCC_STYLE_INT128_SUPPORTED
+#if EASTL_INT128_SUPPORTED && (defined(EA_COMPILER_GNUC) || defined(__clang__))
+#define EASTL_GCC_STYLE_INT128_SUPPORTED 1
+#else
+#define EASTL_GCC_STYLE_INT128_SUPPORTED 0
+#endif
 #endif
 
 
@@ -859,12 +885,15 @@ namespace eastl
 //
 // Defined as 0 or 1.
 // Specifies whether eastl_int128_t/eastl_uint128_t have been typedef'd yet.
+// NB: these types are not considered fundamental, arithmetic or integral when using the EAStdC implementation.
+// this changes the compiler type traits defined in type_traits.h.
+// eg. is_signed<eastl_int128_t>::value may be false, because it is not arithmetic.
 //
 #ifndef EASTL_INT128_DEFINED
 	#if EASTL_INT128_SUPPORTED
 		#define EASTL_INT128_DEFINED 1
 
-		#if defined(__SIZEOF_INT128__) || defined(EA_COMPILER_GNUC) || defined(EA_COMPILER_CLANG)
+		#if EASTL_GCC_STYLE_INT128_SUPPORTED
 			typedef __int128_t   eastl_int128_t;
 			typedef __uint128_t eastl_uint128_t;
 		#else
@@ -873,7 +902,6 @@ namespace eastl
 		#endif
 	#endif
 #endif
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1274,7 +1302,7 @@ namespace eastl
 // useful macro identifier for our type traits implementation.
 //
 #ifndef EASTL_COMPILER_INTRINSIC_TYPE_TRAITS_AVAILABLE
-	#if defined(_MSC_VER) && (_MSC_VER >= 1500) // VS2008 or later
+	#if defined(_MSC_VER) && (_MSC_VER >= 1500) && !defined(EA_COMPILER_CLANG_CL) // VS2008 or later
 		#pragma warning(push, 0)
 			#include <yvals.h>
 		#pragma warning(pop)
@@ -1283,9 +1311,9 @@ namespace eastl
 		#else
 			#define EASTL_COMPILER_INTRINSIC_TYPE_TRAITS_AVAILABLE 0
 		#endif
-	#elif defined(EA_COMPILER_CLANG) && defined(__APPLE__) && defined(_CXXCONFIG) // Apple clang but with GCC's libstdc++.
+	#elif defined(__clang__) && defined(__APPLE__) && defined(_CXXCONFIG) // Apple clang but with GCC's libstdc++.
 		#define EASTL_COMPILER_INTRINSIC_TYPE_TRAITS_AVAILABLE 0
-	#elif defined(EA_COMPILER_CLANG)
+	#elif defined(__clang__)
 		#define EASTL_COMPILER_INTRINSIC_TYPE_TRAITS_AVAILABLE 1
 	#elif defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4003) && !defined(__GCCXML__)
 		#define EASTL_COMPILER_INTRINSIC_TYPE_TRAITS_AVAILABLE 1
@@ -1779,16 +1807,6 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 #ifndef EASTL_USER_LITERALS_ENABLED
 	#if defined(EA_COMPILER_CPP14_ENABLED)
 		#define EASTL_USER_LITERALS_ENABLED 1
-
-		// Disabling the Clang/GCC/MSVC warning about using user defined literals without a leading '_' as they are
-		// reserved for standard libary usage.
-		EA_DISABLE_CLANG_WARNING(-Wuser-defined-literals)
-		EA_DISABLE_CLANG_WARNING(-Wreserved-user-defined-literal)
-		EA_DISABLE_GCC_WARNING(-Wliteral-suffix)
-		#ifdef _MSC_VER
-			#pragma warning(disable: 4455) // disable warning C4455: literal suffix identifiers that do not start with an underscore are reserved
-		#endif
-
 	#else
 		#define EASTL_USER_LITERALS_ENABLED 0
 	#endif
@@ -1836,16 +1854,47 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 
 
 /// EASTL_HAS_UNIQUE_OBJECT_REPRESENTATIONS_AVAILABLE
-#if defined(_MSC_VER) && (_MSC_VER >= 1913)  // VS2017+
-	#define EASTL_HAS_UNIQUE_OBJECT_REPRESENTATIONS_AVAILABLE 1
-#elif defined(EA_COMPILER_CLANG)
+#if defined(__clang__)
+	// NB: !__is_identifier() is correct: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66970#c11
 	#if !__is_identifier(__has_unique_object_representations)
 		#define EASTL_HAS_UNIQUE_OBJECT_REPRESENTATIONS_AVAILABLE 1
 	#else
 		#define EASTL_HAS_UNIQUE_OBJECT_REPRESENTATIONS_AVAILABLE 0
 	#endif
+#elif defined(_MSC_VER) && (_MSC_VER >= 1913)  // VS2017 15.6+
+	#define EASTL_HAS_UNIQUE_OBJECT_REPRESENTATIONS_AVAILABLE 1
 #else
 	#define EASTL_HAS_UNIQUE_OBJECT_REPRESENTATIONS_AVAILABLE 0
+#endif
+
+#if defined(__clang__)
+	// NB: !__is_identifier() is correct: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66970#c11
+	#if !__is_identifier(__is_final)
+		#define EASTL_IS_FINAL_AVAILABLE 1
+	#else
+		#define EASTL_IS_FINAL_AVAILABLE 0
+	#endif
+#elif defined(_MSC_VER) && (_MSC_VER >= 1914)	// VS2017 15.7+
+	#define EASTL_IS_FINAL_AVAILABLE 1
+#elif defined(EA_COMPILER_GNUC)
+	#define EASTL_IS_FINAL_AVAILABLE 1
+#else
+	#define EASTL_IS_FINAL_AVAILABLE 0
+#endif
+
+#if defined(__clang__)
+	// NB: !__is_identifier() is correct: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66970#c11
+	#if !__is_identifier(__is_aggregate)
+		#define EASTL_IS_AGGREGATE_AVAILABLE 1
+	#else
+		#define EASTL_IS_AGGREGATE_AVAILABLE 0
+	#endif
+#elif defined(_MSC_VER) && (_MSC_VER >= 1915)  // VS2017 15.8+
+	#define EASTL_IS_AGGREGATE_AVAILABLE 1
+#elif defined(EA_COMPILER_GNUC)
+	#define EASTL_IS_AGGREGATE_AVAILABLE 1
+#else
+	#define EASTL_IS_AGGREGATE_AVAILABLE 0
 #endif
 
 
@@ -1872,6 +1921,18 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 #else
 	#define EASTL_SYSTEM_LITTLE_ENDIAN_STATEMENT(...)
 #endif
+
+/// EASTL_CONSTEXPR_BIT_CAST_SUPPORTED
+/// eastl::bit_cast, in order to be implemented as constexpr, requires explicit compiler support.
+/// This macro defines whether it's possible for bit_cast to be constexpr.
+///
+#if (defined(EA_COMPILER_MSVC) && defined(EA_COMPILER_MSVC_VERSION_14_26) && EA_COMPILER_VERSION >= EA_COMPILER_MSVC_VERSION_14_26) \
+	|| EA_COMPILER_HAS_BUILTIN(__builtin_bit_cast)
+	#define EASTL_CONSTEXPR_BIT_CAST_SUPPORTED 1
+#else
+	#define EASTL_CONSTEXPR_BIT_CAST_SUPPORTED 0
+#endif
+
 
 
 #endif // Header include guard

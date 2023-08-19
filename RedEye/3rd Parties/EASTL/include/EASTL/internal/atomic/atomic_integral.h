@@ -24,18 +24,18 @@ namespace internal
 
 #define EASTL_ATOMIC_INTEGRAL_STATIC_ASSERT_FUNCS_IMPL(funcName)	\
 	template <typename Order>										\
-	T funcName(T arg, Order order) EA_NOEXCEPT						\
+	T funcName(T /*arg*/, Order /*order*/) EA_NOEXCEPT				\
 	{																\
 		EASTL_ATOMIC_STATIC_ASSERT_INVALID_MEMORY_ORDER(T);			\
 	}																\
 																	\
 	template <typename Order>										\
-	T funcName(T arg, Order order) volatile EA_NOEXCEPT				\
+	T funcName(T /*arg*/, Order /*order*/) volatile EA_NOEXCEPT		\
 	{																\
 		EASTL_ATOMIC_STATIC_ASSERT_VOLATILE_MEM_FN(T);				\
 	}																\
 																	\
-	T funcName(T arg) volatile EA_NOEXCEPT							\
+	T funcName(T /*arg*/) volatile EA_NOEXCEPT						\
 	{																\
 		EASTL_ATOMIC_STATIC_ASSERT_VOLATILE_MEM_FN(T);				\
 	}
@@ -54,7 +54,7 @@ namespace internal
 
 
 #define EASTL_ATOMIC_INTEGRAL_STATIC_ASSERT_ASSIGNMENT_OPERATOR_IMPL(operatorOp) \
-	T operator operatorOp(T arg) volatile EA_NOEXCEPT					\
+	T operator operatorOp(T /*arg*/) volatile EA_NOEXCEPT				\
 	{																	\
 		EASTL_ATOMIC_STATIC_ASSERT_VOLATILE_MEM_FN(T);					\
 	}
@@ -156,7 +156,7 @@ namespace internal
 	struct atomic_integral_width;
 
 #define EASTL_ATOMIC_INTEGRAL_FUNC_IMPL(op, bits)						\
-	T retVal;															\
+	EASTL_ATOMIC_DEFAULT_INIT(T, retVal);	             				\
 	EA_PREPROCESSOR_JOIN(op, bits)(T, retVal, this->GetAtomicAddress(), arg); \
 	return retVal;
 

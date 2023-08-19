@@ -169,6 +169,7 @@ namespace eastl
 		rbtree_iterator();
 		explicit rbtree_iterator(const node_type* pNode);
 		rbtree_iterator(const iterator& x);
+		rbtree_iterator& operator=(const iterator& x);
 
 		reference operator*() const;
 		pointer   operator->() const;
@@ -477,11 +478,6 @@ namespace eastl
 		template <class... Args> 
 		iterator emplace_hint(const_iterator position, Args&&... args);
 
-		template <class... Args> eastl::pair<iterator, bool> try_emplace(const key_type& k, Args&&... args);
-		template <class... Args> eastl::pair<iterator, bool> try_emplace(key_type&& k, Args&&... args);
-		template <class... Args> iterator                    try_emplace(const_iterator position, const key_type& k, Args&&... args);
-		template <class... Args> iterator                    try_emplace(const_iterator position, key_type&& k, Args&&... args);
-
 		// Standard conversion overload to avoid the overhead of mismatched 'pair<const Key, Value>' types.
 		template <class P, class = typename eastl::enable_if<eastl::is_constructible<value_type, P&&>::value>::type> 
 		insert_return_type insert(P&& otherValue);
@@ -662,6 +658,13 @@ namespace eastl
 	rbtree_iterator<T, Pointer, Reference>::rbtree_iterator(const iterator& x)
 		: mpNode(x.mpNode) { }
 
+	template <typename T, typename Pointer, typename Reference>
+	typename rbtree_iterator<T, Pointer, Reference>::this_type&
+	rbtree_iterator<T, Pointer, Reference>::operator=(const iterator& x)
+	{
+		mpNode = x.mpNode;
+		return *this;
+	}
 
 	template <typename T, typename Pointer, typename Reference>
 	typename rbtree_iterator<T, Pointer, Reference>::reference
@@ -1099,43 +1102,6 @@ namespace eastl
 	{
 		return DoInsertValueHint(has_unique_keys_type(), position, eastl::forward<Args>(args)...);
 	}
-
-	template <typename K, typename V, typename C, typename A, typename E, bool bM, bool bU>
-	template <class... Args>
-	inline eastl::pair<typename rbtree<K, V, C, A, E, bM, bU>::iterator, bool>
-	rbtree<K, V, C, A, E, bM, bU>::try_emplace(const key_type& key, Args&&... args)
-	{
-		return DoInsertValue(has_unique_keys_type(), piecewise_construct, eastl::forward_as_tuple(key), eastl::forward_as_tuple(eastl::forward<Args>(args)...));
-	}
-
-	template <typename K, typename V, typename C, typename A, typename E, bool bM, bool bU>
-	template <class... Args>
-	inline eastl::pair<typename rbtree<K, V, C, A, E, bM, bU>::iterator, bool>
-	rbtree<K, V, C, A, E, bM, bU>::try_emplace(key_type&& key, Args&&... args)
-	{
-		return DoInsertValue(has_unique_keys_type(), piecewise_construct, eastl::forward_as_tuple(eastl::move(key)), eastl::forward_as_tuple(eastl::forward<Args>(args)...));
-	}
-
-	template <typename K, typename V, typename C, typename A, typename E, bool bM, bool bU>
-	template <class... Args>
-	inline typename rbtree<K, V, C, A, E, bM, bU>::iterator
-	rbtree<K, V, C, A, E, bM, bU>::try_emplace(const_iterator position, const key_type& key, Args&&... args)
-	{
-		return DoInsertValueHint(
-		    has_unique_keys_type(), position,
-		    piecewise_construct, eastl::forward_as_tuple(key), eastl::forward_as_tuple(eastl::forward<Args>(args)...));
-	}
-
-	template <typename K, typename V, typename C, typename A, typename E, bool bM, bool bU>
-	template <class... Args>
-	inline typename rbtree<K, V, C, A, E, bM, bU>::iterator
-	rbtree<K, V, C, A, E, bM, bU>::try_emplace(const_iterator position, key_type&& key, Args&&... args)
-	{
-		return DoInsertValueHint(
-		    has_unique_keys_type(), position,
-		    piecewise_construct, eastl::forward_as_tuple(eastl::move(key)), eastl::forward_as_tuple(eastl::forward<Args>(args)...));
-	}
-
 
 	template <typename K, typename V, typename C, typename A, typename E, bool bM, bool bU>
 	template <class P, class>
