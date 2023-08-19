@@ -27,10 +27,10 @@
 #include <ImGui/imgui.h>
 #include <PhysFS/physfs.h>
 
-#include <EASTL\internal\char_traits.h>
-#include <EASTL\algorithm.h>
-#include <EASTL\iterator.h>
-#include <EAStdC\EASprintf.h>
+#include <EASTL/internal/char_traits.h>
+#include <EASTL/algorithm.h>
+#include <EASTL/iterator.h>
+#include <EAStdC/EASprintf.h>
 
 bool RE_FileSystem::Init(int argc, char* argv[])
 {

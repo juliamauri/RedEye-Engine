@@ -126,7 +126,7 @@ enum RE_ProfiledClass : unsigned short
 #endif // _DEBUG
 #endif // PARTICLE_PHYSICS_TEST
 
-#include <EASTL\vector.h>
+#include <EASTL/vector.h>
 
 struct ProfilingOperation
 {

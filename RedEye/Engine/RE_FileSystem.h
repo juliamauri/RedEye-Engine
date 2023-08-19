@@ -1,11 +1,11 @@
 #ifndef __FILESYSTEM_H__
 #define __FILESYSTEM_H__
 
-#include <EASTL\list.h>
-#include <EASTL\vector.h>
-#include <EASTL\stack.h>
-#include <EASTL\string.h>
-#include <EASTL\priority_queue.h>
+#include <EASTL/list.h>
+#include <EASTL/vector.h>
+#include <EASTL/stack.h>
+#include <EASTL/string.h>
+#include <EASTL/priority_queue.h>
 
 class Config;
 class RE_Json;

@@ -21,7 +21,7 @@
 #include <GL/glew.h>
 #include <gl/GL.h>
 #include <MGL/MathGeoLib.h>
-#include <MGL/Math\Quat.h>
+#include <MGL/Math/Quat.h>
 #include <MD5/md5.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

@@ -4,7 +4,7 @@
 #ifdef INTERNAL_PROFILING
 
 #include "Application.h"
-#include <MGL/Time\Clock.h>
+#include <MGL/Time/Clock.h>
 #include <RapidJson/writer.h>
 #include <RapidJson/stringbuffer.h>
 #include <iostream>
