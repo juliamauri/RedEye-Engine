@@ -623,7 +623,7 @@ unsigned int ModuleRenderer3D::GetRenderedEditorSceneTexture() const
 	return fbos->GetTextureID(render_views[0].GetFBO(), 4 * (render_views[0].light == LIGHT_DEFERRED));
 }
 
-unsigned int ModuleRenderer3D::GetRenderedParticleEditorTexture() const
+uintptr_t ModuleRenderer3D::GetRenderedParticleEditorTexture() const
 {
 	return fbos->GetTextureID(render_views[2].GetFBO(), 4 * (render_views[2].light == LIGHT_DEFERRED));;
 }
@@ -634,7 +634,7 @@ unsigned int ModuleRenderer3D::GetDepthTexture() const
 	return fbos->GetDepthTexture(current_fbo);
 }
 
-unsigned int ModuleRenderer3D::GetRenderedGameSceneTexture() const
+uintptr_t ModuleRenderer3D::GetRenderedGameSceneTexture() const
 {
 	return fbos->GetTextureID(render_views[1].GetFBO(), 4 * (render_views[1].light == LIGHT_DEFERRED));
 }

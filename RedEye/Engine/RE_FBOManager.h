@@ -4,8 +4,8 @@
 struct RE_FBO
 {
 	enum class FBO_Type : char { DEFAULT, DEFERRED } type = FBO_Type::DEFAULT;
-	eastl::vector<unsigned int> texturesID;
-	unsigned int
+	eastl::vector<uint32_t> texturesID;
+	uint32_t
 		ID = 0, width = 0, height = 0,
 		depthBuffer = 0, stencilBuffer = 0,
 		depthstencilBuffer = 0, depthBufferTexture = 0;
@@ -21,7 +21,7 @@ public:
 	int CreateDeferredFBO(unsigned int width, unsigned int height);
 
 	unsigned int GetDepthTexture(unsigned int ID);
-	unsigned int GetTextureID(unsigned int ID, unsigned int texAttachment);
+	uint32_t  GetTextureID(unsigned int ID, unsigned int texAttachment);
 	unsigned int GetWidth(unsigned int ID);
 	unsigned int GetHeight(unsigned int ID);
 

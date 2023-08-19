@@ -71,11 +71,11 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 		}
 	}
 
-	unsigned int drawFubbersize = newFbo.texturesID.size();
+	eastl_size_t drawFubbersize = newFbo.texturesID.size();
 	GLenum* DrawBuffers = new GLenum[drawFubbersize];
-	for (unsigned int i = 0; i < drawFubbersize; i++) DrawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
-	glDrawBuffers(drawFubbersize, DrawBuffers);
-
+	for (eastl_size_t i = 0; i < drawFubbersize; i++) DrawBuffers[i] = GL_COLOR_ATTACHMENT0 + static_cast<GLenum>(i);
+	glDrawBuffers(static_cast<GLenum>(drawFubbersize), DrawBuffers);
+	
 	fbos.insert(eastl::pair<unsigned int, RE_FBO>(newFbo.ID, newFbo));
 	int error = 0;
 	if ((error = glCheckFramebufferStatus(GL_FRAMEBUFFER)) == GL_FRAMEBUFFER_COMPLETE)
@@ -172,7 +172,7 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 	toChange.width = width;
 	toChange.height = height;
 
-	unsigned int texturesNum = toChange.texturesID.size();
+	eastl_size_t texturesNum = toChange.texturesID.size();
 	bool stencil = false;
 	bool depth = false;
 	if (stencil = (toChange.stencilBuffer != 0)) glDeleteRenderbuffers(1, &toChange.stencilBuffer);
@@ -191,8 +191,8 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 	}
 	else
 	{
-		for (unsigned int i = 0; i < texturesNum; i++) {
-			unsigned int tex = 0;
+		for (eastl_size_t i = 0; i < texturesNum; i++) {
+			uint32_t tex = 0;
 			glGenTextures(1, &tex);
 			glBindTexture(GL_TEXTURE_2D, tex);
 
@@ -209,7 +209,7 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, tex, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + static_cast<GLenum>(i), GL_TEXTURE_2D, tex, 0);
 
 			toChange.texturesID.push_back(tex);
 		}
@@ -300,7 +300,7 @@ unsigned int RE_FBOManager::GetDepthTexture(unsigned int ID)
 	return fbo.depthBufferTexture;
 }
 
-unsigned int RE_FBOManager::GetTextureID(unsigned int ID, unsigned int texAttachment)
+uint32_t RE_FBOManager::GetTextureID(unsigned int ID, unsigned int texAttachment)
 {
 	return (fbos.at(ID).texturesID.size() < texAttachment) ? 0 : fbos.at(ID).texturesID[texAttachment];
 }

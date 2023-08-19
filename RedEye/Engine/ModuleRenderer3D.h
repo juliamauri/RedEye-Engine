@@ -93,9 +93,9 @@ public:
 
 	void ChangeFBOSize(int width, int height, RENDER_VIEWS view);
 	unsigned int GetRenderedEditorSceneTexture()const;
-	unsigned int GetRenderedParticleEditorTexture()const;
+	uintptr_t GetRenderedParticleEditorTexture()const;
 	unsigned int GetDepthTexture()const;
-	unsigned int GetRenderedGameSceneTexture()const;
+	uintptr_t GetRenderedGameSceneTexture()const;
 
 	void PushSceneRend(RenderView& rV);
 	void PushThumnailRend(const char* md5, bool redo = false);

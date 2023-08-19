@@ -45,7 +45,7 @@ void GameWindow::Draw(bool secondary)
 		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 		ImGui::SetCursorPos({ viewport.x, viewport.y });
 		ImGui::Image(eastl::bit_cast<void*>(RE_RENDER->GetRenderedGameSceneTexture()), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
-		
+
 		if (secondary)
 		{
 			ImGui::PopItemFlag();
