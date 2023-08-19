@@ -5,17 +5,6 @@
 #include "ModuleRenderer3D.h"
 #include <GL/glew.h>
 
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-#include "ModulePhysics.h"
-
-#ifdef PARTICLE_RENDER_TEST
-
-RE_Timer ParticleManager::timer_simple(false);
-
-#endif // PARTICLE_RENDER_TEST
-
-#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
-
 #include "RE_Math.h"
 #include "RE_Profiler.h"
 #include "RE_GLCache.h"
@@ -50,50 +39,8 @@ void ParticleManager::Update(const float dt)
 {
 	RE_PROFILE(PROF_Update, PROF_ParticleManager);
 
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-
-	ProfilingTimer::p_count = particle_count;
-
-#ifdef PARTICLE_PHYSICS_TEST
-
-	RE_Timer timer_simple;
-
-#endif // PARTICLE_PHYSICS_TEST
-#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
-
 	particle_count = 0u;
 	for (auto sim : simulations) particle_count += sim->Update(dt);
-
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-
-	if (ProfilingTimer::wait4frame > 0)
-	{
-		ProfilingTimer::wait4frame--;
-	}
-	else if (ProfilingTimer::wait4frame == 0)
-	{
-		ProfilingTimer::update_time = 0u;
-		ProfilingTimer::wait4frame--;
-		RE_Profiler::Reset();
-		RE_Profiler::Start();
-		RE_ParticleEmitter::demo_emitter->state = RE_ParticleEmitter::PlaybackState::PLAY;
-		RE_PHYSICS->mode = ModulePhysics::UpdateMode::FIXED_TIME_STEP;
-	}
-
-#ifdef PARTICLE_PHYSICS_TEST
-
-	else
-	{
-		ProfilingTimer::update_time = RE_Math::MaxUI(timer_simple.Read(), ProfilingTimer::update_time);
-		if (ProfilingTimer::update_time > 33u || RE_ParticleEmitter::demo_emitter->particle_count == RE_ParticleEmitter::demo_emitter->max_particles)
-		{
-			RE_PHYSICS->mode = ModulePhysics::UpdateMode::ENGINE_PAR;
-			RE_Profiler::Deploy(RE_ParticleEmitter::filename.c_str());
-			ProfilingTimer::current_sim < 11 ? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->Quit();
-		}
-	}
-#endif // PARTICLE_PHYSICS_TEST
-#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 }
 
 void ParticleManager::Clear()
@@ -116,26 +63,6 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 		}
 	}
 	if(!simulation || !simulation->active_rendering) return;
-
-#ifdef PARTICLE_RENDER_TEST
-
-	if (ProfilingTimer::wait4frame < 0) {
-		ProfilingTimer::update_time = RE_Math::MaxUI(timer_simple.Read(), ProfilingTimer::update_time);
-		if (ProfilingTimer::update_time > 33u || RE_ParticleEmitter::demo_emitter->particle_count == RE_ParticleEmitter::demo_emitter->max_particles)
-		{
-			RE_PHYSICS->mode = ModulePhysics::UpdateMode::ENGINE_PAR;
-
-			RE_Profiler::Deploy(RE_ParticleEmitter::filename.c_str());
-			ProfilingTimer::current_sim < 3 // MAX SIMULATIONS INDEX
-				? RE_ParticleEmitter::demo_emitter->DemoSetup() : App->Quit();
-		}
-
-		timer_simple.Stop();
-		timer_simple.Start();
-	}
-
-
-#endif // PARTICLE_RENDER_TEST
 
 	// Get Shader and uniforms
 	const RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
@@ -228,12 +155,6 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 		if (simulation->meshMD5) dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
 		else simulation->primCmp->SimpleDraw();
 	}
-
-#ifdef PARTICLE_RENDER_TEST
-
-	timer_simple.Pause();
-
-#endif // PARTICLE_RENDER_TEST
 }
 
 void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const

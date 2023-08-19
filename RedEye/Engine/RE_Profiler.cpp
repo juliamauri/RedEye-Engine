@@ -15,53 +15,13 @@ bool ProfilingTimer::recording = RECORD_FROM_START;
 unsigned long ProfilingTimer::frame = 0u;
 eastl::vector<ProfilingOperation> ProfilingTimer::operations;
 
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-
-int ProfilingTimer::current_sim = -1;
-int ProfilingTimer::wait4frame = 0;
-unsigned int ProfilingTimer::update_time = 0u;
-unsigned int ProfilingTimer::p_count = 0u;
-
-#ifdef PARTICLE_PHYSICS_TEST
-
-unsigned int ProfilingTimer::p_col_internal = 0u;
-unsigned int ProfilingTimer::p_col_boundary = 0u;
-
-#else
-
-unsigned int ProfilingTimer::p_lights = 0u;
-
-
-#endif // PARTICLE_RENDER_TEST
-#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
-
 ProfilingTimer::ProfilingTimer(RE_ProfiledFunc f, RE_ProfiledClass c) : operation_id(0u)
 {
-#ifdef PARTICLE_PHYSICS_TEST
-
-	if (pushed = (recording && c == PROF_ParticleManager))
-	{
-		operation_id = operations.size();
-		operations.push_back({ f, c, math::Clock::Tick() - ProfilingTimer::start, 0ull, frame, p_count, p_col_internal, p_col_boundary });
-	}
-
-#elif defined(PARTICLE_RENDER_TEST)
-
-	if (pushed = (recording && (f == PROF_DrawParticles || f == PROF_DrawParticlesLight)))
-	{
-		operation_id = operations.size();
-		operations.push_back({ f, c, math::Clock::Tick() - ProfilingTimer::start, 0ull, frame, p_count, p_lights });
-	}
-
-#else
-
 	if (pushed = recording)
 	{
 		operation_id = operations.size();
 		operations.push_back({ f, c, math::Clock::Tick(), 0ull, frame });
 	}
-
-#endif // PARTICLE_PHYSICS_TEST
 }
 
 ProfilingTimer::~ProfilingTimer()
@@ -164,26 +124,6 @@ void DumpToFile(eastl::string file_name/*, eastl::vector<ProfilingOperation> ope
 		writer.Uint64(op.duration);
 		writer.Key("st");
 		writer.Uint64(op.start);
-
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-
-		writer.Key("pC");
-		writer.Uint(op.p_count);
-
-#ifdef PARTICLE_PHYSICS_TEST
-
-		writer.Key("cI");
-		writer.Uint(op.p_col_internal);
-		writer.Key("cB");
-		writer.Uint(op.p_col_boundary);
-
-#else
-		writer.Key("lC");
-		writer.Uint(op.p_lights);
-
-
-#endif // PARTICLE_RENDER_TEST
-#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 
 		writer.EndObject();
 	}

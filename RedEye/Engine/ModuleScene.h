@@ -27,7 +27,7 @@ public:
 	void OnPause();
 	void OnStop();
 
-	bool isPlaying()const { return is_playing; }
+	bool isPlaying() const { return is_playing; }
 
 	// Current Pool
 	RE_ECS_Pool* GetScenePool() { return &scenePool; }

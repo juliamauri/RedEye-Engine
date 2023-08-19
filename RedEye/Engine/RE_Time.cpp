@@ -62,24 +62,6 @@ void RE_Time::DrawEditorGraphs()
 	ImGui::PlotHistogram("##milliseconds", ms, ((int)(sizeof(ms) / sizeof(*ms))), 0, title, 0.0f, 40.0f, ImVec2(310, 100));
 
 #ifdef INTERNAL_PROFILING
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-
-	ImGui::Text("Current Sim %i", ProfilingTimer::current_sim);
-	ImGui::Text("Particle Count %u", ProfilingTimer::p_count);
-	ImGui::Text("Registers %u", ProfilingTimer::operations.size());
-	ImGui::Text("Dt %u / 33 ms", ProfilingTimer::update_time);
-	ImGui::Text("Ticks till reset %i", ProfilingTimer::wait4frame);
-
-#ifdef PARTICLE_PHYSICS_TEST
-
-	ImGui::Text("Collisions internal %u", ProfilingTimer::p_col_internal);
-	ImGui::Text("Collisions boundary %u", ProfilingTimer::p_col_boundary);
-
-#else
-	ImGui::Text("Particle light count: %u", ProfilingTimer::p_lights);
-#endif // PARTICLE_PHYSICS_TEST
-
-#else
 
 	if (ImGui::Checkbox(pause_plotting ? "Restart Plotting" : "Pause Plotting", &pause_plotting) && !pause_plotting)
 		for (int i = 0; i <= 99; i++)
@@ -106,7 +88,6 @@ void RE_Time::DrawEditorGraphs()
 		if (ImGui::Button("Clear Logs")) RE_Profiler::Clear();
 	}
 
-#endif // PARTICLE_PHYSICS_TEST
 #endif // INTERNAL_PROFILING
 }
 

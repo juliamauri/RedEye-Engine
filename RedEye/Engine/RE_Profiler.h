@@ -1,13 +1,9 @@
 #ifndef __RE_PROFILER__
 #define __RE_PROFILER__
 
-//#define PROFILING_ENABLED // undefine to disable any profiling methods
+#define PROFILING_ENABLED // undefine to disable any profiling methods
 #define INTERNAL_PROFILING // undefine to use Optick Profiling
 #define RECORD_FROM_START true
-
-// define to set engine to run particle physics or rendering demo test
-//#define PARTICLE_PHYSICS_TEST
-//#define PARTICLE_RENDER_TEST
 
 enum RE_ProfiledFunc : unsigned short
 {
@@ -101,32 +97,23 @@ enum RE_ProfiledClass : unsigned short
 
 #ifdef PROFILING_ENABLED
 #ifdef INTERNAL_PROFILING
-
-#ifdef PARTICLE_PHYSICS_TEST
-#undef PARTICLE_RENDER_TEST
 #ifdef _DEBUG
-#define PROFILING_OUTPUT_FILE_NAME "Debug Physics Red Eye Profiling.json"
+#define PROFILING_OUTPUT_FILE_NAME "Debug Red Eye Profiling.json"
 #else
-#define PROFILING_OUTPUT_FILE_NAME "Release Physics Red Eye Profiling.json"
+#define PROFILING_OUTPUT_FILE_NAME "Release Red Eye Profiling.json"
 #endif // _DEBUG
-
-#elif defined(PARTICLE_RENDER_TEST)
-#undef PARTICLE_PHYSICS_TEST
-#ifdef _DEBUG
-#define PROFILING_OUTPUT_FILE_NAME "Debug Rendering Red Eye Profiling.json"
-#else
-#define PROFILING_OUTPUT_FILE_NAME "Release Rendering Red Eye Profiling.json"
-#endif // _DEBUG
-
-#else
-#ifdef _DEBUG
-#define PROFILING_OUTPUT_FILE_NAME "Debug General Red Eye Profiling.json"
-#else
-#define PROFILING_OUTPUT_FILE_NAME "Release General Red Eye Profiling.json"
-#endif // _DEBUG
-#endif // PARTICLE_PHYSICS_TEST
 
 #include <EASTL/vector.h>
+
+namespace RE_Profiler
+{
+	void Start();
+	void Pause();
+	void Clear();
+	void Reset();
+	void Deploy(const char* file_name = PROFILING_OUTPUT_FILE_NAME);
+	void Exit();
+};
 
 struct ProfilingOperation
 {
@@ -135,22 +122,6 @@ struct ProfilingOperation
 	unsigned long long start; // ticks
 	unsigned long long duration; // ticks
 	unsigned long frame;
-
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-
-	unsigned int p_count = 0u;
-
-#ifdef PARTICLE_PHYSICS_TEST
-
-	unsigned int p_col_internal = 0u;
-	unsigned int p_col_boundary = 0u;
-
-#elif defined(PARTICLE_RENDER_TEST)
-
-	unsigned int p_lights = 0u;
-
-#endif // PARTICLE_RENDER_TEST
-#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 };
 
 struct ProfilingTimer
@@ -168,35 +139,6 @@ struct ProfilingTimer
 	static bool recording;
 	static unsigned long frame;
 	static eastl::vector<ProfilingOperation> operations;
-
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-
-	static int wait4frame;
-	static int current_sim;
-	static unsigned int update_time;
-	static unsigned int p_count;
-
-#ifdef PARTICLE_PHYSICS_TEST
-
-	static unsigned int p_col_internal;
-	static unsigned int p_col_boundary;
-
-#else
-
-	static unsigned int p_lights;
-
-#endif // PARTICLE_PHYSICS_TEST
-#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
-};
-
-namespace RE_Profiler
-{
-	void Start();
-	void Pause();
-	void Clear();
-	void Reset();
-	void Deploy(const char* file_name = PROFILING_OUTPUT_FILE_NAME);
-	void Exit();
 };
 
 #define RE_PROFILE(func, context) ProfilingTimer profiling_timer(func, context)
@@ -204,26 +146,61 @@ namespace RE_Profiler
 
 #else
 
+namespace RE_Profiler
+{
+	char* GetFunctionStr(RE_ProfiledFunc function)
+	{
+		switch (function)
+		{
+		case PROF_Init: return "Init";
+		case PROF_Start: return "Start";
+		case PROF_PreUpdate: return "PreUpdate";
+		case PROF_Update: return "Update";
+		case PROF_PostUpdate: return "PostUpdate";
+		case PROF_CleanUp: return "CleanUp";
+		case PROF_Load: return "Load";
+		case PROF_Save: return "Save";
+		case PROF_Clear: return "Clear";
+
+		case PROF_ReadAssetChanges: return "Read Asset Changes";
+		case PROF_DroppedFile: return "Dropped File";
+
+		case PROF_GetActiveShaders: return "Get Active Shaders";
+		case PROF_DrawScene: return "DrawS cene";
+		case PROF_DrawSkybox: return "Draw Skybox";
+		case PROF_DrawStencil: return "Draw Stencil";
+		case PROF_DrawEditor: return "Draw Editor";
+		case PROF_DrawDebug: return "Draw Debug";
+		case PROF_DrawThumbnails: return "Draw Thumbnails";
+		case PROF_DrawParticles: return "Draw Particles";
+		case PROF_DrawParticlesLight: return "Camera Particles' Light";
+
+		case PROF_CameraRaycast: return "Camera Raycast";
+		case PROF_EditorCamera: return "Editor Camera";
+
+		case PROF_ThumbnailResources: return "Thumbnail Resources";
+		case PROF_InitChecker: return "Init Checker";
+		case PROF_InitShaders: return "Init Shaders";
+		case PROF_InitWater: return "Init Water";
+		case PROF_InitMaterial: return "Init Material";
+		case PROF_InitSkyBox: return "Init SkyBox";
+
+		case PROF_SetWindowProperties: return "Set Window Properties";
+		case PROF_CreateWindow: return "Create Window";
+
+		case PROF_ParticleTiming: return "Particle Timing";
+		case PROF_ParticleUpdate: return "Particle Update";
+		case PROF_ParticleSpawn: return "Particle Spawn";
+		case PROF_ParticleCollision: return "Particle Collision";
+		case PROF_ParticleBoundPCol: return "Particle Plane Boundary Collision";
+		case PROF_ParticleBoundSCol: return "Particle Sphere Boundary Collision";
+
+		default: return "Undefined";
+		}
+	}
+}
+
 #include <Optick/optick.h>
-#define RE_OPTICK_NAME(function)\ // TODO RUB: missing some definitions & should be improved
-	function == PROF_Init ? "Init" : \
-	function == PROF_Start ? "Start" : \
-	function == PROF_PreUpdate ? "PreUpdate" : \
-	function == PROF_Update ? "Update" : \
-	function == PROF_PostUpdate ? "PostUpdate" : \
-	function == PROF_CleanUp ? "CleanUp" : \
-	function == PROF_Load ? "Load" : \
-	function == PROF_Save ? "Save" : \
-	function == PROF_Clear ? "Clear" : \
-	function == PROF_ReadAssetChanges ? "Read Asset Changes" : \
-	function == PROF_DroppedFile ? "Dropped File" : \
-	function == PROF_DrawScene ? "Draw Scene" : \
-	function == PROF_DrawSkybox ? "Draw Skybox" : \
-	function == PROF_DrawStencil ? "Draw Stencil" : \
-	function == PROF_DrawEditor ? "Draw Editor" : \
-	function == PROF_DrawDebug ? "Draw Debug" : \
-	function == PROF_CameraRaycast ? "Camera Raycast" : \
-	function == PROF_EditorCamera ? "Editor Camera" : "Undefined"
 
 #define RE_OPTICK_CATEGORY(category)\
 	(category < PROF_ModuleInput	?	Optick::Category::GameLogic :	\
@@ -234,11 +211,8 @@ namespace RE_Profiler
 	(category < PROF_ModuleAudio	?	Optick::Category::Rendering :	\
 	(category < PROF_FileSystem 	?	Optick::Category::Audio : Optick::Category::IO)))))))
 
-#define RE_PROFILE(func, context) OPTICK_CATEGORY(RE_OPTICK_NAME(func),	RE_OPTICK_CATEGORY(context))
+#define RE_PROFILE(func, context) OPTICK_CATEGORY(RE_Profiler::GetFunctionStr(func), RE_OPTICK_CATEGORY(context))
 #define RE_PROFILE_FRAME() OPTICK_FRAME("MainThread RedEye")
-
-#undef PARTICLE_PHYSICS_TEST
-#undef PARTICLE_RENDER_TEST
 
 #endif // INTERNAL_PROFILING
 
@@ -246,10 +220,6 @@ namespace RE_Profiler
 
 #define RE_PROFILE(func, context)
 #define RE_PROFILE_FRAME()
-
-#undef INTERNAL_PROFILING
-#undef PARTICLE_PHYSICS_TEST
-#undef PARTICLE_RENDER_TEST
 
 #endif // PROFILING_ENABLED
 

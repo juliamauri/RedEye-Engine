@@ -35,12 +35,6 @@ public:
 
 	eastl::list<RE_ParticleEmitter*> simulations;
 
-#ifdef PARTICLE_RENDER_TEST
-
-	static RE_Timer timer_simple;
-
-#endif // PARTICLE_RENDER_TEST
-
 private:
 
 	void DrawAASphere(const math::vec p_pos, const float radius) const;

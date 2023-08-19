@@ -57,28 +57,9 @@ bool ModuleScene::Start()
 	RE_PROFILE(PROF_Start, PROF_ModuleScene);
 	RE_LOG("Starting Module Scene");
 
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-
-	NewEmptyScene();
-
-	const math::vec best_pos = { 0.f, -10.f, 0.f };
-	cams->MainCamera()->Focus(best_pos, 70.f);
-	cams->EditorCamera()->Focus(best_pos, 70.f);
-
-	RE_GameObject* go = scenePool.AddGO("Particle System", GetRootUID(), true);
-	RE_CompParticleEmitter* comp = dynamic_cast<RE_CompParticleEmitter*>(go->AddNewComponent(C_PARTICLEEMITER));
-	comp->UseResources();
-
-	RE_ParticleEmitter::demo_emitter = comp->GetSimulation();
-	RE_ParticleEmitter::demo_emitter->DemoSetup();
-
-#else
-
 	eastl::vector<ResourceContainer*> scenes = RE_RES->GetResourcesByType(R_SCENE);
 	if (!scenes.empty()) LoadScene(scenes[0]->GetMD5());
 	else NewEmptyScene();
-
-#endif // PARTICLE_PHYSICS_TEST
 
 	return true;
 }

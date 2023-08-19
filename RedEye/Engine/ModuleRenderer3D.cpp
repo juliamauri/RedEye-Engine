@@ -845,20 +845,12 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			unif_name = "count";
 			RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, unif_name.c_str()), count);
 
-
 			// Render Lights
 			DrawQuad();
 
-
+			// Render Particle Lights
 			RE_PROFILE(PROF_DrawParticlesLight, PROF_ModuleRender);
 
-#ifdef PARTICLE_RENDER_TEST
-
-			ParticleManager::timer_simple.Start();
-
-#endif // PARTICLE_RENDER_TEST
-
-			// Render Particle Lights
 			// Setup Shader
 			unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
 			RE_GLCache::ChangeShader(particlelight_pass);
@@ -885,23 +877,10 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 			// Render Lights
 			DrawQuad();
-
-#ifdef PARTICLE_RENDER_TEST
-
-			ProfilingTimer::p_lights = particlelightsCount;
-			ParticleManager::timer_simple.Pause();
-
-#endif // PARTICLE_RENDER_TEST
 		}
 		else
 		{
 			RE_PROFILE(PROF_DrawParticlesLight, PROF_ModuleRender);
-
-#ifdef PARTICLE_RENDER_TEST
-
-			ParticleManager::timer_simple.Start();
-
-#endif // PARTICLE_RENDER_TEST
 
 			// Bind Textures
 			static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
@@ -936,13 +915,6 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 			// Render Lights
 			DrawQuad();
-
-#ifdef PARTICLE_RENDER_TEST
-
-			ProfilingTimer::p_lights = particlelightsCount;
-			ParticleManager::timer_simple.Pause();
-
-#endif // PARTICLE_RENDER_TEST
 		}
 
 

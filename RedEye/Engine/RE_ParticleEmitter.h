@@ -7,10 +7,6 @@
 
 #include <EASTL/vector.h>
 
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-#include <EASTL/string.h>
-#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
-
 class RE_ParticleEmitter
 {
 public:
@@ -97,15 +93,6 @@ public:
 	} orientation = ParticleDir::Billboard;
 
 	math::float3 direction = { -1.0f,1.0f,0.5f };
-
-#if defined(PARTICLE_PHYSICS_TEST) || defined(PARTICLE_RENDER_TEST)
-
-	void DemoSetup();
-
-	static RE_ParticleEmitter* demo_emitter;
-	static eastl::string filename;
-
-#endif // PARTICLE_PHYSICS_TEST || PARTICLE_RENDER_TEST
 };
 
 #endif //!__RE_PARTICLEEMITTER_H__
