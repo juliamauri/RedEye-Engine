@@ -35,9 +35,9 @@ void RE_GameObject::SetUp(GameObjectsPool* goPool, ComponentsPool* compPool, con
 	pool_comps = compPool;
 	pool_gos = goPool;
 
-	transform = pool_comps->GetNewComponentPtr(ComponentType::C_TRANSFORM)->PoolSetUp(pool_gos, go_uid);
-
 	if (parent_uid = parent) pool_gos->AtPtr(parent)->childs.push_back(go_uid);
+
+	transform = pool_comps->GetNewComponentPtr(ComponentType::C_TRANSFORM)->PoolSetUp(pool_gos, go_uid);
 
 	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);

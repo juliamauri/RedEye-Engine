@@ -10,6 +10,7 @@ public:
 	RE_CompTransform();
 	~RE_CompTransform();
 
+	COMP_UID PoolSetUp(class GameObjectsPool* pool, const GO_UID parent, bool report_parent = false) override;
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
 
 	void Update();
