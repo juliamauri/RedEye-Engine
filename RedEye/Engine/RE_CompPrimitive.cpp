@@ -395,6 +395,9 @@ void RE_CompPlatonic::Draw() const
 	RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
 	RE_ShaderImporter::setFloat(shader, "cdiffuse", color);
+	RE_ShaderImporter::setFloat(shader, "cspecular", math::vec::zero);
+	RE_ShaderImporter::setFloat(shader, "shininess", 1.0f);
+	RE_ShaderImporter::setFloat(shader, "opacity", 1.0f);
 
 	// Draw
 	RE_GLCache::ChangeVAO(VAO);
@@ -492,6 +495,9 @@ void RE_CompParametric::Draw() const
 		RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 		RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
 		RE_ShaderImporter::setFloat(shader, "cdiffuse", color);
+		RE_ShaderImporter::setFloat(shader, "cspecular", math::vec::zero);
+		RE_ShaderImporter::setFloat(shader, "shininess", 1.0f);
+		RE_ShaderImporter::setFloat(shader, "opacity", 1.0f);
 	}
 	else // Apply Checkers Texture
 	{
