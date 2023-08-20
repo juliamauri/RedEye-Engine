@@ -8,17 +8,15 @@
 class AboutWindow : public EditorWindow
 {
 public:
+	AboutWindow() : EditorWindow("About", false) {}
+	~AboutWindow() final = default;
+
 	struct SoftwareInfo
 	{
 		eastl::string name;
 		eastl::string version;
 		eastl::string website;
 	};
-
-public:
-
-	AboutWindow() : EditorWindow("About", false) {}
-	~AboutWindow() final = default;
 
 private:
 	void Draw(bool secondary = false) override;
