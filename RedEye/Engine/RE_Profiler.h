@@ -1,10 +1,10 @@
 #ifndef __RE_PROFILER__
 #define __RE_PROFILER__
 
-#define PROFILING_ENABLED // undefine to disable any profiling methods
+//#define PROFILING_ENABLED // undefine to disable any profiling 
+#ifdef PROFILING_ENABLED
 #define INTERNAL_PROFILING // undefine to use Optick Profiling
-#define RECORD_FROM_START true
-#define OUTPUT_CLASSES_AND_FUNCTIONS_TABLE
+#endif // PROFILING_ENABLED
 
 enum class RE_ProfiledFunc : unsigned short
 {
@@ -105,6 +105,10 @@ namespace RE_Profiler
 }
 
 #ifdef INTERNAL_PROFILING
+
+#define RECORD_FROM_START true
+#define OUTPUT_CLASSES_AND_FUNCTIONS_TABLE
+
 #ifdef _DEBUG
 #define PROFILING_OUTPUT_FILE_NAME "Debug Red Eye Profiling.json"
 #else
