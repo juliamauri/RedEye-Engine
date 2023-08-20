@@ -108,7 +108,7 @@ void AssetsWindow::DrawDirectoryItem(eastl::stack<RE_FileSystem::RE_Path*>& file
 	}
 }
 
-void AssetsWindow::DrawItemResource(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, const eastl::string& idName, const unsigned int& idCount)
+void AssetsWindow::DrawItemResource(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, const eastl::string& idName, const unsigned int& idCount) const
 {
 	if (p->AsFile()->metaResource != nullptr)
 	{
@@ -195,7 +195,7 @@ void AssetsWindow::DrawItemNotSupported(bool secondary, float iconsSize, const R
 	}
 }
 
-void AssetsWindow::DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, const eastl::string& idName, const unsigned int& idCount)
+void AssetsWindow::DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, const eastl::string& idName, const unsigned int& idCount) const
 {
 	const ResourceContainer* res = RE_RES->At(p->AsMeta()->resource);
 

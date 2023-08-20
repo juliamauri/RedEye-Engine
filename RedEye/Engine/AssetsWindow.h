@@ -19,9 +19,9 @@ private:
 
 	void DrawDirectoryItem(eastl::stack<RE_FileSystem::RE_Path*>& filesToDisplay, const eastl::string& idName, unsigned int& idCount, float iconsSize, RE_FileSystem::RE_Directory*& toChange, bool secondary);
 	
-	void DrawItemResource(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, const eastl::string& idName, const unsigned int& idCount);
+	void DrawItemResource(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, const eastl::string& idName, const unsigned int& idCount) const;
 	void DrawItemNotSupported(bool secondary, float iconsSize, const RE_FileSystem::RE_Path* p, eastl::string& id, const eastl::string& idName, const unsigned int& idCount);
-	void DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, const eastl::string& idName, const unsigned int& idCount);
+	void DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, const eastl::string& idName, const unsigned int& idCount) const;
 	void DrawItemFolder(float iconsSize, RE_FileSystem::RE_Directory*& toChange, const RE_FileSystem::RE_Path* p) const;
 
 	void DrawPopUpDeleteResource(eastl::string& id, const eastl::string& idName, const unsigned int& idCount, const ResourceContainer* res) const;
