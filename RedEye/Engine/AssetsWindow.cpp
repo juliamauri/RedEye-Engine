@@ -68,11 +68,12 @@ void AssetsWindow::Draw(bool secondary)
 	ImGui::End();
 }
 
-void AssetsWindow::DrawDirectoryItem(eastl::stack<RE_FileSystem::RE_Path*>& filesToDisplay, eastl::string& idName, unsigned int& idCount, float iconsSize, RE_FileSystem::RE_Directory*& toChange, bool secondary)
+void AssetsWindow::DrawDirectoryItem(eastl::stack<RE_FileSystem::RE_Path*>& filesToDisplay, const eastl::string& idName, unsigned int& idCount, float iconsSize, RE_FileSystem::RE_Directory*& toChange, bool secondary)
 {
 	const RE_FileSystem::RE_Path* p = filesToDisplay.top();
 	filesToDisplay.pop();
-	eastl::string id = idName + eastl::to_string((idCount++));
+	idCount += 1;
+	eastl::string id = idName + eastl::to_string(idCount);
 	ImGui::PushID(id.c_str());
 	switch (p->pType)
 	{
@@ -107,7 +108,7 @@ void AssetsWindow::DrawDirectoryItem(eastl::stack<RE_FileSystem::RE_Path*>& file
 	}
 }
 
-void AssetsWindow::DrawItemResource(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, eastl::string& idName, unsigned int& idCount)
+void AssetsWindow::DrawItemResource(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, const eastl::string& idName, const unsigned int& idCount)
 {
 	if (p->AsFile()->metaResource != nullptr)
 	{
@@ -145,7 +146,7 @@ void AssetsWindow::DrawItemResource(const RE_FileSystem::RE_Path* p, float icons
 		ImGui::PopID();
 }
 
-void AssetsWindow::DrawItemNotSupported(bool secondary, float iconsSize, const RE_FileSystem::RE_Path* p, eastl::string& id, eastl::string& idName, unsigned int& idCount)
+void AssetsWindow::DrawItemNotSupported(bool secondary, float iconsSize, const RE_FileSystem::RE_Path* p, eastl::string& id, const eastl::string& idName, const unsigned int& idCount)
 {
 	bool pop = (!selectingUndefFile && !secondary);
 	if (pop)
@@ -156,7 +157,7 @@ void AssetsWindow::DrawItemNotSupported(bool secondary, float iconsSize, const R
 
 	if (ImGui::ImageButton(
 		eastl::bit_cast<void*>(selectingUndefFile ? RE_EDITOR->thumbnails->GetSelectFileID() : RE_EDITOR->thumbnails->GetFileID()),
-		{ iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, (selectingUndefFile) ? -1 : 0)
+		{ iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, selectingUndefFile ? -1 : 0)
 		&& selectingUndefFile)
 	{
 		*selectingUndefFile = p->path;
@@ -194,7 +195,7 @@ void AssetsWindow::DrawItemNotSupported(bool secondary, float iconsSize, const R
 	}
 }
 
-void AssetsWindow::DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, eastl::string& idName, unsigned int& idCount)
+void AssetsWindow::DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, const eastl::string& idName, const unsigned int& idCount)
 {
 	const ResourceContainer* res = RE_RES->At(p->AsMeta()->resource);
 
@@ -216,7 +217,7 @@ void AssetsWindow::DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize
 	ImGui::Text(res->GetName());
 }
 
-void AssetsWindow::DrawItemFolder(float iconsSize, RE_FileSystem::RE_Directory*& toChange, const RE_FileSystem::RE_Path* p)
+void AssetsWindow::DrawItemFolder(float iconsSize, RE_FileSystem::RE_Directory*& toChange, const RE_FileSystem::RE_Path* p) const
 {
 	if (ImGui::ImageButton(eastl::bit_cast<void*>(RE_EDITOR->thumbnails->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 		toChange = p->AsDirectory();
@@ -224,7 +225,7 @@ void AssetsWindow::DrawItemFolder(float iconsSize, RE_FileSystem::RE_Directory*&
 	ImGui::Text(p->AsDirectory()->name.c_str());
 }
 
-void AssetsWindow::DrawPopUpDeleteResource(eastl::string& id, eastl::string& idName, unsigned int& idCount, const ResourceContainer* res)
+void AssetsWindow::DrawPopUpDeleteResource(eastl::string& id, const eastl::string& idName, const unsigned int& idCount, const ResourceContainer* res) const
 {
 	id = idName + eastl::to_string(idCount) + "Delete";
 	ImGui::PushID(id.c_str());
