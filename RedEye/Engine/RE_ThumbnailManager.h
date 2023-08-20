@@ -22,37 +22,37 @@ public:
 	void Change(const char* ref, unsigned int id);
 	void Delete(const char* ref);
 
-	unsigned int At(const char* ref);
+	uintptr_t At(const char* ref);
 
-	unsigned int GetFolderID()const { return folder; }
-	unsigned int GetFileID()const { return file; }
-	unsigned int GetSelectFileID()const { return selectfile; }
-	unsigned int GetShaderFileID()const { return shaderFile; }
-	unsigned int GetPEmitterFileID()const { return p_emitter; }
-	unsigned int GetPEmissionFileID()const { return p_emission; }
-	unsigned int GetPRenderFileID()const { return p_render; }
+	uintptr_t GetFolderID()const { return folder; }
+	uintptr_t GetFileID()const { return file; }
+	uintptr_t GetSelectFileID()const { return selectfile; }
+	uintptr_t GetShaderFileID()const { return shaderFile; }
+	uintptr_t GetPEmitterFileID()const { return p_emitter; }
+	uintptr_t GetPEmissionFileID()const { return p_emission; }
+	uintptr_t GetPRenderFileID()const { return p_render; }
 
-	unsigned int ThumbnailTexture(const char* ref);
+	uint32_t ThumbnailTexture(const char* ref);
 
 	void SaveTextureFromFBO(const char* path);
-	unsigned int LoadLibraryThumbnail(const char* ref);
+	uint32_t LoadLibraryThumbnail(const char* ref);
 
 private:
 
-	unsigned int LoadDefIcon(const char* filename);
+	uint32_t LoadDefIcon(const char* filename);
 
 private:
 
-	eastl::map<const char*, unsigned int> thumbnails;
+	eastl::map<const char*, uint32_t> thumbnails;
 
-	unsigned int singleRenderFBO = 0;
-	unsigned int pboRender = 0;
+	uint32_t singleRenderFBO = 0;
+	uint32_t pboRender = 0;
 
-	unsigned int folder = 0;
-	unsigned int file = 0;
-	unsigned int selectfile = 0;
-	unsigned int shaderFile = 0;
-	unsigned int p_emitter = 0, p_emission = 0, p_render = 0;
+	uint32_t folder = 0;
+	uint32_t file = 0;
+	uint32_t selectfile = 0;
+	uint32_t shaderFile = 0;
+	uint32_t p_emitter = 0, p_emission = 0, p_render = 0;
 };
 
 #endif // !__RETHUMBNAILMANAGER_H__

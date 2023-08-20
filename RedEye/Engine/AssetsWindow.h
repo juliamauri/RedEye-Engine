@@ -1,12 +1,14 @@
 #ifndef __ASSETS_WINDOW__
 #define __ASSETS_WINDOW__
 
+#include "RE_FileSystem.h"
+
 class AssetsWindow : public EditorWindow
 {
 public:
 
 	AssetsWindow() : EditorWindow("Assets", true) {}
-	~AssetsWindow() {}
+	~AssetsWindow() final = default;
 
 	const char* GetCurrentDirPath() const { return currentPath; }
 	void SelectUndefined(eastl::string* toFill) { selectingUndefFile = toFill; }
@@ -15,7 +17,18 @@ private:
 
 	void Draw(bool secondary = false) override;
 
-private:
+	void DrawDirectoryItem(eastl::stack<RE_FileSystem::RE_Path*>& filesToDisplay, eastl::string& idName, unsigned int& idCount, float iconsSize, RE_FileSystem::RE_Directory*& toChange, bool secondary);
+	
+	void DrawItemResource(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, eastl::string& idName, unsigned int& idCount);
+	void DrawItemNotSupported(bool secondary, float iconsSize, const RE_FileSystem::RE_Path* p, eastl::string& id, eastl::string& idName, unsigned int& idCount);
+	void DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize, eastl::string& id, eastl::string& idName, unsigned int& idCount);
+	void DrawItemFolder(float iconsSize, RE_FileSystem::RE_Directory*& toChange, const RE_FileSystem::RE_Path* p);
+
+	void DrawPopUpDeleteResource(eastl::string& id, eastl::string& idName, unsigned int& idCount, const ResourceContainer* res);
+
+	void DrawDisplayOptions(float& iconsSize);
+	void DrawDirectories(RE_FileSystem::RE_Directory* currentDir, RE_FileSystem::RE_Directory*& toChange);
+
 
 	const char* currentPath = nullptr;
 	eastl::string* selectingUndefFile = nullptr;

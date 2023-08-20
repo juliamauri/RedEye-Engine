@@ -33,6 +33,7 @@ void RE_ThumbnailManager::Init()
 
 void RE_ThumbnailManager::Clear()
 {
+	
 	glDeleteTextures(1, &folder);
 	glDeleteTextures(1, &file);
 	glDeleteTextures(1, &selectfile);
@@ -60,12 +61,12 @@ void RE_ThumbnailManager::Delete(const char* ref)
 	}
 }
 
-unsigned int RE_ThumbnailManager::At(const char* ref)
+uintptr_t RE_ThumbnailManager::At(const char* ref)
 { 
 	return (thumbnails.find(ref) != thumbnails.end()) ? thumbnails.at(ref) : 0u;
 }
 
-unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
+uint32_t RE_ThumbnailManager::LoadDefIcon(const char* filename)
 {
 	unsigned int ret = 0u;
 	eastl::string path(DEFTHUMBNAILS);
@@ -80,7 +81,7 @@ unsigned int RE_ThumbnailManager::LoadDefIcon(const char* filename)
 	return ret;
 }
 
-unsigned int RE_ThumbnailManager::ThumbnailTexture(const char* ref)
+uint32_t RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 {
 	unsigned int ret = 0u;
 	eastl::string path(THUMBNAILPATH);
@@ -147,7 +148,7 @@ void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
 }
 
-unsigned int RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
+uint32_t RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 {
 	uint ret = 0u;
 	eastl::string path(THUMBNAILPATH);
