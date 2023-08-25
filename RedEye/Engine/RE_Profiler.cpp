@@ -53,6 +53,14 @@ const char* RE_Profiler::GetFunctionStr(const RE_ProfiledFunc function)
 	}
 }
 
+#ifdef INTERNAL_PROFILING
+
+#include "Application.h"
+#include <MGL/Time/Clock.h>
+#include <RapidJson/writer.h>
+#include <iostream>
+#include <fstream>
+
 const char* RE_Profiler::GetClassStr(const RE_ProfiledClass function)
 {
 	switch (function)
@@ -98,17 +106,133 @@ const char* RE_Profiler::GetClassStr(const RE_ProfiledClass function)
 	}
 }
 
-#ifdef INTERNAL_PROFILING
+void RE_Profiler::Start() { ProfilingTimer::recording = true; }
+void RE_Profiler::Pause() { ProfilingTimer::recording = false; }
+void RE_Profiler::Clear() { ProfilingTimer::operations.clear(); }
 
-#include "Application.h"
-#include <MGL/Time/Clock.h>
-#include <RapidJson/writer.h>
-#include <RapidJson/stringbuffer.h>
-#include <iostream>
-#include <fstream>
+void RE_Profiler::Reset()
+{
+	ProfilingTimer::start = math::Clock::Tick();
+	ProfilingTimer::frame = 0ul;
+	Clear();
+}
+
+void RE_Profiler::Exit()
+{
+	if (!ProfilingTimer::operations.empty())
+		RE_Profiler::Deploy();
+}
+
+void RE_Profiler::Deploy()
+{
+	Pause();
+	if (!ProfilingTimer::operations.empty())
+	{ // Frame Operations
+		rapidjson::StringBuffer buffer;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		DumpFrameOperations(writer);
+		WriteToFile(
+#ifdef _DEBUG
+			"Debug Red Eye Profiling.json",
+#else
+			"Release Red Eye Profiling.json",
+#endif
+			buffer.GetString());
+	}
+
+	{ // Functions
+		rapidjson::StringBuffer buffer;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		DumpFunctionNames(writer);
+		WriteToFile("Functions Table.json", buffer.GetString());
+	}
+
+	{ // Classes
+		rapidjson::StringBuffer buffer;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		DumpClassNames(writer);
+		WriteToFile("Classes Table.json", buffer.GetString());
+	}
+
+	Clear();
+}
+
+void RE_Profiler::WriteToFile(const char* filename, const char* buffer)
+{
+	std::ofstream file;
+	file.open(filename, std::ios::trunc);
+	file << buffer;
+	file.close();
+}
+
+void DumpFrameOperations(rapidjson::Writer<rapidjson::StringBuffer>& writer)
+{
+	writer.StartObject();
+	writer.Key("Operations");
+
+	writer.StartArray();
+	for (auto& op : ProfilingTimer::operations)
+	{
+		writer.StartObject();
+		writer.Key("fr");
+		writer.Uint(op.frame);
+		writer.Key("fu");
+		writer.String(RE_Profiler::GetFunctionStr(op.function));
+		writer.Key("cl");
+		writer.String(RE_Profiler::GetClassStr(op.context));
+		writer.Key("du");
+		writer.Uint64(op.duration);
+		writer.Key("st");
+		writer.Uint64(op.start);
+
+		writer.EndObject();
+	}
+
+	writer.EndArray();
+	writer.EndObject();
+}
+
+void DumpFunctionNames(rapidjson::Writer<rapidjson::StringBuffer>& writer)
+{
+	writer.StartObject();
+	writer.Key("Functions");
+
+	writer.StartArray();
+	for (unsigned short i = 0; i < static_cast<const unsigned short>(RE_ProfiledFunc::END); ++i)
+	{
+		writer.StartObject();
+		writer.Key("id");
+		writer.Uint(i);
+		writer.Key("name");
+		writer.String(RE_Profiler::GetFunctionStr(static_cast<const RE_ProfiledFunc>(i)));
+		writer.EndObject();
+	}
+
+	writer.EndArray();
+	writer.EndObject();
+}
+void DumpClassNames(rapidjson::Writer<rapidjson::StringBuffer>& writer)
+{
+	writer.StartObject();
+	writer.Key("Classes");
+
+	writer.StartArray();
+	for (unsigned short i = 0; i < static_cast<const unsigned short>(RE_ProfiledClass::END); ++i)
+	{
+		writer.StartObject();
+		writer.Key("id");
+		writer.Uint(i);
+		writer.Key("name");
+		writer.String(RE_Profiler::GetClassStr(static_cast<const RE_ProfiledClass>(i)));
+		writer.EndObject();
+	}
+
+	writer.EndArray();
+	writer.EndObject();
+}
 
 unsigned long long ProfilingTimer::start = 0ull;
-bool ProfilingTimer::recording = RECORD_FROM_START;
+bool ProfilingTimer::recording = RE_Profiler::RecordFromStart;
 unsigned long ProfilingTimer::frame = 0u;
 eastl::vector<ProfilingOperation> ProfilingTimer::operations;
 
@@ -136,129 +260,6 @@ float ProfilingTimer::ReadMs() const
 {
 	return pushed ? (static_cast<float>(math::Clock::Tick() - operations[operation_id].start) / 1000.f / 1000.f) : 0.f;
 }
-
-void RE_Profiler::Start() { ProfilingTimer::recording = true; }
-void RE_Profiler::Pause() { ProfilingTimer::recording = false; }
-void RE_Profiler::Clear() { ProfilingTimer::operations.clear(); }
-
-void RE_Profiler::Reset()
-{
-	ProfilingTimer::start = math::Clock::Tick();
-	ProfilingTimer::frame = 0ul;
-	Clear();
-}
-
-void DumpToFile(eastl::string file_name)
-{
-	rapidjson::StringBuffer s;
-	rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-
-	writer.StartObject();
-
-	// Operations
-	writer.Key("Operations");
-	writer.StartArray();
-
-	for (auto &op : ProfilingTimer::operations)
-	{
-		writer.StartObject();
-		writer.Key("fr");
-		writer.Uint(op.frame);
-		writer.Key("fu");
-		writer.String(RE_Profiler::GetFunctionStr(op.function));
-		writer.Key("cl");
-		writer.String(RE_Profiler::GetClassStr(op.context));
-		writer.Key("du");
-		writer.Uint64(op.duration);
-		writer.Key("st");
-		writer.Uint64(op.start);
-
-		writer.EndObject();
-	}
-	writer.EndArray();
-	writer.EndObject();
-
-	std::ofstream file;
-	file.open(file_name.c_str(), std::ios::trunc);
-	file << s.GetString();
-	file.close();
-}
-
-void RE_Profiler::Deploy(const char* file_name)
-{
-	Pause();
-
-	if (!ProfilingTimer::operations.empty())
-	{
-		DeployIntermediates();
-		DumpToFile(file_name);
-		Clear();
-	}
-}
-
-void RE_Profiler::DeployIntermediates()
-{
-#ifdef OUTPUT_CLASSES_AND_FUNCTIONS_TABLE
-	// Functions
-	{
-		rapidjson::StringBuffer s;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-
-		writer.StartObject();
-		writer.Key("Functions");
-		writer.StartArray();
-		for (unsigned short i = 0; i < static_cast<const unsigned short>(RE_ProfiledFunc::END); ++i)
-		{
-			writer.StartObject();
-			writer.Key("id");
-			writer.Uint(i);
-			writer.Key("name");
-			writer.String(RE_Profiler::GetFunctionStr(static_cast<const RE_ProfiledFunc>(i)));
-			writer.EndObject();
-		}
-		writer.EndArray();
-		writer.EndObject();
-
-		std::ofstream file;
-		file.open("Functions Table.json", std::ios::trunc);
-		file << s.GetString();
-		file.close();
-	}
-	// Classes
-	{
-		rapidjson::StringBuffer s;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-
-		writer.StartObject();
-		writer.Key("Classes");
-		writer.StartArray();
-		for (unsigned short i = 0; i < static_cast<const unsigned short>(RE_ProfiledClass::END); ++i)
-		{
-			writer.StartObject();
-			writer.Key("id");
-			writer.Uint(i);
-			writer.Key("name");
-			writer.String(RE_Profiler::GetClassStr(static_cast<const RE_ProfiledClass>(i)));
-			writer.EndObject();
-		}
-		writer.EndArray();
-		writer.EndObject();
-
-		std::ofstream file;
-		file.open("Classes Table.json", std::ios::trunc);
-		file << s.GetString();
-		file.close();
-	}
-
-#endif // OUTPUT_CLASSES_AND_FUNCTIONS_TABLE
-}
-
-void RE_Profiler::Exit()
-{
-	if (ProfilingTimer::recording) RE_Profiler::Deploy();
-	else Clear();
-}
-
 
 #endif // INTERNAL_PROFILING
 #endif // PROFILING_ENABLED

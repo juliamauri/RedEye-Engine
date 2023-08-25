@@ -1,7 +1,7 @@
 #ifndef __RE_PROFILER__
 #define __RE_PROFILER__
 
-//#define PROFILING_ENABLED // undefine to disable any profiling 
+#define PROFILING_ENABLED // undefine to disable any profiling 
 #ifdef PROFILING_ENABLED
 #define INTERNAL_PROFILING // undefine to use Optick Profiling
 #endif // PROFILING_ENABLED
@@ -101,31 +101,26 @@ enum class RE_ProfiledClass : unsigned short
 namespace RE_Profiler
 {
 	const char* GetFunctionStr(const RE_ProfiledFunc function);
-	const char* GetClassStr(const RE_ProfiledClass function);
 }
 
 #ifdef INTERNAL_PROFILING
-
-#define RECORD_FROM_START true
-#define OUTPUT_CLASSES_AND_FUNCTIONS_TABLE
-
-#ifdef _DEBUG
-#define PROFILING_OUTPUT_FILE_NAME "Debug Red Eye Profiling.json"
-#else
-#define PROFILING_OUTPUT_FILE_NAME "Release Red Eye Profiling.json"
-#endif // _DEBUG
 
 #include <EASTL/vector.h>
 
 namespace RE_Profiler
 {
+	constexpr bool RecordFromStart = true;
+
+	const char* GetClassStr(const RE_ProfiledClass function);
+
 	void Start();
 	void Pause();
 	void Clear();
 	void Reset();
-	void Deploy(const char* file_name = PROFILING_OUTPUT_FILE_NAME);
-	void DeployIntermediates();
 	void Exit();
+
+	void Deploy();
+	void WriteToFile(const char* filename, const char* buffer);
 };
 
 struct ProfilingOperation
