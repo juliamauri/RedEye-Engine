@@ -274,9 +274,9 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 			{
 				switch (rType)
 				{
-				case ResourceType::SKYBOX:			 comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(C_CAMERA); break;
-				case ResourceType::MATERIAL:		 comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(C_MESH); break;
-				case ResourceType::PARTICLE_EMITTER: comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(C_PARTICLEEMITER); break;
+				case ResourceType::SKYBOX:			 comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(RE_Component::Type::CAMERA); break;
+				case ResourceType::MATERIAL:		 comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(RE_Component::Type::MESH); break;
+				case ResourceType::PARTICLE_EMITTER: comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(RE_Component::Type::PARTICLEEMITER); break;
 				default: break;
 				}
 
@@ -374,7 +374,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 				if (poolGORes != nullptr)
 				{
 					eastl::stack<RE_Component*> comps = poolGORes->GetRootPtr()->GetAllChildsComponents(
-						(rType == ResourceType::MATERIAL) ? C_MESH : C_CAMERA);
+						(rType == ResourceType::MATERIAL) ? RE_Component::Type::MESH : RE_Component::Type::CAMERA);
 
 					while (!comps.empty())
 					{
@@ -454,21 +454,19 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 			
 			resChange->SaveMeta();
 
-			if (need_update_scene) {
-				eastl::stack<RE_Component*> comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(C_PARTICLEEMITER);
+			if (need_update_scene)
+			{
+				eastl::stack<RE_Component*> comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(RE_Component::Type::PARTICLEEMITER);
 
 				while (!comps.empty())
 				{
 					RE_CompParticleEmitter* emitter = dynamic_cast<RE_CompParticleEmitter*>(comps.top());
 					comps.pop();
 
-					if (emitter)
+					if (emitter && emitter->GetEmitterResource() == resToChange)
 					{
-						if (emitter->GetEmitterResource() == resToChange)
-						{
-							emitter->UnUseResources();
-							emitter->UseResources();
-						}
+						emitter->UnUseResources();
+						emitter->UseResources();
 					}
 				}
 			}
@@ -484,9 +482,9 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 		
 		switch (rType)
 		{
-		case ResourceType::SKYBOX: comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(C_CAMERA); break;
-		case ResourceType::MATERIAL: comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(C_MESH); break;
-		case ResourceType::PARTICLE_EMITTER: comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(C_PARTICLEEMITER); break;
+		case ResourceType::SKYBOX: comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(RE_Component::Type::CAMERA); break;
+		case ResourceType::MATERIAL: comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(RE_Component::Type::MESH); break;
+		case ResourceType::PARTICLE_EMITTER: comps = RE_SCENE->GetRootPtr()->GetAllChildsComponents(RE_Component::Type::PARTICLEEMITER); break;
 		default: break;
 		}
 		
@@ -534,8 +532,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	if (rType != ResourceType::SHADER &&
 		rType != ResourceType::PARTICLE_EMITTER &&
 		rType != ResourceType::PARTICLE_EMISSION &&
-		rType != ResourceType::PARTICLE_RENDER)
-		RE_EDITOR->thumbnails->Delete(res);
+		rType != ResourceType::PARTICLE_RENDER) RE_EDITOR->thumbnails->Delete(res);
 
 	return resource;
 }
@@ -643,15 +640,12 @@ const char* RE_ResourceManager::CheckOrFindMeshOnLibrary(const char* librariPath
 
 	meshMD5 = FindMD5ByLibraryPath(librariPath, ResourceType::MESH);
 
-	if (!meshMD5)
+	if (!meshMD5 && RE_FS->Exists(librariPath))
 	{
-		if (RE_FS->Exists(librariPath))
-		{
-			RE_Mesh* newMesh = new RE_Mesh();
-			newMesh->SetLibraryPath(librariPath);
-			newMesh->SetType(ResourceType::MESH);
-			meshMD5 = Reference(newMesh);
-		}
+		RE_Mesh* newMesh = new RE_Mesh();
+		newMesh->SetLibraryPath(librariPath);
+		newMesh->SetType(ResourceType::MESH);
+		meshMD5 = Reference(newMesh);
 	}
 
 	if (!meshMD5) RE_LOG_ERROR("Error finding library mesh:\n%s", librariPath);
@@ -665,16 +659,16 @@ bool RE_ResourceManager::isNeededResoursesLoaded(const char* metaPath, ResourceT
 
 	ResourceContainer* newContainer = nullptr;
 	switch (type) {
-	case ResourceType::SHADER:				newContainer = static_cast<ResourceContainer*>(new RE_Shader(metaPath));				break;
-	case ResourceType::TEXTURE:				newContainer = static_cast<ResourceContainer*>(new RE_Texture(metaPath));				break;
-	case ResourceType::PREFAB:				newContainer = static_cast<ResourceContainer*>(new RE_Prefab(metaPath));				break;
-	case ResourceType::SKYBOX:				newContainer = static_cast<ResourceContainer*>(new RE_SkyBox(metaPath));				break;
-	case ResourceType::MATERIAL:			newContainer = static_cast<ResourceContainer*>(new RE_Material(metaPath));				break;
-	case ResourceType::MODEL:				newContainer = static_cast<ResourceContainer*>(new RE_Model(metaPath));					break;
-	case ResourceType::SCENE:				newContainer = static_cast<ResourceContainer*>(new RE_Scene(metaPath));					break;
-	case ResourceType::PARTICLE_EMITTER:	newContainer = static_cast<ResourceContainer*>(new RE_ParticleEmitterBase(metaPath));	break;
-	case ResourceType::PARTICLE_EMISSION:	newContainer = static_cast<ResourceContainer*>(new RE_ParticleEmission(metaPath));		break;
-	case ResourceType::PARTICLE_RENDER:		newContainer = static_cast<ResourceContainer*>(new RE_ParticleRender(metaPath));		break;
+	case ResourceType::SHADER:			  newContainer = static_cast<ResourceContainer*>(new RE_Shader(metaPath));				break;
+	case ResourceType::TEXTURE:			  newContainer = static_cast<ResourceContainer*>(new RE_Texture(metaPath));				break;
+	case ResourceType::PREFAB:			  newContainer = static_cast<ResourceContainer*>(new RE_Prefab(metaPath));				break;
+	case ResourceType::SKYBOX:			  newContainer = static_cast<ResourceContainer*>(new RE_SkyBox(metaPath));				break;
+	case ResourceType::MATERIAL:		  newContainer = static_cast<ResourceContainer*>(new RE_Material(metaPath));			break;
+	case ResourceType::MODEL:			  newContainer = static_cast<ResourceContainer*>(new RE_Model(metaPath));				break;
+	case ResourceType::SCENE:			  newContainer = static_cast<ResourceContainer*>(new RE_Scene(metaPath));				break;
+	case ResourceType::PARTICLE_EMITTER:  newContainer = static_cast<ResourceContainer*>(new RE_ParticleEmitterBase(metaPath)); break;
+	case ResourceType::PARTICLE_EMISSION: newContainer = static_cast<ResourceContainer*>(new RE_ParticleEmission(metaPath));	break;
+	case ResourceType::PARTICLE_RENDER:	  newContainer = static_cast<ResourceContainer*>(new RE_ParticleRender(metaPath));		break;
 	}
 
 	if(newContainer)
@@ -689,11 +683,10 @@ bool RE_ResourceManager::isNeededResoursesLoaded(const char* metaPath, ResourceT
 void RE_ResourceManager::ThumbnailResources()
 {
 	RE_PROFILE(RE_ProfiledFunc::ThumbnailResources, RE_ProfiledClass::ResourcesManager);
-	for (auto res : resources)
+	for (auto& res : resources)
 	{
 		ResourceType rT = res.second->GetType();
-		if(
-			rT == ResourceType::SCENE ||
+		if( rT == ResourceType::SCENE ||
 			rT == ResourceType::PREFAB ||
 			rT == ResourceType::MODEL ||
 			rT == ResourceType::SKYBOX ||
@@ -726,7 +719,8 @@ void RE_ResourceManager::ProcessParticlesReimport()
 
 const char* RE_ResourceManager::GetNameFromType(const ResourceType type)
 {
-	switch (type) {
+	switch (type)
+	{
 	case ResourceType::TEXTURE: return "Texture";
 	case ResourceType::SCENE: return "Scene";
 	case ResourceType::MATERIAL: return "Material";
@@ -739,7 +733,8 @@ const char* RE_ResourceManager::GetNameFromType(const ResourceType type)
 	case ResourceType::PARTICLE_EMISSION: return "Particle emission";
 	case ResourceType::PARTICLE_RENDER: return "Particle render";
 	case ResourceType::UNDEFINED: return "Undefined";
-	default: return "Invalid"; }
+	default: return "Invalid";
+	}
 }
 
 const char* RE_ResourceManager::ImportModel(const char* assetPath)

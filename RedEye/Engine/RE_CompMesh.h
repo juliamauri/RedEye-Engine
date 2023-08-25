@@ -4,7 +4,7 @@
 class RE_CompMesh : public RE_Component
 {
 public:
-	RE_CompMesh() : RE_Component(C_MESH) {}
+	RE_CompMesh() : RE_Component(RE_Component::Type::MESH) {}
 	~RE_CompMesh() {}
 	
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;

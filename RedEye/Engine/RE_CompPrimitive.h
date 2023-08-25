@@ -9,7 +9,7 @@ class RE_CompPrimitive : public RE_Component
 {
 public:
 
-	RE_CompPrimitive(ComponentType t);
+	RE_CompPrimitive(RE_Component::Type t);
 	virtual ~RE_CompPrimitive() {}
 
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override {}
@@ -52,7 +52,7 @@ class RE_CompGrid : public RE_CompPrimitive
 {
 public:
 
-	RE_CompGrid() : RE_CompPrimitive(C_GRID) {}
+	RE_CompGrid() : RE_CompPrimitive(RE_Component::Type::GRID) {}
 	~RE_CompGrid();
 	friend class RE_PrimitiveManager;
 
@@ -87,7 +87,7 @@ class RE_CompRock : public RE_CompPrimitive
 {
 public:
 
-	RE_CompRock() : RE_CompPrimitive(C_ROCK) {}
+	RE_CompRock() : RE_CompPrimitive(RE_Component::Type::ROCK) {}
 	~RE_CompRock();
 	friend class RE_PrimitiveManager;
 
@@ -128,7 +128,7 @@ class RE_CompPlatonic : public RE_CompPrimitive
 {
 public:
 
-	RE_CompPlatonic(ComponentType t) : RE_CompPrimitive(t) {}
+	RE_CompPlatonic(RE_Component::Type t) : RE_CompPrimitive(t) {}
 	~RE_CompPlatonic();
 	friend class RE_PrimitiveManager;
 
@@ -157,7 +157,7 @@ protected:
 class RE_CompParametric : public RE_CompPrimitive
 {
 public:
-	RE_CompParametric(ComponentType t, const char* name);
+	RE_CompParametric(RE_Component::Type t, const char* name);
 	virtual ~RE_CompParametric();
 	friend class RE_PrimitiveManager;
 
@@ -201,22 +201,22 @@ private:
 **************************************************/
 
 class RE_CompPoint : public RE_CompPlatonic
-{ public: RE_CompPoint() : RE_CompPlatonic(C_POINT) {} };
+{ public: RE_CompPoint() : RE_CompPlatonic(RE_Component::Type::POINT) {} };
 
 class RE_CompCube : public RE_CompPlatonic
-{ public: RE_CompCube() : RE_CompPlatonic(C_CUBE) {} };
+{ public: RE_CompCube() : RE_CompPlatonic(RE_Component::Type::CUBE) {} };
 
 class RE_CompDodecahedron : public RE_CompPlatonic
-{ public: RE_CompDodecahedron() : RE_CompPlatonic(C_DODECAHEDRON) {} };
+{ public: RE_CompDodecahedron() : RE_CompPlatonic(RE_Component::Type::DODECAHEDRON) {} };
 
 class RE_CompTetrahedron : public RE_CompPlatonic
-{ public: RE_CompTetrahedron() : RE_CompPlatonic(C_TETRAHEDRON) {} };
+{ public: RE_CompTetrahedron() : RE_CompPlatonic(RE_Component::Type::TETRAHEDRON) {} };
 
 class RE_CompOctohedron : public RE_CompPlatonic
-{ public: RE_CompOctohedron() : RE_CompPlatonic(C_OCTOHEDRON) {} };
+{ public: RE_CompOctohedron() : RE_CompPlatonic(RE_Component::Type::OCTOHEDRON) {} };
 
 class RE_CompIcosahedron : public RE_CompPlatonic
-{ public: RE_CompIcosahedron() : RE_CompPlatonic(C_ICOSAHEDRON) {} };
+{ public: RE_CompIcosahedron() : RE_CompPlatonic(RE_Component::Type::ICOSAHEDRON) {} };
 
 /**************************************************
 ******	Plane - Parametric

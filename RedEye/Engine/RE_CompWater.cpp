@@ -24,12 +24,12 @@
 #include <par_shapes.h>
 #include <ImGui/imgui.h>
 
-RE_CompWater::RE_CompWater() : RE_Component(C_WATER) { box.SetFromCenterAndSize(math::vec::zero, math::vec::one); }
+RE_CompWater::RE_CompWater() : RE_Component(RE_Component::Type::WATER) { box.SetFromCenterAndSize(math::vec::zero, math::vec::one); }
 
 void RE_CompWater::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
-	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_WATER);
+	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, RE_Component::Type::WATER);
 
 	RE_CompWater* cmpWater = dynamic_cast<RE_CompWater*>(copy);
 	target_slices = slices = cmpWater->slices;

@@ -22,7 +22,7 @@
 
 #include <ImGui/imgui.h>
 
-RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(C_PARTICLEEMITER) {}
+RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(RE_Component::Type::PARTICLEEMITER) {}
 
 RE_CompParticleEmitter::~RE_CompParticleEmitter() {}
 
@@ -30,7 +30,7 @@ RE_CompParticleEmitter::~RE_CompParticleEmitter() {}
 void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
-	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_PARTICLEEMITER);
+	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, RE_Component::Type::PARTICLEEMITER);
 
 	RE_CompParticleEmitter* cmp_emitter = dynamic_cast<RE_CompParticleEmitter*>(copy);
 	simulation = cmp_emitter->simulation;
@@ -53,7 +53,7 @@ void RE_CompParticleEmitter::Update()
 
 void RE_CompParticleEmitter::Draw() const
 {
-	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
+	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(RE_Component::Type::TRANSFORM));
 	RE_PHYSICS->DrawParticleEmitterSimulation(simulation->id, transform->GetGlobalPosition(), transform->GetUp().Normalized());
 }
 
@@ -151,7 +151,7 @@ bool RE_CompParticleEmitter::isLighting() const { return simulation->light.type;
 
 void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
 {
-	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(C_TRANSFORM));
+	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(RE_Component::Type::TRANSFORM));
 	RE_PHYSICS->CallParticleEmitterLightShaderUniforms(simulation->id, transform->GetGlobalPosition(), shader, array_unif_name, count, maxLights, sharedLight);
 }
 

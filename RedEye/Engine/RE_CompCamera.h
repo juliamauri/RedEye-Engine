@@ -3,28 +3,36 @@
 
 #include "RE_Component.h"
 #include "RE_Math.h"
+#include "RE_DataTypes.h"
 
 class RE_CompCamera : public RE_Component
 {
 public:
 
-	enum AspectRatioTYPE
+	RE_CompCamera();
+	~RE_CompCamera();
+
+	enum class AspectRatio : ushort
 	{
 		Fit_Window = 0,
 		Square_1x1,
 		TraditionalTV_4x3,
 		Movietone_16x9,
 		Personalized
-	} target_ar = Fit_Window;
-
-public:
-
-	RE_CompCamera();
-	~RE_CompCamera();
+	};
 
 	friend class ModuleEditor;
 
-	void SetProperties(bool toPerspective = true, float near_plane = 1.0f, float far_plane = 5000.0f, float v_fov = 0.523599f, short aspect_ratio_t = 0, bool draw_frustum = true, bool usingSkybox = true, const char* skyboxMD5 = nullptr);
+	void SetProperties(
+		bool toPerspective = true,
+		float near_plane = 1.0f,
+		float far_plane = 5000.0f,
+		float v_fov = 0.523599f,
+		AspectRatio ar = AspectRatio::Fit_Window,
+		bool draw_frustum = true,
+		bool usingSkybox = true,
+		const char* skyboxMD5 = nullptr);
+
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
 	
 	void Update() override;
@@ -39,7 +47,7 @@ public:
 	void SetPlanesDistance(float near_plane, float far_plane);
 	void SetFOV(float vertical_fov_degrees);
 	void ForceFOV(float vertical_fov_degrees, float horizontal_fov_degrees);
-	void SetAspectRatio(AspectRatioTYPE aspect_ratio);
+	void SetAspectRatio(AspectRatio aspect_ratio);
 	void SetBounds(float width, float height);
 	void SetPerspective();
 	void SetOrthographic();
@@ -108,6 +116,7 @@ private:
 	float v_fov_degrees = 0.0f;
 
 	// Aspect Ratio
+	AspectRatio target_ar = AspectRatio::Fit_Window;
 	float width = 0.f;
 	float height = 0.f;
 

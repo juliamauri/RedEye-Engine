@@ -38,20 +38,20 @@ void RE_CameraManager::Clear()
 RE_CompCamera* RE_CameraManager::CurrentCamera()
 {
 	return main_camera ?
-		dynamic_cast<RE_CompCamera*>(RE_SCENE->GetScenePool()->GetComponentPtr(main_camera, C_CAMERA)) :
+		dynamic_cast<RE_CompCamera*>(RE_SCENE->GetScenePool()->GetComponentPtr(main_camera, RE_Component::Type::CAMERA)) :
 		editor_camera;
 }
 
 RE_CompCamera* RE_CameraManager::EditorCamera() { return editor_camera; }
 RE_CompCamera* RE_CameraManager::ParticleEditorCamera() { return particleEditor_camera; }
-RE_CompCamera* RE_CameraManager::MainCamera() { return dynamic_cast<RE_CompCamera*>(RE_SCENE->GetScenePool()->GetComponentPtr(main_camera, C_CAMERA)); }
+RE_CompCamera* RE_CameraManager::MainCamera() { return dynamic_cast<RE_CompCamera*>(RE_SCENE->GetScenePool()->GetComponentPtr(main_camera, RE_Component::Type::CAMERA)); }
 bool RE_CameraManager::HasMainCamera() { return main_camera != 0ull; }
 
 void RE_CameraManager::OnWindowChangeSize(float width, float height)
 {
 	// Adapt cameras to knew window dimensions
 	// editor_camera->SetBounds(width, height);
-	for (auto cam : RE_SCENE->GetScenePool()->GetAllCompPtr(C_CAMERA))
+	for (auto cam : RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::CAMERA))
 		dynamic_cast<RE_CompCamera*>(cam)->SetBounds(width, height);
 }
 
@@ -63,7 +63,7 @@ void RE_CameraManager::AddMainCamera(RE_CompCamera* cam)
 void RE_CameraManager::RecallSceneCameras()
 {
 	main_camera = 0ull;
-	eastl::vector<RE_Component*> allCameras = RE_SCENE->GetScenePool()->GetAllCompPtr(C_CAMERA);
+	eastl::vector<RE_Component*> allCameras = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::CAMERA);
 
 	for (auto cam : allCameras)
 	{
@@ -77,7 +77,8 @@ void RE_CameraManager::RecallSceneCameras()
 
 const math::Frustum RE_CameraManager::GetCullingFrustum() const
 {
-	for (auto cam : RE_SCENE->GetScenePool()->GetAllCompCPtr(C_CAMERA)) {
+	for (auto cam : RE_SCENE->GetScenePool()->GetAllCompCPtr(RE_Component::Type::CAMERA))
+	{
 		const RE_CompCamera* camera = dynamic_cast<const RE_CompCamera*>(cam);
 
 		if (camera->OverridesCulling())

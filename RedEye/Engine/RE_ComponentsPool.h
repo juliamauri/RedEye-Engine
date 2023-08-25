@@ -41,21 +41,22 @@ public:
 	void UnUseResources();
 
 	// Component Handling
-	eastl::pair<const COMP_UID, RE_Component*> GetNewComponent(ComponentType cType);
-	const COMP_UID GetNewComponentUID(ComponentType cType);
-	RE_Component* GetNewComponentPtr(ComponentType cType);
+	eastl::pair<const COMP_UID, RE_Component*> GetNewComponent(RE_Component::Type cType);
+	const COMP_UID GetNewComponentUID(RE_Component::Type cType);
+	RE_Component* GetNewComponentPtr(RE_Component::Type cType);
 
 	RE_Component* CopyComponent(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent);
-	void DestroyComponent(ComponentType cType, COMP_UID toDelete);
+	void DestroyComponent(RE_Component::Type cType, COMP_UID toDelete);
 
 	// Component Getters
-	RE_Component* GetComponentPtr(COMP_UID poolid, ComponentType cType);
-	const RE_Component* GetComponentCPtr(COMP_UID poolid, ComponentType cType) const;
+	RE_Component* GetComponentPtr(COMP_UID poolid, RE_Component::Type cType);
+	const RE_Component* GetComponentCPtr(COMP_UID poolid, RE_Component::Type cType) const;
 
-	eastl::vector<COMP_UID> GetAllCompUID(ushort type = 0) const;
-	eastl::vector<RE_Component*> GetAllCompPtr(ushort type = 0) const;
-	eastl::vector<const RE_Component*> GetAllCompCPtr(ushort type = 0) const;
-	eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> GetAllCompData(ushort type = 0) const;
+	eastl::vector<COMP_UID> GetAllCompUID(RE_Component::Type type = RE_Component::Type::EMPTY) const;
+	eastl::vector<RE_Component*> GetAllCompPtr(RE_Component::Type type = RE_Component::Type::EMPTY) const;
+	eastl::vector<const RE_Component*> GetAllCompCPtr(RE_Component::Type type = RE_Component::Type::EMPTY) const;
+	eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> GetAllCompData(RE_Component::Type type = RE_Component::Type::EMPTY) const;
+	eastl::vector<eastl::pair<const COMP_UID, const RE_Component*>> GetAllCompCData(RE_Component::Type type = RE_Component::Type::EMPTY) const;
 
 	// Serialization
 	unsigned int GetBinarySize()const;

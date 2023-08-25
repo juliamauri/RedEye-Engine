@@ -306,10 +306,10 @@ void ModuleScene::RecieveEvent(const Event& e)
 	case RE_EventType::PLANE_CHANGE_TO_MESH:
 	{
 		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
-		RE_CompPlane* plane = dynamic_cast<RE_CompPlane*>(go->GetCompPtr(C_PLANE));
+		RE_CompPlane* plane = dynamic_cast<RE_CompPlane*>(go->GetCompPtr(RE_Component::Type::PLANE));
 		const char* planeMD5 = plane->TransformAsMeshResource();
-		go->DestroyComponent(plane->GetPoolID(), C_PLANE);
-		RE_CompMesh* newMesh = dynamic_cast<RE_CompMesh*>(go->AddNewComponent(C_MESH));
+		go->DestroyComponent(plane->GetPoolID(), RE_Component::Type::PLANE);
+		RE_CompMesh* newMesh = dynamic_cast<RE_CompMesh*>(go->AddNewComponent(RE_Component::Type::MESH));
 		newMesh->SetMesh(planeMD5);
 		newMesh->UseResources();
 		haschanges = true;
@@ -318,22 +318,22 @@ void ModuleScene::RecieveEvent(const Event& e)
 	}
 }
 
-void ModuleScene::CreatePrimitive(ComponentType type, const GO_UID parent)
+void ModuleScene::CreatePrimitive(RE_Component::Type type, const GO_UID parent)
 {
 	scenePool.AddGO("Primitive", Validate(parent), true)->AddNewComponent(type);
 }
 
 void ModuleScene::CreateCamera(const GO_UID parent)
 {
-	scenePool.AddGO("Camera", Validate(parent), true)->AddNewComponent(C_CAMERA);
+	scenePool.AddGO("Camera", Validate(parent), true)->AddNewComponent(RE_Component::Type::CAMERA);
 }
 
 void ModuleScene::CreateLight(const GO_UID parent)
 {
 	RE_GameObject* light_go = scenePool.AddGO("Light", Validate(parent), true);
 
-	dynamic_cast<RE_CompPrimitive*>(light_go->AddNewComponent(C_SPHERE))->SetColor(
-		dynamic_cast<RE_CompLight*>(light_go->AddNewComponent(C_LIGHT))->diffuse);
+	dynamic_cast<RE_CompPrimitive*>(light_go->AddNewComponent(RE_Component::Type::SPHERE))->SetColor(
+		dynamic_cast<RE_CompLight*>(light_go->AddNewComponent(RE_Component::Type::LIGHT))->diffuse);
 }
 
 void ModuleScene::CreateMaxLights(const GO_UID parent)
@@ -349,8 +349,8 @@ void ModuleScene::CreateMaxLights(const GO_UID parent)
 			light_go->GetTransformPtr()->SetPosition(math::vec((static_cast<float>(x) * 12.5f) - 50.f, 0.f, (static_cast<float>(y) * 12.5f) - 50.f));
 
 			static math::vec colors[5] = { math::vec(1.f,0.f,0.f), math::vec(0.f,1.f,0.f), math::vec(0.f,0.f,1.f), math::vec(1.f,1.f,0.f), math::vec(0.f,1.f,1.f) };
-			dynamic_cast<RE_CompPrimitive*>(light_go->AddNewComponent(C_SPHERE))->SetColor(
-				dynamic_cast<RE_CompLight*>(light_go->AddNewComponent(C_LIGHT))->diffuse = colors[RE_MATH->RandomInt() % 5]);
+			dynamic_cast<RE_CompPrimitive*>(light_go->AddNewComponent(RE_Component::Type::SPHERE))->SetColor(
+				dynamic_cast<RE_CompLight*>(light_go->AddNewComponent(RE_Component::Type::LIGHT))->diffuse = colors[RE_MATH->RandomInt() % 5]);
 		}
 	}
 }
@@ -358,7 +358,7 @@ void ModuleScene::CreateMaxLights(const GO_UID parent)
 void ModuleScene::CreateWater(const GO_UID parent)
 {
 	RE_GameObject* water_go = scenePool.AddGO("Water", Validate(parent), true);
-	water_go->AddNewComponent(C_WATER)->UseResources();
+	water_go->AddNewComponent(RE_Component::Type::WATER)->UseResources();
 	RE_CompTransform* transform = water_go->GetTransformPtr();
 	transform->SetRotation({ -(math::pi / 2.f), 0.0f, 0.0f });
 	transform->SetScale({ 10.0f, 10.0f, 1.0f });
@@ -368,7 +368,7 @@ void ModuleScene::CreateParticleSystem(const GO_UID parent)
 {
 	RE_GameObject* go = scenePool.AddGO("Particle System", Validate(parent), true);
 	go->SetStatic(false, false);
-	dynamic_cast<RE_CompParticleEmitter*>(go->AddNewComponent(C_PARTICLEEMITER))->UseResources();
+	dynamic_cast<RE_CompParticleEmitter*>(go->AddNewComponent(RE_Component::Type::PARTICLEEMITER))->UseResources();
 }
 
 void ModuleScene::AddGOPool(RE_ECS_Pool* toAdd)
@@ -468,7 +468,7 @@ void ModuleScene::ClearScene()
 	root->SetStatic(false);
 
 	GO_UID root_uid = scenePool.GetRootUID();
-	scenePool.AddGO("Camera", root_uid)->AddNewComponent(C_CAMERA);
+	scenePool.AddGO("Camera", root_uid)->AddNewComponent(RE_Component::Type::CAMERA);
 	RE_EDITOR->SetSelected(root_uid);
 
 	RE_CameraManager::RecallSceneCameras();

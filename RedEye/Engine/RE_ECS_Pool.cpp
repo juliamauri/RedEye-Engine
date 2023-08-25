@@ -29,7 +29,7 @@ GO_UID RE_ECS_Pool::CopyGO(const RE_GameObject* copy, GO_UID parent, bool broadc
 	GO_UID new_go = AddGO(copy->name.c_str(), parent, broadcast)->GetUID();
 
 	for (auto copy_comp : copy->AllCompData())
-		componentsPool.CopyComponent(&gameObjectsPool, copy->pool_comps->GetComponentPtr(copy_comp.uid, static_cast<ComponentType>(copy_comp.type)), new_go);
+		componentsPool.CopyComponent(&gameObjectsPool, copy->pool_comps->GetComponentPtr(copy_comp.uid, copy_comp.type), new_go);
 	
 	return new_go;
 }
@@ -103,7 +103,7 @@ void RE_ECS_Pool::DestroyGO(GO_UID toDestroy)
 
 	eastl::stack<GO_UID> gos;
 	for (auto child : go->childs) gos.push(child);
-	for (auto comp : go->AllCompData()) componentsPool.DestroyComponent(static_cast<ComponentType>(comp.type), comp.uid);
+	for (auto& comp : go->AllCompData()) componentsPool.DestroyComponent(comp.type, comp.uid);
 
 	while (!gos.empty()) {
 
@@ -113,7 +113,7 @@ void RE_ECS_Pool::DestroyGO(GO_UID toDestroy)
 		RE_GameObject* cGO = gameObjectsPool.AtPtr(toD);
 
 		for (auto child : cGO->childs) gos.push(child);
-		for (auto comp : cGO->AllCompData()) componentsPool.DestroyComponent(static_cast<ComponentType>(comp.type), comp.uid);
+		for (auto comp : cGO->AllCompData()) componentsPool.DestroyComponent(comp.type, comp.uid);
 
 		gameObjectsPool.DeleteGO(toD);
 	}
@@ -135,32 +135,37 @@ RE_ECS_Pool* RE_ECS_Pool::GetNewPoolFromID(GO_UID id)
 	return ret;
 }
 
-eastl::vector<COMP_UID> RE_ECS_Pool::GetAllCompUID(ushort type) const
+eastl::vector<COMP_UID> RE_ECS_Pool::GetAllCompUID(RE_Component::Type type) const
 {
 	return componentsPool.GetAllCompUID(type);
 }
 
-eastl::vector<RE_Component*> RE_ECS_Pool::GetAllCompPtr(ushort type) const
+eastl::vector<RE_Component*> RE_ECS_Pool::GetAllCompPtr(RE_Component::Type type) const
 {
 	return componentsPool.GetAllCompPtr(type);
 }
 
-eastl::vector<const RE_Component*> RE_ECS_Pool::GetAllCompCPtr(ushort type) const
+eastl::vector<const RE_Component*> RE_ECS_Pool::GetAllCompCPtr(RE_Component::Type type) const
 {
 	return componentsPool.GetAllCompCPtr(type);
 }
 
-eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> RE_ECS_Pool::GetAllCompData(ushort type) const
+eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> RE_ECS_Pool::GetAllCompData(RE_Component::Type type) const
 {
 	return componentsPool.GetAllCompData(type);
 }
 
-RE_Component* RE_ECS_Pool::GetComponentPtr(COMP_UID poolid, ComponentType cType)
+eastl::vector<eastl::pair<const COMP_UID, const RE_Component*>> RE_ECS_Pool::GetAllCompCData(RE_Component::Type type) const
+{
+	return componentsPool.GetAllCompCData(type);
+}
+
+RE_Component* RE_ECS_Pool::GetComponentPtr(COMP_UID poolid, RE_Component::Type cType)
 {
 	return componentsPool.GetComponentPtr(poolid, cType);
 }
 
-const RE_Component* RE_ECS_Pool::GetComponentCPtr(COMP_UID poolid, ComponentType cType) const
+const RE_Component* RE_ECS_Pool::GetComponentCPtr(COMP_UID poolid, RE_Component::Type cType) const
 {
 	return componentsPool.GetComponentCPtr(poolid, cType);
 }

@@ -1,12 +1,8 @@
 #ifndef __RE_COMPLIGHT_H__
 #define __RE_COMPLIGHT_H__
 
-enum LightType : int
-{
-	L_DIRECTIONAL = 0,
-	L_POINT,
-	L_SPOTLIGHT
-};
+#include "RE_Component.h"
+#include "RE_DataTypes.h"
 
 class RE_CompLight : public RE_Component
 {
@@ -25,7 +21,7 @@ public:
 	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
 	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)override;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
 private:
 
@@ -33,7 +29,12 @@ private:
 
 public:
 
-	LightType type = L_POINT;
+	enum class Type : ushort
+	{
+		DIRECTIONAL = 0,
+		POINT,
+		SPOTLIGHT
+	} type = Type::POINT;
 
 	// Attenuattion
 	float intensity = 1.0f;

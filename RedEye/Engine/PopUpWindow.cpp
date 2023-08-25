@@ -100,11 +100,11 @@ void PopUpWindow::PopUpDelRes(const char* res)
 	ResourceType rType = RE_RES->At(res)->GetType();
 
 	switch (rType) {
-	case ResourceType::SKYBOX: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_CAMERA); break;
-	case ResourceType::MATERIAL: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_MESH); break;
+	case ResourceType::SKYBOX: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(RE_Component::Type::CAMERA); break;
+	case ResourceType::MATERIAL: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(RE_Component::Type::MESH); break;
 	case ResourceType::PARTICLE_EMISSION:
 	case ResourceType::PARTICLE_RENDER:
-	case ResourceType::PARTICLE_EMITTER: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_PARTICLEEMITER); break; }
+	case ResourceType::PARTICLE_EMITTER: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(RE_Component::Type::PARTICLEEMITER); break; }
 
 	bool skip = false;
 	while (!comps.empty() && !skip)

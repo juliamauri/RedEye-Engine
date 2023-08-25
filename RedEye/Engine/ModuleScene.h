@@ -41,7 +41,7 @@ public:
 	const RE_GameObject* GetRootCPtr() const { return scenePool.GetRootCPtr(); }
 
 	// Adding to scene
-	void CreatePrimitive(ComponentType type, const GO_UID parent = 0);
+	void CreatePrimitive(RE_Component::Type type, const GO_UID parent = 0);
 	void CreateCamera(const GO_UID parent = 0);
 	void CreateLight(const GO_UID parent = 0);
 	void CreateMaxLights(const GO_UID parent = 0);

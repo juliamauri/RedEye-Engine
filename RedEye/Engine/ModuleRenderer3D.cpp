@@ -718,8 +718,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case RenderView::LightMode::GL:
 	{
 		SetLighting(true);
-		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(C_LIGHT);
-		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(C_PARTICLEEMITER);
+		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::LIGHT);
+		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::PARTICLEEMITER);
 		for(auto ps: tmp)
 			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->isLighting())
 				particleS_lights.push_back(ps);
@@ -730,8 +730,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case RenderView::LightMode::DIRECT:
 	{
 		SetLighting(false);
-		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(C_LIGHT);
-		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(C_PARTICLEEMITER);
+		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::LIGHT);
+		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::PARTICLEEMITER);
 		for (auto ps : tmp)
 			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->isLighting())
 				particleS_lights.push_back(ps);
@@ -742,8 +742,8 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	case RenderView::LightMode::DEFERRED:
 	{
 		SetLighting(false);
-		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(C_LIGHT);
-		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(C_PARTICLEEMITER);
+		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::LIGHT);
+		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::PARTICLEEMITER);
 		for (auto ps : tmp)
 			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->isLighting())
 				particleS_lights.push_back(ps);
@@ -761,12 +761,12 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		comptsToDraw.pop();
 
 		bool blend = false;
-		ComponentType dT = drawing->GetType();
-		if (dT == C_MESH)
+		RE_Component::Type dT = drawing->GetType();
+		if (dT == RE_Component::Type::MESH)
 			 blend = dynamic_cast<RE_CompMesh*>(drawing)->isBlend();
 
-		if (dT == C_PARTICLEEMITER) particleSystems.push(drawing);
-		else if (!blend && dT != C_WATER) drawing->Draw();
+		if (dT == RE_Component::Type::PARTICLEEMITER) particleSystems.push(drawing);
+		else if (!blend && dT != RE_Component::Type::WATER) drawing->Draw();
 		else drawAsLast.push(drawing);
 	}
 
@@ -974,20 +974,20 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 				RE_PROFILE(RE_ProfiledFunc::DrawStencil, RE_ProfiledClass::ModuleRender);
 				unsigned int vaoToStencil = 0, triangleToStencil = 0;
 
-				ComponentType cT = rendComponent->GetType();
-				if (cT == ComponentType::C_MESH)
+				RE_Component::Type cT = rendComponent->GetType();
+				if (cT == RE_Component::Type::MESH)
 				{
 					RE_CompMesh* mesh_comp = dynamic_cast<RE_CompMesh*>(rendComponent);
 					vaoToStencil = mesh_comp->GetVAOMesh();
 					triangleToStencil = mesh_comp->GetTriangleMesh();
 				}
-				else if (cT > ComponentType::C_PRIMIVE_MIN && cT < ComponentType::C_PRIMIVE_MAX)
+				else if (cT > RE_Component::Type::PRIMIVE_MIN && cT < RE_Component::Type::PRIMIVE_MAX)
 				{
 					RE_CompPrimitive* prim_comp = dynamic_cast<RE_CompPrimitive*>(rendComponent);
 					vaoToStencil = prim_comp->GetVAO();
 					triangleToStencil = prim_comp->GetTriangleCount();
 				}
-				else if (cT == C_WATER)
+				else if (cT == RE_Component::Type::WATER)
 				{
 					RE_CompWater* water_comp = dynamic_cast<RE_CompWater*>(rendComponent);
 					vaoToStencil = water_comp->GetVAO();

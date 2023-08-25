@@ -20,7 +20,7 @@
 void RE_CompMesh::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
-	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_MESH);
+	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, RE_Component::Type::MESH);
 
 	RE_CompMesh* cmpMesh = dynamic_cast<RE_CompMesh*>(copy);
 	meshMD5 = cmpMesh->meshMD5;

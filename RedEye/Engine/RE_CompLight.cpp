@@ -10,7 +10,7 @@
 #include "RE_ECS_Pool.h"
 #include <ImGui/imgui.h>
 
-RE_CompLight::RE_CompLight() : RE_Component(C_LIGHT)
+RE_CompLight::RE_CompLight() : RE_Component(RE_Component::Type::LIGHT)
 {
 	diffuse = math::vec(0.8f);
 	cutOff[0] = 12.5f;
@@ -21,7 +21,7 @@ RE_CompLight::RE_CompLight() : RE_Component(C_LIGHT)
 void RE_CompLight::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
-	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, C_LIGHT);
+	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, RE_Component::Type::LIGHT);
 
 	RE_CompLight* cmpLight = dynamic_cast<RE_CompLight*>(copy);
 	type = cmpLight->type;
@@ -47,14 +47,14 @@ void RE_CompLight::CallShaderUniforms(unsigned int shader, const char* name) con
 	RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "diffuseSpecular").c_str()), diffuse.x, diffuse.y, diffuse.z, specular);
 
 
-	if (type != L_DIRECTIONAL)
+	if (type != Type::DIRECTIONAL)
 	{
 		math::vec p = transform->GetGlobalPosition();
 
 		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), p.x, p.y, p.z, float(type));
 		RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "clq").c_str()), constant, linear, quadratic, 0.0f);
 
-		if (type == L_SPOTLIGHT)
+		if (type == Type::SPOTLIGHT)
 			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "co").c_str()), cutOff[1], outerCutOff[1], 0.0f, 0.0f);
 	}
 	else
@@ -75,7 +75,7 @@ void RE_CompLight::DrawProperties()
 		ImGui::ColorEdit3("Diffuse Color", &diffuse[0]);
 		ImGui::DragFloat("Specular", &specular, 0.01f, 0.f, 1.f, "%.2f");
 
-		if (type == L_SPOTLIGHT)
+		if (type == Type::SPOTLIGHT)
 		{
 			if (ImGui::DragFloat("CutOff", &cutOff[0], 1.0f, 0.0f, 90.0f, "%.0f"))
 				cutOff[1] = math::Cos(math::DegToRad(cutOff[0]));
@@ -87,7 +87,7 @@ void RE_CompLight::DrawProperties()
 
 void RE_CompLight::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
-	node->PushInt("type", type);
+	node->PushUInt("type", static_cast<uint>(type));
 	node->PushFloat("intensity", intensity);
 	node->PushFloat("constant", constant);
 	node->PushFloat("linear", linear);
@@ -100,8 +100,7 @@ void RE_CompLight::SerializeJson(RE_Json* node, eastl::map<const char*, int>* re
 
 void RE_CompLight::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
 {
-	type = static_cast<LightType>(node->PullInt("type", L_POINT));
-
+	type = static_cast<Type>(node->PullUInt("type", static_cast<uint>(Type::POINT)));
 	intensity = node->PullFloat("intensity", intensity);
 	constant = node->PullFloat("constant", constant);
 	linear = node->PullFloat("linear", linear);
@@ -115,12 +114,12 @@ void RE_CompLight::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* 
 
 unsigned int RE_CompLight::GetBinarySize() const
 {
-	return sizeof(int) + sizeof(float) * 10;
+	return sizeof(ushort) + sizeof(float) * 10;
 }
 
 void RE_CompLight::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
 {
-	size_t size = sizeof(int);
+	size_t size = sizeof(ushort);
 	memcpy(cursor, &type, size);
 	cursor += size;
 
@@ -145,7 +144,7 @@ void RE_CompLight::SerializeBinary(char*& cursor, eastl::map<const char*, int>* 
 
 void RE_CompLight::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
 {
-	size_t size = sizeof(int);
+	size_t size = sizeof(ushort);
 	memcpy(&type, cursor, size);
 	cursor += size;
 

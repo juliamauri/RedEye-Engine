@@ -568,7 +568,7 @@ void ModuleEditor::Load()
 	math::float2 planes = node->PullFloat("C_Planes", { 1.0f, 5000.0f });
 	editor_camera->SetPlanesDistance(planes.x, planes.y);
 
-	editor_camera->target_ar = static_cast<RE_CompCamera::AspectRatioTYPE>(node->PullInt("C_AspectRatio", static_cast<int>(RE_CompCamera::AspectRatioTYPE::Fit_Window)));
+	editor_camera->target_ar = static_cast<RE_CompCamera::AspectRatio>(node->PullInt("C_AspectRatio", static_cast<int>(RE_CompCamera::AspectRatio::Fit_Window)));
 	editor_camera->isPerspective = node->PullBool("C_Prespective", true);
 	editor_camera->SetFOV(math::RadToDeg(node->PullFloat("C_VerticalFOV", math::DegToRad(30.0f))));
 	//------------------
@@ -742,7 +742,7 @@ void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const
 		if (draw_cameras)
 		{
 			glColor4f(frustum_color[0], frustum_color[1], frustum_color[2], 1.0f);
-			for (auto cam : RE_SCENE->GetScenePool()->GetAllCompPtr(C_CAMERA))
+			for (auto cam : RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::CAMERA))
 				static_cast<RE_CompCamera*>(cam)->DrawFrustum();
 		}
 
@@ -983,28 +983,28 @@ void ModuleEditor::DrawGameObjectItems(const GO_UID parent)
 {
 	if (ImGui::BeginMenu("Primitive"))
 	{
-		if (ImGui::MenuItem("Grid")) RE_SCENE->CreatePrimitive(C_GRID, parent);
-		if (ImGui::MenuItem("Cube")) RE_SCENE->CreatePrimitive(C_CUBE, parent);
-		if (ImGui::MenuItem("Dodecahedron")) RE_SCENE->CreatePrimitive(C_DODECAHEDRON, parent);
-		if (ImGui::MenuItem("Tetrahedron")) RE_SCENE->CreatePrimitive(C_TETRAHEDRON, parent);
-		if (ImGui::MenuItem("Octohedron")) RE_SCENE->CreatePrimitive(C_OCTOHEDRON, parent);
-		if (ImGui::MenuItem("Icosahedron")) RE_SCENE->CreatePrimitive(C_ICOSAHEDRON, parent);
-		if (ImGui::MenuItem("Point")) RE_SCENE->CreatePrimitive(C_POINT, parent);
-		if (ImGui::MenuItem("Plane")) RE_SCENE->CreatePrimitive(C_PLANE, parent);
-		// if (ImGui::MenuItem("Frustum")) RE_SCENE->CreatePrimitive(C_FUSTRUM, parent);
-		if (ImGui::MenuItem("Sphere")) RE_SCENE->CreatePrimitive(C_SPHERE, parent);
-		if (ImGui::MenuItem("Cylinder")) RE_SCENE->CreatePrimitive(C_CYLINDER, parent);
-		if (ImGui::MenuItem("HemiSphere")) RE_SCENE->CreatePrimitive(C_HEMISHPERE, parent);
-		if (ImGui::MenuItem("Torus")) RE_SCENE->CreatePrimitive(C_TORUS, parent);
-		if (ImGui::MenuItem("Trefoil Knot")) RE_SCENE->CreatePrimitive(C_TREFOILKNOT, parent);
-		if (ImGui::MenuItem("Rock")) RE_SCENE->CreatePrimitive(C_ROCK, parent);
+		if (ImGui::MenuItem("Grid"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::GRID, parent);
+		if (ImGui::MenuItem("Cube"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::CUBE, parent);
+		if (ImGui::MenuItem("Dodecahedron")) RE_SCENE->CreatePrimitive(RE_Component::Type::DODECAHEDRON, parent);
+		if (ImGui::MenuItem("Tetrahedron"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::TETRAHEDRON, parent);
+		if (ImGui::MenuItem("Octohedron"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::OCTOHEDRON, parent);
+		if (ImGui::MenuItem("Icosahedron"))  RE_SCENE->CreatePrimitive(RE_Component::Type::ICOSAHEDRON, parent);
+		if (ImGui::MenuItem("Point"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::POINT, parent);
+		if (ImGui::MenuItem("Plane"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::PLANE, parent);
+		// if (ImGui::MenuItem("Frustum"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::C_FUSTRUM, parent);
+		if (ImGui::MenuItem("Sphere"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::SPHERE, parent);
+		if (ImGui::MenuItem("Cylinder"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::CYLINDER, parent);
+		if (ImGui::MenuItem("HemiSphere"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::HEMISHPERE, parent);
+		if (ImGui::MenuItem("Torus"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::TORUS, parent);
+		if (ImGui::MenuItem("Trefoil Knot")) RE_SCENE->CreatePrimitive(RE_Component::Type::TREFOILKNOT, parent);
+		if (ImGui::MenuItem("Rock"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::ROCK, parent);
 
 		ImGui::EndMenu();
 	}
 
-	if (ImGui::MenuItem("Camera")) RE_SCENE->CreateCamera(parent);
-	if (ImGui::MenuItem("Light")) RE_SCENE->CreateLight(parent);
-	if (ImGui::MenuItem("Max Lights")) RE_SCENE->CreateMaxLights(parent);
-	if (ImGui::MenuItem("Water")) RE_SCENE->CreateWater(parent);
-	if (ImGui::MenuItem("Particle System")) RE_SCENE->CreateParticleSystem(parent);
+	if (ImGui::MenuItem("Camera"))			RE_SCENE->CreateCamera(parent);
+	if (ImGui::MenuItem("Light"))			RE_SCENE->CreateLight(parent);
+	if (ImGui::MenuItem("Max Lights"))		RE_SCENE->CreateMaxLights(parent);
+	if (ImGui::MenuItem("Water"))			RE_SCENE->CreateWater(parent);
+	if (ImGui::MenuItem("Particle System"))	RE_SCENE->CreateParticleSystem(parent);
 }

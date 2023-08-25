@@ -12,7 +12,6 @@
 #include "RE_ResourceManager.h"
 #include "RE_ECS_Pool.h"
 #include "RE_PrimitiveManager.h"
-#include "RE_Component.h"
 #include "RE_ParticleEmitter.h"
 #include "RE_Memory.h"
 
@@ -37,7 +36,7 @@ void RE_GameObject::SetUp(GameObjectsPool* goPool, ComponentsPool* compPool, con
 
 	if (parent_uid = parent) pool_gos->AtPtr(parent)->childs.push_back(go_uid);
 
-	transform = pool_comps->GetNewComponentPtr(ComponentType::C_TRANSFORM)->PoolSetUp(pool_gos, go_uid);
+	transform = pool_comps->GetNewComponentPtr(RE_Component::Type::TRANSFORM)->PoolSetUp(pool_gos, go_uid);
 
 	local_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
 	global_bounding_box.SetFromCenterAndSize(math::vec::zero, math::vec::zero);
@@ -110,13 +109,13 @@ void RE_GameObject::DrawChilds() const
 	}
 }
 
-RE_Component* RE_GameObject::GetCompPtr(const ushort type) const
+RE_Component* RE_GameObject::GetCompPtr(const RE_Component::Type type) const
 {
 	RE_Component* ret = nullptr;
-	switch (static_cast<ComponentType>(type)) {
-	case ComponentType::C_TRANSFORM: ret = CompPtr(transform, ComponentType::C_TRANSFORM); break;
-	case ComponentType::C_CAMERA: ret = camera ? CompPtr(camera, ComponentType::C_CAMERA) : nullptr; break;
-	case ComponentType::C_LIGHT: ret = light ? CompPtr(light, ComponentType::C_LIGHT) : nullptr; break;
+	switch (type) {
+	case RE_Component::Type::TRANSFORM: ret = CompPtr(transform, RE_Component::Type::TRANSFORM); break;
+	case RE_Component::Type::CAMERA: ret = camera ? CompPtr(camera, RE_Component::Type::CAMERA) : nullptr; break;
+	case RE_Component::Type::LIGHT: ret = light ? CompPtr(light, RE_Component::Type::LIGHT) : nullptr; break;
 	default:
 	{
 		if (render_geo.type == type && render_geo.uid) ret = CompPtr(render_geo);
@@ -135,14 +134,14 @@ RE_Component* RE_GameObject::GetCompPtr(const ushort type) const
 	return ret;
 }
 
-COMP_UID RE_GameObject::GetCompUID(const ushort type) const
+COMP_UID RE_GameObject::GetCompUID(const RE_Component::Type type) const
 {
 	COMP_UID ret = 0;
 
 	switch (type) {
-	case C_TRANSFORM: ret = transform; break;
-	case ComponentType::C_CAMERA: ret = camera; break;
-	case ComponentType::C_LIGHT: ret = light; break;
+	case RE_Component::Type::TRANSFORM: ret = transform; break;
+	case RE_Component::Type::CAMERA: ret = camera; break;
+	case RE_Component::Type::LIGHT: ret = light; break;
 	default:
 	{
 		if (render_geo.uid && render_geo.type == type) ret = render_geo.uid;
@@ -173,7 +172,7 @@ bool RE_GameObject::HasActiveRenderGeo() const
 
 RE_CompTransform* RE_GameObject::GetTransformPtr() const
 {
-	return dynamic_cast<RE_CompTransform*>(CompPtr(transform, ComponentType::C_TRANSFORM));
+	return dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
 }
 
 RE_Component* RE_GameObject::GetRenderGeo() const
@@ -183,32 +182,32 @@ RE_Component* RE_GameObject::GetRenderGeo() const
 
 RE_CompMesh* RE_GameObject::GetMesh() const
 {
-	return (render_geo.type == ComponentType::C_MESH) ? dynamic_cast<RE_CompMesh*>(CompPtr(render_geo)) : nullptr;
+	return (render_geo.type == RE_Component::Type::MESH) ? dynamic_cast<RE_CompMesh*>(CompPtr(render_geo)) : nullptr;
 }
 
 RE_CompWater* RE_GameObject::GetWater() const
 {
-	return (render_geo.type == ComponentType::C_WATER) ? dynamic_cast<RE_CompWater*>(CompPtr(render_geo)) : nullptr;
+	return (render_geo.type == RE_Component::Type::WATER) ? dynamic_cast<RE_CompWater*>(CompPtr(render_geo)) : nullptr;
 }
 
 RE_CompParticleEmitter* RE_GameObject::GetParticleSystem() const
 {
-	return (render_geo.type == ComponentType::C_PARTICLEEMITER) ? dynamic_cast<RE_CompParticleEmitter*>(CompPtr(render_geo)) : nullptr;
+	return (render_geo.type == RE_Component::Type::PARTICLEEMITER) ? dynamic_cast<RE_CompParticleEmitter*>(CompPtr(render_geo)) : nullptr;
 }
 
 RE_CompCamera* RE_GameObject::GetCamera() const
 {
-	return camera ? dynamic_cast<RE_CompCamera*>(CompPtr(camera, ComponentType::C_CAMERA)) : nullptr;
+	return camera ? dynamic_cast<RE_CompCamera*>(CompPtr(camera, RE_Component::Type::CAMERA)) : nullptr;
 }
 
 RE_CompLight* RE_GameObject::GetLight() const
 {
-	return light ? dynamic_cast<RE_CompLight*>(CompPtr(light, ComponentType::C_LIGHT)) : nullptr;
+	return light ? dynamic_cast<RE_CompLight*>(CompPtr(light, RE_Component::Type::LIGHT)) : nullptr;
 }
 
 RE_CompPrimitive* RE_GameObject::GetPrimitive() const
 {
-	return (render_geo.type > ComponentType::C_PRIMIVE_MIN && render_geo.type < ComponentType::C_PRIMIVE_MAX) ?
+	return (render_geo.type > RE_Component::Type::PRIMIVE_MIN && render_geo.type < RE_Component::Type::PRIMIVE_MAX) ?
 		dynamic_cast<RE_CompPrimitive*>(CompPtr(render_geo)) : nullptr;
 }
 
@@ -216,10 +215,10 @@ eastl::list<RE_Component*> RE_GameObject::GetComponentsPtr() const
 {
 	eastl::list<RE_Component*> ret;
 
-	ret.push_back(CompPtr(transform, ComponentType::C_TRANSFORM));
+	ret.push_back(CompPtr(transform, RE_Component::Type::TRANSFORM));
 	if (render_geo.uid) ret.push_back(CompPtr(render_geo));
-	if (camera) ret.push_back(CompPtr(camera, ComponentType::C_CAMERA));
-	if (light) ret.push_back(CompPtr(light, ComponentType::C_LIGHT));
+	if (camera) ret.push_back(CompPtr(camera, RE_Component::Type::CAMERA));
+	if (light) ret.push_back(CompPtr(light, RE_Component::Type::LIGHT));
 	for (auto comp : components) ret.push_back(CompPtr(comp));
 
 	return ret;
@@ -232,7 +231,7 @@ eastl::list<RE_Component*> RE_GameObject::GetStackableComponentsPtr() const
 	return ret;
 }
 
-eastl::stack<RE_Component*> RE_GameObject::GetAllChildsComponents(const unsigned short type) const
+eastl::stack<RE_Component*> RE_GameObject::GetAllChildsComponents(const RE_Component::Type type) const
 {
 	eastl::stack<RE_Component*> ret;
 
@@ -306,13 +305,14 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const GO
 	return ret;
 }
 
-void RE_GameObject::ReportComponent(const COMP_UID id, const ushort type)
+void RE_GameObject::ReportComponent(const COMP_UID id, const RE_Component::Type type)
 {
 	RE_ASSERT(id > 0);
-	switch (static_cast<ComponentType>(type)) {
-	case ComponentType::C_TRANSFORM: transform = id; break;
-	case ComponentType::C_CAMERA: camera = id; break;
-	case ComponentType::C_LIGHT: light = id; break;
+	switch (type)
+	{
+	case RE_Component::Type::TRANSFORM: transform = id; break;
+	case RE_Component::Type::CAMERA: camera = id; break;
+	case RE_Component::Type::LIGHT: light = id; break;
 	default:
 	{
 		if (IsRenderGeo(type)) render_geo = { id, type };
@@ -322,52 +322,52 @@ void RE_GameObject::ReportComponent(const COMP_UID id, const ushort type)
 	}
 }
 
-RE_Component* RE_GameObject::AddNewComponent(const ushort type)
+RE_Component* RE_GameObject::AddNewComponent(const RE_Component::Type type)
 {
 	RE_Component* ret = nullptr;
-	ComponentType _type = static_cast<ComponentType>(type);
-	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
+	RE_ASSERT(type < MAX);
 
-	switch (_type) {
-	case C_TRANSFORM:
+	switch (type)
 	{
-		if (transform) pool_comps->DestroyComponent(_type, transform);
-		transform = (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid);
+	case RE_Component::Type::TRANSFORM:
+	{
+		if (transform) pool_comps->DestroyComponent(type, transform);
+		transform = (ret = pool_comps->GetNewComponentPtr(type))->PoolSetUp(pool_gos, go_uid);
 		break;
 	}
-	case C_MESH:
-	case C_WATER:
-	case C_PARTICLEEMITER:
+	case RE_Component::Type::MESH:
+	case RE_Component::Type::WATER:
+	case RE_Component::Type::PARTICLEEMITER:
 	{
-		if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
-		render_geo = { (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type };
+		if (render_geo.uid) pool_comps->DestroyComponent(render_geo.type, render_geo.uid);
+		render_geo = { (ret = pool_comps->GetNewComponentPtr(type))->PoolSetUp(pool_gos, go_uid), type };
 		break;
 	}
-	case C_CAMERA:
+	case RE_Component::Type::CAMERA:
 	{
-		if (camera) pool_comps->DestroyComponent(_type, camera);
-		camera = (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid);
+		if (camera) pool_comps->DestroyComponent(type, camera);
+		camera = (ret = pool_comps->GetNewComponentPtr(type))->PoolSetUp(pool_gos, go_uid);
 		RE_CompCamera* new_cam = dynamic_cast<RE_CompCamera*>(ret);
 		new_cam->SetProperties();
 		if (!RE_INPUT->Paused()) RE_SCENE->cams->AddMainCamera(new_cam);
 		break;
 	}
-	case C_LIGHT:
+	case RE_Component::Type::LIGHT:
 	{
-		if (light) pool_comps->DestroyComponent(_type, light);
-		light = (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid);
+		if (light) pool_comps->DestroyComponent(type, light);
+		light = (ret = pool_comps->GetNewComponentPtr(type))->PoolSetUp(pool_gos, go_uid);
 		break;
 	}
 	default:
 	{
 		if (IsRenderGeo(type))
 		{
-			if (render_geo.uid) pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
-			ret = pool_comps->GetNewComponentPtr(_type);
+			if (render_geo.uid) pool_comps->DestroyComponent(render_geo.type, render_geo.uid);
+			ret = pool_comps->GetNewComponentPtr(type);
 			render_geo = { ret->PoolSetUp(pool_gos, go_uid), type };
 			RE_SCENE->primitives->SetUpComponentPrimitive(dynamic_cast<RE_CompPrimitive*>(ret));
 		}
-		else components.push_back({ (ret = pool_comps->GetNewComponentPtr(_type))->PoolSetUp(pool_gos, go_uid), type });
+		else components.push_back({ (ret = pool_comps->GetNewComponentPtr(type))->PoolSetUp(pool_gos, go_uid), type });
 
 		break;
 	}
@@ -376,18 +376,17 @@ RE_Component* RE_GameObject::AddNewComponent(const ushort type)
 	return ret;
 }
 
-void RE_GameObject::ReleaseComponent(const COMP_UID id, const ushort type)
+void RE_GameObject::ReleaseComponent(const COMP_UID id, const RE_Component::Type type)
 {
-	ComponentType _type = static_cast<ComponentType>(type);
-	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
+	RE_ASSERT(type < MAX);
 
-	switch (_type){
-	case C_TRANSFORM: transform = 0; break;
-	case C_CAMERA: camera = 0; break;
-	case C_LIGHT: light = 0; break;
+	switch (type){
+	case RE_Component::Type::TRANSFORM: transform = 0; break;
+	case RE_Component::Type::CAMERA: camera = 0; break;
+	case RE_Component::Type::LIGHT: light = 0; break;
 	default:
 	{
-		if (IsRenderGeo(static_cast<ushort>(type))) render_geo = { 0, 0 };
+		if (IsRenderGeo(type)) render_geo = { 0, RE_Component::Type::EMPTY };
 		else
 		{
 			uint count = 0u;
@@ -408,38 +407,38 @@ void RE_GameObject::ReleaseComponent(const COMP_UID id, const ushort type)
 	}
 }
 
-void RE_GameObject::DestroyComponent(const COMP_UID id, const ushort type)
+void RE_GameObject::DestroyComponent(const COMP_UID id, const RE_Component::Type type)
 {
-	ComponentType _type = static_cast<ComponentType>(type);
-	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
+	RE_ASSERT(type < MAX);
 
-	switch (_type){
-	case C_TRANSFORM:
+	switch (type)
 	{
-		if (transform) pool_comps->DestroyComponent(_type, transform);
+	case RE_Component::Type::TRANSFORM:
+	{
+		if (transform) pool_comps->DestroyComponent(type, transform);
 		transform = 0;
 		break;
 	}
-	case C_CAMERA:
+	case RE_Component::Type::CAMERA:
 	{
-		if (camera) pool_comps->DestroyComponent(_type, camera);
+		if (camera) pool_comps->DestroyComponent(type, camera);
 		camera = 0;
 		break;
 	}
-	case C_LIGHT:
+	case RE_Component::Type::LIGHT:
 	{
-		if (light) pool_comps->DestroyComponent(_type, light);
+		if (light) pool_comps->DestroyComponent(type, light);
 		light = 0;
 		break;
 	}
 	default:
 	{
-		if (IsRenderGeo(static_cast<ushort>(type)))
+		if (IsRenderGeo(type))
 		{
 			if (render_geo.uid)
-				pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
+				pool_comps->DestroyComponent(render_geo.type, render_geo.uid);
 
-			render_geo = { 0, 0 };
+			render_geo = { 0, RE_Component::Type::EMPTY };
 		}
 		else
 		{
@@ -448,7 +447,7 @@ void RE_GameObject::DestroyComponent(const COMP_UID id, const ushort type)
 			{
 				if (comp.uid == id)
 				{
-					pool_comps->DestroyComponent(_type, id);
+					pool_comps->DestroyComponent(type, id);
 					components.erase(&components[count]);
 					break;
 				}
@@ -803,7 +802,7 @@ void RE_GameObject::OnTransformModified()
 		gos.pop();
 
 		// Update components
-		if (go->camera) go->CompPtr(go->camera, C_CAMERA)->OnTransformModified();
+		if (go->camera) go->CompPtr(go->camera, RE_Component::Type::CAMERA)->OnTransformModified();
 		for (auto component : go->GetStackableComponentsPtr()) component->OnTransformModified();
 
 		// Add active childs to queue
@@ -863,13 +862,13 @@ bool RE_GameObject::CheckRayCollision(const math::Ray& global_ray, float& distan
 		local_ray.Transform(GetTransformPtr()->GetGlobalMatrix().Transposed().Inverted());
 
 		switch (render_geo.type) {
-		case C_MESH:
+		case RE_Component::Type::MESH:
 			ret = dynamic_cast<RE_CompMesh*>(CompPtr(render_geo))->CheckFaceCollision(local_ray, distance);
 			break;
-		case C_WATER:
+		case RE_Component::Type::WATER:
 			ret = dynamic_cast<RE_CompWater*>(CompPtr(render_geo))->CheckFaceCollision(local_ray, distance);
 			break;	
-		case C_PARTICLEEMITER:
+		case RE_Component::Type::PARTICLEEMITER:
 			ret = true;
 			break;		
 		default:
@@ -883,40 +882,26 @@ bool RE_GameObject::CheckRayCollision(const math::Ray& global_ray, float& distan
 
 void RE_GameObject::UseResources()
 {
-	eastl::stack<RE_Component*> cmps = GetAllChildsComponents(C_WATER);
-	while (!cmps.empty()) {
-		cmps.top()->UseResources();
-		cmps.pop();
-	}
-	cmps = GetAllChildsComponents(C_MESH);
-	while (!cmps.empty()) {
-		cmps.top()->UseResources();
-		cmps.pop();
-	}
-	cmps = GetAllChildsComponents(C_CAMERA);
-	while (!cmps.empty()) {
-		cmps.top()->UseResources();
-		cmps.pop();
-	}
+	eastl::stack<RE_Component*> cmps = GetAllChildsComponents(RE_Component::Type::WATER);
+	while (!cmps.empty()) { cmps.top()->UseResources(); cmps.pop(); }
+
+	cmps = GetAllChildsComponents(RE_Component::Type::MESH);
+	while (!cmps.empty()) { cmps.top()->UseResources(); cmps.pop(); }
+
+	cmps = GetAllChildsComponents(RE_Component::Type::CAMERA);
+	while (!cmps.empty()) { cmps.top()->UseResources(); cmps.pop(); }
 }
 
 void RE_GameObject::UnUseResources()
 {
-	eastl::stack<RE_Component*> cmps = GetAllChildsComponents(C_WATER);
-	while (!cmps.empty()) {
-		cmps.top()->UnUseResources();
-		cmps.pop();
-	}
-	cmps = GetAllChildsComponents(C_MESH);
-	while (!cmps.empty()) {
-		cmps.top()->UnUseResources();
-		cmps.pop();
-	}
-	cmps = GetAllChildsComponents(C_CAMERA);
-	while (!cmps.empty()) {
-		cmps.top()->UnUseResources();
-		cmps.pop();
-	}
+	eastl::stack<RE_Component*> cmps = GetAllChildsComponents(RE_Component::Type::WATER);
+	while (!cmps.empty()) { cmps.top()->UnUseResources(); cmps.pop(); }
+
+	cmps = GetAllChildsComponents(RE_Component::Type::MESH);
+	while (!cmps.empty()) { cmps.top()->UnUseResources(); cmps.pop(); }
+
+	cmps = GetAllChildsComponents(RE_Component::Type::CAMERA);
+	while (!cmps.empty()) { cmps.top()->UnUseResources(); cmps.pop(); }
 }
 
 void RE_GameObject::ResetLocalBoundingBox()
@@ -924,9 +909,9 @@ void RE_GameObject::ResetLocalBoundingBox()
 	if (render_geo.uid)
 	{
 		switch (render_geo.type) {
-		case C_MESH:		 local_bounding_box = dynamic_cast<const RE_CompMesh*>(CompCPtr(render_geo))->GetAABB(); break;
-		case C_WATER:		 local_bounding_box = dynamic_cast<const RE_CompWater*>(CompCPtr(render_geo))->GetAABB(); break;
-		case C_PARTICLEEMITER:
+		case RE_Component::Type::MESH:		 local_bounding_box = dynamic_cast<const RE_CompMesh*>(CompCPtr(render_geo))->GetAABB(); break;
+		case RE_Component::Type::WATER:		 local_bounding_box = dynamic_cast<const RE_CompWater*>(CompCPtr(render_geo))->GetAABB(); break;
+		case RE_Component::Type::PARTICLEEMITER:
 		{
 			const RE_ParticleEmitter* sim = dynamic_cast<const RE_CompParticleEmitter*>(CompCPtr(render_geo))->GetSimulation();
 			if (sim != nullptr)
@@ -938,25 +923,25 @@ void RE_GameObject::ResetLocalBoundingBox()
 			}
 			break;
 		}
-		case C_GRID:
+		case RE_Component::Type::GRID:
 		{
 			float dist = dynamic_cast<RE_CompGrid*>(CompPtr(render_geo))->GetDistance();
 			local_bounding_box.FromCenterAndSize(math::vec::zero, { dist , 1.0f, dist }); 
 			break;
 		}
-		case C_CUBE:		 local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
-		case C_DODECAHEDRON: local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
-		case C_TETRAHEDRON:	 local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
-		case C_OCTOHEDRON:	 local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
-		case C_ICOSAHEDRON:	 local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
-		case C_PLANE:		 /*local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one));*/ break;
-		case C_FUSTRUM:		 /*local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one));*/ break;
-		case C_SPHERE:		 local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
-		case C_CYLINDER:	 local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
-		case C_HEMISHPERE:	 local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
-		case C_TORUS:		 local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
-		case C_TREFOILKNOT:	 local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
-		case C_ROCK:		 local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break; }
+		case RE_Component::Type::CUBE:			local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
+		case RE_Component::Type::DODECAHEDRON:	local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
+		case RE_Component::Type::TETRAHEDRON:	local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
+		case RE_Component::Type::OCTOHEDRON:	local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
+		case RE_Component::Type::ICOSAHEDRON:	local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
+		case RE_Component::Type::PLANE:			/*local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one));*/ break;
+		case RE_Component::Type::FUSTRUM:		/*local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one));*/ break;
+		case RE_Component::Type::SPHERE:		local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
+		case RE_Component::Type::CYLINDER:		local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
+		case RE_Component::Type::HEMISHPERE:	local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
+		case RE_Component::Type::TORUS:			local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
+		case RE_Component::Type::TREFOILKNOT:	local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
+		case RE_Component::Type::ROCK:			local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break; }
 	}
 	else local_bounding_box = { math::vec::zero, math::vec::zero };
 }
@@ -999,7 +984,8 @@ void RE_GameObject::DrawAABB(math::vec color) const
 	RE_GLCache::ChangeShader(0);
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((dynamic_cast<RE_CompTransform*>(CompPtr(transform, C_TRANSFORM))->GetGlobalMatrix() * RE_CameraManager::CurrentCamera()->GetView()).ptr());
+	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
+	glLoadMatrixf((t->GetGlobalMatrix() * RE_CameraManager::CurrentCamera()->GetView()).ptr());
 
 	glColor3f(color.x, color.y, color.z);
 	glBegin(GL_LINES);
@@ -1036,7 +1022,7 @@ void RE_GameObject::SerializeJson(RE_Json * node)
 	node->PushString("name", name.c_str());
 	if (parent_uid) node->PushUnsignedLongLong("Parent Pool ID", parent_uid);
 
-	const RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, C_TRANSFORM));
+	const RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
 	node->PushFloatVector("position", t->GetLocalPosition());
 	node->PushFloatVector("rotation", t->GetLocalEulerRotation());
 	node->PushFloatVector("scale", t->GetLocalScale());
@@ -1046,7 +1032,7 @@ void RE_GameObject::DeserializeJSON(RE_Json* node, GameObjectsPool* goPool, Comp
 {
 	SetUp(goPool, cmpsPool, node->PullString("name", "GameObject"), node->PullUnsignedLongLong("Parent Pool ID", 0));
 
-	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, C_TRANSFORM));
+	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
 	t->SetPosition(node->PullFloatVector("position", math::vec::zero));
 	t->SetRotation(node->PullFloatVector("rotation", math::vec::zero));
 	t->SetScale(node->PullFloatVector("scale", math::vec::one));
@@ -1067,7 +1053,7 @@ void RE_GameObject::SerializeBinary(char*& cursor)
 	cursor += size;
 
 	size = sizeof(float) * 3;
-	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, C_TRANSFORM));
+	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
 	memcpy(cursor, &t->GetLocalPosition()[0], size);
 	cursor += size;
 	memcpy(cursor, &t->GetLocalEulerRotation()[0], size);
@@ -1101,7 +1087,7 @@ void RE_GameObject::DeserializeBinary(char*& cursor, GameObjectsPool* goPool, Co
 
 	float vec[3] = { 0.0, 0.0, 0.0 };
 	size = sizeof(float) * 3;
-	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, C_TRANSFORM));
+	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
 	memcpy(vec, cursor, size);
 	cursor += size;
 	t->SetPosition(math::vec(vec));
@@ -1120,32 +1106,32 @@ GO_UID RE_GameObject::GetUID() const
 
 inline RE_Component* RE_GameObject::CompPtr(ComponentData comp) const
 {
-	return pool_comps->GetComponentPtr(comp.uid, static_cast<ComponentType>(comp.type));
+	return pool_comps->GetComponentPtr(comp.uid, comp.type);
 }
 
-inline RE_Component* RE_GameObject::CompPtr(COMP_UID id, ushort type) const
+inline RE_Component* RE_GameObject::CompPtr(COMP_UID id, RE_Component::Type type) const
 {
-	return pool_comps->GetComponentPtr(id, static_cast<ComponentType>(type));
+	return pool_comps->GetComponentPtr(id, type);
 }
 
 inline const RE_Component* RE_GameObject::CompCPtr(ComponentData comp) const
 {
-	return pool_comps->GetComponentCPtr(comp.uid, static_cast<ComponentType>(comp.type));
+	return pool_comps->GetComponentCPtr(comp.uid, comp.type);
 }
 
-inline const RE_Component* RE_GameObject::CompCPtr(COMP_UID id, ushort type) const
+inline const RE_Component* RE_GameObject::CompCPtr(COMP_UID id, RE_Component::Type type) const
 {
-	return pool_comps->GetComponentCPtr(id, static_cast<ComponentType>(type));
+	return pool_comps->GetComponentCPtr(id, type);
 }
 
 eastl::list<RE_GameObject::ComponentData> RE_GameObject::AllCompData() const
 {
 	eastl::list<ComponentData> ret;
 
-	ret.push_back({ transform, ComponentType::C_TRANSFORM });
+	ret.push_back({ transform, RE_Component::Type::TRANSFORM });
 	if (render_geo.uid) ret.push_back(render_geo);
-	if (camera) ret.push_back({ camera, ComponentType::C_CAMERA });
-	if (light) ret.push_back({ light, ComponentType::C_LIGHT });
+	if (camera) ret.push_back({ camera, RE_Component::Type::CAMERA });
+	if (light) ret.push_back({ light, RE_Component::Type::LIGHT });
 	for (auto comp : components) ret.push_back(comp);
 
 	return ret;
@@ -1161,7 +1147,11 @@ inline const RE_GameObject* RE_GameObject::ChildCPtr(const GO_UID child) const
 	return pool_gos->AtCPtr(child);
 }
 
-inline bool RE_GameObject::IsRenderGeo(ushort type) const
+inline bool RE_GameObject::IsRenderGeo(RE_Component::Type type) const
 {
-	return (type == ComponentType::C_MESH || type == ComponentType::C_WATER || type == ComponentType::C_PARTICLEEMITER || (type > ComponentType::C_PRIMIVE_MIN && type < ComponentType::C_PRIMIVE_MAX));
+	return 
+		type == RE_Component::Type::MESH ||
+		type == RE_Component::Type::WATER ||
+		type == RE_Component::Type::PARTICLEEMITER ||
+		(type > RE_Component::Type::PRIMIVE_MIN && type < RE_Component::Type::PRIMIVE_MAX);
 }

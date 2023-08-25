@@ -33,56 +33,58 @@ void RE_PrimitiveManager::Clear() { }
 
 void RE_PrimitiveManager::SetUpComponentPrimitive(RE_CompPrimitive* cmpP)
 {
-	ComponentType type = cmpP->GetType();
-	switch (type) {
+	switch (cmpP->GetType())
+	{
 		// Grid
-	case C_GRID: dynamic_cast<RE_CompGrid*>(cmpP)->GridSetUp(50); break;
+	case RE_Component::Type::GRID: dynamic_cast<RE_CompGrid*>(cmpP)->GridSetUp(50); break;
 		// Platonics
-	case C_POINT: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
-	case C_CUBE: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
-	case C_DODECAHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
-	case C_TETRAHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
-	case C_OCTOHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
-	case C_ICOSAHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
+	case RE_Component::Type::POINT: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
+	case RE_Component::Type::CUBE: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
+	case RE_Component::Type::DODECAHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
+	case RE_Component::Type::TETRAHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
+	case RE_Component::Type::OCTOHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
+	case RE_Component::Type::ICOSAHEDRON: dynamic_cast<RE_CompPlatonic*>(cmpP)->PlatonicSetUp(); break;
 		// Parametrics
-	case C_PLANE: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(3, 3); break;
-	case C_FUSTRUM: break;
-	case C_SPHERE: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(16, 18); break;
-	case C_CYLINDER: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(30, 3); break;
-	case C_HEMISHPERE: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(10, 10); break;
-	case C_TORUS: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(30, 40, 0.1f); break;
-	case C_TREFOILKNOT: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(30, 40, 0.5f); break;
+	case RE_Component::Type::PLANE: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(3, 3); break;
+	case RE_Component::Type::SPHERE: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(16, 18); break;
+	case RE_Component::Type::CYLINDER: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(30, 3); break;
+	case RE_Component::Type::HEMISHPERE: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(10, 10); break;
+	case RE_Component::Type::TORUS: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(30, 40, 0.1f); break;
+	case RE_Component::Type::TREFOILKNOT: dynamic_cast<RE_CompParametric*>(cmpP)->ParametricSetUp(30, 40, 0.5f); break;
 		// Rock
-	case C_ROCK: dynamic_cast<RE_CompRock*>(cmpP)->RockSetUp(5, 20); break; }
+	case RE_Component::Type::ROCK: dynamic_cast<RE_CompRock*>(cmpP)->RockSetUp(5, 20); break;
+	default: break;
+	}
 }
 
 eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPrimitiveMeshData(RE_Component* primComp, int id)
 {
-	ComponentType pType = primComp->GetType();
-
+	RE_Component::Type pType = primComp->GetType();
 	switch (pType)
 	{
-	case C_CUBE:
-	case C_POINT:
-	case C_DODECAHEDRON:
-	case C_TETRAHEDRON:
-	case C_OCTOHEDRON:
-	case C_ICOSAHEDRON:
+	case RE_Component::Type::CUBE:
+	case RE_Component::Type::POINT:
+	case RE_Component::Type::DODECAHEDRON:
+	case RE_Component::Type::TETRAHEDRON:
+	case RE_Component::Type::OCTOHEDRON:
+	case RE_Component::Type::ICOSAHEDRON:
 	{
-		unsigned short index = pType - C_CUBE;
+		unsigned short index = static_cast<ushort>(pType) - static_cast<ushort>(RE_Component::Type::CUBE);
 
 		if (!platonics[index].refCount)
 		{
-			if (pType == C_POINT) GeneratePoint(platonics[index]);
+			if (pType == RE_Component::Type::POINT) GeneratePoint(platonics[index]);
 			else
 			{
 				par_shapes_mesh* mesh = nullptr;
-				switch (pType) {
-				case C_CUBE: mesh = par_shapes_create_cube(); break;
-				case C_DODECAHEDRON: mesh = par_shapes_create_dodecahedron(); break;
-				case C_TETRAHEDRON: mesh = par_shapes_create_tetrahedron(); break;
-				case C_OCTOHEDRON: mesh = par_shapes_create_octahedron(); break;
-				case C_ICOSAHEDRON: mesh = par_shapes_create_icosahedron(); break;
+				switch (pType)
+				{
+				case RE_Component::Type::CUBE: mesh = par_shapes_create_cube(); break;
+				case RE_Component::Type::DODECAHEDRON: mesh = par_shapes_create_dodecahedron(); break;
+				case RE_Component::Type::TETRAHEDRON: mesh = par_shapes_create_tetrahedron(); break;
+				case RE_Component::Type::OCTOHEDRON: mesh = par_shapes_create_octahedron(); break;
+				case RE_Component::Type::ICOSAHEDRON: mesh = par_shapes_create_icosahedron(); break;
+				default: break;
 				}
 
 				UploadPlatonic(platonics[index], mesh);
@@ -95,9 +97,11 @@ eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPrimitiveMeshDat
 	}
 
 	auto pIter = primReference.find(pType);
-	if (pIter != primReference.end()) {
+	if (pIter != primReference.end())
+	{
 		auto iIter = pIter->second.find(id);
-		if (iIter != pIter->second.end()) {
+		if (iIter != pIter->second.end())
+		{
 			iIter->second.refCount += 1;
 			return { iIter->second.vao, iIter->second.triangles };
 		}
@@ -113,33 +117,33 @@ eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPrimitiveMeshDat
 	RE_CompParametric* cP = nullptr;
 	switch (pType)
 	{
-	case C_GRID:
+	case RE_Component::Type::GRID:
 		GenerateGrid(newPrim, dynamic_cast<RE_CompGrid*>(primComp));
 		return { newPrim.vao, newPrim.triangles };
-	case C_ROCK:
+	case RE_Component::Type::ROCK:
 		GenerateRock(newPrim, dynamic_cast<RE_CompRock*>(primComp));
 		return { newPrim.vao, newPrim.triangles };
-	case C_PLANE:
+	case RE_Component::Type::PLANE:
 		cP = dynamic_cast<RE_CompParametric*>(primComp);
 		pMesh = par_shapes_create_plane(cP->slices, cP->stacks);
 		break;
-	case C_SPHERE:
+	case RE_Component::Type::SPHERE:
 		cP = dynamic_cast<RE_CompParametric*>(primComp);
 		pMesh = par_shapes_create_parametric_sphere(cP->slices, cP->stacks);
 		break;
-	case C_CYLINDER:
+	case RE_Component::Type::CYLINDER:
 		cP = dynamic_cast<RE_CompParametric*>(primComp);
 		pMesh = par_shapes_create_cylinder(cP->slices, cP->stacks);
 		break;
-	case C_HEMISHPERE:
+	case RE_Component::Type::HEMISHPERE:
 		cP = dynamic_cast<RE_CompParametric*>(primComp);
 		pMesh = par_shapes_create_hemisphere(cP->slices, cP->stacks);
 		break;
-	case C_TORUS:
+	case RE_Component::Type::TORUS:
 		cP = dynamic_cast<RE_CompParametric*>(primComp);
 		pMesh = par_shapes_create_torus(cP->slices, cP->stacks, cP->radius);
 		break;
-	case C_TREFOILKNOT:
+	case RE_Component::Type::TREFOILKNOT:
 		cP = dynamic_cast<RE_CompParametric*>(primComp);
 		pMesh = par_shapes_create_trefoil_knot(cP->slices, cP->stacks, cP->radius);
 		break;
@@ -151,18 +155,18 @@ eastl::pair<unsigned int, unsigned int> RE_PrimitiveManager::GetPrimitiveMeshDat
 	return { newPrim.vao, newPrim.triangles };
 }
 
-void RE_PrimitiveManager::UnUsePrimitive(unsigned short pType, int id)
+void RE_PrimitiveManager::UnUsePrimitive(RE_Component::Type pType, int id)
 {
 	switch (pType)
 	{
-	case C_CUBE:
-	case C_POINT:
-	case C_DODECAHEDRON:
-	case C_TETRAHEDRON:
-	case C_OCTOHEDRON:
-	case C_ICOSAHEDRON:
+	case RE_Component::Type::CUBE:
+	case RE_Component::Type::POINT:
+	case RE_Component::Type::DODECAHEDRON:
+	case RE_Component::Type::TETRAHEDRON:
+	case RE_Component::Type::OCTOHEDRON:
+	case RE_Component::Type::ICOSAHEDRON:
 	{
-		unsigned short index = pType - C_CUBE;
+		ushort index = static_cast<ushort>(pType) - static_cast<ushort>(RE_Component::Type::CUBE);
 		platonics[index].refCount -= 1;
 
 		if (platonics[index].refCount == 0) {
@@ -273,7 +277,8 @@ void RE_PrimitiveManager::GeneratePoint(PrimData& prim)
 	RE_GLCache::ChangeVAO(prim.vao);
 	glBindBuffer(GL_ARRAY_BUFFER, prim.vbo);
 
-	float triangle[9]{
+	float triangle[9]
+	{
 		-0.5f, -0.5f, 0.0f,
 		0.5f, -0.5f, 0.0f,
 		0.0f,  0.5f, 0.0f
@@ -328,7 +333,6 @@ void RE_PrimitiveManager::GenerateGrid(PrimData& prim, RE_CompGrid* gridC)
 	vertices.push_back(-distance);
 	vertices.push_back(0.f);
 	vertices.push_back((f * 5.f) - distance);
-
 
 	glGenVertexArrays(1, &prim.vao);
 	glGenBuffers(1, &prim.vbo);
@@ -390,7 +394,7 @@ void RE_PrimitiveManager::GenerateRock(PrimData& prim, RE_CompRock* rockC)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(sizeof(float) * 3));
 
 	glGenBuffers(1, &prim.ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prim.ebo);

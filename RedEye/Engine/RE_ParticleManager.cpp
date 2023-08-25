@@ -182,7 +182,7 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 		eastl::string uniform_name("pInfo.tclq");
 		RE_ShaderImporter::setFloat(
 			RE_ShaderImporter::getLocation(shader, (uniform_name).c_str()),
-			static_cast<float>(L_POINT),
+			static_cast<float>(RE_CompLight::Type::POINT),
 			simulation->light.constant,
 			simulation->light.linear,
 			simulation->light.quadratic);
@@ -260,7 +260,13 @@ void ParticleManager::CallLightShaderUniforms(unsigned int index, math::float3 g
 			}
 
 			const math::float3 partcleGlobalpos = go_position + p.position;
-			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "positionType").c_str()), partcleGlobalpos.x, partcleGlobalpos.y, partcleGlobalpos.z, static_cast<float>(L_POINT));
+			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(
+				shader,
+				(unif_name + "positionType").c_str()),
+				partcleGlobalpos.x,
+				partcleGlobalpos.y,
+				partcleGlobalpos.z,
+				static_cast<float>(RE_CompLight::Type::POINT));
 
 			const math::vec quadratic = simulation->light.GetQuadraticValues();
 			RE_ShaderImporter::setFloat(RE_ShaderImporter::getLocation(shader, (unif_name + "clq").c_str()), quadratic.x, quadratic.y, quadratic.z, 0.f);

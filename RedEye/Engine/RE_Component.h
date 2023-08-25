@@ -6,41 +6,42 @@
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
 
-enum ComponentType : unsigned short int
-{
-	C_EMPTY = 0x00,
-	C_TRANSFORM,
-	C_MESH,
-	C_CAMERA,
-	C_LIGHT,
-	C_WATER,
-	C_PARTICLEEMITER,
-
-	C_PRIMIVE_MIN = 20,
-	C_GRID,
-	C_CUBE,
-	C_POINT,
-	C_DODECAHEDRON,
-	C_TETRAHEDRON,
-	C_OCTOHEDRON,
-	C_ICOSAHEDRON,
-	C_PLANE,
-	C_FUSTRUM,
-	C_SPHERE,
-	C_CYLINDER,
-	C_HEMISHPERE,
-	C_TORUS,
-	C_TREFOILKNOT,
-	C_ROCK,
-	C_PRIMIVE_MAX,
-
-	MAX_COMPONENT_TYPES
-};
-
 class RE_Component
 {
 public:
-	RE_Component(const ComponentType type = C_EMPTY, const GO_UID go = 0, const bool start_active = true) :
+
+	enum class Type : ushort
+	{
+		EMPTY = 0x00,
+		TRANSFORM,
+		MESH,
+		CAMERA,
+		LIGHT,
+		WATER,
+		PARTICLEEMITER,
+
+		PRIMIVE_MIN = 20,
+		GRID,
+		CUBE,
+		POINT,
+		DODECAHEDRON,
+		TETRAHEDRON,
+		OCTOHEDRON,
+		ICOSAHEDRON,
+		PLANE,
+		FUSTRUM,
+		SPHERE,
+		CYLINDER,
+		HEMISHPERE,
+		TORUS,
+		TREFOILKNOT,
+		ROCK,
+		PRIMIVE_MAX,
+
+		MAX
+	};
+
+	RE_Component(const Type type = Type::EMPTY, const GO_UID go = 0, const bool start_active = true) :
 		type(type), go(go), active(start_active) {}
 	virtual ~RE_Component() {}
 
@@ -70,8 +71,8 @@ public:
 	bool IsActive() const { return active; }
 	void SetActive(const bool value) { active = value; }
 
-	void SetType(ComponentType t) { type = t; }
-	ComponentType GetType() const { return type; }
+	void SetType(Type t) { type = t; }
+	Type GetType() const { return type; }
 	GO_UID GetGOUID() const { return go; }
 	class RE_GameObject* GetGOPtr() const;
 	const RE_GameObject* GetGOCPtr() const;
@@ -96,7 +97,7 @@ public:
 protected:
 
 	bool active = true;
-	ComponentType type = C_EMPTY;
+	Type type = Type::EMPTY;
 
 	COMP_UID id = 0;
 	GO_UID go = 0;

@@ -12,7 +12,7 @@
 
 #define MIN_SCALE 0.001f
 
-RE_CompTransform::RE_CompTransform() : RE_Component(C_TRANSFORM)
+RE_CompTransform::RE_CompTransform() : RE_Component(RE_Component::Type::TRANSFORM)
 {
 	scale.scale = math::vec::one;
 }

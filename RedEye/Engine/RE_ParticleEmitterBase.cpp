@@ -56,7 +56,7 @@ void RE_ParticleEmitterBase::SomeResourceChanged(const char* resMD5)
 	}
 
 	if (check_scene) {
-		eastl::vector<RE_Component*> emitters = RE_SCENE->GetScenePool()->GetAllCompPtr(C_PARTICLEEMITER);
+		eastl::vector<RE_Component*> emitters = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::PARTICLEEMITER);
 		for (auto c_emitter : emitters)
 			dynamic_cast<RE_CompParticleEmitter*>(c_emitter)->UpdateEmitter(GetMD5());
 	}

@@ -16,14 +16,14 @@
 #include <ImGui/imgui.h>
 #include <SDL2/SDL_opengl.h>
 
-RE_CompCamera::RE_CompCamera() : RE_Component(C_CAMERA) {}
+RE_CompCamera::RE_CompCamera() : RE_Component(RE_Component::Type::CAMERA) {}
 
 RE_CompCamera::~RE_CompCamera()
 {
 	if(!useParent && transform != nullptr) DEL(transform);
 }
 
-void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_plane, float v_fov, short aspect, bool _draw_frustum, bool _usingSkybox, const char* _skyboxMD5)
+void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_plane, float v_fov, AspectRatio ar, bool _draw_frustum, bool _usingSkybox, const char* _skyboxMD5)
 {
 	draw_frustum = _draw_frustum;
 	usingSkybox = _usingSkybox;
@@ -38,7 +38,7 @@ void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_pla
 	// Fustrum - Perspective & Aspect Ratio
 	isPerspective = toPerspective;
 	v_fov_rads = v_fov;
-	SetAspectRatio(AspectRatioTYPE(aspect));
+	SetAspectRatio(ar);
 
 	// Transform
 	if (!useParent) (transform = new RE_CompTransform())->PoolSetUp(nullptr, 0ull);
@@ -53,7 +53,15 @@ void RE_CompCamera::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const G
 	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);
 
 	RE_CompCamera* cmpCamera = dynamic_cast<RE_CompCamera*>(copy);
-	SetProperties(cmpCamera->isPerspective, cmpCamera->frustum.NearPlaneDistance(), cmpCamera->frustum.FarPlaneDistance(), cmpCamera->v_fov_rads, cmpCamera->target_ar, cmpCamera->draw_frustum, cmpCamera->usingSkybox, cmpCamera->skyboxMD5);
+	SetProperties(
+		cmpCamera->isPerspective,
+		cmpCamera->frustum.NearPlaneDistance(),
+		cmpCamera->frustum.FarPlaneDistance(),
+		cmpCamera->v_fov_rads,
+		cmpCamera->target_ar,
+		cmpCamera->draw_frustum,
+		cmpCamera->usingSkybox,
+		cmpCamera->skyboxMD5);
 }
 
 void RE_CompCamera::Update()
@@ -181,7 +189,7 @@ void RE_CompCamera::ForceFOV(float vertical_fov_degrees, float horizontal_fov_de
 	}
 }
 
-void RE_CompCamera::SetAspectRatio(AspectRatioTYPE aspect_ratio)
+void RE_CompCamera::SetAspectRatio(AspectRatio aspect_ratio)
 {
 	target_ar = aspect_ratio;
 	SetBounds(static_cast<float>(RE_WINDOW->GetWidth()), static_cast<float>(RE_WINDOW->GetHeight()));
@@ -191,19 +199,19 @@ void RE_CompCamera::SetBounds(float w, float h)
 {
 	switch (target_ar)
 	{
-	case Fit_Window:
+	case AspectRatio::Fit_Window:
 	{
 		width = w;
 		height = h;
 		break;
 	}
-	case Square_1x1:
+	case AspectRatio::Square_1x1:
 	{
 		if (w >= h) width = height = h;
 		else width = height = w;
 		break;
 	}
-	case TraditionalTV_4x3:
+	case AspectRatio::TraditionalTV_4x3:
 	{
 		if (w / 4.0f >= h / 3.0f)
 		{
@@ -217,7 +225,7 @@ void RE_CompCamera::SetBounds(float w, float h)
 		}
 		break;
 	}
-	case Movietone_16x9:
+	case AspectRatio::Movietone_16x9:
 	{
 		if (w / 16.0f >= h / 9.0f)
 		{
@@ -231,7 +239,7 @@ void RE_CompCamera::SetBounds(float w, float h)
 		}
 		break;
 	}
-	case Personalized:
+	default:
 	{
 		width = w;
 		height = h;
@@ -285,31 +293,31 @@ void RE_CompCamera::GetTargetViewPort(math::float4& viewPort) const
 
 	switch (target_ar)
 	{
-	case RE_CompCamera::Fit_Window:
+	case AspectRatio::Fit_Window:
 	{
 		viewPort.x = 0.f;
 		viewPort.y = 0.f;
 		break;
 	}
-	case RE_CompCamera::Square_1x1:
+	case AspectRatio::Square_1x1:
 	{
 		viewPort.y = 0.f;
 		viewPort.x = (wW / 2.f) - (width / 2.f);
 		break; 
 	}
-	case RE_CompCamera::TraditionalTV_4x3:
+	case AspectRatio::TraditionalTV_4x3:
 	{
 		viewPort.y = 0.f;
 		viewPort.x = (wW / 2.f) - (width / 2.f);
 		break; 
 	}
-	case RE_CompCamera::Movietone_16x9:
+	case AspectRatio::Movietone_16x9:
 	{
 		viewPort.x = 0.f;
 		if (height < wH) viewPort.y = (wH / 2.f) - (height / 2.f);
 		break; 
 	}
-	case RE_CompCamera::Personalized:
+	default:
 	{
 		viewPort.x = 0.f;
 		viewPort.y = 0.f;
@@ -404,7 +412,7 @@ eastl::vector<const char*> RE_CompCamera::GetAllResources()
 
 unsigned int RE_CompCamera::GetBinarySize() const
 {
-	return sizeof(bool) * 3 + sizeof(int) * 2 + sizeof(float) * 3;
+	return sizeof(bool) * 3 + sizeof(int) + sizeof(ushort) + sizeof(float) * 3;
 }
 
 void RE_CompCamera::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
@@ -426,8 +434,8 @@ void RE_CompCamera::SerializeBinary(char*& cursor, eastl::map<const char*, int>*
 	memcpy(cursor, &v_fov_rads, size);
 	cursor += size;
 
-	size = sizeof(int);
-	int aspectRatioInt = (int)target_ar;
+	size = sizeof(ushort);
+	int aspectRatioInt = static_cast<ushort>(target_ar);
 	memcpy(cursor, &aspectRatioInt, size);
 	cursor += size;
 
@@ -463,9 +471,9 @@ void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*
 	memcpy(&v_fov_rads, cursor, size);
 	cursor += size;
 
-	size = sizeof(int);
-	int aspectRatioInt;
-	memcpy(&aspectRatioInt, cursor, size);
+	size = sizeof(ushort);
+	ushort aspectRatio;
+	memcpy(&aspectRatio, cursor, size);
 	cursor += size;
 
 	size = sizeof(bool);
@@ -480,7 +488,7 @@ void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*
 	memcpy(&sbRes, cursor, size);
 	cursor += size;
 
-	SetProperties(isPerspective, near_plane, far_plane, v_fov_rads, aspectRatioInt, draw_frustum, usingSkybox, (sbRes != -1) ? resources->at(sbRes) : nullptr);
+	SetProperties(isPerspective, near_plane, far_plane, v_fov_rads, static_cast<AspectRatio>(aspectRatio), draw_frustum, usingSkybox, (sbRes != -1) ? resources->at(sbRes) : nullptr);
 }
 
 void RE_CompCamera::SerializeJson(RE_Json * node, eastl::map<const char*, int>* resources) const
@@ -489,7 +497,7 @@ void RE_CompCamera::SerializeJson(RE_Json * node, eastl::map<const char*, int>* 
 	node->PushFloat("near_plane", frustum.NearPlaneDistance());
 	node->PushFloat("far_plane", frustum.FarPlaneDistance());
 	node->PushFloat("v_fov_rads", v_fov_rads);
-	node->PushInt("aspect_ratio", target_ar);
+	node->PushUInt("aspect_ratio", static_cast<const unsigned int>(target_ar));
 	node->PushBool("draw_frustum", draw_frustum);
 	node->PushBool("usingSkybox", usingSkybox);
 	node->PushInt("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
@@ -502,8 +510,10 @@ void RE_CompCamera::DeserializeJson(RE_Json* node, eastl::map<int, const char*>*
 
 	SetProperties(node->PullBool("isPrespective", true),
 		node->PullFloat("near_plane", 1.0f), node->PullFloat("far_plane", 5000.0f),
-		node->PullFloat("v_fov_rads", 0.523599f), node->PullInt("aspect_ratio", 0),
-		node->PullBool("draw_frustum", true), usingSkybox,
+		node->PullFloat("v_fov_rads", 0.523599f),
+		static_cast<AspectRatio>(node->PullUInt("aspect_ratio", 0u)),
+		node->PullBool("draw_frustum", true),
+		usingSkybox,
 		(sbRes != -1) ? resources->at(sbRes) : nullptr);
 }
 
@@ -527,10 +537,10 @@ void RE_CompCamera::DrawItsProperties()
 	if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f")) SetPlanesDistance(near_plane, far_plane);
 	if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane, 65000.0f, "%.1f")) SetPlanesDistance(near_plane, far_plane);
 
-	int aspect_ratio = target_ar;
+	int aspect_ratio = static_cast<int>(target_ar);
 	if (ImGui::Combo("Aspect Ratio", &aspect_ratio, "Fit Window\0Square 1x1\0TraditionalTV 4x3\0Movietone 16x9\0Personalized\0"))
 	{
-		target_ar = AspectRatioTYPE(aspect_ratio);
+		target_ar = AspectRatio(aspect_ratio);
 		RE_INPUT->Push(RE_EventType::UPDATE_SCENE_WINDOWS, RE_EDITOR, go);
 	}
 

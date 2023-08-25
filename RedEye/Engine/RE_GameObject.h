@@ -1,7 +1,7 @@
 #ifndef __RE_GAMEOBJECT_H__
 #define __RE_GAMEOBJECT_H__
 
-#include "RE_DataTypes.h"
+#include "RE_Component.h"
 
 #include <MGL/Geometry/AABB.h>
 #include <EASTL/list.h>
@@ -40,22 +40,22 @@ public:
 	class RE_CompLight* GetLight() const;
 	class RE_CompPrimitive* GetPrimitive() const;
 
-	RE_Component* GetCompPtr(const ushort type) const;
-	COMP_UID GetCompUID(const ushort type) const;
+	RE_Component* GetCompPtr(const RE_Component::Type type) const;
+	COMP_UID GetCompUID(const RE_Component::Type type) const;
 	bool HasRenderGeo() const;
 	bool HasActiveRenderGeo() const;
 
 	eastl::list<RE_Component*> GetComponentsPtr() const;
 	eastl::list<RE_Component*> GetStackableComponentsPtr() const;
-	eastl::stack<RE_Component*> GetAllChildsComponents(const unsigned short type) const;
+	eastl::stack<RE_Component*> GetAllChildsComponents(const RE_Component::Type type) const;
 	eastl::stack<RE_Component*> GetAllChildsActiveRenderGeos() const;
 	eastl::stack<RE_Component*> GetAllChildsActiveRenderGeos(const COMP_UID stencil_mask) const;
 
 	// Components
-	void ReportComponent(const COMP_UID id, const ushort type);
-	RE_Component* AddNewComponent(const ushort type);
-	void ReleaseComponent(const COMP_UID id, const ushort type);
-	void DestroyComponent(const COMP_UID id, const ushort type);
+	void ReportComponent(const COMP_UID id, const RE_Component::Type type);
+	RE_Component* AddNewComponent(const RE_Component::Type type);
+	void ReleaseComponent(const COMP_UID id, const RE_Component::Type type);
+	void DestroyComponent(const COMP_UID id, const RE_Component::Type type);
 
 	// Children Getters
 	const eastl::vector<GO_UID>& GetChilds() const;
@@ -136,7 +136,7 @@ public:
 
 	//POOL
 	GO_UID GetUID() const;
-	struct ComponentData { COMP_UID uid = 0ull; ushort type = 0u; };
+	struct ComponentData { COMP_UID uid = 0ull; RE_Component::Type type = RE_Component::Type::EMPTY; };
 
 	// Resources
 	void UseResources();
@@ -152,12 +152,12 @@ public:
 private:
 
 	inline RE_Component* CompPtr(ComponentData comp) const;
-	inline RE_Component* CompPtr(COMP_UID id, ushort type) const;
+	inline RE_Component* CompPtr(COMP_UID id, RE_Component::Type type) const;
 	inline const RE_Component* CompCPtr(ComponentData comp) const;
-	inline const RE_Component* CompCPtr(COMP_UID id, ushort type) const;
+	inline const RE_Component* CompCPtr(COMP_UID id, RE_Component::Type type) const;
 	eastl::list<ComponentData> AllCompData() const;
 
-	inline bool IsRenderGeo(ushort type) const;
+	inline bool IsRenderGeo(RE_Component::Type type) const;
 
 	inline RE_GameObject* ChildPtr(const GO_UID child) const;
 	inline const RE_GameObject* ChildCPtr(const GO_UID child) const;

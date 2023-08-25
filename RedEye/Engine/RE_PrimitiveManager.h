@@ -1,14 +1,20 @@
 #ifndef __RE_PRIMITVEMANAGER_H__
 #define __RE_PRIMITVEMANAGER_H__
 
+#include "RE_Component.h"
+
 class RE_GameObject;
-class RE_Component;
 class RE_CompPrimitive;
 class RE_CompGrid;
 class RE_CompRock;
 
-struct PrimData {
-	unsigned int vao = 0, vbo = 0, ebo = 0, triangles = 0, refCount = 0;
+struct PrimData
+{
+	uint vao = 0, vbo = 0, ebo = 0, triangles = 0, refCount = 0;
+
+	PrimData(uint vao = 0, uint vbo = 0, uint ebo = 0, uint triangles = 0, uint refCount = 0)
+		: vao(vao), vbo(vbo), ebo(ebo), triangles(triangles), refCount(refCount)
+	{}
 };
 
 class RE_PrimitiveManager
@@ -22,7 +28,7 @@ public:
 
 	void SetUpComponentPrimitive(RE_CompPrimitive* cmpP);
 	eastl::pair<unsigned int, unsigned int> GetPrimitiveMeshData(RE_Component* primComp, int id = -1);
-	void UnUsePrimitive(unsigned short pType, int id = -1);
+	void UnUsePrimitive(RE_Component::Type pType, int id = -1);
 
 	void CreateSphere(int slices, int stacks, unsigned int& vao, unsigned int& vbo, unsigned int& ebo, unsigned int& triangles);
 
@@ -39,7 +45,7 @@ private:
 
 	PrimData *platonics = nullptr;
 
-	eastl::map<unsigned short, eastl::map<int,PrimData>> primReference;
+	eastl::map<RE_Component::Type, eastl::map<int,PrimData>> primReference;
 };
 
 #endif // !__RE_PRIMITVEMANAGER_H__#

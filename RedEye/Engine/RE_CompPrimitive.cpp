@@ -26,7 +26,7 @@
 
 #include <par_shapes.h>
 
-RE_CompPrimitive::RE_CompPrimitive(ComponentType t) : RE_Component(t)
+RE_CompPrimitive::RE_CompPrimitive(RE_Component::Type t) : RE_Component(t)
 {
 	color = math::vec(1.0f, 0.15f, 0.15f);
 }
@@ -355,7 +355,7 @@ void RE_CompRock::GenerateNewRock(int s, int subdivisions)
 	nsubdivisions = subdivisions;
 
 	if (primID = !- 1) RE_SCENE->primitives->UnUsePrimitive(type, primID);
-	primID = seed * nsubdivisions * C_ROCK;
+	primID = seed * nsubdivisions * static_cast<int>(RE_Component::Type::ROCK);
 	auto mD = RE_SCENE->primitives->GetPrimitiveMeshData(this, primID);
 
 	VAO = mD.first;
@@ -452,7 +452,7 @@ void RE_CompPlatonic::DeserializeBinary(char*& cursor, eastl::map<int, const cha
 }
 
 ///////   Parametric   ////////////////////////////////////////////
-RE_CompParametric::RE_CompParametric(ComponentType t, const char* _name) : RE_CompPrimitive(t), name(_name) {}
+RE_CompParametric::RE_CompParametric(RE_Component::Type t, const char* _name) : RE_CompPrimitive(t), name(_name) {}
 RE_CompParametric::~RE_CompParametric() { }
 
 void RE_CompParametric::ParametricSetUp(int _slices, int _stacks, float _radius)
@@ -464,7 +464,7 @@ void RE_CompParametric::ParametricSetUp(int _slices, int _stacks, float _radius)
 
 	if(primID != -1) RE_SCENE->primitives->UnUsePrimitive(type, primID);
 	int curves[2] = { 1, static_cast<int>(radius * 100.f) };
-	primID = slices * stacks * curves[type == C_TORUS || type == C_TREFOILKNOT];
+	primID = slices * stacks * curves[type == RE_Component::Type::TORUS || type == RE_Component::Type::TREFOILKNOT];
 
 	auto md = RE_SCENE->primitives->GetPrimitiveMeshData(this, primID);
 	VAO = md.first;
@@ -523,13 +523,13 @@ void RE_CompParametric::DrawProperties()
 		ImGui::PushItemWidth(75.0f);
 		if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) canChange = true;
 		if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) canChange = true;
-		if ((type == C_TORUS || type == C_TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) canChange = true;
+		if ((type == RE_Component::Type::TORUS || type == RE_Component::Type::TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) canChange = true;
 
 		ImGui::PopItemWidth();
 		if (canChange && ImGui::Button("Apply"))
 			ParametricSetUp(target_slices, target_stacks, target_radius);
 
-		if (type == C_PLANE && ImGui::Button("Convert To Mesh")) 
+		if (type == RE_Component::Type::PLANE && ImGui::Button("Convert To Mesh"))
 			RE_INPUT->Push(RE_EventType::PLANE_CHANGE_TO_MESH, RE_SCENE, go);
 	}
 }
@@ -539,7 +539,7 @@ bool RE_CompParametric::DrawPrimPropierties()
 	bool ret = false;
 	if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) ret = canChange = true;
 	if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) ret = canChange = true;
-	if ((type == C_TORUS || type == C_TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) ret = canChange = true;
+	if ((type == RE_Component::Type::TORUS || type == RE_Component::Type::TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) ret = canChange = true;
 
 	if (canChange && ImGui::Button("Apply"))
 		ParametricSetUp(target_slices, target_stacks, target_radius);
@@ -658,7 +658,7 @@ void RE_CompParametric::DeserializeParticleBinary(char*& cursor)
 }
 
 ///////   Plane   ////////////////////////////////////////////
-RE_CompPlane::RE_CompPlane() : RE_CompParametric(C_PLANE, "Plane") {}
+RE_CompPlane::RE_CompPlane() : RE_CompParametric(RE_Component::Type::PLANE, "Plane") {}
 RE_CompPlane::~RE_CompPlane() {}
 
 const char* RE_CompPlane::TransformAsMeshResource()
@@ -700,19 +700,19 @@ const char* RE_CompPlane::TransformAsMeshResource()
 }
 
 ///////   Sphere   ////////////////////////////////////////////
-RE_CompSphere::RE_CompSphere() : RE_CompParametric(C_SPHERE, "Sphere") {}
+RE_CompSphere::RE_CompSphere() : RE_CompParametric(RE_Component::Type::SPHERE, "Sphere") {}
 RE_CompSphere::~RE_CompSphere() {}
 
 ///////   Cylinder   ////////////////////////////////////////////
-RE_CompCylinder::RE_CompCylinder() : RE_CompParametric(C_CYLINDER, "Cylinder") {}
+RE_CompCylinder::RE_CompCylinder() : RE_CompParametric(RE_Component::Type::CYLINDER, "Cylinder") {}
 RE_CompCylinder::~RE_CompCylinder() {}
 
 ///////   HemiSphere   ////////////////////////////////////////////
-RE_CompHemiSphere::RE_CompHemiSphere() : RE_CompParametric(C_HEMISHPERE, "HemiSphere") {}
+RE_CompHemiSphere::RE_CompHemiSphere() : RE_CompParametric(RE_Component::Type::HEMISHPERE, "HemiSphere") {}
 RE_CompHemiSphere::~RE_CompHemiSphere() {}
 
 ///////   Torus   ////////////////////////////////////////////
-RE_CompTorus::RE_CompTorus() : RE_CompParametric(C_TORUS, "Torus")
+RE_CompTorus::RE_CompTorus() : RE_CompParametric(RE_Component::Type::TORUS, "Torus")
 {
 	min_r = 0.1f;
 	max_r = 1.0f;
@@ -720,7 +720,7 @@ RE_CompTorus::RE_CompTorus() : RE_CompParametric(C_TORUS, "Torus")
 RE_CompTorus::~RE_CompTorus() {}
 
 ///////   TrefoiKnot   ////////////////////////////////////////////
-RE_CompTrefoiKnot::RE_CompTrefoiKnot() : RE_CompParametric(C_TREFOILKNOT,"Trefoil Knot")
+RE_CompTrefoiKnot::RE_CompTrefoiKnot() : RE_CompParametric(RE_Component::Type::TREFOILKNOT,"Trefoil Knot")
 {
 	min_r = 0.5f;
 	max_r = 3.0f;
