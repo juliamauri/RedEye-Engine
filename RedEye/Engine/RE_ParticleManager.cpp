@@ -119,7 +119,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 		float weight = 1.f;
 
 		// Lightmode
-		if (ModuleRenderer3D::GetLightMode() == LightMode::LIGHT_DEFERRED)
+		if (ModuleRenderer3D::GetLightMode() == RenderView::LightMode::DEFERRED)
 		{
 			const bool cNormal = !simulation->meshMD5 && !simulation->primCmp;
 			RE_ShaderImporter::setFloat(shader, "customNormal", static_cast<float>(cNormal));

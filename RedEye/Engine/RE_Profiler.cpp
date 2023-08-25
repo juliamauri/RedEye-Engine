@@ -123,48 +123,6 @@ void RE_Profiler::Exit()
 		RE_Profiler::Deploy();
 }
 
-void RE_Profiler::Deploy()
-{
-	Pause();
-	if (!ProfilingTimer::operations.empty())
-	{ // Frame Operations
-		rapidjson::StringBuffer buffer;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-		DumpFrameOperations(writer);
-		WriteToFile(
-#ifdef _DEBUG
-			"Debug Red Eye Profiling.json",
-#else
-			"Release Red Eye Profiling.json",
-#endif
-			buffer.GetString());
-	}
-
-	{ // Functions
-		rapidjson::StringBuffer buffer;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-		DumpFunctionNames(writer);
-		WriteToFile("Functions Table.json", buffer.GetString());
-	}
-
-	{ // Classes
-		rapidjson::StringBuffer buffer;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-		DumpClassNames(writer);
-		WriteToFile("Classes Table.json", buffer.GetString());
-	}
-
-	Clear();
-}
-
-void RE_Profiler::WriteToFile(const char* filename, const char* buffer)
-{
-	std::ofstream file;
-	file.open(filename, std::ios::trunc);
-	file << buffer;
-	file.close();
-}
-
 void DumpFrameOperations(rapidjson::Writer<rapidjson::StringBuffer>& writer)
 {
 	writer.StartObject();
@@ -211,6 +169,7 @@ void DumpFunctionNames(rapidjson::Writer<rapidjson::StringBuffer>& writer)
 	writer.EndArray();
 	writer.EndObject();
 }
+
 void DumpClassNames(rapidjson::Writer<rapidjson::StringBuffer>& writer)
 {
 	writer.StartObject();
@@ -229,6 +188,48 @@ void DumpClassNames(rapidjson::Writer<rapidjson::StringBuffer>& writer)
 
 	writer.EndArray();
 	writer.EndObject();
+}
+
+void RE_Profiler::Deploy()
+{
+	Pause();
+	if (!ProfilingTimer::operations.empty())
+	{ // Frame Operations
+		rapidjson::StringBuffer buffer;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		DumpFrameOperations(writer);
+		WriteToFile(
+#ifdef _DEBUG
+			"Debug Red Eye Profiling.json",
+#else
+			"Release Red Eye Profiling.json",
+#endif
+			buffer.GetString());
+	}
+
+	{ // Functions
+		rapidjson::StringBuffer buffer;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		DumpFunctionNames(writer);
+		WriteToFile("Functions Table.json", buffer.GetString());
+	}
+
+	{ // Classes
+		rapidjson::StringBuffer buffer;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		DumpClassNames(writer);
+		WriteToFile("Classes Table.json", buffer.GetString());
+	}
+
+	Clear();
+}
+
+void RE_Profiler::WriteToFile(const char* filename, const char* buffer)
+{
+	std::ofstream file;
+	file.open(filename, std::ios::trunc);
+	file << buffer;
+	file.close();
 }
 
 unsigned long long ProfilingTimer::start = 0ull;

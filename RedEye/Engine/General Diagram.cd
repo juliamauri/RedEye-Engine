@@ -810,7 +810,7 @@
       <FileName>ModuleRenderer3D.h</FileName>
     </TypeIdentifier>
   </Enum>
-  <Enum Name="RenderViewFlags" Collapsed="true">
+  <Enum Name="RenderView::Flags" Collapsed="true">
     <Position X="5.75" Y="21.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AABAAAAAAABAQJAAAAAAAIAABAAAAAAiAABBAAAAgAA=</HashCode>

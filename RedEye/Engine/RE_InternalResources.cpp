@@ -207,13 +207,13 @@ void RE_InternalResources::InitWaterResources()
 const char* RE_InternalResources::GetDefaultShader() const
 {
 	static const char* shaders[4] = { defaultShader, defaultShader, defaultShader /* TODO RUB: add shader with light input*/, defGeoShader };
-	return shaders[ModuleRenderer3D::GetLightMode()];
+	return shaders[static_cast<const int>(ModuleRenderer3D::GetLightMode())];
 }
 
 const char* RE_InternalResources::GetDefaultWaterShader() const
 {
 	static const char* waterShaders[4] = { waterShader, waterShader, waterShader /* TODO RUB: add shader with light input*/, waterDefShader };
-	return waterShaders[ModuleRenderer3D::GetLightMode()];
+	return waterShaders[static_cast<const int>(ModuleRenderer3D::GetLightMode())];
 }
 
 const char*	 RE_InternalResources::GetDefaultScaleShader() const { return defaultScaleShader; }
@@ -226,7 +226,7 @@ const char* RE_InternalResources::GetParticleLightPassShader() const { return de
 const char* RE_InternalResources::GetParticleShader() const
 {
 	static const char* particleshaders[4] = { particleShader, particleShader, particleShader /* TODO RUB: add shader with light input*/, defParticleShader };
-	return particleshaders[ModuleRenderer3D::GetLightMode()];
+	return particleshaders[static_cast<const int>(ModuleRenderer3D::GetLightMode())];
 }
 
 const char*	 RE_InternalResources::GetDefaultSkyBoxShader() const { return skyboxShader; }

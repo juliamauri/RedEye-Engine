@@ -1,6 +1,7 @@
 #ifndef __APP_H__
 #define __APP_H__
 
+#include "EventListener.h"
 #include "Event.h"
 #include "RE_ConsoleLog.h"
 

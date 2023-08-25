@@ -1,5 +1,6 @@
 #include "Event.h"
 
+#include "EventListener.h"
 #include <SDL2/SDL_timer.h>
 
 Event::Event(RE_EventType t, EventListener * lis, RE_Cvar d1, RE_Cvar d2) :

@@ -3,6 +3,8 @@
 
 #include "RE_Cvar.h"
 
+class EventListener;
+
 enum class RE_EventType : unsigned short int
 {
 	// APP
@@ -79,14 +81,6 @@ struct Event
 	Event(RE_EventType t, EventListener* lis, RE_Cvar data = RE_Cvar(), RE_Cvar data2 = RE_Cvar());
 	Event(Event& e);
 	~Event() {}
-};
-
-class EventListener
-{
-public:
-
-	virtual ~EventListener() {}
-	virtual void RecieveEvent(const Event& e) = 0;
 };
 
 #endif // !__EVENT__

@@ -284,18 +284,18 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 
 			if (ImGui::BeginMenuBar())
 			{
-				static bool debug_draw = RE_RENDER->GetRenderViewDebugDraw(RENDER_VIEWS::VIEW_PARTICLE);
-				static bool deferred = (RE_RENDER->GetRenderViewLightMode(RENDER_VIEWS::VIEW_PARTICLE) == LightMode::LIGHT_DEFERRED);
-				static math::float4 clear_color = RE_RENDER->GetRenderViewClearColor(RENDER_VIEWS::VIEW_PARTICLE);
+				static bool debug_draw = RE_RENDER->GetRenderViewDebugDraw(RenderView::Type::PARTICLE);
+				static bool deferred = (RE_RENDER->GetRenderViewLightMode(RenderView::Type::PARTICLE) == RenderView::LightMode::DEFERRED);
+				static math::float4 clear_color = RE_RENDER->GetRenderViewClearColor(RenderView::Type::PARTICLE);
 
 				if (ImGui::Checkbox("Particle debug draw", &debug_draw))
-					RE_RENDER->SetRenderViewDebugDraw(RENDER_VIEWS::VIEW_PARTICLE, debug_draw);
+					RE_RENDER->SetRenderViewDebugDraw(RenderView::Type::PARTICLE, debug_draw);
 
 				if (ImGui::Checkbox("Deferred lighting", &deferred)) {
-					RE_RENDER->SetRenderViewDeferred(RENDER_VIEWS::VIEW_PARTICLE, deferred);
+					RE_RENDER->SetRenderViewDeferred(RenderView::Type::PARTICLE, deferred);
 					if (deferred) {
 						clear_color = { 0.0f,0.0f,0.0f,1.0 };
-						RE_RENDER->SetRenderViewClearColor(RENDER_VIEWS::VIEW_PARTICLE, clear_color);
+						RE_RENDER->SetRenderViewClearColor(RenderView::Type::PARTICLE, clear_color);
 					}
 				}
 
@@ -303,7 +303,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 					ImGui::PushItemWidth(150.0f);
 
 					if (ImGui::ColorEdit3("Background color", clear_color.ptr()))
-						RE_RENDER->SetRenderViewClearColor(RENDER_VIEWS::VIEW_PARTICLE, clear_color);
+						RE_RENDER->SetRenderViewClearColor(RenderView::Type::PARTICLE, clear_color);
 
 					ImGui::PopItemWidth();
 				}

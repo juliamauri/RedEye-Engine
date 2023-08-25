@@ -1,60 +1,9 @@
 #ifndef __MODULERENDER3D_H__
 #define __MODULERENDER3D_H__
 
+#include "EventListener.h"
+#include "RenderView.h"
 #include <EASTL/stack.h>
-
-enum LightMode : int
-{
-	LIGHT_DISABLED = 0,
-	LIGHT_GL,
-	LIGHT_DIRECT,
-	LIGHT_DEFERRED,
-};
-
-enum RenderViewFlags : short
-{
-	FRUSTUM_CULLING = 0x1,	 // 0000 0000 0001
-	OVERRIDE_CULLING = 0x2,	 // 0000 0000 0010
-	OUTLINE_SELECTION = 0x4, // 0000 0000 0100
-	DEBUG_DRAW = 0x8,		 // 0000 0000 1000
-
-	SKYBOX = 0x10,			 // 0000 0001 0000
-	BLENDED = 0x20,			 // 0000 0010 0000
-	WIREFRAME = 0x40,		 // 0000 0100 0000
-	FACE_CULLING = 0X80,	 // 0000 1000 0000
-
-	TEXTURE_2D = 0x100,		 // 0001 0000 0000
-	COLOR_MATERIAL = 0x200,	 // 0010 0000 0000
-	DEPTH_TEST = 0x400,		 // 0100 0000 0000
-	CLIP_DISTANCE = 0x800	 // 1000 0000 0000
-};
-
-struct RenderView
-{
-	RenderView(eastl::string name = "",
-		eastl::pair<unsigned int, unsigned int> fbos = { 0, 0 },
-		short flags = 0, LightMode light = LIGHT_GL, math::float4 clipDistance = math::float4::zero);
-
-	eastl::string name;
-	eastl::pair<unsigned int, unsigned int> fbos;
-	short flags;
-	LightMode light;
-	math::float4 clear_color;
-	math::float4 clip_distance;
-	class RE_CompCamera* camera = nullptr;
-
-	const unsigned int GetFBO() const;
-
-	static const char* labels[12];
-};
-
-enum RENDER_VIEWS : short
-{
-	VIEW_EDITOR,
-	VIEW_GAME,
-	VIEW_PARTICLE,
-	VIEW_OTHER
-};
 
 class ModuleRenderer3D : public EventListener 
 {
@@ -87,32 +36,33 @@ public:
 	const char* GetGPUVendor() const;
 
 	// Sets shader for unassigned geometry
-	static const LightMode GetLightMode();
+	static const RenderView::LightMode GetLightMode();
 	
 	static RE_CompCamera* GetCamera();
 
-	void ChangeFBOSize(int width, int height, RENDER_VIEWS view);
-	unsigned int GetRenderedEditorSceneTexture()const;
-	uintptr_t GetRenderedParticleEditorTexture()const;
-	unsigned int GetDepthTexture()const;
-	uintptr_t GetRenderedGameSceneTexture()const;
+	void ChangeFBOSize(int width, int height, RenderView::Type view);
+	unsigned int GetRenderedEditorSceneTexture() const;
+	uintptr_t GetRenderedParticleEditorTexture() const;
+	unsigned int GetDepthTexture() const;
+	uintptr_t GetRenderedGameSceneTexture() const;
 
 	void PushSceneRend(RenderView& rV);
 	void PushThumnailRend(const char* md5, bool redo = false);
 
-	math::float4 GetRenderViewClearColor(RENDER_VIEWS r_view)const;
-	LightMode GetRenderViewLightMode(RENDER_VIEWS r_view)const;
-	bool GetRenderViewDebugDraw(RENDER_VIEWS r_view)const;
-	void SetRenderViewDeferred(RENDER_VIEWS r_view, bool using_deferred);
-	void SetRenderViewClearColor(RENDER_VIEWS r_view, math::float4 clear_color);
-	void SetRenderViewDebugDraw(RENDER_VIEWS r_view, bool debug_draw);
+	math::float4 GetRenderViewClearColor(RenderView::Type r_view) const;
+	RenderView::LightMode GetRenderViewLightMode(RenderView::Type r_view) const;
+	bool GetRenderViewDebugDraw(RenderView::Type r_view)const;
+	void SetRenderViewDeferred(RenderView::Type r_view, bool using_deferred);
+	void SetRenderViewClearColor(RenderView::Type r_view, math::float4 clear_color);
+	void SetRenderViewDebugDraw(RenderView::Type r_view, bool debug_draw);
 
-	enum RenderType {
-		R_R_SCENE,
-		T_R_GO,
-		T_R_MAT,
-		T_R_TEX,
-		T_R_SKYBOX
+	enum RenderType
+	{
+		SCENE,
+		GO,
+		MAT,
+		TEX,
+		SKYBOX
 	};
 	
 	struct RenderQueue
@@ -121,7 +71,8 @@ public:
 		RenderView& renderview;
 		const char* resMD5;
 		bool redo = false;
-		RenderQueue(RenderType t, RenderView& rv, const char* r, bool re = false) : type(t), renderview(rv), resMD5(r), redo(re) {}
+		RenderQueue(RenderType t, RenderView& rv, const char* r, bool re = false) :
+			type(t), renderview(rv), resMD5(r), redo(re) {}
 	};
 
 private:
@@ -147,14 +98,13 @@ private:
 	void DrawQuad();
 	void DirectDrawCube(math::vec position, math::vec color);
 
-
 public:
 
 	class RE_FBOManager* fbos = nullptr;
 
 private:
 
-	eastl::stack<RenderQueue> rendQueue;
+	eastl::stack<RenderQueue> render_queue;
 	eastl::vector<const char*> activeShaders;
 
 	// Context
@@ -171,7 +121,7 @@ private:
 	bool lighting = false;
 	bool clip_distance = false;
 
-	static LightMode current_lighting;
+	static RenderView::LightMode current_lighting;
 	static RE_CompCamera* current_camera;
 	static unsigned int current_fbo;
 

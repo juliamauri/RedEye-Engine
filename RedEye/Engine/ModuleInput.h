@@ -1,6 +1,7 @@
 #ifndef __MODULEINPUT_H__
 #define __MODULEINPUT_H__
 
+#include "Event.h"
 #include <EASTL/queue.h>
 
 constexpr unsigned int MAX_MOUSE_BUTTONS = 5u;

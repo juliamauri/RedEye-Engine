@@ -40,6 +40,7 @@
     <ClCompile Include="HierarchyWindow.cpp" />
     <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="ParticleEmitterEditorWindow.cpp" />
+    <ClCompile Include="RenderView.cpp" />
     <ClCompile Include="SceneEditorWindow.cpp" />
     <ClCompile Include="MaterialEditorWindow.cpp" />
     <ClCompile Include="ShaderEditorWindow.cpp" />
@@ -165,9 +166,11 @@
     <ClInclude Include="ConsoleWindow.h" />
     <ClInclude Include="EditorWindow.h" />
     <ClInclude Include="AboutWindow.h" />
+    <ClInclude Include="EventListener.h" />
     <ClInclude Include="GameWindow.h" />
     <ClInclude Include="MaterialEditorWindow.h" />
     <ClInclude Include="ParticleEmitterEditorWindow.h" />
+    <ClInclude Include="RenderView.h" />
     <ClInclude Include="resource1.h" />
     <ClInclude Include="SceneEditorWindow.h" />
     <ClInclude Include="PlayPauseWindow.h" />

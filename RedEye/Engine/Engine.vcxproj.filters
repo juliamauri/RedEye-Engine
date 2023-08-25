@@ -259,6 +259,9 @@
     <ClCompile Include="..\3rd Parties\Others\MD5\md5.cpp">
       <Filter>3rd Party\MD5</Filter>
     </ClCompile>
+    <ClCompile Include="RenderView.cpp">
+      <Filter>Engine\Application\Modules\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event.h">
@@ -671,6 +674,12 @@
     </ClInclude>
     <ClInclude Include="resource1.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderView.h">
+      <Filter>Engine\Application\Modules\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="EventListener.h">
+      <Filter>Engine\Application\Modules\Input\Events System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

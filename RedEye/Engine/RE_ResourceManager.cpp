@@ -584,7 +584,7 @@ const char* RE_ResourceManager::IsReference(const char* md5, Resource_Type type)
 const char * RE_ResourceManager::FindMD5ByMETAPath(const char * metaPath, Resource_Type type)
 {
 	const char* ret = nullptr;
-	int sizemeta = 0;
+	size_t sizemeta = 0;
 	if (type == Resource_Type::R_UNDEFINED)
 	{
 		for (auto resource : resources)
@@ -606,7 +606,7 @@ const char * RE_ResourceManager::FindMD5ByMETAPath(const char * metaPath, Resour
 const char* RE_ResourceManager::FindMD5ByLibraryPath(const char* libraryPath, Resource_Type type)
 {
 	const char* ret = nullptr;
-	int sizelibrary = 0;
+	size_t sizelibrary = 0;
 	if (type == Resource_Type::R_UNDEFINED)
 	{
 		for (auto resource : resources)
@@ -630,7 +630,7 @@ const char* RE_ResourceManager::FindMD5ByLibraryPath(const char* libraryPath, Re
 const char * RE_ResourceManager::FindMD5ByAssetsPath(const char * assetsPath, Resource_Type type)
 {
 	const char* ret = nullptr;
-	int sizeassets = 0;
+	size_t sizeassets = 0;
 	if (type == Resource_Type::R_UNDEFINED)
 	{
 		for (auto resource : resources)

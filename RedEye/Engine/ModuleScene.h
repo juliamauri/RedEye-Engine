@@ -1,6 +1,7 @@
 #ifndef __MODULESCENE_H__
 #define __MODULESCENE_H__
 
+#include "EventListener.h"
 #include "RE_ECS_Pool.h"
 #include "RE_AABBDynTree.h"
 
