@@ -168,7 +168,7 @@ void RE_SkyBox::DrawEditSkyBox()
 				id = "Change";
 				if (ImGui::BeginMenu(id.c_str()))
 				{
-					eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(Resource_Type::R_TEXTURE);
+					eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceType::TEXTURE);
 					for (auto textRes : allTex)
 					{
 						if (ImGui::MenuItem(textRes->GetName()))
@@ -186,7 +186,7 @@ void RE_SkyBox::DrawEditSkyBox()
 				id = "Add";
 				if (ImGui::BeginMenu(id.c_str()))
 				{
-					eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(Resource_Type::R_TEXTURE);
+					eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceType::TEXTURE);
 					for (auto textRes : allTex)
 					{
 						if (ImGui::MenuItem(textRes->GetName()))
@@ -335,13 +335,13 @@ void RE_SkyBox::LoadResourceMeta(RE_Json* metaNode)
 	{
 		eastl::string key(texturesname[i]);
 		eastl::string texMD5 = nodeTex->PullString(eastl::string(key + "textureMD5").c_str(), "");
-		skyBoxSettings.textures[i].textureMD5 = RE_RES->IsReference(texMD5.c_str(), Resource_Type::R_TEXTURE);
+		skyBoxSettings.textures[i].textureMD5 = RE_RES->IsReference(texMD5.c_str(), ResourceType::TEXTURE);
 	}
 
 	restoreSettings = skyBoxSettings;
 }
 
-bool RE_SkyBox::isNeededResourcesReferenced(RE_Json* metaNode)
+bool RE_SkyBox::NeededResourcesReferenced(RE_Json* metaNode)
 {
 
 	RE_Json* nodeTex = metaNode->PullJObject("textures");
@@ -349,7 +349,7 @@ bool RE_SkyBox::isNeededResourcesReferenced(RE_Json* metaNode)
 	{
 		eastl::string key(texturesname[i]);
 		eastl::string texMD5 = nodeTex->PullString(eastl::string(key + "textureMD5").c_str(), "");
-		skyBoxSettings.textures[i].textureMD5 = RE_RES->IsReference(texMD5.c_str(), Resource_Type::R_TEXTURE);
+		skyBoxSettings.textures[i].textureMD5 = RE_RES->IsReference(texMD5.c_str(), ResourceType::TEXTURE);
 
 		if (!skyBoxSettings.textures[i].textureMD5) return true;
 	}

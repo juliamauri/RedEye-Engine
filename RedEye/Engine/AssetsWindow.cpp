@@ -118,8 +118,8 @@ void AssetsWindow::DrawItemResource(const RE_FileSystem::RE_Path* p, float icons
 
 		switch (res->GetType())
 		{
-		case R_PARTICLE_EMISSION: file_icon = RE_EDITOR->thumbnails->GetPEmissionFileID(); break;
-		case R_PARTICLE_RENDER: file_icon = RE_EDITOR->thumbnails->GetPRenderFileID(); break;
+		case ResourceType::PARTICLE_EMISSION: file_icon = RE_EDITOR->thumbnails->GetPEmissionFileID(); break;
+		case ResourceType::PARTICLE_RENDER: file_icon = RE_EDITOR->thumbnails->GetPRenderFileID(); break;
 		default: file_icon = RE_EDITOR->thumbnails->At(res->GetMD5()); break;
 		}
 		
@@ -129,9 +129,9 @@ void AssetsWindow::DrawItemResource(const RE_FileSystem::RE_Path* p, float icons
 
 		DrawPopUpDeleteResource(id, idName, idCount, res);
 		
-		static eastl::array<const char*, MAX_R_TYPES> names = { "Undefined", "Shader", "Texture", "Mesh", "Prefab", "SkyBox", "Material", "Model", "Scene", "Particle emitter", "Particle emission", "Particle render" };
+		static eastl::array<const char*, static_cast<unsigned short>(ResourceType::MAX)> names = { "Undefined", "Shader", "Texture", "Mesh", "Prefab", "SkyBox", "Material", "Model", "Scene", "Particle emitter", "Particle emission", "Particle render" };
 		eastl::string dragID("#");
-		(dragID += names[res->GetType()]) += "Reference";
+		(dragID += names[static_cast<unsigned short>(res->GetType())]) += "Reference";
 
 		if (ImGui::BeginDragDropSource())
 		{
@@ -199,14 +199,14 @@ void AssetsWindow::DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize
 {
 	const ResourceContainer* res = RE_RES->At(p->AsMeta()->resource);
 
-	uintptr_t icon_meta = (res->GetType() == R_SHADER) ? RE_EDITOR->thumbnails->GetShaderFileID() : RE_EDITOR->thumbnails->GetPEmitterFileID();
+	uintptr_t icon_meta = (res->GetType() == ResourceType::SHADER) ? RE_EDITOR->thumbnails->GetShaderFileID() : RE_EDITOR->thumbnails->GetPEmitterFileID();
 
 	if (ImGui::ImageButton(eastl::bit_cast<void*>(icon_meta), { iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 		RE_RES->PushSelected(res->GetMD5(), true);
 
 	if (ImGui::BeginDragDropSource())
 	{
-		ImGui::SetDragDropPayload((res->GetType() == R_SHADER) ? "#ShadereReference" : "#EmitterReference", &p->AsMeta()->resource, sizeof(const char**));
+		ImGui::SetDragDropPayload((res->GetType() == ResourceType::SHADER) ? "#ShadereReference" : "#EmitterReference", &p->AsMeta()->resource, sizeof(const char**));
 		ImGui::Image(eastl::bit_cast<void*>(icon_meta), { 50,50 }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 		ImGui::EndDragDropSource();
 	}

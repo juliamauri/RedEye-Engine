@@ -152,7 +152,7 @@ void RE_Material::SaveResourceMeta(RE_Json* metaNode)
 void RE_Material::LoadResourceMeta(RE_Json* metaNode)
 {
 	eastl::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
-	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = RE_RES->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
+	if (shaderMeta.compare("NOMETAPATH") != 0) shaderMD5 = RE_RES->FindMD5ByMETAPath(shaderMeta.c_str(), ResourceType::SHADER);
 
 	RE_Json* diffuseNode = metaNode->PullJObject("DiffuseTextures");
 	PullTexturesJson(diffuseNode, &tDiffuse);
@@ -186,45 +186,45 @@ void RE_Material::LoadResourceMeta(RE_Json* metaNode)
 	DEL(unknownNode);
 }
 
-bool RE_Material::isNeededResourcesReferenced(RE_Json* metaNode)
+bool RE_Material::NeededResourcesReferenced(RE_Json* metaNode)
 {
 	bool ret = false;
 	eastl::string shaderMeta = metaNode->PullString("shaderMeta", "NOMETAPATH");
 	if (shaderMeta.compare("NOMETAPATH") != 0) {
-		shaderMD5 = RE_RES->FindMD5ByMETAPath(shaderMeta.c_str(), Resource_Type::R_SHADER);
+		shaderMD5 = RE_RES->FindMD5ByMETAPath(shaderMeta.c_str(), ResourceType::SHADER);
 
 		if (!shaderMD5) ret = true;
 	}
 
 	RE_Json* diffuseNode = metaNode->PullJObject("DiffuseTextures");
-	if(isNeededResourcesReferencedTexturePull(diffuseNode)) ret = true;
+	if(NeededResourcesReferencedTexturePull(diffuseNode)) ret = true;
 	DEL(diffuseNode);
 	RE_Json* specularNode = metaNode->PullJObject("SpecularTextures");
-	if (isNeededResourcesReferencedTexturePull(specularNode)) ret = true;
+	if (NeededResourcesReferencedTexturePull(specularNode)) ret = true;
 	DEL(specularNode);
 	RE_Json* ambientNode = metaNode->PullJObject("AmbientTextures");
-	if (isNeededResourcesReferencedTexturePull(ambientNode)) ret = true;
+	if (NeededResourcesReferencedTexturePull(ambientNode)) ret = true;
 	DEL(ambientNode);
 	RE_Json* emissiveNode = metaNode->PullJObject("EmissiveTextures");
-	if (isNeededResourcesReferencedTexturePull(emissiveNode)) ret = true;
+	if (NeededResourcesReferencedTexturePull(emissiveNode)) ret = true;
 	DEL(emissiveNode);
 	RE_Json* opacityNode = metaNode->PullJObject("OpacityTextures");
-	if (isNeededResourcesReferencedTexturePull(opacityNode)) ret = true;
+	if (NeededResourcesReferencedTexturePull(opacityNode)) ret = true;
 	DEL(opacityNode);
 	RE_Json* shininessNode = metaNode->PullJObject("ShininessTextures");
-	if (isNeededResourcesReferencedTexturePull(shininessNode)) ret = true;
+	if (NeededResourcesReferencedTexturePull(shininessNode)) ret = true;
 	DEL(shininessNode);
 	RE_Json* heightNode = metaNode->PullJObject("HeightTextures");
-	if (isNeededResourcesReferencedTexturePull(heightNode)) ret = true;
+	if (NeededResourcesReferencedTexturePull(heightNode)) ret = true;
 	DEL(heightNode);
 	RE_Json* normalsNode = metaNode->PullJObject("NormalsTextures");
-	if (isNeededResourcesReferencedTexturePull(normalsNode)) ret = true;
+	if (NeededResourcesReferencedTexturePull(normalsNode)) ret = true;
 	DEL(normalsNode);
 	RE_Json* reflectionNode = metaNode->PullJObject("ReflectionTextures");
-	if (isNeededResourcesReferencedTexturePull(reflectionNode)) ret = true;
+	if (NeededResourcesReferencedTexturePull(reflectionNode)) ret = true;
 	DEL(reflectionNode);
 	RE_Json* unknownNode = metaNode->PullJObject("UnknownTextures");
-	if (isNeededResourcesReferencedTexturePull(unknownNode)) ret = true;
+	if (NeededResourcesReferencedTexturePull(unknownNode)) ret = true;
 	DEL(unknownNode);
 
 	return ret;
@@ -244,8 +244,8 @@ void RE_Material::DrawMaterialEdit()
 		const char* selected = RE_RES->GetSelected();
 		if (selected)
 		{
-			Resource_Type t = RE_RES->At(selected)->GetType();
-			popAll = (t == Resource_Type::R_SHADER || t == Resource_Type::R_TEXTURE);
+			ResourceType t = RE_RES->At(selected)->GetType();
+			popAll = (t == ResourceType::SHADER || t == ResourceType::TEXTURE);
 		}
 		RE_RES->PushSelected(matShader->GetMD5(), popAll);
 	}
@@ -263,7 +263,7 @@ void RE_Material::DrawMaterialEdit()
 
 	if (ImGui::BeginMenu("Change shader"))
 	{
-		eastl::vector<ResourceContainer*> shaders = RE_RES->GetResourcesByType(Resource_Type::R_SHADER);
+		eastl::vector<ResourceContainer*> shaders = RE_RES->GetResourcesByType(ResourceType::SHADER);
 		bool none = true;
 		for (auto  shader :  shaders)
 		{
@@ -686,8 +686,8 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 				const char* selected = RE_RES->GetSelected();
 				if (selected)
 				{
-					Resource_Type t = RE_RES->At(selected)->GetType();
-					popAll = (t == Resource_Type::R_SHADER || t == Resource_Type::R_TEXTURE);
+					ResourceType t = RE_RES->At(selected)->GetType();
+					popAll = (t == ResourceType::SHADER || t == ResourceType::TEXTURE);
 				}
 				RE_RES->PushSelected(*md5, popAll);
 			}
@@ -706,7 +706,7 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 			changetexture += eastl::to_string(count++);
 			if (ImGui::BeginMenu(changetexture.c_str()))
 			{
-				eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(Resource_Type::R_TEXTURE);
+				eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceType::TEXTURE);
 				for (auto textRes : allTex)
 				{
 					if (ImGui::MenuItem(textRes->GetName()))
@@ -732,7 +732,7 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 	eastl::string addtexture = "Add #";
 	if (ImGui::BeginMenu(((addtexture += texturesName) += " texture").c_str()))
 	{
-		eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(Resource_Type::R_TEXTURE);
+		eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceType::TEXTURE);
 		for (auto textRes : allTex)
 		{
 			if (ImGui::MenuItem(textRes->GetName()))
@@ -960,7 +960,7 @@ void RE_Material::PushTexturesJson(RE_Json * texturesNode, eastl::vector<const c
 	}
 }
 
-bool RE_Material::isNeededResourcesReferencedTexturePull(RE_Json* texturesNode)
+bool RE_Material::NeededResourcesReferencedTexturePull(RE_Json* texturesNode)
 {
 	uint texturesSize = texturesNode->PullInt("Size", 0);
 	for (uint i = 0; i < texturesSize; i++)

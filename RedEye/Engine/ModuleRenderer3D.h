@@ -3,6 +3,7 @@
 
 #include "EventListener.h"
 #include "RenderView.h"
+#include "RE_DataTypes.h"
 #include <EASTL/stack.h>
 
 class ModuleRenderer3D : public EventListener 
@@ -51,12 +52,12 @@ public:
 
 	math::float4 GetRenderViewClearColor(RenderView::Type r_view) const;
 	RenderView::LightMode GetRenderViewLightMode(RenderView::Type r_view) const;
-	bool GetRenderViewDebugDraw(RenderView::Type r_view)const;
+	bool GetRenderViewDebugDraw(RenderView::Type r_view) const;
 	void SetRenderViewDeferred(RenderView::Type r_view, bool using_deferred);
 	void SetRenderViewClearColor(RenderView::Type r_view, math::float4 clear_color);
 	void SetRenderViewDebugDraw(RenderView::Type r_view, bool debug_draw);
 
-	enum RenderType
+	enum RenderType : ushort
 	{
 		SCENE,
 		GO,

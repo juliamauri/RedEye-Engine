@@ -135,22 +135,22 @@ RE_ECS_Pool* RE_ECS_Pool::GetNewPoolFromID(GO_UID id)
 	return ret;
 }
 
-eastl::vector<COMP_UID> RE_ECS_Pool::GetAllCompUID(ushortint type) const
+eastl::vector<COMP_UID> RE_ECS_Pool::GetAllCompUID(ushort type) const
 {
 	return componentsPool.GetAllCompUID(type);
 }
 
-eastl::vector<RE_Component*> RE_ECS_Pool::GetAllCompPtr(ushortint type) const
+eastl::vector<RE_Component*> RE_ECS_Pool::GetAllCompPtr(ushort type) const
 {
 	return componentsPool.GetAllCompPtr(type);
 }
 
-eastl::vector<const RE_Component*> RE_ECS_Pool::GetAllCompCPtr(ushortint type) const
+eastl::vector<const RE_Component*> RE_ECS_Pool::GetAllCompCPtr(ushort type) const
 {
 	return componentsPool.GetAllCompCPtr(type);
 }
 
-eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> RE_ECS_Pool::GetAllCompData(ushortint type) const
+eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> RE_ECS_Pool::GetAllCompData(ushort type) const
 {
 	return componentsPool.GetAllCompData(type);
 }

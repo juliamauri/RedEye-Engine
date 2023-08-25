@@ -359,7 +359,7 @@ void ComponentsPool::DestroyComponent(ComponentType cType, COMP_UID toDelete)
 	case C_TREFOILKNOT: pTrefoiKnotPool.Pop(toDelete); break; }
 }
 
-eastl::vector<COMP_UID> ComponentsPool::GetAllCompUID(ushortint type) const
+eastl::vector<COMP_UID> ComponentsPool::GetAllCompUID(ushort type) const
 {
 	eastl::vector<COMP_UID> ret;
 	switch (type) {
@@ -388,7 +388,7 @@ eastl::vector<COMP_UID> ComponentsPool::GetAllCompUID(ushortint type) const
 	return ret;
 }
 
-eastl::vector<RE_Component*> ComponentsPool::GetAllCompPtr(ushortint type) const
+eastl::vector<RE_Component*> ComponentsPool::GetAllCompPtr(ushort type) const
 {
 	eastl::vector<RE_Component*> ret;
 	switch (type)
@@ -519,7 +519,7 @@ eastl::vector<RE_Component*> ComponentsPool::GetAllCompPtr(ushortint type) const
 	return ret;
 }
 
-eastl::vector<const RE_Component*> ComponentsPool::GetAllCompCPtr(ushortint type) const
+eastl::vector<const RE_Component*> ComponentsPool::GetAllCompCPtr(ushort type) const
 {
 	eastl::vector<const RE_Component*> ret;
 	switch (type)
@@ -650,7 +650,7 @@ eastl::vector<const RE_Component*> ComponentsPool::GetAllCompCPtr(ushortint type
 	return ret;
 }
 
-eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> ComponentsPool::GetAllCompData(ushortint type) const
+eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> ComponentsPool::GetAllCompData(ushort type) const
 {
 	eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> ret;
 	switch (type)

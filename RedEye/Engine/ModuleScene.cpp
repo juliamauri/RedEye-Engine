@@ -57,7 +57,7 @@ bool ModuleScene::Start()
 	RE_PROFILE(RE_ProfiledFunc::Start, RE_ProfiledClass::ModuleScene);
 	RE_LOG("Starting Module Scene");
 
-	eastl::vector<ResourceContainer*> scenes = RE_RES->GetResourcesByType(R_SCENE);
+	eastl::vector<ResourceContainer*> scenes = RE_RES->GetResourcesByType(ResourceType::SCENE);
 	if (!scenes.empty()) LoadScene(scenes[0]->GetMD5());
 	else NewEmptyScene();
 
@@ -486,7 +486,7 @@ void ModuleScene::NewEmptyScene(const char* name)
 
 	unsavedScene = new RE_Scene();
 	unsavedScene->SetName(name);
-	unsavedScene->SetType(R_SCENE);
+	unsavedScene->SetType(ResourceType::SCENE);
 
 	scenePool.UnUseResources();
 	savedState.ClearPool();

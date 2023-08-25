@@ -32,13 +32,15 @@ const char * ResourceContainer::GetName() const { return name.c_str(); }
 const char * ResourceContainer::GetAssetPath() const { return assetPath.c_str(); }
 const char * ResourceContainer::GetMetaPath() const { return metaPath.c_str(); }
 const char* ResourceContainer::GetMD5() const { return md5; }
-Resource_Type ResourceContainer::GetType() const { return type; }
-signed long long ResourceContainer::GetLastTimeModified() const { return lastModified; }
+const ResourceType ResourceContainer::GetType() const { return type; }
+const signed long long ResourceContainer::GetLastTimeModified() const { return lastModified; }
 
-void ResourceContainer::SetType(Resource_Type _type)
+void ResourceContainer::SetType(const ResourceType _type)
 {
-	static const char* names[MAX_R_TYPES] = { "Undefined ", "Shader ", "Texture ", "Mesh ", "Prefab ", "SkyBox ", "Material ", "Model ", "Scene ", "Particle emitter", "Particle emission", "Particle render" };
-	(propietiesName = names[type = _type]) += "resource ";
+	static const char* names[static_cast<const unsigned short>(ResourceType::MAX)] =
+	{ "Undefined ", "Shader ", "Texture ", "Mesh ", "Prefab ", "SkyBox ", "Material ", "Model ", "Scene ", "Particle emitter", "Particle emission", "Particle render" };
+	
+	(propietiesName = names[static_cast<const unsigned short>(type = _type)]) += "resource ";
 }
 
 void ResourceContainer::SetMD5(const char * _md5)
@@ -73,7 +75,7 @@ void ResourceContainer::SaveMeta()
 	metaNode->PushString("AssetPath", assetPath.c_str());
 	metaNode->PushString("LibraryPath", libraryPath.c_str());
 	metaNode->PushString("MD5", md5);
-	metaNode->PushInt("Type", type);
+	metaNode->PushUInt("Type", static_cast<const unsigned int>(type));
 	metaNode->PushSignedLongLong("lastModified", lastModified);
 
 	SaveResourceMeta(metaNode);
@@ -91,7 +93,7 @@ void ResourceContainer::LoadMeta()
 		assetPath = metaNode->PullString("AssetPath", "Assets/");
 		libraryPath = metaNode->PullString("LibraryPath", "Library/");
 		SetMD5(metaNode->PullString("MD5", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
-		SetType((Resource_Type)metaNode->PullInt("Type", Resource_Type::R_UNDEFINED));
+		SetType(static_cast<const ResourceType>(metaNode->PullUInt("Type", static_cast<const unsigned int>(ResourceType::UNDEFINED))));
 		lastModified  = metaNode->PullSignedLongLong("lastModified", 0);
 
 		LoadResourceMeta(metaNode);
@@ -105,7 +107,7 @@ bool ResourceContainer::isNeededResourcesReferenced()
 	Config metaDeserialize(metaPath.c_str());
 	if (metaDeserialize.Load()) {
 		RE_Json* metaNode = metaDeserialize.GetRootNode("meta");
-		ret = isNeededResourcesReferenced(metaNode);
+		ret = NeededResourcesReferenced(metaNode);
 		DEL(metaNode);
 	}
 	return ret;

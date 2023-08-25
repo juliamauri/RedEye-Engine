@@ -40,8 +40,8 @@ public:
 	class RE_CompLight* GetLight() const;
 	class RE_CompPrimitive* GetPrimitive() const;
 
-	RE_Component* GetCompPtr(const ushortint type) const;
-	COMP_UID GetCompUID(const ushortint type) const;
+	RE_Component* GetCompPtr(const ushort type) const;
+	COMP_UID GetCompUID(const ushort type) const;
 	bool HasRenderGeo() const;
 	bool HasActiveRenderGeo() const;
 
@@ -52,10 +52,10 @@ public:
 	eastl::stack<RE_Component*> GetAllChildsActiveRenderGeos(const COMP_UID stencil_mask) const;
 
 	// Components
-	void ReportComponent(const COMP_UID id, const ushortint type);
-	RE_Component* AddNewComponent(const ushortint type);
-	void ReleaseComponent(const COMP_UID id, const ushortint type);
-	void DestroyComponent(const COMP_UID id, const ushortint type);
+	void ReportComponent(const COMP_UID id, const ushort type);
+	RE_Component* AddNewComponent(const ushort type);
+	void ReleaseComponent(const COMP_UID id, const ushort type);
+	void DestroyComponent(const COMP_UID id, const ushort type);
 
 	// Children Getters
 	const eastl::vector<GO_UID>& GetChilds() const;
@@ -136,7 +136,7 @@ public:
 
 	//POOL
 	GO_UID GetUID() const;
-	struct ComponentData { COMP_UID uid = 0ull; ushortint type = 0u; };
+	struct ComponentData { COMP_UID uid = 0ull; ushort type = 0u; };
 
 	// Resources
 	void UseResources();
@@ -152,12 +152,12 @@ public:
 private:
 
 	inline RE_Component* CompPtr(ComponentData comp) const;
-	inline RE_Component* CompPtr(COMP_UID id, ushortint type) const;
+	inline RE_Component* CompPtr(COMP_UID id, ushort type) const;
 	inline const RE_Component* CompCPtr(ComponentData comp) const;
-	inline const RE_Component* CompCPtr(COMP_UID id, ushortint type) const;
+	inline const RE_Component* CompCPtr(COMP_UID id, ushort type) const;
 	eastl::list<ComponentData> AllCompData() const;
 
-	inline bool IsRenderGeo(ushortint type) const;
+	inline bool IsRenderGeo(ushort type) const;
 
 	inline RE_GameObject* ChildPtr(const GO_UID child) const;
 	inline const RE_GameObject* ChildCPtr(const GO_UID child) const;

@@ -82,7 +82,7 @@ void ShaderEditorWindow::Draw(bool secondary)
 		if (ImGui::Button("Save")) {
 			if (!shaderName.empty() && !exists) {
 				editingShader->SetName(shaderName.c_str());
-				editingShader->SetType(Resource_Type::R_SHADER);
+				editingShader->SetType(ResourceType::SHADER);
 				editingShader->SetPaths(vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr);
 				editingShader->isShaderFilesChanged();
 				editingShader->SaveMeta();

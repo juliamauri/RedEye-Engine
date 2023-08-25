@@ -231,7 +231,7 @@ void ModuleRenderer3D::PostUpdate()
 	{
 		RE_PROFILE(RE_ProfiledFunc::GetActiveShaders, RE_ProfiledClass::ModuleRender);
 		// Setup Draws
-		activeShaders = RE_RES->GetAllResourcesActiveByType(Resource_Type::R_SHADER);
+		activeShaders = RE_RES->GetAllResourcesActiveByType(ResourceType::SHADER);
 	}
 	{
 		RE_PROFILE(RE_ProfiledFunc::DrawThumbnails, RE_ProfiledClass::ModuleRender);
@@ -264,9 +264,9 @@ void ModuleRenderer3D::PostUpdate()
 					ResourceContainer* res = RE_RES->At(rend.resMD5);
 					RE_RES->Use(rend.resMD5);
 					switch (res->GetType()) {
-					case Resource_Type::R_MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
-					case Resource_Type::R_PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
-					case Resource_Type::R_SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break;
+					case ResourceType::MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
+					case ResourceType::PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
+					case ResourceType::SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break;
 					}
 					if (poolGOThumbnail != nullptr)
 					{
@@ -643,30 +643,16 @@ void ModuleRenderer3D::PushSceneRend(RenderView& rV)
 
 void ModuleRenderer3D::PushThumnailRend(const char* md5, bool redo)
 {
-	RenderType t = RenderType::GO;
-	Resource_Type rType = RE_RES->At(md5)->GetType();
-	switch (rType)
+	switch (RE_RES->At(md5)->GetType())
 	{
-	case R_SCENE:
-	case R_MODEL:
-	case R_PREFAB:
-		t = RenderType::GO;
-		render_queue.push({ t, thumbnailView, md5, redo });
-		break;
-	case R_MATERIAL:
-		t = RenderType::MAT;
-		render_queue.push({ t, thumbnailView, md5, redo });
-		break;
-	case R_TEXTURE:
-		t = RenderType::TEX;
-		render_queue.push({ t, thumbnailView, md5, redo });
-		break;
-	case R_SKYBOX:
-		t = RenderType::SKYBOX;
-		render_queue.push({ t, thumbnailView, md5, redo });
-		break;
+	case ResourceType::SCENE:
+	case ResourceType::MODEL:
+	case ResourceType::PREFAB:	 render_queue.push({ RenderType::GO,	 thumbnailView, md5, redo }); break;
+	case ResourceType::MATERIAL: render_queue.push({ RenderType::MAT,	 thumbnailView, md5, redo }); break;
+	case ResourceType::TEXTURE:	 render_queue.push({ RenderType::TEX,	 thumbnailView, md5, redo }); break;
+	case ResourceType::SKYBOX:	 render_queue.push({ RenderType::SKYBOX, thumbnailView, md5, redo }); break;
+	default: break;
 	}
-
 }
 
 void ModuleRenderer3D::DrawScene(const RenderView& render_view)

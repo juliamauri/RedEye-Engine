@@ -97,21 +97,21 @@ void PopUpWindow::PopUpDelRes(const char* res)
 	using_resources = RE_RES->WhereIsUsed(res);
 
 	eastl::stack<RE_Component*> comps;
-	Resource_Type rType = RE_RES->At(res)->GetType();
+	ResourceType rType = RE_RES->At(res)->GetType();
 
 	switch (rType) {
-	case R_SKYBOX: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_CAMERA); break;
-	case R_MATERIAL: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_MESH); break;
-	case R_PARTICLE_EMISSION:
-	case R_PARTICLE_RENDER:
-	case R_PARTICLE_EMITTER: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_PARTICLEEMITER); break; }
+	case ResourceType::SKYBOX: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_CAMERA); break;
+	case ResourceType::MATERIAL: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_MESH); break;
+	case ResourceType::PARTICLE_EMISSION:
+	case ResourceType::PARTICLE_RENDER:
+	case ResourceType::PARTICLE_EMITTER: comps = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsComponents(C_PARTICLEEMITER); break; }
 
 	bool skip = false;
 	while (!comps.empty() && !skip)
 	{
 		switch (rType)
 		{
-		case R_SKYBOX:
+		case ResourceType::SKYBOX:
 		{
 			RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(comps.top());
 			if (cam && cam->GetSkybox() == res)
@@ -121,7 +121,7 @@ void PopUpWindow::PopUpDelRes(const char* res)
 			}
 			break;
 		}
-		case R_MATERIAL:
+		case ResourceType::MATERIAL:
 		{
 			RE_CompMesh* mesh = dynamic_cast<RE_CompMesh*>(comps.top());
 			if (mesh && mesh->GetMaterial() == res)
@@ -131,7 +131,7 @@ void PopUpWindow::PopUpDelRes(const char* res)
 			}
 			break;
 		}
-		case R_PARTICLE_EMITTER:
+		case ResourceType::PARTICLE_EMITTER:
 		{
 			RE_CompParticleEmitter* emitter = dynamic_cast<RE_CompParticleEmitter*>(comps.top());
 			if (emitter && emitter->GetEmitterResource() == res)
@@ -141,8 +141,8 @@ void PopUpWindow::PopUpDelRes(const char* res)
 			}
 			break;
 		}
-		case R_PARTICLE_EMISSION:
-		case R_PARTICLE_RENDER:
+		case ResourceType::PARTICLE_EMISSION:
+		case ResourceType::PARTICLE_RENDER:
 		{
 			RE_CompParticleEmitter* emitter = dynamic_cast<RE_CompParticleEmitter*>(comps.top());
 			if (emitter)
@@ -368,7 +368,7 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				RE_Prefab* newPrefab = new RE_Prefab();
 				newPrefab->SetName(name_str.c_str());
-				newPrefab->SetType(Resource_Type::R_PREFAB);
+				newPrefab->SetType(ResourceType::PREFAB);
 
 				RE_INPUT->PauseEvents();
 				newPrefab->Save(RE_SCENE->GetScenePool()->GetNewPoolFromID(go_prefab->GetUID()), identityRoot, true);
@@ -394,8 +394,9 @@ void PopUpWindow::Draw(bool secondary)
 			ResourceContainer* res = RE_RES->At(resource_to_delete);
 			ImGui::Text("Name: %s", res->GetName());
 
-			static const char* names[MAX_R_TYPES] = { "undefined.", "shader.", "texture.", "mesh.", "prefab.", "skyBox.", "material.", "model.", "scene.", "particle emitter.", "particle emission.", "particle render." };
-			ImGui::Text("Type: %s", names[res->GetType()]);
+			static const char* names[static_cast<const unsigned short>(ResourceType::MAX)] =
+			{ "undefined.", "shader.", "texture.", "mesh.", "prefab.", "skyBox.", "material.", "model.", "scene.", "particle emitter.", "particle emission.", "particle render." };
+			ImGui::Text("Type: %s", names[static_cast<const unsigned short>(res->GetType())]);
 
 			ImGui::Separator();
 
@@ -456,8 +457,10 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
 				ResourceContainer* resConflict = RE_RES->At(resource);
-				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | ", "Particle emitter | ", "Particle emission | ", "Particle render | " };
-				btnname += (resource == RE_SCENE->GetCurrentScene()) ? "Scene (current scene) | " : names[resConflict->GetType()];
+				static const char* names[static_cast<const unsigned short>(ResourceType::MAX)] =
+				{ "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | ", "Particle emitter | ", "Particle emission | ", "Particle render | " };
+
+				btnname += (resource == RE_SCENE->GetCurrentScene()) ? "Scene (current scene) | " : names[static_cast<const unsigned short>(resConflict->GetType())];
 				btnname += resConflict->GetName();
 
 				if (ImGui::Button(btnname.c_str())) RE_RES->PushSelected(resource, true);
@@ -480,7 +483,7 @@ void PopUpWindow::Draw(bool secondary)
 				{
 					eastl::stack<ResourceContainer*> shadersDeleted;
 					for (auto resource : using_resources)
-						if (RE_RES->At(resource)->GetType() == R_SHADER)
+						if (RE_RES->At(resource)->GetType() == ResourceType::SHADER)
 							shadersDeleted.push(RE_RES->DeleteResource(resource, RE_RES->WhereIsUsed(resource), false));
 
 					// Delete shader files
@@ -517,15 +520,17 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				eastl::string btnname = eastl::to_string(count++) + ". ";
 				ResourceContainer* resConflict = RE_RES->At(resource);
-				Resource_Type type = resConflict->GetType();
+				ResourceType type = resConflict->GetType();
 
-				static const char* names[MAX_R_TYPES] = { "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | ", "Particle emitter | ", "Particle emission | ", "Particle render | " };
-				btnname += names[type];
+				static const char* names[static_cast<const unsigned short>(ResourceType::MAX)] =
+				{ "Undefined | ", "Shader | ", "Texture | ", "Mesh | ", "Prefab | ", "SkyBox | ", "Material | ", "Model (need ReImport for future use) | ", "Scene | ", "Particle emitter | ", "Particle emission | ", "Particle render | " };
+				
+				btnname += names[static_cast<const unsigned short>(type)];
 				btnname += resConflict->GetName();
 
-				if (type == R_SHADER) ImGui::Separator();
+				if (type == ResourceType::SHADER) ImGui::Separator();
 				if (ImGui::Button(btnname.c_str())) RE_RES->PushSelected(resource, true);
-				if (type == R_SHADER) ImGui::Text("%s will be deleted and the next resources will be affected:", resConflict->GetName());
+				if (type == ResourceType::SHADER) ImGui::Text("%s will be deleted and the next resources will be affected:", resConflict->GetName());
 			}
 
 			break;

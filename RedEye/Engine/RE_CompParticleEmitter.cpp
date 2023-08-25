@@ -71,7 +71,7 @@ void RE_CompParticleEmitter::DrawProperties()
 		
 		if (ImGui::BeginMenu("Change particle emitter"))
 		{
-			eastl::vector<ResourceContainer*> r_emitters = RE_RES->GetResourcesByType(Resource_Type::R_PARTICLE_EMITTER);
+			eastl::vector<ResourceContainer*> r_emitters = RE_RES->GetResourcesByType(ResourceType::PARTICLE_EMITTER);
 			bool none = true;
 			for (auto emitter : r_emitters)
 			{

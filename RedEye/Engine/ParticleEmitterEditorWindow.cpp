@@ -69,7 +69,7 @@ void ParticleEmitterEditorWindow::SaveEmitter(bool close, const char* emitter_na
 	else
 	{
 		new_emitter->SetName(emitter_name);
-		new_emitter->SetType(R_PARTICLE_EMITTER);
+		new_emitter->SetType(ResourceType::PARTICLE_EMITTER);
 		new_emitter->GenerateSubResourcesAndReference(emissor_base, renderer_base);
 		new_emitter->FillAndSave(simulation);
 
@@ -173,7 +173,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				ImGui::SameLine();
 				if (ImGui::BeginMenu("Change emissor"))
 				{
-					eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(Resource_Type::R_PARTICLE_EMISSION);
+					eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(ResourceType::PARTICLE_EMISSION);
 					bool none = true;
 					unsigned int count = 0;
 					for (auto m : meshes)
@@ -199,7 +199,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 
 				if (ImGui::BeginMenu("Change render"))
 				{
-					eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(Resource_Type::R_PARTICLE_RENDER);
+					eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(ResourceType::PARTICLE_RENDER);
 					bool none = true;
 					unsigned int count = 0;
 					for (auto m : meshes)
@@ -586,7 +586,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 
 			if (ImGui::BeginMenu("Change mesh"))
 			{
-				eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(Resource_Type::R_MESH);
+				eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(ResourceType::MESH);
 				bool none = true;
 				unsigned int count = 0;
 				for (auto m : meshes)

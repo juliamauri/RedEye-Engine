@@ -121,7 +121,7 @@ void RE_ParticleEmitterBase::GenerateSubResourcesAndReference(const char* emissi
 	if (!resource_emission) {
 		RE_ParticleEmission* new_emission = new RE_ParticleEmission();
 		new_emission->SetName(emission_name);
-		new_emission->SetType(R_PARTICLE_EMISSION);
+		new_emission->SetType(ResourceType::PARTICLE_EMISSION);
 		new_emission->SetAssetPath(eastl::string("Assets/Particles/"
 			+ eastl::string(emission_name) + ".lasse").c_str());
 		resource_emission = RE_RES->Reference(new_emission);
@@ -130,7 +130,7 @@ void RE_ParticleEmitterBase::GenerateSubResourcesAndReference(const char* emissi
 	if (!resource_renderer) {
 		RE_ParticleRender* new_renderer = new RE_ParticleRender();
 		new_renderer->SetName(renderer_name);
-		new_renderer->SetType(R_PARTICLE_RENDER);
+		new_renderer->SetType(ResourceType::PARTICLE_RENDER);
 		new_renderer->SetAssetPath(eastl::string("Assets/Particles/"
 			+ eastl::string(renderer_name) + ".lopfe").c_str());
 		resource_renderer = RE_RES->Reference(new_renderer);
@@ -218,8 +218,8 @@ void RE_ParticleEmitterBase::SaveResourceMeta(RE_Json* metaNode)
 void RE_ParticleEmitterBase::LoadResourceMeta(RE_Json* metaNode)
 {
 	eastl::string tmp = metaNode->PullString("Emission Meta", "NOMETAPATH");
-	if (tmp.compare("NOMETAPATH") != 0) resource_emission = RE_RES->FindMD5ByMETAPath(tmp.c_str(), Resource_Type::R_PARTICLE_EMISSION);
+	if (tmp.compare("NOMETAPATH") != 0) resource_emission = RE_RES->FindMD5ByMETAPath(tmp.c_str(), ResourceType::PARTICLE_EMISSION);
 	
 	tmp = metaNode->PullString("Rendering Meta", "NOMETAPATH");
-	if (tmp.compare("NOMETAPATH") != 0) resource_renderer = RE_RES->FindMD5ByMETAPath(tmp.c_str(), Resource_Type::R_PARTICLE_RENDER);
+	if (tmp.compare("NOMETAPATH") != 0) resource_renderer = RE_RES->FindMD5ByMETAPath(tmp.c_str(), ResourceType::PARTICLE_RENDER);
 }

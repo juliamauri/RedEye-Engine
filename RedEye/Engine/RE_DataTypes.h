@@ -2,7 +2,7 @@
 #define __DATA_TYPES__
 
 typedef unsigned int uint;
-typedef unsigned short int ushortint;
+typedef unsigned short ushort;
 typedef unsigned char uchar;
 typedef unsigned long ulong;
 

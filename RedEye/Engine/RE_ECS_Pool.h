@@ -44,10 +44,10 @@ public:
 	RE_Component* GetComponentPtr(const COMP_UID poolid, ComponentType cType);
 	const RE_Component* GetComponentCPtr(const COMP_UID poolid, ComponentType cType) const;
 
-	eastl::vector<COMP_UID> GetAllCompUID(ushortint type = 0) const;
-	eastl::vector<RE_Component*> GetAllCompPtr(ushortint type = 0) const;
-	eastl::vector<const RE_Component*> GetAllCompCPtr(ushortint type = 0) const;
-	eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> GetAllCompData(ushortint type = 0) const;
+	eastl::vector<COMP_UID> GetAllCompUID(ushort type = 0) const;
+	eastl::vector<RE_Component*> GetAllCompPtr(ushort type = 0) const;
+	eastl::vector<const RE_Component*> GetAllCompCPtr(ushort type = 0) const;
+	eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> GetAllCompData(ushort type = 0) const;
 
 	#pragma endregion
 

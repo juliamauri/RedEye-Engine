@@ -665,7 +665,7 @@ bool RE_Shader_Cvar::DrawPropieties(bool isInMemory)
 
 		if (ImGui::BeginMenu(eastl::string("Change Sampler Texture #" + name).c_str()))
 		{
-			eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(Resource_Type::R_TEXTURE);
+			eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceType::TEXTURE);
 			for (auto textRes : allTex) {
 				if (ImGui::MenuItem(textRes->GetName())) {
 					if (isInMemory) RE_RES->UnUse(value.char_p_v);

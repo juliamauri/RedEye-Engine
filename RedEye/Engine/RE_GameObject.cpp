@@ -110,7 +110,7 @@ void RE_GameObject::DrawChilds() const
 	}
 }
 
-RE_Component* RE_GameObject::GetCompPtr(const ushortint type) const
+RE_Component* RE_GameObject::GetCompPtr(const ushort type) const
 {
 	RE_Component* ret = nullptr;
 	switch (static_cast<ComponentType>(type)) {
@@ -135,7 +135,7 @@ RE_Component* RE_GameObject::GetCompPtr(const ushortint type) const
 	return ret;
 }
 
-COMP_UID RE_GameObject::GetCompUID(const ushortint type) const
+COMP_UID RE_GameObject::GetCompUID(const ushort type) const
 {
 	COMP_UID ret = 0;
 
@@ -306,7 +306,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const GO
 	return ret;
 }
 
-void RE_GameObject::ReportComponent(const COMP_UID id, const ushortint type)
+void RE_GameObject::ReportComponent(const COMP_UID id, const ushort type)
 {
 	RE_ASSERT(id > 0);
 	switch (static_cast<ComponentType>(type)) {
@@ -322,7 +322,7 @@ void RE_GameObject::ReportComponent(const COMP_UID id, const ushortint type)
 	}
 }
 
-RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
+RE_Component* RE_GameObject::AddNewComponent(const ushort type)
 {
 	RE_Component* ret = nullptr;
 	ComponentType _type = static_cast<ComponentType>(type);
@@ -376,7 +376,7 @@ RE_Component* RE_GameObject::AddNewComponent(const ushortint type)
 	return ret;
 }
 
-void RE_GameObject::ReleaseComponent(const COMP_UID id, const ushortint type)
+void RE_GameObject::ReleaseComponent(const COMP_UID id, const ushort type)
 {
 	ComponentType _type = static_cast<ComponentType>(type);
 	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
@@ -387,7 +387,7 @@ void RE_GameObject::ReleaseComponent(const COMP_UID id, const ushortint type)
 	case C_LIGHT: light = 0; break;
 	default:
 	{
-		if (IsRenderGeo(static_cast<ushortint>(type))) render_geo = { 0, 0 };
+		if (IsRenderGeo(static_cast<ushort>(type))) render_geo = { 0, 0 };
 		else
 		{
 			uint count = 0u;
@@ -408,7 +408,7 @@ void RE_GameObject::ReleaseComponent(const COMP_UID id, const ushortint type)
 	}
 }
 
-void RE_GameObject::DestroyComponent(const COMP_UID id, const ushortint type)
+void RE_GameObject::DestroyComponent(const COMP_UID id, const ushort type)
 {
 	ComponentType _type = static_cast<ComponentType>(type);
 	RE_ASSERT(_type < MAX_COMPONENT_TYPES);
@@ -434,7 +434,7 @@ void RE_GameObject::DestroyComponent(const COMP_UID id, const ushortint type)
 	}
 	default:
 	{
-		if (IsRenderGeo(static_cast<ushortint>(type)))
+		if (IsRenderGeo(static_cast<ushort>(type)))
 		{
 			if (render_geo.uid)
 				pool_comps->DestroyComponent(static_cast<ComponentType>(render_geo.type), render_geo.uid);
@@ -1123,7 +1123,7 @@ inline RE_Component* RE_GameObject::CompPtr(ComponentData comp) const
 	return pool_comps->GetComponentPtr(comp.uid, static_cast<ComponentType>(comp.type));
 }
 
-inline RE_Component* RE_GameObject::CompPtr(COMP_UID id, ushortint type) const
+inline RE_Component* RE_GameObject::CompPtr(COMP_UID id, ushort type) const
 {
 	return pool_comps->GetComponentPtr(id, static_cast<ComponentType>(type));
 }
@@ -1133,7 +1133,7 @@ inline const RE_Component* RE_GameObject::CompCPtr(ComponentData comp) const
 	return pool_comps->GetComponentCPtr(comp.uid, static_cast<ComponentType>(comp.type));
 }
 
-inline const RE_Component* RE_GameObject::CompCPtr(COMP_UID id, ushortint type) const
+inline const RE_Component* RE_GameObject::CompCPtr(COMP_UID id, ushort type) const
 {
 	return pool_comps->GetComponentCPtr(id, static_cast<ComponentType>(type));
 }
@@ -1161,7 +1161,7 @@ inline const RE_GameObject* RE_GameObject::ChildCPtr(const GO_UID child) const
 	return pool_gos->AtCPtr(child);
 }
 
-inline bool RE_GameObject::IsRenderGeo(ushortint type) const
+inline bool RE_GameObject::IsRenderGeo(ushort type) const
 {
 	return (type == ComponentType::C_MESH || type == ComponentType::C_WATER || type == ComponentType::C_PARTICLEEMITER || (type > ComponentType::C_PRIMIVE_MIN && type < ComponentType::C_PRIMIVE_MAX));
 }

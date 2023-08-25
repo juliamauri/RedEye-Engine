@@ -69,7 +69,7 @@ void RE_CompMesh::DrawProperties()
 
 		if (ImGui::BeginMenu("Change material"))
 		{
-			eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(Resource_Type::R_MATERIAL);
+			eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(ResourceType::MATERIAL);
 			bool none = true;
 			for (auto material : materials)
 			{

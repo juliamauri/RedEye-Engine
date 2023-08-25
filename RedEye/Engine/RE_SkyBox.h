@@ -25,11 +25,11 @@ public:
 	void AddTexturePath(RE_TextureFace face, const char* path);
 	void AssetSave();
 
-	void DrawSkybox()const;
+	void DrawSkybox() const;
 
 	void DrawEditSkyBox();
 
-	bool isFacesFilled()const;
+	bool isFacesFilled() const;
 
 private:
 
@@ -37,7 +37,7 @@ private:
 	void SaveResourceMeta(RE_Json* metaNode) override;
 	void LoadResourceMeta(RE_Json* metaNode) override;
 
-	bool isNeededResourcesReferenced(RE_Json* metaNode) override;
+	bool NeededResourcesReferenced(RE_Json* metaNode) override;
 
 	void AssetLoad(bool generateLibraryPath = false);
 	void LibraryLoad();

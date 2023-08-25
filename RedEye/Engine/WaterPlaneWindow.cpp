@@ -24,6 +24,7 @@ void WaterPlaneWindow::Draw(bool secondary)
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
+
 		ImGui::TextWrapped("After generating resource, create a primitive plane, set slices and stacks and finally transform as mesh, then you can add the new material.\n\
 			Remember to set the values and save on the generated material. Important to set direction different from 0 - 0.");
 
@@ -34,8 +35,9 @@ void WaterPlaneWindow::Draw(bool secondary)
 		shaderPath += (deferred) ? "WaterDeferredShader" : "WaterShader";
 		shaderPath += ".meta";
 
-		const char* waterShader = RE_RES->FindMD5ByMETAPath(shaderPath.c_str(), R_SHADER);
-		if (!waterShader) {
+		const char* waterShader = RE_RES->FindMD5ByMETAPath(shaderPath.c_str(), ResourceType::SHADER);
+		if (!waterShader)
+		{
 			ImGui::Text((deferred) ? "Water Deferred Shader doesn't exists." : "Water Shader doesn't exists.");
 			ImGui::Text("Shader will generate when create.");
 		}
@@ -55,12 +57,15 @@ void WaterPlaneWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (ImGui::Button("Create water resource")) {
-
-			if (!waterShader) {
+		if (ImGui::Button("Create water resource"))
+		{
+			if (!waterShader)
+			{
 				eastl::string shaderVertexFile("Assets/Shaders/");
 				shaderVertexFile += (deferred) ? "WaterDeferred.vert" : "Water.vert";
-				if (!RE_FS->Exists(shaderVertexFile.c_str())) {
+
+				if (!RE_FS->Exists(shaderVertexFile.c_str()))
+				{
 					RE_FileBuffer vertexFile(shaderVertexFile.c_str());
 					vertexFile.Save((deferred) ? WATERPASSVERTEXSHADER : WATERVERTEXSHADER,
 						eastl::CharStrlen((deferred) ? WATERPASSVERTEXSHADER : WATERVERTEXSHADER));
@@ -68,14 +73,17 @@ void WaterPlaneWindow::Draw(bool secondary)
 
 				eastl::string shaderFragmentFile("Assets/Shaders/");
 				shaderFragmentFile += (deferred) ? "WaterDeferred.frag" : "Water.frag";
-				if (!RE_FS->Exists(shaderFragmentFile.c_str())) {
+
+				if (!RE_FS->Exists(shaderFragmentFile.c_str()))
+				{
 					RE_FileBuffer fragmentFile(shaderFragmentFile.c_str());
 					fragmentFile.Save((deferred) ? WATERPASSFRAGMENTSHADER : WATERFRAGMENTSHADER,
 						eastl::CharStrlen((deferred) ? WATERPASSFRAGMENTSHADER : WATERFRAGMENTSHADER));
 				}
+
 				RE_Shader* waterShaderRes = new RE_Shader();
 				waterShaderRes->SetName((deferred) ? "WaterDeferredShader" : "WaterShader");
-				waterShaderRes->SetType(Resource_Type::R_SHADER);
+				waterShaderRes->SetType(ResourceType::SHADER);
 				waterShaderRes->SetMetaPath(shaderPath.c_str());
 				waterShaderRes->SetPaths(shaderVertexFile.c_str(), shaderFragmentFile.c_str(), nullptr);
 				waterShaderRes->isShaderFilesChanged();
@@ -87,7 +95,7 @@ void WaterPlaneWindow::Draw(bool secondary)
 			editingMaterialRes->blendMode = true;
 			editingMaterialRes->SetName(waterResouceName.c_str());
 			editingMaterialRes->SetAssetPath(materialPath.c_str());
-			editingMaterialRes->SetType(Resource_Type::R_MATERIAL);
+			editingMaterialRes->SetType(ResourceType::MATERIAL);
 			editingMaterialRes->SetShader(waterShader); //save meta after add to shader
 
 			RE_RENDER->PushThumnailRend(RE_RES->Reference((ResourceContainer*)editingMaterialRes));

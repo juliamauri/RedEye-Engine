@@ -74,56 +74,56 @@ bool RE_InternalResources::InitShaders()
 	// Default
 	RE_Shader* defSRes = new RE_Shader();
 	defSRes->SetName("Default Shader");
-	defSRes->SetType(Resource_Type::R_SHADER);
+	defSRes->SetType(ResourceType::SHADER);
 	defSRes->SetAsInternal(DEFVERTEXSHADER, DEFFRAGMENTSHADER);
 	defaultShader = RE_RES->Reference(defSRes);
 
 	// Scaled (for outline)
 	RE_Shader* defScaleRes = new RE_Shader();
 	defScaleRes->SetName("Default Scale Shader");
-	defScaleRes->SetType(Resource_Type::R_SHADER);
+	defScaleRes->SetType(ResourceType::SHADER);
 	defScaleRes->SetAsInternal(DEFVERTEXSCALESHADER, DEFFRAGMENTSHADER);
 	defaultScaleShader = RE_RES->Reference(defScaleRes);
 
 	// Skybox
 	RE_Shader* defSKRes = new RE_Shader();
 	defSKRes->SetName("Default SkyBox Shader");
-	defSKRes->SetType(Resource_Type::R_SHADER);
+	defSKRes->SetType(ResourceType::SHADER);
 	defSKRes->SetAsInternal(SKYBOXVERTEXSHADER, SKYBOXFRAGMENTSHADER);
 	skyboxShader = RE_RES->Reference(defSKRes);
 
 	// Deferred
 	RE_Shader* deferred = new RE_Shader();
 	deferred->SetName("Deferred Shader");
-	deferred->SetType(Resource_Type::R_SHADER);
+	deferred->SetType(ResourceType::SHADER);
 	deferred->SetAsInternal(GEOPASSVERTEXSHADER, GEOPASSFRAGMENTSHADER);
 	defGeoShader = RE_RES->Reference(deferred);
 
 	// Light Pass
 	RE_Shader* lightPass = new RE_Shader();
 	lightPass->SetName("Light Pass Shader");
-	lightPass->SetType(Resource_Type::R_SHADER);
+	lightPass->SetType(ResourceType::SHADER);
 	lightPass->SetAsInternal(LIGHTPASSVERTEXSHADER, LIGHTPASSFRAGMENTSHADER);
 	defLightShader = RE_RES->Reference(lightPass);
 
 	// Particle Light Pass
 	RE_Shader* lightParticlePass = new RE_Shader();
 	lightParticlePass->SetName("Particle Light Pass Shader");
-	lightParticlePass->SetType(Resource_Type::R_SHADER);
+	lightParticlePass->SetType(ResourceType::SHADER);
 	lightParticlePass->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
 	defParticleLightShader = RE_RES->Reference(lightParticlePass);
 
 	// Particle
 	RE_Shader* particleS = new RE_Shader();
 	particleS->SetName("Particle Shader");
-	particleS->SetType(Resource_Type::R_SHADER);
+	particleS->SetType(ResourceType::SHADER);
 	particleS->SetAsInternal(PARTICLEVERTEXSHADER, PARTICLEFRAGMENTSHADER);
 	particleShader = RE_RES->Reference(particleS);
 
 	// Deferred Particle
 	RE_Shader* defParticleS = new RE_Shader();
 	defParticleS->SetName("Geo Pass Particle Shader");
-	defParticleS->SetType(Resource_Type::R_SHADER);
+	defParticleS->SetType(ResourceType::SHADER);
 	defParticleS->SetAsInternal(PARTICLEGEOPASSVERTEXSHADER, PARTICLEGEOPASSFRAGMENTSHADER);
 	defParticleShader = RE_RES->Reference(defParticleS);
 
@@ -147,7 +147,7 @@ bool RE_InternalResources::InitSkyBox()
 	RE_PROFILE(RE_ProfiledFunc::InitSkyBox, RE_ProfiledClass::InternalResources);
 	RE_SkyBox* rdefaultSkybox = new RE_SkyBox();
 	rdefaultSkybox->SetName("defaultSkyBox");
-	rdefaultSkybox->SetType(Resource_Type::R_SKYBOX);
+	rdefaultSkybox->SetType(ResourceType::SKYBOX);
 	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_RIGHT, "Internal/DefaultAssets/Skybox/1right.dds");
 	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_LEFT, "Internal/DefaultAssets/Skybox/2left.dds");
 	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_TOP, "Internal/DefaultAssets/Skybox/3top.dds");
@@ -165,14 +165,14 @@ void RE_InternalResources::InitWaterResources()
 	// Deferred
 	RE_Shader* waterSr = new RE_Shader();
 	waterSr->SetName("Water Shader");
-	waterSr->SetType(Resource_Type::R_SHADER);
+	waterSr->SetType(ResourceType::SHADER);
 	waterSr->SetAsInternal(WATERVERTEXSHADER, WATERFRAGMENTSHADER);
 	waterShader = RE_RES->Reference(waterSr);
 
 	// Light Pass
 	RE_Shader* waterDefS = new RE_Shader();
 	waterDefS->SetName("Water Deferred Shader");
-	waterDefS->SetType(Resource_Type::R_SHADER);
+	waterDefS->SetType(ResourceType::SHADER);
 	waterDefS->SetAsInternal(WATERPASSVERTEXSHADER, WATERPASSFRAGMENTSHADER);
 	waterDefShader = RE_RES->Reference(waterDefS);
 

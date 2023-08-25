@@ -62,7 +62,7 @@ private:
 	void SaveResourceMeta(RE_Json* metaNode)override;
 	void LoadResourceMeta(RE_Json* metaNode)override;
 
-	bool isNeededResourcesReferenced(RE_Json* metaNode) override;
+	bool NeededResourcesReferenced(RE_Json* metaNode) override;
 
 	void DrawTextures(const char* texturesName, eastl::vector<const char*>* textures);
 
@@ -72,7 +72,7 @@ private:
 	void PullTexturesJson(RE_Json * texturesNode, eastl::vector<const char*>* textures);
 	void PushTexturesJson(RE_Json * texturesNode, eastl::vector<const char*>* textures);
 
-	bool isNeededResourcesReferencedTexturePull(RE_Json* texturesNode);
+	bool NeededResourcesReferencedTexturePull(RE_Json* texturesNode);
 
 	void BinaryDeserialize();
 	void BinarySerialize();
