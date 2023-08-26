@@ -133,7 +133,7 @@ public:
 
 	//POOL
 	GO_UID GetUID() const;
-	struct ComponentData { COMP_UID uid = 0ull; RE_Component::Type type = RE_Component::Type::EMPTY; };
+	struct ComponentData { COMP_UID uid = 0ull; RE_Component::Type type = RE_Component::Type(0); };
 
 	// Resources
 	void UseResources();

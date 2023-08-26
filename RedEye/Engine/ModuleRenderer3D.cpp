@@ -137,33 +137,33 @@ bool ModuleRenderer3D::Init()
 			glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS, &test);
 
 			render_views.push_back(RenderView("Scene", { 0, 0 },
-				static_cast<const short>(RenderView::Flag::FRUSTUM_CULLING) |
-				static_cast<const short>(RenderView::Flag::OVERRIDE_CULLING) |
-				static_cast<const short>(RenderView::Flag::OUTLINE_SELECTION) |
-				static_cast<const short>(RenderView::Flag::SKYBOX) |
-				static_cast<const short>(RenderView::Flag::BLENDED) |
-				static_cast<const short>(RenderView::Flag::FACE_CULLING) |
-				static_cast<const short>(RenderView::Flag::TEXTURE_2D) |
-				static_cast<const short>(RenderView::Flag::COLOR_MATERIAL) |
-				static_cast<const short>(RenderView::Flag::DEPTH_TEST),
+				static_cast<const ushort>(RenderView::Flag::FRUSTUM_CULLING) |
+				static_cast<const ushort>(RenderView::Flag::OVERRIDE_CULLING) |
+				static_cast<const ushort>(RenderView::Flag::OUTLINE_SELECTION) |
+				static_cast<const ushort>(RenderView::Flag::SKYBOX) |
+				static_cast<const ushort>(RenderView::Flag::BLENDED) |
+				static_cast<const ushort>(RenderView::Flag::FACE_CULLING) |
+				static_cast<const ushort>(RenderView::Flag::TEXTURE_2D) |
+				static_cast<const ushort>(RenderView::Flag::COLOR_MATERIAL) |
+				static_cast<const ushort>(RenderView::Flag::DEPTH_TEST),
 				RenderView::LightMode::DISABLED));
 			
 			render_views.push_back(RenderView("Game", { 0, 0 },
-				static_cast<const short>(RenderView::Flag::FRUSTUM_CULLING) |
-				static_cast<const short>(RenderView::Flag::SKYBOX) |
-				static_cast<const short>(RenderView::Flag::BLENDED) |
-				static_cast<const short>(RenderView::Flag::FACE_CULLING) |
-				static_cast<const short>(RenderView::Flag::TEXTURE_2D) |
-				static_cast<const short>(RenderView::Flag::COLOR_MATERIAL) |
-				static_cast<const short>(RenderView::Flag::DEPTH_TEST),
+				static_cast<const ushort>(RenderView::Flag::FRUSTUM_CULLING) |
+				static_cast<const ushort>(RenderView::Flag::SKYBOX) |
+				static_cast<const ushort>(RenderView::Flag::BLENDED) |
+				static_cast<const ushort>(RenderView::Flag::FACE_CULLING) |
+				static_cast<const ushort>(RenderView::Flag::TEXTURE_2D) |
+				static_cast<const ushort>(RenderView::Flag::COLOR_MATERIAL) |
+				static_cast<const ushort>(RenderView::Flag::DEPTH_TEST),
 				RenderView::LightMode::DEFERRED));
 
 			render_views.push_back(RenderView("Particle Editor", { 0, 0 },
-				static_cast<const short>(RenderView::Flag::FACE_CULLING) |
-				static_cast<const short>(RenderView::Flag::BLENDED) |
-				static_cast<const short>(RenderView::Flag::TEXTURE_2D) |
-				static_cast<const short>(RenderView::Flag::COLOR_MATERIAL) |
-				static_cast<const short>(RenderView::Flag::DEPTH_TEST),
+				static_cast<const ushort>(RenderView::Flag::FACE_CULLING) |
+				static_cast<const ushort>(RenderView::Flag::BLENDED) |
+				static_cast<const ushort>(RenderView::Flag::TEXTURE_2D) |
+				static_cast<const ushort>(RenderView::Flag::COLOR_MATERIAL) |
+				static_cast<const ushort>(RenderView::Flag::DEPTH_TEST),
 				RenderView::LightMode::DISABLED));
 
 			//Thumbnail Configuration
@@ -203,19 +203,19 @@ bool ModuleRenderer3D::Start()
 	RE_LOG("Starting Module Renderer3D");
 	thumbnailView.fbos = { fbos->CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
 
-	render_views[static_cast<const short>(RenderView::Type::EDITOR)].fbos =
+	render_views[static_cast<const ushort>(RenderView::Type::EDITOR)].fbos =
 	{
 		fbos->CreateFBO(1024, 768, 1, true, true),
 		fbos->CreateDeferredFBO(1024, 768)
 	};
 
-	render_views[static_cast<const short>(RenderView::Type::GAME)].fbos =
+	render_views[static_cast<const ushort>(RenderView::Type::GAME)].fbos =
 	{
 		fbos->CreateFBO(1024, 768, 1, true, true),
 		fbos->CreateDeferredFBO(1024, 768)
 	};
 
-	render_views[static_cast<const short>(RenderView::Type::PARTICLE)].fbos =
+	render_views[static_cast<const ushort>(RenderView::Type::PARTICLE)].fbos =
 	{
 		fbos->CreateFBO(1024, 768, 1, true, false),
 		fbos->CreateDeferredFBO(1024, 768)
@@ -524,7 +524,7 @@ RE_CompCamera* ModuleRenderer3D::GetCamera()
 
 void ModuleRenderer3D::ChangeFBOSize(int width, int height, RenderView::Type view)
 {
-	fbos->ChangeFBOSize(render_views[static_cast<const short>(view)].GetFBO(), width, height);
+	fbos->ChangeFBOSize(render_views[static_cast<const ushort>(view)].GetFBO(), width, height);
 }
 
 uint ModuleRenderer3D::GetRenderViewTexture(RenderView::Type type) const
@@ -583,7 +583,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
-		static_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
+		dynamic_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
 			render_view.camera,
 			static_cast<float>(fbos->GetHeight(current_fbo)),
 			static_cast<float>(fbos->GetWidth(current_fbo)),
@@ -799,7 +799,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			for (auto pS : particleS_lights)
 				dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(light_pass, unif_name.c_str(), count, 203, shareLightPass);
 
-			particlelightsCount = static_cast<unsigned int>(math::Clamp(static_cast<int>(count) - static_cast<int>(lightsCount), 0, 203));
+			particlelightsCount = static_cast<uint>(math::Clamp(static_cast<int>(count) - static_cast<int>(lightsCount), 0, 203));
 
 			unif_name = "count";
 			RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, unif_name.c_str()), count);
@@ -913,7 +913,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
-		static_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
+		dynamic_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
 			render_view.camera,
 			static_cast<float>(fbos->GetHeight(current_fbo)),
 			static_cast<float>(fbos->GetWidth(current_fbo)),
@@ -989,7 +989,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 		// Draw Blended elements
 		if (drawParticleSystemAsLast)
 		{
-			if (render_view.flags & static_cast<const short>(RenderView::Flag::BLENDED))
+			if (render_view.flags & static_cast<const ushort>(RenderView::Flag::BLENDED))
 			{
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1065,7 +1065,7 @@ void ModuleRenderer3D::DrawSkyBox()
 	RE_PROFILE(RE_ProfiledFunc::DrawSkybox, RE_ProfiledClass::ModuleRender);
 	RE_GLCache::ChangeTextureBind(0);
 
-	uint skysphereshader = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultSkyBoxShader()))->GetID();
+	uint skysphereshader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultSkyBoxShader()))->GetID();
 	RE_GLCache::ChangeShader(skysphereshader);
 	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
 	RE_ShaderImporter::setBool(skysphereshader, "deferred", (current_lighting == RenderView::LightMode::DEFERRED));

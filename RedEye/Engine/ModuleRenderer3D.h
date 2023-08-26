@@ -54,7 +54,7 @@ public:
 	void SetRenderViewClearColor(RenderView::Type r_view, math::float4 clear_color);
 	void SetRenderViewDebugDraw(RenderView::Type r_view, bool debug_draw);
 
-	enum RenderType : ushort
+	enum class RenderType : ushort
 	{
 		SCENE,
 		GO,

@@ -488,7 +488,7 @@ void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*
 	memcpy(&sbRes, cursor, size);
 	cursor += size;
 
-	SetProperties(isPerspective, near_plane, far_plane, v_fov_rads, static_cast<AspectRatio>(aspectRatio), draw_frustum, usingSkybox, (sbRes != -1) ? resources->at(sbRes) : nullptr);
+	SetProperties(isPerspective, near_plane, far_plane, v_fov_rads, AspectRatio(aspectRatio), draw_frustum, usingSkybox, (sbRes != -1) ? resources->at(sbRes) : nullptr);
 }
 
 void RE_CompCamera::SerializeJson(RE_Json * node, eastl::map<const char*, int>* resources) const
@@ -511,7 +511,7 @@ void RE_CompCamera::DeserializeJson(RE_Json* node, eastl::map<int, const char*>*
 	SetProperties(node->PullBool("isPrespective", true),
 		node->PullFloat("near_plane", 1.0f), node->PullFloat("far_plane", 5000.0f),
 		node->PullFloat("v_fov_rads", 0.523599f),
-		static_cast<AspectRatio>(node->PullUInt("aspect_ratio", 0u)),
+		AspectRatio(node->PullUInt("aspect_ratio", 0u)),
 		node->PullBool("draw_frustum", true),
 		usingSkybox,
 		(sbRes != -1) ? resources->at(sbRes) : nullptr);
@@ -537,7 +537,7 @@ void RE_CompCamera::DrawItsProperties()
 	if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f")) SetPlanesDistance(near_plane, far_plane);
 	if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane, 65000.0f, "%.1f")) SetPlanesDistance(near_plane, far_plane);
 
-	int aspect_ratio = static_cast<int>(target_ar);
+	auto aspect_ratio = static_cast<int>(target_ar);
 	if (ImGui::Combo("Aspect Ratio", &aspect_ratio, "Fit Window\0Square 1x1\0TraditionalTV 4x3\0Movietone 16x9\0Personalized\0"))
 	{
 		target_ar = AspectRatio(aspect_ratio);
