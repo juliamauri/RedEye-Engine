@@ -527,7 +527,7 @@ void ModuleRenderer3D::ChangeFBOSize(int width, int height, RenderView::Type vie
 	fbos->ChangeFBOSize(render_views[static_cast<const ushort>(view)].GetFBO(), width, height);
 }
 
-uint ModuleRenderer3D::GetRenderViewTexture(RenderView::Type type) const
+uintptr_t  ModuleRenderer3D::GetRenderViewTexture(RenderView::Type type) const
 {
 	auto id = static_cast<ushort>(type);
 	return fbos->GetTextureID(

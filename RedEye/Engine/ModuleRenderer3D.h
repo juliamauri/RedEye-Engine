@@ -41,7 +41,7 @@ public:
 	static RE_CompCamera* GetCamera();
 
 	void ChangeFBOSize(int width, int height, RenderView::Type view);
-	uint GetRenderViewTexture(RenderView::Type type) const;
+	uintptr_t GetRenderViewTexture(RenderView::Type type) const;
 	unsigned int GetDepthTexture() const;
 
 	void PushSceneRend(RenderView& rV);
