@@ -76,7 +76,6 @@ Application::~Application()
 
 bool Application::Init(int _argc, char* _argv[])
 {
-	bool ret = false;
 	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::Application);
 	RE_LOG_SEPARATOR("Initializing Application");
 
@@ -93,38 +92,41 @@ bool Application::Init(int _argc, char* _argv[])
 	RE_SOFT_N("gpudetect");
 
 	RE_LOG_SECONDARY("Initializing SDL file I/O and threading subsystems");
-	if (SDL_Init(0) == 0)
+	if (SDL_Init(0) != 0)
 	{
-		SDL_version sdl_version;
-		SDL_GetVersion(&sdl_version);
-		EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", sdl_version.major, sdl_version.minor, sdl_version.patch);
-		RE_SOFT_NVS("SDL", tmp, "https://www.libsdl.org/");
+		RE_LOG_ERROR("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	}
 
-		if (fs->Init(argc = _argc, argv = _argv))
-		{
-			if (input->Init() &&
-				window->Init() &&
-				scene->Init() &&
-				renderer->Init() &&
-				editor->Init() &&
-				audio->Init())
-			{
-				hardware->Init();
-				res->Init();
+	SDL_version sdl_version;
+	SDL_GetVersion(&sdl_version);
+	EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", sdl_version.major, sdl_version.minor, sdl_version.patch);
+	RE_SOFT_NVS("SDL", tmp, "https://www.libsdl.org/");
 
-				if (scene->Start() &&
-					editor->Start() &&
-					renderer->Start() &&
-					audio->Start())
-				{
-					res->ThumbnailResources();
-					ret = true;
-				} else RE_LOG_ERROR("Application Init failed to start modules");
-			} else RE_LOG_ERROR("Application Init failed to initialize");
-		} else RE_LOG_ERROR("Application Init failed to initialize file system");
-	} else RE_LOG_ERROR("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+	if (!fs->Init(argc = _argc, argv = _argv))
+	{
+		RE_LOG_ERROR("Application Init failed to initialize File System");
+		return false;
+	}
 
-	return ret;
+	if (!InitModules())
+	{
+		RE_LOG_ERROR("Application Init failed to Initialize Modules");
+		return false;
+	}
+
+	hardware->Init();
+	res->Init();
+
+	if (!StartModules())
+	{
+		RE_LOG_ERROR("Application Init failed to Start Modules");
+		return false;
+	}
+
+	res->ThumbnailResources();
+
+	return true;
 }
 
 void Application::MainLoop()
@@ -182,8 +184,7 @@ void Application::CleanUp()
 	RE_Profiler::Exit();
 #endif // INTERNAL_PROFILING
 
-	if (SDL_WasInit(0) != 0)
-		SDL_Quit();
+	if (SDL_WasInit(0) != 0) SDL_Quit();
 }
 
 void Application::Quit()
@@ -231,6 +232,76 @@ void Application::RecieveEvent(const Event& e)
 	case RE_EventType::REQUEST_SAVE: flags |= AppFlags::SAVE_CONFIG; break;
 	case RE_EventType::REQUEST_QUIT: flags |= AppFlags::WANT_TO_QUIT; break;
 	default: RE_ASSERT(false); break; }
+}
+
+bool Application::InitModules()
+{
+	if (!input->Init())
+	{
+		RE_LOG_ERROR("Application Init failed to initialize Input Module");
+		return false;
+	}
+
+	if (!window->Init())
+	{
+		RE_LOG_ERROR("Application Init failed to initialize Window Module");
+		return false;
+	}
+
+	if (!scene->Init())
+	{
+		RE_LOG_ERROR("Application Init failed to initialize Scene Module");
+		return false;
+	}
+
+	if (!renderer->Init())
+	{
+		RE_LOG_ERROR("Application Init failed to initialize Renderer Module");
+		return false;
+	}
+
+	if (!editor->Init())
+	{
+		RE_LOG_ERROR("Application Init failed to initialize Editor Module");
+		return false;
+	}
+
+	if (!audio->Init())
+	{
+		RE_LOG_ERROR("Application Init failed to initialize Audio Module");
+		return false;
+	}
+
+	return true;
+}
+
+bool Application::StartModules()
+{
+	if (!scene->Start())
+	{
+		RE_LOG_ERROR("Application Init failed to Start Scene Module");
+		return false;
+	}
+
+	if (!editor->Start())
+	{
+		RE_LOG_ERROR("Application Init failed to Start Editor Module");
+		return false;
+	}
+
+	if (!renderer->Start())
+	{
+		RE_LOG_ERROR("Application Init failed to Start Render Module");
+		return false;
+	}
+
+	if (!audio->Start())
+	{
+		RE_LOG_ERROR("Application Init failed to Start Audio Module");
+		return false;
+	}
+
+	return true;
 }
 
 void Application::LoadConfig()

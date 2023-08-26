@@ -20,6 +20,9 @@ public:
 
 private:
 
+	bool InitModules();
+	bool StartModules();
+
 	void LoadConfig();
 	void SaveConfig();
 
