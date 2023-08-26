@@ -304,3 +304,9 @@ __pycache__/
 !RedEye/BuildData/**/*
 !RedEye/BuildLib/**/*
 !RedEye/3rd Parties/assimp/code/AssetLib/**/*
+
+# Profiling Output
+RedEye/Engine/Functions Table.json
+RedEye/Engine/Classes Table.json
+RedEye/Engine/Debug Red Eye Profiling.json
+RedEye/Engine/Release Red Eye Profiling.json
