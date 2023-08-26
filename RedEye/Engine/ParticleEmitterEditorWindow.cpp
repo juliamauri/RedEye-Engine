@@ -325,7 +325,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 
 			isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 			ImGui::SetCursorPos({ viewport.x, viewport.y });
-			ImGui::Image(eastl::bit_cast<void*>(RE_RENDER->GetRenderedParticleEditorTexture()), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
+			ImGui::Image(eastl::bit_cast<void*>(RE_RENDER->GetRenderViewTexture(RenderView::Type::PARTICLE)), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 			
 			if (secondary)
 			{

@@ -8,9 +8,6 @@
 #include <EASTL/stack.h>
 #include <EASTL/string.h>
 
-/* Todo Rub: bitmask go flags with properties
-enum GO_Flags : char { ACTIVE, PARENT_ACTIVE, STATIC, DYNAMIC, KINEMATIC, HAS_CHILDS, IS_ROOT };*/
-
 class RE_GameObject
 {
 public:
@@ -49,7 +46,7 @@ public:
 	eastl::list<RE_Component*> GetStackableComponentsPtr() const;
 	eastl::stack<RE_Component*> GetAllChildsComponents(const RE_Component::Type type) const;
 	eastl::stack<RE_Component*> GetAllChildsActiveRenderGeos() const;
-	eastl::stack<RE_Component*> GetAllChildsActiveRenderGeos(const COMP_UID stencil_mask) const;
+	eastl::stack<RE_Component*> GetAllChildsActiveRenderGeos(const GO_UID stencil_mask) const;
 
 	// Components
 	void ReportComponent(const COMP_UID id, const RE_Component::Type type);
@@ -167,6 +164,22 @@ public:
 	eastl::string name;
 
 private:
+
+
+	/* Todo Rub: bitmask go flags with properties
+	enum GO_Flags : char { ACTIVE, PARENT_ACTIVE, STATIC, DYNAMIC, KINEMATIC, HAS_CHILDS, IS_ROOT };*/
+
+	enum class Flag : ushort
+	{
+		ACTIVE = 0x1,			 // 0000 0000 0000 0001
+		PARENT_ACTIVE = 0x2,	 // 0000 0000 0000 0010
+		HAS_CHILDS = 0x4,		 // 0000 0000 0000 0100
+		IS_ROOT = 0x8,			 // 0000 0000 0000 1000
+
+		STATIC = 0x10,			 // 0000 0000 0001 0000
+		DYNAMIC = 0x20,			 // 0000 0000 0010 0000
+		KINEMATIC = 0x40,		 // 0000 0000 0100 0000
+	};
 
 	bool active = true;
 	bool isStatic = true;

@@ -3,7 +3,6 @@
 
 #include "EventListener.h"
 #include "RenderView.h"
-#include "RE_DataTypes.h"
 #include <EASTL/stack.h>
 
 class ModuleRenderer3D : public EventListener 
@@ -37,15 +36,13 @@ public:
 	const char* GetGPUVendor() const;
 
 	// Sets shader for unassigned geometry
-	static const RenderView::LightMode GetLightMode();
+	static RenderView::LightMode GetLightMode();
 	
 	static RE_CompCamera* GetCamera();
 
 	void ChangeFBOSize(int width, int height, RenderView::Type view);
-	unsigned int GetRenderedEditorSceneTexture() const;
-	uintptr_t GetRenderedParticleEditorTexture() const;
+	uint GetRenderViewTexture(RenderView::Type type) const;
 	unsigned int GetDepthTexture() const;
-	uintptr_t GetRenderedGameSceneTexture() const;
 
 	void PushSceneRend(RenderView& rV);
 	void PushThumnailRend(const char* md5, bool redo = false);
@@ -81,8 +78,11 @@ private:
 	void DrawScene(const RenderView& render_view);
 	void DrawDebug(const RenderView& render_view);
 	void DrawParticleEditor(RenderView& render_view);
+	void DrawParticleLights(const uint sim_id);
 	void DrawSkyBox();
-	void ThumbnailGameObject(class RE_GameObject* go);
+	void DrawStencil(class RE_GameObject* go, class RE_Component* comp, bool has_depth_test);
+
+	void ThumbnailGameObject(RE_GameObject* go);
 	void ThumbnailMaterial(class RE_Material* mat);
 	void ThumbnailSkyBox(class RE_SkyBox* skybox);
 

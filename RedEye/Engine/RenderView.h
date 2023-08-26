@@ -1,12 +1,16 @@
 #ifndef __RENDER_VIEW_H__
 #define __RENDER_VIEW_H__
 
-#include <EASTL/string.h>
+#include "RE_DataTypes.h"
 #include <MGL/MathGeoLib.h>
+#include <EASTL/string.h>
+#include <EASTL/array.h>
+
+class RE_Json;
 
 struct RenderView
 {
-	enum class Type : short
+	enum class Type : ushort
 	{
 		EDITOR,
 		GAME,
@@ -14,7 +18,7 @@ struct RenderView
 		OTHER
 	};
 
-	enum class LightMode : int
+	enum class LightMode : ushort
 	{
 		DISABLED = 0,
 		GL,
@@ -35,22 +39,22 @@ struct RenderView
 	eastl::pair<unsigned int, unsigned int> fbos;
 	const unsigned int GetFBO() const;
 
-	enum class Flag : short
+	enum class Flag : ushort
 	{
-		FRUSTUM_CULLING = 0x1,	 // 0000 0000 0001
-		OVERRIDE_CULLING = 0x2,	 // 0000 0000 0010
-		OUTLINE_SELECTION = 0x4, // 0000 0000 0100
-		DEBUG_DRAW = 0x8,		 // 0000 0000 1000
+		FRUSTUM_CULLING = 0x1,	 // 0000 0000 0000 0001
+		OVERRIDE_CULLING = 0x2,	 // 0000 0000 0000 0010
+		OUTLINE_SELECTION = 0x4, // 0000 0000 0000 0100
+		DEBUG_DRAW = 0x8,		 // 0000 0000 0000 1000
 
-		SKYBOX = 0x10,			 // 0000 0001 0000
-		BLENDED = 0x20,			 // 0000 0010 0000
-		WIREFRAME = 0x40,		 // 0000 0100 0000
-		FACE_CULLING = 0X80,	 // 0000 1000 0000
+		SKYBOX = 0x10,			 // 0000 0000 0001 0000
+		BLENDED = 0x20,			 // 0000 0000 0010 0000
+		WIREFRAME = 0x40,		 // 0000 0000 0100 0000
+		FACE_CULLING = 0X80,	 // 0000 0000 1000 0000
 
-		TEXTURE_2D = 0x100,		 // 0001 0000 0000
-		COLOR_MATERIAL = 0x200,	 // 0010 0000 0000
-		DEPTH_TEST = 0x400,		 // 0100 0000 0000
-		CLIP_DISTANCE = 0x800	 // 1000 0000 0000
+		TEXTURE_2D = 0x100,		 // 0000 0001 0000 0000
+		COLOR_MATERIAL = 0x200,	 // 0000 0010 0000 0000
+		DEPTH_TEST = 0x400,		 // 0000 0100 0000 0000
+		CLIP_DISTANCE = 0x800	 // 0000 1000 0000 0000
 	};
 
 	short flags;
@@ -58,7 +62,11 @@ struct RenderView
 
 	inline void AddFlag(Flag flag) { flags |= static_cast<const short>(flag); }
 	inline void RemoveFlag(Flag flag) { flags -= static_cast<const short>(flag); }
-	inline const bool HasFlag(Flag flag) const { return flags & static_cast<const short>(flag); }
+	inline const bool HasFlag(Flag flag) const;
+
+	void DrawEditor();
+	void Load(RE_Json* node);
+	void Save(RE_Json* node) const;
 };
 
 #endif // !__RENDER_VIEW_H__

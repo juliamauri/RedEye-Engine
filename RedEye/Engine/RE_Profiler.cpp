@@ -88,6 +88,7 @@ const char* RE_Profiler::GetClassStr(const RE_ProfiledClass function)
 	case RE_ProfiledClass::ThumbnailManager: return "Thumbnail Manager";
 
 	case RE_ProfiledClass::ModuleRender: return "Module Render"; // Rendering
+	case RE_ProfiledClass::RenderView: return "Render View";
 	case RE_ProfiledClass::FBOManager: return "FBO Manager";
 	case RE_ProfiledClass::GLCache: return "GL Cache";
 

@@ -79,6 +79,7 @@ enum class RE_ProfiledClass : unsigned short
 	ThumbnailManager,
 
 	ModuleRender, // Rendering
+	RenderView,
 	FBOManager,
 	GLCache,
 

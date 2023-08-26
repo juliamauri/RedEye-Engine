@@ -15,6 +15,7 @@
 
 #include <SDL2/SDL_scancode.h>
 #include <ImGui/imgui_internal.h>
+#include <EASTL/bit.h>
 
 void SceneEditorWindow::UpdateViewPort()
 {
@@ -47,7 +48,7 @@ void SceneEditorWindow::Draw(bool secondary)
 
 		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
 		ImGui::SetCursorPos({ viewport.x, viewport.y });
-		ImGui::Image((void*)RE_RENDER->GetRenderedEditorSceneTexture(), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
+		ImGui::Image(eastl::bit_cast<void*>(RE_RENDER->GetRenderViewTexture(RenderView::Type::EDITOR)), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
 
 		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 		ImVec2 vMax = ImGui::GetWindowContentRegionMax();

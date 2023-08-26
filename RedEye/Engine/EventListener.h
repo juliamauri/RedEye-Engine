@@ -7,7 +7,7 @@ class EventListener
 {
 public:
 
-	virtual ~EventListener() {}
+	virtual ~EventListener() = default;
 	virtual void RecieveEvent(const Event& e) = 0;
 };
 
