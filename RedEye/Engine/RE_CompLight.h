@@ -17,7 +17,7 @@ public:
 
 	void DrawProperties() override;
 
-	unsigned int GetBinarySize()const override;
+	size_t GetBinarySize() const override;
 	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
 	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
@@ -34,7 +34,9 @@ public:
 		DIRECTIONAL = 0,
 		POINT,
 		SPOTLIGHT
-	} type = Type::POINT;
+	};
+	
+	Type light_type = Type::POINT;
 
 	// Attenuattion
 	float intensity = 1.0f;

@@ -28,7 +28,7 @@ public:
 	const RE_GameObject* GetRootCPtr() const;
 
 	// Serialization
-	unsigned int GetBinarySize() const;
+	size_t GetBinarySize() const;
 	void SerializeBinary(char*& cursor);
 	void DeserializeBinary(char*& cursor, ComponentsPool* cmpsPool);
 

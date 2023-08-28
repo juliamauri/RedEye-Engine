@@ -8,6 +8,8 @@
 #include "RE_Math.h"
 #include "RE_HashMap.h"
 
+#include <EASTL/bit.h>
+
 class GameObjectsPool;
 
 template<class COMPCLASS, unsigned int size, unsigned int increment>
@@ -29,7 +31,7 @@ public:
 
 	void Clear()
 	{
-		poolmapped_.clear();
+		key_map.clear();
 		lastAvaibleIndex = 0;
 	}
 
@@ -37,7 +39,7 @@ public:
 	{
 		COMP_UID ret = RE_MATH->RandomUID();
 		RE_HashMap::Push(val, ret);
-		RE_HashMap::pool_[RE_HashMap::poolmapped_.at(ret)].SetPoolID(ret);
+		RE_HashMap::pool_[RE_HashMap::key_map.at(ret)].SetPoolID(ret);
 		return ret;
 	}
 
@@ -72,13 +74,13 @@ public:
 	{
 		RE_Json* compPool = node->PushJObject(cName.c_str());
 
-		unsigned int cmpSize = GetCount();
-		compPool->PushUInt("poolSize", cmpSize);
+		size_t count = GetCount();
+		compPool->Push("poolSize", static_cast<uint>(count));
 
-		for (uint i = 0; i < cmpSize; i++)
+		for (size_t i = 0; i < count; i++)
 		{
 			RE_Json* comp = compPool->PushJObject(eastl::to_string(i).c_str());
-			comp->PushUnsignedLongLong("parentPoolID", pool_[i].GetGOUID());
+			comp->Push("parentPoolID", pool_[i].GetGOUID());
 			pool_[i].SerializeJson(comp, resources);
 			DEL(comp);
 		}
@@ -101,27 +103,31 @@ public:
 		DEL(comp_objs);
 	}
 
-	unsigned int GetBinarySize()const
+	size_t GetBinarySize() const
 	{
-		unsigned int size = sizeof(unsigned int);
-		unsigned int cmpSize = GetCount();
-		size += sizeof(COMP_UID) * cmpSize;
-		for (unsigned int i = 0; i < cmpSize; i++) size += pool_[i].GetBinarySize();
+		// Count
+		size_t size = sizeof(size_t);
+
+		// GO_UID & Component Size
+		for (size_t i = 0; i < GetCount(); i++)
+			size += sizeof(GO_UID) + pool_[i].GetBinarySize();
+
 		return size;
 	}
 
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) {
-		unsigned int size = sizeof(unsigned int);
-		unsigned int cmpSize = GetCount();
-
-		memcpy(cursor, &cmpSize, size);
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources)
+	{
+		// Count
+		size_t size = sizeof(size_t);
+		size_t count = GetCount();
+		memcpy(cursor, eastl::bit_cast<const void*>(count), size);
 		cursor += size;
 
+		// Serialize each GO_UID & Component data
 		size = sizeof(GO_UID);
-		for (unsigned int i = 0; i < cmpSize; i++)
+		for (size_t i = 0; i < count; i++)
 		{
-			GO_UID goID = pool_[i].GetGOUID();
-			memcpy(cursor, &goID, size);
+			memcpy(cursor, eastl::bit_cast<const void*>(pool_[i].GetGOUID()), size);
 			cursor += size;
 
 			pool_[i].SerializeBinary(cursor, resources);
@@ -130,14 +136,15 @@ public:
 
 	void DeserializeBinary(GameObjectsPool* goPool, char*& cursor, eastl::map<int, const char*>* resources)
 	{
-		unsigned int size = sizeof(unsigned int);
-		unsigned int totalComps;
-
+		// Count
+		size_t size = sizeof(size_t);
+		size_t totalComps;
 		memcpy(&totalComps, cursor, size);
 		cursor += size;
 
+		// Deserialize each GO_UID & Component data
 		size = sizeof(GO_UID);
-		for (uint i = 0; i < totalComps; i++)
+		for (size_t i = 0; i < totalComps; i++)
 		{
 			GO_UID goID;
 			memcpy(&goID, cursor, size);
@@ -152,7 +159,7 @@ public:
 	eastl::vector<COMP_UID> GetAllKeys() const override
 	{
 		eastl::vector<COMP_UID> ret;
-		for (auto &cmp : poolmapped_) ret.push_back(cmp.first);
+		for (const auto &cmp : key_map) ret.push_back(cmp.first);
 		return ret;
 	}
 

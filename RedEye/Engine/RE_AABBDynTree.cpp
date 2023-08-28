@@ -10,12 +10,12 @@
 void RE_AABBDynTree::PushNode(Object_UID go_index, AABB box)
 {
 	// Stage 0: Allocate Leaf Node
-	int leafIndex = AllocateLeafNode(box, go_index);
+	size_t leafIndex = AllocateLeafNode(box, go_index);
 
 	if (root_index != -1)
 	{
 		// Stage 1: find the best sibling for the new leaf
-		int best_sibling_index = root_index;
+		size_t best_sibling_index = root_index;
 		{
 			RE_AABBDynTreeNode rootNode = At(root_index);
 			float best_cost = Union(rootNode.box, box).SurfaceArea();
@@ -23,13 +23,13 @@ void RE_AABBDynTree::PushNode(Object_UID go_index, AABB box)
 
 			if (!rootNode.is_leaf)
 			{
-				eastl::queue<int> potential_siblings;
+				eastl::queue<size_t> potential_siblings;
 				potential_siblings.push(rootNode.child1);
 				potential_siblings.push(rootNode.child2);
 
 				while (!potential_siblings.empty())
 				{
-					int current_sibling = potential_siblings.front();
+					size_t current_sibling = potential_siblings.front();
 					potential_siblings.pop();
 
 					RE_AABBDynTreeNode& currentSNode = At(current_sibling);
@@ -42,7 +42,7 @@ void RE_AABBDynTree::PushNode(Object_UID go_index, AABB box)
 					float inherited_cost = 0.f;
 
 					RE_AABBDynTreeNode* iNode = nullptr;
-					for (int i = currentSNode.parent_index; i != -1; i = iNode->parent_index)
+					for (size_t i = currentSNode.parent_index; i != -1; i = iNode->parent_index)
 					{
 						iNode = AtPtr(i);
 						inherited_cost += Union(iNode->box, box).SurfaceArea() - iNode->box.SurfaceArea();
@@ -67,9 +67,9 @@ void RE_AABBDynTree::PushNode(Object_UID go_index, AABB box)
 		}
 
 		// Stage 2: create a new parent
-		int new_parent_index = AllocateInternalNode();
+		size_t new_parent_index = AllocateInternalNode();
 		RE_AABBDynTreeNode& best_sibling = At(best_sibling_index);
-		int old_parent = best_sibling.parent_index;
+		size_t old_parent = best_sibling.parent_index;
 
 		if (old_parent != -1)
 		{
@@ -99,7 +99,7 @@ void RE_AABBDynTree::PushNode(Object_UID go_index, AABB box)
 		{
 			RE_AABBDynTreeNode& iN = At(new_parent_index);
 			iN.box = Union(AtPtr(iN.child1)->box, AtPtr(iN.child2)->box);
-			int next = iN.parent_index;
+			size_t next = iN.parent_index;
 			Rotate(iN, new_parent_index);
 			new_parent_index = next;
 		}
@@ -114,7 +114,7 @@ void RE_AABBDynTree::PushNode(Object_UID go_index, AABB box)
 void RE_AABBDynTree::PopNode(Object_UID go_index)
 {
 	SDL_assert(node_count > 0);
-	int index = objectToNode.at(go_index);
+	size_t index = objectToNode.at(go_index);
 	SDL_assert(index < randomCount);
 
 	if (index == root_index)
@@ -123,7 +123,7 @@ void RE_AABBDynTree::PopNode(Object_UID go_index)
 	}
 	else
 	{
-		int parent_index = At(index).parent_index;
+		size_t parent_index = At(index).parent_index;
 		RE_AABBDynTreeNode& parent_node = At(parent_index);
 
 		if (parent_index == root_index) // son of root
@@ -165,7 +165,7 @@ void RE_AABBDynTree::PopNode(Object_UID go_index)
 void RE_AABBDynTree::UpdateNode(Object_UID go_index, AABB box)
 {
 	SDL_assert(node_count > 0);
-	int index = objectToNode.at(go_index);
+	size_t index = objectToNode.at(go_index);
 	SDL_assert(index < randomCount);
 
 	if (index == root_index) // is root
@@ -176,7 +176,7 @@ void RE_AABBDynTree::UpdateNode(Object_UID go_index, AABB box)
 	{
 		RE_AABBDynTreeNode& current_node = At(index);
 		current_node.box = box;
-		int parent_index = current_node.parent_index;
+		size_t parent_index = current_node.parent_index;
 		RE_AABBDynTreeNode& parent_node = At(parent_index);
 		if (parent_index == root_index) // son of root
 		{
@@ -202,17 +202,17 @@ void RE_AABBDynTree::UpdateNode(Object_UID go_index, AABB box)
 			}
 
 			// Stage 1: find best sibling
-			int best_sibling_index = root_index;
+			size_t best_sibling_index = root_index;
 			{
 				RE_AABBDynTreeNode& rootNode = At(root_index);
 				float best_cost = Union(rootNode.box, box).SurfaceArea();
 				float box_sa = box.SurfaceArea();
-				eastl::queue<int> potential_siblings;
+				eastl::queue<size_t> potential_siblings;
 				potential_siblings.push(rootNode.child1);
 				potential_siblings.push(rootNode.child2);
 				while (!potential_siblings.empty())
 				{
-					int current_sibling = potential_siblings.front();
+					size_t current_sibling = potential_siblings.front();
 					potential_siblings.pop();
 
 					RE_AABBDynTreeNode currentSNode = At(current_sibling);
@@ -225,7 +225,7 @@ void RE_AABBDynTree::UpdateNode(Object_UID go_index, AABB box)
 					float inherited_cost = 0.f;
 
 					RE_AABBDynTreeNode* iNode = nullptr;
-					for (int i = currentSNode.parent_index; i != -1; i = iNode->parent_index)
+					for (size_t i = currentSNode.parent_index; i != -1; i = iNode->parent_index)
 					{
 						iNode = AtPtr(i);
 						inherited_cost += Union(iNode->box, box).SurfaceArea() - iNode->box.SurfaceArea();
@@ -251,7 +251,7 @@ void RE_AABBDynTree::UpdateNode(Object_UID go_index, AABB box)
 			// Stage 2: conect parent and best sibling
 			{
 				RE_AABBDynTreeNode& best_sibling = At(best_sibling_index);
-				int best_grand_parent = best_sibling.parent_index;
+				size_t best_grand_parent = best_sibling.parent_index;
 				if (best_grand_parent == -1)
 				{
 					// Sibling is root and has no parent
@@ -277,7 +277,7 @@ void RE_AABBDynTree::UpdateNode(Object_UID go_index, AABB box)
 					RE_AABBDynTreeNode& iN = At(parent_index);
 					iN.box = Union(AtPtr(iN.child1)->box, AtPtr(iN.child2)->box);
 
-					int next = iN.parent_index;
+					size_t next = iN.parent_index;
 					Rotate(iN, parent_index);
 					parent_index = next;
 				}
@@ -286,10 +286,10 @@ void RE_AABBDynTree::UpdateNode(Object_UID go_index, AABB box)
 	}
 }
 
-eastl::vector<int> RE_AABBDynTree::GetAllKeys() const
+eastl::vector<size_t> RE_AABBDynTree::GetAllKeys() const
 {
-	eastl::vector<int> ret;
-	for (auto go : poolmapped_) ret.push_back(go.first);
+	eastl::vector<size_t> ret;
+	for (const auto& go : key_map) ret.push_back(go.first);
 	return ret;
 }
 
@@ -298,7 +298,7 @@ void RE_AABBDynTree::Clear()
 	root_index = -1;
 	size = node_count = randomCount = lastAvaibleIndex = 0;
 	objectToNode.clear();
-	poolmapped_.clear();
+	key_map.clear();
 }
 
 void RE_AABBDynTree::CollectIntersections(Ray ray, eastl::queue<Object_UID>& indexes) const
@@ -306,7 +306,7 @@ void RE_AABBDynTree::CollectIntersections(Ray ray, eastl::queue<Object_UID>& ind
 	if (node_count > 0)
 	{
 		RE_AABBDynTreeNode node;
-		eastl::queue<int> node_stack;
+		eastl::queue<size_t> node_stack;
 		node_stack.push(root_index);
 
 		while (!node_stack.empty())
@@ -335,7 +335,7 @@ void RE_AABBDynTree::CollectIntersections(const Frustum frustum, eastl::queue<Ob
 	if (node_count > 0)
 	{
 		RE_AABBDynTreeNode node;
-		eastl::queue<int> node_stack;
+		eastl::queue<size_t> node_stack;
 		node_stack.push(root_index);
 
 		while (!node_stack.empty())
@@ -361,7 +361,8 @@ void RE_AABBDynTree::CollectIntersections(const Frustum frustum, eastl::queue<Ob
 
 void RE_AABBDynTree::Draw() const
 {
-	for (auto pm_ : poolmapped_) {
+	for (auto& pm_ : key_map)
+	{
 		RE_AABBDynTreeNode node = At(pm_.first);
 		if (!node.is_leaf && (node.parent_index != -1 || pm_.first == root_index))
 		{
@@ -380,7 +381,7 @@ void RE_AABBDynTree::Draw() const
 	}
 }
 
-int RE_AABBDynTree::GetCount() const
+size_t RE_AABBDynTree::GetCount() const
 {
 	return node_count;
 }
@@ -391,7 +392,7 @@ AABB RE_AABBDynTree::Union(AABB box1, AABB box2)
 	return AABB::MinimalEnclosingAABB(&point_array[0], 4);
 }
 
-void RE_AABBDynTree::Rotate(RE_AABBDynTreeNode& node, int index)
+void RE_AABBDynTree::Rotate(RE_AABBDynTreeNode& node, size_t index)
 {
 	if (node.parent_index != -1)
 	{
@@ -438,7 +439,7 @@ void RE_AABBDynTree::Rotate(RE_AABBDynTreeNode& node, int index)
 				sibling.parent_index = index;
 				At(node.child1).parent_index = node.parent_index;
 
-				int child_node_index = node.child1;
+				auto child_node_index = node.child1;
 
 				if (node_is_child1)
 				{
@@ -458,7 +459,7 @@ void RE_AABBDynTree::Rotate(RE_AABBDynTreeNode& node, int index)
 				sibling.parent_index = index;
 				At(node.child2).parent_index = node.parent_index;
 
-				int child_node_index = node.child2;
+				auto child_node_index = node.child2;
 
 				if (node_is_child1)
 				{
@@ -475,7 +476,7 @@ void RE_AABBDynTree::Rotate(RE_AABBDynTreeNode& node, int index)
 			}
 			case 2: // current <-> sibling child1;
 			{
-				int parent_node_index = node.parent_index;
+				auto parent_node_index = node.parent_index;
 
 				if (node_is_child1)
 				{
@@ -495,7 +496,7 @@ void RE_AABBDynTree::Rotate(RE_AABBDynTreeNode& node, int index)
 			}
 			case 3: // current <-> sibling child2;
 			{
-				int parent_node_index = node.parent_index;
+				auto parent_node_index = node.parent_index;
 
 				if (node_is_child1)
 				{
@@ -518,12 +519,12 @@ void RE_AABBDynTree::Rotate(RE_AABBDynTreeNode& node, int index)
 	}
 }
 
-int RE_AABBDynTree::AllocateLeafNode(AABB box, Object_UID index)
+size_t RE_AABBDynTree::AllocateLeafNode(AABB box, Object_UID index)
 {
 	RE_AABBDynTreeNode newNode;
 	SetLeaf(newNode, box, index);
 
-	int node_index = randomCount++;
+	size_t node_index = randomCount++;
 	Push(newNode, node_index);
 	objectToNode.insert({ index, node_index });
 
@@ -532,12 +533,12 @@ int RE_AABBDynTree::AllocateLeafNode(AABB box, Object_UID index)
 	return node_index;
 }
 
-int RE_AABBDynTree::AllocateInternalNode()
+size_t RE_AABBDynTree::AllocateInternalNode()
 {
 	RE_AABBDynTreeNode newNode;
 	SetInternal(newNode);
 
-	int node_index = randomCount++;
+	size_t node_index = randomCount++;
 	Push(newNode, node_index);
 
 	node_count++;

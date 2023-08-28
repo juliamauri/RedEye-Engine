@@ -51,9 +51,9 @@ void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuff
 {
 	SetInternal(true);
 	
-	uint vertexLenght = eastl::CharStrlen(vertexBuffer);
-	uint fragmentLenght = eastl::CharStrlen(fragmentBuffer);
-	uint geometryLenght = (geometryBuffer) ? eastl::CharStrlen(fragmentBuffer) : 0;
+	size_t vertexLenght = eastl::CharStrlen(vertexBuffer);
+	size_t fragmentLenght = eastl::CharStrlen(fragmentBuffer);
+	size_t geometryLenght = (geometryBuffer) ? eastl::CharStrlen(fragmentBuffer) : 0;
 	eastl::string vbuffer(vertexBuffer, vertexLenght);
 	eastl::string fbuffer(fragmentBuffer, fragmentLenght);
 	eastl::string gbuffer;
@@ -290,12 +290,12 @@ eastl::vector<eastl::string> RE_Shader::GetUniformLines(const char* buffer)
 {
 	eastl::vector<eastl::string> lines;
 	eastl::string parse(buffer);
-	int linePos = parse.find_first_of('\n');
+	size_t linePos = parse.find_first_of('\n');
 
 	while (linePos != eastl::string::npos)
 	{
 		eastl::string line = parse.substr(0, linePos);
-		int exitsUniform = line.find("uniform");
+		size_t exitsUniform = line.find("uniform");
 		if (exitsUniform != eastl::string::npos) lines.push_back(line);
 		parse.erase(0, linePos + 1);
 		linePos = parse.find_first_of('\n');
@@ -312,7 +312,7 @@ void RE_Shader::MountRE_Shader_Cvar(eastl::vector<eastl::string> uniformLines)
 	static const char* internalNames[33] = { "useTexture", "useColor", "useClipPlane", "clip_plane", "time", "dt", "near_plane", "far_plane", "viewport_w", "viewport_h", "model", "view", "projection", "cdiffuse", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "opacity", "topacity", "tshininess", "shininess", "shininessST", "refraccti", "theight", "tnormals", "treflection", "currentDepth", "viewPos" };
 	for (auto uniform : uniformLines)
 	{
-		int pos = uniform.find_first_of(" ");
+		size_t pos = uniform.find_first_of(" ");
 		if (pos != eastl::string::npos)
 		{
 			RE_Shader_Cvar sVar;
@@ -350,7 +350,7 @@ void RE_Shader::MountRE_Shader_Cvar(eastl::vector<eastl::string> uniformLines)
 			else if (varType.compare("sampler2DShadow") == 0 || varType.compare("sampler1DShadow") == 0 || varType.compare("samplerCube") == 0 || varType.compare("sampler3D") == 0 || varType.compare("sampler1D") == 0 || varType.compare("sampler2D") == 0) sVar.SetSampler(nullptr, true);
 			else continue;
 
-			int pos = sVar.name.find_first_of("0123456789");
+			size_t pos = sVar.name.find_first_of("0123456789");
 			eastl::string name = (pos != eastl::string::npos) ? sVar.name.substr(0, pos) : sVar.name;
 
 			//Custom or internal variables
@@ -412,22 +412,22 @@ void RE_Shader::Draw()
 
 void RE_Shader::SaveResourceMeta(RE_Json* metaNode)
 {
-	metaNode->PushString("vertexPath", shaderSettings.vertexShader.c_str());
-	metaNode->PushSignedLongLong("vLastModified", shaderSettings.vlastModified);
-	metaNode->PushString("fragmentPath", shaderSettings.fragmentShader.c_str());
-	metaNode->PushSignedLongLong("fLastModified", shaderSettings.flastModified);
-	metaNode->PushString("geometryPath", shaderSettings.geometryShader.c_str());
-	metaNode->PushSignedLongLong("gLastModified", shaderSettings.glastModified);
+	metaNode->Push("vertexPath", shaderSettings.vertexShader.c_str());
+	metaNode->Push("vLastModified", shaderSettings.vlastModified);
+	metaNode->Push("fragmentPath", shaderSettings.fragmentShader.c_str());
+	metaNode->Push("fLastModified", shaderSettings.flastModified);
+	metaNode->Push("geometryPath", shaderSettings.geometryShader.c_str());
+	metaNode->Push("gLastModified", shaderSettings.glastModified);
 
 	RE_Json* nuniforms = metaNode->PushJObject("uniforms");
-	nuniforms->PushUInt("size", uniforms.size());
+	nuniforms->Push("size", uniforms.size());
 	if (!uniforms.empty())
 	{
 		for (uint i = 0; i < uniforms.size(); i++)
 		{
-			nuniforms->PushString(("name" + eastl::to_string(i)).c_str(), uniforms[i].name.c_str());
-			nuniforms->PushUInt(("type" + eastl::to_string(i)).c_str(), uniforms[i].GetType());
-			nuniforms->PushBool(("custom" + eastl::to_string(i)).c_str(), uniforms[i].custom);
+			nuniforms->Push(("name" + eastl::to_string(i)).c_str(), uniforms[i].name.c_str());
+			nuniforms->Push(("type" + eastl::to_string(i)).c_str(), uniforms[i].GetType());
+			nuniforms->Push(("custom" + eastl::to_string(i)).c_str(), uniforms[i].custom);
 		}
 	}
 	DEL(nuniforms);

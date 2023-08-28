@@ -19,7 +19,7 @@ public:
 	~RE_ModelImporter() {}
 
 	eastl::vector<eastl::string> GetOutsideResourcesAssetsPath(const char * path);
-	RE_ECS_Pool* ProcessModel(const char* buffer, unsigned int size, const char* assetPayh, RE_ModelSettings* mSettings);
+	RE_ECS_Pool* ProcessModel(const char* buffer, size_t size, const char* assetPayh, RE_ModelSettings* mSettings);
 
 private:
 

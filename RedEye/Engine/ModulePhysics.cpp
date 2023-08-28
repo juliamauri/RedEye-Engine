@@ -162,7 +162,7 @@ void ModulePhysics::Save() const
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModulePhysics);
 	RE_Json* node = RE_FS->ConfigNode("Physics");
 
-	node->PushInt("UpdateMode", static_cast<int>(mode));
+	node->Push("UpdateMode", static_cast<int>(mode));
 
 	DEL(node);
 }

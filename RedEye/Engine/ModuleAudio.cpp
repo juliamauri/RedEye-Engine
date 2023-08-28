@@ -272,7 +272,7 @@ void ModuleAudio::Save() const
 {
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModuleAudio);
 	RE_Json* node = RE_FS->ConfigNode("Audio");
-	node->PushString("FolderBanks", audioBanksFolderPath.c_str());
+	node->Push("FolderBanks", audioBanksFolderPath.c_str());
 	DEL(node);
 }
 
@@ -366,9 +366,11 @@ void SoundBank::LoadBank()
 	RE_FileBuffer* bnkLoaded = RE_FS->QuickBufferFromPDPath(path.c_str());
 	if (bnkLoaded != nullptr)
 	{
-		AKRESULT result = AK::SoundEngine::LoadBankMemoryCopy(bnkLoaded->GetBuffer(), bnkLoaded->GetSize(), ID);
-		if (result != AK_Success) RE_LOG_ERROR("Error while loading bank sound: %s", name.c_str());
-		else loaded = true;
+		AKRESULT result = AK::SoundEngine::LoadBankMemoryCopy(bnkLoaded->GetBuffer(), static_cast<AkUInt32>(bnkLoaded->GetSize()), ID);
+
+		if (result == AK_Success) loaded = true;
+		else RE_LOG_ERROR("Error while loading bank sound: %s", name.c_str());
+
 		DEL(bnkLoaded);
 	}
 }

@@ -12,33 +12,34 @@ public:
 
 	enum class Type : ushort
 	{
-		EMPTY = 0x00,
-		TRANSFORM,
-		MESH,
-		CAMERA,
-		LIGHT,
-		WATER,
-		PARTICLEEMITER,
+		EMPTY = 0,
+
+		TRANSFORM = 1,
+		MESH = 2,
+		CAMERA = 3,
+		LIGHT = 4,
+		WATER = 5,
+		PARTICLEEMITER = 6,
 
 		PRIMIVE_MIN = 20,
-		GRID,
-		CUBE,
-		POINT,
-		DODECAHEDRON,
-		TETRAHEDRON,
-		OCTOHEDRON,
-		ICOSAHEDRON,
-		PLANE,
-		FUSTRUM,
-		SPHERE,
-		CYLINDER,
-		HEMISHPERE,
-		TORUS,
-		TREFOILKNOT,
-		ROCK,
-		PRIMIVE_MAX,
+		GRID = 21,
+		CUBE = 22,
+		POINT = 23,
+		DODECAHEDRON = 24,
+		TETRAHEDRON = 25,
+		OCTOHEDRON = 26,
+		ICOSAHEDRON = 27,
+		PLANE = 28,
+		FUSTRUM = 29,
+		SPHERE = 30,
+		CYLINDER = 31,
+		HEMISHPERE = 32,
+		TORUS = 33,
+		TREFOILKNOT = 34,
+		ROCK = 35,
+		PRIMIVE_MAX = 36,
 
-		MAX
+		MAX = 37
 	};
 
 	RE_Component(const Type type = Type::EMPTY, const GO_UID go = 0, const bool start_active = true) :
@@ -83,7 +84,7 @@ public:
 	virtual void SerializeJson(class RE_Json* node, eastl::map<const char*, int>* resources) const {}
 	virtual void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) {}
 
-	virtual unsigned int GetBinarySize() const { return 0; }
+	virtual size_t GetBinarySize() const { return 0; }
 	virtual void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const {}
 	virtual void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) {}
 

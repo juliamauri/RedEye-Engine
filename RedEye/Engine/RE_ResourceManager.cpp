@@ -131,9 +131,8 @@ void RE_ResourceManager::PopSelected(bool all)
 {
 	if (resourcesSelected.empty()) return;
 
-	do {
-		resourcesSelected.pop();
-	} while (all && !resourcesSelected.empty());
+	do resourcesSelected.pop();
+	while (all && !resourcesSelected.empty());
 }
 
 ResourceContainer* RE_ResourceManager::At(const char* md5) const { return resources.at(md5); }
@@ -141,7 +140,8 @@ ResourceContainer* RE_ResourceManager::At(const char* md5) const { return resour
 const char* RE_ResourceManager::ReferenceByMeta(const char* metaPath, ResourceType type)
 {
 	ResourceContainer* newContainer = nullptr;
-	switch (type) {
+	switch (type)
+	{
 	case ResourceType::SHADER:				newContainer = static_cast<ResourceContainer*>(new RE_Shader(metaPath));				break;
 	case ResourceType::TEXTURE:				newContainer = static_cast<ResourceContainer*>(new RE_Texture(metaPath));				break;
 	case ResourceType::PREFAB:				newContainer = static_cast<ResourceContainer*>(new RE_Prefab(metaPath));				break;
@@ -151,7 +151,9 @@ const char* RE_ResourceManager::ReferenceByMeta(const char* metaPath, ResourceTy
 	case ResourceType::SCENE:				newContainer = static_cast<ResourceContainer*>(new RE_Scene(metaPath));					break; 
 	case ResourceType::PARTICLE_EMITTER:	newContainer = static_cast<ResourceContainer*>(new RE_ParticleEmitterBase(metaPath));	break; 
 	case ResourceType::PARTICLE_EMISSION:	newContainer = static_cast<ResourceContainer*>(new RE_ParticleEmission(metaPath));		break; 
-	case ResourceType::PARTICLE_RENDER:		newContainer = static_cast<ResourceContainer*>(new RE_ParticleRender(metaPath));		break;  }
+	case ResourceType::PARTICLE_RENDER:		newContainer = static_cast<ResourceContainer*>(new RE_ParticleRender(metaPath));		break;
+	default: break;
+	}
 
 	const char* retMD5 = nullptr;
 	if (newContainer)
@@ -163,7 +165,7 @@ const char* RE_ResourceManager::ReferenceByMeta(const char* metaPath, ResourceTy
 	return retMD5;
 }
 
-unsigned int RE_ResourceManager::TotalReferences() const { return resources.size(); }
+size_t RE_ResourceManager::TotalReferences() const { return resources.size(); }
 
 eastl::vector<const char*> RE_ResourceManager::GetAllResourcesActiveByType(ResourceType resT)
 {
@@ -186,7 +188,7 @@ eastl::vector<const char*> RE_ResourceManager::WhereUndefinedFileIsUsed(const ch
 	eastl::vector<ResourceContainer*> temp_resources = GetResourcesByType(ResourceType::SHADER);
 
 	RE_Shader* shader = nullptr;
-	for (auto res : temp_resources)
+	for (const auto& res : temp_resources)
 	{
 		shader = dynamic_cast<RE_Shader*>(res);
 		if (!res->isInternal() && shader->IsPathOnShader(assetPath)) shadersUsed.push_back(res->GetMD5());
@@ -218,15 +220,11 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 	case ResourceType::TEXTURE: //search on materials. no scenes will be afected
 	{
 		temp_resources = GetResourcesByType(ResourceType::MATERIAL);
-		RE_Material* mat = nullptr;
-		for (auto resource : temp_resources)
+		for (const auto& resource : temp_resources)
 		{
-			mat = dynamic_cast<RE_Material*>(resource);
-			if (rType == ResourceType::SHADER)
-			{
-				if (mat->ExitsOnShader(res)) ret.push_back(resource->GetMD5());
-			}
-			else if (mat->ExistsOnTexture(res)) ret.push_back(resource->GetMD5());
+			auto mat = dynamic_cast<const RE_Material*>(resource);
+			if ((rType == ResourceType::SHADER && mat->ExistsOnShader(res)) || mat->ExistsOnTexture(res))
+				ret.push_back(resource->GetMD5());
 		}
 
 		break;
@@ -235,14 +233,9 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 	case ResourceType::PARTICLE_RENDER:
 	{
 		temp_resources = GetResourcesByType(ResourceType::PARTICLE_EMITTER);
-		RE_ParticleEmitterBase* emitter = nullptr;
-		for (auto resource : temp_resources)
-		{
-			emitter = dynamic_cast<RE_ParticleEmitterBase*>(resource);
-
-			if (emitter->Contains(res)) ret.push_back(resource->GetMD5());
-
-		}
+		for (const auto& resource : temp_resources)
+			if (dynamic_cast<const RE_ParticleEmitterBase*>(resource)->Contains(res))
+				ret.push_back(resource->GetMD5());
 		break;
 	}
 	case ResourceType::SKYBOX: //search on cameras from scenes or prefabs
@@ -259,14 +252,16 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 		}
 
 		RE_INPUT->PauseEvents();
-		for (auto resource : temp_resources)
+		for (auto& resource : temp_resources)
 		{
 			RE_ECS_Pool* poolGORes = nullptr;
 			Use(resource->GetMD5());
-			switch (resource->GetType()) {
+			switch (resource->GetType())
+			{
 			case ResourceType::SCENE: poolGORes = dynamic_cast<RE_Scene*>(resource)->GetPool(); break;
 			case ResourceType::PREFAB: poolGORes = dynamic_cast<RE_Prefab*>(resource)->GetPool(); break;
 			case ResourceType::MODEL: poolGORes = dynamic_cast<RE_Model*>(resource)->GetPool(); break;
+			default: break;
 			}
 
 			eastl::stack<RE_Component*> comps;
@@ -312,9 +307,9 @@ eastl::vector<const char*> RE_ResourceManager::WhereIsUsed(const char* res)
 				}
 				UnUse(resource->GetMD5());
 			}
-			RE_INPUT->ResumeEvents();
-			break;
 		}
+		RE_INPUT->ResumeEvents();
+		break;
 	}
 	default: break;
 	}
@@ -436,9 +431,8 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 
 		break;
 	}
-	//Search on particle emitters and then apply changes on scene if exists
 	case ResourceType::PARTICLE_EMISSION:
-	case ResourceType::PARTICLE_RENDER:
+	case ResourceType::PARTICLE_RENDER: // Search on particle emitters and then apply changes on scene if exists
 	{
 		RE_ParticleEmitterBase* resChange = nullptr;
 		for (auto resToChange : resourcesWillChange)
@@ -537,11 +531,11 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	return resource;
 }
 
-eastl::vector<ResourceContainer*> RE_ResourceManager::GetResourcesByType(ResourceType type)
+eastl::vector<ResourceContainer*> RE_ResourceManager::GetResourcesByType(ResourceType type) const
 {
 	eastl::vector<ResourceContainer*> ret;
 
-	for (auto resource : resources)
+	for (auto& resource : resources)
 		if (resource.second->GetType() == type)
 			ret.push_back(resource.second);
 
@@ -553,7 +547,7 @@ const char* RE_ResourceManager::IsReference(const char* md5, ResourceType type)
 	const char* ret = nullptr;
 	if (type == ResourceType::UNDEFINED)
 	{
-		for (auto resource : resources)
+		for (auto& resource : resources)
 			if (eastl::Compare(resource.second->GetMD5(), md5, 32) == 0)
 				ret = resource.first;
 	}

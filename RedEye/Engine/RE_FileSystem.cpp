@@ -260,7 +260,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 				if (!res->isInternal())
 				{
-					int sizefile = 0;
+					size_t sizefile = 0;
 					if (!filesToFindMeta.empty())
 					{
 						for (RE_File* file : filesToFindMeta)
@@ -866,7 +866,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 					bool newFile = (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FILE || (*iter)->path != inPath);
 					if (newFile && fileType == FileType::F_META && !metaRecentlyAdded->empty())
 					{
-						int sizemetap = 0;
+						size_t sizemetap = 0;
 						for (RE_Meta* metaAdded : *metaRecentlyAdded)
 						{
 							sizemetap = eastl::CharStrlen(metaAdded->path.c_str());

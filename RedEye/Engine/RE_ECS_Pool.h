@@ -35,7 +35,7 @@ public:
 	eastl::vector<RE_GameObject*> GetAllGOPtrs() const;
 	eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> GetAllGOData() const;
 
-	unsigned int TotalGameObjects() const { return gameObjectsPool.GetCount(); };
+	size_t TotalGameObjects() const { return gameObjectsPool.GetCount(); };
 
 	RE_ECS_Pool* GetNewPoolFromID(GO_UID id);
 
@@ -62,7 +62,7 @@ public:
 
 	#pragma region Serialization
 
-	unsigned int GetBinarySize() const;
+	size_t GetBinarySize() const;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources);
 	void SerializeJson(class RE_Json* node, eastl::map<const char*, int>* resources);

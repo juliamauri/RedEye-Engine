@@ -135,7 +135,7 @@ void RE_Scene::LibraryLoad()
 
 void RE_Scene::LibrarySave(bool fromLoaded)
 {
-	uint size = 0;
+	size_t size = 0;
 	char* buffer = RE_ECS_Importer::BinarySerialize((fromLoaded) ? loaded : toSave, &size);
 	RE_FileBuffer toLibrarySave(GetLibraryPath());
 	toLibrarySave.Save(buffer, size);

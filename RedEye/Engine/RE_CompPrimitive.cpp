@@ -34,7 +34,7 @@ RE_CompPrimitive::RE_CompPrimitive(RE_Component::Type t) : RE_Component(t)
 void RE_CompPrimitive::SimpleDraw() const
 {
 	RE_GLCache::ChangeVAO(VAO);
-	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(triangle_count) * 3, GL_UNSIGNED_SHORT, 0);
 	RE_GLCache::ChangeVAO(0);
 }
 
@@ -47,7 +47,7 @@ bool RE_CompPrimitive::CheckFaceCollision(const math::Ray& ray, float& distance)
 void RE_CompPrimitive::SetColor(float r, float g, float b) { color.Set(r, g, b); }
 void RE_CompPrimitive::SetColor(math::vec nColor) { color = nColor; }
 unsigned int RE_CompPrimitive::GetVAO() const { return VAO; }
-unsigned int RE_CompPrimitive::GetTriangleCount() const { return triangle_count; }
+size_t RE_CompPrimitive::GetTriangleCount() const { return triangle_count; }
 
 void RE_CompPrimitive::UnUseResources() { RE_SCENE->primitives->UnUsePrimitive(type, primID); }
 
@@ -117,7 +117,7 @@ RE_CompTransform* RE_CompGrid::GetTransformPtr() const
 	return (useParent) ? GetGOCPtr()->GetTransformPtr() : transform;
 }
 
-unsigned int RE_CompGrid::GetBinarySize() const
+size_t RE_CompGrid::GetBinarySize() const
 {
 	return sizeof(float) * 3u + sizeof(int);
 }
@@ -125,7 +125,7 @@ unsigned int RE_CompGrid::GetBinarySize() const
 void RE_CompGrid::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushFloatVector("color", color);
-	node->PushInt("divisions", divisions);
+	node->Push("divisions", divisions);
 }
 
 void RE_CompGrid::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
@@ -168,7 +168,7 @@ RE_CompRock::~RE_CompRock() { }
 
 void RE_CompRock::RockSetUp(int _seed, int _subdivions)
 {
-	GenerateNewRock(_seed, RE_Math::CapI(_subdivions, 1, 5));
+	GenerateNewRock(_seed, RE_Math::Cap(_subdivions, 1, 5));
 }
 
 void RE_CompRock::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO_UID parent)
@@ -194,7 +194,7 @@ void RE_CompRock::Draw() const
 
 	// Draw
 	RE_GLCache::ChangeVAO(VAO);
-	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(triangle_count) * 3, GL_UNSIGNED_SHORT, 0);
 	RE_GLCache::ChangeVAO(0);
 }
 
@@ -216,7 +216,7 @@ void RE_CompRock::DrawProperties()
 
 		if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
 		{
-			tmpSb = RE_Math::CapI(tmpSb, 1, 5);
+			tmpSb = RE_Math::Cap(tmpSb, 1, 5);
 			if (nsubdivisions != tmpSb)
 			{
 				nsubdivisions = tmpSb;
@@ -244,7 +244,7 @@ bool RE_CompRock::DrawPrimPropierties()
 
 	if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1, 5))
 	{
-		tmpSb = RE_Math::CapI(tmpSb, 1, 5);
+		tmpSb = RE_Math::Cap(tmpSb, 1, 5);
 		if ( nsubdivisions != tmpSb)
 		{
 			nsubdivisions = tmpSb;
@@ -257,7 +257,7 @@ bool RE_CompRock::DrawPrimPropierties()
 	return ret;
 }
 
-unsigned int RE_CompRock::GetBinarySize() const
+size_t RE_CompRock::GetBinarySize() const
 {
 	return sizeof(float) * 3 + sizeof(int) * 2;
 }
@@ -265,8 +265,8 @@ unsigned int RE_CompRock::GetBinarySize() const
 void RE_CompRock::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushFloatVector("color", color);
-	node->PushInt("seed", seed);
-	node->PushInt("nsubdivisions", nsubdivisions);
+	node->Push("seed", seed);
+	node->Push("nsubdivisions", nsubdivisions);
 }
 
 void RE_CompRock::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
@@ -307,15 +307,15 @@ void RE_CompRock::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 	RockSetUp(seed, nsubdivisions);
 }
 
-unsigned int RE_CompRock::GetParticleBinarySize() const
+size_t RE_CompRock::GetParticleBinarySize() const
 {
 	return sizeof(int) * 2;
 }
 
 void RE_CompRock::SerializeParticleJson(RE_Json* node) const
 {
-	node->PushInt("seed", seed);
-	node->PushInt("nsubdivisions", nsubdivisions);
+	node->Push("seed", seed);
+	node->Push("nsubdivisions", nsubdivisions);
 	DEL(node);
 }
 
@@ -354,7 +354,7 @@ void RE_CompRock::GenerateNewRock(int s, int subdivisions)
 	seed = s;
 	nsubdivisions = subdivisions;
 
-	if (primID = !- 1) RE_SCENE->primitives->UnUsePrimitive(type, primID);
+	if (primID != -1) RE_SCENE->primitives->UnUsePrimitive(type, primID);
 	primID = seed * nsubdivisions * static_cast<int>(RE_Component::Type::ROCK);
 	auto mD = RE_SCENE->primitives->GetPrimitiveMeshData(this, primID);
 
@@ -401,7 +401,7 @@ void RE_CompPlatonic::Draw() const
 
 	// Draw
 	RE_GLCache::ChangeVAO(VAO);
-	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(triangle_count) * 3, GL_UNSIGNED_SHORT, 0);
 	RE_GLCache::ChangeVAO(0);
 }
 
@@ -419,7 +419,7 @@ bool RE_CompPlatonic::DrawPrimPropierties()
 	return false;
 }
 
-unsigned int RE_CompPlatonic::GetBinarySize() const
+size_t RE_CompPlatonic::GetBinarySize() const
 {
 	return sizeof(float) * 3;
 }
@@ -457,9 +457,9 @@ RE_CompParametric::~RE_CompParametric() { }
 
 void RE_CompParametric::ParametricSetUp(int _slices, int _stacks, float _radius)
 {
-	target_slices = slices = RE_Math::CapI(_slices, 3, INT_MAX);
-	target_stacks = stacks = RE_Math::CapI(_stacks, 3, INT_MAX);
-	target_radius = radius = RE_Math::CapF(_radius, min_r, max_r);
+	target_slices = slices = RE_Math::Cap(_slices, 3, INT_MAX);
+	target_stacks = stacks = RE_Math::Cap(_stacks, 3, INT_MAX);
+	target_radius = radius = RE_Math::Cap(_radius, min_r, max_r);
 	canChange = false;
 
 	if(primID != -1) RE_SCENE->primitives->UnUsePrimitive(type, primID);
@@ -509,7 +509,7 @@ void RE_CompParametric::Draw() const
 	}
 
 	RE_GLCache::ChangeVAO(VAO);
-	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(triangle_count) * 3, GL_UNSIGNED_SHORT, 0);
 	RE_GLCache::ChangeVAO(0);
 	RE_GLCache::ChangeTextureBind(0);
 }
@@ -547,7 +547,7 @@ bool RE_CompParametric::DrawPrimPropierties()
 	return ret;
 }
 
-unsigned int RE_CompParametric::GetBinarySize() const
+size_t RE_CompParametric::GetBinarySize() const
 {
 	return sizeof(float) * 4 + sizeof(int) * 2;
 }
@@ -555,9 +555,9 @@ unsigned int RE_CompParametric::GetBinarySize() const
 void RE_CompParametric::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushFloatVector("color", color);
-	node->PushInt("slices", slices);
-	node->PushInt("stacks", stacks);
-	node->PushFloat("radius", radius);
+	node->Push("slices", slices);
+	node->Push("stacks", stacks);
+	node->Push("radius", radius);
 }
 
 void RE_CompParametric::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
@@ -606,16 +606,16 @@ void RE_CompParametric::DeserializeBinary(char*& cursor, eastl::map<int, const c
 	ParametricSetUp(slices, stacks, radius);
 }
 
-unsigned int RE_CompParametric::GetParticleBinarySize() const
+size_t RE_CompParametric::GetParticleBinarySize() const
 {
 	return sizeof(int) * 2 + sizeof(float);
 }
 
 void RE_CompParametric::SerializeParticleJson(RE_Json* node) const
 {
-	node->PushInt("slices", slices);
-	node->PushInt("stacks", stacks);
-	node->PushFloat("radius", radius);
+	node->Push("slices", slices);
+	node->Push("stacks", stacks);
+	node->Push("radius", radius);
 	DEL(node);
 }
 
@@ -665,26 +665,28 @@ const char* RE_CompPlane::TransformAsMeshResource()
 {
 	par_shapes_mesh* plane = par_shapes_create_plane(slices, stacks);
 
-	float* points = new float[plane->npoints * 3];
-	float* normals = new float[plane->npoints * 3];
-	float* texCoords = new float[plane->npoints * 2];
+	size_t vertex_count = plane->npoints;
 
-	size_t size = plane->npoints * 3 * sizeof(float);
+	float* points = new float[vertex_count * 3];
+	float* normals = new float[vertex_count * 3];
+	float* texCoords = new float[vertex_count * 2];
+
+	size_t size = vertex_count * 3 * sizeof(float);
 	memcpy(points, plane->points, size);
 	memcpy(normals, plane->normals, size);
-	size = plane->npoints * 2 * sizeof(float);
+	size = vertex_count * 2 * sizeof(float);
 	memcpy(texCoords, plane->tcoords, size);
 
 	eastl::vector<unsigned int> index;
 	for (int i = 0; i < plane->ntriangles * 3; i++)
 		index.push_back(plane->triangles[i]);
 
-	uint* indexA = new uint[plane->ntriangles * 3];
+	uint* indexA = new uint[static_cast<size_t>(plane->ntriangles) * 3];
 	memcpy(indexA, &index[0], index.size() * sizeof(uint));
 
 	bool exists = false;
 	RE_Mesh* newMesh = new RE_Mesh();
-	newMesh->SetVerticesAndIndex(points, indexA, plane->npoints, plane->ntriangles, texCoords, normals);
+	newMesh->SetVerticesAndIndex(points, indexA, vertex_count, plane->ntriangles, texCoords, normals);
 
 	const char* meshMD5 = newMesh->CheckAndSave(&exists);
 	if (!exists)

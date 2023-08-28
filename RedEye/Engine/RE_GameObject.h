@@ -81,7 +81,7 @@ public:
 	void ReleaseChild(const GO_UID id);
 	void DestroyChild(const GO_UID id);
 
-	unsigned int ChildCount() const;
+	eastl_size_t ChildCount() const;
 	bool IsLastChild() const;
 
 	// Parent
@@ -140,7 +140,7 @@ public:
 	void UnUseResources();
 
 	// Serialization
-	unsigned int GetBinarySize() const;
+	size_t GetBinarySize() const;
 	void SerializeJson(class RE_Json* node);
 	void DeserializeJSON(RE_Json* node, GameObjectsPool* goPool, ComponentsPool* cmpsPool);
 	void SerializeBinary(char*& cursor);

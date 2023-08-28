@@ -15,8 +15,8 @@ public:
 
 	//Load shaders and put in vector
 	static bool LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr, bool compileTest = false);
-	static bool LoadFromBuffer(unsigned int* ID, const char* vertexBuffer, unsigned int vSize, const char* fragmentBuffer, unsigned int fSize, const char* geometryBuffer = nullptr, unsigned int gSize = 0 );
-	static bool LoadFromBinary(const char* buffer, unsigned int size, unsigned int* ID);
+	static bool LoadFromBuffer(unsigned int* ID, const char* vertexBuffer, size_t vSize, const char* fragmentBuffer, size_t fSize, const char* geometryBuffer = nullptr, size_t gSize = 0 );
+	static bool LoadFromBinary(const char* buffer, size_t size, unsigned int* ID);
 	static bool GetBinaryProgram(unsigned int ID, char** buffer, int* size);
 
 	static bool Compile(const char* buffer, unsigned int size, unsigned int GLCompile = 0x8B31);

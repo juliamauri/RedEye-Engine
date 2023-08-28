@@ -10,7 +10,6 @@
 #include "RE_Texture.h"
 
 #include <GL/glew.h>
-#include <IL/il.h>
 #include <IL/ilu.h>
 #include <IL/ilut.h>
 #include <EAStdC\EASprintf.h>
@@ -63,16 +62,17 @@ const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPat
 	return retMD5;
 }
 
-const char* RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsigned int assetSize, TextureType assetType, unsigned int* newSize)
+const char* RE_TextureImporter::TransformToDDS(const void* assetBuffer, ILuint assetSize, TextureType assetType, ILuint* newSize)
 {
 	eastl::string ret;
-	unsigned int imageID = 0;
+
+	ILuint imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 
-	if (IL_FALSE != ilLoadL(assetType, assetBuffer, assetSize)) {
-		if (assetType == IL_TGA)
-			ilFlipSurfaceDxtcData();
+	if (IL_FALSE != ilLoadL(assetType, assetBuffer, assetSize))
+	{
+		if (assetType == IL_TGA) ilFlipSurfaceDxtcData();
 
 		//Save into dds
 		*newSize = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
@@ -83,16 +83,15 @@ const char* RE_TextureImporter::TransformToDDS(const char* assetBuffer, unsigned
 		ilBindImage(0);
 		/* Delete used resources*/
 		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
-	} else {
-		RE_LOG_ERROR("Error when loading texture on DevIL");
 	}
+	else RE_LOG_ERROR("Error when loading texture on DevIL");
 
 	return ret.c_str();
 }
 
-void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int size, TextureType type, unsigned int * ID, int * width, int * height, RE_TextureSettings settings)
+void RE_TextureImporter::LoadTextureInMemory(const void* buffer, ILuint size, TextureType type, ILuint* ID, ILint* width, ILint* height, RE_TextureSettings settings)
 {
-	unsigned int imageID = 0;
+	ILuint imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 
@@ -127,9 +126,9 @@ void RE_TextureImporter::LoadTextureInMemory(const char * buffer, unsigned int s
 	}
 }
 
-void RE_TextureImporter::SaveOwnFormat(const char* assetBuffer, unsigned int assetSize, TextureType assetType, RE_FileBuffer* toSave)
+void RE_TextureImporter::SaveOwnFormat(const void* assetBuffer, ILuint assetSize, TextureType assetType, RE_FileBuffer* toSave)
 {
-	unsigned int imageID = 0;
+	ILuint imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 

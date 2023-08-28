@@ -57,9 +57,9 @@ void RE_SkyBox::SetAsInternal()
 	RE_Json* node = toMD5.GetRootNode("skybox");
 
 	//For differentMD5
-	node->PushString("SKname", GetName());
-	node->PushString("SKPath", GetAssetPath());
-	node->PushFloat("skyBoxSize", skyBoxSettings.skyBoxSize);
+	node->Push("SKname", GetName());
+	node->Push("SKPath", GetAssetPath());
+	node->Push("skyBoxSize", skyBoxSettings.skyBoxSize);
 	DEL(node);
 
 	SetMD5(toMD5.GetMd5().c_str());
@@ -305,11 +305,11 @@ bool RE_SkyBox::isFacesFilled() const
 
 void RE_SkyBox::SaveResourceMeta(RE_Json* metaNode)
 {
-	metaNode->PushInt("minFilter", skyBoxSettings.min_filter);
-	metaNode->PushInt("magFilter", skyBoxSettings.mag_filter);
-	metaNode->PushInt("wrapS", skyBoxSettings.wrap_s);
-	metaNode->PushInt("wrapT", skyBoxSettings.wrap_t);
-	metaNode->PushInt("wrapR", skyBoxSettings.wrap_r);
+	metaNode->Push("minFilter", skyBoxSettings.min_filter);
+	metaNode->Push("magFilter", skyBoxSettings.mag_filter);
+	metaNode->Push("wrapS", skyBoxSettings.wrap_s);
+	metaNode->Push("wrapT", skyBoxSettings.wrap_t);
+	metaNode->Push("wrapR", skyBoxSettings.wrap_r);
 
 	RE_Json* nodeTex = metaNode->PushJObject("textures");
 	for (uint i = 0; i < 6; i++)
@@ -317,7 +317,7 @@ void RE_SkyBox::SaveResourceMeta(RE_Json* metaNode)
 		if (texturesname[i] != nullptr && skyBoxSettings.textures[i].textureMD5 != nullptr)
 		{
 			eastl::string key = texturesname[i];
-			nodeTex->PushString((key + "textureMD5").c_str(), skyBoxSettings.textures[i].textureMD5);
+			nodeTex->Push((key + "textureMD5").c_str(), skyBoxSettings.textures[i].textureMD5);
 		}
 	}
 }
@@ -396,9 +396,9 @@ void RE_SkyBox::AssetSave()
 	RE_Json* node = toSave.GetRootNode("skybox");
 
 	//For differentMD5
-	node->PushString("SKname", GetName());
-	node->PushString("SKPath", GetAssetPath());
-	node->PushFloat("skyBoxSize", skyBoxSettings.skyBoxSize);
+	node->Push("SKname", GetName());
+	node->Push("SKPath", GetAssetPath());
+	node->Push("skyBoxSize", skyBoxSettings.skyBoxSize);
 	DEL(node);
 
 	toSave.Save();
@@ -440,7 +440,7 @@ void RE_SkyBox::LibraryLoad()
 
 void RE_SkyBox::LibrarySave()
 {
-	uint totalSize = sizeof(float);
+	size_t totalSize = sizeof(float);
 	
 	char* libraryBuffer = new char[totalSize + 1];
 	char* cursor = libraryBuffer;
@@ -481,7 +481,7 @@ void RE_SkyBox::LoadSkyBoxSphere()
 
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, 3 * sphere->npoints * sizeof(float), sphere->points, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, static_cast<size_t>(sphere->npoints) * sizeof(float) * 3, sphere->points, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);

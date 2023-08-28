@@ -134,10 +134,10 @@ void RE_ParticleEmission::JsonSerialize(bool onlyMD5)
 	Config emission(GetAssetPath());
 	RE_Json* node = emission.GetRootNode("Emission");
 
-	node->PushBool("Loop", loop);
-	node->PushFloat("Max time", max_time);
-	node->PushFloat("Start Delay", start_delay);
-	node->PushFloat("Time Multiplier", time_muliplier);
+	node->Push("Loop", loop);
+	node->Push("Max time", max_time);
+	node->Push("Start Delay", start_delay);
+	node->Push("Time Multiplier", time_muliplier);
 
 	spawn_interval.JsonSerialize(node->PushJObject("Interval"));
 	spawn_mode.JsonSerialize(node->PushJObject("Spawn Mode"));

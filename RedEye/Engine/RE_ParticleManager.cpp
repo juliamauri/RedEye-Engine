@@ -131,7 +131,8 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 		else
 		{
 			//Opacity
-			switch (simulation->opacity.type) {
+			switch (simulation->opacity.type)
+			{
 			case RE_PR_Opacity::Type::OVERLIFETIME: weight = p.lifetime / simulation->initial_lifetime.GetMax(); break;
 			case RE_PR_Opacity::Type::OVERDISTANCE: weight = math::SqrtFast(p.position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq); break;
 			case RE_PR_Opacity::Type::OVERSPEED: weight = math::SqrtFast(p.velocity.LengthSq()) / math::SqrtFast(simulation->max_speed_sq); break;
@@ -142,7 +143,8 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 		}
 
 		// Color
-		switch (simulation->color.type) {
+		switch (simulation->color.type)
+		{
 		case RE_PR_Color::Type::OVERLIFETIME: weight = p.lifetime / simulation->initial_lifetime.GetMax(); break;
 		case RE_PR_Color::Type::OVERDISTANCE: weight = math::SqrtFast(p.position.LengthSq()) / math::SqrtFast(simulation->max_dist_sq); break;
 		case RE_PR_Color::Type::OVERSPEED: weight = math::SqrtFast(p.velocity.LengthSq()) / math::SqrtFast(simulation->max_speed_sq); break;
@@ -153,7 +155,11 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 
 		// Draw Call
 		if (simulation->meshMD5) dynamic_cast<RE_Mesh*>(RE_RES->At(simulation->meshMD5))->DrawMesh(shader);
-		else simulation->primCmp->SimpleDraw();
+		else
+		{
+			RE_CompPrimitive* primitive_component = simulation->primCmp;
+			if (primitive_component) primitive_component->SimpleDraw();
+		}
 	}
 }
 

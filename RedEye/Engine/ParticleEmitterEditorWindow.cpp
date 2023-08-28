@@ -369,7 +369,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 
 			int tmp = static_cast<int>(simulation->max_particles);
 			if (ImGui::DragInt("Max particles", &tmp, 1.f, 0, 65000)) {
-				simulation->max_particles = static_cast<unsigned int>(RE_Math::CapI(tmp, 0, 500000));
+				simulation->max_particles = static_cast<unsigned int>(RE_Math::Cap(tmp, 0, 500000));
 				need_save = true;
 			}
 

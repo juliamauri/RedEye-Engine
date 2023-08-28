@@ -15,26 +15,31 @@ public:
 	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
 	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
 
-	unsigned int GetBinarySize() const override;
+	size_t GetBinarySize() const override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 
 	math::AABB GetAABB() const;
 	bool CheckFaceCollision(const math::Ray& local_ray, float& distance) const;
 
-	void UseResources()override;
-	void UnUseResources()override;
+	void UseResources() override;
+	void UnUseResources() override;
 
-	unsigned int GetVAO()const;
-	unsigned int GetTriangles()const;
+	unsigned int GetVAO() const;
+	size_t GetTriangles() const;
 
 private:
+
 	void GeneratePlane();
 	void SetUpWaterUniforms();
 
+	void DeferedDraw(const uint texture_count) const;
+	void DefaultDraw(const uint texture_count) const;
+
 private:
 	math::AABB box;
-	unsigned int VAO = 0, VBO = 0, EBO = 0, triangle_count = 0;
+	unsigned int VAO = 0, VBO = 0, EBO = 0;
+	size_t triangle_count = 0;
 	int slices = 20, stacks = 20, target_slices = 0, target_stacks = 0;
 
 	eastl::pair<RE_Shader_Cvar*, unsigned int> waterFoam = {nullptr, 0};

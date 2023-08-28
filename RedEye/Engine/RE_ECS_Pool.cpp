@@ -103,17 +103,17 @@ void RE_ECS_Pool::DestroyGO(GO_UID toDestroy)
 
 	eastl::stack<GO_UID> gos;
 	for (auto child : go->childs) gos.push(child);
-	for (auto& comp : go->AllCompData()) componentsPool.DestroyComponent(comp.type, comp.uid);
+	for (const auto& comp : go->AllCompData()) componentsPool.DestroyComponent(comp.type, comp.uid);
 
-	while (!gos.empty()) {
-
+	while (!gos.empty())
+	{
 		GO_UID toD = gos.top();
 		gos.pop();
 
 		RE_GameObject* cGO = gameObjectsPool.AtPtr(toD);
 
 		for (auto child : cGO->childs) gos.push(child);
-		for (auto comp : cGO->AllCompData()) componentsPool.DestroyComponent(comp.type, comp.uid);
+		for (const auto& comp : cGO->AllCompData()) componentsPool.DestroyComponent(comp.type, comp.uid);
 
 		gameObjectsPool.DeleteGO(toD);
 	}
@@ -206,7 +206,7 @@ void RE_ECS_Pool::ClearPool()
 
 // Serialization
 
-unsigned int RE_ECS_Pool::GetBinarySize() const
+size_t RE_ECS_Pool::GetBinarySize() const
 {
 	return gameObjectsPool.GetBinarySize() + componentsPool.GetBinarySize();
 }

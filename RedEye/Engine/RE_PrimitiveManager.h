@@ -10,7 +10,11 @@ class RE_CompRock;
 
 struct PrimData
 {
-	uint vao = 0, vbo = 0, ebo = 0, triangles = 0, refCount = 0;
+	uint vao = 0;
+	uint vbo = 0;
+	uint ebo = 0;
+	uint triangles = 0;
+	uint refCount = 0;
 
 	PrimData(uint vao = 0, uint vbo = 0, uint ebo = 0, uint triangles = 0, uint refCount = 0)
 		: vao(vao), vbo(vbo), ebo(ebo), triangles(triangles), refCount(refCount)

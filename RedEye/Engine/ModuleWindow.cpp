@@ -110,24 +110,24 @@ void ModuleWindow::Save() const
 	RE_Json* node = RE_FS->ConfigNode("Window");
 	if (flags == 0u)
 	{
-		node->PushBool("Fullscreen", false);
-		node->PushBool("Resizable", true);
-		node->PushBool("Borderless", false);
-		node->PushBool("Fullscreen Desktop", false);
+		node->Push("Fullscreen", false);
+		node->Push("Resizable", true);
+		node->Push("Borderless", false);
+		node->Push("Fullscreen Desktop", false);
 	}
 	else
 	{
-		node->PushBool("Fullscreen", flags & SDL_WINDOW_FULLSCREEN);
-		node->PushBool("Resizable", flags & SDL_WINDOW_RESIZABLE);
-		node->PushBool("Borderless", flags & SDL_WINDOW_BORDERLESS);
-		node->PushBool("Fullscreen Desktop", flags & SDL_WINDOW_FULLSCREEN_DESKTOP);
+		node->Push("Fullscreen", static_cast<bool>(flags & SDL_WINDOW_FULLSCREEN));
+		node->Push("Resizable", static_cast<bool>(flags & SDL_WINDOW_RESIZABLE));
+		node->Push("Borderless", static_cast<bool>(flags & SDL_WINDOW_BORDERLESS));
+		node->Push("Fullscreen Desktop", static_cast<bool>(flags & SDL_WINDOW_FULLSCREEN_DESKTOP));
 	}
 
-	node->PushString("title", title.c_str());
-	node->PushInt("pos_x", pos_x);
-	node->PushInt("pos_y", pos_y);
-	node->PushInt("width", width);
-	node->PushInt("height", height);
+	node->Push("title", title.c_str());
+	node->Push("pos_x", pos_x);
+	node->Push("pos_y", pos_y);
+	node->Push("width", width);
+	node->Push("height", height);
 
 	DEL(node);
 }

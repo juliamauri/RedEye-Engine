@@ -166,7 +166,7 @@ void RE_CompCamera::SetPlanesDistance(float n_plane, float f_plane)
 
 void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 {
-	v_fov_rads = math::DegToRad(v_fov_degrees = RE_Math::CapF(vertical_fov_degrees, 1.f, 180.f));
+	v_fov_rads = math::DegToRad(v_fov_degrees = RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f));
 	h_fov_rads = 2.0f * math::Atan(math::Tan(v_fov_rads / 2.0f) * (width / height));
 	h_fov_degrees = math::RadToDeg(h_fov_rads);
 
@@ -179,8 +179,8 @@ void RE_CompCamera::SetFOV(float vertical_fov_degrees)
 
 void RE_CompCamera::ForceFOV(float vertical_fov_degrees, float horizontal_fov_degrees)
 {
-	v_fov_rads = math::DegToRad(v_fov_degrees = RE_Math::CapF(vertical_fov_degrees, 1.f, 180.f));
-	h_fov_rads = math::DegToRad(h_fov_degrees = RE_Math::CapF(horizontal_fov_degrees, 1.f, 180.f));
+	v_fov_rads = math::DegToRad(v_fov_degrees = RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f));
+	h_fov_rads = math::DegToRad(h_fov_degrees = RE_Math::Cap(horizontal_fov_degrees, 1.f, 180.f));
 
 	if (isPerspective)
 	{
@@ -410,7 +410,7 @@ eastl::vector<const char*> RE_CompCamera::GetAllResources()
 	return ret;
 }
 
-unsigned int RE_CompCamera::GetBinarySize() const
+size_t RE_CompCamera::GetBinarySize() const
 {
 	return sizeof(bool) * 3 + sizeof(int) + sizeof(ushort) + sizeof(float) * 3;
 }
@@ -493,14 +493,14 @@ void RE_CompCamera::DeserializeBinary(char*& cursor, eastl::map<int, const char*
 
 void RE_CompCamera::SerializeJson(RE_Json * node, eastl::map<const char*, int>* resources) const
 {
-	node->PushBool("isPrespective", isPerspective);
-	node->PushFloat("near_plane", frustum.NearPlaneDistance());
-	node->PushFloat("far_plane", frustum.FarPlaneDistance());
-	node->PushFloat("v_fov_rads", v_fov_rads);
-	node->PushUInt("aspect_ratio", static_cast<const unsigned int>(target_ar));
-	node->PushBool("draw_frustum", draw_frustum);
-	node->PushBool("usingSkybox", usingSkybox);
-	node->PushInt("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
+	node->Push("isPrespective", isPerspective);
+	node->Push("near_plane", frustum.NearPlaneDistance());
+	node->Push("far_plane", frustum.FarPlaneDistance());
+	node->Push("v_fov_rads", v_fov_rads);
+	node->Push("aspect_ratio", static_cast<uint>(target_ar));
+	node->Push("draw_frustum", draw_frustum);
+	node->Push("usingSkybox", usingSkybox);
+	node->Push("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
 }
 
 void RE_CompCamera::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)

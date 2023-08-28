@@ -23,12 +23,20 @@ public:
 	void clearVertexNormals();
 	void clearFaceNormals();
 
-	void SetVerticesAndIndex(float* vertex, unsigned int* index = nullptr, unsigned int vertexCount = 0, unsigned int triangleCount = 0, float* textureCoords = nullptr, float* normals = nullptr, float* tangents = nullptr, float* bitangents = nullptr);
+	void SetVerticesAndIndex(
+		float* vertex,
+		unsigned int* index = nullptr,
+		size_t vertexCount = 0,
+		unsigned int triangleCount = 0,
+		float* textureCoords = nullptr,
+		float* normals = nullptr,
+		float* tangents = nullptr,
+		float* bitangents = nullptr);
 
 	bool CheckFaceCollision(const math::Ray& local_ray, float& distance) const;
 
-	unsigned int GetVAO()const { return VAO; }
-	unsigned int GetTriangleCount()const { return triangle_count; }
+	unsigned int GetVAO() const { return VAO; }
+	size_t GetTriangleCount() const { return triangle_count; }
 
 public:
 
@@ -53,7 +61,8 @@ private:
 		*texturecoords = nullptr;
 	unsigned int* index = nullptr;
 
-	unsigned int triangle_count = 0, vertex_count = 0;
+	size_t triangle_count = 0;
+	size_t vertex_count = 0;
 
 	math::AABB bounding_box;
 

@@ -211,8 +211,8 @@ void RE_ParticleEmitterBase::Draw()
 
 void RE_ParticleEmitterBase::SaveResourceMeta(RE_Json* metaNode)
 {
-	metaNode->PushString("Emission Meta", (resource_emission) ? RE_RES->At(resource_emission)->GetMetaPath() : "NOMETAPATH");
-	metaNode->PushString("Rendering Meta", (resource_renderer) ? RE_RES->At(resource_renderer)->GetMetaPath() : "NOMETAPATH");
+	metaNode->Push("Emission Meta", (resource_emission) ? RE_RES->At(resource_emission)->GetMetaPath() : "NOMETAPATH");
+	metaNode->Push("Rendering Meta", (resource_renderer) ? RE_RES->At(resource_renderer)->GetMetaPath() : "NOMETAPATH");
 }
 
 void RE_ParticleEmitterBase::LoadResourceMeta(RE_Json* metaNode)

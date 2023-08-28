@@ -121,12 +121,12 @@ const char* RE_CompMesh::GetMesh() const
 
 unsigned int RE_CompMesh::GetVAOMesh() const
 {
-	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->GetVAO() : 0u;
+	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->GetVAO() : 0;
 }
 
-unsigned int RE_CompMesh::GetTriangleMesh() const
+size_t RE_CompMesh::GetTriangleMesh() const
 {
-	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->GetTriangleCount() : 0u;
+	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->GetTriangleCount() : 0;
 }
 
 void RE_CompMesh::SetMaterial(const char * md5) { materialMD5 = md5; }
@@ -142,8 +142,8 @@ eastl::vector<const char*> RE_CompMesh::GetAllResources()
 
 void RE_CompMesh::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
-	node->PushInt("meshResource", (meshMD5) ? resources->at(meshMD5) : -1);
-	node->PushInt("materialResource", (materialMD5) ? resources->at(materialMD5) : -1);
+	node->Push("meshResource", (meshMD5) ? resources->at(meshMD5) : -1);
+	node->Push("materialResource", (materialMD5) ? resources->at(materialMD5) : -1);
 }
 
 void RE_CompMesh::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
@@ -154,7 +154,7 @@ void RE_CompMesh::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* r
 	materialMD5 = (id != -1) ? resources->at(id) : nullptr;
 }
 
-unsigned int RE_CompMesh::GetBinarySize() const
+size_t RE_CompMesh::GetBinarySize() const
 {
 	return sizeof(int) * 2;
 }

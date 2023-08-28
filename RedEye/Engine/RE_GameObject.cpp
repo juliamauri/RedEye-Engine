@@ -688,7 +688,7 @@ void RE_GameObject::DestroyChild(const GO_UID id)
 	}
 }
 
-unsigned int RE_GameObject::ChildCount() const { return childs.size(); }
+eastl_size_t RE_GameObject::ChildCount() const { return childs.size(); }
 bool RE_GameObject::IsLastChild() const { return parent_uid && (GetParentCPtr()->GetLastChildUID() == go_uid); }
 bool RE_GameObject::isParent(GO_UID parent) const
 {
@@ -846,7 +846,7 @@ math::AABB RE_GameObject::GetGlobalBoundingBoxWithChilds() const
 		}
 
 		// Enclose stored points
-		ret.SetFrom(&points[0], points.size());
+		ret.SetFrom(&points[0], static_cast<int>(points.size()));
 	}
 
 	return ret;
@@ -906,44 +906,49 @@ void RE_GameObject::UnUseResources()
 
 void RE_GameObject::ResetLocalBoundingBox()
 {
-	if (render_geo.uid)
+	if (!render_geo.uid)
 	{
-		switch (render_geo.type) {
-		case RE_Component::Type::MESH:		 local_bounding_box = dynamic_cast<const RE_CompMesh*>(CompCPtr(render_geo))->GetAABB(); break;
-		case RE_Component::Type::WATER:		 local_bounding_box = dynamic_cast<const RE_CompWater*>(CompCPtr(render_geo))->GetAABB(); break;
-		case RE_Component::Type::PARTICLEEMITER:
-		{
-			const RE_ParticleEmitter* sim = dynamic_cast<const RE_CompParticleEmitter*>(CompCPtr(render_geo))->GetSimulation();
-			if (sim != nullptr)
-			{
-				local_bounding_box = sim->bounding_box;
-
-				if (!sim->local_space)
-					local_bounding_box.TransformAsAABB(GetTransformPtr()->GetGlobalMatrix().InverseTransposed());
-			}
-			break;
-		}
-		case RE_Component::Type::GRID:
-		{
-			float dist = dynamic_cast<RE_CompGrid*>(CompPtr(render_geo))->GetDistance();
-			local_bounding_box.FromCenterAndSize(math::vec::zero, { dist , 1.0f, dist }); 
-			break;
-		}
-		case RE_Component::Type::CUBE:			local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
-		case RE_Component::Type::DODECAHEDRON:	local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
-		case RE_Component::Type::TETRAHEDRON:	local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
-		case RE_Component::Type::OCTOHEDRON:	local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
-		case RE_Component::Type::ICOSAHEDRON:	local_bounding_box.FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
-		case RE_Component::Type::PLANE:			/*local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one));*/ break;
-		case RE_Component::Type::FUSTRUM:		/*local_bounding_box.Enclose(math::AABB(math::vec::zero, math::vec::one));*/ break;
-		case RE_Component::Type::SPHERE:		local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
-		case RE_Component::Type::CYLINDER:		local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
-		case RE_Component::Type::HEMISHPERE:	local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
-		case RE_Component::Type::TORUS:			local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
-		case RE_Component::Type::TREFOILKNOT:	local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break;
-		case RE_Component::Type::ROCK:			local_bounding_box.FromCenterAndSize(math::vec::zero, math::vec::one); break; }
+		local_bounding_box = { math::vec::zero, math::vec::zero };
+		return;
 	}
-	else local_bounding_box = { math::vec::zero, math::vec::zero };
+
+	switch (render_geo.type)
+	{
+	case RE_Component::Type::MESH:		 local_bounding_box = dynamic_cast<const RE_CompMesh*>(CompCPtr(render_geo))->GetAABB(); break;
+	case RE_Component::Type::WATER:		 local_bounding_box = dynamic_cast<const RE_CompWater*>(CompCPtr(render_geo))->GetAABB(); break;
+	case RE_Component::Type::PARTICLEEMITER:
+	{
+		auto sim = dynamic_cast<const RE_CompParticleEmitter*>(CompCPtr(render_geo))->GetSimulation();
+		if (sim != nullptr)
+		{
+			local_bounding_box = sim->bounding_box;
+
+			if (!sim->local_space)
+				local_bounding_box.TransformAsAABB(GetTransformPtr()->GetGlobalMatrix().InverseTransposed());
+		}
+		break;
+	}
+	case RE_Component::Type::GRID:
+	{
+		float dist = dynamic_cast<RE_CompGrid*>(CompPtr(render_geo))->GetDistance();
+		local_bounding_box.FromCenterAndSize(math::vec::zero, { dist , 1.0f, dist });
+		break;
+	}
+	case RE_Component::Type::CUBE:			local_bounding_box = math::AABB::FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
+	case RE_Component::Type::DODECAHEDRON:	local_bounding_box = math::AABB::FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
+	case RE_Component::Type::TETRAHEDRON:	local_bounding_box = math::AABB::FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
+	case RE_Component::Type::OCTOHEDRON:	local_bounding_box = math::AABB::FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
+	case RE_Component::Type::ICOSAHEDRON:	local_bounding_box = math::AABB::FromCenterAndSize(math::vec::one * 0.5f, math::vec::one * 0.5f); break;
+	case RE_Component::Type::PLANE:			local_bounding_box = { math::vec::zero, math::vec::zero }; break;
+	case RE_Component::Type::FUSTRUM:		local_bounding_box = { math::vec::zero, math::vec::zero }; break;
+	case RE_Component::Type::SPHERE:		local_bounding_box = math::AABB::FromCenterAndSize(math::vec::zero, math::vec::one); break;
+	case RE_Component::Type::CYLINDER:		local_bounding_box = math::AABB::FromCenterAndSize(math::vec::zero, math::vec::one); break;
+	case RE_Component::Type::HEMISHPERE:	local_bounding_box = math::AABB::FromCenterAndSize(math::vec::zero, math::vec::one); break;
+	case RE_Component::Type::TORUS:			local_bounding_box = math::AABB::FromCenterAndSize(math::vec::zero, math::vec::one); break;
+	case RE_Component::Type::TREFOILKNOT:	local_bounding_box = math::AABB::FromCenterAndSize(math::vec::zero, math::vec::one); break;
+	case RE_Component::Type::ROCK:			local_bounding_box = math::AABB::FromCenterAndSize(math::vec::zero, math::vec::one); break;
+	default: break;
+	}
 }
 
 void RE_GameObject::ResetGlobalBoundingBox()
@@ -984,7 +989,7 @@ void RE_GameObject::DrawAABB(math::vec color) const
 	RE_GLCache::ChangeShader(0);
 
 	glMatrixMode(GL_MODELVIEW);
-	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
+	auto t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
 	glLoadMatrixf((t->GetGlobalMatrix() * RE_CameraManager::CurrentCamera()->GetView()).ptr());
 
 	glColor3f(color.x, color.y, color.z);
@@ -1011,18 +1016,17 @@ void RE_GameObject::DrawGlobalAABB() const
 math::AABB RE_GameObject::GetLocalBoundingBox() const { return local_bounding_box; }
 math::AABB RE_GameObject::GetGlobalBoundingBox() const { return global_bounding_box; }
 
-unsigned int RE_GameObject::GetBinarySize()const
+size_t RE_GameObject::GetBinarySize()const
 {
-	uint size = (sizeof(float) * 9) + sizeof(uint) + name.length() + sizeof(GO_UID);
-	return size;
+	return (sizeof(float) * 9) + sizeof(uint) + name.length() + sizeof(GO_UID);
 }
 
 void RE_GameObject::SerializeJson(RE_Json * node)
 {
-	node->PushString("name", name.c_str());
-	if (parent_uid) node->PushUnsignedLongLong("Parent Pool ID", parent_uid);
+	node->Push("name", name.c_str());
+	if (parent_uid) node->Push("Parent Pool ID", parent_uid);
 
-	const RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
+	const auto t = dynamic_cast<const RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
 	node->PushFloatVector("position", t->GetLocalPosition());
 	node->PushFloatVector("rotation", t->GetLocalEulerRotation());
 	node->PushFloatVector("scale", t->GetLocalScale());
@@ -1032,7 +1036,7 @@ void RE_GameObject::DeserializeJSON(RE_Json* node, GameObjectsPool* goPool, Comp
 {
 	SetUp(goPool, cmpsPool, node->PullString("name", "GameObject"), node->PullUnsignedLongLong("Parent Pool ID", 0));
 
-	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
+	auto t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
 	t->SetPosition(node->PullFloatVector("position", math::vec::zero));
 	t->SetRotation(node->PullFloatVector("rotation", math::vec::zero));
 	t->SetScale(node->PullFloatVector("scale", math::vec::one));
@@ -1040,8 +1044,8 @@ void RE_GameObject::DeserializeJSON(RE_Json* node, GameObjectsPool* goPool, Comp
 
 void RE_GameObject::SerializeBinary(char*& cursor)
 {
-	uint size = sizeof(uint);
-	uint strLenght = name.length();
+	size_t size = sizeof(uint);
+	size_t strLenght = name.length();
 	memcpy(cursor, &strLenght, size);
 	cursor += size;
 	size = sizeof(char) * strLenght;
@@ -1053,7 +1057,7 @@ void RE_GameObject::SerializeBinary(char*& cursor)
 	cursor += size;
 
 	size = sizeof(float) * 3;
-	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
+	const auto t = dynamic_cast<const RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
 	memcpy(cursor, &t->GetLocalPosition()[0], size);
 	cursor += size;
 	memcpy(cursor, &t->GetLocalEulerRotation()[0], size);
@@ -1064,8 +1068,8 @@ void RE_GameObject::SerializeBinary(char*& cursor)
 
 void RE_GameObject::DeserializeBinary(char*& cursor, GameObjectsPool* goPool, ComponentsPool* compPool)
 {
-	uint strLenght = 0;
-	uint size = sizeof(uint);
+	size_t strLenght = 0;
+	size_t size = sizeof(uint);
 	memcpy(&strLenght, cursor, size);
 	cursor += size;
 
@@ -1087,7 +1091,7 @@ void RE_GameObject::DeserializeBinary(char*& cursor, GameObjectsPool* goPool, Co
 
 	float vec[3] = { 0.0, 0.0, 0.0 };
 	size = sizeof(float) * 3;
-	RE_CompTransform* t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
+	auto t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
 	memcpy(vec, cursor, size);
 	cursor += size;
 	t->SetPosition(math::vec(vec));

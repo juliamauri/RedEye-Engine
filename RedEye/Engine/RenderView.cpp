@@ -80,11 +80,11 @@ void RenderView::Save(RE_Json* node) const
 
 	if (node == nullptr) return;
 
-	node->PushUInt("Light Mode", static_cast<uint>(light));
+	node->Push("Light Mode", static_cast<uint>(light));
 	node->PushFloat4("Clear Color", clear_color);
 	node->PushFloat4("Clip Distance", clip_distance);
 
-	for (int i = 0; i < 12; i++) node->PushBool(flag_labels[i], flags & (1 << i));
+	for (int i = 0; i < 12; i++) node->Push(flag_labels[i], static_cast<bool>(flags & (1 << i)));
 
 	DEL(node);
 }

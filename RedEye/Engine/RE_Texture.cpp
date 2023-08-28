@@ -35,7 +35,7 @@ TextureType RE_Texture::DetectExtension()
 	eastl::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
 	const char* extension = extensionStr.c_str();
 
-	int size = eastl::CharStrlen(extension);
+	auto size = eastl::CharStrlen(extension);
 	if (size > 0)
 	{
 		if (eastl::Compare(extension, "dds", 3) == 0) texType = RE_DDS;
@@ -200,11 +200,11 @@ void RE_Texture::Draw()
 
 void RE_Texture::SaveResourceMeta(RE_Json * metaNode)
 {
-	metaNode->PushInt("TextureType", texType);
-	metaNode->PushInt("minFilter", texSettings.min_filter);
-	metaNode->PushInt("magFilter", texSettings.mag_filter);
-	metaNode->PushInt("wrapS", texSettings.wrap_s);
-	metaNode->PushInt("wrapT", texSettings.wrap_t);
+	metaNode->Push("TextureType", texType);
+	metaNode->Push("minFilter", texSettings.min_filter);
+	metaNode->Push("magFilter", texSettings.mag_filter);
+	metaNode->Push("wrapS", texSettings.wrap_s);
+	metaNode->Push("wrapT", texSettings.wrap_t);
 	metaNode->PushFloat4("borderColor", texSettings.borderColor);
 }
 

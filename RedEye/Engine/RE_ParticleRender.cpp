@@ -95,7 +95,7 @@ void RE_ParticleRender::FillEmitter(RE_ParticleEmitter* to_fill)
 			RE_SCENE->primitives->SetUpComponentPrimitive(to_fill->primCmp);
 		else {
 
-			uint p_size = primCmp->GetParticleBinarySize();
+			size_t p_size = primCmp->GetParticleBinarySize();
 
 			char* prim_buffer = new char[p_size];
 			char* cursor = prim_buffer;
@@ -137,9 +137,9 @@ void RE_ParticleRender::FillResouce(RE_ParticleEmitter* from)
 
 void RE_ParticleRender::SaveResourceMeta(RE_Json* metaNode)
 {
-	metaNode->PushBool("isMesh", (meshMD5));
+	metaNode->Push("isMesh", (meshMD5));
 	if (meshMD5)
-		metaNode->PushString("meshPath", RE_RES->At(meshMD5)->GetLibraryPath());
+		metaNode->Push("meshPath", RE_RES->At(meshMD5)->GetLibraryPath());
 }
 
 void RE_ParticleRender::LoadResourceMeta(RE_Json* metaNode)
@@ -214,10 +214,10 @@ void RE_ParticleRender::JsonSerialize(bool onlyMD5)
 	light.JsonSerialize(node->PushJObject("Light"));
 
 	node->PushFloatVector("Scale", scale);
-	node->PushInt("particleDir", static_cast<int>(particleDir));
+	node->Push("particleDir", static_cast<int>(particleDir));
 	node->PushFloatVector("Direction", direction);
 
-	node->PushInt("primitiveType", static_cast<int>(primType));
+	node->Push("primitiveType", static_cast<int>(primType));
 	if (primType != RE_Component::Type::EMPTY)
 		primCmp->SerializeParticleJson(node->PushJObject("primitive"));
 
@@ -289,7 +289,7 @@ void RE_ParticleRender::BinarySerialize()
 {
 	RE_FileBuffer libraryFile(GetLibraryPath());
 
-	uint bufferSize = GetBinarySize() + 1;
+	auto bufferSize = GetBinarySize() + 1;
 
 	char* buffer = new char[bufferSize];
 	char* cursor = buffer;
@@ -323,7 +323,7 @@ void RE_ParticleRender::BinarySerialize()
 	DEL_A(buffer);
 }
 
-unsigned int RE_ParticleRender::GetBinarySize() const
+size_t RE_ParticleRender::GetBinarySize() const
 {
 	return sizeof(RE_ParticleEmitter::ParticleDir)
 		+ (sizeof(float) * 6u)

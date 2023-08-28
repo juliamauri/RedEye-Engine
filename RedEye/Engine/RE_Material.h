@@ -44,10 +44,10 @@ public:
 	void DrawMaterialEdit();
 	void DrawMaterialParticleEdit(bool tex);
 
-	void SomeResourceChanged(const char* resMD5)override;
+	void SomeResourceChanged(const char* resMD5) override;
 
-	bool ExitsOnShader(const char* shader);
-	bool ExistsOnTexture(const char* texture);
+	bool ExistsOnShader(const char* shader) const;
+	bool ExistsOnTexture(const char* texture) const;
 
 	//direct method, use it when creates the material.
 	void SetShader(const char* shaderMD5);
@@ -76,11 +76,11 @@ private:
 
 	void BinaryDeserialize();
 	void BinarySerialize();
-	unsigned int GetBinarySize();
+	size_t GetBinarySize();
 
 	void GetAndProcessUniformsFromShader();
 
-	bool ExistsOnTexture(const char* texture, eastl::vector<const char*>* textures);
+	bool ExistsOnTexture(const char* texture, const eastl::vector<const char*>* textures) const;
 	void DeleteTexture(const char* texMD5, eastl::vector<const char*>* textures);
 
 public:

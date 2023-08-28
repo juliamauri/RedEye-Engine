@@ -90,11 +90,11 @@ void RE_EmissionInterval::JsonDeserialize(RE_Json* node)
 
 void RE_EmissionInterval::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 	if (type)
 	{
-		node->PushFloat("Duration 1", duration[0]);
-		node->PushFloat("Duration 2", duration[1]);
+		node->Push("Duration 1", duration[0]);
+		node->Push("Duration 2", duration[1]);
 	}
 
 	DEL(node);
@@ -236,22 +236,22 @@ void RE_EmissionSpawn::JsonDeserialize(RE_Json* node)
 
 void RE_EmissionSpawn::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 	switch (type) {
 	case RE_EmissionSpawn::Type::SINGLE:
 	{
-		node->PushInt("Particles spawned", particles_spawned);
+		node->Push("Particles spawned", particles_spawned);
 		break;
 	}
 	case RE_EmissionSpawn::Type::BURST:
 	{
-		node->PushInt("Particles spawned", particles_spawned);
-		node->PushFloat("Period", frequency);
+		node->Push("Particles spawned", particles_spawned);
+		node->Push("Period", frequency);
 		break;
 	}
 	case RE_EmissionSpawn::Type::FLOW:
 	{
-		node->PushFloat("Frequency", frequency);
+		node->Push("Frequency", frequency);
 		break;
 	}
 	}
@@ -471,19 +471,19 @@ void RE_EmissionShape::JsonDeserialize(RE_Json* node)
 
 void RE_EmissionShape::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 	switch (type) {
 	case RE_EmissionShape::Type::CIRCLE:
 	{
-		node->PushFloat("Radius", geo.circle.r);
+		node->Push("Radius", geo.circle.r);
 		node->PushFloatVector("Position", geo.circle.pos);
 		node->PushFloatVector("Normal", geo.circle.normal);
 		break;
 	}
 	case RE_EmissionShape::Type::RING:
 	{
-		node->PushFloat("Inner radius", geo.ring.second);
-		node->PushFloat("Radius", geo.ring.first.r);
+		node->Push("Inner radius", geo.ring.second);
+		node->Push("Radius", geo.ring.first.r);
 		node->PushFloatVector("Position", geo.ring.first.pos);
 		node->PushFloatVector("Normal", geo.ring.first.normal);
 		break;
@@ -496,14 +496,14 @@ void RE_EmissionShape::JsonSerialize(RE_Json* node) const
 	}
 	case RE_EmissionShape::Type::SPHERE:
 	{
-		node->PushFloat("Radius", geo.sphere.r);
+		node->Push("Radius", geo.sphere.r);
 		node->PushFloatVector("Position", geo.sphere.pos);
 		break;
 	}
 	case RE_EmissionShape::Type::HOLLOW_SPHERE:
 	{
-		node->PushFloat("Inner radius", geo.hollow_sphere.second);
-		node->PushFloat("Radius", geo.hollow_sphere.first.r);
+		node->Push("Inner radius", geo.hollow_sphere.second);
+		node->Push("Radius", geo.hollow_sphere.first.r);
 		node->PushFloatVector("Position", geo.hollow_sphere.first.pos);
 		break;
 	}
@@ -822,7 +822,7 @@ void RE_EmissionVector::JsonDeserialize(RE_Json* node)
 
 void RE_EmissionVector::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 	switch (type) {
 	case RE_EmissionVector::Type::VALUE:
 	{
@@ -831,40 +831,40 @@ void RE_EmissionVector::JsonSerialize(RE_Json* node) const
 	}
 	case RE_EmissionVector::Type::RANGEX:
 	{
-		node->PushFloat("Margin X", margin.x);
+		node->Push("Margin X", margin.x);
 		node->PushFloatVector("Value", val);
 		break;
 	}
 	case RE_EmissionVector::Type::RANGEY:
 	{
-		node->PushFloat("Margin Y", margin.y);
+		node->Push("Margin Y", margin.y);
 		node->PushFloatVector("Value", val);
 		break;
 	}
 	case RE_EmissionVector::Type::RANGEZ:
 	{
-		node->PushFloat("Margin Z", margin.z);
+		node->Push("Margin Z", margin.z);
 		node->PushFloatVector("Value", val);
 		break;
 	}
 	case RE_EmissionVector::Type::RANGEXY:
 	{
-		node->PushFloat("Margin X", margin.x);
-		node->PushFloat("Margin Y", margin.y);
+		node->Push("Margin X", margin.x);
+		node->Push("Margin Y", margin.y);
 		node->PushFloatVector("Value", val);
 		break;
 	}
 	case RE_EmissionVector::Type::RANGEXZ:
 	{
-		node->PushFloat("Margin X", margin.x);
-		node->PushFloat("Margin Z", margin.z);
+		node->Push("Margin X", margin.x);
+		node->Push("Margin Z", margin.z);
 		node->PushFloatVector("Value", val);
 		break;
 	}
 	case RE_EmissionVector::Type::RANGEYZ:
 	{
-		node->PushFloat("Margin Y", margin.y);
-		node->PushFloat("Margin Z", margin.z);
+		node->Push("Margin Y", margin.y);
+		node->Push("Margin Z", margin.z);
 		node->PushFloatVector("Value", val);
 		break;
 	}
@@ -1148,17 +1148,17 @@ void RE_EmissionSingleValue::JsonDeserialize(RE_Json* node)
 
 void RE_EmissionSingleValue::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 	switch (type) {
 	case RE_EmissionSingleValue::Type::VALUE:
 	{
-		node->PushFloat("Value", val);
+		node->Push("Value", val);
 		break;
 	}
 	case RE_EmissionSingleValue::Type::RANGE:
 	{
-		node->PushFloat("Value", val);
-		node->PushFloat("Margin", margin);
+		node->Push("Value", val);
+		node->Push("Margin", margin);
 		break;
 	}
 	default: break; }
@@ -1287,11 +1287,11 @@ void RE_EmissionExternalForces::JsonDeserialize(RE_Json* node)
 
 void RE_EmissionExternalForces::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 	switch (type) {
 	case RE_EmissionExternalForces::GRAVITY:
 	{
-		node->PushFloat("Gravity", gravity);
+		node->Push("Gravity", gravity);
 		break;
 	}
 	case RE_EmissionExternalForces::WIND:
@@ -1301,7 +1301,7 @@ void RE_EmissionExternalForces::JsonSerialize(RE_Json* node) const
 	}
 	case RE_EmissionExternalForces::WIND_GRAVITY:
 	{
-		node->PushFloat("Gravity", gravity);
+		node->Push("Gravity", gravity);
 		node->PushFloatVector("Wind", wind);
 		break;
 	}
@@ -1661,21 +1661,21 @@ void RE_EmissionBoundary::JsonDeserialize(RE_Json* node)
 
 void RE_EmissionBoundary::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 	if (type)
 	{
-		node->PushInt("Effect", static_cast<int>(effect));
+		node->Push("Effect", static_cast<int>(effect));
 
 		switch (type) {
 		case RE_EmissionBoundary::PLANE:
 		{
-			node->PushFloat("Distance", geo.plane.d);
+			node->Push("Distance", geo.plane.d);
 			node->PushFloatVector("Normal", geo.plane.normal);
 			break;
 		}
 		case RE_EmissionBoundary::SPHERE:
 		{
-			node->PushFloat("Radius", geo.sphere.r);
+			node->Push("Radius", geo.sphere.r);
 			node->PushFloatVector("Position", geo.sphere.pos);
 			break;
 		}
@@ -1847,10 +1847,10 @@ void RE_EmissionCollider::JsonDeserialize(RE_Json* node)
 
 void RE_EmissionCollider::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 	if (type)
 	{
-		node->PushBool("Inter collisions", inter_collisions);
+		node->Push("Inter collisions", inter_collisions);
 		switch (type) {
 		case RE_EmissionCollider::Type::POINT:
 		{
@@ -2009,11 +2009,11 @@ void RE_PR_Color::JsonDeserialize(RE_Json* node)
 
 void RE_PR_Color::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 
 	node->PushFloatVector("Base", base);
 	node->PushFloatVector("Gradient", gradient);
-	node->PushBool("useCurve", useCurve);
+	node->Push("useCurve", useCurve);
 
 	curve.JsonSerialize(node->PushJObject("curve"));
 
@@ -2060,7 +2060,7 @@ void RE_PR_Color::BinarySerialize(char*& cursor) const
 	curve.BinarySerialize(cursor);
 }
 
-unsigned int RE_PR_Color::GetBinarySize() const
+size_t RE_PR_Color::GetBinarySize() const
 {
 	return sizeof(int)
 		+ (sizeof(float) * 6u)
@@ -2123,7 +2123,7 @@ void CurveData::JsonDeserialize(RE_Json* node)
 	total_points = node->PullInt("TotalPoints", 10);
 	comboCurve = node->PullInt("comboCurve", 0);
 	for (int i = 0; i < total_points; i++) {
-		math::float2 toImVec2 = node->PullFloat((eastl::to_string(i) + "p").c_str(), { -1.0f, 0.0f });
+		math::float2 toImVec2 = node->PullFloat2((eastl::to_string(i) + "p").c_str(), { -1.0f, 0.0f });
 		points.push_back({ toImVec2.x,toImVec2.y });
 	}
 	DEL(node);
@@ -2131,11 +2131,11 @@ void CurveData::JsonDeserialize(RE_Json* node)
 
 void CurveData::JsonSerialize(RE_Json* node) const
 {
-	node->PushBool("Smooth", smooth);
-	node->PushInt("TotalPoints", total_points);
-	node->PushInt("comboCurve", comboCurve);
+	node->Push("Smooth", smooth);
+	node->Push("TotalPoints", total_points);
+	node->Push("comboCurve", comboCurve);
 	for (int i = 0; i < total_points; i++)
-		node->PushFloat((eastl::to_string(i) + "p").c_str(), { points[i].x, points[i].y });
+		node->PushFloat2((eastl::to_string(i) + "p").c_str(), { points[i].x, points[i].y });
 
 	DEL(node);
 }
@@ -2185,9 +2185,9 @@ void CurveData::BinarySerialize(char*& cursor) const
 	cursor += size;
 }
 
-unsigned int CurveData::GetBinarySize() const
+size_t CurveData::GetBinarySize() const
 {
-	return sizeof(bool) + (sizeof(int) * 2u) + (sizeof(float) * 2u * points.size());
+	return sizeof(bool) + (sizeof(int) * 2) + (sizeof(float) * 2 * points.size());
 }
 
 float RE_PR_Opacity::GetValue(const float weight) const
@@ -2244,11 +2244,11 @@ void RE_PR_Opacity::JsonDeserialize(RE_Json* node)
 
 void RE_PR_Opacity::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 
-	node->PushFloat("Opacity", opacity);
-	node->PushBool("Inverted", inverted);
-	node->PushBool("useCurve", useCurve);
+	node->Push("Opacity", opacity);
+	node->Push("Inverted", inverted);
+	node->Push("useCurve", useCurve);
 
 	curve.JsonSerialize(node->PushJObject("curve"));
 
@@ -2295,7 +2295,7 @@ void RE_PR_Opacity::BinarySerialize(char*& cursor) const
 	curve.BinarySerialize(cursor);
 }
 
-unsigned int RE_PR_Opacity::GetBinarySize() const
+size_t RE_PR_Opacity::GetBinarySize() const
 {
 	return sizeof(int)
 		+ sizeof(float)
@@ -2492,36 +2492,36 @@ void RE_PR_Light::JsonDeserialize(RE_Json* node)
 
 void RE_PR_Light::JsonSerialize(RE_Json* node) const
 {
-	node->PushInt("Type", static_cast<int>(type));
+	node->Push("Type", static_cast<int>(type));
 	switch (type) {
 	case RE_PR_Light::UNIQUE:
 	{
 		node->PushFloatVector("Color", color);
-		node->PushFloat("Intensity", intensity);
-		node->PushFloat("Specular", specular);
+		node->Push("Intensity", intensity);
+		node->Push("Specular", specular);
 
-		node->PushFloat("Constant", constant);
-		node->PushFloat("Linear", linear);
-		node->PushFloat("Quadratic", quadratic);
+		node->Push("Constant", constant);
+		node->Push("Linear", linear);
+		node->Push("Quadratic", quadratic);
 
 		break;
 	}
 	case RE_PR_Light::PER_PARTICLE:
 	{
-		node->PushBool("Random Color", random_color);
+		node->Push("Random Color", random_color);
 		if (!random_color) node->PushFloatVector("Color", color);
 
-		node->PushBool("Random Intensity", random_i);
-		node->PushFloat("Intensity", intensity);
-		if (random_i) node->PushFloat("Intensity Max", intensity_max);
+		node->Push("Random Intensity", random_i);
+		node->Push("Intensity", intensity);
+		if (random_i) node->Push("Intensity Max", intensity_max);
 
-		node->PushBool("Random Specular", random_s);
-		node->PushFloat("Specular", specular);
-		if (random_s) node->PushFloat("Specular Max", specular_max);
+		node->Push("Random Specular", random_s);
+		node->Push("Specular", specular);
+		if (random_s) node->Push("Specular Max", specular_max);
 
-		node->PushFloat("Constant", constant);
-		node->PushFloat("Linear", linear);
-		node->PushFloat("Quadratic", quadratic);
+		node->Push("Constant", constant);
+		node->Push("Linear", linear);
+		node->Push("Quadratic", quadratic);
 
 		break;
 	}
@@ -2532,7 +2532,7 @@ void RE_PR_Light::JsonSerialize(RE_Json* node) const
 
 void RE_PR_Light::BinaryDeserialize(char*& cursor)
 {
-	unsigned int size = sizeof(int);
+	size_t size = sizeof(int);
 	memcpy(&type, cursor, size);
 	cursor += size;
 
@@ -2604,7 +2604,7 @@ void RE_PR_Light::BinaryDeserialize(char*& cursor)
 
 void RE_PR_Light::BinarySerialize(char*& cursor) const
 {
-	unsigned int size = sizeof(int);
+	size_t size = sizeof(int);
 	memcpy(cursor, &type, size);
 	cursor += size;
 
@@ -2612,8 +2612,8 @@ void RE_PR_Light::BinarySerialize(char*& cursor) const
 	case RE_PR_Light::UNIQUE:
 	{
 		size = sizeof(float);
-		memcpy(cursor, color.ptr(), size * 3u);
-		cursor += size * 3u;
+		memcpy(cursor, color.ptr(), size * 3);
+		cursor += size * 3;
 		memcpy(cursor, &intensity, size);
 		cursor += size;
 		memcpy(cursor, &specular, size);
@@ -2635,7 +2635,7 @@ void RE_PR_Light::BinarySerialize(char*& cursor) const
 		cursor += size;
 		if (!random_color)
 		{
-			size = sizeof(float) * 3u;
+			size = sizeof(float) * 3;
 			memcpy(cursor, color.ptr(), size);
 			cursor += size;
 		}
@@ -2675,22 +2675,22 @@ void RE_PR_Light::BinarySerialize(char*& cursor) const
 	}
 }
 
-unsigned int RE_PR_Light::GetBinarySize() const
+size_t RE_PR_Light::GetBinarySize() const
 {
-	unsigned int ret = sizeof(int);
+	size_t ret = sizeof(int);
 
 	switch (type) {
 	case RE_PR_Light::UNIQUE:
 	{
-		ret += sizeof(float) * 8u;
+		ret += sizeof(float) * 8;
 		break;
 	}
 	case RE_PR_Light::PER_PARTICLE:
 	{
-		ret += sizeof(bool) * 3u;
-		ret += sizeof(float) * 5u;
+		ret += sizeof(bool) * 3;
+		ret += sizeof(float) * 5;
 
-		if (!random_color) ret += sizeof(float) * 3u;
+		if (!random_color) ret += sizeof(float) * 3;
 		if (!random_i) ret += sizeof(float);
 		if (!random_s) ret += sizeof(float);
 

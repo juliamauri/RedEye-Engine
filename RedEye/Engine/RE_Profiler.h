@@ -2,9 +2,16 @@
 #define __RE_PROFILER__
 
 #define PROFILING_ENABLED // undefine to disable any profiling 
+
 #ifdef PROFILING_ENABLED
 #define INTERNAL_PROFILING // undefine to use Optick Profiling
 #endif // PROFILING_ENABLED
+
+#ifdef INTERNAL_PROFILING
+#include "RE_DataTypes.h"
+#include <MGL/Time/Clock.h>
+#include <EASTL/vector.h>
+#endif
 
 enum class RE_ProfiledFunc : unsigned short
 {
@@ -106,8 +113,6 @@ namespace RE_Profiler
 
 #ifdef INTERNAL_PROFILING
 
-#include <EASTL/vector.h>
-
 namespace RE_Profiler
 {
 	constexpr bool RecordFromStart = true;
@@ -119,35 +124,47 @@ namespace RE_Profiler
 	void Clear();
 	void Reset();
 	void Exit();
-
 	void Deploy();
-	void WriteToFile(const char* filename, const char* buffer);
 };
 
 struct ProfilingOperation
 {
+	ProfilingOperation() = default;
+	ProfilingOperation(
+		const RE_ProfiledFunc& function,
+		const RE_ProfiledClass& context,
+		const math::tick_t& start,
+		const math::tick_t& duration,
+		const ulong& frame);
+
+	bool operator==(const ProfilingOperation& other) const;
+
 	RE_ProfiledFunc function;
 	RE_ProfiledClass context;
-	unsigned long long start; // ticks
-	unsigned long long duration; // ticks
-	unsigned long frame;
+	math::tick_t start; // ticks
+	math::tick_t duration; // ticks
+	ulong frame;
 };
 
 struct ProfilingTimer
 {
+	static math::tick_t start;
+	static bool recording;
+	static ulong frame;
+	static eastl::vector<ProfilingOperation> operations;
+
+	ProfilingTimer() = default;
+	ProfilingTimer(bool pushed, const eastl_size_t& operation_id);
 	ProfilingTimer(RE_ProfiledFunc function, RE_ProfiledClass context);
 	~ProfilingTimer();
 
-	unsigned long long Read() const;
+	bool operator==(const ProfilingTimer& other) const;
+
+	math::tick_t Read() const;
 	float ReadMs() const;
 
 	bool pushed;
-	unsigned int operation_id;
-
-	static unsigned long long start;
-	static bool recording;
-	static unsigned long frame;
-	static eastl::vector<ProfilingOperation> operations;
+	eastl_size_t operation_id = 0;
 };
 
 #define RE_PROFILE(func, context) ProfilingTimer profiling_timer(func, context)

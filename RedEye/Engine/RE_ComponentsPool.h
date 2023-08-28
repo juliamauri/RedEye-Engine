@@ -6,29 +6,7 @@
 class ComponentsPool
 {
 public:
-	ComponentsPool()
-	{
-		transPool.SetName("Transforms Pool");
-		camPool.SetName("Cameras Pool");
-		meshPool.SetName("Meshes Pool");
-		lightPool.SetName("Lights Pool");
-		waterPool.SetName("Water Pool");
-		particleSPool.SetName("Particle System Pool");
-		pGridPool.SetName("Grid Pool");
-		pRockPool.SetName("Rock Pool");
-		pDodecahedronPool.SetName("Dodecahedron Pool");
-		pTetrahedronPool.SetName("Tetrahedron Pool");
-		pOctohedronPool.SetName("Octohedron Pool");
-		pIcosahedronPool.SetName("Icosahedron Pool");
-		pPointPool.SetName("Point Pool");
-		pPlanePool.SetName("Plane Pool");
-		pSpherePool.SetName("Sphere Pool");
-		pCylinderPool.SetName("Cylinder Pool");
-		pHemiSpherePool.SetName("HemiSphere Pool");
-		pTorusPool.SetName("orus Pool");
-		pTrefoiKnotPool.SetName("TrefoiKnot Pool");
-	}
-
+	ComponentsPool();
 	~ComponentsPool() {}
 
 	// Content iteration
@@ -42,7 +20,7 @@ public:
 
 	// Component Handling
 	eastl::pair<const COMP_UID, RE_Component*> GetNewComponent(RE_Component::Type cType);
-	const COMP_UID GetNewComponentUID(RE_Component::Type cType);
+	COMP_UID GetNewComponentUID(RE_Component::Type cType);
 	RE_Component* GetNewComponentPtr(RE_Component::Type cType);
 
 	RE_Component* CopyComponent(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent);
@@ -59,7 +37,7 @@ public:
 	eastl::vector<eastl::pair<const COMP_UID, const RE_Component*>> GetAllCompCData(RE_Component::Type type = RE_Component::Type::EMPTY) const;
 
 	// Serialization
-	unsigned int GetBinarySize()const;
+	size_t GetBinarySize() const;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
 	void DeserializeBinary(GameObjectsPool* goPool, char*& cursor, eastl::map<int, const char*>* resources);
 

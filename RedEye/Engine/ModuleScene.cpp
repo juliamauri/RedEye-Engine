@@ -30,12 +30,14 @@
 #include "RE_Prefab.h"
 #include "RE_Scene.h"
 #include "RE_Model.h"
+#include "RE_Math.h"
 
 #include <SDL2/SDL.h>
 #include <ImGui/imgui_internal.h>
 #include <EASTL/string.h>
 #include <EASTL/queue.h>
 #include <EASTL/vector.h>
+#include <EASTL/numeric.h>
 
 ModuleScene::ModuleScene() :
 	cams(new RE_CameraManager()),
@@ -91,9 +93,9 @@ void ModuleScene::CleanUp()
 
 void ModuleScene::DrawEditor()
 {
-	int total_count = scenePool.TotalGameObjects();
-	int static_count = static_tree.GetCount();
-	int dynamic_count = dynamic_tree.GetCount();
+	size_t total_count = scenePool.TotalGameObjects();
+	size_t static_count = static_tree.GetCount();
+	size_t dynamic_count = dynamic_tree.GetCount();
 	static_count = static_count <= 1 ? static_count : (static_count - 1) / 2;
 	dynamic_count = dynamic_count <= 1 ? dynamic_count : (dynamic_count - 1) / 2;
 	ImGui::Text("Total Scene GOs: %i", total_count);
@@ -106,17 +108,18 @@ void ModuleScene::DrawEditor()
 	{
 		eastl::vector<GO_UID> allTransforms = GetScenePool()->GetAllGOUIDs();
 
-		int transformCount = allTransforms.size();
-		ImGui::Text("Total %i transforms.", transformCount);
+		eastl_size_t transformCount = allTransforms.size();
+		ImGui::Text("Total %d transforms.", transformCount);
 		ImGui::SameLine();
 		ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
-		static int range = 0, totalShowing = 8;
 		ImGui::SameLine();
 
-		ImGui::Text("Actual Range: %i - %i", range, (range + totalShowing < transformCount) ? range + totalShowing : transformCount);
+		static int range = 0;
+		static int totalShowing = 8;
+		ImGui::Text("Actual Range: %d - %d", range, RE_Math::Min(static_cast<eastl_size_t>(range) + totalShowing, transformCount));
 
 		ImGui::PushItemWidth(50.f);
-		ImGui::DragInt("Position", &range, 1.f, 0, transformCount - totalShowing);
+		ImGui::DragInt("Position", &range, 1.f, 0, static_cast<int>(transformCount) - totalShowing);
 		ImGui::SameLine();
 		ImGui::DragInt("List Size", &totalShowing, 1.f, 0);
 

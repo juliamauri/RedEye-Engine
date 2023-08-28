@@ -148,8 +148,8 @@ void RE_ParticleEmitter::UpdateParticles()
 			particle_pool[index].position += (particle_pool[index].velocity += external_acc.GetAcceleration() * local_dt) * local_dt;
 
 			// Update Control values
-			max_dist_sq = RE_Math::MaxF(max_dist_sq, (particle_pool[index].position - (parent_pos * !local_space)).LengthSq());
-			max_speed_sq = RE_Math::MaxF(max_speed_sq, particle_pool[index].velocity.LengthSq());
+			max_dist_sq = RE_Math::Max(max_dist_sq, (particle_pool[index].position - (parent_pos * !local_space)).LengthSq());
+			max_speed_sq = RE_Math::Max(max_speed_sq, particle_pool[index].velocity.LengthSq());
 
 			// Broadphase AABB Boundary
 			if (RE_ParticleEmitter::mode == BoundingMode::PER_PARTICLE)
@@ -180,7 +180,7 @@ void RE_ParticleEmitter::UpdateSpawn()
 	RE_PROFILE(RE_ProfiledFunc::ParticleSpawn, RE_ProfiledClass::ParticleEmitter);
 	if (spawn_interval.IsActive(local_dt))
 	{
-		const unsigned int to_add = RE_Math::MinUI(
+		const unsigned int to_add = RE_Math::Min(
 			spawn_mode.CountNewParticles(local_dt),
 			max_particles - particle_count);
 

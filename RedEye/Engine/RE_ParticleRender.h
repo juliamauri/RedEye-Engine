@@ -33,7 +33,7 @@ private:
 
 	void BinaryDeserialize();
 	void BinarySerialize();
-	unsigned int GetBinarySize() const;
+	size_t GetBinarySize() const;
 
 private:
 

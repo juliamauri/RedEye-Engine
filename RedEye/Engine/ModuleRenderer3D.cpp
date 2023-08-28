@@ -474,9 +474,9 @@ void ModuleRenderer3D::Save() const
 {
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModuleRender);
 	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
-	node->PushBool("vsync", vsync);
+	node->Push("vsync", vsync);
 
-	node->PushBool("share_light_pass", shareLightPass);
+	node->Push("share_light_pass", shareLightPass);
 
 	// Render Views
 	for (uint i = 0; i < render_views.size(); ++i)
@@ -1080,26 +1080,27 @@ void ModuleRenderer3D::DrawStencil(RE_GameObject* go, RE_Component* comp, bool h
 	if (!comp) return;
 
 	RE_PROFILE(RE_ProfiledFunc::DrawStencil, RE_ProfiledClass::ModuleRender);
-	unsigned int vaoToStencil = 0, triangleToStencil = 0;
+	unsigned int vaoToStencil = 0;
+	GLsizei triangleToStencil = 0;
 
 	RE_Component::Type cT = comp->GetType();
 	if (cT == RE_Component::Type::MESH)
 	{
 		RE_CompMesh* mesh_comp = dynamic_cast<RE_CompMesh*>(comp);
 		vaoToStencil = mesh_comp->GetVAOMesh();
-		triangleToStencil = mesh_comp->GetTriangleMesh();
+		triangleToStencil = static_cast<GLsizei>(mesh_comp->GetTriangleMesh());
 	}
 	else if (cT > RE_Component::Type::PRIMIVE_MIN && cT < RE_Component::Type::PRIMIVE_MAX)
 	{
 		RE_CompPrimitive* prim_comp = dynamic_cast<RE_CompPrimitive*>(comp);
 		vaoToStencil = prim_comp->GetVAO();
-		triangleToStencil = prim_comp->GetTriangleCount();
+		triangleToStencil = static_cast<GLsizei>(prim_comp->GetTriangleCount());
 	}
 	else if (cT == RE_Component::Type::WATER)
 	{
 		RE_CompWater* water_comp = dynamic_cast<RE_CompWater*>(comp);
 		vaoToStencil = water_comp->GetVAO();
-		triangleToStencil = water_comp->GetTriangles();
+		triangleToStencil = static_cast<GLsizei>(water_comp->GetTriangles());
 	}
 
 	glEnable(GL_STENCIL_TEST);

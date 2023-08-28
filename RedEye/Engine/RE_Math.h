@@ -36,60 +36,34 @@ public:
 	void SetRNGSeed(unsigned int seed);
 
 	// Number valuations
-	static inline int CapI(const int val, const int min, const int max)
+	template<typename T>
+	static inline T Cap(const T val, const T min, const T max)
 	{
 		RE_ASSERT(min <= max);
-		int res[4] = { val, min, max, 0 };
+		T res[4] = { val, min, max, 0 };
 		return res[(val < min) + (2 * (val > max))];
 	}
-	static inline unsigned int CapUI(const unsigned int val, const unsigned int min, const unsigned int max)
+
+	template<typename T>
+	static inline T Min(const T a, const T b)
 	{
-		RE_ASSERT(min <= max);
-		unsigned int res[4] = { val, min, max, 0u };
-		return res[(val < min) + (2 * (val > max))];
-	}
-	static inline float CapF(const float val, const float min, const float max)
-	{
-		RE_ASSERT(min <= max);
-		float res[4] = { val, min, max, 0.f };
-		return res[(val < min) + (2 * (val > max))];
-	}
-	inline const int MinI(const int a, const int b)
-	{
-		const int res[2] = { a, b };
+		T res[2] = { a, b };
 		return res[b < a];
 	}
-	static inline unsigned int MinUI(const unsigned int a, const unsigned int b)
+
+	template<typename T>
+	static inline T Max(const T a, const T b)
 	{
-		unsigned int res[2] = { a, b };
-		return res[b < a];
+		T res[2] = { a, b };
+		return res[b > a];
 	}
-	static inline float MinF(const float a, const float b)
-	{
-		float res[2] = { a, b };
-		return res[b < a];
-	}
+
 	static inline math::vec MinVecValues(const math::vec a, const math::vec b)
 	{
 		float res[6] = { a.x, b.x, a.y, b.y, a.z, b.z };
 		return math::vec(res[b.x < a.x], res[2 + (b.y < a.y)], res[4 + (b.z < a.z)]);
 	}
 
-	static inline int MaxI(const int a, const int b)
-	{
-		int res[2] = { a, b };
-		return res[b > a];
-	}
-	static inline unsigned int MaxUI(const unsigned int a, const unsigned int b)
-	{
-		unsigned int res[2] = { a, b };
-		return res[b > a];
-	}
-	static inline float MaxF(const float a, const float b)
-	{
-		float res[2] = { a, b };
-		return res[b > a];
-	}
 	static inline math::vec MaxVecValues(const math::vec a, const math::vec b)
 	{
 		float res[6] = { a.x, b.x, a.y, b.y, a.z, b.z };

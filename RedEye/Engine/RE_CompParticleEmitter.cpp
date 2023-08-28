@@ -93,7 +93,7 @@ void RE_CompParticleEmitter::DrawProperties()
 
 void RE_CompParticleEmitter::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
-	node->PushInt("emitterResource", (emitter_md5) ? resources->at(emitter_md5) : -1);
+	node->Push("emitterResource", (emitter_md5) ? resources->at(emitter_md5) : -1);
 }
 
 void RE_CompParticleEmitter::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
@@ -102,7 +102,7 @@ void RE_CompParticleEmitter::DeserializeJson(RE_Json* node, eastl::map<int, cons
 	emitter_md5 = (id != -1) ? resources->at(id) : nullptr;
 }
 
-unsigned int RE_CompParticleEmitter::GetBinarySize() const { return sizeof(int); }
+size_t RE_CompParticleEmitter::GetBinarySize() const { return sizeof(int); }
 
 void RE_CompParticleEmitter::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
 {

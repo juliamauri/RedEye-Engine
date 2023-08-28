@@ -96,7 +96,7 @@ uint32_t RE_ThumbnailManager::ThumbnailTexture(const char* ref)
 			ilGenImages(1, &imageID);
 			ilBindImage(imageID);
 
-			if (IL_FALSE != ilLoadL(tex->DetectExtension(), texFile.GetBuffer(), texFile.GetSize()))
+			if (IL_FALSE != ilLoadL(static_cast<ILenum>(tex->DetectExtension()), texFile.GetBuffer(), static_cast<ILuint>(texFile.GetSize())))
 			{
 				iluScale(THUMBNAILSIZE, THUMBNAILSIZE, 1);
 				RE_FileBuffer saveThumb(path.c_str());
@@ -160,7 +160,7 @@ uint32_t RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 		ilGenImages(1, &imageID);
 		ilBindImage(imageID);
 
-		if (IL_FALSE != ilLoadL(TextureType::RE_DDS, thumbFile.GetBuffer(), thumbFile.GetSize()))
+		if (IL_FALSE != ilLoadL(TextureType::RE_DDS, thumbFile.GetBuffer(), static_cast<ILuint>(thumbFile.GetSize())))
 		{
 			/* OpenGL texture binding of the image loaded by DevIL  */
 			glGenTextures(1, &ret); /* Texture name generation */

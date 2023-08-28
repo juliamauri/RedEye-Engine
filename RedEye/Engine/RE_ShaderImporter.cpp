@@ -52,7 +52,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 		if (file_vertexShader.Load())
 		{
 			buffer = file_vertexShader.GetBuffer();
-			int vSize = file_vertexShader.GetSize();
+			auto vSize = static_cast<GLint>(file_vertexShader.GetSize());
 			glShaderSource(vertexShader, 1, &buffer, &vSize);
 			glCompileShader(vertexShader);
 
@@ -87,7 +87,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 		if (file_fragmentShader.Load())
 		{
 			buffer = file_fragmentShader.GetBuffer();
-			int fSize = file_fragmentShader.GetSize();
+			auto fSize = static_cast<GLint>(file_fragmentShader.GetSize());
 			glShaderSource(fragmentShader, 1, &buffer, &fSize);
 			glCompileShader(fragmentShader);
 
@@ -122,7 +122,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 		if (file_geometryShader.Load())
 		{
 			buffer = file_geometryShader.GetBuffer();
-			int gSize = file_geometryShader.GetSize();
+			auto gSize = static_cast<GLint>(file_geometryShader.GetSize());
 			glShaderSource(geometryShader, 1, &buffer, &gSize);
 			glCompileShader(geometryShader);
 
@@ -157,10 +157,10 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 
 	//check
 	glGetProgramiv(*ID, GL_LINK_STATUS, &success);
-	if (!success) {
+	if (!success)
+	{
 		glGetProgramInfoLog(*ID, 512, NULL, infoLog);
-		last_error += "\nShader program compilation failed";
-		last_error += ":\n";
+		last_error += "\nShader program compilation failed:\n";
 		last_error += infoLog;
 		last_error += "\n";
 		if(!compileTest) glDeleteProgram(*ID);
@@ -178,7 +178,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 	return ret;
 }
 
-bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffer, unsigned int vSize, const char* fragmentBuffer, unsigned int fSize, const char* geometryBuffer, unsigned int gSize)
+bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffer, size_t vSize, const char* fragmentBuffer, size_t fSize, const char* geometryBuffer, size_t gSize)
 {
 	bool ret = true;
 	eastl::string last_error;
@@ -191,11 +191,12 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 	unsigned int fragmentShader = 0;
 	unsigned int geometryShader = 0;
 
-	if (vertexBuffer) {
+	if (vertexBuffer)
+	{
 		//compiling vertex shader
 		vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
-		int vbsize = vSize;
+		auto vbsize = static_cast<GLint>(vSize);
 		glShaderSource(vertexShader, 1, &vertexBuffer, &vbsize);
 		glCompileShader(vertexShader);
 
@@ -211,14 +212,14 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 			last_error += "\n";
 			ret = false;
 		}
-     
 	}
 
-	if (fragmentBuffer) {
+	if (fragmentBuffer)
+	{
 		//compiling fragment shader
 		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-		int fbSize = fSize;
+		auto fbSize = static_cast<GLint>(fSize);
 		glShaderSource(fragmentShader, 1, &fragmentBuffer, &fbSize);
 		glCompileShader(fragmentShader);
 
@@ -236,11 +237,12 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 		}
 	}
 
-	if (geometryBuffer) {
+	if (geometryBuffer)
+	{
 		//compiling geometry shader
 		geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
 
-		int gbSize = gSize;
+		auto gbSize = static_cast<GLint>(gSize);
 		glShaderSource(geometryShader, 1, &buffer, &gbSize);
 		glCompileShader(geometryShader);
 
@@ -291,11 +293,11 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 	return ret;
 }
 
-bool RE_ShaderImporter::LoadFromBinary(const char* buffer, unsigned int size, unsigned int* ID)
+bool RE_ShaderImporter::LoadFromBinary(const char* buffer, size_t size, unsigned int* ID)
 {
 	int ret;
 
-	glProgramBinary((*ID = glCreateProgram()), RE_RES->shader_importer->binaryFormats[0], buffer, size);
+	glProgramBinary((*ID = glCreateProgram()), RE_RES->shader_importer->binaryFormats[0], buffer, static_cast<GLsizei>(size));
 	glValidateProgram(*ID);
 	glGetProgramiv(*ID, GL_VALIDATE_STATUS, &ret);
 	if (!ret) glDeleteProgram(*ID);

@@ -44,7 +44,7 @@ void RE_InternalResources::InitChecker()
 {
 	RE_PROFILE(RE_ProfiledFunc::InitChecker, RE_ProfiledClass::InternalResources);
 	// Checkers
-	unsigned char imageData[264][264][3];
+	unsigned char imageData[264][264][3]{};
 	int IMAGE_ROWS = 264, IMAGE_COLS = 264;
 	for (int row = 0; row < IMAGE_ROWS; row++)
 	{

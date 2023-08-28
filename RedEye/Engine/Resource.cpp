@@ -71,12 +71,12 @@ void ResourceContainer::SaveMeta()
 
 	RE_Json* metaNode = metaSerialize.GetRootNode("meta");
 
-	metaNode->PushString("Name", name.c_str());
-	metaNode->PushString("AssetPath", assetPath.c_str());
-	metaNode->PushString("LibraryPath", libraryPath.c_str());
-	metaNode->PushString("MD5", md5);
-	metaNode->PushUInt("Type", static_cast<const unsigned int>(type));
-	metaNode->PushSignedLongLong("lastModified", lastModified);
+	metaNode->Push("Name", name.c_str());
+	metaNode->Push("AssetPath", assetPath.c_str());
+	metaNode->Push("LibraryPath", libraryPath.c_str());
+	metaNode->Push("MD5", md5);
+	metaNode->Push("Type", static_cast<const uint>(type));
+	metaNode->Push("lastModified", lastModified);
 
 	SaveResourceMeta(metaNode);
 	metaSerialize.Save();

@@ -26,7 +26,7 @@ public:
 	ResourceContainer* At(const char* md5) const;
 	const char* ReferenceByMeta(const char* path, ResourceType type);
 	const char* Reference(ResourceContainer* rc);
-	unsigned int TotalReferences() const;
+	size_t TotalReferences() const;
 
 	eastl::vector<const char*> GetAllResourcesActiveByType(ResourceType resT);
 
@@ -52,7 +52,7 @@ public:
 	const char* GetSelected()const;
 	void PopSelected(bool all = false);
 
-	eastl::vector<ResourceContainer*> GetResourcesByType(ResourceType type);
+	eastl::vector<ResourceContainer*> GetResourcesByType(ResourceType type) const;
 	const char* IsReference(const char* md5, ResourceType type = ResourceType::UNDEFINED);
 	const char* FindMD5ByMETAPath(const char* metaPath, ResourceType type = ResourceType::UNDEFINED);
 	const char* FindMD5ByLibraryPath(const char* libraryPath, ResourceType type = ResourceType::UNDEFINED);

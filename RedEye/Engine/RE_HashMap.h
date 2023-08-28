@@ -4,11 +4,11 @@
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
 
-template<class TYPEVALUE, class TYPEKEY, unsigned int size, unsigned int increment>
+template<class TYPEVALUE, class TYPEKEY, const size_t Size, const size_t Increment>
 class RE_HashMap
 {
 public:
-	RE_HashMap() { pool_ = new TYPEVALUE[currentSize = size]; }
+	RE_HashMap() { pool_ = new TYPEVALUE[currentSize = Size]; }
 	virtual ~RE_HashMap() { delete[] pool_; }
 
 	virtual TYPEKEY Push(TYPEVALUE val) { return TYPEKEY(); };
@@ -16,11 +16,11 @@ public:
 	virtual bool Push(TYPEVALUE val, const TYPEKEY key)
 	{
 		bool ret = false;
-		if (poolmapped_.find(key) == poolmapped_.end())
+		if (key_map.find(key) == key_map.end())
 		{
 			if (static_cast<unsigned int>(lastAvaibleIndex) == currentSize) IncrementArray();
 			pool_[lastAvaibleIndex] = val;
-			poolmapped_.insert({ key, lastAvaibleIndex++ });
+			key_map.insert({ key, lastAvaibleIndex++ });
 			ret = true;
 		}
 		return ret;
@@ -28,32 +28,36 @@ public:
 
 	virtual void Pop(const TYPEKEY key)
 	{
-		unsigned int index = poolmapped_.at(key);
+		unsigned int index = key_map.at(key);
 		int lastIndex = lastAvaibleIndex - 1;
-		memcpy(&pool_[index], &pool_[index + 1], sizeof(TYPEVALUE) * (lastIndex - index));
-		poolmapped_.erase(poolmapped_.find(key));
 
-		typename eastl::map<TYPEKEY, unsigned int>::iterator i = poolmapped_.begin();
-		for (; i != poolmapped_.end(); ++i)
+		size_t size = sizeof(TYPEVALUE);
+		size *= lastIndex - static_cast<size_t>(index);
+
+		memcpy(&pool_[index], &pool_[index + 1], size);
+		key_map.erase(key_map.find(key));
+
+		typename eastl::map<TYPEKEY, unsigned int>::iterator i = key_map.begin();
+		for (; i != key_map.end(); ++i)
 			if(i->second > index) i->second--;
 
 		lastAvaibleIndex--;
 	}
 
-	TYPEVALUE At(const TYPEKEY key) const { return pool_[poolmapped_.at(key)]; }
-	TYPEVALUE& At(const TYPEKEY key) { return pool_[poolmapped_.at(key)]; }
-	TYPEVALUE* AtPtr(const TYPEKEY key) const { return &pool_[poolmapped_.at(key)]; }
-	const TYPEVALUE* AtCPtr(const TYPEKEY key) const { return &pool_[poolmapped_.at(key)]; }
+	TYPEVALUE At(const TYPEKEY key) const { return pool_[key_map.at(key)]; }
+	TYPEVALUE& At(const TYPEKEY key) { return pool_[key_map.at(key)]; }
+	TYPEVALUE* AtPtr(const TYPEKEY key) const { return &pool_[key_map.at(key)]; }
+	const TYPEVALUE* AtCPtr(const TYPEKEY key) const { return &pool_[key_map.at(key)]; }
 
 	virtual eastl::vector<TYPEKEY> GetAllKeys() const = 0;
 
-	int GetCount() const { return poolmapped_.size(); }
+	size_t GetCount() const { return key_map.size(); }
 
 private:
 
 	void IncrementArray()
 	{
-		unsigned int newSize = currentSize + increment;
+		unsigned int newSize = currentSize + Increment;
 		poolTmp_ = new TYPEVALUE[newSize];
 		eastl::copy(pool_, pool_ + currentSize, poolTmp_);
 		currentSize = newSize;
@@ -65,7 +69,7 @@ protected:
 
 	TYPEVALUE* pool_ = nullptr;
 	TYPEVALUE* poolTmp_ = nullptr;
-	eastl::map<TYPEKEY, unsigned int> poolmapped_;
+	eastl::map<TYPEKEY, unsigned int> key_map;
 
 	int lastAvaibleIndex = 0;
 	unsigned int currentSize = 0;

@@ -260,7 +260,7 @@ struct CurveData
 
 	void BinaryDeserialize(char*& cursor);
 	void BinarySerialize(char*& cursor) const;
-	unsigned int GetBinarySize() const;
+	size_t GetBinarySize() const;
 };
 
 struct RE_PR_Color
@@ -288,7 +288,7 @@ struct RE_PR_Color
 
 	void BinaryDeserialize(char*& cursor);
 	void BinarySerialize(char*& cursor) const;
-	unsigned int GetBinarySize() const;
+	size_t GetBinarySize() const;
 };
 
 struct RE_PR_Opacity
@@ -317,7 +317,7 @@ struct RE_PR_Opacity
 
 	void BinaryDeserialize(char*& cursor);
 	void BinarySerialize(char*& cursor) const;
-	unsigned int GetBinarySize() const;
+	size_t GetBinarySize() const;
 };
 
 struct RE_PR_Light
@@ -347,7 +347,7 @@ struct RE_PR_Light
 
 	void BinaryDeserialize(char*& cursor);
 	void BinarySerialize(char*& cursor) const;
-	unsigned int GetBinarySize() const;
+	size_t GetBinarySize() const;
 };
 
 #endif //!__RE_EMISSION_SHAPE_H__

@@ -17,21 +17,21 @@ public:
 
 	virtual bool Load();
 	virtual void Save();
-	virtual void Save(char* buffer, unsigned int size = 0);
+	virtual void Save(char* buffer, size_t size = 0);
 
-	virtual unsigned int GetSize();
+	virtual size_t GetSize();
 	virtual eastl::string GetMd5();
 
 	virtual inline bool operator!() const;
 
 protected:
 
-	unsigned int HardLoad();
-	void HardSave(const char* buffer, unsigned int size = 0);
+	size_t HardLoad();
+	void HardSave(const char* buffer, size_t size = 0);
 
 protected:
 
-	unsigned int size = 0;
+	size_t size = 0;
 	const char *file_name;
 	char* buffer = nullptr;
 };

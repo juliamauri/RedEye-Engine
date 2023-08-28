@@ -1,10 +1,6 @@
 #include "RE_Json.h"
 
-#include "RE_DataTypes.h"
 #include "RE_Memory.h"
-#include "RE_Config.h"
-
-#include <RapidJson/pointer.h>
 
 RE_Json::RE_Json(const char* path, Config* config, bool isArray) : pointerPath(path), config(config)
 {
@@ -17,7 +13,7 @@ RE_Json::~RE_Json() { config = nullptr; }
 
 // Push ============================================================
 
-void RE_Json::PushBool(const char* name, const bool value)
+void RE_Json::PushSizeT(const char* name, const size_t value)
 {
 	if (name)
 	{
@@ -26,67 +22,18 @@ void RE_Json::PushBool(const char* name, const bool value)
 	}
 }
 
-void RE_Json::PushBool(const char* name, const bool* value, unsigned int quantity)
+void RE_Json::PushSizeT(const char* name, const size_t* value, uint quantity)
 {
 	if (name)
 	{
 		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		for (uint i = 0; i < quantity; i++) float_array.PushBack(value[i], config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
+		rapidjson::Value values_array(rapidjson::kArrayType);
+		for (uint i = 0; i < quantity; i++) values_array.PushBack(value[i], config->document.GetAllocator());
+		rapidjson::Pointer(path.c_str()).Set(config->document, values_array);
 	}
 }
 
-void RE_Json::PushInt(const char* name, const int value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void RE_Json::PushInt(const char* name, const int* value, unsigned int quantity)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		for (uint i = 0; i < quantity; i++) float_array.PushBack(value[i], config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
-	}
-}
-
-void RE_Json::PushUInt(const char* name, const unsigned int value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void RE_Json::PushUInt(const char* name, const unsigned int* value, unsigned int quantity)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Value float_array(rapidjson::kArrayType);
-		for (uint i = 0; i < quantity; i++) float_array.PushBack(value[i], config->document.GetAllocator());
-		rapidjson::Pointer(path.c_str()).Set(config->document, float_array);
-	}
-}
-
-void RE_Json::PushFloat(const char* name, const float value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void RE_Json::PushFloat(const char* name, math::float2 value)
+void RE_Json::PushFloat2(const char* name, math::float2 value)
 {
 	if (name)
 	{
@@ -141,42 +88,6 @@ void RE_Json::PushMat4(const char* name, math::float4x4 mat4)
 	}
 }
 
-void RE_Json::PushDouble(const char* name, const double value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void RE_Json::PushSignedLongLong(const char* name, const signed long long value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void RE_Json::PushUnsignedLongLong(const char* name, const unsigned long long value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
-void RE_Json::PushString(const char* name, const char* value)
-{
-	if (name)
-	{
-		eastl::string path = pointerPath + "/" + name;
-		rapidjson::Pointer(path.c_str()).Set(config->document, value);
-	}
-}
-
 void RE_Json::PushValue(rapidjson::Value* val)
 {
 	rapidjson::Value* val_push = rapidjson::Pointer(pointerPath.c_str()).Get(config->document);
@@ -212,7 +123,7 @@ bool RE_Json::PullBool(const char* name, bool deflt)
 	return ret;
 }
 
-bool* RE_Json::PullBool(const char* name, unsigned int quantity, bool deflt)
+bool* RE_Json::PullBool(const char* name, uint quantity, bool deflt)
 {
 	bool* ret = new bool[quantity];
 	bool* cursor = ret;
@@ -253,7 +164,7 @@ int RE_Json::PullInt(const char* name, int deflt)
 	return ret;
 }
 
-int* RE_Json::PullInt(const char* name, unsigned int quantity, int deflt)
+int* RE_Json::PullInt(const char* name, uint quantity, int deflt)
 {
 	int* ret = new int[quantity];
 	int* cursor = ret;
@@ -281,7 +192,7 @@ int* RE_Json::PullInt(const char* name, unsigned int quantity, int deflt)
 	return ret;
 }
 
-unsigned int RE_Json::PullUInt(const char* name, const unsigned int deflt)
+unsigned int RE_Json::PullUInt(const char* name, const uint deflt)
 {
 	unsigned int ret = 0u;
 
@@ -295,7 +206,7 @@ unsigned int RE_Json::PullUInt(const char* name, const unsigned int deflt)
 	return ret;
 }
 
-unsigned int* RE_Json::PullUInt(const char* name, unsigned int quantity, unsigned int deflt)
+unsigned int* RE_Json::PullUInt(const char* name, uint quantity, uint deflt)
 {
 	unsigned int* ret = new unsigned int[quantity];
 	unsigned int* cursor = ret;
@@ -323,6 +234,50 @@ unsigned int* RE_Json::PullUInt(const char* name, unsigned int quantity, unsigne
 	return ret;
 }
 
+size_t RE_Json::PullSizeT(const char* name, size_t deflt)
+{
+	if (!name) return deflt;
+
+	eastl::string path = pointerPath + "/" + name;
+	rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+	
+#ifdef _WIN64
+	if (val) return val->GetUint64();
+#else
+	if (val) return val->GetUint();
+#endif
+	return deflt;
+}
+
+size_t* RE_Json::PullSizeT(const char* name, uint quantity, size_t deflt)
+{
+	if (!name) return nullptr;
+
+	size_t* ret = new size_t[quantity];
+	size_t* cursor = ret;
+
+	eastl::string path = pointerPath + "/" + name;
+	rapidjson::Value* val = rapidjson::Pointer(path.c_str()).Get(config->document);
+	if (val)
+	{
+		for (uint i = 0; i < quantity; i++, cursor++)
+		{
+#ifdef _WIN64
+			size_t f = val->GetArray()[i].GetUint64();
+#else
+			size_t f = val->GetArray()[i].GetUint();
+#endif
+			memcpy(cursor, &f, sizeof(size_t));
+		}
+	}
+	else
+	{
+		for (uint i = 0; i < quantity; i++, cursor++)
+			memcpy(cursor, &deflt, sizeof(size_t));
+	}
+
+	return ret;
+}
 
 float RE_Json::PullFloat(const char* name, float deflt)
 {
@@ -338,7 +293,7 @@ float RE_Json::PullFloat(const char* name, float deflt)
 	return ret;
 }
 
-math::float2 RE_Json::PullFloat(const char* name, math::float2 deflt)
+math::float2 RE_Json::PullFloat2(const char* name, math::float2 deflt)
 {
 	math::float2 ret = deflt;
 

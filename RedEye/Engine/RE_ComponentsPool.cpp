@@ -4,6 +4,29 @@
 #include "RE_Json.h"
 #include "RE_GameObject.h"
 
+ComponentsPool::ComponentsPool()
+{
+	transPool.SetName("Transforms Pool");
+	camPool.SetName("Cameras Pool");
+	meshPool.SetName("Meshes Pool");
+	lightPool.SetName("Lights Pool");
+	waterPool.SetName("Water Pool");
+	particleSPool.SetName("Particle System Pool");
+	pGridPool.SetName("Grid Pool");
+	pRockPool.SetName("Rock Pool");
+	pDodecahedronPool.SetName("Dodecahedron Pool");
+	pTetrahedronPool.SetName("Tetrahedron Pool");
+	pOctohedronPool.SetName("Octohedron Pool");
+	pIcosahedronPool.SetName("Icosahedron Pool");
+	pPointPool.SetName("Point Pool");
+	pPlanePool.SetName("Plane Pool");
+	pSpherePool.SetName("Sphere Pool");
+	pCylinderPool.SetName("Cylinder Pool");
+	pHemiSpherePool.SetName("HemiSphere Pool");
+	pTorusPool.SetName("orus Pool");
+	pTrefoiKnotPool.SetName("TrefoiKnot Pool");
+}
+
 void ComponentsPool::Update()
 {
 	transPool.Update();
@@ -51,7 +74,7 @@ eastl::vector<const char*> ComponentsPool::GetAllResources()
 	if (!resources.empty()) allResources.insert(allResources.end(), resources.begin(), resources.end());
 
 	eastl::vector<const char*> ret;
-	int resSize = 0;
+	size_t resSize = 0;
 	for (auto res : allResources)
 	{
 		bool repeat = false;
@@ -98,7 +121,6 @@ RE_Component* ComponentsPool::GetComponentPtr(COMP_UID poolid, RE_Component::Typ
 	case RE_Component::Type::LIGHT: ret = static_cast<RE_Component*>(lightPool.AtPtr(poolid)); break;
 	case RE_Component::Type::WATER: ret = static_cast<RE_Component*>(waterPool.AtPtr(poolid)); break;
 	case RE_Component::Type::PARTICLEEMITER: ret = static_cast<RE_Component*>(particleSPool.AtPtr(poolid)); break;
-	case RE_Component::Type::FUSTRUM: break;
 	case RE_Component::Type::GRID: ret = static_cast<RE_Component*>(pGridPool.AtPtr(poolid)); break;
 	case RE_Component::Type::ROCK: ret = static_cast<RE_Component*>(pRockPool.AtPtr(poolid)); break;
 	case RE_Component::Type::CUBE: ret = static_cast<RE_Component*>(pCubePool.AtPtr(poolid)); break;
@@ -113,6 +135,7 @@ RE_Component* ComponentsPool::GetComponentPtr(COMP_UID poolid, RE_Component::Typ
 	case RE_Component::Type::HEMISHPERE: ret = static_cast<RE_Component*>(pHemiSpherePool.AtPtr(poolid)); break;
 	case RE_Component::Type::TORUS: ret = static_cast<RE_Component*>(pTorusPool.AtPtr(poolid)); break;
 	case RE_Component::Type::TREFOILKNOT:  ret = static_cast<RE_Component*>(pTrefoiKnotPool.AtPtr(poolid)); break;
+	default: break;
 	}
 
 	return ret;
@@ -144,6 +167,7 @@ const RE_Component* ComponentsPool::GetComponentCPtr(COMP_UID poolid, RE_Compone
 	case RE_Component::Type::HEMISHPERE: ret = static_cast<const RE_Component*>(pHemiSpherePool.AtCPtr(poolid)); break;
 	case RE_Component::Type::TORUS: ret = static_cast<const RE_Component*>(pTorusPool.AtCPtr(poolid)); break;
 	case RE_Component::Type::TREFOILKNOT: ret = static_cast<const RE_Component*>(pTrefoiKnotPool.AtCPtr(poolid)); break;
+	default: break;
 	}
 
 	return ret;
@@ -177,7 +201,7 @@ eastl::pair<const COMP_UID, RE_Component*> ComponentsPool::GetNewComponent(RE_Co
 	}
 }
 
-const COMP_UID ComponentsPool::GetNewComponentUID(RE_Component::Type cType)
+COMP_UID ComponentsPool::GetNewComponentUID(RE_Component::Type cType)
 {
 	switch (cType)
 	{
@@ -201,8 +225,10 @@ const COMP_UID ComponentsPool::GetNewComponentUID(RE_Component::Type cType)
 	case RE_Component::Type::HEMISHPERE: return pHemiSpherePool.GetNewCompUID();
 	case RE_Component::Type::TORUS:  return pTorusPool.GetNewCompUID();
 	case RE_Component::Type::TREFOILKNOT: return pTrefoiKnotPool.GetNewCompUID();
-	default: return 0ull;
+	default: break;
 	}
+
+	return 0;
 }
 
 RE_Component* ComponentsPool::GetNewComponentPtr(RE_Component::Type cType)
@@ -336,26 +362,86 @@ eastl::vector<RE_Component*> ComponentsPool::GetAllCompPtr(RE_Component::Type ty
 
 	switch (type)
 	{
-	case RE_Component::Type::TRANSFORM: for (auto id : transPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(transPool.AtPtr(id))); break;
-	case RE_Component::Type::CAMERA: for (auto id : camPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(camPool.AtPtr(id))); break;
-	case RE_Component::Type::MESH: for (auto id : meshPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(meshPool.AtPtr(id))); break;
-	case RE_Component::Type::LIGHT: for (auto id : lightPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(lightPool.AtPtr(id))); break;
-	case RE_Component::Type::WATER: for (auto id : waterPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(waterPool.AtPtr(id))); break;
-	case RE_Component::Type::PARTICLEEMITER: for (auto id : particleSPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(particleSPool.AtPtr(id))); break;
-	case RE_Component::Type::GRID: for (auto id : pGridPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pGridPool.AtPtr(id))); break;
-	case RE_Component::Type::ROCK: for (auto id : pRockPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pRockPool.AtPtr(id))); break;
-	case RE_Component::Type::CUBE: for (auto id : pCubePool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pCubePool.AtPtr(id))); break;
-	case RE_Component::Type::DODECAHEDRON: for (auto id : pDodecahedronPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pDodecahedronPool.AtPtr(id))); break;
-	case RE_Component::Type::TETRAHEDRON: for (auto id : pTetrahedronPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pTetrahedronPool.AtPtr(id))); break;
-	case RE_Component::Type::OCTOHEDRON: for (auto id : pOctohedronPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pOctohedronPool.AtPtr(id))); break;
-	case RE_Component::Type::ICOSAHEDRON: for (auto id : pIcosahedronPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pIcosahedronPool.AtPtr(id))); break;
-	case RE_Component::Type::POINT: for (auto id : pPointPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pPointPool.AtPtr(id))); break;
-	case RE_Component::Type::PLANE: for (auto id : pPlanePool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pPlanePool.AtPtr(id))); break;
-	case RE_Component::Type::SPHERE: for (auto id : pSpherePool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pSpherePool.AtPtr(id))); break;
-	case RE_Component::Type::CYLINDER: for (auto id : pCylinderPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pCylinderPool.AtPtr(id))); break;
-	case RE_Component::Type::HEMISHPERE: for (auto id : pHemiSpherePool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pHemiSpherePool.AtPtr(id))); break;
-	case RE_Component::Type::TORUS: for (auto id : pTorusPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pTorusPool.AtPtr(id))); break;
-	case RE_Component::Type::TREFOILKNOT: for (auto id : pTrefoiKnotPool.GetAllKeys()) ret.push_back(static_cast<RE_Component*>(pTrefoiKnotPool.AtPtr(id))); break;
+	case RE_Component::Type::TRANSFORM:
+		for (auto id : transPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(transPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::CAMERA:
+		for (auto id : camPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(camPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::MESH:
+		for (auto id : meshPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(meshPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::LIGHT:
+		for (auto id : lightPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(lightPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::WATER:
+		for (auto id : waterPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(waterPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::PARTICLEEMITER:
+		for (auto id : particleSPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(particleSPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::GRID:
+		for (auto id : pGridPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pGridPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::ROCK:
+		for (auto id : pRockPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pRockPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::CUBE:
+		for (auto id : pCubePool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pCubePool.AtPtr(id)));
+		break;
+	case RE_Component::Type::DODECAHEDRON:
+		for (auto id : pDodecahedronPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pDodecahedronPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::TETRAHEDRON:
+		for (auto id : pTetrahedronPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pTetrahedronPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::OCTOHEDRON:
+		for (auto id : pOctohedronPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pOctohedronPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::ICOSAHEDRON:
+		for (auto id : pIcosahedronPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pIcosahedronPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::POINT:
+		for (auto id : pPointPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pPointPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::PLANE:
+		for (auto id : pPlanePool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pPlanePool.AtPtr(id)));
+		break;
+	case RE_Component::Type::SPHERE:
+		for (auto id : pSpherePool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pSpherePool.AtPtr(id)));
+		break;
+	case RE_Component::Type::CYLINDER:
+		for (auto id : pCylinderPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pCylinderPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::HEMISHPERE:
+		for (auto id : pHemiSpherePool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pHemiSpherePool.AtPtr(id)));
+		break;
+	case RE_Component::Type::TORUS:
+		for (auto id : pTorusPool.GetAllKeys())
+			ret.push_back(static_cast<RE_Component*>(pTorusPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::TREFOILKNOT:
+		for (auto id : pTrefoiKnotPool.GetAllKeys())
+		ret.push_back(static_cast<RE_Component*>(pTrefoiKnotPool.AtPtr(id)));
+		break;
 	default: break;
 	}
 
@@ -368,26 +454,86 @@ eastl::vector<const RE_Component*> ComponentsPool::GetAllCompCPtr(RE_Component::
 
 	switch (type)
 	{
-	case RE_Component::Type::TRANSFORM: for (auto id : transPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(transPool.AtPtr(id))); break;
-	case RE_Component::Type::CAMERA: for (auto id : camPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(camPool.AtPtr(id))); break;
-	case RE_Component::Type::MESH: for (auto id : meshPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(meshPool.AtPtr(id))); break;
-	case RE_Component::Type::LIGHT: for (auto id : lightPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(lightPool.AtPtr(id))); break;
-	case RE_Component::Type::WATER: for (auto id : waterPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(waterPool.AtPtr(id))); break;
-	case RE_Component::Type::PARTICLEEMITER: for (auto id : particleSPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(particleSPool.AtPtr(id))); break;
-	case RE_Component::Type::GRID: for (auto id : pGridPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pGridPool.AtPtr(id))); break;
-	case RE_Component::Type::ROCK: for (auto id : pRockPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pRockPool.AtPtr(id))); break;
-	case RE_Component::Type::CUBE: for (auto id : pCubePool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pCubePool.AtPtr(id))); break;
-	case RE_Component::Type::DODECAHEDRON: for (auto id : pDodecahedronPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pDodecahedronPool.AtPtr(id))); break;
-	case RE_Component::Type::TETRAHEDRON: for (auto id : pTetrahedronPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pTetrahedronPool.AtPtr(id))); break;
-	case RE_Component::Type::OCTOHEDRON: for (auto id : pOctohedronPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pOctohedronPool.AtPtr(id))); break;
-	case RE_Component::Type::ICOSAHEDRON: for (auto id : pIcosahedronPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pIcosahedronPool.AtPtr(id))); break;
-	case RE_Component::Type::POINT: for (auto id : pPointPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pPointPool.AtPtr(id))); break;
-	case RE_Component::Type::PLANE: for (auto id : pPlanePool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pPlanePool.AtPtr(id))); break;
-	case RE_Component::Type::SPHERE: for (auto id : pSpherePool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pSpherePool.AtPtr(id))); break;
-	case RE_Component::Type::CYLINDER: for (auto id : pCylinderPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pCylinderPool.AtPtr(id))); break;
-	case RE_Component::Type::HEMISHPERE: for (auto id : pHemiSpherePool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pHemiSpherePool.AtPtr(id))); break;
-	case RE_Component::Type::TORUS: for (auto id : pTorusPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pTorusPool.AtPtr(id))); break;
-	case RE_Component::Type::TREFOILKNOT: for (auto id : pTrefoiKnotPool.GetAllKeys()) ret.push_back(static_cast<const RE_Component*>(pTrefoiKnotPool.AtPtr(id))); break;
+	case RE_Component::Type::TRANSFORM:
+		for (auto id : transPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(transPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::CAMERA:
+		for (auto id : camPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(camPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::MESH:
+		for (auto id : meshPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(meshPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::LIGHT:
+		for (auto id : lightPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(lightPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::WATER:
+		for (auto id : waterPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(waterPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::PARTICLEEMITER:
+		for (auto id : particleSPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(particleSPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::GRID:
+		for (auto id : pGridPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pGridPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::ROCK:
+		for (auto id : pRockPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pRockPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::CUBE:
+		for (auto id : pCubePool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pCubePool.AtPtr(id)));
+		break;
+	case RE_Component::Type::DODECAHEDRON:
+		for (auto id : pDodecahedronPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pDodecahedronPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::TETRAHEDRON:
+		for (auto id : pTetrahedronPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pTetrahedronPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::OCTOHEDRON:
+		for (auto id : pOctohedronPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pOctohedronPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::ICOSAHEDRON:
+		for (auto id : pIcosahedronPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pIcosahedronPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::POINT:
+		for (auto id : pPointPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pPointPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::PLANE:
+		for (auto id : pPlanePool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pPlanePool.AtPtr(id)));
+		break;
+	case RE_Component::Type::SPHERE:
+		for (auto id : pSpherePool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pSpherePool.AtPtr(id)));
+		break;
+	case RE_Component::Type::CYLINDER:
+		for (auto id : pCylinderPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pCylinderPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::HEMISHPERE:
+		for (auto id : pHemiSpherePool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pHemiSpherePool.AtPtr(id)));
+		break;
+	case RE_Component::Type::TORUS:
+		for (auto id : pTorusPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pTorusPool.AtPtr(id)));
+		break;
+	case RE_Component::Type::TREFOILKNOT:
+		for (auto id : pTrefoiKnotPool.GetAllKeys())
+			ret.push_back(static_cast<const RE_Component*>(pTrefoiKnotPool.AtPtr(id)));
+		break;
 	default: break;
 	}
 
@@ -400,26 +546,86 @@ eastl::vector<eastl::pair<const COMP_UID, RE_Component*>> ComponentsPool::GetAll
 
 	switch (type)
 	{
-	case RE_Component::Type::TRANSFORM: for (auto id : transPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(transPool.AtPtr(id)) }); break;
-	case RE_Component::Type::CAMERA: for (auto id : camPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(camPool.AtPtr(id)) }); break;
-	case RE_Component::Type::MESH: for (auto id : meshPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(meshPool.AtPtr(id)) }); break;
-	case RE_Component::Type::LIGHT: for (auto id : lightPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(lightPool.AtPtr(id)) }); break;
-	case RE_Component::Type::WATER: for (auto id : waterPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(waterPool.AtPtr(id)) }); break;
-	case RE_Component::Type::PARTICLEEMITER: for (auto id : particleSPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(particleSPool.AtPtr(id)) }); break;
-	case RE_Component::Type::GRID: for (auto id : pGridPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pGridPool.AtPtr(id)) }); break;
-	case RE_Component::Type::ROCK: for (auto id : pRockPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pRockPool.AtPtr(id)) }); break;
-	case RE_Component::Type::CUBE: for (auto id : pCubePool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pCubePool.AtPtr(id)) }); break;
-	case RE_Component::Type::DODECAHEDRON: for (auto id : pDodecahedronPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pDodecahedronPool.AtPtr(id)) }); break;
-	case RE_Component::Type::TETRAHEDRON: for (auto id : pTetrahedronPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pTetrahedronPool.AtPtr(id)) }); break;
-	case RE_Component::Type::OCTOHEDRON: for (auto id : pOctohedronPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pOctohedronPool.AtPtr(id)) }); break;
-	case RE_Component::Type::ICOSAHEDRON: for (auto id : pIcosahedronPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pIcosahedronPool.AtPtr(id)) }); break;
-	case RE_Component::Type::POINT: for (auto id : pPointPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pPointPool.AtPtr(id)) }); break;
-	case RE_Component::Type::PLANE: for (auto id : pPlanePool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pPlanePool.AtPtr(id)) }); break;
-	case RE_Component::Type::SPHERE: for (auto id : pSpherePool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pSpherePool.AtPtr(id)) }); break;
-	case RE_Component::Type::CYLINDER: for (auto id : pCylinderPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pCylinderPool.AtPtr(id)) }); break;
-	case RE_Component::Type::HEMISHPERE: for (auto id : pHemiSpherePool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pHemiSpherePool.AtPtr(id)) }); break;
-	case RE_Component::Type::TORUS: for (auto id : pTorusPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pTorusPool.AtPtr(id)) }); break;
-	case RE_Component::Type::TREFOILKNOT: for (auto id : pTrefoiKnotPool.GetAllKeys()) ret.push_back({ id, static_cast<RE_Component*>(pTrefoiKnotPool.AtPtr(id)) }); break;
+	case RE_Component::Type::TRANSFORM:
+		for (auto id : transPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(transPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::CAMERA:
+		for (auto id : camPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(camPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::MESH:
+		for (auto id : meshPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(meshPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::LIGHT:
+		for (auto id : lightPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(lightPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::WATER:
+		for (auto id : waterPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(waterPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::PARTICLEEMITER:
+		for (auto id : particleSPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(particleSPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::GRID:
+		for (auto id : pGridPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pGridPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::ROCK:
+		for (auto id : pRockPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pRockPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::CUBE:
+		for (auto id : pCubePool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pCubePool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::DODECAHEDRON:
+		for (auto id : pDodecahedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pDodecahedronPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::TETRAHEDRON:
+		for (auto id : pTetrahedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pTetrahedronPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::OCTOHEDRON:
+		for (auto id : pOctohedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pOctohedronPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::ICOSAHEDRON:
+		for (auto id : pIcosahedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pIcosahedronPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::POINT:
+		for (auto id : pPointPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pPointPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::PLANE:
+		for (auto id : pPlanePool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pPlanePool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::SPHERE:
+		for (auto id : pSpherePool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pSpherePool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::CYLINDER:
+		for (auto id : pCylinderPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pCylinderPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::HEMISHPERE:
+		for (auto id : pHemiSpherePool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pHemiSpherePool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::TORUS:
+		for (auto id : pTorusPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pTorusPool.AtPtr(id)) });
+		break;
+	case RE_Component::Type::TREFOILKNOT:
+		for (auto id : pTrefoiKnotPool.GetAllKeys())
+			ret.push_back({ id, static_cast<RE_Component*>(pTrefoiKnotPool.AtPtr(id)) });
+		break;
 	default: break;
 	}
 
@@ -432,35 +638,95 @@ eastl::vector<eastl::pair<const COMP_UID, const RE_Component*>> ComponentsPool::
 
 	switch (type)
 	{
-	case RE_Component::Type::TRANSFORM: for (auto id : transPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(transPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::CAMERA: for (auto id : camPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(camPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::MESH: for (auto id : meshPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(meshPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::LIGHT: for (auto id : lightPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(lightPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::WATER: for (auto id : waterPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(waterPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::PARTICLEEMITER: for (auto id : particleSPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(particleSPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::GRID: for (auto id : pGridPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pGridPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::ROCK: for (auto id : pRockPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pRockPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::CUBE: for (auto id : pCubePool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pCubePool.AtCPtr(id)) }); break;
-	case RE_Component::Type::DODECAHEDRON: for (auto id : pDodecahedronPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pDodecahedronPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::TETRAHEDRON: for (auto id : pTetrahedronPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pTetrahedronPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::OCTOHEDRON: for (auto id : pOctohedronPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pOctohedronPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::ICOSAHEDRON: for (auto id : pIcosahedronPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pIcosahedronPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::POINT: for (auto id : pPointPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pPointPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::PLANE: for (auto id : pPlanePool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pPlanePool.AtCPtr(id)) }); break;
-	case RE_Component::Type::SPHERE: for (auto id : pSpherePool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pSpherePool.AtCPtr(id)) }); break;
-	case RE_Component::Type::CYLINDER: for (auto id : pCylinderPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pCylinderPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::HEMISHPERE: for (auto id : pHemiSpherePool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pHemiSpherePool.AtCPtr(id)) }); break;
-	case RE_Component::Type::TORUS: for (auto id : pTorusPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pTorusPool.AtCPtr(id)) }); break;
-	case RE_Component::Type::TREFOILKNOT: for (auto id : pTrefoiKnotPool.GetAllKeys()) ret.push_back({ id, static_cast<const RE_Component*>(pTrefoiKnotPool.AtCPtr(id)) }); break;
+	case RE_Component::Type::TRANSFORM:
+		for (auto id : transPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(transPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::CAMERA:
+		for (auto id : camPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(camPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::MESH:
+		for (auto id : meshPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(meshPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::LIGHT:
+		for (auto id : lightPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(lightPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::WATER:
+		for (auto id : waterPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(waterPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::PARTICLEEMITER:
+		for (auto id : particleSPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(particleSPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::GRID:
+		for (auto id : pGridPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pGridPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::ROCK:
+		for (auto id : pRockPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pRockPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::CUBE:
+		for (auto id : pCubePool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pCubePool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::DODECAHEDRON:
+		for (auto id : pDodecahedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pDodecahedronPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::TETRAHEDRON:
+		for (auto id : pTetrahedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pTetrahedronPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::OCTOHEDRON:
+		for (auto id : pOctohedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pOctohedronPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::ICOSAHEDRON:
+		for (auto id : pIcosahedronPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pIcosahedronPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::POINT:
+		for (auto id : pPointPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pPointPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::PLANE:
+		for (auto id : pPlanePool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pPlanePool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::SPHERE:
+		for (auto id : pSpherePool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pSpherePool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::CYLINDER:
+		for (auto id : pCylinderPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pCylinderPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::HEMISHPERE:
+		for (auto id : pHemiSpherePool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pHemiSpherePool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::TORUS:
+		for (auto id : pTorusPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pTorusPool.AtCPtr(id)) });
+		break;
+	case RE_Component::Type::TREFOILKNOT:
+		for (auto id : pTrefoiKnotPool.GetAllKeys())
+			ret.push_back({ id, static_cast<const RE_Component*>(pTrefoiKnotPool.AtCPtr(id)) });
+		break;
 	default: break;
 	}
 
 	return ret;
 }
 
-unsigned int ComponentsPool::GetBinarySize() const
+size_t ComponentsPool::GetBinarySize() const
 {
-	uint size = 0;
+	size_t size = 0;
 	size += camPool.GetBinarySize();
 	size += meshPool.GetBinarySize();
 	size += lightPool.GetBinarySize();

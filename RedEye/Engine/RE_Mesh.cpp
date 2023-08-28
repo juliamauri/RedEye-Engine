@@ -73,18 +73,18 @@ void RE_Mesh::UnloadMemory()
 
 const char* RE_Mesh::CheckAndSave(bool* exists)
 {
-	size_t size = (sizeof(uint) * 2)  + (sizeof(bool) * 5) + (sizeof(float) * 3 * vertex_count);
+	size_t size = 1 + (sizeof(uint) * 2)  + (sizeof(bool) * 5) + (sizeof(float) * 3 * vertex_count);
 	if (normals) size += sizeof(float) * 3 * vertex_count;
 	if (tangents) size += sizeof(float) * 3 * vertex_count;
 	if (bitangents) size += sizeof(float) * 3 * vertex_count;
 	if (texturecoords) size += sizeof(float) * 2 * vertex_count;
 	if (index) size += sizeof(uint) * 3 * triangle_count;
 
-	char* buffer = new char[size + 1];
+	char* buffer = new char[size];
 	char* cursor = buffer;
 
 	size_t cSize = sizeof(uint);
-	memcpy(cursor, static_cast<const void*>(&triangle_count), cSize);
+	memcpy(cursor, &triangle_count, cSize);
 	cursor += cSize;
 
 	memcpy(cursor, &vertex_count, cSize);
@@ -160,7 +160,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	char nullchar = '\0';
 	memcpy(cursor, &nullchar, sizeof(char));
 
-	eastl::string md5Generated = MD5(eastl::string(buffer, size + 1)).hexdigest();
+	eastl::string md5Generated = MD5(eastl::string(buffer, size)).hexdigest();
 	const char* existsMD5 = RE_RES->IsReference(md5Generated.c_str());
 	if (!existsMD5)
 	{
@@ -172,7 +172,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 		ResourceContainer::SetLibraryPath(libraryPath.c_str());
 
 		RE_FileBuffer toSave(GetLibraryPath());
-		toSave.Save(buffer, size + 1);
+		toSave.Save(buffer, size);
 	}
 	else *exists = true;
 
@@ -190,7 +190,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 {
 	// Draw mesh
 	RE_GLCache::ChangeVAO(VAO);
-	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(triangle_count) * 3, GL_UNSIGNED_INT, nullptr);
 	RE_GLCache::ChangeVAO(0);
 
 	// MESH DEBUG DRAWING
@@ -205,7 +205,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			math::vec color(0.f, 0.f, 1.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 			RE_GLCache::ChangeVAO(VAO_FaceNormals);
-			glDrawArrays(GL_LINES, 0, triangle_count * 2);
+			glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(triangle_count) * 2);
 			RE_GLCache::ChangeVAO(0);
 
 			// Draw points
@@ -214,7 +214,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
 			RE_GLCache::ChangeVAO(VAO_FaceCenters);
-			glDrawArrays(GL_POINTS, 0, triangle_count);
+			glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(triangle_count));
 			RE_GLCache::ChangeVAO(0);
 
 			// Reset Draw mode
@@ -228,7 +228,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			math::vec color(0.f, 1.f, 0.f);
 			RE_ShaderImporter::setFloat(shader, "objectColor", color);
 			RE_GLCache::ChangeVAO(VAO_VertexNormals);
-			glDrawArrays(GL_LINES, 0, triangle_count * 3 * 2);
+			glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(triangle_count) * 3 * 2);
 			RE_GLCache::ChangeVAO(0);
 
 			// Draw points
@@ -237,7 +237,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glPointSize(10.0f);
 			RE_GLCache::ChangeVAO(VAO_Vertex);
-			glDrawArrays(GL_POINTS, 0, triangle_count * 3);
+			glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(triangle_count) * 3);
 			RE_GLCache::ChangeVAO(0);
 
 			// Reset Draw mode
@@ -253,7 +253,7 @@ void RE_Mesh::DrawMesh(unsigned int shader)
 void RE_Mesh::Draw()
 {
 	ImGui::Text("%u triangles.", triangle_count);
-	ImGui::Text("%u vertex.", vertex_count);
+	ImGui::Text("%d vertex.", vertex_count);
 	ImGui::Text("Bounding Box");
 	ImGui::TextWrapped("Min: { %.2f, %.2f, %.2f}", bounding_box.minPoint.x, bounding_box.minPoint.y, bounding_box.minPoint.z);
 	ImGui::TextWrapped("Max: { %.2f, %.2f, %.2f}", bounding_box.maxPoint.x, bounding_box.maxPoint.y, bounding_box.maxPoint.z);
@@ -267,8 +267,8 @@ void RE_Mesh::SetupAABB()
 {
 	eastl::vector<math::vec> vertex_pos;
 	vertex_pos.resize(vertex_count * 3);
-	for (unsigned int i = 0; i < vertex_count; i++) vertex_pos[i] = math::vec(&vertex[i * 3]);
-	bounding_box.SetFrom(&vertex_pos[0], vertex_count);
+	for (size_t i = 0; i < vertex_count; i++) vertex_pos[i] = math::vec(&vertex[i * 3]);
+	bounding_box.SetFrom(&vertex_pos[0], static_cast<int>(vertex_count));
 }
 
 void RE_Mesh::SetupMesh()
@@ -281,7 +281,7 @@ void RE_Mesh::SetupMesh()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	
 	int strideSize = 3;
-	uint meshSize = 3;
+	size_t meshSize = 3;
 	if (normals)
 	{
 		meshSize += 3;
@@ -346,7 +346,7 @@ void RE_Mesh::SetupMesh()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangle_count * 3 * sizeof(unsigned int), &index[0], GL_STATIC_DRAW);
 
 	// vertex positions
-	int accumulativeOffset = 0;
+	size_t accumulativeOffset = 0;
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, strideSize, reinterpret_cast<void*>(accumulativeOffset));
 	accumulativeOffset += sizeof(float) * 3;
@@ -511,7 +511,7 @@ void RE_Mesh::clearFaceNormals()
 	lFaceNormals = false;
 }
 
-void RE_Mesh::SetVerticesAndIndex(float* v, unsigned int* i,unsigned int vertexCount, unsigned int triangleCount, float* tC, float* n, float* t, float* bT)
+void RE_Mesh::SetVerticesAndIndex(float* v, unsigned int* i, size_t vertexCount, unsigned int triangleCount, float* tC, float* n, float* t, float* bT)
 {
 	vertex = v; index = i; vertex_count = vertexCount; triangle_count = triangleCount; texturecoords = tC; normals = n; tangents = t; bitangents = bT;
 }

@@ -8,6 +8,7 @@
 #include "Resource.h"
 
 #include <EASTL/internal/char_traits.h>
+#include <EASTL/bit.h>
 
 void RE_ECS_Importer::JsonSerialize(RE_Json* node, RE_ECS_Pool* pool)
 {
@@ -19,16 +20,16 @@ void RE_ECS_Importer::JsonSerialize(RE_Json* node, RE_ECS_Pool* pool)
 
 	//Resources Serialize
 	RE_Json* resources = node->PushJObject("resources");
-	resources->PushUInt("resSize", resGo.size());
+	resources->PushSizeT("resSize", resGo.size());
 	for (int r = 0; r < static_cast<int>(resGo.size()); r++)
 	{
 		RE_Json* resN = resources->PushJObject(("r" + eastl::to_string(r)).c_str());
 		ResourceContainer* res = RE_RES->At(resGo.at(static_cast<unsigned int>(r)));
 		ResourceType rtype = res->GetType();
 
-		resN->PushInt("index", r);
-		resN->PushUInt("type", static_cast<unsigned int>(rtype));
-		resN->PushString("mPath", (rtype == ResourceType::MESH) ? res->GetLibraryPath() : res->GetMetaPath());
+		resN->Push("index", r);
+		resN->Push("type", static_cast<uint>(rtype));
+		resN->Push("mPath", (rtype == ResourceType::MESH) ? res->GetLibraryPath() : res->GetMetaPath());
 
 		DEL(resN);
 	}
@@ -38,7 +39,7 @@ void RE_ECS_Importer::JsonSerialize(RE_Json* node, RE_ECS_Pool* pool)
 	pool->SerializeJson(node, &resourcesIndex);
 }
 
-char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, unsigned int* bufferSize)
+char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, size_t* bufferSize)
 {
 	//Get resources
 	eastl::vector<const char*>  resGo = pool->GetAllResources();
@@ -56,12 +57,13 @@ char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, unsigned int* bufferSi
 		*bufferSize += eastl::CharStrlen((res->GetType() == ResourceType::MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
 	*bufferSize += pool->GetBinarySize();
 	*bufferSize += 1;
+
 	char* buffer = new char[*bufferSize];
 	char* cursor = buffer;
 
 	size_t size = sizeof(uint);
-	uint resSize = resGo.size();
-	memcpy(cursor, &resSize, size);
+	eastl_size_t resSize = resGo.size();
+	memcpy(eastl::bit_cast<void*>(cursor), &resSize, size);
 	cursor += size;
 
 	for (int r = 0; r < static_cast<int>(resGo.size()); r++)
@@ -74,13 +76,13 @@ char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, unsigned int* bufferSi
 		cursor += size;
 
 		size = sizeof(ushort);
-		ushort typeI = static_cast<const ushort>(rtype);
+		auto typeI = static_cast<ushort>(rtype);
 		memcpy(cursor, &typeI, size);
 		cursor += size;
 
 		const char* toCopy = (rtype == ResourceType::MESH) ? res->GetLibraryPath() : res->GetMetaPath();
-		uint strsize = eastl::CharStrlen(toCopy);
-		size = sizeof(uint);
+		size_t strsize = eastl::CharStrlen(toCopy);
+		size = sizeof(size_t);
 		memcpy(cursor, &strsize, size);
 		cursor += size;
 
@@ -104,13 +106,13 @@ RE_ECS_Pool* RE_ECS_Importer::JsonDeserialize(RE_Json* node)
 	RE_Json* resources = node->PullJObject("resources");
 	eastl::map< int, const char*> resourcesIndex;
 
-	uint resSize = resources->PullUInt("resSize", 0);
+	size_t resSize = resources->PullSizeT("resSize", 0);
 	for (uint r = 0; r < resSize; r++)
 	{
 		RE_Json* resN = resources->PullJObject(("r" + eastl::to_string(r)).c_str());
 
 		int index = resN->PullInt("index", -1);
-		ResourceType type = static_cast<ResourceType>(resN->PullUInt("type", static_cast<const unsigned int>(ResourceType::UNDEFINED)));
+		auto type = static_cast<ResourceType>(resN->PullUInt("type", static_cast<const uint>(ResourceType::UNDEFINED)));
 		eastl::string mPath = resN->PullString("mPath", "");
 
 		const char* resMD5 = nullptr;
@@ -148,10 +150,10 @@ RE_ECS_Pool* RE_ECS_Importer::BinaryDeserialize(char*& cursor)
 		ushort typeI = 0;
 		memcpy(&typeI, cursor, size);
 		cursor += size;
-		ResourceType rType = static_cast<ResourceType>(typeI);
+		auto rType = static_cast<ResourceType>(typeI);
 
-		size = sizeof(uint);
-		uint strsize = 0;
+		size = sizeof(size_t);
+		size_t strsize = 0;
 		memcpy(&strsize, cursor, size);
 		cursor += size;
 
@@ -192,7 +194,7 @@ bool RE_ECS_Importer::JsonCheckResources(RE_Json* node)
 		RE_Json* resN = resources->PullJObject(ref.c_str());
 
 		int index = resN->PullInt("index", -1);
-		ResourceType type = static_cast<ResourceType>(resN->PullUInt("type", static_cast<unsigned int>(ResourceType::UNDEFINED)));
+		auto type = static_cast<ResourceType>(resN->PullUInt("type", static_cast<unsigned int>(ResourceType::UNDEFINED)));
 		eastl::string mPath = resN->PullString("mPath", "");
 
 		const char* resMD5 = nullptr;
@@ -228,10 +230,10 @@ bool RE_ECS_Importer::BinaryCheckResources(char*& cursor)
 		ushort typeI = 0;
 		memcpy(&typeI, cursor, size);
 		cursor += size;
-		ResourceType rType = static_cast<ResourceType>(typeI);
+		auto rType = static_cast<ResourceType>(typeI);
 
-		size = sizeof(uint);
-		uint strsize = 0;
+		size = sizeof(size_t);
+		size_t strsize = 0;
 		memcpy(&strsize, cursor, size);
 		cursor += size;
 

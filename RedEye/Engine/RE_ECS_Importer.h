@@ -7,7 +7,7 @@ class RE_Json;
 namespace RE_ECS_Importer
 {
 	void JsonSerialize(RE_Json* node, RE_ECS_Pool* pool);
-	char* BinarySerialize(RE_ECS_Pool* pool, unsigned int* bufferSize);
+	char* BinarySerialize(RE_ECS_Pool* pool, size_t* bufferSize);
 
 	RE_ECS_Pool* JsonDeserialize(RE_Json* node);
 	RE_ECS_Pool* BinaryDeserialize(char*& cursor);

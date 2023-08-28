@@ -146,7 +146,7 @@ void RE_Prefab::LibraryLoad()
 
 void RE_Prefab::LibrarySave()
 {
-	uint size = 0;
+	size_t size = 0;
 	char* buffer = RE_ECS_Importer::BinarySerialize(toSave, &size);
 	RE_FileBuffer toLibrarySave(GetLibraryPath());
 	toLibrarySave.Save(buffer, size);

@@ -19,7 +19,7 @@ public:
 	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
 	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
 
-	unsigned int GetBinarySize() const override;
+	size_t GetBinarySize() const override;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
 	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
 

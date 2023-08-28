@@ -26,13 +26,13 @@
 #include <assimp/postprocess.h>
 #include <assimp/material.h>
 
-RE_ECS_Pool* RE_ModelImporter::ProcessModel(const char * buffer, unsigned int size, const char* assetPath, RE_ModelSettings* mSettings)
+RE_ECS_Pool* RE_ModelImporter::ProcessModel(const char * buffer, size_t size, const char* assetPath, RE_ModelSettings* mSettings)
 {
 	aditionalData = new CurrentlyImporting();
 	aditionalData->settings = mSettings;
 	aditionalData->workingfilepath = assetPath;
-	uint l = 0;
-	aditionalData->name = aditionalData->workingfilepath.substr(l = aditionalData->workingfilepath.find_last_of("/") + 1, aditionalData->workingfilepath.find_last_of(".") - l);
+	eastl_size_t last_slash = aditionalData->workingfilepath.find_last_of("/") + 1;
+	aditionalData->name = aditionalData->workingfilepath.substr(last_slash, aditionalData->workingfilepath.find_last_of(".") - last_slash);
 
 	RE_ECS_Pool* ret = nullptr;
 
@@ -173,7 +173,7 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 
 		if (mesh->mNumVertices > 0)
 		{
-			uint numVertices = mesh->mNumVertices;
+			size_t numVertices = static_cast<size_t>(mesh->mNumVertices);
 			float* verticesArray = new float[numVertices * 3];
 			memcpy(verticesArray, &mesh->mVertices[0].x, numVertices * 3 * sizeof(float));
 
@@ -185,39 +185,39 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 
 			if (mesh->HasNormals())
 			{
-				normalsArray = new float[numVertices * 3u];
-				memcpy(normalsArray, &mesh->mNormals[0].x, numVertices * 3u * sizeof(float));
+				normalsArray = new float[numVertices * 3];
+				memcpy(normalsArray, &mesh->mNormals[0].x, numVertices * 3 * sizeof(float));
 			}
 
 			if (mesh->HasTangentsAndBitangents())
 			{
-				tangentsArray = new float[numVertices * 3u];
-				memcpy(tangentsArray, &mesh->mTangents[0].x, numVertices * 3u * sizeof(float));
+				tangentsArray = new float[numVertices * 3];
+				memcpy(tangentsArray, &mesh->mTangents[0].x, numVertices * 3 * sizeof(float));
 
-				bitangentsArray = new float[mesh->mNumVertices * 3u];
-				memcpy(bitangentsArray, &mesh->mBitangents[0].x, numVertices * 3u * sizeof(float));
+				bitangentsArray = new float[static_cast<size_t>(mesh->mNumVertices) * 3];
+				memcpy(bitangentsArray, &mesh->mBitangents[0].x, numVertices * 3 * sizeof(float));
 			}
 
 			if (mesh->mTextureCoords[0])
 			{
-				float* cursor = (textureCoordsArray = new float[numVertices * 2u]);
+				float* cursor = (textureCoordsArray = new float[numVertices * 2]);
 				for (uint i = 0; i < numVertices; i++)
 				{
-					memcpy(cursor, &mesh->mTextureCoords[0][i].x, 2u * sizeof(float));
+					memcpy(cursor, &mesh->mTextureCoords[0][i].x, 2 * sizeof(float));
 					cursor += 2u;
 				}
 			}
 
 			if (mesh->HasFaces())
 			{
-				indexArray = new uint[mesh->mNumFaces * 3];
+				indexArray = new uint[static_cast<size_t>(mesh->mNumFaces) * 3];
 				uint* cursor = indexArray;
 
 				for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 				{
 					aiFace* face = &mesh->mFaces[i];
-					memcpy(cursor, &face->mIndices[0], 3u * sizeof(uint));
-					cursor += 3u;
+					memcpy(cursor, &face->mIndices[0], 3 * sizeof(uint));
+					cursor += 3;
 
 					if (face->mNumIndices != 3)
 						RE_LOG_WARNING("Loading geometry face with %u indexes (instead of 3)", face->mNumIndices);

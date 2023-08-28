@@ -1,6 +1,19 @@
 #include "RE_Profiler.h"
 
+#ifdef INTERNAL_PROFILING
+#include "Application.h"
+#include <RapidJson/writer.h>
+#include <iostream>
+#include <fstream>
+#endif
+
 #ifdef PROFILING_ENABLED
+
+/**************************************************
+******	RE_Profiler
+**************************************************/
+
+#pragma region RE_Profiler
 
 const char* RE_Profiler::GetFunctionStr(const RE_ProfiledFunc function)
 {
@@ -55,12 +68,6 @@ const char* RE_Profiler::GetFunctionStr(const RE_ProfiledFunc function)
 
 #ifdef INTERNAL_PROFILING
 
-#include "Application.h"
-#include <MGL/Time/Clock.h>
-#include <RapidJson/writer.h>
-#include <iostream>
-#include <fstream>
-
 const char* RE_Profiler::GetClassStr(const RE_ProfiledClass function)
 {
 	switch (function)
@@ -114,7 +121,7 @@ void RE_Profiler::Clear() { ProfilingTimer::operations.clear(); }
 void RE_Profiler::Reset()
 {
 	ProfilingTimer::start = math::Clock::Tick();
-	ProfilingTimer::frame = 0ul;
+	ProfilingTimer::frame = 0UL;
 	Clear();
 }
 
@@ -124,13 +131,16 @@ void RE_Profiler::Exit()
 		RE_Profiler::Deploy();
 }
 
-void DumpFrameOperations(rapidjson::Writer<rapidjson::StringBuffer>& writer)
+const char* OperationsReport()
 {
+	rapidjson::StringBuffer buffer;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+
 	writer.StartObject();
 	writer.Key("Operations");
 
 	writer.StartArray();
-	for (auto& op : ProfilingTimer::operations)
+	for (const auto& op : ProfilingTimer::operations)
 	{
 		writer.StartObject();
 		writer.Key("fr");
@@ -149,15 +159,20 @@ void DumpFrameOperations(rapidjson::Writer<rapidjson::StringBuffer>& writer)
 
 	writer.EndArray();
 	writer.EndObject();
+
+	return buffer.GetString();
 }
 
-void DumpFunctionNames(rapidjson::Writer<rapidjson::StringBuffer>& writer)
+const char* FunctionNames()
 {
+	rapidjson::StringBuffer buffer;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+
 	writer.StartObject();
 	writer.Key("Functions");
 
 	writer.StartArray();
-	for (unsigned short i = 0; i < static_cast<const unsigned short>(RE_ProfiledFunc::END); ++i)
+	for (ushort i = 0; i < static_cast<const ushort>(RE_ProfiledFunc::END); ++i)
 	{
 		writer.StartObject();
 		writer.Key("id");
@@ -169,15 +184,20 @@ void DumpFunctionNames(rapidjson::Writer<rapidjson::StringBuffer>& writer)
 
 	writer.EndArray();
 	writer.EndObject();
+
+	return buffer.GetString();
 }
 
-void DumpClassNames(rapidjson::Writer<rapidjson::StringBuffer>& writer)
+const char* ClassNames()
 {
+	rapidjson::StringBuffer buffer;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+
 	writer.StartObject();
 	writer.Key("Classes");
 
 	writer.StartArray();
-	for (unsigned short i = 0; i < static_cast<const unsigned short>(RE_ProfiledClass::END); ++i)
+	for (ushort i = 0; i < static_cast<const ushort>(RE_ProfiledClass::END); ++i)
 	{
 		writer.StartObject();
 		writer.Key("id");
@@ -189,43 +209,11 @@ void DumpClassNames(rapidjson::Writer<rapidjson::StringBuffer>& writer)
 
 	writer.EndArray();
 	writer.EndObject();
+
+	return buffer.GetString();
 }
 
-void RE_Profiler::Deploy()
-{
-	Pause();
-	if (!ProfilingTimer::operations.empty())
-	{ // Frame Operations
-		rapidjson::StringBuffer buffer;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-		DumpFrameOperations(writer);
-		WriteToFile(
-#ifdef _DEBUG
-			"Debug Red Eye Profiling.json",
-#else
-			"Release Red Eye Profiling.json",
-#endif
-			buffer.GetString());
-	}
-
-	{ // Functions
-		rapidjson::StringBuffer buffer;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-		DumpFunctionNames(writer);
-		WriteToFile("Functions Table.json", buffer.GetString());
-	}
-
-	{ // Classes
-		rapidjson::StringBuffer buffer;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-		DumpClassNames(writer);
-		WriteToFile("Classes Table.json", buffer.GetString());
-	}
-
-	Clear();
-}
-
-void RE_Profiler::WriteToFile(const char* filename, const char* buffer)
+void WriteToFile(const char* filename, const char* buffer)
 {
 	std::ofstream file;
 	file.open(filename, std::ios::trunc);
@@ -233,17 +221,67 @@ void RE_Profiler::WriteToFile(const char* filename, const char* buffer)
 	file.close();
 }
 
-unsigned long long ProfilingTimer::start = 0ull;
+void RE_Profiler::Deploy()
+{
+	Pause();
+	if (!ProfilingTimer::operations.empty())
+	{
+		WriteToFile(
+#ifdef _DEBUG
+			"Debug Red Eye Profiling.json",
+#else
+			"Release Red Eye Profiling.json",
+#endif
+			OperationsReport());
+		Clear();
+	}
+
+	WriteToFile("Functions Table.json", FunctionNames());
+	WriteToFile("Classes Table.json", ClassNames());
+}
+
+#pragma endregion
+
+/**************************************************
+******	ProfilingOperation
+**************************************************/
+
+ProfilingOperation::ProfilingOperation(
+	const RE_ProfiledFunc& function,
+	const RE_ProfiledClass& context,
+	const math::tick_t& start,
+	const math::tick_t& duration,
+	const ulong& frame)
+	: function(function), context(context), start(start), duration(duration), frame(frame)
+{}
+
+bool ProfilingOperation::operator==(const ProfilingOperation& other) const
+{
+	return function == other.function && context == other.context && start == other.start && duration == other.duration && frame == other.frame;
+}
+
+/**************************************************
+******	ProfilingTimer
+**************************************************/
+
+#pragma region ProfilingTimer
+
+math::tick_t ProfilingTimer::start = 0;
 bool ProfilingTimer::recording = RE_Profiler::RecordFromStart;
-unsigned long ProfilingTimer::frame = 0u;
+ulong ProfilingTimer::frame = 0;
 eastl::vector<ProfilingOperation> ProfilingTimer::operations;
 
-ProfilingTimer::ProfilingTimer(RE_ProfiledFunc f, RE_ProfiledClass c) : operation_id(0u)
+ProfilingTimer::ProfilingTimer(bool pushed, const eastl_size_t& operation_id)
+	: pushed(pushed), operation_id(operation_id)
+{}
+
+ProfilingTimer::ProfilingTimer(RE_ProfiledFunc f, RE_ProfiledClass c)
 {
-	if (pushed = recording)
+	pushed = recording;
+	if (pushed)
 	{
 		operation_id = operations.size();
-		operations.push_back({ f, c, math::Clock::Tick(), 0ull, frame });
+		operations.push_back({ f, c, math::Clock::Tick(), 0, frame });
 	}
 }
 
@@ -253,15 +291,22 @@ ProfilingTimer::~ProfilingTimer()
 		operations[operation_id].duration = math::Clock::Tick() - ProfilingTimer::start - operations[operation_id].start;
 }
 
-unsigned long long ProfilingTimer::Read() const
+bool ProfilingTimer::operator==(const ProfilingTimer& other) const
 {
-	return pushed ? (math::Clock::Tick() - operations[operation_id].start) : 0ull;
+	return operation_id == other.operation_id;
+}
+
+
+math::tick_t ProfilingTimer::Read() const
+{
+	return pushed ? (math::Clock::Tick() - operations[operation_id].start) : 0;
 }
 
 float ProfilingTimer::ReadMs() const
 {
 	return pushed ? (static_cast<float>(math::Clock::Tick() - operations[operation_id].start) / 1000.f / 1000.f) : 0.f;
 }
+#pragma endregion
 
 #endif // INTERNAL_PROFILING
 #endif // PROFILING_ENABLED

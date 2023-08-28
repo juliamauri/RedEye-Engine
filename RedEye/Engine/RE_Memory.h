@@ -5,6 +5,6 @@
 #define DEL(x) if (x != nullptr) { delete x; x = nullptr; }
 #define DEL_A(x) if (x != nullptr) { delete[] x; x = nullptr; }
 
-//#define RE_NEW new
+// TODO Julius: #define RE_NEW new
 
 #endif // !__MEMORY__

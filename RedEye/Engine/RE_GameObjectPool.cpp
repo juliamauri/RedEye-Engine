@@ -4,10 +4,11 @@
 #include "Application.h"
 #include "RE_Math.h"
 #include "RE_Json.h"
+#include "RE_ComponentsPool.h"
 
 void GameObjectsPool::Clear()
 {
-	poolmapped_.clear();
+	key_map.clear();
 	lastAvaibleIndex = 0;
 }
 
@@ -62,9 +63,9 @@ eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> GameObjectsPool::GetAll
 	return ret;
 }
 
-unsigned int GameObjectsPool::GetBinarySize() const
+size_t GameObjectsPool::GetBinarySize() const
 {
-	uint size = sizeof(unsigned int);
+	size_t size = sizeof(unsigned int);
 	size += lastAvaibleIndex * sizeof(GO_UID);
 	for (int i = 0; i < lastAvaibleIndex; i++)
 		size += pool_[i].GetBinarySize();
@@ -73,13 +74,13 @@ unsigned int GameObjectsPool::GetBinarySize() const
 
 void GameObjectsPool::SerializeBinary(char*& cursor)
 {
-	uint size = sizeof(unsigned int);
-	uint goSize = GetCount();
+	size_t size = sizeof(unsigned int);
+	size_t goSize = GetCount();
 	memcpy(cursor, &goSize, size);
 	cursor += size;
 
 	size = sizeof(GO_UID);
-	for (uint i = 0; i < goSize; i++)
+	for (size_t i = 0; i < goSize; i++)
 	{
 		memcpy(cursor, &pool_[i].go_uid, size);
 		cursor += size;
@@ -111,12 +112,12 @@ void GameObjectsPool::DeserializeBinary(char*& cursor, ComponentsPool* cmpsPool)
 void GameObjectsPool::SerializeJson(RE_Json* node)
 {
 	RE_Json* goPool = node->PushJObject("gameobjects Pool");
-	uint goSize = GetCount();
-	goPool->PushUInt("gameobjectsSize", goSize);
-	for (uint i = 0; i < goSize; i++)
+	size_t goSize = GetCount();
+	goPool->PushSizeT("gameobjectsSize", goSize);
+	for (size_t i = 0; i < goSize; i++)
 	{
 		RE_Json* goNode = goPool->PushJObject(eastl::to_string(i).c_str());
-		goNode->PushUnsignedLongLong("GOUID", pool_[i].go_uid);
+		goNode->Push("GOUID", pool_[i].go_uid);
 		pool_[i].SerializeJson(goNode);
 		DEL(goNode);
 	}
@@ -144,6 +145,6 @@ void GameObjectsPool::DeserializeJson(RE_Json* node, ComponentsPool* cmpsPool)
 eastl::vector<GO_UID> GameObjectsPool::GetAllKeys() const
 {
 	eastl::vector<GO_UID> ret;
-	for (auto &go : poolmapped_) ret.push_back(go.first);
+	for (auto &go : key_map) ret.push_back(go.first);
 	return ret;
 }

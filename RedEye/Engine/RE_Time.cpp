@@ -80,8 +80,8 @@ void RE_Time::DrawEditorGraphs()
 		ImGui::PopStyleColor(3);
 	}
 
-	unsigned int logged_operations = ProfilingTimer::operations.size();
-	if (logged_operations > 0u)
+	auto logged_operations = ProfilingTimer::operations.size();
+	if (logged_operations > 0)
 	{
 		EA::StdC::Snprintf(title, 25, "Deploy %u", logged_operations);
 		if (ImGui::Button(title)) RE_Profiler::Deploy();

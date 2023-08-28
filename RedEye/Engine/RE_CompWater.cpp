@@ -51,7 +51,8 @@ void RE_CompWater::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO
 	opacity.second = cmpWater->opacity.second;
 	distanceFoam.second = cmpWater->distanceFoam.second;
 
-	if (cmpWater->VAO) {
+	if (cmpWater->VAO)
+	{
 		SetUpWaterUniforms();
 		VAO = cmpWater->VAO;
 		VBO = cmpWater->VBO;
@@ -62,10 +63,10 @@ void RE_CompWater::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO
 
 void RE_CompWater::Draw() const
 {
-	unsigned int textureCounter = 0;
+	uint textureCounter = 0;
 
 	RE_Shader* shader = dynamic_cast<RE_Shader * >(RE_RES->At(RE_RES->internalResources->GetDefaultWaterShader()));
-	unsigned int shaderID = shader->GetID();
+	uint shaderID = shader->GetID();
 	RE_GLCache::ChangeShader(shaderID);
 	shader->UploadModel(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 	
@@ -76,71 +77,12 @@ void RE_CompWater::Draw() const
 	shader->UploadDepth(textureCounter++);
 
 	RE_GLCache::ChangeShader(shaderID);
-	switch (lMode)
-	{
-	case RenderView::LightMode::DEFERRED:
-		for (uint i = 0; i < waterUniforms.size(); i++)
-		{
-			switch (waterUniforms[i].GetType())
-			{
-			case RE_Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].locationDeferred, waterUniforms[i].AsBool()); break;
-			case RE_Cvar::INT: RE_ShaderImporter::setInt(waterUniforms[i].locationDeferred, waterUniforms[i].AsInt()); break;
-			case RE_Cvar::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, waterUniforms[i].AsFloat()); break;
-			case RE_Cvar::FLOAT2:
-			{
-				const float* f_ptr = waterUniforms[i].AsFloatPointer();
-				RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, f_ptr[0], f_ptr[1]);
-				break;
-			}
-			case RE_Cvar::FLOAT3:
-			{
-				const float* f_ptr = waterUniforms[i].AsFloatPointer();
-				RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, f_ptr[0], f_ptr[1], f_ptr[2]);
-				break;
-			}
-			{
-			case RE_Cvar::SAMPLER: //Only one case
-				glActiveTexture(GL_TEXTURE0 + textureCounter);
-				RE_GLCache::ChangeTextureBind(waterFoam.second);
-				RE_ShaderImporter::setUnsignedInt(waterUniforms[i].locationDeferred, textureCounter++);
-				break;
-			}
-			}
-		}
 
-		break;
-	default:
-		for (uint i = 0; i < waterUniforms.size(); i++)
-		{
-			switch (waterUniforms[i].GetType())
-			{
-			case RE_Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].location, waterUniforms[i].AsBool()); break;
-			case RE_Cvar::INT: RE_ShaderImporter::setInt(waterUniforms[i].location, waterUniforms[i].AsInt()); break;
-			case RE_Cvar::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].location, waterUniforms[i].AsFloat()); break;
-			case RE_Cvar::FLOAT2:
-			{
-				const float* f_ptr = waterUniforms[i].AsFloatPointer();
-				RE_ShaderImporter::setFloat(waterUniforms[i].location, f_ptr[0], f_ptr[1]);
-				break;
-			}
-			case RE_Cvar::FLOAT3:
-			{
-				const float* f_ptr = waterUniforms[i].AsFloatPointer();
-				RE_ShaderImporter::setFloat(waterUniforms[i].location, f_ptr[0], f_ptr[1], f_ptr[2]);
-				break;
-			}
-			case RE_Cvar::SAMPLER: //Only one case
-				glActiveTexture(GL_TEXTURE0 + textureCounter);
-				RE_GLCache::ChangeTextureBind(waterFoam.second);
-				RE_ShaderImporter::setUnsignedInt(waterUniforms[i].location, textureCounter++);
-				break;
-			}
-		}
-		break;
-	}
+	if (lMode == RenderView::LightMode::DEFERRED) DeferedDraw(textureCounter);
+	else DefaultDraw(textureCounter);
 
 	RE_GLCache::ChangeVAO(VAO);
-	glDrawElements(GL_TRIANGLES, triangle_count * 3, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(triangle_count) * 3, GL_UNSIGNED_INT, nullptr);
 	RE_GLCache::ChangeVAO(0);
 	RE_GLCache::ChangeShader(0);
 	RE_GLCache::ChangeTextureBind(0);
@@ -221,22 +163,22 @@ void RE_CompWater::DrawProperties()
 
 void RE_CompWater::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
-	node->PushInt("slices", slices);
-	node->PushInt("stacks", stacks);
-	node->PushFloat("waveLenght", waveLenght.second);
-	node->PushFloat("amplitude", amplitude.second);
-	node->PushFloat("speed", speed.second);
-	node->PushBool("is_linear", is_linear.second);
+	node->Push("slices", slices);
+	node->Push("stacks", stacks);
+	node->Push("waveLenght", waveLenght.second);
+	node->Push("amplitude", amplitude.second);
+	node->Push("speed", speed.second);
+	node->Push("is_linear", is_linear.second);
 	node->PushFloat4("dirCe", { direction.second.x, direction.second.y, center.second.x, center.second.y });
-	node->PushFloat("steepness", steepness.second);
-	node->PushInt("numWaves", numWaves.second);
+	node->Push("steepness", steepness.second);
+	node->Push("numWaves", numWaves.second);
 	node->PushFloatVector("cdiffuse", cdiffuse.second);
-	node->PushFloat("shininess", shininess.second);
-	node->PushFloat("foamMin", foamMin.second);
-	node->PushFloat("foamMax", foamMax.second);
+	node->Push("shininess", shininess.second);
+	node->Push("foamMin", foamMin.second);
+	node->Push("foamMax", foamMax.second);
 	node->PushFloatVector("foamColor", foam_color.second);
-	node->PushFloat("opacity", opacity.second);
-	node->PushFloat("distanceFoam", distanceFoam.second);
+	node->Push("opacity", opacity.second);
+	node->Push("distanceFoam", distanceFoam.second);
 }
 
 void RE_CompWater::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
@@ -263,7 +205,7 @@ void RE_CompWater::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* 
 	distanceFoam.second = node->PullFloat("distanceFoam", distanceFoam.second);
 }
 
-unsigned int RE_CompWater::GetBinarySize() const
+size_t RE_CompWater::GetBinarySize() const
 {
 	return sizeof(int) * 3 + sizeof(float) * 19 + sizeof(bool);
 }
@@ -388,20 +330,22 @@ void RE_CompWater::UnUseResources()
 }
 
 unsigned int RE_CompWater::GetVAO() const { return VAO; }
-unsigned int RE_CompWater::GetTriangles() const { return triangle_count; }
+size_t RE_CompWater::GetTriangles() const { return triangle_count; }
 
 void RE_CompWater::GeneratePlane()
 {
 	par_shapes_mesh* plane = par_shapes_create_plane(slices, stacks);
 
-	float* points = new float[plane->npoints * 3];
-	float* normals = new float[plane->npoints * 3];
-	float* texCoords = new float[plane->npoints * 2];
+	size_t vertex_count = plane->npoints;
+
+	float* points = new float[vertex_count * 3];
+	float* normals = new float[vertex_count * 3];
+	float* texCoords = new float[vertex_count * 2];
 
 	uint meshSize = 0;
 	uint stride = 0;
 
-	size_t size = plane->npoints * 3 * sizeof(float);
+	size_t size = vertex_count * 3 * sizeof(float);
 	memcpy(points, plane->points, size);
 	meshSize += 3 * plane->npoints;
 	stride += 3;
@@ -410,7 +354,7 @@ void RE_CompWater::GeneratePlane()
 	meshSize += 3 * plane->npoints;
 	stride += 3;
 
-	size = plane->npoints * 2 * sizeof(float);
+	size = vertex_count * 2 * sizeof(float);
 	memcpy(texCoords, plane->tcoords, size);
 	meshSize += 2 * plane->npoints;
 	stride += 2;
@@ -452,10 +396,10 @@ void RE_CompWater::GeneratePlane()
 	float* meshBuffer = new float[meshSize];
 	float* cursor = meshBuffer;
 
-	for (uint i = 0; i < static_cast<uint>(plane->npoints); i++)
+	for (int i = 0; i < plane->npoints; i++)
 	{
-		uint indexArray = i * 3;
-		uint indexTexCoord = i * 2;
+		int indexArray = i * 3;
+		int indexTexCoord = i * 2;
 
 		size_t size = 3;
 		memcpy(cursor, &points[indexArray], size * sizeof(float));
@@ -469,10 +413,10 @@ void RE_CompWater::GeneratePlane()
 
 	glBufferData(GL_ARRAY_BUFFER, meshSize * sizeof(float), &meshBuffer[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangle_count * 3 * sizeof(unsigned int), indexA, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<size_t>(triangle_count) * 3 * sizeof(unsigned int), indexA, GL_STATIC_DRAW);
 
 	// vertex positions
-	int accumulativeOffset = 0;
+	size_t accumulativeOffset = 0;
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(accumulativeOffset));
 	accumulativeOffset += sizeof(float) * 3;
@@ -497,71 +441,154 @@ void RE_CompWater::SetUpWaterUniforms()
 {
 	waterUniforms = RE_RES->internalResources->GetWaterUniforms();
 
-	for (unsigned int i = 0; i < waterUniforms.size(); i++) {
-		if (waterUniforms[i].name == "waveLength") {
+	for (uint i = 0; i < waterUniforms.size(); i++)
+	{
+		if (waterUniforms[i].name == "waveLength")
+		{
 			waveLenght.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(waveLenght.second);
 		}
-		else if (waterUniforms[i].name == "amplitude") {
+		else if (waterUniforms[i].name == "amplitude")
+		{
 			amplitude.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(amplitude.second);
 			box.SetFromCenterAndSize(math::vec::one * 0.5f, { 1.0f, amplitude.second, 1.0f });
 		}
-		else if (waterUniforms[i].name == "speed") {
+		else if (waterUniforms[i].name == "speed")
+		{
 			speed.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(speed.second);
 		}
-		else if (waterUniforms[i].name == "is_linear") {
+		else if (waterUniforms[i].name == "is_linear")
+		{
 			is_linear.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(is_linear.second);
 		}
-		else if (waterUniforms[i].name == "direction") {
+		else if (waterUniforms[i].name == "direction")
+		{
 			direction.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(direction.second);
 		}
-		else if (waterUniforms[i].name == "center") {
+		else if (waterUniforms[i].name == "center")
+		{
 			center.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(center.second);
 		}
-		else if (waterUniforms[i].name == "steepness") {
+		else if (waterUniforms[i].name == "steepness")
+		{
 			steepness.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(steepness.second);
 		}
-		else if (waterUniforms[i].name == "numWaves") {
+		else if (waterUniforms[i].name == "numWaves")
+		{
 			numWaves.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(numWaves.second);
 		}
-		else if (waterUniforms[i].name == "cdiffuse") {
+		else if (waterUniforms[i].name == "cdiffuse")
+		{
 			cdiffuse.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(cdiffuse.second);
 		}
-		else if (waterUniforms[i].name == "shininess") {
+		else if (waterUniforms[i].name == "shininess")
+		{
 			shininess.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(shininess.second);
 		}
-		else if (waterUniforms[i].name == "foamMin") {
+		else if (waterUniforms[i].name == "foamMin")
+		{
 			foamMin.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(foamMin.second);
 		}
-		else if (waterUniforms[i].name == "foamMax") {
+		else if (waterUniforms[i].name == "foamMax")
+		{
 			foamMax.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(foamMax.second);
 		}
-		else if (waterUniforms[i].name == "foam_color") {
+		else if (waterUniforms[i].name == "foam_color")
+		{
 			foam_color.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(foam_color.second);
 		}
-		else if (waterUniforms[i].name == "opacity") {
+		else if (waterUniforms[i].name == "opacity")
+		{
 			opacity.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(opacity.second);
 		}
-		else if (waterUniforms[i].name == "distanceFoam") {
+		else if (waterUniforms[i].name == "distanceFoam")
+		{
 			distanceFoam.first = &waterUniforms[i];
 			waterUniforms[i].SetValue(distanceFoam.second);
 		}
-		else if (waterUniforms[i].name == "water_foam") {
+		else if (waterUniforms[i].name == "water_foam")
+		{
 			waterFoam.first = &waterUniforms[i];
 			waterFoam.second = RE_RES->internalResources->GetTextureWaterFoam();
+		}
+	}
+}
+
+void RE_CompWater::DeferedDraw(const uint texture_count) const
+{
+	uint textureCounter = texture_count;
+
+	for (uint i = 0; i < waterUniforms.size(); i++)
+	{
+		switch (waterUniforms[i].GetType())
+		{
+		case RE_Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].locationDeferred, waterUniforms[i].AsBool()); break;
+		case RE_Cvar::INT: RE_ShaderImporter::setInt(waterUniforms[i].locationDeferred, waterUniforms[i].AsInt()); break;
+		case RE_Cvar::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, waterUniforms[i].AsFloat()); break;
+		case RE_Cvar::FLOAT2:
+		{
+			const float* f_ptr = waterUniforms[i].AsFloatPointer();
+			RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, f_ptr[0], f_ptr[1]);
+			break;
+		}
+		case RE_Cvar::FLOAT3:
+		{
+			const float* f_ptr = waterUniforms[i].AsFloatPointer();
+			RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, f_ptr[0], f_ptr[1], f_ptr[2]);
+			break;
+		}
+		{
+		case RE_Cvar::SAMPLER: //Only one case
+			glActiveTexture(GL_TEXTURE0 + textureCounter);
+			RE_GLCache::ChangeTextureBind(waterFoam.second);
+			RE_ShaderImporter::setUnsignedInt(waterUniforms[i].locationDeferred, textureCounter++);
+			break;
+		}
+		}
+	}
+}
+
+void RE_CompWater::DefaultDraw(const uint texture_count) const
+{
+	uint textureCounter = texture_count;
+
+	for (uint i = 0; i < waterUniforms.size(); i++)
+	{
+		switch (waterUniforms[i].GetType())
+		{
+		case RE_Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].location, waterUniforms[i].AsBool()); break;
+		case RE_Cvar::INT: RE_ShaderImporter::setInt(waterUniforms[i].location, waterUniforms[i].AsInt()); break;
+		case RE_Cvar::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].location, waterUniforms[i].AsFloat()); break;
+		case RE_Cvar::FLOAT2:
+		{
+			const float* f_ptr = waterUniforms[i].AsFloatPointer();
+			RE_ShaderImporter::setFloat(waterUniforms[i].location, f_ptr[0], f_ptr[1]);
+			break;
+		}
+		case RE_Cvar::FLOAT3:
+		{
+			const float* f_ptr = waterUniforms[i].AsFloatPointer();
+			RE_ShaderImporter::setFloat(waterUniforms[i].location, f_ptr[0], f_ptr[1], f_ptr[2]);
+			break;
+		}
+		case RE_Cvar::SAMPLER: //Only one case
+			glActiveTexture(GL_TEXTURE0 + textureCounter);
+			RE_GLCache::ChangeTextureBind(waterFoam.second);
+			RE_ShaderImporter::setUnsignedInt(waterUniforms[i].location, textureCounter++);
+			break;
 		}
 	}
 }

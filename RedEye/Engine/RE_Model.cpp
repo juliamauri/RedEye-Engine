@@ -43,8 +43,8 @@ void RE_Model::SetAssetPath(const char* originPath)
 {
 	ResourceContainer::SetAssetPath(originPath);
 	eastl::string assetPath(originPath);
-	uint l = 0;
-	SetName(assetPath.substr(l = assetPath.find_last_of("/") + 1, assetPath.find_last_of(".") - l).c_str());
+	eastl_size_t last_slash = assetPath.find_last_of("/") + 1;
+	SetName(assetPath.substr(last_slash, assetPath.find_last_of(".") - last_slash).c_str());
 }
 
 void RE_Model::Import(bool keepInMemory)
@@ -172,20 +172,20 @@ void RE_Model::Draw()
 void RE_Model::SaveResourceMeta(RE_Json* metaNode)
 {
 	RE_Json* presets = metaNode->PushJObject("presets");
-	for (uint i = 0; i < 3; i++) presets->PushBool(eastl::to_string(i).c_str(), modelSettings.presets[i]);
+	for (uint i = 0; i < 3; i++) presets->Push(eastl::to_string(i).c_str(), modelSettings.presets[i]);
 	DEL(presets);
 
 	RE_Json* flags = metaNode->PushJObject("flags");
-	for (uint i = 0; i < 25; i++) flags->PushBool(eastl::to_string(i).c_str(), modelSettings.flags[i]);
+	for (uint i = 0; i < 25; i++) flags->Push(eastl::to_string(i).c_str(), modelSettings.flags[i]);
 	DEL(flags);
 
-	metaNode->PushUInt("MeshesSize", modelSettings.libraryMeshes.size());
+	metaNode->Push("MeshesSize", modelSettings.libraryMeshes.size());
 	uint count = 0;
 	for (const char* mesh : modelSettings.libraryMeshes)
 	{
 		ResourceContainer* rM = RE_RES->At(mesh);
-		metaNode->PushString((eastl::string("Name") + eastl::to_string(count)).c_str(), rM->GetName());
-		metaNode->PushString((eastl::string("LibraryPath") + eastl::to_string(count++)).c_str(), rM->GetLibraryPath());
+		metaNode->Push((eastl::string("Name") + eastl::to_string(count)).c_str(), rM->GetName());
+		metaNode->Push((eastl::string("LibraryPath") + eastl::to_string(count++)).c_str(), rM->GetLibraryPath());
 	}
 }
 
@@ -221,7 +221,7 @@ void RE_Model::AssetLoad()
 	RE_FileBuffer assetload(GetAssetPath());
 	if (assetload.Load())
 	{
-		loaded = RE_RES->model_importer->ProcessModel(assetload.GetBuffer(), assetload.GetSize(),GetAssetPath(), &modelSettings);
+		loaded = RE_RES->model_importer->ProcessModel(assetload.GetBuffer(), assetload.GetSize(), GetAssetPath(), &modelSettings);
 		SetMD5(assetload.GetMd5().c_str());
 		eastl::string libraryPath("Library/Models/");
 		libraryPath += GetMD5();
@@ -245,7 +245,7 @@ void RE_Model::LibrarySave()
 {
 	if (loaded != nullptr)
 	{
-		uint size = 0;
+		size_t size = 0;
 		char* buffer = RE_ECS_Importer::BinarySerialize(loaded, &size);
 
 		RE_FileBuffer toLibrarySave(GetLibraryPath());
