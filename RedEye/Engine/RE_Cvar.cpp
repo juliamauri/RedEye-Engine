@@ -7,6 +7,8 @@
 #include <ImGui/imgui.h>
 #include <EASTL/vector.h>
 
+#pragma region Cvar
+
 RE_Cvar::RE_Cvar() : type(UNDEFINED) { value.int_v = 0; }
 
 RE_Cvar::RE_Cvar(const RE_Cvar & copy) : type(copy.type)
@@ -138,7 +140,7 @@ bool* RE_Cvar::AsBool2() { return value.bool2_v; }
 bool* RE_Cvar::AsBool3() { return value.bool3_v; }
 bool* RE_Cvar::AsBool4() { return value.bool4_v; }
 int RE_Cvar::AsInt() const { return value.int_v; }
-int* RE_Cvar::AsInt2() {return value.int2_v; }
+int* RE_Cvar::AsInt2() { return value.int2_v; }
 int* RE_Cvar::AsInt3() { return value.int3_v; }
 int* RE_Cvar::AsInt4() { return value.int4_v; }
 unsigned int RE_Cvar::AsUInt() const { return value.uint_v; }
@@ -156,14 +158,17 @@ float* RE_Cvar::AsFloatPointer()
 { 
 	float* ret = nullptr;
 
-	switch (type) {
+	switch (type)
+	{
 	case RE_Cvar::FLOAT: ret = &value.float_v; break;
 	case RE_Cvar::FLOAT2: ret = value.float2_v.ptr(); break;
 	case RE_Cvar::FLOAT3: ret = value.float3_v.ptr(); break;
 	case RE_Cvar::FLOAT4:
 	case RE_Cvar::MAT2: ret = value.float4_v.ptr(); break;
 	case RE_Cvar::MAT3: ret = value.mat3_v.ptr(); break;
-	case RE_Cvar::MAT4: ret = value.mat4_v.ptr(); break; }
+	case RE_Cvar::MAT4: ret = value.mat4_v.ptr(); break;
+	default: break;
+	}
 
 	return ret;
 }
@@ -172,7 +177,8 @@ const float* RE_Cvar::AsFloatPointer() const
 {
 	const float* ret = nullptr;
 
-	switch (type) {
+	switch (type)
+	{
 	case RE_Cvar::FLOAT: ret = &value.float_v; break;
 	case RE_Cvar::FLOAT2: ret = value.float2_v.ptr(); break;
 	case RE_Cvar::FLOAT3: ret = value.float3_v.ptr(); break;
@@ -180,6 +186,7 @@ const float* RE_Cvar::AsFloatPointer() const
 	case RE_Cvar::MAT2: ret = value.float4_v.ptr(); break;
 	case RE_Cvar::MAT3: ret = value.mat3_v.ptr(); break;
 	case RE_Cvar::MAT4: ret = value.mat4_v.ptr(); break;
+	default: break;
 	}
 
 	return ret;
@@ -187,134 +194,95 @@ const float* RE_Cvar::AsFloatPointer() const
 
 const char * RE_Cvar::AsCharP() const
 {
-	switch (type) {
+	switch (type)
+	{
 	case RE_Cvar::CHAR_P: return value.char_p_v;
 	case RE_Cvar::STRING: return value.string_v.c_str();
-	default: return nullptr; }
+	default: break;
+	}
+	return nullptr;
 }
 
 RE_GameObject * RE_Cvar::AsGO() const { return value.go_v; }
 
-// --- RE_Double_Cvar ------------------------------------------------------------------------------
-/*RE_Double_Cvar::RE_Double_Cvar(bool bool_v) : RE_Cvar(bool_v) { original_value.bool_v = bool_v; }
-RE_Double_Cvar::RE_Double_Cvar(int int_v) : RE_Cvar(int_v) { original_value.int_v = int_v; }
-RE_Double_Cvar::RE_Double_Cvar(unsigned int uint_v) : RE_Cvar(uint_v) { original_value.uint_v = uint_v; }
-RE_Double_Cvar::RE_Double_Cvar(long long int int64_v) : RE_Cvar(int64_v) { original_value.int64_v = int64_v; }
-RE_Double_Cvar::RE_Double_Cvar(unsigned long long int uint64_v) : RE_Cvar(uint64_v) { original_value.uint64_v = uint64_v; }
-RE_Double_Cvar::RE_Double_Cvar(double double_v) : RE_Cvar(double_v) { original_value.double_v = double_v; }
-RE_Double_Cvar::RE_Double_Cvar(float float_v) : RE_Cvar(float_v) { original_value.float_v = float_v; }
-RE_Double_Cvar::RE_Double_Cvar(const char * char_p_v) : RE_Cvar(char_p_v) { original_value.char_p_v = char_p_v; }
-
-bool RE_Double_Cvar::ValueHasChanged() const
+bool RE_Cvar::operator==(const RE_Cvar& other) const
 {
-	bool ret = false;
-	switch (type) {
-	case BOOL: ret = (value.bool_v != original_value.bool_v); break;
-	case INT: ret = (value.int_v != original_value.int_v); break;
-	case UINT: ret = (value.uint_v != original_value.uint_v); break;
-	case INT64: ret = (value.int64_v != original_value.int64_v); break;
-	case UINT64: ret = (value.uint64_v != original_value.uint64_v); break;
-	case DOUBLE: ret = (value.double_v != original_value.double_v); break;
-	case FLOAT: ret = (value.float_v != original_value.float_v); break;
-	case CHAR_P: ret = (value.char_p_v != original_value.char_p_v); break; }
-	return ret;
+	if (type != other.type) return false;
+
+	switch (type)
+	{
+	case UNDEFINED: break;
+	case BOOL: return value.bool_v == other.value.bool_v;
+	case BOOL2: return
+		value.bool2_v[0] == other.value.bool2_v[0] &&
+		value.bool2_v[1] == other.value.bool2_v[1];
+	case BOOL3: return
+		value.bool3_v[0] == other.value.bool3_v[0] &&
+		value.bool3_v[1] == other.value.bool3_v[1] &&
+		value.bool3_v[2] == other.value.bool3_v[2];
+	case BOOL4: return
+		value.bool4_v[0] == other.value.bool4_v[0] &&
+		value.bool4_v[1] == other.value.bool4_v[1] &&
+		value.bool4_v[2] == other.value.bool4_v[2] &&
+		value.bool4_v[3] == other.value.bool4_v[3];
+	case INT: return value.int_v == other.value.int_v;
+	case INT2: return
+		value.int2_v[0] == other.value.int2_v[0] &&
+		value.int2_v[1] == other.value.int2_v[1];
+	case INT3: return
+		value.int3_v[0] == other.value.int3_v[0] &&
+		value.int3_v[1] == other.value.int3_v[1] &&
+		value.int3_v[2] == other.value.int3_v[2];
+	case INT4: return
+		value.int4_v[0] == other.value.int4_v[0] &&
+		value.int4_v[1] == other.value.int4_v[1] &&
+		value.int4_v[2] == other.value.int4_v[2] &&
+		value.int4_v[3] == other.value.int4_v[3];
+	case UINT: return value.uint_v == other.value.uint_v;
+	case INT64: return value.int64_v == other.value.int64_v;
+	case UINT64: return value.uint64_v == other.value.uint64_v;
+	case DOUBLE: return value.double_v == other.value.double_v;
+	case FLOAT: return value.float_v == other.value.float_v;
+	case FLOAT2: return
+		value.float2_v[0] == other.value.float2_v[0] &&
+		value.float2_v[1] == other.value.float2_v[1];
+	case FLOAT3: return
+		value.float3_v[0] == other.value.float3_v[0] &&
+		value.float3_v[1] == other.value.float3_v[1] &&
+		value.float3_v[2] == other.value.float3_v[2];
+	case FLOAT4:
+	case MAT2: return
+		value.float4_v[0] == other.value.float4_v[0] &&
+		value.float4_v[1] == other.value.float4_v[1] &&
+		value.float4_v[2] == other.value.float4_v[2] &&
+		value.float4_v[3] == other.value.float4_v[3];
+	case MAT3:
+	{
+		bool ret = true;
+		for (short i = 0; i < 9; i++)
+			ret &= value.mat3_v.At(i % 3, i / 3) == other.value.mat3_v.At(i % 3, i / 3);
+		return ret; 
+	}
+	case MAT4:
+	{
+		bool ret = true;
+		for (short i = 0; i < 16; i++)
+			ret &= value.mat4_v.At(i % 4, i / 4) == other.value.mat4_v.At(i % 4, i / 4);
+		return ret; 
+	}
+	case CHAR_P: return eastl::string(value.char_p_v).compare(other.value.char_p_v) == 0;
+	case STRING: return value.string_v.compare(other.value.string_v) == 0;
+	case GAMEOBJECT: return value.go_v == other.value.go_v;
+	case SAMPLER: break;
+	default: break;
+	}
+
+	return false;
 }
 
-bool RE_Double_Cvar::SetValue(bool bool_v, bool force_type)
-{
-	bool ret;
-	if (force_type)
-	{
-		type = BOOL;
-		original_value.bool_v = bool_v;
-	}
-	if (ret = (type == BOOL)) value.bool_v = bool_v;
-	return ret;
-}
+#pragma endregion
 
-bool RE_Double_Cvar::SetValue(int int_v, bool force_type)
-{
-	bool ret;
-	if (force_type)
-	{
-		type = INT;
-		original_value.int_v = int_v;
-	}
-	if (ret = (type == INT)) value.int_v = int_v;
-	return ret;
-}
-
-bool RE_Double_Cvar::SetValue(unsigned int uint_v, bool force_type)
-{
-	bool ret;
-	if (force_type)
-	{
-		type = UINT;
-		original_value.uint_v = uint_v;
-	}
-	if (ret = (type == UINT)) value.uint_v = uint_v;
-	return ret;
-}
-
-bool RE_Double_Cvar::SetValue(long long int int64_v, bool force_type)
-{
-	bool ret;
-	if (force_type)
-	{
-		type = INT64;
-		original_value.int64_v = int64_v;
-	}
-	if (ret = (type == INT64)) value.int64_v = int64_v;
-	return ret;
-}
-
-bool RE_Double_Cvar::SetValue(unsigned long long int uint64_v, bool force_type)
-{
-	bool ret;
-	if (force_type)
-	{
-		type = UINT64;
-		original_value.uint64_v = uint64_v;
-	}
-	if (ret = (type == UINT64)) value.uint64_v = uint64_v;
-	return ret;
-}
-
-bool RE_Double_Cvar::SetValue(double double_v, bool force_type)
-{
-	bool ret;
-	if (force_type)
-	{
-		type = DOUBLE;
-		original_value.double_v = double_v;
-	}
-	if (ret = (type == DOUBLE)) value.double_v = double_v;
-	return ret;
-}
-
-bool RE_Double_Cvar::SetValue(float float_v, bool force_type)
-{
-	bool ret;
-	if (force_type)
-	{
-		type = FLOAT;
-		original_value.float_v = float_v;
-	}
-	if (ret = (type == FLOAT)) value.float_v = float_v;
-	return ret;
-}
-
-bool RE_Double_Cvar::SetValue(const char * char_p_v, bool force_type)
-{
-	bool ret;
-	if (force_type)
-	{
-		type = CHAR_P;
-		original_value.char_p_v = char_p_v;
-	}
-	if (ret = (type == CHAR_P)) value.char_p_v = char_p_v;
-	return ret;
-}*/
+#pragma region Shader Cvar
 
 RE_Shader_Cvar::RE_Shader_Cvar() : RE_Cvar() {}
 RE_Shader_Cvar::RE_Shader_Cvar(const RE_Shader_Cvar& copy) : RE_Cvar(copy), name(copy.name), location(copy.location), locationDeferred(copy.locationDeferred), custom(copy.custom) { }
@@ -691,3 +659,126 @@ bool RE_Shader_Cvar::DrawPropieties(bool isInMemory)
 	}
 	return ret;
 }
+
+#pragma endregion
+
+// --- RE_Double_Cvar ------------------------------------------------------------------------------
+/*RE_Double_Cvar::RE_Double_Cvar(bool bool_v) : RE_Cvar(bool_v) { original_value.bool_v = bool_v; }
+RE_Double_Cvar::RE_Double_Cvar(int int_v) : RE_Cvar(int_v) { original_value.int_v = int_v; }
+RE_Double_Cvar::RE_Double_Cvar(unsigned int uint_v) : RE_Cvar(uint_v) { original_value.uint_v = uint_v; }
+RE_Double_Cvar::RE_Double_Cvar(long long int int64_v) : RE_Cvar(int64_v) { original_value.int64_v = int64_v; }
+RE_Double_Cvar::RE_Double_Cvar(unsigned long long int uint64_v) : RE_Cvar(uint64_v) { original_value.uint64_v = uint64_v; }
+RE_Double_Cvar::RE_Double_Cvar(double double_v) : RE_Cvar(double_v) { original_value.double_v = double_v; }
+RE_Double_Cvar::RE_Double_Cvar(float float_v) : RE_Cvar(float_v) { original_value.float_v = float_v; }
+RE_Double_Cvar::RE_Double_Cvar(const char * char_p_v) : RE_Cvar(char_p_v) { original_value.char_p_v = char_p_v; }
+
+bool RE_Double_Cvar::ValueHasChanged() const
+{
+	bool ret = false;
+	switch (type) {
+	case BOOL: ret = (value.bool_v != original_value.bool_v); break;
+	case INT: ret = (value.int_v != original_value.int_v); break;
+	case UINT: ret = (value.uint_v != original_value.uint_v); break;
+	case INT64: ret = (value.int64_v != original_value.int64_v); break;
+	case UINT64: ret = (value.uint64_v != original_value.uint64_v); break;
+	case DOUBLE: ret = (value.double_v != original_value.double_v); break;
+	case FLOAT: ret = (value.float_v != original_value.float_v); break;
+	case CHAR_P: ret = (value.char_p_v != original_value.char_p_v); break; }
+	return ret;
+}
+
+bool RE_Double_Cvar::SetValue(bool bool_v, bool force_type)
+{
+	bool ret;
+	if (force_type)
+	{
+		type = BOOL;
+		original_value.bool_v = bool_v;
+	}
+	if (ret = (type == BOOL)) value.bool_v = bool_v;
+	return ret;
+}
+
+bool RE_Double_Cvar::SetValue(int int_v, bool force_type)
+{
+	bool ret;
+	if (force_type)
+	{
+		type = INT;
+		original_value.int_v = int_v;
+	}
+	if (ret = (type == INT)) value.int_v = int_v;
+	return ret;
+}
+
+bool RE_Double_Cvar::SetValue(unsigned int uint_v, bool force_type)
+{
+	bool ret;
+	if (force_type)
+	{
+		type = UINT;
+		original_value.uint_v = uint_v;
+	}
+	if (ret = (type == UINT)) value.uint_v = uint_v;
+	return ret;
+}
+
+bool RE_Double_Cvar::SetValue(long long int int64_v, bool force_type)
+{
+	bool ret;
+	if (force_type)
+	{
+		type = INT64;
+		original_value.int64_v = int64_v;
+	}
+	if (ret = (type == INT64)) value.int64_v = int64_v;
+	return ret;
+}
+
+bool RE_Double_Cvar::SetValue(unsigned long long int uint64_v, bool force_type)
+{
+	bool ret;
+	if (force_type)
+	{
+		type = UINT64;
+		original_value.uint64_v = uint64_v;
+	}
+	if (ret = (type == UINT64)) value.uint64_v = uint64_v;
+	return ret;
+}
+
+bool RE_Double_Cvar::SetValue(double double_v, bool force_type)
+{
+	bool ret;
+	if (force_type)
+	{
+		type = DOUBLE;
+		original_value.double_v = double_v;
+	}
+	if (ret = (type == DOUBLE)) value.double_v = double_v;
+	return ret;
+}
+
+bool RE_Double_Cvar::SetValue(float float_v, bool force_type)
+{
+	bool ret;
+	if (force_type)
+	{
+		type = FLOAT;
+		original_value.float_v = float_v;
+	}
+	if (ret = (type == FLOAT)) value.float_v = float_v;
+	return ret;
+}
+
+bool RE_Double_Cvar::SetValue(const char * char_p_v, bool force_type)
+{
+	bool ret;
+	if (force_type)
+	{
+		type = CHAR_P;
+		original_value.char_p_v = char_p_v;
+	}
+	if (ret = (type == CHAR_P)) value.char_p_v = char_p_v;
+	return ret;
+}*/

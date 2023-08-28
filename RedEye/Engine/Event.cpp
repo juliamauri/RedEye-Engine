@@ -8,3 +8,9 @@ Event::Event(RE_EventType t, EventListener * lis, RE_Cvar d1, RE_Cvar d2) :
 
 Event::Event(Event& e) :
 	type(e.type), listener(e.listener), data1(e.data1), data2(e.data2), timestamp(SDL_GetTicks()) {}
+
+
+bool Event::operator==(const Event& other) const
+{
+	return type == other.type && listener == other.listener && data1 == other.data1 && data2 == other.data2 && timestamp == other.timestamp;
+}

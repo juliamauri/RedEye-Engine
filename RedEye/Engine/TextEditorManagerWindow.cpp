@@ -109,7 +109,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 			names = "Compile as shader script #" + eastl::to_string(count);
 			if (ImGui::Button(names.c_str()))
 			{
-				RE_LOGGER.ScopeProcedureLogging();
+				RE_LOGGER::ScopeProcedureLogging();
 
 				std::string tmp = e->textEditor->GetText();
 				eastl::string text(tmp.c_str(), tmp.size());
@@ -117,7 +117,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 				if (!e->works) RE_LOG_ERROR("%s", RE_ShaderImporter::GetShaderError());
 				e->compiled = true;
 
-				RE_LOGGER.EndScope();
+				RE_LOGGER::EndScope();
 			}
 
 			if (e->compiled) ImGui::Text((e->works) ? "Succeful compile" : "Error compile");

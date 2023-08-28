@@ -210,13 +210,13 @@ void ShaderEditorWindow::Draw(bool secondary)
 
 		if (!compilePass && ImGui::Button("Compile Test"))
 		{
-			RE_LOGGER.ScopeProcedureLogging();
+			RE_LOGGER::ScopeProcedureLogging();
 
 			uint sID = 0;
 			compilePass = RE_ShaderImporter::LoadFromAssets(&sID, vertexPath.c_str(), fragmentPath.c_str(), (!geometryPath.empty()) ? geometryPath.c_str() : nullptr, true);
 			if (!compilePass) RE_LOG_ERROR("Shader Compilation Error:\n%s", RE_ShaderImporter::GetShaderError());
 
-			RE_LOGGER.EndScope();
+			RE_LOGGER::EndScope();
 		}
 
 		if (secondary || pop || neededVertexAndFragment)

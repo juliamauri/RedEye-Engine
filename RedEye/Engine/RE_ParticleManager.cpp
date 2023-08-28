@@ -338,7 +338,7 @@ void ParticleManager::DrawDebug() const
 
 void ParticleManager::DebugDrawSimulation(const RE_ParticleEmitter* const sim, const float interval) const
 {
-	if (sim->initial_pos.type || sim->boundary.type)
+	if (sim->initial_pos.IsShaped() || sim->boundary.HasBoundary())
 	{
 		glBegin(GL_LINES);
 
@@ -408,7 +408,7 @@ void ParticleManager::DebugDrawSimulation(const RE_ParticleEmitter* const sim, c
 		// Render Boundary
 		glColor4f(1.f, 0.84f, 0.0f, 1.f); // gold
 		switch (sim->boundary.type) {
-		case RE_EmissionBoundary::PLANE:
+		case RE_EmissionBoundary::Type::PLANE:
 		{
 			const float interval = RE_Math::pi_x2 / circle_steps;
 			for (float j = 1.f; j < 6.f; ++j)
@@ -425,12 +425,12 @@ void ParticleManager::DebugDrawSimulation(const RE_ParticleEmitter* const sim, c
 
 			break;
 		}
-		case RE_EmissionBoundary::SPHERE:
+		case RE_EmissionBoundary::Type::SPHERE:
 		{
 			DrawAASphere(sim->parent_pos + sim->boundary.geo.sphere.pos, sim->boundary.geo.sphere.r);
 			break;
 		}
-		case RE_EmissionBoundary::AABB:
+		case RE_EmissionBoundary::Type::AABB:
 		{
 			for (int i = 0; i < 12; i++)
 			{

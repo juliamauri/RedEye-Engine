@@ -175,9 +175,6 @@
     <ClCompile Include="RE_Profiler.cpp">
       <Filter>Engine\Application\Utility\Profiling</Filter>
     </ClCompile>
-    <ClCompile Include="RE_EmissionData.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles</Filter>
-    </ClCompile>
     <ClCompile Include="RE_ParticleEmission.cpp">
       <Filter>Engine\Application\Resources\Particle Emitter</Filter>
     </ClCompile>
@@ -261,6 +258,42 @@
     </ClCompile>
     <ClCompile Include="RenderView.cpp">
       <Filter>Engine\Application\Modules\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_EmissionInterval.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_EmissionSpawn.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_EmissionShape.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_EmissionVector.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_EmissionSingleValue.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_EmissionExternalForces.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_EmissionBoundary.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_EmissionCollider.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Curve.cpp">
+      <Filter>Engine\Application\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_PR_Color.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_PR_Opacity.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_PR_Light.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -455,9 +488,6 @@
     </ClInclude>
     <ClInclude Include="RE_Profiler.h">
       <Filter>Engine\Application\Utility\Profiling</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_EmissionData.h">
-      <Filter>Engine\Application\Modules\Physics\Particles</Filter>
     </ClInclude>
     <ClInclude Include="RE_ParticleEmission.h">
       <Filter>Engine\Application\Resources\Particle Emitter</Filter>
@@ -681,6 +711,45 @@
     <ClInclude Include="EventListener.h">
       <Filter>Engine\Application\Modules\Input\Events System</Filter>
     </ClInclude>
+    <ClInclude Include="RE_Serializable.h">
+      <Filter>Engine\Application\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_EmissionInterval.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_EmissionSpawn.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_EmissionShape.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_EmissionVector.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_EmissionSingleValue.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_EmissionExternalForces.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_EmissionBoundary.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_EmissionCollider.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Curve.h">
+      <Filter>Engine\Application\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_PR_Color.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_PR_Opacity.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_PR_Light.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd Party">
@@ -874,6 +943,9 @@
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{f67675b7-cb18-4f10-a715-37a957201e92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Physics\Particles\Emission Data">
+      <UniqueIdentifier>{8fe1fee5-6a07-44ff-b654-03aad26e6d4d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

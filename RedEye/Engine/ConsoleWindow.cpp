@@ -2,6 +2,7 @@
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 #include <EASTL/map.h>
+#include <EASTL/array.h>
 
 #include "ConsoleWindow.h"
 
@@ -41,8 +42,8 @@ void ConsoleWindow::Draw(bool secondary)
 
 			if (ImGui::BeginMenu("Filter Categories"))
 			{
-				static const char* category_names[8] = { "Separator", "Global", "Secondary", "Terciary", "Software", "Error" , "Warning", "Solution" };
-				for (unsigned int j = 0; j < L_TOTAL_CATEGORIES; j++)
+				static eastl::array<const char*, 8> category_names = { "Separator", "Global", "Secondary", "Terciary", "Software", "Error" , "Warning", "Solution" };
+				for (unsigned int j = 0; j <= category_names.count; j++)
 					if (ImGui::MenuItem(category_names[j], categories[j] ? "Hide" : "Show"))
 						SwapCategory(j);
 
@@ -74,7 +75,7 @@ void ConsoleWindow::ResetBuffer()
 	needs_rewriting = false;
 	console_buffer.clear();
 
-	for (auto log : logHistory)
+	for (const auto& log : logHistory)
 	{
 		if (categories[log.category] && (file_filter < 0 || log.caller_id == file_filter))
 		{

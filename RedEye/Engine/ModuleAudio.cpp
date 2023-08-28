@@ -177,7 +177,7 @@ void ModuleAudio::DrawEditor()
 		ImGui::Text("The path will changed to:\n%s\\ \n", tempPath.c_str());
 		if (ImGui::Button("Check and Apply Path")) {
 
-			App->log.ScopeProcedureLogging();
+			RE_LOGGER::ScopeProcedureLogging();
 
 			if (tempPath[tempPath.size()] != '\\') tempPath += "\\";
 
@@ -191,7 +191,7 @@ void ModuleAudio::DrawEditor()
 				tempPath = audioBanksFolderPath;
 			}
 
-			App->log.EndScope();
+			RE_LOGGER::EndScope();
 			pathChanged = false;
 		}
 	}

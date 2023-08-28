@@ -3,7 +3,17 @@
 
 #include "RE_Profiler.h"
 #include "RE_Particle.h"
-#include "RE_EmissionData.h"
+#include "RE_EmissionInterval.h"
+#include "RE_EmissionSpawn.h"
+#include "RE_EmissionSingleValue.h"
+#include "RE_EmissionShape.h"
+#include "RE_EmissionVector.h"
+#include "RE_EmissionExternalForces.h"
+#include "RE_EmissionBoundary.h"
+#include "RE_EmissionCollider.h"
+#include "RE_PR_Color.h"
+#include "RE_PR_Opacity.h"
+#include "RE_PR_Light.h"
 
 #include <EASTL/vector.h>
 
@@ -54,7 +64,7 @@ public:
 	bool start_on_play = true;
 
 	// Spawning
-	unsigned int max_particles = 500000u;
+	unsigned int max_particles = 500000;
 	RE_EmissionInterval spawn_interval = {};
 	RE_EmissionSpawn spawn_mode = {};
 

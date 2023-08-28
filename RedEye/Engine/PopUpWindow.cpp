@@ -419,7 +419,7 @@ void PopUpWindow::Draw(bool secondary)
 
 			if (clicked)
 			{
-				RE_LOGGER.ScopeProcedureLogging();
+				RE_LOGGER::ScopeProcedureLogging();
 
 				// Delete at resource & filesystem
 				ResourceContainer* resAlone = RE_RES->DeleteResource(resource_to_delete, using_resources, flags & PopUpFlags::resource_on_scene);
@@ -440,7 +440,7 @@ void PopUpWindow::Draw(bool secondary)
 				using_resources.clear();
 				flags &= ~PopUpFlags::resource_on_scene;
 				RE_RES->PopSelected(true);
-				RE_LOGGER.EndScope();
+				RE_LOGGER::EndScope();
 			}
 
 			if (flags & PopUpFlags::resource_on_scene)
@@ -478,7 +478,7 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				clicked = true;
 
-				RE_LOGGER.ScopeProcedureLogging();
+				RE_LOGGER::ScopeProcedureLogging();
 				if (!using_resources.empty())
 				{
 					eastl::stack<ResourceContainer*> shadersDeleted;
@@ -496,7 +496,7 @@ void PopUpWindow::Draw(bool secondary)
 					}
 				}
 
-				if (!RE_LOGGER.ScopedErrors()) RE_FS->DeleteUndefinedFile(name_str.c_str());
+				if (!RE_LOGGER::ScopedErrors()) RE_FS->DeleteUndefinedFile(name_str.c_str());
 				else RE_LOG_ERROR("File can't be erased; shaders can't be delete.");
 			}
 
@@ -509,7 +509,7 @@ void PopUpWindow::Draw(bool secondary)
 				RE_EDITOR->PopUpFocus(false);
 				using_resources.clear();
 				RE_RES->PopSelected(true);
-				RE_LOGGER.EndScope();
+				RE_LOGGER::EndScope();
 			}
 
 			ImGui::Separator();

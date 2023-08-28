@@ -329,7 +329,7 @@ bool RE_ShaderImporter::Compile(const char* buffer, unsigned int size, unsigned 
 
 	uint shaderScript = glCreateShader(GLCompile);
 
-	int bSize = size;
+	auto bSize = static_cast<GLint>(size);
 	glShaderSource(shaderScript, 1, &buffer, &bSize);
 	glCompileShader(shaderScript);
 

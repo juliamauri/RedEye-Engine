@@ -515,7 +515,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	scenePool.ClearPool();
 
 	RE_LOG("Loading scene from own format:");
-	if(!ignorehandle) RE_LOGGER.ScopeProcedureLogging();
+	if(!ignorehandle) RE_LOGGER::ScopeProcedureLogging();
 	RE_Timer timer;
 	currentScene = sceneMD5;
 	RE_Scene* scene = dynamic_cast<RE_Scene*>(RE_RES->At(currentScene));
@@ -533,7 +533,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	RE_EDITOR->SetSelected(0);
 
 	RE_LOG("Time loading scene: %u ms", timer.Read());
-	if (!ignorehandle) RE_LOGGER.EndScope();
+	if (!ignorehandle) RE_LOGGER::EndScope();
 	RE_INPUT->ResumeEvents();
 }
 

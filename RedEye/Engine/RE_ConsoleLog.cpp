@@ -6,9 +6,9 @@
 #include <EAStdC/EASprintf.h>
 #include <windows.h> // TODO Julius: Destruir Windows. Reventarlo quitandote la camiseta. Que no lo reconozca ni Billy el Puertas.
 
-#define LOG_STATEMENT_MAX_LENGTH 512
+constexpr auto LOG_STATEMENT_MAX_LENGTH = 512;
 
-void RE_ConsoleLog::Log(int category, const char file[], int line, const char* format, ...)
+void RE_ConsoleLog::Log(RE_ConsoleLog::Category category, const char file[], int line, const char* format, ...)
 {
 	static char base[LOG_STATEMENT_MAX_LENGTH];
 	static va_list  ap;
@@ -27,19 +27,23 @@ void RE_ConsoleLog::Log(int category, const char file[], int line, const char* f
 
 	// Create event for Editor Console
 	eastl::string edited;
-	switch (category) {
-	case L_SEPARATOR: edited = "\n============\t"; edited += base; edited += "\t============\n"; break;
-	case L_GLOBAL: edited = base; edited.push_back('\n'); break;
-	case L_SECONDARY: edited = "\t- "; edited += base; edited.push_back('\n'); break;
-	case L_TERCIARY: edited = "\t\t+ "; edited += base; edited.push_back('\n'); break;
-	case L_SOFTWARE: edited = "\t* "; edited += base; edited.push_back('\n'); break;
-	case L_ERROR: edited = "ERROR: "; edited += base; edited.push_back('\n'); error_scoped = scoping_procedure; break;
-	case L_WARNING: edited = "Warning: "; edited += base; edited.push_back('\n'); break;
-	case L_SOLUTION: edited = "Solution: "; edited += base; edited.push_back('\n'); break;
-	default: return; }
+	switch (category)
+	{
+	case Category::SEPARATOR: edited = "\n============\t"; edited += base; edited += "\t============\n"; break;
+	case Category::GLOBAL: edited = base; edited.push_back('\n'); break;
+	case Category::SECONDARY: edited = "\t- "; edited += base; edited.push_back('\n'); break;
+	case Category::TERCIARY: edited = "\t\t+ "; edited += base; edited.push_back('\n'); break;
+	case Category::SOFTWARE: edited = "\t* "; edited += base; edited.push_back('\n'); break;
+	case Category::ERROR_: edited = "ERROR: "; edited += base; edited.push_back('\n'); error_scoped = scoping_procedure; break;
+	case Category::WARNING: edited = "Warning: "; edited += base; edited.push_back('\n'); break;
+	case Category::SOLUTION: edited = "Solution: "; edited += base; edited.push_back('\n'); break;
+	default: return;
+	}
 
-	if (scoping_procedure && category >= L_ERROR) category += 3;
-	RE_INPUT->PushForced(static_cast<RE_EventType>(category + static_cast<int>(RE_EventType::CONSOLE_LOG_SEPARATOR)), RE_EDITOR, edited, file_name);
+	auto cat = static_cast<ushort>(category);
+	if (scoping_procedure && category >= RE_ConsoleLog::Category::ERROR_) cat += 3;
+	cat += static_cast<ushort>(RE_EventType::CONSOLE_LOG_SEPARATOR);
+	RE_INPUT->PushForced(static_cast<RE_EventType>(cat), RE_EDITOR, edited, file_name);
 }
 
 void RE_ConsoleLog::ReportSoftware(const char file[], int line, const char* name, const char* version, const char* website)
@@ -48,14 +52,14 @@ void RE_ConsoleLog::ReportSoftware(const char file[], int line, const char* name
 
 	if (version != nullptr)
 	{
-		if (website != nullptr) Log(L_SOFTWARE, file, line, "3rd party software report: %s v%s (%s)", name, version, website);
-		else Log(L_SOFTWARE, file, line, "3rd party software report: %s v%s", name, version);
+		if (website != nullptr) Log(RE_ConsoleLog::Category::SOFTWARE, file, line, "3rd party software report: %s v%s (%s)", name, version, website);
+		else Log(RE_ConsoleLog::Category::SOFTWARE, file, line, "3rd party software report: %s v%s", name, version);
 	}
-	else if (website != nullptr) Log(L_SOFTWARE, file, line, "3rd party software report: %s (%s)", name, website);
-	else Log(L_SOFTWARE, file, line, "3rd party software report: %s", name);
+	else if (website != nullptr) Log(RE_ConsoleLog::Category::SOFTWARE, file, line, "3rd party software report: %s (%s)", name, website);
+	else Log(RE_ConsoleLog::Category::SOFTWARE, file, line, "3rd party software report: %s", name);
 }
 
-void RE_ConsoleLog::RequestBrowser(const char* link) const
+void RE_ConsoleLog::RequestBrowser(const char* link)
 {
 	ShellExecute(NULL, "open", link, NULL, NULL, SW_SHOWNORMAL);
 }

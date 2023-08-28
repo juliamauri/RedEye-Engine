@@ -626,7 +626,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::LIGHT);
 		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::PARTICLEEMITER);
 		for(auto ps: tmp)
-			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->isLighting())
+			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->HasLight())
 				particleS_lights.push_back(ps);
 		// TODO RUB: Bind GL Lights
 
@@ -638,7 +638,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::LIGHT);
 		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::PARTICLEEMITER);
 		for (auto ps : tmp)
-			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->isLighting())
+			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->HasLight())
 				particleS_lights.push_back(ps);
 		// TODO RUB: Upload Light uniforms
 
@@ -650,7 +650,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::LIGHT);
 		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::PARTICLEEMITER);
 		for (auto ps : tmp)
-			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->isLighting())
+			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->HasLight())
 				particleS_lights.push_back(ps);
 		break;
 	}

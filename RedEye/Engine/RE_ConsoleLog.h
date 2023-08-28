@@ -1,54 +1,51 @@
 #ifndef __RE_CONSOLE_LOG__
 #define __RE_CONSOLE_LOG__
 
-enum LogCategory : unsigned int
-{
-	L_SEPARATOR = 0,
-	L_GLOBAL,
-	L_SECONDARY,
-	L_TERCIARY,
-	L_SOFTWARE,
-	L_ERROR,
-	L_WARNING,
-	L_SOLUTION,
-	L_TOTAL_CATEGORIES
-};
+#include "RE_DataTypes.h"
 
-class RE_ConsoleLog
+namespace RE_ConsoleLog
 {
-public:
-	RE_ConsoleLog() {}
-	~RE_ConsoleLog() {}
+	enum class Category : ushort
+	{
+		SEPARATOR = 0,
+		GLOBAL,
+		SECONDARY,
+		TERCIARY,
+		SOFTWARE,
+		ERROR_,
+		WARNING,
+		SOLUTION,
+		TOTAL_CATEGORIES
+	};
 
-	void Log(int category, const char file[], int line, const char* format, ...);
+	void Log(RE_ConsoleLog::Category category, const char file[], int line, const char* format, ...);
 	void ReportSoftware(const char file[], int line, const char* name, const char* version = nullptr, const char* website = nullptr);
 	
-	void RequestBrowser(const char* link) const;
+	void RequestBrowser(const char* link);
 	 
 	void ScopeProcedureLogging();
 	void EndScope();
 	bool ScopedErrors();
 
-private:
-
-	bool scoping_procedure = false;
-	bool error_scoped = false;
+	static bool scoping_procedure = false;
+	static bool error_scoped = false;
 };
 
-#define RE_LOG(format, ...) App->log.Log(L_GLOBAL, __FILE__, __LINE__, format, __VA_ARGS__)
-#define RE_LOG_INTERNAL(format, ...) App->log.Log(-1, __FILE__, __LINE__, format, __VA_ARGS__)
-#define RE_LOG_SEPARATOR(format, ...) App->log.Log(L_SEPARATOR, __FILE__, __LINE__, format, __VA_ARGS__)
-#define RE_LOG_SECONDARY(format, ...) App->log.Log(L_SECONDARY, __FILE__, __LINE__, format, __VA_ARGS__)
-#define RE_LOG_TERCIARY(format, ...) App->log.Log(L_TERCIARY, __FILE__, __LINE__, format, __VA_ARGS__)
-#define RE_LOG_ERROR(format, ...) App->log.Log(L_ERROR, __FILE__, __LINE__, format, __VA_ARGS__)
-#define RE_LOG_WARNING(format, ...) App->log.Log(L_WARNING, __FILE__, __LINE__, format, __VA_ARGS__)
-#define RE_LOG_SOLUTION(format, ...) App->log.Log(L_SOLUTION, __FILE__, __LINE__, format, __VA_ARGS__)
+#define RE_LOGGER RE_ConsoleLog
+#define RE_LOG(format, ...) RE_ConsoleLog::Log(RE_ConsoleLog::Category::GLOBAL, __FILE__, __LINE__, format, __VA_ARGS__)
+#define RE_LOG_INTERNAL(format, ...) RE_ConsoleLog::Log(-1, __FILE__, __LINE__, format, __VA_ARGS__)
+#define RE_LOG_SEPARATOR(format, ...) RE_ConsoleLog::Log(RE_ConsoleLog::Category::SEPARATOR, __FILE__, __LINE__, format, __VA_ARGS__)
+#define RE_LOG_SECONDARY(format, ...) RE_ConsoleLog::Log(RE_ConsoleLog::Category::SECONDARY, __FILE__, __LINE__, format, __VA_ARGS__)
+#define RE_LOG_TERCIARY(format, ...) RE_ConsoleLog::Log(RE_ConsoleLog::Category::TERCIARY, __FILE__, __LINE__, format, __VA_ARGS__)
+#define RE_LOG_ERROR(format, ...) RE_ConsoleLog::Log(RE_ConsoleLog::Category::ERROR_, __FILE__, __LINE__, format, __VA_ARGS__)
+#define RE_LOG_WARNING(format, ...) RE_ConsoleLog::Log(RE_ConsoleLog::Category::WARNING, __FILE__, __LINE__, format, __VA_ARGS__)
+#define RE_LOG_SOLUTION(format, ...) RE_ConsoleLog::Log(RE_ConsoleLog::Category::SOLUTION, __FILE__, __LINE__, format, __VA_ARGS__)
 
-#define RE_SOFT_N(name) App->log.ReportSoftware(__FILE__, __LINE__, name, nullptr, nullptr)
-#define RE_SOFT_NV(name, version) App->log.ReportSoftware(__FILE__, __LINE__, name, version, nullptr)
-#define RE_SOFT_NS(name, website) App->log.ReportSoftware(__FILE__, __LINE__, name, nullptr, website)
-#define RE_SOFT_NVS(name, version, website) App->log.ReportSoftware(__FILE__, __LINE__, name, version, website)
+#define RE_SOFT_N(name) RE_ConsoleLog::ReportSoftware(__FILE__, __LINE__, name, nullptr, nullptr)
+#define RE_SOFT_NV(name, version) RE_ConsoleLog::ReportSoftware(__FILE__, __LINE__, name, version, nullptr)
+#define RE_SOFT_NS(name, website) RE_ConsoleLog::ReportSoftware(__FILE__, __LINE__, name, nullptr, website)
+#define RE_SOFT_NVS(name, version, website) RE_ConsoleLog::ReportSoftware(__FILE__, __LINE__, name, version, website)
 
-#define BROWSER(link) App->log.RequestBrowser(link)
+#define BROWSER(link) RE_ConsoleLog::RequestBrowser(link)
 
 #endif // !__RE_CONSOLE_LOG__

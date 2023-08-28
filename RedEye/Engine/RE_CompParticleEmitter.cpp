@@ -147,7 +147,7 @@ void RE_CompParticleEmitter::UnUseResources()
 	RE_PHYSICS->RemoveEmitter(simulation);
 }
 
-bool RE_CompParticleEmitter::isLighting() const { return simulation->light.type; }
+bool RE_CompParticleEmitter::HasLight() const { return simulation->light.HasLight(); }
 
 void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
 {

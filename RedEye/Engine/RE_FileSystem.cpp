@@ -305,7 +305,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 		}
 
 		if (!toImport.empty()) {
-			RE_LOGGER.ScopeProcedureLogging();
+			RE_LOGGER::ScopeProcedureLogging();
 			while ((doAll || run) && !toImport.empty())
 			{
 
@@ -348,7 +348,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					break;
 				}
 			}
-			RE_LOGGER.EndScope();
+			RE_LOGGER::EndScope();
 		}
 
 		while ((doAll || run) && !reloadResourceMeta.empty())

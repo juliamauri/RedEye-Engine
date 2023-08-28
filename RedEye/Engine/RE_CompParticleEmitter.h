@@ -27,7 +27,7 @@ public:
 	void UseResources();
 	void UnUseResources();
 
-	bool isLighting() const;
+	bool HasLight() const;
 	void CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
 
 	bool isBlend() const;

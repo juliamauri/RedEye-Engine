@@ -14,6 +14,7 @@ class RE_GameObject;
 class RE_Cvar // Global Value Container
 {
 public:
+
 	RE_Cvar();
 	RE_Cvar(const RE_Cvar& copy);
 	RE_Cvar(bool bool_v);
@@ -28,37 +29,40 @@ public:
 	RE_Cvar(RE_GameObject* go_v);
 	RE_Cvar(const math::float4x4 mat4_v);
 
-public:
 	enum VAR_TYPE : unsigned int
 	{
 		UNDEFINED,
+
 		BOOL,
 		BOOL2,
 		BOOL3,
 		BOOL4,
+
 		INT,
 		INT2,
 		INT3,
 		INT4,
+
 		UINT,
 		INT64,
 		UINT64,
 		DOUBLE,
+
 		FLOAT,
 		FLOAT2,
 		FLOAT3,
 		FLOAT4,
+
 		MAT2,
 		MAT3,
 		MAT4,
+
 		CHAR_P,
 		STRING,
+
 		GAMEOBJECT,
 		SAMPLER
 	};
-
-protected:
-	VAR_TYPE type;
 
 	union VAR_data
 	{
@@ -66,28 +70,41 @@ protected:
 		bool bool2_v[2];
 		bool bool3_v[3];
 		bool bool4_v[4];
+
 		int int_v;
 		int int2_v[2];
 		int int3_v[3];
 		int int4_v[4];
+
 		unsigned int uint_v;
 		long long int int64_v;
 		unsigned long long int uint64_v;
 		double double_v;
+
 		float float_v;
 		math::float2 float2_v;
 		math::float3 float3_v;
 		math::float4 float4_v;
-		const char* char_p_v;
-		eastl::string string_v = "";
-		RE_GameObject* go_v;
+
 		math::float3x3 mat3_v;
 		math::float4x4 mat4_v;
-		VAR_data() { }
-		~VAR_data() { }
-	} value;
+
+		const char* char_p_v;
+		eastl::string string_v = "";
+
+		RE_GameObject* go_v;
+
+		VAR_data() {}
+		~VAR_data() {}
+	};
+
+protected:
+
+	VAR_TYPE type;
+	VAR_data value;
 
 public:
+
 	virtual bool SetValue(bool bool_v, bool force_type = false);
 	virtual bool SetValue(int int_v, bool force_type = false);
 	virtual bool SetValue(unsigned int uint_v, bool force_type = false);
@@ -122,6 +139,8 @@ public:
 	const float*			AsFloatPointer() const;
 	const char*				AsCharP() const;
 	RE_GameObject*			AsGO() const;
+
+	bool operator==(const RE_Cvar& other) const;
 };
 
 class RE_Shader_Cvar : public RE_Cvar

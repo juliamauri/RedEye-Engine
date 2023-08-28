@@ -1,11 +1,12 @@
 #ifndef __EVENT__
 #define __EVENT__
 
+#include "RE_DataTypes.h"
 #include "RE_Cvar.h"
 
 class EventListener;
 
-enum class RE_EventType : unsigned short int
+enum class RE_EventType : ushort
 {
 	// APP
 	PLAY,
@@ -81,6 +82,7 @@ struct Event
 	Event(RE_EventType t, EventListener* lis, RE_Cvar data = RE_Cvar(), RE_Cvar data2 = RE_Cvar());
 	Event(Event& e);
 	~Event() {}
+	bool operator==(const Event& other) const;
 };
 
 #endif // !__EVENT__

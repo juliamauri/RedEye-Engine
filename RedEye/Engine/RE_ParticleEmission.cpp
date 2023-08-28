@@ -96,6 +96,35 @@ void RE_ParticleEmission::FillResouce(RE_ParticleEmitter* from)
 	collider = from->collider;
 }
 
+void RE_ParticleEmission::JsonSerialize(bool onlyMD5)
+{
+	Config emission(GetAssetPath());
+	RE_Json* node = emission.GetRootNode("Emission");
+
+	node->Push("Loop", loop);
+	node->Push("Max time", max_time);
+	node->Push("Start Delay", start_delay);
+	node->Push("Time Multiplier", time_muliplier);
+
+	spawn_interval.JsonSerialize(node->PushJObject("Interval"));
+	spawn_mode.JsonSerialize(node->PushJObject("Spawn Mode"));
+	initial_lifetime.JsonSerialize(node->PushJObject("Lifetime"));
+	initial_pos.JsonSerialize(node->PushJObject("Position"));
+	initial_speed.JsonSerialize(node->PushJObject("Speed"));
+	external_acc.JsonSerialize(node->PushJObject("Acceleration"));
+	boundary.JsonSerialize(node->PushJObject("Boundary"));
+	collider.JsonSerialize(node->PushJObject("Collider"));
+
+	if (!onlyMD5) emission.Save();
+	SetMD5(emission.GetMd5().c_str());
+
+	eastl::string libraryPath("Library/Particles/");
+	libraryPath += GetMD5();
+	SetLibraryPath(libraryPath.c_str());
+
+	DEL(node);
+}
+
 void RE_ParticleEmission::JsonDeserialize(bool generateLibraryPath)
 {
 	Config emission(GetAssetPath());
@@ -129,33 +158,57 @@ void RE_ParticleEmission::JsonDeserialize(bool generateLibraryPath)
 	}
 }
 
-void RE_ParticleEmission::JsonSerialize(bool onlyMD5)
+size_t RE_ParticleEmission::GetBinarySize() const
 {
-	Config emission(GetAssetPath());
-	RE_Json* node = emission.GetRootNode("Emission");
+	return sizeof(bool) + (3u * sizeof(float)) + sizeof(uint)
+		+ spawn_interval.GetBinarySize()
+		+ spawn_mode.GetBinarySize()
+		+ initial_lifetime.GetBinarySize()
+		+ initial_pos.GetBinarySize()
+		+ initial_speed.GetBinarySize()
+		+ external_acc.GetBinarySize()
+		+ boundary.GetBinarySize()
+		+ collider.GetBinarySize();
+}
 
-	node->Push("Loop", loop);
-	node->Push("Max time", max_time);
-	node->Push("Start Delay", start_delay);
-	node->Push("Time Multiplier", time_muliplier);
+void RE_ParticleEmission::BinarySerialize() const
+{
+	RE_FileBuffer libraryFile(GetLibraryPath());
 
-	spawn_interval.JsonSerialize(node->PushJObject("Interval"));
-	spawn_mode.JsonSerialize(node->PushJObject("Spawn Mode"));
-	initial_lifetime.JsonSerialize(node->PushJObject("Lifetime"));
-	initial_pos.JsonSerialize(node->PushJObject("Position"));
-	initial_speed.JsonSerialize(node->PushJObject("Speed"));
-	external_acc.JsonSerialize(node->PushJObject("Acceleration"));
-	boundary.JsonSerialize(node->PushJObject("Boundary"));
-	collider.JsonSerialize(node->PushJObject("Collider"));
+	auto bufferSize = GetBinarySize() + 1;
+	char* buffer = new char[bufferSize];
+	char* cursor = buffer;
 
-	if (!onlyMD5) emission.Save();
-	SetMD5(emission.GetMd5().c_str());
+	size_t size = sizeof(bool);
+	memcpy(cursor, &loop, size);
+	cursor += size;
 
-	eastl::string libraryPath("Library/Particles/");
-	libraryPath += GetMD5();
-	SetLibraryPath(libraryPath.c_str());
+	size = sizeof(float);
+	memcpy(cursor, &max_time, size);
+	cursor += size;
+	memcpy(cursor, &start_delay, size);
+	cursor += size;
+	memcpy(cursor, &time_muliplier, size);
+	cursor += size;
 
-	DEL(node);
+	size = sizeof(uint);
+	memcpy(cursor, &max_particles, size);
+	cursor += size;
+
+	spawn_interval.BinarySerialize(cursor);
+	spawn_mode.BinarySerialize(cursor);
+	initial_lifetime.BinarySerialize(cursor);
+	initial_pos.BinarySerialize(cursor);
+	initial_speed.BinarySerialize(cursor);
+	external_acc.BinarySerialize(cursor);
+	boundary.BinarySerialize(cursor);
+	collider.BinarySerialize(cursor);
+
+	char nullchar = '\0';
+	memcpy(cursor, &nullchar, sizeof(char));
+
+	libraryFile.Save(buffer, bufferSize);
+	DEL_A(buffer);
 }
 
 void RE_ParticleEmission::BinaryDeserialize()
@@ -192,57 +245,4 @@ void RE_ParticleEmission::BinaryDeserialize()
 
 		ResourceContainer::inMemory = true;
 	}
-}
-
-void RE_ParticleEmission::BinarySerialize() const
-{
-	RE_FileBuffer libraryFile(GetLibraryPath());
-
-	uint bufferSize = GetBinarySize() + 1;
-	char* buffer = new char[bufferSize];
-	char* cursor = buffer;
-
-	size_t size = sizeof(bool);
-	memcpy(cursor, &loop, size);
-	cursor += size;
-
-	size = sizeof(float);
-	memcpy(cursor, &max_time, size);
-	cursor += size;
-	memcpy(cursor, &start_delay, size);
-	cursor += size;
-	memcpy(cursor, &time_muliplier, size);
-	cursor += size;
-
-	size = sizeof(uint);
-	memcpy(cursor, &max_particles, size);
-	cursor += size;
-
-	spawn_interval.BinarySerialize(cursor);
-	spawn_mode.BinarySerialize(cursor);
-	initial_lifetime.BinarySerialize(cursor);
-	initial_pos.BinarySerialize(cursor);
-	initial_speed.BinarySerialize(cursor);
-	external_acc.BinarySerialize(cursor);
-	boundary.BinarySerialize(cursor);
-	collider.BinarySerialize(cursor);
-
-	char nullchar = '\0';
-	memcpy(cursor, &nullchar, sizeof(char));
-
-	libraryFile.Save(buffer, bufferSize);
-	DEL_A(buffer);
-}
-
-unsigned int RE_ParticleEmission::GetBinarySize() const
-{
-	return sizeof(bool) + (3u * sizeof(float)) + sizeof(uint)
-		+ spawn_interval.GetBinarySize()
-		+ spawn_mode.GetBinarySize()
-		+ initial_lifetime.GetBinarySize()
-		+ initial_pos.GetBinarySize()
-		+ initial_speed.GetBinarySize()
-		+ external_acc.GetBinarySize()
-		+ boundary.GetBinarySize()
-		+ collider.GetBinarySize();
 }

@@ -134,7 +134,7 @@ void RE_Model::Draw()
 
 	if (!needReImport && ImGui::Button("Add to Scene"))
 	{
-		RE_LOGGER.ScopeProcedureLogging();
+		RE_LOGGER::ScopeProcedureLogging();
 
 		if (CheckResourcesIsOnAssets())
 		{
@@ -148,7 +148,7 @@ void RE_Model::Draw()
 			needReImport = true;
 		}
 
-		RE_LOGGER.EndScope();
+		RE_LOGGER::EndScope();
 	}
 	else if(needReImport && ImGui::Button("ReImport before add"))
 	{
