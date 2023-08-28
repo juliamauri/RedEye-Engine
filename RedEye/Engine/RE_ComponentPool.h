@@ -75,7 +75,7 @@ public:
 		RE_Json* compPool = node->PushJObject(cName.c_str());
 
 		size_t count = GetCount();
-		compPool->Push("poolSize", static_cast<uint>(count));
+		compPool->PushSizeT("poolSize", count);
 
 		for (size_t i = 0; i < count; i++)
 		{
@@ -90,8 +90,8 @@ public:
 	void DeserializeJson(GameObjectsPool* goPool, RE_Json* node, eastl::map<int, const char*>* resources)
 	{
 		RE_Json* comp_objs = node->PullJObject(cName.c_str());
-		unsigned int cmpSize = comp_objs->PullUInt("poolSize", 0);
-		for (unsigned int i = 0; i < cmpSize; i++)
+		auto cmpSize = comp_objs->PullSizeT("poolSize", 0);
+		for (size_t i = 0; i < cmpSize; i++)
 		{
 			COMPCLASS* comp_ptr = AtPtr(Push({}));
 			RE_Json* comp_obj = comp_objs->PullJObject(eastl::to_string(i).c_str());

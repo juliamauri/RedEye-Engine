@@ -773,20 +773,20 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 
 		fromShaderCustomUniforms.clear();
 		RE_Json* nuniforms = nodeMat->PullJObject("uniforms");
-		uint size = nuniforms->PullUInt("size", 0);
+		auto size = nuniforms->PullSizeT("size", 0);
 		if (size)
 		{
 			bool* b = nullptr;
 			int* intPtr = nullptr;
 			eastl::string id;
-			for (uint i = 0; i < size; i++)
+			for (size_t i = 0; i < size; i++)
 			{
 				RE_Shader_Cvar sVar;
 				id = "name" + eastl::to_string(i);
 				sVar.name = nuniforms->PullString(id.c_str(), "");
 
 				id = "type" + eastl::to_string(i);
-				RE_Cvar::VAR_TYPE vT = (RE_Cvar::VAR_TYPE)nuniforms->PullUInt(id.c_str(), RE_Shader_Cvar::UNDEFINED);
+				auto vT = static_cast<RE_Cvar::VAR_TYPE>(nuniforms->PullUInt(id.c_str(), static_cast<uint>(RE_Shader_Cvar::VAR_TYPE(0))));
 
 				id = "custom" + eastl::to_string(i);
 				sVar.custom = nuniforms->PullBool(id.c_str(), true);
@@ -901,8 +901,9 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 	materialNode->Push("Refraccti", refraccti);
 
 	RE_Json* nuniforms = materialNode->PushJObject("uniforms");
-	nuniforms->Push("size", fromShaderCustomUniforms.size());
-	if (!fromShaderCustomUniforms.empty()) {
+	nuniforms->PushSizeT("size", fromShaderCustomUniforms.size());
+	if (!fromShaderCustomUniforms.empty())
+	{
 		eastl::string id;
 		for (uint i = 0; i < fromShaderCustomUniforms.size(); i++)
 		{

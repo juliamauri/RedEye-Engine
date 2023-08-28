@@ -128,9 +128,10 @@ void GameObjectsPool::DeserializeJson(RE_Json* node, ComponentsPool* cmpsPool)
 {
 	eastl::map<GO_UID, RE_GameObject*> idGO;
 	RE_Json* goPool = node->PullJObject("gameobjects Pool");
-	unsigned int goSize = goPool->PullUInt("gameobjectsSize", 0);
+	auto goSize = goPool->PullSizeT("gameobjectsSize", 0);
 
-	for (uint i = 0; i < goSize; i++) {
+	for (size_t i = 0; i < goSize; i++)
+	{
 		RE_Json* goNode = goPool->PullJObject(eastl::to_string(i).c_str());
 		GO_UID goUID = goNode->PullUnsignedLongLong("GOUID", 0);
 		RE_GameObject newGO;

@@ -179,7 +179,7 @@ void RE_Model::SaveResourceMeta(RE_Json* metaNode)
 	for (uint i = 0; i < 25; i++) flags->Push(eastl::to_string(i).c_str(), modelSettings.flags[i]);
 	DEL(flags);
 
-	metaNode->Push("MeshesSize", modelSettings.libraryMeshes.size());
+	metaNode->PushSizeT("MeshesSize", modelSettings.libraryMeshes.size());
 	uint count = 0;
 	for (const char* mesh : modelSettings.libraryMeshes)
 	{
@@ -199,8 +199,8 @@ void RE_Model::LoadResourceMeta(RE_Json* metaNode)
 	for (uint i = 0; i < 25; i++) modelSettings.flags[i] = flags->PullBool(eastl::to_string(i).c_str(), false);
 	DEL(flags);
 
-	uint totalMeshes = metaNode->PullUInt("MeshesSize", 0);
-	for (uint i = 0; i < totalMeshes; i++)
+	auto totalMeshes = metaNode->PullSizeT("MeshesSize", 0);
+	for (size_t i = 0; i < totalMeshes; i++)
 	{
 		eastl::string name_mesh = metaNode->PullString((eastl::string("Name") + eastl::to_string(i)).c_str(), "");
 		eastl::string library_mesh = metaNode->PullString((eastl::string("LibraryPath") + eastl::to_string(i)).c_str(), "");

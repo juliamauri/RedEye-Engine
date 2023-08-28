@@ -420,10 +420,10 @@ void RE_Shader::SaveResourceMeta(RE_Json* metaNode)
 	metaNode->Push("gLastModified", shaderSettings.glastModified);
 
 	RE_Json* nuniforms = metaNode->PushJObject("uniforms");
-	nuniforms->Push("size", uniforms.size());
+	nuniforms->PushSizeT("size", uniforms.size());
 	if (!uniforms.empty())
 	{
-		for (uint i = 0; i < uniforms.size(); i++)
+		for (size_t i = 0; i < uniforms.size(); i++)
 		{
 			nuniforms->Push(("name" + eastl::to_string(i)).c_str(), uniforms[i].name.c_str());
 			nuniforms->Push(("type" + eastl::to_string(i)).c_str(), uniforms[i].GetType());
@@ -445,10 +445,11 @@ void RE_Shader::LoadResourceMeta(RE_Json* metaNode)
 	projection = view = model = time = dt = depth = viewport_w = viewport_h = near_plane = far_plane = view_pos = -1;
 	uniforms.clear();
 	RE_Json* nuniforms = metaNode->PullJObject("uniforms");
-	uint size = nuniforms->PullUInt("size", 0);
-	if (size) {
+	auto size = nuniforms->PullSizeT("size", 0);
+	if (size)
+	{
 		eastl::string id;
-		for (uint i = 0; i < size; i++)
+		for (size_t i = 0; i < size; i++)
 		{
 			RE_Shader_Cvar sVar;
 			id = "name";
@@ -456,7 +457,7 @@ void RE_Shader::LoadResourceMeta(RE_Json* metaNode)
 			sVar.name = nuniforms->PullString(id.c_str(), "");
 			id = "type";
 			id += eastl::to_string(i);
-			RE_Cvar::VAR_TYPE vT = (RE_Cvar::VAR_TYPE)nuniforms->PullUInt(id.c_str(), RE_Shader_Cvar::UNDEFINED);
+			auto vT = static_cast<RE_Cvar::VAR_TYPE>(nuniforms->PullUInt(id.c_str(), RE_Shader_Cvar::VAR_TYPE(0)));
 			id = "custom";
 			id += eastl::to_string(i);
 			sVar.custom = nuniforms->PullBool(id.c_str(), true);

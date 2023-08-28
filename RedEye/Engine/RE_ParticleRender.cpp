@@ -167,7 +167,7 @@ void RE_ParticleRender::JsonDeserialize(bool generateLibraryPath)
 		particleDir = static_cast<RE_ParticleEmitter::ParticleDir>(node->PullInt("particleDir", 0));
 		direction = node->PullFloatVector("Direction", { -1.0f,1.0f,0.5f });
 
-		primType = static_cast<RE_Component::Type>(node->PullUInt("primitiveType", static_cast<uint>(RE_Component::Type::EMPTY)));
+		primType = static_cast<RE_Component::Type>(node->PullUInt("primitiveType", static_cast<uint>(RE_Component::Type(0))));
 		if (primType != RE_Component::Type::EMPTY)
 		{
 			switch (primType)

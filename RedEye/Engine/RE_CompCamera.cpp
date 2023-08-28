@@ -511,7 +511,7 @@ void RE_CompCamera::DeserializeJson(RE_Json* node, eastl::map<int, const char*>*
 	SetProperties(node->PullBool("isPrespective", true),
 		node->PullFloat("near_plane", 1.0f), node->PullFloat("far_plane", 5000.0f),
 		node->PullFloat("v_fov_rads", 0.523599f),
-		AspectRatio(node->PullUInt("aspect_ratio", 0u)),
+		AspectRatio(node->PullUInt("aspect_ratio", 0)),
 		node->PullBool("draw_frustum", true),
 		usingSkybox,
 		(sbRes != -1) ? resources->at(sbRes) : nullptr);
