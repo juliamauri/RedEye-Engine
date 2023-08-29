@@ -120,34 +120,34 @@ void RE_Material::SaveResourceMeta(RE_Json* metaNode)
 
 	RE_Json* diffuseNode = metaNode->PushJObject("DiffuseTextures");
 	PushTexturesJson(diffuseNode, &tDiffuse);
-	DEL(diffuseNode);
+	DEL(diffuseNode)
 	RE_Json* specularNode = metaNode->PushJObject("SpecularTextures");
 	PushTexturesJson(specularNode, &tSpecular);
-	DEL(specularNode);
+	DEL(specularNode)
 	RE_Json* ambientNode = metaNode->PushJObject("AmbientTextures");
 	PushTexturesJson(ambientNode, &tAmbient);
-	DEL(ambientNode);
+	DEL(ambientNode)
 	RE_Json* emissiveNode = metaNode->PushJObject("EmissiveTextures");
 	PushTexturesJson(emissiveNode, &tEmissive);
-	DEL(emissiveNode);
+	DEL(emissiveNode)
 	RE_Json* opacityNode = metaNode->PushJObject("OpacityTextures");
 	PushTexturesJson(opacityNode, &tOpacity);
-	DEL(opacityNode);
+	DEL(opacityNode)
 	RE_Json* shininessNode = metaNode->PushJObject("ShininessTextures");
 	PushTexturesJson(shininessNode, &tShininess);
-	DEL(shininessNode);
+	DEL(shininessNode)
 	RE_Json* heightNode = metaNode->PushJObject("HeightTextures");
 	PushTexturesJson(heightNode, &tHeight);
-	DEL(heightNode);
+	DEL(heightNode)
 	RE_Json* normalsNode = metaNode->PushJObject("NormalsTextures");
 	PushTexturesJson(normalsNode, &tNormals);
-	DEL(normalsNode);
+	DEL(normalsNode)
 	RE_Json* reflectionNode = metaNode->PushJObject("ReflectionTextures");
 	PushTexturesJson(reflectionNode, &tReflection);
-	DEL(reflectionNode);
+	DEL(reflectionNode)
 	RE_Json* unknownNode = metaNode->PushJObject("UnknownTextures");
 	PushTexturesJson(unknownNode, &tUnknown);
-	DEL(unknownNode);
+	DEL(unknownNode)
 }
 
 void RE_Material::LoadResourceMeta(RE_Json* metaNode)
@@ -157,34 +157,34 @@ void RE_Material::LoadResourceMeta(RE_Json* metaNode)
 
 	RE_Json* diffuseNode = metaNode->PullJObject("DiffuseTextures");
 	PullTexturesJson(diffuseNode, &tDiffuse);
-	DEL(diffuseNode);
+	DEL(diffuseNode)
 	RE_Json* specularNode = metaNode->PullJObject("SpecularTextures");
 	PullTexturesJson(specularNode, &tSpecular);
-	DEL(specularNode);
+	DEL(specularNode)
 	RE_Json* ambientNode = metaNode->PullJObject("AmbientTextures");
 	PullTexturesJson(ambientNode, &tAmbient);
-	DEL(ambientNode);
+	DEL(ambientNode)
 	RE_Json* emissiveNode = metaNode->PullJObject("EmissiveTextures");
 	PullTexturesJson(emissiveNode, &tEmissive);
-	DEL(emissiveNode);
+	DEL(emissiveNode)
 	RE_Json* opacityNode = metaNode->PullJObject("OpacityTextures");
 	PullTexturesJson(opacityNode, &tOpacity);
-	DEL(opacityNode);
+	DEL(opacityNode)
 	RE_Json* shininessNode = metaNode->PullJObject("ShininessTextures");
 	PullTexturesJson(shininessNode, &tShininess);
-	DEL(shininessNode);
+	DEL(shininessNode)
 	RE_Json* heightNode = metaNode->PullJObject("HeightTextures");
 	PullTexturesJson(heightNode, &tHeight);
-	DEL(heightNode);
+	DEL(heightNode)
 	RE_Json* normalsNode = metaNode->PullJObject("NormalsTextures");
 	PullTexturesJson(normalsNode, &tNormals);
-	DEL(normalsNode);
+	DEL(normalsNode)
 	RE_Json* reflectionNode = metaNode->PullJObject("ReflectionTextures");
 	PullTexturesJson(reflectionNode, &tReflection);
-	DEL(reflectionNode);
+	DEL(reflectionNode)
 	RE_Json* unknownNode = metaNode->PullJObject("UnknownTextures");
 	PullTexturesJson(unknownNode, &tUnknown);
-	DEL(unknownNode);
+	DEL(unknownNode)
 }
 
 bool RE_Material::NeededResourcesReferenced(RE_Json* metaNode)
@@ -199,34 +199,34 @@ bool RE_Material::NeededResourcesReferenced(RE_Json* metaNode)
 
 	RE_Json* diffuseNode = metaNode->PullJObject("DiffuseTextures");
 	if(NeededResourcesReferencedTexturePull(diffuseNode)) ret = true;
-	DEL(diffuseNode);
+	DEL(diffuseNode)
 	RE_Json* specularNode = metaNode->PullJObject("SpecularTextures");
 	if (NeededResourcesReferencedTexturePull(specularNode)) ret = true;
-	DEL(specularNode);
+	DEL(specularNode)
 	RE_Json* ambientNode = metaNode->PullJObject("AmbientTextures");
 	if (NeededResourcesReferencedTexturePull(ambientNode)) ret = true;
-	DEL(ambientNode);
+	DEL(ambientNode)
 	RE_Json* emissiveNode = metaNode->PullJObject("EmissiveTextures");
 	if (NeededResourcesReferencedTexturePull(emissiveNode)) ret = true;
-	DEL(emissiveNode);
+	DEL(emissiveNode)
 	RE_Json* opacityNode = metaNode->PullJObject("OpacityTextures");
 	if (NeededResourcesReferencedTexturePull(opacityNode)) ret = true;
-	DEL(opacityNode);
+	DEL(opacityNode)
 	RE_Json* shininessNode = metaNode->PullJObject("ShininessTextures");
 	if (NeededResourcesReferencedTexturePull(shininessNode)) ret = true;
-	DEL(shininessNode);
+	DEL(shininessNode)
 	RE_Json* heightNode = metaNode->PullJObject("HeightTextures");
 	if (NeededResourcesReferencedTexturePull(heightNode)) ret = true;
-	DEL(heightNode);
+	DEL(heightNode)
 	RE_Json* normalsNode = metaNode->PullJObject("NormalsTextures");
 	if (NeededResourcesReferencedTexturePull(normalsNode)) ret = true;
-	DEL(normalsNode);
+	DEL(normalsNode)
 	RE_Json* reflectionNode = metaNode->PullJObject("ReflectionTextures");
 	if (NeededResourcesReferencedTexturePull(reflectionNode)) ret = true;
-	DEL(reflectionNode);
+	DEL(reflectionNode)
 	RE_Json* unknownNode = metaNode->PullJObject("UnknownTextures");
 	if (NeededResourcesReferencedTexturePull(unknownNode)) ret = true;
-	DEL(unknownNode);
+	DEL(unknownNode)
 
 	return ret;
 }

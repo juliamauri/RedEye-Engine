@@ -1,7 +1,7 @@
 #ifndef __RE_PROFILER__
 #define __RE_PROFILER__
 
-#define PROFILING_ENABLED // undefine to disable any profiling 
+//#define PROFILING_ENABLED // undefine to disable any profiling 
 
 #ifdef PROFILING_ENABLED
 #define INTERNAL_PROFILING // undefine to use Optick Profiling

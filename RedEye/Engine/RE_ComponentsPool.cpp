@@ -724,6 +724,56 @@ eastl::vector<eastl::pair<const COMP_UID, const RE_Component*>> ComponentsPool::
 	return ret;
 }
 
+void ComponentsPool::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources)
+{
+	RE_Json* comps = node->PushJObject("Components Pool");
+	camPool.SerializeJson(comps, resources);
+	meshPool.SerializeJson(comps, resources);
+	lightPool.SerializeJson(comps, resources);
+	waterPool.SerializeJson(comps, resources);
+	particleSPool.SerializeJson(comps, resources);
+	pGridPool.SerializeJson(comps, resources);
+	pRockPool.SerializeJson(comps, resources);
+	pCubePool.SerializeJson(comps, resources);
+	pDodecahedronPool.SerializeJson(comps, resources);
+	pTetrahedronPool.SerializeJson(comps, resources);
+	pOctohedronPool.SerializeJson(comps, resources);
+	pIcosahedronPool.SerializeJson(comps, resources);
+	pPointPool.SerializeJson(comps, resources);
+	pPlanePool.SerializeJson(comps, resources);
+	pSpherePool.SerializeJson(comps, resources);
+	pCylinderPool.SerializeJson(comps, resources);
+	pHemiSpherePool.SerializeJson(comps, resources);
+	pTorusPool.SerializeJson(comps, resources);
+	pTrefoiKnotPool.SerializeJson(comps, resources);
+	DEL(comps)
+}
+
+void ComponentsPool::DeserializeJson(GameObjectsPool* goPool, RE_Json* node, eastl::map<int, const char*>* resources)
+{
+	RE_Json* comps = node->PullJObject("Components Pool");
+	camPool.DeserializeJson(goPool, comps, resources);
+	meshPool.DeserializeJson(goPool, comps, resources);
+	lightPool.DeserializeJson(goPool, comps, resources);
+	waterPool.DeserializeJson(goPool, comps, resources);
+	particleSPool.DeserializeJson(goPool, comps, resources);
+	pGridPool.DeserializeJson(goPool, comps, resources);
+	pRockPool.DeserializeJson(goPool, comps, resources);
+	pCubePool.DeserializeJson(goPool, comps, resources);
+	pDodecahedronPool.DeserializeJson(goPool, comps, resources);
+	pTetrahedronPool.DeserializeJson(goPool, comps, resources);
+	pOctohedronPool.DeserializeJson(goPool, comps, resources);
+	pIcosahedronPool.DeserializeJson(goPool, comps, resources);
+	pPointPool.DeserializeJson(goPool, comps, resources);
+	pPlanePool.DeserializeJson(goPool, comps, resources);
+	pSpherePool.DeserializeJson(goPool, comps, resources);
+	pCylinderPool.DeserializeJson(goPool, comps, resources);
+	pHemiSpherePool.DeserializeJson(goPool, comps, resources);
+	pTorusPool.DeserializeJson(goPool, comps, resources);
+	pTrefoiKnotPool.DeserializeJson(goPool, comps, resources);
+	DEL(comps)
+}
+
 size_t ComponentsPool::GetBinarySize() const
 {
 	size_t size = 0;
@@ -793,54 +843,4 @@ void ComponentsPool::DeserializeBinary(GameObjectsPool* goPool, char*& cursor, e
 	pHemiSpherePool.DeserializeBinary(goPool, cursor, resources);
 	pTorusPool.DeserializeBinary(goPool, cursor, resources);
 	pTrefoiKnotPool.DeserializeBinary(goPool, cursor, resources);
-}
-
-void ComponentsPool::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources)
-{
-	RE_Json* comps = node->PushJObject("Components Pool");
-	camPool.SerializeJson(comps, resources);
-	meshPool.SerializeJson(comps, resources);
-	lightPool.SerializeJson(comps, resources);
-	waterPool.SerializeJson(comps, resources);
-	particleSPool.SerializeJson(comps, resources);
-	pGridPool.SerializeJson(comps, resources);
-	pRockPool.SerializeJson(comps, resources);
-	pCubePool.SerializeJson(comps, resources);
-	pDodecahedronPool.SerializeJson(comps, resources);
-	pTetrahedronPool.SerializeJson(comps, resources);
-	pOctohedronPool.SerializeJson(comps, resources);
-	pIcosahedronPool.SerializeJson(comps, resources);
-	pPointPool.SerializeJson(comps, resources);
-	pPlanePool.SerializeJson(comps, resources);
-	pSpherePool.SerializeJson(comps, resources);
-	pCylinderPool.SerializeJson(comps, resources);
-	pHemiSpherePool.SerializeJson(comps, resources);
-	pTorusPool.SerializeJson(comps, resources);
-	pTrefoiKnotPool.SerializeJson(comps, resources);
-	DEL(comps);
-}
-
-void ComponentsPool::DeserializeJson(GameObjectsPool* goPool, RE_Json* node, eastl::map<int, const char*>* resources)
-{
-	RE_Json* comps = node->PullJObject("Components Pool");
-	camPool.DeserializeJson(goPool, comps, resources);
-	meshPool.DeserializeJson(goPool, comps, resources);
-	lightPool.DeserializeJson(goPool, comps, resources);
-	waterPool.DeserializeJson(goPool, comps, resources);
-	particleSPool.DeserializeJson(goPool, comps, resources);
-	pGridPool.DeserializeJson(goPool, comps, resources);
-	pRockPool.DeserializeJson(goPool, comps, resources);
-	pCubePool.DeserializeJson(goPool, comps, resources);
-	pDodecahedronPool.DeserializeJson(goPool, comps, resources);
-	pTetrahedronPool.DeserializeJson(goPool, comps, resources);
-	pOctohedronPool.DeserializeJson(goPool, comps, resources);
-	pIcosahedronPool.DeserializeJson(goPool, comps, resources);
-	pPointPool.DeserializeJson(goPool, comps, resources);
-	pPlanePool.DeserializeJson(goPool, comps, resources);
-	pSpherePool.DeserializeJson(goPool, comps, resources);
-	pCylinderPool.DeserializeJson(goPool, comps, resources);
-	pHemiSpherePool.DeserializeJson(goPool, comps, resources);
-	pTorusPool.DeserializeJson(goPool, comps, resources);
-	pTrefoiKnotPool.DeserializeJson(goPool, comps, resources);
-	DEL(comps);
 }

@@ -37,12 +37,12 @@ public:
 	eastl::vector<eastl::pair<const COMP_UID, const RE_Component*>> GetAllCompCData(RE_Component::Type type = RE_Component::Type::EMPTY) const;
 
 	// Serialization
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources);
+	void DeserializeJson(GameObjectsPool* goPool, RE_Json* node, eastl::map<int, const char*>* resources);
+
 	size_t GetBinarySize() const;
 	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources);
 	void DeserializeBinary(GameObjectsPool* goPool, char*& cursor, eastl::map<int, const char*>* resources);
-
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources);
-	void DeserializeJson(GameObjectsPool* goPool, RE_Json* node, eastl::map<int, const char*>* resources);
 
 private:
 
