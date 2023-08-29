@@ -26,9 +26,12 @@ struct RenderView
 		DEFERRED,
 	};
 
-	RenderView(eastl::string name = "",
-		eastl::pair<unsigned int, unsigned int> fbos = { 0, 0 },
-		short flags = 0, LightMode light = LightMode::GL, math::float4 clipDistance = math::float4::zero);
+	RenderView(
+		eastl::string name = "",
+		eastl::pair<uint, uint> fbos = { 0, 0 },
+		short flags = 0,
+		LightMode light = LightMode::GL,
+		math::float4 clipDistance = math::float4::zero);
 
 	LightMode light;
 	eastl::string name;
@@ -36,8 +39,8 @@ struct RenderView
 	math::float4 clip_distance;
 	class RE_CompCamera* camera = nullptr;
 
-	eastl::pair<unsigned int, unsigned int> fbos;
-	const unsigned int GetFBO() const;
+	eastl::pair<uint, uint> fbos;
+	const uint GetFBO() const;
 
 	enum class Flag : ushort
 	{
@@ -57,16 +60,16 @@ struct RenderView
 		CLIP_DISTANCE = 0x800	 // 0000 1000 0000 0000
 	};
 
-	short flags;
+	ushort flags;
 	static const char* flag_labels[12];
 
-	inline void AddFlag(Flag flag) { flags |= static_cast<const short>(flag); }
-	inline void RemoveFlag(Flag flag) { flags -= static_cast<const short>(flag); }
+	inline void AddFlag(Flag flag) { flags |= static_cast<const ushort>(flag); }
+	inline void RemoveFlag(Flag flag) { flags -= static_cast<const ushort>(flag); }
 	inline const bool HasFlag(Flag flag) const;
 
 	void DrawEditor();
-	void Load(RE_Json* node);
 	void Save(RE_Json* node) const;
+	void Load(RE_Json* node);
 };
 
 #endif // !__RENDER_VIEW_H__

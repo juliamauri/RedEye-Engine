@@ -10,7 +10,7 @@ class Application : public EventListener
 public:
 
 	Application();
-	~Application();
+	~Application() final;
 
 	bool Init(int argc, char* argv[]);
 	void MainLoop();
@@ -25,6 +25,18 @@ private:
 
 	void LoadConfig();
 	void SaveConfig();
+
+	enum class Flag : uchar
+	{
+		LOAD_CONFIG = 1 << 0,
+		SAVE_CONFIG = 1 << 1,
+		WANT_TO_QUIT = 1 << 2,
+		SAVE_ON_EXIT = 1 << 3
+	};
+
+	inline void AddFlag(Flag flag);
+	inline void RemoveFlag(Flag flag);
+	inline const bool HasFlag(Flag flag) const;
 
 public:
 
@@ -48,8 +60,10 @@ public:
 
 private:
 
-	unsigned char flags = 0;
-	int argc = 0; char** argv = nullptr;
+	uchar flags = 0;
+
+	int argc = 0;
+	char** argv = nullptr;
 };
 
 extern Application* App;

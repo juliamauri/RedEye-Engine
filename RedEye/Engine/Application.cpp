@@ -21,15 +21,6 @@
 #include <EAStdC/EASprintf.h>
 #include <eathread/internal/config.h>
 
-namespace AppFlags {
-	constexpr unsigned char
-		EMPLY_FLAGS = 0,
-		LOAD_CONFIG = 1 << 0,
-		SAVE_CONFIG = 1 << 1,
-		WANT_TO_QUIT = 1 << 2,
-		SAVE_ON_EXIT = 1 << 3;
-}
-
 Application::Application()
 {
 	time = new RE_Time();
@@ -54,20 +45,20 @@ Application::Application()
 
 Application::~Application()
 {
-	DEL(audio);
-	DEL(renderer);
-	DEL(editor);
-	DEL(scene);
-	DEL(physics);
-	DEL(window);
-	DEL(input);
+	DEL(audio)
+	DEL(renderer)
+	DEL(editor)
+	DEL(scene)
+	DEL(physics)
+	DEL(window)
+	DEL(input)
 
-	DEL(res);
-	DEL(fs);
+	DEL(res)
+	DEL(fs)
 
-	DEL(hardware);
-	DEL(math);
-	DEL(time);
+	DEL(hardware)
+	DEL(math)
+	DEL(time)
 
 #ifdef INTERNAL_PROFILING
 	if (ProfilingTimer::recording) RE_Profiler::Deploy();
@@ -79,12 +70,15 @@ bool Application::Init(int _argc, char* _argv[])
 	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::Application);
 	RE_LOG_SEPARATOR("Initializing Application");
 
-	char tmp[8];
-	EA::StdC::Snprintf(tmp, 8, "%i.%i.%i", EAASSERT_VERSION_MAJOR, EAASSERT_VERSION_MINOR, EAASSERT_VERSION_PATCH);
+	const size_t capacity = 8;
+	eastl::string tmp;
+	tmp.set_capacity(capacity);
+
+	EA::StdC::Snprintf(&tmp[0], capacity, "%i.%i.%i", EAASSERT_VERSION_MAJOR, EAASSERT_VERSION_MINOR, EAASSERT_VERSION_PATCH);
 	RE_SOFT_NVS("EABase", EABASE_VERSION, "https://github.com/electronicarts/EABase");
 	RE_SOFT_NVS("EASTL", EASTL_VERSION, "https://github.com/electronicarts/EASTL");
 	RE_SOFT_NVS("EAStdC", EASTDC_VERSION, "https://github.com/electronicarts/EAStdC");
-	RE_SOFT_NVS("EAAssert", tmp, "https://github.com/electronicarts/EAAssert");
+	RE_SOFT_NVS("EAAssert", tmp.c_str(), "https://github.com/electronicarts/EAAssert");
 	RE_SOFT_NVS("EAThread", EATHREAD_VERSION, "https://github.com/electronicarts/EAThread");
 	RE_SOFT_NVS("Optick", "1.2.9", "https://optick.dev/");
 	RE_SOFT_NS("MathGeoLib", "https://github.com/juj/MathGeoLib");
@@ -100,10 +94,12 @@ bool Application::Init(int _argc, char* _argv[])
 
 	SDL_version sdl_version;
 	SDL_GetVersion(&sdl_version);
-	EA::StdC::Snprintf(tmp, 8, "%u.%u.%u", sdl_version.major, sdl_version.minor, sdl_version.patch);
-	RE_SOFT_NVS("SDL", tmp, "https://www.libsdl.org/");
+	EA::StdC::Snprintf(&tmp[0], capacity, "%u.%u.%u", sdl_version.major, sdl_version.minor, sdl_version.patch);
+	RE_SOFT_NVS("SDL", tmp.c_str(), "https://www.libsdl.org/");
 
-	if (!fs->Init(argc = _argc, argv = _argv))
+	argc = _argc;
+	argv = _argv;
+	if (!fs->Init(argc, argv))
 	{
 		RE_LOG_ERROR("Application Init failed to initialize File System");
 		return false;
@@ -149,8 +145,8 @@ void Application::MainLoop()
 		renderer->PostUpdate();
 		audio->PostUpdate();
 
-		if (flags & AppFlags::LOAD_CONFIG) LoadConfig();
-		if (flags & AppFlags::SAVE_CONFIG) SaveConfig();
+		if (HasFlag(Flag::LOAD_CONFIG)) LoadConfig();
+		if (HasFlag(Flag::SAVE_CONFIG)) SaveConfig();
 		if (time->GetState() == GS_TICK)
 		{
 			time->PauseGameTimer();
@@ -162,12 +158,12 @@ void Application::MainLoop()
 		if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
 		if (extra_ms > 0) time->Delay(extra_ms);
 
-	} while (!(flags & AppFlags::WANT_TO_QUIT));
+	} while (!HasFlag(Flag::WANT_TO_QUIT));
 }
 
 void Application::CleanUp()
 {
-	if (flags & AppFlags::SAVE_ON_EXIT) fs->SaveConfig();
+	if (HasFlag(Flag::SAVE_ON_EXIT)) fs->SaveConfig();
 
 	audio->CleanUp();
 	renderer->CleanUp();
@@ -189,7 +185,7 @@ void Application::CleanUp()
 
 void Application::Quit()
 {
-	flags |= AppFlags::WANT_TO_QUIT;
+	AddFlag(Flag::WANT_TO_QUIT);
 }
 
 void Application::RecieveEvent(const Event& e)
@@ -228,9 +224,9 @@ void Application::RecieveEvent(const Event& e)
 		time->StopGameTimer();
 		break;
 	}
-	case RE_EventType::REQUEST_LOAD: flags |= AppFlags::LOAD_CONFIG; break;
-	case RE_EventType::REQUEST_SAVE: flags |= AppFlags::SAVE_CONFIG; break;
-	case RE_EventType::REQUEST_QUIT: flags |= AppFlags::WANT_TO_QUIT; break;
+	case RE_EventType::REQUEST_LOAD: AddFlag(Flag::LOAD_CONFIG); break;
+	case RE_EventType::REQUEST_SAVE: AddFlag(Flag::SAVE_CONFIG); break;
+	case RE_EventType::REQUEST_QUIT: AddFlag(Flag::WANT_TO_QUIT); break;
 	default: RE_ASSERT(false); break; }
 }
 
@@ -306,7 +302,7 @@ bool Application::StartModules()
 
 void Application::LoadConfig()
 {
-	if (flags & AppFlags::LOAD_CONFIG) flags -= AppFlags::LOAD_CONFIG;
+	if (HasFlag(Flag::LOAD_CONFIG)) RemoveFlag(Flag::LOAD_CONFIG);
 
 	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::Application);
 	window->Load();
@@ -318,7 +314,7 @@ void Application::LoadConfig()
 
 void Application::SaveConfig()
 {
-	if (flags & AppFlags::SAVE_CONFIG) flags -= AppFlags::SAVE_CONFIG;
+	if (HasFlag(Flag::SAVE_CONFIG)) RemoveFlag(Flag::SAVE_CONFIG);
 
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::Application);
 	window->Save();
@@ -328,4 +324,19 @@ void Application::SaveConfig()
 	audio->Save();
 
 	fs->SaveConfig();
+}
+
+inline void Application::AddFlag(Flag flag)
+{
+	flags |= static_cast<uchar>(flag);
+}
+
+inline void Application::RemoveFlag(Flag flag)
+{
+	flags -= static_cast<uchar>(flag);
+}
+
+inline const bool Application::HasFlag(Flag flag) const
+{
+	return flags & static_cast<const uchar>(flag);
 }

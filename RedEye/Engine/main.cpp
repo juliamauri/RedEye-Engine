@@ -36,7 +36,6 @@ void* operator new (size_t size, const char* pName, int flags, unsigned debugFla
 #include "Application.h"
 Application* App = nullptr;
 
-
 int main(int argc, char* argv[])
 {
 	bool exit_with_error = true;

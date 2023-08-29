@@ -7,7 +7,7 @@
 
 RenderView::RenderView(
 	eastl::string name,
-	eastl::pair<unsigned int, unsigned int> fbos,
+	eastl::pair<uint, uint> fbos,
 	short flags,
 	LightMode light,
 	math::float4 clipDistance) :
@@ -16,9 +16,9 @@ RenderView::RenderView(
 	clear_color({ 0.0f, 0.0f, 0.0f, 1.0f })
 {}
 
-const unsigned int RenderView::GetFBO() const { return light != LightMode::DEFERRED ? fbos.first : fbos.second; }
+const uint RenderView::GetFBO() const { return light != LightMode::DEFERRED ? fbos.first : fbos.second; }
 
-inline const bool RenderView::HasFlag(Flag flag) const { return flags & static_cast<const short>(flag); }
+inline const bool RenderView::HasFlag(Flag flag) const { return flags & static_cast<const ushort>(flag); }
 
 void RenderView::DrawEditor()
 {
@@ -54,26 +54,6 @@ void RenderView::DrawEditor()
 	}
 }
 
-void RenderView::Load(RE_Json* node)
-{
-	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::RenderView);
-
-	if (node == nullptr) return;
-
-	light = static_cast<LightMode>(node->PullUInt("Light Mode", static_cast<uint>(LightMode::DEFERRED)));
-	clear_color = node->PullFloat4("Clear Color", { 0.0f, 0.0f, 0.0f, 1.0f });
-	clip_distance = node->PullFloat4("Clip Distance", math::float4::zero);
-
-	for (int i = 0; i < 12; i++)
-	{
-		int flag_id = 1 << i;
-		if (node->PullBool(flag_labels[i], flags & flag_id)) flags |= flag_id;
-		else flags -= flag_id;
-	}
-
-	DEL(node);
-}
-
 void RenderView::Save(RE_Json* node) const
 {
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::RenderView);
@@ -85,6 +65,27 @@ void RenderView::Save(RE_Json* node) const
 	node->PushFloat4("Clip Distance", clip_distance);
 
 	for (int i = 0; i < 12; i++) node->Push(flag_labels[i], static_cast<bool>(flags & (1 << i)));
+
+	DEL(node);
+}
+
+
+void RenderView::Load(RE_Json* node)
+{
+	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::RenderView);
+
+	if (node == nullptr) return;
+
+	light = static_cast<LightMode>(node->PullUInt("Light Mode", static_cast<uint>(LightMode::DEFERRED)));
+	clear_color = node->PullFloat4("Clear Color", { 0.0f, 0.0f, 0.0f, 1.0f });
+	clip_distance = node->PullFloat4("Clip Distance", math::float4::zero);
+
+	for (ushort i = 0; i < 12; i++)
+	{
+		ushort flag_id = 1 << i;
+		if (node->PullBool(flag_labels[i], flags & flag_id)) flags |= flag_id;
+		else flags -= flag_id;
+	}
 
 	DEL(node);
 }
