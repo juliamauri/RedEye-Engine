@@ -112,7 +112,8 @@ void RE_GameObject::DrawChilds() const
 RE_Component* RE_GameObject::GetCompPtr(const RE_Component::Type type) const
 {
 	RE_Component* ret = nullptr;
-	switch (type) {
+	switch (type)
+	{
 	case RE_Component::Type::TRANSFORM: ret = CompPtr(transform, RE_Component::Type::TRANSFORM); break;
 	case RE_Component::Type::CAMERA: ret = camera ? CompPtr(camera, RE_Component::Type::CAMERA) : nullptr; break;
 	case RE_Component::Type::LIGHT: ret = light ? CompPtr(light, RE_Component::Type::LIGHT) : nullptr; break;
@@ -120,7 +121,7 @@ RE_Component* RE_GameObject::GetCompPtr(const RE_Component::Type type) const
 	{
 		if (render_geo.type == type && render_geo.uid) ret = CompPtr(render_geo);
 		else
-			for (auto comp : components)
+			for (const auto& comp : components)
 				if (comp.type == type)
 				{
 					ret = CompPtr(comp.uid, comp.type);
@@ -146,7 +147,7 @@ COMP_UID RE_GameObject::GetCompUID(const RE_Component::Type type) const
 	{
 		if (render_geo.uid && render_geo.type == type) ret = render_geo.uid;
 		else
-			for (auto comp : components)
+			for (const auto& comp : components)
 				if (comp.type == type)
 				{
 					ret = comp.uid;
@@ -219,7 +220,7 @@ eastl::list<RE_Component*> RE_GameObject::GetComponentsPtr() const
 	if (render_geo.uid) ret.push_back(CompPtr(render_geo));
 	if (camera) ret.push_back(CompPtr(camera, RE_Component::Type::CAMERA));
 	if (light) ret.push_back(CompPtr(light, RE_Component::Type::LIGHT));
-	for (auto comp : components) ret.push_back(CompPtr(comp));
+	for (const auto& comp : components) ret.push_back(CompPtr(comp));
 
 	return ret;
 }
@@ -227,7 +228,7 @@ eastl::list<RE_Component*> RE_GameObject::GetComponentsPtr() const
 eastl::list<RE_Component*> RE_GameObject::GetStackableComponentsPtr() const
 {
 	eastl::list<RE_Component*> ret;
-	for (auto comp : components) ret.push_back(CompPtr(comp));
+	for (const auto& comp : components) ret.push_back(CompPtr(comp));
 	return ret;
 }
 
@@ -244,11 +245,11 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsComponents(const RE_Compo
 		const RE_GameObject* go = pool_gos->AtCPtr(gos.top());
 		gos.pop();
 
-		for (auto comp : go->AllCompData())
+		for (const auto& comp : go->AllCompData())
 			if (comp.type == type)
 				ret.push(CompPtr(comp));
 
-		for (auto child : go->childs)
+		for (auto& child : go->childs)
 			gos.push(child);
 	}
 
@@ -260,7 +261,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos() const
 	eastl::stack<RE_Component*> ret;
 
 	eastl::stack<const RE_GameObject*> gos;
-	for (auto child : GetChildsPtr())
+	for (const auto& child : GetChildsPtr())
 		if (child->IsActive())
 			gos.push(child);
 
@@ -272,7 +273,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos() const
 		if (go->render_geo.uid)
 			ret.push(CompPtr(render_geo));
 
-		for (auto child : go->GetChildsPtr())
+		for (auto& child : go->GetChildsPtr())
 			if (child->IsActive())
 				gos.push(child);
 	}
@@ -285,7 +286,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const GO
 	eastl::stack<RE_Component*> ret;
 
 	eastl::stack<const RE_GameObject*> gos;
-	for (auto child : GetChildsPtr())
+	for (const auto& child : GetChildsPtr())
 		if (child->IsActive())
 			gos.push(child);
 
@@ -297,7 +298,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const GO
 		if (go->go_uid != stencil_mask && go->render_geo.uid)
 			ret.push(CompPtr(render_geo));
 
-		for (auto child : go->GetChildsPtr())
+		for (auto& child : go->GetChildsPtr())
 			if (child->IsActive())
 				gos.push(child);
 	}
@@ -442,8 +443,8 @@ void RE_GameObject::DestroyComponent(const COMP_UID id, const RE_Component::Type
 		}
 		else
 		{
-			unsigned int count = 0u;
-			for (auto comp : components)
+			uint count = 0;
+			for (const auto& comp : components)
 			{
 				if (comp.uid == id)
 				{
@@ -1108,22 +1109,22 @@ GO_UID RE_GameObject::GetUID() const
 	return go_uid;
 }
 
-inline RE_Component* RE_GameObject::CompPtr(ComponentData comp) const
+inline RE_Component* RE_GameObject::CompPtr(const ComponentData comp) const
 {
 	return pool_comps->GetComponentPtr(comp.uid, comp.type);
 }
 
-inline RE_Component* RE_GameObject::CompPtr(COMP_UID id, RE_Component::Type type) const
+inline RE_Component* RE_GameObject::CompPtr(const COMP_UID id, const RE_Component::Type type) const
 {
 	return pool_comps->GetComponentPtr(id, type);
 }
 
-inline const RE_Component* RE_GameObject::CompCPtr(ComponentData comp) const
+inline const RE_Component* RE_GameObject::CompCPtr(const ComponentData comp) const
 {
 	return pool_comps->GetComponentCPtr(comp.uid, comp.type);
 }
 
-inline const RE_Component* RE_GameObject::CompCPtr(COMP_UID id, RE_Component::Type type) const
+inline const RE_Component* RE_GameObject::CompCPtr(const COMP_UID id, const RE_Component::Type type) const
 {
 	return pool_comps->GetComponentCPtr(id, type);
 }
@@ -1136,7 +1137,7 @@ eastl::list<RE_GameObject::ComponentData> RE_GameObject::AllCompData() const
 	if (render_geo.uid) ret.push_back(render_geo);
 	if (camera) ret.push_back({ camera, RE_Component::Type::CAMERA });
 	if (light) ret.push_back({ light, RE_Component::Type::LIGHT });
-	for (auto comp : components) ret.push_back(comp);
+	for (auto& comp : components) ret.push_back(comp);
 
 	return ret;
 }

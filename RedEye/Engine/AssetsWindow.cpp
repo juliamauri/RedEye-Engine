@@ -77,21 +77,21 @@ void AssetsWindow::DrawDirectoryItem(eastl::stack<RE_FileSystem::RE_Path*>& file
 	ImGui::PushID(id.c_str());
 	switch (p->pType)
 	{
-	case RE_FileSystem::PathType::D_FOLDER:
+	case RE_FileSystem::PathType::FOLDER:
 	{
 		DrawItemFolder(iconsSize, toChange, p);
 		break;
 	}
-	case RE_FileSystem::PathType::D_FILE:
+	case RE_FileSystem::PathType::FILE:
 	{
 		switch (p->AsFile()->fType)
 		{
-		case RE_FileSystem::FileType::F_META:
+		case RE_FileSystem::FileType::META:
 		{
 			DrawItemMeta(p, iconsSize, id, idName, idCount);
 			break;
 		}
-		case RE_FileSystem::FileType::F_NOTSUPPORTED:
+		case RE_FileSystem::FileType::NOTSUPPORTED:
 		{
 			DrawItemNotSupported(secondary, iconsSize, p, id, idName, idCount);
 			break;

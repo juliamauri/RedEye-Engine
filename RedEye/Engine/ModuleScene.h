@@ -17,6 +17,7 @@ public:
 	void PostUpdate();
 	void CleanUp();
 	void DrawEditor();
+	void DrawTransformTable(RE_CompTransform* transform);
 
 	void RecieveEvent(const Event& e) override;
 

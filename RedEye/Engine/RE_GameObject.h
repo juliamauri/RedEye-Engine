@@ -148,10 +148,10 @@ public:
 
 private:
 
-	inline RE_Component* CompPtr(ComponentData comp) const;
-	inline RE_Component* CompPtr(COMP_UID id, RE_Component::Type type) const;
-	inline const RE_Component* CompCPtr(ComponentData comp) const;
-	inline const RE_Component* CompCPtr(COMP_UID id, RE_Component::Type type) const;
+	inline RE_Component* CompPtr(const ComponentData comp) const;
+	inline RE_Component* CompPtr(const COMP_UID id, const RE_Component::Type type) const;
+	inline const RE_Component* CompCPtr(const ComponentData comp) const;
+	inline const RE_Component* CompCPtr(const COMP_UID id, const RE_Component::Type type) const;
 	eastl::list<ComponentData> AllCompData() const;
 
 	inline bool IsRenderGeo(RE_Component::Type type) const;

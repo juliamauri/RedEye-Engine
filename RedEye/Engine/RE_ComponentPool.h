@@ -8,8 +8,6 @@
 #include "RE_Math.h"
 #include "RE_HashMap.h"
 
-#include <EASTL/bit.h>
-
 class GameObjectsPool;
 
 template<class COMPCLASS, unsigned int size, unsigned int increment>
@@ -120,14 +118,15 @@ public:
 		// Count
 		size_t size = sizeof(size_t);
 		size_t count = GetCount();
-		memcpy(cursor, eastl::bit_cast<const void*>(count), size);
+		memcpy(cursor, &count, size);
 		cursor += size;
 
 		// Serialize each GO_UID & Component data
 		size = sizeof(GO_UID);
 		for (size_t i = 0; i < count; i++)
 		{
-			memcpy(cursor, eastl::bit_cast<const void*>(pool_[i].GetGOUID()), size);
+			GO_UID uid = pool_[i].GetGOUID();
+			memcpy(cursor, &uid, size);
 			cursor += size;
 
 			pool_[i].SerializeBinary(cursor, resources);

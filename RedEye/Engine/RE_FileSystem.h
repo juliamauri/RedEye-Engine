@@ -1,6 +1,7 @@
 #ifndef __FILESYSTEM_H__
 #define __FILESYSTEM_H__
 
+#include "RE_DataTypes.h"
 #include <EASTL/list.h>
 #include <EASTL/vector.h>
 #include <EASTL/stack.h>
@@ -18,9 +19,36 @@ class RE_FileSystem
 {
 public:
 
-	enum PathType { D_NULL = -1, D_FOLDER, D_FILE };
-	enum FileType { F_NOTSUPPORTED = -1, F_NONE, F_MESH, F_TEXTURE, F_MATERIAL, F_SKYBOX, F_PARTICLEEMISSOR, F_PARTICLERENDER, F_PREFAB, F_MODEL,  F_SCENE, F_META };
-	enum PathProcessType { P_ADDFILE, P_DELETE, P_REIMPORT, P_ADDFOLDER, };
+	enum class PathType : short
+	{
+		NONE = -1,
+		FOLDER,
+		FILE
+	};
+
+	enum class FileType : short
+	{
+		NOTSUPPORTED = -1,
+		NONE,
+		MESH,
+		TEXTURE,
+		MATERIAL,
+		SKYBOX,
+		PARTICLEEMISSOR,
+		PARTICLERENDER,
+		PREFAB,
+		MODEL,
+		SCENE,
+		META
+	};
+
+	enum class PathProcess : ushort
+	{
+		ADDFILE,
+		DELETE,
+		REIMPORT,
+		ADDFOLDER,
+	};
 
 	struct RE_File;
 	struct RE_Meta;
@@ -28,17 +56,17 @@ public:
 	struct RE_Path
 	{
 		eastl::string path;
-		PathType pType = D_NULL;
+		PathType pType = PathType::NONE;
 
-		RE_File* AsFile()const { return (RE_File*)this; }
-		RE_Meta* AsMeta()const { return (RE_Meta*)this; }
-		RE_Directory* AsDirectory()const { return (RE_Directory*)this; }
+		RE_File* AsFile() const { return (RE_File*)this; }
+		RE_Meta* AsMeta() const { return (RE_Meta*)this; }
+		RE_Directory* AsDirectory() const { return (RE_Directory*)this; }
 	};
 
 	struct RE_File : public RE_Path
 	{
 		eastl::string filename;
-		FileType fType = F_NONE;
+		FileType fType = FileType::NONE;
 		const char* extension = nullptr;
 		signed long long lastModified = 0;
 		signed long long lastSize = 0;
@@ -47,8 +75,8 @@ public:
 
 		static FileType DetectExtensionAndType(const char* _path, const char*& _extension);
 
-		RE_Path* AsPath()const { return (RE_Path*)this; }
-		RE_Meta* AsMeta()const { return (RE_Meta*)this; }
+		RE_Path* AsPath() const { return (RE_Path*)this; }
+		RE_Meta* AsMeta() const { return (RE_Meta*)this; }
 	};
 
 	struct RE_Meta : public RE_File
@@ -56,13 +84,21 @@ public:
 		RE_File* fromFile = nullptr;
 		const char* resource = nullptr;
 		
-		bool IsModified()const;
+		bool IsModified() const;
 
-		RE_Path* AsPath()const { return (RE_Path*)this; }
-		RE_File* AsFile()const { return (RE_File*)this; }
+		RE_Path* AsPath() const { return (RE_Path*)this; }
+		RE_File* AsFile() const { return (RE_File*)this; }
 	};
 
-	struct RE_ProcessPath { PathProcessType procedure; RE_Path* toProcess; };
+	struct RE_ProcessPath
+	{
+		PathProcess procedure;
+		RE_Path* toProcess;
+
+		RE_ProcessPath(const PathProcess& procedure, RE_Path* toProcess)
+			: procedure(procedure), toProcess(toProcess)
+		{}
+	};
 
 	struct RE_Directory : public RE_Path
 	{
@@ -142,7 +178,8 @@ private:
 	eastl::vector<RE_File*> filesToFindMeta;
 	eastl::vector<RE_Meta*> metaRecentlyAdded;
 
-	struct AssetsPrioroty {
+	struct AssetsPrioroty
+	{
 		bool operator()(const RE_File* lhs, const RE_File* rhs) const
 		{
 			return lhs->fType > rhs->fType;

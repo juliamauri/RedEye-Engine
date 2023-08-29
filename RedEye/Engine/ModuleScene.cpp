@@ -108,7 +108,7 @@ void ModuleScene::DrawEditor()
 	{
 		eastl::vector<GO_UID> allTransforms = GetScenePool()->GetAllGOUIDs();
 
-		eastl_size_t transformCount = allTransforms.size();
+		size_t transformCount = allTransforms.size();
 		ImGui::Text("Total %d transforms.", transformCount);
 		ImGui::SameLine();
 		ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
@@ -116,63 +116,68 @@ void ModuleScene::DrawEditor()
 
 		static int range = 0;
 		static int totalShowing = 8;
-		ImGui::Text("Actual Range: %d - %d", range, RE_Math::Min(static_cast<eastl_size_t>(range) + totalShowing, transformCount));
+		ImGui::Text("Actual Range: %d - %d", range, RE_Math::Min(static_cast<size_t>(range) + totalShowing, transformCount));
 
 		ImGui::PushItemWidth(50.f);
 		ImGui::DragInt("Position", &range, 1.f, 0, static_cast<int>(transformCount) - totalShowing);
 		ImGui::SameLine();
 		ImGui::DragInt("List Size", &totalShowing, 1.f, 0);
 
-		if (ImGui::BeginTable("transformTable", 1, ImGuiTableFlags_::ImGuiTableFlags_BordersH | ImGuiTableFlags_Hideable)) {
-			ImGui::TableNextColumn();
-			for (int i = range; i < totalShowing + range && i < transformCount; i++) {
-				RE_CompTransform* transform = GetGOPtr(allTransforms[i])->GetTransformPtr();
-
-				ImGui::Text(("Name: " + transform->GetGOPtr()->name).c_str());
-
-				if (ImGui::BeginTable("transformsTableNested", 2, ImGuiTableFlags_Hideable))
-				{
-					ImGui::TableSetupColumn("Local Transform:");
-					ImGui::TableSetupColumn("Global Transform:");
-					ImGui::TableHeadersRow();
-					ImGui::TableNextRow(ImGuiTableRowFlags_None);
-
-					ImGui::TableNextColumn();
-
-					static math::vec pos, rotE, scl;
-					static math::float3x3 rot;
-
-					static math::float4x4 localM;
-					localM = transform->GetLocalMatrix().Transposed();
-					localM.Decompose(pos, rot, scl);
-					rotE = rot.ToEulerXYZ();
-					ImGui::Text("Position:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
-					ImGui::Text("Rotation:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
-					ImGui::Text("Scale:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
-
-					ImGui::TableNextColumn();
-
-					static math::float4x4 globalM;
-					globalM = transform->GetGlobalMatrix().Transposed();
-					globalM.Decompose(pos, rot, scl);
-					rotE = rot.ToEulerXYZ();
-					ImGui::Text("Position:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
-					ImGui::Text("Rotation:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
-					ImGui::Text("Scale:");
-					ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
-
-					ImGui::EndTable();
-				}
-				ImGui::TableNextColumn();
-			}
+		if (ImGui::BeginTable("transformTable", 1,
+			ImGuiTableFlags_::ImGuiTableFlags_BordersH |
+			ImGuiTableFlags_::ImGuiTableFlags_Hideable))
+		{
+			for (auto i = static_cast<size_t>(range);
+				i < static_cast<size_t>(totalShowing + range) && i < transformCount; i++)
+				DrawTransformTable(GetGOPtr(allTransforms[i])->GetTransformPtr());
 			ImGui::EndTable();
 		}
 		ImGui::TreePop();
+	}
+}
+
+void ModuleScene::DrawTransformTable(RE_CompTransform* transform)
+{
+	ImGui::TableNextColumn();
+	ImGui::Text(("Name: " + transform->GetGOPtr()->name).c_str());
+
+	if (ImGui::BeginTable("transformsTableNested", 2, ImGuiTableFlags_::ImGuiTableFlags_Hideable))
+	{
+		ImGui::TableSetupColumn("Local Transform:");
+		ImGui::TableSetupColumn("Global Transform:");
+		ImGui::TableHeadersRow();
+		ImGui::TableNextRow(ImGuiTableRowFlags_None);
+
+		ImGui::TableNextColumn();
+
+		static math::vec pos, rotE, scl;
+		static math::float3x3 rot;
+
+		static math::float4x4 localM;
+		localM = transform->GetLocalMatrix().Transposed();
+		localM.Decompose(pos, rot, scl);
+		rotE = rot.ToEulerXYZ();
+		ImGui::Text("Position:");
+		ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
+		ImGui::Text("Rotation:");
+		ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
+		ImGui::Text("Scale:");
+		ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+
+		ImGui::TableNextColumn();
+
+		static math::float4x4 globalM;
+		globalM = transform->GetGlobalMatrix().Transposed();
+		globalM.Decompose(pos, rot, scl);
+		rotE = rot.ToEulerXYZ();
+		ImGui::Text("Position:");
+		ImGui::Text("X %.3f | Y %.3f | Z %.3f", pos.x, pos.y, pos.z);
+		ImGui::Text("Rotation:");
+		ImGui::Text("X %.3f | Y %.3f | Z %.3f", math::RadToDeg(rotE.x), math::RadToDeg(rotE.y), math::RadToDeg(rotE.z));
+		ImGui::Text("Scale:");
+		ImGui::Text("X %.3f | Y %.3f | Z %.3f", scl.x, scl.y, scl.z);
+
+		ImGui::EndTable();
 	}
 }
 
@@ -403,7 +408,7 @@ GO_UID ModuleScene::RayCastGeometry(math::Ray & global_ray) const
 		// Check Ray-Triangle
 		bool collision = false;
 		float res_distance, closest_distance = -1.f;
-		for (auto go : gos)
+		for (const auto& go : gos)
 		{
 			res_distance = 0.f;
 			if (go.second->CheckRayCollision(global_ray, res_distance) && (!collision || res_distance < closest_distance))

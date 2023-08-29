@@ -120,7 +120,7 @@ void RE_FileSystem::Clear()
 {
 	for (auto dir : assetsDirectories)
 		for (auto p : dir->tree)
-			if (p->pType != PathType::D_FOLDER)
+			if (p->pType != PathType::FOLDER)
 				DEL(p);
 
 	for (auto dir : assetsDirectories) DEL(dir);
@@ -166,14 +166,14 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 			switch (process->procedure)
 			{
-			case P_ADDFILE:
+			case PathProcess::ADDFILE:
 			{
 				RE_File* file = process->toProcess->AsFile();
 				RE_Meta* metaFile = file->AsMeta();
 
 				FileType type = file->fType;
 
-				if (type == F_META)
+				if (type == FileType::META)
 				{
 					const char* isReferenced = RE_RES->FindMD5ByMETAPath(file->path.c_str());
 
@@ -203,11 +203,11 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 					metaToFindFile.push_back(metaFile);
 				}
-				else if (type > F_NONE) filesToFindMeta.push_back(file);
+				else if (type > FileType::NONE) filesToFindMeta.push_back(file);
 				else RE_LOG_ERROR("Unsupported file type");
 				break;
 			}
-			case P_ADDFOLDER:
+			case PathProcess::ADDFOLDER:
 			{
 				RE_Directory* dir = (RE_Directory*)process->toProcess;
 				eastl::stack<RE_ProcessPath*> toProcess = dir->CheckAndApply(&metaRecentlyAdded);
@@ -222,7 +222,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				assetsDirectories.push_back(dir);
 				break;
 			}
-			case P_REIMPORT:
+			case PathProcess::REIMPORT:
 			{
 				toReImport.push(process->toProcess->AsFile());
 				break;
@@ -304,7 +304,8 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			filesToFindMeta.clear();
 		}
 
-		if (!toImport.empty()) {
+		if (!toImport.empty())
+		{
 			RE_LOGGER::ScopeProcedureLogging();
 			while ((doAll || run) && !toImport.empty())
 			{
@@ -316,15 +317,17 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				RE_LOG("Importing %s", file->path.c_str());
 
 				const char* newRes = nullptr;
-				switch (file->fType) {
-				case F_MODEL:	 newRes = RE_RES->ImportModel(file->path.c_str()); break;
-				case F_TEXTURE:	 newRes = RE_RES->ImportTexture(file->path.c_str()); break;
-				case F_MATERIAL: newRes = RE_RES->ImportMaterial(file->path.c_str()); break;
-				case F_SKYBOX:	 newRes = RE_RES->ImportSkyBox(file->path.c_str()); break;
-				case F_PREFAB:	 newRes = RE_RES->ImportPrefab(file->path.c_str()); break;
-				case F_SCENE:	 newRes = RE_RES->ImportScene(file->path.c_str()); break;
-				case F_PARTICLEEMISSOR:	 newRes = RE_RES->ImportParticleEmissor(file->path.c_str()); break;
-				case F_PARTICLERENDER:	 newRes = RE_RES->ImportParticleRender(file->path.c_str()); break;
+				switch (file->fType)
+				{
+				case FileType::MODEL:	 newRes = RE_RES->ImportModel(file->path.c_str()); break;
+				case FileType::TEXTURE:	 newRes = RE_RES->ImportTexture(file->path.c_str()); break;
+				case FileType::MATERIAL: newRes = RE_RES->ImportMaterial(file->path.c_str()); break;
+				case FileType::SKYBOX:	 newRes = RE_RES->ImportSkyBox(file->path.c_str()); break;
+				case FileType::PREFAB:	 newRes = RE_RES->ImportPrefab(file->path.c_str()); break;
+				case FileType::SCENE:	 newRes = RE_RES->ImportScene(file->path.c_str()); break;
+				case FileType::PARTICLEEMISSOR:	 newRes = RE_RES->ImportParticleEmissor(file->path.c_str()); break;
+				case FileType::PARTICLERENDER:	 newRes = RE_RES->ImportParticleRender(file->path.c_str()); break;
+				default: break;
 				}
 
 				if (newRes != nullptr)
@@ -334,13 +337,13 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 					newMetaFile->fromFile = file;
 					file->metaResource = newMetaFile;
 					RE_File* fromMetaF = newMetaFile->AsFile();
-					fromMetaF->fType = FileType::F_META;
+					fromMetaF->fType = FileType::META;
 					fromMetaF->path = RE_RES->At(newRes)->GetMetaPath();
-					newMetaFile->AsPath()->pType = PathType::D_FILE;
+					newMetaFile->AsPath()->pType = PathType::FILE;
 					metaRecentlyAdded.push_back(newMetaFile);
 				}
 				else
-					file->fType = F_NOTSUPPORTED;
+					file->fType = FileType::NOTSUPPORTED;
 
 				if (!doAll && extra_ms < time.Read())
 				{
@@ -723,7 +726,7 @@ RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const cha
 {
 	static const char* extensionsSuported[14] = { "meta", "re","refab", "pupil", "sk",  "fbx", "jpg", "dds", "png", "tga", "tiff", "bmp", "lasse", "lopfe" };
 
-	RE_FileSystem::FileType ret = F_NOTSUPPORTED;
+	RE_FileSystem::FileType ret = FileType::NOTSUPPORTED;
 	eastl::string modPath(_path);
 	eastl::string filename = modPath.substr(modPath.find_last_of("/") + 1);
 	eastl::string extensionStr = filename.substr(filename.find_last_of(".") + 1);
@@ -734,21 +737,23 @@ RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const cha
 		if (extensionStr.compare(extensionsSuported[i]) == 0)
 		{
 			_extension = extensionsSuported[i];
-			switch (i) {
-			case 0: ret = F_META; break;
-			case 1: ret = F_SCENE; break;
-			case 2: ret = F_PREFAB; break;
-			case 3: ret = F_MATERIAL; break;
-			case 4: ret = F_SKYBOX; break;
-			case 5: ret = F_MODEL; break;
+			switch (i)
+			{
+			case 0: ret = FileType::META; break;
+			case 1: ret = FileType::SCENE; break;
+			case 2: ret = FileType::PREFAB; break;
+			case 3: ret = FileType::MATERIAL; break;
+			case 4: ret = FileType::SKYBOX; break;
+			case 5: ret = FileType::MODEL; break;
 			case 6:
 			case 7:
 			case 8:
 			case 9:
 			case 10:
-			case 11: ret = F_TEXTURE; break;
-			case 12: ret = F_PARTICLEEMISSOR; break;
-			case 13: ret = F_PARTICLERENDER; break;
+			case 11: ret = FileType::TEXTURE; break;
+			case 12: ret = FileType::PARTICLEEMISSOR; break;
+			case 13: ret = FileType::PARTICLERENDER; break;
+			default: break;
 			}
 		}
 	}
@@ -786,7 +791,7 @@ eastl::list< RE_FileSystem::RE_Directory*> RE_FileSystem::RE_Directory::MountTre
 				RE_Directory* newDirectory = new RE_Directory();
 				newDirectory->SetPath((inPath += "/").c_str());
 				newDirectory->parent = this;
-				newDirectory->pType = D_FOLDER;
+				newDirectory->pType = PathType::FOLDER;
 				tree.push_back(newDirectory->AsPath());
 				ret.push_back(newDirectory);
 			}
@@ -816,7 +821,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 		auto iter = tree.begin();
 		for (char** i = rc; *i != NULL; i++)
 		{
-			PathType iterTreeType = (iter != tree.end()) ? (*iter)->pType : PathType::D_NULL;
+			PathType iterTreeType = (iter != tree.end()) ? (*iter)->pType : PathType::NONE;
 			eastl::string inPath(iterPath);
 			inPath += *i;
 			PHYSFS_Stat fileStat;
@@ -824,7 +829,7 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 			{
 				if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_DIRECTORY)
 				{
-					bool newFolder = (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FOLDER || (*iter)->path != (inPath += "/"));
+					bool newFolder = (iterTreeType == PathType::NONE || iterTreeType != PathType::FOLDER || (*iter)->path != (inPath += "/"));
 					if (newFolder && iter != tree.end())
 					{
 						auto postPath = iter;
@@ -848,23 +853,20 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 						if (inPath.back() != '/')inPath += "/";
 						newDirectory->SetPath(inPath.c_str());
 						newDirectory->parent = this;
-						newDirectory->pType = D_FOLDER;
+						newDirectory->pType = PathType::FOLDER;
 
 						AddBeforeOf(newDirectory->AsPath(), iter);
 						iter--;
 
-						RE_ProcessPath* newProcess = new RE_ProcessPath();
-						newProcess->procedure = P_ADDFOLDER;
-						newProcess->toProcess = newDirectory->AsPath();
-						ret.push(newProcess);
+						ret.push(new RE_ProcessPath(PathProcess::ADDFOLDER, newDirectory->AsPath()));
 					}
 				}
 				else if (fileStat.filetype == PHYSFS_FileType::PHYSFS_FILETYPE_REGULAR)
 				{
 					const char* extension = nullptr;
 					FileType fileType = RE_File::DetectExtensionAndType(inPath.c_str(), extension);
-					bool newFile = (iterTreeType == PathType::D_NULL || iterTreeType != PathType::D_FILE || (*iter)->path != inPath);
-					if (newFile && fileType == FileType::F_META && !metaRecentlyAdded->empty())
+					bool newFile = (iterTreeType == PathType::NONE || iterTreeType != PathType::FILE || (*iter)->path != inPath);
+					if (newFile && fileType == FileType::META && !metaRecentlyAdded->empty())
 					{
 						size_t sizemetap = 0;
 						for (RE_Meta* metaAdded : *metaRecentlyAdded)
@@ -902,48 +904,39 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 
 					if (newFile)
 					{
-						RE_File* newFile = (fileType != FileType::F_META) ? new RE_File() : (RE_File*)new RE_Meta();
+						RE_File* newFile = (fileType != FileType::META) ? new RE_File() : (RE_File*)new RE_Meta();
 						newFile->path = inPath;
 						newFile->filename = inPath.substr(inPath.find_last_of("/") + 1);
 						newFile->lastSize = fileStat.filesize;
-						newFile->pType = PathType::D_FILE;
+						newFile->pType = PathType::FILE;
 						newFile->fType = fileType;
 						newFile->extension = extension;
 						newFile->lastModified = fileStat.modtime;
 
-						RE_ProcessPath* newProcess = new RE_ProcessPath();
-						newProcess->procedure = P_ADDFILE;
-						newProcess->toProcess = newFile->AsPath();
-						ret.push(newProcess);
+						ret.push(new RE_ProcessPath(PathProcess::ADDFILE, newFile->AsPath()));
 						AddBeforeOf(newFile->AsPath(), iter);
 						iter--;
 					}
-					else if ((*iter)->AsFile()->fType == FileType::F_META)
+					else if ((*iter)->AsFile()->fType == FileType::META)
 					{
 						bool reimport = false;
 						ResourceContainer* res = RE_RES->At((*iter)->AsFile()->AsMeta()->resource);
 						switch (res->GetType())
 						{
-						case ResourceType::SHADER: {
+						case ResourceType::SHADER:
+						{
 							RE_Shader* shadeRes = dynamic_cast<RE_Shader*>(res);
 							if (shadeRes->isShaderFilesChanged())
-							{
-								RE_ProcessPath* newProcess = new RE_ProcessPath();
-								newProcess->procedure = P_REIMPORT;
-								newProcess->toProcess = (*iter);
-								ret.push(newProcess);
-							}
-							break; }
+								ret.push(new RE_ProcessPath(PathProcess::REIMPORT, *iter));
+							break;
+						}
 						case ResourceType::PARTICLE_RENDER:
-						case ResourceType::PARTICLE_EMISSION: {
-
-							if ((*iter)->AsFile()->lastModified != fileStat.modtime) {
+						case ResourceType::PARTICLE_EMISSION:
+						{
+							if ((*iter)->AsFile()->lastModified != fileStat.modtime)
+							{
 								(*iter)->AsFile()->lastModified = fileStat.modtime;
-
-								RE_ProcessPath* newProcess = new RE_ProcessPath();
-								newProcess->procedure = P_REIMPORT;
-								newProcess->toProcess = (*iter);
-								ret.push(newProcess);
+								ret.push(new RE_ProcessPath(PathProcess::REIMPORT, *iter));
 							}
 							break;
 						}
@@ -966,11 +959,11 @@ eastl::stack<RE_FileSystem::RE_Path*> RE_FileSystem::RE_Directory::GetDisplaying
 	{
 		switch (path->pType)
 		{
-		case RE_FileSystem::PathType::D_FILE:
+		case RE_FileSystem::PathType::FILE:
 		{
 			switch (path->AsFile()->fType)
 			{
-			case RE_FileSystem::FileType::F_META:
+			case RE_FileSystem::FileType::META:
 			{
 				if (path->AsMeta()->resource)
 				{
@@ -980,12 +973,13 @@ eastl::stack<RE_FileSystem::RE_Path*> RE_FileSystem::RE_Directory::GetDisplaying
 				}
 				break;
 			}
-			case RE_FileSystem::FileType::F_NONE: break;
+			case RE_FileSystem::FileType::NONE: break;
 			default: ret.push(path); break;
 			}
 			break;
 		}
-		case RE_FileSystem::PathType::D_FOLDER: ret.push(path); break;
+		case RE_FileSystem::PathType::FOLDER: ret.push(path); break;
+		default: break;
 		}
 	}
 

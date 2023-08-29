@@ -28,7 +28,7 @@ GO_UID RE_ECS_Pool::CopyGO(const RE_GameObject* copy, GO_UID parent, bool broadc
 {
 	GO_UID new_go = AddGO(copy->name.c_str(), parent, broadcast)->GetUID();
 
-	for (auto copy_comp : copy->AllCompData())
+	for (const auto& copy_comp : copy->AllCompData())
 		componentsPool.CopyComponent(&gameObjectsPool, copy->pool_comps->GetComponentPtr(copy_comp.uid, copy_comp.type), new_go);
 	
 	return new_go;
@@ -39,7 +39,7 @@ GO_UID RE_ECS_Pool::CopyGOandChilds(const RE_GameObject* copy, GO_UID parent, bo
 	GO_UID ret_uid = CopyGO(copy, parent, broadcast);
 
 	eastl::stack<eastl::pair<const RE_GameObject*, GO_UID>> copy_gos;
-	for (auto copy_child : copy->GetChildsCPtr())
+	for (const auto& copy_child : copy->GetChildsCPtr())
 		copy_gos.push({ copy_child, ret_uid });
 
 	while (!copy_gos.empty())

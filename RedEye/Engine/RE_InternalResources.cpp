@@ -200,7 +200,7 @@ void RE_InternalResources::InitWaterResources()
 	{
 		RE_TextureSettings defTexSettings;
 		int tmp1, tmp2;
-		RE_TextureImporter::LoadTextureInMemory(waterTexture.GetBuffer(), waterTexture.GetSize(), TextureType::RE_PNG, &water_foam_texture, &tmp1, &tmp2, defTexSettings);
+		RE_TextureImporter::LoadTextureInMemory(waterTexture.GetBuffer(), static_cast<ILuint>(waterTexture.GetSize()), TextureType::RE_PNG, &water_foam_texture, &tmp1, &tmp2, defTexSettings);
 	}
 }
 

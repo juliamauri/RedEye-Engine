@@ -46,11 +46,6 @@ public:
 	unsigned int			PullUInt(const char* name, uint deflt);
 	unsigned int *			PullUInt(const char* name, uint quantity, uint deflt);
 
-	/*short					PullShortInt(const char* name, short deflt);
-	short *					PullShortInt(const char* name, unsigned int quantity, short deflt);
-	ushort					PullUShortInt(const char* name, ushort deflt);
-	ushort *				PullUShortInt(const char* name, unsigned int quantity, ushort deflt);*/
-
 	size_t					PullSizeT(const char* name, size_t deflt);
 	size_t *				PullSizeT(const char* name, uint quantity, size_t deflt);
 
