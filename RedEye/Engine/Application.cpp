@@ -22,24 +22,6 @@
 #include <EAStdC/EASprintf.h>
 #include <eathread/internal/config.h>
 
-Application::Application()
-{
-	fs = new RE_FileSystem();
-	res = new RE_ResourceManager();
-
-	input = new ModuleInput();
-	window = new ModuleWindow();
-	scene = new ModuleScene();
-	physics = new ModulePhysics();
-	editor = new ModuleEditor();
-	renderer = new ModuleRenderer3D();
-	audio = new ModuleAudio();
-
-#ifdef INTERNAL_PROFILING
-	ProfilingTimer::operations.reserve(20000u);
-#endif // INTERNAL_PROFILING
-}
-
 Application::~Application()
 {
 	DEL(audio)
@@ -55,6 +37,24 @@ Application::~Application()
 
 #ifdef INTERNAL_PROFILING
 	if (ProfilingTimer::recording) RE_Profiler::Deploy();
+#endif // INTERNAL_PROFILING
+}
+
+void Application::AllocateModules()
+{
+	fs = new RE_FileSystem();
+	res = new RE_ResourceManager();
+
+	input = new ModuleInput();
+	window = new ModuleWindow();
+	scene = new ModuleScene();
+	physics = new ModulePhysics();
+	editor = new ModuleEditor();
+	renderer = new ModuleRenderer3D();
+	audio = new ModuleAudio();
+
+#ifdef INTERNAL_PROFILING
+	ProfilingTimer::operations.reserve(20000u);
 #endif // INTERNAL_PROFILING
 }
 

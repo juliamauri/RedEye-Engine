@@ -9,9 +9,10 @@ class Application : public EventListener
 {
 public:
 
-	Application();
+	Application() = default;
 	~Application() final;
 
+	void AllocateModules();
 	bool Init(int argc, char* argv[]);
 	void MainLoop();
 	void CleanUp();

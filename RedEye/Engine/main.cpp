@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
 {
 	bool exit_with_error = true;
 	App = new Application();
+	App->AllocateModules();
 
 	if (App->Init(argc, argv))
 	{
