@@ -40,9 +40,6 @@ private:
 
 public:
 
-	// Utility
-	class RE_Hardware* hardware = nullptr;
-
 	// Modules
 	class ModuleInput* input = nullptr;
 	class ModuleWindow* window = nullptr;
@@ -66,7 +63,6 @@ private:
 
 extern Application* App;
 
-#define RE_HARDWARE App->hardware
 #define RE_FS App->fs
 #define RE_RES App->res
 

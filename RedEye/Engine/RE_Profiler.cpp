@@ -61,6 +61,7 @@ const char* RE_Profiler::GetFunctionStr(const RE_ProfiledFunc function)
 	case RE_ProfiledFunc::ParticleCollision: return "Particle Collision";
 	case RE_ProfiledFunc::ParticleBoundPCol: return "Particle Plane Boundary Collision";
 	case RE_ProfiledFunc::ParticleBoundSCol: return "Particle Sphere Boundary Collision";
+	case RE_ProfiledFunc::CheckHardware: return "Check Hardware";
 
 	default: return "Undefined";
 	}

@@ -58,6 +58,8 @@ enum class RE_ProfiledFunc : unsigned short
 	ParticleBoundPCol,
 	ParticleBoundSCol,
 
+	CheckHardware, // Utility
+
 	END
 };
 

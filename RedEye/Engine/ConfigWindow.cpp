@@ -65,5 +65,5 @@ void ConfigWindow::DrawModules() const
 	if (ImGui::CollapsingHeader("Renderer3D")) RE_RENDER->DrawEditor();
 	if (ImGui::CollapsingHeader("Audio")) RE_AUDIO->DrawEditor();
 	if (ImGui::CollapsingHeader("File System")) RE_FS->DrawEditor();
-	if (ImGui::CollapsingHeader("Hardware")) RE_HARDWARE->DrawEditor();
+	if (ImGui::CollapsingHeader("Hardware")) RE_Hardware::DrawEditor();
 }

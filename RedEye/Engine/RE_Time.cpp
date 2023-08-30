@@ -23,10 +23,10 @@ RE_Timer fps_timer; // read every second
 RE_Timer game_timer(false); // read when playing scene
 
 // Plotting
-constexpr size_t plotting_range = 100;
-eastl::array<float, plotting_range> fps = {};
-eastl::array<float, plotting_range> ms = {};
-bool pause_plotting = false;
+constexpr size_t time_plotting_range = 100;
+eastl::array<float, time_plotting_range> fps = {};
+eastl::array<float, time_plotting_range> ms = {};
+bool pause_time_plotting = false;
 float max_fps = 0.f;
 
 // Time Controls
@@ -120,18 +120,18 @@ RE_Time::GameState RE_Time::DrawEditorControls()
 
 void RE_Time::DrawEditorGraphs()
 {
-	if (!pause_plotting)
+	if (!pause_time_plotting)
 	{
 		max_fps = fps[0];
-		for (size_t i = 0; i < plotting_range - 1; i++)
+		for (size_t i = 0; i < time_plotting_range - 1; i++)
 		{
 			ms[i] = ms[i + 1];
 			fps[i] = fps[i + 1];
 			if (max_fps < fps[i]) max_fps = fps[i];
 		}
 
-		ms[plotting_range - 1] = static_cast<float>(last_ms_count);
-		fps[plotting_range - 1] = static_cast<float>(last_fps_count);
+		ms[time_plotting_range - 1] = static_cast<float>(last_ms_count);
+		fps[time_plotting_range - 1] = static_cast<float>(last_fps_count);
 	}
 
 	if (ImGui::SliderFloat("Max FPS", &capped_fps, 0.0f, 500.0f, "%.0f"))
@@ -140,9 +140,9 @@ void RE_Time::DrawEditorGraphs()
 	ImGui::PlotHistogram(
 		"##framerate",
 		fps.begin(),
-		plotting_range,
+		time_plotting_range,
 		0,
-		(eastl::string("Framerate ") + eastl::to_string(static_cast<uint>(fps[plotting_range - 1]))).c_str(),
+		(eastl::string("Framerate ") + eastl::to_string(static_cast<uint>(fps[time_plotting_range - 1]))).c_str(),
 		0.0f,
 		(capped_fps < 1.f ? max_fps : capped_fps) * 1.2f,
 		ImVec2(310, 100));
@@ -150,17 +150,17 @@ void RE_Time::DrawEditorGraphs()
 	ImGui::PlotHistogram(
 		"##milliseconds",
 		ms.begin(),
-		plotting_range,
+		time_plotting_range,
 		0,
-		(eastl::string("Milliseconds ") + eastl::to_string(static_cast<uint>(ms[plotting_range - 1]))).c_str(),
+		(eastl::string("Milliseconds ") + eastl::to_string(static_cast<uint>(ms[time_plotting_range - 1]))).c_str(),
 		0.0f,
 		40.0f, 
 		ImVec2(310, 100));
 
 #ifdef INTERNAL_PROFILING
 
-	if (ImGui::Checkbox(pause_plotting ? "Restart Plotting" : "Pause Plotting", &pause_plotting) && !pause_plotting)
-		for (int i = 0; i < plotting_range; i++)
+	if (ImGui::Checkbox(pause_time_plotting ? "Restart Plotting" : "Pause Plotting", &pause_time_plotting) && !pause_time_plotting)
+		for (int i = 0; i < time_plotting_range; i++)
 			fps[i] = ms[i] = 0.f;
 
 	if (ProfilingTimer::recording)

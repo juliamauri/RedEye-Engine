@@ -24,8 +24,6 @@
 
 Application::Application()
 {
-	hardware = new RE_Hardware();
-
 	fs = new RE_FileSystem();
 	res = new RE_ResourceManager();
 
@@ -54,8 +52,6 @@ Application::~Application()
 
 	DEL(res)
 	DEL(fs)
-
-	DEL(hardware)
 
 #ifdef INTERNAL_PROFILING
 	if (ProfilingTimer::recording) RE_Profiler::Deploy();
@@ -110,7 +106,7 @@ bool Application::Init(int _argc, char* _argv[])
 
 	// Initialize Intermediate Systems
 	RE_Random::SetRandomRNGSeed();
-	hardware->Init();
+	RE_Hardware::CheckHardware();
 	res->Init();
 
 	if (!StartModules())
