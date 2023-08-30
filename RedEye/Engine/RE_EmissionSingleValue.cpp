@@ -2,7 +2,7 @@
 
 #include "RE_Memory.h"
 #include "Application.h"
-#include "RE_Math.h"
+#include "RE_Random.h"
 #include "RE_Json.h"
 
 #include <ImGui/imgui.h>
@@ -15,7 +15,7 @@ float RE_EmissionSingleValue::GetValue() const
 	switch (type)
 	{
 	case Type::VALUE: ret = val;
-	case Type::RANGE: ret = val + (RE_MATH->RandomFN() * margin);
+	case Type::RANGE: ret = val + (RE_Random::RandomFN() * margin);
 	default: break;
 	}
 
@@ -127,7 +127,7 @@ size_t RE_EmissionSingleValue::GetBinarySize() const
 	switch (type)
 	{
 	case RE_EmissionSingleValue::Type::VALUE: ret += sizeof(float); break;
-	case RE_EmissionSingleValue::Type::RANGE: ret += sizeof(float) * 2u; break;
+	case RE_EmissionSingleValue::Type::RANGE: ret += sizeof(float) * 2; break;
 	default: break;
 	}
 	return ret;

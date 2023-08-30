@@ -2,6 +2,7 @@
 
 #include "ModuleInput.h"
 
+#include "RE_Assert.h"
 #include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "Application.h"

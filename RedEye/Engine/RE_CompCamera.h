@@ -2,8 +2,7 @@
 #define __RE_COMPCAMERA_H__
 
 #include "RE_Component.h"
-#include "RE_Math.h"
-#include "RE_DataTypes.h"
+#include <MGL/MathGeoLib.h>
 
 class RE_CompCamera : public RE_Component
 {
@@ -76,7 +75,7 @@ public:
 
 	// Camera Controls
 	void LocalPan(float dx, float dy);
-	void LocalMove(Dir dir, float speed);
+	void LocalMove(Direction dir, float speed);
 	void Orbit(float dx, float dy, math::vec center);
 	void Focus(math::vec center, float radius = 1.f, float min_dist = 3.0f);
 

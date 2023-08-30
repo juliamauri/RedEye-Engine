@@ -2,6 +2,7 @@
 
 #include "RE_Memory.h"
 #include "Application.h"
+#include "RE_Random.h"
 #include "RE_Math.h"
 #include "RE_Json.h"
 
@@ -19,20 +20,20 @@ math::vec RE_EmissionShape::GetPosition() const
 	{
 	case Type::CIRCLE:
 		ret = geo.circle.pos +
-			((geo.circle.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2) - geo.circle.pos) * RE_MATH->RandomF());
+			((geo.circle.GetPoint(RE_Random::RandomF() * RE_Math::pi_x2) - geo.circle.pos) * RE_Random::RandomF());
 	case Type::RING:
-		ret = geo.ring.first.GetPoint(RE_MATH->RandomF() * RE_Math::pi_x2) +
-			(RE_MATH->RandomNVec() * geo.ring.second);
+		ret = geo.ring.first.GetPoint(RE_Random::RandomF() * RE_Math::pi_x2) +
+			(RE_Random::RandomNVec() * geo.ring.second);
 	case Type::AABB: ret = {
-			geo.box.minPoint.x + (RE_MATH->RandomF() * (geo.box.maxPoint.x - geo.box.minPoint.x)),
-			geo.box.minPoint.y + (RE_MATH->RandomF() * (geo.box.maxPoint.y - geo.box.minPoint.y)),
-			geo.box.minPoint.z + (RE_MATH->RandomF() * (geo.box.maxPoint.z - geo.box.minPoint.z)) };
+			geo.box.minPoint.x + (RE_Random::RandomF() * (geo.box.maxPoint.x - geo.box.minPoint.x)),
+			geo.box.minPoint.y + (RE_Random::RandomF() * (geo.box.maxPoint.y - geo.box.minPoint.y)),
+			geo.box.minPoint.z + (RE_Random::RandomF() * (geo.box.maxPoint.z - geo.box.minPoint.z)) };
 	case Type::SPHERE:
 		ret = geo.sphere.pos +
-			((RE_MATH->RandomF() * geo.sphere.r) * RE_MATH->RandomNVec());
+			((RE_Random::RandomF() * geo.sphere.r) * RE_Random::RandomNVec());
 	case Type::HOLLOW_SPHERE:
 		ret = geo.hollow_sphere.first.pos +
-			((geo.hollow_sphere.first.r + (geo.hollow_sphere.second + RE_MATH->RandomFN())) * RE_MATH->RandomNVec());
+			((geo.hollow_sphere.first.r + (geo.hollow_sphere.second + RE_Random::RandomFN())) * RE_Random::RandomNVec());
 	default: ret = geo.point;
 	}
 

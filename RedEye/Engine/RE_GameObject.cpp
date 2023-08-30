@@ -2,6 +2,7 @@
 
 #include "RE_GameObject.h"
 
+#include "RE_Assert.h"
 #include "RE_Json.h"
 #include "Application.h"
 #include "ModuleInput.h"

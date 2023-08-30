@@ -2,7 +2,7 @@
 
 #include "RE_Memory.h"
 #include "Application.h"
-#include "RE_Math.h"
+#include "RE_Random.h"
 #include "RE_Json.h"
 #include "RE_ComponentsPool.h"
 
@@ -14,7 +14,7 @@ void GameObjectsPool::Clear()
 
 GO_UID GameObjectsPool::Push(RE_GameObject val)
 {
-	return RE_HashMap::Push(val, val.go_uid = RANDOM_UID) ? val.go_uid : 0ull;
+	return RE_HashMap::Push(val, val.go_uid = RANDOM_UID) ? val.go_uid : 0;
 }
 
 GO_UID GameObjectsPool::GetNewGOUID()

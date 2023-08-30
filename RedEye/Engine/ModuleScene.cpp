@@ -6,7 +6,7 @@
 #include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "RE_Timer.h"
-#include "RE_Math.h"
+#include "RE_Random.h"
 #include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleEditor.h"
@@ -43,7 +43,11 @@ ModuleScene::ModuleScene() :
 	cams(new RE_CameraManager()),
 	primitives(new RE_PrimitiveManager()) {}
 
-ModuleScene::~ModuleScene() { DEL(cams) DEL(primitives) }
+ModuleScene::~ModuleScene()
+{
+	DEL(cams)
+	DEL(primitives)
+}
 
 bool ModuleScene::Init()
 {
@@ -358,7 +362,7 @@ void ModuleScene::CreateMaxLights(const GO_UID parent)
 
 			static math::vec colors[5] = { math::vec(1.f,0.f,0.f), math::vec(0.f,1.f,0.f), math::vec(0.f,0.f,1.f), math::vec(1.f,1.f,0.f), math::vec(0.f,1.f,1.f) };
 			dynamic_cast<RE_CompPrimitive*>(light_go->AddNewComponent(RE_Component::Type::SPHERE))->SetColor(
-				dynamic_cast<RE_CompLight*>(light_go->AddNewComponent(RE_Component::Type::LIGHT))->diffuse = colors[RE_MATH->RandomInt() % 5]);
+				dynamic_cast<RE_CompLight*>(light_go->AddNewComponent(RE_Component::Type::LIGHT))->diffuse = colors[RE_Random::RandomInt() % 5]);
 		}
 	}
 }

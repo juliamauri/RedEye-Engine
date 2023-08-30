@@ -4,6 +4,7 @@
 #include "RE_CompPrimitive.h"
 
 #include "RE_Memory.h"
+#include "RE_Math.h"
 #include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"

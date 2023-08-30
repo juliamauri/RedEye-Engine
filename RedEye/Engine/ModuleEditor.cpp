@@ -915,12 +915,12 @@ void ModuleEditor::UpdateCamera()
 				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
 				
 				// Move
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_W)->Down)			camera->LocalMove(Dir::FORWARD, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_S)->Down)			camera->LocalMove(Dir::BACKWARD, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_A)->Down)			camera->LocalMove(Dir::LEFT, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_D)->Down)			camera->LocalMove(Dir::RIGHT, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Space)->Down)		camera->LocalMove(Dir::UP, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_C)->Down)			camera->LocalMove(Dir::DOWN, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_W)->Down)			camera->LocalMove(Direction::FORWARD, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_S)->Down)			camera->LocalMove(Direction::BACKWARD, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_A)->Down)			camera->LocalMove(Direction::LEFT, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_D)->Down)			camera->LocalMove(Direction::RIGHT, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Space)->Down)		camera->LocalMove(Direction::UP, cameraSpeed);
+				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_C)->Down)			camera->LocalMove(Direction::DOWN, cameraSpeed);
 
 				// Rotate
 				if (mouseData.x != 0 || mouseData.y != 0)
@@ -957,12 +957,12 @@ void ModuleEditor::UpdateCamera()
 					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
 
 					// Move
-					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_W)->Down)			camera->LocalMove(Dir::FORWARD, cameraSpeed);
-					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_S)->Down)			camera->LocalMove(Dir::BACKWARD, cameraSpeed);
-					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_A)->Down)			camera->LocalMove(Dir::LEFT, cameraSpeed);
-					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_D)->Down)			camera->LocalMove(Dir::RIGHT, cameraSpeed);
-					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Space)->Down)		camera->LocalMove(Dir::UP, cameraSpeed);
-					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_C)->Down)			camera->LocalMove(Dir::DOWN, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_W)->Down)			camera->LocalMove(Direction::FORWARD, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_S)->Down)			camera->LocalMove(Direction::BACKWARD, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_A)->Down)			camera->LocalMove(Direction::LEFT, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_D)->Down)			camera->LocalMove(Direction::RIGHT, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Space)->Down)		camera->LocalMove(Direction::UP, cameraSpeed);
+					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_C)->Down)			camera->LocalMove(Direction::DOWN, cameraSpeed);
 
 					// Rotate
 					if (mouseData.x != 0 || mouseData.y != 0)

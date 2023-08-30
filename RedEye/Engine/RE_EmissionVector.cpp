@@ -2,7 +2,7 @@
 
 #include "RE_Memory.h"
 #include "Application.h"
-#include "RE_Math.h"
+#include "RE_Random.h"
 #include "RE_Json.h"
 
 #include <ImGui/imgui.h>
@@ -13,13 +13,13 @@ math::vec RE_EmissionVector::GetValue() const
 	switch (type)
 	{
 	case Type::VALUE: ret = val;
-	case Type::RANGEX: ret = { val.x + (RE_MATH->RandomFN() * margin.x), val.y, val.z };
-	case Type::RANGEY: ret = { val.x, val.y + (RE_MATH->RandomFN() * margin.y), val.z };
-	case Type::RANGEZ: ret = { val.x, val.y, val.z + (RE_MATH->RandomFN() * margin.z) };
-	case Type::RANGEXY: ret = { val.x + (RE_MATH->RandomFN() * margin.x), val.y + (RE_MATH->RandomFN() * margin.y), val.z };
-	case Type::RANGEXZ: ret = { val.x + (RE_MATH->RandomFN() * margin.x), val.y, val.z + (RE_MATH->RandomFN() * margin.z) };
-	case Type::RANGEYZ: ret = { val.x, val.y + (RE_MATH->RandomFN() * margin.y), val.z + (RE_MATH->RandomFN() * margin.z) };
-	case Type::RANGEXYZ: ret = { val.x + (RE_MATH->RandomFN() * margin.x), val.y + (RE_MATH->RandomFN() * margin.y), val.z + (RE_MATH->RandomFN() * margin.z) };
+	case Type::RANGEX: ret = { val.x + (RE_Random::RandomFN() * margin.x), val.y, val.z };
+	case Type::RANGEY: ret = { val.x, val.y + (RE_Random::RandomFN() * margin.y), val.z };
+	case Type::RANGEZ: ret = { val.x, val.y, val.z + (RE_Random::RandomFN() * margin.z) };
+	case Type::RANGEXY: ret = { val.x + (RE_Random::RandomFN() * margin.x), val.y + (RE_Random::RandomFN() * margin.y), val.z };
+	case Type::RANGEXZ: ret = { val.x + (RE_Random::RandomFN() * margin.x), val.y, val.z + (RE_Random::RandomFN() * margin.z) };
+	case Type::RANGEYZ: ret = { val.x, val.y + (RE_Random::RandomFN() * margin.y), val.z + (RE_Random::RandomFN() * margin.z) };
+	case Type::RANGEXYZ: ret = { val.x + (RE_Random::RandomFN() * margin.x), val.y + (RE_Random::RandomFN() * margin.y), val.z + (RE_Random::RandomFN() * margin.z) };
 	default: break;
 	}
 	return math::vec::zero;

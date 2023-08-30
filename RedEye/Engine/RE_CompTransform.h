@@ -2,7 +2,7 @@
 #define __NEW_RE_COMPTRANSFORM_H__
 
 #include "RE_Component.h"
-#include "RE_Math.h"
+#include <MGL/MathGeoLib.h>
 
 class RE_CompTransform: public RE_Component
 {
@@ -32,7 +32,7 @@ public:
 
 	// Movement Controls
 	void LocalPan(float rad_dx, float rad_dy, float rad_dz = 0.f);
-	void LocalMove(Dir dir, float speed);
+	void LocalMove(Direction dir, float speed);
 	void Orbit(float dx, float dy, const math::vec center);
 	void Focus(const math::vec center, float v_fov_rads, float h_fov_rads, float radius = 1.f, float min_dist = 3.0f);
 

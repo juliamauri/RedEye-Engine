@@ -2,7 +2,7 @@
 
 #include "RE_Memory.h"
 #include "Application.h"
-#include "RE_Math.h"
+#include "RE_Random.h"
 #include "ModulePhysics.h"
 #include "RE_Json.h"
 
@@ -10,9 +10,9 @@
 #include <EASTL/vector.h>
 
 bool RE_PR_Light::HasLight() const { return type != Type::NONE; }
-math::vec RE_PR_Light::GetColor() const { return random_color ? RE_MATH->RandomVec() : color; }
-float RE_PR_Light::GetIntensity() const { return random_i ? intensity + (RE_MATH->RandomF() * (intensity_max - intensity)) : intensity; }
-float RE_PR_Light::GetSpecular() const { return random_s ? specular + (RE_MATH->RandomF() * (specular_max - specular)) : specular; }
+math::vec RE_PR_Light::GetColor() const { return random_color ? RE_Random::RandomVec() : color; }
+float RE_PR_Light::GetIntensity() const { return random_i ? intensity + (RE_Random::RandomF() * (intensity_max - intensity)) : intensity; }
+float RE_PR_Light::GetSpecular() const { return random_s ? specular + (RE_Random::RandomF() * (specular_max - specular)) : specular; }
 math::vec RE_PR_Light::GetQuadraticValues() const { return { constant, linear, quadratic }; }
 
 bool RE_PR_Light::DrawEditor(const unsigned int id)

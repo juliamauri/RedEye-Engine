@@ -2,10 +2,9 @@
 #define __RE_COMPONENT_POOL_H__
 
 #include "RE_Memory.h"
-#include "RE_DataTypes.h"
+#include "RE_Random.h"
 #include "Application.h"
 #include "RE_Json.h"
-#include "RE_Math.h"
 #include "RE_HashMap.h"
 
 class GameObjectsPool;
@@ -35,7 +34,7 @@ public:
 
 	COMP_UID Push(COMPCLASS val) override
 	{
-		COMP_UID ret = RE_MATH->RandomUID();
+		COMP_UID ret = RANDOM_UID;
 		RE_HashMap::Push(val, ret);
 		RE_HashMap::pool_[RE_HashMap::key_map.at(ret)].SetPoolID(ret);
 		return ret;

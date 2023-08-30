@@ -3,7 +3,6 @@
 
 #include "RE_CompMesh.h"
 
-#include "RE_Math.h"
 #include "RE_ConsoleLog.h"
 #include "RE_Json.h"
 #include "Application.h"

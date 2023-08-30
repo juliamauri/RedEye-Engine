@@ -151,17 +151,20 @@ void RE_CompTransform::LocalPan(float rad_dx, float rad_dy, float rad_dz)
 	needed_update_transform = true;
 }
 
-void RE_CompTransform::LocalMove(Dir dir, float speed)
+void RE_CompTransform::LocalMove(Direction dir, float speed)
 {
 	if (speed != 0.f)
 	{
-		switch (dir) {
-		case FORWARD:	pos -= model_global.WorldZ() * speed; break;
-		case BACKWARD:	pos += model_global.WorldZ() * speed; break;
-		case LEFT:		pos -= model_global.WorldX() * speed; break;
-		case RIGHT:		pos += model_global.WorldX() * speed; break;
-		case UP:		pos += model_global.WorldY() * speed; break;
-		case DOWN:		pos -= model_global.WorldY() * speed; break; }
+		switch (dir)
+		{
+		case Direction::FORWARD:	pos -= model_global.WorldZ() * speed; break;
+		case Direction::BACKWARD:	pos += model_global.WorldZ() * speed; break;
+		case Direction::LEFT:		pos -= model_global.WorldX() * speed; break;
+		case Direction::RIGHT:		pos += model_global.WorldX() * speed; break;
+		case Direction::UP:		pos += model_global.WorldY() * speed; break;
+		case Direction::DOWN:		pos -= model_global.WorldY() * speed; break;
+		default: break;
+		}
 
 		needed_update_transform = true;
 	}

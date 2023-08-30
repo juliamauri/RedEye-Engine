@@ -1,9 +1,10 @@
 #include "Application.h"
 
+#include "RE_Assert.h"
 #include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "RE_Time.h"
-#include "RE_Math.h"
+#include "RE_Random.h"
 #include "RE_Hardware.h"
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
@@ -23,7 +24,6 @@
 
 Application::Application()
 {
-	math = new RE_Math();
 	hardware = new RE_Hardware();
 
 	fs = new RE_FileSystem();
@@ -56,7 +56,6 @@ Application::~Application()
 	DEL(fs)
 
 	DEL(hardware)
-	DEL(math)
 
 #ifdef INTERNAL_PROFILING
 	if (ProfilingTimer::recording) RE_Profiler::Deploy();
@@ -109,6 +108,8 @@ bool Application::Init(int _argc, char* _argv[])
 		return false;
 	}
 
+	// Initialize Intermediate Systems
+	RE_Random::SetRandomRNGSeed();
 	hardware->Init();
 	res->Init();
 

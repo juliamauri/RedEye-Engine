@@ -32,10 +32,8 @@ void RE_Scene::LoadInMemory()
 
 void RE_Scene::UnloadMemory()
 {
-	if (loaded) DEL(loaded)
-	if (toSave) DEL(toSave)
-	loaded = nullptr;
-	toSave = nullptr;
+	DEL(loaded)
+	DEL(toSave)
 	ResourceContainer::inMemory = false;
 }
 

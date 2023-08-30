@@ -53,6 +53,7 @@
     <ClCompile Include="RE_PR_Color.cpp" />
     <ClCompile Include="RE_PR_Light.cpp" />
     <ClCompile Include="RE_PR_Opacity.cpp" />
+    <ClCompile Include="RE_Random.cpp" />
     <ClCompile Include="SceneEditorWindow.cpp" />
     <ClCompile Include="MaterialEditorWindow.cpp" />
     <ClCompile Include="ShaderEditorWindow.cpp" />
@@ -84,7 +85,6 @@
     <ClCompile Include="RE_GLCache.cpp" />
     <ClCompile Include="RE_ECS_Pool.cpp" />
     <ClCompile Include="RE_InternalResources.cpp" />
-    <ClCompile Include="RE_Math.cpp" />
     <ClCompile Include="RE_Model.cpp" />
     <ClCompile Include="RE_ModelImporter.cpp" />
     <ClCompile Include="RE_CompParticleEmitter.cpp" />
@@ -195,6 +195,7 @@
     <ClInclude Include="RE_PR_Color.h" />
     <ClInclude Include="RE_PR_Light.h" />
     <ClInclude Include="RE_PR_Opacity.h" />
+    <ClInclude Include="RE_Random.h" />
     <ClInclude Include="RE_Serializable.h" />
     <ClInclude Include="SceneEditorWindow.h" />
     <ClInclude Include="PlayPauseWindow.h" />
@@ -323,34 +324,34 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{13DC399F-3A96-48E0-82B4-94FD73051599}</ProjectGuid>
     <RootNamespace>Engine</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.20348.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>Engine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>

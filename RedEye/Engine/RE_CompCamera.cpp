@@ -1,6 +1,7 @@
 #include "RE_CompCamera.h"
 
 #include "RE_Memory.h"
+#include "RE_Math.h"
 #include "Application.h"
 #include "RE_Json.h"
 #include "ModuleInput.h"
@@ -372,7 +373,7 @@ void RE_CompCamera::LocalPan(float x_angle_rad, float y_angle_rad)
 	}
 }
 
-void RE_CompCamera::LocalMove(Dir dir, float speed)
+void RE_CompCamera::LocalMove(Direction dir, float speed)
 {
 	if (speed != 0.f)
 	{
