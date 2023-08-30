@@ -163,9 +163,6 @@
     <ClCompile Include="RE_GLCache.cpp">
       <Filter>Engine\Application\Modules\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Math.cpp">
-      <Filter>Engine\Application\Utility\Math</Filter>
-    </ClCompile>
     <ClCompile Include="ModulePhysics.cpp">
       <Filter>Engine\Application\Modules\Physics</Filter>
     </ClCompile>
@@ -294,6 +291,9 @@
     </ClCompile>
     <ClCompile Include="RE_PR_Light.cpp">
       <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Random.cpp">
+      <Filter>Engine\Application\Utility\Math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -749,6 +749,9 @@
     </ClInclude>
     <ClInclude Include="RE_PR_Light.h">
       <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Random.h">
+      <Filter>Engine\Application\Utility\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
