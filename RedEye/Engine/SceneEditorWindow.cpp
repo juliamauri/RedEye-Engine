@@ -101,7 +101,7 @@ void SceneEditorWindow::Draw(bool secondary)
 
 			ImGuizmo::RecomposeMatrixFromComponents(pos.ptr(), rot.ToEulerXYZ().ptr(), scl.ptr(), matA);
 
-			math::float4x4 deltamatrix = math::float4x4::identity * RE_TIME->GetDeltaTime();
+			math::float4x4 deltamatrix = math::float4x4::identity * RE_Time::DeltaTime();
 
 			//SetRect of window at imgizmo
 			ImGuizmo::SetRect(vMin.x, vMin.y, vMax.x - vMin.x, vMax.y - vMin.y);

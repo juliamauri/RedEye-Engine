@@ -23,7 +23,6 @@
 
 Application::Application()
 {
-	time = new RE_Time();
 	math = new RE_Math();
 	hardware = new RE_Hardware();
 
@@ -58,7 +57,6 @@ Application::~Application()
 
 	DEL(hardware)
 	DEL(math)
-	DEL(time)
 
 #ifdef INTERNAL_PROFILING
 	if (ProfilingTimer::recording) RE_Profiler::Deploy();
@@ -127,12 +125,12 @@ bool Application::Init(int _argc, char* _argv[])
 
 void Application::MainLoop()
 {
-	RE_LOG_SEPARATOR("Entering Application's Main Loop - %.3f", time->FrameDeltaTime());
+	RE_LOG_SEPARATOR("Entering Application's Main Loop - %.3f", RE_Time::FrameDeltaTime());
 	do {
 		RE_PROFILE_FRAME();
 		RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::Application);
 
-		time->FrameDeltaTime();
+		RE_Time::FrameDeltaTime();
 
 		input->PreUpdate();
 		editor->PreUpdate();
@@ -147,16 +145,16 @@ void Application::MainLoop()
 
 		if (HasFlag(Flag::LOAD_CONFIG)) LoadConfig();
 		if (HasFlag(Flag::SAVE_CONFIG)) SaveConfig();
-		if (time->GetState() == GS_TICK)
+		if (RE_Time::StateIs(RE_Time::GameState::TICK))
 		{
-			time->PauseGameTimer();
+			RE_Time::PauseGameTimer();
 			scene->OnPause();
 		}
 
-		unsigned int extra_ms = time->FrameExtraMS();
+		unsigned int extra_ms = RE_Time::FrameExtraMS();
 		if (extra_ms > 0) extra_ms = fs->ReadAssetChanges(extra_ms);
 		if (extra_ms > 0) extra_ms = audio->ReadBanksChanges(extra_ms);
-		if (extra_ms > 0) time->Delay(extra_ms);
+		if (extra_ms > 0) RE_Time::Delay(extra_ms);
 
 	} while (!HasFlag(Flag::WANT_TO_QUIT));
 }
@@ -195,9 +193,9 @@ void Application::RecieveEvent(const Event& e)
 	case RE_EventType::PLAY:
 	{
 		scene->OnPlay();
-		physics->OnPlay(time->GetState() == GS_PAUSE);
+		physics->OnPlay(RE_Time::StateIs(RE_Time::GameState::PAUSE));
 
-		time->StartGameTimer();
+		RE_Time::StartGameTimer();
 		break;
 	}
 	case RE_EventType::PAUSE:
@@ -205,15 +203,15 @@ void Application::RecieveEvent(const Event& e)
 		scene->OnPause();
 		physics->OnPause();
 
-		time->PauseGameTimer();
+		RE_Time::PauseGameTimer();
 		break;
 	}
 	case RE_EventType::TICK:
 	{
 		scene->OnPlay();
-		physics->OnPlay(time->GetState() == GS_PAUSE);
+		physics->OnPlay(RE_Time::StateIs(RE_Time::GameState::PAUSE));
 
-		time->TickGameTimer();
+		RE_Time::TickGameTimer();
 		break;
 	}
 	case RE_EventType::STOP:
@@ -221,13 +219,14 @@ void Application::RecieveEvent(const Event& e)
 		scene->OnStop();
 		physics->OnStop();
 
-		time->StopGameTimer();
+		RE_Time::StopGameTimer();
 		break;
 	}
 	case RE_EventType::REQUEST_LOAD: AddFlag(Flag::LOAD_CONFIG); break;
 	case RE_EventType::REQUEST_SAVE: AddFlag(Flag::SAVE_CONFIG); break;
 	case RE_EventType::REQUEST_QUIT: AddFlag(Flag::WANT_TO_QUIT); break;
-	default: RE_ASSERT(false); break; }
+	default: RE_ASSERT(false); break;
+	}
 }
 
 bool Application::InitModules()

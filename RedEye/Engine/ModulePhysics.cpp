@@ -13,7 +13,7 @@
 void ModulePhysics::Update()
 {
 	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModulePhysics);
-	const float global_dt = RE_TIME->GetDeltaTime();
+	float global_dt = RE_Time::DeltaTime();
 
 	switch (mode) {
 	case ModulePhysics::UpdateMode::FIXED_UPDATE:

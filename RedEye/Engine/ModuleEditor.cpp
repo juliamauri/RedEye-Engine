@@ -911,7 +911,7 @@ void ModuleEditor::UpdateCamera()
 			if (ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Right))
 			{
 				// Camera Speed
-				float cameraSpeed = cam_speed * RE_TIME->GetDeltaTime();
+				float cameraSpeed = cam_speed * RE_Time::DeltaTime();
 				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
 				
 				// Move
@@ -953,7 +953,7 @@ void ModuleEditor::UpdateCamera()
 				if (ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Right))
 				{
 					// Camera Speed
-					float cameraSpeed = cam_speed * RE_TIME->GetDeltaTime();
+					float cameraSpeed = cam_speed * RE_Time::DeltaTime();
 					if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
 
 					// Move

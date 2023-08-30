@@ -43,7 +43,7 @@ void RE_CompParticleEmitter::Update()
 	{
 		RE_GameObject* g_obj = GetGOPtr();
 		const math::vec global_pos = g_obj->GetTransformPtr()->GetGlobalPosition();
-		simulation->parent_speed = (global_pos - simulation->parent_pos) / RE_TIME->GetDeltaTime();
+		simulation->parent_speed = (global_pos - simulation->parent_pos) / RE_Time::DeltaTime();
 		simulation->parent_pos = global_pos;
 
 		if (simulation->state <= RE_ParticleEmitter::PlaybackState::PLAY)

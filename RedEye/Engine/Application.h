@@ -41,7 +41,6 @@ private:
 public:
 
 	// Utility
-	class RE_Time* time = nullptr;
 	class RE_Math* math = nullptr;
 	class RE_Hardware* hardware = nullptr;
 
@@ -68,7 +67,6 @@ private:
 
 extern Application* App;
 
-#define RE_TIME App->time
 #define RE_MATH App->math
 #define RE_HARDWARE App->hardware
 #define RE_FS App->fs

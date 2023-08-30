@@ -56,7 +56,7 @@ void ConfigWindow::DrawOptions() const
 
 void ConfigWindow::DrawModules() const
 {
-	if (ImGui::CollapsingHeader("Time Profiling")) RE_TIME->DrawEditorGraphs();
+	if (ImGui::CollapsingHeader("Time Profiling")) RE_Time::DrawEditorGraphs();
 	if (ImGui::CollapsingHeader("Input")) RE_INPUT->DrawEditor();
 	if (ImGui::CollapsingHeader("Window")) RE_WINDOW->DrawEditor();
 	if (ImGui::CollapsingHeader("Scene")) RE_SCENE->DrawEditor();

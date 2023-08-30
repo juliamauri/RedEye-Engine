@@ -145,8 +145,8 @@ void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float 
 	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
 	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera->GetProjectionPtr());
 
-	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, RE_TIME->GetDeltaTime());
-	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, RE_TIME->GetCurrentTimer());
+	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, RE_Time::DeltaTime());
+	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, RE_Time::CurrentTimer());
 
 	if (viewport_h != -1) RE_ShaderImporter::setFloat(uniforms[viewport_h].location, window_h);
 	if (viewport_w != -1) RE_ShaderImporter::setFloat(uniforms[viewport_w].location, window_w);
