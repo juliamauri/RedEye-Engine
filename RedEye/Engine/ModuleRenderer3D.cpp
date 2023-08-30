@@ -427,9 +427,9 @@ void ModuleRenderer3D::DrawEditor()
 
 	if (ImGui::Checkbox(shareLightPass ? "Not share light pass" : "Share Light pass", &shareLightPass)) {
 		if (shareLightPass)
-			RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader())->UnloadMemory();
+			RE_RES->At(RE_InternalResources::GetParticleLightPassShader())->UnloadMemory();
 		else
-			dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
+			dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
 	}
 
 	ImGui::Separator();
@@ -461,7 +461,7 @@ void ModuleRenderer3D::Load()
 	RE_LOG_TERCIARY((vsync) ? "VSync enabled." : "VSync disabled");
 
 	if (shareLightPass = node->PullBool("share_light_pass", false))
-		RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader())->UnloadMemory();
+		RE_RES->At(RE_InternalResources::GetParticleLightPassShader())->UnloadMemory();
 
 	// Render Views
 	for (uint i = 0; i < render_views.size(); ++i)
@@ -699,7 +699,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		}
 
 		// Setup Shader
-		unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetLightPassShader()))->GetID();
+		unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetLightPassShader()))->GetID();
 		RE_GLCache::ChangeShader(light_pass);
 
 		SetDepthTest(false);
@@ -742,7 +742,7 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 			if (!particleS_lights.empty())
 			{
 				// Setup Shader
-				unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
+				unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->GetID();
 				RE_GLCache::ChangeShader(particlelight_pass);
 
 				glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
@@ -1007,7 +1007,7 @@ void ModuleRenderer3D::DrawParticleLights(const uint sim_id)
 	if (!shareLightPass)
 	{
 		// Setup Shader
-		unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleLightPassShader()))->GetID();
+		unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->GetID();
 		RE_GLCache::ChangeShader(particlelight_pass);
 
 		glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
@@ -1033,7 +1033,7 @@ void ModuleRenderer3D::DrawParticleLights(const uint sim_id)
 	else
 	{
 		// Setup Shader
-		unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetLightPassShader()))->GetID();
+		unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetLightPassShader()))->GetID();
 		RE_GLCache::ChangeShader(light_pass);
 
 		SetDepthTest(false);
@@ -1065,7 +1065,7 @@ void ModuleRenderer3D::DrawSkyBox()
 	RE_PROFILE(RE_ProfiledFunc::DrawSkybox, RE_ProfiledClass::ModuleRender);
 	RE_GLCache::ChangeTextureBind(0);
 
-	uint skysphereshader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultSkyBoxShader()))->GetID();
+	uint skysphereshader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetDefaultSkyBoxShader()))->GetID();
 	RE_GLCache::ChangeShader(skysphereshader);
 	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
 	RE_ShaderImporter::setBool(skysphereshader, "deferred", (current_lighting == RenderView::LightMode::DEFERRED));
@@ -1107,7 +1107,7 @@ void ModuleRenderer3D::DrawStencil(RE_GameObject* go, RE_Component* comp, bool h
 	SetDepthTest(false);
 
 	//Getting the scale shader and setting some values
-	const char* scaleShader = RE_RES->internalResources->GetDefaultScaleShader();
+	const char* scaleShader = RE_InternalResources::GetDefaultScaleShader();
 	RE_Shader* sShader = dynamic_cast<RE_Shader*>(RE_RES->At(scaleShader));
 	unsigned int shaderiD = sShader->GetID();
 	RE_GLCache::ChangeShader(shaderiD);
@@ -1241,7 +1241,7 @@ void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
 
 	RE_GLCache::ChangeTextureBind(0);
 
-	RE_Shader* skyboxShader = (RE_Shader*)RE_RES->At(RE_RES->internalResources->GetDefaultSkyBoxShader());
+	RE_Shader* skyboxShader = (RE_Shader*)RE_RES->At(RE_InternalResources::GetDefaultSkyBoxShader());
 	uint skysphereshader = skyboxShader->GetID();
 	RE_GLCache::ChangeShader(skysphereshader);
 	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);

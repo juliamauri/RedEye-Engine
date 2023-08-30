@@ -36,12 +36,10 @@ RE_ResourceManager::RE_ResourceManager()
 {
 	model_importer = new RE_ModelImporter();
 	shader_importer = new RE_ShaderImporter();
-	internalResources = new RE_InternalResources();
 }
 
 RE_ResourceManager::~RE_ResourceManager()
 {
-	DEL(internalResources)
 	DEL(shader_importer)
 	DEL(model_importer)
 }
@@ -53,7 +51,7 @@ void RE_ResourceManager::Init()
 
 	RE_TextureImporter::Init();
 	shader_importer->Init();
-	internalResources->Init();
+	RE_InternalResources::Init();
 
 	// Fetch Assets
 	RE_FS->ReadAssetChanges(0, true);
@@ -63,7 +61,7 @@ void RE_ResourceManager::Init()
 void RE_ResourceManager::Clear()
 {
 	RE_PROFILE(RE_ProfiledFunc::Clear, RE_ProfiledClass::ResourcesManager);
-	internalResources->Clear();
+	RE_InternalResources::Clear();
 	shader_importer->Clear();
 
 	while (!resources.empty())

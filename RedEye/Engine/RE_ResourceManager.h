@@ -8,7 +8,6 @@
 #include <EASTL/vector.h>
 #include <EASTL/stack.h> 
 
-class RE_InternalResources;
 class RE_ModelImporter;
 class RE_ShaderImporter;
 
@@ -82,7 +81,6 @@ public:
 
 	RE_ModelImporter* model_importer = nullptr;
 	RE_ShaderImporter* shader_importer = nullptr;
-	RE_InternalResources* internalResources = nullptr;
 
 	/* Other importers are purely static therefore namespaces
 	namespace RE_ECS_Importer

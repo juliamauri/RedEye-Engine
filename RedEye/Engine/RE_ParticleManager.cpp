@@ -65,7 +65,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 	if(!simulation || !simulation->active_rendering) return;
 
 	// Get Shader and uniforms
-	const RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetParticleShader()));
+	const RE_Shader* pS = static_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleShader()));
 	const unsigned int shader = pS->GetID();
 	RE_GLCache::ChangeShader(shader);
 

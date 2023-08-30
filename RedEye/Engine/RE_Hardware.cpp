@@ -10,7 +10,6 @@
 #include <GL/glew.h>
 #include <EASTL/array.h>
 #include <EASTL/string.h>
-//#include <EAStdC/EAString.h>
 
 #include <Psapi.h> // WINDOWS memory calls
 
@@ -181,13 +180,16 @@ void RE_Hardware::DrawEditor()
 	// Memory
 	if (ImGui::TreeNodeEx("RAM", ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
 	{
-		PROCESS_MEMORY_COUNTERS memCounter;
-		if (!pause_memory_plotting && GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter)))
+		if (!pause_memory_plotting)
 		{
-			PlotMemory("Working", working_memory, memCounter.WorkingSetSize / megabyte, memCounter.PeakWorkingSetSize / megabyte);
-			PlotMemory("Pageable", working_memory, memCounter.QuotaPagedPoolUsage / megabyte, memCounter.QuotaPeakPagedPoolUsage / megabyte);
-			PlotMemory("Non-Pageable", working_memory, memCounter.QuotaNonPagedPoolUsage / megabyte, memCounter.QuotaPeakNonPagedPoolUsage / megabyte);
-			PlotMemory("Paged", working_memory, memCounter.PagefileUsage / megabyte, memCounter.PeakPagefileUsage / megabyte);
+			PROCESS_MEMORY_COUNTERS memCounter;
+			if (GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter)))
+			{
+				PlotMemory("Working", working_memory, memCounter.WorkingSetSize / megabyte, memCounter.PeakWorkingSetSize / megabyte);
+				PlotMemory("Pageable", working_memory, memCounter.QuotaPagedPoolUsage / megabyte, memCounter.QuotaPeakPagedPoolUsage / megabyte);
+				PlotMemory("Non-Pageable", working_memory, memCounter.QuotaNonPagedPoolUsage / megabyte, memCounter.QuotaPeakNonPagedPoolUsage / megabyte);
+				PlotMemory("Paged", working_memory, memCounter.PagefileUsage / megabyte, memCounter.PeakPagefileUsage / megabyte);
+			}
 		}
 
 		if (ImGui::Checkbox(pause_memory_plotting ? "Restart Plotting" : "Pause Plotting", &pause_memory_plotting) && !pause_memory_plotting)

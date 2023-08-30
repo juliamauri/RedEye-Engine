@@ -86,7 +86,7 @@ void RE_CompGrid::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO
 
 void RE_CompGrid::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetDefaultShader()))->GetID();
 	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetTransformPtr()->GetGlobalMatrixPtr());
 	RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
@@ -184,7 +184,7 @@ void RE_CompRock::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO
 
 void RE_CompRock::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetDefaultShader()))->GetID();
 	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
@@ -388,7 +388,7 @@ void RE_CompPlatonic::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, cons
 
 void RE_CompPlatonic::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetDefaultShader()))->GetID();
 	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
@@ -487,7 +487,7 @@ void RE_CompParametric::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, co
 
 void RE_CompParametric::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_RES->internalResources->GetDefaultShader()))->GetID();
+	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetDefaultShader()))->GetID();
 	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 
@@ -506,7 +506,7 @@ void RE_CompParametric::Draw() const
 		RE_ShaderImporter::setFloat(shader, "useColor", 0.0f);
 		RE_ShaderImporter::setFloat(shader, "useTexture", 1.0f);
 		RE_ShaderImporter::setUnsignedInt(shader, "tdiffuse", 0);
-		RE_GLCache::ChangeTextureBind(RE_RES->internalResources->GetTextureChecker());
+		RE_GLCache::ChangeTextureBind(RE_InternalResources::GetTextureChecker());
 	}
 
 	RE_GLCache::ChangeVAO(VAO);

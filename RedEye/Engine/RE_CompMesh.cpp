@@ -28,7 +28,7 @@ void RE_CompMesh::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_
 
 void RE_CompMesh::Draw() const
 {
-	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_RES->internalResources->GetDefaulMaterial();
+	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_InternalResources::GetDefaulMaterial();
 	RE_Material* material = dynamic_cast<RE_Material*>(RE_RES->At(materialToDraw));
 	if (material != nullptr)
 	{
@@ -56,7 +56,7 @@ void RE_CompMesh::DrawProperties()
 		ImGui::Separator();
 		RE_Material* matRes = (materialMD5) ?
 			dynamic_cast<RE_Material*>(RE_RES->At(materialMD5)) :
-			dynamic_cast<RE_Material*>(RE_RES->At(RE_RES->internalResources->GetDefaulMaterial()));
+			dynamic_cast<RE_Material*>(RE_RES->At(RE_InternalResources::GetDefaulMaterial()));
 
 		if (!materialMD5) ImGui::Text("This component mesh is using the default material.");
 		if (ImGui::Button(matRes->GetName())) RE_RES->PushSelected(matRes->GetMD5(), true);
@@ -221,7 +221,7 @@ void RE_CompMesh::UnUseResources()
 
 bool RE_CompMesh::isBlend() const
 {
-	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_RES->internalResources->GetDefaulMaterial();
+	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_InternalResources::GetDefaulMaterial();
 	RE_Material* material = dynamic_cast<RE_Material*>(RE_RES->At(materialToDraw));
 	return material->blendMode;
 }

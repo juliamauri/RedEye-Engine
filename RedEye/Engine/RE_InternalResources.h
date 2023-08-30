@@ -1,64 +1,27 @@
 #ifndef __INTERNALRESOURCCES_H__
 #define __INTERNALRESOURCCES_H__
 
-class RE_SkyBox;
-class RE_Shader;
+#include "RE_Cvar.h"
+#include <EASTL/vector.h>
 
-class RE_InternalResources
+namespace RE_InternalResources
 {
-public:
-
-	RE_InternalResources() {}
-	~RE_InternalResources() {}
-
 	void Init();
 	void Clear();
 	
-	const char* GetDefaultShader() const;
-	const char* GetDefaultWaterShader() const;
-	const char* GetDefaultSkyBoxShader() const;
-	const char* GetDefaultScaleShader() const;
-	const char* GetDefaulMaterial() const;
-	const char* GetDefaultSkyBox() const;
-	const char* GetLightPassShader() const;
-	const char* GetParticleLightPassShader() const;
-	const char* GetParticleShader() const;
+	const char* GetDefaultShader();
+	const char* GetDefaultWaterShader();
+	const char* GetDefaultSkyBoxShader();
+	const char* GetDefaultScaleShader();
+	const char* GetDefaulMaterial();
+	const char* GetDefaultSkyBox();
+	const char* GetLightPassShader();
+	const char* GetParticleLightPassShader();
+	const char* GetParticleShader();
 
-	unsigned int GetTextureChecker() const;
-	unsigned int GetTextureWaterFoam() const;
-	eastl::vector<RE_Shader_Cvar> GetWaterUniforms() const;
-
-private:
-
-	void InitChecker();
-	bool InitShaders();
-	bool InitMaterial();
-	bool InitSkyBox();
-
-	void InitWaterResources();
-
-private:
-
-	const char* defaultShader = nullptr;
-	const char* defaultScaleShader = nullptr;
-	const char* skyboxShader = nullptr;
-
-	const char* defGeoShader = nullptr;
-	const char* defLightShader = nullptr;
-	const char* defParticleLightShader = nullptr;
-
-	const char* particleShader = nullptr;
-	const char* defParticleShader = nullptr;
-
-	const char* waterShader = nullptr;
-	const char* waterDefShader = nullptr;
-	eastl::vector<RE_Shader_Cvar> waterUniforms;
-	unsigned int water_foam_texture = 0;
-
-	const char* defaultMaterial = nullptr;
-	const char* defaultSkybox = nullptr;
-
-	unsigned int checkerTexture = 0u; 
+	unsigned int GetTextureChecker();
+	unsigned int GetTextureWaterFoam();
+	eastl::vector<RE_Shader_Cvar> GetWaterUniforms();
 };
 
 #endif // !__INTERNALRESOURCCES_H__

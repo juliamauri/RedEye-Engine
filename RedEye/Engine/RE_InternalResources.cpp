@@ -1,6 +1,3 @@
-#include "RE_Cvar.h"
-#include <EASTL/vector.h>
-
 #include "RE_InternalResources.h"
 
 #include "RE_Profiler.h"
@@ -21,26 +18,30 @@
 #include <GL/glew.h>
 #include <gl/GL.h>
 
-#define WATER_FOAM_TEX_PATH "Internal/DefaultAssets/water_foam.png"
+const char* defaultShader = nullptr;
+const char* defaultScaleShader = nullptr;
+const char* skyboxShader = nullptr;
 
-void RE_InternalResources::Init()
-{
-	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::InternalResources);
-	InitChecker();
-	if (!InitShaders()) RE_LOG_WARNING("Could not initialize default shaders");
-	InitWaterResources();
-	if (!InitMaterial()) RE_LOG_WARNING("Could not initialize default materials");
-	if (!InitSkyBox()) RE_LOG_WARNING("Could not initialize default skybox");
-}
+const char* defGeoShader = nullptr;
+const char* defLightShader = nullptr;
+const char* defParticleLightShader = nullptr;
 
-void RE_InternalResources::Clear()
-{
-	RE_PROFILE(RE_ProfiledFunc::Clear, RE_ProfiledClass::InternalResources);
-	if (checkerTexture != 0u) glDeleteTextures(1, &checkerTexture);
-	if (water_foam_texture != 0u) glDeleteTextures(1, &water_foam_texture);
-}
+const char* particleShader = nullptr;
+const char* defParticleShader = nullptr;
 
-void RE_InternalResources::InitChecker()
+const char* waterShader = nullptr;
+const char* waterDefShader = nullptr;
+eastl::vector<RE_Shader_Cvar> waterUniforms;
+unsigned int water_foam_texture = 0;
+
+const char* defaultMaterial = nullptr;
+const char* defaultSkybox = nullptr;
+
+unsigned int checkerTexture = 0;
+
+constexpr const char* WaterFoamTexturePath = "Internal/DefaultAssets/water_foam.png";
+
+void InitChecker()
 {
 	RE_PROFILE(RE_ProfiledFunc::InitChecker, RE_ProfiledClass::InternalResources);
 	// Checkers
@@ -67,7 +68,7 @@ void RE_InternalResources::InitChecker()
 	RE_GLCache::ChangeTextureBind(0);
 }
 
-bool RE_InternalResources::InitShaders()
+bool InitShaders()
 {
 	RE_PROFILE(RE_ProfiledFunc::InitShaders, RE_ProfiledClass::InternalResources);
 	//Loading Shaders
@@ -130,7 +131,7 @@ bool RE_InternalResources::InitShaders()
 	return defaultShader && defaultScaleShader && skyboxShader && defGeoShader && defLightShader && particleShader && defParticleShader;
 }
 
-bool RE_InternalResources::InitMaterial()
+bool InitMaterial()
 {
 	RE_PROFILE(RE_ProfiledFunc::InitMaterial, RE_ProfiledClass::InternalResources);
 	RE_Material* defMaterial = new RE_Material();
@@ -142,7 +143,7 @@ bool RE_InternalResources::InitMaterial()
 	return defaultMaterial = RE_RES->Reference(defMaterial);
 }
 
-bool RE_InternalResources::InitSkyBox()
+bool InitSkyBox()
 {
 	RE_PROFILE(RE_ProfiledFunc::InitSkyBox, RE_ProfiledClass::InternalResources);
 	RE_SkyBox* rdefaultSkybox = new RE_SkyBox();
@@ -159,7 +160,7 @@ bool RE_InternalResources::InitSkyBox()
 	return defaultSkybox = RE_RES->Reference(rdefaultSkybox);
 }
 
-void RE_InternalResources::InitWaterResources()
+void InitWaterResources()
 {
 	RE_PROFILE(RE_ProfiledFunc::InitWater, RE_ProfiledClass::InternalResources);
 	// Deferred
@@ -179,15 +180,19 @@ void RE_InternalResources::InitWaterResources()
 
 	static const char* internalNames[30] = { "useTexture", "useColor", "useClipPlane", "clip_plane", "time", "dt", "near_plane", "far_plane", "viewport_w", "viewport_h", "model", "view", "projection", "tdiffuse", "cspecular", "tspecular", "cambient", "tambient", "cemissive", "temissive", "ctransparent", "topacity", "tshininess", "shininessST", "refraccti", "theight", "tnormals", "treflection", "currentDepth", "viewPos" };
 	eastl::vector<RE_Shader_Cvar> uniformsWaterShader = waterSr->GetUniformValues(), uniformsWaterDefShader = waterDefS->GetUniformValues();
-	for (unsigned int i = 0; i < uniformsWaterShader.size(); i++) {
+	for (unsigned int i = 0; i < uniformsWaterShader.size(); i++)
+	{
 		bool skip = false;
 		for (int iN = 0; iN < 30 && !skip; iN++)
 			if (uniformsWaterShader[i].name == internalNames[iN])
 				skip = true;
+
 		if (skip) continue;
-		
-		for (unsigned int j = 0; j < uniformsWaterDefShader.size(); j++) {
-			if (uniformsWaterShader[i].name == uniformsWaterDefShader[j].name) {
+
+		for (unsigned int j = 0; j < uniformsWaterDefShader.size(); j++)
+		{
+			if (uniformsWaterShader[i].name == uniformsWaterDefShader[j].name)
+			{
 				uniformsWaterShader[i].locationDeferred = uniformsWaterDefShader[j].location;
 				waterUniforms.push_back(uniformsWaterShader[i]);
 				break;
@@ -195,7 +200,7 @@ void RE_InternalResources::InitWaterResources()
 		}
 	}
 
-	RE_FileBuffer waterTexture(WATER_FOAM_TEX_PATH);
+	RE_FileBuffer waterTexture(WaterFoamTexturePath);
 	if (waterTexture.Load())
 	{
 		RE_TextureSettings defTexSettings;
@@ -204,32 +209,45 @@ void RE_InternalResources::InitWaterResources()
 	}
 }
 
-const char* RE_InternalResources::GetDefaultShader() const
+
+void RE_InternalResources::Init()
+{
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::InternalResources);
+	InitChecker();
+	if (!InitShaders()) RE_LOG_WARNING("Could not initialize default shaders");
+	InitWaterResources();
+	if (!InitMaterial()) RE_LOG_WARNING("Could not initialize default materials");
+	if (!InitSkyBox()) RE_LOG_WARNING("Could not initialize default skybox");
+}
+
+void RE_InternalResources::Clear()
+{
+	RE_PROFILE(RE_ProfiledFunc::Clear, RE_ProfiledClass::InternalResources);
+	if (checkerTexture != 0u) glDeleteTextures(1, &checkerTexture);
+	if (water_foam_texture != 0u) glDeleteTextures(1, &water_foam_texture);
+}
+
+const char* RE_InternalResources::GetDefaultShader()
 {
 	static const char* shaders[4] = { defaultShader, defaultShader, defaultShader /* TODO RUB: add shader with light input*/, defGeoShader };
 	return shaders[static_cast<const int>(ModuleRenderer3D::GetLightMode())];
 }
-
-const char* RE_InternalResources::GetDefaultWaterShader() const
+const char* RE_InternalResources::GetDefaultWaterShader()
 {
 	static const char* waterShaders[4] = { waterShader, waterShader, waterShader /* TODO RUB: add shader with light input*/, waterDefShader };
 	return waterShaders[static_cast<const int>(ModuleRenderer3D::GetLightMode())];
 }
-
-const char*	 RE_InternalResources::GetDefaultScaleShader() const { return defaultScaleShader; }
-const char*	 RE_InternalResources::GetDefaulMaterial() const { return defaultMaterial; }
-const char*	 RE_InternalResources::GetDefaultSkyBox() const { return defaultSkybox; }
-const char*	 RE_InternalResources::GetLightPassShader() const { return defLightShader; }
-
-const char* RE_InternalResources::GetParticleLightPassShader() const { return defParticleLightShader; }
-
-const char* RE_InternalResources::GetParticleShader() const
+const char*	RE_InternalResources::GetDefaultScaleShader() { return defaultScaleShader; }
+const char*	RE_InternalResources::GetDefaulMaterial() { return defaultMaterial; }
+const char*	RE_InternalResources::GetDefaultSkyBox() { return defaultSkybox; }
+const char*	RE_InternalResources::GetLightPassShader() { return defLightShader; }
+const char*	RE_InternalResources::GetParticleLightPassShader() { return defParticleLightShader; }
+const char* RE_InternalResources::GetParticleShader()
 {
 	static const char* particleshaders[4] = { particleShader, particleShader, particleShader /* TODO RUB: add shader with light input*/, defParticleShader };
-	return particleshaders[static_cast<const int>(ModuleRenderer3D::GetLightMode())];
+	return particleshaders[static_cast<ushort>(ModuleRenderer3D::GetLightMode())];
 }
-
-const char*	 RE_InternalResources::GetDefaultSkyBoxShader() const { return skyboxShader; }
-unsigned int RE_InternalResources::GetTextureChecker() const { return checkerTexture; }
-unsigned int RE_InternalResources::GetTextureWaterFoam() const { return water_foam_texture; }
-eastl::vector<RE_Shader_Cvar> RE_InternalResources::GetWaterUniforms() const { return waterUniforms; }
+const char*	 RE_InternalResources::GetDefaultSkyBoxShader() { return skyboxShader; }
+unsigned int RE_InternalResources::GetTextureChecker() { return checkerTexture; }
+unsigned int RE_InternalResources::GetTextureWaterFoam() { return water_foam_texture; }
+eastl::vector<RE_Shader_Cvar> RE_InternalResources::GetWaterUniforms() { return waterUniforms; }

@@ -95,7 +95,7 @@ void RE_CompCamera::DrawProperties()
 			else
 			{
 				ImGui::Text("This component camera is using the default skybox.");
-				skyRes = dynamic_cast<RE_SkyBox*>(RE_RES->At(RE_RES->internalResources->GetDefaultSkyBox()));
+				skyRes = dynamic_cast<RE_SkyBox*>(RE_RES->At(RE_InternalResources::GetDefaultSkyBox()));
 				if (ImGui::Button(skyRes->GetName())) RE_RES->PushSelected(skyRes->GetMD5(), true);
 			}
 
@@ -155,7 +155,7 @@ void RE_CompCamera::DrawFrustum() const
 
 void RE_CompCamera::DrawSkybox() const
 {
-	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(RE_RES->At(skyboxMD5 ? skyboxMD5 : RE_RES->internalResources->GetDefaultSkyBox()));
+	RE_SkyBox* skyRes = dynamic_cast<RE_SkyBox*>(RE_RES->At(skyboxMD5 ? skyboxMD5 : RE_InternalResources::GetDefaultSkyBox()));
 	if (skyRes) skyRes->DrawSkybox();
 }
 
