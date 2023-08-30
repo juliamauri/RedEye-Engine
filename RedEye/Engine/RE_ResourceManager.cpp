@@ -32,25 +32,13 @@
 #include <EASTL/internal/char_traits.h>
 #include <EASTL/string.h>
 
-RE_ResourceManager::RE_ResourceManager()
-{
-	model_importer = new RE_ModelImporter();
-	shader_importer = new RE_ShaderImporter();
-}
-
-RE_ResourceManager::~RE_ResourceManager()
-{
-	DEL(shader_importer)
-	DEL(model_importer)
-}
-
 void RE_ResourceManager::Init()
 {
 	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ResourcesManager);
 	RE_LOG_SEPARATOR("Initializing Resources");
 
 	RE_TextureImporter::Init();
-	shader_importer->Init();
+	RE_ShaderImporter::Init();
 	RE_InternalResources::Init();
 
 	// Fetch Assets
@@ -62,7 +50,7 @@ void RE_ResourceManager::Clear()
 {
 	RE_PROFILE(RE_ProfiledFunc::Clear, RE_ProfiledClass::ResourcesManager);
 	RE_InternalResources::Clear();
-	shader_importer->Clear();
+	RE_ShaderImporter::Clear();
 
 	while (!resources.empty())
 	{

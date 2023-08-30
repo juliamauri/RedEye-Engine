@@ -42,17 +42,23 @@ struct RE_ModelSettings
 	// SplitByBoneCount
 	//24 Debone
 
-	inline bool operator==(const RE_ModelSettings& b) {
+	inline bool operator==(const RE_ModelSettings& b)
+	{
 		bool ret = true;
-		for (unsigned int i = 0; i < 3; i++) {
-			if (presets[i] != b.presets[i]) {
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			if (presets[i] != b.presets[i])
+			{
 				ret = false;
 				break;
 			}
 		}
-		if (ret) {
-			for (unsigned int i = 0; i < 25; i++) {
-				if (flags[i] != b.flags[i]) {
+		if (ret)
+		{
+			for (unsigned int i = 0; i < 25; i++)
+			{
+				if (flags[i] != b.flags[i])
+				{
 					ret = false;
 					break;
 				}
@@ -60,17 +66,23 @@ struct RE_ModelSettings
 		}
 		return ret;
 	}
-	inline bool operator!=(const RE_ModelSettings& b) {
+	inline bool operator!=(const RE_ModelSettings& b)
+	{
 		bool ret = true;
-		for (unsigned int i = 0; i < 3; i++) {
-			if (presets[i] == b.presets[i]) {
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			if (presets[i] == b.presets[i])
+			{
 				ret = false;
 				break;
 			}
 		}
-		if (ret) {
-			for (unsigned int i = 0; i < 25; i++) {
-				if (flags[i] == b.flags[i]) {
+		if (ret)
+		{
+			for (unsigned int i = 0; i < 25; i++)
+			{
+				if (flags[i] == b.flags[i])
+				{
 					ret = false;
 					break;
 				}

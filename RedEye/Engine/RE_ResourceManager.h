@@ -8,14 +8,11 @@
 #include <EASTL/vector.h>
 #include <EASTL/stack.h> 
 
-class RE_ModelImporter;
-class RE_ShaderImporter;
-
 class RE_ResourceManager : public EventListener
 {
 public:
-	RE_ResourceManager();
-	~RE_ResourceManager();
+	RE_ResourceManager() = default;
+	~RE_ResourceManager() final = default;
 
 	void Init();
 	void Clear();
@@ -76,16 +73,6 @@ public:
 private:
 
 	const char* GetNameFromType(const ResourceType type);
-
-public:
-
-	RE_ModelImporter* model_importer = nullptr;
-	RE_ShaderImporter* shader_importer = nullptr;
-
-	/* Other importers are purely static therefore namespaces
-	namespace RE_ECS_Importer
-	namespace RE_TextureImporter
-	namespace RE_SkyboxImporter*/
 
 private:
 

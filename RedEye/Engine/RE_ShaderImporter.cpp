@@ -9,6 +9,10 @@
 
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
+#include <EASTL/string.h>
+
+eastl::string shader_last_error;
+int* binaryFormats = nullptr;
 
 void RE_ShaderImporter::Init()
 {
@@ -173,7 +177,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 	if (geometryShader != 0) glDeleteShader(geometryShader);
 	if(compileTest) glDeleteProgram(*ID);
 
-	if (!ret) RE_RES->shader_importer->last_error = last_error;
+	if (!ret) shader_last_error = last_error;
 
 	return ret;
 }
@@ -288,7 +292,7 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 	if (fragmentShader != 0) glDeleteShader(fragmentShader);
 	if (geometryShader != 0) glDeleteShader(geometryShader);
 
-	if (!ret) RE_RES->shader_importer->last_error = last_error;
+	if (!ret) shader_last_error = last_error;
 
 	return ret;
 }
@@ -297,7 +301,7 @@ bool RE_ShaderImporter::LoadFromBinary(const char* buffer, size_t size, unsigned
 {
 	int ret;
 
-	glProgramBinary((*ID = glCreateProgram()), RE_RES->shader_importer->binaryFormats[0], buffer, static_cast<GLsizei>(size));
+	glProgramBinary((*ID = glCreateProgram()), binaryFormats[0], buffer, static_cast<GLsizei>(size));
 	glValidateProgram(*ID);
 	glGetProgramiv(*ID, GL_VALIDATE_STATUS, &ret);
 	if (!ret) glDeleteProgram(*ID);
@@ -314,7 +318,7 @@ bool RE_ShaderImporter::GetBinaryProgram(unsigned int ID, char** buffer, int* si
 		if (*size > 0)
 		{
 			*buffer = new char[*size];
-			glGetProgramBinary(ID, *size, size, reinterpret_cast<GLenum*>(RE_RES->shader_importer->binaryFormats), *buffer);
+			glGetProgramBinary(ID, *size, size, reinterpret_cast<GLenum*>(binaryFormats), *buffer);
 			ret = true;
 		}
 	}
@@ -347,14 +351,14 @@ bool RE_ShaderImporter::Compile(const char* buffer, unsigned int size, unsigned 
 	}
 	glDeleteShader(shaderScript);
 
-	if (!ret) RE_RES->shader_importer->last_error = last_error;
+	if (!ret) shader_last_error = last_error;
 
 	return ret;
 }
 
 const char * RE_ShaderImporter::GetShaderError()
 {
-	return RE_RES->shader_importer->last_error.c_str();
+	return shader_last_error.c_str();
 }
 
 void RE_ShaderImporter::use(unsigned int ID)

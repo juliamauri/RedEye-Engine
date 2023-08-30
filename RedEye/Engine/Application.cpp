@@ -298,9 +298,11 @@ bool Application::StartModules()
 
 void Application::LoadConfig()
 {
-	if (HasFlag(Flag::LOAD_CONFIG)) RemoveFlag(Flag::LOAD_CONFIG);
-
 	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::Application);
+
+	if (HasFlag(Flag::LOAD_CONFIG))
+		RemoveFlag(Flag::LOAD_CONFIG);
+
 	window->Load();
 	editor->Load();
 	renderer->Load();
@@ -310,9 +312,11 @@ void Application::LoadConfig()
 
 void Application::SaveConfig()
 {
-	if (HasFlag(Flag::SAVE_CONFIG)) RemoveFlag(Flag::SAVE_CONFIG);
-
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::Application);
+
+	if (HasFlag(Flag::SAVE_CONFIG))
+		RemoveFlag(Flag::SAVE_CONFIG);
+
 	window->Save();
 	editor->Save();
 	renderer->Save();

@@ -40,6 +40,10 @@ private:
 
 public:
 
+	// Files & Resources
+	class RE_FileSystem* fs = nullptr;
+	class RE_ResourceManager* res = nullptr;
+
 	// Modules
 	class ModuleInput* input = nullptr;
 	class ModuleWindow* window = nullptr;
@@ -48,10 +52,6 @@ public:
 	class ModuleEditor* editor = nullptr;
 	class ModuleRenderer3D* renderer = nullptr;
 	class ModuleAudio* audio = nullptr;
-
-	// Files & Resources
-	class RE_FileSystem* fs = nullptr;
-	class RE_ResourceManager* res = nullptr;
 
 private:
 

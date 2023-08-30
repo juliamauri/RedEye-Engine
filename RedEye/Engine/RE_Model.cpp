@@ -221,7 +221,7 @@ void RE_Model::AssetLoad()
 	RE_FileBuffer assetload(GetAssetPath());
 	if (assetload.Load())
 	{
-		loaded = RE_RES->model_importer->ProcessModel(assetload.GetBuffer(), assetload.GetSize(), GetAssetPath(), &modelSettings);
+		loaded = RE_ModelImporter::ProcessModel(assetload.GetBuffer(), assetload.GetSize(), GetAssetPath(), &modelSettings);
 		SetMD5(assetload.GetMd5().c_str());
 		eastl::string libraryPath("Library/Models/");
 		libraryPath += GetMD5();

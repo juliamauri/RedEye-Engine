@@ -1,36 +1,15 @@
 #ifndef __REMODELIMPORTER_H__
 #define __REMODELIMPORTER_H__
 
-struct aiNode;
 struct aiMesh;
-struct aiScene;
 struct aiMaterial;
-struct aiString;
 struct RE_ModelSettings;
-enum aiTextureType;
 class RE_ECS_Pool;
-class RE_GameObject;
 
-class RE_ModelImporter
+namespace RE_ModelImporter
 {
-public:
-
-	RE_ModelImporter() {}
-	~RE_ModelImporter() {}
-
 	eastl::vector<eastl::string> GetOutsideResourcesAssetsPath(const char * path);
 	RE_ECS_Pool* ProcessModel(const char* buffer, size_t size, const char* assetPayh, RE_ModelSettings* mSettings);
-
-private:
-
-	void ProcessMaterials(const aiScene* scene);
-	void ProcessMeshes(const aiScene* scene);
-	void ProcessNodes(RE_ECS_Pool* goPool, aiNode* parentNode, const aiScene* scene, unsigned long long parentGO, math::float4x4 patrentTansform);
-
-	void GetTexturesMaterial(aiMaterial* material, eastl::string& fileTexturePath, aiTextureType textureType, eastl::vector<const char*>* vectorToFill, aiString& name);
-	void GetTexturePath(aiMaterial* material, eastl::vector<eastl::string>& retPaths, aiTextureType textureType);
-
-private:
 
 	struct CurrentlyImporting
 	{
@@ -39,8 +18,7 @@ private:
 		eastl::map<aiMaterial*, const char*> materialsLoaded;
 		eastl::string workingfilepath;
 		eastl::string name;
-	}* aditionalData = nullptr;
-
+	};
 };
 
 #endif // !__REMODELIMPORTER_H__
