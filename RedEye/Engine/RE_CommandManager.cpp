@@ -29,13 +29,15 @@ void RE_CommandManager::Undo()
 
 void RE_CommandManager::PushCommand(RE_Command* newCommand)
 {
-	while (!redoCommands.empty()) {
-		DEL(redoCommands.top());
+	while (!redoCommands.empty())
+	{
+		DEL(redoCommands.top())
 		redoCommands.pop();
 	}
 
-	if (undoCommands.size() == MAX_COMMANDS) {
-		DEL(*undoCommands.c.begin());
+	if (undoCommands.size() == MAX_COMMANDS)
+	{
+		DEL(*undoCommands.c.begin())
 		undoCommands.c.erase(undoCommands.c.begin());
 	}
 	
@@ -44,13 +46,15 @@ void RE_CommandManager::PushCommand(RE_Command* newCommand)
 
 void RE_CommandManager::Clear()
 {
-	while (!undoCommands.empty()) {
-		DEL(undoCommands.top());
+	while (!undoCommands.empty())
+	{
+		DEL(undoCommands.top())
 		undoCommands.pop();
 	}
 
-	while (!redoCommands.empty()) {
-		DEL(redoCommands.top());
+	while (!redoCommands.empty())
+	{
+		DEL(redoCommands.top())
 		redoCommands.pop();
 	}
 }

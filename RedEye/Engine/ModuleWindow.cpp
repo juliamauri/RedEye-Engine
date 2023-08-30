@@ -101,7 +101,7 @@ void ModuleWindow::Load()
 	width = node->PullInt("width", width);
 	height = node->PullInt("height", height);
 
-	DEL(node);
+	DEL(node)
 }
 
 void ModuleWindow::Save() const
@@ -129,7 +129,7 @@ void ModuleWindow::Save() const
 	node->Push("width", width);
 	node->Push("height", height);
 
-	DEL(node);
+	DEL(node)
 }
 
 void ModuleWindow::RecieveEvent(const Event& e)

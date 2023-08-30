@@ -60,7 +60,7 @@ void RE_SkyBox::SetAsInternal()
 	node->Push("SKname", GetName());
 	node->Push("SKPath", GetAssetPath());
 	node->Push("skyBoxSize", skyBoxSettings.skyBoxSize);
-	DEL(node);
+	DEL(node)
 
 	SetMD5(toMD5.GetMd5().c_str());
 
@@ -371,7 +371,7 @@ void RE_SkyBox::AssetLoad(bool generateLibraryPath)
 	{
 		RE_Json* node = toLoad.GetRootNode("skybox");
 		skyBoxSettings.skyBoxSize = node->PullFloat("skyBoxSize", 5000);
-		DEL(node);
+		DEL(node)
 		
 		if (generateLibraryPath)
 		{
@@ -399,7 +399,7 @@ void RE_SkyBox::AssetSave()
 	node->Push("SKname", GetName());
 	node->Push("SKPath", GetAssetPath());
 	node->Push("skyBoxSize", skyBoxSettings.skyBoxSize);
-	DEL(node);
+	DEL(node)
 
 	toSave.Save();
 	eastl::string newMd5 = toSave.GetMd5();

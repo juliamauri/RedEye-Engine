@@ -87,7 +87,7 @@ const char* RenderView::flag_labels[12] = {
 						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clip Distance"};
 
 ModuleRenderer3D::ModuleRenderer3D() : fbos(new RE_FBOManager()) {}
-ModuleRenderer3D::~ModuleRenderer3D() { DEL(fbos); }
+ModuleRenderer3D::~ModuleRenderer3D() { DEL(fbos) }
 
 bool ModuleRenderer3D::Init()
 {
@@ -274,7 +274,7 @@ void ModuleRenderer3D::PostUpdate()
 						poolGOThumbnail->UnUseResources();
 						RE_RES->UnUse(rend.resMD5);
 						RE_EDITOR->thumbnails->SaveTextureFromFBO(path.c_str());
-						DEL(poolGOThumbnail);
+						DEL(poolGOThumbnail)
 					}
 				}
 
@@ -467,7 +467,7 @@ void ModuleRenderer3D::Load()
 	for (uint i = 0; i < render_views.size(); ++i)
 		render_views[i].Load(node->PullJObject((render_views[i].name + " View").c_str()));
 
-	DEL(node);
+	DEL(node)
 }
 
 void ModuleRenderer3D::Save() const
@@ -482,7 +482,7 @@ void ModuleRenderer3D::Save() const
 	for (uint i = 0; i < render_views.size(); ++i)
 		render_views[i].Save(node->PushJObject((render_views[i].name + " View").c_str()));
 
-	DEL(node);
+	DEL(node)
 }
 
 void ModuleRenderer3D::SetVSync(bool enable)

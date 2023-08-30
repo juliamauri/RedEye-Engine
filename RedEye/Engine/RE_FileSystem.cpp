@@ -121,11 +121,11 @@ void RE_FileSystem::Clear()
 	for (auto dir : assetsDirectories)
 		for (auto p : dir->tree)
 			if (p->pType != PathType::FOLDER)
-				DEL(p);
+				DEL(p)
 
-	for (auto dir : assetsDirectories) DEL(dir);
+	for (auto dir : assetsDirectories) DEL(dir)
 
-	DEL(config);
+	DEL(config)
 
 	PHYSFS_deinit();
 }
@@ -184,7 +184,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 						{
 							RE_Json* metaNode = metaLoad.GetRootNode("meta");
 							ResourceType type = static_cast<ResourceType>(metaNode->PullUInt("Type", static_cast<uint>(ResourceType::UNDEFINED)));
-							DEL(metaNode);
+							DEL(metaNode)
 
 							if (type == ResourceType::PARTICLE_EMITTER) {
 								meta_to_process_last.push(process);
@@ -228,7 +228,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 				break;
 			}
 			}
-			DEL(process);
+			DEL(process)
 
 			//timer
 			if (!doAll && extra_ms < time.Read()) run = false;
@@ -486,10 +486,10 @@ RE_FileBuffer* RE_FileSystem::QuickBufferFromPDPath(const char* full_path)// , c
 
 		if (RE_FS->AddPath(file_path.c_str(), "/Export/"))
 		{
-			if (!ret->Load()) DEL(ret);
+			if (!ret->Load()) DEL(ret)
 			RE_FS->RemovePath(file_path.c_str());
 		}
-		else DEL(ret);
+		else DEL(ret)
 	}
 
 	return ret;
@@ -581,7 +581,7 @@ void RE_FileSystem::DeleteUndefinedFile(const char* filePath)
 
 			RE_FileBuffer fileToDelete(filePath);
 			fileToDelete.Delete();
-			DEL(file);
+			DEL(file)
 		}
 		else
 			RE_LOG_ERROR("Error deleting file. The file culdn't be located: %s", filePath);

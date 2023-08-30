@@ -852,8 +852,8 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 			}
 		}
 
-		DEL(nuniforms);
-		DEL(nodeMat);
+		DEL(nuniforms)
+		DEL(nodeMat)
 
 		if (generateLibraryPath)
 		{
@@ -946,8 +946,8 @@ void RE_Material::JsonSerialize(bool onlyMD5)
 	libraryPath += GetMD5();
 	SetLibraryPath(libraryPath.c_str());
 
-	DEL(nuniforms);
-	DEL(materialNode);
+	DEL(nuniforms)
+	DEL(materialNode)
 }
 
 void RE_Material::PushTexturesJson(RE_Json * texturesNode, eastl::vector<const char*>* textures)

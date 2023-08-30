@@ -430,7 +430,7 @@ void RE_Shader::SaveResourceMeta(RE_Json* metaNode)
 			nuniforms->Push(("custom" + eastl::to_string(i)).c_str(), uniforms[i].custom);
 		}
 	}
-	DEL(nuniforms);
+	DEL(nuniforms)
 }
 
 void RE_Shader::LoadResourceMeta(RE_Json* metaNode)
@@ -509,7 +509,7 @@ void RE_Shader::LoadResourceMeta(RE_Json* metaNode)
 		}
 	}
 
-	DEL(nuniforms);
+	DEL(nuniforms)
 	restoreSettings = shaderSettings;
 }
 

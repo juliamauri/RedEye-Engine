@@ -265,7 +265,7 @@ void ModuleAudio::Load()
 	RE_Json* node = RE_FS->ConfigNode("Audio");
 	audioBanksFolderPath = node->PullString("FolderBanks", "NONE SELECTED");
 	located_banksFolder = (audioBanksFolderPath != "NONE SELECTED");
-	DEL(node);
+	DEL(node)
 }
 
 void ModuleAudio::Save() const
@@ -273,7 +273,7 @@ void ModuleAudio::Save() const
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModuleAudio);
 	RE_Json* node = RE_FS->ConfigNode("Audio");
 	node->Push("FolderBanks", audioBanksFolderPath.c_str());
-	DEL(node);
+	DEL(node)
 }
 
 unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
@@ -317,7 +317,7 @@ unsigned int ModuleAudio::ReadBanksChanges(unsigned int extra_ms)
 						soundbanks.push_back(newSB);
 					}
 
-					DEL(rootNode);
+					DEL(rootNode)
 					lastSoundBanksInfoModified = lastMod;
 
 					for (auto& sB : soundbanks)
@@ -371,7 +371,7 @@ void SoundBank::LoadBank()
 		if (result == AK_Success) loaded = true;
 		else RE_LOG_ERROR("Error while loading bank sound: %s", name.c_str());
 
-		DEL(bnkLoaded);
+		DEL(bnkLoaded)
 	}
 }
 

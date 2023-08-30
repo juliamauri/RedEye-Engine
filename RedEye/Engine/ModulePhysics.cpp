@@ -154,7 +154,7 @@ void ModulePhysics::Load()
 
 	mode = static_cast<UpdateMode>(node->PullInt("UpdateMode", static_cast<int>(UpdateMode::FIXED_UPDATE)));
 
-	DEL(node);
+	DEL(node)
 }
 
 void ModulePhysics::Save() const
@@ -164,7 +164,7 @@ void ModulePhysics::Save() const
 
 	node->Push("UpdateMode", static_cast<int>(mode));
 
-	DEL(node);
+	DEL(node)
 }
 
 RE_ParticleEmitter* ModulePhysics::AddEmitter(RE_ParticleEmitter* to_add)

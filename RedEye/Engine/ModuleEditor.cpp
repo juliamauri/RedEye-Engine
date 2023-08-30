@@ -75,11 +75,11 @@ ModuleEditor::ModuleEditor() :
 
 ModuleEditor::~ModuleEditor()
 {
-	DEL(popupWindow);
-	DEL(about);
+	DEL(popupWindow)
+	DEL(about)
 
-	DEL(commands);
-	DEL(thumbnails);
+	DEL(commands)
+	DEL(thumbnails)
 }
 
 bool ModuleEditor::Init()
@@ -413,17 +413,17 @@ void ModuleEditor::CleanUp()
 
 	windows.clear();
 
-	DEL(materialeditor);
-	DEL(skyboxeditor);
-	DEL(shadereditor);
+	DEL(materialeditor)
+	DEL(skyboxeditor)
+	DEL(shadereditor)
 
-	DEL(texteditormanager);
-	DEL(waterplaneWindow);
+	DEL(texteditormanager)
+	DEL(waterplaneWindow)
 
-	DEL(sceneEditorWindow);
-	DEL(sceneGameWindow);
+	DEL(sceneEditorWindow)
+	DEL(sceneGameWindow)
 
-	DEL(grid);
+	DEL(grid)
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
@@ -603,7 +603,7 @@ void ModuleEditor::Load()
 	temp_color = node->PullFloatVector("Frustum_Color", { 0.0f, 1.0f, 1.0f });
 	memcpy_s(frustum_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
 
-	DEL(node);
+	DEL(node)
 }
 
 void ModuleEditor::Save() const
@@ -649,7 +649,7 @@ void ModuleEditor::Save() const
 	node->Push("Frustum_Draw", draw_cameras);
 	node->PushFloatVector("Frustum_Color", { frustum_color[0], frustum_color[1], frustum_color[2] });
 
-	DEL(node);
+	DEL(node)
 }
 
 void ModuleEditor::DrawDebug(RE_CompCamera* current_camera) const

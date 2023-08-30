@@ -39,8 +39,8 @@ void RE_Prefab::LoadInMemory()
 
 void RE_Prefab::UnloadMemory()
 {
-	DEL(loaded);
-	DEL(toSave);
+	DEL(loaded)
+	DEL(toSave)
 	ResourceContainer::inMemory = false;
 }
 
@@ -67,7 +67,7 @@ void RE_Prefab::Save(RE_ECS_Pool* pool, bool rootidentity, bool keepInMemory)
 		}
 		AssetSave();
 		LibrarySave();
-		if (!keepInMemory) DEL(loaded);
+		if (!keepInMemory) DEL(loaded)
 		ResourceContainer::inMemory = keepInMemory;
 	}
 }
@@ -97,7 +97,7 @@ void RE_Prefab::AssetSave()
 	RE_Json* prefabNode = prefab_SaveFile.GetRootNode("prefab");
 
 	RE_ECS_Importer::JsonSerialize(prefabNode, toSave);
-	DEL(prefabNode);
+	DEL(prefabNode)
 
 	//Setting LibraryPath and MD5
 	eastl::string md5 = prefab_SaveFile.GetMd5();
@@ -118,7 +118,7 @@ void RE_Prefab::AssetLoad(bool generateLibraryPath)
 	{
 		RE_Json* prefabNode = jsonLoad.GetRootNode("prefab");
 		loaded = RE_ECS_Importer::JsonDeserialize(prefabNode);
-		DEL(prefabNode);
+		DEL(prefabNode)
 
 		if (generateLibraryPath)
 		{

@@ -162,7 +162,7 @@ void RE_EmissionShape::JsonSerialize(RE_Json* node) const
 	}
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_EmissionShape::JsonDeserialize(RE_Json* node)
@@ -199,7 +199,7 @@ void RE_EmissionShape::JsonDeserialize(RE_Json* node)
 		break;
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 size_t RE_EmissionShape::GetBinarySize() const

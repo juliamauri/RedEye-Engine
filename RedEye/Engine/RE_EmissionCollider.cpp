@@ -48,7 +48,7 @@ void RE_EmissionCollider::JsonSerialize(RE_Json* node) const
 		}
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_EmissionCollider::JsonDeserialize(RE_Json* node)
@@ -74,7 +74,7 @@ void RE_EmissionCollider::JsonDeserialize(RE_Json* node)
 		}
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 size_t RE_EmissionCollider::GetBinarySize() const

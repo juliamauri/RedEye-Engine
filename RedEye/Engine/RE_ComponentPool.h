@@ -80,9 +80,9 @@ public:
 			RE_Json* comp = compPool->PushJObject(eastl::to_string(i).c_str());
 			comp->Push("parentPoolID", pool_[i].GetGOUID());
 			pool_[i].SerializeJson(comp, resources);
-			DEL(comp);
+			DEL(comp)
 		}
-		DEL(compPool);
+		DEL(compPool)
 	}
 
 	void DeserializeJson(GameObjectsPool* goPool, RE_Json* node, eastl::map<int, const char*>* resources)
@@ -96,9 +96,9 @@ public:
 			comp_ptr->PoolSetUp(goPool, comp_obj->PullUnsignedLongLong("parentPoolID", 0), true);
 			comp_ptr->DeserializeJson(comp_obj, resources);
 
-			DEL(comp_obj);
+			DEL(comp_obj)
 		}
-		DEL(comp_objs);
+		DEL(comp_objs)
 	}
 
 	size_t GetBinarySize() const

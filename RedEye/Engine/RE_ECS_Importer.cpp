@@ -31,9 +31,9 @@ void RE_ECS_Importer::JsonSerialize(RE_Json* node, RE_ECS_Pool* pool)
 		resN->Push("type", static_cast<uint>(rtype));
 		resN->Push("mPath", (rtype == ResourceType::MESH) ? res->GetLibraryPath() : res->GetMetaPath());
 
-		DEL(resN);
+		DEL(resN)
 	}
-	DEL(resources);
+	DEL(resources)
 
 	//GOs Serialize
 	pool->SerializeJson(node, &resourcesIndex);
@@ -121,10 +121,10 @@ RE_ECS_Pool* RE_ECS_Importer::JsonDeserialize(RE_Json* node)
 			RE_RES->FindMD5ByMETAPath(mPath.c_str(), type);
 
 		resourcesIndex.insert(eastl::pair< int, const char*>(r, resMD5));
-		DEL(resN);
+		DEL(resN)
 	}
 
-	DEL(resources);
+	DEL(resources)
 	RE_ECS_Pool* ret = new RE_ECS_Pool();
 	ret->DeserializeJson(node, &resourcesIndex);
 	return ret;
@@ -203,10 +203,10 @@ bool RE_ECS_Importer::JsonCheckResources(RE_Json* node)
 			RE_RES->FindMD5ByMETAPath(mPath.c_str(), type);
 
 		if (!resMD5) ret = false;
-		DEL(resN);
+		DEL(resN)
 	}
 
-	DEL(resources);
+	DEL(resources)
 	return ret;
 }
 

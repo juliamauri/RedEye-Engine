@@ -71,7 +71,7 @@ void RE_EmissionExternalForces::JsonSerialize(RE_Json* node) const
 	default: break;
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_EmissionExternalForces::JsonDeserialize(RE_Json* node)
@@ -93,7 +93,7 @@ void RE_EmissionExternalForces::JsonDeserialize(RE_Json* node)
 	default: break;
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 size_t RE_EmissionExternalForces::GetBinarySize() const

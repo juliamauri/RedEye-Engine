@@ -87,7 +87,7 @@ void RE_ParticleEmitterBase::FillEmitter(RE_ParticleEmitter* emitter_to_fill)
 		if (emitter_to_fill->primCmp)
 		{
 			emitter_to_fill->primCmp->UnUseResources();
-			DEL(emitter_to_fill->primCmp);
+			DEL(emitter_to_fill->primCmp)
 			emitter_to_fill->primCmp = new RE_CompPoint();
 			RE_SCENE->primitives->SetUpComponentPrimitive(emitter_to_fill->primCmp);
 

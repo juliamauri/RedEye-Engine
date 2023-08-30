@@ -203,7 +203,7 @@ void RE_PR_Light::JsonSerialize(RE_Json* node) const
 	default: break;
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_PR_Light::JsonDeserialize(RE_Json* node)
@@ -246,7 +246,7 @@ void RE_PR_Light::JsonDeserialize(RE_Json* node)
 	default: break;
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 size_t RE_PR_Light::GetBinarySize() const

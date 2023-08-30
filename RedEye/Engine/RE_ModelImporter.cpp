@@ -56,7 +56,7 @@ RE_ECS_Pool* RE_ModelImporter::ProcessModel(const char * buffer, size_t size, co
 
 	}
 
-	DEL(aditionalData);
+	DEL(aditionalData)
 	return ret;
 }
 
@@ -236,7 +236,7 @@ void RE_ModelImporter::ProcessMeshes(const aiScene* scene)
 				newMesh->SetAssetPath(aditionalData->workingfilepath.c_str());
 				RE_RES->Reference(newMesh);
 			}
-			else DEL(newMesh);
+			else DEL(newMesh)
 
 			aditionalData->settings->libraryMeshes.push_back(meshMD5);
 			aditionalData->meshesLoaded.insert(eastl::pair<aiMesh*, const char*>(mesh, meshMD5));
@@ -276,7 +276,7 @@ eastl::vector<eastl::string> RE_ModelImporter::GetOutsideResourcesAssetsPath(con
 			}
 		}
 
-		DEL(fbxloaded);
+		DEL(fbxloaded)
 	}
 
 	return retPaths;

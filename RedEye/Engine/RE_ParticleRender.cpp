@@ -34,7 +34,7 @@ void RE_ParticleRender::UnloadMemory()
 	if (primType != RE_Component::Type::EMPTY)
 	{
 		primCmp->UnUseResources();
-		DEL(primCmp);
+		DEL(primCmp)
 	}
 	primType = RE_Component::Type::EMPTY;
 
@@ -119,8 +119,9 @@ void RE_ParticleRender::FillResouce(RE_ParticleEmitter* from)
 	opacity = from->opacity;
 	light = from->light;
 	meshMD5 = from->meshMD5;
-	if (from->primCmp) {
-		if (primCmp) DEL(primCmp);
+	if (from->primCmp)
+	{
+		if (primCmp) DEL(primCmp)
 
 		primType = from->primCmp->GetType();
 		primCmp = from->primCmp;

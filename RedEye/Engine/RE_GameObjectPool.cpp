@@ -119,9 +119,9 @@ void GameObjectsPool::SerializeJson(RE_Json* node)
 		RE_Json* goNode = goPool->PushJObject(eastl::to_string(i).c_str());
 		goNode->Push("GOUID", pool_[i].go_uid);
 		pool_[i].SerializeJson(goNode);
-		DEL(goNode);
+		DEL(goNode)
 	}
-	DEL(goPool);
+	DEL(goPool)
 }
 
 void GameObjectsPool::DeserializeJson(RE_Json* node, ComponentsPool* cmpsPool)
@@ -138,9 +138,9 @@ void GameObjectsPool::DeserializeJson(RE_Json* node, ComponentsPool* cmpsPool)
 		newGO.go_uid = goUID;
 		RE_HashMap::Push(newGO, goUID);
 		AtPtr(goUID)->DeserializeJSON(goNode, this, cmpsPool);
-		DEL(goNode);
+		DEL(goNode)
 	}
-	DEL(goPool);
+	DEL(goPool)
 }
 
 eastl::vector<GO_UID> GameObjectsPool::GetAllKeys() const

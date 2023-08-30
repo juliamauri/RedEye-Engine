@@ -21,7 +21,7 @@ MaterialEditorWindow::MaterialEditorWindow() :
 
 MaterialEditorWindow::~MaterialEditorWindow()
 {
-	DEL(editingMaerial);
+	DEL(editingMaerial)
 }
 
 void MaterialEditorWindow::Draw(bool secondary)

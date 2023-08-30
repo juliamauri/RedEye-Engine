@@ -279,7 +279,7 @@ void RE_EmissionBoundary::JsonSerialize(RE_Json* node) const
 		}
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_EmissionBoundary::JsonDeserialize(RE_Json* node)
@@ -308,7 +308,7 @@ void RE_EmissionBoundary::JsonDeserialize(RE_Json* node)
 		}
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 size_t RE_EmissionBoundary::GetBinarySize() const

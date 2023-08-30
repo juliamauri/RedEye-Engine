@@ -63,7 +63,7 @@ void RE_PR_Opacity::JsonSerialize(RE_Json* node) const
 
 	curve.JsonSerialize(node->PushJObject("curve"));
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_PR_Opacity::JsonDeserialize(RE_Json* node)
@@ -76,7 +76,7 @@ void RE_PR_Opacity::JsonDeserialize(RE_Json* node)
 
 	curve.JsonDeserialize(node->PullJObject("curve"));
 
-	DEL(node);
+	DEL(node)
 }
 
 size_t RE_PR_Opacity::GetBinarySize() const

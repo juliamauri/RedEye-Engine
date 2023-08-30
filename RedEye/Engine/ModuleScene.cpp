@@ -43,7 +43,7 @@ ModuleScene::ModuleScene() :
 	cams(new RE_CameraManager()),
 	primitives(new RE_PrimitiveManager()) {}
 
-ModuleScene::~ModuleScene() { DEL(cams); DEL(primitives); }
+ModuleScene::~ModuleScene() { DEL(cams) DEL(primitives) }
 
 bool ModuleScene::Init()
 {
@@ -88,7 +88,7 @@ void ModuleScene::CleanUp()
 	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleScene);
 	cams->Clear();
 	primitives->Clear();
-	if (unsavedScene) DEL(unsavedScene);
+	DEL(unsavedScene)
 }
 
 void ModuleScene::DrawEditor()
@@ -489,7 +489,7 @@ void ModuleScene::NewEmptyScene(const char* name)
 	RE_INPUT->PauseEvents();
 	RE_EDITOR->ClearCommands();
 
-	if (unsavedScene) { DEL(unsavedScene); }
+	if (unsavedScene) { DEL(unsavedScene) }
 	else currentScene = nullptr;
 
 	unsavedScene = new RE_Scene();
@@ -513,7 +513,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 {
 	RE_INPUT->PauseEvents();
 	RE_EDITOR->ClearCommands();
-	if (unsavedScene) DEL(unsavedScene);
+	if (unsavedScene) DEL(unsavedScene)
 	
 	scenePool.UnUseResources();
 	savedState.ClearPool();
@@ -530,7 +530,7 @@ void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 	if (loadedDO)scenePool.InsertPool(loadedDO);
 	else RE_LOG_ERROR("Can't Load Scene");
 
-	DEL(loadedDO);
+	DEL(loadedDO)
 
 	RE_RES->UnUse(sceneMD5);
 	scenePool.UseResources();

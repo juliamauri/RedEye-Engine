@@ -91,7 +91,7 @@ void ParticleEmitterEditorWindow::CloseEditor()
 {
 	if (simulation) RE_PHYSICS->RemoveEmitter(simulation);
 	simulation = nullptr;
-	if (!emiter_md5 && new_emitter) DEL(new_emitter);
+	if (!emiter_md5 && new_emitter) DEL(new_emitter)
 	if (emiter_md5) RE_RES->UnUse(emiter_md5);
 	emiter_md5 = nullptr;
 	new_emitter = nullptr;
@@ -241,12 +241,13 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				ImGui::SameLine();
 				if (ImGui::Button("Discard changes"))
 				{
-					DEL(simulation);
+					DEL(simulation)
 					simulation = (emiter_md5) ? dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->GetNewEmitter()
 						: new RE_ParticleEmitter(true);
 
-					if (!emiter_md5) {
-						DEL(new_emitter);
+					if (!emiter_md5)
+					{
+						DEL(new_emitter)
 						new_emitter = new RE_ParticleEmitterBase();
 					}
 
@@ -462,7 +463,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Point")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompPoint();
 					setUpPrimitive = clearMesh = true;
@@ -470,7 +471,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Cube")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompCube();
 					setUpPrimitive = clearMesh = true;
@@ -478,7 +479,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Dodecahedron")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompDodecahedron();
 					setUpPrimitive = clearMesh = true;
@@ -486,7 +487,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Tetrahedron")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompTetrahedron();
 					setUpPrimitive = clearMesh = true;
@@ -494,7 +495,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Octohedron")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompOctohedron();
 					setUpPrimitive = clearMesh = true;
@@ -502,7 +503,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Icosahedron")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompIcosahedron();
 					setUpPrimitive = clearMesh = true;
@@ -510,7 +511,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Plane")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompPlane();
 					setUpPrimitive = clearMesh = true;
@@ -518,7 +519,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Sphere")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompSphere();
 					setUpPrimitive = clearMesh = true;
@@ -526,7 +527,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Cylinder")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompCylinder();
 					setUpPrimitive = clearMesh = true;
@@ -534,7 +535,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("HemiSphere")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompHemiSphere();
 					setUpPrimitive = clearMesh = true;
@@ -542,7 +543,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Torus")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompTorus();
 					setUpPrimitive = clearMesh = true;
@@ -550,7 +551,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Trefoil Knot")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompTrefoiKnot();
 					setUpPrimitive = clearMesh = true;
@@ -558,7 +559,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				if (ImGui::MenuItem("Rock")) {
 					if (simulation->primCmp) {
 						simulation->primCmp->UnUseResources();
-						DEL(simulation->primCmp);
+						DEL(simulation->primCmp)
 					}
 					simulation->primCmp = new RE_CompRock();
 					setUpPrimitive = clearMesh = true;

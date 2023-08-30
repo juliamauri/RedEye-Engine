@@ -94,7 +94,7 @@ void RE_EmissionSpawn::JsonSerialize(RE_Json* node) const
 	default: break;
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_EmissionSpawn::JsonDeserialize(RE_Json* node)
@@ -113,7 +113,7 @@ void RE_EmissionSpawn::JsonDeserialize(RE_Json* node)
 		break;
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 size_t RE_EmissionSpawn::GetBinarySize() const

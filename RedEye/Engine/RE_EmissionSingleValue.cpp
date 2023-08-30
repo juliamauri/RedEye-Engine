@@ -99,7 +99,7 @@ void RE_EmissionSingleValue::JsonSerialize(RE_Json* node) const
 	default: break;
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_EmissionSingleValue::JsonDeserialize(RE_Json* node)
@@ -118,7 +118,7 @@ void RE_EmissionSingleValue::JsonDeserialize(RE_Json* node)
 	default: break;
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 size_t RE_EmissionSingleValue::GetBinarySize() const

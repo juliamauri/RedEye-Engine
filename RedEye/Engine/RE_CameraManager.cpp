@@ -31,8 +31,8 @@ void RE_CameraManager::Init()
 
 void RE_CameraManager::Clear()
 {
-	DEL(editor_camera);
-	DEL(particleEditor_camera);
+	DEL(editor_camera)
+	DEL(particleEditor_camera)
 }
 
 RE_CompCamera* RE_CameraManager::CurrentCamera()

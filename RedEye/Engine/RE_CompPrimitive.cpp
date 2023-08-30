@@ -51,8 +51,8 @@ size_t RE_CompPrimitive::GetTriangleCount() const { return triangle_count; }
 
 void RE_CompPrimitive::UnUseResources() { RE_SCENE->primitives->UnUsePrimitive(type, primID); }
 
-void RE_CompPrimitive::SerializeParticleJson(RE_Json* node) const { DEL(node); }
-void RE_CompPrimitive::DeserializeParticleJson(RE_Json* node) { DEL(node); }
+void RE_CompPrimitive::SerializeParticleJson(RE_Json* node) const { DEL(node) }
+void RE_CompPrimitive::DeserializeParticleJson(RE_Json* node) { DEL(node) }
 
 ///////   Grid   ////////////////////////////////////////////
 RE_CompGrid::~RE_CompGrid() { }
@@ -316,13 +316,13 @@ void RE_CompRock::SerializeParticleJson(RE_Json* node) const
 {
 	node->Push("seed", seed);
 	node->Push("nsubdivisions", nsubdivisions);
-	DEL(node);
+	DEL(node)
 }
 
 void RE_CompRock::DeserializeParticleJson(RE_Json* node)
 {
 	RockSetUp(node->PullInt("seed", seed), node->PullInt("nsubdivisions", nsubdivisions));
-	DEL(node);
+	DEL(node)
 }
 
 void RE_CompRock::SerializeParticleBinary(char*& cursor) const
@@ -616,13 +616,13 @@ void RE_CompParametric::SerializeParticleJson(RE_Json* node) const
 	node->Push("slices", slices);
 	node->Push("stacks", stacks);
 	node->Push("radius", radius);
-	DEL(node);
+	DEL(node)
 }
 
 void RE_CompParametric::DeserializeParticleJson(RE_Json* node)
 {
 	ParametricSetUp(node->PullInt("slices", slices), node->PullInt("stacks", stacks), node->PullFloat("radius", radius));
-	DEL(node);
+	DEL(node)
 }
 
 void RE_CompParametric::SerializeParticleBinary(char*& cursor) const
@@ -695,7 +695,7 @@ const char* RE_CompPlane::TransformAsMeshResource()
 		newMesh->SetType(ResourceType::MESH);
 		RE_RES->Reference(newMesh);
 	}
-	else DEL(newMesh);
+	else DEL(newMesh)
 
 	par_shapes_free_mesh(plane);
 	return meshMD5;

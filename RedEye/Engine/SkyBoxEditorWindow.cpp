@@ -22,7 +22,7 @@ SkyBoxEditorWindow::SkyBoxEditorWindow() :
 
 SkyBoxEditorWindow::~SkyBoxEditorWindow()
 {
-	DEL(editingSkybox);
+	DEL(editingSkybox)
 	if (previewImage != 0) glDeleteTextures(1, &previewImage);
 }
 

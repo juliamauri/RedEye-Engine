@@ -63,7 +63,7 @@ void RE_Curve::JsonSerialize(RE_Json* node) const
 	for (int i = 0; i < total_points; i++)
 		node->PushFloat2((eastl::to_string(i) + "p").c_str(), { points[i].x, points[i].y });
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_Curve::JsonDeserialize(RE_Json* node)
@@ -78,7 +78,7 @@ void RE_Curve::JsonDeserialize(RE_Json* node)
 		points.push_back({ toImVec2.x,toImVec2.y });
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 size_t RE_Curve::GetBinarySize() const

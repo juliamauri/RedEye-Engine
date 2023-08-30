@@ -79,7 +79,7 @@ void RE_EmissionInterval::JsonSerialize(RE_Json* node) const
 		node->Push("Duration 2", duration[1]);
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_EmissionInterval::JsonDeserialize(RE_Json* node)
@@ -91,7 +91,7 @@ void RE_EmissionInterval::JsonDeserialize(RE_Json* node)
 		duration[1] = node->PullFloat("Duration 2", duration[1]);
 	}
 
-	DEL(node);
+	DEL(node)
 }
 
 size_t RE_EmissionInterval::GetBinarySize() const

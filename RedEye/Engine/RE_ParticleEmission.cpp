@@ -122,7 +122,7 @@ void RE_ParticleEmission::JsonSerialize(bool onlyMD5)
 	libraryPath += GetMD5();
 	SetLibraryPath(libraryPath.c_str());
 
-	DEL(node);
+	DEL(node)
 }
 
 void RE_ParticleEmission::JsonDeserialize(bool generateLibraryPath)

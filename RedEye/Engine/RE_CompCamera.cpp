@@ -20,7 +20,7 @@ RE_CompCamera::RE_CompCamera() : RE_Component(RE_Component::Type::CAMERA) {}
 
 RE_CompCamera::~RE_CompCamera()
 {
-	if(!useParent && transform != nullptr) DEL(transform);
+	if(!useParent) DEL(transform)
 }
 
 void RE_CompCamera::SetProperties(bool toPerspective, float n_plane, float f_plane, float v_fov, AspectRatio ar, bool _draw_frustum, bool _usingSkybox, const char* _skyboxMD5)

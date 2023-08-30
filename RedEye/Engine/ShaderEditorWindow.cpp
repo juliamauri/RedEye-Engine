@@ -27,7 +27,7 @@ ShaderEditorWindow::ShaderEditorWindow() :
 
 ShaderEditorWindow::~ShaderEditorWindow()
 {
-	DEL(editingShader);
+	DEL(editingShader)
 }
 
 void ShaderEditorWindow::Draw(bool secondary)

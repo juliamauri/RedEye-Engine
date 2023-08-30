@@ -41,9 +41,9 @@ RE_ResourceManager::RE_ResourceManager()
 
 RE_ResourceManager::~RE_ResourceManager()
 {
-	DEL(internalResources);
-	DEL(shader_importer);
-	DEL(model_importer);
+	DEL(internalResources)
+	DEL(shader_importer)
+	DEL(model_importer)
 }
 
 void RE_ResourceManager::Init()
@@ -68,7 +68,7 @@ void RE_ResourceManager::Clear()
 
 	while (!resources.empty())
 	{
-		DEL(resources.begin()->second);
+		DEL(resources.begin()->second)
 		resources.erase(resources.begin());
 	}
 }
@@ -423,7 +423,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 					}
 					RE_RENDER->PushThumnailRend(resToChange, true);
 					UnUse(resToChange);
-					DEL(poolGORes);
+					DEL(poolGORes)
 					RE_INPUT->ResumeEvents();
 				}
 			}
@@ -668,7 +668,7 @@ bool RE_ResourceManager::isNeededResoursesLoaded(const char* metaPath, ResourceT
 	if(newContainer)
 	{
 		ret = newContainer->isNeededResourcesReferenced();
-		DEL(newContainer);
+		DEL(newContainer)
 	}
 
 	return ret;

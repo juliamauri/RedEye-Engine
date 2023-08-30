@@ -23,7 +23,7 @@ RE_PrimitiveManager::RE_PrimitiveManager()
 
 RE_PrimitiveManager::~RE_PrimitiveManager()
 {
-	DEL(platonics);
+	DEL(platonics)
 }
 
 void RE_PrimitiveManager::Init()

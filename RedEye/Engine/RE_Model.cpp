@@ -35,7 +35,7 @@ void RE_Model::LoadInMemory()
 
 void RE_Model::UnloadMemory()
 {
-	DEL(loaded);
+	DEL(loaded)
 	ResourceContainer::inMemory = false;
 }
 
@@ -173,11 +173,11 @@ void RE_Model::SaveResourceMeta(RE_Json* metaNode)
 {
 	RE_Json* presets = metaNode->PushJObject("presets");
 	for (uint i = 0; i < 3; i++) presets->Push(eastl::to_string(i).c_str(), modelSettings.presets[i]);
-	DEL(presets);
+	DEL(presets)
 
 	RE_Json* flags = metaNode->PushJObject("flags");
 	for (uint i = 0; i < 25; i++) flags->Push(eastl::to_string(i).c_str(), modelSettings.flags[i]);
-	DEL(flags);
+	DEL(flags)
 
 	metaNode->PushSizeT("MeshesSize", modelSettings.libraryMeshes.size());
 	uint count = 0;
@@ -193,11 +193,11 @@ void RE_Model::LoadResourceMeta(RE_Json* metaNode)
 {
 	RE_Json* presets = metaNode->PullJObject("presets");
 	for (uint i = 0; i < 3; i++) modelSettings.presets[i] = presets->PullBool(eastl::to_string(i).c_str(), false);
-	DEL(presets);
+	DEL(presets)
 
 	RE_Json* flags = metaNode->PullJObject("flags");
 	for (uint i = 0; i < 25; i++) modelSettings.flags[i] = flags->PullBool(eastl::to_string(i).c_str(), false);
-	DEL(flags);
+	DEL(flags)
 
 	auto totalMeshes = metaNode->PullSizeT("MeshesSize", 0);
 	for (size_t i = 0; i < totalMeshes; i++)

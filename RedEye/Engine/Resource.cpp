@@ -80,7 +80,7 @@ void ResourceContainer::SaveMeta()
 
 	SaveResourceMeta(metaNode);
 	metaSerialize.Save();
-	DEL(metaNode);
+	DEL(metaNode)
 }
 
 void ResourceContainer::LoadMeta()
@@ -97,7 +97,7 @@ void ResourceContainer::LoadMeta()
 		lastModified  = metaNode->PullSignedLongLong("lastModified", 0);
 
 		LoadResourceMeta(metaNode);
-		DEL(metaNode);
+		DEL(metaNode)
 	}
 }
 
@@ -108,7 +108,7 @@ bool ResourceContainer::isNeededResourcesReferenced()
 	if (metaDeserialize.Load()) {
 		RE_Json* metaNode = metaDeserialize.GetRootNode("meta");
 		ret = NeededResourcesReferenced(metaNode);
-		DEL(metaNode);
+		DEL(metaNode)
 	}
 	return ret;
 }

@@ -66,7 +66,7 @@ void RenderView::Save(RE_Json* node) const
 
 	for (int i = 0; i < 12; i++) node->Push(flag_labels[i], static_cast<bool>(flags & (1 << i)));
 
-	DEL(node);
+	DEL(node)
 }
 
 
@@ -87,5 +87,5 @@ void RenderView::Load(RE_Json* node)
 		else flags -= flag_id;
 	}
 
-	DEL(node);
+	DEL(node)
 }

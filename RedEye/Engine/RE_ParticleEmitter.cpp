@@ -24,7 +24,7 @@ RE_ParticleEmitter::~RE_ParticleEmitter()
 	if (primCmp)
 	{
 		primCmp->UnUseResources();
-		DEL(primCmp);
+		DEL(primCmp)
 	}
 }
 

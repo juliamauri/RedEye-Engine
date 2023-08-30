@@ -32,8 +32,8 @@ void RE_Scene::LoadInMemory()
 
 void RE_Scene::UnloadMemory()
 {
-	if (loaded) DEL(loaded);
-	if (toSave) DEL(toSave);
+	if (loaded) DEL(loaded)
+	if (toSave) DEL(toSave)
 	loaded = nullptr;
 	toSave = nullptr;
 	ResourceContainer::inMemory = false;
@@ -54,8 +54,8 @@ void RE_Scene::Save(RE_ECS_Pool* pool)
 		toSave->InsertPool(pool);
 		AssetSave();
 		LibrarySave();
-		if (loaded) DEL(loaded);
-		if (toSave) DEL(toSave);
+		if (loaded) DEL(loaded)
+		if (toSave) DEL(toSave)
 	}
 }
 
@@ -88,7 +88,7 @@ void RE_Scene::AssetSave()
 	RE_Json* scenebNode = scene_SaveFile.GetRootNode("scene");
 
 	if (toSave->TotalGameObjects() > 0) RE_ECS_Importer::JsonSerialize(scenebNode, toSave);
-	DEL(scenebNode);
+	DEL(scenebNode)
 
 	//Setting LibraryPath and MD5
 	eastl::string md5 = scene_SaveFile.GetMd5();
@@ -109,7 +109,7 @@ void RE_Scene::AssetLoad(bool generateLibraryPath)
 	{
 		RE_Json* scenebNode = jsonLoad.GetRootNode("scene");
 		loaded = RE_ECS_Importer::JsonDeserialize(scenebNode);
-		DEL(scenebNode);
+		DEL(scenebNode)
 
 		if (generateLibraryPath)
 		{

@@ -19,9 +19,9 @@ TextEditorManagerWindow::~TextEditorManagerWindow()
 {
 	for (auto e : editors)
 	{
-		if (e->file) DEL(e->file);
-		if (e->textEditor) DEL(e->textEditor);
-		DEL(e);
+		if (e->file) DEL(e->file)
+		if (e->textEditor) DEL(e->textEditor)
+		DEL(e)
 	}
 }
 
@@ -60,8 +60,8 @@ void TextEditorManagerWindow::PushEditor(const char* filePath, eastl::string* ne
 	}
 	else
 	{
-		if (filePath) DEL(e->file);
-		DEL(e);
+		if (filePath) DEL(e->file)
+		DEL(e)
 	}
 
 	if (e)e->open = open;
@@ -181,8 +181,8 @@ void TextEditorManagerWindow::Draw(bool secondary)
 		{
 			if (!e->file) e->toModify->clear();
 			if (e->open) *e->open = false;
-			DEL(e->textEditor);
-			if (e->file) DEL(e->file);
+			DEL(e->textEditor)
+			if (e->file) DEL(e->file)
 			toRemoveE.push_back(e);
 		}
 	}
@@ -192,7 +192,7 @@ void TextEditorManagerWindow::Draw(bool secondary)
 		//https://stackoverflow.com/questions/21195217/elegant-way-to-remove-all-elements-of-a-vector-that-are-contained-in-another-vec
 		editors.erase(eastl::remove_if(eastl::begin(editors), eastl::end(editors),
 			[&](auto x) {return eastl::find(begin(toRemoveE), end(toRemoveE), x) != end(toRemoveE); }), eastl::end(editors));
-		for (auto e : toRemoveE) DEL(e);
+		for (auto e : toRemoveE) DEL(e)
 		toRemoveE.clear();
 	}
 }

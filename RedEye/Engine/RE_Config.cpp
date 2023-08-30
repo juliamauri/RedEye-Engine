@@ -38,7 +38,7 @@ bool Config::LoadFromWindowsPath()
 		rapidjson::StringStream s(fileToLoad->GetBuffer());
 		document.ParseStream(s);
 		ret = true;
-		DEL(fileToLoad);
+		DEL(fileToLoad)
 	}
 	return ret;
 }

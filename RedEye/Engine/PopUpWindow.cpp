@@ -425,7 +425,7 @@ void PopUpWindow::Draw(bool secondary)
 				ResourceContainer* resAlone = RE_RES->DeleteResource(resource_to_delete, using_resources, flags & PopUpFlags::resource_on_scene);
 				RE_FS->DeleteResourceFiles(resAlone);
 
-				DEL(resAlone);
+				DEL(resAlone)
 			}
 
 			if (ImGui::Button("Cancel")) clicked = true;
@@ -492,7 +492,7 @@ void PopUpWindow::Draw(bool secondary)
 						ResourceContainer* resS = shadersDeleted.top();
 						RE_FS->DeleteResourceFiles(resS);
 						shadersDeleted.pop();
-						DEL(resS);
+						DEL(resS)
 					}
 				}
 
