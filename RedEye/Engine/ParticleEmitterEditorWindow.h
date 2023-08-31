@@ -9,7 +9,7 @@ class ParticleEmitterEditorWindow : public EditorWindow
 public:
 
 	ParticleEmitterEditorWindow() : EditorWindow("Particle Emitter Workspace", false) {}
-	~ParticleEmitterEditorWindow() {}
+	~ParticleEmitterEditorWindow() final = default;
 
 	void StartEditing(RE_ParticleEmitter* sim, const char* md5);
 	const RE_ParticleEmitter* GetEdittingParticleEmitter() const { return simulation; }
@@ -38,7 +38,7 @@ public:
 
 private:
 
-	void Draw(bool secondary = false) override;
+	void Draw(bool secondary = false) override final;
 
 private:
 

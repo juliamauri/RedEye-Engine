@@ -21,6 +21,7 @@ public:
 	// Getters
 	eastl::vector<RE_GameObject*> GetAllPtrs() const;
 	eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> GetAllData() const;
+	eastl::vector<eastl::pair<const GO_UID, const RE_GameObject*>> GetAllCData() const;
 
 	// Root
 	GO_UID GetRootUID() const;

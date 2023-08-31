@@ -24,7 +24,10 @@
 #include <par_shapes.h>
 #include <ImGui/imgui.h>
 
-RE_CompWater::RE_CompWater() : RE_Component(RE_Component::Type::WATER) { box.SetFromCenterAndSize(math::vec::zero, math::vec::one); }
+RE_CompWater::RE_CompWater() : RE_Component(RE_Component::Type::WATER)
+{
+	box.SetFromCenterAndSize(math::vec::zero, math::vec::one);
+}
 
 void RE_CompWater::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
@@ -535,28 +538,27 @@ void RE_CompWater::DeferedDraw(const uint texture_count) const
 	{
 		switch (waterUniforms[i].GetType())
 		{
-		case RE_Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].locationDeferred, waterUniforms[i].AsBool()); break;
-		case RE_Cvar::INT: RE_ShaderImporter::setInt(waterUniforms[i].locationDeferred, waterUniforms[i].AsInt()); break;
-		case RE_Cvar::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, waterUniforms[i].AsFloat()); break;
-		case RE_Cvar::FLOAT2:
+		case RE_Cvar::Type::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].locationDeferred, waterUniforms[i].AsBool()); break;
+		case RE_Cvar::Type::INT: RE_ShaderImporter::setInt(waterUniforms[i].locationDeferred, waterUniforms[i].AsInt()); break;
+		case RE_Cvar::Type::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, waterUniforms[i].AsFloat()); break;
+		case RE_Cvar::Type::FLOAT2:
 		{
 			const float* f_ptr = waterUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, f_ptr[0], f_ptr[1]);
 			break;
 		}
-		case RE_Cvar::FLOAT3:
+		case RE_Cvar::Type::FLOAT3:
 		{
 			const float* f_ptr = waterUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat(waterUniforms[i].locationDeferred, f_ptr[0], f_ptr[1], f_ptr[2]);
 			break;
 		}
-		{
-		case RE_Cvar::SAMPLER: //Only one case
+		case RE_Cvar::Type::SAMPLER: //Only one case
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_GLCache::ChangeTextureBind(waterFoam.second);
 			RE_ShaderImporter::setUnsignedInt(waterUniforms[i].locationDeferred, textureCounter++);
 			break;
-		}
+		default: break;
 		}
 	}
 }
@@ -569,26 +571,27 @@ void RE_CompWater::DefaultDraw(const uint texture_count) const
 	{
 		switch (waterUniforms[i].GetType())
 		{
-		case RE_Cvar::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].location, waterUniforms[i].AsBool()); break;
-		case RE_Cvar::INT: RE_ShaderImporter::setInt(waterUniforms[i].location, waterUniforms[i].AsInt()); break;
-		case RE_Cvar::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].location, waterUniforms[i].AsFloat()); break;
-		case RE_Cvar::FLOAT2:
+		case RE_Cvar::Type::BOOL: RE_ShaderImporter::setBool(waterUniforms[i].location, waterUniforms[i].AsBool()); break;
+		case RE_Cvar::Type::INT: RE_ShaderImporter::setInt(waterUniforms[i].location, waterUniforms[i].AsInt()); break;
+		case RE_Cvar::Type::FLOAT: RE_ShaderImporter::setFloat(waterUniforms[i].location, waterUniforms[i].AsFloat()); break;
+		case RE_Cvar::Type::FLOAT2:
 		{
 			const float* f_ptr = waterUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat(waterUniforms[i].location, f_ptr[0], f_ptr[1]);
 			break;
 		}
-		case RE_Cvar::FLOAT3:
+		case RE_Cvar::Type::FLOAT3:
 		{
 			const float* f_ptr = waterUniforms[i].AsFloatPointer();
 			RE_ShaderImporter::setFloat(waterUniforms[i].location, f_ptr[0], f_ptr[1], f_ptr[2]);
 			break;
 		}
-		case RE_Cvar::SAMPLER: //Only one case
+		case RE_Cvar::Type::SAMPLER: //Only one case
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_GLCache::ChangeTextureBind(waterFoam.second);
 			RE_ShaderImporter::setUnsignedInt(waterUniforms[i].location, textureCounter++);
 			break;
+		default: break;
 		}
 	}
 }

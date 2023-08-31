@@ -6,7 +6,8 @@
 class RE_Command
 {
 public:
-	virtual ~RE_Command() {};
+	RE_Command() = default;
+	virtual ~RE_Command() = default;
 	virtual void execute() = 0;
 	virtual void Undo() = 0;
 };
@@ -16,9 +17,8 @@ public:
 
 	RE_CMDTransformPosition(GO_UID go, math::vec pBefore, math::vec p) : go_(go), pBefore_(pBefore), p_(p) { }
 
-	void execute() override;
-
-	void Undo() override;
+	void execute() override final;
+	void Undo() override final;
 
 private:
 	GO_UID go_;
@@ -32,9 +32,8 @@ public:
 
 	RE_CMDTransformRotation(GO_UID go, math::vec rBefore, math::vec r) : go_(go), rBefore_(rBefore), r_(r) { }
 
-	void execute() override;
-
-	void Undo() override;
+	void execute() override final;
+	void Undo() override final;
 
 private:
 	GO_UID go_;
@@ -46,9 +45,8 @@ class RE_CMDTransformScale : public RE_Command {
 public:
 	RE_CMDTransformScale(GO_UID go, math::vec sBefore, math::vec s) : go_(go), sBefore_(sBefore), s_(s) { }
 
-	void execute() override;
-
-	void Undo() override;
+	void execute() override final;
+	void Undo() override final;
 
 private:
 	GO_UID go_;

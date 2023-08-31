@@ -5,7 +5,7 @@ class ConsoleWindow : public EditorWindow
 {
 public:
 	ConsoleWindow();
-	~ConsoleWindow() {}
+	~ConsoleWindow() final = default;
 
 	void ChangeFilter(const int new_filter);
 	void SwapCategory(const unsigned int category);
@@ -14,7 +14,7 @@ public:
 
 private:
 
-	void Draw(bool secondary = false) override;
+	void Draw(bool secondary = false) override final;
 	void ResetBuffer();
 
 private:

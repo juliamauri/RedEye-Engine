@@ -34,6 +34,7 @@ public:
 	eastl::vector<GO_UID> GetAllGOUIDs() const;
 	eastl::vector<RE_GameObject*> GetAllGOPtrs() const;
 	eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> GetAllGOData() const;
+	eastl::vector<eastl::pair<const GO_UID, const RE_GameObject*>> GetAllGOCData() const;
 
 	size_t TotalGameObjects() const { return gameObjectsPool.GetCount(); };
 

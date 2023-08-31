@@ -63,6 +63,14 @@ eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> GameObjectsPool::GetAll
 	return ret;
 }
 
+eastl::vector<eastl::pair<const GO_UID, const RE_GameObject*>> GameObjectsPool::GetAllCData() const
+{
+	eastl::vector<eastl::pair<const GO_UID, const RE_GameObject*>> ret;
+	eastl::vector<GO_UID> uids = GetAllKeys();
+	for (auto uid : uids) ret.push_back({ uid, AtCPtr(uid) });
+	return ret;
+}
+
 size_t GameObjectsPool::GetBinarySize() const
 {
 	size_t size = sizeof(unsigned int);

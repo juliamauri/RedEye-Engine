@@ -19,7 +19,7 @@ public:
 	};
 
 private:
-	void Draw(bool secondary = false) override;
+	void Draw(bool secondary = false) override final;
 
 	void DrawThirdParties() const;
 	void DisplayThirdParty(const SoftwareInfo& software) const;

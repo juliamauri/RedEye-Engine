@@ -8,8 +8,8 @@ class RE_CompCamera : public RE_Component
 {
 public:
 
-	RE_CompCamera();
-	~RE_CompCamera();
+	RE_CompCamera::RE_CompCamera() : RE_Component(RE_Component::Type::CAMERA) {}
+	~RE_CompCamera() final;
 
 	enum class AspectRatio : ushort
 	{
@@ -32,12 +32,12 @@ public:
 		bool usingSkybox = true,
 		const char* skyboxMD5 = nullptr);
 
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override final;
 	
-	void Update() override;
-	void OnTransformModified() override;
+	void Update() override final;
+	void OnTransformModified() override final;
 
-	void DrawProperties() override;
+	void DrawProperties() override final;
 	void DrawAsEditorProperties();
 	void DrawFrustum() const;
 	void DrawSkybox() const;
@@ -86,16 +86,16 @@ public:
 	void SetSkyBox(const char* resS);
 
 	// Resources - Skybox
-	void UseResources() override;
-	void UnUseResources() override;
-	eastl::vector<const char*> GetAllResources() override;
+	void UseResources() override final;
+	void UnUseResources() override final;
+	eastl::vector<const char*> GetAllResources() override final;
 
 	// Serialization
 	size_t GetBinarySize() const override;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)override;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override final;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override final;
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override final;
+	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override final;
 
 private:
 

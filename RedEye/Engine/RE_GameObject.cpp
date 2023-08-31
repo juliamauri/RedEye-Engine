@@ -24,13 +24,17 @@
 #include <EASTL/internal/char_traits.h>
 #include <EAStdC/EASprintf.h>
 
-RE_GameObject::RE_GameObject() {}
-RE_GameObject::~RE_GameObject() {}
-
-void RE_GameObject::SetUp(GameObjectsPool* goPool, ComponentsPool* compPool, const char* _name, const GO_UID parent, const bool start_active, const bool _isStatic)
+void RE_GameObject::SetUp(
+	GameObjectsPool* goPool,
+	ComponentsPool* compPool,
+	const char* _name,
+	const GO_UID parent,
+	const bool start_active,
+	const bool is_static)
 {
-	active = start_active;
-	isStatic = _isStatic;
+	if (start_active) AddFlag(Flag::ACTIVE);
+	if (is_static) AddFlag(Flag::STATIC);
+
 	name = _name;
 	pool_comps = compPool;
 	pool_gos = goPool;
@@ -58,12 +62,12 @@ void RE_GameObject::DrawProperties()
 	EA::StdC::Snprintf(name_holder, 64, "%s", name.c_str());
 	if (ImGui::InputText("Name", name_holder, 64)) name = name_holder;
 
-	bool tmp_active = active;
+	bool tmp_active = HasFlag(Flag::ACTIVE);
 	if (ImGui::Checkbox("Active", &tmp_active)) SetActive(tmp_active);
 
 	ImGui::SameLine();
 
-	bool tmp_static = isStatic;
+	bool tmp_static = HasFlag(Flag::STATIC);
 	if (ImGui::Checkbox("Static", &tmp_static)) SetStatic(tmp_static);
 
 	if (ImGui::TreeNode("Local Bounding Box"))
@@ -102,7 +106,7 @@ void RE_GameObject::DrawChilds() const
 		const RE_GameObject* go = pool_gos->AtPtr(gos.top());
 		gos.pop();
 
-		if (go->active)
+		if (go->HasFlag(Flag::ACTIVE))
 		{
 			go->DrawItselfOnly();
 			for (auto child : go->childs) gos.push(child);
@@ -120,14 +124,19 @@ RE_Component* RE_GameObject::GetCompPtr(const RE_Component::Type type) const
 	case RE_Component::Type::LIGHT: ret = light ? CompPtr(light, RE_Component::Type::LIGHT) : nullptr; break;
 	default:
 	{
-		if (render_geo.type == type && render_geo.uid) ret = CompPtr(render_geo);
-		else
-			for (const auto& comp : components)
-				if (comp.type == type)
-				{
-					ret = CompPtr(comp.uid, comp.type);
-					break;
-				}
+		if (render_geo.type == type && render_geo.uid)
+		{
+			ret = CompPtr(render_geo);
+			break;
+		}
+		for (const auto& comp : components)
+		{
+			if (comp.type == type)
+			{
+				ret = CompPtr(comp.uid, comp.type);
+				break;
+			}
+		}
 
 		break;
 	}
@@ -140,20 +149,27 @@ COMP_UID RE_GameObject::GetCompUID(const RE_Component::Type type) const
 {
 	COMP_UID ret = 0;
 
-	switch (type) {
+	switch (type)
+	{
 	case RE_Component::Type::TRANSFORM: ret = transform; break;
 	case RE_Component::Type::CAMERA: ret = camera; break;
 	case RE_Component::Type::LIGHT: ret = light; break;
 	default:
 	{
-		if (render_geo.uid && render_geo.type == type) ret = render_geo.uid;
-		else
-			for (const auto& comp : components)
-				if (comp.type == type)
-				{
-					ret = comp.uid;
-					break;
-				}
+		if (render_geo.uid && render_geo.type == type)
+		{
+			ret = render_geo.uid;
+			break;
+		}
+
+		for (const auto& comp : components)
+		{
+			if (comp.type == type)
+			{
+				ret = comp.uid;
+				break;
+			}
+		}
 
 		break;
 	}
@@ -169,7 +185,7 @@ bool RE_GameObject::HasRenderGeo() const
 
 bool RE_GameObject::HasActiveRenderGeo() const
 {
-	return active && render_geo.uid;
+	return HasFlag(Flag::ACTIVE) && render_geo.uid;
 }
 
 RE_CompTransform* RE_GameObject::GetTransformPtr() const
@@ -263,7 +279,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos() const
 
 	eastl::stack<const RE_GameObject*> gos;
 	for (const auto& child : GetChildsPtr())
-		if (child->IsActive())
+		if (child->HasFlag(RE_GameObject::Flag::ACTIVE))
 			gos.push(child);
 
 	while (!gos.empty())
@@ -275,7 +291,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos() const
 			ret.push(CompPtr(render_geo));
 
 		for (auto& child : go->GetChildsPtr())
-			if (child->IsActive())
+			if (child->HasFlag(RE_GameObject::Flag::ACTIVE))
 				gos.push(child);
 	}
 
@@ -288,7 +304,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const GO
 
 	eastl::stack<const RE_GameObject*> gos;
 	for (const auto& child : GetChildsPtr())
-		if (child->IsActive())
+		if (child->HasFlag(RE_GameObject::Flag::ACTIVE))
 			gos.push(child);
 
 	while (!gos.empty())
@@ -300,7 +316,7 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const GO
 			ret.push(CompPtr(render_geo));
 
 		for (auto& child : go->GetChildsPtr())
-			if (child->IsActive())
+			if (child->HasFlag(RE_GameObject::Flag::ACTIVE))
 				gos.push(child);
 	}
 
@@ -556,7 +572,7 @@ eastl::vector<RE_GameObject*> RE_GameObject::GetActiveDrawableChilds() const
 
 	eastl::queue<RE_GameObject*> go_queue;
 	for (auto child : GetChildsPtr())
-		if (child->active)
+		if (child->HasFlag(Flag::ACTIVE))
 			go_queue.push(child);
 
 	while (!go_queue.empty())
@@ -566,7 +582,7 @@ eastl::vector<RE_GameObject*> RE_GameObject::GetActiveDrawableChilds() const
 		if (go->HasActiveRenderGeo()) ret.push_back(go);
 
 		for (auto child : GetChildsPtr())
-			if (child->active)
+			if (child->HasFlag(Flag::ACTIVE))
 				go_queue.push(child);
 	}
 
@@ -598,7 +614,7 @@ eastl::vector<const RE_GameObject*> RE_GameObject::GetActiveDrawableGOandChildsC
 	eastl::vector<const RE_GameObject*> ret;
 
 	eastl::queue<const RE_GameObject*> go_queue;
-	if (active) go_queue.push(this);
+	if (HasFlag(Flag::ACTIVE)) go_queue.push(this);
 
 	while (!go_queue.empty())
 	{
@@ -607,7 +623,7 @@ eastl::vector<const RE_GameObject*> RE_GameObject::GetActiveDrawableGOandChildsC
 		if (go->HasActiveRenderGeo()) ret.push_back(go);
 
 		for (auto child : go->GetChildsCPtr())
-			if (child->active)
+			if (child->HasFlag(Flag::ACTIVE))
 				go_queue.push(child);
 	}
 
@@ -694,12 +710,7 @@ eastl_size_t RE_GameObject::ChildCount() const { return childs.size(); }
 bool RE_GameObject::IsLastChild() const { return parent_uid && (GetParentCPtr()->GetLastChildUID() == go_uid); }
 bool RE_GameObject::isParent(GO_UID parent) const
 {
-	bool ret = false;
-	if (parent_uid){
-		if(parent == parent_uid) ret = true;
-		else ret = GetParentPtr()->isParent(parent);
-	}
-	return ret;
+	return (parent_uid) && (parent == parent_uid || GetParentPtr()->isParent(parent));
 }
 GO_UID RE_GameObject::GetParentUID() const { return parent_uid; }
 RE_GameObject* RE_GameObject::GetParentPtr() const { return pool_gos->AtPtr(parent_uid); }
@@ -722,23 +733,32 @@ GO_UID RE_GameObject::GetRootUID() const { return pool_gos->GetRootUID(); }
 RE_GameObject* RE_GameObject::GetRootPtr() const { return pool_gos->GetRootPtr(); }
 const RE_GameObject* RE_GameObject::GetRootCPtr() const { return pool_gos->GetRootCPtr(); }
 
-bool RE_GameObject::IsActive() const { return active; }
-bool RE_GameObject::IsStatic() const { return isStatic; }
-bool RE_GameObject::IsActiveStatic() const { return active && isStatic; }
-bool RE_GameObject::IsActiveNonStatic() const { return active && !isStatic; }
+bool RE_GameObject::HasFlag(Flag flag) const
+{
+	return flags & static_cast<ushort>(flag);
+}
+
+void RE_GameObject::AddFlag(Flag flag)
+{
+	flags &= static_cast<ushort>(flag);
+}
+
+void RE_GameObject::RemoveFlag(Flag flag)
+{
+	flags -= static_cast<ushort>(flag);
+}
 
 void RE_GameObject::SetActive(const bool value, const bool broadcast)
 {
-	if (active != value)
+	if (HasFlag(Flag::ACTIVE) != value)
 	{
-		active = value;
-		if (broadcast) RE_INPUT->Push(active ? RE_EventType::GO_CHANGED_TO_ACTIVE : RE_EventType::GO_CHANGED_TO_INACTIVE, RE_SCENE, go_uid);
+		value ? AddFlag(Flag::ACTIVE) : RemoveFlag(Flag::ACTIVE);
+		if (broadcast) RE_INPUT->Push(value ? RE_EventType::GO_CHANGED_TO_ACTIVE : RE_EventType::GO_CHANGED_TO_INACTIVE, RE_SCENE, go_uid);
 	}
 }
 
 void RE_GameObject::SetActiveWithChilds(bool val, bool broadcast)
 {
-	bool tmp = active;
 	eastl::stack<RE_GameObject*> gos;
 	gos.push(this);
 
@@ -749,16 +769,15 @@ void RE_GameObject::SetActiveWithChilds(bool val, bool broadcast)
 		gos.pop();
 		for (auto child : go->childs) gos.push(ChildPtr(child));
 	}
-
-	active = tmp;
 }
 
 void RE_GameObject::SetStatic(const bool value, bool broadcast)
 {
-	if (isStatic != value)
+	if (HasFlag(Flag::STATIC) != value)
 	{
-		isStatic = value;
-		if (active && broadcast) RE_INPUT->Push(isStatic ? RE_EventType::GO_CHANGED_TO_STATIC : RE_EventType::GO_CHANGED_TO_NON_STATIC, RE_SCENE, go_uid);
+		value ? AddFlag(Flag::STATIC) : RemoveFlag(Flag::STATIC);
+		if (HasFlag(Flag::ACTIVE) && broadcast)
+			RE_INPUT->Push(value ? RE_EventType::GO_CHANGED_TO_STATIC : RE_EventType::GO_CHANGED_TO_NON_STATIC, RE_SCENE, go_uid);
 	}
 }
 
@@ -796,7 +815,7 @@ void RE_GameObject::OnStop()
 void RE_GameObject::OnTransformModified()
 {
 	eastl::queue<RE_GameObject*> gos;
-	if (active) gos.push(this);
+	if (HasFlag(Flag::ACTIVE)) gos.push(this);
 
 	while (!gos.empty())
 	{
@@ -809,7 +828,7 @@ void RE_GameObject::OnTransformModified()
 
 		// Add active childs to queue
 		for (auto child : go->GetChildsPtr())
-			if (child->active)
+			if (child->HasFlag(Flag::ACTIVE))
 				gos.push(child);
 	}
 }

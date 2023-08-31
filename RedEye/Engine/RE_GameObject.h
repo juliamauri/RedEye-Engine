@@ -12,14 +12,14 @@ class RE_GameObject
 {
 public:
 
-	RE_GameObject();
-	~RE_GameObject();
+	RE_GameObject() = default;
+	~RE_GameObject() = default;
 
 	friend class GameObjectsPool;
 	friend class RE_ECS_Pool;
 
 	void SetUp(GameObjectsPool* goPool, class ComponentsPool* compPool, const char* name,
-		const GO_UID parent = 0, const bool start_active = true, const bool isStatic = true);
+		const GO_UID parent = 0, const bool start_active = true, const bool is_static = true);
 
 	// Draws
 	void DrawProperties();
@@ -85,7 +85,7 @@ public:
 	bool IsLastChild() const;
 
 	// Parent
-	bool isParent(GO_UID parent)const;
+	bool isParent(GO_UID parent) const;
 	GO_UID GetParentUID() const;
 	RE_GameObject* GetParentPtr() const;
 	const RE_GameObject* GetParentCPtr() const;
@@ -97,10 +97,22 @@ public:
 	const RE_GameObject* GetRootCPtr() const;
 
 	// Flags
-	bool IsActive() const;
-	bool IsStatic() const;
-	bool IsActiveStatic() const;
-	bool IsActiveNonStatic() const;
+	enum class Flag : ushort
+	{
+		ACTIVE = 0x1,				// 0000 0000 0000 0001
+		//PARENT_ACTIVE = 0x2,		// 0000 0000 0000 0010
+		//HAS_CHILDS = 0x4,			// 0000 0000 0000 0100
+		//IS_ROOT = 0x8,			// 0000 0000 0000 1000
+
+		STATIC = 0x10,				// 0000 0000 0001 0000
+		//DYNAMIC = 0x20,			// 0000 0000 0010 0000
+		//KINEMATIC = 0x40,			// 0000 0000 0100 0000
+		ACTIVE_RENDER_GEO = 0x80,	// 0000 0000 1000 0000
+	};
+
+	inline bool HasFlag(Flag flag) const;
+	inline void AddFlag(Flag flag);
+	inline void RemoveFlag(Flag flag);
 
 	void SetActive(const bool value, bool broadcast = true);
 	void SetActiveWithChilds(bool val, bool broadcast = true);
@@ -131,9 +143,14 @@ public:
 	// Raycast
 	bool CheckRayCollision(const math::Ray& global_ray, float& distance) const;
 
-	//POOL
+	// POOL
 	GO_UID GetUID() const;
-	struct ComponentData { COMP_UID uid = 0ull; RE_Component::Type type = RE_Component::Type(0); };
+
+	struct ComponentData
+	{
+		COMP_UID uid = 0;
+		RE_Component::Type type = RE_Component::Type(0);
+	};
 
 	// Resources
 	void UseResources();
@@ -161,42 +178,25 @@ private:
 
 public:
 	
-	eastl::string name;
+	eastl::string name = "Undefined";
 
 private:
 
+	ushort flags = 0;
 
-	/* Todo Rub: bitmask go flags with properties
-	enum GO_Flags : char { ACTIVE, PARENT_ACTIVE, STATIC, DYNAMIC, KINEMATIC, HAS_CHILDS, IS_ROOT };*/
+	GO_UID go_uid = 0;
+	GO_UID parent_uid = 0;
 
-	enum class Flag : ushort
-	{
-		ACTIVE = 0x1,			 // 0000 0000 0000 0001
-		PARENT_ACTIVE = 0x2,	 // 0000 0000 0000 0010
-		HAS_CHILDS = 0x4,		 // 0000 0000 0000 0100
-		IS_ROOT = 0x8,			 // 0000 0000 0000 1000
+	ComponentData render_geo = {}; // mesh or primitive
+	COMP_UID transform = 0;
+	COMP_UID camera = 0;
+	COMP_UID light = 0;
 
-		STATIC = 0x10,			 // 0000 0000 0001 0000
-		DYNAMIC = 0x20,			 // 0000 0000 0010 0000
-		KINEMATIC = 0x40,		 // 0000 0000 0100 0000
-	};
+	math::AABB local_bounding_box = {};
+	math::AABB global_bounding_box = {};
 
-	bool active = true;
-	bool isStatic = true;
-
-	GO_UID go_uid = 0ull;
-	GO_UID parent_uid = 0ull;
-
-	ComponentData render_geo; // mesh or primitive
-	COMP_UID transform = 0ull;
-	COMP_UID camera = 0ull;
-	COMP_UID light = 0ull;
-
-	math::AABB local_bounding_box;
-	math::AABB global_bounding_box;
-
-	eastl::vector<GO_UID> childs;
-	eastl::vector<ComponentData> components;
+	eastl::vector<GO_UID> childs = {};
+	eastl::vector<ComponentData> components = {};
 
 	ComponentsPool* pool_comps = nullptr;
 	GameObjectsPool* pool_gos = nullptr;

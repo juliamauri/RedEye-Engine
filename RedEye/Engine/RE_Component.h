@@ -44,7 +44,7 @@ public:
 
 	RE_Component(const Type type = Type::EMPTY, const GO_UID go = 0, const bool start_active = true) :
 		type(type), go(go), active(start_active) {}
-	virtual ~RE_Component() {}
+	virtual ~RE_Component() = default;
 
 	virtual COMP_UID PoolSetUp(class GameObjectsPool* pool, const GO_UID parent, bool report_parent = false);
 	virtual void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) {}
@@ -92,7 +92,7 @@ public:
 	virtual void UnUseResources() {}
 
 	//POOL
-	COMP_UID GetPoolID()const { return id; }
+	COMP_UID GetPoolID() const { return id; }
 	void SetPoolID(COMP_UID uid) { id = uid; }
 
 protected:

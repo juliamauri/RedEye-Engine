@@ -8,10 +8,10 @@ class RE_CompTransform: public RE_Component
 {
 public:
 	RE_CompTransform();
-	~RE_CompTransform();
+	~RE_CompTransform() final = default;
 
-	COMP_UID PoolSetUp(class GameObjectsPool* pool, const GO_UID parent, bool report_parent = false) override;
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
+	COMP_UID PoolSetUp(class GameObjectsPool* pool, const GO_UID parent, bool report_parent = false) override final;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override final;
 
 	void Update();
 	bool CheckUpdate();
@@ -74,7 +74,6 @@ private:
 	// Matrix
 	math::float4x4 model_local = math::float4x4::identity;
 	math::float4x4 model_global = math::float4x4::identity;
-
 };
 
 #endif // !__NEW_RE_COMPTRANSFORM_H__

@@ -5,11 +5,11 @@ class PlayPauseWindow : public EditorWindow
 {
 public:
 	PlayPauseWindow() : EditorWindow("Play Controls", true) {}
-	~PlayPauseWindow() {}
+	~PlayPauseWindow() final = default;
 
 private:
 
-	void Draw(bool secondary = false) override;
+	void Draw(bool secondary = false) override final;
 };
 
 #endif //!__PLAY_PAUSE_WINDOW__

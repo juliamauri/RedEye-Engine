@@ -5,11 +5,11 @@ class PropertiesWindow : public EditorWindow
 {
 public:
 	PropertiesWindow() : EditorWindow("Properties", true) {}
-	~PropertiesWindow() {}
+	~PropertiesWindow() final = default;
 
 private:
 
-	void Draw(bool secondary = false) override;
+	void Draw(bool secondary = false) override final;
 };
 
 #endif //!__PROPERTIES_WINDOW__

@@ -22,11 +22,6 @@
 
 #include <ImGui/imgui.h>
 
-RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(RE_Component::Type::PARTICLEEMITER) {}
-
-RE_CompParticleEmitter::~RE_CompParticleEmitter() {}
-
-
 void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;

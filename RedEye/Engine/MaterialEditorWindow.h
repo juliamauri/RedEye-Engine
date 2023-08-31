@@ -5,11 +5,11 @@ class MaterialEditorWindow :public EditorWindow
 {
 public:
 	MaterialEditorWindow();
-	~MaterialEditorWindow();
+	~MaterialEditorWindow() final;
 
 private:
 
-	void Draw(bool secondary = false) override;
+	void Draw(bool secondary = false) override final;
 
 private:
 

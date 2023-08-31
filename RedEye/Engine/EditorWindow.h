@@ -14,7 +14,7 @@ protected:
 public:
 
 	EditorWindow(const char* name, bool start_active) : name(name), active(start_active) {}
-	virtual ~EditorWindow() {}
+	virtual ~EditorWindow() = default;
 
 	const char* Name() const { return name; }
 	bool IsActive() const { return active; }

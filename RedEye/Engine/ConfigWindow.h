@@ -9,7 +9,7 @@ public:
 
 private:
 
-	void Draw(bool secondary = false) override;
+	void Draw(bool secondary = false) override final;
 
 	void DrawOptions() const;
 	void DrawModules() const;

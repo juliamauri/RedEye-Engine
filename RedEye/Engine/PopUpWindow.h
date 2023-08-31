@@ -7,7 +7,7 @@ class PopUpWindow :public EditorWindow
 {
 public:
 	PopUpWindow() : EditorWindow("PopUp", false) {}
-	~PopUpWindow() {}
+	~PopUpWindow() final = default;
 
 	void PopUp(const char* btnText = "Accept", const char* title = "PopUp", bool disableAllWindows = false);
 
@@ -23,7 +23,7 @@ public:
 
 private:
 
-	void Draw(bool secondary = false) override;
+	void Draw(bool secondary = false) override final;
 
 public:
 

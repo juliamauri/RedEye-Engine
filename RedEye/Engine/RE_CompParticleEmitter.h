@@ -6,24 +6,25 @@ class RE_ParticleEmitter;
 class RE_CompParticleEmitter : public RE_Component
 {
 public:
-	RE_CompParticleEmitter();
-	~RE_CompParticleEmitter();
 
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override;
+	RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(RE_Component::Type::PARTICLEEMITER) {}
+	~RE_CompParticleEmitter() final = default;
 
-	void Update() override;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override final;
 
-	void Draw() const override;
-	void DrawProperties() override;
+	void Update() override final;
 
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override;
+	void Draw() const override final;
+	void DrawProperties() override final;
 
-	size_t GetBinarySize() const override;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override;
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override final;
+	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override final;
 
-	eastl::vector<const char*> GetAllResources() override;
+	size_t GetBinarySize() const override final;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override final;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override final;
+
+	eastl::vector<const char*> GetAllResources() override final;
 	void UseResources();
 	void UnUseResources();
 
@@ -33,7 +34,7 @@ public:
 	bool isBlend() const;
 
 	RE_ParticleEmitter* GetSimulation() const;
-	const char* GetEmitterResource()const;
+	const char* GetEmitterResource() const;
 	void UpdateEmitter(const char* emitter);
 
 	void SetEmitter(const char* md5);

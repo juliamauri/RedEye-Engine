@@ -8,7 +8,7 @@ class RE_Serializable
 public:
 
 	RE_Serializable() = default;
-	~RE_Serializable() = default;
+	virtual ~RE_Serializable() = default;
 
 	virtual void JsonSerialize(RE_Json* node) const = 0;
 	virtual void JsonDeserialize(RE_Json* node) = 0;

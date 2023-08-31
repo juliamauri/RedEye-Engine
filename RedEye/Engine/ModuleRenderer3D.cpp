@@ -598,12 +598,12 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 		RE_SCENE->FustrumCulling(objects, render_view.HasFlag(RenderView::Flag::OVERRIDE_CULLING) ?
 			RE_SCENE->cams->GetCullingFrustum() : render_view.camera->GetFrustum());
 
-		for (const RE_GameObject* object : objects)
+		for (auto& go : objects)
 		{
-			if (object->IsActive())
+			if (go->HasFlag(RE_GameObject::Flag::ACTIVE))
 			{
-				RE_Component* goRend = object->GetRenderGeo();
-				if (goRend) comptsToDraw.push(goRend);
+				RE_Component* render_geo = go->GetRenderGeo();
+				if (render_geo) comptsToDraw.push(render_geo);
 			}
 		}
 	}

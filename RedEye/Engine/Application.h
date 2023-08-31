@@ -17,7 +17,7 @@ public:
 	void MainLoop();
 	void CleanUp();
 	void Quit();
-	void RecieveEvent(const Event& e) override;
+	void RecieveEvent(const Event& e) override final;
 
 private:
 

@@ -17,8 +17,6 @@
 #include <ImGui/imgui.h>
 #include <SDL2/SDL_opengl.h>
 
-RE_CompCamera::RE_CompCamera() : RE_Component(RE_Component::Type::CAMERA) {}
-
 RE_CompCamera::~RE_CompCamera()
 {
 	if(!useParent) DEL(transform)

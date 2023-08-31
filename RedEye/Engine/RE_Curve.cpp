@@ -12,7 +12,10 @@ RE_Curve::RE_Curve()
 		points.push_back({ 0.0f, 0.0f });
 }
 
-RE_Curve::~RE_Curve() { points.clear(); }
+RE_Curve::~RE_Curve()
+{
+	points.clear();
+}
 
 float RE_Curve::GetValue(const float weight) const
 {

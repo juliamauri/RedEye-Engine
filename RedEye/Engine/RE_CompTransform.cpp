@@ -17,8 +17,6 @@ RE_CompTransform::RE_CompTransform() : RE_Component(RE_Component::Type::TRANSFOR
 	scale.scale = math::vec::one;
 }
 
-RE_CompTransform::~RE_CompTransform() {}
-
 COMP_UID RE_CompTransform::PoolSetUp(GameObjectsPool* pool, const GO_UID parent, bool report_parent)
 {
 	pool_gos = pool;

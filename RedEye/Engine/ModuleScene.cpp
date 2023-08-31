@@ -234,16 +234,18 @@ void ModuleScene::RecieveEvent(const Event& e)
 		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
 		go->ResetGOandChildsAABB();
 
-		for (auto draw_go : go->GetActiveDrawableGOandChildsPtr())
-			(draw_go->IsStatic() ? static_tree : dynamic_tree).PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
+		for (auto draw_go : go->GetActiveDrawableGOandChildsCPtr())
+			(draw_go->HasFlag(RE_GameObject::Flag::STATIC) ? static_tree : dynamic_tree)
+			.PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
 
 		haschanges = true;
 		break;
 	}
 	case RE_EventType::GO_CHANGED_TO_INACTIVE:
 	{
-		for (auto draw_go : scenePool.GetGOPtr(e.data1.AsUInt64())->GetActiveDrawableGOandChildsPtr())
-			(draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
+		for (auto draw_go : scenePool.GetGOPtr(e.data1.AsUInt64())->GetActiveDrawableGOandChildsCPtr())
+			(draw_go->HasFlag(RE_GameObject::Flag::STATIC) ? static_tree : dynamic_tree)
+			.PopNode(draw_go->GetUID());
 
 		haschanges = true;
 		break;
@@ -251,8 +253,8 @@ void ModuleScene::RecieveEvent(const Event& e)
 	case RE_EventType::GO_CHANGED_TO_STATIC:
 	{
 		GO_UID go_uid = e.data1.AsUInt64();
-		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
-		if (go->IsActive())
+		auto go = scenePool.GetGOCPtr(go_uid);
+		if (go->HasFlag(RE_GameObject::Flag::ACTIVE))
 		{
 			dynamic_tree.PopNode(go_uid);
 			static_tree.PushNode(go_uid, go->GetGlobalBoundingBox());
@@ -264,8 +266,8 @@ void ModuleScene::RecieveEvent(const Event& e)
 	case RE_EventType::GO_CHANGED_TO_NON_STATIC:
 	{
 		GO_UID go_uid = e.data1.AsUInt64();
-		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
-		if (go->IsActive())
+		auto go = scenePool.GetGOCPtr(go_uid);
+		if (go->HasFlag(RE_GameObject::Flag::ACTIVE))
 		{
 			static_tree.PopNode(go_uid);
 			dynamic_tree.PushNode(go_uid, go->GetGlobalBoundingBox());
@@ -281,8 +283,13 @@ void ModuleScene::RecieveEvent(const Event& e)
 		child_go->OnTransformModified();
 
 		eastl::vector<RE_GameObject*> all = child_go->GetActiveDrawableGOandChildsPtr();
-		for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
-		for (auto draw_go : all) (draw_go->IsStatic() ? static_tree : dynamic_tree).UpdateNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
+		for (auto draw_go : all)
+			(draw_go->HasFlag(RE_GameObject::Flag::STATIC) ? static_tree : dynamic_tree)
+			.PushNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
+		
+		for (auto draw_go : all)
+			(draw_go->HasFlag(RE_GameObject::Flag::STATIC) ? static_tree : dynamic_tree)
+			.UpdateNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
 
 		haschanges = true;
 		break;
@@ -292,9 +299,10 @@ void ModuleScene::RecieveEvent(const Event& e)
 		GO_UID go_uid = e.data1.AsUInt64();
 		RE_GameObject* go = scenePool.GetGOPtr(go_uid);
 
-		if (go->IsActive())
+		if (go->HasFlag(RE_GameObject::Flag::ACTIVE))
 			for (auto draw_go : go->GetActiveDrawableGOandChildsCPtr())
-				(draw_go->IsStatic() ? static_tree : dynamic_tree).PopNode(draw_go->GetUID());
+				(draw_go->HasFlag(RE_GameObject::Flag::STATIC) ? static_tree : dynamic_tree)
+				.PopNode(draw_go->GetUID());
 
 		to_delete.push(go_uid);
 		haschanges = true;
@@ -303,13 +311,14 @@ void ModuleScene::RecieveEvent(const Event& e)
 	case RE_EventType::TRANSFORM_MODIFIED:
 	{
 		RE_GameObject* go = scenePool.GetGOPtr(e.data1.AsUInt64());
-		if (go->IsActive())
+		if (go->HasFlag(RE_GameObject::Flag::ACTIVE))
 		{
 			go->ResetGOandChildsAABB();
 			go->OnTransformModified();
 
 			for (auto draw_go : go->GetActiveDrawableGOandChildsCPtr())
-				(draw_go->IsStatic() ? static_tree : dynamic_tree).UpdateNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
+				(draw_go->HasFlag(RE_GameObject::Flag::STATIC) ? static_tree : dynamic_tree)
+				.UpdateNode(draw_go->GetUID(), draw_go->GetGlobalBoundingBox());
 		}
 
 		haschanges = true;
@@ -567,11 +576,12 @@ void ModuleScene::SetupScene()
 	dynamic_tree.Clear();
 	GetRootPtr()->ResetGOandChildsAABB();
 
-	eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> gos = scenePool.GetAllGOData();
-	for (unsigned int i = 0; i < gos.size(); i++)
+	auto gos = scenePool.GetAllGOCData();
+	for (size_t i = 0; i < gos.size(); i++)
 	{
 		if (gos[i].second->HasActiveRenderGeo())
-			(gos[i].second->IsStatic() ? static_tree : dynamic_tree).PushNode(gos[i].first, gos[i].second->GetGlobalBoundingBox());
+			(gos[i].second->HasFlag(RE_GameObject::Flag::STATIC) ? static_tree : dynamic_tree)
+			.PushNode(gos[i].first, gos[i].second->GetGlobalBoundingBox());
 	}
 
 	RE_INPUT->ResumeEvents();

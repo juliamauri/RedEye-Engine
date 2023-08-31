@@ -17,7 +17,7 @@ public:
 	void PreUpdate();
 	void Update();
 	void CleanUp();
-	void RecieveEvent(const Event& e) override;
+	void RecieveEvent(const Event& e) override final;
 	void DrawEditor();
 
 	void Load();

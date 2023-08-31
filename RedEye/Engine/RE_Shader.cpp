@@ -426,7 +426,7 @@ void RE_Shader::SaveResourceMeta(RE_Json* metaNode)
 		for (size_t i = 0; i < uniforms.size(); i++)
 		{
 			nuniforms->Push(("name" + eastl::to_string(i)).c_str(), uniforms[i].name.c_str());
-			nuniforms->Push(("type" + eastl::to_string(i)).c_str(), uniforms[i].GetType());
+			nuniforms->Push(("type" + eastl::to_string(i)).c_str(), static_cast<uint>(uniforms[i].GetType()));
 			nuniforms->Push(("custom" + eastl::to_string(i)).c_str(), uniforms[i].custom);
 		}
 	}
@@ -452,14 +452,13 @@ void RE_Shader::LoadResourceMeta(RE_Json* metaNode)
 		for (size_t i = 0; i < size; i++)
 		{
 			RE_Shader_Cvar sVar;
-			id = "name";
-			id += eastl::to_string(i);
+			id = "name" + eastl::to_string(i);
 			sVar.name = nuniforms->PullString(id.c_str(), "");
-			id = "type";
-			id += eastl::to_string(i);
-			auto vT = static_cast<RE_Cvar::VAR_TYPE>(nuniforms->PullUInt(id.c_str(), RE_Shader_Cvar::VAR_TYPE(0)));
-			id = "custom";
-			id += eastl::to_string(i);
+
+			id = "type" + eastl::to_string(i);
+			auto vT = static_cast<RE_Cvar::Type>(nuniforms->PullUInt(id.c_str(), static_cast<uint>(RE_Cvar::Type(0))));
+
+			id = "custom" + eastl::to_string(i);
 			sVar.custom = nuniforms->PullBool(id.c_str(), true);
 
 			bool b2[2] = { false, false };
@@ -471,23 +470,26 @@ void RE_Shader::LoadResourceMeta(RE_Json* metaNode)
 			int i4[4] = { 0, 0, 0, 0 };
 			float f = 0.0;
 
-			switch (vT) {
-			case RE_Cvar::BOOL: sVar.SetValue(true, true); break;
-			case RE_Cvar::BOOL2: sVar.SetValue(b2, 2, true); break;
-			case RE_Cvar::BOOL3: sVar.SetValue(b3, 3, true); break;
-			case RE_Cvar::BOOL4: sVar.SetValue(b4, 4, true); break;
-			case RE_Cvar::INT: sVar.SetValue(-1, true); break;
-			case RE_Cvar::INT2: sVar.SetValue(i2, 2, true); break;
-			case RE_Cvar::INT3: sVar.SetValue(i3, 3, true); break;
-			case RE_Cvar::INT4: sVar.SetValue(i4, 4, true); break;
-			case RE_Cvar::FLOAT: sVar.SetValue(f, true); break;
-			case RE_Cvar::FLOAT2: sVar.SetValue(math::float2::zero, true); break;
-			case RE_Cvar::FLOAT3: sVar.SetValue(math::float3::zero, true); break;
-			case RE_Cvar::FLOAT4: sVar.SetValue(math::float4::zero, false, true); break;
-			case RE_Cvar::MAT2: sVar.SetValue(math::float4::zero, true, true); break;
-			case RE_Cvar::MAT3: sVar.SetValue(math::float3x3::zero, true); break;
-			case RE_Cvar::MAT4: sVar.SetValue(math::float4x4::zero, true); break;
-			case RE_Cvar::SAMPLER: sVar.SetSampler(nullptr, true); break; }
+			switch (vT)
+			{
+			case RE_Cvar::Type::BOOL: sVar.SetValue(true, true); break;
+			case RE_Cvar::Type::BOOL2: sVar.SetValue(b2, 2, true); break;
+			case RE_Cvar::Type::BOOL3: sVar.SetValue(b3, 3, true); break;
+			case RE_Cvar::Type::BOOL4: sVar.SetValue(b4, 4, true); break;
+			case RE_Cvar::Type::INT: sVar.SetValue(-1, true); break;
+			case RE_Cvar::Type::INT2: sVar.SetValue(i2, 2, true); break;
+			case RE_Cvar::Type::INT3: sVar.SetValue(i3, 3, true); break;
+			case RE_Cvar::Type::INT4: sVar.SetValue(i4, 4, true); break;
+			case RE_Cvar::Type::FLOAT: sVar.SetValue(f, true); break;
+			case RE_Cvar::Type::FLOAT2: sVar.SetValue(math::float2::zero, true); break;
+			case RE_Cvar::Type::FLOAT3: sVar.SetValue(math::float3::zero, true); break;
+			case RE_Cvar::Type::FLOAT4: sVar.SetValue(math::float4::zero, false, true); break;
+			case RE_Cvar::Type::MAT2: sVar.SetValue(math::float4::zero, true, true); break;
+			case RE_Cvar::Type::MAT3: sVar.SetValue(math::float3x3::zero, true); break;
+			case RE_Cvar::Type::MAT4: sVar.SetValue(math::float4x4::zero, true); break;
+			case RE_Cvar::Type::SAMPLER: sVar.SetSampler(nullptr, true); break;
+			default: break;
+			}
 
 			uniforms.push_back(sVar);
 			if (!sVar.custom)

@@ -96,6 +96,11 @@ eastl::vector<eastl::pair<const GO_UID, RE_GameObject*>> RE_ECS_Pool::GetAllGODa
 	return gameObjectsPool.GetAllData();
 }
 
+eastl::vector<eastl::pair<const GO_UID, const RE_GameObject*>> RE_ECS_Pool::GetAllGOCData() const
+{
+	return gameObjectsPool.GetAllCData();
+}
+
 void RE_ECS_Pool::DestroyGO(GO_UID toDestroy)
 {
 	RE_GameObject* go = gameObjectsPool.AtPtr(toDestroy);

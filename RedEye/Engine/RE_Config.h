@@ -10,15 +10,16 @@ class Config : public RE_FileBuffer
 {
 public:
 	Config(const char* file_name);
+	~Config() final = default;
 
-	bool Load() override;
+	bool Load() override final;
 	bool LoadFromWindowsPath();
-	void Save() override;
+	void Save() override final;
 
 	RE_Json* GetRootNode(const char* member);
-	inline bool operator!() const override;
+	inline bool operator!() const override final;
 
-	eastl::string GetMd5() override;
+	eastl::string GetMd5() override final;
 
 public:
 

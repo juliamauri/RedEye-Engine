@@ -32,7 +32,7 @@ public:
 		lastAvaibleIndex = 0;
 	}
 
-	COMP_UID Push(COMPCLASS val) override
+	COMP_UID Push(COMPCLASS val) override final
 	{
 		COMP_UID ret = RANDOM_UID;
 		RE_HashMap::Push(val, ret);
@@ -154,7 +154,7 @@ public:
 		}
 	}
 
-	eastl::vector<COMP_UID> GetAllKeys() const override
+	eastl::vector<COMP_UID> GetAllKeys() const override final
 	{
 		eastl::vector<COMP_UID> ret;
 		for (const auto &cmp : key_map) ret.push_back(cmp.first);

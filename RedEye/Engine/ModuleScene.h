@@ -19,7 +19,7 @@ public:
 	void DrawEditor();
 	void DrawTransformTable(RE_CompTransform* transform);
 
-	void RecieveEvent(const Event& e) override;
+	void RecieveEvent(const Event& e) override final;
 
 	// Draw space Partitioning
 	void DrawSpacePartitioning() const;

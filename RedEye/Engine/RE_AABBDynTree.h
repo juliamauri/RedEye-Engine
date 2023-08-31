@@ -18,14 +18,14 @@ class RE_AABBDynTree : public RE_HashMap<RE_AABBDynTreeNode, size_t, 1024, 512>
 {
 public:
 
-	RE_AABBDynTree() {}
-	~RE_AABBDynTree() {}
+	RE_AABBDynTree() = default;
+	~RE_AABBDynTree() final = default;
 
 	void PushNode(Object_UID id, AABB box);
 	void PopNode(Object_UID index);
 	void UpdateNode(Object_UID index, AABB box);
 
-	eastl::vector<size_t> GetAllKeys() const override;
+	eastl::vector<size_t> GetAllKeys() const override final;
 	void Clear();
 	void CollectIntersections(Ray ray, eastl::queue<Object_UID>& indexes) const;
 	void CollectIntersections(const Frustum frustum, eastl::queue<Object_UID>& indexes) const;

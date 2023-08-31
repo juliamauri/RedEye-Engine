@@ -56,7 +56,6 @@ void RE_CompPrimitive::SerializeParticleJson(RE_Json* node) const { DEL(node) }
 void RE_CompPrimitive::DeserializeParticleJson(RE_Json* node) { DEL(node) }
 
 ///////   Grid   ////////////////////////////////////////////
-RE_CompGrid::~RE_CompGrid() { }
 
 void RE_CompGrid::GridSetUp(int newD)
 {
@@ -165,7 +164,6 @@ float RE_CompGrid::GetDistance() const
 }
 
 ///////   Rock   ////////////////////////////////////////////
-RE_CompRock::~RE_CompRock() { }
 
 void RE_CompRock::RockSetUp(int _seed, int _subdivions)
 {
@@ -366,7 +364,6 @@ void RE_CompRock::GenerateNewRock(int s, int subdivisions)
 }
 
 ///////   Platonic   ////////////////////////////////////////////
-RE_CompPlatonic::~RE_CompPlatonic() { }
 
 void RE_CompPlatonic::PlatonicSetUp()
 {
@@ -659,8 +656,6 @@ void RE_CompParametric::DeserializeParticleBinary(char*& cursor)
 }
 
 ///////   Plane   ////////////////////////////////////////////
-RE_CompPlane::RE_CompPlane() : RE_CompParametric(RE_Component::Type::PLANE, "Plane") {}
-RE_CompPlane::~RE_CompPlane() {}
 
 const char* RE_CompPlane::TransformAsMeshResource()
 {
@@ -701,31 +696,3 @@ const char* RE_CompPlane::TransformAsMeshResource()
 	par_shapes_free_mesh(plane);
 	return meshMD5;
 }
-
-///////   Sphere   ////////////////////////////////////////////
-RE_CompSphere::RE_CompSphere() : RE_CompParametric(RE_Component::Type::SPHERE, "Sphere") {}
-RE_CompSphere::~RE_CompSphere() {}
-
-///////   Cylinder   ////////////////////////////////////////////
-RE_CompCylinder::RE_CompCylinder() : RE_CompParametric(RE_Component::Type::CYLINDER, "Cylinder") {}
-RE_CompCylinder::~RE_CompCylinder() {}
-
-///////   HemiSphere   ////////////////////////////////////////////
-RE_CompHemiSphere::RE_CompHemiSphere() : RE_CompParametric(RE_Component::Type::HEMISHPERE, "HemiSphere") {}
-RE_CompHemiSphere::~RE_CompHemiSphere() {}
-
-///////   Torus   ////////////////////////////////////////////
-RE_CompTorus::RE_CompTorus() : RE_CompParametric(RE_Component::Type::TORUS, "Torus")
-{
-	min_r = 0.1f;
-	max_r = 1.0f;
-}
-RE_CompTorus::~RE_CompTorus() {}
-
-///////   TrefoiKnot   ////////////////////////////////////////////
-RE_CompTrefoiKnot::RE_CompTrefoiKnot() : RE_CompParametric(RE_Component::Type::TREFOILKNOT,"Trefoil Knot")
-{
-	min_r = 0.5f;
-	max_r = 3.0f;
-}
-RE_CompTrefoiKnot::~RE_CompTrefoiKnot() {}
