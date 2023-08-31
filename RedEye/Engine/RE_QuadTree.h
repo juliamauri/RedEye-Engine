@@ -1,45 +1,13 @@
 #ifndef __QUADTREE_H__
 #define __QUADTREE_H__
 
-enum QTreeDrawMode : short { DISABLED, TOP, BOTTOM, TOP_BOTTOM, ALL };
-
-template <class TYPE> class QTreeNode;
-
-template <class TYPE> class RE_QuadTree
-{
-public:
-
-	RE_QuadTree(math::AABB& max_size);
-	~RE_QuadTree() {}
-
-	void Push(TYPE in, math::AABB& in_box);
-	void Pop(TYPE to_remove);
-	void Clear();
-
-	void BuildFromList(const eastl::vector<eastl::pair<TYPE, math::AABB>>& items, math::AABB& max_scope);
-
-	void GetDrawVertices(eastl::vector<math::vec>& out) const;
-	short GetDrawMode() const;
-	void SetDrawMode(short mode);
-
-	template<typename COLLISION_GEO>
-	inline void RecursiveIntersections(eastl::vector<TYPE>& out, const COLLISION_GEO& geometry) const
-	{
-		root.RecursiveIntersections(out, geometry);
-	}
-
-private:
-
-	QTreeNode<TYPE> root;
-	short draw_mode = DISABLED;
-	int edges[12] = {}, count = 0;
-};
+#include "RE_DataTypes.h"
 
 template <class TYPE> class QTreeNode
 {
 public:
 
-	QTreeNode() {}
+	QTreeNode() = default;
 	QTreeNode(const AABB& box, QTreeNode* parent = nullptr);
 	~QTreeNode();
 
@@ -52,8 +20,8 @@ public:
 
 	void GetDrawVertices(const int* edges, int count, eastl::vector<math::vec>& out) const;
 
-	template<typename COLLISION_GEO>
-	inline void RecursiveIntersections(eastl::vector<TYPE>& out, const COLLISION_GEO& geometry) const
+	template<typename CollisionGeometry>
+	inline void RecursiveIntersections(eastl::vector<TYPE>& out, const CollisionGeometry& geometry) const
 	{
 		if (box.Intersects(geometry))
 		{
@@ -83,6 +51,47 @@ private:
 
 	QTreeNode* nodes[4] = {};
 	QTreeNode* parent = nullptr;
+};
+
+template <class TYPE> class RE_QuadTree
+{
+public:
+
+	RE_QuadTree(math::AABB& max_size);
+	~RE_QuadTree() = default;
+
+	void Push(TYPE in, math::AABB& in_box);
+	void Pop(TYPE to_remove);
+	void Clear();
+
+	void BuildFromList(const eastl::vector<eastl::pair<TYPE, math::AABB>>& items, math::AABB& max_scope);
+
+	void GetDrawVertices(eastl::vector<math::vec>& out) const;
+	short GetDrawMode() const;
+	void SetDrawMode(short mode);
+
+	template<typename CollisionGeometry>
+	inline void RecursiveIntersections(eastl::vector<TYPE>& out, const CollisionGeometry& geometry) const
+	{
+		root.RecursiveIntersections(out, geometry);
+	}
+
+private:
+
+	QTreeNode<TYPE> root;
+
+	int count = 0;
+	int edges[12] = {};
+
+	enum DrawMode : ushort
+	{
+		DISABLED,
+		TOP,
+		BOTTOM,
+		TOP_BOTTOM,
+		ALL
+	};
+	DrawMode draw_mode = DrawMode::DISABLED;
 };
 
 #endif // !__QUADTREE_H__

@@ -4,59 +4,7 @@
 
 #include "RE_QuadTree.h"
 
-template<class TYPE>
-RE_QuadTree<TYPE>::RE_QuadTree(math::AABB& max_size)
-{
-	root.SetBox(max_size);
-}
-
-template<class TYPE>
-void RE_QuadTree<TYPE>::Push(TYPE in, math::AABB& in_box)
-{
-	if (root.GetBox().Intersects(in_box))
-		root.RecursivePush(in, in_box);
-}
-
-template<class TYPE>
-void RE_QuadTree<TYPE>::Pop(TYPE to_remove)
-{
-	root.RecursivePop(to_remove);
-}
-
-template<class TYPE>
-void RE_QuadTree<TYPE>::Clear()
-{
-	root.Clear();
-}
-
-template<class TYPE>
-void RE_QuadTree<TYPE>::BuildFromList(const eastl::vector<eastl::pair<TYPE, math::AABB>>& items, math::AABB& max_scope)
-{
-	for (auto item : items) root.RecursivePush(item.first, item.second);
-}
-
-template<class TYPE>
-void RE_QuadTree<TYPE>::GetDrawVertices(eastl::vector<math::vec>& out) const
-{
-	root.GetDrawVertices(edges, count, out);
-}
-
-template<class TYPE>
-short RE_QuadTree<TYPE>::GetDrawMode() const
-{
-	return draw_mode;
-}
-
-template<class TYPE>
-void RE_QuadTree<TYPE>::SetDrawMode(short mode)
-{
-	switch (draw_mode = mode) {
-	case QTreeDrawMode::DISABLED: count = 0;
-	case QTreeDrawMode::TOP: count = 4; edges[0] = 5; edges[1] = 6; edges[2] = 7; edges[3] = 11; break;
-	case QTreeDrawMode::BOTTOM: count = 4; edges[0] = 0; edges[1] = 2; edges[2] = 4; edges[3] = 8; break;
-	case QTreeDrawMode::TOP_BOTTOM: count = 8; edges[0] = edges[4] = 0; edges[1] = edges[5] = 2; edges[2] = edges[6] = 4; edges[3] = edges[7] = 8; break;
-	case QTreeDrawMode::ALL: count = 12; for (int i = 0; i < 12; i++) { edges[i] = i; } break; }
-}
+#pragma region QTreeNode
 
 template<class TYPE>
 QTreeNode<TYPE>::QTreeNode(const AABB& box, QTreeNode* parent) : box(box), parent(parent) {}
@@ -190,3 +138,63 @@ void QTreeNode<TYPE>::GetDrawVertices(const int* edges, int count, eastl::vector
 		for (int i = 0; i < 4; i++)
 			nodes[i]->GetDrawVertices(edges, count, out);
 }
+
+#pragma endregion
+
+#pragma region RE_QuadTree
+
+template<class TYPE>
+RE_QuadTree<TYPE>::RE_QuadTree(math::AABB& max_size)
+{
+	root.SetBox(max_size);
+}
+
+template<class TYPE>
+void RE_QuadTree<TYPE>::Push(TYPE in, math::AABB& in_box)
+{
+	if (root.GetBox().Intersects(in_box))
+		root.RecursivePush(in, in_box);
+}
+
+template<class TYPE>
+void RE_QuadTree<TYPE>::Pop(TYPE to_remove)
+{
+	root.RecursivePop(to_remove);
+}
+
+template<class TYPE>
+void RE_QuadTree<TYPE>::Clear()
+{
+	root.Clear();
+}
+
+template<class TYPE>
+void RE_QuadTree<TYPE>::BuildFromList(const eastl::vector<eastl::pair<TYPE, math::AABB>>& items, math::AABB& max_scope)
+{
+	for (auto item : items) root.RecursivePush(item.first, item.second);
+}
+
+template<class TYPE>
+void RE_QuadTree<TYPE>::GetDrawVertices(eastl::vector<math::vec>& out) const
+{
+	root.GetDrawVertices(edges, count, out);
+}
+
+template<class TYPE>
+short RE_QuadTree<TYPE>::GetDrawMode() const
+{
+	return draw_mode;
+}
+
+template<class TYPE>
+void RE_QuadTree<TYPE>::SetDrawMode(short mode)
+{
+	switch (draw_mode = mode) {
+	case QTreeDrawMode::DISABLED: count = 0;
+	case QTreeDrawMode::TOP: count = 4; edges[0] = 5; edges[1] = 6; edges[2] = 7; edges[3] = 11; break;
+	case QTreeDrawMode::BOTTOM: count = 4; edges[0] = 0; edges[1] = 2; edges[2] = 4; edges[3] = 8; break;
+	case QTreeDrawMode::TOP_BOTTOM: count = 8; edges[0] = edges[4] = 0; edges[1] = edges[5] = 2; edges[2] = edges[6] = 4; edges[3] = edges[7] = 8; break;
+	case QTreeDrawMode::ALL: count = 12; for (int i = 0; i < 12; i++) { edges[i] = i; } break; }
+}
+
+#pragma endregion

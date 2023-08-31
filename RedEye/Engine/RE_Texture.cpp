@@ -28,7 +28,7 @@ const char* RE_Texture::GenerateMD5()
 	return ret;
 }
 
-TextureType RE_Texture::DetectExtension()
+RE_TextureSettings::Type RE_Texture::DetectExtension()
 {
 	eastl::string assetPath(GetAssetPath());
 	eastl::string filename = assetPath.substr(assetPath.find_last_of("/") + 1);
@@ -38,20 +38,20 @@ TextureType RE_Texture::DetectExtension()
 	auto size = eastl::CharStrlen(extension);
 	if (size > 0)
 	{
-		if (eastl::Compare(extension, "dds", 3) == 0) texType = RE_DDS;
-		else if (eastl::Compare(extension, "png", 3) == 0) texType = RE_PNG;
-		else if (eastl::Compare(extension, "jpg", 3) == 0) texType = RE_JPG;
-		else if (eastl::Compare(extension, "tga", 3) == 0) texType = RE_TGA;
-		else if (eastl::Compare(extension, "tiff", 4) == 0) texType = RE_TIFF;
-		else if (eastl::Compare(extension, "bmp", 3) == 0) texType = RE_BMP;
-		else texType = RE_TEXTURE_UNKNOWN;
+		if		(eastl::Compare(extension, "dds", 3) == 0) texType = RE_TextureSettings::Type::DDS;
+		else if (eastl::Compare(extension, "png", 3) == 0) texType = RE_TextureSettings::Type::PNG;
+		else if (eastl::Compare(extension, "jpg", 3) == 0) texType = RE_TextureSettings::Type::JPG;
+		else if (eastl::Compare(extension, "tga", 3) == 0) texType = RE_TextureSettings::Type::TGA;
+		else if (eastl::Compare(extension, "tiff", 4) == 0)texType = RE_TextureSettings::Type::TIFF;
+		else if (eastl::Compare(extension, "bmp", 3) == 0) texType = RE_TextureSettings::Type::BMP;
+		else texType = RE_TextureSettings::Type::TEXTURE_UNKNOWN;
 	}
-	else texType = RE_TEXTURE_UNKNOWN;
+	else texType = RE_TextureSettings::Type::TEXTURE_UNKNOWN;
 
 	return texType;
 }
 
-TextureType RE_Texture::GetTextureType() const { return texType; }
+RE_TextureSettings::Type RE_Texture::GetTextureType() const { return texType; }
 
 void RE_Texture::LoadInMemory()
 {
@@ -94,6 +94,81 @@ void RE_Texture::DrawTextureImGui()
 	ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(GetMD5())), ImVec2(256, 256), { 0.0, 1.0 }, {1.0, 0.0});
 }
 
+int RE_Texture::GetComboFilter(RE_TextureSettings::Filter filter)
+{
+	int ret = 0;
+
+	switch (filter)
+	{
+	case RE_TextureSettings::Filter::LINEAR: ret = 1; break;
+	case RE_TextureSettings::Filter::NEAREST_MIPMAP_NEAREST: ret = 2; break;
+	case RE_TextureSettings::Filter::LINEAR_MIPMAP_NEAREST: ret = 3; break;
+	case RE_TextureSettings::Filter::NEAREST_MIPMAP_LINEAR: ret = 4; break;
+	case RE_TextureSettings::Filter::LINEAR_MIPMAP_LINEAR: ret = 5; break;
+	default: break;
+	}
+
+	return ret;
+}
+
+RE_TextureSettings::Filter RE_Texture::GetFilterCombo(int combo)
+{
+	RE_TextureSettings::Filter ret = RE_TextureSettings::Filter::NEAREST;
+
+	switch (combo)
+	{
+	case 0: break;
+	case 1: ret = RE_TextureSettings::Filter::LINEAR; break;
+	case 2: ret = RE_TextureSettings::Filter::NEAREST_MIPMAP_NEAREST; break;
+	case 3: ret = RE_TextureSettings::Filter::LINEAR_MIPMAP_NEAREST; break;
+	case 4: ret = RE_TextureSettings::Filter::NEAREST_MIPMAP_LINEAR; break;
+	case 5: ret = RE_TextureSettings::Filter::LINEAR_MIPMAP_LINEAR; break;
+	default: break;
+	}
+
+	return ret;
+}
+
+int RE_Texture::GetComboWrap(RE_TextureSettings::Wrap wrap)
+{
+	int ret = 0;
+
+	switch (wrap)
+	{
+	case RE_TextureSettings::Wrap::CLAMP_TO_BORDER: ret = 1; break;
+	case RE_TextureSettings::Wrap::CLAMP_TO_EDGE: ret = 2; break;
+	case RE_TextureSettings::Wrap::MIRRORED_REPEAT: ret = 3; break;
+	default: break;
+	}
+
+	return ret;
+}
+
+RE_TextureSettings::Wrap RE_Texture::GetWrapCombo(int combo)
+{
+	RE_TextureSettings::Wrap ret = RE_TextureSettings::Wrap::REPEAT;
+
+	switch (combo)
+	{
+	case 0: break;
+	case 1: ret = RE_TextureSettings::Wrap::CLAMP_TO_BORDER; break;
+	case 2: ret = RE_TextureSettings::Wrap::CLAMP_TO_EDGE; break;
+	case 3: ret = RE_TextureSettings::Wrap::MIRRORED_REPEAT; break;
+	default: break;
+	}
+
+	return ret;
+}
+
+void RE_Texture::ReImport()
+{
+	bool unload = isInMemory();
+	if (unload) UnloadMemory();
+	AssetLoad();
+	LibrarySave();
+	if (!unload) UnloadMemory();
+}
+
 void RE_Texture::Draw()
 {
 	if (applySave)
@@ -106,8 +181,12 @@ void RE_Texture::Draw()
 		}
 		if (ImGui::Button("Restore"))
 		{
-			if (ResourceContainer::inMemory && ((texSettings.min_filter <= RE_LINEAR && restoreSettings.min_filter > RE_LINEAR)
-				|| (restoreSettings.min_filter <= RE_LINEAR && texSettings.min_filter > RE_LINEAR)))
+			if (ResourceContainer::inMemory && (
+				(texSettings.min_filter <= RE_TextureSettings::Filter::LINEAR &&
+				 restoreSettings.min_filter > RE_TextureSettings::Filter::LINEAR)
+				||
+				(restoreSettings.min_filter <= RE_TextureSettings::Filter::LINEAR &&
+				 texSettings.min_filter > RE_TextureSettings::Filter::LINEAR)))
 			{
 				texSettings = restoreSettings;
 				UnloadMemory();
@@ -119,7 +198,8 @@ void RE_Texture::Draw()
 				TexParameteri(GL_TEXTURE_MAG_FILTER, restoreSettings.mag_filter);
 				TexParameteri(GL_TEXTURE_WRAP_S, restoreSettings.wrap_s);
 				TexParameteri(GL_TEXTURE_WRAP_T, restoreSettings.wrap_t);
-				if (restoreSettings.wrap_s == RE_TextureWrap::RE_CLAMP_TO_BORDER || restoreSettings.wrap_t == RE_TextureWrap::RE_CLAMP_TO_BORDER)
+				if (restoreSettings.wrap_s == RE_TextureSettings::Wrap::CLAMP_TO_BORDER ||
+					restoreSettings.wrap_t == RE_TextureSettings::Wrap::CLAMP_TO_BORDER)
 					TexParameterfv(GL_TEXTURE_BORDER_COLOR, &restoreSettings.borderColor[0]);
 				texSettings = restoreSettings;
 			}
@@ -133,11 +213,14 @@ void RE_Texture::Draw()
 	int minIndex = GetComboFilter(texSettings.min_filter);
 	if (ImGui::Combo("Minify filter", &minIndex, minf_combo))
 	{
-		RE_TextureFilters newfilter = GetFilterCombo(minIndex);
+		auto newfilter = GetFilterCombo(minIndex);
 		if (texSettings.min_filter != newfilter)
 		{
-			if (ResourceContainer::inMemory && ((texSettings.min_filter <= RE_LINEAR && newfilter > RE_LINEAR)
-				|| (newfilter <= RE_LINEAR && texSettings.min_filter > RE_LINEAR)))
+			if (ResourceContainer::inMemory && (
+				(texSettings.min_filter <= RE_TextureSettings::Filter::LINEAR &&
+					newfilter > RE_TextureSettings::Filter::LINEAR)
+				|| (newfilter <= RE_TextureSettings::Filter::LINEAR &&
+					texSettings.min_filter > RE_TextureSettings::Filter::LINEAR)))
 			{
 				texSettings.min_filter = newfilter;
 				UnloadMemory();
@@ -154,7 +237,7 @@ void RE_Texture::Draw()
 	int magIndex = GetComboFilter(texSettings.mag_filter);
 	if(ImGui::Combo("Magnify filter",&magIndex, mag_combo))
 	{
-		RE_TextureFilters newfilter = GetFilterCombo(magIndex);
+		auto newfilter = GetFilterCombo(magIndex);
 		if (texSettings.mag_filter != newfilter)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_MAG_FILTER, texSettings.mag_filter = newfilter);
@@ -166,7 +249,7 @@ void RE_Texture::Draw()
 	int wrapSIndex = GetComboWrap(texSettings.wrap_s);
 	if(ImGui::Combo("Wrap S", &wrapSIndex , wrap_combo))
 	{
-		RE_TextureWrap newwrap = GetWrapCombo(wrapSIndex);
+		auto newwrap = GetWrapCombo(wrapSIndex);
 		if (texSettings.wrap_s != newwrap)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_S, texSettings.wrap_s = newwrap);
@@ -177,7 +260,7 @@ void RE_Texture::Draw()
 	int wrapTIndex = GetComboWrap(texSettings.wrap_t);
 	if(ImGui::Combo("Wrap T", &wrapTIndex, wrap_combo))
 	{
-		RE_TextureWrap newwrap = GetWrapCombo(wrapTIndex);
+		auto newwrap = GetWrapCombo(wrapTIndex);
 		if (texSettings.wrap_t != newwrap)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_T, texSettings.wrap_t = newwrap);
@@ -188,7 +271,9 @@ void RE_Texture::Draw()
 	math::float4 bColor = texSettings.borderColor;
 	if (ImGui::ColorEdit4("Border Color", &bColor[0], ImGuiColorEditFlags_AlphaBar) && !texSettings.borderColor.Equals(bColor))
 	{
-		if (ResourceContainer::inMemory && texSettings.wrap_s == RE_TextureWrap::RE_CLAMP_TO_BORDER || texSettings.wrap_t == RE_TextureWrap::RE_CLAMP_TO_BORDER)
+		if (ResourceContainer::inMemory &&
+			texSettings.wrap_s == RE_TextureSettings::Wrap::CLAMP_TO_BORDER ||
+			texSettings.wrap_t == RE_TextureSettings::Wrap::CLAMP_TO_BORDER)
 			TexParameterfv(GL_TEXTURE_BORDER_COLOR, &texSettings.borderColor[0]);
 		applySave = true;
 	}
@@ -200,100 +285,23 @@ void RE_Texture::Draw()
 
 void RE_Texture::SaveResourceMeta(RE_Json * metaNode)
 {
-	metaNode->Push("TextureType", texType);
-	metaNode->Push("minFilter", texSettings.min_filter);
-	metaNode->Push("magFilter", texSettings.mag_filter);
-	metaNode->Push("wrapS", texSettings.wrap_s);
-	metaNode->Push("wrapT", texSettings.wrap_t);
+	metaNode->Push("TextureType", static_cast<int>(texType));
+	metaNode->Push("minFilter", static_cast<int>(texSettings.min_filter));
+	metaNode->Push("magFilter", static_cast<int>(texSettings.mag_filter));
+	metaNode->Push("wrapS", static_cast<int>(texSettings.wrap_s));
+	metaNode->Push("wrapT", static_cast<int>(texSettings.wrap_t));
 	metaNode->PushFloat4("borderColor", texSettings.borderColor);
 }
 
 void RE_Texture::LoadResourceMeta(RE_Json * metaNode)
 {
-	texType = static_cast<TextureType>(metaNode->PullInt("TextureType", RE_TEXTURE_UNKNOWN));
-	texSettings.min_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("minFilter", RE_NEAREST));
-	texSettings.mag_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("magFilter", RE_NEAREST));
-	texSettings.wrap_s = static_cast<RE_TextureWrap>(metaNode->PullInt("wrapS", RE_REPEAT));
-	texSettings.wrap_t = static_cast<RE_TextureWrap>(metaNode->PullInt("wrapT", RE_REPEAT));
+	texType = static_cast<RE_TextureSettings::Type>(metaNode->PullInt("TextureType", static_cast<int>(RE_TextureSettings::Type::TEXTURE_UNKNOWN)));
+	texSettings.min_filter = static_cast<RE_TextureSettings::Filter>(metaNode->PullInt("minFilter", static_cast<int>(RE_TextureSettings::Filter::NEAREST)));
+	texSettings.mag_filter = static_cast<RE_TextureSettings::Filter>(metaNode->PullInt("magFilter", static_cast<int>(RE_TextureSettings::Filter::NEAREST)));
+	texSettings.wrap_s = static_cast<RE_TextureSettings::Wrap>(metaNode->PullInt("wrapS", static_cast<int>(RE_TextureSettings::Wrap::REPEAT)));
+	texSettings.wrap_t = static_cast<RE_TextureSettings::Wrap>(metaNode->PullInt("wrapT", static_cast<int>(RE_TextureSettings::Wrap::REPEAT)));
 	texSettings.borderColor = metaNode->PullFloat4("borderColor", math::float4::zero);
 	restoreSettings = texSettings;
-}
-
-int RE_Texture::GetComboFilter(RE_TextureFilters filter)
-{
-	switch (filter) {
-	case RE_TextureFilters::RE_NEAREST: return 0;
-	case RE_TextureFilters::RE_LINEAR: return 1;
-	case RE_TextureFilters::RE_NEAREST_MIPMAP_NEAREST: return 2;
-	case RE_TextureFilters::RE_LINEAR_MIPMAP_NEAREST: return 3;
-	case RE_TextureFilters::RE_NEAREST_MIPMAP_LINEAR: return 4;
-	case RE_TextureFilters::RE_LINEAR_MIPMAP_LINEAR: return 5;
-	default: return 0; }
-}
-
-RE_TextureFilters RE_Texture::GetFilterCombo(int combo)
-{
-	switch (combo) {
-	case 0: return RE_TextureFilters::RE_NEAREST;
-	case 1: return RE_TextureFilters::RE_LINEAR;
-	case 2: return RE_TextureFilters::RE_NEAREST_MIPMAP_NEAREST;
-	case 3: return RE_TextureFilters::RE_LINEAR_MIPMAP_NEAREST;
-	case 4: return RE_TextureFilters::RE_NEAREST_MIPMAP_LINEAR;
-	case 5: return RE_TextureFilters::RE_LINEAR_MIPMAP_LINEAR;
-	default: return RE_TextureFilters::RE_NEAREST; }
-}
-
-int RE_Texture::GetComboWrap(RE_TextureWrap wrap)
-{
-	switch (wrap) {
-	case RE_TextureWrap::RE_REPEAT: return 0;
-	case RE_TextureWrap::RE_CLAMP_TO_BORDER: return 1;
-	case RE_TextureWrap::RE_CLAMP_TO_EDGE: return 2;
-	case RE_TextureWrap::RE_MIRRORED_REPEAT: return 3;
-	default: return 0; }
-}
-
-RE_TextureWrap RE_Texture::GetWrapCombo(int combo)
-{
-	switch (combo) {
-	case 0: return RE_TextureWrap::RE_REPEAT;
-	case 1: return RE_TextureWrap::RE_CLAMP_TO_BORDER;
-	case 2: return RE_TextureWrap::RE_CLAMP_TO_EDGE;
-	case 3: return RE_TextureWrap::RE_MIRRORED_REPEAT;
-	default: return RE_TextureWrap::RE_REPEAT; }
-}
-
-void RE_Texture::ReImport()
-{
-	bool unload = isInMemory();
-	if (unload) UnloadMemory();
-	AssetLoad();
-	LibrarySave();
-	if (!unload) UnloadMemory();
-}
-
-void RE_Texture::TexParameteri(unsigned int pname, int param)
-{
-	if (ResourceContainer::inMemory)
-	{
-		GLuint boundTexture = 0;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, reinterpret_cast<GLint*>(&boundTexture));
-		glBindTexture(GL_TEXTURE_2D, ID);
-		glTexParameteri(GL_TEXTURE_2D, pname, param);
-		glBindTexture(GL_TEXTURE_2D, boundTexture);
-	}
-}
-
-void RE_Texture::TexParameterfv(unsigned int pname, float * param)
-{
-	if (ResourceContainer::inMemory)
-	{
-		GLuint boundTexture = 0;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, reinterpret_cast<GLint*>(&boundTexture));
-		glBindTexture(GL_TEXTURE_2D, ID);
-		glTexParameterfv(GL_TEXTURE_2D, pname, param);
-		glBindTexture(GL_TEXTURE_2D, boundTexture);
-	}
 }
 
 void RE_Texture::AssetLoad()
@@ -317,7 +325,7 @@ void RE_Texture::LibraryLoad()
 	RE_FileBuffer libraryFile(GetLibraryPath());
 	if (libraryFile.Load())
 	{
-		RE_TextureImporter::LoadTextureInMemory(libraryFile.GetBuffer(), libraryFile.GetSize(), TextureType::RE_DDS, &ID, &width, &height, texSettings);
+		RE_TextureImporter::LoadTextureInMemory(libraryFile.GetBuffer(), libraryFile.GetSize(), RE_TextureSettings::Type::DDS, &ID, &width, &height, texSettings);
 		ResourceContainer::inMemory = true;
 	}
 }
@@ -327,4 +335,28 @@ void RE_Texture::LibrarySave()
 	RE_FileBuffer assetFile(GetAssetPath());
 	RE_FileBuffer libraryFile(GetLibraryPath());
 	if (assetFile.Load()) RE_TextureImporter::SaveOwnFormat(assetFile.GetBuffer(), assetFile.GetSize(), texType, &libraryFile);
+}
+
+void RE_Texture::TexParameteri(uint pname, int param)
+{
+	if (ResourceContainer::inMemory)
+	{
+		GLuint boundTexture = 0;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, reinterpret_cast<GLint*>(&boundTexture));
+		glBindTexture(GL_TEXTURE_2D, ID);
+		glTexParameteri(GL_TEXTURE_2D, pname, param);
+		glBindTexture(GL_TEXTURE_2D, boundTexture);
+	}
+}
+
+void RE_Texture::TexParameterfv(uint pname, float* param)
+{
+	if (ResourceContainer::inMemory)
+	{
+		GLuint boundTexture = 0;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, reinterpret_cast<GLint*>(&boundTexture));
+		glBindTexture(GL_TEXTURE_2D, ID);
+		glTexParameterfv(GL_TEXTURE_2D, pname, param);
+		glBindTexture(GL_TEXTURE_2D, boundTexture);
+	}
 }

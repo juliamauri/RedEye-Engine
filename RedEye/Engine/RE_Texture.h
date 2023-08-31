@@ -7,13 +7,13 @@
 class RE_Texture : public ResourceContainer
 {
 public:
-	RE_Texture() {}
+	RE_Texture() = default;
 	RE_Texture(const char* metaPath) : ResourceContainer(metaPath) {}
-	~RE_Texture() {}
+	~RE_Texture() final = default;
 
 	const char* GenerateMD5();
-	TextureType DetectExtension();
-	TextureType GetTextureType() const;
+	RE_TextureSettings::Type DetectExtension();
+	RE_TextureSettings::Type GetTextureType() const;
 
 	void LoadInMemory() override;
 	void UnloadMemory() override;
@@ -23,13 +23,13 @@ public:
 	void use();
 	void GetWithHeight(int* w, int* h);
 	void DrawTextureImGui();
-	unsigned int GetID()const { return ID; }
+	uint GetID()const { return ID; }
 
-	static int GetComboFilter(RE_TextureFilters filter);
-	static RE_TextureFilters GetFilterCombo(int combo);
+	static int GetComboFilter(RE_TextureSettings::Filter filter);
+	static RE_TextureSettings::Filter GetFilterCombo(int combo);
 
-	static int GetComboWrap(RE_TextureWrap wrap);
-	static RE_TextureWrap GetWrapCombo(int combo);
+	static int GetComboWrap(RE_TextureSettings::Wrap wrap);
+	static RE_TextureSettings::Wrap GetWrapCombo(int combo);
 
 	void ReImport() override;
 
@@ -43,14 +43,17 @@ private:
 	void LibraryLoad();
 	void LibrarySave();
 
-	void TexParameteri(unsigned int pname, int param);
-	void TexParameterfv(unsigned int pname, float* param);
+	void TexParameteri(uint pname, int param);
+	void TexParameterfv(uint pname, float* param);
 											  
 private:
 
-	unsigned int ID = 0;
-	int width = -1, height = -1;
-	TextureType texType = RE_TEXTURE_UNKNOWN;
+	uint ID = 0;
+
+	int width = -1;
+	int height = -1;
+
+	RE_TextureSettings::Type texType = RE_TextureSettings::Type::TEXTURE_UNKNOWN;
 	RE_TextureSettings texSettings;
 
 	bool applySave = false;

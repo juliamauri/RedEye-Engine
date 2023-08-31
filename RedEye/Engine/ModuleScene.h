@@ -9,7 +9,7 @@ class ModuleScene : public EventListener
 {
 public:
 	ModuleScene();
-	~ModuleScene();
+	~ModuleScene() final;
 
 	bool Init();
 	bool Start();

@@ -7,8 +7,8 @@ class ModuleWindow : public EventListener
 {
 public:
 
-	ModuleWindow() {}
-	~ModuleWindow() {}
+	ModuleWindow() = default;
+	~ModuleWindow() final = default;
 
 	bool Init();
 	void CleanUp();

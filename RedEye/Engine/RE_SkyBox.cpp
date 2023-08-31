@@ -70,14 +70,14 @@ void RE_SkyBox::SetAsInternal()
 	ResourceContainer::inMemory = true;
 }
 
-void RE_SkyBox::AddTexture(RE_TextureFace face, const char* textureMD5)
+void RE_SkyBox::AddTexture(SkyBoxTexture::Face face, const char* textureMD5)
 {
-	skyBoxSettings.textures[face].textureMD5 = textureMD5;
+	skyBoxSettings.textures[static_cast<short>(face)].textureMD5 = textureMD5;
 }
 
-void RE_SkyBox::AddTexturePath(RE_TextureFace face, const char* path)
+void RE_SkyBox::AddTexturePath(SkyBoxTexture::Face face, const char* path)
 {
-	skyBoxSettings.textures[face].path = path;
+	skyBoxSettings.textures[static_cast<short>(face)].path = path;
 }
 
 void RE_SkyBox::Draw()
@@ -146,7 +146,7 @@ void RE_SkyBox::DrawEditSkyBox()
 	ImGui::Text("Textures by face:");
 	static eastl::string texture = "Texture ";
 	static eastl::string id;
-	static RE_TextureFace toDelete = RE_NOFACE;
+	static SkyBoxTexture::Face toDelete = SkyBoxTexture::Face::NOFACE;
 	for (uint i = 0; i < 6 && !isInternal(); i++)
 	{
 		if (ImGui::BeginMenu(texturesname[i]))
@@ -201,10 +201,10 @@ void RE_SkyBox::DrawEditSkyBox()
 			ImGui::Separator();
 			ImGui::EndMenu();
 
-			if (toDelete != RE_TextureFace::RE_NOFACE)
+			if (toDelete != SkyBoxTexture::Face::NOFACE)
 			{
-				skyBoxSettings.textures[toDelete].textureMD5 = nullptr;
-				toDelete = RE_NOFACE;
+				skyBoxSettings.textures[static_cast<short>(toDelete)].textureMD5 = nullptr;
+				toDelete = SkyBoxTexture::Face::NOFACE;
 			}
 		}
 
@@ -225,11 +225,14 @@ void RE_SkyBox::DrawEditSkyBox()
 	int minIndex = RE_Texture::GetComboFilter(skyBoxSettings.min_filter);
 	if (ImGui::Combo("Minify filter", &minIndex, minf_combo))
 	{
-		RE_TextureFilters newfilter = RE_Texture::GetFilterCombo(minIndex);
+		auto newfilter = RE_Texture::GetFilterCombo(minIndex);
 		if (skyBoxSettings.min_filter != newfilter)
 		{
-			if ((ResourceContainer::inMemory && ((skyBoxSettings.min_filter <= RE_LINEAR && newfilter > RE_LINEAR)
-				|| (newfilter <= RE_LINEAR && skyBoxSettings.min_filter > RE_LINEAR))) && !isInternal())
+			if ((ResourceContainer::inMemory &&
+				((skyBoxSettings.min_filter <= RE_TextureSettings::Filter::LINEAR &&
+					newfilter > RE_TextureSettings::Filter::LINEAR)
+				|| (newfilter <= RE_TextureSettings::Filter::LINEAR &&
+					skyBoxSettings.min_filter > RE_TextureSettings::Filter::LINEAR))) && !isInternal())
 			{
 				skyBoxSettings.min_filter = newfilter;
 				UnloadMemory();
@@ -246,7 +249,7 @@ void RE_SkyBox::DrawEditSkyBox()
 	int magIndex = RE_Texture::GetComboFilter(skyBoxSettings.mag_filter);
 	if (ImGui::Combo("Magnify filter", &magIndex, mag_combo))
 	{
-		RE_TextureFilters newfilter = RE_Texture::GetFilterCombo(magIndex);
+		auto newfilter = RE_Texture::GetFilterCombo(magIndex);
 		if (skyBoxSettings.mag_filter != newfilter)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_MAG_FILTER, skyBoxSettings.mag_filter = newfilter);
@@ -258,7 +261,7 @@ void RE_SkyBox::DrawEditSkyBox()
 	int wrapSIndex = RE_Texture::GetComboWrap(skyBoxSettings.wrap_s);
 	if (ImGui::Combo("Wrap S", &wrapSIndex, wrap_combo))
 	{
-		RE_TextureWrap newwrap = RE_Texture::GetWrapCombo(wrapSIndex);
+		auto newwrap = RE_Texture::GetWrapCombo(wrapSIndex);
 		if (skyBoxSettings.wrap_s != newwrap)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_S, skyBoxSettings.wrap_s = newwrap);
@@ -269,7 +272,7 @@ void RE_SkyBox::DrawEditSkyBox()
 	int wrapTIndex = RE_Texture::GetComboWrap(skyBoxSettings.wrap_t);
 	if (ImGui::Combo("Wrap T", &wrapTIndex, wrap_combo))
 	{
-		RE_TextureWrap newwrap = RE_Texture::GetWrapCombo(wrapTIndex);
+		auto newwrap = RE_Texture::GetWrapCombo(wrapTIndex);
 		if (skyBoxSettings.wrap_t != newwrap)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_T, skyBoxSettings.wrap_t = newwrap);
@@ -280,7 +283,7 @@ void RE_SkyBox::DrawEditSkyBox()
 	int wrapRIndex = RE_Texture::GetComboWrap(skyBoxSettings.wrap_r);
 	if (ImGui::Combo("Wrap R", &wrapRIndex, wrap_combo))
 	{
-		RE_TextureWrap newwrap = RE_Texture::GetWrapCombo(wrapRIndex);
+		auto newwrap = RE_Texture::GetWrapCombo(wrapRIndex);
 		if (skyBoxSettings.wrap_r != newwrap)
 		{
 			if (ResourceContainer::inMemory) TexParameteri(GL_TEXTURE_WRAP_R, skyBoxSettings.wrap_r = newwrap);
@@ -324,11 +327,11 @@ void RE_SkyBox::SaveResourceMeta(RE_Json* metaNode)
 
 void RE_SkyBox::LoadResourceMeta(RE_Json* metaNode)
 {
-	skyBoxSettings.min_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("minFilter", RE_LINEAR));
-	skyBoxSettings.mag_filter = static_cast<RE_TextureFilters>(metaNode->PullInt("magFilter", RE_LINEAR));
-	skyBoxSettings.wrap_s =		static_cast<RE_TextureWrap>(metaNode->PullInt("wrapS", RE_CLAMP_TO_EDGE));
-	skyBoxSettings.wrap_t =		static_cast<RE_TextureWrap>(metaNode->PullInt("wrapT", RE_CLAMP_TO_EDGE));
-	skyBoxSettings.wrap_r =		static_cast<RE_TextureWrap>(metaNode->PullInt("wrapR", RE_CLAMP_TO_EDGE));
+	skyBoxSettings.min_filter = static_cast<RE_TextureSettings::Filter>(metaNode->PullInt("minFilter", static_cast<int>(RE_TextureSettings::Filter::LINEAR)));
+	skyBoxSettings.mag_filter = static_cast<RE_TextureSettings::Filter>(metaNode->PullInt("magFilter", static_cast<int>(RE_TextureSettings::Filter::LINEAR)));
+	skyBoxSettings.wrap_s =		static_cast<RE_TextureSettings::Wrap>(metaNode->PullInt("wrapS", static_cast<int>(RE_TextureSettings::Wrap::CLAMP_TO_EDGE)));
+	skyBoxSettings.wrap_t =		static_cast<RE_TextureSettings::Wrap>(metaNode->PullInt("wrapT", static_cast<int>(RE_TextureSettings::Wrap::CLAMP_TO_EDGE)));
+	skyBoxSettings.wrap_r =		static_cast<RE_TextureSettings::Wrap>(metaNode->PullInt("wrapR", static_cast<int>(RE_TextureSettings::Wrap::CLAMP_TO_EDGE)));
 
 	RE_Json* nodeTex = metaNode->PullJObject("textures");
 	for (uint i = 0; i < 6; i++)

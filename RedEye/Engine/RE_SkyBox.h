@@ -6,9 +6,9 @@
 class RE_SkyBox : public ResourceContainer
 {
 public:
-	RE_SkyBox() {}
+	RE_SkyBox() = default;
 	RE_SkyBox(const char* metaPath) : ResourceContainer(metaPath) {}
-	~RE_SkyBox() {}
+	~RE_SkyBox() final = default;
 
 	void LoadInMemory() override;
 	void UnloadMemory() override;
@@ -21,8 +21,8 @@ public:
 
 	void SetAsInternal();
 
-	void AddTexture(RE_TextureFace face, const char* textureMD5);
-	void AddTexturePath(RE_TextureFace face, const char* path);
+	void AddTexture(SkyBoxTexture::Face face, const char* textureMD5);
+	void AddTexturePath(SkyBoxTexture::Face face, const char* path);
 	void AssetSave();
 
 	void DrawSkybox() const;
@@ -49,9 +49,18 @@ private:
 
 private:
 
-	unsigned int ID = 0, VAO = 0, VBO = 0, EBO = 0, triangle_count = 0;
-	bool applySize = false, applyTextures = false, applySave = false;
-	RE_SkyBoxSettings skyBoxSettings, restoreSettings;
+	uint ID = 0;
+	uint VAO = 0;
+	uint VBO = 0;
+	uint EBO = 0;
+	uint triangle_count = 0;
+
+	bool applySize = false;
+	bool applyTextures = false;
+	bool applySave = false;
+
+	RE_SkyBoxSettings skyBoxSettings;
+	RE_SkyBoxSettings restoreSettings;
 
 	static const char* texturesname[6];
 };

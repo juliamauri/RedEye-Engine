@@ -68,7 +68,7 @@ uintptr_t RE_ThumbnailManager::At(const char* ref)
 
 uint32_t RE_ThumbnailManager::LoadDefIcon(const char* filename)
 {
-	unsigned int ret = 0u;
+	uint32_t ret = 0;
 	eastl::string path(DEFTHUMBNAILS);
 	path += filename;
 	RE_FileBuffer filderIcon(path.c_str());
@@ -76,7 +76,14 @@ uint32_t RE_ThumbnailManager::LoadDefIcon(const char* filename)
 	{
 		RE_TextureSettings defTexSettings;
 		int tmp1, tmp2;
-		RE_TextureImporter::LoadTextureInMemory(filderIcon.GetBuffer(), filderIcon.GetSize(), TextureType::RE_DDS, &ret, &tmp1, &tmp2, defTexSettings);
+		RE_TextureImporter::LoadTextureInMemory(
+			filderIcon.GetBuffer(),
+			filderIcon.GetSize(),
+			RE_TextureSettings::Type::DDS,
+			&ret,
+			&tmp1,
+			&tmp2,
+			defTexSettings);
 	}
 	return ret;
 }
@@ -160,7 +167,7 @@ uint32_t RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 		ilGenImages(1, &imageID);
 		ilBindImage(imageID);
 
-		if (IL_FALSE != ilLoadL(TextureType::RE_DDS, thumbFile.GetBuffer(), static_cast<ILuint>(thumbFile.GetSize())))
+		if (IL_FALSE != ilLoadL(static_cast<ILenum>(RE_TextureSettings::Type::DDS), thumbFile.GetBuffer(), static_cast<ILuint>(thumbFile.GetSize())))
 		{
 			/* OpenGL texture binding of the image loaded by DevIL  */
 			glGenTextures(1, &ret); /* Texture name generation */

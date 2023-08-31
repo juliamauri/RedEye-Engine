@@ -1,33 +1,35 @@
 #ifndef __RE_MATERIAL_H__
 #define __RE_MATERIAL_H__
 
-class RE_Json;
+#include "Resource.h"
 
-enum RE_ShadingMode : int { //from assimp documentation
-	S_FLAT = 0x1,
-	S_GORAUND,
-	S_PHONG,
-	S_PHONG_BLINN,
-	S_TOON,
-	S_ORENNAYAR,
-	S_MINNAERT,
-	S_COOKTORRANCE,
-	S_NOSHADING, //No shading at all. Constant light influence of 1.0.
-	S_FRESNEL
-};
+class RE_Json;
 
 class RE_Material : public ResourceContainer
 {
 public:
 
-	RE_Material();
-	RE_Material(const char* metapath);
-	~RE_Material();
+	enum class RE_ShadingMode : int { //from assimp documentation
+		FLAT = 0x1,
+		GORAUND,
+		PHONG,
+		PHONG_BLINN,
+		TOON,
+		ORENNAYAR,
+		MINNAERT,
+		COOKTORRANCE,
+		NOSHADING, //No shading at all. Constant light influence of 1.0.
+		FRESNEL
+	};
 
-	void LoadInMemory() override;
-	void UnloadMemory() override;
+	RE_Material() = default;
+	RE_Material(const char* metapath) : ResourceContainer(metapath) {}
+	~RE_Material() final = default;
 
-	void Import(bool keepInMemory = true) override;
+	void LoadInMemory() final override;
+	void UnloadMemory() final override;
+
+	void Import(bool keepInMemory = true) final override;
 
 	void ProcessMD5();
 
@@ -44,7 +46,7 @@ public:
 	void DrawMaterialEdit();
 	void DrawMaterialParticleEdit(bool tex);
 
-	void SomeResourceChanged(const char* resMD5) override;
+	void SomeResourceChanged(const char* resMD5) final override;
 
 	bool ExistsOnShader(const char* shader) const;
 	bool ExistsOnTexture(const char* texture) const;
@@ -57,12 +59,12 @@ public:
 
 private:
 
-	void Draw() override;
+	void Draw() final override;
 
-	void SaveResourceMeta(RE_Json* metaNode)override;
-	void LoadResourceMeta(RE_Json* metaNode)override;
+	void SaveResourceMeta(RE_Json* metaNode) final override;
+	void LoadResourceMeta(RE_Json* metaNode) final override;
 
-	bool NeededResourcesReferenced(RE_Json* metaNode) override;
+	bool NeededResourcesReferenced(RE_Json* metaNode) final override;
 
 	void DrawTextures(const char* texturesName, eastl::vector<const char*>* textures);
 
@@ -85,7 +87,7 @@ private:
 
 public:
 
-	RE_ShadingMode shadingType = S_FLAT;
+	RE_ShadingMode shadingType = RE_ShadingMode::FLAT;
 
 	eastl::vector<const char*> tDiffuse;
 	math::float3 cDiffuse = math::float3::zero;
@@ -121,12 +123,33 @@ private:
 	const char* shaderMD5 = nullptr;
 	eastl::vector<RE_Shader_Cvar> fromShaderCustomUniforms;
 
-	enum MaterialUINT {
-		UNDEFINED = -1, CDIFFUSE, TDIFFUSE, CSPECULAR, TSPECULAR, CAMBIENT, TAMBIENT, CEMISSIVE,
-		TEMISSIVE, CTRANSPARENT, OPACITY, TOPACITY, SHININESS, SHININESSSTRENGHT, TSHININESS, REFRACCTI,
-		THEIGHT, TNORMALS, TREFLECTION
+	enum class MaterialUINT : short
+	{
+		UNDEFINED = -1,
+
+		CDIFFUSE,
+		TDIFFUSE,
+		CSPECULAR,
+		TSPECULAR,
+		CAMBIENT,
+		TAMBIENT,
+		CEMISSIVE,
+
+		TEMISSIVE,
+		CTRANSPARENT,
+		OPACITY,
+		TOPACITY,
+		SHININESS,
+		SHININESSSTRENGHT,
+		TSHININESS,
+		REFRACCTI,
+		
+		THEIGHT,
+		TNORMALS,
+		TREFLECTION
 	};
-	unsigned int usingOnMat[18] = { 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 };
+
+	ushort usingOnMat[18] = { 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 };
 };
 
 #endif // !__RE_MATERIAL_H__

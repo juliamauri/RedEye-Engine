@@ -35,7 +35,7 @@ void RE_SkyboxImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned
 			ilGenImages(1, &imageID);
 			ilBindImage(imageID);
 
-			if (IL_FALSE != ilLoadL(RE_DDS, librayTexture.GetBuffer(), librayTexture.GetSize()))
+			if (IL_FALSE != ilLoadL(static_cast<ILenum>(RE_TextureSettings::Type::DDS), librayTexture.GetBuffer(), librayTexture.GetSize()))
 			{
 				iluFlipImage();
 

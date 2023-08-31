@@ -149,12 +149,12 @@ bool InitSkyBox()
 	RE_SkyBox* rdefaultSkybox = new RE_SkyBox();
 	rdefaultSkybox->SetName("defaultSkyBox");
 	rdefaultSkybox->SetType(ResourceType::SKYBOX);
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_RIGHT, "Internal/DefaultAssets/Skybox/1right.dds");
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_LEFT, "Internal/DefaultAssets/Skybox/2left.dds");
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_TOP, "Internal/DefaultAssets/Skybox/3top.dds");
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_BOTTOM, "Internal/DefaultAssets/Skybox/4bottom.dds");
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_FRONT, "Internal/DefaultAssets/Skybox/5front.dds");
-	rdefaultSkybox->AddTexturePath(RE_TextureFace::RE_BACK, "Internal/DefaultAssets/Skybox/6back.dds");
+	rdefaultSkybox->AddTexturePath(SkyBoxTexture::Face::RIGHT, "Internal/DefaultAssets/Skybox/1right.dds");
+	rdefaultSkybox->AddTexturePath(SkyBoxTexture::Face::LEFT, "Internal/DefaultAssets/Skybox/2left.dds");
+	rdefaultSkybox->AddTexturePath(SkyBoxTexture::Face::TOP, "Internal/DefaultAssets/Skybox/3top.dds");
+	rdefaultSkybox->AddTexturePath(SkyBoxTexture::Face::BOTTOM, "Internal/DefaultAssets/Skybox/4bottom.dds");
+	rdefaultSkybox->AddTexturePath(SkyBoxTexture::Face::FRONT, "Internal/DefaultAssets/Skybox/5front.dds");
+	rdefaultSkybox->AddTexturePath(SkyBoxTexture::Face::BACK, "Internal/DefaultAssets/Skybox/6back.dds");
 	rdefaultSkybox->SetAsInternal();
 
 	return defaultSkybox = RE_RES->Reference(rdefaultSkybox);
@@ -205,7 +205,14 @@ void InitWaterResources()
 	{
 		RE_TextureSettings defTexSettings;
 		int tmp1, tmp2;
-		RE_TextureImporter::LoadTextureInMemory(waterTexture.GetBuffer(), static_cast<ILuint>(waterTexture.GetSize()), TextureType::RE_PNG, &water_foam_texture, &tmp1, &tmp2, defTexSettings);
+		RE_TextureImporter::LoadTextureInMemory(
+			waterTexture.GetBuffer(),
+			static_cast<ILuint>(waterTexture.GetSize()),
+			RE_TextureSettings::Type::PNG,
+			&water_foam_texture,
+			&tmp1,
+			&tmp2,
+			defTexSettings);
 	}
 }
 

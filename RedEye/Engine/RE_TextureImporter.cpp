@@ -49,7 +49,7 @@ const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPat
 
 	RE_Texture* newTexture = new RE_Texture();
 	newTexture->SetAssetPath(path.c_str());
-	if (newTexture->DetectExtension() != RE_TEXTURE_UNKNOWN)
+	if (newTexture->DetectExtension() != RE_TextureSettings::Type::TEXTURE_UNKNOWN)
 	{
 		newTexture->SetName(name.c_str());
 		newTexture->SetType(ResourceType::TEXTURE);
@@ -62,7 +62,7 @@ const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPat
 	return retMD5;
 }
 
-const char* RE_TextureImporter::TransformToDDS(const void* assetBuffer, ILuint assetSize, TextureType assetType, ILuint* newSize)
+const char* RE_TextureImporter::TransformToDDS(const void* assetBuffer, ILuint assetSize, RE_TextureSettings::Type assetType, ILuint* newSize)
 {
 	eastl::string ret;
 
@@ -70,9 +70,10 @@ const char* RE_TextureImporter::TransformToDDS(const void* assetBuffer, ILuint a
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 
-	if (IL_FALSE != ilLoadL(assetType, assetBuffer, assetSize))
+	auto type = static_cast<ILenum>(assetType);
+	if (IL_FALSE != ilLoadL(type, assetBuffer, assetSize))
 	{
-		if (assetType == IL_TGA) ilFlipSurfaceDxtcData();
+		if (type == IL_TGA) ilFlipSurfaceDxtcData();
 
 		//Save into dds
 		*newSize = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer
@@ -89,52 +90,64 @@ const char* RE_TextureImporter::TransformToDDS(const void* assetBuffer, ILuint a
 	return ret.c_str();
 }
 
-void RE_TextureImporter::LoadTextureInMemory(const void* buffer, ILuint size, TextureType type, ILuint* ID, ILint* width, ILint* height, RE_TextureSettings settings)
+void RE_TextureImporter::LoadTextureInMemory(const void* buffer, ILuint size, RE_TextureSettings::Type t_type, ILuint* ID, ILint* width, ILint* height, RE_TextureSettings settings)
 {
 	ILuint imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 
-	if (IL_FALSE != ilLoadL(type, buffer, size)) {
-
-		if (type == IL_TGA)
-			iluFlipImage();
-
-		/* OpenGL texture binding of the image loaded by DevIL  */
-		glGenTextures(1, ID); /* Texture name generation */
-		RE_GLCache::ChangeTextureBind(*ID); /* Binding of texture name */
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.mag_filter); /* We will use linear interpolation for magnification filter */
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.min_filter); /* We will use linear interpolation for minifying filter */
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, settings.wrap_s); /* We will use linear interpolation for minifying filter */
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, settings.wrap_t); /* We will use linear interpolation for minifying filter */
-
-		if(settings.wrap_s == RE_TextureWrap::RE_CLAMP_TO_BORDER || settings.wrap_t == RE_TextureWrap::RE_CLAMP_TO_BORDER)
-			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &settings.borderColor[0]);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), *width = ilGetInteger(IL_IMAGE_WIDTH), *height = ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData()); /* Texture specification */
-		if(settings.min_filter >= RE_TextureFilters::RE_NEAREST_MIPMAP_NEAREST)
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-		RE_GLCache::ChangeTextureBind(0);
-		ilBindImage(0);
-		/* Delete used resources*/
-		ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
-	}
-	else {
+	auto type = static_cast<ILenum>(t_type);
+	if (IL_FALSE == ilLoadL(type, buffer, size))
+	{
 		RE_LOG_ERROR("Error when loading texture on DevIL");
+		return;
 	}
+
+	if (type == IL_TGA) iluFlipImage();
+
+	/* OpenGL texture binding of the image loaded by DevIL  */
+	glGenTextures(1, ID); /* Texture name generation */
+	RE_GLCache::ChangeTextureBind(*ID); /* Binding of texture name */
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.mag_filter); /* We will use linear interpolation for magnification filter */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.min_filter); /* We will use linear interpolation for minifying filter */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, settings.wrap_s); /* We will use linear interpolation for minifying filter */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, settings.wrap_t); /* We will use linear interpolation for minifying filter */
+
+	if (settings.wrap_s == RE_TextureSettings::Wrap::CLAMP_TO_BORDER ||
+		settings.wrap_t == RE_TextureSettings::Wrap::CLAMP_TO_BORDER)
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &settings.borderColor[0]);
+
+	glTexImage2D( // Texture specification
+		GL_TEXTURE_2D,
+		0,
+		ilGetInteger(IL_IMAGE_BPP),
+		*width = ilGetInteger(IL_IMAGE_WIDTH),
+		*height = ilGetInteger(IL_IMAGE_HEIGHT),
+		0,
+		ilGetInteger(IL_IMAGE_FORMAT),
+		GL_UNSIGNED_BYTE,
+		ilGetData());
+	
+	if (settings.min_filter >= RE_TextureSettings::Filter::NEAREST_MIPMAP_NEAREST)
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+	RE_GLCache::ChangeTextureBind(0);
+	ilBindImage(0);
+	/* Delete used resources*/
+	ilDeleteImages(1, &imageID); /* Because we have already copied image data into texture data we can release memory used by image. */
 }
 
-void RE_TextureImporter::SaveOwnFormat(const void* assetBuffer, ILuint assetSize, TextureType assetType, RE_FileBuffer* toSave)
+void RE_TextureImporter::SaveOwnFormat(const void* assetBuffer, ILuint assetSize, RE_TextureSettings::Type assetType, RE_FileBuffer* toSave)
 {
 	ILuint imageID = 0;
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 
-	if (IL_FALSE != ilLoadL(assetType, assetBuffer, assetSize))
+	auto type = static_cast<ILenum>(assetType);
+	if (IL_FALSE != ilLoadL(type, assetBuffer, assetSize))
 	{
-		if (assetType == IL_TGA) ilFlipSurfaceDxtcData();
+		if (type == IL_TGA) ilFlipSurfaceDxtcData();
 
 		//Save into dds
 		ILuint   size = ilSaveL(IL_DDS, NULL, 0); // Get the size of the data buffer

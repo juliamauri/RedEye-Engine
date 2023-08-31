@@ -9,7 +9,7 @@ class ModuleEditor : public EventListener
 {
 public:
 	ModuleEditor();
-	~ModuleEditor();
+	~ModuleEditor() final;
 
 	// Module
 	bool Init();

@@ -6,7 +6,7 @@ struct Event;
 class EventListener
 {
 public:
-
+	EventListener() = default;
 	virtual ~EventListener() = default;
 	virtual void RecieveEvent(const Event& e) = 0;
 };

@@ -27,10 +27,6 @@
 #include <GL/glew.h>
 #include <EAStdC/EAString.h>
 
-RE_Material::RE_Material() {}
-RE_Material::RE_Material(const char* metapath) : ResourceContainer(metapath) {}
-RE_Material::~RE_Material() {}
-
 void RE_Material::LoadInMemory()
 {
 	if (RE_FS->Exists(GetLibraryPath()))
@@ -78,10 +74,10 @@ void RE_Material::Save()
 	if(!shaderMD5)
 	{
 		//Default Shader
-		usingOnMat[CDIFFUSE] = 1;
-		usingOnMat[TDIFFUSE] = 1;
-		usingOnMat[OPACITY] = 1;
-		usingOnMat[SHININESS] = 1;
+		usingOnMat[static_cast<int>(MaterialUINT::CDIFFUSE)] = 1;
+		usingOnMat[static_cast<int>(MaterialUINT::TDIFFUSE)] = 1;
+		usingOnMat[static_cast<int>(MaterialUINT::OPACITY)] = 1;
+		usingOnMat[static_cast<int>(MaterialUINT::SHININESS)] = 1;
 	}
 	JsonSerialize();
 	BinarySerialize();
@@ -312,13 +308,13 @@ void RE_Material::DrawMaterialEdit()
 		}
 	}
 
-	if (usingOnMat[CDIFFUSE] || usingOnMat[TDIFFUSE])
+	if (usingOnMat[static_cast<short>(MaterialUINT::CDIFFUSE)] || usingOnMat[static_cast<short>(MaterialUINT::TDIFFUSE)])
 	{
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Diffuse values"))
 		{
-			if (usingOnMat[CDIFFUSE] && ImGui::ColorEdit3("Diffuse Color", &cDiffuse[0])) applySave = true;
-			if (usingOnMat[TDIFFUSE]) DrawTextures("Diffuse", &tDiffuse);
+			if (usingOnMat[static_cast<short>(MaterialUINT::CDIFFUSE)] && ImGui::ColorEdit3("Diffuse Color", &cDiffuse[0])) applySave = true;
+			if (usingOnMat[static_cast<short>(MaterialUINT::TDIFFUSE)]) DrawTextures("Diffuse", &tDiffuse);
 
 			ImGui::EndMenu();
 		}
@@ -334,13 +330,13 @@ void RE_Material::DrawMaterialEdit()
 		}
 	}
 
-	if (usingOnMat[CSPECULAR] || usingOnMat[TSPECULAR])
+	if (usingOnMat[static_cast<short>(MaterialUINT::CSPECULAR)] || usingOnMat[static_cast<short>(MaterialUINT::TSPECULAR)])
 	{
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Specular values"))
 		{
-			if (usingOnMat[CSPECULAR] && ImGui::ColorEdit3("Specular Color", &cSpecular[0])) applySave = true;
-			if (usingOnMat[TSPECULAR]) DrawTextures("Specular", &tSpecular);
+			if (usingOnMat[static_cast<short>(MaterialUINT::CSPECULAR)] && ImGui::ColorEdit3("Specular Color", &cSpecular[0])) applySave = true;
+			if (usingOnMat[static_cast<short>(MaterialUINT::TSPECULAR)]) DrawTextures("Specular", &tSpecular);
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginDragDropTarget())
@@ -355,13 +351,13 @@ void RE_Material::DrawMaterialEdit()
 		}
 	}
 
-	if (usingOnMat[CAMBIENT] || usingOnMat[TAMBIENT])
+	if (usingOnMat[static_cast<short>(MaterialUINT::CAMBIENT)] || usingOnMat[static_cast<short>(MaterialUINT::TAMBIENT)])
 	{
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Ambient values"))
 		{
-			if (usingOnMat[CAMBIENT] && ImGui::ColorEdit3("Ambient Color", &cAmbient[0])) applySave = true;
-			if (usingOnMat[TAMBIENT]) DrawTextures("Ambient", &tAmbient);
+			if (usingOnMat[static_cast<short>(MaterialUINT::CAMBIENT)] && ImGui::ColorEdit3("Ambient Color", &cAmbient[0])) applySave = true;
+			if (usingOnMat[static_cast<short>(MaterialUINT::TAMBIENT)]) DrawTextures("Ambient", &tAmbient);
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginDragDropTarget())
@@ -376,13 +372,13 @@ void RE_Material::DrawMaterialEdit()
 		}
 	}
 
-	if (usingOnMat[CEMISSIVE] || usingOnMat[TEMISSIVE])
+	if (usingOnMat[static_cast<short>(MaterialUINT::CEMISSIVE)] || usingOnMat[static_cast<short>(MaterialUINT::TEMISSIVE)])
 	{
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Emissive values"))
 		{
-			if (usingOnMat[CEMISSIVE] && ImGui::ColorEdit3("Emissive Color", &cEmissive[0])) applySave = true;
-			if (usingOnMat[TEMISSIVE]) DrawTextures("Emissive", &tEmissive);
+			if (usingOnMat[static_cast<short>(MaterialUINT::CEMISSIVE)] && ImGui::ColorEdit3("Emissive Color", &cEmissive[0])) applySave = true;
+			if (usingOnMat[static_cast<short>(MaterialUINT::TEMISSIVE)]) DrawTextures("Emissive", &tEmissive);
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginDragDropTarget())
@@ -397,13 +393,13 @@ void RE_Material::DrawMaterialEdit()
 		}
 	}
 
-	if (usingOnMat[OPACITY] || usingOnMat[TOPACITY])
+	if (usingOnMat[static_cast<short>(MaterialUINT::OPACITY)] || usingOnMat[static_cast<short>(MaterialUINT::TOPACITY)])
 	{
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Opacity values"))
 		{
-			if (usingOnMat[OPACITY] && ImGui::InputFloat("Opacity", &opacity)) applySave = true;
-			if (usingOnMat[TOPACITY]) DrawTextures("Opacity", &tOpacity);
+			if (usingOnMat[static_cast<short>(MaterialUINT::OPACITY)] && ImGui::InputFloat("Opacity", &opacity)) applySave = true;
+			if (usingOnMat[static_cast<short>(MaterialUINT::TOPACITY)]) DrawTextures("Opacity", &tOpacity);
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginDragDropTarget())
@@ -418,14 +414,14 @@ void RE_Material::DrawMaterialEdit()
 		}
 	}
 
-	if (usingOnMat[SHININESS] || usingOnMat[SHININESSSTRENGHT] || usingOnMat[TSHININESS])
+	if (usingOnMat[static_cast<short>(MaterialUINT::SHININESS)] || usingOnMat[static_cast<short>(MaterialUINT::SHININESSSTRENGHT)] || usingOnMat[static_cast<short>(MaterialUINT::TSHININESS)])
 	{
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Shininess values"))
 		{
-			if (usingOnMat[SHININESS] && ImGui::DragFloat("Shininess", &shininess, 0.1f, 1.0f, 32.0f)) applySave = true;
-			if (usingOnMat[SHININESSSTRENGHT] && ImGui::InputFloat("Shininess strenght", &shininessStrenght)) applySave = true;
-			if (usingOnMat[TSHININESS]) DrawTextures("Shininess", &tShininess);
+			if (usingOnMat[static_cast<short>(MaterialUINT::SHININESS)] && ImGui::DragFloat("Shininess", &shininess, 0.1f, 1.0f, 32.0f)) applySave = true;
+			if (usingOnMat[static_cast<short>(MaterialUINT::SHININESSSTRENGHT)] && ImGui::InputFloat("Shininess strenght", &shininessStrenght)) applySave = true;
+			if (usingOnMat[static_cast<short>(MaterialUINT::TSHININESS)]) DrawTextures("Shininess", &tShininess);
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginDragDropTarget())
@@ -440,7 +436,7 @@ void RE_Material::DrawMaterialEdit()
 		}
 	}
 
-	if (usingOnMat[THEIGHT])
+	if (usingOnMat[static_cast<short>(MaterialUINT::THEIGHT)])
 	{
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Height values"))
@@ -459,7 +455,7 @@ void RE_Material::DrawMaterialEdit()
 			ImGui::EndDragDropTarget();
 		}
 	}
-	if (usingOnMat[TNORMALS])
+	if (usingOnMat[static_cast<short>(MaterialUINT::TNORMALS)])
 	{
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Normals values"))
@@ -478,7 +474,7 @@ void RE_Material::DrawMaterialEdit()
 			ImGui::EndDragDropTarget();
 		}
 	}
-	if (usingOnMat[TREFLECTION])
+	if (usingOnMat[static_cast<short>(MaterialUINT::TREFLECTION)])
 	{
 		ImGui::Separator();
 		if (ImGui::BeginMenu("Reflection values"))
@@ -501,7 +497,7 @@ void RE_Material::DrawMaterialEdit()
 	ImGui::Separator();
 	if (ImGui::BeginMenu("Others values"))
 	{
-		if (usingOnMat[CTRANSPARENT])
+		if (usingOnMat[static_cast<short>(MaterialUINT::CTRANSPARENT)])
 		{
 			if (ImGui::ColorEdit3("Transparent", &cTransparent[0])) applySave = true;
 			ImGui::Separator();
@@ -513,7 +509,7 @@ void RE_Material::DrawMaterialEdit()
 		if (ImGui::Checkbox("Blend mode", &blendMode)) applySave = true;
 		ImGui::Separator();
 
-		if (usingOnMat[REFRACCTI])
+		if (usingOnMat[static_cast<short>(MaterialUINT::REFRACCTI)])
 		{
 			if (ImGui::InputFloat("Refraccti", &refraccti)) applySave = true;
 			ImGui::Separator();
@@ -753,11 +749,11 @@ void RE_Material::JsonDeserialize(bool generateLibraryPath)
 	if (material.Load()) {
 		RE_Json* nodeMat = material.GetRootNode("Material");
 
-		shadingType = (RE_ShadingMode)nodeMat->PullInt("ShaderType", RE_ShadingMode::S_FLAT);
+		shadingType = static_cast<RE_ShadingMode>(nodeMat->PullInt("ShaderType", static_cast<int>(RE_ShadingMode::FLAT)));
 
 		unsigned int* uOM = nodeMat->PullUInt("usingOnMat", 18, 0);
 		memcpy(usingOnMat, uOM, sizeof(uint) * 18);
-		DEL_A(uOM);
+		DEL_A(uOM)
 
 		cDiffuse = nodeMat->PullFloatVector("DiffuseColor", math::vec::zero);
 		cSpecular = nodeMat->PullFloatVector("SpecularColor", math::vec::zero);
@@ -1455,17 +1451,28 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 	bool onlyColor = true;
 	if (!usingChekers)
 	{
-		RE_ShaderImporter::setFloat(ShaderID, "useColor",
-			(usingOnMat[CDIFFUSE] || usingOnMat[CSPECULAR] || usingOnMat[CAMBIENT] ||
-			 usingOnMat[CEMISSIVE] || usingOnMat[CTRANSPARENT] || usingOnMat[OPACITY] ||
-			 usingOnMat[SHININESS] || usingOnMat[SHININESSSTRENGHT] || usingOnMat[REFRACCTI]) ? 1.0f : 0.0f);
+		RE_ShaderImporter::setFloat(ShaderID, "useColor", (
+			usingOnMat[static_cast<short>(MaterialUINT::CDIFFUSE)] ||
+			usingOnMat[static_cast<short>(MaterialUINT::CSPECULAR)] ||
+			usingOnMat[static_cast<short>(MaterialUINT::CAMBIENT)] ||
+			usingOnMat[static_cast<short>(MaterialUINT::CEMISSIVE)] ||
+			usingOnMat[static_cast<short>(MaterialUINT::CTRANSPARENT)] ||
+			usingOnMat[static_cast<short>(MaterialUINT::OPACITY)] ||
+			usingOnMat[static_cast<short>(MaterialUINT::SHININESS)] ||
+			usingOnMat[static_cast<short>(MaterialUINT::SHININESSSTRENGHT)] ||
+			usingOnMat[static_cast<short>(MaterialUINT::REFRACCTI)]) ? 1.0f : 0.0f);
 
-		if ((usingOnMat[TDIFFUSE] && !tDiffuse.empty()) || (usingOnMat[TSPECULAR] && !tSpecular.empty())
-			|| (usingOnMat[TAMBIENT] && !tAmbient.empty()) || (usingOnMat[TEMISSIVE] && !tEmissive.empty())
-			|| (usingOnMat[TOPACITY] && !tOpacity.empty() || (usingOnMat[TSHININESS] && !tShininess.empty())
-			|| (usingOnMat[THEIGHT] && !tHeight.empty()) || !usingOnMat[TNORMALS] && !tNormals.empty())
-			|| (usingOnMat[TREFLECTION] && !tReflection.empty())
-			|| shaderRes->NeedUploadDepth())
+		if (
+			(usingOnMat[static_cast<short>(MaterialUINT::TDIFFUSE)]		&& !tDiffuse.empty()) ||
+			(usingOnMat[static_cast<short>(MaterialUINT::TSPECULAR)]	&& !tSpecular.empty()) ||
+			(usingOnMat[static_cast<short>(MaterialUINT::TAMBIENT)]		&& !tAmbient.empty()) ||
+			(usingOnMat[static_cast<short>(MaterialUINT::TEMISSIVE)]	&& !tEmissive.empty()) ||
+			(usingOnMat[static_cast<short>(MaterialUINT::TOPACITY)]		&& !tOpacity.empty()) ||
+			(usingOnMat[static_cast<short>(MaterialUINT::TSHININESS)]	&& !tShininess.empty()) ||
+			(usingOnMat[static_cast<short>(MaterialUINT::THEIGHT)]		&& !tHeight.empty()) ||
+			(usingOnMat[static_cast<short>(MaterialUINT::TNORMALS)]		&& !tNormals.empty()) ||
+			(usingOnMat[static_cast<short>(MaterialUINT::TREFLECTION)]	&& !tReflection.empty()) ||
+			shaderRes->NeedUploadDepth())
 		{
 			RE_ShaderImporter::setFloat(ShaderID, "useTexture", 1.0f);
 			onlyColor = false;
@@ -1490,15 +1497,15 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 	// Bind Textures
 	if (onlyColor)
 	{
-		if(usingOnMat[CDIFFUSE])			RE_ShaderImporter::setFloat(ShaderID, "cdiffuse", cDiffuse);
-		if(usingOnMat[CSPECULAR])			RE_ShaderImporter::setFloat(ShaderID, "cspecular", cSpecular);
-		if(usingOnMat[CAMBIENT])			RE_ShaderImporter::setFloat(ShaderID, "cambient", cAmbient);
-		if(usingOnMat[CEMISSIVE])			RE_ShaderImporter::setFloat(ShaderID, "cemissive", cEmissive);
-		if(usingOnMat[CTRANSPARENT])		RE_ShaderImporter::setFloat(ShaderID, "ctransparent", cTransparent);
-		if(usingOnMat[OPACITY])				RE_ShaderImporter::setFloat(ShaderID, "opacity", opacity);
-		if(usingOnMat[SHININESS])			RE_ShaderImporter::setFloat(ShaderID, "shininess", shininess);
-		if(usingOnMat[SHININESSSTRENGHT])	RE_ShaderImporter::setFloat(ShaderID, "shininessST", shininessStrenght);
-		if(usingOnMat[REFRACCTI])			RE_ShaderImporter::setFloat(ShaderID, "refraccti", refraccti);
+		if (usingOnMat[static_cast<short>(MaterialUINT::CDIFFUSE)])			 RE_ShaderImporter::setFloat(ShaderID, "cdiffuse", cDiffuse);
+		if (usingOnMat[static_cast<short>(MaterialUINT::CSPECULAR)])		 RE_ShaderImporter::setFloat(ShaderID, "cspecular", cSpecular);
+		if (usingOnMat[static_cast<short>(MaterialUINT::CAMBIENT)])			 RE_ShaderImporter::setFloat(ShaderID, "cambient", cAmbient);
+		if (usingOnMat[static_cast<short>(MaterialUINT::CEMISSIVE)])		 RE_ShaderImporter::setFloat(ShaderID, "cemissive", cEmissive);
+		if (usingOnMat[static_cast<short>(MaterialUINT::CTRANSPARENT)])		 RE_ShaderImporter::setFloat(ShaderID, "ctransparent", cTransparent);
+		if (usingOnMat[static_cast<short>(MaterialUINT::OPACITY)])			 RE_ShaderImporter::setFloat(ShaderID, "opacity", opacity);
+		if (usingOnMat[static_cast<short>(MaterialUINT::SHININESS)])		 RE_ShaderImporter::setFloat(ShaderID, "shininess", shininess);
+		if (usingOnMat[static_cast<short>(MaterialUINT::SHININESSSTRENGHT)]) RE_ShaderImporter::setFloat(ShaderID, "shininessST", shininessStrenght);
+		if (usingOnMat[static_cast<short>(MaterialUINT::REFRACCTI)])		 RE_ShaderImporter::setFloat(ShaderID, "refraccti", refraccti);
 	}
 	else if (usingChekers)
 	{
@@ -1508,65 +1515,65 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 	}
 	else
 	{
-		if (usingOnMat[CDIFFUSE])			RE_ShaderImporter::setFloat(ShaderID, "cdiffuse", cDiffuse);
-		if (usingOnMat[CSPECULAR])			RE_ShaderImporter::setFloat(ShaderID, "cspecular", cSpecular);
-		if (usingOnMat[CAMBIENT])			RE_ShaderImporter::setFloat(ShaderID, "cambient", cAmbient);
-		if (usingOnMat[CEMISSIVE])			RE_ShaderImporter::setFloat(ShaderID, "cemissive", cEmissive);
-		if (usingOnMat[CTRANSPARENT])		RE_ShaderImporter::setFloat(ShaderID, "ctransparent", cTransparent);
-		if (usingOnMat[OPACITY])			RE_ShaderImporter::setFloat(ShaderID, "opacity", opacity);
-		if (usingOnMat[SHININESS])			RE_ShaderImporter::setFloat(ShaderID, "shininess", shininess);
-		if (usingOnMat[SHININESSSTRENGHT])	RE_ShaderImporter::setFloat(ShaderID, "shininessST", shininessStrenght);
-		if (usingOnMat[REFRACCTI])			RE_ShaderImporter::setFloat(ShaderID, "refraccti", refraccti);
+		if (usingOnMat[static_cast<short>(MaterialUINT::CDIFFUSE)])			 RE_ShaderImporter::setFloat(ShaderID, "cdiffuse", cDiffuse);
+		if (usingOnMat[static_cast<short>(MaterialUINT::CSPECULAR)])		 RE_ShaderImporter::setFloat(ShaderID, "cspecular", cSpecular);
+		if (usingOnMat[static_cast<short>(MaterialUINT::CAMBIENT)])			 RE_ShaderImporter::setFloat(ShaderID, "cambient", cAmbient);
+		if (usingOnMat[static_cast<short>(MaterialUINT::CEMISSIVE)])		 RE_ShaderImporter::setFloat(ShaderID, "cemissive", cEmissive);
+		if (usingOnMat[static_cast<short>(MaterialUINT::CTRANSPARENT)])		 RE_ShaderImporter::setFloat(ShaderID, "ctransparent", cTransparent);
+		if (usingOnMat[static_cast<short>(MaterialUINT::OPACITY)])			 RE_ShaderImporter::setFloat(ShaderID, "opacity", opacity);
+		if (usingOnMat[static_cast<short>(MaterialUINT::SHININESS)])		 RE_ShaderImporter::setFloat(ShaderID, "shininess", shininess);
+		if (usingOnMat[static_cast<short>(MaterialUINT::SHININESSSTRENGHT)]) RE_ShaderImporter::setFloat(ShaderID, "shininessST", shininessStrenght);
+		if (usingOnMat[static_cast<short>(MaterialUINT::REFRACCTI)])		 RE_ShaderImporter::setFloat(ShaderID, "refraccti", refraccti);
 
-		for (unsigned int i = 0; i < tDiffuse.size() || i < usingOnMat[TDIFFUSE]; i++)
+		for (unsigned int i = 0; i < tDiffuse.size() || i < usingOnMat[static_cast<short>(MaterialUINT::TDIFFUSE)]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tdiffuse" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tDiffuse[i]))->use();
 		}
-		for (unsigned int i = 0; i < tSpecular.size() && i < usingOnMat[TSPECULAR]; i++)
+		for (unsigned int i = 0; i < tSpecular.size() && i < usingOnMat[static_cast<short>(MaterialUINT::TSPECULAR)]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tspecular" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tSpecular[i]))->use();
 		}
-		for (unsigned int i = 0; i < tAmbient.size() && i < usingOnMat[TAMBIENT]; i++)
+		for (unsigned int i = 0; i < tAmbient.size() && i < usingOnMat[static_cast<short>(MaterialUINT::TAMBIENT)]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tambient" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tAmbient[i]))->use();
 		}
-		for (unsigned int i = 0; i < tEmissive.size() && i < usingOnMat[TEMISSIVE]; i++)
+		for (unsigned int i = 0; i < tEmissive.size() && i < usingOnMat[static_cast<short>(MaterialUINT::TEMISSIVE)]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("temissive" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tEmissive[i]))->use();
 		}
-		for (unsigned int i = 0; i < tOpacity.size() && i < usingOnMat[TOPACITY]; i++)
+		for (unsigned int i = 0; i < tOpacity.size() && i < usingOnMat[static_cast<short>(MaterialUINT::TOPACITY)]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("topacity" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tOpacity[i]))->use();
 		}
-		for (unsigned int i = 0; i < tShininess.size() && i < usingOnMat[TSHININESS]; i++)
+		for (unsigned int i = 0; i < tShininess.size() && i < usingOnMat[static_cast<short>(MaterialUINT::TSHININESS)]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tshininess" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tShininess[i]))->use();
 		}
-		for (unsigned int i = 0; i < tHeight.size() && i < usingOnMat[THEIGHT]; i++)
+		for (unsigned int i = 0; i < tHeight.size() && i < usingOnMat[static_cast<short>(MaterialUINT::THEIGHT)]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("theight" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tHeight[i]))->use();
 		}
-		for (unsigned int i = 0; i < tNormals.size() && i < usingOnMat[TNORMALS]; i++)
+		for (unsigned int i = 0; i < tNormals.size() && i < usingOnMat[static_cast<short>(MaterialUINT::TNORMALS)]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("tnormals" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tNormals[i]))->use();
 		}
-		for (unsigned int i = 0; i < tReflection.size() && i < usingOnMat[TREFLECTION]; i++)
+		for (unsigned int i = 0; i < tReflection.size() && i < usingOnMat[static_cast<short>(MaterialUINT::TREFLECTION)]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(ShaderID, ("treflection" + eastl::to_string(i)).c_str(), textureCounter++);
@@ -1671,24 +1678,27 @@ void RE_Material::UploadAsParticleDataToShader(unsigned int shaderID, bool useTe
 
 	RE_ShaderImporter::setFloat(shaderID, "cdiffuse", cDiffuse);
 	RE_ShaderImporter::setFloat(shaderID, "opacity", opacity);
-	if (lighting) {
+
+	if (lighting)
+	{
 		RE_ShaderImporter::setFloat(shaderID, "cspecular", cSpecular);
 		RE_ShaderImporter::setFloat(shaderID, "shininess", shininess);
-	}else
-		RE_ShaderImporter::setFloat(shaderID, "opacity", 1.0f);
+	}
+	else RE_ShaderImporter::setFloat(shaderID, "opacity", 1.0f);
 
-	if (useTextures) {
+	if (useTextures)
+	{
 		RE_ShaderImporter::setFloat(shaderID, "useTexture", static_cast<float>(tDiffuse.size() > 0 && tSpecular.size() > 0));
 
 		unsigned int textureCounter = 0;
-		for (unsigned int i = 0; i < tDiffuse.size() && i < usingOnMat[TDIFFUSE]; i++)
+		for (unsigned int i = 0; i < tDiffuse.size() && i < usingOnMat[static_cast<short>(MaterialUINT::TDIFFUSE)]; i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + textureCounter);
 			RE_ShaderImporter::setInt(shaderID, ("tdiffuse" + eastl::to_string(i)).c_str(), textureCounter++);
 			dynamic_cast<RE_Texture*>(RE_RES->At(tDiffuse[i]))->use();
 		}
 		if (lighting) {
-			for (unsigned int i = 0; i < tSpecular.size() && i < usingOnMat[TSPECULAR]; i++)
+			for (unsigned int i = 0; i < tSpecular.size() && i < usingOnMat[static_cast<short>(MaterialUINT::TSPECULAR)]; i++)
 			{
 				glActiveTexture(GL_TEXTURE0 + textureCounter);
 				RE_ShaderImporter::setInt(shaderID, ("tspecular" + eastl::to_string(i)).c_str(), textureCounter++);
@@ -1765,20 +1775,21 @@ void RE_Material::GetAndProcessUniformsFromShader()
 		{
 			size_t pos = sVar.name.find_first_of("0123456789");
 			eastl::string name = (pos != eastl::string::npos) ? sVar.name.substr(0, pos) : sVar.name;
-			MaterialUINT index = UNDEFINED;
-			for (uint i = 0; i < 18; i++)
+
+			auto index = MaterialUINT::UNDEFINED;
+			for (short i = 0; i < 18; i++)
 			{
 				if (name.compare(materialNames[i]) == 0)
 				{
-					index = (MaterialUINT)i;
+					index = MaterialUINT(i);
 					break;
 				}
 			}
 
-			if (index != UNDEFINED)
+			if (index != MaterialUINT::UNDEFINED)
 			{
 				bool texture = false;
-				for (uint i = 0; i < 9; i++)
+				for (ushort i = 0; i < 9; i++)
 				{
 					if (name.compare(materialTextures[i]) == 0)
 					{
@@ -1789,10 +1800,11 @@ void RE_Material::GetAndProcessUniformsFromShader()
 
 				if (texture)
 				{
-					unsigned int count = EA::StdC::AtoU32(&sVar.name.back()) + 1;
-					if (usingOnMat[index] < count) usingOnMat[index] = count;
+					auto count = EA::StdC::AtoU32(&sVar.name.back()) + 1;
+					if (usingOnMat[static_cast<short>(index)] < count)
+						usingOnMat[static_cast<short>(index)] = count;
 				}
-				else usingOnMat[index] = 1;
+				else usingOnMat[static_cast<short>(index)] = 1;
 			}
 		}
 	}

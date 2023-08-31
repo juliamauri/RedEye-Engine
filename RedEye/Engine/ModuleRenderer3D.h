@@ -9,7 +9,7 @@ class ModuleRenderer3D : public EventListener
 {
 public:
 	ModuleRenderer3D();
-	~ModuleRenderer3D();
+	~ModuleRenderer3D() final;
 
 	bool Init();
 	bool Start();
