@@ -1326,7 +1326,7 @@ void RE_Material::BinarySerialize()
 			cursor += size;
 			break;
 		case RE_Cvar::Type::SAMPLER:
-			nSize = (fromShaderCustomUniforms[i].AsCharP()) ? strlen(fromShaderCustomUniforms[i].AsCharP()) : 0;
+			nSize = (fromShaderCustomUniforms[i].AsCharP()) ? eastl::string(fromShaderCustomUniforms[i].AsCharP()).size() : 0;
 			size = sizeof(uint);
 			memcpy(cursor, &nSize, size);
 			cursor += size;
@@ -1667,7 +1667,7 @@ size_t RE_Material::GetBinarySize()
 			case RE_Cvar::Type::SAMPLER:
 				charCount += sizeof(uint);
 				if (fromShaderCustomUniforms[i].AsCharP())
-					charCount += sizeof(char) * strlen(fromShaderCustomUniforms[i].AsCharP());
+					charCount += sizeof(char) * eastl::string(fromShaderCustomUniforms[i].AsCharP()).size();
 				break;
 			default: break;
 			}
