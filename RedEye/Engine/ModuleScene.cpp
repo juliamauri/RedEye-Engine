@@ -502,9 +502,9 @@ void ModuleScene::NewEmptyScene(const char* name)
 	RE_INPUT->PauseEvents();
 	RE_EDITOR->ClearCommands();
 
+	if (unsavedScene == nullptr) currentScene = nullptr;
 	DEL(unsavedScene)
-	currentScene = nullptr;
-
+	
 	unsavedScene = new RE_Scene();
 	unsavedScene->SetName(name);
 	unsavedScene->SetType(ResourceContainer::Type::SCENE);
