@@ -688,7 +688,7 @@ const char* RE_CompPlane::TransformAsMeshResource()
 	if (!exists)
 	{
 		newMesh->SetName(eastl::string("Plane " + eastl::to_string(plane->ntriangles) + " triangles").c_str());
-		newMesh->SetType(ResourceType::MESH);
+		newMesh->SetType(ResourceContainer::Type::MESH);
 		RE_RES->Reference(newMesh);
 	}
 	else DEL(newMesh)

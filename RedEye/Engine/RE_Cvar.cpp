@@ -138,10 +138,16 @@ bool RE_Cvar::AsBool() const { return value.bool_v; }
 bool* RE_Cvar::AsBool2() { return value.bool2_v; }
 bool* RE_Cvar::AsBool3() { return value.bool3_v; }
 bool* RE_Cvar::AsBool4() { return value.bool4_v; }
+const bool* RE_Cvar::AsBool2() const { return value.bool2_v; }
+const bool* RE_Cvar::AsBool3() const { return value.bool3_v; }
+const bool* RE_Cvar::AsBool4() const { return value.bool4_v; }
 int RE_Cvar::AsInt() const { return value.int_v; }
 int* RE_Cvar::AsInt2() { return value.int2_v; }
 int* RE_Cvar::AsInt3() { return value.int3_v; }
 int* RE_Cvar::AsInt4() { return value.int4_v; }
+const int* RE_Cvar::AsInt2() const { return value.int2_v; }
+const int* RE_Cvar::AsInt3() const { return value.int3_v; }
+const int* RE_Cvar::AsInt4() const { return value.int4_v; }
 uint RE_Cvar::AsUInt() const { return value.uint_v; }
 long long RE_Cvar::AsInt64() const { return value.int64_v; }
 ulonglong RE_Cvar::AsUInt64() const { return value.uint64_v; }
@@ -655,7 +661,7 @@ bool RE_Shader_Cvar::DrawPropieties(bool isInMemory)
 
 		if (ImGui::BeginMenu(eastl::string("Change Sampler Texture #" + name).c_str()))
 		{
-			eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceType::TEXTURE);
+			eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceContainer::Type::TEXTURE);
 			for (auto textRes : allTex)
 			{
 				if (ImGui::MenuItem(textRes->GetName()))

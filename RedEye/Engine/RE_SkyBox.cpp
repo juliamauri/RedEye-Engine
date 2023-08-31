@@ -168,7 +168,7 @@ void RE_SkyBox::DrawEditSkyBox()
 				id = "Change";
 				if (ImGui::BeginMenu(id.c_str()))
 				{
-					eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceType::TEXTURE);
+					eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceContainer::Type::TEXTURE);
 					for (auto textRes : allTex)
 					{
 						if (ImGui::MenuItem(textRes->GetName()))
@@ -186,7 +186,7 @@ void RE_SkyBox::DrawEditSkyBox()
 				id = "Add";
 				if (ImGui::BeginMenu(id.c_str()))
 				{
-					eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceType::TEXTURE);
+					eastl::vector<ResourceContainer*> allTex = RE_RES->GetResourcesByType(ResourceContainer::Type::TEXTURE);
 					for (auto textRes : allTex)
 					{
 						if (ImGui::MenuItem(textRes->GetName()))
@@ -306,7 +306,7 @@ bool RE_SkyBox::isFacesFilled() const
 	return ret;
 }
 
-void RE_SkyBox::SaveResourceMeta(RE_Json* metaNode)
+void RE_SkyBox::SaveResourceMeta(RE_Json* metaNode) const
 {
 	metaNode->Push("minFilter", skyBoxSettings.min_filter);
 	metaNode->Push("magFilter", skyBoxSettings.mag_filter);
@@ -338,7 +338,7 @@ void RE_SkyBox::LoadResourceMeta(RE_Json* metaNode)
 	{
 		eastl::string key(texturesname[i]);
 		eastl::string texMD5 = nodeTex->PullString(eastl::string(key + "textureMD5").c_str(), "");
-		skyBoxSettings.textures[i].textureMD5 = RE_RES->IsReference(texMD5.c_str(), ResourceType::TEXTURE);
+		skyBoxSettings.textures[i].textureMD5 = RE_RES->IsReference(texMD5.c_str(), ResourceContainer::Type::TEXTURE);
 	}
 
 	restoreSettings = skyBoxSettings;
@@ -352,7 +352,7 @@ bool RE_SkyBox::NeededResourcesReferenced(RE_Json* metaNode)
 	{
 		eastl::string key(texturesname[i]);
 		eastl::string texMD5 = nodeTex->PullString(eastl::string(key + "textureMD5").c_str(), "");
-		skyBoxSettings.textures[i].textureMD5 = RE_RES->IsReference(texMD5.c_str(), ResourceType::TEXTURE);
+		skyBoxSettings.textures[i].textureMD5 = RE_RES->IsReference(texMD5.c_str(), ResourceContainer::Type::TEXTURE);
 
 		if (!skyBoxSettings.textures[i].textureMD5) return true;
 	}

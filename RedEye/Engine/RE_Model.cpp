@@ -169,7 +169,7 @@ void RE_Model::Draw()
 	if (applySave && modelSettings == restoreSettings) applySave = false;
 }
 
-void RE_Model::SaveResourceMeta(RE_Json* metaNode)
+void RE_Model::SaveResourceMeta(RE_Json* metaNode) const
 {
 	RE_Json* presets = metaNode->PushJObject("presets");
 	for (uint i = 0; i < 3; i++) presets->Push(eastl::to_string(i).c_str(), modelSettings.presets[i]);

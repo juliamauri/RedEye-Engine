@@ -62,7 +62,7 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 		{
 			editingSkybox->SetName(sbName.c_str());
 			editingSkybox->SetAssetPath(assetPath.c_str());
-			editingSkybox->SetType(ResourceType::SKYBOX);
+			editingSkybox->SetType(ResourceContainer::Type::SKYBOX);
 			editingSkybox->AssetSave();
 			editingSkybox->SaveMeta();
 

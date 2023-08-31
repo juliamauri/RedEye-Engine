@@ -52,7 +52,7 @@ const char * RE_TextureImporter::AddNewTextureOnResources(const char * assetsPat
 	if (newTexture->DetectExtension() != RE_TextureSettings::Type::TEXTURE_UNKNOWN)
 	{
 		newTexture->SetName(name.c_str());
-		newTexture->SetType(ResourceType::TEXTURE);
+		newTexture->SetType(ResourceContainer::Type::TEXTURE);
 		retMD5 = newTexture->GenerateMD5();
 		newTexture->SaveMeta();
 	}

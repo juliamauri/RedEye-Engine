@@ -136,17 +136,17 @@ void RE_ParticleRender::FillResouce(RE_ParticleEmitter* from)
 	direction = from->direction;
 }
 
-void RE_ParticleRender::SaveResourceMeta(RE_Json* metaNode)
+void RE_ParticleRender::SaveResourceMeta(RE_Json* metaNode) const
 {
-	metaNode->Push("isMesh", (meshMD5));
-	if (meshMD5)
-		metaNode->Push("meshPath", RE_RES->At(meshMD5)->GetLibraryPath());
+	metaNode->Push("isMesh", (meshMD5 != nullptr));
+	if (meshMD5) metaNode->Push("meshPath", RE_RES->At(meshMD5)->GetLibraryPath());
 }
 
 void RE_ParticleRender::LoadResourceMeta(RE_Json* metaNode)
 {
 	bool isMesh = metaNode->PullBool("isMesh", false);
-	if (isMesh) {
+	if (isMesh)
+	{
 		eastl::string libraryMesh = metaNode->PullString("meshPath", "");
 		meshMD5 = RE_RES->CheckOrFindMeshOnLibrary(libraryMesh.c_str());
 	}
@@ -286,7 +286,7 @@ void RE_ParticleRender::BinaryDeserialize()
 	}
 }
 
-void RE_ParticleRender::BinarySerialize()
+void RE_ParticleRender::BinarySerialize() const
 {
 	RE_FileBuffer libraryFile(GetLibraryPath());
 

@@ -7,13 +7,13 @@ class RE_ParticleRender : public ResourceContainer
 {
 public:
 
-	RE_ParticleRender() {}
+	RE_ParticleRender() = default;
 	RE_ParticleRender(const char* metapath) : ResourceContainer(metapath) {}
-	~RE_ParticleRender() {}
+	~RE_ParticleRender() final = default;
 
-	void LoadInMemory() override;
-	void UnloadMemory() override;
-	void Import(bool keepInMemory = true) override;
+	void LoadInMemory() override final;
+	void UnloadMemory() override final;
+	void Import(bool keepInMemory = true) override final;
 
 	void Save();
 	void ProcessMD5();
@@ -23,16 +23,14 @@ public:
 
 private:
 
-	//void Draw() override;
-
-	void SaveResourceMeta(RE_Json* metaNode) override;
-	void LoadResourceMeta(RE_Json* metaNode) override;
+	void SaveResourceMeta(RE_Json* metaNode) const override final;
+	void LoadResourceMeta(RE_Json* metaNode) override final;
 
 	void JsonDeserialize(bool generateLibraryPath = false);
 	void JsonSerialize(bool onlyMD5 = false); //We need to call ProcessMD5() before SaveMeta
 
 	void BinaryDeserialize();
-	void BinarySerialize();
+	void BinarySerialize() const;
 	size_t GetBinarySize() const;
 
 private:

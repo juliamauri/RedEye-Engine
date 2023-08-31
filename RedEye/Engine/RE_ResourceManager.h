@@ -20,11 +20,11 @@ public:
 	void RecieveEvent(const Event& e) override;
 
 	ResourceContainer* At(const char* md5) const;
-	const char* ReferenceByMeta(const char* path, ResourceType type);
+	const char* ReferenceByMeta(const char* path, ResourceContainer::Type type);
 	const char* Reference(ResourceContainer* rc);
 	size_t TotalReferences() const;
 
-	eastl::vector<const char*> GetAllResourcesActiveByType(ResourceType resT);
+	eastl::vector<const char*> GetAllResourcesActiveByType(ResourceContainer::Type resT);
 
 	eastl::vector<const char*> WhereUndefinedFileIsUsed(const char* assetPath);
 	eastl::vector<const char*> WhereIsUsed(const char* res);
@@ -48,14 +48,14 @@ public:
 	const char* GetSelected()const;
 	void PopSelected(bool all = false);
 
-	eastl::vector<ResourceContainer*> GetResourcesByType(ResourceType type) const;
-	const char* IsReference(const char* md5, ResourceType type = ResourceType::UNDEFINED);
-	const char* FindMD5ByMETAPath(const char* metaPath, ResourceType type = ResourceType::UNDEFINED);
-	const char* FindMD5ByLibraryPath(const char* libraryPath, ResourceType type = ResourceType::UNDEFINED);
-	const char* FindMD5ByAssetsPath(const char* assetsPath, ResourceType type = ResourceType::UNDEFINED);
+	eastl::vector<ResourceContainer*> GetResourcesByType(ResourceContainer::Type type) const;
+	const char* IsReference(const char* md5, ResourceContainer::Type type = ResourceContainer::Type::UNDEFINED);
+	const char* FindMD5ByMETAPath(const char* metaPath, ResourceContainer::Type type = ResourceContainer::Type::UNDEFINED);
+	const char* FindMD5ByLibraryPath(const char* libraryPath, ResourceContainer::Type type = ResourceContainer::Type::UNDEFINED);
+	const char* FindMD5ByAssetsPath(const char* assetsPath, ResourceContainer::Type type = ResourceContainer::Type::UNDEFINED);
 	const char* CheckOrFindMeshOnLibrary(const char* librariPath);
 
-	bool isNeededResoursesLoaded(const char* metaPath, ResourceType type)const;
+	bool isNeededResoursesLoaded(const char* metaPath, ResourceContainer::Type type)const;
 
 	void ThumbnailResources();
 
@@ -72,7 +72,7 @@ public:
 
 private:
 
-	const char* GetNameFromType(const ResourceType type);
+	const char* GetNameFromType(const ResourceContainer::Type type);
 
 private:
 

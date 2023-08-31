@@ -121,7 +121,7 @@ void RE_ParticleEmitterBase::GenerateSubResourcesAndReference(const char* emissi
 	if (!resource_emission) {
 		RE_ParticleEmission* new_emission = new RE_ParticleEmission();
 		new_emission->SetName(emission_name);
-		new_emission->SetType(ResourceType::PARTICLE_EMISSION);
+		new_emission->SetType(ResourceContainer::Type::PARTICLE_EMISSION);
 		new_emission->SetAssetPath(eastl::string("Assets/Particles/"
 			+ eastl::string(emission_name) + ".lasse").c_str());
 		resource_emission = RE_RES->Reference(new_emission);
@@ -130,7 +130,7 @@ void RE_ParticleEmitterBase::GenerateSubResourcesAndReference(const char* emissi
 	if (!resource_renderer) {
 		RE_ParticleRender* new_renderer = new RE_ParticleRender();
 		new_renderer->SetName(renderer_name);
-		new_renderer->SetType(ResourceType::PARTICLE_RENDER);
+		new_renderer->SetType(ResourceContainer::Type::PARTICLE_RENDER);
 		new_renderer->SetAssetPath(eastl::string("Assets/Particles/"
 			+ eastl::string(renderer_name) + ".lopfe").c_str());
 		resource_renderer = RE_RES->Reference(new_renderer);
@@ -209,7 +209,7 @@ void RE_ParticleEmitterBase::Draw()
 	//ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
 }
 
-void RE_ParticleEmitterBase::SaveResourceMeta(RE_Json* metaNode)
+void RE_ParticleEmitterBase::SaveResourceMeta(RE_Json* metaNode) const
 {
 	metaNode->Push("Emission Meta", (resource_emission) ? RE_RES->At(resource_emission)->GetMetaPath() : "NOMETAPATH");
 	metaNode->Push("Rendering Meta", (resource_renderer) ? RE_RES->At(resource_renderer)->GetMetaPath() : "NOMETAPATH");
@@ -218,8 +218,8 @@ void RE_ParticleEmitterBase::SaveResourceMeta(RE_Json* metaNode)
 void RE_ParticleEmitterBase::LoadResourceMeta(RE_Json* metaNode)
 {
 	eastl::string tmp = metaNode->PullString("Emission Meta", "NOMETAPATH");
-	if (tmp.compare("NOMETAPATH") != 0) resource_emission = RE_RES->FindMD5ByMETAPath(tmp.c_str(), ResourceType::PARTICLE_EMISSION);
+	if (tmp.compare("NOMETAPATH") != 0) resource_emission = RE_RES->FindMD5ByMETAPath(tmp.c_str(), ResourceContainer::Type::PARTICLE_EMISSION);
 	
 	tmp = metaNode->PullString("Rendering Meta", "NOMETAPATH");
-	if (tmp.compare("NOMETAPATH") != 0) resource_renderer = RE_RES->FindMD5ByMETAPath(tmp.c_str(), ResourceType::PARTICLE_RENDER);
+	if (tmp.compare("NOMETAPATH") != 0) resource_renderer = RE_RES->FindMD5ByMETAPath(tmp.c_str(), ResourceContainer::Type::PARTICLE_RENDER);
 }

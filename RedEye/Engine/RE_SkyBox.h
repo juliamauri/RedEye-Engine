@@ -10,10 +10,10 @@ public:
 	RE_SkyBox(const char* metaPath) : ResourceContainer(metaPath) {}
 	~RE_SkyBox() final = default;
 
-	void LoadInMemory() override;
-	void UnloadMemory() override;
+	void LoadInMemory() override final;
+	void UnloadMemory() override final;
 
-	void Import(bool keepInMemory = true) override;
+	void Import(bool keepInMemory = true) override final;
 
 	void use();
 	unsigned int GetID()const { return ID; }
@@ -33,11 +33,11 @@ public:
 
 private:
 
-	void Draw() override;
-	void SaveResourceMeta(RE_Json* metaNode) override;
-	void LoadResourceMeta(RE_Json* metaNode) override;
+	void Draw() override final;
+	void SaveResourceMeta(RE_Json* metaNode) const override final;
+	void LoadResourceMeta(RE_Json* metaNode) override final;
 
-	bool NeededResourcesReferenced(RE_Json* metaNode) override;
+	bool NeededResourcesReferenced(RE_Json* metaNode) override final;
 
 	void AssetLoad(bool generateLibraryPath = false);
 	void LibraryLoad();

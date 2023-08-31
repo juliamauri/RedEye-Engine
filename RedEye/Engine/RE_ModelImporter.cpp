@@ -43,7 +43,7 @@ void GetTexturesMaterial(aiMaterial* material, eastl::string& fileTexturePath, a
 
 				if (RE_FS->Exists(realAssetsPath.c_str()))
 				{
-					const char* texture = RE_RES->FindMD5ByAssetsPath(realAssetsPath.c_str(), ResourceType::TEXTURE);
+					const char* texture = RE_RES->FindMD5ByAssetsPath(realAssetsPath.c_str(), ResourceContainer::Type::TEXTURE);
 					if (texture) vectorToFill->push_back(texture);
 					else RE_LOG_ERROR("Cannot load texture from material.\nMaterial: %s\nTexture Path: %s\n", name.C_Str(), realAssetsPath.c_str());
 				}
@@ -66,7 +66,7 @@ void ProcessMaterials(const aiScene* scene)
 		RE_LOG_TERCIARY("Loadinig %s material.", name.C_Str());
 
 		eastl::string filePath = "Assets/Materials/" + aditionalData->name + "/" + name.C_Str() + ".pupil";
-		materialMD5 = RE_RES->FindMD5ByAssetsPath(filePath.c_str(), ResourceType::MATERIAL);
+		materialMD5 = RE_RES->FindMD5ByAssetsPath(filePath.c_str(), ResourceContainer::Type::MATERIAL);
 		if (!materialMD5)
 		{
 			RE_Material* newMaterial = new RE_Material();
@@ -135,7 +135,7 @@ void ProcessMaterials(const aiScene* scene)
 			ResourceContainer* container = static_cast<ResourceContainer*>(newMaterial);
 			container->SetName(name.C_Str());
 			container->SetAssetPath(filePath.c_str());
-			container->SetType(ResourceType::MATERIAL);
+			container->SetType(ResourceContainer::Type::MATERIAL);
 
 			newMaterial->Save();
 			materialMD5 = RE_RES->Reference(container);
@@ -219,7 +219,7 @@ void ProcessMeshes(const aiScene* scene)
 			if (!exists)
 			{
 				newMesh->SetName(mesh->mName.C_Str());
-				newMesh->SetType(ResourceType::MESH);
+				newMesh->SetType(ResourceContainer::Type::MESH);
 				newMesh->SetAssetPath(aditionalData->workingfilepath.c_str());
 				RE_RES->Reference(newMesh);
 			}

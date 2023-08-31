@@ -9,28 +9,29 @@ class RE_Json;
 #include "RE_DataTypes.h"
 #include <EASTL/string.h>
 
-enum class ResourceType : ushort
-{
-	UNDEFINED = 0x00,
-
-	SHADER,
-	TEXTURE,
-	MESH,
-	PREFAB,
-	SKYBOX,
-	MATERIAL,
-	MODEL,
-	SCENE,
-	PARTICLE_EMITTER,
-	PARTICLE_EMISSION,
-	PARTICLE_RENDER,
-
-	MAX
-};
-
 class ResourceContainer
 {
 public:
+
+	enum class Type : ushort
+	{
+		UNDEFINED = 0x00,
+
+		SHADER,
+		TEXTURE,
+		MESH,
+		PREFAB,
+		SKYBOX,
+		MATERIAL,
+		MODEL,
+		SCENE,
+		PARTICLE_EMITTER,
+		PARTICLE_EMISSION,
+		PARTICLE_RENDER,
+
+		MAX
+	};
+
 	ResourceContainer();
 	ResourceContainer(const char* metaPath);
 	virtual ~ResourceContainer();
@@ -39,10 +40,10 @@ public:
 	const char* GetAssetPath() const;
 	const char* GetMetaPath() const;
 	const char* GetMD5() const;
-	const ResourceType GetType() const;
+	const Type GetType() const;
 	const signed long long GetLastTimeModified() const;
 
-	void SetType(const ResourceType type);
+	void SetType(const Type type);
 	void SetMD5(const char* md5);
 	virtual void SetLibraryPath(const char* path);
 	virtual void SetAssetPath(const char* originPath);
@@ -51,7 +52,6 @@ public:
 	void SetInternal(bool is_internal);
 
 	bool isInternal() const { return isinternal; }
-
 	bool isInMemory() const { return inMemory; }
 	virtual void LoadInMemory(){}
 	virtual void UnloadMemory(){}
@@ -63,14 +63,14 @@ public:
 	void SaveMeta();
 	void LoadMeta();
 
-	bool isNeededResourcesReferenced();
+	bool CheckResourcesReferenced();
 
 	void DrawPropieties();
 
 private:
 
 	virtual void Draw() {}
-	virtual void SaveResourceMeta(RE_Json* metaNode) {}
+	virtual void SaveResourceMeta(RE_Json* metaNode) const {}
 	virtual void LoadResourceMeta(RE_Json* metaNode) {}
 
 	virtual bool NeededResourcesReferenced(RE_Json* metaNode) { return false; }
@@ -84,7 +84,7 @@ private:
 	eastl::string metaPath;
 
 	char* md5 = nullptr;
-	ResourceType type = ResourceType::UNDEFINED;
+	Type type = Type::UNDEFINED;
 	signed long long lastModified = 0;
 
 	bool isinternal = false;

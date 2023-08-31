@@ -32,12 +32,12 @@ const char * ResourceContainer::GetName() const { return name.c_str(); }
 const char * ResourceContainer::GetAssetPath() const { return assetPath.c_str(); }
 const char * ResourceContainer::GetMetaPath() const { return metaPath.c_str(); }
 const char* ResourceContainer::GetMD5() const { return md5; }
-const ResourceType ResourceContainer::GetType() const { return type; }
+const ResourceContainer::Type ResourceContainer::GetType() const { return type; }
 const signed long long ResourceContainer::GetLastTimeModified() const { return lastModified; }
 
-void ResourceContainer::SetType(const ResourceType _type)
+void ResourceContainer::SetType(const ResourceContainer::Type _type)
 {
-	static const char* names[static_cast<const unsigned short>(ResourceType::MAX)] =
+	static const char* names[static_cast<const unsigned short>(ResourceContainer::Type::MAX)] =
 	{ "Undefined ", "Shader ", "Texture ", "Mesh ", "Prefab ", "SkyBox ", "Material ", "Model ", "Scene ", "Particle emitter", "Particle emission", "Particle render" };
 	
 	(propietiesName = names[static_cast<const unsigned short>(type = _type)]) += "resource ";
@@ -93,7 +93,7 @@ void ResourceContainer::LoadMeta()
 		assetPath = metaNode->PullString("AssetPath", "Assets/");
 		libraryPath = metaNode->PullString("LibraryPath", "Library/");
 		SetMD5(metaNode->PullString("MD5", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
-		SetType(static_cast<const ResourceType>(metaNode->PullUInt("Type", static_cast<const unsigned int>(ResourceType::UNDEFINED))));
+		SetType(static_cast<ResourceContainer::Type>(metaNode->PullUInt("Type", static_cast<uint>(ResourceContainer::Type::UNDEFINED))));
 		lastModified  = metaNode->PullSignedLongLong("lastModified", 0);
 
 		LoadResourceMeta(metaNode);
@@ -101,11 +101,12 @@ void ResourceContainer::LoadMeta()
 	}
 }
 
-bool ResourceContainer::isNeededResourcesReferenced()
+bool ResourceContainer::CheckResourcesReferenced()
 {
 	bool ret = false;
 	Config metaDeserialize(metaPath.c_str());
-	if (metaDeserialize.Load()) {
+	if (metaDeserialize.Load())
+	{
 		RE_Json* metaNode = metaDeserialize.GetRootNode("meta");
 		ret = NeededResourcesReferenced(metaNode);
 		DEL(metaNode)

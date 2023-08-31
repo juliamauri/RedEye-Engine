@@ -283,9 +283,9 @@ void RE_Texture::Draw()
 	if (applySave && texSettings == restoreSettings) applySave = false;
 }
 
-void RE_Texture::SaveResourceMeta(RE_Json * metaNode)
+void RE_Texture::SaveResourceMeta(RE_Json * metaNode) const
 {
-	metaNode->Push("TextureType", static_cast<int>(texType));
+	metaNode->Push("TextureType", static_cast<uint>(texType));
 	metaNode->Push("minFilter", static_cast<int>(texSettings.min_filter));
 	metaNode->Push("magFilter", static_cast<int>(texSettings.mag_filter));
 	metaNode->Push("wrapS", static_cast<int>(texSettings.wrap_s));
@@ -295,7 +295,7 @@ void RE_Texture::SaveResourceMeta(RE_Json * metaNode)
 
 void RE_Texture::LoadResourceMeta(RE_Json * metaNode)
 {
-	texType = static_cast<RE_TextureSettings::Type>(metaNode->PullInt("TextureType", static_cast<int>(RE_TextureSettings::Type::TEXTURE_UNKNOWN)));
+	texType = static_cast<RE_TextureSettings::Type>(metaNode->PullInt("TextureType", static_cast<uint>(RE_TextureSettings::Type::TEXTURE_UNKNOWN)));
 	texSettings.min_filter = static_cast<RE_TextureSettings::Filter>(metaNode->PullInt("minFilter", static_cast<int>(RE_TextureSettings::Filter::NEAREST)));
 	texSettings.mag_filter = static_cast<RE_TextureSettings::Filter>(metaNode->PullInt("magFilter", static_cast<int>(RE_TextureSettings::Filter::NEAREST)));
 	texSettings.wrap_s = static_cast<RE_TextureSettings::Wrap>(metaNode->PullInt("wrapS", static_cast<int>(RE_TextureSettings::Wrap::REPEAT)));

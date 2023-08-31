@@ -15,10 +15,10 @@ public:
 	RE_TextureSettings::Type DetectExtension();
 	RE_TextureSettings::Type GetTextureType() const;
 
-	void LoadInMemory() override;
-	void UnloadMemory() override;
+	void LoadInMemory() override final;
+	void UnloadMemory() override final;
 
-	void Import(bool keepInMemory = true) override;
+	void Import(bool keepInMemory = true) override final;
 
 	void use();
 	void GetWithHeight(int* w, int* h);
@@ -31,13 +31,13 @@ public:
 	static int GetComboWrap(RE_TextureSettings::Wrap wrap);
 	static RE_TextureSettings::Wrap GetWrapCombo(int combo);
 
-	void ReImport() override;
+	void ReImport() override final;
 
 private:
 
-	void Draw() override;
-	void SaveResourceMeta(RE_Json* metaNode) override; 
-	void LoadResourceMeta(RE_Json* metaNode) override; 
+	void Draw() override final;
+	void SaveResourceMeta(RE_Json* metaNode) const override final;
+	void LoadResourceMeta(RE_Json* metaNode) override final;
 
 	void AssetLoad();
 	void LibraryLoad();

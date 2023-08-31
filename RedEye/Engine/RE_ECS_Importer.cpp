@@ -25,11 +25,11 @@ void RE_ECS_Importer::JsonSerialize(RE_Json* node, RE_ECS_Pool* pool)
 	{
 		RE_Json* resN = resources->PushJObject(("r" + eastl::to_string(r)).c_str());
 		ResourceContainer* res = RE_RES->At(resGo.at(static_cast<unsigned int>(r)));
-		ResourceType rtype = res->GetType();
+		ResourceContainer::Type rtype = res->GetType();
 
 		resN->Push("index", r);
 		resN->Push("type", static_cast<uint>(rtype));
-		resN->Push("mPath", (rtype == ResourceType::MESH) ? res->GetLibraryPath() : res->GetMetaPath());
+		resN->Push("mPath", (rtype == ResourceContainer::Type::MESH) ? res->GetLibraryPath() : res->GetMetaPath());
 
 		DEL(resN)
 	}
@@ -54,7 +54,7 @@ char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, size_t* bufferSize)
 
 	*bufferSize = sizeof(uint) + ((sizeof(int) + sizeof(ushort) + sizeof(uint)) * resGo.size());
 	for (ResourceContainer* res : resC)
-		*bufferSize += eastl::CharStrlen((res->GetType() == ResourceType::MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
+		*bufferSize += eastl::CharStrlen((res->GetType() == ResourceContainer::Type::MESH) ? res->GetLibraryPath() : res->GetMetaPath()) * sizeof(char);
 	*bufferSize += pool->GetBinarySize();
 	*bufferSize += 1;
 
@@ -69,7 +69,7 @@ char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, size_t* bufferSize)
 	for (int r = 0; r < static_cast<int>(resGo.size()); r++)
 	{
 		ResourceContainer* res = resC.at(static_cast<unsigned int>(r));
-		ResourceType rtype = res->GetType();
+		ResourceContainer::Type rtype = res->GetType();
 
 		size = sizeof(int);
 		memcpy(cursor, &r, size);
@@ -80,7 +80,7 @@ char* RE_ECS_Importer::BinarySerialize(RE_ECS_Pool* pool, size_t* bufferSize)
 		memcpy(cursor, &typeI, size);
 		cursor += size;
 
-		const char* toCopy = (rtype == ResourceType::MESH) ? res->GetLibraryPath() : res->GetMetaPath();
+		const char* toCopy = (rtype == ResourceContainer::Type::MESH) ? res->GetLibraryPath() : res->GetMetaPath();
 		size_t strsize = eastl::CharStrlen(toCopy);
 		size = sizeof(size_t);
 		memcpy(cursor, &strsize, size);
@@ -112,11 +112,11 @@ RE_ECS_Pool* RE_ECS_Importer::JsonDeserialize(RE_Json* node)
 		RE_Json* resN = resources->PullJObject(("r" + eastl::to_string(r)).c_str());
 
 		int index = resN->PullInt("index", -1);
-		auto type = static_cast<ResourceType>(resN->PullUInt("type", static_cast<const uint>(ResourceType::UNDEFINED)));
+		auto type = static_cast<ResourceContainer::Type>(resN->PullUInt("type", static_cast<const uint>(ResourceContainer::Type::UNDEFINED)));
 		eastl::string mPath = resN->PullString("mPath", "");
 
 		const char* resMD5 = nullptr;
-		resMD5 = (type == ResourceType::MESH) ?
+		resMD5 = (type == ResourceContainer::Type::MESH) ?
 			RE_RES->CheckOrFindMeshOnLibrary(mPath.c_str()) :
 			RE_RES->FindMD5ByMETAPath(mPath.c_str(), type);
 
@@ -150,7 +150,7 @@ RE_ECS_Pool* RE_ECS_Importer::BinaryDeserialize(char*& cursor)
 		ushort typeI = 0;
 		memcpy(&typeI, cursor, size);
 		cursor += size;
-		auto rType = static_cast<ResourceType>(typeI);
+		auto rType = static_cast<ResourceContainer::Type>(typeI);
 
 		size = sizeof(size_t);
 		size_t strsize = 0;
@@ -167,7 +167,7 @@ RE_ECS_Pool* RE_ECS_Importer::BinaryDeserialize(char*& cursor)
 		memcpy(strCursor, &nullchar, sizeof(char));
 
 		const char* resMD5 = nullptr;
-		(rType == ResourceType::MESH) ?
+		(rType == ResourceContainer::Type::MESH) ?
 			resMD5 = RE_RES->CheckOrFindMeshOnLibrary(str) :
 			resMD5= RE_RES->FindMD5ByMETAPath(str, rType);
 
@@ -194,11 +194,11 @@ bool RE_ECS_Importer::JsonCheckResources(RE_Json* node)
 		RE_Json* resN = resources->PullJObject(ref.c_str());
 
 		int index = resN->PullInt("index", -1);
-		auto type = static_cast<ResourceType>(resN->PullUInt("type", static_cast<unsigned int>(ResourceType::UNDEFINED)));
+		auto type = static_cast<ResourceContainer::Type>(resN->PullUInt("type", static_cast<unsigned int>(ResourceContainer::Type::UNDEFINED)));
 		eastl::string mPath = resN->PullString("mPath", "");
 
 		const char* resMD5 = nullptr;
-		resMD5 = (type == ResourceType::MESH) ?
+		resMD5 = (type == ResourceContainer::Type::MESH) ?
 			RE_RES->CheckOrFindMeshOnLibrary(mPath.c_str()) :
 			RE_RES->FindMD5ByMETAPath(mPath.c_str(), type);
 
@@ -230,7 +230,7 @@ bool RE_ECS_Importer::BinaryCheckResources(char*& cursor)
 		ushort typeI = 0;
 		memcpy(&typeI, cursor, size);
 		cursor += size;
-		auto rType = static_cast<ResourceType>(typeI);
+		auto rType = static_cast<ResourceContainer::Type>(typeI);
 
 		size = sizeof(size_t);
 		size_t strsize = 0;
@@ -247,7 +247,7 @@ bool RE_ECS_Importer::BinaryCheckResources(char*& cursor)
 		memcpy(strCursor, &nullchar, sizeof(char));
 
 		const char* resMD5 = nullptr;
-		resMD5 = (rType == ResourceType::MESH) ?
+		resMD5 = (rType == ResourceContainer::Type::MESH) ?
 			RE_RES->CheckOrFindMeshOnLibrary(str) :
 			RE_RES->FindMD5ByMETAPath(str, rType);
 

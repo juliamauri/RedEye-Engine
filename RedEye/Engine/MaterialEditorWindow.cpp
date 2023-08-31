@@ -57,7 +57,7 @@ void MaterialEditorWindow::Draw(bool secondary)
 		{
 			editingMaerial->SetName(matName.c_str());
 			editingMaerial->SetAssetPath(assetPath.c_str());
-			editingMaerial->SetType(ResourceType::MATERIAL);
+			editingMaerial->SetType(ResourceContainer::Type::MATERIAL);
 			editingMaerial->Save();
 
 			RE_RENDER->PushThumnailRend(RE_RES->Reference((ResourceContainer*)editingMaerial));

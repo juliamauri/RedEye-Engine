@@ -122,10 +122,16 @@ public:
 	bool*			AsBool2();
 	bool*			AsBool3();
 	bool*			AsBool4();
+	const bool*		AsBool2() const;
+	const bool*		AsBool3() const;
+	const bool*		AsBool4() const;
 	int				AsInt() const;
 	int*			AsInt2();
 	int*			AsInt3();
 	int*			AsInt4();
+	const int*		AsInt2() const;
+	const int*		AsInt3() const;
+	const int*		AsInt4() const;
 	uint			AsUInt() const;
 	long long		AsInt64() const;
 	ulonglong		AsUInt64() const;

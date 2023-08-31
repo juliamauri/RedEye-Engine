@@ -70,7 +70,7 @@ void ParticleEmitterEditorWindow::SaveEmitter(bool close, const char* emitter_na
 	else
 	{
 		new_emitter->SetName(emitter_name);
-		new_emitter->SetType(ResourceType::PARTICLE_EMITTER);
+		new_emitter->SetType(ResourceContainer::Type::PARTICLE_EMITTER);
 		new_emitter->GenerateSubResourcesAndReference(emissor_base, renderer_base);
 		new_emitter->FillAndSave(simulation);
 
@@ -174,7 +174,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				ImGui::SameLine();
 				if (ImGui::BeginMenu("Change emissor"))
 				{
-					eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(ResourceType::PARTICLE_EMISSION);
+					eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(ResourceContainer::Type::PARTICLE_EMISSION);
 					bool none = true;
 					unsigned int count = 0;
 					for (auto m : meshes)
@@ -185,7 +185,8 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 						eastl::string name = eastl::to_string(count++) + m->GetName();
 						if (ImGui::MenuItem(name.c_str()))
 						{
-							if (emiter_md5) dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->ChangeEmissor(simulation, m->GetMD5());
+							if (emiter_md5)
+								dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->ChangeEmissor(simulation, m->GetMD5());
 							else new_emitter->ChangeEmissor(simulation, m->GetMD5());
 
 							need_save = true;
@@ -200,7 +201,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 
 				if (ImGui::BeginMenu("Change render"))
 				{
-					eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(ResourceType::PARTICLE_RENDER);
+					eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(ResourceContainer::Type::PARTICLE_RENDER);
 					bool none = true;
 					unsigned int count = 0;
 					for (auto m : meshes)
@@ -211,7 +212,8 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 						eastl::string name = eastl::to_string(count++) + m->GetName();
 						if (ImGui::MenuItem(name.c_str()))
 						{
-							if (emiter_md5) dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->ChangeRenderer(simulation, m->GetMD5());
+							if (emiter_md5)
+								dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->ChangeRenderer(simulation, m->GetMD5());
 							else new_emitter->ChangeRenderer(simulation, m->GetMD5());
 
 							need_save = true;
@@ -615,7 +617,7 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 
 			if (ImGui::BeginMenu("Change mesh"))
 			{
-				eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(ResourceType::MESH);
+				eastl::vector<ResourceContainer*> meshes = RE_RES->GetResourcesByType(ResourceContainer::Type::MESH);
 				bool none = true;
 				unsigned int count = 0;
 				for (auto m : meshes)

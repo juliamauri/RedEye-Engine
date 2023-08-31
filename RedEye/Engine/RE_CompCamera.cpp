@@ -99,7 +99,7 @@ void RE_CompCamera::DrawProperties()
 
 			if (ImGui::BeginMenu("Change skybox"))
 			{
-				eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(ResourceType::SKYBOX);
+				eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(ResourceContainer::Type::SKYBOX);
 				bool none = true;
 				for (auto material : materials)
 				{

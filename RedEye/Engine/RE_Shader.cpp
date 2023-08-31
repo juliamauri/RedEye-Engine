@@ -24,29 +24,6 @@
 #include <ImGui/imgui.h>
 #include <PhysFS/physfs.h>
 
-void RE_Shader::LoadInMemory()
-{
-	if (RE_FS->Exists(GetLibraryPath()))
-	{
-		LibraryLoad();
-	}
-	else if (RE_FS->Exists(shaderSettings.vertexShader.c_str()) && RE_FS->Exists(shaderSettings.fragmentShader.c_str()))
-	{
-		AssetLoad();
-		LibrarySave();
-	}
-	else RE_LOG_ERROR("Shader %s not found in project", GetName());
-
-	if (isInMemory()) 
-		GetLocations();
-}
-
-void RE_Shader::UnloadMemory()
-{
-	RE_ShaderImporter::Delete(ID);
-	ResourceContainer::inMemory = false;
-}
-
 void RE_Shader::SetAsInternal(const char* vertexBuffer, const char* fragmentBuffer, const char* geometryBuffer)
 {
 	SetInternal(true);
@@ -137,9 +114,7 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	if (!isInternal()) SetMetaPath("Assets/Shaders/");
 }
 
-eastl::vector<RE_Shader_Cvar> RE_Shader::GetUniformValues() { return uniforms; }
-
-void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane)
+void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane) const
 {
 	RE_GLCache::ChangeShader(ID);
 	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
@@ -170,7 +145,7 @@ void RE_Shader::UploadDepth(int texture) const
 	if (depth != -1) RE_ShaderImporter::setInt(uniforms[depth].location, texture);
 }
 
-bool RE_Shader::isShaderFilesChanged()
+bool RE_Shader::ShaderFilesChanged()
 {
 	bool ret = false;
 
@@ -212,6 +187,35 @@ bool RE_Shader::isShaderFilesChanged()
 	return ret;
 }
 
+bool RE_Shader::IsPathOnShader(const char* assetPath) const
+{
+	eastl::string path = assetPath;
+	return (path == shaderSettings.vertexShader || path == shaderSettings.fragmentShader || path == shaderSettings.geometryShader);
+}
+
+void RE_Shader::LoadInMemory()
+{
+	if (RE_FS->Exists(GetLibraryPath()))
+	{
+		LibraryLoad();
+	}
+	else if (RE_FS->Exists(shaderSettings.vertexShader.c_str()) && RE_FS->Exists(shaderSettings.fragmentShader.c_str()))
+	{
+		AssetLoad();
+		LibrarySave();
+	}
+	else RE_LOG_ERROR("Shader %s not found in project", GetName());
+
+	if (isInMemory())
+		GetLocations();
+}
+
+void RE_Shader::UnloadMemory()
+{
+	RE_ShaderImporter::Delete(ID);
+	ResourceContainer::inMemory = false;
+}
+
 void RE_Shader::ReImport()
 {
 	bool reload = (ResourceContainer::inMemory);
@@ -228,10 +232,161 @@ void RE_Shader::ReImport()
 	RE_INPUT->Push(RE_EventType::RESOURCE_CHANGED, RE_RES, RE_Cvar(GetMD5()));
 }
 
-bool RE_Shader::IsPathOnShader(const char* assetPath)
+void RE_Shader::Draw()
 {
-	eastl::string path = assetPath;
-	return (path == shaderSettings.vertexShader || path == shaderSettings.fragmentShader || path == shaderSettings.geometryShader);
+	// TODO Julius: drag & drop of shader files
+	ImGui::Text("Vertex Shader path: %s", shaderSettings.vertexShader.c_str());
+	if (!shaderSettings.vertexShader.empty())
+		if (ImGui::Button("Edit vertex"))
+			RE_EDITOR->OpenTextEditor(shaderSettings.vertexShader.c_str(), &shaderSettings.vertexShader);
+	ImGui::Text("Fragment Shader path: %s", shaderSettings.fragmentShader.c_str());
+	if (!shaderSettings.fragmentShader.empty())
+		if (ImGui::Button("Edit fragment"))
+			RE_EDITOR->OpenTextEditor(shaderSettings.fragmentShader.c_str(), &shaderSettings.fragmentShader);
+	ImGui::Text("Geometry Shader path: %s", shaderSettings.geometryShader.c_str());
+	if (!shaderSettings.geometryShader.empty())
+		if (ImGui::Button("Edit geometry"))
+			RE_EDITOR->OpenTextEditor(shaderSettings.geometryShader.c_str(), &shaderSettings.geometryShader);
+}
+
+void RE_Shader::SaveResourceMeta(RE_Json* metaNode) const
+{
+	metaNode->Push("vertexPath", shaderSettings.vertexShader.c_str());
+	metaNode->Push("vLastModified", shaderSettings.vlastModified);
+	metaNode->Push("fragmentPath", shaderSettings.fragmentShader.c_str());
+	metaNode->Push("fLastModified", shaderSettings.flastModified);
+	metaNode->Push("geometryPath", shaderSettings.geometryShader.c_str());
+	metaNode->Push("gLastModified", shaderSettings.glastModified);
+
+	RE_Json* nuniforms = metaNode->PushJObject("uniforms");
+	nuniforms->PushSizeT("size", uniforms.size());
+	if (!uniforms.empty())
+	{
+		for (size_t i = 0; i < uniforms.size(); i++)
+		{
+			nuniforms->Push(("name" + eastl::to_string(i)).c_str(), uniforms[i].name.c_str());
+			nuniforms->Push(("type" + eastl::to_string(i)).c_str(), static_cast<uint>(uniforms[i].GetType()));
+			nuniforms->Push(("custom" + eastl::to_string(i)).c_str(), uniforms[i].custom);
+		}
+	}
+	DEL(nuniforms)
+}
+
+void RE_Shader::LoadResourceMeta(RE_Json* metaNode)
+{
+	shaderSettings.vertexShader = metaNode->PullString("vertexPath", "");
+	shaderSettings.vlastModified = metaNode->PullSignedLongLong("vLastModified", 0);
+	shaderSettings.fragmentShader = metaNode->PullString("fragmentPath", "");
+	shaderSettings.flastModified = metaNode->PullSignedLongLong("fLastModified", 0);
+	shaderSettings.geometryShader = metaNode->PullString("geometryPath", "");
+	shaderSettings.glastModified = metaNode->PullSignedLongLong("gLastModified", 0);
+
+	projection = view = model = time = dt = depth = viewport_w = viewport_h = near_plane = far_plane = view_pos = -1;
+	uniforms.clear();
+	RE_Json* nuniforms = metaNode->PullJObject("uniforms");
+	auto size = nuniforms->PullSizeT("size", 0);
+	if (size)
+	{
+		eastl::string id;
+		for (size_t i = 0; i < size; i++)
+		{
+			RE_Shader_Cvar sVar;
+			id = "name" + eastl::to_string(i);
+			sVar.name = nuniforms->PullString(id.c_str(), "");
+
+			id = "type" + eastl::to_string(i);
+			auto vT = static_cast<RE_Cvar::Type>(nuniforms->PullUInt(id.c_str(), static_cast<uint>(RE_Cvar::Type(0))));
+
+			id = "custom" + eastl::to_string(i);
+			sVar.custom = nuniforms->PullBool(id.c_str(), true);
+
+			bool b2[2] = { false, false };
+			bool b3[3] = { false, false, false };
+			bool b4[4] = { false, false, false, false };
+
+			int i2[2] = { 0, 0 };
+			int i3[3] = { 0, 0, 0 };
+			int i4[4] = { 0, 0, 0, 0 };
+			float f = 0.0;
+
+			switch (vT)
+			{
+			case RE_Cvar::Type::BOOL: sVar.SetValue(true, true); break;
+			case RE_Cvar::Type::BOOL2: sVar.SetValue(b2, 2, true); break;
+			case RE_Cvar::Type::BOOL3: sVar.SetValue(b3, 3, true); break;
+			case RE_Cvar::Type::BOOL4: sVar.SetValue(b4, 4, true); break;
+			case RE_Cvar::Type::INT: sVar.SetValue(-1, true); break;
+			case RE_Cvar::Type::INT2: sVar.SetValue(i2, 2, true); break;
+			case RE_Cvar::Type::INT3: sVar.SetValue(i3, 3, true); break;
+			case RE_Cvar::Type::INT4: sVar.SetValue(i4, 4, true); break;
+			case RE_Cvar::Type::FLOAT: sVar.SetValue(f, true); break;
+			case RE_Cvar::Type::FLOAT2: sVar.SetValue(math::float2::zero, true); break;
+			case RE_Cvar::Type::FLOAT3: sVar.SetValue(math::float3::zero, true); break;
+			case RE_Cvar::Type::FLOAT4: sVar.SetValue(math::float4::zero, false, true); break;
+			case RE_Cvar::Type::MAT2: sVar.SetValue(math::float4::zero, true, true); break;
+			case RE_Cvar::Type::MAT3: sVar.SetValue(math::float3x3::zero, true); break;
+			case RE_Cvar::Type::MAT4: sVar.SetValue(math::float4x4::zero, true); break;
+			case RE_Cvar::Type::SAMPLER: sVar.SetSampler(nullptr, true); break;
+			default: break;
+			}
+
+			uniforms.push_back(sVar);
+			if (!sVar.custom)
+			{
+				if (projection == -1 && sVar.name.compare("projection") == 0) projection = uniforms.size() - 1;
+				else if (view == -1 && sVar.name.compare("view") == 0) view = uniforms.size() - 1;
+				else if (model == -1 && sVar.name.compare("model") == 0) model = uniforms.size() - 1;
+				else if (dt == -1 && sVar.name.compare("dt") == 0) dt = uniforms.size() - 1;
+				else if (time == -1 && sVar.name.compare("time") == 0) time = uniforms.size() - 1;
+				else if (depth == -1 && sVar.name.compare("currentDepth") == 0) depth = uniforms.size() - 1;
+				else if (viewport_w == -1 && sVar.name.compare("viewport_w") == 0) viewport_w = uniforms.size() - 1;
+				else if (viewport_h == -1 && sVar.name.compare("viewport_h") == 0) viewport_h = uniforms.size() - 1;
+				else if (near_plane == -1 && sVar.name.compare("near_plane") == 0) near_plane = uniforms.size() - 1;
+				else if (far_plane == -1 && sVar.name.compare("far_plane") == 0) far_plane = uniforms.size() - 1;
+				else if (using_clip_plane == -1 && sVar.name.compare("useClipPlane") == 0) using_clip_plane = uniforms.size() - 1;
+				else if (clip_plane == -1 && sVar.name.compare("clip_plane") == 0) clip_plane = uniforms.size() - 1;
+				else if (view_pos == -1 && sVar.name.compare("viewPos") == 0) view_pos = uniforms.size() - 1;
+			}
+		}
+	}
+
+	DEL(nuniforms)
+		restoreSettings = shaderSettings;
+}
+
+void RE_Shader::AssetLoad()
+{
+	bool loaded = false;
+	loaded = RE_ShaderImporter::LoadFromAssets(&ID,
+		(!shaderSettings.vertexShader.empty()) ? shaderSettings.vertexShader.c_str() : nullptr,
+		(!shaderSettings.fragmentShader.empty()) ? shaderSettings.fragmentShader.c_str() : nullptr,
+		(!shaderSettings.geometryShader.empty()) ? shaderSettings.geometryShader.c_str() : nullptr);
+
+	if (!loaded) RE_LOG_ERROR("Error while loading shader %s on assets:\n%s\n", GetName(), RE_ShaderImporter::GetShaderError());
+	else ResourceContainer::inMemory = true;
+}
+
+void RE_Shader::LibraryLoad()
+{
+	RE_FileBuffer libraryLoad(GetLibraryPath());
+	if (libraryLoad.Load())
+	{
+		if (!RE_ShaderImporter::LoadFromBinary(libraryLoad.GetBuffer(), libraryLoad.GetSize(), &ID))
+		{
+			AssetLoad();
+			LibrarySave();
+		}
+		ResourceContainer::inMemory = true;
+	}
+}
+
+void RE_Shader::LibrarySave() const
+{
+	RE_FileBuffer librarySave(GetLibraryPath());
+	char* buffer = nullptr;
+	int size = 0;
+	if (RE_ShaderImporter::GetBinaryProgram(ID, &buffer, &size)) librarySave.Save(buffer, size);
+	DEL_A(buffer);
 }
 
 void RE_Shader::GetVertexFileInfo(const char*& path, signed long long* lastTimeModified) const
@@ -364,7 +519,8 @@ void RE_Shader::MountRE_Shader_Cvar(eastl::vector<eastl::string> uniformLines)
 			}
 
 			uniforms.push_back(sVar);
-			if (!sVar.custom) {
+			if (!sVar.custom)
+			{
 				if (projection == -1 && sVar.name.compare("projection") == 0) projection = uniforms.size() - 1;
 				else if (view == -1 && sVar.name.compare("view") == 0) view = uniforms.size() - 1;
 				else if (model == -1 && sVar.name.compare("model") == 0) model = uniforms.size() - 1;
@@ -389,163 +545,4 @@ void RE_Shader::GetLocations()
 	for (unsigned int i = 0; i < uniforms.size(); i++)
 		uniforms[i].location = RE_ShaderImporter::getLocation(ID, uniforms[i].name.c_str());
 	RE_GLCache::ChangeShader(0);
-}
-
-bool RE_Shader::NeedUploadDepth() const { return (depth != -1); }
-
-void RE_Shader::Draw()
-{
-	// TODO Julius: drag & drop of shader files
-	ImGui::Text("Vertex Shader path: %s", shaderSettings.vertexShader.c_str());
-	if (!shaderSettings.vertexShader.empty())
-		if (ImGui::Button("Edit vertex"))
-			RE_EDITOR->OpenTextEditor(shaderSettings.vertexShader.c_str(), &shaderSettings.vertexShader);
-	ImGui::Text("Fragment Shader path: %s", shaderSettings.fragmentShader.c_str());
-	if (!shaderSettings.fragmentShader.empty())
-		if (ImGui::Button("Edit fragment"))
-			RE_EDITOR->OpenTextEditor(shaderSettings.fragmentShader.c_str(), &shaderSettings.fragmentShader);
-	ImGui::Text("Geometry Shader path: %s", shaderSettings.geometryShader.c_str());
-	if (!shaderSettings.geometryShader.empty())
-		if (ImGui::Button("Edit geometry"))
-			RE_EDITOR->OpenTextEditor(shaderSettings.geometryShader.c_str(), &shaderSettings.geometryShader);
-}
-
-void RE_Shader::SaveResourceMeta(RE_Json* metaNode)
-{
-	metaNode->Push("vertexPath", shaderSettings.vertexShader.c_str());
-	metaNode->Push("vLastModified", shaderSettings.vlastModified);
-	metaNode->Push("fragmentPath", shaderSettings.fragmentShader.c_str());
-	metaNode->Push("fLastModified", shaderSettings.flastModified);
-	metaNode->Push("geometryPath", shaderSettings.geometryShader.c_str());
-	metaNode->Push("gLastModified", shaderSettings.glastModified);
-
-	RE_Json* nuniforms = metaNode->PushJObject("uniforms");
-	nuniforms->PushSizeT("size", uniforms.size());
-	if (!uniforms.empty())
-	{
-		for (size_t i = 0; i < uniforms.size(); i++)
-		{
-			nuniforms->Push(("name" + eastl::to_string(i)).c_str(), uniforms[i].name.c_str());
-			nuniforms->Push(("type" + eastl::to_string(i)).c_str(), static_cast<uint>(uniforms[i].GetType()));
-			nuniforms->Push(("custom" + eastl::to_string(i)).c_str(), uniforms[i].custom);
-		}
-	}
-	DEL(nuniforms)
-}
-
-void RE_Shader::LoadResourceMeta(RE_Json* metaNode)
-{
-	shaderSettings.vertexShader = metaNode->PullString("vertexPath", "");
-	shaderSettings.vlastModified = metaNode->PullSignedLongLong("vLastModified", 0);
-	shaderSettings.fragmentShader = metaNode->PullString("fragmentPath", "");
-	shaderSettings.flastModified = metaNode->PullSignedLongLong("fLastModified", 0);
-	shaderSettings.geometryShader = metaNode->PullString("geometryPath", "");
-	shaderSettings.glastModified = metaNode->PullSignedLongLong("gLastModified", 0);
-
-	projection = view = model = time = dt = depth = viewport_w = viewport_h = near_plane = far_plane = view_pos = -1;
-	uniforms.clear();
-	RE_Json* nuniforms = metaNode->PullJObject("uniforms");
-	auto size = nuniforms->PullSizeT("size", 0);
-	if (size)
-	{
-		eastl::string id;
-		for (size_t i = 0; i < size; i++)
-		{
-			RE_Shader_Cvar sVar;
-			id = "name" + eastl::to_string(i);
-			sVar.name = nuniforms->PullString(id.c_str(), "");
-
-			id = "type" + eastl::to_string(i);
-			auto vT = static_cast<RE_Cvar::Type>(nuniforms->PullUInt(id.c_str(), static_cast<uint>(RE_Cvar::Type(0))));
-
-			id = "custom" + eastl::to_string(i);
-			sVar.custom = nuniforms->PullBool(id.c_str(), true);
-
-			bool b2[2] = { false, false };
-			bool b3[3] = { false, false, false };
-			bool b4[4] = { false, false, false, false };
-
-			int i2[2] = { 0, 0 };
-			int i3[3] = { 0, 0, 0 };
-			int i4[4] = { 0, 0, 0, 0 };
-			float f = 0.0;
-
-			switch (vT)
-			{
-			case RE_Cvar::Type::BOOL: sVar.SetValue(true, true); break;
-			case RE_Cvar::Type::BOOL2: sVar.SetValue(b2, 2, true); break;
-			case RE_Cvar::Type::BOOL3: sVar.SetValue(b3, 3, true); break;
-			case RE_Cvar::Type::BOOL4: sVar.SetValue(b4, 4, true); break;
-			case RE_Cvar::Type::INT: sVar.SetValue(-1, true); break;
-			case RE_Cvar::Type::INT2: sVar.SetValue(i2, 2, true); break;
-			case RE_Cvar::Type::INT3: sVar.SetValue(i3, 3, true); break;
-			case RE_Cvar::Type::INT4: sVar.SetValue(i4, 4, true); break;
-			case RE_Cvar::Type::FLOAT: sVar.SetValue(f, true); break;
-			case RE_Cvar::Type::FLOAT2: sVar.SetValue(math::float2::zero, true); break;
-			case RE_Cvar::Type::FLOAT3: sVar.SetValue(math::float3::zero, true); break;
-			case RE_Cvar::Type::FLOAT4: sVar.SetValue(math::float4::zero, false, true); break;
-			case RE_Cvar::Type::MAT2: sVar.SetValue(math::float4::zero, true, true); break;
-			case RE_Cvar::Type::MAT3: sVar.SetValue(math::float3x3::zero, true); break;
-			case RE_Cvar::Type::MAT4: sVar.SetValue(math::float4x4::zero, true); break;
-			case RE_Cvar::Type::SAMPLER: sVar.SetSampler(nullptr, true); break;
-			default: break;
-			}
-
-			uniforms.push_back(sVar);
-			if (!sVar.custom)
-			{
-				if (projection == -1 && sVar.name.compare("projection") == 0) projection = uniforms.size() -1;
-				else if (view == -1 && sVar.name.compare("view") == 0) view = uniforms.size() - 1;
-				else if (model == -1 && sVar.name.compare("model") == 0) model = uniforms.size() - 1;
-				else if (dt == -1 && sVar.name.compare("dt") == 0) dt = uniforms.size() - 1;
-				else if (time == -1 && sVar.name.compare("time") == 0) time = uniforms.size() - 1;
-				else if (depth == -1 && sVar.name.compare("currentDepth") == 0) depth = uniforms.size() - 1;
-				else if (viewport_w == -1 && sVar.name.compare("viewport_w") == 0) viewport_w = uniforms.size() - 1;
-				else if (viewport_h == -1 && sVar.name.compare("viewport_h") == 0) viewport_h = uniforms.size() - 1;
-				else if (near_plane == -1 && sVar.name.compare("near_plane") == 0) near_plane = uniforms.size() - 1;
-				else if (far_plane == -1 && sVar.name.compare("far_plane") == 0) far_plane = uniforms.size() - 1;
-				else if (using_clip_plane == -1 && sVar.name.compare("useClipPlane") == 0) using_clip_plane = uniforms.size() - 1;
-				else if (clip_plane == -1 && sVar.name.compare("clip_plane") == 0) clip_plane = uniforms.size() - 1;
-				else if (view_pos == -1 && sVar.name.compare("viewPos") == 0) view_pos = uniforms.size() - 1;
-			}
-		}
-	}
-
-	DEL(nuniforms)
-	restoreSettings = shaderSettings;
-}
-
-void RE_Shader::AssetLoad()
-{
-	bool loaded = false;
-	loaded = RE_ShaderImporter::LoadFromAssets(&ID,
-		(!shaderSettings.vertexShader.empty()) ? shaderSettings.vertexShader.c_str() : nullptr,
-		(!shaderSettings.fragmentShader.empty()) ? shaderSettings.fragmentShader.c_str() : nullptr,
-		(!shaderSettings.geometryShader.empty()) ? shaderSettings.geometryShader.c_str() : nullptr);
-
-	if (!loaded) RE_LOG_ERROR("Error while loading shader %s on assets:\n%s\n", GetName(), RE_ShaderImporter::GetShaderError());
-	else ResourceContainer::inMemory = true;
-}
-
-void RE_Shader::LibraryLoad()
-{
-	RE_FileBuffer libraryLoad(GetLibraryPath());
-	if (libraryLoad.Load())
-	{
-		if (!RE_ShaderImporter::LoadFromBinary(libraryLoad.GetBuffer(), libraryLoad.GetSize(), &ID))
-		{
-			AssetLoad();
-			LibrarySave();
-		}
-		ResourceContainer::inMemory = true;
-	}
-}
-
-void RE_Shader::LibrarySave()
-{
-	RE_FileBuffer librarySave(GetLibraryPath());
-	char* buffer = nullptr;
-	int size = 0;
-	if (RE_ShaderImporter::GetBinaryProgram(ID, &buffer, &size)) librarySave.Save(buffer, size);
-	DEL_A(buffer);
 }

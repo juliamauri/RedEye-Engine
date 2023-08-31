@@ -9,7 +9,8 @@ class RE_Material : public ResourceContainer
 {
 public:
 
-	enum class RE_ShadingMode : int { //from assimp documentation
+	enum class ShadingMode : int // from assimp documentation
+	{
 		FLAT = 0x1,
 		GORAUND,
 		PHONG,
@@ -39,9 +40,9 @@ public:
 	void UnUseResources();
 
 	void UploadToShader(const float* model, bool usingChekers, bool defaultShader = false);
-	void UploadAsParticleDataToShader(unsigned int shaderID, bool useTextures, bool lighting);
+	void UploadAsParticleDataToShader(uint shaderID, bool useTextures, bool lighting);
 
-	unsigned int GetShaderID()const;
+	uint GetShaderID() const;
 
 	void DrawMaterialEdit();
 	void DrawMaterialParticleEdit(bool tex);
@@ -61,7 +62,7 @@ private:
 
 	void Draw() final override;
 
-	void SaveResourceMeta(RE_Json* metaNode) final override;
+	void SaveResourceMeta(RE_Json* metaNode) const final override;
 	void LoadResourceMeta(RE_Json* metaNode) final override;
 
 	bool NeededResourcesReferenced(RE_Json* metaNode) final override;
@@ -72,13 +73,13 @@ private:
 	void JsonSerialize(bool onlyMD5 = false);
 
 	void PullTexturesJson(RE_Json * texturesNode, eastl::vector<const char*>* textures);
-	void PushTexturesJson(RE_Json * texturesNode, eastl::vector<const char*>* textures);
+	void PushTexturesJson(RE_Json * texturesNode, const eastl::vector<const char*>* textures) const;
 
-	bool NeededResourcesReferencedTexturePull(RE_Json* texturesNode);
+	bool NeededResourcesReferencedTexturePull(RE_Json* texturesNode) const;
 
 	void BinaryDeserialize();
 	void BinarySerialize();
-	size_t GetBinarySize();
+	size_t GetBinarySize() const;
 
 	void GetAndProcessUniformsFromShader();
 
@@ -87,7 +88,7 @@ private:
 
 public:
 
-	RE_ShadingMode shadingType = RE_ShadingMode::FLAT;
+	ShadingMode shadingType = ShadingMode::FLAT;
 
 	eastl::vector<const char*> tDiffuse;
 	math::float3 cDiffuse = math::float3::zero;

@@ -8,23 +8,23 @@ class RE_ECS_Pool;
 class RE_Model : public ResourceContainer
 {
 public:
-	RE_Model() {}
+	RE_Model() = default;
 	RE_Model(const char* metaPath) : ResourceContainer(metaPath) {}
-	~RE_Model() {}
+	~RE_Model() final = default;
 
-	void LoadInMemory() override;
-	void UnloadMemory() override;
+	void LoadInMemory() override final;
+	void UnloadMemory() override final;
 
-	void SetAssetPath(const char* originPath)override;
+	void SetAssetPath(const char* originPath) override final;
 
-	void Import(bool keepInMemory = true) override;
+	void Import(bool keepInMemory = true) override final;
 	RE_ECS_Pool* GetPool();
 
 private:
 
 	void Draw() override;
-	void SaveResourceMeta(RE_Json* metaNode) override;
-	void LoadResourceMeta(RE_Json* metaNode) override;
+	void SaveResourceMeta(RE_Json* metaNode) const override final;
+	void LoadResourceMeta(RE_Json* metaNode) override final;
 
 	void AssetLoad();
 	void LibraryLoad();

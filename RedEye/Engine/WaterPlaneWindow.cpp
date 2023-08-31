@@ -35,7 +35,7 @@ void WaterPlaneWindow::Draw(bool secondary)
 		shaderPath += (deferred) ? "WaterDeferredShader" : "WaterShader";
 		shaderPath += ".meta";
 
-		const char* waterShader = RE_RES->FindMD5ByMETAPath(shaderPath.c_str(), ResourceType::SHADER);
+		const char* waterShader = RE_RES->FindMD5ByMETAPath(shaderPath.c_str(), ResourceContainer::Type::SHADER);
 		if (!waterShader)
 		{
 			ImGui::Text((deferred) ? "Water Deferred Shader doesn't exists." : "Water Shader doesn't exists.");
@@ -83,10 +83,10 @@ void WaterPlaneWindow::Draw(bool secondary)
 
 				RE_Shader* waterShaderRes = new RE_Shader();
 				waterShaderRes->SetName((deferred) ? "WaterDeferredShader" : "WaterShader");
-				waterShaderRes->SetType(ResourceType::SHADER);
+				waterShaderRes->SetType(ResourceContainer::Type::SHADER);
 				waterShaderRes->SetMetaPath(shaderPath.c_str());
 				waterShaderRes->SetPaths(shaderVertexFile.c_str(), shaderFragmentFile.c_str(), nullptr);
-				waterShaderRes->isShaderFilesChanged();
+				waterShaderRes->ShaderFilesChanged();
 				waterShaderRes->SaveMeta();
 				waterShader = RE_RES->Reference(static_cast<ResourceContainer*>(waterShaderRes));
 			}
@@ -95,7 +95,7 @@ void WaterPlaneWindow::Draw(bool secondary)
 			editingMaterialRes->blendMode = true;
 			editingMaterialRes->SetName(waterResouceName.c_str());
 			editingMaterialRes->SetAssetPath(materialPath.c_str());
-			editingMaterialRes->SetType(ResourceType::MATERIAL);
+			editingMaterialRes->SetType(ResourceContainer::Type::MATERIAL);
 			editingMaterialRes->SetShader(waterShader); //save meta after add to shader
 
 			RE_RENDER->PushThumnailRend(RE_RES->Reference((ResourceContainer*)editingMaterialRes));

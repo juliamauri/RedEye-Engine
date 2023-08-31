@@ -6,12 +6,12 @@ class RE_ParticleEmitter;
 class RE_ParticleEmitterBase : public ResourceContainer
 {
 public:
-	RE_ParticleEmitterBase() {}
+	RE_ParticleEmitterBase() = default;
 	RE_ParticleEmitterBase(const char* metapath) : ResourceContainer(metapath) {}
-	~RE_ParticleEmitterBase() {}
+	~RE_ParticleEmitterBase() final = default;
 
-	void LoadInMemory() override;
-	void UnloadMemory() override;
+	void LoadInMemory() override final;
+	void UnloadMemory() override final;
 
 	void SomeResourceChanged(const char* resMD5);
 
@@ -23,18 +23,17 @@ public:
 	void ChangeEmissor(RE_ParticleEmitter* sim, const char* emissor);
 	void ChangeRenderer(RE_ParticleEmitter* sim, const char* renderer);
 
-	bool HasEmissor()const;
-	bool HasRenderer()const;
+	bool HasEmissor() const;
+	bool HasRenderer() const;
 
-	bool Contains(const char* res)const;
-
+	bool Contains(const char* res) const;
 
 private:
 
-	void Draw() override;
+	void Draw() override final;
 
-	void SaveResourceMeta(RE_Json* metaNode) override;
-	void LoadResourceMeta(RE_Json* metaNode) override;
+	void SaveResourceMeta(RE_Json* metaNode) const override final;
+	void LoadResourceMeta(RE_Json* metaNode) override final;
 
 private:
 	const char* resource_emission = nullptr;

@@ -183,10 +183,10 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 						if (metaLoad.Load())
 						{
 							RE_Json* metaNode = metaLoad.GetRootNode("meta");
-							ResourceType type = static_cast<ResourceType>(metaNode->PullUInt("Type", static_cast<uint>(ResourceType::UNDEFINED)));
+							ResourceContainer::Type type = static_cast<ResourceContainer::Type>(metaNode->PullUInt("Type", static_cast<uint>(ResourceContainer::Type::UNDEFINED)));
 							DEL(metaNode)
 
-							if (type == ResourceType::PARTICLE_EMITTER) {
+							if (type == ResourceContainer::Type::PARTICLE_EMITTER) {
 								meta_to_process_last.push(process);
 								continue;
 							}
@@ -194,7 +194,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 							if (RE_RES->isNeededResoursesLoaded(file->path.c_str(), type))
 								reloadResourceMeta.push(metaFile);
 
-							if (type != ResourceType::UNDEFINED)
+							if (type != ResourceContainer::Type::UNDEFINED)
 								metaFile->resource = RE_RES->ReferenceByMeta(file->path.c_str(), type);
 						}
 					}
@@ -242,7 +242,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 			RE_File* file = process->toProcess->AsFile();
 			RE_Meta* metaFile = file->AsMeta();
 
-			metaFile->resource = RE_RES->ReferenceByMeta(file->path.c_str(), ResourceType::PARTICLE_EMITTER);
+			metaFile->resource = RE_RES->ReferenceByMeta(file->path.c_str(), ResourceContainer::Type::PARTICLE_EMITTER);
 
 			//timer
 			if (!doAll && extra_ms < time.Read()) run = false;
@@ -275,7 +275,7 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 							}
 						}
 					}
-					if (res->GetType() == ResourceType::SHADER)  toRemoveM.push_back(meta);
+					if (res->GetType() == ResourceContainer::Type::SHADER)  toRemoveM.push_back(meta);
 				}
 				else toRemoveM.push_back(meta);
 
@@ -377,11 +377,11 @@ unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 
 				switch (RE_RES->At(meta->resource)->GetType())
 				{
-				case ResourceType::SHADER:
+				case ResourceContainer::Type::SHADER:
 					RE_RES->At(meta->resource)->ReImport();
 					break;
-				case ResourceType::PARTICLE_RENDER:
-				case ResourceType::PARTICLE_EMISSION:
+				case ResourceContainer::Type::PARTICLE_RENDER:
+				case ResourceContainer::Type::PARTICLE_EMISSION:
 					RE_RES->PushParticleResource(meta->resource);
 					particle_reimport = true;
 					break;
@@ -592,8 +592,8 @@ void RE_FileSystem::DeleteUndefinedFile(const char* filePath)
 
 void RE_FileSystem::DeleteResourceFiles(ResourceContainer* resContainer)
 {
-	const ResourceType type = resContainer->GetType();
-	if (type != ResourceType::SHADER && type != ResourceType::PARTICLE_EMITTER)
+	const ResourceContainer::Type type = resContainer->GetType();
+	if (type != ResourceContainer::Type::SHADER && type != ResourceContainer::Type::PARTICLE_EMITTER)
 		DeleteUndefinedFile(resContainer->GetAssetPath());
 
 	DeleteUndefinedFile(resContainer->GetMetaPath());
@@ -762,7 +762,7 @@ RE_FileSystem::FileType RE_FileSystem::RE_File::DetectExtensionAndType(const cha
 
 bool RE_FileSystem::RE_Meta::IsModified() const
 {
-	return (RE_RES->At(resource)->GetType() != ResourceType::SHADER
+	return (RE_RES->At(resource)->GetType() != ResourceContainer::Type::SHADER
 		&& fromFile->lastModified != RE_RES->At(resource)->GetLastTimeModified());
 }
 
@@ -923,15 +923,15 @@ eastl::stack<RE_FileSystem::RE_ProcessPath*> RE_FileSystem::RE_Directory::CheckA
 						ResourceContainer* res = RE_RES->At((*iter)->AsFile()->AsMeta()->resource);
 						switch (res->GetType())
 						{
-						case ResourceType::SHADER:
+						case ResourceContainer::Type::SHADER:
 						{
 							RE_Shader* shadeRes = dynamic_cast<RE_Shader*>(res);
-							if (shadeRes->isShaderFilesChanged())
+							if (shadeRes->ShaderFilesChanged())
 								ret.push(new RE_ProcessPath(PathProcess::REIMPORT, *iter));
 							break;
 						}
-						case ResourceType::PARTICLE_RENDER:
-						case ResourceType::PARTICLE_EMISSION:
+						case ResourceContainer::Type::PARTICLE_RENDER:
+						case ResourceContainer::Type::PARTICLE_EMISSION:
 						{
 							if ((*iter)->AsFile()->lastModified != fileStat.modtime)
 							{
@@ -968,8 +968,8 @@ eastl::stack<RE_FileSystem::RE_Path*> RE_FileSystem::RE_Directory::GetDisplaying
 				if (path->AsMeta()->resource)
 				{
 					ResourceContainer* res = RE_RES->At(path->AsMeta()->resource);
-					ResourceType type = res->GetType();
-					if (type == ResourceType::SHADER || type == ResourceType::PARTICLE_EMITTER) ret.push(path);
+					ResourceContainer::Type type = res->GetType();
+					if (type == ResourceContainer::Type::SHADER || type == ResourceContainer::Type::PARTICLE_EMITTER) ret.push(path);
 				}
 				break;
 			}
