@@ -78,7 +78,7 @@ uint32_t RE_ThumbnailManager::LoadDefIcon(const char* filename)
 		int tmp1, tmp2;
 		RE_TextureImporter::LoadTextureInMemory(
 			filderIcon.GetBuffer(),
-			filderIcon.GetSize(),
+			static_cast<ILuint>(filderIcon.GetSize()),
 			RE_TextureSettings::Type::DDS,
 			&ret,
 			&tmp1,

@@ -326,12 +326,12 @@ bool RE_ShaderImporter::GetBinaryProgram(unsigned int ID, char** buffer, int* si
 	return ret;
 }
 
-bool RE_ShaderImporter::Compile(const char* buffer, unsigned int size, unsigned int GLCompile)
+bool RE_ShaderImporter::Compile(const char* buffer, size_t size, unsigned int GLCompile)
 {
 	bool ret = true;
 	eastl::string last_error;
 
-	uint shaderScript = glCreateShader(GLCompile);
+	auto shaderScript = glCreateShader(GLCompile);
 
 	auto bSize = static_cast<GLint>(size);
 	glShaderSource(shaderScript, 1, &buffer, &bSize);

@@ -31,11 +31,14 @@ void RE_SkyboxImporter::LoadSkyBoxInMemory(RE_SkyBoxSettings& settings, unsigned
 		RE_FileBuffer librayTexture(texPath);
 		if (librayTexture.Load())
 		{
-			unsigned int imageID = 0u;
+			ILuint imageID = 0;
 			ilGenImages(1, &imageID);
 			ilBindImage(imageID);
 
-			if (IL_FALSE != ilLoadL(static_cast<ILenum>(RE_TextureSettings::Type::DDS), librayTexture.GetBuffer(), librayTexture.GetSize()))
+			if (IL_FALSE != ilLoadL(
+				static_cast<ILenum>(RE_TextureSettings::Type::DDS),
+				librayTexture.GetBuffer(),
+				static_cast<ILuint>(librayTexture.GetSize())))
 			{
 				iluFlipImage();
 

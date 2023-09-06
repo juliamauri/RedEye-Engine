@@ -309,7 +309,14 @@ void RE_Texture::AssetLoad()
 	RE_FileBuffer assetFile(GetAssetPath());
 	if (assetFile.Load())
 	{
-		RE_TextureImporter::LoadTextureInMemory(assetFile.GetBuffer(), assetFile.GetSize(), texType, &ID, &width, &height, texSettings);
+		RE_TextureImporter::LoadTextureInMemory(
+			assetFile.GetBuffer(),
+			static_cast<ILuint>(assetFile.GetSize()),
+			texType,
+			&ID,
+			&width,
+			&height,
+			texSettings);
 		
 		SetMD5(assetFile.GetMd5().c_str());
 		eastl::string libraryPath("Library/Textures/");
@@ -325,7 +332,14 @@ void RE_Texture::LibraryLoad()
 	RE_FileBuffer libraryFile(GetLibraryPath());
 	if (libraryFile.Load())
 	{
-		RE_TextureImporter::LoadTextureInMemory(libraryFile.GetBuffer(), libraryFile.GetSize(), RE_TextureSettings::Type::DDS, &ID, &width, &height, texSettings);
+		RE_TextureImporter::LoadTextureInMemory(
+			libraryFile.GetBuffer(),
+			static_cast<ILuint>(libraryFile.GetSize()),
+			RE_TextureSettings::Type::DDS,
+			&ID,
+			&width,
+			&height,
+			texSettings);
 		ResourceContainer::inMemory = true;
 	}
 }
@@ -334,7 +348,12 @@ void RE_Texture::LibrarySave()
 {
 	RE_FileBuffer assetFile(GetAssetPath());
 	RE_FileBuffer libraryFile(GetLibraryPath());
-	if (assetFile.Load()) RE_TextureImporter::SaveOwnFormat(assetFile.GetBuffer(), assetFile.GetSize(), texType, &libraryFile);
+	if (assetFile.Load())
+		RE_TextureImporter::SaveOwnFormat(
+			assetFile.GetBuffer(),
+			static_cast<ILuint>(assetFile.GetSize()),
+			texType,
+			&libraryFile);
 }
 
 void RE_Texture::TexParameteri(uint pname, int param)

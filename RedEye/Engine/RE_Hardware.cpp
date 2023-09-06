@@ -98,7 +98,7 @@ void PlotMemory(const char* name, eastl::array<float, mem_plotting_range>& data,
 		0,
 		name,
 		0.0f,
-		1.2f * peak,
+		1.2f * static_cast<float>(peak),
 		ImVec2(310, 100));
 
 	// Max Peak
