@@ -82,10 +82,6 @@ RenderView::LightMode ModuleRenderer3D::current_lighting = RenderView::LightMode
 RE_CompCamera* ModuleRenderer3D::current_camera = nullptr;
 unsigned int ModuleRenderer3D::current_fbo = 0;
 
-const char* RenderView::flag_labels[12] = {
-						"Fustrum Culling", "Override Culling", "Outline Selection", "Debug Draw", "Skybox", "Blending",
-						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clip Distance"};
-
 ModuleRenderer3D::ModuleRenderer3D() : fbos(new RE_FBOManager()) {}
 ModuleRenderer3D::~ModuleRenderer3D() { DEL(fbos) }
 

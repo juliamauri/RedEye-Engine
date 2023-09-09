@@ -5,6 +5,10 @@
 #include "RE_Json.h"
 #include <ImGui/imgui.h>
 
+const char* RenderView::flag_labels[12] = {
+						"Fustrum Culling", "Override Culling", "Outline Selection", "Debug Draw", "Skybox", "Blending",
+						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clipping Distance" };
+
 RenderView::RenderView(
 	eastl::string name,
 	eastl::pair<uint, uint> fbos,
@@ -64,7 +68,7 @@ void RenderView::Save(RE_Json* node) const
 	node->PushFloat4("Clear Color", clear_color);
 	node->PushFloat4("Clip Distance", clip_distance);
 
-	for (int i = 0; i < 12; i++) node->Push(flag_labels[i], static_cast<bool>(flags & (1 << i)));
+	node->Push("Flags", static_cast<uint>(flags));
 
 	DEL(node)
 }
@@ -80,12 +84,7 @@ void RenderView::Load(RE_Json* node)
 	clear_color = node->PullFloat4("Clear Color", { 0.0f, 0.0f, 0.0f, 1.0f });
 	clip_distance = node->PullFloat4("Clip Distance", math::float4::zero);
 
-	for (ushort i = 0; i < 12; i++)
-	{
-		ushort flag_id = 1 << i;
-		if (node->PullBool(flag_labels[i], flags & flag_id)) flags |= flag_id;
-		else flags -= flag_id;
-	}
+	flags = static_cast<ushort>(node->PullUInt("Flags", 0));
 
 	DEL(node)
 }
