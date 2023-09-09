@@ -12,19 +12,19 @@ public:
 	RE_Model(const char* metaPath) : ResourceContainer(metaPath) {}
 	~RE_Model() final = default;
 
-	void LoadInMemory() override final;
-	void UnloadMemory() override final;
+	void LoadInMemory() final;
+	void UnloadMemory() final;
 
-	void SetAssetPath(const char* originPath) override final;
+	void SetAssetPath(const char* originPath) final;
 
-	void Import(bool keepInMemory = true) override final;
+	void Import(bool keepInMemory = true) final;
 	RE_ECS_Pool* GetPool();
 
 private:
 
 	void Draw() override;
-	void SaveResourceMeta(RE_Json* metaNode) const override final;
-	void LoadResourceMeta(RE_Json* metaNode) override final;
+	void SaveResourceMeta(RE_Json* metaNode) const final;
+	void LoadResourceMeta(RE_Json* metaNode) final;
 
 	void AssetLoad();
 	void LibraryLoad();

@@ -9,7 +9,7 @@ public:
 
 private:
 
-	void Draw(bool secondary = false) override final;
+	void Draw(bool secondary = false) final;
 
 private:
 

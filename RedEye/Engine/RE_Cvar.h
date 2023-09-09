@@ -170,11 +170,11 @@ public:
 	RE_Shader_Cvar operator=(const RE_Shader_Cvar& cpy);
 
 	bool SetValue(const RE_Shader_Cvar& copyValue, bool force_type = false);
-	bool SetValue(const bool bool_v, bool force_type = false) override final;
+	bool SetValue(const bool bool_v, bool force_type = false) final;
 	bool SetValue(const bool boola_v[], unsigned int count, bool force_type = false);
-	bool SetValue(const int int_v, bool force_type = false) override final;
+	bool SetValue(const int int_v, bool force_type = false) final;
 	bool SetValue(const int inta_v[], unsigned int count, bool force_type = false);
-	bool SetValue(const float float_v, bool force_type = false) override final;
+	bool SetValue(const float float_v, bool force_type = false) final;
 	bool SetValue(const math::float2 float2_v, bool force_type = false);
 	bool SetValue(const math::float3 float3_v, bool force_type = false);
 	bool SetValue(const math::float4 float4_v, bool mat2 = false, bool force_type = false);

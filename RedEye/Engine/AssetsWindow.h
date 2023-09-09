@@ -15,7 +15,7 @@ public:
 
 private:
 
-	void Draw(bool secondary = false) override final;
+	void Draw(bool secondary = false) final;
 
 	void DrawDirectoryItem(eastl::stack<RE_FileSystem::RE_Path*>& filesToDisplay, const eastl::string& idName, unsigned int& idCount, float iconsSize, RE_FileSystem::RE_Directory*& toChange, bool secondary);
 	

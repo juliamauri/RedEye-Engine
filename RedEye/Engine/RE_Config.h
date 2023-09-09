@@ -12,14 +12,14 @@ public:
 	Config(const char* file_name);
 	~Config() final = default;
 
-	bool Load() override final;
+	bool Load() final;
 	bool LoadFromWindowsPath();
-	void Save() override final;
+	void Save() final;
 
 	RE_Json* GetRootNode(const char* member);
-	inline bool operator!() const override final;
+	inline bool operator!() const final;
 
-	eastl::string GetMd5() override final;
+	eastl::string GetMd5() final;
 
 public:
 

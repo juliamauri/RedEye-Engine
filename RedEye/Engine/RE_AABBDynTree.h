@@ -25,7 +25,7 @@ public:
 	void PopNode(Object_UID index);
 	void UpdateNode(Object_UID index, AABB box);
 
-	eastl::vector<size_t> GetAllKeys() const override final;
+	eastl::vector<size_t> GetAllKeys() const final;
 	void Clear();
 	void CollectIntersections(Ray ray, eastl::queue<Object_UID>& indexes) const;
 	void CollectIntersections(const Frustum frustum, eastl::queue<Object_UID>& indexes) const;

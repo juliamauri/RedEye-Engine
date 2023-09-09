@@ -20,12 +20,12 @@ struct RE_Curve : RE_Serializable
 	float GetValue(const float weight) const;
 	bool DrawEditor(const char* name);
 
-	void JsonSerialize(RE_Json* node) const override final;
-	void JsonDeserialize(RE_Json* node) override final;
+	void JsonSerialize(RE_Json* node) const final;
+	void JsonDeserialize(RE_Json* node) final;
 
-	size_t GetBinarySize() const override final;
-	void BinarySerialize(char*& cursor) const override final;
-	void BinaryDeserialize(char*& cursor) override final;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor) const final;
+	void BinaryDeserialize(char*& cursor) final;
 };
 
 #endif // !__RE_CURVE_H__

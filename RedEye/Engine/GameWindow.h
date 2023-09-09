@@ -31,7 +31,7 @@ public:
 
 private:
 
-	void Draw(bool secondary = false) override final;
+	void Draw(bool secondary = false) final;
 
 	math::float4 viewport = math::float4::zero;
 	int width = 0;

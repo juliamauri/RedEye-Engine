@@ -32,12 +32,12 @@ public:
 		bool usingSkybox = true,
 		const char* skyboxMD5 = nullptr);
 
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override final;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
 	
-	void Update() override final;
-	void OnTransformModified() override final;
+	void Update() final;
+	void OnTransformModified() final;
 
-	void DrawProperties() override final;
+	void DrawProperties() final;
 	void DrawAsEditorProperties();
 	void DrawFrustum() const;
 	void DrawSkybox() const;
@@ -86,16 +86,16 @@ public:
 	void SetSkyBox(const char* resS);
 
 	// Resources - Skybox
-	void UseResources() override final;
-	void UnUseResources() override final;
-	eastl::vector<const char*> GetAllResources() override final;
+	void UseResources() final;
+	void UnUseResources() final;
+	eastl::vector<const char*> GetAllResources() final;
 
 	// Serialization
 	size_t GetBinarySize() const override;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override final;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override final;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
 
 private:
 

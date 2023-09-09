@@ -9,7 +9,7 @@ public:
 
 private:
 
-	void Draw(bool secondary = false) override final;
+	void Draw(bool secondary = false) final;
 };
 
 #endif //!__PLAY_PAUSE_WINDOW__

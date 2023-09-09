@@ -10,8 +10,8 @@ public:
 	RE_ParticleEmitterBase(const char* metapath) : ResourceContainer(metapath) {}
 	~RE_ParticleEmitterBase() final = default;
 
-	void LoadInMemory() override final;
-	void UnloadMemory() override final;
+	void LoadInMemory() final;
+	void UnloadMemory() final;
 
 	void SomeResourceChanged(const char* resMD5);
 
@@ -30,10 +30,10 @@ public:
 
 private:
 
-	void Draw() override final;
+	void Draw() final;
 
-	void SaveResourceMeta(RE_Json* metaNode) const override final;
-	void LoadResourceMeta(RE_Json* metaNode) override final;
+	void SaveResourceMeta(RE_Json* metaNode) const final;
+	void LoadResourceMeta(RE_Json* metaNode) final;
 
 private:
 	const char* resource_emission = nullptr;

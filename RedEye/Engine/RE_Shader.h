@@ -22,9 +22,9 @@ public:
 	bool ShaderFilesChanged();
 	bool IsPathOnShader(const char* assetPath) const;
 
-	void LoadInMemory() override final;
-	void UnloadMemory() override final;
-	void ReImport() override final;
+	void LoadInMemory() final;
+	void UnloadMemory() final;
+	void ReImport() final;
 
 	struct Settings
 	{
@@ -44,10 +44,10 @@ public:
 
 private:
 
-	void Draw() override final;
+	void Draw() final;
 
-	void SaveResourceMeta(RE_Json* metaNode) const override final;
-	void LoadResourceMeta(RE_Json* metaNode) override final;
+	void SaveResourceMeta(RE_Json* metaNode) const final;
+	void LoadResourceMeta(RE_Json* metaNode) final;
 
 	void AssetLoad();
 	void LibraryLoad();

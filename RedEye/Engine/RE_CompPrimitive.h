@@ -57,18 +57,18 @@ public:
 	friend class RE_PrimitiveManager;
 
 	void GridSetUp(int divisions = 10);
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override final;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
 
-	void Draw() const override final;
-	void DrawProperties() override final;
+	void Draw() const final;
+	void DrawProperties() final;
 
 	RE_CompTransform* GetTransformPtr() const;
 
-	size_t GetBinarySize() const override final;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override final;
+	size_t GetBinarySize() const final;
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
 
 	float GetDistance() const;
 
@@ -92,23 +92,23 @@ public:
 	friend class RE_PrimitiveManager;
 
 	void RockSetUp(int _seed = 251654, int _subdivions = 5);
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override final;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
 
-	void Draw() const override final;
-	void DrawProperties() override final;
-	bool DrawPrimPropierties() override final;
+	void Draw() const final;
+	void DrawProperties() final;
+	bool DrawPrimPropierties() final;
 
-	size_t GetBinarySize() const override final;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override final;
+	size_t GetBinarySize() const final;
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
 
-	size_t GetParticleBinarySize() const override final;
-	void SerializeParticleJson(RE_Json* node) const override final;
-	void DeserializeParticleJson(RE_Json* node) override final;
-	void SerializeParticleBinary(char*& cursor) const override final;
-	void DeserializeParticleBinary(char*& cursor) override final;
+	size_t GetParticleBinarySize() const final;
+	void SerializeParticleJson(RE_Json* node) const final;
+	void DeserializeParticleJson(RE_Json* node) final;
+	void SerializeParticleBinary(char*& cursor) const final;
+	void DeserializeParticleBinary(char*& cursor) final;
 
 private:
 
@@ -133,17 +133,17 @@ public:
 	friend class RE_PrimitiveManager;
 
 	void PlatonicSetUp();
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override final;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
 
-	void Draw() const override final;
-	void DrawProperties() override final;
-	bool DrawPrimPropierties() override final;
+	void Draw() const final;
+	void DrawProperties() final;
+	bool DrawPrimPropierties() final;
 
-	size_t GetBinarySize() const override final;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override final;
+	size_t GetBinarySize() const final;
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
 
 protected:
 
@@ -162,23 +162,23 @@ public:
 	friend class RE_PrimitiveManager;
 
 	void ParametricSetUp(int _slices, int _stacks, float _radius = 0.0f);
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override final;
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
 
-	void Draw() const override final;
-	void DrawProperties() override final;
-	bool DrawPrimPropierties() override final;
+	void Draw() const final;
+	void DrawProperties() final;
+	bool DrawPrimPropierties() final;
 
-	size_t GetBinarySize() const override final;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const override final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) override final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const override final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) override final;
+	size_t GetBinarySize() const final;
+	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
+	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
 
-	size_t GetParticleBinarySize() const override final;
-	void SerializeParticleJson(RE_Json* node) const override final;
-	void DeserializeParticleJson(RE_Json* node) override final;
-	void SerializeParticleBinary(char*& cursor) const override final;
-	void DeserializeParticleBinary(char*& cursor) override final;
+	size_t GetParticleBinarySize() const final;
+	void SerializeParticleJson(RE_Json* node) const final;
+	void DeserializeParticleJson(RE_Json* node) final;
+	void SerializeParticleBinary(char*& cursor) const final;
+	void DeserializeParticleBinary(char*& cursor) final;
 
 protected:
 

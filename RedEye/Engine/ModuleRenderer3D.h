@@ -17,7 +17,7 @@ public:
 	void CleanUp();
 
 	void DrawEditor();
-	void RecieveEvent(const Event& e) override final;
+	void RecieveEvent(const Event& e) final;
 
 	void Load();
 	void Save() const;
