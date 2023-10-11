@@ -40,12 +40,10 @@
 #include <EASTL/numeric.h>
 
 ModuleScene::ModuleScene() :
-	cams(new RE_CameraManager()),
 	primitives(new RE_PrimitiveManager()) {}
 
 ModuleScene::~ModuleScene()
 {
-	DEL(cams)
 	DEL(primitives)
 }
 
@@ -53,7 +51,6 @@ bool ModuleScene::Init()
 {
 	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleScene);
 	RE_LOG("Initializing Module Scene");
-	cams->Init();
 	primitives->Init();
 	return true;
 }
@@ -79,7 +76,6 @@ void ModuleScene::Update()
 void ModuleScene::PostUpdate()
 {
 	RE_PROFILE(RE_ProfiledFunc::PostUpdate, RE_ProfiledClass::ModuleScene);
-	bool someDelete = !to_delete.empty();
 	while (!to_delete.empty())
 	{
 		scenePool.DestroyGO(to_delete.top());
@@ -90,7 +86,6 @@ void ModuleScene::PostUpdate()
 void ModuleScene::CleanUp()
 {
 	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleScene);
-	cams->Clear();
 	primitives->Clear();
 	DEL(unsavedScene)
 }

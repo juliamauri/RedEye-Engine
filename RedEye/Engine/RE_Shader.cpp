@@ -114,22 +114,22 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 	if (!isInternal()) SetMetaPath("Assets/Shaders/");
 }
 
-void RE_Shader::UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane) const
+void RE_Shader::UploadMainUniforms(const RE_Camera& camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane) const
 {
 	RE_GLCache::ChangeShader(ID);
-	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera->GetViewPtr());
-	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera->GetProjectionPtr());
+	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera.GetView().ptr());
+	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera.GetProjection().ptr());
 
 	if (dt != -1) RE_ShaderImporter::setFloat(uniforms[dt].location, RE_Time::DeltaTime());
 	if (time != -1) RE_ShaderImporter::setFloat(uniforms[time].location, RE_Time::CurrentTimer());
 
 	if (viewport_h != -1) RE_ShaderImporter::setFloat(uniforms[viewport_h].location, window_h);
 	if (viewport_w != -1) RE_ShaderImporter::setFloat(uniforms[viewport_w].location, window_w);
-	if (near_plane != -1) RE_ShaderImporter::setFloat(uniforms[near_plane].location, camera->GetNearPlane());
-	if (far_plane != -1) RE_ShaderImporter::setFloat(uniforms[far_plane].location, camera->GetFarPlane());
+	if (near_plane != -1) RE_ShaderImporter::setFloat(uniforms[near_plane].location, camera.GetNearPlane());
+	if (far_plane != -1) RE_ShaderImporter::setFloat(uniforms[far_plane].location, camera.GetFarPlane());
 	if (using_clip_plane != -1) RE_ShaderImporter::setFloat(uniforms[using_clip_plane].location, (clipDistance) ? 1.0f : -1.0f);
 	if (clip_plane != -1) RE_ShaderImporter::setFloat(uniforms[clip_plane].location, clipPlane.x, clipPlane.y, clipPlane.z, clipPlane.w);
-	if (view_pos != -1) RE_ShaderImporter::setFloat(uniforms[view_pos].location, camera->GetTransform()->GetGlobalPosition());
+	if (view_pos != -1) RE_ShaderImporter::setFloat(uniforms[view_pos].location, camera.GetFrustum().Pos());
 	RE_GLCache::ChangeShader(0);
 }
 

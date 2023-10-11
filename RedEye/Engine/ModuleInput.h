@@ -35,8 +35,8 @@ struct MouseData
 class ModuleInput
 {
 public:
-	ModuleInput() {}
-	~ModuleInput() {}
+	ModuleInput() = default;
+	~ModuleInput() = default;
 
 	bool Init();
 	void PreUpdate();

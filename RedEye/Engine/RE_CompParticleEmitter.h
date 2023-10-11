@@ -31,7 +31,7 @@ public:
 	bool HasLight() const;
 	void CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
 
-	bool isBlend() const;
+	bool HasBlend() const;
 
 	RE_ParticleEmitter* GetSimulation() const;
 	const char* GetEmitterResource() const;

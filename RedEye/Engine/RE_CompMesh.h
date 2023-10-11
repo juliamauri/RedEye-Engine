@@ -36,7 +36,7 @@ public:
 	void UseResources() final;
 	void UnUseResources() final;
 
-	bool isBlend()const;
+	bool HasBlend()const;
 
 protected:
 

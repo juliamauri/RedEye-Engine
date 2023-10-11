@@ -3,6 +3,7 @@
 #include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "RE_Json.h"
+#include "RE_CameraManager.h"
 #include <ImGui/imgui.h>
 
 const char* RenderView::flag_labels[12] = {
@@ -20,9 +21,21 @@ RenderView::RenderView(
 	clear_color({ 0.0f, 0.0f, 0.0f, 1.0f })
 {}
 
+RenderView::~RenderView()
+{
+	DEL(camera)
+}
+
+const math::Frustum* RenderView::GetFrustum() const
+{
+	if (!HasFlag(RenderView::Flag::FRUSTUM_CULLING)) return nullptr;
+	if (HasFlag(RenderView::Flag::OVERRIDE_CULLING)) return RE_CameraManager::GetCullingFrustum();
+	return &camera->GetFrustum();
+}
+
 const uint RenderView::GetFBO() const { return light != LightMode::DEFERRED ? fbos.first : fbos.second; }
 
-inline const bool RenderView::HasFlag(Flag flag) const { return flags & static_cast<const ushort>(flag); }
+inline const bool RenderView::HasFlag(Flag flag) const { return flags & static_cast<ushort>(flag); }
 
 void RenderView::DrawEditor()
 {

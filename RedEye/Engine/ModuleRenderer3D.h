@@ -15,44 +15,90 @@ public:
 	bool Start();
 	void PostUpdate();
 	void CleanUp();
-
 	void DrawEditor();
 	void RecieveEvent(const Event& e) final;
 
+	// Config Serialization
 	void Load();
 	void Save() const;
 
-	// Editor Values
-	void SetVSync(bool enable);
-
-	// Context & Viewport
-	void* GetWindowContext()const;
-
-	// Shaders - A vector in GLSL contains 4 component
-	unsigned int GetMaxVertexAttributes(); //it's usually 16
-
-	// GPU Specs
-	const char* GetGPURenderer() const;
-	const char* GetGPUVendor() const;
-
-	// Sets shader for unassigned geometry
-	static RenderView::LightMode GetLightMode();
-	
-	static RE_CompCamera* GetCamera();
-
+	// Actions
+	void LoadCameraMatrixes(const RE_Camera& camera);
 	void ChangeFBOSize(int width, int height, RenderView::Type view);
-	uintptr_t GetRenderViewTexture(RenderView::Type type) const;
-	unsigned int GetDepthTexture() const;
-
-	void PushSceneRend(RenderView& rV);
 	void PushThumnailRend(const char* md5, bool redo = false);
 
-	math::float4 GetRenderViewClearColor(RenderView::Type r_view) const;
-	RenderView::LightMode GetRenderViewLightMode(RenderView::Type r_view) const;
-	bool GetRenderViewDebugDraw(RenderView::Type r_view) const;
+	// Setters
 	void SetRenderViewDeferred(RenderView::Type r_view, bool using_deferred);
 	void SetRenderViewClearColor(RenderView::Type r_view, math::float4 clear_color);
 	void SetRenderViewDebugDraw(RenderView::Type r_view, bool debug_draw);
+
+	// Getters
+	void* GetWindowContext() const;
+	static RenderView::LightMode GetLightMode();
+	static RE_Camera* GetCamera();
+
+	const char* GetGPURenderer() const;
+	const char* GetGPUVendor() const;
+	uint GetMaxVertexAttributes(); // (usually 16 as vector in GLSL contains 4 component)
+
+	uintptr_t GetRenderViewTexture(RenderView::Type type) const;
+	uint GetDepthTexture() const;
+
+	// I don't like these
+	math::float4 GetRenderViewClearColor(RenderView::Type r_view) const;
+	RenderView::LightMode GetRenderViewLightMode(RenderView::Type r_view) const;
+	bool GetRenderViewDebugDraw(RenderView::Type r_view) const;
+
+private:
+
+	// Render Flags
+	inline bool HasFlag(RenderView::Flag flag) const;
+	void AddFlag(RenderView::Flag flag, bool force_state = false);
+	void RemoveFlag(RenderView::Flag flag, bool force_state = false);
+	void SetupFlag(RenderView::Flag flag, bool target_state, bool force_state = false);
+	void SetupFlags(ushort flags, bool force_state = false);
+
+	// Prepare To Render
+	void PrepareToRender(const RenderView& render_view);
+	void CategorizeDrawables(eastl::stack<const RE_Component*>& to_draw,
+		eastl::stack<const RE_Component*>& geo,
+		eastl::stack<const RE_Component*>& blended_geo,
+		eastl::stack<const RE_CompParticleEmitter*>& particle_systems,
+		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems);
+
+	eastl::stack<const RE_Component*> GatherDrawables(const RenderView& render_view) const;
+	eastl::vector<const RE_Component*> GatherSceneLights() const;
+	eastl::vector<const class RE_CompParticleEmitter*> GatherParticleLights() const;
+
+	// Main Draws
+	void DrawScene(const RenderView& render_view);
+	void DrawSceneForward(
+		const RenderView& render_view,
+		eastl::stack<const RE_Component*>& blended_geo,
+		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems);
+	void DrawSceneDeferred(
+		const RenderView& render_view,
+		eastl::stack<const RE_Component*>& blended_geo,
+		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems);
+
+	// Utility Draws
+	void DrawDebug(const RenderView& render_view);
+	void DrawSkyBox();
+	void DrawStencil(bool has_depth_test);
+
+	// Direct Draws
+	void DrawQuad() const;
+	void DirectDrawCube(math::vec position, math::vec color) const;
+
+	// Particle Editor Draws
+	void DrawParticleEditor(RenderView& render_view);
+	void DrawParticleEditorDebug(const RenderView& render_view, const class RE_ParticleEmitter* emitter);
+	void DrawParticleLights(const uint sim_id);
+
+	// Thumbnail Draws
+	void ThumbnailGameObject(RE_GameObject* go);
+	void ThumbnailMaterial(class RE_Material* mat);
+	void ThumbnailSkyBox(class RE_SkyBox* skybox);
 
 	enum class RenderType : ushort
 	{
@@ -62,7 +108,7 @@ public:
 		TEX,
 		SKYBOX
 	};
-	
+
 	struct RenderQueue
 	{
 		RenderType type;
@@ -73,72 +119,36 @@ public:
 			type(t), renderview(rv), resMD5(r), redo(re) {}
 	};
 
-private:
-
-	void DrawScene(const RenderView& render_view);
-	void DrawDebug(const RenderView& render_view);
-	void DrawParticleEditor(RenderView& render_view);
-	void DrawParticleLights(const uint sim_id);
-	void DrawSkyBox();
-	void DrawStencil(class RE_GameObject* go, class RE_Component* comp, bool has_depth_test);
-
-	void ThumbnailGameObject(RE_GameObject* go);
-	void ThumbnailMaterial(class RE_Material* mat);
-	void ThumbnailSkyBox(class RE_SkyBox* skybox);
-
-	// Render Flags
-	void inline SetWireframe(bool enable);
-	void inline SetFaceCulling(bool enable);
-	void inline SetTexture2D(bool enable);
-	void inline SetColorMaterial(bool enable);
-	void inline SetDepthTest(bool enable);
-	void inline SetLighting(bool enable);
-	void inline SetClipDistance(bool enable);
-
-	// Direct Draws
-	void DrawQuad();
-	void DirectDrawCube(math::vec position, math::vec color);
-
 public:
 
 	class RE_FBOManager* fbos = nullptr;
 
 private:
 
+	// Rendering Data
+	void* mainContext = nullptr;
+
+	static RenderView::LightMode current_lighting;
+	static RE_Camera* current_camera;
+	static uint current_fbo;
+
+	eastl::vector<RenderView> render_views;
 	eastl::stack<RenderQueue> render_queue;
 	eastl::vector<const char*> activeShaders;
 
-	// Context
-	void* mainContext = nullptr;
-
 	// Renderer Flags
-	bool vsync = false;
-
-	bool wireframe = false;
-	bool cullface = false;
-	bool texture2d = false;
-	bool color_material = false;
-	bool depthtest = false;
-	bool lighting = false;
-	bool clip_distance = false;
-
-	static RenderView::LightMode current_lighting;
-	static RE_CompCamera* current_camera;
-	static unsigned int current_fbo;
-
-	// Rendering Views
-	eastl::vector<RenderView> render_views;
+	ushort flags = 0;
 
 	//Thumbnail values
 	RenderView thumbnailView;
-	unsigned int mat_vao = 0, mat_vbo = 0, mat_ebo = 0, mat_triangles = 0;
+	uint mat_vao = 0;
+	uint mat_vbo = 0;
+	uint mat_ebo = 0;
+	uint mat_triangles = 0;
 
 	//Debug info
-	unsigned int lightsCount = 0;
-	unsigned int particlelightsCount = 0;
-
-	// Light pass render
-	bool shareLightPass = false;
+	uint lightsCount = 0;
+	uint particlelightsCount = 0;
 };
 
 #endif // !__MODULERENDER3D_H__

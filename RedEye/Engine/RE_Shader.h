@@ -3,8 +3,6 @@
 
 #include "RE_DataTypes.h"
 
-class RE_CompCamera;
-
 class RE_Shader : public ResourceContainer
 {
 public:
@@ -15,7 +13,7 @@ public:
 	void SetAsInternal(const char* vertexBuffer, const char* fragmentBuffer, const char* geometryBuffer = nullptr);
 	void SetPaths(const char* vertex, const char* fragment, const char* geometry = nullptr);
 
-	void UploadMainUniforms(RE_CompCamera* camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane) const;
+	void UploadMainUniforms(const class RE_Camera& camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane) const;
 	void UploadModel(const float* model) const;
 	void UploadDepth(int texture) const;
 

@@ -219,7 +219,7 @@ void RE_CompMesh::UnUseResources()
 	}
 }
 
-bool RE_CompMesh::isBlend() const
+bool RE_CompMesh::HasBlend() const
 {
 	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_InternalResources::GetDefaulMaterial();
 	RE_Material* material = dynamic_cast<RE_Material*>(RE_RES->At(materialToDraw));

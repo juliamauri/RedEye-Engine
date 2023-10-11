@@ -150,7 +150,7 @@ void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const 
 	RE_PHYSICS->CallParticleEmitterLightShaderUniforms(simulation->id, transform->GetGlobalPosition(), shader, array_unif_name, count, maxLights, sharedLight);
 }
 
-bool RE_CompParticleEmitter::isBlend() const { return static_cast<bool>(simulation->opacity.type); }
+bool RE_CompParticleEmitter::HasBlend() const { return static_cast<bool>(simulation->opacity.type); }
 
 RE_ParticleEmitter* RE_CompParticleEmitter::GetSimulation() const
 {

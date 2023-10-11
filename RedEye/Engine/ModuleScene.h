@@ -33,6 +33,7 @@ public:
 
 	// Current Pool
 	RE_ECS_Pool* GetScenePool() { return &scenePool; }
+	const RE_ECS_Pool* GetCScenePool() const { return &scenePool; }
 	RE_GameObject* GetGOPtr(GO_UID id) const { return scenePool.GetGOPtr(id); }
 	const RE_GameObject* GetGOCPtr(GO_UID id) const { return scenePool.GetGOCPtr(id); }
 
@@ -73,7 +74,6 @@ private:
 
 public:
 
-	class RE_CameraManager* cams = nullptr;
 	RE_PrimitiveManager* primitives = nullptr;
 
 private:

@@ -3,12 +3,17 @@
 
 struct RE_FBO
 {
-	enum class FBO_Type : char { DEFAULT, DEFERRED } type = FBO_Type::DEFAULT;
+	enum class Type : char { DEFAULT, DEFERRED };
+	Type type = Type::DEFAULT;
+
 	eastl::vector<uint32_t> texturesID;
-	uint32_t
-		ID = 0, width = 0, height = 0,
-		depthBuffer = 0, stencilBuffer = 0,
-		depthstencilBuffer = 0, depthBufferTexture = 0;
+	uint32_t ID = 0;
+	uint32_t width = 0;
+	uint32_t height = 0;
+	uint32_t depthBuffer = 0;
+	uint32_t stencilBuffer = 0;
+	uint32_t depthstencilBuffer = 0;
+	uint32_t depthBufferTexture = 0;
 };
 
 class RE_FBOManager

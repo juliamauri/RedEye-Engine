@@ -14,7 +14,7 @@
 
 void GameWindow::UpdateViewPort()
 {
-	RE_CameraManager::MainCamera()->GetTargetViewPort(viewport);
+	RE_CameraManager::MainCamera()->Camera.GetTargetViewPort(viewport);
 	viewport.x = (static_cast<float>(width) - viewport.z) * 0.5f;
 	viewport.y = (static_cast<float>(heigth) - viewport.w) * 0.5f + 20;
 }

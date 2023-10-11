@@ -26,6 +26,7 @@ struct RE_PR_Opacity : RE_Serializable
 	bool useCurve = false;
 	RE_Curve curve = {};
 
+	bool HasOpacity() const;
 	float GetValue(const float weight) const;
 
 	bool DrawEditor();

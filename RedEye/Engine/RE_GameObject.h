@@ -30,6 +30,7 @@ public:
 	// Component Getters
 	class RE_CompTransform* GetTransformPtr() const;
 	class RE_Component* GetRenderGeo() const;
+	const RE_Component* GetRenderGeoC() const;
 	class RE_CompMesh* GetMesh() const;
 	class RE_CompWater* GetWater() const;
 	class RE_CompParticleEmitter* GetParticleSystem() const;
@@ -46,6 +47,7 @@ public:
 	eastl::list<RE_Component*> GetStackableComponentsPtr() const;
 	eastl::stack<RE_Component*> GetAllChildsComponents(const RE_Component::Type type) const;
 	eastl::stack<RE_Component*> GetAllChildsActiveRenderGeos() const;
+	eastl::stack<const RE_Component*> GetAllChildsActiveRenderGeosC() const;
 	eastl::stack<RE_Component*> GetAllChildsActiveRenderGeos(const GO_UID stencil_mask) const;
 
 	// Components

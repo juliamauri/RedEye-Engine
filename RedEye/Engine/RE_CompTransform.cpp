@@ -201,43 +201,41 @@ void RE_CompTransform::Orbit(float rad_dx, float rad_dy, const math::vec center)
 
 void RE_CompTransform::Focus(const math::vec center, float v_fov_rads, float h_fov_rads, float radius, float min_dist)
 {
-	if (radius > 0)
+	if (radius <= 0) return;
+
+	float camDistance = min_dist;
+
+	// Vertical distance
+	float v_dist = radius / math::Sin(v_fov_rads / 2.0f);
+	if (v_dist > camDistance) camDistance = v_dist;
+
+	// Horizontal distance
+	float h_dist = radius / math::Sin(h_fov_rads / 2.0f);
+	if (h_dist > camDistance) camDistance = h_dist;
+
+	bool has_parent = useParent;
+	if (has_parent)
 	{
-		float camDistance = min_dist;
-
-		// Vertical distance
-		float v_dist = radius / math::Sin(v_fov_rads / 2.0f);
-		if (v_dist > camDistance) camDistance = v_dist;
-
-		// Horizontal distance
-		float h_dist = radius / math::Sin(h_fov_rads / 2.0f);
-		if (h_dist > camDistance) camDistance = h_dist;
-
-		bool has_parent = useParent;
-		if (has_parent)
+		const RE_GameObject* go_ptr = nullptr;
+		go_ptr = pool_gos->AtCPtr(go);
+		if (has_parent = go_ptr->GetParentUID())
 		{
-			const RE_GameObject* go_ptr = nullptr;
-			go_ptr = pool_gos->AtCPtr(go);
-			if (has_parent = go_ptr->GetParentUID())
-			{
-				math::float4x4 parent_global = go_ptr->GetParentCPtr()->GetTransformPtr()->GetGlobalMatrix();
+			math::float4x4 parent_global = go_ptr->GetParentCPtr()->GetTransformPtr()->GetGlobalMatrix();
 
-				if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
-				model_global = model_local * parent_global;
-
-				pos = (center + (model_global.Col3(2).Normalized() * camDistance)) - parent_global.Row3(3);
-			}
-		}
-
-		if (!has_parent)
-		{
 			if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
-			pos = center + (model_local.Col3(2).Normalized() * camDistance);
-		}
+			model_global = model_local * parent_global;
 
-		needed_update_transform = true;
+			pos = (center + (model_global.Col3(2).Normalized() * camDistance)) - parent_global.Row3(3);
+		}
 	}
 
+	if (!has_parent)
+	{
+		if (needed_update_transform) model_local = math::float4x4::FromTRS(pos, rot_quat, scale.scale).Transposed();
+		pos = center + (model_local.Col3(2).Normalized() * camDistance);
+	}
+
+	needed_update_transform = true;
 }
 
 math::vec RE_CompTransform::GetRight()

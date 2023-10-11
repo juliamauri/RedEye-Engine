@@ -198,6 +198,11 @@ RE_Component* RE_GameObject::GetRenderGeo() const
 	return render_geo.uid ? CompPtr(render_geo) : nullptr;
 }
 
+const RE_Component* RE_GameObject::GetRenderGeoC() const
+{
+	return render_geo.uid ? CompCPtr(render_geo) : nullptr;
+}
+
 RE_CompMesh* RE_GameObject::GetMesh() const
 {
 	return (render_geo.type == RE_Component::Type::MESH) ? dynamic_cast<RE_CompMesh*>(CompPtr(render_geo)) : nullptr;
@@ -298,6 +303,31 @@ eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos() const
 	return ret;
 }
 
+eastl::stack<const RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeosC() const
+{
+	eastl::stack<const RE_Component*> ret;
+
+	eastl::stack<const RE_GameObject*> gos;
+	for (auto& child : GetChildsCPtr())
+		if (child->HasFlag(RE_GameObject::Flag::ACTIVE))
+			gos.push(child);
+
+	while (!gos.empty())
+	{
+		auto go = gos.top();
+		gos.pop();
+
+		if (go->render_geo.uid)
+			ret.push(CompCPtr(render_geo));
+
+		for (auto& child : go->GetChildsCPtr())
+			if (child->HasFlag(RE_GameObject::Flag::ACTIVE))
+				gos.push(child);
+	}
+
+	return ret;
+}
+
 eastl::stack<RE_Component*> RE_GameObject::GetAllChildsActiveRenderGeos(const GO_UID stencil_mask) const
 {
 	eastl::stack<RE_Component*> ret;
@@ -367,7 +397,7 @@ RE_Component* RE_GameObject::AddNewComponent(const RE_Component::Type type)
 		camera = (ret = pool_comps->GetNewComponentPtr(type))->PoolSetUp(pool_gos, go_uid);
 		RE_CompCamera* new_cam = dynamic_cast<RE_CompCamera*>(ret);
 		new_cam->SetProperties();
-		if (!RE_INPUT->Paused()) RE_SCENE->cams->AddMainCamera(new_cam);
+		if (!RE_INPUT->Paused()) RE_CameraManager::SetAsMainCamera(new_cam->GetPoolID());
 		break;
 	}
 	case RE_Component::Type::LIGHT:
@@ -1011,7 +1041,7 @@ void RE_GameObject::DrawAABB(math::vec color) const
 
 	glMatrixMode(GL_MODELVIEW);
 	auto t = dynamic_cast<RE_CompTransform*>(CompPtr(transform, RE_Component::Type::TRANSFORM));
-	glLoadMatrixf((t->GetGlobalMatrix() * RE_CameraManager::CurrentCamera()->GetView()).ptr());
+	glLoadMatrixf((RE_CameraManager::MainCamera()->Camera.GetView() * t->GetGlobalMatrix()).ptr());
 
 	glColor3f(color.x, color.y, color.z);
 	glBegin(GL_LINES);

@@ -72,10 +72,6 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 	RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
 	RE_ShaderImporter::setFloat(shader, "useTexture", 0.0f);
 
-	// Get Camera Transform
-	RE_CompTransform* cT = ModuleRenderer3D::GetCamera()->GetTransform();
-	const math::float3 cUp = cT->GetUp().Normalized();
-
 	for (const auto &p : simulation->particle_pool)
 	{
 		// Calculate Particle Transform
@@ -93,9 +89,10 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 		}
 		case RE_ParticleEmitter::ParticleDir::Billboard:
 		{
-			front = cT->GetGlobalPosition() - partcleGlobalpos;
+			auto& frustum = ModuleRenderer3D::GetCamera()->GetFrustum();
+			front = frustum.Pos() - partcleGlobalpos;
 			front.Normalize();
-			right = front.Cross(cUp).Normalized();
+			right = front.Cross(frustum.Up()).Normalized();
 			if (right.x < 0.0f) right *= -1.0f;
 			up = right.Cross(front).Normalized();
 			break;
@@ -103,7 +100,7 @@ void ParticleManager::DrawSimulation(unsigned int index, math::float3 go_positio
 		case RE_ParticleEmitter::ParticleDir::Custom:
 		{
 			front = simulation->direction.Normalized();
-			right = front.Cross(cUp).Normalized();
+			right = front.Cross(ModuleRenderer3D::GetCamera()->GetFrustum().Up()).Normalized();
 			if (right.x < 0.0f) right *= -1.0f;
 			up = right.Cross(front).Normalized();
 			break;

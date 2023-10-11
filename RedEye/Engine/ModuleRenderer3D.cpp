@@ -78,9 +78,10 @@ void GLAPIENTRY MessageCallback(
 	else RE_LOG_WARNING("%s, %s, message = %s\n", (typeStr.c_str()), severityStr.c_str(), message);
 }
 
+// Static values
 RenderView::LightMode ModuleRenderer3D::current_lighting = RenderView::LightMode::GL;
-RE_CompCamera* ModuleRenderer3D::current_camera = nullptr;
-unsigned int ModuleRenderer3D::current_fbo = 0;
+RE_Camera* ModuleRenderer3D::current_camera = nullptr;
+uint ModuleRenderer3D::current_fbo = 0;
 
 ModuleRenderer3D::ModuleRenderer3D() : fbos(new RE_FBOManager()) {}
 ModuleRenderer3D::~ModuleRenderer3D() { DEL(fbos) }
@@ -88,7 +89,7 @@ ModuleRenderer3D::~ModuleRenderer3D() { DEL(fbos) }
 bool ModuleRenderer3D::Init()
 {
 	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleRender);
-	bool ret = false;
+
 	RE_LOG("Initializing Module Renderer3D");
 	RE_LOG_SECONDARY("Seting SDL/GL Attributes.");
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) < 0)
@@ -103,94 +104,92 @@ bool ModuleRenderer3D::Init()
 		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MAJOR_VERSION: 3'");
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1) < 0)
 		RE_LOG_ERROR("SDL could not set GL Attributes: 'SDL_GL_CONTEXT_MINOR_VERSION: 1'");
-	
-	if (RE_WINDOW)
+
+	RE_LOG_SECONDARY("Creating SDL GL Context");
+	mainContext = SDL_GL_CreateContext(RE_WINDOW->GetWindow());
+	if (mainContext == nullptr)
 	{
-		RE_LOG_SECONDARY("Creating SDL GL Context");
-		mainContext = SDL_GL_CreateContext(RE_WINDOW->GetWindow());
-		if (ret = (mainContext != nullptr))
-			RE_SOFT_NVS("OpenGL", reinterpret_cast<const char*>(glGetString(GL_VERSION)), "https://www.opengl.org/");
-		else
-			RE_LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
+		RE_LOG_ERROR("SDL could not create GL Context! SDL_Error: %s", SDL_GetError());
+		return false;
 	}
+	RE_SOFT_NVS("OpenGL", reinterpret_cast<const char*>(glGetString(GL_VERSION)), "https://www.opengl.org/");
 
-	if (ret)
+	RE_LOG_SECONDARY("Initializing Glew");
+	GLenum error = glewInit();
+	if (error != GLEW_OK)
 	{
-		RE_LOG_SECONDARY("Initializing Glew");
-		GLenum error = glewInit();
-		if (ret = (error == GLEW_OK))
-		{
-			RE_SOFT_NVS("Glew", reinterpret_cast<const char*>(glewGetString(GLEW_VERSION)), "http://glew.sourceforge.net/");
-
-			int test;
-			glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &test);
-			glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_BLOCKS, &test);
-			glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &test);
-			glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &test);
-			glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &test);
-			glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &test);
-			glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &test);
-			glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS, &test);
-
-			render_views.push_back(RenderView("Scene", { 0, 0 },
-				static_cast<const ushort>(RenderView::Flag::FRUSTUM_CULLING) |
-				static_cast<const ushort>(RenderView::Flag::OVERRIDE_CULLING) |
-				static_cast<const ushort>(RenderView::Flag::OUTLINE_SELECTION) |
-				static_cast<const ushort>(RenderView::Flag::SKYBOX) |
-				static_cast<const ushort>(RenderView::Flag::BLENDED) |
-				static_cast<const ushort>(RenderView::Flag::FACE_CULLING) |
-				static_cast<const ushort>(RenderView::Flag::TEXTURE_2D) |
-				static_cast<const ushort>(RenderView::Flag::COLOR_MATERIAL) |
-				static_cast<const ushort>(RenderView::Flag::DEPTH_TEST),
-				RenderView::LightMode::DISABLED));
-			
-			render_views.push_back(RenderView("Game", { 0, 0 },
-				static_cast<const ushort>(RenderView::Flag::FRUSTUM_CULLING) |
-				static_cast<const ushort>(RenderView::Flag::SKYBOX) |
-				static_cast<const ushort>(RenderView::Flag::BLENDED) |
-				static_cast<const ushort>(RenderView::Flag::FACE_CULLING) |
-				static_cast<const ushort>(RenderView::Flag::TEXTURE_2D) |
-				static_cast<const ushort>(RenderView::Flag::COLOR_MATERIAL) |
-				static_cast<const ushort>(RenderView::Flag::DEPTH_TEST),
-				RenderView::LightMode::DEFERRED));
-
-			render_views.push_back(RenderView("Particle Editor", { 0, 0 },
-				static_cast<const ushort>(RenderView::Flag::FACE_CULLING) |
-				static_cast<const ushort>(RenderView::Flag::BLENDED) |
-				static_cast<const ushort>(RenderView::Flag::TEXTURE_2D) |
-				static_cast<const ushort>(RenderView::Flag::COLOR_MATERIAL) |
-				static_cast<const ushort>(RenderView::Flag::DEPTH_TEST),
-				RenderView::LightMode::DISABLED));
-
-			//Thumbnail Configuration
-			thumbnailView.clear_color = {0.f, 0.f, 0.f, 1.f};
-			RE_INPUT->PauseEvents();
-			thumbnailView.camera = new RE_CompCamera();
-			thumbnailView.camera->SetParent(0ull);
-			thumbnailView.camera->SetProperties();
-			thumbnailView.camera->SetBounds(THUMBNAILSIZE, THUMBNAILSIZE);
-			thumbnailView.camera->Update();
-			RE_INPUT->ResumeEvents();
-			
-			RE_SCENE->primitives->CreateSphere(24, 24, mat_vao, mat_vbo, mat_ebo, mat_triangles);
-
-			//OpenGL Debug Output
-			glEnable(GL_DEBUG_OUTPUT);
-			glDebugMessageCallback(MessageCallback, 0);
-
-			glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
-			cullface ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
-			texture2d ? glEnable(GL_TEXTURE_2D) : glDisable(GL_TEXTURE_2D);
-			color_material ? glEnable(GL_COLOR_MATERIAL) : glDisable(GL_COLOR_MATERIAL);
-			depthtest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
-			lighting ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
-
-			Load();
-		}
-		else RE_LOG_ERROR("Glew could not initialize! Glew_Error: %s", glewGetErrorString(error));
+		RE_LOG_ERROR("Glew could not initialize! Glew_Error: %s", glewGetErrorString(error));
+		return false;
 	}
+	RE_SOFT_NVS("Glew", reinterpret_cast<const char*>(glewGetString(GLEW_VERSION)), "http://glew.sourceforge.net/");
+
+	int test;
+	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &test);
+	RE_LOG_TERCIARY("GL Variable lookup: GL_MAX_VERTEX_UNIFORM_BLOCKS = %i", test);
+	glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_BLOCKS, &test);
+	RE_LOG_TERCIARY("GL Variable lookup: GL_MAX_GEOMETRY_UNIFORM_BLOCKS = %i", test);
+	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &test);
+	RE_LOG_TERCIARY("GL Variable lookup: GL_MAX_FRAGMENT_UNIFORM_BLOCKS = %i", test);
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &test);
+	RE_LOG_TERCIARY("GL Variable lookup: GL_MAX_UNIFORM_BLOCK_SIZE = %i", test);
+	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &test);
+	RE_LOG_TERCIARY("GL Variable lookup: GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT = %i", test);
+	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &test);
+	RE_LOG_TERCIARY("GL Variable lookup: GL_MAX_FRAGMENT_UNIFORM_COMPONENTS = %i", test);
+	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &test);
+	RE_LOG_TERCIARY("GL Variable lookup: GL_MAX_VERTEX_UNIFORM_COMPONENTS = %i", test);
+	glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS, &test);
+	RE_LOG_TERCIARY("GL Variable lookup: GL_MAX_GEOMETRY_UNIFORM_COMPONENTS = %i", test);
+
+	// Setup Empty Render Flags
+	SetupFlags(0, true);
+
+	//OpenGL Debug Output
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(MessageCallback, 0);
+
+
+	render_views.push_back(RenderView("Scene", { 0, 0 },
+		static_cast<ushort>(RenderView::Flag::FRUSTUM_CULLING) |
+		static_cast<ushort>(RenderView::Flag::OVERRIDE_CULLING) |
+		static_cast<ushort>(RenderView::Flag::OUTLINE_SELECTION) |
+		static_cast<ushort>(RenderView::Flag::SKYBOX) |
+		static_cast<ushort>(RenderView::Flag::BLENDED) |
+		static_cast<ushort>(RenderView::Flag::FACE_CULLING) |
+		static_cast<ushort>(RenderView::Flag::TEXTURE_2D) |
+		static_cast<ushort>(RenderView::Flag::COLOR_MATERIAL) |
+		static_cast<ushort>(RenderView::Flag::DEPTH_TEST),
+		RenderView::LightMode::DISABLED));
+
+	render_views.push_back(RenderView("Game", { 0, 0 },
+		static_cast<ushort>(RenderView::Flag::FRUSTUM_CULLING) |
+		static_cast<ushort>(RenderView::Flag::SKYBOX) |
+		static_cast<ushort>(RenderView::Flag::BLENDED) |
+		static_cast<ushort>(RenderView::Flag::FACE_CULLING) |
+		static_cast<ushort>(RenderView::Flag::TEXTURE_2D) |
+		static_cast<ushort>(RenderView::Flag::COLOR_MATERIAL) |
+		static_cast<ushort>(RenderView::Flag::DEPTH_TEST),
+		RenderView::LightMode::DEFERRED));
+
+	render_views.push_back(RenderView("Particle Editor", { 0, 0 },
+		static_cast<ushort>(RenderView::Flag::FACE_CULLING) |
+		static_cast<ushort>(RenderView::Flag::BLENDED) |
+		static_cast<ushort>(RenderView::Flag::TEXTURE_2D) |
+		static_cast<ushort>(RenderView::Flag::COLOR_MATERIAL) |
+		static_cast<ushort>(RenderView::Flag::DEPTH_TEST),
+		RenderView::LightMode::DISABLED));
+
+	//Thumbnail Configuration
+	thumbnailView.clear_color = { 0.f, 0.f, 0.f, 1.f };
+	thumbnailView.camera = new RE_Camera();
+	thumbnailView.camera->SetupFrustum();
+	thumbnailView.camera->SetBounds(THUMBNAILSIZE, THUMBNAILSIZE);
+
+	RE_SCENE->primitives->CreateSphere(24, 24, mat_vao, mat_vbo, mat_ebo, mat_triangles);
+
+	Load();
 	 
-	return ret;
+	return true;
 }
 
 bool ModuleRenderer3D::Start()
@@ -199,23 +198,17 @@ bool ModuleRenderer3D::Start()
 	RE_LOG("Starting Module Renderer3D");
 	thumbnailView.fbos = { fbos->CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
 
-	render_views[static_cast<const ushort>(RenderView::Type::EDITOR)].fbos =
-	{
-		fbos->CreateFBO(1024, 768, 1, true, true),
-		fbos->CreateDeferredFBO(1024, 768)
-	};
+	RenderView* rv = &render_views[static_cast<ushort>(RenderView::Type::EDITOR)];
+	rv->camera = RE_EDITOR->GetSceneCamera();
+	rv->fbos = { fbos->CreateFBO(1024, 768, 1, true, true), fbos->CreateDeferredFBO(1024, 768) };
 
-	render_views[static_cast<const ushort>(RenderView::Type::GAME)].fbos =
-	{
-		fbos->CreateFBO(1024, 768, 1, true, true),
-		fbos->CreateDeferredFBO(1024, 768)
-	};
+	rv = &render_views[static_cast<ushort>(RenderView::Type::GAME)];
+	rv->camera = &RE_CameraManager::MainCamera()->Camera;
+	rv->fbos = { fbos->CreateFBO(1024, 768, 1, true, true), fbos->CreateDeferredFBO(1024, 768) };
 
-	render_views[static_cast<const ushort>(RenderView::Type::PARTICLE)].fbos =
-	{
-		fbos->CreateFBO(1024, 768, 1, true, false),
-		fbos->CreateDeferredFBO(1024, 768)
-	};
+	rv = &render_views[static_cast<ushort>(RenderView::Type::PARTICLE)];
+	rv->camera = RE_EDITOR->GetParticlesCamera();
+	rv->fbos = { fbos->CreateFBO(1024, 768, 1, true, false), fbos->CreateDeferredFBO(1024, 768) };
 
 	return true;
 }
@@ -317,13 +310,11 @@ void ModuleRenderer3D::PostUpdate()
 
 		}}
 
-	render_views[0].camera = RE_CameraManager::EditorCamera();
-	render_views[1].camera = RE_CameraManager::MainCamera();
-	render_views[2].camera = RE_CameraManager::ParticleEditorCamera();
-	if (RE_EDITOR->EditorSceneNeedsRender()) PushSceneRend(render_views[0]);
-	if (RE_EDITOR->GameSceneNeedsRender()) PushSceneRend(render_views[1]);
+	if (RE_EDITOR->EditorSceneNeedsRender()) render_queue.push({ RenderType::SCENE, render_views[0], nullptr });
+	if (RE_EDITOR->GameSceneNeedsRender()) render_queue.push({ RenderType::SCENE, render_views[1], nullptr });
 
-	while (!render_queue.empty()) {
+	while (!render_queue.empty())
+	{
 		RenderQueue rend = render_queue.top();
 		render_queue.pop();
 
@@ -342,7 +333,7 @@ void ModuleRenderer3D::PostUpdate()
 	fbos->ChangeFBOBind(0, RE_WINDOW->GetWidth(), RE_WINDOW->GetHeight());
 
 	// Draw Editor
-	SetWireframe(false);
+	RemoveFlag(RenderView::Flag::WIREFRAME);
 	RE_EDITOR->Draw();
 
 	//Swap buffers
@@ -360,59 +351,33 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 {
 	switch (e.type)
 	{
-	case RE_EventType::SET_VSYNC:
-	{
-		SetVSync(e.data1.AsBool());
-		break;
-	}
-	case RE_EventType::SET_DEPTH_TEST:
-	{
-		SetDepthTest(e.data1.AsBool());
-		break;
-	}
-	case RE_EventType::SET_FACE_CULLING:
-	{
-		SetFaceCulling(e.data1.AsBool());
-		break;
-	}
-	case RE_EventType::SET_LIGHTNING:
-	{
-		SetLighting(e.data1.AsBool());
-		break;
-	}
-	case RE_EventType::SET_TEXTURE_TWO_D:
-	{
-		SetTexture2D(e.data1.AsBool());
-		break;
-	}
-	case RE_EventType::SET_COLOR_MATERIAL:
-	{
-		SetColorMaterial(e.data1.AsBool());
-		break;
-	}
-	case RE_EventType::SET_WIRE_FRAME:
-	{
-		SetWireframe(e.data1.AsBool());
-		break;
-	}
-	case RE_EventType::EDITORWINDOWCHANGED:
+	case RE_EventType::SET_WIRE_FRAME: SetupFlag(RenderView::Flag::WIREFRAME, e.data1.AsBool()); break;
+	case RE_EventType::SET_FACE_CULLING: SetupFlag(RenderView::Flag::FACE_CULLING, e.data1.AsBool()); break;
+	case RE_EventType::SET_TEXTURE_TWO_D: SetupFlag(RenderView::Flag::TEXTURE_2D, e.data1.AsBool()); break;
+	case RE_EventType::SET_COLOR_MATERIAL: SetupFlag(RenderView::Flag::COLOR_MATERIAL, e.data1.AsBool()); break;
+	case RE_EventType::SET_DEPTH_TEST: SetupFlag(RenderView::Flag::DEPTH_TEST, e.data1.AsBool()); break;
+	case RE_EventType::SET_CLIP_DISTANCE: SetupFlag(RenderView::Flag::CLIP_DISTANCE, e.data1.AsBool()); break;
+	case RE_EventType::SET_LIGHTNING: SetupFlag(RenderView::Flag::GL_LIGHT, e.data1.AsBool()); break;
+	case RE_EventType::SET_VSYNC: SetupFlag(RenderView::Flag::VSYNC, e.data1.AsBool()); break;
+
+	case RE_EventType::EDITOR_WINDOW_CHANGED:
 	{
 		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
-		RE_CameraManager::EditorCamera()->SetBounds(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
+		render_views[static_cast<ushort>(RenderView::Type::EDITOR)].camera->SetBounds(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
 		ChangeFBOSize(window_size[0], window_size[1], RenderView::Type::EDITOR);
 		break;
 	}
-	case RE_EventType::GAMEWINDOWCHANGED:
+	case RE_EventType::GAME_WINDOW_CHANGED:
 	{
 		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
-		RE_SCENE->cams->OnWindowChangeSize(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
+		RE_CameraManager::OnWindowChangeSize(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
 		ChangeFBOSize(window_size[0], window_size[1], RenderView::Type::GAME);
 		break;
 	}
-	case RE_EventType::PARTRICLEEDITORWINDOWCHANGED:
+	case RE_EventType::PARTRICLE_EDITOR_WINDOW_CHANGED:
 	{
 		const int window_size[2] = { e.data1.AsInt(), e.data2.AsInt() };
-		RE_CameraManager::ParticleEditorCamera()->SetBounds(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
+		render_views[static_cast<ushort>(RenderView::Type::PARTICLE)].camera->SetBounds(static_cast<float>(window_size[0]), static_cast<float>(window_size[1]));
 		ChangeFBOSize(window_size[0], window_size[1], RenderView::Type::PARTICLE);
 		break;
 	}
@@ -421,19 +386,19 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 
 void ModuleRenderer3D::DrawEditor()
 {
-	if (ImGui::Checkbox((vsync) ? "VSync Enabled" : "VSync Disabled", &vsync))
-		SetVSync(vsync);
+	// Vertical Sync
+	bool vsync = HasFlag(RenderView::Flag::VSYNC);
+	if (ImGui::Checkbox(vsync ? "VSync Enabled" : "VSync Disabled", &vsync))
+		SetupFlag(RenderView::Flag::VSYNC, vsync);
 
-	if (ImGui::Checkbox(shareLightPass ? "Not share light pass" : "Share Light pass", &shareLightPass)) {
-		if (shareLightPass)
-			RE_RES->At(RE_InternalResources::GetParticleLightPassShader())->UnloadMemory();
-		else
-			dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
-	}
+	// Shared Light Pass
+	bool share_light_pass = HasFlag(RenderView::Flag::SHARE_LIGHT_PASS);
+	if (ImGui::Checkbox(share_light_pass ? "Disable light pass" : "Share Light pass", &share_light_pass))
+		SetupFlag(RenderView::Flag::SHARE_LIGHT_PASS, share_light_pass);
 
 	ImGui::Separator();
 
-	if (shareLightPass)
+	if (share_light_pass)
 	{
 		ImGui::Text("Total Lights: %u:203", lightsCount + particlelightsCount);
 		ImGui::Text("From lights components: %u", lightsCount);
@@ -450,17 +415,16 @@ void ModuleRenderer3D::DrawEditor()
 	for (auto& view : render_views) view.DrawEditor();
 }
 
+#pragma region Config Serialization
+
 void ModuleRenderer3D::Load()
 {
 	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleRender);
 	RE_LOG_SECONDARY("Loading Render3D config values:");
 	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
 
-	SetVSync(node->PullBool("vsync", true));
-	RE_LOG_TERCIARY((vsync) ? "VSync enabled." : "VSync disabled");
-
-	if (shareLightPass = node->PullBool("share_light_pass", false))
-		RE_RES->At(RE_InternalResources::GetParticleLightPassShader())->UnloadMemory();
+	SetupFlag(RenderView::Flag::VSYNC, node->PullBool("vsync", true));
+	SetupFlag(RenderView::Flag::SHARE_LIGHT_PASS, node->PullBool("share_light_pass", false));
 
 	// Render Views
 	for (uint i = 0; i < render_views.size(); ++i)
@@ -473,9 +437,9 @@ void ModuleRenderer3D::Save() const
 {
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModuleRender);
 	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
-	node->Push("vsync", vsync);
 
-	node->Push("share_light_pass", shareLightPass);
+	node->Push("vsync", HasFlag(RenderView::Flag::VSYNC));
+	node->Push("share_light_pass", HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
 
 	// Render Views
 	for (uint i = 0; i < render_views.size(); ++i)
@@ -484,65 +448,20 @@ void ModuleRenderer3D::Save() const
 	DEL(node)
 }
 
-void ModuleRenderer3D::SetVSync(bool enable)
-{
-	SDL_GL_SetSwapInterval((vsync = enable) ? 1 : 0);
-}
+#pragma endregion
+#pragma region Actions
 
-void* ModuleRenderer3D::GetWindowContext() const
+void ModuleRenderer3D::LoadCameraMatrixes(const RE_Camera& camera)
 {
-	return mainContext;
-}
-
-unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
-{
-	int nrAttributes;
-	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-	return nrAttributes;
-}
-
-const char* ModuleRenderer3D::GetGPURenderer() const
-{
-	return reinterpret_cast<const char*>(glGetString(GL_RENDERER));
-}
-
-const char* ModuleRenderer3D::GetGPUVendor() const
-{
-	return reinterpret_cast<const char*>(glGetString(GL_VENDOR));
-}
-
-RenderView::LightMode ModuleRenderer3D::GetLightMode()
-{
-	return current_lighting;
-}
-
-RE_CompCamera* ModuleRenderer3D::GetCamera()
-{
-	return current_camera;
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(camera.GetProjection().Transposed().ptr());
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(camera.GetView().Transposed().ptr());
 }
 
 void ModuleRenderer3D::ChangeFBOSize(int width, int height, RenderView::Type view)
 {
-	fbos->ChangeFBOSize(render_views[static_cast<const ushort>(view)].GetFBO(), width, height);
-}
-
-uintptr_t  ModuleRenderer3D::GetRenderViewTexture(RenderView::Type type) const
-{
-	auto id = static_cast<ushort>(type);
-	return fbos->GetTextureID(
-		render_views[id].GetFBO(),
-		render_views[id].light == RenderView::LightMode::DEFERRED ? 4u : 0u);
-}
-
-unsigned int ModuleRenderer3D::GetDepthTexture() const
-{
-	RE_GLCache::ChangeTextureBind(0);
-	return fbos->GetDepthTexture(current_fbo);
-}
-
-void ModuleRenderer3D::PushSceneRend(RenderView& rV)
-{
-	render_queue.push({ RenderType::SCENE, rV, nullptr});
+	fbos->ChangeFBOSize(render_views[static_cast<ushort>(view)].GetFBO(), width, height);
 }
 
 void ModuleRenderer3D::PushThumnailRend(const char* md5, bool redo)
@@ -559,10 +478,171 @@ void ModuleRenderer3D::PushThumnailRend(const char* md5, bool redo)
 	}
 }
 
-void ModuleRenderer3D::DrawScene(const RenderView& render_view)
-{
-	RE_PROFILE(RE_ProfiledFunc::DrawScene, RE_ProfiledClass::ModuleRender);
+#pragma endregion
+#pragma region Setters
 
+void ModuleRenderer3D::SetRenderViewDeferred(RenderView::Type r_view, bool using_deferred)
+{
+	if (r_view < RenderView::Type::OTHER) render_views[static_cast<const short>(r_view)].light =
+		using_deferred ? RenderView::LightMode::DEFERRED : RenderView::LightMode::DISABLED;
+}
+void ModuleRenderer3D::SetRenderViewClearColor(RenderView::Type r_view, math::float4 clear_color)
+{
+	if (r_view < RenderView::Type::OTHER) render_views[static_cast<const short>(r_view)].clear_color = clear_color;
+}
+void ModuleRenderer3D::SetRenderViewDebugDraw(RenderView::Type r_view, bool debug_draw)
+{
+	if (r_view < RenderView::Type::OTHER)
+	{
+		if (debug_draw) render_views[static_cast<const short>(r_view)].AddFlag(RenderView::Flag::DEBUG_DRAW);
+		else render_views[static_cast<const short>(r_view)].RemoveFlag(RenderView::Flag::DEBUG_DRAW);
+	}
+}
+
+#pragma endregion
+
+#pragma region Getters
+
+void* ModuleRenderer3D::GetWindowContext() const { return mainContext; }
+RenderView::LightMode ModuleRenderer3D::GetLightMode() { return current_lighting; }
+RE_Camera* ModuleRenderer3D::GetCamera() { return current_camera; }
+
+const char* ModuleRenderer3D::GetGPURenderer() const { return reinterpret_cast<const char*>(glGetString(GL_RENDERER)); }
+const char* ModuleRenderer3D::GetGPUVendor() const { return reinterpret_cast<const char*>(glGetString(GL_VENDOR)); }
+unsigned int ModuleRenderer3D::GetMaxVertexAttributes()
+{
+	int nrAttributes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+	return nrAttributes;
+}
+
+uintptr_t  ModuleRenderer3D::GetRenderViewTexture(RenderView::Type type) const
+{
+	auto id = static_cast<ushort>(type);
+	return fbos->GetTextureID(
+		render_views[id].GetFBO(),
+		4 * (render_views[id].light == RenderView::LightMode::DEFERRED));
+}
+uint ModuleRenderer3D::GetDepthTexture() const
+{
+	RE_GLCache::ChangeTextureBind(0);
+	return fbos->GetDepthTexture(current_fbo);
+}
+
+math::float4 ModuleRenderer3D::GetRenderViewClearColor(RenderView::Type r_view) const
+{
+	return (r_view < RenderView::Type::OTHER) ? render_views[static_cast<const short>(r_view)].clear_color : math::float4(0.0f, 0.0f, 0.0f, 1.0f);
+}
+RenderView::LightMode ModuleRenderer3D::GetRenderViewLightMode(RenderView::Type r_view) const
+{
+	return (r_view < RenderView::Type::OTHER) ? render_views[static_cast<const short>(r_view)].light : RenderView::LightMode::DISABLED;
+}
+bool ModuleRenderer3D::GetRenderViewDebugDraw(RenderView::Type r_view) const
+{
+	return (r_view < RenderView::Type::OTHER) ? render_views[static_cast<const short>(r_view)].HasFlag(RenderView::Flag::DEBUG_DRAW) : false;
+}
+
+
+#pragma endregion
+
+#pragma region Render Flags
+
+inline bool ModuleRenderer3D::HasFlag(RenderView::Flag flag) const
+{
+	return flags & static_cast<ushort>(flag);
+}
+
+void ModuleRenderer3D::AddFlag(RenderView::Flag flag, bool force_state)
+{
+	if (!force_state && HasFlag(flag)) return;
+
+	flags |= static_cast<ushort>(flag);
+
+	switch (flag)
+	{
+		// GL Specs
+	case RenderView::Flag::WIREFRAME: glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); break;
+	case RenderView::Flag::FACE_CULLING: glEnable(GL_CULL_FACE); break;
+	case RenderView::Flag::TEXTURE_2D: glEnable(GL_TEXTURE_2D); break;
+	case RenderView::Flag::COLOR_MATERIAL: glEnable(GL_COLOR_MATERIAL); break;
+	case RenderView::Flag::DEPTH_TEST: glEnable(GL_DEPTH_TEST); break;
+	case RenderView::Flag::CLIP_DISTANCE: glEnable(GL_CLIP_DISTANCE0); break;
+	case RenderView::Flag::GL_LIGHT: glEnable(GL_LIGHTING); break;
+
+		// RE Utility
+	case RenderView::Flag::FRUSTUM_CULLING: ; break;
+	case RenderView::Flag::OVERRIDE_CULLING: ; break;
+	case RenderView::Flag::OUTLINE_SELECTION: ; break;
+	case RenderView::Flag::DEBUG_DRAW: ; break;
+	case RenderView::Flag::SKYBOX: ; break;
+	case RenderView::Flag::BLENDED: ; break;
+
+		// Renderer
+	case RenderView::Flag::VSYNC:
+		SDL_GL_SetSwapInterval(1);
+		RE_LOG_TERCIARY("VSync enabled.");
+		break;
+	case RenderView::Flag::SHARE_LIGHT_PASS:
+		RE_RES->At(RE_InternalResources::GetParticleLightPassShader())->UnloadMemory();
+		break;
+	default: break;
+	}
+}
+
+void ModuleRenderer3D::RemoveFlag(RenderView::Flag flag, bool force_state)
+{
+	if (!force_state && !HasFlag(flag)) return;
+	
+	auto f = static_cast<ushort>(flag);
+	if (flags & f) flags -= f;
+
+	switch (flag)
+	{
+		// GL Specs
+	case RenderView::Flag::WIREFRAME: glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); break;
+	case RenderView::Flag::FACE_CULLING: glDisable(GL_CULL_FACE); break;
+	case RenderView::Flag::TEXTURE_2D: glDisable(GL_TEXTURE_2D); break;
+	case RenderView::Flag::COLOR_MATERIAL: glDisable(GL_COLOR_MATERIAL); break;
+	case RenderView::Flag::DEPTH_TEST: glDisable(GL_DEPTH_TEST); break;
+	case RenderView::Flag::CLIP_DISTANCE: glDisable(GL_CLIP_DISTANCE0); break;
+	case RenderView::Flag::GL_LIGHT: glDisable(GL_LIGHTING); break;
+
+		// Renderer
+	case RenderView::Flag::VSYNC:
+		SDL_GL_SetSwapInterval(0);
+		RE_LOG_TERCIARY("VSync disabled.");
+		break;
+	case RenderView::Flag::SHARE_LIGHT_PASS:
+		dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
+		break;
+	default: break;
+	}
+}
+
+void ModuleRenderer3D::SetupFlag(RenderView::Flag flag, bool target_state, bool force_state)
+{
+	if (target_state) AddFlag(flag, force_state);
+	else RemoveFlag(flag, force_state);
+}
+
+void ModuleRenderer3D::SetupFlags(ushort _flags, bool force_state)
+{
+	for (int i = 0; i < 15; i++)
+	{
+		ushort flag = 1 << 0;
+		SetupFlag(static_cast<RenderView::Flag>(flag), _flags & flag, force_state);
+
+		if (_flags & flag) AddFlag(static_cast<RenderView::Flag>(flag), force_state);
+		else RemoveFlag(static_cast<RenderView::Flag>(flag), force_state);
+	}
+
+	flags = _flags;
+}
+
+#pragma endregion
+
+void ModuleRenderer3D::PrepareToRender(const RenderView& render_view)
+{
 	// Setup Frame Buffer
 	current_lighting = render_view.light;
 	current_fbo = render_view.GetFBO();
@@ -572,306 +652,276 @@ void ModuleRenderer3D::DrawScene(const RenderView& render_view)
 	fbos->ClearFBOBuffers(current_fbo, render_view.clear_color.ptr());
 
 	// Setup Render Flags
+	RemoveFlag(RenderView::Flag::TEXTURE_2D);
+	SetupFlag(RenderView::Flag::WIREFRAME, render_view.HasFlag(RenderView::Flag::WIREFRAME));
+	SetupFlag(RenderView::Flag::FACE_CULLING, render_view.HasFlag(RenderView::Flag::FACE_CULLING));
+	SetupFlag(RenderView::Flag::COLOR_MATERIAL, render_view.HasFlag(RenderView::Flag::COLOR_MATERIAL));
+	SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+
 	bool usingClipDistance = render_view.HasFlag(RenderView::Flag::CLIP_DISTANCE);
-	SetWireframe(render_view.HasFlag(RenderView::Flag::WIREFRAME));
-	SetFaceCulling(render_view.HasFlag(RenderView::Flag::FACE_CULLING));
-	SetTexture2D(false);
-	SetColorMaterial(render_view.HasFlag(RenderView::Flag::COLOR_MATERIAL));
-	SetDepthTest(render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
-	SetClipDistance(usingClipDistance);
+	SetupFlag(RenderView::Flag::CLIP_DISTANCE, usingClipDistance);
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
 		dynamic_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
-			render_view.camera,
+			*render_view.camera,
 			static_cast<float>(fbos->GetHeight(current_fbo)),
 			static_cast<float>(fbos->GetWidth(current_fbo)),
 			usingClipDistance,
 			render_view.clip_distance);
 
-	// Frustum Culling
-	eastl::stack<RE_Component*> comptsToDraw;
-	if (render_view.HasFlag(RenderView::Flag::FRUSTUM_CULLING))
-	{
-		eastl::vector<const RE_GameObject*> objects;
-		RE_SCENE->FustrumCulling(objects, render_view.HasFlag(RenderView::Flag::OVERRIDE_CULLING) ?
-			RE_SCENE->cams->GetCullingFrustum() : render_view.camera->GetFrustum());
-
-		for (auto& go : objects)
-		{
-			if (go->HasFlag(RE_GameObject::Flag::ACTIVE))
-			{
-				RE_Component* render_geo = go->GetRenderGeo();
-				if (render_geo) comptsToDraw.push(render_geo);
-			}
-		}
-	}
-	else comptsToDraw = RE_SCENE->GetScenePool()->GetRootPtr()->GetAllChildsActiveRenderGeos();
-
 	// Setup Lights
-	eastl::vector<RE_Component*> scene_lights;
-	eastl::vector<RE_Component*> particleS_lights;
+	/* switch (render_view.light) {
+	case RenderView::LightMode::GL: break; // TODO RUB: Bind GL Lights
+	case RenderView::LightMode::DIRECT: break; // TODO RUB: Upload Light uniforms
+	default: break; }*/
+	bool using_gl_lights = render_view.light == RenderView::LightMode::GL;
+	SetupFlag(RenderView::Flag::GL_LIGHT, using_gl_lights);
+}
 
-	switch (render_view.light)
+void ModuleRenderer3D::CategorizeDrawables(eastl::stack<const RE_Component*>& drawables, eastl::stack<const RE_Component*>& geo, eastl::stack<const RE_Component*>& blended_geo, eastl::stack<const RE_CompParticleEmitter*>& particle_systems, eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems)
+{
+	while (!drawables.empty())
 	{
-	case RenderView::LightMode::DISABLED:
-	{
-		SetLighting(false);
-		break;
-	}
-	case RenderView::LightMode::GL:
-	{
-		SetLighting(true);
-		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::LIGHT);
-		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::PARTICLEEMITER);
-		for(auto ps: tmp)
-			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->HasLight())
-				particleS_lights.push_back(ps);
-		// TODO RUB: Bind GL Lights
-
-		break;
-	}
-	case RenderView::LightMode::DIRECT:
-	{
-		SetLighting(false);
-		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::LIGHT);
-		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::PARTICLEEMITER);
-		for (auto ps : tmp)
-			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->HasLight())
-				particleS_lights.push_back(ps);
-		// TODO RUB: Upload Light uniforms
-
-		break;
-	}
-	case RenderView::LightMode::DEFERRED:
-	{
-		SetLighting(false);
-		scene_lights = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::LIGHT);
-		eastl::vector<RE_Component*> tmp = RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::PARTICLEEMITER);
-		for (auto ps : tmp)
-			if (dynamic_cast<RE_CompParticleEmitter*>(ps)->HasLight())
-				particleS_lights.push_back(ps);
-		break;
-	}
-	}
-
-	// Draw Scene
-	eastl::stack<RE_Component*> drawAsLast;
-	eastl::stack<RE_Component*> particleSystems;
-	RE_Component* drawing = nullptr;
-	while (!comptsToDraw.empty())
-	{
-		drawing = comptsToDraw.top();
-		comptsToDraw.pop();
+		auto drawable = drawables.top();
+		drawables.pop();
 
 		bool blend = false;
-		RE_Component::Type dT = drawing->GetType();
-		if (dT == RE_Component::Type::MESH)
-			 blend = dynamic_cast<RE_CompMesh*>(drawing)->isBlend();
+		RE_Component::Type dT = drawable->GetType();
 
-		if (dT == RE_Component::Type::PARTICLEEMITER) particleSystems.push(drawing);
-		else if (!blend && dT != RE_Component::Type::WATER) drawing->Draw();
-		else drawAsLast.push(drawing);
+		switch (dT)
+		{
+		default: geo.push(drawable); break;
+		case RE_Component::Type::MESH:
+			if (drawable->As<RE_CompMesh*>()->HasBlend()) blended_geo.push(drawable);
+			else geo.push(drawable);
+			break;
+		case RE_Component::Type::WATER: blended_geo.push(drawable); break;
+		case RE_Component::Type::PARTICLEEMITER:
+			auto emitter = drawable->As<const RE_CompParticleEmitter*>();
+			if (emitter->HasBlend()) blended_particle_systems.push(emitter);
+			else particle_systems.push(emitter);
+			break;
+		}
+	}
+}
+
+eastl::stack<const RE_Component*> ModuleRenderer3D::GatherDrawables(const RenderView& render_view) const
+{
+	auto culling_frustum = render_view.GetFrustum();
+	if (culling_frustum == nullptr)
+		return RE_SCENE->GetCScenePool()->GetRootCPtr()->GetAllChildsActiveRenderGeosC();
+
+	// Cull Scene
+	eastl::vector<const RE_GameObject*> objects;
+	RE_SCENE->FustrumCulling(objects, *culling_frustum);
+
+	eastl::stack<const RE_Component*> to_draw;
+	for (auto& go : objects)
+	{
+		if (go->HasFlag(RE_GameObject::Flag::ACTIVE))
+		{
+			auto render_geo = go->GetRenderGeoC();
+			if (render_geo) to_draw.push(render_geo);
+		}
+	}
+	return to_draw;
+}
+
+eastl::vector<const RE_Component*> ModuleRenderer3D::GatherSceneLights() const
+{
+	return RE_SCENE->GetScenePool()->GetAllCompCPtr(RE_Component::Type::LIGHT);
+}
+
+eastl::vector<const RE_CompParticleEmitter*> ModuleRenderer3D::GatherParticleLights() const
+{
+	eastl::vector<const RE_CompParticleEmitter*> ret;
+	for (auto comp : RE_SCENE->GetScenePool()->GetAllCompCPtr(RE_Component::Type::PARTICLEEMITER))
+	{
+		auto emitter = comp->As<const RE_CompParticleEmitter*>();
+		if (emitter->HasLight()) ret.push_back(emitter);
+	}
+	return ret;
+}
+
+#pragma region Draws
+#pragma region Main Draws
+
+void ModuleRenderer3D::DrawScene(const RenderView& render_view)
+{
+	RE_PROFILE(RE_ProfiledFunc::DrawScene, RE_ProfiledClass::ModuleRender);
+
+	// Prep Renderer
+	PrepareToRender(render_view);
+
+	// Get & Categorize Drawn Elements
+	eastl::stack<const RE_Component*> geo;
+	eastl::stack<const RE_Component*> blended_geo;
+	eastl::stack<const RE_CompParticleEmitter*> particle_systems;
+	eastl::stack<const RE_CompParticleEmitter*> blended_particle_systems;
+	CategorizeDrawables(GatherDrawables(render_view), geo, blended_geo, particle_systems, blended_particle_systems);
+
+	// Draw Geos
+	while (!geo.empty())
+	{
+		geo.top()->Draw();
+		geo.pop();
 	}
 
-	// Deferred Light Pass
-	if (render_view.light == RenderView::LightMode::DEFERRED)
+	// Draw Particle Systems
+	while (!particle_systems.empty())
 	{
-		// Particle System Draws
-		if (!particleSystems.empty())
+		particle_systems.top()->Draw();
+		particle_systems.pop();
+	}
+
+	// Draw Elements based on LightMode
+	switch (render_view.light)
+	{
+	case RenderView::LightMode::DEFERRED:
+		DrawSceneDeferred(render_view, blended_geo, blended_particle_systems);
+		break;
+	default:
+		DrawSceneForward(render_view, blended_geo, blended_particle_systems);
+		break;
+	}
+
+	// Stencil
+	if (render_view.HasFlag(RenderView::Flag::OUTLINE_SELECTION))
+		DrawStencil(render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+}
+
+void ModuleRenderer3D::DrawSceneForward(
+	const RenderView& render_view,
+	eastl::stack<const RE_Component*>& blended_geo,
+	eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems)
+{
+	// Draw Debug Geometry
+	if (render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
+		DrawDebug(render_view);
+
+	// Draw Skybox
+	if (render_view.HasFlag(RenderView::Flag::SKYBOX) && render_view.camera->isUsingSkybox())
+		DrawSkyBox();
+
+	// Draw Blended elements
+	if (!blended_geo.empty() || !blended_particle_systems.empty())
+	{
+		if (render_view.HasFlag(RenderView::Flag::BLENDED))
 		{
-			while (!particleSystems.empty())
-			{
-				particleSystems.top()->Draw();
-				particleSystems.pop();
-			}
+			AddFlag(RenderView::Flag::BLENDED);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
-		// Draw Blended elements
-		if (!drawAsLast.empty())
+		while (!blended_geo.empty())
 		{
-			while (!drawAsLast.empty())
-			{
-				drawAsLast.top()->Draw();
-				drawAsLast.pop();
-			}
+			blended_geo.top()->Draw();
+			blended_geo.pop();
 		}
 
-		// Setup Shader
-		unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetLightPassShader()))->GetID();
-		RE_GLCache::ChangeShader(light_pass);
-
-		SetDepthTest(false);
-
-		glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
-
-		if (!shareLightPass) 
+		while (!blended_particle_systems.empty())
 		{
+			blended_particle_systems.top()->Draw();
+			blended_particle_systems.pop();
+		}
+
+		if (render_view.HasFlag(RenderView::Flag::BLENDED))
+			RemoveFlag(RenderView::Flag::BLENDED);
+	}
+}
+
+void ModuleRenderer3D::DrawSceneDeferred(
+	const RenderView& render_view,
+	eastl::stack<const RE_Component*>& blended_geo,
+	eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems)
+{
+	// Gather Lights
+	eastl::vector<const RE_Component*> scene_lights = GatherSceneLights();
+	eastl::vector<const RE_CompParticleEmitter*> particle_lights = GatherParticleLights();
+
+	// Setup Shader
+	uint light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetLightPassShader()))->GetID();
+	RE_GLCache::ChangeShader(light_pass);
+
+	RemoveFlag(RenderView::Flag::DEPTH_TEST);
+
+	glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
+	
+	// Bind Textures
+	static const eastl::string texture_uniform_names[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
+	for (uint count = 0; count < 4; count++)
+	{
+		glActiveTexture(GL_TEXTURE0 + count);
+		RE_ShaderImporter::setInt(light_pass, texture_uniform_names[count].c_str(), count);
+		RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+	}
+
+	// Setup Light Uniforms
+	unsigned int count = 0;
+	for (auto l : scene_lights)
+	{
+		dynamic_cast<const RE_CompLight*>(l)->CallShaderUniforms(light_pass, (eastl::string("lights[") + eastl::to_string(count) + "].").c_str());
+		if (++count == 203) break;
+	}
+	lightsCount = count;
+
+	if (!HasFlag(RenderView::Flag::SHARE_LIGHT_PASS))
+	{
+		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, "count"), count);
+
+		// Render Lights
+		DrawQuad();
+
+		// Render Particle Lights
+		RE_PROFILE(RE_ProfiledFunc::DrawParticlesLight, RE_ProfiledClass::ModuleRender);
+		if (!particle_lights.empty())
+		{
+			// Setup Shader
+			uint particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->GetID();
+			RE_GLCache::ChangeShader(particlelight_pass);
+
+			glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
 
 			// Bind Textures
-			static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
-			for (unsigned int count = 0; count < 4; ++count)
+			for (uint count = 0; count < 5; ++count)
 			{
 				glActiveTexture(GL_TEXTURE0 + count);
-				RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
+				RE_ShaderImporter::setInt(particlelight_pass, texture_uniform_names[count].c_str(), count);
 				RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
 			}
 
-			// Setup Light Uniforms
-			unsigned int count = 0;
+			uint pCount = 0;
+			for (auto pS : particle_lights)
+				dynamic_cast<const RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(
+					particlelight_pass, "plights", pCount, 508, HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
 
-			eastl::string unif_name;
-			for (auto l : scene_lights)
-			{
-				unif_name = "lights[" + eastl::to_string(count) + "].";
-				dynamic_cast<RE_CompLight*>(l)->CallShaderUniforms(light_pass, unif_name.c_str());
-				count++;
-				if (count == 203) break;
-			}
-			lightsCount = count;
-
-			unif_name = "count";
-			RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, unif_name.c_str()), count);
-
-			// Render Lights
-			DrawQuad();
-
-			// Render Particle Lights
-			RE_PROFILE(RE_ProfiledFunc::DrawParticlesLight, RE_ProfiledClass::ModuleRender);
-			if (!particleS_lights.empty())
-			{
-				// Setup Shader
-				unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->GetID();
-				RE_GLCache::ChangeShader(particlelight_pass);
-
-				glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
-
-				// Bind Textures
-				static const eastl::string pdeferred_textures[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
-				for (unsigned int count = 0; count < 5; ++count)
-				{
-					glActiveTexture(GL_TEXTURE0 + count);
-					RE_ShaderImporter::setInt(particlelight_pass, pdeferred_textures[count].c_str(), count);
-					RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
-				}
-
-				unsigned int pCount = 0;
-				for (auto pS : particleS_lights)
-					dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(particlelight_pass, "plights", pCount, 508, shareLightPass);
-
-				particlelightsCount = pCount;
-
-				unif_name = "pInfo.pCount";
-				RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, unif_name.c_str()), pCount);
-
-				// Render Lights
-				DrawQuad();
-			}
-		}
-		else
-		{
-			RE_PROFILE(RE_ProfiledFunc::DrawParticlesLight, RE_ProfiledClass::ModuleRender);
-
-			// Bind Textures
-			static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
-			for (unsigned int count = 0; count < 4; ++count)
-			{
-				glActiveTexture(GL_TEXTURE0 + count);
-				RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
-				RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
-			}
-
-			// Setup Light Uniforms
-			unsigned int count = 0;
-
-			eastl::string unif_name;
-			for (auto l : scene_lights)
-			{
-				unif_name = "lights[" + eastl::to_string(count) + "].";
-				dynamic_cast<RE_CompLight*>(l)->CallShaderUniforms(light_pass, unif_name.c_str());
-				count++;
-				if (count == 203) break;
-			}
-			lightsCount = count;
-
-			unif_name = "lights";
-			for (auto pS : particleS_lights)
-				dynamic_cast<RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(light_pass, unif_name.c_str(), count, 203, shareLightPass);
-
-			particlelightsCount = static_cast<uint>(math::Clamp(static_cast<int>(count) - static_cast<int>(lightsCount), 0, 203));
-
-			unif_name = "count";
-			RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, unif_name.c_str()), count);
+			particlelightsCount = pCount;
+			RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, "pInfo.pCount"), pCount);
 
 			// Render Lights
 			DrawQuad();
 		}
-
-		if (render_view.HasFlag(RenderView::Flag::DEPTH_TEST))
-			SetDepthTest(true);
-
-		if (render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
-			DrawDebug(render_view);
-
-		if (render_view.HasFlag(RenderView::Flag::SKYBOX) && render_view.camera->isUsingSkybox())
-			DrawSkyBox();
 	}
 	else
 	{
-		eastl::stack<RE_Component*> drawParticleSystemAsLast;
+		RE_PROFILE(RE_ProfiledFunc::DrawParticlesLight, RE_ProfiledClass::ModuleRender);
 
-		// Particle System Draws
-		while (!particleSystems.empty())
-		{
-			RE_Component* toDraw = particleSystems.top();
-			if (dynamic_cast<RE_CompParticleEmitter*>(toDraw)->isBlend()) drawParticleSystemAsLast.push(toDraw);
-			else toDraw->Draw();
-			particleSystems.pop();
-		}
+		for (auto pS : particle_lights)
+			dynamic_cast<const RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(
+				light_pass, "lights", count, 203, HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
 
-		// Draw Debug Geometry
-		if (render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
-			DrawDebug(render_view);
+		particlelightsCount = static_cast<uint>(math::Clamp(static_cast<int>(count) - static_cast<int>(lightsCount), 0, 203));
+		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, "count"), count);
 
-		// Draw Skybox
-		if (render_view.HasFlag(RenderView::Flag::SKYBOX) && render_view.camera->isUsingSkybox())
-			DrawSkyBox();
-
-		// Draw Blended elements
-		if (!drawAsLast.empty() || !drawParticleSystemAsLast.empty())
-		{
-			if (render_view.HasFlag(RenderView::Flag::BLENDED))
-			{
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			}
-
-			while (!drawAsLast.empty())
-			{
-				drawAsLast.top()->Draw();
-				drawAsLast.pop();
-			}
-
-			while (!drawParticleSystemAsLast.empty())
-			{
-				drawParticleSystemAsLast.top()->Draw();
-				drawParticleSystemAsLast.pop();
-			}
-
-			if (render_view.HasFlag(RenderView::Flag::BLENDED)) glDisable(GL_BLEND);
-		}
+		// Render Lights
+		DrawQuad();
 	}
 
-	// Draw Stencil
-	if (render_view.HasFlag(RenderView::Flag::OUTLINE_SELECTION))
-	{
-		GO_UID stencilGO = RE_EDITOR->GetSelected();
-		if (stencilGO)
-		{
-			RE_GameObject* stencilPtr = RE_SCENE->GetGOPtr(stencilGO);
-			DrawStencil(stencilPtr, stencilPtr->GetRenderGeo(), render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
-		}
-	}
+	SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+	if (render_view.HasFlag(RenderView::Flag::DEBUG_DRAW)) DrawDebug(render_view);
+
+	if (render_view.HasFlag(RenderView::Flag::SKYBOX) && render_view.camera->isUsingSkybox())
+		DrawSkyBox();
 }
 
 void ModuleRenderer3D::DrawDebug(const RenderView& render_view)
@@ -879,184 +929,15 @@ void ModuleRenderer3D::DrawDebug(const RenderView& render_view)
 	RE_GLCache::ChangeShader(0);
 	RE_GLCache::ChangeTextureBind(0);
 
-	bool reset_light = lighting;
-	SetLighting(false);
-	SetTexture2D(false);
+	bool prev_light = HasFlag(RenderView::Flag::GL_LIGHT);
+	RemoveFlag(RenderView::Flag::GL_LIGHT);
+	RemoveFlag(RenderView::Flag::TEXTURE_2D);
 
 	RE_PHYSICS->DrawDebug(render_view.camera);
 	RE_EDITOR->DrawDebug(render_view.camera);
 
-	if (reset_light) SetLighting(true);
-	SetTexture2D(render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
-}
-
-void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
-{
-	// Setup Frame Buffer
-	current_lighting = render_view.light;
-	current_fbo = render_view.GetFBO();
-	current_camera = render_view.camera;
-
-	fbos->ChangeFBOBind(current_fbo, fbos->GetWidth(current_fbo), fbos->GetHeight(current_fbo));
-	fbos->ClearFBOBuffers(current_fbo, render_view.clear_color.ptr());
-
-	// Setup Render Flags
-	SetWireframe(render_view.HasFlag(RenderView::Flag::WIREFRAME));
-	SetFaceCulling(render_view.HasFlag(RenderView::Flag::FACE_CULLING));
-	SetTexture2D(false);
-	SetColorMaterial(render_view.HasFlag(RenderView::Flag::COLOR_MATERIAL));
-	SetDepthTest(render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
-
-	bool usingClipDistance = render_view.HasFlag(RenderView::Flag::CLIP_DISTANCE);
-	SetClipDistance(usingClipDistance);
-
-	// Upload Shader Uniforms
-	for (auto sMD5 : activeShaders)
-		dynamic_cast<RE_Shader*>(RE_RES->At(sMD5))->UploadMainUniforms(
-			render_view.camera,
-			static_cast<float>(fbos->GetHeight(current_fbo)),
-			static_cast<float>(fbos->GetWidth(current_fbo)),
-			usingClipDistance,
-			render_view.clip_distance);
-
-	const RE_ParticleEmitter* editting_simulation = RE_EDITOR->GetCurrentEditingParticleEmitter();
-	if (editting_simulation == nullptr) return;
-
-	// Deferred Light Pass
-	if (render_view.light == RenderView::LightMode::DEFERRED)
-	{
-		// Particle System Draws
-		RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0 }, { 0.0,1.0,0.0 });
-
-		if (editting_simulation->light.type != RE_PR_Light::Type::NONE)
-			DrawParticleLights(editting_simulation->id);
-
-		if (render_view.HasFlag(RenderView::Flag::DEPTH_TEST))
-			SetDepthTest(true);
-
-		// Draw Debug Geometry
-		if (render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
-		{
-			RE_GLCache::ChangeShader(0);
-			RE_GLCache::ChangeTextureBind(0);
-
-			bool reset_light = lighting;
-			SetLighting(false);
-			SetTexture2D(false);
-
-			glMatrixMode(GL_PROJECTION);
-			glLoadMatrixf(render_view.camera->GetProjectionPtr());
-			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixf((render_view.camera->GetView()).ptr());
-
-			RE_PHYSICS->DebugDrawParticleEmitterSimulation(editting_simulation);
-
-			if (reset_light) SetLighting(true);
-			SetTexture2D(render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
-		}
-	}
-	else
-	{
-		bool drawParticleSystemAsLast = false;
-		// Particle System Draws
-		if (editting_simulation->opacity.type != RE_PR_Opacity::Type::NONE)
-			drawParticleSystemAsLast = true;
-		else
-			RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0 }, { 0.0,1.0,0.0 });
-
-		// Draw Debug Geometry
-		if (render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
-		{
-			RE_GLCache::ChangeShader(0);
-			RE_GLCache::ChangeTextureBind(0);
-
-			bool reset_light = lighting;
-			SetLighting(false);
-			SetTexture2D(false);
-
-			glMatrixMode(GL_PROJECTION);
-			glLoadMatrixf(render_view.camera->GetProjectionPtr());
-			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixf((render_view.camera->GetView()).ptr());
-
-			RE_PHYSICS->DebugDrawParticleEmitterSimulation(editting_simulation);
-
-			if (reset_light) SetLighting(true);
-			SetTexture2D(render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
-		}
-
-		// Draw Blended elements
-		if (drawParticleSystemAsLast)
-		{
-			if (render_view.flags & static_cast<const ushort>(RenderView::Flag::BLENDED))
-			{
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			}
-
-			RE_PHYSICS->DrawParticleEmitterSimulation(editting_simulation->id, { 0.0,0.0,0.0 }, { 0.0,1.0,0.0 });
-
-			if (render_view.HasFlag(RenderView::Flag::BLENDED)) glDisable(GL_BLEND);
-		}
-	}
-}
-
-void ModuleRenderer3D::DrawParticleLights(const uint sim_id)
-{
-	if (!shareLightPass)
-	{
-		// Setup Shader
-		unsigned int particlelight_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->GetID();
-		RE_GLCache::ChangeShader(particlelight_pass);
-
-		glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
-
-		// Bind Textures
-		static const eastl::string pdeferred_textures[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
-		for (unsigned int count = 0; count < 5; ++count)
-		{
-			glActiveTexture(GL_TEXTURE0 + count);
-			RE_ShaderImporter::setInt(particlelight_pass, pdeferred_textures[count].c_str(), count);
-			RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
-		}
-
-		unsigned int pCount = 0;
-		RE_PHYSICS->CallParticleEmitterLightShaderUniforms(sim_id, { 0.0,0.0,0.0 }, particlelight_pass, "plights", pCount, 508, shareLightPass);
-
-		eastl::string unif_name = "pInfo.pCount";
-		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, unif_name.c_str()), pCount);
-
-		// Render Lights
-		DrawQuad();
-	}
-	else
-	{
-		// Setup Shader
-		unsigned int light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetLightPassShader()))->GetID();
-		RE_GLCache::ChangeShader(light_pass);
-
-		SetDepthTest(false);
-
-		glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
-
-		// Bind Textures
-		static const eastl::string deferred_textures[4] = { "gPosition", "gNormal", "gAlbedo", "gSpec" };
-		for (unsigned int count = 0; count < 4; ++count)
-		{
-			glActiveTexture(GL_TEXTURE0 + count);
-			RE_ShaderImporter::setInt(light_pass, deferred_textures[count].c_str(), count);
-			RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
-		}
-
-		// Setup Light Uniforms
-		unsigned int count = 0;
-		RE_PHYSICS->CallParticleEmitterLightShaderUniforms(sim_id, { 0.0,0.0,0.0 }, light_pass, "lights", count, 203, shareLightPass);
-
-		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, "count"), count);
-
-		// Render Lights
-		DrawQuad();
-	}
+	if (prev_light) AddFlag(RenderView::Flag::GL_LIGHT);
+	SetupFlag(RenderView::Flag::TEXTURE_2D, render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
 }
 
 void ModuleRenderer3D::DrawSkyBox()
@@ -1074,36 +955,50 @@ void ModuleRenderer3D::DrawSkyBox()
 	glDepthFunc(GL_LESS); // set depth function back to default
 }
 
-void ModuleRenderer3D::DrawStencil(RE_GameObject* go, RE_Component* comp, bool has_depth_test)
+void ModuleRenderer3D::DrawStencil(/*RE_GameObject* go, RE_Component* comp,*/ bool has_depth_test)
 {
-	if (!comp) return;
+	GO_UID stencilGO = RE_EDITOR->GetSelected();
+	if (!stencilGO) return;
+
+	RE_GameObject* go = RE_SCENE->GetGOPtr(stencilGO);
+	RE_Component* comp = go->GetRenderGeo();
+	if (comp == nullptr) return;
 
 	RE_PROFILE(RE_ProfiledFunc::DrawStencil, RE_ProfiledClass::ModuleRender);
 	unsigned int vaoToStencil = 0;
 	GLsizei triangleToStencil = 0;
 
 	RE_Component::Type cT = comp->GetType();
-	if (cT == RE_Component::Type::MESH)
+
+	switch (cT)
+	{
+	case RE_Component::Type::MESH:
 	{
 		RE_CompMesh* mesh_comp = dynamic_cast<RE_CompMesh*>(comp);
 		vaoToStencil = mesh_comp->GetVAOMesh();
 		triangleToStencil = static_cast<GLsizei>(mesh_comp->GetTriangleMesh());
+		break;
 	}
-	else if (cT > RE_Component::Type::PRIMIVE_MIN && cT < RE_Component::Type::PRIMIVE_MAX)
-	{
-		RE_CompPrimitive* prim_comp = dynamic_cast<RE_CompPrimitive*>(comp);
-		vaoToStencil = prim_comp->GetVAO();
-		triangleToStencil = static_cast<GLsizei>(prim_comp->GetTriangleCount());
-	}
-	else if (cT == RE_Component::Type::WATER)
+	case RE_Component::Type::WATER:
 	{
 		RE_CompWater* water_comp = dynamic_cast<RE_CompWater*>(comp);
 		vaoToStencil = water_comp->GetVAO();
 		triangleToStencil = static_cast<GLsizei>(water_comp->GetTriangles());
+		break;
+	}
+	default:
+
+		if (cT > RE_Component::Type::PRIMIVE_MIN && cT < RE_Component::Type::PRIMIVE_MAX)
+		{
+			RE_CompPrimitive* prim_comp = dynamic_cast<RE_CompPrimitive*>(comp);
+			vaoToStencil = prim_comp->GetVAO();
+			triangleToStencil = static_cast<GLsizei>(prim_comp->GetTriangleCount());
+		}
+		break;
 	}
 
 	glEnable(GL_STENCIL_TEST);
-	SetDepthTest(false);
+	RemoveFlag(RenderView::Flag::DEPTH_TEST);
 
 	//Getting the scale shader and setting some values
 	const char* scaleShader = RE_InternalResources::GetDefaultScaleShader();
@@ -1146,153 +1041,16 @@ void ModuleRenderer3D::DrawStencil(RE_GameObject* go, RE_Component* comp, bool h
 	RE_GLCache::ChangeShader(0);
 
 	glDisable(GL_STENCIL_TEST);
-	if (has_depth_test) SetDepthTest(true);
+	if (has_depth_test) AddFlag(RenderView::Flag::DEPTH_TEST);
 }
 
-void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
-{
-	unsigned int c_fbo = thumbnailView.fbos.first;
-	fbos->ChangeFBOBind(c_fbo, fbos->GetWidth(c_fbo), fbos->GetHeight(c_fbo));
-	fbos->ClearFBOBuffers(c_fbo, thumbnailView.clear_color.ptr());
+#pragma endregion
+#pragma region Direct Draws
 
-	go->ResetGOandChildsAABB();
-
-	RE_CompCamera* internalCamera = thumbnailView.camera;
-
-	internalCamera->SetFOV(math::RadToDeg(0.523599f));
-	internalCamera->Update();
-	internalCamera->GetTransform()->SetPosition({ 0.0f,1.0f,5.0f });
-	internalCamera->Update();
-	internalCamera->GetTransform()->SetRotation({ math::DegToRad(45.0f),0.0f,0.0f});
-	internalCamera->Update();
-	math::AABB box = go->GetGlobalBoundingBoxWithChilds();
-	internalCamera->Focus(box.CenterPoint(), box.HalfSize().Length());
-	internalCamera->Update();
-	
-	current_camera = internalCamera;
-
-	for (auto sMD5 : activeShaders)
-	{
-		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));
-		if (!shader->uniforms.empty())
-			shader->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
-	}
-
-	go->DrawChilds();
-}
-
-void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
-{
-	unsigned int c_fbo = thumbnailView.fbos.first;
-	fbos->ChangeFBOBind(c_fbo, fbos->GetWidth(c_fbo), fbos->GetHeight(c_fbo));
-	fbos->ClearFBOBuffers(c_fbo, thumbnailView.clear_color.ptr());
-
-	RE_CompCamera* internalCamera = thumbnailView.camera;
-
-	RE_INPUT->PauseEvents();
-	internalCamera->SetFOV(math::RadToDeg(0.523599f));
-	internalCamera->Update();
-	internalCamera->GetTransform()->SetRotation({ 0.0f,0.0f, 0.0f });
-	internalCamera->Update();
-	//internalCamera->GetTransform()->SetPosition({ 0.0f, 0.0f, 0.0f});
-	//internalCamera->Update();
-	internalCamera->GetTransform()->SetPosition({ 0.0f ,0.0f, 5.0f });
-	internalCamera->Update();
-	RE_INPUT->ResumeEvents();
-
-	for (auto sMD5 : activeShaders)
-	{
-		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));
-		if (!shader->uniforms.empty())
-			shader->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
-	}
-
-	mat->UploadToShader(math::float4x4::identity.ptr(), false, true);
-
-	RE_GLCache::ChangeVAO(mat_vao);
-	glDrawElements(GL_TRIANGLES, mat_triangles * 3, GL_UNSIGNED_SHORT, 0);
-	RE_GLCache::ChangeVAO(0);
-	RE_GLCache::ChangeShader(0);
-	RE_GLCache::ChangeTextureBind(0);
-}
-
-void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
-{
-	unsigned int c_fbo = thumbnailView.fbos.first;
-	fbos->ChangeFBOBind(c_fbo, fbos->GetWidth(c_fbo), fbos->GetHeight(c_fbo));
-	fbos->ClearFBOBuffers(c_fbo, thumbnailView.clear_color.ptr());
-
-	RE_CompCamera* internalCamera = thumbnailView.camera;
-
-	RE_INPUT->PauseEvents();
-	internalCamera->ForceFOV(125, 140);
-	internalCamera->GetTransform()->SetRotation({ 0.0,0.0,0.0 });
-	internalCamera->GetTransform()->SetPosition(math::vec(0.f, 0.f, 0.f));
-	internalCamera->Update();
-	RE_INPUT->ResumeEvents();
-
-	for (auto sMD5 : activeShaders)
-	{
-		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));
-		if (!shader->uniforms.empty())
-			shader->UploadMainUniforms(internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
-	}
-
-	RE_GLCache::ChangeTextureBind(0);
-
-	RE_Shader* skyboxShader = (RE_Shader*)RE_RES->At(RE_InternalResources::GetDefaultSkyBoxShader());
-	uint skysphereshader = skyboxShader->GetID();
-	RE_GLCache::ChangeShader(skysphereshader);
-	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
-	skybox->DrawSkybox();
-}
-
-inline void ModuleRenderer3D::SetWireframe(bool enable)
-{
-	if (wireframe != enable)
-		glPolygonMode(GL_FRONT_AND_BACK, (wireframe = enable) ? GL_LINE : GL_FILL);
-}
-
-inline void ModuleRenderer3D::SetFaceCulling(bool enable)
-{
-	if (cullface != enable)
-		(cullface = enable) ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
-}
-
-inline void ModuleRenderer3D::SetTexture2D(bool enable)
-{
-	if (texture2d != enable)
-		(texture2d = enable) ? glEnable(GL_TEXTURE_2D) : glDisable(GL_TEXTURE_2D);
-}
-
-inline void ModuleRenderer3D::SetColorMaterial(bool enable)
-{
-	if (color_material != enable)
-		(color_material = enable) ? glEnable(GL_COLOR_MATERIAL) : glDisable(GL_COLOR_MATERIAL);
-}
-
-inline void ModuleRenderer3D::SetDepthTest(bool enable)
-{
-	if (depthtest != enable)
-		(depthtest = enable) ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
-}
-
-inline void ModuleRenderer3D::SetLighting(bool enable)
-{
-	if (lighting != enable)
-		(lighting = enable) ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
-}
-
-inline void ModuleRenderer3D::SetClipDistance(bool enable)
-{
-	if (clip_distance != enable)
-		(clip_distance = enable) ? glEnable(GL_CLIP_DISTANCE0) : glDisable(GL_CLIP_DISTANCE0);
-}
-
-void ModuleRenderer3D::DrawQuad()
+void ModuleRenderer3D::DrawQuad() const
 {
 	// Setup Screen Quad
-	static unsigned int quadVAO = 0;
+	static uint quadVAO = 0;
 	if (quadVAO == 0)
 	{
 		float quadVertices[] = {
@@ -1303,7 +1061,7 @@ void ModuleRenderer3D::DrawQuad()
 			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 		};
 		// setup plane VAO
-		unsigned int quadVBO;
+		uint quadVBO;
 		glGenVertexArrays(1, &quadVAO);
 		glGenBuffers(1, &quadVBO);
 		glBindVertexArray(quadVAO);
@@ -1322,7 +1080,7 @@ void ModuleRenderer3D::DrawQuad()
 	RE_GLCache::ChangeShader(0);
 }
 
-void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
+void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color) const
 {
 	glColor3f(color.x, color.y, color.z);
 
@@ -1330,29 +1088,29 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	model.InverseTranspose();
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((RE_CameraManager::CurrentCamera()->GetView() * model).ptr());
+	glLoadMatrixf((RE_CameraManager::MainCamera()->Camera.GetView().Transposed() * model).ptr());
 
 	glBegin(GL_TRIANGLES);
 	glVertex3f(-1.0f, -1.0f, -1.0f);
 	glVertex3f(1.0f, -1.0f, -1.0f);
 	glVertex3f(1.0f, 1.0f, -1.0f);
 	glVertex3f(1.0f, 1.0f, -1.0f);
-	glVertex3f(- 1.0f, 1.0f, -1.0f);
-	glVertex3f(- 1.0f, -1.0f, -1.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f);
+	glVertex3f(-1.0f, -1.0f, -1.0f);
 
-	glVertex3f(- 1.0f, -1.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, 1.0f);
 	glVertex3f(1.0f, -1.0f, 1.0f);
 	glVertex3f(1.0f, 1.0f, 1.0f);
 	glVertex3f(1.0f, 1.0f, 1.0f);
-	glVertex3f(- 1.0f, 1.0f, 1.0f);
-	glVertex3f(- 1.0f, -1.0f, 1.0f);
+	glVertex3f(-1.0f, 1.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, 1.0f);
 
 	glVertex3f(-1.0f, 1.0f, 1.0f);
 	glVertex3f(-1.0f, 1.0f, -1.0f);
 	glVertex3f(-1.0f, -1.0f, -1.0f);
 	glVertex3f(-1.0f, -1.0f, -1.0f);
 	glVertex3f(-1.0f, -1.0f, 1.0f);
-	glVertex3f(- 1.0f, 1.0f, 1.0f);
+	glVertex3f(-1.0f, 1.0f, 1.0f);
 
 	glVertex3f(1.0f, 1.0f, 1.0f);
 	glVertex3f(1.0f, 1.0f, -1.0f);
@@ -1366,48 +1124,214 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color)
 	glVertex3f(1.0f, -1.0f, 1.0f);
 	glVertex3f(1.0f, -1.0f, 1.0f);
 	glVertex3f(-1.0f, -1.0f, 1.0f);
-	glVertex3f(- 1.0f, -1.0f, -1.0f);
+	glVertex3f(-1.0f, -1.0f, -1.0f);
 
 	glVertex3f(-1.0f, 1.0f, -1.0f);
 	glVertex3f(1.0f, 1.0f, -1.0f);
 	glVertex3f(1.0f, 1.0f, 1.0f);
 	glVertex3f(1.0f, 1.0f, 1.0f);
 	glVertex3f(-1.0f, 1.0f, 1.0f);
-	glVertex3f(- 1.0f, 1.0f, -1.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f);
 	glEnd();
 }
 
-math::float4 ModuleRenderer3D::GetRenderViewClearColor(RenderView::Type r_view) const
-{
-	return (r_view < RenderView::Type::OTHER) ? render_views[static_cast<const short>(r_view)].clear_color : math::float4(0.0f, 0.0f, 0.0f, 1.0f);
-}
+#pragma endregion
+#pragma region Particle Editor Draws
 
-RenderView::LightMode ModuleRenderer3D::GetRenderViewLightMode(RenderView::Type r_view) const
+void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view)
 {
-	return (r_view < RenderView::Type::OTHER) ? render_views[static_cast<const short>(r_view)].light : RenderView::LightMode::DISABLED;
-}
+	auto emitter = RE_EDITOR->GetCurrentEditingParticleEmitter();
+	if (emitter == nullptr) return;
 
-bool ModuleRenderer3D::GetRenderViewDebugDraw(RenderView::Type r_view) const
-{
-	return (r_view < RenderView::Type::OTHER) ? render_views[static_cast<const short>(r_view)].HasFlag(RenderView::Flag::DEBUG_DRAW) : false;
-}
+	PrepareToRender(render_view);
 
-void ModuleRenderer3D::SetRenderViewDeferred(RenderView::Type r_view, bool using_deferred)
-{
-	if (r_view < RenderView::Type::OTHER) render_views[static_cast<const short>(r_view)].light =
-		using_deferred ? RenderView::LightMode::DEFERRED : RenderView::LightMode::DISABLED;
-}
-
-void ModuleRenderer3D::SetRenderViewClearColor(RenderView::Type r_view, math::float4 clear_color)
-{
-	if (r_view < RenderView::Type::OTHER) render_views[static_cast<const short>(r_view)].clear_color = clear_color;
-}
-
-void ModuleRenderer3D::SetRenderViewDebugDraw(RenderView::Type r_view, bool debug_draw)
-{
-	if (r_view < RenderView::Type::OTHER)
+	switch (render_view.light)
 	{
-		if (debug_draw) render_views[static_cast<const short>(r_view)].AddFlag(RenderView::Flag::DEBUG_DRAW);
-		else render_views[static_cast<const short>(r_view)].RemoveFlag(RenderView::Flag::DEBUG_DRAW);
+	case RenderView::LightMode::DEFERRED:
+
+		RE_PHYSICS->DrawParticleEmitterSimulation(emitter->id);
+		if (emitter->light.HasLight()) DrawParticleLights(emitter->id);
+
+		SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+
+		DrawParticleEditorDebug(render_view, emitter);
+
+		break;
+
+	default:
+	{
+		bool draw_last = emitter->opacity.HasOpacity();
+		if (!draw_last) RE_PHYSICS->DrawParticleEmitterSimulation(emitter->id);
+
+		DrawParticleEditorDebug(render_view, emitter);
+
+		if (draw_last) // Draw Blended elements
+		{
+			if (render_view.HasFlag(RenderView::Flag::BLENDED))
+			{
+				AddFlag(RenderView::Flag::BLENDED);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			}
+
+			RE_PHYSICS->DrawParticleEmitterSimulation(emitter->id);
+
+			SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+			if (render_view.HasFlag(RenderView::Flag::BLENDED)) RemoveFlag(RenderView::Flag::BLENDED);
+		}
+
+		break;
+	}
 	}
 }
+
+void ModuleRenderer3D::DrawParticleEditorDebug(const RenderView& render_view, const RE_ParticleEmitter* emitter)
+{
+	if (!render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
+		return;
+
+	RE_GLCache::ChangeShader(0);
+	RE_GLCache::ChangeTextureBind(0);
+
+	bool reset_light = render_view.HasFlag(RenderView::Flag::GL_LIGHT);
+	RemoveFlag(RenderView::Flag::GL_LIGHT);
+	RemoveFlag(RenderView::Flag::TEXTURE_2D);
+
+	LoadCameraMatrixes(*render_view.camera);
+	RE_PHYSICS->DebugDrawParticleEmitterSimulation(emitter);
+
+	if (reset_light) AddFlag(RenderView::Flag::GL_LIGHT);
+	SetupFlag(RenderView::Flag::TEXTURE_2D, render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
+}
+
+void ModuleRenderer3D::DrawParticleLights(const uint sim_id)
+{
+	static const eastl::string deferred_textures[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
+	bool shared_light_pass = HasFlag(RenderView::Flag::SHARE_LIGHT_PASS);
+	
+	uint shader_pass;
+	uint texture_count;
+	eastl::string shader_pass_name;
+	eastl::string count_var;
+	uint max_lights;
+
+	if (!shared_light_pass)
+	{
+		shader_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->GetID();
+		texture_count = 5;
+		shader_pass_name = "plights";
+		count_var = "pInfo.pCount";
+		max_lights = 508;
+	}
+	else
+	{
+		shader_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetLightPassShader()))->GetID();
+		texture_count = 4;
+		shader_pass_name = "lights";
+		count_var = "count";
+		max_lights = 203;
+		RemoveFlag(RenderView::Flag::DEPTH_TEST);
+	}
+
+	// Setup Shader
+	RE_GLCache::ChangeShader(shader_pass);
+	glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
+
+	// Bind Textures
+	for (uint count = 0; count < texture_count; ++count)
+	{
+		glActiveTexture(GL_TEXTURE0 + count);
+		RE_ShaderImporter::setInt(shader_pass, deferred_textures[count].c_str(), count);
+		RE_GLCache::ChangeTextureBind(fbos->GetTextureID(current_fbo, count));
+	}
+
+	// Setup Light Uniforms
+	uint count = 0;
+	RE_PHYSICS->CallParticleEmitterLightShaderUniforms(sim_id, { 0.0,0.0,0.0 }, shader_pass, shader_pass_name.c_str(), count, max_lights, shared_light_pass);
+	RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(shader_pass, count_var.c_str()), count);
+
+	// Render Lights
+	DrawQuad();
+}
+#pragma endregion
+#pragma region Thumbnail Draws
+
+void ModuleRenderer3D::ThumbnailGameObject(RE_GameObject* go)
+{
+	unsigned int c_fbo = thumbnailView.fbos.first;
+	fbos->ChangeFBOBind(c_fbo, fbos->GetWidth(c_fbo), fbos->GetHeight(c_fbo));
+	fbos->ClearFBOBuffers(c_fbo, thumbnailView.clear_color.ptr());
+
+	// Reset Camera
+	current_camera = thumbnailView.camera;
+	current_camera->SetupFrustum();
+	current_camera->SetFrame(
+		{ 0.0f,1.0f,5.0f },
+		math::Quat::FromEulerXYZ(math::DegToRad(45.0f), 0.0f, 0.0f) * math::vec::unitZ,
+		math::vec::unitY);
+
+	// Focus GO's AABB
+	go->ResetGOandChildsAABB();
+	current_camera->Focus(go->GetGlobalBoundingBoxWithChilds());
+	
+	for (auto sMD5 : activeShaders)
+	{
+		RE_Shader* shader = dynamic_cast<RE_Shader*>(RE_RES->At(sMD5));
+		if (!shader->uniforms.empty())
+			shader->UploadMainUniforms(*current_camera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+	}
+
+	go->DrawChilds();
+}
+
+void ModuleRenderer3D::ThumbnailMaterial(RE_Material* mat)
+{
+	unsigned int c_fbo = thumbnailView.fbos.first;
+	fbos->ChangeFBOBind(c_fbo, fbos->GetWidth(c_fbo), fbos->GetHeight(c_fbo));
+	fbos->ClearFBOBuffers(c_fbo, thumbnailView.clear_color.ptr());
+
+	RE_Camera* internalCamera = thumbnailView.camera;
+	internalCamera->SetupFrustum();
+
+	for (auto sMD5 : activeShaders)
+	{
+		auto shader = dynamic_cast<const RE_Shader*>(RE_RES->At(sMD5));
+		if (!shader->uniforms.empty())
+			shader->UploadMainUniforms(*internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+	}
+
+	mat->UploadToShader(math::float4x4::identity.ptr(), false, true);
+
+	RE_GLCache::ChangeVAO(mat_vao);
+	glDrawElements(GL_TRIANGLES, mat_triangles * 3, GL_UNSIGNED_SHORT, 0);
+	RE_GLCache::ChangeVAO(0);
+	RE_GLCache::ChangeShader(0);
+	RE_GLCache::ChangeTextureBind(0);
+}
+
+void ModuleRenderer3D::ThumbnailSkyBox(RE_SkyBox* skybox)
+{
+	unsigned int c_fbo = thumbnailView.fbos.first;
+	fbos->ChangeFBOBind(c_fbo, fbos->GetWidth(c_fbo), fbos->GetHeight(c_fbo));
+	fbos->ClearFBOBuffers(c_fbo, thumbnailView.clear_color.ptr());
+
+	RE_Camera* internalCamera = thumbnailView.camera;
+	internalCamera->SetFOVDegrees(125.f);
+
+	for (auto sMD5 : activeShaders)
+	{
+		auto shader = dynamic_cast<const RE_Shader*>(RE_RES->At(sMD5));
+		if (!shader->uniforms.empty())
+			shader->UploadMainUniforms(*internalCamera, THUMBNAILSIZE, THUMBNAILSIZE, false, {});
+	}
+
+	RE_GLCache::ChangeTextureBind(0);
+
+	auto skyboxShader = dynamic_cast<const RE_Shader*>(RE_RES->At(RE_InternalResources::GetDefaultSkyBoxShader()));
+	uint skysphereshader = skyboxShader->GetID();
+	RE_GLCache::ChangeShader(skysphereshader);
+	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
+	skybox->DrawSkybox();
+}
+
+#pragma endregion
+#pragma endregion

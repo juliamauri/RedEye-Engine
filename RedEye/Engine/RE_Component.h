@@ -95,6 +95,9 @@ public:
 	COMP_UID GetPoolID() const { return id; }
 	void SetPoolID(COMP_UID uid) { id = uid; }
 
+	template <typename T> T As() { return dynamic_cast<T>(this); }
+	template <typename T> const T As() const { return dynamic_cast<const T>(this); }
+
 protected:
 
 	bool active = true;

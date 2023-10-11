@@ -101,7 +101,7 @@ void ModulePhysics::OnStop()
 		sim->state = RE_ParticleEmitter::PlaybackState::STOPING;
 }
 
-void ModulePhysics::DrawParticleEmitterSimulation(unsigned int index, math::float3 go_positon, math::float3 go_up) const
+void ModulePhysics::DrawParticleEmitterSimulation(uint index, math::float3 go_positon, math::float3 go_up) const
 {
 	particles.DrawSimulation(index, go_positon, go_up);
 }
@@ -111,19 +111,19 @@ void ModulePhysics::DebugDrawParticleEmitterSimulation(const RE_ParticleEmitter*
 	particles.DebugDrawSimulation(sim, particles.GetInterval());
 }
 
-void ModulePhysics::CallParticleEmitterLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
+void ModulePhysics::CallParticleEmitterLightShaderUniforms(uint index, math::float3 go_position, uint shader, const char* array_unif_name, uint& count, uint maxLights, bool sharedLight) const
 {
 	particles.CallLightShaderUniforms(index, go_position, shader, array_unif_name, count, maxLights, sharedLight);
 }
 
-void ModulePhysics::DrawDebug(RE_CompCamera* current_camera) const
+void ModulePhysics::DrawDebug(RE_Camera* current_camera) const
 {
 	if (!particles.simulations.empty())
 	{
 		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(current_camera->GetProjectionPtr());
+		glLoadMatrixf(current_camera->GetProjection().Transposed().ptr());
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf((current_camera->GetView()).ptr());
+		glLoadMatrixf(current_camera->GetView().Transposed().ptr());
 		particles.DrawDebug();
 	}
 }
@@ -178,7 +178,7 @@ void ModulePhysics::RemoveEmitter(RE_ParticleEmitter* emitter)
 	particles.Deallocate(emitter->id);
 }
 
-unsigned int ModulePhysics::GetParticleCount(unsigned int emitter_id) const
+uint ModulePhysics::GetParticleCount(uint emitter_id) const
 {
 	for (const auto sim : particles.simulations)
 		if (sim->id == emitter_id)
@@ -187,7 +187,7 @@ unsigned int ModulePhysics::GetParticleCount(unsigned int emitter_id) const
 	return 0u;
 }
 
-bool ModulePhysics::GetParticles(unsigned int emitter_id, eastl::vector<RE_Particle>& out) const
+bool ModulePhysics::GetParticles(uint emitter_id, eastl::vector<RE_Particle>& out) const
 {
 	for (const auto& sim : particles.simulations)
 	{

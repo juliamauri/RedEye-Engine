@@ -8,6 +8,7 @@
 class ModuleEditor : public EventListener
 {
 public:
+
 	ModuleEditor();
 	~ModuleEditor() final;
 
@@ -25,14 +26,14 @@ public:
 
 	// Draws
 	void Draw() const;
-	void DrawDebug(class RE_CompCamera* current_camera) const;
+	void DrawDebug(class RE_Camera* current_camera) const;
 	void DrawHeriarchy();
 
 	// UI
 	void DrawGameObjectItems(const GO_UID parent = 0);
 
 	// Selection
-	GO_UID GetSelected() const;
+	GO_UID GetSelected() const { return selected; }
 	void SetSelected(const GO_UID go, bool force_focus = false);
 	void DuplicateSelectedObject();
 
@@ -52,6 +53,9 @@ public:
 	bool EditorSceneNeedsRender() const;
 	bool GameSceneNeedsRender() const;
 
+	RE_Camera* GetSceneCamera() const;
+	RE_Camera* GetParticlesCamera() const;
+
 	// Commands
 	void PushCommand(class RE_Command* cmd);
 	void ClearCommands();
@@ -60,7 +64,23 @@ public:
 
 private:
 
+	void ApplyRedeyeStyling();
+	void DrawMainMenuBar();
+	void DrawWindows();
 	void UpdateCamera();
+	void CheckEditorInputs();
+
+	// Debug Drawing
+	enum class AABBDebugDrawing : int
+	{
+		NONE = 0,
+		SELECTED_ONLY,
+		ALL,
+		ALL_AND_SELECTED,
+	};
+	void DrawBoundingBoxes(AABBDebugDrawing mode) const;
+	void DrawQuadTree() const;
+	void DrawFrustums() const;
 
 public:
 
@@ -122,18 +142,15 @@ private:
 	float grid_size[2];
 
 	// Debug Drawing
-	enum class AABBDebugDrawing : int
-	{
-		NONE = 0,
-		SELECTED_ONLY,
-		ALL,
-		ALL_AND_SELECTED,
-	} aabb_drawing = AABBDebugDrawing::ALL_AND_SELECTED;
+	AABBDebugDrawing aabb_drawing = AABBDebugDrawing::ALL_AND_SELECTED;
 
 	bool draw_quad_tree = true;
 	bool draw_cameras = true;
 
-	float all_aabb_color[3],  sel_aabb_color[3], quad_tree_color[3], frustum_color[3];
+	float all_aabb_color[3];
+	float sel_aabb_color[3];
+	float quad_tree_color[3];
+	float frustum_color[3];
 
 	//crtd security
 	bool isDuplicated = false;

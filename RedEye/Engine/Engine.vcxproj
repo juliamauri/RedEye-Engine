@@ -57,6 +57,7 @@
     <ClCompile Include="SceneEditorWindow.cpp" />
     <ClCompile Include="MaterialEditorWindow.cpp" />
     <ClCompile Include="ShaderEditorWindow.cpp" />
+    <ClCompile Include="RE_Camera.cpp" />
     <ClCompile Include="SkyBoxEditorWindow.cpp" />
     <ClCompile Include="TextEditorManagerWindow.cpp" />
     <ClCompile Include="WwiseWindow.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="GameWindow.h" />
     <ClInclude Include="MaterialEditorWindow.h" />
     <ClInclude Include="ParticleEmitterEditorWindow.h" />
+    <ClInclude Include="RenderedWindow.h" />
     <ClInclude Include="RenderView.h" />
     <ClInclude Include="resource1.h" />
     <ClInclude Include="RE_Curve.h" />
@@ -201,6 +203,7 @@
     <ClInclude Include="PlayPauseWindow.h" />
     <ClInclude Include="HierarchyWindow.h" />
     <ClInclude Include="ShaderEditorWindow.h" />
+    <ClInclude Include="RE_Camera.h" />
     <ClInclude Include="SkyBoxEditorWindow.h" />
     <ClInclude Include="TextEditorManagerWindow.h" />
     <ClCompile Include="WaterPlaneWindow.cpp" />

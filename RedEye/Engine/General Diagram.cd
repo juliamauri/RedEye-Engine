@@ -17,7 +17,7 @@
   <Class Name="ModuleRenderer3D" Collapsed="true">
     <Position X="2.25" Y="21.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>IAQApIFAACTs5wZQgIBAMgkkQAiQDAAJBIEKVGpMAA4=</HashCode>
+      <HashCode>IAQApIFAACTsZwZQgIBAMgkkQAiwTAAJBIEKVWpIAA4=</HashCode>
       <FileName>ModuleRenderer3D.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -35,25 +35,25 @@
       <FileName>ModuleWindow.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Module&lt;OutOfProc, ModuleT&gt;" Collapsed="true">
+  <Class Name="Microsoft::WRL::Module&lt;OutOfProc, ModuleT&gt;" Collapsed="true">
     <Position X="1" Y="12.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AIAAAAAAIAAAAAAABAAAQAAAAAQAAAAAAAAACAAAAAA=</HashCode>
-      <FileName>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\winrt\wrl\module.h</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\winrt\wrl\module.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MD5" Collapsed="true">
     <Position X="7.25" Y="4" Width="1.25" />
     <TypeIdentifier>
       <HashCode>ABAAAEAAAAAAIAgABEAEAAAAAAAGQAJEAIBAGGAEAAE=</HashCode>
-      <FileName>C:\Users\JuliG\Documents\GitHub\RedEye-Engine\RedEye\3rd Parties\Others\Include\MD5\md5.h</FileName>
+      <FileName>D:\G\RedEye-Engine\RedEye\3rd Parties\Others\MD5\md5.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="EventListener" Collapsed="true">
     <Position X="0.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Event.h</FileName>
+      <HashCode>AAAAAAAgBAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EventListener.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_ConsoleLog" Collapsed="true">
@@ -80,7 +80,7 @@
   <Class Name="ConfigWindow" Collapsed="true">
     <Position X="10.25" Y="22.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAgAAAAAQAAAAAAAAAAAAAAQAAAAAQAA=</HashCode>
+      <HashCode>AAAAAAAAAAAIAgAAAAAQAAAEAAAAAAAAAAQAAAAAQAA=</HashCode>
       <FileName>ConfigWindow.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -97,7 +97,7 @@
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAoAAAAAAAAAAABAAAAAAQAAAAAAAAAA=</HashCode>
+      <HashCode>AAAACAAAAAAAAoAAAAAAAAAAABAAAAAAQAAAAAAAAAg=</HashCode>
       <FileName>AboutWindow.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -118,7 +118,7 @@
   <Class Name="AssetsWindow" Collapsed="true">
     <Position X="10.25" Y="21.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAiAgAAAIAAAAAABAAAAAEAAAAAAAAQA=</HashCode>
+      <HashCode>AAAAAIAAAAAAAiAoQAAIACgAAAFAAAAAEAAAAgEAAQA=</HashCode>
       <FileName>AssetsWindow.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -186,14 +186,14 @@
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>IAABAAAAABBAAgAAAAIAmICBgAACABAIAIACAEAAkQQ=</HashCode>
+      <HashCode>IAAQCAQAABBAAgAGAAIAmICBAAACABAIAIACAEAAgQQ=</HashCode>
       <FileName>Application.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_Command" Collapsed="true">
     <Position X="6.25" Y="20.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAABAAAAAEEAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAABAAAAAEEIAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>RE_Command.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -207,14 +207,14 @@
   <Class Name="RE_Cvar" Collapsed="true">
     <Position X="4.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AEAAAgAAACAAggABgAAIAAACcBABACEDABACAAAAAAg=</HashCode>
+      <HashCode>AEAAAgAAACAAggABgAAIAQACcBABACEDCBACAAAAAAg=</HashCode>
       <FileName>RE_Cvar.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_Shader_Cvar" Collapsed="true">
     <Position X="6.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAIgAAAAAAAAACAAAEAAAAAAAgAQAGAAE=</HashCode>
+      <HashCode>AAAAAAAAAAAAIgAAAAAAAAACAAAEAAAAAAAgAQAGgAE=</HashCode>
       <FileName>RE_Cvar.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -251,7 +251,7 @@
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAEAyACAEAwJEigIhQEAUAEAEAGEIQAAICRCChBgBAA=</HashCode>
+      <HashCode>AAEAyACAEAwJEigIhQEAUAAAEAGEIQAAICRCAhBgBAA=</HashCode>
       <FileName>RE_ResourceManager.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -272,7 +272,7 @@
   <Class Name="RE_Material" Collapsed="true">
     <Position X="4.75" Y="9.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>DQgBGICAAhIASgACIOAqCgEMSCQUZYEARFgAEAJ4wDA=</HashCode>
+      <HashCode>DQgBCICAABIASgACIOA6CgEMSCAUZYEARFgAEAJ4wDA=</HashCode>
       <FileName>RE_Material.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -307,14 +307,14 @@
   <Class Name="RE_Shader" Collapsed="true">
     <Position X="4.75" Y="6.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>wBkBACACQEIAgjAEAEAIgCAAEIAAQIcgEQYKtAIqCAA=</HashCode>
+      <HashCode>wBkBACASQEIAgjAEAEAIgCAAEIAAQIcgEQYKNAIqCAA=</HashCode>
       <FileName>RE_Shader.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_SkyBox" Collapsed="true">
     <Position X="4.75" Y="7.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>gAgAUiAAAEIAggAGMAAYgAAAUAAARKIgFAQAAAgMACE=</HashCode>
+      <HashCode>gQgAQiAAAEIAggAGMAAYgAAAUAAARKIgFAQAAAgMACE=</HashCode>
       <FileName>RE_SkyBox.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -328,7 +328,7 @@
   <Class Name="ResourceContainer" Collapsed="true">
     <Position X="3.5" Y="4" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>BMgAEEAIIIIAAgAAIAAICAgBKAAFxiUUAgIAUAAiBIA=</HashCode>
+      <HashCode>BcgAAEAIIMIAAgAAIAAICAgBKAAFxiUUAgIAUAAiBIA=</HashCode>
       <FileName>Resource.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -363,21 +363,21 @@
   <Class Name="RE_FileSystem" Collapsed="true">
     <Position X="1.75" Y="3" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAIiIAI4gAABEABwCBAQgABACIAQAIAEAAAjoAFIFgI=</HashCode>
+      <HashCode>AAIiIgI4gEABEABwCBAQgABACIAQAIAEAAAjoAFIFgI=</HashCode>
       <FileName>RE_FileSystem.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Config" Collapsed="true">
     <Position X="5.25" Y="3" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAgIAAAgAAAAAAAAAAAAAAAAIAAAAAAAAgIAAAEAA=</HashCode>
+      <HashCode>AAAAgIAAAgAAAAAAAAAAAAAAAAIAQAAAAAAgIAAAEAA=</HashCode>
       <FileName>RE_Config.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_Json" Collapsed="true">
     <Position X="3.5" Y="3" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>ABCDCQAAQAQkBAQIAoBIAAAAEAAAACAGQgigAEQACS4=</HashCode>
+      <HashCode>ABCDAAAAQAwkBAQAAoBIAAAAEAAAAKiCAgigAAQACSw=</HashCode>
       <FileName>RE_Json.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -391,28 +391,28 @@
   <Class Name="ComponentsPool" Collapsed="true">
     <Position X="4" Y="16" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>DAwAQDLAAEAgEBASABgCgGEhAYAFAAAAZAAQADQABgY=</HashCode>
+      <HashCode>DAwAQDLAAEAgEBASABgCgGEhAYAFAAAAZAAQADQAJgY=</HashCode>
       <FileName>RE_ComponentsPool.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="GameObjectsPool" Collapsed="true">
     <Position X="6" Y="16" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AIgAAACEAEAAAAAAAAAAAAEAgQYAAAAAQAEAAgBACAA=</HashCode>
+      <HashCode>AIgAAACEAEAAAAAAAAAAgAEAgQYAAAAAQAEAAgBACAA=</HashCode>
       <FileName>RE_GameObjectPool.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_CompWater" Collapsed="true">
     <Position X="13.75" Y="5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>DAgBA4CAIAQCIgACQCBQIoEFASBMAYEAYIAAAAAFAXE=</HashCode>
+      <HashCode>DAgBA4CAIARCIgACQCBQIoEFASBMAYEAYIAAAAAFAXE=</HashCode>
       <FileName>RE_CompWater.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_CompTransform" Collapsed="true">
     <Position X="13.75" Y="2.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>ECwCMIAABIAAgIgAAAYJAIGCEQEAAgmAAAAQAoAggGA=</HashCode>
+      <HashCode>ECwCMIAABIAAgIgAAAYJAIGCEQEAAgmAAAIQAoAggGA=</HashCode>
       <FileName>RE_CompTransform.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -463,35 +463,35 @@
   <Class Name="RE_CompCube" Collapsed="true">
     <Position X="13.75" Y="10" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAA=</HashCode>
       <FileName>RE_CompPrimitive.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_CompDodecahedron" Collapsed="true">
     <Position X="13.75" Y="10.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
       <FileName>RE_CompPrimitive.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_CompTetrahedron" Collapsed="true">
     <Position X="13.75" Y="11.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAgAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>RE_CompPrimitive.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_CompOctohedron" Collapsed="true">
     <Position X="13.75" Y="8.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAIAAAAAAEAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>RE_CompPrimitive.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_CompIcosahedron" Collapsed="true">
     <Position X="13.75" Y="9.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AABAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>RE_CompPrimitive.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -554,7 +554,7 @@
   <Class Name="RE_CompLight" Collapsed="true">
     <Position X="13.75" Y="4.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAICAAAQAIAAAAAAAAAMAgSABCIAASAAIACBAEEA=</HashCode>
+      <HashCode>AAgAAICAAAQAKAAAAAAAAAMAgSAACIAASAAIACBAEEA=</HashCode>
       <FileName>RE_CompLight.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -568,7 +568,7 @@
   <Class Name="RE_GameObject" Collapsed="true">
     <Position X="15.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>DZkhAEiiC1gJBQiCEhKiZFELBw7MnwOZVFEQIZBkDsA=</HashCode>
+      <HashCode>DZkxCECiC1gJBQiGAhKiJFEDBw7MlwOZVFEQAZBkDsQ=</HashCode>
       <FileName>RE_GameObject.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -589,14 +589,14 @@
   <Class Name="ParticleManager" Collapsed="true">
     <Position X="4" Y="18.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>EAQAhAQEIAADABSAAEAAAAAQAAAQABAIAAAAAABMIAA=</HashCode>
+      <HashCode>EAQAhAAEIAADABSAAEAAAAAQAAAQABAIAAAAAABMIAA=</HashCode>
       <FileName>RE_ParticleManager.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RE_CompParticleEmitter" Collapsed="true">
     <Position X="7.75" Y="18.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>CAwAgICQQAAAAgAAAAABAAEAAQAEAAAEQAAAJAgAREA=</HashCode>
+      <HashCode>CAwAgICQQAAAAgAAAAABBAEAAQAEAAAEQAAAJAgAREA=</HashCode>
       <FileName>RE_CompParticleEmitter.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -623,9 +623,26 @@
   </Struct>
   <Struct Name="RenderView" Collapsed="true">
     <Position X="4" Y="21.75" Width="1.5" />
+    <NestedTypes>
+      <Enum Name="RenderView::LightMode" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>RenderView.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="RenderView::Type" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>RenderView.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="RenderView::Flag" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>RenderView.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAgAAABQAAAAAAAACAAIEAAAAAAAIAABAAAQ=</HashCode>
-      <FileName>ModuleRenderer3D.h</FileName>
+      <HashCode>AAAQiIAAAgAAAAQEAAAAAAACAAIEABAAAAAIAABIAAQ=</HashCode>
+      <FileName>RenderView.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="RE_ModelSettings" Collapsed="true">
@@ -824,10 +841,10 @@
       <FileName>Event.h</FileName>
     </TypeIdentifier>
   </Enum>
-  <Enum Name="GameState" Collapsed="true">
+  <Enum Name="RE_Time::GameState" Collapsed="true">
     <Position X="3" Y="2" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAICAAAAAAAAAAAAAAAIAAJAAA=</HashCode>
+      <HashCode>IAAAAAAAIACAAAAAAQAAAAAEAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>RE_Time.h</FileName>
     </TypeIdentifier>
   </Enum>

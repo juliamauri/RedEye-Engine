@@ -3,6 +3,11 @@
 #include "RE_Memory.h"
 #include "RE_Json.h"
 
+bool RE_PR_Opacity::HasOpacity() const
+{
+	return type != RE_PR_Opacity::Type::NONE;
+}
+
 float RE_PR_Opacity::GetValue(const float weight) const
 {
 	float ret = 1.f;

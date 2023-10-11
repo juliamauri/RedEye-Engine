@@ -142,9 +142,6 @@
     <ClCompile Include="RE_ThumbnailManager.cpp">
       <Filter>Engine\Application\Modules\Editor\Thumbnails</Filter>
     </ClCompile>
-    <ClCompile Include="RE_CameraManager.cpp">
-      <Filter>Engine\Application\Modules\Scene\Component Managers</Filter>
-    </ClCompile>
     <ClCompile Include="RE_PrimitiveManager.cpp">
       <Filter>Engine\Application\Modules\Scene\Component Managers</Filter>
     </ClCompile>
@@ -294,6 +291,12 @@
     </ClCompile>
     <ClCompile Include="RE_Random.cpp">
       <Filter>Engine\Application\Utility\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_CameraManager.cpp">
+      <Filter>Engine\Application\Modules\Renderer\Cameras</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Camera.cpp">
+      <Filter>Engine\Application\Modules\Renderer\Cameras</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -459,9 +462,6 @@
     <ClInclude Include="RE_PrimitiveManager.h">
       <Filter>Engine\Application\Modules\Scene\Component Managers</Filter>
     </ClInclude>
-    <ClInclude Include="RE_CameraManager.h">
-      <Filter>Engine\Application\Modules\Scene\Component Managers</Filter>
-    </ClInclude>
     <ClInclude Include="RE_Hardware.h">
       <Filter>Engine\Application\Utility\Hardware</Filter>
     </ClInclude>
@@ -566,9 +566,6 @@
     </ClInclude>
     <ClInclude Include="ParticleEmitterEditorWindow.h">
       <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Particle Emitter Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="EditorWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows</Filter>
     </ClInclude>
     <ClInclude Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3.h">
       <Filter>3rd Party\ImGuiImpl</Filter>
@@ -752,6 +749,18 @@
     </ClInclude>
     <ClInclude Include="RE_Random.h">
       <Filter>Engine\Application\Utility\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderedWindow.h">
+      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\_Base</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorWindow.h">
+      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\_Base</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_CameraManager.h">
+      <Filter>Engine\Application\Modules\Renderer\Cameras</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Camera.h">
+      <Filter>Engine\Application\Modules\Renderer\Cameras</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -949,6 +958,12 @@
     </Filter>
     <Filter Include="Engine\Application\Modules\Physics\Particles\Emission Data">
       <UniqueIdentifier>{8fe1fee5-6a07-44ff-b654-03aad26e6d4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\_Base">
+      <UniqueIdentifier>{e575ef90-2628-4d37-b646-f0844549e5dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Renderer\Cameras">
+      <UniqueIdentifier>{075c1c4b-5b5c-42c1-8a2c-abb88d1569f6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

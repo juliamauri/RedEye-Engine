@@ -31,30 +31,34 @@
 
 void ParticleEmitterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const char* md5)
 {
-	if (emiter_md5 != md5 || md5 == nullptr) {
-		if (active || simulation || emiter_md5) {
-			if (need_save) {
-				next_emiter_md5 = md5;
-				next_simulation = sim;
-				load_next = true;
+	if (emiter_md5 == md5 && md5 != nullptr) return;
 
-				if (emiter_md5) {
-					RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
-					bool has_emissor = emitter->HasEmissor(), has_render = emitter->HasRenderer();
-					RE_EDITOR->popupWindow->PopUpSaveParticles((!has_emissor || !has_render), true, has_emissor, has_render);
-				}
-				else RE_EDITOR->popupWindow->PopUpSaveParticles(true, false, new_emitter->HasEmissor(), new_emitter->HasRenderer());
+	if (active || simulation || emiter_md5)
+	{
+		if (need_save)
+		{
+			next_emiter_md5 = md5;
+			next_simulation = sim;
+			load_next = true;
 
-				return;
+			if (emiter_md5)
+			{
+				RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+				bool has_emissor = emitter->HasEmissor(), has_render = emitter->HasRenderer();
+				RE_EDITOR->popupWindow->PopUpSaveParticles((!has_emissor || !has_render), true, has_emissor, has_render);
 			}
-			else CloseEditor();
+			else RE_EDITOR->popupWindow->PopUpSaveParticles(true, false, new_emitter->HasEmissor(), new_emitter->HasRenderer());
+
+			return;
 		}
-		emiter_md5 = md5;
-		if (!emiter_md5) new_emitter = new RE_ParticleEmitterBase();
-		active = true;
-		simulation = sim;
-		RE_PHYSICS->AddEmitter(simulation);
+		else CloseEditor();
 	}
+
+	emiter_md5 = md5;
+	if (!emiter_md5) new_emitter = new RE_ParticleEmitterBase();
+	active = true;
+	simulation = sim;
+	RE_PHYSICS->AddEmitter(simulation);
 }
 
 void ParticleEmitterEditorWindow::SaveEmitter(bool close, const char* emitter_name, const char* emissor_base, const char* renderer_base)
@@ -112,13 +116,6 @@ void ParticleEmitterEditorWindow::LoadNextEmitter()
 	load_next = false;
 	next_emiter_md5 = nullptr;
 	simulation = nullptr;
-}
-
-void ParticleEmitterEditorWindow::UpdateViewPort()
-{
-	RE_CameraManager::ParticleEditorCamera()->GetTargetViewPort(viewport);
-	viewport.x = (width - viewport.z) * 0.5f;
-	viewport.y = (heigth - viewport.w) * 0.5f + 20;
 }
 
 void ParticleEmitterEditorWindow::Draw(bool secondary)

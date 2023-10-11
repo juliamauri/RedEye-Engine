@@ -55,6 +55,11 @@ void RE_CompPrimitive::UnUseResources() { RE_SCENE->primitives->UnUsePrimitive(t
 void RE_CompPrimitive::SerializeParticleJson(RE_Json* node) const { DEL(node) }
 void RE_CompPrimitive::DeserializeParticleJson(RE_Json* node) { DEL(node) }
 
+bool RE_CompPrimitive::IsPrimitive(RE_Component::Type t)
+{
+	return t > RE_Component::Type::PRIMIVE_MIN && t < RE_Component::Type::PRIMIVE_MAX;
+}
+
 ///////   Grid   ////////////////////////////////////////////
 
 void RE_CompGrid::GridSetUp(int newD)

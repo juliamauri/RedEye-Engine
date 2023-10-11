@@ -50,12 +50,12 @@ struct RE_EmissionBoundary : RE_Serializable
 
 	bool DrawEditor();
 
-	void JsonSerialize(RE_Json* node) const override;
-	void JsonDeserialize(RE_Json* node) override;
+	void JsonSerialize(RE_Json* node) const final;
+	void JsonDeserialize(RE_Json* node) final;
 
-	size_t GetBinarySize() const override;
-	void BinarySerialize(char*& cursor) const override;
-	void BinaryDeserialize(char*& cursor) override;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor) const final;
+	void BinaryDeserialize(char*& cursor) final;
 };
 
 #endif // !__RE_EMISSION_BOUNDARY_H__

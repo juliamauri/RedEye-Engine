@@ -7,8 +7,8 @@
 class RE_ECS_Pool
 {
 public:
-	RE_ECS_Pool() {}
-	~RE_ECS_Pool() {}
+	RE_ECS_Pool() = default;
+	~RE_ECS_Pool() = default;
 
 	// Content iteration
 	void Update();

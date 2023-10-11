@@ -7,8 +7,8 @@
 class GameObjectsPool : public RE_HashMap<RE_GameObject, GO_UID, 1024, 512>
 {
 public:
-	GameObjectsPool() {}
-	~GameObjectsPool() {}
+	GameObjectsPool() = default;
+	~GameObjectsPool() final = default;
 
 	// Content iteration
 	void Clear();
@@ -36,11 +36,11 @@ public:
 	void SerializeJson(RE_Json* node);
 	void DeserializeJson(RE_Json* node, ComponentsPool* cmpsPool);
 
-	eastl::vector<GO_UID> GetAllKeys() const override;
+	eastl::vector<GO_UID> GetAllKeys() const final;
 
 private:
 
-	GO_UID Push(RE_GameObject val) override;
+	GO_UID Push(RE_GameObject val) final;
 };
 
 #endif // !__RE_GAMEOBJECT_POOL_H__

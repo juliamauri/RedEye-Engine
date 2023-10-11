@@ -7,7 +7,7 @@ class ComponentsPool
 {
 public:
 	ComponentsPool();
-	~ComponentsPool() {}
+	~ComponentsPool() = default;
 
 	// Content iteration
 	void Update();

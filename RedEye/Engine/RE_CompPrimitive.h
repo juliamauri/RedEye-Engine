@@ -35,6 +35,7 @@ public:
 	virtual void SerializeParticleBinary(char*& cursor) const {}
 	virtual void DeserializeParticleBinary(char*& cursor) {}
 
+	static bool IsPrimitive(RE_Component::Type t);
 
 protected:
 
