@@ -5,21 +5,6 @@
 
 #include <ImGui/imgui.h>
 
-math::vec RE_EmissionExternalForces::GetAcceleration() const
-{
-	math::vec ret = math::vec::zero;
-
-	switch (type)
-	{
-	case Type::GRAVITY: ret = math::vec(0.f, gravity, 0.f);
-	case Type::WIND: ret = wind;
-	case Type::WIND_GRAVITY: ret = math::vec(wind.x, wind.y + gravity, wind.z);
-	default: break;
-	}
-
-	return ret;
-}
-
 bool RE_EmissionExternalForces::DrawEditor()
 {
 	bool ret = false;
@@ -52,7 +37,22 @@ bool RE_EmissionExternalForces::DrawEditor()
 	return ret;
 }
 
-void RE_EmissionExternalForces::JsonSerialize(RE_Json* node) const
+math::vec RE_EmissionExternalForces::GetAcceleration() const
+{
+	math::vec ret = math::vec::zero;
+
+	switch (type)
+	{
+	case Type::GRAVITY: ret = math::vec(0.f, gravity, 0.f);
+	case Type::WIND: ret = wind;
+	case Type::WIND_GRAVITY: ret = math::vec(wind.x, wind.y + gravity, wind.z);
+	default: break;
+	}
+
+	return ret;
+}
+
+void RE_EmissionExternalForces::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("Type", static_cast<uint>(type));
 
@@ -74,7 +74,7 @@ void RE_EmissionExternalForces::JsonSerialize(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_EmissionExternalForces::JsonDeserialize(RE_Json* node)
+void RE_EmissionExternalForces::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<Type>(node->PullUInt("Type", static_cast<uint>(type)));
 
@@ -109,7 +109,7 @@ size_t RE_EmissionExternalForces::GetBinarySize() const
 	return ret;
 }
 
-void RE_EmissionExternalForces::BinarySerialize(char*& cursor) const
+void RE_EmissionExternalForces::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(ushort);
 	memcpy(cursor, &type, size);
@@ -139,7 +139,7 @@ void RE_EmissionExternalForces::BinarySerialize(char*& cursor) const
 	}
 }
 
-void RE_EmissionExternalForces::BinaryDeserialize(char*& cursor)
+void RE_EmissionExternalForces::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(int);
 	memcpy(&type, cursor, size);

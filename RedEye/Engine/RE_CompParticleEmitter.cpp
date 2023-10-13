@@ -86,43 +86,22 @@ void RE_CompParticleEmitter::DrawProperties()
 	}
 }
 
-void RE_CompParticleEmitter::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
+bool RE_CompParticleEmitter::HasBlend() const { return static_cast<bool>(simulation->opacity.type); }
+bool RE_CompParticleEmitter::HasLight() const { return simulation->light.HasLight(); }
+
+void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
 {
-	node->Push("emitterResource", (emitter_md5) ? resources->at(emitter_md5) : -1);
+	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(RE_Component::Type::TRANSFORM));
+	RE_PHYSICS->CallParticleEmitterLightShaderUniforms(simulation->id, transform->GetGlobalPosition(), shader, array_unif_name, count, maxLights, sharedLight);
 }
 
-void RE_CompParticleEmitter::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
+void RE_CompParticleEmitter::UpdateEmitter(const char* emitter)
 {
-	int id = node->PullInt("emitterResource", -1);
-	emitter_md5 = (id != -1) ? resources->at(id) : nullptr;
+	if (emitter == emitter_md5)
+		dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_md5))->FillEmitter(simulation);
 }
 
-size_t RE_CompParticleEmitter::GetBinarySize() const { return sizeof(int); }
-
-void RE_CompParticleEmitter::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
-{
-	size_t size = sizeof(int);
-	int md5 = (emitter_md5) ? resources->at(emitter_md5) : -1;
-	memcpy(cursor, &md5, size);
-	cursor += size;
-}
-
-void RE_CompParticleEmitter::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
-{
-	size_t size = sizeof(int);
-	int md5 = -1;
-	memcpy(&md5, cursor, size);
-	cursor += size;
-
-	emitter_md5 = (md5 != -1) ? resources->at(md5) : nullptr;
-}
-
-eastl::vector<const char*> RE_CompParticleEmitter::GetAllResources()
-{
-	eastl::vector<const char*> ret;
-	if (emitter_md5) ret.push_back(emitter_md5);
-	return ret;
-}
+#pragma region Resources
 
 void RE_CompParticleEmitter::UseResources()
 {
@@ -142,33 +121,46 @@ void RE_CompParticleEmitter::UnUseResources()
 	RE_PHYSICS->RemoveEmitter(simulation);
 }
 
-bool RE_CompParticleEmitter::HasLight() const { return simulation->light.HasLight(); }
-
-void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
+eastl::vector<const char*> RE_CompParticleEmitter::GetAllResources()
 {
-	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(RE_Component::Type::TRANSFORM));
-	RE_PHYSICS->CallParticleEmitterLightShaderUniforms(simulation->id, transform->GetGlobalPosition(), shader, array_unif_name, count, maxLights, sharedLight);
+	eastl::vector<const char*> ret;
+	if (emitter_md5) ret.push_back(emitter_md5);
+	return ret;
 }
 
-bool RE_CompParticleEmitter::HasBlend() const { return static_cast<bool>(simulation->opacity.type); }
+#pragma endregion
 
-RE_ParticleEmitter* RE_CompParticleEmitter::GetSimulation() const
+#pragma region Serialization
+
+void RE_CompParticleEmitter::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
-	return simulation;
+	node->Push("emitterResource", (emitter_md5) ? resources->at(emitter_md5) : -1);
 }
 
-const char* RE_CompParticleEmitter::GetEmitterResource() const
+void RE_CompParticleEmitter::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
-	return emitter_md5;
+	int id = node->PullInt("emitterResource", -1);
+	emitter_md5 = (id != -1) ? resources->at(id) : nullptr;
 }
 
-void RE_CompParticleEmitter::UpdateEmitter(const char* emitter)
+size_t RE_CompParticleEmitter::GetBinarySize() const { return sizeof(int); }
+
+void RE_CompParticleEmitter::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
-	if (emitter == emitter_md5)
-		dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_md5))->FillEmitter(simulation);
+	size_t size = sizeof(int);
+	int md5 = (emitter_md5) ? resources->at(emitter_md5) : -1;
+	memcpy(cursor, &md5, size);
+	cursor += size;
 }
 
-void RE_CompParticleEmitter::SetEmitter(const char* md5)
+void RE_CompParticleEmitter::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
-	emitter_md5 = md5;
+	size_t size = sizeof(int);
+	int md5 = -1;
+	memcpy(&md5, cursor, size);
+	cursor += size;
+
+	emitter_md5 = (md5 != -1) ? resources->at(md5) : nullptr;
 }
+
+#pragma endregion

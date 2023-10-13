@@ -3,42 +3,7 @@
 
 class RE_CompWater : public RE_Component
 {
-public:
-	RE_CompWater();
-	~RE_CompWater() final = default;
-
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
-
-	void Draw() const final;
-	void DrawProperties() final;
-
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
-
-	size_t GetBinarySize() const final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
-
-	math::AABB GetAABB() const;
-	bool CheckFaceCollision(const math::Ray& local_ray, float& distance) const;
-
-	void UseResources() final;
-	void UnUseResources() final;
-
-	unsigned int GetVAO() const;
-	size_t GetTriangles() const;
-
 private:
-
-	void GeneratePlane();
-	void SetUpWaterUniforms();
-
-	void DeferedDraw(const uint texture_count) const;
-	void DefaultDraw(const uint texture_count) const;
-
-private:
-
-	math::AABB box;
 
 	uint VAO = 0;
 	uint VBO = 0;
@@ -50,8 +15,10 @@ private:
 	int target_slices = 0;
 	int target_stacks = 0;
 
-	eastl::pair<RE_Shader_Cvar*, uint> waterFoam = { nullptr, 0 };
+	math::AABB box;
+
 	eastl::vector<RE_Shader_Cvar> waterUniforms;
+	eastl::pair<RE_Shader_Cvar*, uint> waterFoam = { nullptr, 0 };
 	eastl::pair<RE_Shader_Cvar*, float> waveLenght = { nullptr, 1.5f };
 	eastl::pair<RE_Shader_Cvar*, float> amplitude = { nullptr, 0.75f };
 	eastl::pair<RE_Shader_Cvar*, float> speed = { nullptr, 1.0f };
@@ -67,6 +34,45 @@ private:
 	eastl::pair<RE_Shader_Cvar*, math::vec> foam_color = { nullptr, math::vec::one };
 	eastl::pair<RE_Shader_Cvar*, float> opacity = { nullptr, 1.f };
 	eastl::pair<RE_Shader_Cvar*, float> distanceFoam = { nullptr, 0.0002f };
+
+public:
+
+	RE_CompWater();
+	~RE_CompWater() final = default;
+
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
+
+	void Draw() const final;
+	void DrawProperties() final;
+
+	unsigned int GetVAO() const { return VAO; }
+	size_t GetTriangles() const { return triangle_count; }
+	math::AABB GetAABB() const { return box; }
+	bool CheckFaceCollision(const math::Ray& local_ray, float& distance) const
+	{
+		// TODO Rub: WaterPlane raycast checking (only check on aabb)
+		return false;
+	}
+
+	// Resources
+	void UseResources() final;
+	void UnUseResources() final;
+
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources) final;
+
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources) final;
+
+private:
+
+	void GeneratePlane();
+	void SetUpWaterUniforms();
+
+	void DeferedDraw(const uint texture_count) const;
+	void DefaultDraw(const uint texture_count) const;
 };
 
 #endif // !__RE_COMPWATER_H__

@@ -8,38 +8,6 @@
 
 #include <ImGui/imgui.h>
 
-bool RE_EmissionShape::IsShaped() const
-{
-	return type != Type::POINT;
-}
-
-math::vec RE_EmissionShape::GetPosition() const
-{
-	math::vec ret = math::vec::zero;
-	switch (type)
-	{
-	case Type::CIRCLE:
-		ret = geo.circle.pos +
-			((geo.circle.GetPoint(RE_Random::RandomF() * RE_Math::pi_x2) - geo.circle.pos) * RE_Random::RandomF());
-	case Type::RING:
-		ret = geo.ring.first.GetPoint(RE_Random::RandomF() * RE_Math::pi_x2) +
-			(RE_Random::RandomNVec() * geo.ring.second);
-	case Type::AABB: ret = {
-			geo.box.minPoint.x + (RE_Random::RandomF() * (geo.box.maxPoint.x - geo.box.minPoint.x)),
-			geo.box.minPoint.y + (RE_Random::RandomF() * (geo.box.maxPoint.y - geo.box.minPoint.y)),
-			geo.box.minPoint.z + (RE_Random::RandomF() * (geo.box.maxPoint.z - geo.box.minPoint.z)) };
-	case Type::SPHERE:
-		ret = geo.sphere.pos +
-			((RE_Random::RandomF() * geo.sphere.r) * RE_Random::RandomNVec());
-	case Type::HOLLOW_SPHERE:
-		ret = geo.hollow_sphere.first.pos +
-			((geo.hollow_sphere.first.r + (geo.hollow_sphere.second + RE_Random::RandomFN())) * RE_Random::RandomNVec());
-	default: ret = geo.point;
-	}
-
-	return ret;
-}
-
 bool RE_EmissionShape::DrawEditor()
 {
 	bool ret = false;
@@ -116,7 +84,34 @@ bool RE_EmissionShape::DrawEditor()
 	return ret;
 }
 
-void RE_EmissionShape::JsonSerialize(RE_Json* node) const
+math::vec RE_EmissionShape::GetPosition() const
+{
+	math::vec ret = math::vec::zero;
+	switch (type)
+	{
+	case Type::CIRCLE:
+		ret = geo.circle.pos +
+			((geo.circle.GetPoint(RE_Random::RandomF() * RE_Math::pi_x2) - geo.circle.pos) * RE_Random::RandomF());
+	case Type::RING:
+		ret = geo.ring.first.GetPoint(RE_Random::RandomF() * RE_Math::pi_x2) +
+			(RE_Random::RandomNVec() * geo.ring.second);
+	case Type::AABB: ret = {
+			geo.box.minPoint.x + (RE_Random::RandomF() * (geo.box.maxPoint.x - geo.box.minPoint.x)),
+			geo.box.minPoint.y + (RE_Random::RandomF() * (geo.box.maxPoint.y - geo.box.minPoint.y)),
+			geo.box.minPoint.z + (RE_Random::RandomF() * (geo.box.maxPoint.z - geo.box.minPoint.z)) };
+	case Type::SPHERE:
+		ret = geo.sphere.pos +
+			((RE_Random::RandomF() * geo.sphere.r) * RE_Random::RandomNVec());
+	case Type::HOLLOW_SPHERE:
+		ret = geo.hollow_sphere.first.pos +
+			((geo.hollow_sphere.first.r + (geo.hollow_sphere.second + RE_Random::RandomFN())) * RE_Random::RandomNVec());
+	default: ret = geo.point;
+	}
+
+	return ret;
+}
+
+void RE_EmissionShape::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("Type", static_cast<uint>(type));
 
@@ -166,7 +161,7 @@ void RE_EmissionShape::JsonSerialize(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_EmissionShape::JsonDeserialize(RE_Json* node)
+void RE_EmissionShape::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<RE_EmissionShape::Type>(node->PullUInt("Type", static_cast<uint>(type)));
 	switch (type)
@@ -218,7 +213,7 @@ size_t RE_EmissionShape::GetBinarySize() const
 	return ret;
 }
 
-void RE_EmissionShape::BinarySerialize(char*& cursor) const
+void RE_EmissionShape::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(ushort);
 	memcpy(cursor, &type, size);
@@ -281,7 +276,7 @@ void RE_EmissionShape::BinarySerialize(char*& cursor) const
 	}
 }
 
-void RE_EmissionShape::BinaryDeserialize(char*& cursor)
+void RE_EmissionShape::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	unsigned int size = sizeof(ushort);
 	memcpy(&type, cursor, size);

@@ -7,20 +7,21 @@
 #include "RE_GLCache.h"
 #include <GL/glew.h>
 
-int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize, bool depth, bool stencil)
+int RE_FBOManager::CreateFBO(uint width, uint height, uint texturesSize, bool depth, bool stencil)
 {
 	int ret = -1;
 
 	RE_FBO newFbo;
-	newFbo.type = RE_FBO::FBO_Type::DEFAULT;
+	newFbo.type = RE_FBO::Type::DEFAULT;
 	newFbo.width = width;
 	newFbo.height = height;
 
 	glGenFramebuffers(1, &newFbo.ID);
 	ChangeFBOBind(newFbo.ID);
 
-	for (unsigned int i = 0; i < texturesSize; i++) {
-		unsigned int tex = 0;
+	for (uint i = 0; i < texturesSize; i++)
+	{
+		uint tex = 0;
 		glGenTextures(1, &tex);
 		glBindTexture(GL_TEXTURE_2D, tex);
 
@@ -49,21 +50,25 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, newFbo.depthBufferTexture, 0);
 
-	if (depth && stencil) {
+	if (depth && stencil)
+	{
 		glGenRenderbuffers(1, &newFbo.depthstencilBuffer);
 		glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthstencilBuffer);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthstencilBuffer);
 	}
-	else {
-		if (depth) {
+	else
+	{
+		if (depth)
+		{
 			glGenRenderbuffers(1, &newFbo.depthBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, newFbo.depthBuffer);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthBuffer);
 		}
 
-		if (stencil) {
+		if (stencil)
+		{
 			glGenRenderbuffers(1, &newFbo.stencilBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, newFbo.stencilBuffer);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL, width, height);
@@ -76,11 +81,12 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 	for (eastl_size_t i = 0; i < drawFubbersize; i++) DrawBuffers[i] = GL_COLOR_ATTACHMENT0 + static_cast<GLenum>(i);
 	glDrawBuffers(static_cast<GLenum>(drawFubbersize), DrawBuffers);
 	
-	fbos.insert(eastl::pair<unsigned int, RE_FBO>(newFbo.ID, newFbo));
+	fbos.insert(eastl::pair<uint, RE_FBO>(newFbo.ID, newFbo));
 	int error = 0;
 	if ((error = glCheckFramebufferStatus(GL_FRAMEBUFFER)) == GL_FRAMEBUFFER_COMPLETE)
 		ret = newFbo.ID;
-	else {
+	else
+	{
 		ClearFBO(newFbo.ID);
 
 		switch (error) {
@@ -106,12 +112,12 @@ int RE_FBOManager::CreateFBO(unsigned int width, unsigned int height, unsigned i
 	return ret;
 }
 
-int RE_FBOManager::CreateDeferredFBO(unsigned int width, unsigned int height)
+int RE_FBOManager::CreateDeferredFBO(uint width, uint height)
 {
 	int ret = -1;
 
 	RE_FBO newFbo;
-	newFbo.type = RE_FBO::FBO_Type::DEFERRED;
+	newFbo.type = RE_FBO::Type::DEFERRED;
 	newFbo.width = width;
 	newFbo.height = height;
 	glGenFramebuffers(1, &newFbo.ID);
@@ -134,11 +140,12 @@ int RE_FBOManager::CreateDeferredFBO(unsigned int width, unsigned int height)
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, newFbo.depthstencilBuffer);
 
 	// Check status
-	fbos.insert(eastl::pair<unsigned int, RE_FBO>(newFbo.ID, newFbo));
+	fbos.insert(eastl::pair<uint, RE_FBO>(newFbo.ID, newFbo));
 	int error = 0;
 	if ((error = glCheckFramebufferStatus(GL_FRAMEBUFFER)) == GL_FRAMEBUFFER_COMPLETE)
 		ret = newFbo.ID;
-	else {
+	else
+	{
 		ClearFBO(newFbo.ID);
 
 		switch (error) {
@@ -164,7 +171,7 @@ int RE_FBOManager::CreateDeferredFBO(unsigned int width, unsigned int height)
 	return ret;
 }
 
-void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned int height)
+void RE_FBOManager::ChangeFBOSize(uint ID, uint width, uint height)
 {
 	RE_FBO& toChange = fbos.at(ID);
 
@@ -185,7 +192,7 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 	toChange.texturesID.clear();
 	glDeleteTextures(1, &toChange.depthBufferTexture);
 
-	if (toChange.type == RE_FBO::FBO_Type::DEFERRED)
+	if (toChange.type == RE_FBO::Type::DEFERRED)
 	{
 		LoadDeferredTextures(toChange);
 	}
@@ -249,7 +256,7 @@ void RE_FBOManager::ChangeFBOSize(unsigned int ID, unsigned int width, unsigned 
 	ChangeFBOBind(0);
 }
 
-void RE_FBOManager::ClearFBOBuffers(unsigned int ID, const float color[4])
+void RE_FBOManager::ClearFBOBuffers(uint ID, const float color[4])
 {
 	RE_FBO fbo = fbos.at(ID);
 	GLbitfield mask = GL_COLOR_BUFFER_BIT;
@@ -269,7 +276,7 @@ void RE_FBOManager::ClearFBOBuffers(unsigned int ID, const float color[4])
 	glClear(mask);
 }
 
-void RE_FBOManager::ClearFBO(unsigned int ID)
+void RE_FBOManager::ClearFBO(uint ID)
 {
 	RE_FBO toDelete = fbos.at(ID);
 
@@ -281,17 +288,17 @@ void RE_FBOManager::ClearFBO(unsigned int ID)
 	fbos.erase(ID);
 }
 
-unsigned int RE_FBOManager::GetWidth(unsigned int ID)
+uint RE_FBOManager::GetWidth(uint ID)
 {
 	return fbos.at(ID).width;
 }
 
-unsigned int RE_FBOManager::GetHeight(unsigned int ID)
+uint RE_FBOManager::GetHeight(uint ID)
 {
 	return fbos.at(ID).height;
 }
 
-unsigned int RE_FBOManager::GetDepthTexture(unsigned int ID)
+uint RE_FBOManager::GetDepthTexture(uint ID)
 {
 	RE_FBO fbo = fbos.at(ID);
 	RE_GLCache::ChangeTextureBind(fbo.depthBufferTexture);
@@ -300,21 +307,21 @@ unsigned int RE_FBOManager::GetDepthTexture(unsigned int ID)
 	return fbo.depthBufferTexture;
 }
 
-uint32_t RE_FBOManager::GetTextureID(unsigned int ID, unsigned int texAttachment)
+uint32_t RE_FBOManager::GetTextureID(uint ID, uint texAttachment)
 {
 	return (fbos.at(ID).texturesID.size() < texAttachment) ? 0 : fbos.at(ID).texturesID[texAttachment];
 }
 
-void RE_FBOManager::ChangeFBOBind(unsigned int fID, unsigned int width, unsigned int height)
+void RE_FBOManager::ChangeFBOBind(uint fID, uint width, uint height)
 {
-	static unsigned int currentFBOID = 0;
+	static uint currentFBOID = 0;
 	if (currentFBOID != fID) glBindFramebuffer(GL_FRAMEBUFFER, currentFBOID = fID);
 	if(width != 0 && height != 0) glViewport(0, 0, width, height);
 }
 
 void RE_FBOManager::ClearAll()
 {
-	for (eastl::pair<unsigned int, RE_FBO> fbo : fbos)
+	for (eastl::pair<uint, RE_FBO> fbo : fbos)
 	{
 		const RE_FBO current = fbo.second;
 		if (current.stencilBuffer != 0) glDeleteRenderbuffers(1, &current.stencilBuffer);
@@ -329,7 +336,7 @@ void RE_FBOManager::ClearAll()
 void RE_FBOManager::LoadDeferredTextures(RE_FBO& fbo)
 {
 	// position
-	unsigned int tex = 0;
+	uint tex = 0;
 	glGenTextures(1, &tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, fbo.width, fbo.height, 0, GL_RGB, GL_FLOAT, NULL);
@@ -375,7 +382,14 @@ void RE_FBOManager::LoadDeferredTextures(RE_FBO& fbo)
 	fbo.texturesID.push_back(tex);
 
 	// Bind Attachments
-	unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+	uint attachments[5] =
+	{
+		GL_COLOR_ATTACHMENT0,
+		GL_COLOR_ATTACHMENT1,
+		GL_COLOR_ATTACHMENT2,
+		GL_COLOR_ATTACHMENT3,
+		GL_COLOR_ATTACHMENT4
+	};
 	glDrawBuffers(5, attachments);
 
 	glBindTexture(GL_TEXTURE_2D, 0);

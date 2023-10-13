@@ -164,129 +164,7 @@ void RE_CompWater::DrawProperties()
 	}
 }
 
-void RE_CompWater::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
-{
-	node->Push("slices", slices);
-	node->Push("stacks", stacks);
-	node->Push("waveLenght", waveLenght.second);
-	node->Push("amplitude", amplitude.second);
-	node->Push("speed", speed.second);
-	node->Push("is_linear", is_linear.second);
-	node->PushFloat4("dirCe", { direction.second.x, direction.second.y, center.second.x, center.second.y });
-	node->Push("steepness", steepness.second);
-	node->Push("numWaves", numWaves.second);
-	node->PushFloatVector("cdiffuse", cdiffuse.second);
-	node->Push("shininess", shininess.second);
-	node->Push("foamMin", foamMin.second);
-	node->Push("foamMax", foamMax.second);
-	node->PushFloatVector("foamColor", foam_color.second);
-	node->Push("opacity", opacity.second);
-	node->Push("distanceFoam", distanceFoam.second);
-}
-
-void RE_CompWater::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
-{
-	target_slices = slices = node->PullInt("slices", slices);
-	target_stacks = stacks = node->PullInt("stacks", stacks);
-	waveLenght.second = node->PullFloat("waveLenght", waveLenght.second);
-	amplitude.second = node->PullFloat("amplitude", amplitude.second);
-	speed.second = node->PullFloat("speed", speed.second);
-	is_linear.second = node->PullBool("is_linear", is_linear.second);
-
-	math::float4 dirCe(node->PullFloat4("dirCe", { direction.second.x, direction.second.y, center.second.x, center.second.y }));
-	direction.second = dirCe.xy();
-	center.second.Set(dirCe.z, dirCe.w);
-
-	steepness.second = node->PullFloat("steepness", steepness.second);
-	numWaves.second = node->PullInt("numWaves", numWaves.second);
-	cdiffuse.second = node->PullFloatVector("cdiffuse", cdiffuse.second);
-	shininess.second = node->PullFloat("shininess", shininess.second);
-	foamMin.second = node->PullFloat("foamMin", foamMin.second);
-	foamMax.second = node->PullFloat("foamMax", foamMax.second);
-	foam_color.second = node->PullFloatVector("foamColor", foam_color.second);
-	opacity.second = node->PullFloat("opacity", opacity.second);
-	distanceFoam.second = node->PullFloat("distanceFoam", distanceFoam.second);
-}
-
-size_t RE_CompWater::GetBinarySize() const
-{
-	return sizeof(int) * 3 + sizeof(float) * 19 + sizeof(bool);
-}
-
-void RE_CompWater::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
-{
-	size_t size = sizeof(int);
-	memcpy(cursor, &slices, size); cursor += size;
-	memcpy(cursor, &stacks, size); cursor += size;
-	size = sizeof(float);
-	memcpy(cursor, &waveLenght.second, size); cursor += size;
-	memcpy(cursor, &amplitude.second, size); cursor += size;
-	memcpy(cursor, &speed.second, size); cursor += size;
-	size = sizeof(bool);
-	memcpy(cursor, &is_linear.second, size); cursor += size;
-	size = sizeof(float) * 2;
-	memcpy(cursor, direction.second.ptr(), size); cursor += size;
-	memcpy(cursor, center.second.ptr(), size); cursor += size;
-	size = sizeof(float);
-	memcpy(cursor, &steepness.second, size); cursor += size;
-	size = sizeof(int);
-	memcpy(cursor, &numWaves.second, size); cursor += size;
-	size = sizeof(float) * 3;
-	memcpy(cursor, &cdiffuse.second, size); cursor += size;
-	size = sizeof(float);
-	memcpy(cursor, &shininess.second, size); cursor += size;
-	memcpy(cursor, &foamMin.second, size); cursor += size;
-	memcpy(cursor, &foamMax.second, size); cursor += size;
-	size = sizeof(float) * 3;
-	memcpy(cursor, &foam_color.second, size); cursor += size;
-	size = sizeof(float);
-	memcpy(cursor, &opacity.second, size); cursor += size;
-	memcpy(cursor, &distanceFoam.second, size); cursor += size;
-}
-
-void RE_CompWater::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
-{
-	size_t size = sizeof(int);
-	memcpy(&slices, cursor, size); cursor += size;
-	memcpy(&stacks, cursor, size); cursor += size;
-	target_slices = slices;
-	target_stacks = stacks;
-	size = sizeof(float);
-	memcpy(&waveLenght.second, cursor, size); cursor += size;
-	memcpy(&amplitude.second, cursor, size); cursor += size;
-	memcpy(&speed.second, cursor, size); cursor += size;
-	size = sizeof(bool);
-	memcpy(&is_linear.second, cursor, size); cursor += size;
-	size = sizeof(float) * 2;
-	memcpy(direction.second.ptr(), cursor, size); cursor += size;
-	memcpy(center.second.ptr(), cursor, size); cursor += size;
-	size = sizeof(float);
-	memcpy(&steepness.second, cursor, size); cursor += size;
-	size = sizeof(int);
-	memcpy(&numWaves.second, cursor, size); cursor += size;
-	size = sizeof(float) * 3;
-	memcpy(&cdiffuse.second, cursor, size); cursor += size;
-	size = sizeof(float);
-	memcpy(&shininess.second, cursor, size); cursor += size;
-	memcpy(&foamMin.second, cursor, size); cursor += size;
-	memcpy(&foamMax.second, cursor, size); cursor += size;
-	size = sizeof(float) * 3;
-	memcpy(&foam_color.second, cursor, size); cursor += size;
-	size = sizeof(float);
-	memcpy(&opacity.second, cursor, size); cursor += size;
-	memcpy(&distanceFoam.second, cursor, size); cursor += size;
-}
-
-math::AABB RE_CompWater::GetAABB() const
-{
-	return box;
-}
-
-bool RE_CompWater::CheckFaceCollision(const math::Ray& local_ray, float& distance) const
-{
-	// TODO Rub: WaterPlane raycast checking (only check on aabb)
-	return false;
-}
+#pragma region Resources
 
 void RE_CompWater::UseResources()
 {
@@ -332,8 +210,124 @@ void RE_CompWater::UnUseResources()
 	}
 }
 
-unsigned int RE_CompWater::GetVAO() const { return VAO; }
-size_t RE_CompWater::GetTriangles() const { return triangle_count; }
+#pragma endregion
+
+#pragma region Serialization
+
+void RE_CompWater::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
+{
+	node->Push("slices", slices);
+	node->Push("stacks", stacks);
+	node->Push("waveLenght", waveLenght.second);
+	node->Push("amplitude", amplitude.second);
+	node->Push("speed", speed.second);
+	node->Push("is_linear", is_linear.second);
+	node->PushFloat4("dirCe", { direction.second.x, direction.second.y, center.second.x, center.second.y });
+	node->Push("steepness", steepness.second);
+	node->Push("numWaves", numWaves.second);
+	node->PushFloatVector("cdiffuse", cdiffuse.second);
+	node->Push("shininess", shininess.second);
+	node->Push("foamMin", foamMin.second);
+	node->Push("foamMax", foamMax.second);
+	node->PushFloatVector("foamColor", foam_color.second);
+	node->Push("opacity", opacity.second);
+	node->Push("distanceFoam", distanceFoam.second);
+}
+
+void RE_CompWater::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
+{
+	target_slices = slices = node->PullInt("slices", slices);
+	target_stacks = stacks = node->PullInt("stacks", stacks);
+	waveLenght.second = node->PullFloat("waveLenght", waveLenght.second);
+	amplitude.second = node->PullFloat("amplitude", amplitude.second);
+	speed.second = node->PullFloat("speed", speed.second);
+	is_linear.second = node->PullBool("is_linear", is_linear.second);
+
+	math::float4 dirCe(node->PullFloat4("dirCe", { direction.second.x, direction.second.y, center.second.x, center.second.y }));
+	direction.second = dirCe.xy();
+	center.second.Set(dirCe.z, dirCe.w);
+
+	steepness.second = node->PullFloat("steepness", steepness.second);
+	numWaves.second = node->PullInt("numWaves", numWaves.second);
+	cdiffuse.second = node->PullFloatVector("cdiffuse", cdiffuse.second);
+	shininess.second = node->PullFloat("shininess", shininess.second);
+	foamMin.second = node->PullFloat("foamMin", foamMin.second);
+	foamMax.second = node->PullFloat("foamMax", foamMax.second);
+	foam_color.second = node->PullFloatVector("foamColor", foam_color.second);
+	opacity.second = node->PullFloat("opacity", opacity.second);
+	distanceFoam.second = node->PullFloat("distanceFoam", distanceFoam.second);
+}
+
+size_t RE_CompWater::GetBinarySize() const
+{
+	return sizeof(int) * 3 + sizeof(float) * 19 + sizeof(bool);
+}
+
+void RE_CompWater::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
+{
+	size_t size = sizeof(int);
+	memcpy(cursor, &slices, size); cursor += size;
+	memcpy(cursor, &stacks, size); cursor += size;
+	size = sizeof(float);
+	memcpy(cursor, &waveLenght.second, size); cursor += size;
+	memcpy(cursor, &amplitude.second, size); cursor += size;
+	memcpy(cursor, &speed.second, size); cursor += size;
+	size = sizeof(bool);
+	memcpy(cursor, &is_linear.second, size); cursor += size;
+	size = sizeof(float) * 2;
+	memcpy(cursor, direction.second.ptr(), size); cursor += size;
+	memcpy(cursor, center.second.ptr(), size); cursor += size;
+	size = sizeof(float);
+	memcpy(cursor, &steepness.second, size); cursor += size;
+	size = sizeof(int);
+	memcpy(cursor, &numWaves.second, size); cursor += size;
+	size = sizeof(float) * 3;
+	memcpy(cursor, &cdiffuse.second, size); cursor += size;
+	size = sizeof(float);
+	memcpy(cursor, &shininess.second, size); cursor += size;
+	memcpy(cursor, &foamMin.second, size); cursor += size;
+	memcpy(cursor, &foamMax.second, size); cursor += size;
+	size = sizeof(float) * 3;
+	memcpy(cursor, &foam_color.second, size); cursor += size;
+	size = sizeof(float);
+	memcpy(cursor, &opacity.second, size); cursor += size;
+	memcpy(cursor, &distanceFoam.second, size); cursor += size;
+}
+
+void RE_CompWater::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
+{
+	size_t size = sizeof(int);
+	memcpy(&slices, cursor, size); cursor += size;
+	memcpy(&stacks, cursor, size); cursor += size;
+	target_slices = slices;
+	target_stacks = stacks;
+	size = sizeof(float);
+	memcpy(&waveLenght.second, cursor, size); cursor += size;
+	memcpy(&amplitude.second, cursor, size); cursor += size;
+	memcpy(&speed.second, cursor, size); cursor += size;
+	size = sizeof(bool);
+	memcpy(&is_linear.second, cursor, size); cursor += size;
+	size = sizeof(float) * 2;
+	memcpy(direction.second.ptr(), cursor, size); cursor += size;
+	memcpy(center.second.ptr(), cursor, size); cursor += size;
+	size = sizeof(float);
+	memcpy(&steepness.second, cursor, size); cursor += size;
+	size = sizeof(int);
+	memcpy(&numWaves.second, cursor, size); cursor += size;
+	size = sizeof(float) * 3;
+	memcpy(&cdiffuse.second, cursor, size); cursor += size;
+	size = sizeof(float);
+	memcpy(&shininess.second, cursor, size); cursor += size;
+	memcpy(&foamMin.second, cursor, size); cursor += size;
+	memcpy(&foamMax.second, cursor, size); cursor += size;
+	size = sizeof(float) * 3;
+	memcpy(&foam_color.second, cursor, size); cursor += size;
+	size = sizeof(float);
+	memcpy(&opacity.second, cursor, size); cursor += size;
+	memcpy(&distanceFoam.second, cursor, size); cursor += size;
+}
+
+#pragma endregion
 
 void RE_CompWater::GeneratePlane()
 {

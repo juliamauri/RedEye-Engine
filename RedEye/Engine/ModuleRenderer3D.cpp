@@ -679,7 +679,12 @@ void ModuleRenderer3D::PrepareToRender(const RenderView& render_view)
 	SetupFlag(RenderView::Flag::GL_LIGHT, using_gl_lights);
 }
 
-void ModuleRenderer3D::CategorizeDrawables(eastl::stack<const RE_Component*>& drawables, eastl::stack<const RE_Component*>& geo, eastl::stack<const RE_Component*>& blended_geo, eastl::stack<const RE_CompParticleEmitter*>& particle_systems, eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems)
+void ModuleRenderer3D::CategorizeDrawables(
+	eastl::stack<const RE_Component*>& drawables,
+	eastl::stack<const RE_Component*>& geo,
+	eastl::stack<const RE_Component*>& blended_geo,
+	eastl::stack<const RE_CompParticleEmitter*>& particle_systems,
+	eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems)
 {
 	while (!drawables.empty())
 	{
@@ -693,7 +698,7 @@ void ModuleRenderer3D::CategorizeDrawables(eastl::stack<const RE_Component*>& dr
 		{
 		default: geo.push(drawable); break;
 		case RE_Component::Type::MESH:
-			if (drawable->As<RE_CompMesh*>()->HasBlend()) blended_geo.push(drawable);
+			if (drawable->As<const RE_CompMesh*>()->HasBlend()) blended_geo.push(drawable);
 			else geo.push(drawable);
 			break;
 		case RE_Component::Type::WATER: blended_geo.push(drawable); break;
@@ -802,7 +807,11 @@ void ModuleRenderer3D::DrawSceneForward(
 
 	// Draw Skybox
 	if (render_view.HasFlag(RenderView::Flag::SKYBOX) && render_view.camera->isUsingSkybox())
-		DrawSkyBox();
+	{
+		const char* skybox_md5 = render_view.camera->GetSkybox();
+		auto skybox = dynamic_cast<const RE_SkyBox*>(RE_RES->At(skybox_md5 ? skybox_md5 : RE_InternalResources::GetDefaultSkyBox()));
+		DrawSkyBox(skybox);
+	}
 
 	// Draw Blended elements
 	if (!blended_geo.empty() || !blended_particle_systems.empty())
@@ -918,10 +927,16 @@ void ModuleRenderer3D::DrawSceneDeferred(
 	}
 
 	SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
-	if (render_view.HasFlag(RenderView::Flag::DEBUG_DRAW)) DrawDebug(render_view);
+
+	if (render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
+		DrawDebug(render_view);
 
 	if (render_view.HasFlag(RenderView::Flag::SKYBOX) && render_view.camera->isUsingSkybox())
-		DrawSkyBox();
+	{
+		const char* skybox_md5 = render_view.camera->GetSkybox();
+		auto skybox = dynamic_cast<const RE_SkyBox*>(RE_RES->At(skybox_md5 ? skybox_md5 : RE_InternalResources::GetDefaultSkyBox()));
+		DrawSkyBox(skybox);
+	}
 }
 
 void ModuleRenderer3D::DrawDebug(const RenderView& render_view)
@@ -940,8 +955,10 @@ void ModuleRenderer3D::DrawDebug(const RenderView& render_view)
 	SetupFlag(RenderView::Flag::TEXTURE_2D, render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
 }
 
-void ModuleRenderer3D::DrawSkyBox()
+void ModuleRenderer3D::DrawSkyBox(const RE_SkyBox* skybox)
 {
+	if (skybox == nullptr) return;
+
 	RE_PROFILE(RE_ProfiledFunc::DrawSkybox, RE_ProfiledClass::ModuleRender);
 	RE_GLCache::ChangeTextureBind(0);
 
@@ -951,7 +968,7 @@ void ModuleRenderer3D::DrawSkyBox()
 	RE_ShaderImporter::setBool(skysphereshader, "deferred", (current_lighting == RenderView::LightMode::DEFERRED));
 
 	glDepthFunc(GL_LEQUAL);
-	RE_CameraManager::MainCamera()->DrawSkybox();
+	skybox->DrawSkybox();
 	glDepthFunc(GL_LESS); // set depth function back to default
 }
 

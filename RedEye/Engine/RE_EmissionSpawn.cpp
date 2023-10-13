@@ -5,6 +5,36 @@
 
 #include <ImGui/imgui.h>
 
+bool RE_EmissionSpawn::DrawEditor(bool& changes)
+{
+	bool ret = false;
+	int tmp = static_cast<int>(type);
+	if (ImGui::Combo("Spawn type", &tmp, "Single\0Burst\0Flow\0"))
+	{
+		type = static_cast<RE_EmissionSpawn::Type>(tmp);
+		has_started = false;
+		time_offset = 0.f;
+		changes = ret = true;
+	}
+
+	switch (type)
+	{
+	case RE_EmissionSpawn::Type::SINGLE:
+		if (ImGui::DragInt("Particle amount", &particles_spawned, 1.f, 0, 10000)) changes = true;
+		break;
+	case RE_EmissionSpawn::Type::BURST:
+		if (ImGui::DragInt("Particles/burst", &particles_spawned, 1.f, 0, 10000) ||
+			ImGui::DragFloat("Period", &frequency, 1.f, 0.0001f, 10000.f)) changes = true;
+		break;
+	case RE_EmissionSpawn::Type::FLOW:
+		if (ImGui::DragFloat("Frecuency", &frequency, 1.f, 0.0001f, 1000.f)) changes = true;
+		break;
+	default: break;
+	}
+
+	return ret;
+}
+
 uint RE_EmissionSpawn::CountNewParticles(const float dt)
 {
 	uint ret = 0;
@@ -46,37 +76,7 @@ uint RE_EmissionSpawn::CountNewParticles(const float dt)
 	return ret;
 }
 
-bool RE_EmissionSpawn::DrawEditor(bool& changes)
-{
-	bool ret = false;
-	int tmp = static_cast<int>(type);
-	if (ImGui::Combo("Spawn type", &tmp, "Single\0Burst\0Flow\0"))
-	{
-		type = static_cast<RE_EmissionSpawn::Type>(tmp);
-		has_started = false;
-		time_offset = 0.f;
-		changes = ret = true;
-	}
-
-	switch (type)
-	{
-	case RE_EmissionSpawn::Type::SINGLE:
-		if (ImGui::DragInt("Particle amount", &particles_spawned, 1.f, 0, 10000)) changes = true;
-		break;
-	case RE_EmissionSpawn::Type::BURST:
-		if (ImGui::DragInt("Particles/burst", &particles_spawned, 1.f, 0, 10000) ||
-			ImGui::DragFloat("Period", &frequency, 1.f, 0.0001f, 10000.f)) changes = true;
-		break;
-	case RE_EmissionSpawn::Type::FLOW:
-		if (ImGui::DragFloat("Frecuency", &frequency, 1.f, 0.0001f, 1000.f)) changes = true;
-		break;
-	default: break;
-	}
-
-	return ret;
-}
-
-void RE_EmissionSpawn::JsonSerialize(RE_Json* node) const
+void RE_EmissionSpawn::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("Type", static_cast<uint>(type));
 	switch (type)
@@ -97,7 +97,7 @@ void RE_EmissionSpawn::JsonSerialize(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_EmissionSpawn::JsonDeserialize(RE_Json* node)
+void RE_EmissionSpawn::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<RE_EmissionSpawn::Type>(node->PullUInt("Type", static_cast<uint>(type)));
 	switch (type) {
@@ -129,7 +129,7 @@ size_t RE_EmissionSpawn::GetBinarySize() const
 	return ret;
 }
 
-void RE_EmissionSpawn::BinarySerialize(char*& cursor) const
+void RE_EmissionSpawn::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(ushort);
 	memcpy(cursor, &type, size);
@@ -156,7 +156,7 @@ void RE_EmissionSpawn::BinarySerialize(char*& cursor) const
 	}
 }
 
-void RE_EmissionSpawn::BinaryDeserialize(char*& cursor)
+void RE_EmissionSpawn::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(ushort);
 	memcpy(&type, cursor, size);

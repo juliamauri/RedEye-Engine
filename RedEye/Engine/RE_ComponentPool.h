@@ -78,7 +78,7 @@ public:
 		{
 			RE_Json* comp = compPool->PushJObject(eastl::to_string(i).c_str());
 			comp->Push("parentPoolID", pool_[i].GetGOUID());
-			pool_[i].SerializeJson(comp, resources);
+			pool_[i].JsonSerialize(comp, resources);
 			DEL(comp)
 		}
 		DEL(compPool)
@@ -93,7 +93,7 @@ public:
 			COMPCLASS* comp_ptr = AtPtr(Push({}));
 			RE_Json* comp_obj = comp_objs->PullJObject(eastl::to_string(i).c_str());
 			comp_ptr->PoolSetUp(goPool, comp_obj->PullUnsignedLongLong("parentPoolID", 0), true);
-			comp_ptr->DeserializeJson(comp_obj, resources);
+			comp_ptr->JsonDeserialize(comp_obj, resources);
 
 			DEL(comp_obj)
 		}
@@ -128,7 +128,7 @@ public:
 			memcpy(cursor, &uid, size);
 			cursor += size;
 
-			pool_[i].SerializeBinary(cursor, resources);
+			pool_[i].BinarySerialize(cursor, resources);
 		}
 	}
 
@@ -150,7 +150,7 @@ public:
 
 			COMPCLASS* comp_ptr = AtPtr(Push({}));
 			comp_ptr->PoolSetUp(goPool, goID, true);
-			comp_ptr->DeserializeBinary(cursor, resources);
+			comp_ptr->BinaryDeserialize(cursor, resources);
 		}
 	}
 

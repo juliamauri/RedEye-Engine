@@ -4,9 +4,9 @@
 #include "RE_Serializable.h"
 #include "RE_DataTypes.h"
 
-struct RE_EmissionSpawn : RE_Serializable
+class RE_EmissionSpawn : public RE_Serializable
 {
-	RE_EmissionSpawn() = default;
+public:
 
 	enum class Type : ushort
 	{
@@ -15,6 +15,8 @@ struct RE_EmissionSpawn : RE_Serializable
 		FLOW
 	};
 
+public:
+
 	Type type = Type(0);
 
 	bool has_started = false;
@@ -22,16 +24,20 @@ struct RE_EmissionSpawn : RE_Serializable
 	int particles_spawned = 10;
 	float frequency = 10.f;
 
-	uint CountNewParticles(const float dt);
+public:
+
+	RE_EmissionSpawn() = default;
+	~RE_EmissionSpawn() = default;
 
 	bool DrawEditor(bool& changes);
+	uint CountNewParticles(const float dt);
 
-	void JsonSerialize(RE_Json* node) const override;
-	void JsonDeserialize(RE_Json* node) override;
-
-	size_t GetBinarySize() const override;
-	void BinarySerialize(char*& cursor) const override;
-	void BinaryDeserialize(char*& cursor) override;
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
 };
 
 #endif // !__RE_EMISSION_SPAWN_H__

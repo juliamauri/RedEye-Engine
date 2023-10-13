@@ -25,7 +25,7 @@ bool RE_EmissionCollider::DrawEditor()
 	return ret;
 }
 
-void RE_EmissionCollider::JsonSerialize(RE_Json* node) const
+void RE_EmissionCollider::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("Type", static_cast<uint>(type));
 
@@ -51,7 +51,7 @@ void RE_EmissionCollider::JsonSerialize(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_EmissionCollider::JsonDeserialize(RE_Json* node)
+void RE_EmissionCollider::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<Type>(node->PullUInt("Type", static_cast<uint>(type)));
 
@@ -102,7 +102,7 @@ size_t RE_EmissionCollider::GetBinarySize() const
 	return ret;
 }
 
-void RE_EmissionCollider::BinarySerialize(char*& cursor) const
+void RE_EmissionCollider::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(ushort);
 	memcpy(cursor, &type, size);
@@ -130,7 +130,7 @@ void RE_EmissionCollider::BinarySerialize(char*& cursor) const
 	}
 }
 
-void RE_EmissionCollider::BinaryDeserialize(char*& cursor)
+void RE_EmissionCollider::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(ushort);
 	memcpy(&type, cursor, size);

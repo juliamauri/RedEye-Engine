@@ -57,7 +57,7 @@ bool RE_Curve::DrawEditor(const char* name)
 	return ret;
 }
 
-void RE_Curve::JsonSerialize(RE_Json* node) const
+void RE_Curve::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("Smooth", smooth);
 	node->Push("TotalPoints", total_points);
@@ -69,7 +69,7 @@ void RE_Curve::JsonSerialize(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_Curve::JsonDeserialize(RE_Json* node)
+void RE_Curve::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	smooth = node->PullBool("Smooth", false);
 	total_points = node->PullInt("TotalPoints", 10);
@@ -89,7 +89,7 @@ size_t RE_Curve::GetBinarySize() const
 	return sizeof(bool) + (sizeof(int) * 2) + (sizeof(float) * 2 * points.size());
 }
 
-void RE_Curve::BinarySerialize(char*& cursor) const
+void RE_Curve::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(bool);
 	memcpy(cursor, &smooth, size);
@@ -107,7 +107,7 @@ void RE_Curve::BinarySerialize(char*& cursor) const
 	cursor += size;
 }
 
-void RE_Curve::BinaryDeserialize(char*& cursor)
+void RE_Curve::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(bool);
 	memcpy(&smooth, cursor, size);

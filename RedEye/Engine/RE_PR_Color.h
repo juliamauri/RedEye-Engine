@@ -7,9 +7,9 @@
 
 #include <MGL/Math/float3.h>
 
-struct RE_PR_Color : RE_Serializable
+class RE_PR_Color : public RE_Serializable
 {
-	RE_PR_Color() = default;
+public:
 
 	enum class Type : ushort
 	{
@@ -19,6 +19,8 @@ struct RE_PR_Color : RE_Serializable
 		OVERSPEED
 	};
 
+public:
+
 	Type type = Type(0);
 
 	math::vec base = math::vec::one;
@@ -27,16 +29,21 @@ struct RE_PR_Color : RE_Serializable
 	bool useCurve = false;
 	RE_Curve curve = {};
 
-	math::vec GetValue(const float weight = 1.f) const;
+public:
+
+	RE_PR_Color() = default;
+	~RE_PR_Color() = default;
 
 	bool DrawEditor();
 
-	void JsonSerialize(RE_Json* node) const override;
-	void JsonDeserialize(RE_Json* node) override;
+	math::vec GetValue(const float weight = 1.f) const;
 
-	size_t GetBinarySize() const override;
-	void BinarySerialize(char*& cursor) const override;
-	void BinaryDeserialize(char*& cursor) override;
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
 };
 
 #endif // !__RE_PR_COLOR_H__

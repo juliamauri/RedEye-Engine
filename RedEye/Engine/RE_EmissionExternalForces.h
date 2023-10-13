@@ -6,9 +6,9 @@
 
 #include <MGL/Math/float3.h>
 
-struct RE_EmissionExternalForces : public RE_Serializable
+class RE_EmissionExternalForces : public RE_Serializable
 {
-	RE_EmissionExternalForces() = default;
+public:
 
 	enum class Type : ushort
 	{
@@ -18,21 +18,27 @@ struct RE_EmissionExternalForces : public RE_Serializable
 		WIND_GRAVITY
 	};
 
-	Type type = Type(0);
+public:
 
+	Type type = Type(0);
 	float gravity = -9.81f;
 	math::vec wind = math::vec::zero;
 
-	math::vec GetAcceleration() const;
+public:
+
+	RE_EmissionExternalForces() = default;
+	~RE_EmissionExternalForces() = default;
 
 	bool DrawEditor();
 
-	void JsonSerialize(RE_Json* node) const final;
-	void JsonDeserialize(RE_Json* node) final;
+	math::vec GetAcceleration() const;
 
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
 	size_t GetBinarySize() const final;
-	void BinarySerialize(char*& cursor) const final;
-	void BinaryDeserialize(char*& cursor) final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
 };
 
 #endif // !__RE_EMISSION_EXTERNAL_FORCES_H__

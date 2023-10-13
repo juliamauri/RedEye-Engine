@@ -9,13 +9,7 @@
 #include <ImGui/imgui.h>
 #include <EASTL/vector.h>
 
-bool RE_PR_Light::HasLight() const { return type != Type::NONE; }
-math::vec RE_PR_Light::GetColor() const { return random_color ? RE_Random::RandomVec() : color; }
-float RE_PR_Light::GetIntensity() const { return random_i ? intensity + (RE_Random::RandomF() * (intensity_max - intensity)) : intensity; }
-float RE_PR_Light::GetSpecular() const { return random_s ? specular + (RE_Random::RandomF() * (specular_max - specular)) : specular; }
-math::vec RE_PR_Light::GetQuadraticValues() const { return { constant, linear, quadratic }; }
-
-bool RE_PR_Light::DrawEditor(const unsigned int id)
+bool RE_PR_Light::DrawEditor(uint id)
 {
 	bool ret = false;
 	int tmp = static_cast<int>(type);
@@ -76,7 +70,7 @@ bool RE_PR_Light::DrawEditor(const unsigned int id)
 				ret = true;
 
 			ImGui::Separator();
-			if (ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f")||
+			if (ImGui::DragFloat("Constant", &constant, 0.01f, 0.001f, 5.0f, "%.2f") ||
 				ImGui::DragFloat("Linear", &linear, 0.001f, 0.001f, 5.0f, "%.3f") ||
 				ImGui::DragFloat("Quadratic", &quadratic, 0.001f, 0.001f, 5.0f, "%.3f"))
 				ret = true;
@@ -163,7 +157,12 @@ bool RE_PR_Light::DrawEditor(const unsigned int id)
 	return ret;
 }
 
-void RE_PR_Light::JsonSerialize(RE_Json* node) const
+math::vec RE_PR_Light::GetColor() const { return random_color ? RE_Random::RandomVec() : color; }
+float RE_PR_Light::GetIntensity() const { return random_i ? intensity + (RE_Random::RandomF() * (intensity_max - intensity)) : intensity; }
+float RE_PR_Light::GetSpecular() const { return random_s ? specular + (RE_Random::RandomF() * (specular_max - specular)) : specular; }
+math::vec RE_PR_Light::GetQuadraticValues() const { return { constant, linear, quadratic }; }
+
+void RE_PR_Light::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("Type", static_cast<uint>(type));
 
@@ -206,7 +205,7 @@ void RE_PR_Light::JsonSerialize(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_PR_Light::JsonDeserialize(RE_Json* node)
+void RE_PR_Light::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<RE_PR_Light::Type>(node->PullUInt("Type", static_cast<uint>(type)));
 
@@ -275,7 +274,7 @@ size_t RE_PR_Light::GetBinarySize() const
 	return ret;
 }
 
-void RE_PR_Light::BinarySerialize(char*& cursor) const
+void RE_PR_Light::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(Type);
 	memcpy(cursor, &type, size);
@@ -349,7 +348,7 @@ void RE_PR_Light::BinarySerialize(char*& cursor) const
 	}
 }
 
-void RE_PR_Light::BinaryDeserialize(char*& cursor)
+void RE_PR_Light::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(Type);
 	memcpy(&type, cursor, size);

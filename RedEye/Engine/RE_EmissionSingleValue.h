@@ -4,9 +4,9 @@
 #include "RE_Serializable.h"
 #include "RE_DataTypes.h"
 
-struct RE_EmissionSingleValue : RE_Serializable
+class RE_EmissionSingleValue : public RE_Serializable
 {
-	RE_EmissionSingleValue() = default;
+public:
 
 	enum class Type : ushort
 	{
@@ -15,10 +15,17 @@ struct RE_EmissionSingleValue : RE_Serializable
 		RANGE
 	};
 
+public:
+
 	Type type = Type(0);
 
 	float val = 1.f;
 	float margin = 1.f;
+
+public:
+
+	RE_EmissionSingleValue() = default;
+	~RE_EmissionSingleValue() = default;
 
 	float GetValue() const;
 	float GetMin() const;
@@ -26,12 +33,12 @@ struct RE_EmissionSingleValue : RE_Serializable
 
 	bool DrawEditor(const char* name);
 
-	void JsonSerialize(RE_Json* node) const override;
-	void JsonDeserialize(RE_Json* node) override;
-
-	size_t GetBinarySize() const override;
-	void BinarySerialize(char*& cursor) const override;
-	void BinaryDeserialize(char*& cursor) override;
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
 };
 
 #endif // !__RE_EMISSION_SINGLE_VALUE_H__

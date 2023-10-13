@@ -20,30 +20,21 @@
 class RE_ParticleEmitter
 {
 public:
-	RE_ParticleEmitter(bool instance_primitive = false);
-	~RE_ParticleEmitter();
 
-	unsigned int Update(const float global_dt);
-	void Reset();
-
-private:
-
-	inline bool IsTimeValid(const float global_dt);
-	inline void UpdateParticles();
-	inline void UpdateSpawn();
-
-	void ImpulseCollision(RE_Particle& p1, RE_Particle& p2, const float combined_radius = 0.001f) const;
+	enum class PlaybackState : int { STOPING, RESTART, PLAY, STOP, PAUSE };
+	enum class BoundingMode : int { GENERAL, PER_PARTICLE };
+	enum class ParticleDir : uchar { FromPS, Billboard, Custom };
 
 public:
 
-	unsigned int id = 0u;
-	enum class PlaybackState { STOPING, RESTART, PLAY, STOP, PAUSE } state = PlaybackState::STOP;
+	uint id = 0u;
+	PlaybackState state = PlaybackState::STOP;
 
 	// Particle storage
 	eastl::vector<RE_Particle> particle_pool;
 
 	// Control (read-only)
-	unsigned int particle_count = 0u;
+	uint particle_count = 0u;
 	float total_time = 0.f;
 	float max_dist_sq = 0.f;
 	float max_speed_sq = 0.f;
@@ -52,10 +43,10 @@ public:
 	math::vec parent_speed = math::vec::zero;
 
 	math::AABB bounding_box;
-	static enum class BoundingMode : int { GENERAL, PER_PARTICLE } mode;
+	static BoundingMode mode;
 
-	// Emission properties ---------------------------------------------------------
-	
+#pragma region Emission Properties
+
 	// Playback
 	bool loop = true;
 	float max_time = 5.f;
@@ -64,7 +55,7 @@ public:
 	bool start_on_play = true;
 
 	// Spawning
-	unsigned int max_particles = 500000;
+	uint max_particles = 500000;
 	RE_EmissionInterval spawn_interval = {};
 	RE_EmissionSpawn spawn_mode = {};
 
@@ -82,7 +73,9 @@ public:
 	RE_EmissionBoundary boundary = {};
 	RE_EmissionCollider collider = {};
 
-	// Render properties ---------------------------------------------------------
+#pragma endregion
+
+#pragma region Render Properties
 
 	bool active_rendering = true;
 
@@ -95,14 +88,27 @@ public:
 	const char* meshMD5 = nullptr;
 	class RE_CompPrimitive* primCmp = nullptr;
 
-	enum class ParticleDir : unsigned char
-	{
-		FromPS,
-		Billboard,
-		Custom
-	} orientation = ParticleDir::Billboard;
+	ParticleDir orientation = ParticleDir::Billboard;
 
 	math::float3 direction = { -1.0f,1.0f,0.5f };
+
+#pragma endregion
+
+public:
+
+	RE_ParticleEmitter(bool instance_primitive = false);
+	~RE_ParticleEmitter();
+
+	uint Update(const float global_dt);
+	void Reset();
+
+private:
+
+	inline bool IsTimeValid(const float global_dt);
+	inline void UpdateParticles();
+	inline void UpdateSpawn();
+
+	void ImpulseCollision(RE_Particle& p1, RE_Particle& p2, const float combined_radius = 0.001f) const;
 };
 
 #endif //!__RE_PARTICLEEMITTER_H__

@@ -5,6 +5,11 @@ class RE_ParticleEmitter;
 
 class RE_CompParticleEmitter : public RE_Component
 {
+private:
+
+	RE_ParticleEmitter* simulation = nullptr;
+	const char* emitter_md5 = nullptr;
+
 public:
 
 	RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(RE_Component::Type::PARTICLEEMITER) {}
@@ -17,32 +22,27 @@ public:
 	void Draw() const final;
 	void DrawProperties() final;
 
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
-
-	size_t GetBinarySize() const final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
-
-	eastl::vector<const char*> GetAllResources() final;
-	void UseResources();
-	void UnUseResources();
-
+	bool HasBlend() const;
 	bool HasLight() const;
 	void CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
 
-	bool HasBlend() const;
-
-	RE_ParticleEmitter* GetSimulation() const;
-	const char* GetEmitterResource() const;
 	void UpdateEmitter(const char* emitter);
+	void SetEmitter(const char* md5) { emitter_md5 = md5; }
+	RE_ParticleEmitter* GetSimulation() const { return simulation; }
+	const char* GetEmitterResource() const { return emitter_md5; }
 
-	void SetEmitter(const char* md5);
+	// Resources
+	void UseResources() final;
+	void UnUseResources() final;
+	eastl::vector<const char*> GetAllResources() final;
 
-private:
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources) final;
 
-	RE_ParticleEmitter* simulation = nullptr;
-	const char* emitter_md5 = nullptr;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources) final;
 };
 
 #endif // !__RE_COMPPARTICLEEMITTER_H__

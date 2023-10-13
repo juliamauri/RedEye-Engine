@@ -1,5 +1,5 @@
-#ifndef __SIMPLE_CAMERA_H__
-#define __SIMPLE_CAMERA_H__
+#ifndef __RE_CAMERA_H__
+#define __RE_CAMERA_H__
 
 #include <MGL/MathGeoLib.h>
 #include "RE_DataTypes.h"
@@ -26,6 +26,10 @@ private:
 	AspectRatio target_ar = AspectRatio::Fit_Window;
 	float width = 0.f;
 	float height = 0.f;
+
+	// Skybox
+	bool usingSkybox = true;
+	const char* skyboxMD5 = nullptr;
 
 public:
 
@@ -95,13 +99,24 @@ public:
 	math::float4x4 GetProjection() const { return frustum.ProjectionMatrix().Transposed(); }
 	math::float4x4 GetViewProjMatrix() const { return frustum.ViewProjMatrix().Transposed(); }
 
+	// Skybox
+	bool isUsingSkybox() const { return usingSkybox; }
+	const char* GetSkybox() const { return skyboxMD5; }
+	void SetSkyBox(const char* md5) { skyboxMD5 = md5; }
+	void SetSkyBox(const char* md5, bool using_skybox) { skyboxMD5 = md5; usingSkybox = using_skybox; }
+	void DeleteSkybox() { usingSkybox = false; skyboxMD5 = nullptr; }
+
+	// Skybox - Resources
+	void UseSkybox() const;
+	void UnUseSkybox() const;
+
 	// Serialization
-	void JsonSerialize(RE_Json* node) const final;
-	void JsonDeserialize(RE_Json* node) final;
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
 
 	size_t GetBinarySize() const final;
-	void BinarySerialize(char*& cursor) const final;
-	void BinaryDeserialize(char*& cursor) final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
 };
 
-#endif // !__SIMPLE_CAMERA_H__
+#endif // !__RE_CAMERA_H__

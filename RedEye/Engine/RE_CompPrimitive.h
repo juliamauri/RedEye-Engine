@@ -7,90 +7,102 @@ class RE_CompTransform;
 
 class RE_CompPrimitive : public RE_Component
 {
+protected:
+
+	int primID = -1;
+	uint VAO = 0;
+	size_t triangle_count = 0;
+	math::vec color = math::vec::one;
+
 public:
 
 	RE_CompPrimitive(RE_Component::Type t);
 	virtual ~RE_CompPrimitive() = default;
 
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override {}
+	virtual void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) override {}
 
-	void Draw() const override {}
 	void SimpleDraw() const;
-	void DrawProperties() override {}
 	virtual bool DrawPrimPropierties() { return false; }
+	virtual bool CheckFaceCollision(const math::Ray& ray, float& distance) const
+	{
+		// TODO Rub: Primitive raycast checking
+		return false;
+	}
 
-	virtual bool CheckFaceCollision(const math::Ray& ray, float& distance) const;
+	static bool IsPrimitive(RE_Component::Type t)
+	{
+		return t > RE_Component::Type::PRIMIVE_MIN && t < RE_Component::Type::PRIMIVE_MAX;
+	}
 
-	void SetColor(float r, float g, float b);
-	void SetColor(math::vec nColor);
+	uint GetVAO() const { return VAO; }
+	size_t GetTriangleCount() const { return triangle_count; }
 
-	unsigned int GetVAO() const;
-	size_t GetTriangleCount() const;
+	void SetColor(math::vec nColor) { color = nColor; }
+	void SetColor(float r, float g, float b) { color.Set(r, g, b); }
 
 	void UnUseResources();
 
+	// Particle Serialization
+	virtual void ParticleJsonSerialize(RE_Json* node) const;
+	virtual void ParticleJsonDeserialize(RE_Json* node);
 	virtual size_t GetParticleBinarySize() const { return 0; }
-	virtual void SerializeParticleJson(RE_Json* node) const;
-	virtual void DeserializeParticleJson(RE_Json* node);
-	virtual void SerializeParticleBinary(char*& cursor) const {}
-	virtual void DeserializeParticleBinary(char*& cursor) {}
-
-	static bool IsPrimitive(RE_Component::Type t);
-
-protected:
-
-	int primID = -1;
-	unsigned int VAO = 0;
-	size_t triangle_count = 0;
-	math::vec color = math::vec::one;
+	virtual void ParticleBinarySerialize(char*& cursor) const {}
+	virtual void ParticleBinaryDeserialize(char*& cursor) {}
 };
 
-/**************************************************
-******	Grid
-**************************************************/
+#pragma region Grid **************************************************
 
 class RE_CompGrid : public RE_CompPrimitive
 {
+private:
+
+	int divisions = 50;
+	int tmpSb = 50;
+	float distance = 125.f;
+	RE_CompTransform* transform = nullptr;
+
 public:
+
+	friend class RE_PrimitiveManager;
 
 	RE_CompGrid() : RE_CompPrimitive(RE_Component::Type::GRID) {}
 	~RE_CompGrid() final = default;
-	friend class RE_PrimitiveManager;
 
-	void GridSetUp(int divisions = 10);
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
+	void GridSetUp(int divisions = 10);
 
 	void Draw() const final;
 	void DrawProperties() final;
 
+	float GetDistance() const { return distance; }
 	RE_CompTransform* GetTransformPtr() const;
 
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources) final;
 	size_t GetBinarySize() const final;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
-
-	float GetDistance() const;
-
-private:
-
-	int divisions = 50, tmpSb = 50;
-	float distance = 125.f;
-	RE_CompTransform* transform = nullptr;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources) final;
 };
 
-/**************************************************
-******	Rock
-**************************************************/
+#pragma endregion
+
+#pragma region Rock **************************************************
 
 class RE_CompRock : public RE_CompPrimitive
 {
+private:
+
+	int seed = 251654;
+	int nsubdivisions = 5;
+	bool canChange = true;
+
 public:
+
+	friend class RE_PrimitiveManager;
 
 	RE_CompRock() : RE_CompPrimitive(RE_Component::Type::ROCK) {}
 	~RE_CompRock() final = default;
-	friend class RE_PrimitiveManager;
 
 	void RockSetUp(int _seed = 251654, int _subdivions = 5);
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
@@ -99,107 +111,56 @@ public:
 	void DrawProperties() final;
 	bool DrawPrimPropierties() final;
 
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources) final;
 	size_t GetBinarySize() const final;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources) final;
 
+	// Particle Serialization
+	void ParticleJsonSerialize(RE_Json* node) const final;
+	void ParticleJsonDeserialize(RE_Json* node) final;
 	size_t GetParticleBinarySize() const final;
-	void SerializeParticleJson(RE_Json* node) const final;
-	void DeserializeParticleJson(RE_Json* node) final;
-	void SerializeParticleBinary(char*& cursor) const final;
-	void DeserializeParticleBinary(char*& cursor) final;
+	void ParticleBinarySerialize(char*& cursor) const final;
+	void ParticleBinaryDeserialize(char*& cursor) final;
 
 private:
 
 	void GenerateNewRock(int seed, int subdivisions);
-
-private:
-
-	int seed = 251654, nsubdivisions = 5;
-	bool canChange = true;
 };
 
-/**************************************************
-******	Platonic
-**************************************************/
+#pragma endregion
+
+#pragma region Platonic **************************************************
 
 class RE_CompPlatonic : public RE_CompPrimitive
 {
+protected:
+
+	eastl::string pName;
+
 public:
+
+	friend class RE_PrimitiveManager;
 
 	RE_CompPlatonic(RE_Component::Type t) : RE_CompPrimitive(t) {}
 	~RE_CompPlatonic() = default;
-	friend class RE_PrimitiveManager;
 
 	void PlatonicSetUp();
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
 
 	void Draw() const final;
 	void DrawProperties() final;
-	bool DrawPrimPropierties() final;
+	bool DrawPrimPropierties() final { return false; }
 
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources) final;
 	size_t GetBinarySize() const final;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
-
-protected:
-
-	eastl::string pName;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources) final;
 };
-
-/**************************************************
-******	Parametric
-**************************************************/
-
-class RE_CompParametric : public RE_CompPrimitive
-{
-public:
-	RE_CompParametric(RE_Component::Type t, const char* name);
-	virtual ~RE_CompParametric();
-	friend class RE_PrimitiveManager;
-
-	void ParametricSetUp(int _slices, int _stacks, float _radius = 0.0f);
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
-
-	void Draw() const final;
-	void DrawProperties() final;
-	bool DrawPrimPropierties() final;
-
-	size_t GetBinarySize() const final;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
-
-	size_t GetParticleBinarySize() const final;
-	void SerializeParticleJson(RE_Json* node) const final;
-	void DeserializeParticleJson(RE_Json* node) final;
-	void SerializeParticleBinary(char*& cursor) const final;
-	void DeserializeParticleBinary(char*& cursor) final;
-
-protected:
-
-	eastl::string name;
-
-	bool show_checkers = false;
-	bool canChange = false;
-
-	int slices = 0, stacks = 0;
-	float radius = 0.f, min_r = 0.f, max_r = 0.f;
-
-private:
-
-	int target_slices = 0, target_stacks = 0;
-	float target_radius = 0.f;
-};
-
-/**************************************************
-******	Platonic
-**************************************************/
 
 class RE_CompPoint : public RE_CompPlatonic
 {
@@ -243,9 +204,60 @@ public:
 	~RE_CompIcosahedron() final = default;
 };
 
-/**************************************************
-******	Plane - Parametric
-**************************************************/
+#pragma endregion
+
+#pragma region Parametric **************************************************
+
+class RE_CompParametric : public RE_CompPrimitive
+{
+protected:
+
+	eastl::string name;
+
+	bool show_checkers = false;
+	bool canChange = false;
+
+	int slices = 0;
+	int stacks = 0;
+
+	float radius = 0.f;
+	float min_r = 0.f;
+	float max_r = 0.f;
+
+private:
+
+	int target_slices = 0;
+	int target_stacks = 0;
+	float target_radius = 0.f;
+
+public:
+
+	friend class RE_PrimitiveManager;
+
+	RE_CompParametric(RE_Component::Type t, const char* _name) : RE_CompPrimitive(t), name(_name) {}
+	virtual ~RE_CompParametric() = default;
+
+	void ParametricSetUp(int _slices, int _stacks, float _radius = 0.0f);
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
+
+	void Draw() const final;
+	void DrawProperties() final;
+	bool DrawPrimPropierties() final;
+
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources) final;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources) final;
+
+	// Particle Serialization
+	void ParticleJsonSerialize(RE_Json* node) const final;
+	void ParticleJsonDeserialize(RE_Json* node) final;
+	size_t GetParticleBinarySize() const final;
+	void ParticleBinarySerialize(char*& cursor) const final;
+	void ParticleBinaryDeserialize(char*& cursor) final;
+};
 
 class RE_CompPlane : public RE_CompParametric
 {
@@ -256,20 +268,12 @@ public:
 	const char* TransformAsMeshResource();
 };
 
-/**************************************************
-******	Sphere - Parametric
-**************************************************/
-
 class RE_CompSphere : public RE_CompParametric
 {
 public:
 	RE_CompSphere::RE_CompSphere() : RE_CompParametric(RE_Component::Type::SPHERE, "Sphere") {}
 	~RE_CompSphere() final = default;
 };
-
-/**************************************************
-******	Cylinder - Parametric
-**************************************************/
 
 class RE_CompCylinder : public RE_CompParametric
 {
@@ -278,20 +282,12 @@ public:
 	~RE_CompCylinder() final = default;
 };
 
-/**************************************************
-******	HemiSphere - Parametric
-**************************************************/
-
 class RE_CompHemiSphere : public RE_CompParametric
 {
 public:
 	RE_CompHemiSphere::RE_CompHemiSphere() : RE_CompParametric(RE_Component::Type::HEMISHPERE, "HemiSphere") {}
 	~RE_CompHemiSphere() final = default;
 };
-
-/**************************************************
-******	Torus - Parametric
-**************************************************/
 
 class RE_CompTorus : public RE_CompParametric
 {
@@ -304,10 +300,6 @@ public:
 	~RE_CompTorus() final = default;
 };
 
-/**************************************************
-******	Trefoi Knot - Parametric
-**************************************************/
-
 class RE_CompTrefoiKnot : public RE_CompParametric
 {
 public:
@@ -318,5 +310,7 @@ public:
 	}
 	~RE_CompTrefoiKnot() final = default;
 };
+
+#pragma endregion
 
 #endif // !__RE_COMPPRIMITIVE_H__

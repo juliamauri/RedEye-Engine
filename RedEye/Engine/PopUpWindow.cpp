@@ -123,7 +123,7 @@ void PopUpWindow::PopUpDelRes(const char* res)
 		case ResourceContainer::Type::SKYBOX:
 		{
 			RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(comps.top());
-			if (cam && cam->GetSkybox() == res)
+			if (cam && cam->Camera.GetSkybox() == res)
 			{
 				flags |= PopUpFlags::resource_on_scene;
 				skip = true;

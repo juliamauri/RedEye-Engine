@@ -3,23 +3,6 @@
 #include "RE_Memory.h"
 #include "RE_Json.h"
 
-math::vec RE_PR_Color::GetValue(const float weight) const
-{
-	math::vec ret = math::vec::zero;
-
-	switch (type)
-	{
-	case Type::SINGLE: ret = base;
-	default:
-	{
-		float w = (useCurve) ? curve.GetValue(weight) : weight;
-		ret = (gradient * w) + (base * (1.f - w));
-	}
-	}
-
-	return ret;
-}
-
 bool RE_PR_Color::DrawEditor()
 {
 	bool ret = false;
@@ -44,7 +27,24 @@ bool RE_PR_Color::DrawEditor()
 	return ret;
 }
 
-void RE_PR_Color::JsonSerialize(RE_Json* node) const
+math::vec RE_PR_Color::GetValue(const float weight) const
+{
+	math::vec ret = math::vec::zero;
+
+	switch (type)
+	{
+	case Type::SINGLE: ret = base;
+	default:
+	{
+		float w = (useCurve) ? curve.GetValue(weight) : weight;
+		ret = (gradient * w) + (base * (1.f - w));
+	}
+	}
+
+	return ret;
+}
+
+void RE_PR_Color::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("Type", static_cast<int>(type));
 
@@ -57,7 +57,7 @@ void RE_PR_Color::JsonSerialize(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_PR_Color::JsonDeserialize(RE_Json* node)
+void RE_PR_Color::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<Type>(node->PullInt("Type", 0));
 
@@ -78,7 +78,7 @@ size_t RE_PR_Color::GetBinarySize() const
 		+ curve.GetBinarySize();
 }
 
-void RE_PR_Color::BinarySerialize(char*& cursor) const
+void RE_PR_Color::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(Type);
 	memcpy(cursor, &type, size);
@@ -98,7 +98,7 @@ void RE_PR_Color::BinarySerialize(char*& cursor) const
 	curve.BinarySerialize(cursor);
 }
 
-void RE_PR_Color::BinaryDeserialize(char*& cursor)
+void RE_PR_Color::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(Type);
 	memcpy(&type, cursor, size);

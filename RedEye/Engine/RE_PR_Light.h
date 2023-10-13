@@ -6,9 +6,9 @@
 
 #include <MGL/Math/float3.h>
 
-struct RE_PR_Light : RE_Serializable
+class RE_PR_Light : public RE_Serializable
 {
-	RE_PR_Light() = default;
+public:
 
 	enum class Type : ushort
 	{
@@ -16,6 +16,8 @@ struct RE_PR_Light : RE_Serializable
 		UNIQUE,
 		PER_PARTICLE
 	};
+
+public:
 
 	Type type = Type(0);
 
@@ -33,20 +35,25 @@ struct RE_PR_Light : RE_Serializable
 	float linear = 0.091f;
 	float quadratic = 0.011f;
 
-	bool HasLight() const;
+public:
+
+	RE_PR_Light() = default;
+	~RE_PR_Light() = default;
+
+	bool DrawEditor(uint id);
+
 	math::vec GetColor() const;
 	float GetIntensity() const;
 	float GetSpecular() const;
 	math::vec GetQuadraticValues() const;
+	bool HasLight() const { return type != Type::NONE; }
 
-	bool DrawEditor(const unsigned int id);
-
-	void JsonSerialize(RE_Json* node) const override;
-	void JsonDeserialize(RE_Json* node) override;
-
-	size_t GetBinarySize() const override;
-	void BinarySerialize(char*& cursor) const override;
-	void BinaryDeserialize(char*& cursor) override;
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
 };
 
 #endif // !__RE_PR_LIGHT_H__

@@ -10,9 +10,9 @@
 
 struct RE_Particle;
 
-struct RE_EmissionBoundary : RE_Serializable
+class RE_EmissionBoundary : public RE_Serializable
 {
-	RE_EmissionBoundary() = default;
+public:
 
 	enum class Type : ushort
 	{
@@ -22,15 +22,11 @@ struct RE_EmissionBoundary : RE_Serializable
 		AABB
 	};
 
-	Type type = Type(0);
-
 	enum class Effect : ushort
 	{
 		CONTAIN = 0,
 		KILL
 	};
-
-	Effect effect = Effect(0);
 
 	union Data
 	{
@@ -39,23 +35,31 @@ struct RE_EmissionBoundary : RE_Serializable
 		math::AABB box;
 	};
 
+public:
+
+	Type type = Type(0);
+	Effect effect = Effect(0);
 	Data geo = {};
 
 	float restitution = 0.95f;
 
-	bool HasBoundary() const;
+public:
 
-	bool PointCollision(RE_Particle& p) const;
-	bool SphereCollision(RE_Particle& p) const;
+	RE_EmissionBoundary() = default;
+	~RE_EmissionBoundary() = default;
 
 	bool DrawEditor();
 
-	void JsonSerialize(RE_Json* node) const final;
-	void JsonDeserialize(RE_Json* node) final;
+	bool HasBoundary() const { return type != Type::NONE; }
+	bool PointCollision(RE_Particle& p) const;
+	bool SphereCollision(RE_Particle& p) const;
 
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
 	size_t GetBinarySize() const final;
-	void BinarySerialize(char*& cursor) const final;
-	void BinaryDeserialize(char*& cursor) final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
 };
 
 #endif // !__RE_EMISSION_BOUNDARY_H__

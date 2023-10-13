@@ -65,6 +65,59 @@ bool RE_Camera::DrawProperties()
 	if (IsPerspective() && ImGui::DragFloat("FOV", &v_fov_degrees, 1.0f, 0.0f, 180.0f, "%.1f"))
 		SetFOVDegrees(v_fov_degrees);
 
+
+	ImGui::Separator();
+	ImGui::Checkbox("Use skybox", &usingSkybox);
+
+	if (usingSkybox)
+	{
+		RE_SkyBox* skyRes = nullptr;
+
+		if (skyboxMD5)
+		{
+			skyRes = dynamic_cast<RE_SkyBox*>(RE_RES->At(skyboxMD5));
+			if (ImGui::Button(skyRes->GetName())) RE_RES->PushSelected(skyRes->GetMD5(), true);
+			ImGui::SameLine();
+			if (ImGui::Button("Back to Default Skybox")) skyboxMD5 = nullptr;
+		}
+		else
+		{
+			ImGui::Text("This component camera is using the default skybox.");
+			skyRes = dynamic_cast<RE_SkyBox*>(RE_RES->At(RE_InternalResources::GetDefaultSkyBox()));
+			if (ImGui::Button(skyRes->GetName())) RE_RES->PushSelected(skyRes->GetMD5(), true);
+		}
+
+		if (ImGui::BeginMenu("Change skybox"))
+		{
+			eastl::vector<ResourceContainer*> materials = RE_RES->GetResourcesByType(ResourceContainer::Type::SKYBOX);
+			bool none = true;
+			for (auto material : materials)
+			{
+				if (material->isInternal()) continue;
+
+				none = false;
+				if (ImGui::MenuItem(material->GetName()))
+				{
+					if (skyboxMD5) RE_RES->UnUse(skyboxMD5);
+					skyboxMD5 = material->GetMD5();
+					if (skyboxMD5) RE_RES->Use(skyboxMD5);
+				}
+			}
+			if (none) ImGui::Text("No custom skyboxes on assets");
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload("#SkyboxReference"))
+			{
+				if (skyboxMD5) RE_RES->UnUse(skyboxMD5);
+				skyboxMD5 = *static_cast<const char**>(dropped->Data);
+				if (skyboxMD5) RE_RES->Use(skyboxMD5);
+			}
+			ImGui::EndDragDropTarget();
+		}
+	}
+
 	return ret;
 }
 
@@ -292,19 +345,29 @@ void RE_Camera::GetTargetViewPort(math::float4& viewPort) const
 
 #pragma endregion
 
+#pragma region Skybox
+
+void RE_Camera::UseSkybox() const { if (skyboxMD5) RE_RES->Use(skyboxMD5); }
+void RE_Camera::UnUseSkybox() const { if (skyboxMD5) RE_RES->UnUse(skyboxMD5); }
+
+#pragma endregion
+
 #pragma region Serialization
 
-void RE_Camera::JsonSerialize(RE_Json* node) const
+void RE_Camera::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("near_plane", frustum.NearPlaneDistance());
 	node->Push("far_plane", frustum.FarPlaneDistance());
 	node->Push("v_fov_rads", GetVFOVRads());
 	node->Push("aspect_ratio", static_cast<uint>(target_ar));
 
+	node->Push("usingSkybox", usingSkybox);
+	node->Push("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
+
 	DEL(node)
 }
 
-void RE_Camera::JsonDeserialize(RE_Json* node)
+void RE_Camera::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	SetupFrustum(
 		node->PullFloat("near_plane", 1.0f),
@@ -312,15 +375,19 @@ void RE_Camera::JsonDeserialize(RE_Json* node)
 		static_cast<RE_Camera::AspectRatio>(node->PullUInt("aspect_ratio", 0)),
 		node->PullFloat("v_fov_rads", 0.523599f));
 
+	usingSkybox = node->PullBool("usingSkybox", true);
+	int sbRes = node->PullInt("skyboxResource", -1);
+	skyboxMD5 = (sbRes != -1) ? resources->at(sbRes) : nullptr;
+
 	DEL(node)
 }
 
 size_t RE_Camera::GetBinarySize() const
 {
-	return sizeof(float) * 3 + sizeof(uint);
+	return sizeof(float) * 3 + sizeof(uint) + sizeof(bool) + sizeof(int);
 }
 
-void RE_Camera::BinarySerialize(char*& cursor) const
+void RE_Camera::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	float near_plane = frustum.NearPlaneDistance();
 	float far_plane = frustum.FarPlaneDistance();
@@ -340,9 +407,18 @@ void RE_Camera::BinarySerialize(char*& cursor) const
 	size = sizeof(uint);
 	memcpy(cursor, &aspect_ratio, size);
 	cursor += size;
+
+	size = sizeof(bool);
+	memcpy(cursor, &usingSkybox, size);
+	cursor += size;
+
+	size = sizeof(int);
+	int sbres = (skyboxMD5) ? resources->at(skyboxMD5) : -1;
+	memcpy(cursor, &sbres, size);
+	cursor += size;
 }
 
-void RE_Camera::BinaryDeserialize(char*& cursor)
+void RE_Camera::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	float near_plane;
 	size_t size = sizeof(float);
@@ -363,6 +439,16 @@ void RE_Camera::BinaryDeserialize(char*& cursor)
 	cursor += size;
 
 	SetupFrustum(near_plane, far_plane, static_cast<AspectRatio>(aspect_ratio), v_fov);
+
+	size = sizeof(bool);
+	memcpy(&usingSkybox, cursor, size);
+	cursor += size;
+
+	size = sizeof(int);
+	int sbRes = -1;
+	memcpy(&sbRes, cursor, size);
+	skyboxMD5 = (sbRes != -1) ? resources->at(sbRes) : nullptr;
+	cursor += size;
 }
 
 #pragma endregion

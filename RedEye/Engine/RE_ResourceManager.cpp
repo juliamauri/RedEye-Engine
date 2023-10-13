@@ -367,7 +367,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 						case ResourceContainer::Type::SKYBOX:
 						{
 							RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(go);
-							if (cam && cam->isUsingSkybox() && cam->GetSkybox() == res) cam->SetSkyBox(nullptr);
+							if (cam && cam->Camera.isUsingSkybox() && cam->Camera.GetSkybox() == res) cam->Camera.SetSkyBox(nullptr);
 							break;
 						}
 						case ResourceContainer::Type::MATERIAL:
@@ -478,7 +478,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 			case ResourceContainer::Type::SKYBOX:
 			{
 				RE_CompCamera* cam = dynamic_cast<RE_CompCamera*>(go);
-				if (cam && cam->GetSkybox() == res) cam->SetSkyBox(nullptr);
+				if (cam && cam->Camera.GetSkybox() == res) cam->Camera.SetSkyBox(nullptr);
 				break;
 			}
 			case ResourceContainer::Type::MATERIAL:

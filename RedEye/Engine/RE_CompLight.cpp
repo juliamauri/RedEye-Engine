@@ -85,12 +85,9 @@ void RE_CompLight::DrawProperties()
 	}
 }
 
-size_t RE_CompLight::GetBinarySize() const
-{
-	return sizeof(ushort) + sizeof(float) * 10;
-}
+#pragma region Serialization
 
-void RE_CompLight::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
+void RE_CompLight::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("light_type", static_cast<uint>(light_type));
 	node->Push("intensity", intensity);
@@ -103,7 +100,7 @@ void RE_CompLight::SerializeJson(RE_Json* node, eastl::map<const char*, int>* re
 	node->Push("outerCutOff", outerCutOff[0]);
 }
 
-void RE_CompLight::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
+void RE_CompLight::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	light_type = static_cast<Type>(node->PullUInt("light_type", static_cast<uint>(Type::POINT)));
 	intensity = node->PullFloat("intensity", intensity);
@@ -117,7 +114,12 @@ void RE_CompLight::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* 
 	UpdateCutOff();
 }
 
-void RE_CompLight::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
+size_t RE_CompLight::GetBinarySize() const
+{
+	return sizeof(ushort) + sizeof(float) * 10;
+}
+
+void RE_CompLight::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(ushort);
 	memcpy(cursor, &light_type, size);
@@ -142,7 +144,7 @@ void RE_CompLight::SerializeBinary(char*& cursor, eastl::map<const char*, int>* 
 	cursor += size;
 }
 
-void RE_CompLight::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
+void RE_CompLight::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(ushort);
 	memcpy(&light_type, cursor, size);
@@ -168,6 +170,8 @@ void RE_CompLight::DeserializeBinary(char*& cursor, eastl::map<int, const char*>
 
 	UpdateCutOff();
 }
+
+#pragma endregion
 
 inline void RE_CompLight::UpdateCutOff()
 {

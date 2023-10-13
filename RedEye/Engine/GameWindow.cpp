@@ -37,8 +37,8 @@ void GameWindow::Draw(bool secondary)
 
 		if (recalc || lastWidht != width || lastHeight != heigth)
 		{
-			RE_INPUT->Push(RE_EventType::GAMEWINDOWCHANGED, RE_RENDER, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
-			RE_INPUT->Push(RE_EventType::GAMEWINDOWCHANGED, RE_EDITOR);
+			RE_INPUT->Push(RE_EventType::GAME_WINDOW_CHANGED, RE_RENDER, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
+			RE_INPUT->Push(RE_EventType::GAME_WINDOW_CHANGED, RE_EDITOR);
 			recalc = false;
 		}
 

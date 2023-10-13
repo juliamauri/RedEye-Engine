@@ -6,40 +6,15 @@
 #include "RE_CameraManager.h"
 #include <ImGui/imgui.h>
 
-const char* RenderView::flag_labels[12] = {
-						"Fustrum Culling", "Override Culling", "Outline Selection", "Debug Draw", "Skybox", "Blending",
-						"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clipping Distance" };
-
-RenderView::RenderView(
-	eastl::string name,
-	eastl::pair<uint, uint> fbos,
-	short flags,
-	LightMode light,
-	math::float4 clipDistance) :
-
-	name(name), fbos(fbos), flags(flags), light(light), clip_distance(clipDistance),
-	clear_color({ 0.0f, 0.0f, 0.0f, 1.0f })
-{}
-
 RenderView::~RenderView()
 {
 	DEL(camera)
 }
 
-const math::Frustum* RenderView::GetFrustum() const
-{
-	if (!HasFlag(RenderView::Flag::FRUSTUM_CULLING)) return nullptr;
-	if (HasFlag(RenderView::Flag::OVERRIDE_CULLING)) return RE_CameraManager::GetCullingFrustum();
-	return &camera->GetFrustum();
-}
-
-const uint RenderView::GetFBO() const { return light != LightMode::DEFERRED ? fbos.first : fbos.second; }
-
-inline const bool RenderView::HasFlag(Flag flag) const { return flags & static_cast<ushort>(flag); }
-
 void RenderView::DrawEditor()
 {
-	if (ImGui::TreeNodeEx((name + " View").c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
+	if (ImGui::TreeNodeEx((name + " View").c_str(),
+		ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
 	{
 		auto light_int = static_cast<int>(light);
 		ImGui::PushID(eastl::string("#light" + name).c_str());
@@ -51,11 +26,15 @@ void RenderView::DrawEditor()
 		ImGui::ColorEdit4("Clear Color", clear_color.ptr(), ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar);
 		ImGui::PopID();
 
+		static const char* flag_labels[12] = {
+			"Fustrum Culling", "Override Culling", "Outline Selection", "Debug Draw", "Skybox", "Blending",
+			"Wireframe", "Face Culling", "Texture 2D", "Color Material", "Depth Testing", "Clipping Distance" };
+
 		for (ushort count = 0; count < 12; ++count)
 		{
 			bool temp = flags & (1 << count);
-			ImGui::PushID(eastl::string(RenderView::flag_labels[count] + name).c_str());
-			if (ImGui::Checkbox(RenderView::flag_labels[count], &temp))
+			ImGui::PushID(eastl::string(flag_labels[count] + name).c_str());
+			if (ImGui::Checkbox(flag_labels[count], &temp))
 				temp ? flags |= (1 << count) : flags -= (1 << count);
 			ImGui::PopID();
 		}
@@ -69,6 +48,13 @@ void RenderView::DrawEditor()
 
 		ImGui::TreePop();
 	}
+}
+
+const math::Frustum* RenderView::GetFrustum() const
+{
+	if (!HasFlag(RenderView::Flag::FRUSTUM_CULLING)) return nullptr;
+	if (HasFlag(RenderView::Flag::OVERRIDE_CULLING)) return RE_CameraManager::GetCullingFrustum();
+	return &camera->GetFrustum();
 }
 
 void RenderView::Save(RE_Json* node) const
@@ -85,7 +71,6 @@ void RenderView::Save(RE_Json* node) const
 
 	DEL(node)
 }
-
 
 void RenderView::Load(RE_Json* node)
 {

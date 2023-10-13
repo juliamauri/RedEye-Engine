@@ -113,11 +113,6 @@ void RE_CompMesh::SetMesh(const char* mesh)
 	if (go) GetGOPtr()->ResetBoundingBoxes();
 }
 
-const char* RE_CompMesh::GetMesh() const
-{
-	return meshMD5;
-}
-
 unsigned int RE_CompMesh::GetVAOMesh() const
 {
 	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->GetVAO() : 0;
@@ -128,61 +123,11 @@ size_t RE_CompMesh::GetTriangleMesh() const
 	return (meshMD5) ? (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->GetTriangleCount() : 0;
 }
 
-void RE_CompMesh::SetMaterial(const char * md5) { materialMD5 = md5; }
-const char * RE_CompMesh::GetMaterial() const { return materialMD5; }
-
-eastl::vector<const char*> RE_CompMesh::GetAllResources()
+bool RE_CompMesh::HasBlend() const
 {
-	eastl::vector<const char*> ret;
-	if (meshMD5) ret.push_back(meshMD5);
-	if (materialMD5) ret.push_back(materialMD5);
-	return ret;
-}
-
-void RE_CompMesh::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
-{
-	node->Push("meshResource", (meshMD5) ? resources->at(meshMD5) : -1);
-	node->Push("materialResource", (materialMD5) ? resources->at(materialMD5) : -1);
-}
-
-void RE_CompMesh::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
-{
-	int id = node->PullInt("meshResource", -1);
-	meshMD5 = (id != -1) ? resources->at(id) : nullptr;
-	id = node->PullInt("materialResource", -1);
-	materialMD5 = (id != -1) ? resources->at(id) : nullptr;
-}
-
-size_t RE_CompMesh::GetBinarySize() const
-{
-	return sizeof(int) * 2;
-}
-
-void RE_CompMesh::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
-{
-	size_t size = sizeof(int);
-	int md5 = (meshMD5) ? resources->at(meshMD5) : -1;
-	memcpy(cursor, &md5, size);
-	cursor += size;
-
-	md5 = (materialMD5) ? resources->at(materialMD5) : -1;
-	memcpy(cursor, &md5, size);
-	cursor += size;
-}
-
-void RE_CompMesh::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
-{
-	size_t size = sizeof(int);
-	int md5 = -1;
-
-	memcpy(&md5, cursor, size);
-	cursor += size;
-	meshMD5 = (md5 != -1 ) ? resources->at(md5) : nullptr;
-
-	md5 = -1;
-	memcpy(&md5, cursor,  size);
-	cursor += size;
-	materialMD5 = (md5 != -1) ? resources->at(md5) : nullptr;
+	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_InternalResources::GetDefaulMaterial();
+	RE_Material* material = dynamic_cast<RE_Material*>(RE_RES->At(materialToDraw));
+	return material->blendMode;
 }
 
 math::AABB RE_CompMesh::GetAABB() const
@@ -194,10 +139,12 @@ math::AABB RE_CompMesh::GetAABB() const
 	return ret;
 }
 
-bool RE_CompMesh::CheckFaceCollision(const math::Ray & local_ray, float & distance) const
+bool RE_CompMesh::CheckFaceCollision(const math::Ray& local_ray, float& distance) const
 {
 	return meshMD5 && (dynamic_cast<RE_Mesh*>(RE_RES->At(meshMD5)))->CheckFaceCollision(local_ray, distance);
 }
+
+#pragma region Resources
 
 void RE_CompMesh::UseResources()
 {
@@ -219,10 +166,62 @@ void RE_CompMesh::UnUseResources()
 	}
 }
 
-bool RE_CompMesh::HasBlend() const
+eastl::vector<const char*> RE_CompMesh::GetAllResources()
 {
-	const char* materialToDraw = (materialMD5) ? materialMD5 : RE_InternalResources::GetDefaulMaterial();
-	RE_Material* material = dynamic_cast<RE_Material*>(RE_RES->At(materialToDraw));
-	return material->blendMode;
+	eastl::vector<const char*> ret;
+	if (meshMD5) ret.push_back(meshMD5);
+	if (materialMD5) ret.push_back(materialMD5);
+	return ret;
 }
 
+#pragma endregion
+
+#pragma region Serialization
+
+void RE_CompMesh::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
+{
+	node->Push("meshResource", (meshMD5) ? resources->at(meshMD5) : -1);
+	node->Push("materialResource", (materialMD5) ? resources->at(materialMD5) : -1);
+}
+
+void RE_CompMesh::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
+{
+	int id = node->PullInt("meshResource", -1);
+	meshMD5 = (id != -1) ? resources->at(id) : nullptr;
+	id = node->PullInt("materialResource", -1);
+	materialMD5 = (id != -1) ? resources->at(id) : nullptr;
+}
+
+size_t RE_CompMesh::GetBinarySize() const
+{
+	return sizeof(int) * 2;
+}
+
+void RE_CompMesh::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
+{
+	size_t size = sizeof(int);
+	int md5 = (meshMD5) ? resources->at(meshMD5) : -1;
+	memcpy(cursor, &md5, size);
+	cursor += size;
+
+	md5 = (materialMD5) ? resources->at(materialMD5) : -1;
+	memcpy(cursor, &md5, size);
+	cursor += size;
+}
+
+void RE_CompMesh::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
+{
+	size_t size = sizeof(int);
+	int md5 = -1;
+
+	memcpy(&md5, cursor, size);
+	cursor += size;
+	meshMD5 = (md5 != -1 ) ? resources->at(md5) : nullptr;
+
+	md5 = -1;
+	memcpy(&md5, cursor,  size);
+	cursor += size;
+	materialMD5 = (md5 != -1) ? resources->at(md5) : nullptr;
+}
+
+#pragma endregion

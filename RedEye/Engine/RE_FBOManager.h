@@ -1,6 +1,8 @@
 #ifndef __REFBOMANAGER__
 #define __REFBOMANAGER__
 
+#include "RE_DataTypes.h"
+
 struct RE_FBO
 {
 	enum class Type : char { DEFAULT, DEFERRED };
@@ -18,32 +20,33 @@ struct RE_FBO
 
 class RE_FBOManager
 {
+private:
+
+	eastl::map<uint, RE_FBO> fbos;
+
 public:
-	RE_FBOManager() {}
-	~RE_FBOManager() {}
 
-	int CreateFBO(unsigned int width, unsigned int height, unsigned int texturesSize = 1, bool depth = true, bool stencil = false);
-	int CreateDeferredFBO(unsigned int width, unsigned int height);
+	RE_FBOManager() = default;
+	~RE_FBOManager() = default;
 
-	unsigned int GetDepthTexture(unsigned int ID);
-	uint32_t  GetTextureID(unsigned int ID, unsigned int texAttachment);
-	unsigned int GetWidth(unsigned int ID);
-	unsigned int GetHeight(unsigned int ID);
+	int CreateFBO(uint width, uint height, uint texturesSize = 1, bool depth = true, bool stencil = false);
+	int CreateDeferredFBO(uint width, uint height);
 
-	void ChangeFBOSize(unsigned int ID, unsigned int width, unsigned int height);
-	void ChangeFBOBind(unsigned int tID, unsigned int width = 0, unsigned int height = 0);
+	uint GetDepthTexture(uint ID);
+	uint32_t  GetTextureID(uint ID, uint texAttachment);
+	uint GetWidth(uint ID);
+	uint GetHeight(uint ID);
 
-	void ClearFBOBuffers(unsigned int ID, const float color[4]);
-	void ClearFBO(unsigned int ID);
+	void ChangeFBOSize(uint ID, uint width, uint height);
+	void ChangeFBOBind(uint tID, uint width = 0, uint height = 0);
+
+	void ClearFBOBuffers(uint ID, const float color[4]);
+	void ClearFBO(uint ID);
 	void ClearAll();
 
 private:
 
 	void LoadDeferredTextures(RE_FBO& fbo);
-
-private:
-
-	eastl::map<unsigned int, RE_FBO> fbos;
 };
 
 #endif // !__REFBOMANAGER__

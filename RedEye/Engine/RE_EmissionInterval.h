@@ -4,9 +4,9 @@
 #include "RE_Serializable.h"
 #include "RE_DataTypes.h"
 
-struct RE_EmissionInterval : RE_Serializable
+class RE_EmissionInterval : public RE_Serializable
 {
-	RE_EmissionInterval() = default;
+public:
 
 	enum class Type : ushort
 	{
@@ -15,22 +15,28 @@ struct RE_EmissionInterval : RE_Serializable
 		CUSTOM
 	};
 
-	Type type = Type(0);
+public:
 
+	Type type = Type(0);
 	bool is_open = false;
 	float time_offset = 0.f;
 	float duration[2] = { 1.f, 1.f };
 
-	bool IsActive(float& dt);
+public:
+
+	RE_EmissionInterval() = default;
+	~RE_EmissionInterval() = default;
 
 	bool DrawEditor(bool& changes);
 
-	void JsonSerialize(RE_Json* node) const override;
-	void JsonDeserialize(RE_Json* node) override;
+	bool IsActive(float& dt);
 
-	size_t GetBinarySize() const override;
-	void BinarySerialize(char*& cursor) const override;
-	void BinaryDeserialize(char*& cursor) override;
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
 };
 
 #endif // !__RE_EMISSION_INTERVAL_H__

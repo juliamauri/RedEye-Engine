@@ -319,8 +319,8 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			heigth = static_cast<int>(size.y) - 28;
 			if (recalc || lastWidht != width || lastHeight != heigth)
 			{
-				RE_INPUT->Push(RE_EventType::PARTRICLEEDITORWINDOWCHANGED, RE_RENDER, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
-				RE_INPUT->Push(RE_EventType::PARTRICLEEDITORWINDOWCHANGED, RE_EDITOR);
+				RE_INPUT->Push(RE_EventType::PARTRICLE_EDITOR_WINDOW_CHANGED, RE_RENDER, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
+				RE_INPUT->Push(RE_EventType::PARTRICLE_EDITOR_WINDOW_CHANGED, RE_EDITOR);
 				recalc = false;
 			}
 

@@ -8,34 +8,13 @@ class RE_CompLight : public RE_Component
 {
 public:
 
-	RE_CompLight();
-	~RE_CompLight() final = default;
-
-	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
-
-	void CallShaderUniforms(unsigned int shader, const char* unif_name) const;
-
-	void DrawProperties() final;
-
-	size_t GetBinarySize() const final;
-	void SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const final;
-	void DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources) final;
-	void SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const final;
-	void DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources) final;
-
-private:
-
-	inline void UpdateCutOff();
-
-public:
-
 	enum class Type : ushort
 	{
 		DIRECTIONAL = 0,
 		POINT,
 		SPOTLIGHT
 	};
-	
+
 	Type light_type = Type::POINT;
 
 	// Attenuattion
@@ -51,6 +30,29 @@ public:
 	// Spotlight
 	float cutOff[2]; // cos(radians(12.5f))
 	float outerCutOff[2]; // cos(radians(17.5f))
+
+public:
+
+	RE_CompLight();
+	~RE_CompLight() final = default;
+
+	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
+
+	void CallShaderUniforms(unsigned int shader, const char* unif_name) const;
+
+	void DrawProperties() final;
+
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
+
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
+
+private:
+
+	inline void UpdateCutOff();
 };
 
 #endif // !__RE_COMPLIGHT_H__

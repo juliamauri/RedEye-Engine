@@ -5,9 +5,9 @@
 #include "RE_DataTypes.h"
 #include "RE_Curve.h"
 
-struct RE_PR_Opacity : RE_Serializable
+class RE_PR_Opacity : public RE_Serializable
 {
-	RE_PR_Opacity() = default;
+public:
 
 	enum class Type : ushort
 	{
@@ -18,6 +18,8 @@ struct RE_PR_Opacity : RE_Serializable
 		OVERSPEED
 	};
 
+public:
+
 	Type type = Type(0);
 
 	float opacity = 1.0f;
@@ -26,17 +28,22 @@ struct RE_PR_Opacity : RE_Serializable
 	bool useCurve = false;
 	RE_Curve curve = {};
 
-	bool HasOpacity() const;
-	float GetValue(const float weight) const;
+public:
+
+	RE_PR_Opacity() = default;
+	~RE_PR_Opacity() = default;
 
 	bool DrawEditor();
 
-	void JsonSerialize(RE_Json* node) const override;
-	void JsonDeserialize(RE_Json* node) override;
+	float GetValue(const float weight) const;
+	bool HasOpacity() const { return type != RE_PR_Opacity::Type::NONE; }
 
-	size_t GetBinarySize() const override;
-	void BinarySerialize(char*& cursor) const override;
-	void BinaryDeserialize(char*& cursor) override;
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
 };
 
 #endif // !__RE_PR_OPACITY_H__

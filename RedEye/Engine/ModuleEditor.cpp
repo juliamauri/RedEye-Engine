@@ -201,9 +201,9 @@ void ModuleEditor::RecieveEvent(const Event& e)
 {
 	switch (e.type)
 	{
-	case RE_EventType::PARTRICLEEDITORWINDOWCHANGED: particleEmitterWindow->UpdateViewPort(); break;
-	case RE_EventType::EDITORWINDOWCHANGED: sceneEditorWindow->UpdateViewPort(); break;
-	case RE_EventType::GAMEWINDOWCHANGED: sceneGameWindow->UpdateViewPort(); break;
+	case RE_EventType::PARTRICLE_EDITOR_WINDOW_CHANGED: particleEmitterWindow->UpdateViewPort(); break;
+	case RE_EventType::EDITOR_WINDOW_CHANGED: sceneEditorWindow->UpdateViewPort(); break;
+	case RE_EventType::GAME_WINDOW_CHANGED: sceneGameWindow->UpdateViewPort(); break;
 	case RE_EventType::UPDATE_SCENE_WINDOWS:
 	{
 		if(e.data1.AsGO()) sceneGameWindow->Recalc();

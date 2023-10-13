@@ -9,9 +9,9 @@
 #include <MGL/Geometry/Sphere.h>
 #include <EASTL/vector.h>
 
-struct RE_EmissionShape : RE_Serializable
+class RE_EmissionShape : public RE_Serializable
 {
-	RE_EmissionShape() = default;
+public:
 
 	enum class Type : ushort
 	{
@@ -23,8 +23,6 @@ struct RE_EmissionShape : RE_Serializable
 		HOLLOW_SPHERE
 	};
 
-	Type type = Type(0);
-
 	union Geo
 	{
 		math::vec point;
@@ -35,19 +33,27 @@ struct RE_EmissionShape : RE_Serializable
 		eastl::pair<math::Sphere, float> hollow_sphere;
 	};
 
+public:
+
+	Type type = Type(0);
 	Geo geo = {};
 
-	bool IsShaped() const;
-	math::vec GetPosition() const;
+public:
+
+	RE_EmissionShape() = default;
+	~RE_EmissionShape() = default;
 
 	bool DrawEditor();
 
-	void JsonSerialize(RE_Json* node) const override;
-	void JsonDeserialize(RE_Json* node) override;
+	math::vec GetPosition() const;
+	bool IsShaped() const { return type != Type::POINT; }
 
-	size_t GetBinarySize() const override;
-	void BinarySerialize(char*& cursor) const override;
-	void BinaryDeserialize(char*& cursor) override;
+	// Serialization
+	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
+	void JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources = nullptr) final;
+	size_t GetBinarySize() const final;
+	void BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources = nullptr) const final;
+	void BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources = nullptr) final;
 };
 
 #endif // !__RE_EMISSION_SHAPE_H__

@@ -5,6 +5,10 @@
 #include "RenderView.h"
 #include <EASTL/stack.h>
 
+class RE_Component;
+class RE_CompParticleEmitter;
+class RE_SkyBox;
+
 class ModuleRenderer3D : public EventListener 
 {
 public:
@@ -83,7 +87,7 @@ private:
 
 	// Utility Draws
 	void DrawDebug(const RenderView& render_view);
-	void DrawSkyBox();
+	void DrawSkyBox(const RE_SkyBox* skybox);
 	void DrawStencil(bool has_depth_test);
 
 	// Direct Draws
@@ -98,7 +102,7 @@ private:
 	// Thumbnail Draws
 	void ThumbnailGameObject(RE_GameObject* go);
 	void ThumbnailMaterial(class RE_Material* mat);
-	void ThumbnailSkyBox(class RE_SkyBox* skybox);
+	void ThumbnailSkyBox(RE_SkyBox* skybox);
 
 	enum class RenderType : ushort
 	{

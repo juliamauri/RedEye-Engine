@@ -7,24 +7,6 @@
 
 #include <ImGui/imgui.h>
 
-math::vec RE_EmissionVector::GetValue() const
-{
-	math::vec ret = math::vec::zero;
-	switch (type)
-	{
-	case Type::VALUE: ret = val;
-	case Type::RANGEX: ret = { val.x + (RE_Random::RandomFN() * margin.x), val.y, val.z };
-	case Type::RANGEY: ret = { val.x, val.y + (RE_Random::RandomFN() * margin.y), val.z };
-	case Type::RANGEZ: ret = { val.x, val.y, val.z + (RE_Random::RandomFN() * margin.z) };
-	case Type::RANGEXY: ret = { val.x + (RE_Random::RandomFN() * margin.x), val.y + (RE_Random::RandomFN() * margin.y), val.z };
-	case Type::RANGEXZ: ret = { val.x + (RE_Random::RandomFN() * margin.x), val.y, val.z + (RE_Random::RandomFN() * margin.z) };
-	case Type::RANGEYZ: ret = { val.x, val.y + (RE_Random::RandomFN() * margin.y), val.z + (RE_Random::RandomFN() * margin.z) };
-	case Type::RANGEXYZ: ret = { val.x + (RE_Random::RandomFN() * margin.x), val.y + (RE_Random::RandomFN() * margin.y), val.z + (RE_Random::RandomFN() * margin.z) };
-	default: break;
-	}
-	return math::vec::zero;
-}
-
 bool RE_EmissionVector::DrawEditor(const char* name)
 {
 	bool ret = false;
@@ -88,7 +70,23 @@ bool RE_EmissionVector::DrawEditor(const char* name)
 	return ret;
 }
 
-void RE_EmissionVector::JsonSerialize(RE_Json* node) const
+math::vec RE_EmissionVector::GetValue() const
+{
+	switch (type)
+	{
+	case Type::VALUE: return val;
+	case Type::RANGEX: return { val.x + (RE_Random::RandomFN() * margin.x), val.y, val.z };
+	case Type::RANGEY: return { val.x, val.y + (RE_Random::RandomFN() * margin.y), val.z };
+	case Type::RANGEZ: return { val.x, val.y, val.z + (RE_Random::RandomFN() * margin.z) };
+	case Type::RANGEXY: return { val.x + (RE_Random::RandomFN() * margin.x), val.y + (RE_Random::RandomFN() * margin.y), val.z };
+	case Type::RANGEXZ: return { val.x + (RE_Random::RandomFN() * margin.x), val.y, val.z + (RE_Random::RandomFN() * margin.z) };
+	case Type::RANGEYZ: return { val.x, val.y + (RE_Random::RandomFN() * margin.y), val.z + (RE_Random::RandomFN() * margin.z) };
+	case Type::RANGEXYZ: return { val.x + (RE_Random::RandomFN() * margin.x), val.y + (RE_Random::RandomFN() * margin.y), val.z + (RE_Random::RandomFN() * margin.z) };
+	default: return math::vec::zero;
+	}
+}
+
+void RE_EmissionVector::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("Type", static_cast<uint>(type));
 
@@ -134,7 +132,7 @@ void RE_EmissionVector::JsonSerialize(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_EmissionVector::JsonDeserialize(RE_Json* node)
+void RE_EmissionVector::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<RE_EmissionVector::Type>(node->PullUInt("Type", static_cast<uint>(type)));
 
@@ -201,12 +199,13 @@ size_t RE_EmissionVector::GetBinarySize() const
 	return ret;
 }
 
-void RE_EmissionVector::BinarySerialize(char*& cursor) const
+void RE_EmissionVector::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(ushort);
 	memcpy(cursor, &type, size);
 	cursor += size;
-	switch (type) {
+	switch (type)
+	{
 	case RE_EmissionVector::Type::VALUE:
 		size = sizeof(float) * 3;
 		memcpy(cursor, val.ptr(), size);
@@ -277,7 +276,7 @@ void RE_EmissionVector::BinarySerialize(char*& cursor) const
 	}
 }
 
-void RE_EmissionVector::BinaryDeserialize(char*& cursor)
+void RE_EmissionVector::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(ushort);
 	memcpy(&type, cursor, size);

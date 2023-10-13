@@ -3,28 +3,6 @@
 #include "RE_Memory.h"
 #include "RE_Json.h"
 
-bool RE_PR_Opacity::HasOpacity() const
-{
-	return type != RE_PR_Opacity::Type::NONE;
-}
-
-float RE_PR_Opacity::GetValue(const float weight) const
-{
-	float ret = 1.f;
-
-	switch (type)
-	{
-	case Type::VALUE: ret = opacity;
-	case Type::OVERLIFETIME:
-	case Type::OVERDISTANCE:
-	case Type::OVERSPEED:
-		ret = (useCurve) ? curve.GetValue(weight) : (inverted) ? 1.f - weight : weight;
-	default: break;
-	}
-
-	return ret;
-}
-
 bool RE_PR_Opacity::DrawEditor()
 {
 	bool ret = false;
@@ -58,7 +36,24 @@ bool RE_PR_Opacity::DrawEditor()
 	return ret;
 }
 
-void RE_PR_Opacity::JsonSerialize(RE_Json* node) const
+float RE_PR_Opacity::GetValue(const float weight) const
+{
+	float ret = 1.f;
+
+	switch (type)
+	{
+	case Type::VALUE: ret = opacity;
+	case Type::OVERLIFETIME:
+	case Type::OVERDISTANCE:
+	case Type::OVERSPEED:
+		ret = (useCurve) ? curve.GetValue(weight) : (inverted) ? 1.f - weight : weight;
+	default: break;
+	}
+
+	return ret;
+}
+
+void RE_PR_Opacity::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("Type", static_cast<uint>(type));
 
@@ -71,7 +66,7 @@ void RE_PR_Opacity::JsonSerialize(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_PR_Opacity::JsonDeserialize(RE_Json* node)
+void RE_PR_Opacity::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<Type>(node->PullUInt("Type", 0));
 
@@ -92,7 +87,7 @@ size_t RE_PR_Opacity::GetBinarySize() const
 		+ curve.GetBinarySize();
 }
 
-void RE_PR_Opacity::BinarySerialize(char*& cursor) const
+void RE_PR_Opacity::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(Type);
 	memcpy(cursor, &type, size);
@@ -112,7 +107,7 @@ void RE_PR_Opacity::BinarySerialize(char*& cursor) const
 	curve.BinarySerialize(cursor);
 }
 
-void RE_PR_Opacity::BinaryDeserialize(char*& cursor)
+void RE_PR_Opacity::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(Type);
 	memcpy(&type, cursor, size);

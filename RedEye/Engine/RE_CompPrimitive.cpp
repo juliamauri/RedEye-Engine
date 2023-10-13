@@ -39,32 +39,26 @@ void RE_CompPrimitive::SimpleDraw() const
 	RE_GLCache::ChangeVAO(0);
 }
 
-bool RE_CompPrimitive::CheckFaceCollision(const math::Ray& ray, float& distance) const
-{
-	// TODO Rub: Primitive raycast checking
-	return false;
-}
-
-void RE_CompPrimitive::SetColor(float r, float g, float b) { color.Set(r, g, b); }
-void RE_CompPrimitive::SetColor(math::vec nColor) { color = nColor; }
-unsigned int RE_CompPrimitive::GetVAO() const { return VAO; }
-size_t RE_CompPrimitive::GetTriangleCount() const { return triangle_count; }
-
 void RE_CompPrimitive::UnUseResources() { RE_SCENE->primitives->UnUsePrimitive(type, primID); }
+void RE_CompPrimitive::ParticleJsonSerialize(RE_Json* node) const { DEL(node) }
+void RE_CompPrimitive::ParticleJsonDeserialize(RE_Json* node) { DEL(node) }
 
-void RE_CompPrimitive::SerializeParticleJson(RE_Json* node) const { DEL(node) }
-void RE_CompPrimitive::DeserializeParticleJson(RE_Json* node) { DEL(node) }
+#pragma region Grid **************************************************
 
-bool RE_CompPrimitive::IsPrimitive(RE_Component::Type t)
+void RE_CompGrid::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO_UID parent)
 {
-	return t > RE_Component::Type::PRIMIVE_MIN && t < RE_Component::Type::PRIMIVE_MAX;
-}
+	pool_gos = pool;
+	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);
 
-///////   Grid   ////////////////////////////////////////////
+	RE_CompGrid* copy = dynamic_cast<RE_CompGrid*>(_copy);
+	color = copy->color;
+	GridSetUp(copy->divisions);
+}
 
 void RE_CompGrid::GridSetUp(int newD)
 {
-	if (!useParent && !transform) {
+	if (!useParent && !transform)
+	{
 		transform = new RE_CompTransform();
 		transform->SetParent(0ull);
 	}
@@ -76,16 +70,6 @@ void RE_CompGrid::GridSetUp(int newD)
 	primID = static_cast<int>(type) + divisions;
 	auto mD = RE_SCENE->primitives->GetPrimitiveMeshData(this, primID);
 	VAO = mD.first;
-}
-
-void RE_CompGrid::CopySetUp(GameObjectsPool* pool, RE_Component* _copy, const GO_UID parent)
-{
-	pool_gos = pool;
-	if (useParent = (go = parent)) pool_gos->AtPtr(go)->ReportComponent(id, type);
-
-	RE_CompGrid* copy = dynamic_cast<RE_CompGrid*>(_copy);
-	color = copy->color;
-	GridSetUp(copy->divisions);
 }
 
 void RE_CompGrid::Draw() const
@@ -104,17 +88,16 @@ void RE_CompGrid::Draw() const
 
 void RE_CompGrid::DrawProperties()
 {
-	if (ImGui::CollapsingHeader("Grid Primitive"))
-	{
-		ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
+	if (!ImGui::CollapsingHeader("Grid Primitive")) return;
 
-		static bool apply = false;
-		if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1))
-			if(tmpSb != divisions) apply = true;
+	ImGui::ColorEdit3("Diffuse Color", &RE_CompPrimitive::color[0]);
 
-		if (apply && ImGui::Button("Apply"))
-			GridSetUp(tmpSb);
-	}
+	static bool apply = false;
+	if (ImGui::DragInt("Num Subdivisions", &tmpSb, 1.0f, 1))
+		if (tmpSb != divisions) apply = true;
+
+	if (apply && ImGui::Button("Apply"))
+		GridSetUp(tmpSb);
 }
 
 RE_CompTransform* RE_CompGrid::GetTransformPtr() const
@@ -122,24 +105,26 @@ RE_CompTransform* RE_CompGrid::GetTransformPtr() const
 	return (useParent) ? GetGOCPtr()->GetTransformPtr() : transform;
 }
 
-size_t RE_CompGrid::GetBinarySize() const
-{
-	return sizeof(float) * 3u + sizeof(int);
-}
+#pragma region Serialization
 
-void RE_CompGrid::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
+void RE_CompGrid::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushFloatVector("color", color);
 	node->Push("divisions", divisions);
 }
 
-void RE_CompGrid::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
+void RE_CompGrid::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	color = node->PullFloatVector("color", color);
 	GridSetUp(node->PullInt("divisions", divisions));
 }
 
-void RE_CompGrid::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
+size_t RE_CompGrid::GetBinarySize() const
+{
+	return sizeof(float) * 3u + sizeof(int);
+}
+
+void RE_CompGrid::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(float) * 3;
 	memcpy(cursor, color.ptr(), size);
@@ -150,7 +135,7 @@ void RE_CompGrid::SerializeBinary(char*& cursor, eastl::map<const char*, int>* r
 	cursor += size;
 }
 
-void RE_CompGrid::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
+void RE_CompGrid::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(float) * 3;
 	memcpy(&color[0], cursor, size);
@@ -163,12 +148,11 @@ void RE_CompGrid::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 	GridSetUp(divisions);
 }
 
-float RE_CompGrid::GetDistance() const
-{
-	return distance;
-}
+#pragma endregion
 
-///////   Rock   ////////////////////////////////////////////
+#pragma endregion
+
+#pragma region Rock **************************************************
 
 void RE_CompRock::RockSetUp(int _seed, int _subdivions)
 {
@@ -261,25 +245,27 @@ bool RE_CompRock::DrawPrimPropierties()
 	return ret;
 }
 
-size_t RE_CompRock::GetBinarySize() const
-{
-	return sizeof(float) * 3 + sizeof(int) * 2;
-}
+#pragma region Serialization
 
-void RE_CompRock::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
+void RE_CompRock::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushFloatVector("color", color);
 	node->Push("seed", seed);
 	node->Push("nsubdivisions", nsubdivisions);
 }
 
-void RE_CompRock::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
+void RE_CompRock::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	color = node->PullFloatVector("color", { 1.0f,1.0f,1.0f });
 	RockSetUp(node->PullInt("seed", seed), node->PullInt("nsubdivisions", nsubdivisions));
 }
 
-void RE_CompRock::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
+size_t RE_CompRock::GetBinarySize() const
+{
+	return sizeof(float) * 3 + sizeof(int) * 2;
+}
+
+void RE_CompRock::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(float) * 3;
 	memcpy(cursor, color.ptr(), size);
@@ -294,7 +280,7 @@ void RE_CompRock::SerializeBinary(char*& cursor, eastl::map<const char*, int>* r
 	cursor += size;
 }
 
-void RE_CompRock::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
+void RE_CompRock::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(float) * 3;
 	memcpy(&color[0], cursor, size);
@@ -311,25 +297,25 @@ void RE_CompRock::DeserializeBinary(char*& cursor, eastl::map<int, const char*>*
 	RockSetUp(seed, nsubdivisions);
 }
 
-size_t RE_CompRock::GetParticleBinarySize() const
-{
-	return sizeof(int) * 2;
-}
-
-void RE_CompRock::SerializeParticleJson(RE_Json* node) const
+void RE_CompRock::ParticleJsonSerialize(RE_Json* node) const
 {
 	node->Push("seed", seed);
 	node->Push("nsubdivisions", nsubdivisions);
 	DEL(node)
 }
 
-void RE_CompRock::DeserializeParticleJson(RE_Json* node)
+void RE_CompRock::ParticleJsonDeserialize(RE_Json* node)
 {
 	RockSetUp(node->PullInt("seed", seed), node->PullInt("nsubdivisions", nsubdivisions));
 	DEL(node)
 }
 
-void RE_CompRock::SerializeParticleBinary(char*& cursor) const
+size_t RE_CompRock::GetParticleBinarySize() const
+{
+	return sizeof(int) * 2;
+}
+
+void RE_CompRock::ParticleBinarySerialize(char*& cursor) const
 {
 	size_t size = sizeof(int);
 	memcpy(cursor, &seed, size);
@@ -340,7 +326,7 @@ void RE_CompRock::SerializeParticleBinary(char*& cursor) const
 	cursor += size;
 }
 
-void RE_CompRock::DeserializeParticleBinary(char*& cursor)
+void RE_CompRock::ParticleBinaryDeserialize(char*& cursor)
 {
 	size_t size = sizeof(int);
 	memcpy(&seed, cursor, size);
@@ -352,6 +338,8 @@ void RE_CompRock::DeserializeParticleBinary(char*& cursor)
 
 	RockSetUp(seed, nsubdivisions);
 }
+
+#pragma endregion
 
 void RE_CompRock::GenerateNewRock(int s, int subdivisions)
 {
@@ -368,7 +356,9 @@ void RE_CompRock::GenerateNewRock(int s, int subdivisions)
 	canChange = false;
 }
 
-///////   Platonic   ////////////////////////////////////////////
+#pragma endregion
+
+#pragma region Platonic **************************************************
 
 void RE_CompPlatonic::PlatonicSetUp()
 {
@@ -410,16 +400,24 @@ void RE_CompPlatonic::Draw() const
 
 void RE_CompPlatonic::DrawProperties()
 {
-	if (ImGui::CollapsingHeader((pName + " Primitive").c_str()))
-	{
-		ImGui::Text("Can't checker because don't support Texture Coords");
-		ImGui::ColorEdit3("Diffuse Color", &color[0]);
-	}
+	if (!ImGui::CollapsingHeader((pName + " Primitive").c_str()))
+		return;
+
+	ImGui::Text("Can't checker because don't support Texture Coords");
+	ImGui::ColorEdit3("Diffuse Color", &color[0]);
 }
 
-bool RE_CompPlatonic::DrawPrimPropierties()
+#pragma region Serialization
+
+void RE_CompPlatonic::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
-	return false;
+	node->PushFloatVector("color", color);
+}
+
+void RE_CompPlatonic::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
+{
+	color = node->PullFloatVector("color", color);
+	PlatonicSetUp();
 }
 
 size_t RE_CompPlatonic::GetBinarySize() const
@@ -427,25 +425,14 @@ size_t RE_CompPlatonic::GetBinarySize() const
 	return sizeof(float) * 3;
 }
 
-void RE_CompPlatonic::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
-{
-	node->PushFloatVector("color", color);
-}
-
-void RE_CompPlatonic::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
-{
-	color = node->PullFloatVector("color", color);
-	PlatonicSetUp();
-}
-
-void RE_CompPlatonic::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
+void RE_CompPlatonic::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(float) * 3;
 	memcpy(cursor, color.ptr(), size);
 	cursor += size;
 }
 
-void RE_CompPlatonic::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
+void RE_CompPlatonic::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(float) * 3;
 	memcpy(&color[0], cursor, size);
@@ -454,9 +441,11 @@ void RE_CompPlatonic::DeserializeBinary(char*& cursor, eastl::map<int, const cha
 	PlatonicSetUp();
 }
 
-///////   Parametric   ////////////////////////////////////////////
-RE_CompParametric::RE_CompParametric(RE_Component::Type t, const char* _name) : RE_CompPrimitive(t), name(_name) {}
-RE_CompParametric::~RE_CompParametric() { }
+#pragma endregion
+
+#pragma endregion
+
+#pragma region Parametric **************************************************
 
 void RE_CompParametric::ParametricSetUp(int _slices, int _stacks, float _radius)
 {
@@ -519,30 +508,35 @@ void RE_CompParametric::Draw() const
 
 void RE_CompParametric::DrawProperties()
 {
-	if (ImGui::CollapsingHeader((name + " Primitive").c_str()))
-	{
-		ImGui::Checkbox("Use checkers texture", &show_checkers);
-		ImGui::ColorEdit3("Diffuse Color", &color[0]);
-		ImGui::PushItemWidth(75.0f);
-		if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) canChange = true;
-		if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) canChange = true;
-		if ((type == RE_Component::Type::TORUS || type == RE_Component::Type::TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) canChange = true;
+	if (!ImGui::CollapsingHeader((name + " Primitive").c_str()))
+		return;
 
-		ImGui::PopItemWidth();
-		if (canChange && ImGui::Button("Apply"))
-			ParametricSetUp(target_slices, target_stacks, target_radius);
+	ImGui::Checkbox("Use checkers texture", &show_checkers);
+	ImGui::ColorEdit3("Diffuse Color", &color[0]);
+	ImGui::PushItemWidth(75.0f);
+	if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) canChange = true;
+	if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) canChange = true;
+	if ((type == RE_Component::Type::TORUS || type == RE_Component::Type::TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) canChange = true;
 
-		if (type == RE_Component::Type::PLANE && ImGui::Button("Convert To Mesh"))
-			RE_INPUT->Push(RE_EventType::PLANE_CHANGE_TO_MESH, RE_SCENE, go);
-	}
+	ImGui::PopItemWidth();
+	if (canChange && ImGui::Button("Apply"))
+		ParametricSetUp(target_slices, target_stacks, target_radius);
+
+	if (type == RE_Component::Type::PLANE && ImGui::Button("Convert To Mesh"))
+		RE_INPUT->Push(RE_EventType::PLANE_CHANGE_TO_MESH, RE_SCENE, go);
 }
 
 bool RE_CompParametric::DrawPrimPropierties()
 {
 	bool ret = false;
-	if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3) && target_slices != slices) ret = canChange = true;
-	if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3) && target_stacks != stacks) ret = canChange = true;
-	if ((type == RE_Component::Type::TORUS || type == RE_Component::Type::TREFOILKNOT) && ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r) && target_radius != radius) ret = canChange = true;
+
+	if (target_radius != radius)
+	{
+		if (ImGui::DragInt("Slices", &target_slices, 1.0f, 3)) ret = canChange = true;
+		if (ImGui::DragInt("Stacks", &target_stacks, 1.0f, 3)) ret = canChange = true;
+		if ((type == RE_Component::Type::TORUS || type == RE_Component::Type::TREFOILKNOT) &&
+			ImGui::DragFloat("Radius", &target_radius, 0.1f, min_r, max_r)) ret = canChange = true;
+	}
 
 	if (canChange && ImGui::Button("Apply"))
 		ParametricSetUp(target_slices, target_stacks, target_radius);
@@ -550,26 +544,32 @@ bool RE_CompParametric::DrawPrimPropierties()
 	return ret;
 }
 
-size_t RE_CompParametric::GetBinarySize() const
-{
-	return sizeof(float) * 4 + sizeof(int) * 2;
-}
+#pragma region Serialization
 
-void RE_CompParametric::SerializeJson(RE_Json* node, eastl::map<const char*, int>* resources) const
+void RE_CompParametric::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->PushFloatVector("color", color);
 	node->Push("slices", slices);
 	node->Push("stacks", stacks);
 	node->Push("radius", radius);
+
+	DEL(node)
 }
 
-void RE_CompParametric::DeserializeJson(RE_Json* node, eastl::map<int, const char*>* resources)
+void RE_CompParametric::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	color = node->PullFloatVector("color", color);
 	ParametricSetUp(node->PullInt("slices", slices), node->PullInt("stacks", stacks), node->PullFloat("radius", radius));
+	
+	DEL(node)
 }
 
-void RE_CompParametric::SerializeBinary(char*& cursor, eastl::map<const char*, int>* resources) const
+size_t RE_CompParametric::GetBinarySize() const
+{
+	return sizeof(float) * 4 + sizeof(int) * 2;
+}
+
+void RE_CompParametric::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(float) * 3;
 	memcpy(cursor, color.ptr(), size);
@@ -588,7 +588,7 @@ void RE_CompParametric::SerializeBinary(char*& cursor, eastl::map<const char*, i
 	cursor += size;
 }
 
-void RE_CompParametric::DeserializeBinary(char*& cursor, eastl::map<int, const char*>* resources)
+void RE_CompParametric::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(float) * 3;
 	memcpy(&RE_CompPrimitive::color[0], cursor, size);
@@ -609,12 +609,7 @@ void RE_CompParametric::DeserializeBinary(char*& cursor, eastl::map<int, const c
 	ParametricSetUp(slices, stacks, radius);
 }
 
-size_t RE_CompParametric::GetParticleBinarySize() const
-{
-	return sizeof(int) * 2 + sizeof(float);
-}
-
-void RE_CompParametric::SerializeParticleJson(RE_Json* node) const
+void RE_CompParametric::ParticleJsonSerialize(RE_Json* node) const
 {
 	node->Push("slices", slices);
 	node->Push("stacks", stacks);
@@ -622,13 +617,18 @@ void RE_CompParametric::SerializeParticleJson(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_CompParametric::DeserializeParticleJson(RE_Json* node)
+void RE_CompParametric::ParticleJsonDeserialize(RE_Json* node)
 {
 	ParametricSetUp(node->PullInt("slices", slices), node->PullInt("stacks", stacks), node->PullFloat("radius", radius));
 	DEL(node)
 }
 
-void RE_CompParametric::SerializeParticleBinary(char*& cursor) const
+size_t RE_CompParametric::GetParticleBinarySize() const
+{
+	return sizeof(int) * 2 + sizeof(float);
+}
+
+void RE_CompParametric::ParticleBinarySerialize(char*& cursor) const
 {
 	size_t size = sizeof(int);
 	memcpy(cursor, &slices, size);
@@ -643,7 +643,7 @@ void RE_CompParametric::SerializeParticleBinary(char*& cursor) const
 	cursor += size;
 }
 
-void RE_CompParametric::DeserializeParticleBinary(char*& cursor)
+void RE_CompParametric::ParticleBinaryDeserialize(char*& cursor)
 {
 	size_t size = sizeof(int);
 	memcpy(&slices, cursor, size);
@@ -660,7 +660,7 @@ void RE_CompParametric::DeserializeParticleBinary(char*& cursor)
 	ParametricSetUp(slices, stacks, radius);
 }
 
-///////   Plane   ////////////////////////////////////////////
+#pragma endregion
 
 const char* RE_CompPlane::TransformAsMeshResource()
 {
@@ -701,3 +701,5 @@ const char* RE_CompPlane::TransformAsMeshResource()
 	par_shapes_free_mesh(plane);
 	return meshMD5;
 }
+
+#pragma endregion

@@ -9,9 +9,64 @@
 
 #include <ImGui/imgui.h>
 
-bool RE_EmissionBoundary::HasBoundary() const
+bool RE_EmissionBoundary::DrawEditor()
 {
-	return type != Type::NONE;
+	bool ret = false;
+	int tmp = static_cast<int>(type);
+	if (ImGui::Combo("Boundary Type", &tmp, "None\0Plane\0Sphere\0AABB\0"))
+	{
+		switch (type = static_cast<Type>(tmp))
+		{
+		case Type::PLANE: geo.plane = math::Plane({ 0.f, 1.f, 0.f }, 0.f); break;
+		case Type::SPHERE: geo.sphere = math::Sphere({ 0.f, 0.f, 0.f }, 10.f); break;
+		case Type::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one * 5.f); break;
+		default: break;
+		}
+		ret = true;
+	}
+
+	if (type == Type::NONE) return ret;
+
+	tmp = static_cast<int>(effect);
+	if (ImGui::Combo("Boundary Effect", &tmp, "Contain\0Kill\0"))
+	{
+		effect = static_cast<Effect>(tmp);
+		ret = true;
+	}
+
+	if (effect == Effect::CONTAIN && ImGui::DragFloat("Boundary Restitution", &restitution, 1.f, 0.f, 100.f))
+		ret = true;
+
+	switch (type)
+	{
+	case Type::PLANE:
+	{
+		if (ImGui::DragFloat("Distance to origin", &geo.plane.d, 1.f, 0.f))
+			ret = true;
+
+		math::float2 angles = geo.plane.normal.ToSphericalCoordinatesNormalized() * RE_Math::rad_to_deg;
+		if (ImGui::DragFloat2("Boundary Yaw - Pitch", angles.ptr(), 0.1f, -180.f, 180.f))
+		{
+			angles *= RE_Math::deg_to_rad;
+			geo.plane.normal = math::vec::FromSphericalCoordinates(angles.x, angles.y);
+			ret = true;
+		}
+
+		break;
+	}
+	case Type::SPHERE:
+		if (ImGui::DragFloat3("Boundary Position", geo.sphere.pos.ptr()) ||
+			ImGui::DragFloat("Boundary Radius", &geo.sphere.r, 1.f, 0.f))
+			ret = true;
+		break;
+	case Type::AABB:
+		if (ImGui::DragFloat3("Boundary Min", geo.box.minPoint.ptr()) ||
+			ImGui::DragFloat3("Boundary Max", geo.box.maxPoint.ptr()))
+			ret = true;
+		break;
+	default: break;
+	}
+	return ret;
 }
 
 bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
@@ -193,67 +248,7 @@ bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 	return true;
 }
 
-bool RE_EmissionBoundary::DrawEditor()
-{
-	bool ret = false;
-	int tmp = static_cast<int>(type);
-	if (ImGui::Combo("Boundary Type", &tmp, "None\0Plane\0Sphere\0AABB\0"))
-	{
-		switch (type = static_cast<Type>(tmp))
-		{
-		case Type::PLANE: geo.plane = math::Plane({ 0.f, 1.f, 0.f }, 0.f); break;
-		case Type::SPHERE: geo.sphere = math::Sphere({ 0.f, 0.f, 0.f }, 10.f); break;
-		case Type::AABB: geo.box.SetFromCenterAndSize(math::vec::zero, math::vec::one * 5.f); break;
-		default: break;
-		}
-		ret = true;
-	}
-
-	if (type == Type::NONE) return ret;
-
-	tmp = static_cast<int>(effect);
-	if (ImGui::Combo("Boundary Effect", &tmp, "Contain\0Kill\0"))
-	{
-		effect = static_cast<Effect>(tmp);
-		ret = true;
-	}
-
-	if (effect == Effect::CONTAIN && ImGui::DragFloat("Boundary Restitution", &restitution, 1.f, 0.f, 100.f))
-		ret = true;
-
-	switch (type)
-	{
-	case Type::PLANE:
-	{
-		if (ImGui::DragFloat("Distance to origin", &geo.plane.d, 1.f, 0.f))
-			ret = true;
-
-		math::float2 angles = geo.plane.normal.ToSphericalCoordinatesNormalized() * RE_Math::rad_to_deg;
-		if (ImGui::DragFloat2("Boundary Yaw - Pitch", angles.ptr(), 0.1f, -180.f, 180.f))
-		{
-			angles *= RE_Math::deg_to_rad;
-			geo.plane.normal = math::vec::FromSphericalCoordinates(angles.x, angles.y);
-			ret = true;
-		}
-
-		break;
-	}
-	case Type::SPHERE:
-		if (ImGui::DragFloat3("Boundary Position", geo.sphere.pos.ptr()) ||
-			ImGui::DragFloat("Boundary Radius", &geo.sphere.r, 1.f, 0.f))
-			ret = true;
-		break;
-	case Type::AABB:
-		if (ImGui::DragFloat3("Boundary Min", geo.box.minPoint.ptr()) ||
-			ImGui::DragFloat3("Boundary Max", geo.box.maxPoint.ptr()))
-			ret = true;
-		break;
-	default: break;
-	}
-	return ret;
-}
-
-void RE_EmissionBoundary::JsonSerialize(RE_Json* node) const
+void RE_EmissionBoundary::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	node->Push("Type", static_cast<uint>(type));
 
@@ -282,7 +277,7 @@ void RE_EmissionBoundary::JsonSerialize(RE_Json* node) const
 	DEL(node)
 }
 
-void RE_EmissionBoundary::JsonDeserialize(RE_Json* node)
+void RE_EmissionBoundary::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	type = static_cast<Type>(node->PullUInt("Type", static_cast<uint>(type)));
 
@@ -330,7 +325,7 @@ size_t RE_EmissionBoundary::GetBinarySize() const
 	return ret;
 }
 
-void RE_EmissionBoundary::BinarySerialize(char*& cursor) const
+void RE_EmissionBoundary::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
 	size_t size = sizeof(ushort);
 	memcpy(cursor, &type, size);
@@ -370,7 +365,7 @@ void RE_EmissionBoundary::BinarySerialize(char*& cursor) const
 	}
 }
 
-void RE_EmissionBoundary::BinaryDeserialize(char*& cursor)
+void RE_EmissionBoundary::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
 	size_t size = sizeof(ushort);
 	memcpy(&type, cursor, size);

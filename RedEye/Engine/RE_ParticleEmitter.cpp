@@ -13,19 +13,18 @@ RE_ParticleEmitter::BoundingMode RE_ParticleEmitter::mode = BoundingMode::PER_PA
 
 RE_ParticleEmitter::RE_ParticleEmitter(bool instance_primitive)
 {
-	if (instance_primitive) {
-		primCmp = new RE_CompPoint();
-		RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
-	}
+	if (!instance_primitive) return;
+
+	primCmp = new RE_CompPoint();
+	RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
 }
 
 RE_ParticleEmitter::~RE_ParticleEmitter()
 {
-	if (primCmp)
-	{
-		primCmp->UnUseResources();
-		DEL(primCmp)
-	}
+	if (!primCmp) return;
+
+	primCmp->UnUseResources();
+	DEL(primCmp)
 }
 
 unsigned int RE_ParticleEmitter::Update(const float global_dt)

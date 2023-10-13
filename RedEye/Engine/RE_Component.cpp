@@ -19,3 +19,13 @@ const RE_GameObject* RE_Component::GetGOCPtr() const
 {
 	return pool_gos->AtCPtr(go);
 }
+
+void RE_Component::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
+{
+	DEL(node)
+}
+
+void RE_Component::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
+{
+	DEL(node)
+}

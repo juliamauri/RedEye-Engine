@@ -10,33 +10,10 @@
 #include "RE_EmissionBoundary.h"
 #include "RE_EmissionCollider.h"
 
+class RE_ParticleEmitter;
 
 class RE_ParticleEmission : public ResourceContainer
 {
-public:
-	RE_ParticleEmission() = default;
-	RE_ParticleEmission(const char* metapath) : ResourceContainer(metapath) {}
-	~RE_ParticleEmission() = default;
-
-	void LoadInMemory() override;
-	void UnloadMemory() override;
-	void Import(bool keepInMemory = true) override;
-
-	void Save();
-	void ProcessMD5();
-
-	void FillEmitter(class RE_ParticleEmitter* to_fill);
-	void FillResouce(class RE_ParticleEmitter* from);
-
-private:
-
-	void JsonSerialize(bool onlyMD5 = false); //We need to call ProcessMD5() before SaveMeta
-	void JsonDeserialize(bool generateLibraryPath = false);
-
-	size_t GetBinarySize() const;
-	void BinarySerialize() const;
-	void BinaryDeserialize();
-
 private:
 
 	// Playback
@@ -59,6 +36,31 @@ private:
 	RE_EmissionExternalForces external_acc = {};
 	RE_EmissionBoundary boundary = {};
 	RE_EmissionCollider collider = {};
+
+public:
+
+	RE_ParticleEmission() = default;
+	RE_ParticleEmission(const char* metapath) : ResourceContainer(metapath) {}
+	~RE_ParticleEmission() = default;
+
+	void LoadInMemory() override;
+	void UnloadMemory() override;
+	void Import(bool keepInMemory = true) override;
+
+	void Save();
+	void ProcessMD5();
+
+	void FillEmitter(RE_ParticleEmitter* to_fill);
+	void FillResouce(RE_ParticleEmitter* from);
+
+private:
+
+	void JsonSerialize(bool onlyMD5 = false); //We need to call ProcessMD5() before SaveMeta
+	void JsonDeserialize(bool generateLibraryPath = false);
+
+	size_t GetBinarySize() const;
+	void BinarySerialize() const;
+	void BinaryDeserialize();
 };
 
 #endif //!__RE_PARTICLEEMISSION_H__

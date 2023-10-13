@@ -99,9 +99,9 @@ void RE_ParticleRender::FillEmitter(RE_ParticleEmitter* to_fill)
 
 			char* prim_buffer = new char[p_size];
 			char* cursor = prim_buffer;
-			primCmp->SerializeParticleBinary(cursor);
+			primCmp->ParticleBinarySerialize(cursor);
 			cursor = prim_buffer;
-			to_fill->primCmp->DeserializeParticleBinary(cursor);
+			to_fill->primCmp->ParticleBinaryDeserialize(cursor);
 
 			DEL_A(prim_buffer);
 		}
@@ -190,7 +190,7 @@ void RE_ParticleRender::JsonDeserialize(bool generateLibraryPath)
 
 			if (primType >= RE_Component::Type::CUBE && primType <= RE_Component::Type::ICOSAHEDRON)
 				RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
-			else primCmp->SerializeParticleJson(node->PullJObject("primitive"));
+			else primCmp->ParticleJsonSerialize(node->PullJObject("primitive"));
 		}
 
 		if (generateLibraryPath)
@@ -220,7 +220,7 @@ void RE_ParticleRender::JsonSerialize(bool onlyMD5)
 
 	node->Push("primitiveType", static_cast<int>(primType));
 	if (primType != RE_Component::Type::EMPTY)
-		primCmp->SerializeParticleJson(node->PushJObject("primitive"));
+		primCmp->ParticleJsonSerialize(node->PushJObject("primitive"));
 
 	if (!onlyMD5) render.Save();
 	SetMD5(render.GetMd5().c_str());
@@ -276,7 +276,7 @@ void RE_ParticleRender::BinaryDeserialize()
 			case RE_Component::Type::ROCK: primCmp = new RE_CompRock(); break;
 			}
 
-			primCmp->DeserializeParticleBinary(cursor);
+			primCmp->ParticleBinaryDeserialize(cursor);
 
 			if(primType >= RE_Component::Type::CUBE && primType <= RE_Component::Type::ICOSAHEDRON)
 				RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
@@ -315,7 +315,7 @@ void RE_ParticleRender::BinarySerialize() const
 	memcpy(cursor, &primType, size);
 	cursor += size;
 
-	if (primType != RE_Component::Type::EMPTY) primCmp->SerializeParticleBinary(cursor);
+	if (primType != RE_Component::Type::EMPTY) primCmp->ParticleBinarySerialize(cursor);
 
 	char nullchar = '\0';
 	memcpy(cursor, &nullchar, sizeof(char));
