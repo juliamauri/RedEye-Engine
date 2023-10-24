@@ -71,7 +71,7 @@ bool RE_EmissionBoundary::DrawEditor()
 
 bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 {
-	RE_PROFILE(RE_ProfiledFunc::ParticleBoundPCol, RE_ProfiledClass::ParticleBoundary);
+	RE_PROFILE(RE_ProfiledFunc::ParticleBoundPCol, RE_ProfiledClass::ParticleBoundary)
 	switch (type)
 	{
 	case Type::PLANE:
@@ -159,7 +159,7 @@ bool RE_EmissionBoundary::PointCollision(RE_Particle& p) const
 
 bool RE_EmissionBoundary::SphereCollision(RE_Particle& p) const
 {
-	RE_PROFILE(RE_ProfiledFunc::ParticleBoundSCol, RE_ProfiledClass::ParticleBoundary);
+	RE_PROFILE(RE_ProfiledFunc::ParticleBoundSCol, RE_ProfiledClass::ParticleBoundary)
 	switch (type)
 	{
 	case Type::PLANE:

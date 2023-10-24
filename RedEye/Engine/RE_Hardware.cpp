@@ -107,7 +107,8 @@ void PlotMemory(const char* name, eastl::array<float, mem_plotting_range>& data,
 
 void RE_Hardware::CheckHardware()
 {
-	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::Hardware);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::Hardware)
+
 	// CPU
 	std::string brand, vendor;
 	getCPUInfo(&brand, &vendor);

@@ -109,7 +109,7 @@ void ComponentsPool::UnUseResources()
 	particleSPool.UnUseResources();
 }
 
-RE_Component* ComponentsPool::GetComponentPtr(COMP_UID poolid, RE_Component::Type cType)
+RE_Component* ComponentsPool::GetComponentPtr(COMP_UID poolid, RE_Component::Type cType) const
 {
 	RE_Component* ret = nullptr;
 

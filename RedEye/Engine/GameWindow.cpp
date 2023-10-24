@@ -7,50 +7,53 @@
 #include "ModuleInput.h"
 #include "ModuleEditor.h"
 #include "ModuleRenderer3D.h"
+#include "RE_FBOManager.h"
 #include "RE_CameraManager.h"
 
 #include <ImGui/imgui_internal.h>
 #include <EASTL/bit.h>
 
-void GameWindow::UpdateViewPort()
+GameWindow::GameWindow() : RenderedWindow("Game Scene", true)
 {
-	RE_CameraManager::MainCamera()->Camera.GetTargetViewPort(viewport);
-	viewport.x = (static_cast<float>(width) - viewport.z) * 0.5f;
-	viewport.y = (static_cast<float>(heigth) - viewport.w) * 0.5f + 20;
+	render_view.flags =
+		RenderView::Flag::FRUSTUM_CULLING |
+		RenderView::Flag::SKYBOX |
+		RenderView::Flag::BLENDED |
+		RenderView::Flag::FACE_CULLING |
+		RenderView::Flag::TEXTURE_2D |
+		RenderView::Flag::COLOR_MATERIAL |
+		RenderView::Flag::DEPTH_TEST;
+	render_view.light_mode = RenderView::LightMode::DEFERRED;
+	render_view.fbos = {
+		RE_FBOManager::CreateFBO(1024, 768, 1, true, true),
+		RE_FBOManager::CreateDeferredFBO(1024, 768) };
 }
+
+RE_Camera& GameWindow::GetCamera() { return RE_CameraManager::MainCamera()->Camera; }
+const RE_Camera& GameWindow::GetCamera() const { return RE_CameraManager::MainCamera()->Camera; }
 
 void GameWindow::Draw(bool secondary)
 {
-	if ((need_render = ImGui::Begin(name, nullptr, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse)))
+	need_render = ImGui::Begin(name, nullptr, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse);
+
+	if (!need_render)
 	{
-		if (secondary)
-		{
-			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-		}
+		ImGui::End();
+		return;
+	}
 
-		static int lastWidht = 0;
-		static int lastHeight = 0;
-		ImVec2 size = ImGui::GetWindowSize();
-		width = static_cast<int>(size.x);
-		heigth = static_cast<int>(size.y) - 28;
+	if (secondary)
+	{
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+	}
 
-		if (recalc || lastWidht != width || lastHeight != heigth)
-		{
-			RE_INPUT->Push(RE_EventType::GAME_WINDOW_CHANGED, RE_RENDER, RE_Cvar(lastWidht = width), RE_Cvar(lastHeight = heigth));
-			RE_INPUT->Push(RE_EventType::GAME_WINDOW_CHANGED, RE_EDITOR);
-			recalc = false;
-		}
+	UpdateWindow();
 
-		isWindowSelected = (ImGui::IsWindowHovered() && ImGui::IsWindowFocused(ImGuiHoveredFlags_AnyWindow));
-		ImGui::SetCursorPos({ viewport.x, viewport.y });
-		ImGui::Image(eastl::bit_cast<void*>(RE_RENDER->GetRenderViewTexture(RenderView::Type::GAME)), { viewport.z, viewport.w }, { 0.0, 1.0 }, { 1.0, 0.0 });
-
-		if (secondary)
-		{
-			ImGui::PopItemFlag();
-			ImGui::PopStyleVar();
-		}
+	if (secondary)
+	{
+		ImGui::PopItemFlag();
+		ImGui::PopStyleVar();
 	}
 
 	ImGui::End();

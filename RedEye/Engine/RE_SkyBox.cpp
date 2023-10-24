@@ -8,8 +8,6 @@
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
 #include "RE_Json.h"
-#include "ModuleEditor.h"
-#include "ModuleRenderer3D.h"
 #include "RE_TextureImporter.h"
 #include "RE_SkyBoxImporter.h"
 #include "RE_ResourceManager.h"
@@ -101,7 +99,7 @@ void RE_SkyBox::Draw()
 
 			}
 
-			RE_RENDER->PushThumnailRend(GetMD5(), true);
+			RE_ThumbnailManager::AddThumbnail(GetMD5(), true);
 			applySize = applyTextures = applySave = false;
 		}
 		if (ImGui::Button("Restore"))
@@ -132,7 +130,7 @@ void RE_SkyBox::Draw()
 		applySize = applyTextures = false;
 	}
 
-	ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
+	ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
 
 	if (applySave && skyBoxSettings == restoreSettings) applySave = false;
 }

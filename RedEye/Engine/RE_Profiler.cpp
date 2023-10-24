@@ -43,6 +43,7 @@ const char* RE_Profiler::GetFunctionStr(const RE_ProfiledFunc function)
 	case RE_ProfiledFunc::DrawParticlesLight: return "Camera Particles' Light";
 
 	case RE_ProfiledFunc::CameraRaycast: return "Camera Raycast";
+	case RE_ProfiledFunc::FrustumCulling: return "Frustum Culling";
 	case RE_ProfiledFunc::EditorCamera: return "Editor Camera";
 
 	case RE_ProfiledFunc::ThumbnailResources: return "Thumbnail Resources";

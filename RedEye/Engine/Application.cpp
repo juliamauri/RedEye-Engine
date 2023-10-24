@@ -60,7 +60,7 @@ void Application::AllocateModules()
 
 bool Application::Init(int _argc, char* _argv[])
 {
-	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::Application);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::Application)
 	RE_LOG_SEPARATOR("Initializing Application");
 
 	const size_t capacity = 8;
@@ -125,7 +125,7 @@ void Application::MainLoop()
 	RE_LOG_SEPARATOR("Entering Application's Main Loop - %.3f", RE_Time::FrameDeltaTime());
 	do {
 		RE_PROFILE_FRAME();
-		RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::Application);
+		RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::Application)
 
 		RE_Time::FrameDeltaTime();
 
@@ -281,12 +281,6 @@ bool Application::StartModules()
 		return false;
 	}
 
-	if (!renderer->Start())
-	{
-		RE_LOG_ERROR("Application Init failed to Start Render Module");
-		return false;
-	}
-
 	if (!audio->Start())
 	{
 		RE_LOG_ERROR("Application Init failed to Start Audio Module");
@@ -298,7 +292,7 @@ bool Application::StartModules()
 
 void Application::LoadConfig()
 {
-	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::Application);
+	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::Application)
 
 	if (HasFlag(Flag::LOAD_CONFIG))
 		RemoveFlag(Flag::LOAD_CONFIG);
@@ -312,7 +306,7 @@ void Application::LoadConfig()
 
 void Application::SaveConfig()
 {
-	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::Application);
+	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::Application)
 
 	if (HasFlag(Flag::SAVE_CONFIG))
 		RemoveFlag(Flag::SAVE_CONFIG);

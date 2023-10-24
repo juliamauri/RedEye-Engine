@@ -5,9 +5,9 @@
 
 #include "RE_Memory.h"
 #include "Application.h"
-#include "ModuleRenderer3D.h"
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
+#include "RE_ThumbnailManager.h"
 #include "RE_SkyBox.h"
 
 #include <ImGuiImpl/imgui_stdlib.h>
@@ -66,7 +66,7 @@ void SkyBoxEditorWindow::Draw(bool secondary)
 			editingSkybox->AssetSave();
 			editingSkybox->SaveMeta();
 
-			RE_RENDER->PushThumnailRend(RE_RES->Reference((ResourceContainer*)editingSkybox));
+			RE_ThumbnailManager::AddThumbnail(RE_RES->Reference((ResourceContainer*)editingSkybox));
 
 			editingSkybox = new RE_SkyBox();
 			sbName = "New Skybox";

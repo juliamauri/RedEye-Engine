@@ -5,8 +5,63 @@
 #include "RE_DataTypes.h"
 #include <EASTL/list.h>
 
+class RE_Camera;
+
 class ModuleEditor : public EventListener
 {
+public:
+
+	enum class Flag : int
+	{
+		// Config
+		SHOW_EDITOR = 1 << 0,
+		SHOW_IMGUI_DEMO = 1 << 1,
+
+		// State
+		POPUP_IS_FOCUSED = 1 << 2
+	};
+
+	class PopUpWindow* popupWindow = nullptr;
+
+private:
+
+	// Flags
+	ushort flags = 0;
+
+	// Selected GO
+	GO_UID selected;
+
+	// Base Windows
+	eastl::list<class EditorWindow*> windows;
+	class ConsoleWindow* console = nullptr;
+	class ConfigWindow* config = nullptr;
+	class HierarchyWindow* hierarchy = nullptr;
+	class PropertiesWindow* properties = nullptr;
+	class PlayPauseWindow* play_pause = nullptr;
+	class AssetsWindow* assets = nullptr;
+	class WwiseWindow* wwise = nullptr;
+	class AboutWindow* about = nullptr;
+
+	// Resource Editors
+	class MaterialEditorWindow* materialeditor = nullptr;
+	class ShaderEditorWindow* shadereditor = nullptr;
+	class SkyBoxEditorWindow* skyboxeditor = nullptr;
+	class TextEditorManagerWindow* texteditormanager = nullptr;
+	class WaterPlaneWindow* waterplaneWindow = nullptr;
+
+	// Scene views
+	eastl::list<class RenderedWindow*> rendered_windows;
+	class SceneEditorWindow* sceneEditorWindow = nullptr;
+	class GameWindow* sceneGameWindow = nullptr;
+	class ParticleEmitterEditorWindow* particleEmitterWindow = nullptr;
+
+	// Tools
+	class RandomTest* rng = nullptr;
+
+	// Debug Windows
+	class TransformDebugWindow* transDebInfo = nullptr;
+	class RendererDebugWindow* rendDebInfo = nullptr;
+
 public:
 
 	ModuleEditor();
@@ -18,142 +73,92 @@ public:
 	void PreUpdate();
 	void Update();
 	void CleanUp();
-	void RecieveEvent(const Event& e) final;
 	void DrawEditor();
 
+	// Config Serialization
 	void Load();
 	void Save() const;
 
+	// Events
+	void RecieveEvent(const Event& e) final;
+	void HandleSDLEvent(union SDL_Event* e);
+
 	// Draws
-	void Draw() const;
-	void DrawDebug(class RE_Camera* current_camera) const;
+	void DrawEditorWindows() const;
+	void RenderWindowFBOs() const;
 	void DrawHeriarchy();
 
-	// UI
-	void DrawGameObjectItems(const GO_UID parent = 0);
-
-	// Selection
-	GO_UID GetSelected() const { return selected; }
-	void SetSelected(const GO_UID go, bool force_focus = false);
+	// GO Selection
+	GO_UID GetSelected() { return selected; }
+	void SetSelected(GO_UID go, bool force_focus = false);
 	void DuplicateSelectedObject();
 
-	// Editor Windows
-	void ReportSoftawe(const char* name, const char* version, const char* website) const;
-	void HandleSDLEvent(union SDL_Event* e);
-	void PopUpFocus(bool focus);
+	// Flags
+	inline void AddFlag(Flag flag) { flags |= static_cast<int>(flag); }
+	inline void RemoveFlag(Flag flag) { flags -= static_cast<int>(flag); }
+	inline const bool HasFlag(Flag flag) const { return flags & static_cast<int>(flag); }
+	void CheckboxFlag(const char* label, Flag flag);
+
+#pragma region Editor Windows
+	
+	// Assets Window
 	const char* GetAssetsPanelPath() const;
 	void SelectUndefinedFile(eastl::string* toSelect) const;
-	void OpenTextEditor(const char* filePath, eastl::string* filePathStr, const char* shadertTemplate = nullptr, bool* open = nullptr);
-	void GetSceneWindowSize(unsigned int* widht, unsigned int* height);
-	void StartEditingParticleEmitter(class RE_ParticleEmitter* sim, const char* md5);
-	const RE_ParticleEmitter* GetCurrentEditingParticleEmitter()const;
+
+	// Text Editor Window
+	void OpenTextEditor(
+		const char* filePath,
+		eastl::string* filePathStr,
+		const char* shadertTemplate = nullptr,
+		bool* open = nullptr);
+
+	// About Window
+	void ReportSoftawe(const char* name, const char* version, const char* website) const;
+
+	// Popup Window
+	void SetPopUpFocus(bool focus);
+	
+	// Rendered Windows
+	SceneEditorWindow* GetSceneEditor() const { return sceneEditorWindow; }
+	ParticleEmitterEditorWindow* GetParticleEmitterEditorWindow() const { return particleEmitterWindow; }
+	
+	/*/ Particle Editor Window
+	void StartEditingParticleEmitter(RE_ParticleEmitter* sim, const char* md5);
+	const RE_ParticleEmitter* GetCurrentEditingParticleEmitter() const;
 	void SaveEmitter(bool close = false, const char* emitter_name = nullptr, const char* emissor_base = nullptr, const char* renderer_base = nullptr);
 	void CloseParticleEditor();
 	bool IsParticleEditorActive() const;
-	bool EditorSceneNeedsRender() const;
-	bool GameSceneNeedsRender() const;
+	RE_Camera* GetParticlesCamera() const;*/
 
-	RE_Camera* GetSceneCamera() const;
-	RE_Camera* GetParticlesCamera() const;
+	/*void ModuleEditor::StartEditingParticleEmitter(RE_ParticleEmitter* sim, const char* md5)
+		particleEmitterWindow->StartEditing(sim, md5);
+	
+	const RE_ParticleEmitter* ModuleEditor::GetCurrentEditingParticleEmitter() const
+		return particleEmitterWindow->GetEdittingParticleEmitter();
 
-	// Commands
-	void PushCommand(class RE_Command* cmd);
-	void ClearCommands();
+	void ModuleEditor::SaveEmitter(bool close, const char* emitter_name, const char* emissor_base, const char* renderer_base)
+		particleEmitterWindow->SaveEmitter(close, emitter_name, emissor_base, renderer_base);
 
-	class SceneEditorWindow* GetSceneEditor() { return sceneEditorWindow; }
+	void ModuleEditor::CloseParticleEditor() { particleEmitterWindow->NextOrClose(); }
+	bool ModuleEditor::IsParticleEditorActive() const { return particleEmitterWindow->IsActive(); }
+	RE_Camera* ModuleEditor::GetParticlesCamera() const { return &(particleEmitterWindow->GetCamera()); }*/
+
+#pragma endregion
 
 private:
 
+	// Init
+	bool InitializeImGui();
 	void ApplyRedeyeStyling();
-	void DrawMainMenuBar();
+
+	// Editor Update
 	void DrawWindows();
-	void UpdateCamera();
 	void CheckEditorInputs();
+	void UpdateEditorCameras();
 
-	// Debug Drawing
-	enum class AABBDebugDrawing : int
-	{
-		NONE = 0,
-		SELECTED_ONLY,
-		ALL,
-		ALL_AND_SELECTED,
-	};
-	void DrawBoundingBoxes(AABBDebugDrawing mode) const;
-	void DrawQuadTree() const;
-	void DrawFrustums() const;
-
-public:
-
-	class RE_CommandManager* commands = nullptr;
-	class RE_ThumbnailManager* thumbnails = nullptr;
-
-	bool debug_drawing = true;
-
-	class PopUpWindow* popupWindow = nullptr;
-
-private:
-
-	// Flags
-	bool show_all = true;
-	bool show_demo = false;
-	bool popUpFocus = false;
-
-	// Windows & Tools
-	eastl::list<class EditorWindow*> windows;
-
-	// General Windows
-	class ConsoleWindow* console = nullptr;
-	class AssetsWindow* assets = nullptr;
-	class WwiseWindow* wwise = nullptr;
-	class ConfigWindow* config = nullptr;
-	class HierarchyWindow* hierarchy = nullptr;
-	class PropertiesWindow* properties = nullptr;
-	class PlayPauseWindow* play_pause = nullptr;
-	class AboutWindow* about = nullptr;
-	class MaterialEditorWindow* materialeditor = nullptr;
-	class ShaderEditorWindow* shadereditor = nullptr;
-	class SkyBoxEditorWindow* skyboxeditor = nullptr;
-	class TextEditorManagerWindow* texteditormanager = nullptr;
-	class WaterPlaneWindow* waterplaneWindow = nullptr;
-	class ParticleEmitterEditorWindow* particleEmitterWindow = nullptr;
-
-	// Scene views
-	SceneEditorWindow* sceneEditorWindow = nullptr;
-	class GameWindow* sceneGameWindow = nullptr;
-
-	// Tools
-	class RandomTest* rng = nullptr;
-
-	//Debug info
-	class TransformDebugWindow* transDebInfo = nullptr;
-	class RendererDebugWindow* rendDebInfo = nullptr;
-
-	// Camera Controls
-	bool select_on_mc = true;
-	bool focus_on_select = false;
-	float cam_speed = 25.0f;
-	float cam_sensitivity = 0.01f;
-
-	// Selected GO
-	GO_UID selected = 0;
-
-	// Grid
-	class RE_CompGrid* grid = nullptr;
-	float grid_size[2];
-
-	// Debug Drawing
-	AABBDebugDrawing aabb_drawing = AABBDebugDrawing::ALL_AND_SELECTED;
-
-	bool draw_quad_tree = true;
-	bool draw_cameras = true;
-
-	float all_aabb_color[3];
-	float sel_aabb_color[3];
-	float quad_tree_color[3];
-	float frustum_color[3];
-
-	//crtd security
-	bool isDuplicated = false;
+	// Main Menu Bar
+	void DrawMainMenuBar();
+	void DrawGameObjectItems(GO_UID parent = 0);
 };
 
 #endif // !__MODULEEDITOR__

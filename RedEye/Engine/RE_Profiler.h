@@ -39,6 +39,7 @@ enum class RE_ProfiledFunc : unsigned short
 	DrawParticlesLight,
 
 	CameraRaycast, // Cameras
+	FrustumCulling,
 	EditorCamera,
 
 	ThumbnailResources, // Resources
@@ -169,7 +170,7 @@ struct ProfilingTimer
 	eastl_size_t operation_id = 0;
 };
 
-#define RE_PROFILE(func, context) ProfilingTimer profiling_timer(func, context)
+#define RE_PROFILE(func, context) ProfilingTimer profiling_timer(func, context);
 #define RE_PROFILE_FRAME() ProfilingTimer::frame++;
 
 #else

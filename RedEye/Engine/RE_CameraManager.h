@@ -5,7 +5,7 @@
 
 namespace RE_CameraManager
 {
-	RE_CompCamera * MainCamera();
+	RE_CompCamera* MainCamera();
 	void SetAsMainCamera(COMP_UID id);
 	bool HasMainCamera();
 

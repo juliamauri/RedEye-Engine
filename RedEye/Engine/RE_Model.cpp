@@ -9,7 +9,6 @@
 #include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
-#include "ModuleEditor.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_ResourceManager.h"
 #include "RE_ModelImporter.h"
@@ -164,7 +163,7 @@ void RE_Model::Draw()
 		needReImport = false;
 	}
 
-	ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
+	ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
 
 	if (applySave && modelSettings == restoreSettings) applySave = false;
 }

@@ -1,7 +1,6 @@
-#include "EditorWindow.h"
-
 #include "ConfigWindow.h"
 
+#include "RE_Time.h"
 #include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
@@ -10,9 +9,8 @@
 #include "ModuleEditor.h"
 #include "ModuleRenderer3D.h"
 #include "ModuleAudio.h"
-#include "RE_Time.h"
-#include "RE_Hardware.h"
 #include "RE_FileSystem.h"
+#include "RE_Hardware.h"
 
 #include <ImGui/imgui_internal.h>
 
@@ -32,7 +30,6 @@ void ConfigWindow::Draw(bool secondary)
 		}
 
 		DrawOptions();
-
 		DrawModules();
 
 		if (secondary)
@@ -46,12 +43,12 @@ void ConfigWindow::Draw(bool secondary)
 
 void ConfigWindow::DrawOptions() const
 {
-	if (ImGui::BeginMenu("Options"))
-	{
-		if (ImGui::MenuItem("Load")) RE_INPUT->Push(RE_EventType::REQUEST_LOAD, App);
-		if (ImGui::MenuItem("Save")) RE_INPUT->Push(RE_EventType::REQUEST_SAVE, App);
-		ImGui::EndMenu();
-	}
+	if (!ImGui::BeginMenu("Options")) return;
+
+	if (ImGui::MenuItem("Load")) RE_INPUT->Push(RE_EventType::REQUEST_LOAD, App);
+	if (ImGui::MenuItem("Save")) RE_INPUT->Push(RE_EventType::REQUEST_SAVE, App);
+
+	ImGui::EndMenu();
 }
 
 void ConfigWindow::DrawModules() const

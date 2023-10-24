@@ -29,7 +29,7 @@ RE_ParticleEmitter::~RE_ParticleEmitter()
 
 unsigned int RE_ParticleEmitter::Update(const float global_dt)
 {
-	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ParticleEmitter);
+	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ParticleEmitter)
 	switch (state)
 	{
 	case RE_ParticleEmitter::PlaybackState::STOPING:
@@ -72,7 +72,7 @@ void RE_ParticleEmitter::Reset()
 
 bool RE_ParticleEmitter::IsTimeValid(const float global_dt)
 {
-	RE_PROFILE(RE_ProfiledFunc::ParticleTiming, RE_ProfiledClass::ParticleEmitter);
+	RE_PROFILE(RE_ProfiledFunc::ParticleTiming, RE_ProfiledClass::ParticleEmitter)
 	// Check time limitations
 	local_dt = global_dt * time_muliplier;
 	if (total_time < start_delay)
@@ -97,7 +97,7 @@ bool RE_ParticleEmitter::IsTimeValid(const float global_dt)
 
 void RE_ParticleEmitter::UpdateParticles()
 {
-	RE_PROFILE(RE_ProfiledFunc::ParticleUpdate, RE_ProfiledClass::ParticleEmitter);
+	RE_PROFILE(RE_ProfiledFunc::ParticleUpdate, RE_ProfiledClass::ParticleEmitter)
 
 	max_dist_sq = max_speed_sq = 0.f;
 	bounding_box.minPoint = bounding_box.maxPoint = parent_pos * !local_space;
@@ -176,38 +176,38 @@ void RE_ParticleEmitter::UpdateParticles()
 
 void RE_ParticleEmitter::UpdateSpawn()
 {
-	RE_PROFILE(RE_ProfiledFunc::ParticleSpawn, RE_ProfiledClass::ParticleEmitter);
-	if (spawn_interval.IsActive(local_dt))
+	RE_PROFILE(RE_ProfiledFunc::ParticleSpawn, RE_ProfiledClass::ParticleEmitter)
+	if (!spawn_interval.IsActive(local_dt)) return;
+
+	uint to_add = RE_Math::Min(
+		spawn_mode.CountNewParticles(local_dt),
+		max_particles - particle_count);
+
+	particle_count += to_add;
+	if (particle_pool.capacity() < particle_count)
 	{
-		const unsigned int to_add = RE_Math::Min(
-			spawn_mode.CountNewParticles(local_dt),
-			max_particles - particle_count);
+		uint allocation_step = max_particles / 10u;
+		uint desired_capacity = allocation_step;
 
-		particle_count += to_add;
-		if (particle_pool.capacity() < particle_count)
-		{
-			const unsigned int allocation_step = max_particles / 10u;
-			unsigned int desired_capacity = allocation_step;
+		while (particle_count < desired_capacity)
+			desired_capacity += allocation_step;
 
-			while (particle_count < desired_capacity)
-				desired_capacity += allocation_step;
-
-			particle_pool.reserve(desired_capacity);
-		}
-
-		for (unsigned int i = 0u; i < to_add; ++i)
-			particle_pool.push_back(RE_Particle(
-				initial_lifetime.GetValue(),
-				local_space ? initial_pos.GetPosition() : initial_pos.GetPosition() + parent_pos,
-				!inherit_speed ? initial_speed.GetValue() : initial_speed.GetValue() + parent_speed,
-				collider.mass.GetValue(), collider.radius.GetValue(), collider.restitution.GetValue(),
-				light.GetColor(), light.GetIntensity(), light.GetSpecular()));
+		particle_pool.reserve(desired_capacity);
 	}
+
+	for (uint i = 0u; i < to_add; ++i)
+		particle_pool.push_back(RE_Particle(
+			initial_lifetime.GetValue(),
+			local_space ? initial_pos.GetPosition() : initial_pos.GetPosition() + parent_pos,
+			!inherit_speed ? initial_speed.GetValue() : initial_speed.GetValue() + parent_speed,
+			collider.mass.GetValue(), collider.radius.GetValue(), collider.restitution.GetValue(),
+			light.GetColor(), light.GetIntensity(), light.GetSpecular()));
 }
 
 void RE_ParticleEmitter::ImpulseCollision(RE_Particle& p1, RE_Particle& p2, const float combined_radius) const
 {
-	RE_PROFILE(RE_ProfiledFunc::ParticleCollision, RE_ProfiledClass::ParticleEmitter);
+	RE_PROFILE(RE_ProfiledFunc::ParticleCollision, RE_ProfiledClass::ParticleEmitter)
+
 	// Check particle collision
 	const math::vec collision_dir = p1.position - p2.position;
 	const float dist2 = collision_dir.Dot(collision_dir);

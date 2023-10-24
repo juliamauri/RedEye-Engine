@@ -10,9 +10,10 @@
 #include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleEditor.h"
-#include "ModuleRenderer3D.h"
+#include "RE_CommandManager.h"
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
+#include "RE_ThumbnailManager.h"
 #include "RE_CameraManager.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_ShaderImporter.h"
@@ -49,7 +50,7 @@ ModuleScene::~ModuleScene()
 
 bool ModuleScene::Init()
 {
-	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleScene);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleScene)
 	RE_LOG("Initializing Module Scene");
 	primitives->Init();
 	return true;
@@ -57,7 +58,7 @@ bool ModuleScene::Init()
 
 bool ModuleScene::Start()
 {
-	RE_PROFILE(RE_ProfiledFunc::Start, RE_ProfiledClass::ModuleScene);
+	RE_PROFILE(RE_ProfiledFunc::Start, RE_ProfiledClass::ModuleScene)
 	RE_LOG("Starting Module Scene");
 
 	eastl::vector<ResourceContainer*> scenes = RE_RES->GetResourcesByType(ResourceContainer::Type::SCENE);
@@ -69,13 +70,13 @@ bool ModuleScene::Start()
 
 void ModuleScene::Update()
 {
-	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModuleScene);
+	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModuleScene)
 	scenePool.Update();
 }
 
 void ModuleScene::PostUpdate()
 {
-	RE_PROFILE(RE_ProfiledFunc::PostUpdate, RE_ProfiledClass::ModuleScene);
+	RE_PROFILE(RE_ProfiledFunc::PostUpdate, RE_ProfiledClass::ModuleScene)
 	while (!to_delete.empty())
 	{
 		scenePool.DestroyGO(to_delete.top());
@@ -85,7 +86,7 @@ void ModuleScene::PostUpdate()
 
 void ModuleScene::CleanUp()
 {
-	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleScene);
+	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleScene)
 	primitives->Clear();
 	DEL(unsavedScene)
 }
@@ -397,6 +398,7 @@ void ModuleScene::AddGOPool(RE_ECS_Pool* toAdd)
 
 GO_UID ModuleScene::RayCastGeometry(math::Ray & global_ray) const
 {
+	RE_PROFILE(RE_ProfiledFunc::CameraRaycast, RE_ProfiledClass::ModuleScene)
 	GO_UID ret = 0;
 
 	eastl::queue<GO_UID> aabb_collisions;
@@ -433,6 +435,7 @@ GO_UID ModuleScene::RayCastGeometry(math::Ray & global_ray) const
 
 void ModuleScene::FustrumCulling(eastl::vector<const RE_GameObject*>& container, const math::Frustum & frustum) const
 {
+	RE_PROFILE(RE_ProfiledFunc::FrustumCulling, RE_ProfiledClass::ModuleScene)
 	eastl::queue<GO_UID> goIndex;
 	static_tree.CollectIntersections(frustum, goIndex);
 	dynamic_tree.CollectIntersections(frustum, goIndex);
@@ -457,11 +460,11 @@ void ModuleScene::SaveScene(const char* newName)
 	if (unsavedScene)
 	{
 		currentScene = RE_RES->Reference(scene);
-		RE_RENDER->PushThumnailRend(currentScene);
+		RE_ThumbnailManager::AddThumbnail(currentScene);
 		unsavedScene = nullptr;
 	}
 	else
-		RE_RENDER->PushThumnailRend(scene->GetMD5(), true);
+		RE_ThumbnailManager::AddThumbnail(scene->GetMD5(), true);
 
 	haschanges = false;
 	RE_INPUT->ResumeEvents();
@@ -495,7 +498,7 @@ void ModuleScene::ClearScene()
 void ModuleScene::NewEmptyScene(const char* name)
 {
 	RE_INPUT->PauseEvents();
-	RE_EDITOR->ClearCommands();
+	RE_CommandManager::Clear();
 
 	if (unsavedScene == nullptr) currentScene = nullptr;
 	DEL(unsavedScene)
@@ -520,7 +523,7 @@ void ModuleScene::NewEmptyScene(const char* name)
 void ModuleScene::LoadScene(const char* sceneMD5, bool ignorehandle)
 {
 	RE_INPUT->PauseEvents();
-	RE_EDITOR->ClearCommands();
+	RE_CommandManager::Clear();
 	
 	DEL(unsavedScene)
 	

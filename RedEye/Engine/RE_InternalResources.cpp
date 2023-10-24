@@ -43,7 +43,8 @@ constexpr const char* WaterFoamTexturePath = "Internal/DefaultAssets/water_foam.
 
 void InitChecker()
 {
-	RE_PROFILE(RE_ProfiledFunc::InitChecker, RE_ProfiledClass::InternalResources);
+	RE_PROFILE(RE_ProfiledFunc::InitChecker, RE_ProfiledClass::InternalResources)
+
 	// Checkers
 	unsigned char imageData[264][264][3]{};
 	int IMAGE_ROWS = 264, IMAGE_COLS = 264;
@@ -70,8 +71,9 @@ void InitChecker()
 
 bool InitShaders()
 {
-	RE_PROFILE(RE_ProfiledFunc::InitShaders, RE_ProfiledClass::InternalResources);
 	//Loading Shaders
+	RE_PROFILE(RE_ProfiledFunc::InitShaders, RE_ProfiledClass::InternalResources)
+
 	// Default
 	RE_Shader* defSRes = new RE_Shader();
 	defSRes->SetName("Default Shader");
@@ -133,7 +135,7 @@ bool InitShaders()
 
 bool InitMaterial()
 {
-	RE_PROFILE(RE_ProfiledFunc::InitMaterial, RE_ProfiledClass::InternalResources);
+	RE_PROFILE(RE_ProfiledFunc::InitMaterial, RE_ProfiledClass::InternalResources)
 	RE_Material* defMaterial = new RE_Material();
 	defMaterial->SetName("Default Material");
 	defMaterial->cDiffuse.x = 1.0;
@@ -145,7 +147,7 @@ bool InitMaterial()
 
 bool InitSkyBox()
 {
-	RE_PROFILE(RE_ProfiledFunc::InitSkyBox, RE_ProfiledClass::InternalResources);
+	RE_PROFILE(RE_ProfiledFunc::InitSkyBox, RE_ProfiledClass::InternalResources)
 	RE_SkyBox* rdefaultSkybox = new RE_SkyBox();
 	rdefaultSkybox->SetName("defaultSkyBox");
 	rdefaultSkybox->SetType(ResourceContainer::Type::SKYBOX);
@@ -162,7 +164,7 @@ bool InitSkyBox()
 
 void InitWaterResources()
 {
-	RE_PROFILE(RE_ProfiledFunc::InitWater, RE_ProfiledClass::InternalResources);
+	RE_PROFILE(RE_ProfiledFunc::InitWater, RE_ProfiledClass::InternalResources)
 	// Deferred
 	RE_Shader* waterSr = new RE_Shader();
 	waterSr->SetName("Water Shader");
@@ -219,7 +221,7 @@ void InitWaterResources()
 
 void RE_InternalResources::Init()
 {
-	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::InternalResources);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::InternalResources)
 	InitChecker();
 	if (!InitShaders()) RE_LOG_WARNING("Could not initialize default shaders");
 	InitWaterResources();
@@ -229,7 +231,7 @@ void RE_InternalResources::Init()
 
 void RE_InternalResources::Clear()
 {
-	RE_PROFILE(RE_ProfiledFunc::Clear, RE_ProfiledClass::InternalResources);
+	RE_PROFILE(RE_ProfiledFunc::Clear, RE_ProfiledClass::InternalResources)
 	if (checkerTexture != 0u) glDeleteTextures(1, &checkerTexture);
 	if (water_foam_texture != 0u) glDeleteTextures(1, &water_foam_texture);
 }

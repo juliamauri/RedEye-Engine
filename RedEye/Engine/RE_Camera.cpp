@@ -121,15 +121,6 @@ bool RE_Camera::DrawProperties()
 	return ret;
 }
 
-void RE_Camera::DrawAsEditorProperties()
-{
-	if (ImGui::TreeNodeEx("Camera", ImGuiTreeNodeFlags_(ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)))
-	{
-		DrawProperties();
-		ImGui::TreePop();
-	}
-}
-
 void RE_Camera::DrawFrustum() const
 {
 	for (uint i = 0; i < 12; i++)

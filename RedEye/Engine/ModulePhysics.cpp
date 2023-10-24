@@ -12,7 +12,7 @@
 
 void ModulePhysics::Update()
 {
-	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModulePhysics);
+	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModulePhysics)
 	float global_dt = RE_Time::DeltaTime();
 
 	switch (mode) {
@@ -70,7 +70,7 @@ void ModulePhysics::CleanUp()
 	particles.Clear();
 }
 
-void ModulePhysics::OnPlay(const bool was_paused)
+void ModulePhysics::OnPlay(bool was_paused)
 {
 	for (auto sim : particles.simulations)
 	{
@@ -116,16 +116,10 @@ void ModulePhysics::CallParticleEmitterLightShaderUniforms(uint index, math::flo
 	particles.CallLightShaderUniforms(index, go_position, shader, array_unif_name, count, maxLights, sharedLight);
 }
 
-void ModulePhysics::DrawDebug(RE_Camera* current_camera) const
+void ModulePhysics::DrawDebug(const RE_Camera& camera) const
 {
-	if (!particles.simulations.empty())
-	{
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(current_camera->GetProjection().Transposed().ptr());
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(current_camera->GetView().Transposed().ptr());
-		particles.DrawDebug();
-	}
+	if (particles.simulations.empty()) return;
+	particles.DrawDebug();
 }
 
 void ModulePhysics::DrawEditor()
@@ -148,7 +142,7 @@ void ModulePhysics::DrawEditor()
 
 void ModulePhysics::Load()
 {
-	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleWindow);
+	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleWindow)
 	RE_LOG_SECONDARY("Loading Physics propieties from config:");
 	RE_Json* node = RE_FS->ConfigNode("Physics");
 
@@ -159,7 +153,7 @@ void ModulePhysics::Load()
 
 void ModulePhysics::Save() const
 {
-	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModulePhysics);
+	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModulePhysics)
 	RE_Json* node = RE_FS->ConfigNode("Physics");
 
 	node->Push("UpdateMode", static_cast<int>(mode));

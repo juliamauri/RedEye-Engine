@@ -3,14 +3,7 @@
 
 class TextEditorManagerWindow :public EditorWindow
 {
-public:
-	TextEditorManagerWindow() : EditorWindow("Text Editor Manager", false) {}
-	~TextEditorManagerWindow();
-
-	void PushEditor(const char* filePath, eastl::string* newFile = nullptr, const char* shadertTemplate = nullptr, bool* open = nullptr);
-
 private:
-	void Draw(bool secondary = false) override;
 
 	struct EditorData
 	{
@@ -24,6 +17,21 @@ private:
 	};
 
 	eastl::vector<EditorData*> editors;
+
+public:
+
+	TextEditorManagerWindow() : EditorWindow("Text Editor Manager", false) {}
+	~TextEditorManagerWindow();
+
+	void PushEditor(
+		const char* filePath,
+		eastl::string* newFile = nullptr,
+		const char* shadertTemplate = nullptr,
+		bool* open = nullptr);
+
+private:
+
+	void Draw(bool secondary = false) override;
 };
 
 #endif // !__TEXT_EDITOR_MANAGER_WINDOW__

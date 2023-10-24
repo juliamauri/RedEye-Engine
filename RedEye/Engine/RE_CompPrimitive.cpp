@@ -74,7 +74,7 @@ void RE_CompGrid::GridSetUp(int newD)
 
 void RE_CompGrid::Draw() const
 {
-	unsigned int shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetDefaultShader()))->GetID();
+	uint shader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetDefaultShader()))->GetID();
 	RE_GLCache::ChangeShader(shader);
 	RE_ShaderImporter::setFloat4x4(shader, "model", GetTransformPtr()->GetGlobalMatrixPtr());
 	RE_ShaderImporter::setFloat(shader, "useColor", 1.0f);
@@ -121,7 +121,7 @@ void RE_CompGrid::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* r
 
 size_t RE_CompGrid::GetBinarySize() const
 {
-	return sizeof(float) * 3u + sizeof(int);
+	return sizeof(float) * 3 + sizeof(int);
 }
 
 void RE_CompGrid::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const

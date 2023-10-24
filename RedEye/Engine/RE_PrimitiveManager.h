@@ -31,10 +31,10 @@ public:
 	void Clear();
 
 	void SetUpComponentPrimitive(RE_CompPrimitive* cmpP);
-	eastl::pair<unsigned int, unsigned int> GetPrimitiveMeshData(RE_Component* primComp, int id = -1);
+	eastl::pair<uint, uint> GetPrimitiveMeshData(RE_Component* primComp, int id = -1);
 	void UnUsePrimitive(RE_Component::Type pType, int id = -1);
 
-	void CreateSphere(int slices, int stacks, unsigned int& vao, unsigned int& vbo, unsigned int& ebo, unsigned int& triangles);
+	static void CreateSphere(int slices, int stacks, uint& vao, uint& vbo, uint& ebo, uint& triangles);
 
 private:
 

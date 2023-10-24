@@ -1,9 +1,10 @@
 #ifndef __RE_CAMERA_H__
 #define __RE_CAMERA_H__
 
-#include <MGL/MathGeoLib.h>
 #include "RE_DataTypes.h"
 #include "RE_Serializable.h"
+
+#include <MGL/MathGeoLib.h>
 
 class RE_Camera : public RE_Serializable
 {
@@ -49,7 +50,6 @@ public:
 
 	// Draws
 	bool DrawProperties();
-	void DrawAsEditorProperties();
 	void DrawFrustum() const;
 
 	// Camera Controls

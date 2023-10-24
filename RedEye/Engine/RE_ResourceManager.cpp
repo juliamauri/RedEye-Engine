@@ -8,8 +8,6 @@
 #include "RE_FileSystem.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
-#include "ModuleEditor.h"
-#include "ModuleRenderer3D.h"
 #include "ModuleAudio.h"
 #include "RE_InternalResources.h"
 #include "RE_ShaderImporter.h"
@@ -34,7 +32,7 @@
 
 void RE_ResourceManager::Init()
 {
-	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ResourcesManager);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ResourcesManager)
 	RE_LOG_SEPARATOR("Initializing Resources");
 
 	RE_TextureImporter::Init();
@@ -48,7 +46,7 @@ void RE_ResourceManager::Init()
 
 void RE_ResourceManager::Clear()
 {
-	RE_PROFILE(RE_ProfiledFunc::Clear, RE_ProfiledClass::ResourcesManager);
+	RE_PROFILE(RE_ProfiledFunc::Clear, RE_ProfiledClass::ResourcesManager)
 	RE_InternalResources::Clear();
 	RE_ShaderImporter::Clear();
 
@@ -322,7 +320,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 			if(rType == ResourceContainer::Type::SHADER) resChange->DeleteShader();
 			else resChange->DeleteTexture(res);
 			resChange->UnloadMemory();
-			RE_RENDER->PushThumnailRend(resToChange, true);
+			RE_ThumbnailManager::AddThumbnail(resToChange, true);
 		}
 		break;
 	}
@@ -407,7 +405,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 					}
 					default: break;
 					}
-					RE_RENDER->PushThumnailRend(resToChange, true);
+					RE_ThumbnailManager::AddThumbnail(resToChange, true);
 					UnUse(resToChange);
 					DEL(poolGORes)
 					RE_INPUT->ResumeEvents();
@@ -512,7 +510,7 @@ ResourceContainer* RE_ResourceManager::DeleteResource(const char* res, eastl::ve
 	if (rType != ResourceContainer::Type::SHADER &&
 		rType != ResourceContainer::Type::PARTICLE_EMITTER &&
 		rType != ResourceContainer::Type::PARTICLE_EMISSION &&
-		rType != ResourceContainer::Type::PARTICLE_RENDER) RE_EDITOR->thumbnails->Delete(res);
+		rType != ResourceContainer::Type::PARTICLE_RENDER) RE_ThumbnailManager::Delete(res);
 
 	return resource;
 }
@@ -662,7 +660,8 @@ bool RE_ResourceManager::isNeededResoursesLoaded(const char* metaPath, ResourceC
 
 void RE_ResourceManager::ThumbnailResources()
 {
-	RE_PROFILE(RE_ProfiledFunc::ThumbnailResources, RE_ProfiledClass::ResourcesManager);
+	RE_PROFILE(RE_ProfiledFunc::ThumbnailResources, RE_ProfiledClass::ResourcesManager)
+
 	for (const auto& res : resources)
 	{
 		ResourceContainer::Type rT = res.second->GetType();
@@ -672,7 +671,7 @@ void RE_ResourceManager::ThumbnailResources()
 			rT == ResourceContainer::Type::SKYBOX ||
 			rT == ResourceContainer::Type::MATERIAL ||
 			rT == ResourceContainer::Type::TEXTURE)
-			RE_RENDER->PushThumnailRend(res.first);
+			RE_ThumbnailManager::AddThumbnail(res.first);
 	}
 }
 

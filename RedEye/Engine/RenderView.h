@@ -6,20 +6,11 @@
 #include <EASTL/string.h>
 #include <EASTL/array.h>
 
-class RE_Camera;
 class RE_Json;
 
 class RenderView
 {
 public:
-
-	enum class Type : ushort
-	{
-		EDITOR,
-		GAME,
-		PARTICLE,
-		OTHER
-	};
 
 	enum class LightMode : ushort
 	{
@@ -29,10 +20,8 @@ public:
 		DEFERRED,
 	};
 
-	enum class Flag : ushort
+	enum Flag
 	{
-		EMPTY = 0,
-
 		// GL Specs
 		WIREFRAME = 1 << 0,			// 0000 0000 0000 0001
 		FACE_CULLING = 1 << 1,		// 0000 0000 0000 0010
@@ -57,42 +46,36 @@ public:
 
 public:
 
-	// Properties
-	eastl::string name;
-	eastl::pair<uint, uint> fbos;
 	ushort flags = 0;
-
-	LightMode light;
+	LightMode light_mode;
+	eastl::pair<uint, uint> fbos;
 	math::float4 clip_distance = math::float4::zero;
 	math::float4 clear_color = { 0.0f, 0.0f, 0.0f, 1.0f };
-
-	RE_Camera* camera = nullptr;
 
 public:
 
 	RenderView(
-		eastl::string name = "",
 		eastl::pair<uint, uint> fbos = { 0, 0 },
-		short flags = 0,
+		ushort flags = 0,
 		LightMode light = LightMode::GL,
 		math::float4 clipDistance = math::float4::zero) :
-		name(name), fbos(fbos), flags(flags), light(light), clip_distance(clipDistance) {}
+		fbos(fbos), flags(flags), light_mode(light), clip_distance(clipDistance) {}
 
-	~RenderView();
+	~RenderView() = default;
 
-	void DrawEditor();
+	void DrawEditor(const char* id);
 
-	const math::Frustum* GetFrustum() const;
-	const uint GetFBO() const { return light != LightMode::DEFERRED ? fbos.first : fbos.second; }
+	uint GetFBO() const { return light_mode != LightMode::DEFERRED ? fbos.first : fbos.second; }
 
 	// Flags
 	inline void AddFlag(Flag flag) { flags |= static_cast<ushort>(flag); }
 	inline void RemoveFlag(Flag flag) { flags -= static_cast<ushort>(flag); }
 	inline const bool HasFlag(Flag flag) const { return flags & static_cast<ushort>(flag); }
+	void CheckboxFlag(const char* label, Flag flag);
 
 	// Serialization
-	void Save(RE_Json* node) const;
 	void Load(RE_Json* node);
+	void Save(RE_Json* node) const;
 };
 
 #endif // !__RENDER_VIEW_H__

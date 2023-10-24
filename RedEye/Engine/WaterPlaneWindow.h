@@ -3,19 +3,19 @@
 
 class WaterPlaneWindow : public EditorWindow
 {
-public:
-
-	WaterPlaneWindow() : EditorWindow("Water As Resource", false) {}
-	~WaterPlaneWindow() {}
-
-private:
-
-	void Draw(bool secondary = false) override;
-
 private:
 
 	eastl::string waterResouceName = "WaterMaterial";
 	bool deferred = false;
+
+public:
+
+	WaterPlaneWindow() : EditorWindow("Water As Resource", false) {}
+	~WaterPlaneWindow() = default;
+
+private:
+
+	void Draw(bool secondary = false) override;
 };
 
 #endif // !__WATER_PLANE_WINDOW__

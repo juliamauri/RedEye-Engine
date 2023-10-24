@@ -40,6 +40,7 @@
     <ClCompile Include="HierarchyWindow.cpp" />
     <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="ParticleEmitterEditorWindow.cpp" />
+    <ClCompile Include="RenderedWindow.cpp" />
     <ClCompile Include="RenderView.cpp" />
     <ClCompile Include="RE_Curve.cpp" />
     <ClCompile Include="RE_EmissionBoundary.cpp" />

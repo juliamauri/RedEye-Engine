@@ -11,7 +11,7 @@
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "ModuleInput.h"
-#include "ModuleRenderer3D.h"
+#include "RE_ThumbnailManager.h"
 #include "RE_ResourceManager.h"
 #include "RE_TextureImporter.h"
 #include "RE_ShaderImporter.h"
@@ -139,7 +139,7 @@ void ProcessMaterials(const aiScene* scene)
 
 			newMaterial->Save();
 			materialMD5 = RE_RES->Reference(container);
-			RE_RENDER->PushThumnailRend(materialMD5);
+			RE_ThumbnailManager::AddThumbnail(materialMD5);
 		}
 		aditionalData->materialsLoaded.insert(eastl::pair<aiMaterial*, const char*>(material, materialMD5));
 	}

@@ -118,9 +118,9 @@ void AssetsWindow::DrawItemResource(const RE_FileSystem::RE_Path* p, float icons
 
 		switch (res->GetType())
 		{
-		case ResourceContainer::Type::PARTICLE_EMISSION: file_icon = RE_EDITOR->thumbnails->GetPEmissionFileID(); break;
-		case ResourceContainer::Type::PARTICLE_RENDER: file_icon = RE_EDITOR->thumbnails->GetPRenderFileID(); break;
-		default: file_icon = RE_EDITOR->thumbnails->At(res->GetMD5()); break;
+		case ResourceContainer::Type::PARTICLE_EMISSION: file_icon = RE_ThumbnailManager::GetPEmissionFileID(); break;
+		case ResourceContainer::Type::PARTICLE_RENDER: file_icon = RE_ThumbnailManager::GetPRenderFileID(); break;
+		default: file_icon = RE_ThumbnailManager::At(res->GetMD5()); break;
 		}
 		
 		if (ImGui::ImageButton(eastl::bit_cast<void*>(file_icon), { iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
@@ -156,7 +156,7 @@ void AssetsWindow::DrawItemNotSupported(bool secondary, float iconsSize, const R
 	}
 
 	if (ImGui::ImageButton(
-		eastl::bit_cast<void*>(selectingUndefFile ? RE_EDITOR->thumbnails->GetSelectFileID() : RE_EDITOR->thumbnails->GetFileID()),
+		eastl::bit_cast<void*>(selectingUndefFile ? RE_ThumbnailManager::GetSelectFileID() : RE_ThumbnailManager::GetFileID()),
 		{ iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, selectingUndefFile ? -1 : 0)
 		&& selectingUndefFile)
 	{
@@ -199,7 +199,7 @@ void AssetsWindow::DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize
 {
 	const ResourceContainer* res = RE_RES->At(p->AsMeta()->resource);
 
-	uintptr_t icon_meta = (res->GetType() == ResourceContainer::Type::SHADER) ? RE_EDITOR->thumbnails->GetShaderFileID() : RE_EDITOR->thumbnails->GetPEmitterFileID();
+	uintptr_t icon_meta = (res->GetType() == ResourceContainer::Type::SHADER) ? RE_ThumbnailManager::GetShaderFileID() : RE_ThumbnailManager::GetPEmitterFileID();
 
 	if (ImGui::ImageButton(eastl::bit_cast<void*>(icon_meta), { iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 		RE_RES->PushSelected(res->GetMD5(), true);
@@ -219,7 +219,7 @@ void AssetsWindow::DrawItemMeta(const RE_FileSystem::RE_Path* p, float iconsSize
 
 void AssetsWindow::DrawItemFolder(float iconsSize, RE_FileSystem::RE_Directory*& toChange, const RE_FileSystem::RE_Path* p) const
 {
-	if (ImGui::ImageButton(eastl::bit_cast<void*>(RE_EDITOR->thumbnails->GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
+	if (ImGui::ImageButton(eastl::bit_cast<void*>(RE_ThumbnailManager::GetFolderID()), { iconsSize, iconsSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 		toChange = p->AsDirectory();
 	ImGui::PopID();
 	ImGui::Text(p->AsDirectory()->name.c_str());

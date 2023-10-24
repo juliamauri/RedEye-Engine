@@ -7,6 +7,71 @@
 #include "RE_GLCache.h"
 #include <GL/glew.h>
 
+eastl::map<uint, RE_FBO> fbos;
+
+void RE_FBO::LoadDeferredTextures()
+{
+	// position
+	uint tex = 0;
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+	texturesID.push_back(tex);
+
+	// normal
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, tex, 0);
+	texturesID.push_back(tex);
+
+	// Albedo
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, tex, 0);
+	texturesID.push_back(tex);
+
+	// Specular + Shininess + Alpha
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, tex, 0);
+	texturesID.push_back(tex);
+
+	// Result
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, tex, 0);
+	texturesID.push_back(tex);
+
+	// Bind Attachments
+	uint attachments[5] =
+	{
+		GL_COLOR_ATTACHMENT0,
+		GL_COLOR_ATTACHMENT1,
+		GL_COLOR_ATTACHMENT2,
+		GL_COLOR_ATTACHMENT3,
+		GL_COLOR_ATTACHMENT4
+	};
+	glDrawBuffers(5, attachments);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
 int RE_FBOManager::CreateFBO(uint width, uint height, uint texturesSize, bool depth, bool stencil)
 {
 	int ret = -1;
@@ -123,7 +188,7 @@ int RE_FBOManager::CreateDeferredFBO(uint width, uint height)
 	glGenFramebuffers(1, &newFbo.ID);
 	ChangeFBOBind(newFbo.ID);
 
-	LoadDeferredTextures(newFbo);
+	newFbo.LoadDeferredTextures();
 
 	// Depth Texture
 	glGenTextures(1, &newFbo.depthBufferTexture);
@@ -194,7 +259,7 @@ void RE_FBOManager::ChangeFBOSize(uint ID, uint width, uint height)
 
 	if (toChange.type == RE_FBO::Type::DEFERRED)
 	{
-		LoadDeferredTextures(toChange);
+		toChange.LoadDeferredTextures();
 	}
 	else
 	{
@@ -288,14 +353,14 @@ void RE_FBOManager::ClearFBO(uint ID)
 	fbos.erase(ID);
 }
 
-uint RE_FBOManager::GetWidth(uint ID)
-{
-	return fbos.at(ID).width;
-}
+uint RE_FBOManager::GetWidth(uint ID) { return fbos.at(ID).width; }
+uint RE_FBOManager::GetHeight(uint ID) { return fbos.at(ID).height; }
 
-uint RE_FBOManager::GetHeight(uint ID)
+void RE_FBOManager::GetWidthAndHeight(uint ID, uint32_t& width, uint32_t& height)
 {
-	return fbos.at(ID).height;
+	auto& fbo = fbos.at(ID);
+	width = fbo.width;
+	height = fbo.height;
 }
 
 uint RE_FBOManager::GetDepthTexture(uint ID)
@@ -309,7 +374,8 @@ uint RE_FBOManager::GetDepthTexture(uint ID)
 
 uint32_t RE_FBOManager::GetTextureID(uint ID, uint texAttachment)
 {
-	return (fbos.at(ID).texturesID.size() < texAttachment) ? 0 : fbos.at(ID).texturesID[texAttachment];
+	auto& fbo = fbos.at(ID);
+	return (fbo.texturesID.size() < texAttachment) ? 0 : fbo.texturesID[texAttachment];
 }
 
 void RE_FBOManager::ChangeFBOBind(uint fID, uint width, uint height)
@@ -331,66 +397,4 @@ void RE_FBOManager::ClearAll()
 		glDeleteFramebuffers(1, &current.ID);
 	}
 	fbos.clear();
-}
-
-void RE_FBOManager::LoadDeferredTextures(RE_FBO& fbo)
-{
-	// position
-	uint tex = 0;
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, fbo.width, fbo.height, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
-	fbo.texturesID.push_back(tex);
-
-	// normal
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, fbo.width, fbo.height, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, tex, 0);
-	fbo.texturesID.push_back(tex);
-
-	// Albedo
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, fbo.width, fbo.height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, tex, 0);
-	fbo.texturesID.push_back(tex);
-
-	// Specular + Shininess + Alpha
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, fbo.width, fbo.height, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, tex, 0);
-	fbo.texturesID.push_back(tex);
-
-	// Result
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, fbo.width, fbo.height, 0, GL_RGBA, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, tex, 0);
-	fbo.texturesID.push_back(tex);
-
-	// Bind Attachments
-	uint attachments[5] =
-	{
-		GL_COLOR_ATTACHMENT0,
-		GL_COLOR_ATTACHMENT1,
-		GL_COLOR_ATTACHMENT2,
-		GL_COLOR_ATTACHMENT3,
-		GL_COLOR_ATTACHMENT4
-	};
-	glDrawBuffers(5, attachments);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
 }

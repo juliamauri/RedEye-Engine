@@ -165,7 +165,7 @@ eastl::vector<eastl::pair<const COMP_UID, const RE_Component*>> RE_ECS_Pool::Get
 	return componentsPool.GetAllCompCData(type);
 }
 
-RE_Component* RE_ECS_Pool::GetComponentPtr(COMP_UID poolid, RE_Component::Type cType)
+RE_Component* RE_ECS_Pool::GetComponentPtr(COMP_UID poolid, RE_Component::Type cType) const
 {
 	return componentsPool.GetComponentPtr(poolid, cType);
 }

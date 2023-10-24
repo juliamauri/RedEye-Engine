@@ -8,6 +8,9 @@
 
 constexpr auto LOG_STATEMENT_MAX_LENGTH = 512;
 
+bool scoping_procedure = false;
+bool error_scoped = false;
+
 void RE_ConsoleLog::Log(RE_ConsoleLog::Category category, const char file[], int line, const char* format, ...)
 {
 	static char base[LOG_STATEMENT_MAX_LENGTH];
@@ -69,13 +72,12 @@ void RE_ConsoleLog::ScopeProcedureLogging()
 	scoping_procedure = true;
 	error_scoped = false;
 }
-void RE_ConsoleLog::EndScope()
-{
-	if (scoping_procedure)
-	{
-		scoping_procedure = false;
-		RE_INPUT->PushForced(RE_EventType::SCOPE_PROCEDURE_END, RE_EDITOR, error_scoped);
-	}
-}
 
 bool RE_ConsoleLog::ScopedErrors() { return error_scoped; }
+
+void RE_ConsoleLog::EndScope()
+{
+	if (!scoping_procedure) return;
+	scoping_procedure = false;
+	RE_INPUT->PushForced(RE_EventType::SCOPE_PROCEDURE_END, RE_EDITOR, error_scoped);
+}

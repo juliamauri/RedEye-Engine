@@ -16,26 +16,26 @@ struct RE_FBO
 	uint32_t stencilBuffer = 0;
 	uint32_t depthstencilBuffer = 0;
 	uint32_t depthBufferTexture = 0;
+
+	void LoadDeferredTextures();
 };
 
-class RE_FBOManager
+namespace RE_FBOManager
 {
-private:
-
-	eastl::map<uint, RE_FBO> fbos;
-
-public:
-
-	RE_FBOManager() = default;
-	~RE_FBOManager() = default;
-
-	int CreateFBO(uint width, uint height, uint texturesSize = 1, bool depth = true, bool stencil = false);
+	int CreateFBO(
+		uint width,
+		uint height,
+		uint texturesSize = 1,
+		bool depth = true,
+		bool stencil = false);
+	
 	int CreateDeferredFBO(uint width, uint height);
 
 	uint GetDepthTexture(uint ID);
-	uint32_t  GetTextureID(uint ID, uint texAttachment);
+	uint32_t GetTextureID(uint ID, uint texAttachment);
 	uint GetWidth(uint ID);
 	uint GetHeight(uint ID);
+	void GetWidthAndHeight(uint ID, uint32_t& width, uint32_t& height);
 
 	void ChangeFBOSize(uint ID, uint width, uint height);
 	void ChangeFBOBind(uint tID, uint width = 0, uint height = 0);
@@ -43,10 +43,6 @@ public:
 	void ClearFBOBuffers(uint ID, const float color[4]);
 	void ClearFBO(uint ID);
 	void ClearAll();
-
-private:
-
-	void LoadDeferredTextures(RE_FBO& fbo);
 };
 
 #endif // !__REFBOMANAGER__

@@ -4,8 +4,6 @@
 
 #include "RE_Profiler.h"
 #include "RE_ConsoleLog.h"
-#include "RE_Time.h"
-#include "RE_Math.h"
 #include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
@@ -13,12 +11,12 @@
 #include "ModuleRenderer3D.h"
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
-#include "RE_ResourceManager.h"
 #include "RE_CommandManager.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_CameraManager.h"
 #include "RE_ParticleEmitter.h"
 #include "RE_Memory.h"
+#include "RE_ResourceManager.h"
 
 #include "AboutWindow.h"
 #include "AssetsWindow.h"
@@ -50,105 +48,67 @@
 #include <EASTL/queue.h>
 
 ModuleEditor::ModuleEditor() :
-	commands(new RE_CommandManager),
-	thumbnails(new RE_ThumbnailManager),
 	popupWindow(new PopUpWindow),
 	about(new AboutWindow)
 {
-	grid_size[0] = grid_size[1] = 1.f;
-
-	all_aabb_color[0] = 0.f;
-	all_aabb_color[1] = 1.f;
-	all_aabb_color[2] = 0.f;
-
-	sel_aabb_color[0] = 1.f;
-	sel_aabb_color[1] = .5f;
-	sel_aabb_color[2] = 0.f;
-
-	quad_tree_color[0] = 1.f;
-	quad_tree_color[1] = 1.f;
-	quad_tree_color[2] = 0.f;
-
-	frustum_color[0] = 0.f;
-	frustum_color[1] = 1.f;
-	frustum_color[2] = 1.f;
+	flags = static_cast<int>(Flag::SHOW_EDITOR);
 }
 
 ModuleEditor::~ModuleEditor()
 {
 	DEL(popupWindow)
 	DEL(about)
-
-	DEL(commands)
-	DEL(thumbnails)
 }
+
+#pragma region Module
 
 bool ModuleEditor::Init()
 {
-	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleEditor)
 	RE_LOG("Initializing Module Editor");
 
-	// ImGui
-	RE_LOG_SECONDARY("Init ImGui");
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ApplyRedeyeStyling();
-
-	if (!ImGui_ImplSDL2_InitForOpenGL(RE_WINDOW->GetWindow(), RE_RENDER->GetWindowContext()))
+	if (!InitializeImGui())
 	{
-		RE_LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
+		RE_LOG_ERROR("Error Initializing ImGui!");
 		return false;
 	}
 
-	if (!ImGui_ImplOpenGL3_Init())
-	{
-		RE_LOG_ERROR("ImGui could not OpenGL3_Init!");
-		return false;
-	}
-
-	RE_SOFT_NVS("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
-
-	materialeditor = new MaterialEditorWindow();
-	skyboxeditor = new SkyBoxEditorWindow();
-	shadereditor = new ShaderEditorWindow();
-	texteditormanager = new TextEditorManagerWindow();
-	waterplaneWindow = new WaterPlaneWindow();
-
+	// Base Windows
 	windows.push_back(console = new ConsoleWindow());
 	windows.push_back(config = new ConfigWindow());
 	windows.push_back(hierarchy = new HierarchyWindow());
 	windows.push_back(properties = new PropertiesWindow());
 	windows.push_back(play_pause = new PlayPauseWindow());
 
-	sceneEditorWindow = new SceneEditorWindow();
-	sceneGameWindow = new GameWindow();
-	particleEmitterWindow = new ParticleEmitterEditorWindow();
+	// Resource Editors
+	materialeditor = new MaterialEditorWindow();
+	skyboxeditor = new SkyBoxEditorWindow();
+	shadereditor = new ShaderEditorWindow();
+	texteditormanager = new TextEditorManagerWindow();
+	waterplaneWindow = new WaterPlaneWindow();
 
 	return true;
 }
 
 bool ModuleEditor::Start()
 {
-	RE_PROFILE(RE_ProfiledFunc::Start, RE_ProfiledClass::ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::Start, RE_ProfiledClass::ModuleEditor)
 	windows.push_back(assets = new AssetsWindow());
 	windows.push_back(wwise = new WwiseWindow());
 
-	grid = new RE_CompGrid();
-	grid->SetParent(0ull);
-	grid->GridSetUp(50);
+	// Scene views
+	rendered_windows.push_back(sceneEditorWindow = new SceneEditorWindow());
+	rendered_windows.push_back(sceneGameWindow = new GameWindow());
+	rendered_windows.push_back(particleEmitterWindow = new ParticleEmitterEditorWindow());
 
-	// FOCUS CAMERA
-	GO_UID first = RE_SCENE->GetRootCPtr()->GetFirstChildUID();
-	if (first) SetSelected(first);
-
-	thumbnails->Init();
+	RE_ThumbnailManager::Init();
 
 	return true;
 }
 
 void ModuleEditor::PreUpdate()
 {
-	RE_PROFILE(RE_ProfiledFunc::PreUpdate, RE_ProfiledClass::ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::PreUpdate, RE_ProfiledClass::ModuleEditor)
 	ImGuizmo::SetOrthographic(sceneEditorWindow->GetCamera().IsOrthographic());
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
@@ -158,275 +118,163 @@ void ModuleEditor::PreUpdate()
 
 void ModuleEditor::Update()
 {
-	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModuleEditor);
+	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModuleEditor)
 
-	if (show_all)
+	if (HasFlag(Flag::SHOW_EDITOR))
 	{
 		DrawMainMenuBar();
 		DrawWindows();
 	}
 
-	UpdateCamera();
 	CheckEditorInputs();
+	UpdateEditorCameras();
 
 	ImGui::End();
 }
 
 void ModuleEditor::CleanUp()
 {
-	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleEditor);
-	commands->Clear();
-	thumbnails->Clear();
+	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleEditor)
+	
+	RE_CommandManager::Clear();
+	RE_ThumbnailManager::Clear();
 
 	windows.clear();
+	rendered_windows.clear();
 
 	DEL(materialeditor)
 	DEL(skyboxeditor)
 	DEL(shadereditor)
-
 	DEL(texteditormanager)
 	DEL(waterplaneWindow)
-
-	DEL(sceneEditorWindow)
-	DEL(sceneGameWindow)
-
-	DEL(grid)
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
 }
 
-void ModuleEditor::RecieveEvent(const Event& e)
-{
-	switch (e.type)
-	{
-	case RE_EventType::PARTRICLE_EDITOR_WINDOW_CHANGED: particleEmitterWindow->UpdateViewPort(); break;
-	case RE_EventType::EDITOR_WINDOW_CHANGED: sceneEditorWindow->UpdateViewPort(); break;
-	case RE_EventType::GAME_WINDOW_CHANGED: sceneGameWindow->UpdateViewPort(); break;
-	case RE_EventType::UPDATE_SCENE_WINDOWS:
-	{
-		if(e.data1.AsGO()) sceneGameWindow->Recalc();
-		else sceneEditorWindow->Recalc();
-		break;
-	}
-	case RE_EventType::EDITOR_SCENE_RAYCAST:
-	{
-		// Mouse Pick
-		const auto& camera = sceneEditorWindow->GetCamera();
-		float width, height;
-		camera.GetTargetWidthHeight(width, height);
-
-		RE_PROFILE(RE_ProfiledFunc::CameraRaycast, RE_ProfiledClass::ModuleEditor);
-		GO_UID hit = RE_SCENE->RayCastGeometry(
-			math::Ray(camera.GetFrustum().UnProjectLineSegment(
-			(e.data1.AsFloat() -(width / 2.0f)) / (width / 2.0f),
-				((height - e.data2.AsFloat()) - (height / 2.0f)) / (height / 2.0f))));
-
-		if (hit) SetSelected(hit);
-
-		break;
-	}
-	case RE_EventType::SCOPE_PROCEDURE_END:
-	{
-		if (e.data1.AsBool()) popupWindow->PopUpError();
-		break;
-	}
-	default:
-	{
-		if (e.type > RE_EventType::CONSOLE_LOG_MIN && e.type < RE_EventType::CONSOLE_LOG_MAX)
-		{
-			unsigned int category = static_cast<unsigned int>(e.type) - static_cast<unsigned int>(RE_EventType::CONSOLE_LOG_SEPARATOR);
-			const char* text = e.data1.AsCharP();
-
-			if (e.type >= RE_EventType::CONSOLE_LOG_SAVE_ERROR)
-			{
-				category -= 3u;
-				popupWindow->AppendScopedLog(text, e.type);
-			}
-
-			console->AppendLog(category, text, e.data2.AsCharP());
-		}
-	}
-	}
-}
-
-void ModuleEditor::Draw() const
-{
-	RE_PROFILE(RE_ProfiledFunc::DrawEditor, RE_ProfiledClass::ModuleEditor);
-	sceneEditorWindow->DrawWindow();
-	sceneGameWindow->DrawWindow();
-
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		SDL_Window* backup_current_window = RE_WINDOW->GetWindow();
-		SDL_GLContext backup_current_context = RE_RENDER->GetWindowContext();
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-		SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
-	}
-}
-
 void ModuleEditor::DrawEditor()
 {
-	ImGui::DragFloat("Camera speed", &cam_speed, 0.1f, 0.1f, 100.0f, "%.1f");
-	ImGui::DragFloat("Camera sensitivity", &cam_sensitivity, 0.01f, 0.01f, 1.0f, "%.2f");
-
-	sceneEditorWindow->GetCamera().DrawAsEditorProperties();
-
-	ImGui::Separator();
-	ImGui::Checkbox("Select on mouse click", &select_on_mc);
-	ImGui::Checkbox("Focus on Select", &focus_on_select);
-	ImGui::Separator();
-
-	// Debug Drawing
-	ImGui::Checkbox("Debug Draw", &debug_drawing);
-
-	if (!debug_drawing) return;
-
-	bool active_grid = grid->IsActive();
-	if (ImGui::Checkbox("Draw Grid", &active_grid))
-		grid->SetActive(active_grid);
-
-	if (active_grid && ImGui::DragFloat2("Grid Size", grid_size, 0.2f, 0.01f, 100.0f, "%.1f"))
-	{
-		grid->GetTransformPtr()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
-		grid->GetTransformPtr()->Update();
-	}
-
-	int aabb_d = static_cast<int>(aabb_drawing);
-	if (ImGui::Combo("Draw AABB", &aabb_d, "None\0Selected only\0All\0All w/ different selected\0"))
-		aabb_drawing = static_cast<AABBDebugDrawing>(aabb_d);
-
-	if (aabb_drawing > AABBDebugDrawing::SELECTED_ONLY) ImGui::ColorEdit3("Color AABB", all_aabb_color);
-	if (static_cast<int>(aabb_drawing) % 2 == 1) ImGui::ColorEdit3("Color Selected", sel_aabb_color);
-
-	ImGui::Checkbox("Draw QuadTree", &draw_quad_tree);
-	if (draw_quad_tree) ImGui::ColorEdit3("Color Quadtree", quad_tree_color);
-
-	ImGui::Checkbox("Draw Camera Fustrums", &draw_cameras);
-	if (draw_cameras) ImGui::ColorEdit3("Color Fustrum", frustum_color);
+	for (auto& window : rendered_windows)
+		if (ImGui::TreeNodeEx(window->Name(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
+		{
+			window->DrawEditor();
+			ImGui::TreePop();
+		}
 }
 
 void ModuleEditor::Load()
 {
-	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleWindow);
-	RE_LOG_SECONDARY("Loading Editor propieties from config:");
+	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleWindow)
 
+	// ImGui Settings
 	RE_FileBuffer _load("imgui.ini");
-	if (_load.Load())
-		ImGui::LoadIniSettingsFromMemory(_load.GetBuffer(), _load.GetSize());
+	if (_load.Load()) ImGui::LoadIniSettingsFromMemory(_load.GetBuffer(), _load.GetSize());
 
+	// Editor Flags
+	RE_LOG_SECONDARY("Loading Editor propieties from config:");
 	RE_Json* node = RE_FS->ConfigNode("Editor");
+	node->PullBool("Show_Editor", HasFlag(Flag::SHOW_EDITOR)) ? AddFlag(Flag::SHOW_EDITOR) : RemoveFlag(Flag::SHOW_EDITOR);
+	node->PullBool("Show_Imgui_Demo", HasFlag(Flag::SHOW_IMGUI_DEMO)) ? AddFlag(Flag::SHOW_IMGUI_DEMO) : RemoveFlag(Flag::SHOW_IMGUI_DEMO);
 
-	cam_speed = node->PullFloat("C_Speed", 25.0f);
-	cam_sensitivity = node->PullFloat("C_Sensitivity", 0.01f);
-
-	sceneEditorWindow->GetCamera().JsonDeserialize(node->PullJObject("Camera"));
-	particleEmitterWindow->GetCamera().JsonDeserialize(node->PullJObject("Camera"));
-
-	select_on_mc = node->PullBool("SelectMouseClick", true);
-	focus_on_select = node->PullBool("FocusOnSelect", false);
-
-	debug_drawing = node->PullBool("DebugDraw", true);
-
-	grid->SetActive(node->PullBool("Grid_Draw", true));
-
-	math::float2 grid_size_vec = node->PullFloat2("Grid_Size", { 1.0f, 1.0f });
-	memcpy_s(grid_size, sizeof(float) * 2, grid_size_vec.ptr(), sizeof(float) * 2);
-	grid->GetTransformPtr()->SetScale(math::vec(grid_size[0], 0.f, grid_size[1]));
-	grid->GetTransformPtr()->Update();
-
-	aabb_drawing = static_cast<AABBDebugDrawing>(node->PullInt("AABB_Drawing", static_cast<int>(AABBDebugDrawing::ALL_AND_SELECTED)));
-
-	math::vec temp_color = node->PullFloatVector("AABB_Selected_Color", { 0.0f, 1.0f, 0.0f });
-	memcpy_s(all_aabb_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
-
-	temp_color = node->PullFloatVector("AABB_Color", { 1.0f, 0.5f, 0.0f });
-	memcpy_s(sel_aabb_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
-
-	draw_quad_tree = node->PullBool("QuadTree_Draw", true);
-
-	temp_color = node->PullFloatVector("Quadtree_Color", { 1.0f, 1.0f, 0.0f });
-	memcpy_s(quad_tree_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
-
-	draw_cameras = node->PullBool("Frustum_Draw", true);
-
-	temp_color = node->PullFloatVector("Frustum_Color", { 0.0f, 1.0f, 1.0f });
-	memcpy_s(frustum_color, sizeof(float) * 3, temp_color.ptr(), sizeof(float) * 3);
+	// Rendered Windows
+	for (auto& window : rendered_windows)
+		window->Load(node->PullJObject(window->Name()));
 
 	DEL(node)
 }
 
 void ModuleEditor::Save() const
 {
-	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModuleWindow);
-	
+	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModuleWindow)
+
+	// ImGui Settings
 	size_t _size = 0;
 	const char* buff = ImGui::SaveIniSettingsToMemory(&_size);
 	RE_FileBuffer _save("imgui.ini");
 	_save.Save(const_cast<char*>(buff), _size);
 
+	// Editor Flags
 	RE_Json* node = RE_FS->ConfigNode("Editor");
+	node->Push("Show_Editor", HasFlag(Flag::SHOW_EDITOR));
+	node->Push("Show_Imgui_Demo", HasFlag(Flag::SHOW_IMGUI_DEMO));
 
-	node->Push("C_Speed", cam_speed);
-	node->Push("C_Sensitivity", cam_sensitivity);
-	sceneEditorWindow->GetCamera().JsonSerialize(node->PushJObject("Camera"));
-	particleEmitterWindow->GetCamera().JsonSerialize(node->PushJObject("Camera"));
-
-	node->Push("SelectMouseClick", select_on_mc);
-	node->Push("FocusOnSelect", focus_on_select);
-
-	node->Push("DebugDraw", debug_drawing);
-
-	node->Push("Grid_Draw", grid->IsActive());
-	node->PushFloat2("Grid_Size", { grid_size[0], grid_size[0]});
-
-	node->Push("AABB_Drawing", static_cast<int>(aabb_drawing));
-
-	node->PushFloatVector("AABB_Selected_Color", { all_aabb_color[0], all_aabb_color[1], all_aabb_color[2] });
-	node->PushFloatVector("AABB_Color", { sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2] });
-
-	node->Push("QuadTree_Draw", draw_quad_tree);
-	node->PushFloatVector("Quadtree_Color", { quad_tree_color[0], quad_tree_color[1], quad_tree_color[2] });
-
-	node->Push("Frustum_Draw", draw_cameras);
-	node->PushFloatVector("Frustum_Color", { frustum_color[0], frustum_color[1], frustum_color[2] });
+	// Rendered Windows
+	for (auto& window : rendered_windows)
+		window->Save(node->PushJObject(window->Name()));
 
 	DEL(node)
 }
 
-void ModuleEditor::DrawDebug(RE_Camera* current_camera) const
-{
-	RE_PROFILE(RE_ProfiledFunc::DrawDebug, RE_ProfiledClass::ModuleEditor);
+#pragma endregion
 
-	// Check if any debug shape is rendered (aabb_drawing can be bypassed if none selected)
-	auto mode = (selected ? aabb_drawing : static_cast<AABBDebugDrawing>(static_cast<int>(aabb_drawing) - 1));
-	if (!debug_drawing || ((mode == AABBDebugDrawing::NONE) && !draw_quad_tree && !draw_cameras))
+#pragma region Events
+
+void ModuleEditor::RecieveEvent(const Event& e)
+{
+	switch (e.type)
+	{
+	case RE_EventType::UPDATE_SCENE_WINDOWS: e.data1.AsGO() ? sceneGameWindow->Recalc() : sceneEditorWindow->Recalc(); break;
+	case RE_EventType::SCOPE_PROCEDURE_END: if (e.data1.AsBool()) popupWindow->PopUpError(); break;
+	default:
+		if (e.type > RE_EventType::CONSOLE_LOG_MIN && e.type < RE_EventType::CONSOLE_LOG_MAX)
+		{
+			uint category = static_cast<uint>(e.type) - static_cast<uint>(RE_EventType::CONSOLE_LOG_SEPARATOR);
+			const char* text = e.data1.AsCharP();
+
+			if (e.type >= RE_EventType::CONSOLE_LOG_SAVE_ERROR)
+			{
+				category -= 3;
+				popupWindow->AppendScopedLog(text, e.type);
+			}
+
+			console->AppendLog(category, text, e.data2.AsCharP());
+		}
+		else RE_LOG("Unused Event at Module Editor");
+		break;
+	}
+}
+
+void ModuleEditor::HandleSDLEvent(SDL_Event* e) { ImGui_ImplSDL2_ProcessEvent(e); }
+
+#pragma endregion
+
+#pragma region Draws
+
+void ModuleEditor::DrawEditorWindows() const
+{
+	RE_PROFILE(RE_ProfiledFunc::DrawEditor, RE_ProfiledClass::ModuleEditor)
+
+	for (auto& window : rendered_windows)
+		window->DrawWindow(true);
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
 		return;
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(current_camera->GetProjection().Transposed().ptr());
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((current_camera->GetView()).Transposed().ptr());
-	glBegin(GL_LINES);
+	ImGui::UpdatePlatformWindows();
+	ImGui::RenderPlatformWindowsDefault();
+	SDL_GL_MakeCurrent(RE_WINDOW->GetWindow(), RE_RENDER->GetWindowContext());
+}
 
-	DrawBoundingBoxes(mode);
-	DrawQuadTree();
-	DrawFrustums();
+void ModuleEditor::RenderWindowFBOs() const
+{
+	//if (sceneEditorWindow->NeedRender()) RE_RENDER->DrawScene(sceneEditorWindow->render_view);
+	//if (sceneGameWindow->NeedRender()) RE_RENDER->DrawScene(sceneGameWindow->render_view);
+	//if (particleEmitterWindow->IsActive()) RE_RENDER->DrawParticleEditor(particleEmitterWindow->render_view);
 
-	glEnd();
-
-	if (grid->IsActive()) grid->Draw();
+	for (auto& window : rendered_windows)
+		window->RenderFBO();
 }
 
 void ModuleEditor::DrawHeriarchy()
 {
-	GO_UID to_select = 0ull, goToDelete_uid = 0ull;
+	if (!RE_SCENE) return;
+
+	GO_UID to_select = 0;
+	GO_UID goToDelete_uid = 0;
 
 	const RE_GameObject* root = RE_SCENE->GetRootCPtr();
 	GO_UID root_uid = root->GetUID();
@@ -436,7 +284,7 @@ void ModuleEditor::DrawHeriarchy()
 		eastl::stack<RE_GameObject*> gos;
 		for (auto child : root->GetChildsPtrReversed()) gos.push(child);
 
-		unsigned int count = 0;
+		uint count = 0;
 		while (!gos.empty())
 		{
 			RE_GameObject* go = gos.top();
@@ -474,69 +322,50 @@ void ModuleEditor::DrawHeriarchy()
 	}
 
 	if (to_select) SetSelected(to_select);
-	if (goToDelete_uid != 0ull) {
-		RE_INPUT->Push(RE_EventType::DESTROY_GO, RE_SCENE, goToDelete_uid);
-		if (selected == goToDelete_uid || RE_SCENE->GetGOPtr(goToDelete_uid)->isParent(selected)) selected = 0ull;
-	}
-}
-
-void ModuleEditor::DrawGameObjectItems(const GO_UID parent)
-{
-	if (ImGui::BeginMenu("Primitive"))
+	if (goToDelete_uid)
 	{
-		if (ImGui::MenuItem("Grid"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::GRID, parent);
-		if (ImGui::MenuItem("Cube"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::CUBE, parent);
-		if (ImGui::MenuItem("Dodecahedron")) RE_SCENE->CreatePrimitive(RE_Component::Type::DODECAHEDRON, parent);
-		if (ImGui::MenuItem("Tetrahedron"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::TETRAHEDRON, parent);
-		if (ImGui::MenuItem("Octohedron"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::OCTOHEDRON, parent);
-		if (ImGui::MenuItem("Icosahedron"))  RE_SCENE->CreatePrimitive(RE_Component::Type::ICOSAHEDRON, parent);
-		if (ImGui::MenuItem("Point"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::POINT, parent);
-		if (ImGui::MenuItem("Plane"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::PLANE, parent);
-		// if (ImGui::MenuItem("Frustum"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::C_FUSTRUM, parent);
-		if (ImGui::MenuItem("Sphere"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::SPHERE, parent);
-		if (ImGui::MenuItem("Cylinder"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::CYLINDER, parent);
-		if (ImGui::MenuItem("HemiSphere"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::HEMISHPERE, parent);
-		if (ImGui::MenuItem("Torus"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::TORUS, parent);
-		if (ImGui::MenuItem("Trefoil Knot")) RE_SCENE->CreatePrimitive(RE_Component::Type::TREFOILKNOT, parent);
-		if (ImGui::MenuItem("Rock"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::ROCK, parent);
-
-		ImGui::EndMenu();
+		RE_INPUT->Push(RE_EventType::DESTROY_GO, RE_SCENE, goToDelete_uid);
+		if (selected == goToDelete_uid || RE_SCENE->GetGOPtr(goToDelete_uid)->isParent(selected)) selected = 0;
 	}
-
-	if (ImGui::MenuItem("Camera"))			RE_SCENE->CreateCamera(parent);
-	if (ImGui::MenuItem("Light"))			RE_SCENE->CreateLight(parent);
-	if (ImGui::MenuItem("Max Lights"))		RE_SCENE->CreateMaxLights(parent);
-	if (ImGui::MenuItem("Water"))			RE_SCENE->CreateWater(parent);
-	if (ImGui::MenuItem("Particle System"))	RE_SCENE->CreateParticleSystem(parent);
 }
 
-void ModuleEditor::SetSelected(const GO_UID go, bool force_focus)
+#pragma endregion
+
+#pragma region GO Selection
+
+void ModuleEditor::SetSelected(GO_UID go, bool force_focus)
 {
 	selected = go;
 	RE_RES->PopSelected(true);
-	if (force_focus || (focus_on_select && selected))
-	{
-		math::AABB box = RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds();
-		sceneEditorWindow->GetCamera().Focus(box.CenterPoint(), box.HalfSize().Length());
-	}
+
+	if (force_focus ||
+		(sceneEditorWindow->HasFlag(SceneEditorWindow::Flag::FOCUS_GO_ON_SELECT) && selected))
+		sceneEditorWindow->Focus();
 }
 
 void ModuleEditor::DuplicateSelectedObject()
 {
-	if (selected)
-	{
-		const RE_GameObject* sel_go = RE_SCENE->GetGOCPtr(selected);
-		RE_SCENE->GetGOPtr(RE_SCENE->GetScenePool()->CopyGOandChilds(sel_go, sel_go->GetParentUID(), true))->UseResources();
-	}
+	if (!selected) return;
+
+	const RE_GameObject* sel_go = RE_SCENE->GetGOCPtr(selected);
+	RE_SCENE->GetGOPtr(RE_SCENE->GetScenePool()->CopyGOandChilds(sel_go, sel_go->GetParentUID(), true))->UseResources();
 }
 
-void ModuleEditor::ReportSoftawe(const char* name, const char* version, const char* website) const
+#pragma endregion
+
+#pragma region Flags
+
+void ModuleEditor::CheckboxFlag(const char* label, Flag flag)
 {
-	about->sw_info.push_back({ name, version ? version : "", website ? website : "" });
+	bool tmp = HasFlag(flag);
+	if (ImGui::Checkbox(label, &tmp))
+		tmp ? AddFlag(flag) : RemoveFlag(flag);
 }
 
-void ModuleEditor::HandleSDLEvent(SDL_Event* e) { ImGui_ImplSDL2_ProcessEvent(e); }
-void ModuleEditor::PopUpFocus(bool focus) { popUpFocus = focus; }
+#pragma endregion
+
+#pragma region Editor Windows
+
 const char* ModuleEditor::GetAssetsPanelPath() const { return assets->GetCurrentDirPath(); }
 void ModuleEditor::SelectUndefinedFile(eastl::string* toSelect) const { assets->SelectUndefined(toSelect); }
 
@@ -545,56 +374,49 @@ void ModuleEditor::OpenTextEditor(const char* filePath, eastl::string* filePathS
 	texteditormanager->PushEditor(filePath, filePathStr, shadertTemplate, open);
 }
 
-void ModuleEditor::GetSceneWindowSize(unsigned int* widht, unsigned int* height)
+void ModuleEditor::ReportSoftawe(const char* name, const char* version, const char* website) const
 {
-	*widht = sceneEditorWindow->GetWidth();
-	*height = sceneEditorWindow->GetHeight();
+	about->sw_info.push_back({ name, version ? version : "", website ? website : "" });
 }
 
-void ModuleEditor::StartEditingParticleEmitter(RE_ParticleEmitter* sim, const char* md5)
+void ModuleEditor::SetPopUpFocus(bool focus)
 {
-	particleEmitterWindow->StartEditing(sim, md5);
+	if (focus && !HasFlag(Flag::POPUP_IS_FOCUSED)) AddFlag(Flag::POPUP_IS_FOCUSED);
+	else if (!focus && HasFlag(Flag::POPUP_IS_FOCUSED)) RemoveFlag(Flag::POPUP_IS_FOCUSED);
 }
 
-const RE_ParticleEmitter* ModuleEditor::GetCurrentEditingParticleEmitter() const
+#pragma endregion
+
+#pragma region Init
+
+bool ModuleEditor::InitializeImGui()
 {
-	return particleEmitterWindow->GetEdittingParticleEmitter();
+	RE_LOG_SECONDARY("Init ImGui");
+	if (!IMGUI_CHECKVERSION())
+	{
+		RE_LOG_ERROR("ABI incompatibility error between caller code and compiled version of Dear ImGui!");
+		return false;
+	}
+
+	ImGui::CreateContext();
+	ApplyRedeyeStyling();
+
+	if (!ImGui_ImplSDL2_InitForOpenGL(RE_WINDOW->GetWindow(), RE_RENDER->GetWindowContext()))
+	{
+		RE_LOG_ERROR("ImGui could not SDL2_InitForOpenGL!");
+		return false;
+	}
+
+	if (!ImGui_ImplOpenGL3_Init())
+	{
+		RE_LOG_ERROR("ImGui could not OpenGL3_Init!");
+		return false;
+	}
+
+	RE_SOFT_NVS("ImGui", IMGUI_VERSION, "https://github.com/ocornut/imgui");
+
+	return true;
 }
-
-void ModuleEditor::SaveEmitter(bool close, const char* emitter_name, const char* emissor_base, const char* renderer_base)
-{
-	particleEmitterWindow->SaveEmitter(close, emitter_name, emissor_base, renderer_base);
-}
-
-void ModuleEditor::CloseParticleEditor()
-{
-	particleEmitterWindow->NextOrClose();
-}
-
-bool ModuleEditor::IsParticleEditorActive() const { return particleEmitterWindow->IsActive(); }
-
-bool ModuleEditor::EditorSceneNeedsRender() const
-{
-	return sceneEditorWindow->NeedRender();
-}
-
-bool ModuleEditor::GameSceneNeedsRender() const
-{
-	return sceneGameWindow->NeedRender();
-}
-
-RE_Camera* ModuleEditor::GetSceneCamera() const
-{
-	return &(sceneEditorWindow->GetCamera());
-}
-
-RE_Camera* ModuleEditor::GetParticlesCamera() const
-{
-	return &(particleEmitterWindow->GetCamera());
-}
-
-void ModuleEditor::PushCommand(RE_Command* cmd) { commands->PushCommand(cmd); }
-void ModuleEditor::ClearCommands() { commands->Clear(); }
 
 void ModuleEditor::ApplyRedeyeStyling()
 {
@@ -671,6 +493,87 @@ void ModuleEditor::ApplyRedeyeStyling()
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 }
 
+#pragma endregion
+
+#pragma region Editor Update
+void ModuleEditor::DrawWindows()
+{
+	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None; // | ImGuiDockNodeFlags_PassthruCentralNode;
+	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+	// because it would be confusing to have two docking targets within each others.
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+
+	ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->Pos);
+	ImGui::SetNextWindowSize(viewport->Size);
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background 
+	// and handle the pass-thru hole, so we ask Begin() to not render a background.
+	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+		window_flags |= ImGuiWindowFlags_NoBackground;
+
+	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
+	// all active windows docked into it will lose their parent and become undocked.
+	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
+	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("DockSpace Demo", (bool*)true, window_flags);
+	ImGui::PopStyleVar();
+	ImGui::PopStyleVar(2);
+
+	// DockSpace
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+	{
+		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+	}
+
+	popupWindow->DrawWindow(true);
+
+	// Draw Windows
+	bool popUpFocus = HasFlag(Flag::POPUP_IS_FOCUSED);
+	for (auto window : windows) window->DrawWindow(true, popUpFocus);
+	if (about) about->DrawWindow(true, popUpFocus); // (not in windows' list)
+
+	// Draw Editors
+	materialeditor->DrawWindow(true, popUpFocus);
+	shadereditor->DrawWindow(true, popUpFocus);
+	skyboxeditor->DrawWindow(true, popUpFocus);
+	waterplaneWindow->DrawWindow(true, popUpFocus);
+	particleEmitterWindow->DrawWindow(true, popUpFocus);
+	texteditormanager->DrawWindow(false, popUpFocus);
+}
+
+void ModuleEditor::CheckEditorInputs()
+{
+	// Toggle show editor on F1
+	if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_F1)->Down)
+		HasFlag(Flag::SHOW_EDITOR) ? RemoveFlag(Flag::SHOW_EDITOR) : AddFlag(Flag::SHOW_EDITOR);
+
+	// Undo/Redo Commands
+	if (!ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftCtrl)->Down) return;
+	if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Z)->Down) RE_CommandManager::Undo();
+	if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Y)->Down) RE_CommandManager::Redo();
+}
+
+void ModuleEditor::UpdateEditorCameras()
+{
+	RE_PROFILE(RE_ProfiledFunc::EditorCamera, RE_ProfiledClass::ModuleEditor)
+	sceneEditorWindow->UpdateCamera();
+	particleEmitterWindow->UpdateCamera();
+}
+
+#pragma endregion
+
+#pragma region Main Menu Bar
+
 void ModuleEditor::DrawMainMenuBar()
 {
 	if (!ImGui::BeginMainMenuBar()) return;
@@ -697,11 +600,11 @@ void ModuleEditor::DrawMainMenuBar()
 
 	if (ImGui::BeginMenu("Edit"))
 	{
-		if (ImGui::MenuItem("Undo", "LCTRL + Z", false, commands->CanUndo()))
-			commands->Undo();
+		if (ImGui::MenuItem("Undo", "LCTRL + Z", false, RE_CommandManager::CanUndo()))
+			RE_CommandManager::Undo();
 
-		if (ImGui::MenuItem("Redo", "LCTRL + Y", false, commands->CanRedo()))
-			commands->Redo();
+		if (ImGui::MenuItem("Redo", "LCTRL + Y", false, RE_CommandManager::CanRedo()))
+			RE_CommandManager::Redo();
 
 		ImGui::EndMenu();
 	}
@@ -749,8 +652,10 @@ void ModuleEditor::DrawMainMenuBar()
 	// Help
 	if (ImGui::BeginMenu("Help"))
 	{
-		if (ImGui::MenuItem(show_demo ? "Close Gui Demo" : "Open Gui Demo"))
-			show_demo = !show_demo;
+		bool tmp = HasFlag(Flag::SHOW_IMGUI_DEMO);
+		if (ImGui::MenuItem(tmp ? "Close Gui Demo" : "Open Gui Demo"))
+			tmp ? RemoveFlag(Flag::SHOW_IMGUI_DEMO) : AddFlag(Flag::SHOW_IMGUI_DEMO);
+
 		if (ImGui::MenuItem("Documentation"))
 			BROWSER("https://github.com/juliamauri/RedEye-Engine/wiki");
 		if (ImGui::MenuItem("Download Latest"))
@@ -763,246 +668,39 @@ void ModuleEditor::DrawMainMenuBar()
 		ImGui::EndMenu();
 	}
 
-	if (show_demo) ImGui::ShowDemoWindow();
+	if (HasFlag(Flag::SHOW_IMGUI_DEMO)) ImGui::ShowDemoWindow();
 
 	ImGui::EndMainMenuBar();
 }
 
-void ModuleEditor::DrawWindows()
+void ModuleEditor::DrawGameObjectItems(GO_UID parent)
 {
-	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None; // | ImGuiDockNodeFlags_PassthruCentralNode;
-	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-	// because it would be confusing to have two docking targets within each others.
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-
-	ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->Pos);
-	ImGui::SetNextWindowSize(viewport->Size);
-	ImGui::SetNextWindowViewport(viewport->ID);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
-	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background 
-	// and handle the pass-thru hole, so we ask Begin() to not render a background.
-	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-		window_flags |= ImGuiWindowFlags_NoBackground;
-
-	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-	// all active windows docked into it will lose their parent and become undocked.
-	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	ImGui::Begin("DockSpace Demo", (bool*)true, window_flags);
-	ImGui::PopStyleVar();
-	ImGui::PopStyleVar(2);
-
-	// DockSpace
-	ImGuiIO& io = ImGui::GetIO();
-	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+	if (ImGui::BeginMenu("Primitive"))
 	{
-		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+		if (ImGui::MenuItem("Grid"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::GRID, parent);
+		if (ImGui::MenuItem("Cube"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::CUBE, parent);
+		if (ImGui::MenuItem("Dodecahedron")) RE_SCENE->CreatePrimitive(RE_Component::Type::DODECAHEDRON, parent);
+		if (ImGui::MenuItem("Tetrahedron"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::TETRAHEDRON, parent);
+		if (ImGui::MenuItem("Octohedron"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::OCTOHEDRON, parent);
+		if (ImGui::MenuItem("Icosahedron"))  RE_SCENE->CreatePrimitive(RE_Component::Type::ICOSAHEDRON, parent);
+		if (ImGui::MenuItem("Point"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::POINT, parent);
+		if (ImGui::MenuItem("Plane"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::PLANE, parent);
+		// if (ImGui::MenuItem("Frustum"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::C_FUSTRUM, parent);
+		if (ImGui::MenuItem("Sphere"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::SPHERE, parent);
+		if (ImGui::MenuItem("Cylinder"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::CYLINDER, parent);
+		if (ImGui::MenuItem("HemiSphere"))	 RE_SCENE->CreatePrimitive(RE_Component::Type::HEMISHPERE, parent);
+		if (ImGui::MenuItem("Torus"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::TORUS, parent);
+		if (ImGui::MenuItem("Trefoil Knot")) RE_SCENE->CreatePrimitive(RE_Component::Type::TREFOILKNOT, parent);
+		if (ImGui::MenuItem("Rock"))		 RE_SCENE->CreatePrimitive(RE_Component::Type::ROCK, parent);
+
+		ImGui::EndMenu();
 	}
 
-	if (popupWindow->IsActive()) popupWindow->DrawWindow();
-
-	// Draw Windows
-	for (auto window : windows)
-		if (window->IsActive())
-			window->DrawWindow(popUpFocus);
-
-	if (about && about->IsActive())
-		about->DrawWindow(popUpFocus); // (not in windows' list)
-
-	if (materialeditor->IsActive()) materialeditor->DrawWindow(popUpFocus);
-	if (shadereditor->IsActive()) shadereditor->DrawWindow(popUpFocus);
-	if (skyboxeditor->IsActive()) skyboxeditor->DrawWindow(popUpFocus);
-	if (waterplaneWindow->IsActive()) waterplaneWindow->DrawWindow(popUpFocus);
-	if (particleEmitterWindow->IsActive()) particleEmitterWindow->DrawWindow(popUpFocus);
-
-	texteditormanager->DrawWindow(popUpFocus);
+	if (ImGui::MenuItem("Camera"))			RE_SCENE->CreateCamera(parent);
+	if (ImGui::MenuItem("Light"))			RE_SCENE->CreateLight(parent);
+	if (ImGui::MenuItem("Max Lights"))		RE_SCENE->CreateMaxLights(parent);
+	if (ImGui::MenuItem("Water"))			RE_SCENE->CreateWater(parent);
+	if (ImGui::MenuItem("Particle System"))	RE_SCENE->CreateParticleSystem(parent);
 }
 
-void ModuleEditor::UpdateCamera()
-{
-	RE_PROFILE(RE_ProfiledFunc::EditorCamera, RE_ProfiledClass::ModuleEditor);
-
-	if (sceneEditorWindow->isSelected())
-	{
-		auto& camera = sceneEditorWindow->GetCamera();
-		auto mouseData = ImGui::GetIO().MouseDelta;
-
-		if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftAlt)->Down && ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
-		{
-			// Orbit
-			if (selected && (mouseData.x || mouseData.y))
-				camera.Orbit(cam_sensitivity * -mouseData.x, cam_sensitivity * mouseData.y, RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds().CenterPoint());
-		}
-		else if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_F)->Down && selected)
-		{
-			// Focus
-			math::AABB box = RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds();
-			camera.Focus(box.CenterPoint(), box.HalfSize().Length());
-		}
-		else
-		{
-			if (ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Right))
-			{
-				// Camera Speed
-				float cameraSpeed = cam_speed * RE_Time::DeltaTime();
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
-				
-				// Move
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_W)->Down)	   camera.Move(Direction::FORWARD,	cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_S)->Down)	   camera.Move(Direction::BACKWARD,	cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_A)->Down)	   camera.Move(Direction::LEFT,		cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_D)->Down)	   camera.Move(Direction::RIGHT,	cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Space)->Down) camera.Move(Direction::UP,		cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_C)->Down)	   camera.Move(Direction::DOWN,		cameraSpeed);
-
-				// Rotate
-				if (mouseData.x != 0 || mouseData.y != 0)
-					camera.Pan(cam_sensitivity * -mouseData.x, cam_sensitivity * mouseData.y);
-			}
-
-			// Zoom
-			float mouseWheelData = ImGui::GetIO().MouseWheel;
-			if (mouseWheelData != 0) camera.SetFOVRads(camera.GetVFOVRads() - mouseWheelData * RE_Math::deg_to_rad);
-		}
-	}
-
-	if (particleEmitterWindow->IsActive() && particleEmitterWindow->isSelected())
-	{
-		auto& camera = particleEmitterWindow->GetCamera();
-		auto mouseData = ImGui::GetIO().MouseDelta;
-
-		if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_F)->Down)
-		{
-			// Focus
-			math::AABB box = particleEmitterWindow->GetEdittingParticleEmitter()->bounding_box;
-			camera.Focus(box.CenterPoint(), box.HalfSize().Length());
-		}
-		else
-		{
-			if (ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Right))
-			{
-				// Camera Speed
-				float cameraSpeed = cam_speed * RE_Time::DeltaTime();
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftShift)->Down) cameraSpeed *= 2.0f;
-
-				// Move
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_W)->Down)			camera.Move(Direction::FORWARD, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_S)->Down)			camera.Move(Direction::BACKWARD, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_A)->Down)			camera.Move(Direction::LEFT, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_D)->Down)			camera.Move(Direction::RIGHT, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Space)->Down)		camera.Move(Direction::UP, cameraSpeed);
-				if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_C)->Down)			camera.Move(Direction::DOWN, cameraSpeed);
-
-				// Rotate
-				if (mouseData.x != 0 || mouseData.y != 0)
-					camera.Pan(cam_sensitivity * -mouseData.x, cam_sensitivity * mouseData.y);
-			}
-
-			// Zoom
-			float mouseWheelData = ImGui::GetIO().MouseWheel;
-			if (mouseWheelData != 0) camera.SetFOVRads(camera.GetVFOVRads() - mouseWheelData * RE_Math::deg_to_rad);
-		}
-	}
-}
-
-void ModuleEditor::CheckEditorInputs()
-{
-	// Toggle show editor on F1
-	if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_F1)->Down) show_all = !show_all;
-
-	// Undo/Redo Commands
-	if (!ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftCtrl)->Down) return;
-	if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Z)->Down) commands->Undo();
-	if (ImGui::GetKeyData(ImGuiKey::ImGuiKey_Y)->Down) commands->Redo();
-}
-
-void ModuleEditor::DrawBoundingBoxes(AABBDebugDrawing mode) const
-{
-	switch (mode)
-	{
-	case AABBDebugDrawing::SELECTED_ONLY:
-		glColor4f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2], 1.0f);
-		RE_SCENE->GetGOCPtr(selected)->DrawGlobalAABB();
-		break;
-	case AABBDebugDrawing::ALL:
-	{
-		eastl::queue<const RE_GameObject*> objects;
-		for (auto child : RE_SCENE->GetRootCPtr()->GetChildsPtr())
-			objects.push(child);
-
-		if (objects.empty()) break;
-
-		glColor4f(all_aabb_color[0], all_aabb_color[1] * 255.0f, all_aabb_color[2], 1.0f);
-
-		const RE_GameObject* object = nullptr;
-		while (!objects.empty())
-		{
-			(object = objects.front())->DrawGlobalAABB();
-			objects.pop();
-
-			if (object->ChildCount() > 0)
-				for (auto child : object->GetChildsPtr())
-					objects.push(child);
-		}
-
-		break;
-	}
-	case AABBDebugDrawing::ALL_AND_SELECTED:
-	{
-		glColor4f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2], 1.0f);
-		RE_SCENE->GetGOCPtr(selected)->DrawGlobalAABB();
-
-		eastl::queue<const RE_GameObject*> objects;
-		for (auto child : RE_SCENE->GetRootCPtr()->GetChildsPtr())
-			objects.push(child);
-
-		if (!objects.empty())
-		{
-			glColor4f(all_aabb_color[0], all_aabb_color[1], all_aabb_color[2], 1.0f);
-
-			while (!objects.empty())
-			{
-				const RE_GameObject* object = objects.front();
-				objects.pop();
-
-				if (object->GetUID() != selected) object->DrawGlobalAABB();
-
-				if (object->ChildCount() > 0)
-					for (auto child : object->GetChildsPtr())
-						objects.push(child);
-			}
-		}
-
-		break;
-	}
-	default: break;
-	}
-}
-
-void ModuleEditor::DrawQuadTree() const
-{
-	if (!draw_quad_tree) return;
-
-	glColor4f(quad_tree_color[0], quad_tree_color[1], quad_tree_color[2], 1.0f);
-	RE_SCENE->DrawSpacePartitioning();
-}
-
-void ModuleEditor::DrawFrustums() const
-{
-	if (!draw_cameras) return;
-
-	glColor4f(frustum_color[0], frustum_color[1], frustum_color[2], 1.0f);
-	for (const auto& comp : RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::CAMERA))
-	{
-		auto cam = dynamic_cast<const RE_CompCamera*>(comp);
-		if (cam->draw_frustum) cam->Camera.DrawFrustum();
-	}
-}
+#pragma endregion

@@ -4,7 +4,6 @@
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Json.h"
-#include "ModuleEditor.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_TextureImporter.h"
 #include "RE_GLCache.h"
@@ -91,7 +90,7 @@ void RE_Texture::GetWithHeight(int * w, int * h)
 
 void RE_Texture::DrawTextureImGui()
 {
-	ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(GetMD5())), ImVec2(256, 256), { 0.0, 1.0 }, {1.0, 0.0});
+	ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::At(GetMD5())), ImVec2(256, 256), { 0.0, 1.0 }, {1.0, 0.0});
 }
 
 int RE_Texture::GetComboFilter(RE_TextureSettings::Filter filter)

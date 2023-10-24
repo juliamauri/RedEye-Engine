@@ -8,8 +8,11 @@ class EditorWindow
 protected:
 
 	const char* name = nullptr;
-	bool active , lock_pos = false;
-	ImVec2 pos, size, anchor;
+	bool active = true;
+	bool lock_pos = false;
+	ImVec2 pos;
+	ImVec2 size;
+	ImVec2 anchor;
 
 public:
 
@@ -20,8 +23,10 @@ public:
 	bool IsActive() const { return active; }
 	void ToggleActive() { active = !active; }
 
-	void DrawWindow(bool secondary = false)
+	void DrawWindow(bool draw_only_if_active = false, bool secondary = false)
 	{
+		if (draw_only_if_active && !active) return;
+
 		if (lock_pos)
 		{
 			ImGui::SetNextWindowPos(pos);

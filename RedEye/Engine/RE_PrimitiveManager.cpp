@@ -191,7 +191,7 @@ void RE_PrimitiveManager::UnUsePrimitive(RE_Component::Type pType, int id)
 	}
 }
 
-void RE_PrimitiveManager::CreateSphere(int slices, int stacks, unsigned int& vao, unsigned int& vbo, unsigned int& ebo, unsigned int& triangles)
+void RE_PrimitiveManager::CreateSphere(int slices, int stacks, uint& vao, uint& vbo, uint& ebo, uint& triangles)
 {
 	if (slices < 3) slices = 3;
 	if (stacks < 3) stacks = 3;
@@ -287,11 +287,11 @@ void RE_PrimitiveManager::GeneratePoint(PrimData& prim)
 		0.0f,  0.5f, 0.0f
 	};
 
-	unsigned short index[3] = { 0, 1, 2 };
+	ushort index[3] = { 0, 1, 2 };
 
 	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), &triangle[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prim.ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(unsigned short), &index[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(ushort), &index[0], GL_STATIC_DRAW);
 
 	// vertex positions
 	glEnableVertexAttribArray(0);

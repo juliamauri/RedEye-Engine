@@ -18,7 +18,7 @@
 // Called before render is available
 bool ModuleInput::Init()
 {
-	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleInput);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::ModuleInput)
 	RE_LOG("Initializing Module Input");
 	RE_LOG_SECONDARY("Init SDL input & event subsystems");
 	bool ret = true;
@@ -35,7 +35,7 @@ bool ModuleInput::Init()
 // Called every draw update
 void ModuleInput::PreUpdate()
 {
-	RE_PROFILE(RE_ProfiledFunc::PreUpdate, RE_ProfiledClass::ModuleInput);
+	RE_PROFILE(RE_ProfiledFunc::PreUpdate, RE_ProfiledClass::ModuleInput)
 
 	SDL_PumpEvents();
 
@@ -86,7 +86,7 @@ void ModuleInput::DrawEditor()
 // Called before quitting
 void ModuleInput::CleanUp()
 {
-	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleInput);
+	RE_PROFILE(RE_ProfiledFunc::CleanUp, RE_ProfiledClass::ModuleInput)
 	SDL_QuitSubSystem(SDL_INIT_EVENTS);
 	while (!events_queue.empty()) events_queue.pop();
 }

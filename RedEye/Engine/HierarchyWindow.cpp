@@ -17,7 +17,7 @@ void HierarchyWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (RE_SCENE) RE_EDITOR->DrawHeriarchy();
+		RE_EDITOR->DrawHeriarchy();
 
 		if (secondary)
 		{

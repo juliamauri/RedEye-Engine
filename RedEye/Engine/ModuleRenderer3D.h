@@ -3,7 +3,9 @@
 
 #include "EventListener.h"
 #include "RenderView.h"
+#include "RE_Camera.h"
 #include <EASTL/stack.h>
+#include <EASTL/vector.h>
 
 class RE_Component;
 class RE_CompParticleEmitter;
@@ -12,147 +14,118 @@ class RE_SkyBox;
 class ModuleRenderer3D : public EventListener 
 {
 public:
-	ModuleRenderer3D();
-	~ModuleRenderer3D() final;
+
+	enum class Flag : ushort
+	{
+		VSYNC = 1 << 0,				// 0000 0000 0000 0001
+		SHARE_LIGHT_PASS = 1 << 1	// 0000 0000 0000 0010
+	};
+
+private:
+
+	// OpenGL
+	static void* mainContext;
+
+	// Current State
+	static ushort flags;
+	static RenderView::LightMode current_lighting;
+	static uint current_fbo;
+	static eastl::vector<const char*> activeShaders;
+
+	//Debug info
+	static uint lightsCount;
+	static uint particlelightsCount;
+
+public:
+
+	ModuleRenderer3D() = default;
+	~ModuleRenderer3D() final = default;
 
 	bool Init();
-	bool Start();
 	void PostUpdate();
 	void CleanUp();
 	void DrawEditor();
 	void RecieveEvent(const Event& e) final;
-
-	// Config Serialization
 	void Load();
 	void Save() const;
 
 	// Actions
-	void LoadCameraMatrixes(const RE_Camera& camera);
-	void ChangeFBOSize(int width, int height, RenderView::Type view);
-	void PushThumnailRend(const char* md5, bool redo = false);
-
-	// Setters
-	void SetRenderViewDeferred(RenderView::Type r_view, bool using_deferred);
-	void SetRenderViewClearColor(RenderView::Type r_view, math::float4 clear_color);
-	void SetRenderViewDebugDraw(RenderView::Type r_view, bool debug_draw);
+	static void LoadCameraMatrixes(const RE_Camera& camera);
+	void DrawScene(
+		const RenderView& render_view,
+		const RE_Camera& camera,
+		eastl::stack<const RE_Component*>& drawables,
+		eastl::vector<const RE_Component*> lights,
+		eastl::vector<const RE_CompParticleEmitter*> particle_lights) const;
 
 	// Getters
-	void* GetWindowContext() const;
-	static RenderView::LightMode GetLightMode();
-	static RE_Camera* GetCamera();
+	static uint GetDepthTexture();
+	static RenderView::LightMode GetLightMode() { return current_lighting; }
+	static eastl::vector<const char*>& GetActiveShaders() { return activeShaders; }
 
-	const char* GetGPURenderer() const;
-	const char* GetGPUVendor() const;
-	uint GetMaxVertexAttributes(); // (usually 16 as vector in GLSL contains 4 component)
-
-	uintptr_t GetRenderViewTexture(RenderView::Type type) const;
-	uint GetDepthTexture() const;
-
-	// I don't like these
-	math::float4 GetRenderViewClearColor(RenderView::Type r_view) const;
-	RenderView::LightMode GetRenderViewLightMode(RenderView::Type r_view) const;
-	bool GetRenderViewDebugDraw(RenderView::Type r_view) const;
+	// OpenGL
+	static void* GetWindowContext() { return mainContext; }
+	static const char* GetGPURenderer();
+	static const char* GetGPUVendor();
+	static uint GetMaxVertexAttributes(); // (usually 16 as vector in GLSL contains 4 component)
 
 private:
 
+	// OpenGL
+	bool InitializeGL();
+
 	// Render Flags
-	inline bool HasFlag(RenderView::Flag flag) const;
-	void AddFlag(RenderView::Flag flag, bool force_state = false);
-	void RemoveFlag(RenderView::Flag flag, bool force_state = false);
-	void SetupFlag(RenderView::Flag flag, bool target_state, bool force_state = false);
-	void SetupFlags(ushort flags, bool force_state = false);
+	static bool HasFlag(RenderView::Flag flag);
+	static void AddFlag(RenderView::Flag flag, bool force_state = false);
+	static void RemoveFlag(RenderView::Flag flag, bool force_state = false);
+	static void SetupFlag(RenderView::Flag flag, bool target_state, bool force_state = false);
+	static void SetupFlags(ushort flags, bool force_state = false);
 
 	// Prepare To Render
-	void PrepareToRender(const RenderView& render_view);
-	void CategorizeDrawables(eastl::stack<const RE_Component*>& to_draw,
+	void PullActiveShaders() const;
+	void PrepareToRender(const RenderView& render_view, const RE_Camera& camera) const;
+	void CategorizeDrawables(
+		eastl::stack<const RE_Component*>& to_draw,
 		eastl::stack<const RE_Component*>& geo,
 		eastl::stack<const RE_Component*>& blended_geo,
 		eastl::stack<const RE_CompParticleEmitter*>& particle_systems,
-		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems);
+		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems) const;
 
-	eastl::stack<const RE_Component*> GatherDrawables(const RenderView& render_view) const;
-	eastl::vector<const RE_Component*> GatherSceneLights() const;
-	eastl::vector<const class RE_CompParticleEmitter*> GatherParticleLights() const;
-
-	// Main Draws
-	void DrawScene(const RenderView& render_view);
+	// Scene Draws
 	void DrawSceneForward(
 		const RenderView& render_view,
+		const RE_Camera& camera,
 		eastl::stack<const RE_Component*>& blended_geo,
-		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems);
+		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems) const;
 	void DrawSceneDeferred(
 		const RenderView& render_view,
+		const RE_Camera& camera,
 		eastl::stack<const RE_Component*>& blended_geo,
-		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems);
+		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems,
+		eastl::vector<const RE_Component*> lights,
+		eastl::vector<const RE_CompParticleEmitter*> particle_lights) const;
+
+	// Thumbnails
+	void DrawThumbnails();
 
 	// Utility Draws
-	void DrawDebug(const RenderView& render_view);
-	void DrawSkyBox(const RE_SkyBox* skybox);
-	void DrawStencil(bool has_depth_test);
+	void DrawDebug(const RenderView& render_view, const RE_Camera& camera) const;
+	void DrawSkyBox(const RE_SkyBox* skybox) const;
+	void DrawStencil(GO_UID stencilGO, bool has_depth_test) const;
 
 	// Direct Draws
 	void DrawQuad() const;
 	void DirectDrawCube(math::vec position, math::vec color) const;
 
 	// Particle Editor Draws
-	void DrawParticleEditor(RenderView& render_view);
-	void DrawParticleEditorDebug(const RenderView& render_view, const class RE_ParticleEmitter* emitter);
-	void DrawParticleLights(const uint sim_id);
+	void DrawParticleEditor(RenderView& render_view) const;
+	void DrawParticleEditorDebug(const RenderView& render_view, const class RE_ParticleEmitter* emitter) const;
+	void DrawParticleLights(const uint sim_id) const;
 
 	// Thumbnail Draws
-	void ThumbnailGameObject(RE_GameObject* go);
-	void ThumbnailMaterial(class RE_Material* mat);
-	void ThumbnailSkyBox(RE_SkyBox* skybox);
-
-	enum class RenderType : ushort
-	{
-		SCENE,
-		GO,
-		MAT,
-		TEX,
-		SKYBOX
-	};
-
-	struct RenderQueue
-	{
-		RenderType type;
-		RenderView& renderview;
-		const char* resMD5;
-		bool redo = false;
-		RenderQueue(RenderType t, RenderView& rv, const char* r, bool re = false) :
-			type(t), renderview(rv), resMD5(r), redo(re) {}
-	};
-
-public:
-
-	class RE_FBOManager* fbos = nullptr;
-
-private:
-
-	// Rendering Data
-	void* mainContext = nullptr;
-
-	static RenderView::LightMode current_lighting;
-	static RE_Camera* current_camera;
-	static uint current_fbo;
-
-	eastl::vector<RenderView> render_views;
-	eastl::stack<RenderQueue> render_queue;
-	eastl::vector<const char*> activeShaders;
-
-	// Renderer Flags
-	ushort flags = 0;
-
-	//Thumbnail values
-	RenderView thumbnailView;
-	uint mat_vao = 0;
-	uint mat_vbo = 0;
-	uint mat_ebo = 0;
-	uint mat_triangles = 0;
-
-	//Debug info
-	uint lightsCount = 0;
-	uint particlelightsCount = 0;
+	void ThumbnailGameObject(RE_GameObject* go) const;
+	void ThumbnailMaterial(class RE_Material* mat) const;
+	void ThumbnailSkyBox(RE_SkyBox* skybox) const;
 };
 
 #endif // !__MODULERENDER3D_H__

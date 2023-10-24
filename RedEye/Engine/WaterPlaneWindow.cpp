@@ -4,11 +4,11 @@
 #include "WaterPlaneWindow.h"
 
 #include "Application.h"
-#include "ModuleRenderer3D.h"
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
 #include "RE_FileBuffer.h"
 #include "RE_DefaultShaders.h"
+#include "RE_ThumbnailManager.h"
 #include "RE_Material.h"
 #include "RE_Shader.h"
 
@@ -98,7 +98,7 @@ void WaterPlaneWindow::Draw(bool secondary)
 			editingMaterialRes->SetType(ResourceContainer::Type::MATERIAL);
 			editingMaterialRes->SetShader(waterShader); //save meta after add to shader
 
-			RE_RENDER->PushThumnailRend(RE_RES->Reference((ResourceContainer*)editingMaterialRes));
+			RE_ThumbnailManager::AddThumbnail(RE_RES->Reference((ResourceContainer*)editingMaterialRes));
 
 			waterResouceName = "WaterMaterial";
 		}

@@ -185,55 +185,55 @@
       <Filter>Engine\Application\Modules\Scene\Entity Component System\Components</Filter>
     </ClCompile>
     <ClCompile Include="PopUpWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\PopUp</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\PopUp</Filter>
     </ClCompile>
     <ClCompile Include="ConfigWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Config</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Config</Filter>
     </ClCompile>
     <ClCompile Include="ConsoleWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Console</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Console</Filter>
     </ClCompile>
     <ClCompile Include="HierarchyWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Hierarchy</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Hierarchy</Filter>
     </ClCompile>
     <ClCompile Include="PlayPauseWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\PlayPause</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\PlayPause</Filter>
     </ClCompile>
     <ClCompile Include="PropertiesWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Properties</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Properties</Filter>
     </ClCompile>
     <ClCompile Include="AssetsWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Assets</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Assets</Filter>
     </ClCompile>
     <ClCompile Include="WwiseWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Wwise</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Wwise</Filter>
     </ClCompile>
     <ClCompile Include="GameWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Game</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows\Game</Filter>
     </ClCompile>
     <ClCompile Include="SceneEditorWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Scene</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows\Scene</Filter>
     </ClCompile>
     <ClCompile Include="AboutWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\About</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\About</Filter>
     </ClCompile>
     <ClCompile Include="MaterialEditorWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Material Editor</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Resource Editors\Material Editor</Filter>
     </ClCompile>
     <ClCompile Include="SkyBoxEditorWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Skybox Editor</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Resource Editors\Skybox Editor</Filter>
     </ClCompile>
     <ClCompile Include="TextEditorManagerWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Text Editor Manager</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Resource Editors\Text Editor Manager</Filter>
     </ClCompile>
     <ClCompile Include="ShaderEditorWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Shader Editor</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Resource Editors\Shader Editor</Filter>
     </ClCompile>
     <ClCompile Include="ParticleEmitterEditorWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Particle Emitter Editor</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows\Particle Emitter Editor</Filter>
     </ClCompile>
     <ClCompile Include="WaterPlaneWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Water Plane</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Resource Editors\Water Plane</Filter>
     </ClCompile>
     <ClCompile Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3.cpp">
       <Filter>3rd Party\ImGuiImpl</Filter>
@@ -277,9 +277,6 @@
     <ClCompile Include="RE_EmissionCollider.cpp">
       <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
     </ClCompile>
-    <ClCompile Include="RE_Curve.cpp">
-      <Filter>Engine\Application\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="RE_PR_Color.cpp">
       <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
     </ClCompile>
@@ -297,6 +294,12 @@
     </ClCompile>
     <ClCompile Include="RE_Camera.cpp">
       <Filter>Engine\Application\Modules\Renderer\Cameras</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_Curve.cpp">
+      <Filter>Engine\Application\Utility\Curve</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderedWindow.cpp">
+      <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -517,55 +520,55 @@
       <Filter>Engine\Application\Utility</Filter>
     </ClInclude>
     <ClInclude Include="PopUpWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\PopUp</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\PopUp</Filter>
     </ClInclude>
     <ClInclude Include="ConfigWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Config</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Config</Filter>
     </ClInclude>
     <ClInclude Include="ConsoleWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Console</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Console</Filter>
     </ClInclude>
     <ClInclude Include="AboutWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\About</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\About</Filter>
     </ClInclude>
     <ClInclude Include="HierarchyWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Hierarchy</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Hierarchy</Filter>
     </ClInclude>
     <ClInclude Include="PlayPauseWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\PlayPause</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\PlayPause</Filter>
     </ClInclude>
     <ClInclude Include="PropertiesWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Properties</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Properties</Filter>
     </ClInclude>
     <ClInclude Include="AssetsWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Assets</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Assets</Filter>
     </ClInclude>
     <ClInclude Include="WwiseWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Wwise</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Wwise</Filter>
     </ClInclude>
     <ClInclude Include="GameWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Game</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows\Game</Filter>
     </ClInclude>
     <ClInclude Include="SceneEditorWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Scene</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows\Scene</Filter>
     </ClInclude>
     <ClInclude Include="MaterialEditorWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Material Editor</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Resource Editors\Material Editor</Filter>
     </ClInclude>
     <ClInclude Include="SkyBoxEditorWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Skybox Editor</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Resource Editors\Skybox Editor</Filter>
     </ClInclude>
     <ClInclude Include="TextEditorManagerWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Text Editor Manager</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Resource Editors\Text Editor Manager</Filter>
     </ClInclude>
     <ClInclude Include="ShaderEditorWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Shader Editor</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Resource Editors\Shader Editor</Filter>
     </ClInclude>
     <ClInclude Include="WaterPlaneWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Water Plane</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Resource Editors\Water Plane</Filter>
     </ClInclude>
     <ClInclude Include="ParticleEmitterEditorWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Particle Emitter Editor</Filter>
+      <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows\Particle Emitter Editor</Filter>
     </ClInclude>
     <ClInclude Include="..\3rd Parties\Others\ImGuiImpl\imgui_impl_opengl3.h">
       <Filter>3rd Party\ImGuiImpl</Filter>
@@ -735,9 +738,6 @@
     <ClInclude Include="RE_EmissionCollider.h">
       <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
     </ClInclude>
-    <ClInclude Include="RE_Curve.h">
-      <Filter>Engine\Application\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="RE_PR_Color.h">
       <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
     </ClInclude>
@@ -750,17 +750,20 @@
     <ClInclude Include="RE_Random.h">
       <Filter>Engine\Application\Utility\Math</Filter>
     </ClInclude>
-    <ClInclude Include="RenderedWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\_Base</Filter>
-    </ClInclude>
-    <ClInclude Include="EditorWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Editor%27s Windows\_Base</Filter>
-    </ClInclude>
     <ClInclude Include="RE_CameraManager.h">
       <Filter>Engine\Application\Modules\Renderer\Cameras</Filter>
     </ClInclude>
     <ClInclude Include="RE_Camera.h">
       <Filter>Engine\Application\Modules\Renderer\Cameras</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderedWindow.h">
+      <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_Curve.h">
+      <Filter>Engine\Application\Utility\Curve</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorWindow.h">
+      <Filter>Engine\Application\Modules\Editor\Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -805,60 +808,6 @@
     </Filter>
     <Filter Include="Engine\Application\Modules\Editor\Thumbnails">
       <UniqueIdentifier>{ae9a93ff-6fc9-4767-854d-7d9e43779e88}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows">
-      <UniqueIdentifier>{e69f9a16-1fd2-4f03-9765-c5d2d970ece9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors">
-      <UniqueIdentifier>{a3c8abdb-529e-49a7-8144-029d9fb227e9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Material Editor">
-      <UniqueIdentifier>{5f7c9fe0-4dcf-4fb5-a4dc-0a1ed74108cc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Skybox Editor">
-      <UniqueIdentifier>{c93d304c-951c-4bc9-8a36-fb86ac0571e2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Shader Editor">
-      <UniqueIdentifier>{33ef5b50-a825-49f2-aa7e-c2974fb29511}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Resource Editors\Particle Emitter Editor">
-      <UniqueIdentifier>{d44a74ad-6a08-4a9b-94ca-0ced9627667b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Text Editor Manager">
-      <UniqueIdentifier>{0cadaf2b-4832-4167-bd67-4abea9b1d96c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Water Plane">
-      <UniqueIdentifier>{04d2bda9-33bf-4e1f-aaef-ef5176cc306f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\PopUp">
-      <UniqueIdentifier>{4bff0e54-3d2e-448a-a7db-88cc029f117c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\About">
-      <UniqueIdentifier>{814386d6-61fc-40c3-a980-781e8b2ab49a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Assets">
-      <UniqueIdentifier>{90cf6012-4345-4f17-aa10-1499f225a711}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Config">
-      <UniqueIdentifier>{942d7962-e36b-4310-a448-ad817032562c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Console">
-      <UniqueIdentifier>{4b2b9ce5-a270-4a72-b90f-e7c9c7392c15}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Game">
-      <UniqueIdentifier>{ea464fc3-cac0-4fb6-81cc-4c3f089ffb77}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\PlayPause">
-      <UniqueIdentifier>{0449aa3b-c3b0-4e3e-897c-01403a18102f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Properties">
-      <UniqueIdentifier>{edfbe3a6-4a49-4958-a0f0-41ec35b189ad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Scene">
-      <UniqueIdentifier>{125bb508-86a2-4cc6-b875-cc1ca97da142}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Wwise">
-      <UniqueIdentifier>{8ebeb94a-6bb7-4244-92c8-867651647d82}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Application\Modules\Renderer">
       <UniqueIdentifier>{76318a8d-8016-4819-bc7f-f1a6a7f7e38f}</UniqueIdentifier>
@@ -950,20 +899,80 @@
     <Filter Include="3rd Party\ImGuiImpl">
       <UniqueIdentifier>{ad5d9ea1-006f-4d2d-a94c-62673cae903b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\Hierarchy">
-      <UniqueIdentifier>{e923f986-34cc-4a0a-9760-8a71a536d3fd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{f67675b7-cb18-4f10-a715-37a957201e92}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Application\Modules\Physics\Particles\Emission Data">
       <UniqueIdentifier>{8fe1fee5-6a07-44ff-b654-03aad26e6d4d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Editor%27s Windows\_Base">
-      <UniqueIdentifier>{e575ef90-2628-4d37-b646-f0844549e5dd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Application\Modules\Renderer\Cameras">
       <UniqueIdentifier>{075c1c4b-5b5c-42c1-8a2c-abb88d1569f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Utility\Curve">
+      <UniqueIdentifier>{151a30eb-69c0-4ff2-afa9-d07b08d3a12a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows">
+      <UniqueIdentifier>{e575ef90-2628-4d37-b646-f0844549e5dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Rendered Windows">
+      <UniqueIdentifier>{808a1791-ca06-45fc-92ad-a5080c671dc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Rendered Windows\Particle Emitter Editor">
+      <UniqueIdentifier>{d44a74ad-6a08-4a9b-94ca-0ced9627667b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Rendered Windows\Scene">
+      <UniqueIdentifier>{125bb508-86a2-4cc6-b875-cc1ca97da142}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Rendered Windows\Game">
+      <UniqueIdentifier>{ea464fc3-cac0-4fb6-81cc-4c3f089ffb77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\PopUp">
+      <UniqueIdentifier>{4bff0e54-3d2e-448a-a7db-88cc029f117c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Resource Editors">
+      <UniqueIdentifier>{a3c8abdb-529e-49a7-8144-029d9fb227e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Resource Editors\Material Editor">
+      <UniqueIdentifier>{5f7c9fe0-4dcf-4fb5-a4dc-0a1ed74108cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Resource Editors\Skybox Editor">
+      <UniqueIdentifier>{c93d304c-951c-4bc9-8a36-fb86ac0571e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Resource Editors\Shader Editor">
+      <UniqueIdentifier>{33ef5b50-a825-49f2-aa7e-c2974fb29511}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Resource Editors\Water Plane">
+      <UniqueIdentifier>{04d2bda9-33bf-4e1f-aaef-ef5176cc306f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Resource Editors\Text Editor Manager">
+      <UniqueIdentifier>{0cadaf2b-4832-4167-bd67-4abea9b1d96c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Base Windows">
+      <UniqueIdentifier>{25673d9e-a750-4de6-81b5-9b241c9ca7d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Base Windows\About">
+      <UniqueIdentifier>{814386d6-61fc-40c3-a980-781e8b2ab49a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Base Windows\Assets">
+      <UniqueIdentifier>{90cf6012-4345-4f17-aa10-1499f225a711}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Base Windows\Config">
+      <UniqueIdentifier>{942d7962-e36b-4310-a448-ad817032562c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Base Windows\Console">
+      <UniqueIdentifier>{4b2b9ce5-a270-4a72-b90f-e7c9c7392c15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Base Windows\Hierarchy">
+      <UniqueIdentifier>{e923f986-34cc-4a0a-9760-8a71a536d3fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Base Windows\PlayPause">
+      <UniqueIdentifier>{0449aa3b-c3b0-4e3e-897c-01403a18102f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Base Windows\Properties">
+      <UniqueIdentifier>{edfbe3a6-4a49-4958-a0f0-41ec35b189ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Editor\Windows\Base Windows\Wwise">
+      <UniqueIdentifier>{8ebeb94a-6bb7-4244-92c8-867651647d82}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

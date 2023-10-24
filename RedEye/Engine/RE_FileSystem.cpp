@@ -34,7 +34,7 @@
 
 bool RE_FileSystem::Init(int argc, char* argv[])
 {
-	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::FileSystem);
+	RE_PROFILE(RE_ProfiledFunc::Init, RE_ProfiledClass::FileSystem)
 	bool ret = false;
 	RE_LOG("Initializing File System");
 	if (PHYSFS_init(argv[0]) != 0)
@@ -132,7 +132,7 @@ void RE_FileSystem::Clear()
 
 unsigned int RE_FileSystem::ReadAssetChanges(unsigned int extra_ms, bool doAll)
 {
-	RE_PROFILE(RE_ProfiledFunc::ReadAssetChanges, RE_ProfiledClass::FileSystem);
+	RE_PROFILE(RE_ProfiledFunc::ReadAssetChanges, RE_ProfiledClass::FileSystem)
 	RE_Timer time;
 	bool run = true;
 
@@ -524,7 +524,7 @@ const char* RE_FileSystem::GetExecutableDirectory() const { return PHYSFS_getBas
 
 void RE_FileSystem::HandleDropedFile(const char* file)
 {
-	RE_PROFILE(RE_ProfiledFunc::DroppedFile, RE_ProfiledClass::FileSystem);
+	RE_PROFILE(RE_ProfiledFunc::DroppedFile, RE_ProfiledClass::FileSystem)
 	eastl::string full_path(file);
 	eastl::string directory = full_path.substr(0, full_path.find_last_of('\\') + 1);
 	eastl::string fileNameExtension = full_path.substr(full_path.find_last_of("\\") + 1);

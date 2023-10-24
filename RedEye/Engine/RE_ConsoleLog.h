@@ -24,11 +24,8 @@ namespace RE_ConsoleLog
 	void RequestBrowser(const char* link);
 	 
 	void ScopeProcedureLogging();
-	void EndScope();
 	bool ScopedErrors();
-
-	static bool scoping_procedure = false;
-	static bool error_scoped = false;
+	void EndScope();
 };
 
 #define RE_LOGGER RE_ConsoleLog

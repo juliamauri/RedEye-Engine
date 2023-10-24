@@ -41,7 +41,7 @@ void PlayPauseWindow::Draw(bool secondary)
 	else ImGui::Text("Missing Main Camera");
 
 	ImGui::SameLine();
-	ImGui::Checkbox("Draw Gizmos", &RE_EDITOR->debug_drawing);
+	RE_EDITOR->GetSceneEditor()->CheckboxFlag("Draw Gizmos", SceneEditorWindow::Flag::DRAW_DEBUG);
 
 	ImGui::SameLine();
 	ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);

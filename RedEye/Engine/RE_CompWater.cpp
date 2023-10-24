@@ -76,7 +76,7 @@ void RE_CompWater::Draw() const
 	RenderView::LightMode lMode = ModuleRenderer3D::GetLightMode();
 	
 	glActiveTexture(GL_TEXTURE0 + textureCounter);
-	RE_GLCache::ChangeTextureBind(RE_RENDER->GetDepthTexture());
+	RE_GLCache::ChangeTextureBind(ModuleRenderer3D::GetDepthTexture());
 	shader->UploadDepth(textureCounter++);
 
 	RE_GLCache::ChangeShader(shaderID);

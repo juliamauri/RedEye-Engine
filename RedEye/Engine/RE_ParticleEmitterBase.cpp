@@ -13,6 +13,7 @@
 #include "RE_ParticleRender.h"
 #include "RE_ParticleEmitter.h"
 #include "RE_CompParticleEmitter.h"
+#include "ParticleEmitterEditorWindow.h"
 
 #include <MD5/md5.h>
 
@@ -185,15 +186,16 @@ bool RE_ParticleEmitterBase::Contains(const char* res) const
 void RE_ParticleEmitterBase::Draw()
 {
 	static RE_ParticleEmitter* editting_emitter = nullptr;
-	if (ImGui::Button("Edit particle emitter")) {
+	if (ImGui::Button("Edit particle emitter"))
+	{
 		RE_RES->Use(GetMD5());
-		RE_EDITOR->StartEditingParticleEmitter(GetNewEmitter(), GetMD5());
+		RE_EDITOR->GetParticleEmitterEditorWindow()->StartEditing(GetNewEmitter(), GetMD5());
 	}
 
 	//if (!isInternal() && applySave && ImGui::Button("Save Changes"))
 	//{
 	//	Save();
-	//	RE_RENDER->PushThumnailRend(GetMD5(), true);
+	//	RE_ThumbnailManager::AddThumbnail(GetMD5(), true);
 	//	applySave = false;
 	//}
 

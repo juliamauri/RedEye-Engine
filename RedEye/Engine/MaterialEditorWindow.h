@@ -13,8 +13,9 @@ private:
 
 private:
 
-	class RE_Material* editingMaerial = nullptr;
-	eastl::string matName, assetPath;
+	class RE_Material* editing_material = nullptr;
+	eastl::string matName;
+	eastl::string assetPath;
 };
 
 #endif // !__MATERIAL_EDITOR_WINDOW__

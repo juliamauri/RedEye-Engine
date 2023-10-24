@@ -5,23 +5,23 @@
 
 #include "RE_Memory.h"
 #include "Application.h"
-#include "ModuleRenderer3D.h"
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
 #include "RE_Material.h"
+#include "RE_ThumbnailManager.h"
 
 #include <ImGuiImpl/imgui_stdlib.h>
 #include <ImGui/imgui_internal.h>
 
 MaterialEditorWindow::MaterialEditorWindow() :
 	EditorWindow("Material Editor", false),
-	editingMaerial(new RE_Material),
+	editing_material(new RE_Material),
 	matName("New Material")
 {}
 
 MaterialEditorWindow::~MaterialEditorWindow()
 {
-	DEL(editingMaerial)
+	DEL(editing_material)
 }
 
 void MaterialEditorWindow::Draw(bool secondary)
@@ -55,14 +55,14 @@ void MaterialEditorWindow::Draw(bool secondary)
 		ImGui::SameLine();
 		if (ImGui::Button("Save") && !matName.empty() && !exits)
 		{
-			editingMaerial->SetName(matName.c_str());
-			editingMaerial->SetAssetPath(assetPath.c_str());
-			editingMaerial->SetType(ResourceContainer::Type::MATERIAL);
-			editingMaerial->Save();
+			editing_material->SetName(matName.c_str());
+			editing_material->SetAssetPath(assetPath.c_str());
+			editing_material->SetType(ResourceContainer::Type::MATERIAL);
+			editing_material->Save();
 
-			RE_RENDER->PushThumnailRend(RE_RES->Reference((ResourceContainer*)editingMaerial));
+			RE_ThumbnailManager::AddThumbnail(RE_RES->Reference(static_cast<ResourceContainer*>(editing_material)));
 
-			editingMaerial = new RE_Material();
+			editing_material = new RE_Material();
 			matName = "New Material";
 		}
 
@@ -73,7 +73,7 @@ void MaterialEditorWindow::Draw(bool secondary)
 		}
 
 		ImGui::Separator();
-		editingMaerial->DrawMaterialEdit();
+		editing_material->DrawMaterialEdit();
 
 		if (secondary)
 		{

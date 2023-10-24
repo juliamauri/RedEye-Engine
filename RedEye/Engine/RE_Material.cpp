@@ -682,7 +682,7 @@ void RE_Material::DrawMaterialParticleEdit(bool tex)
 	if (!isInternal() && applySave && ImGui::Button("Save Changes"))
 	{
 		Save();
-		RE_RENDER->PushThumnailRend(GetMD5(), true);
+		RE_ThumbnailManager::AddThumbnail(GetMD5(), true);
 		applySave = false;
 	}
 
@@ -815,7 +815,7 @@ void RE_Material::Draw()
 	if (!isInternal() && applySave && ImGui::Button("Save Changes"))
 	{
 		Save();
-		RE_RENDER->PushThumnailRend(GetMD5(), true);
+		RE_ThumbnailManager::AddThumbnail(GetMD5(), true);
 		applySave = false;
 	}
 
@@ -832,7 +832,7 @@ void RE_Material::Draw()
 	}
 
 	DrawMaterialEdit();
-	ImGui::Image(reinterpret_cast<void*>(RE_EDITOR->thumbnails->At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
+	ImGui::Image(reinterpret_cast<void*>(RE_ThumbnailManager::At(GetMD5())), { 256, 256 }, { 0,1 }, { 1, 0 });
 }
 
 void RE_Material::SaveResourceMeta(RE_Json* metaNode) const

@@ -3,7 +3,7 @@
 #include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
-#include "ModuleEditor.h"
+#include "RE_CommandManager.h"
 #include "RE_Command.h"
 
 #include "RE_GameObject.h"
@@ -139,9 +139,9 @@ void RE_CompTransform::DrawProperties()
 
 		if (watchingChange && !ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left) || !frameWatched)
 		{
-			if (pFrom) RE_EDITOR->PushCommand(new RE_CMDTransformPosition(go, before, last));
-			else if (rFrom) RE_EDITOR->PushCommand(new RE_CMDTransformRotation(go, before, last));
-			else if (sFrom) RE_EDITOR->PushCommand(new RE_CMDTransformScale(go, before, last));
+			if (pFrom) RE_CommandManager::PushCommand(new RE_CMDTransformPosition(go, before, last));
+			else if (rFrom) RE_CommandManager::PushCommand(new RE_CMDTransformRotation(go, before, last));
+			else if (sFrom) RE_CommandManager::PushCommand(new RE_CMDTransformScale(go, before, last));
 
 			watchingChange = pFrom = rFrom = sFrom = false;
 			before = last = math::vec::zero;

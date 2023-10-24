@@ -42,7 +42,7 @@ public:
 
 	#pragma region Component Getters
 
-	RE_Component* GetComponentPtr(const COMP_UID poolid, RE_Component::Type cType);
+	RE_Component* GetComponentPtr(const COMP_UID poolid, RE_Component::Type cType) const;
 	const RE_Component* GetComponentCPtr(const COMP_UID poolid, RE_Component::Type cType) const;
 
 	eastl::vector<COMP_UID> GetAllCompUID(RE_Component::Type type = RE_Component::Type::EMPTY) const;

@@ -8,11 +8,12 @@
 #include "ModuleInput.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"
-#include "ModuleRenderer3D.h"
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
+#include "RE_ThumbnailManager.h"
 #include "RE_Prefab.h"
 #include "RE_ParticleEmitterBase.h"
+#include "ParticleEmitterEditorWindow.h"
 
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_internal.h>
@@ -36,7 +37,7 @@ void PopUpWindow::PopUp(const char* _btnText, const char* title, bool _disableAl
 {
 	btn_text = _btnText;
 	title_text = title;
-	RE_EDITOR->PopUpFocus(_disableAllWindows);
+	RE_EDITOR->SetPopUpFocus(_disableAllWindows);
 	active = true;
 }
 
@@ -230,7 +231,7 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				active = false;
 				state = PopUpState::NONE;
-				RE_EDITOR->PopUpFocus(false);
+				RE_EDITOR->SetPopUpFocus(false);
 				ClearScope();
 			}
 
@@ -275,7 +276,7 @@ void PopUpWindow::Draw(bool secondary)
 				active = false;
 				state = PopUpState::NONE;
 				flags &= ~PopUpFlags::input_name;
-				RE_EDITOR->PopUpFocus(false);
+				RE_EDITOR->SetPopUpFocus(false);
 				if (flags & PopUpFlags::exit_after) RE_INPUT->Push(RE_EventType::REQUEST_QUIT, App);
 				else if (flags & PopUpFlags::spawn_new_scene) RE_SCENE->NewEmptyScene();
 				flags &= ~PopUpFlags::spawn_new_scene;
@@ -354,9 +355,14 @@ void PopUpWindow::Draw(bool secondary)
 				active = false;
 				state = PopUpState::NONE;
 				flags &= ~(PopUpFlags::input_name | PopUpFlags::particle_names | PopUpFlags::need_emission | PopUpFlags::need_renderer);
-				RE_EDITOR->PopUpFocus(false);
-				if (!canceled) RE_EDITOR->SaveEmitter(flags & PopUpFlags::exit_after, name_str.c_str(), emission_name.c_str(), renderer_name.c_str());
-				else RE_EDITOR->CloseParticleEditor();
+				RE_EDITOR->SetPopUpFocus(false);
+				if (!canceled)
+					RE_EDITOR->GetParticleEmitterEditorWindow()->SaveEmitter(
+						flags & PopUpFlags::exit_after,
+						name_str.c_str(),
+						emission_name.c_str(),
+						renderer_name.c_str());
+				else RE_EDITOR->GetParticleEmitterEditorWindow()->NextOrClose();
 			}
 
 			break;
@@ -385,7 +391,7 @@ void PopUpWindow::Draw(bool secondary)
 				RE_INPUT->ResumeEvents();
 
 				newPrefab->SaveMeta();
-				RE_RENDER->PushThumnailRend(RE_RES->Reference(newPrefab));
+				RE_ThumbnailManager::AddThumbnail(RE_RES->Reference(newPrefab));
 			}
 
 			if (ImGui::Button("Cancel") || clicked)
@@ -394,7 +400,7 @@ void PopUpWindow::Draw(bool secondary)
 				active = false;
 				flags &= ~PopUpFlags::input_name;
 				go_prefab = nullptr;
-				RE_EDITOR->PopUpFocus(false);
+				RE_EDITOR->SetPopUpFocus(false);
 			}
 
 			break;
@@ -444,7 +450,7 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				active = false;
 				state = PopUpState::NONE;
-				RE_EDITOR->PopUpFocus(false);
+				RE_EDITOR->SetPopUpFocus(false);
 				go_prefab = nullptr;
 				resource_to_delete = nullptr;
 				using_resources.clear();
@@ -516,7 +522,7 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				active = false;
 				state = PopUpState::NONE;
-				RE_EDITOR->PopUpFocus(false);
+				RE_EDITOR->SetPopUpFocus(false);
 				using_resources.clear();
 				RE_RES->PopSelected(true);
 				RE_LOGGER::EndScope();
@@ -552,7 +558,7 @@ void PopUpWindow::Draw(bool secondary)
 			{
 				active = false;
 				state = PopUpState::NONE;
-				RE_EDITOR->PopUpFocus(false);
+				RE_EDITOR->SetPopUpFocus(false);
 			}
 			break;
 		}
