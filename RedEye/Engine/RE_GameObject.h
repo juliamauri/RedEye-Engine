@@ -6,6 +6,7 @@
 #include <MGL/Geometry/AABB.h>
 #include <EASTL/list.h>
 #include <EASTL/stack.h>
+#include <EASTL/vector.h>
 #include <EASTL/string.h>
 
 class RE_GameObject

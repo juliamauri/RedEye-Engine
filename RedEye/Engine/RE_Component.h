@@ -5,6 +5,7 @@
 #include "RE_Serializable.h"
 
 #include <EASTL/vector.h>
+#include "MGL/Math/float3.h"
 
 class RE_GameObject;
 class GameObjectsPool;
@@ -90,12 +91,13 @@ public:
 
 	void SetType(Type t) { type = t; }
 	Type GetType() const { return type; }
+	template <typename T> T As() const { return dynamic_cast<T>(this); }
+
 	GO_UID GetGOUID() const { return go; }
 	RE_GameObject* GetGOPtr() const;
 	const RE_GameObject* GetGOCPtr() const;
 	void SetParent(const GO_UID parent) { useParent = (go = parent); };
-
-	template <typename T> T As() const { return dynamic_cast<T>(this); }
+	math::vec GetGlobalPosition() const;
 
 	//POOL
 	COMP_UID GetPoolID() const { return id; }

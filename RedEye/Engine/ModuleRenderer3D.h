@@ -4,9 +4,11 @@
 #include "EventListener.h"
 #include "RenderView.h"
 #include "RE_Camera.h"
+#include "RE_ParticleEmitter.h"
 #include <EASTL/stack.h>
 #include <EASTL/vector.h>
 
+class RenderedWindow;
 class RE_Component;
 class RE_CompParticleEmitter;
 class RE_SkyBox;
@@ -36,6 +38,10 @@ private:
 	static uint lightsCount;
 	static uint particlelightsCount;
 
+	// Utility
+	float point_size = 2.f;
+	eastl::vector<math::float2> circle_precompute;
+
 public:
 
 	ModuleRenderer3D() = default;
@@ -56,7 +62,12 @@ public:
 		const RE_Camera& camera,
 		eastl::stack<const RE_Component*>& drawables,
 		eastl::vector<const RE_Component*> lights,
-		eastl::vector<const RE_CompParticleEmitter*> particle_lights) const;
+		eastl::vector<const RE_CompParticleEmitter*> particle_lights,
+		RenderedWindow* toDebug = nullptr) const;
+
+	// Draws
+	void DrawStencil(GO_UID stencilGO, bool has_depth_test) const;
+	void DebugDrawParticleEmitter(const RE_ParticleEmitter& sim) const;
 
 	// Getters
 	static uint GetDepthTexture();
@@ -73,6 +84,9 @@ private:
 
 	// OpenGL
 	bool InitializeGL();
+
+	// Utility
+	void PrecomputeCircle(int steps = 12);
 
 	// Render Flags
 	static bool HasFlag(RenderView::Flag flag);
@@ -92,11 +106,6 @@ private:
 		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems) const;
 
 	// Scene Draws
-	void DrawSceneForward(
-		const RenderView& render_view,
-		const RE_Camera& camera,
-		eastl::stack<const RE_Component*>& blended_geo,
-		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems) const;
 	void DrawSceneDeferred(
 		const RenderView& render_view,
 		const RE_Camera& camera,
@@ -104,28 +113,30 @@ private:
 		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems,
 		eastl::vector<const RE_Component*> lights,
 		eastl::vector<const RE_CompParticleEmitter*> particle_lights) const;
-
-	// Thumbnails
-	void DrawThumbnails();
-
 	// Utility Draws
-	void DrawDebug(const RenderView& render_view, const RE_Camera& camera) const;
+	void DrawDebug(
+		const RenderedWindow* toDebug,
+		const RenderView& render_view,
+		const RE_Camera& camera) const;
+	
 	void DrawSkyBox(const RE_SkyBox* skybox) const;
-	void DrawStencil(GO_UID stencilGO, bool has_depth_test) const;
 
 	// Direct Draws
 	void DrawQuad() const;
 	void DirectDrawCube(math::vec position, math::vec color) const;
+	void DrawAASphere(const math::vec p_pos, const float radius) const;
 
 	// Particle Editor Draws
-	void DrawParticleEditor(RenderView& render_view) const;
-	void DrawParticleEditorDebug(const RenderView& render_view, const class RE_ParticleEmitter* emitter) const;
-	void DrawParticleLights(const uint sim_id) const;
+	void DrawParticleEditor(
+		RenderView& render_view,
+		const RE_Camera& camera) const;
 
-	// Thumbnail Draws
-	void ThumbnailGameObject(RE_GameObject* go) const;
-	void ThumbnailMaterial(class RE_Material* mat) const;
-	void ThumbnailSkyBox(RE_SkyBox* skybox) const;
+	void DrawParticleEditorDebug(
+		const RenderView& render_view,
+		const RE_ParticleEmitter* emitter,
+		const RE_Camera& camera) const;
+
+	void DrawParticleLights(const uint sim_id) const;
 };
 
 #endif // !__MODULERENDER3D_H__

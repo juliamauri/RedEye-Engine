@@ -48,6 +48,7 @@ public:
 	~SceneEditorWindow() final = default;
 
 	void DrawDebug() const final;
+	void DrawOther() const final;
 
 	// Guizmos
 	ImGuizmo::OPERATION GetOperation() const { return operation; }
@@ -58,6 +59,7 @@ public:
 	// Camera
 	void Orbit(float delta_x, float delta_y) final;
 	void Focus() final;
+	const math::Frustum* GetFrustum() const final;
 
 	// GO Selection
 	void MousePick(float x, float y);

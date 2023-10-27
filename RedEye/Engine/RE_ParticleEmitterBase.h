@@ -36,6 +36,7 @@ private:
 	void LoadResourceMeta(RE_Json* metaNode) final;
 
 private:
+
 	const char* resource_emission = nullptr;
 	const char* resource_renderer = nullptr;
 };

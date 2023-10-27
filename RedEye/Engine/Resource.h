@@ -67,6 +67,8 @@ public:
 
 	void DrawPropieties();
 
+	template <typename T> T As() const { return dynamic_cast<T>(this); }
+
 private:
 
 	virtual void Draw() {}

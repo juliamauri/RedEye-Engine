@@ -96,9 +96,9 @@ void RE_ThumbnailManager::AddThumbnail(const char* md5, bool redo)
 	{
 	case ResourceContainer::Type::SCENE:
 	case ResourceContainer::Type::MODEL:
-	case ResourceContainer::Type::PREFAB:	pending.push({ RenderType::GO,	  md5, redo }); break;
-	case ResourceContainer::Type::MATERIAL:	pending.push({ RenderType::MAT,	  md5, redo }); break;
-	case ResourceContainer::Type::TEXTURE:	pending.push({ RenderType::TEX,	  md5, redo }); break;
+	case ResourceContainer::Type::PREFAB:	pending.push({ RenderType::GO,	   md5, redo }); break;
+	case ResourceContainer::Type::MATERIAL:	pending.push({ RenderType::MAT,	   md5, redo }); break;
+	case ResourceContainer::Type::TEXTURE:	pending.push({ RenderType::TEX,	   md5, redo }); break;
 	case ResourceContainer::Type::SKYBOX:	pending.push({ RenderType::SKYBOX, md5, redo }); break;
 	default: break;
 	}

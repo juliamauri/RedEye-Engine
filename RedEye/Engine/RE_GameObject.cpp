@@ -1,20 +1,20 @@
-#include <EASTL/vector.h>
-
 #include "RE_GameObject.h"
 
+#include "RE_Memory.h"
 #include "RE_Assert.h"
 #include "RE_Json.h"
 #include "Application.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
+
 #include "RE_CameraManager.h"
-#include "RE_GLCache.h"
 #include "RE_ResourceManager.h"
 #include "RE_ECS_Pool.h"
 #include "RE_PrimitiveManager.h"
 #include "RE_ParticleEmitter.h"
-#include "RE_Memory.h"
+#include "RE_ParticleManager.h"
+#include "RE_GLCache.h"
 
 #include <GL/glew.h>
 #include <ImGui/imgui.h>
@@ -969,14 +969,12 @@ void RE_GameObject::ResetLocalBoundingBox()
 	case RE_Component::Type::WATER:		 local_bounding_box = dynamic_cast<const RE_CompWater*>(CompCPtr(render_geo))->GetAABB(); break;
 	case RE_Component::Type::PARTICLEEMITER:
 	{
-		auto sim = dynamic_cast<const RE_CompParticleEmitter*>(CompCPtr(render_geo))->GetSimulation();
-		if (sim != nullptr)
-		{
-			local_bounding_box = sim->bounding_box;
+		auto sim_id = dynamic_cast<const RE_CompParticleEmitter*>(CompCPtr(render_geo))->GetSimulationID();
+		auto emitter = RE_ParticleManager::GetEmitter(sim_id);
+		if (!emitter) break;
 
-			if (!sim->local_space)
-				local_bounding_box.TransformAsAABB(GetTransformPtr()->GetGlobalMatrix().InverseTransposed());
-		}
+		local_bounding_box = emitter->bounding_box;
+		if (!emitter->local_space) local_bounding_box.TransformAsAABB(GetTransformPtr()->GetGlobalMatrix().InverseTransposed());
 		break;
 	}
 	case RE_Component::Type::GRID:

@@ -45,13 +45,6 @@ void RenderView::DrawEditor(const char* _id)
 	}
 }
 
-/*const math::Frustum* RenderView::GetFrustum() const
-{
-	if (!HasFlag(RenderView::Flag::FRUSTUM_CULLING)) return nullptr;
-	if (HasFlag(RenderView::Flag::OVERRIDE_CULLING)) return RE_CameraManager::GetCullingFrustum();
-	return &camera->GetFrustum();
-}*/
-
 void RenderView::CheckboxFlag(const char* label, Flag flag)
 {
 	bool tmp = HasFlag(flag);

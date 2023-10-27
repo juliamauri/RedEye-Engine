@@ -1,30 +1,36 @@
-#include "Event.h"
-#include <MGL/Math/float4.h>
-#include <EASTL/string.h>
-
 #include "ModuleRenderer3D.h"
 
 #include "RE_Memory.h"
+#include "RE_Profiler.h"
+#include "RE_ConsoleLog.h"
+#include "RE_Math.h"
+#include "Event.h"
 #include "Application.h"
 #include "ModuleWindow.h"
 #include "ModuleInput.h"
 #include "ModuleEditor.h"
 #include "ModuleScene.h"
 #include "ModulePhysics.h"
-#include "RE_Profiler.h"
-#include "RE_ConsoleLog.h"
+
 #include "RE_FileSystem.h"
 #include "RE_FileBuffer.h"
 #include "RE_Config.h"
 #include "RE_Json.h"
+
 #include "RE_GLCache.h"
 #include "RE_FBOManager.h"
 #include "RE_ResourceManager.h"
 #include "RE_InternalResources.h"
+#include "RE_DefaultShaders.h"
 #include "RE_ShaderImporter.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_CameraManager.h"
 #include "RE_PrimitiveManager.h"
+#include "RE_ParticleManager.h"
+
+#include "RenderedWindow.h"
+#include "ParticleEmitterEditorWindow.h"
+
 #include "RE_CompTransform.h"
 #include "RE_CompCamera.h"
 #include "RE_CompMesh.h"
@@ -35,16 +41,15 @@
 #include "RE_Prefab.h"
 #include "RE_Model.h"
 #include "RE_Material.h"
-#include "RE_DefaultShaders.h"
 
 #include <MGL/Math/float3.h>
+#include <MGL/Math/float4.h>
 #include <MGL/Math/Quat.h>
 #include <ImGuiWidgets/ImGuizmo/ImGuizmo.h>
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <gl/GL.h>
 #include <EASTL/list.h>
-#include <EASTL/stack.h>
 #include <EASTL/array.h>
 
 // OpenGL Output Debug
@@ -103,6 +108,9 @@ bool ModuleRenderer3D::Init()
 		return false;
 	}
 
+	// Precompute debug circle for faster draws
+	PrecomputeCircle();
+
 	// Setup Empty Render Flags
 	SetupFlags(0, true);
 	Load();
@@ -115,7 +123,7 @@ void ModuleRenderer3D::PostUpdate()
 	RE_PROFILE(RE_ProfiledFunc::PostUpdate, RE_ProfiledClass::ModuleRender)
 	
 	PullActiveShaders();
-	DrawThumbnails();
+	RE_ThumbnailManager::DrawThumbnails();
 
 	// Render Window FBO's
 	RE_EDITOR->RenderWindowFBOs();
@@ -180,7 +188,14 @@ void ModuleRenderer3D::DrawEditor()
 		ImGui::Text("Particle Lights: %u:508", particlelightsCount);
 	}
 
+	// Debug Drawing
 	ImGui::Separator();
+
+	ImGui::DragFloat("Point Size", &point_size, 1.f, 0.f, 100.f);
+
+	auto steps = static_cast<int>(circle_precompute.capacity());
+	if (ImGui::DragInt("Circle Steps", &steps, 1.f, 0, 64))
+		PrecomputeCircle(steps);
 }
 
 #pragma region Config Serialization
@@ -194,6 +209,9 @@ void ModuleRenderer3D::Load()
 	SetupFlag(RenderView::Flag::VSYNC, node->PullBool("vsync", true));
 	SetupFlag(RenderView::Flag::SHARE_LIGHT_PASS, node->PullBool("share_light_pass", false));
 
+	// Debug circle
+	PrecomputeCircle(node->PullInt("CircleSteps", 12));
+
 	DEL(node)
 }
 
@@ -204,6 +222,9 @@ void ModuleRenderer3D::Save() const
 	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
 	node->Push("vsync", HasFlag(RenderView::Flag::VSYNC));
 	node->Push("share_light_pass", HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
+
+	// Debug circle
+	node->Push("CircleSteps", circle_precompute.size());
 
 	DEL(node)
 }
@@ -225,7 +246,8 @@ void ModuleRenderer3D::DrawScene(
 	const RE_Camera& camera,
 	eastl::stack<const RE_Component*>& drawables,
 	eastl::vector<const RE_Component*> lights,
-	eastl::vector<const RE_CompParticleEmitter*> particle_lights) const
+	eastl::vector<const RE_CompParticleEmitter*> particle_lights,
+	RenderedWindow* toDebug) const
 {
 	RE_PROFILE(RE_ProfiledFunc::DrawScene, RE_ProfiledClass::ModuleRender)
 
@@ -257,16 +279,152 @@ void ModuleRenderer3D::DrawScene(
 	switch (render_view.light_mode)
 	{
 	case RenderView::LightMode::DEFERRED:
-		DrawSceneDeferred(render_view, camera, blended_geo, blended_particle_systems, lights, particle_lights);
+
+		DrawSceneDeferred(
+			render_view, camera,
+			blended_geo, blended_particle_systems,
+			lights, particle_lights);
+
+		if (toDebug && render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
+			DrawDebug(toDebug, render_view, camera);
+
+		if (render_view.HasFlag(RenderView::Flag::SKYBOX) && camera.isUsingSkybox())
+		{
+			const char* skybox_md5 = camera.GetSkybox();
+			auto skybox = dynamic_cast<const RE_SkyBox*>(RE_RES->At(skybox_md5 ? skybox_md5 : RE_InternalResources::GetDefaultSkyBox()));
+			DrawSkyBox(skybox);
+		}
+
 		break;
 	default:
-		DrawSceneForward(render_view, camera, blended_geo, blended_particle_systems);
+
+		// Draw Debug Geometry
+		if (toDebug && render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
+			DrawDebug(toDebug, render_view, camera);
+
+		// Draw Skybox
+		if (render_view.HasFlag(RenderView::Flag::SKYBOX) && camera.isUsingSkybox())
+		{
+			const char* skybox_md5 = camera.GetSkybox();
+			auto skybox = RE_RES->At(skybox_md5 ? skybox_md5 : RE_InternalResources::GetDefaultSkyBox());
+			DrawSkyBox(skybox->As<const RE_SkyBox*>());
+		}
+
+		// Draw Blended elements
+		if (!blended_geo.empty() || !blended_particle_systems.empty())
+		{
+			if (render_view.HasFlag(RenderView::Flag::BLENDED))
+			{
+				AddFlag(RenderView::Flag::BLENDED);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			}
+
+			while (!blended_geo.empty())
+			{
+				blended_geo.top()->Draw();
+				blended_geo.pop();
+			}
+
+			while (!blended_particle_systems.empty())
+			{
+				blended_particle_systems.top()->Draw();
+				blended_particle_systems.pop();
+			}
+
+			if (render_view.HasFlag(RenderView::Flag::BLENDED))
+				RemoveFlag(RenderView::Flag::BLENDED);
+		}
+
+		break;
+	}
+}
+
+void ModuleRenderer3D::DrawStencil(GO_UID stencilGO, bool has_depth_test) const
+{
+	if (!stencilGO) return;
+
+	RE_GameObject* go = RE_SCENE->GetGOPtr(stencilGO);
+	RE_Component* comp = go->GetRenderGeo();
+	if (comp == nullptr) return;
+
+	RE_PROFILE(RE_ProfiledFunc::DrawStencil, RE_ProfiledClass::ModuleRender)
+		unsigned int vaoToStencil = 0;
+	GLsizei triangleToStencil = 0;
+
+	RE_Component::Type cT = comp->GetType();
+
+	switch (cT)
+	{
+	case RE_Component::Type::MESH:
+	{
+		RE_CompMesh* mesh_comp = dynamic_cast<RE_CompMesh*>(comp);
+		vaoToStencil = mesh_comp->GetVAOMesh();
+		triangleToStencil = static_cast<GLsizei>(mesh_comp->GetTriangleMesh());
+		break;
+	}
+	case RE_Component::Type::WATER:
+	{
+		RE_CompWater* water_comp = dynamic_cast<RE_CompWater*>(comp);
+		vaoToStencil = water_comp->GetVAO();
+		triangleToStencil = static_cast<GLsizei>(water_comp->GetTriangles());
+		break;
+	}
+	default:
+
+		if (cT > RE_Component::Type::PRIMIVE_MIN && cT < RE_Component::Type::PRIMIVE_MAX)
+		{
+			RE_CompPrimitive* prim_comp = dynamic_cast<RE_CompPrimitive*>(comp);
+			vaoToStencil = prim_comp->GetVAO();
+			triangleToStencil = static_cast<GLsizei>(prim_comp->GetTriangleCount());
+		}
 		break;
 	}
 
-	// Stencil
-	if (render_view.HasFlag(RenderView::Flag::OUTLINE_SELECTION))
-		DrawStencil(RE_EDITOR->GetSelected(), render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+	glEnable(GL_STENCIL_TEST);
+	RemoveFlag(RenderView::Flag::DEPTH_TEST);
+
+	//Getting the scale shader and setting some values
+	const char* scaleShader = RE_InternalResources::GetDefaultScaleShader();
+	RE_Shader* sShader = dynamic_cast<RE_Shader*>(RE_RES->At(scaleShader));
+	unsigned int shaderiD = sShader->GetID();
+	RE_GLCache::ChangeShader(shaderiD);
+	RE_GLCache::ChangeVAO(vaoToStencil);
+	sShader->UploadModel(go->GetTransformPtr()->GetGlobalMatrixPtr());
+	RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
+	RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
+	RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
+	RE_ShaderImporter::setFloat(shaderiD, "opacity", 1.0f);
+	RE_ShaderImporter::setFloat(shaderiD, "center", go->GetLocalBoundingBox().CenterPoint());
+
+	//Prepare stencil for detect
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); //don't draw to color buffer
+	glStencilFunc(GL_ALWAYS, 1, 0xFF); //mark to 1 where pass
+	glStencilMask(0xFF);
+	glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+
+	//Draw scaled mesh 
+	RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / go->GetTransformPtr()->GetLocalScale().Length());
+
+	glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
+
+	glStencilFunc(GL_ALWAYS, 0, 0x00);//change stencil to draw 0
+	//Draw normal mesh for empty the inside of stencil
+	RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.0);
+	glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
+
+	//Turn on the draw and only draw where stencil buffer marks 1
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Make sure we draw on the backbuffer again.
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Make sure you will no longer (over)write stencil values, even if any test succeeds
+	glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
+
+	//Draw scaled mesh 
+	RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / go->GetTransformPtr()->GetLocalScale().Length());
+	glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
+
+	RE_GLCache::ChangeShader(0);
+
+	glDisable(GL_STENCIL_TEST);
+	if (has_depth_test) AddFlag(RenderView::Flag::DEPTH_TEST);
 }
 
 #pragma endregion
@@ -347,6 +505,18 @@ bool ModuleRenderer3D::InitializeGL()
 	glDebugMessageCallback(MessageCallback, 0);
 
 	return true;
+}
+
+void ModuleRenderer3D::PrecomputeCircle(int steps)
+{
+	if (steps == circle_precompute.capacity())
+		return;
+
+	circle_precompute.clear();
+	circle_precompute.set_capacity(steps);
+	auto interval = RE_Math::pi_x2 / steps;
+	for (float i = 0.f; i < RE_Math::pi_x2; i += interval)
+		circle_precompute.push_back({ math::Sin(i), -math::Cos(i) });
 }
 
 #pragma region Render Flags
@@ -525,50 +695,6 @@ void ModuleRenderer3D::CategorizeDrawables(
 
 #pragma region Main Draws
 
-void ModuleRenderer3D::DrawSceneForward(
-	const RenderView& render_view,
-	const RE_Camera& camera,
-	eastl::stack<const RE_Component*>& blended_geo,
-	eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems) const
-{
-	// Draw Debug Geometry
-	if (render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
-		DrawDebug(render_view, camera);
-
-	// Draw Skybox
-	if (render_view.HasFlag(RenderView::Flag::SKYBOX) && camera.isUsingSkybox())
-	{
-		const char* skybox_md5 = camera.GetSkybox();
-		auto skybox = dynamic_cast<const RE_SkyBox*>(RE_RES->At(skybox_md5 ? skybox_md5 : RE_InternalResources::GetDefaultSkyBox()));
-		DrawSkyBox(skybox);
-	}
-
-	// Draw Blended elements
-	if (!blended_geo.empty() || !blended_particle_systems.empty())
-	{
-		if (render_view.HasFlag(RenderView::Flag::BLENDED))
-		{
-			AddFlag(RenderView::Flag::BLENDED);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
-
-		while (!blended_geo.empty())
-		{
-			blended_geo.top()->Draw();
-			blended_geo.pop();
-		}
-
-		while (!blended_particle_systems.empty())
-		{
-			blended_particle_systems.top()->Draw();
-			blended_particle_systems.pop();
-		}
-
-		if (render_view.HasFlag(RenderView::Flag::BLENDED))
-			RemoveFlag(RenderView::Flag::BLENDED);
-	}
-}
-
 void ModuleRenderer3D::DrawSceneDeferred(
 	const RenderView& render_view,
 	const RE_Camera& camera,
@@ -632,9 +758,15 @@ void ModuleRenderer3D::DrawSceneDeferred(
 			}
 
 			uint pCount = 0;
-			for (auto pS : particle_lights)
-				dynamic_cast<const RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(
-					particlelight_pass, "plights", pCount, 508, HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
+			for (auto comp_emitter : particle_lights)
+				RE_ParticleManager::CallLightShaderUniforms(
+					comp_emitter->GetSimulationID(),
+					comp_emitter->GetGlobalPosition(),
+					particlelight_pass,
+					"plights",
+					pCount,
+					508,
+					HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
 
 			particlelightsCount = pCount;
 			RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, "pInfo.pCount"), pCount);
@@ -647,9 +779,15 @@ void ModuleRenderer3D::DrawSceneDeferred(
 	{
 		RE_PROFILE(RE_ProfiledFunc::DrawParticlesLight, RE_ProfiledClass::ModuleRender)
 
-		for (auto pS : particle_lights)
-			dynamic_cast<const RE_CompParticleEmitter*>(pS)->CallLightShaderUniforms(
-				light_pass, "lights", count, 203, HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
+		for (auto comp_emitter : particle_lights)
+			RE_ParticleManager::CallLightShaderUniforms(
+				comp_emitter->GetSimulationID(),
+				comp_emitter->GetGlobalPosition(),
+				light_pass,
+				"lights",
+				count,
+				203,
+				HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
 
 		particlelightsCount = static_cast<uint>(math::Clamp(static_cast<int>(count) - static_cast<int>(lightsCount), 0, 203));
 		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, "count"), count);
@@ -659,19 +797,12 @@ void ModuleRenderer3D::DrawSceneDeferred(
 	}
 
 	SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
-
-	if (render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
-		DrawDebug(render_view, camera);
-
-	if (render_view.HasFlag(RenderView::Flag::SKYBOX) && camera.isUsingSkybox())
-	{
-		const char* skybox_md5 = camera.GetSkybox();
-		auto skybox = dynamic_cast<const RE_SkyBox*>(RE_RES->At(skybox_md5 ? skybox_md5 : RE_InternalResources::GetDefaultSkyBox()));
-		DrawSkyBox(skybox);
-	}
 }
 
-void ModuleRenderer3D::DrawDebug(const RenderView& render_view, const RE_Camera& camera) const
+void ModuleRenderer3D::DrawDebug(
+	const RenderedWindow* toDebug,
+	const RenderView& render_view,
+	const RE_Camera& camera) const
 {
 	RE_GLCache::ChangeShader(0);
 	RE_GLCache::ChangeTextureBind(0);
@@ -680,8 +811,7 @@ void ModuleRenderer3D::DrawDebug(const RenderView& render_view, const RE_Camera&
 	RemoveFlag(RenderView::Flag::GL_LIGHT);
 	RemoveFlag(RenderView::Flag::TEXTURE_2D);
 
-	RE_PHYSICS->DrawDebug(camera);
-	RE_EDITOR->DrawDebug(camera);
+	toDebug->DrawDebug();
 
 	if (prev_light) AddFlag(RenderView::Flag::GL_LIGHT);
 	SetupFlag(RenderView::Flag::TEXTURE_2D, render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
@@ -702,94 +832,6 @@ void ModuleRenderer3D::DrawSkyBox(const RE_SkyBox* skybox) const
 	glDepthFunc(GL_LEQUAL);
 	skybox->DrawSkybox();
 	glDepthFunc(GL_LESS); // set depth function back to default
-}
-
-void ModuleRenderer3D::DrawStencil(GO_UID stencilGO, bool has_depth_test) const
-{
-	if (!stencilGO) return;
-
-	RE_GameObject* go = RE_SCENE->GetGOPtr(stencilGO);
-	RE_Component* comp = go->GetRenderGeo();
-	if (comp == nullptr) return;
-
-	RE_PROFILE(RE_ProfiledFunc::DrawStencil, RE_ProfiledClass::ModuleRender)
-	unsigned int vaoToStencil = 0;
-	GLsizei triangleToStencil = 0;
-
-	RE_Component::Type cT = comp->GetType();
-
-	switch (cT)
-	{
-	case RE_Component::Type::MESH:
-	{
-		RE_CompMesh* mesh_comp = dynamic_cast<RE_CompMesh*>(comp);
-		vaoToStencil = mesh_comp->GetVAOMesh();
-		triangleToStencil = static_cast<GLsizei>(mesh_comp->GetTriangleMesh());
-		break;
-	}
-	case RE_Component::Type::WATER:
-	{
-		RE_CompWater* water_comp = dynamic_cast<RE_CompWater*>(comp);
-		vaoToStencil = water_comp->GetVAO();
-		triangleToStencil = static_cast<GLsizei>(water_comp->GetTriangles());
-		break;
-	}
-	default:
-
-		if (cT > RE_Component::Type::PRIMIVE_MIN && cT < RE_Component::Type::PRIMIVE_MAX)
-		{
-			RE_CompPrimitive* prim_comp = dynamic_cast<RE_CompPrimitive*>(comp);
-			vaoToStencil = prim_comp->GetVAO();
-			triangleToStencil = static_cast<GLsizei>(prim_comp->GetTriangleCount());
-		}
-		break;
-	}
-
-	glEnable(GL_STENCIL_TEST);
-	RemoveFlag(RenderView::Flag::DEPTH_TEST);
-
-	//Getting the scale shader and setting some values
-	const char* scaleShader = RE_InternalResources::GetDefaultScaleShader();
-	RE_Shader* sShader = dynamic_cast<RE_Shader*>(RE_RES->At(scaleShader));
-	unsigned int shaderiD = sShader->GetID();
-	RE_GLCache::ChangeShader(shaderiD);
-	RE_GLCache::ChangeVAO(vaoToStencil);
-	sShader->UploadModel(go->GetTransformPtr()->GetGlobalMatrixPtr());
-	RE_ShaderImporter::setFloat(shaderiD, "useColor", 1.0);
-	RE_ShaderImporter::setFloat(shaderiD, "useTexture", 0.0);
-	RE_ShaderImporter::setFloat(shaderiD, "cdiffuse", { 1.0, 0.5, 0.0 });
-	RE_ShaderImporter::setFloat(shaderiD, "opacity", 1.0f);
-	RE_ShaderImporter::setFloat(shaderiD, "center", go->GetLocalBoundingBox().CenterPoint());
-
-	//Prepare stencil for detect
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); //don't draw to color buffer
-	glStencilFunc(GL_ALWAYS, 1, 0xFF); //mark to 1 where pass
-	glStencilMask(0xFF);
-	glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-
-	//Draw scaled mesh 
-	RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / go->GetTransformPtr()->GetLocalScale().Length());
-
-	glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
-
-	glStencilFunc(GL_ALWAYS, 0, 0x00);//change stencil to draw 0
-	//Draw normal mesh for empty the inside of stencil
-	RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.0);
-	glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
-
-	//Turn on the draw and only draw where stencil buffer marks 1
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Make sure we draw on the backbuffer again.
-	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Make sure you will no longer (over)write stencil values, even if any test succeeds
-	glStencilFunc(GL_EQUAL, 1, 0xFF); // Now we will only draw pixels where the corresponding stencil buffer value equals 1
-
-	//Draw scaled mesh 
-	RE_ShaderImporter::setFloat(shaderiD, "scaleFactor", 0.5f / go->GetTransformPtr()->GetLocalScale().Length());
-	glDrawElements(GL_TRIANGLES, triangleToStencil * 3, GL_UNSIGNED_INT, nullptr);
-
-	RE_GLCache::ChangeShader(0);
-
-	glDisable(GL_STENCIL_TEST);
-	if (has_depth_test) AddFlag(RenderView::Flag::DEPTH_TEST);
 }
 
 #pragma endregion
@@ -884,36 +926,63 @@ void ModuleRenderer3D::DirectDrawCube(math::vec position, math::vec color) const
 	glEnd();
 }
 
+void ModuleRenderer3D::DrawAASphere(const math::vec p_pos, const float radius) const
+{
+	eastl::vector<math::float2>::const_iterator i = circle_precompute.cbegin() + 1;
+	math::vec previous = { p_pos.x + (circle_precompute.cbegin()->x * radius), p_pos.y + (circle_precompute.cbegin()->y * radius), p_pos.z };
+	for (; i != circle_precompute.cend(); ++i) // Z
+	{
+		glVertex3fv(previous.ptr());
+		previous = { p_pos.x + (i->x * radius), p_pos.y + (i->y * radius), p_pos.z };
+		glVertex3fv(previous.ptr());
+	}
+	previous = { p_pos.x + (circle_precompute.cbegin()->x * radius), p_pos.y, p_pos.z + (circle_precompute.cbegin()->y * radius) };
+	for (i = circle_precompute.cbegin() + 1; i != circle_precompute.cend(); ++i) // Y
+	{
+		glVertex3fv(previous.ptr());
+		previous = { p_pos.x + (i->x * radius), p_pos.y, p_pos.z + (i->y * radius) };
+		glVertex3fv(previous.ptr());
+	}
+	previous = { p_pos.x, p_pos.y + (circle_precompute.cbegin()->y * radius), p_pos.z + (circle_precompute.cbegin()->x * radius) };
+	for (i = circle_precompute.cbegin() + 1; i != circle_precompute.cend(); ++i) // X
+	{
+		glVertex3fv(previous.ptr());
+		previous = { p_pos.x, p_pos.y + (i->y * radius), p_pos.z + (i->x * radius) };
+		glVertex3fv(previous.ptr());
+	}
+}
+
 #pragma endregion
 
 #pragma region Particle Editor Draws
 
-void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view) const
+void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view, const RE_Camera& camera) const
 {
-	auto emitter = RE_EDITOR->GetParticleEmitterEditorWindow()->GetEdittingParticleEmitter();
-	if (emitter == nullptr) return;
+	auto emitter_id = RE_EDITOR->GetParticleEmitterEditorWindow()->GetEdittingParticleEmitter();
+	auto emitter = RE_ParticleManager::GetEmitter(emitter_id);
+	if (!emitter) return;
 
-	PrepareToRender(render_view);
+	PrepareToRender(render_view, camera);
 
 	switch (render_view.light_mode)
 	{
 	case RenderView::LightMode::DEFERRED:
 
-		RE_PHYSICS->DrawParticleEmitterSimulation(emitter->id);
-		if (emitter->light.HasLight()) DrawParticleLights(emitter->id);
+		RE_ParticleManager::DrawSimulation(emitter_id, camera);
+		if (emitter->HasLight()) DrawParticleLights(emitter_id);
 
 		SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
 
-		DrawParticleEditorDebug(render_view, emitter);
+		DrawParticleEditorDebug(render_view, emitter, camera);
 
 		break;
 
 	default:
 	{
 		bool draw_last = emitter->opacity.HasOpacity();
-		if (!draw_last) RE_PHYSICS->DrawParticleEmitterSimulation(emitter->id);
+		if (!draw_last) RE_ParticleManager::DrawSimulation(emitter_id, camera);
 
-		DrawParticleEditorDebug(render_view, emitter);
+		DrawParticleEditorDebug(render_view, emitter, camera);
 
 		if (draw_last) // Draw Blended elements
 		{
@@ -923,7 +992,7 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view) const
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
 
-			RE_PHYSICS->DrawParticleEmitterSimulation(emitter->id);
+			RE_ParticleManager::DrawSimulation(emitter_id, camera);
 
 			SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
 			if (render_view.HasFlag(RenderView::Flag::BLENDED)) RemoveFlag(RenderView::Flag::BLENDED);
@@ -934,7 +1003,10 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view) const
 	}
 }
 
-void ModuleRenderer3D::DrawParticleEditorDebug(const RenderView& render_view, const RE_ParticleEmitter* emitter) const
+void ModuleRenderer3D::DrawParticleEditorDebug(
+	const RenderView& render_view,
+	const RE_ParticleEmitter* emitter,
+	const RE_Camera& camera) const
 {
 	if (!render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
 		return;
@@ -946,8 +1018,8 @@ void ModuleRenderer3D::DrawParticleEditorDebug(const RenderView& render_view, co
 	RemoveFlag(RenderView::Flag::GL_LIGHT);
 	RemoveFlag(RenderView::Flag::TEXTURE_2D);
 
-	LoadCameraMatrixes(*render_view.camera);
-	RE_PHYSICS->DebugDrawParticleEmitterSimulation(emitter);
+	LoadCameraMatrixes(camera);
+	DebugDrawParticleEmitter(*emitter);
 
 	if (reset_light) AddFlag(RenderView::Flag::GL_LIGHT);
 	SetupFlag(RenderView::Flag::TEXTURE_2D, render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
@@ -996,12 +1068,160 @@ void ModuleRenderer3D::DrawParticleLights(const uint sim_id) const
 
 	// Setup Light Uniforms
 	uint count = 0;
-	RE_PHYSICS->CallParticleEmitterLightShaderUniforms(sim_id, { 0.0,0.0,0.0 }, shader_pass, shader_pass_name.c_str(), count, max_lights, shared_light_pass);
+	RE_ParticleManager::CallLightShaderUniforms(
+		sim_id,
+		{ 0.0,0.0,0.0 },
+		shader_pass,
+		shader_pass_name.c_str(),
+		count,
+		max_lights,
+		shared_light_pass);
+
 	RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(shader_pass, count_var.c_str()), count);
 
 	// Render Lights
 	DrawQuad();
 }
+
+void ModuleRenderer3D::DebugDrawParticleEmitter(const RE_ParticleEmitter& sim) const
+{
+	if (sim.initial_pos.IsShaped() || sim.boundary.HasBoundary())
+	{
+		glBegin(GL_LINES);
+
+		// Render Spawn Shape
+		glColor4f(1.0f, 0.27f, 0.f, 1.f); // orange
+		switch (sim.initial_pos.type) {
+		case RE_EmissionShape::Type::CIRCLE:
+		{
+			math::Circle c = sim.initial_pos.geo.circle;
+			c.pos += sim.parent_pos;
+			math::vec previous = c.GetPoint(0.f);
+			auto interval = static_cast<float>(circle_precompute.size());
+			for (float i = interval; i < RE_Math::pi_x2; i += interval)
+			{
+				glVertex3f(previous.x, previous.y, previous.z);
+				previous = c.GetPoint(i);
+				glVertex3f(previous.x, previous.y, previous.z);
+			}
+			break;
+		}
+		case RE_EmissionShape::Type::RING:
+		{
+			math::Circle c = sim.initial_pos.geo.ring.first;
+			c.pos += sim.parent_pos;
+			c.r += sim.initial_pos.geo.ring.second;
+			math::vec previous = c.GetPoint(0.f);
+			auto interval = static_cast<float>(circle_precompute.size());
+			for (float i = interval; i < RE_Math::pi_x2; i += interval)
+			{
+				glVertex3f(previous.x, previous.y, previous.z);
+				previous = c.GetPoint(i);
+				glVertex3f(previous.x, previous.y, previous.z);
+			}
+
+			c.r -= 2.f * sim.initial_pos.geo.ring.second;
+			previous = c.GetPoint(0.f);
+			for (float i = interval; i < RE_Math::pi_x2; i += interval)
+			{
+				glVertex3f(previous.x, previous.y, previous.z);
+				previous = c.GetPoint(i);
+				glVertex3f(previous.x, previous.y, previous.z);
+			}
+			break;
+		}
+		case RE_EmissionShape::Type::AABB:
+		{
+			for (int i = 0; i < 12; i++)
+			{
+				glVertex3fv((sim.initial_pos.geo.box.Edge(i).a + sim.parent_pos).ptr());
+				glVertex3fv((sim.initial_pos.geo.box.Edge(i).b + sim.parent_pos).ptr());
+			}
+
+			break;
+		}
+		case RE_EmissionShape::Type::SPHERE:
+		{
+			DrawAASphere(sim.parent_pos + sim.initial_pos.geo.sphere.pos, sim.initial_pos.geo.sphere.r);
+			break;
+		}
+		case RE_EmissionShape::Type::HOLLOW_SPHERE:
+		{
+			DrawAASphere(sim.parent_pos + sim.initial_pos.geo.hollow_sphere.first.pos, sim.initial_pos.geo.hollow_sphere.first.r - sim.initial_pos.geo.hollow_sphere.second);
+			DrawAASphere(sim.parent_pos + sim.initial_pos.geo.hollow_sphere.first.pos, sim.initial_pos.geo.hollow_sphere.first.r + sim.initial_pos.geo.hollow_sphere.second);
+			break;
+		}
+		default: break;
+		}
+
+		// Render Boundary
+		glColor4f(1.f, 0.84f, 0.0f, 1.f); // gold
+		switch (sim.boundary.type) {
+		case RE_EmissionBoundary::Type::PLANE:
+		{
+			const float interval = RE_Math::pi_x2 / circle_precompute.size();
+			for (float j = 1.f; j < 6.f; ++j)
+			{
+				const math::Circle c = sim.boundary.geo.plane.GenerateCircle(sim.parent_pos, j * j);
+				math::vec previous = c.GetPoint(0.f);
+				for (float i = interval; i < RE_Math::pi_x2; i += interval)
+				{
+					glVertex3f(previous.x, previous.y, previous.z);
+					previous = c.GetPoint(i);
+					glVertex3f(previous.x, previous.y, previous.z);
+				}
+			}
+
+			break;
+		}
+		case RE_EmissionBoundary::Type::SPHERE:
+		{
+			DrawAASphere(sim.parent_pos + sim.boundary.geo.sphere.pos, sim.boundary.geo.sphere.r);
+			break;
+		}
+		case RE_EmissionBoundary::Type::AABB:
+		{
+			for (int i = 0; i < 12; i++)
+			{
+				glVertex3fv((sim.parent_pos + sim.boundary.geo.box.Edge(i).a).ptr());
+				glVertex3fv((sim.parent_pos + sim.boundary.geo.box.Edge(i).b).ptr());
+			}
+
+			break;
+		}
+		default: break;
+		}
+
+		// Render Shape Collider
+		if (sim.collider.type == RE_EmissionCollider::Type::SPHERE)
+		{
+			glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
+			for (const auto& p : sim.particle_pool)
+				DrawAASphere(sim.local_space ? sim.parent_pos + p.position : p.position, p.col_radius);
+		}
+
+		glEnd();
+	}
+
+	// Render Point Collider
+	if (sim.collider.type == RE_EmissionCollider::Type::POINT)
+	{
+		glPointSize(point_size);
+		glBegin(GL_POINTS);
+		glColor4f(0.1f, 0.8f, 0.1f, 1.f); // light green
+
+		if (sim.local_space)
+			for (const auto& p : sim.particle_pool)
+				glVertex3fv((sim.parent_pos + p.position).ptr());
+		else
+			for (const auto& p : sim.particle_pool)
+				glVertex3fv(p.position.ptr());
+
+		glPointSize(1.f);
+		glEnd();
+	}
+}
+
 #pragma endregion
 
 #pragma endregion

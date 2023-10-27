@@ -128,34 +128,33 @@ void RE_ParticleEmission::JsonSerialize(bool onlyMD5)
 void RE_ParticleEmission::JsonDeserialize(bool generateLibraryPath)
 {
 	Config emission(GetAssetPath());
-	if (emission.Load())
+	if (!emission.Load()) return;
+
+	RE_Json* node = emission.GetRootNode("Emission");
+
+	loop = node->PullBool("Loop", loop);
+	max_time = node->PullFloat("Max time", max_time);
+	start_delay = node->PullFloat("Start Delay", start_delay);
+	time_muliplier = node->PullFloat("Time Multiplier", time_muliplier);
+
+	spawn_interval.JsonDeserialize(node->PullJObject("Interval"));
+	spawn_mode.JsonDeserialize(node->PullJObject("Spawn Mode"));
+	initial_lifetime.JsonDeserialize(node->PullJObject("Lifetime"));
+	initial_pos.JsonDeserialize(node->PullJObject("Position"));
+	initial_speed.JsonDeserialize(node->PullJObject("Speed"));
+	external_acc.JsonDeserialize(node->PullJObject("Acceleration"));
+	boundary.JsonDeserialize(node->PullJObject("Boundary"));
+	collider.JsonDeserialize(node->PullJObject("Collider"));
+
+	if (generateLibraryPath)
 	{
-		RE_Json* node = emission.GetRootNode("Emission");
-
-		loop = node->PullBool("Loop", loop);
-		max_time = node->PullFloat("Max time", max_time);
-		start_delay = node->PullFloat("Start Delay", start_delay);
-		time_muliplier = node->PullFloat("Time Multiplier", time_muliplier);
-
-		spawn_interval.JsonDeserialize(node->PullJObject("Interval"));
-		spawn_mode.JsonDeserialize(node->PullJObject("Spawn Mode"));
-		initial_lifetime.JsonDeserialize(node->PullJObject("Lifetime"));
-		initial_pos.JsonDeserialize(node->PullJObject("Position"));
-		initial_speed.JsonDeserialize(node->PullJObject("Speed"));
-		external_acc.JsonDeserialize(node->PullJObject("Acceleration"));
-		boundary.JsonDeserialize(node->PullJObject("Boundary"));
-		collider.JsonDeserialize(node->PullJObject("Collider"));
-
-		if (generateLibraryPath)
-		{
-			SetMD5(emission.GetMd5().c_str());
-			eastl::string libraryPath("Library/Particles/");
-			libraryPath += GetMD5();
-			SetLibraryPath(libraryPath.c_str());
-		}
-
-		ResourceContainer::inMemory = true;
+		SetMD5(emission.GetMd5().c_str());
+		eastl::string libraryPath("Library/Particles/");
+		libraryPath += GetMD5();
+		SetLibraryPath(libraryPath.c_str());
 	}
+
+	ResourceContainer::inMemory = true;
 }
 
 size_t RE_ParticleEmission::GetBinarySize() const
@@ -214,35 +213,34 @@ void RE_ParticleEmission::BinarySerialize() const
 void RE_ParticleEmission::BinaryDeserialize()
 {
 	RE_FileBuffer libraryFile(GetLibraryPath());
-	if (libraryFile.Load())
-	{
-		char* cursor = libraryFile.GetBuffer();
+	if (!libraryFile.Load()) return;
 
-		size_t size = sizeof(bool);
-		memcpy(&loop, cursor, size);
-		cursor += size;
+	char* cursor = libraryFile.GetBuffer();
 
-		size = sizeof(float);
-		memcpy(&max_time, cursor, size);
-		cursor += size;
-		memcpy(&start_delay, cursor, size);
-		cursor += size;
-		memcpy(&time_muliplier, cursor, size);
-		cursor += size;
+	size_t size = sizeof(bool);
+	memcpy(&loop, cursor, size);
+	cursor += size;
 
-		size = sizeof(uint);
-		memcpy(&max_particles, cursor, size);
-		cursor += size;
+	size = sizeof(float);
+	memcpy(&max_time, cursor, size);
+	cursor += size;
+	memcpy(&start_delay, cursor, size);
+	cursor += size;
+	memcpy(&time_muliplier, cursor, size);
+	cursor += size;
 
-		spawn_interval.BinaryDeserialize(cursor);
-		spawn_mode.BinaryDeserialize(cursor);
-		initial_lifetime.BinaryDeserialize(cursor);
-		initial_pos.BinaryDeserialize(cursor);
-		initial_speed.BinaryDeserialize(cursor);
-		external_acc.BinaryDeserialize(cursor);
-		boundary.BinaryDeserialize(cursor);
-		collider.BinaryDeserialize(cursor);
+	size = sizeof(uint);
+	memcpy(&max_particles, cursor, size);
+	cursor += size;
 
-		ResourceContainer::inMemory = true;
-	}
+	spawn_interval.BinaryDeserialize(cursor);
+	spawn_mode.BinaryDeserialize(cursor);
+	initial_lifetime.BinaryDeserialize(cursor);
+	initial_pos.BinaryDeserialize(cursor);
+	initial_speed.BinaryDeserialize(cursor);
+	external_acc.BinaryDeserialize(cursor);
+	boundary.BinaryDeserialize(cursor);
+	collider.BinaryDeserialize(cursor);
+
+	ResourceContainer::inMemory = true;
 }

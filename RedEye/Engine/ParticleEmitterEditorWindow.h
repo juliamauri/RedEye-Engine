@@ -3,7 +3,6 @@
 
 #include "RenderedWindow.h"
 
-class RE_ParticleEmitter;
 class RE_ParticleEmitterBase;
 
 class ParticleEmitterEditorWindow : public OwnCameraRenderedWindow
@@ -11,12 +10,12 @@ class ParticleEmitterEditorWindow : public OwnCameraRenderedWindow
 private:
 
 	const char* emiter_md5 = nullptr;
-	RE_ParticleEmitter* simulation = nullptr;
+	P_UID simulation = 0;
 	RE_ParticleEmitterBase* new_emitter = nullptr;
 
 	bool load_next = false;
 	const char* next_emiter_md5 = nullptr;
-	RE_ParticleEmitter* next_simulation = nullptr;
+	P_UID next_simulation = 0;
 
 	bool docking = false;
 	bool need_save = false;
@@ -29,8 +28,8 @@ public:
 	void Orbit(float delta_x, float delta_y) final;
 	void Focus() final;
 
-	void StartEditing(RE_ParticleEmitter* sim, const char* md5);
-	const RE_ParticleEmitter* GetEdittingParticleEmitter() const { return simulation; }
+	void StartEditing(P_UID sim, const char* md5);
+	const P_UID GetEdittingParticleEmitter() const { return simulation; }
 
 	void SaveEmitter(
 		bool close = false,

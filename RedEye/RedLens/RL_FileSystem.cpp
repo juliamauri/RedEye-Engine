@@ -54,7 +54,7 @@ void RL_FileSystem::Write(const char* path, const char* file, const char* buff, 
 	NewDir(path);
 
 	PHYSFS_file* myfile = PHYSFS_openWrite(filepath.c_str());
-	int length_writed = PHYSFS_write(myfile, buff, 1, buff_size);
+	auto length_written = PHYSFS_write(myfile, buff, 1, buff_size);
 	PHYSFS_close(myfile);
 }
 

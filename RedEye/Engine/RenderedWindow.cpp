@@ -25,6 +25,8 @@ void RenderedWindow::RenderFBO() const
 		GatherDrawables(),
 		GatherSceneLights(),
 		GatherParticleLights());
+
+	DrawOther();
 }
 
 void RenderedWindow::DrawEditor()
@@ -86,7 +88,7 @@ void RenderedWindow::UpdateWindow()
 
 eastl::stack<const RE_Component*> RenderedWindow::GatherDrawables() const
 {
-	auto culling_frustum = render_view.GetFrustum();
+	auto culling_frustum = GetFrustum();
 	if (culling_frustum == nullptr)
 		return RE_SCENE->GetCScenePool()->GetRootCPtr()->GetAllChildsActiveRenderGeosC();
 

@@ -7,6 +7,7 @@ typedef unsigned char uchar;
 typedef unsigned long ulong;
 typedef unsigned long long ulonglong;
 
+typedef unsigned long long P_UID;
 typedef unsigned long long GO_UID;
 typedef unsigned long long COMP_UID;
 

@@ -57,7 +57,7 @@ void ConfigWindow::DrawModules() const
 	if (ImGui::CollapsingHeader("Input")) RE_INPUT->DrawEditor();
 	if (ImGui::CollapsingHeader("Window")) RE_WINDOW->DrawEditor();
 	if (ImGui::CollapsingHeader("Scene")) RE_SCENE->DrawEditor();
-	if (ImGui::CollapsingHeader("Physics")) RE_PHYSICS->DrawEditor();
+	if (ImGui::CollapsingHeader("Physics")) ModulePhysics::DrawEditor();
 	if (ImGui::CollapsingHeader("Editor")) RE_EDITOR->DrawEditor();
 	if (ImGui::CollapsingHeader("Renderer3D")) RE_RENDER->DrawEditor();
 	if (ImGui::CollapsingHeader("Audio")) RE_AUDIO->DrawEditor();

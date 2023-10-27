@@ -5,8 +5,6 @@
 #include "RE_DataTypes.h"
 #include <EASTL/list.h>
 
-class RE_Camera;
-
 class ModuleEditor : public EventListener
 {
 public:
@@ -29,7 +27,7 @@ private:
 	ushort flags = 0;
 
 	// Selected GO
-	GO_UID selected;
+	GO_UID selected = 0;
 
 	// Base Windows
 	eastl::list<class EditorWindow*> windows;
@@ -122,27 +120,6 @@ public:
 	SceneEditorWindow* GetSceneEditor() const { return sceneEditorWindow; }
 	ParticleEmitterEditorWindow* GetParticleEmitterEditorWindow() const { return particleEmitterWindow; }
 	
-	/*/ Particle Editor Window
-	void StartEditingParticleEmitter(RE_ParticleEmitter* sim, const char* md5);
-	const RE_ParticleEmitter* GetCurrentEditingParticleEmitter() const;
-	void SaveEmitter(bool close = false, const char* emitter_name = nullptr, const char* emissor_base = nullptr, const char* renderer_base = nullptr);
-	void CloseParticleEditor();
-	bool IsParticleEditorActive() const;
-	RE_Camera* GetParticlesCamera() const;*/
-
-	/*void ModuleEditor::StartEditingParticleEmitter(RE_ParticleEmitter* sim, const char* md5)
-		particleEmitterWindow->StartEditing(sim, md5);
-	
-	const RE_ParticleEmitter* ModuleEditor::GetCurrentEditingParticleEmitter() const
-		return particleEmitterWindow->GetEdittingParticleEmitter();
-
-	void ModuleEditor::SaveEmitter(bool close, const char* emitter_name, const char* emissor_base, const char* renderer_base)
-		particleEmitterWindow->SaveEmitter(close, emitter_name, emissor_base, renderer_base);
-
-	void ModuleEditor::CloseParticleEditor() { particleEmitterWindow->NextOrClose(); }
-	bool ModuleEditor::IsParticleEditorActive() const { return particleEmitterWindow->IsActive(); }
-	RE_Camera* ModuleEditor::GetParticlesCamera() const { return &(particleEmitterWindow->GetCamera()); }*/
-
 #pragma endregion
 
 private:

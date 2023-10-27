@@ -17,9 +17,7 @@ public:
 		PER_PARTICLE
 	};
 
-public:
-
-	Type type = Type(0);
+	Type type = Type::NONE;
 
 	bool random_color = false;
 	bool random_i = false;
@@ -40,7 +38,7 @@ public:
 	RE_PR_Light() = default;
 	~RE_PR_Light() = default;
 
-	bool DrawEditor(uint id);
+	bool DrawEditor(P_UID id);
 
 	math::vec GetColor() const;
 	float GetIntensity() const;

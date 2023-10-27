@@ -1,18 +1,19 @@
 #ifndef __RE_COMPPARTICLEEMITTER_H__
 #define __RE_COMPPARTICLEEMITTER_H__
 
-class RE_ParticleEmitter;
+#include "RE_Component.h"
+#include <EASTL/vector.h>
 
 class RE_CompParticleEmitter : public RE_Component
 {
 private:
 
-	RE_ParticleEmitter* simulation = nullptr;
+	P_UID simulation;
 	const char* emitter_md5 = nullptr;
 
 public:
 
-	RE_CompParticleEmitter::RE_CompParticleEmitter() : RE_Component(RE_Component::Type::PARTICLEEMITER) {}
+	RE_CompParticleEmitter();
 	~RE_CompParticleEmitter() final = default;
 
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
@@ -24,11 +25,12 @@ public:
 
 	bool HasBlend() const;
 	bool HasLight() const;
-	void CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
 
 	void UpdateEmitter(const char* emitter);
 	void SetEmitter(const char* md5) { emitter_md5 = md5; }
-	RE_ParticleEmitter* GetSimulation() const { return simulation; }
+
+	// Getters
+	P_UID GetSimulationID() const { return simulation; }
 	const char* GetEmitterResource() const { return emitter_md5; }
 
 	// Resources

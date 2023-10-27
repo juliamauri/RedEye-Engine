@@ -49,7 +49,6 @@ public:
 	class ModuleInput* input = nullptr;
 	class ModuleWindow* window = nullptr;
 	class ModuleScene* scene = nullptr;
-	class ModulePhysics* physics = nullptr;
 	class ModuleEditor* editor = nullptr;
 	class ModuleRenderer3D* renderer = nullptr;
 	class ModuleAudio* audio = nullptr;
@@ -70,7 +69,6 @@ extern Application* App;
 #define RE_INPUT App->input
 #define RE_WINDOW App->window
 #define RE_SCENE App->scene
-#define RE_PHYSICS App->physics
 #define RE_EDITOR App->editor
 #define RE_RENDER App->renderer
 #define RE_AUDIO App->audio

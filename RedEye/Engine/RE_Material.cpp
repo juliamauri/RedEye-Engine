@@ -1033,121 +1033,121 @@ void RE_Material::DrawTextures(const char* texturesName, eastl::vector<const cha
 void RE_Material::JsonDeserialize(bool generateLibraryPath)
 {
 	Config material(GetAssetPath());
-	if (material.Load()) {
-		RE_Json* nodeMat = material.GetRootNode("Material");
+	if (!material.Load()) return;
 
-		shadingType = static_cast<ShadingMode>(nodeMat->PullInt("ShaderType", static_cast<int>(ShadingMode::FLAT)));
+	RE_Json* nodeMat = material.GetRootNode("Material");
 
-		unsigned int* uOM = nodeMat->PullUInt("usingOnMat", 18, 0);
-		memcpy(usingOnMat, uOM, sizeof(uint) * 18);
-		DEL_A(uOM)
+	shadingType = static_cast<ShadingMode>(nodeMat->PullInt("ShaderType", static_cast<int>(ShadingMode::FLAT)));
 
-		cDiffuse = nodeMat->PullFloatVector("DiffuseColor", math::vec::zero);
-		cSpecular = nodeMat->PullFloatVector("SpecularColor", math::vec::zero);
-		cAmbient = nodeMat->PullFloatVector("AmbientColor", math::vec::zero);
-		cEmissive = nodeMat->PullFloatVector("EmissiveColor", math::vec::zero);
-		cTransparent = nodeMat->PullFloatVector("TransparentColor", math::vec::zero);
-		backFaceCulling = nodeMat->PullBool("BackFaceCulling", true);
-		blendMode = nodeMat->PullBool("BlendMode", false);
-		opacity = nodeMat->PullFloat("Opacity", 1.0f);
-		shininess = nodeMat->PullFloat("Shininess", 0.0f);
-		shininessStrenght = nodeMat->PullFloat("ShininessStrenght", 1.0f);
-		refraccti = nodeMat->PullFloat("Refraccti", 1.0f);
+	auto uOM = nodeMat->PullUInt("usingOnMat", 18, 0);
+	memcpy(usingOnMat, uOM, sizeof(uint) * 18);
+	DEL_A(uOM)
 
-		fromShaderCustomUniforms.clear();
-		RE_Json* nuniforms = nodeMat->PullJObject("uniforms");
-		auto size = nuniforms->PullSizeT("size", 0);
-		if (size)
+	cDiffuse = nodeMat->PullFloatVector("DiffuseColor", math::vec::zero);
+	cSpecular = nodeMat->PullFloatVector("SpecularColor", math::vec::zero);
+	cAmbient = nodeMat->PullFloatVector("AmbientColor", math::vec::zero);
+	cEmissive = nodeMat->PullFloatVector("EmissiveColor", math::vec::zero);
+	cTransparent = nodeMat->PullFloatVector("TransparentColor", math::vec::zero);
+	backFaceCulling = nodeMat->PullBool("BackFaceCulling", true);
+	blendMode = nodeMat->PullBool("BlendMode", false);
+	opacity = nodeMat->PullFloat("Opacity", 1.0f);
+	shininess = nodeMat->PullFloat("Shininess", 0.0f);
+	shininessStrenght = nodeMat->PullFloat("ShininessStrenght", 1.0f);
+	refraccti = nodeMat->PullFloat("Refraccti", 1.0f);
+
+	fromShaderCustomUniforms.clear();
+	RE_Json* nuniforms = nodeMat->PullJObject("uniforms");
+	auto size = nuniforms->PullSizeT("size", 0);
+	if (size)
+	{
+		bool* b = nullptr;
+		int* intPtr = nullptr;
+		eastl::string id;
+		for (size_t i = 0; i < size; i++)
 		{
-			bool* b = nullptr;
-			int* intPtr = nullptr;
-			eastl::string id;
-			for (size_t i = 0; i < size; i++)
+			RE_Shader_Cvar sVar;
+			id = "name" + eastl::to_string(i);
+			sVar.name = nuniforms->PullString(id.c_str(), "");
+
+			id = "type" + eastl::to_string(i);
+			auto vT = static_cast<RE_Cvar::Type>(nuniforms->PullUInt(id.c_str(), static_cast<uint>(RE_Cvar::Type(0))));
+
+			id = "custom" + eastl::to_string(i);
+			sVar.custom = nuniforms->PullBool(id.c_str(), true);
+
+			id = "value" + eastl::to_string(i);
+			switch (vT)
 			{
-				RE_Shader_Cvar sVar;
-				id = "name" + eastl::to_string(i);
-				sVar.name = nuniforms->PullString(id.c_str(), "");
-
-				id = "type" + eastl::to_string(i);
-				auto vT = static_cast<RE_Cvar::Type>(nuniforms->PullUInt(id.c_str(), static_cast<uint>(RE_Cvar::Type(0))));
-
-				id = "custom" + eastl::to_string(i);
-				sVar.custom = nuniforms->PullBool(id.c_str(), true);
-
-				id = "value" + eastl::to_string(i);
-				switch (vT)
-				{
-				case RE_Cvar::Type::BOOL: sVar.SetValue(nuniforms->PullBool(id.c_str(), true), true); break;
-				case RE_Cvar::Type::BOOL2:
-				{
-					b = nuniforms->PullBool(id.c_str(), 2, true);
-					sVar.SetValue(b, 2, true);
-					DEL_A(b);
-					break;
-				}
-				case RE_Cvar::Type::BOOL3:
-				{
-					b = nuniforms->PullBool(id.c_str(), 3, true);
-					sVar.SetValue(b, 3, true);
-					DEL_A(b);
-					break; 
-				}
-				case RE_Cvar::Type::BOOL4:
-				{
-					b = nuniforms->PullBool(id.c_str(), 4, true);
-					sVar.SetValue(b, 4, true);
-					DEL_A(b);
-					break; 
-				}
-				case RE_Cvar::Type::INT: sVar.SetValue(-1, true); break;
-				case RE_Cvar::Type::INT2:
-				{
-					intPtr = nuniforms->PullInt(id.c_str(), 2, true);
-					sVar.SetValue(intPtr, 2, true);
-					DEL_A(b);
-					break;
-				}
-				case RE_Cvar::Type::INT3:
-				{
-					intPtr = nuniforms->PullInt(id.c_str(), 3, true);
-					sVar.SetValue(intPtr, 3, true);
-					DEL_A(b);
-					break; 
-				}
-				case RE_Cvar::Type::INT4:
-				{
-					intPtr = nuniforms->PullInt(id.c_str(), 4, true);
-					sVar.SetValue(intPtr, 4, true);
-					DEL_A(b);
-					break; 
-				}
-				case RE_Cvar::Type::FLOAT: sVar.SetValue(nuniforms->PullFloat(id.c_str(), 0), true); break;
-				case RE_Cvar::Type::FLOAT2: sVar.SetValue(nuniforms->PullFloat2(id.c_str(), math::float2::zero), true); break;
-				case RE_Cvar::Type::FLOAT3: sVar.SetValue(nuniforms->PullFloatVector(id.c_str(), math::float3::zero), true); break;
-				case RE_Cvar::Type::FLOAT4:
-				case RE_Cvar::Type::MAT2: sVar.SetValue(nuniforms->PullFloat4(id.c_str(), math::float4::zero), true); break;
-				case RE_Cvar::Type::MAT3: sVar.SetValue(nuniforms->PullMat3(id.c_str(), math::float3x3::zero), true); break;
-				case RE_Cvar::Type::MAT4: sVar.SetValue(nuniforms->PullMat4(id.c_str(), math::float4x4::zero), true); break;
-				case RE_Cvar::Type::SAMPLER: sVar.SetSampler(RE_RES->IsReference(nuniforms->PullString(id.c_str(),"")), true); break;
-				}
-
-				fromShaderCustomUniforms.push_back(sVar);
+			case RE_Cvar::Type::BOOL: sVar.SetValue(nuniforms->PullBool(id.c_str(), true), true); break;
+			case RE_Cvar::Type::BOOL2:
+			{
+				b = nuniforms->PullBool(id.c_str(), 2, true);
+				sVar.SetValue(b, 2, true);
+				DEL_A(b);
+				break;
 			}
+			case RE_Cvar::Type::BOOL3:
+			{
+				b = nuniforms->PullBool(id.c_str(), 3, true);
+				sVar.SetValue(b, 3, true);
+				DEL_A(b);
+				break;
+			}
+			case RE_Cvar::Type::BOOL4:
+			{
+				b = nuniforms->PullBool(id.c_str(), 4, true);
+				sVar.SetValue(b, 4, true);
+				DEL_A(b);
+				break;
+			}
+			case RE_Cvar::Type::INT: sVar.SetValue(-1, true); break;
+			case RE_Cvar::Type::INT2:
+			{
+				intPtr = nuniforms->PullInt(id.c_str(), 2, true);
+				sVar.SetValue(intPtr, 2, true);
+				DEL_A(b);
+				break;
+			}
+			case RE_Cvar::Type::INT3:
+			{
+				intPtr = nuniforms->PullInt(id.c_str(), 3, true);
+				sVar.SetValue(intPtr, 3, true);
+				DEL_A(b);
+				break;
+			}
+			case RE_Cvar::Type::INT4:
+			{
+				intPtr = nuniforms->PullInt(id.c_str(), 4, true);
+				sVar.SetValue(intPtr, 4, true);
+				DEL_A(b);
+				break;
+			}
+			case RE_Cvar::Type::FLOAT: sVar.SetValue(nuniforms->PullFloat(id.c_str(), 0), true); break;
+			case RE_Cvar::Type::FLOAT2: sVar.SetValue(nuniforms->PullFloat2(id.c_str(), math::float2::zero), true); break;
+			case RE_Cvar::Type::FLOAT3: sVar.SetValue(nuniforms->PullFloatVector(id.c_str(), math::float3::zero), true); break;
+			case RE_Cvar::Type::FLOAT4:
+			case RE_Cvar::Type::MAT2: sVar.SetValue(nuniforms->PullFloat4(id.c_str(), math::float4::zero), true); break;
+			case RE_Cvar::Type::MAT3: sVar.SetValue(nuniforms->PullMat3(id.c_str(), math::float3x3::zero), true); break;
+			case RE_Cvar::Type::MAT4: sVar.SetValue(nuniforms->PullMat4(id.c_str(), math::float4x4::zero), true); break;
+			case RE_Cvar::Type::SAMPLER: sVar.SetSampler(RE_RES->IsReference(nuniforms->PullString(id.c_str(), "")), true); break;
+			}
+
+			fromShaderCustomUniforms.push_back(sVar);
 		}
-
-		DEL(nuniforms)
-		DEL(nodeMat)
-
-		if (generateLibraryPath)
-		{
-			SetMD5(material.GetMd5().c_str());
-			eastl::string libraryPath("Library/Materials/");
-			libraryPath += GetMD5();
-			SetLibraryPath(libraryPath.c_str());
-		}
-
-		ResourceContainer::inMemory = true;
 	}
+
+	DEL(nuniforms)
+	DEL(nodeMat)
+
+	if (generateLibraryPath)
+	{
+		SetMD5(material.GetMd5().c_str());
+		eastl::string libraryPath("Library/Materials/");
+		libraryPath += GetMD5();
+		SetLibraryPath(libraryPath.c_str());
+	}
+
+	ResourceContainer::inMemory = true;
 }
 
 void RE_Material::JsonSerialize(bool onlyMD5)

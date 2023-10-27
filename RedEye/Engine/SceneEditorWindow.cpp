@@ -65,13 +65,20 @@ SceneEditorWindow::SceneEditorWindow() : OwnCameraRenderedWindow("Editor Scene",
 	if (root) RE_EDITOR->SetSelected(root->GetFirstChildUID());
 }
 
+void SceneEditorWindow::DrawOther() const
+{
+	// Stencil
+	if (render_view.HasFlag(RenderView::Flag::OUTLINE_SELECTION))
+		RE_RENDER->DrawStencil(RE_EDITOR->GetSelected(), render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+}
+
 void SceneEditorWindow::DrawDebug() const
 {
 	RE_PROFILE(RE_ProfiledFunc::DrawDebug, RE_ProfiledClass::ModuleEditor)
 
 	if (!HasFlag(Flag::DRAW_DEBUG)) return;
 
-	RE_PHYSICS->DrawDebug(cam);
+	ModulePhysics::DrawDebug();
 
 	// Check if any debug shape is rendered (aabb_drawing can be bypassed if none selected)
 	auto selected = RE_EDITOR->GetSelected();
@@ -114,6 +121,13 @@ void SceneEditorWindow::Focus()
 
 	math::AABB box = RE_SCENE->GetGOCPtr(selected)->GetGlobalBoundingBoxWithChilds();
 	cam.Focus(box.CenterPoint(), box.HalfSize().Length());
+}
+
+const math::Frustum* SceneEditorWindow::GetFrustum() const
+{
+	if (!render_view.HasFlag(RenderView::Flag::FRUSTUM_CULLING)) return nullptr;
+	if (render_view.HasFlag(RenderView::Flag::OVERRIDE_CULLING)) return RE_CameraManager::GetCullingFrustum();
+	return &cam.GetFrustum();
 }
 
 #pragma endregion

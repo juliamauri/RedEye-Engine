@@ -1,124 +1,122 @@
-#include "RE_Component.h"
-#include <MGL/Math/float3.h>
-#include <EASTL/vector.h>
-
 #include "RE_CompParticleEmitter.h"
 
+#include "RE_Time.h"
 #include "RE_Profiler.h"
+#include "RE_Json.h"
 #include "Application.h"
 #include "ModuleInput.h"
-#include "ModulePhysics.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"
+
+#include "RE_ParticleManager.h"
 #include "RE_ResourceManager.h"
+#include "RE_CameraManager.h"
 
-#include "RE_ParticleEmitterBase.h"
-#include "RE_ShaderImporter.h"
-
-#include "RE_Time.h"
-#include "RE_Json.h"
 #include "RE_GameObject.h"
 #include "RE_CompTransform.h"
+#include "RE_ParticleEmitterBase.h"
 
+#include <MGL/Math/float3.h>
 #include <ImGui/imgui.h>
+
+RE_CompParticleEmitter::RE_CompParticleEmitter() :
+	RE_Component(RE_Component::Type::PARTICLEEMITER),
+	simulation(RE_ParticleManager::Allocate(*(new RE_ParticleEmitter())))
+{}
 
 void RE_CompParticleEmitter::CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent)
 {
 	pool_gos = pool;
 	if (go = parent) pool_gos->AtPtr(go)->ReportComponent(id, RE_Component::Type::PARTICLEEMITER);
 
-	RE_CompParticleEmitter* cmp_emitter = dynamic_cast<RE_CompParticleEmitter*>(copy);
+	auto cmp_emitter = dynamic_cast<RE_CompParticleEmitter*>(copy);
 	simulation = cmp_emitter->simulation;
 	emitter_md5 = cmp_emitter->emitter_md5;
 }
 
 void RE_CompParticleEmitter::Update()
 {
-	if (simulation)
-	{
-		RE_GameObject* g_obj = GetGOPtr();
-		const math::vec global_pos = g_obj->GetTransformPtr()->GetGlobalPosition();
-		simulation->parent_speed = (global_pos - simulation->parent_pos) / RE_Time::DeltaTime();
-		simulation->parent_pos = global_pos;
+	if (!simulation) return;
 
-		if (simulation->state <= RE_ParticleEmitter::PlaybackState::PLAY)
-			RE_INPUT->Push(RE_EventType::TRANSFORM_MODIFIED, RE_SCENE, go);
-	}
+	RE_GameObject* g_obj = GetGOPtr();
+	auto global_pos = g_obj->GetTransformPtr()->GetGlobalPosition();
+	if (RE_ParticleManager::UpdateEmitter(simulation, global_pos))
+		RE_INPUT->Push(RE_EventType::TRANSFORM_MODIFIED, RE_SCENE, go);
 }
 
 void RE_CompParticleEmitter::Draw() const
 {
-	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(RE_Component::Type::TRANSFORM));
-	RE_PHYSICS->DrawParticleEmitterSimulation(simulation->id, transform->GetGlobalPosition(), transform->GetUp().Normalized());
+	auto transform = dynamic_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(RE_Component::Type::TRANSFORM));
+	RE_ParticleManager::DrawSimulation(
+		simulation,
+		RE_CameraManager::MainCamera()->Camera,
+		transform->GetGlobalPosition(),
+		transform->GetUp().Normalized());
 }
 
 void RE_CompParticleEmitter::DrawProperties()
 {
-	if (ImGui::CollapsingHeader("Particle Emitter"))
-	{
-		if (emitter_md5)
-		{
-			if (ImGui::Button("Go to emitter resource"))
-				RE_RES->PushSelected(emitter_md5, true);
-		}
-		else
-			ImGui::Text("There is not particle emitter resource selected, using basic emitter.");
-		
-		if (ImGui::BeginMenu("Change particle emitter"))
-		{
-			eastl::vector<ResourceContainer*> r_emitters = RE_RES->GetResourcesByType(ResourceContainer::Type::PARTICLE_EMITTER);
-			bool none = true;
-			for (auto emitter : r_emitters)
-			{
-				if (emitter->isInternal()) continue;
+	if (!ImGui::CollapsingHeader("Particle Emitter"))
+		return;
 
-				none = false;
-				if (ImGui::MenuItem(emitter->GetName()))
-				{
-					UnUseResources();
-					emitter_md5 = emitter->GetMD5();
-					UseResources();
-				}
-			}
-			if (none) ImGui::Text("No custom emitters on assets");
-			ImGui::EndMenu();
+	if (!emitter_md5)
+		ImGui::Text("There is not particle emitter resource selected, using basic emitter.");
+	else if (ImGui::Button("Go to emitter resource"))
+		RE_RES->PushSelected(emitter_md5, true);
+		
+
+	if (!ImGui::BeginMenu("Change particle emitter"))
+		return;
+
+	bool none = true;
+	for (auto emitter : RE_RES->GetResourcesByType(ResourceContainer::Type::PARTICLE_EMITTER))
+	{
+		if (emitter->isInternal()) continue;
+
+		none = false;
+		if (ImGui::MenuItem(emitter->GetName()))
+		{
+			UnUseResources();
+			emitter_md5 = emitter->GetMD5();
+			UseResources();
 		}
 	}
+	if (none) ImGui::Text("No custom emitters on assets");
+	ImGui::EndMenu();
 }
 
-bool RE_CompParticleEmitter::HasBlend() const { return static_cast<bool>(simulation->opacity.type); }
-bool RE_CompParticleEmitter::HasLight() const { return simulation->light.HasLight(); }
-
-void RE_CompParticleEmitter::CallLightShaderUniforms(unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const
-{
-	RE_CompTransform* transform = static_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(RE_Component::Type::TRANSFORM));
-	RE_PHYSICS->CallParticleEmitterLightShaderUniforms(simulation->id, transform->GetGlobalPosition(), shader, array_unif_name, count, maxLights, sharedLight);
-}
+bool RE_CompParticleEmitter::HasBlend() const { return RE_ParticleManager::EmitterHasBlend(simulation); }
+bool RE_CompParticleEmitter::HasLight() const { return RE_ParticleManager::EmitterHasLight(simulation); }
 
 void RE_CompParticleEmitter::UpdateEmitter(const char* emitter)
 {
-	if (emitter == emitter_md5)
-		dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_md5))->FillEmitter(simulation);
+	if (emitter != emitter_md5) return;
+
+	RE_ParticleEmitter* to_fill = RE_ParticleManager::GetEmitter(simulation);
+	if (!to_fill) return;
+	
+	dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_md5))->FillEmitter(to_fill);
 }
 
 #pragma region Resources
 
 void RE_CompParticleEmitter::UseResources()
 {
-	if (emitter_md5) {
+	RE_ParticleEmitter* emitter = nullptr;
+	if (emitter_md5)
+	{
 		RE_RES->Use(emitter_md5);
-		simulation = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_md5))->GetNewEmitter();
+		emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emitter_md5))->GetNewEmitter();
 	}
-	else
-		simulation = new RE_ParticleEmitter(true);
+	else emitter = new RE_ParticleEmitter(true);
 
-	RE_PHYSICS->AddEmitter(simulation);
+	simulation = RE_ParticleManager::Allocate(*emitter);
 }
 
 void RE_CompParticleEmitter::UnUseResources()
 {
 	if (emitter_md5) RE_RES->UnUse(emitter_md5);
-	RE_PHYSICS->RemoveEmitter(simulation);
+	RE_ParticleManager::Deallocate(simulation);
 }
 
 eastl::vector<const char*> RE_CompParticleEmitter::GetAllResources()

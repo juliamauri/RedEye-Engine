@@ -1,25 +1,23 @@
-#include "EditorWindow.h"
-#include <EASTL/string.h>
-#include <MGL/Math/float4.h>
-
 #include "ParticleEmitterEditorWindow.h"
 
 #include "RE_Memory.h"
 #include "RE_Math.h"
 #include "Application.h"
+#include "RE_FileSystem.h"
 #include "ModuleInput.h"
 #include "ModuleScene.h"
-#include "ModulePhysics.h"
 #include "ModuleEditor.h"
+#include "PopUpWindow.h"
+
 #include "RE_FBOManager.h"
-#include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
 #include "RE_CameraManager.h"
 #include "RE_PrimitiveManager.h"
+#include "RE_ParticleManager.h"
+
 #include "RE_CompPrimitive.h"
 #include "RE_ParticleEmitter.h"
 #include "RE_ParticleEmitterBase.h"
-#include "PopUpWindow.h"
 
 #define IMGUICURVEIMPLEMENTATION
 #include <ImGuiWidgets/ImGuiCurverEditor/ImGuiCurveEditor.hpp>
@@ -48,21 +46,25 @@ void ParticleEmitterEditorWindow::Orbit(float delta_x, float delta_y)
 {
 	if (!simulation) return;
 
-	cam.Orbit(
+	RE_ParticleEmitter* emitter = RE_ParticleManager::GetEmitter(simulation);
+	if (emitter) cam.Orbit(
 		cam_sensitivity * -delta_x,
 		cam_sensitivity * delta_y,
-		simulation->bounding_box.CenterPoint());
+		emitter->bounding_box.CenterPoint());
 }
 
 void ParticleEmitterEditorWindow::Focus()
 {
 	if (!simulation) return;
 
-	math::AABB box = simulation->bounding_box;
+	RE_ParticleEmitter* emitter = RE_ParticleManager::GetEmitter(simulation);
+	if (!emitter) return;
+
+	math::AABB box = emitter->bounding_box;
 	cam.Focus(box.CenterPoint(), box.HalfSize().Length());
 }
 
-void ParticleEmitterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const char* md5)
+void ParticleEmitterEditorWindow::StartEditing(P_UID sim, const char* md5)
 {
 	if (emiter_md5 == md5 && md5 != nullptr) return;
 
@@ -91,25 +93,31 @@ void ParticleEmitterEditorWindow::StartEditing(RE_ParticleEmitter* sim, const ch
 	if (!emiter_md5) new_emitter = new RE_ParticleEmitterBase();
 	active = true;
 	simulation = sim;
-	RE_PHYSICS->AddEmitter(simulation);
 }
 
-void ParticleEmitterEditorWindow::SaveEmitter(bool close, const char* emitter_name, const char* emissor_base, const char* renderer_base)
+void ParticleEmitterEditorWindow::SaveEmitter(
+	bool close,
+	const char* emitter_name,
+	const char* emissor_base,
+	const char* renderer_base)
 {
+	RE_ParticleEmitter* emitter = RE_ParticleManager::GetEmitter(simulation);
+	if (!emitter) return;
+
 	if (emiter_md5)
 	{
-		RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
-		if (!emitter->HasEmissor() || !emitter->HasRenderer())
-			emitter->GenerateSubResourcesAndReference(emissor_base, renderer_base);
+		auto emitter_base = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+		if (!emitter_base->HasEmissor() || !emitter_base->HasRenderer())
+			emitter_base->GenerateSubResourcesAndReference(emissor_base, renderer_base);
 
-		emitter->FillAndSave(simulation);
+		emitter_base->FillAndSave(emitter);
 	}
 	else
 	{
 		new_emitter->SetName(emitter_name);
 		new_emitter->SetType(ResourceContainer::Type::PARTICLE_EMITTER);
 		new_emitter->GenerateSubResourcesAndReference(emissor_base, renderer_base);
-		new_emitter->FillAndSave(simulation);
+		new_emitter->FillAndSave(emitter);
 
 		emiter_md5 = RE_RES->Reference(dynamic_cast<ResourceContainer*>(new_emitter));
 	}
@@ -127,12 +135,11 @@ void ParticleEmitterEditorWindow::NextOrClose()
 
 void ParticleEmitterEditorWindow::CloseEditor()
 {
-	if (simulation) RE_PHYSICS->RemoveEmitter(simulation);
-	simulation = nullptr;
-	if (!emiter_md5 && new_emitter) DEL(new_emitter)
+	RE_ParticleManager::Deallocate(simulation);
+	simulation = 0;
 	if (emiter_md5) RE_RES->UnUse(emiter_md5);
 	emiter_md5 = nullptr;
-	new_emitter = nullptr;
+	DEL(new_emitter)
 	active = false;
 }
 
@@ -144,16 +151,19 @@ void ParticleEmitterEditorWindow::LoadNextEmitter()
 	if (!emiter_md5) new_emitter = new RE_ParticleEmitterBase();
 	active = true;
 	simulation = next_simulation;
-	RE_PHYSICS->AddEmitter(simulation);
+	RE_ParticleManager::Deallocate(simulation);
 
 	load_next = false;
 	next_emiter_md5 = nullptr;
-	simulation = nullptr;
+	simulation = 0;
 }
 
 void ParticleEmitterEditorWindow::Draw(bool secondary)
 {
 	if (!simulation) return;
+
+	RE_ParticleEmitter* emitter = RE_ParticleManager::GetEmitter(simulation);
+	if (!emitter) return;
 
 	bool close = false;
 
@@ -174,25 +184,25 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 		if (ImGui::BeginMenuBar())
 		{
 			// Playback
-			switch (simulation->state)
+			switch (emitter->state)
 			{
 			case RE_ParticleEmitter::PlaybackState::STOP:
 			{
-				if (ImGui::Button("Play simulation")) simulation->state = RE_ParticleEmitter::PlaybackState::PLAY;
+				if (ImGui::Button("Play simulation")) emitter->state = RE_ParticleEmitter::PlaybackState::PLAY;
 				break;
 			}
 			case RE_ParticleEmitter::PlaybackState::PLAY:
 			{
-				if (ImGui::Button("Pause simulation")) simulation->state = RE_ParticleEmitter::PlaybackState::PAUSE;
+				if (ImGui::Button("Pause simulation")) emitter->state = RE_ParticleEmitter::PlaybackState::PAUSE;
 				ImGui::SameLine();
-				if (ImGui::Button("Stop simulation")) simulation->state = RE_ParticleEmitter::PlaybackState::STOPING;
+				if (ImGui::Button("Stop simulation")) emitter->state = RE_ParticleEmitter::PlaybackState::STOPING;
 				break;
 			}
 			case RE_ParticleEmitter::PlaybackState::PAUSE:
 			{
-				if (ImGui::Button("Resume simulation")) simulation->state = RE_ParticleEmitter::PlaybackState::PLAY;
+				if (ImGui::Button("Resume simulation")) emitter->state = RE_ParticleEmitter::PlaybackState::PLAY;
 				ImGui::SameLine();
-				if (ImGui::Button("Stop simulation")) simulation->state = RE_ParticleEmitter::PlaybackState::STOPING;
+				if (ImGui::Button("Stop simulation")) emitter->state = RE_ParticleEmitter::PlaybackState::STOPING;
 				break;
 			}
 			}
@@ -216,8 +226,8 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 					if (ImGui::MenuItem(name.c_str()))
 					{
 						if (emiter_md5)
-							dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->ChangeEmissor(simulation, m->GetMD5());
-						else new_emitter->ChangeEmissor(simulation, m->GetMD5());
+							dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->ChangeEmissor(emitter, m->GetMD5());
+						else new_emitter->ChangeEmissor(emitter, m->GetMD5());
 
 						need_save = true;
 					}
@@ -243,8 +253,8 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 					if (ImGui::MenuItem(name.c_str()))
 					{
 						if (emiter_md5)
-							dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->ChangeRenderer(simulation, m->GetMD5());
-						else new_emitter->ChangeRenderer(simulation, m->GetMD5());
+							dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->ChangeRenderer(emitter, m->GetMD5());
+						else new_emitter->ChangeRenderer(emitter, m->GetMD5());
 
 						need_save = true;
 					}
@@ -255,7 +265,8 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			}
 
 			bool disabled = false;
-			if (!need_save && !secondary) {
+			if (!need_save && !secondary)
+			{
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 				disabled = true;
@@ -264,7 +275,8 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			ImGui::SameLine();
 			if (ImGui::Button("Save"))
 			{
-				if (emiter_md5) {
+				if (emiter_md5)
+				{
 					RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
 					bool has_emissor = emitter->HasEmissor(), has_render = emitter->HasRenderer();
 					RE_EDITOR->popupWindow->PopUpSaveParticles((!has_emissor || !has_render), true, has_emissor, has_render);
@@ -274,14 +286,15 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			ImGui::SameLine();
 			if (ImGui::Button("Discard changes"))
 			{
-				DEL(simulation)
-					simulation = (emiter_md5) ? dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->GetNewEmitter()
-					: new RE_ParticleEmitter(true);
+				RE_ParticleManager::Deallocate(simulation);
+				simulation = emiter_md5 ?
+					RE_ParticleManager::Allocate(*dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5))->GetNewEmitter()) :
+					RE_ParticleManager::Allocate(*new RE_ParticleEmitter(true));
 
 				if (!emiter_md5)
 				{
 					DEL(new_emitter)
-						new_emitter = new RE_ParticleEmitterBase();
+					new_emitter = new RE_ParticleEmitterBase();
 				}
 
 				need_save = false;
@@ -361,12 +374,12 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 		}
 
 		// Control (read-only)
-		ImGui::Text("Current particles: %i", simulation->particle_count);
-		ImGui::Text("Total time: %.1f s", simulation->total_time);
-		ImGui::Text("Max Distance: %.1f units", math::SqrtFast(simulation->max_dist_sq));
-		ImGui::Text("Max Speed: %.1f units/s", math::SqrtFast(simulation->max_speed_sq));
-		ImGui::Text("Parent Position: %.1f, %.1f, %.1f", simulation->parent_pos.x, simulation->parent_pos.y, simulation->parent_pos.z);
-		ImGui::Text("Parent Speed: %.1f, %.1f, %.1f", simulation->parent_speed.x, simulation->parent_speed.y, simulation->parent_speed.z);
+		ImGui::Text("Current particles: %i", emitter->particle_count);
+		ImGui::Text("Total time: %.1f s", emitter->total_time);
+		ImGui::Text("Max Distance: %.1f units", math::SqrtFast(emitter->max_dist_sq));
+		ImGui::Text("Max Speed: %.1f units/s", math::SqrtFast(emitter->max_speed_sq));
+		ImGui::Text("Parent Position: %.1f, %.1f, %.1f", emitter->parent_pos.x, emitter->parent_pos.y, emitter->parent_pos.z);
+		ImGui::Text("Parent Speed: %.1f, %.1f, %.1f", emitter->parent_speed.x, emitter->parent_speed.y, emitter->parent_speed.z);
 
 		if (secondary)
 		{
@@ -384,41 +397,41 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		int tmp = static_cast<int>(simulation->max_particles);
+		int tmp = static_cast<int>(emitter->max_particles);
 		if (ImGui::DragInt("Max particles", &tmp, 1.f, 0, 65000))
 		{
-			simulation->max_particles = static_cast<unsigned int>(RE_Math::Cap(tmp, 0, 500000));
+			emitter->max_particles = static_cast<unsigned int>(RE_Math::Cap(tmp, 0, 500000));
 			need_save = true;
 		}
 
-		if (simulation->spawn_interval.DrawEditor(need_save) + simulation->spawn_mode.DrawEditor(need_save) &&
-			simulation->state != RE_ParticleEmitter::PlaybackState::STOP)
-			simulation->state = RE_ParticleEmitter::PlaybackState::RESTART;
+		if (emitter->spawn_interval.DrawEditor(need_save) + emitter->spawn_mode.DrawEditor(need_save) &&
+			emitter->state != RE_ParticleEmitter::PlaybackState::STOP)
+			emitter->state = RE_ParticleEmitter::PlaybackState::RESTART;
 
 		ImGui::Separator();
-		if (ImGui::Checkbox("Start on Play", &simulation->start_on_play))  need_save = true;
-		if (ImGui::Checkbox("Loop", &simulation->loop))  need_save = true;
-		if (!simulation->loop)
+		if (ImGui::Checkbox("Start on Play", &emitter->start_on_play))  need_save = true;
+		if (ImGui::Checkbox("Loop", &emitter->loop))  need_save = true;
+		if (!emitter->loop)
 		{
 			ImGui::SameLine();
-			if (ImGui::DragFloat("Max time", &simulation->max_time, 1.f, 0.f, 10000.f))
+			if (ImGui::DragFloat("Max time", &emitter->max_time, 1.f, 0.f, 10000.f))
 				need_save = true;
 		}
-		if (ImGui::DragFloat("Time Multiplier", &simulation->time_muliplier, 0.01f, 0.01f, 10.f)) need_save = true;
-		if (ImGui::DragFloat("Start Delay", &simulation->start_delay, 1.f, 0.f, 10000.f)) need_save = true;
+		if (ImGui::DragFloat("Time Multiplier", &emitter->time_muliplier, 0.01f, 0.01f, 10.f)) need_save = true;
+		if (ImGui::DragFloat("Start Delay", &emitter->start_delay, 1.f, 0.f, 10000.f)) need_save = true;
 
 		ImGui::Separator();
-		if (ImGui::Checkbox("Local Space", &simulation->local_space)) need_save = true;
-		if (ImGui::Checkbox("Inherit Speed", &simulation->inherit_speed)) need_save = true;
+		if (ImGui::Checkbox("Local Space", &emitter->local_space)) need_save = true;
+		if (ImGui::Checkbox("Inherit Speed", &emitter->inherit_speed)) need_save = true;
 
 		ImGui::Separator();
-		if (simulation->initial_lifetime.DrawEditor("Lifetime")) need_save = true;
+		if (emitter->initial_lifetime.DrawEditor("Lifetime")) need_save = true;
 
 		ImGui::Separator();
-		if (simulation->initial_pos.DrawEditor()) need_save = true;
+		if (emitter->initial_pos.DrawEditor()) need_save = true;
 
 		ImGui::Separator();
-		if (simulation->initial_speed.DrawEditor("Starting Speed")) need_save = true;
+		if (emitter->initial_speed.DrawEditor("Starting Speed")) need_save = true;
 
 		if (secondary)
 		{
@@ -436,13 +449,13 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (simulation->external_acc.DrawEditor()) need_save = true;
+		if (emitter->external_acc.DrawEditor()) need_save = true;
 
 		ImGui::Separator();
-		if (simulation->boundary.DrawEditor()) need_save = true;
+		if (emitter->boundary.DrawEditor()) need_save = true;
 
 		ImGui::Separator();
-		if (simulation->collider.DrawEditor()) need_save = true;
+		if (emitter->collider.DrawEditor()) need_save = true;
 
 		if (secondary)
 		{
@@ -460,14 +473,14 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (simulation->meshMD5)
+		if (emitter->meshMD5)
 		{
 			if (ImGui::Button(eastl::string("Resource Mesh").c_str()))
-				RE_RES->PushSelected(simulation->meshMD5, true);
+				RE_RES->PushSelected(emitter->meshMD5, true);
 		}
-		else if (!simulation->primCmp)
+		else if (!emitter->primCmp)
 			ImGui::TextWrapped("Select mesh resource or select primitive");
-		else if (simulation->primCmp->DrawPrimPropierties()) need_save = true;
+		else if (emitter->primCmp->DrawPrimPropierties()) need_save = true;
 
 
 		ImGui::Separator();
@@ -477,132 +490,132 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 		{
 			if (ImGui::MenuItem("Point"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompPoint();
+				emitter->primCmp = new RE_CompPoint();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Cube"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompCube();
+				emitter->primCmp = new RE_CompCube();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Dodecahedron"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompDodecahedron();
+				emitter->primCmp = new RE_CompDodecahedron();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Tetrahedron"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompTetrahedron();
+				emitter->primCmp = new RE_CompTetrahedron();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Octohedron"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompOctohedron();
+				emitter->primCmp = new RE_CompOctohedron();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Icosahedron"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompIcosahedron();
+				emitter->primCmp = new RE_CompIcosahedron();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Plane"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompPlane();
+				emitter->primCmp = new RE_CompPlane();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Sphere"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompSphere();
+				emitter->primCmp = new RE_CompSphere();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Cylinder"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompCylinder();
+				emitter->primCmp = new RE_CompCylinder();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("HemiSphere"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompHemiSphere();
+				emitter->primCmp = new RE_CompHemiSphere();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Torus"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompTorus();
+				emitter->primCmp = new RE_CompTorus();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Trefoil Knot"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompTrefoiKnot();
+				emitter->primCmp = new RE_CompTrefoiKnot();
 				setUpPrimitive = clearMesh = true;
 			}
 			if (ImGui::MenuItem("Rock"))
 			{
-				if (simulation->primCmp)
+				if (emitter->primCmp)
 				{
-					simulation->primCmp->UnUseResources();
-					DEL(simulation->primCmp)
+					emitter->primCmp->UnUseResources();
+					DEL(emitter->primCmp)
 				}
-				simulation->primCmp = new RE_CompRock();
+				emitter->primCmp = new RE_CompRock();
 				setUpPrimitive = clearMesh = true;
 			}
 
@@ -613,15 +626,15 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 		{
 			need_save = true;
 
-			if (simulation->meshMD5)
+			if (emitter->meshMD5)
 			{
-				RE_RES->UnUse(simulation->meshMD5);
-				simulation->meshMD5 = nullptr;
+				RE_RES->UnUse(emitter->meshMD5);
+				emitter->meshMD5 = nullptr;
 			}
 
 			if (setUpPrimitive)
 			{
-				RE_SCENE->primitives->SetUpComponentPrimitive(simulation->primCmp);
+				RE_SCENE->primitives->SetUpComponentPrimitive(emitter->primCmp);
 				setUpPrimitive = false;
 			}
 
@@ -641,9 +654,9 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 				eastl::string name = eastl::to_string(count++) + m->GetName();
 				if (ImGui::MenuItem(name.c_str()))
 				{
-					if (simulation->meshMD5) RE_RES->UnUse(simulation->meshMD5);
-					simulation->meshMD5 = m->GetMD5();
-					if (simulation->meshMD5) RE_RES->Use(simulation->meshMD5);
+					if (emitter->meshMD5) RE_RES->UnUse(emitter->meshMD5);
+					emitter->meshMD5 = m->GetMD5();
+					if (emitter->meshMD5) RE_RES->Use(emitter->meshMD5);
 
 					need_save = true;
 				}
@@ -668,7 +681,8 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (simulation->light.DrawEditor(simulation->id)) need_save = true;
+		if (emitter->light.DrawEditor(simulation))
+			need_save = true;
 
 		if (secondary)
 		{
@@ -686,27 +700,27 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (ImGui::DragFloat3("Scale", simulation->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f"))
+		if (ImGui::DragFloat3("Scale", emitter->scale.ptr(), 0.1f, -10000.f, 10000.f, "%.2f"))
 		{
-			if (!simulation->scale.IsFinite())simulation->scale.Set(0.5f, 0.5f, 0.5f);
+			if (!emitter->scale.IsFinite()) emitter->scale.Set(0.5f, 0.5f, 0.5f);
 			need_save = true;
 		}
 
-		int pDir = static_cast<int>(simulation->orientation);
+		int pDir = static_cast<int>(emitter->orientation);
 		if (ImGui::Combo("Particle Direction", &pDir, "Normal\0Billboard\0Custom\0"))
 		{
-			simulation->orientation = static_cast<RE_ParticleEmitter::ParticleDir>(pDir);
+			emitter->orientation = static_cast<RE_ParticleEmitter::ParticleDir>(pDir);
 			need_save = true;
 		}
 
-		if (simulation->orientation == RE_ParticleEmitter::ParticleDir::Custom)
+		if (emitter->orientation == RE_ParticleEmitter::ParticleDir::Custom)
 		{
-			ImGui::DragFloat3("Custom Direction", simulation->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
+			ImGui::DragFloat3("Custom Direction", emitter->direction.ptr(), 0.1f, -1.f, 1.f, "%.2f");
 			need_save = true;
 		}
 
-		if (simulation->color.DrawEditor()) need_save = true;
-		if (simulation->opacity.DrawEditor()) need_save = true;
+		if (emitter->color.DrawEditor()) need_save = true;
+		if (emitter->opacity.DrawEditor()) need_save = true;
 
 		if (secondary)
 		{
@@ -724,9 +738,12 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (simulation->opacity.type != RE_PR_Opacity::Type::VALUE && simulation->opacity.type != RE_PR_Opacity::Type::NONE && simulation->opacity.useCurve)
+		if (emitter->opacity.type != RE_PR_Opacity::Type::VALUE
+			&& emitter->opacity.type != RE_PR_Opacity::Type::NONE
+			&& emitter->opacity.useCurve)
 		{
-			if (simulation->opacity.curve.DrawEditor("Opacity")) need_save = true;
+			if (emitter->opacity.curve.DrawEditor("Opacity"))
+				need_save = true;
 		}
 		else
 			ImGui::Text("Select a opacity over type and enable curve at opacity propierties.");
@@ -747,9 +764,10 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 		}
 
-		if (simulation->color.type != RE_PR_Color::Type::SINGLE && simulation->color.useCurve)
+		if (emitter->color.type != RE_PR_Color::Type::SINGLE && emitter->color.useCurve)
 		{
-			if (simulation->color.curve.DrawEditor("Color")) need_save = true;
+			if (emitter->color.curve.DrawEditor("Color"))
+				need_save = true;
 		}
 		else
 			ImGui::Text("Select a color over type and enable curve at color propierties.");
@@ -774,8 +792,9 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 
 	if (emiter_md5)
 	{
-		RE_ParticleEmitterBase* emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
-		bool has_emissor = emitter->HasEmissor(), has_render = emitter->HasRenderer();
+		auto emitter = dynamic_cast<RE_ParticleEmitterBase*>(RE_RES->At(emiter_md5));
+		bool has_emissor = emitter->HasEmissor();
+		bool has_render = emitter->HasRenderer();
 		RE_EDITOR->popupWindow->PopUpSaveParticles((!has_emissor || !has_render), true, has_emissor, has_render, true);
 	}
 	else RE_EDITOR->popupWindow->PopUpSaveParticles(true, false, new_emitter->HasEmissor(), new_emitter->HasRenderer(), true);

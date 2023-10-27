@@ -1,52 +1,66 @@
 #ifndef __RE_PARTICLEMANAGER_H__
 #define __RE_PARTICLEMANAGER_H__
 
+#include "RE_DataTypes.h"
 #include "RE_ParticleEmitter.h"
+#include "RE_Camera.h"
 
-#include <EASTL/list.h>
-#include "RE_Timer.h"
+#include <EASTL/map.h>
 
-struct RE_Particle;
+class RE_Json;
 
-class ParticleManager
+namespace RE_ParticleManager
 {
-public:
-	ParticleManager();
-	~ParticleManager();
+	enum class BoundingMode : int { GENERAL, PER_PARTICLE };
 
-	void Update(const float dt);
-	void Clear();
+	namespace
+	{
+		BoundingMode bounding_mode;
+		uint particle_count = 0;
+		eastl::map<P_UID, RE_ParticleEmitter&> simulations;
+	}
 
-	void DrawSimulation(unsigned int index, math::float3  go_position, math::float3  go_up) const;
-	void CallLightShaderUniforms(unsigned int index, math::float3 go_position, unsigned int shader, const char* array_unif_name, unsigned int& count, unsigned int maxLights, bool sharedLight) const;
+	void UpdateAllSimulations(const float dt);
+	bool UpdateEmitter(P_UID id, const math::vec& global_pos);
+	void ClearSimulations();
 
-	unsigned int Allocate(RE_ParticleEmitter* emitter);
-	bool Deallocate(unsigned int index);
+	P_UID Allocate(RE_ParticleEmitter& emitter, P_UID id = 0);
+	bool Deallocate(P_UID id);
+
+	void OnPlay(bool was_paused);
+	void OnPause();
+	void OnStop();
+
+	RE_ParticleEmitter* GetEmitter(P_UID id);
+	bool EmitterHasBlend(P_UID id);
+	bool EmitterHasLight(P_UID id);
+	bool SetEmitterState(P_UID id, RE_ParticleEmitter::PlaybackState state);
 
 	void DrawEditor();
-	void DrawDebug() const;
+	void DrawDebugAll();
 
-	void DebugDrawSimulation(const RE_ParticleEmitter* const sim, const float interval) const;
+	uint GetTotalParticleCount();
+	uint GetParticleCount(P_UID id);
+	bool GetParticles(P_UID id, eastl::vector<RE_Particle>& out);
+	BoundingMode GetBoundingMode() { return bounding_mode; }
 
-	float GetInterval()const;
-	bool SetEmitterState(unsigned int index, RE_ParticleEmitter::PlaybackState state);
+	void DrawSimulation(
+		P_UID id,
+		const RE_Camera& camera,
+		math::float3 go_position = math::float3::zero,
+		math::float3 go_up = math::float3::unitY);
+	
+	void CallLightShaderUniforms(
+		P_UID id,
+		math::float3 go_position,
+		uint shader,
+		const char* array_unif_name,
+		uint& count,
+		uint maxLights,
+		bool sharedLight);
 
-public:
-
-	eastl::list<RE_ParticleEmitter*> simulations;
-
-private:
-
-	void DrawAASphere(const math::vec p_pos, const float radius) const;
-
-private:
-
-	unsigned int emitter_count = 0u;
-	unsigned int particle_count = 0u;
-
-	float point_size = 2.f;
-	float circle_steps = 12.f;
-	eastl::vector<math::float2> circle_precompute;
+	void Load(RE_Json* node);
+	void Save(RE_Json* node);
 };
 
 #endif //!__RE_PARTICLEMANAGER_H__

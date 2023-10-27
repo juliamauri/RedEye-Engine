@@ -1,21 +1,21 @@
 #include "ModulePhysics.h"
 
 #include "RE_Profiler.h"
+#include "RE_Time.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "RE_FileSystem.h"
 #include "RE_PrimitiveManager.h"
-#include "RE_Time.h"
+#include "RE_ParticleManager.h"
 #include "RE_CompCamera.h"
-
-#include <GL/glew.h>
 
 void ModulePhysics::Update()
 {
 	RE_PROFILE(RE_ProfiledFunc::Update, RE_ProfiledClass::ModulePhysics)
 	float global_dt = RE_Time::DeltaTime();
 
-	switch (mode) {
+	switch (mode)
+	{
 	case ModulePhysics::UpdateMode::FIXED_UPDATE:
 	{
 		dt_offset += global_dt;
@@ -30,7 +30,7 @@ void ModulePhysics::Update()
 		if (final_dt > 0.f)
 		{
 			update_count++;
-			particles.Update(final_dt);
+			RE_ParticleManager::UpdateAllSimulations(final_dt);
 		}
 
 		break;
@@ -43,7 +43,7 @@ void ModulePhysics::Update()
 		{
 			dt_offset -= fixed_dt;
 			update_count++;
-			particles.Update(fixed_dt);
+			RE_ParticleManager::UpdateAllSimulations(fixed_dt);
 		}
 
 		break;
@@ -51,7 +51,7 @@ void ModulePhysics::Update()
 	default:
 	{
 		update_count++;
-		particles.Update(global_dt);
+		RE_ParticleManager::UpdateAllSimulations(global_dt);
 		break;
 	}
 	}
@@ -65,62 +65,11 @@ void ModulePhysics::Update()
 	}
 }
 
-void ModulePhysics::CleanUp()
-{
-	particles.Clear();
-}
-
-void ModulePhysics::OnPlay(bool was_paused)
-{
-	for (auto sim : particles.simulations)
-	{
-		if (was_paused)
-		{
-			if (sim->state == RE_ParticleEmitter::PlaybackState::PAUSE)
-				sim->state = RE_ParticleEmitter::PlaybackState::RESTART;
-			else
-				sim->state = RE_ParticleEmitter::PlaybackState::STOPING;
-		}
-		else if (sim->start_on_play)
-			sim->state = RE_ParticleEmitter::PlaybackState::RESTART;
-		else 
-			sim->state = RE_ParticleEmitter::PlaybackState::STOPING;
-	}
-}
-
-void ModulePhysics::OnPause()
-{
-	for (auto sim : particles.simulations)
-		if (sim->state == RE_ParticleEmitter::PlaybackState::PLAY)
-			sim->state = RE_ParticleEmitter::PlaybackState::PAUSE;
-}
-
-void ModulePhysics::OnStop()
-{
-	for (auto sim : particles.simulations)
-		sim->state = RE_ParticleEmitter::PlaybackState::STOPING;
-}
-
-void ModulePhysics::DrawParticleEmitterSimulation(uint index, math::float3 go_positon, math::float3 go_up) const
-{
-	particles.DrawSimulation(index, go_positon, go_up);
-}
-
-void ModulePhysics::DebugDrawParticleEmitterSimulation(const RE_ParticleEmitter* const sim) const
-{
-	particles.DebugDrawSimulation(sim, particles.GetInterval());
-}
-
-void ModulePhysics::CallParticleEmitterLightShaderUniforms(uint index, math::float3 go_position, uint shader, const char* array_unif_name, uint& count, uint maxLights, bool sharedLight) const
-{
-	particles.CallLightShaderUniforms(index, go_position, shader, array_unif_name, count, maxLights, sharedLight);
-}
-
-void ModulePhysics::DrawDebug(const RE_Camera& camera) const
-{
-	if (particles.simulations.empty()) return;
-	particles.DrawDebug();
-}
+void ModulePhysics::CleanUp() { RE_ParticleManager::ClearSimulations(); }
+void ModulePhysics::OnPlay(bool was_paused) { RE_ParticleManager::OnPlay(was_paused); }
+void ModulePhysics::OnPause() { RE_ParticleManager::OnPause(); }
+void ModulePhysics::OnStop() { RE_ParticleManager::OnStop(); }
+void ModulePhysics::DrawDebug() { RE_ParticleManager::DrawDebugAll(); }
 
 void ModulePhysics::DrawEditor()
 {
@@ -137,60 +86,28 @@ void ModulePhysics::DrawEditor()
 			fixed_dt = 1.f / period;
 	}
 
-	particles.DrawEditor();
+	RE_ParticleManager::DrawEditor();
 }
 
 void ModulePhysics::Load()
 {
 	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleWindow)
 	RE_LOG_SECONDARY("Loading Physics propieties from config:");
-	RE_Json* node = RE_FS->ConfigNode("Physics");
 
-	mode = static_cast<UpdateMode>(node->PullInt("UpdateMode", static_cast<int>(UpdateMode::FIXED_UPDATE)));
+	RE_Json* node = RE_FS->ConfigNode("Physics");
+	mode = static_cast<UpdateMode>(node->PullInt("UpdateMode", static_cast<int>(mode)));
+	RE_ParticleManager::Load(node->PullJObject("ParticleManager"));
 
 	DEL(node)
 }
 
-void ModulePhysics::Save() const
+void ModulePhysics::Save()
 {
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModulePhysics)
-	RE_Json* node = RE_FS->ConfigNode("Physics");
 
+	RE_Json* node = RE_FS->ConfigNode("Physics");
 	node->Push("UpdateMode", static_cast<int>(mode));
+	RE_ParticleManager::Save(node->PushJObject("ParticleManager"));
 
 	DEL(node)
-}
-
-RE_ParticleEmitter* ModulePhysics::AddEmitter(RE_ParticleEmitter* to_add)
-{
-	particles.Allocate(to_add);
-	return to_add;
-}
-
-void ModulePhysics::RemoveEmitter(RE_ParticleEmitter* emitter)
-{
-	particles.Deallocate(emitter->id);
-}
-
-uint ModulePhysics::GetParticleCount(uint emitter_id) const
-{
-	for (const auto sim : particles.simulations)
-		if (sim->id == emitter_id)
-			return sim->particle_count;
-
-	return 0u;
-}
-
-bool ModulePhysics::GetParticles(uint emitter_id, eastl::vector<RE_Particle>& out) const
-{
-	for (const auto& sim : particles.simulations)
-	{
-		if (sim->id == emitter_id)
-		{
-			out = sim->particle_pool;
-			return true;
-		}
-	}
-
-	return false;
 }

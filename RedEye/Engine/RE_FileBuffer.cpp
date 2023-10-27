@@ -53,7 +53,7 @@ size_t RE_FileBuffer::HardLoad()
 	}
 
 	PHYSFS_sint64 amount_read = 0;
-	PHYSFS_sint64 sll_size = PHYSFS_fileLength(fs_file);
+	auto sll_size = PHYSFS_fileLength(fs_file);
 
 	if (sll_size > 0)
 	{

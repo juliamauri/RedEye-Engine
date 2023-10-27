@@ -1,14 +1,11 @@
-#include "EditorWindow.h"
-#include <EASTL/string.h>
-
 #include "MaterialEditorWindow.h"
 
 #include "RE_Memory.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
 #include "RE_ResourceManager.h"
-#include "RE_Material.h"
 #include "RE_ThumbnailManager.h"
+#include "RE_Material.h"
 
 #include <ImGuiImpl/imgui_stdlib.h>
 #include <ImGui/imgui_internal.h>
@@ -60,7 +57,7 @@ void MaterialEditorWindow::Draw(bool secondary)
 			editing_material->SetType(ResourceContainer::Type::MATERIAL);
 			editing_material->Save();
 
-			RE_ThumbnailManager::AddThumbnail(RE_RES->Reference(static_cast<ResourceContainer*>(editing_material)));
+			RE_ThumbnailManager::AddThumbnail(RE_RES->Reference(editing_material));
 
 			editing_material = new RE_Material();
 			matName = "New Material";

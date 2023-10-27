@@ -20,6 +20,11 @@ const RE_GameObject* RE_Component::GetGOCPtr() const
 	return pool_gos->AtCPtr(go);
 }
 
+math::vec RE_Component::GetGlobalPosition() const
+{
+	return dynamic_cast<RE_CompTransform*>(pool_gos->AtCPtr(go)->GetCompPtr(RE_Component::Type::TRANSFORM))->GetGlobalPosition();
+}
+
 void RE_Component::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
 	DEL(node)

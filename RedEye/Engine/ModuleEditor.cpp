@@ -2,6 +2,7 @@
 
 #include "ModuleEditor.h"
 
+#include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "RE_ConsoleLog.h"
 #include "Application.h"
@@ -15,8 +16,8 @@
 #include "RE_ThumbnailManager.h"
 #include "RE_CameraManager.h"
 #include "RE_ParticleEmitter.h"
-#include "RE_Memory.h"
 #include "RE_ResourceManager.h"
+#include "RE_ParticleManager.h"
 
 #include "AboutWindow.h"
 #include "AssetsWindow.h"
@@ -261,10 +262,6 @@ void ModuleEditor::DrawEditorWindows() const
 
 void ModuleEditor::RenderWindowFBOs() const
 {
-	//if (sceneEditorWindow->NeedRender()) RE_RENDER->DrawScene(sceneEditorWindow->render_view);
-	//if (sceneGameWindow->NeedRender()) RE_RENDER->DrawScene(sceneGameWindow->render_view);
-	//if (particleEmitterWindow->IsActive()) RE_RENDER->DrawParticleEditor(particleEmitterWindow->render_view);
-
 	for (auto& window : rendered_windows)
 		window->RenderFBO();
 }
@@ -496,6 +493,7 @@ void ModuleEditor::ApplyRedeyeStyling()
 #pragma endregion
 
 #pragma region Editor Update
+
 void ModuleEditor::DrawWindows()
 {
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None; // | ImGuiDockNodeFlags_PassthruCentralNode;
@@ -626,7 +624,7 @@ void ModuleEditor::DrawMainMenuBar()
 				waterplaneWindow->ToggleActive();
 
 			if (ImGui::MenuItem("Particle Resources"))
-				particleEmitterWindow->StartEditing(new RE_ParticleEmitter(true), nullptr);
+				particleEmitterWindow->StartEditing(RE_ParticleManager::Allocate(*(new RE_ParticleEmitter())), nullptr);
 
 			ImGui::EndMenu();
 		}

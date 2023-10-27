@@ -1,15 +1,15 @@
 #include "RE_ParticleEmitter.h"
 
 #include "RE_Memory.h"
+#include "RE_Profiler.h"
+#include "RE_Math.h"
 #include "Application.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
+#include "RE_ParticleManager.h"
 #include "RE_PrimitiveManager.h"
-#include "RE_Math.h"
 
 #include "RE_CompPrimitive.h"
-
-RE_ParticleEmitter::BoundingMode RE_ParticleEmitter::mode = BoundingMode::PER_PARTICLE;
 
 RE_ParticleEmitter::RE_ParticleEmitter(bool instance_primitive)
 {
@@ -151,7 +151,7 @@ void RE_ParticleEmitter::UpdateParticles()
 			max_speed_sq = RE_Math::Max(max_speed_sq, particle_pool[index].velocity.LengthSq());
 
 			// Broadphase AABB Boundary
-			if (RE_ParticleEmitter::mode == BoundingMode::PER_PARTICLE)
+			if (RE_ParticleManager::GetBoundingMode() == RE_ParticleManager::BoundingMode::PER_PARTICLE)
 			{
 				bounding_box.maxPoint = RE_Math::MaxVecValues(particle_pool[index].position, bounding_box.maxPoint);
 				bounding_box.minPoint = RE_Math::MinVecValues(particle_pool[index].position, bounding_box.minPoint);
@@ -165,7 +165,7 @@ void RE_ParticleEmitter::UpdateParticles()
 		}
 	}
 
-	if (RE_ParticleEmitter::mode == BoundingMode::GENERAL)
+	if (RE_ParticleManager::GetBoundingMode() == RE_ParticleManager::BoundingMode::GENERAL)
 	{
 		switch (boundary.type) {
 		case RE_EmissionBoundary::Type::SPHERE: bounding_box.SetFrom(boundary.geo.sphere); break;
@@ -211,30 +211,28 @@ void RE_ParticleEmitter::ImpulseCollision(RE_Particle& p1, RE_Particle& p2, cons
 	// Check particle collision
 	const math::vec collision_dir = p1.position - p2.position;
 	const float dist2 = collision_dir.Dot(collision_dir);
-	if (dist2 <= combined_radius * combined_radius)
-	{
-		// Get mtd: Minimum Translation Distance
-		const float dist = math::Sqrt(dist2);
-		const math::vec mtd = collision_dir * (combined_radius - dist) / dist;
+	if (dist2 > combined_radius * combined_radius) return;
 
-		// Resolve Intersection
-		const float p1_inv_mass = 1.f / p1.mass;
-		const float p2_inv_mass = 1.f / p2.mass;
-		p1.position += mtd * (p1_inv_mass / (p1_inv_mass + p2_inv_mass));
-		p2.position -= mtd * (p2_inv_mass / (p1_inv_mass + p2_inv_mass));
+	// Get mtd: Minimum Translation Distance
+	const float dist = math::Sqrt(dist2);
+	const math::vec mtd = collision_dir * (combined_radius - dist) / dist;
 
-		// Resolve Collision
-		const math::vec col_normal = collision_dir.Normalized();
-		const math::vec col_speed = (p1.velocity - p2.velocity);
-		const float dot = col_speed.Dot(col_normal);
+	// Resolve Intersection
+	const float p1_inv_mass = 1.f / p1.mass;
+	const float p2_inv_mass = 1.f / p2.mass;
+	p1.position += mtd * (p1_inv_mass / (p1_inv_mass + p2_inv_mass));
+	p2.position -= mtd * (p2_inv_mass / (p1_inv_mass + p2_inv_mass));
 
-		// Check if particles not already moving away
-		if (dot < 0.0f)
-		{
-			// Resolve applying impulse
-			const math::vec impulse = col_normal * (-(p1.col_restitution + p2.col_restitution) * dot) / (p1_inv_mass + p2_inv_mass);
-			p1.velocity += impulse * p1_inv_mass;
-			p2.velocity -= impulse * p2_inv_mass;
-		}
-	}
+	// Resolve Collision
+	const math::vec col_normal = collision_dir.Normalized();
+	const math::vec col_speed = (p1.velocity - p2.velocity);
+	const float dot = col_speed.Dot(col_normal);
+
+	// Check if particles not already moving away
+	if (dot >= 0.f) return;
+
+	// Resolve applying impulse
+	const math::vec impulse = col_normal * (-(p1.col_restitution + p2.col_restitution) * dot) / (p1_inv_mass + p2_inv_mass);
+	p1.velocity += impulse * p1_inv_mass;
+	p2.velocity -= impulse * p2_inv_mass;
 }

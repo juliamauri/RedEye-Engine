@@ -1,7 +1,6 @@
 #ifndef __RE_PARTICLEEMITTER_H__
 #define __RE_PARTICLEEMITTER_H__
 
-#include "RE_Profiler.h"
 #include "RE_Particle.h"
 #include "RE_EmissionInterval.h"
 #include "RE_EmissionSpawn.h"
@@ -17,24 +16,22 @@
 
 #include <EASTL/vector.h>
 
+class RE_CompPrimitive;
+
 class RE_ParticleEmitter
 {
 public:
 
 	enum class PlaybackState : int { STOPING, RESTART, PLAY, STOP, PAUSE };
-	enum class BoundingMode : int { GENERAL, PER_PARTICLE };
 	enum class ParticleDir : uchar { FromPS, Billboard, Custom };
 
-public:
-
-	uint id = 0u;
 	PlaybackState state = PlaybackState::STOP;
 
 	// Particle storage
 	eastl::vector<RE_Particle> particle_pool;
 
 	// Control (read-only)
-	uint particle_count = 0u;
+	uint particle_count = 0;
 	float total_time = 0.f;
 	float max_dist_sq = 0.f;
 	float max_speed_sq = 0.f;
@@ -43,7 +40,6 @@ public:
 	math::vec parent_speed = math::vec::zero;
 
 	math::AABB bounding_box;
-	static BoundingMode mode;
 
 #pragma region Emission Properties
 
@@ -86,7 +82,7 @@ public:
 	RE_PR_Light light = {};
 
 	const char* meshMD5 = nullptr;
-	class RE_CompPrimitive* primCmp = nullptr;
+	RE_CompPrimitive* primCmp = nullptr;
 
 	ParticleDir orientation = ParticleDir::Billboard;
 
@@ -101,6 +97,8 @@ public:
 
 	uint Update(const float global_dt);
 	void Reset();
+
+	bool HasLight() const { return light.HasLight(); }
 
 private:
 

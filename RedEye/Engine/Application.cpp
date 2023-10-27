@@ -28,7 +28,6 @@ Application::~Application()
 	DEL(renderer)
 	DEL(editor)
 	DEL(scene)
-	DEL(physics)
 	DEL(window)
 	DEL(input)
 
@@ -48,7 +47,6 @@ void Application::AllocateModules()
 	input = new ModuleInput();
 	window = new ModuleWindow();
 	scene = new ModuleScene();
-	physics = new ModulePhysics();
 	editor = new ModuleEditor();
 	renderer = new ModuleRenderer3D();
 	audio = new ModuleAudio();
@@ -133,7 +131,7 @@ void Application::MainLoop()
 		editor->PreUpdate();
 
 		scene->Update();
-		physics->Update();
+		ModulePhysics::Update();
 		editor->Update();
 
 		scene->PostUpdate();
@@ -163,7 +161,7 @@ void Application::CleanUp()
 	audio->CleanUp();
 	renderer->CleanUp();
 	editor->CleanUp();
-	physics->CleanUp();
+	ModulePhysics::CleanUp();
 	scene->CleanUp();
 	window->CleanUp();
 	input->CleanUp();
@@ -190,7 +188,7 @@ void Application::RecieveEvent(const Event& e)
 	case RE_EventType::PLAY:
 	{
 		scene->OnPlay();
-		physics->OnPlay(RE_Time::StateIs(RE_Time::GameState::PAUSE));
+		ModulePhysics::OnPlay(RE_Time::StateIs(RE_Time::GameState::PAUSE));
 
 		RE_Time::StartGameTimer();
 		break;
@@ -198,7 +196,7 @@ void Application::RecieveEvent(const Event& e)
 	case RE_EventType::PAUSE:
 	{
 		scene->OnPause();
-		physics->OnPause();
+		ModulePhysics::OnPause();
 
 		RE_Time::PauseGameTimer();
 		break;
@@ -206,7 +204,7 @@ void Application::RecieveEvent(const Event& e)
 	case RE_EventType::TICK:
 	{
 		scene->OnPlay();
-		physics->OnPlay(RE_Time::StateIs(RE_Time::GameState::PAUSE));
+		ModulePhysics::OnPlay(RE_Time::StateIs(RE_Time::GameState::PAUSE));
 
 		RE_Time::TickGameTimer();
 		break;
@@ -214,7 +212,7 @@ void Application::RecieveEvent(const Event& e)
 	case RE_EventType::STOP:
 	{
 		scene->OnStop();
-		physics->OnStop();
+		ModulePhysics::OnStop();
 
 		RE_Time::StopGameTimer();
 		break;
@@ -300,7 +298,7 @@ void Application::LoadConfig()
 	window->Load();
 	editor->Load();
 	renderer->Load();
-	physics->Load();
+	ModulePhysics::Load();
 	audio->Load();
 }
 
@@ -314,7 +312,7 @@ void Application::SaveConfig()
 	window->Save();
 	editor->Save();
 	renderer->Save();
-	physics->Save();
+	ModulePhysics::Save();
 	audio->Save();
 
 	fs->SaveConfig();

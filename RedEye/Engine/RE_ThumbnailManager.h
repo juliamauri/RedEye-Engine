@@ -1,11 +1,11 @@
-#ifndef __RETHUMBNAILMANAGER_H__
-#define __RETHUMBNAILMANAGER_H__
+#ifndef __RE_THUMBNAIL_MANAGER_H__
+#define __RE_THUMBNAIL_MANAGER_H__
 
 #include "RenderView.h"
 #include "RE_Camera.h"
 
-#include <EASTL/map.h>
 #include <EASTL/stack.h>
+#include <EASTL/map.h>
 
 class RE_GameObject;
 class RE_Material;
@@ -20,7 +20,6 @@ namespace RE_ThumbnailManager
 
 	enum class RenderType : ushort
 	{
-		SCENE,
 		GO,
 		MAT,
 		TEX,
@@ -98,4 +97,4 @@ namespace RE_ThumbnailManager
 	}
 };
 
-#endif // !__RETHUMBNAILMANAGER_H__
+#endif // !__RE_THUMBNAIL_MANAGER_H__

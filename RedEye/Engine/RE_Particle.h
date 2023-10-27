@@ -39,6 +39,7 @@ struct RE_Particle
 		mass(_mass), col_radius(_col_radius), col_restitution(_col_restitution),
 		lightColor(_light_color), intensity(_light_intensity), specular(_light_specular)
 	{}
+	~RE_Particle() = default;
 };
 
 #endif //!__RE_PARTICLE_H__

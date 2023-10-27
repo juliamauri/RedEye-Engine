@@ -93,16 +93,13 @@ void RE_ParticleRender::FillEmitter(RE_ParticleEmitter* to_fill)
 
 		if (primType >= RE_Component::Type::CUBE && primType <= RE_Component::Type::ICOSAHEDRON)
 			RE_SCENE->primitives->SetUpComponentPrimitive(to_fill->primCmp);
-		else {
-
-			size_t p_size = primCmp->GetParticleBinarySize();
-
-			char* prim_buffer = new char[p_size];
+		else
+		{
+			char* prim_buffer = new char[primCmp->GetParticleBinarySize()];
 			char* cursor = prim_buffer;
 			primCmp->ParticleBinarySerialize(cursor);
 			cursor = prim_buffer;
 			to_fill->primCmp->ParticleBinaryDeserialize(cursor);
-
 			DEL_A(prim_buffer);
 		}
 	}
@@ -121,8 +118,7 @@ void RE_ParticleRender::FillResouce(RE_ParticleEmitter* from)
 	meshMD5 = from->meshMD5;
 	if (from->primCmp)
 	{
-		if (primCmp) DEL(primCmp)
-
+		DEL(primCmp)
 		primType = from->primCmp->GetType();
 		primCmp = from->primCmp;
 	}
@@ -144,65 +140,60 @@ void RE_ParticleRender::SaveResourceMeta(RE_Json* metaNode) const
 
 void RE_ParticleRender::LoadResourceMeta(RE_Json* metaNode)
 {
-	bool isMesh = metaNode->PullBool("isMesh", false);
-	if (isMesh)
-	{
-		eastl::string libraryMesh = metaNode->PullString("meshPath", "");
-		meshMD5 = RE_RES->CheckOrFindMeshOnLibrary(libraryMesh.c_str());
-	}
+	if (metaNode->PullBool("isMesh", false))
+		meshMD5 = RE_RES->CheckOrFindMeshOnLibrary(metaNode->PullString("meshPath", ""));
 }
 
 void RE_ParticleRender::JsonDeserialize(bool generateLibraryPath)
 {
 	Config render(GetAssetPath());
-	if (render.Load())
+	if (!render.Load()) return;
+
+	math::float2 tmp;
+	RE_Json* node = render.GetRootNode("Render");
+
+	color.JsonDeserialize(node->PullJObject("Color"));
+	opacity.JsonDeserialize(node->PullJObject("Opacity"));
+	light.JsonDeserialize(node->PullJObject("Light"));
+
+	scale = node->PullFloatVector("Scale", { 0.5f,0.5f,0.1f });
+	particleDir = static_cast<RE_ParticleEmitter::ParticleDir>(node->PullInt("particleDir", 0));
+	direction = node->PullFloatVector("Direction", { -1.0f,1.0f,0.5f });
+
+	primType = static_cast<RE_Component::Type>(node->PullUInt("primitiveType", static_cast<uint>(RE_Component::Type(0))));
+	if (primType != RE_Component::Type::EMPTY)
 	{
-		math::float2 tmp;
-		RE_Json* node = render.GetRootNode("Render");
-
-		color.JsonDeserialize(node->PullJObject("Color"));
-		opacity.JsonDeserialize(node->PullJObject("Opacity"));
-		light.JsonDeserialize(node->PullJObject("Light"));
-
-		scale = node->PullFloatVector("Scale", { 0.5f,0.5f,0.1f });
-		particleDir = static_cast<RE_ParticleEmitter::ParticleDir>(node->PullInt("particleDir", 0));
-		direction = node->PullFloatVector("Direction", { -1.0f,1.0f,0.5f });
-
-		primType = static_cast<RE_Component::Type>(node->PullUInt("primitiveType", static_cast<uint>(RE_Component::Type(0))));
-		if (primType != RE_Component::Type::EMPTY)
+		switch (primType)
 		{
-			switch (primType)
-			{
-			case RE_Component::Type::CUBE: primCmp = new RE_CompCube(); break;
-			case RE_Component::Type::POINT: primCmp = new RE_CompPoint(); break;
-			case RE_Component::Type::DODECAHEDRON: primCmp = new RE_CompDodecahedron(); break;
-			case RE_Component::Type::TETRAHEDRON: primCmp = new RE_CompTetrahedron(); break;
-			case RE_Component::Type::OCTOHEDRON: primCmp = new RE_CompOctohedron(); break;
-			case RE_Component::Type::ICOSAHEDRON: primCmp = new RE_CompIcosahedron(); break;
-			case RE_Component::Type::PLANE: primCmp = new RE_CompPlane(); break;
-			case RE_Component::Type::SPHERE: primCmp = new RE_CompSphere(); break;
-			case RE_Component::Type::CYLINDER: primCmp = new RE_CompCylinder(); break;
-			case RE_Component::Type::HEMISHPERE: primCmp = new RE_CompHemiSphere(); break;
-			case RE_Component::Type::TORUS: primCmp = new RE_CompTorus(); break;
-			case RE_Component::Type::TREFOILKNOT: primCmp = new RE_CompTrefoiKnot(); break;
-			case RE_Component::Type::ROCK: primCmp = new RE_CompRock(); break;
-			}
-
-			if (primType >= RE_Component::Type::CUBE && primType <= RE_Component::Type::ICOSAHEDRON)
-				RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
-			else primCmp->ParticleJsonSerialize(node->PullJObject("primitive"));
+		case RE_Component::Type::CUBE: primCmp = new RE_CompCube(); break;
+		case RE_Component::Type::POINT: primCmp = new RE_CompPoint(); break;
+		case RE_Component::Type::DODECAHEDRON: primCmp = new RE_CompDodecahedron(); break;
+		case RE_Component::Type::TETRAHEDRON: primCmp = new RE_CompTetrahedron(); break;
+		case RE_Component::Type::OCTOHEDRON: primCmp = new RE_CompOctohedron(); break;
+		case RE_Component::Type::ICOSAHEDRON: primCmp = new RE_CompIcosahedron(); break;
+		case RE_Component::Type::PLANE: primCmp = new RE_CompPlane(); break;
+		case RE_Component::Type::SPHERE: primCmp = new RE_CompSphere(); break;
+		case RE_Component::Type::CYLINDER: primCmp = new RE_CompCylinder(); break;
+		case RE_Component::Type::HEMISHPERE: primCmp = new RE_CompHemiSphere(); break;
+		case RE_Component::Type::TORUS: primCmp = new RE_CompTorus(); break;
+		case RE_Component::Type::TREFOILKNOT: primCmp = new RE_CompTrefoiKnot(); break;
+		case RE_Component::Type::ROCK: primCmp = new RE_CompRock(); break;
 		}
 
-		if (generateLibraryPath)
-		{
-			SetMD5(render.GetMd5().c_str());
-			eastl::string libraryPath("Library/Particles/");
-			libraryPath += GetMD5();
-			SetLibraryPath(libraryPath.c_str());
-		}
-
-		ResourceContainer::inMemory = true;
+		if (primType >= RE_Component::Type::CUBE && primType <= RE_Component::Type::ICOSAHEDRON)
+			RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
+		else primCmp->ParticleJsonSerialize(node->PullJObject("primitive"));
 	}
+
+	if (generateLibraryPath)
+	{
+		SetMD5(render.GetMd5().c_str());
+		eastl::string libraryPath("Library/Particles/");
+		libraryPath += GetMD5();
+		SetLibraryPath(libraryPath.c_str());
+	}
+
+	ResourceContainer::inMemory = true;
 }
 
 void RE_ParticleRender::JsonSerialize(bool onlyMD5)
@@ -233,57 +224,55 @@ void RE_ParticleRender::JsonSerialize(bool onlyMD5)
 void RE_ParticleRender::BinaryDeserialize()
 {
 	RE_FileBuffer libraryFile(GetLibraryPath());
-	if (libraryFile.Load())
+	if (!libraryFile.Load()) return;
+
+	char* cursor = libraryFile.GetBuffer();
+	color.BinaryDeserialize(cursor);
+	opacity.BinaryDeserialize(cursor);
+	light.BinaryDeserialize(cursor);
+
+	size_t size = sizeof(float) * 3u;
+	memcpy(scale.ptr(), cursor, size);
+	cursor += size;
+
+	size = sizeof(RE_ParticleEmitter::ParticleDir);
+	memcpy(&particleDir, cursor, size);
+	cursor += size;
+
+	size = sizeof(float) * 3u;
+	memcpy(direction.ptr(), cursor, size);
+	cursor += size;
+
+	size = sizeof(RE_Component::Type);
+	memcpy(&primType, cursor, size);
+	cursor += size;
+
+	if (primType != RE_Component::Type::EMPTY)
 	{
-		char* cursor = libraryFile.GetBuffer();
-
-		color.BinaryDeserialize(cursor);
-		opacity.BinaryDeserialize(cursor);
-		light.BinaryDeserialize(cursor);
-
-		size_t size = sizeof(float) * 3u;
-		memcpy(scale.ptr(), cursor, size);
-		cursor += size;
-
-		size = sizeof(RE_ParticleEmitter::ParticleDir);
-		memcpy(&particleDir, cursor, size);
-		cursor += size;
-
-		size = sizeof(float) * 3u;
-		memcpy(direction.ptr(), cursor, size);
-		cursor += size;
-
-		size = sizeof(RE_Component::Type);
-		memcpy(&primType, cursor, size);
-		cursor += size;
-
-		if (primType != RE_Component::Type::EMPTY)
+		switch (primType)
 		{
-			switch (primType)
-			{
-			case RE_Component::Type::CUBE: primCmp = new RE_CompCube(); break;
-			case RE_Component::Type::POINT: primCmp = new RE_CompPoint(); break;
-			case RE_Component::Type::DODECAHEDRON: primCmp = new RE_CompDodecahedron(); break;
-			case RE_Component::Type::TETRAHEDRON: primCmp = new RE_CompTetrahedron(); break;
-			case RE_Component::Type::OCTOHEDRON: primCmp = new RE_CompOctohedron(); break;
-			case RE_Component::Type::ICOSAHEDRON: primCmp = new RE_CompIcosahedron(); break;
-			case RE_Component::Type::PLANE: primCmp = new RE_CompPlane(); break;
-			case RE_Component::Type::SPHERE: primCmp = new RE_CompSphere(); break;
-			case RE_Component::Type::CYLINDER: primCmp = new RE_CompCylinder(); break;
-			case RE_Component::Type::HEMISHPERE: primCmp = new RE_CompHemiSphere(); break;
-			case RE_Component::Type::TORUS: primCmp = new RE_CompTorus(); break;
-			case RE_Component::Type::TREFOILKNOT: primCmp = new RE_CompTrefoiKnot(); break;
-			case RE_Component::Type::ROCK: primCmp = new RE_CompRock(); break;
-			}
-
-			primCmp->ParticleBinaryDeserialize(cursor);
-
-			if(primType >= RE_Component::Type::CUBE && primType <= RE_Component::Type::ICOSAHEDRON)
-				RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
+		case RE_Component::Type::CUBE: primCmp = new RE_CompCube(); break;
+		case RE_Component::Type::POINT: primCmp = new RE_CompPoint(); break;
+		case RE_Component::Type::DODECAHEDRON: primCmp = new RE_CompDodecahedron(); break;
+		case RE_Component::Type::TETRAHEDRON: primCmp = new RE_CompTetrahedron(); break;
+		case RE_Component::Type::OCTOHEDRON: primCmp = new RE_CompOctohedron(); break;
+		case RE_Component::Type::ICOSAHEDRON: primCmp = new RE_CompIcosahedron(); break;
+		case RE_Component::Type::PLANE: primCmp = new RE_CompPlane(); break;
+		case RE_Component::Type::SPHERE: primCmp = new RE_CompSphere(); break;
+		case RE_Component::Type::CYLINDER: primCmp = new RE_CompCylinder(); break;
+		case RE_Component::Type::HEMISHPERE: primCmp = new RE_CompHemiSphere(); break;
+		case RE_Component::Type::TORUS: primCmp = new RE_CompTorus(); break;
+		case RE_Component::Type::TREFOILKNOT: primCmp = new RE_CompTrefoiKnot(); break;
+		case RE_Component::Type::ROCK: primCmp = new RE_CompRock(); break;
 		}
 
-		ResourceContainer::inMemory = true;
+		primCmp->ParticleBinaryDeserialize(cursor);
+
+		if (primType >= RE_Component::Type::CUBE && primType <= RE_Component::Type::ICOSAHEDRON)
+			RE_SCENE->primitives->SetUpComponentPrimitive(primCmp);
 	}
+
+	ResourceContainer::inMemory = true;
 }
 
 void RE_ParticleRender::BinarySerialize() const
@@ -327,7 +316,7 @@ void RE_ParticleRender::BinarySerialize() const
 size_t RE_ParticleRender::GetBinarySize() const
 {
 	return sizeof(RE_ParticleEmitter::ParticleDir)
-		+ (sizeof(float) * 6u)
+		+ (sizeof(float) * 6)
 		+ sizeof(RE_Component::Type)
 		+ ((primType != RE_Component::Type::EMPTY) ? primCmp->GetParticleBinarySize() : 0)
 		+ color.GetBinarySize() 
