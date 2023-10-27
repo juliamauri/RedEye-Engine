@@ -53,7 +53,8 @@ unsigned int RE_ParticleEmitter::Update(const float global_dt)
 		}
 		break;
 	}
-	default: break; }
+	default: break;
+	}
 
 	return particle_count;
 }

@@ -74,13 +74,13 @@ namespace RE_ThumbnailManager
 	void Delete(const char* ref);
 
 	uintptr_t At(const char* ref);
-	uintptr_t GetFolderID() { return folder; }
-	uintptr_t GetFileID() { return file; }
-	uintptr_t GetSelectFileID() { return selectfile; }
-	uintptr_t GetShaderFileID() { return shaderFile; }
-	uintptr_t GetPEmitterFileID() { return p_emitter; }
-	uintptr_t GetPEmissionFileID() { return p_emission; }
-	uintptr_t GetPRenderFileID() { return p_render; }
+	uintptr_t GetFolderID();
+	uintptr_t GetFileID();
+	uintptr_t GetSelectFileID();
+	uintptr_t GetShaderFileID();
+	uintptr_t GetPEmitterFileID();
+	uintptr_t GetPEmissionFileID();
+	uintptr_t GetPRenderFileID();
 
 	void SaveTextureFromFBO(const char* path);
 	uint32_t LoadLibraryThumbnail(const char* ref);

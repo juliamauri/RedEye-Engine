@@ -1,6 +1,7 @@
 #ifndef __MODULERENDER3D_H__
 #define __MODULERENDER3D_H__
 
+#include "RE_DataTypes.h"
 #include "EventListener.h"
 #include "RenderView.h"
 #include "RE_Camera.h"
@@ -136,7 +137,7 @@ private:
 		const RE_ParticleEmitter* emitter,
 		const RE_Camera& camera) const;
 
-	void DrawParticleLights(const uint sim_id) const;
+	void DrawParticleLights(P_UID sim_id) const;
 };
 
 #endif // !__MODULERENDER3D_H__

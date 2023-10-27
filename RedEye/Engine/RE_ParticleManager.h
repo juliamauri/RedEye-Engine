@@ -1,5 +1,5 @@
-#ifndef __RE_PARTICLEMANAGER_H__
-#define __RE_PARTICLEMANAGER_H__
+#ifndef __RE_PARTICLE_MANAGER_H__
+#define __RE_PARTICLE_MANAGER_H__
 
 #include "RE_DataTypes.h"
 #include "RE_ParticleEmitter.h"
@@ -42,7 +42,7 @@ namespace RE_ParticleManager
 	uint GetTotalParticleCount();
 	uint GetParticleCount(P_UID id);
 	bool GetParticles(P_UID id, eastl::vector<RE_Particle>& out);
-	BoundingMode GetBoundingMode() { return bounding_mode; }
+	BoundingMode GetBoundingMode();
 
 	void DrawSimulation(
 		P_UID id,
@@ -63,4 +63,4 @@ namespace RE_ParticleManager
 	void Save(RE_Json* node);
 };
 
-#endif //!__RE_PARTICLEMANAGER_H__
+#endif //!__RE_PARTICLE_MANAGER_H__

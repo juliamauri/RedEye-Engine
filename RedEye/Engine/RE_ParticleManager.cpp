@@ -149,6 +149,7 @@ bool RE_ParticleManager::GetParticles(P_UID id, eastl::vector<RE_Particle>& out)
 	out = sim->second.particle_pool;
 	return true;
 }
+RE_ParticleManager::BoundingMode RE_ParticleManager::GetBoundingMode() { return bounding_mode; }
 
 void RE_ParticleManager::DrawSimulation(P_UID id, const RE_Camera& camera, math::float3 go_position, math::float3 go_up)
 {

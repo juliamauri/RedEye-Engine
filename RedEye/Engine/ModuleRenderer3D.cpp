@@ -89,7 +89,7 @@ void GLAPIENTRY MessageCallback(
 
 // Static values
 void* ModuleRenderer3D::mainContext = nullptr;
-static ushort flags = 0;
+ushort ModuleRenderer3D::flags = 0;
 RenderView::LightMode ModuleRenderer3D::current_lighting = RenderView::LightMode::GL;
 uint ModuleRenderer3D::current_fbo = 0;
 eastl::vector<const char*> ModuleRenderer3D::activeShaders;
@@ -1025,7 +1025,7 @@ void ModuleRenderer3D::DrawParticleEditorDebug(
 	SetupFlag(RenderView::Flag::TEXTURE_2D, render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
 }
 
-void ModuleRenderer3D::DrawParticleLights(const uint sim_id) const
+void ModuleRenderer3D::DrawParticleLights(P_UID sim_id) const
 {
 	static const eastl::string deferred_textures[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
 	bool shared_light_pass = HasFlag(RenderView::Flag::SHARE_LIGHT_PASS);

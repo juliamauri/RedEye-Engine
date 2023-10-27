@@ -218,6 +218,14 @@ uintptr_t RE_ThumbnailManager::At(const char* ref)
 	return (thumbnails.find(ref) != thumbnails.end()) ? thumbnails.at(ref) : 0;
 }
 
+uintptr_t RE_ThumbnailManager::GetFolderID() { return folder; }
+uintptr_t RE_ThumbnailManager::GetFileID() { return file; }
+uintptr_t RE_ThumbnailManager::GetSelectFileID() { return selectfile; }
+uintptr_t RE_ThumbnailManager::GetShaderFileID() { return shaderFile; }
+uintptr_t RE_ThumbnailManager::GetPEmitterFileID() { return p_emitter; }
+uintptr_t RE_ThumbnailManager::GetPEmissionFileID() { return p_emission; }
+uintptr_t RE_ThumbnailManager::GetPRenderFileID() { return p_render; }
+
 void RE_ThumbnailManager::SaveTextureFromFBO(const char* path)
 {
 	glReadBuffer(GL_COLOR_ATTACHMENT0);

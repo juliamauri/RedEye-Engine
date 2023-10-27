@@ -10,8 +10,6 @@ namespace ModulePhysics
 		FIXED_TIME_STEP
 	};
 
-	UpdateMode mode = UpdateMode::FIXED_UPDATE;
-
 	namespace
 	{
 		float fixed_dt = 1.f / 30.f;
@@ -20,6 +18,8 @@ namespace ModulePhysics
 		float update_count = 0.f;
 		float time_counter = 0.f;
 		float updates_per_s = 0.f;
+
+		UpdateMode mode = UpdateMode::FIXED_UPDATE;
 	}
 
 	void Update();

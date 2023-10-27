@@ -88,6 +88,11 @@ bool ModuleEditor::Init()
 	texteditormanager = new TextEditorManagerWindow();
 	waterplaneWindow = new WaterPlaneWindow();
 
+	// Scene views
+	rendered_windows.push_back(sceneEditorWindow = new SceneEditorWindow());
+	rendered_windows.push_back(sceneGameWindow = new GameWindow());
+	rendered_windows.push_back(particleEmitterWindow = new ParticleEmitterEditorWindow());
+
 	return true;
 }
 
@@ -96,11 +101,6 @@ bool ModuleEditor::Start()
 	RE_PROFILE(RE_ProfiledFunc::Start, RE_ProfiledClass::ModuleEditor)
 	windows.push_back(assets = new AssetsWindow());
 	windows.push_back(wwise = new WwiseWindow());
-
-	// Scene views
-	rendered_windows.push_back(sceneEditorWindow = new SceneEditorWindow());
-	rendered_windows.push_back(sceneGameWindow = new GameWindow());
-	rendered_windows.push_back(particleEmitterWindow = new ParticleEmitterEditorWindow());
 
 	RE_ThumbnailManager::Init();
 
@@ -156,7 +156,7 @@ void ModuleEditor::CleanUp()
 
 void ModuleEditor::DrawEditor()
 {
-	for (auto& window : rendered_windows)
+	for (auto window : rendered_windows)
 		if (ImGui::TreeNodeEx(window->Name(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
 		{
 			window->DrawEditor();
