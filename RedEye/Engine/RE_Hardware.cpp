@@ -2,108 +2,13 @@
 
 #include "RE_Math.h"
 #include "RE_Profiler.h"
+#include "ModuleRenderer3D.h"
 
 #include <SDL2/SDL.h>
 #include <ImGui/imgui.h>
 #include "gpudetect/DeviceId.h"
 
-#include <GL/glew.h>
-#include <EASTL/array.h>
-#include <EASTL/string.h>
-
 #include <Psapi.h> // WINDOWS memory calls
-
-constexpr double kilobyte = 1024.0;
-constexpr double megabyte = kilobyte * kilobyte;
-constexpr double gigabyte = kilobyte * megabyte;
-
-// RAM
-eastl::string ram_capacity;
-
-// CPU
-eastl::string cpu_brand;
-eastl::string cpu_vendor;
-eastl::string core_count;
-eastl::string caps1;
-eastl::string caps2;
-
-// Display
-eastl::string display_drivers;
-
-// GPU
-eastl::string vendor_id;
-eastl::string device_id;
-eastl::string gfx_brand;
-eastl::string gt_generation;
-eastl::string gpu_renderer;
-eastl::string gpu_vendor;
-
-//VRAM
-eastl::string vram_total;
-eastl::string vram_used;
-eastl::string vram_available;
-eastl::string vram_reserved;
-
-// Memory Plotting
-bool pause_memory_plotting = false;
-constexpr size_t mem_plotting_range = 100;
-eastl::array<float, mem_plotting_range> working_memory {}; // amount of memory physically mapped to the process context at a given time
-eastl::array<float, mem_plotting_range> pageable_memory {}; // system memory that can be transferred to the paging file on disk (paged) when it is not being used
-eastl::array<float, mem_plotting_range> nonpageable_memory {}; // system memory that cannot be paged to disk as long as the corresponding objects are allocated
-eastl::array<float, mem_plotting_range> paged_memory {}; // memory set aside for the process in the system paging file
-
-eastl::string BytesString(const char* stat, const double val)
-{
-	eastl::string ret = stat;
-	if (val >= gigabyte)		ret + eastl::to_string(static_cast<float>(val / gigabyte)) + " Gbs";
-	else if (val >= megabyte)	ret += eastl::to_string(static_cast<float>(val / megabyte)) + " Mbs";
-	else if (val >= kilobyte)	ret += eastl::to_string(static_cast<float>(val / kilobyte)) + " Kbs";
-	else						ret += eastl::to_string(val) + " bytes";
-	return ret;
-}
-
-eastl::string KBytesString(const char* stat, const double val)
-{
-	eastl::string ret = stat;
-	if (val >= megabyte)	  ret += eastl::to_string(static_cast<float>(val / megabyte)) + " Gbs";
-	else if (val >= kilobyte) ret += eastl::to_string(static_cast<float>(val / kilobyte)) + " Mbs";
-	else					  ret += eastl::to_string(val) + " Kbs";
-	return ret;
-}
-
-eastl::string MBytesString(const char* stat, const double val)
-{
-	eastl::string ret = stat;
-	if (val >= kilobyte) ret += eastl::to_string(static_cast<float>(val / kilobyte)) + " Gbs";
-	else				 ret += eastl::to_string(val) + " Mbs";
-	return ret;
-}
-
-void PlotMemory(const char* name, eastl::array<float, mem_plotting_range>& data, double usage, double peak)
-{
-	// Add next value
-	float max = data[0];
-	for (size_t i = 0; i < mem_plotting_range - 1; i++)
-	{
-		max = RE_Math::Max(max, data[i]);
-		data[i] = data[i + 1];
-	}
-	data[mem_plotting_range - 1] = static_cast<float>(usage);
-
-	// Plot
-	ImGui::PlotHistogram(
-		MBytesString((eastl::string("##") + name + ": ").c_str(), static_cast<double>(data[mem_plotting_range - 1])).c_str(),
-		data.data(),
-		100,
-		0,
-		name,
-		0.0f,
-		1.2f * static_cast<float>(peak),
-		ImVec2(310, 100));
-
-	// Max Peak
-	ImGui::Text(MBytesString("Highest peak: ", peak).c_str());
-}
 
 void RE_Hardware::CheckHardware()
 {
@@ -131,7 +36,7 @@ void RE_Hardware::CheckHardware()
 	if (SDL_HasSSE42()) caps2 += " SSE42";
 
 	// Memory
-	ram_capacity = MBytesString("Total space: ", static_cast<double>(SDL_GetSystemRAM()));
+	ram_capacity = Internal::MBytesString("Total space: ", static_cast<double>(SDL_GetSystemRAM()));
 
 	// Display Drivers
 	display_drivers = "2D display drivers: ";
@@ -155,14 +60,14 @@ void RE_Hardware::CheckHardware()
 		(gfx_brand = "") += reinterpret_cast<const char*>(GFXBrand.c_str());
 		gt_generation = "GT generation: " + eastl::to_string(static_cast<int>(getGTGeneration(DeviceId)));
 
-		vram_total = BytesString("Total VRAM: ", static_cast<double>(total));
-		vram_used = BytesString("VRAM used: ", static_cast<double>(used));
-		vram_available = BytesString("VRAM available: ", static_cast<double>(available));
-		vram_reserved = BytesString("VRAM reserved: ", static_cast<double>(reserved));
+		vram_total = Internal::BytesString("Total VRAM: ", static_cast<double>(total));
+		vram_used = Internal::BytesString("VRAM used: ", static_cast<double>(used));
+		vram_available = Internal::BytesString("VRAM available: ", static_cast<double>(available));
+		vram_reserved = Internal::BytesString("VRAM reserved: ", static_cast<double>(reserved));
 	}
 
-	(gpu_renderer = "GPU: ") += reinterpret_cast<const char*>(glGetString(GL_RENDERER));
-	(gpu_vendor = "Brand: ") += reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+	(gpu_renderer = "GPU: ") += ModuleRenderer3D::GetGPURenderer();
+	(gpu_vendor = "Brand: ") += ModuleRenderer3D::GetGPUVendor();
 }
 
 void RE_Hardware::DrawEditor()
@@ -186,10 +91,10 @@ void RE_Hardware::DrawEditor()
 			PROCESS_MEMORY_COUNTERS memCounter;
 			if (GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter)))
 			{
-				PlotMemory("Working", working_memory, memCounter.WorkingSetSize / megabyte, memCounter.PeakWorkingSetSize / megabyte);
-				PlotMemory("Pageable", working_memory, memCounter.QuotaPagedPoolUsage / megabyte, memCounter.QuotaPeakPagedPoolUsage / megabyte);
-				PlotMemory("Non-Pageable", working_memory, memCounter.QuotaNonPagedPoolUsage / megabyte, memCounter.QuotaPeakNonPagedPoolUsage / megabyte);
-				PlotMemory("Paged", working_memory, memCounter.PagefileUsage / megabyte, memCounter.PeakPagefileUsage / megabyte);
+				Internal::PlotMemory("Working", working_memory, memCounter.WorkingSetSize / megabyte, memCounter.PeakWorkingSetSize / megabyte);
+				Internal::PlotMemory("Pageable", working_memory, memCounter.QuotaPagedPoolUsage / megabyte, memCounter.QuotaPeakPagedPoolUsage / megabyte);
+				Internal::PlotMemory("Non-Pageable", working_memory, memCounter.QuotaNonPagedPoolUsage / megabyte, memCounter.QuotaPeakNonPagedPoolUsage / megabyte);
+				Internal::PlotMemory("Paged", working_memory, memCounter.PagefileUsage / megabyte, memCounter.PeakPagefileUsage / megabyte);
 			}
 		}
 
@@ -227,10 +132,10 @@ void RE_Hardware::DrawEditor()
 			unsigned long long available;
 			unsigned long long reserved;
 			getGraphicsDeviceInfo(nullptr, nullptr, nullptr, &total, &used, &available, &reserved);
-			vram_total = MBytesString("Total VRAM: ", static_cast<double>(total));
-			vram_used = MBytesString("VRAM used: ", static_cast<double>(used));
-			vram_available = MBytesString("VRAM available: ", static_cast<double>(available));
-			vram_reserved = MBytesString("VRAM reserved: ", static_cast<double>(reserved));
+			vram_total = Internal::MBytesString("Total VRAM: ", static_cast<double>(total));
+			vram_used = Internal::MBytesString("VRAM used: ", static_cast<double>(used));
+			vram_available = Internal::MBytesString("VRAM available: ", static_cast<double>(available));
+			vram_reserved = Internal::MBytesString("VRAM reserved: ", static_cast<double>(reserved));
 		}
 
 		ImGui::Text(vram_total.c_str());
@@ -241,3 +146,60 @@ void RE_Hardware::DrawEditor()
 		ImGui::TreePop();
 	}
 }
+
+#pragma region Internal
+
+eastl::string RE_Hardware::Internal::BytesString(const char* stat, const double val)
+{
+	eastl::string ret = stat;
+	if (val >= gigabyte)		ret + eastl::to_string(val / gigabyte) + " Gbs";
+	else if (val >= megabyte)	ret += eastl::to_string(val / megabyte) + " Mbs";
+	else if (val >= kilobyte)	ret += eastl::to_string(val / kilobyte) + " Kbs";
+	else						ret += eastl::to_string(val) + " bytes";
+	return ret;
+}
+
+eastl::string RE_Hardware::Internal::KBytesString(const char* stat, const double val)
+{
+	eastl::string ret = stat;
+	if (val >= megabyte)	  ret += eastl::to_string(val / megabyte) + " Gbs";
+	else if (val >= kilobyte) ret += eastl::to_string(val / kilobyte) + " Mbs";
+	else					  ret += eastl::to_string(val) + " Kbs";
+	return ret;
+}
+
+eastl::string RE_Hardware::Internal::MBytesString(const char* stat, const double val)
+{
+	eastl::string ret = stat;
+	if (val >= kilobyte) ret += eastl::to_string(val / kilobyte) + " Gbs";
+	else				 ret += eastl::to_string(val) + " Mbs";
+	return ret;
+}
+
+void RE_Hardware::Internal::PlotMemory(const char* name, eastl::array<float, mem_plotting_range>& data, double usage, double peak)
+{
+	// Add next value
+	float max = data[0];
+	for (size_t i = 0; i < mem_plotting_range - 1; i++)
+	{
+		max = RE_Math::Max(max, data[i]);
+		data[i] = data[i + 1];
+	}
+	data[mem_plotting_range - 1] = static_cast<float>(usage);
+
+	// Plot
+	ImGui::PlotHistogram(
+		MBytesString((eastl::string("##") + name + ": ").c_str(), static_cast<double>(data[mem_plotting_range - 1])).c_str(),
+		data.data(),
+		100,
+		0,
+		name,
+		0.0f,
+		1.2f * static_cast<float>(peak),
+		ImVec2(310, 100));
+
+	// Max Peak
+	ImGui::Text(MBytesString("Highest peak: ", peak).c_str());
+}
+
+#pragma endregion

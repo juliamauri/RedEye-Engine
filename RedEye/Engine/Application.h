@@ -9,38 +9,6 @@ class Application : public EventListener
 {
 public:
 
-	Application() = default;
-	~Application() final;
-
-	void AllocateModules();
-	bool Init(int argc, char* argv[]);
-	void MainLoop();
-	void CleanUp();
-	void Quit();
-	void RecieveEvent(const Event& e) final;
-
-private:
-
-	bool InitModules();
-	bool StartModules();
-
-	void LoadConfig();
-	void SaveConfig();
-
-	enum class Flag : uchar
-	{
-		LOAD_CONFIG = 1 << 0,
-		SAVE_CONFIG = 1 << 1,
-		WANT_TO_QUIT = 1 << 2,
-		SAVE_ON_EXIT = 1 << 3
-	};
-
-	inline void AddFlag(Flag flag);
-	inline void RemoveFlag(Flag flag);
-	inline const bool HasFlag(Flag flag) const;
-
-public:
-
 	// Files & Resources
 	class RE_FileSystem* fs = nullptr;
 	class RE_ResourceManager* res = nullptr;
@@ -56,9 +24,39 @@ public:
 private:
 
 	uchar flags = 0;
+	enum Flag : uchar
+	{
+		LOAD_CONFIG = 1 << 0,
+		SAVE_CONFIG = 1 << 1,
+		WANT_TO_QUIT = 1 << 2,
+		SAVE_ON_EXIT = 1 << 3
+	};
 
 	int argc = 0;
 	char** argv = nullptr;
+
+public:
+
+	Application();
+	~Application() final;
+
+	bool Init(int argc, char* argv[]);
+	void MainLoop();
+	void CleanUp();
+	void Quit();
+	void RecieveEvent(const Event& e) final;
+
+private:
+
+	bool InitModules();
+	bool StartModules();
+
+	void LoadConfig();
+	void SaveConfig();
+
+	inline void AddFlag(Flag flag) { flags |= flag; }
+	inline void RemoveFlag(Flag flag) { flags -= flag; }
+	inline const bool HasFlag(Flag flag) const { return flags & flag; }
 };
 
 extern Application* App;

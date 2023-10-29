@@ -91,9 +91,6 @@
     <ClCompile Include="RE_GameObject.cpp">
       <Filter>Engine\Application\Modules\Scene\Entity Component System</Filter>
     </ClCompile>
-    <ClCompile Include="RE_FBOManager.cpp">
-      <Filter>Engine\Application\Modules\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleRenderer3D.cpp">
       <Filter>Engine\Application\Modules\Renderer</Filter>
     </ClCompile>
@@ -157,9 +154,6 @@
     <ClCompile Include="ModuleAudio.cpp">
       <Filter>Engine\Application\Modules\Audio</Filter>
     </ClCompile>
-    <ClCompile Include="RE_GLCache.cpp">
-      <Filter>Engine\Application\Modules\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="ModulePhysics.cpp">
       <Filter>Engine\Application\Modules\Physics</Filter>
     </ClCompile>
@@ -208,9 +202,6 @@
     <ClCompile Include="WwiseWindow.cpp">
       <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Wwise</Filter>
     </ClCompile>
-    <ClCompile Include="GameWindow.cpp">
-      <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows\Game</Filter>
-    </ClCompile>
     <ClCompile Include="SceneEditorWindow.cpp">
       <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows\Scene</Filter>
     </ClCompile>
@@ -250,41 +241,29 @@
     <ClCompile Include="..\3rd Parties\Others\MD5\md5.cpp">
       <Filter>3rd Party\MD5</Filter>
     </ClCompile>
-    <ClCompile Include="RenderView.cpp">
-      <Filter>Engine\Application\Modules\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="RE_EmissionInterval.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClCompile>
     <ClCompile Include="RE_EmissionSpawn.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClCompile>
     <ClCompile Include="RE_EmissionShape.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClCompile>
     <ClCompile Include="RE_EmissionVector.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClCompile>
     <ClCompile Include="RE_EmissionSingleValue.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClCompile>
     <ClCompile Include="RE_EmissionExternalForces.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClCompile>
     <ClCompile Include="RE_EmissionBoundary.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClCompile>
     <ClCompile Include="RE_EmissionCollider.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_PR_Color.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_PR_Opacity.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
-    </ClCompile>
-    <ClCompile Include="RE_PR_Light.cpp">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClCompile>
     <ClCompile Include="RE_Random.cpp">
       <Filter>Engine\Application\Utility\Math</Filter>
@@ -300,6 +279,27 @@
     </ClCompile>
     <ClCompile Include="RenderedWindow.cpp">
       <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_FBOManager.cpp">
+      <Filter>Engine\Application\Modules\Renderer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_GLCache.cpp">
+      <Filter>Engine\Application\Modules\Renderer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSettings.cpp">
+      <Filter>Engine\Application\Modules\Renderer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderView.cpp">
+      <Filter>Engine\Application\Modules\Renderer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_PR_Color.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_PR_Light.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="RE_PR_Opacity.cpp">
+      <Filter>Engine\Application\Modules\Physics\Particles\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -408,9 +408,6 @@
     <ClInclude Include="RE_GameObject.h">
       <Filter>Engine\Application\Modules\Scene\Entity Component System</Filter>
     </ClInclude>
-    <ClInclude Include="RE_FBOManager.h">
-      <Filter>Engine\Application\Modules\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleRenderer3D.h">
       <Filter>Engine\Application\Modules\Renderer</Filter>
     </ClInclude>
@@ -477,9 +474,6 @@
     <ClInclude Include="ModuleAudio.h">
       <Filter>Engine\Application\Modules\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="RE_GLCache.h">
-      <Filter>Engine\Application\Modules\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="ModulePhysics.h">
       <Filter>Engine\Application\Modules\Physics</Filter>
     </ClInclude>
@@ -545,9 +539,6 @@
     </ClInclude>
     <ClInclude Include="WwiseWindow.h">
       <Filter>Engine\Application\Modules\Editor\Windows\Base Windows\Wwise</Filter>
-    </ClInclude>
-    <ClInclude Include="GameWindow.h">
-      <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows\Game</Filter>
     </ClInclude>
     <ClInclude Include="SceneEditorWindow.h">
       <Filter>Engine\Application\Modules\Editor\Windows\Rendered Windows\Scene</Filter>
@@ -705,9 +696,6 @@
     <ClInclude Include="resource1.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderView.h">
-      <Filter>Engine\Application\Modules\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="EventListener.h">
       <Filter>Engine\Application\Modules\Input\Events System</Filter>
     </ClInclude>
@@ -715,37 +703,28 @@
       <Filter>Engine\Application\Utility</Filter>
     </ClInclude>
     <ClInclude Include="RE_EmissionInterval.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClInclude>
     <ClInclude Include="RE_EmissionSpawn.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClInclude>
     <ClInclude Include="RE_EmissionShape.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClInclude>
     <ClInclude Include="RE_EmissionVector.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClInclude>
     <ClInclude Include="RE_EmissionSingleValue.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClInclude>
     <ClInclude Include="RE_EmissionExternalForces.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClInclude>
     <ClInclude Include="RE_EmissionBoundary.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClInclude>
     <ClInclude Include="RE_EmissionCollider.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_PR_Color.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_PR_Opacity.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
-    </ClInclude>
-    <ClInclude Include="RE_PR_Light.h">
-      <Filter>Engine\Application\Modules\Physics\Particles\Emission Data</Filter>
+      <Filter>Engine\Application\Modules\Physics\Particles\Emission</Filter>
     </ClInclude>
     <ClInclude Include="RE_Random.h">
       <Filter>Engine\Application\Utility\Math</Filter>
@@ -764,6 +743,27 @@
     </ClInclude>
     <ClInclude Include="EditorWindow.h">
       <Filter>Engine\Application\Modules\Editor\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_FBOManager.h">
+      <Filter>Engine\Application\Modules\Renderer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_GLCache.h">
+      <Filter>Engine\Application\Modules\Renderer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSettings.h">
+      <Filter>Engine\Application\Modules\Renderer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderView.h">
+      <Filter>Engine\Application\Modules\Renderer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_PR_Color.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_PR_Light.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RE_PR_Opacity.h">
+      <Filter>Engine\Application\Modules\Physics\Particles\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -902,9 +902,6 @@
     <Filter Include="Resource Files">
       <UniqueIdentifier>{f67675b7-cb18-4f10-a715-37a957201e92}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Application\Modules\Physics\Particles\Emission Data">
-      <UniqueIdentifier>{8fe1fee5-6a07-44ff-b654-03aad26e6d4d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Application\Modules\Renderer\Cameras">
       <UniqueIdentifier>{075c1c4b-5b5c-42c1-8a2c-abb88d1569f6}</UniqueIdentifier>
     </Filter>
@@ -922,9 +919,6 @@
     </Filter>
     <Filter Include="Engine\Application\Modules\Editor\Windows\Rendered Windows\Scene">
       <UniqueIdentifier>{125bb508-86a2-4cc6-b875-cc1ca97da142}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Application\Modules\Editor\Windows\Rendered Windows\Game">
-      <UniqueIdentifier>{ea464fc3-cac0-4fb6-81cc-4c3f089ffb77}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Application\Modules\Editor\Windows\PopUp">
       <UniqueIdentifier>{4bff0e54-3d2e-448a-a7db-88cc029f117c}</UniqueIdentifier>
@@ -973,6 +967,15 @@
     </Filter>
     <Filter Include="Engine\Application\Modules\Editor\Windows\Base Windows\Wwise">
       <UniqueIdentifier>{8ebeb94a-6bb7-4244-92c8-867651647d82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Renderer\Utility">
+      <UniqueIdentifier>{bee94b45-4122-445a-891b-4ac9eeb1b986}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Physics\Particles\Rendering">
+      <UniqueIdentifier>{df306c37-a725-4177-acb4-493b1d0949e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Application\Modules\Physics\Particles\Emission">
+      <UniqueIdentifier>{8fe1fee5-6a07-44ff-b654-03aad26e6d4d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

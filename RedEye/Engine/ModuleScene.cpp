@@ -104,36 +104,36 @@ void ModuleScene::DrawEditor()
 	ImGui::Text(" - Non Static: %i", dynamic_count);
 	ImGui::Text("Total Inacive: %i", total_count - (static_count + dynamic_count));
 
-	if (ImGui::TreeNodeEx("Transforms", ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
+	if (!ImGui::TreeNodeEx("Transforms", ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
+		return;
+
+	eastl::vector<GO_UID> allTransforms = GetScenePool()->GetAllGOUIDs();
+	size_t transformCount = allTransforms.size();
+	ImGui::Text("Total %d transforms.", transformCount);
+	ImGui::SameLine();
+	ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
+	ImGui::SameLine();
+
+	static int range = 0;
+	static int totalShowing = 8;
+	ImGui::Text("Actual Range: %d - %d", range, RE_Math::Min(static_cast<size_t>(range) + totalShowing, transformCount));
+
+	ImGui::PushItemWidth(50.f);
+	ImGui::DragInt("Position", &range, 1.f, 0, static_cast<int>(transformCount) - totalShowing);
+	ImGui::SameLine();
+	ImGui::DragInt("List Size", &totalShowing, 1.f, 0);
+
+	if (ImGui::BeginTable("transformTable", 1,
+		ImGuiTableFlags_::ImGuiTableFlags_BordersH |
+		ImGuiTableFlags_::ImGuiTableFlags_Hideable))
 	{
-		eastl::vector<GO_UID> allTransforms = GetScenePool()->GetAllGOUIDs();
-
-		size_t transformCount = allTransforms.size();
-		ImGui::Text("Total %d transforms.", transformCount);
-		ImGui::SameLine();
-		ImGui::SeparatorEx(ImGuiSeparatorFlags_::ImGuiSeparatorFlags_Vertical);
-		ImGui::SameLine();
-
-		static int range = 0;
-		static int totalShowing = 8;
-		ImGui::Text("Actual Range: %d - %d", range, RE_Math::Min(static_cast<size_t>(range) + totalShowing, transformCount));
-
-		ImGui::PushItemWidth(50.f);
-		ImGui::DragInt("Position", &range, 1.f, 0, static_cast<int>(transformCount) - totalShowing);
-		ImGui::SameLine();
-		ImGui::DragInt("List Size", &totalShowing, 1.f, 0);
-
-		if (ImGui::BeginTable("transformTable", 1,
-			ImGuiTableFlags_::ImGuiTableFlags_BordersH |
-			ImGuiTableFlags_::ImGuiTableFlags_Hideable))
-		{
-			for (auto i = static_cast<size_t>(range);
-				i < static_cast<size_t>(totalShowing + range) && i < transformCount; i++)
-				DrawTransformTable(GetGOPtr(allTransforms[i])->GetTransformPtr());
-			ImGui::EndTable();
-		}
-		ImGui::TreePop();
+		for (auto i = static_cast<size_t>(range);
+			i < static_cast<size_t>(totalShowing + range) && i < transformCount; i++)
+			DrawTransformTable(GetGOPtr(allTransforms[i])->GetTransformPtr());
+		ImGui::EndTable();
 	}
+
+	ImGui::TreePop();
 }
 
 void ModuleScene::DrawTransformTable(RE_CompTransform* transform)

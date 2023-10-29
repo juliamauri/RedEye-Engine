@@ -42,6 +42,8 @@ void RE_ResourceManager::Init()
 	// Fetch Assets
 	RE_FS->ReadAssetChanges(0, true);
 	RE_AUDIO->ReadBanksChanges();
+
+	ThumbnailResources();
 }
 
 void RE_ResourceManager::Clear()

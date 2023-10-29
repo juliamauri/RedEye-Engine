@@ -23,17 +23,17 @@
 SceneEditorWindow::SceneEditorWindow() : OwnCameraRenderedWindow("Editor Scene", true)
 {
 	// Render View Setup
-	render_view.flags =
-		RenderView::Flag::FRUSTUM_CULLING |
-		RenderView::Flag::OVERRIDE_CULLING |
-		RenderView::Flag::OUTLINE_SELECTION |
-		RenderView::Flag::SKYBOX |
-		RenderView::Flag::BLENDED |
-		RenderView::Flag::FACE_CULLING |
-		RenderView::Flag::TEXTURE_2D |
-		RenderView::Flag::COLOR_MATERIAL |
-		RenderView::Flag::DEPTH_TEST;
-	render_view.light_mode = RenderView::LightMode::DISABLED;
+	render_view.settings.flags =
+		RenderSettings::Flag::FRUSTUM_CULLING |
+		RenderSettings::Flag::OVERRIDE_CULLING |
+		RenderSettings::Flag::OUTLINE_SELECTION |
+		RenderSettings::Flag::SKYBOX |
+		RenderSettings::Flag::BLENDED |
+		RenderSettings::Flag::FACE_CULLING |
+		RenderSettings::Flag::TEXTURE_2D |
+		RenderSettings::Flag::COLOR_MATERIAL |
+		RenderSettings::Flag::DEPTH_TEST;
+	render_view.settings.light = RenderSettings::LightMode::DISABLED;
 	render_view.fbos = {
 		RE_FBOManager::CreateFBO(1024, 768, 1, true, true),
 		RE_FBOManager::CreateDeferredFBO(1024, 768) };
@@ -68,8 +68,8 @@ SceneEditorWindow::SceneEditorWindow() : OwnCameraRenderedWindow("Editor Scene",
 void SceneEditorWindow::DrawOther() const
 {
 	// Stencil
-	if (render_view.HasFlag(RenderView::Flag::OUTLINE_SELECTION))
-		RE_RENDER->DrawStencil(RE_EDITOR->GetSelected(), render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+	if (render_view.settings.HasFlag(RenderSettings::Flag::OUTLINE_SELECTION))
+		RE_RENDER->DrawStencil(RE_EDITOR->GetSelected(), render_view.settings.HasFlag(RenderSettings::Flag::DEPTH_TEST));
 }
 
 void SceneEditorWindow::DrawDebug() const
@@ -125,8 +125,8 @@ void SceneEditorWindow::Focus()
 
 const math::Frustum* SceneEditorWindow::GetFrustum() const
 {
-	if (!render_view.HasFlag(RenderView::Flag::FRUSTUM_CULLING)) return nullptr;
-	if (render_view.HasFlag(RenderView::Flag::OVERRIDE_CULLING)) return RE_CameraManager::GetCullingFrustum();
+	if (!render_view.settings.HasFlag(RenderSettings::Flag::FRUSTUM_CULLING)) return nullptr;
+	if (render_view.settings.HasFlag(RenderSettings::Flag::OVERRIDE_CULLING)) return RE_CameraManager::GetCullingFrustum();
 	return &cam.GetFrustum();
 }
 

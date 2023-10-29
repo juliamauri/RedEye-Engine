@@ -211,7 +211,7 @@ void RE_ParticleManager::DrawSimulation(P_UID id, const RE_Camera& camera, math:
 		float weight = 1.f;
 
 		// Lightmode
-		if (ModuleRenderer3D::GetLightMode() == RenderView::LightMode::DEFERRED)
+		if (ModuleRenderer3D::GetLightMode() == RenderSettings::LightMode::DEFERRED)
 		{
 			bool cNormal = !simulation.meshMD5 && !simulation.primCmp;
 			RE_ShaderImporter::setFloat(shader, "customNormal", static_cast<float>(cNormal));

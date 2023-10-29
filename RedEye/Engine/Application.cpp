@@ -22,6 +22,21 @@
 #include <EAStdC/EASprintf.h>
 #include <eathread/internal/config.h>
 
+Application::Application() :
+	fs(new RE_FileSystem()),
+	res(new RE_ResourceManager()),
+	input(new ModuleInput()),
+	window(new ModuleWindow()),
+	scene(new ModuleScene()),
+	editor(new ModuleEditor()),
+	renderer(new ModuleRenderer3D()),
+	audio(new ModuleAudio())
+{
+#ifdef INTERNAL_PROFILING
+	ProfilingTimer::operations.reserve(20000);
+#endif // INTERNAL_PROFILING
+}
+
 Application::~Application()
 {
 	DEL(audio)
@@ -36,23 +51,6 @@ Application::~Application()
 
 #ifdef INTERNAL_PROFILING
 	if (ProfilingTimer::recording) RE_Profiler::Deploy();
-#endif // INTERNAL_PROFILING
-}
-
-void Application::AllocateModules()
-{
-	fs = new RE_FileSystem();
-	res = new RE_ResourceManager();
-
-	input = new ModuleInput();
-	window = new ModuleWindow();
-	scene = new ModuleScene();
-	editor = new ModuleEditor();
-	renderer = new ModuleRenderer3D();
-	audio = new ModuleAudio();
-
-#ifdef INTERNAL_PROFILING
-	ProfilingTimer::operations.reserve(20000u);
 #endif // INTERNAL_PROFILING
 }
 
@@ -112,8 +110,6 @@ bool Application::Init(int _argc, char* _argv[])
 		RE_LOG_ERROR("Application Init failed to Start Modules");
 		return false;
 	}
-
-	res->ThumbnailResources();
 
 	return true;
 }
@@ -292,22 +288,18 @@ void Application::LoadConfig()
 {
 	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::Application)
 
-	if (HasFlag(Flag::LOAD_CONFIG))
-		RemoveFlag(Flag::LOAD_CONFIG);
-
 	window->Load();
 	editor->Load();
 	renderer->Load();
 	ModulePhysics::Load();
 	audio->Load();
+
+	RemoveFlag(Flag::LOAD_CONFIG);
 }
 
 void Application::SaveConfig()
 {
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::Application)
-
-	if (HasFlag(Flag::SAVE_CONFIG))
-		RemoveFlag(Flag::SAVE_CONFIG);
 
 	window->Save();
 	editor->Save();
@@ -316,19 +308,6 @@ void Application::SaveConfig()
 	audio->Save();
 
 	fs->SaveConfig();
-}
 
-inline void Application::AddFlag(Flag flag)
-{
-	flags |= static_cast<uchar>(flag);
-}
-
-inline void Application::RemoveFlag(Flag flag)
-{
-	flags -= static_cast<uchar>(flag);
-}
-
-inline const bool Application::HasFlag(Flag flag) const
-{
-	return flags & static_cast<const uchar>(flag);
+	RemoveFlag(Flag::SAVE_CONFIG);
 }

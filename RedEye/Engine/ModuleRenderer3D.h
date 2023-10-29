@@ -1,7 +1,6 @@
 #ifndef __MODULERENDER3D_H__
 #define __MODULERENDER3D_H__
 
-#include "RE_DataTypes.h"
 #include "EventListener.h"
 #include "RenderView.h"
 #include "RE_Camera.h"
@@ -16,22 +15,13 @@ class RE_SkyBox;
 
 class ModuleRenderer3D : public EventListener 
 {
-public:
-
-	enum class Flag : ushort
-	{
-		VSYNC = 1 << 0,				// 0000 0000 0000 0001
-		SHARE_LIGHT_PASS = 1 << 1	// 0000 0000 0000 0010
-	};
-
 private:
 
 	// OpenGL
 	static void* mainContext;
 
 	// Current State
-	static ushort flags;
-	static RenderView::LightMode current_lighting;
+	static RenderSettings current_settings;
 	static uint current_fbo;
 	static eastl::vector<const char*> activeShaders;
 
@@ -40,6 +30,7 @@ private:
 	static uint particlelightsCount;
 
 	// Utility
+	bool sharing_lightpass;
 	float point_size = 2.f;
 	eastl::vector<math::float2> circle_precompute;
 
@@ -72,7 +63,7 @@ public:
 
 	// Getters
 	static uint GetDepthTexture();
-	static RenderView::LightMode GetLightMode() { return current_lighting; }
+	static RenderSettings::LightMode GetLightMode() { return current_settings.light; }
 	static eastl::vector<const char*>& GetActiveShaders() { return activeShaders; }
 
 	// OpenGL
@@ -89,12 +80,12 @@ private:
 	// Utility
 	void PrecomputeCircle(int steps = 12);
 
-	// Render Flags
-	static bool HasFlag(RenderView::Flag flag);
-	static void AddFlag(RenderView::Flag flag, bool force_state = false);
-	static void RemoveFlag(RenderView::Flag flag, bool force_state = false);
-	static void SetupFlag(RenderView::Flag flag, bool target_state, bool force_state = false);
-	static void SetupFlags(ushort flags, bool force_state = false);
+	// Render Settings Flags
+	static inline bool HasFlag(RenderSettings::Flag flag) { return current_settings.flags & flag; }
+	static void AddFlag(RenderSettings::Flag flag, bool force_state = false);
+	static void RemoveFlag(RenderSettings::Flag flag, bool force_state = false);
+	static void SetupFlag(RenderSettings::Flag flag, bool target_state, bool force_state = false);
+	static void SetupAllFlags(ushort flags, bool force_state = false);
 
 	// Prepare To Render
 	void PullActiveShaders() const;
@@ -114,6 +105,7 @@ private:
 		eastl::stack<const RE_CompParticleEmitter*>& blended_particle_systems,
 		eastl::vector<const RE_Component*> lights,
 		eastl::vector<const RE_CompParticleEmitter*> particle_lights) const;
+
 	// Utility Draws
 	void DrawDebug(
 		const RenderedWindow* toDebug,

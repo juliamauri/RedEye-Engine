@@ -30,7 +30,7 @@ protected:
 
 public:
 
-	RenderedWindow(const char* name, bool start_active) : EditorWindow(name, start_active) {}
+	RenderedWindow(const char* name, bool start_active);
 	virtual ~RenderedWindow() = default;
 
 	void RenderFBO() const;
@@ -38,8 +38,8 @@ public:
 	virtual void DrawDebug() const {}
 	virtual void DrawOther() const {}
 
-	virtual RE_Camera& GetCamera() { return RE_Camera(); }
-	virtual const RE_Camera& GetCamera() const { return RE_Camera(); }
+	virtual RE_Camera& GetCamera();
+	virtual const RE_Camera& GetCamera() const;
 	virtual const math::Frustum* GetFrustum() const { return nullptr; }
 
 	void Recalc() { recalc = true; }
@@ -79,6 +79,10 @@ protected:
 
 	virtual void Load2(RE_Json* node) {}
 	virtual void Save2(RE_Json* node) const {}
+
+private:
+
+	void Draw(bool secondary = false) override;
 };
 
 class OwnCameraRenderedWindow : public RenderedWindow

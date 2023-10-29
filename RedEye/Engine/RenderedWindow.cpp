@@ -3,17 +3,37 @@
 #include "RE_Math.h"
 #include "RE_Time.h"
 #include "RE_Memory.h"
+#include "RE_Json.h"
+
 #include "Application.h"
 #include "ModuleRenderer3D.h"
-#include "RE_FBOManager.h"
 #include "ModuleScene.h"
-#include "RE_Json.h"
+
+#include "RE_FBOManager.h"
+#include "RE_CameraManager.h"
+
 #include "RE_CompPrimitive.h"
 #include "RE_CompTransform.h"
 
 #include <EASTL/string.h>
 #include <EASTL/bit.h>
 #include <ImGui/imgui_internal.h>
+
+RenderedWindow::RenderedWindow(const char* name, bool start_active) : EditorWindow(name, start_active)
+{
+	render_view.settings.flags =
+		RenderSettings::Flag::FRUSTUM_CULLING |
+		RenderSettings::Flag::SKYBOX |
+		RenderSettings::Flag::BLENDED |
+		RenderSettings::Flag::FACE_CULLING |
+		RenderSettings::Flag::TEXTURE_2D |
+		RenderSettings::Flag::COLOR_MATERIAL |
+		RenderSettings::Flag::DEPTH_TEST;
+	render_view.settings.light = RenderSettings::LightMode::DEFERRED;
+	render_view.fbos = {
+		RE_FBOManager::CreateFBO(1024, 768, 1, true, true),
+		RE_FBOManager::CreateDeferredFBO(1024, 768) };
+}
 
 void RenderedWindow::RenderFBO() const
 {
@@ -42,6 +62,9 @@ void RenderedWindow::DrawEditor()
 	// Other values
 	DrawEditor2();
 }
+
+RE_Camera& RenderedWindow::GetCamera() { return RE_CameraManager::MainCamera()->Camera; }
+const RE_Camera& RenderedWindow::GetCamera() const { return RE_CameraManager::MainCamera()->Camera; }
 
 void RenderedWindow::Load(RE_Json* node)
 {
@@ -78,7 +101,10 @@ void RenderedWindow::UpdateWindow()
 	ImGui::SetCursorPos({ viewport.x, viewport.y });
 
 	// Push rendered texture
-	auto texture_id = RE_FBOManager::GetTextureID(render_view.GetFBO(), 4 * (render_view.light_mode == RenderView::LightMode::DEFERRED));
+	auto texture_id = RE_FBOManager::GetTextureID(
+		render_view.GetFBO(),
+		4 * (render_view.settings.light == RenderSettings::LightMode::DEFERRED));
+
 	ImGui::Image(
 		eastl::bit_cast<void*>(&texture_id), // texture
 		{ viewport.z, viewport.w }, // size
@@ -261,4 +287,31 @@ void OwnCameraRenderedWindow::Save2(RE_Json* node) const
 
 	// Other values
 	Save3(node);
+}
+
+void RenderedWindow::Draw(bool secondary)
+{
+	need_render = ImGui::Begin(name, nullptr, ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse);
+
+	if (!need_render)
+	{
+		ImGui::End();
+		return;
+	}
+
+	if (secondary)
+	{
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+	}
+
+	UpdateWindow();
+
+	if (secondary)
+	{
+		ImGui::PopItemFlag();
+		ImGui::PopStyleVar();
+	}
+
+	ImGui::End();
 }

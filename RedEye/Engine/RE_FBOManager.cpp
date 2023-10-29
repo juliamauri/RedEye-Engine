@@ -71,7 +71,6 @@ void RE_FBO::LoadDeferredTextures()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-
 int RE_FBOManager::CreateFBO(uint width, uint height, uint texturesSize, bool depth, bool stencil)
 {
 	int ret = -1;

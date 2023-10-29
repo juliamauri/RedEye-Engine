@@ -89,11 +89,9 @@ void GLAPIENTRY MessageCallback(
 
 // Static values
 void* ModuleRenderer3D::mainContext = nullptr;
-ushort ModuleRenderer3D::flags = 0;
-RenderView::LightMode ModuleRenderer3D::current_lighting = RenderView::LightMode::GL;
+RenderSettings ModuleRenderer3D::current_settings = RenderSettings();
 uint ModuleRenderer3D::current_fbo = 0;
 eastl::vector<const char*> ModuleRenderer3D::activeShaders;
-
 uint ModuleRenderer3D::lightsCount = 0;
 uint ModuleRenderer3D::particlelightsCount = 0;
 
@@ -112,7 +110,7 @@ bool ModuleRenderer3D::Init()
 	PrecomputeCircle();
 
 	// Setup Empty Render Flags
-	SetupFlags(0, true);
+	SetupAllFlags(0, true);
 	Load();
 
 	return true;
@@ -132,7 +130,7 @@ void ModuleRenderer3D::PostUpdate()
 	RE_FBOManager::ChangeFBOBind(0, RE_WINDOW->GetWidth(), RE_WINDOW->GetHeight());
 
 	// Draw Editor
-	RemoveFlag(RenderView::Flag::WIREFRAME);
+	RemoveFlag(RenderSettings::Flag::WIREFRAME);
 	RE_EDITOR->DrawEditorWindows();
 
 	//Swap buffers
@@ -150,14 +148,14 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 {
 	switch (e.type)
 	{
-	case RE_EventType::SET_WIRE_FRAME: SetupFlag(RenderView::Flag::WIREFRAME, e.data1.AsBool()); break;
-	case RE_EventType::SET_FACE_CULLING: SetupFlag(RenderView::Flag::FACE_CULLING, e.data1.AsBool()); break;
-	case RE_EventType::SET_TEXTURE_TWO_D: SetupFlag(RenderView::Flag::TEXTURE_2D, e.data1.AsBool()); break;
-	case RE_EventType::SET_COLOR_MATERIAL: SetupFlag(RenderView::Flag::COLOR_MATERIAL, e.data1.AsBool()); break;
-	case RE_EventType::SET_DEPTH_TEST: SetupFlag(RenderView::Flag::DEPTH_TEST, e.data1.AsBool()); break;
-	case RE_EventType::SET_CLIP_DISTANCE: SetupFlag(RenderView::Flag::CLIP_DISTANCE, e.data1.AsBool()); break;
-	case RE_EventType::SET_LIGHTNING: SetupFlag(RenderView::Flag::GL_LIGHT, e.data1.AsBool()); break;
-	case RE_EventType::SET_VSYNC: SetupFlag(RenderView::Flag::VSYNC, e.data1.AsBool()); break;
+	case RE_EventType::SET_WIRE_FRAME: SetupFlag(RenderSettings::Flag::WIREFRAME, e.data1.AsBool()); break;
+	case RE_EventType::SET_FACE_CULLING: SetupFlag(RenderSettings::Flag::FACE_CULLING, e.data1.AsBool()); break;
+	case RE_EventType::SET_TEXTURE_TWO_D: SetupFlag(RenderSettings::Flag::TEXTURE_2D, e.data1.AsBool()); break;
+	case RE_EventType::SET_COLOR_MATERIAL: SetupFlag(RenderSettings::Flag::COLOR_MATERIAL, e.data1.AsBool()); break;
+	case RE_EventType::SET_DEPTH_TEST: SetupFlag(RenderSettings::Flag::DEPTH_TEST, e.data1.AsBool()); break;
+	case RE_EventType::SET_CLIP_DISTANCE: SetupFlag(RenderSettings::Flag::CLIP_DISTANCE, e.data1.AsBool()); break;
+	case RE_EventType::SET_LIGHTNING: SetupFlag(RenderSettings::Flag::GL_LIGHT, e.data1.AsBool()); break;
+	case RE_EventType::SET_VSYNC: SDL_GL_SetSwapInterval(e.data1.AsBool() ? 1 : 0); break;
 	default: RE_LOG("Unused Event at Module Render"); break;
 	}
 }
@@ -165,18 +163,22 @@ void ModuleRenderer3D::RecieveEvent(const Event & e)
 void ModuleRenderer3D::DrawEditor()
 {
 	// Vertical Sync
-	bool vsync = HasFlag(RenderView::Flag::VSYNC);
+	bool vsync = SDL_GL_GetSwapInterval() == 1;
 	if (ImGui::Checkbox(vsync ? "VSync Enabled" : "VSync Disabled", &vsync))
-		SetupFlag(RenderView::Flag::VSYNC, vsync);
+		SDL_GL_SetSwapInterval(vsync ? 1 : 0);
 
 	// Shared Light Pass
-	bool share_light_pass = HasFlag(RenderView::Flag::SHARE_LIGHT_PASS);
-	if (ImGui::Checkbox(share_light_pass ? "Disable light pass" : "Share Light pass", &share_light_pass))
-		SetupFlag(RenderView::Flag::SHARE_LIGHT_PASS, share_light_pass);
+	if (ImGui::Checkbox(sharing_lightpass ? "No light pass" : "Shared light pass", &sharing_lightpass))
+	{
+		if (sharing_lightpass)
+			RE_RES->At(RE_InternalResources::GetParticleLightPassShader())->UnloadMemory();
+		else
+			dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
+	}
 
 	ImGui::Separator();
 
-	if (share_light_pass)
+	if (sharing_lightpass)
 	{
 		ImGui::Text("Total Lights: %u:203", lightsCount + particlelightsCount);
 		ImGui::Text("From lights components: %u", lightsCount);
@@ -206,8 +208,8 @@ void ModuleRenderer3D::Load()
 	RE_PROFILE(RE_ProfiledFunc::Load, RE_ProfiledClass::ModuleRender)
 
 	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
-	SetupFlag(RenderView::Flag::VSYNC, node->PullBool("vsync", true));
-	SetupFlag(RenderView::Flag::SHARE_LIGHT_PASS, node->PullBool("share_light_pass", false));
+	SDL_GL_SetSwapInterval(node->PullBool("vsync", SDL_GL_GetSwapInterval() == 1) ? 1 : 0);
+	sharing_lightpass = node->PullBool("share_light_pass", sharing_lightpass);
 
 	// Debug circle
 	PrecomputeCircle(node->PullInt("CircleSteps", 12));
@@ -220,8 +222,8 @@ void ModuleRenderer3D::Save() const
 	RE_PROFILE(RE_ProfiledFunc::Save, RE_ProfiledClass::ModuleRender)
 
 	RE_Json* node = RE_FS->ConfigNode("Renderer3D");
-	node->Push("vsync", HasFlag(RenderView::Flag::VSYNC));
-	node->Push("share_light_pass", HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
+	node->Push("vsync", SDL_GL_GetSwapInterval() == 1);
+	node->Push("share_light_pass", sharing_lightpass);
 
 	// Debug circle
 	node->Push("CircleSteps", circle_precompute.size());
@@ -276,19 +278,19 @@ void ModuleRenderer3D::DrawScene(
 	}
 
 	// Draw Elements based on LightMode
-	switch (render_view.light_mode)
+	switch (render_view.settings.light)
 	{
-	case RenderView::LightMode::DEFERRED:
+	case RenderSettings::LightMode::DEFERRED:
 
 		DrawSceneDeferred(
 			render_view, camera,
 			blended_geo, blended_particle_systems,
 			lights, particle_lights);
 
-		if (toDebug && render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
+		if (toDebug && render_view.settings.HasFlag(RenderSettings::Flag::DEBUG_DRAW))
 			DrawDebug(toDebug, render_view, camera);
 
-		if (render_view.HasFlag(RenderView::Flag::SKYBOX) && camera.isUsingSkybox())
+		if (render_view.settings.HasFlag(RenderSettings::Flag::SKYBOX) && camera.isUsingSkybox())
 		{
 			const char* skybox_md5 = camera.GetSkybox();
 			auto skybox = dynamic_cast<const RE_SkyBox*>(RE_RES->At(skybox_md5 ? skybox_md5 : RE_InternalResources::GetDefaultSkyBox()));
@@ -299,11 +301,11 @@ void ModuleRenderer3D::DrawScene(
 	default:
 
 		// Draw Debug Geometry
-		if (toDebug && render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
+		if (toDebug && render_view.settings.HasFlag(RenderSettings::Flag::DEBUG_DRAW))
 			DrawDebug(toDebug, render_view, camera);
 
 		// Draw Skybox
-		if (render_view.HasFlag(RenderView::Flag::SKYBOX) && camera.isUsingSkybox())
+		if (render_view.settings.HasFlag(RenderSettings::Flag::SKYBOX) && camera.isUsingSkybox())
 		{
 			const char* skybox_md5 = camera.GetSkybox();
 			auto skybox = RE_RES->At(skybox_md5 ? skybox_md5 : RE_InternalResources::GetDefaultSkyBox());
@@ -313,9 +315,9 @@ void ModuleRenderer3D::DrawScene(
 		// Draw Blended elements
 		if (!blended_geo.empty() || !blended_particle_systems.empty())
 		{
-			if (render_view.HasFlag(RenderView::Flag::BLENDED))
+			if (render_view.settings.HasFlag(RenderSettings::Flag::BLENDED))
 			{
-				AddFlag(RenderView::Flag::BLENDED);
+				AddFlag(RenderSettings::Flag::BLENDED);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
 
@@ -331,8 +333,8 @@ void ModuleRenderer3D::DrawScene(
 				blended_particle_systems.pop();
 			}
 
-			if (render_view.HasFlag(RenderView::Flag::BLENDED))
-				RemoveFlag(RenderView::Flag::BLENDED);
+			if (render_view.settings.HasFlag(RenderSettings::Flag::BLENDED))
+				RemoveFlag(RenderSettings::Flag::BLENDED);
 		}
 
 		break;
@@ -381,7 +383,7 @@ void ModuleRenderer3D::DrawStencil(GO_UID stencilGO, bool has_depth_test) const
 	}
 
 	glEnable(GL_STENCIL_TEST);
-	RemoveFlag(RenderView::Flag::DEPTH_TEST);
+	RemoveFlag(RenderSettings::Flag::DEPTH_TEST);
 
 	//Getting the scale shader and setting some values
 	const char* scaleShader = RE_InternalResources::GetDefaultScaleShader();
@@ -424,7 +426,7 @@ void ModuleRenderer3D::DrawStencil(GO_UID stencilGO, bool has_depth_test) const
 	RE_GLCache::ChangeShader(0);
 
 	glDisable(GL_STENCIL_TEST);
-	if (has_depth_test) AddFlag(RenderView::Flag::DEPTH_TEST);
+	if (has_depth_test) AddFlag(RenderSettings::Flag::DEPTH_TEST);
 }
 
 #pragma endregion
@@ -521,96 +523,54 @@ void ModuleRenderer3D::PrecomputeCircle(int steps)
 
 #pragma region Render Flags
 
-bool ModuleRenderer3D::HasFlag(RenderView::Flag flag)
+void ModuleRenderer3D::AddFlag(RenderSettings::Flag flag, bool force_state)
 {
-	return flags & static_cast<ushort>(flag);
-}
-
-void ModuleRenderer3D::AddFlag(RenderView::Flag flag, bool force_state)
-{
-	if (!force_state && HasFlag(flag)) return;
-
-	flags |= static_cast<ushort>(flag);
+	if (HasFlag(flag) && !force_state) return;
 
 	switch (flag)
 	{
-		// GL Specs
-	case RenderView::Flag::WIREFRAME: glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); break;
-	case RenderView::Flag::FACE_CULLING: glEnable(GL_CULL_FACE); break;
-	case RenderView::Flag::TEXTURE_2D: glEnable(GL_TEXTURE_2D); break;
-	case RenderView::Flag::COLOR_MATERIAL: glEnable(GL_COLOR_MATERIAL); break;
-	case RenderView::Flag::DEPTH_TEST: glEnable(GL_DEPTH_TEST); break;
-	case RenderView::Flag::CLIP_DISTANCE: glEnable(GL_CLIP_DISTANCE0); break;
-	case RenderView::Flag::GL_LIGHT: glEnable(GL_LIGHTING); break;
-
-		// RE Utility
-	case RenderView::Flag::FRUSTUM_CULLING: ; break;
-	case RenderView::Flag::OVERRIDE_CULLING: ; break;
-	case RenderView::Flag::OUTLINE_SELECTION: ; break;
-	case RenderView::Flag::DEBUG_DRAW: ; break;
-	case RenderView::Flag::SKYBOX: ; break;
-	case RenderView::Flag::BLENDED: ; break;
-
-		// Renderer
-	case RenderView::Flag::VSYNC:
-		SDL_GL_SetSwapInterval(1);
-		RE_LOG_TERCIARY("VSync enabled.");
-		break;
-	case RenderView::Flag::SHARE_LIGHT_PASS:
-		RE_RES->At(RE_InternalResources::GetParticleLightPassShader())->UnloadMemory();
-		break;
+	case RenderSettings::Flag::WIREFRAME: glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); break;
+	case RenderSettings::Flag::FACE_CULLING: glEnable(GL_CULL_FACE); break;
+	case RenderSettings::Flag::TEXTURE_2D: glEnable(GL_TEXTURE_2D); break;
+	case RenderSettings::Flag::COLOR_MATERIAL: glEnable(GL_COLOR_MATERIAL); break;
+	case RenderSettings::Flag::DEPTH_TEST: glEnable(GL_DEPTH_TEST); break;
+	case RenderSettings::Flag::CLIP_DISTANCE: glEnable(GL_CLIP_DISTANCE0); break;
+	case RenderSettings::Flag::GL_LIGHT: glEnable(GL_LIGHTING); break;
 	default: break;
 	}
+
+	current_settings.flags |= flag;
 }
 
-void ModuleRenderer3D::RemoveFlag(RenderView::Flag flag, bool force_state)
+void ModuleRenderer3D::RemoveFlag(RenderSettings::Flag flag, bool force_state)
 {
-	if (!force_state && !HasFlag(flag)) return;
-	
-	auto f = static_cast<ushort>(flag);
-	if (flags & f) flags -= f;
+	if (!HasFlag(flag) && !force_state) return;
 
 	switch (flag)
 	{
-		// GL Specs
-	case RenderView::Flag::WIREFRAME: glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); break;
-	case RenderView::Flag::FACE_CULLING: glDisable(GL_CULL_FACE); break;
-	case RenderView::Flag::TEXTURE_2D: glDisable(GL_TEXTURE_2D); break;
-	case RenderView::Flag::COLOR_MATERIAL: glDisable(GL_COLOR_MATERIAL); break;
-	case RenderView::Flag::DEPTH_TEST: glDisable(GL_DEPTH_TEST); break;
-	case RenderView::Flag::CLIP_DISTANCE: glDisable(GL_CLIP_DISTANCE0); break;
-	case RenderView::Flag::GL_LIGHT: glDisable(GL_LIGHTING); break;
-
-		// Renderer
-	case RenderView::Flag::VSYNC:
-		SDL_GL_SetSwapInterval(0);
-		RE_LOG_TERCIARY("VSync disabled.");
-		break;
-	case RenderView::Flag::SHARE_LIGHT_PASS:
-		dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->SetAsInternal(LIGHTPASSVERTEXSHADER, PARTICLELIGHTPASSFRAGMENTSHADER);
-		break;
+	case RenderSettings::Flag::WIREFRAME: glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); break;
+	case RenderSettings::Flag::FACE_CULLING: glDisable(GL_CULL_FACE); break;
+	case RenderSettings::Flag::TEXTURE_2D: glDisable(GL_TEXTURE_2D); break;
+	case RenderSettings::Flag::COLOR_MATERIAL: glDisable(GL_COLOR_MATERIAL); break;
+	case RenderSettings::Flag::DEPTH_TEST: glDisable(GL_DEPTH_TEST); break;
+	case RenderSettings::Flag::CLIP_DISTANCE: glDisable(GL_CLIP_DISTANCE0); break;
+	case RenderSettings::Flag::GL_LIGHT: glDisable(GL_LIGHTING); break;
 	default: break;
 	}
+
+	if (HasFlag(flag)) current_settings.flags -= static_cast<ushort>(flag);
 }
 
-void ModuleRenderer3D::SetupFlag(RenderView::Flag flag, bool target_state, bool force_state)
+void ModuleRenderer3D::SetupFlag(RenderSettings::Flag flag, bool target_state, bool force_state)
 {
 	if (target_state) AddFlag(flag, force_state);
 	else RemoveFlag(flag, force_state);
 }
 
-void ModuleRenderer3D::SetupFlags(ushort _flags, bool force_state)
+void ModuleRenderer3D::SetupAllFlags(ushort _flags, bool force_state)
 {
-	for (int i = 0; i < 15; i++)
-	{
-		ushort flag = 1 << 0;
-		SetupFlag(static_cast<RenderView::Flag>(flag), _flags & flag, force_state);
-
-		if (_flags & flag) AddFlag(static_cast<RenderView::Flag>(flag), force_state);
-		else RemoveFlag(static_cast<RenderView::Flag>(flag), force_state);
-	}
-
-	flags = _flags;
+	for (int i = 0; i <= 12; i++)
+		SetupFlag(static_cast<RenderSettings::Flag>(1 << i), _flags & (1 << i), force_state);
 }
 
 #pragma endregion
@@ -624,7 +584,7 @@ void ModuleRenderer3D::PullActiveShaders() const
 void ModuleRenderer3D::PrepareToRender(const RenderView& render_view, const RE_Camera& camera) const
 {
 	// Setup Frame Buffer
-	current_lighting = render_view.light_mode;
+	current_settings = render_view.settings;
 	current_fbo = render_view.GetFBO();
 	//current_camera = camera;
 
@@ -632,14 +592,14 @@ void ModuleRenderer3D::PrepareToRender(const RenderView& render_view, const RE_C
 	RE_FBOManager::ClearFBOBuffers(current_fbo, render_view.clear_color.ptr());
 
 	// Setup Render Flags
-	RemoveFlag(RenderView::Flag::TEXTURE_2D);
-	SetupFlag(RenderView::Flag::WIREFRAME, render_view.HasFlag(RenderView::Flag::WIREFRAME));
-	SetupFlag(RenderView::Flag::FACE_CULLING, render_view.HasFlag(RenderView::Flag::FACE_CULLING));
-	SetupFlag(RenderView::Flag::COLOR_MATERIAL, render_view.HasFlag(RenderView::Flag::COLOR_MATERIAL));
-	SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+	RemoveFlag(RenderSettings::Flag::TEXTURE_2D);
+	SetupFlag(RenderSettings::Flag::WIREFRAME, render_view.settings.HasFlag(RenderSettings::Flag::WIREFRAME));
+	SetupFlag(RenderSettings::Flag::FACE_CULLING, render_view.settings.HasFlag(RenderSettings::Flag::FACE_CULLING));
+	SetupFlag(RenderSettings::Flag::COLOR_MATERIAL, render_view.settings.HasFlag(RenderSettings::Flag::COLOR_MATERIAL));
+	SetupFlag(RenderSettings::Flag::DEPTH_TEST, render_view.settings.HasFlag(RenderSettings::Flag::DEPTH_TEST));
 
-	bool usingClipDistance = render_view.HasFlag(RenderView::Flag::CLIP_DISTANCE);
-	SetupFlag(RenderView::Flag::CLIP_DISTANCE, usingClipDistance);
+	bool usingClipDistance = render_view.settings.HasFlag(RenderSettings::Flag::CLIP_DISTANCE);
+	SetupFlag(RenderSettings::Flag::CLIP_DISTANCE, usingClipDistance);
 
 	// Upload Shader Uniforms
 	for (auto sMD5 : activeShaders)
@@ -655,8 +615,8 @@ void ModuleRenderer3D::PrepareToRender(const RenderView& render_view, const RE_C
 	case RenderView::LightMode::GL: break; // TODO RUB: Bind GL Lights
 	case RenderView::LightMode::DIRECT: break; // TODO RUB: Upload Light uniforms
 	default: break; }*/
-	bool using_gl_lights = render_view.light_mode == RenderView::LightMode::GL;
-	SetupFlag(RenderView::Flag::GL_LIGHT, using_gl_lights);
+
+	SetupFlag(RenderSettings::Flag::GL_LIGHT, render_view.settings.light == RenderSettings::LightMode::GL);
 }
 
 void ModuleRenderer3D::CategorizeDrawables(
@@ -707,7 +667,7 @@ void ModuleRenderer3D::DrawSceneDeferred(
 	uint light_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetLightPassShader()))->GetID();
 	RE_GLCache::ChangeShader(light_pass);
 
-	RemoveFlag(RenderView::Flag::DEPTH_TEST);
+	RemoveFlag(RenderSettings::Flag::DEPTH_TEST);
 
 	glMemoryBarrierByRegion(GL_FRAMEBUFFER_BARRIER_BIT);
 	
@@ -732,7 +692,7 @@ void ModuleRenderer3D::DrawSceneDeferred(
 	}
 	lightsCount = count;
 
-	if (!HasFlag(RenderView::Flag::SHARE_LIGHT_PASS))
+	if (!sharing_lightpass)
 	{
 		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, "count"), count);
 
@@ -766,7 +726,7 @@ void ModuleRenderer3D::DrawSceneDeferred(
 					"plights",
 					pCount,
 					508,
-					HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
+					sharing_lightpass);
 
 			particlelightsCount = pCount;
 			RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(particlelight_pass, "pInfo.pCount"), pCount);
@@ -787,7 +747,7 @@ void ModuleRenderer3D::DrawSceneDeferred(
 				"lights",
 				count,
 				203,
-				HasFlag(RenderView::Flag::SHARE_LIGHT_PASS));
+				sharing_lightpass);
 
 		particlelightsCount = static_cast<uint>(math::Clamp(static_cast<int>(count) - static_cast<int>(lightsCount), 0, 203));
 		RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(light_pass, "count"), count);
@@ -796,7 +756,7 @@ void ModuleRenderer3D::DrawSceneDeferred(
 		DrawQuad();
 	}
 
-	SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+	SetupFlag(RenderSettings::Flag::DEPTH_TEST, render_view.settings.HasFlag(RenderSettings::Flag::DEPTH_TEST));
 }
 
 void ModuleRenderer3D::DrawDebug(
@@ -807,14 +767,14 @@ void ModuleRenderer3D::DrawDebug(
 	RE_GLCache::ChangeShader(0);
 	RE_GLCache::ChangeTextureBind(0);
 
-	bool prev_light = HasFlag(RenderView::Flag::GL_LIGHT);
-	RemoveFlag(RenderView::Flag::GL_LIGHT);
-	RemoveFlag(RenderView::Flag::TEXTURE_2D);
+	bool prev_light = HasFlag(RenderSettings::Flag::GL_LIGHT);
+	RemoveFlag(RenderSettings::Flag::GL_LIGHT);
+	RemoveFlag(RenderSettings::Flag::TEXTURE_2D);
 
 	toDebug->DrawDebug();
 
-	if (prev_light) AddFlag(RenderView::Flag::GL_LIGHT);
-	SetupFlag(RenderView::Flag::TEXTURE_2D, render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
+	if (prev_light) AddFlag(RenderSettings::Flag::GL_LIGHT);
+	SetupFlag(RenderSettings::Flag::TEXTURE_2D, render_view.settings.HasFlag(RenderSettings::Flag::TEXTURE_2D));
 }
 
 void ModuleRenderer3D::DrawSkyBox(const RE_SkyBox* skybox) const
@@ -827,7 +787,7 @@ void ModuleRenderer3D::DrawSkyBox(const RE_SkyBox* skybox) const
 	uint skysphereshader = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetDefaultSkyBoxShader()))->GetID();
 	RE_GLCache::ChangeShader(skysphereshader);
 	RE_ShaderImporter::setInt(skysphereshader, "cubemap", 0);
-	RE_ShaderImporter::setBool(skysphereshader, "deferred", (current_lighting == RenderView::LightMode::DEFERRED));
+	RE_ShaderImporter::setBool(skysphereshader, "deferred", (current_settings.light == RenderSettings::LightMode::DEFERRED));
 
 	glDepthFunc(GL_LEQUAL);
 	skybox->DrawSkybox();
@@ -964,14 +924,14 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view, const RE_Came
 
 	PrepareToRender(render_view, camera);
 
-	switch (render_view.light_mode)
+	switch (render_view.settings.light)
 	{
-	case RenderView::LightMode::DEFERRED:
+	case RenderSettings::LightMode::DEFERRED:
 
 		RE_ParticleManager::DrawSimulation(emitter_id, camera);
 		if (emitter->HasLight()) DrawParticleLights(emitter_id);
 
-		SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
+		SetupFlag(RenderSettings::Flag::DEPTH_TEST, render_view.settings.HasFlag(RenderSettings::Flag::DEPTH_TEST));
 
 		DrawParticleEditorDebug(render_view, emitter, camera);
 
@@ -986,16 +946,16 @@ void ModuleRenderer3D::DrawParticleEditor(RenderView& render_view, const RE_Came
 
 		if (draw_last) // Draw Blended elements
 		{
-			if (render_view.HasFlag(RenderView::Flag::BLENDED))
+			if (render_view.settings.HasFlag(RenderSettings::Flag::BLENDED))
 			{
-				AddFlag(RenderView::Flag::BLENDED);
+				AddFlag(RenderSettings::Flag::BLENDED);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
 
 			RE_ParticleManager::DrawSimulation(emitter_id, camera);
 
-			SetupFlag(RenderView::Flag::DEPTH_TEST, render_view.HasFlag(RenderView::Flag::DEPTH_TEST));
-			if (render_view.HasFlag(RenderView::Flag::BLENDED)) RemoveFlag(RenderView::Flag::BLENDED);
+			SetupFlag(RenderSettings::Flag::DEPTH_TEST, render_view.settings.HasFlag(RenderSettings::Flag::DEPTH_TEST));
+			if (render_view.settings.HasFlag(RenderSettings::Flag::BLENDED)) RemoveFlag(RenderSettings::Flag::BLENDED);
 		}
 
 		break;
@@ -1008,27 +968,26 @@ void ModuleRenderer3D::DrawParticleEditorDebug(
 	const RE_ParticleEmitter* emitter,
 	const RE_Camera& camera) const
 {
-	if (!render_view.HasFlag(RenderView::Flag::DEBUG_DRAW))
+	if (!render_view.settings.HasFlag(RenderSettings::Flag::DEBUG_DRAW))
 		return;
 
 	RE_GLCache::ChangeShader(0);
 	RE_GLCache::ChangeTextureBind(0);
 
-	bool reset_light = render_view.HasFlag(RenderView::Flag::GL_LIGHT);
-	RemoveFlag(RenderView::Flag::GL_LIGHT);
-	RemoveFlag(RenderView::Flag::TEXTURE_2D);
+	bool reset_light = render_view.settings.HasFlag(RenderSettings::Flag::GL_LIGHT);
+	RemoveFlag(RenderSettings::Flag::GL_LIGHT);
+	RemoveFlag(RenderSettings::Flag::TEXTURE_2D);
 
 	LoadCameraMatrixes(camera);
 	DebugDrawParticleEmitter(*emitter);
 
-	if (reset_light) AddFlag(RenderView::Flag::GL_LIGHT);
-	SetupFlag(RenderView::Flag::TEXTURE_2D, render_view.HasFlag(RenderView::Flag::TEXTURE_2D));
+	if (reset_light) AddFlag(RenderSettings::Flag::GL_LIGHT);
+	SetupFlag(RenderSettings::Flag::TEXTURE_2D, render_view.settings.HasFlag(RenderSettings::Flag::TEXTURE_2D));
 }
 
 void ModuleRenderer3D::DrawParticleLights(P_UID sim_id) const
 {
 	static const eastl::string deferred_textures[5] = { "gPosition", "gNormal", "gAlbedo", "gSpec", "gLighting" };
-	bool shared_light_pass = HasFlag(RenderView::Flag::SHARE_LIGHT_PASS);
 	
 	uint shader_pass;
 	uint texture_count;
@@ -1036,7 +995,7 @@ void ModuleRenderer3D::DrawParticleLights(P_UID sim_id) const
 	eastl::string count_var;
 	uint max_lights;
 
-	if (!shared_light_pass)
+	if (!sharing_lightpass)
 	{
 		shader_pass = dynamic_cast<RE_Shader*>(RE_RES->At(RE_InternalResources::GetParticleLightPassShader()))->GetID();
 		texture_count = 5;
@@ -1051,7 +1010,7 @@ void ModuleRenderer3D::DrawParticleLights(P_UID sim_id) const
 		shader_pass_name = "lights";
 		count_var = "count";
 		max_lights = 203;
-		RemoveFlag(RenderView::Flag::DEPTH_TEST);
+		RemoveFlag(RenderSettings::Flag::DEPTH_TEST);
 	}
 
 	// Setup Shader
@@ -1075,7 +1034,7 @@ void ModuleRenderer3D::DrawParticleLights(P_UID sim_id) const
 		shader_pass_name.c_str(),
 		count,
 		max_lights,
-		shared_light_pass);
+		sharing_lightpass);
 
 	RE_ShaderImporter::setInt(RE_ShaderImporter::getLocation(shader_pass, count_var.c_str()), count);
 

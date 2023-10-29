@@ -1,43 +1,44 @@
-#include "Event.h"
-
 #include "ModuleEditor.h"
 
 #include "RE_Memory.h"
 #include "RE_Profiler.h"
 #include "RE_ConsoleLog.h"
+
 #include "Application.h"
+#include "RE_ResourceManager.h"
 #include "ModuleInput.h"
 #include "ModuleWindow.h"
 #include "ModuleScene.h"
 #include "ModuleRenderer3D.h"
 #include "RE_FileSystem.h"
+
 #include "RE_FileBuffer.h"
 #include "RE_CommandManager.h"
 #include "RE_ThumbnailManager.h"
-#include "RE_CameraManager.h"
 #include "RE_ParticleEmitter.h"
-#include "RE_ResourceManager.h"
 #include "RE_ParticleManager.h"
 
-#include "AboutWindow.h"
-#include "AssetsWindow.h"
-#include "ConfigWindow.h"
-#include "ConsoleWindow.h"
-#include "HierarchyWindow.h"
-#include "PlayPauseWindow.h"
-#include "PropertiesWindow.h"
 #include "PopUpWindow.h"
+
+// Base Windows
+#include "ConsoleWindow.h"
+#include "ConfigWindow.h"
+#include "HierarchyWindow.h"
+#include "PropertiesWindow.h"
+#include "PlayPauseWindow.h"
+#include "AssetsWindow.h"
 #include "WwiseWindow.h"
+#include "AboutWindow.h"
 
-#include "SceneEditorWindow.h"
-#include "GameWindow.h"
-
+// Resource Editors
 #include "MaterialEditorWindow.h"
 #include "SkyBoxEditorWindow.h"
 #include "ShaderEditorWindow.h"
 #include "TextEditorManagerWindow.h"
 #include "WaterPlaneWindow.h"
 #include "ParticleEmitterEditorWindow.h"
+
+#include "SceneEditorWindow.h"
 
 #include <ImGuiImpl/imgui_impl_sdl2.h>
 #include <ImGuiImpl/imgui_stdlib.h>
@@ -46,13 +47,12 @@
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <EASTL/stack.h>
-#include <EASTL/queue.h>
 
 ModuleEditor::ModuleEditor() :
 	popupWindow(new PopUpWindow),
 	about(new AboutWindow)
 {
-	flags = static_cast<int>(Flag::SHOW_EDITOR);
+	flags = static_cast<ushort>(Flag::SHOW_EDITOR);
 }
 
 ModuleEditor::~ModuleEditor()
@@ -89,8 +89,8 @@ bool ModuleEditor::Init()
 	waterplaneWindow = new WaterPlaneWindow();
 
 	// Scene views
+	rendered_windows.push_back(sceneGameWindow = new RenderedWindow("Game Scene", true));
 	rendered_windows.push_back(sceneEditorWindow = new SceneEditorWindow());
-	rendered_windows.push_back(sceneGameWindow = new GameWindow());
 	rendered_windows.push_back(particleEmitterWindow = new ParticleEmitterEditorWindow());
 
 	return true;

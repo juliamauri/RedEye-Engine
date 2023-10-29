@@ -30,13 +30,13 @@
 ParticleEmitterEditorWindow::ParticleEmitterEditorWindow() :
 	OwnCameraRenderedWindow("Particle Emitter Workspace", false)
 {
-	render_view.flags =
-		RenderView::Flag::FACE_CULLING |
-		RenderView::Flag::BLENDED |
-		RenderView::Flag::TEXTURE_2D |
-		RenderView::Flag::COLOR_MATERIAL |
-		RenderView::Flag::DEPTH_TEST;
-	render_view.light_mode = RenderView::LightMode::DISABLED;
+	render_view.settings.flags =
+		RenderSettings::Flag::FACE_CULLING |
+		RenderSettings::Flag::BLENDED |
+		RenderSettings::Flag::TEXTURE_2D |
+		RenderSettings::Flag::COLOR_MATERIAL |
+		RenderSettings::Flag::DEPTH_TEST;
+	render_view.settings.light = RenderSettings::LightMode::DISABLED;
 	render_view.fbos = {
 		RE_FBOManager::CreateFBO(1024, 768, 1, true, false),
 		RE_FBOManager::CreateDeferredFBO(1024, 768) };
@@ -331,17 +331,17 @@ void ParticleEmitterEditorWindow::Draw(bool secondary)
 
 		if (ImGui::BeginMenuBar())
 		{
-			render_view.CheckboxFlag("Particle debug draw", RenderView::Flag::DEBUG_DRAW);
+			render_view.settings.CheckboxFlag("Particle debug draw", RenderSettings::Flag::DEBUG_DRAW);
 
-			bool deferred = (render_view.light_mode == RenderView::LightMode::DEFERRED);
+			bool deferred = (render_view.settings.light == RenderSettings::LightMode::DEFERRED);
 			if (ImGui::Checkbox("Deferred lighting", &deferred))
 			{
 				if (deferred)
 				{
-					render_view.light_mode = RenderView::LightMode::DEFERRED;
+					render_view.settings.light = RenderSettings::LightMode::DEFERRED;
 					render_view.clear_color = { 0.0f,0.0f,0.0f,1.0 };
 				}
-				else render_view.light_mode = RenderView::LightMode::DISABLED;
+				else render_view.settings.light = RenderSettings::LightMode::DISABLED;
 			}
 
 			if (!deferred)

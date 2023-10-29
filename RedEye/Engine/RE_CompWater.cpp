@@ -73,7 +73,7 @@ void RE_CompWater::Draw() const
 	RE_GLCache::ChangeShader(shaderID);
 	shader->UploadModel(GetGOCPtr()->GetTransformPtr()->GetGlobalMatrixPtr());
 	
-	RenderView::LightMode lMode = ModuleRenderer3D::GetLightMode();
+	RenderSettings::LightMode lMode = ModuleRenderer3D::GetLightMode();
 	
 	glActiveTexture(GL_TEXTURE0 + textureCounter);
 	RE_GLCache::ChangeTextureBind(ModuleRenderer3D::GetDepthTexture());
@@ -81,7 +81,7 @@ void RE_CompWater::Draw() const
 
 	RE_GLCache::ChangeShader(shaderID);
 
-	if (lMode == RenderView::LightMode::DEFERRED) DeferedDraw(textureCounter);
+	if (lMode == RenderSettings::LightMode::DEFERRED) DeferedDraw(textureCounter);
 	else DefaultDraw(textureCounter);
 
 	RE_GLCache::ChangeVAO(VAO);

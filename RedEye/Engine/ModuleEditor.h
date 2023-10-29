@@ -3,13 +3,20 @@
 
 #include "EventListener.h"
 #include "RE_DataTypes.h"
+
+#include <EASTL/string.h>
 #include <EASTL/list.h>
 
 class ModuleEditor : public EventListener
 {
 public:
 
-	enum class Flag : int
+	class PopUpWindow* popupWindow = nullptr;
+
+private:
+
+	// Flags
+	enum class Flag : ushort
 	{
 		// Config
 		SHOW_EDITOR = 1 << 0,
@@ -18,19 +25,12 @@ public:
 		// State
 		POPUP_IS_FOCUSED = 1 << 2
 	};
-
-	class PopUpWindow* popupWindow = nullptr;
-
-private:
-
-	// Flags
 	ushort flags = 0;
 
 	// Selected GO
 	GO_UID selected = 0;
 
 	// Base Windows
-	eastl::list<class EditorWindow*> windows;
 	class ConsoleWindow* console = nullptr;
 	class ConfigWindow* config = nullptr;
 	class HierarchyWindow* hierarchy = nullptr;
@@ -38,6 +38,8 @@ private:
 	class PlayPauseWindow* play_pause = nullptr;
 	class AssetsWindow* assets = nullptr;
 	class WwiseWindow* wwise = nullptr;
+	eastl::list<class EditorWindow*> windows;
+
 	class AboutWindow* about = nullptr;
 
 	// Resource Editors
@@ -47,14 +49,11 @@ private:
 	class TextEditorManagerWindow* texteditormanager = nullptr;
 	class WaterPlaneWindow* waterplaneWindow = nullptr;
 
-	// Scene views
-	eastl::list<class RenderedWindow*> rendered_windows;
+	// Rendered Windows
+	class RenderedWindow* sceneGameWindow = nullptr;
 	class SceneEditorWindow* sceneEditorWindow = nullptr;
-	class GameWindow* sceneGameWindow = nullptr;
 	class ParticleEmitterEditorWindow* particleEmitterWindow = nullptr;
-
-	// Tools
-	class RandomTest* rng = nullptr;
+	eastl::list<RenderedWindow*> rendered_windows;
 
 	// Debug Windows
 	class TransformDebugWindow* transDebInfo = nullptr;
@@ -92,9 +91,9 @@ public:
 	void DuplicateSelectedObject();
 
 	// Flags
-	inline void AddFlag(Flag flag) { flags |= static_cast<int>(flag); }
-	inline void RemoveFlag(Flag flag) { flags -= static_cast<int>(flag); }
-	inline const bool HasFlag(Flag flag) const { return flags & static_cast<int>(flag); }
+	inline void AddFlag(Flag flag) { flags |= static_cast<ushort>(flag); }
+	inline void RemoveFlag(Flag flag) { flags -= static_cast<ushort>(flag); }
+	inline const bool HasFlag(Flag flag) const { return flags & static_cast<ushort>(flag); }
 	void CheckboxFlag(const char* label, Flag flag);
 
 #pragma region Editor Windows
