@@ -33,14 +33,14 @@ public:
 	RenderedWindow(const char* name, bool start_active);
 	virtual ~RenderedWindow() = default;
 
-	void RenderFBO() const;
+	virtual void RenderFBO() const;
 	void DrawEditor();
 	virtual void DrawDebug() const {}
 	virtual void DrawOther() const {}
 
 	virtual RE_Camera& GetCamera();
 	virtual const RE_Camera& GetCamera() const;
-	virtual const math::Frustum* GetFrustum() const { return nullptr; }
+	virtual const math::Frustum* GetFrustum() const;
 
 	void Recalc() { recalc = true; }
 	bool isSelected() const { return isWindowSelected; }

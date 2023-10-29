@@ -22,13 +22,16 @@
 RenderedWindow::RenderedWindow(const char* name, bool start_active) : EditorWindow(name, start_active)
 {
 	render_view.settings.flags =
-		RenderSettings::Flag::FRUSTUM_CULLING |
-		RenderSettings::Flag::SKYBOX |
-		RenderSettings::Flag::BLENDED |
 		RenderSettings::Flag::FACE_CULLING |
 		RenderSettings::Flag::TEXTURE_2D |
 		RenderSettings::Flag::COLOR_MATERIAL |
-		RenderSettings::Flag::DEPTH_TEST;
+		RenderSettings::Flag::DEPTH_TEST |
+		RenderSettings::Flag::CLIP_DISTANCE |
+
+		RenderSettings::Flag::FRUSTUM_CULLING |
+		RenderSettings::Flag::SKYBOX |
+		RenderSettings::Flag::BLENDED;
+
 	render_view.settings.light = RenderSettings::LightMode::DEFERRED;
 	render_view.fbos = {
 		RE_FBOManager::CreateFBO(1024, 768, 1, true, true),
@@ -44,27 +47,25 @@ void RenderedWindow::RenderFBO() const
 		GetCamera(),
 		GatherDrawables(),
 		GatherSceneLights(),
-		GatherParticleLights());
+		GatherParticleLights(),
+		this);
 
 	DrawOther();
 }
 
 void RenderedWindow::DrawEditor()
 {
-	ImGui::PushID((eastl::string(name) + " Render View").c_str());
-	if (ImGui::TreeNodeEx("Render View"), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow)
+	if (ImGui::TreeNodeEx("Render View", ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow))
 	{
 		render_view.DrawEditor(name);
 		ImGui::TreePop();
 	}
-	ImGui::PopID();
-
-	// Other values
 	DrawEditor2();
 }
 
 RE_Camera& RenderedWindow::GetCamera() { return RE_CameraManager::MainCamera()->Camera; }
 const RE_Camera& RenderedWindow::GetCamera() const { return RE_CameraManager::MainCamera()->Camera; }
+const math::Frustum* RenderedWindow::GetFrustum() const { return &GetCamera().GetFrustum(); }
 
 void RenderedWindow::Load(RE_Json* node)
 {

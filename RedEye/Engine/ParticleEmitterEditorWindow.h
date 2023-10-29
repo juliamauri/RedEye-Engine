@@ -25,6 +25,8 @@ public:
 	ParticleEmitterEditorWindow();
 	~ParticleEmitterEditorWindow() final = default;
 
+	void RenderFBO() const final;
+
 	void Orbit(float delta_x, float delta_y) final;
 	void Focus() final;
 

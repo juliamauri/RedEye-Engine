@@ -190,7 +190,7 @@ void RE_ParticleEmitter::UpdateSpawn()
 		uint allocation_step = max_particles / 10u;
 		uint desired_capacity = allocation_step;
 
-		while (particle_count < desired_capacity)
+		while (particle_count > desired_capacity)
 			desired_capacity += allocation_step;
 
 		particle_pool.reserve(desired_capacity);

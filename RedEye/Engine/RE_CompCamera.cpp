@@ -65,21 +65,17 @@ void RE_CompCamera::OnTransformModified() { need_recalculation = true; }
 
 void RE_CompCamera::DrawProperties()
 {
-	if (ImGui::CollapsingHeader("Camera"))
-	{
-		ImGui::Checkbox("Draw Frustum", &draw_frustum);
-		ImGui::Checkbox("Override Culling", &override_cull);
+	if (!ImGui::CollapsingHeader("Camera"))
+		return;
 
-		if (Camera.DrawProperties())
-			RE_INPUT->Push(RE_EventType::UPDATE_SCENE_WINDOWS, RE_EDITOR, go);
-	}
+	ImGui::Checkbox("Draw Frustum", &draw_frustum);
+	ImGui::Checkbox("Override Culling", &override_cull);
+
+	if (Camera.DrawProperties())
+		RE_INPUT->Push(RE_EventType::UPDATE_SCENE_WINDOWS, RE_EDITOR, go);
 }
 
-RE_CompTransform* RE_CompCamera::GetTransform() const
-{
-	return GetGOCPtr()->GetTransformPtr();
-}
-
+RE_CompTransform* RE_CompCamera::GetTransform() const { return GetGOCPtr()->GetTransformPtr(); }
 void RE_CompCamera::UseResources() { Camera.UseSkybox(); }
 void RE_CompCamera::UnUseResources() { Camera.UnUseSkybox(); }
 

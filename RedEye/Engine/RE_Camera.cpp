@@ -82,7 +82,7 @@ bool RE_Camera::DrawProperties()
 		}
 		else
 		{
-			ImGui::Text("This component camera is using the default skybox.");
+			ImGui::Text("This camera is using the default skybox.");
 			skyRes = dynamic_cast<RE_SkyBox*>(RE_RES->At(RE_InternalResources::GetDefaultSkyBox()));
 			if (ImGui::Button(skyRes->GetName())) RE_RES->PushSelected(skyRes->GetMD5(), true);
 		}

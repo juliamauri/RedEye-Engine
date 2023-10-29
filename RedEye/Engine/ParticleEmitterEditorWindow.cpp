@@ -7,6 +7,7 @@
 #include "ModuleInput.h"
 #include "ModuleScene.h"
 #include "ModuleEditor.h"
+#include "ModuleRenderer3D.h"
 #include "PopUpWindow.h"
 
 #include "RE_FBOManager.h"
@@ -32,14 +33,25 @@ ParticleEmitterEditorWindow::ParticleEmitterEditorWindow() :
 {
 	render_view.settings.flags =
 		RenderSettings::Flag::FACE_CULLING |
-		RenderSettings::Flag::BLENDED |
 		RenderSettings::Flag::TEXTURE_2D |
 		RenderSettings::Flag::COLOR_MATERIAL |
-		RenderSettings::Flag::DEPTH_TEST;
+		//RenderSettings::Flag::DEPTH_TEST |
+		//RenderSettings::Flag::CLIP_DISTANCE |
+
+		RenderSettings::Flag::DEBUG_DRAW |
+		RenderSettings::Flag::BLENDED;
+
 	render_view.settings.light = RenderSettings::LightMode::DISABLED;
 	render_view.fbos = {
 		RE_FBOManager::CreateFBO(1024, 768, 1, true, false),
 		RE_FBOManager::CreateDeferredFBO(1024, 768) };
+}
+
+void ParticleEmitterEditorWindow::RenderFBO() const
+{
+	if (!active || !need_render) return;
+
+	RE_RENDER->DrawParticleEmitter(simulation, render_view, cam);
 }
 
 void ParticleEmitterEditorWindow::Orbit(float delta_x, float delta_y)

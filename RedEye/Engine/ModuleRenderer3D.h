@@ -47,19 +47,23 @@ public:
 	void Load();
 	void Save() const;
 
-	// Actions
+	// Camera
 	static void LoadCameraMatrixes(const RE_Camera& camera);
+
+	// Draws
 	void DrawScene(
 		const RenderView& render_view,
 		const RE_Camera& camera,
 		eastl::stack<const RE_Component*>& drawables,
 		eastl::vector<const RE_Component*> lights,
 		eastl::vector<const RE_CompParticleEmitter*> particle_lights,
-		RenderedWindow* toDebug = nullptr) const;
-
-	// Draws
+		const RenderedWindow* toDebug = nullptr) const;
 	void DrawStencil(GO_UID stencilGO, bool has_depth_test) const;
 	void DebugDrawParticleEmitter(const RE_ParticleEmitter& sim) const;
+	void DrawParticleEmitter(
+		P_UID simulation,
+		const RenderView& render_view,
+		const RE_Camera& camera) const;
 
 	// Getters
 	static uint GetDepthTexture();
@@ -120,15 +124,10 @@ private:
 	void DrawAASphere(const math::vec p_pos, const float radius) const;
 
 	// Particle Editor Draws
-	void DrawParticleEditor(
-		RenderView& render_view,
-		const RE_Camera& camera) const;
-
 	void DrawParticleEditorDebug(
 		const RenderView& render_view,
 		const RE_ParticleEmitter* emitter,
 		const RE_Camera& camera) const;
-
 	void DrawParticleLights(P_UID sim_id) const;
 };
 

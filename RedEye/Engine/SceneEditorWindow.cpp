@@ -24,15 +24,19 @@ SceneEditorWindow::SceneEditorWindow() : OwnCameraRenderedWindow("Editor Scene",
 {
 	// Render View Setup
 	render_view.settings.flags =
-		RenderSettings::Flag::FRUSTUM_CULLING |
-		RenderSettings::Flag::OVERRIDE_CULLING |
-		RenderSettings::Flag::OUTLINE_SELECTION |
-		RenderSettings::Flag::SKYBOX |
-		RenderSettings::Flag::BLENDED |
 		RenderSettings::Flag::FACE_CULLING |
 		RenderSettings::Flag::TEXTURE_2D |
 		RenderSettings::Flag::COLOR_MATERIAL |
-		RenderSettings::Flag::DEPTH_TEST;
+		RenderSettings::Flag::DEPTH_TEST |
+		RenderSettings::Flag::CLIP_DISTANCE |
+
+		RenderSettings::Flag::FRUSTUM_CULLING |
+		RenderSettings::Flag::OVERRIDE_CULLING |
+		RenderSettings::Flag::OUTLINE_SELECTION |
+		RenderSettings::Flag::DEBUG_DRAW |
+		RenderSettings::Flag::SKYBOX |
+		RenderSettings::Flag::BLENDED;
+
 	render_view.settings.light = RenderSettings::LightMode::DISABLED;
 	render_view.fbos = {
 		RE_FBOManager::CreateFBO(1024, 768, 1, true, true),
@@ -439,7 +443,7 @@ void SceneEditorWindow::DrawBoundingBoxes() const
 	{
 		glColor4f(sel_aabb_color[0], sel_aabb_color[1], sel_aabb_color[2], 1.0f);
 		auto selected = RE_EDITOR->GetSelected();
-		RE_SCENE->GetGOCPtr(selected)->DrawGlobalAABB();
+		if (selected) RE_SCENE->GetGOCPtr(selected)->DrawGlobalAABB();
 
 		eastl::queue<const RE_GameObject*> objects;
 		for (auto child : RE_SCENE->GetRootCPtr()->GetChildsPtr())

@@ -55,10 +55,6 @@ private:
 	class ParticleEmitterEditorWindow* particleEmitterWindow = nullptr;
 	eastl::list<RenderedWindow*> rendered_windows;
 
-	// Debug Windows
-	class TransformDebugWindow* transDebInfo = nullptr;
-	class RendererDebugWindow* rendDebInfo = nullptr;
-
 public:
 
 	ModuleEditor();
