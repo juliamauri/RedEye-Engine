@@ -55,9 +55,8 @@ uint32_t LoadDefIcon(const char* filename)
 void RE_ThumbnailManager::Init()
 {
 	// Rendering
-	render_view.fbos = { RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE),0 };
-	camera.SetupFrustum();
-	camera.SetBounds(THUMBNAILSIZE, THUMBNAILSIZE);
+	render_view.fbos[0] = RE_FBOManager::CreateFBO(THUMBNAILSIZE, THUMBNAILSIZE);
+	camera.SetupFrustum({ THUMBNAILSIZE, THUMBNAILSIZE });
 	RE_PrimitiveManager::CreateSphere(24, 24, mat_vao, mat_vbo, mat_ebo, mat_triangles);
 
 	// Default Icons
@@ -86,6 +85,7 @@ void RE_ThumbnailManager::Clear()
 	glDeleteTextures(1, &p_emission);
 	glDeleteTextures(1, &p_render);
 	for (auto& thumb : thumbnails) glDeleteTextures(1, &thumb.second);
+	thumbnails.clear();
 
 	glDeleteBuffersARB(1, &pboRender);
 }
@@ -104,100 +104,103 @@ void RE_ThumbnailManager::AddThumbnail(const char* md5, bool redo)
 	}
 }
 
-void RE_ThumbnailManager::DrawThumbnails()
+void RE_ThumbnailManager::DrawPendingThumbnails()
 {
 	RE_PROFILE(RE_ProfiledFunc::DrawThumbnails, RE_ProfiledClass::ThumbnailManager)
 
 	while (!pending.empty())
 	{
-		PendingThumbnail rend = pending.top();
+		DrawThumbnail(pending.top());
 		pending.pop();
-
-		RE_ECS_Pool* poolGOThumbnail = nullptr;
-		eastl::string path(THUMBNAILPATH);
-		path += rend.resMD5;
-
-		bool exist = RE_FS->Exists(path.c_str());
-		if (rend.redo && exist)
-		{
-			RE_FileBuffer fileToDelete(path.c_str());
-			fileToDelete.Delete();
-			exist = false;
-		}
-
-		RE_GLCache::ChangeVAO(0);
-
-		switch (rend.type)
-		{
-		case RenderType::GO:
-		{
-			RE_INPUT->PauseEvents();
-			if (!exist)
-			{
-				ResourceContainer* res = RE_RES->At(rend.resMD5);
-				RE_RES->Use(rend.resMD5);
-				switch (res->GetType())
-				{
-				case ResourceContainer::Type::MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
-				case ResourceContainer::Type::PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
-				case ResourceContainer::Type::SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break;
-				default: break;
-				}
-				if (poolGOThumbnail != nullptr)
-				{
-					poolGOThumbnail->UseResources();
-					Internal::ThumbnailGameObject(poolGOThumbnail->GetRootPtr());
-					poolGOThumbnail->UnUseResources();
-					RE_RES->UnUse(rend.resMD5);
-					SaveTextureFromFBO(path.c_str());
-					DEL(poolGOThumbnail)
-				}
-			}
-
-			Change(rend.resMD5, LoadLibraryThumbnail(rend.resMD5));
-			RE_INPUT->ResumeEvents();
-
-			break;
-		}
-		case RenderType::MAT:
-		{
-			if (!exist)
-			{
-				ResourceContainer* res = RE_RES->At(rend.resMD5);
-				RE_RES->Use(rend.resMD5);
-				dynamic_cast<RE_Material*>(res)->UseResources();
-				Internal::ThumbnailMaterial(dynamic_cast<RE_Material*>(res));
-				dynamic_cast<RE_Material*>(res)->UnUseResources();
-				RE_RES->UnUse(rend.resMD5);
-				SaveTextureFromFBO(path.c_str());
-			}
-
-			Change(rend.resMD5, LoadLibraryThumbnail(rend.resMD5));
-			break;
-		}
-		case RenderType::TEX:
-			Change(rend.resMD5, Internal::ThumbnailTexture(rend.resMD5));
-			break;
-		case RenderType::SKYBOX:
-			if (!exist)
-			{
-				ResourceContainer* res = RE_RES->At(rend.resMD5);
-
-				RE_RES->Use(rend.resMD5);
-				Internal::ThumbnailSkyBox(dynamic_cast<RE_SkyBox*>(res));
-				RE_RES->UnUse(rend.resMD5);
-				SaveTextureFromFBO(path.c_str());
-			}
-			Change(rend.resMD5, LoadLibraryThumbnail(rend.resMD5));
-			break;
-		}
 	}
 }
 
-void RE_ThumbnailManager::Change(const char* ref, unsigned int id)
+void RE_ThumbnailManager::DrawThumbnail(PendingThumbnail& thumbnail)
+{
+	RE_ECS_Pool* poolGOThumbnail = nullptr;
+	eastl::string path(THUMBNAILPATH);
+	path += thumbnail.resMD5;
+
+	bool exist = RE_FS->Exists(path.c_str());
+	if (thumbnail.redo && exist)
+	{
+		RE_FileBuffer fileToDelete(path.c_str());
+		fileToDelete.Delete();
+		exist = false;
+	}
+
+	RE_GLCache::ChangeVAO(0);
+
+	switch (thumbnail.type)
+	{
+	case RenderType::GO:
+	{
+		RE_INPUT->PauseEvents();
+		if (!exist)
+		{
+			ResourceContainer* res = RE_RES->At(thumbnail.resMD5);
+			RE_RES->Use(thumbnail.resMD5);
+			switch (res->GetType())
+			{
+			case ResourceContainer::Type::MODEL: poolGOThumbnail = dynamic_cast<RE_Model*>(res)->GetPool(); break;
+			case ResourceContainer::Type::PREFAB: poolGOThumbnail = dynamic_cast<RE_Prefab*>(res)->GetPool(); break;
+			case ResourceContainer::Type::SCENE: poolGOThumbnail = dynamic_cast<RE_Scene*>(res)->GetPool(); break;
+			default: break;
+			}
+			if (poolGOThumbnail != nullptr)
+			{
+				poolGOThumbnail->UseResources();
+				Internal::ThumbnailGameObject(poolGOThumbnail->GetRootPtr());
+				poolGOThumbnail->UnUseResources();
+				RE_RES->UnUse(thumbnail.resMD5);
+				SaveTextureFromFBO(path.c_str());
+				DEL(poolGOThumbnail)
+			}
+		}
+
+		Change(thumbnail.resMD5, LoadLibraryThumbnail(thumbnail.resMD5));
+		RE_INPUT->ResumeEvents();
+
+		break;
+	}
+	case RenderType::MAT:
+	{
+		if (!exist)
+		{
+			ResourceContainer* res = RE_RES->At(thumbnail.resMD5);
+			RE_RES->Use(thumbnail.resMD5);
+			dynamic_cast<RE_Material*>(res)->UseResources();
+			Internal::ThumbnailMaterial(dynamic_cast<RE_Material*>(res));
+			dynamic_cast<RE_Material*>(res)->UnUseResources();
+			RE_RES->UnUse(thumbnail.resMD5);
+			SaveTextureFromFBO(path.c_str());
+		}
+
+		Change(thumbnail.resMD5, LoadLibraryThumbnail(thumbnail.resMD5));
+		break;
+	}
+	case RenderType::TEX:
+		Change(thumbnail.resMD5, Internal::ThumbnailTexture(thumbnail.resMD5));
+		break;
+	case RenderType::SKYBOX:
+		if (!exist)
+		{
+			ResourceContainer* res = RE_RES->At(thumbnail.resMD5);
+
+			RE_RES->Use(thumbnail.resMD5);
+			Internal::ThumbnailSkyBox(dynamic_cast<RE_SkyBox*>(res));
+			RE_RES->UnUse(thumbnail.resMD5);
+			SaveTextureFromFBO(path.c_str());
+		}
+		Change(thumbnail.resMD5, LoadLibraryThumbnail(thumbnail.resMD5));
+		break;
+	}
+}
+
+void RE_ThumbnailManager::Change(const char* ref, uint32_t id)
 {
 	auto iter = thumbnails.find(ref);
-	if (iter == thumbnails.end()) thumbnails.insert(eastl::pair<const char*, unsigned int>(ref, id));
+	if (iter == thumbnails.end()) thumbnails.insert({ ref, id });
 	else iter->second = id;
 }
 
@@ -294,7 +297,7 @@ uint32_t RE_ThumbnailManager::LoadLibraryThumbnail(const char* ref)
 
 void RE_ThumbnailManager::Internal::SetupFBO()
 {
-	auto fbo = render_view.fbos.first;
+	auto fbo = render_view.fbos[0];
 	RE_FBOManager::ChangeFBOBind(fbo, RE_FBOManager::GetWidth(fbo), RE_FBOManager::GetHeight(fbo));
 	RE_FBOManager::ClearFBOBuffers(fbo, render_view.clear_color.ptr());
 }
@@ -348,7 +351,7 @@ void RE_ThumbnailManager::Internal::ThumbnailGameObject(RE_GameObject* go)
 	SetupFBO();
 
 	// Reset Camera
-	camera.SetupFrustum();
+	camera.SetupFrustum({ THUMBNAILSIZE, THUMBNAILSIZE });
 	camera.SetFrame(
 		{ 0.0f,1.0f,5.0f },
 		math::Quat::FromEulerXYZ(math::DegToRad(45.0f), 0.0f, 0.0f) * math::vec::unitZ,
@@ -367,7 +370,7 @@ void RE_ThumbnailManager::Internal::ThumbnailMaterial(RE_Material* mat)
 {
 	SetupFBO();
 
-	camera.SetupFrustum();
+	camera.SetupFrustum({ THUMBNAILSIZE, THUMBNAILSIZE });
 
 	UploadUniforms();
 
@@ -384,9 +387,7 @@ void RE_ThumbnailManager::Internal::ThumbnailSkyBox(RE_SkyBox* skybox)
 {
 	SetupFBO();
 
-	camera.SetupFrustum();
-	camera.SetFOVDegrees(125.f);
-	camera.SetFrame(math::vec::zero, math::vec::unitZ, math::vec::unitY);
+	camera.SetupFrustum({ THUMBNAILSIZE, THUMBNAILSIZE }, AspectRatio::Fit_Window, 125.f);
 
 	UploadUniforms();
 

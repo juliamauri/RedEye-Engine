@@ -9,7 +9,7 @@ namespace RE_CameraManager
 	void SetAsMainCamera(COMP_UID id);
 	bool HasMainCamera();
 
-	void OnWindowChangeSize(float width, float height);
+	void OnWindowChangeSize(math::float2 window_bounds);
 	void RecallSceneCameras();
 
 	const math::Frustum* GetCullingFrustum();

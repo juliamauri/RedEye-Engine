@@ -119,7 +119,7 @@ void RE_CompParticleEmitter::UnUseResources()
 	RE_ParticleManager::Deallocate(simulation);
 }
 
-eastl::vector<const char*> RE_CompParticleEmitter::GetAllResources()
+eastl::vector<const char*> RE_CompParticleEmitter::GetAllResources() const
 {
 	eastl::vector<const char*> ret;
 	if (emitter_md5) ret.push_back(emitter_md5);

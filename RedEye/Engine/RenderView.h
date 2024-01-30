@@ -12,23 +12,23 @@ class RenderView
 public:
 
 	RenderSettings settings;
-	eastl::pair<uint, uint> fbos;
+	uint fbos[2];
 	math::float4 clip_distance = math::float4::zero;
 	math::float4 clear_color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 public:
 
 	RenderView(
-		eastl::pair<uint, uint> fbos = { 0, 0 },
+		uint default_fbo = 0U,
+		uint deferred_fbo = 0U,
 		RenderSettings settings = RenderSettings(),
-		math::float4 clipDistance = math::float4::zero) :
-		fbos(fbos), settings(settings), clip_distance(clipDistance) {}
+		math::float4 clipDistance = math::float4::zero);
 
 	~RenderView() = default;
 
 	void DrawEditor(const char* id);
 
-	uint GetFBO() const { return settings.light != RenderSettings::LightMode::DEFERRED ? fbos.first : fbos.second; }
+	uint GetFBO() const;
 
 	// Serialization
 	void Load(RE_Json* node);

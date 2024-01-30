@@ -166,7 +166,7 @@ void RE_CompMesh::UnUseResources()
 	}
 }
 
-eastl::vector<const char*> RE_CompMesh::GetAllResources()
+eastl::vector<const char*> RE_CompMesh::GetAllResources() const
 {
 	eastl::vector<const char*> ret;
 	if (meshMD5) ret.push_back(meshMD5);

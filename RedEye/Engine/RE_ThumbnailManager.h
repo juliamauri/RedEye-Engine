@@ -67,10 +67,11 @@ namespace RE_ThumbnailManager
 	void Clear();
 
 	void AddThumbnail(const char* md5, bool redo = false);
-	void DrawThumbnails();
+	void DrawPendingThumbnails();
+	void DrawThumbnail(PendingThumbnail& to_render);
 
 	// Edits
-	void Change(const char* ref, unsigned int id);
+	void Change(const char* ref, uint32_t id);
 	void Delete(const char* ref);
 
 	uintptr_t At(const char* ref);

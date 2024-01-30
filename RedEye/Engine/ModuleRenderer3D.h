@@ -30,7 +30,7 @@ private:
 	static uint particlelightsCount;
 
 	// Utility
-	bool sharing_lightpass;
+	bool sharing_lightpass = true;
 	float point_size = 2.f;
 	eastl::vector<math::float2> circle_precompute;
 

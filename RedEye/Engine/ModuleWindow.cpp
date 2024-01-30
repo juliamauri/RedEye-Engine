@@ -167,6 +167,9 @@ int ModuleWindow::GetHeight() const
 	return (flags & SDL_WINDOW_FULLSCREEN) ? GetMaxHeight() : height;
 }
 
+float ModuleWindow::GetWidthF() const { return static_cast<float>(GetWidth()); }
+float ModuleWindow::GetHeightF() const { return static_cast<float>(GetHeight()); }
+
 int ModuleWindow::GetMaxWidth() const
 {
 	SDL_DisplayMode mode;

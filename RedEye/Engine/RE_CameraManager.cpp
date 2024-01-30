@@ -17,10 +17,10 @@ RE_CompCamera* RE_CameraManager::MainCamera()
 void RE_CameraManager::SetAsMainCamera(COMP_UID id) { main_camera = id; }
 bool RE_CameraManager::HasMainCamera() { return main_camera != 0; }
 
-void RE_CameraManager::OnWindowChangeSize(float width, float height)
+void RE_CameraManager::OnWindowChangeSize(math::float2 window_bounds)
 {
 	for (auto cam : RE_SCENE->GetScenePool()->GetAllCompPtr(RE_Component::Type::CAMERA))
-		dynamic_cast<RE_CompCamera*>(cam)->Camera.SetBounds(width, height);
+		dynamic_cast<RE_CompCamera*>(cam)->Camera.SetBounds(window_bounds);
 }
 
 void RE_CameraManager::RecallSceneCameras()

@@ -20,7 +20,6 @@ public:
 
 protected:
 
-	bool recalc = false;
 	bool isWindowSelected = false;
 	bool need_render = true;
 
@@ -30,7 +29,7 @@ protected:
 
 public:
 
-	RenderedWindow(const char* name, bool start_active);
+	RenderedWindow(const char* name, bool start_active, uint default_fbo = 0U, uint deferred_fbo = 0U);
 	virtual ~RenderedWindow() = default;
 
 	virtual void RenderFBO() const;
@@ -42,15 +41,7 @@ public:
 	virtual const RE_Camera& GetCamera() const;
 	virtual const math::Frustum* GetFrustum() const;
 
-	void Recalc() { recalc = true; }
 	bool isSelected() const { return isWindowSelected; }
-
-	void UpdateViewPort()
-	{
-		GetCamera().GetTargetViewPort(viewport);
-		viewport.x = (width - viewport.z) * 0.5f;
-		viewport.y = (height - viewport.w) * 0.5f + 20;
-	}
 
 	uint GetWidth() const
 	{
@@ -100,7 +91,7 @@ protected:
 
 public:
 
-	OwnCameraRenderedWindow(const char* name, bool start_active);
+	OwnCameraRenderedWindow(const char* name, bool start_active, uint default_fbo = 0U, uint deferred_fbo = 0U);
 	~OwnCameraRenderedWindow();
 
 	virtual void DrawDebug() const override;

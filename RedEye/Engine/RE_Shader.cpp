@@ -117,6 +117,7 @@ void RE_Shader::SetPaths(const char* vertex, const char* fragment, const char* g
 void RE_Shader::UploadMainUniforms(const RE_Camera& camera, float window_h, float window_w, bool clipDistance, math::float4 clipPlane) const
 {
 	RE_GLCache::ChangeShader(ID);
+
 	if(view != -1) RE_ShaderImporter::setFloat4x4(uniforms[view].location, camera.GetView().ptr());
 	if(projection != -1) RE_ShaderImporter::setFloat4x4(uniforms[projection].location, camera.GetProjection().ptr());
 
@@ -129,7 +130,7 @@ void RE_Shader::UploadMainUniforms(const RE_Camera& camera, float window_h, floa
 	if (far_plane != -1) RE_ShaderImporter::setFloat(uniforms[far_plane].location, camera.GetFarPlane());
 	if (using_clip_plane != -1) RE_ShaderImporter::setFloat(uniforms[using_clip_plane].location, (clipDistance) ? 1.0f : -1.0f);
 	if (clip_plane != -1) RE_ShaderImporter::setFloat(uniforms[clip_plane].location, clipPlane.x, clipPlane.y, clipPlane.z, clipPlane.w);
-	if (view_pos != -1) RE_ShaderImporter::setFloat(uniforms[view_pos].location, camera.GetFrustum().Pos());
+	if (view_pos != -1) RE_ShaderImporter::setFloat(uniforms[view_pos].location, camera.GetPos());
 	RE_GLCache::ChangeShader(0);
 }
 

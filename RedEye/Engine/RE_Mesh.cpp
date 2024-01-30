@@ -186,7 +186,7 @@ const char* RE_Mesh::CheckAndSave(bool* exists)
 	return existsMD5;
 }
 
-void RE_Mesh::DrawMesh(unsigned int shader)
+void RE_Mesh::DrawMesh(uint shader)
 {
 	// Draw mesh
 	RE_GLCache::ChangeVAO(VAO);
@@ -511,9 +511,24 @@ void RE_Mesh::clearFaceNormals()
 	lFaceNormals = false;
 }
 
-void RE_Mesh::SetVerticesAndIndex(float* v, unsigned int* i, size_t vertexCount, unsigned int triangleCount, float* tC, float* n, float* t, float* bT)
+void RE_Mesh::SetVerticesAndIndex(
+	float* v,
+	uint* i,
+	size_t vertexCount,
+	uint triangleCount,
+	float* tC,
+	float* n,
+	float* t,
+	float* bT)
 {
-	vertex = v; index = i; vertex_count = vertexCount; triangle_count = triangleCount; texturecoords = tC; normals = n; tangents = t; bitangents = bT;
+	vertex = v;
+	index = i;
+	vertex_count = vertexCount;
+	triangle_count = triangleCount;
+	texturecoords = tC;
+	normals = n;
+	tangents = t;
+	bitangents = bT;
 }
 
 bool RE_Mesh::CheckFaceCollision(const math::Ray& local_ray, float& distance) const

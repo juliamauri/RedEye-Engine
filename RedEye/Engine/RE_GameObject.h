@@ -113,9 +113,9 @@ public:
 		ACTIVE_RENDER_GEO = 0x80,	// 0000 0000 1000 0000
 	};
 
-	inline bool HasFlag(Flag flag) const;
-	inline void AddFlag(Flag flag);
-	inline void RemoveFlag(Flag flag);
+	inline bool HasFlag(Flag flag) const { return flags & static_cast<ushort>(flag); }
+	inline void AddFlag(Flag flag) { flags |= static_cast<ushort>(flag); }
+	inline void RemoveFlag(Flag flag) { flags -= static_cast<ushort>(flag); }
 
 	void SetActive(const bool value, bool broadcast = true);
 	void SetActiveWithChilds(bool val, bool broadcast = true);

@@ -7,6 +7,13 @@
 
 #include <ImGui/imgui.h>
 
+RenderView::RenderView(uint default_fbo, uint deferred_fbo, RenderSettings settings, math::float4 clipDistance) :
+	settings(settings), clip_distance(clipDistance)
+{
+	fbos[0] = default_fbo;
+	fbos[1] = deferred_fbo;
+}
+
 void RenderView::DrawEditor(const char* _id)
 {
 	eastl::string id = _id;
@@ -26,6 +33,11 @@ void RenderView::DrawEditor(const char* _id)
 	ImGui::PushID((id + "Clip Distance").c_str());
 	ImGui::DragFloat4("Clip Distance", clip_distance.ptr(), 0.1f);
 	ImGui::PopID();
+}
+
+uint RenderView::GetFBO() const
+{
+	return fbos[settings.light == RenderSettings::LightMode::DEFERRED];
 }
 
 void RenderView::Load(RE_Json* node)

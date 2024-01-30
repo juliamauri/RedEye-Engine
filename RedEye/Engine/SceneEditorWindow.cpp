@@ -20,7 +20,8 @@
 #include <ImGui/imgui_internal.h>
 #include <GL/glew.h>
 
-SceneEditorWindow::SceneEditorWindow() : OwnCameraRenderedWindow("Editor Scene", true)
+SceneEditorWindow::SceneEditorWindow() :
+	OwnCameraRenderedWindow("Editor Scene", true)
 {
 	// Render View Setup
 	render_view.settings.flags =
@@ -38,9 +39,6 @@ SceneEditorWindow::SceneEditorWindow() : OwnCameraRenderedWindow("Editor Scene",
 		RenderSettings::Flag::BLENDED;
 
 	render_view.settings.light = RenderSettings::LightMode::DISABLED;
-	render_view.fbos = {
-		RE_FBOManager::CreateFBO(1024, 768, 1, true, true),
-		RE_FBOManager::CreateDeferredFBO(1024, 768) };
 
 	flags = 
 		Flag::SELECT_GO_ON_MOUSE_CLICK |
@@ -136,16 +134,9 @@ const math::Frustum* SceneEditorWindow::GetFrustum() const
 
 #pragma endregion
 
-void SceneEditorWindow::MousePick(float x, float y)
+void SceneEditorWindow::MousePick(math::float2 coordinates)
 {
-	float width, height;
-	cam.GetTargetWidthHeight(width, height);
-
-	GO_UID hit = RE_SCENE->RayCastGeometry(
-		math::Ray(cam.GetFrustum().UnProjectLineSegment(
-			(x - (width / 2.0f)) / (width / 2.0f),
-			((height - y) - (height / 2.0f)) / (height / 2.0f))));
-
+	GO_UID hit = RE_SCENE->RayCastGeometry(math::Ray(cam.UnProjectLineSegment(coordinates)));
 	if (hit) RE_EDITOR->SetSelected(hit);
 }
 
@@ -217,16 +208,22 @@ void SceneEditorWindow::Draw(bool secondary)
 
 	ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 	ImVec2 vMax = ImGui::GetWindowContentRegionMax();
-	vMin.x += ImGui::GetWindowPos().x;
-	vMin.y += ImGui::GetWindowPos().y;
-	vMax.x += ImGui::GetWindowPos().x;
-	vMax.y += ImGui::GetWindowPos().y;
+	auto window_pos = ImGui::GetWindowPos();
+	vMin.x += window_pos.x;
+	vMin.y += window_pos.y;
+	vMax.x += window_pos.x;
+	vMax.y += window_pos.y;
 
-	if (!ImGuizmo::IsOver() && !ImGuizmo::IsUsing() && isWindowSelected && !ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftAlt)->Down && ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
+	if (!ImGuizmo::IsOver()
+		&& !ImGuizmo::IsUsing()
+		&& isWindowSelected
+		&& !ImGui::GetKeyData(ImGuiKey::ImGuiKey_LeftAlt)->Down
+		&& ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left))
 	{
 		ImVec2 mousePosOnThis = ImGui::GetMousePos();
-		if ((mousePosOnThis.x -= vMin.x - ImGui::GetStyle().WindowPadding.x) > 0.f && (mousePosOnThis.y -= vMin.y - ImGui::GetStyle().WindowPadding.y) > 0.f)
-			MousePick(mousePosOnThis.x, mousePosOnThis.y);
+		if ((mousePosOnThis.x -= vMin.x - ImGui::GetStyle().WindowPadding.x) > 0.f
+			&& (mousePosOnThis.y -= vMin.y - ImGui::GetStyle().WindowPadding.y) > 0.f)
+			MousePick({ mousePosOnThis.x, mousePosOnThis.y });
 	}
 
 	auto selected = RE_EDITOR->GetSelected();

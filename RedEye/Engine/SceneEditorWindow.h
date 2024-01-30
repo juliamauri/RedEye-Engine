@@ -62,7 +62,7 @@ public:
 	const math::Frustum* GetFrustum() const final;
 
 	// GO Selection
-	void MousePick(float x, float y);
+	void MousePick(math::float2 coordinates);
 
 	// Flags
 	inline void AddFlag(Flag flag) { flags |= static_cast<ushort>(flag); }

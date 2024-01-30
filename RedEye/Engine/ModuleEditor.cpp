@@ -215,7 +215,6 @@ void ModuleEditor::RecieveEvent(const Event& e)
 {
 	switch (e.type)
 	{
-	case RE_EventType::UPDATE_SCENE_WINDOWS: e.data1.AsGO() ? sceneGameWindow->Recalc() : sceneEditorWindow->Recalc(); break;
 	case RE_EventType::SCOPE_PROCEDURE_END: if (e.data1.AsBool()) popupWindow->PopUpError(); break;
 	default:
 		if (e.type > RE_EventType::CONSOLE_LOG_MIN && e.type < RE_EventType::CONSOLE_LOG_MAX)
@@ -231,7 +230,7 @@ void ModuleEditor::RecieveEvent(const Event& e)
 
 			console->AppendLog(category, text, e.data2.AsCharP());
 		}
-		else RE_LOG("Unused Event at Module Editor");
+		else RE_LOG_WARNING("Unused Event at Module Editor");
 		break;
 	}
 }

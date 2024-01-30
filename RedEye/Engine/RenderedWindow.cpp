@@ -7,6 +7,7 @@
 
 #include "Application.h"
 #include "ModuleRenderer3D.h"
+#include "ModuleWindow.h"
 #include "ModuleScene.h"
 
 #include "RE_FBOManager.h"
@@ -19,8 +20,12 @@
 #include <EASTL/bit.h>
 #include <ImGui/imgui_internal.h>
 
-RenderedWindow::RenderedWindow(const char* name, bool start_active) : EditorWindow(name, start_active)
+RenderedWindow::RenderedWindow(const char* name, bool start_active, uint default_fbo, uint deferred_fbo) :
+	EditorWindow(name, start_active)
 {
+	render_view.fbos[0] = default_fbo > 0U ? default_fbo : RE_FBOManager::CreateFBO(1024, 768, 1, true, true);
+	render_view.fbos[1] = deferred_fbo > 0U ? deferred_fbo : RE_FBOManager::CreateDeferredFBO(1024, 768);
+
 	render_view.settings.flags =
 		RenderSettings::Flag::FACE_CULLING |
 		RenderSettings::Flag::TEXTURE_2D |
@@ -33,9 +38,6 @@ RenderedWindow::RenderedWindow(const char* name, bool start_active) : EditorWind
 		RenderSettings::Flag::BLENDED;
 
 	render_view.settings.light = RenderSettings::LightMode::DEFERRED;
-	render_view.fbos = {
-		RE_FBOManager::CreateFBO(1024, 768, 1, true, true),
-		RE_FBOManager::CreateDeferredFBO(1024, 768) };
 }
 
 void RenderedWindow::RenderFBO() const
@@ -84,17 +86,20 @@ void RenderedWindow::Save(RE_Json* node) const
 void RenderedWindow::UpdateWindow()
 {
 	// Update Size
-	int lastWidht = width;
-	int lastHeight = height;
+	static int lastWidth = 0;
+	static int lastHeight = 0;
 	ImVec2 size = ImGui::GetWindowSize();
+	static const float tabHeight = 28.f;
 	width = static_cast<int>(size.x);
-	height = static_cast<int>(size.y) - 28;
-	if (recalc || lastWidht != width || lastHeight != height)
+	height = static_cast<int>(size.y - tabHeight);
+	if (lastWidth != width || lastHeight != height)
 	{
-		GetCamera().SetBounds(size.x, size.y - 28.f);
 		RE_FBOManager::ChangeFBOSize(render_view.GetFBO(), width, height);
-		UpdateViewPort();
-		recalc = false;
+		GetCamera().SetBounds({ size.x, size.y - tabHeight });
+
+		viewport = GetCamera().GetTargetViewPort(RE_WINDOW->GetWidth(), RE_WINDOW->GetHeight());
+		viewport.x = (width - viewport.z) * 0.5f;
+		viewport.y = (height - viewport.w + 40.f) * 0.5f;
 	}
 
 	// Check if window is focused
@@ -151,8 +156,8 @@ eastl::vector<const RE_CompParticleEmitter*> RenderedWindow::GatherParticleLight
 	return ret;
 }
 
-OwnCameraRenderedWindow::OwnCameraRenderedWindow(const char* name, bool start_active) :
-	RenderedWindow(name, start_active)
+OwnCameraRenderedWindow::OwnCameraRenderedWindow(const char* name, bool start_active, uint default_fbo, uint deferred_fbo) :
+	RenderedWindow(name, start_active, default_fbo, deferred_fbo)
 {
 	cam.SetupFrustum();
 

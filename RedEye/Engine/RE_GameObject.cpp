@@ -763,21 +763,6 @@ GO_UID RE_GameObject::GetRootUID() const { return pool_gos->GetRootUID(); }
 RE_GameObject* RE_GameObject::GetRootPtr() const { return pool_gos->GetRootPtr(); }
 const RE_GameObject* RE_GameObject::GetRootCPtr() const { return pool_gos->GetRootCPtr(); }
 
-bool RE_GameObject::HasFlag(Flag flag) const
-{
-	return flags & static_cast<ushort>(flag);
-}
-
-void RE_GameObject::AddFlag(Flag flag)
-{
-	flags &= static_cast<ushort>(flag);
-}
-
-void RE_GameObject::RemoveFlag(Flag flag)
-{
-	flags -= static_cast<ushort>(flag);
-}
-
 void RE_GameObject::SetActive(const bool value, const bool broadcast)
 {
 	if (HasFlag(Flag::ACTIVE) != value)

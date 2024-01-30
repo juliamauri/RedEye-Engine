@@ -36,7 +36,7 @@ public:
 	// Resources
 	void UseResources() final;
 	void UnUseResources() final;
-	eastl::vector<const char*> GetAllResources() final;
+	eastl::vector<const char*> GetAllResources() const final;
 
 	// Serialization
 	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const final;

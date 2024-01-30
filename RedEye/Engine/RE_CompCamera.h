@@ -12,10 +12,11 @@ public:
 	~RE_CompCamera() final = default;
 
 	void SetProperties(
+		math::float2 bounds = { 300.f, 300.f },
+		AspectRatio ar = AspectRatio::Fit_Window,
+		float v_fov = 0.523599f,
 		float near_plane = 1.0f,
 		float far_plane = 5000.0f,
-		float v_fov = 0.523599f,
-		RE_Camera::AspectRatio ar = RE_Camera::AspectRatio::Fit_Window,
 		bool usingSkybox = true,
 		const char* skyboxMD5 = nullptr,
 		bool draw_frustum = true);
@@ -23,16 +24,16 @@ public:
 	void CopySetUp(GameObjectsPool* pool, RE_Component* copy, const GO_UID parent) final;
 	
 	void Update() final;
-	void OnTransformModified() final;
+	void OnTransformModified() final { need_recalculation = true; }
 	void DrawProperties() final;
 
 	// Getters
 	class RE_CompTransform* GetTransform() const;
 
 	// Resources - Skybox
-	void UseResources() final;
-	void UnUseResources() final;
-	eastl::vector<const char*> GetAllResources() final;
+	void UseResources() final { Camera.UseSkybox(); }
+	void UnUseResources() final { Camera.UnUseSkybox(); }
+	eastl::vector<const char*> GetAllResources() const final;
 
 	// Serialization
 	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;
@@ -46,7 +47,7 @@ public:
 
 	RE_Camera Camera;
 
-	bool draw_frustum = true;
+	bool draw_frustum = false;
 	bool override_cull = false;
 
 private:

@@ -106,7 +106,7 @@ public:
 	// Resources
 	virtual void UseResources() {}
 	virtual void UnUseResources() {}
-	virtual eastl::vector<const char*> GetAllResources() { return eastl::vector<const char*>(); }
+	virtual eastl::vector<const char*> GetAllResources() const { return eastl::vector<const char*>(); }
 
 	// Serialization
 	virtual void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const override;

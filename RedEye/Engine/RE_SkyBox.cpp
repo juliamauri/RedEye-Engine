@@ -1,5 +1,3 @@
-#include "Resource.h"
-
 #include "RE_SkyBox.h"
 
 #include "RE_Memory.h"

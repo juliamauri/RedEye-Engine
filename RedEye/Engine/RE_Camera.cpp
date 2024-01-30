@@ -1,26 +1,56 @@
 #include "RE_Camera.h"
-#include "RE_Math.h"
 
+
+
+#include "RE_ConsoleLog.h"
+
+
+
+
+
+
+#include "RE_Math.h"
 #include "RE_Memory.h"
 #include "Application.h"
 #include "RE_ResourceManager.h"
+
 #include "RE_InternalResources.h"
 #include "RE_SkyBox.h"
 #include "RE_Json.h"
 
-#include "ModuleWindow.h"
-
 #include <ImGui/imgui.h>
 #include <SDL2/SDL_opengl.h>
 
-void RE_Camera::SetupFrustum(float n_plane, float f_plane, AspectRatio ar, float v_fov)
+RE_Camera& RE_Camera::operator=(const RE_Camera& other)
 {
+	frustum = other.frustum;
+	ar = other.ar;
+	bounds = other.bounds;
+	usingSkybox = other.usingSkybox;
+	skyboxMD5 = other.skyboxMD5;
+	return *this;
+}
+
+void RE_Camera::SetupFrustum(math::float2 _bounds, AspectRatio _ar, float v_fov, float n_plane, float f_plane)
+{
+	ar = _ar;
+	SetBounds(_bounds);
+
 	frustum.SetKind(math::FrustumProjectiveSpace::FrustumSpaceGL, math::FrustumHandedness::FrustumRightHanded);
 	frustum.SetViewPlaneDistances(n_plane, f_plane);
-	SetAspectRatio(ar, false);
+	frustum.SetFrame(math::vec::zero, math::vec::unitZ, math::vec::unitY);
 
-	if (v_fov > 0.f) frustum.SetVerticalFovAndAspectRatio(v_fov, width / height);
-	else frustum.SetOrthographic(width, height);
+	if (v_fov > 0.f) frustum.SetVerticalFovAndAspectRatio(v_fov, bounds.x / bounds.y);
+	else frustum.SetOrthographic(bounds.x, bounds.y);
+}
+
+void RE_Camera::SetBounds(math::float2 _bounds)
+{
+	ARContainBounds(ar, _bounds);
+	bounds = _bounds;
+
+	if (frustum.Type() == math::FrustumType::OrthographicFrustum)
+		frustum.SetOrthographic(bounds.x, bounds.y);
 }
 
 void RE_Camera::SetFrame(const math::vec& pos, const math::vec& front, const math::vec& up)
@@ -28,26 +58,54 @@ void RE_Camera::SetFrame(const math::vec& pos, const math::vec& front, const mat
 	frustum.SetFrame(pos, front, up);
 }
 
+math::LineSegment RE_Camera::UnProjectLineSegment(math::float2 coordinates)
+{
+	return frustum.UnProjectLineSegment(
+			(coordinates.x - (bounds.x / 2.0f)) / (bounds.x / 2.0f),
+			((bounds.y - coordinates.y) - (bounds.y / 2.0f)) / (bounds.y / 2.0f));
+}
+
+void RE_Camera::ARContainBounds(AspectRatio ar, math::float2& bounds)
+{
+	switch (ar)
+	{
+	case AspectRatio::Square_1x1:
+
+		if (bounds.x >= bounds.y) bounds.x = bounds.y;
+		else bounds.y = bounds.x;
+		break;
+
+	case AspectRatio::TraditionalTV_4x3:
+
+		if (bounds.x / 4.0f >= bounds.y / 3.0f) bounds.x = (bounds.y * 4.0f) / 3.0f;
+		else bounds.y = (bounds.x * 3.0f) / 4.0f;
+		break;
+
+	case AspectRatio::Movietone_16x9:
+
+		if (bounds.x / 16.0f >= bounds.y / 9.0f) bounds.x = (bounds.y * 16.0f) / 9.0f;
+		else bounds.y = (bounds.x * 9.0f) / 16.0f;
+		break;
+
+	default: break;
+	}
+}
+
 #pragma region Draws
 
-bool RE_Camera::DrawProperties()
+void RE_Camera::DrawProperties()
 {
-	bool ret = false; // return true if camera AR is modified
-
 	float near_plane = frustum.NearPlaneDistance();
 	float far_plane = frustum.FarPlaneDistance();
-	if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane, "%.1f")) SetPlanesDistance(near_plane, far_plane);
-	if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane, 65000.0f, "%.1f")) SetPlanesDistance(near_plane, far_plane);
+	if (ImGui::DragFloat("Near Plane", &near_plane, 1.0f, 1.0f, far_plane - 0.1f, "%.1f")) SetPlanesDistance(near_plane, far_plane);
+	if (ImGui::DragFloat("Far Plane", &far_plane, 10.0f, near_plane + 0.1f, 65000.0f, "%.1f")) SetPlanesDistance(near_plane, far_plane);
 
-	auto aspect_ratio = static_cast<int>(target_ar);
+	auto aspect_ratio = static_cast<int>(ar);
 	if (ImGui::Combo("Aspect Ratio", &aspect_ratio, "Fit Window\0Square 1x1\0TraditionalTV 4x3\0Movietone 16x9\0Personalized\0"))
-	{
-		target_ar = static_cast<AspectRatio>(aspect_ratio);
-		ret = true;
-	}
+		SetAspectRatio(static_cast<AspectRatio>(aspect_ratio));
 
 	// TODO Rub: Custom Aspect Ratio
-	//if (target_ar == Custom)
+	//if (ar == Custom)
 	//{
 	//	int w = width;
 	//	int h = height;
@@ -57,7 +115,7 @@ bool RE_Camera::DrawProperties()
 	//}
 
 	int current_type = IsPerspective();
-	if (ImGui::Combo("Type", &current_type, "Perspective\0Orthographic\0"))
+	if (ImGui::Combo("Type", &current_type, "Orthographic\0Perspective\0"))
 		SwapCameraType();
 
 
@@ -65,6 +123,15 @@ bool RE_Camera::DrawProperties()
 	if (IsPerspective() && ImGui::DragFloat("FOV", &v_fov_degrees, 1.0f, 0.0f, 180.0f, "%.1f"))
 		SetFOVDegrees(v_fov_degrees);
 
+	// TODO: Remove debug functionality of showing all camera matrixes
+	ImGui::Separator();
+	ImGui::Text("v_fov: %f\nn_plane: %f\nf_plane: %f\nView: %s\nProjection: %s\nPosition: %s",
+		frustum.VerticalFov() * RE_Math::rad_to_deg,
+		frustum.NearPlaneDistance(),
+		frustum.FarPlaneDistance(),
+		frustum.ViewMatrix().ToString().c_str(),
+		frustum.ProjectionMatrix().ToString().c_str(),
+		frustum.Pos().ToString().c_str());
 
 	ImGui::Separator();
 	ImGui::Checkbox("Use skybox", &usingSkybox);
@@ -117,8 +184,6 @@ bool RE_Camera::DrawProperties()
 			ImGui::EndDragDropTarget();
 		}
 	}
-
-	return ret;
 }
 
 void RE_Camera::DrawFrustum() const
@@ -162,8 +227,6 @@ void RE_Camera::Pan(float rad_dx, float rad_dy, float rad_dz)
 		math::Quat::RotateY(rad_dy) *
 		math::Quat::RotateZ(rad_dz) *
 		frustum.Front());
-
-	//rot_eul -= math::vec(rad_dy * -1, rad_dx, rad_dz);
 }
 
 void RE_Camera::Orbit(float rad_dx, float rad_dy, math::vec center)
@@ -206,7 +269,7 @@ void RE_Camera::Focus(math::AABB box, float min_dist)
 void RE_Camera::SetFOVRads(float vertical_fov_rads)
 {
 	frustum.SetPerspective(
-		2.0f * math::Atan(math::Tan(vertical_fov_rads / 2.0f) * (width / height)),
+		2.0f * math::Atan(math::Tan(vertical_fov_rads / 2.0f) * (bounds.x / bounds.y)),
 		vertical_fov_rads);
 }
 
@@ -215,123 +278,40 @@ void RE_Camera::SetFOVDegrees(float vertical_fov_degrees)
 	SetFOVRads(RE_Math::Cap(vertical_fov_degrees, 1.f, 180.f) * RE_Math::deg_to_rad);
 }
 
-void RE_Camera::SetAspectRatio(AspectRatio aspect_ratio, bool apply_changes)
+void RE_Camera::SetAspectRatio(AspectRatio aspect_ratio)
 {
-	target_ar = aspect_ratio;
-	SetBounds(static_cast<float>(RE_WINDOW->GetWidth()), static_cast<float>(RE_WINDOW->GetHeight()), apply_changes);
-}
-
-void RE_Camera::SetBounds(float w, float h, bool apply_changes)
-{
-	switch (target_ar)
-	{
-	case AspectRatio::Fit_Window:
-
-		width = w;
-		height = h;
-		break;
-
-	case AspectRatio::Square_1x1:
-
-		if (w >= h) width = height = h;
-		else width = height = w;
-		break;
-
-	case AspectRatio::TraditionalTV_4x3:
-
-		if (w / 4.0f >= h / 3.0f)
-		{
-			width = (h * 4.0f) / 3.0f;
-			height = h;
-		}
-		else
-		{
-			width = w;
-			height = (w * 3.0f) / 4.0f;
-		}
-		break;
-
-	case AspectRatio::Movietone_16x9:
-
-		if (w / 16.0f >= h / 9.0f)
-		{
-			width = (h * 16.0f) / 9.0f;
-			height = h;
-		}
-		else
-		{
-			width = w;
-			height = (w * 9.0f) / 16.0f;
-		}
-		break;
-
-	default:
-
-		width = w;
-		height = h;
-		break;
-	}
-	if (!apply_changes) return;
-	if (IsPerspective()) SetFOVRads(frustum.VerticalFov());
-	else frustum.SetOrthographic(width, height);
+	ar = aspect_ratio;
+	SetBounds(bounds);
 }
 
 void RE_Camera::SetPerspective(float default_vfov_degrees)
 {
-	frustum.SetVerticalFovAndAspectRatio(default_vfov_degrees * RE_Math::deg_to_rad, width / height);
+	frustum.SetVerticalFovAndAspectRatio(default_vfov_degrees * RE_Math::deg_to_rad, bounds.x / bounds.y);
 }
 
-void RE_Camera::SetOrthographic()
+math::float4 RE_Camera::GetTargetViewPort(int window_width, int window_height) const
 {
-	frustum.SetOrthographic(width, height);
+	return GetTargetViewPort({ static_cast<float>(window_width), static_cast<float>(window_height) });
 }
 
-void RE_Camera::SwapCameraType()
+math::float4 RE_Camera::GetTargetViewPort(math::float2 window_bounds) const
 {
-	IsPerspective() ? SetOrthographic() : SetPerspective();
-}
+	math::float4 viewPort = math::float4(0.f, 0.f, bounds.x, bounds.y);
 
-void RE_Camera::GetTargetViewPort(math::float4& viewPort) const
-{
-	viewPort.z = width;
-	viewPort.w = height;
-
-	float wH = static_cast<float>(RE_WINDOW->GetHeight());
-	float wW = static_cast<float>(RE_WINDOW->GetWidth());
-
-	switch (target_ar)
+	switch (ar)
 	{
-	case AspectRatio::Fit_Window:
-	{
-		viewPort.x = 0.f;
-		viewPort.y = 0.f;
-		break;
-	}
-	case AspectRatio::Square_1x1:
-	{
-		viewPort.y = 0.f;
-		viewPort.x = (wW / 2.f) - (width / 2.f);
-		break;
-	}
-	case AspectRatio::TraditionalTV_4x3:
-	{
-		viewPort.y = 0.f;
-		viewPort.x = (wW / 2.f) - (width / 2.f);
-		break;
-	}
+	case AspectRatio::Square_1x1: viewPort.x = (window_bounds.x / 2.f) - (viewPort.z / 2.f); break;
+	case AspectRatio::TraditionalTV_4x3: viewPort.x = (window_bounds.x / 2.f) - (viewPort.z / 2.f); break;
 	case AspectRatio::Movietone_16x9:
 	{
-		viewPort.x = 0.f;
-		if (height < wH) viewPort.y = (wH / 2.f) - (height / 2.f);
+		if (viewPort.w < window_bounds.y)
+			viewPort.y = (window_bounds.y / 2.f) - (viewPort.w / 2.f);
 		break;
 	}
-	default:
-	{
-		viewPort.x = 0.f;
-		viewPort.y = 0.f;
-		break;
+	default: break;
 	}
-	}
+
+	return viewPort;
 }
 
 #pragma endregion
@@ -347,10 +327,11 @@ void RE_Camera::UnUseSkybox() const { if (skyboxMD5) RE_RES->UnUse(skyboxMD5); }
 
 void RE_Camera::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources) const
 {
+	node->PushFloat2("bounds", bounds);
+	node->Push("aspect_ratio", static_cast<uint>(ar));
+	node->Push("v_fov_rads", GetVFOVRads());
 	node->Push("near_plane", frustum.NearPlaneDistance());
 	node->Push("far_plane", frustum.FarPlaneDistance());
-	node->Push("v_fov_rads", GetVFOVRads());
-	node->Push("aspect_ratio", static_cast<uint>(target_ar));
 
 	node->Push("usingSkybox", usingSkybox);
 	node->Push("skyboxResource", (skyboxMD5) ? resources->at(skyboxMD5) : -1);
@@ -361,10 +342,11 @@ void RE_Camera::JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resou
 void RE_Camera::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* resources)
 {
 	SetupFrustum(
+		node->PullFloat2("bounds", { 300.f, 300.f }),
+		static_cast<AspectRatio>(node->PullUInt("aspect_ratio", 0)),
+		node->PullFloat("v_fov_rads", 0.523599f),
 		node->PullFloat("near_plane", 1.0f),
-		node->PullFloat("far_plane", 5000.0f),
-		static_cast<RE_Camera::AspectRatio>(node->PullUInt("aspect_ratio", 0)),
-		node->PullFloat("v_fov_rads", 0.523599f));
+		node->PullFloat("far_plane", 5000.0f));
 
 	usingSkybox = node->PullBool("usingSkybox", true);
 	int sbRes = node->PullInt("skyboxResource", -1);
@@ -375,28 +357,31 @@ void RE_Camera::JsonDeserialize(RE_Json* node, eastl::map<int, const char*>* res
 
 size_t RE_Camera::GetBinarySize() const
 {
-	return sizeof(float) * 3 + sizeof(uint) + sizeof(bool) + sizeof(int);
+	return sizeof(math::float2) + sizeof(uint) + sizeof(float) * 3 + sizeof(bool) + sizeof(int);
 }
 
 void RE_Camera::BinarySerialize(char*& cursor, eastl::map<const char*, int>* resources) const
 {
-	float near_plane = frustum.NearPlaneDistance();
-	float far_plane = frustum.FarPlaneDistance();
-	float v_fov = GetVFOVRads();
-	auto aspect_ratio = static_cast<uint>(target_ar);
-
-	size_t size = sizeof(float);
-	memcpy(cursor, &near_plane, size);
-	cursor += size;
-
-	memcpy(cursor, &far_plane, size);
-	cursor += size;
-
-	memcpy(cursor, &v_fov, size);
+	size_t size = sizeof(math::float2);
+	memcpy(cursor, &bounds, size);
 	cursor += size;
 
 	size = sizeof(uint);
+	auto aspect_ratio = static_cast<uint>(ar);
 	memcpy(cursor, &aspect_ratio, size);
+	cursor += size;
+
+	size = sizeof(float);
+	float v_fov = GetVFOVRads();
+	memcpy(cursor, &v_fov, size);
+	cursor += size;
+
+	float near_plane = frustum.NearPlaneDistance();
+	memcpy(cursor, &near_plane, size);
+	cursor += size;
+
+	float far_plane = frustum.FarPlaneDistance();
+	memcpy(cursor, &far_plane, size);
 	cursor += size;
 
 	size = sizeof(bool);
@@ -411,17 +396,8 @@ void RE_Camera::BinarySerialize(char*& cursor, eastl::map<const char*, int>* res
 
 void RE_Camera::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* resources)
 {
-	float near_plane;
-	size_t size = sizeof(float);
-	memcpy(&near_plane, cursor, size);
-	cursor += size;
-
-	float far_plane;
-	memcpy(&far_plane, cursor, size);
-	cursor += size;
-
-	float v_fov;
-	memcpy(&v_fov, cursor, size);
+	size_t size = sizeof(math::float2);
+	memcpy(&bounds, cursor, size);
 	cursor += size;
 
 	uint aspect_ratio;
@@ -429,7 +405,25 @@ void RE_Camera::BinaryDeserialize(char*& cursor, eastl::map<int, const char*>* r
 	memcpy(&aspect_ratio, cursor, size);
 	cursor += size;
 
-	SetupFrustum(near_plane, far_plane, static_cast<AspectRatio>(aspect_ratio), v_fov);
+	float v_fov;
+	memcpy(&v_fov, cursor, size);
+	cursor += size;
+
+	float near_plane;
+	size = sizeof(float);
+	memcpy(&near_plane, cursor, size);
+	cursor += size;
+
+	float far_plane;
+	memcpy(&far_plane, cursor, size);
+	cursor += size;
+
+	SetupFrustum(
+		bounds,
+		static_cast<AspectRatio>(aspect_ratio),
+		v_fov,
+		near_plane,
+		far_plane);
 
 	size = sizeof(bool);
 	memcpy(&usingSkybox, cursor, size);

@@ -13,6 +13,7 @@ protected:
 	bool show_v_normals = false;
 
 public:
+
 	RE_CompMesh() : RE_Component(RE_Component::Type::MESH) {}
 	~RE_CompMesh() final = default;
 	
@@ -38,7 +39,7 @@ public:
 	// Resources
 	void UseResources() final;
 	void UnUseResources() final;
-	eastl::vector<const char*> GetAllResources() final;
+	eastl::vector<const char*> GetAllResources() const final;
 
 	// Serialization
 	void JsonSerialize(RE_Json* node, eastl::map<const char*, int>* resources = nullptr) const final;

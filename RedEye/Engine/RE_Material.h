@@ -2,6 +2,10 @@
 #define __RE_MATERIAL_H__
 
 #include "Resource.h"
+#include "RE_Cvar.h"
+
+#include <MGL/Math/float3.h>
+#include <EASTL/vector.h>
 
 class RE_Json;
 

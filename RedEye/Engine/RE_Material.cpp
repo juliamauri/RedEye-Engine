@@ -1,27 +1,17 @@
-#include "Resource.h"
-#include "RE_Cvar.h"
-#include <MGL/Math/float3.h>
-#include <EASTL/string.h>
-#include <EASTL/vector.h>
-#include <EASTL/bit.h>
-
 #include "RE_Material.h"
 
 #include "RE_Memory.h"
 #include "Application.h"
 #include "RE_FileSystem.h"
-#include "RE_FileBuffer.h"
-#include "RE_Config.h"
-#include "RE_Json.h"
-#include "ModuleRenderer3D.h"
-#include "ModuleEditor.h"
 #include "RE_ResourceManager.h"
+#include "ModuleRenderer3D.h"
 #include "RE_InternalResources.h"
 #include "RE_ShaderImporter.h"
 #include "RE_GLCache.h"
 #include "RE_ThumbnailManager.h"
 #include "RE_Shader.h"
 #include "RE_Texture.h"
+#include "RE_Json.h"
 
 #include <ImGui/imgui.h>
 #include <GL/glew.h>
@@ -165,7 +155,7 @@ void RE_Material::UploadToShader(const float* model, bool usingChekers, bool def
 	if (shaderRes->NeedUploadDepth())
 	{
 		glActiveTexture(GL_TEXTURE0 + textureCounter);
-		RE_GLCache::ChangeTextureBind(RE_RENDER->GetDepthTexture());
+		RE_GLCache::ChangeTextureBind(ModuleRenderer3D::GetDepthTexture());
 		shaderRes->UploadDepth(textureCounter++);
 	}
 
@@ -1470,7 +1460,7 @@ void RE_Material::BinarySerialize()
 	memcpy(cursor, &shadingType, size);
 	cursor += size;
 
-	size = sizeof(uint) * 18;
+	size = sizeof(ushort) * 18;
 	memcpy(cursor, usingOnMat, size);
 	cursor += size;
 

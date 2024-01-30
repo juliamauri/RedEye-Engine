@@ -6,27 +6,22 @@
 
 #include <MGL/MathGeoLib.h>
 
+enum class AspectRatio : uint
+{
+	Fit_Window = 0,
+	Square_1x1,
+	TraditionalTV_4x3,
+	Movietone_16x9,
+	Personalized
+};
+
 class RE_Camera : public RE_Serializable
 {
-public:
-
-	enum class AspectRatio : uint
-	{
-		Fit_Window = 0,
-		Square_1x1,
-		TraditionalTV_4x3,
-		Movietone_16x9,
-		Personalized
-	};
-
 private:
 
+	AspectRatio ar = AspectRatio::Fit_Window;
+	math::float2 bounds;
 	math::Frustum frustum;
-
-	// Aspect Ratio
-	AspectRatio target_ar = AspectRatio::Fit_Window;
-	float width = 0.f;
-	float height = 0.f;
 
 	// Skybox
 	bool usingSkybox = true;
@@ -37,62 +32,56 @@ public:
 	RE_Camera() = default;
 	~RE_Camera() = default;
 
-	void SetupFrustum(
-		float n_plane = 1.0f,
-		float f_plane = 5000.0f,
-		RE_Camera::AspectRatio ar = RE_Camera::AspectRatio::Fit_Window,
-		float v_fov = 0.523599f);
+	RE_Camera& operator=(const RE_Camera& other);
 
-	void SetFrame(
-		const math::vec& pos,
-		const math::vec& front,
-		const math::vec& up);
+	void SetupFrustum(
+		math::float2 bounds = { 300.f, 300.f },
+		AspectRatio ar = AspectRatio::Fit_Window,
+		float v_fov = 0.523599f,
+		float n_plane = 1.0f,
+		float f_plane = 5000.0f);
+
+	void SetBounds(math::float2 bounds);
+	void SetFrame(const math::vec& pos, const math::vec& front, const math::vec& up);
+
+	math::LineSegment UnProjectLineSegment(math::float2 coordinates);
+	static void ARContainBounds(AspectRatio ar, math::float2& bounds);
 
 	// Draws
-	bool DrawProperties();
+	void DrawProperties();
 	void DrawFrustum() const;
 
 	// Camera Controls
 	void Move(Direction dir, float speed);
 	void Pan(float rad_dx, float rad_dy, float rad_dz = 0.f);
 	void Orbit(float rad_dx, float rad_dy, math::vec center);
-	void Focus(math::vec center, float radius = 1.f, float min_dist = 3.0f);
-	void Focus(math::AABB box, float min_dist = 3.0f);
+	void Focus(math::vec center, float radius = 1.f, float min_dist = 3.f);
+	void Focus(math::AABB box, float min_dist = 3.f);
 
 	// Setters
 	void SetPlanesDistance(float near_plane, float far_plane) { frustum.SetViewPlaneDistances(near_plane, far_plane); }
 	void SetFOVRads(float vertical_fov_rads);
 	void SetFOVDegrees(float vertical_fov_degrees);
-	void SetAspectRatio(AspectRatio aspect_ratio, bool apply_changes = true);
-	void SetBounds(float width, float height, bool apply_changes = true);
+	void SetAspectRatio(AspectRatio aspect_ratio);
 	void SetPerspective(float default_vfov_degrees = 50.f);
-	void SetOrthographic();
-	void SwapCameraType();
+	void SetOrthographic() { frustum.SetOrthographic(bounds.x, bounds.y); }
+	void SwapCameraType() { IsPerspective() ? SetOrthographic() : SetPerspective(); }
 
 	// Getters - Frustum
 	const math::Frustum& GetFrustum() const { return frustum; }
+	const math::vec GetPos() const { return frustum.Pos(); }
 	bool IsPerspective() const { return frustum.Type() == PerspectiveFrustum; }
 	bool IsOrthographic() const { return frustum.Type() == OrthographicFrustum; }
 	float GetNearPlane() const { return frustum.NearPlaneDistance(); }
 	float GetFarPlane() const { return frustum.FarPlaneDistance(); }
 	float GetVFOVRads() const { return IsPerspective() ? frustum.VerticalFov() : -1.f; }
 	float GetHFOVRads() const { return IsPerspective() ? frustum.HorizontalFov() : -1.f; }
-	AspectRatio GetAspectRatio() const { return target_ar; }
+	AspectRatio GetAspectRatio() const { return ar; }
 
 	// Getters - Viewport
-	void GetTargetViewPort(math::float4& viewPort) const;
-	float GetTargetWidth() const { return width; }
-	float GetTargetHeight() const { return height; }
-	void GetTargetWidthHeight(int& _width, int& _height) const
-	{
-		_width = static_cast<int>(width);
-		_height = static_cast<int>(height);
-	}
-	void GetTargetWidthHeight(float& _width, float& _height) const
-	{
-		_width = width;
-		_height = height;
-	}
+	math::float2 GetBounds() const { return bounds; }
+	math::float4 GetTargetViewPort(int window_width, int window_height) const;
+	math::float4 GetTargetViewPort(math::float2 window_bounds) const;
 
 	// Getters - Matrixes
 	math::float4x4 GetView() const { return math::float4x4(frustum.ViewMatrix()).Transposed(); }

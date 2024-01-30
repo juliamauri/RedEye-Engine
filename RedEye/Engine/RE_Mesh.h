@@ -5,16 +5,16 @@ class RE_Mesh : public ResourceContainer
 {
 public:
 	RE_Mesh();
-	~RE_Mesh() {}
+	~RE_Mesh() = default;
 
-	void SetLibraryPath(const char* path)override;
+	void SetLibraryPath(const char* path) override;
 
 	void LoadInMemory() override;
 	void UnloadMemory() override;
 
 	const char* CheckAndSave(bool* exists);
 
-	void DrawMesh(unsigned int shader);
+	void DrawMesh(uint shader);
 
 	math::AABB GetAABB() const;
 
@@ -25,9 +25,9 @@ public:
 
 	void SetVerticesAndIndex(
 		float* vertex,
-		unsigned int* index = nullptr,
+		uint* index = nullptr,
 		size_t vertexCount = 0,
-		unsigned int triangleCount = 0,
+		uint triangleCount = 0,
 		float* textureCoords = nullptr,
 		float* normals = nullptr,
 		float* tangents = nullptr,
@@ -35,12 +35,13 @@ public:
 
 	bool CheckFaceCollision(const math::Ray& local_ray, float& distance) const;
 
-	unsigned int GetVAO() const { return VAO; }
+	uint GetVAO() const { return VAO; }
 	size_t GetTriangleCount() const { return triangle_count; }
 
 public:
 
-	bool lVertexNormals = false, lFaceNormals = false;
+	bool lVertexNormals = false;
+	bool lFaceNormals = false;
 
 private:
 
@@ -56,22 +57,35 @@ private:
 
 private:
 
-	float *vertex = nullptr, *normals = nullptr,
-		*tangents = nullptr, *bitangents = nullptr,
-		*texturecoords = nullptr;
-	unsigned int* index = nullptr;
+	uint* index = nullptr;
+
+	float* vertex = nullptr;
+	float* normals = nullptr;
+	float* tangents = nullptr;
+	float* bitangents = nullptr;
+	float* texturecoords = nullptr;
 
 	size_t triangle_count = 0;
 	size_t vertex_count = 0;
 
 	math::AABB bounding_box;
 
-	unsigned int VAO = 0u, VBO = 0u, EBO = 0u;
+	uint VAO = 0u;
+	uint VBO = 0u;
+	uint EBO = 0u;
 
-	float *vertexNormals = nullptr,
-		*faceNormals = nullptr,
-		*faceCenters = nullptr;
-	unsigned int VAO_Vertex = 0u, VAO_FaceNormals = 0u, VAO_VertexNormals = 0u, VAO_FaceCenters = 0u;
-	unsigned int VBO_Vertex = 0u, VBO_FaceNormals = 0u, VBO_VertexNormals = 0u, VBO_FaceCenters = 0u;
+	float* vertexNormals = nullptr;
+	float* faceNormals = nullptr;
+	float* faceCenters = nullptr;
+
+	uint VAO_Vertex = 0u;
+	uint VAO_FaceNormals = 0u;
+	uint VAO_VertexNormals = 0u;
+	uint VAO_FaceCenters = 0u;
+
+	uint VBO_Vertex = 0u;
+	uint VBO_FaceNormals = 0u;
+	uint VBO_VertexNormals = 0u;
+	uint VBO_FaceCenters = 0u;
 };
 #endif // !__RE_MESH_H__

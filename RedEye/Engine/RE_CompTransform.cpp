@@ -47,7 +47,8 @@ void RE_CompTransform::CopySetUp(GameObjectsPool* pool, RE_Component* copy, cons
 
 void RE_CompTransform::Update()
 {
-	if (needed_update_transform) CalcGlobalTransform();
+	if (needed_update_transform)
+		CalcGlobalTransform();
 }
 
 bool RE_CompTransform::CheckUpdate()
@@ -66,86 +67,85 @@ math::float4x4 RE_CompTransform::UpdateGlobalMatrixFromParent(math::float4x4 par
 
 void RE_CompTransform::DrawProperties()
 {
-	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+	if (!ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) return;
+
+	static bool watchingChange = false;
+	bool frameWatched = false;
+	static math::vec before = math::vec::zero;
+	static math::vec last = math::vec::zero;
+
+	static bool pFrom = false;
+	static bool rFrom = false;
+	static bool sFrom = false;
+
+	// Position -----------------------------------------------------
+	float p[3] = { pos.x, pos.y, pos.z };
+	if (ImGui::DragFloat3("Position", p, 0.1f, -10000.f, 10000.f, "%.2f"))
 	{
-		static bool watchingChange = false;
-		bool frameWatched = false;
-		static math::vec before = math::vec::zero;
-		static math::vec last = math::vec::zero;
-
-		static bool pFrom = false;
-		static bool rFrom = false;
-		static bool sFrom = false;
-
-		// Position -----------------------------------------------------
-		float p[3] = { pos.x, pos.y, pos.z };
-		if (ImGui::DragFloat3("Position", p, 0.1f, -10000.f, 10000.f, "%.2f"))
+		if (!watchingChange)
 		{
-			if (!watchingChange)
-			{
-				watchingChange = true;
-				before = pos;
-				pFrom = true;
-			}
-
-			SetPosition({ p[0], p[1], p[2] });
-
-			if (watchingChange)
-			{
-				frameWatched = true;
-				last = pos;
-			}
+			watchingChange = true;
+			before = pos;
+			pFrom = true;
 		}
 
-		// Rotation -----------------------------------------------------
-		float r[3] = { math::RadToDeg(rot_eul.x), math::RadToDeg(rot_eul.y), math::RadToDeg(rot_eul.z) };
-		if (ImGui::DragFloat3("Rotation", r, 1.f, -360.f, 360.f, "%.2f"))
+		SetPosition({ p[0], p[1], p[2] });
+
+		if (watchingChange)
 		{
-			if (!watchingChange)
-			{
-				watchingChange = true;
-				before = rot_eul;
-				rFrom = true;
-			}
+			frameWatched = true;
+			last = pos;
+		}
+	}
 
-			SetRotation({ math::DegToRad(r[0]), math::DegToRad(r[1]), math::DegToRad(r[2]) });
-
-			if (watchingChange)
-			{
-				frameWatched = true;
-				last = rot_eul;
-			}
+	// Rotation -----------------------------------------------------
+	float r[3] = { math::RadToDeg(rot_eul.x), math::RadToDeg(rot_eul.y), math::RadToDeg(rot_eul.z) };
+	if (ImGui::DragFloat3("Rotation", r, 1.f, -360.f, 360.f, "%.2f"))
+	{
+		if (!watchingChange)
+		{
+			watchingChange = true;
+			before = rot_eul;
+			rFrom = true;
 		}
 
-		// Scale -----------------------------------------------------
-		float s[3] = { scale.scale.x, scale.scale.y, scale.scale.z };
-		if (ImGui::DragFloat3("Scale", s, 0.1f, -10000.f, 10000.f, "%.2f"))
+		SetRotation({ math::DegToRad(r[0]), math::DegToRad(r[1]), math::DegToRad(r[2]) });
+
+		if (watchingChange)
 		{
-			if (!watchingChange)
-			{
-				watchingChange = true;
-				before = scale.scale;
-				sFrom = true;
-			}
+			frameWatched = true;
+			last = rot_eul;
+		}
+	}
 
-			SetScale({ s[0], s[1], s[2] });
-
-			if (watchingChange)
-			{
-				frameWatched = true;
-				last = scale.scale;
-			}
+	// Scale -----------------------------------------------------
+	float s[3] = { scale.scale.x, scale.scale.y, scale.scale.z };
+	if (ImGui::DragFloat3("Scale", s, 0.1f, -10000.f, 10000.f, "%.2f"))
+	{
+		if (!watchingChange)
+		{
+			watchingChange = true;
+			before = scale.scale;
+			sFrom = true;
 		}
 
-		if (watchingChange && !ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left) || !frameWatched)
-		{
-			if (pFrom) RE_CommandManager::PushCommand(new RE_CMDTransformPosition(go, before, last));
-			else if (rFrom) RE_CommandManager::PushCommand(new RE_CMDTransformRotation(go, before, last));
-			else if (sFrom) RE_CommandManager::PushCommand(new RE_CMDTransformScale(go, before, last));
+		SetScale({ s[0], s[1], s[2] });
 
-			watchingChange = pFrom = rFrom = sFrom = false;
-			before = last = math::vec::zero;
+		if (watchingChange)
+		{
+			frameWatched = true;
+			last = scale.scale;
 		}
+	}
+
+	if (watchingChange && !ImGui::IsMouseDown(ImGuiMouseButton_::ImGuiMouseButton_Left) || !frameWatched)
+	{
+		if (pFrom) RE_CommandManager::PushCommand(new RE_CMDTransformPosition(go, before, last));
+		else if (rFrom) RE_CommandManager::PushCommand(new RE_CMDTransformRotation(go, before, last));
+		else if (sFrom) RE_CommandManager::PushCommand(new RE_CMDTransformScale(go, before, last));
+
+		watchingChange = pFrom = rFrom = sFrom = false;
+		before = last = math::vec::zero;
 	}
 }
 

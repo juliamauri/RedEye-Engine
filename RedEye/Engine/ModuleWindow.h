@@ -38,6 +38,9 @@ public:
 
 	int GetWidth() const;
 	int GetHeight() const;
+	float GetWidthF() const;
+	float GetHeightF() const;
+
 	int GetMaxWidth() const;
 	int GetMaxHeight() const;
 	float GetAspectRatio() const { return static_cast<float>(width) / static_cast<float>(height); }

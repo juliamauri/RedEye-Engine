@@ -121,7 +121,7 @@ void ModuleRenderer3D::PostUpdate()
 	RE_PROFILE(RE_ProfiledFunc::PostUpdate, RE_ProfiledClass::ModuleRender)
 	
 	PullActiveShaders();
-	RE_ThumbnailManager::DrawThumbnails();
+	RE_ThumbnailManager::DrawPendingThumbnails();
 
 	// Render Window FBO's
 	RE_EDITOR->RenderWindowFBOs();
@@ -697,8 +697,7 @@ bool ModuleRenderer3D::InitializeGL()
 
 void ModuleRenderer3D::PrecomputeCircle(int steps)
 {
-	if (steps == circle_precompute.capacity())
-		return;
+	if (steps == circle_precompute.capacity()) return;
 
 	circle_precompute.clear();
 	circle_precompute.set_capacity(steps);
@@ -769,16 +768,16 @@ void ModuleRenderer3D::PullActiveShaders() const
 
 void ModuleRenderer3D::PrepareToRender(const RenderView& render_view, const RE_Camera& camera) const
 {
-	// Setup Frame Buffer
-	current_settings = render_view.settings;
-	current_fbo = render_view.GetFBO();
-	//current_camera = camera;
+	current_settings.light = render_view.settings.light;
+	SetupFlag(RenderSettings::Flag::GL_LIGHT, current_settings.light == RenderSettings::LightMode::GL);
 
+	// Setup Frame Buffer
+	current_fbo = render_view.GetFBO();
 	RE_FBOManager::ChangeFBOBind(current_fbo, RE_FBOManager::GetWidth(current_fbo), RE_FBOManager::GetHeight(current_fbo));
 	RE_FBOManager::ClearFBOBuffers(current_fbo, render_view.clear_color.ptr());
 
 	// Setup Render Flags
-	RemoveFlag(RenderSettings::Flag::TEXTURE_2D);
+	RemoveFlag(RenderSettings::Flag::TEXTURE_2D, true);
 	SetupFlag(RenderSettings::Flag::WIREFRAME, render_view.settings.HasFlag(RenderSettings::Flag::WIREFRAME));
 	SetupFlag(RenderSettings::Flag::FACE_CULLING, render_view.settings.HasFlag(RenderSettings::Flag::FACE_CULLING));
 	SetupFlag(RenderSettings::Flag::COLOR_MATERIAL, render_view.settings.HasFlag(RenderSettings::Flag::COLOR_MATERIAL));
@@ -797,7 +796,7 @@ void ModuleRenderer3D::PrepareToRender(const RenderView& render_view, const RE_C
 			render_view.clip_distance);
 
 	// Setup Lights
-	/* switch (render_view.light) {
+	/* switch (current_settings.light) {
 	case RenderView::LightMode::GL: break; // TODO RUB: Bind GL Lights
 	case RenderView::LightMode::DIRECT: break; // TODO RUB: Upload Light uniforms
 	default: break; }*/
@@ -817,21 +816,16 @@ void ModuleRenderer3D::CategorizeDrawables(
 		auto drawable = drawables.top();
 		drawables.pop();
 
-		bool blend = false;
-		RE_Component::Type dT = drawable->GetType();
-
-		switch (dT)
+		switch (drawable->GetType())
 		{
 		default: geo.push(drawable); break;
 		case RE_Component::Type::MESH:
-			if (drawable->As<const RE_CompMesh*>()->HasBlend()) blended_geo.push(drawable);
-			else geo.push(drawable);
+			(drawable->As<const RE_CompMesh*>()->HasBlend() ? blended_geo : geo).push(drawable);
 			break;
 		case RE_Component::Type::WATER: blended_geo.push(drawable); break;
 		case RE_Component::Type::PARTICLEEMITER:
 			auto emitter = drawable->As<const RE_CompParticleEmitter*>();
-			if (emitter->HasBlend()) blended_particle_systems.push(emitter);
-			else particle_systems.push(emitter);
+			(emitter->HasBlend() ? blended_particle_systems : particle_systems).push(emitter);
 			break;
 		}
 	}
@@ -966,6 +960,7 @@ void ModuleRenderer3D::DrawDebug(
 void ModuleRenderer3D::DrawSkyBox(const RE_SkyBox* skybox) const
 {
 	if (skybox == nullptr) return;
+	RE_LOG("Rendering Skybok %s, VAO: %i", skybox->GetName(), skybox->GetVAO());
 
 	RE_PROFILE(RE_ProfiledFunc::DrawSkybox, RE_ProfiledClass::ModuleRender)
 	RE_GLCache::ChangeTextureBind(0);

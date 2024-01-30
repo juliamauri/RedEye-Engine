@@ -34,7 +34,7 @@ void RE_ShaderImporter::Clear()
 	DEL_A(binaryFormats);
 }
 
-bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath, bool compileTest)
+bool RE_ShaderImporter::LoadFromAssets(uint* ID, const char* vertexPath, const char* fragmentPath, const char* geometryPath, bool compileTest)
 {
 	RE_LOG("%s %s\n%s\n%s shaders.",(!compileTest) ? "Loading" : "Compile Test", vertexPath, fragmentPath, (geometryPath) ? geometryPath : "No geometry shader");
 
@@ -45,7 +45,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 	int  success;
 	char infoLog[512];
 
-	unsigned int vertexShader = 0, fragmentShader = 0, geometryShader = 0;
+	uint vertexShader = 0, fragmentShader = 0, geometryShader = 0;
 
 	if (vertexPath)
 	{
@@ -183,7 +183,7 @@ bool RE_ShaderImporter::LoadFromAssets(unsigned int* ID, const char* vertexPath,
 	return ret;
 }
 
-bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffer, size_t vSize, const char* fragmentBuffer, size_t fSize, const char* geometryBuffer, size_t gSize)
+bool RE_ShaderImporter::LoadFromBuffer(uint* ID, const char* vertexBuffer, size_t vSize, const char* fragmentBuffer, size_t fSize, const char* geometryBuffer, size_t gSize)
 {
 	bool ret = true;
 	eastl::string last_error;
@@ -192,9 +192,9 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 	int  success;
 	char infoLog[512];
 
-	unsigned int vertexShader = 0;
-	unsigned int fragmentShader = 0;
-	unsigned int geometryShader = 0;
+	uint vertexShader = 0;
+	uint fragmentShader = 0;
+	uint geometryShader = 0;
 
 	if (vertexBuffer)
 	{
@@ -298,7 +298,7 @@ bool RE_ShaderImporter::LoadFromBuffer(unsigned int* ID, const char* vertexBuffe
 	return ret;
 }
 
-bool RE_ShaderImporter::LoadFromBinary(const char* buffer, size_t size, unsigned int* ID)
+bool RE_ShaderImporter::LoadFromBinary(const char* buffer, size_t size, uint* ID)
 {
 	int ret;
 
@@ -310,7 +310,7 @@ bool RE_ShaderImporter::LoadFromBinary(const char* buffer, size_t size, unsigned
 	return ret;
 }
 
-bool RE_ShaderImporter::GetBinaryProgram(unsigned int ID, char** buffer, int* size)
+bool RE_ShaderImporter::GetBinaryProgram(uint ID, char** buffer, int* size)
 {
 	bool ret = false;
 	if (ID > 0)
@@ -327,7 +327,7 @@ bool RE_ShaderImporter::GetBinaryProgram(unsigned int ID, char** buffer, int* si
 	return ret;
 }
 
-bool RE_ShaderImporter::Compile(const char* buffer, size_t size, unsigned int GLCompile)
+bool RE_ShaderImporter::Compile(const char* buffer, size_t size, uint GLCompile)
 {
 	bool ret = true;
 	eastl::string last_error;
@@ -362,22 +362,22 @@ const char * RE_ShaderImporter::GetShaderError()
 	return shader_last_error.c_str();
 }
 
-void RE_ShaderImporter::use(unsigned int ID)
+void RE_ShaderImporter::use(uint ID)
 {
 	glUseProgram(ID);
 }
 
-void RE_ShaderImporter::Delete(unsigned int ID)
+void RE_ShaderImporter::Delete(uint ID)
 {
 	glUseProgram(ID);
 }
 
-int RE_ShaderImporter::getLocation(unsigned int ID, const char* name)
+int RE_ShaderImporter::getLocation(uint ID, const char* name)
 {
 	return glGetUniformLocation(ID, name);
 }
 
-void RE_ShaderImporter::setBool(unsigned int ID, const char* name, bool value)
+void RE_ShaderImporter::setBool(uint ID, const char* name, bool value)
 {
 	glUniform1i(glGetUniformLocation(ID, name), (int)value);
 }
@@ -387,7 +387,7 @@ void RE_ShaderImporter::setBool(int loc, bool value)
 	glUniform1i(loc, (int)value);
 }
 
-void RE_ShaderImporter::setBool(unsigned int ID, const char* name, bool value, bool value2)
+void RE_ShaderImporter::setBool(uint ID, const char* name, bool value, bool value2)
 {
 	glUniform2i(glGetUniformLocation(ID, name), (int)value, (int)value2);
 }
@@ -397,7 +397,7 @@ void RE_ShaderImporter::setBool(int loc, bool value, bool value2)
 	glUniform2i(loc, (int)value, (int)value2);
 }
 
-void RE_ShaderImporter::setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3) 
+void RE_ShaderImporter::setBool(uint ID, const char* name, bool value, bool value2, bool value3) 
 {
 	glUniform3i(glGetUniformLocation(ID, name), (int)value, (int)value2, (int)value3);
 }
@@ -407,7 +407,7 @@ void RE_ShaderImporter::setBool(int loc, bool value, bool value2, bool value3)
 	glUniform3i(loc, (int)value, (int)value2, (int)value3);
 }
 
-void RE_ShaderImporter::setBool(unsigned int ID, const char* name, bool value, bool value2, bool value3, bool value4) 
+void RE_ShaderImporter::setBool(uint ID, const char* name, bool value, bool value2, bool value3, bool value4) 
 {
 	glUniform4i(glGetUniformLocation(ID, name), (int)value, (int)value2, (int)value3, (int)value4);
 }
@@ -417,7 +417,7 @@ void RE_ShaderImporter::setBool(int loc, bool value, bool value2, bool value3, b
 	glUniform4i(loc, (int)value, (int)value2, (int)value3, (int)value4);
 }
 
-void RE_ShaderImporter::setInt(unsigned int ID, const char* name, int value) 
+void RE_ShaderImporter::setInt(uint ID, const char* name, int value) 
 {
 	glUniform1i(glGetUniformLocation(ID, name), value);
 }
@@ -427,7 +427,7 @@ void RE_ShaderImporter::setInt(int loc, int value)
 	glUniform1i(loc, value);
 }
 
-void RE_ShaderImporter::setInt(unsigned int ID, const char * name, int value, int value2) 
+void RE_ShaderImporter::setInt(uint ID, const char * name, int value, int value2) 
 {
 	glUniform2i(glGetUniformLocation(ID, name), value, value2);
 }
@@ -437,7 +437,7 @@ void RE_ShaderImporter::setInt(int loc, int value, int value2)
 	glUniform2i(loc, value, value2);
 }
 
-void RE_ShaderImporter::setInt(unsigned int ID, const char * name, int value, int value2, int value3) 
+void RE_ShaderImporter::setInt(uint ID, const char * name, int value, int value2, int value3) 
 {
 	glUniform3i(glGetUniformLocation(ID, name), value, value2, value3);
 }
@@ -447,7 +447,7 @@ void RE_ShaderImporter::setInt(int loc, int value, int value2, int value3)
 	glUniform3i(loc, value, value2, value3);
 }
 
-void RE_ShaderImporter::setInt(unsigned int ID, const char * name, int value, int value2, int value3, int value4) 
+void RE_ShaderImporter::setInt(uint ID, const char * name, int value, int value2, int value3, int value4) 
 {
 	glUniform4i(glGetUniformLocation(ID, name), value, value2, value3, value4);
 }
@@ -457,7 +457,7 @@ void RE_ShaderImporter::setInt(int loc, int value, int value2, int value3, int v
 	glUniform4i(loc, value, value2, value3, value4);
 }
 
-void RE_ShaderImporter::setFloat(unsigned int ID, const char*name, float value) 
+void RE_ShaderImporter::setFloat(uint ID, const char*name, float value) 
 {
 	glUniform1f(glGetUniformLocation(ID, name), value);
 }
@@ -467,7 +467,7 @@ void RE_ShaderImporter::setFloat(int loc, float value)
 	glUniform1f(loc, value);
 }
 
-void RE_ShaderImporter::setFloat(unsigned int ID, const char * name, float value, float value2) 
+void RE_ShaderImporter::setFloat(uint ID, const char * name, float value, float value2) 
 {
 	glUniform2f(glGetUniformLocation(ID, name), value, value2);
 }
@@ -477,7 +477,7 @@ void RE_ShaderImporter::setFloat(int loc, float value, float value2)
 	glUniform2f(loc, value, value2);
 }
 
-void RE_ShaderImporter::setFloat(unsigned int ID, const char * name, float value, float value2, float value3) 
+void RE_ShaderImporter::setFloat(uint ID, const char * name, float value, float value2, float value3) 
 {
 	glUniform3f(glGetUniformLocation(ID, name), value, value2, value3);
 }
@@ -487,7 +487,7 @@ void RE_ShaderImporter::setFloat(int loc, float value, float value2, float value
 	glUniform3f(loc, value, value2, value3);
 }
 
-void RE_ShaderImporter::setFloat(unsigned int ID, const char * name, float value, float value2, float value3, float value4) 
+void RE_ShaderImporter::setFloat(uint ID, const char * name, float value, float value2, float value3, float value4) 
 {
 	glUniform4f(glGetUniformLocation(ID, name), value, value2, value3, value4);
 }
@@ -497,7 +497,7 @@ void RE_ShaderImporter::setFloat(int loc, float value, float value2, float value
 	glUniform4f(loc, value, value2, value3, value4);
 }
 
-void RE_ShaderImporter::setFloat(unsigned int ID, const char * name, math::vec value) 
+void RE_ShaderImporter::setFloat(uint ID, const char * name, math::vec value) 
 {
 	glUniform3f(glGetUniformLocation(ID, name), value.x, value.y, value.z);
 }
@@ -507,47 +507,47 @@ void RE_ShaderImporter::setFloat(int loc, math::vec value)
 	glUniform3f(loc, value.x, value.y, value.z);
 }
 
-void RE_ShaderImporter::setUnsignedInt(unsigned int ID, const char * name, unsigned int value)
+void RE_ShaderImporter::setUnsignedInt(uint ID, const char * name, uint value)
 {
 	glUniform1ui(glGetUniformLocation(ID, name), value);
 }
 
-void RE_ShaderImporter::setUnsignedInt(int loc, unsigned int value)
+void RE_ShaderImporter::setUnsignedInt(int loc, uint value)
 {
 	glUniform1ui(loc, value);
 }
 
-void RE_ShaderImporter::setUnsignedInt(unsigned int ID, const char * name, unsigned int value, unsigned int value2)
+void RE_ShaderImporter::setUnsignedInt(uint ID, const char * name, uint value, uint value2)
 {
 	glUniform2ui(glGetUniformLocation(ID, name), value, value2);
 }
 
-void RE_ShaderImporter::setUnsignedInt(int loc, unsigned int value, unsigned int value2)
+void RE_ShaderImporter::setUnsignedInt(int loc, uint value, uint value2)
 {
 	glUniform2ui(loc, value, value2);
 }
 
-void RE_ShaderImporter::setUnsignedInt(unsigned int ID, const char * name, unsigned int value, unsigned int value2, unsigned int value3)
+void RE_ShaderImporter::setUnsignedInt(uint ID, const char * name, uint value, uint value2, uint value3)
 {
 	glUniform3ui(glGetUniformLocation(ID, name), value, value2, value3);
 }
 
-void RE_ShaderImporter::setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3)
+void RE_ShaderImporter::setUnsignedInt(int loc, uint value, uint value2, uint value3)
 {
 	glUniform3ui(loc, value, value2, value3);
 }
 
-void RE_ShaderImporter::setUnsignedInt(unsigned int ID, const char * name, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4)
+void RE_ShaderImporter::setUnsignedInt(uint ID, const char * name, uint value, uint value2, uint value3, uint value4)
 {
 	glUniform4ui(glGetUniformLocation(ID, name), value, value2, value3, value4);
 }
 
-void RE_ShaderImporter::setUnsignedInt(int loc, unsigned int value, unsigned int value2, unsigned int value3, unsigned int value4)
+void RE_ShaderImporter::setUnsignedInt(int loc, uint value, uint value2, uint value3, uint value4)
 {
 	glUniform4ui(loc, value, value2, value3, value4);
 }
 
-void RE_ShaderImporter::setFloat3x3(unsigned int ID, const char * name, const float * trans)
+void RE_ShaderImporter::setFloat3x3(uint ID, const char * name, const float * trans)
 {
 	glUniformMatrix3fv(glGetUniformLocation(ID, name), 1, GL_FALSE, trans);
 }
@@ -557,7 +557,7 @@ void RE_ShaderImporter::setFloat3x3(int loc, const float* trans)
 	glUniformMatrix3fv(loc, 1, GL_FALSE, trans);
 }
 
-void RE_ShaderImporter::setFloat4x4(unsigned int ID, const char * name, const float* trans)
+void RE_ShaderImporter::setFloat4x4(uint ID, const char * name, const float* trans)
 {
 	glUniformMatrix4fv(glGetUniformLocation(ID, name), 1, GL_FALSE, trans);
 }

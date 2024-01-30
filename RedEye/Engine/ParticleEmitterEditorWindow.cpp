@@ -29,7 +29,8 @@
 #include <EASTL/bit.h>
 
 ParticleEmitterEditorWindow::ParticleEmitterEditorWindow() :
-	OwnCameraRenderedWindow("Particle Emitter Workspace", false)
+	OwnCameraRenderedWindow("Particle Emitter Workspace", false,
+		RE_FBOManager::CreateFBO(1024, 768, 1, true, false))
 {
 	render_view.settings.flags =
 		RenderSettings::Flag::FACE_CULLING |
@@ -42,9 +43,6 @@ ParticleEmitterEditorWindow::ParticleEmitterEditorWindow() :
 		RenderSettings::Flag::BLENDED;
 
 	render_view.settings.light = RenderSettings::LightMode::DISABLED;
-	render_view.fbos = {
-		RE_FBOManager::CreateFBO(1024, 768, 1, true, false),
-		RE_FBOManager::CreateDeferredFBO(1024, 768) };
 }
 
 void ParticleEmitterEditorWindow::RenderFBO() const
