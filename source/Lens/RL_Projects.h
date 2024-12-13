@@ -1,8 +1,8 @@
 #ifndef RL_PROJECTS_CLASS
 #define RL_PROJECTS_CLASS
 
-#include <EASTL/vector.h>
-#include <EASTL/string.h>
+#include <vector>
+#include <string>
 
 class RL_Projects
 {
@@ -16,8 +16,8 @@ private:
 	} _state = State::NONE;
 
 	struct Project {
-		eastl::string name;
-		eastl::string path;
+		std::string name;
+		std::string path;
 	};
 
 public:
@@ -39,7 +39,7 @@ private:
 #else
 	static constexpr const char* ENGINE_EXECUTABLE = "Engine.exe";
 #endif
-	eastl::vector<Project> _projects;
+	std::vector<Project> _projects;
 };
 
 #endif //RL_PROJECTS_CLASS

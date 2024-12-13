@@ -1,14 +1,16 @@
 #include "RL_Projects.h"
 
-#include "JR_Application.h"
+#include "RL_Application.h"
 #include "RL_FileSystem.h"
 
 #include <RapidJson/document.h>
 #include <RapidJson/stringbuffer.h>
 #include <RapidJson/writer.h>
-#include <ImGui/imgui.h>
-#include <ImGuiImpl/imgui_stdlib.h>
-#include <nfd/nfd.h>
+#include <imgui.h>
+#include <imgui_stdlib.h>
+#include <nfd.h>
+
+#include <string>
 
 bool RL_Projects::Init()
 {
@@ -51,7 +53,7 @@ void RL_Projects::DrawGUI()
 		}
 		ImGui::EndMainMenuBar();
 
-		static eastl::string project_selected;
+		static std::string project_selected;
 		if (_findpath)
 		{
 			project_selected.clear();
@@ -61,15 +63,15 @@ void RL_Projects::DrawGUI()
 			switch (_state)
 			{
 			case RL_Projects::State::NEW:
-				result = NFD_PickFolder(NULL, &outPath);
+				// result = NFD_PickFolder(NULL, &outPath);
 				break;
 			case RL_Projects::State::LOAD:
-				result = NFD_OpenDialog("reproject", RL_FS->GetExecutableDirectory(), &outPath);
+				// result = NFD_OpenDialog("reproject", RL_FS->GetExecutableDirectory(), &outPath);
 				break;
 			}
 
-			if (result == NFD_OKAY)
-				project_selected = outPath;
+			// if (result == NFD_OKAY)
+			// 	project_selected = outPath;
 		}
 
 		if (!project_selected.empty())
@@ -78,7 +80,7 @@ void RL_Projects::DrawGUI()
 			{
 			case RL_Projects::State::NEW:
 			{
-				static eastl::string _name = "New Project";
+				static std::string _name = "New Project";
 				ImGui::InputText("Name", &_name);
 
 				ImGui::TextWrapped("Destination project: %s", (project_selected + "\\" + _name + ".reproject").c_str());
@@ -87,7 +89,7 @@ void RL_Projects::DrawGUI()
 				{
 					rapidjson::Document _template;
 					{
-						eastl::string _tempate_str = RL_FS->Read(PROJECT_CONFIG_TEMPLATE);
+						std::string _tempate_str = RL_FS->Read(PROJECT_CONFIG_TEMPLATE);
 						_template.Parse(_tempate_str.c_str());
 					}
 					_template["Project"]["name"].SetString(_name.c_str(), _template.GetAllocator());
@@ -105,7 +107,7 @@ void RL_Projects::DrawGUI()
 					project_selected += '\\';
 					RL_FS->WriteOutside(project_selected.c_str(), _name.c_str(), s_buffer.GetString(), s_buffer.GetSize());
 
-					eastl::string _imgui = RL_FS->Read(IMGUI_CONFIG_TEMPLATE);
+					std::string _imgui = RL_FS->Read(IMGUI_CONFIG_TEMPLATE);
 					if (!_imgui.empty())
 						RL_FS->WriteOutside(project_selected.c_str(), IMGUI_CONFIG_TEMPLATE, _imgui.c_str(), _imgui.size());
 
@@ -123,7 +125,7 @@ void RL_Projects::DrawGUI()
 			case RL_Projects::State::LOAD:
 			{
 				rapidjson::Document _project;
-				eastl::string _config = RL_FS->ReadOutside(project_selected.c_str());
+				std::string _config = RL_FS->ReadOutside(project_selected.c_str());
 				if (!_config.empty())
 				{
 					_project.Parse(_config.c_str());
@@ -131,7 +133,7 @@ void RL_Projects::DrawGUI()
 					if (_project_settings != _project.MemberEnd())
 					{
 						Project _p;
-						_p.name = eastl::string(_project_settings->value["name"].GetString(), _project_settings->value["name"].GetStringLength());
+						_p.name = std::string(_project_settings->value["name"].GetString(), _project_settings->value["name"].GetStringLength());
 						_p.path = project_selected;
 						_projects.push_back(_p);
 
@@ -144,8 +146,8 @@ void RL_Projects::DrawGUI()
 			}
 		}
 
-		eastl::vector<Project>::iterator to_erase = _projects.end();
-		eastl::string _open_path;
+		std::vector<Project>::iterator to_erase = _projects.end();
+		std::string _open_path;
 		ImGui::Text("Projects");
 		if (ImGui::BeginTable("Projects_table", 4, flags | ImGuiTableFlags_SizingFixedFit, ImVec2(0.0f, 0.0f)))
 		{
@@ -160,7 +162,7 @@ void RL_Projects::DrawGUI()
 			{
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
-				ImGui::PushID(("#OpenProject_" + iter->name + eastl::to_string(count)).c_str());
+				ImGui::PushID(("#OpenProject_" + iter->name + std::to_string(count)).c_str());
 				if (ImGui::Button("Open")) _open_path = iter->path;
 				ImGui::PopID();
 
@@ -168,7 +170,7 @@ void RL_Projects::DrawGUI()
 				ImGui::Text(iter->name.c_str());
 
 				ImGui::TableSetColumnIndex(2);
-				ImGui::PushID(("#RemoveProject_" + iter->name + eastl::to_string(count)).c_str());
+				ImGui::PushID(("#RemoveProject_" + iter->name + std::to_string(count)).c_str());
 				if (ImGui::Button("Remove")) to_erase = iter;
 				ImGui::PopID();
 
@@ -185,7 +187,7 @@ void RL_Projects::DrawGUI()
 
 		if (!_open_path.empty())
 		{
-			eastl::string exec("start ");
+			std::string exec("start ");
 			exec += '\"';
 			exec += RL_FS->GetExecutableDirectory();
 			exec += '\"';
@@ -207,7 +209,7 @@ void RL_Projects::Load()
 {
 	rapidjson::Document projects;
 	{
-		eastl::string data = RL_FS->Read(PROJECTS_FILE);
+		std::string data = RL_FS->Read(PROJECTS_FILE);
 		projects.Parse(data.c_str());
 	}
 

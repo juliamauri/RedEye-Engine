@@ -1,18 +1,17 @@
-#include "JR_WindowsManager.h"
+#include "RL_WindowsManager.h"
 
-#include "JR_Application.h"
-#include "JR_WindowAndRenderer.h"
-#include "JR_Input.h"
+#include "RL_Application.h"
+#include "RL_WindowAndRenderer.h"
+#include "RL_Input.h"
 #include "RL_Projects.h"
 
-#include "JR_Window.h"
+#include "RL_Window.h"
 
 #include <SDL2/SDL.h>
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include <ImGui/imgui_internal.h>
-#include <ImGuiImpl/imgui_impl_sdl2.h>
-#include <ImGuiImpl/imgui_impl_opengl3_loader.h>
-#include <ImGuiImpl/imgui_impl_opengl3.h>
+#include <imgui_internal.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_impl_opengl3_loader.h>
+#include <imgui_impl_opengl3.h>
 
 bool JR_WindowsManager::Init()
 {

@@ -1,6 +1,6 @@
 #include "RL_FileSystem.h"
 
-#include <physfs/physfs.h>
+#include <physfs.h>
 
 bool RL_FileSystem::Init(char* argv[])
 {
@@ -49,7 +49,7 @@ void RL_FileSystem::NewDir(const char* dir)
 
 void RL_FileSystem::Write(const char* path, const char* file, const char* buff, unsigned int buff_size)
 {
-	eastl::string filepath(eastl::string(path) + eastl::string(file));
+	std::string filepath(std::string(path) + std::string(file));
 
 	NewDir(path);
 
@@ -95,9 +95,9 @@ void RL_FileSystem::WriteOutside(const char* path, const char* file, const char*
 	}
 }
 
-eastl::string RL_FileSystem::Read(const char* filepath)
+std::string RL_FileSystem::Read(const char* filepath)
 {
-	eastl::string ret("");
+	std::string ret("");
 	if (PHYSFS_exists(filepath) != 0)
 	{
 		PHYSFS_file* myfile2 = PHYSFS_openRead(filepath);
@@ -112,22 +112,22 @@ eastl::string RL_FileSystem::Read(const char* filepath)
 	return ret;
 }
 
-eastl::string RL_FileSystem::ReadOutside(const char* filepath)
+std::string RL_FileSystem::ReadOutside(const char* filepath)
 {
 	if (PHYSFS_unmount(".") == 0) {
 		PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
 		int i = 0;
 	}
-	eastl::string _path(filepath);
-	eastl::string _dir(_path);
-	eastl::string _file;
+	std::string _path(filepath);
+	std::string _dir(_path);
+	std::string _file;
 	_dir = _path.substr(0, _path.find_last_of('\\') + 1);
 	_file = _path.substr(_dir.size());
 	PHYSFS_mount(_dir.c_str(), "Read/", 0);
 
-	eastl::string _read_path("Read/");
+	std::string _read_path("Read/");
 	_read_path += _file;
-	eastl::string ret("");
+	std::string ret("");
 	if (PHYSFS_exists(_read_path.c_str()) != 0)
 	{
 		PHYSFS_file* myfile2 = PHYSFS_openRead(_read_path.c_str());
@@ -158,16 +158,16 @@ const char* RL_FileSystem::GetPrefDirectory() const
 	return _pref_directory.c_str();
 }
 
-eastl::vector<eastl::string> RL_FileSystem::GetFilespathFrom(const char* _path)
+std::vector<std::string> RL_FileSystem::GetFilespathFrom(const char* _path)
 {
-	eastl::vector<eastl::string> ret;
+	std::vector<std::string> ret;
 	if (PHYSFS_exists(_path) != 0) {
 
-		eastl::string path(_path);
+		std::string path(_path);
 		char** rc = PHYSFS_enumerateFiles(path.c_str());
 		for (char** i = rc; *i != NULL; i++)
 		{
-			eastl::string inPath(path);
+			std::string inPath(path);
 			inPath += *i;
 			ret.push_back(inPath);
 		}
@@ -175,13 +175,13 @@ eastl::vector<eastl::string> RL_FileSystem::GetFilespathFrom(const char* _path)
 	return ret;
 }
 
-eastl::vector<eastl::string> RL_FileSystem::GetFilesnameFrom(const char* _path)
+std::vector<std::string> RL_FileSystem::GetFilesnameFrom(const char* _path)
 {
-	eastl::vector<eastl::string> ret;
+	std::vector<std::string> ret;
 
 	if (PHYSFS_exists(_path) != 0) {
 
-		eastl::string path(_path);
+		std::string path(_path);
 		char** rc = PHYSFS_enumerateFiles(path.c_str());
 		for (char** i = rc; *i != NULL; i++)
 			ret.push_back(*i);

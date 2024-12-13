@@ -1,4 +1,4 @@
-#include "JR_Window.h"
+#include "RL_Window.h"
 
 JR_Window::JR_Window(const char* n) : name(n) { }
 

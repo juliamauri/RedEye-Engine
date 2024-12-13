@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    {
+      "name": "imgui",
+      "features": [
+        "docking-experimental",
+        "opengl3-binding",
+        "sdl2-binding"
+      ]
+    },
+    "nativefiledialog-extended",
+    "physfs",
+    "rapidjson",
+    "sdl2"
+  ]
+}

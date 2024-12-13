@@ -1,9 +1,9 @@
-#include "JR_Application.h"
+#include "RL_Application.h"
 
 #include "RL_FileSystem.h"
-#include "JR_Input.h"
-#include "JR_WindowAndRenderer.h"
-#include "JR_WindowsManager.h"
+#include "RL_Input.h"
+#include "RL_WindowAndRenderer.h"
+#include "RL_WindowsManager.h"
 
 #include "RL_Projects.h"
 

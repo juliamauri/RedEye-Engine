@@ -1,10 +1,10 @@
-#include "JR_Input.h"
+#include "RL_Input.h"
 
-#include "JR_Application.h"
-#include "JR_WindowAndRenderer.h"
+#include "RL_Application.h"
+#include "RL_WindowAndRenderer.h"
 
 #include <SDL2/SDL.h>
-#include <ImGuiImpl/imgui_impl_sdl2.h>
+#include <imgui_impl_sdl2.h>
 
 #define EVENT_NULL -1
 
