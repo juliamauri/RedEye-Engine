@@ -11,10 +11,14 @@
 #include <nfd.h>
 
 #include <string>
+#include <functional>
+
+import WindowsManager;
 
 bool RL_Projects::Init()
 {
 	if (RL_FS->Exist(PROJECTS_FILE)) Load();
+	RE::WindowsManager::AddMainWindow(std::bind(&RL_Projects::DrawGUI, this));
 	return true;
 }
 

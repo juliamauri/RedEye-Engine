@@ -5,6 +5,7 @@ module;
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3_loader.h>
 #include <imgui_impl_opengl3.h>
+#include <functional>
 
 export module WindowsManager;
 
@@ -98,6 +99,8 @@ namespace {
 		colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 		colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 	}
+
+	std::function<void()> DrawMainWindow;
 }
 
 export namespace RE {
@@ -135,6 +138,11 @@ export namespace RE {
 				}
 			}
 			return false;
+		}
+
+		void AddMainWindow(std::function<void()> DrawContent)
+		{
+			DrawMainWindow = DrawContent;
 		}
 
 		void Draw()
@@ -175,6 +183,8 @@ export namespace RE {
 				ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 				ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 			}
+
+			DrawMainWindow();
 
 			RE::WindowsManager::DrawWindows();
 
