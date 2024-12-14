@@ -14,17 +14,13 @@ target_sources(Lens PRIVATE
     RL_Projects.cpp
     "RL_WindowAndRenderer.cpp"
 )
-target_sources(Lens PUBLIC
-    FILE_SET all_my_modules TYPE CXX_MODULES FILES
-    "RL_Window.ixx"
-    "RL_WindowsManager.ixx"
-)
 
 # Compile definitions
 target_compile_definitions(Lens PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
 
 # Link libraries
 target_link_libraries(Lens PRIVATE
+    windowsM_lib
     $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
     $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
     imgui::imgui

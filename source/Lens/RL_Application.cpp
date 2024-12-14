@@ -18,7 +18,7 @@ bool JR_Application::Init(char* argv[])
 		&& (file_system = new RL_FileSystem())->Init(argv)
 		&& (JR_Input::instance = input = new JR_Input())->Init()
 		&& (visual_magnament = new JR_WindowAndRenderer())->Init()
-		&& RE::WindowsManager::Init()
+		&& RE::WindowsManager::Init(visual_magnament->GetWindow(), visual_magnament->GetContext())
 		&& (projects_manager = new RL_Projects())->Init())
 		return true;
 

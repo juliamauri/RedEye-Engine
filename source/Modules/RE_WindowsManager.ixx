@@ -1,11 +1,5 @@
 module;
 
-#include "RL_Application.h"
-
-#include "RL_WindowAndRenderer.h"
-#include "RL_Input.h"
-#include "RL_Projects.h"
-
 #include <SDL2/SDL.h>
 #include <imgui_internal.h>
 #include <imgui_impl_sdl2.h>
@@ -108,7 +102,7 @@ namespace {
 
 export namespace RE {
 	namespace WindowsManager {
-		bool Init()
+		bool Init(SDL_Window* _window, void* _sdl_gl_context)
 		{
 			// Setup Dear ImGui context
 			IMGUI_CHECKVERSION();
@@ -134,15 +128,9 @@ export namespace RE {
 			}
 
 			// Setup Platform/Renderer backends
-			if (ImGui_ImplSDL2_InitForOpenGL(JR_VISUAL->GetWindow(), JR_VISUAL->GetContext()))
+			if (ImGui_ImplSDL2_InitForOpenGL(_window, _sdl_gl_context))
 			{
 				if (ImGui_ImplOpenGL3_Init("#version 130")) {
-
-					//Windows push back
-					RE::WindowsManager::AddWindow("Test", [] {
-						ImGui::Text("Hwllo std::function");
-						});
-
 					return true;
 				}
 			}
@@ -187,8 +175,6 @@ export namespace RE {
 				ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 				ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 			}
-
-			RL_PROJECTS->DrawGUI();
 
 			RE::WindowsManager::DrawWindows();
 
