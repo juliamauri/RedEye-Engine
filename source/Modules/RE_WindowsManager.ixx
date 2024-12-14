@@ -1,6 +1,5 @@
 module;
 
-#include <SDL2/SDL.h>
 #include <imgui_internal.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3_loader.h>
