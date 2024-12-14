@@ -13,11 +13,12 @@
 #include <string>
 #include <functional>
 
+import FileSystem;
 import WindowsManager;
 
 bool RL_Projects::Init()
 {
-	if (RL_FS->Exist(PROJECTS_FILE)) Load();
+	if (RE::FileSystem::Exist(PROJECTS_FILE)) Load();
 	RE::WindowsManager::AddMainWindow(std::bind(&RL_Projects::DrawGUI, this));
 	return true;
 }
@@ -93,7 +94,7 @@ void RL_Projects::DrawGUI()
 				{
 					rapidjson::Document _template;
 					{
-						std::string _tempate_str = RL_FS->Read(PROJECT_CONFIG_TEMPLATE);
+						std::string _tempate_str = RE::FileSystem::Read(PROJECT_CONFIG_TEMPLATE);
 						_template.Parse(_tempate_str.c_str());
 					}
 					_template["Project"]["name"].SetString(_name.c_str(), _template.GetAllocator());
@@ -109,11 +110,11 @@ void RL_Projects::DrawGUI()
 
 					_name += ".reproject";
 					project_selected += '\\';
-					RL_FS->WriteOutside(project_selected.c_str(), _name.c_str(), s_buffer.GetString(), s_buffer.GetSize());
+					RE::FileSystem::WriteOutside(project_selected.c_str(), _name.c_str(), s_buffer.GetString(), s_buffer.GetSize());
 
-					std::string _imgui = RL_FS->Read(IMGUI_CONFIG_TEMPLATE);
+					std::string _imgui = RE::FileSystem::Read(IMGUI_CONFIG_TEMPLATE);
 					if (!_imgui.empty())
-						RL_FS->WriteOutside(project_selected.c_str(), IMGUI_CONFIG_TEMPLATE, _imgui.c_str(), _imgui.size());
+						RE::FileSystem::WriteOutside(project_selected.c_str(), IMGUI_CONFIG_TEMPLATE, _imgui.c_str(), _imgui.size());
 
 					_p.path = project_selected + _name;
 					_projects.push_back(_p);
@@ -129,7 +130,7 @@ void RL_Projects::DrawGUI()
 			case RL_Projects::State::LOAD:
 			{
 				rapidjson::Document _project;
-				std::string _config = RL_FS->ReadOutside(project_selected.c_str());
+				std::string _config = RE::FileSystem::ReadOutside(project_selected.c_str());
 				if (!_config.empty())
 				{
 					_project.Parse(_config.c_str());
@@ -193,7 +194,7 @@ void RL_Projects::DrawGUI()
 		{
 			std::string exec("start ");
 			exec += '\"';
-			exec += RL_FS->GetExecutableDirectory();
+			exec += RE::FileSystem::GetExecutableDirectory();
 			exec += '\"';
 			exec += " ";
 			exec += '\"';
@@ -213,7 +214,7 @@ void RL_Projects::Load()
 {
 	rapidjson::Document projects;
 	{
-		std::string data = RL_FS->Read(PROJECTS_FILE);
+		std::string data = RE::FileSystem::Read(PROJECTS_FILE);
 		projects.Parse(data.c_str());
 	}
 
@@ -254,5 +255,5 @@ void RL_Projects::Save() const
 	projects.Accept(writer);
 	s_buffer.Put('\0');
 
-	RL_FS->Write("", "projects.json", s_buffer.GetString(), s_buffer.GetSize());
+	RE::FileSystem::Write("", "projects.json", s_buffer.GetString(), s_buffer.GetSize());
 }

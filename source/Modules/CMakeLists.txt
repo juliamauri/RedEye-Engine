@@ -1,14 +1,16 @@
 find_package(imgui CONFIG REQUIRED)
+find_package(PhysFS CONFIG REQUIRED)
 
-add_library(windowsM_lib STATIC)
-target_sources(windowsM_lib
+add_library(RedEye_lib STATIC)
+target_sources(RedEye_lib
     PUBLIC FILE_SET CXX_MODULES
         BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-        FILES RE_Window.ixx RE_WindowsManager.ixx
+        FILES RE_Window.ixx RE_WindowsManager.ixx RL_FileSystem.ixx
 )
 
-target_compile_definitions(windowsM_lib PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
+target_compile_definitions(RedEye_lib PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
 
-target_link_libraries(windowsM_lib PRIVATE
+target_link_libraries(RedEye_lib PRIVATE
     imgui::imgui
+    $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
 )

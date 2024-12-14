@@ -1,6 +1,5 @@
 #include "RL_Application.h"
 
-#include "RL_FileSystem.h"
 #include "RL_Input.h"
 #include "RL_WindowAndRenderer.h"
 
@@ -8,6 +7,7 @@
 
 #include <SDL2/SDL.h>
 
+import FileSystem;
 import WindowsManager;
 
 JR_Application* JR_Application::App = nullptr;
@@ -15,12 +15,12 @@ JR_Application* JR_Application::App = nullptr;
 bool JR_Application::Init(char* argv[])
 {
 	if (SDL_Init(0) == 0
-		&& (file_system = new RL_FileSystem())->Init(argv)
+		&& RE::FileSystem::Init(argv, "RedEye", "Lens")
 		&& (JR_Input::instance = input = new JR_Input())->Init()
 		&& (visual_magnament = new JR_WindowAndRenderer())->Init()
 		&& RE::WindowsManager::Init(visual_magnament->GetWindow(), visual_magnament->GetContext())
 		&& (projects_manager = new RL_Projects())->Init())
-		return true;
+			return true;
 
 	CleanUp();
 	return false;
@@ -57,10 +57,7 @@ void JR_Application::CleanUp()
 		delete projects_manager;
 	}
 
-	if (file_system) {
-		file_system->CleanUp();
-		delete file_system;
-	}
+	RE::FileSystem::CleanUp();
 
 	SDL_Quit();
 }
