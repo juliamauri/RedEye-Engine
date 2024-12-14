@@ -1,6 +1,5 @@
 # Find and link dependencies
 find_package(SDL2 CONFIG REQUIRED)
-find_package(imgui CONFIG REQUIRED)
 find_package(nfd CONFIG REQUIRED)
 find_package(PhysFS CONFIG REQUIRED)
 find_package(RapidJSON CONFIG REQUIRED)
@@ -23,7 +22,6 @@ target_link_libraries(Lens PRIVATE
     windowsM_lib
     $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
     $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
-    imgui::imgui
     nfd::nfd
     $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
     rapidjson
