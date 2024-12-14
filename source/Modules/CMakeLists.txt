@@ -5,7 +5,7 @@ add_library(RedEye_lib STATIC)
 target_sources(RedEye_lib
     PUBLIC FILE_SET CXX_MODULES
         BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-        FILES RE_Window.ixx RE_WindowsManager.ixx RL_FileSystem.ixx
+        FILES "RE_GUI.ixx" "RE_GUIManager.ixx" RL_FileSystem.ixx
 )
 
 target_compile_definitions(RedEye_lib PRIVATE IMGUI_DEFINE_MATH_OPERATORS)

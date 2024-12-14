@@ -8,7 +8,7 @@
 #include <SDL2/SDL.h>
 
 import FileSystem;
-import WindowsManager;
+import GUIManager;
 
 JR_Application* JR_Application::App = nullptr;
 
@@ -18,7 +18,7 @@ bool JR_Application::Init(char* argv[])
 		&& RE::FileSystem::Init(argv, "RedEye", "Lens")
 		&& (JR_Input::instance = input = new JR_Input())->Init()
 		&& (visual_magnament = new JR_WindowAndRenderer())->Init()
-		&& RE::WindowsManager::Init(visual_magnament->GetWindow(), visual_magnament->GetContext())
+		&& RE::GUI::Init(visual_magnament->GetWindow(), visual_magnament->GetContext())
 		&& (projects_manager = new RL_Projects())->Init())
 			return true;
 
@@ -37,7 +37,7 @@ void JR_Application::Update()
 
 void JR_Application::CleanUp()
 {
-	RE::WindowsManager::CleanUp();
+	RE::GUI::CleanUp();
 
 	if (visual_magnament)
 	{

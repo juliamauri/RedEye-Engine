@@ -14,12 +14,12 @@
 #include <functional>
 
 import FileSystem;
-import WindowsManager;
+import GUIManager;
 
 bool RL_Projects::Init()
 {
 	if (RE::FileSystem::Exist(PROJECTS_FILE)) Load();
-	RE::WindowsManager::AddMainWindow(std::bind(&RL_Projects::DrawGUI, this));
+	RE::GUI::AddMainWindow(std::bind(&RL_Projects::DrawGUI, this));
 	return true;
 }
 

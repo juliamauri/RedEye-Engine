@@ -6,9 +6,9 @@ module;
 #include <imgui_impl_opengl3.h>
 #include <functional>
 
-export module WindowsManager;
+export module GUIManager;
 
-import CustomWindows;
+import GUI;
 
 namespace {
 	void SetStyleColor()
@@ -103,7 +103,7 @@ namespace {
 }
 
 export namespace RE {
-	namespace WindowsManager {
+	namespace GUI {
 		bool Init(SDL_Window* _window, void* _sdl_gl_context)
 		{
 			// Setup Dear ImGui context
@@ -185,7 +185,7 @@ export namespace RE {
 
 			DrawMainWindow();
 
-			RE::WindowsManager::DrawWindows();
+			RE::GUI::DrawWindows();
 
 			ImGui::End();
 		}

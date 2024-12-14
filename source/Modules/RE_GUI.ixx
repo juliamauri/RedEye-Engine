@@ -22,7 +22,7 @@ namespace
 
 export namespace RE
 {
-	namespace WindowsManager {
+	namespace GUI {
 		unsigned int AddWindow(const char* name, std::function<void()> DrawContent)
 		{
 			_windows.push_back({ name, ImGuiWindowFlags_None, false, ImVec2(0.0f, 0.5f), ImVec4(0.09f, 0.09f, 0.09f, 1.00f), DrawContent });

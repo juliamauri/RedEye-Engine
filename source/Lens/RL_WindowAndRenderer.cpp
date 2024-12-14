@@ -7,7 +7,7 @@
 #include <imgui_impl_opengl3_loader.h>
 #include <imgui_impl_opengl3.h>
 
-import WindowsManager;
+import GUIManager;
 
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -42,7 +42,7 @@ void JR_WindowAndRenderer::PostUpdate()
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 
-	RE::WindowsManager::Draw();
+	RE::GUI::Draw();
 
 	ImGui::Render();
 
