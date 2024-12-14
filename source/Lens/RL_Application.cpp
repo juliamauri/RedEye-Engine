@@ -3,11 +3,12 @@
 #include "RL_FileSystem.h"
 #include "RL_Input.h"
 #include "RL_WindowAndRenderer.h"
-#include "RL_WindowsManager.h"
 
 #include "RL_Projects.h"
 
 #include <SDL2/SDL.h>
+
+import WindowsManager;
 
 JR_Application* JR_Application::App = nullptr;
 
@@ -17,7 +18,7 @@ bool JR_Application::Init(char* argv[])
 		&& (file_system = new RL_FileSystem())->Init(argv)
 		&& (JR_Input::instance = input = new JR_Input())->Init()
 		&& (visual_magnament = new JR_WindowAndRenderer())->Init()
-		&& (windows_manager = new JR_WindowsManager())->Init()
+		&& RE::WindowsManager::Init()
 		&& (projects_manager = new RL_Projects())->Init())
 		return true;
 
@@ -36,11 +37,7 @@ void JR_Application::Update()
 
 void JR_Application::CleanUp()
 {
-	if (windows_manager)
-	{
-		windows_manager->CleanUp();
-		delete windows_manager;
-	}
+	RE::WindowsManager::CleanUp();
 
 	if (visual_magnament)
 	{

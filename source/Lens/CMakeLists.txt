@@ -12,9 +12,12 @@ target_sources(Lens PRIVATE
     RL_FileSystem.cpp
     RL_Input.cpp
     RL_Projects.cpp
-    RL_Window.cpp
-    RL_WindowAndRenderer.cpp
-    RL_WindowsManager.cpp
+    "RL_WindowAndRenderer.cpp"
+)
+target_sources(Lens PUBLIC
+    FILE_SET all_my_modules TYPE CXX_MODULES FILES
+    "RL_Window.ixx"
+    "RL_WindowsManager.ixx"
 )
 
 # Compile definitions
