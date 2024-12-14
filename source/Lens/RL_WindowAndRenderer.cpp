@@ -7,6 +7,7 @@
 #include <imgui_impl_opengl3_loader.h>
 #include <imgui_impl_opengl3.h>
 
+import EventSystem;
 import GUIManager;
 
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -15,6 +16,8 @@ bool JR_WindowAndRenderer::Init()
 {
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) == 0)
 	{
+		RE::Event::SetWindowListener([this](SDL_Event* event) { this->EventListener(event); });
+
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -68,4 +71,10 @@ void JR_WindowAndRenderer::CleanUp()
 {
 	SDL_GL_DeleteContext(context);
 	SDL_DestroyWindow(window);
+}
+
+void JR_WindowAndRenderer::EventListener(SDL_Event* event)
+{
+	if (event->window.event == SDL_WINDOWEVENT_CLOSE && event->window.windowID == SDL_GetWindowID(window))
+		APP->RequestExit();
 }

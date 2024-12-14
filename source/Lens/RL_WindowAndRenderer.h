@@ -16,6 +16,9 @@ public:
 	SDL_GLContext GetContext()const { return context; }
 
 private:
+	void EventListener(union SDL_Event* event);
+
+private:
 	SDL_Window* window = nullptr;
 	SDL_GLContext context = nullptr;
 };

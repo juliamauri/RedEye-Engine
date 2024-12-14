@@ -10,6 +10,9 @@ public:
 
 	void CleanUp();
 
+	void RequestExit() { status = Status::WANT_EXIT; }
+
+	void EventListener(union SDL_Event* event);
 
 public:
 	static JR_Application* App;
@@ -18,7 +21,11 @@ public:
 	class RL_FileSystem* file_system = nullptr;
 	class RL_Projects* projects_manager = nullptr;
 private:
-
+	enum class Status
+	{
+		RUNNING,
+		WANT_EXIT
+	} status = Status::RUNNING;
 };
 
 #define APP JR_Application::App
