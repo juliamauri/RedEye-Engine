@@ -9,6 +9,7 @@
 
 import FileSystem;
 import EventSystem;
+import WindowManager;
 import GUIManager;
 
 JR_Application* JR_Application::App = nullptr;
@@ -20,7 +21,7 @@ bool JR_Application::Init(char* argv[])
 		&& RE::Event::Init([this](SDL_Event* event) { this->EventListener(event); })
 		&& (input = new JR_Input())->Init()
 		&& (visual_magnament = new JR_WindowAndRenderer())->Init()
-		&& RE::GUI::Init(visual_magnament->GetWindow(), visual_magnament->GetContext())
+		&& RE::GUI::Init(visual_magnament->GetMainWindow(), visual_magnament->GetContext())
 		&& (projects_manager = new RL_Projects())->Init())
 			return true;
 
@@ -55,6 +56,7 @@ void JR_Application::CleanUp()
 		visual_magnament->CleanUp();
 		delete visual_magnament;
 	}
+	RE::Window::CleanUp();
 
 	if (input) delete input;
 

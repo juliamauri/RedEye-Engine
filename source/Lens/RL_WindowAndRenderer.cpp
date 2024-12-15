@@ -8,6 +8,7 @@
 #include <imgui_impl_opengl3.h>
 
 import EventSystem;
+import WindowManager;
 import GUIManager;
 
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -27,11 +28,12 @@ bool JR_WindowAndRenderer::Init()
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-		SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
-		window = SDL_CreateWindow("RedEye - Projects Explorer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 500, 500, window_flags);
-		context = SDL_GL_CreateContext(window);
-		SDL_GL_MakeCurrent(window, context);
-		SDL_GL_SetSwapInterval(1); // Enable vsync
+
+		main_window = RE::Window::NewWindow("RedEye - Projects Explorer");
+		SDL_Window* mainWindow = RE::Window::GetWindow(main_window);
+		context = SDL_GL_CreateContext(mainWindow);
+		SDL_GL_MakeCurrent(mainWindow, context);
+		SDL_GL_SetSwapInterval(1); // Enable vsynci
 
 		return true;
 	}
@@ -64,17 +66,23 @@ void JR_WindowAndRenderer::PostUpdate()
 		SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
 	}
 
+	static SDL_Window* window = RE::Window::GetWindow(main_window);
 	SDL_GL_SwapWindow(window);
 }
 
 void JR_WindowAndRenderer::CleanUp()
 {
 	SDL_GL_DeleteContext(context);
-	SDL_DestroyWindow(window);
+}
+
+SDL_Window* JR_WindowAndRenderer::GetMainWindow() const
+{
+	static SDL_Window* window = RE::Window::GetWindow(main_window);
+	return window;
 }
 
 void JR_WindowAndRenderer::EventListener(SDL_Event* event)
 {
-	if (event->window.event == SDL_WINDOWEVENT_CLOSE && event->window.windowID == SDL_GetWindowID(window))
+	if (event->window.event == SDL_WINDOWEVENT_CLOSE && event->window.windowID == main_window)
 		APP->RequestExit();
 }
