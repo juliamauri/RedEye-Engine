@@ -11,7 +11,7 @@ target_sources(RedEye_lib
         "RE_GUIManager.ixx"
         "RE_FileSystem.ixx"
         "RE_EventSystem.ixx"
-        "RE_WindowManager.ixx")
+        "RE_WindowManager.ixx" "RE_Dialogs.ixx")
 
 target_compile_definitions(RedEye_lib PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
 

@@ -8,12 +8,12 @@
 #include <RapidJson/writer.h>
 #include <imgui.h>
 #include <imgui_stdlib.h>
-#include <nfd.h>
 
 #include <string>
 #include <functional>
 
 import FileSystem;
+import Dialogs;
 import GUIManager;
 
 bool RL_Projects::Init()
@@ -62,21 +62,15 @@ void RL_Projects::DrawGUI()
 		if (_findpath)
 		{
 			project_selected.clear();
-
-			nfdchar_t* outPath = NULL;
-			nfdresult_t result;
 			switch (_state)
 			{
 			case RL_Projects::State::NEW:
-				// result = NFD_PickFolder(NULL, &outPath);
+				project_selected = RE::Dialogs::PickFolder(nullptr);
 				break;
 			case RL_Projects::State::LOAD:
-				// result = NFD_OpenDialog("reproject", RL_FS->GetExecutableDirectory(), &outPath);
+				project_selected = RE::Dialogs::OpenDialog(L"reproject", RE::FileSystem::GetExecutableDirectory());
 				break;
 			}
-
-			// if (result == NFD_OKAY)
-			// 	project_selected = outPath;
 		}
 
 		if (!project_selected.empty())
