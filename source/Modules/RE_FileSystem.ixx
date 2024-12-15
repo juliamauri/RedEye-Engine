@@ -59,7 +59,7 @@ export namespace RE {
 			//else already exists
 		}
 
-		void Write(const char* path, const char* file, const char* buff, unsigned int buff_size)
+		void Write(const char* path, const char* file, const char* buff, uint32_t buff_size)
 		{
 			std::string filepath(std::string(path) + std::string(file));
 
@@ -70,7 +70,7 @@ export namespace RE {
 			PHYSFS_close(myfile);
 		}
 
-		void WriteOutside(const char* path, const char* file, const char* buff, unsigned int buff_size)
+		void WriteOutside(const char* path, const char* file, const char* buff, uint32_t buff_size)
 		{
 			if (PHYSFS_unmount(".") == 0) {
 				PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
