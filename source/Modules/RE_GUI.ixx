@@ -17,7 +17,7 @@ namespace
 		ImVec4 title_bg_color = { 0.09f, 0.09f, 0.09f, 1.00f };
 		std::function<void()> DrawContent;
 	};
-	static std::vector<Window> _windows;
+	std::vector<Window> _windows;
 }
 
 export namespace RE
