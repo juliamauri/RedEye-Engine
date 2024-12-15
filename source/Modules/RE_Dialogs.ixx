@@ -48,98 +48,111 @@ export namespace RE {
 			nfdnfilteritem_t filterItem = { filterList, filterList };
 			wchar_t* wDefaultPath = CharToWChar(defaultPath);
 			nfdopendialognargs_t args = { &filterItem, 1, wDefaultPath, { 0, nullptr } };
-			if(wDefaultPath) delete[] wDefaultPath;
-			if (NFD_OpenDialogN_With(&outPath, &args) == NFD_OKAY)
+
+			if (NFD_OpenDialogN_With(&outPath, &args) != NFD_OKAY)
 			{
-				std::string path(WCharToString(outPath));
-				NFD_FreePathN(outPath);
-				return path;
+				delete[] wDefaultPath;
+				return "";
 			}
-			return "";
+			delete[] wDefaultPath;
+
+			std::string path(WCharToString(outPath));
+			NFD_FreePathN(outPath);
+			return path;
 		}
 
 		std::vector<std::string> OpenDialogMultiple(const wchar_t* filterList, const char* defaultPath)
 		{
 			const nfdpathset_t* outPaths = nullptr;
-			nfdnfilteritem_t filterItem = { filterList, nullptr };
+			nfdnfilteritem_t filterItem = { filterList, filterList };
 			wchar_t* wDefaultPath = CharToWChar(defaultPath);
 			nfdopendialognargs_t args = { &filterItem, 1, wDefaultPath, { 0, nullptr } };
-			if (wDefaultPath) delete[] wDefaultPath;
-			if (NFD_OpenDialogMultipleN_With(&outPaths, &args) == NFD_OKAY)
+
+			if (NFD_OpenDialogMultipleN_With(&outPaths, &args) != NFD_OKAY)
 			{
-				std::vector<std::string> paths;
-				nfdpathsetenum_t enumerator;
-				if (NFD_PathSet_GetEnum(outPaths, &enumerator) == NFD_OKAY)
-				{
-					nfdnchar_t* outPath = nullptr;
-					while (NFD_PathSet_EnumNextN(&enumerator, &outPath) == NFD_OKAY)
-					{
-						paths.push_back(WCharToString(outPath));
-						NFD_PathSet_FreePathN(outPath);
-					}
-					NFD_PathSet_FreeEnum(&enumerator);
-				}
-				NFD_PathSet_Free(outPaths);
-				return paths;
+				delete[] wDefaultPath;
+				return {};
 			}
-			return {};
+			delete[] wDefaultPath;
+
+			std::vector<std::string> paths;
+			nfdpathsetenum_t enumerator;
+			if (NFD_PathSet_GetEnum(outPaths, &enumerator) == NFD_OKAY)
+			{
+				nfdnchar_t* outPath = nullptr;
+				while (NFD_PathSet_EnumNextN(&enumerator, &outPath) == NFD_OKAY)
+				{
+					paths.push_back(WCharToString(outPath));
+					NFD_PathSet_FreePathN(outPath);
+				}
+				NFD_PathSet_FreeEnum(&enumerator);
+			}
+			NFD_PathSet_Free(outPaths);
+			return paths;
 		}
 
 		std::string SaveDialog(const wchar_t* filterList, const char* defaultPath)
 		{
 			nfdnchar_t* outPath = nullptr;
-			nfdnfilteritem_t filterItem = { filterList, nullptr };
+			nfdnfilteritem_t filterItem = { filterList, filterList };
 			wchar_t* wDefaultPath = CharToWChar(defaultPath);
 			nfdsavedialognargs_t args = { &filterItem, 1, wDefaultPath, L"", { 0, nullptr } };
-			if (wDefaultPath) delete[] wDefaultPath;
-			if (NFD_SaveDialogN_With(&outPath, &args) == NFD_OKAY)
+
+			if (NFD_SaveDialogN_With(&outPath, &args) != NFD_OKAY)
 			{
-				std::string path(WCharToString(outPath));
-				NFD_FreePathN(outPath);
-				return path;
+				delete[] wDefaultPath;
+				return "";
 			}
-			return "";
+			delete[] wDefaultPath;
+
+			std::string path(WCharToString(outPath));
+			NFD_FreePathN(outPath);
+			return path;
 		}
 
 		std::string PickFolder(const char* defaultPath)
 		{
 			nfdnchar_t* outPath = nullptr;
 			wchar_t* wDefaultPath = CharToWChar(defaultPath);
-			if (NFD_PickFolderN(&outPath, wDefaultPath) == NFD_OKAY)
+
+			if (NFD_PickFolderN(&outPath, wDefaultPath) != NFD_OKAY)
 			{
-				if (wDefaultPath) delete[] wDefaultPath;
-				std::string path(WCharToString(outPath));
-				NFD_FreePathN(outPath);
-				return path;
+				delete[] wDefaultPath;
+				return "";
 			}
-			if (wDefaultPath) delete[] wDefaultPath;
-			return "";
+			delete[] wDefaultPath;
+
+			std::string path(WCharToString(outPath));
+			NFD_FreePathN(outPath);
+			return path;
 		}
 
 		std::vector<std::string> PickFolderMultiple(const char* defaultPath)
 		{
 			const nfdpathset_t* outPaths = nullptr;
 			wchar_t* wDefaultPath = CharToWChar(defaultPath);
+
 			if (NFD_PickFolderMultipleN(&outPaths, wDefaultPath) == NFD_OKAY)
 			{
-				if (wDefaultPath) delete[] wDefaultPath;
-				std::vector<std::string> paths;
-				nfdpathsetenum_t enumerator;
-				if (NFD_PathSet_GetEnum(outPaths, &enumerator) == NFD_OKAY)
-				{
-					nfdnchar_t* outPath = nullptr;
-					while (NFD_PathSet_EnumNextN(&enumerator, &outPath) == NFD_OKAY)
-					{
-						paths.push_back(WCharToString(outPath));
-						NFD_PathSet_FreePathN(outPath);
-					}
-					NFD_PathSet_FreeEnum(&enumerator);
-				}
-				NFD_PathSet_Free(outPaths);
-				return paths;
+				delete[] wDefaultPath;
+				return {};
 			}
-			if (wDefaultPath) delete[] wDefaultPath;
-			return {};
+			delete[] wDefaultPath;
+
+			std::vector<std::string> paths;
+			nfdpathsetenum_t enumerator;
+			if (NFD_PathSet_GetEnum(outPaths, &enumerator) == NFD_OKAY)
+			{
+				nfdnchar_t* outPath = nullptr;
+				while (NFD_PathSet_EnumNextN(&enumerator, &outPath) == NFD_OKAY)
+				{
+					paths.push_back(WCharToString(outPath));
+					NFD_PathSet_FreePathN(outPath);
+				}
+				NFD_PathSet_FreeEnum(&enumerator);
+			}
+			NFD_PathSet_Free(outPaths);
+			return paths;
 		}
 	}
 }
