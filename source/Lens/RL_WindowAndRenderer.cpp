@@ -74,9 +74,6 @@ void JR_WindowAndRenderer::CleanUp()
 {
 	SDL_GL_DeleteContext(context);
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
-
-	// Todo: know why this exceptions trows when the video subsystem is closed
-	// Microsoft C++ exception: wil::ResultException at memory location
 }
 
 SDL_Window* JR_WindowAndRenderer::GetMainWindow() const
