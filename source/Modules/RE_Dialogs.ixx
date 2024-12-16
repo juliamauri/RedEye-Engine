@@ -1,13 +1,14 @@
 module;
 
+#include <codecvt>
 #include <nfd.h>
 #include <string>
 #include <vector>
-#include <codecvt>
 
 export module Dialogs;
 
-namespace {
+namespace
+{
     /**
      * @brief Converts a wide character string to a UTF-8 encoded string.
      * @param wstr The wide character string to convert.
@@ -31,16 +32,19 @@ namespace {
      */
     wchar_t* CharToWChar(const char* str)
     {
-        if (str == nullptr) return nullptr;
+        if (str == nullptr)
+            return nullptr;
         size_t len = std::strlen(str) + 1;
         wchar_t* wstr = new wchar_t[len];
         std::mbstowcs(wstr, str, len);
         return wstr;
     }
-}
+} // namespace
 
-export namespace RE {
-    namespace Dialogs {
+export namespace RE
+{
+    namespace Dialogs
+    {
         /**
          * @brief Initializes the native file dialog library.
          * @return True if initialization was successful, false otherwise.
@@ -59,7 +63,8 @@ export namespace RE {
         }
 
         /**
-         * @brief Opens a file dialog with the specified filter and default path.
+         * @brief Opens a file dialog with the specified filter and default
+         * path.
          * @param filterList The filter list for the file dialog.
          * @param defaultPath The default path for the file dialog.
          * @return The selected file path as a string.
@@ -67,9 +72,9 @@ export namespace RE {
         std::string OpenDialog(const wchar_t* filterList = nullptr, const char* defaultPath = nullptr)
         {
             nfdnchar_t* outPath = nullptr;
-            nfdnfilteritem_t filterItem = { filterList, filterList };
+            nfdnfilteritem_t filterItem = {filterList, filterList};
             wchar_t* wDefaultPath = CharToWChar(defaultPath);
-            nfdopendialognargs_t args = { &filterItem, 1, wDefaultPath, { 0, nullptr } };
+            nfdopendialognargs_t args = {&filterItem, 1, wDefaultPath, {0, nullptr}};
 
             if (NFD_OpenDialogN_With(&outPath, &args) != NFD_OKAY)
             {
@@ -84,17 +89,19 @@ export namespace RE {
         }
 
         /**
-         * @brief Opens a file dialog with the specified filter and default path, allowing multiple selections.
+         * @brief Opens a file dialog with the specified filter and default
+         * path, allowing multiple selections.
          * @param filterList The filter list for the file dialog.
          * @param defaultPath The default path for the file dialog.
          * @return A vector of selected file paths as strings.
          */
-        std::vector<std::string> OpenDialogMultiple(const wchar_t* filterList = nullptr, const char* defaultPath = nullptr)
+        std::vector<std::string> OpenDialogMultiple(const wchar_t* filterList = nullptr,
+                                                    const char* defaultPath = nullptr)
         {
             const nfdpathset_t* outPaths = nullptr;
-            nfdnfilteritem_t filterItem = { filterList, filterList };
+            nfdnfilteritem_t filterItem = {filterList, filterList};
             wchar_t* wDefaultPath = CharToWChar(defaultPath);
-            nfdopendialognargs_t args = { &filterItem, 1, wDefaultPath, { 0, nullptr } };
+            nfdopendialognargs_t args = {&filterItem, 1, wDefaultPath, {0, nullptr}};
 
             if (NFD_OpenDialogMultipleN_With(&outPaths, &args) != NFD_OKAY)
             {
@@ -120,7 +127,8 @@ export namespace RE {
         }
 
         /**
-         * @brief Opens a save file dialog with the specified filter and default path.
+         * @brief Opens a save file dialog with the specified filter and default
+         * path.
          * @param filterList The filter list for the save file dialog.
          * @param defaultPath The default path for the save file dialog.
          * @return The selected file path as a string.
@@ -128,9 +136,9 @@ export namespace RE {
         std::string SaveDialog(const wchar_t* filterList = nullptr, const char* defaultPath = nullptr)
         {
             nfdnchar_t* outPath = nullptr;
-            nfdnfilteritem_t filterItem = { filterList, filterList };
+            nfdnfilteritem_t filterItem = {filterList, filterList};
             wchar_t* wDefaultPath = CharToWChar(defaultPath);
-            nfdsavedialognargs_t args = { &filterItem, 1, wDefaultPath, L"", { 0, nullptr } };
+            nfdsavedialognargs_t args = {&filterItem, 1, wDefaultPath, L"", {0, nullptr}};
 
             if (NFD_SaveDialogN_With(&outPath, &args) != NFD_OKAY)
             {
@@ -167,7 +175,8 @@ export namespace RE {
         }
 
         /**
-         * @brief Opens a folder picker dialog with the specified default path, allowing multiple selections.
+         * @brief Opens a folder picker dialog with the specified default path,
+         * allowing multiple selections.
          * @param defaultPath The default path for the folder picker dialog.
          * @return A vector of selected folder paths as strings.
          */
@@ -198,5 +207,5 @@ export namespace RE {
             NFD_PathSet_Free(outPaths);
             return paths;
         }
-    }
-}
+    } // namespace Dialogs
+} // namespace RE

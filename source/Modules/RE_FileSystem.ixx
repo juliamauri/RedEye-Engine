@@ -1,18 +1,21 @@
 module;
 
 #include <physfs.h>
-#include <vector>
 #include <string>
+#include <vector>
 
 export module FileSystem;
 
-namespace {
+namespace
+{
     std::string _exec_directory;
     std::string _pref_directory;
-}
+} // namespace
 
-export namespace RE {
-    namespace FileSystem {
+export namespace RE
+{
+    namespace FileSystem
+    {
         /**
          * @brief Initializes the file system.
          * @param argv The command line arguments.
@@ -22,21 +25,25 @@ export namespace RE {
          */
         bool Init(char* argv[], const char* org, const char* app)
         {
-            if (PHYSFS_init(argv[0]) != 0) {
+            if (PHYSFS_init(argv[0]) != 0)
+            {
 
                 _pref_directory = PHYSFS_getPrefDir(org, app);
                 _exec_directory = argv[0];
                 _exec_directory = _exec_directory.substr(0, _exec_directory.find_last_of('\\') + 1);
 
-                if (PHYSFS_mount(".", 0, 0) == 0) {
+                if (PHYSFS_mount(".", 0, 0) == 0)
+                {
                     PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                     return false;
                 }
-                if (PHYSFS_mount(_pref_directory.c_str(), "WriteDir/", 0) == 0) {
+                if (PHYSFS_mount(_pref_directory.c_str(), "WriteDir/", 0) == 0)
+                {
                     PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                     return false;
                 }
-                if (PHYSFS_setWriteDir(_pref_directory.c_str()) == 0) {
+                if (PHYSFS_setWriteDir(_pref_directory.c_str()) == 0)
+                {
                     PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                     return false;
                 }
@@ -68,10 +75,11 @@ export namespace RE {
          */
         void NewDir(const char* dir)
         {
-            if (PHYSFS_exists(dir) != 0) return;
+            if (PHYSFS_exists(dir) != 0)
+                return;
             if (PHYSFS_mkdir(dir) == 0)
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
-            //else already exists
+            // else already exists
         }
 
         /**
@@ -101,36 +109,43 @@ export namespace RE {
          */
         void WriteOutside(const char* path, const char* file, const char* buff, uint32_t buff_size)
         {
-            if (PHYSFS_unmount(".") == 0) {
+            if (PHYSFS_unmount(".") == 0)
+            {
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                 int i = 0;
             }
-            if (PHYSFS_mount(path, 0, 0) == 0) {
+            if (PHYSFS_mount(path, 0, 0) == 0)
+            {
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                 int i = 0;
             }
-            if (PHYSFS_setWriteDir(path) == 0) {
+            if (PHYSFS_setWriteDir(path) == 0)
+            {
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                 int i = 0;
             }
 
             PHYSFS_file* myfile = PHYSFS_openWrite(file);
-            if (myfile == NULL) {
+            if (myfile == NULL)
+            {
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                 int i = 0;
             }
             int length_writed = PHYSFS_write(myfile, buff, 1, buff_size);
             PHYSFS_close(myfile);
 
-            if (PHYSFS_unmount(path) == 0) {
+            if (PHYSFS_unmount(path) == 0)
+            {
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                 int i = 0;
             }
-            if (PHYSFS_mount(".", 0, 0) == 0) {
+            if (PHYSFS_mount(".", 0, 0) == 0)
+            {
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                 int i = 0;
             }
-            if (PHYSFS_setWriteDir(_pref_directory.c_str()) == 0) {
+            if (PHYSFS_setWriteDir(_pref_directory.c_str()) == 0)
+            {
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                 int i = 0;
             }
@@ -165,7 +180,8 @@ export namespace RE {
          */
         std::string ReadOutside(const char* filepath)
         {
-            if (PHYSFS_unmount(".") == 0) {
+            if (PHYSFS_unmount(".") == 0)
+            {
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                 int i = 0;
             }
@@ -192,7 +208,8 @@ export namespace RE {
             }
 
             PHYSFS_unmount(_dir.c_str());
-            if (PHYSFS_mount(".", 0, 0) == 0) {
+            if (PHYSFS_mount(".", 0, 0) == 0)
+            {
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                 int i = 0;
             }
@@ -225,7 +242,8 @@ export namespace RE {
         std::vector<std::string> GetFilespathFrom(const char* _path)
         {
             std::vector<std::string> ret;
-            if (PHYSFS_exists(_path) != 0) {
+            if (PHYSFS_exists(_path) != 0)
+            {
 
                 std::string path(_path);
                 char** rc = PHYSFS_enumerateFiles(path.c_str());
@@ -248,7 +266,8 @@ export namespace RE {
         {
             std::vector<std::string> ret;
 
-            if (PHYSFS_exists(_path) != 0) {
+            if (PHYSFS_exists(_path) != 0)
+            {
 
                 std::string path(_path);
                 char** rc = PHYSFS_enumerateFiles(path.c_str());
@@ -257,5 +276,5 @@ export namespace RE {
             }
             return ret;
         }
-    }
-}
+    } // namespace FileSystem
+} // namespace RE

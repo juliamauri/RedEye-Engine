@@ -1,12 +1,13 @@
 module;
 
 #include <SDL2/SDL.h>
-#include <vector>
 #include <functional>
+#include <vector>
 
 export module EventSystem;
 
-namespace {
+namespace
+{
     std::function<void(SDL_Event*)> _systemListener;
     std::function<void(SDL_Event*)> _inputListener;
     std::function<void(SDL_Event*)> _windowListener;
@@ -15,10 +16,12 @@ namespace {
     std::vector<std::function<void(SDL_Event*)>> _customlisteners;
 
     constexpr const uint32_t EVENT_NULL = -1;
-}
+} // namespace
 
-export namespace RE {
-    namespace Event {
+export namespace RE
+{
+    namespace Event
+    {
         /**
          * @brief Initializes the event system with a system listener.
          * @param systemlistener The system listener function to handle events.
@@ -63,7 +66,8 @@ export namespace RE {
 
         /**
          * @brief Adds a custom event listener function.
-         * @param listener The custom event listener function to handle custom events.
+         * @param listener The custom event listener function to handle custom
+         * events.
          */
         void AddCustomListener(std::function<void(SDL_Event*)> listener)
         {
@@ -85,9 +89,11 @@ export namespace RE {
                 if (event.type == SDL_WINDOWEVENT)
                     _windowListener(&event);
 
-                if (_customEvents.empty() || _customlisteners.empty()) continue;
+                if (_customEvents.empty() || _customlisteners.empty())
+                    continue;
                 auto isCustom = std::find(_customEvents.begin(), _customEvents.end(), event.type);
-                if (isCustom != _customEvents.end()) {
+                if (isCustom != _customEvents.end())
+                {
                     for (auto& listener : _customlisteners)
                     {
                         listener(&event);
@@ -95,5 +101,5 @@ export namespace RE {
                 }
             }
         }
-    }
-}
+    } // namespace Event
+} // namespace RE

@@ -1,0 +1,9 @@
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 120
+BreakBeforeBraces: Allman
+AllowShortFunctionsOnASingleLine: false
+IndentCaseLabels: true
+NamespaceIndentation: All
+PointerAlignment: Left

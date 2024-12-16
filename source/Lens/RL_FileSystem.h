@@ -1,6 +1,0 @@
-#ifndef RL_FILESYSTEM_CLASS
-#define RL_FILESYSTEM_CLASS
-
-
-
-#endif //RL_FILESYSTEM_CLASS
