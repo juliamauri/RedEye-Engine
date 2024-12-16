@@ -11,6 +11,9 @@ export module GUIManager;
 import GUI;
 
 namespace {
+	/**
+	 * @brief Sets the style colors for the ImGui context.
+	 */
 	void SetStyleColor()
 	{
 		ImGuiStyle* style = &ImGui::GetStyle();
@@ -104,6 +107,12 @@ namespace {
 
 export namespace RE {
 	namespace GUI {
+		/**
+		 * @brief Initializes the ImGui context and sets up the SDL and OpenGL backends.
+		 * @param _window The SDL window.
+		 * @param _sdl_gl_context The SDL OpenGL context.
+		 * @return True if initialization was successful, false otherwise.
+		 */
 		bool Init(SDL_Window* _window, void* _sdl_gl_context)
 		{
 			// Setup Dear ImGui context
@@ -139,11 +148,18 @@ export namespace RE {
 			return false;
 		}
 
+		/**
+		 * @brief Adds the main window drawing function.
+		 * @param DrawContent The function to draw the content of the main window.
+		 */
 		void AddMainWindow(std::function<void()> DrawContent)
 		{
 			DrawMainWindow = DrawContent;
 		}
 
+		/**
+		 * @brief Draws the main window and all other windows in the GUI system.
+		 */
 		void Draw()
 		{
 			static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode; // | ImGuiDockNodeFlags_PassthruCentralNode;
@@ -190,6 +206,9 @@ export namespace RE {
 			ImGui::End();
 		}
 
+		/**
+		 * @brief Cleans up the ImGui context and shuts down the SDL and OpenGL backends.
+		 */
 		void CleanUp()
 		{
 			ImGui_ImplOpenGL3_Shutdown();
