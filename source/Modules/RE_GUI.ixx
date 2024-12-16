@@ -52,7 +52,7 @@ export namespace RE
          */
         void PopWindowFlag(unsigned int index, ImGuiWindowFlags flag)
         {
-            _windows[index].w_flags -= flag;
+            _windows[index].w_flags &= ~flag;
         }
 
         /**
