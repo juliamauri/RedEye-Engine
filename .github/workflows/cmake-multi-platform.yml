@@ -53,7 +53,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y autoconf automake libtool libtool-bin pkg-config
+        sudo apt-get install -y autoconf automake libtool libtool-bin pkg-config m4
 
     - name: Set up VCPKG
       shell: bash
@@ -92,5 +92,9 @@ jobs:
       if: always() && matrix.os == 'ubuntu-latest'
       shell: bash
       run: |
+        echo "vcpkg-bootstrap.log:"
+        cat vcpkg-bootstrap.log
+        echo "vcpkg-install.log:"
+        cat vcpkg-install.log
         cat /home/runner/work/RedEye-Engine/RedEye-Engine/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log
         cat /home/runner/work/RedEye-Engine/RedEye-Engine/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log
