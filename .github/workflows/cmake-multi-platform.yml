@@ -53,7 +53,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y autoconf automake libtool pkg-config perl-open
+        sudo apt-get install -y autoconf automake libtool pkg-config perl
 
     - name: Set up VCPKG
       shell: bash
