@@ -53,7 +53,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y autoconf automake libtool pkg-config perl
+        sudo apt-get install -y autoconf automake libtool pkg-config
 
     - name: Set up VCPKG
       shell: bash
@@ -77,6 +77,13 @@ jobs:
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
+
+    - name: Output Logs
+      if: matrix.os == 'ubuntu-latest'
+      shell: bash
+      run: |
+        cat /home/runner/work/RedEye-Engine/RedEye-Engine/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log
+        cat /home/runner/work/RedEye-Engine/RedEye-Engine/vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
