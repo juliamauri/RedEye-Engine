@@ -49,6 +49,16 @@ jobs:
       with:
         submodules: true
 
+    - name: Set up CMake
+      uses: actions/setup-cmake@v2
+      with:
+        cmake-version: 3.28.0
+
+    - name: Set up VCPKG
+      shell: bash
+      run: |
+        ./vcpkg/bootstrap-vcpkg.sh
+      
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
