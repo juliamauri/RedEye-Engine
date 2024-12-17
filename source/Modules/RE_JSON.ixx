@@ -20,6 +20,9 @@ namespace
     uint32_t _nextId = 1;
     uint32_t _selected = 0;
 
+    
+    bool _isArray = false;
+    rapidjson::Value* _array = nullptr;
     /**
      * @brief Gets the ID of the JSON container to use.
      * @param id The ID of the JSON container.
@@ -127,12 +130,6 @@ export namespace RE
 
         namespace Value
         {
-            namespace
-            {
-                bool _isArray = false;
-                rapidjson::Value* _array = nullptr;
-            } // namespace
-
             /**
              * @brief Pushes a new name onto the JSON pointer stack.
              * @param name The name to push onto the pointer stack.
