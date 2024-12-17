@@ -49,11 +49,6 @@ jobs:
       with:
         submodules: true
 
-    - name: Set up CMake
-      uses: actions/setup-cmake@v2
-      with:
-        cmake-version: 3.28.0
-
     - name: Set up VCPKG
       shell: bash
       run: |
