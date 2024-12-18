@@ -54,7 +54,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y autoconf automake libtool libtool-bin pkg-config m4 libltdl-dev ninja-build
-        
+
     - name: Install dependencies (Windows)
       if: matrix.os == 'windows-latest'
       run: |
@@ -62,9 +62,10 @@ jobs:
 
     - name: Set up Visual Studio environment (Windows)
       if: matrix.os == 'windows-latest'
+      shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
 
     - name: Set up VCPKG
       shell: bash
