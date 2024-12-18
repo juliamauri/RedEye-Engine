@@ -1,5 +1,6 @@
 module;
 
+#include <cstdint>
 #include <physfs.h>
 #include <string>
 #include <vector>
@@ -30,7 +31,11 @@ export namespace RE
 
                 _pref_directory = PHYSFS_getPrefDir(org, app);
                 _exec_directory = argv[0];
+#ifdef _WIN32
                 _exec_directory = _exec_directory.substr(0, _exec_directory.find_last_of('\\') + 1);
+#else
+                _exec_directory = _exec_directory.substr(0, _exec_directory.find_last_of('/') + 1);
+#endif
 
                 if (PHYSFS_mount(".", 0, 0) == 0)
                 {
@@ -188,7 +193,11 @@ export namespace RE
             std::string _path(filepath);
             std::string _dir(_path);
             std::string _file;
+#ifdef _WIN32
             _dir = _path.substr(0, _path.find_last_of('\\') + 1);
+#else
+            _dir = _path.substr(0, _path.find_last_of('/') + 1);
+#endif
             _file = _path.substr(_dir.size());
             PHYSFS_mount(_dir.c_str(), "Read/", 0);
 
