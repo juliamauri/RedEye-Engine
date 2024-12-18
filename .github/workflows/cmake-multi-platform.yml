@@ -60,7 +60,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y autoconf automake libtool libtool-bin pkg-config m4 libltdl-dev ninja-build cmake
+        sudo apt-get install -y autoconf automake libtool libtool-bin pkg-config m4 libltdl-dev ninja-build cmake build-essential
 
     - name: Install dependencies (Windows)
       if: matrix.os == 'windows-latest'
