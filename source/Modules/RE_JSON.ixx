@@ -1,9 +1,9 @@
 module;
 
-#include <RapidJson/document.h>
-#include <RapidJson/pointer.h>
-#include <RapidJson/stringbuffer.h>
-#include <RapidJson/writer.h>
+#include <rapidjson/document.h>
+#include <rapidjson/pointer.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include <string>
 #include <unordered_map>
 
