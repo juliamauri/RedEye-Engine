@@ -25,11 +25,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
-        c_compiler: [gcc, clang, "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.35527\bin\Hostx64\x64\cl.exe"]
+        c_compiler: [gcc, clang, 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.35527\bin\Hostx64\x64\cl.exe']
         include:
           - os: windows-latest
-            c_compiler: "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.35527\bin\Hostx64\x64\cl.exe"
-            cpp_compiler: "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.35527\bin\Hostx64\x64\cl.exe"
+            c_compiler: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.35527\bin\Hostx64\x64\cl.exe'
+            cpp_compiler: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.35527\bin\Hostx64\x64\cl.exe'
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
@@ -42,7 +42,7 @@ jobs:
           - os: windows-latest
             c_compiler: clang
           - os: ubuntu-latest
-            c_compiler: "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.35527\bin\Hostx64\x64\cl.exe"
+            c_compiler: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.35527\bin\Hostx64\x64\cl.exe'
 
     steps:
     - uses: actions/checkout@v4
