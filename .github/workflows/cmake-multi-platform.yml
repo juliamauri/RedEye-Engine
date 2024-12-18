@@ -49,11 +49,6 @@ jobs:
       with:
         submodules: true
 
-    # - name: Set up VCPKG
-    #   shell: bash
-    #   run: |
-    #     ./vcpkg/bootstrap-vcpkg.sh
-    # 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
@@ -69,15 +64,19 @@ jobs:
 
     - name: Install dependencies (Windows)
       if: matrix.os == 'windows-latest'
+      shell: pwsh
       run: |
         choco install ninja
-
-    - name: Set up Visual Studio environment (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
         & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
+        cmake -G "Ninja" -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_TOOLCHAIN_FILE:STRING="./vcpkg/scripts/buildsystems/vcpkg.cmake"
+        -DCMAKE_CXX_COMPILER="${{ matrix.cpp_compiler }}"
+        -DCMAKE_C_COMPILER="${{ matrix.c_compiler }}"
+        -DCMAKE_BUILD_TYPE="${{ matrix.build_type }}"
+        -S ${{ github.workspace }}
 
     - name: Configure CMake
+      if: matrix.os == 'ubuntu-latest'
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
