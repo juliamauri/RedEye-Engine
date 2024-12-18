@@ -61,13 +61,10 @@ jobs:
             cpp_compiler: clang++
         exclude:
           - os: windows-latest
-            beauty_os: linux
             c_compiler: gcc
           - os: windows-latest
-            beauty_os: linux
             c_compiler: clang
           - os: ubuntu-latest
-            beauty_os: windows
             c_compiler: cl
 
     steps:
