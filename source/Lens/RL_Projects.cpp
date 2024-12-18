@@ -2,9 +2,9 @@
 
 #include "RL_Application.h"
 
-#include <RapidJson/document.h>
-#include <RapidJson/stringbuffer.h>
-#include <RapidJson/writer.h>
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
