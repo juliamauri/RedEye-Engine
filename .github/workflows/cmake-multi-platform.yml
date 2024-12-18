@@ -61,6 +61,10 @@ jobs:
             cpp_compiler: clang++
         exclude:
           - os: windows-latest
+            beauty_os: linux
+          - os: ubuntu-latest
+            beauty_os: windows
+          - os: windows-latest
             c_compiler: gcc
           - os: windows-latest
             c_compiler: clang
