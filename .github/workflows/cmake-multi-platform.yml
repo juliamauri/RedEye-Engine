@@ -26,7 +26,6 @@ jobs:
         os: [windows-latest, ubuntu-latest]
         beauty_os: [windows, linux]
         platform: [x86, x64]
-        configuration: [release, debug]
         c_compiler: [gcc, clang, cl]
         include:
           - os: windows-latest
