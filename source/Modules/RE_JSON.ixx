@@ -10,43 +10,40 @@ module;
 
 export module JSON;
 
-namespace
+struct JsonContainer
 {
-    struct JsonContainer
-    {
-        rapidjson::Document document;
-        std::string pointer;
-    };
-    std::unordered_map<uint32_t, JsonContainer> _jsons;
-    uint32_t _nextId = 1;
-    uint32_t _selected = 0;
+    rapidjson::Document document;
+    std::string pointer;
+};
+static std::unordered_map<uint32_t, JsonContainer> _jsons;
+static uint32_t _nextId = 1;
+static uint32_t _selected = 0;
 
-    
-    bool _isArray = false;
-    rapidjson::Value* _array = nullptr;
-    /**
-     * @brief Gets the ID of the JSON container to use.
-     * @param id The ID of the JSON container.
-     * @return The ID of the JSON container to use.
-     */
-    inline uint32_t GetID(const uint32_t id)
-    {
-        // ASSERT: _selected == id == 0 || _selected > 0 && id == 0
-        uint32_t _options[2] = {id, _selected};
-        return _options[_selected];
-    }
+static bool _isArray = false;
+static rapidjson::Value* _array = nullptr;
 
-    /**
-     * @brief Gets the JSON pointer string.
-     * @param pointer The current JSON pointer.
-     * @param name The name to append to the pointer.
-     * @return The updated JSON pointer string.
-     */
-    inline std::string GetPointer(std::string& pointer, const char* name)
-    {
-        return name ? pointer + "/" + name : pointer;
-    }
-} // namespace
+/**
+ * @brief Gets the ID of the JSON container to use.
+ * @param id The ID of the JSON container.
+ * @return The ID of the JSON container to use.
+ */
+inline uint32_t GetID(const uint32_t id)
+{
+    // ASSERT: _selected == id == 0 || _selected > 0 && id == 0
+    uint32_t _options[2] = {id, _selected};
+    return _options[_selected];
+}
+
+/**
+ * @brief Gets the JSON pointer string.
+ * @param pointer The current JSON pointer.
+ * @param name The name to append to the pointer.
+ * @return The updated JSON pointer string.
+ */
+inline std::string GetPointer(std::string& pointer, const char* name)
+{
+    return name ? pointer + "/" + name : pointer;
+}
 
 export namespace RE
 {
