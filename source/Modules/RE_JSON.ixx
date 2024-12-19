@@ -1,5 +1,6 @@
 module;
 
+#include <cstdint>
 #include <rapidjson/document.h>
 #include <rapidjson/pointer.h>
 #include <rapidjson/stringbuffer.h>
