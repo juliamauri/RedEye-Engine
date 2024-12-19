@@ -18,7 +18,12 @@ namespace
         ImVec4 title_bg_color = {0.09f, 0.09f, 0.09f, 1.00f};
         std::function<void()> DrawContent;
     };
-    std::vector<Window> _windows;
+
+    static std::vector<Window>& GetWindows()
+    {
+        static std::vector<Window> _windows;
+        return _windows;
+    }
 } // namespace
 
 export namespace RE
@@ -33,6 +38,7 @@ export namespace RE
          */
         unsigned int AddWindow(const char* name, std::function<void()> DrawContent)
         {
+            auto& _windows = GetWindows();
             _windows.push_back({name, ImGuiWindowFlags_None, false, ImVec2(0.0f, 0.5f),
                                 ImVec4(0.09f, 0.09f, 0.09f, 1.00f), DrawContent});
             return _windows.size() - 1;
@@ -45,6 +51,7 @@ export namespace RE
          */
         void PushWindowFlag(unsigned int index, ImGuiWindowFlags flag)
         {
+            auto& _windows = GetWindows();
             _windows[index].w_flags |= flag;
         }
 
@@ -55,6 +62,7 @@ export namespace RE
          */
         void PopWindowFlag(unsigned int index, ImGuiWindowFlags flag)
         {
+            auto& _windows = GetWindows();
             _windows[index].w_flags &= ~flag;
         }
 
@@ -65,6 +73,7 @@ export namespace RE
          */
         void SetTitleAlign(unsigned int index, ImVec2 align)
         {
+            auto& _windows = GetWindows();
             _windows[index].apply_styles = true;
             _windows[index].title_align = align;
         }
@@ -76,6 +85,7 @@ export namespace RE
          */
         void SetTitleBGColor(unsigned int index, ImVec4 color)
         {
+            auto& _windows = GetWindows();
             _windows[index].apply_styles = true;
             _windows[index].title_bg_color = color;
         }
@@ -85,6 +95,7 @@ export namespace RE
          */
         void DrawWindows()
         {
+            auto& _windows = GetWindows();
             for (auto& window : _windows)
             {
                 static bool pop;
