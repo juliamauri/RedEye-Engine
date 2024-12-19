@@ -27,7 +27,7 @@ static rapidjson::Value* _array = nullptr;
  * @param id The ID of the JSON container.
  * @return The ID of the JSON container to use.
  */
-inline uint32_t GetID(const uint32_t id)
+static inline uint32_t GetID(const uint32_t id)
 {
     // ASSERT: _selected == id == 0 || _selected > 0 && id == 0
     uint32_t _options[2] = {id, _selected};
@@ -40,7 +40,7 @@ inline uint32_t GetID(const uint32_t id)
  * @param name The name to append to the pointer.
  * @return The updated JSON pointer string.
  */
-inline std::string GetPointer(std::string& pointer, const char* name)
+static inline std::string GetPointer(std::string& pointer, const char* name)
 {
     return name ? pointer + "/" + name : pointer;
 }
