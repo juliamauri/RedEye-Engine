@@ -172,10 +172,15 @@ export namespace RE
          */
         std::string PickFolder(const char* defaultPath)
         {
-            nfdnchar_t* outPath = nullptr;
+#ifdef _WIN32
             std::wstring wDefaultPath = CharToWChar(defaultPath);
+            const wchar_t* cwDefaultPath = wDefaultPath.c_str();
+#else
+            const char* cwDefaultPath = defaultPath;
+#endif
+            nfdnchar_t* outPath = nullptr;
 
-            if (NFD_PickFolderN(&outPath, wDefaultPath.c_str()) != NFD_OKAY)
+            if (NFD_PickFolderN(&outPath, cwDefaultPath) != NFD_OKAY)
             {
                 return "";
             }
@@ -193,10 +198,15 @@ export namespace RE
          */
         std::vector<std::string> PickFolderMultiple(const char* defaultPath = nullptr)
         {
-            const nfdpathset_t* outPaths = nullptr;
+#ifdef _WIN32
             std::wstring wDefaultPath = CharToWChar(defaultPath);
+            const wchar_t* cwDefaultPath = wDefaultPath.c_str();
+#else
+            const char* cwDefaultPath = defaultPath;
+#endif
+            const nfdpathset_t* outPaths = nullptr;
 
-            if (NFD_PickFolderMultipleN(&outPaths, wDefaultPath.c_str()) != NFD_OKAY)
+            if (NFD_PickFolderMultipleN(&outPaths, cwDefaultPath) != NFD_OKAY)
             {
                 return {};
             }
