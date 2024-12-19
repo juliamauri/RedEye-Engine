@@ -6,6 +6,7 @@
 #include "RL_Projects.h"
 
 #include <SDL2/SDL.h>
+#include <functional>
 
 import FileSystem;
 import EventSystem;
@@ -17,10 +18,10 @@ JR_Application* JR_Application::App = nullptr;
 
 bool JR_Application::Init(char* argv[])
 {
-    if (SDL_Init(0) == 0 && RE::FileSystem::Init(argv, "RedEye", "Lens") &&
-        RE::Event::Init([this](SDL_Event* event) { this->EventListener(event); }) && (input = new JR_Input())->Init() &&
-        (visual_magnament = new JR_WindowAndRenderer())->Init() && RE::Dialogs::Init() &&
-        RE::GUI::Init(visual_magnament->GetMainWindow(), visual_magnament->GetContext()) &&
+    std::function<void(SDL_Event*)> listener = [this](SDL_Event* event) { this->EventListener(event); };
+    if (SDL_Init(0) == 0 && RE::FileSystem::Init(argv, "RedEye", "Lens") && RE::Event::Init(listener) &&
+        (input = new JR_Input())->Init() && (visual_magnament = new JR_WindowAndRenderer())->Init() &&
+        RE::Dialogs::Init() && RE::GUI::Init(visual_magnament->GetMainWindow(), visual_magnament->GetContext()) &&
         (projects_manager = new RL_Projects())->Init())
         return true;
 
