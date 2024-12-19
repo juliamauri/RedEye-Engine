@@ -3,6 +3,7 @@ module;
 #include <SDL2/SDL.h>
 #include <functional>
 #include <vector>
+#include <algorithm>
 
 export module EventSystem;
 
