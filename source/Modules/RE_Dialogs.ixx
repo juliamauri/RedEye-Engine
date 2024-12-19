@@ -81,8 +81,11 @@ export namespace RE
             {
                 return "";
             }
-
+#ifdef _WIN32
             std::string path(WCharToString(outPath));
+#else
+            std::string path(outPath);
+#endif
             NFD_FreePathN(outPath);
             return path;
         }
@@ -123,7 +126,11 @@ export namespace RE
                 nfdnchar_t* outPath = nullptr;
                 while (NFD_PathSet_EnumNextN(&enumerator, &outPath) == NFD_OKAY)
                 {
+#ifdef _WIN32
                     paths.push_back(WCharToString(outPath));
+#else
+                    paths.push_back(outPath);
+#endif
                     NFD_PathSet_FreePathN(outPath);
                 }
                 NFD_PathSet_FreeEnum(&enumerator);
@@ -159,8 +166,11 @@ export namespace RE
             {
                 return "";
             }
-
+#ifdef _WIN32
             std::string path(WCharToString(outPath));
+#else
+            std::string path(outPath);
+#endif
             NFD_FreePathN(outPath);
             return path;
         }
@@ -184,8 +194,11 @@ export namespace RE
             {
                 return "";
             }
-
+#ifdef _WIN32
             std::string path(WCharToString(outPath));
+#else
+            std::string path(outPath);
+#endif
             NFD_FreePathN(outPath);
             return path;
         }
@@ -218,7 +231,11 @@ export namespace RE
                 nfdnchar_t* outPath = nullptr;
                 while (NFD_PathSet_EnumNextN(&enumerator, &outPath) == NFD_OKAY)
                 {
+#ifdef _WIN32
                     paths.push_back(WCharToString(outPath));
+#else
+                    paths.push_back(outPath);
+#endif
                     NFD_PathSet_FreePathN(outPath);
                 }
                 NFD_PathSet_FreeEnum(&enumerator);
