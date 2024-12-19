@@ -2,9 +2,6 @@
 
 #include "RL_Application.h"
 
-#include <rapidjson/document.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
@@ -14,6 +11,7 @@
 import FileSystem;
 import Dialogs;
 import GUIManager;
+import JSON;
 
 bool RL_Projects::Init()
 {
@@ -92,35 +90,11 @@ void RL_Projects::DrawGUI()
 
                     if (ImGui::Button("Generate"))
                     {
-                        rapidjson::Document _template;
+                        if (GenerateProject(_name.c_str(), project_selected.c_str()))
                         {
-                            std::string _tempate_str = RE::FileSystem::Read(PROJECT_CONFIG_TEMPLATE);
-                            _template.Parse(_tempate_str.c_str());
+                            _projects.push_back({_name + ".reproject", project_selected + _name});
+                            Save();
                         }
-                        _template["Project"]["name"].SetString(_name.c_str(), _template.GetAllocator());
-                        _template["Window"]["title"].SetString(_name.c_str(), _template.GetAllocator());
-
-                        rapidjson::StringBuffer s_buffer;
-                        rapidjson::Writer<rapidjson::StringBuffer> writer(s_buffer);
-                        _template.Accept(writer);
-                        s_buffer.Put('\0');
-
-                        Project _p;
-                        _p.name = _name;
-
-                        _name += ".reproject";
-                        project_selected += '\\';
-                        RE::FileSystem::WriteOutside(project_selected.c_str(), _name.c_str(), s_buffer.GetString(),
-                                                     s_buffer.GetSize());
-
-                        std::string _imgui = RE::FileSystem::Read(IMGUI_CONFIG_TEMPLATE);
-                        if (!_imgui.empty())
-                            RE::FileSystem::WriteOutside(project_selected.c_str(), IMGUI_CONFIG_TEMPLATE,
-                                                         _imgui.c_str(), _imgui.size());
-
-                        _p.path = project_selected + _name;
-                        _projects.push_back(_p);
-                        Save();
 
                         _name = "Project Name";
                         project_selected.clear();
@@ -131,23 +105,13 @@ void RL_Projects::DrawGUI()
                 break;
                 case RL_Projects::State::LOAD:
                 {
-                    rapidjson::Document _project;
-                    std::string _config = RE::FileSystem::ReadOutside(project_selected.c_str());
-                    if (!_config.empty())
+                    std::string _loadName;
+                    if (LoadProject(project_selected.c_str(), _loadName))
                     {
-                        _project.Parse(_config.c_str());
-                        auto _project_settings = _project.FindMember("Project");
-                        if (_project_settings != _project.MemberEnd())
-                        {
-                            Project _p;
-                            _p.name = std::string(_project_settings->value["name"].GetString(),
-                                                  _project_settings->value["name"].GetStringLength());
-                            _p.path = project_selected;
-                            _projects.push_back(_p);
-
-                            Save();
-                        }
+                        _projects.push_back({_loadName, project_selected});
+                        Save();
                     }
+
                     project_selected.clear();
                 }
                 break;
@@ -220,55 +184,116 @@ void RL_Projects::DrawGUI()
 
 void RL_Projects::Load()
 {
-    rapidjson::Document projects;
+    uint32_t _projectsIn = 0;
     {
         std::string data = RE::FileSystem::Read(PROJECTS_FILE);
-        projects.Parse(data.c_str());
+        if (data.empty())
+            return;
+        _projectsIn = RE::JSON::Parse(data);
     }
+    _projects.clear();
 
-    if (projects.IsArray())
+    RE::JSON::PushSelected(_projectsIn);
     {
-        auto _p = projects.GetArray();
-        rapidjson::Value* iter = _p.begin();
-
-        while (iter != _p.end())
+        using namespace RE::JSON::Value;
+        Array::PullMode();
+        while (Array::PullObject())
         {
             Project _add;
-            auto _v = iter->FindMember("name");
-            if (_v != iter->MemberEnd())
-                _add.name = _v->value.GetString();
-            _v = iter->FindMember("path");
-            if (_v != iter->MemberEnd())
-                _add.path = _v->value.GetString();
+            _add.name = PullString("name", "Project Name");
+            _add.path = PullString("path", "Project Path");
             _projects.push_back(_add);
-
-            iter++;
         }
+        Array::Disable();
     }
+    RE::JSON::Destroy();
+    RE::JSON::PopSelected();
 }
 
 void RL_Projects::Save() const
 {
-    rapidjson::Document projects;
-    projects.SetArray();
+    uint32_t _projectsOut = RE::JSON::Create();
+    std::string _buffer;
 
-    for (Project _p : _projects)
+    RE::JSON::PushSelected(_projectsOut);
     {
-        rapidjson::Value _val;
-        _val.SetObject();
+        using namespace RE::JSON::Value;
+        SetArray();
+        Array::Enable(true);
+        for (Project _p : _projects)
+        {
+            PushString(_p.name.c_str(), "name");
+            PushString(_p.path.c_str(), "path");
+            Array::PushObject();
+        }
+        Array::Disable();
 
-        _val.AddMember("name", rapidjson::Value().SetString(_p.name.c_str(), projects.GetAllocator()),
-                       projects.GetAllocator());
-        _val.AddMember("path", rapidjson::Value().SetString(_p.path.c_str(), projects.GetAllocator()),
-                       projects.GetAllocator());
-
-        projects.PushBack(_val, projects.GetAllocator());
+        _buffer = RE::JSON::GetBuffer();
+        RE::JSON::Destroy();
     }
+    RE::JSON::PopSelected();
 
-    rapidjson::StringBuffer s_buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(s_buffer);
-    projects.Accept(writer);
-    s_buffer.Put('\0');
+    RE::FileSystem::Write("", "projects.json", _buffer.c_str(), _buffer.size());
+}
 
-    RE::FileSystem::Write("", "projects.json", s_buffer.GetString(), s_buffer.GetSize());
+bool RL_Projects::GenerateProject(const char* _name, const char* _path)
+{
+    uint32_t _template = 0;
+    std::string _buffer;
+    {
+        // Todo, sometimes the template is not found
+        std::string _tempate_str = RE::FileSystem::Read(PROJECT_CONFIG_TEMPLATE);
+        if (_tempate_str.empty())
+            return false;
+        _template = RE::JSON::Parse(_tempate_str);
+    }
+    RE::JSON::PushSelected(_template);
+    {
+        using namespace RE::JSON::Value;
+        Push("Project");
+        SetObject();
+        PushString(_name, "name");
+        Pop();
+        Push("Window");
+        SetObject();
+        PushString(_name, "title");
+
+        _buffer = RE::JSON::GetBuffer();
+        RE::JSON::Destroy();
+    }
+    RE::JSON::PopSelected();
+
+    std::string name(_name);
+    name += ".reproject";
+    std::string path(_path);
+    path += '\\';
+    RE::FileSystem::WriteOutside(path.c_str(), name.c_str(), _buffer.c_str(), _buffer.size());
+
+    std::string _imgui = RE::FileSystem::Read(IMGUI_CONFIG_TEMPLATE);
+    if (_imgui.empty())
+        return false;
+    RE::FileSystem::WriteOutside(path.c_str(), IMGUI_CONFIG_TEMPLATE, _imgui.c_str(), _imgui.size());
+
+    return true;
+}
+
+bool RL_Projects::LoadProject(const char* path, std::string& outName)
+{
+    uint32_t _project = 0;
+    std::string _buffer;
+    {
+        std::string _tempate_str = RE::FileSystem::ReadOutside(path);
+        if (_tempate_str.empty())
+            return false;
+        _project = RE::JSON::Parse(_tempate_str);
+    }
+    RE::JSON::PushSelected(_project);
+    {
+        using namespace RE::JSON::Value;
+        Push("Project");
+        outName = PullString("name", "RedEye Project");
+        RE::JSON::Destroy();
+    }
+    RE::JSON::PopSelected();
+    return true;
 }

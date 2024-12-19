@@ -21,3 +21,19 @@ target_link_libraries(Lens PRIVATE
     $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
     rapidjson
 )
+
+# Define the destination directory
+set(DESTINATION_DIR ${CMAKE_BINARY_DIR}/source/Lens)
+
+# Create a custom command to copy files
+add_custom_command(
+    TARGET Lens POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/OutputFiles/imgui.ini
+        ${DESTINATION_DIR}/imgui.ini
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/OutputFiles/template
+        ${DESTINATION_DIR}/template
+    COMMENT "Copying resource files to output directory"
+)
