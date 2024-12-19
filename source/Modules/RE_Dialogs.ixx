@@ -153,14 +153,16 @@ export namespace RE
             const wchar_t* cwDefaultPath = wDefaultPath.c_str();
             std::wstring wFilterList = CharToWChar(filterList);
             const wchar_t* cwFilterList = wFilterList.c_str();
+            const wchar_t* empty = L"";
 #else
             const char* cwDefaultPath = defaultPath;
             const char* cwFilterList = filterList;
+            const char* empty = "";
 #endif
 
             nfdnchar_t* outPath = nullptr;
             nfdnfilteritem_t filterItem = {cwFilterList, cwFilterList};
-            nfdsavedialognargs_t args = {&filterItem, 1, cwDefaultPath, L"", {0, nullptr}};
+            nfdsavedialognargs_t args = {&filterItem, 1, cwDefaultPath, empty, {0, nullptr}};
 
             if (NFD_SaveDialogN_With(&outPath, &args) != NFD_OKAY)
             {
