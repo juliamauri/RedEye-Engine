@@ -13,25 +13,28 @@ export module JSON;
 struct JsonContainer
 {
     rapidjson::Document document;
-    std::string pointer;
+    std::string pointer = "";
 };
-static std::unordered_map<uint32_t, JsonContainer> _jsons;
-static uint32_t _nextId = 1;
-static uint32_t _selected = 0;
+std::unordered_map<uint32_t, JsonContainer> _jsons;
+uint32_t _nextId = 1;
+uint32_t _selected = 0;
 
-static bool _isArray = false;
-static rapidjson::Value* _array = nullptr;
+bool _isArray = false;
+rapidjson::Value* _array = nullptr;
+bool _isArrayObject = false;
+rapidjson::Value _arrayObject;
+rapidjson::Value* _arrayIter = nullptr;
 
 /**
  * @brief Gets the ID of the JSON container to use.
  * @param id The ID of the JSON container.
  * @return The ID of the JSON container to use.
  */
-static inline uint32_t GetID(const uint32_t id)
+inline uint32_t GetID(const uint32_t id)
 {
-    // ASSERT: _selected == id == 0 || _selected > 0 && id == 0
+    // ASSERT: _selected == 0 && id > 0 || _selected > 0 && id == 0
     uint32_t _options[2] = {id, _selected};
-    return _options[_selected];
+    return _options[static_cast<bool>(_selected)];
 }
 
 /**
@@ -40,7 +43,7 @@ static inline uint32_t GetID(const uint32_t id)
  * @param name The name to append to the pointer.
  * @return The updated JSON pointer string.
  */
-static inline std::string GetPointer(std::string& pointer, const char* name)
+inline std::string GetPointer(std::string& pointer, const char* name)
 {
     return name ? pointer + "/" + name : pointer;
 }
@@ -135,7 +138,9 @@ export namespace RE
              */
             void Push(const char* name, const uint32_t id = 0)
             {
-                _jsons[GetID(id)].pointer += '/' + name;
+                std::string& pointer = _jsons[GetID(id)].pointer;
+                pointer += "/";
+                pointer += name;
             }
 
             /**
@@ -144,8 +149,8 @@ export namespace RE
              */
             void Pop(const uint32_t id = 0)
             {
-                std::string& pointer = _jsons[GetID(id)].pointer;
-                pointer = pointer.substr(0, pointer.find_last_of('/'));
+                JsonContainer& jc = _jsons[GetID(id)];
+                jc.pointer = jc.pointer.substr(0, jc.pointer.find_last_of('/'));
             }
 
             /**
@@ -172,34 +177,93 @@ export namespace RE
             {
                 /**
                  * @brief Enables array mode for the current JSON container.
+                 * @param pushObjects Whether to push objects into the array.
                  * @param id The ID of the JSON container.
                  */
-                void EnableArray(const uint32_t id = 0)
+                void Enable(bool pushObjects, const uint32_t id = 0)
                 {
                     _isArray = true;
                     JsonContainer& jc = _jsons[GetID(id)];
                     _array = rapidjson::Pointer(jc.pointer.c_str()).Get(jc.document);
+                    if (pushObjects)
+                    {
+                        _isArrayObject = true;
+                        _arrayObject = rapidjson::Value();
+                        _arrayObject.SetObject();
+                    }
+                }
+
+                /**
+                 * @brief Enables pull mode for the current JSON container.
+                 * @param name The name to pull from the JSON container.
+                 * @param id The ID of the JSON container.
+                 * @return True if the value is an array, false otherwise.
+                 */
+                bool PullMode(const char* name = nullptr, const uint32_t id = 0)
+                {
+                    JsonContainer& jc = _jsons[GetID(id)];
+                    rapidjson::Value* val = rapidjson::Pointer(GetPointer(jc.pointer, name).c_str()).Get(jc.document);
+                    if (val->IsArray() == false)
+                    {
+                        return false;
+                    }
+                    _isArray = true;
+                    _array = val;
+                    return true;
                 }
 
                 /**
                  * @brief Disables array mode for the current JSON container.
                  */
-                void DisableArray()
+                void Disable()
                 {
                     _isArray = false;
                     _array = nullptr;
+                    _isArrayObject = false;
+                    _arrayIter = nullptr;
+                    _arrayObject = rapidjson::Value();
+                    _arrayObject.SetObject();
                 }
 
                 /**
-                 * @brief Pushes a new value onto the current JSON array.
+                 * @brief Pushes a new object onto the current JSON array.
                  * @param id The ID of the JSON container.
                  */
-                void Push(const uint32_t id = 0)
+                void PushObject(const uint32_t id = 0)
+                {
+                    if (_isArray && _isArrayObject)
+                    {
+                        // ASSERT: _isArray == true && _isArrayObject == true
+                        // TODO: how to handle value types
+                        JsonContainer& jc = _jsons[GetID(id)];
+                        _array->PushBack(_arrayObject, jc.document.GetAllocator());
+                        _arrayObject = rapidjson::Value();
+                        _arrayObject.SetObject();
+                    }
+                }
+
+                /**
+                 * @brief Pulls the next object from the current JSON array.
+                 * @param id The ID of the JSON container.
+                 * @return True if there are more objects to pull, false otherwise.
+                 */
+                bool PullObject(const uint32_t id = 0)
                 {
                     // ASSERT: _isArray == true
-                    // TODO: how to handle value types
-                    JsonContainer& jc = _jsons[GetID(id)];
-                    _array->PushBack(rapidjson::Value(), jc.document.GetAllocator());
+                    if (_isArray)
+                    {
+                        if (_arrayIter == nullptr)
+                        {
+                            _arrayIter = _array->Begin();
+                        }
+                        else
+                        {
+                            _arrayIter++;
+                        }
+                        // ASSERT: _arrayIter->IsObject() == true
+
+                        return _arrayIter != _array->End();
+                    }
                 }
             } // namespace Array
 
@@ -212,7 +276,16 @@ export namespace RE
             void PushString(const char* value, const char* name = nullptr, const uint32_t id = 0)
             {
                 JsonContainer& jc = _jsons[GetID(id)];
-                rapidjson::Pointer(GetPointer(jc.pointer, name).c_str()).Set(jc.document, value);
+                if (_isArray && _isArrayObject)
+                {
+                    _arrayObject.AddMember(rapidjson::Value().SetString(name, jc.document.GetAllocator()),
+                                           rapidjson::Value().SetString(value, jc.document.GetAllocator()),
+                                           jc.document.GetAllocator());
+                }
+                else
+                {
+                    rapidjson::Pointer(GetPointer(jc.pointer, name).c_str()).Set(jc.document, value);
+                }
             }
 
             /**
@@ -224,9 +297,17 @@ export namespace RE
              */
             std::string PullString(const char* name, const char* deflt, const uint32_t id = 0)
             {
-                JsonContainer& jc = _jsons[GetID(id)];
-                rapidjson::Value* val = rapidjson::Pointer(jc.pointer.c_str()).Get(jc.document);
-                return val ? val->GetString() : deflt;
+                if (_isArray && _array && _arrayIter)
+                {
+                    // ASSERT: _arrayIter != _array->End()
+                    return _arrayIter->FindMember(name)->value.GetString();
+                }
+                else
+                {
+                    JsonContainer& jc = _jsons[GetID(id)];
+                    rapidjson::Value* val = rapidjson::Pointer(GetPointer(jc.pointer, name).c_str()).Get(jc.document);
+                    return val ? val->GetString() : deflt;
+                }
             }
 
         } // namespace Value
