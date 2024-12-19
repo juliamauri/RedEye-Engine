@@ -10,7 +10,7 @@ JR_Input* JR_Input::instance = nullptr;
 bool JR_Input::Init()
 {
     instance = this;
-    RE::Event::SetInputListener(StaticEventListener);
+    RE::Event::SetInputListener(&JR_Input::StaticEventListener);
     return true;
 }
 
