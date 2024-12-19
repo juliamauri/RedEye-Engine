@@ -73,7 +73,7 @@ void RL_Projects::DrawGUI()
                     project_selected = RE::Dialogs::PickFolder(nullptr);
                     break;
                 case RL_Projects::State::LOAD:
-                    project_selected = RE::Dialogs::OpenDialog(L"reproject", RE::FileSystem::GetExecutableDirectory());
+                    project_selected = RE::Dialogs::OpenDialog("reproject", RE::FileSystem::GetExecutableDirectory());
                     break;
             }
         }

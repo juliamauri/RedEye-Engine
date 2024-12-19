@@ -61,12 +61,21 @@ export namespace RE
          * @param defaultPath The default path for the file dialog.
          * @return The selected file path as a string.
          */
-        std::string OpenDialog(const wchar_t* filterList = nullptr, const char* defaultPath = nullptr)
+        std::string OpenDialog(const char* filterList = nullptr, const char* defaultPath = nullptr)
         {
-            nfdnchar_t* outPath = nullptr;
-            nfdnfilteritem_t filterItem = {filterList, filterList};
+#ifdef _WIN32
             std::wstring wDefaultPath = CharToWChar(defaultPath);
-            nfdopendialognargs_t args = {&filterItem, 1, wDefaultPath.c_str(), {0, nullptr}};
+            const wchar_t* cwDefaultPath = wDefaultPath.c_str();
+            std::wstring wFilterList = CharToWChar(filterList);
+            const wchar_t* cwFilterList = wFilterList.c_str();
+#else
+            const char* cwDefaultPath = defaultPath;
+            const char* cwFilterList = filterList;
+#endif
+
+            nfdnchar_t* outPath = nullptr;
+            nfdnfilteritem_t filterItem = {cwFilterList, cwFilterList};
+            nfdopendialognargs_t args = {&filterItem, 1, cwDefaultPath, {0, nullptr}};
 
             if (NFD_OpenDialogN_With(&outPath, &args) != NFD_OKAY)
             {
@@ -85,13 +94,22 @@ export namespace RE
          * @param defaultPath The default path for the file dialog.
          * @return A vector of selected file paths as strings.
          */
-        std::vector<std::string> OpenDialogMultiple(const wchar_t* filterList = nullptr,
+        std::vector<std::string> OpenDialogMultiple(const char* filterList = nullptr,
                                                     const char* defaultPath = nullptr)
         {
-            const nfdpathset_t* outPaths = nullptr;
-            nfdnfilteritem_t filterItem = {filterList, filterList};
+#ifdef _WIN32
             std::wstring wDefaultPath = CharToWChar(defaultPath);
-            nfdopendialognargs_t args = {&filterItem, 1, wDefaultPath.c_str(), {0, nullptr}};
+            const wchar_t* cwDefaultPath = wDefaultPath.c_str();
+            std::wstring wFilterList = CharToWChar(filterList);
+            const wchar_t* cwFilterList = wFilterList.c_str();
+#else
+            const char* cwDefaultPath = defaultPath;
+            const char* cwFilterList = filterList;
+#endif
+
+            const nfdpathset_t* outPaths = nullptr;
+            nfdnfilteritem_t filterItem = {cwFilterList, cwFilterList};
+            nfdopendialognargs_t args = {&filterItem, 1, cwDefaultPath, {0, nullptr}};
 
             if (NFD_OpenDialogMultipleN_With(&outPaths, &args) != NFD_OKAY)
             {
@@ -121,12 +139,21 @@ export namespace RE
          * @param defaultPath The default path for the save file dialog.
          * @return The selected file path as a string.
          */
-        std::string SaveDialog(const wchar_t* filterList = nullptr, const char* defaultPath = nullptr)
+        std::string SaveDialog(const char* filterList = nullptr, const char* defaultPath = nullptr)
         {
-            nfdnchar_t* outPath = nullptr;
-            nfdnfilteritem_t filterItem = {filterList, filterList};
+#ifdef _WIN32
             std::wstring wDefaultPath = CharToWChar(defaultPath);
-            nfdsavedialognargs_t args = {&filterItem, 1, wDefaultPath.c_str(), L"", {0, nullptr}};
+            const wchar_t* cwDefaultPath = wDefaultPath.c_str();
+            std::wstring wFilterList = CharToWChar(filterList);
+            const wchar_t* cwFilterList = wFilterList.c_str();
+#else
+            const char* cwDefaultPath = defaultPath;
+            const char* cwFilterList = filterList;
+#endif
+
+            nfdnchar_t* outPath = nullptr;
+            nfdnfilteritem_t filterItem = {cwFilterList, cwFilterList};
+            nfdsavedialognargs_t args = {&filterItem, 1, cwDefaultPath, L"", {0, nullptr}};
 
             if (NFD_SaveDialogN_With(&outPath, &args) != NFD_OKAY)
             {
