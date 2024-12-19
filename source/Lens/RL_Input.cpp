@@ -4,10 +4,21 @@
 
 import EventSystem;
 
+JR_Input* JR_Input::instance = nullptr;
+
 bool JR_Input::Init()
 {
-    RE::Event::SetInputListener([this](SDL_Event* event) { this->EventListener(event); });
+    instance = this;
+    RE::Event::SetInputListener(StaticEventListener);
     return true;
+}
+
+void JR_Input::StaticEventListener(SDL_Event* event)
+{
+    if (instance)
+    {
+        instance->EventListener(event);
+    }
 }
 
 void JR_Input::EventListener(SDL_Event* event)
