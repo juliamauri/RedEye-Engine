@@ -30,6 +30,9 @@ class RL_Projects
     void Load();
     void Save() const;
 
+    bool GenerateProject(const char* name, const char* path);
+    bool LoadProject(const char* path, std::string& outName);
+
   private:
     static constexpr const char* PROJECTS_FILE = "WriteDir/Projects.json";
     static constexpr const char* PROJECT_CONFIG_TEMPLATE = "template";
