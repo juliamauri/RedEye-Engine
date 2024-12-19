@@ -1,6 +1,7 @@
 module;
 
 #include <codecvt>
+#include <locale>
 #include <nfd.h>
 #include <string>
 #include <vector>
@@ -16,13 +17,8 @@ namespace
      */
     std::string WCharToString(const wchar_t* wstr)
     {
-        // Create a wstring_convert object using codecvt_utf8
         std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-
-        // Convert the wchar_t* to std::string
-        std::string str = converter.to_bytes(wstr);
-
-        return str;
+        return converter.to_bytes(wstr);
     }
 
     /**
@@ -30,14 +26,10 @@ namespace
      * @param str The UTF-8 encoded string to convert.
      * @return The wide character string.
      */
-    wchar_t* CharToWChar(const char* str)
+    std::wstring CharToWChar(const char* str)
     {
-        if (str == nullptr)
-            return nullptr;
-        size_t len = std::strlen(str) + 1;
-        wchar_t* wstr = new wchar_t[len];
-        std::mbstowcs(wstr, str, len);
-        return wstr;
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+        return converter.from_bytes(str);
     }
 } // namespace
 
@@ -73,15 +65,13 @@ export namespace RE
         {
             nfdnchar_t* outPath = nullptr;
             nfdnfilteritem_t filterItem = {filterList, filterList};
-            wchar_t* wDefaultPath = CharToWChar(defaultPath);
-            nfdopendialognargs_t args = {&filterItem, 1, wDefaultPath, {0, nullptr}};
+            std::wstring wDefaultPath = CharToWChar(defaultPath);
+            nfdopendialognargs_t args = {&filterItem, 1, wDefaultPath.c_str(), {0, nullptr}};
 
             if (NFD_OpenDialogN_With(&outPath, &args) != NFD_OKAY)
             {
-                delete[] wDefaultPath;
                 return "";
             }
-            delete[] wDefaultPath;
 
             std::string path(WCharToString(outPath));
             NFD_FreePathN(outPath);
@@ -100,15 +90,13 @@ export namespace RE
         {
             const nfdpathset_t* outPaths = nullptr;
             nfdnfilteritem_t filterItem = {filterList, filterList};
-            wchar_t* wDefaultPath = CharToWChar(defaultPath);
-            nfdopendialognargs_t args = {&filterItem, 1, wDefaultPath, {0, nullptr}};
+            std::wstring wDefaultPath = CharToWChar(defaultPath);
+            nfdopendialognargs_t args = {&filterItem, 1, wDefaultPath.c_str(), {0, nullptr}};
 
             if (NFD_OpenDialogMultipleN_With(&outPaths, &args) != NFD_OKAY)
             {
-                delete[] wDefaultPath;
                 return {};
             }
-            delete[] wDefaultPath;
 
             std::vector<std::string> paths;
             nfdpathsetenum_t enumerator;
@@ -137,15 +125,13 @@ export namespace RE
         {
             nfdnchar_t* outPath = nullptr;
             nfdnfilteritem_t filterItem = {filterList, filterList};
-            wchar_t* wDefaultPath = CharToWChar(defaultPath);
-            nfdsavedialognargs_t args = {&filterItem, 1, wDefaultPath, L"", {0, nullptr}};
+            std::wstring wDefaultPath = CharToWChar(defaultPath);
+            nfdsavedialognargs_t args = {&filterItem, 1, wDefaultPath.c_str(), L"", {0, nullptr}};
 
             if (NFD_SaveDialogN_With(&outPath, &args) != NFD_OKAY)
             {
-                delete[] wDefaultPath;
                 return "";
             }
-            delete[] wDefaultPath;
 
             std::string path(WCharToString(outPath));
             NFD_FreePathN(outPath);
@@ -160,14 +146,12 @@ export namespace RE
         std::string PickFolder(const char* defaultPath)
         {
             nfdnchar_t* outPath = nullptr;
-            wchar_t* wDefaultPath = CharToWChar(defaultPath);
+            std::wstring wDefaultPath = CharToWChar(defaultPath);
 
-            if (NFD_PickFolderN(&outPath, wDefaultPath) != NFD_OKAY)
+            if (NFD_PickFolderN(&outPath, wDefaultPath.c_str()) != NFD_OKAY)
             {
-                delete[] wDefaultPath;
                 return "";
             }
-            delete[] wDefaultPath;
 
             std::string path(WCharToString(outPath));
             NFD_FreePathN(outPath);
@@ -183,14 +167,12 @@ export namespace RE
         std::vector<std::string> PickFolderMultiple(const char* defaultPath = nullptr)
         {
             const nfdpathset_t* outPaths = nullptr;
-            wchar_t* wDefaultPath = CharToWChar(defaultPath);
+            std::wstring wDefaultPath = CharToWChar(defaultPath);
 
-            if (NFD_PickFolderMultipleN(&outPaths, wDefaultPath) == NFD_OKAY)
+            if (NFD_PickFolderMultipleN(&outPaths, wDefaultPath.c_str()) != NFD_OKAY)
             {
-                delete[] wDefaultPath;
                 return {};
             }
-            delete[] wDefaultPath;
 
             std::vector<std::string> paths;
             nfdpathsetenum_t enumerator;
