@@ -1,5 +1,6 @@
 #include "RL_Input.h"
 
+#include <functional>
 #include <imgui_impl_sdl2.h>
 #include <typeinfo>
 
@@ -10,7 +11,8 @@ JR_Input* JR_Input::instance = nullptr;
 bool JR_Input::Init()
 {
     instance = this;
-    RE::Event::SetInputListener([](SDL_Event* event) { JR_Input::StaticEventListener(event); });
+    std::function<void(SDL_Event*)> listener = [](SDL_Event* event) { JR_Input::StaticEventListener(event); };
+    RE::Event::SetInputListener(listener);
     return true;
 }
 
