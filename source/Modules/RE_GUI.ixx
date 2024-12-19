@@ -7,24 +7,21 @@ module;
 
 export module GUI;
 
-namespace
+struct Window
 {
-    struct Window
-    {
-        std::string name;
-        ImGuiWindowFlags w_flags = ImGuiWindowFlags_None;
-        bool apply_styles = false;
-        ImVec2 title_align = {0.0f, 0.5f};
-        ImVec4 title_bg_color = {0.09f, 0.09f, 0.09f, 1.00f};
-        std::function<void()> DrawContent;
-    };
+    std::string name;
+    ImGuiWindowFlags w_flags = ImGuiWindowFlags_None;
+    bool apply_styles = false;
+    ImVec2 title_align = {0.0f, 0.5f};
+    ImVec4 title_bg_color = {0.09f, 0.09f, 0.09f, 1.00f};
+    std::function<void()> DrawContent;
+};
 
-    static std::vector<Window>& GetWindows()
-    {
-        static std::vector<Window> _windows;
-        return _windows;
-    }
-} // namespace
+static std::vector<Window>& GetWindows()
+{
+    static std::vector<Window> _windows;
+    return _windows;
+}
 
 export namespace RE
 {
