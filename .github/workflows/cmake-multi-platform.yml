@@ -75,6 +75,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      if: ${{ '${{ matrix.platform }}-release-${{ matrix.beauty_os }}' != 'x64-release-windows' }}
+      with:
+        submodules: true
+
+    - uses: actions/checkout@v4
+      if: ${{ '${{ matrix.platform }}-release-${{ matrix.beauty_os }}' == 'x64-release-windows' }}
       with:
         submodules: true
         fetch-depth: 0
