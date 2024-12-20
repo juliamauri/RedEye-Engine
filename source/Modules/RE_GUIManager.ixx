@@ -6,11 +6,11 @@ module;
 #include <imgui_impl_sdl2.h>
 #include <imgui_internal.h>
 
-export module GUIManager;
-
 import GUI;
 
-    /**
+export module GUIManager;
+
+/**
  * @brief Sets the style colors for the ImGui context.
  */
 void SetStyleColor()
