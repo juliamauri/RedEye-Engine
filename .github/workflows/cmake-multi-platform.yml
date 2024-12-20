@@ -156,7 +156,7 @@ jobs:
         $content += "sonar.projectKey=redeye_main"
         $content += "sonar.organization=redeye"
         $content += "sonar.projectVersion=$version"
-        $content += "sonar.sources=\\source\\Modules,\\source\\Lens,\\source\\Engine"
+        $content += "sonar.sources=source\\Modules,source\\Lens,source\\Engine"
 
         $content | Out-File -FilePath "${sourceDirectory}\sonar-project.properties" -Encoding utf8
 
