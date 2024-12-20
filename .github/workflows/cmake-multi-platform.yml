@@ -79,12 +79,12 @@ jobs:
       run: echo "build-config=${{ matrix.platform }}-release-${{ matrix.beauty_os }}" >> $GITHUB_ENV
 
     - uses: actions/checkout@v4
-      if: env.build-config != 'x64-release-windows'
+      if: ${{ env.build-config != 'x64-release-windows' }}
       with:
         submodules: true
 
     - uses: actions/checkout@v4
-      if: env.build-config == 'x64-release-windows'
+      if: ${{ env.build-config == 'x64-release-windows' }}
       with:
         submodules: true
         fetch-depth: 0
@@ -136,7 +136,7 @@ jobs:
       run: cmake --preset ${{ matrix.platform }}-release-${{ matrix.beauty_os }}
 
     - name: Create sonar-project.properties
-      if: env.build-config == 'x64-release-windows'
+      if: ${{ env.build-config == 'x64-release-windows' }}
       shell: pwsh
       run: |
         $sourceDirectory = "${{ github.workspace }}"
@@ -153,11 +153,11 @@ jobs:
         $content | Out-File -FilePath "${sourceDirectory}\sonar-project.properties" -Encoding utf8
 
     - name: Install sonar-scanner and build-wrapper
-      if: env.build-config == 'x64-release-windows'
+      if: ${{ env.build-config == 'x64-release-windows' }}
       uses: SonarSource/sonarcloud-github-c-cpp@v3
       
     - name: Run build-wrapper Release
-      if: env.build-config == 'x64-release-windows'
+      if: ${{ env.build-config == 'x64-release-windows' }}
       run: |
         build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-release-${{ matrix.beauty_os }}
 
@@ -170,7 +170,7 @@ jobs:
         sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
         
     - name: Build Release 
-      if: env.build-config != 'x64-release-windows'
+      if: ${{ env.build-config != 'x64-release-windows' }}
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-release-${{ matrix.beauty_os }}
 
