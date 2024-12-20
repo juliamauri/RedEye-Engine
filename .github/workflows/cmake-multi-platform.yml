@@ -138,7 +138,7 @@ jobs:
         $content += "sonar.projectKey=redeye_main"
         $content += "sonar.organization=redeye"
         $content += "sonar.projectVersion=$version"
-        $content += "sonar.sources=${sourceDirectory}/source"
+        $content += "sonar.sources=${sourceDirectory}\source"
 
         $content | Out-File -FilePath "${sourceDirectory}\sonar-project.properties" -Encoding utf8
 
@@ -160,7 +160,7 @@ jobs:
         sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
         
     - name: Build Release 
-      if: matrix.os != 'windows-latest' && matrix.platform != 'x64'
+      if: ${{ '${{ matrix.platform }}-release-${{ matrix.beauty_os }}' != 'asads' }}
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-release-${{ matrix.beauty_os }}
 
