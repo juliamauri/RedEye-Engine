@@ -76,15 +76,21 @@ jobs:
     steps:
     - name: Set build config
       id: set-build-config
-      run: echo "build-config=${{ matrix.platform }}-release-${{ matrix.beauty_os }}" >> $GITHUB_ENV
+      run: |
+        echo "build-config=${{ matrix.platform }}-release-${{ matrix.beauty_os }}" >> $GITHUB_ENV
+        if [ "${{ matrix.platform }}-release-${{ matrix.beauty_os }}" == "x64-release-windows" ]; then
+          echo "is_x64_release_windows=true" >> $GITHUB_ENV
+        else
+          echo "is_x64_release_windows=false" >> $GITHUB_ENV
+        fi
 
     - uses: actions/checkout@v4
-      if: ${{ env.build-config != 'x64-release-windows' }}
+      if: env.is_x64_release_windows == 'false'
       with:
         submodules: true
 
     - uses: actions/checkout@v4
-      if: ${{ env.build-config == 'x64-release-windows' }}
+      if: env.is_x64_release_windows == 'true'
       with:
         submodules: true
         fetch-depth: 0
@@ -136,7 +142,7 @@ jobs:
       run: cmake --preset ${{ matrix.platform }}-release-${{ matrix.beauty_os }}
 
     - name: Create sonar-project.properties
-      if: ${{ env.build-config == 'x64-release-windows' }}
+      if: env.is_x64_release_windows == 'true'
       shell: pwsh
       run: |
         $sourceDirectory = "${{ github.workspace }}"
@@ -153,16 +159,16 @@ jobs:
         $content | Out-File -FilePath "${sourceDirectory}\sonar-project.properties" -Encoding utf8
 
     - name: Install sonar-scanner and build-wrapper
-      if: ${{ env.build-config == 'x64-release-windows' }}
+      if: env.is_x64_release_windows == 'true'
       uses: SonarSource/sonarcloud-github-c-cpp@v3
       
     - name: Run build-wrapper Release
-      if: ${{ env.build-config == 'x64-release-windows' }}
+      if: env.is_x64_release_windows == 'true'
       run: |
         build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-release-${{ matrix.beauty_os }}
 
     - name: Run sonar-scanner
-      if: env.build-config == 'x64-release-windows'
+      if: env.is_x64_release_windows == 'false'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
