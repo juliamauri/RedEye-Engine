@@ -6,9 +6,9 @@ module;
 #include <imgui_impl_sdl2.h>
 #include <imgui_internal.h>
 
-import GUI;
-
 export module GUIManager;
+
+import GUI;
 
 /**
  * @brief Sets the style colors for the ImGui context.
