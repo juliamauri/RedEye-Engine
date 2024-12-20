@@ -148,9 +148,10 @@ jobs:
       shell: pwsh
       run: |
         $sourceDirectory = "${{ github.workspace }}"
+        $branch = "${{ github.ref }}" -replace '^refs/heads/', ''
         $majorVersion = 6
         $minorVersion = 0
-        $shaVersion = git --git-dir="${sourceDirectory}\.git" rev-parse --short origin/master | Out-String
+        $shaVersion = git --git-dir="${sourceDirectory}\.git" rev-parse --short $branch | Out-String
         $version = "${majorVersion}.${minorVersion}.${shaVersion.Trim()}"
         $content = @( )
         $content += "sonar.projectKey=redeye_main"
