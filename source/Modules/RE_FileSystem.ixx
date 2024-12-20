@@ -98,7 +98,7 @@ export namespace RE
             NewDir(path);
 
             PHYSFS_file* myfile = PHYSFS_openWrite(filepath.c_str());
-            int length_writed = PHYSFS_write(myfile, buff, 1, buff_size);
+            int length_writed = PHYSFS_writeBytes(myfile, buff, buff_size);
             PHYSFS_close(myfile);
         }
 
@@ -133,7 +133,7 @@ export namespace RE
                 PHYSFS_ErrorCode _direrr = PHYSFS_getLastErrorCode();
                 int i = 0;
             }
-            int length_writed = PHYSFS_write(myfile, buff, 1, buff_size);
+            int length_writed = PHYSFS_writeBytes(myfile, buff, buff_size);
             PHYSFS_close(myfile);
 
             if (PHYSFS_unmount(path) == 0)
@@ -163,13 +163,13 @@ export namespace RE
             std::string ret("");
             if (PHYSFS_exists(filepath) != 0)
             {
-                PHYSFS_file* myfile2 = PHYSFS_openRead(filepath);
-                PHYSFS_sint64 file_size = PHYSFS_fileLength(myfile2);
-                char* myBuf2 = new char[file_size];
-                long long length_readed = PHYSFS_read(myfile2, myBuf2, 1, file_size);
-                ret.assign(myBuf2, file_size);
-                delete[] myBuf2;
-                PHYSFS_close(myfile2);
+                PHYSFS_file* myfile = PHYSFS_openRead(filepath);
+                PHYSFS_sint64 file_size = PHYSFS_fileLength(myfile);
+                char* myBuf = new char[file_size];
+                long long length_readed = PHYSFS_readBytes(myfile, myBuf, file_size);
+                ret.assign(myBuf, file_size);
+                delete[] myBuf;
+                PHYSFS_close(myfile);
                 return ret;
             }
             return ret;
@@ -203,13 +203,13 @@ export namespace RE
             std::string ret("");
             if (PHYSFS_exists(_read_path.c_str()) != 0)
             {
-                PHYSFS_file* myfile2 = PHYSFS_openRead(_read_path.c_str());
-                PHYSFS_sint64 file_size = PHYSFS_fileLength(myfile2);
-                char* myBuf2 = new char[file_size];
-                long long length_readed = PHYSFS_read(myfile2, myBuf2, 1, file_size);
-                ret.assign(myBuf2, file_size);
-                delete[] myBuf2;
-                PHYSFS_close(myfile2);
+                PHYSFS_file* myfile = PHYSFS_openRead(_read_path.c_str());
+                PHYSFS_sint64 file_size = PHYSFS_fileLength(myfile);
+                char* myBuf = new char[file_size];
+                long long length_readed = PHYSFS_readBytes(myfile, myBuf, file_size);
+                ret.assign(myBuf, file_size);
+                delete[] myBuf;
+                PHYSFS_close(myfile);
                 return ret;
             }
 
