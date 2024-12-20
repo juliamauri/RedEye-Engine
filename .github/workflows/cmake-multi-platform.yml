@@ -7,10 +7,13 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    env:
+      BUILD_WRAPPER_OUT_DIR: ${{ github.workspace }}/sonar
 
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
@@ -71,10 +74,29 @@ jobs:
             c_compiler: cl
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Set build config
+      id: set-build-config
+      shell: bash
+      run: |
+        if [ "${{ matrix.platform }}-release-${{ matrix.beauty_os }}" == "x64-release-windows" ]; then
+          echo "is_x64_release_windows=true" >> $GITHUB_ENV
+        else
+          echo "is_x64_release_windows=false" >> $GITHUB_ENV
+        fi
+
+    - name: Checkout  
+      uses: actions/checkout@v4
+      if: env.is_x64_release_windows == 'false'
       with:
         submodules: true
-        
+
+    - name: 'Checkout fetch-depth: 0'
+      uses: actions/checkout@v4 
+      if: env.is_x64_release_windows == 'true'
+      with:
+        submodules: true
+        fetch-depth: 0
+
     - name: Set reusable strings  
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
@@ -121,7 +143,42 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake --preset ${{ matrix.platform }}-release-${{ matrix.beauty_os }}
 
-    - name: Build Release
+    - name: Create sonar-project.properties
+      if: env.is_x64_release_windows == 'true'
+      shell: pwsh
+      run: |
+        $sourceDirectory = "${{ github.workspace }}"
+        $majorVersion = 6
+        $minorVersion = 0
+        $shaVersion = git --git-dir="${sourceDirectory}\.git" rev-parse --short origin/master | Out-String
+        $version = "${majorVersion}.${minorVersion}.${shaVersion.Trim()}"
+        $content = @( )
+        $content += "sonar.projectKey=redeye_main"
+        $content += "sonar.organization=redeye"
+        $content += "sonar.projectVersion=$version"
+        $content += "sonar.sources=source\\Modules,source\\Lens,source\\Engine"
+
+        $content | Out-File -FilePath "${sourceDirectory}\sonar-project.properties" -Encoding utf8
+
+    - name: Install sonar-scanner and build-wrapper
+      if: env.is_x64_release_windows == 'true'
+      uses: SonarSource/sonarcloud-github-c-cpp@v3
+      
+    - name: Run build-wrapper Release
+      if: env.is_x64_release_windows == 'true'
+      run: |
+        build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-release-${{ matrix.beauty_os }}
+
+    - name: Run sonar-scanner
+      if: env.is_x64_release_windows == 'true'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+        
+    - name: Build Release 
+      if: env.is_x64_release_windows == 'false'
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-release-${{ matrix.beauty_os }}
 
