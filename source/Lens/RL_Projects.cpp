@@ -144,7 +144,7 @@ void RL_Projects::DrawGUI()
                 ImGui::PopID();
 
                 ImGui::TableSetColumnIndex(1);
-                ImGui::Text(iter->name.c_str());
+                ImGui::TextUnformatted(iter->name.c_str());
 
                 ImGui::TableSetColumnIndex(2);
                 ImGui::PushID(("#RemoveProject_" + iter->name + std::to_string(count)).c_str());
@@ -153,7 +153,7 @@ void RL_Projects::DrawGUI()
                 ImGui::PopID();
 
                 ImGui::TableSetColumnIndex(3);
-                ImGui::Text(iter->path.c_str());
+                ImGui::TextUnformatted(iter->path.c_str());
             }
         }
         ImGui::EndTable();
