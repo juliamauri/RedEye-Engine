@@ -76,6 +76,7 @@ jobs:
     steps:
     - name: Set build config
       id: set-build-config
+      shell: bash
       run: |
         echo "build-config=${{ matrix.platform }}-release-${{ matrix.beauty_os }}" >> $GITHUB_ENV
         if [ "${{ matrix.platform }}-release-${{ matrix.beauty_os }}" == "x64-release-windows" ]; then
