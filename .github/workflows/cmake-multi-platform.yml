@@ -148,7 +148,8 @@ jobs:
       shell: pwsh
       run: |
         $sourceDirectory = "${{ github.workspace }}"
-        $branch = "${{ github.ref }}" -replace '^refs/heads/', ''
+        $branch = "${{ github.ref }}" -replace 'refs/heads/', ''
+        $branch = "origin/$branch"
         $majorVersion = 6
         $minorVersion = 0
         $shaVersion = git --git-dir="${sourceDirectory}\.git" rev-parse --short $branch | Out-String
