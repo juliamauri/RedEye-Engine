@@ -7,11 +7,8 @@ module;
 
 export module FileSystem;
 
-namespace
-{
-    std::string _exec_directory;
-    std::string _pref_directory;
-} // namespace
+std::string _exec_directory;
+std::string _pref_directory;
 
 export namespace RE
 {

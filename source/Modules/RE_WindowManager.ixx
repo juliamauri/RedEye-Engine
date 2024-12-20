@@ -6,10 +6,7 @@ module;
 
 export module WindowManager;
 
-namespace
-{
-    std::unordered_map<uint32_t, SDL_Window*> _windows;
-}
+std::unordered_map<uint32_t, SDL_Window*> _windows;
 
 export namespace RE
 {

@@ -8,11 +8,11 @@ module;
 
 export module EventSystem;
 
-static std::function<void(SDL_Event*)> _systemListener;
-static std::function<void(SDL_Event*)> _inputListener;
-static std::function<void(SDL_Event*)> _windowListener;
-static std::vector<unsigned int> _customEvents;
-static std::vector<std::function<void(SDL_Event*)>> _customlisteners;
+std::function<void(SDL_Event*)> _systemListener;
+std::function<void(SDL_Event*)> _inputListener;
+std::function<void(SDL_Event*)> _windowListener;
+std::vector<unsigned int> _customEvents;
+std::vector<std::function<void(SDL_Event*)>> _customlisteners;
 
 constexpr const uint32_t EVENT_NULL = -1;
 

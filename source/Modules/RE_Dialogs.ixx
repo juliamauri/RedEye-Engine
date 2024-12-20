@@ -8,30 +8,27 @@ module;
 
 export module Dialogs;
 
-namespace
+/**
+ * @brief Converts a wide character string to a UTF-8 encoded string.
+ * @param wstr The wide character string to convert.
+ * @return The UTF-8 encoded string.
+ */
+std::string WCharToString(const wchar_t* wstr)
 {
-    /**
-     * @brief Converts a wide character string to a UTF-8 encoded string.
-     * @param wstr The wide character string to convert.
-     * @return The UTF-8 encoded string.
-     */
-    std::string WCharToString(const wchar_t* wstr)
-    {
-        std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-        return converter.to_bytes(wstr);
-    }
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    return converter.to_bytes(wstr);
+}
 
-    /**
-     * @brief Converts a UTF-8 encoded string to a wide character string.
-     * @param str The UTF-8 encoded string to convert.
-     * @return The wide character string.
-     */
-    std::wstring CharToWChar(const char* str)
-    {
-        std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-        return converter.from_bytes(str);
-    }
-} // namespace
+/**
+ * @brief Converts a UTF-8 encoded string to a wide character string.
+ * @param str The UTF-8 encoded string to convert.
+ * @return The wide character string.
+ */
+std::wstring CharToWChar(const char* str)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    return converter.from_bytes(str);
+}
 
 export namespace RE
 {
