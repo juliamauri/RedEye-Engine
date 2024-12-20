@@ -177,7 +177,11 @@ void RL_Projects::DrawGUI()
             exec += '\"';
             exec += _open_path;
             exec += '\"';
-            system(exec.c_str());
+            int result = system(exec.c_str());
+            if (result != 0)
+            {
+                // Todo: Handle error
+            }
         }
     }
     ImGui::End();
