@@ -264,6 +264,7 @@ export namespace RE
 
                         return _arrayIter != _array->End();
                     }
+                    return false;
                 }
             } // namespace Array
 
