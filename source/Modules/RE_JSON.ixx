@@ -1,6 +1,7 @@
 module;
 
 #include <cstdint>
+#include <optional>
 #include <rapidjson/document.h>
 #include <rapidjson/pointer.h>
 #include <rapidjson/stringbuffer.h>
@@ -17,7 +18,7 @@ struct JsonContainer
 };
 std::unordered_map<uint32_t, JsonContainer> _jsons;
 uint32_t _nextId = 1;
-uint32_t _selected = 0;
+std::optional<uint32_t> _selected = std::nullopt;
 
 bool _isArray = false;
 rapidjson::Value* _array = nullptr;
@@ -32,9 +33,8 @@ rapidjson::Value* _arrayIter = nullptr;
  */
 inline uint32_t GetID(const uint32_t id)
 {
-    // ASSERT: _selected == 0 && id > 0 || _selected > 0 && id == 0
-    uint32_t _options[2] = {id, _selected};
-    return _options[static_cast<bool>(_selected)];
+    // ASSERT: !_selected.has_value() && id > 0 || _selected.has_value() && id == 0
+    return _selected.value_or(id);
 }
 
 /**
@@ -126,7 +126,7 @@ export namespace RE
          */
         void PopSelected()
         {
-            _selected = 0;
+            _selected.reset();
         }
 
         namespace Value
