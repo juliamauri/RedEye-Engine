@@ -1,0 +1,101 @@
+name: SonarCloud templete
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      platform:
+        required: true
+        type: string
+      beauty_os:
+        required: true
+        type: string
+      build_wrapper_out_dir:
+        required: true
+        type: string
+      build_dir:
+        required: true
+        type: string
+      sonar_token:
+        required: true
+        type: string
+      target_source:
+        required: true
+        type: string
+
+jobs:
+  sonarcloud:
+    runs-on: ${{ inputs.os }}
+    env:
+      BUILD_WRAPPER_OUT_DIR: ${{ inputs.build_wrapper_out_dir }}
+      BUILD_DIR: ${{ inputs.build_dir }}
+      BEAUTY_OS: ${{ inputs.beauty_os }}
+      PLATFORM: ${{ inputs.platform }}
+      C_COMPILER: "cl"
+      SONAR_TOKEN: ${{ inputs.sonar_token }}
+      TARGET_SOURCE: ${{ inputs.target_source }}
+
+    steps:
+    - name: 'Checkout fetch-depth: 0'
+      uses: actions/checkout@v4 
+      with:
+        submodules: true
+        fetch-depth: 0
+
+    - name: Fetch all branches
+      run: git fetch --all
+    
+    - name: Install dependencies (Windows)
+      run: choco install ninja
+    
+    - name: Set up Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: ${{ env.PLATFORM }}
+    
+    - name: Configure CMake Release
+      run: cmake --preset ${{ env.PLATFORM }}-release-${{ env.BEAUTY_OS }}
+
+    - name: Create sonar-project.properties
+      shell: pwsh
+      run: |
+        $sourceDirectory = "${{ github.workspace }}"
+        $majorVersion = 6
+        $minorVersion = 0
+
+        $branch = "${{ github.ref }}"
+        if($branch.Contains("refs/pull")) {
+            $branch = "${{ github.head_ref }}"
+        }
+        else {
+            $branch = $branch -replace 'refs/heads/', ''
+        }
+        Write-Host "Branch: $branch"
+        
+        $shaVersion = git rev-parse --short origin/$branch | Out-String
+        $version = "${majorVersion}.${minorVersion}.${shaVersion.Trim()}"
+        Write-Host "Version: $version"
+
+        $content = @( )
+        $content += "sonar.projectKey=redeye_main"
+        $content += "sonar.organization=redeye"
+        $content += "sonar.projectVersion=$version"
+        $content += "sonar.sources=${{ env.TARGET_SOURCE }}"
+        $content += "sonar.cfamily.enableModules=true"
+    
+        $content | Out-File -FilePath "${sourceDirectory}\sonar-project.properties" -Encoding utf8
+    
+    - name: Install sonar-scanner and build-wrapper
+      uses: SonarSource/sonarcloud-github-c-cpp@v3
+      
+    - name: Run build-wrapper Release
+      run: |
+        build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIR }}/${{ env.PLATFORM }}-release-${{ env.BEAUTY_OS }}
+    
+    - name: Run sonar-scanner
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+      run: sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"

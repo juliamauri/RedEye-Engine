@@ -1,0 +1,24 @@
+name: SonarCloud on Lens files
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'source/Lens/**'
+  pull_request:
+    branches: [ "main" ]
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'source/Lens/**'
+
+jobs:
+  sonarcloud:
+    uses: ./.github/workflows/sonarcloud-template.yml
+    with:
+      os: "windows-latest"
+      platform: "x64"
+      beauty_os: "windows"
+      build_wrapper_out_dir: ${{ github.workspace }}/sonar
+      build_dir: ${{ github.workspace }}/build
+      sonar_token: ${{ secrets.SONAR_TOKEN_LENS }}
+      target_source: "source\\Lens"

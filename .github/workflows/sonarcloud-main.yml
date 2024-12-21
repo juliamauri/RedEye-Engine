@@ -1,0 +1,20 @@
+name: SonarCloud on whole project files
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarcloud:
+    uses: ./.github/workflows/sonarcloud-template.yml
+    with:
+      os: "windows-latest"
+      platform: "x64"
+      beauty_os: "windows"
+      build_wrapper_out_dir: ${{ github.workspace }}/sonar
+      build_dir: ${{ github.workspace }}/build
+      sonar_token: ${{ secrets.SONAR_TOKEN }}
+      target_source: "source\\Engine,source\\Lens,source\\Modules"
