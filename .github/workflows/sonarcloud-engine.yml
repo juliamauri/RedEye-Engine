@@ -20,5 +20,6 @@ jobs:
       beauty_os: "windows"
       build_wrapper_out_dir: ${{ github.workspace }}/sonar
       target_source: "source\\Engine"
+      job_name: "Engine"
     secrets:
       sonar_token: ${{ secrets.SONAR_TOKEN_ENGINE }}

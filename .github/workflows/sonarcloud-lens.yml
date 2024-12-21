@@ -21,5 +21,6 @@ jobs:
       build_wrapper_out_dir: ${{ github.workspace }}/sonar
       build_dir: ${{ github.workspace }}/build
       target_source: "source\\Lens"
+      job_name: "Lens"
     secrets:
       sonar_token: ${{ secrets.SONAR_TOKEN_LENS }}
