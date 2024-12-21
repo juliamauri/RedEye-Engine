@@ -18,5 +18,6 @@ jobs:
       build_dir: ${{ github.workspace }}/build
       target_source: 'source\Engine,source\Lens,source\Modules'
       job_name: "Main"
+      project_key: "redeye_main"
     secrets:
       sonar_token: ${{ secrets.SONAR_TOKEN }}
