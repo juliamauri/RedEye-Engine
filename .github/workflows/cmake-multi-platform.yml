@@ -166,7 +166,7 @@ jobs:
         
         $shaVersion = git rev-parse --short origin/$branch | Out-String
         $version = "${majorVersion}.${minorVersion}.${shaVersion.Trim()}"
-        Write-Host "Version: $branch"
+        Write-Host "Version: $version"
 
         $content = @( )
         $content += "sonar.projectKey=redeye_main"
