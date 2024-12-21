@@ -16,7 +16,7 @@ jobs:
       beauty_os: "windows"
       build_wrapper_out_dir: ${{ github.workspace }}/sonar
       build_dir: ${{ github.workspace }}/build
-      target_source: 'source\Engine,source\Lens,source\Modules'
+      target_source: 'source/Engine,source/Lens,source/Modules'
       job_name: "Main"
       project_key: "redeye_main"
     secrets:

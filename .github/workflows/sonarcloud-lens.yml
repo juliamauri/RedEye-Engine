@@ -20,7 +20,7 @@ jobs:
       beauty_os: "windows"
       build_wrapper_out_dir: ${{ github.workspace }}/sonar
       build_dir: ${{ github.workspace }}/build
-      target_source: 'source\Lens'
+      target_source: 'source/Lens'
       job_name: "Lens"
       project_key: "redeye_lens"
     secrets:
