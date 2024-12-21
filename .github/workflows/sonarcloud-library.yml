@@ -22,5 +22,6 @@ jobs:
       build_dir: ${{ github.workspace }}/build
       target_source: 'source\Modules'
       job_name: "Library"
+      project_key: "redeye_library"
     secrets:
       sonar_token: ${{ secrets.SONAR_TOKEN_LIBRARY }}

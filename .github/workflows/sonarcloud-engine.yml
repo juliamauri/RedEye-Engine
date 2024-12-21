@@ -21,5 +21,6 @@ jobs:
       build_wrapper_out_dir: ${{ github.workspace }}/sonar
       target_source: 'source\Engine'
       job_name: "Engine"
+      project_key: "redeye_engine"
     secrets:
       sonar_token: ${{ secrets.SONAR_TOKEN_ENGINE }}

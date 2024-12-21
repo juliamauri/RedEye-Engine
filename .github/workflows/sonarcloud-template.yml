@@ -24,6 +24,9 @@ on:
       job_name:
         required: true
         type: string
+      project_key:
+        required: true
+        type: string
     secrets:
       sonar_token:
         required: true
@@ -86,7 +89,7 @@ jobs:
         Write-Host "Version: $version"
 
         $content = @( )
-        $content += "sonar.projectKey=redeye_main"
+        $content += "sonar.projectKey=${{ inputs.project_key }}"
         $content += "sonar.organization=redeye"
         $content += "sonar.projectVersion=$version"
         $content += "sonar.sources=${{ env.TARGET_SOURCE }}"
