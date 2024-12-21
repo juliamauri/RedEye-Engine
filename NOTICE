@@ -1,0 +1,41 @@
+
+NOTICE
+
+RedEye Engine  
+A 3D Game Engine written in C++.
+
+---
+
+Copyright
+Copyright (C) 2018-2024
+Julia Mauri and Ruben Sardon
+
+---
+
+License
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, visit:
+https://www.gnu.org/licenses/
+
+---
+
+Contributors
+- Julia Mauri
+- Ruben Sardon
+
+Contributions from the open-source community are welcome. Please follow the contribution guidelines outlined in the repository.
+
+---
+
+Contact  
+For questions, feedback, or support, please contact:
+- Julia Mauri: julimacowork@gmail.com
+- Ruben Sardon: ec4who@hotmail.com
+
+---
+
+Purpose of This File
+This file provides information about the copyright, license, and contributors of the RedEye Engine project. For detailed licensing terms, refer to the LICENSE file in the root directory of this repository.

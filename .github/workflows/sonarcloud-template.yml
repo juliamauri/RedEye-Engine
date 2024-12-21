@@ -15,9 +15,6 @@ on:
       build_wrapper_out_dir:
         required: true
         type: string
-      build_dir:
-        required: true
-        type: string
       target_source:
         required: true
         type: string
@@ -37,7 +34,6 @@ jobs:
     runs-on: ${{ inputs.os }}
     env:
       BUILD_WRAPPER_OUT_DIR: ${{ inputs.build_wrapper_out_dir }}
-      BUILD_DIR: ${{ inputs.build_dir }}
       BEAUTY_OS: ${{ inputs.beauty_os }}
       PLATFORM: ${{ inputs.platform }}
       TARGET_SOURCE: ${{ inputs.target_source }}
