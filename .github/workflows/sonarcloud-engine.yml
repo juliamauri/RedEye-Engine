@@ -1,0 +1,26 @@
+name: SonarCloud on engine files
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'source/Engine/**'
+  pull_request:
+    branches: [ "main" ]
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'source/Engine/**'
+
+jobs:
+  sonarcloud:
+    uses: ./.github/workflows/sonarcloud-template.yml
+    with:
+      os: "windows-latest"
+      platform: "x64"
+      beauty_os: "windows"
+      build_wrapper_out_dir: ${{ github.workspace }}/sonar
+      target_source: 'source/Engine'
+      job_name: "Engine"
+      project_key: "redeye_engine"
+    secrets:
+      sonar_token: ${{ secrets.SONAR_TOKEN_ENGINE }}
