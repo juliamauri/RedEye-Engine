@@ -86,7 +86,7 @@ jobs:
         Write-Host "Source Directory: $sourceDirectory"
         $branch = "${{ github.ref }}"
         Write-Host "Branch: $branch"
-        if($branc.Contains("refs/pull")) {
+        if($branch.Contains("refs/pull")) {
             $branch = "${{ github.head_ref }}"
             Write-Host "Branch: $branch"
         }
