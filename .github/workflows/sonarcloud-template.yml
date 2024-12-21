@@ -44,6 +44,12 @@ jobs:
 
     - name: Fetch all branches
       run: git fetch --all
+
+    - name: Set reusable strings  
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
     
     - name: Install dependencies (Windows)
       run: choco install ninja
@@ -90,7 +96,7 @@ jobs:
       
     - name: Run build-wrapper Release
       run: |
-        build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIR }}/${{ env.PLATFORM }}-release-${{ env.BEAUTY_OS }}
+        build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ env.BEAUTY_OS }}
     
     - name: Run sonar-scanner
       env:

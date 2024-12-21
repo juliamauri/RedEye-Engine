@@ -19,7 +19,6 @@ jobs:
       platform: "x64"
       beauty_os: "windows"
       build_wrapper_out_dir: ${{ github.workspace }}/sonar
-      build_dir: ${{ github.workspace }}/build
       target_source: "source\\Engine"
     secrets:
       sonar_token: ${{ secrets.SONAR_TOKEN_ENGINE }}
