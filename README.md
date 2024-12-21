@@ -1,4 +1,4 @@
-# Red Eye ![logo](https://github.com/juliamauri/RedEye-Engine/blob/master/docs/Multimedia/favicon-32x32.png?raw=true) Engine [![Build status](https://ci.appveyor.com/api/projects/status/swrp9sgx89yxl493?svg=true)](https://ci.appveyor.com/project/cumus/redeye-engine)
+# Red Eye ![logo](https://github.com/juliamauri/RedEye-Engine/blob/main/docs/Multimedia/favicon-32x32.png?raw=true) Engine [![Build status](https://ci.appveyor.com/api/projects/status/swrp9sgx89yxl493?svg=true)](https://ci.appveyor.com/project/cumus/redeye-engine)
 
 Red Eye is a 3D Game Engine written in C++.
 
