@@ -85,7 +85,7 @@ jobs:
         Write-Host "Branch: $branch"
         
         $shaVersion = git rev-parse --short origin/$branch | Out-String
-        $version = "${majorVersion}.${minorVersion}.${shaVersion.Trim()}"
+        $version = "${majorVersion}.${minorVersion}.${shaVersion}"
         Write-Host "Version: $version"
 
         $content = @( )
