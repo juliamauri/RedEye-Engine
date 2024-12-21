@@ -92,7 +92,7 @@ jobs:
         }
         $branch = $branch -replace 'refs/heads/', ''
         Write-Host "Branch: $branch"
-        $shaVersion = git --git-dir="${sourceDirectory}\.git" rev-parse --short origin/$branch | Out-String
+        $shaVersion = git rev-parse --short origin/$branch | Out-String
         Write-Host "SHA: $shaVersion"
         
 #   - name: Set build config
