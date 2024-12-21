@@ -3,9 +3,17 @@ name: SonarCloud on whole project files
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'source/Engine/**'
+      - 'source/Lens/**'
+      - 'source/Modules/**'
   pull_request:
     branches: [ "main" ]
     types: [opened, synchronize, reopened]
+    paths:
+      - 'source/Engine/**'
+      - 'source/Lens/**'
+      - 'source/Modules/**'
 
 jobs:
   sonarcloud:
