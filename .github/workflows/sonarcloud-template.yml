@@ -1,4 +1,4 @@
-name: SonarCloud templete
+name: SonarCloud template
 
 on:
   workflow_call:
@@ -18,12 +18,12 @@ on:
       build_dir:
         required: true
         type: string
-      sonar_token:
-        required: true
-        type: string
       target_source:
         required: true
         type: string
+    secrets:
+      sonar_token:
+        required: true
 
 jobs:
   sonarcloud:
@@ -33,8 +33,6 @@ jobs:
       BUILD_DIR: ${{ inputs.build_dir }}
       BEAUTY_OS: ${{ inputs.beauty_os }}
       PLATFORM: ${{ inputs.platform }}
-      C_COMPILER: "cl"
-      SONAR_TOKEN: ${{ inputs.sonar_token }}
       TARGET_SOURCE: ${{ inputs.target_source }}
 
     steps:
@@ -97,5 +95,5 @@ jobs:
     - name: Run sonar-scanner
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.sonar_token }}
       run: sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"

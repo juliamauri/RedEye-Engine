@@ -16,5 +16,6 @@ jobs:
       beauty_os: "windows"
       build_wrapper_out_dir: ${{ github.workspace }}/sonar
       build_dir: ${{ github.workspace }}/build
-      sonar_token: ${{ secrets.SONAR_TOKEN }}
       target_source: "source\\Engine,source\\Lens,source\\Modules"
+    secrets:
+      sonar_token: ${{ secrets.SONAR_TOKEN }}
