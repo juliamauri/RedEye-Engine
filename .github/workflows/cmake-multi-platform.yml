@@ -82,6 +82,8 @@ jobs:
     - name: Testing
       shell: pwsh
       run: |
+        $sourceDirectory = "${{ github.workspace }}"
+        Write-Host "Source Directory: $sourceDirectory"
         $branch = "${{ github.ref }}"
         Write-Host "Branch: $branch"
         $branch = $branch -replace 'refs/heads/', ''
