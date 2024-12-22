@@ -11,3 +11,6 @@ set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 project ("RedEye")
 add_subdirectory(source)
+
+enable_testing()
+add_subdirectory(tests)

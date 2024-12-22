@@ -11,6 +11,7 @@
     "nativefiledialog-extended",
     "physfs",
     "rapidjson",
-    "sdl2"
+    "sdl2",
+    "gtest"
   ]
 }
