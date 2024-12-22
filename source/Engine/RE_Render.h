@@ -1,4 +1,4 @@
-﻿/*
+/*
  * RedEye Engine - A 3D Game Engine written in C++.
  * Copyright (C) 2018-2024 Julia Mauri and Ruben Sardon
  *
@@ -16,18 +16,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <GL/gl.h>
+#pragma once
 
-#include "RE_Application.h"
-
-int main(int argc, char* argv[])
+namespace Renderer
 {
-    if (!Application::Init(argc, argv))
-        return EXIT_FAILURE;
-
-    Application::MainLoop();
-    Application::CleanUp();
-    return EXIT_SUCCESS;
-}
+    bool Init();
+    void Update();
+    void CleanUp();
+}; // namespace Renderer
