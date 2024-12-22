@@ -53,13 +53,10 @@ class RL_Projects
 
   private:
     static constexpr const char* PROJECTS_FILE = "WriteDir/Projects.json";
+    static constexpr const char* TEMPLATE_PATH = "project/";
     static constexpr const char* PROJECT_CONFIG_TEMPLATE = "template";
     static constexpr const char* IMGUI_CONFIG_TEMPLATE = "imgui.ini";
-#ifdef _DEBUG
-    static constexpr const char* ENGINE_EXECUTABLE = "Engine-d.exe";
-#else
     static constexpr const char* ENGINE_EXECUTABLE = "Engine.exe";
-#endif
     std::vector<Project> _projects;
 };
 

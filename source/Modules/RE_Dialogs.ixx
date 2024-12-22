@@ -33,6 +33,11 @@ export module Dialogs;
  */
 std::string WCharToString(const wchar_t* wstr)
 {
+    if (wstr == nullptr)
+    {
+        return "";
+    }
+
     std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
     return converter.to_bytes(wstr);
 }
@@ -44,6 +49,11 @@ std::string WCharToString(const wchar_t* wstr)
  */
 std::wstring CharToWChar(const char* str)
 {
+    if (str == nullptr)
+    {
+        return L"";
+    }
+
     std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
     return converter.from_bytes(str);
 }

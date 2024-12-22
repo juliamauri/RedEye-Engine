@@ -262,10 +262,11 @@ void RL_Projects::Save() const
 bool RL_Projects::GenerateProject(const char* _name, const char* _path)
 {
     uint32_t _template = 0;
+    std::string _templateDir(TEMPLATE_PATH);
     std::string _buffer;
     {
         // Todo, sometimes the template is not found
-        std::string _tempate_str = RE::FileSystem::Read(PROJECT_CONFIG_TEMPLATE);
+        std::string _tempate_str = RE::FileSystem::Read((_templateDir + PROJECT_CONFIG_TEMPLATE).c_str());
         if (_tempate_str.empty())
             return false;
         _template = RE::JSON::Parse(_tempate_str);
@@ -292,7 +293,7 @@ bool RL_Projects::GenerateProject(const char* _name, const char* _path)
     path += '\\';
     RE::FileSystem::WriteOutside(path.c_str(), name.c_str(), _buffer.c_str(), _buffer.size());
 
-    std::string _imgui = RE::FileSystem::Read(IMGUI_CONFIG_TEMPLATE);
+    std::string _imgui = RE::FileSystem::Read((_templateDir + IMGUI_CONFIG_TEMPLATE).c_str());
     if (_imgui.empty())
         return false;
     RE::FileSystem::WriteOutside(path.c_str(), IMGUI_CONFIG_TEMPLATE, _imgui.c_str(), _imgui.size());

@@ -31,9 +31,9 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${DESTINATION_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/OutputFiles/imgui.ini
-        ${DESTINATION_DIR}/imgui.ini
+        ${DESTINATION_DIR}/project/imgui.ini
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/OutputFiles/template
-        ${DESTINATION_DIR}/template
+        ${DESTINATION_DIR}/project/template
     COMMENT "Copying resource files to output directory"
 )
