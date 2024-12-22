@@ -30,6 +30,11 @@ export namespace RE
 {
     namespace Window
     {
+        bool Init()
+        {
+            return SDL_Init(SDL_INIT_VIDEO) == 0;
+        }
+
         /**
          * @brief Creates a new SDL window and adds it to the window manager.
          * @param title The title of the window.
@@ -83,6 +88,7 @@ export namespace RE
                 SDL_DestroyWindow(window.second);
             }
             _windows.clear();
+            SDL_QuitSubSystem(SDL_INIT_VIDEO);
         }
     } // namespace Window
 } // namespace RE

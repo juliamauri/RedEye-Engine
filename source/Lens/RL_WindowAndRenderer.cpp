@@ -34,31 +34,29 @@ ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 bool JR_WindowAndRenderer::Init()
 {
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO) == 0)
-    {
-        std::function<void(SDL_Event*)> listener = [this](SDL_Event* event) { this->EventListener(event); };
-        RE::Event::SetWindowListener(listener);
+    if (!RE::Window::Init())
+        return false;
 
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    std::function<void(SDL_Event*)> listener = [this](SDL_Event* event) { this->EventListener(event); };
+    RE::Event::SetWindowListener(listener);
 
-        // Create window with graphics context
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-        main_window = RE::Window::NewWindow("RedEye - Projects Explorer");
-        SDL_Window* mainWindow = RE::Window::GetWindow(main_window);
-        context = SDL_GL_CreateContext(mainWindow);
-        SDL_GL_MakeCurrent(mainWindow, context);
-        SDL_GL_SetSwapInterval(1); // Enable vsynci
+    // Create window with graphics context
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
-        return true;
-    }
+    main_window = RE::Window::NewWindow("RedEye - Projects Explorer");
+    SDL_Window* mainWindow = RE::Window::GetWindow(main_window);
+    context = SDL_GL_CreateContext(mainWindow);
+    SDL_GL_MakeCurrent(mainWindow, context);
+    SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    return false;
+    return true;
 }
 
 void JR_WindowAndRenderer::PostUpdate()
@@ -94,7 +92,6 @@ void JR_WindowAndRenderer::PostUpdate()
 void JR_WindowAndRenderer::CleanUp()
 {
     SDL_GL_DeleteContext(context);
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 SDL_Window* JR_WindowAndRenderer::GetMainWindow() const
