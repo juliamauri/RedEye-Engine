@@ -12,6 +12,7 @@
     "physfs",
     "rapidjson",
     "sdl2",
+    "opengl",
     "gtest"
   ]
 }
