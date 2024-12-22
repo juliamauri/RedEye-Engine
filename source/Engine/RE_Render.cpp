@@ -28,10 +28,14 @@ void* context = nullptr;
 
 bool Renderer::Init()
 {
-    if (!RE::Window::Init()) return false;
+    if (!RE::Window::Init())
+        return false;
 
-	window = RE::Window::NewWindow("RedEye Engine");
+    window = RE::Window::NewWindow("RedEye Engine");
     context = RE::Render::CreateContext(RE::Window::GetWindow(window));
+
+    if (!RE::Render::Init())
+        return false;
 
     return context != nullptr;
 }

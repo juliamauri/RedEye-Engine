@@ -19,7 +19,7 @@
 module;
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include <GL/glew.h>
 #include <GL/gl.h>
 
 export module OpenGL;
@@ -30,6 +30,11 @@ export namespace RE
     {
         namespace API
         {
+            bool Init()
+            {
+                return glewInit() == GLEW_OK;
+            }
+
             SDL_GLContext CreateContext(SDL_Window* window)
             {
                 return SDL_GL_CreateContext(window);

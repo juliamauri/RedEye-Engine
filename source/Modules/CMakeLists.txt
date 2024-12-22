@@ -2,7 +2,7 @@ find_package(imgui CONFIG REQUIRED)
 find_package(PhysFS CONFIG REQUIRED)
 find_package(nfd CONFIG REQUIRED)
 find_package(RapidJSON CONFIG REQUIRED)
-find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
 
 add_library(RedEye_lib STATIC)
 target_sources(RedEye_lib
@@ -30,5 +30,5 @@ target_link_libraries(RedEye_lib PRIVATE
     $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
     nfd::nfd
     rapidjson
-    OpenGL::GL
+    GLEW::GLEW
 )

@@ -26,6 +26,10 @@ export namespace RE
     {
         namespace API
         {
+            bool Init()
+            {
+                return true;
+            }
             void* CreateContext()
             {
                 return nullptr;

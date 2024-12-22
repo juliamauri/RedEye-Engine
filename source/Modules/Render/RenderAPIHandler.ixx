@@ -35,6 +35,11 @@ export namespace RE
 {
     namespace Render
     {
+        bool Init()
+        {
+            return API::Init();
+        }
+
         void* CreateContext(SDL_Window* window)
         {
             return API::CreateContext(window);
