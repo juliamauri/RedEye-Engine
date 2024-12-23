@@ -120,7 +120,7 @@ jobs:
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: |
-        cat /home/runner/work/RedEye-Engine/RedEye-Engine/build/x64-debug-linux/vcpkg-manifest-install.log
+        cat /home/runner/work/RedEye-Engine/RedEye-Engine/vcpkg/buildtrees/vulkan-loader/install-x64-linux-dbg-out.log
     
     - name: Build Debug
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
