@@ -18,6 +18,10 @@
 
 module;
 
+#include <SDL2/SDL.h>
+#include <SDL_vulkan.h>
+#include <vulkan/vulkan.h>
+
 export module Vulkan;
 
 export namespace RE
@@ -26,17 +30,25 @@ export namespace RE
     {
         namespace API
         {
-            bool Init()
-            {
-                return true;
-            }
-            void* CreateContext()
+            void* CreateContext(SDL_Window* window)
             {
                 return nullptr;
             }
+
             void DeleteContext(void* context)
             {
-                
+            }
+
+            void PrepareRender()
+            {
+            }
+
+            void Render()
+            {
+            }
+
+            void SwapWindow(SDL_Window* window)
+            {
             }
         }
     } // namespace IMP_API

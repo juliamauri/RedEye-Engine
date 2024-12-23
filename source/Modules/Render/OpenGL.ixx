@@ -24,20 +24,22 @@ module;
 
 export module OpenGL;
 
+bool initialized = false;
+
 export namespace RE
 {
     namespace OpenGL
     {
         namespace API
         {
-            bool Init()
-            {
-                return glewInit() == GLEW_OK;
-            }
-
             SDL_GLContext CreateContext(SDL_Window* window)
             {
-                return SDL_GL_CreateContext(window);
+                if (initialized) return SDL_GL_CreateContext(window);
+
+                SDL_GLContext context = SDL_GL_CreateContext(window);
+                if (glewInit() == GLEW_OK) initialized = true;
+                else SDL_GL_DeleteContext(context);
+                return context;
             }
             void DeleteContext(SDL_GLContext context)
             {

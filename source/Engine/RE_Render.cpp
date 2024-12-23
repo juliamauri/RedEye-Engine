@@ -34,9 +34,6 @@ bool Renderer::Init()
     window = RE::Window::NewWindow("RedEye Engine");
     context = RE::Render::CreateContext(RE::Window::GetWindow(window));
 
-    if (!RE::Render::Init())
-        return false;
-
     return context != nullptr;
 }
 
