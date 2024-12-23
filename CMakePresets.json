@@ -2,15 +2,22 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "windows-base",
+      "name": "base",
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "installDir": "${sourceDir}/install/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "cl.exe",
-        "CMAKE_CXX_COMPILER": "cl.exe",
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      }
+    },
+    {
+      "name": "windows-base",
+      "inherits": "base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
       },
       "condition": {
         "type": "equals",
@@ -19,160 +26,12 @@
       }
     },
     {
-      "name": "x86-windows",
-      "hidden": true,
-      "inherits": "windows-base",
-      "architecture": {
-        "value": "x86",
-        "strategy": "external"
-      }
-    },
-    {
-      "name": "x64-windows",
-      "hidden": true,
-      "inherits": "windows-base",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
-      }
-    },
-    {
-      "name": "x86-debug-windows",
-      "hidden": true,
-      "inherits": "x86-windows",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "x86-release-windows",
-      "hidden": true,
-      "inherits": "x86-windows",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "x64-debug-windows",
-      "hidden": true,
-      "inherits": "x64-windows",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "x64-release-windows",
-      "hidden": true,
-      "inherits": "x64-windows",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "x86-debug-windows-opengl",
-      "hidden": false,
-      "displayName": "Win86 Debug (OpenGL)",
-      "inherits": "x86-debug-windows",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "ON",
-        "ENABLE_VULKAN": "OFF"
-      }
-    },
-    {
-      "name": "x86-release-windows-opengl",
-      "hidden": false,
-      "displayName": "Win86 Release (OpenGL)",
-      "inherits": "x86-release-windows",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "ON",
-        "ENABLE_VULKAN": "OFF"
-      }
-    },
-    {
-      "name": "x64-debug-windows-opengl",
-      "hidden": false,
-      "displayName": "Win64 Debug (OpenGL)",
-      "inherits": "x64-debug-windows",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "ON",
-        "ENABLE_VULKAN": "OFF"
-      }
-    },
-    {
-      "name": "x64-release-windows-opengl",
-      "hidden": false,
-      "displayName": "Win64 Release (OpenGL)",
-      "inherits": "x64-release-windows",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "ON",
-        "ENABLE_VULKAN": "OFF"
-      }
-    },
-    {
-      "name": "x86-debug-windows-vulkan",
-      "hidden": false,
-      "displayName": "Win86 Debug (Vulkan)",
-      "inherits": "x86-debug-windows",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "OFF",
-        "ENABLE_VULKAN": "ON"
-      }
-    },
-    {
-      "name": "x86-release-windows-vulkan",
-      "hidden": false,
-      "displayName": "Win86 Release (Vulkan)",
-      "inherits": "x86-release-windows",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "OFF",
-        "ENABLE_VULKAN": "ON"
-      }
-    },
-    {
-      "name": "x64-debug-windows-vulkan",
-      "hidden": false,
-      "displayName": "Win64 Debug (Vulkan)",
-      "inherits": "x64-debug-windows",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "OFF",
-        "ENABLE_VULKAN": "ON"
-      }
-    },
-    {
-      "name": "x64-release-windows-vulkan",
-      "hidden": false,
-      "displayName": "Win64 Release (Vulkan)",
-      "inherits": "x64-release-windows",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "OFF",
-        "ENABLE_VULKAN": "ON"
-      }
-    },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {
       "name": "linux-base",
+      "inherits": "base",
       "hidden": true,
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "installDir": "${sourceDir}/install/${presetName}",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+        "CMAKE_CXX_COMPILER": "g++"
       },
       "condition": {
         "type": "equals",
@@ -181,18 +40,128 @@
       }
     },
     {
-      "name": "x86-linux",
+      "name": "x86",
       "hidden": true,
-      "inherits": "linux-base",
       "architecture": {
         "value": "x86",
         "strategy": "external"
       }
     },
     {
-      "name": "x64-linux",
+      "name": "x64",
       "hidden": true,
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "debug",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "opengl",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_OPENGL": "ON",
+        "ENABLE_VULKAN": "OFF"
+      }
+    },
+    {
+      "name": "vulkan",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_OPENGL": "OFF",
+        "ENABLE_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "x86-debug-windows",
+      "hidden": true,
+      "inherits": [ "windows-base", "x86", "debug" ]
+    },
+    {
+      "name": "x86-release-windows",
+      "hidden": true,
+      "inherits": [ "windows-base", "x86", "release" ]
+    },
+    {
+      "name": "x64-debug-windows",
+      "hidden": true,
+      "inherits": [ "windows-base", "x64", "debug" ]
+    },
+    {
+      "name": "x64-release-windows",
+      "hidden": true,
+      "inherits": [ "windows-base", "x64", "release" ]
+    },
+    {
+      "name": "x86-debug-windows-opengl",
+      "inherits": [ "x86-debug-windows", "opengl" ],
+      "displayName": "Win86 Debug (OpenGL)"
+    },
+    {
+      "name": "x86-release-windows-opengl",
+      "inherits": [ "x86-release-windows", "opengl" ],
+      "displayName": "Win86 Release (OpenGL)"
+    },
+    {
+      "name": "x64-debug-windows-opengl",
+      "inherits": [ "x64-debug-windows", "opengl" ],
+      "displayName": "Win64 Debug (OpenGL)"
+    },
+    {
+      "name": "x64-release-windows-opengl",
+      "inherits": [ "x64-release-windows", "opengl" ],
+      "displayName": "Win64 Release (OpenGL)"
+    },
+    {
+      "name": "x86-debug-windows-vulkan",
+      "inherits": [ "x86-debug-windows", "vulkan" ],
+      "displayName": "Win86 Debug (Vulkan)"
+    },
+    {
+      "name": "x86-release-windows-vulkan",
+      "inherits": [ "x86-release-windows", "vulkan" ],
+      "displayName": "Win86 Release (Vulkan)"
+    },
+    {
+      "name": "x64-debug-windows-vulkan",
+      "inherits": [ "x64-debug-windows", "vulkan" ],
+      "displayName": "Win64 Debug (Vulkan)"
+    },
+    {
+      "name": "x64-release-windows-vulkan",
+      "inherits": [ "x64-release-windows", "vulkan" ],
+      "displayName": "Win64 Release (Vulkan)"
+    },
+    {
+      "name": "x86-linux",
       "inherits": "linux-base",
+      "hidden": true,
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_C_FLAGS": "-m32",
+        "CMAKE_CXX_FLAGS": "-m32"
+      }
+    },
+    {
+      "name": "x64-linux",
+      "inherits": "linux-base",
+      "hidden": true,
       "architecture": {
         "value": "x64",
         "strategy": "external"
@@ -201,114 +170,62 @@
     {
       "name": "x86-debug-linux",
       "hidden": true,
-      "inherits": "x86-linux",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "inherits": [ "x86-linux", "debug" ]
     },
     {
       "name": "x86-release-linux",
       "hidden": true,
-      "inherits": "x86-linux",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+      "inherits": [ "x86-linux", "release" ]
     },
     {
       "name": "x64-debug-linux",
       "hidden": true,
-      "inherits": "x64-linux",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "inherits": [ "x64-linux", "debug" ]
     },
     {
       "name": "x64-release-linux",
       "hidden": true,
-      "inherits": "x64-linux",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+      "inherits": [ "x64-linux", "release" ]
     },
     {
       "name": "x86-debug-linux-opengl",
-      "hidden": false,
-      "displayName": "Lin86 Debug (OpenGL)",
-      "inherits": "x86-debug-linux",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "ON",
-        "ENABLE_VULKAN": "OFF"
-      }
+      "inherits": [ "x86-debug-linux", "opengl" ],
+      "displayName": "Lin86 Debug (OpenGL)"
     },
     {
       "name": "x86-release-linux-opengl",
-      "hidden": false,
-      "displayName": "Lin86 Release (OpenGL)",
-      "inherits": "x86-release-linux",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "ON",
-        "ENABLE_VULKAN": "OFF"
-      }
+      "inherits": [ "x86-release-linux", "opengl" ],
+      "displayName": "Lin86 Release (OpenGL)"
     },
     {
       "name": "x64-debug-linux-opengl",
-      "hidden": false,
-      "displayName": "Lin64 Debug (OpenGL)",
-      "inherits": "x64-debug-linux",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "ON",
-        "ENABLE_VULKAN": "OFF"
-      }
+      "inherits": [ "x64-debug-linux", "opengl" ],
+      "displayName": "Lin64 Debug (OpenGL)"
     },
     {
       "name": "x64-release-linux-opengl",
-      "hidden": false,
-      "displayName": "Lin64 Release (OpenGL)",
-      "inherits": "x64-release-linux",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "ON",
-        "ENABLE_VULKAN": "OFF"
-      }
+      "inherits": [ "x64-release-linux", "opengl" ],
+      "displayName": "Lin64 Release (OpenGL)"
     },
     {
       "name": "x86-debug-linux-vulkan",
-      "hidden": false,
-      "displayName": "Lin86 Debug (Vulkan)",
-      "inherits": "x86-debug-linux",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "OFF",
-        "ENABLE_VULKAN": "ON"
-      }
+      "inherits": [ "x86-debug-linux", "vulkan" ],
+      "displayName": "Lin86 Debug (Vulkan)"
     },
     {
       "name": "x86-release-linux-vulkan",
-      "hidden": false,
-      "displayName": "Lin86 Release (Vulkan)",
-      "inherits": "x86-release-linux",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "OFF",
-        "ENABLE_VULKAN": "ON"
-      }
+      "inherits": [ "x86-release-linux", "vulkan" ],
+      "displayName": "Lin86 Release (Vulkan)"
     },
     {
       "name": "x64-debug-linux-vulkan",
-      "hidden": false,
-      "displayName": "Lin64 Debug (Vulkan)",
-      "inherits": "x64-debug-linux",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "OFF",
-        "ENABLE_VULKAN": "ON"
-      }
+      "inherits": [ "x64-debug-linux", "vulkan" ],
+      "displayName": "Lin64 Debug (Vulkan)"
     },
     {
       "name": "x64-release-linux-vulkan",
-      "hidden": false,
-      "displayName": "Lin64 Release (Vulkan)",
-      "inherits": "x64-release-linux",
-      "cacheVariables": {
-        "ENABLE_OPENGL": "OFF",
-        "ENABLE_VULKAN": "ON"
-      }
+      "inherits": [ "x64-release-linux", "vulkan" ],
+      "displayName": "Lin64 Release (Vulkan)"
     }
   ]
 }
