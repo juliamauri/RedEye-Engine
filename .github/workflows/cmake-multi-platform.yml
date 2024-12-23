@@ -19,38 +19,50 @@ jobs:
         os: [windows-latest, ubuntu-latest]
         platform: [x64]
         c_compiler: [gcc, clang, cl]
-        graphics: [opengl, vulkan]
         include:
           - os: windows-latest
+            beauty_os: windows
             platform: x64
             c_compiler: cl
             cpp_compiler: cl
             graphics: opengl
           - os: windows-latest
+            beauty_os: windows
             platform: x64
             c_compiler: cl
             cpp_compiler: cl
             graphics: vulkan
           - os: ubuntu-latest
+            beauty_os: linux
             platform: x64
             c_compiler: gcc
             cpp_compiler: g++
             graphics: opengl
           - os: ubuntu-latest
+            beauty_os: linux
             platform: x64
             c_compiler: gcc
             cpp_compiler: g++
             graphics: vulkan
           - os: ubuntu-latest
+            beauty_os: linux
             platform: x64
             c_compiler: clang
             cpp_compiler: clang++
             graphics: opengl
           - os: ubuntu-latest
+            beauty_os: linux
             platform: x64
             c_compiler: clang
             cpp_compiler: clang++
             graphics: vulkan
+        exclude:
+          - os: windows-latest
+            c_compiler: gcc
+          - os: windows-latest
+            c_compiler: clang
+          - os: ubuntu-latest
+            c_compiler: cl
 
     steps:
     - name: Checkout  
@@ -88,27 +100,27 @@ jobs:
         arch: ${{ matrix.platform }}
     
     - name: Configure CMake Debug
-      run: cmake --preset ${{ matrix.platform }}-debug-${{ matrix.os }}-${{ matrix.graphics }}
+      run: cmake --preset ${{ matrix.platform }}-debug-${{ matrix.beauty_os }}-${{ matrix.graphics }}
     
     - name: Build Debug
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-debug-${{ matrix.os }}-${{ matrix.graphics }}
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-debug-${{ matrix.beauty_os }}-${{ matrix.graphics }}
     
     - name: Test Debug
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       run: |
-        cd ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-debug-${{ matrix.os }}-${{ matrix.graphics }}
+        cd ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-debug-${{ matrix.beauty_os }}-${{ matrix.graphics }}
         ctest --verbose
         cd ${{ github.workspace }}
 
     - name: Configure CMake Release
-      run: cmake --preset ${{ matrix.platform }}-release-${{ matrix.os }}-${{ matrix.graphics }}
+      run: cmake --preset ${{ matrix.platform }}-release-${{ matrix.beauty_os }}-${{ matrix.graphics }}
 
     - name: Build Release
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-release-${{ matrix.os }}-${{ matrix.graphics }}
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-release-${{ matrix.beauty_os }}-${{ matrix.graphics }}
     
     - name: Test Release
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       run: |
-        cd ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-release-${{ matrix.os }}-${{ matrix.graphics }}
+        cd ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.platform }}-release-${{ matrix.beauty_os }}-${{ matrix.graphics }}
         ctest --verbose
         cd ${{ github.workspace }}
