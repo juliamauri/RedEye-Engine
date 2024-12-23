@@ -58,7 +58,8 @@ jobs:
           git fetch origin main
           git diff --name-only origin/main...HEAD > changed_files.txt
         fi
-        if ! grep -qE "${{ matrix.target_source.replace(',', '|') }}" changed_files.txt; then
+        target_source_pattern=$(echo "${{ matrix.target_source }}" | sed 's/,/|/g')
+        if ! grep -qE "$target_source_pattern" changed_files.txt; then
           echo "No changes in ${{ matrix.target_source }}. Skipping job."
           exit 0
         fi
