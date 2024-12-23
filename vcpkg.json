@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "glew",
     "gtest",
     {
       "name": "imgui",
@@ -18,6 +19,6 @@
         "vulkan"
       ]
     },
-    "glew"
+    "vulkan"
   ]
 }
