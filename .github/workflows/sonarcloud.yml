@@ -19,7 +19,6 @@ jobs:
   sonarcloud:
     runs-on: windows-latest
     env:
-      BUILD_WRAPPER_OUT_DIR: ${{ github.workspace }}/sonar
       PLATFORM: x64
       BEAUTY_OS: windows
 
@@ -66,7 +65,9 @@ jobs:
     - name: Set reusable strings
       id: strings
       shell: bash
-      run: echo "build-wrapper-out-dir=${{ github.workspace }}/sonar" >> "$GITHUB_OUTPUT"
+      run: |
+        echo "build-wrapper-out-dir=${{ github.workspace }}/sonar" >> "$GITHUB_OUTPUT"
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Install dependencies (Windows)
       run: choco install ninja
@@ -113,10 +114,10 @@ jobs:
       
     - name: Run build-wrapper Release
       run: |
-        build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ env.BEAUTY_OS }}-opengl
+        build-wrapper-win-x86-64 --out-dir ${{ steps.strings.outputs.build-wrapper-out-dir }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ env.BEAUTY_OS }}-opengl
     
     - name: Run sonar-scanner
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.sonar_token }}
-      run: sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+      run: sonar-scanner --define sonar.cfamily.compile-commands="${{ steps.strings.outputs.build-wrapper-out-dir }}/compile_commands.json"
