@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "gtest",
     {
       "name": "imgui",
       "features": [
@@ -11,7 +12,12 @@
     "nativefiledialog-extended",
     "physfs",
     "rapidjson",
-    "sdl2",
-    "gtest"
+    {
+      "name": "sdl2",
+      "features": [
+        "vulkan"
+      ]
+    },
+    "glew"
   ]
 }
