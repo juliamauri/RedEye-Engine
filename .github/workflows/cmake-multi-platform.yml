@@ -19,43 +19,38 @@ jobs:
         os: [windows-latest, ubuntu-latest]
         platform: [x64]
         c_compiler: [gcc, clang, cl]
+        graphics: [opengl, vulkan]
         include:
           - os: windows-latest
             beauty_os: windows
             platform: x64
             c_compiler: cl
             cpp_compiler: cl
-            graphics: opengl
           - os: windows-latest
             beauty_os: windows
             platform: x64
             c_compiler: cl
             cpp_compiler: cl
-            graphics: vulkan
           - os: ubuntu-latest
             beauty_os: linux
             platform: x64
             c_compiler: gcc
             cpp_compiler: g++
-            graphics: opengl
           - os: ubuntu-latest
             beauty_os: linux
             platform: x64
             c_compiler: gcc
             cpp_compiler: g++
-            graphics: vulkan
           - os: ubuntu-latest
             beauty_os: linux
             platform: x64
             c_compiler: clang
             cpp_compiler: clang++
-            graphics: opengl
           - os: ubuntu-latest
             beauty_os: linux
             platform: x64
             c_compiler: clang
             cpp_compiler: clang++
-            graphics: vulkan
         exclude:
           - os: windows-latest
             c_compiler: gcc
