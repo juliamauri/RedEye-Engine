@@ -92,7 +92,7 @@ jobs:
         sudo apt-get install -y software-properties-common
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         sudo apt-get update
-        sudo apt-get install -y autoconf automake libtool libtool-bin pkg-config m4 libltdl-dev ninja-build cmake
+        sudo apt-get install -y autoconf automake libtool libtool-bin pkg-config m4 libltdl-dev ninja-build cmake libglu1-mesa-dev libxext-dev libxrandr-dev
         sudo apt-get install -y gcc-14 g++-14  # Replace with the desired version if necessary
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
