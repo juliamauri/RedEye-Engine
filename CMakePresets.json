@@ -19,45 +19,150 @@
       }
     },
     {
-      "name": "x64-debug-windows",
-      "displayName": "x64 Debug (Windows)",
-      "inherits": "windows-base",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
-      },
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "x64-release-windows",
-      "displayName": "x64 Release (Windows)",
-      "inherits": "x64-debug-windows",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "x86-debug-windows",
-      "displayName": "x86 Debug (Windows)",
+      "name": "x86-windows",
+      "hidden": true,
       "inherits": "windows-base",
       "architecture": {
         "value": "x86",
         "strategy": "external"
-      },
+      }
+    },
+    {
+      "name": "x64-windows",
+      "hidden": true,
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "x86-debug-windows",
+      "hidden": true,
+      "inherits": "x86-windows",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
       "name": "x86-release-windows",
-      "displayName": "x86 Release (Windows)",
-      "inherits": "x86-debug-windows",
+      "hidden": true,
+      "inherits": "x86-windows",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
+    {
+      "name": "x64-debug-windows",
+      "hidden": true,
+      "inherits": "x64-windows",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "x64-release-windows",
+      "hidden": true,
+      "inherits": "x64-windows",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "x86-debug-windows-opengl",
+      "hidden": false,
+      "displayName": "Win86 Debug (OpenGL)",
+      "inherits": "x86-debug-windows",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "ON",
+        "ENABLE_VULKAN": "OFF"
+      }
+    },
+    {
+      "name": "x86-release-windows-opengl",
+      "hidden": false,
+      "displayName": "Win86 Release (OpenGL)",
+      "inherits": "x86-release-windows",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "ON",
+        "ENABLE_VULKAN": "OFF"
+      }
+    },
+    {
+      "name": "x64-debug-windows-opengl",
+      "hidden": false,
+      "displayName": "Win64 Debug (OpenGL)",
+      "inherits": "x64-debug-windows",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "ON",
+        "ENABLE_VULKAN": "OFF"
+      }
+    },
+    {
+      "name": "x64-release-windows-opengl",
+      "hidden": false,
+      "displayName": "Win64 Release (OpenGL)",
+      "inherits": "x64-release-windows",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "ON",
+        "ENABLE_VULKAN": "OFF"
+      }
+    },
+    {
+      "name": "x86-debug-windows-vulkan",
+      "hidden": false,
+      "displayName": "Win86 Debug (Vulkan)",
+      "inherits": "x86-debug-windows",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "OFF",
+        "ENABLE_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "x86-release-windows-vulkan",
+      "hidden": false,
+      "displayName": "Win86 Release (Vulkan)",
+      "inherits": "x86-release-windows",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "OFF",
+        "ENABLE_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "x64-debug-windows-vulkan",
+      "hidden": false,
+      "displayName": "Win64 Debug (Vulkan)",
+      "inherits": "x64-debug-windows",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "OFF",
+        "ENABLE_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "x64-release-windows-vulkan",
+      "hidden": false,
+      "displayName": "Win64 Release (Vulkan)",
+      "inherits": "x64-release-windows",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "OFF",
+        "ENABLE_VULKAN": "ON"
+      }
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     {
       "name": "linux-base",
       "hidden": true,
@@ -76,43 +181,133 @@
       }
     },
     {
-      "name": "x64-debug-linux",
-      "displayName": "x64 Debug (Linux)",
-      "inherits": "linux-base",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
-      },
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "x64-release-linux",
-      "displayName": "x64 Release (Linux)",
-      "inherits": "x64-debug-linux",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "x86-debug-linux",
-      "displayName": "x86 Debug (Linux)",
+      "name": "x86-linux",
+      "hidden": true,
       "inherits": "linux-base",
       "architecture": {
         "value": "x86",
         "strategy": "external"
-      },
+      }
+    },
+    {
+      "name": "x64-linux",
+      "hidden": true,
+      "inherits": "linux-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "x86-debug-linux",
+      "hidden": true,
+      "inherits": "x86-linux",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
       "name": "x86-release-linux",
-      "displayName": "x86 Release (Linux)",
-      "inherits": "x86-debug-linux",
+      "hidden": true,
+      "inherits": "x86-linux",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "x64-debug-linux",
+      "hidden": true,
+      "inherits": "x64-linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "x64-release-linux",
+      "hidden": true,
+      "inherits": "x64-linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "x86-debug-linux-opengl",
+      "hidden": false,
+      "displayName": "Lin86 Debug (OpenGL)",
+      "inherits": "x86-debug-linux",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "ON",
+        "ENABLE_VULKAN": "OFF"
+      }
+    },
+    {
+      "name": "x86-release-linux-opengl",
+      "hidden": false,
+      "displayName": "Lin86 Release (OpenGL)",
+      "inherits": "x86-release-linux",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "ON",
+        "ENABLE_VULKAN": "OFF"
+      }
+    },
+    {
+      "name": "x64-debug-linux-opengl",
+      "hidden": false,
+      "displayName": "Lin64 Debug (OpenGL)",
+      "inherits": "x64-debug-linux",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "ON",
+        "ENABLE_VULKAN": "OFF"
+      }
+    },
+    {
+      "name": "x64-release-linux-opengl",
+      "hidden": false,
+      "displayName": "Lin64 Release (OpenGL)",
+      "inherits": "x64-release-linux",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "ON",
+        "ENABLE_VULKAN": "OFF"
+      }
+    },
+    {
+      "name": "x86-debug-linux-vulkan",
+      "hidden": false,
+      "displayName": "Lin86 Debug (Vulkan)",
+      "inherits": "x86-debug-linux",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "OFF",
+        "ENABLE_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "x86-release-linux-vulkan",
+      "hidden": false,
+      "displayName": "Lin86 Release (Vulkan)",
+      "inherits": "x86-release-linux",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "OFF",
+        "ENABLE_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "x64-debug-linux-vulkan",
+      "hidden": false,
+      "displayName": "Lin64 Debug (Vulkan)",
+      "inherits": "x64-debug-linux",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "OFF",
+        "ENABLE_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "x64-release-linux-vulkan",
+      "hidden": false,
+      "displayName": "Lin64 Release (Vulkan)",
+      "inherits": "x64-release-linux",
+      "cacheVariables": {
+        "ENABLE_OPENGL": "OFF",
+        "ENABLE_VULKAN": "ON"
       }
     }
   ]
