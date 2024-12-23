@@ -48,6 +48,7 @@ jobs:
 
     - name: Check for changes in target source
       id: check_changes
+      shell: bash
       run: |
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           git fetch origin ${{ github.event.pull_request.base.ref }}
