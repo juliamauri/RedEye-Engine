@@ -1,17 +1,26 @@
 {
   "dependencies": [
+    "glew",
+    "gtest",
     {
       "name": "imgui",
       "features": [
         "docking-experimental",
         "opengl3-binding",
-        "sdl2-binding"
+        "sdl2-binding",
+        "vulkan-binding",
+        "sdl2-renderer-binding"
       ]
     },
     "nativefiledialog-extended",
     "physfs",
     "rapidjson",
-    "sdl2",
-    "gtest"
+    {
+      "name": "sdl2",
+      "features": [
+        "vulkan"
+      ]
+    },
+    "vulkan"
   ]
 }
