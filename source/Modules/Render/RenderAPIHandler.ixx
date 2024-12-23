@@ -1,4 +1,4 @@
-﻿/*
+/*
  * RedEye Engine - A 3D Game Engine written in C++.
  * Copyright (C) 2018-2024 Julia Mauri and Ruben Sardon
  *
@@ -16,18 +16,46 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+module;
+
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <GL/gl.h>
 
-#include "RE_Application.h"
+export module Render;
 
-int main(int argc, char* argv[])
+#ifdef ENABLE_OPENGL
+import OpenGL;
+using namespace RE::OpenGL;
+#elif ENABLE_VULKAN
+import Vulkan;
+using namespace RE::Vulkan;
+#endif // DEBUG
+
+export namespace RE
 {
-    if (!Application::Init(argc, argv))
-        return EXIT_FAILURE;
+    namespace Render
+    {
+        void* CreateContext(SDL_Window* window)
+        {
+            return API::CreateContext(window);
+        }
+        void DeleteContext(void* context)
+        {
+            API::DeleteContext(context);
+        }
 
-    Application::MainLoop();
-    Application::CleanUp();
-    return EXIT_SUCCESS;
-}
+        void PrepareRender()
+        {
+            API::PrepareRender();
+        }
+
+        void Render()
+        {
+            API::Render();
+        }
+
+        void SwapWindow(SDL_Window* window)
+        {
+            API::SwapWindow(window);
+        }
+    }
+} // namespace RE
