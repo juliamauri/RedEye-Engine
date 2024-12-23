@@ -26,8 +26,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target_source: ['source/Engine', 'source/Lens', 'source/Modules', 'source/Engine,source/Lens,source/Modules']
-        project_key: ['redeye_engine', 'redeye_lens', 'redeye_library', 'redeye_main']
         include:
           - target_source: 'source/Engine'
             project_key: 'redeye_engine'
