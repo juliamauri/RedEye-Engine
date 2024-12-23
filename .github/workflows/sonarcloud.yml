@@ -21,7 +21,7 @@ jobs:
     env:
       BUILD_WRAPPER_OUT_DIR: ${{ github.workspace }}/sonar
       PLATFORM: x64
-      BEAUTY_OS: x64
+      BEAUTY_OS: windows
 
     strategy:
       fail-fast: false
