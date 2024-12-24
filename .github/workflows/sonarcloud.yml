@@ -155,6 +155,7 @@ jobs:
     
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
             content+="sonar.coverageReportPaths=sonarqube-report.xml\n"
+            content+="sonar.cfamily.gcov.reportsPath=${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}/coverage\n"
         fi
     
         echo -e $content > "${sourceDirectory}/sonar-project.properties"
