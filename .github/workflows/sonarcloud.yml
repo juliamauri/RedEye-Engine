@@ -30,21 +30,25 @@ jobs:
             os: windows-latest
             beauty_os: windows
             build_wrapper: 'build-wrapper-win-x86-64.exe'
+            config: 'release'
           - target_source: 'source/Lens'
             project_key: 'redeye_lens'
             os: windows-latest
             beauty_os: windows
             build_wrapper: 'build-wrapper-win-x86-64.exe'
+            config: 'release'
           - target_source: 'source/Modules'
             project_key: 'redeye_library'
             os: windows-latest
             beauty_os: windows
             build_wrapper: 'build-wrapper-win-x86-64.exe'
+            config: 'release'
           - target_source: 'source/Engine,source/Lens,source/Modules'
             project_key: 'redeye_main'
             os: ubuntu-latest
             beauty_os: linux
             build_wrapper: 'build-wrapper-linux-x86-64'
+            config: 'debug'
 
     steps:
     - name: 'Checkout fetch-depth: 0'
@@ -82,6 +86,7 @@ jobs:
       run: |
         echo "build-wrapper-out-dir=${{ github.workspace }}/sonar" >> "$GITHUB_OUTPUT"
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "preset=${{ env.PLATFORM }}-${{ matrix.config }}-${{ matrix.beauty_os }}-opengl" >> "$GITHUB_OUTPUT"
     
     - name: Install dependencies (Linux)
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
@@ -112,11 +117,11 @@ jobs:
     
     - name: Configure CMake Release (Windows)
       if: matrix.os == 'windows-latest' && env.skip_job != 'true'
-      run: cmake --preset ${{ env.PLATFORM }}-release-${{ matrix.beauty_os }}-opengl
+      run: cmake --preset ${{ steps.strings.outputs.preset }}
       
     - name: Configure CMake Release (Linux)
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
-      run: cmake --preset ${{ env.PLATFORM }}-release-${{ matrix.beauty_os }}-opengl -DCODE_COVERAGE=ON
+      run: cmake --preset ${{ steps.strings.outputs.preset }} -DCODE_COVERAGE=ON
 
     - name: Create sonar-project.properties
       if: env.skip_job != 'true'
@@ -145,7 +150,7 @@ jobs:
         content+="sonar.cfamily.enableModules=true\n"
 
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            content+="sonar.coverageReportPaths=${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ matrix.beauty_os }}-opengl/coverage_cleaned.info\n"
+            content+="sonar.coverageReportPaths=${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}/coverage_cleaned.info\n"
         fi
 
         echo -e $content > "${sourceDirectory}/sonar-project.properties"
@@ -157,12 +162,12 @@ jobs:
     - name: Run build-wrapper Release
       if: env.skip_job != 'true'
       run: |
-        ${{ matrix.build_wrapper }} --out-dir ${{ steps.strings.outputs.build-wrapper-out-dir }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ matrix.beauty_os }}-opengl
+        ${{ matrix.build_wrapper }} --out-dir ${{ steps.strings.outputs.build-wrapper-out-dir }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
 
     - name: Run tests and generate coverage report (Linux)
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: |
-        cd ${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ matrix.beauty_os }}-opengl
+        cd ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
         ctest --verbose
         lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1
         lcov --remove coverage.info '/usr/*' '/tests/*' --output-file coverage_cleaned.info
