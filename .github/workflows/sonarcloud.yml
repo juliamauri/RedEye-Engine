@@ -169,8 +169,8 @@ jobs:
       run: |
         cd ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
         ctest --verbose
-        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1
-        lcov --remove coverage.info '/usr/*' /usr/include/*' '/tests/*' --output-file coverage_cleaned.info --ignore-errors mismatch
+        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch
+        lcov --remove coverage.info '/usr/*' /usr/include/*' '/tests/*' --output-file coverage_cleaned.info
         genhtml coverage_cleaned.info --output-directory coverage_report
         echo "Raw Coverage Info:"
         cat coverage.info
