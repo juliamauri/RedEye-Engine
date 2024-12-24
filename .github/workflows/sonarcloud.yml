@@ -181,7 +181,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: |
         # Generate SonarQube-compatible coverage XML report for Modules
-        gcovr --root source --object-directory ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }} --xml --output coverage.xml
+        gcovr --sonarqube --root source --object-directory ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }} --xml --output coverage.xml
         
         # Log SonarQube-compatible XML coverage report for debugging
         echo "SonarQube XML Coverage Report:"
