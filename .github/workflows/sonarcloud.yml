@@ -196,4 +196,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.sonar_token }}
-      run: sonar-scanner --define sonar.cfamily.compile-commands="${{ steps.strings.outputs.build-wrapper-out-dir }}/compile_commands.json"
+      run: sonar-scanner -X --define sonar.cfamily.compile-commands="${{ steps.strings.outputs.build-wrapper-out-dir }}/compile_commands.json"
