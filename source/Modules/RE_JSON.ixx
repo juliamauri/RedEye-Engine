@@ -18,6 +18,8 @@
 
 module;
 
+// TMP: Trigger sonarcloud pipeline
+
 #include <cstdint>
 #include <optional>
 #include <rapidjson/document.h>

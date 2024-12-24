@@ -9,6 +9,30 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
+# Enable code coverage
+option(CODE_COVERAGE "Enable code coverage reporting" OFF)
+
+if(CODE_COVERAGE)
+  message(STATUS "Enabling code coverage support")
+
+  # Add coverage flags for GCC/Clang
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov")
+
+  # Ensure gcov is used as coverage generator
+  find_program(GCOV_PATH gcov)
+  if(NOT GCOV_PATH)
+    message(FATAL_ERROR "gcov not found! Please install gcov.")
+  endif()
+
+  # Add coverage to the build output
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+  add_compile_options(-g -O0 --coverage)
+  add_link_options(--coverage)
+endif()
+
 project ("RedEye")
 add_subdirectory(source)
 
