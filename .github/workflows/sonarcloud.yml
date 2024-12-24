@@ -178,7 +178,7 @@ jobs:
         ctest --verbose
         
         # Generate SonarQube-compatible coverage XML report for Modules
-        gcovr -r ./source/Modules --sonarqube --output coverage.xml --exclude '/GUI/*' --exclude '/Render/*' --exclude '/Lens/*'
+        gcovr -r ${{ github.workspace }}/source/Modules --sonarqube --output coverage.xml --verbose
         
         # Generate HTML report for visualization (optional)
         mkdir -p coverage_report
