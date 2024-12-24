@@ -154,7 +154,7 @@ jobs:
         content+="sonar.cfamily.enableModules=true\n"
     
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            content+="sonar.coverageReportPaths=coverage.xml\n"
+            content+="sonar.coverageReportPaths=sonarqube-report.xml\n"
         fi
     
         echo -e $content > "${sourceDirectory}/sonar-project.properties"
@@ -181,7 +181,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: |
         # Generate SonarQube-compatible coverage XML report for Modules
-        gcovr --sonarqube --root source --object-directory ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }} --xml --output coverage.xml
+        gcovr --root source --object-directory ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }} --xml --output coverage.xml --sonarqube sonarqube-report.xml
         
         # Log SonarQube-compatible XML coverage report for debugging
         echo "SonarQube XML Coverage Report:"
