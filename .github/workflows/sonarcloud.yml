@@ -167,16 +167,31 @@ jobs:
     - name: Run tests and generate coverage report (Linux)
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: |
+        # Navigate to build directory
         cd ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
+        
+        # Run tests with verbose output
         ctest --verbose
-        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch
-        lcov --remove coverage.info '/usr/*' /usr/include/*' '/tests/*' --output-file coverage_cleaned.info
+        
+        # Capture coverage data
+        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1
+        
+        # Remove unnecessary coverage data (system headers and test files)
+        lcov --remove coverage.info '/usr/*' '/usr/include/*' '/tests/*' --output-file coverage_cleaned.info
+        
+        # Generate HTML report
         genhtml coverage_cleaned.info --output-directory coverage_report
+        
+        # Log raw and cleaned coverage info for debugging
         echo "Raw Coverage Info:"
         cat coverage.info
+        
         echo "Cleaned Coverage Info:"
         cat coverage_cleaned.info
+        
+        # Navigate back to the repository root
         cd ${{ github.workspace }}
+
 
     - name: Run sonar-scanner
       if: env.skip_job != 'true'
