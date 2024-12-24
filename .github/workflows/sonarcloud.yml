@@ -71,7 +71,7 @@ jobs:
         target_source_pattern=$(echo "${{ matrix.target_source }}" | sed 's/,/|/g')
         if ! grep -qE "$target_source_pattern" changed_files.txt; then
           echo "No changes in ${{ matrix.target_source }}. Skipping job."
-          exit 0
+          exit 1
         fi
 
     - name: Set reusable strings
