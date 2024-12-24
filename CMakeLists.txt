@@ -15,15 +15,20 @@ option(CODE_COVERAGE "Enable code coverage reporting" OFF)
 if(CODE_COVERAGE)
   message(STATUS "Enabling code coverage support")
 
-  # Add coverage flags
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-  set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} --coverage")
+  # Add coverage flags for GCC/Clang
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -g -O0")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage -g -O0")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
 
-  # Add debug symbols
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+  # Ensure gcov is used as coverage generator
+  find_program(GCOV_PATH gcov)
+  if(NOT GCOV_PATH)
+    message(FATAL_ERROR "gcov not found! Please install gcov.")
+  endif()
 
-  # Disable optimizations
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+  # Add coverage to the build output
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
 project ("RedEye")

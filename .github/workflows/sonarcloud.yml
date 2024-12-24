@@ -167,6 +167,10 @@ jobs:
         lcov --capture --directory . --output-file coverage.info
         lcov --remove coverage.info '/usr/*' '/tests/*' --output-file coverage_cleaned.info
         genhtml coverage_cleaned.info --output-directory coverage_report
+        echo "Raw Coverage Info:"
+        cat coverage.info
+        echo "Cleaned Coverage Info:"
+        cat coverage_cleaned.info
         cd ${{ github.workspace }}
 
     - name: Run sonar-scanner
