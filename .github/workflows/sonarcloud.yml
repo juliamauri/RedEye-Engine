@@ -164,7 +164,7 @@ jobs:
       run: |
         cd ${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ matrix.beauty_os }}-opengl
         ctest --verbose
-        lcov --capture --directory . --output-file coverage.info
+        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1
         lcov --remove coverage.info '/usr/*' '/tests/*' --output-file coverage_cleaned.info
         genhtml coverage_cleaned.info --output-directory coverage_report
         echo "Raw Coverage Info:"
