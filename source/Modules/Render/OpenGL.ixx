@@ -30,42 +30,37 @@ export namespace RE
 {
     namespace OpenGL
     {
-        namespace API
+        bool CreateContext(SDL_GLContext& out_context, SDL_Window* window)
         {
-            SDL_GLContext CreateContext(SDL_Window* window)
-            {
-                if (initialized) return SDL_GL_CreateContext(window);
+            if (initialized)
+                return SDL_GL_CreateContext(window);
 
-                SDL_GLContext context = SDL_GL_CreateContext(window);
-                if (glewInit() == GLEW_OK) initialized = true;
-                else SDL_GL_DeleteContext(context);
-                return context;
-            }
-            void DeleteContext(SDL_GLContext context)
-            {
+            SDL_GLContext context = SDL_GL_CreateContext(window);
+            if (glewInit() == GLEW_OK)
+                initialized = true;
+            else
                 SDL_GL_DeleteContext(context);
-            }
+            return context;
+        }
 
-            void PrepareRender()
-            {
-                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-                glClear(GL_COLOR_BUFFER_BIT);
-            }
+        void DeleteContext(SDL_GLContext context)
+        {
+            SDL_GL_DeleteContext(context);
+        }
 
-            void Render()
-            {
-                glBegin(GL_TRIANGLES);
-                glColor3f(1.0f, 0.0f, 0.0f);
-                glVertex2f(0.0f, 0.5f);
-                glVertex2f(-0.5f, -0.5f);
-                glVertex2f(0.5f, -0.5f);
-                glEnd();
-            }
+        void RenderTriangle(SDL_Window* window)
+        {
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-            void SwapWindow(SDL_Window* window)
-            {
-                SDL_GL_SwapWindow(window);
-            }
-        } // namespace API
+            glBegin(GL_TRIANGLES);
+            glColor3f(1.0f, 0.0f, 0.0f);
+            glVertex2f(0.0f, 0.5f);
+            glVertex2f(-0.5f, -0.5f);
+            glVertex2f(0.5f, -0.5f);
+            glEnd();
+
+            SDL_GL_SwapWindow(window);
+        }
     } // namespace OpenGL
 } // namespace RE

@@ -20,32 +20,26 @@
 
 #include <cstdint>
 
-import WindowManager;
 import Render;
 
-uint32_t window = 0;
-void* context = nullptr;
+uint32_t window_gl = 0;
+uint32_t window_vk = 0;
 
 bool Renderer::Init()
 {
-    if (!RE::Window::Init())
-        return false;
-
-    window = RE::Window::NewWindow("RedEye Engine");
-    context = RE::Render::CreateContext(RE::Window::GetWindow(window));
-
-    return context != nullptr;
+    return RE::Render::Init()
+        && RE::Render::CreateWindow(window_gl, "RedEye Engine OpenGL", RE::Render::Flag::OpenGL | RE::Render::Flag::DEFAULT) 
+        && RE::Render::CreateWindow(window_vk, "RedEye Engine Vulkan", RE::Render::Flag::Vulkan | RE::Render::Flag::DEFAULT)
+        ;
 }
 
 void Renderer::Update()
 {
-    RE::Render::PrepareRender();
-    RE::Render::Render();
-    RE::Render::SwapWindow(RE::Window::GetWindow(window));
+    RE::Render::RenderTriangle(window_gl);
+    RE::Render::RenderTriangle(window_vk);
 }
 
 void Renderer::CleanUp()
 {
-    RE::Render::DeleteContext(context);
-    RE::Window::CleanUp();
+    RE::Render::CleanUp();
 }
