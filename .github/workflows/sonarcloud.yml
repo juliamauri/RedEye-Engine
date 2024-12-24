@@ -174,7 +174,7 @@ jobs:
         ctest --verbose
         
         # Capture coverage data
-        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1
+        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch
         
         # Remove unnecessary coverage data (system headers and test files)
         lcov --remove coverage.info '/usr/*' '/usr/include/*' '/tests/*' --output-file coverage_cleaned.info
@@ -191,7 +191,6 @@ jobs:
         
         # Navigate back to the repository root
         cd ${{ github.workspace }}
-
 
     - name: Run sonar-scanner
       if: env.skip_job != 'true'
