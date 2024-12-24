@@ -105,7 +105,7 @@ jobs:
         gcov --version
         lcov --version
 
-    - name: Install gcovr
+    - name: Install gcovr (Linux)
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: sudo pip install gcovr
 
@@ -113,7 +113,7 @@ jobs:
       if: matrix.os == 'windows-latest' && env.skip_job != 'true'
       run: choco install ninja
     
-    - name: Set up Visual Studio shell
+    - name: Set up Visual Studio shell (Windows)
       if: matrix.os == 'windows-latest' && env.skip_job != 'true'
       uses: egor-tensin/vs-shell@v2
       with:
@@ -167,7 +167,7 @@ jobs:
       if: env.skip_job != 'true'
       run: |
         ${{ matrix.build_wrapper }} --out-dir ${{ steps.strings.outputs.build-wrapper-out-dir }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
-        
+
     - name: Run tests and generate coverage report (Linux)
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: |
@@ -177,19 +177,19 @@ jobs:
         # Run tests with verbose output
         ctest --verbose
         
-        # Generate Cobertura XML report using gcovr
-        gcovr -r . --xml-pretty --output coverage.xml --exclude '/usr/*' --exclude '/tests/*'
+        # Generate Cobertura XML report for Modules (RedEye_lib)
+        gcovr -r ./source/Modules --xml-pretty --output coverage.xml --exclude '/GUI/*' --exclude '/Render/*' --exclude '/Lens/*'
         
-        # Generate HTML report
-        gcovr -r . --html --html-details -o coverage_report/index.html --exclude '/usr/*' --exclude '/tests/*'
+        # Generate HTML report for visualization
+        gcovr -r ./source/Modules --html --html-details -o coverage_report/index.html --exclude '/GUI/*' --exclude '/Render/*' --exclude '/Lens/*'
         
-        # Log raw and cleaned coverage info for debugging
+        # Log Cobertura XML coverage report for debugging
         echo "Cobertura XML Coverage Report:"
         cat coverage.xml
         
         # Navigate back to the repository root
         cd ${{ github.workspace }}
-    
+
     - name: Run sonar-scanner
       if: env.skip_job != 'true'
       env:
