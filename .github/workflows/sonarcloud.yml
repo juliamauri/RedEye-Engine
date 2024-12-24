@@ -105,9 +105,9 @@ jobs:
         gcov --version
         lcov --version
 
-    - name: Install lcov-cobertura
+    - name: Install gcovr
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
-      run: npm install -g lcov-cobertura
+      run: sudo pip install gcovr
 
     - name: Install dependencies (Windows)
       if: matrix.os == 'windows-latest' && env.skip_job != 'true'
@@ -183,8 +183,8 @@ jobs:
         # Remove unnecessary coverage data (system headers and test files)
         lcov --remove coverage.info '/usr/*' '/tests/*' --output-file coverage_cleaned.info --ignore-errors unused
         
-        # Convert lcov report to Cobertura XML format
-        lcov-cobertura coverage_cleaned.info --output coverage.xml
+        # Convert lcov report to Cobertura XML format using gcovr
+        gcovr -r . --xml-pretty --output coverage.xml
         
         # Generate HTML report
         genhtml coverage_cleaned.info --output-directory coverage_report
@@ -198,7 +198,7 @@ jobs:
         
         # Navigate back to the repository root
         cd ${{ github.workspace }}
-        
+
     - name: Run sonar-scanner
       if: env.skip_job != 'true'
       env:
