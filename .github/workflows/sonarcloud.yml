@@ -105,9 +105,9 @@ jobs:
         gcov --version
         lcov --version
 
-    - name: Install lcov-to-cobertura-xml
+    - name: Install lcov-cobertura
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
-      run: npm install -g lcov-to-cobertura-xml
+      run: npm install -g lcov-cobertura
 
     - name: Install dependencies (Windows)
       if: matrix.os == 'windows-latest' && env.skip_job != 'true'
@@ -184,7 +184,7 @@ jobs:
         lcov --remove coverage.info '/usr/*' '/tests/*' --output-file coverage_cleaned.info --ignore-errors unused
         
         # Convert lcov report to Cobertura XML format
-        lcov-to-cobertura-xml coverage_cleaned.info --output coverage.xml
+        lcov-cobertura coverage_cleaned.info --output coverage.xml
         
         # Generate HTML report
         genhtml coverage_cleaned.info --output-directory coverage_report
@@ -198,11 +198,10 @@ jobs:
         
         # Navigate back to the repository root
         cd ${{ github.workspace }}
-    
+        
     - name: Run sonar-scanner
       if: env.skip_job != 'true'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.sonar_token }}
       run: sonar-scanner --define sonar.cfamily.compile-commands="${{ steps.strings.outputs.build-wrapper-out-dir }}/compile_commands.json"
-    
