@@ -177,6 +177,9 @@ jobs:
         # Run tests with verbose output
         ctest --verbose
         
+        # Create the coverage report directory
+        mkdir -p coverage_report
+        
         # Generate Cobertura XML report for Modules (RedEye_lib)
         gcovr -r ./source/Modules --xml-pretty --output coverage.xml --exclude '/GUI/*' --exclude '/Render/*' --exclude '/Lens/*'
         
