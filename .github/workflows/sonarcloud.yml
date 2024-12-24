@@ -170,7 +170,7 @@ jobs:
         cd ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
         ctest --verbose
         lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1
-        lcov --remove coverage.info '/usr/*' '/tests/*' --output-file coverage_cleaned.info
+        lcov --remove coverage.info '/usr/*' /usr/include/*' '/tests/*' --output-file coverage_cleaned.info
         genhtml coverage_cleaned.info --output-directory coverage_report
         echo "Raw Coverage Info:"
         cat coverage.info
