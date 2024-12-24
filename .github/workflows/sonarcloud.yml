@@ -168,28 +168,28 @@ jobs:
       run: |
         ${{ matrix.build_wrapper }} --out-dir ${{ steps.strings.outputs.build-wrapper-out-dir }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
 
-    - name: Run tests and generate coverage report (Linux)
+    - name: Run tests (Linux)
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: |
         # Navigate to build directory
         cd ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
         
         # Run tests with verbose output
-        ctest --verbose
+        ctest --output-on-failure
+        
+    - name: Generate coverage report (Linux)
+      if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
+      run: |
+        # Navigate to build directory
+        cd ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
         
         # Generate SonarQube-compatible coverage XML report for Modules
-        gcovr -r ${{ github.workspace }}/source/Modules --sonarqube --output coverage.xml --verbose
-        
-        # Generate HTML report for visualization (optional)
-        mkdir -p coverage_report
-        gcovr -r ./source/Modules --html --html-details -o coverage_report/index.html --exclude '/GUI/*' --exclude '/Render/*' --exclude '/Lens/*'
+        gcovr --root ${GITHUB_WORKSPACE}/source --xml --output coverage.xml
         
         # Log SonarQube-compatible XML coverage report for debugging
         echo "SonarQube XML Coverage Report:"
         cat coverage.xml
-    
-        # Navigate back to the repository root
-        cd ${{ github.workspace }}
+
 
     - name: Run sonar-scanner
       if: env.skip_job != 'true'
