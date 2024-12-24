@@ -29,6 +29,9 @@ if(CODE_COVERAGE)
 
   # Add coverage to the build output
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+  add_compile_options(-g -O0 --coverage)
+  add_link_options(--coverage)
 endif()
 
 project ("RedEye")
