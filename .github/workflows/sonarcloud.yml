@@ -59,6 +59,7 @@ jobs:
     - name: Check for changes in target source
       id: check_changes
       shell: bash
+      continue-on-error: true
       run: |
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           git fetch origin ${{ github.event.pull_request.base.ref }}
@@ -71,10 +72,11 @@ jobs:
         target_source_pattern=$(echo "${{ matrix.target_source }}" | sed 's/,/|/g')
         if ! grep -qE "$target_source_pattern" changed_files.txt; then
           echo "No changes in ${{ matrix.target_source }}. Skipping job."
-          exit 1
+          echo "skip_job=true" >> $GITHUB_ENV
         fi
 
     - name: Set reusable strings
+      if: env.skip_job != 'true'
       id: strings
       shell: bash
       run: |
@@ -82,7 +84,7 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
     
     - name: Install dependencies (Linux)
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: |
         sudo apt-get update
         sudo apt-get install -y software-properties-common
@@ -99,24 +101,25 @@ jobs:
         lcov --version
 
     - name: Install dependencies (Windows)
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-latest' && env.skip_job != 'true'
       run: choco install ninja
     
     - name: Set up Visual Studio shell
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-latest' && env.skip_job != 'true'
       uses: egor-tensin/vs-shell@v2
       with:
         arch: ${{ env.PLATFORM }}
     
     - name: Configure CMake Release (Windows)
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-latest' && env.skip_job != 'true'
       run: cmake --preset ${{ env.PLATFORM }}-release-${{ matrix.beauty_os }}-opengl
       
     - name: Configure CMake Release (Linux)
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: cmake --preset ${{ env.PLATFORM }}-release-${{ matrix.beauty_os }}-opengl -DCODE_COVERAGE=ON
 
     - name: Create sonar-project.properties
+      if: env.skip_job != 'true'
       shell: bash
       run: |
         sourceDirectory="${{ github.workspace }}"
@@ -148,14 +151,16 @@ jobs:
         echo -e $content > "${sourceDirectory}/sonar-project.properties"
     
     - name: Install sonar-scanner and build-wrapper
+      if: env.skip_job != 'true'
       uses: SonarSource/sonarcloud-github-c-cpp@v3
       
     - name: Run build-wrapper Release
+      if: env.skip_job != 'true'
       run: |
         ${{ matrix.build_wrapper }} --out-dir ${{ steps.strings.outputs.build-wrapper-out-dir }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ matrix.beauty_os }}-opengl
 
     - name: Run tests and generate coverage report (Linux)
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: |
         cd ${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ matrix.beauty_os }}-opengl
         ctest --verbose
@@ -165,6 +170,7 @@ jobs:
         cd ${{ github.workspace }}
 
     - name: Run sonar-scanner
+      if: env.skip_job != 'true'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.sonar_token }}
