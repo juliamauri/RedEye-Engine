@@ -154,8 +154,7 @@ jobs:
         content+="sonar.cfamily.enableModules=true\n"
     
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            content+="sonar.coverageReportPaths=sonarqube-report.xml\n"
-            content+="sonar.cfamily.gcov.reportsPath=${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}/coverage\n"
+            content+="sonar.cfamily.gcov.reportsPath=sonarqube-report.xml\n"
         fi
     
         echo -e $content > "${sourceDirectory}/sonar-project.properties"
