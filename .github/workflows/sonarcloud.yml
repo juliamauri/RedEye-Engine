@@ -105,6 +105,10 @@ jobs:
         gcov --version
         lcov --version
 
+    - name: Install lcov-to-cobertura-xml
+      if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
+      run: npm install -g lcov-to-cobertura-xml
+
     - name: Install dependencies (Windows)
       if: matrix.os == 'windows-latest' && env.skip_job != 'true'
       run: choco install ninja
@@ -130,7 +134,7 @@ jobs:
         sourceDirectory="${{ github.workspace }}"
         majorVersion=6
         minorVersion=0
-
+    
         branch="${{ github.ref }}"
         if [[ "$branch" == refs/pull/* ]]; then
             branch="${{ github.head_ref }}"
@@ -142,17 +146,17 @@ jobs:
         shaVersion=$(git rev-parse --short origin/$branch)
         version="${majorVersion}.${minorVersion}.${shaVersion}"
         echo "Version: $version"
-
+    
         content="sonar.projectKey=${{ matrix.project_key }}\n"
         content+="sonar.organization=redeye\n"
         content+="sonar.projectVersion=$version\n"
         content+="sonar.sources=${{ matrix.target_source }}\n"
         content+="sonar.cfamily.enableModules=true\n"
-
+    
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            content+="sonar.coverageReportPaths=${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}/coverage_cleaned.info\n"
+            content+="sonar.coverageReportPaths=${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}/coverage.xml\n"
         fi
-
+    
         echo -e $content > "${sourceDirectory}/sonar-project.properties"
     
     - name: Install sonar-scanner and build-wrapper
@@ -163,7 +167,7 @@ jobs:
       if: env.skip_job != 'true'
       run: |
         ${{ matrix.build_wrapper }} --out-dir ${{ steps.strings.outputs.build-wrapper-out-dir }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
-
+    
     - name: Run tests and generate coverage report (Linux)
       if: matrix.os == 'ubuntu-latest' && env.skip_job != 'true'
       run: |
@@ -177,7 +181,10 @@ jobs:
         lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch
         
         # Remove unnecessary coverage data (system headers and test files)
-        lcov --remove coverage.info '/usr/*' '/tests/*' --output-file coverage_cleaned.info
+        lcov --remove coverage.info '/usr/*' '/tests/*' --output-file coverage_cleaned.info --ignore-errors unused
+        
+        # Convert lcov report to Cobertura XML format
+        lcov-to-cobertura-xml coverage_cleaned.info --output coverage.xml
         
         # Generate HTML report
         genhtml coverage_cleaned.info --output-directory coverage_report
@@ -191,10 +198,11 @@ jobs:
         
         # Navigate back to the repository root
         cd ${{ github.workspace }}
-
+    
     - name: Run sonar-scanner
       if: env.skip_job != 'true'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.sonar_token }}
       run: sonar-scanner --define sonar.cfamily.compile-commands="${{ steps.strings.outputs.build-wrapper-out-dir }}/compile_commands.json"
+    
