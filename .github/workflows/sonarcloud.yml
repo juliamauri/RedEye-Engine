@@ -177,7 +177,7 @@ jobs:
         lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch
         
         # Remove unnecessary coverage data (system headers and test files)
-        lcov --remove coverage.info '/usr/*' '/usr/include/*' '/tests/*' --output-file coverage_cleaned.info
+        lcov --remove coverage.info '/usr/*' '/tests/*' --output-file coverage_cleaned.info
         
         # Generate HTML report
         genhtml coverage_cleaned.info --output-directory coverage_report
