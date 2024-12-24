@@ -185,9 +185,12 @@ jobs:
         
         # Log SonarQube-compatible XML coverage report for debugging
         echo "SonarQube XML Coverage Report:"
+        cat sonarqube-report.xml
+        
+        # Log XML coverage report for debugging
+        echo "XML Coverage Report:"
         cat coverage.xml
-
-
+        
     - name: Run sonar-scanner
       if: env.skip_job != 'true'
       env:
