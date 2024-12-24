@@ -73,77 +73,35 @@
       "name": "opengl",
       "hidden": true,
       "cacheVariables": {
-        "ENABLE_OPENGL": "ON",
-        "ENABLE_VULKAN": "OFF"
+        "ENABLE_OPENGL": "ON"
       }
     },
     {
       "name": "vulkan",
       "hidden": true,
       "cacheVariables": {
-        "ENABLE_OPENGL": "OFF",
         "ENABLE_VULKAN": "ON"
       }
     },
     {
       "name": "x86-debug-windows",
-      "hidden": true,
-      "inherits": [ "windows-base", "x86", "debug" ]
+      "displayName": "Win-32 Debug",
+      "inherits": [ "windows-base", "x86", "debug", "opengl", "vulkan" ]
     },
     {
       "name": "x86-release-windows",
-      "hidden": true,
-      "inherits": [ "windows-base", "x86", "release" ]
+      "displayName": "Win-32 Release",
+      "inherits": [ "windows-base", "x86", "release", "opengl", "vulkan" ]
     },
     {
       "name": "x64-debug-windows",
-      "hidden": true,
-      "inherits": [ "windows-base", "x64", "debug" ]
+      "displayName": "Win-64 Debug",
+      "inherits": [ "windows-base", "x64", "debug", "opengl", "vulkan" ]
     },
     {
       "name": "x64-release-windows",
-      "hidden": true,
-      "inherits": [ "windows-base", "x64", "release" ]
-    },
-    {
-      "name": "x86-debug-windows-opengl",
-      "inherits": [ "x86-debug-windows", "opengl" ],
-      "displayName": "Win86 Debug (OpenGL)"
-    },
-    {
-      "name": "x86-release-windows-opengl",
-      "inherits": [ "x86-release-windows", "opengl" ],
-      "displayName": "Win86 Release (OpenGL)"
-    },
-    {
-      "name": "x64-debug-windows-opengl",
-      "inherits": [ "x64-debug-windows", "opengl" ],
-      "displayName": "Win64 Debug (OpenGL)"
-    },
-    {
-      "name": "x64-release-windows-opengl",
-      "inherits": [ "x64-release-windows", "opengl" ],
-      "displayName": "Win64 Release (OpenGL)"
-    },
-    {
-      "name": "x86-debug-windows-vulkan",
-      "inherits": [ "x86-debug-windows", "vulkan" ],
-      "displayName": "Win86 Debug (Vulkan)"
-    },
-    {
-      "name": "x86-release-windows-vulkan",
-      "inherits": [ "x86-release-windows", "vulkan" ],
-      "displayName": "Win86 Release (Vulkan)"
-    },
-    {
-      "name": "x64-debug-windows-vulkan",
-      "inherits": [ "x64-debug-windows", "vulkan" ],
-      "displayName": "Win64 Debug (Vulkan)"
-    },
-    {
-      "name": "x64-release-windows-vulkan",
-      "inherits": [ "x64-release-windows", "vulkan" ],
-      "displayName": "Win64 Release (Vulkan)"
+      "displayName": "Win-64 Release",
+      "inherits": [ "windows-base", "x64", "release", "opengl", "vulkan" ]
     },
     {
       "name": "x86-linux",
@@ -169,63 +127,23 @@
     },
     {
       "name": "x86-debug-linux",
-      "hidden": true,
-      "inherits": [ "x86-linux", "debug" ]
+      "displayName": "Lin-32 Debug",
+      "inherits": [ "x86-linux", "debug", "opengl", "vulkan" ]
     },
     {
       "name": "x86-release-linux",
-      "hidden": true,
-      "inherits": [ "x86-linux", "release" ]
+      "displayName": "Lin-32 Release",
+      "inherits": [ "x86-linux", "release", "opengl", "vulkan" ]
     },
     {
       "name": "x64-debug-linux",
-      "hidden": true,
-      "inherits": [ "x64-linux", "debug" ]
+      "displayName": "Lin-64 Debug",
+      "inherits": [ "x64-linux", "debug", "opengl", "vulkan" ]
     },
     {
       "name": "x64-release-linux",
-      "hidden": true,
-      "inherits": [ "x64-linux", "release" ]
-    },
-    {
-      "name": "x86-debug-linux-opengl",
-      "inherits": [ "x86-debug-linux", "opengl" ],
-      "displayName": "Lin86 Debug (OpenGL)"
-    },
-    {
-      "name": "x86-release-linux-opengl",
-      "inherits": [ "x86-release-linux", "opengl" ],
-      "displayName": "Lin86 Release (OpenGL)"
-    },
-    {
-      "name": "x64-debug-linux-opengl",
-      "inherits": [ "x64-debug-linux", "opengl" ],
-      "displayName": "Lin64 Debug (OpenGL)"
-    },
-    {
-      "name": "x64-release-linux-opengl",
-      "inherits": [ "x64-release-linux", "opengl" ],
-      "displayName": "Lin64 Release (OpenGL)"
-    },
-    {
-      "name": "x86-debug-linux-vulkan",
-      "inherits": [ "x86-debug-linux", "vulkan" ],
-      "displayName": "Lin86 Debug (Vulkan)"
-    },
-    {
-      "name": "x86-release-linux-vulkan",
-      "inherits": [ "x86-release-linux", "vulkan" ],
-      "displayName": "Lin86 Release (Vulkan)"
-    },
-    {
-      "name": "x64-debug-linux-vulkan",
-      "inherits": [ "x64-debug-linux", "vulkan" ],
-      "displayName": "Lin64 Debug (Vulkan)"
-    },
-    {
-      "name": "x64-release-linux-vulkan",
-      "inherits": [ "x64-release-linux", "vulkan" ],
-      "displayName": "Lin64 Release (Vulkan)"
+      "displayName": "Lin-64 Release",
+      "inherits": [ "x64-linux", "release", "opengl", "vulkan" ]
     }
   ]
 }
