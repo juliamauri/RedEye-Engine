@@ -177,19 +177,17 @@ jobs:
         # Run tests with verbose output
         ctest --verbose
         
-        # Create the coverage report directory
+        # Generate SonarQube-compatible coverage XML report for Modules
+        gcovr -r ./source/Modules --sonarqube --output coverage.xml --exclude '/GUI/*' --exclude '/Render/*' --exclude '/Lens/*'
+        
+        # Generate HTML report for visualization (optional)
         mkdir -p coverage_report
-        
-        # Generate Cobertura XML report for Modules (RedEye_lib)
-        gcovr -r ./source/Modules --xml-pretty --output coverage.xml --exclude '/GUI/*' --exclude '/Render/*' --exclude '/Lens/*'
-        
-        # Generate HTML report for visualization
         gcovr -r ./source/Modules --html --html-details -o coverage_report/index.html --exclude '/GUI/*' --exclude '/Render/*' --exclude '/Lens/*'
         
-        # Log Cobertura XML coverage report for debugging
-        echo "Cobertura XML Coverage Report:"
+        # Log SonarQube-compatible XML coverage report for debugging
+        echo "SonarQube XML Coverage Report:"
         cat coverage.xml
-        
+    
         # Navigate back to the repository root
         cd ${{ github.workspace }}
 
