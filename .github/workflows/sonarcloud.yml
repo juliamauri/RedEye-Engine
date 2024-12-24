@@ -184,7 +184,7 @@ jobs:
         cd ${{ steps.strings.outputs.build-output-dir }}/${{ steps.strings.outputs.preset }}
         
         # Generate SonarQube-compatible coverage XML report for Modules
-        gcovr --root ${GITHUB_WORKSPACE}/source --xml --output coverage.xml
+        gcovr --root ${GITHUB_WORKSPACE} --xml --output coverage.xml
         
         # Log SonarQube-compatible XML coverage report for debugging
         echo "SonarQube XML Coverage Report:"
