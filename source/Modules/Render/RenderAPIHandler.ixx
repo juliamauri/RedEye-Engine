@@ -22,13 +22,6 @@ module;
 #include <iostream>
 #include <unordered_map>
 
-#ifdef ENABLE_OPENGL
-#include <GL/glew.h>
-#endif
-#ifdef ENABLE_VULKAN
-#include <SDL_vulkan.h>
-#endif
-
 export module Render;
 
 #ifdef ENABLE_OPENGL
@@ -40,91 +33,154 @@ import Vulkan;
 
 struct Window
 {
-    uint32_t id;
-
-    union Data
+    SDL_Window* ptr;
+    
+    enum API
     {
-        bool is_cpu_rendering = false;
+        SDL,
+        OpenGL,
+        Vulkan
+    } type;
+
+    union Context
+    {
+        struct SDLContext
+        {
+            SDL_Renderer* renderer = nullptr;
+
+            bool Create(SDL_Window* window)
+            {
+                renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+                return renderer != NULL;
+            }
+
+            void Delete()
+            {
+                SDL_DestroyRenderer(renderer);
+            }
+
+            void RenderTriangle()
+            {
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                SDL_RenderClear(renderer);
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                SDL_RenderDrawLine(renderer, 200, 100, 100, 300);
+                SDL_RenderDrawLine(renderer, 100, 300, 300, 300);
+                SDL_RenderDrawLine(renderer, 300, 300, 200, 100);
+                SDL_RenderPresent(renderer);
+            }
+        } sdl;
+
 #ifdef ENABLE_OPENGL
-        SDL_GLContext gl_context;
+        RE::OpenGL::Context gl;
 #endif
 #ifdef ENABLE_VULKAN
-        RE::VulkanContext vk_context;
+        RE::Vulkan::Context vk;
 #endif
-    } data;
+        int i = 0;
+        ~Context() {}
+    } context = {0};
 
-    bool Create(const char* title, uint32_t flags, int x, int y, int w, int h)
+    bool CreateContext(SDL_Window* sdl_window, uint32_t flags, int w, int h)
     {
-        SDL_Window* window = SDL_CreateWindow(title, x, y, w, h, flags);
-        if (window == nullptr)
-        {
-            std::cerr << "Failed to create window: " << SDL_GetError() << std::endl;
-            return false;
-        }
+        ptr = sdl_window;
 
         if (flags & SDL_WINDOW_OPENGL)
-        {
-#ifndef ENABLE_OPENGL
-            std::cerr << "OpenGL is not enabled." << std::endl;
-            SDL_DestroyWindow(window);
-            return false;
-#else
-            std::cout << "Creating OpenGL context." << std::endl;
-            if (!RE::OpenGL::CreateContext(data.gl_context, window))
-            {
-                std::cerr << "Failed to create OpenGL context: " << SDL_GetError() << std::endl;
-                SDL_DestroyWindow(window);
-                return false;
-            }
-#endif
-        }
+            type = OpenGL;
         else if (flags & SDL_WINDOW_VULKAN)
-        {
-#ifndef ENABLE_VULKAN
-            std::cerr << "Vulkan is not enabled." << std::endl;
-            SDL_DestroyWindow(window);
-            return false;
-#else
-            std::cout << "Creating Vulkan context." << std::endl;
-            if (!data.vk_context.Create(window))
-            {
-                std::cerr << "Failed to create Vulkan context: " << std::endl;
-                SDL_DestroyWindow(window);
-                return false;
-            }
-#endif
-        }
+            type = Vulkan;
         else
+            type = SDL;
+
+        switch (type)
         {
-            std::cout << "No rendering API specified for window: " << title << std::endl;
-            data.is_cpu_rendering = true;
+            case Window::OpenGL:
+#ifndef ENABLE_OPENGL
+                std::cerr << "OpenGL is not enabled." << std::endl;
+                SDL_DestroyWindow(ptr);
+                return false;
+#else
+                std::cout << "Creating OpenGL context." << std::endl;
+                if (!context.gl.Create(ptr))
+                {
+                    std::cerr << "Failed to create OpenGL context: " << SDL_GetError() << std::endl;
+                    SDL_DestroyWindow(ptr);
+                    return false;
+                }
+#endif
+                break;
+            case Window::Vulkan:
+#ifndef ENABLE_VULKAN
+                std::cerr << "Vulkan is not enabled." << std::endl;
+                SDL_DestroyWindow(ptr);
+                return false;
+#else
+                std::cout << "Creating Vulkan context." << std::endl;
+                if (!context.vk.Create(ptr, w, h))
+                {
+                    std::cerr << "Failed to create Vulkan context." << std::endl;
+                    SDL_DestroyWindow(ptr);
+                    return false;
+                }
+#endif
+                break;
+            default:
+                std::cout << "No rendering API specified for window." << std::endl;
+                std::cout << "Creating SDL renderer." << std::endl;
+                if (!context.sdl.Create(ptr))
+                {
+                    std::cerr << "Failed to create SDL renderer: " << SDL_GetError() << std::endl;
+                    SDL_DestroyWindow(ptr);
+                    return false;
+                }
+                break;
         }
 
-        std::cout << "Successfull context creation for window: " << title << std::endl;
-        id = SDL_GetWindowID(window);
+        std::cout << "Successfull context creation for window" << std::endl;
         return true;
-    };
+    }
 
     void Delete()
     {
-        SDL_Window* window = SDL_GetWindowFromID(id);
-        uint32_t flags = SDL_GetWindowFlags(window);
-        if (flags & SDL_WINDOW_OPENGL)
-            RE::OpenGL::DeleteContext(data.gl_context);
-        else if (flags & SDL_WINDOW_VULKAN)
-            data.vk_context.Delete();
-
-        SDL_DestroyWindow(window);
+        switch (type)
+        {
+#ifdef ENABLE_OPENGL
+            case Window::OpenGL:
+                context.gl.Delete();
+                break;
+#endif
+#ifdef ENABLE_VULKAN
+            case Window::Vulkan:
+                context.vk.Delete();
+                break;
+#endif
+            default:
+                context.sdl.Delete();
+                break;
+        }
+        SDL_DestroyWindow(ptr);
     }
 
-    void RenderTriangle()
+    bool RenderTriangle()
     {
-        SDL_Window* window = SDL_GetWindowFromID(id);
-        uint32_t flags = SDL_GetWindowFlags(window);
-        if (flags & SDL_WINDOW_OPENGL)
-            RE::OpenGL::RenderTriangle(window);
-        else if (flags & SDL_WINDOW_VULKAN)
-            data.vk_context.RenderTriangle(window);
+        switch (type)
+        {
+            case SDL:
+                context.sdl.RenderTriangle();
+                return true;
+#ifdef ENABLE_OPENGL
+            case Window::OpenGL:
+                context.gl.RenderTriangle();
+                SDL_GL_SwapWindow(ptr);
+                return true;
+#endif
+#ifdef ENABLE_VULKAN
+            case Window::Vulkan:
+                return context.vk.RenderTriangle();
+#endif
+            default:
+                return false;
+        }
     }
 };
 
@@ -151,10 +207,10 @@ export namespace RE
                 return false;
             }
 #ifdef ENABLE_VULKAN
-            std::cout << "Loading default Vulkan library." << std::endl;
-            if (SDL_Vulkan_LoadLibrary(nullptr) != 0)
+            std::cout << "Initializing Vulkan." << std::endl;
+            if (!RE::Vulkan::Init())
             {
-                std::cerr << "Failed to load default Vulkan library: " << SDL_GetError() << std::endl;
+                std::cerr << "Failed to initialize Vulkan." << std::endl;
                 SDL_QuitSubSystem(SDL_INIT_VIDEO);
                 return false;
             }
@@ -174,15 +230,24 @@ export namespace RE
         bool CreateWindow(uint32_t& out_window_id, const char* title, uint32_t flags = Flag::DEFAULT,
                           int x = SDL_WINDOWPOS_CENTERED, int y = SDL_WINDOWPOS_CENTERED, int w = 500, int h = 500)
         {
-            std::cout << "Creating Window: " << title << std::endl;
-            Window window;
-            if (!window.Create(title, flags, x, y, w, h))
+            std::cout << "Creating SDL Window: " << title << std::endl;
+            SDL_Window* window_ptr = SDL_CreateWindow(title, x, y, w, h, flags);
+            if (window_ptr == nullptr)
             {
-                std::cerr << "Failed to create window: " << title << std::endl;
+                std::cerr << "Failed to create SDL Window: " << SDL_GetError() << std::endl;
                 return false;
             }
 
-            _windows[out_window_id = window.id] = window;
+            std::cout << "Creating Context for Window: " << title << " " << std::endl;
+            out_window_id = SDL_GetWindowID(window_ptr);
+            if (!_windows[out_window_id].CreateContext(window_ptr, flags, w, h))
+            {
+                std::cerr << "Failed to create context for window: " << title << std::endl;
+                _windows.erase(out_window_id);
+                return false;
+            }
+
+            std::cout << "Window: " << title << " ready to render!" << std::endl;
             return true;
         }
 
@@ -192,9 +257,9 @@ export namespace RE
             _windows.erase(window_id);
         }
 
-        void RenderTriangle(uint32_t window_id)
+        bool RenderTriangle(uint32_t window_id)
         {
-            _windows[window_id].RenderTriangle();
+            return _windows[window_id].RenderTriangle();
         }
     } // namespace Render
 } // namespace RE
