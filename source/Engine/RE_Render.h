@@ -21,6 +21,6 @@
 namespace Renderer
 {
     bool Init();
-    void Update();
+    bool Update();
     void CleanUp();
 }; // namespace Renderer

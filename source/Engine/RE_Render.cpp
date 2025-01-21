@@ -22,21 +22,25 @@
 
 import Render;
 
+uint32_t window_sdl = 0;
 uint32_t window_gl = 0;
 uint32_t window_vk = 0;
 
 bool Renderer::Init()
 {
     return RE::Render::Init()
+        && RE::Render::CreateWindow(window_sdl, "RedEye Engine SDL", RE::Render::Flag::DEFAULT) 
         && RE::Render::CreateWindow(window_gl, "RedEye Engine OpenGL", RE::Render::Flag::OpenGL | RE::Render::Flag::DEFAULT) 
         && RE::Render::CreateWindow(window_vk, "RedEye Engine Vulkan", RE::Render::Flag::Vulkan | RE::Render::Flag::DEFAULT)
         ;
 }
 
-void Renderer::Update()
+bool Renderer::Update()
 {
-    RE::Render::RenderTriangle(window_gl);
-    RE::Render::RenderTriangle(window_vk);
+    return 
+        RE::Render::RenderTriangle(window_sdl) &&
+        RE::Render::RenderTriangle(window_gl) &&
+        RE::Render::RenderTriangle(window_vk);
 }
 
 void Renderer::CleanUp()
