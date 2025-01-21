@@ -1126,7 +1126,7 @@ struct DynamicState
     uint16_t update_flags = 0;
     bool requires_recreation = false;
 
-    void Setup(const VkExtent2D& extent, uint16_t flags = 0)
+    void Setup(const VkExtent2D& extent, uint16_t flags = VIEWPORT | SCISSOR)
     {
         current_flags = flags;
         swapchain_extent = extent;
@@ -1510,6 +1510,8 @@ struct ModelData
             std::cerr << "Failed to create <TransfomMatrices> Descriptor Set!" << std::endl;
             return false;
         }
+
+        return true;
     }
 
     void Destroy(VkDevice logical_device)
