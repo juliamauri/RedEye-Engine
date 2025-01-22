@@ -23,8 +23,6 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 
-import WindowManager;
-
 bool InitModules();
 bool StartModules();
 void LoadConfig();
@@ -65,7 +63,11 @@ void Application::MainLoop()
 {
     do
     {
-        Renderer::Update();
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) { }
+
+        if (!Renderer::Update())
+            AddFlag(Flag::WANT_TO_QUIT);
 
         if (HasFlag(Flag::LOAD_CONFIG))
             LoadConfig();

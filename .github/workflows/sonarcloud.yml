@@ -51,8 +51,8 @@ jobs:
       run: |
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           git fetch origin ${{ github.event.pull_request.base.ref }}
-          git fetch origin ${{ github.event.pull_request.head.ref }}
-          git diff --name-only origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }} > changed_files.txt
+          git fetch origin "${{ github.event.pull_request.head.ref }}"
+          git diff --name-only "origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }}" > changed_files.txt
         else
           git fetch origin main
           git diff --name-only origin/main...HEAD > changed_files.txt
@@ -79,7 +79,7 @@ jobs:
         arch: ${{ env.PLATFORM }}
     
     - name: Configure CMake Release
-      run: cmake --preset ${{ env.PLATFORM }}-release-${{ env.BEAUTY_OS }}-opengl
+      run: cmake --preset ${{ env.PLATFORM }}-release-${{ env.BEAUTY_OS }}
 
     - name: Create sonar-project.properties
       shell: pwsh
@@ -115,7 +115,7 @@ jobs:
       
     - name: Run build-wrapper Release
       run: |
-        build-wrapper-win-x86-64 --out-dir ${{ steps.strings.outputs.build-wrapper-out-dir }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ env.BEAUTY_OS }}-opengl
+        build-wrapper-win-x86-64 --out-dir ${{ steps.strings.outputs.build-wrapper-out-dir }} cmake --build ${{ steps.strings.outputs.build-output-dir }}/${{ env.PLATFORM }}-release-${{ env.BEAUTY_OS }}
     
     - name: Run sonar-scanner
       env:
