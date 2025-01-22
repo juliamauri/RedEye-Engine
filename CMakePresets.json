@@ -31,7 +31,8 @@
       "hidden": true,
       "cacheVariables": {
         "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++"
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja"
       },
       "condition": {
         "type": "equals",
@@ -127,22 +128,22 @@
     },
     {
       "name": "x86-debug-linux",
-      "displayName": "Lin-32 Debug",
+      "displayName": "Linux-32 Debug",
       "inherits": [ "x86-linux", "debug", "opengl", "vulkan" ]
     },
     {
       "name": "x86-release-linux",
-      "displayName": "Lin-32 Release",
+      "displayName": "Linux-32 Release",
       "inherits": [ "x86-linux", "release", "opengl", "vulkan" ]
     },
     {
       "name": "x64-debug-linux",
-      "displayName": "Lin-64 Debug",
+      "displayName": "Linux-64 Debug",
       "inherits": [ "x64-linux", "debug", "opengl", "vulkan" ]
     },
     {
       "name": "x64-release-linux",
-      "displayName": "Lin-64 Release",
+      "displayName": "Linux-64 Release",
       "inherits": [ "x64-linux", "release", "opengl", "vulkan" ]
     }
   ]
