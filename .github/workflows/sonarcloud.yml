@@ -51,7 +51,7 @@ jobs:
       run: |
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           git fetch origin ${{ github.event.pull_request.base.ref }}
-          git fetch origin ${{ github.event.pull_request.head.ref }}
+          git fetch origin "${{ github.event.pull_request.head.ref }}"
           git diff --name-only "origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }}" > changed_files.txt
         else
           git fetch origin main
