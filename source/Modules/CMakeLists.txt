@@ -31,7 +31,16 @@ target_sources(RedEye_lib
 
         "Render/RenderAPIHandler.ixx"
         $<IF:$<BOOL:${ENABLE_OPENGL}>,Render/OpenGL.ixx,>
+
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/VkDebug.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/VkSDLWindow.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Device.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Buffers.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Shading.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Swapchain.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/PipelineDynamicStates.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/GraphicPipeline.ixx,>
 )
 
 target_compile_definitions(RedEye_lib PRIVATE
