@@ -26,6 +26,7 @@ export module Shading;
 
 import VkDebug;
 import Buffers;
+import Uniforms;
 
 struct Shader
 {
@@ -60,6 +61,24 @@ struct Shader
         createInfo.pCode = codeBytes.data();
 
         return vkCreateShaderModule(logical_device, &createInfo, VkDebug::Allocation(), &module) == VK_SUCCESS;
+    }
+};
+struct Shading;
+export struct ShadingDescriptor
+{
+    VkDescriptorPool pool = VK_NULL_HANDLE;
+    std::vector<VkDescriptorSetLayout> set_layouts{};
+
+    bool Create(VkDevice logical_device, const Shading& shading);
+    void Clear(VkDevice logical_device)
+    {
+        for (auto& set_layout : set_layouts)
+            vkDestroyDescriptorSetLayout(logical_device, set_layout, VkDebug::Allocation());
+
+        set_layouts.clear();
+
+        vkDestroyDescriptorPool(logical_device, pool, VkDebug::Allocation());
+        pool = VK_NULL_HANDLE;
     }
 };
 
@@ -97,75 +116,17 @@ export struct Shading
         float pos[3];
         float color[3];
     };
-
-    struct Uniform
-    {
-        void* data = nullptr;
-        Buffer buffer{};
-
-        struct CreateInfo
-        {
-            void* data = nullptr;
-            uint32_t binding = 0;
-            VkDeviceSize size = 0;
-
-            template <typename T> static CreateInfo From(T& data, uint32_t binding = 0)
-            {
-                return {&data, binding, sizeof(T)};
-            }
-        };
-
-        bool Create(const VkDevice logical_device, VkPhysicalDeviceMemoryProperties mem_properties,
-                    VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout,
-                    VkDescriptorSet& descriptor_set, CreateInfo create_info)
-        {
-            // Create Uniform Buffer
-            if (!buffer.Create(logical_device, mem_properties, create_info.size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) ||
-                !buffer.FillData(logical_device, data = create_info.data))
-                return false;
-
-            // Create Descriptor Set
-            VkDescriptorSetAllocateInfo allocInfo{};
-            allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-            allocInfo.descriptorPool = descriptorPool;
-            allocInfo.descriptorSetCount = 1;
-            allocInfo.pSetLayouts = &descriptorSetLayout;
-
-            if (vkAllocateDescriptorSets(logical_device, &allocInfo, &descriptor_set) != VK_SUCCESS)
-                return false;
-
-            // Update Descriptor Set
-            VkDescriptorBufferInfo bufferInfo = {buffer.id, 0, buffer.buffer_size};
-            VkWriteDescriptorSet descriptorWrite{};
-            descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrite.dstSet = descriptor_set;
-            descriptorWrite.dstBinding = create_info.binding;
-            descriptorWrite.dstArrayElement = 0;
-            descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            descriptorWrite.descriptorCount = 1;
-            descriptorWrite.pBufferInfo = &bufferInfo;
-            vkUpdateDescriptorSets(logical_device, 1, &descriptorWrite, 0, nullptr);
-            return true;
-        }
-
-        bool Update(VkDevice logical_device) const
-        {
-            return data != nullptr && buffer.FillData(logical_device, data);
-        }
-
-        void Clear(VkDevice logical_device)
-        {
-            buffer.Clear(logical_device);
-        }
-    };
     
     // Buffers
     Buffer vertex{};
     Buffer index{};
     std::vector<Uniform> uniforms{};
 
-    // Cached Bindings
+    // Geometry Data
+    uint32_t vertex_count = 0;
+    uint32_t index_count = 0;
+
+    // Binding Cached Dta
     uint32_t instance_count = 0;
     std::vector<VkDescriptorSet> descriptor_sets{};
 
@@ -173,19 +134,17 @@ export struct Shading
     bool Create(VkDevice logical_device,
                 VkQueue queue,
                 VkPhysicalDeviceMemoryProperties mem_properties,
-                VkCommandPool commandPool,
-                VkDescriptorPool& descriptorPool,
-                VkDescriptorSetLayout& descriptorSetLayout,
+                VkCommandPool commandPool, const ShadingDescriptor& descriptor,
                 const std::vector<VertexInputType>& vertices,
                 const std::vector<IndexInputType>& indices,
-                const std::vector<Uniform::CreateInfo> uniform_infos)
+                const std::vector<UniformCreateInfo> uniform_infos)
     {
         if (!SetVertexBuffer(logical_device, queue, mem_properties, commandPool, vertices) ||
             !SetIndexBuffer(logical_device, queue, mem_properties, commandPool, indices))
             return false;
 
         for (const auto& uniform_info : uniform_infos)
-            if (!AddUniform(logical_device, mem_properties, descriptorPool, descriptorSetLayout, uniform_info))
+            if (!AddUniform(logical_device, mem_properties, descriptor, uniform_info))
                 return false;
 
         return true;
@@ -227,13 +186,13 @@ export struct Shading
         vkCmdBindIndexBuffer(commandBuffer, index.id, 0, VK_INDEX_TYPE_UINT32);
 
         // Draw
-        vkCmdDrawIndexed(commandBuffer, index.element_count, instance_count, 0, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, index_count, instance_count, 0, 0, 0);
     }
 
     virtual void BindingDescriptions(std::vector<VkVertexInputBindingDescription>& binding_descriptions) const = 0;
     virtual void AttributeDescriptions(std::vector<VkVertexInputAttributeDescription>& attr_descriptions) const = 0;
 
-    bool CreateDescriptorSetLayout(VkDevice& logical_device, VkDescriptorSetLayout& descriptorSetLayout) const
+    bool CreateDescriptorSetLayout(VkDevice& logical_device, VkDescriptorSetLayout& descriptor_set_layout) const
     {
         std::vector<VkDescriptorSetLayoutBinding> layout_bindings{};
         DescriptorSetLayoutBindings(layout_bindings);
@@ -243,7 +202,7 @@ export struct Shading
         layoutInfo.bindingCount = static_cast<uint32_t>(layout_bindings.size());
         layoutInfo.pBindings = layout_bindings.data();
 
-        return vkCreateDescriptorSetLayout(logical_device, &layoutInfo, VkDebug::Allocation(), &descriptorSetLayout) ==
+        return vkCreateDescriptorSetLayout(logical_device, &layoutInfo, VkDebug::Allocation(), &descriptor_set_layout) ==
                VK_SUCCESS;
     }
     bool CreateDescriptorPool(VkDevice& logical_device, VkDescriptorPool& descriptorPool) const
@@ -261,28 +220,32 @@ export struct Shading
     }
 
   protected:
+
     template <typename VertexInputType>
     bool SetVertexBuffer(VkDevice logical_device, VkQueue queue, VkPhysicalDeviceMemoryProperties mem_properties,
-                         VkCommandPool commandPool, const std::vector<VertexInputType>& vertices)
+                         VkCommandPool commandPool, const std::vector<VertexInputType>& vertices,
+                         VkDeviceSize buffer_offset = 0)
     {
+        vertex_count = static_cast<uint32_t>(vertices.size());
         return vertex.CreateFromStagedCopy(logical_device, queue, mem_properties, commandPool,
-                                           VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertices);
+                                           VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertices, buffer_offset);
     }
     template <typename IndexInputType>
     bool SetIndexBuffer(VkDevice logical_device, VkQueue queue, VkPhysicalDeviceMemoryProperties mem_properties,
-                        VkCommandPool commandPool, const std::vector<IndexInputType>& indices)
+                        VkCommandPool commandPool, const std::vector<IndexInputType>& indices,
+                        VkDeviceSize buffer_offset = 0)
     {
+        index_count = static_cast<uint32_t>(indices.size());
         return index.CreateFromStagedCopy(logical_device, queue, mem_properties, commandPool,
-                                          VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indices);
+                                          VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indices, buffer_offset);
     }
 
     bool AddUniform(VkDevice logical_device, VkPhysicalDeviceMemoryProperties mem_properties,
-                    VkDescriptorPool& descriptorPool, VkDescriptorSetLayout& descriptorSetLayout,
-                    Uniform::CreateInfo uniform_data)
+                    const ShadingDescriptor& descriptor, UniformCreateInfo uniform_data)
     {
         uniforms.push_back({});
         descriptor_sets.push_back({});
-        return uniforms.back().Create(logical_device, mem_properties, descriptorPool, descriptorSetLayout,
+        return uniforms.back().Create(logical_device, mem_properties, descriptor.pool, descriptor.set_layouts,
                                       descriptor_sets.back(), uniform_data);
     }
 
@@ -307,6 +270,13 @@ export struct Shading
     virtual void DescriptorSetLayoutBindings(std::vector<VkDescriptorSetLayoutBinding>& layout_bindings) const = 0;
     virtual void DescriptorPoolSizes(std::vector<VkDescriptorPoolSize>& pool_sizes) const = 0;
 };
+
+bool ShadingDescriptor::Create(VkDevice logical_device, const Shading& shading)
+{
+    set_layouts.push_back(VK_NULL_HANDLE);
+    return shading.CreateDescriptorPool(logical_device, pool) &&
+           shading.CreateDescriptorSetLayout(logical_device, set_layouts.back());
+}
 
 export struct FastShading : public Shading
 {
@@ -444,10 +414,8 @@ export struct InstancedShading : public Shading
             instance.Clear(logical_device);
         transforms.resize(transforms.size() + to_add);
 
-        return instance.Create(logical_device, mem_properties,
-                               static_cast<VkDeviceSize>(transforms.size()) * sizeof(float) * 16,
-                               VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) &&
+        return instance.Create(logical_device, mem_properties, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                               static_cast<VkDeviceSize>(transforms.size()) * sizeof(float) * 16) &&
                UpdateTransforms(logical_device);
     }
 

@@ -27,6 +27,7 @@ module;
 export module Device;
 
 import VkDebug;
+import Surface;
 
 const char* PhysicalDeviceVendor(uint32_t vendorID)
 {
@@ -431,14 +432,6 @@ export struct LogicalDevice
         SAMPLER_ANISOTROPY = 2
     };
 
-    struct Requirements
-    {
-        uint8_t features = Feature::GEOMETRY_SHADER | Feature::TESSELLATION_SHADER | Feature::SAMPLER_ANISOTROPY;
-        std::vector<const char*> extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-        VkSurfaceFormatKHR surface_format = {VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
-        VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR;
-    };
-
     VkDevice logical_device = VK_NULL_HANDLE;
     VkPhysicalDevice physical_device = VK_NULL_HANDLE;
 
@@ -448,32 +441,31 @@ export struct LogicalDevice
     uint32_t present_family = 0;
 
     VkPhysicalDeviceMemoryProperties mem_properties;
-    VkSurfaceFormatKHR surface_format;
-    VkPresentModeKHR present_mode;
 
-    bool Create(VkInstance instance, VkSurfaceKHR surface, const Requirements* requirements_ptr = nullptr)
+    bool Create(VkInstance instance, const Surface& surface,
+                VkPresentModeKHR present_mode,
+                uint8_t required_features = Feature::GEOMETRY_SHADER | Feature::TESSELLATION_SHADER |
+                                   Feature::SAMPLER_ANISOTROPY,
+                const std::vector<const char*>& required_extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME})
     {
         std::cout << "Finding suitable Vulkan Physical Devices." << std::endl;
         std::vector<VkPhysicalDevice> physical_devices{};
         if (!GetPhysicalDevices(instance, physical_devices))
             return false;
 
-        const Requirements& requirements = requirements_ptr ? *requirements_ptr : Requirements{};
         for (size_t i = 0; i < physical_devices.size(); ++i)
         {
             physical_device = physical_devices[i];
             if (HasValidType() && 
-                HasRequiredFeatures(requirements.features) &&
-                SupportsRequiredExtensions(requirements.extensions) && 
-                HasValidQueueFamiliesWithKHR(surface) &&
-                HasRequiredSurfaceFormat(surface, requirements.surface_format) &&
-                HasRequiredPresentMode(surface, requirements.present_mode) &&
-                CorrectCreation(requirements.extensions))
+                HasRequiredFeatures(required_features) &&
+                SupportsRequiredExtensions(required_extensions) && 
+                HasValidQueueFamiliesWithKHR(surface.surface) &&
+                HasRequiredSurfaceFormat(surface.surface, surface.format) &&
+                HasRequiredPresentMode(surface.surface, present_mode) &&
+                CorrectCreation(required_extensions))
             {
-                std::cout << "Created Logical Device from suitable Vulkan Physical Device: " << i << std::endl;
+                std::cout << "Created Logical Device from suitable Vulkan Physical Device ID: " << i << std::endl;
                 vkGetPhysicalDeviceMemoryProperties(physical_device, &mem_properties);
-                surface_format = requirements.surface_format;
-                present_mode = requirements.present_mode;
                 return true;
             }
         }
@@ -482,10 +474,13 @@ export struct LogicalDevice
         return false;
     }
 
-    void Delete()
+    void Clear()
     {
-        if (logical_device != VK_NULL_HANDLE)
-            vkDestroyDevice(logical_device, VkDebug::Allocation());
+        if (physical_device == VK_NULL_HANDLE)
+            return;
+        
+        vkDestroyDevice(logical_device, VkDebug::Allocation());
+        logical_device = VK_NULL_HANDLE;
     }
 
     VkQueue GetGraphicsQueue() const

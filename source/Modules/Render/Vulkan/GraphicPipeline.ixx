@@ -29,6 +29,7 @@ import VkDebug;
 import Device;
 import Buffers;
 import Shading;
+import Surface;
 import Swapchain;
 import PipelineDynamicStates;
 
@@ -37,210 +38,106 @@ export struct GraphicPipeline
     VkDevice logical_device = VK_NULL_HANDLE;
     VkPipeline pipeline = VK_NULL_HANDLE;
 
-    // State
-    VkClearColorValue clear_color = {0.f, 0.f, 0.f, 1.f};
+    Swapchain swapchain{};
+    VkRenderPass render_pass = VK_NULL_HANDLE; // Describes rendering operations.
+    VkPipelineLayout layout = VK_NULL_HANDLE;  // Manages shaders and resources.
     PipelineDynamicStates dynamic_state{};
 
-    // Swapchain
-    Swapchain swapchain{};
-    std::vector<VkImage> images{};
-    std::vector<VkImageView> image_views{};    // Image views for swapchain images.
-    std::vector<VkFramebuffer> framebuffers{}; // Framebuffers for swapchain images.
-
     // Commands
-    VkCommandPool commandPool = VK_NULL_HANDLE;
-    VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+    VkCommandPool cmd_pool = VK_NULL_HANDLE;
+    VkCommandBuffer cmd_buffer = VK_NULL_HANDLE;
 
     // Semaphores
     VkSemaphore imageAvailableSemaphore = VK_NULL_HANDLE;
     VkSemaphore renderFinishedSemaphore = VK_NULL_HANDLE;
 
-    VkRenderPass renderPass = VK_NULL_HANDLE;         // Describes rendering operations.
-    VkPipelineLayout pipelineLayout = VK_NULL_HANDLE; // Manages shaders and resources.
-
-    VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE; // Describes the layout of descriptor sets.
-    VkDescriptorPool descriptorPool = VK_NULL_HANDLE;           // Manages descriptor sets.
-
-    bool Create(const Shading* shading, const LogicalDevice& device, VkSurfaceKHR surface,
-                VkSurfaceCapabilitiesKHR& surface_capabilities,
-                const VkExtent2D& window_size)
+    bool Create(const Shading* shading, VkDevice device, const Surface& surface,
+                VkPresentModeKHR present_mode, uint32_t graphics_family, uint32_t present_family, 
+                const ShadingDescriptor& descriptor)
     {
-        if (shading == nullptr)
-        {
-            std::cerr << "Error: Shading is null!" << std::endl;
-            return false;
-        }
+        std::cout << "Creating Graphic Pipeline..." << std::endl;
 
-        if (!swapchain.Create(device, surface, surface_capabilities, window_size))
-        {
-            std::cerr << "Failed to create swapchain for Graphic Pipeline." << std::endl;
+        if (!swapchain.Create(logical_device = device, surface, graphics_family, present_family, present_mode))
             return false;
-        }
 
-        logical_device = device.logical_device;
         dynamic_state.Setup(swapchain.extent);
 
-        if (!RetrieveImages(device.surface_format) ||
-            !CreateCommandPool(device.graphics_family) ||
-            !CreateCommandBuffer() || 
-            !CreateSemaphores() ||
-            !CreateRenderPass(device.surface_format) ||
-            !shading->CreateDescriptorSetLayout(logical_device, descriptorSetLayout) ||
-            !CreatePipelineLayout() || 
-            !CreateGraphicsPipeline(shading) ||
-            !shading->CreateDescriptorPool(logical_device, descriptorPool))
+        if (!CreateRenderPass(surface.format) ||
+            !CreatePipelineLayout(descriptor.set_layouts) || 
+            !CreateGraphicsPipeline(shading))
         {
             std::cerr << "Failed to create Graphic Pipeline." << std::endl;
             return false;
         }
-        
-        return true;
+
+        return 
+            swapchain.RetrieveImages(logical_device, surface.format, render_pass) &&
+            CreateCommandPool(graphics_family) &&
+            CreateCommandBuffer() && 
+            CreateSemaphores();
     }
 
-    void Delete()
+    void Clear()
     {
-        if (pipelineLayout != VK_NULL_HANDLE)
-            vkDestroyPipelineLayout(logical_device, pipelineLayout, VkDebug::Allocation());
-        if (renderPass != VK_NULL_HANDLE)
-            vkDestroyRenderPass(logical_device, renderPass, VkDebug::Allocation());
+        vkDestroyPipelineLayout(logical_device, layout, VkDebug::Allocation());
+        vkDestroyRenderPass(logical_device, render_pass, VkDebug::Allocation());
+        layout = VK_NULL_HANDLE;
+        render_pass = VK_NULL_HANDLE;
 
-        for (auto framebuffer : framebuffers)
-            vkDestroyFramebuffer(logical_device, framebuffer, VkDebug::Allocation());
-        for (auto imageView : image_views)
-            vkDestroyImageView(logical_device, imageView, VkDebug::Allocation());
+        swapchain.Clear(logical_device);
 
-        if (swapchain.swapchain != VK_NULL_HANDLE)
-            vkDestroySwapchainKHR(logical_device, swapchain.swapchain, VkDebug::Allocation());
-        if (commandPool != VK_NULL_HANDLE)
-            vkDestroyCommandPool(logical_device, commandPool, VkDebug::Allocation());
+        vkDestroyCommandPool(logical_device, cmd_pool, VkDebug::Allocation());
+        cmd_pool = VK_NULL_HANDLE;
+        cmd_buffer = VK_NULL_HANDLE;
 
-        if (imageAvailableSemaphore != VK_NULL_HANDLE)
-            vkDestroySemaphore(logical_device, imageAvailableSemaphore, VkDebug::Allocation());
-        if (renderFinishedSemaphore != VK_NULL_HANDLE)
-            vkDestroySemaphore(logical_device, renderFinishedSemaphore, VkDebug::Allocation());
-
-        if (descriptorSetLayout != VK_NULL_HANDLE)
-            vkDestroyDescriptorSetLayout(logical_device, descriptorSetLayout, VkDebug::Allocation());
-        if (descriptorPool != VK_NULL_HANDLE)
-            vkDestroyDescriptorPool(logical_device, descriptorPool, VkDebug::Allocation());
+        vkDestroySemaphore(logical_device, imageAvailableSemaphore, VkDebug::Allocation());
+        vkDestroySemaphore(logical_device, renderFinishedSemaphore, VkDebug::Allocation());
+        imageAvailableSemaphore = VK_NULL_HANDLE;
+        renderFinishedSemaphore = VK_NULL_HANDLE;
     }
     
-    bool PrepareRender(const Shading* shading, LogicalDevice& device, VkSurfaceKHR surface,
-                       VkSurfaceCapabilitiesKHR& surface_capabilities,
-                       const VkExtent2D& window_size, uint32_t& next_swapchain_image)
+    bool OnSurfaceCapabilitiesChanged(uint8_t changes, const Shading* shading, 
+        const Surface& surface, uint32_t graphics_family, uint32_t present_family)
     {
-        if (!ValidatePipeline(shading, device, surface, surface_capabilities, window_size) ||
-            !GetNextImage(next_swapchain_image) || !BeginCommandRecording())
+        std::cout << "Recreating Swapchain..." << std::endl;
+        if (!swapchain.Recreate(logical_device, surface, graphics_family, present_family, render_pass))
+        {
+            std::cerr << "Failed to recreate swapchain!" << std::endl;
+            return false;
+        }
+
+        // If dynamic_state can handle Extent changes, no need to recreate the pipeline
+        if (changes & Surface::CapabilityChanges::Extent)
+            dynamic_state.OnSwapchainExtentChanged(surface.capabilities.currentExtent);
+        if (!dynamic_state.requires_recreation)
+            return true;
+
+        std::cout << "Recreating Pipeline..." << std::endl;
+        return CreateGraphicsPipeline(shading);
+    }
+    
+    bool PrepareRender(uint32_t& next_swapchain_image)
+    {
+        if (!swapchain.GetNextImage(logical_device, next_swapchain_image, imageAvailableSemaphore) ||
+            !BeginCommandRecording())
             return false;
 
-        BeginRenderPass(framebuffers[next_swapchain_image]);
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-        dynamic_state.Update(commandBuffer);
+        BeginRenderPass(swapchain.framebuffers[next_swapchain_image], dynamic_state.GetClearValues());
+        vkCmdBindPipeline(cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+        dynamic_state.Update(cmd_buffer);
         return true;
     }
 
     bool SubmitRender(VkQueue graphics_queue, uint32_t& next_swapchain_image)
     {
-        vkCmdEndRenderPass(commandBuffer);
-        return EndCommandRecording() && SubmitCommands(graphics_queue) && Present(graphics_queue, next_swapchain_image);
+        vkCmdEndRenderPass(cmd_buffer);
+        return EndCommandRecording() && SubmitCommands(graphics_queue, {cmd_buffer}) &&
+               Present(graphics_queue, next_swapchain_image);
     }
 
   private:
-    bool RetrieveImages(const VkSurfaceFormatKHR& surface_format)
-    {
-        // Get VkImages
-        uint32_t image_count;
-        if (vkGetSwapchainImagesKHR(logical_device, swapchain.swapchain, &image_count, nullptr) != VK_SUCCESS)
-        {
-            std::cerr << "Failed to get swapchain image count!" << std::endl;
-            return false;
-        }
 
-        images.resize(image_count);
-        if (vkGetSwapchainImagesKHR(logical_device, swapchain.swapchain, &image_count, images.data()) != VK_SUCCESS)
-        {
-            std::cerr << "Failed to get swapchain images!" << std::endl;
-            return false;
-        }
-
-        // Get VkImageViews & VkFramebuffers
-        image_views.resize(image_count);
-        framebuffers.resize(image_count);
-        for (auto i = 0; i < image_count; i++)
-        {
-            VkImageViewCreateInfo createInfo{};
-            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            createInfo.image = images[i];
-            createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            createInfo.format = surface_format.format;
-            createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            createInfo.subresourceRange.baseMipLevel = 0;
-            createInfo.subresourceRange.levelCount = 1;
-            createInfo.subresourceRange.baseArrayLayer = 0;
-            createInfo.subresourceRange.layerCount = 1;
-
-            if (vkCreateImageView(logical_device, &createInfo, VkDebug::Allocation(), &image_views[i]) != VK_SUCCESS)
-            {
-                std::cerr << "Failed to create image view " << i + 1 << "/" << image_count << "!" << std::endl;
-                return false;
-            }
-
-            VkFramebufferCreateInfo framebufferInfo{};
-            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferInfo.renderPass = renderPass;
-            framebufferInfo.attachmentCount = 1;
-            framebufferInfo.pAttachments = &image_views[i];
-            framebufferInfo.width = swapchain.extent.width;
-            framebufferInfo.height = swapchain.extent.height;
-            framebufferInfo.layers = 1;
-
-            if (vkCreateFramebuffer(logical_device, &framebufferInfo, VkDebug::Allocation(), &framebuffers[i]) !=
-                VK_SUCCESS)
-            {
-                std::cerr << "Failed to create framebuffer " << i + 1 << " / " << image_count << "!" << std::endl;
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    bool CreateCommandPool(uint32_t graphics_family)
-    {
-        VkCommandPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        poolInfo.queueFamilyIndex = graphics_family;
-        poolInfo.flags = 0;
-
-        std::cout << "Creating Command Pool." << std::endl;
-        if (vkCreateCommandPool(logical_device, &poolInfo, VkDebug::Allocation(), &commandPool) != VK_SUCCESS)
-        {
-            std::cerr << "Failed to create Command Pool!" << std::endl;
-            return false;
-        }
-        return true;
-    }
-
-    bool CreateCommandBuffer()
-    {
-        VkCommandBufferAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = commandPool;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandBufferCount = 1;
-
-        std::cout << "Creating Command Buffer." << std::endl;
-        if (vkAllocateCommandBuffers(logical_device, &allocInfo, &commandBuffer) != VK_SUCCESS)
-        {
-            std::cerr << "Failed to create Command Buffer!" << std::endl;
-            return false;
-        }
-        return true;
-    }
+    // Pipeline Creation
 
     bool CreateRenderPass(const VkSurfaceFormatKHR& surface_format)
     {
@@ -281,7 +178,7 @@ export struct GraphicPipeline
         renderPassInfo.pDependencies = &dependency;
 
         std::cout << "Creating Render Pass." << std::endl;
-        if (vkCreateRenderPass(logical_device, &renderPassInfo, VkDebug::Allocation(), &renderPass) != VK_SUCCESS)
+        if (vkCreateRenderPass(logical_device, &renderPassInfo, VkDebug::Allocation(), &render_pass) != VK_SUCCESS)
         {
             std::cerr << "Failed to create render pass!" << std::endl;
             return false;
@@ -290,29 +187,18 @@ export struct GraphicPipeline
         return true;
     }
 
-    bool CreateSemaphores()
-    {
-        std::cout << "Creating Semaphores." << std::endl;
-        VkSemaphoreCreateInfo semaphoreInfo{};
-        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-        return vkCreateSemaphore(logical_device, &semaphoreInfo, VkDebug::Allocation(), &imageAvailableSemaphore) ==
-                   VK_SUCCESS &&
-               vkCreateSemaphore(logical_device, &semaphoreInfo, VkDebug::Allocation(), &renderFinishedSemaphore) ==
-                   VK_SUCCESS;
-    }
-
-    bool CreatePipelineLayout()
+    bool CreatePipelineLayout(const std::vector<VkDescriptorSetLayout>& set_layouts)
     {
         std::cout << "Creating Pipeline Layout." << std::endl;
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = 1;
-        pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(set_layouts.size());
+        pipelineLayoutInfo.pSetLayouts = set_layouts.data();
         pipelineLayoutInfo.pushConstantRangeCount = 0;
         pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-        if (vkCreatePipelineLayout(logical_device, &pipelineLayoutInfo, VkDebug::Allocation(), &pipelineLayout) !=
+        if (vkCreatePipelineLayout(logical_device, &pipelineLayoutInfo, VkDebug::Allocation(), &layout) !=
             VK_SUCCESS)
         {
             std::cerr << "Failed to create pipeline layout!" << std::endl;
@@ -341,20 +227,20 @@ export struct GraphicPipeline
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineInfo.stageCount = shader_stages.size();
         pipelineInfo.pStages = shader_stages.data();
-        pipelineInfo.layout = pipelineLayout;
-        pipelineInfo.renderPass = renderPass;
+        pipelineInfo.layout = layout;
+        pipelineInfo.renderPass = render_pass;
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
         pipelineInfo.basePipelineIndex = -1;
 
-        // Static States - VertexInput
-        VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+        // Static States - VertexInput from Shading
         std::vector<VkVertexInputBindingDescription> binding_descriptions{};
-        std::vector<VkVertexInputAttributeDescription> attribute_descriptions{};
-
         shading->BindingDescriptions(binding_descriptions);
+        std::vector<VkVertexInputAttributeDescription> attribute_descriptions{};
         shading->AttributeDescriptions(attribute_descriptions);
 
+        // Static States - VertexInput
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(binding_descriptions.size());
         vertexInputInfo.pVertexBindingDescriptions = binding_descriptions.data();
@@ -418,63 +304,59 @@ export struct GraphicPipeline
         return success;
     }
 
-    // Rendering
+    // Pipeline Resources' Creation
 
-    bool ValidatePipeline(const Shading* shading, LogicalDevice& device, VkSurfaceKHR surface,
-                          VkSurfaceCapabilitiesKHR& surface_capabilities,
-                          const VkExtent2D& window_size)
+    bool CreateCommandPool(uint32_t graphics_family)
     {
-        const uint8_t changes = swapchain.GetChanges(surface_capabilities);
-        if (changes != 0)
+        VkCommandPoolCreateInfo poolInfo{};
+        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        poolInfo.queueFamilyIndex = graphics_family;
+        poolInfo.flags = 0;
+
+        std::cout << "Creating Command Pool." << std::endl;
+        if (vkCreateCommandPool(logical_device, &poolInfo, VkDebug::Allocation(), &cmd_pool) != VK_SUCCESS)
         {
-            std::cout << "Recreating swapchain..." << std::endl;
-            if (changes & Swapchain::CapabilityChanges::Transform)
-                std::cout << "Surface transformation changed. ";
-            if (changes & Swapchain::CapabilityChanges::Extent)
-                std::cout << "Surface extent changed. ";
-
-            // Freeing old resources
-            for (auto framebuffer : framebuffers)
-                vkDestroyFramebuffer(logical_device, framebuffer, VkDebug::Allocation());
-            for (auto imageView : image_views)
-                vkDestroyImageView(logical_device, imageView, VkDebug::Allocation());
-
-            if (!swapchain.Create(device, surface, surface_capabilities, window_size, swapchain.swapchain) ||
-                !RetrieveImages(device.surface_format))
-            {
-                std::cerr << "Failed to recreate swapchain!" << std::endl;
-                return false;
-            }
-
-            if (changes & Swapchain::CapabilityChanges::Extent)
-                dynamic_state.OnSwapchainExtentChanged(swapchain.extent);
-        }
-
-        if (dynamic_state.requires_recreation && !CreateGraphicsPipeline(shading))
-        {
-            std::cerr << "Failed to recreate Graphics Pipeline!" << std::endl;
-            return false;
-        }
-
-        return true;
-    }
-
-    bool GetNextImage(uint32_t& next_swapchain_image) const
-    {
-        if (vkAcquireNextImageKHR(logical_device, swapchain.swapchain, UINT64_MAX, imageAvailableSemaphore,
-                                  VK_NULL_HANDLE, &next_swapchain_image) != VK_SUCCESS)
-        {
-            std::cerr << "Failed to acquire next swapchain image." << std::endl;
+            std::cerr << "Failed to create Command Pool!" << std::endl;
             return false;
         }
         return true;
     }
+
+    bool CreateCommandBuffer()
+    {
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool = cmd_pool;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = 1;
+
+        std::cout << "Creating Command Buffer." << std::endl;
+        if (vkAllocateCommandBuffers(logical_device, &allocInfo, &cmd_buffer) != VK_SUCCESS)
+        {
+            std::cerr << "Failed to create Command Buffer!" << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    bool CreateSemaphores()
+    {
+        std::cout << "Creating Semaphores." << std::endl;
+        VkSemaphoreCreateInfo semaphoreInfo{};
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        return vkCreateSemaphore(logical_device, &semaphoreInfo, VkDebug::Allocation(), &imageAvailableSemaphore) ==
+                   VK_SUCCESS &&
+               vkCreateSemaphore(logical_device, &semaphoreInfo, VkDebug::Allocation(), &renderFinishedSemaphore) ==
+                   VK_SUCCESS;
+    }
+
+    // Rendering - Prepare
 
     bool BeginCommandRecording() const
     {
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+        if (vkBeginCommandBuffer(cmd_buffer, &beginInfo) != VK_SUCCESS)
         {
             std::cerr << "Failed to Begin Command Buffer." << std::endl;
             return false;
@@ -483,23 +365,26 @@ export struct GraphicPipeline
         return true;
     }
 
-    void BeginRenderPass(VkFramebuffer framebuffer) const
+    void BeginRenderPass(VkFramebuffer framebuffer, const std::vector<VkClearValue>& clear_values,
+                         VkOffset2D offset = {0, 0}) const
     {
-        VkClearValue clear = {clear_color};
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = renderPass;
+        renderPassInfo.renderPass = render_pass;
         renderPassInfo.framebuffer = framebuffer;
-        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.offset = offset;
         renderPassInfo.renderArea.extent = swapchain.extent;
-        renderPassInfo.clearValueCount = 1;
-        renderPassInfo.pClearValues = &clear;
-        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clear_values.size());
+        renderPassInfo.pClearValues = clear_values.data();
+
+        vkCmdBeginRenderPass(cmd_buffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
     
+    // Rendering - Submit & Present
+
     bool EndCommandRecording() const
     {
-        if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+        if (vkEndCommandBuffer(cmd_buffer) != VK_SUCCESS)
         {
             std::cerr << "Failed to end command buffer." << std::endl;
             return false;
@@ -508,7 +393,7 @@ export struct GraphicPipeline
         return true;
     }
 
-    bool SubmitCommands(VkQueue graphics_queue) const
+    bool SubmitCommands(VkQueue graphics_queue, const std::vector<VkCommandBuffer>& cmd_buffers) const
     {
         // Submit the command buffer.
         VkSubmitInfo submitInfo{};
@@ -520,8 +405,8 @@ export struct GraphicPipeline
         submitInfo.pWaitSemaphores = waitSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
 
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
+        submitInfo.commandBufferCount = static_cast<uint32_t>(cmd_buffers.size());
+        submitInfo.pCommandBuffers = cmd_buffers.data();
 
         VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
         submitInfo.signalSemaphoreCount = 1;
@@ -544,7 +429,7 @@ export struct GraphicPipeline
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores = &renderFinishedSemaphore;
         presentInfo.swapchainCount = 1;
-        presentInfo.pSwapchains = &swapchain.swapchain;
+        presentInfo.pSwapchains = &swapchain.id;
         presentInfo.pImageIndices = &next_swapchain_image;
 
         if (vkQueuePresentKHR(graphics_queue, &presentInfo) != VK_SUCCESS)

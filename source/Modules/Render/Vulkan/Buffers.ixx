@@ -30,21 +30,18 @@ import VkDebug;
 export struct Buffer
 {
     VkBuffer id = VK_NULL_HANDLE;
-    VkDeviceSize buffer_size = 0;
-    uint32_t element_count = 0;
+    VkDeviceSize stride = 0; // Size of the buffer in bytes, used for data transfer and memory allocation.
+    VkDeviceSize offset = 0; // Offset in bytes from the start of the buffer where data will be written or read.
     VkDeviceMemory memory = VK_NULL_HANDLE;
 
     template <typename T>
     bool CreateFromStagedCopy(VkDevice logical_device, VkQueue queue,
                               const VkPhysicalDeviceMemoryProperties& mem_properties, VkCommandPool commandPool,
-                              VkBufferUsageFlagBits usage_flags, const std::vector<T>& vector)
+                              VkBufferUsageFlagBits usage_flags, const std::vector<T>& vector, VkDeviceSize buffer_offset)
     {
-        element_count = static_cast<uint32_t>(vector.size());
-        buffer_size = static_cast<VkDeviceSize>(sizeof(vector[0])) * element_count;
-
-        Buffer staging_buffer;
-        if (!staging_buffer.Create(logical_device, mem_properties, buffer_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+        Buffer staging_buffer{};
+        if (!staging_buffer.Create(logical_device, mem_properties, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                                   sizeof(T) * vector.size(), buffer_offset))
         {
             std::cerr << "Failed to create Staging Buffer." << std::endl;
             return false;
@@ -55,67 +52,65 @@ export struct Buffer
             std::cerr << "Failed to copy data to Staging Buffer." << std::endl;
             return false;
         }
-        if (!Create(logical_device, mem_properties, buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage_flags,
-                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT))
+        if (!Create(logical_device, mem_properties, VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage_flags,
+                    staging_buffer.stride, staging_buffer.offset, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT))
         {
             std::cerr << "Failed to create new Buffer." << std::endl;
             return false;
         }
-        if (!staging_buffer.CopyTo(logical_device, id, buffer_size, queue, commandPool))
+        if (!staging_buffer.CopyTo(logical_device, queue, commandPool, *this))
             return false;
 
         staging_buffer.Clear(logical_device);
         return true;
     }
 
-    bool Create(VkDevice device, const VkPhysicalDeviceMemoryProperties& mem_properties, VkDeviceSize size,
-                VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
+    bool Create(VkDevice logical_device, const VkPhysicalDeviceMemoryProperties& mem_properties,
+        VkBufferUsageFlags usage, 
+        VkDeviceSize buffer_size, 
+        VkDeviceSize buffer_offset = 0,
+        VkMemoryPropertyFlags mem_property_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
     {
+        stride = buffer_size;
+        offset = buffer_offset;
+
         VkBufferCreateInfo buffer_info{};
         buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        buffer_info.size = buffer_size = size;
+        buffer_info.size = stride;
         buffer_info.usage = usage;
         buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (vkCreateBuffer(device, &buffer_info, nullptr, &id) != VK_SUCCESS)
+        if (vkCreateBuffer(logical_device, &buffer_info, VkDebug::Allocation(), &id) != VK_SUCCESS)
         {
             std::cerr << "Failed to create buffer!" << std::endl;
             return false;
         }
 
         VkMemoryRequirements mem_requirements;
-        vkGetBufferMemoryRequirements(device, id, &mem_requirements);
+        vkGetBufferMemoryRequirements(logical_device, id, &mem_requirements);
 
         VkMemoryAllocateInfo alloc_info{};
         alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         alloc_info.allocationSize = mem_requirements.size;
-
-        bool found_valid_mem_type = false;
-        for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++)
-        {
-            if ((mem_requirements.memoryTypeBits & (1 << i)) &&
-                (mem_properties.memoryTypes[i].propertyFlags & properties) == properties)
-            {
-                found_valid_mem_type = true;
-                alloc_info.memoryTypeIndex = i;
-                break;
-            }
-        }
-        if (!found_valid_mem_type)
+        if (!FindMemoryType(mem_properties, mem_property_flags, mem_requirements, alloc_info.memoryTypeIndex))
         {
             std::cerr << "Failed to find suitable memory type!" << std::endl;
+            Clear(logical_device);
             return false;
         }
 
-        if (vkAllocateMemory(device, &alloc_info, nullptr, &memory) != VK_SUCCESS)
+        if (vkAllocateMemory(logical_device, &alloc_info, VkDebug::Allocation(), &memory) != VK_SUCCESS)
         {
             std::cerr << "Failed to allocate buffer memory!" << std::endl;
+            Clear(logical_device);
             return false;
         }
 
-        if (vkBindBufferMemory(device, id, memory, 0) != VK_SUCCESS)
+        if (vkBindBufferMemory(logical_device, id, memory, offset) != VK_SUCCESS)
         {
             std::cerr << "Failed to bind buffer memory!" << std::endl;
+            Clear(logical_device);
             return false;
         }
 
@@ -124,27 +119,47 @@ export struct Buffer
 
     void Clear(VkDevice logical_device)
     {
-        if (id != VK_NULL_HANDLE)
-            vkDestroyBuffer(logical_device, id, VkDebug::Allocation());
+        if (id == VK_NULL_HANDLE)
+            return;
 
-        if (memory != VK_NULL_HANDLE)
-            vkFreeMemory(logical_device, memory, VkDebug::Allocation());
+        vkDestroyBuffer(logical_device, id, VkDebug::Allocation());
+        vkFreeMemory(logical_device, memory, VkDebug::Allocation());
+        id = VK_NULL_HANDLE;
+        memory = VK_NULL_HANDLE;
     }
 
-    bool FillData(VkDevice device, const void* source) const
+    bool FillData(VkDevice device, const void* source, VkMemoryMapFlags flags = 0) const
     {
         void* tmp;
-        if (vkMapMemory(device, memory, 0, buffer_size, 0, &tmp) != VK_SUCCESS)
+        if (vkMapMemory(device, memory, offset, stride, flags, &tmp) != VK_SUCCESS)
         {
             std::cerr << "Failed to map buffer data for copy operation." << std::endl;
             return false;
         }
-        memcpy(tmp, source, static_cast<size_t>(buffer_size));
+        memcpy(tmp, source, static_cast<size_t>(stride));
         vkUnmapMemory(device, memory);
         return true;
     }
 
-    bool CopyTo(VkDevice device, VkBuffer dst_buffer, VkDeviceSize size, VkQueue queue, VkCommandPool commandPool) const
+    private:
+
+    bool FindMemoryType(const VkPhysicalDeviceMemoryProperties& mem_properties,
+                          VkMemoryPropertyFlags mem_property_flags, const VkMemoryRequirements& mem_requirements,
+                          uint32_t& memory_type_id) const
+    {
+        for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++)
+        {
+            if ((mem_requirements.memoryTypeBits & (1 << i)) &&
+                (mem_properties.memoryTypes[i].propertyFlags & mem_property_flags) == mem_property_flags)
+            {
+                memory_type_id = i;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool CopyTo(VkDevice device, VkQueue queue, VkCommandPool commandPool, const Buffer& dst) const
     {
         VkCommandBufferAllocateInfo alloc_info{};
         alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -170,8 +185,18 @@ export struct Buffer
         }
 
         VkBufferCopy copy_region{};
-        copy_region.size = size;
-        vkCmdCopyBuffer(command_buffer, id, dst_buffer, 1, &copy_region);
+        copy_region.srcOffset = offset;
+        copy_region.dstOffset = dst.offset;
+        if (stride != dst.stride)
+        {
+            copy_region.size = std::min(stride, dst.stride);
+            std::cout << "Warning: Buffer::CopyTo(...) will only copy " << copy_region.size << "/"
+                      << std::max(stride, dst.stride) << " bytes. Src Stride : (" << stride << ") Dst Stride ("
+                      << dst.stride << ")" << std::endl;
+        }
+        else copy_region.size = stride;
+
+        vkCmdCopyBuffer(command_buffer, id, dst.id, 1, &copy_region);
 
         if (vkEndCommandBuffer(command_buffer) != VK_SUCCESS)
         {

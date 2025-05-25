@@ -24,7 +24,7 @@ module;
 
 export module PipelineDynamicStates;
 
-void ViewportState(VkPipelineViewportStateCreateInfo& create_info, VkRect2D& scissor, VkViewport& viewport)
+void FillViewportState(VkPipelineViewportStateCreateInfo& create_info, VkRect2D& scissor, VkViewport& viewport)
 {
     create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     create_info.viewportCount = 1;
@@ -32,7 +32,7 @@ void ViewportState(VkPipelineViewportStateCreateInfo& create_info, VkRect2D& sci
     create_info.scissorCount = 1;
     create_info.pScissors = &scissor;
 }
-void RasterizationState(VkPipelineRasterizationStateCreateInfo& create_info, float lineWidth,
+void FillRasterizationState(VkPipelineRasterizationStateCreateInfo& create_info, float lineWidth,
                                bool depthBiasEnabled, float depthBiasConstantFactor, float depthBiasClamp,
                                float depthBiasSlopeFactor)
 {
@@ -92,6 +92,14 @@ export struct PipelineDynamicStates
     StencilFaceConfig write = {VK_STENCIL_FACE_FRONT_AND_BACK, 0xFF};
     StencilFaceConfig reference = {VK_STENCIL_FACE_FRONT_AND_BACK, 0};
 
+    VkClearColorValue clear_color = {0.f, 0.f, 0.f, 1.f};
+    // VkClearDepthStencilValue clear_depth_stencil = {1.f, 0}; // { depth, stencil }
+    std::vector<VkClearValue> GetClearValues()
+    {
+        return {{.color = clear_color}};
+        //{.depthStencil = clear_depth_stencil});
+    }
+
     enum Flags : uint16_t
     {
         NONE = 0,
@@ -135,13 +143,13 @@ export struct PipelineDynamicStates
         requires_recreation = false;
 
         // Setup Rasterization State Create Info
-        RasterizationState(rasterizer, line_width, current_flags & DEPTH_BIAS_ENABLED,
+        FillRasterizationState(rasterizer, line_width, current_flags & DEPTH_BIAS_ENABLED,
                                                        depth_bias[0], depth_bias[1], depth_bias[2]);
         pipelineInfo.pRasterizationState = &rasterizer;
 
         if (current_flags == 0)
         {
-            ViewportState(viewportState, scissor, viewport);
+            FillViewportState(viewportState, scissor, viewport);
             pipelineInfo.pViewportState = &viewportState;
             pipelineInfo.pDepthStencilState = nullptr;
             pipelineInfo.pDynamicState = nullptr;
@@ -183,7 +191,7 @@ export struct PipelineDynamicStates
         }
         else
         {
-            ViewportState(viewportState, scissor, viewport);
+            FillViewportState(viewportState, scissor, viewport);
             pipelineInfo.pViewportState = &viewportState;
         }
 
@@ -199,9 +207,6 @@ export struct PipelineDynamicStates
 
     void OnSwapchainExtentChanged(const VkExtent2D& next_extent)
     {
-        if (swapchain_extent.width == next_extent.width && swapchain_extent.height == next_extent.height)
-            return;
-
         // New extent linear interpolation
         float width_ratio = static_cast<float>(next_extent.width) / swapchain_extent.width;
         float height_ratio = static_cast<float>(next_extent.height) / swapchain_extent.height;

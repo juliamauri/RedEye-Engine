@@ -28,236 +28,14 @@ module;
 
 export module Vulkan;
 
+import LayerProperties;
 import VkDebug;
 import VkSDLWindow;
+import Surface;
 import Device;
+import Uniforms;
 import Shading;
 import GraphicPipeline;
-
-namespace Layers
-{
-    std::vector<VkLayerProperties> available{};
-
-    bool RetrieveAvailable()
-    {
-        std::cout << "Retrieving available Vulkan layer properties." << std::endl;
-
-        uint32_t layerCount;
-        if (vkEnumerateInstanceLayerProperties(&layerCount, nullptr) != VK_SUCCESS)
-        {
-            std::cerr << "Failed to get Vulkan layer count." << std::endl;
-            return false;
-        }
-
-        available.resize(layerCount);
-        if (vkEnumerateInstanceLayerProperties(&layerCount, available.data()) != VK_SUCCESS)
-        {
-            std::cerr << "Failed to get Vulkan layer properties." << std::endl;
-            return false;
-        }
-
-        std::cout << "Retrieved " << available.size() << " Vulkan layers:" << std::endl;
-        for (auto& layer : available)
-            std::cout << "\t-" << layer.layerName << std::endl;
-
-        return true;
-    }
-
-    const std::vector<const char*> prefered = {
-        "VK_LAYER_KHRONOS_validation", // requieres vulkan-validationlayers vcpkg
-        "VK_LAYER_NV_optimus"          // Ensures discrete NVIDIA GPU usage instead of default integrated GPU
-                                       // (Improves Nvidia performance on laptops)
-    };
-
-    void Get(std::vector<const char*>& layers)
-    {
-        for (const auto& prefered_layer : prefered)
-        {
-            for (const auto& layer : available)
-            {
-                if (strcmp(layer.layerName, prefered_layer) != 0)
-                    continue;
-
-                layers.push_back(layer.layerName);
-                break;
-            }
-        }
-    }
-
-    bool Contains(const std::vector<const char*>& layers, const char* layer_to_find)
-    {
-        for (const auto& layer : layers)
-            if (strcmp(layer, layer_to_find) == 0)
-                return true;
-        return false;
-    }
-} // namespace Layers
-
-
-struct ShadingContext
-{
-  public:
-    enum class Type : char
-    {
-        Fast,
-        Instanced
-    };
-
-  private:
-    Type type = Type::Fast;
-
-    // Fast Shading
-    std::vector<FastShading> fast_drawables{};
-    FastShading::TransfomMatrices transform_matrices{};
-
-    // Instanced Shading
-    std::vector<InstancedShading> instanced_drawables{};
-    InstancedShading::ProjectionView proj_view{};
-
-  public:
-    void Init(Type _type)
-    {
-        type = _type;
-
-        // Fast
-        fast_drawables.push_back({});
-        transform_matrices = {{1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f},
-                              {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f},
-                              {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f}};
-
-        // Instanced
-        instanced_drawables.push_back({});
-    }
-
-    void Clear(VkDevice logical_device)
-    {
-        for (auto& drawable : fast_drawables)
-            drawable.Clear(logical_device);
-        for (auto& drawable : instanced_drawables)
-            drawable.Clear(logical_device);
-        fast_drawables.clear();
-        instanced_drawables.clear();
-        transform_matrices = {};
-        proj_view = {};
-    }
-
-    bool OnCreate(VkDevice logical_device, VkPhysicalDeviceMemoryProperties mem_properties)
-    {
-        switch (type)
-        {
-            case Type::Instanced:
-                return instanced_drawables[0].AddTransform(logical_device, mem_properties, 4);
-            default:
-                return true;
-        }
-    }
-
-    bool Update(VkDevice logical_device, float global_time)
-    {
-        switch (type)
-        {
-            case Type::Instanced:
-
-                for (auto& drawable : instanced_drawables)
-                {
-                    int i = 0;
-                    for (auto& transform : drawable.transforms)
-                    {
-                        float time = global_time * (1.f + 0.1f * (++i));
-                        transform.model[12] = sin(time) * 0.5f; // X-axis
-                        transform.model[13] = cos(time) * 0.5f; // Y-axis
-                    }
-
-                    if (!drawable.UpdateTransforms(logical_device))
-                    {
-                        std::cerr << "Failed to Update Transforms Buffer for Instanced Shading!" << std::endl;
-                        return false;
-                    }
-                }
-                break;
-            default: break;
-        }
-        return true;
-    }
-
-    bool UpdateUniforms(VkDevice logical_device, float time) const
-    {
-        switch (type)
-        {
-            case Type::Fast:
-                for (auto& drawable : fast_drawables)
-                    if (!drawable.UpdateUniforms(logical_device))
-                        return false;
-                return true;
-            case Type::Instanced:
-                for (auto& drawable : instanced_drawables)
-                    if (!drawable.UpdateUniforms(logical_device))
-                        return false;
-                return true;
-
-            default:
-                return true;
-        }
-    }
-
-    void Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout) const
-    {
-        switch (type)
-        {
-            case Type::Fast:
-                for (auto& drawable : fast_drawables)
-                    drawable.Draw(commandBuffer, pipelineLayout);
-                break;
-            case Type::Instanced:
-                for (auto& drawable : instanced_drawables)
-                    drawable.Draw(commandBuffer, pipelineLayout);
-                break;
-            default: break;
-        }
-    }
-
-    Shading* GerFirst()
-    {
-        switch (type)
-        {
-            case Type::Fast:
-                return fast_drawables.data();
-            case Type::Instanced:
-                return instanced_drawables.data();
-            default:
-                return nullptr;
-        }
-    }
-
-    const Shading* GerFirst() const
-    {
-        switch (type)
-        {
-            case Type::Fast:
-                return fast_drawables.data();
-            case Type::Instanced:
-                return instanced_drawables.data();
-            default:
-                return nullptr;
-        }
-    }
-
-    void GetUniformCreateInfos(std::vector<Shading::Uniform::CreateInfo>& out)
-    {
-        switch (type)
-        {
-            case Type::Fast:
-                out.push_back({&transform_matrices, 0, sizeof(FastShading::TransfomMatrices)});
-                break;
-            case Type::Instanced:
-                out.push_back({&proj_view, 0, sizeof(InstancedShading::ProjectionView)});
-                break;
-            default:
-                break;
-        }
-    }
-};
-
 
 export namespace RE
 {
@@ -275,54 +53,224 @@ export namespace RE
             // TODO: Setup Allocation Callbacks for memory management
             VkDebug::SetAllocation(nullptr);
 
-            return Layers::RetrieveAvailable();
+            return LayerProperties::RetrieveAvailable();
         }
 
         struct Context
         {
             VkInstance instance = VK_NULL_HANDLE;
-            VkSurfaceKHR surface = VK_NULL_HANDLE;
 
+            Surface surface{};
             LogicalDevice device{};
             GraphicPipeline pipeline{};
 
-            // State
-            VkSurfaceCapabilitiesKHR surface_capabilities{};
-            VkExtent2D window_size{};
+            struct ShadingContextDemo
+            {
+              public:
+                enum class Type : char
+                {
+                    Fast,
+                    Instanced
+                };
 
-            // Shading
-            ShadingContext shading_context{};
+                ShadingDescriptor descriptor{};
+
+              private:
+                Type type = Type::Fast;
+
+                // Fast Shading
+                std::vector<FastShading> fast_drawables{};
+                FastShading::TransfomMatrices transform_matrices{};
+
+                // Instanced Shading
+                std::vector<InstancedShading> instanced_drawables{};
+                InstancedShading::ProjectionView proj_view{};
+
+              public:
+                bool Init(VkDevice logical_device, Type _type)
+                {
+                    type = _type;
+
+                    // Fast
+                    fast_drawables.push_back({});
+                    transform_matrices = {
+                        {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f},
+                        {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f},
+                        {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f}};
+
+                    // Instanced
+                    instanced_drawables.push_back({});
+                    proj_view = {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f};
+
+                    return descriptor.Create(logical_device, *GerFirst());
+                }
+
+                void Clear(VkDevice logical_device)
+                {
+                    for (auto& drawable : fast_drawables)
+                        drawable.Clear(logical_device);
+                    for (auto& drawable : instanced_drawables)
+                        drawable.Clear(logical_device);
+                    fast_drawables.clear();
+                    instanced_drawables.clear();
+                    transform_matrices = {};
+                    proj_view = {};
+                }
+
+                template <typename VertexInputType, typename IndexInputType>
+                bool LoadGeometry(VkDevice logical_device, VkQueue queue,
+                                  VkPhysicalDeviceMemoryProperties mem_properties, VkCommandPool cmd_pool,
+                                  const std::vector<VertexInputType>& vertices,
+                                  const std::vector<IndexInputType>& indices)
+                {
+                    if (!GerFirst()->Create(logical_device, queue, mem_properties, cmd_pool, descriptor, vertices,
+                                            indices, GetUniformCreateInfos()))
+                        return false;
+
+                    switch (type)
+                    {
+                        case Type::Instanced:
+                            return instanced_drawables[0].AddTransform(logical_device, mem_properties, 4);
+                        default:
+                            return true;
+                    }
+                }
+
+                bool Update(VkDevice logical_device, float global_time)
+                {
+                    switch (type)
+                    {
+                        case Type::Instanced:
+
+                            for (auto& drawable : instanced_drawables)
+                            {
+                                int i = -1;
+                                for (auto& transform : drawable.transforms)
+                                {
+                                    float time = global_time * (1.f + 0.1f * (++i));
+                                    transform.model[12] = sin(time) * 0.5f; // X-axis
+                                    transform.model[13] = cos(time) * 0.5f; // Y-axis
+                                }
+
+                                if (!drawable.UpdateTransforms(logical_device))
+                                {
+                                    std::cerr << "Failed to Update Transforms Buffer for Instanced Shading!"
+                                              << std::endl;
+                                    return false;
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    return true;
+                }
+
+                bool UpdateUniforms(VkDevice logical_device, float time) const
+                {
+                    switch (type)
+                    {
+                        case Type::Fast:
+                            for (auto& drawable : fast_drawables)
+                                if (!drawable.UpdateUniforms(logical_device))
+                                    return false;
+                            return true;
+                        case Type::Instanced:
+                            for (auto& drawable : instanced_drawables)
+                                if (!drawable.UpdateUniforms(logical_device))
+                                    return false;
+                            return true;
+
+                        default:
+                            return true;
+                    }
+                }
+
+                void Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout) const
+                {
+                    switch (type)
+                    {
+                        case Type::Fast:
+                            for (auto& drawable : fast_drawables)
+                                drawable.Draw(commandBuffer, pipelineLayout);
+                            break;
+                        case Type::Instanced:
+                            for (auto& drawable : instanced_drawables)
+                                drawable.Draw(commandBuffer, pipelineLayout);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                Shading* GerFirst()
+                {
+                    switch (type)
+                    {
+                        case Type::Fast:
+                            return fast_drawables.data();
+                        case Type::Instanced:
+                            return instanced_drawables.data();
+                        default:
+                            return nullptr;
+                    }
+                }
+
+                const Shading* GerFirst() const
+                {
+                    switch (type)
+                    {
+                        case Type::Fast:
+                            return fast_drawables.data();
+                        case Type::Instanced:
+                            return instanced_drawables.data();
+                        default:
+                            return nullptr;
+                    }
+                }
+
+                std::vector<UniformCreateInfo> GetUniformCreateInfos()
+                {
+                    switch (type)
+                    {
+                        case Type::Fast:
+                            return {UniformCreateInfo::From(transform_matrices)};
+                        case Type::Instanced:
+                            return {UniformCreateInfo::From(proj_view)};
+                        default:
+                            return {};
+                    }
+                }
+            } demo{};
 
             bool Create(SDL_Window* window, int w, int h)
             {
-                std::cout << "Creating Vulkan Context..." << std::endl;
-                window_size = {static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
-                if (!CreateInstance(window) ||
-                    !CreateSurface(window) ||
-                    !device.Create(instance, surface) ||
-                    !GetSurfaceCapabilities())
+                if (!CreateInstance(window))
+                    return false;
+
+                VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR;
+                if (!surface.Create(window, instance, {static_cast<uint32_t>(w), static_cast<uint32_t>(h)}) ||
+                    !device.Create(instance, surface, present_mode) || 
+                    !surface.UpdateCapabilities(device.physical_device) ||
+                    !demo.Init(device.logical_device, ShadingContextDemo::Type::Instanced) ||
+                    !pipeline.Create(demo.GerFirst(), device.logical_device, surface, present_mode,
+                                     device.graphics_family, device.present_family, demo.descriptor))
                 {
-                    std::cerr << "Failed to setup environment for Vulkan rendering." << std::endl;
                     Delete();
                     return false;
                 }
 
-                std::cout << "Successfully setup Vulkan Instance, Surface & Device." << std::endl
-                          << "Creating Graphic Pipeline..." << std::endl;
-                shading_context.Init(ShadingContext::Type::Fast);
-                if (!pipeline.Create(shading_context.GerFirst(), device, surface, surface_capabilities, window_size))
-                {
-                    std::cerr << "Failed to setup environment for Vulkan rendering." << std::endl;
-                    Delete();
-                    return false;
-                }
+                std::cout << "Graphic Pipeline created. Creating triangle for Demo..." << std::endl;
 
-                std::cout << "Graphic Pipeline created." << std::endl 
-                          << "Setting up Demo..." << std::endl;
-                if (!CreateTriangle())
+                std::vector<uint32_t> indices = {0, 1, 2};
+                std::vector<Shading::PosColor> vertices = {{{.0f, -.5f, 0.f}, {1.f, 0.f, 0.f}},
+                                                           {{.5f, .5f, 0.f}, {0.f, 1.f, 0.f}},
+                                                           {{-.5f, .5f, 0.f}, {0.f, 0.f, 1.f}}};
+
+                if (!demo.LoadGeometry(device.logical_device, device.GetGraphicsQueue(), device.mem_properties,
+                                            pipeline.cmd_pool, vertices, indices))
                 {
-                    std::cerr << "Failed to setup Demo." << std::endl;
-                    Delete();
+                    std::cerr << "Failed to create triangle!" << std::endl;
                     return false;
                 }
 
@@ -332,22 +280,14 @@ export namespace RE
 
             bool Delete()
             {
-                shading_context.Clear(device.logical_device);
+                demo.Clear(device.logical_device);
+                pipeline.Clear();
+                device.Clear();
+                surface.Clear(instance);
 
-                pipeline.Delete();
-
-                if (device.logical_device != VK_NULL_HANDLE)
-                    vkDestroyDevice(device.logical_device, VkDebug::Allocation());
-                if (surface != VK_NULL_HANDLE)
-                    vkDestroySurfaceKHR(instance, surface, VkDebug::Allocation());
-
-                if (!VkDebug::Messenger::Delete(instance))
-                    return false;
-
-                if (instance != VK_NULL_HANDLE)
-                    vkDestroyInstance(instance, VkDebug::Allocation());
-
-                return true;
+                bool success = VkDebug::Messenger::Delete(instance);
+                vkDestroyInstance(instance, VkDebug::Allocation());
+                return success;
             }
 
             bool RenderTriangle()
@@ -355,25 +295,36 @@ export namespace RE
                 // Fake time & Transform Matrices
                 static float fake_time = 0.0f;
                 fake_time += 0.05f;
-                shading_context.Update(device.logical_device, fake_time);
+                demo.Update(device.logical_device, fake_time);
+
+                // Check for surface capability changes  
+                uint8_t capability_changes{};
+                if (!surface.UpdateAndGetCapabilityChanges(device.physical_device, capability_changes,
+                                                           pipeline.swapchain.extent,
+                                                           pipeline.swapchain.surface_transform))
+                    return false;
+
+                // If capabilities changed, recreate swapchain and pipeline
+                if (capability_changes != Surface::CapabilityChanges::None)
+                    if (!pipeline.OnSurfaceCapabilitiesChanged(capability_changes, demo.GerFirst(), surface,
+                                                               device.graphics_family, device.present_family))
+                        return false;
 
                 uint32_t next_swapchain_image{};
-                if (!GetSurfaceCapabilities() ||
-                    !pipeline.PrepareRender(shading_context.GerFirst(), device, surface, surface_capabilities,
-                                            window_size, next_swapchain_image))
+                if (!pipeline.PrepareRender(next_swapchain_image))
                 {
-                    std::cerr << "Failed to Prepare Render!" << std::endl;
+                    std::cout << "Failed to Prepare Render!" << std::endl;
                     return false;
                 }
 
-                if (!shading_context.UpdateUniforms(device.logical_device, fake_time))
+                if (!demo.UpdateUniforms(device.logical_device, fake_time))
                 {
                     std::cerr << "Failed to Update Uniforms!" << std::endl;
                     return false;
                 }
 
                 // Bind [Descriptor Sets, Vertex Buffers, Index Buffer] & Draw
-                shading_context.Draw(pipeline.commandBuffer, pipeline.pipelineLayout);
+                demo.Draw(pipeline.cmd_buffer, pipeline.layout);
 
                 if (!pipeline.SubmitRender(device.GetGraphicsQueue(), next_swapchain_image))
                 {
@@ -395,7 +346,7 @@ export namespace RE
                     return false;
 
                 std::vector<const char*> layers{};
-                Layers::Get(layers);
+                LayerProperties::Get(layers);
 
                 VkApplicationInfo appInfo{};
                 appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -420,7 +371,7 @@ export namespace RE
                 }
 
                 // VkDebug::Messenger
-                if (!Layers::Contains(layers, "VK_LAYER_KHRONOS_validation"))
+                if (!LayerProperties::Contains(layers, "VK_LAYER_KHRONOS_validation"))
                 {
                     std::cout << "Missing VK_LAYER_KHRONOS_validation layer -> VkDebug::Messenger disabled."
                               << std::endl;
@@ -429,47 +380,6 @@ export namespace RE
                 {
                     std::cerr << "Failed to create VkDebug::Messenger." << std::endl;
                     Delete();
-                    return false;
-                }
-
-                return true;
-            }
-
-            bool CreateSurface(SDL_Window* window)
-            {
-                if (SDL_Vulkan_CreateSurface(window, instance, &surface) == SDL_TRUE)
-                    return true;
-
-                std::cerr << "Failed to get surface capabilities!" << std::endl;
-                return false;
-            }
-
-            bool GetSurfaceCapabilities()
-            {
-                if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device.physical_device, surface, &surface_capabilities) ==
-                    VK_SUCCESS)
-                    return true;
-
-                std::cerr << "Failed to get surface capabilities!" << std::endl;
-                return false;
-            }
-
-            bool CreateTriangle()
-            {
-                std::vector<uint32_t> indices = {0, 1, 2};
-                std::vector<Shading::PosColor> vertices = {{{ .0f, -.5f, 0.f}, {1.f, 0.f, 0.f}},
-                                                           {{ .5f,  .5f, 0.f}, {0.f, 1.f, 0.f}},
-                                                           {{-.5f, .5f, 0.f}, {0.f, 0.f, 1.f}}};
-                std::vector<Shading::Uniform::CreateInfo> uniform_create_infos{};
-                shading_context.GetUniformCreateInfos(uniform_create_infos);
-
-                if (!shading_context.GerFirst()->Create(
-                    device.logical_device, device.GetGraphicsQueue(), device.mem_properties,
-                    pipeline.commandPool, pipeline.descriptorPool, pipeline.descriptorSetLayout,
-                    vertices, indices, uniform_create_infos) ||
-                    !shading_context.OnCreate(device.logical_device, device.mem_properties))
-                {
-                    std::cerr << "Failed to create triangle!" << std::endl;
                     return false;
                 }
 
