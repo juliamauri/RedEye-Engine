@@ -35,8 +35,11 @@ target_sources(RedEye_lib
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan.ixx,>
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/VkDebug.ixx,>
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/VkSDLWindow.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/LayerProperties.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Surface.ixx,>
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Device.ixx,>
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Buffers.ixx,>
+        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Uniforms.ixx,>
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Shading.ixx,>
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Swapchain.ixx,>
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/PipelineDynamicStates.ixx,>
