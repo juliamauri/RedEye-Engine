@@ -65,7 +65,9 @@ struct Window
                 SDL_RenderClear(renderer);
                 SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
                 SDL_RenderDrawLine(renderer, 200, 100, 100, 300);
+                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
                 SDL_RenderDrawLine(renderer, 100, 300, 300, 300);
+                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
                 SDL_RenderDrawLine(renderer, 300, 300, 200, 100);
                 SDL_RenderPresent(renderer);
             }
