@@ -27,21 +27,18 @@ export module GraphicPipeline;
 
 import VkDebug;
 import Device;
-import Buffers;
-import Shading;
 import Surface;
 import Swapchain;
 import PipelineDynamicStates;
+import PipelineShading;
 
 export struct GraphicPipeline
 {
-    VkDevice logical_device = VK_NULL_HANDLE;
-    VkPipeline pipeline = VK_NULL_HANDLE;
-
     Swapchain swapchain{};
+    PipelineDynamicStates dynamic_state{};
     VkRenderPass render_pass = VK_NULL_HANDLE; // Describes rendering operations.
     VkPipelineLayout layout = VK_NULL_HANDLE;  // Manages shaders and resources.
-    PipelineDynamicStates dynamic_state{};
+    VkPipeline pipeline = VK_NULL_HANDLE;
 
     // Commands
     VkCommandPool cmd_pool = VK_NULL_HANDLE;
@@ -51,20 +48,19 @@ export struct GraphicPipeline
     VkSemaphore imageAvailableSemaphore = VK_NULL_HANDLE;
     VkSemaphore renderFinishedSemaphore = VK_NULL_HANDLE;
 
-    bool Create(const Shading* shading, VkDevice device, const Surface& surface,
-                VkPresentModeKHR present_mode, uint32_t graphics_family, uint32_t present_family, 
-                const ShadingDescriptor& descriptor)
+    bool Create(VkDevice logical_device, const PipelineShading& shading, const Surface& surface,
+                uint32_t graphics_family, uint32_t present_family)
     {
         std::cout << "Creating Graphic Pipeline..." << std::endl;
 
-        if (!swapchain.Create(logical_device = device, surface, graphics_family, present_family, present_mode))
+        if (!swapchain.Create(logical_device, surface, graphics_family, present_family))
             return false;
 
         dynamic_state.Setup(swapchain.extent);
 
-        if (!CreateRenderPass(surface.format) ||
-            !CreatePipelineLayout(descriptor.set_layouts) || 
-            !CreateGraphicsPipeline(shading))
+        if (!CreateRenderPass(logical_device, surface.format) ||
+            !CreatePipelineLayout(logical_device, shading.set_layouts) || 
+            !CreateGraphicsPipeline(logical_device, shading))
         {
             std::cerr << "Failed to create Graphic Pipeline." << std::endl;
             return false;
@@ -72,12 +68,12 @@ export struct GraphicPipeline
 
         return 
             swapchain.RetrieveImages(logical_device, surface.format, render_pass) &&
-            CreateCommandPool(graphics_family) &&
-            CreateCommandBuffer() && 
-            CreateSemaphores();
+            CreateCommandPool(logical_device, graphics_family) &&
+            CreateCommandBuffer(logical_device) && 
+            CreateSemaphores(logical_device);
     }
 
-    void Clear()
+    void Clear(VkDevice logical_device)
     {
         vkDestroyPipelineLayout(logical_device, layout, VkDebug::Allocation());
         vkDestroyRenderPass(logical_device, render_pass, VkDebug::Allocation());
@@ -95,9 +91,9 @@ export struct GraphicPipeline
         imageAvailableSemaphore = VK_NULL_HANDLE;
         renderFinishedSemaphore = VK_NULL_HANDLE;
     }
-    
-    bool OnSurfaceCapabilitiesChanged(uint8_t changes, const Shading* shading, 
-        const Surface& surface, uint32_t graphics_family, uint32_t present_family)
+
+    bool OnSurfaceCapabilitiesChanged(VkDevice logical_device, uint8_t changes, const PipelineShading& shading,
+                                      const Surface& surface, uint32_t graphics_family, uint32_t present_family)
     {
         std::cout << "Recreating Swapchain..." << std::endl;
         if (!swapchain.Recreate(logical_device, surface, graphics_family, present_family, render_pass))
@@ -113,10 +109,10 @@ export struct GraphicPipeline
             return true;
 
         std::cout << "Recreating Pipeline..." << std::endl;
-        return CreateGraphicsPipeline(shading);
+        return CreateGraphicsPipeline(logical_device, shading);
     }
     
-    bool PrepareRender(uint32_t& next_swapchain_image)
+    bool PrepareRender(VkDevice logical_device, uint32_t& next_swapchain_image)
     {
         if (!swapchain.GetNextImage(logical_device, next_swapchain_image, imageAvailableSemaphore) ||
             !BeginCommandRecording())
@@ -139,7 +135,7 @@ export struct GraphicPipeline
 
     // Pipeline Creation
 
-    bool CreateRenderPass(const VkSurfaceFormatKHR& surface_format)
+    bool CreateRenderPass(VkDevice logical_device, const VkSurfaceFormatKHR& surface_format)
     {
         VkAttachmentDescription colorAttachment{};
         colorAttachment.format = surface_format.format;
@@ -187,7 +183,7 @@ export struct GraphicPipeline
         return true;
     }
 
-    bool CreatePipelineLayout(const std::vector<VkDescriptorSetLayout>& set_layouts)
+    bool CreatePipelineLayout(VkDevice logical_device, const std::vector<VkDescriptorSetLayout>& set_layouts)
     {
         std::cout << "Creating Pipeline Layout." << std::endl;
 
@@ -208,11 +204,11 @@ export struct GraphicPipeline
         return true;
     }
 
-    bool CreateGraphicsPipeline(const Shading* shading)
+    bool CreateGraphicsPipeline(VkDevice logical_device, const PipelineShading& shading)
     {
         std::cout << "Creating Shader Modules." << std::endl;
         std::vector<VkPipelineShaderStageCreateInfo> shader_stages{};
-        if (!shading->GetStageCreateInfo(logical_device, shader_stages))
+        if (!shading.GetShaderStageCreateInfo(logical_device, shader_stages))
         {
             std::cerr << "Failed to create shader modules!" << std::endl;
 
@@ -233,19 +229,9 @@ export struct GraphicPipeline
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
         pipelineInfo.basePipelineIndex = -1;
 
-        // Static States - VertexInput from Shading
-        std::vector<VkVertexInputBindingDescription> binding_descriptions{};
-        shading->BindingDescriptions(binding_descriptions);
-        std::vector<VkVertexInputAttributeDescription> attribute_descriptions{};
-        shading->AttributeDescriptions(attribute_descriptions);
-
         // Static States - VertexInput
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-        vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(binding_descriptions.size());
-        vertexInputInfo.pVertexBindingDescriptions = binding_descriptions.data();
-        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attribute_descriptions.size());
-        vertexInputInfo.pVertexAttributeDescriptions = attribute_descriptions.data();
+        shading.FillVertexInputStateCreateInfo(vertexInputInfo);
         pipelineInfo.pVertexInputState = &vertexInputInfo;
 
         // Static States - InputAssembly, Multisampling, ColorBlend
@@ -306,7 +292,7 @@ export struct GraphicPipeline
 
     // Pipeline Resources' Creation
 
-    bool CreateCommandPool(uint32_t graphics_family)
+    bool CreateCommandPool(VkDevice logical_device, uint32_t graphics_family)
     {
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -322,7 +308,7 @@ export struct GraphicPipeline
         return true;
     }
 
-    bool CreateCommandBuffer()
+    bool CreateCommandBuffer(VkDevice logical_device)
     {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -339,7 +325,7 @@ export struct GraphicPipeline
         return true;
     }
 
-    bool CreateSemaphores()
+    bool CreateSemaphores(VkDevice logical_device)
     {
         std::cout << "Creating Semaphores." << std::endl;
         VkSemaphoreCreateInfo semaphoreInfo{};

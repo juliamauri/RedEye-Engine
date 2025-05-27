@@ -30,14 +30,15 @@ import VkDebug;
 
 export struct Surface
 {
-    VkExtent2D window_size{};
-    VkSurfaceFormatKHR format{};
-
     VkSurfaceKHR surface = VK_NULL_HANDLE;
     VkSurfaceCapabilitiesKHR capabilities{};
+    VkExtent2D window_size{};
+    VkSurfaceFormatKHR format{};
+    VkPresentModeKHR present_mode{};
 
     bool Create(SDL_Window* window, VkInstance instance, VkExtent2D _window_size,
-                VkSurfaceFormatKHR _format = {VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
+                VkSurfaceFormatKHR _format = {VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR},
+                VkPresentModeKHR _present_mode = VK_PRESENT_MODE_FIFO_KHR)
     {
         std::cout << "Creating SDL Vulkan Surface." << std::endl;
 
@@ -47,7 +48,9 @@ export struct Surface
             return false;
         }
 
+        window_size = _window_size;
         format = _format;
+        present_mode = _present_mode;
         return true;
     }
 
@@ -55,6 +58,9 @@ export struct Surface
     {
         vkDestroySurfaceKHR(instance, surface, VkDebug::Allocation());
         surface = VK_NULL_HANDLE;
+        window_size = {};
+        format = {};
+        present_mode = {};
     }
 
     enum CapabilityChanges : uint8_t

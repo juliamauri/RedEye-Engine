@@ -27,90 +27,10 @@ export module Shading;
 import VkDebug;
 import Buffers;
 import Uniforms;
-
-struct Shader
-{
-    const char* code = nullptr;
-    VkShaderStageFlagBits stage{};
-
-    const char* Name() const
-    {
-        switch (stage)
-        {
-            case VK_SHADER_STAGE_VERTEX_BIT:
-                return "Vertex";
-            case VK_SHADER_STAGE_FRAGMENT_BIT:
-                return "Fragment";
-            default:
-                return "Unknown";
-        }
-    }
-
-    bool CreateModule(VkDevice logical_device, VkShaderModule& module) const
-    {
-        if (code == nullptr)
-            return false;
-
-        size_t codeSize = strlen(code);
-        std::vector<uint32_t> codeBytes((codeSize + 3) / 4);
-        memcpy(codeBytes.data(), code, codeSize);
-
-        VkShaderModuleCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        createInfo.codeSize = codeBytes.size() * sizeof(uint32_t);
-        createInfo.pCode = codeBytes.data();
-
-        return vkCreateShaderModule(logical_device, &createInfo, VkDebug::Allocation(), &module) == VK_SUCCESS;
-    }
-};
-struct Shading;
-export struct ShadingDescriptor
-{
-    VkDescriptorPool pool = VK_NULL_HANDLE;
-    std::vector<VkDescriptorSetLayout> set_layouts{};
-
-    bool Create(VkDevice logical_device, const Shading& shading);
-    void Clear(VkDevice logical_device)
-    {
-        for (auto& set_layout : set_layouts)
-            vkDestroyDescriptorSetLayout(logical_device, set_layout, VkDebug::Allocation());
-
-        set_layouts.clear();
-
-        vkDestroyDescriptorPool(logical_device, pool, VkDebug::Allocation());
-        pool = VK_NULL_HANDLE;
-    }
-};
+import PipelineShading;
 
 export struct Shading
 {
-    virtual const char* VertexShader() const = 0;
-    virtual const char* FragmentShader() const = 0;
-    bool GetStageCreateInfo(VkDevice logical_device, std::vector<VkPipelineShaderStageCreateInfo>& info) const
-    {
-        std::vector<Shader> shaders{};
-        GetShaders(shaders);
-        for (const auto& shader : shaders)
-        {
-            size_t codeSize = strlen(shader.code);
-            std::vector<uint32_t> codeBytes((codeSize + 3) / 4);
-            memcpy(codeBytes.data(), shader.code, codeSize);
-
-            VkShaderModuleCreateInfo createInfo{};
-            createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-            createInfo.codeSize = codeBytes.size() * sizeof(uint32_t);
-            createInfo.pCode = codeBytes.data();
-
-            info.push_back({VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, nullptr, 0, shader.stage,
-                            VK_NULL_HANDLE, "main", nullptr});
-            if (vkCreateShaderModule(logical_device, &createInfo, VkDebug::Allocation(), &info.back().module) !=
-                VK_SUCCESS)
-                return false;
-        }
-
-        return true;
-    }
-
     struct PosColor
     {
         float pos[3];
@@ -134,7 +54,7 @@ export struct Shading
     bool Create(VkDevice logical_device,
                 VkQueue queue,
                 VkPhysicalDeviceMemoryProperties mem_properties,
-                VkCommandPool commandPool, const ShadingDescriptor& descriptor,
+                VkCommandPool commandPool, const PipelineShading& pipeline_shading,
                 const std::vector<VertexInputType>& vertices,
                 const std::vector<IndexInputType>& indices,
                 const std::vector<UniformCreateInfo> uniform_infos)
@@ -144,7 +64,7 @@ export struct Shading
             return false;
 
         for (const auto& uniform_info : uniform_infos)
-            if (!AddUniform(logical_device, mem_properties, descriptor, uniform_info))
+            if (!AddUniform(logical_device, mem_properties, pipeline_shading, uniform_info))
                 return false;
 
         return true;
@@ -189,35 +109,53 @@ export struct Shading
         vkCmdDrawIndexed(commandBuffer, index_count, instance_count, 0, 0, 0);
     }
 
-    virtual void BindingDescriptions(std::vector<VkVertexInputBindingDescription>& binding_descriptions) const = 0;
-    virtual void AttributeDescriptions(std::vector<VkVertexInputAttributeDescription>& attr_descriptions) const = 0;
-
-    bool CreateDescriptorSetLayout(VkDevice& logical_device, VkDescriptorSetLayout& descriptor_set_layout) const
+    virtual const char* VertexShader() const = 0;
+    virtual const char* FragmentShader() const = 0;
+    virtual std::vector<PipelineShading::Shader> GetShaders() const
     {
-        std::vector<VkDescriptorSetLayoutBinding> layout_bindings{};
-        DescriptorSetLayoutBindings(layout_bindings);
-
-        VkDescriptorSetLayoutCreateInfo layoutInfo{};
-        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = static_cast<uint32_t>(layout_bindings.size());
-        layoutInfo.pBindings = layout_bindings.data();
-
-        return vkCreateDescriptorSetLayout(logical_device, &layoutInfo, VkDebug::Allocation(), &descriptor_set_layout) ==
-               VK_SUCCESS;
+        return {{VertexShader(), VK_SHADER_STAGE_VERTEX_BIT}, 
+                {FragmentShader(), VK_SHADER_STAGE_FRAGMENT_BIT}};
     }
-    bool CreateDescriptorPool(VkDevice& logical_device, VkDescriptorPool& descriptorPool) const
+    virtual std::vector<VkVertexInputBindingDescription> BindingDescriptions() const = 0;
+    virtual std::vector<VkVertexInputAttributeDescription> AttributeDescriptions() const = 0;
+    virtual std::vector<VkDescriptorPoolSize> DescriptorPoolSizes() const = 0;
+    virtual std::vector<VkDescriptorSetLayoutBinding> DescriptorSetLayoutBindings() const = 0;
+    
+    bool SetupPipelineShading(VkDevice logical_device, PipelineShading& shading) const
     {
-        std::vector<VkDescriptorPoolSize> pool_sizes{};
-        DescriptorPoolSizes(pool_sizes);
-
-        VkDescriptorPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        poolInfo.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
-        poolInfo.pPoolSizes = pool_sizes.data();
-        poolInfo.maxSets = 1;
-
-        return vkCreateDescriptorPool(logical_device, &poolInfo, VkDebug::Allocation(), &descriptorPool) == VK_SUCCESS;
+        shading.shaders = GetShaders();
+        shading.binding_descriptions = BindingDescriptions();
+        shading.attribute_descriptions = AttributeDescriptions();
+        return shading.CreateDescriptorPool(logical_device, DescriptorPoolSizes()) &&
+               shading.CreateDescriptorSetLayout(logical_device, DescriptorSetLayoutBindings());
     }
+
+    //bool CreateDescriptorSetLayout(VkDevice& logical_device, VkDescriptorSetLayout& descriptor_set_layout) const
+    //{
+    //    std::vector<VkDescriptorSetLayoutBinding> layout_bindings{};
+    //    DescriptorSetLayoutBindings(layout_bindings);
+    //
+    //    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    //    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    //    layoutInfo.bindingCount = static_cast<uint32_t>(layout_bindings.size());
+    //    layoutInfo.pBindings = layout_bindings.data();
+    //
+    //    return vkCreateDescriptorSetLayout(logical_device, &layoutInfo, VkDebug::Allocation(), &descriptor_set_layout) ==
+    //           VK_SUCCESS;
+    //}
+    //bool CreateDescriptorPool(VkDevice& logical_device, VkDescriptorPool& descriptorPool) const
+    //{
+    //    std::vector<VkDescriptorPoolSize> pool_sizes{};
+    //    DescriptorPoolSizes(pool_sizes);
+    //
+    //    VkDescriptorPoolCreateInfo poolInfo{};
+    //    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    //    poolInfo.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
+    //    poolInfo.pPoolSizes = pool_sizes.data();
+    //    poolInfo.maxSets = 1;
+    //
+    //    return vkCreateDescriptorPool(logical_device, &poolInfo, VkDebug::Allocation(), &descriptorPool) == VK_SUCCESS;
+    //}
 
   protected:
 
@@ -241,18 +179,13 @@ export struct Shading
     }
 
     bool AddUniform(VkDevice logical_device, VkPhysicalDeviceMemoryProperties mem_properties,
-                    const ShadingDescriptor& descriptor, UniformCreateInfo uniform_data)
+                    const PipelineShading& pipeline_shading, UniformCreateInfo uniform_data)
     {
         uniforms.push_back({});
         descriptor_sets.push_back({});
-        return uniforms.back().Create(logical_device, mem_properties, descriptor.pool, descriptor.set_layouts,
+        return uniforms.back().Create(logical_device, mem_properties, 
+                                      pipeline_shading.pool, pipeline_shading.set_layouts,
                                       descriptor_sets.back(), uniform_data);
-    }
-
-    virtual void GetShaders(std::vector<Shader>& shaders) const
-    {
-        shaders.push_back({VertexShader(), VK_SHADER_STAGE_VERTEX_BIT});
-        shaders.push_back({FragmentShader(), VK_SHADER_STAGE_FRAGMENT_BIT});
     }
     virtual void ClearDerivates(VkDevice logical_device)
     {
@@ -266,17 +199,7 @@ export struct Shading
                                          std::vector<VkDeviceSize>& offsets) const
     {
     }
-
-    virtual void DescriptorSetLayoutBindings(std::vector<VkDescriptorSetLayoutBinding>& layout_bindings) const = 0;
-    virtual void DescriptorPoolSizes(std::vector<VkDescriptorPoolSize>& pool_sizes) const = 0;
 };
-
-bool ShadingDescriptor::Create(VkDevice logical_device, const Shading& shading)
-{
-    set_layouts.push_back(VK_NULL_HANDLE);
-    return shading.CreateDescriptorPool(logical_device, pool) &&
-           shading.CreateDescriptorSetLayout(logical_device, set_layouts.back());
-}
 
 export struct FastShading : public Shading
 {
@@ -320,26 +243,22 @@ export struct FastShading : public Shading
         float view[16];
         float proj[16];
     };
-
-    void BindingDescriptions(std::vector<VkVertexInputBindingDescription>& out) const override
+    std::vector<VkVertexInputBindingDescription> BindingDescriptions() const override
     {
-        out.push_back({0, sizeof(float) * 6, VK_VERTEX_INPUT_RATE_VERTEX});
+        return {{0, sizeof(PosColor), VK_VERTEX_INPUT_RATE_VERTEX}};
     }
-    void AttributeDescriptions(std::vector<VkVertexInputAttributeDescription>& out) const override
+    std::vector<VkVertexInputAttributeDescription> AttributeDescriptions() const override
     {
-        out.push_back({0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(PosColor, pos)});   // Position
-        out.push_back({1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(PosColor, color)}); // Color
+        return {{0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(PosColor, pos)},
+                {1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(PosColor, color)}};
     }
-
-  protected:
-
-    void DescriptorSetLayoutBindings(std::vector<VkDescriptorSetLayoutBinding>& out) const override
+    std::vector<VkDescriptorPoolSize> DescriptorPoolSizes() const override
     {
-        out.push_back({0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr});
+        return {{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}};
     }
-    void DescriptorPoolSizes(std::vector<VkDescriptorPoolSize>& out) const override
+    std::vector<VkDescriptorSetLayoutBinding> DescriptorSetLayoutBindings() const override
     {
-        out.push_back({VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1});
+        return {{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr}};
     }
 };
 
@@ -391,19 +310,27 @@ export struct InstancedShading : public Shading
     Buffer instance{};
     std::vector<Transform> transforms{};
 
-    void BindingDescriptions(std::vector<VkVertexInputBindingDescription>& out) const override
+    std::vector<VkVertexInputBindingDescription> BindingDescriptions() const override
     {
-        out.push_back({0, sizeof(PosColor), VK_VERTEX_INPUT_RATE_VERTEX});    // PosColor
-        out.push_back({1, sizeof(Transform), VK_VERTEX_INPUT_RATE_INSTANCE}); // Transform
+        return {{0, sizeof(PosColor), VK_VERTEX_INPUT_RATE_VERTEX}, // PosColor
+                {1, sizeof(Transform), VK_VERTEX_INPUT_RATE_INSTANCE}}; // Transform
     }
-    void AttributeDescriptions(std::vector<VkVertexInputAttributeDescription>& out) const override
+    std::vector<VkVertexInputAttributeDescription> AttributeDescriptions() const override
     {
-        out.push_back({0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(PosColor, pos)});       // Position
-        out.push_back({1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(PosColor, color)});     // Color
-        out.push_back({2, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Transform, model)}); // Model
-        out.push_back({3, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Transform, model) + sizeof(float) * 4});
-        out.push_back({4, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Transform, model) + sizeof(float) * 8});
-        out.push_back({5, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Transform, model) + sizeof(float) * 12});
+        return {{0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(PosColor, pos)},       // Position
+                {1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(PosColor, color)},     // Color
+                {2, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Transform, model)}, // Model
+                {3, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Transform, model) + sizeof(float) * 4},
+                {4, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Transform, model) + sizeof(float) * 8},
+                {5, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Transform, model) + sizeof(float) * 12}};
+    }
+    std::vector<VkDescriptorPoolSize> DescriptorPoolSizes() const override
+    {
+        return {{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}};
+    }
+    std::vector<VkDescriptorSetLayoutBinding> DescriptorSetLayoutBindings() const override
+    {
+        return {{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr}};
     }
 
     bool AddTransform(VkDevice logical_device, VkPhysicalDeviceMemoryProperties mem_properties, uint32_t to_add = 1)
@@ -440,14 +367,5 @@ export struct InstancedShading : public Shading
     {
         vertex_buffers.push_back(instance.id);
         offsets.push_back(0);
-    }
-
-    void DescriptorSetLayoutBindings(std::vector<VkDescriptorSetLayoutBinding>& out) const override
-    {
-        out.push_back({0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr});
-    }
-    void DescriptorPoolSizes(std::vector<VkDescriptorPoolSize>& out) const override
-    {
-        out.push_back({VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1});
     }
 };

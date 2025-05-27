@@ -32,7 +32,6 @@ export struct Swapchain
 {
     VkSwapchainKHR id = VK_NULL_HANDLE;
 
-    VkPresentModeKHR present_mode;
     VkExtent2D extent{};
     VkSurfaceTransformFlagBitsKHR surface_transform;
 
@@ -40,8 +39,7 @@ export struct Swapchain
     std::vector<VkImageView> image_views{};    // Image views for swapchain images.
     std::vector<VkFramebuffer> framebuffers{}; // Framebuffers for swapchain images.
 
-    bool Create(VkDevice logical_device, const Surface& surface, uint32_t graphics_family, uint32_t present_family,
-                VkPresentModeKHR _present_mode)
+    bool Create(VkDevice logical_device, const Surface& surface, uint32_t graphics_family, uint32_t present_family)
     {
         std::cout << "Creating Swapchain..." << std::endl;
 
@@ -71,7 +69,7 @@ export struct Swapchain
 
         createInfo.preTransform = surface_transform = surface.capabilities.currentTransform;
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-        createInfo.presentMode = present_mode = _present_mode;
+        createInfo.presentMode = surface.present_mode;
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = id;
 
@@ -93,7 +91,7 @@ export struct Swapchain
                   VkRenderPass render_pass)
     {
         ClearResources(logical_device);
-        return Create(logical_device, surface, graphics_family, present_family, present_mode) &&
+        return Create(logical_device, surface, graphics_family, present_family) &&
                RetrieveImages(logical_device, surface.format, render_pass);
     }
 

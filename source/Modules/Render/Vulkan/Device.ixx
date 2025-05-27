@@ -443,7 +443,6 @@ export struct LogicalDevice
     VkPhysicalDeviceMemoryProperties mem_properties;
 
     bool Create(VkInstance instance, const Surface& surface,
-                VkPresentModeKHR present_mode,
                 uint8_t required_features = Feature::GEOMETRY_SHADER | Feature::TESSELLATION_SHADER |
                                    Feature::SAMPLER_ANISOTROPY,
                 const std::vector<const char*>& required_extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME})
@@ -461,7 +460,7 @@ export struct LogicalDevice
                 SupportsRequiredExtensions(required_extensions) && 
                 HasValidQueueFamiliesWithKHR(surface.surface) &&
                 HasRequiredSurfaceFormat(surface.surface, surface.format) &&
-                HasRequiredPresentMode(surface.surface, present_mode) &&
+                HasRequiredPresentMode(surface.surface, surface.present_mode) &&
                 CorrectCreation(required_extensions))
             {
                 std::cout << "Created Logical Device from suitable Vulkan Physical Device ID: " << i << std::endl;

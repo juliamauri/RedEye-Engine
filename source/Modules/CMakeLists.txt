@@ -9,6 +9,7 @@ find_package(imgui CONFIG REQUIRED)
 find_package(PhysFS CONFIG REQUIRED)
 find_package(nfd CONFIG REQUIRED)
 find_package(RapidJSON CONFIG REQUIRED)
+
 if(ENABLE_OPENGL)
     find_package(GLEW REQUIRED)
 endif()
@@ -28,23 +29,31 @@ target_sources(RedEye_lib
         "RE_WindowManager.ixx"
         "RE_Dialogs.ixx"
         "RE_JSON.ixx"
-
         "Render/RenderAPIHandler.ixx"
-        $<IF:$<BOOL:${ENABLE_OPENGL}>,Render/OpenGL.ixx,>
-
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/VkDebug.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/VkSDLWindow.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/LayerProperties.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Surface.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Device.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Buffers.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Uniforms.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Shading.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/Swapchain.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/PipelineDynamicStates.ixx,>
-        $<IF:$<BOOL:${ENABLE_VULKAN}>,Render/Vulkan/GraphicPipeline.ixx,>
 )
+if(ENABLE_OPENGL)
+    target_sources(RedEye_lib PUBLIC FILE_SET CXX_MODULES FILES "Render/OpenGL.ixx")
+
+endif()
+
+if(ENABLE_VULKAN)
+    set(VULKAN_MODULES
+    Render/Vulkan.ixx
+    Render/Vulkan/VkDebug.ixx
+    Render/Vulkan/VkSDLWindow.ixx
+    Render/Vulkan/LayerProperties.ixx
+    Render/Vulkan/Surface.ixx
+    Render/Vulkan/Device.ixx
+    Render/Vulkan/PipelineShading.ixx
+    Render/Vulkan/Buffers.ixx
+    Render/Vulkan/Uniforms.ixx
+    Render/Vulkan/Shading.ixx
+    Render/Vulkan/Swapchain.ixx
+    Render/Vulkan/PipelineDynamicStates.ixx
+    Render/Vulkan/GraphicPipeline.ixx
+    )
+    target_sources(RedEye_lib PUBLIC FILE_SET CXX_MODULES FILES ${VULKAN_MODULES})
+endif()
 
 target_compile_definitions(RedEye_lib PRIVATE
     IMGUI_DEFINE_MATH_OPERATORS

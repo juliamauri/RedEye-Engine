@@ -25,16 +25,18 @@ module;
 #include <iostream>
 #include <set>
 #include <vector>
+#include <map>
 
 export module Vulkan;
 
-import LayerProperties;
 import VkDebug;
 import VkSDLWindow;
+import LayerProperties;
 import Surface;
 import Device;
 import Uniforms;
 import Shading;
+import PipelineShading;
 import GraphicPipeline;
 
 export namespace RE
@@ -73,7 +75,7 @@ export namespace RE
                     Instanced
                 };
 
-                ShadingDescriptor descriptor{};
+                PipelineShading shading{};
 
               private:
                 Type type = Type::Fast;
@@ -102,7 +104,7 @@ export namespace RE
                     instanced_drawables.push_back({});
                     proj_view = {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f};
 
-                    return descriptor.Create(logical_device, *GerFirst());
+                    return GerFirst()->SetupPipelineShading(logical_device, shading);
                 }
 
                 void Clear(VkDevice logical_device)
@@ -123,8 +125,8 @@ export namespace RE
                                   const std::vector<VertexInputType>& vertices,
                                   const std::vector<IndexInputType>& indices)
                 {
-                    if (!GerFirst()->Create(logical_device, queue, mem_properties, cmd_pool, descriptor, vertices,
-                                            indices, GetUniformCreateInfos()))
+                    if (!GerFirst()->Create(logical_device, queue, mem_properties, cmd_pool, shading, 
+                                            vertices, indices, GetUniformCreateInfos()))
                         return false;
 
                     switch (type)
@@ -141,10 +143,10 @@ export namespace RE
                     switch (type)
                     {
                         case Type::Instanced:
-
+                        {
+                            int i = -1;
                             for (auto& drawable : instanced_drawables)
                             {
-                                int i = -1;
                                 for (auto& transform : drawable.transforms)
                                 {
                                     float time = global_time * (1.f + 0.1f * (++i));
@@ -160,6 +162,7 @@ export namespace RE
                                 }
                             }
                             break;
+                        }
                         default:
                             break;
                     }
@@ -248,13 +251,12 @@ export namespace RE
                 if (!CreateInstance(window))
                     return false;
 
-                VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR;
                 if (!surface.Create(window, instance, {static_cast<uint32_t>(w), static_cast<uint32_t>(h)}) ||
-                    !device.Create(instance, surface, present_mode) || 
+                    !device.Create(instance, surface) || 
                     !surface.UpdateCapabilities(device.physical_device) ||
                     !demo.Init(device.logical_device, ShadingContextDemo::Type::Instanced) ||
-                    !pipeline.Create(demo.GerFirst(), device.logical_device, surface, present_mode,
-                                     device.graphics_family, device.present_family, demo.descriptor))
+                    !pipeline.Create(device.logical_device, demo.shading, surface,
+                                     device.graphics_family, device.present_family))
                 {
                     Delete();
                     return false;
@@ -271,6 +273,7 @@ export namespace RE
                                             pipeline.cmd_pool, vertices, indices))
                 {
                     std::cerr << "Failed to create triangle!" << std::endl;
+                    Delete();
                     return false;
                 }
 
@@ -281,7 +284,7 @@ export namespace RE
             bool Delete()
             {
                 demo.Clear(device.logical_device);
-                pipeline.Clear();
+                pipeline.Clear(device.logical_device);
                 device.Clear();
                 surface.Clear(instance);
 
@@ -298,20 +301,20 @@ export namespace RE
                 demo.Update(device.logical_device, fake_time);
 
                 // Check for surface capability changes  
-                uint8_t capability_changes{};
-                if (!surface.UpdateAndGetCapabilityChanges(device.physical_device, capability_changes,
+                uint8_t changes{};
+                if (!surface.UpdateAndGetCapabilityChanges(device.physical_device, changes,
                                                            pipeline.swapchain.extent,
                                                            pipeline.swapchain.surface_transform))
                     return false;
 
-                // If capabilities changed, recreate swapchain and pipeline
-                if (capability_changes != Surface::CapabilityChanges::None)
-                    if (!pipeline.OnSurfaceCapabilitiesChanged(capability_changes, demo.GerFirst(), surface,
-                                                               device.graphics_family, device.present_family))
+                // If capabilities changed, recreate swapchain
+                if (changes != Surface::CapabilityChanges::None)
+                    if (!pipeline.OnSurfaceCapabilitiesChanged(device.logical_device, changes, demo.shading,
+                                                               surface, device.graphics_family, device.present_family))
                         return false;
 
                 uint32_t next_swapchain_image{};
-                if (!pipeline.PrepareRender(next_swapchain_image))
+                if (!pipeline.PrepareRender(device.logical_device, next_swapchain_image))
                 {
                     std::cout << "Failed to Prepare Render!" << std::endl;
                     return false;
