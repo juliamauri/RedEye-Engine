@@ -20,10 +20,10 @@
 
 #include "RL_Application.h"
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_opengl3_loader.h>
-#include <imgui_impl_sdl2.h>
+#include <imgui_impl_sdl3.h>
 #include <functional>
 
 import EventSystem;
@@ -62,7 +62,7 @@ bool JR_WindowAndRenderer::Init()
 void JR_WindowAndRenderer::PostUpdate()
 {
     ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
 
     RE::GUI::Draw();
@@ -91,7 +91,7 @@ void JR_WindowAndRenderer::PostUpdate()
 
 void JR_WindowAndRenderer::CleanUp()
 {
-    SDL_GL_DeleteContext(context);
+    SDL_GL_DestroyContext(context);
 }
 
 SDL_Window* JR_WindowAndRenderer::GetMainWindow() const

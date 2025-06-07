@@ -19,7 +19,8 @@
 #ifndef JR_WINDOWRENDERER_CLASS
 #define JR_WINDOWRENDERER_CLASS
 
-#include <SDL2/SDL_render.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL.h>
 
 class JR_WindowAndRenderer
 {

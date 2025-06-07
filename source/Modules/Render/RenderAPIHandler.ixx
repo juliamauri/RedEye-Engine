@@ -194,7 +194,7 @@ export namespace RE
         {
             const uint32_t OpenGL = SDL_WINDOW_OPENGL;
             const uint32_t Vulkan = SDL_WINDOW_VULKAN;
-            const uint32_t DEFAULT = SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN;
+            const uint32_t DEFAULT = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_SHOWN;
         } // namespace Flag
 
         bool Init()
