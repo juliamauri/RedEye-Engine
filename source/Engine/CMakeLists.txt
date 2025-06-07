@@ -1,4 +1,4 @@
-find_package(SDL2 CONFIG REQUIRED)
+find_package(SDL3 CONFIG REQUIRED)
 
 add_executable(Engine)
 target_sources(Engine PRIVATE
@@ -10,6 +10,5 @@ target_sources(Engine PRIVATE
 target_link_libraries(Engine
     PRIVATE
     RedEye_lib
-    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-    $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+    main PRIVATE SDL3::SDL3
 )

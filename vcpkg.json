@@ -7,18 +7,17 @@
       "features": [
         "docking-experimental",
         "opengl3-binding",
-        "sdl2-binding",
-        "vulkan-binding",
-        "sdl2-renderer-binding"
+        "vulkan-binding"
       ]
     },
     "nativefiledialog-extended",
     "physfs",
     "rapidjson",
     {
-      "name": "sdl2",
+      "name": "sdl3",
       "features": [
-        "vulkan"
+        "vulkan",
+        "wayland"
       ]
     },
     "vulkan"

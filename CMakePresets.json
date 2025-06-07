@@ -41,14 +41,6 @@
       }
     },
     {
-      "name": "x86",
-      "hidden": true,
-      "architecture": {
-        "value": "x86",
-        "strategy": "external"
-      }
-    },
-    {
       "name": "x64",
       "hidden": true,
       "architecture": {
@@ -85,37 +77,26 @@
       }
     },
     {
-      "name": "x86-debug-windows",
-      "displayName": "Win-32 Debug",
-      "inherits": [ "windows-base", "x86", "debug", "opengl", "vulkan" ]
-    },
-    {
-      "name": "x86-release-windows",
-      "displayName": "Win-32 Release",
-      "inherits": [ "windows-base", "x86", "release", "opengl", "vulkan" ]
-    },
-    {
       "name": "x64-debug-windows",
       "displayName": "Win-64 Debug",
-      "inherits": [ "windows-base", "x64", "debug", "opengl", "vulkan" ]
+      "inherits": [
+        "windows-base",
+        "x64",
+        "debug",
+        "opengl",
+        "vulkan"
+      ]
     },
     {
       "name": "x64-release-windows",
       "displayName": "Win-64 Release",
-      "inherits": [ "windows-base", "x64", "release", "opengl", "vulkan" ]
-    },
-    {
-      "name": "x86-linux",
-      "inherits": "linux-base",
-      "hidden": true,
-      "architecture": {
-        "value": "x86",
-        "strategy": "external"
-      },
-      "cacheVariables": {
-        "CMAKE_C_FLAGS": "-m32",
-        "CMAKE_CXX_FLAGS": "-m32"
-      }
+      "inherits": [
+        "windows-base",
+        "x64",
+        "release",
+        "opengl",
+        "vulkan"
+      ]
     },
     {
       "name": "x64-linux",
@@ -124,27 +105,31 @@
       "architecture": {
         "value": "x64",
         "strategy": "external"
+      },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/build/x64-release-linux/vcpkg_installed/x64-linux"
       }
-    },
-    {
-      "name": "x86-debug-linux",
-      "displayName": "Linux-32 Debug",
-      "inherits": [ "x86-linux", "debug", "opengl", "vulkan" ]
-    },
-    {
-      "name": "x86-release-linux",
-      "displayName": "Linux-32 Release",
-      "inherits": [ "x86-linux", "release", "opengl", "vulkan" ]
     },
     {
       "name": "x64-debug-linux",
       "displayName": "Linux-64 Debug",
-      "inherits": [ "x64-linux", "debug", "opengl", "vulkan" ]
+      "inherits": [
+        "x64-linux",
+        "debug",
+        "opengl",
+        "vulkan"
+      ]
     },
     {
       "name": "x64-release-linux",
       "displayName": "Linux-64 Release",
-      "inherits": [ "x64-linux", "release", "opengl", "vulkan" ]
+      "inherits": [
+        "x64-linux",
+        "release",
+        "opengl",
+        "vulkan"
+      ]
     }
   ]
 }
