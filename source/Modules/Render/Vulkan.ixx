@@ -18,8 +18,7 @@
 
 module;
 
-#include <SDL2/SDL.h>
-#include <SDL_vulkan.h>
+#include <SDL3/SDL.h>
 #include <vulkan/vulkan.h>
 
 #include <iostream>
@@ -2318,7 +2317,7 @@ export namespace RE
 
             bool CreateSurface(SDL_Window* window)
             {
-                if (SDL_Vulkan_CreateSurface(window, instance, &surface) == SDL_TRUE)
+                if (SDL_Vulkan_CreateSurface(window, instance, &surface) == true)
                     return true;
 
                 std::cerr << "Failed to get surface capabilities!" << std::endl;

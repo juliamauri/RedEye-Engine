@@ -18,7 +18,7 @@
 
 module;
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 #include <unordered_map>
 
@@ -48,10 +48,9 @@ export namespace RE
          */
         uint32_t NewWindow(const char* title, int x = SDL_WINDOWPOS_CENTERED, int y = SDL_WINDOWPOS_CENTERED,
                            int w = 500, int h = 500,
-                           uint32_t flags = (SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI |
-                                             SDL_WINDOW_SHOWN))
+                           uint32_t flags = (SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY))
         {
-            SDL_Window* window = SDL_CreateWindow(title, x, y, w, h, flags);
+            SDL_Window* window = SDL_CreateWindow(title, w, h, flags);
             uint32_t id = SDL_GetWindowID(window);
             _windows[id] = window;
             return id;

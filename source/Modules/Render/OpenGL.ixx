@@ -18,9 +18,10 @@
 
 module;
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <GL/glew.h>
 #include <GL/gl.h>
+#include <SDL3/SDL_opengl.h>
 
 export module OpenGL;
 
@@ -52,7 +53,7 @@ export namespace RE
 
             void Delete()
             {
-                SDL_GL_DeleteContext(context);
+                SDL_GL_DestroyContext(context);
             }
 
             void RenderTriangle()

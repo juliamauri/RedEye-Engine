@@ -21,7 +21,6 @@ module;
 #include <functional>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_opengl3_loader.h>
-#include <imgui_impl_sdl2.h>
 #include <imgui_internal.h>
 
 export module GUIManager;

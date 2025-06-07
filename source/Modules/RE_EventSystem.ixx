@@ -18,7 +18,7 @@
 
 module;
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <functional>
 #include <vector>
 #include <algorithm>
@@ -102,8 +102,7 @@ export namespace RE
             {
                 _systemListener(&event);
                 _inputListener(&event);
-                if (event.type == SDL_WINDOWEVENT)
-                    _windowListener(&event);
+                _windowListener(&event);
 
                 if (_customEvents.empty() || _customlisteners.empty())
                     continue;
