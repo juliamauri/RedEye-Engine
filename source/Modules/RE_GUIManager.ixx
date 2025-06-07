@@ -19,8 +19,10 @@
 module;
 
 #include <functional>
+#include <SDL3/SDL.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_opengl3_loader.h>
+#include <imgui_impl_sdl3.h>
 #include <imgui_internal.h>
 
 export module GUIManager;
@@ -159,7 +161,7 @@ export namespace RE
             }
 
             // Setup Platform/Renderer backends
-            if (ImGui_ImplSDL2_InitForOpenGL(_window, _sdl_gl_context))
+            if (ImGui_ImplSDL3_InitForOpenGL(_window, _sdl_gl_context))
             {
                 if (ImGui_ImplOpenGL3_Init("#version 130"))
                 {
@@ -243,7 +245,7 @@ export namespace RE
         void CleanUp()
         {
             ImGui_ImplOpenGL3_Shutdown();
-            ImGui_ImplSDL2_Shutdown();
+            ImGui_ImplSDL3_Shutdown();
             ImGui::DestroyContext();
         }
     } // namespace GUI

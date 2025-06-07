@@ -19,6 +19,8 @@
 #ifndef JR_INPUT_CLASS
 #define JR_INPUT_CLASS
 
+#include <SDL3/SDL.h>
+
 class JR_Input
 {
   public:

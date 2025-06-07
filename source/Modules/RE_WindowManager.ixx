@@ -43,7 +43,7 @@ export namespace RE
          * @param w The width of the window (default is 500).
          * @param h The height of the window (default is 500).
          * @param flags The window flags (default is SDL_WINDOW_OPENGL |
-         * SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN).
+         * SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY).
          * @return The ID of the newly created window.
          */
         uint32_t NewWindow(const char* title, int x = SDL_WINDOWPOS_CENTERED, int y = SDL_WINDOWPOS_CENTERED,

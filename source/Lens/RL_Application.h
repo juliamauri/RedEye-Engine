@@ -19,6 +19,8 @@
 #ifndef JR_APPLICATION_CLASS
 #define JR_APPLICATION_CLASS
 
+#include <SDL3/SDL.h>
+
 class JR_Application
 {
   public:

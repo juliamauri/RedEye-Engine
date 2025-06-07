@@ -17,7 +17,7 @@
  */
 
 #include "RL_Application.h"
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 int main(int argc, char* argv[])
 {
