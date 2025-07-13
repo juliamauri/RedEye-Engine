@@ -18,10 +18,11 @@
 
 module;
 
-#include <SDL2/SDL.h>
-#include <SDL_vulkan.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_vulkan.h>
 #include <vulkan/vulkan.h>
 
+#include <cmath>
 #include <iostream>
 #include <vector>
 #include <set>
@@ -238,8 +239,10 @@ namespace Log
             SDL_GetWindowSize(window, &logicalWidth, &logicalHeight);
 
             int drawableWidth, drawableHeight;
-            SDL_Vulkan_GetDrawableSize(window, &drawableWidth, &drawableHeight);
-
+            if (!SDL_GetWindowSizeInPixels(window, &drawableWidth, &drawableHeight)) {
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                             "Pixel-size query failed: %s", SDL_GetError());
+            }
             float dpiScaleX = static_cast<float>(drawableWidth) / logicalWidth;
             float dpiScaleY = static_cast<float>(drawableHeight) / logicalHeight;
 
@@ -588,32 +591,29 @@ namespace Populate
             }
         }
 
-        bool RequiredSDLExtensions(SDL_Window* window, std::vector<const char*>& extensions)
+        bool RequiredSDLExtensions(std::vector<const char*>& extensions)
         {
-            std::cout << "Retrieving Vulkan window extensions." << std::endl;
+            std::cout << "Retrieving Vulkan instance extensions.\n";
 
-            uint32_t extensionCount = 0;
-            if (!SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, nullptr))
-            {
-                std::cerr << "Failed to SDL get Vulkan instance extension count." << std::endl;
+            Uint32 count = 0;
+            const char* const* names = SDL_Vulkan_GetInstanceExtensions(&count);
+            if (!names) {
+                std::cerr << "SDL_Vulkan_GetInstanceExtensions failed: "
+                          << SDL_GetError() << '\n';
                 return false;
             }
-            if (extensionCount == 0)
-            {
-                std::cout << "Retrieved 0 Vulkan window extensions." << std::endl;
+
+            extensions.assign(names, names + count);
+
+            if (extensions.empty()) {
+                std::cout << "Retrieved 0 Vulkan surface extensions.\n";
                 return true;
             }
 
-            extensions.resize(extensionCount);
-            if (!SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, extensions.data()))
-            {
-                std::cerr << "Failed to SDL get Vulkan instance extensions." << std::endl;
-                return false;
-            }
-
-            std::cout << "Retrieved " << extensions.size() << " Vulkan surface extensions:" << std::endl;
-            for (const char* extension : extensions)
-                std::cout << "\t-" << extension << std::endl;
+            std::cout << "Retrieved " << extensions.size()
+                      << " Vulkan surface extensions:\n";
+            for (const char* ext : extensions)
+                std::cout << "\t- " << ext << '\n';
 
             return true;
         }
@@ -2181,7 +2181,7 @@ export namespace RE
         bool Init()
         {
             std::cout << "Loading default Vulkan library." << std::endl;
-            if (SDL_Vulkan_LoadLibrary(nullptr) != 0)
+            if (SDL_Vulkan_LoadLibrary(nullptr) == false)
             {
                 std::cerr << "Failed to load default Vulkan library: " << SDL_GetError() << std::endl;
                 return false;
@@ -2226,7 +2226,7 @@ export namespace RE
                 to_draw.push_back({});
                 window_size = {static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
 
-                if (!CreateInstance(window) ||
+                if (!CreateInstance() ||
                     !CreateSurface(window) ||
                     !device.Create(instance, surface) ||
                     !GetSurfaceCapabilities() ||
@@ -2261,6 +2261,7 @@ export namespace RE
                 if (instance != VK_NULL_HANDLE)
                     vkDestroyInstance(instance, allocation_callbacks);
 
+                SDL_Vulkan_DestroySurface(instance, surface, allocation_callbacks);
                 return true;
             }
 
@@ -2278,10 +2279,10 @@ export namespace RE
 
           private:
 
-            bool CreateInstance(SDL_Window* window)
+            bool CreateInstance()
             {
                 std::vector<const char*> instance_extensions;
-                if (!Populate::Instance::RequiredSDLExtensions(window, instance_extensions))
+                if (!Populate::Instance::RequiredSDLExtensions(instance_extensions))
                     return false;
 
                 std::vector<const char*> layers{};
@@ -2318,7 +2319,7 @@ export namespace RE
 
             bool CreateSurface(SDL_Window* window)
             {
-                if (SDL_Vulkan_CreateSurface(window, instance, &surface) == SDL_TRUE)
+                if (SDL_Vulkan_CreateSurface(window, instance, allocation_callbacks, &surface) == true)
                     return true;
 
                 std::cerr << "Failed to get surface capabilities!" << std::endl;
