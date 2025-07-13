@@ -50,3 +50,6 @@ CMakeUserPresets.json
 
 build/
 vc140.pdb
+
+# CLion
+.idea/*
