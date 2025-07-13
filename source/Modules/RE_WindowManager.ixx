@@ -18,9 +18,10 @@
 
 module;
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 #include <unordered_map>
+#include <iostream>
 
 export module WindowManager;
 
@@ -32,7 +33,7 @@ export namespace RE
     {
         bool Init()
         {
-            return SDL_Init(SDL_INIT_VIDEO) == 0;
+            return SDL_Init(SDL_INIT_VIDEO);
         }
 
         /**
@@ -46,15 +47,20 @@ export namespace RE
          * SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN).
          * @return The ID of the newly created window.
          */
-        uint32_t NewWindow(const char* title, int x = SDL_WINDOWPOS_CENTERED, int y = SDL_WINDOWPOS_CENTERED,
+        std::pair<uint32_t, SDL_Window*> NewWindow(const char* title, int x = SDL_WINDOWPOS_CENTERED, int y = SDL_WINDOWPOS_CENTERED,
                            int w = 500, int h = 500,
-                           uint32_t flags = (SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI |
-                                             SDL_WINDOW_SHOWN))
+                           uint32_t flags = (SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE))
         {
-            SDL_Window* window = SDL_CreateWindow(title, x, y, w, h, flags);
+            SDL_Window* window = SDL_CreateWindow(title, w, h, flags);
+            if (window == nullptr)
+            {
+                std::cerr << "Failed to create SDL Window: " << SDL_GetError() << std::endl;
+                return {-1, nullptr};
+            }
             uint32_t id = SDL_GetWindowID(window);
             _windows[id] = window;
-            return id;
+            SDL_SetWindowPosition(window, x, y);
+            return {id, window};
         }
 
         /**
@@ -88,7 +94,6 @@ export namespace RE
                 SDL_DestroyWindow(window.second);
             }
             _windows.clear();
-            SDL_QuitSubSystem(SDL_INIT_VIDEO);
         }
     } // namespace Window
 } // namespace RE
