@@ -18,13 +18,10 @@
 
 module;
 
-#include <SDL2/SDL.h>
-#include <GL/glew.h>
+#include <SDL3/SDL.h>
 #include <GL/gl.h>
 
 export module OpenGL;
-
-bool glew_initialized = false;
 
 export namespace RE
 {
@@ -37,26 +34,17 @@ export namespace RE
             bool Create(SDL_Window* window)
             {
                 context = SDL_GL_CreateContext(window);
-
-                if (glew_initialized || context == NULL)
-                    return context != NULL;
-
-                if (glewInit() != GLEW_OK)
-                {
-                    Delete();
-                    return false;
-                }
-
-                return glew_initialized = true;
+                return context != nullptr;
             }
 
             void Delete()
             {
-                SDL_GL_DeleteContext(context);
+                SDL_GL_DestroyContext(context);
             }
 
-            void RenderTriangle()
+            void RenderTriangle(SDL_Window* window)
             {
+                SDL_GL_MakeCurrent(window, context);
                 glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                 glClear(GL_COLOR_BUFFER_BIT);
 
