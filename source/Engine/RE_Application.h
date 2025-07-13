@@ -18,12 +18,13 @@
 
 #pragma once
 
+#include <SDL3/SDL_init.h>
 #include <cstdint>
 
 namespace Application
 {
     bool Init(int argc, char* argv[]);
-    void MainLoop();
+    SDL_AppResult Tick();
     void CleanUp();
 
     namespace

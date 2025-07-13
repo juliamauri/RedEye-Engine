@@ -20,7 +20,7 @@
 
 #include "RE_Render.h"
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <iostream>
 
 bool InitModules();
@@ -34,7 +34,7 @@ bool Application::Init(int _argc, char* _argv[])
     argv = _argv;
 
     std::cout << "Initializing Application" << std::endl;
-    if (SDL_Init(0) != 0)
+    if (SDL_Init(0) == false)
     {
         std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
         return false;
@@ -59,29 +59,29 @@ bool Application::Init(int _argc, char* _argv[])
     return true;
 }
 
-void Application::MainLoop()
+SDL_AppResult Application::Tick()
 {
-    do
+    if (Renderer::Update() == false)
     {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) { }
+        return SDL_APP_FAILURE;
+    }
 
-        if (!Renderer::Update())
-            AddFlag(Flag::WANT_TO_QUIT);
+    if (HasFlag(Flag::LOAD_CONFIG))
+        LoadConfig();
+    if (HasFlag(Flag::SAVE_CONFIG))
+        SaveConfig();
 
-        if (HasFlag(Flag::LOAD_CONFIG))
-            LoadConfig();
-        if (HasFlag(Flag::SAVE_CONFIG))
-            SaveConfig();
-
-    } while (!HasFlag(Flag::WANT_TO_QUIT));
+    if (HasFlag(Flag::WANT_TO_QUIT))
+    {
+        return SDL_APP_SUCCESS;
+    }
+    return SDL_APP_CONTINUE;
 }
 
 void Application::CleanUp()
 {
     std::cout << "Quiting Application" << std::endl;
     Renderer::CleanUp();
-    SDL_Quit();
 }
 
 bool InitModules()
