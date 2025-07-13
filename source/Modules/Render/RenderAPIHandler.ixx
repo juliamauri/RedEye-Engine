@@ -18,7 +18,7 @@
 
 module;
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <iostream>
 #include <unordered_map>
 
@@ -50,8 +50,8 @@ struct Window
 
             bool Create(SDL_Window* window)
             {
-                renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-                return renderer != NULL;
+                renderer = SDL_CreateRenderer(window, nullptr);
+                return renderer != nullptr;
             }
 
             void Delete()
@@ -64,9 +64,9 @@ struct Window
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                 SDL_RenderClear(renderer);
                 SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-                SDL_RenderDrawLine(renderer, 200, 100, 100, 300);
-                SDL_RenderDrawLine(renderer, 100, 300, 300, 300);
-                SDL_RenderDrawLine(renderer, 300, 300, 200, 100);
+                SDL_RenderLine(renderer, 200, 100, 100, 300);
+                SDL_RenderLine(renderer, 100, 300, 300, 300);
+                SDL_RenderLine(renderer, 300, 300, 200, 100);
                 SDL_RenderPresent(renderer);
             }
         } sdl;
@@ -101,10 +101,9 @@ struct Window
                 return false;
 #else
                 std::cout << "Creating OpenGL context." << std::endl;
-                if (!context.gl.Create(ptr))
+                if (context.gl.Create(ptr) == false)
                 {
                     std::cerr << "Failed to create OpenGL context: " << SDL_GetError() << std::endl;
-                    SDL_DestroyWindow(ptr);
                     return false;
                 }
 #endif
@@ -116,10 +115,9 @@ struct Window
                 return false;
 #else
                 std::cout << "Creating Vulkan context." << std::endl;
-                if (!context.vk.Create(ptr, w, h))
+                if (context.vk.Create(ptr, w, h)== false)
                 {
                     std::cerr << "Failed to create Vulkan context." << std::endl;
-                    SDL_DestroyWindow(ptr);
                     return false;
                 }
 #endif
@@ -127,10 +125,9 @@ struct Window
             default:
                 std::cout << "No rendering API specified for window." << std::endl;
                 std::cout << "Creating SDL renderer." << std::endl;
-                if (!context.sdl.Create(ptr))
+                if (context.sdl.Create(ptr) == false)
                 {
                     std::cerr << "Failed to create SDL renderer: " << SDL_GetError() << std::endl;
-                    SDL_DestroyWindow(ptr);
                     return false;
                 }
                 break;
@@ -158,7 +155,6 @@ struct Window
                 context.sdl.Delete();
                 break;
         }
-        SDL_DestroyWindow(ptr);
     }
 
     bool RenderTriangle()
@@ -170,7 +166,7 @@ struct Window
                 return true;
 #ifdef ENABLE_OPENGL
             case Window::OpenGL:
-                context.gl.RenderTriangle();
+                context.gl.RenderTriangle(ptr);
                 SDL_GL_SwapWindow(ptr);
                 return true;
 #endif
@@ -194,14 +190,14 @@ export namespace RE
         {
             const uint32_t OpenGL = SDL_WINDOW_OPENGL;
             const uint32_t Vulkan = SDL_WINDOW_VULKAN;
-            const uint32_t DEFAULT = SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN;
+            const uint32_t DEFAULT = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
         } // namespace Flag
 
         bool Init()
         {
             std::cout << "Initializing Redeye Render." << std::endl;
             std::cout << "Initializing SDL_VIDEO." << std::endl;
-            if (SDL_Init(SDL_INIT_VIDEO) != 0)
+            if (SDL_Init(SDL_INIT_VIDEO)  == false)
             {
                 std::cout << "Failed to Initialize SDL_VIDEO: " << SDL_GetError() << std::endl;
                 return false;
@@ -211,7 +207,6 @@ export namespace RE
             if (!RE::Vulkan::Init())
             {
                 std::cerr << "Failed to initialize Vulkan." << std::endl;
-                SDL_QuitSubSystem(SDL_INIT_VIDEO);
                 return false;
             }
 #endif
@@ -224,30 +219,18 @@ export namespace RE
                 window.second.Delete();
 
             _windows.clear();
-            SDL_QuitSubSystem(SDL_INIT_VIDEO);
         }
 
-        bool CreateWindow(uint32_t& out_window_id, const char* title, uint32_t flags = Flag::DEFAULT,
-                          int x = SDL_WINDOWPOS_CENTERED, int y = SDL_WINDOWPOS_CENTERED, int w = 500, int h = 500)
+        bool CreateContext(uint32_t window_id, SDL_Window* pWindow, int width, int heigh, uint32_t flags = Flag::DEFAULT)
         {
-            std::cout << "Creating SDL Window: " << title << std::endl;
-            SDL_Window* window_ptr = SDL_CreateWindow(title, x, y, w, h, flags);
-            if (window_ptr == nullptr)
+            std::cout << "Creating Context for Window" << std::endl;
+            if (!_windows[window_id].CreateContext(pWindow, flags, width, heigh))
             {
-                std::cerr << "Failed to create SDL Window: " << SDL_GetError() << std::endl;
+                std::cerr << "Failed to create context for window" << std::endl;
+                _windows.erase(window_id);
                 return false;
             }
-
-            std::cout << "Creating Context for Window: " << title << " " << std::endl;
-            out_window_id = SDL_GetWindowID(window_ptr);
-            if (!_windows[out_window_id].CreateContext(window_ptr, flags, w, h))
-            {
-                std::cerr << "Failed to create context for window: " << title << std::endl;
-                _windows.erase(out_window_id);
-                return false;
-            }
-
-            std::cout << "Window: " << title << " ready to render!" << std::endl;
+            std::cout << "Window: ready to render!" << std::endl;
             return true;
         }
 

@@ -18,8 +18,10 @@
 
 #include "RE_Render.h"
 
+#include <SDL3/SDL.h>
 #include <cstdint>
 
+import WindowManager;
 import Render;
 
 uint32_t window_sdl = 0;
@@ -28,16 +30,50 @@ uint32_t window_vk = 0;
 
 bool Renderer::Init()
 {
-    return RE::Render::Init()
-        && RE::Render::CreateWindow(window_sdl, "RedEye Engine SDL", RE::Render::Flag::DEFAULT) 
-        && RE::Render::CreateWindow(window_gl, "RedEye Engine OpenGL", RE::Render::Flag::OpenGL | RE::Render::Flag::DEFAULT) 
-        && RE::Render::CreateWindow(window_vk, "RedEye Engine Vulkan", RE::Render::Flag::Vulkan | RE::Render::Flag::DEFAULT)
-        ;
+    if (RE::Render::Init() == false)
+    {
+        return false;
+    }
+
+    auto sdl = RE::Window::NewWindow("RedEye Engine SDL", 100, 100, 250, 250, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    if (window_sdl == -1)
+    {
+        return false;
+    }
+    window_sdl = sdl.first;
+    if (RE::Render::CreateContext(window_sdl, sdl.second, 250, 250, RE::Render::Flag::DEFAULT) == false)
+    {
+        return false;
+    }
+
+    auto gl =  RE::Window::NewWindow("RedEye Engine OpenGL", 100, 350, 250, 250, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    if (window_gl == -1)
+    {
+        return false;
+    }
+    window_gl = gl.first;
+    if (RE::Render::CreateContext(window_gl, gl.second, 250, 250, RE::Render::Flag::OpenGL | RE::Render::Flag::DEFAULT) == false)
+    {
+        return false;
+    }
+
+    auto vulkan  =  RE::Window::NewWindow("RedEye Engine Vulkan", 100, 600, 250, 250, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    if (window_vk == -1)
+    {
+        return false;
+    }
+    window_vk = vulkan.first;
+    if (RE::Render::CreateContext(window_vk, vulkan.second, 250, 250, RE::Render::Flag::Vulkan | RE::Render::Flag::DEFAULT) == false)
+    {
+        return false;
+    }
+
+    return  true;
 }
 
 bool Renderer::Update()
 {
-    return 
+    return
         RE::Render::RenderTriangle(window_sdl) &&
         RE::Render::RenderTriangle(window_gl) &&
         RE::Render::RenderTriangle(window_vk);
