@@ -1,19 +1,7 @@
 {
   "dependencies": [
     "gtest",
-    "nativefiledialog-extended",
-    "physfs",
-    "rapidjson",
     { "name": "sdl3",
-      "features": ["wayland","x11","vulkan"] },
-
-    { "name": "imgui",
-      "features": [
-        "docking-experimental",
-        "sdl3-binding", "sdl3-renderer-binding",
-        "opengl3-binding", "vulkan-binding" ] },
-
-    { "name": "glslang",  "features": ["tools"] },
-    "shaderc"
+      "features": ["wayland","x11","vulkan"] }
   ]
 }

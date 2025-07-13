@@ -5,10 +5,11 @@ message(STATUS "Configuration Summary:")
 message(STATUS "  ENABLE_OPENGL: ${ENABLE_OPENGL}")
 message(STATUS "  ENABLE_VULKAN: ${ENABLE_VULKAN}")
 
-find_package(imgui CONFIG REQUIRED)
-find_package(PhysFS CONFIG REQUIRED)
-find_package(nfd CONFIG REQUIRED)
-find_package(RapidJSON CONFIG REQUIRED)
+find_package(SDL3 CONFIG REQUIRED)
+# find_package(imgui CONFIG REQUIRED)
+# find_package(PhysFS CONFIG REQUIRED)
+# find_package(nfd CONFIG REQUIRED)
+# find_package(RapidJSON CONFIG REQUIRED)
 if(ENABLE_OPENGL)
     find_package(OpenGL REQUIRED)
 endif()
@@ -21,13 +22,13 @@ target_sources(RedEye_lib
     PUBLIC FILE_SET CXX_MODULES
         BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
         FILES 
-        "RE_GUI.ixx"
-        "RE_GUIManager.ixx"
-        "RE_FileSystem.ixx"
-        "RE_EventSystem.ixx"
+        # "RE_GUI.ixx"
+        # "RE_GUIManager.ixx"
+        # "RE_FileSystem.ixx"
+        # "RE_EventSystem.ixx"
         "RE_WindowManager.ixx"
-        "RE_Dialogs.ixx"
-        "RE_JSON.ixx"
+        # "RE_Dialogs.ixx"
+        # "RE_JSON.ixx"
 
         "Render/RenderAPIHandler.ixx"
         $<IF:$<BOOL:${ENABLE_OPENGL}>,Render/OpenGL.ixx,>
@@ -41,10 +42,11 @@ target_compile_definitions(RedEye_lib PRIVATE
 )
 
 target_link_libraries(RedEye_lib PRIVATE
-        imgui::imgui
-        $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
-        nfd::nfd
-        rapidjson
+        SDL3::SDL3
+        # imgui::imgui
+        # $<IF:$<TARGET_EXISTS:PhysFS::PhysFS>,PhysFS::PhysFS,PhysFS::PhysFS-static>
+        # nfd::nfd
+        # rapidjson
         $<IF:$<BOOL:${ENABLE_OPENGL}>,OpenGL::GL,>
         $<IF:$<BOOL:${ENABLE_VULKAN}>,Vulkan::Vulkan,>
 )

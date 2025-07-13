@@ -1,6 +1,6 @@
 # Find and link dependencies
 find_package(SDL3 CONFIG REQUIRED)
-find_package(RapidJSON CONFIG REQUIRED)
+# find_package(RapidJSON CONFIG REQUIRED)
 
 add_executable(Lens)
 target_sources(Lens PRIVATE
@@ -18,7 +18,7 @@ target_compile_definitions(Lens PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
 target_link_libraries(Lens PRIVATE
         RedEye_lib
         SDL3::SDL3
-        rapidjson
+        # rapidjson
 )
 
 # Define the destination directory
