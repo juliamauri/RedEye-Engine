@@ -23,6 +23,8 @@
 #include <SDL3/SDL.h>
 #include <iostream>
 
+import WindowManager;
+
 bool InitModules();
 bool StartModules();
 void LoadConfig();
@@ -41,7 +43,7 @@ bool Application::Init(int _argc, char* _argv[])
     }
 
     std::cout << "Initializing Modules" << std::endl;
-    if (!InitModules())
+    if (InitModules() == false)
     {
         std::cerr << "Application Init failed to Initialize Modules" << std::endl;
         SDL_Quit();
@@ -49,7 +51,7 @@ bool Application::Init(int _argc, char* _argv[])
     }
 
     std::cout << "Starting Modules" << std::endl;
-    if (!StartModules())
+    if (StartModules() == false)
     {
         std::cerr << "Application Init failed to Start Modules" << std::endl;
         SDL_Quit();
@@ -81,12 +83,19 @@ SDL_AppResult Application::Tick()
 void Application::CleanUp()
 {
     std::cout << "Quiting Application" << std::endl;
+    RE::Window::CleanUp();
     Renderer::CleanUp();
 }
 
 bool InitModules()
 {
-    if (!Renderer::Init())
+    if (RE::Window::Init() == false)
+    {
+        std::cerr << "Failed to initialize Window Module" << std::endl;
+        return false;
+    }
+
+    if (Renderer::Init() == false)
     {
         std::cerr << "Failed to initialize Renderer Module" << std::endl;
         return false;
